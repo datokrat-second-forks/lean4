@@ -16,6 +16,7 @@ Logs them from most abusive (`all`) down to least (`instances`).
 
 /-- A single location where defeq abuse occurs. -/
 structure AbusePoint where
+  appExpr  : Expr   -- the full application `f a` where the mismatch occurs
   arg      : Expr   -- the argument expression
   expected : Expr   -- parameter type (what the function expects)
   inferred : Expr   -- actual type of the argument
@@ -60,7 +61,7 @@ private partial def collectAbuse (e : Expr) :
         let aType ← withTransparency .all <| inferType a
         let level ← abuseLevel d aType
         if level > 0 then
-          modify fun s => s.push (level, { arg := a, expected := d, inferred := aType })
+          modify fun s => s.push (level, { appExpr := e, arg := a, expected := d, inferred := aType })
       | _ => pure ()
     | .lam .. | .letE .. =>
       lambdaLetTelescope e fun xs b => do
@@ -106,7 +107,7 @@ elab "defeq_abuse_locs" : tactic => do
   for (level, pts) in byLevel do
     msg := msg ++ m!"requires `{modeName level}` transparency:"
     for pt in pts do
-      msg := msg ++ m!"\n  {pt.arg} : {pt.inferred.consumeMData} =?= {pt.expected.consumeMData}"
+      msg := msg ++ m!"\n  in {pt.appExpr}: {pt.arg} : {pt.inferred.consumeMData} =?= {pt.expected.consumeMData}"
     msg := msg ++ "\n"
   logInfo msg
 
@@ -134,7 +135,7 @@ attribute [instance_reducible] InstNat
 
 /--
 info: requires `instances` transparency:
-  instVal : InstNat =?= Nat
+  in Eq instVal: instVal : InstNat =?= Nat
 ---
 warning: declaration uses `sorry`
 -/
@@ -152,7 +153,7 @@ def semiVal : SemiNat := Nat.zero
 
 /--
 info: requires `default` transparency:
-  semiVal : SemiNat =?= Nat
+  in Eq semiVal: semiVal : SemiNat =?= Nat
 ---
 warning: declaration uses `sorry`
 -/
@@ -172,7 +173,7 @@ attribute [irreducible] IrredNat
 
 /--
 info: requires `all` transparency:
-  0 : Nat =?= IrredNat
+  in irredVal = 0: 0 : Nat =?= IrredNat
 ---
 warning: declaration uses `sorry`
 -/
@@ -192,9 +193,9 @@ def MultiStatement := Nat.add semiVal instVal = (0 : Nat)
 
 /--
 info: requires `default` transparency:
-  semiVal : SemiNat =?= Nat
+  in Nat.add semiVal: semiVal : SemiNat =?= Nat
 requires `instances` transparency:
-  instVal : InstNat =?= Nat
+  in Nat.add semiVal instVal: instVal : InstNat =?= Nat
 ---
 warning: declaration uses `sorry`
 -/
