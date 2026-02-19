@@ -162,66 +162,47 @@ example : @Eq Nat semiVal 0 := by
   sorry
 
 -- ===================================================================
--- Test: Abuse at `all` level (programmatic)
+-- Test: Abuse at `all` level
 -- ===================================================================
 
 def IrredNat := Nat
-def irredVal : IrredNat := Nat.zero
+def irredVal : IrredNat := (0 : Nat)
+def IrredStatement := irredVal = (0 : Nat)
 attribute [irreducible] IrredNat
 
 /--
 info: requires `all` transparency:
-  irredVal : IrredNat =?= Nat
+  0 : Nat =?= IrredNat
+---
+warning: declaration uses `sorry`
 -/
 #guard_msgs in
-#eval show MetaM Unit from do
-  let e := mkApp3 (mkConst ``Eq [.succ .zero]) (mkConst ``Nat) (mkConst ``irredVal) (mkNatLit 0)
-  let points ← findDefeqAbuse e
-  if points.isEmpty then
-    IO.println "no defeq abuse found"
-    return
-  let mut byLevel : Array (Nat × Array AbusePoint) := #[]
-  for level in #[3, 2, 1] do
-    let matching := points.filter (·.1 == level) |>.map (·.2)
-    if !matching.isEmpty then
-      byLevel := byLevel.push (level, matching)
-  for (level, pts) in byLevel do
-    IO.print s!"requires `{modeName level}` transparency:"
-    for pt in pts do
-      IO.println s!"\n  {pt.arg} : {pt.inferred.consumeMData} =?= {pt.expected.consumeMData}"
+example : IrredStatement := by
+  unfold IrredStatement
+  defeq_abuse_locs
+  sorry
 
 -- ===================================================================
 -- Test: Multiple abuse points at different levels
 -- ===================================================================
 
 -- semiVal : SemiNat (needs default) and instVal : InstNat (needs instances)
--- Construct: @Eq Nat (Nat.add semiVal instVal) 0
--- This has two abuse points:
---   semiVal passed to Nat.add (expects Nat, got SemiNat → needs default)
---   instVal passed to Nat.add (expects Nat, got InstNat → needs instances)
--- Plus the result of Nat.add semiVal instVal passed to @Eq Nat (expects Nat, got Nat → ok)
+-- in a single expression: Nat.add semiVal instVal = 0
+def MultiStatement := Nat.add semiVal instVal = (0 : Nat)
 
 /--
 info: requires `default` transparency:
   semiVal : SemiNat =?= Nat
 requires `instances` transparency:
   instVal : InstNat =?= Nat
+---
+warning: declaration uses `sorry`
 -/
 #guard_msgs in
-#eval show MetaM Unit from do
-  -- @Eq Nat (Nat.add semiVal instVal) 0
-  let add := mkApp2 (mkConst ``Nat.add) (mkConst ``semiVal) (mkConst ``instVal)
-  let e := mkApp3 (mkConst ``Eq [.succ .zero]) (mkConst ``Nat) add (mkNatLit 0)
-  let points ← findDefeqAbuse e
-  let mut byLevel : Array (Nat × Array AbusePoint) := #[]
-  for level in #[3, 2, 1] do
-    let matching := points.filter (·.1 == level) |>.map (·.2)
-    if !matching.isEmpty then
-      byLevel := byLevel.push (level, matching)
-  for (level, pts) in byLevel do
-    IO.print s!"requires `{modeName level}` transparency:"
-    for pt in pts do
-      IO.println s!"\n  {pt.arg} : {pt.inferred.consumeMData} =?= {pt.expected.consumeMData}"
+example : MultiStatement := by
+  unfold MultiStatement
+  defeq_abuse_locs
+  sorry
 
 -- ===================================================================
 -- Test: No abuse on a complex but well-typed goal

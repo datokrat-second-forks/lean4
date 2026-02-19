@@ -97,7 +97,6 @@ example : (0 : Nat) = 0 := by
 -- Test: Score 1 — needs instance transparency
 -- ===================================================================
 
--- Define with default transparency, create value, then change to instance_reducible
 def InstNat := Nat
 def instVal : InstNat := Nat.zero
 attribute [instance_reducible] InstNat
@@ -116,7 +115,6 @@ example : @Eq Nat instVal 0 := by
 -- Test: Score 2 — needs default transparency
 -- ===================================================================
 
--- A plain def (semireducible): unfolds at .default but not .instances
 def SemiNat := Nat
 def semiVal : SemiNat := Nat.zero
 
@@ -131,22 +129,26 @@ example : @Eq Nat semiVal 0 := by
   sorry
 
 -- ===================================================================
--- Test: Score 3 — needs all transparency (programmatic, since the
--- elaborator can't build such a goal at default transparency)
+-- Test: Score 3 — needs all transparency
 -- ===================================================================
 
+-- Define the statement before making IrredNat irreducible, then unfold
+-- in the tactic block to get a goal that only typechecks at .all
 def IrredNat := Nat
-def irredVal : IrredNat := Nat.zero
+def irredVal : IrredNat := (0 : Nat)
+def IrredStatement := irredVal = (0 : Nat)
 attribute [irreducible] IrredNat
 
--- We construct the expression @Eq Nat irredVal 0 manually, since
--- the elaborator at default transparency can't unify IrredNat with Nat.
-/-- info: defeq abuse score: 3 -/
+/--
+info: defeq abuse score: 3
+---
+warning: declaration uses `sorry`
+-/
 #guard_msgs in
-#eval show MetaM Unit from do
-  let e := mkApp3 (mkConst ``Eq [.succ .zero]) (mkConst ``Nat) (mkConst ``irredVal) (mkNatLit 0)
-  let score ← defeqAbuseScore e
-  IO.println s!"defeq abuse score: {score}"
+example : IrredStatement := by
+  unfold IrredStatement
+  defeq_abuse_score
+  sorry
 
 -- ===================================================================
 -- Test: Score 0 on a more complex but well-typed goal
