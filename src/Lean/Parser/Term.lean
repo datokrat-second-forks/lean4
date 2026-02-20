@@ -767,6 +767,18 @@ In particular, it is like a unary operation with a fixed parameter `b`, where on
   "with_decl_name% " >> optional "?" >> ident >> ppSpace >> termParser
 @[builtin_term_parser] def typeOf := leading_parser
   "type_of% " >> termParser maxPrec
+/--
+`infer_public_type% e` elaborates `e`, infers its type, replaces any private
+declarations appearing in the type with public `abbrev` aliases, and ascribes
+the resulting public type to `e`.
+
+This is useful in a `public section` to give a definition with an elided type
+a type that is accessible from other modules, even when Lean has auto-generated
+private auxiliaries (e.g., pattern-match helpers) that would otherwise appear
+in the inferred type.
+-/
+@[builtin_term_parser] def inferPublicType := leading_parser
+  "infer_public_type% " >> termParser leadPrec
 @[builtin_term_parser] def ensureTypeOf := leading_parser
   "ensure_type_of% " >> termParser maxPrec >> strLit >> ppSpace >> termParser
 @[builtin_term_parser] def ensureExpectedType := leading_parser
