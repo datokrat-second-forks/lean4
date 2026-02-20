@@ -38,11 +38,16 @@ private partial def makePublicExpr (e : Expr) : TermElabM Expr := do
   | _            => return e
 
 /--
-Given a private constant name `privateN`, ensures a public standalone copy exists and returns the
-public name. The copy is placed under the `_public_alias` namespace to avoid normalized-name
-collisions with the private declaration, and with `forceExpose := true` so that it is always
-fully exported. Its body is recursively processed to replace any private sub-declarations, so the
-copy is self-contained in the public kernel environment.
+Given a private constant name `privateN`, ensures a public alias exists and returns the public
+name. The alias is placed under the `_public_alias` namespace to avoid normalized-name collisions
+with the private declaration.
+
+Only the *type* is processed to replace private sub-declarations with their own aliases. The body
+is left as-is: because we call `addDecl` with `forceExpose := false` (the default) inside
+`withoutExporting`, the alias is exported to the public kernel environment as an **axiom** (type
+only), so the public kernel never needs to check the body. In the private environment, the
+original body still type-checks against the public type because each `_public_alias.X` is
+definitionally equal to its original `X` there.
 -/
 private partial def ensurePublicAlias (privateN : Name) : TermElabM Name := do
   let env ← getEnv
@@ -52,11 +57,9 @@ private partial def ensurePublicAlias (privateN : Name) : TermElabM Name := do
   let ci ← getConstInfo privateN
   let levelParams := ci.levelParams
   let publicType ← makePublicExpr ci.type
-  let publicValue ← match ci.value? with
-    | some v => makePublicExpr v
-    | none   => pure (.const privateN (levelParams.map Level.param))
-  let defval ← mkDefinitionValInferringUnsafe aliasN levelParams publicType publicValue .abbrev
-  addDecl (.defnDecl defval) (forceExpose := true)
+  let value := ci.value?.getD (.const privateN (levelParams.map Level.param))
+  let defval ← mkDefinitionValInferringUnsafe aliasN levelParams publicType value .abbrev
+  addDecl (.defnDecl defval)
   return aliasN
 
 end
