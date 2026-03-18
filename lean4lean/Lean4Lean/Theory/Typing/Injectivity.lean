@@ -74,13 +74,27 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
   induction n using WellFounded.induction Nat.lt_wfRel.2 with | _ n IH =>
   dsimp [Nat.lt_wfRel] at IH
   -- Step 1: Prove sort_inv_n first (using only IH)
+  -- This follows the same double-induction structure as uniq's base/defeq cases,
+  -- but restricted to sort expressions.
   have sort_inv_n : ∀ {Γ : List VExpr} {u v : VLevel} {A : VExpr} {b : Bool} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
       env.HasTypeStratified U Γ (.sort u) A b n₁ →
       env.HasTypeStratified U Γ (.sort v) A b n₂ → u ≈ v := by
-    -- Double-induction on two HasTypeStratified for sorts with same type
-    -- Uses uniq_{<n} and sort_inv_{<n} from IH
-    sorry -- TODO: fill in the double-induction proof for sorts
+    intro Γ u v A b n₁ n₂ hΓ le₁ le₂ H1 H2
+    -- Extract canonical type info from both HasTypeStratified derivations.
+    -- Each sort expression .sort w has a canonical type .sort (.succ l) with w ≈ l
+    -- from the innermost sort' constructor. Through base/defeq layers, the
+    -- outer type A may differ, but all are related by defeq chains.
+    --
+    -- We proceed by induction on (n₁ + n₂), peeling off base/defeq from whichever
+    -- side has higher depth.
+    --
+    -- Base case: n₁ = 0, n₂ = 0 → sort_inv_zero handles it.
+    -- Inductive: peel off one layer from the side with higher depth,
+    --   relate types using uniq_{<n} from IH, apply sort_inv_{<n} from IH.
+    --
+    -- For now, sorry pending the formal induction.
+    sorry
   -- Step 2: Prove uniq_n using sort_inv_n and IH
   have uniq_n : ∀ {Γ : List VExpr} {e A B : VExpr} {b : Bool} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
