@@ -118,99 +118,100 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
           let .sort' a1 a2 a3 := h1
           let .sort' b1 b2 b3 := h2
           exact a3.trans b3.symm
-        | .defeq (B := B) (n := n₂') b1 b2 b3 b4 b5 =>
-          -- H2 = defeq: .sort v : B at depth n₂', B ≡ A : .sort w, n₂'+1 ≤ n
-          let .sort' a1 a2 a3 := h1
-          -- A = .sort (.succ l₁), u ≈ l₁
-          let ⟨l₂, hv_l₂, hw₂⟩ := sort_canonical b5
+        | .defeq (u := w) (A := B) (n := n₂') hw hBA hBw hAw hvB =>
+          -- H2 = defeq: .sort v : B at depth n₂', B ≡ .sort (.succ l₁) : .sort w
+          let .sort' a1 a2 a3 := h1  -- u ≈ l₁, A = .sort (.succ l₁)
+          let ⟨l₂, hv_l₂, hw₂⟩ := sort_canonical hvB  -- v ≈ l₂
           have hlt : n₂' < n := Nat.lt_of_succ_le le₂
+          -- hAw : HTS (.sort (.succ l₁)) (.sort w) n₂'
+          -- hvB : HTS (.sort v) B n₂'
+          -- hBA : B ≡ .sort (.succ l₁) : .sort w
+          -- Construct HTS (.sort (.succ l₂)) (.sort w) n₂' by going through B:
+          -- .sort (.succ l₂) has HasType (.sort (.succ l₁)) via hBA.symm composed
+          -- Actually, we construct: .sort (.succ l₂) : .sort w via defeqDF from B
+          -- d1.symm gives .sort (.succ l₂) ≡ B and hBA gives B ≡ .sort (.succ l₁)
+          -- But these have different sort types... Use defeqDF!
+          -- .sort (.succ l₂) has HasType at type B (from d1.hasType.2)
+          -- and B has type .sort w (from hBw)
+          -- So .sort (.succ l₂) : B (HasType) and B ≡ .sort (.succ l₁) : .sort w
+          -- By defeqDF: .sort (.succ l₂) : .sort (.succ l₁)
+          -- Then .sort (.succ l₁) ≡ .sort (.succ l₁) (refl), so .sort (.succ l₂) : .sort (.succ l₁)
+          -- Hmm, that gives type .sort (.succ l₁), not .sort w.
+          -- We need .sort (.succ l₂) : .sort w.
+          -- From hvB.hasType : HasType (.sort v) B
+          -- .sort v has canonical type .sort (.succ l₂). By uniq of .sort v types,
+          -- B ≡ .sort (.succ l₂) : .sort w₃. Then HasType (.sort (.succ l₂)) (.sort w₃).
+          -- But we need type .sort w, not .sort w₃.
+          -- Use the defeq approach: construct using the HasType from the derivation.
+          -- .sort (.succ l₂) has HasType via d1.hasType.2 (the right side of d1)
+          -- d1 is from uniq_IH: B ≡ .sort (.succ l₂) : .sort w₃
+          -- So d1.hasType.2 : HasType (.sort (.succ l₂)) (.sort w₃)
+          -- HasType (.sort (.succ l₂)) (.sort w) via defeqDF using the uniq between
+          -- .sort w₃ and .sort w.
+          -- This needs uniq and sort_inv again...
+          -- SIMPLER: just use sort_inv_lt(n₂') on hAw and a constructed
+          -- HTS (.sort (.succ l₂)) (.sort w) n₂'.
+          -- To construct it: .sort (.succ l₂) has type .sort w because
+          -- HasType (.sort (.succ l₂)) (.sort w) follows from
+          -- hBA.symm.hasType.2 (gives HasType (.sort (.succ l₂)) B) and
+          -- hBw.hasType (gives HasType B (.sort w)) composed as
+          -- .defeqDF (.sort w₃ ≡ .sort w) ... but this requires uniq again.
+          --
+          -- Actually: hvB.hasType gives HasType (.sort v) B
+          -- and .sort' gives HasType (.sort v) (.sort (.succ l₂))
+          -- By the uniq_IH at depth n₂': B ≡ .sort (.succ l₂) : .sort w₃ (= d1)
+          -- Then d1.symm : .sort (.succ l₂) ≡ B : .sort w₃
+          -- Then (.defeqDF hBA (d1.symm)) : .sort (.succ l₂) ≡ B : .sort w
+          -- Wait, defeqDF changes the TYPE, not the expression.
+          -- defeqDF : A ≡ B : sort u → e₁ ≡ e₂ : A → e₁ ≡ e₂ : B
+          -- So: hBA : B ≡ .sort (.succ l₁) : .sort w (type equality)
+          --     d1.symm : .sort (.succ l₂) ≡ B : .sort w₃ (expression equality at type w₃)
+          -- defeqDF changes the type of the SECOND argument:
+          -- We'd need sort_type_eq : .sort w₃ ≡ .sort w : sort w₅
+          -- Then .defeqDF sort_type_eq (d1.symm) : .sort (.succ l₂) ≡ B : .sort w
+          -- This requires .sort w₃ ≡ .sort w.
+          -- From uniq for B: hBw at depth n₂' and ds1 at depth n₂'-1:
+          -- gives .sort w ≡ .sort w₃ : .sort w₄
+          -- Good! This is available from IH.
+          -- uniq for B: (.sort w) ≡ (.sort w₃), both with HTS at bounded depth
           have cu_v : env.HasTypeStratified U Γ (.sort v) (.sort (.succ l₂)) false n₂' :=
-            .sort' (b5.hasType.sort_inv_l henv) hw₂ hv_l₂
+            .sort' (hvB.hasType.sort_inv_l henv) hw₂ hv_l₂
           have ⟨w₃, d1, w₃', dw, ds1, ds2⟩ :=
-            (IH _ hlt).1 hΓ (Nat.le_refl _) (Nat.le_refl _) b5 (.base cu_v)
-          -- d1 : B ≡ .sort (.succ l₂) : .sort w₃
-          -- ds1 : HasTypeStratified B (.sort w₃) true (n₂'-1)
-          -- ds2 : HasTypeStratified (.sort (.succ l₂)) (.sort w₃') true (n₂'-1)
-          -- dw : w₃ ≈ w₃'
-          -- Also: B ≡ A (= .sort (.succ l₁)) from b2
-          -- So .sort (.succ l₁) ≡ .sort (.succ l₂) by transitivity
-          -- ds2 gives HasTypeStratified (.sort (.succ l₂)) (.sort w₃') true (n₂'-1)
-          -- We need HasTypeStratified (.sort (.succ l₁)) with same type (.sort w₃')
-          -- From b2 : B ≡ .sort (.succ l₁), d1 : B ≡ .sort (.succ l₂)
-          -- by uniq (IH) for B: .sort (.succ l₁) ≡ .sort (.succ l₂) ?
-          -- Actually, we have b2 : B ≡ A where A = .sort (.succ l₁)
-          -- and d1 : B ≡ .sort (.succ l₂)
-          -- We need HasTypeStratified (.sort (.succ l₁)) with a type that
-          -- matches HasTypeStratified (.sort (.succ l₂))
-          -- From ds1 : HasTypeStratified B (.sort w₃) (n₂'-1)
-          -- and b3 : HasTypeStratified B (.sort b1) (from the defeq constructor)
-          -- Wait, b3 : HasTypeStratified B (.sort w) n₂'
-          -- b4 : HasTypeStratified A (.sort w) n₂'
-          -- A = .sort (.succ l₁)
-          -- b4 : HasTypeStratified (.sort (.succ l₁)) (.sort w) n₂'
-          -- ds2 : HasTypeStratified (.sort (.succ l₂)) (.sort w₃') (n₂'-1)
-          -- Need same type. w and w₃' may differ.
-          -- Use uniq (IH) for B with types (.sort w) and (.sort w₃):
-          -- b3 at depth n₂', ds1 at depth n₂'-1. Both ≤ n₂'.
-          -- gives (.sort w) ≡ (.sort w₃) : .sort w₄
-          -- Then w ≈ w₃ by sort_inv at depth n₂'-1 (from IH)
-          -- Add defeq to ds2: HasTypeStratified (.sort (.succ l₂)) (.sort w) n₂'
-          -- Now b4 and this: both at depth n₂', same type (.sort w)
-          -- sort_inv at depth n₂' < n (from IH): succ l₁ ≈ succ l₂
-          -- By VLevel.succ_congr_iff: l₁ ≈ l₂
-          -- Hence u ≈ l₁ ≈ l₂ ≈⁻¹ v ✓
-
-          -- b1 : u✝.WF U (universe level for defeq)
-          -- b2 : IsDefEq B A (.sort u✝) where B is some type, A = .sort (.succ l₁)
-          -- b3 : HTS B (.sort u✝) true n₂'
-          -- b4 : HTS (.sort (.succ l₁)) (.sort u✝) true n₂'  (A = .sort (.succ l₁))
-          -- b5 : HTS (.sort v) B true n₂'
-          -- sort_inv for .sort (.succ l₁) and .sort (.succ l₂):
-          -- b4 gives HTS (.sort (.succ l₁)) (.sort u✝) at depth n₂'
-          -- We need HTS (.sort (.succ l₂)) (.sort u✝) at depth ≤ n₂'
-          -- From ds2 : HTS (.sort (.succ l₂)) (.sort w₃') (n₂'-1) and
-          -- we need to change type from (.sort w₃') to (.sort u✝)
-          -- First relate w₃' to u✝:
-          -- From (IH _ hlt).1 applied to b3 and ds1:
-          --   d1 : B ≡ .sort (.succ l₂) and
-          --   ds1 : HTS B (.sort w₃) (n₂'-1) at type (.sort w₃)
-          -- From (IH _ hlt).1 applied to b3 and ds1 we also get:
-          --   HTS (.sort w₃) (.sort w₄') (n₂'-1) and
-          --   HTS B (.sort w₃) ... wait I'm getting confused.
-          --
-          -- Let me simplify: just use sort_inv at depth n₂' (from IH)
-          -- for b4 (HTS (.sort (.succ l₁)) (.sort u✝) n₂') and
-          -- a HTS (.sort (.succ l₂)) (.sort u✝) n₂' that we construct.
-          --
-          -- From b5 : HTS (.sort v) B n₂' and canonical:
-          -- .sort v :! .sort (.succ l₂) at any depth including n₂'
-          -- By (IH _ hlt).1 for .sort v: B ≡ .sort (.succ l₂)
-          -- Combined with b2 : B ≡ A : (.sort u✝) where A = .sort (.succ l₁)
-          -- We get .sort (.succ l₁) ≡ .sort (.succ l₂) via B
-          -- From d1 and b2.symm: .sort (.succ l₂) ≡ B ≡ .sort (.succ l₁) : (.sort u✝)
-          -- So .sort (.succ l₂) has type (.sort u✝)
-          -- HasType (.sort (.succ l₂)) (.sort u✝) follows from this IsDefEq
-          -- d1.symm.trans b2 doesn't work because d1 and b2 have different sort types
-          -- d1_eq : .sort (.succ l₂) ≡ .sort (.succ l₁) : .sort w₃
-          -- Wait, d1 : B ≡ .sort (.succ l₂) : .sort w₃
-          -- b2 : B ≡ A (.sort u✝) where A = .sort (.succ l₁)
-          -- So: d1.symm : .sort (.succ l₂) ≡ B : .sort w₃
-          -- b2.defeqDF (d1.symm.hasType.2) : .sort (.succ l₂) ≡ .sort (.succ l₁) : .sort u✝
-          -- Wait, we need defeqDF to change the type from w₃ to u✝
-          -- Actually: .sort (.succ l₂) ≡ B (via d1.symm at type .sort w₃)
-          --           B ≡ .sort (.succ l₁) (via b2 at type .sort u✝)
-          -- These have different types! Can't directly compose.
-          -- Use b2.defeqDF to change type:
-          -- b2 : B ≡ A : .sort u✝
-          -- d1 : B ≡ .sort (.succ l₂) : .sort w₃
-          -- We need: A ≡ .sort (.succ l₂) i.e. .sort (.succ l₁) ≡ .sort (.succ l₂)
-          -- at SOME type. We have .sort (.succ l₁) as A in b2 and b4
-          -- b4 : HTS (.sort (.succ l₁)) (.sort u✝) n₂'
-          -- And .sort (.succ l₂) has HTS at depth 0 with canonical type
-          -- .sort (.succ l₂) :! .sort (.succ (.succ l₂)) at depth 0
-          -- By (IH _ hlt).1 for .sort (.succ l₂): (.sort u✝_somevar) ≡ (.sort (.succ (.succ l₂)))
-          -- This is getting very tangled. Let me just sorry the rest for now.
-          sorry
+            (IH _ hlt).1 hΓ (Nat.le_refl _) (Nat.le_refl _) hvB (.base cu_v)
+          -- ds1 : HTS B (.sort w₃) (n₂'-1)
+          -- uniq for B with (.sort w) and (.sort w₃):
+          have ⟨w₄, ew, w₄', dw₄, hts_w, hts_w₃⟩ :=
+            (IH _ hlt).1 hΓ (Nat.le_refl _) (Nat.pred_le _) hBw ds1
+          -- ew : .sort w ≡ .sort w₃ : .sort w₄
+          -- hts_w : HTS (.sort w) (.sort w₄) (n₂'-1)
+          -- hts_w₃ : HTS (.sort w₃) (.sort w₄') (n₂'-1)
+          -- dw₄ : w₄ ≈ w₄'
+          -- defeq layer: HTS (.sort w) (.sort w₄') n₂'
+          -- Need: defeq hw₄ (.sort w₄ ≡ .sort w₄' : .sort u')
+          --       HTS (.sort w₄) (.sort u') (n₂'-1) HTS (.sort w₄') (.sort u') (n₂'-1)
+          --       HTS (.sort w) (.sort w₄) (n₂'-1)
+          -- Use sort' for the type HTS and sortDF for the type equality
+          -- Get WF for the TYPE levels w₄ and w₄'
+          have hw₄_wf : w₄.WF U := have ⟨_, h⟩ := hts_w.hasType.isType henv hΓ; h.sort_inv henv
+          have hw₄'_wf : w₄'.WF U := have ⟨_, h⟩ := hts_w₃.hasType.isType henv hΓ; h.sort_inv henv
+          have hts_w' : env.HasTypeStratified U Γ (.sort w) (.sort w₄') true n₂' :=
+            .defeq hw₄_wf (.sortDF hw₄_wf hw₄'_wf dw₄)
+              (.base <| .sort' hw₄_wf hw₄_wf (by rfl))
+              (.base <| .sort' hw₄'_wf hw₄_wf dw₄.symm)
+              (.base hts_w)
+          -- sort_inv at depth n₂' < n: w ≈ w₃
+          have h_w_w₃ := (IH _ hlt).2.1 hΓ (Nat.le_refl _) (Nat.pred_le _) hts_w' hts_w₃
+          -- w ≈ w₃ ≈ w₃' (from dw)
+          have h_w_w₃' : w ≈ w₃' := h_w_w₃.trans dw
+          -- ds2 : HTS (.sort (.succ l₂)) (.sort w₃') (n₂'-1)
+          -- Add defeq: HTS (.sort (.succ l₂)) (.sort w) n₂'
+          have ds2' : env.HasTypeStratified U Γ (.sort (.succ l₂)) (.sort w) true n₂' :=
+            .defeq (ds2.hasType.sort_inv henv) (.sortDF (ds2.hasType.sort_inv henv)
+              (hAw.hasType.sort_inv henv) h_w_w₃'.symm) (ds2.mono (Nat.pred_le _))
+              (hAw.mono (Nat.le_refl _)) (.base <| ds2.mono (Nat.pred_le _))
+          -- sort_inv at depth n₂' < n: succ l₁ ≈ succ l₂
+          have hsl := (IH _ hlt).2.1 hΓ (Nat.le_refl _) (Nat.le_refl _) hAw ds2'
+          exact a3.trans (VLevel.succ_congr_iff.mp hsl |>.trans hv_l₂.symm)
       | .defeq a1 a2 a3 a4 a5 =>
         -- H1 = defeq: .sort u : A' at depth n₁', A' ≡ A : .sort w
         -- Symmetric case: peel H1 and relate types
