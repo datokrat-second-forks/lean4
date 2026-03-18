@@ -116,9 +116,8 @@ def main : IO Unit := do
     return (dep, v2t)
     : CoreM _).toIO ctx state
 
-  -- Truncate to 200
+  -- Truncate Cat 1 to 200, show all of Cat 2
   let dep := if dep.size > 200 then dep.extract 0 200 else dep
-  let v2t := if v2t.size > 200 then v2t.extract 0 200 else v2t
 
   IO.println s!"\n=== Category 1: Declarations with dependent value parameters ({dep.size}) ==="
   IO.println "  (A later parameter's type depends on an earlier non-Type/Prop value parameter)"
