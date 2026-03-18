@@ -9,6 +9,8 @@ set_option linter.unusedVariables false
     `Type → Type → Type`). This classifies both types and type constructors
     as "type-valued". -/
 def isTypeValued (e : Expr) : MetaM Bool := do
+  -- whnf first to unfold wrappers like semiOutParam/outParam
+  let e ← withReducible <| whnf e
   forallTelescope e fun _ body => do
     let body ← withReducible <| whnf body
     return body.isSort
