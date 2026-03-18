@@ -261,6 +261,23 @@ The three lemmas are interdependent:
 The base case (depth 0) should be tractable because there are no `defeqDF` steps,
 so the derivation is purely structural.
 
+## Current Implementation Status
+
+### What's proven
+- `sort_inv_zero`: base case for sort inversion at depth 0
+- `forallE_inv`: derived from `forallE_inv_stratified`
+- Proof architecture in `stratified_bundle`: WF induction with correct ordering
+
+### Remaining sorries
+- `sort_inv_n`: double-induction on two HasTypeStratified for sorts with same type
+- `uniq_n`: copy of IsDefEq.uniq suffices body with IH-provided sort_inv/forallE_inv
+- `forallE_inv_n`: extraction of component equalities from forallE typing
+
+### Rules
+- **Never stop working until all sorries are eliminated.** Keep iterating until
+  `Injectivity.lean` compiles with no sorries in the dependencies of unique typing.
+- Always verify compilation after changes.
+
 ## Summary
 
 The proof requires:
