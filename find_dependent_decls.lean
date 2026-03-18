@@ -43,7 +43,11 @@ def checkDependentValueParam (name : Name) : MetaM (Option Name) := do
   if ci.isUnsafe then return none
   if isPrivateName name then return none
   if !isInteresting name then return none
-  forallTelescope ci.type fun xs _ => do
+  forallTelescope ci.type fun xs body => do
+    -- Exclude proof-valued declarations (return type lives in Prop)
+    let bodyType ← inferType body
+    let bodyType ← withReducible <| whnf bodyType
+    if bodyType.isProp then return none
     let mut valueParamFVars : Array (Nat × Expr) := #[]
     for i in [:xs.size] do
       let xiType ← inferType xs[i]!
