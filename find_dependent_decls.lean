@@ -43,6 +43,9 @@ def checkDependentValueParam (name : Name) : MetaM (Option Name) := do
     for (vi, vfvar) in valueParamFVars do
       for j in [vi+1:xs.size] do
         let xjType ← inferType xs[j]!
+        -- Use reducible whnf to unfold optParam/autoParam wrappers,
+        -- so that `(stop : optParam Nat as.size)` is seen as just `Nat`
+        let xjType ← withReducible <| whnf xjType
         if xjType.containsFVar vfvar.fvarId! then
           return some name
     return none
@@ -61,6 +64,7 @@ def checkValueToType (name : Name) : MetaM (Option Name) := do
     if body == mkSort .zero then return none
     for i in [:xs.size] do
       let xiType ← inferType xs[i]!
+      let xiType ← withReducible <| whnf xiType
       if !xiType.isSort then
         return some name
     return none

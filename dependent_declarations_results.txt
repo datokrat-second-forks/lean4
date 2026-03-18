@@ -6,7 +6,7 @@ Total declarations in Init/Std: 73109
   ... processed 50000/73109
   ... processed 60000/73109
   ... processed 70000/73109
-  Done. Found 38681 dependent-value-param decls, 367 value-to-type decls
+  Done. Found 38664 dependent-value-param decls, 327 value-to-type decls
 
 === Category 1: Declarations with dependent value parameters (200) ===
   (A later parameter's type depends on an earlier non-Type/Prop value parameter)
@@ -48,7 +48,6 @@ Total declarations in Init/Std: 73109
   Array.Perm.symm
   Array.Perm.toList
   Array.Perm.trans
-  Array.all
   Array.allM
   Array.allM_congr
   Array.allM_eq_not_anyM_not
@@ -65,7 +64,6 @@ Total declarations in Init/Std: 73109
   Array.all_push'
   Array.all_reverse'
   Array.all_subtype
-  Array.any
   Array.anyM
   Array.anyM.eq_1
   Array.anyM.loop
@@ -137,9 +135,7 @@ Total declarations in Init/Std: 73109
   Array.back_pop
   Array.back_replicate
   Array.binInsertM
-  Array.binSearch
   Array.binSearchAux
-  Array.binSearchContains
   Array.boole_getElem_le_count
   Array.boole_getElem_le_countP
   Array.contains_eq_mem
@@ -210,6 +206,10 @@ Total declarations in Init/Std: 73109
   Array.eraseP_append_right
   Array.eraseP_comm
   Array.eraseP_of_forall_getElem_not
+  Array.eraseP_of_forall_mem_not
+  Array.eraseP_replicate_of_neg
+  Array.eraseP_replicate_of_pos
+  Array.erase_append
 
 === Category 2: Declarations taking value but returning Type (200) ===
   (Takes a non-Type/Prop parameter but returns a Type, not Prop)
@@ -220,20 +220,14 @@ Total declarations in Init/Std: 73109
   BitVec.DivModArgs
   BitVec.DivModState
   BreakT
-  Coe
   CoeDep
   CoeFun
-  CoeHead
-  CoeOut
-  CoeSort
   CoeT
-  CoeTail
   ContinueT
   DecidableLE
   DecidableLT
   DecidablePred
   DecidableRel
-  EStateM.Backtrackable
   EarlyReturnT
   ExceptCpsT
   ExceptT
@@ -245,25 +239,9 @@ Total declarations in Init/Std: 73109
   Functor
   GetElem
   GetElem?
-  HAdd
-  HAnd
-  HAndThen
-  HAppend
-  HDiv
-  HMod
-  HMul
-  HOr
-  HOrElse
-  HPow
-  HSMul
-  HShiftLeft
-  HShiftRight
-  HSub
-  HXor
   HasEquiv.Equiv
   IO.Process.Child
   IO.Process.Stdio.toHandleType
-  Insert
   Lean.Data.AC.Variable
   Lean.Grind.IntModule.OfNatModule.Q
   Lean.Grind.Ring.OfSemiring.Q
@@ -282,7 +260,6 @@ Total declarations in Init/Std: 73109
   Lean.TSyntax
   Lean.TSyntaxArray
   List.Cursor
-  Membership
   Monad
   MonadAttach
   MonadControl
@@ -314,7 +291,6 @@ Total declarations in Init/Std: 73109
   Quotient
   ReaderT
   STWorld
-  Sep
   Seq
   SeqLeft
   SeqRight
@@ -326,7 +302,6 @@ Total declarations in Init/Std: 73109
   ShareCommonM
   ShareCommonT
   Sigma
-  Singleton
   StateCpsT
   StateRefT'
   StateT
@@ -413,3 +388,28 @@ Total declarations in Init/Std: 73109
   Std.DTreeMap.Internal.Unit.RooSliceData
   Std.DTreeMap.Internal.Zipper
   Std.DTreeMap.Raw
+  Std.Do.Assertion
+  Std.Do.ExceptConds
+  Std.Do.Invariant
+  Std.Do.PostCond
+  Std.Do.PredTrans
+  Std.Do.SPred
+  Std.Do.SVal
+  Std.Do.SVal.GetTy
+  Std.Do.SVal.StateTuple
+  Std.Do.StringInvariant
+  Std.Do.StringSliceInvariant
+  Std.Do.WP
+  Std.Do.WPMonad
+  Std.ExtDHashMap
+  Std.ExtDTreeMap
+  Std.ExtHashMap
+  Std.ExtHashSet
+  Std.ExtTreeMap
+  Std.ExtTreeSet
+  Std.Format.MonadPrettyFormat
+  Std.HashMap
+  Std.HashSet
+  Std.Http.Internal.Encode
+  Std.Internal.ComputableSmall.Target
+  Std.Internal.IO.Async.MonadAsync
