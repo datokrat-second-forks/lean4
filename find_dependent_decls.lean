@@ -4,6 +4,15 @@ open Lean Meta
 
 set_option linter.unusedVariables false
 
+/-- Returns true if the type is `Sort u`, or a function type whose return type
+    is ultimately a `Sort` (i.e., a type constructor like `Type → Type` or
+    `Type → Type → Type`). This classifies both types and type constructors
+    as "type-valued". -/
+def isTypeValued (e : Expr) : MetaM Bool := do
+  forallTelescope e fun _ body => do
+    let body ← withReducible <| whnf body
+    return body.isSort
+
 /-- Check if declaration is from Init or Std module -/
 def isFromInitOrStd (env : Environment) (name : Name) : Bool :=
   match env.getModuleIdxFor? name with
@@ -38,7 +47,7 @@ def checkDependentValueParam (name : Name) : MetaM (Option Name) := do
     let mut valueParamFVars : Array (Nat × Expr) := #[]
     for i in [:xs.size] do
       let xiType ← inferType xs[i]!
-      if !xiType.isSort then
+      if !(← isTypeValued xiType) then
         valueParamFVars := valueParamFVars.push (i, xs[i]!)
     for (vi, vfvar) in valueParamFVars do
       for j in [vi+1:xs.size] do
@@ -64,8 +73,7 @@ def checkValueToType (name : Name) : MetaM (Option Name) := do
     if body == mkSort .zero then return none
     for i in [:xs.size] do
       let xiType ← inferType xs[i]!
-      let xiType ← withReducible <| whnf xiType
-      if !xiType.isSort then
+      if !(← isTypeValued xiType) then
         return some name
     return none
 
