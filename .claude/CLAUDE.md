@@ -1,7 +1,3 @@
-## Git Push
-
-Never push to the remote repository. The remote consistently returns 403 permission errors. All work stays on local branches only.
-
 (In the following, use `sysctl -n hw.logicalcpu` instead of `nproc` on macOS)
 
 To build Lean you should use `make -j$(nproc) -C build/release`.
