@@ -88,6 +88,16 @@ private theorem forallElike_const_transfer {c : Name} {ls ls' : List VLevel}
       ForallELikeWith.instL' hsteps₀
     exact ⟨C.instL ls_p', D.instL ls_p', (ReflTransGen.rfl.tail step').trans chain'⟩
 
+/-- Subject reduction for WHSteps: WHNF reduction preserves typing.
+If `e →_WH* e'` and `Γ ⊢ e : A`, then `Γ ⊢ e' : A`.
+Proof: by induction on the WHStep chain, using WHStep_IsDefEq for each step. -/
+private theorem WHSteps_hasType
+    (hord : Ordered ip.env)
+    (hΓ : OnCtx Γ (ip.env.IsType U))
+    (hsteps : WHSteps e e') (ht : ip.env.HasType U Γ e A) :
+    ip.env.HasType U Γ e' A := by
+  sorry
+
 /-- SortLike/ForallELike preservation (bidirectional) through IsDefEqStrong.
 Combined into a 4-tuple to handle the symm case.
 
@@ -161,7 +171,13 @@ theorem whnf_preserved
   | appDF _ _ _ _ _ _ _ _ _ _ _ _ =>
     exact ⟨fun _ _ => sorry, fun _ _ => sorry,
            fun _ _ _ => sorry, fun _ _ _ => sorry⟩
-  | proofIrrel _ _ _ _ _ _ =>
+  | proofIrrel hp hh hh' _ _ _ =>
+    -- e₁ = h, e₂ = h', V = p where Γ ⊢ p : .sort 0, Γ ⊢ h : p, Γ ⊢ h' : p
+    -- All 4 properties are vacuously true:
+    -- SortLikeWith h l ⟹ by SR (WHSteps_hasType): .sort l : p
+    --   ⟹ .sort (.succ l) ≡ p (by uniq) ⟹ p : .sort 0 ⟹ 0 ≈ succ(succ l) ⟹ False
+    -- ForallELikeWith h A B ⟹ similarly: .forallE A B : p ⟹ .sort(imax ..) ≡ p ⟹ False
+    -- Needs: WHSteps_hasType (subject reduction) + Ordered env + OnCtx Γ
     exact ⟨fun _ _ => sorry, fun _ _ => sorry,
            fun _ _ _ => sorry, fun _ _ _ => sorry⟩
 
