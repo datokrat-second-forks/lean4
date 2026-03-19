@@ -95,7 +95,68 @@ private def StratifiedBundle (env : VEnv) (U n : Nat) : Prop :=
 the same type. `sortEquiv` bridges this gap by constructing same-type HTS at low depth.
 See PLAN.md for the detailed proof strategy. -/
 
-/-- Extract sort level equivalence from HTS derivations at ≈-related types. -/
+/-- For HTS (.sort u) (.sort w) true m with m < N, the type level w is ≈ succ l
+    for some l with u ≈ l. Proof by strong induction on m, using uniq_{<N}. -/
+private theorem sort_type_canonical' (henv : VEnv.WF env)
+    (IH : ∀ m, m < N → StratifiedBundle env U m)
+    {Γ : List VExpr} (hΓ : OnCtx Γ (env.IsType U))
+    {u w : VLevel} {m : Nat}
+    (h : env.HasTypeStratified U Γ (.sort u) (.sort w) true m) (hm : m < N) :
+    ∃ l, u ≈ l ∧ l.WF U ∧ w ≈ .succ l := by
+  induction m using Nat.strongRecOn generalizing u w with | _ m ih_m =>
+  match h with
+  | .base (.sort' a1 a2 a3) =>
+    -- base(sort'): type = .sort(.succ l'), u ≈ l', w = .succ l'
+    exact ⟨_, a3, a2, rfl⟩
+  | .defeq (u := w_inner) (A := T) (n := k) hwi hTeq hT_wi hW_wi huT =>
+    -- defeq: HTS (.sort u) T true k, T ≡ .sort w : .sort w_inner
+    -- Goal: w ≈ succ l for some l with u ≈ l
+    have ⟨l, hu_l, hl_wf⟩ := sort_canonical huT
+    have hu_wf : u.WF U := huT.hasType.sort_inv henv
+    have hk : k < N := by omega
+    -- Construct canonical typing for .sort u at depth k
+    have huCanon : env.HasTypeStratified U Γ (.sort u) (.sort (.succ l)) true k :=
+      .base (.sort' hu_wf hl_wf hu_l)
+    -- (1) uniq at depth k: HTS (.sort u) T and HTS (.sort u) (.sort(.succ l))
+    have ⟨t, _, t', ht_t', hT_t, hSl_t'⟩ :=
+      (IH k hk).1 hΓ (by omega) (by omega) huT huCanon
+    -- (2) uniq at depth k: HTS T (.sort w_inner) (depth k) and HTS T (.sort t) (depth k-1)
+    have ⟨s, _, s', hs_s', hWi_s, ht_s'⟩ :=
+      (IH k hk).1 hΓ (by omega) (by omega) hT_wi hT_t
+    -- Recursive calls at lower depth:
+    -- (3) w ≈ l_w and w_inner ≈ succ l_w from HTS (.sort w) (.sort w_inner) at depth k
+    have ⟨l_w, hw_lw, _, hwi_slw⟩ := ih_m k (by omega) hW_wi (by omega)
+    -- (4) w_inner ≈ l_wi and s ≈ succ l_wi from HTS (.sort w_inner) (.sort s) at depth k-1
+    have ⟨l_wi, hwi_lwi, _, hs_slwi⟩ := ih_m (k-1) (by omega) hWi_s (by omega)
+    -- (5) t ≈ l_t and s' ≈ succ l_t from HTS (.sort t) (.sort s') at depth k-1
+    have ⟨l_t, ht_lt, _, hs'_slt⟩ := ih_m (k-1) (by omega) ht_s' (by omega)
+    -- (6) succ l ≈ l_sl and t' ≈ succ l_sl from HTS (.sort(.succ l)) (.sort t') at depth k-1
+    have ⟨l_sl, hsl_lsl, _, ht'_slsl⟩ := ih_m (k-1) (by omega) hSl_t' (by omega)
+    -- Chain reasoning:
+    -- From (4): w_inner ≈ l_wi, s ≈ succ l_wi
+    -- From (3): w_inner ≈ succ l_w
+    -- So: succ l_w ≈ w_inner ≈ l_wi, hence succ l_w ≈ l_wi
+    have h1 : VLevel.succ l_w ≈ l_wi := hwi_slw.symm.trans hwi_lwi
+    -- From hs_s': s ≈ s'. From (4): s ≈ succ l_wi. From (5): s' ≈ succ l_t.
+    -- So succ l_wi ≈ succ l_t, hence l_wi ≈ l_t
+    have h2 : l_wi ≈ l_t := VLevel.succ_congr_iff.mp (hs_slwi.symm.trans (hs_s'.trans hs'_slt))
+    -- From (5): t ≈ l_t. From ht_t': t ≈ t'. From (6): t' ≈ succ l_sl.
+    -- So l_t ≈ t ≈ t' ≈ succ l_sl
+    have h3 : l_t ≈ VLevel.succ l_sl := ht_lt.symm.trans (ht_t'.trans ht'_slsl)
+    -- From (6): succ l ≈ l_sl. So l_sl ≈ succ l.
+    -- So succ l_sl ≈ succ (succ l) ... no, not what we want.
+    -- Actually: l_t ≈ succ l_sl (from h3). And l_wi ≈ l_t (from h2).
+    -- And succ l_w ≈ l_wi (from h1). So:
+    -- succ l_w ≈ l_wi ≈ l_t ≈ succ l_sl
+    have h4 : VLevel.succ l_w ≈ VLevel.succ l_sl := h1.trans (h2.trans h3)
+    -- So l_w ≈ l_sl (by succ_congr_iff)
+    have h5 : l_w ≈ l_sl := VLevel.succ_congr_iff.mp h4
+    -- From (6): succ l ≈ l_sl. So l_sl ≈ succ l.
+    -- From h5: l_w ≈ l_sl ≈ succ l.
+    have h6 : l_w ≈ VLevel.succ l := h5.trans hsl_lsl.symm
+    -- Goal: w ≈ succ l. From (3): w ≈ l_w. From h6: l_w ≈ succ l.
+    exact ⟨l, hu_l, hl_wf, hw_lw.trans h6⟩
+
 private theorem sortEquiv (henv : VEnv.WF env)
     (IH : ∀ m, m < N → StratifiedBundle env U m)
     {Γ : List VExpr} (hΓ : OnCtx Γ (env.IsType U))
@@ -103,14 +164,12 @@ private theorem sortEquiv (henv : VEnv.WF env)
     (h1 : env.HasTypeStratified U Γ (.sort u) (.sort w) true m₁) (hm₁ : m₁ < N)
     (h2 : env.HasTypeStratified U Γ (.sort v) (.sort w') true m₂) (hm₂ : m₂ < N)
     (hw : w ≈ w') : u ≈ v := by
-  -- Proof: by strong induction on m₁ + m₂.
-  -- Base: both base(sort'). w = succ l₁, w' = succ l₂.
-  --   w ≈ w' gives succ l₁ ≈ succ l₂ so l₁ ≈ l₂.
-  --   u ≈ l₁ and v ≈ l₂ gives u ≈ v.
-  -- Step: WLOG h1 is defeq. Peel to get HTS (.sort u) B_inner (m₁-1).
-  --   Use uniq_{<N} to get B_inner ≡ .sort(.succ l₁) and HTS at lower depth.
-  --   Use sort_inv_{<N} to bridge types. Recurse at lower m₁+m₂.
-  sorry
+  have ⟨l₁, hu, _, hw1⟩ := sort_type_canonical' henv IH hΓ h1 hm₁
+  have ⟨l₂, hv, _, hw2⟩ := sort_type_canonical' henv IH hΓ h2 hm₂
+  -- w ≈ succ l₁, w' ≈ succ l₂, w ≈ w'
+  -- So succ l₁ ≈ succ l₂, hence l₁ ≈ l₂
+  -- u ≈ l₁ ≈ l₂ ≈ v⁻¹ → u ≈ v
+  exact hu.trans (VLevel.succ_congr_iff.mp (hw1.symm.trans (hw.trans hw2)) |>.trans hv.symm)
 
 /-! ## Main bundle proof -/
 
@@ -138,17 +197,83 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
           let .sort' b1 b2 b3 := h2
           exact a3.trans b3.symm
         | .defeq (u := w) (A := B) (n := n₂') hw hBA hBw hAw hvB =>
-          -- H1 = base(sort'): u ≈ l₁, A = .sort(.succ l₁)
-          -- H2 = defeq: .sort v : B at depth n₂', B ≡ A : .sort w
-          -- See PLAN.md "base/defeq" for the 6-step construction
-          sorry
-      | .defeq a1 a2 a3 a4 a5 =>
+          -- H1 = base(sort'): A = .sort(.succ l₁), u ≈ l₁
+          -- H2 = defeq: hvB : HTS (.sort v) B true n₂', B ≡ A : .sort w
+          -- hAw : HTS (.sort(.succ l₁)) (.sort w) true n₂', n₂' < n
+          let .sort' a1 a2 a3 := h1  -- a3 : u ≈ l₁, A = .sort(.succ l₁)
+          -- Get v ≈ l₂ from sort_canonical
+          have ⟨l₂, hv_l₂, hl₂_wf⟩ := sort_canonical hvB
+          have hv_wf : v.WF U := hvB.hasType.sort_inv henv
+          -- Construct canonical HTS for .sort v at depth n₂'
+          have hvCanon : env.HasTypeStratified U Γ (.sort v) (.sort (.succ l₂)) true n₂' :=
+            .base (.sort' hv_wf hl₂_wf hv_l₂)
+          -- uniq at depth n₂' on hvB and hvCanon: B ≡ .sort(.succ l₂) : .sort t
+          have hn₂' : n₂' < n := by omega
+          have ⟨t, hBsl₂, t', ht_t', hB_t, hSl₂_t'⟩ :=
+            (IH n₂' hn₂').1 hΓ (by omega) (by omega) hvB hvCanon
+          -- sort_inv_{<n} on .sort(.succ l₂) and .sort(.succ l₁) through their common type
+          -- From hBA: B ≡ A : .sort w = B ≡ .sort(.succ l₁) : .sort w
+          -- From hBsl₂: B ≡ .sort(.succ l₂) : .sort t
+          -- Compose: .sort(.succ l₁) ≡ B.symm ≡ .sort(.succ l₂), so .sort(.succ l₁) ≡ .sort(.succ l₂)
+          -- Use sort_type_canonical' on hAw and hSl₂_t' with sortEquiv to get l₁ ≈ l₂
+          have ⟨l_A, hsl₁_lA, _, hw_sl_A⟩ :=
+            sort_type_canonical' henv IH hΓ hAw hn₂'
+          have ⟨l_sl₂, hsl₂_lsl₂, _, ht'_sl_sl₂⟩ :=
+            sort_type_canonical' henv IH hΓ hSl₂_t' (by omega)
+          -- Bridge: from uniq on hBw and hB_t, get w ≈ t (via sortEquiv)
+          have ⟨s, _, s', hs_s', hW_s, hT_s'⟩ :=
+            (IH n₂' hn₂').1 hΓ (by omega) (by omega) hBw hB_t
+          have hw_t : w ≈ t := sortEquiv henv IH hΓ hW_s (by omega) hT_s' (by omega) hs_s'
+          -- From t ≈ t' and hw_t: w ≈ t' (through t ≈ t')
+          have hw_t' : w ≈ t' := hw_t.trans ht_t'
+          -- Now: w ≈ succ l_A (from sort_type_canonical' on hAw)
+          -- And: t' ≈ succ l_sl₂ (from sort_type_canonical' on hSl₂_t')
+          -- So: succ l_A ≈ w ≈ t' ≈ succ l_sl₂
+          have hslA_slsl₂ : VLevel.succ l_A ≈ VLevel.succ l_sl₂ :=
+            hw_sl_A.symm.trans (hw_t'.trans ht'_sl_sl₂)
+          have hlA_lsl₂ : l_A ≈ l_sl₂ := VLevel.succ_congr_iff.mp hslA_slsl₂
+          -- And: succ l₁ ≈ l_A, succ l₂ ≈ l_sl₂
+          -- So: succ l₁ ≈ l_A ≈ l_sl₂ ≈ succ l₂ (reversed)
+          have hsl₁_sl₂ : VLevel.succ _ ≈ VLevel.succ l₂ :=
+            hsl₁_lA.trans (hlA_lsl₂.trans hsl₂_lsl₂.symm)
+          exact a3.trans (VLevel.succ_congr_iff.mp hsl₁_sl₂ |>.trans hv_l₂.symm)
+      | .defeq (u := w₁) (A := B₁) (n := n₁') hw₁ hB₁A hB₁w₁ hAw₁ huB₁ =>
         match H2 with
         | .base h2 =>
-          -- Symmetric to base/defeq: swap H1 and H2 roles
-          sorry
-        | .defeq b1 b2 b3 b4 b5 =>
-          -- Both defeq: use sortEquiv to bridge ≈-related types
+          -- Symmetric to base/defeq
+          let .sort' b1 b2 b3 := h2
+          have ⟨l₁, hu_l₁, hl₁_wf⟩ := sort_canonical huB₁
+          have hu_wf : u.WF U := huB₁.hasType.sort_inv henv
+          have huCanon : env.HasTypeStratified U Γ (.sort u) (.sort (.succ l₁)) true n₁' :=
+            .base (.sort' hu_wf hl₁_wf hu_l₁)
+          have hn₁' : n₁' < n := by omega
+          have ⟨t, hBsl₁, t', ht_t', hB₁_t, hSl₁_t'⟩ :=
+            (IH n₁' hn₁').1 hΓ (by omega) (by omega) huB₁ huCanon
+          have ⟨l_A, hsl₂_lA, _, hw₁_sl_A⟩ :=
+            sort_type_canonical' henv IH hΓ hAw₁ hn₁'
+          have ⟨l_sl₁, hsl₁_lsl₁, _, ht'_sl_sl₁⟩ :=
+            sort_type_canonical' henv IH hΓ hSl₁_t' (by omega)
+          have ⟨s, _, s', hs_s', hW₁_s, hT_s'⟩ :=
+            (IH n₁' hn₁').1 hΓ (by omega) (by omega) hB₁w₁ hB₁_t
+          have hw₁_t : w₁ ≈ t := sortEquiv henv IH hΓ hW₁_s (by omega) hT_s' (by omega) hs_s'
+          have hw₁_t' : w₁ ≈ t' := hw₁_t.trans ht_t'
+          have hslA_slsl₁ : VLevel.succ l_A ≈ VLevel.succ l_sl₁ :=
+            hw₁_sl_A.symm.trans (hw₁_t'.trans ht'_sl_sl₁)
+          have hlA_lsl₁ : l_A ≈ l_sl₁ := VLevel.succ_congr_iff.mp hslA_slsl₁
+          -- b3 : v ≈ l₂ where A = .sort(.succ l₂)
+          -- hsl₂_lA : succ l₂ ≈ l_A (where l₂ is the level from b3's sort')
+          -- hsl₁_lsl₁ : succ l₁ ≈ l_sl₁
+          -- So succ l₂ ≈ l_A ≈ l_sl₁ ≈ succ l₁ (reversed)
+          have hsl₂_sl₁ : VLevel.succ _ ≈ VLevel.succ l₁ :=
+            hsl₂_lA.trans (hlA_lsl₁.trans hsl₁_lsl₁.symm)
+          exact hu_l₁.trans (VLevel.succ_congr_iff.mp hsl₂_sl₁ |>.symm.trans b3.symm)
+        | .defeq (u := w₂) (A := B₂) (n := n₂') hw₂ hB₂A hB₂w₂ hAw₂ hvB₂ =>
+          -- Both defeq. Inner sub-derivations at depth n₁' < n and n₂' < n.
+          -- Use sort_canonical + uniq + sortEquiv on inner parts, similar to
+          -- base/defeq but applied to both sides symmetrically.
+          -- The chain: construct canonical typings for .sort u and .sort v,
+          -- use uniq to relate B₁ ≡ .sort(.succ l₁) and B₂ ≡ .sort(.succ l₂),
+          -- then bridge through the shared type A to get l₁ ≈ l₂.
           sorry
   -- Step 2: uniq_n (copy from UniqueTyping.lean with IH-provided sort_inv/forallE_inv)
   have uniq_n : ∀ {Γ : List VExpr} {e A B : VExpr} {b : Bool} {n₁ n₂ : Nat},
