@@ -269,12 +269,59 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
           exact hu_l₁.trans (VLevel.succ_congr_iff.mp hsl₂_sl₁ |>.symm.trans b3.symm)
         | .defeq (u := w₂) (A := B₂) (n := n₂') hw₂ hB₂A hB₂w₂ hAw₂ hvB₂ =>
           -- Both defeq. Inner sub-derivations at depth n₁' < n and n₂' < n.
-          -- Use sort_canonical + uniq + sortEquiv on inner parts, similar to
-          -- base/defeq but applied to both sides symmetrically.
-          -- The chain: construct canonical typings for .sort u and .sort v,
-          -- use uniq to relate B₁ ≡ .sort(.succ l₁) and B₂ ≡ .sort(.succ l₂),
-          -- then bridge through the shared type A to get l₁ ≈ l₂.
-          sorry
+          -- Strategy: get sort_canonical levels, construct canonical typings,
+          -- use uniq to relate inner types, then chain via sortEquiv.
+          have hn₁' : n₁' < n := by omega
+          have hn₂' : n₂' < n := by omega
+          have ⟨l₁, hu_l₁, hl₁_wf⟩ := sort_canonical huB₁
+          have ⟨l₂, hv_l₂, hl₂_wf⟩ := sort_canonical hvB₂
+          have hu_wf := huB₁.hasType.sort_inv henv
+          have hv_wf := hvB₂.hasType.sort_inv henv
+          -- Canonical typings at depth n₁' and n₂'
+          have huC : env.HasTypeStratified U Γ (.sort u) (.sort (.succ l₁)) true n₁' :=
+            .base (.sort' hu_wf hl₁_wf hu_l₁)
+          have hvC : env.HasTypeStratified U Γ (.sort v) (.sort (.succ l₂)) true n₂' :=
+            .base (.sort' hv_wf hl₂_wf hv_l₂)
+          -- uniq at n₁': B₁ ≡ .sort(.succ l₁) with HTS at depth n₁'-1
+          have ⟨t₁, _, t₁', ht₁, hB₁_t₁, hSl₁_t₁'⟩ :=
+            (IH n₁' hn₁').1 hΓ (by omega) (by omega) huB₁ huC
+          -- uniq at n₂': B₂ ≡ .sort(.succ l₂) with HTS at depth n₂'-1
+          have ⟨t₂, _, t₂', ht₂, hB₂_t₂, hSl₂_t₂'⟩ :=
+            (IH n₂' hn₂').1 hΓ (by omega) (by omega) hvB₂ hvC
+          -- sortEquiv on .sort(.succ l₁) and .sort(.succ l₂) through their types:
+          -- hSl₁_t₁' : HTS (.sort(.succ l₁)) (.sort t₁') true (n₁'-1)
+          -- hSl₂_t₂' : HTS (.sort(.succ l₂)) (.sort t₂') true (n₂'-1)
+          -- Need t₁' ≈ t₂'. Chain through:
+          -- B₁ has types (.sort w₁) and (.sort t₁). hAw₁ gives A at (.sort w₁).
+          -- B₁ ≡ A (from hB₁A). B₂ ≡ A (from hB₂A).
+          -- So B₁ ≡ B₂ (transitivity through A).
+          -- From uniq on B₁: (.sort w₁) and (.sort t₁) are ≈-related (via sortEquiv).
+          -- From uniq on B₂: (.sort w₂) and (.sort t₂) are ≈-related.
+          -- From hAw₁ and hAw₂: A has types (.sort w₁) and (.sort w₂).
+          -- By uniq on A: w₁ and w₂ are ≈-related.
+          -- Chain: t₁ ≈ w₁ ≈ w₂ ≈ t₂.
+          -- And t₁ ≈ t₁', t₂ ≈ t₂' from the uniq results.
+          -- So t₁' ≈ t₂'.
+          -- Bridge w₁ ≈ t₁
+          have ⟨_, _, _, hr₁, hW₁_r₁, hT₁_r₁'⟩ :=
+            (IH n₁' hn₁').1 hΓ (by omega) (by omega) hB₁w₁ hB₁_t₁
+          have hw₁_t₁ := sortEquiv henv IH hΓ hW₁_r₁ (by omega) hT₁_r₁' (by omega) hr₁
+          -- Bridge w₂ ≈ t₂
+          have ⟨_, _, _, hr₂, hW₂_r₂, hT₂_r₂'⟩ :=
+            (IH n₂' hn₂').1 hΓ (by omega) (by omega) hB₂w₂ hB₂_t₂
+          have hw₂_t₂ := sortEquiv henv IH hΓ hW₂_r₂ (by omega) hT₂_r₂' (by omega) hr₂
+          -- Bridge w₁ ≈ w₂ via uniq on A
+          have hm := Nat.lt_of_lt_of_le (Nat.lt_max_of_lt_left hn₁') (Nat.le_refl _)
+          have ⟨_, _, _, hs_A, hW₁_sA, hW₂_sA'⟩ :=
+            (IH (max n₁' n₂') (by omega)).1 hΓ (by omega) (by omega) hAw₁ hAw₂
+          have hw₁_w₂ := sortEquiv henv IH hΓ hW₁_sA (by omega) hW₂_sA' (by omega) hs_A
+          -- Chain: t₁' ≈ t₁ ≈ w₁ ≈ w₂ ≈ t₂ ≈ t₂'
+          have ht₁'_t₂' : t₁' ≈ t₂' :=
+            ht₁.symm.trans (hw₁_t₁.symm.trans (hw₁_w₂.trans (hw₂_t₂.trans ht₂)))
+          -- Now sortEquiv on .sort(.succ l₁) and .sort(.succ l₂):
+          have hsl₁_sl₂ : VLevel.succ l₁ ≈ VLevel.succ l₂ :=
+            sortEquiv henv IH hΓ hSl₁_t₁' (by omega) hSl₂_t₂' (by omega) ht₁'_t₂'
+          exact hu_l₁.trans (VLevel.succ_congr_iff.mp hsl₁_sl₂ |>.trans hv_l₂.symm)
   -- Step 2: uniq_n (copy from UniqueTyping.lean with IH-provided sort_inv/forallE_inv)
   have uniq_n : ∀ {Γ : List VExpr} {e A B : VExpr} {b : Bool} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
