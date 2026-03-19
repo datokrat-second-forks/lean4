@@ -105,13 +105,14 @@ class InjectivityParams where
     df.lhs.instL ls = .app f a →
     env.defeqs df' → ls'.length = df'.uvars → df'.lhs.instL ls' ≠ f
 
-  /-- Re-leveling for extra rules matching a const: if the rule's LHS matches
-  `.const c us` with level params `ls`, then with different level params `ls'`
-  it still matches `.const c us'` for some `us'`. This is trivially true for
-  defn patterns (which have identity universe params). -/
+  /-- For defn patterns: the const's level list has the same length as df.uvars. -/
+  extra_const_uvars : env.defeqs df → ls.length = df.uvars →
+    df.lhs.instL ls = .const c us → us.length = df.uvars
+  /-- Re-leveling: if the rule's LHS matches `.const c us₁`, then for any `us₂`
+  with the same length, there are level params that make it match `.const c us₂`. -/
   extra_const_relevel : env.defeqs df → ls.length = df.uvars →
-    df.lhs.instL ls = .const c us → ls'.length = df.uvars →
-    ∃ us', df.lhs.instL ls' = .const c us'
+    df.lhs.instL ls = .const c us₁ → us₂.length = us₁.length →
+    ∃ ls₂, ls₂.length = df.uvars ∧ df.lhs.instL ls₂ = .const c us₂
 
 variable [InjectivityParams]
 open InjectivityParams

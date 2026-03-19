@@ -50,6 +50,44 @@ private theorem ForallELikeWith_not_lam (h : ForallELikeWith (.lam A body) C D) 
   · cases heq
   · exact WHStep.not_lam hstep
 
+/-- Transfer SortLikeWith between `.const c ls` and `.const c ls'` (same const, different levels).
+Uses const_inv + instL_inv + extra_const_relevel + WHSteps.instL. -/
+private theorem sortlike_const_transfer {c : Name} {ls ls' : List VLevel}
+    (hlen : ls'.length = ls.length)
+    (h : SortLikeWith (.const c ls) l) :
+    ∃ l', SortLikeWith (.const c ls') l' := by
+  rcases ReflTransGen.cases_head' h with heq | ⟨mid, hstep, hrest⟩
+  · cases heq  -- .const ≠ .sort
+  · have ⟨df, ls_p, hdf, hlen_p, hlhs, hmid⟩ := WHStep.const_inv hstep
+    subst hmid
+    have ⟨l₀, hsteps₀, _⟩ := SortLikeWith.instL_inv hrest
+    -- Get ls_p' for .const c ls'
+    have ⟨ls_p', hlen_p', hlhs'⟩ :
+        ∃ ls_p', ls_p'.length = df.uvars ∧ df.lhs.instL ls_p' = .const c ls' :=
+      extra_const_relevel hdf hlen_p hlhs hlen
+    have step' : WHStep (.const c ls') (df.rhs.instL ls_p') :=
+      hlhs' ▸ WHStep.extra hdf hlen_p'
+    have chain' : WHSteps (df.rhs.instL ls_p') (.sort (l₀.inst ls_p')) :=
+      WHSteps.instL hsteps₀
+    exact ⟨l₀.inst ls_p', (ReflTransGen.rfl.tail step').trans chain'⟩
+
+/-- Transfer ForallELikeWith between `.const c ls` and `.const c ls'`. -/
+private theorem forallElike_const_transfer {c : Name} {ls ls' : List VLevel}
+    (hlen : ls'.length = ls.length)
+    (h : ForallELikeWith (.const c ls) A B) :
+    ∃ A' B', ForallELikeWith (.const c ls') A' B' := by
+  rcases ReflTransGen.cases_head' h with heq | ⟨mid, hstep, hrest⟩
+  · cases heq  -- .const ≠ .forallE
+  · have ⟨df, ls_p, hdf, hlen_p, hlhs, hmid⟩ := WHStep.const_inv hstep
+    subst hmid
+    have ⟨C, D, hsteps₀, _, _⟩ := ForallELikeWith.instL_inv hrest
+    have ⟨ls_p', hlen_p', hlhs'⟩ := extra_const_relevel hdf hlen_p hlhs hlen
+    have step' : WHStep (.const c ls') (df.rhs.instL ls_p') :=
+      hlhs' ▸ WHStep.extra hdf hlen_p'
+    have chain' : ForallELikeWith (df.rhs.instL ls_p') (C.instL ls_p') (D.instL ls_p') :=
+      ForallELikeWith.instL' hsteps₀
+    exact ⟨C.instL ls_p', D.instL ls_p', (ReflTransGen.rfl.tail step').trans chain'⟩
+
 /-- SortLike/ForallELike preservation (bidirectional) through IsDefEqStrong.
 Combined into a 4-tuple to handle the symm case.
 
@@ -115,16 +153,11 @@ theorem whnf_preserved
       · exact absurd heq (forallE_not_pat_lhs hdf hlen)
       · have := WHStep.deterministic hstep hextra; subst this; exact ⟨A', B', hrest⟩
   | constDF hc _ _ hlen hequiv _ _ _ _ _ =>
-    -- e₁ = .const c ls, e₂ = .const c ls', Forall₂ (· ≈ ·) ls ls'
-    -- Approach (validated, needs variable access):
-    -- 1. const_inv extracts the extra step: df, ls_p, with df.lhs.instL ls_p = .const c ls
-    -- 2. SortLikeWith.instL_inv factors: df.rhs →* .sort l₀
-    -- 3. extra_const_relevel: df.lhs.instL ls' = .const c us' for some us'
-    -- 4. WHSteps.instL reconstructs: df.rhs.instL ls' →* .sort (l₀.inst ls')
-    -- 5. WHStep.extra + chain = SortLikeWith (.const c ls') (l₀.inst ls')
-    -- Same for ForallELike using ForallELikeWith.instL_inv + instL'.
-    exact ⟨fun _ _ => sorry, fun _ _ => sorry,
-           fun _ _ _ => sorry, fun _ _ _ => sorry⟩
+    have hlen' := (List.Forall₂.length_eq hequiv).symm
+    exact ⟨fun l h => sortlike_const_transfer hlen' h,
+           fun l h => sortlike_const_transfer hlen'.symm h,
+           fun A B h => forallElike_const_transfer hlen' h,
+           fun A B h => forallElike_const_transfer hlen'.symm h⟩
   | appDF _ _ _ _ _ _ _ _ _ _ _ _ =>
     exact ⟨fun _ _ => sorry, fun _ _ => sorry,
            fun _ _ _ => sorry, fun _ _ _ => sorry⟩
