@@ -47,24 +47,24 @@ open InjectivityParams
 /-- `e` is a major premise: it matches the function part of some application
 sub-pattern of a known pattern. E.g., `Nat.rec T base step` is a major premise
 when the recursor pattern is `app (Nat.rec T base step) (Nat.zero)`.
-This is the same definition as `IsMajorPremise` in HeadReduction.lean,
+This is the same definition as `WHIsMajorPremise` in HeadReduction.lean,
 but using `InjectivityParams.Pat` instead of `Params.Pat`. -/
-def IsMajorPremise (e : VExpr) : Prop :=
+def WHIsMajorPremise (e : VExpr) : Prop :=
   ∃ p, (∃ r, Pat p r) ∧ ∃ p₁ p₂, Subpattern (.app p₁ p₂) p ∧ ∃ m1 m2, p₁.Matches e m1 m2
 
 /-- Lambda can't be a major premise: Pattern.Matches can't produce .lam. -/
-theorem IsMajorPremise.not_lam : ¬IsMajorPremise (.lam A e) := nofun
+theorem WHIsMajorPremise.not_lam : ¬WHIsMajorPremise (.lam A e) := nofun
 
-/-- IsMajorPremise commutes with instL (forward). -/
-theorem IsMajorPremise.instL (h : IsMajorPremise e) :
-    IsMajorPremise (e.instL ls) := by
+/-- WHIsMajorPremise commutes with instL (forward). -/
+theorem WHIsMajorPremise.instL (h : WHIsMajorPremise e) :
+    WHIsMajorPremise (e.instL ls) := by
   obtain ⟨p, ⟨r, hp⟩, p₁, p₂, hsub, m1, m2, hm⟩ := h
   have ⟨m1', m2', hm'⟩ := Lean4Lean.Pattern.matches_instL hm (ls := ls)
   exact ⟨p, ⟨r, hp⟩, p₁, p₂, hsub, m1', m2', hm'⟩
 
-/-- IsMajorPremise commutes with instL (inverse). -/
-theorem IsMajorPremise.instL_inv (h : IsMajorPremise (e.instL ls)) :
-    IsMajorPremise e := by
+/-- WHIsMajorPremise commutes with instL (inverse). -/
+theorem WHIsMajorPremise.instL_inv (h : WHIsMajorPremise (e.instL ls)) :
+    WHIsMajorPremise e := by
   obtain ⟨p, ⟨r, hp⟩, p₁, p₂, hsub, m1, m2, hm⟩ := h
   have ⟨m1', m2', hm'⟩ := Lean4Lean.Pattern.matches_instL_inv hm (ls := ls)
   exact ⟨p, ⟨r, hp⟩, p₁, p₂, hsub, m1', m2', hm'⟩
@@ -75,7 +75,7 @@ inductive WHStep : VExpr → VExpr → Prop where
   | extra : env.defeqs df → ls.length = df.uvars →
             WHStep (df.lhs.instL ls) (df.rhs.instL ls)
   | appFn : WHStep f f' → WHStep (.app f a) (.app f' a)
-  | major : IsMajorPremise f → WHStep a a' → WHStep (.app f a) (.app f a')
+  | major : WHIsMajorPremise f → WHStep a a' → WHStep (.app f a) (.app f a')
 
 /-- `e` WHNF-reduces to `e'` (reflexive-transitive closure). -/
 abbrev WHSteps (e e' : VExpr) : Prop := ReflTransGen WHStep e e'

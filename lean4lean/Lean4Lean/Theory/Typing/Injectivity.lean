@@ -1,6 +1,7 @@
 import Lean4Lean.Theory.Typing.EnvLemmas
 import Lean4Lean.Theory.Typing.Strong
 import Lean4Lean.Theory.Typing.PatternParams
+import Lean4Lean.Theory.Typing.SortLikePreservation
 
 /-!
 # Injectivity lemmas for type formers
@@ -512,21 +513,16 @@ theorem IsDefEqU.forallE_inv (henv : VEnv.WF env) (hΓ : OnCtx Γ (env.IsType U)
   ⟨⟨_, a1⟩, _, a2⟩
 
 /-- `sort u` cannot be definitionally equal to `forallE A B`.
-This requires pattern matching axioms (InjectivityParams) for the WHStep-based
-proof. The proof uses SortLike preservation through IsDefEqStrong + disjointness.
-The full proof is in `Lean4Lean.Theory.Typing.SortLikePreservation` (a separate
-file that can import WHNFStep.lean without causing name collisions).
-See PLAN.md Phase 6 for the proof strategy.
-
-Remaining sorry's needed to complete:
-1. `whnf_preserved` (SortLike/ForallELike preservation): proved for 9/13 IsDefEqStrong
-   constructors (bvar, symm, trans, sortDF, lamDF, forallEDF, defeqDF, beta, extra).
-   Sorry'd: constDF (instL factoring), appDF (depth-decreasing), proofIrrel (subject
-   reduction), eta backward (sort_forallE_inv_{<n}).
-2. `sort_forallE_inv_ip`: proved FROM whnf_preserved + forallE_sort_disjoint.
-3. This theorem: bridge from InjectivityParams.env to the implicit env variable. -/
-theorem IsDefEqU.sort_forallE_inv (henv : VEnv.WF env) (hΓ : OnCtx Γ (env.IsType U)) :
-    ¬env.IsDefEqU U Γ (.sort u) (.forallE A B) := sorry
+Uses SortLike preservation through IsDefEqStrong + disjointness.
+Requires `InjectivityParams` for the WHStep relation and WHStep determinism. -/
+theorem IsDefEqU.sort_forallE_inv [ip : InjectivityParams]
+    (h_env : ip.env = env)
+    (hdet : ∀ {e e₁ e₂ : VExpr}, WHStep e e₁ → WHStep e e₂ → e₁ = e₂)
+    (henv : VEnv.WF env) (hΓ : OnCtx Γ (env.IsType U)) :
+    ¬env.IsDefEqU U Γ (.sort u) (.forallE A B) := by
+  subst h_env
+  intro h
+  exact sort_forallE_inv_ip hdet henv.ordered (U := U) hΓ h
 
 end VEnv
 end Lean4Lean

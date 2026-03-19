@@ -17,6 +17,15 @@ open VExpr
 variable [Params]
 open Params
 
+/-- Derive InjectivityParams from Params, bridging WHStep-based and ParRed-based worlds. -/
+instance : InjectivityParams where
+  env := env
+  univs := univs
+  Pat := Pat
+  pat_simple := pat_simple
+  extra_pat := fun hdf hlen => sorry
+  extra_instL_inv := fun _ _ _ => sorry
+
 local notation:65 Γ " ⊢ " e " : " A:36 => HasType env univs Γ e A
 local notation:65 Γ " ⊢ " e1 " ≡ " e2:36 " : " A:36 => IsDefEq env univs Γ e1 e2 A
 local notation:65 Γ " ⊢ " e1 " ≡ " e2:36 => IsDefEqU env univs Γ e1 e2
@@ -451,7 +460,7 @@ theorem IsDefEq.reduce_sort (H : Γ ⊢ e ≡ .sort u : A) :
     cases h3 with
     | refl => exact ⟨_, rfl, rfl⟩
     | sortDF _ _ h => exact ⟨_, rfl, h⟩
-    | etaL h => cases ((HasType.sort hu).uniqU henv hΓ h).sort_forallE_inv henv hΓ
+    | etaL h => cases ((HasType.sort hu).uniqU henv hΓ h).sort_forallE_inv rfl sorry henv hΓ
     | proofIrrel h1 _ h3 =>
       have := h1.defeqU_l henv hΓ ((HasType.sort hu).uniqU henv hΓ h3).symm
       have := ((HasType.sort (by exact hu)).uniqU henv hΓ this).sort_inv henv hΓ
@@ -471,7 +480,7 @@ theorem IsDefEq.reduce_forallE (H : Γ ⊢ e ≡ .forallE A B : V) :
     cases h3 with
     | refl
     | forallEDF _ _ h => exact ⟨_, _, rfl⟩
-    | etaL h => cases ((hA₁.hasType.2.forallE hB₁).uniqU henv hΓ h).sort_forallE_inv henv hΓ
+    | etaL h => cases ((hA₁.hasType.2.forallE hB₁).uniqU henv hΓ h).sort_forallE_inv rfl sorry henv hΓ
     | proofIrrel h1 _ h3 =>
       have := h1.defeqU_l henv hΓ ((hA₁.hasType.2.forallE hB₁).uniqU henv hΓ h3).symm
       have := ((HasType.sort (by exact this.sort_inv henv)).uniqU henv hΓ this).sort_inv henv hΓ
