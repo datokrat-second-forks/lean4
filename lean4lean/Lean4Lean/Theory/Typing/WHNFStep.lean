@@ -214,6 +214,23 @@ private theorem app_lam_not_pat_lhs
     match hm with
     | .app h1 _ => exact varN_const_not_match_lam ⟨_, _, h1⟩
 
+/-- The argument part of an iota pattern LHS can't take any WHStep
+(it must already be in constructor form when the rule fires). -/
+theorem extra_app_arg_stuck (hdf : env.defeqs df) (hlen : ls.length = df.uvars)
+    (hlhs : df.lhs.instL ls = .app f a) : ∀ {e'}, ¬WHStep a e' := by
+  sorry -- needs: structural analysis of the iota pattern argument
+
+/-- A major premise can't take any WHStep (it's stuck waiting for its argument). -/
+theorem WHIsMajorPremise.no_step (hm : WHIsMajorPremise f) : ∀ {e'}, ¬WHStep f e' := by
+  sorry -- needs: structural analysis of the pattern match + extra_app_fn_not_extra
+
+/-- The function part of an iota pattern LHS can't take any WHStep.
+Proved by induction on WHStep, using extra_app_fn_not_extra for the extra case
+and the iota pattern structure for the beta/appFn/major cases. -/
+theorem extra_app_fn_stuck (hdf : env.defeqs df) (hlen : ls.length = df.uvars)
+    (hlhs : df.lhs.instL ls = .app f a) : ∀ {e'}, ¬WHStep f e' := by
+  sorry -- needs structural induction on the pattern match depth
+
 /-- Inversion for WHStep on `.const c us`: the only applicable constructor is `extra`. -/
 theorem WHStep.const_inv {c us} (h : WHStep (.const c us) e') :
     ∃ df ls, env.defeqs df ∧ ls.length = df.uvars ∧
@@ -266,20 +283,43 @@ theorem WHStep.deterministic (h1 : WHStep e e₁) (h2 : WHStep e e₂) : e₁ = 
     · exact absurd hstep WHStep.not_lam
     · exact absurd hm WHIsMajorPremise.not_lam
   | extra hdf hlen =>
-    sorry -- extra case: need inversion on h2 at df.lhs.instL ls
+    -- h2 : WHStep (df.lhs.instL ls) e₂
+    -- Case-split: df.lhs.instL ls is const or app (by pat_simple)
+    rcases pat_lhs_const_or_app hdf hlen with ⟨c, us, heq_lhs⟩ | ⟨f, a, heq_lhs⟩
+    · -- Const case: df.lhs.instL ls = .const c us
+      rw [heq_lhs] at h2
+      have ⟨df₂, ls₂, hdf₂, hlen₂, hlhs₂, heq₂⟩ := h2.const_inv
+      rw [heq₂]
+      exact extra_det hdf hlen hdf₂ hlen₂ (hlhs₂.symm ▸ heq_lhs)
+    · -- App case: df.lhs.instL ls = .app f a
+      rw [heq_lhs] at h2
+      rcases h2.app_inv with ⟨A, body, heq_f, heq₂⟩ | ⟨df₂, ls₂, hdf₂, hlen₂, hlhs₂, heq₂⟩ |
+          ⟨f', hstep, heq₂⟩ | ⟨a', hm, hstep, heq₂⟩
+      · -- beta: f = .lam A body — impossible (iota fn is const-headed)
+        subst heq_f
+        exact absurd heq_lhs (app_lam_not_pat_lhs hdf hlen)
+      · -- extra: same expression matches another rule → use extra_det
+        rw [heq₂]
+        exact extra_det hdf hlen hdf₂ hlen₂ (hlhs₂.symm ▸ heq_lhs)
+      · -- appFn: WHStep f f' — contradicts extra_app_fn_stuck
+        exact absurd hstep (extra_app_fn_stuck hdf hlen heq_lhs)
+      · -- major: WHIsMajorPremise f, WHStep a a' — argument can't step when rule fires
+        exact absurd hstep (extra_app_arg_stuck hdf hlen heq_lhs)
   | appFn h1 ih =>
     rcases h2.app_inv with ⟨A', body', heq1, heq2⟩ | ⟨df, ls, hdf, hlen, hlhs, heq2⟩ |
         ⟨f', hstep, heq2⟩ | ⟨a', hm, hstep, heq2⟩
     · cases heq1; exact absurd h1 WHStep.not_lam
-    · sorry -- appFn vs extra
+    · -- appFn vs extra: f steps but pattern fires on .app f a
+      exact absurd h1 (extra_app_fn_stuck hdf hlen hlhs)
     · subst heq2; congr 1; exact ih hstep
-    · sorry -- appFn vs major
+    · exact absurd h1 (hm.no_step)
   | major hm h1 ih =>
     rcases h2.app_inv with ⟨A', body', heq1, heq2⟩ | ⟨df, ls, hdf, hlen, hlhs, heq2⟩ |
         ⟨f', hstep, heq2⟩ | ⟨a', hm', hstep, heq2⟩
     · cases heq1; exact absurd hm WHIsMajorPremise.not_lam
-    · sorry -- major vs extra
-    · sorry -- major vs appFn
+    · -- major vs extra: pattern fires but argument also steps
+      exact absurd h1 (extra_app_arg_stuck hdf hlen hlhs)
+    · exact absurd hstep (hm.no_step)
     · subst heq2; congr 1; exact ih hstep
 
 /-- Inverse commutation of a single WHStep with instL.

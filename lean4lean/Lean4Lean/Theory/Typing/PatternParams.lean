@@ -157,5 +157,16 @@ theorem bvar_not_pat_lhs :
   subst hsp; rw [heq] at hm
   exact bvar_not_simple_match ⟨_, _, hm⟩
 
+/-- The LHS of an extra rule, after instL, is either a `.const` or `.app`. -/
+theorem pat_lhs_const_or_app (hdf : env.defeqs df) (hlen : ls.length = df.uvars) :
+    (∃ c us, df.lhs.instL ls = .const c us) ∨ (∃ f a, df.lhs.instL ls = .app f a) := by
+  cases h : df.lhs.instL ls with
+  | const c us => exact .inl ⟨c, us, rfl⟩
+  | app f a => exact .inr ⟨f, a, rfl⟩
+  | sort l => exact absurd h (sort_not_pat_lhs hdf hlen)
+  | forallE A B => exact absurd h (forallE_not_pat_lhs hdf hlen)
+  | lam A body => exact absurd h (lam_not_pat_lhs hdf hlen)
+  | bvar i => exact absurd h (bvar_not_pat_lhs hdf hlen)
+
 end VEnv
 end Lean4Lean
