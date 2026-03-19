@@ -22,6 +22,20 @@ Check a single file:
 lake env lean Lean4Lean/Theory/Typing/Injectivity.lean
 ```
 
+## Sorry discipline
+
+Keeping the number of `sorry`s small is critical for the project's success. Every sorry
+is a potential unsoundness and makes it harder to reason about what's actually proved.
+Before introducing a sorry, consider whether the lemma can be proved now. When closing
+sorries, verify that no new ones were accidentally introduced elsewhere.
+
+## Plan and detail files
+
+Always read `PLAN.md` and the relevant `DETAIL_*.md` files before starting work on a task.
+Keep them updated regularly as you make progress or discover new information — context is
+lost after conversation compaction, and the plan files are the primary way to preserve
+architectural knowledge across sessions.
+
 ## Current task: Injectivity proofs
 
 The main open problem is proving the injectivity lemmas in
