@@ -137,14 +137,17 @@ Proof order (NO circularity within step s):
    a LOWER sum than the external HTS (because `HasType.stratify` might produce
    different depths). If not, see the detailed proof in Phase D.
 
-   Actually, simpler: the sort_forallE_inv proof applies whnf_preserved to
-   `.sort u ≡ .forallE A B`. Inside whnf_preserved (by structural induction on this
-   IsDefEqStrong), the only hard case is trans. The trans case requires SortLike
-   preservation from the sub-derivations (structural IH, not sum-indexed). Since the
-   sub-derivations are structurally smaller, the structural IH applies. The appDF case
-   can't appear (endpoints are sort and forallE, not apps). The eta case can't appear
-   (endpoint is sort, not lam). So sort_forallE_inv doesn't even need sum-indexed
-   whnf_preserved! It only needs structural induction. See Phase D for details.
+   sort_forallE_inv_s converts to IsDefEqStrong and calls whnf_preserved.
+   The whnf_preserved call uses the SAME external HTS at sum k₁+k₂ ≤ s.
+   When k₁+k₂ < s: use whnf_preserved from IH. When k₁+k₂ = s: use
+   whnf_preserved_s (step 2, proved after step 1). This ordering works because
+   sort_forallE_inv_s is a CONSUMER of whnf_preserved_s, not vice versa — the
+   ordering within step s is: (1) sort_forallE_inv_s using IH, (2) whnf_preserved_s
+   using sort_forallE_inv_s, (3) forallE_inv_s using whnf_preserved_s.
+
+   **Correction**: The trans case of sort_forallE_inv DOES need whnf_preserved
+   (for SortLike/ForallELike preservation of e_mid). It cannot be done with
+   structural induction alone. See "Known gaps" section.
 
 2. **whnf_preserved_s**: By structural induction on IsDefEqStrong:
    - eta: uses sort_forallE_inv_s (step 1) ✓
@@ -228,6 +231,50 @@ have forallE_inv_n := fun hΓ hdeq hk₁ hk₂ ht₁ ht₂ =>
 ```
 
 Where `preservation_bundle` is proved by WF induction at ALL sums.
+
+## Known gaps and missing lemmas
+
+### Gap 1: No HasTypeStratified substitution lemma
+
+The appDF depth argument requires `body.inst a` at HTS depth ≤ k₁-1. This needs a
+stratified substitution lemma:
+```lean
+theorem HasTypeStratified.instN :
+    HTS body B true n → HTS a A true n → HTS (body.inst a) (B.inst a) true n
+```
+
+Only the non-stratified version exists (`HasType.instN` in Lemmas.lean line 680).
+The stratified version must be proved, likely by induction on the HTS derivation.
+This is NON-TRIVIAL due to the `defeq` constructor in HTS which can wrap terms at
+any depth. **Must be proved before Phase D (appDF case) can proceed.**
+
+### Gap 2: WHStep → IsDefEqStrong lifting
+
+The appDF chain construction requires converting each `WHStep` into an `IsDefEqStrong`
+derivation. This requires typing witnesses for each step:
+- `WHStep.beta` → `IsDefEqStrong.beta` (needs typing of lam, arg)
+- `WHStep.extra` → `IsDefEqStrong.extra` (needs env.defeqs, level WF)
+- `WHStep.appFn` → `IsDefEqStrong.appDF` with refl on arg (needs f, f' typing)
+- `WHStep.major` → `IsDefEqStrong.appDF` with refl on fn (needs a, a' typing)
+
+This needs SR (to thread typing through the chain) and is not "mechanical."
+
+### Gap 3: sort_forallE_inv trans case
+
+The plan claims sort_forallE_inv "only needs structural induction." This is wrong.
+The trans case `sort u ≡ e_mid ≡ forallE A B` has arbitrary `e_mid`, so the
+sub-derivations can involve any IsDefEqStrong constructor. SortLike/ForallELike
+preservation (i.e., whnf_preserved) IS needed for the trans case.
+
+The resolution still works: sort_forallE_inv_s uses whnf_preserved from IH at sum < s.
+But the claim that structural induction suffices is incorrect.
+
+### Gap 4: HasType.stratify naming
+
+The plan references `HasType.stratify` but the actual lemma is `HasTypeStrong.stratify`
+(Strong.lean line 882). To invoke it, you must first convert `HasType` to `HasTypeStrong`
+via `.strong` (which requires `Ordered env` and `OnCtx`). All call sites in the plan
+that assume direct stratification need to account for this.
 
 ## What Went Wrong With the Previous Plan
 
