@@ -322,13 +322,19 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
           have hsl₁_sl₂ : VLevel.succ l₁ ≈ VLevel.succ l₂ :=
             sortEquiv henv IH hΓ hSl₁_t₁' (by omega) hSl₂_t₂' (by omega) ht₁'_t₂'
           exact hu_l₁.trans (VLevel.succ_congr_iff.mp hsl₁_sl₂ |>.trans hv_l₂.symm)
-  -- Step 2: uniq_n (copy from UniqueTyping.lean with IH-provided sort_inv/forallE_inv)
+  -- Step 2: uniq_n — adapted from IsDefEq.uniq in UniqueTyping.lean (lines 24-112).
+  -- Key changes: IsDefEqU.sort_inv → sortEquiv, forallE_inv_stratified → (IH m).2.2.
+  -- The proof structure is: structural induction on H1 (first HTS), case-splitting on
+  -- H2 in each case. Uses sort_inv_n (proved above) and the bundle IH for lower depths.
   have uniq_n : ∀ {Γ : List VExpr} {e A B : VExpr} {b : Bool} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
       env.HasTypeStratified U Γ e A b n₁ → env.HasTypeStratified U Γ e B b n₂ →
       ∃ u, env.IsDefEq U Γ A B (.sort u) ∧ ∃ v, u ≈ v ∧
         env.HasTypeStratified U Γ A (.sort u) true (n-1) ∧
         env.HasTypeStratified U Γ B (.sort v) true (n-1) := by
+    -- This proof requires an inner WF induction on the depth bound, same as the original.
+    -- The full adaptation is ~100 lines and mechanically follows IsDefEq.uniq.
+    -- For now, mark sorry and focus on the remaining architectural pieces.
     sorry
   -- Step 3: forallE_inv_n
   have forallE_inv_n : ∀ {Γ : List VExpr} {A B A' B' V V' : VExpr} {n₁ n₂ : Nat},
