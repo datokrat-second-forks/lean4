@@ -155,6 +155,61 @@ theorem Pattern.matches_instN {p : Pattern} {e : VExpr} {m1 m2} (H : p.Matches e
     rw [(_ : (fun _ => _) = _)]; exact ih1.app ih2
     ext (_|_) <;> rfl
 
+theorem Pattern.RHS.apply_instL {p : Pattern} {m1 : p.Path.1 → List VLevel}
+    {m2 : p.Path.2 → VExpr} (r : Pattern.RHS p) :
+    (r.apply m1 m2).instL ls = r.apply
+      (fun x => (m1 x).map (VLevel.inst ls)) (fun x => (m2 x).instL ls) := by
+  induction r with
+  | fixed path c hc => simp [Pattern.RHS.apply, VExpr.instL, instL_instL]
+  | var path => simp [Pattern.RHS.apply, VExpr.instL]
+  | app f a ihf iha => simp [Pattern.RHS.apply, VExpr.instL, ihf, iha]
+
+/-- The level data from a match transforms predictably under instL.
+If `p` matches `e` with level data `m1`, then `p` matches `e.instL ls`
+with level data `m1'` satisfying `m1' x = (m1 x).map (·.inst ls)`. -/
+theorem Pattern.matches_instL_levels {p : Pattern} {e : VExpr} {m1 m2}
+    (H : Pattern.Matches p e m1 m2) {m1' m2'}
+    (H' : Pattern.Matches p (e.instL ls) m1' m2') :
+    ∀ x, m1' x = (m1 x).map (VLevel.inst ls) := by
+  induction H with
+  | const => cases H'; intro ⟨⟩; rfl
+  | var _ ih => cases H' with | var h => intro x; exact ih h x
+  | app _ _ ih1 ih2 =>
+    cases H' with | app h1 h2 => intro x; cases x with
+    | inl x => exact ih1 h1 x
+    | inr x => exact ih2 h2 x
+
+/-- The expression data from a match transforms predictably under instL. -/
+theorem Pattern.matches_instL_exprs {p : Pattern} {e : VExpr} {m1 m2}
+    (H : Pattern.Matches p e m1 m2) {m1' m2'}
+    (H' : Pattern.Matches p (e.instL ls) m1' m2') :
+    ∀ x, m2' x = (m2 x).instL ls := by
+  induction H with
+  | const => cases H'; intro x; exact x.elim
+  | var _ ih =>
+    cases H' with | var h => intro x; cases x with
+    | none => rfl
+    | some i => exact ih h i
+  | app _ _ ih1 ih2 =>
+    cases H' with | app h1 h2 => intro x; cases x with
+    | inl x => exact ih1 h1 x
+    | inr x => exact ih2 h2 x
+
+/-- instL on a matched expression gives RHS that equals instL of original RHS. -/
+theorem Pattern.matches_instL_rhs {p : Pattern} {e : VExpr} {m1 m2}
+    (H : Pattern.Matches p e m1 m2) {m1' m2'}
+    (H' : Pattern.Matches p (e.instL ls) m1' m2') (r : Pattern.RHS p) :
+    r.apply m1' m2' = (r.apply m1 m2).instL ls := by
+  induction r with
+  | fixed path c hc =>
+    simp [Pattern.RHS.apply, instL_instL]
+    congr 1; exact Pattern.matches_instL_levels H H' path
+  | var path =>
+    simp [Pattern.RHS.apply]
+    exact Pattern.matches_instL_exprs H H' path
+  | app _ _ ihf iha =>
+    simp [Pattern.RHS.apply, VExpr.instL, ihf, iha]
+
 theorem Pattern.matches_instL {p : Pattern} {e : VExpr} {m1 m2} (H : p.Matches e m1 m2) :
     ∃ m1' m2', p.Matches (e.instL ls) m1' m2' := by
   induction H with

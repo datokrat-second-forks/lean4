@@ -23,7 +23,43 @@ instance : InjectivityParams where
   univs := univs
   Pat := Pat
   pat_simple := pat_simple
-  extra_pat := fun hdf hlen => sorry
+  extra_pat := fun {df ls} hdf hlen => by
+    -- Use identity level substitution (VLevel.params) to apply Params.extra_pat
+    let ls₀ := VLevel.params df.uvars
+    have hlen₀ : ls₀.length = df.uvars := by simp [ls₀, VLevel.params]
+    have hWF : ∀ l ∈ ls₀, l.WF df.uvars := by
+      intro l hl
+      simp [ls₀, VLevel.params] at hl
+      obtain ⟨i, hi, rfl⟩ := hl
+      exact hi
+    obtain ⟨p, r, m1₀, m2₀, hPat, hMatch₀, _, hRhs₀⟩ :=
+      Params.extra_pat hdf hWF hlen₀ (Γ := []) (uvars := df.uvars)
+    -- Get match on df.lhs (un-instantiated) by inverting instL
+    obtain ⟨m1_raw, m2_raw, hMatch_raw⟩ := Pattern.matches_instL_inv hMatch₀
+    -- Get match on df.lhs.instL ls
+    obtain ⟨m1, m2, hMatch⟩ := Pattern.matches_instL hMatch_raw (ls := ls)
+    refine ⟨p, r, m1, m2, hPat, hMatch, ?_⟩
+    -- Transfer the RHS equation using instL_instL + inst_map_id
+    -- h₀: r.1.apply m1₀ m2₀ = (r.1.apply m1_raw m2_raw).instL ls₀
+    have h₀ := Pattern.matches_instL_rhs hMatch_raw hMatch₀ r.1
+    -- h: r.1.apply m1 m2 = (r.1.apply m1_raw m2_raw).instL ls
+    have h := Pattern.matches_instL_rhs hMatch_raw hMatch r.1
+    -- hRhs₀: df.rhs.instL ls₀ = r.1.apply m1₀ m2₀
+    -- So: df.rhs.instL ls₀ = (r.1.apply m1_raw m2_raw).instL ls₀
+    have key : df.rhs.instL ls₀ = (Pattern.RHS.apply m1_raw m2_raw r.1).instL ls₀ := by
+      rw [hRhs₀, h₀]
+    -- Apply .instL ls to both sides and use instL_instL:
+    -- (df.rhs.instL ls₀).instL ls = df.rhs.instL (ls₀.map (·.inst ls))
+    --                               = df.rhs.instL ls (by inst_map_id)
+    rw [h]
+    -- key: df.rhs.instL ls₀ = (r.1.apply m1_raw m2_raw).instL ls₀
+    -- Apply instL ls to both sides:
+    -- (df.rhs.instL ls₀).instL ls = ((r.1.apply m1_raw m2_raw).instL ls₀).instL ls
+    -- By instL_instL: both sides become .instL (ls₀.map (·.inst ls))
+    -- By inst_map_id hlen: ls₀.map (·.inst ls) = ls  [since ls₀ = params df.uvars]
+    have := congrArg (VExpr.instL ls) key
+    rw [instL_instL, instL_instL, VLevel.inst_map_id hlen] at this
+    exact this
   extra_instL_inv := fun _ _ _ => sorry
   extra_det := fun _ _ _ _ _ => sorry
   extra_app_fn_not_extra := fun _ _ _ _ _ => sorry
