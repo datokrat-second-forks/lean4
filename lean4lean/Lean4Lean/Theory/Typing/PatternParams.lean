@@ -105,6 +105,14 @@ class InjectivityParams where
     df.lhs.instL ls = .app f a →
     env.defeqs df' → ls'.length = df'.uvars → df'.lhs.instL ls' ≠ f
 
+  /-- Re-leveling for extra rules matching a const: if the rule's LHS matches
+  `.const c us` with level params `ls`, then with different level params `ls'`
+  it still matches `.const c us'` for some `us'`. This is trivially true for
+  defn patterns (which have identity universe params). -/
+  extra_const_relevel : env.defeqs df → ls.length = df.uvars →
+    df.lhs.instL ls = .const c us → ls'.length = df.uvars →
+    ∃ us', df.lhs.instL ls' = .const c us'
+
 variable [InjectivityParams]
 open InjectivityParams
 

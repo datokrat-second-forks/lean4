@@ -115,6 +115,10 @@ theorem whnf_preserved
       · exact absurd heq (forallE_not_pat_lhs hdf hlen)
       · have := WHStep.deterministic hstep hextra; subst this; exact ⟨A', B', hrest⟩
   | constDF _ _ _ _ _ _ _ _ _ _ =>
+    -- e₁ = .const c ls, e₂ = .const c ls', Forall₂ (· ≈ ·) ls ls'
+    -- Proof: WHStep.const_inv gives first step is extra. SortLikeWith.instL_inv
+    -- factors out the instL. extra_const_relevel gives same rule with ls'.
+    -- WHSteps.instL reconstructs the chain.
     exact ⟨fun _ _ => sorry, fun _ _ => sorry,
            fun _ _ _ => sorry, fun _ _ _ => sorry⟩
   | appDF _ _ _ _ _ _ _ _ _ _ _ _ =>

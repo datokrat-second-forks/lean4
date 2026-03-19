@@ -27,6 +27,7 @@ instance : InjectivityParams where
   extra_instL_inv := fun _ _ _ => sorry
   extra_det := fun _ _ _ _ _ => sorry
   extra_app_fn_not_extra := fun _ _ _ _ _ => sorry
+  extra_const_relevel := fun _ _ _ _ => sorry
 
 local notation:65 Γ " ⊢ " e " : " A:36 => HasType env univs Γ e A
 local notation:65 Γ " ⊢ " e1 " ≡ " e2:36 " : " A:36 => IsDefEq env univs Γ e1 e2 A

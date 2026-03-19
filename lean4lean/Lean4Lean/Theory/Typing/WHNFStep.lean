@@ -214,19 +214,23 @@ private theorem app_lam_not_pat_lhs
     match hm with
     | .app h1 _ => exact varN_const_not_match_lam ⟨_, _, h1⟩
 
-/-- WHStep is deterministic: each expression steps to at most one result.
-Proof sketch: by cases on both WHStep constructors.
-- beta/beta: same result
-- beta/extra: impossible (app_lam_not_pat_lhs)
-- beta/appFn: impossible (not_lam)
-- beta/major: impossible (not_lam for major premise)
-- extra/extra: by extra_det
-- extra/appFn: impossible (extra_app_fn_not_extra)
-- extra/major: handled by extra_app_fn_not_extra
-- appFn/appFn: by IH
-- appFn/major: these don't overlap (appFn steps the function, major steps the argument)
-- major/major: by IH
-The sorry's are due to dependent elimination issues with WHStep's indexed type. -/
+/-- Inversion for WHStep on `.const c us`: the only applicable constructor is `extra`. -/
+theorem WHStep.const_inv {c us} (h : WHStep (.const c us) e') :
+    ∃ df ls, env.defeqs df ∧ ls.length = df.uvars ∧
+      df.lhs.instL ls = .const c us ∧ e' = df.rhs.instL ls := by
+  sorry -- Proof: only extra applies to const (beta needs app, appFn/major need app)
+
+/-- Inversion for WHStep on `.app f a`: the applicable constructors are
+beta, extra, appFn, or major. -/
+theorem WHStep.app_inv {f a} (h : WHStep (.app f a) e') :
+    (∃ A body, f = .lam A body ∧ e' = body.inst a) ∨
+    (∃ df ls, env.defeqs df ∧ ls.length = df.uvars ∧
+      df.lhs.instL ls = .app f a ∧ e' = df.rhs.instL ls) ∨
+    (∃ f', WHStep f f' ∧ e' = .app f' a) ∨
+    (∃ a', WHIsMajorPremise f ∧ WHStep a a' ∧ e' = .app f a') := by
+  sorry -- Proof: case split on WHStep constructor, straightforward
+
+/-- WHStep is deterministic: each expression steps to at most one result. -/
 theorem WHStep.deterministic (h1 : WHStep e e₁) (h2 : WHStep e e₂) : e₁ = e₂ := by
   sorry
 
@@ -295,6 +299,22 @@ theorem ForallELikeWith.instL_inv {e : VExpr}
   | sort l => simp [VExpr.instL]
   | const c us => simp [VExpr.instL]
   | app f a => simp [VExpr.instL]
+  | lam A body => simp [VExpr.instL]
+
+/-- If `e.instL ls →* sort l`, then `e →* sort l'` with `l = l'.inst ls`. -/
+theorem SortLikeWith.instL_inv {e : VExpr}
+    (h : SortLikeWith (e.instL ls) l) :
+    ∃ l', SortLikeWith e l' ∧ l = l'.inst ls := by
+  have ⟨e₀, hsteps, heq⟩ := WHSteps.instL_inv h
+  revert heq
+  cases e₀ with
+  | sort l' =>
+    simp [VExpr.instL]
+    intro h1; exact ⟨l', hsteps, h1⟩
+  | bvar i => simp [VExpr.instL]
+  | const c us => simp [VExpr.instL]
+  | app f a => simp [VExpr.instL]
+  | forallE A B => simp [VExpr.instL]
   | lam A body => simp [VExpr.instL]
 
 /-! ## Summary of remaining sorry obligations
