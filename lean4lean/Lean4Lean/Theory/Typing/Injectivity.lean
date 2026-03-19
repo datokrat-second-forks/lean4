@@ -465,7 +465,17 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
      structural induction on H1. Each IsDefEqU.sort_inv call → sortEquiv with
      bundle IH. The forallE_inv_stratified call → (IH m).2.2. See the detail
      files and PLAN.md for the full adaptation strategy. -/
-  -- Step 3: forallE_inv_n
+  /- Step 3: forallE_inv_n. Extracts component equalities A ≡ A' and B ≡ B' from
+     forallE A B ≡ forallE A' B'. Proved by structural induction on IsDefEqStrong.
+
+     The trans case requires ForallELike preservation (from SortLikePreservation.lean)
+     to determine that e_mid is also forallE-like. The extra case requires
+     forallE_not_pat_lhs. Both need InjectivityParams, which is not currently
+     threaded through the stratified bundle. Adding it would change the types of
+     all non-stratified extractions (sort_inv, forallE_inv, etc.).
+
+     All other cases (forallEDF, symm, defeqDF, proofIrrel) can be handled with
+     the current bundle machinery. See PLAN.md Phase 7 and DETAIL_forallE_inv_trans.md. -/
   have forallE_inv_n : ∀ {Γ : List VExpr} {A B A' B' V V' : VExpr} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) →
       env.IsDefEqU U Γ (.forallE A B) (.forallE A' B') →
