@@ -332,10 +332,16 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
       ∃ u, env.IsDefEq U Γ A B (.sort u) ∧ ∃ v, u ≈ v ∧
         env.HasTypeStratified U Γ A (.sort u) true (n-1) ∧
         env.HasTypeStratified U Γ B (.sort v) true (n-1) := by
-    -- This proof requires an inner WF induction on the depth bound, same as the original.
-    -- The full adaptation is ~100 lines and mechanically follows IsDefEq.uniq.
-    -- For now, mark sorry and focus on the remaining architectural pieces.
+    -- Adapted from IsDefEq.uniq (UniqueTyping.lean lines 24-112).
+    -- Requires inner WF induction + structural induction on H1.
+    -- Changes: IsDefEqU.sort_inv → sortEquiv, forallE_inv_stratified → (IH m).2.2.
+    -- The proof is ~100 lines; for now, mark sorry.
     sorry
+  /- The uniq_n proof is a ~100 line adaptation of IsDefEq.uniq (UniqueTyping.lean
+     lines 24-112). Structure: inner WF induction on depth bound n_inner, then
+     structural induction on H1. Each IsDefEqU.sort_inv call → sortEquiv with
+     bundle IH. The forallE_inv_stratified call → (IH m).2.2. See the detail
+     files and PLAN.md for the full adaptation strategy. -/
   -- Step 3: forallE_inv_n
   have forallE_inv_n : ∀ {Γ : List VExpr} {A B A' B' V V' : VExpr} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) →
