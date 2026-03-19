@@ -12,266 +12,184 @@ injectivity lemmas in `Lean4Lean/Theory/Typing/Injectivity.lean`, all marked `so
 
 These are collectively called "definitional inversion" or "injectivity of type formers."
 
-## Why This Is Hard
+## Architecture
 
-### The Circularity Problem
-Unique typing and definitional inversion are mutually dependent:
-- Unique typing needs injectivity (e.g., the `app` case needs `forallE_inv`)
-- Injectivity needs Church-Rosser (to reduce both sides to WHNF and compare heads)
-- Church-Rosser (as proven in `ChurchRosser.lean`) already depends on unique typing
-  (the `ParRed.defeq` theorem uses `uniqU`, `forallE_inv`, etc.)
+### Dependency Structure
 
-This creates a *circular dependency* that must be broken somehow.
+The dependency chain that creates the circularity:
 
-### Mario's Failed Approach (2019 Thesis)
-In his thesis, Carneiro attempted to break the circularity via **stratification**:
-- Define `⊢_0` where definitional equality is syntactic identity
-- Define `⊢_{n+1}` where definitional equality can use `⊢_n` typing
-- Prove unique typing at each level by induction on `n`
-
-**Why it broke:** The stratification `⊢_n` does not respect substitution with the
-right bound. If `Γ, x:B ⊢_i e : A` and `Γ ⊢_j e' : B`, you need
-`Γ ⊢_{max(i,j)} e[e'/x] : A` but can only derive `Γ ⊢_{i+j} e[e'/x] : A`.
-The `i+j` bound grows under substitution, breaking the induction.
-
-### Current Lean4Lean Architecture
-The current codebase already has a different stratification (`HasTypeStratified`) that
-is used in the *unique typing* proof itself (not for breaking the circularity with
-Church-Rosser). The Church-Rosser proof (`ChurchRosser.lean`) uses a `Params` typeclass
-that abstracts over:
-- Pattern-based reduction rules (`Pat`)
-- Their well-formedness (`pat_wf`) — which itself uses `IsDefEqU` and `HasType`
-
-Critically, `ChurchRosser.lean` *imports* `UniqueTyping.lean`, meaning the current
-architecture has Church-Rosser depending on unique typing (not the other way around).
-This means the injectivity lemmas cannot simply be derived from Church-Rosser as
-currently structured.
-
-## Proposed Approach
-
-### Key Insight
-The injectivity lemmas need to be proven *without* relying on Church-Rosser or unique
-typing (since those depend on injectivity). We need an independent argument.
-
-### Strategy: Logical Relations / Reducibility Candidates
-
-Following Lennon-Bertrand's FSCD 2025 approach ("What Does It Take to Certify a
-Conversion Checker?"), we can prove injectivity using a **logical relation** that:
-1. Does not require normalization (Lean's reduction is undecidable)
-2. Does not require full Church-Rosser
-3. Only needs a weak form of confluence (typed parallel reduction)
-
-#### Phase 1: Typed Parallel Reduction (Independent of Unique Typing)
-
-Define a *minimal* typed parallel reduction `⊢ e ≫_t e'` that:
-- Tracks typing information in the relation itself
-- Does NOT depend on unique typing or injectivity
-- Includes beta, delta (extra), eta steps
-- Satisfies substitution (by carrying type witnesses)
-
-This is essentially a subset of the existing `ParRed` that doesn't use the `Params`
-class (which depends on unique typing via `pat_wf`).
-
-The challenge: the existing `ParRed` and `CParRed` in `ChurchRosser.lean` are defined
-inside the `Params` scope which requires unique typing. We need a *bootstrap* version.
-
-#### Phase 2: Weak Head Reduction Analysis
-
-The key observation is that injectivity is fundamentally about **weak head normal forms**:
-- If `sort u ≡ sort v`, then both sides are already in WHNF, and by analyzing the
-  derivation structure, we can extract `u ≈ v`
-- If `sort u ≡ forallE A B`, both are in WHNF with different heads, contradiction
-- If `forallE A B ≡ forallE A' B'`, both are in WHNF with matching heads, and we can
-  extract the component equalities
-
-The difficulty is that `IsDefEqU` is defined as `∃ A, IsDefEq Γ e₁ e₂ A`, and `IsDefEq`
-allows arbitrary chains of `defeqDF` (type conversion), `trans`, `symm`, `extra`, etc.
-We need to show these chains preserve head structure for type formers.
-
-#### Phase 3: Induction Strategy
-
-The most promising approach is **induction on the `IsDefEq` derivation** with a
-strengthened induction hypothesis. The key steps:
-
-**For `sort_inv` and `sort_forallE_inv`:**
-
-1. Define a notion of "head form": every well-typed expression either head-reduces or
-   is in WHNF (a sort, forallE, lam, bvar, or stuck const/app).
-2. Show that `IsDefEqU` preserves "being a sort" and "being a forallE" in the following
-   sense: if `e₁` is a sort and `e₁ ≡ e₂`, then either `e₂` head-reduces to a sort,
-   or the equality goes through a `defeqDF` that changes the type.
-3. The `defeqDF` case is where the stratification (`HasTypeStratified`) comes in: by
-   tracking the depth of `defeqDF` applications, we can do induction on this depth.
-
-**For `forallE_inv_stratified`:**
-
-This is the hardest lemma. Given `forallE A B ≡ forallE A' B'`:
-1. By `IsDefEqStrong`, we can assume the derivation is in "strong" form
-2. The derivation must go through a chain: `forallE A B ≡ ... ≡ forallE A' B'`
-3. Each step in the chain either:
-   - Is a `forallEDF` step (directly gives component equalities)
-   - Is a `defeqDF` step (changes the type, can be handled by stratification)
-   - Is a `trans` step (inductively decompose)
-   - Is an `extra` step (pattern-based rewrite — must show it preserves forallE head)
-   - Is `proofIrrel` (forallE is never a proof unless it's `Prop → Prop → ...`)
-
-The `extra` case is subtle: we need to show that no pattern rule rewrites a `forallE`
-to a non-`forallE` or vice versa. This should follow from `pat_simple` (all patterns
-are `SimplePattern`s, which are headed by constants, not type formers).
-
-#### Phase 4: The `extra` / Pattern Rule Case
-
-The `Params.pat_simple` axiom states that all patterns are either `defn c` (a constant)
-or `iota r m c n` (a recursor applied to a constructor). Both patterns match expressions
-headed by constants, never by `sort` or `forallE`. Therefore:
-- A `sort` cannot match any pattern (it's not a const or app)
-- A `forallE` cannot match any pattern (same reason)
-- So `extra` steps never produce or consume sorts or forallE types
-
-This means we can exclude the `extra` case entirely when proving injectivity for
-sorts and forallE.
-
-#### Phase 5: Proof Irrelevance Case
-
-If `sort u ≡ forallE A B` via `proofIrrel`, both must be proofs of some `p : Prop`.
-But `sort u : sort (succ u)` and `succ u ≠ 0`, so a sort is never a proof. Similarly,
-for `forallE_inv`, if `forallE A B ≡ forallE A' B'` via `proofIrrel`, they are both
-proofs of the same proposition, and we need to show their components are still related.
-Since proof irrelevance only applies at `sort 0`, and `forallE A B : sort (imax u v)`,
-this constrains when proof irrelevance can apply.
-
-### Concrete Implementation Plan
-
-#### Step 1: Characterize WHNF head forms for sorts and forallE
-- In `Injectivity.lean` (or a new helper file), prove that well-typed sorts and
-  forallE expressions cannot be rewritten by `extra` rules.
-- Leverage `pat_simple` to show patterns don't match sorts/forallE.
-
-#### Step 2: Prove `sort_forallE_inv` first (likely easiest)
-- By induction on `IsDefEq` derivation (via `IsDefEqStrong`)
-- The `sortDF` case: trivially impossible (sort ≠ forallE syntactically)
-- The `forallEDF` case: trivially impossible
-- The `defeqDF` case: recurse on the type equality
-- The `trans` case: by unique typing (but this creates circularity!)
-
-**Alternative for Step 2:** Instead of induction on the derivation, use the
-`HasTypeStratified` approach already in the codebase:
-- By `strong` + `stratify`, we get `HasTypeStratified` witnesses
-- Induction on the stratification depth `n`
-- At each level, sorts and forallE have distinct sort types (`sort (succ u)` vs
-  `sort (imax u v)`), and we can use the IH to distinguish them
-
-#### Step 3: Prove `sort_inv`
-- Similar structure to `sort_forallE_inv`
-- If `sort u ≡ sort v`, both have type `sort (succ u)` and `sort (succ v)` respectively
-- By unique typing (already proven modulo injectivity!), `sort (succ u) ≡ sort (succ v)`
-- By IH on stratification depth, `succ u ≈ succ v`, hence `u ≈ v`
-
-#### Step 4: Prove `forallE_inv_stratified`
-- The hardest case. Given `forallE A B ≡ forallE A' B'`:
-- Both sides are typed: `forallE A B : sort (imax u v)` and
-  `forallE A' B' : sort (imax u' v')`
-- By unique typing, `sort (imax u v) ≡ sort (imax u' v')`
-- By `sort_inv` (Step 3), `imax u v ≈ imax u' v'`
-- Need to extract `A ≡ A'` and `B ≡ B'` from the original derivation
-- The `forallEDF` case in `IsDefEqStrong` gives this directly
-- The `defeqDF` case is handled by induction on stratification depth
-- The `trans` case needs careful handling with the IH
-
-#### Step 5: Prove `IsDefEqU.weakN_iff` (forward direction)
-- This follows from unique typing + injectivity being fully established
-- If `e1.liftN ≡ e2.liftN` in the extended context, show `e1 ≡ e2` in the original
-- Use the existing backward direction + unique typing to transfer
-
-### Key Risk: The Trans Case
-
-The main risk is the `trans` case in induction on `IsDefEq`. Given:
 ```
-sort u ≡ e₂ : A    and    e₂ ≡ sort v : A
+HeadReduction.lean (WHRed, standardization)
+  └── ChurchRosser.lean (Params class, parallel reduction, confluence)
+        └── UniqueTyping.lean (IsDefEq.uniq — proven modulo our sorry's)
+              └── Injectivity.lean (sort_inv, forallE_inv — WE PROVE THESE)
 ```
-We need to know that `e₂` is also a sort. This requires either:
-- Church-Rosser (to reduce `e₂` to WHNF and see it's a sort), or
-- A direct structural argument about `IsDefEq`
 
-Since Church-Rosser depends on unique typing (circular), we need the direct argument.
-The `HasTypeStratified` induction should handle this: at depth 0, there are no
-`defeqDF` steps, so the derivation is purely structural and trans must go through
-sorts. At depth `n+1`, we can use the IH at depth `n`.
+Key observations about WHRed vs our approach:
+- `WHRed` in HeadReduction.lean depends on `Params` (11 fields), which is defined
+  in ChurchRosser.lean that imports UniqueTyping.lean
+- The `Params` class definition and `WHRed` definition don't *intrinsically* need
+  UniqueTyping — the dependency is a file organization artifact
+- The *proofs* in ChurchRosser.lean (confluence etc.) heavily use `.uniq`, `.forallE_inv`
+  etc. from UniqueTyping — creating the real circular dependency
 
-This is precisely the approach already taken in `UniqueTyping.lean` — the induction
-on `HasTypeStratified` breaks the mutual dependency. The question is whether this
-same stratification suffices for the injectivity lemmas, given the substitution issue.
+Our approach avoids this entirely:
+- `InjectivityParams` (in PatternParams.lean) is a minimal 3-field subset of `Params`
+  (`Pat`, `pat_simple`, `extra_pat`) — no `pat_wf` or typing dependencies
+- `WHStep` (in WHNFStep.lean) is a simpler version of `WHRed` that only depends on
+  `InjectivityParams`, not on `Params` or UniqueTyping
+- For the core injectivity proofs, we use direct HasTypeStratified induction (no
+  WHRed/Church-Rosser needed)
 
-### Substitution Issue (The Hard Part)
+### PatternParams and WHNFStep (Infrastructure)
 
-The crux of the difficulty is that `forallE_inv_stratified` needs the conclusion at
-a *specific stratification level* (matching the input). When we go under a binder
-(as in proving `B ≡ B'` in `A::Γ`), we need substitution to preserve the
-stratification level. The existing `HasTypeStratified` does track levels, and the
-`forallE_inv_stratified` statement already accounts for this by taking `n` and `n'`
-separately and providing the conclusion at matching levels.
+`PatternParams.lean` defines `InjectivityParams` and proves that type formers
+(sort, forallE, lam, bvar) cannot be LHS of any extra (pattern) rule:
+- `forallE_not_pat_lhs`, `sort_not_pat_lhs`, `lam_not_pat_lhs`, `bvar_not_pat_lhs`
 
-The key question is: does the induction go through without the substitution level
-blowing up? Looking at the statement:
+These are used by `WHNFStep.lean` which defines `WHStep` (a WHNF step relation)
+and proves sorts/forallE are in WHNF. This infrastructure may be useful for
+`sort_forallE_inv` but is not needed for the core sort_inv/forallE_inv proofs.
+
+## Proof Strategy
+
+### StratifiedBundle: Simultaneous Induction
+
+All three lemmas are proven simultaneously by WF induction on `HasTypeStratified`
+depth `n`, packaged as `StratifiedBundle env U n`:
+
+```
+Part 1 (uniq_n): type uniqueness at depth ≤ n
+Part 2 (sort_inv_n): sort inversion at depth ≤ n
+Part 3 (forallE_inv_n): forallE inversion at depth ≤ n
+```
+
+At each depth n, the IH provides all three at bounds < n.
+
+### Ordering Within Each Level
+
+**At each depth n, prove in this order:**
+1. **sort_inv_n** — using `uniq_{<n}` and `sort_inv_{<n}` from the IH
+2. **uniq_n** — copy of `IsDefEq.uniq` from UniqueTyping.lean, using `sort_inv_n`
+   (just proven) and `forallE_inv_{<n}` from the IH
+3. **forallE_inv_n** — using `uniq_n` and `sort_inv_n`
+
+### sort_inv_n: Detailed Case Analysis
+
+Given `HTS (.sort u) A b n₁` and `HTS (.sort v) A b n₂` with `n₁, n₂ ≤ n`, same
+type `A`, same `b`. Goal: `u ≈ v`.
+
+**Case b = false**: Both must be `sort'`. Types are syntactically equal
+(`.sort (.succ l)`), so `u ≈ l ≈ v` directly. ✓ Proven.
+
+**Case b = true**: Both are `base` or `defeq`.
+
+- **base/base**: Strips to b=false, reduces to the sort'/sort' case. ✓ Proven.
+
+- **base/defeq**: H1 = `.base(.sort'(...))` giving `A = .sort(.succ l₁)`, `u ≈ l₁`.
+  H2 = `.defeq(hvB, B ≡ A : .sort w)` at depth `n₂' < n`.
+  This is the **long construction** (~90 lines):
+  1. `sort_canonical(hvB)` → `v ≈ l₂`
+  2. `uniq_{<n}` on `hvB` and `sort'_v` → `B ≡ .sort(.succ l₂)` with HTS at depth `n₂'-1`
+  3. `uniq_{<n}` on `hBw` and the result → `.sort w ≡ .sort w₃` with HTS at depth `n₂'-1`
+  4. Construct `HTS (.sort w) (.sort w₄') true n₂'` via `.defeq` + `sortDF`
+  5. `sort_inv_{<n}` → `w ≈ w₃`
+  6. Construct `HTS (.sort(.succ l₂)) (.sort w) true n₂'` via `.defeq`
+  7. `sort_inv_{<n}` → `succ l₁ ≈ succ l₂`
+  ✓ Proven (modulo a build error in the `.defeq` construction at step 6).
+
+- **defeq/base**: Symmetric to base/defeq. Same construction with roles swapped.
+
+- **defeq/defeq**: H1 = `.defeq(a5: HTS .sort u A' true n₁')`,
+  H2 = `.defeq(b5: HTS .sort v B true n₂')`. Both `n₁', n₂' < n`.
+
+  **This is the hardest case.** The difficulty: `a5` has type `A'`, `b5` has type `B`,
+  and these differ from each other and from `A`. `sort_inv` requires the SAME type.
+
+  **Solution: `sortEquiv` helper** (see below). Using `uniq_{<n}` on each side to
+  relate to canonical forms, then `sortEquiv` to bridge the ≈-related types.
+
+### The sortEquiv Helper
+
+**Problem**: `uniq_{<n}` gives HTS results at types that differ by `≈` (not syntactically
+equal), but `sort_inv_{<n}` requires syntactically the same type.
+
+**Solution**: `sortEquiv` extracts sort level equivalence from two HTS derivations
+at ≈-related types:
+
 ```lean
-theorem IsDefEqU.forallE_inv_stratified (henv : VEnv.WF env) (hΓ : OnCtx Γ (env.IsType U))
-    (h1 : env.IsDefEqU U Γ (.forallE A B) (.forallE A' B'))
-    (h2 : env.HasTypeStratified U Γ (.forallE A B) V true n)
-    (h3 : env.HasTypeStratified U Γ (.forallE A' B') V' true n') :
-    (∃ u, env.IsDefEq U Γ A A' (.sort u) ∧ env.HasTypeStratified U Γ A (.sort u) true n) ∧
-    ∃ u, env.IsDefEq U (A::Γ) B B' (.sort u) ∧
-      env.HasTypeStratified U (A::Γ) B (.sort u) true n ∧
-      env.HasTypeStratified U (A'::Γ) B' (.sort u) true n'
+sortEquiv : HTS (.sort u) (.sort w) true m₁ → m₁ < N →
+            HTS (.sort v) (.sort w') true m₂ → m₂ < N →
+            w ≈ w' → u ≈ v
 ```
 
-The conclusion preserves the stratification levels `n` and `n'` from the inputs.
-This is the right shape — it doesn't need substitution to work at a specific level,
-because the `forallE` rule in `HasTypeStratified` directly decomposes:
-```
-forallE h1 h2 : Γ ⊢ A : sort u !! n, A::Γ ⊢ B : sort v !! n
-    → Γ ⊢ forallE A B :! sort (imax u v) !! n+1
-```
+**Proof** (by WF induction on `max(m₁, m₂)`):
+- Base (max = 0): Both are `base(sort')`. Types are `.sort(.succ l)` with known `≈`,
+  so `u ≈ l₁ ≈ l₂ ≈ v` by `succ_congr_iff`.
+- Step: Use `uniq` from bundle IH to relate types to canonical forms (at depth max-1),
+  recurse at lower depth. Specifically:
+  1. `sort_canonical` → `u ≈ l₁`, `v ≈ l₂`
+  2. `uniq_{<N}(h1, sort'_u)` → HTS results at depth `m₁-1`, including `w₃ ≈ w₃'`
+  3. Recursive `sortEquiv` at depth `m₁-1` → `w ≈ succ l₁`
+  4. Similarly → `w' ≈ succ l₂`
+  5. `w ≈ w'` + chain → `succ l₁ ≈ succ l₂` → `u ≈ v`
 
-So the subterms `A` and `B` are at level `n` (one less than the forallE), and no
-substitution is needed. The hard part is handling the `defeq` constructor:
-```
-defeq : Γ ⊢ A ≡ B : sort u → Γ ⊢ A : sort u !! n → Γ ⊢ B : sort u !! n
-    → Γ ⊢ e : A !! n → Γ ⊢ e : B !! n+1
-```
+### uniq_n: Copy from UniqueTyping.lean
 
-When the type of `forallE A B` is changed via `defeq`, we need to know that the
-new type is still a sort (which it must be, since `forallE` always has sort type).
-This is where `sort_forallE_inv` is needed — but that's one of the lemmas we're
-trying to prove!
+`uniq_n` is essentially `IsDefEq.uniq` from `UniqueTyping.lean` (lines 13-112) with
+two systematic replacements:
 
-### Breaking the Mutual Dependency
+1. **`IsDefEqU.sort_inv henv hΓ ⟨_, h⟩`** → `sortEquiv henv IH hΓ hts1 ... hts2 ... hw`
+   using the HTS components from the IH result (depths < n, so available from bundle IH)
 
-The three lemmas are interdependent:
-- `forallE_inv` needs `sort_inv` (to relate universe levels)
-- `sort_inv` needs unique typing (already proven modulo injectivity)
-- `sort_forallE_inv` is needed to handle `defeqDF` cases
+2. **`IsDefEqU.forallE_inv_stratified henv hΓ ⟨_, c1⟩ c3 c4`** →
+   `(IH (max ...) ...).2.2 hΓ ⟨_, c1⟩ ... c3 c4`
+   using the forallE_inv component of the bundle IH
 
-**Proposed resolution:** Prove all three simultaneously by induction on
-`max(n, n')` where `n, n'` are the stratification depths. At each level:
+The proof uses nested WF induction (on the bound `m`) + structural induction (on H1),
+exactly as in the original. The WF IH provides `uniq` at lower bounds. The structural
+IH handles the `base`/`defeq` layer peeling.
 
-1. First prove `sort_forallE_inv` at this level (by IH at lower levels)
-2. Then prove `sort_inv` at this level (using `sort_forallE_inv` at this level)
-3. Then prove `forallE_inv_stratified` at this level (using both at this level)
+### forallE_inv_n
 
-The base case (depth 0) should be tractable because there are no `defeqDF` steps,
-so the derivation is purely structural.
+Given `IsDefEqU (.forallE A B) (.forallE A' B')` with stratified HTS for each side:
+- Both sides have type `.sort(.imax u v)` and `.sort(.imax u' v')` respectively
+- By `uniq_n`: the types are related
+- By `sort_inv_n`: the sort levels are related
+- The `forallE` constructor in HTS directly decomposes into domain/codomain HTS
+- The `defeq` case is handled by peeling layers (using IH)
+
+### sort_forallE_inv
+
+Given `IsDefEqU (.sort u) (.forallE A B)`:
+- `.sort u` has type `.sort(.succ l)` (from sort')
+- `.forallE A B` has type `.sort(.imax u' v')` (from forallE constructor)
+- By `uniq`: `.sort(.succ l) ≡ .sort(.imax u' v')`
+- By `sort_inv`: `succ l ≈ imax u' v'`
+- But `succ l` is always > 0 while `imax u' v'` can be 0 when `v' = 0`
+  ... actually this argument needs more care. May need `pat_simple` from
+  `InjectivityParams` to handle the `extra` case.
 
 ## Current Implementation Status
 
-### What's proven
-- `sort_inv_zero`: base case for sort inversion at depth 0
-- `forallE_inv`: derived from `forallE_inv_stratified`
-- Proof architecture in `stratified_bundle`: WF induction with correct ordering
+### Files
+- `PatternParams.lean`: `InjectivityParams` class + pattern exclusion lemmas ✓
+- `WHNFStep.lean`: `WHStep` relation + WHNF stability (infrastructure, not yet used)
+- `Injectivity.lean`: Main proofs (in progress)
+
+### What's proven in Injectivity.lean
+- `sort_inv_zero`: base case for sort inversion at depth 0 ✓
+- `sort_canonical`: extract canonical level from any HTS for a sort ✓
+- `StratifiedBundle` definition ✓
+- `sort_inv_n` cases: b=false ✓, base/base ✓, base/defeq ✓ (modulo build error)
+- Non-stratified theorem derivations (sort_inv, forallE_inv from bundle) ✓
 
 ### Remaining sorries
-- `sort_inv_n`: double-induction on two HasTypeStratified for sorts with same type
-- `uniq_n`: copy of IsDefEq.uniq suffices body with IH-provided sort_inv/forallE_inv
-- `forallE_inv_n`: extraction of component equalities from forallE typing
+- `sortEquiv`: the key helper for bridging ≈-related types
+- `sort_inv_n`: defeq/base (symmetric to base/defeq), defeq/defeq (needs sortEquiv)
+- `uniq_n`: copy from UniqueTyping.lean with sort_inv/forallE_inv from IH
+- `forallE_inv_n`: extraction of component equalities
+- `sort_forallE_inv`: sort/forallE disjointness
 
 ### Rules
 - **Never stop working until all sorries are eliminated.** Keep iterating until
@@ -281,11 +199,10 @@ so the derivation is purely structural.
 ## Summary
 
 The proof requires:
-1. **Mutual induction** on stratification depth for all three injectivity lemmas
-2. **Excluding `extra` rules** for sorts/forallE via `pat_simple`
-3. **Careful handling of `defeqDF`** using the stratification level
-4. **No Church-Rosser dependency** — the proof is purely structural/inductive
-5. **Leveraging `HasTypeStratified`** already in the codebase for the level tracking
-
-The main technical challenge is ensuring the `trans` case goes through at each
-stratification level without needing substitution-level preservation.
+1. **Simultaneous induction** on stratification depth for all three injectivity lemmas
+2. **`sortEquiv` helper** to bridge the gap between `uniq` (gives ≈-related types)
+   and `sort_inv` (needs same type)
+3. **Careful `defeq` layer construction** using `sortDF` and `.mono` to keep depths
+   within the IH bound
+4. **No Church-Rosser dependency** — purely structural/inductive via HasTypeStratified
+5. **`uniq_n` is a direct copy** from UniqueTyping.lean with IH-provided replacements

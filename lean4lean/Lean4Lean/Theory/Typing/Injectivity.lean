@@ -7,12 +7,12 @@ import Lean4Lean.Theory.Typing.PatternParams
 
 We prove type uniqueness and injectivity simultaneously by WF induction on
 `HasTypeStratified` depth. At each depth N:
-1. uniq_N is proven using sort_inv_{<N} and forallE_inv_{<N} from the IH,
-   with a `sortEquiv` helper replacing direct sort_inv calls
-2. sort_inv_N is derived from uniq_N + sortEquiv
+1. sort_inv_N is proven using uniq_{<N} and sort_inv_{<N} from the IH
+2. uniq_N is proven using sort_inv_N and forallE_inv_{<N} from the IH
 3. forallE_inv_N is proven using uniq_N and sort_inv_N
 
 Non-stratified sort_inv follows by choosing N = max(n₁, n₂) from stratify.
+See PLAN.md for the detailed proof plan.
 -/
 
 namespace Lean4Lean
@@ -89,10 +89,13 @@ private def StratifiedBundle (env : VEnv) (U n : Nat) : Prop :=
       env.HasTypeStratified U (A::Γ) B (.sort u) true n₁ ∧
       env.HasTypeStratified U (A'::Γ) B' (.sort u) true n₂)
 
-/-! ## Helper: extract sort equivalence from HTS at ≈-related types -/
+/-! ## Helper: sortEquiv — bridge ≈-related types for sort_inv
 
-/-- Extract sort level equivalence from HTS derivations at ≈-related types.
-    Both derivations must have depth < N, and the bundle IH provides uniq at bounds < N. -/
+`uniq_{<n}` gives HTS results at types that differ by ≈, but `sort_inv_{<n}` needs
+the same type. `sortEquiv` bridges this gap by constructing same-type HTS at low depth.
+See PLAN.md for the detailed proof strategy. -/
+
+/-- Extract sort level equivalence from HTS derivations at ≈-related types. -/
 private theorem sortEquiv (henv : VEnv.WF env)
     (IH : ∀ m, m < N → StratifiedBundle env U m)
     {Γ : List VExpr} (hΓ : OnCtx Γ (env.IsType U))
@@ -108,15 +111,7 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
   intro n
   induction n using WellFounded.induction Nat.lt_wfRel.2 with | _ n IH =>
   dsimp [Nat.lt_wfRel] at IH
-  -- Step 1: uniq_n
-  have uniq_n : ∀ {Γ : List VExpr} {e A B : VExpr} {b : Bool} {n₁ n₂ : Nat},
-      OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
-      env.HasTypeStratified U Γ e A b n₁ → env.HasTypeStratified U Γ e B b n₂ →
-      ∃ u, env.IsDefEq U Γ A B (.sort u) ∧ ∃ v, u ≈ v ∧
-        env.HasTypeStratified U Γ A (.sort u) true (n-1) ∧
-        env.HasTypeStratified U Γ B (.sort v) true (n-1) := by
-    sorry
-  -- Step 2: sort_inv_n (derived from uniq_n)
+  -- Step 1: sort_inv_n
   have sort_inv_n : ∀ {Γ : List VExpr} {u v : VLevel} {A : VExpr} {b : Bool} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
       env.HasTypeStratified U Γ (.sort u) A b n₁ →
@@ -128,21 +123,34 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
       let .sort' b1 b2 b3 := H2
       exact a3.trans b3.symm
     | true =>
-      have ⟨l₁, hu_l₁, hl₁_wf⟩ := sort_canonical H1
-      have ⟨l₂, hv_l₂, hl₂_wf⟩ := sort_canonical H2
-      have hu_wf : u.WF U := H1.hasType.sort_inv_l henv
-      have hv_wf : v.WF U := H2.hasType.sort_inv_l henv
-      have su' : env.HasTypeStratified U Γ (.sort u) (.sort (.succ l₁)) true 0 :=
-        .base (.sort' hu_wf hl₁_wf hu_l₁)
-      have sv' : env.HasTypeStratified U Γ (.sort v) (.sort (.succ l₂)) true 0 :=
-        .base (.sort' hv_wf hl₂_wf hv_l₂)
-      have ⟨w, _, w', hw, c₃, c₄⟩ := uniq_n hΓ le₁ (Nat.zero_le _) H1 su'
-      have ⟨w₂, _, w₂', hw₂, d₃, d₄⟩ := uniq_n hΓ le₂ (Nat.zero_le _) H2 sv'
-      -- c₄ : HTS (.sort (.succ l₁)) (.sort w') (n-1)
-      -- d₄ : HTS (.sort (.succ l₂)) (.sort w₂') (n-1)
-      -- Relate w' and w₂' via sortEquiv
-      -- First: w ≈ w₂ from uniq_IH on A
-      sorry
+      match H1 with
+      | .base h1 =>
+        match H2 with
+        | .base h2 =>
+          let .sort' a1 a2 a3 := h1
+          let .sort' b1 b2 b3 := h2
+          exact a3.trans b3.symm
+        | .defeq (u := w) (A := B) (n := n₂') hw hBA hBw hAw hvB =>
+          -- H1 = base(sort'): u ≈ l₁, A = .sort(.succ l₁)
+          -- H2 = defeq: .sort v : B at depth n₂', B ≡ A : .sort w
+          -- See PLAN.md "base/defeq" for the 6-step construction
+          sorry
+      | .defeq a1 a2 a3 a4 a5 =>
+        match H2 with
+        | .base h2 =>
+          -- Symmetric to base/defeq: swap H1 and H2 roles
+          sorry
+        | .defeq b1 b2 b3 b4 b5 =>
+          -- Both defeq: use sortEquiv to bridge ≈-related types
+          sorry
+  -- Step 2: uniq_n (copy from UniqueTyping.lean with IH-provided sort_inv/forallE_inv)
+  have uniq_n : ∀ {Γ : List VExpr} {e A B : VExpr} {b : Bool} {n₁ n₂ : Nat},
+      OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
+      env.HasTypeStratified U Γ e A b n₁ → env.HasTypeStratified U Γ e B b n₂ →
+      ∃ u, env.IsDefEq U Γ A B (.sort u) ∧ ∃ v, u ≈ v ∧
+        env.HasTypeStratified U Γ A (.sort u) true (n-1) ∧
+        env.HasTypeStratified U Γ B (.sort v) true (n-1) := by
+    sorry
   -- Step 3: forallE_inv_n
   have forallE_inv_n : ∀ {Γ : List VExpr} {A B A' B' V V' : VExpr} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) →
