@@ -7,14 +7,6 @@ namespace VEnv
 
 open VExpr
 
-inductive SimplePattern where
-  | iota (recursor : Name) (major : Nat) (constr : Name) (args : Nat)
-  | defn (head : Name)
-
-def SimplePattern.toPattern : SimplePattern → Pattern
-  | .defn c => .const c
-  | .iota r m c n => .app (.varN (.const r) m) (.varN (.const c) n)
-
 class Params where
   env : VEnv
   henv : env.WF

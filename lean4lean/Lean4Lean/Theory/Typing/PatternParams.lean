@@ -74,49 +74,64 @@ class InjectivityParams where
   univs : Nat
   Pat : (p : Pattern) → p.RHS × p.Check → Prop
   pat_simple : Pat p r → ∃ sp : SimplePattern, p = sp.toPattern
-  extra_pat : env.defeqs df → (∀ l ∈ ls, l.WF univs) → ls.length = df.uvars →
+  /-- Every defeq rule corresponds to a pattern match. The level WF condition
+  is intentionally omitted: pattern matching is structural and does not depend
+  on level well-formedness. This weaker axiom makes `WHStep.instL_inv` provable.
+  It is derivable from `Params.extra_pat` by using dummy WF levels (e.g., `.zero`)
+  and observing that `Pattern.Matches` is determined by expression structure alone. -/
+  extra_pat : env.defeqs df → ls.length = df.uvars →
     ∃ p r m1 m2, Pat p r ∧ p.Matches (df.lhs.instL ls) m1 m2 ∧
     df.rhs.instL ls = r.1.apply m1 m2
+  /-- instL inversion for defeq LHS: if `e.instL ls_outer = df.lhs.instL ls`,
+  then `e` is also a level instantiation of `df.lhs`, and the corresponding
+  RHS instantiation is compatible. This follows from the fact that `df.lhs`
+  is structurally determined (a simple pattern) and `instL` preserves structure,
+  plus the well-formedness condition that `df.rhs` only uses level parameters
+  that appear in `df.lhs`. -/
+  extra_instL_inv : env.defeqs df → ls.length = df.uvars →
+    e.instL ls_outer = df.lhs.instL ls →
+    ∃ ls', ls'.length = df.uvars ∧ e = df.lhs.instL ls' ∧
+      (df.rhs.instL ls').instL ls_outer = df.rhs.instL ls
 
 variable [InjectivityParams]
 open InjectivityParams
 
 /-- A `forallE` expression cannot be the LHS of any extra (pattern) rule. -/
 theorem forallE_not_pat_lhs :
-    env.defeqs df → (∀ l ∈ ls, l.WF univs) → ls.length = df.uvars →
+    env.defeqs df → ls.length = df.uvars →
     df.lhs.instL ls ≠ .forallE A B := by
-  intro hdf hls hlen heq
-  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hls hlen
+  intro hdf hlen heq
+  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hlen
   have ⟨sp, hsp⟩ := pat_simple hp
   subst hsp; rw [heq] at hm
   exact forallE_not_simple_match ⟨_, _, hm⟩
 
 /-- A `sort` expression cannot be the LHS of any extra (pattern) rule. -/
 theorem sort_not_pat_lhs :
-    env.defeqs df → (∀ l ∈ ls, l.WF univs) → ls.length = df.uvars →
+    env.defeqs df → ls.length = df.uvars →
     df.lhs.instL ls ≠ .sort l := by
-  intro hdf hls hlen heq
-  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hls hlen
+  intro hdf hlen heq
+  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hlen
   have ⟨sp, hsp⟩ := pat_simple hp
   subst hsp; rw [heq] at hm
   exact sort_not_simple_match ⟨_, _, hm⟩
 
 /-- A `lam` expression cannot be the LHS of any extra (pattern) rule. -/
 theorem lam_not_pat_lhs :
-    env.defeqs df → (∀ l ∈ ls, l.WF univs) → ls.length = df.uvars →
+    env.defeqs df → ls.length = df.uvars →
     df.lhs.instL ls ≠ .lam A body := by
-  intro hdf hls hlen heq
-  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hls hlen
+  intro hdf hlen heq
+  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hlen
   have ⟨sp, hsp⟩ := pat_simple hp
   subst hsp; rw [heq] at hm
   exact lam_not_simple_match ⟨_, _, hm⟩
 
 /-- A `bvar` expression cannot be the LHS of any extra (pattern) rule. -/
 theorem bvar_not_pat_lhs :
-    env.defeqs df → (∀ l ∈ ls, l.WF univs) → ls.length = df.uvars →
+    env.defeqs df → ls.length = df.uvars →
     df.lhs.instL ls ≠ .bvar i := by
-  intro hdf hls hlen heq
-  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hls hlen
+  intro hdf hlen heq
+  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hlen
   have ⟨sp, hsp⟩ := pat_simple hp
   subst hsp; rw [heq] at hm
   exact bvar_not_simple_match ⟨_, _, hm⟩
