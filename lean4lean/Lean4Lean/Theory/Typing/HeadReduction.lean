@@ -55,7 +55,31 @@ instance : InjectivityParams where
     cases hr; subst_vars
     have ⟨rfl, rfl⟩ := Pattern.matches_determ hMatch₁ hMatch₂
     rw [hRhs₁, hRhs₂]
-  extra_app_fn_not_extra := fun _ _ _ _ _ => sorry
+  extra_app_fn_not_extra := fun {df ls f a df' ls'} hdf hlen hlhs hdf' hlen' heq => by
+    -- df.lhs.instL ls = .app f a (iota), df'.lhs.instL ls' = f
+    have ⟨p₁, r₁, m1₁, m2₁, hPat₁, hMatch₁, _⟩ := derive_extra_pat hdf hlen
+    have ⟨p₂, r₂, m1₂, m2₂, hPat₂, hMatch₂, _⟩ := derive_extra_pat hdf' hlen'
+    -- p₁ matches .app f a, so p₁ must be an iota pattern (.app ...)
+    rw [hlhs] at hMatch₁
+    have ⟨sp₁, hsp₁⟩ := pat_simple hPat₁; subst hsp₁
+    cases sp₁ with
+    | defn => exact nomatch hMatch₁
+    | iota r m c n =>
+      rw [heq] at hMatch₂
+      -- Extract sub-matches from the iota match
+      have hMatchF : ∃ f1 g1, (Pattern.varN (.const r) m).Matches f f1 g1 := by
+        cases hMatch₁; exact ⟨_, _, ‹_›⟩
+      have ⟨_, _, hMatchF⟩ := hMatchF
+      -- By matches_inter: varN (const r) m and p₂ overlap on f
+      have ⟨_, _, _, hinter, _⟩ :=
+        Pattern.matches_inter.mp ⟨⟨_, _, hMatch₂⟩, ⟨_, _, hMatchF⟩⟩
+      -- pat_uniq: p₁ = p₂ and p₂ = varN (const r) m (the subpattern)
+      have hsub : Subpattern (.varN (.const r) m) (.app (.varN (.const r) m) (.varN (.const c) n)) :=
+        .appL .refl
+      have ⟨rfl, h_eq, _⟩ := pat_uniq hPat₁ hPat₂ hsub hinter
+      -- h_eq : .app (varN ..) (varN ..) = varN (const r) m — contradiction by size
+      -- h_eq says the iota pattern = varN (const r) m — impossible by constructor mismatch
+      cases m <;> simp [SimplePattern.toPattern, Pattern.varN] at h_eq
   extra_const_uvars := fun _ _ _ => sorry
   extra_const_relevel := fun _ _ _ _ => sorry
 
