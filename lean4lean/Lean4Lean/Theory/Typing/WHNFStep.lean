@@ -218,7 +218,17 @@ private theorem app_lam_not_pat_lhs
 theorem WHStep.const_inv {c us} (h : WHStep (.const c us) e') :
     ∃ df ls, env.defeqs df ∧ ls.length = df.uvars ∧
       df.lhs.instL ls = .const c us ∧ e' = df.rhs.instL ls := by
-  sorry -- Proof: only extra applies to const (beta needs app, appFn/major need app)
+  -- Auxiliary: case split on WHStep with generalized source
+  have : ∀ {e₁ e₂ : VExpr}, WHStep e₁ e₂ → e₁ = .const c us →
+      ∃ df ls, env.defeqs df ∧ ls.length = df.uvars ∧
+        df.lhs.instL ls = .const c us ∧ e₂ = df.rhs.instL ls := by
+    intro e₁ e₂ hs heq
+    induction hs with
+    | beta => cases heq
+    | extra hdf hlen => exact ⟨_, _, hdf, hlen, heq, rfl⟩
+    | appFn => cases heq
+    | major => cases heq
+  exact this h rfl
 
 /-- Inversion for WHStep on `.app f a`: the applicable constructors are
 beta, extra, appFn, or major. -/
@@ -228,11 +238,49 @@ theorem WHStep.app_inv {f a} (h : WHStep (.app f a) e') :
       df.lhs.instL ls = .app f a ∧ e' = df.rhs.instL ls) ∨
     (∃ f', WHStep f f' ∧ e' = .app f' a) ∨
     (∃ a', WHIsMajorPremise f ∧ WHStep a a' ∧ e' = .app f a') := by
-  sorry -- Proof: case split on WHStep constructor, straightforward
+  have : ∀ {e₁ e₂ : VExpr}, WHStep e₁ e₂ → e₁ = .app f a →
+      (∃ A body, f = .lam A body ∧ e₂ = body.inst a) ∨
+      (∃ df ls, env.defeqs df ∧ ls.length = df.uvars ∧
+        df.lhs.instL ls = .app f a ∧ e₂ = df.rhs.instL ls) ∨
+      (∃ f', WHStep f f' ∧ e₂ = .app f' a) ∨
+      (∃ a', WHIsMajorPremise f ∧ WHStep a a' ∧ e₂ = .app f a') := by
+    intro e₁ e₂ hs heq
+    induction hs with
+    | beta =>
+      cases heq with | refl => exact .inl ⟨_, _, rfl, rfl⟩
+    | extra hdf hlen => exact .inr (.inl ⟨_, _, hdf, hlen, heq, rfl⟩)
+    | appFn h _ =>
+      cases heq with | refl => exact .inr (.inr (.inl ⟨_, h, rfl⟩))
+    | major hm h _ =>
+      cases heq with | refl => exact .inr (.inr (.inr ⟨_, hm, h, rfl⟩))
+  exact this h rfl
 
 /-- WHStep is deterministic: each expression steps to at most one result. -/
 theorem WHStep.deterministic (h1 : WHStep e e₁) (h2 : WHStep e e₂) : e₁ = e₂ := by
-  sorry
+  induction h1 generalizing e₂ with
+  | beta =>
+    rcases h2.app_inv with ⟨A', body', heq1, heq2⟩ | ⟨df, ls, hdf, hlen, hlhs, heq2⟩ |
+        ⟨f', hstep, heq2⟩ | ⟨a', hm, hstep, heq2⟩
+    · cases heq1; exact heq2.symm
+    · exact absurd hlhs (app_lam_not_pat_lhs hdf hlen)
+    · exact absurd hstep WHStep.not_lam
+    · exact absurd hm WHIsMajorPremise.not_lam
+  | extra hdf hlen =>
+    sorry -- extra case: need inversion on h2 at df.lhs.instL ls
+  | appFn h1 ih =>
+    rcases h2.app_inv with ⟨A', body', heq1, heq2⟩ | ⟨df, ls, hdf, hlen, hlhs, heq2⟩ |
+        ⟨f', hstep, heq2⟩ | ⟨a', hm, hstep, heq2⟩
+    · cases heq1; exact absurd h1 WHStep.not_lam
+    · sorry -- appFn vs extra
+    · subst heq2; congr 1; exact ih hstep
+    · sorry -- appFn vs major
+  | major hm h1 ih =>
+    rcases h2.app_inv with ⟨A', body', heq1, heq2⟩ | ⟨df, ls, hdf, hlen, hlhs, heq2⟩ |
+        ⟨f', hstep, heq2⟩ | ⟨a', hm', hstep, heq2⟩
+    · cases heq1; exact absurd hm WHIsMajorPremise.not_lam
+    · sorry -- major vs extra
+    · sorry -- major vs appFn
+    · subst heq2; congr 1; exact ih hstep
 
 /-- Inverse commutation of a single WHStep with instL.
 If `WHStep (e.instL ls) e'`, then `∃ e₀, WHStep e e₀ ∧ e' = e₀.instL ls`. -/
