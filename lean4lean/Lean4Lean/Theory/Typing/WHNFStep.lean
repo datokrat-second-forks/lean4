@@ -28,8 +28,46 @@ namespace VEnv
 
 open VExpr
 
+section ReflTransGenHelper
+variable {R : α → α → Prop}
+/-- Extract the first step from a ReflTransGen chain. -/
+theorem ReflTransGen.cases_head' (h : ReflTransGen R a b) :
+    a = b ∨ ∃ c, R a c ∧ ReflTransGen R c b := by
+  induction h with
+  | rfl => exact Or.inl rfl
+  | tail _ h_step ih =>
+    match ih with
+    | .inl heq => subst heq; exact .inr ⟨_, h_step, .rfl⟩
+    | .inr ⟨c, hac, hcb⟩ => exact .inr ⟨c, hac, hcb.tail h_step⟩
+end ReflTransGenHelper
+
 variable [InjectivityParams]
 open InjectivityParams
+
+/-- `e` is a major premise: it matches the function part of some application
+sub-pattern of a known pattern. E.g., `Nat.rec T base step` is a major premise
+when the recursor pattern is `app (Nat.rec T base step) (Nat.zero)`.
+This is the same definition as `IsMajorPremise` in HeadReduction.lean,
+but using `InjectivityParams.Pat` instead of `Params.Pat`. -/
+def IsMajorPremise (e : VExpr) : Prop :=
+  ∃ p, (∃ r, Pat p r) ∧ ∃ p₁ p₂, Subpattern (.app p₁ p₂) p ∧ ∃ m1 m2, p₁.Matches e m1 m2
+
+/-- Lambda can't be a major premise: Pattern.Matches can't produce .lam. -/
+theorem IsMajorPremise.not_lam : ¬IsMajorPremise (.lam A e) := nofun
+
+/-- IsMajorPremise commutes with instL (forward). -/
+theorem IsMajorPremise.instL (h : IsMajorPremise e) :
+    IsMajorPremise (e.instL ls) := by
+  obtain ⟨p, ⟨r, hp⟩, p₁, p₂, hsub, m1, m2, hm⟩ := h
+  have ⟨m1', m2', hm'⟩ := Lean4Lean.Pattern.matches_instL hm (ls := ls)
+  exact ⟨p, ⟨r, hp⟩, p₁, p₂, hsub, m1', m2', hm'⟩
+
+/-- IsMajorPremise commutes with instL (inverse). -/
+theorem IsMajorPremise.instL_inv (h : IsMajorPremise (e.instL ls)) :
+    IsMajorPremise e := by
+  obtain ⟨p, ⟨r, hp⟩, p₁, p₂, hsub, m1, m2, hm⟩ := h
+  have ⟨m1', m2', hm'⟩ := Lean4Lean.Pattern.matches_instL_inv hm (ls := ls)
+  exact ⟨p, ⟨r, hp⟩, p₁, p₂, hsub, m1', m2', hm'⟩
 
 /-- A single WHNF step. -/
 inductive WHStep : VExpr → VExpr → Prop where
@@ -37,6 +75,7 @@ inductive WHStep : VExpr → VExpr → Prop where
   | extra : env.defeqs df → ls.length = df.uvars →
             WHStep (df.lhs.instL ls) (df.rhs.instL ls)
   | appFn : WHStep f f' → WHStep (.app f a) (.app f' a)
+  | major : IsMajorPremise f → WHStep a a' → WHStep (.app f a) (.app f a')
 
 /-- `e` WHNF-reduces to `e'` (reflexive-transitive closure). -/
 abbrev WHSteps (e e' : VExpr) : Prop := ReflTransGen WHStep e e'
@@ -54,6 +93,7 @@ theorem WHStep.not_forallE (h : WHStep (.forallE A B) e) : False := by
   | beta => cases hx
   | extra hdf hlen => exact absurd hx.symm (forallE_not_pat_lhs hdf hlen)
   | appFn => cases hx
+  | major => cases hx
 
 /-- No WHStep from sort. -/
 theorem WHStep.not_sort (h : WHStep (.sort l) e) : False := by
@@ -62,19 +102,7 @@ theorem WHStep.not_sort (h : WHStep (.sort l) e) : False := by
   | beta => cases hx
   | extra hdf hlen => exact absurd hx.symm (sort_not_pat_lhs hdf hlen)
   | appFn => cases hx
-
-section
-variable {R : α → α → Prop}
-/-- Extract the first step from a ReflTransGen chain. -/
-theorem ReflTransGen.cases_head' (h : ReflTransGen R a b) :
-    a = b ∨ ∃ c, R a c ∧ ReflTransGen R c b := by
-  induction h with
-  | rfl => exact Or.inl rfl
-  | tail _ h_step ih =>
-    match ih with
-    | .inl heq => subst heq; exact .inr ⟨_, h_step, .rfl⟩
-    | .inr ⟨c, hac, hcb⟩ => exact .inr ⟨c, hac, hcb.tail h_step⟩
-end
+  | major => cases hx
 
 /-- Deterministic step chains to stuck terms agree. -/
 private theorem WHSteps.det_eq
@@ -128,6 +156,7 @@ theorem WHStep.instL {e e' : VExpr} (h : WHStep e e') :
     rw [instL_instL, instL_instL]
     exact .extra hdf (by simp [hlen])
   | appFn _ ih => exact .appFn ih
+  | major hm _ ih => exact .major hm.instL ih
 
 /-- WHSteps commutes with instL. -/
 theorem WHSteps.instL {e e' : VExpr} (h : WHSteps e e') :
@@ -150,6 +179,7 @@ theorem WHStep.not_lam (h : WHStep (.lam A body) e) : False := by
   | beta => cases hx
   | extra hdf hlen => exact absurd hx.symm (lam_not_pat_lhs hdf hlen)
   | appFn => cases hx
+  | major => cases hx
 
 /-- No WHStep from a bvar expression. -/
 theorem WHStep.not_bvar (h : WHStep (.bvar i) e) : False := by
@@ -158,6 +188,7 @@ theorem WHStep.not_bvar (h : WHStep (.bvar i) e) : False := by
   | beta => cases hx
   | extra hdf hlen => exact absurd hx.symm (bvar_not_pat_lhs hdf hlen)
   | appFn => cases hx
+  | major => cases hx
 
 /-- Inverse commutation of a single WHStep with instL.
 If `WHStep (e.instL ls) e'`, then `∃ e₀, WHStep e e₀ ∧ e' = e₀.instL ls`. -/
@@ -188,6 +219,13 @@ theorem WHStep.instL_inv {e : VExpr} (h : WHStep (e.instL ls) e') :
       obtain ⟨rfl, rfl⟩ := heq
       have ⟨f₀, hstep, hfeq⟩ := ih rfl
       exact ⟨.app f₀ a, .appFn hstep, by simp [VExpr.instL, hfeq]⟩
+  | major hm _ ih =>
+    match e, heq with
+    | .app f a, heq =>
+      simp [VExpr.instL] at heq
+      obtain ⟨rfl, rfl⟩ := heq
+      have ⟨a₀, hstep, haeq⟩ := ih rfl
+      exact ⟨.app f a₀, .major hm.instL_inv hstep, by simp [VExpr.instL, haeq]⟩
 
 /-- Inverse commutation of WHSteps with instL. -/
 theorem WHSteps.instL_inv {e : VExpr} (h : WHSteps (e.instL ls) e') :

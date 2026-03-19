@@ -155,6 +155,31 @@ theorem Pattern.matches_instN {p : Pattern} {e : VExpr} {m1 m2} (H : p.Matches e
     rw [(_ : (fun _ => _) = _)]; exact ih1.app ih2
     ext (_|_) <;> rfl
 
+theorem Pattern.matches_instL {p : Pattern} {e : VExpr} {m1 m2} (H : p.Matches e m1 m2) :
+    ∃ m1' m2', p.Matches (e.instL ls) m1' m2' := by
+  induction H with
+  | const => exact ⟨_, _, .const⟩
+  | var _ ih =>
+    have ⟨_, _, h⟩ := ih; exact ⟨_, _, h.var⟩
+  | app _ _ ih1 ih2 =>
+    have ⟨_, _, h1⟩ := ih1; have ⟨_, _, h2⟩ := ih2; exact ⟨_, _, h1.app h2⟩
+
+theorem Pattern.matches_instL_inv {p : Pattern} {e : VExpr} {m1 m2}
+    (H : p.Matches (e.instL ls) m1 m2) :
+    ∃ m1' m2', p.Matches e m1' m2' := by
+  generalize heq : e.instL ls = x at H
+  induction H generalizing e with
+  | const => cases e <;> cases heq; exact ⟨_, _, .const⟩
+  | var _ ih =>
+    cases e <;> cases heq
+    have ⟨_, _, h⟩ := ih rfl
+    exact ⟨_, _, h.var⟩
+  | app _ _ ih1 ih2 =>
+    cases e <;> cases heq
+    have ⟨_, _, h1⟩ := ih1 rfl
+    have ⟨_, _, h2⟩ := ih2 rfl
+    exact ⟨_, _, h1.app h2⟩
+
 theorem Pattern.matches_inter {p q : Pattern} {e : VExpr} :
     (∃ m1 m2, p.Matches e m1 m2) ∧ (∃ m1 m2, q.Matches e m1 m2) ↔
     (∃ r m1 m2, p.inter q = some r ∧ r.Matches e m1 m2) := by
