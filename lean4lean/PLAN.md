@@ -326,16 +326,26 @@ Alternatively, steps 3-5 can be proven as local lemmas using uniq_n and sort_inv
 | forallE_inv_n constDF case | **HIGH** | Needs instL_inv + unique + instL_r composition |
 | ForallELikeWith.instL_inv | ~~Medium~~ **DONE** | ✓ Fully proven |
 
-## Current Implementation Status (updated 2026-03-19)
+## Current Implementation Status (updated 2026-03-19, session 2)
 
 ### Files
 - **PatternParams.lean**: `InjectivityParams` class + pattern exclusion lemmas ✓ DONE
-- **WHNFStep.lean**: `WHStep` (with `major` constructor), `ForallELikeWith`, `SortLikeWith`,
-  commutation, instL/instL_inv (**0 code sorry's**, determinism is a hypothesis not a theorem)
-- **SortLikePreservation.lean** [NEW]: `whnf_preserved` (9/13 cases proven), `sort_forallE_inv_ip` ✓
+  - Added: `extra_det`, `extra_app_fn_not_extra`, `extra_const_uvars`,
+    `extra_const_relevel`, `pat_lhs_const_or_app`
+- **WHNFStep.lean**: `WHStep` (with `major`), `ForallELikeWith`, `SortLikeWith`,
+  commutation, instL/instL_inv. **3 sorry's**: stuckness lemmas.
+  - `WHStep.deterministic` ✓ PROVEN (uses 3 sorry'd stuckness helpers)
+  - `WHStep.const_inv`, `WHStep.app_inv` ✓ PROVEN
+  - `SortLikeWith.instL_inv` ✓ PROVEN
+  - `extra_app_fn_stuck`, `extra_app_arg_stuck`, `WHIsMajorPremise.no_step` sorry'd
+- **SortLikePreservation.lean**: `whnf_preserved` (10/13 cases proven), `sort_forallE_inv_ip` ✓
+  - Added: `sortlike_const_transfer`, `forallElike_const_transfer` ✓
+  - Added: `WHSteps_hasType` (SR stub, sorry'd)
+  - constDF case ✓ PROVEN
+  - Remaining sorry'd: eta backward (2), appDF (4), proofIrrel (4)
 - **Injectivity.lean**: Main stratified bundle (**1 sorry**: `forallE_inv_n`)
   - `sort_forallE_inv` ✓ PROVEN (via SortLikePreservation)
-- **HeadReduction.lean**: `Params → InjectivityParams` instance (**4 sorry's**: extra_pat, extra_instL_inv, 2× hdet)
+- **HeadReduction.lean**: `Params → InjectivityParams` instance (**6 sorry's**: axiom bridges)
 
 ### What's proven
 - `sort_inv_zero` ✓, `sort_canonical` ✓, `StratifiedBundle` definition ✓
@@ -353,50 +363,54 @@ Alternatively, steps 3-5 can be proven as local lemmas using uniq_n and sort_inv
   forallEDF, defeqDF, beta, extra) ✓
 - `SortLikePreservation.lean`: sort_forallE_inv_ip ✓
 
-### Remaining sorry's (13 total across 3 files)
+### Remaining sorry's (21 sorry tokens, 5 distinct theorems + 6 axiom bridges)
 
-**SortLikePreservation.lean (8 sorry's):**
-- constDF: 4 sorry's (SortLike fwd/bwd, ForallELike fwd/bwd)
-- appDF: 4 sorry's (SortLike fwd/bwd, ForallELike fwd/bwd)
-- proofIrrel: 4 sorry's (SortLike fwd/bwd, ForallELike fwd/bwd)
-- eta backward: 2 sorry's (SortLike bwd, ForallELike bwd)
-  Note: eta backward is circular (needs sort_forallE_inv_{<n}), must be inside bundle
+**WHNFStep.lean (3 sorry's — stuckness lemmas):**
+- `extra_app_arg_stuck`: iota argument is stuck
+- `WHIsMajorPremise.no_step`: major premise is stuck
+- `extra_app_fn_stuck`: iota function is stuck
+  All 3 express the same property: pattern sub-components don't step.
+  Derivable from pat_simple + structural analysis of iota patterns.
 
-**HeadReduction.lean (4 sorry's):**
-- `extra_pat` in InjectivityParams instance: needs to derive from Params.extra_pat
-- `extra_instL_inv` in InjectivityParams instance: needs pattern structural reasoning
-- 2× `hdet` at sort_forallE_inv call sites: needs WHStep.deterministic theorem
+**SortLikePreservation.lean (11 sorry tokens, 4 distinct):**
+- `WHSteps_hasType` (1 sorry): subject reduction for WHSteps
+- eta backward (2 sorry's): circular, needs sort_forallE_inv_{<n}
+- appDF (4 sorry's): needs SR + depth-decreasing
+- proofIrrel (4 sorry's): needs SR + level contradiction
 
 **Injectivity.lean (1 sorry):**
-- `forallE_inv_n`: needs InjectivityParams in bundle + ForallELike preservation
+- `forallE_inv_n`: needs full whnf_preserved + InjectivityParams in bundle
+
+**HeadReduction.lean (6 sorry's — axiom bridges):**
+- `extra_pat`, `extra_instL_inv`, `extra_det`, `extra_app_fn_not_extra`,
+  `extra_const_uvars`, `extra_const_relevel`
+  All derivable from Params axioms (pat_uniq, pat_app_l, etc.)
 
 ### Dependency graph of remaining sorry's
 
 ```
-Independent (can close now):
-  A. WHStep.deterministic (add pat_uniq to InjectivityParams)
-     → closes 2 hdet sorry's in HeadReduction
-  B. constDF in whnf_preserved (instL_inv factoring)
-     → closes 4 sorry's in SortLikePreservation
+Stuckness lemmas (independent, derivable from pat_simple):
+  A. extra_app_fn_stuck, extra_app_arg_stuck, WHIsMajorPremise.no_step
+     → enables: WHStep.deterministic is COMPLETE (uses these)
 
-Need subject reduction for WHStep:
-  C. proofIrrel in whnf_preserved (SR + level contradiction)
-  D. appDF in whnf_preserved (SR + depth-decreasing)
+Subject reduction (main blocker):
+  B. WHSteps_hasType (needs WHStep_IsDefEq proof)
+     → enables: proofIrrel case (level contradiction)
+     → enables: appDF case (depth-decreasing)
 
 Circular (must go inside stratified bundle):
-  E. eta backward in whnf_preserved (needs sort_forallE_inv_{<n})
+  C. eta backward (needs sort_forallE_inv_{<n} from bundle IH)
 
-Blocked on C, D, E:
-  F. forallE_inv_n (needs full whnf_preserved + InjectivityParams in bundle)
+Blocked on B + C:
+  D. forallE_inv_n (needs full whnf_preserved + InjectivityParams in bundle)
 
-Plumbing:
-  G. extra_pat (derive from Params.extra_pat)
-  H. extra_instL_inv (pattern structural reasoning)
+Axiom bridges (independent, derivable from Params):
+  E. HeadReduction.lean instance fields (6 sorry's)
 ```
 
-## Revised Implementation Plan
+## Revised Implementation Plan (updated session 2)
 
-### Phase A: WHStep determinism (closes 2 sorry's)
+### Phase A: WHStep determinism ✓ DONE
 1. Add `pat_uniq` field to `InjectivityParams` in PatternParams.lean
 2. Prove `WHStep.deterministic` theorem in WHNFStep.lean using pat_uniq
 3. Add `pat_uniq` to HeadReduction.lean instance (from Params.pat_uniq — may need sorry)
