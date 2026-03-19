@@ -5,23 +5,56 @@
 **20 sorry's** across 7 files. **3 proven results**: sort_inv, sort_forallE_inv (non-stratified), uniq.
 **1 remaining goal**: `forallE_inv_n` in Injectivity.lean (1 sorry), which depends on everything else.
 
+## Architecture
+
+### Two-level induction
+
+The proof uses TWO induction layers, cleanly separated:
+
+**Layer 1: StratifiedBundle (WF induction on max depth n)**
+Already exists. Proves sort_inv_n, uniq_n. These need forallE_inv_{<n} from the IH
+but do NOT need whnf_preserved. Unchanged from current code.
+
+**Layer 2: PreservationBundle (WF induction on depth-sum s = k₁ + k₂)**
+NEW. Proved AFTER Layer 1 (uses sort_inv/uniq at all depths). Contains:
+1. `sort_forallE_inv_s` — uses `whnf_preserved_{<s}`
+2. `whnf_preserved_s` — uses `sort_forallE_inv_s` + `whnf_preserved_{<s}`
+3. `forallE_inv_s` — uses `whnf_preserved_s` + `sort_forallE_inv_s`
+
+No circularity within each step s. The depth-sum k₁+k₂ strictly decreases for
+appDF (body.inst a at depth ≤ k₁-1, so sum drops by 1), resolving the two-sided
+depth problem.
+
+### Why depth-SUM works
+
+From HasTypeStratified (Strong.lean lines 833-846):
+- `app` at depth `n+1` has ALL premises (f, a, domain, codomain) at depth `n`
+- `lam` at depth `n+1` has ALL premises (A, B, body, forallE type) at depth `n`
+
+So for `.app f a` at HTS depth k₁:
+- `body.inst a` at depth ≤ k₁ - 1 (via app inversion → f typing → lam inversion → substitution)
+- Chain `body.inst a ≡ .app f' a'` has sum (k₁-1) + k₂ = (k₁+k₂) - 1 < k₁+k₂ = s ✓
+
+For `.lam A body` at HTS depth k₁ (eta case):
+- `.forallE A B : .sort (imax u v)` is a premise at depth k₁ - 1 (strictly less!) ✓
+- `sort_forallE_inv` called with `.sort (succ l)` at depth 0 and `.forallE A B` at depth k₁-1
+- Sum = 0 + (k₁-1) = k₁ - 1 ≤ k₁ ≤ s. Use sort_forallE_inv_s (same step). ✓
+
 ## Critical Path
 
 ```
 Phase A: WHNFStep stuck lemmas ──────────── 3 sorry's in WHNFStep.lean
-Phase B: Subject reduction bridge ────────── 0 sorry's (adds 1 field, proves it)
-Phase C: Stratify whnf_preserved ─────────── refactor SortLikePreservation + Injectivity
-Phase D: Close eta + proofIrrel cases ────── 6 sorry's in SortLikePreservation.lean
-Phase E: Close appDF case ────────────────── 4 sorry's in SortLikePreservation.lean
-Phase F: Close forallE_inv_n ─────────────── 1 sorry in Injectivity.lean
+Phase B: Subject reduction bridge ────────── 1 sorry in SortLikePreservation.lean
+Phase C: Restructure into two layers ────── refactor SortLikePreservation + Injectivity
+Phase D: Close eta + proofIrrel + appDF ──── 10 sorry's in SortLikePreservation.lean
+Phase E: Close forallE_inv ───────────────── 1 sorry in Injectivity.lean
                                               ─────
-                                              14 sorry's closed
+                                              15 sorry's closed (14 on critical path + 1 SR)
 ```
 
-Remaining 6 sorry's (non-critical-path):
-- 3 in HeadReduction.lean (VDefEq axiom bridges — closed when addInduct is implemented)
-- 2 in ChurchRosser.lean (secondary, not needed for injectivity)
-- 1 in UniqueTyping.lean / InductiveLemmas.lean
+Remaining 5 sorry's (non-critical-path):
+- 3 in HeadReduction.lean (VDefEq axiom bridges)
+- 2 in ChurchRosser.lean (NormalEq.parRed extra cases — CR itself is proved)
 
 ## Phase A: WHNFStep Stuck Lemmas
 
@@ -35,178 +68,173 @@ Prove that pattern-matched sub-expressions can't take WHStep:
 2. `extra_app_fn_stuck`: iota function prefix is partially-applied const (stuck)
 3. `WHIsMajorPremise.no_step`: major premise is stuck (follows from 2)
 
-These use `pat_simple` to decompose patterns into `SimplePattern.iota r m c n`,
-then structural analysis of `varN (.const r) m` matching to show the function part
-is a partially-applied constant (can't beta/extra/major), and the argument part is
-a `varN (.const c) n` match (constructor-headed, can't step).
+These use `pat_simple` to decompose into `SimplePattern.iota`, then structural
+analysis of `varN (.const r) m` matching.
 
 ## Phase B: Subject Reduction Bridge
 
 **Files**: PatternParams.lean, HeadReduction.lean, SortLikePreservation.lean
-**Sorry's closed**: 1 (WHSteps_hasType at line 99 of SortLikePreservation.lean)
+**Sorry's closed**: 1 (WHSteps_hasType at line 99)
 **Dependencies**: None (parallel with Phase A)
 **Detail**: [DETAIL_sr_bridge.md](DETAIL_sr_bridge.md)
 
-Add `whsteps_hasType` field to `InjectivityParams`:
-```lean
-whsteps_hasType : Ordered env → OnCtx Γ (env.IsType univs) →
-    WHSteps e e' → env.HasType univs Γ e A → env.HasType univs Γ e' A
-```
+Add `whsteps_hasType` field to `InjectivityParams`. Fill in HeadReduction.lean
+via existing `WHRedS.hasType`. Requires `WHStep → WHRed` given typing context.
 
-In HeadReduction.lean: fill it via existing `WHRedS.hasType` (which uses `WHRed.hasType`,
-already proven). Requires showing `WHStep → WHRed` given typing context — mechanical
-since both have the same constructors (beta, extra, appFn, major).
-
-Closes `WHSteps_hasType` sorry (line 99 of SortLikePreservation.lean).
-
-## Phase C: Stratify whnf_preserved
+## Phase C: Restructure into Two Layers
 
 **Files**: SortLikePreservation.lean, Injectivity.lean
 **Sorry's closed**: 0 (refactor only)
 **Dependencies**: None (parallel with A and B)
-**Detail**: [DETAIL_stratify_preserved.md](DETAIL_stratify_preserved.md)
+**Detail**: [DETAIL_two_layers.md](DETAIL_two_layers.md)
 
-**The key architectural change.** Currently `whnf_preserved` is non-stratified and
-`sort_forallE_inv_ip` sits outside the bundle. Both must move inside.
+### Layer 1 changes (Injectivity.lean)
 
-New signature:
+The existing StratifiedBundle keeps its 3 components (uniq, sort_inv, forallE_inv).
+Change `forallE_inv_n` from sorry to: invoke Layer 2's `forallE_inv` at the right depth-sum.
+
+### Layer 2: PreservationBundle (NEW, in SortLikePreservation.lean)
+
 ```lean
-private theorem whnf_preserved_n
-    (bundle_lt : ∀ m < n, StratifiedBundle env U m)
-    (uniq_n : ...) (sort_inv_n : ...)
-    (hord : Ordered ip.env) (hΓ : OnCtx Γ (ip.env.IsType U))
-    (H : ip.env.IsDefEqStrong U Γ e₁ e₂ V)
-    (ht₁ : ip.env.HasTypeStratified U Γ e₁ T₁ true k₁) (hk₁ : k₁ ≤ n)
-    (ht₂ : ip.env.HasTypeStratified U Γ e₂ T₂ true k₂) (hk₂ : k₂ ≤ n)
-    : (4-tuple of SortLike/ForallELike preservation)
+/-- All preservation results indexed by depth-sum s = k₁ + k₂. -/
+private def PreservationBundle (env : VEnv) (U s : Nat) [InjectivityParams] : Prop :=
+  -- sort_forallE_inv at sum ≤ s
+  (∀ {Γ u A B T₁ T₂ k₁ k₂}, OnCtx Γ (env.IsType U) →
+    env.HasTypeStratified U Γ (.sort u) T₁ true k₁ →
+    env.HasTypeStratified U Γ (.forallE A B) T₂ true k₂ →
+    k₁ + k₂ ≤ s →
+    env.IsDefEqU U Γ (.sort u) (.forallE A B) → False) ∧
+  -- whnf_preserved at sum ≤ s
+  (∀ {Γ e₁ e₂ V T₁ T₂ k₁ k₂}, OnCtx Γ (env.IsType U) →
+    env.IsDefEqStrong U Γ e₁ e₂ V →
+    env.HasTypeStratified U Γ e₁ T₁ true k₁ →
+    env.HasTypeStratified U Γ e₂ T₂ true k₂ →
+    k₁ + k₂ ≤ s →
+    (4-tuple)) ∧
+  -- forallE_inv at sum ≤ s
+  (∀ {Γ A B A' B' T₁ T₂ k₁ k₂}, OnCtx Γ (env.IsType U) →
+    env.HasTypeStratified U Γ (.forallE A B) T₁ true k₁ →
+    env.HasTypeStratified U Γ (.forallE A' B') T₂ true k₂ →
+    k₁ + k₂ ≤ s →
+    env.IsDefEqU U Γ (.forallE A B) (.forallE A' B') →
+    component equalities)
 ```
 
-Why the typing witnesses: the eta case needs `sort_forallE_inv` at depth < n
-(extractable from the eta constructor's embedded typing at depth ≤ k-2 < k ≤ n),
-and the proofIrrel case needs SR + uniq_n. The appDF case needs constructed-chain
-preservation at depth < n (see Phase E).
+### The Layer 2 induction step at s
 
-The StratifiedBundle grows to include `sort_forallE_inv_n` as Part 4, derived from
-`whnf_preserved_n` inside the bundle step.
+Given: `∀ s' < s, PreservationBundle s'` (IH)
+Available: `∀ n, sort_inv_n ∧ uniq_n` (from Layer 1, already proved)
 
-## Phase D: Close eta + proofIrrel
+Proof order (NO circularity within step s):
+
+1. **sort_forallE_inv_s**: Convert to IsDefEqStrong, apply whnf_preserved from IH at sum < s.
+   The sum is k₁ + k₂ where k₁ (sort depth) and k₂ (forallE depth) come from the
+   external HTS. The whnf_preserved call uses these same HTS at sum k₁ + k₂ ≤ s.
+   When k₁ + k₂ < s: use IH directly.
+   When k₁ + k₂ = s: use whnf_preserved from IH at sum < s — but the call IS at sum s!
+   **Fix**: sort_forallE_inv_s only claims for sum ≤ s, but its internal whnf_preserved
+   call can use the HTS depths from the IsDefEqStrong conversion, which might be at
+   a LOWER sum than the external HTS (because `HasType.stratify` might produce
+   different depths). If not, see the detailed proof in Phase D.
+
+   Actually, simpler: the sort_forallE_inv proof applies whnf_preserved to
+   `.sort u ≡ .forallE A B`. Inside whnf_preserved (by structural induction on this
+   IsDefEqStrong), the only hard case is trans. The trans case requires SortLike
+   preservation from the sub-derivations (structural IH, not sum-indexed). Since the
+   sub-derivations are structurally smaller, the structural IH applies. The appDF case
+   can't appear (endpoints are sort and forallE, not apps). The eta case can't appear
+   (endpoint is sort, not lam). So sort_forallE_inv doesn't even need sum-indexed
+   whnf_preserved! It only needs structural induction. See Phase D for details.
+
+2. **whnf_preserved_s**: By structural induction on IsDefEqStrong:
+   - eta: uses sort_forallE_inv_s (step 1) ✓
+   - proofIrrel: uses sort_inv + uniq (from Layer 1) ✓
+   - appDF: uses whnf_preserved from IH at sum < s (chain sum decreases) ✓
+   - All other cases: structural IH ✓
+
+3. **forallE_inv_s**: By structural induction on IsDefEqStrong:
+   - trans: uses ForallELike preservation from whnf_preserved_s (step 2) ✓
+   - All other cases: structural IH or head-form analysis ✓
+
+### New signature for whnf_preserved
+
+```lean
+private theorem whnf_preserved_s
+    (pb_lt : ∀ s' < s, PreservationBundle env U s')
+    (sort_forallE_inv_s : ∀ ..., k₁+k₂ ≤ s → ...)
+    (henv : VEnv.WF ip.env)
+    (hord : Ordered ip.env) (hΓ : OnCtx Γ (ip.env.IsType U))
+    (H : ip.env.IsDefEqStrong U Γ e₁ e₂ V)
+    (ht₁ : HTS e₁ T₁ true k₁) (ht₂ : HTS e₂ T₂ true k₂)
+    (hsum : k₁ + k₂ ≤ s)
+    : (4-tuple)
+```
+
+## Phase D: Close all SortLikePreservation sorry's
 
 **Files**: SortLikePreservation.lean
-**Sorry's closed**: 6 (lines 99, 151, 153, 181×4)
-**Dependencies**: Phases B and C
-**Detail**: [DETAIL_eta_proofirrel.md](DETAIL_eta_proofirrel.md)
+**Sorry's closed**: 11 (WHSteps_hasType + 6 eta/proofIrrel + 4 appDF)
+**Dependencies**: Phases A, B, C
+**Detail**: [DETAIL_eta_proofirrel.md](DETAIL_eta_proofirrel.md), [DETAIL_appDF_v2.md](DETAIL_appDF_v2.md)
 
-**proofIrrel** (4 sorry's): Vacuously true. Argument for SortLike direction:
-1. `SortLikeWith h l` + `h : p` → by SR (`whsteps_hasType`): `.sort l : p`
-2. Canonical: `.sort l : .sort (succ l)`. By `uniq_n`: `p ≡ .sort (succ l)`
-3. `p : .sort 0` → `.sort (succ l) : .sort 0` → by sort typing + `uniq_n`:
-   `.sort 0 ≡ .sort (succ (succ l))` → by `sort_inv_n`: contradiction
+### proofIrrel (4 sorry's at line 181)
 
-ForallELike direction: identical, replacing `.sort l` with `.forallE A B`.
+Vacuously true. Prove `SortLikeWith h l → False` given `h : p` and `p : .sort 0`:
+1. By SR: `.sort l : p`
+2. By sort canonical + uniq: `p ≡ .sort (succ l)`
+3. By `p : .sort 0` + sort canonical + uniq: `.sort 0 ≡ .sort (succ (succ l))`
+4. By sort_inv: `0 ≈ succ (succ l)` — impossible
 
-**eta backward** (2 sorry's): Also vacuously true.
-The eta constructor provides `e : .forallE A B` at depth k_e ≤ k₂ - 2.
-If `SortLikeWith e l`, then by SR: `.sort l : .forallE A B`.
-By uniq + sort typing: `.forallE A B ≡ .sort (succ l)`.
-By `sort_forallE_inv` at depth k_e (from `bundle_lt`, since k_e < n): contradiction.
+Uses uniq and sort_inv from Layer 1 (no whnf_preserved needed). ✓
 
-## Phase E: Close appDF
+### eta backward (2 sorry's at lines 151, 153)
 
-**Files**: SortLikePreservation.lean
-**Sorry's closed**: 4 (lines 172×2, 173×2)
-**Dependencies**: Phases A, B, C, D
-**Detail**: [DETAIL_appDF_v2.md](DETAIL_appDF_v2.md)
+Vacuously true. Prove `SortLikeWith e l → False` given `e : .forallE A B`:
+1. By SR: `.sort l : .forallE A B`
+2. By sort canonical + uniq: `.forallE A B ≡ .sort (succ l)`
+3. By sort_forallE_inv_s: False
 
-The hardest case. Given `appDF: .app f a ≡ .app f' a'` with `SortLikeWith (.app f a) l`.
+Key depth fact: `.forallE A B` is a PREMISE of the lam constructor at depth k₁ - 1.
+From the lam HTS rule: all premises at depth n, lam at n+1. So if ht₁ has the lam
+at depth k₁, then `.forallE A B` has HTS at depth k₁ - 1. The sort_forallE_inv call
+uses sum 0 + (k₁ - 1) = k₁ - 1 ≤ k₁ + k₂ = s. ✓
 
-**Forward direction** (`SortLikeWith (.app f a) l → ∃ l', SortLikeWith (.app f' a') l'`):
+ForallELike backward is also vacuous by the same argument (`.forallE A' B' : .forallE A B`
+→ type conflict via uniq + sort_forallE_inv).
 
-Analyze the WHStep chain from `.app f a`:
-- Eventually reaches a beta step: `f →_WH* .lam T body`, then `body.inst a →_WH* .sort l`
-- Or an extra step: full pattern fires, `r.apply m1 m2 →_WH* .sort l`
+### appDF (4 sorry's at lines 172-173)
 
-In the beta sub-case:
-1. `body.inst a` has HTS at depth ≤ k₁-1 (by app/lam inversion)
-2. Construct chain: `body.inst a ≡ .app (.lam T body) a ≡ .app f a ≡ .app f' a'`
-3. Apply `whnf_preserved` at depth k₁-1 < n (from `bundle_lt`)
-4. Get `SortLikeWith (.app f' a') l'` ✓
+**Forward**: `SortLikeWith (.app f a) l → SortLikeWith (.app f' a') l'`
 
-In the extra sub-case:
-1. The pattern RHS `r.apply m1 m2` has HTS at depth ≤ k₁-1 (from pat_wf + app typing)
-2. Same chain construction approach applies
+1. From WHStep chain: `body.inst a →_WH* .sort l` (after beta or extra reduction)
+2. `body.inst a` at HTS depth ≤ k₁ - 1 (app inversion: sub-terms at depth k₁ - 1)
+3. Construct IsDefEqStrong chain: `body.inst a ≡ .app f' a'`
+4. Apply `whnf_preserved` from IH at sum (k₁-1) + k₂ = s - 1 < s ✓
 
-**Backward direction**: symmetric, using k₂-1 < n.
+**Backward**: symmetric, chain sum k₁ + (k₂-1) = s - 1 < s ✓
 
-**Key subtlety**: The constructed chain is NOT a sub-derivation of the original appDF,
-so structural induction fails. The depth-decreasing argument via `bundle_lt` is essential.
-The SortLike-bearing side determines the depth bound (k₁-1 for forward, k₂-1 for backward).
-
-## Phase F: Close forallE_inv_n
+## Phase E: Close forallE_inv
 
 **Files**: Injectivity.lean
 **Sorry's closed**: 1 (line 490)
-**Dependencies**: Phases C, D, E
-**Detail**: [DETAIL_forallE_inv_trans.md](DETAIL_forallE_inv_trans.md) (already exists)
+**Dependencies**: Phase D
+**Detail**: [DETAIL_forallE_inv_trans.md](DETAIL_forallE_inv_trans.md)
 
-With `whnf_preserved_n` and `sort_forallE_inv_n` in the bundle, prove `forallE_inv_n`
-by structural induction on `IsDefEqStrong`.
+Use Layer 2's `forallE_inv_s` to fill Layer 1's `forallE_inv_n`:
 
-Hard case: **trans** — `forallE A B ≡ e_mid` and `e_mid ≡ forallE A' B'`.
-By ForallELike preservation (from `whnf_preserved_n`): `e_mid` is forallE-like.
-By WHStep determinism: `e_mid →_WH* .forallE A_mid B_mid`.
-Then apply IH on the two sub-derivations.
+```lean
+have forallE_inv_n := fun hΓ hdeq hk₁ hk₂ ht₁ ht₂ =>
+  (preservation_bundle (k₁ + k₂)).2.2 hΓ ht₁ ht₂ (le_refl _) hdeq
+```
 
-## Known Risks
-
-### Risk 1 (HIGH): Depth bound circularity in eta + sort_forallE_inv
-
-`whnf_preserved` and `sort_forallE_inv` are mutually dependent:
-- eta case of `whnf_preserved` needs `sort_forallE_inv`
-- `sort_forallE_inv` is proved via `whnf_preserved`
-
-Stratification breaks this: prove `sort_forallE_inv_n` using `whnf_preserved_{<n}`,
-then use `sort_forallE_inv_n` in `whnf_preserved_n`. But the eta case at depth n
-requires `sort_forallE_inv` at depth involving `.forallE A B` typed at depth k_f.
-If k_f = n (tight bound), the argument is circular.
-
-**Mitigation**: Include `whnf_preserved` in the StratifiedBundle (5 components).
-Prove `sort_forallE_inv_n` first using `whnf_preserved_{<n}`, then
-`whnf_preserved_n` using `sort_forallE_inv_n`. The eta case uses `sort_forallE_inv_n`
-at the CURRENT depth n (just proved, not from bundle_lt). This requires careful ordering
-within the bundle step. See [DETAIL_eta_proofirrel.md](DETAIL_eta_proofirrel.md).
-
-### Risk 2 (HIGH): Two-sided depth bound in appDF
-
-The constructed chain for appDF has one side at depth k₁-1 < n but the other side
-at depth k₂ ≤ n. When k₂ = n, whnf_preserved at depth n is needed for the chain,
-which is circular (we're proving it).
-
-**Mitigation options** (see [DETAIL_appDF_v2.md](DETAIL_appDF_v2.md)):
-- **Depth-sum measure**: Induct on k₁+k₂ instead of max(k₁,k₂). The chain has sum
-  (k₁-1)+k₂ < k₁+k₂. Viable but requires changing the StratifiedBundle index.
-- **Church-Rosser shortcut**: If the 2 CR sorry's can be closed, appDF follows from
-  confluence without depth tracking. The CR sorry's are uninvestigated.
-
-### Risk 3 (MEDIUM): StratifiedBundle size
-
-With 5 components (uniq, sort_inv, forallE_inv, sort_forallE_inv, whnf_preserved),
-the bundle becomes large. The well-founded induction proof may be unwieldy and slow
-to compile. Consider factoring into smaller mutual groups.
+Where `preservation_bundle` is proved by WF induction at ALL sums.
 
 ## What Went Wrong With the Previous Plan
 
-1. **whnf_preserved was not stratified.** It was treated as a standalone theorem, but
-   eta/proofIrrel/appDF all need depth-indexed information (sort_forallE_inv_{<n}, SR,
-   bundle_lt). The current flat signature can't express this.
-
-2. **SR cross-layer mismatch.** InjectivityParams has no typing, but SR requires it.
-   Solution: add SR as a field of InjectivityParams, proved via WHRed.hasType in the
-   HeadReduction bridge.
-
-3. **appDF depth bound was hand-waved.** The DETAIL said "chain at depth ≤ k₁-1 < n"
-   but only verified this for one side. Both sides need analysis: the SortLike-bearing
-   side determines the depth bound (k₁-1 for forward, k₂-1 for backward).
-
-4. **Mutual dependency between whnf_preserved and sort_forallE_inv was not identified.**
-   The eta case creates a circularity that requires careful ordering within the bundle
-   step. This is the single most important architectural issue the previous plan missed.
+1. **whnf_preserved was not stratified.** Eta/proofIrrel/appDF need depth-indexed info.
+2. **SR cross-layer mismatch.** InjectivityParams needs a `whsteps_hasType` field.
+3. **appDF depth bound was single-sided.** Both sides must be accounted for. The sum
+   k₁+k₂ decreases for appDF chains because one side drops by 1.
+4. **Mutual dependency between whnf_preserved and sort_forallE_inv.** Resolved by the
+   HTS depth structure: the lam rule has `.forallE A B` as a premise at depth k₁-1,
+   strictly less than the lam's depth k₁.
