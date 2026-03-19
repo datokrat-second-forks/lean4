@@ -322,3 +322,93 @@ In Injectivity.lean (7):
 - `uniq_n`
 - `forallE_inv_n`
 - `sort_forallE_inv`
+
+## Detail Files
+
+The following detail files contain extended analysis of the hardest components:
+
+- **DETAIL_whstep_determinism.md** — WHStep determinism proof, pat_uniq design,
+  case-by-case analysis of WHStep constructor overlaps
+- **DETAIL_instL_inv.md** — ForallELikeWith.instL_inv proof strategy, instL/instN
+  commutation, WHStep.instL_inv single-step inverse
+- **DETAIL_sortlike_preservation.md** — SortLike/ForallELike preservation through
+  IsDefEqStrong, constructor-by-constructor analysis, the appDF difficulty
+- **DETAIL_forallE_inv_trans.md** — The generalized forallE_inv statement, the
+  constDF case using instL_r, depth bound management
+
+## Key Type Signatures
+
+### InjectivityParams (PatternParams.lean)
+```lean
+class InjectivityParams (Pat : VExpr → List VLevel → VExpr → Prop) where
+  pat_simple : Pat lhs ls rhs → lhs.isSimplePattern  -- const/app-headed
+  extra_pat : ∀ {e e'}, WHStep env Pat e e' → Pat lhs ls rhs → e = lhs.instL ls → e' = rhs.instL ls
+  -- TODO: add pat_uniq for WHStep determinism
+```
+
+### WHStep (WHNFStep.lean)
+```lean
+inductive WHStep (env : VEnv) (Pat : VExpr → List VLevel → VExpr → Prop) :
+    VExpr → VExpr → Prop where
+  | beta : WHStep env Pat (.app (.lam A body) arg) (body.inst arg)
+  | extra : Pat lhs ls rhs → WHStep env Pat (lhs.instL ls) (rhs.instL ls)
+  | appFn : WHStep env Pat f f' → WHStep env Pat (.app f a) (.app f' a)
+```
+
+### SortLikeWith / ForallELikeWith (WHNFStep.lean)
+```lean
+abbrev SortLikeWith e l := WHSteps e (.sort l)        -- i.e. ReflTransGen (WHStep ..) e (.sort l)
+abbrev ForallELikeWith e A B := WHSteps e (.forallE A B)  -- i.e. ReflTransGen (WHStep ..) e (.forallE A B)
+```
+
+### StratifiedBundle (Injectivity.lean)
+```lean
+private def StratifiedBundle (env : VEnv) (U n : Nat) : Prop :=
+  -- Part 1: uniq at depth ≤ n
+  (∀ {Γ A V V'} {n₁ n₂ : Nat}, OnCtx Γ (env.IsType U) →
+    env.HasTypeStratified U Γ A V false n₁ → n₁ ≤ n →
+    env.HasTypeStratified U Γ A V' false n₂ → n₂ ≤ n →
+    V.IsDefEq env U Γ V') ∧
+  -- Part 2: sort_inv at depth ≤ n
+  (∀ {Γ : List VExpr} {u v A : VExpr} {b : Bool} {n₁ n₂ : Nat},
+    OnCtx Γ (env.IsType U) →
+    env.HasTypeStratified U Γ (.sort u) A b n₁ → n₁ ≤ n →
+    env.HasTypeStratified U Γ (.sort v) A b n₂ → n₂ ≤ n →
+    u.IsDefEq env U Γ v) ∧
+  -- Part 3: forallE_inv at depth ≤ n
+  (∀ {Γ : List VExpr} {A B A' B' V V' : VExpr} {n₁ n₂ : Nat},
+    OnCtx Γ (env.IsType U) →
+    env.IsDefEqU U Γ (.forallE A B) (.forallE A' B') →
+    n₁ ≤ n → n₂ ≤ n →
+    env.HasTypeStratified U Γ (.forallE A B) V true n₁ →
+    env.HasTypeStratified U Γ (.forallE A' B') V' true n₂ →
+    (∃ u, env.IsDefEq U Γ A A' (.sort u) ∧ ...) ∧
+    (∃ u, env.IsDefEq U (A::Γ) B B' (.sort u) ∧ ...))
+```
+
+### Key lemma signatures needed
+```lean
+-- WHStep determinism (needs pat_uniq)
+theorem WHStep.deterministic (h1 : WHStep env Pat e e₁) (h2 : WHStep env Pat e e₂) : e₁ = e₂
+
+-- WHNF uniqueness for forallE
+theorem ForallELikeWith.unique (h1 : ForallELikeWith e A B) (h2 : ForallELikeWith e A' B') :
+    A = A' ∧ B = B'
+
+-- Disjointness
+theorem forallE_sort_disjoint (h1 : ForallELikeWith e A B) (h2 : SortLikeWith e l) : False
+
+-- Inverse commutation with instL
+theorem ForallELikeWith.instL_inv (h : ForallELikeWith (e.instL ls) A B) :
+    ∃ C D, ForallELikeWith e C D ∧ A = C.instL ls ∧ B = D.instL ls
+
+-- SortLike preservation through IsDefEqStrong
+theorem IsDefEqStrong.sortLike_preserved
+    (H : env.IsDefEqStrong U Γ e₁ e₂ A) (hs : SortLikeWith e₁ l) :
+    ∃ l', SortLikeWith e₂ l'
+
+-- ForallELike preservation through IsDefEqStrong
+theorem IsDefEqStrong.forallELike_preserved
+    (H : env.IsDefEqStrong U Γ e₁ e₂ A) (hf : ForallELikeWith e₁ C D) :
+    ∃ C' D', ForallELikeWith e₂ C' D'
+```
