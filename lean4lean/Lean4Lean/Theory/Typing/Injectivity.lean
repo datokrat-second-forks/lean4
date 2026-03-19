@@ -311,7 +311,7 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
             (IH n₂' hn₂').1 hΓ (by omega) (by omega) hB₂w₂ hB₂_t₂
           have hw₂_t₂ := sortEquiv henv IH hΓ hW₂_r₂ (by omega) hT₂_r₂' (by omega) hr₂
           -- Bridge w₁ ≈ w₂ via uniq on A
-          have hm := Nat.lt_of_lt_of_le (Nat.lt_max_of_lt_left hn₁') (Nat.le_refl _)
+          have hm : max n₁' n₂' < n := by omega
           have ⟨_, _, _, hs_A, hW₁_sA, hW₂_sA'⟩ :=
             (IH (max n₁' n₂') (by omega)).1 hΓ (by omega) (by omega) hAw₁ hAw₂
           have hw₁_w₂ := sortEquiv henv IH hΓ hW₁_sA (by omega) hW₂_sA' (by omega) hs_A
