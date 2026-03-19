@@ -103,6 +103,13 @@ private theorem sortEquiv (henv : VEnv.WF env)
     (h1 : env.HasTypeStratified U Γ (.sort u) (.sort w) true m₁) (hm₁ : m₁ < N)
     (h2 : env.HasTypeStratified U Γ (.sort v) (.sort w') true m₂) (hm₂ : m₂ < N)
     (hw : w ≈ w') : u ≈ v := by
+  -- Proof: by strong induction on m₁ + m₂.
+  -- Base: both base(sort'). w = succ l₁, w' = succ l₂.
+  --   w ≈ w' gives succ l₁ ≈ succ l₂ so l₁ ≈ l₂.
+  --   u ≈ l₁ and v ≈ l₂ gives u ≈ v.
+  -- Step: WLOG h1 is defeq. Peel to get HTS (.sort u) B_inner (m₁-1).
+  --   Use uniq_{<N} to get B_inner ≡ .sort(.succ l₁) and HTS at lower depth.
+  --   Use sort_inv_{<N} to bridge types. Recurse at lower m₁+m₂.
   sorry
 
 /-! ## Main bundle proof -/
