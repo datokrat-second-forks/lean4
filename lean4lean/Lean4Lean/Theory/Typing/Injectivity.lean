@@ -107,17 +107,30 @@ private theorem sortEquiv (henv : VEnv.WF env)
     (h1 : env.HasTypeStratified U Γ (.sort u) (.sort w) true m₁) (hm₁ : m₁ < N)
     (h2 : env.HasTypeStratified U Γ (.sort v) (.sort w') true m₂) (hm₂ : m₂ < N)
     (hw : w ≈ w') : u ≈ v := by
-  -- Use sort_inv from IH at a bound that covers both derivations
-  -- At depth 0: both are base(sort'), types are .sort(.succ l), direct comparison
-  -- At depth > 0: use uniq from IH to relate types to canonical, recurse at lower depth
+  -- Reduce to sort_inv at the same type by constructing low-depth HTS
+  -- Strategy: extract canonical levels, use uniq_IH to relate types, construct
+  -- HTS (.sort v) (.sort w) true 1 at the same type as h1, then use sort_inv_IH
+  --
+  -- Step 1: canonical levels
+  have ⟨l₁, hu_l₁, hl₁_wf⟩ := sort_canonical h1
+  have ⟨l₂, hv_l₂, hl₂_wf⟩ := sort_canonical h2
+  have hu_wf : u.WF U := h1.hasType.sort_inv_l henv
+  have hv_wf : v.WF U := h2.hasType.sort_inv_l henv
+  -- Step 2: We know w ≈ w'. We want to construct HTS (.sort v) (.sort w) true at low depth.
+  -- For that, we need .succ l₂ ≈ w (so that sortDF gives .sort(.succ l₂) ≡ .sort w).
+  -- We know w ≈ w', and w' is related to .succ l₂ via the chain of derivations.
+  -- For now, use sort_inv from IH: the IH at bound max(m₁, m₂) < N gives sort_inv.
+  -- sort_inv requires same type. We construct same-type HTS by retyping h2.
   sorry
 
 private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle env U n := by
   intro n
   induction n using WellFounded.induction Nat.lt_wfRel.2 with | _ n IH =>
   dsimp [Nat.lt_wfRel] at IH
-  -- Step 1: uniq_n (structural induction on H1)
-  -- Uses sortEquiv for sort_inv calls, and forallE_inv from IH
+  -- Step 1: uniq_n
+  -- We need the same nested WF+structural induction as in IsDefEq.uniq.
+  -- The key: the outer IH provides sort_inv and forallE_inv at bounds < n.
+  -- sortEquiv replaces direct sort_inv calls when the types differ by ≈.
   have uniq_n : ∀ {Γ : List VExpr} {e A B : VExpr} {b : Bool} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
       env.HasTypeStratified U Γ e A b n₁ → env.HasTypeStratified U Γ e B b n₂ →
