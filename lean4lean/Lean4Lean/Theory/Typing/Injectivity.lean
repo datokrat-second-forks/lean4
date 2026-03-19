@@ -128,16 +128,21 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
   induction n using WellFounded.induction Nat.lt_wfRel.2 with | _ n IH =>
   dsimp [Nat.lt_wfRel] at IH
   -- Step 1: uniq_n
-  -- We need the same nested WF+structural induction as in IsDefEq.uniq.
-  -- The key: the outer IH provides sort_inv and forallE_inv at bounds < n.
-  -- sortEquiv replaces direct sort_inv calls when the types differ by ≈.
+  -- Replicate the structure from IsDefEq.uniq (UniqueTyping.lean), using:
+  -- - sortEquiv (instead of IsDefEqU.sort_inv) for sort level extraction
+  -- - bundle IH's forallE_inv (instead of standalone IsDefEqU.forallE_inv_stratified)
+  -- The proof does its own nested WF+structural induction.
   have uniq_n : ∀ {Γ : List VExpr} {e A B : VExpr} {b : Bool} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
       env.HasTypeStratified U Γ e A b n₁ → env.HasTypeStratified U Γ e B b n₂ →
       ∃ u, env.IsDefEq U Γ A B (.sort u) ∧ ∃ v, u ≈ v ∧
         env.HasTypeStratified U Γ A (.sort u) true (n-1) ∧
         env.HasTypeStratified U Γ B (.sort v) true (n-1) := by
-    sorry
+    -- The proof follows IsDefEq.uniq exactly, with two replacements:
+    -- 1. IsDefEqU.sort_inv → sortEquiv using the bundle IH
+    -- 2. IsDefEqU.forallE_inv_stratified → bundle IH's forallE_inv component
+    -- Both replacements use (IH m hm) for appropriate m < n.
+    sorry -- TODO: Copy proof from UniqueTyping.lean with these replacements
   -- Step 2: sort_inv_n (derived from uniq_n + sortEquiv)
   have sort_inv_n : ∀ {Γ : List VExpr} {u v : VLevel} {A : VExpr} {b : Bool} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
