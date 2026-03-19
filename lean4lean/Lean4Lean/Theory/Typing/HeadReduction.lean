@@ -44,7 +44,7 @@ instance : InjectivityParams where
   Pat := Pat
   pat_simple := pat_simple
   extra_pat := derive_extra_pat
-  extra_instL_inv := fun _ _ _ => sorry
+  extra_instL_inv := fun _ _ _ => sorry -- structural property of df.lhs template
   extra_det := fun {df₁ ls₁ df₂ ls₂} hdf₁ hlen₁ hdf₂ hlen₂ heq => by
     have ⟨p₁, r₁, m1₁, m2₁, hPat₁, hMatch₁, hRhs₁⟩ := derive_extra_pat hdf₁ hlen₁
     have ⟨p₂, r₂, m1₂, m2₂, hPat₂, hMatch₂, hRhs₂⟩ := derive_extra_pat hdf₂ hlen₂
