@@ -345,7 +345,13 @@ Alternatively, steps 3-5 can be proven as local lemmas using uniq_n and sort_inv
   - Remaining sorry'd: eta backward (2), appDF (4), proofIrrel (4)
 - **Injectivity.lean**: Main stratified bundle (**1 sorry**: `forallE_inv_n`)
   - `sort_forallE_inv` ✓ PROVEN (via SortLikePreservation)
-- **HeadReduction.lean**: `Params → InjectivityParams` instance (**6 sorry's**: axiom bridges)
+- **HeadReduction.lean**: `Params → InjectivityParams` instance (**3 sorry's**: axiom bridges)
+  - `extra_pat` ✓ PROVEN (via derive_extra_pat + instL_instL + inst_map_id)
+  - `extra_det` ✓ PROVEN (via pat_uniq + matches_inter + matches_determ)
+  - `extra_app_fn_not_extra` ✓ PROVEN (via pat_uniq + Subpattern.appL)
+  - Remaining sorry'd: `extra_instL_inv`, `extra_const_uvars`, `extra_const_relevel`
+- **Pattern.lean**: Added `matches_instL_levels`, `matches_instL_exprs`, `matches_instL_rhs`,
+  `RHS.apply_instL` — all proven
 
 ### What's proven
 - `sort_inv_zero` ✓, `sort_canonical` ✓, `StratifiedBundle` definition ✓
