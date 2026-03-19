@@ -206,35 +206,46 @@ The argument: since ls ≈ ls', by `ForallELikeWith.instL_inv`:
 
 This requires the three sorry'd lemmas from WHNFStep.lean.
 
-## WHNFStep.lean: Remaining Sorries
+## WHNFStep.lean: Status and Remaining Work
 
-### 1. WHStep determinism (prerequisite for unique and disjoint)
+### Completed ✓
+- WHStep determinism (with pat_uniq)
+- ForallELikeWith.unique
+- forallE_sort_disjoint
+- ForallELikeWith.instL_inv
+- SortLikeWith.instL_inv
 
-Need to add `pat_uniq` to `InjectivityParams` (currently only has `pat_simple` + `extra_pat`).
+### Remaining: Add `major` constructor to WHStep
 
-Then WHStep determinism:
-- beta vs beta: same result (trivial — both sides determined by expression structure)
-- beta vs extra: no overlap (app (lam ..) can't match const/app-headed pattern)
-- beta vs appFn: no overlap (lam has no WHStep out of it)
-- extra vs extra: same result (from pat_uniq)
-- extra vs appFn: needs pattern structure — const-headed extra can't overlap with appFn
-- appFn vs appFn: inductive on sub-step
+**CRITICAL**: WHStep is missing the `major` constructor from WHRed (HeadReduction.lean).
+Without it, SortLike preservation through IsDefEqStrong FAILS (see
+DETAIL_appDF_resolution.md for concrete counterexample).
 
-### 2. ForallELikeWith.unique — follows immediately from determinism
+```lean
+| major : IsMajorPremise Pat f → WHStep env Pat a a' → WHStep env Pat (.app f a) (.app f a')
+```
 
-### 3. forallE_sort_disjoint — follows immediately from determinism
+This reduces the argument when the function is a partial pattern match (e.g.,
+`Nat.rec base step` waiting for its argument `n` to reduce to a constructor).
 
-### 4. ForallELikeWith.instL_inv — inverse commutation with instL
+Adding `major` requires:
+1. Define/import `IsMajorPremise` (exists in HeadReduction.lean, line 41)
+2. Update WHStep.deterministic (new cases — all mutually exclusive, see detail)
+3. Update WHStep.instL, instL_inv (mechanical new case)
+4. Add IsMajorPremise properties to InjectivityParams or derive from existing axioms
+5. Verify not_sort, not_forallE, not_lam still hold (they do — major only applies to .app)
 
-Lemma: If `e.instL ls →_WH* forallE A B`, then `∃ C D, e →_WH* forallE C D ∧
-A = C.instL ls ∧ B = D.instL ls`.
+### Also needed: WHStep_IsDefEq and Subject Reduction
 
-By induction on the WHSteps chain:
-- Zero steps: instL preserves constructors, so e = forallE C D directly.
-- One+ steps: case split on first step:
-  - beta: use `instL_instN` commutation (proven in VExpr.lean)
-  - extra: use `instL_instL` composition (proven in VExpr.lean)
-  - appFn: reconstruct on e
+Two new lemmas needed for the preservation proof:
+
+1. **WHStep_IsDefEq**: Each WHStep corresponds to an IsDefEqStrong derivation
+   (by induction on WHStep, 4 cases including major)
+2. **Subject reduction**: WHStep preserves typing
+   (by induction on WHStep, uses WHStep_IsDefEq for the major case's type conversion)
+
+Dependency chain: WHStep_IsDefEq → Subject reduction (no circularity).
+See DETAIL_appDF_resolution.md for full analysis.
 
 ## Extended StratifiedBundle
 
@@ -259,22 +270,38 @@ Alternatively, steps 3-5 can be proven as local lemmas using uniq_n and sort_inv
 
 ## Implementation Order
 
-### Phase 1: Complete WHNFStep infrastructure
-1. Add `pat_uniq` to `InjectivityParams`
-2. Prove WHStep determinism
-3. Prove `ForallELikeWith.unique` and `forallE_sort_disjoint`
-4. Prove `ForallELikeWith.instL_inv`
+### Phase 1: Complete WHNFStep infrastructure ✓ DONE
+1. ✓ Add `pat_uniq` to `InjectivityParams`
+2. ✓ Prove WHStep determinism
+3. ✓ Prove `ForallELikeWith.unique` and `forallE_sort_disjoint`
+4. ✓ Prove `ForallELikeWith.instL_inv`
 
-### Phase 2: Complete sort_inv_n
-5. Prove `sortEquiv`
-6. Fill in sort_inv_n base/defeq, defeq/base, defeq/defeq cases
+### Phase 2: Complete sort_inv_n ✓ DONE
+5. ✓ Prove `sortEquiv`
+6. ✓ Fill in sort_inv_n base/defeq, defeq/base, defeq/defeq cases
 
-### Phase 3: Prove uniq_n
-7. Adapt `IsDefEq.uniq` from UniqueTyping.lean with IH-provided lemmas
+### Phase 3: Prove uniq_n ✓ DONE
+7. ✓ Adapt `IsDefEq.uniq` from UniqueTyping.lean with IH-provided lemmas
 
-### Phase 4: Prove sort_forallE_inv_n via preservation
-8. Define SortLike/ForallELike preservation through IsDefEqStrong (structural induction)
-9. Prove sort_forallE_inv_n using preservation + disjointness
+### Phase 4: Add `major` to WHStep
+8. Define/import IsMajorPremise for WHStep's Pat
+9. Add `major` constructor to WHStep
+10. Update WHStep.deterministic (new cases for major)
+11. Update WHStep.instL, instL_inv (mechanical new case)
+12. Verify not_sort, not_forallE, not_lam (unaffected — major is for .app only)
+
+### Phase 5: Prove WHStep_IsDefEq and subject reduction
+13. Prove WHStep_IsDefEq (by induction on WHStep, 4 cases)
+14. Prove subject reduction (by induction on WHStep, uses WHStep_IsDefEq for major)
+
+### Phase 6: Prove sort_forallE_inv_n via preservation
+15. Define depth-parameterized SortLike/ForallELike preservation through IsDefEqStrong
+16. Prove all 13 cases (appDF uses depth-decreasing + bundle IH, proofIrrel uses SR + uniq)
+17. Prove sort_forallE_inv_n using preservation + disjointness
+
+### Phase 7: Prove forallE_inv_n
+18. Define generalized statement over ForallELikeWith expressions
+19. Prove by structural induction (trans uses ForallELike preservation, constDF uses instL_inv)
 
 ### Phase 5: Prove forallE_inv_n
 10. Define generalized statement over ForallELikeWith expressions

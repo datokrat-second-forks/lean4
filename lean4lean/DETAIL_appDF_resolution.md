@@ -1,6 +1,92 @@
 # Detail: Resolving the appDF and proofIrrel Cases of Preservation
 
-## The Problem
+## Prerequisite: WHStep Needs the `major` Constructor
+
+### The Problem
+
+WHStep currently has 3 constructors (beta, extra, appFn). But WHRed (the "real" WHNF
+reduction in HeadReduction.lean) has 4 — the missing one is `major`:
+
+```lean
+| major : IsMajorPremise f → WHRed a a' → WHRed (.app f a) (.app f a')
+```
+
+This reduces the ARGUMENT of an application when the function is a "major premise"
+(a partial pattern match waiting for its argument to reduce, e.g., `Nat.rec base step`
+waiting for `n` to reduce to a constructor).
+
+### Why `major` Is Needed
+
+Without `major`, SortLike preservation FAILS. Concrete counterexample:
+
+```
+-- Nat.rec base step (id Nat.zero)
+-- Under WHStep (no major): STUCK — no step applies
+--   appFn can't reduce (Nat.rec base step) — it's a partial pattern match
+--   extra doesn't match — argument (id Nat.zero) isn't a constructor
+--   beta doesn't apply — head is not (lam ..)
+--
+-- Under WHRed (with major): reduces to sort
+--   major step: (id Nat.zero) → Nat.zero
+--   extra step: Nat.rec base step Nat.zero → base = .sort 0
+
+-- IsDefEqStrong via appDF:
+--   Nat.rec base step Nat.zero ≡ Nat.rec base step (id Nat.zero)
+--   (with sub-derivation: Nat.zero ≡ id Nat.zero)
+--
+-- SortLikeWith (Nat.rec base step Nat.zero)     ✓ (extra fires)
+-- SortLikeWith (Nat.rec base step (id Nat.zero)) ✗ (stuck without major!)
+-- Preservation fails!
+```
+
+### Adding `major` to WHStep
+
+```lean
+inductive WHStep (env : VEnv) (Pat : VExpr → List VLevel → VExpr → Prop) :
+    VExpr → VExpr → Prop where
+  | beta : WHStep env Pat (.app (.lam A body) arg) (body.inst arg)
+  | extra : Pat lhs ls rhs → WHStep env Pat (lhs.instL ls) (rhs.instL ls)
+  | appFn : WHStep env Pat f f' → WHStep env Pat (.app f a) (.app f' a)
+  | major : IsMajorPremise Pat f → WHStep env Pat a a' →  -- NEW
+      WHStep env Pat (.app f a) (.app f a')
+```
+
+### Determinism Still Holds
+
+`major` is mutually exclusive with the other constructors on `(.app f a)`:
+- **major vs beta**: beta needs `f = .lam A body`, but `IsMajorPremise.lam` = False ✓
+- **major vs appFn**: appFn needs `WHStep f f'`, but a major premise has no WHStep
+  (it's a partial pattern match — const-headed inner function, not enough args for extra,
+  no beta because no lam) ✓
+- **major vs extra**: if the full pattern matches (extra fires), the argument is already
+  in matched form (constructor-headed, not reducible). So both can't fire simultaneously ✓
+- **major vs major**: same `f`, use IH on argument step (deterministic by IH) ✓
+
+### Impact on Existing Proofs
+
+- `not_sort`, `not_forallE`, `not_lam`: UNAFFECTED (major only applies to .app)
+- `WHStep.instL`: needs new case for major (mechanical)
+- `ForallELikeWith.instL_inv`: needs new case for major (mechanical)
+- `WHStep.deterministic`: needs new cases (see analysis above)
+- `IsMajorPremise` definition needs to be added (reuse from HeadReduction.lean)
+- Need new axiom in InjectivityParams for major premise properties
+
+### IsMajorPremise Definition
+
+From HeadReduction.lean (line 41):
+```lean
+def IsMajorPremise (e : VExpr) :=
+  ∃ p, (∃ r, Pat p r) ∧ ∃ p₁ p₂, Subpattern (.app p₁ p₂) p ∧ ∃ m1 m2, p₁.Matches e m1 m2
+```
+
+This says: `e` matches the function part of some application sub-pattern. E.g., for
+pattern `Nat.rec T base step n`, the function prefix `Nat.rec T base step` is a major
+premise.
+
+For WHStep's `Pat : VExpr → List VLevel → VExpr → Prop`, we need an adapted version.
+This may require adding properties to InjectivityParams or importing pattern framework.
+
+## The Preservation Problem
 
 SortLike/ForallELike preservation through IsDefEqStrong requires handling 13
 constructors. Two are genuinely hard:
@@ -162,7 +248,32 @@ By cases on `hs`:
    - By IH: `HasType f' (.forallE A B)` (same type as f)
    - Reconstruct app typing ✓
 
+4. **major**: `(.app f a) →_WH (.app f a')` where `IsMajorPremise f` and `WHStep a a'`
+   - `HasType (.app f a) T`
+   - App inversion: `f : .forallE A B`, `a : A`, `T ≡ B.inst a`
+   - By SR IH on sub-step: `HasType a' A`
+   - App typing gives: `HasType (.app f a') (B.inst a')`
+   - Need `T ≡ B.inst a'`, i.e., `B.inst a ≡ B.inst a'`
+   - By WHStep_IsDefEq on sub-step: `IsDefEqStrong a a' A`
+   - By substitution congruence: `B.inst a ≡ B.inst a'` ✓
+
 Subject reduction for WHSteps (multi-step) follows by induction on the chain.
+
+### Dependency Chain for Subject Reduction + WHStep_IsDefEq
+
+These must be proved in order (no circularity):
+
+1. **WHStep_IsDefEq** (by induction on WHStep, 4 cases):
+   - beta: use `IsDefEqStrong.beta` constructor + typing inversions
+   - extra: use `IsDefEqStrong.extra` constructor + env.defeqs typing
+   - appFn: use `IsDefEqStrong.appDF` with refl on argument + IH
+   - major: use `IsDefEqStrong.appDF` with refl on function + IH on argument
+   - **Dependencies**: typing inversions, uniq (for extra), substitution congruence
+
+2. **Subject reduction** (by induction on WHStep, 4 cases):
+   - beta, extra, appFn: standard (no dependency on WHStep_IsDefEq)
+   - major: uses WHStep_IsDefEq (already proved in step 1) for type conversion
+   - **Dependencies**: typing inversions, uniq, WHStep_IsDefEq
 
 ### Depth Consideration for proofIrrel
 
@@ -202,11 +313,16 @@ the "clean" version in PLAN.md but is necessary for the nested induction to work
 
 ### Implementation Strategy
 
-1. **Phase A**: Prove all easy cases of preservation (10 of 13 constructors), sorry appDF
+1. **Phase 0**: Add `major` constructor to WHStep + IsMajorPremise definition.
+   Update WHStep.deterministic, instL, instL_inv, and related lemmas.
+   This is a prerequisite — preservation is wrong without `major`.
+2. **Phase A**: Prove all easy cases of preservation (10 of 13 constructors), sorry appDF
    and proofIrrel. This validates the overall structure.
-2. **Phase B**: Prove subject reduction for WHStep. This unblocks proofIrrel.
-3. **Phase C**: Prove WHStep_IsDefEq (converting WHSteps to IsDefEqStrong). This unblocks appDF.
-4. **Phase D**: Fill in appDF using the depth-decreasing argument.
+3. **Phase B**: Prove WHStep_IsDefEq (by induction on WHStep, 4 cases). No circularity.
+4. **Phase C**: Prove subject reduction for WHStep (by induction on WHStep, uses
+   WHStep_IsDefEq for the major case). This unblocks proofIrrel.
+5. **Phase D**: Fill in appDF using the depth-decreasing argument + WHStep_IsDefEq +
+   subject reduction.
 
 Each phase is independently verifiable. If any phase hits unexpected obstacles, the others
 still provide value.
