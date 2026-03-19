@@ -89,14 +89,7 @@ private def StratifiedBundle (env : VEnv) (U n : Nat) : Prop :=
       env.HasTypeStratified U (A::Γ) B (.sort u) true n₁ ∧
       env.HasTypeStratified U (A'::Γ) B' (.sort u) true n₂)
 
-/-! ## Helper: extract sort equivalence from HTS at ≈-related types
-
-Given two HTS derivations for sort expressions at types that are ≈-equivalent
-(but not necessarily syntactically equal), extract the sort level equivalence.
-
-This is the key lemma that replaces direct sort_inv calls inside the uniq proof.
-It uses uniq from the bundle IH to peel layers, and recurses at strictly lower depth.
--/
+/-! ## Helper: extract sort equivalence from HTS at ≈-related types -/
 
 /-- Extract sort level equivalence from HTS derivations at ≈-related types.
     Both derivations must have depth < N, and the bundle IH provides uniq at bounds < N. -/
@@ -107,57 +100,34 @@ private theorem sortEquiv (henv : VEnv.WF env)
     (h1 : env.HasTypeStratified U Γ (.sort u) (.sort w) true m₁) (hm₁ : m₁ < N)
     (h2 : env.HasTypeStratified U Γ (.sort v) (.sort w') true m₂) (hm₂ : m₂ < N)
     (hw : w ≈ w') : u ≈ v := by
-  -- Reduce to sort_inv at the same type by constructing low-depth HTS
-  -- Strategy: extract canonical levels, use uniq_IH to relate types, construct
-  -- HTS (.sort v) (.sort w) true 1 at the same type as h1, then use sort_inv_IH
-  --
-  -- Step 1: canonical levels
-  have ⟨l₁, hu_l₁, hl₁_wf⟩ := sort_canonical h1
-  have ⟨l₂, hv_l₂, hl₂_wf⟩ := sort_canonical h2
-  have hu_wf : u.WF U := h1.hasType.sort_inv_l henv
-  have hv_wf : v.WF U := h2.hasType.sort_inv_l henv
-  -- Step 2: We know w ≈ w'. We want to construct HTS (.sort v) (.sort w) true at low depth.
-  -- For that, we need .succ l₂ ≈ w (so that sortDF gives .sort(.succ l₂) ≡ .sort w).
-  -- We know w ≈ w', and w' is related to .succ l₂ via the chain of derivations.
-  -- For now, use sort_inv from IH: the IH at bound max(m₁, m₂) < N gives sort_inv.
-  -- sort_inv requires same type. We construct same-type HTS by retyping h2.
   sorry
+
+/-! ## Main bundle proof -/
 
 private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle env U n := by
   intro n
   induction n using WellFounded.induction Nat.lt_wfRel.2 with | _ n IH =>
   dsimp [Nat.lt_wfRel] at IH
   -- Step 1: uniq_n
-  -- Replicate the structure from IsDefEq.uniq (UniqueTyping.lean), using:
-  -- - sortEquiv (instead of IsDefEqU.sort_inv) for sort level extraction
-  -- - bundle IH's forallE_inv (instead of standalone IsDefEqU.forallE_inv_stratified)
-  -- The proof does its own nested WF+structural induction.
   have uniq_n : ∀ {Γ : List VExpr} {e A B : VExpr} {b : Bool} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
       env.HasTypeStratified U Γ e A b n₁ → env.HasTypeStratified U Γ e B b n₂ →
       ∃ u, env.IsDefEq U Γ A B (.sort u) ∧ ∃ v, u ≈ v ∧
         env.HasTypeStratified U Γ A (.sort u) true (n-1) ∧
         env.HasTypeStratified U Γ B (.sort v) true (n-1) := by
-    -- The proof follows IsDefEq.uniq exactly, with two replacements:
-    -- 1. IsDefEqU.sort_inv → sortEquiv using the bundle IH
-    -- 2. IsDefEqU.forallE_inv_stratified → bundle IH's forallE_inv component
-    -- Both replacements use (IH m hm) for appropriate m < n.
-    sorry -- TODO: Copy proof from UniqueTyping.lean with these replacements
-  -- Step 2: sort_inv_n (derived from uniq_n + sortEquiv)
+    sorry
+  -- Step 2: sort_inv_n (derived from uniq_n)
   have sort_inv_n : ∀ {Γ : List VExpr} {u v : VLevel} {A : VExpr} {b : Bool} {n₁ n₂ : Nat},
       OnCtx Γ (env.IsType U) → n₁ ≤ n → n₂ ≤ n →
       env.HasTypeStratified U Γ (.sort u) A b n₁ →
       env.HasTypeStratified U Γ (.sort v) A b n₂ → u ≈ v := by
     intro Γ u v A b n₁ n₂ hΓ le₁ le₂ H1 H2
-    -- Case split on b
     match b with
     | false =>
-      -- b = false: both must be sort'
       let .sort' a1 a2 a3 := H1
       let .sort' b1 b2 b3 := H2
       exact a3.trans b3.symm
     | true =>
-      -- b = true: use uniq_n to relate H1 and H2 to canonical forms
       have ⟨l₁, hu_l₁, hl₁_wf⟩ := sort_canonical H1
       have ⟨l₂, hv_l₂, hl₂_wf⟩ := sort_canonical H2
       have hu_wf : u.WF U := H1.hasType.sort_inv_l henv
@@ -166,16 +136,12 @@ private theorem stratified_bundle (henv : VEnv.WF env) : ∀ n, StratifiedBundle
         .base (.sort' hu_wf hl₁_wf hu_l₁)
       have sv' : env.HasTypeStratified U Γ (.sort v) (.sort (.succ l₂)) true 0 :=
         .base (.sort' hv_wf hl₂_wf hv_l₂)
-      -- uniq_n: same expression .sort u, types A and .sort(.succ l₁)
       have ⟨w, _, w', hw, c₃, c₄⟩ := uniq_n hΓ le₁ (Nat.zero_le _) H1 su'
-      -- uniq_n: same expression .sort v, types A and .sort(.succ l₂)
       have ⟨w₂, _, w₂', hw₂, d₃, d₄⟩ := uniq_n hΓ le₂ (Nat.zero_le _) H2 sv'
-      -- c₃ : HTS A (.sort w) (n-1), c₄ : HTS (.sort (.succ l₁)) (.sort w') (n-1)
-      -- d₃ : HTS A (.sort w₂) (n-1), d₄ : HTS (.sort (.succ l₂)) (.sort w₂') (n-1)
-      -- Use sortEquiv to extract succ l₁ ≈ succ l₂
-      -- First relate w' and w₂': both are types of sort-typed things at depth n-1
-      -- Through the chain: w ≈ w' (from c), w₂ ≈ w₂' (from d),
-      -- and w ≈ w₂ (from uniq_IH on A with types .sort w and .sort w₂)
+      -- c₄ : HTS (.sort (.succ l₁)) (.sort w') (n-1)
+      -- d₄ : HTS (.sort (.succ l₂)) (.sort w₂') (n-1)
+      -- Relate w' and w₂' via sortEquiv
+      -- First: w ≈ w₂ from uniq_IH on A
       sorry
   -- Step 3: forallE_inv_n
   have forallE_inv_n : ∀ {Γ : List VExpr} {A B A' B' V V' : VExpr} {n₁ n₂ : Nat},
