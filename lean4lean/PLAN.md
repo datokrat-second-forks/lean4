@@ -326,38 +326,106 @@ Alternatively, steps 3-5 can be proven as local lemmas using uniq_n and sort_inv
 | forallE_inv_n constDF case | **HIGH** | Needs instL_inv + unique + instL_r composition |
 | ForallELikeWith.instL_inv | ~~Medium~~ **DONE** | ✓ Fully proven |
 
-## Current Implementation Status
+## Current Implementation Status (updated 2026-03-19)
+
+### Files
+- **PatternParams.lean**: `InjectivityParams` class + pattern exclusion lemmas ✓ DONE
+- **WHNFStep.lean**: `WHStep` (with `major` constructor), `ForallELikeWith`, `SortLikeWith`,
+  commutation, instL/instL_inv (**0 code sorry's**, determinism is a hypothesis not a theorem)
+- **SortLikePreservation.lean** [NEW]: `whnf_preserved` (9/13 cases proven), `sort_forallE_inv_ip` ✓
+- **Injectivity.lean**: Main stratified bundle (**1 sorry**: `forallE_inv_n`)
+  - `sort_forallE_inv` ✓ PROVEN (via SortLikePreservation)
+- **HeadReduction.lean**: `Params → InjectivityParams` instance (**4 sorry's**: extra_pat, extra_instL_inv, 2× hdet)
 
 ### What's proven
-- `sort_inv_zero` ✓
-- `sort_canonical` ✓
-- `StratifiedBundle` definition ✓
-- `sort_inv_n` ALL cases ✓ (b=false, base/base, base/defeq, defeq/base, defeq/defeq)
+- `sort_inv_zero` ✓, `sort_canonical` ✓, `StratifiedBundle` definition ✓
+- `sort_inv_n` ALL cases ✓
 - `sortEquiv` ✓
 - `uniq_n` ✓
 - Non-stratified theorem derivations ✓
+- `sort_forallE_inv` ✓ (connected to `sort_forallE_inv_ip` via SortLikePreservation)
 - `PatternParams.lean` fully proven ✓
-- `WHNFStep.lean`: WHStep definition, not_forallE, not_sort, WHStep.instL, WHSteps.instL ✓
-- `WHNFStep.lean`: WHStep.deterministic, ForallELikeWith.unique, forallE_sort_disjoint ✓
-- `WHNFStep.lean`: ForallELikeWith.instL_inv ✓
-- `WHNFStep.lean`: SortLikeWith.instL_inv ✓
+- `WHNFStep.lean`: WHStep + major, not_forallE, not_sort, not_lam, not_bvar ✓
+- `WHNFStep.lean`: WHStep.instL, WHSteps.instL, WHStep.instL_inv, WHSteps.instL_inv ✓
+- `WHNFStep.lean`: WHSteps.det_eq, ForallELikeWith.unique, forallE_sort_disjoint ✓
+- `WHNFStep.lean`: ForallELikeWith.instL_inv, ForallELikeWith.instL' ✓
+- `SortLikePreservation.lean`: whnf_preserved 9/13 cases (bvar, symm, trans, sortDF, lamDF,
+  forallEDF, defeqDF, beta, extra) ✓
+- `SortLikePreservation.lean`: sort_forallE_inv_ip ✓
 
-### Remaining sorries (2 total)
-In Injectivity.lean (2):
-- `forallE_inv_n`
-- `sort_forallE_inv`
+### Remaining sorry's (13 total across 3 files)
 
-Both depend on SortLike/ForallELike preservation through IsDefEqStrong (not yet implemented).
+**SortLikePreservation.lean (8 sorry's):**
+- constDF: 4 sorry's (SortLike fwd/bwd, ForallELike fwd/bwd)
+- appDF: 4 sorry's (SortLike fwd/bwd, ForallELike fwd/bwd)
+- proofIrrel: 4 sorry's (SortLike fwd/bwd, ForallELike fwd/bwd)
+- eta backward: 2 sorry's (SortLike bwd, ForallELike bwd)
+  Note: eta backward is circular (needs sort_forallE_inv_{<n}), must be inside bundle
 
-### appDF Resolution Path (see DETAIL_appDF_resolution.md)
-The preservation statement must carry HTS depth bounds. The appDF case uses preservation
-at depth < n from the bundle IH (NOT the structural IH on IsDefEqStrong). This works
-because app typing at depth n₁ requires sub-components at depth n₁-1.
+**HeadReduction.lean (4 sorry's):**
+- `extra_pat` in InjectivityParams instance: needs to derive from Params.extra_pat
+- `extra_instL_inv` in InjectivityParams instance: needs pattern structural reasoning
+- 2× `hdet` at sort_forallE_inv call sites: needs WHStep.deterministic theorem
 
-Key steps:
-1. Build IsDefEqStrong chain from WHSteps (WHStep_IsDefEq)
-2. Subject reduction for WHStep (3 simple cases)
-3. Depth-bounded preservation via nested induction (structural × depth)
+**Injectivity.lean (1 sorry):**
+- `forallE_inv_n`: needs InjectivityParams in bundle + ForallELike preservation
+
+### Dependency graph of remaining sorry's
+
+```
+Independent (can close now):
+  A. WHStep.deterministic (add pat_uniq to InjectivityParams)
+     → closes 2 hdet sorry's in HeadReduction
+  B. constDF in whnf_preserved (instL_inv factoring)
+     → closes 4 sorry's in SortLikePreservation
+
+Need subject reduction for WHStep:
+  C. proofIrrel in whnf_preserved (SR + level contradiction)
+  D. appDF in whnf_preserved (SR + depth-decreasing)
+
+Circular (must go inside stratified bundle):
+  E. eta backward in whnf_preserved (needs sort_forallE_inv_{<n})
+
+Blocked on C, D, E:
+  F. forallE_inv_n (needs full whnf_preserved + InjectivityParams in bundle)
+
+Plumbing:
+  G. extra_pat (derive from Params.extra_pat)
+  H. extra_instL_inv (pattern structural reasoning)
+```
+
+## Revised Implementation Plan
+
+### Phase A: WHStep determinism (closes 2 sorry's)
+1. Add `pat_uniq` field to `InjectivityParams` in PatternParams.lean
+2. Prove `WHStep.deterministic` theorem in WHNFStep.lean using pat_uniq
+3. Add `pat_uniq` to HeadReduction.lean instance (from Params.pat_uniq — may need sorry)
+4. Replace hdet sorry's in HeadReduction.lean with WHStep.deterministic
+
+### Phase B: constDF case (closes 4 sorry's)
+1. Add `SortLikeWith.instL_inv` to WHNFStep.lean (analogous to ForallELikeWith.instL_inv)
+2. Prove constDF in whnf_preserved:
+   - Given SortLikeWith (.const c ls) l, first WHStep must be extra
+   - Factor: df.rhs.instL ls_p →* sort l, by instL_inv: df.rhs →* sort l₀
+   - For ls': same extra step gives df.rhs.instL ls_p', then instL: →* sort (l₀.instL ls_p')
+   - Need: pattern re-instantiation lemma (df.lhs.instL ls_p = const c ls → ...)
+
+### Phase C: Subject reduction for WHStep (enables proofIrrel + appDF)
+1. Prove WHStep_IsDefEq: each WHStep step corresponds to an IsDefEqStrong
+2. Prove subject reduction: WHStep preserves typing
+
+### Phase D: proofIrrel + appDF (closes 8 sorry's)
+1. proofIrrel: use SR + uniq to derive level contradiction
+2. appDF: use SR + depth-decreasing to transfer SortLike through app reduction
+
+### Phase E: Restructure for eta + forallE_inv_n (closes 3 sorry's)
+1. Move whnf_preserved into the stratified bundle (or add sort_forallE_inv_n to bundle)
+2. eta backward uses sort_forallE_inv_{<n} from bundle IH
+3. forallE_inv_n uses full whnf_preserved + InjectivityParams
+
+### Phase F: Clean up HeadReduction plumbing (closes 2 sorry's)
+1. Properly derive extra_pat from Params.extra_pat
+2. Derive or sorry extra_instL_inv
 
 ## Detail Files
 

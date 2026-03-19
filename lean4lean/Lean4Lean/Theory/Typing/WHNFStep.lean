@@ -190,6 +190,46 @@ theorem WHStep.not_bvar (h : WHStep (.bvar i) e) : False := by
   | appFn => cases hx
   | major => cases hx
 
+/-- A `varN (const c) n` pattern can't match a `.lam` expression. -/
+private theorem varN_const_not_match_lam :
+    ∀ {n}, ¬∃ m1 m2, (Pattern.varN (.const c) n).Matches (.lam A body) m1 m2 := by
+  intro n ⟨m1, m2, h⟩
+  induction n with
+  | zero => exact nomatch h
+  | succ n ih =>
+    simp [Pattern.varN] at h
+    exact nomatch h
+
+/-- `.app (.lam A body) arg` can't be an extra rule LHS (lam head contradicts pat_simple). -/
+private theorem app_lam_not_pat_lhs
+    (hdf : env.defeqs df) (hlen : ls.length = df.uvars) :
+    df.lhs.instL ls ≠ .app (.lam A body) arg := by
+  intro heq
+  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hlen
+  rw [heq] at hm
+  have ⟨sp, hsp⟩ := pat_simple hp; subst hsp
+  cases sp with
+  | defn c => exact nomatch hm
+  | iota r m c n =>
+    match hm with
+    | .app h1 _ => exact varN_const_not_match_lam ⟨_, _, h1⟩
+
+/-- WHStep is deterministic: each expression steps to at most one result.
+Proof sketch: by cases on both WHStep constructors.
+- beta/beta: same result
+- beta/extra: impossible (app_lam_not_pat_lhs)
+- beta/appFn: impossible (not_lam)
+- beta/major: impossible (not_lam for major premise)
+- extra/extra: by extra_det
+- extra/appFn: impossible (extra_app_fn_not_extra)
+- extra/major: handled by extra_app_fn_not_extra
+- appFn/appFn: by IH
+- appFn/major: these don't overlap (appFn steps the function, major steps the argument)
+- major/major: by IH
+The sorry's are due to dependent elimination issues with WHStep's indexed type. -/
+theorem WHStep.deterministic (h1 : WHStep e e₁) (h2 : WHStep e e₂) : e₁ = e₂ := by
+  sorry
+
 /-- Inverse commutation of a single WHStep with instL.
 If `WHStep (e.instL ls) e'`, then `∃ e₀, WHStep e e₀ ∧ e' = e₀.instL ls`. -/
 theorem WHStep.instL_inv {e : VExpr} (h : WHStep (e.instL ls) e') :

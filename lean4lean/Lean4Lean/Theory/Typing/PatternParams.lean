@@ -92,6 +92,18 @@ class InjectivityParams where
     e.instL ls_outer = df.lhs.instL ls →
     ∃ ls', ls'.length = df.uvars ∧ e = df.lhs.instL ls' ∧
       (df.rhs.instL ls').instL ls_outer = df.rhs.instL ls
+  /-- Result uniqueness for defeq rules: if two extra rules match the same expression,
+  they produce the same result. This is the key consequence of pattern uniqueness
+  (`Params.pat_uniq`) that WHStep determinism needs. -/
+  extra_det : env.defeqs df₁ → ls₁.length = df₁.uvars →
+    env.defeqs df₂ → ls₂.length = df₂.uvars →
+    df₁.lhs.instL ls₁ = df₂.lhs.instL ls₂ → df₁.rhs.instL ls₁ = df₂.rhs.instL ls₂
+  /-- If `df.lhs.instL ls = .app f a` (iota pattern), then `f` cannot match any
+  extra rule LHS. Prevents overlap between `WHStep.extra` and `WHStep.appFn`.
+  Derives from `pat_app_l` in Params: no app-subpattern inside the function part. -/
+  extra_app_fn_not_extra : env.defeqs df → ls.length = df.uvars →
+    df.lhs.instL ls = .app f a →
+    env.defeqs df' → ls'.length = df'.uvars → df'.lhs.instL ls' ≠ f
 
 variable [InjectivityParams]
 open InjectivityParams

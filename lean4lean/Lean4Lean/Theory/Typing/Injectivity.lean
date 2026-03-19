@@ -527,12 +527,11 @@ Uses SortLike preservation through IsDefEqStrong + disjointness.
 Requires `InjectivityParams` for the WHStep relation and WHStep determinism. -/
 theorem IsDefEqU.sort_forallE_inv [ip : InjectivityParams]
     (h_env : ip.env = env)
-    (hdet : ∀ {e e₁ e₂ : VExpr}, WHStep e e₁ → WHStep e e₂ → e₁ = e₂)
     (henv : VEnv.WF env) (hΓ : OnCtx Γ (env.IsType U)) :
     ¬env.IsDefEqU U Γ (.sort u) (.forallE A B) := by
   subst h_env
   intro h
-  exact sort_forallE_inv_ip hdet henv.ordered (U := U) hΓ h
+  exact sort_forallE_inv_ip henv.ordered (U := U) hΓ h
 
 end VEnv
 end Lean4Lean

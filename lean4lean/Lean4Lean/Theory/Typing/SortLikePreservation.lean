@@ -57,7 +57,6 @@ Sorry'd cases: constDF (instL factoring), appDF (depth-decreasing),
 proofIrrel (subject reduction + level contradiction), eta backward
 (sort_forallE_inv_{<n}). See PLAN.md and DETAIL files. -/
 theorem whnf_preserved
-    (hdet : ∀ {e e₁ e₂ : VExpr}, WHStep e e₁ → WHStep e e₂ → e₁ = e₂)
     {U : Nat} {Γ : List VExpr} {e₁ e₂ V : VExpr}
     (H : ip.env.IsDefEqStrong U Γ e₁ e₂ V) :
     (∀ l, SortLikeWith e₁ l → ∃ l', SortLikeWith e₂ l') ∧
@@ -95,10 +94,10 @@ theorem whnf_preserved
             fun A' B' h => ?_, fun A' B' h => ⟨A', B', (ReflTransGen.tail .rfl .beta).trans h⟩⟩
     · rcases ReflTransGen.cases_head' h with heq | ⟨c, hstep, hrest⟩
       · cases heq
-      · have := hdet hstep WHStep.beta; subst this; exact ⟨l, hrest⟩
+      · have := WHStep.deterministic hstep WHStep.beta; subst this; exact ⟨l, hrest⟩
     · rcases ReflTransGen.cases_head' h with heq | ⟨c, hstep, hrest⟩
       · cases heq
-      · have := hdet hstep WHStep.beta; subst this; exact ⟨A', B', hrest⟩
+      · have := WHStep.deterministic hstep WHStep.beta; subst this; exact ⟨A', B', hrest⟩
   | eta _ _ _ _ _ _ _ _ _ _ _ _ _ _ =>
     exact ⟨fun _ h => absurd h SortLikeWith_not_lam,
            fun _ _ => sorry, -- eta backward SortLike: needs sort_forallE_inv_{<n}
@@ -111,10 +110,10 @@ theorem whnf_preserved
             fun A' B' h => ⟨A', B', (ReflTransGen.tail .rfl hextra).trans h⟩⟩
     · rcases ReflTransGen.cases_head' h with heq | ⟨c, hstep, hrest⟩
       · exact absurd heq (sort_not_pat_lhs hdf hlen)
-      · have := hdet hstep hextra; subst this; exact ⟨l, hrest⟩
+      · have := WHStep.deterministic hstep hextra; subst this; exact ⟨l, hrest⟩
     · rcases ReflTransGen.cases_head' h with heq | ⟨c, hstep, hrest⟩
       · exact absurd heq (forallE_not_pat_lhs hdf hlen)
-      · have := hdet hstep hextra; subst this; exact ⟨A', B', hrest⟩
+      · have := WHStep.deterministic hstep hextra; subst this; exact ⟨A', B', hrest⟩
   | constDF _ _ _ _ _ _ _ _ _ _ =>
     exact ⟨fun _ _ => sorry, fun _ _ => sorry,
            fun _ _ _ => sorry, fun _ _ _ => sorry⟩
@@ -128,15 +127,14 @@ theorem whnf_preserved
 /-- sort_forallE_inv proved from SortLike preservation + disjointness.
 Requires InjectivityParams and WHStep determinism. -/
 theorem sort_forallE_inv_ip
-    (hdet : ∀ {e e₁ e₂ : VExpr}, WHStep e e₁ → WHStep e e₂ → e₁ = e₂)
     (henv : Ordered ip.env) (hΓ : OnCtx Γ (ip.env.IsType U))
     (h : ip.env.IsDefEqU U Γ (.sort u) (.forallE A B)) : False := by
   let ⟨_, hdeq⟩ := h
   have hstrong := hdeq.strong henv hΓ
   have hs : SortLikeWith (.sort u) u := .rfl
-  have ⟨l', hl'⟩ := (whnf_preserved hdet hstrong).1 u hs
+  have ⟨l', hl'⟩ := (whnf_preserved hstrong).1 u hs
   have hf : ForallELikeWith (.forallE A B) A B := .rfl
-  exact forallE_sort_disjoint hf hl' hdet
+  exact forallE_sort_disjoint hf hl' WHStep.deterministic
 
 end VEnv
 end Lean4Lean
