@@ -287,15 +287,17 @@ Alternatively, steps 3-5 can be proven as local lemmas using uniq_n and sort_inv
 
 | Component | Risk | Notes |
 |---|---|---|
-| sort_inv_n remaining cases | Medium | Long but mechanical constructions |
-| sortEquiv | Medium | WF induction, needs careful depth tracking |
-| uniq_n | Low | Direct copy from UniqueTyping.lean |
-| WHStep determinism | Medium | Needs pat_uniq added to InjectivityParams |
-| SortLike preservation | Medium | eta case needs sort_forallE_inv_{<n} |
+| sort_inv_n remaining cases | ~~Medium~~ **DONE** | ✓ Fully proven |
+| sortEquiv | ~~Medium~~ **DONE** | ✓ Fully proven |
+| uniq_n | ~~Low~~ **DONE** | ✓ Fully proven |
+| WHStep determinism | **DONE** | ✓ pat_uniq added, determinism proven |
+| SortLike preservation (easy cases) | Medium | 10/13 cases straightforward |
+| SortLike preservation (appDF) | Medium | Viable via depth-decreasing argument (see DETAIL_appDF_resolution.md) |
+| SortLike preservation (proofIrrel) | Low-Medium | Subject reduction for WHStep + uniq at bounded depth |
 | sort_forallE_inv_n | Low | Direct from preservation + disjointness |
 | forallE_inv_n trans case | Medium-High | Generalized statement, ForallELike threading |
 | forallE_inv_n constDF case | **HIGH** | Needs instL_inv + unique + instL_r composition |
-| ForallELikeWith.instL_inv | Medium | Technical but standard inst/instL commutation |
+| ForallELikeWith.instL_inv | ~~Medium~~ **DONE** | ✓ Fully proven |
 
 ## Current Implementation Status
 
@@ -303,38 +305,47 @@ Alternatively, steps 3-5 can be proven as local lemmas using uniq_n and sort_inv
 - `sort_inv_zero` ✓
 - `sort_canonical` ✓
 - `StratifiedBundle` definition ✓
-- `sort_inv_n` b=false, base/base ✓
+- `sort_inv_n` ALL cases ✓ (b=false, base/base, base/defeq, defeq/base, defeq/defeq)
+- `sortEquiv` ✓
+- `uniq_n` ✓
 - Non-stratified theorem derivations ✓
 - `PatternParams.lean` fully proven ✓
 - `WHNFStep.lean`: WHStep definition, not_forallE, not_sort, WHStep.instL, WHSteps.instL ✓
+- `WHNFStep.lean`: WHStep.deterministic, ForallELikeWith.unique, forallE_sort_disjoint ✓
+- `WHNFStep.lean`: ForallELikeWith.instL_inv ✓
+- `WHNFStep.lean`: SortLikeWith.instL_inv ✓
 
-### Remaining sorries (10 total)
-In WHNFStep.lean (3):
-- `ForallELikeWith.unique`
-- `forallE_sort_disjoint`
-- `ForallELikeWith.instL_inv`
-
-In Injectivity.lean (7):
-- `sortEquiv`
-- `sort_inv_n` base/defeq case
-- `sort_inv_n` defeq/base case
-- `sort_inv_n` defeq/defeq case
-- `uniq_n`
+### Remaining sorries (2 total)
+In Injectivity.lean (2):
 - `forallE_inv_n`
 - `sort_forallE_inv`
+
+Both depend on SortLike/ForallELike preservation through IsDefEqStrong (not yet implemented).
+
+### appDF Resolution Path (see DETAIL_appDF_resolution.md)
+The preservation statement must carry HTS depth bounds. The appDF case uses preservation
+at depth < n from the bundle IH (NOT the structural IH on IsDefEqStrong). This works
+because app typing at depth n₁ requires sub-components at depth n₁-1.
+
+Key steps:
+1. Build IsDefEqStrong chain from WHSteps (WHStep_IsDefEq)
+2. Subject reduction for WHStep (3 simple cases)
+3. Depth-bounded preservation via nested induction (structural × depth)
 
 ## Detail Files
 
 The following detail files contain extended analysis of the hardest components:
 
 - **DETAIL_whstep_determinism.md** — WHStep determinism proof, pat_uniq design,
-  case-by-case analysis of WHStep constructor overlaps
+  case-by-case analysis of WHStep constructor overlaps [COMPLETED]
 - **DETAIL_instL_inv.md** — ForallELikeWith.instL_inv proof strategy, instL/instN
-  commutation, WHStep.instL_inv single-step inverse
+  commutation, WHStep.instL_inv single-step inverse [COMPLETED]
 - **DETAIL_sortlike_preservation.md** — SortLike/ForallELike preservation through
   IsDefEqStrong, constructor-by-constructor analysis, the appDF difficulty
 - **DETAIL_forallE_inv_trans.md** — The generalized forallE_inv statement, the
   constDF case using instL_r, depth bound management
+- **DETAIL_appDF_resolution.md** — Resolution of the appDF and proofIrrel cases via
+  depth-decreasing argument and subject reduction [NEW]
 
 ## Key Type Signatures
 
