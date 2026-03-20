@@ -232,6 +232,11 @@ def get! [TransCmp cmp] [LawfulEqCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) [
 def getD [TransCmp cmp] [LawfulEqCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) (fallback : β a) : β a :=
   t.lift (fun m => m.getD a fallback) (fun _ _ h => h.getD_eq)
 
+@[inherit_doc DTreeMap.getV]
+noncomputable def getV [TransCmp cmp] [LawfulEqCmp cmp] (t : ExtDTreeMap α β cmp) (a : α)
+    [Nonempty (β a)] : β a :=
+  t.getD a Classical.ofNonempty
+
 @[inline, inherit_doc DTreeMap.getKey?]
 def getKey? [TransCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) : Option α :=
   t.lift (fun m => m.getKey? a) (fun _ _ h => h.getKey?_eq)
@@ -529,6 +534,10 @@ def get! [TransCmp cmp] [Inhabited β] (t : ExtDTreeMap α β cmp) (a : α) : β
 def getD [TransCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) (fallback : β) : β :=
   t.lift (fun m => DTreeMap.Const.getD m a fallback)
     (fun _ _ h => h.constGetD_eq)
+
+@[inherit_doc ExtDTreeMap.getV]
+noncomputable def getV [TransCmp cmp] [Nonempty β] (t : ExtDTreeMap α β cmp) (a : α) : β :=
+  Const.getD t a Classical.ofNonempty
 
 @[inline, inherit_doc ExtDTreeMap.minEntry?]
 def minEntry? [TransCmp cmp] (t : ExtDTreeMap α β cmp) : Option (α × β) :=

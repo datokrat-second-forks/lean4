@@ -162,10 +162,18 @@ def get! [Inhabited β] (t : TreeMap α β cmp) (a : α) : β :=
 def getD (t : TreeMap α β cmp) (a : α) (fallback : β) : β :=
   DTreeMap.Const.getD t.inner a fallback
 
+@[inherit_doc DTreeMap.Const.getV]
+noncomputable def getV [Nonempty β] (t : TreeMap α β cmp) (a : α) : β :=
+  t.getD a Classical.ofNonempty
+
 instance : GetElem? (TreeMap α β cmp) α β (fun m a => a ∈ m) where
   getElem m a h := m.get a h
   getElem? m a := m.get? a
   getElem! m a := m.get! a
+
+-- TODO: remove nonepty instances from these
+noncomputable instance [Nonempty β] : GetElemV (TreeMap α β cmp) α β where
+  getElemV m a := m.getV a
 
 @[inline, inherit_doc DTreeMap.getKey?]
 def getKey? (t : TreeMap α β cmp) (a : α) : Option α :=

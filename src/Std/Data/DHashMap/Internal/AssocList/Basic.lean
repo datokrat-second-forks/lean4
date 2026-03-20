@@ -180,6 +180,16 @@ def getD {β : Type v} [BEq α] (a : α) (fallback : β) : AssocList α (fun _ =
   | cons k v es => bif k == a then v else es.getD a fallback
 
 /-- Internal implementation detail of the hash map -/
+noncomputable def getCastV [BEq α] [LawfulBEq α] (a : α) [Nonempty (β a)] :
+    AssocList α β → β a :=
+  getCastD a Classical.ofNonempty
+
+/-- Internal implementation detail of the hash map -/
+noncomputable def getV {β : Type v} [BEq α] [Nonempty β] (a : α) :
+    AssocList α (fun _ => β) → β :=
+  getD a Classical.ofNonempty
+
+/-- Internal implementation detail of the hash map -/
 def getKeyD [BEq α] (a : α) (fallback : α) : AssocList α β → α
   | nil => fallback
   | cons k _ es => if k == a then k else es.getKeyD a fallback

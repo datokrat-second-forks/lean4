@@ -174,10 +174,17 @@ def get! [Inhabited β] (t : Raw α β cmp) (a : α) : β :=
 def getD (t : Raw α β cmp) (a : α) (fallback : β) : β :=
   DTreeMap.Raw.Const.getD t.inner a fallback
 
+@[inherit_doc DTreeMap.Raw.Const.getV]
+noncomputable def getV [Nonempty β] (t : Raw α β cmp) (a : α) : β :=
+  t.getD a Classical.ofNonempty
+
 instance : GetElem? (Raw α β cmp) α β (fun m a => a ∈ m) where
   getElem m a h := m.get a h
   getElem? m a := m.get? a
   getElem! m a := m.get! a
+
+noncomputable instance [Nonempty β] : GetElemV (Raw α β cmp) α β where
+  getElemV m a := m.getV a
 
 @[inline, inherit_doc DTreeMap.Raw.getKey?]
 def getKey? (t : Raw α β cmp) (a : α) : Option α :=

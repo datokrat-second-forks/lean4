@@ -4410,6 +4410,9 @@ theorem size_uset {xs : Array α} {v : α} {i : USize} (h : i.toNat < xs.size) :
 theorem getElem!_eq_getD [Inhabited α] {xs : Array α} {i} : xs[i]! = xs.getD i default := by
   rfl
 
+theorem getElemV_eq_getD [Nonempty α] {xs : Array α} {i} : xs｢i｣ = xs.getD i Classical.ofNonempty := by
+  rfl
+
 theorem getElem_eq_getD {xs : Array α} {i} {h : i < xs.size} (fallback : α) :
     xs[i]'h = xs.getD i fallback := by
   rw [getD_eq_getD_getElem?, getElem_eq_getElem?_get, Option.get_eq_getD]

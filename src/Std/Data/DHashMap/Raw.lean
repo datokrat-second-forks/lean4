@@ -207,6 +207,12 @@ Uses the `LawfulBEq` instance to cast the retrieved value to the correct type.
     Raw₀.get! ⟨m, h⟩ a
   else default -- will never happen for well-formed inputs
 
+/-- Tries to retrieve the mapping for the given key, returning `Classical.ofNonempty` if no such
+mapping is present. -/
+noncomputable def getV [BEq α] [Hashable α] [LawfulBEq α] (m : Raw α β) (a : α)
+    [Nonempty (β a)] : β a :=
+  m.getD a Classical.ofNonempty
+
 /-- Removes the mapping for the given key if it exists. -/
 @[inline] def erase [BEq α] [Hashable α] (m : Raw α β) (a : α) : Raw α β :=
   if h : 0 < m.buckets.size then
@@ -246,6 +252,12 @@ Tries to retrieve the mapping for the given key, returning `fallback` if no such
   if h : 0 < m.buckets.size then
     Raw₀.Const.get! ⟨m, h⟩ a
   else default -- will never happen for well-formed inputs
+
+/-- Tries to retrieve the mapping for the given key, returning `Classical.ofNonempty` if no such
+mapping is present. -/
+noncomputable def Const.getV [BEq α] [Hashable α] [Nonempty β] (m : Raw α (fun _ => β))
+    (a : α) : β :=
+  Const.getD m a Classical.ofNonempty
 
 /--
 Equivalent to (but potentially faster than) calling `Const.get?` followed by `insertIfNew`.

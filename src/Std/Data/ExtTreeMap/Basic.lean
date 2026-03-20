@@ -159,10 +159,17 @@ def get! [TransCmp cmp] [Inhabited β] (t : ExtTreeMap α β cmp) (a : α) : β 
 def getD [TransCmp cmp] (t : ExtTreeMap α β cmp) (a : α) (fallback : β) : β :=
   ExtDTreeMap.Const.getD t.inner a fallback
 
+@[inherit_doc ExtDTreeMap.Const.getV]
+noncomputable def getV [TransCmp cmp] [Nonempty β] (t : ExtTreeMap α β cmp) (a : α) : β :=
+  t.getD a Classical.ofNonempty
+
 instance [TransCmp cmp] : GetElem? (ExtTreeMap α β cmp) α β (fun m a => a ∈ m) where
   getElem m a h := m.get a h
   getElem? m a := m.get? a
   getElem! m a := m.get! a
+
+noncomputable instance [TransCmp cmp] [Nonempty β] : GetElemV (ExtTreeMap α β cmp) α β where
+  getElemV m a := m.getV a
 
 @[inline, inherit_doc ExtDTreeMap.getKey?]
 def getKey? [TransCmp cmp] (t : ExtTreeMap α β cmp) (a : α) : Option α :=

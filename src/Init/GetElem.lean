@@ -77,7 +77,7 @@ class GetElem (coll : Type u) (idx : Type v) (elem : outParam (Type w))
 
 export GetElem (getElem)
 
-class GetElemV (coll : Type u) (idx : Type v) (elem : Type w) where
+class GetElemV (coll : Type u) (idx : Type v) (elem : outParam (Type w)) where
   getElemV [Nonempty elem] (xs : coll) (i : idx) : elem
 
 export GetElemV (getElemV)
@@ -179,6 +179,8 @@ class LawfulGetElemV (cont : Type u) (idx : Type v) (elem : outParam (Type w)) (
   getElemV_def [Nonempty elem] (c : cont) (i : idx) :
     c｢i｣ = match c[i]? with | some e => e | none => Classical.ofNonempty
 
+export LawfulGetElemV (getElemV_def)
+
 instance (priority := low) [GetElem coll idx elem valid] [∀ xs i, Decidable (valid xs i)] :
     LawfulGetElem coll idx elem valid where
 
@@ -207,6 +209,18 @@ grind_pattern getElem?_pos => c[i] where
     [Inhabited elem] (c : cont) (i : idx) (h : ¬dom c i) : c[i]! = default := by
   have : Decidable (dom c i) := .isFalse h
   simp [getElem!_def, h]
+
+@[simp, grind =] theorem getElemV_pos [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
+    [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom] [Nonempty elem]
+    (c : cont) (i : idx) (h : dom c i) :
+    c｢i｣ = c[i]'h := by
+  rw [getElemV_def]; simp [h]
+
+@[simp, grind =] theorem getElemV_neg [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
+    [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom] [Nonempty elem]
+    (c : cont) (i : idx) (h : ¬dom c i) :
+    c｢i｣ = (Classical.ofNonempty : elem) := by
+  rw [getElemV_def]; simp [h]
 
 @[simp, grind =] theorem get_getElem? [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     (c : cont) (i : idx) [Decidable (dom c i)] (h) :
@@ -390,6 +404,14 @@ theorem getElem?_eq_none (h : length l ≤ i) : l[i]? = none := getElem?_eq_none
 grind_pattern getElem?_eq_none => l.length, l[i]? where
   guard l.length ≤ i
 
+noncomputable def getElemVInternal [Nonempty α] : (as : List α) → (i : Nat) → α
+  | a::_,  0   => a
+  | _::as, n+1 => getElemVInternal as n
+  | _,     _   => Classical.ofNonempty
+
+noncomputable instance : GetElemV (List α) Nat α where
+  getElemV xs i := xs.getElemVInternal i
+
 instance : LawfulGetElem (List α) Nat α fun as i => i < as.length where
   getElem?_def as i h := by
     split <;> simp_all
@@ -400,6 +422,16 @@ instance : LawfulGetElem (List α) Nat α fun as i => i < as.length where
       cases i with
       | zero => rfl
       | succ i => simpa using ih i
+
+instance : LawfulGetElemV (List α) Nat α fun as i => i < as.length where
+  getElemV_def as i := by
+    simp only [getElemV, getElem?]
+    induction as generalizing i with
+    | nil => rfl
+    | cons a as ih =>
+      cases i with
+      | zero => rfl
+      | succ i => exact ih i
 
 end List
 
@@ -414,12 +446,20 @@ instance : GetElem? (Array α) Nat α fun xs i => i < xs.size where
   getElem? xs i := decidableGetElem? xs i
   getElem! xs i := xs.get!Internal i
 
+noncomputable instance : GetElemV (Array α) Nat α where
+  getElemV xs i := xs.getD i Classical.ofNonempty
+
 instance : LawfulGetElem (Array α) Nat α fun xs i => i < xs.size where
   getElem?_def xs i h := by
     simp only [getElem?, decidableGetElem?]
     split <;> rfl
   getElem!_def xs i := by
     simp only [getElem!, getElem?, decidableGetElem?, get!Internal, getD, getElem]
+    split <;> rfl
+
+instance : LawfulGetElemV (Array α) Nat α fun xs i => i < xs.size where
+  getElemV_def xs i := by
+    simp only [getElemV, getElem?, decidableGetElem?, getD, getElem]
     split <;> rfl
 
 @[simp] theorem getInternal_eq_getElem (a : Array α) (i : Nat) (h) :

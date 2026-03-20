@@ -240,6 +240,15 @@ Uses the `LawfulEqCmp` instance to cast the retrieved value to the correct type.
 def getD [LawfulEqCmp cmp] (t : DTreeMap α β cmp) (a : α) (fallback : β a) : β a :=
   letI : Ord α := ⟨cmp⟩; t.inner.getD a fallback
 
+/-- Retrieves the mapping for the given key, returning `Classical.ofNonempty` if no such mapping
+is present. This requires the target type to be `Nonempty` rather than `Inhabited`.
+
+Uses the `LawfulEqCmp` instance to cast the retrieved value to the correct type.
+-/
+noncomputable def getV [LawfulEqCmp cmp] (t : DTreeMap α β cmp) (a : α) [Nonempty (β a)] :
+    β a :=
+  t.getD a Classical.ofNonempty
+
 /--
 Checks if a mapping for the given key exists and returns the key if it does, otherwise `none`.
 The result in the `some` case is guaranteed to be pointer equal to the key in the map.
@@ -691,6 +700,10 @@ def get! [Inhabited β] (t : DTreeMap α β cmp) (a : α) : β :=
 @[inline, inherit_doc DTreeMap.getD]
 def getD (t : DTreeMap α β cmp) (a : α) (fallback : β) : β :=
   letI : Ord α := ⟨cmp⟩; Impl.Const.getD t.inner a fallback
+
+@[inline, inherit_doc DTreeMap.getV]
+noncomputable def getV [Nonempty β] (t : DTreeMap α β cmp) (a : α) : β :=
+  letI : Ord α := ⟨cmp⟩; Impl.Const.getD t.inner a Classical.ofNonempty
 
 @[inline, inherit_doc DTreeMap.minEntry?]
 def minEntry? (t : DTreeMap α β cmp) : Option (α × β) :=

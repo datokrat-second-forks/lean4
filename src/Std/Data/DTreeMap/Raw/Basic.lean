@@ -182,6 +182,10 @@ def get! [LawfulEqCmp cmp] (t : Raw α β cmp) (a : α) [Inhabited (β a)]  : β
 def getD [LawfulEqCmp cmp] (t : Raw α β cmp) (a : α) (fallback : β a) : β a :=
   letI : Ord α := ⟨cmp⟩; t.inner.getD a fallback
 
+@[inherit_doc DTreeMap.getV]
+noncomputable def getV [LawfulEqCmp cmp] (t : Raw α β cmp) (a : α) [Nonempty (β a)] : β a :=
+  t.getD a Classical.ofNonempty
+
 @[inline, inherit_doc DTreeMap.getEntry?]
 def getEntry? (t : Raw α β cmp) (a : α) : Option ((a : α) × β a) :=
   letI : Ord α := ⟨cmp⟩; t.inner.getEntry? a
@@ -439,6 +443,10 @@ def get! [Inhabited β] (t : Raw α β cmp) (a : α) : β :=
 @[inline, inherit_doc DTreeMap.Const.getD]
 def getD (t : Raw α β cmp) (a : α) (fallback : β) : β :=
   letI : Ord α := ⟨cmp⟩; Impl.Const.getD t.inner a fallback
+
+@[inherit_doc DTreeMap.Const.getV]
+noncomputable def getV [Nonempty β] (t : Raw α β cmp) (a : α) : β :=
+  letI : Ord α := ⟨cmp⟩; Const.getD t a Classical.ofNonempty
 
 @[inline, inherit_doc DTreeMap.Const.minEntry?]
 def minEntry? (t : Raw α β cmp) : Option (α × β) :=

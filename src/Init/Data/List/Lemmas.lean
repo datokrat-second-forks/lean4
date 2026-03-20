@@ -208,6 +208,19 @@ theorem getElem!_eq_getElem?_getD [Inhabited α] {l : List α} {i : Nat} :
   | some _ => simp
   | none => simp
 
+/-! ### getElemV
+
+We simplify `l｢i｣` to `(l[i]?).getD Classical.ofNonempty`.
+-/
+
+@[simp, grind =]
+theorem getElemV_eq_getElem?_getD [Nonempty α] {l : List α} {i : Nat} :
+    l｢i｣ = (l[i]?).getD (Classical.ofNonempty : α) := by
+  simp only [getElemV_def]
+  match l[i]? with
+  | some _ => simp
+  | none => simp
+
 /-! ### getElem? and getElem -/
 
 @[simp, grind =] theorem getElem?_nil {i : Nat} : ([] : List α)[i]? = none := rfl
@@ -3760,6 +3773,25 @@ theorem getElem!_cons_succ [Inhabited α] {l : List α} : (a::l)[i+1]! = l[i]! :
 theorem getElem!_of_getElem? [Inhabited α] : ∀ {l : List α} {i : Nat}, l[i]? = some a → l[i]! = a
   | _a::_, 0, _ => by
     rw [getElem!_pos] <;> simp_all
+  | _::l, _+1, e => by
+    simp at e
+    simp_all
+
+theorem getElemV_nil [Nonempty α] {n : Nat} : ([] : List α)｢n｣ = Classical.ofNonempty := rfl
+
+theorem getElemV_cons_zero [Nonempty α] {l : List α} : (a::l)｢0｣ = a := by
+  rw [getElemV_pos]; rfl; simp
+
+theorem getElemV_cons_succ [Nonempty α] {l : List α} : (a::l)｢i+1｣ = l｢i｣ := by
+  by_cases h : i < l.length
+  · rw [getElemV_pos, getElemV_pos]
+    · rfl
+    · simp; apply Nat.succ_lt_succ; assumption
+  · rw [getElemV_neg, getElemV_neg] <;> simp_all [Nat.succ_lt_succ_iff]
+
+theorem getElemV_of_getElem? [Nonempty α] : ∀ {l : List α} {i : Nat}, l[i]? = some a → l｢i｣ = a
+  | _a::_, 0, _ => by
+    rw [getElemV_pos] <;> simp_all
   | _::l, _+1, e => by
     simp at e
     simp_all
