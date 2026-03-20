@@ -105,6 +105,23 @@ class InjectivityParams where
     df.lhs.instL ls = .app f a →
     env.defeqs df' → ls'.length = df'.uvars → df'.lhs.instL ls' ≠ f
 
+  /-- Pattern uniqueness: if two patterns both match overlapping expressions,
+  they must be the same pattern. Specifically, if `p₃` is a subpattern of `p₁`
+  and `p₂` overlaps with `p₃`, then `p₁ = p₂ = p₃`. -/
+  pat_uniq : Pat p₁ r → Pat p₂ r' → Subpattern p₃ p₁ → p₂.inter p₃ = some p₄ →
+    p₁ = p₂ ∧ p₂ = p₃ ∧ HEq r r'
+  /-- The inner function parts of different patterns don't overlap.
+  If both patterns have app subpatterns, and `.var p₃` is inside the function
+  part of one, then the function part of the other can't overlap with `p₃`. -/
+  pat_app_l_uniq : Pat p r → Pat p' r' → Subpattern (.app p₁ p₂) p →
+    Subpattern (.app p₁' p₂') p' → Subpattern (.var p₃) p₁ → p₁'.inter p₃ = none
+  /-- The function part of one pattern can't overlap with the argument part of another.
+  If `p₃` is inside the function part of `p` and `p₃'` is inside the argument
+  part of `p'`, then `p₃` and `p₃'` don't overlap. -/
+  pat_app_uniq : Pat p r → Pat p' r' → Subpattern (.app p₁ p₂) p →
+    Subpattern (.app p₁' p₂') p' → Subpattern p₃ p₁ → Subpattern p₃' p₂' →
+    p₃.inter p₃' = none
+
   /-- For defn patterns: the const's level list has the same length as df.uvars. -/
   extra_const_uvars : env.defeqs df → ls.length = df.uvars →
     df.lhs.instL ls = .const c us → us.length = df.uvars

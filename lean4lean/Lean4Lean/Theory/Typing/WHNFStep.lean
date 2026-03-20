@@ -214,22 +214,128 @@ private theorem app_lam_not_pat_lhs
     match hm with
     | .app h1 _ => exact varN_const_not_match_lam ⟨_, _, h1⟩
 
-/-- The argument part of an iota pattern LHS can't take any WHStep
-(it must already be in constructor form when the rule fires). -/
+/-- Any subpattern of `varN (.const c) n` is itself `varN (.const c) k` for some k. -/
+private theorem Subpattern.varN_const' (H : Subpattern p (.varN (.const c) n)) :
+    ∃ k, p = .varN (.const c) k := by
+  generalize eq : Pattern.varN (.const c) n = p' at H
+  induction H generalizing n with
+  | refl => exact ⟨_, eq.symm⟩
+  | appL | appR => cases n <;> cases eq
+  | varL _ ih => cases n <;> cases eq; exact ih rfl
+
+/-- If `.app p₁ p₂` is a subpattern of a simple pattern, then `.app p₁ p₂` equals the pattern. -/
+private theorem simple_app_ip (H : Pat p r) (h : Subpattern (.app p₁ p₂) p) : .app p₁ p₂ = p := by
+  obtain ⟨_|_, rfl⟩ := pat_simple H <;> cases h
+  · rfl
+  · obtain ⟨_|_, ⟨⟩⟩ := Subpattern.varN_const' ‹_›
+  · obtain ⟨_|_, ⟨⟩⟩ := Subpattern.varN_const' ‹_›
+
+/-- `varN (.const c) k` can't match a `.lam` expression for any k. -/
+private theorem varN_const_not_match_lam' :
+    ∀ {k}, ¬∃ m1 m2, (Pattern.varN (.const c) k).Matches (.lam A body) m1 m2 := by
+  intro k ⟨m1, m2, h⟩
+  induction k with
+  | zero => exact nomatch h
+  | succ k ih => exact nomatch h
+
+/-- `varN (.const c) n` is never `.app f a` (it's always `.const` or `.var`). -/
+private theorem varN_const_ne_app :
+    ∀ {n}, Pattern.varN (.const c) n ≠ .app f a := by
+  intro n; cases n <;> exact nofun
+
+/-- No pattern equals `.app` of itself (by size). -/
+private theorem pattern_ne_app_self (p q : Pattern) : p ≠ Pattern.app p q := by
+  intro h; have := congrArg sizeOf h; simp [Pattern.app] at this; omega
+
+/-- Core stuckness lemma: if `e` matches a proper subpattern of a known pattern,
+then `e` can't take any WHStep. Mirrors `WHNF.subpattern` from HeadReduction.lean
+but for WHStep instead of WHRed. -/
+private theorem subpattern_no_step
+    (h1 : Pat p r) (h2 : Subpattern p₁ p) (h3 : p₁ ≠ p)
+    (h4 : p₁.Matches e m1 m2) : ∀ {e'}, ¬WHStep e e' := by
+  intro e' H2
+  -- Extract the varN form: p₁ = varN (.const c') n for some c', n
+  have ⟨c', n, hpn⟩ : ∃ c' n, p₁ = .varN (.const c') n := by
+    obtain ⟨_|_, rfl⟩ := pat_simple h1
+    · -- iota case: proper subpatterns are in varN parts
+      cases h2 with
+      | refl => exact absurd rfl h3
+      | appL h => exact let ⟨k, hk⟩ := Subpattern.varN_const' h; ⟨_, k, hk⟩
+      | appR h => exact let ⟨k, hk⟩ := Subpattern.varN_const' h; ⟨_, k, hk⟩
+    · -- defn case: only subpattern is itself
+      cases h2; exact absurd rfl h3
+  subst hpn
+  -- Prove .const c' is not a full pattern (used in the extra case)
+  have not_pat : ∀ s, ¬Pat (.const c') s := fun _ h => by
+    have ⟨heq, _, _⟩ := InjectivityParams.pat_uniq h1 h
+      (Subpattern.varN (p := .const c') .refl |>.trans h2)
+      (Pattern.inter_self _)
+    subst heq
+    exact h3.symm (h2.antisymm (Subpattern.varN .refl))
+  clear h3
+  -- Induction on the WHStep derivation
+  induction H2 generalizing n with
+  | beta =>
+    -- varN (.const c') n can never match .app (.lam ..) ..
+    generalize Pattern.varN (.const c') n = p' at m1 m2 h4; nomatch h4
+  | @extra df' ls' hdf' hlen' =>
+    -- The firing rule's pattern overlaps with our subpattern → contradiction
+    have ⟨q, s, m1', m2', hq, hm', _⟩ := extra_pat hdf' hlen'
+    have ⟨_, _, _, a1, _⟩ := Pattern.matches_inter.mp ⟨⟨_, _, hm'⟩, ⟨_, _, h4⟩⟩
+    obtain ⟨⟨_, m, _⟩ | _, rfl⟩ := pat_simple h1 <;> [skip; cases n <;> cases h2]
+    have ⟨rfl, eq, _⟩ := InjectivityParams.pat_uniq h1 hq h2 a1
+    cases n <;> cases eq
+    exact not_pat _ h1
+  | appFn h_step ih =>
+    -- e = .app f₁ a₁, WHStep f₁ f₁'. Pattern depth decreases.
+    let n+1 := n; let .var h4' := h4
+    exact ih n (Subpattern.trans (.varL .refl) h2) h4'
+  | major hm _ ih =>
+    -- e = .app f₁ a₁, WHIsMajorPremise f₁, WHStep a₁ a₁'
+    let n+1 := n; let .var h4' := h4
+    let ⟨p', ⟨s, h1'⟩, p₁', p₂', h2', _, _, h3'⟩ := hm
+    cases simple_app_ip h1' h2'
+    obtain ⟨⟨_, m, _⟩ | _, rfl⟩ := pat_simple h1 <;> [skip; cases n <;> cases h2]
+    have ⟨_, _, _, a1, _⟩ := Pattern.matches_inter.mp ⟨⟨_, _, h3'⟩, ⟨_, _, h4'⟩⟩
+    cases h2 with
+    | appL h2 =>
+      cases (InjectivityParams.pat_app_l_uniq h1 h1' .refl .refl h2).symm.trans a1
+    | appR h2 =>
+      cases (InjectivityParams.pat_app_uniq h1' h1 .refl .refl .refl
+        (Subpattern.trans (.varL .refl) h2)).symm.trans a1
+
+/-- The argument part of an iota pattern LHS can't take any WHStep. -/
 theorem extra_app_arg_stuck (hdf : env.defeqs df) (hlen : ls.length = df.uvars)
     (hlhs : df.lhs.instL ls = .app f a) : ∀ {e'}, ¬WHStep a e' := by
-  sorry -- needs: structural analysis of the iota pattern argument
+  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hlen
+  rw [hlhs] at hm
+  have ⟨sp, hsp⟩ := pat_simple hp; subst hsp
+  cases sp with
+  | defn c => exact nomatch hm
+  | iota r_name m_val c n_val =>
+    let .app _ h_arg := hm
+    intro; exact subpattern_no_step hp (.appR .refl) (fun heq => absurd heq varN_const_ne_app) h_arg
 
 /-- A major premise can't take any WHStep (it's stuck waiting for its argument). -/
 theorem WHIsMajorPremise.no_step (hm : WHIsMajorPremise f) : ∀ {e'}, ¬WHStep f e' := by
-  sorry -- needs: structural analysis of the pattern match + extra_app_fn_not_extra
+  obtain ⟨p, ⟨r, hp⟩, p₁, p₂, hsub, m1, m2, hmatch⟩ := hm
+  refine subpattern_no_step hp (Subpattern.trans (.appL .refl) hsub) ?_ hmatch
+  intro heq
+  have h := simple_app_ip hp hsub
+  -- heq : p₁ = p, h : .app p₁ p₂ = p. So p₁ = .app p₁ p₂, impossible by size.
+  exact pattern_ne_app_self _ _ (heq.trans h.symm)
 
-/-- The function part of an iota pattern LHS can't take any WHStep.
-Proved by induction on WHStep, using extra_app_fn_not_extra for the extra case
-and the iota pattern structure for the beta/appFn/major cases. -/
+/-- The function part of an iota pattern LHS can't take any WHStep. -/
 theorem extra_app_fn_stuck (hdf : env.defeqs df) (hlen : ls.length = df.uvars)
     (hlhs : df.lhs.instL ls = .app f a) : ∀ {e'}, ¬WHStep f e' := by
-  sorry -- needs structural induction on the pattern match depth
+  have ⟨p, r, m1, m2, hp, hm, _⟩ := extra_pat hdf hlen
+  rw [hlhs] at hm
+  have ⟨sp, hsp⟩ := pat_simple hp; subst hsp
+  cases sp with
+  | defn c => exact nomatch hm
+  | iota r_name m_val c n_val =>
+    let .app h_fn _ := hm
+    intro; exact subpattern_no_step hp (.appL .refl) (fun heq => absurd heq varN_const_ne_app) h_fn
 
 /-- Inversion for WHStep on `.const c us`: the only applicable constructor is `extra`. -/
 theorem WHStep.const_inv {c us} (h : WHStep (.const c us) e') :

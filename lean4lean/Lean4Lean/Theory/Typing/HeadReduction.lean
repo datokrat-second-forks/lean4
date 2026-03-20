@@ -55,6 +55,9 @@ instance : InjectivityParams where
     cases hr; subst_vars
     have ⟨rfl, rfl⟩ := Pattern.matches_determ hMatch₁ hMatch₂
     rw [hRhs₁, hRhs₂]
+  pat_uniq := fun h1 h2 h3 h4 => Params.pat_uniq h1 h2 h3 h4
+  pat_app_l_uniq := fun h1 h2 h3 h4 h5 => pat_app_l_uniq h1 h2 h3 h4 h5
+  pat_app_uniq := fun h1 h2 h3 h4 h5 h6 => pat_app_uniq h1 h2 h3 h4 h5 h6
   extra_app_fn_not_extra := fun {df ls f a df' ls'} hdf hlen hlhs hdf' hlen' heq => by
     -- df.lhs.instL ls = .app f a (iota), df'.lhs.instL ls' = f
     have ⟨p₁, r₁, m1₁, m2₁, hPat₁, hMatch₁, _⟩ := derive_extra_pat hdf hlen
