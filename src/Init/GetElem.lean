@@ -77,6 +77,11 @@ class GetElem (coll : Type u) (idx : Type v) (elem : outParam (Type w))
 
 export GetElem (getElem)
 
+class GetElemV (coll : Type u) (idx : Type v) (elem : Type w) where
+  getElemV [Nonempty elem] (xs : coll) (i : idx) : elem
+
+export GetElemV (getElemV)
+
 @[inherit_doc getElem]
 syntax:max term noWs "[" withoutPosition(term) "]" : term
 macro_rules | `($x[$i]) => `(getElem $x $i (by get_elem_tactic))
@@ -84,6 +89,10 @@ macro_rules | `($x[$i]) => `(getElem $x $i (by get_elem_tactic))
 @[inherit_doc getElem]
 syntax term noWs "[" withoutPosition(term) "]'" term:max : term
 macro_rules | `($x[$i]'$h) => `(getElem $x $i $h)
+
+@[inherit_doc getElem]
+syntax term noWs "｢" withoutPosition(term) "｣" : term
+macro_rules | `($x｢$i｣) => `(getElemV $x $i)
 
 /-- Helper function for implementation of `GetElem?.getElem?`. -/
 abbrev decidableGetElem? [GetElem coll idx elem valid] (xs : coll) (i : idx) [Decidable (valid xs i)] :
@@ -125,6 +134,7 @@ recommended_spelling "getElem" for "xs[i]" in [GetElem.getElem, «term__[_]»]
 recommended_spelling "getElem" for "xs[i]'h" in [GetElem.getElem, «term__[_]'_»]
 recommended_spelling "getElem?" for "xs[i]?" in [GetElem?.getElem?, «term__[_]_?»]
 recommended_spelling "getElem!" for "xs[i]!" in [GetElem?.getElem!, «term__[_]_!»]
+recommended_spelling "getElemV" for "xs｢i｣" in [GetElemV.getElemV, «term__｢_｣»]
 
 instance (priority := low) [GetElem coll idx elem valid] [∀ xs i, Decidable (valid xs i)] :
     GetElem? coll idx elem valid where
@@ -163,6 +173,11 @@ class LawfulGetElem (cont : Type u) (idx : Type v) (elem : outParam (Type w))
     simp only [getElem!, getElem?, outOfBounds_eq_default]
 
 export LawfulGetElem (getElem?_def getElem!_def)
+
+class LawfulGetElemV (cont : Type u) (idx : Type v) (elem : outParam (Type w)) (dom : outParam (cont → idx → Prop))
+    [GetElem? cont idx elem dom] [GetElemV cont idx elem] : Prop where
+  getElemV_def [Nonempty elem] (c : cont) (i : idx) :
+    c｢i｣ = match c[i]? with | some e => e | none => Classical.ofNonempty
 
 instance (priority := low) [GetElem coll idx elem valid] [∀ xs i, Decidable (valid xs i)] :
     LawfulGetElem coll idx elem valid where
