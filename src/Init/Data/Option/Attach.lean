@@ -136,6 +136,10 @@ theorem mem_attach : ∀ (o : Option α) (x : {x // o = some x}), x ∈ o.attach
     o.attach.get! = default :=
   Subsingleton.elim _ _
 
+@[simp, grind =] theorem getV_attach {o : Option α} [Nonempty { x // o = some x }] :
+    o.attach.getV = Classical.ofNonempty :=
+  Subsingleton.elim _ _
+
 @[simp, grind =] theorem get_attachWith {p : α → Prop} {o : Option α} (H : ∀ a, o = some a → p a) (h : (o.attachWith p H).isSome) :
     (o.attachWith p H).get h = ⟨o.get (by simpa using h), H _ (by simp)⟩ := by
   cases o <;> simp

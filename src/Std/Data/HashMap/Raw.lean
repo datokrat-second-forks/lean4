@@ -150,10 +150,18 @@ Tries to retrieve the mapping for the given key, panicking if no such mapping is
 @[inline] def get! [BEq α] [Hashable α] [Inhabited β] (m : Raw α β) (a : α) : β :=
   DHashMap.Raw.Const.get! m.inner a
 
+/-- Tries to retrieve the mapping for the given key, returning `Classical.ofNonempty` if no such
+mapping is present. -/
+noncomputable def getV [BEq α] [Hashable α] [Nonempty β] (m : Raw α β) (a : α) : β :=
+  m.getD a Classical.ofNonempty
+
 instance [BEq α] [Hashable α] : GetElem? (Raw α β) α β (fun m a => a ∈ m) where
   getElem m a h := m.get a h
   getElem? m a := m.get? a
   getElem! m a := m.get! a
+
+noncomputable instance [BEq α] [Hashable α] : GetElemV (Raw α β) α β where
+  getElemV m a := m.getV a
 
 @[inline, inherit_doc DHashMap.Raw.getKey?] def getKey? [BEq α] [Hashable α] (m : Raw α β) (a : α) :
     Option α :=
@@ -170,6 +178,10 @@ instance [BEq α] [Hashable α] : GetElem? (Raw α β) α β (fun m a => a ∈ m
 @[inline, inherit_doc DHashMap.Raw.getKey!] def getKey! [BEq α] [Hashable α] [Inhabited α]
     (m : Raw α β) (a : α) : α :=
   DHashMap.Raw.getKey! m.inner a
+
+@[inherit_doc DHashMap.Raw.getKeyV] noncomputable def getKeyV [BEq α] [Hashable α] [Nonempty α]
+    (m : Raw α β) (a : α) : α :=
+  m.getKeyD a Classical.ofNonempty
 
 @[inline, inherit_doc DHashMap.Raw.erase] def erase [BEq α] [Hashable α] (m : Raw α β)
     (a : α) : Raw α β :=

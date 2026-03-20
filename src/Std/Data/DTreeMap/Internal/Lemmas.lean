@@ -1343,55 +1343,115 @@ theorem getKeyD_empty {a : α} {fallback : α} :
     (empty : Impl α β).getKeyD a fallback = fallback := by
   simp [getKeyD, empty]
 
+theorem getKeyV_empty {a : α} [Nonempty α] :
+    (empty : Impl α β).getKeyV a = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_empty
+
+
 theorem getKeyD_of_isEmpty [TransOrd α] (h : t.WF) {a fallback : α} :
     t.isEmpty = true → t.getKeyD a fallback = fallback := by
   simp_to_model [isEmpty, getKeyD]; empty
+
+theorem getKeyV_of_isEmpty [TransOrd α] [Nonempty α] (h : t.WF) {a : α} :
+    t.isEmpty = true → t.getKeyV a = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_of_isEmpty (α := α) h
+
 
 theorem getKeyD_insert [TransOrd α] (h : t.WF) {k a fallback : α} {v : β k} :
     (t.insert k v h.balanced).impl.getKeyD a fallback =
       if compare k a = .eq then k else t.getKeyD a fallback := by
   simp_to_model [insert, getKeyD] using List.getKeyD_insertEntry
 
+theorem getKeyV_insert [TransOrd α] [Nonempty α] (h : t.WF) {k a : α}
+    {v : β k} :
+    (t.insert k v h.balanced).impl.getKeyV a = if compare k a = .eq then k else t.getKeyV a := by
+  simpa [getKeyV] using getKeyD_insert (α := α) h
+
+
 theorem getKeyD_insert! [TransOrd α] (h : t.WF) {k a fallback : α} {v : β k} :
     (t.insert! k v).getKeyD a fallback =
       if compare k a = .eq then k else t.getKeyD a fallback := by
   simpa only [insert_eq_insert!] using getKeyD_insert h
+
+theorem getKeyV_insert! [TransOrd α] [Nonempty α] (h : t.WF) {k a : α}
+    {v : β k} :
+    (t.insert! k v).getKeyV a = if compare k a = .eq then k else t.getKeyV a := by
+  simpa [getKeyV] using getKeyD_insert! (α := α) h
+
 
 theorem getKeyD_insert_self [TransOrd α] (h : t.WF) {a fallback : α}
     {b : β a} :
     (t.insert a b h.balanced).impl.getKeyD a fallback = a := by
   simp_to_model [insert, getKeyD] using List.getKeyD_insertEntry_self
 
+theorem getKeyV_insert_self [TransOrd α] [Nonempty α] (h : t.WF) {a : α}
+    {b : β a} : (t.insert a b h.balanced).impl.getKeyV a = a := by
+  simpa [getKeyV] using getKeyD_insert_self (α := α) h
+
+
 theorem getKeyD_insert!_self [TransOrd α] (h : t.WF) {a fallback : α}
     {b : β a} :
     (t.insert! a b).getKeyD a fallback = a := by
   simpa only [insert_eq_insert!] using getKeyD_insert_self h
 
+theorem getKeyV_insert!_self [TransOrd α] [Nonempty α] (h : t.WF) {a : α}
+    {b : β a} : (t.insert! a b).getKeyV a = a := by
+  simpa [getKeyV] using getKeyD_insert!_self (α := α) h
+
+
 theorem getKeyD_eq_fallback_of_contains_eq_false [TransOrd α] (h : t.WF) {a fallback : α} :
     t.contains a = false → t.getKeyD a fallback = fallback := by
   simp_to_model [contains, getKeyD] using List.getKeyD_eq_fallback
 
+theorem getKeyV_eq_default_of_contains_eq_false [TransOrd α] [Nonempty α] (h : t.WF) {a : α} :
+    t.contains a = false → t.getKeyV a = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_eq_fallback_of_contains_eq_false h
+
 theorem getKeyD_eq_fallback [TransOrd α] (h : t.WF) {a fallback : α} :
     ¬ a ∈ t → t.getKeyD a fallback = fallback := by
   simpa [mem_iff_contains] using getKeyD_eq_fallback_of_contains_eq_false h
+
+theorem getKeyV_eq_default [TransOrd α] [Nonempty α] (h : t.WF) {a : α} :
+    ¬ a ∈ t → t.getKeyV a = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_eq_fallback h
 
 theorem getKeyD_erase [TransOrd α] (h : t.WF) {k a fallback : α} :
     (t.erase k h.balanced).impl.getKeyD a fallback =
       if compare k a = .eq then fallback else t.getKeyD a fallback := by
   simp_to_model [erase, getKeyD] using List.getKeyD_eraseKey
 
+theorem getKeyV_erase [TransOrd α] [Nonempty α] (h : t.WF) {k a : α} :
+    (t.erase k h.balanced).impl.getKeyV a = if compare k a = .eq then Classical.ofNonempty else t.getKeyV a := by
+  simpa [getKeyV] using getKeyD_erase (α := α) h
+
+
 theorem getKeyD_erase! [TransOrd α] (h : t.WF) {k a fallback : α} :
     (t.erase! k).getKeyD a fallback =
       if compare k a = .eq then fallback else t.getKeyD a fallback := by
   simpa only [erase_eq_erase!] using getKeyD_erase h
 
+theorem getKeyV_erase! [TransOrd α] [Nonempty α] (h : t.WF) {k a : α} :
+    (t.erase! k).getKeyV a = if compare k a = .eq then Classical.ofNonempty else t.getKeyV a := by
+  simpa [getKeyV] using getKeyD_erase! (α := α) h
+
+
 theorem getKeyD_erase_self [TransOrd α] (h : t.WF) {k fallback : α} :
     (t.erase k h.balanced).impl.getKeyD k fallback = fallback := by
   simp_to_model [erase, getKeyD] using List.getKeyD_eraseKey_self
 
+theorem getKeyV_erase_self [TransOrd α] [Nonempty α] (h : t.WF) {k : α} :
+    (t.erase k h.balanced).impl.getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_erase_self (α := α) h
+
+
 theorem getKeyD_erase!_self [TransOrd α] (h : t.WF) {k fallback : α} :
     (t.erase! k).getKeyD k fallback = fallback := by
   simpa only [erase_eq_erase!] using getKeyD_erase_self h
+
+theorem getKeyV_erase!_self [TransOrd α] [Nonempty α] (h : t.WF) {k : α} :
+    (t.erase! k).getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_erase!_self (α := α) h
+
 
 theorem getKey?_eq_some_getKeyD_of_contains [TransOrd α] (h : t.WF) {a fallback : α} :
     t.contains a = true → t.getKey? a = some (t.getKeyD a fallback) := by
@@ -1405,6 +1465,10 @@ theorem getKeyD_eq_getD_getKey? [TransOrd α] (h : t.WF) {a fallback : α} :
     t.getKeyD a fallback = (t.getKey? a).getD fallback := by
   simp_to_model [getKey?, getKeyD] using List.getKeyD_eq_getKey?
 
+theorem getKeyV_eq_getD_getKey? [TransOrd α] [Nonempty α] (h : t.WF) {a : α} :
+    t.getKeyV a = (t.getKey? a).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_eq_getD_getKey? (α := α) h
+
 theorem getKey_eq_getKeyD [TransOrd α] (h : t.WF) {a fallback : α} {h} :
     t.getKey a h = t.getKeyD a fallback := by
   simp_to_model [getKey, getKeyD] using List.getKey_eq_getKeyD
@@ -1414,17 +1478,37 @@ theorem getKey!_eq_getKeyD_default [TransOrd α] [Inhabited α] (h : t.WF)
     t.getKey! a = t.getKeyD a default := by
   simp_to_model [getKey!, getKeyD] using List.getKey!_eq_getKeyD_default
 
+theorem getKeyV_eq_getKeyD_default [TransOrd α] [Nonempty α] (_h : t.WF)
+    {a : α} :
+    t.getKeyV a = t.getKeyD a Classical.ofNonempty := by
+  simp [getKeyV]
+
 theorem getKeyD_congr [TransOrd α] (h : t.WF) {k k' fallback : α} :
     (h' : compare k k' = .eq) → t.getKeyD k fallback = t.getKeyD k' fallback := by
   simp_to_model [getKeyD] using List.getKeyD_congr
+
+theorem getKeyV_congr [TransOrd α] [Nonempty α] (h : t.WF) {k k' : α} :
+    (h' : compare k k' = .eq) → t.getKeyV k = t.getKeyV k' := by
+  simpa [getKeyV] using getKeyD_congr (α := α) h
+
 
 theorem getKeyD_eq_of_contains [TransOrd α] [LawfulEqOrd α] (h : t.WF)
     {k fallback : α} : (h' : t.contains k) → t.getKeyD k fallback = k := by
   simp_to_model [getKeyD, contains] using List.getKeyD_eq_of_containsKey
 
+theorem getKeyV_eq_of_contains [TransOrd α] [LawfulEqOrd α] [Nonempty α]
+    (h : t.WF) {k : α} : (h' : t.contains k) → t.getKeyV k = k := by
+  simpa [getKeyV] using getKeyD_eq_of_contains h
+
+
 theorem getKeyD_eq_of_mem [TransOrd α] [LawfulEqOrd α] (h : t.WF)
     {k fallback : α} (h' : k ∈ t) : t.getKeyD k fallback = k :=
   getKeyD_eq_of_contains h h'
+
+theorem getKeyV_eq_of_mem [TransOrd α] [LawfulEqOrd α] [Nonempty α]
+    (h : t.WF) {k : α} : (h' : k ∈ t) → t.getKeyV k = k := by
+  simpa [getKeyV] using getKeyD_eq_of_mem h
+
 
 /-- This is a restatement of `mem_of_mem_insertIfNew` that is written to exactly match the
 proof obligation in the statement of `get_insertIfNew`. -/
@@ -1608,11 +1692,25 @@ theorem getKeyD_insertIfNew [TransOrd α] (h : t.WF) {k a fallback : α}
       if compare k a = .eq ∧ ¬ k ∈ t then k else t.getKeyD a fallback := by
   simp_to_model [insertIfNew, getKeyD, contains] using List.getKeyD_insertEntryIfNew
 
+theorem getKeyV_insertIfNew [TransOrd α] [Nonempty α] (h : t.WF) {k a : α}
+    {v : β k} :
+    (t.insertIfNew k v h.balanced).impl.getKeyV a =
+      if compare k a = .eq ∧ ¬ k ∈ t then k else t.getKeyV a := by
+  simpa [getKeyV] using getKeyD_insertIfNew h
+
+
 theorem getKeyD_insertIfNew! [TransOrd α] (h : t.WF) {k a fallback : α}
     {v : β k} :
     (t.insertIfNew! k v).getKeyD a fallback =
       if compare k a = .eq ∧ ¬ k ∈ t then k else t.getKeyD a fallback := by
   simpa only [insertIfNew_eq_insertIfNew!] using getKeyD_insertIfNew h
+
+theorem getKeyV_insertIfNew! [TransOrd α] [Nonempty α] (h : t.WF) {k a : α}
+    {v : β k} :
+    (t.insertIfNew! k v).getKeyV a =
+      if compare k a = .eq ∧ ¬ k ∈ t then k else t.getKeyV a := by
+  simpa [getKeyV] using getKeyD_insertIfNew! h
+
 
 /-!
 ### getThenInsertIfNew?
@@ -2353,11 +2451,25 @@ theorem getKeyD_insertMany_list_of_contains_eq_false [TransOrd α] [BEq α] [Law
     (t.insertMany l h.balanced).1.getKeyD k fallback = t.getKeyD k fallback := by
   simp_to_model [insertMany, getKeyD] using List.getKeyD_insertList_of_contains_eq_false
 
+theorem getKeyV_insertMany_list_of_contains_eq_false [TransOrd α] [BEq α] [LawfulBEqOrd α]
+    [Nonempty α] (h : t.WF) {l : List ((a : α) × β a)} {k : α}
+    (h' : (l.map Sigma.fst).contains k = false) :
+    (t.insertMany l h.balanced).1.getKeyV k = t.getKeyV k := by
+  simpa [getKeyV] using getKeyD_insertMany_list_of_contains_eq_false (α := α) h h'
+
+
 theorem getKeyD_insertMany!_list_of_contains_eq_false [TransOrd α] [BEq α] [LawfulBEqOrd α]
     (h : t.WF) {l : List ((a : α) × β a)} {k fallback : α}
     (h' : (l.map Sigma.fst).contains k = false) :
     (t.insertMany! l).1.getKeyD k fallback = t.getKeyD k fallback := by
   simpa only [insertMany_eq_insertMany!] using getKeyD_insertMany_list_of_contains_eq_false h h'
+
+theorem getKeyV_insertMany!_list_of_contains_eq_false [TransOrd α] [BEq α] [LawfulBEqOrd α]
+    [Nonempty α] (h : t.WF) {l : List ((a : α) × β a)} {k : α}
+    (h' : (l.map Sigma.fst).contains k = false) :
+    (t.insertMany! l).1.getKeyV k = t.getKeyV k := by
+  simpa [getKeyV] using getKeyD_insertMany!_list_of_contains_eq_false (α := α) h h'
+
 
 theorem getKeyD_insertMany_list_of_mem [TransOrd α] (h : t.WF)
     {l : List ((a : α) × β a)}
@@ -2367,6 +2479,15 @@ theorem getKeyD_insertMany_list_of_mem [TransOrd α] (h : t.WF)
     (t.insertMany l h.balanced).1.getKeyD k' fallback = k := by
   simp_to_model [insertMany, getKeyD] using List.getKeyD_insertList_of_mem
 
+theorem getKeyV_insertMany_list_of_mem [TransOrd α] [Nonempty α] (h : t.WF)
+    {l : List ((a : α) × β a)}
+    {k k' : α} : (k_beq : compare k k' = .eq) →
+    (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) →
+    (mem : k ∈ l.map Sigma.fst) →
+    (t.insertMany l h.balanced).1.getKeyV k' = k := by
+  simpa [getKeyV] using getKeyD_insertMany_list_of_mem (α := α) h
+
+
 theorem getKeyD_insertMany!_list_of_mem [TransOrd α] (h : t.WF)
     {l : List ((a : α) × β a)}
     {k k' fallback : α} : (k_beq : compare k k' = .eq) →
@@ -2374,6 +2495,15 @@ theorem getKeyD_insertMany!_list_of_mem [TransOrd α] (h : t.WF)
     (mem : k ∈ l.map Sigma.fst) →
     (t.insertMany! l).1.getKeyD k' fallback = k := by
   simpa only [insertMany_eq_insertMany!] using getKeyD_insertMany_list_of_mem h
+
+theorem getKeyV_insertMany!_list_of_mem [TransOrd α] [Nonempty α] (h : t.WF)
+    {l : List ((a : α) × β a)}
+    {k k' : α} : (k_beq : compare k k' = .eq) →
+    (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) →
+    (mem : k ∈ l.map Sigma.fst) →
+    (t.insertMany! l).1.getKeyV k' = k := by
+  simpa [getKeyV] using getKeyD_insertMany!_list_of_mem (α := α) h
+
 
 theorem size_insertMany_list [TransOrd α] [BEq α] [LawfulBEqOrd α] (h : t.WF)
     {l : List ((a : α) × β a)} : (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) →
@@ -2582,11 +2712,25 @@ theorem getKeyD_insertMany_list_of_contains_eq_false [TransOrd α] [BEq α] [Law
     (insertMany t l h.balanced).1.getKeyD k fallback = t.getKeyD k fallback := by
   simp_to_model [Const.insertMany, getKeyD] using List.getKeyD_insertListConst_of_contains_eq_false
 
+theorem getKeyV_insertMany_list_of_contains_eq_false [TransOrd α] [BEq α] [LawfulBEqOrd α]
+    [Nonempty α] (h : t.WF) {l : List (α × β)} {k : α}
+    (h' : (l.map Prod.fst).contains k = false) :
+    (insertMany t l h.balanced).1.getKeyV k = t.getKeyV k := by
+  simpa [getKeyV] using getKeyD_insertMany_list_of_contains_eq_false (α := α) h h'
+
+
 theorem getKeyD_insertMany!_list_of_contains_eq_false [TransOrd α] [BEq α] [LawfulBEqOrd α]
     (h : t.WF) {l : List (α × β)} {k fallback : α}
     (h' : (l.map Prod.fst).contains k = false) :
     (insertMany! t l).1.getKeyD k fallback = t.getKeyD k fallback := by
   simpa only [insertMany_eq_insertMany!] using getKeyD_insertMany_list_of_contains_eq_false h h'
+
+theorem getKeyV_insertMany!_list_of_contains_eq_false [TransOrd α] [BEq α] [LawfulBEqOrd α]
+    [Nonempty α] (h : t.WF) {l : List (α × β)} {k : α}
+    (h' : (l.map Prod.fst).contains k = false) :
+    (insertMany! t l).1.getKeyV k = t.getKeyV k := by
+  simpa [getKeyV] using getKeyD_insertMany!_list_of_contains_eq_false (α := α) h h'
+
 
 theorem getKeyD_insertMany_list_of_mem [TransOrd α] (h : t.WF)
     {l : List (α × β)}
@@ -2596,6 +2740,15 @@ theorem getKeyD_insertMany_list_of_mem [TransOrd α] (h : t.WF)
     (insertMany t l h.balanced).1.getKeyD k' fallback = k := by
   simp_to_model [Const.insertMany, getKeyD] using List.getKeyD_insertListConst_of_mem
 
+theorem getKeyV_insertMany_list_of_mem [TransOrd α] [Nonempty α] (h : t.WF)
+    {l : List (α × β)}
+    {k k' : α} : (k_beq : compare k k' = .eq) →
+    (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) →
+    (mem : k ∈ l.map Prod.fst) →
+    (insertMany t l h.balanced).1.getKeyV k' = k := by
+  simpa [getKeyV] using getKeyD_insertMany_list_of_mem (α := α) h
+
+
 theorem getKeyD_insertMany!_list_of_mem [TransOrd α] (h : t.WF)
     {l : List (α × β)}
     {k k' fallback : α} : (k_beq : compare k k' = .eq) →
@@ -2603,6 +2756,15 @@ theorem getKeyD_insertMany!_list_of_mem [TransOrd α] (h : t.WF)
     (mem : k ∈ l.map Prod.fst) →
     (insertMany! t l).1.getKeyD k' fallback = k := by
   simpa only [insertMany_eq_insertMany!] using getKeyD_insertMany_list_of_mem h
+
+theorem getKeyV_insertMany!_list_of_mem [TransOrd α] [Nonempty α] (h : t.WF)
+    {l : List (α × β)}
+    {k k' : α} : (k_beq : compare k k' = .eq) →
+    (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) →
+    (mem : k ∈ l.map Prod.fst) →
+    (insertMany! t l).1.getKeyV k' = k := by
+  simpa [getKeyV] using getKeyD_insertMany!_list_of_mem (α := α) h
+
 
 theorem size_insertMany_list [TransOrd α] [BEq α] [LawfulBEqOrd α] (h : t.WF)
     {l : List (α × β)} :
@@ -2998,10 +3160,24 @@ theorem getKeyD_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false [BEq α
   simp_to_model [Const.insertManyIfNewUnit, getKeyD, contains] using
     List.getKeyD_insertListIfNewUnit_of_contains_eq_false_of_contains_eq_false
 
+theorem getKeyV_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false [BEq α] [LawfulBEqOrd α]
+    [TransOrd α] [Nonempty α] (h : t.WF) {l : List α} {k : α} :
+    ¬ k ∈ t → l.contains k = false →
+      getKeyV (insertManyIfNewUnit t l h.balanced).1 k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false (α := α) h
+
+
 theorem getKeyD_insertManyIfNewUnit!_list_of_not_mem_of_contains_eq_false [BEq α] [LawfulBEqOrd α]
     [TransOrd α] (h : t.WF) {l : List α} {k fallback : α} :
     ¬ k ∈ t → l.contains k = false → getKeyD (insertManyIfNewUnit! t l).1 k fallback = fallback := by
   simpa only [insertManyIfNewUnit_eq_insertManyIfNewUnit!] using getKeyD_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false h
+
+theorem getKeyV_insertManyIfNewUnit!_list_of_not_mem_of_contains_eq_false [BEq α] [LawfulBEqOrd α]
+    [TransOrd α] [Nonempty α] (h : t.WF) {l : List α} {k : α} :
+    ¬ k ∈ t → l.contains k = false →
+      getKeyV (insertManyIfNewUnit! t l).1 k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_insertManyIfNewUnit!_list_of_not_mem_of_contains_eq_false (α := α) h
+
 
 theorem getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem [TransOrd α]
     (h : t.WF) {l : List α} {k k' fallback : α} : (k_beq : compare k k' = .eq) →
@@ -3010,11 +3186,25 @@ theorem getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem [TransOrd α]
   simp_to_model [Const.insertManyIfNewUnit, getKeyD, contains] using
     List.getKeyD_insertListIfNewUnit_of_contains_eq_false_of_mem
 
+theorem getKeyV_insertManyIfNewUnit_list_of_not_mem_of_mem [TransOrd α]
+    [Nonempty α] (h : t.WF) {l : List α} {k k' : α} : (k_beq : compare k k' = .eq) →
+    ¬ k ∈ t → l.Pairwise (fun a b => ¬ compare a b = .eq) → k ∈ l →
+      getKeyV (insertManyIfNewUnit t l h.balanced).1 k' = k := by
+  simpa [getKeyV] using getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem (α := α) h
+
+
 theorem getKeyD_insertManyIfNewUnit!_list_of_not_mem_of_mem [TransOrd α]
     (h : t.WF) {l : List α} {k k' fallback : α} : (k_beq : compare k k' = .eq) →
     ¬ k ∈ t → l.Pairwise (fun a b => ¬ compare a b = .eq) → k ∈ l →
       getKeyD (insertManyIfNewUnit! t l).1 k' fallback = k := by
   simpa only [insertManyIfNewUnit_eq_insertManyIfNewUnit!] using getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem h
+
+theorem getKeyV_insertManyIfNewUnit!_list_of_not_mem_of_mem [TransOrd α]
+    [Nonempty α] (h : t.WF) {l : List α} {k k' : α} : (k_beq : compare k k' = .eq) →
+    ¬ k ∈ t → l.Pairwise (fun a b => ¬ compare a b = .eq) → k ∈ l →
+      getKeyV (insertManyIfNewUnit! t l).1 k' = k := by
+  simpa [getKeyV] using getKeyD_insertManyIfNewUnit!_list_of_not_mem_of_mem (α := α) h
+
 
 theorem getKeyD_insertManyIfNewUnit_list_of_mem [TransOrd α]
     (h : t.WF) {l : List α} {k fallback : α} :
@@ -3022,10 +3212,22 @@ theorem getKeyD_insertManyIfNewUnit_list_of_mem [TransOrd α]
   simp_to_model [Const.insertManyIfNewUnit, getKeyD, contains] using
     List.getKeyD_insertListIfNewUnit_of_contains
 
+theorem getKeyV_insertManyIfNewUnit_list_of_mem [TransOrd α]
+    [Nonempty α] (h : t.WF) {l : List α} {k : α} :
+    k ∈ t → getKeyV (insertManyIfNewUnit t l h.balanced).1 k = getKeyV t k := by
+  simpa [getKeyV] using getKeyD_insertManyIfNewUnit_list_of_mem (α := α) h
+
+
 theorem getKeyD_insertManyIfNewUnit!_list_of_mem [TransOrd α]
     (h : t.WF) {l : List α} {k fallback : α} :
     k ∈ t → getKeyD (insertManyIfNewUnit! t l).1 k fallback = getKeyD t k fallback := by
   simpa only [insertManyIfNewUnit_eq_insertManyIfNewUnit!] using getKeyD_insertManyIfNewUnit_list_of_mem h
+
+theorem getKeyV_insertManyIfNewUnit!_list_of_mem [TransOrd α]
+    [Nonempty α] (h : t.WF) {l : List α} {k : α} :
+    k ∈ t → getKeyV (insertManyIfNewUnit! t l).1 k = getKeyV t k := by
+  simpa [getKeyV] using getKeyD_insertManyIfNewUnit!_list_of_mem (α := α) h
+
 
 theorem size_insertManyIfNewUnit_list [TransOrd α] [BEq α] [LawfulBEqOrd α] (h : t.WF)
     {l : List α} :
@@ -3253,6 +3455,13 @@ theorem getKeyD_insertMany_empty_list_of_contains_eq_false [TransOrd α] [BEq α
   rw [getKeyD_insertMany_list_of_contains_eq_false WF.empty h]
   apply getKeyD_empty
 
+theorem getKeyV_insertMany_empty_list_of_contains_eq_false [TransOrd α] [BEq α] [LawfulBEqOrd α]
+    [Nonempty α] {l : List ((a : α) × β a)} {k : α}
+    (h : (l.map Sigma.fst).contains k = false) :
+    (insertMany empty l WF.empty.balanced).1.getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_insertMany_empty_list_of_contains_eq_false (α := α) h
+
+
 theorem getKeyD_insertMany_empty_list_of_mem [TransOrd α]
     {l : List ((a : α) × β a)}
     {k k' fallback : α} (k_beq : compare k k' = .eq)
@@ -3260,6 +3469,15 @@ theorem getKeyD_insertMany_empty_list_of_mem [TransOrd α]
     (mem : k ∈ l.map Sigma.fst) :
     (insertMany empty l WF.empty.balanced).1.getKeyD k' fallback = k := by
   rw [getKeyD_insertMany_list_of_mem WF.empty k_beq distinct mem]
+
+theorem getKeyV_insertMany_empty_list_of_mem [TransOrd α] [Nonempty α]
+    {l : List ((a : α) × β a)}
+    {k k' : α} (k_beq : compare k k' = .eq)
+    (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq))
+    (mem : k ∈ l.map Sigma.fst) :
+    (insertMany empty l WF.empty.balanced).1.getKeyV k' = k := by
+  simpa [getKeyV] using getKeyD_insertMany_empty_list_of_mem (α := α) k_beq distinct mem
+
 
 theorem size_insertMany_empty_list [TransOrd α]
     {l : List ((a : α) × β a)} (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) :
@@ -3405,6 +3623,13 @@ theorem getKeyD_insertMany_empty_list_of_contains_eq_false [TransOrd α] [BEq α
   rw [getKeyD_insertMany_list_of_contains_eq_false WF.empty h]
   apply getKeyD_empty
 
+theorem getKeyV_insertMany_empty_list_of_contains_eq_false [TransOrd α] [BEq α] [LawfulBEqOrd α]
+    [Nonempty α] {l : List (α × β)} {k : α}
+    (h : (l.map Prod.fst).contains k = false) :
+    (insertMany (empty : Impl α β) l WF.empty.balanced).1.getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_insertMany_empty_list_of_contains_eq_false (α := α) h
+
+
 theorem getKeyD_insertMany_empty_list_of_mem [TransOrd α]
     {l : List (α × β)}
     {k k' fallback : α} (k_beq : compare k k' = .eq)
@@ -3412,6 +3637,15 @@ theorem getKeyD_insertMany_empty_list_of_mem [TransOrd α]
     (mem : k ∈ l.map Prod.fst) :
     (insertMany (empty : Impl α β) l WF.empty.balanced).1.getKeyD k' fallback = k := by
   rw [getKeyD_insertMany_list_of_mem WF.empty k_beq distinct mem]
+
+theorem getKeyV_insertMany_empty_list_of_mem [TransOrd α] [Nonempty α]
+    {l : List (α × β)}
+    {k k' : α} (k_beq : compare k k' = .eq)
+    (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq))
+    (mem : k ∈ l.map Prod.fst) :
+    (insertMany (empty : Impl α β) l WF.empty.balanced).1.getKeyV k' = k := by
+  simpa [getKeyV] using getKeyD_insertMany_empty_list_of_mem (α := α) k_beq distinct mem
+
 
 theorem size_insertMany_empty_list [TransOrd α]
     {l : List (α × β)} (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) :
@@ -3506,6 +3740,13 @@ theorem getKeyD_insertManyIfNewUnit_empty_list_of_contains_eq_false [TransOrd α
   exact getKeyD_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false
     WF.empty not_mem_empty h'
 
+theorem getKeyV_insertManyIfNewUnit_empty_list_of_contains_eq_false [TransOrd α] [BEq α]
+    [LawfulBEqOrd α] [Nonempty α] {l : List α} {k : α}
+    (h' : l.contains k = false) :
+    getKeyV (insertManyIfNewUnit (empty : Impl α Unit) l WF.empty.balanced).1 k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_insertManyIfNewUnit_empty_list_of_contains_eq_false (α := α) h'
+
+
 theorem getKeyD_insertManyIfNewUnit_empty_list_of_mem [TransOrd α]
     {l : List α} {k k' fallback : α} (k_beq : compare k k' = .eq)
     (distinct : l.Pairwise (fun a b => ¬ compare a b = .eq))
@@ -3513,6 +3754,14 @@ theorem getKeyD_insertManyIfNewUnit_empty_list_of_mem [TransOrd α]
     getKeyD (insertManyIfNewUnit (empty : Impl α Unit) l WF.empty.balanced).1 k' fallback = k := by
   exact getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem WF.empty k_beq
     not_mem_empty distinct mem
+
+theorem getKeyV_insertManyIfNewUnit_empty_list_of_mem [TransOrd α]
+    [Nonempty α] {l : List α} {k k' : α} (k_beq : compare k k' = .eq)
+    (distinct : l.Pairwise (fun a b => ¬ compare a b = .eq))
+    (mem : k ∈ l) :
+    getKeyV (insertManyIfNewUnit (empty : Impl α Unit) l WF.empty.balanced).1 k' = k := by
+  simpa [getKeyV] using getKeyD_insertManyIfNewUnit_empty_list_of_mem (α := α) k_beq distinct mem
+
 
 theorem size_insertManyIfNewUnit_empty_list [TransOrd α]
     {l : List α}
@@ -4052,12 +4301,26 @@ theorem getKeyD_union [TransOrd α] (h₁ : m₁.WF)
     (m₁.union m₂ h₁.balanced h₂.balanced).getKeyD k fallback = m₂.getKeyD k (m₁.getKeyD k fallback) := by
   simp_to_model [union, getKeyD] using getKeyD_insertList
 
+theorem getKeyV_union [Nonempty α] [TransOrd α]
+    (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} :
+    (m₁.union m₂ h₁.balanced h₂.balanced).getKeyV k = m₂.getKeyD k (m₁.getKeyV k) := by
+  simpa [getKeyV] using getKeyD_union (α := α) h₁ h₂
+
+
 theorem getKeyD_union! [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} :
     (m₁.union! m₂).getKeyD k fallback = m₂.getKeyD k (m₁.getKeyD k fallback) := by
   rw [← union_eq_union!]
   apply getKeyD_union h₁ h₂
   all_goals assumption
+
+theorem getKeyV_union! [Nonempty α] [TransOrd α]
+    (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} :
+    (m₁.union! m₂).getKeyV k = m₂.getKeyD k (m₁.getKeyV k) := by
+  simpa [getKeyV] using getKeyD_union! (α := α) h₁ h₂
+
 
 theorem getKeyD_union_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h' : m₁.contains k = false) :
@@ -4070,12 +4333,26 @@ theorem getKeyD_union_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
   . wf_trivial
   . exact h'
 
+theorem getKeyV_union_of_contains_eq_false_left [Nonempty α]
+    [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α}
+    (h' : m₁.contains k = false) :
+    (m₁.union m₂ h₁.balanced h₂.balanced).getKeyV k = m₂.getKeyV k := by
+  simpa [getKeyV] using getKeyD_union_of_contains_eq_false_left (α := α) h₁ h₂ h'
+
+
 theorem getKeyD_union!_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h' : m₁.contains k = false) :
     (m₁.union! m₂).getKeyD k fallback = m₂.getKeyD k fallback := by
   rw [← union_eq_union!]
   apply getKeyD_union_of_contains_eq_false_left h₁ h₂
   all_goals assumption
+
+theorem getKeyV_union!_of_contains_eq_false_left [Nonempty α]
+    [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α}
+    (h' : m₁.contains k = false) :
+    (m₁.union! m₂).getKeyV k = m₂.getKeyV k := by
+  simpa [getKeyV] using getKeyD_union!_of_contains_eq_false_left (α := α) h₁ h₂ h'
+
 
 theorem getKeyD_union_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h' : m₂.contains k = false) :
@@ -4085,12 +4362,26 @@ theorem getKeyD_union_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
   intro h'
   apply List.getKeyD_insertList_of_contains_eq_false_right h'
 
+theorem getKeyV_union_of_contains_eq_false_right [Nonempty α]
+    [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α}
+    (h' : m₂.contains k = false) :
+    (m₁.union m₂ h₁.balanced h₂.balanced).getKeyV k = m₁.getKeyV k := by
+  simpa [getKeyV] using getKeyD_union_of_contains_eq_false_right (α := α) h₁ h₂ h'
+
+
 theorem getKeyD_union!_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h' : m₂.contains k = false) :
     (m₁.union! m₂).getKeyD k fallback = m₁.getKeyD k fallback := by
   rw [← union_eq_union!]
   apply getKeyD_union_of_contains_eq_false_right h₁ h₂
   all_goals assumption
+
+theorem getKeyV_union!_of_contains_eq_false_right [Nonempty α]
+    [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α}
+    (h' : m₂.contains k = false) :
+    (m₁.union! m₂).getKeyV k = m₁.getKeyV k := by
+  simpa [getKeyV] using getKeyD_union!_of_contains_eq_false_right (α := α) h₁ h₂ h'
+
 
 /- getKey! -/
 theorem getKey!_union [Inhabited α] [TransOrd α]
@@ -4754,6 +5045,13 @@ theorem getKeyD_inter [TransOrd α] (h₁ : m₁.WF)
     if m₂.contains k then m₁.getKeyD k fallback else fallback := by
   simp_to_model [inter, getKeyD, contains] using getKeyD_filter_containsKey
 
+theorem getKeyV_inter [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} :
+    (m₁.inter m₂ h₁.balanced).getKeyV k =
+    if m₂.contains k then m₁.getKeyV k else Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_inter (α := α) h₁ h₂
+
+
 theorem getKeyD_inter! [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} :
     (m₁.inter! m₂).getKeyD k fallback =
@@ -4762,11 +5060,24 @@ theorem getKeyD_inter! [TransOrd α] (h₁ : m₁.WF)
   apply getKeyD_inter h₁ h₂
   all_goals wf_trivial
 
+theorem getKeyV_inter! [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} :
+    (m₁.inter! m₂).getKeyV k =
+    if m₂.contains k then m₁.getKeyV k else Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_inter! (α := α) h₁ h₂
+
+
 theorem getKeyD_inter_of_contains_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₂.contains k) :
     (m₁.inter m₂ h₁.balanced).getKeyD k fallback = m₁.getKeyD k fallback := by
   revert h
   simp_to_model [inter, getKeyD, contains] using getKeyD_filter_containsKey_of_containsKey_right
+
+theorem getKeyV_inter_of_contains_right [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₂.contains k) :
+    (m₁.inter m₂ h₁.balanced).getKeyV k = m₁.getKeyV k := by
+  simpa [getKeyV] using getKeyD_inter_of_contains_right (α := α) h₁ h₂ h
+
 
 theorem getKeyD_inter!_of_contains_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₂.contains k) :
@@ -4775,11 +5086,23 @@ theorem getKeyD_inter!_of_contains_right [TransOrd α] (h₁ : m₁.WF)
   apply getKeyD_inter_of_contains_right h₁ h₂
   all_goals wf_trivial
 
+theorem getKeyV_inter!_of_contains_right [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₂.contains k) :
+    (m₁.inter! m₂).getKeyV k = m₁.getKeyV k := by
+  simpa [getKeyV] using getKeyD_inter!_of_contains_right (α := α) h₁ h₂ h
+
+
 theorem getKeyD_inter_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₂.contains k = false) :
     (m₁.inter m₂ h₁.balanced).getKeyD k fallback = fallback := by
   revert h
   simp_to_model [inter, getKeyD, contains] using getKeyD_filter_containsKey_of_containsKey_eq_false_right
+
+theorem getKeyV_inter_of_contains_eq_false_right [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₂.contains k = false) :
+    (m₁.inter m₂ h₁.balanced).getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_inter_of_contains_eq_false_right (α := α) h₁ h₂ h
+
 
 theorem getKeyD_inter!_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₂.contains k = false) :
@@ -4788,11 +5111,23 @@ theorem getKeyD_inter!_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
   apply getKeyD_inter_of_contains_eq_false_right h₁ h₂
   all_goals wf_trivial
 
+theorem getKeyV_inter!_of_contains_eq_false_right [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₂.contains k = false) :
+    (m₁.inter! m₂).getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_inter!_of_contains_eq_false_right (α := α) h₁ h₂ h
+
+
 theorem getKeyD_inter_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₁.contains k = false) :
     (m₁.inter m₂ h₁.balanced).getKeyD k fallback = fallback := by
   revert h
   simp_to_model [inter, getKeyD, contains] using getKeyD_filter_containsKey_of_containsKey_eq_false_left
+
+theorem getKeyV_inter_of_contains_eq_false_left [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₁.contains k = false) :
+    (m₁.inter m₂ h₁.balanced).getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_inter_of_contains_eq_false_left (α := α) h₁ h₂ h
+
 
 theorem getKeyD_inter!_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₁.contains k = false) :
@@ -4800,6 +5135,12 @@ theorem getKeyD_inter!_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
   rw [← inter_eq_inter!]
   apply getKeyD_inter_of_contains_eq_false_left h₁ h₂
   all_goals wf_trivial
+
+theorem getKeyV_inter!_of_contains_eq_false_left [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₁.contains k = false) :
+    (m₁.inter! m₂).getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_inter!_of_contains_eq_false_left (α := α) h₁ h₂ h
+
 
 /- getKey! -/
 theorem getKey!_inter [Inhabited α] [TransOrd α] (h₁ : m₁.WF)
@@ -5556,6 +5897,13 @@ theorem getKeyD_diff [TransOrd α] (h₁ : m₁.WF)
     if m₂.contains k then fallback else m₁.getKeyD k fallback := by
   simp_to_model [diff, getKeyD, contains] using List.getKeyD_filter_not_contains_map_fst
 
+theorem getKeyV_diff [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} :
+    (m₁.diff m₂ h₁.balanced).getKeyV k =
+    if m₂.contains k then Classical.ofNonempty else m₁.getKeyV k := by
+  simpa [getKeyV] using getKeyD_diff (α := α) h₁ h₂
+
+
 theorem getKeyD_diff! [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} :
     (m₁.diff! m₂).getKeyD k fallback =
@@ -5564,11 +5912,24 @@ theorem getKeyD_diff! [TransOrd α] (h₁ : m₁.WF)
   apply getKeyD_diff h₁ h₂
   all_goals wf_trivial
 
+theorem getKeyV_diff! [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} :
+    (m₁.diff! m₂).getKeyV k =
+    if m₂.contains k then Classical.ofNonempty else m₁.getKeyV k := by
+  simpa [getKeyV] using getKeyD_diff! (α := α) h₁ h₂
+
+
 theorem getKeyD_diff_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₂.contains k = false) :
     (m₁.diff m₂ h₁.balanced).getKeyD k fallback = m₁.getKeyD k fallback := by
   revert h
   simp_to_model [contains, diff, getKeyD] using List.getKeyD_filter_not_contains_map_fst_of_contains_eq_false_right
+
+theorem getKeyV_diff_of_contains_eq_false_right [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₂.contains k = false) :
+    (m₁.diff m₂ h₁.balanced).getKeyV k = m₁.getKeyV k := by
+  simpa [getKeyV] using getKeyD_diff_of_contains_eq_false_right (α := α) h₁ h₂ h
+
 
 theorem getKeyD_diff!_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₂.contains k = false) :
@@ -5577,11 +5938,23 @@ theorem getKeyD_diff!_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
   apply getKeyD_diff_of_contains_eq_false_right h₁ h₂
   all_goals wf_trivial
 
+theorem getKeyV_diff!_of_contains_eq_false_right [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₂.contains k = false) :
+    (m₁.diff! m₂).getKeyV k = m₁.getKeyV k := by
+  simpa [getKeyV] using getKeyD_diff!_of_contains_eq_false_right (α := α) h₁ h₂ h
+
+
 theorem getKeyD_diff_of_contains_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₂.contains k) :
     (m₁.diff m₂ h₁.balanced).getKeyD k fallback = fallback := by
   revert h
   simp_to_model [diff, getKeyD, contains] using List.getKeyD_filter_not_contains_map_fst_of_contains_right
+
+theorem getKeyV_diff_of_contains_right [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₂.contains k) :
+    (m₁.diff m₂ h₁.balanced).getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_diff_of_contains_right (α := α) h₁ h₂ h
+
 
 theorem getKeyD_diff!_of_contains_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₂.contains k) :
@@ -5590,11 +5963,23 @@ theorem getKeyD_diff!_of_contains_right [TransOrd α] (h₁ : m₁.WF)
   apply getKeyD_diff_of_contains_right h₁ h₂
   all_goals wf_trivial
 
+theorem getKeyV_diff!_of_contains_right [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₂.contains k) :
+    (m₁.diff! m₂).getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_diff!_of_contains_right (α := α) h₁ h₂ h
+
+
 theorem getKeyD_diff_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₁.contains k = false) :
     (m₁.diff m₂ h₁.balanced).getKeyD k fallback = fallback := by
   revert h
   simp_to_model [diff, getKeyD, contains] using getKeyD_filter_not_contains_map_fst_of_contains_eq_false_left
+
+theorem getKeyV_diff_of_contains_eq_false_left [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₁.contains k = false) :
+    (m₁.diff m₂ h₁.balanced).getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_diff_of_contains_eq_false_left (α := α) h₁ h₂ h
+
 
 theorem getKeyD_diff!_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h : m₁.contains k = false) :
@@ -5602,6 +5987,12 @@ theorem getKeyD_diff!_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
   rw [← diff_eq_diff!]
   apply getKeyD_diff_of_contains_eq_false_left h₁ h₂
   all_goals wf_trivial
+
+theorem getKeyV_diff!_of_contains_eq_false_left [Nonempty α] [TransOrd α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (h : m₁.contains k = false) :
+    (m₁.diff! m₂).getKeyV k = Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_diff!_of_contains_eq_false_left (α := α) h₁ h₂ h
+
 
 /- getKey! -/
 theorem getKey!_diff [Inhabited α] [TransOrd α] (h₁ : m₁.WF)
@@ -6329,6 +6720,16 @@ theorem getKeyD_alter [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k k' fallback :
         t.getKeyD k' fallback := by
   simp_to_model [alter, getKeyD, get?] using List.getKeyD_alterKey
 
+theorem getKeyV_alter [TransOrd α] [LawfulEqOrd α] [Nonempty α] (h : t.WF) {k k' : α}
+    {f : Option (β k) → Option (β k)} :
+    (t.alter k f h.balanced).1.getKeyV k' =
+      if compare k k' = .eq then
+        if (f (t.get? k)).isSome then k else Classical.ofNonempty
+      else
+        t.getKeyV k' := by
+  simpa [getKeyV] using getKeyD_alter (α := α) h
+
+
 theorem getKeyD_alter! [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k k' fallback : α}
     {f : Option (β k) → Option (β k)} :
     (t.alter! k f).getKeyD k' fallback =
@@ -6338,6 +6739,15 @@ theorem getKeyD_alter! [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k k' fallback 
         t.getKeyD k' fallback := by
   simpa only [alter_eq_alter!] using getKeyD_alter h
 
+theorem getKeyV_alter! [TransOrd α] [LawfulEqOrd α] [Nonempty α] (h : t.WF) {k k' : α}
+    {f : Option (β k) → Option (β k)} : (t.alter! k f).getKeyV k' =
+      if compare k k' = .eq then
+        if (f (t.get? k)).isSome then k else Classical.ofNonempty
+      else
+        t.getKeyV k' := by
+  simpa [getKeyV] using getKeyD_alter! (α := α) h
+
+
 @[simp]
 theorem getKeyD_alter_self [TransOrd α] [LawfulEqOrd α] [Inhabited α] (h : t.WF) {k : α}
     {fallback : α} {f : Option (β k) → Option (β k)} :
@@ -6345,11 +6755,23 @@ theorem getKeyD_alter_self [TransOrd α] [LawfulEqOrd α] [Inhabited α] (h : t.
       if (f (t.get? k)).isSome then k else fallback := by
   simp [getKeyD_alter h]
 
+theorem getKeyV_alter_self [TransOrd α] [LawfulEqOrd α] [Nonempty α] (h : t.WF) {k : α}
+    {f : Option (β k) → Option (β k)} :
+    (t.alter k f h.balanced).1.getKeyV k = if (f (t.get? k)).isSome then k else Classical.ofNonempty := by
+  simp [getKeyV_alter h]
+
+
 @[simp]
 theorem getKeyD_alter!_self [TransOrd α] [LawfulEqOrd α] [Inhabited α] (h : t.WF) {k : α}
     {fallback : α} {f : Option (β k) → Option (β k)} :
     (t.alter! k f).getKeyD k fallback = if (f (t.get? k)).isSome then k else fallback := by
   simpa only [alter_eq_alter!] using getKeyD_alter_self h
+
+theorem getKeyV_alter!_self [TransOrd α] [LawfulEqOrd α] [Nonempty α] (h : t.WF) {k : α}
+    {f : Option (β k) → Option (β k)} :
+    (t.alter! k f).getKeyV k = if (f (t.get? k)).isSome then k else Classical.ofNonempty := by
+  simpa only [alter_eq_alter!] using getKeyV_alter_self h
+
 
 namespace Const
 
@@ -6732,6 +7154,15 @@ theorem getKeyD_alter [TransOrd α] (h : t.WF) {k k' fallback : α} {f : Option 
         t.getKeyD k' fallback := by
   simp_to_model [Const.alter, getKeyD, Const.get?] using List.Const.getKeyD_alterKey
 
+theorem getKeyV_alter [TransOrd α] [Nonempty α] (h : t.WF) {k k' : α} {f : Option β → Option β} :
+    (alter k f t h.balanced).1.getKeyV k' =
+      if compare k k' = .eq then
+        if (f (get? t k)).isSome then k else Classical.ofNonempty
+      else
+        t.getKeyV k' := by
+  simpa [getKeyV] using getKeyD_alter (α := α) h
+
+
 theorem getKeyD_alter! [TransOrd α] (h : t.WF) {k k' fallback : α} {f : Option β → Option β} :
     (alter! k f t).getKeyD k' fallback =
       if compare k k' = .eq then
@@ -6740,6 +7171,15 @@ theorem getKeyD_alter! [TransOrd α] (h : t.WF) {k k' fallback : α} {f : Option
         t.getKeyD k' fallback := by
   simpa only [alter_eq_alter!] using getKeyD_alter h
 
+theorem getKeyV_alter! [TransOrd α] [Nonempty α] (h : t.WF) {k k' : α} {f : Option β → Option β} :
+    (alter! k f t).getKeyV k' =
+      if compare k k' = .eq then
+        if (f (get? t k)).isSome then k else Classical.ofNonempty
+      else
+        t.getKeyV k' := by
+  simpa [getKeyV] using getKeyD_alter! (α := α) h
+
+
 @[simp]
 theorem getKeyD_alter_self [TransOrd α] [Inhabited α] (h : t.WF) {k : α} {fallback : α}
     {f : Option β → Option β} :
@@ -6747,11 +7187,22 @@ theorem getKeyD_alter_self [TransOrd α] [Inhabited α] (h : t.WF) {k : α} {fal
       if (f (get? t k)).isSome then k else fallback := by
   simp [getKeyD_alter h]
 
+theorem getKeyV_alter_self [TransOrd α] [Nonempty α] (h : t.WF) {k : α} {f : Option β → Option β} :
+    (alter k f t h.balanced).1.getKeyV k = if (f (get? t k)).isSome then k else Classical.ofNonempty := by
+  simp [getKeyV_alter h]
+
+
 @[simp]
 theorem getKeyD_alter!_self [TransOrd α] [Inhabited α] (h : t.WF) {k : α} {fallback : α}
     {f : Option β → Option β} :
     (alter! k f t).getKeyD k fallback = if (f (get? t k)).isSome then k else fallback := by
   simpa only [alter_eq_alter!] using getKeyD_alter_self h
+
+theorem getKeyV_alter!_self [TransOrd α] [Nonempty α] (h : t.WF) {k : α}
+    {f : Option β → Option β} :
+    (alter! k f t).getKeyV k = if (f (get? t k)).isSome then k else Classical.ofNonempty := by
+  simpa only [alter_eq_alter!] using getKeyV_alter_self h
+
 
 end Const
 
@@ -6884,9 +7335,23 @@ theorem getKeyD_modify (h : t.WF) {k k' fallback : α} {f : β k → β k} :
         t.getKeyD k' fallback := by
   simp_to_model [modify, getKeyD, contains] using List.getKeyD_modifyKey
 
+theorem getKeyV_modify (h : t.WF) [Nonempty α] {k k' : α} {f : β k → β k} :
+    (t.modify k f).getKeyV k' =
+      if compare k k' = .eq then
+        if k ∈ t then k else Classical.ofNonempty
+      else
+        t.getKeyV k' := by
+  simpa [getKeyV] using getKeyD_modify (α := α) h
+
+
 theorem getKeyD_modify_self (h : t.WF) [Inhabited α] {k fallback : α} {f : β k → β k} :
     (t.modify k f).getKeyD k fallback = if k ∈ t then k else fallback := by
   simp_to_model [modify, getKeyD, contains] using List.getKeyD_modifyKey_self
+
+theorem getKeyV_modify_self (h : t.WF) [Nonempty α] {k : α} {f : β k → β k} :
+    (t.modify k f).getKeyV k = if k ∈ t then k else Classical.ofNonempty := by
+  simp [getKeyV_modify h]
+
 
 end Dependent
 
@@ -7013,9 +7478,23 @@ theorem getKeyD_modify (h : t.WF) {k k' fallback : α} {f : β → β} :
         t.getKeyD k' fallback := by
   simp_to_model [Const.modify, getKeyD, contains] using List.Const.getKeyD_modifyKey
 
+theorem getKeyV_modify (h : t.WF) [Nonempty α] {k k' : α} {f : β → β} :
+    (modify k f t).getKeyV k' =
+      if compare k k' = .eq then
+        if k ∈ t then k else Classical.ofNonempty
+      else
+        t.getKeyV k' := by
+  simpa [getKeyV] using getKeyD_modify (α := α) h
+
+
 theorem getKeyD_modify_self (h : t.WF) [Inhabited α] {k fallback : α} {f : β → β} :
     (modify k f t).getKeyD k fallback = if k ∈ t then k else fallback := by
   simp_to_model [Const.modify, getKeyD, contains] using List.Const.getKeyD_modifyKey_self
+
+theorem getKeyV_modify_self (h : t.WF) [Nonempty α] {k : α} {f : β → β} :
+    (modify k f t).getKeyV k = if k ∈ t then k else Classical.ofNonempty := by
+  simp [getKeyV_modify h]
+
 
 end Const
 
@@ -7246,6 +7725,11 @@ theorem getKeyD_minKey? [TransOrd α] (h : t.WF) {km fallback} :
     (hkm : t.minKey? = some km) → t.getKeyD km fallback = km := by
   simp_to_model [minKey?, getKeyD] using List.getKeyD_minKey?
 
+theorem getKeyV_minKey? [TransOrd α] [Nonempty α] (h : t.WF) {km} :
+    (hkm : t.minKey? = some km) → t.getKeyV km = km := by
+  simpa [getKeyV] using getKeyD_minKey? (α := α) h
+
+
 @[simp]
 theorem minKey?_bind_getKey? [TransOrd α] (h : t.WF) :
     t.minKey?.bind t.getKey? = t.minKey? := by
@@ -7463,6 +7947,11 @@ theorem getKeyD_minKey [TransOrd α] (h : t.WF) {he fallback} :
     t.getKeyD (t.minKey he) fallback = t.minKey he := by
   simp_to_model [getKeyD, minKey] using List.getKeyD_minKey
 
+theorem getKeyV_minKey [TransOrd α] [Nonempty α] (h : t.WF) {he} :
+    t.getKeyV (t.minKey he) = t.minKey he := by
+  simpa [getKeyV] using getKeyD_minKey (α := α) h
+
+
 theorem minKey_erase_eq_iff_not_compare_eq_minKey [TransOrd α] (h : t.WF) {k he} :
     (t.erase k h.balanced |>.impl.minKey he) =
         t.minKey (isEmpty_eq_false_of_isEmpty_erase_eq_false h he) ↔
@@ -7635,6 +8124,11 @@ theorem getKeyD_minKey! [TransOrd α] [Inhabited α] (h : t.WF) :
     (he : t.isEmpty = false) → ∀ {fallback},
     t.getKeyD t.minKey! fallback = t.minKey! := by
   simp_to_model [minKey!, getKeyD, isEmpty] using List.getKeyD_minKey!
+
+theorem getKeyV_minKey! [TransOrd α] [Inhabited α] (h : t.WF) :
+    (he : t.isEmpty = false) → t.getKeyV t.minKey! = t.minKey! := by
+  intro he; simpa [getKeyV] using getKeyD_minKey! (α := α) h he
+
 
 theorem minKey!_erase_eq_iff_not_compare_minKey!_eq [TransOrd α] [Inhabited α] (h : t.WF) :
     ∀ {k}, (he : (t.erase k h.balanced).impl.isEmpty = false) →
@@ -7854,6 +8348,12 @@ theorem getKeyD_minKeyD [TransOrd α] (h : t.WF) :
     (he : t.isEmpty = false) → ∀ {fallback fallback'},
     t.getKeyD (t.minKeyD fallback) fallback' = t.minKeyD fallback := by
   simp_to_model [minKeyD, getKeyD, isEmpty] using List.getKeyD_minKeyD
+
+theorem getKeyV_minKeyD [TransOrd α] [Nonempty α] (h : t.WF) :
+    (he : t.isEmpty = false) → ∀ {fallback},
+    t.getKeyV (t.minKeyD fallback) = (t.minKeyD fallback) := by
+  intro he; intro; simpa [getKeyV] using getKeyD_minKeyD (α := α) h he
+
 
 theorem minKeyD_erase_eq_iff_not_compare_minKeyD_eq [TransOrd α] (h : t.WF) :
     ∀ {k fallback}, (he : (t.erase k h.balanced).impl.isEmpty = false) →
@@ -8100,6 +8600,11 @@ theorem getKeyD_maxKey? [TransOrd α] (h : t.WF) {km fallback} :
     (hkm : t.maxKey? = some km) → t.getKeyD km fallback = km := by
   simp_to_model [maxKey?, getKeyD] using List.getKeyD_maxKey?
 
+theorem getKeyV_maxKey? [TransOrd α] [Nonempty α] (h : t.WF) {km} :
+    (hkm : t.maxKey? = some km) → t.getKeyV km = km := by
+  simpa [getKeyV] using getKeyD_maxKey? (α := α) h
+
+
 @[simp]
 theorem maxKey?_bind_getKey? [TransOrd α] (h : t.WF) :
     t.maxKey?.bind t.getKey? = t.maxKey? := by
@@ -8313,6 +8818,11 @@ theorem getKeyD_maxKey [TransOrd α] (h : t.WF) {he fallback} :
     t.getKeyD (t.maxKey he) fallback = t.maxKey he := by
   simp_to_model [getKeyD, maxKey] using List.getKeyD_maxKey
 
+theorem getKeyV_maxKey [TransOrd α] [Nonempty α] (h : t.WF) {he} :
+    t.getKeyV (t.maxKey he) = t.maxKey he := by
+  simpa [getKeyV] using getKeyD_maxKey (α := α) h
+
+
 theorem maxKey_erase_eq_iff_not_compare_eq_maxKey [TransOrd α] (h : t.WF) {k he} :
     (t.erase k h.balanced |>.impl.maxKey he) =
         t.maxKey (isEmpty_eq_false_of_isEmpty_erase_eq_false h he) ↔
@@ -8484,6 +8994,11 @@ theorem getKeyD_maxKey! [TransOrd α] [Inhabited α] (h : t.WF) :
     (he : t.isEmpty = false) → ∀ {fallback},
     t.getKeyD t.maxKey! fallback = t.maxKey! := by
   simp_to_model [maxKey!, getKeyD, isEmpty] using List.getKeyD_maxKey!
+
+theorem getKeyV_maxKey! [TransOrd α] [Inhabited α] (h : t.WF) :
+    (he : t.isEmpty = false) → t.getKeyV t.maxKey! = t.maxKey! := by
+  intro he; simpa [getKeyV] using getKeyD_maxKey! (α := α) h he
+
 
 theorem maxKey!_erase_eq_iff_not_compare_maxKey!_eq [TransOrd α] [Inhabited α] (h : t.WF) :
     ∀ {k}, (he : (t.erase k h.balanced).impl.isEmpty = false) →
@@ -8704,6 +9219,12 @@ theorem getKeyD_maxKeyD [TransOrd α] (h : t.WF) :
     t.getKeyD (t.maxKeyD fallback) fallback' = t.maxKeyD fallback := by
   simp_to_model [maxKeyD, getKeyD, isEmpty] using List.getKeyD_maxKeyD
 
+theorem getKeyV_maxKeyD [TransOrd α] [Nonempty α] (h : t.WF) :
+    (he : t.isEmpty = false) → ∀ {fallback},
+    t.getKeyV (t.maxKeyD fallback) = (t.maxKeyD fallback) := by
+  intro he; intro; simpa [getKeyV] using getKeyD_maxKeyD (α := α) h he
+
+
 theorem maxKeyD_erase_eq_iff_not_compare_maxKeyD_eq [TransOrd α] (h : t.WF) :
     ∀ {k fallback}, (he : (t.erase k h.balanced).impl.isEmpty = false) →
     (t.erase k h.balanced |>.impl.maxKeyD <| fallback) = t.maxKeyD fallback ↔
@@ -8892,6 +9413,11 @@ theorem getKey!_eq [TransOrd α] [Inhabited α] (h₁ : t₁.WF) (h₂ : t₂.WF
 theorem getKeyD_eq [TransOrd α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂)
     {k fallback : α} : t₁.getKeyD k fallback = t₂.getKeyD k fallback := by
   simp_to_model [getKeyD] using List.getKeyD_of_perm _ h.1
+
+theorem getKeyV_eq [TransOrd α] [Nonempty α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂)
+    {k : α} : t₁.getKeyV k = t₂.getKeyV k := by
+  simpa [getKeyV] using getKeyD_eq (α := α) h₁ h₂ h
+
 
 theorem toList_eq [TransOrd α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁.toList = t₂.toList := by
   simp_to_model [toList] using h.toListModel_eq
@@ -9876,12 +10402,28 @@ theorem getKeyD_filterMap [TransOrd α] [LawfulEqOrd α]
       (f x (t.get x (mem_of_getKey?_eq_some h h'))).isSome)).getD fallback := by
   simp_to_model [filterMap, getKeyD, getKey?, get] using List.getKeyD_filterMap
 
+theorem getKeyV_filterMap [TransOrd α] [LawfulEqOrd α] [Nonempty α]
+    {f : (a : α) → β a → Option (γ a)} {k : α} (h : t.WF) :
+    (t.filterMap f h.balanced).1.getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (t.get x (mem_of_getKey?_eq_some h h'))).isSome)).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_filterMap (α := α) h
+
+
 theorem getKeyD_filterMap! [TransOrd α] [LawfulEqOrd α]
     {f : (a : α) → β a → Option (γ a)} {k fallback : α} (h : t.WF) :
     (t.filterMap! f).getKeyD k fallback =
     ((t.getKey? k).pfilter (fun x h' =>
       (f x (t.get x (mem_of_getKey?_eq_some h h'))).isSome)).getD fallback := by
   simpa only [filter_eq_filter!, filterMap_eq_filterMap!] using getKeyD_filterMap h
+
+theorem getKeyV_filterMap! [TransOrd α] [LawfulEqOrd α] [Nonempty α]
+    {f : (a : α) → β a → Option (γ a)} {k : α} (h : t.WF) :
+    (t.filterMap! f).getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (t.get x (mem_of_getKey?_eq_some h h'))).isSome)).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_filterMap! (α := α) h
+
 
 namespace Const
 
@@ -10101,12 +10643,28 @@ theorem getKeyD_filterMap [TransOrd α]
       (f x (Const.get t x (mem_of_getKey?_eq_some h h'))).isSome)).getD fallback := by
   simp_to_model [filterMap, Const.get, getKey?, getKeyD] using List.Const.getKeyD_filterMap
 
+theorem getKeyV_filterMap [TransOrd α] [Nonempty α]
+    {f : α → β → Option γ} {k : α} (h : t.WF) :
+    (t.filterMap f h.balanced).1.getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (Const.get t x (mem_of_getKey?_eq_some h h'))).isSome)).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_filterMap (α := α) h
+
+
 theorem getKeyD_filterMap! [TransOrd α]
     {f : α → β → Option γ} {k fallback : α} (h : t.WF) :
     (t.filterMap! f).getKeyD k fallback =
     ((t.getKey? k).pfilter (fun x h' =>
       (f x (Const.get t x (mem_of_getKey?_eq_some h h'))).isSome)).getD fallback := by
   simpa only [filter_eq_filter!, filterMap_eq_filterMap!] using getKeyD_filterMap h
+
+theorem getKeyV_filterMap! [TransOrd α] [Nonempty α]
+    {f : α → β → Option γ} {k : α} (h : t.WF) :
+    (t.filterMap! f).getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (Const.get t x (mem_of_getKey?_eq_some h h'))).isSome)).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_filterMap! (α := α) h
+
 
 end Const
 
@@ -10435,6 +10993,14 @@ theorem getKeyD_filter [TransOrd α] [LawfulEqOrd α]
       f x (t.get x (mem_of_getKey?_eq_some h h')))).getD fallback := by
   simp_to_model [filter, getKey?, get, getKeyD] using List.getKeyD_filter
 
+theorem getKeyV_filter [TransOrd α] [LawfulEqOrd α] [Nonempty α]
+    {f : (a : α) → β a → Bool} {k : α} (h : t.WF) :
+    (t.filter f h.balanced).1.getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      f x (t.get x (mem_of_getKey?_eq_some h h')))).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_filter (α := α) h
+
+
 theorem getKeyD_filter! [TransOrd α] [LawfulEqOrd α]
     {f : (a : α) → β a → Bool} {k fallback : α} (h : t.WF) :
     (t.filter! f).getKeyD k fallback =
@@ -10442,15 +11008,35 @@ theorem getKeyD_filter! [TransOrd α] [LawfulEqOrd α]
       f x (t.get x (mem_of_getKey?_eq_some h h')))).getD fallback := by
   simpa only [filter_eq_filter!] using getKeyD_filter h
 
+theorem getKeyV_filter! [TransOrd α] [LawfulEqOrd α] [Nonempty α]
+    {f : (a : α) → β a → Bool} {k : α} (h : t.WF) :
+    (t.filter! f).getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      f x (t.get x (mem_of_getKey?_eq_some h h')))).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_filter! (α := α) h
+
+
 theorem getKeyD_filter_key [TransOrd α]
     {f : α → Bool} {k fallback : α} (h : t.WF) :
     (t.filter (fun k _ => f k) h.balanced).1.getKeyD k fallback = ((t.getKey? k).filter f).getD fallback := by
   simp_to_model [filter, getKey?, get, getKeyD] using List.getKeyD_filter_key
 
+theorem getKeyV_filter_key [TransOrd α] [Nonempty α]
+    {f : α → Bool} {k : α} (h : t.WF) :
+    (t.filter (fun k _ => f k) h.balanced).1.getKeyV k = ((t.getKey? k).filter f).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_filter_key (α := α) h
+
+
 theorem getKeyD_filter!_key [TransOrd α]
     {f : α → Bool} {k fallback : α} (h : t.WF) :
     (t.filter! (fun k _ => f k)).getKeyD k fallback = ((t.getKey? k).filter f).getD fallback := by
   simpa only [filter_eq_filter!] using getKeyD_filter_key h
+
+theorem getKeyV_filter!_key [TransOrd α] [Nonempty α]
+    {f : α → Bool} {k : α} (h : t.WF) :
+    (t.filter! (fun k _ => f k)).getKeyV k = ((t.getKey? k).filter f).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_filter!_key (α := α) h
+
 
 namespace Const
 
@@ -10703,12 +11289,28 @@ theorem getKeyD_filter [TransOrd α]
       (f x (Const.get t x (mem_of_getKey?_eq_some h h'))))).getD fallback := by
   simp_to_model [filter, getKeyD, getKey?, Const.get] using List.Const.getKeyD_filter
 
+theorem getKeyV_filter [TransOrd α] [Nonempty α]
+    {f : α → β → Bool} {k : α} (h : t.WF) :
+    (t.filter f h.balanced).1.getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (Const.get t x (mem_of_getKey?_eq_some h h'))))).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_filter (α := α) h
+
+
 theorem getKeyD_filter! [TransOrd α]
     {f : α → β → Bool} {k fallback : α} (h : t.WF) :
     (t.filter! f).getKeyD k fallback =
     ((t.getKey? k).pfilter (fun x h' =>
       (f x (Const.get t x (mem_of_getKey?_eq_some h h'))))).getD fallback := by
   simpa only [filter_eq_filter!] using getKeyD_filter h
+
+theorem getKeyV_filter! [TransOrd α] [Nonempty α]
+    {f : α → β → Bool} {k : α} (h : t.WF) :
+    (t.filter! f).getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (Const.get t x (mem_of_getKey?_eq_some h h'))))).getD Classical.ofNonempty := by
+  simpa [getKeyV] using getKeyD_filter! (α := α) h
+
 
 end Const
 
@@ -10805,6 +11407,12 @@ theorem getKeyD_map [TransOrd α]
     {f : (a : α) → β a → γ a} {k fallback : α} (h : t.WF) :
     (t.map f).getKeyD k fallback = t.getKeyD k fallback := by
   simp_to_model [map, getKeyD] using List.getKeyD_map
+
+theorem getKeyV_map [TransOrd α] [Nonempty α]
+    {f : (a : α) → β a → γ a} {k : α} (h : t.WF) :
+    (t.map f).getKeyV k = t.getKeyV k := by
+  simpa [getKeyV] using getKeyD_map (α := α) h
+
 
 namespace Const
 

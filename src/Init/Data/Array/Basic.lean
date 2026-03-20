@@ -90,11 +90,14 @@ theorem ext' {xs ys : Array α} (h : xs.toList = ys.toList) : xs = ys := by
 
 @[simp, grind =] theorem toArray_toList {xs : Array α} : xs.toList.toArray = xs := rfl
 
-@[simp, grind =] theorem getElem_toList {xs : Array α} {i : Nat} (h : i < xs.size) : xs.toList[i] = xs[i] := rfl
+theorem getElem_toList {xs : Array α} {i : Nat} (h : i < xs.size) : xs.toList[i] = xs[i] := rfl
 
 @[simp, grind =] theorem getElem?_toList {xs : Array α} {i : Nat} : xs.toList[i]? = xs[i]? := by
   simp only [getElem?_def, getElem_toList]
   simp only [Array.size]
+
+@[simp, grind =] theorem getElemV_toList {_ : Nonempty α} {xs : Array α} {i : Nat} : xs.toList｢i｣ = xs｢i｣ := by
+  simp [getElemV_def, getElem?_toList]
 
 /-- `a ∈ as` is a predicate which asserts that `a` is in the array `as`. -/
 -- NB: This is defined as a structure rather than a plain def so that a lemma
@@ -134,15 +137,19 @@ theorem toList_toArray {as : List α} : as.toArray.toList = as := rfl
 
 @[simp, grind =] theorem size_toArray {as : List α} : as.toArray.size = as.length := by simp [Array.size]
 
-@[simp, grind =] theorem getElem_toArray {xs : List α} {i : Nat} (h : i < xs.toArray.size) :
+theorem getElem_toArray {xs : List α} {i : Nat} (h : i < xs.toArray.size) :
     xs.toArray[i] = xs[i]'(by simpa using h) := rfl
 
 @[simp, grind =] theorem getElem?_toArray {xs : List α} {i : Nat} : xs.toArray[i]? = xs[i]? := by
-  simp [getElem?_def]
+  simp only [getElem?_def, getElem_toArray, size_toArray]
 
 @[simp, grind =] theorem getElem!_toArray [Inhabited α] {xs : List α} {i : Nat} :
     xs.toArray[i]! = xs[i]! := by
   simp [getElem!_def]
+
+@[simp, grind =] theorem getElemV_toArray [Nonempty α] {xs : List α} {i : Nat} :
+    xs.toArray｢i｣ = xs｢i｣ := by
+  simp [getElemV_def, getElem?_toArray]
 
 end List
 
@@ -403,6 +410,18 @@ that requires a proof the array is non-empty.
 @[inline]
 def back? (xs : Array α) : Option α :=
   xs[xs.size - 1]?
+
+/--
+Returns the last element of an array, or `Classical.ofNonempty` if the array is empty.
+
+This is the noncomputable analogue of `Array.back!` that requires only `Nonempty α` instead of
+`Inhabited α`.
+
+See `Array.back` for the version with a proof the array is non-empty, `Array.back!` for the version
+that panics, and `Array.back?` for the version that returns an option.
+-/
+noncomputable def backV [Nonempty α] (xs : Array α) : α :=
+  xs.getD (xs.size - 1) Classical.ofNonempty
 
 /--
 Swaps a new element with the element at the given index.

@@ -127,11 +127,16 @@ namespace Array
 
 /-! ### zipIdx -/
 
-@[simp, grind =] theorem getElem_zipIdx {xs : Array α} {k : Nat} {i : Nat} (h : i < (xs.zipIdx k).size) :
+theorem getElem_zipIdx {xs : Array α} {k : Nat} {i : Nat} (h : i < (xs.zipIdx k).size) :
     (xs.zipIdx k)[i] = (xs[i]'(by simp_all), k + i) := by
   simp [zipIdx]
 
-
+@[simp, grind =]
+theorem getElemV_zipIdx {xs : Array α} {k : Nat} {i : Nat} (h : i < (xs.zipIdx k).size) :
+    haveI : Nonempty (α × Nat) := ⟨(xs[i]'(by simp_all), k + i)⟩
+    (xs.zipIdx k)｢i｣ = (xs｢i｣, k + i) := by
+  haveI : Nonempty (α × Nat) := ⟨(xs[i]'(by simp_all), k + i)⟩
+  simp [getElemV_pos _ _ h, getElem_zipIdx h, getElem_eq_getElemV]
 
 @[simp, grind =] theorem zipIdx_toArray {l : List α} {k : Nat} :
     l.toArray.zipIdx k = (l.zipIdx k).toArray := by
@@ -420,10 +425,15 @@ theorem mapIdx_eq_mapIdx_iff {xs : Array α} :
   rcases xs with ⟨xs⟩
   simp [List.getLast?_mapIdx]
 
-@[simp, grind =] theorem back_mapIdx {xs : Array α} {f : Nat → α → β} (h) :
+theorem back_mapIdx {xs : Array α} {f : Nat → α → β} (h) :
     (xs.mapIdx f).back h = f (xs.size - 1) (xs.back (by simpa using h)) := by
   rcases xs with ⟨xs⟩
   simp [List.getLast_mapIdx]
+
+@[simp, grind =] theorem backV_mapIdx {xs : Array α} {f : Nat → α → β} (h : 0 < xs.size) :
+    haveI : Nonempty β := ⟨f (xs.size - 1) (xs.back h)⟩
+    (xs.mapIdx f).backV = f (xs.size - 1) (xs.backV) := by
+  simp [back_eq_backV, back_mapIdx]
 
 @[simp, grind =] theorem mapIdx_mapIdx {xs : Array α} {f : Nat → α → β} {g : Nat → β → γ} :
     (xs.mapIdx f).mapIdx g = xs.mapIdx (fun i => g i ∘ f i) := by

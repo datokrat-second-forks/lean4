@@ -98,6 +98,11 @@ theorem getElem_eq_getElem_reverse {l : List α} {i} (h : i < l.length) :
   congr
   omega
 
+theorem getElemV_eq_getElemV_reverse {l : List α} {i} (h : i < l.length) :
+    haveI : Nonempty α := ⟨l[i]⟩
+    l｢i｣ = l.reverse｢l.length - 1 - i｣ := by
+  simp [getElem_eq_getElemV, getElem_eq_getElem_reverse h]
+
 /-! ### leftpad -/
 
 /-- The length of the List returned by `List.leftpad n a l` is equal
@@ -157,18 +162,29 @@ theorem getElem?_intersperse :
       simp
       omega
 
-@[simp] theorem getElem_intersperse_two_mul (h : 2 * i < (l.intersperse sep).length) :
+theorem getElem_intersperse_two_mul (h : 2 * i < (l.intersperse sep).length) :
     (l.intersperse sep)[2 * i] = l[i]'(by rw [length_intersperse] at h; omega) := by
   rw [← Option.some_inj, ← getElem?_eq_getElem h]
   simp
 
-@[simp] theorem getElem_intersperse_two_mul_add_one (h : 2 * i + 1 < (l.intersperse sep).length) :
+@[simp] theorem getElemV_intersperse_two_mul {l : List α} {sep : α} {i : Nat}
+    (h : 2 * i < (l.intersperse sep).length) :
+    haveI : Nonempty α := ⟨sep⟩
+    (l.intersperse sep)｢2 * i｣ = l｢i｣ := by
+  simp [getElem_eq_getElemV, getElem_intersperse_two_mul h]
+
+theorem getElem_intersperse_two_mul_add_one (h : 2 * i + 1 < (l.intersperse sep).length) :
     (l.intersperse sep)[2 * i + 1] = sep := by
   rw [← Option.some_inj, ← getElem?_eq_getElem h, getElem?_intersperse_two_mul_add_one]
   rw [length_intersperse] at h
   omega
 
-@[grind =]
+@[simp] theorem getElemV_intersperse_two_mul_add_one {l : List α} {sep : α} {i : Nat}
+    (h : 2 * i + 1 < (l.intersperse sep).length) :
+    haveI : Nonempty α := ⟨sep⟩
+    (l.intersperse sep)｢2 * i + 1｣ = sep := by
+  simp [getElem_eq_getElemV, getElem_intersperse_two_mul_add_one h]
+
 theorem getElem_intersperse (h) :
     (l.intersperse sep)[i] =
       if i % 2 = 0 then l[i / 2]'(by simp at h; omega) else sep := by
@@ -180,9 +196,22 @@ theorem getElem_intersperse (h) :
     conv => lhs; simp +singlePass only [p]
     rw [getElem_intersperse_two_mul_add_one]
 
+@[grind =]
+theorem getElemV_intersperse {l : List α} {sep : α} {i : Nat}
+    (h : i < (l.intersperse sep).length) :
+    haveI : Nonempty α := ⟨sep⟩
+    (l.intersperse sep)｢i｣ = if i % 2 = 0 then l｢i / 2｣ else sep := by
+  simp [getElemV_pos h]
+
 theorem getElem_eq_getElem_intersperse_two_mul (h : i < l.length) :
     l[i] = (l.intersperse sep)[2 * i]'(by rw [length_intersperse]; omega) := by
   simp
+
+theorem getElemV_eq_getElemV_intersperse_two_mul {l : List α} {sep : α} {i : Nat}
+    (h : i < l.length) :
+    haveI : Nonempty α := ⟨sep⟩
+    l｢i｣ = (l.intersperse sep)｢2 * i｣ := by
+  simp [getElem_eq_getElemV, getElem_eq_getElem_intersperse_two_mul h]
 
 end intersperse
 
@@ -207,6 +236,10 @@ theorem mem_eraseIdx_iff_getElem? {x : α} {l} {k} : x ∈ eraseIdx l k ↔ ∃ 
   · rintro h;
     obtain ⟨h', -⟩ := getElem?_eq_some_iff.1 h
     exact ⟨h', h⟩
+
+theorem mem_eraseIdx_iff_getElemV {x : α} {l : List α} {k : Nat} :
+    x ∈ eraseIdx l k ↔ ∃ i, ∃ _ : i < l.length, i ≠ k ∧ l｢i｣ = x := by
+  simp [mem_eraseIdx_iff_getElem, getElem_eq_getElemV]
 
 /-! ### min? -/
 

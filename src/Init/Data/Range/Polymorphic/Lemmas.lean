@@ -3077,6 +3077,18 @@ theorem getElem_toArray_eq [LE α] [DecidableLE α] [UpwardEnumerable α]
         (isSome_succMany?_of_lt_size_toArray h) := by
   simp [Array.getElem_eq_getElem?_get, getElem?_toArray_eq]
 
+theorem getElemV_toList_eq [LE α] [DecidableLE α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [Rxc.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toList｢i｣ = (UpwardEnumerable.succMany? i r.lower).getV := by
+  simp [getElemV_def, getElem?_toList_eq]
+
+theorem getElemV_toArray_eq [LE α] [DecidableLE α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [Rxc.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toArray｢i｣ = (UpwardEnumerable.succMany? i r.lower).getV := by
+  simp [getElemV_def, getElem?_toArray_eq]
+
 theorem eq_succMany?_of_toList_eq_append_cons [LE α] [DecidableLE α]
     [UpwardEnumerable α] [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
     [Rxc.IsAlwaysFinite α] {pref suff : List α} {cur : α} (h : r.toList = pref ++ cur :: suff) :
@@ -3193,6 +3205,18 @@ theorem getElem_toArray_eq [LE α] [DecidableLE α] [UpwardEnumerable α]
         (isSome_succMany?_of_lt_size_toArray h) := by
   simp [Array.getElem_eq_getElem?_get, getElem?_toArray_eq]
 
+theorem getElemV_toList_eq [LE α] [DecidableLE α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [Rxc.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toList｢i｣ = (UpwardEnumerable.succMany? (i + 1) r.lower).getV := by
+  simp [getElemV_def, getElem?_toList_eq]
+
+theorem getElemV_toArray_eq [LE α] [DecidableLE α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [Rxc.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toArray｢i｣ = (UpwardEnumerable.succMany? (i + 1) r.lower).getV := by
+  simp [getElemV_def, getElem?_toArray_eq]
+
 theorem eq_succMany?_of_toList_eq_append_cons [LE α] [DecidableLE α]
     [UpwardEnumerable α] [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
     [Rxc.IsAlwaysFinite α] {pref suff : List α} {cur : α} (h : r.toList = pref ++ cur :: suff) :
@@ -3304,6 +3328,18 @@ theorem getElem_toArray_eq [Least? α] [LE α] [DecidableLE α] [UpwardEnumerabl
     r.toArray[i]'h = (UpwardEnumerable.succMany? i UpwardEnumerable.least).get
         (isSome_succMany?_of_lt_size_toArray h) := by
   simp [Array.getElem_eq_getElem?_get, getElem?_toArray_eq]
+
+theorem getElemV_toList_eq [Least? α] [LE α] [DecidableLE α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [LawfulUpwardEnumerableLeast? α]
+    [Rxc.IsAlwaysFinite α] {_ : Nonempty α} {i} :
+    r.toList｢i｣ = (UpwardEnumerable.succMany? (α := α) i UpwardEnumerable.least).getV := by
+  simp [getElemV_def, getElem?_toList_eq]
+
+theorem getElemV_toArray_eq [Least? α] [LE α] [DecidableLE α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [LawfulUpwardEnumerableLeast? α]
+    [Rxc.IsAlwaysFinite α] {_ : Nonempty α} {i} :
+    r.toArray｢i｣ = (UpwardEnumerable.succMany? (α := α) i UpwardEnumerable.least).getV := by
+  simp [getElemV_def, getElem?_toArray_eq]
 
 theorem eq_succMany?_of_toList_eq_append_cons [Least? α] [LE α] [DecidableLE α]
     [UpwardEnumerable α] [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
@@ -3461,6 +3497,18 @@ theorem getElem_toArray_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
         (isSome_succMany?_of_lt_size_toArray h) := by
   simp [Array.getElem_eq_getElem?_get, getElem?_toArray_eq]
 
+theorem getElemV_toList_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [Rxo.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toList｢i｣ = (UpwardEnumerable.succMany? i r.lower).getV := by
+  simp [getElemV_def, getElem?_toList_eq]
+
+theorem getElemV_toArray_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [Rxo.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toArray｢i｣ = (UpwardEnumerable.succMany? i r.lower).getV := by
+  simp [getElemV_def, getElem?_toArray_eq]
+
 theorem eq_succMany?_of_toList_eq_append_cons [LT α] [DecidableLT α]
     [UpwardEnumerable α] [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
     [Rxo.IsAlwaysFinite α] {pref suff : List α} {cur : α} (h : r.toList = pref ++ cur :: suff) :
@@ -3577,6 +3625,18 @@ theorem getElem_toArray_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
         (isSome_succMany?_of_lt_size_toArray h) := by
   simp [Array.getElem_eq_getElem?_get, getElem?_toArray_eq]
 
+theorem getElemV_toList_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [Rxo.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toList｢i｣ = (UpwardEnumerable.succMany? (i + 1) r.lower).getV := by
+  simp [getElemV_def, getElem?_toList_eq]
+
+theorem getElemV_toArray_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [Rxo.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toArray｢i｣ = (UpwardEnumerable.succMany? (i + 1) r.lower).getV := by
+  simp [getElemV_def, getElem?_toArray_eq]
+
 theorem eq_succMany?_of_toList_eq_append_cons [LT α] [DecidableLT α]
     [UpwardEnumerable α] [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
     [Rxo.IsAlwaysFinite α] {pref suff : List α} {cur : α} (h : r.toList = pref ++ cur :: suff) :
@@ -3688,6 +3748,18 @@ theorem getElem_toArray_eq [Least? α] [LT α] [DecidableLT α] [UpwardEnumerabl
     r.toArray[i]'h = (UpwardEnumerable.succMany? i UpwardEnumerable.least).get
         (isSome_succMany?_of_lt_size_toArray h) := by
   simp [Array.getElem_eq_getElem?_get, getElem?_toArray_eq]
+
+theorem getElemV_toList_eq [Least? α] [LT α] [DecidableLT α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [LawfulUpwardEnumerableLeast? α]
+    [Rxo.IsAlwaysFinite α] {_ : Nonempty α} {i} :
+    r.toList｢i｣ = (UpwardEnumerable.succMany? (α := α) i UpwardEnumerable.least).getV := by
+  simp [getElemV_def, getElem?_toList_eq]
+
+theorem getElemV_toArray_eq [Least? α] [LT α] [DecidableLT α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [LawfulUpwardEnumerableLeast? α]
+    [Rxo.IsAlwaysFinite α] {_ : Nonempty α} {i} :
+    r.toArray｢i｣ = (UpwardEnumerable.succMany? (α := α) i UpwardEnumerable.least).getV := by
+  simp [getElemV_def, getElem?_toArray_eq]
 
 theorem eq_succMany?_of_toList_eq_append_cons [Least? α] [LT α] [DecidableLT α]
     [UpwardEnumerable α] [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
@@ -3818,6 +3890,18 @@ theorem getElem_toArray_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
         (isSome_succMany?_of_lt_size_toArray h) := by
   simp [Array.getElem_eq_getElem?_get, getElem?_toArray_eq]
 
+theorem getElemV_toList_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [Rxi.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toList｢i｣ = (UpwardEnumerable.succMany? i r.lower).getV := by
+  simp [getElemV_def, getElem?_toList_eq]
+
+theorem getElemV_toArray_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [Rxi.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toArray｢i｣ = (UpwardEnumerable.succMany? i r.lower).getV := by
+  simp [getElemV_def, getElem?_toArray_eq]
+
 theorem eq_succMany?_of_toList_eq_append_cons [LT α] [DecidableLT α]
     [UpwardEnumerable α] [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
     [Rxi.IsAlwaysFinite α] {pref suff : List α} {cur : α} (h : r.toList = pref ++ cur :: suff) :
@@ -3926,6 +4010,18 @@ theorem getElem_toArray_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
         (isSome_succMany?_of_lt_size_toArray h) := by
   simp [Array.getElem_eq_getElem?_get, getElem?_toArray_eq]
 
+theorem getElemV_toList_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [Rxi.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toList｢i｣ = (UpwardEnumerable.succMany? (i + 1) r.lower).getV := by
+  simp [getElemV_def, getElem?_toList_eq]
+
+theorem getElemV_toArray_eq [LT α] [DecidableLT α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [Rxi.IsAlwaysFinite α]
+    {_ : Nonempty α} {i} :
+    r.toArray｢i｣ = (UpwardEnumerable.succMany? (i + 1) r.lower).getV := by
+  simp [getElemV_def, getElem?_toArray_eq]
+
 theorem eq_succMany?_of_toList_eq_append_cons [LT α] [DecidableLT α]
     [UpwardEnumerable α] [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
     [Rxi.IsAlwaysFinite α] {pref suff : List α} {cur : α} (h : r.toList = pref ++ cur :: suff) :
@@ -4026,6 +4122,18 @@ theorem getElem_toArray_eq [Least? α] [UpwardEnumerable α]
     r.toArray[i]'h = (Least?.least?.bind (UpwardEnumerable.succMany? i)).get
         (isSome_succMany?_of_lt_size_toArray h) := by
   simp [Array.getElem_eq_getElem?_get, getElem?_toArray_eq]
+
+theorem getElemV_toList_eq [Least? α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLeast? α]
+    [Rxi.IsAlwaysFinite α] {_ : Nonempty α} {i} :
+    r.toList｢i｣ = (Least?.least?.bind (UpwardEnumerable.succMany? (α := α) i)).getV := by
+  simp [getElemV_def, getElem?_toList_eq]
+
+theorem getElemV_toArray_eq [Least? α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLeast? α]
+    [Rxi.IsAlwaysFinite α] {_ : Nonempty α} {i} :
+    r.toArray｢i｣ = (Least?.least?.bind (UpwardEnumerable.succMany? (α := α) i)).getV := by
+  simp [getElemV_def, getElem?_toArray_eq]
 
 theorem eq_succMany?_of_toList_eq_append_cons [Least? α]
     [UpwardEnumerable α] [LawfulUpwardEnumerable α]

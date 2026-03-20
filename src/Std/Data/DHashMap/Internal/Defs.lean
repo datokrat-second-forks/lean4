@@ -414,6 +414,11 @@ def get! [BEq α] [LawfulBEq α] [Hashable α] (m : Raw₀ α β) (a : α) [Inha
   buckets[idx.1].getCast! a
 
 /-- Internal implementation detail of the hash map -/
+noncomputable def getV [BEq α] [LawfulBEq α] [Hashable α] (m : Raw₀ α β) (a : α)
+    [Nonempty (β a)] : β a :=
+  m.getD a Classical.ofNonempty
+
+/-- Internal implementation detail of the hash map -/
 def erase [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) : Raw₀ α β :=
   let ⟨⟨size, buckets⟩, hb⟩ := m
   let ⟨i, h⟩ := mkIdx buckets.size hb (hash a)
@@ -537,6 +542,11 @@ def Const.get! [BEq α] [Hashable α] [Inhabited β] (m : Raw₀ α (fun _ => β
   buckets[idx.1].get! a
 
 /-- Internal implementation detail of the hash map -/
+noncomputable def Const.getV [BEq α] [Hashable α] [Nonempty β] (m : Raw₀ α (fun _ => β))
+    (a : α) : β :=
+  Const.getD m a Classical.ofNonempty
+
+/-- Internal implementation detail of the hash map -/
 @[inline] def Const.getThenInsertIfNew? [BEq α] [Hashable α] (m : Raw₀ α (fun _ => β)) (a : α)
     (b : β) : Option β × Raw₀ α (fun _ => β) :=
   let ⟨⟨size, buckets⟩, hm⟩ := m
@@ -596,6 +606,10 @@ def getKey! [BEq α] [Hashable α] [Inhabited α] (m : Raw₀ α β) (a : α) : 
   let ⟨⟨_, buckets⟩, h⟩ := m
   let idx := mkIdx buckets.size h (hash a)
   buckets[idx.1].getKey! a
+
+/-- Internal implementation detail of the hash map -/
+noncomputable def getKeyV [BEq α] [Hashable α] [Nonempty α] (m : Raw₀ α β) (a : α) : α :=
+  m.getKeyD a Classical.ofNonempty
 
 end Raw₀
 

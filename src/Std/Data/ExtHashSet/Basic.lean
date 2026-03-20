@@ -160,6 +160,13 @@ If no panic occurs the result is guaranteed to be pointer equal to the key in th
   m.inner.getKey! a
 
 /--
+Checks if given key is contained and returns the key if it is, otherwise returns `Classical.ofNonempty`.
+If the key is contained the result is guaranteed to be pointer equal to the key in the set.
+-/
+noncomputable def getV [EquivBEq α] [LawfulHashable α] [Nonempty α] (m : ExtHashSet α) (a : α) : α :=
+  m.getD a Classical.ofNonempty
+
+/--
 Returns `true` if the hash set contains no elements.
 
 Note that if your `BEq` instance is not reflexive or your `Hashable` instance is not
