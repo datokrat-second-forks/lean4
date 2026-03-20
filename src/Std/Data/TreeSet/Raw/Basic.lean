@@ -156,6 +156,13 @@ def get (t : Raw α cmp) (a : α) (h : a ∈ t) : α :=
 def get! [Inhabited α] (t : Raw α cmp) (a : α) : α :=
   t.inner.getKey! a
 
+/--
+Checks if given key is contained and returns the key if it is, otherwise returns `Classical.ofNonempty`.
+If the key is contained the result is guaranteed to be pointer equal to the key in the set.
+-/
+noncomputable def getV [Nonempty α] (t : Raw α cmp) (a : α) : α :=
+  t.getD a Classical.ofNonempty
+
 @[inline, inherit_doc TreeSet.getD]
 def getD (t : Raw α cmp) (a : α) (fallback : α) : α :=
   t.inner.getKeyD a fallback
