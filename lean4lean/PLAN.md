@@ -281,6 +281,32 @@ Throughout the plan, "HasType.stratify" means `HasTypeStrong.stratify` (Strong:8
 which requires converting via `.strong` (needing `Ordered env` + `OnCtx`). Both are
 available as parameters to `whnf_preserved_s`.
 
+## Session 3 Progress (2026-03-20)
+
+### Completed
+- **Phase A: WHNFStep stuckness lemmas** — All 3 sorry's closed.
+  - Added `pat_uniq`, `pat_app_l_uniq`, `pat_app_uniq` to `InjectivityParams`.
+  - Proved `subpattern_no_step` (core stuckness lemma) mirroring `WHNF.subpattern`.
+  - Derived `extra_app_fn_stuck`, `extra_app_arg_stuck`, `WHIsMajorPremise.no_step`.
+  - `WHStep.deterministic` now compiles without sorry.
+
+### Analysis: Architectural blockers for remaining sorry's
+- **proofIrrel** (4 sorry's): Requires `WHSteps_hasType` (subject reduction) AND
+  stratified `uniq_{<n}`. The `uniq` call creates circularity without two-layer restructuring.
+- **eta backward** (2 sorry's): Requires `sort_forallE_inv_{<n}` from stratified bundle IH.
+  Circular with `whnf_preserved` without two-layer restructuring.
+- **appDF** (4 sorry's): Requires depth-decreasing chain construction with stratified IH.
+  The chain uses `whnf_preserved` at lower depth-sum, which is only available via Layer 2 WF IH.
+- **forallE_inv_n** (1 sorry): Requires complete `whnf_preserved` for the trans case.
+
+### Next steps
+1. Implement the two-layer architecture (DETAIL_two_layers.md):
+   - Layer 1: StratifiedBundle (uniq, sort_inv, forallE_inv) on max-depth
+   - Layer 2: PreservationBundle (sort_forallE_inv, whnf_preserved) on depth-sum
+2. Add `whsteps_hasType` field to InjectivityParams (requires moving WHStep defs)
+   or parameterize whnf_preserved with it
+3. Close appDF via depth-decreasing chain at lower depth-sum
+
 ## What Went Wrong With the Previous Plan
 
 1. **whnf_preserved was not stratified.** Eta/proofIrrel/appDF need depth-indexed info.
