@@ -321,6 +321,15 @@ def getEntry! [Inhabited ((a : α) × β a)] (t : DTreeMap α β cmp) (a : α) :
   letI : Ord α := ⟨cmp⟩; t.inner.getEntry! a
 
 /--
+Checks if a mapping for the given key exists and returns the key-value pair if it does, otherwise
+`Classical.ofNonempty`.
+The key in the returned pair will compare equal to the input `a`.
+-/
+noncomputable def getEntryV [Nonempty ((a : α) × β a)] (t : DTreeMap α β cmp) (a : α) :
+    (a : α) × β a :=
+  t.getEntryD a Classical.ofNonempty
+
+/--
 Tries to retrieve the key-value pair with the smallest key in the tree map, returning `none` if the
 map is empty.
 -/
@@ -350,6 +359,13 @@ the tree map is empty.
 @[inline]
 def minEntryD (t : DTreeMap α β cmp) (fallback : (a : α) × β a) : (a : α) × β a :=
   letI : Ord α := ⟨cmp⟩; t.inner.minEntryD fallback
+
+/--
+Tries to retrieve the key-value pair with the smallest key in the tree map, returning
+`Classical.ofNonempty` if the tree map is empty.
+-/
+noncomputable def minEntryV [Nonempty ((a : α) × β a)] (t : DTreeMap α β cmp) : (a : α) × β a :=
+  t.minEntryD Classical.ofNonempty
 
 /--
 Tries to retrieve the key-value pair with the largest key in the tree map, returning `none` if the
@@ -383,6 +399,13 @@ def maxEntryD (t : DTreeMap α β cmp) (fallback : (a : α) × β a) : (a : α) 
   letI : Ord α := ⟨cmp⟩; t.inner.maxEntryD fallback
 
 /--
+Tries to retrieve the key-value pair with the largest key in the tree map, returning
+`Classical.ofNonempty` if the tree map is empty.
+-/
+noncomputable def maxEntryV [Nonempty ((a : α) × β a)] (t : DTreeMap α β cmp) : (a : α) × β a :=
+  t.maxEntryD Classical.ofNonempty
+
+/--
 Tries to retrieve the smallest key in the tree map, returning `none` if the map is empty.
 -/
 @[inline]
@@ -409,6 +432,13 @@ Tries to retrieve the smallest key in the tree map, returning `fallback` if the 
 @[inline]
 def minKeyD (t : DTreeMap α β cmp) (fallback : α) : α :=
   letI : Ord α := ⟨cmp⟩; t.inner.minKeyD fallback
+
+/--
+Tries to retrieve the smallest key in the tree map, returning `Classical.ofNonempty` if the tree
+map is empty.
+-/
+noncomputable def minKeyV [Nonempty α] (t : DTreeMap α β cmp) : α :=
+  t.minKeyD Classical.ofNonempty
 
 /--
 Tries to retrieve the largest key in the tree map, returning `none` if the map is empty.
@@ -438,6 +468,13 @@ Tries to retrieve the largest key in the tree map, returning `fallback` if the t
 def maxKeyD (t : DTreeMap α β cmp) (fallback : α) : α :=
   letI : Ord α := ⟨cmp⟩; t.inner.maxKeyD fallback
 
+/--
+Tries to retrieve the largest key in the tree map, returning `Classical.ofNonempty` if the tree
+map is empty.
+-/
+noncomputable def maxKeyV [Nonempty α] (t : DTreeMap α β cmp) : α :=
+  t.maxKeyD Classical.ofNonempty
+
 /-- Returns the key-value pair with the `n`-th smallest key, or `none` if `n` is at least `t.size`. -/
 @[inline]
 def entryAtIdx? (t : DTreeMap α β cmp) (n : Nat) : Option ((a : α) × β a) :=
@@ -459,6 +496,12 @@ def entryAtIdxD (t : DTreeMap α β cmp) (n : Nat)
     (fallback : (a : α) × β a) : (a : α) × β a :=
   letI : Ord α := ⟨cmp⟩; t.inner.entryAtIdxD n fallback
 
+/-- Returns the key-value pair with the `n`-th smallest key, or `Classical.ofNonempty` if `n` is
+at least `t.size`. -/
+noncomputable def entryAtIdxV [Nonempty ((a : α) × β a)] (t : DTreeMap α β cmp) (n : Nat) :
+    (a : α) × β a :=
+  t.entryAtIdxD n Classical.ofNonempty
+
 /-- Returns the `n`-th smallest key, or `none` if `n` is at least `t.size`. -/
 @[inline]
 def keyAtIdx? (t : DTreeMap α β cmp) (n : Nat) : Option α :=
@@ -478,6 +521,10 @@ def keyAtIdx! [Inhabited α] (t : DTreeMap α β cmp) (n : Nat) : α :=
 @[inline]
 def keyAtIdxD (t : DTreeMap α β cmp) (n : Nat) (fallback : α) : α :=
   letI : Ord α := ⟨cmp⟩; t.inner.keyAtIdxD n fallback
+
+/-- Returns the `n`-th smallest key, or `Classical.ofNonempty` if `n` is at least `t.size`. -/
+noncomputable def keyAtIdxV [Nonempty α] (t : DTreeMap α β cmp) (n : Nat) : α :=
+  t.keyAtIdxD n Classical.ofNonempty
 
 /--
 Tries to retrieve the key-value pair with the smallest key that is greater than or equal to the
@@ -581,6 +628,38 @@ def getEntryLTD (t : DTreeMap α β cmp) (k : α) (fallback : Sigma β) : (a : �
   letI : Ord α := ⟨cmp⟩; Impl.getEntryLTD k t.inner fallback
 
 /--
+Tries to retrieve the key-value pair with the smallest key that is greater than or equal to the
+given key, returning `Classical.ofNonempty` if no such pair exists.
+-/
+noncomputable def getEntryGEV [Nonempty (Sigma β)] (t : DTreeMap α β cmp) (k : α) :
+    (a : α) × β a :=
+  t.getEntryGED k Classical.ofNonempty
+
+/--
+Tries to retrieve the key-value pair with the smallest key that is greater than the given key,
+returning `Classical.ofNonempty` if no such pair exists.
+-/
+noncomputable def getEntryGTV [Nonempty (Sigma β)] (t : DTreeMap α β cmp) (k : α) :
+    (a : α) × β a :=
+  t.getEntryGTD k Classical.ofNonempty
+
+/--
+Tries to retrieve the key-value pair with the largest key that is less than or equal to the
+given key, returning `Classical.ofNonempty` if no such pair exists.
+-/
+noncomputable def getEntryLEV [Nonempty (Sigma β)] (t : DTreeMap α β cmp) (k : α) :
+    (a : α) × β a :=
+  t.getEntryLED k Classical.ofNonempty
+
+/--
+Tries to retrieve the key-value pair with the largest key that is less than the given key,
+returning `Classical.ofNonempty` if no such pair exists.
+-/
+noncomputable def getEntryLTV [Nonempty (Sigma β)] (t : DTreeMap α β cmp) (k : α) :
+    (a : α) × β a :=
+  t.getEntryLTD k Classical.ofNonempty
+
+/--
 Tries to retrieve the smallest key that is greater than or equal to the
 given key, returning `none` if no such key exists.
 -/
@@ -681,6 +760,34 @@ returning `fallback` if no such key exists.
 def getKeyLTD (t : DTreeMap α β cmp) (k : α) (fallback : α) : α :=
   letI : Ord α := ⟨cmp⟩; Impl.getKeyLTD k t.inner fallback
 
+/--
+Tries to retrieve the smallest key that is greater than or equal to the
+given key, returning `Classical.ofNonempty` if no such key exists.
+-/
+noncomputable def getKeyGEV [Nonempty α] (t : DTreeMap α β cmp) (k : α) : α :=
+  t.getKeyGED k Classical.ofNonempty
+
+/--
+Tries to retrieve the smallest key that is greater than the given key,
+returning `Classical.ofNonempty` if no such key exists.
+-/
+noncomputable def getKeyGTV [Nonempty α] (t : DTreeMap α β cmp) (k : α) : α :=
+  t.getKeyGTD k Classical.ofNonempty
+
+/--
+Tries to retrieve the largest key that is less than or equal to the
+given key, returning `Classical.ofNonempty` if no such key exists.
+-/
+noncomputable def getKeyLEV [Nonempty α] (t : DTreeMap α β cmp) (k : α) : α :=
+  t.getKeyLED k Classical.ofNonempty
+
+/--
+Tries to retrieve the largest key that is less than the given key,
+returning `Classical.ofNonempty` if no such key exists.
+-/
+noncomputable def getKeyLTV [Nonempty α] (t : DTreeMap α β cmp) (k : α) : α :=
+  t.getKeyLTD k Classical.ofNonempty
+
 namespace Const
 
 variable {β : Type v}
@@ -728,6 +835,10 @@ def minEntry! [Inhabited (α × β)] (t : DTreeMap α β cmp) : α × β :=
 def minEntryD (t : DTreeMap α β cmp) (fallback : α × β) : α × β :=
   letI : Ord α := ⟨cmp⟩; Impl.Const.minEntryD t.inner fallback
 
+@[inherit_doc DTreeMap.minEntryV]
+noncomputable def minEntryV [Nonempty (α × β)] (t : DTreeMap α β cmp) : α × β :=
+  minEntryD t Classical.ofNonempty
+
 @[inline, inherit_doc DTreeMap.maxEntry?]
 def maxEntry? (t : DTreeMap α β cmp) : Option (α × β) :=
   letI : Ord α := ⟨cmp⟩; Impl.Const.maxEntry? t.inner
@@ -743,6 +854,10 @@ def maxEntry! [Inhabited (α × β)] (t : DTreeMap α β cmp) : α × β :=
 @[inline, inherit_doc DTreeMap.maxEntryD]
 def maxEntryD (t : DTreeMap α β cmp) (fallback : α × β) : α × β :=
   letI : Ord α := ⟨cmp⟩; Impl.Const.maxEntryD t.inner fallback
+
+@[inherit_doc DTreeMap.maxEntryV]
+noncomputable def maxEntryV [Nonempty (α × β)] (t : DTreeMap α β cmp) : α × β :=
+  maxEntryD t Classical.ofNonempty
 
 @[inline, inherit_doc DTreeMap.entryAtIdx?]
 def entryAtIdx? (t : DTreeMap α β cmp) (n : Nat) : Option (α × β) :=
@@ -760,6 +875,10 @@ def entryAtIdx! [Inhabited (α × β)] (t : DTreeMap α β cmp) (n : Nat) : α �
 def entryAtIdxD (t : DTreeMap α β cmp) (n : Nat)
     (fallback : α × β) : α × β :=
   letI : Ord α := ⟨cmp⟩; Impl.Const.entryAtIdxD t.inner n fallback
+
+@[inherit_doc DTreeMap.entryAtIdxV]
+noncomputable def entryAtIdxV [Nonempty (α × β)] (t : DTreeMap α β cmp) (n : Nat) : α × β :=
+  entryAtIdxD t n Classical.ofNonempty
 
 @[inline, inherit_doc DTreeMap.getEntryGE?]
 def getEntryGE? (t : DTreeMap α β cmp) (k : α) : Option (α × β) :=
@@ -813,6 +932,22 @@ def getEntryLED (t : DTreeMap α β cmp) (k : α) (fallback : α × β) : (α ×
 @[inline, inherit_doc DTreeMap.getEntryLTD]
 def getEntryLTD (t : DTreeMap α β cmp) (k : α) (fallback : α × β) : (α × β) :=
   letI : Ord α := ⟨cmp⟩; Impl.Const.getEntryLTD k t.inner fallback
+
+@[inherit_doc DTreeMap.getEntryGEV]
+noncomputable def getEntryGEV [Nonempty (α × β)] (t : DTreeMap α β cmp) (k : α) : α × β :=
+  getEntryGED t k Classical.ofNonempty
+
+@[inherit_doc DTreeMap.getEntryGTV]
+noncomputable def getEntryGTV [Nonempty (α × β)] (t : DTreeMap α β cmp) (k : α) : α × β :=
+  getEntryGTD t k Classical.ofNonempty
+
+@[inherit_doc DTreeMap.getEntryLEV]
+noncomputable def getEntryLEV [Nonempty (α × β)] (t : DTreeMap α β cmp) (k : α) : α × β :=
+  getEntryLED t k Classical.ofNonempty
+
+@[inherit_doc DTreeMap.getEntryLTV]
+noncomputable def getEntryLTV [Nonempty (α × β)] (t : DTreeMap α β cmp) (k : α) : α × β :=
+  getEntryLTD t k Classical.ofNonempty
 
 end Const
 

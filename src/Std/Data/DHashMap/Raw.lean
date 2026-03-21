@@ -355,6 +355,12 @@ The key in the returned pair will be `BEq` to the input `a`.
     Raw₀.getEntry! ⟨m, h⟩ a
   else default -- will never happen for well-formed inputs
 
+/-- Checks if a mapping for the given key exists and returns the key-value pair if it does,
+otherwise `Classical.ofNonempty`. -/
+noncomputable def getEntryV [BEq α] [Hashable α] [Nonempty ((a : α) × β a)] (m : Raw α β)
+    (a : α) : (a : α) × β a :=
+  m.getEntryD a Classical.ofNonempty
+
 /--
 Returns `true` if the hash map contains no mappings.
 
