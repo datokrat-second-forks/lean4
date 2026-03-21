@@ -405,6 +405,18 @@ def back? (xs : Array α) : Option α :=
   xs[xs.size - 1]?
 
 /--
+Returns the last element of an array, or `Classical.ofNonempty` if the array is empty.
+
+This is the noncomputable analogue of `Array.back!` that requires only `Nonempty α` instead of
+`Inhabited α`.
+
+See `Array.back` for the version with a proof the array is non-empty, `Array.back!` for the version
+that panics, and `Array.back?` for the version that returns an option.
+-/
+@[expose] noncomputable def backV [Nonempty α] (xs : Array α) : α :=
+  xs.getD (xs.size - 1) Classical.ofNonempty
+
+/--
 Swaps a new element with the element at the given index.
 
 Returns the value formerly found at `i`, paired with an array in which the value at `i` has been

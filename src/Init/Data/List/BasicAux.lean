@@ -64,6 +64,23 @@ def getLast! [Inhabited α] : List α → α
   | []    => panic! "empty list"
   | a::as => getLast (a::as) (fun h => List.noConfusion rfl (heq_of_eq h))
 
+/-! ### getLastV -/
+
+/--
+Returns the last element of the list, or `Classical.ofNonempty` if the list is empty.
+
+This is the noncomputable analogue of `List.getLast!` that requires only `Nonempty α` instead of
+`Inhabited α`.
+
+Alternatives include:
+  * `List.getLast`, which requires a proof that the list is non-empty,
+  * `List.getLast?`, which returns an `Option`,
+  * `List.getLastD`, which takes a fallback value for empty lists, and
+  * `List.getLast!`, which panics on empty lists.
+-/
+@[expose] noncomputable def getLastV [Nonempty α] (l : List α) : α :=
+  l.getLast?.getD Classical.ofNonempty
+
 /-! ## Head and tail -/
 
 /-! ### head! -/
@@ -79,6 +96,23 @@ Safer alternatives include:
 @[expose] def head! [Inhabited α] : List α → α
   | []   => panic! "empty list"
   | a::_ => a
+
+/-! ### headV -/
+
+/--
+Returns the first element of the list, or `Classical.ofNonempty` if the list is empty.
+
+This is the noncomputable analogue of `List.head!` that requires only `Nonempty α` instead of
+`Inhabited α`.
+
+Alternatives include:
+  * `List.head`, which requires a proof that the list is non-empty,
+  * `List.head?`, which returns an `Option`,
+  * `List.headD`, which returns an explicitly-provided fallback value on empty lists, and
+  * `List.head!`, which panics on empty lists.
+-/
+@[expose] noncomputable def headV [Nonempty α] (l : List α) : α :=
+  l.head?.getD Classical.ofNonempty
 
 /-! ### tail! -/
 
