@@ -86,7 +86,7 @@ theorem toArray_mk {xs : Array α} (h : xs.size = n) : (Vector.mk xs h).toArray 
     (Vector.mk xs h).back? = xs.back? := rfl
 
 @[simp] theorem backV_mk [Nonempty α] {xs : Array α} (h : xs.size = n) :
-    (Vector.mk xs h).backV = xs.backV := rfl
+    (Vector.mk xs h).backV = xs.backV := (rfl)
 
 @[simp] theorem back_mk [NeZero n] {xs : Array α} (h : xs.size = n) :
     (Vector.mk xs h).back = xs.back (by have : 0 ≠ n := NeZero.ne' n; omega) := by

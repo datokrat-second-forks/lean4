@@ -78,7 +78,7 @@ Alternatives include:
   * `List.getLastD`, which takes a fallback value for empty lists, and
   * `List.getLast!`, which panics on empty lists.
 -/
-@[expose] noncomputable def getLastV [Nonempty α] (l : List α) : α :=
+noncomputable def getLastV [Nonempty α] (l : List α) : α :=
   l.getLast?.getD Classical.ofNonempty
 
 /-! ## Head and tail -/
@@ -111,7 +111,7 @@ Alternatives include:
   * `List.headD`, which returns an explicitly-provided fallback value on empty lists, and
   * `List.head!`, which panics on empty lists.
 -/
-@[expose] noncomputable def headV [Nonempty α] (l : List α) : α :=
+noncomputable def headV [Nonempty α] (l : List α) : α :=
   l.head?.getD Classical.ofNonempty
 
 /-! ### tail! -/

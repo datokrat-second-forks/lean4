@@ -133,7 +133,7 @@ of bounds.
 /-- The last element of a vector, or `Classical.ofNonempty` if the vector is empty.
 This is the noncomputable analogue of `Vector.back!` that requires only `Nonempty α` instead of
 `Inhabited α`. -/
-@[expose] noncomputable def backV [Nonempty α] (xs : Vector α n) : α := xs.toArray.backV
+noncomputable def backV [Nonempty α] (xs : Vector α n) : α := xs.toArray.backV
 
 /-- The last element of a non-empty vector. -/
 @[inline, expose] def back [NeZero n] (xs : Vector α n) : α :=

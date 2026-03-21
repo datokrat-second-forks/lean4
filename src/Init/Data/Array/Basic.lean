@@ -413,7 +413,7 @@ This is the noncomputable analogue of `Array.back!` that requires only `Nonempty
 See `Array.back` for the version with a proof the array is non-empty, `Array.back!` for the version
 that panics, and `Array.back?` for the version that returns an option.
 -/
-@[expose] noncomputable def backV [Nonempty α] (xs : Array α) : α :=
+noncomputable def backV [Nonempty α] (xs : Array α) : α :=
   xs.getD (xs.size - 1) Classical.ofNonempty
 
 /--
