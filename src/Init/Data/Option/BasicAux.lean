@@ -21,4 +21,13 @@ Extracts the value from an `Option`, panicking on `none`.
   | some x => x
   | none   => panic! "value is none"
 
+/--
+Extracts the value from an `Option`, returning `Classical.ofNonempty` on `none`.
+
+This is the noncomputable analogue of `Option.get!` that uses `Nonempty` instead of `Inhabited`.
+-/
+noncomputable def getV {α : Type u} [Nonempty α] : Option α → α
+  | some x => x
+  | none   => Classical.ofNonempty
+
 end Option
