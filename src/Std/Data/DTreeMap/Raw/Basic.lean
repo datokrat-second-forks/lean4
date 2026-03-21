@@ -218,6 +218,10 @@ def getKey! [Inhabited α] (t : Raw α β cmp) (a : α) : α :=
 def getKeyD (t : Raw α β cmp) (a : α) (fallback : α) : α :=
   letI : Ord α := ⟨cmp⟩; t.inner.getKeyD a fallback
 
+@[inherit_doc DTreeMap.getKeyV]
+noncomputable def getKeyV [Nonempty α] (t : Raw α β cmp) (a : α) : α :=
+  t.getKeyD a Classical.ofNonempty
+
 @[inline, inherit_doc DTreeMap.minEntry?]
 def minEntry? (t : Raw α β cmp) : Option ((a : α) × β a) :=
   letI : Ord α := ⟨cmp⟩; t.inner.minEntry?

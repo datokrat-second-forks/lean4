@@ -1115,6 +1115,81 @@ theorem getKeyD_eq_of_mem [LawfulBEq α] (h : m.WF) {k fallback : α} :
   simpa only [mem_iff_contains] using getKeyD_eq_of_contains h
 
 @[simp, grind =]
+theorem getKeyV_emptyWithCapacity [Nonempty α] {a : α} {c} :
+    (emptyWithCapacity c : Raw α β).getKeyV a = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_emptyWithCapacity
+
+@[simp, grind =]
+theorem getKeyV_empty [Nonempty α] {a : α} :
+    (∅ : Raw α β).getKeyV a = Classical.ofNonempty :=
+  getKeyV_emptyWithCapacity
+
+theorem getKeyV_of_isEmpty [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF) {a : α} :
+    m.isEmpty = true → m.getKeyV a = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_of_isEmpty h
+
+@[grind =] theorem getKeyV_insert [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF) {k a : α} {v : β k} :
+    (m.insert k v).getKeyV a = if k == a then k else m.getKeyV a := by
+  simpa [Raw.getKeyV] using getKeyD_insert h
+
+@[simp]
+theorem getKeyV_insert_self [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF) {k : α}
+    {v : β k} :
+    (m.insert k v).getKeyV k = k := by
+  simpa [Raw.getKeyV] using getKeyD_insert_self h
+
+theorem getKeyV_eq_classicalOfNonempty_of_contains_eq_false [EquivBEq α] [LawfulHashable α]
+    [Nonempty α] (h : m.WF) {a : α} :
+    m.contains a = false → m.getKeyV a = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_eq_fallback_of_contains_eq_false h
+
+theorem getKeyV_eq_classicalOfNonempty [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF)
+    {a : α} :
+    ¬a ∈ m → m.getKeyV a = Classical.ofNonempty := by
+  simpa [← contains_iff_mem] using getKeyV_eq_classicalOfNonempty_of_contains_eq_false h
+
+@[grind =] theorem getKeyV_erase [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF) {k a : α} :
+    (m.erase k).getKeyV a = if k == a then Classical.ofNonempty else m.getKeyV a := by
+  simpa [Raw.getKeyV] using getKeyD_erase h
+
+@[simp]
+theorem getKeyV_erase_self [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF) {k : α} :
+    (m.erase k).getKeyV k = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_erase_self h
+
+theorem getKey?_eq_some_getKeyV_of_contains [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    (h : m.WF) {a : α} :
+    m.contains a = true → m.getKey? a = some (m.getKeyV a) := by
+  simpa [Raw.getKeyV] using getKey?_eq_some_getKeyD_of_contains h
+
+theorem getKey?_eq_some_getKeyV [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF)
+    {a : α} :
+    a ∈ m → m.getKey? a = some (m.getKeyV a) := by
+  simpa [← contains_iff_mem] using getKey?_eq_some_getKeyV_of_contains h
+
+theorem getKeyV_eq_getD_getKey? [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF)
+    {a : α} :
+    m.getKeyV a = (m.getKey? a).getD Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_eq_getD_getKey? h
+
+theorem getKey_eq_getKeyV [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF)
+    {a : α} {h'} :
+    m.getKey a h' = m.getKeyV a := by
+  simpa [Raw.getKeyV] using getKey_eq_getKeyD h
+
+theorem getKeyV_congr [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF)
+    {k₁ k₂ : α} (h' : k₁ == k₂) : m.getKeyV k₁ = m.getKeyV k₂ := by
+  simpa [Raw.getKeyV] using getKeyD_congr h h'
+
+theorem getKeyV_eq_of_contains [LawfulBEq α] [Nonempty α] (h : m.WF) {k : α} :
+    m.contains k → m.getKeyV k = k := by
+  simpa [Raw.getKeyV] using getKeyD_eq_of_contains h
+
+theorem getKeyV_eq_of_mem [LawfulBEq α] [Nonempty α] (h : m.WF) {k : α} :
+    k ∈ m → m.getKeyV k = k := by
+  simpa only [mem_iff_contains] using getKeyV_eq_of_contains h
+
+@[simp, grind =]
 theorem isEmpty_insertIfNew [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} {v : β k} :
     (m.insertIfNew k v).isEmpty = false := by
   simp_to_raw using Raw₀.isEmpty_insertIfNew
@@ -1256,6 +1331,11 @@ end Const
       if k == a ∧ ¬k ∈ m then k else getKeyD m a fallback := by
   simp only [mem_iff_contains, Bool.not_eq_true]
   simp_to_raw using Raw₀.getKeyD_insertIfNew
+
+@[grind =] theorem getKeyV_insertIfNew [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF)
+    {k a : α} {v : β k} :
+    getKeyV (m.insertIfNew k v) a = if k == a ∧ ¬k ∈ m then k else getKeyV m a := by
+  simpa [Raw.getKeyV] using getKeyD_insertIfNew h
 
 @[simp, grind =]
 theorem getThenInsertIfNew?_fst [LawfulBEq α] (h : m.WF) {k : α} {v : β k} :
@@ -2039,6 +2119,20 @@ theorem getKeyD_insertMany_list_of_mem [EquivBEq α] [LawfulHashable α] (h : m.
     (m.insertMany l).getKeyD k' fallback = k := by
   simp_to_raw using Raw₀.getKeyD_insertMany_list_of_mem
 
+theorem getKeyV_insertMany_list_of_contains_eq_false [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    (h : m.WF) {l : List ((a : α) × β a)} {k : α}
+    (contains_eq_false : (l.map Sigma.fst).contains k = false) :
+    (m.insertMany l).getKeyV k = m.getKeyV k := by
+  simpa [Raw.getKeyV] using getKeyD_insertMany_list_of_contains_eq_false h contains_eq_false
+
+theorem getKeyV_insertMany_list_of_mem [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF)
+    {l : List ((a : α) × β a)}
+    {k k' : α} (k_beq : k == k')
+    (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
+    (mem : k ∈ l.map Sigma.fst) :
+    (m.insertMany l).getKeyV k' = k := by
+  simpa [Raw.getKeyV] using getKeyD_insertMany_list_of_mem h k_beq distinct mem
+
 theorem size_insertMany_list [EquivBEq α] [LawfulHashable α] (h : m.WF)
     {l : List ((a : α) × β a)} (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false)) :
     (∀ (a : α), a ∈ m → (l.map Sigma.fst).contains a = false) →
@@ -2390,6 +2484,24 @@ theorem getKey!_union_of_not_mem_right [Inhabited α]
   revert not_mem
   simp only [Union.union]
   simp_to_raw using getKey!_union_of_contains_eq_false_right
+
+/- getKeyV -/
+theorem getKeyV_union [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α} :
+    (m₁ ∪ m₂).getKeyV k = m₂.getKeyD k (m₁.getKeyV k) := by
+  simpa [Raw.getKeyV] using getKeyD_union h₁ h₂
+
+theorem getKeyV_union_of_not_mem_left [Nonempty α]
+    [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α}
+    (not_mem : ¬k ∈ m₁) :
+    (m₁ ∪ m₂).getKeyV k = m₂.getKeyV k := by
+  simpa [Raw.getKeyV] using getKeyD_union_of_not_mem_left h₁ h₂ not_mem
+
+theorem getKeyV_union_of_not_mem_right [Nonempty α]
+    [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α}
+    (not_mem : ¬k ∈ m₂) :
+    (m₁ ∪ m₂).getKeyV k = m₁.getKeyV k := by
+  simpa [Raw.getKeyV] using getKeyD_union_of_not_mem_right h₁ h₂ not_mem
 
 /- size -/
 theorem size_union_of_not_mem [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF)
@@ -2832,6 +2944,28 @@ theorem getKey!_inter_of_not_mem_left [EquivBEq α] [LawfulHashable α] [Inhabit
   simp only [Inter.inter]
   revert not_mem
   simp_to_raw using Raw₀.getKey!_inter_of_contains_eq_false_left
+
+/- getKeyV -/
+theorem getKeyV_inter [EquivBEq α] [LawfulHashable α] [Nonempty α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} :
+    (m₁ ∩ m₂).getKeyV k =
+    if k ∈ m₂ then m₁.getKeyV k else Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_inter h₁ h₂
+
+theorem getKeyV_inter_of_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (mem : k ∈ m₂) :
+    (m₁ ∩ m₂).getKeyV k = m₁.getKeyV k := by
+  simpa [Raw.getKeyV] using getKeyD_inter_of_mem_right h₁ h₂ mem
+
+theorem getKeyV_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (not_mem : k ∉ m₂) :
+    (m₁ ∩ m₂).getKeyV k = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_inter_of_not_mem_right h₁ h₂ not_mem
+
+theorem getKeyV_inter_of_not_mem_left [EquivBEq α] [LawfulHashable α] [Nonempty α] (h₁ : m₁.WF)
+    (h₂ : m₂.WF) {k : α} (not_mem : k ∉ m₁) :
+    (m₁ ∩ m₂).getKeyV k = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_inter_of_not_mem_left h₁ h₂ not_mem
 
 /- size -/
 theorem size_inter_le_size_left [EquivBEq α] [LawfulHashable α]
@@ -3312,6 +3446,28 @@ theorem getKey!_diff_of_not_mem_left [EquivBEq α] [LawfulHashable α] [Inhabite
   simp only [SDiff.sdiff]
   simp_to_raw using Raw₀.getKey!_diff_of_contains_eq_false_left
 
+/- getKeyV -/
+theorem getKeyV_diff [EquivBEq α] [LawfulHashable α] [Nonempty α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} :
+    (m₁ \ m₂).getKeyV k =
+    if k ∈ m₂ then Classical.ofNonempty else m₁.getKeyV k := by
+  simpa [Raw.getKeyV] using getKeyD_diff h₁ h₂
+
+theorem getKeyV_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (not_mem : k ∉ m₂) :
+    (m₁ \ m₂).getKeyV k = m₁.getKeyV k := by
+  simpa [Raw.getKeyV] using getKeyD_diff_of_not_mem_right h₁ h₂ not_mem
+
+theorem getKeyV_diff_of_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (mem : k ∈ m₂) :
+    (m₁ \ m₂).getKeyV k = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_diff_of_mem_right h₁ h₂ mem
+
+theorem getKeyV_diff_of_not_mem_left [EquivBEq α] [LawfulHashable α] [Nonempty α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (not_mem : k ∉ m₁) :
+    (m₁ \ m₂).getKeyV k = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_diff_of_not_mem_left h₁ h₂ not_mem
+
 /- size -/
 theorem size_diff_le_size_left [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF) :
     (m₁ \ m₂).size ≤ m₁.size := by
@@ -3609,6 +3765,20 @@ theorem getKeyD_insertMany_list_of_mem [EquivBEq α] [LawfulHashable α] (h : m.
     (insertMany m l).getKeyD k' fallback = k := by
   simp_to_raw using Raw₀.Const.getKeyD_insertMany_list_of_mem
 
+theorem getKeyV_insertMany_list_of_contains_eq_false [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    (h : m.WF) {l : List (α × β)} {k : α}
+    (contains_eq_false : (l.map Prod.fst).contains k = false) :
+    (insertMany m l).getKeyV k = m.getKeyV k := by
+  simpa [Raw.getKeyV] using getKeyD_insertMany_list_of_contains_eq_false h contains_eq_false
+
+theorem getKeyV_insertMany_list_of_mem [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF)
+    {l : List (α × β)}
+    {k k' : α} (k_beq : k == k')
+    (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
+    (mem : k ∈ l.map Prod.fst) :
+    (insertMany m l).getKeyV k' = k := by
+  simpa [Raw.getKeyV] using getKeyD_insertMany_list_of_mem h k_beq distinct mem
+
 theorem size_insertMany_list [EquivBEq α] [LawfulHashable α] (h : m.WF)
     {l : List (α × β)}
     (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false)) :
@@ -3847,6 +4017,22 @@ theorem getKeyD_insertManyIfNewUnit_list_of_mem [EquivBEq α] [LawfulHashable α
     k ∈ m → getKeyD (insertManyIfNewUnit m l) k fallback = getKeyD m k fallback := by
   simp only [mem_iff_contains]
   simp_to_raw using Raw₀.Const.getKeyD_insertManyIfNewUnit_list_of_contains
+
+theorem getKeyV_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false
+    [EquivBEq α] [LawfulHashable α] [Nonempty α] (h : m.WF) {l : List α} {k : α} :
+    ¬ k ∈ m → l.contains k = false → getKeyV (insertManyIfNewUnit m l) k = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false h
+
+theorem getKeyV_insertManyIfNewUnit_list_of_not_mem_of_mem [EquivBEq α] [LawfulHashable α]
+    [Nonempty α] (h : m.WF) {l : List α} {k k' : α} (k_beq : k == k') :
+    ¬ k ∈ m → l.Pairwise (fun a b => (a == b) = false) → k ∈ l →
+      getKeyV (insertManyIfNewUnit m l) k' = k := by
+  simpa [Raw.getKeyV] using getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem h k_beq
+
+theorem getKeyV_insertManyIfNewUnit_list_of_mem [EquivBEq α] [LawfulHashable α]
+    [Nonempty α] (h : m.WF) {l : List α} {k : α} :
+    k ∈ m → getKeyV (insertManyIfNewUnit m l) k = getKeyV m k := by
+  simpa [Raw.getKeyV] using getKeyD_insertManyIfNewUnit_list_of_mem h
 
 theorem size_insertManyIfNewUnit_list [EquivBEq α] [LawfulHashable α] (h : m.WF)
     {l : List α}
@@ -4100,6 +4286,20 @@ theorem getKeyD_ofList_of_mem [EquivBEq α] [LawfulHashable α]
     (ofList l).getKeyD k' fallback = k := by
   simp_to_raw using Raw₀.getKeyD_insertMany_emptyWithCapacity_list_of_mem
 
+theorem getKeyV_ofList_of_contains_eq_false [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    {l : List ((a : α) × β a)} {k : α}
+    (contains_eq_false : (l.map Sigma.fst).contains k = false) :
+    (ofList l).getKeyV k = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_ofList_of_contains_eq_false contains_eq_false
+
+theorem getKeyV_ofList_of_mem [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    {l : List ((a : α) × β a)}
+    {k k' : α} (k_beq : k == k')
+    (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
+    (mem : k ∈ l.map Sigma.fst) :
+    (ofList l).getKeyV k' = k := by
+  simpa [Raw.getKeyV] using getKeyD_ofList_of_mem k_beq distinct mem
+
 theorem size_ofList [EquivBEq α] [LawfulHashable α]
     {l : List ((a : α) × β a)} (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false)) :
     (ofList l).size = l.length := by
@@ -4271,6 +4471,20 @@ theorem getKeyD_ofList_of_mem [EquivBEq α] [LawfulHashable α]
     (ofList l).getKeyD k' fallback = k := by
   simp_to_raw using Raw₀.Const.getKeyD_insertMany_emptyWithCapacity_list_of_mem
 
+theorem getKeyV_ofList_of_contains_eq_false [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    {l : List (α × β)} {k : α}
+    (contains_eq_false : (l.map Prod.fst).contains k = false) :
+    (ofList l).getKeyV k = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_ofList_of_contains_eq_false contains_eq_false
+
+theorem getKeyV_ofList_of_mem [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    {l : List (α × β)}
+    {k k' : α} (k_beq : k == k')
+    (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
+    (mem : k ∈ l.map Prod.fst) :
+    (ofList l).getKeyV k' = k := by
+  simpa [Raw.getKeyV] using getKeyD_ofList_of_mem k_beq distinct mem
+
 theorem size_ofList [EquivBEq α] [LawfulHashable α]
     {l : List (α × β)} (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false)) :
     (ofList l).size = l.length := by
@@ -4371,6 +4585,19 @@ theorem getKeyD_unitOfList_of_mem [EquivBEq α] [LawfulHashable α]
     (mem : k ∈ l ) :
     getKeyD (unitOfList l) k' fallback = k := by
   simp_to_raw using Raw₀.Const.getKeyD_insertManyIfNewUnit_emptyWithCapacity_list_of_mem
+
+theorem getKeyV_unitOfList_of_contains_eq_false [EquivBEq α] [LawfulHashable α]
+    [Nonempty α] {l : List α} {k : α}
+    (contains_eq_false : l.contains k = false) :
+    getKeyV (unitOfList l) k = Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_unitOfList_of_contains_eq_false contains_eq_false
+
+theorem getKeyV_unitOfList_of_mem [EquivBEq α] [LawfulHashable α]
+    [Nonempty α] {l : List α} {k k' : α} (k_beq : k == k')
+    (distinct : l.Pairwise (fun a b => (a == b) = false))
+    (mem : k ∈ l) :
+    getKeyV (unitOfList l) k' = k := by
+  simpa [Raw.getKeyV] using getKeyD_unitOfList_of_mem k_beq distinct mem
 
 theorem size_unitOfList [EquivBEq α] [LawfulHashable α]
     {l : List α}
@@ -4646,6 +4873,19 @@ theorem getKeyD_alter_self [LawfulBEq α] [Inhabited α] {k : α} {fallback : α
     (m.alter k f).getKeyD k fallback = if (f (m.get? k)).isSome then k else fallback := by
   simp [getKeyD_alter h]
 
+@[grind =]
+theorem getKeyV_alter [LawfulBEq α] [Nonempty α] {k k' : α} {f : Option (β k) → Option (β k)}
+    (h : m.WF) : (m.alter k f).getKeyV k' =
+      if k == k' then
+        if (f (m.get? k)).isSome then k else Classical.ofNonempty
+      else
+        m.getKeyV k' := by
+  simpa [Raw.getKeyV] using getKeyD_alter h
+
+theorem getKeyV_alter_self [LawfulBEq α] [Nonempty α] {k : α} {f : Option (β k) → Option (β k)}
+    (h : m.WF) : (m.alter k f).getKeyV k = if (f (m.get? k)).isSome then k else Classical.ofNonempty := by
+  simp only [getKeyV_alter h, beq_self_eq_true, reduceIte]
+
 namespace Const
 
 variable {β : Type v} {m : Raw α (fun _ => β)}
@@ -4888,6 +5128,20 @@ theorem getKeyD_alter_self [EquivBEq α] [LawfulHashable α] [Inhabited α] {k f
     (Const.alter m k f).getKeyD k fallback = if (f (Const.get? m k)).isSome then k else fallback := by
   simp [getKeyD_alter h]
 
+@[grind =]
+theorem getKeyV_alter [EquivBEq α] [LawfulHashable α] [Nonempty α] {k k' : α}
+    {f : Option β → Option β} (h : m.WF) : (Const.alter m k f).getKeyV k' =
+      if k == k' then
+        if (f (Const.get? m k)).isSome then k else Classical.ofNonempty
+      else
+        m.getKeyV k' := by
+  simpa [Raw.getKeyV] using getKeyD_alter h
+
+theorem getKeyV_alter_self [EquivBEq α] [LawfulHashable α] [Nonempty α] {k : α}
+    {f : Option β → Option β} (h : m.WF) :
+    (Const.alter m k f).getKeyV k = if (f (Const.get? m k)).isSome then k else Classical.ofNonempty := by
+  simp only [getKeyV_alter h, beq_self_eq_true, reduceIte]
+
 end Const
 
 end Alter
@@ -5029,6 +5283,19 @@ theorem getKeyD_modify_self [LawfulBEq α] [Inhabited α] {k fallback : α} {f :
     (m.modify k f).getKeyD k fallback = if k ∈ m then k else fallback := by
   simp only [mem_iff_contains]
   simp_to_raw using Raw₀.getKeyD_modify_self
+
+@[grind =]
+theorem getKeyV_modify [LawfulBEq α] [Nonempty α] {k k' : α} {f : β k → β k} (h : m.WF) :
+    (m.modify k f).getKeyV k' =
+      if k == k' then
+        if k ∈ m then k else Classical.ofNonempty
+      else
+        m.getKeyV k' := by
+  simpa [Raw.getKeyV] using getKeyD_modify h
+
+theorem getKeyV_modify_self [LawfulBEq α] [Nonempty α] {k : α} {f : β k → β k} (h : m.WF) :
+    (m.modify k f).getKeyV k = if k ∈ m then k else Classical.ofNonempty := by
+  simp only [getKeyV_modify h, beq_self_eq_true, reduceIte]
 
 namespace Const
 
@@ -5197,6 +5464,19 @@ theorem getKeyD_modify_self [EquivBEq α] [LawfulHashable α] [Inhabited α] {k 
   simp only [mem_iff_contains]
   simp_to_raw using Raw₀.Const.getKeyD_modify_self
 
+@[grind =]
+theorem getKeyV_modify [EquivBEq α] [LawfulHashable α] [Nonempty α] {k k' : α} {f : β → β}
+    (h : m.WF) : (Const.modify m k f).getKeyV k' =
+      if k == k' then
+        if k ∈ m then k else Classical.ofNonempty
+      else
+        m.getKeyV k' := by
+  simpa [Raw.getKeyV] using getKeyD_modify h
+
+theorem getKeyV_modify_self [EquivBEq α] [LawfulHashable α] [Nonempty α] {k : α} {f : β → β}
+    (h : m.WF) : (Const.modify m k f).getKeyV k = if k ∈ m then k else Classical.ofNonempty := by
+  simp only [getKeyV_modify h, beq_self_eq_true, reduceIte]
+
 end Const
 
 end Modify
@@ -5301,6 +5581,10 @@ theorem getKey!_eq [EquivBEq α] [LawfulHashable α] [Inhabited α] {k : α} (h�
 theorem getKeyD_eq [EquivBEq α] [LawfulHashable α] {k fallback : α} (h₁ : m₁.WF) (h₂ : m₂.WF)
     (h : m₁ ~m m₂) : m₁.getKeyD k fallback = m₂.getKeyD k fallback := by
   simp_to_raw using Raw₀.getKeyD_eq_of_equiv
+
+theorem getKeyV_eq [EquivBEq α] [LawfulHashable α] [Nonempty α] {k : α} (h₁ : m₁.WF) (h₂ : m₂.WF)
+    (h : m₁ ~m m₂) : m₁.getKeyV k = m₂.getKeyV k := by
+  simpa [Raw.getKeyV] using getKeyD_eq h₁ h₂ h
 
 theorem insert [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF) (k : α) (v : β k)
     (h : m₁ ~m m₂) : m₁.insert k v ~m m₂.insert k v := by
@@ -5608,6 +5892,14 @@ theorem getKeyD_filterMap [LawfulBEq α]
       (f x (m.get x (mem_of_getKey?_eq_some h h'))).isSome)).getD fallback := by
   simp_to_raw using Raw₀.getKeyD_filterMap
 
+@[grind =]
+theorem getKeyV_filterMap [LawfulBEq α] [Nonempty α]
+    {f : (a : α) → β a → Option (γ a)} {k : α} (h : m.WF) :
+    (m.filterMap f).getKeyV k =
+    ((m.getKey? k).pfilter (fun x h' =>
+      (f x (m.get x (mem_of_getKey?_eq_some h h'))).isSome)).getD Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_filterMap h
+
 namespace Const
 
 variable {β : Type v} {γ : Type w} {m : Raw α (fun _ => β)}
@@ -5776,6 +6068,14 @@ theorem getKeyD_filterMap [EquivBEq α] [LawfulHashable α]
     ((m.getKey? k).pfilter (fun x h' =>
       (f x (Const.get m x (mem_of_getKey?_eq_some h h'))).isSome)).getD fallback := by
   simp_to_raw using Raw₀.Const.getKeyD_filterMap
+
+@[grind =]
+theorem getKeyV_filterMap [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    {f : α → β → Option γ} {k : α} (h : m.WF) :
+    (m.filterMap f).getKeyV k =
+    ((m.getKey? k).pfilter (fun x h' =>
+      (f x (Const.get m x (mem_of_getKey?_eq_some h h'))).isSome)).getD Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_filterMap h
 
 end Const
 
@@ -5959,6 +6259,19 @@ theorem getKeyD_filter_key [EquivBEq α] [LawfulHashable α]
     (m.filter fun k _ => f k).getKeyD k fallback = ((m.getKey? k).filter f).getD fallback := by
   simp_to_raw using Raw₀.getKeyD_filter_key
 
+@[grind =]
+theorem getKeyV_filter [LawfulBEq α] [Nonempty α]
+    {f : (a : α) → β a → Bool} {k : α} (h : m.WF) :
+    (m.filter f).getKeyV k =
+    ((m.getKey? k).pfilter (fun x h' =>
+      f x (m.get x (mem_of_getKey?_eq_some h h')))).getD Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_filter h
+
+theorem getKeyV_filter_key [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    {f : α → Bool} {k : α} (h : m.WF) :
+    (m.filter fun k _ => f k).getKeyV k = ((m.getKey? k).filter f).getD Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_filter_key h
+
 namespace Const
 
 variable {β : Type v} {γ : Type w} {m : Raw α (fun _ => β)}
@@ -6130,6 +6443,14 @@ theorem getKeyD_filter [EquivBEq α] [LawfulHashable α]
       (f x (Const.get m x (mem_of_getKey?_eq_some h h'))))).getD fallback := by
   simp_to_raw using Raw₀.Const.getKeyD_filter
 
+@[grind =]
+theorem getKeyV_filter [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    {f : α → β → Bool} {k : α} (h : m.WF) :
+    (m.filter f).getKeyV k =
+    ((m.getKey? k).pfilter (fun x h' =>
+      (f x (Const.get m x (mem_of_getKey?_eq_some h h'))))).getD Classical.ofNonempty := by
+  simpa [Raw.getKeyV] using getKeyD_filter h
+
 end Const
 
 end filter
@@ -6240,6 +6561,12 @@ theorem getKeyD_map [EquivBEq α] [LawfulHashable α]
     {f : (a : α) → β a → γ a} {k fallback : α} (h : m.WF) :
     (m.map f).getKeyD k fallback = m.getKeyD k fallback := by
   simp_to_raw using Raw₀.getKeyD_map
+
+@[simp, grind =]
+theorem getKeyV_map [EquivBEq α] [LawfulHashable α] [Nonempty α]
+    {f : (a : α) → β a → γ a} {k : α} (h : m.WF) :
+    (m.map f).getKeyV k = m.getKeyV k := by
+  simpa [Raw.getKeyV] using getKeyD_map h
 
 namespace Const
 

@@ -186,6 +186,9 @@ noncomputable instance [BEq α] [Hashable α] : GetElemV (HashMap α β) α β w
 @[inline, inherit_doc DHashMap.getKey!] def getKey! [Inhabited α] (m : HashMap α β) (a : α) : α :=
   DHashMap.getKey! m.inner a
 
+@[inherit_doc DHashMap.getKeyV] noncomputable def getKeyV [Nonempty α] (m : HashMap α β) (a : α) : α :=
+  m.getKeyD a Classical.ofNonempty
+
 @[inline, inherit_doc DHashMap.erase] def erase (m : HashMap α β) (a : α) :
     HashMap α β :=
   ⟨m.inner.erase a⟩

@@ -899,33 +899,61 @@ theorem getKeyD_empty [TransCmp cmp] {a : α} {fallback : α} :
     (∅ : ExtDTreeMap α β cmp).getKeyD a fallback = fallback :=
   DTreeMap.getKeyD_emptyc
 
+theorem getKeyV_empty [TransCmp cmp] {a : α} [Nonempty α] :
+    (∅ : ExtDTreeMap α β cmp).getKeyV a = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_empty ∅
+
 @[grind =] theorem getKeyD_insert [TransCmp cmp] {k a fallback : α} {v : β k} :
     (t.insert k v).getKeyD a fallback =
       if cmp k a = .eq then k else t.getKeyD a fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_insert
+
+theorem getKeyV_insert [TransCmp cmp] [Nonempty α] {k a : α}
+    {v : β k} : (t.insert k v).getKeyV a = if cmp k a = .eq then k else t.getKeyV a  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_insert
 
 @[simp]
 theorem getKeyD_insert_self [TransCmp cmp] {a fallback : α} {b : β a} :
     (t.insert a b).getKeyD a fallback = a :=
   t.inductionOn fun _ => DTreeMap.getKeyD_insert_self
 
+theorem getKeyV_insert_self [TransCmp cmp] [Nonempty α] {a : α}
+    {b : β a} : (t.insert a b).getKeyV a = a  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_insert_self
+
 theorem getKeyD_eq_fallback_of_contains_eq_false [TransCmp cmp] {a fallback : α} :
     t.contains a = false → t.getKeyD a fallback = fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_eq_fallback_of_contains_eq_false
 
+theorem getKeyV_eq_classicalOfNonempty_of_contains_eq_false [TransCmp cmp] [Nonempty α] {a : α} :
+    t.contains a = false → t.getKeyV a = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_eq_fallback_of_contains_eq_false
+
 theorem getKeyD_eq_fallback [TransCmp cmp] {a fallback : α} :
     ¬ a ∈ t → t.getKeyD a fallback = fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_eq_fallback
+
+theorem getKeyV_eq_classicalOfNonempty [TransCmp cmp] [Nonempty α] {a : α} :
+    ¬ a ∈ t → t.getKeyV a = Classical.ofNonempty  := by
+  simpa [← contains_iff_mem] using getKeyV_eq_classicalOfNonempty_of_contains_eq_false
 
 @[grind =] theorem getKeyD_erase [TransCmp cmp] {k a fallback : α} :
     (t.erase k).getKeyD a fallback =
       if cmp k a = .eq then fallback else t.getKeyD a fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_erase
 
+theorem getKeyV_erase [TransCmp cmp] [Nonempty α] {k a : α} :
+    (t.erase k).getKeyV a = if cmp k a = .eq then Classical.ofNonempty else t.getKeyV a  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_erase
+
 @[simp]
 theorem getKeyD_erase_self [TransCmp cmp] {k fallback : α} :
     (t.erase k).getKeyD k fallback = fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_erase_self
+
+theorem getKeyV_erase_self [TransCmp cmp] [Nonempty α] {k : α} :
+    (t.erase k).getKeyV k = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_erase_self
 
 theorem getKey?_eq_some_getKeyD_of_contains [TransCmp cmp] {a fallback : α} :
     t.contains a = true → t.getKey? a = some (t.getKeyD a fallback) :=
@@ -939,6 +967,10 @@ theorem getKeyD_eq_getD_getKey? [TransCmp cmp] {a fallback : α} :
     t.getKeyD a fallback = (t.getKey? a).getD fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_eq_getD_getKey?
 
+theorem getKeyV_eq_getD_getKey? [TransCmp cmp] [Nonempty α] {a : α} :
+    t.getKeyV a = (t.getKey? a).getD Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_eq_getD_getKey?
+
 theorem getKey_eq_getKeyD [TransCmp cmp] {a fallback : α} {h} :
     t.getKey a h = t.getKeyD a fallback :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_eq_getKeyD) h
@@ -947,18 +979,36 @@ theorem getKey!_eq_getKeyD_default [TransCmp cmp] [Inhabited α] {a : α} :
     t.getKey! a = t.getKeyD a default :=
   t.inductionOn fun _ => DTreeMap.getKey!_eq_getKeyD_default
 
+theorem getKeyV_eq_getKeyD_classicalOfNonempty [TransCmp cmp] [Nonempty α] {a : α} :
+    t.getKeyV a = t.getKeyD a Classical.ofNonempty  :=
+  rfl
+
 theorem getKeyD_congr [TransCmp cmp] {k k' fallback : α} (h' : cmp k k' = .eq) :
     t.getKeyD k fallback = t.getKeyD k' fallback :=
   t.inductionOn (fun _ h' => DTreeMap.getKeyD_congr h') h'
+
+theorem getKeyV_congr [TransCmp cmp] [Nonempty α] {k k' : α} (h' : cmp k k' = .eq) :
+    t.getKeyV k = t.getKeyV k'  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_congr h'
 
 theorem getKeyD_eq_of_contains [TransCmp cmp] [LawfulEqCmp cmp] {k fallback : α}
     (h' : t.contains k) :
     t.getKeyD k fallback = k :=
   t.inductionOn (fun _ h' => DTreeMap.getKeyD_eq_of_contains h') h'
 
+theorem getKeyV_eq_of_contains [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] {k : α}
+    (h' : t.contains k) :
+    t.getKeyV k = k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_eq_of_contains h'
+
 theorem getKeyD_eq_of_mem [TransCmp cmp] [LawfulEqCmp cmp] {k fallback : α} (h' : k ∈ t) :
     t.getKeyD k fallback = k :=
   t.inductionOn (fun _ h' => DTreeMap.getKeyD_eq_of_mem h') h'
+
+theorem getKeyV_eq_of_mem [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α]
+    {k : α} (h' : k ∈ t) :
+    t.getKeyV k = k  :=
+  getKeyV_eq_of_contains h'
 
 @[simp]
 theorem insertIfNew_ne_empty [TransCmp cmp] {k : α} {v : β k} :
@@ -1100,6 +1150,11 @@ end Const
     (t.insertIfNew k v).getKeyD a fallback =
       if cmp k a = .eq ∧ ¬ k ∈ t then k else t.getKeyD a fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_insertIfNew
+
+theorem getKeyV_insertIfNew [TransCmp cmp] [Nonempty α] {k a : α} {v : β k} :
+    (t.insertIfNew k v).getKeyV a =
+      if cmp k a = .eq ∧ ¬ k ∈ t then k else t.getKeyV a  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_insertIfNew
 
 @[simp, grind =]
 theorem getThenInsertIfNew?_fst [TransCmp cmp] [LawfulEqCmp cmp] {k : α} {v : β k} :
@@ -1597,6 +1652,12 @@ theorem getKeyD_insertMany_list_of_contains_eq_false [TransCmp cmp] [BEq α] [La
   simp only [insertMany_list_mk]
   exact DTreeMap.getKeyD_insertMany_list_of_contains_eq_false contains_eq_false
 
+theorem getKeyV_insertMany_list_of_contains_eq_false [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
+    [Nonempty α] {l : List ((a : α) × β a)} {k : α}
+    (contains_eq_false : (l.map Sigma.fst).contains k = false) :
+    (t.insertMany l).getKeyV k = t.getKeyV k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_insertMany_list_of_contains_eq_false contains_eq_false
+
 theorem getKeyD_insertMany_list_of_mem [TransCmp cmp]
     {l : List ((a : α) × β a)}
     {k k' fallback : α} (k_eq : cmp k k' = .eq)
@@ -1606,6 +1667,14 @@ theorem getKeyD_insertMany_list_of_mem [TransCmp cmp]
   refine t.inductionOn (fun _ distinct mem => ?_) distinct mem
   simp only [insertMany_list_mk]
   exact DTreeMap.getKeyD_insertMany_list_of_mem k_eq distinct mem
+
+theorem getKeyV_insertMany_list_of_mem [TransCmp cmp] [Nonempty α]
+    {l : List ((a : α) × β a)}
+    {k k' : α} (k_eq : cmp k k' = .eq)
+    (distinct : l.Pairwise (fun a b => ¬ cmp a.1 b.1 = .eq))
+    (mem : k ∈ l.map Sigma.fst) :
+    (t.insertMany l).getKeyV k' = k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_insertMany_list_of_mem k_eq distinct mem
 
 theorem size_insertMany_list [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
     {l : List ((a : α) × β a)} (distinct : l.Pairwise (fun a b => ¬ cmp a.1 b.1 = .eq)) :
@@ -1780,6 +1849,12 @@ theorem getKeyD_insertMany_list_of_contains_eq_false [TransCmp cmp] [BEq α] [La
   simp only [insertMany_list_mk]
   exact DTreeMap.Const.getKeyD_insertMany_list_of_contains_eq_false contains_eq_false
 
+theorem getKeyV_insertMany_list_of_contains_eq_false [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
+    [Nonempty α] {l : List (α × β)} {k : α}
+    (contains_eq_false : (l.map Prod.fst).contains k = false) :
+    (insertMany t l).getKeyV k = t.getKeyV k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_insertMany_list_of_contains_eq_false contains_eq_false
+
 theorem getKeyD_insertMany_list_of_mem [TransCmp cmp]
     {l : List (α × β)}
     {k k' fallback : α} (k_eq : cmp k k' = .eq)
@@ -1789,6 +1864,14 @@ theorem getKeyD_insertMany_list_of_mem [TransCmp cmp]
   refine t.inductionOn (fun _ distinct mem => ?_) distinct mem
   simp only [insertMany_list_mk]
   exact DTreeMap.Const.getKeyD_insertMany_list_of_mem k_eq distinct mem
+
+theorem getKeyV_insertMany_list_of_mem [TransCmp cmp] [Nonempty α]
+    {l : List (α × β)}
+    {k k' : α} (k_eq : cmp k k' = .eq)
+    (distinct : l.Pairwise (fun a b => ¬ cmp a.1 b.1 = .eq))
+    (mem : k ∈ l.map Prod.fst) :
+    (insertMany t l).getKeyV k' = k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_insertMany_list_of_mem k_eq distinct mem
 
 theorem size_insertMany_list [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
     {l : List (α × β)}
@@ -2040,6 +2123,12 @@ theorem getKeyD_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false
   simp only [insertManyIfNewUnit_list_mk]
   exact DTreeMap.Const.getKeyD_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false
 
+theorem getKeyV_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false
+    [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp] [Nonempty α] {l : List α} {k : α} :
+    ¬ k ∈ t → l.contains k = false →
+      getKeyV (insertManyIfNewUnit t l) k = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false
+
 theorem getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem [TransCmp cmp]
     {l : List α} {k k' fallback : α} (k_eq : cmp k k' = .eq) :
     ¬ k ∈ t → l.Pairwise (fun a b => ¬ cmp a b = .eq) → k ∈ l →
@@ -2048,12 +2137,23 @@ theorem getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem [TransCmp cmp]
   simp only [insertManyIfNewUnit_list_mk]
   exact DTreeMap.Const.getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem k_eq
 
+theorem getKeyV_insertManyIfNewUnit_list_of_not_mem_of_mem [TransCmp cmp]
+    [Nonempty α] {l : List α} {k k' : α} (k_eq : cmp k k' = .eq) :
+    ¬ k ∈ t → l.Pairwise (fun a b => ¬ cmp a b = .eq) → k ∈ l →
+      getKeyV (insertManyIfNewUnit t l) k' = k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem k_eq
+
 theorem getKeyD_insertManyIfNewUnit_list_of_mem [TransCmp cmp]
     {l : List α} {k fallback : α} :
     k ∈ t → getKeyD (insertManyIfNewUnit t l) k fallback = getKeyD t k fallback := by
   refine t.inductionOn fun _ => ?_
   simp only [insertManyIfNewUnit_list_mk]
   exact DTreeMap.Const.getKeyD_insertManyIfNewUnit_list_of_mem
+
+theorem getKeyV_insertManyIfNewUnit_list_of_mem [TransCmp cmp]
+    [Nonempty α] {l : List α} {k : α} :
+    k ∈ t → getKeyV (insertManyIfNewUnit t l) k = getKeyV t k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_insertManyIfNewUnit_list_of_mem
 
 theorem size_insertManyIfNewUnit_list [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
     {l : List α}
@@ -2263,6 +2363,12 @@ theorem getKeyD_ofList_of_contains_eq_false [TransCmp cmp] [BEq α] [LawfulBEqCm
     (ofList l cmp).getKeyD k fallback = fallback :=
   DTreeMap.getKeyD_ofList_of_contains_eq_false contains_eq_false
 
+theorem getKeyV_ofList_of_contains_eq_false [TransCmp cmp] [Nonempty α] [BEq α] [LawfulBEqCmp cmp]
+    {l : List ((a : α) × β a)} {k : α}
+    (contains_eq_false : (l.map Sigma.fst).contains k = false) :
+    (ofList l cmp).getKeyV k = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_ofList_of_contains_eq_false contains_eq_false
+
 theorem getKeyD_ofList_of_mem [TransCmp cmp]
     {l : List ((a : α) × β a)}
     {k k' fallback : α} (k_eq : cmp k k' = .eq)
@@ -2270,6 +2376,14 @@ theorem getKeyD_ofList_of_mem [TransCmp cmp]
     (mem : k ∈ l.map Sigma.fst) :
     (ofList l cmp).getKeyD k' fallback = k :=
   DTreeMap.getKeyD_ofList_of_mem k_eq distinct mem
+
+theorem getKeyV_ofList_of_mem [TransCmp cmp] [Nonempty α]
+    {l : List ((a : α) × β a)}
+    {k k' : α} (k_eq : cmp k k' = .eq)
+    (distinct : l.Pairwise (fun a b => ¬ cmp a.1 b.1 = .eq))
+    (mem : k ∈ l.map Sigma.fst) :
+    (ofList l cmp).getKeyV k' = k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_ofList_of_mem k_eq distinct mem
 
 theorem size_ofList [TransCmp cmp]
     {l : List ((a : α) × β a)} (distinct : l.Pairwise (fun a b => ¬ cmp a.1 b.1 = .eq)) :
@@ -2426,6 +2540,12 @@ theorem getKeyD_ofList_of_contains_eq_false [TransCmp cmp] [BEq α] [LawfulBEqCm
     (ofList l cmp).getKeyD k fallback = fallback :=
   DTreeMap.Const.getKeyD_ofList_of_contains_eq_false contains_eq_false
 
+theorem getKeyV_ofList_of_contains_eq_false [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
+    [Nonempty α] {l : List (α × β)} {k : α}
+    (contains_eq_false : (l.map Prod.fst).contains k = false) :
+    (ofList l cmp).getKeyV k = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_ofList_of_contains_eq_false contains_eq_false
+
 theorem getKeyD_ofList_of_mem [TransCmp cmp]
     {l : List (α × β)}
     {k k' fallback : α} (k_eq : cmp k k' = .eq)
@@ -2433,6 +2553,14 @@ theorem getKeyD_ofList_of_mem [TransCmp cmp]
     (mem : k ∈ l.map Prod.fst) :
     (ofList l cmp).getKeyD k' fallback = k :=
   DTreeMap.Const.getKeyD_ofList_of_mem k_eq distinct mem
+
+theorem getKeyV_ofList_of_mem [TransCmp cmp] [Nonempty α]
+    {l : List (α × β)}
+    {k k' : α} (k_eq : cmp k k' = .eq)
+    (distinct : l.Pairwise (fun a b => ¬ cmp a.1 b.1 = .eq))
+    (mem : k ∈ l.map Prod.fst) :
+    (ofList l cmp).getKeyV k' = k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_ofList_of_mem k_eq distinct mem
 
 theorem size_ofList [TransCmp cmp] {l : List (α × β)}
     (distinct : l.Pairwise (fun a b => ¬ cmp a.1 b.1 = .eq)) :
@@ -2522,12 +2650,25 @@ theorem getKeyD_unitOfList_of_contains_eq_false [TransCmp cmp] [BEq α]
     getKeyD (unitOfList l cmp) k fallback = fallback :=
   DTreeMap.Const.getKeyD_unitOfList_of_contains_eq_false contains_eq_false
 
+theorem getKeyV_unitOfList_of_contains_eq_false [TransCmp cmp] [BEq α]
+    [LawfulBEqCmp cmp] [Nonempty α] {l : List α} {k : α}
+    (contains_eq_false : l.contains k = false) :
+    getKeyV (unitOfList l cmp) k = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_unitOfList_of_contains_eq_false contains_eq_false
+
 theorem getKeyD_unitOfList_of_mem [TransCmp cmp]
     {l : List α} {k k' fallback : α} (k_eq : cmp k k' = .eq)
     (distinct : l.Pairwise (fun a b => ¬ cmp a b = .eq))
     (mem : k ∈ l) :
     getKeyD (unitOfList l cmp) k' fallback = k :=
   DTreeMap.Const.getKeyD_unitOfList_of_mem k_eq distinct mem
+
+theorem getKeyV_unitOfList_of_mem [TransCmp cmp]
+    [Nonempty α] {l : List α} {k k' : α} (k_eq : cmp k k' = .eq)
+    (distinct : l.Pairwise (fun a b => ¬ cmp a b = .eq))
+    (mem : k ∈ l) :
+    getKeyV (unitOfList l cmp) k' = k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_unitOfList_of_mem k_eq distinct mem
 
 theorem size_unitOfList [TransCmp cmp] {l : List α}
     (distinct : l.Pairwise (fun a b => ¬ cmp a b = .eq)) :
@@ -2738,17 +2879,32 @@ theorem getKeyD_union [TransCmp cmp] {k fallback : α} :
     (t₁ ∪ t₂).getKeyD k fallback = t₂.getKeyD k (t₁.getKeyD k fallback) :=
   t₁.inductionOn₂ t₂ fun _ _ => DTreeMap.getKeyD_union
 
+theorem getKeyV_union [TransCmp cmp] [Nonempty α] {k : α} : (t₁ ∪ t₂).getKeyV k = t₂.getKeyD k (t₁.getKeyV k)  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_union
+
 theorem getKeyD_union_of_not_mem_left [TransCmp cmp]
     {k fallback : α} (not_mem : ¬k ∈ t₁) :
     (t₁ ∪ t₂).getKeyD k fallback = t₂.getKeyD k fallback := by
   revert not_mem
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.getKeyD_union_of_not_mem_left h
 
+theorem getKeyV_union_of_not_mem_left [Nonempty α]
+    [TransCmp cmp] {k : α}
+    (not_mem : ¬k ∈ t₁) :
+    (t₁ ∪ t₂).getKeyV k = t₂.getKeyV k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_union_of_not_mem_left not_mem
+
 theorem getKeyD_union_of_not_mem_right [TransCmp cmp]
     {k fallback : α} (not_mem : ¬k ∈ t₂) :
     (t₁ ∪ t₂).getKeyD k fallback = t₁.getKeyD k fallback := by
   revert not_mem
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.getKeyD_union_of_not_mem_right h
+
+theorem getKeyV_union_of_not_mem_right [Nonempty α]
+    [TransCmp cmp] {k : α}
+    (not_mem : ¬k ∈ t₂) :
+    (t₁ ∪ t₂).getKeyV k = t₁.getKeyV k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_union_of_not_mem_right not_mem
 
 /- getKey! -/
 theorem getKey!_union [TransCmp cmp] [Inhabited α] {k : α} : (t₁ ∪ t₂).getKey! k = t₂.getKeyD k (t₁.getKey! k) :=
@@ -3066,20 +3222,40 @@ theorem getKeyD_inter [TransCmp cmp] {k fallback : α} :
     if k ∈ t₂ then t₁.getKeyD k fallback else fallback :=
   t₁.inductionOn₂ t₂ fun _ _ => DTreeMap.getKeyD_inter
 
+theorem getKeyV_inter [Nonempty α] [TransCmp cmp] {k : α} :
+    (t₁ ∩ t₂).getKeyV k =
+    if k ∈ t₂ then t₁.getKeyV k else Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_inter
+
 theorem getKeyD_inter_of_mem_right [TransCmp cmp] {k fallback : α} (h : k ∈ t₂) :
     (t₁ ∩ t₂).getKeyD k fallback = t₁.getKeyD k fallback := by
   revert h
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.getKeyD_inter_of_mem_right h
+
+theorem getKeyV_inter_of_mem_right [Nonempty α] [TransCmp cmp]
+    {k : α} (h : k ∈ t₂) :
+    (t₁ ∩ t₂).getKeyV k = t₁.getKeyV k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_inter_of_mem_right h
 
 theorem getKeyD_inter_of_not_mem_right [TransCmp cmp] {k fallback : α} (h : ¬k ∈ t₂) :
     (t₁ ∩ t₂).getKeyD k fallback = fallback := by
   revert h
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.getKeyD_inter_of_not_mem_right h
 
+theorem getKeyV_inter_of_not_mem_right [Nonempty α] [TransCmp cmp]
+    {k : α} (h : ¬k ∈ t₂) :
+    (t₁ ∩ t₂).getKeyV k = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_inter_of_not_mem_right h
+
 theorem getKeyD_inter_of_not_mem_left [TransCmp cmp] {k fallback : α} (h : ¬k ∈ t₁) :
     (t₁ ∩ t₂).getKeyD k fallback = fallback := by
   revert h
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.getKeyD_inter_of_not_mem_left h
+
+theorem getKeyV_inter_of_not_mem_left [Nonempty α] [TransCmp cmp]
+    {k : α} (h : ¬k ∈ t₁) :
+    (t₁ ∩ t₂).getKeyV k = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_inter_of_not_mem_left h
 
 /- getKey! -/
 theorem getKey!_inter [Inhabited α] [TransCmp cmp] {k : α} :
@@ -3443,20 +3619,40 @@ theorem getKeyD_diff [TransCmp cmp] {k fallback : α} :
     if k ∈ t₂ then fallback else t₁.getKeyD k fallback :=
   t₁.inductionOn₂ t₂ fun _ _ => DTreeMap.getKeyD_diff
 
+theorem getKeyV_diff [Nonempty α] [TransCmp cmp] {k : α} :
+    (t₁ \ t₂).getKeyV k =
+    if k ∈ t₂ then Classical.ofNonempty else t₁.getKeyV k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_diff
+
 theorem getKeyD_diff_of_not_mem_right [TransCmp cmp] {k fallback : α} (h : ¬k ∈ t₂) :
     (t₁ \ t₂).getKeyD k fallback = t₁.getKeyD k fallback := by
   revert h
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.getKeyD_diff_of_not_mem_right h
+
+theorem getKeyV_diff_of_not_mem_right [Nonempty α] [TransCmp cmp]
+    {k : α} (h : ¬k ∈ t₂) :
+    (t₁ \ t₂).getKeyV k = t₁.getKeyV k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_diff_of_not_mem_right h
 
 theorem getKeyD_diff_of_mem_right [TransCmp cmp] {k fallback : α} (h : k ∈ t₂) :
     (t₁ \ t₂).getKeyD k fallback = fallback := by
   revert h
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.getKeyD_diff_of_mem_right h
 
+theorem getKeyV_diff_of_mem_right [Nonempty α] [TransCmp cmp]
+    {k : α} (h : k ∈ t₂) :
+    (t₁ \ t₂).getKeyV k = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_diff_of_mem_right h
+
 theorem getKeyD_diff_of_not_mem_left [TransCmp cmp] {k fallback : α} (h : ¬k ∈ t₁) :
     (t₁ \ t₂).getKeyD k fallback = fallback := by
   revert h
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.getKeyD_diff_of_not_mem_left h
+
+theorem getKeyV_diff_of_not_mem_left [Nonempty α] [TransCmp cmp]
+    {k : α} (h : ¬k ∈ t₁) :
+    (t₁ \ t₂).getKeyV k = Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_diff_of_not_mem_left h
 
 /- getKey! -/
 theorem getKey!_diff [Inhabited α] [TransCmp cmp] {k : α} :
@@ -3848,11 +4044,24 @@ theorem getKeyD_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' fallback : α}
         t.getKeyD k' fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_alter
 
+theorem getKeyV_alter [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] {k k' : α}
+    {f : Option (β k) → Option (β k)} : (t.alter k f).getKeyV k' =
+      if cmp k k' = .eq then
+        if (f (t.get? k)).isSome then k else Classical.ofNonempty
+      else
+        t.getKeyV k'  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_alter
+
 @[simp]
 theorem getKeyD_alter_self [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k : α}
     {fallback : α} {f : Option (β k) → Option (β k)} :
     (t.alter k f).getKeyD k fallback = if (f (t.get? k)).isSome then k else fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_alter_self
+
+theorem getKeyV_alter_self [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] {k : α}
+    {f : Option (β k) → Option (β k)} :
+    (t.alter k f).getKeyV k = if (f (t.get? k)).isSome then k else Classical.ofNonempty  :=
+  t.inductionOn fun _ => DTreeMap.getKeyV_alter_self
 
 namespace Const
 
@@ -4076,11 +4285,24 @@ theorem getKeyD_alter [TransCmp cmp] {k k' fallback : α} {f : Option β → Opt
         t.getKeyD k' fallback :=
   t.inductionOn fun _ => DTreeMap.Const.getKeyD_alter
 
+theorem getKeyV_alter [TransCmp cmp] [Nonempty α] {k k' : α} {f : Option β → Option β} :
+    (alter t k f).getKeyV k' =
+      if cmp k k' = .eq then
+        if (f (get? t k)).isSome then k else Classical.ofNonempty
+      else
+        t.getKeyV k'  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_alter
+
 @[simp]
 theorem getKeyD_alter_self [TransCmp cmp] [Inhabited α] {k : α} {fallback : α}
     {f : Option β → Option β} :
     (alter t k f).getKeyD k fallback = if (f (get? t k)).isSome then k else fallback :=
   t.inductionOn fun _ => DTreeMap.Const.getKeyD_alter_self
+
+theorem getKeyV_alter_self [TransCmp cmp] [Nonempty α] {k : α}
+    {f : Option β → Option β} :
+    (alter t k f).getKeyV k = if (f (get? t k)).isSome then k else Classical.ofNonempty  :=
+  t.inductionOn fun _ => DTreeMap.Const.getKeyV_alter_self
 
 end Const
 
@@ -4237,9 +4459,21 @@ theorem getKeyD_modify {k k' fallback : α} {f : β k → β k} :
         t.getKeyD k' fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_modify
 
+theorem getKeyV_modify [Nonempty α] {k k' : α} {f : β k → β k} :
+    (t.modify k f).getKeyV k' =
+      if cmp k k' = .eq then
+        if k ∈ t then k else Classical.ofNonempty
+      else
+        t.getKeyV k'  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_modify
+
 theorem getKeyD_modify_self [Inhabited α] {k fallback : α} {f : β k → β k} :
     (t.modify k f).getKeyD k fallback = if k ∈ t then k else fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_modify_self
+
+theorem getKeyV_modify_self [Nonempty α] {k : α} {f : β k → β k} :
+    (t.modify k f).getKeyV k = if k ∈ t then k else Classical.ofNonempty  :=
+  t.inductionOn fun _ => DTreeMap.getKeyV_modify_self
 
 end Dependent
 
@@ -4390,9 +4624,21 @@ theorem getKeyD_modify {k k' fallback : α} {f : β → β} :
         t.getKeyD k' fallback :=
   t.inductionOn fun _ => DTreeMap.Const.getKeyD_modify
 
+theorem getKeyV_modify [Nonempty α] {k k' : α} {f : β → β} :
+    (modify t k f).getKeyV k' =
+      if cmp k k' = .eq then
+        if k ∈ t then k else Classical.ofNonempty
+      else
+        t.getKeyV k'  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_modify
+
 theorem getKeyD_modify_self [Inhabited α] {k fallback : α} {f : β → β} :
     (modify t k f).getKeyD k fallback = if k ∈ t then k else fallback :=
   t.inductionOn fun _ => DTreeMap.Const.getKeyD_modify_self
+
+theorem getKeyV_modify_self [Nonempty α] {k : α} {f : β → β} :
+    (modify t k f).getKeyV k = if k ∈ t then k else Classical.ofNonempty  :=
+  t.inductionOn fun _ => DTreeMap.Const.getKeyV_modify_self
 
 end Const
 
@@ -4548,6 +4794,10 @@ theorem getKey!_minKey? [TransCmp cmp] [Inhabited α] {km} :
 theorem getKeyD_minKey? [TransCmp cmp] {km fallback} :
     (hkm : t.minKey? = some km) → t.getKeyD km fallback = km :=
   t.inductionOn fun _ => DTreeMap.getKeyD_minKey?
+
+theorem getKeyV_minKey? [TransCmp cmp] [Nonempty α] {km} :
+    (hkm : t.minKey? = some km) → t.getKeyV km = km  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_minKey?
 
 @[simp]
 theorem minKey?_bind_getKey? [TransCmp cmp] :
@@ -4716,6 +4966,10 @@ theorem getKeyD_minKey [TransCmp cmp] {he fallback} :
     t.getKeyD (t.minKey he) fallback = t.minKey he :=
   t.inductionOn (fun _ _ _ => DTreeMap.getKeyD_minKey) he fallback
 
+theorem getKeyV_minKey [TransCmp cmp] [Nonempty α] {he} :
+    t.getKeyV (t.minKey he) = t.minKey he  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_minKey
+
 @[simp]
 theorem minKey_erase_eq_iff_not_compare_eq_minKey [TransCmp cmp] {k he} :
     (t.erase k |>.minKey he) =
@@ -4873,6 +5127,10 @@ theorem getKeyD_minKey! [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) {fallback
     t.getKeyD t.minKey! fallback = t.minKey! :=
   t.inductionOn (fun _ he => DTreeMap.getKeyD_minKey! (isEmpty_eq_false_iff.mpr he)) he
 
+theorem getKeyV_minKey! [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) :
+    t.getKeyV t.minKey! = t.minKey!  :=
+  t.inductionOn (fun _ he => DTreeMap.getKeyV_minKey! (isEmpty_eq_false_iff.mpr he)) he
+
 theorem minKey!_erase_eq_of_not_compare_minKey!_eq [TransCmp cmp] [Inhabited α] {k}
     (he : t.erase k ≠ ∅) (heq : ¬ cmp k t.minKey! = .eq) :
     (t.erase k).minKey! = t.minKey! :=
@@ -5013,6 +5271,10 @@ theorem getKey!_minKeyD [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) {fallback
 theorem getKeyD_minKeyD [TransCmp cmp] (he : t ≠ ∅) {fallback fallback'} :
     t.getKeyD (t.minKeyD fallback) fallback' = t.minKeyD fallback :=
   t.inductionOn (fun _ he => DTreeMap.getKeyD_minKeyD (isEmpty_eq_false_iff.mpr he)) he
+
+theorem getKeyV_minKeyD [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) {fallback} :
+    t.getKeyV (t.minKeyD fallback) = t.minKeyD fallback  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_minKeyD he
 
 theorem minKeyD_erase_eq_of_not_compare_minKeyD_eq [TransCmp cmp] {k fallback}
     (he : t.erase k ≠ ∅) (heq : ¬ cmp k (t.minKeyD fallback) = .eq) :
@@ -5186,6 +5448,10 @@ theorem getKeyD_maxKey? [TransCmp cmp] {km fallback} :
     (hkm : t.maxKey? = some km) → t.getKeyD km fallback = km :=
   t.inductionOn fun _ => DTreeMap.getKeyD_maxKey?
 
+theorem getKeyV_maxKey? [TransCmp cmp] [Nonempty α] {km} :
+    (hkm : t.maxKey? = some km) → t.getKeyV km = km  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_maxKey?
+
 @[simp]
 theorem maxKey?_bind_getKey? [TransCmp cmp] :
     t.maxKey?.bind t.getKey? = t.maxKey? :=
@@ -5353,6 +5619,10 @@ theorem getKeyD_maxKey [TransCmp cmp] {he fallback} :
     t.getKeyD (t.maxKey he) fallback = t.maxKey he :=
   t.inductionOn (fun _ _ _ => DTreeMap.getKeyD_maxKey) he fallback
 
+theorem getKeyV_maxKey [TransCmp cmp] [Nonempty α] {he} :
+    t.getKeyV (t.maxKey he) = t.maxKey he  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_maxKey
+
 @[simp]
 theorem maxKey_erase_eq_iff_not_compare_eq_maxKey [TransCmp cmp] {k he} :
     (t.erase k |>.maxKey he) =
@@ -5510,6 +5780,10 @@ theorem getKeyD_maxKey! [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) {fallback
     t.getKeyD t.maxKey! fallback = t.maxKey! :=
   t.inductionOn (fun _ he => DTreeMap.getKeyD_maxKey! (isEmpty_eq_false_iff.mpr he)) he
 
+theorem getKeyV_maxKey! [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) :
+    t.getKeyV t.maxKey! = t.maxKey!  :=
+  t.inductionOn (fun _ he => DTreeMap.getKeyV_maxKey! (isEmpty_eq_false_iff.mpr he)) he
+
 theorem maxKey!_erase_eq_of_not_compare_maxKey!_eq [TransCmp cmp] [Inhabited α] {k}
     (he : t.erase k ≠ ∅) (heq : ¬ cmp k t.maxKey! = .eq) :
     (t.erase k).maxKey! = t.maxKey! :=
@@ -5652,6 +5926,10 @@ theorem getKey!_maxKeyD [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) {fallback
 theorem getKeyD_maxKeyD [TransCmp cmp] (he : t ≠ ∅) {fallback fallback'} :
     t.getKeyD (t.maxKeyD fallback) fallback' = t.maxKeyD fallback :=
   t.inductionOn (fun _ he => DTreeMap.getKeyD_maxKeyD (isEmpty_eq_false_iff.mpr he)) he
+
+theorem getKeyV_maxKeyD [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) {fallback} :
+    t.getKeyV (t.maxKeyD fallback) = t.maxKeyD fallback  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_maxKeyD he
 
 theorem maxKeyD_erase_eq_of_not_compare_maxKeyD_eq [TransCmp cmp] {k fallback}
     (he : t.erase k ≠ ∅) (heq : ¬ cmp k (t.maxKeyD fallback) = .eq) :
@@ -5909,6 +6187,13 @@ theorem getKeyD_filterMap [TransCmp cmp] [LawfulEqCmp cmp]
       (f x (t.get x (mem_of_getKey?_eq_some h'))).isSome)).getD fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_filterMap
 
+theorem getKeyV_filterMap [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α]
+    {f : (a : α) → β a → Option (γ a)} {k : α} :
+    (t.filterMap f).getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (t.get x (mem_of_getKey?_eq_some h'))).isSome)).getD Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_filterMap
+
 namespace Const
 
 variable {β : Type v} {γ : Type w} {t : ExtDTreeMap α (fun _ => β) cmp}
@@ -6062,6 +6347,13 @@ theorem getKeyD_filterMap [TransCmp cmp]
     ((t.getKey? k).pfilter (fun x h' =>
       (f x (Const.get t x (mem_of_getKey?_eq_some h'))).isSome)).getD fallback :=
   t.inductionOn fun _ => DTreeMap.Const.getKeyD_filterMap
+
+theorem getKeyV_filterMap [TransCmp cmp] [Nonempty α]
+    {f : α → β → Option γ} {k : α} :
+    (t.filterMap f).getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (Const.get t x (mem_of_getKey?_eq_some h'))).isSome)).getD Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_filterMap
 
 end Const
 
@@ -6221,10 +6513,22 @@ theorem getKeyD_filter [TransCmp cmp] [LawfulEqCmp cmp]
       f x (t.get x (mem_of_getKey?_eq_some h')))).getD fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_filter
 
+theorem getKeyV_filter [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α]
+    {f : (a : α) → β a → Bool} {k : α} :
+    (t.filter f).getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      f x (t.get x (mem_of_getKey?_eq_some h')))).getD Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_filter
+
 theorem getKeyD_filter_key [TransCmp cmp]
     {f : α → Bool} {k fallback : α} :
     (t.filter fun k _ => f k).getKeyD k fallback = ((t.getKey? k).filter f).getD fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_filter_key
+
+theorem getKeyV_filter_key [TransCmp cmp] [Nonempty α]
+    {f : α → Bool} {k : α} :
+    (t.filter fun k _ => f k).getKeyV k = ((t.getKey? k).filter f).getD Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_filter_key
 
 namespace Const
 
@@ -6382,6 +6686,13 @@ theorem getKeyD_filter [TransCmp cmp]
       (f x (Const.get t x (mem_of_getKey?_eq_some h'))))).getD fallback :=
   t.inductionOn fun _ => DTreeMap.Const.getKeyD_filter
 
+theorem getKeyV_filter [TransCmp cmp] [Nonempty α]
+    {f : α → β → Bool} {k : α} :
+    (t.filter f).getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (Const.get t x (mem_of_getKey?_eq_some h'))))).getD Classical.ofNonempty  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_filter
+
 end Const
 
 end filter
@@ -6500,6 +6811,11 @@ theorem getKeyD_map [TransCmp cmp]
     {f : (a : α) → β a → γ a} {k fallback : α} :
     (t.map f).getKeyD k fallback = t.getKeyD k fallback :=
   t.inductionOn fun _ => DTreeMap.getKeyD_map
+
+theorem getKeyV_map [TransCmp cmp] [Nonempty α]
+    {f : (a : α) → β a → γ a} {k : α} :
+    (t.map f).getKeyV k = t.getKeyV k  := by
+  simpa [ExtDTreeMap.getKeyV] using getKeyD_map
 
 namespace Const
 

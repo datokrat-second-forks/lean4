@@ -281,6 +281,13 @@ If a mapping exists the result is guaranteed to be pointer equal to the key in t
 def getKeyD (t : DTreeMap α β cmp) (a : α) (fallback : α) : α :=
   letI : Ord α := ⟨cmp⟩; t.inner.getKeyD a fallback
 
+/--
+Checks if a mapping for the given key exists and returns the key if it does, otherwise
+`Classical.ofNonempty`.
+If a mapping exists the result is guaranteed to be pointer equal to the key in the map.
+-/
+noncomputable def getKeyV [Nonempty α] (t : DTreeMap α β cmp) (a : α) : α :=
+  t.getKeyD a Classical.ofNonempty
 
 /--
 Checks if a mapping for the given key exists and returns the key-value pair if it does, otherwise `none`.

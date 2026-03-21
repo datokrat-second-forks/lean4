@@ -198,6 +198,9 @@ end
 @[inline, inherit_doc Raw.getKeyD] def getKeyD (m : DHashMap α β) (a : α) (fallback : α) : α :=
   Raw₀.getKeyD ⟨m.1, m.2.size_buckets_pos⟩ a fallback
 
+@[inherit_doc Raw.getKeyV] noncomputable def getKeyV [Nonempty α] (m : DHashMap α β) (a : α) : α :=
+  m.getKeyD a Classical.ofNonempty
+
 @[inline, inherit_doc Raw.getEntry?] def getEntry? (m : DHashMap α β) (a : α) : Option ((a : α) × β a) :=
   Raw₀.getEntry? ⟨m.1, m.2.size_buckets_pos⟩ a
 

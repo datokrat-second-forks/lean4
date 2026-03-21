@@ -200,6 +200,10 @@ def getKeyD [Ord α] (t : Impl α β) (k : α) (fallback : α) : α :=
     | .gt => getKeyD r k fallback
     | .eq => k'
 
+/-- Implementation detail of the tree map -/
+noncomputable def getKeyV [Ord α] [Nonempty α] (t : Impl α β) (k : α) : α :=
+  t.getKeyD k Classical.ofNonempty
+
 namespace Const
 
 /-- Returns the value for the key `k`, or `none` if such a key does not exist. -/
