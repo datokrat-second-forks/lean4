@@ -3952,6 +3952,20 @@ theorem minKeyV_alter_eq_self [TransCmp cmp] [Nonempty α] (h : t.WF) {k f}
       (f t[k]?).isSome ∧ ∀ k', k' ∈ t → (cmp k k').isLE := by
   simpa [Raw.minKeyV] using minKeyD_alter_eq_self h he
 
+@[grind =_] theorem minKeyV_eq_headV_keys [TransCmp cmp] [Nonempty α] (h : t.WF) :
+    t.minKeyV = t.keys.headV := by
+  rw [List.headV_eq_getElemV, List.getElemV_eq_getElem?_getD, ← List.head?_eq_getElem?,
+      ← List.headD_eq_head?_getD]
+  simpa [Raw.minKeyV] using minKeyD_eq_headD_keys h
+
+theorem minKeyV_eq_getElemV_keysArray [TransCmp cmp] [Nonempty α] (h : t.WF) :
+    t.minKeyV = t.keysArray｢0｣ := by
+  rw [Array.getElemV_eq_getD]; simpa [Raw.minKeyV] using minKeyD_eq_getD_keysArray h
+
+theorem minKeyV_eq_minKeyD_classicalOfNonempty [TransCmp cmp] [Nonempty α] (_h : t.WF) :
+    t.minKeyV = t.minKeyD Classical.ofNonempty := by
+  simp [Raw.minKeyV]
+
 end Min
 
 section Max
@@ -4542,6 +4556,21 @@ theorem maxKeyV_alter_eq_self [TransCmp cmp] [Nonempty α] (h : t.WF) {k f}
     (alter t k f).maxKeyV = k ↔
       (f t[k]?).isSome ∧ ∀ k', k' ∈ t → (cmp k' k).isLE := by
   simpa [Raw.maxKeyV] using maxKeyD_alter_eq_self h he
+
+@[grind =_]
+theorem maxKeyV_eq_getLastV_keys [TransCmp cmp] [Nonempty α] (h : t.WF) :
+    t.maxKeyV = t.keys.getLastV := by
+  rw [List.getLastV_eq_getElemV, List.getElemV_eq_getElem?_getD, ← List.getLast?_eq_getElem?,
+      ← List.getLastD_eq_getLast?]
+  simpa [Raw.maxKeyV] using maxKeyD_eq_getLastD_keys h
+
+theorem maxKeyV_eq_backV_keysArray [TransCmp cmp] [Nonempty α] (h : t.WF) :
+    t.maxKeyV = t.keysArray.backV := by
+  rw [Array.backV_eq_back?_getD]; simpa [Raw.maxKeyV] using maxKeyD_eq_getD_back?_keysArray h
+
+theorem maxKeyV_eq_maxKeyD_classicalOfNonempty [TransCmp cmp] [Nonempty α] (_h : t.WF) :
+    t.maxKeyV = t.maxKeyD Classical.ofNonempty := by
+  simp [Raw.maxKeyV]
 
 end Max
 
