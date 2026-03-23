@@ -210,17 +210,25 @@ grind_pattern getElem?_pos => c[i] where
   have : Decidable (dom c i) := .isFalse h
   simp [getElem!_def, h]
 
-@[simp, grind =] theorem getElemV_pos [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
+theorem getElemV_pos [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom] [Nonempty elem]
     (c : cont) (i : idx) (h : dom c i) :
     c｢i｣ = c[i]'h := by
   rw [getElemV_def]; simp [h]
 
-@[simp, grind =] theorem getElemV_neg [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
+theorem getElemV_neg [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom] [Nonempty elem]
     (c : cont) (i : idx) (h : ¬dom c i) :
     c｢i｣ = (Classical.ofNonempty : elem) := by
   rw [getElemV_def]; simp [h]
+
+@[simp, grind norm]
+theorem getElem_eq_getElemV [GetElem? cont idx elem dom]
+    [LawfulGetElem cont idx elem dom]
+    [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom] [Nonempty elem]
+    (c : cont) (i : idx) (h : dom c i) :
+    c[i] = c｢i｣ := by
+  simp [getElemV_def, getElem?_pos, h]
 
 @[simp, grind =] theorem get_getElem? [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     (c : cont) (i : idx) [Decidable (dom c i)] (h) :
