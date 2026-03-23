@@ -590,6 +590,7 @@ theorem get_eq_getD [TransCmp cmp] [LawfulEqCmp cmp] {a : α} {fallback : β a} 
     t.get a h = t.getD a fallback :=
   t.inductionOn (fun _ _ => DTreeMap.get_eq_getD) h
 
+@[simp, grind norm]
 theorem get_eq_getV [TransCmp cmp] [LawfulEqCmp cmp] {a : α} [Nonempty (β a)] {h} :
     t.get a h = t.getV a := by
   simpa [ExtDTreeMap.getV] using get_eq_getD
@@ -687,6 +688,7 @@ theorem get_eq_getD [TransCmp cmp] {a : α} {fallback : β} {h} :
     get t a h = getD t a fallback :=
   t.inductionOn (fun _ _ => DTreeMap.Const.get_eq_getD) h
 
+@[simp, grind norm]
 theorem get_eq_getV [TransCmp cmp] [Nonempty β] {a : α} {h} :
     get t a h = getV t a := by
   simpa [Const.getV] using get_eq_getD
@@ -703,6 +705,7 @@ theorem getV_eq_getD_classicalOfNonempty [TransCmp cmp] [Nonempty β] {a : α} :
     getV t a = getD t a Classical.ofNonempty :=
   rfl
 
+@[simp, grind norm]
 theorem getV_eq_getV [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty β] {a : α} :
     getV t a = t.getV a := by
   simpa [Const.getV, ExtDTreeMap.getV] using getD_eq_getD
@@ -5354,6 +5357,7 @@ theorem minKeyD_alter_eq_self [TransCmp cmp] {k f}
 
 end Const
 
+@[simp, grind norm]
 theorem minKey?_eq_some_minKeyV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
     t.minKey? = some t.minKeyV := by
   simpa [ExtDTreeMap.minKeyV] using minKey?_eq_some_minKeyD he
@@ -5363,6 +5367,7 @@ theorem minKeyV_empty [TransCmp cmp] [Nonempty α] :
     (∅ : ExtDTreeMap α β cmp).minKeyV = Classical.ofNonempty := by
   simp [ExtDTreeMap.minKeyV, minKeyD_empty]
 
+@[simp, grind norm]
 theorem minKey_eq_minKeyV [TransCmp cmp] [Nonempty α] {he : t ≠ ∅} :
     t.minKey he = t.minKeyV :=
   t.inductionOn (fun _ _ => DTreeMap.minKey_eq_minKeyV) he
@@ -6156,6 +6161,7 @@ theorem maxKeyD_alter_eq_self [TransCmp cmp] {k f}
 
 end Const
 
+@[simp, grind norm]
 theorem maxKey?_eq_some_maxKeyV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
     t.maxKey? = some t.maxKeyV := by
   simpa [ExtDTreeMap.maxKeyV] using maxKey?_eq_some_maxKeyD he
@@ -6165,6 +6171,7 @@ theorem maxKeyV_empty [TransCmp cmp] [Nonempty α] :
     (∅ : ExtDTreeMap α β cmp).maxKeyV = Classical.ofNonempty := by
   simp [ExtDTreeMap.maxKeyV, maxKeyD_empty]
 
+@[simp, grind norm]
 theorem maxKey_eq_maxKeyV [TransCmp cmp] [Nonempty α] {he : t ≠ ∅} :
     t.maxKey he = t.maxKeyV :=
   t.inductionOn (fun _ _ => DTreeMap.maxKey_eq_maxKeyV) he
