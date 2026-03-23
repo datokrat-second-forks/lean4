@@ -226,6 +226,14 @@ def minD [TransCmp cmp] (t : ExtTreeSet α cmp) (fallback : α) : α :=
   ExtTreeMap.minKeyD t.inner fallback
 
 /--
+Tries to retrieve the smallest element of the tree set, returning `Classical.ofNonempty` if the
+tree set is empty.
+-/
+@[inherit_doc DTreeMap.minKeyV]
+noncomputable def minV [TransCmp cmp] [Nonempty α] (t : ExtTreeSet α cmp) : α :=
+  t.minD Classical.ofNonempty
+
+/--
 Tries to retrieve the largest element of the tree set, returning `none` if the set is empty.
 -/
 @[inline]
@@ -253,6 +261,14 @@ Tries to retrieve the largest element of the tree set, returning `fallback` if t
 def maxD [TransCmp cmp] (t : ExtTreeSet α cmp) (fallback : α) : α :=
   ExtTreeMap.maxKeyD t.inner fallback
 
+/--
+Tries to retrieve the largest element of the tree set, returning `Classical.ofNonempty` if the
+tree set is empty.
+-/
+@[inherit_doc DTreeMap.maxKeyV]
+noncomputable def maxV [TransCmp cmp] [Nonempty α] (t : ExtTreeSet α cmp) : α :=
+  t.maxD Classical.ofNonempty
+
 /-- Returns the `n`-th smallest element, or `none` if `n` is at least `t.size`. -/
 @[inline]
 def atIdx? [TransCmp cmp] (t : ExtTreeSet α cmp) (n : Nat) : Option α :=
@@ -272,6 +288,11 @@ def atIdx! [TransCmp cmp] [Inhabited α] (t : ExtTreeSet α cmp) (n : Nat) : α 
 @[inline]
 def atIdxD [TransCmp cmp] (t : ExtTreeSet α cmp) (n : Nat) (fallback : α) : α :=
   ExtTreeMap.keyAtIdxD t.inner n fallback
+
+/-- Returns the `n`-th smallest element, or `Classical.ofNonempty` if `n` is at least `t.size`. -/
+@[inherit_doc DTreeMap.keyAtIdxV]
+noncomputable def atIdxV [TransCmp cmp] [Nonempty α] (t : ExtTreeSet α cmp) (n : Nat) : α :=
+  t.atIdxD n Classical.ofNonempty
 
 /--
 Tries to retrieve the smallest element that is greater than or equal to the
@@ -400,6 +421,38 @@ returning `fallback` if no such element exists.
 @[inline]
 def getLTD [TransCmp cmp] (t : ExtTreeSet α cmp) (k : α) (fallback : α) : α :=
   ExtTreeMap.getKeyLTD t.inner k fallback
+
+/--
+Tries to retrieve the smallest element that is greater than or equal to the
+given element, returning `Classical.ofNonempty` if no such element exists.
+-/
+@[inherit_doc DTreeMap.getKeyGEV]
+noncomputable def getGEV [TransCmp cmp] [Nonempty α] (t : ExtTreeSet α cmp) (k : α) : α :=
+  t.getGED k Classical.ofNonempty
+
+/--
+Tries to retrieve the smallest element that is greater than the given element,
+returning `Classical.ofNonempty` if no such element exists.
+-/
+@[inherit_doc DTreeMap.getKeyGTV]
+noncomputable def getGTV [TransCmp cmp] [Nonempty α] (t : ExtTreeSet α cmp) (k : α) : α :=
+  t.getGTD k Classical.ofNonempty
+
+/--
+Tries to retrieve the largest element that is less than or equal to the
+given element, returning `Classical.ofNonempty` if no such element exists.
+-/
+@[inherit_doc DTreeMap.getKeyLEV]
+noncomputable def getLEV [TransCmp cmp] [Nonempty α] (t : ExtTreeSet α cmp) (k : α) : α :=
+  t.getLED k Classical.ofNonempty
+
+/--
+Tries to retrieve the smallest element that is less than the given element,
+returning `Classical.ofNonempty` if no such element exists.
+-/
+@[inherit_doc DTreeMap.getKeyLTV]
+noncomputable def getLTV [TransCmp cmp] [Nonempty α] (t : ExtTreeSet α cmp) (k : α) : α :=
+  t.getLTD k Classical.ofNonempty
 
 variable {γ δ : Type w} {m : Type w → Type w₂} [Monad m] [LawfulMonad m]
 
