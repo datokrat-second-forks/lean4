@@ -6503,6 +6503,46 @@ theorem keyAtIdx_eq_keyAtIdxV [TransCmp cmp] [Nonempty α] {n h} :
     t.keyAtIdx n h = t.keyAtIdxV n := by
   simp [keyAtIdxV]
 
+@[simp, grind norm]
+theorem getEntryGE_eq_getEntryGEV [TransCmp cmp] [Nonempty ((a : α) × β a)] {k : α} {h} :
+    t.getEntryGE k h = t.getEntryGEV k := by
+  simp [getEntryGEV]
+
+@[simp, grind norm]
+theorem getEntryGT_eq_getEntryGTV [TransCmp cmp] [Nonempty ((a : α) × β a)] {k : α} {h} :
+    t.getEntryGT k h = t.getEntryGTV k := by
+  simp [getEntryGTV]
+
+@[simp, grind norm]
+theorem getEntryLE_eq_getEntryLEV [TransCmp cmp] [Nonempty ((a : α) × β a)] {k : α} {h} :
+    t.getEntryLE k h = t.getEntryLEV k := by
+  simp [getEntryLEV]
+
+@[simp, grind norm]
+theorem getEntryLT_eq_getEntryLTV [TransCmp cmp] [Nonempty ((a : α) × β a)] {k : α} {h} :
+    t.getEntryLT k h = t.getEntryLTV k := by
+  simp [getEntryLTV]
+
+@[simp, grind norm]
+theorem getKeyGE_eq_getKeyGEV [TransCmp cmp] [Nonempty α] {k : α} {h} :
+    t.getKeyGE k h = t.getKeyGEV k := by
+  simp [getKeyGEV]
+
+@[simp, grind norm]
+theorem getKeyGT_eq_getKeyGTV [TransCmp cmp] [Nonempty α] {k : α} {h} :
+    t.getKeyGT k h = t.getKeyGTV k := by
+  simp [getKeyGTV]
+
+@[simp, grind norm]
+theorem getKeyLE_eq_getKeyLEV [TransCmp cmp] [Nonempty α] {k : α} {h} :
+    t.getKeyLE k h = t.getKeyLEV k := by
+  simp [getKeyLEV]
+
+@[simp, grind norm]
+theorem getKeyLT_eq_getKeyLTV [TransCmp cmp] [Nonempty α] {k : α} {h} :
+    t.getKeyLT k h = t.getKeyLTV k := by
+  simp [getKeyLTV]
+
 namespace Equiv
 
 variable {t₁ t₂ t₃ t₄ : DTreeMap α β cmp} {δ : Type w} {m : Type w → Type w'}
