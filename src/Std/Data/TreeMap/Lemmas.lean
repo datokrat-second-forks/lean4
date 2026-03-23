@@ -3895,8 +3895,8 @@ theorem minKey?_eq_some_minKeyV [TransCmp cmp] [Nonempty α] (he : t.isEmpty = f
   simpa [TreeMap.minKeyV] using minKey?_eq_some_minKeyD he
 
 theorem minKey_eq_minKeyV [TransCmp cmp] [Nonempty α] {he : t.isEmpty = false} :
-    t.minKey he = t.minKeyV := by
-  simpa [TreeMap.minKeyV] using DTreeMap.Const.minKey_eq_minKeyD
+    t.minKey he = t.minKeyV :=
+  DTreeMap.minKey_eq_minKeyV
 
 theorem minKeyV_eq_classicalOfNonempty [TransCmp cmp] [Nonempty α] (he : t.isEmpty) :
     t.minKeyV = Classical.ofNonempty := by
@@ -4637,8 +4637,8 @@ theorem maxKey?_eq_some_maxKeyV [TransCmp cmp] [Nonempty α] (he : t.isEmpty = f
   simpa [TreeMap.maxKeyV] using maxKey?_eq_some_maxKeyD he
 
 theorem maxKey_eq_maxKeyV [TransCmp cmp] [Nonempty α] {he : t.isEmpty = false} :
-    t.maxKey he = t.maxKeyV := by
-  simpa [TreeMap.maxKeyV] using DTreeMap.Const.maxKey_eq_maxKeyD
+    t.maxKey he = t.maxKeyV :=
+  DTreeMap.maxKey_eq_maxKeyV
 
 theorem maxKeyV_eq_classicalOfNonempty [TransCmp cmp] [Nonempty α] (he : t.isEmpty) :
     t.maxKeyV = Classical.ofNonempty := by

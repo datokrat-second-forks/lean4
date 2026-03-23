@@ -1718,6 +1718,85 @@ theorem minD_eq_headD_toList [TransCmp cmp] {fallback} :
     t.minD fallback = t.toList.headD fallback :=
   ExtTreeMap.minKeyD_eq_headD_keys
 
+theorem minV_insert_of_isEmpty [TransCmp cmp] [Nonempty α] {k} (he : t.isEmpty) :
+    (t.insert k).minV = k := by
+  simpa [ExtTreeSet.minV] using minD_insert_of_isEmpty he
+
+theorem min?_eq_some_minV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
+    t.min? = some t.minV := by
+  simpa [ExtTreeSet.minV] using min?_eq_some_minD he
+
+theorem minV_empty [TransCmp cmp] [Nonempty α] :
+    (∅ : ExtTreeSet α cmp).minV = Classical.ofNonempty := by
+  simpa [ExtTreeSet.minV] using minD_empty
+
+theorem minV_eq_iff_get?_eq_self_and_forall [TransCmp cmp] [Nonempty α]
+    (he : t ≠ ∅) {km} :
+    t.minV = km ↔ t.get? km = some km ∧ ∀ k, k ∈ t → (cmp km k).isLE := by
+  simpa [ExtTreeSet.minV] using minD_eq_iff_get?_eq_self_and_forall he
+
+theorem minV_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α]
+    (he : t ≠ ∅) {km} :
+    t.minV = km ↔ km ∈ t ∧ ∀ k, k ∈ t → (cmp km k).isLE := by
+  simpa [ExtTreeSet.minV] using minD_eq_iff_mem_and_forall he
+
+@[grind =] theorem minV_insert [TransCmp cmp] [Nonempty α] {k} :
+    (t.insert k |>.minV) =
+      t.min?.elim k fun k' => if cmp k k' = .lt then k else k' := by
+  simpa [ExtTreeSet.minV] using minD_insert
+
+theorem minV_insert_le_minV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) {k} :
+    cmp (t.insert k |>.minV) t.minV |>.isLE := by
+  simpa [ExtTreeSet.minV] using minD_insert_le_minD he
+
+theorem minV_insert_le_self [TransCmp cmp] [Nonempty α] {k} :
+    cmp (t.insert k |>.minV) k |>.isLE := by
+  simpa [ExtTreeSet.minV] using minD_insert_le_self
+
+@[grind =] theorem contains_minV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
+    t.contains t.minV := by
+  simpa [ExtTreeSet.minV] using contains_minD he
+
+theorem minV_mem [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
+    t.minV ∈ t := by
+  simpa [ExtTreeSet.minV] using minD_mem he
+
+grind_pattern minV_mem => t.minV ∈ t
+
+theorem minV_le_of_contains [TransCmp cmp] [Nonempty α] {k} (hc : t.contains k) :
+    cmp t.minV k |>.isLE := by
+  simpa [ExtTreeSet.minV] using minD_le_of_contains hc
+
+theorem minV_le_of_mem [TransCmp cmp] [Nonempty α] {k} (hc : k ∈ t) :
+    cmp t.minV k |>.isLE := by
+  simpa [ExtTreeSet.minV] using minD_le_of_mem hc
+
+theorem le_minV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) {k} :
+    (cmp k t.minV).isLE ↔ (∀ k', k' ∈ t → (cmp k k').isLE) := by
+  simpa [ExtTreeSet.minV] using le_minD he
+
+theorem get?_minV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
+    t.get? t.minV = some t.minV := by
+  simpa [ExtTreeSet.minV] using get?_minD he
+
+@[grind =] theorem get_minV [TransCmp cmp] [Nonempty α] {hc} :
+    t.get t.minV hc = t.minV := by
+  simpa [ExtTreeSet.minV] using get_minD
+
+theorem getD_minV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) {fallback} :
+    t.getD t.minV fallback = t.minV := by
+  simpa [ExtTreeSet.minV] using getD_minD he
+
+theorem minV_erase_eq_of_not_compare_minV_eq [TransCmp cmp] [Nonempty α] {k}
+    (he : t.erase k ≠ ∅) (heq : ¬ cmp k t.minV = .eq) :
+    (t.erase k |>.minV) = t.minV := by
+  simpa [ExtTreeSet.minV] using minD_erase_eq_of_not_compare_minD_eq he heq
+
+theorem minV_le_minV_erase [TransCmp cmp] [Nonempty α] {k}
+    (he : t.erase k ≠ ∅) :
+    cmp t.minV (t.erase k |>.minV) |>.isLE := by
+  simpa [ExtTreeSet.minV] using minD_le_minD_erase he
+
 end Min
 
 section Max
@@ -2143,6 +2222,55 @@ theorem maxD_erase_le_maxD [TransCmp cmp] {k}
 theorem maxD_eq_getLastD_toList [TransCmp cmp] {fallback} :
     t.maxD fallback = t.toList.getLastD fallback :=
   ExtTreeMap.maxKeyD_eq_getLastD_keys
+
+theorem max?_eq_some_maxV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
+    t.max? = some t.maxV := by
+  simpa [ExtTreeSet.maxV] using max?_eq_some_maxD he
+
+theorem maxV_empty [TransCmp cmp] [Nonempty α] :
+    (∅ : ExtTreeSet α cmp).maxV = Classical.ofNonempty := by
+  simpa [ExtTreeSet.maxV] using maxD_empty
+
+theorem maxV_eq_iff_get?_eq_self_and_forall [TransCmp cmp] [Nonempty α]
+    (he : t ≠ ∅) {km} :
+    t.maxV = km ↔ t.get? km = some km ∧ ∀ k, k ∈ t → (cmp k km).isLE := by
+  simpa [ExtTreeSet.maxV] using maxD_eq_iff_get?_eq_self_and_forall he
+
+theorem maxV_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α]
+    (he : t ≠ ∅) {km} :
+    t.maxV = km ↔ km ∈ t ∧ ∀ k, k ∈ t → (cmp k km).isLE := by
+  simpa [ExtTreeSet.maxV] using maxD_eq_iff_mem_and_forall he
+
+@[grind =] theorem maxV_insert [TransCmp cmp] [Nonempty α] {k} :
+    (t.insert k |>.maxV) =
+      t.max?.elim k fun k' => if cmp k' k = .lt then k else k' := by
+  simpa [ExtTreeSet.maxV] using maxD_insert
+
+@[grind =] theorem contains_maxV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
+    t.contains t.maxV := by
+  simpa [ExtTreeSet.maxV] using contains_maxD he
+
+theorem maxV_mem [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
+    t.maxV ∈ t := by
+  simpa [ExtTreeSet.maxV] using maxD_mem he
+
+grind_pattern maxV_mem => t.maxV ∈ t
+
+theorem le_maxV_of_contains [TransCmp cmp] [Nonempty α] {k} (hc : t.contains k) :
+    cmp k t.maxV |>.isLE := by
+  simpa [ExtTreeSet.maxV] using le_maxD_of_contains hc
+
+theorem le_maxV_of_mem [TransCmp cmp] [Nonempty α] {k} (hc : k ∈ t) :
+    cmp k t.maxV |>.isLE := by
+  simpa [ExtTreeSet.maxV] using le_maxD_of_mem hc
+
+theorem maxV_le [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) {k} :
+    (cmp t.maxV k).isLE ↔ (∀ k', k' ∈ t → (cmp k' k).isLE) := by
+  simpa [ExtTreeSet.maxV] using maxD_le he
+
+@[grind =] theorem get_maxV [TransCmp cmp] [Nonempty α] {hc} :
+    t.get t.maxV hc = t.maxV := by
+  simpa [ExtTreeSet.maxV] using get_maxD
 
 end Max
 
