@@ -88,7 +88,7 @@ theorem toArray_mk {xs : Array α} (h : xs.size = n) : (Vector.mk xs h).toArray 
 @[simp] theorem backV_mk [Nonempty α] {xs : Array α} (h : xs.size = n) :
     (Vector.mk xs h).backV = xs.backV := (rfl)
 
-@[simp] theorem back_mk [NeZero n] {xs : Array α} (h : xs.size = n) :
+theorem back_mk [NeZero n] {xs : Array α} (h : xs.size = n) :
     (Vector.mk xs h).back = xs.back (by have : 0 ≠ n := NeZero.ne' n; omega) := by
   simp [back, Array.back, h]
 
@@ -2630,7 +2630,7 @@ theorem back?_replicate {a : α} {n : Nat} :
   rw [replicate_eq_mk_replicate]
   simp only [back?_mk, Array.back?_replicate]
 
-@[simp] theorem back_replicate [NeZero n] : (replicate n a).back = a := by
+theorem back_replicate [NeZero n] : (replicate n a).back = a := by
   simp [back_eq_getElem]
 
 /-! ### leftpad and rightpad -/
@@ -2978,7 +2978,7 @@ theorem getElem_push_last {xs : Vector α n} {x : α} : (xs.push x)[n] = x := by
   simp
 
 set_option backward.isDefEq.respectTransparency false in
-@[simp] theorem push_pop_back (xs : Vector α (n + 1)) : xs.pop.push xs.back = xs := by
+theorem push_pop_back (xs : Vector α (n + 1)) : xs.pop.push xs.back = xs := by
   ext i
   by_cases h : i < n
   · simp [h]
