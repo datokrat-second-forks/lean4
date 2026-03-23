@@ -978,6 +978,11 @@ theorem getKey_eq_getKeyD [TransCmp cmp] {a fallback : α} {h} :
     t.getKey a h = t.getKeyD a fallback :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_eq_getKeyD) h
 
+@[simp, grind norm]
+theorem getKey_eq_getKeyV [TransCmp cmp] [Nonempty α] {a : α} {h} :
+    t.getKey a h = t.getKeyV a := by
+  simp [ExtDTreeMap.getKeyV, getKey_eq_getKeyD]
+
 theorem getKey!_eq_getKeyD_default [TransCmp cmp] [Inhabited α] {a : α} :
     t.getKey! a = t.getKeyD a default :=
   t.inductionOn fun _ => DTreeMap.getKey!_eq_getKeyD_default
