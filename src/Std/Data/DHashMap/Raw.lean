@@ -313,6 +313,14 @@ If no panic occurs the result is guaranteed to be pointer equal to the key in th
   else default -- will never happen for well-formed inputs
 
 /--
+Checks if a mapping for the given key exists and returns the key if it does, otherwise
+`Classical.ofNonempty`.
+If a mapping exists the result is guaranteed to be pointer equal to the key in the map.
+-/
+noncomputable def getKeyV [BEq α] [Hashable α] [Nonempty α] (m : Raw α β) (a : α) : α :=
+  m.getKeyD a Classical.ofNonempty
+
+/--
 Checks if a mapping for the given key exists and returns the key-value pair if it does, otherwise `none`.
 The key in the returned pair will be `BEq` to the input `a`.
 -/
@@ -346,6 +354,12 @@ The key in the returned pair will be `BEq` to the input `a`.
   if h : 0 < m.buckets.size then
     Raw₀.getEntry! ⟨m, h⟩ a
   else default -- will never happen for well-formed inputs
+
+/-- Checks if a mapping for the given key exists and returns the key-value pair if it does,
+otherwise `Classical.ofNonempty`. -/
+noncomputable def getEntryV [BEq α] [Hashable α] [Nonempty ((a : α) × β a)] (m : Raw α β)
+    (a : α) : (a : α) × β a :=
+  m.getEntryD a Classical.ofNonempty
 
 /--
 Returns `true` if the hash map contains no mappings.

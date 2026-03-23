@@ -198,6 +198,9 @@ end
 @[inline, inherit_doc Raw.getKeyD] def getKeyD (m : DHashMap α β) (a : α) (fallback : α) : α :=
   Raw₀.getKeyD ⟨m.1, m.2.size_buckets_pos⟩ a fallback
 
+@[inherit_doc Raw.getKeyV] noncomputable def getKeyV [Nonempty α] (m : DHashMap α β) (a : α) : α :=
+  m.getKeyD a Classical.ofNonempty
+
 @[inline, inherit_doc Raw.getEntry?] def getEntry? (m : DHashMap α β) (a : α) : Option ((a : α) × β a) :=
   Raw₀.getEntry? ⟨m.1, m.2.size_buckets_pos⟩ a
 
@@ -209,6 +212,12 @@ end
 
 @[inline, inherit_doc Raw.getEntryD] def getEntryD (m : DHashMap α β) (a : α) (fallback : (a : α) × β a) : (a : α) × β a :=
   Raw₀.getEntryD ⟨m.1, m.2.size_buckets_pos⟩ a fallback
+
+/-- Checks if a mapping for the given key exists and returns the key-value pair if it does,
+otherwise `Classical.ofNonempty`. -/
+noncomputable def getEntryV [Nonempty ((a : α) × β a)] (m : DHashMap α β) (a : α) :
+    (a : α) × β a :=
+  m.getEntryD a Classical.ofNonempty
 
 @[inline, inherit_doc Raw.size] def size (m : DHashMap α β) : Nat :=
   m.1.size

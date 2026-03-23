@@ -4444,6 +4444,20 @@ theorem back!_eq_back? [Inhabited α] {xs : Array α} : xs.back! = xs.back?.getD
 @[simp] theorem back!_push [Inhabited α] {xs : Array α} {x : α} : (xs.push x).back! = x := by
   simp [back!_eq_back?]
 
+theorem backV_eq_back?_getD [Nonempty α] {xs : Array α} :
+    xs.backV = xs.back?.getD Classical.ofNonempty := by
+  delta backV
+  simp only [back?, getD]
+  split <;> simp_all
+
+@[simp] theorem backV_push [Nonempty α] {xs : Array α} {x : α} : (xs.push x).backV = x := by
+  simp [backV_eq_back?_getD]
+
+theorem back_eq_backV [Nonempty α] {xs : Array α} (h : 0 < xs.size) :
+    xs.back h = xs.backV := by
+  rw [backV_eq_back?_getD]
+  simp [back, back?, getElem?_pos, Nat.sub_one_lt_of_lt h]
+
 theorem getElem?_push_lt {xs : Array α} {x : α} {i : Nat} (h : i < xs.size) :
     (xs.push x)[i]? = some xs[i] := by
   rw [getElem?_pos (xs.push x) i (size_push _ ▸ Nat.lt_succ_of_lt h), getElem_push_lt]

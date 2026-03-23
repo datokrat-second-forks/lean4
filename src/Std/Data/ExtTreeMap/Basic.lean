@@ -187,6 +187,10 @@ def getKey! [TransCmp cmp] [Inhabited α] (t : ExtTreeMap α β cmp) (a : α) : 
 def getKeyD [TransCmp cmp] (t : ExtTreeMap α β cmp) (a : α) (fallback : α) : α :=
   t.inner.getKeyD a fallback
 
+@[inherit_doc ExtDTreeMap.getKeyV]
+noncomputable def getKeyV [TransCmp cmp] [Nonempty α] (t : ExtTreeMap α β cmp) (a : α) : α :=
+  t.getKeyD a Classical.ofNonempty
+
 @[inline, inherit_doc ExtDTreeMap.Const.minEntry?]
 def minEntry? [TransCmp cmp] (t : ExtTreeMap α β cmp) : Option (α × β) :=
   ExtDTreeMap.Const.minEntry? t.inner

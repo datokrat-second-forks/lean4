@@ -195,6 +195,10 @@ def getKeyD [BEq α] (a : α) (fallback : α) : AssocList α β → α
   | cons k _ es => if k == a then k else es.getKeyD a fallback
 
 /-- Internal implementation detail of the hash map -/
+noncomputable def getKeyV [BEq α] [Nonempty α] (a : α) : AssocList α β → α :=
+  getKeyD a Classical.ofNonempty
+
+/-- Internal implementation detail of the hash map -/
 def replace [BEq α] (a : α) (b : β a) : AssocList α β → AssocList α β
   | nil => nil
   | cons k v l => bif k == a then cons a b l else cons k v (replace a b l)

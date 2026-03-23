@@ -62,8 +62,16 @@ theorem getD_eq_iff {o : Option α} {a b} : o.getD a = b ↔ (o = some b ∨ o =
 
 @[simp, grind =] theorem get!_some [Inhabited α] {a : α} : (some a).get! = a := rfl
 
+@[simp, grind =] theorem getV_none [Nonempty α] :
+    (none : Option α).getV = Classical.ofNonempty := (rfl)
+
+@[simp, grind =] theorem getV_some [Nonempty α] {a : α} : (some a).getV = a := (rfl)
+
 theorem get_eq_get! [Inhabited α] : (o : Option α) → {h : o.isSome} → o.get h = o.get!
   | some _, _ => rfl
+
+theorem get_eq_getV [Nonempty α] : (o : Option α) → {h : o.isSome} → o.get h = o.getV
+  | some _, _ => (rfl)
 
 theorem get_eq_getD {fallback : α} : (o : Option α) → {h : o.isSome} → o.get h = o.getD fallback
   | some _, _ => rfl
@@ -71,7 +79,13 @@ theorem get_eq_getD {fallback : α} : (o : Option α) → {h : o.isSome} → o.g
 theorem some_get! [Inhabited α] : (o : Option α) → o.isSome → some (o.get!) = o
   | some _, _ => rfl
 
+theorem some_getV [Nonempty α] : (o : Option α) → o.isSome → some (o.getV) = o
+  | some _, _ => (rfl)
+
 theorem get!_eq_getD [Inhabited α] (o : Option α) : o.get! = o.getD default := rfl
+
+theorem getV_eq_getD [Nonempty α] (o : Option α) :
+    o.getV = o.getD Classical.ofNonempty := (rfl)
 
 theorem get_congr {o o' : Option α} {ho : o.isSome} (h : o = o') :
     o.get ho = o'.get (h ▸ ho) := by
@@ -90,6 +104,10 @@ theorem getD_inj {o₁ o₂ : Option α} (h₁ : o₁.isSome) (h₂ : o₂.isSom
 theorem get!_inj [Inhabited α] {o₁ o₂ : Option α} (h₁ : o₁.isSome) (h₂ : o₂.isSome) :
     o₁.get! = o₂.get! ↔ o₁ = o₂ := by
   simpa [get!_eq_getD] using getD_inj h₁ h₂
+
+theorem getV_inj [Nonempty α] {o₁ o₂ : Option α} (h₁ : o₁.isSome) (h₂ : o₂.isSome) :
+    o₁.getV = o₂.getV ↔ o₁ = o₂ := by
+  simpa [getV_eq_getD] using getD_inj h₁ h₂
 
 theorem mem_unique {o : Option α} {a b : α} (ha : a ∈ o) (hb : b ∈ o) : a = b :=
   some.inj <| ha ▸ hb
@@ -813,6 +831,10 @@ theorem getD_choice {a} :
 theorem get!_choice [Inhabited α] : (choice α).get! = (choice α).get isSome_choice := by
   rw [get_eq_get!]
 
+@[simp, grind =]
+theorem getV_choice [Nonempty α] : (choice α).getV = (choice α).get isSome_choice := by
+  rw [get_eq_getV]
+
 end choice
 
 @[simp, grind =] theorem toList_some (a : α) : (some a).toList = [a] := rfl
@@ -885,6 +907,10 @@ theorem getD_or {o o' : Option α} {fallback : α} :
 
 @[simp, grind =]
 theorem get!_or {o o' : Option α} [Inhabited α] : (o.or o').get! = o.getD o'.get! := by
+  cases o <;> simp
+
+@[simp, grind =]
+theorem getV_or {o o' : Option α} [Nonempty α] : (o.or o').getV = o.getD o'.getV := by
   cases o <;> simp
 
 @[simp, grind =] theorem filter_or_filter {o o' : Option α} {f : α → Bool} :

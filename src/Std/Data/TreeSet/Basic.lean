@@ -187,19 +187,19 @@ def get! [Inhabited α] (t : TreeSet α cmp) (a : α) : α :=
   t.inner.getKey! a
 
 /--
-Checks if given key is contained and returns the key if it is, otherwise returns `Classical.ofNonempty`.
-If the key is contained the result is guaranteed to be pointer equal to the key in the set.
--/
-noncomputable def getV [Nonempty α] (t : TreeSet α cmp) (a : α) : α :=
-  t.getD a Classical.ofNonempty
-
-/--
 Checks if given key is contained and returns the key if it is, otherwise `fallback`.
 If they key is contained the result is guaranteed to be pointer equal to the key in the set.
 -/
 @[inline]
 def getD (t : TreeSet α cmp) (a : α) (fallback : α) : α :=
   t.inner.getKeyD a fallback
+
+/--
+Checks if given key is contained and returns the key if it is, otherwise returns `Classical.ofNonempty`.
+If the key is contained the result is guaranteed to be pointer equal to the key in the set.
+-/
+noncomputable def getV [Nonempty α] (t : TreeSet α cmp) (a : α) : α :=
+  t.getD a Classical.ofNonempty
 
 /--
 Tries to retrieve the smallest element of the tree set, returning `none` if the set is empty.

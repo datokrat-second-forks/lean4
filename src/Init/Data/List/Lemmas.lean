@@ -921,6 +921,35 @@ theorem getLast!_eq_getElem! [Inhabited α] {l : List α} : l.getLast! = l[l.len
     rw [getLast?_eq_getElem?]
     simp
 
+/-! ### getLastV -/
+
+/-!
+`getLastV` is defined as `l.getLast?.getD Classical.ofNonempty`.
+-/
+
+@[simp, grind =] theorem getLastV_nil [Nonempty α] :
+    ([] : List α).getLastV = Classical.ofNonempty := by
+  unfold getLastV; simp
+
+@[simp, grind =] theorem getLastV_cons_nil [Nonempty α] {a : α} :
+    [a].getLastV = a := by
+  unfold getLastV; simp
+
+theorem getLastV_of_getLast? [Nonempty α] {l : List α} (h : getLast? l = some a) :
+    getLastV l = a := by
+  unfold getLastV; simp [h]
+
+@[grind =]
+theorem getLastV_eq_getElemV [Nonempty α] {l : List α} : l.getLastV = l｢l.length - 1｣ := by
+  simp only [getLastV, getElemV_def, getLast?_eq_getElem?]
+  cases l[l.length - 1]? <;> rfl
+
+theorem getLast_eq_getLastV [Nonempty α] {l : List α} (h : l ≠ []) :
+    l.getLast h = l.getLastV := by
+  unfold getLastV
+  rw [getLast?_eq_some_getLast h]; rfl
+
+
 /-! ## Head and tail -/
 
 /-! ### head -/
@@ -1008,6 +1037,30 @@ theorem head_of_mem_head? {l : List α} {x} (hx : x ∈ l.head?) :
 /-- `simp` unfolds `headD` in terms of `head?` and `Option.getD`. -/
 @[simp, grind =] theorem headD_eq_head?_getD {l : List α} : headD l a = (head? l).getD a := by
   cases l <;> simp [headD]
+
+/-! ### headV -/
+
+/-!
+`headV` is defined as `l.head?.getD Classical.ofNonempty`.
+-/
+
+@[simp, grind =] theorem headV_nil [Nonempty α] :
+    ([] : List α).headV = Classical.ofNonempty := by
+  unfold headV; simp
+
+@[simp, grind =] theorem headV_cons [Nonempty α] {a : α} {l : List α} :
+    (a :: l).headV = a := by
+  unfold headV; simp
+
+@[grind =]
+theorem headV_eq_getElemV [Nonempty α] {l : List α} : headV l = l｢0｣ := by
+  simp only [headV, getElemV_def, head?_eq_getElem?]
+  cases l[0]? <;> rfl
+
+theorem head_eq_headV [Nonempty α] {l : List α} (h : l ≠ []) : l.head h = l.headV := by
+  cases l with
+  | nil => exact absurd rfl h
+  | cons _ _ => unfold headV; simp
 
 /-! ### tailD -/
 
