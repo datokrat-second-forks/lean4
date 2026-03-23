@@ -3818,6 +3818,140 @@ theorem minKeyD_alter_eq_self [TransCmp cmp] (h : t.WF) {k f}
       (f t[k]?).isSome ∧ ∀ k', k' ∈ t → (cmp k k').isLE :=
   DTreeMap.Raw.Const.minKeyD_alter_eq_self h he
 
+theorem minKeyV_insert_of_isEmpty [TransCmp cmp] [Nonempty α] (h : t.WF) {k v} (he : t.isEmpty) :
+    (t.insert k v).minKeyV = k := by
+  simpa [Raw.minKeyV] using minKeyD_insert_of_isEmpty h he
+
+theorem minKeyV_insertIfNew_of_isEmpty [TransCmp cmp] [Nonempty α] (h : t.WF) {k v}
+    (he : t.isEmpty) :
+    (t.insertIfNew k v).minKeyV = k := by
+  simpa [Raw.minKeyV] using minKeyD_insertIfNew_of_isEmpty h he
+
+theorem minKey?_eq_some_minKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
+    t.minKey? = some t.minKeyV := by
+  simpa [Raw.minKeyV] using minKey?_eq_some_minKeyD h he
+
+theorem minKeyV_eq_classicalOfNonempty [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty) :
+    t.minKeyV = Classical.ofNonempty := by
+  simpa [Raw.minKeyV] using minKeyD_eq_fallback h he
+
+theorem minKeyV_eq_iff_getKey?_eq_self_and_forall [TransCmp cmp] [Nonempty α] (h : t.WF)
+    (he : t.isEmpty = false) {km} :
+    t.minKeyV = km ↔ t.getKey? km = some km ∧ ∀ k, k ∈ t → (cmp km k).isLE := by
+  simpa [Raw.minKeyV] using minKeyD_eq_iff_getKey?_eq_self_and_forall h he
+
+theorem minKeyV_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] (h : t.WF)
+    (he : t.isEmpty = false) {km} :
+    t.minKeyV = km ↔ km ∈ t ∧ ∀ k, k ∈ t → (cmp km k).isLE := by
+  simpa [Raw.minKeyV] using minKeyD_eq_iff_mem_and_forall h he
+
+@[grind =]
+theorem minKeyV_insert [TransCmp cmp] [Nonempty α] (h : t.WF) {k v} :
+    (t.insert k v).minKeyV =
+      (t.minKey?.elim k fun k' => if cmp k k' |>.isLE then k else k') := by
+  simpa [Raw.minKeyV] using minKeyD_insert h
+
+theorem minKeyV_insert_le_minKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false)
+    {k v} :
+    cmp (t.insert k v).minKeyV t.minKeyV |>.isLE := by
+  simpa [Raw.minKeyV] using minKeyD_insert_le_minKeyD h he
+
+theorem minKeyV_insert_le_self [TransCmp cmp] [Nonempty α] (h : t.WF) {k v} :
+    cmp (t.insert k v).minKeyV k |>.isLE := by
+  simpa [Raw.minKeyV] using minKeyD_insert_le_self h
+
+theorem contains_minKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
+    t.contains t.minKeyV := by
+  simpa [Raw.minKeyV] using contains_minKeyD h he
+
+theorem minKeyV_mem [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
+    t.minKeyV ∈ t := by
+  simpa [Raw.minKeyV] using minKeyD_mem h he
+
+theorem minKeyV_le_of_contains [TransCmp cmp] [Nonempty α] (h : t.WF) {k} (hc : t.contains k) :
+    cmp t.minKeyV k |>.isLE := by
+  simpa [Raw.minKeyV] using minKeyD_le_of_contains h hc
+
+theorem minKeyV_le_of_mem [TransCmp cmp] [Nonempty α] (h : t.WF) {k} (hc : k ∈ t) :
+    cmp t.minKeyV k |>.isLE := by
+  simpa [Raw.minKeyV] using minKeyD_le_of_mem h hc
+
+theorem le_minKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) {k} :
+    (cmp k t.minKeyV).isLE ↔ (∀ k', k' ∈ t → (cmp k k').isLE) := by
+  simpa [Raw.minKeyV] using le_minKeyD h he
+
+theorem getKey?_minKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
+    t.getKey? t.minKeyV = some t.minKeyV := by
+  simpa [Raw.minKeyV] using getKey?_minKeyD h he
+
+theorem getKey_minKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) {hc} :
+    t.getKey t.minKeyV hc = t.minKeyV := by
+  simpa [Raw.minKeyV] using getKey_minKeyD h
+
+theorem getKey!_minKeyV [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) :
+    t.getKey! t.minKeyV = t.minKeyV := by
+  simpa [Raw.minKeyV] using getKey!_minKeyD h he
+
+theorem getKeyD_minKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false)
+    {fallback} :
+    t.getKeyD t.minKeyV fallback = t.minKeyV := by
+  simpa [Raw.minKeyV] using getKeyD_minKeyD h he
+
+theorem getKeyV_minKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
+    t.getKeyV t.minKeyV = t.minKeyV := by
+  simpa [Raw.minKeyV] using getKeyD_minKeyD h he
+
+theorem minKeyV_erase_eq_of_not_compare_minKeyV_eq [TransCmp cmp] [Nonempty α] (h : t.WF) {k}
+    (he : (t.erase k).isEmpty = false) (heq : ¬ cmp k t.minKeyV = .eq) :
+    (t.erase k).minKeyV = t.minKeyV := by
+  simpa [Raw.minKeyV] using minKeyD_erase_eq_of_not_compare_minKeyD_eq h he heq
+
+theorem minKeyV_le_minKeyV_erase [TransCmp cmp] [Nonempty α] (h : t.WF) {k}
+    (he : (t.erase k).isEmpty = false) :
+    cmp t.minKeyV (t.erase k).minKeyV |>.isLE := by
+  simpa [Raw.minKeyV] using minKeyD_le_minKeyD_erase h he
+
+@[grind =] theorem minKeyV_insertIfNew [TransCmp cmp] [Nonempty α] (h : t.WF) {k v} :
+    (t.insertIfNew k v).minKeyV =
+      t.minKey?.elim k fun k' => if cmp k k' = .lt then k else k' := by
+  simpa [Raw.minKeyV] using minKeyD_insertIfNew h
+
+theorem minKeyV_insertIfNew_le_minKeyV [TransCmp cmp] [Nonempty α] (h : t.WF)
+    (he : t.isEmpty = false) {k v} :
+    cmp (t.insertIfNew k v).minKeyV t.minKeyV |>.isLE := by
+  simpa [Raw.minKeyV] using minKeyD_insertIfNew_le_minKeyD h he
+
+theorem minKeyV_insertIfNew_le_self [TransCmp cmp] [Nonempty α] (h : t.WF) {k v} :
+    cmp (t.insertIfNew k v).minKeyV k |>.isLE := by
+  simpa [Raw.minKeyV] using minKeyD_insertIfNew_le_self h
+
+theorem minKeyV_modify [TransCmp cmp] [Nonempty α] (h : t.WF) {k f}
+    (he : (modify t k f).isEmpty = false) :
+    (modify t k f).minKeyV = if cmp t.minKeyV k = .eq then k else t.minKeyV := by
+  simpa [Raw.minKeyV] using minKeyD_modify h he
+
+@[simp]
+theorem minKeyV_modify_eq_minKeyV [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] (h : t.WF)
+    {k f} :
+    (modify t k f).minKeyV = t.minKeyV := by
+  simpa [Raw.minKeyV] using minKeyD_modify_eq_minKeyD h
+
+theorem compare_minKeyV_modify_eq [TransCmp cmp] [Nonempty α] (h : t.WF) {k f} :
+    cmp (modify t k f).minKeyV t.minKeyV = .eq := by
+  simpa [Raw.minKeyV] using compare_minKeyD_modify_eq h
+
+@[simp]
+theorem ordCompare_minKeyV_modify_eq [Ord α] [TransOrd α] {t : Raw α β} [Nonempty α] (h : t.WF)
+    {k f} :
+    compare (modify t k f).minKeyV t.minKeyV = .eq :=
+  compare_minKeyV_modify_eq h
+
+theorem minKeyV_alter_eq_self [TransCmp cmp] [Nonempty α] (h : t.WF) {k f}
+    (he : (alter t k f).isEmpty = false) :
+    (alter t k f).minKeyV = k ↔
+      (f t[k]?).isSome ∧ ∀ k', k' ∈ t → (cmp k k').isLE := by
+  simpa [Raw.minKeyV] using minKeyD_alter_eq_self h he
+
 end Min
 
 section Max
@@ -4283,6 +4417,132 @@ theorem maxKeyD_alter_eq_self [TransCmp cmp] (h : t.WF) {k f}
       (f t[k]?).isSome ∧ ∀ k', k' ∈ t → (cmp k' k).isLE :=
   DTreeMap.Raw.Const.maxKeyD_alter_eq_self h he
 
+theorem maxKey?_eq_some_maxKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
+    t.maxKey? = some t.maxKeyV := by
+  simpa [Raw.maxKeyV] using maxKey?_eq_some_maxKeyD h he
+
+theorem maxKeyV_eq_classicalOfNonempty [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty) :
+    t.maxKeyV = Classical.ofNonempty := by
+  simpa [Raw.maxKeyV] using maxKeyD_eq_fallback h he
+
+theorem maxKeyV_eq_iff_getKey?_eq_self_and_forall [TransCmp cmp] [Nonempty α] (h : t.WF)
+    (he : t.isEmpty = false) {km} :
+    t.maxKeyV = km ↔ t.getKey? km = some km ∧ ∀ k, k ∈ t → (cmp k km).isLE := by
+  simpa [Raw.maxKeyV] using maxKeyD_eq_iff_getKey?_eq_self_and_forall h he
+
+theorem maxKeyV_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] (h : t.WF)
+    (he : t.isEmpty = false) {km} :
+    t.maxKeyV = km ↔ km ∈ t ∧ ∀ k, k ∈ t → (cmp k km).isLE := by
+  simpa [Raw.maxKeyV] using maxKeyD_eq_iff_mem_and_forall h he
+
+@[grind =]
+theorem maxKeyV_insert [TransCmp cmp] [Nonempty α] (h : t.WF) {k v} :
+    (t.insert k v).maxKeyV =
+      (t.maxKey?.elim k fun k' => if cmp k' k |>.isLE then k else k') := by
+  simpa [Raw.maxKeyV] using maxKeyD_insert h
+
+theorem maxKeyV_le_maxKeyV_insert [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false)
+    {k v} :
+    cmp t.maxKeyV (t.insert k v).maxKeyV |>.isLE := by
+  simpa [Raw.maxKeyV] using maxKeyD_le_maxKeyD_insert h he
+
+theorem self_le_maxKeyV_insert [TransCmp cmp] [Nonempty α] (h : t.WF) {k v} :
+    cmp k (t.insert k v).maxKeyV |>.isLE := by
+  simpa [Raw.maxKeyV] using self_le_maxKeyD_insert h
+
+theorem contains_maxKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
+    t.contains t.maxKeyV := by
+  simpa [Raw.maxKeyV] using contains_maxKeyD h he
+
+theorem maxKeyV_mem [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
+    t.maxKeyV ∈ t := by
+  simpa [Raw.maxKeyV] using maxKeyD_mem h he
+
+theorem le_maxKeyV_of_contains [TransCmp cmp] [Nonempty α] (h : t.WF) {k} (hc : t.contains k) :
+    cmp k t.maxKeyV |>.isLE := by
+  simpa [Raw.maxKeyV] using le_maxKeyD_of_contains h hc
+
+theorem le_maxKeyV_of_mem [TransCmp cmp] [Nonempty α] (h : t.WF) {k} (hc : k ∈ t) :
+    cmp k t.maxKeyV |>.isLE := by
+  simpa [Raw.maxKeyV] using le_maxKeyD_of_mem h hc
+
+theorem maxKeyV_le [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) {k} :
+    (cmp t.maxKeyV k).isLE ↔ (∀ k', k' ∈ t → (cmp k' k).isLE) := by
+  simpa [Raw.maxKeyV] using maxKeyD_le h he
+
+theorem getKey?_maxKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
+    t.getKey? t.maxKeyV = some t.maxKeyV := by
+  simpa [Raw.maxKeyV] using getKey?_maxKeyD h he
+
+theorem getKey_maxKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) {hc} :
+    t.getKey t.maxKeyV hc = t.maxKeyV := by
+  simpa [Raw.maxKeyV] using getKey_maxKeyD h
+
+theorem getKey!_maxKeyV [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) :
+    t.getKey! t.maxKeyV = t.maxKeyV := by
+  simpa [Raw.maxKeyV] using getKey!_maxKeyD h he
+
+theorem getKeyD_maxKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false)
+    {fallback} :
+    t.getKeyD t.maxKeyV fallback = t.maxKeyV := by
+  simpa [Raw.maxKeyV] using getKeyD_maxKeyD h he
+
+theorem getKeyV_maxKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
+    t.getKeyV t.maxKeyV = t.maxKeyV := by
+  simpa [Raw.maxKeyV] using getKeyD_maxKeyD h he
+
+theorem maxKeyV_erase_eq_of_not_compare_maxKeyV_eq [TransCmp cmp] [Nonempty α] (h : t.WF) {k}
+    (he : (t.erase k).isEmpty = false) (heq : ¬ cmp k t.maxKeyV = .eq) :
+    (t.erase k).maxKeyV = t.maxKeyV := by
+  simpa [Raw.maxKeyV] using maxKeyD_erase_eq_of_not_compare_maxKeyD_eq h he heq
+
+theorem maxKeyV_erase_le_maxKeyV [TransCmp cmp] [Nonempty α] (h : t.WF) {k}
+    (he : (t.erase k).isEmpty = false) :
+    cmp (t.erase k).maxKeyV t.maxKeyV |>.isLE := by
+  simpa [Raw.maxKeyV] using maxKeyD_erase_le_maxKeyD h he
+
+@[grind =]
+theorem maxKeyV_insertIfNew [TransCmp cmp] [Nonempty α] (h : t.WF) {k v} :
+    (t.insertIfNew k v).maxKeyV =
+      t.maxKey?.elim k fun k' => if cmp k' k = .lt then k else k' := by
+  simpa [Raw.maxKeyV] using maxKeyD_insertIfNew h
+
+theorem maxKeyV_le_maxKeyV_insertIfNew [TransCmp cmp] [Nonempty α] (h : t.WF)
+    (he : t.isEmpty = false) {k v} :
+    cmp t.maxKeyV (t.insertIfNew k v).maxKeyV |>.isLE := by
+  simpa [Raw.maxKeyV] using maxKeyD_le_maxKeyD_insertIfNew h he
+
+theorem self_le_maxKeyV_insertIfNew [TransCmp cmp] [Nonempty α] (h : t.WF) {k v} :
+    cmp k (t.insertIfNew k v).maxKeyV |>.isLE := by
+  simpa [Raw.maxKeyV] using self_le_maxKeyD_insertIfNew h
+
+theorem maxKeyV_modify [TransCmp cmp] [Nonempty α] (h : t.WF) {k f}
+    (he : (modify t k f).isEmpty = false) :
+    (modify t k f).maxKeyV = if cmp t.maxKeyV k = .eq then k else t.maxKeyV := by
+  simpa [Raw.maxKeyV] using maxKeyD_modify h he
+
+@[simp]
+theorem maxKeyV_modify_eq_maxKeyV [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] (h : t.WF)
+    {k f} :
+    (modify t k f).maxKeyV = t.maxKeyV := by
+  simpa [Raw.maxKeyV] using maxKeyD_modify_eq_maxKeyD h
+
+theorem compare_maxKeyV_modify_eq [TransCmp cmp] [Nonempty α] (h : t.WF) {k f} :
+    cmp (modify t k f).maxKeyV t.maxKeyV = .eq := by
+  simpa [Raw.maxKeyV] using compare_maxKeyD_modify_eq h
+
+@[simp]
+theorem ordCompare_maxKeyV_modify_eq [Ord α] [TransOrd α] {t : Raw α β} [Nonempty α] (h : t.WF)
+    {k f} :
+    compare (modify t k f).maxKeyV t.maxKeyV = .eq :=
+  compare_maxKeyV_modify_eq h
+
+theorem maxKeyV_alter_eq_self [TransCmp cmp] [Nonempty α] (h : t.WF) {k f}
+    (he : (alter t k f).isEmpty = false) :
+    (alter t k f).maxKeyV = k ↔
+      (f t[k]?).isSome ∧ ∀ k', k' ∈ t → (cmp k' k).isLE := by
+  simpa [Raw.maxKeyV] using maxKeyD_alter_eq_self h he
+
 end Max
 
 namespace Equiv
@@ -4424,6 +4684,10 @@ theorem minKeyD_eq [TransCmp cmp] {fallback : α} (h₁ : t₁.WF) (h₂ : t₂.
     t₁.minKeyD fallback = t₂.minKeyD fallback :=
   h.1.minKeyD_eq h₁.1 h₂.1
 
+theorem minKeyV_eq [TransCmp cmp] [Nonempty α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.minKeyV = t₂.minKeyV := by
+  simpa [Raw.minKeyV] using minKeyD_eq h₁ h₂ h
+
 theorem maxKey?_eq [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.maxKey? = t₂.maxKey? :=
   h.1.maxKey?_eq h₁.1 h₂.1
@@ -4435,6 +4699,10 @@ theorem maxKey!_eq [TransCmp cmp] [Inhabited α] (h₁ : t₁.WF) (h₂ : t₂.W
 theorem maxKeyD_eq [TransCmp cmp] {fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.maxKeyD fallback = t₂.maxKeyD fallback :=
   h.1.maxKeyD_eq h₁.1 h₂.1
+
+theorem maxKeyV_eq [TransCmp cmp] [Nonempty α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.maxKeyV = t₂.maxKeyV := by
+  simpa [Raw.maxKeyV] using maxKeyD_eq h₁ h₂ h
 
 theorem minEntry?_eq [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.minEntry? = t₂.minEntry? :=
@@ -4448,6 +4716,10 @@ theorem minEntryD_eq [TransCmp cmp] {fallback : α × β} (h₁ : t₁.WF) (h₂
     (h : t₁ ~m t₂) : t₁.minEntryD fallback = t₂.minEntryD fallback :=
   h.1.constMinEntryD_eq h₁.1 h₂.1
 
+theorem minEntryV_eq [TransCmp cmp] [Nonempty (α × β)] (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.minEntryV = t₂.minEntryV := by
+  simpa [Raw.minEntryV] using minEntryD_eq h₁ h₂ h
+
 theorem maxEntry?_eq [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.maxEntry? = t₂.maxEntry? :=
   h.1.constMaxEntry?_eq h₁.1 h₂.1
@@ -4459,6 +4731,10 @@ theorem maxEntry!_eq [TransCmp cmp] [Inhabited (α × β)] (h₁ : t₁.WF) (h�
 theorem maxEntryD_eq [TransCmp cmp] {fallback : α × β} (h₁ : t₁.WF) (h₂ : t₂.WF)
     (h : t₁ ~m t₂) : t₁.maxEntryD fallback = t₂.maxEntryD fallback :=
   h.1.constMaxEntryD_eq h₁.1 h₂.1
+
+theorem maxEntryV_eq [TransCmp cmp] [Nonempty (α × β)] (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.maxEntryV = t₂.maxEntryV := by
+  simpa [Raw.maxEntryV] using maxEntryD_eq h₁ h₂ h
 
 theorem entryAtIdx?_eq [TransCmp cmp] {i : Nat} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.entryAtIdx? i = t₂.entryAtIdx? i :=
@@ -4472,6 +4748,10 @@ theorem entryAtIdxD_eq [TransCmp cmp] {i : Nat} {fallback : α × β} (h₁ : t�
     (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁.entryAtIdxD i fallback = t₂.entryAtIdxD i fallback :=
   h.1.constEntryAtIdxD_eq h₁.1 h₂.1
 
+theorem entryAtIdxV_eq [TransCmp cmp] [Nonempty (α × β)] {i : Nat} (h₁ : t₁.WF)
+    (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁.entryAtIdxV i = t₂.entryAtIdxV i := by
+  simpa [Raw.entryAtIdxV] using entryAtIdxD_eq h₁ h₂ h
+
 theorem keyAtIdx?_eq [TransCmp cmp] {i : Nat} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.keyAtIdx? i = t₂.keyAtIdx? i :=
   h.1.keyAtIdx?_eq h₁.1 h₂.1
@@ -4483,6 +4763,10 @@ theorem keyAtIdx!_eq [TransCmp cmp] [Inhabited α] {i : Nat} (h₁ : t₁.WF) (h
 theorem keyAtIdxD_eq [TransCmp cmp] {i : Nat} {fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
     (h : t₁ ~m t₂) : t₁.keyAtIdxD i fallback = t₂.keyAtIdxD i fallback :=
   h.1.keyAtIdxD_eq h₁.1 h₂.1
+
+theorem keyAtIdxV_eq [TransCmp cmp] [Nonempty α] {i : Nat} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.keyAtIdxV i = t₂.keyAtIdxV i := by
+  simpa [Raw.keyAtIdxV] using keyAtIdxD_eq h₁ h₂ h
 
 theorem getEntryGE?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getEntryGE? k = t₂.getEntryGE? k :=
@@ -4496,6 +4780,10 @@ theorem getEntryGED_eq [TransCmp cmp] {k : α} {fallback : α × β} (h₁ : t�
     (h : t₁ ~m t₂) : t₁.getEntryGED k fallback = t₂.getEntryGED k fallback :=
   h.1.constGetEntryGED_eq h₁.1 h₂.1
 
+theorem getEntryGEV_eq [TransCmp cmp] [Nonempty (α × β)] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getEntryGEV k = t₂.getEntryGEV k := by
+  simpa [Raw.getEntryGEV] using getEntryGED_eq h₁ h₂ h
+
 theorem getEntryGT?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getEntryGT? k = t₂.getEntryGT? k :=
   h.1.constGetEntryGT?_eq h₁.1 h₂.1
@@ -4507,6 +4795,10 @@ theorem getEntryGT!_eq [TransCmp cmp] [Inhabited (α × β)] {k : α} (h₁ : t�
 theorem getEntryGTD_eq [TransCmp cmp] {k : α} {fallback : α × β} (h₁ : t₁.WF) (h₂ : t₂.WF)
     (h : t₁ ~m t₂) : t₁.getEntryGTD k fallback = t₂.getEntryGTD k fallback :=
   h.1.constGetEntryGTD_eq h₁.1 h₂.1
+
+theorem getEntryGTV_eq [TransCmp cmp] [Nonempty (α × β)] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getEntryGTV k = t₂.getEntryGTV k := by
+  simpa [Raw.getEntryGTV] using getEntryGTD_eq h₁ h₂ h
 
 theorem getEntryLE?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getEntryLE? k = t₂.getEntryLE? k :=
@@ -4520,6 +4812,10 @@ theorem getEntryLED_eq [TransCmp cmp] {k : α} {fallback : α × β} (h₁ : t�
     (h : t₁ ~m t₂) : t₁.getEntryLED k fallback = t₂.getEntryLED k fallback :=
   h.1.constGetEntryLED_eq h₁.1 h₂.1
 
+theorem getEntryLEV_eq [TransCmp cmp] [Nonempty (α × β)] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getEntryLEV k = t₂.getEntryLEV k := by
+  simpa [Raw.getEntryLEV] using getEntryLED_eq h₁ h₂ h
+
 theorem getEntryLT?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getEntryLT? k = t₂.getEntryLT? k :=
   h.1.constGetEntryLT?_eq h₁.1 h₂.1
@@ -4531,6 +4827,10 @@ theorem getEntryLT!_eq [TransCmp cmp] [Inhabited (α × β)] {k : α} (h₁ : t�
 theorem getEntryLTD_eq [TransCmp cmp] {k : α} {fallback : α × β} (h₁ : t₁.WF) (h₂ : t₂.WF)
     (h : t₁ ~m t₂) : t₁.getEntryLTD k fallback = t₂.getEntryLTD k fallback :=
   h.1.constGetEntryLTD_eq h₁.1 h₂.1
+
+theorem getEntryLTV_eq [TransCmp cmp] [Nonempty (α × β)] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getEntryLTV k = t₂.getEntryLTV k := by
+  simpa [Raw.getEntryLTV] using getEntryLTD_eq h₁ h₂ h
 
 theorem getKeyGE?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKeyGE? k = t₂.getKeyGE? k :=
@@ -4544,6 +4844,10 @@ theorem getKeyGED_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t
     t₁.getKeyGED k fallback = t₂.getKeyGED k fallback :=
   h.1.getKeyGED_eq h₁.1 h₂.1
 
+theorem getKeyGEV_eq [TransCmp cmp] [Nonempty α] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getKeyGEV k = t₂.getKeyGEV k := by
+  simpa [Raw.getKeyGEV] using getKeyGED_eq h₁ h₂ h
+
 theorem getKeyGT?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKeyGT? k = t₂.getKeyGT? k :=
   h.1.getKeyGT?_eq h₁.1 h₂.1
@@ -4555,6 +4859,10 @@ theorem getKeyGT!_eq [TransCmp cmp] [Inhabited α] {k : α} (h₁ : t₁.WF) (h�
 theorem getKeyGTD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKeyGTD k fallback = t₂.getKeyGTD k fallback :=
   h.1.getKeyGTD_eq h₁.1 h₂.1
+
+theorem getKeyGTV_eq [TransCmp cmp] [Nonempty α] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getKeyGTV k = t₂.getKeyGTV k := by
+  simpa [Raw.getKeyGTV] using getKeyGTD_eq h₁ h₂ h
 
 theorem getKeyLE?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKeyLE? k = t₂.getKeyLE? k :=
@@ -4568,6 +4876,10 @@ theorem getKeyLED_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t
     t₁.getKeyLED k fallback = t₂.getKeyLED k fallback :=
   h.1.getKeyLED_eq h₁.1 h₂.1
 
+theorem getKeyLEV_eq [TransCmp cmp] [Nonempty α] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getKeyLEV k = t₂.getKeyLEV k := by
+  simpa [Raw.getKeyLEV] using getKeyLED_eq h₁ h₂ h
+
 theorem getKeyLT?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKeyLT? k = t₂.getKeyLT? k :=
   h.1.getKeyLT?_eq h₁.1 h₂.1
@@ -4579,6 +4891,10 @@ theorem getKeyLT!_eq [TransCmp cmp] [Inhabited α] {k : α} (h₁ : t₁.WF) (h�
 theorem getKeyLTD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKeyLTD k fallback = t₂.getKeyLTD k fallback :=
   h.1.getKeyLTD_eq h₁.1 h₂.1
+
+theorem getKeyLTV_eq [TransCmp cmp] [Nonempty α] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getKeyLTV k = t₂.getKeyLTV k := by
+  simpa [Raw.getKeyLTV] using getKeyLTD_eq h₁ h₂ h
 
 theorem insert [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂)
     (k : α) (v : β) : t₁.insert k v ~m t₂.insert k v :=
