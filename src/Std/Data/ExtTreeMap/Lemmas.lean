@@ -211,17 +211,15 @@ theorem containsThenInsertIfNew_snd [TransCmp cmp] {k : α} {v : β} :
 @[simp, grind =] theorem get?_eq_getElem? [TransCmp cmp] {a : α} : get? t a = t[a]? := rfl
 @[simp, grind =] theorem get!_eq_getElem! [TransCmp cmp] [Inhabited β] {a : α} : get! t a = t[a]! := rfl
 
-@[simp, grind =]
+@[grind =]
 theorem getElem?_empty [TransCmp cmp] {a : α} :
     (∅ : ExtTreeMap α β cmp)[a]? = none :=
   ExtDTreeMap.Const.get?_empty (cmp := cmp) (a := a)
 
-@[grind =]
 theorem getElem?_insert [TransCmp cmp] {a k : α} {v : β} :
     (t.insert k v)[a]? = if cmp k a = .eq then some v else t[a]? :=
   ExtDTreeMap.Const.get?_insert
 
-@[simp]
 theorem getElem?_insert_self [TransCmp cmp] {k : α} {v : β} :
     (t.insert k v)[k]? = some v :=
   ExtDTreeMap.Const.get?_insert_self
@@ -260,7 +258,6 @@ theorem getElem?_eq_none [TransCmp cmp] {a : α} :
     (t.erase k)[a]? = if cmp k a = .eq then none else t[a]? :=
   ExtDTreeMap.Const.get?_erase
 
-@[simp]
 theorem getElem?_erase_self [TransCmp cmp] {k : α} :
     (t.erase k)[k]? = none :=
   ExtDTreeMap.Const.get?_erase_self
@@ -275,12 +272,10 @@ theorem getElem?_congr [TransCmp cmp] {a b : α} (hab : cmp a b = .eq) :
       else t[a]'(mem_of_mem_insert h₁ h₂) :=
   ExtDTreeMap.Const.get_insert (h₁ := h₁)
 
-@[simp]
 theorem getElem_insert_self [TransCmp cmp] {k : α} {v : β} :
     (t.insert k v)[k]'mem_insert_self = v :=
   ExtDTreeMap.Const.get_insert_self
 
-@[simp, grind =]
 theorem getElem_erase [TransCmp cmp] {k a : α} {h'} :
     (t.erase k)[a]'h' = t[a]'(mem_of_mem_erase h') :=
   ExtDTreeMap.Const.get_erase (h' := h')
@@ -301,7 +296,7 @@ theorem getElem_congr [TransCmp cmp] {a b : α} (hab : cmp a b = .eq) {h'} :
     t[a]'h' = t[b]'((mem_congr hab).mp h') :=
   ExtDTreeMap.Const.get_congr hab (h' := h')
 
-@[simp, grind =]
+@[grind =]
 theorem getElem!_empty [TransCmp cmp] [Inhabited β] {a : α} :
     (∅ : ExtTreeMap α β cmp)[a]! = default :=
   ExtDTreeMap.Const.get!_empty (cmp := cmp) (a := a)
@@ -310,7 +305,6 @@ theorem getElem!_empty [TransCmp cmp] [Inhabited β] {a : α} :
     (t.insert k v)[a]! = if cmp k a = .eq then v else t[a]! :=
   ExtDTreeMap.Const.get!_insert
 
-@[simp]
 theorem getElem!_insert_self [TransCmp cmp] [Inhabited β] {k : α}
     {v : β} : (t.insert k v)[k]! = v :=
   ExtDTreeMap.Const.get!_insert_self
@@ -327,7 +321,6 @@ theorem getElem!_eq_default [TransCmp cmp] [Inhabited β] {a : α} :
     (t.erase k)[a]! = if cmp k a = .eq then default else t[a]! :=
   ExtDTreeMap.Const.get!_erase
 
-@[simp]
 theorem getElem!_erase_self [TransCmp cmp] [Inhabited β] {k : α} :
     (t.erase k)[k]! = default :=
   ExtDTreeMap.Const.get!_erase_self
@@ -437,6 +430,7 @@ theorem getElem_eq_getD [TransCmp cmp] {a : α} (fallback : β) {h} :
     t[a]'h = getD t a fallback :=
   ExtDTreeMap.Const.get_eq_getD (h := h)
 
+@[simp, grind norm]
 theorem getElem_eq_getElemV [TransCmp cmp] [Nonempty β] {a : α} {h} :
     t[a]'h = t｢a｣ := by
   simpa [ExtTreeMap.getV] using getElem_eq_getD _
@@ -457,7 +451,7 @@ theorem getElemV_congr [TransCmp cmp] [Nonempty β] {a b : α}
     (hab : cmp a b = .eq) : t｢a｣ = t｢b｣ :=
   ExtDTreeMap.Const.getV_congr hab
 
-@[simp, grind =]
+@[grind =]
 theorem getKey?_empty [TransCmp cmp] {a : α} : (∅ : ExtTreeMap α β cmp).getKey? a = none :=
   ExtDTreeMap.getKey?_empty
 
@@ -465,7 +459,6 @@ theorem getKey?_empty [TransCmp cmp] {a : α} : (∅ : ExtTreeMap α β cmp).get
     (t.insert k v).getKey? a = if cmp k a = .eq then some k else t.getKey? a :=
   ExtDTreeMap.getKey?_insert
 
-@[simp]
 theorem getKey?_insert_self [TransCmp cmp] {k : α} {v : β} :
     (t.insert k v).getKey? k = some k :=
   ExtDTreeMap.getKey?_insert_self
@@ -508,7 +501,6 @@ theorem getKey?_eq_none [TransCmp cmp] {a : α} :
     (t.erase k).getKey? a = if cmp k a = .eq then none else t.getKey? a :=
   ExtDTreeMap.getKey?_erase
 
-@[simp]
 theorem getKey?_erase_self [TransCmp cmp] {k : α} :
     (t.erase k).getKey? k = none :=
   ExtDTreeMap.getKey?_erase_self
@@ -535,12 +527,10 @@ theorem getKey?_eq_some [TransCmp cmp] [LawfulEqCmp cmp] {k : α} (h' : k ∈ t)
       if h₂ : cmp k a = .eq then k else t.getKey a (mem_of_mem_insert h₁ h₂) :=
   ExtDTreeMap.getKey_insert
 
-@[simp]
 theorem getKey_insert_self [TransCmp cmp] {k : α} {v : β} :
     (t.insert k v).getKey k mem_insert_self = k :=
   ExtDTreeMap.getKey_insert_self
 
-@[simp, grind =]
 theorem getKey_erase [TransCmp cmp] {k a : α} {h'} :
     (t.erase k).getKey a h' = t.getKey a (mem_of_mem_erase h') :=
   ExtDTreeMap.getKey_erase
@@ -553,7 +543,7 @@ theorem getKey_eq_get_getKey? [TransCmp cmp] {a : α} {h} :
     t.getKey a h = (t.getKey? a).get (mem_iff_isSome_getKey?.mp h) :=
   ExtDTreeMap.getKey_eq_get_getKey?
 
-@[simp, grind =]
+@[grind =]
 theorem get_getKey? [TransCmp cmp] {a : α} {h} :
     (t.getKey? a).get h = t.getKey a (mem_iff_isSome_getKey?.mpr h) :=
   ExtDTreeMap.get_getKey?
@@ -566,12 +556,11 @@ theorem getKey_congr [TransCmp cmp] {k₁ k₂ : α} (h' : cmp k₁ k₂ = .eq)
     (h₁ : k₁ ∈ t) : t.getKey k₁ h₁ = t.getKey k₂ ((mem_congr h').mp h₁) :=
   ExtDTreeMap.getKey_congr h' h₁
 
-@[simp, grind =]
 theorem getKey_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α} (h' : k ∈ t) :
     t.getKey k h' = k :=
   ExtDTreeMap.getKey_eq h'
 
-@[simp, grind =]
+@[grind =]
 theorem getKey!_empty [TransCmp cmp] {a : α} [Inhabited α] :
     (∅ : ExtTreeMap α β cmp).getKey! a = default :=
   ExtDTreeMap.getKey!_empty
@@ -580,7 +569,6 @@ theorem getKey!_empty [TransCmp cmp] {a : α} [Inhabited α] :
     {v : β} : (t.insert k v).getKey! a = if cmp k a = .eq then k else t.getKey! a :=
   ExtDTreeMap.getKey!_insert
 
-@[simp]
 theorem getKey!_insert_self [TransCmp cmp] [Inhabited α] {a : α}
     {b : β} : (t.insert a b).getKey! a = a :=
   ExtDTreeMap.getKey!_insert_self
@@ -597,7 +585,6 @@ theorem getKey!_eq_default [TransCmp cmp] [Inhabited α] {a : α} :
     (t.erase k).getKey! a = if cmp k a = .eq then default else t.getKey! a :=
   ExtDTreeMap.getKey!_erase
 
-@[simp]
 theorem getKey!_erase_self [TransCmp cmp] [Inhabited α] {k : α} :
     (t.erase k).getKey! k = default :=
   ExtDTreeMap.getKey!_erase_self
@@ -710,6 +697,11 @@ theorem getKeyV_eq_getD_getKey? [TransCmp cmp] [Nonempty α] {a : α} :
 theorem getKey_eq_getKeyD [TransCmp cmp] {a fallback : α} {h} :
     t.getKey a h = t.getKeyD a fallback :=
   ExtDTreeMap.getKey_eq_getKeyD
+
+@[simp, grind norm]
+theorem getKey_eq_getKeyV [TransCmp cmp] [Nonempty α] {a : α} {h} :
+    t.getKey a h = t.getKeyV a := by
+  simp [ExtTreeMap.getKeyV, getKey_eq_getKeyD]
 
 theorem getKey!_eq_getKeyD_default [TransCmp cmp] [Inhabited α] {a : α} :
     t.getKey! a = t.getKeyD a default :=
@@ -1398,18 +1390,15 @@ theorem insertManyIfNewUnit_list_eq_empty_iff [TransCmp cmp] {l : List α} :
     insertManyIfNewUnit t l = ∅ ↔ t = ∅ ∧ l = [] := by
   simpa only [ext_iff] using ExtDTreeMap.Const.insertManyIfNewUnit_list_eq_empty_iff
 
-@[simp]
 theorem getElem?_insertManyIfNewUnit_list [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
     {l : List α} {k : α} :
     (insertManyIfNewUnit t l)[k]? = if k ∈ t ∨ l.contains k then some () else none :=
   ExtDTreeMap.Const.get?_insertManyIfNewUnit_list
 
-@[simp]
 theorem getElem_insertManyIfNewUnit_list [TransCmp cmp] {l : List α} {k : α} {h'} :
     (insertManyIfNewUnit t l)[k]'h' = () :=
   rfl
 
-@[simp]
 theorem getElem!_insertManyIfNewUnit_list [TransCmp cmp] {l : List α} {k : α} :
     (insertManyIfNewUnit t l)[k]! = () :=
   rfl
@@ -1710,17 +1699,14 @@ theorem unitOfList_eq_empty_iff [TransCmp cmp] {l : List α} :
     unitOfList l cmp = ∅ ↔ l = [] :=
   ext_iff.trans ExtDTreeMap.Const.unitOfList_eq_empty_iff
 
-@[simp]
 theorem getElem?_unitOfList [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp] {l : List α} {k : α} :
     (unitOfList l cmp)[k]? = if l.contains k then some () else none :=
   ExtDTreeMap.Const.get?_unitOfList
 
-@[simp]
 theorem getElem_unitOfList [TransCmp cmp] {l : List α} {k : α} {h} :
     (unitOfList l cmp)[k]'h = () :=
   rfl
 
-@[simp]
 theorem getElem!_unitOfList [TransCmp cmp] {l : List α} {k : α} :
     (unitOfList l cmp)[k]! = () :=
   rfl
@@ -2072,7 +2058,6 @@ theorem get?_inter_of_not_mem_right [TransCmp cmp]
   ExtDTreeMap.Const.get?_inter_of_not_mem_right not_mem
 
 /- getElem -/
-@[simp]
 theorem getElem_inter [TransCmp cmp]
     {k : α} {h_mem : k ∈ t₁ ∩ t₂} :
     (t₁ ∩ t₂)[k]'h_mem = t₁[k]'(mem_inter_iff.1 h_mem).1 :=
@@ -2193,7 +2178,6 @@ theorem getKey?_inter_of_not_mem_left [TransCmp cmp]
   ExtDTreeMap.getKey?_inter_of_not_mem_left not_mem
 
 /- getKey -/
-@[simp]
 theorem getKey_inter [TransCmp cmp]
     {k : α} {h_mem : k ∈ t₁ ∩ t₂} :
     (t₁ ∩ t₂).getKey k h_mem =
@@ -2679,7 +2663,6 @@ theorem size_le_size_alter [TransCmp cmp] {k : α} {f : Option β → Option β}
     t.size - 1 ≤ (alter t k f).size :=
   ExtDTreeMap.Const.size_le_size_alter
 
-@[grind =]
 theorem getElem?_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β} :
     (alter t k f)[k']? =
       if cmp k k' = .eq then
@@ -2688,12 +2671,10 @@ theorem getElem?_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β} 
         t[k']? :=
   ExtDTreeMap.Const.get?_alter
 
-@[simp]
 theorem getElem?_alter_self [TransCmp cmp] {k : α} {f : Option β → Option β} :
     (alter t k f)[k]? = f t[k]? :=
   ExtDTreeMap.Const.get?_alter_self
 
-@[grind =]
 theorem getElem_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β}
     {hc : k' ∈ (alter t k f)} :
     (alter t k f)[(k')]'hc =
@@ -2705,14 +2686,12 @@ theorem getElem_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β}
         t[(k')]'h' :=
   ExtDTreeMap.Const.get_alter (hc := hc)
 
-@[simp]
 theorem getElem_alter_self [TransCmp cmp] {k : α} {f : Option β → Option β}
     {hc : k ∈ alter t k f} :
     haveI h' : (f t[k]?).isSome := mem_alter_self.mp hc
     (alter t k f)[k]'hc = (f t[k]?).get h' :=
   ExtDTreeMap.Const.get_alter_self (hc := hc)
 
-@[grind =]
 theorem getElem!_alter [TransCmp cmp] {k k' : α} [Inhabited β] {f : Option β → Option β} :
     (alter t k f)[k']! =
       if cmp k k' = .eq then
@@ -2721,7 +2700,6 @@ theorem getElem!_alter [TransCmp cmp] {k k' : α} [Inhabited β] {f : Option β 
         t[k']! :=
   ExtDTreeMap.Const.get!_alter
 
-@[simp]
 theorem getElem!_alter_self [TransCmp cmp] {k : α} [Inhabited β] {f : Option β → Option β} :
     (alter t k f)[k]! = (f t[k]?).get! :=
   ExtDTreeMap.Const.get!_alter_self
@@ -2757,7 +2735,6 @@ theorem getElemV_alter_self [TransCmp cmp] [Nonempty β] {k : α}
     (alter t k f)｢k｣ = (f t[k]?).getD Classical.ofNonempty :=
   ExtDTreeMap.Const.getV_alter_self
 
-@[grind =]
 theorem getKey?_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β} :
     (alter t k f).getKey? k' =
       if cmp k k' = .eq then
@@ -2770,7 +2747,6 @@ theorem getKey?_alter_self [TransCmp cmp] {k : α} {f : Option β → Option β}
     (alter t k f).getKey? k = if (f t[k]?).isSome then some k else none :=
   ExtDTreeMap.Const.getKey?_alter_self
 
-@[grind =]
 theorem getKey!_alter [TransCmp cmp] [Inhabited α] {k k' : α} {f : Option β → Option β} :
     (alter t k f).getKey! k' =
       if cmp k k' = .eq then
@@ -2784,7 +2760,6 @@ theorem getKey!_alter_self [TransCmp cmp] [Inhabited α] {k : α}
     (alter t k f).getKey! k = if (f t[k]?).isSome then k else default :=
   ExtDTreeMap.Const.getKey!_alter_self
 
-@[grind =]
 theorem getKey_alter [TransCmp cmp] [Inhabited α] {k k' : α} {f : Option β → Option β}
     {hc : k' ∈ alter t k f} :
     (alter t k f).getKey k' hc =
@@ -2795,7 +2770,6 @@ theorem getKey_alter [TransCmp cmp] [Inhabited α] {k k' : α} {f : Option β �
         t.getKey k' h' :=
   ExtDTreeMap.Const.getKey_alter
 
-@[simp]
 theorem getKey_alter_self [TransCmp cmp] [Inhabited α] {k : α} {f : Option β → Option β}
     {hc : k ∈ alter t k f} :
     (alter t k f).getKey k hc = k :=
@@ -2853,7 +2827,6 @@ theorem size_modify [TransCmp cmp] {k : α} {f : β → β} :
     (modify t k f).size = t.size :=
   ExtDTreeMap.Const.size_modify
 
-@[grind =]
 theorem getElem?_modify [TransCmp cmp] {k k' : α} {f : β → β} :
     (modify t k f)[k']? =
       if cmp k k' = .eq then
@@ -2862,12 +2835,10 @@ theorem getElem?_modify [TransCmp cmp] {k k' : α} {f : β → β} :
         t[k']? :=
   ExtDTreeMap.Const.get?_modify
 
-@[simp]
 theorem getElem?_modify_self [TransCmp cmp] {k : α} {f : β → β} :
     (modify t k f)[k]? = t[k]?.map f :=
   ExtDTreeMap.Const.get?_modify_self
 
-@[grind =]
 theorem getElem_modify [TransCmp cmp] {k k' : α} {f : β → β} {hc : k' ∈ modify t k f} :
     (modify t k f)[(k')]'hc =
       if heq : cmp k k' = .eq then
@@ -2878,13 +2849,11 @@ theorem getElem_modify [TransCmp cmp] {k k' : α} {f : β → β} {hc : k' ∈ m
         t[(k')]'h' :=
   ExtDTreeMap.Const.get_modify (hc := hc)
 
-@[simp]
 theorem getElem_modify_self [TransCmp cmp] {k : α} {f : β → β} {hc : k ∈ modify t k f} :
     haveI h' : k ∈ t := mem_modify.mp hc
     (modify t k f)[k]'hc = f (t[k]'h') :=
   ExtDTreeMap.Const.get_modify_self (hc := hc)
 
-@[grind =]
 theorem getElem!_modify [TransCmp cmp] {k k' : α} [hi : Inhabited β] {f : β → β} :
     (modify t k f)[k']! =
       if cmp k k' = .eq then
@@ -2893,7 +2862,6 @@ theorem getElem!_modify [TransCmp cmp] {k k' : α} [hi : Inhabited β] {f : β �
         t[k']! :=
   ExtDTreeMap.Const.get!_modify
 
-@[simp]
 theorem getElem!_modify_self [TransCmp cmp] {k : α} [Inhabited β] {f : β → β} :
     (modify t k f)[k]! = (t[k]?.map f).get! :=
   ExtDTreeMap.Const.get!_modify_self
@@ -2925,7 +2893,6 @@ theorem getElemV_modify_self [TransCmp cmp] [Nonempty β] {k : α} {f : β → �
     (modify t k f)｢k｣ = ((t[k]?.map f).getD Classical.ofNonempty) :=
   ExtDTreeMap.Const.getV_modify_self
 
-@[grind =]
 theorem getKey?_modify [TransCmp cmp] {k k' : α} {f : β → β} :
     (modify t k f).getKey? k' =
       if cmp k k' = .eq then
@@ -2938,7 +2905,6 @@ theorem getKey?_modify_self [TransCmp cmp] {k : α} {f : β → β} :
     (modify t k f).getKey? k = if k ∈ t then some k else none :=
   ExtDTreeMap.Const.getKey?_modify_self
 
-@[grind =]
 theorem getKey!_modify [TransCmp cmp] [Inhabited α] {k k' : α} {f : β → β} :
     (modify t k f).getKey! k' =
       if cmp k k' = .eq then
@@ -2951,7 +2917,6 @@ theorem getKey!_modify_self [TransCmp cmp] [Inhabited α] {k : α} {f : β → �
     (modify t k f).getKey! k = if k ∈ t then k else default :=
   ExtDTreeMap.Const.getKey!_modify_self
 
-@[grind =]
 theorem getKey_modify [TransCmp cmp] [Inhabited α] {k k' : α} {f : β → β}
     {hc : k' ∈ modify t k f} :
     (modify t k f).getKey k' hc =
@@ -2962,7 +2927,6 @@ theorem getKey_modify [TransCmp cmp] [Inhabited α] {k k' : α} {f : β → β}
         t.getKey k' h' :=
   ExtDTreeMap.Const.getKey_modify
 
-@[simp]
 theorem getKey_modify_self [TransCmp cmp] [Inhabited α] {k : α} {f : β → β}
     {hc : k ∈ modify t k f} : (modify t k f).getKey k hc = k :=
   ExtDTreeMap.Const.getKey_modify_self
@@ -2996,11 +2960,11 @@ end Modify
 
 section Min
 
-@[simp, grind =]
+@[grind =]
 theorem minKey?_empty [TransCmp cmp] : (∅ : ExtTreeMap α β cmp).minKey? = none :=
   ExtDTreeMap.minKey?_empty
 
-@[simp, grind =]
+@[grind =]
 theorem minKey?_eq_none_iff [TransCmp cmp] :
     t.minKey? = none ↔ t = ∅ :=
   ExtDTreeMap.minKey?_eq_none_iff.trans ext_iff.symm
@@ -3142,7 +3106,6 @@ theorem getKeyV_minKey? [TransCmp cmp] [Nonempty α] {km} :
     (hkm : t.minKey? = some km) → t.getKeyV km = km  :=
   ExtDTreeMap.getKeyV_minKey?
 
-@[simp]
 theorem minKey?_bind_getKey? [TransCmp cmp] :
     t.minKey?.bind t.getKey? = t.minKey? :=
   ExtDTreeMap.minKey?_bind_getKey?
@@ -3197,7 +3160,7 @@ theorem minKey?_modify [TransCmp cmp] {k f} :
     (t.modify k f).minKey? = t.minKey?.map fun km => if cmp km k = .eq then k else km :=
   ExtDTreeMap.Const.minKey?_modify
 
-@[simp, grind =]
+@[grind =]
 theorem minKey?_modify_eq_minKey? [TransCmp cmp] [LawfulEqCmp cmp] {k f} :
     (t.modify k f).minKey? = t.minKey? :=
   ExtDTreeMap.Const.minKey?_modify_eq_minKey?
@@ -3273,17 +3236,16 @@ theorem le_minKey [TransCmp cmp] {k he} :
     (cmp k (t.minKey he)).isLE ↔ (∀ k', k' ∈ t → (cmp k k').isLE) :=
   ExtDTreeMap.le_minKey
 
-@[simp, grind =]
+@[grind =]
 theorem getKey?_minKey [TransCmp cmp] {he} :
     t.getKey? (t.minKey he) = some (t.minKey he) :=
   ExtDTreeMap.getKey?_minKey
 
-@[simp, grind =]
 theorem getKey_minKey [TransCmp cmp] {he hc} :
     t.getKey (t.minKey he) hc = t.minKey he :=
   ExtDTreeMap.getKey_minKey
 
-@[simp, grind =]
+@[grind =]
 theorem getKey!_minKey [TransCmp cmp] [Inhabited α] {he} :
     t.getKey! (t.minKey he) = t.minKey he :=
   ExtDTreeMap.getKey!_minKey
@@ -3297,7 +3259,6 @@ theorem getKeyV_minKey [TransCmp cmp] [Nonempty α] {he} :
     t.getKeyV (t.minKey he) = t.minKey he  :=
   ExtDTreeMap.getKeyV_minKey
 
-@[simp]
 theorem minKey_erase_eq_iff_not_compare_eq_minKey [TransCmp cmp] {k he} :
     (t.erase k |>.minKey he) =
         t.minKey (ne_empty_of_erase_ne_empty he) ↔
@@ -3341,7 +3302,6 @@ theorem minKey_modify [TransCmp cmp] {k f he} :
         (t.minKey (mt modify_eq_empty_iff.mpr he)) :=
   ExtDTreeMap.Const.minKey_modify
 
-@[simp, grind =]
 theorem minKey_modify_eq_minKey [TransCmp cmp] [LawfulEqCmp cmp] {k f he} :
     (modify t k f).minKey he = t.minKey (mt modify_eq_empty_iff.mpr he) :=
   ExtDTreeMap.Const.minKey_modify_eq_minKey
@@ -3383,7 +3343,6 @@ theorem minKey!_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] [Inhabite
     t.minKey! = km ↔ km ∈ t ∧ ∀ k, k ∈ t → (cmp km k).isLE :=
   ExtDTreeMap.minKey!_eq_iff_mem_and_forall (mt ext he)
 
-@[grind =]
 theorem minKey!_insert [TransCmp cmp] [Inhabited α] {k v} :
     (t.insert k v).minKey! =
       (t.minKey?.elim k fun k' => if cmp k k' |>.isLE then k else k') :=
@@ -3425,7 +3384,6 @@ theorem getKey?_minKey! [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) :
     t.getKey t.minKey! hc = t.minKey! :=
   ExtDTreeMap.getKey_minKey!
 
-@[simp, grind =]
 theorem getKey_minKey!_eq_minKey [TransCmp cmp] [Inhabited α] {hc} :
     t.getKey t.minKey! hc = t.minKey (ne_empty_of_mem hc) :=
   ExtDTreeMap.getKey_minKey!_eq_minKey
@@ -3452,7 +3410,6 @@ theorem minKey!_le_minKey!_erase [TransCmp cmp] [Inhabited α] {k}
     cmp t.minKey! (t.erase k).minKey! |>.isLE :=
   ExtDTreeMap.minKey!_le_minKey!_erase (mt ext he)
 
-@[grind =]
 theorem minKey!_insertIfNew [TransCmp cmp] [Inhabited α] {k v} :
     (t.insertIfNew k v).minKey! =
       t.minKey?.elim k fun k' => if cmp k k' = .lt then k else k' :=
@@ -3466,7 +3423,6 @@ theorem minKey!_insertIfNew_le_self [TransCmp cmp] [Inhabited α] {k v} :
     cmp (t.insertIfNew k v).minKey! k |>.isLE :=
   ExtDTreeMap.minKey!_insertIfNew_le_self
 
-@[grind =_]
 theorem minKey!_eq_head!_keys [TransCmp cmp] [Inhabited α] :
     t.minKey! = t.keys.head! :=
   ExtDTreeMap.minKey!_eq_head!_keys
@@ -3476,7 +3432,6 @@ theorem minKey!_modify [TransCmp cmp] [Inhabited α] {k f}
     (modify t k f).minKey! = if cmp t.minKey! k = .eq then k else t.minKey! :=
   ExtDTreeMap.Const.minKey!_modify (mt ext he)
 
-@[simp]
 theorem minKey!_modify_eq_minKey! [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k f} :
     (modify t k f).minKey! = t.minKey! :=
   ExtDTreeMap.Const.minKey!_modify_eq_minKey!
@@ -3635,10 +3590,12 @@ theorem minKeyV_insertIfNew_of_isEmpty [TransCmp cmp] [Nonempty α] {k v} (he : 
     (t.insertIfNew k v).minKeyV = k := by
   simpa [ExtTreeMap.minKeyV] using minKeyD_insertIfNew_of_isEmpty he
 
+@[grind norm]
 theorem minKey?_eq_some_minKeyV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
     t.minKey? = some t.minKeyV := by
   simpa [ExtTreeMap.minKeyV] using minKey?_eq_some_minKeyD he
 
+@[simp, grind norm]
 theorem minKey_eq_minKeyV [TransCmp cmp] [Nonempty α] {he : t ≠ ∅} :
     t.minKey he = t.minKeyV :=
   ExtDTreeMap.minKey_eq_minKeyV
@@ -3736,7 +3693,7 @@ theorem minKeyV_modify [TransCmp cmp] [Nonempty α] {k f}
     (modify t k f).minKeyV = if cmp t.minKeyV k = .eq then k else t.minKeyV := by
   simpa [ExtTreeMap.minKeyV] using minKeyD_modify he
 
-@[simp]
+@[simp, grind norm]
 theorem minKeyV_modify_eq_minKeyV [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] {k f} :
     (modify t k f).minKeyV = t.minKeyV := by
   simpa [ExtTreeMap.minKeyV] using minKeyD_modify_eq_minKeyD
@@ -3761,11 +3718,11 @@ end Min
 
 section Max
 
-@[simp, grind =]
+@[grind =]
 theorem maxKey?_empty [TransCmp cmp] : (∅ : ExtTreeMap α β cmp).maxKey? = none :=
   ExtDTreeMap.maxKey?_empty
 
-@[simp, grind =]
+@[grind =]
 theorem maxKey?_eq_none_iff [TransCmp cmp] :
     t.maxKey? = none ↔ t = ∅ :=
   ExtDTreeMap.maxKey?_eq_none_iff.trans ext_iff.symm
@@ -3792,7 +3749,6 @@ theorem isSome_maxKey?_iff_ne_empty [TransCmp cmp] :
     t.maxKey?.isSome ↔ t ≠ ∅ :=
   ExtDTreeMap.isSome_maxKey?_iff_ne_empty.trans (not_congr ext_iff).symm
 
-@[grind =]
 theorem maxKey?_insert [TransCmp cmp] {k v} :
     (t.insert k v).maxKey? =
       some (t.maxKey?.elim k fun k' => if cmp k' k |>.isLE then k else k') :=
@@ -3865,7 +3821,6 @@ theorem getKeyV_maxKey? [TransCmp cmp] [Nonempty α] {km} :
     (hkm : t.maxKey? = some km) → t.getKeyV km = km  :=
   ExtDTreeMap.getKeyV_maxKey?
 
-@[simp]
 theorem maxKey?_bind_getKey? [TransCmp cmp] :
     t.maxKey?.bind t.getKey? = t.maxKey? :=
   ExtDTreeMap.maxKey?_bind_getKey?
@@ -3920,7 +3875,7 @@ theorem self_le_maxKey?_insertIfNew [TransCmp cmp] {k v kmi} :
     (t.modify k f).maxKey? = t.maxKey?.map fun km => if cmp km k = .eq then k else km :=
   ExtDTreeMap.Const.maxKey?_modify
 
-@[simp, grind =]
+@[grind =]
 theorem maxKey?_modify_eq_maxKey? [TransCmp cmp] [LawfulEqCmp cmp] {k f} :
     (t.modify k f).maxKey? = t.maxKey? :=
   ExtDTreeMap.Const.maxKey?_modify_eq_maxKey?
@@ -3996,17 +3951,16 @@ theorem maxKey_le [TransCmp cmp] {k he} :
     (cmp (t.maxKey he) k).isLE ↔ (∀ k', k' ∈ t → (cmp k' k).isLE) :=
   ExtDTreeMap.maxKey_le
 
-@[simp, grind =]
+@[grind =]
 theorem getKey?_maxKey [TransCmp cmp] {he} :
     t.getKey? (t.maxKey he) = some (t.maxKey he) :=
   ExtDTreeMap.getKey?_maxKey
 
-@[simp, grind =]
 theorem getKey_maxKey [TransCmp cmp] {he hc} :
     t.getKey (t.maxKey he) hc = t.maxKey he :=
   ExtDTreeMap.getKey_maxKey
 
-@[simp, grind =]
+@[grind =]
 theorem getKey!_maxKey [TransCmp cmp] [Inhabited α] {he} :
     t.getKey! (t.maxKey he) = t.maxKey he :=
   ExtDTreeMap.getKey!_maxKey
@@ -4020,7 +3974,6 @@ theorem getKeyV_maxKey [TransCmp cmp] [Nonempty α] {he} :
     t.getKeyV (t.maxKey he) = t.maxKey he  :=
   ExtDTreeMap.getKeyV_maxKey
 
-@[simp]
 theorem maxKey_erase_eq_iff_not_compare_eq_maxKey [TransCmp cmp] {k he} :
     (t.erase k |>.maxKey he) =
         t.maxKey (ne_empty_of_erase_ne_empty he) ↔
@@ -4064,7 +4017,6 @@ theorem maxKey_modify [TransCmp cmp] {k f he} :
         (t.maxKey (mt modify_eq_empty_iff.mpr he)) :=
   ExtDTreeMap.Const.maxKey_modify
 
-@[simp, grind =]
 theorem maxKey_modify_eq_maxKey [TransCmp cmp] [LawfulEqCmp cmp] {k f he} :
     (modify t k f).maxKey he = t.maxKey (mt modify_eq_empty_iff.mpr he) :=
   ExtDTreeMap.Const.maxKey_modify_eq_maxKey
@@ -4106,7 +4058,6 @@ theorem maxKey!_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] [Inhabite
     t.maxKey! = km ↔ km ∈ t ∧ ∀ k, k ∈ t → (cmp k km).isLE :=
   ExtDTreeMap.maxKey!_eq_iff_mem_and_forall (mt ext he)
 
-@[grind =]
 theorem maxKey!_insert [TransCmp cmp] [Inhabited α] {k v} :
     (t.insert k v).maxKey! =
       (t.maxKey?.elim k fun k' => if cmp k' k |>.isLE then k else k') :=
@@ -4148,7 +4099,6 @@ theorem getKey?_maxKey! [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) :
     t.getKey t.maxKey! hc = t.maxKey! :=
   ExtDTreeMap.getKey_maxKey!
 
-@[simp, grind =]
 theorem getKey_maxKey!_eq_maxKey [TransCmp cmp] [Inhabited α] {hc} :
     t.getKey t.maxKey! hc = t.maxKey (ne_empty_of_mem hc) :=
   ExtDTreeMap.getKey_maxKey!_eq_maxKey
@@ -4175,7 +4125,6 @@ theorem maxKey!_erase_le_maxKey! [TransCmp cmp] [Inhabited α] {k}
     cmp (t.erase k).maxKey! t.maxKey! |>.isLE :=
   ExtDTreeMap.maxKey!_erase_le_maxKey! (mt ext he)
 
-@[grind =]
 theorem maxKey!_insertIfNew [TransCmp cmp] [Inhabited α] {k v} :
     (t.insertIfNew k v).maxKey! =
       t.maxKey?.elim k fun k' => if cmp k' k = .lt then k else k' :=
@@ -4189,7 +4138,6 @@ theorem self_le_maxKey!_insertIfNew [TransCmp cmp] [Inhabited α] {k v} :
     cmp k (t.insertIfNew k v).maxKey! |>.isLE :=
   ExtDTreeMap.self_le_maxKey!_insertIfNew
 
-@[grind =_]
 theorem maxKey!_eq_getLast!_keys [TransCmp cmp] [Inhabited α] :
     t.maxKey! = t.keys.getLast! :=
   ExtDTreeMap.maxKey!_eq_getLast!_keys
@@ -4199,7 +4147,6 @@ theorem maxKey!_modify [TransCmp cmp] [Inhabited α] {k f}
     (modify t k f).maxKey! = if cmp t.maxKey! k = .eq then k else t.maxKey! :=
   ExtDTreeMap.Const.maxKey!_modify (mt ext he)
 
-@[simp]
 theorem maxKey!_modify_eq_maxKey! [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k f} :
     (modify t k f).maxKey! = t.maxKey! :=
   ExtDTreeMap.Const.maxKey!_modify_eq_maxKey!
@@ -4350,10 +4297,12 @@ theorem maxKeyD_alter_eq_self [TransCmp cmp] {k f}
       (f t[k]?).isSome ∧ ∀ k', k' ∈ t → (cmp k' k).isLE :=
   ExtDTreeMap.Const.maxKeyD_alter_eq_self (mt ext he)
 
+@[grind norm]
 theorem maxKey?_eq_some_maxKeyV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
     t.maxKey? = some t.maxKeyV := by
   simpa [ExtTreeMap.maxKeyV] using maxKey?_eq_some_maxKeyD he
 
+@[simp, grind norm]
 theorem maxKey_eq_maxKeyV [TransCmp cmp] [Nonempty α] {he : t ≠ ∅} :
     t.maxKey he = t.maxKeyV :=
   ExtDTreeMap.maxKey_eq_maxKeyV
@@ -4451,7 +4400,7 @@ theorem maxKeyV_modify [TransCmp cmp] [Nonempty α] {k f}
     (modify t k f).maxKeyV = if cmp t.maxKeyV k = .eq then k else t.maxKeyV := by
   simpa [ExtTreeMap.maxKeyV] using maxKeyD_modify he
 
-@[simp]
+@[simp, grind norm]
 theorem maxKeyV_modify_eq_maxKeyV [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] {k f} :
     (modify t k f).maxKeyV = t.maxKeyV := by
   simpa [ExtTreeMap.maxKeyV] using maxKeyD_modify_eq_maxKeyD
@@ -4559,7 +4508,6 @@ theorem size_filterMap_eq_size_iff [TransCmp cmp]
     (t.filterMap f).size = t.size ↔ ∀ k h, (f (t.getKey k h) t[k]).isSome :=
   ExtDTreeMap.Const.size_filterMap_eq_size_iff
 
-@[simp]
 theorem getElem?_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f)[k]? = t[k]?.pbind (fun x h' =>
@@ -4567,7 +4515,6 @@ theorem getElem?_filterMap [TransCmp cmp]
   ExtDTreeMap.Const.get?_filterMap
 
 /-- Simpler variant of `getElem?_filterMap` when `LawfulEqCmp` is available. -/
-@[grind =]
 theorem getElem?_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f)[k]? = t[k]?.bind fun x => f k x := by
@@ -4585,7 +4532,6 @@ theorem isSome_apply_of_mem_filterMap [TransCmp cmp]
         (t[k]'(mem_of_mem_filterMap h))).isSome :=
   ExtDTreeMap.Const.isSome_apply_of_mem_filterMap
 
-@[simp]
 theorem getElem_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} {h} :
     (t.filterMap f)[k]'h =
@@ -4595,7 +4541,6 @@ theorem getElem_filterMap [TransCmp cmp]
   ExtDTreeMap.Const.get_filterMap (h := h)
 
 /-- Simpler variant of `getElem_filterMap` when `LawfulEqCmp` is available. -/
-@[grind =]
 theorem getElem_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {h} :
     (t.filterMap f)[k]'h =
@@ -4610,7 +4555,6 @@ theorem getElem!_filterMap [TransCmp cmp] [Inhabited γ]
   ExtDTreeMap.Const.get!_filterMap
 
 /-- Simpler variant of `getElem!_filterMap` when `LawfulEqCmp` is available. -/
-@[grind =]
 theorem getElem!_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f)[k]! = (t[k]?.bind (f k)).get! := by
@@ -4660,7 +4604,6 @@ theorem getElemV_filterMap_of_getKey?_eq_some [TransCmp cmp] [Nonempty γ]
     (t.filterMap f)｢k｣ = (t[k]?.bind (f k')).getD Classical.ofNonempty :=
   ExtDTreeMap.Const.getV_filterMap_of_getKey?_eq_some h
 
-@[grind =]
 theorem getKey?_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f).getKey? k =
@@ -4668,13 +4611,11 @@ theorem getKey?_filterMap [TransCmp cmp]
       (f x (t[x]'(mem_of_getKey?_eq_some h'))).isSome) :=
   ExtDTreeMap.Const.getKey?_filterMap
 
-@[simp, grind =]
 theorem getKey_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} {h'} :
     (t.filterMap f).getKey k h' = t.getKey k (mem_of_mem_filterMap h') :=
   ExtDTreeMap.getKey_filterMap
 
-@[grind =]
 theorem getKey!_filterMap [TransCmp cmp] [Inhabited α]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f).getKey! k =
@@ -4755,7 +4696,6 @@ theorem filter_eq_self_iff [TransCmp cmp]
     t.filter f = t ↔ ∀ k h, f (t.getKey k h) (t[k]'h) :=
   ext_iff.trans ExtDTreeMap.Const.filter_eq_self_iff
 
-@[simp]
 theorem getElem?_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} :
     (t.filter f)[k]? = t[k]?.pfilter (fun x h' =>
@@ -4763,7 +4703,6 @@ theorem getElem?_filter [TransCmp cmp]
   ExtDTreeMap.Const.get?_filter
 
 /-- Simpler variant of `getElem?_filter` when `LawfulEqCmp` is available. -/
-@[grind =]
 theorem getElem?_filter' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Bool} {k : α} :
     (t.filter f)[k]? = t[k]?.filter (f k) := by
@@ -4775,7 +4714,6 @@ theorem getElem?_filter_of_getKey?_eq_some [TransCmp cmp]
       (t.filter f)[k]? = t[k]?.filter (fun x => f k' x) :=
   ExtDTreeMap.Const.get?_filter_of_getKey?_eq_some
 
-@[simp, grind =]
 theorem getElem_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} {h'} :
     (t.filter f)[k]'(h') = t[k]'(mem_of_mem_filter h') :=
@@ -4789,7 +4727,6 @@ theorem getElem!_filter [TransCmp cmp] [Inhabited β]
   ExtDTreeMap.Const.get!_filter
 
 /-- Simpler variant of `getElem!_filter` when `LawfulEqCmp` is available. -/
-@[grind =]
 theorem getElem!_filter' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited β]
     {f : α → β → Bool} {k : α} :
     (t.filter f)[k]! = (t[k]?.filter (f k)).get! := by
@@ -4847,7 +4784,6 @@ theorem keys_filter [TransCmp cmp] {f : α → β → Bool} :
       (t.keys.attach.filter (fun ⟨x, h'⟩ => f x (t[x]'(mem_of_mem_keys h')))).unattach :=
   ExtDTreeMap.Const.keys_filter
 
-@[grind =]
 theorem getKey?_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} :
     (t.filter f).getKey? k =
@@ -4860,13 +4796,11 @@ theorem getKey?_filter_key [TransCmp cmp]
     (t.filter fun k _ => f k).getKey? k = (t.getKey? k).filter f :=
   ExtDTreeMap.getKey?_filter_key
 
-@[simp, grind =]
 theorem getKey_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} {h'} :
     (t.filter f).getKey k h' = t.getKey k (mem_of_mem_filter h') :=
   ExtDTreeMap.getKey_filter
 
-@[grind =]
 theorem getKey!_filter [TransCmp cmp] [Inhabited α]
     {f : α → β → Bool} {k : α} :
     (t.filter f).getKey! k =
@@ -4966,7 +4900,7 @@ theorem size_map [TransCmp cmp]
     (t.map f).size = t.size :=
   ExtDTreeMap.size_map
 
-@[simp, grind =]
+@[grind =]
 theorem getElem?_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → γ} {k : α} :
     (t.map f)[k]? = t[k]?.map (f k) :=
@@ -4985,7 +4919,6 @@ theorem getElem?_map_of_getKey?_eq_some [TransCmp cmp]
     (t.map f)[k]? = t[k]?.map (f k') :=
   ExtDTreeMap.Const.get?_map_of_getKey?_eq_some h
 
-@[simp, grind =]
 theorem getElem_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → γ} {k : α} {h'} :
     (t.map f)[k]'(h') =
@@ -4993,14 +4926,12 @@ theorem getElem_map [TransCmp cmp] [LawfulEqCmp cmp]
   ExtDTreeMap.Const.get_map (h' := h')
 
 /-- Variant of `getElem_map` that holds without `LawfulEqCmp`. -/
-@[simp (low)]
 theorem getElem_map' [TransCmp cmp]
     {f : α → β → γ} {k : α} {h'} :
     (t.map f)[k]'(h') =
       f (t.getKey k (mem_of_mem_map h')) (t[k]'(mem_of_mem_map h')) :=
   ExtDTreeMap.Const.get_map' (h' := h')
 
-@[grind =]
 theorem getElem!_map [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → γ} {k : α} :
     (t.map f)[k]! =
@@ -5060,19 +4991,18 @@ theorem getElemV_map_of_getKey?_eq_some [TransCmp cmp] [Nonempty γ]
     (t.map f)｢k｣ = (t[k]?.map (f k')).getD Classical.ofNonempty :=
   ExtDTreeMap.Const.getV_map_of_getKey?_eq_some h
 
-@[simp, grind =]
+@[grind =]
 theorem getKey?_map [TransCmp cmp]
     {f : α → β → γ} {k : α} :
     (t.map f).getKey? k = t.getKey? k :=
   ExtDTreeMap.getKey?_map
 
-@[simp, grind =]
 theorem getKey_map [TransCmp cmp]
     {f : α → β → γ} {k : α} {h'} :
     (t.map f).getKey k h' = t.getKey k (mem_of_mem_map h') :=
   ExtDTreeMap.getKey_map
 
-@[simp, grind =]
+@[grind =]
 theorem getKey!_map [TransCmp cmp] [Inhabited α]
     {f : α → β → γ} {k : α} :
     (t.map f).getKey! k = t.getKey! k :=

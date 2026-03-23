@@ -202,7 +202,7 @@ theorem containsThenInsertIfNew_snd [TransCmp cmp] {k : α} {v : β k} :
     (t.containsThenInsertIfNew k v).2 = t.insertIfNew k v :=
   t.inductionOn fun _ => congrArg mk DTreeMap.containsThenInsertIfNew_snd
 
-@[simp, grind =]
+@[grind =]
 theorem get?_empty [TransCmp cmp] [LawfulEqCmp cmp] {a : α} :
     (∅ : ExtDTreeMap α β cmp).get? a = none :=
   DTreeMap.get?_emptyc
@@ -212,7 +212,6 @@ theorem get?_empty [TransCmp cmp] [LawfulEqCmp cmp] {a : α} :
       if h : cmp k a = .eq then some (cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h)) v) else t.get? a :=
   t.inductionOn fun _ => DTreeMap.get?_insert
 
-@[simp]
 theorem get?_insert_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α} {v : β k} :
     (t.insert k v).get? k = some v :=
   t.inductionOn fun _ => DTreeMap.get?_insert_self
@@ -251,7 +250,6 @@ theorem get?_eq_none [TransCmp cmp] [LawfulEqCmp cmp] {a : α} :
     (t.erase k).get? a = if cmp k a = .eq then none else t.get? a :=
   t.inductionOn fun _ => DTreeMap.get?_erase
 
-@[simp]
 theorem get?_erase_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α} :
     (t.erase k).get? k = none :=
   t.inductionOn fun _ => DTreeMap.get?_erase_self
@@ -260,7 +258,7 @@ namespace Const
 
 variable {β : Type v} {t : ExtDTreeMap α β cmp}
 
-@[simp, grind =]
+@[grind =]
 theorem get?_empty [TransCmp cmp] {a : α} :
     get? (∅ : ExtDTreeMap α β cmp) a = none :=
   DTreeMap.Const.get?_emptyc
@@ -270,7 +268,6 @@ theorem get?_empty [TransCmp cmp] {a : α} :
       if cmp k a = .eq then some v else get? t a :=
   t.inductionOn fun _ => DTreeMap.Const.get?_insert
 
-@[simp]
 theorem get?_insert_self [TransCmp cmp] {k : α} {v : β} :
     get? (t.insert k v) k = some v :=
   t.inductionOn fun _ => DTreeMap.Const.get?_insert_self
@@ -309,7 +306,6 @@ theorem get?_eq_none [TransCmp cmp] {a : α} :
     get? (t.erase k) a = if cmp k a = .eq then none else get? t a :=
   t.inductionOn fun _ => DTreeMap.Const.get?_erase
 
-@[simp]
 theorem get?_erase_self [TransCmp cmp] {k : α} :
     get? (t.erase k) k = none :=
   t.inductionOn fun _ => DTreeMap.Const.get?_erase_self
@@ -331,12 +327,10 @@ end Const
         t.get a (mem_of_mem_insert h₁ h₂) :=
   t.inductionOn (fun _ _ => DTreeMap.get_insert) h₁
 
-@[simp]
 theorem get_insert_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α} {v : β k} :
     (t.insert k v).get k mem_insert_self = v :=
   t.inductionOn fun _ => DTreeMap.get_insert_self
 
-@[simp, grind =]
 theorem get_erase [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} {h'} :
     (t.erase k).get a h' = t.get a (mem_of_mem_erase h') :=
   t.inductionOn (fun _ _ => DTreeMap.get_erase) h'
@@ -363,12 +357,10 @@ variable {β : Type v} {t : ExtDTreeMap α β cmp}
       else get t a (mem_of_mem_insert h₁ h₂) :=
   t.inductionOn (fun _ _ => DTreeMap.Const.get_insert) h₁
 
-@[simp]
 theorem get_insert_self [TransCmp cmp] {k : α} {v : β} :
     get (t.insert k v) k mem_insert_self = v :=
   t.inductionOn fun _ => DTreeMap.Const.get_insert_self
 
-@[simp, grind =]
 theorem get_erase [TransCmp cmp] {k a : α} {h'} :
     get (t.erase k) a h' = get t a (mem_of_mem_erase h') :=
   t.inductionOn (fun _ _ => DTreeMap.Const.get_erase) h'
@@ -394,7 +386,7 @@ theorem get_congr [TransCmp cmp] {a b : α} (hab : cmp a b = .eq) {h'} :
 
 end Const
 
-@[simp, grind =]
+@[grind =]
 theorem get!_empty [TransCmp cmp] [LawfulEqCmp cmp] {a : α} [Inhabited (β a)] :
     get! (∅ : ExtDTreeMap α β cmp) a = default :=
   DTreeMap.get!_emptyc
@@ -404,7 +396,6 @@ theorem get!_empty [TransCmp cmp] [LawfulEqCmp cmp] {a : α} [Inhabited (β a)] 
       if h : cmp k a = .eq then cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h)) v else t.get! a :=
   t.inductionOn fun _ => DTreeMap.get!_insert
 
-@[simp]
 theorem get!_insert_self [TransCmp cmp] [LawfulEqCmp cmp] {a : α} [Inhabited (β a)] {b : β a} :
     (t.insert a b).get! a = b :=
   t.inductionOn fun _ => DTreeMap.get!_insert_self
@@ -421,7 +412,6 @@ theorem get!_eq_default [TransCmp cmp] [LawfulEqCmp cmp] {a : α} [Inhabited (β
     (t.erase k).get! a = if cmp k a = .eq then default else t.get! a :=
   t.inductionOn fun _ => DTreeMap.get!_erase
 
-@[simp]
 theorem get!_erase_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α} [Inhabited (β k)] :
     (t.erase k).get! k = default :=
   t.inductionOn fun _ => DTreeMap.get!_erase_self
@@ -446,7 +436,7 @@ namespace Const
 
 variable {β : Type v} {t : ExtDTreeMap α β cmp}
 
-@[simp, grind =]
+@[grind =]
 theorem get!_empty [TransCmp cmp] [Inhabited β] {a : α} :
     get! (∅ : ExtDTreeMap α β cmp) a = default :=
   DTreeMap.Const.get!_emptyc
@@ -455,7 +445,6 @@ theorem get!_empty [TransCmp cmp] [Inhabited β] {a : α} :
     get! (t.insert k v) a = if cmp k a = .eq then v else get! t a :=
   t.inductionOn fun _ => DTreeMap.Const.get!_insert
 
-@[simp]
 theorem get!_insert_self [TransCmp cmp] [Inhabited β] {k : α} {v : β} : get! (t.insert k v) k = v :=
   t.inductionOn fun _ => DTreeMap.Const.get!_insert_self
 
@@ -471,7 +460,6 @@ theorem get!_eq_default [TransCmp cmp] [Inhabited β] {a : α} :
     get! (t.erase k) a = if cmp k a = .eq then default else get! t a :=
   t.inductionOn fun _ => DTreeMap.Const.get!_erase
 
-@[simp]
 theorem get!_erase_self [TransCmp cmp] [Inhabited β] {k : α} :
     get! (t.erase k) k = default :=
   t.inductionOn fun _ => DTreeMap.Const.get!_erase_self
@@ -720,7 +708,7 @@ theorem getV_congr [TransCmp cmp] [Nonempty β] {a b : α} (hab : cmp a b = .eq)
 
 end Const
 
-@[simp, grind =]
+@[grind =]
 theorem getKey?_empty [TransCmp cmp] {a : α} : (∅ : ExtDTreeMap α β cmp).getKey? a = none :=
   DTreeMap.getKey?_emptyc
 
@@ -728,7 +716,6 @@ theorem getKey?_empty [TransCmp cmp] {a : α} : (∅ : ExtDTreeMap α β cmp).ge
     (t.insert k v).getKey? a = if cmp k a = .eq then some k else t.getKey? a :=
   t.inductionOn fun _ => DTreeMap.getKey?_insert
 
-@[simp]
 theorem getKey?_insert_self [TransCmp cmp] {k : α} {v : β k} :
     (t.insert k v).getKey? k = some k :=
   t.inductionOn fun _ => DTreeMap.getKey?_insert_self
@@ -771,7 +758,6 @@ theorem getKey?_eq_none [TransCmp cmp] {a : α} :
     (t.erase k).getKey? a = if cmp k a = .eq then none else t.getKey? a :=
   t.inductionOn fun _ => DTreeMap.getKey?_erase
 
-@[simp]
 theorem getKey?_erase_self [TransCmp cmp] {k : α} :
     (t.erase k).getKey? k = none :=
   t.inductionOn fun _ => DTreeMap.getKey?_erase_self
@@ -800,12 +786,10 @@ theorem getKey?_eq_some [TransCmp cmp] [LawfulEqCmp cmp] {k : α} (h' : k ∈ t)
         t.getKey a (mem_of_mem_insert h₁ h₂) :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_insert) h₁
 
-@[simp]
 theorem getKey_insert_self [TransCmp cmp] {k : α} {v : β k} :
     (t.insert k v).getKey k mem_insert_self = k :=
   t.inductionOn fun _ => DTreeMap.getKey_insert_self
 
-@[simp, grind =]
 theorem getKey_erase [TransCmp cmp] {k a : α} {h'} :
     (t.erase k).getKey a h' = t.getKey a (mem_of_mem_erase h') :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_erase) h'
@@ -818,7 +802,6 @@ theorem getKey_eq_get_getKey? [TransCmp cmp] {a : α} {h} :
     t.getKey a h = (t.getKey? a).get (mem_iff_isSome_getKey?.mp h) :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_eq_get_getKey?) h
 
-@[simp, grind =]
 theorem get_getKey? [TransCmp cmp] {a : α} {h} :
     (t.getKey? a).get h = t.getKey a (mem_iff_isSome_getKey?.mpr h) :=
   t.inductionOn (fun _ _ => DTreeMap.get_getKey?) h
@@ -831,12 +814,11 @@ theorem getKey_congr [TransCmp cmp] {k₁ k₂ : α} (h' : cmp k₁ k₂ = .eq)
     (h₁ : k₁ ∈ t) : t.getKey k₁ h₁ = t.getKey k₂ ((mem_congr h').mp h₁) :=
   t.inductionOn (fun _ h' h₁ => DTreeMap.getKey_congr h' h₁) h' h₁
 
-@[simp, grind =]
 theorem getKey_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
     (h' : k ∈ t) : t.getKey k h' = k :=
   t.inductionOn (fun _ h' => DTreeMap.getKey_eq h') h'
 
-@[simp, grind =]
+@[grind =]
 theorem getKey!_empty [TransCmp cmp] {a : α} [Inhabited α] :
     (∅ : ExtDTreeMap α β cmp).getKey! a = default :=
   DTreeMap.getKey!_emptyc
@@ -845,7 +827,6 @@ theorem getKey!_empty [TransCmp cmp] {a : α} [Inhabited α] :
     {v : β k} : (t.insert k v).getKey! a = if cmp k a = .eq then k else t.getKey! a :=
   t.inductionOn fun _ => DTreeMap.getKey!_insert
 
-@[simp]
 theorem getKey!_insert_self [TransCmp cmp] [Inhabited α] {a : α}
     {b : β a} : (t.insert a b).getKey! a = a :=
   t.inductionOn fun _ => DTreeMap.getKey!_insert_self
@@ -862,7 +843,6 @@ theorem getKey!_eq_default [TransCmp cmp] [Inhabited α] {a : α} :
     (t.erase k).getKey! a = if cmp k a = .eq then default else t.getKey! a :=
   t.inductionOn fun _ => DTreeMap.getKey!_erase
 
-@[simp]
 theorem getKey!_erase_self [TransCmp cmp] [Inhabited α] {k : α} :
     (t.erase k).getKey! k = default :=
   t.inductionOn fun _ => DTreeMap.getKey!_erase_self
@@ -2198,7 +2178,6 @@ theorem insertManyIfNewUnit_list_eq_empty_iff [TransCmp cmp] {l : List α} :
     insertManyIfNewUnit t l = ∅ ↔ t = ∅ ∧ l = [] := by
   simp only [← isEmpty_iff, isEmpty_insertManyIfNewUnit_list, Bool.and_eq_true, List.isEmpty_iff]
 
-@[simp]
 theorem get?_insertManyIfNewUnit_list [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
     {l : List α} {k : α} :
     get? (insertManyIfNewUnit t l) k =
@@ -2207,12 +2186,10 @@ theorem get?_insertManyIfNewUnit_list [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
   simp only [insertManyIfNewUnit_list_mk]
   exact DTreeMap.Const.get?_insertManyIfNewUnit_list
 
-@[simp]
 theorem get_insertManyIfNewUnit_list [TransCmp cmp] {l : List α} {k : α} {h'} :
     get (insertManyIfNewUnit t l) k h' = () :=
   rfl
 
-@[simp]
 theorem get!_insertManyIfNewUnit_list [TransCmp cmp] {l : List α} {k : α} :
     get! (insertManyIfNewUnit t l) k = () :=
   rfl
@@ -2692,17 +2669,14 @@ theorem unitOfList_eq_empty_iff [TransCmp cmp] {l : List α} :
     unitOfList l cmp = ∅ ↔ l = [] := by
   simpa only [← isEmpty_iff, ← List.isEmpty_iff, Bool.coe_iff_coe] using DTreeMap.Const.isEmpty_unitOfList
 
-@[simp]
 theorem get?_unitOfList [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp] {l : List α} {k : α} :
     get? (unitOfList l cmp) k = if l.contains k then some () else none :=
   DTreeMap.Const.get?_unitOfList
 
-@[simp]
 theorem get_unitOfList [TransCmp cmp] {l : List α} {k : α} {h} :
     get (unitOfList l cmp) k h = () :=
   rfl
 
-@[simp]
 theorem get!_unitOfList [TransCmp cmp] {l : List α} {k : α} :
     get! (unitOfList l cmp) k = () :=
   rfl
@@ -3105,7 +3079,6 @@ theorem get?_inter_of_not_mem_right [TransCmp cmp] [LawfulEqCmp cmp]
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.get?_inter_of_not_mem_right h
 
 /- get -/
-@[simp]
 theorem get_inter [TransCmp cmp] [LawfulEqCmp cmp]
     {k : α} {h_mem : k ∈ t₁ ∩ t₂} :
     (t₁ ∩ t₂).get k h_mem =
@@ -3213,7 +3186,6 @@ theorem getKey?_inter_of_not_mem_left [TransCmp cmp]
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.getKey?_inter_of_not_mem_left h
 
 /- getKey -/
-@[simp]
 theorem getKey_inter [TransCmp cmp]
     {k : α} {h_mem : k ∈ t₁ ∩ t₂} :
     (t₁ ∩ t₂).getKey k h_mem =
@@ -3362,7 +3334,6 @@ theorem get?_inter_of_not_mem_right [TransCmp cmp]
   exact t₁.inductionOn₂ t₂ fun _ _ h => DTreeMap.Const.get?_inter_of_not_mem_right h
 
 /- get -/
-@[simp]
 theorem get_inter [TransCmp cmp]
     {k : α} {h_mem : k ∈ t₁ ∩ t₂} :
     Const.get (t₁ ∩ t₂) k h_mem =
@@ -3926,7 +3897,6 @@ theorem size_le_size_alter [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
     t.size - 1 ≤ (t.alter k f).size :=
   t.inductionOn fun _ => DTreeMap.size_le_size_alter
 
-@[grind =]
 theorem get?_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).get? k' =
@@ -3936,13 +3906,11 @@ theorem get?_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
         t.get? k' :=
   t.inductionOn fun _ => DTreeMap.get?_alter
 
-@[simp]
 theorem get?_alter_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).get? k = f (t.get? k) :=
   t.inductionOn fun _ => DTreeMap.get?_alter_self
 
-@[grind =]
 theorem get_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
     {f : Option (β k) → Option (β k)} {hc : k' ∈ (t.alter k f)} :
     (t.alter k f).get k' hc =
@@ -3954,14 +3922,12 @@ theorem get_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
         t.get k' h' :=
   t.inductionOn (fun _ _ => DTreeMap.get_alter) hc
 
-@[simp]
 theorem get_alter_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
     {f : Option (β k) → Option (β k)} {hc : k ∈ t.alter k f} :
     haveI h' : (f (t.get? k)).isSome := mem_alter_self.mp hc
     (t.alter k f).get k hc = (f (t.get? k)).get h' :=
   t.inductionOn (fun _ _ => DTreeMap.get_alter_self) hc
 
-@[grind =]
 theorem get!_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α} [Inhabited (β k')]
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).get! k' =
@@ -3971,7 +3937,6 @@ theorem get!_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α} [Inhabited (β k
         t.get! k' :=
   t.inductionOn fun _ => DTreeMap.get!_alter
 
-@[simp]
 theorem get!_alter_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α} [Inhabited (β k)]
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).get! k = (f (t.get? k)).get! :=
@@ -4007,7 +3972,6 @@ theorem getV_alter_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α} [Nonempty (β 
     (t.alter k f).getV k = (f (t.get? k)).getD Classical.ofNonempty := by
   simpa [ExtDTreeMap.getV] using getD_alter_self
 
-@[grind =]
 theorem getKey?_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).getKey? k' =
@@ -4022,7 +3986,6 @@ theorem getKey?_alter_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
     (t.alter k f).getKey? k = if (f (t.get? k)).isSome then some k else none :=
   t.inductionOn fun _ => DTreeMap.getKey?_alter_self
 
-@[grind =]
 theorem getKey!_alter [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k k' : α}
     {f : Option (β k) → Option (β k)} : (t.alter k f).getKey! k' =
       if cmp k k' = .eq then
@@ -4036,7 +3999,6 @@ theorem getKey!_alter_self [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k : 
     (t.alter k f).getKey! k = if (f (t.get? k)).isSome then k else default :=
   t.inductionOn fun _ => DTreeMap.getKey!_alter_self
 
-@[simp]
 theorem getKey_alter_self [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k : α}
     {f : Option (β k) → Option (β k)} {hc : k ∈ t.alter k f} :
     (t.alter k f).getKey k hc = k :=
@@ -4163,7 +4125,6 @@ theorem size_le_size_alter [TransCmp cmp] {k : α} {f : Option β → Option β}
     t.size - 1 ≤ (alter t k f).size :=
   t.inductionOn fun _ => DTreeMap.Const.size_le_size_alter
 
-@[grind =]
 theorem get?_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β} :
     get? (alter t k f) k' =
       if cmp k k' = .eq then
@@ -4172,12 +4133,10 @@ theorem get?_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β} :
         get? t k' :=
   t.inductionOn fun _ => DTreeMap.Const.get?_alter
 
-@[simp]
 theorem get?_alter_self [TransCmp cmp] {k : α} {f : Option β → Option β} :
     get? (alter t k f) k = f (get? t k) :=
   t.inductionOn fun _ => DTreeMap.Const.get?_alter_self
 
-@[grind =]
 theorem get_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β}
     {hc : k' ∈ (alter t k f)} :
     get (alter t k f) k' hc =
@@ -4189,14 +4148,12 @@ theorem get_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β}
         get t k' h' :=
   t.inductionOn (fun _ _ => DTreeMap.Const.get_alter) hc
 
-@[simp]
 theorem get_alter_self [TransCmp cmp] {k : α} {f : Option β → Option β}
     {hc : k ∈ alter t k f} :
     haveI h' : (f (get? t k)).isSome := mem_alter_self.mp hc
     get (alter t k f) k hc = (f (get? t k)).get h' :=
   t.inductionOn (fun _ _ => DTreeMap.Const.get_alter_self) hc
 
-@[grind =]
 theorem get!_alter [TransCmp cmp] {k k' : α} [Inhabited β] {f : Option β → Option β} :
     get! (alter t k f) k' =
       if cmp k k' = .eq then
@@ -4205,7 +4162,6 @@ theorem get!_alter [TransCmp cmp] {k k' : α} [Inhabited β] {f : Option β → 
         get! t k' :=
   t.inductionOn fun _ => DTreeMap.Const.get!_alter
 
-@[simp]
 theorem get!_alter_self [TransCmp cmp] {k : α} [Inhabited β] {f : Option β → Option β} :
     get! (alter t k f) k = (f (get? t k)).get! :=
   t.inductionOn fun _ => DTreeMap.Const.get!_alter_self
@@ -4240,7 +4196,6 @@ theorem getV_alter_self [TransCmp cmp] [Nonempty β] {k : α}
     getV (alter t k f) k = (f (get? t k)).getD Classical.ofNonempty := by
   simpa [Const.getV] using getD_alter_self
 
-@[grind =]
 theorem getKey?_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β} :
     (alter t k f).getKey? k' =
       if cmp k k' = .eq then
@@ -4253,7 +4208,6 @@ theorem getKey?_alter_self [TransCmp cmp] {k : α} {f : Option β → Option β}
     (alter t k f).getKey? k = if (f (get? t k)).isSome then some k else none :=
   t.inductionOn fun _ => DTreeMap.Const.getKey?_alter_self
 
-@[grind =]
 theorem getKey!_alter [TransCmp cmp] [Inhabited α] {k k' : α} {f : Option β → Option β} :
     (alter t k f).getKey! k' =
       if cmp k k' = .eq then
@@ -4267,7 +4221,6 @@ theorem getKey!_alter_self [TransCmp cmp] [Inhabited α] {k : α}
     (alter t k f).getKey! k = if (f (get? t k)).isSome then k else default :=
   t.inductionOn fun _ => DTreeMap.Const.getKey!_alter_self
 
-@[grind =]
 theorem getKey_alter [TransCmp cmp] [Inhabited α] {k k' : α} {f : Option β → Option β}
     {hc : k' ∈ alter t k f} :
     (alter t k f).getKey k' hc =
@@ -4278,7 +4231,6 @@ theorem getKey_alter [TransCmp cmp] [Inhabited α] {k k' : α} {f : Option β �
         t.getKey k' h' :=
   t.inductionOn (fun _ _ => DTreeMap.Const.getKey_alter) hc
 
-@[simp]
 theorem getKey_alter_self [TransCmp cmp] [Inhabited α] {k : α} {f : Option β → Option β}
     {hc : k ∈ alter t k f} :
     (alter t k f).getKey k hc = k :=
@@ -4345,7 +4297,6 @@ theorem size_modify {k : α} {f : β k → β k} :
     (t.modify k f).size = t.size :=
   t.inductionOn fun _ => DTreeMap.size_modify
 
-@[grind =]
 theorem get?_modify {k k' : α} {f : β k → β k} :
     (t.modify k f).get? k' =
       if h : cmp k k' = .eq then
@@ -4354,12 +4305,10 @@ theorem get?_modify {k k' : α} {f : β k → β k} :
         t.get? k' :=
   t.inductionOn fun _ => DTreeMap.get?_modify
 
-@[simp]
 theorem get?_modify_self {k : α} {f : β k → β k} :
     (t.modify k f).get? k = (t.get? k).map f :=
   t.inductionOn fun _ => DTreeMap.get?_modify_self
 
-@[grind =]
 theorem get_modify {k k' : α} {f : β k → β k} {hc : k' ∈ t.modify k f} :
     (t.modify k f).get k' hc =
       if heq : cmp k k' = .eq then
@@ -4370,13 +4319,11 @@ theorem get_modify {k k' : α} {f : β k → β k} {hc : k' ∈ t.modify k f} :
         t.get k' h' :=
   t.inductionOn (fun _ _ => DTreeMap.get_modify) hc
 
-@[simp]
 theorem get_modify_self {k : α} {f : β k → β k} {hc : k ∈ t.modify k f} :
     haveI h' : k ∈ t := mem_modify.mp hc
     (t.modify k f).get k hc = f (t.get k h') :=
   t.inductionOn (fun _ _ => DTreeMap.get_modify_self) hc
 
-@[grind =]
 theorem get!_modify {k k' : α} [hi : Inhabited (β k')] {f : β k → β k} :
     (t.modify k f).get! k' =
       if heq : cmp k k' = .eq then
@@ -4385,7 +4332,6 @@ theorem get!_modify {k k' : α} [hi : Inhabited (β k')] {f : β k → β k} :
         t.get! k' :=
   t.inductionOn fun _ => DTreeMap.get!_modify
 
-@[simp]
 theorem get!_modify_self {k : α} [Inhabited (β k)] {f : β k → β k} :
     (t.modify k f).get! k = ((t.get? k).map f).get! :=
   t.inductionOn fun _ => DTreeMap.get!_modify_self
@@ -4416,7 +4362,6 @@ theorem getV_modify_self {k : α} [Nonempty (β k)] {f : β k → β k} :
     (t.modify k f).getV k = ((t.get? k).map f).getD Classical.ofNonempty := by
   simpa [ExtDTreeMap.getV] using getD_modify_self
 
-@[grind =]
 theorem getKey?_modify {k k' : α} {f : β k → β k} :
     (t.modify k f).getKey? k' =
       if cmp k k' = .eq then
@@ -4429,7 +4374,6 @@ theorem getKey?_modify_self {k : α} {f : β k → β k} :
     (t.modify k f).getKey? k = if k ∈ t then some k else none :=
   t.inductionOn fun _ => DTreeMap.getKey?_modify_self
 
-@[grind =]
 theorem getKey!_modify [Inhabited α] {k k' : α} {f : β k → β k} :
     (t.modify k f).getKey! k' =
       if cmp k k' = .eq then
@@ -4442,7 +4386,6 @@ theorem getKey!_modify_self [Inhabited α] {k : α} {f : β k → β k} :
     (t.modify k f).getKey! k = if k ∈ t then k else default :=
   t.inductionOn fun _ => DTreeMap.getKey!_modify_self
 
-@[grind =]
 theorem getKey_modify [Inhabited α] {k k' : α} {f : β k → β k}
     {hc : k' ∈ t.modify k f} :
     (t.modify k f).getKey k' hc =
@@ -4453,7 +4396,6 @@ theorem getKey_modify [Inhabited α] {k k' : α} {f : β k → β k}
         t.getKey k' h' :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_modify) hc
 
-@[simp]
 theorem getKey_modify_self [Inhabited α] {k : α} {f : β k → β k}
     {hc : k ∈ t.modify k f} : (t.modify k f).getKey k hc = k :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_modify_self) hc
@@ -4510,7 +4452,6 @@ theorem size_modify {k : α} {f : β → β} :
     (modify t k f).size = t.size :=
   t.inductionOn fun _ => DTreeMap.Const.size_modify
 
-@[grind =]
 theorem get?_modify {k k' : α} {f : β → β} :
     get? (modify t k f) k' =
       if cmp k k' = .eq then
@@ -4519,12 +4460,10 @@ theorem get?_modify {k k' : α} {f : β → β} :
         get? t k' :=
   t.inductionOn fun _ => DTreeMap.Const.get?_modify
 
-@[simp]
 theorem get?_modify_self {k : α} {f : β → β} :
     get? (modify t k f) k = (get? t k).map f :=
   t.inductionOn fun _ => DTreeMap.Const.get?_modify_self
 
-@[grind =]
 theorem get_modify {k k' : α} {f : β → β} {hc : k' ∈ modify t k f} :
     get (modify t k f) k' hc =
       if heq : cmp k k' = .eq then
@@ -4535,13 +4474,11 @@ theorem get_modify {k k' : α} {f : β → β} {hc : k' ∈ modify t k f} :
         get t k' h' :=
   t.inductionOn (fun _ _ => DTreeMap.Const.get_modify) hc
 
-@[simp]
 theorem get_modify_self {k : α} {f : β → β} {hc : k ∈ modify t k f} :
     haveI h' : k ∈ t := mem_modify.mp hc
     get (modify t k f) k hc = f (get t k h') :=
   t.inductionOn (fun _ _ => DTreeMap.Const.get_modify_self) hc
 
-@[grind =]
 theorem get!_modify {k k' : α} [hi : Inhabited β] {f : β → β} :
     get! (modify t k f) k' =
       if cmp k k' = .eq then
@@ -4550,7 +4487,6 @@ theorem get!_modify {k k' : α} [hi : Inhabited β] {f : β → β} :
         get! t k' :=
   t.inductionOn fun _ => DTreeMap.Const.get!_modify
 
-@[simp]
 theorem get!_modify_self {k : α} [Inhabited β] {f : β → β} :
     get! (modify t k f) k = ((get? t k).map f).get! :=
   t.inductionOn fun _ => DTreeMap.Const.get!_modify_self
@@ -4581,7 +4517,6 @@ theorem getV_modify_self [Nonempty β] {k : α} {f : β → β} :
     Const.getV (modify t k f) k = ((get? t k).map f).getD Classical.ofNonempty := by
   simpa [Const.getV] using getD_modify_self
 
-@[grind =]
 theorem getKey?_modify {k k' : α} {f : β → β} :
     (modify t k f).getKey? k' =
       if cmp k k' = .eq then
@@ -4594,7 +4529,6 @@ theorem getKey?_modify_self {k : α} {f : β → β} :
     (modify t k f).getKey? k = if k ∈ t then some k else none :=
   t.inductionOn fun _ => DTreeMap.Const.getKey?_modify_self
 
-@[grind =]
 theorem getKey!_modify [Inhabited α] {k k' : α} {f : β → β} :
     (modify t k f).getKey! k' =
       if cmp k k' = .eq then
@@ -4607,7 +4541,6 @@ theorem getKey!_modify_self [Inhabited α] {k : α} {f : β → β} :
     (modify t k f).getKey! k = if k ∈ t then k else default :=
   t.inductionOn fun _ => DTreeMap.Const.getKey!_modify_self
 
-@[grind =]
 theorem getKey_modify [Inhabited α] {k k' : α} {f : β → β}
     {hc : k' ∈ modify t k f} :
     (modify t k f).getKey k' hc =
@@ -4618,7 +4551,6 @@ theorem getKey_modify [Inhabited α] {k k' : α} {f : β → β}
         t.getKey k' h' :=
   t.inductionOn (fun _ _ => DTreeMap.Const.getKey_modify) hc
 
-@[simp]
 theorem getKey_modify_self [Inhabited α] {k : α} {f : β → β}
     {hc : k ∈ modify t k f} : (modify t k f).getKey k hc = k :=
   t.inductionOn (fun _ _ => DTreeMap.Const.getKey_modify_self) hc
@@ -4654,12 +4586,12 @@ end Modify
 
 section Min
 
-@[simp, grind =]
+@[grind =]
 theorem minKey?_empty [TransCmp cmp] :
     (∅ : ExtDTreeMap α β cmp).minKey? = none :=
   DTreeMap.minKey?_emptyc
 
-@[simp, grind =]
+@[grind =]
 theorem minKey?_eq_none_iff [TransCmp cmp] :
     t.minKey? = none ↔ t = ∅ :=
   Iff.symm <| isEmpty_iff.symm.trans <| Iff.symm <| t.inductionOn fun _ => DTreeMap.minKey?_eq_none_iff
@@ -4815,7 +4747,6 @@ theorem getKeyV_minKey? [TransCmp cmp] [Nonempty α] {km} :
     (hkm : t.minKey? = some km) → t.getKeyV km = km  := by
   simpa [ExtDTreeMap.getKeyV] using getKeyD_minKey?
 
-@[simp]
 theorem minKey?_bind_getKey? [TransCmp cmp] :
     t.minKey?.bind t.getKey? = t.minKey? :=
   t.inductionOn fun _ => DTreeMap.minKey?_bind_getKey?
@@ -4866,7 +4797,7 @@ theorem minKey?_insertIfNew_le_self [TransCmp cmp] {k v kmi} :
     t.minKey? = t.keys.head? :=
   t.inductionOn fun _ => DTreeMap.minKey?_eq_head?_keys
 
-@[simp, grind =]
+@[grind =]
 theorem minKey?_modify [TransCmp cmp] [LawfulEqCmp cmp] {k f} :
     (t.modify k f).minKey? = t.minKey? :=
   t.inductionOn fun _ => DTreeMap.minKey?_modify
@@ -4884,7 +4815,6 @@ variable {β : Type v} {t : ExtDTreeMap α β cmp}
     (Const.modify t k f).minKey? = t.minKey?.map fun km => if cmp km k = .eq then k else km :=
   t.inductionOn fun _ => DTreeMap.Const.minKey?_modify
 
-@[simp]
 theorem minKey?_modify_eq_minKey? [TransCmp cmp] [LawfulEqCmp cmp] {k f} :
     (Const.modify t k f).minKey? = t.minKey? :=
   t.inductionOn fun _ => DTreeMap.Const.minKey?_modify_eq_minKey?
@@ -4962,17 +4892,16 @@ theorem le_minKey [TransCmp cmp] {k he} :
     (cmp k (t.minKey he)).isLE ↔ (∀ k', k' ∈ t → (cmp k k').isLE) :=
   t.inductionOn (fun _ _ => DTreeMap.le_minKey) he
 
-@[simp, grind =]
+@[grind =]
 theorem getKey?_minKey [TransCmp cmp] {he} :
     t.getKey? (t.minKey he) = some (t.minKey he) :=
   t.inductionOn (fun _ _ => DTreeMap.getKey?_minKey) he
 
-@[simp, grind =]
 theorem getKey_minKey [TransCmp cmp] {he hc} :
     t.getKey (t.minKey he) hc = t.minKey he :=
   t.inductionOn (fun _ _ _ => DTreeMap.getKey_minKey) he hc
 
-@[simp, grind =]
+@[grind =]
 theorem getKey!_minKey [TransCmp cmp] [Inhabited α] {he} :
     t.getKey! (t.minKey he) = t.minKey he :=
   t.inductionOn (fun _ _ => DTreeMap.getKey!_minKey) he
@@ -4986,7 +4915,6 @@ theorem getKeyV_minKey [TransCmp cmp] [Nonempty α] {he} :
     t.getKeyV (t.minKey he) = t.minKey he  := by
   simpa [ExtDTreeMap.getKeyV] using getKeyD_minKey
 
-@[simp]
 theorem minKey_erase_eq_iff_not_compare_eq_minKey [TransCmp cmp] {k he} :
     (t.erase k |>.minKey he) =
         t.minKey (ne_empty_of_erase_ne_empty he) ↔
@@ -5022,7 +4950,6 @@ theorem minKey_insertIfNew_le_self [TransCmp cmp] {k v} :
     t.minKey he = t.keys.head (mt keys_eq_nil_iff.mp he) :=
   t.inductionOn (fun _ _ => DTreeMap.minKey_eq_head_keys) he
 
-@[simp, grind =]
 theorem minKey_modify [TransCmp cmp] [LawfulEqCmp cmp] {k f he} :
     (t.modify k f).minKey he = t.minKey (mt modify_eq_empty_iff.mpr he) :=
   t.inductionOn (fun _ _ => DTreeMap.minKey_modify) he
@@ -5044,7 +4971,6 @@ variable {β : Type v} {t : ExtDTreeMap α β cmp}
         (t.minKey (mt modify_eq_empty_iff.mpr he)) :=
   t.inductionOn (fun _ _ => DTreeMap.Const.minKey_modify) he
 
-@[simp]
 theorem minKey_modify_eq_minKey [TransCmp cmp] [LawfulEqCmp cmp] {k f he} :
     (modify t k f).minKey he = t.minKey (mt modify_eq_empty_iff.mpr he) :=
   t.inductionOn (fun _ _ => DTreeMap.Const.minKey_modify_eq_minKey) he
@@ -5075,7 +5001,6 @@ theorem minKey?_eq_some_minKey! [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) :
     t.minKey? = some t.minKey! := by
   rw [minKey?_eq_some_minKey he, minKey_eq_minKey!]
 
-@[simp]
 theorem minKey!_empty [TransCmp cmp] [Inhabited α] : (∅ : ExtDTreeMap α β cmp).minKey! = default :=
   DTreeMap.minKey!_eq_default rfl
 
@@ -5130,7 +5055,6 @@ theorem getKey?_minKey! [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) :
     t.getKey t.minKey! hc = t.minKey! :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_minKey!) hc
 
-@[simp, grind =]
 theorem getKey_minKey!_eq_minKey [TransCmp cmp] [Inhabited α] {hc} :
     t.getKey t.minKey! hc = t.minKey (ne_empty_of_mem hc) :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_minKey!_eq_minKey) hc
@@ -5174,7 +5098,6 @@ theorem minKey!_insertIfNew_le_self [TransCmp cmp] [Inhabited α] {k v} :
     t.minKey! = t.keys.head! :=
   t.inductionOn fun _ => DTreeMap.minKey!_eq_head!_keys
 
-@[simp]
 theorem minKey!_modify [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k f} :
     (t.modify k f).minKey! = t.minKey! :=
   t.inductionOn fun _ => DTreeMap.minKey!_modify
@@ -5193,7 +5116,6 @@ variable {β : Type v} {t : ExtDTreeMap α β cmp}
     (modify t k f).minKey! = if cmp t.minKey! k = .eq then k else t.minKey! :=
   t.inductionOn (fun _ he => DTreeMap.Const.minKey!_modify (isEmpty_eq_false_iff.mpr he)) he
 
-@[simp]
 theorem minKey!_modify_eq_minKey! [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k f} :
     (modify t k f).minKey! = t.minKey! :=
   t.inductionOn fun _ => DTreeMap.Const.minKey!_modify_eq_minKey!
@@ -5362,7 +5284,7 @@ theorem minKeyD_alter_eq_self [TransCmp cmp] {k f}
 
 end Const
 
-@[simp, grind norm]
+@[grind norm]
 theorem minKey?_eq_some_minKeyV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
     t.minKey? = some t.minKeyV := by
   simpa [ExtDTreeMap.minKeyV] using minKey?_eq_some_minKeyD he
@@ -5428,7 +5350,7 @@ theorem getKey?_minKeyV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
     t.getKey t.minKeyV hc = t.minKeyV := by
   simpa [ExtDTreeMap.minKeyV] using getKey_minKeyD
 
-@[simp, grind =]
+@[grind =]
 theorem getKey_minKeyV_eq_minKey [TransCmp cmp] [Nonempty α] {hc} :
     t.getKey t.minKeyV hc = t.minKey (ne_empty_of_mem hc) := by
   rw [getKey_minKeyV, minKey_eq_minKeyV]
@@ -5514,11 +5436,11 @@ end Min
 
 section Max
 
-@[simp, grind =]
+@[grind =]
 theorem maxKey?_empty [TransCmp cmp] : (∅ : ExtDTreeMap α β cmp).maxKey? = none :=
   DTreeMap.maxKey?_emptyc
 
-@[simp, grind =]
+@[grind =]
 theorem maxKey?_eq_none_iff [TransCmp cmp] : t.maxKey? = none ↔ t = ∅ :=
   Iff.symm <| isEmpty_iff.symm.trans <| Iff.symm <| t.inductionOn fun _ => DTreeMap.maxKey?_eq_none_iff
 
@@ -5616,7 +5538,6 @@ theorem getKeyV_maxKey? [TransCmp cmp] [Nonempty α] {km} :
     (hkm : t.maxKey? = some km) → t.getKeyV km = km  := by
   simpa [ExtDTreeMap.getKeyV] using getKeyD_maxKey?
 
-@[simp]
 theorem maxKey?_bind_getKey? [TransCmp cmp] :
     t.maxKey?.bind t.getKey? = t.maxKey? :=
   t.inductionOn fun _ => DTreeMap.maxKey?_bind_getKey?
@@ -5667,7 +5588,7 @@ theorem self_le_maxKey?_insertIfNew [TransCmp cmp] {k v kmi} :
     t.maxKey? = t.keys.getLast? :=
   t.inductionOn fun _ => DTreeMap.maxKey?_eq_getLast?_keys
 
-@[simp, grind =]
+@[grind =]
 theorem maxKey?_modify [TransCmp cmp] [LawfulEqCmp cmp] {k f} :
     (t.modify k f).maxKey? = t.maxKey? :=
   t.inductionOn fun _ => DTreeMap.maxKey?_modify
@@ -5685,7 +5606,7 @@ variable {β : Type v} {t : ExtDTreeMap α β cmp}
     (Const.modify t k f).maxKey? = t.maxKey?.map fun km => if cmp km k = .eq then k else km :=
   t.inductionOn fun _ => DTreeMap.Const.maxKey?_modify
 
-@[simp, grind =]
+@[grind =]
 theorem maxKey?_modify_eq_maxKey? [TransCmp cmp] [LawfulEqCmp cmp] {k f} :
     (Const.modify t k f).maxKey? = t.maxKey? :=
   t.inductionOn fun _ => DTreeMap.Const.maxKey?_modify_eq_maxKey?
@@ -5763,17 +5684,16 @@ theorem maxKey_le [TransCmp cmp] {k he} :
     (cmp (t.maxKey he) k).isLE ↔ (∀ k', k' ∈ t → (cmp k' k).isLE) :=
   t.inductionOn (fun _ _ => DTreeMap.maxKey_le) he
 
-@[simp, grind =]
+@[grind =]
 theorem getKey?_maxKey [TransCmp cmp] {he} :
     t.getKey? (t.maxKey he) = some (t.maxKey he) :=
   t.inductionOn (fun _ _ => DTreeMap.getKey?_maxKey) he
 
-@[simp, grind =]
 theorem getKey_maxKey [TransCmp cmp] {he hc} :
     t.getKey (t.maxKey he) hc = t.maxKey he :=
   t.inductionOn (fun _ _ _ => DTreeMap.getKey_maxKey) he hc
 
-@[simp, grind =]
+@[grind =]
 theorem getKey!_maxKey [TransCmp cmp] [Inhabited α] {he} :
     t.getKey! (t.maxKey he) = t.maxKey he :=
   t.inductionOn (fun _ _ => DTreeMap.getKey!_maxKey) he
@@ -5787,7 +5707,6 @@ theorem getKeyV_maxKey [TransCmp cmp] [Nonempty α] {he} :
     t.getKeyV (t.maxKey he) = t.maxKey he  := by
   simpa [ExtDTreeMap.getKeyV] using getKeyD_maxKey
 
-@[simp]
 theorem maxKey_erase_eq_iff_not_compare_eq_maxKey [TransCmp cmp] {k he} :
     (t.erase k |>.maxKey he) =
         t.maxKey (ne_empty_of_erase_ne_empty he) ↔
@@ -5823,7 +5742,6 @@ theorem self_le_maxKey_insertIfNew [TransCmp cmp] {k v} :
     t.maxKey he = t.keys.getLast (mt keys_eq_nil_iff.mp he) :=
   t.inductionOn (fun _ _ => DTreeMap.maxKey_eq_getLast_keys) he
 
-@[simp]
 theorem maxKey_modify [TransCmp cmp] [LawfulEqCmp cmp] {k f he} :
     (t.modify k f).maxKey he = t.maxKey (mt modify_eq_empty_iff.mpr he) :=
   t.inductionOn (fun _ _ => DTreeMap.maxKey_modify) he
@@ -5845,7 +5763,6 @@ theorem maxKey_modify [TransCmp cmp] {k f he} :
         (t.maxKey (mt modify_eq_empty_iff.mpr he)) :=
   t.inductionOn (fun _ _ => DTreeMap.Const.maxKey_modify) he
 
-@[simp, grind =]
 theorem maxKey_modify_eq_maxKey [TransCmp cmp] [LawfulEqCmp cmp] {k f he} :
     (modify t k f).maxKey he = t.maxKey (mt modify_eq_empty_iff.mpr he) :=
   t.inductionOn (fun _ _ => DTreeMap.Const.maxKey_modify_eq_maxKey) he
@@ -5876,7 +5793,6 @@ theorem maxKey?_eq_some_maxKey! [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) :
     t.maxKey? = some t.maxKey! := by
   rw [maxKey?_eq_some_maxKey he, maxKey_eq_maxKey!]
 
-@[simp]
 theorem maxKey!_empty [TransCmp cmp] [Inhabited α] : (∅ : ExtDTreeMap α β cmp).maxKey! = default :=
   DTreeMap.maxKey!_eq_default rfl
 
@@ -5931,7 +5847,6 @@ theorem getKey?_maxKey! [TransCmp cmp] [Inhabited α] (he : t ≠ ∅) :
     t.getKey t.maxKey! hc = t.maxKey! :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_maxKey!) hc
 
-@[simp, grind =]
 theorem getKey_maxKey!_eq_maxKey [TransCmp cmp] [Inhabited α] {hc} :
     t.getKey t.maxKey! hc = t.maxKey (ne_empty_of_mem hc) :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_maxKey!_eq_maxKey) hc
@@ -5971,12 +5886,10 @@ theorem self_le_maxKey!_insertIfNew [TransCmp cmp] [Inhabited α] {k v} :
     cmp k (t.insertIfNew k v).maxKey! |>.isLE :=
   t.inductionOn fun _ => DTreeMap.self_le_maxKey!_insertIfNew
 
-@[grind =_]
 theorem maxKey!_eq_getLast!_keys [TransCmp cmp] [Inhabited α] :
     t.maxKey! = t.keys.getLast! :=
   t.inductionOn fun _ => DTreeMap.maxKey!_eq_getLast!_keys
 
-@[simp]
 theorem maxKey!_modify [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k f} :
     (t.modify k f).maxKey! = t.maxKey! :=
   t.inductionOn fun _ => DTreeMap.maxKey!_modify
@@ -5995,7 +5908,6 @@ theorem maxKey!_modify [TransCmp cmp] [Inhabited α] {k f}
     (modify t k f).maxKey! = if cmp t.maxKey! k = .eq then k else t.maxKey! :=
   t.inductionOn (fun _ he => DTreeMap.Const.maxKey!_modify (isEmpty_eq_false_iff.mpr he)) he
 
-@[simp]
 theorem maxKey!_modify_eq_maxKey! [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k f} :
     (modify t k f).maxKey! = t.maxKey! :=
   t.inductionOn fun _ => DTreeMap.Const.maxKey!_modify_eq_maxKey!
@@ -6166,7 +6078,7 @@ theorem maxKeyD_alter_eq_self [TransCmp cmp] {k f}
 
 end Const
 
-@[simp, grind norm]
+@[grind norm]
 theorem maxKey?_eq_some_maxKeyV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
     t.maxKey? = some t.maxKeyV := by
   simpa [ExtDTreeMap.maxKeyV] using maxKey?_eq_some_maxKeyD he
@@ -6232,7 +6144,7 @@ theorem getKey?_maxKeyV [TransCmp cmp] [Nonempty α] (he : t ≠ ∅) :
     t.getKey t.maxKeyV hc = t.maxKeyV := by
   simpa [ExtDTreeMap.maxKeyV] using getKey_maxKeyD
 
-@[simp, grind =]
+@[grind =]
 theorem getKey_maxKeyV_eq_maxKey [TransCmp cmp] [Nonempty α] {hc} :
     t.getKey t.maxKeyV hc = t.maxKey (ne_empty_of_mem hc) := by
   rw [getKey_maxKeyV, maxKey_eq_maxKeyV]
@@ -6431,7 +6343,7 @@ theorem size_filterMap_eq_size_iff [TransCmp cmp] [LawfulEqCmp cmp]
     (t.filterMap f).size = t.size ↔ ∀ (a : α) (h : a ∈ t), (f a (t.get a h)).isSome :=
   t.inductionOn fun _ => DTreeMap.size_filterMap_eq_size_iff
 
-@[simp, grind =]
+@[grind =]
 theorem get?_filterMap [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → Option (γ a)} {k : α} :
     (t.filterMap f).get? k = (t.get? k).bind (f k) :=
@@ -6443,7 +6355,6 @@ theorem isSome_apply_of_mem_filterMap [TransCmp cmp] [LawfulEqCmp cmp]
       (f k (t.get k (mem_of_mem_filterMap h'))).isSome :=
   t.inductionOn fun _ => DTreeMap.isSome_apply_of_mem_filterMap
 
-@[simp, grind =]
 theorem get_filterMap [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → Option (γ a)} {k : α} {h'} :
     (t.filterMap f).get k h' =
@@ -6451,7 +6362,7 @@ theorem get_filterMap [TransCmp cmp] [LawfulEqCmp cmp]
         (isSome_apply_of_mem_filterMap h') :=
   t.inductionOn (fun _ _ => DTreeMap.get_filterMap) h'
 
-@[simp, grind =]
+@[grind =]
 theorem get!_filterMap [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → Option (γ a)} {k : α} [Inhabited (γ k)] :
     (t.filterMap f).get! k = ((t.get? k).bind (f k)).get! :=
@@ -6469,7 +6380,6 @@ theorem getV_filterMap [TransCmp cmp] [LawfulEqCmp cmp]
     (t.filterMap f).getV k = ((t.get? k).bind (f k)).getD Classical.ofNonempty := by
   simpa [ExtDTreeMap.getV] using getD_filterMap
 
-@[grind =]
 theorem getKey?_filterMap [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → Option (γ a)} {k : α} :
     (t.filterMap f).getKey? k =
@@ -6477,13 +6387,11 @@ theorem getKey?_filterMap [TransCmp cmp] [LawfulEqCmp cmp]
       (f x (t.get x (mem_of_getKey?_eq_some h'))).isSome) :=
   t.inductionOn fun _ => DTreeMap.getKey?_filterMap
 
-@[simp, grind =]
 theorem getKey_filterMap [TransCmp cmp]
     {f : (a : α) → β a → Option (γ a)} {k : α} {h'} :
     (t.filterMap f).getKey k h' = t.getKey k (mem_of_mem_filterMap h') :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_filterMap) h'
 
-@[grind =]
 theorem getKey!_filterMap [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α]
     {f : (a : α) → β a → Option (γ a)} {k : α} :
     (t.filterMap f).getKey! k =
@@ -6529,7 +6437,6 @@ theorem size_filterMap_eq_size_iff [TransCmp cmp]
     (t.filterMap f).size = t.size ↔ ∀ k h, (f (t.getKey k h) (Const.get t k h)).isSome :=
   t.inductionOn fun _ => DTreeMap.Const.size_filterMap_eq_size_iff
 
-@[simp]
 theorem get?_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} :
     Const.get? (t.filterMap f) k = (Const.get? t k).pbind (fun x h' =>
@@ -6537,7 +6444,6 @@ theorem get?_filterMap [TransCmp cmp]
   t.inductionOn fun _ => DTreeMap.Const.get?_filterMap
 
 /-- Simpler variant of `get?_filterMap` when `LawfulEqCmp` is available. -/
-@[grind =]
 theorem get?_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} :
     Const.get? (t.filterMap f) k = (Const.get? t k).bind fun x => f k x := by
@@ -6555,7 +6461,6 @@ theorem isSome_apply_of_mem_filterMap [TransCmp cmp]
         (Const.get t k (mem_of_mem_filterMap h))).isSome :=
   t.inductionOn fun _ => DTreeMap.Const.isSome_apply_of_mem_filterMap
 
-@[simp]
 theorem get_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} {h} :
     Const.get (t.filterMap f) k h =
@@ -6565,7 +6470,6 @@ theorem get_filterMap [TransCmp cmp]
   t.inductionOn (fun _ _ => DTreeMap.Const.get_filterMap) h
 
 /-- Simpler variant of `get_filterMap` when `LawfulEqCmp` is available. -/
-@[grind =]
 theorem get_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {h} :
     Const.get (t.filterMap f) k h =
@@ -6580,7 +6484,6 @@ theorem get!_filterMap [TransCmp cmp] [Inhabited γ]
   t.inductionOn fun _ => DTreeMap.Const.get!_filterMap
 
 /-- Simpler variant of `get!_filterMap` when `LawfulEqCmp` is available. -/
-@[grind =]
 theorem get!_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} :
     Const.get! (t.filterMap f) k = ((Const.get? t k).bind (f k) ).get!:= by
@@ -6636,7 +6539,6 @@ theorem toList_filterMap [TransCmp cmp] {f : α → β → Option γ} :
       (Const.toList t).filterMap (fun p => (f p.1 p.2).map (fun x => (p.1, x))) :=
   t.inductionOn fun _ => DTreeMap.Const.toList_filterMap
 
-@[grind =]
 theorem getKey?_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f).getKey? k =
@@ -6644,7 +6546,6 @@ theorem getKey?_filterMap [TransCmp cmp]
       (f x (Const.get t x (mem_of_getKey?_eq_some h'))).isSome) :=
   t.inductionOn fun _ => DTreeMap.Const.getKey?_filterMap
 
-@[grind =]
 theorem getKey!_filterMap [TransCmp cmp] [Inhabited α]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f).getKey! k =
@@ -6750,19 +6651,17 @@ theorem size_filter_key_eq_size_iff [TransCmp cmp]
     (t.filter fun k _ => f k).size = t.size ↔ ∀ (k : α) (h : k ∈ t), f (t.getKey k h) :=
   t.inductionOn fun _ => DTreeMap.size_filter_key_eq_size_iff
 
-@[simp, grind =]
+@[grind =]
 theorem get?_filter [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} :
     (t.filter f).get? k = (t.get? k).filter (f k) :=
   t.inductionOn fun _ => DTreeMap.get?_filter
 
-@[simp, grind =]
 theorem get_filter [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} {h'} :
     (t.filter f).get k h' = t.get k (mem_of_mem_filter h') :=
   t.inductionOn (fun _ _ => DTreeMap.get_filter) h'
 
-@[grind =]
 theorem get!_filter [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} [Inhabited (β k)] :
     (t.filter f).get! k = ((t.get? k).filter (f k)).get! :=
@@ -6785,7 +6684,6 @@ theorem keys_filter [TransCmp cmp] [LawfulEqCmp cmp] {f : (a : α) → β a → 
       (t.keys.attach.filter (fun ⟨x, h'⟩ => f x (t.get x (mem_of_mem_keys h')))).unattach :=
   t.inductionOn fun _ => DTreeMap.keys_filter
 
-@[grind =]
 theorem getKey?_filter [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} :
     (t.filter f).getKey? k =
@@ -6798,13 +6696,11 @@ theorem getKey?_filter_key [TransCmp cmp]
     (t.filter fun k _ => f k).getKey? k = (t.getKey? k).filter f :=
   t.inductionOn fun _ => DTreeMap.getKey?_filter_key
 
-@[simp, grind =]
 theorem getKey_filter [TransCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} {h'} :
     (t.filter f).getKey k h' = t.getKey k (mem_of_mem_filter h') :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_filter) h'
 
-@[grind =]
 theorem getKey!_filter [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α]
     {f : (a : α) → β a → Bool} {k : α} :
     (t.filter f).getKey! k =
@@ -6884,7 +6780,7 @@ theorem get?_filter [TransCmp cmp]
   t.inductionOn fun _ => DTreeMap.Const.get?_filter
 
 /-- Simpler variant of `get?_filter` when `LawfulEqCmp` is available. -/
-@[simp, grind =]
+@[grind =]
 theorem get?_filter' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Bool} {k : α} :
     Const.get? (t.filter f) k = (Const.get? t k).filter (f k) := by
@@ -6896,7 +6792,6 @@ theorem get?_filter_of_getKey?_eq_some [TransCmp cmp]
       Const.get? (t.filter f) k = (Const.get? t k).filter (fun x => f k' x) :=
   t.inductionOn fun _ => DTreeMap.Const.get?_filter_of_getKey?_eq_some
 
-@[simp, grind =]
 theorem get_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} {h'} :
     Const.get (t.filter f) k h' = Const.get t k (mem_of_mem_filter h') :=
@@ -6910,7 +6805,6 @@ theorem get!_filter [TransCmp cmp] [Inhabited β]
   t.inductionOn fun _ => DTreeMap.Const.get!_filter
 
 /-- Simpler variant of `get!_filter` when `LawfulEqCmp` is available. -/
-@[grind =]
 theorem get!_filter' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited β]
     {f : α → β → Bool} {k : α} :
     Const.get! (t.filter f) k = ((Const.get? t k).filter (f k)).get! := by
@@ -6974,7 +6868,6 @@ theorem keys_filter [TransCmp cmp] {f : α → β → Bool} :
       (t.keys.attach.filter (fun ⟨x, h'⟩ => f x (get t x (mem_of_mem_keys h')))).unattach :=
   t.inductionOn fun _ => DTreeMap.Const.keys_filter
 
-@[grind =]
 theorem getKey?_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} :
     (t.filter f).getKey? k =
@@ -6982,7 +6875,6 @@ theorem getKey?_filter [TransCmp cmp]
       (f x (Const.get t x (mem_of_getKey?_eq_some h')))) :=
   t.inductionOn fun _ => DTreeMap.Const.getKey?_filter
 
-@[grind =]
 theorem getKey!_filter [TransCmp cmp] [Inhabited α]
     {f : α → β → Bool} {k : α} :
     (t.filter f).getKey! k =
@@ -7070,19 +6962,17 @@ theorem size_map [TransCmp cmp]
     (t.map f).size = t.size :=
   t.inductionOn fun _ => DTreeMap.size_map
 
-@[simp, grind =]
+@[grind =]
 theorem get?_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → γ a} {k : α} :
     (t.map f).get? k = (t.get? k).map (f k) :=
   t.inductionOn fun _ => DTreeMap.get?_map
 
-@[simp, grind =]
 theorem get_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → γ a} {k : α} {h'} :
     (t.map f).get k h' = f k (t.get k (mem_of_mem_map h')) :=
   t.inductionOn (fun _ _ => DTreeMap.get_map) h'
 
-@[grind =]
 theorem get!_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → γ a} {k : α} [Inhabited (γ k)] :
     (t.map f).get! k = ((t.get? k).map (f k)).get! :=
@@ -7100,19 +6990,18 @@ theorem getV_map [TransCmp cmp] [LawfulEqCmp cmp]
     (t.map f).getV k = ((t.get? k).map (f k)).getD Classical.ofNonempty := by
   simpa [ExtDTreeMap.getV] using getD_map
 
-@[simp, grind =]
+@[grind =]
 theorem getKey?_map [TransCmp cmp]
     {f : (a : α) → β a → γ a} {k : α} :
     (t.map f).getKey? k = t.getKey? k :=
   t.inductionOn fun _ => DTreeMap.getKey?_map
 
-@[simp, grind =]
 theorem getKey_map [TransCmp cmp]
     {f : (a : α) → β a → γ a} {k : α} {h'} :
     (t.map f).getKey k h' = t.getKey k (mem_of_mem_map h') :=
   t.inductionOn (fun _ _ => DTreeMap.getKey_map) h'
 
-@[simp, grind =]
+@[grind =]
 theorem getKey!_map [TransCmp cmp] [Inhabited α]
     {f : (a : α) → β a → γ a} {k : α} :
     (t.map f).getKey! k = t.getKey! k :=
@@ -7133,7 +7022,7 @@ namespace Const
 
 variable {β : Type v} {γ : Type w} {t : ExtDTreeMap α (fun _ => β) cmp}
 
-@[simp, grind =]
+@[grind =]
 theorem get?_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → γ} {k : α} :
     Const.get? (t.map f) k = (Const.get? t k).map (f k) :=
@@ -7152,21 +7041,18 @@ theorem get?_map_of_getKey?_eq_some [TransCmp cmp]
     Const.get? (t.map f) k = (Const.get? t k).map (f k') :=
   t.inductionOn (fun _ => DTreeMap.Const.get?_map_of_getKey?_eq_some) h
 
-@[simp, grind =]
 theorem get_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → γ} {k : α} {h'} :
     Const.get (t.map f) k h' = f k (Const.get t k (mem_of_mem_map h')) :=
   t.inductionOn (fun _ _ => DTreeMap.Const.get_map) h'
 
 /-- Variant of `get_map` that holds without `LawfulEqCmp`. -/
-@[simp (low)]
 theorem get_map' [TransCmp cmp]
     {f : α → β → γ} {k : α} {h'} :
     Const.get (t.map f) k h' =
       f (t.getKey k (mem_of_mem_map h')) (Const.get t k (mem_of_mem_map h')) :=
   t.inductionOn (fun _ _ => DTreeMap.Const.get_map') h'
 
-@[grind =]
 theorem get!_map [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → γ} {k : α} :
     Const.get! (t.map f) k = ((Const.get? t k).map (f k)).get! :=
