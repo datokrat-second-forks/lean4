@@ -127,7 +127,7 @@ theorem getLast_take {l : List α} (h : l.take i ≠ []) :
   simp [length_take, Nat.min_def]
   simp at h
   split
-  · rw [getElem?_eq_getElemV (by omega)]
+  · rw [getElem?_eq_some_getElemV _ _ (by omega)]
     simp
   · rw [getElem?_eq_none (by omega), getLastV_eq_getElemV]
     simp

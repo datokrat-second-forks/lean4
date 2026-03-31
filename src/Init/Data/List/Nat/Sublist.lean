@@ -116,7 +116,7 @@ theorem infix_iff_getElem? {l₁ l₂ : List α} : l₁ <:+: l₂ ↔
       · rw [getElem?_take]; simp_all; omega
       · simp_all
         have p : i = (i - k) + k := by omega
-        rw [p, w _ (by omega), getElem?_eq_getElemV]
+        rw [p, w _ (by omega), getElem?_eq_some_getElemV]
         · congr 2
           omega
         · omega
