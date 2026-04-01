@@ -1229,7 +1229,7 @@ theorem head_of_mem_head? {l : List α} {x} (hx : x ∈ l.head?) :
 
 @[simp, grind =] theorem headV_nil {_ : Nonempty α} :
     ([] : List α).headV = Classical.ofNonempty := by
-  unfold headV; simp
+  simp [headV]
 
 @[simp, grind =] theorem headV_cons {_ : Nonempty α} {a : α} {l : List α} :
     (a :: l).headV = a := by
@@ -1256,10 +1256,10 @@ theorem headV_singleton {a : α} :
     [a].headV = a := by
   simp
 
-theorem getElemV_zero_eq_headV {l : List α} (h : 0 < l.length) :
-    l[0] = head l (by simpa [length_pos_iff] using h) := by
+theorem getElemV_zero_eq_headV {_ : Nonempty α} {l : List α} :
+    l｢0｣ = l.headV := by
   cases l with
-  | nil => simp at h
+  | nil => simp [getElemV_neg]
   | cons _ _ => simp
 
 theorem headV_eq_iff_head?_eq_some {xs : List α} (h : xs ≠ []) :

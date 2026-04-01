@@ -30,4 +30,11 @@ noncomputable def getV {α : Type u} [Nonempty α] : Option α → α
   | some x => x
   | none   => Classical.ofNonempty
 
+theorem getV_eq_get? {α : Type u} {_ : Nonempty α} {x : Option α} :
+    x.getV =
+      match x with
+      | some a => a
+      | none => Classical.ofNonempty := by
+  simp [getV]
+
 end Option

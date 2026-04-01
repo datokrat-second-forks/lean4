@@ -109,34 +109,44 @@ theorem getElem_eq_getElem_data {a : ByteArray} {i : Nat} {h : i < a.size} :
 
 theorem getElemV_eq_getElemV_data {a : ByteArray} {i : Nat} {_ : Nonempty UInt8} :
     a｢i｣ = a.data｢i｣ := by
-  simp [getElemV_def, getElem?_def, getElem_eq_getElem_data, size_data]
-
-theorem getElem_append_left {i : Nat} {a b : ByteArray} {h : i < (a ++ b).size}
-    (hlt : i < a.size) : (a ++ b)[i] = a[i] := by
-  simp only [getElem_eq_getElem_data, data_append]
-  rw [Array.getElem_append_left (by simpa)]; rfl
+  by_cases i < a.size
+  · rw [getElemV_pos _ _ ‹_›, getElemV_pos _ _ (by simpa)]
+    apply getElem_eq_getElem_data
+  · rename_i h
+    rw [getElemV_neg _ _ ‹_›, getElemV_neg _ _ (by simpa using h)]
 
 @[simp]
 theorem getElemV_append_left {i : Nat} {a b : ByteArray} (hlt : i < a.size) :
-    haveI : Nonempty UInt8 := ⟨a[i]⟩; (a ++ b)｢i｣ = a｢i｣ := by
-  simp [getElem_eq_getElemV, getElem_append_left hlt]
+    (a ++ b)｢i｣ = a｢i｣ := by
+  simp only [getElemV_eq_getElemV_data, data_append]
+  rw [Array.getElemV_append_left (by simpa)]
 
-theorem getElem_append_right {i : Nat} {a b : ByteArray} {h : i < (a ++ b).size}
-    (hle : a.size ≤ i) : (a ++ b)[i] = b[i - a.size]'(by simp_all; omega) := by
-  simp only [getElem_eq_getElem_data, data_append]
-  rw [Array.getElem_append_right (by simpa)]
-  simp; rfl
+theorem getElem_append_left {i : Nat} {a b : ByteArray} {h : i < (a ++ b).size}
+    (hlt : i < a.size) : (a ++ b)[i] = a[i] := by
+  simpa using getElemV_append_left hlt
 
 theorem getElemV_append_right {_ : Nonempty UInt8} {i : Nat} {a b : ByteArray} (hle : a.size ≤ i) :
     (a ++ b)｢i｣ = b｢i - a.size｣ := by
-  by_cases h : i < (a ++ b).size
-  · simp [getElemV_pos _ _ h, getElemV_pos _ _ (by simp at h; omega), getElem_append_right hle]
-  · simp [getElemV_neg _ _ h, getElemV_neg _ _ (by simp at h ⊢; omega)]
+  simp only [getElemV_eq_getElemV_data, data_append]
+  rw [Array.getElemV_append_right (by simpa)]
+  simp
+
+theorem getElem_append_right {i : Nat} {a b : ByteArray} {h : i < (a ++ b).size}
+    (hle : a.size ≤ i) : (a ++ b)[i] = b[i - a.size]'(by simp_all; omega) := by
+  simpa using getElemV_append_right hle
 
 @[simp]
+theorem _root_.List.getElemV_toByteArray {l : List UInt8} {i : Nat} :
+    l.toByteArray｢i｣ = l｢i｣ := by
+  simp [ByteArray.getElemV_eq_getElemV_data]
+
 theorem _root_.List.getElem_toByteArray {l : List UInt8} {i : Nat} {h : i < l.toByteArray.size} :
     l.toByteArray[i]'h = l[i]'(by simp_all) := by
-  simp [ByteArray.getElem_eq_getElem_data]
+  simp
+
+theorem _root_.List.getElemV_eq_getElemV_toByteArray {l : List UInt8} {i : Nat} :
+    l｢i｣ = l.toByteArray｢i｣ := by
+  simp
 
 theorem _root_.List.getElem_eq_getElem_toByteArray {l : List UInt8} {i : Nat} {h : i < l.length} :
     l[i]'h = l.toByteArray[i]'(by simp_all) := by
@@ -235,17 +245,13 @@ theorem getElem_extract_aux {xs : ByteArray} {start stop : Nat} (h : i < (xs.ext
   rw [size_extract] at h; apply Nat.add_lt_of_lt_sub'; apply Nat.lt_of_lt_of_le h
   apply Nat.sub_le_sub_right; apply Nat.min_le_right
 
+theorem getElemV_extract {i : Nat} {b : ByteArray} {start stop : Nat} (h : start + i < stop) :
+    (b.extract start stop)｢i｣ = b｢start + i｣ := by
+  simp [getElemV_eq_getElemV_data, h]
+
 theorem getElem_extract {i : Nat} {b : ByteArray} {start stop : Nat}
     (h) : (b.extract start stop)[i]'h = b[start + i]'(getElem_extract_aux h) := by
-  simp [getElem_eq_getElem_data]; rfl
-
-theorem getElemV_extract {i : Nat} {b : ByteArray} {start stop : Nat} {_ : Nonempty UInt8} :
-    (b.extract start stop)｢i｣ = b｢start + i｣ := by
-  by_cases h : i < (b.extract start stop).size
-  · simp [getElemV_pos _ _ h, getElemV_pos _ _ (getElem_extract_aux h), getElem_extract h]
-  · simp only [size_extract] at h
-    have hb : ¬(start + i < b.size) := by omega
-    simp [getElemV_neg _ _ (by simpa [size_extract]), getElemV_neg _ _ hb]
+  simpa using getElemV_extract (by simp at h; omega)
 
 theorem extract_eq_extract_left {a : ByteArray} {i i' j : Nat} :
     a.extract i j = a.extract i' j ↔ min j a.size - i = min j a.size - i' := by
@@ -258,25 +264,25 @@ theorem extract_add_one {a : ByteArray} {i : Nat} (ha : i + 1 ≤ a.size) :
     omega
   · rename_i j hj hj'
     obtain rfl : j = 0 := by simpa using hj'
-    simp [ByteArray.getElem_eq_getElem_data]; rfl
+    simp [ByteArray.getElemV_eq_getElemV_data]
 
 theorem extract_add_two {a : ByteArray} {i : Nat} (ha : i + 2 ≤ a.size) :
     a.extract i (i + 2) = [a[i], a[i + 1]].toByteArray := by
   rw [extract_eq_extract_append_extract (i + 1) (by simp) (by omega),
     extract_add_one (by omega), extract_add_one (by omega)]
-  simp [← List.toByteArray_append]; rfl
+  simp [← List.toByteArray_append]
 
 theorem extract_add_three {a : ByteArray} {i : Nat} (ha : i + 3 ≤ a.size) :
     a.extract i (i + 3) = [a[i], a[i + 1], a[i + 2]].toByteArray := by
   rw [extract_eq_extract_append_extract (i + 1) (by simp) (by omega),
     extract_add_one (by omega), extract_add_two (by omega)]
-  simp [← List.toByteArray_append]; rfl
+  simp [← List.toByteArray_append]
 
 theorem extract_add_four {a : ByteArray} {i : Nat} (ha : i + 4 ≤ a.size) :
     a.extract i (i + 4) = [a[i], a[i + 1], a[i + 2], a[i + 3]].toByteArray := by
   rw [extract_eq_extract_append_extract (i + 1) (by simp) (by omega),
     extract_add_one (by omega), extract_add_three (by omega)]
-  simp [← List.toByteArray_append]; rfl
+  simp [← List.toByteArray_append]
 
 theorem append_assoc {a b c : ByteArray} : a ++ b ++ c = a ++ (b ++ c) := by
   ext1
@@ -328,7 +334,7 @@ theorem size_push {bs : ByteArray} {b : UInt8} : (bs.push b).size = bs.size + 1 
 theorem ext_getElem {a b : ByteArray} (h₀ : a.size = b.size) (h : ∀ (i : Nat) hi hi', a[i]'hi = b[i]'hi') : a = b := by
   rw [ByteArray.ext_iff]
   apply Array.ext (by simpa using h₀)
-  simpa [← ByteArray.getElem_eq_getElem_data]
+  simpa [← ByteArray.getElemV_eq_getElemV_data] using h
 
 @[simp]
 theorem _root_.List.toByteArray_inj {l l' : List UInt8} : l.toByteArray = l'.toByteArray ↔ l = l' := by

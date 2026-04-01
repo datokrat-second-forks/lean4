@@ -9,6 +9,7 @@ module
 prelude
 import all Init.Data.List.Attach
 public import Init.Data.List.Attach
+public import Init.Data.Option.BasicAux
 import Init.Data.Fin.Lemmas
 import Init.Data.List.Impl
 import Init.Data.List.Range
@@ -353,6 +354,27 @@ theorem mem_of_find?_eq_some : ∀ {l}, find? p l = some a → a ∈ l
     · exact H ▸ .head _
     · exact .tail _ (mem_of_find?_eq_some H)
 
+/-
+PLOG(getV_find?_mem):
+Had to manually discharge a side condition of the inductive hypothesis.
+-/
+
+theorem getV_find?_mem {xs : List α} {p : α → Bool} (h : (xs.find? p).isSome) :
+    haveI : Nonempty α := ⟨(xs.find? p).get h⟩
+    (xs.find? p).getV ∈ xs := by
+  induction xs with
+  | nil => simp at h
+  | cons x xs ih =>
+    simp only [find?_cons]
+    by_cases h' : p x
+    · simp [h']
+    · simp only [h']
+      right
+      apply ih
+      simpa [h'] using h
+
+grind_pattern getV_find?_mem => haveI : Nonempty α := _; (xs.find? p).getV
+
 theorem get_find?_mem {xs : List α} {p : α → Bool} (h) : (xs.find? p).get h ∈ xs := by
   induction xs with
   | nil => simp at h
@@ -363,8 +385,6 @@ theorem get_find?_mem {xs : List α} {p : α → Bool} (h) : (xs.find? p).get h 
     · simp only [h]
       right
       apply ih
-
-grind_pattern get_find?_mem => (xs.find? p).get h
 
 @[simp, grind =] theorem find?_filter {xs : List α} {p : α → Bool} {q : α → Bool} :
     (xs.filter p).find? q = xs.find? (fun a => p a ∧ q a) := by
@@ -389,10 +409,13 @@ manual bounds proof
   have : (l.find? p).isSome := by simp_all [Option.isSome_iff_ne_none]
   simp [headV_eq_iff_head?_eq_some h, this]
 
-theorem headV_filter {p : α → Bool} {l : List α} (h : (l.filter p) ≠ []) :
-    haveI : Nonempty α := ⟨(l.filter p).head h⟩
-    (l.filter p).headV = (l.find? p).get (by simp_all [Option.isSome_iff_ne_none]) := by
-  simpa using head_filter h
+theorem headV_filter {_ : Nonempty α} {p : α → Bool} {l : List α} :
+    (l.filter p).headV = (l.find? p).getV := by
+  induction l
+  · simp
+  · rename_i x xs ih
+    simp only [filter_cons, find?_cons]
+    split <;> simp [*]
 
 @[simp, grind =] theorem getLast?_filter {p : α → Bool} {l : List α} : (l.filter p).getLast? = l.reverse.find? p := by
   rw [getLast?_eq_head?_reverse]
@@ -520,6 +543,13 @@ manual bounds proof, must use `simpa` to apply the same simplification *again* t
 was previously applied to the term (`find?_replicate_of_length_pos`)
 Note: I haven't added the `getV` counterparts; this would require us to add an import.
 -/
+
+@[simp] theorem getV_find?_replicate {n : Nat} {a : α} {p : α → Bool} (h : p a ∧ 0 < n) :
+    haveI : Nonempty α := ⟨a⟩
+    ((replicate n a).find? p).getV = a := by
+  cases n with
+  | zero => omega
+  | succ n => simp [Option.getV_ite (by simpa using h)]
 
 @[simp] theorem get_find?_replicate {n : Nat} {a : α} {p : α → Bool} (h) : ((replicate n a).find? p).get h = a := by
   cases n with

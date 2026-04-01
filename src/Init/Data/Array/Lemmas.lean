@@ -3062,12 +3062,15 @@ theorem getElem_extract {xs : Array α} {start stop : Nat}
   show (extract.loop xs (min stop xs.size - start) start #[])[i]
     = xs[start + i]'(getElem_extract_aux h) by rw [getElem_extract_loop_ge]; rfl; exact Nat.zero_le _
 
-@[simp, grind =] theorem getElemV_extract {xs : Array α} {start stop : Nat}
-    (h : i < (xs.extract start stop).size) :
-    haveI : Nonempty α := ⟨(xs.extract start stop)｢i｣⟩
+@[simp, grind =] theorem getElemV_extract {_ : Nonempty α} {xs : Array α} {start stop : Nat}
+    (h : start + i < stop) :
     (xs.extract start stop)｢i｣ = xs｢start + i｣ := by
-  rw [← getElem_eq_getElemV, ← getElem_eq_getElemV, getElem_extract]
-  exact h
+  by_cases start + i < xs.size
+  · rw [← getElem_eq_getElemV, ← getElem_eq_getElemV, getElem_extract]
+    simp; omega
+  · rw [getElemV_neg, getElemV_neg]
+    · simp; omega
+    · simp; omega
 
 theorem getElem?_extract {xs : Array α} {start stop : Nat} :
     (xs.extract start stop)[i]? = if i < min stop xs.size - start then xs[start + i]? else none := by
@@ -3087,6 +3090,7 @@ theorem getElem?_extract {xs : Array α} {start stop : Nat} :
 /-
 PLOG(toList_extract):
 Had to use `rw` because providing all the boundary conditions for `simp` was untenable.
+Moreover, the `getElemV_extract` boundary condition is weaker, but its proof requires omega.
 -/
 
 @[simp] theorem toList_extract {xs : Array α} {start stop : Nat} :
@@ -3099,7 +3103,7 @@ Had to use `rw` because providing all the boundary conditions for `simp` was unt
     rw [getElemV_extract, List.getElemV_drop, List.getElemV_take, getElemV_toList]
     · simp only [length_toList, size_extract] at h
       omega
-    · simpa using h
+    · simp at h; omega
 
 @[simp] theorem extract_size {xs : Array α} : xs.extract 0 xs.size = xs := by
   apply ext
@@ -3171,6 +3175,7 @@ This was quite annoying.
 In the second focus point, we can't just use `simp [size_shrink, getElemV_shrink, *]`:
 The `size_shrink` prevents to use a hypothesis to discharge `getElemV_shrink`.
 One has to call `simp` *again* without `size_shrink`.
+Moreover, `getElemV_extract` has a side condition that requires omega.
 -/
 
 @[simp] theorem shrink_eq_take {xs : Array α} {i : Nat} : xs.shrink i = xs.take i := by
@@ -3179,7 +3184,7 @@ One has to call `simp` *again* without `size_shrink`.
     omega
   · simp only [getElem_eq_getElemV, take_eq_extract]
     rw [getElemV_shrink, getElemV_extract, Nat.zero_add]
-    · assumption
+    · simp at *; omega
     · assumption
 
 theorem toList_shrink {xs : Array α} {i : Nat} : (xs.shrink i).toList = xs.toList.take i := by
