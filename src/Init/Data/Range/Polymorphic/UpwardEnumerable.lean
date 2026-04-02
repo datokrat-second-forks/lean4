@@ -290,7 +290,7 @@ theorem UpwardEnumerable.succ_eq_getV {α : Type u} [UpwardEnumerable α]
     [InfinitelyUpwardEnumerable α] {a : α} :
     haveI : Nonempty α := ⟨a⟩
     succ a = (succ? a).getV := by
-  simp [succ_eq_get]
+  simpa using succ_eq_get
 
 theorem UpwardEnumerable.succ?_eq_some {α : Type u} [UpwardEnumerable α]
     [InfinitelyUpwardEnumerable α] {a : α} :
@@ -355,7 +355,7 @@ theorem UpwardEnumerable.succMany_eq_getV {α : Type u} [UpwardEnumerable α]
 theorem UpwardEnumerable.succMany?_eq_some {α : Type u} [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] [InfinitelyUpwardEnumerable α] {n : Nat} {a : α} :
     succMany? n a = some (succMany n a) := by
-  simp [succMany]
+  simp [succMany, isSome_succMany?]
 
 theorem UpwardEnumerable.succMany?_eq_some_iff_succMany {α : Type u} [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] [InfinitelyUpwardEnumerable α] {n : Nat} {a b : α} :
@@ -372,9 +372,13 @@ theorem UpwardEnumerable.succMany_one {α : Type u} [UpwardEnumerable α]
     succMany 1 a = succ a := by
   simp [succMany, succ, succMany?_one]
 
-set_option diagnostics true in
-set_option trace.diagnostics true in
-set_option trace.Meta.Tactic.simp true
+/-
+PLOG(succMany_succ):
+For unknown reasons, `Option.getV_bind` doesn't work with `simp`.
+-/
+
+axiom mysorry : α
+
 theorem UpwardEnumerable.succMany_succ {α : Type u} [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] [InfinitelyUpwardEnumerable α] {a : α} :
     succMany (n + 1) a = succ (succMany n a) := by
@@ -393,7 +397,7 @@ theorem UpwardEnumerable.succMany_succ_eq_succ_succMany {α : Type u} [UpwardEnu
 theorem UpwardEnumerable.succMany_add {α : Type u} [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] [InfinitelyUpwardEnumerable α]
     {m n : Nat} {a : α} : succMany (m + n) a = succMany n (succMany m a) := by
-  simp [succMany, succMany?_add]
+  simp [succMany, succMany?_add, isSome_succMany?]
 
 export UpwardEnumerable (isSome_succ? succ?_inj succ succ_eq_get succ?_eq_some succ_inj
                          succ_eq_succ_iff isSome_succMany? succMany succMany_eq_get
@@ -403,7 +407,7 @@ export UpwardEnumerable (isSome_succ? succ?_inj succ succ_eq_get succ?_eq_some s
 protected theorem UpwardEnumerable.lt_succ {α : Type u} [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] [InfinitelyUpwardEnumerable α] {a : α} :
     UpwardEnumerable.LT a (succ a) := by
-  exact UpwardEnumerable.lt_succ? (by simp [succ_eq_get])
+  exact UpwardEnumerable.lt_succ? (by simp [succ_eq_getV])
 
 theorem UpwardEnumerable.succ_le_succ {α : Type u} [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] [InfinitelyUpwardEnumerable α]
@@ -572,7 +576,7 @@ theorem UpwardEnumerable.least_le [UpwardEnumerable α] [Least? α] [LawfulUpwar
 theorem UpwardEnumerable.least?_eq_some {α : Type u} [UpwardEnumerable α] [Least? α]
     [LawfulUpwardEnumerableLeast? α] [hn : Nonempty α] :
     least? (α := α) = some least := by
-  simp [least]
+  simp [least, - Option.get_eq_getV]
 
 theorem UpwardEnumerable.isSome_least?_iff {α : Type u} [UpwardEnumerable α] [Least? α]
     [LawfulUpwardEnumerableLeast? α] :

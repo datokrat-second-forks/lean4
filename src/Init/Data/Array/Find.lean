@@ -256,15 +256,14 @@ theorem get_find?_mem {xs : Array α} (h) : (xs.find? p).get h ∈ xs := by
 PLOG(getElem_zero_filter):
 * There's no `Array.ne_empty_iff_size_pos`.
 * Side condition needs annoying manual proof, creating the need for simp squashing, rw, simpa.
+Update: This was a false-positive. Adding `List.headV_filter` to the simp set closed th goal.
 -/
 
 @[simp, grind =] theorem getElemV_zero_filter {_ : Nonempty α} {p : α → Bool} {xs : Array α} :
     (xs.filter p)｢0｣ =
       (xs.find? p).getV := by
   cases xs
-  simp only [List.size_toArray, List.filter_toArray', List.getElemV_toArray,
-    List.getElemV_zero_eq_headV, List.find?_toArray]
-  rw [List.headV_filter]
+  simp [List.getElemV_zero_eq_headV, List.headV_filter]
 
 theorem getElem_zero_filter {p : α → Bool} {xs : Array α} (h) :
     (xs.filter p)[0] =

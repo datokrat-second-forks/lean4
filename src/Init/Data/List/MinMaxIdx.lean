@@ -826,7 +826,7 @@ protected theorem get_minIdxOn?_lt_length [LE β] [DecidableLE β] {f : α → �
   simpa using List.getV_minIdxOn?_lt_length h
 
 /-
-PLOG(getElemV_eq_getV_minIdxOn?):
+PLOG(getElemV_getV_minIdxOn?):
 Annoying: The index bound can't be proved by `simp`, so it doesn't happen automatically.
 -/
 

@@ -202,7 +202,6 @@ theorem getElem_eq_getElemV [GetElem? cont idx elem dom]
 theorem getElem?_eq_some_getElemV [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom]
     (c : cont) (i : idx) (h : dom c i) :
-    haveI : Nonempty elem := ⟨c[i]⟩
     c[i]? = some c｢i｣ := by
   have : Decidable (dom c i) := .isTrue h
   simp only [getElem?_def, getElem_eq_getElemV]
@@ -238,14 +237,13 @@ theorem getElem!_neg [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem d
 theorem getElemV_pos [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom]
     (c : cont) (i : idx) (h : dom c i) :
-    haveI : Nonempty elem := ⟨c[i]'h⟩
     c｢i｣ = c[i]'h := by
   rw [getElemV_def, getElem?_pos]
 
 theorem getElemV_neg [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom] {_ : Nonempty elem}
     (c : cont) (i : idx) (h : ¬dom c i) :
-    c｢i｣ = (Classical.ofNonempty : elem) := by
+    c｢i｣ = Classical.ofNonempty := by
   rw [getElemV_def, getElem?_neg _ _ h]
 
 -- -- TODO
