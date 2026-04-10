@@ -124,6 +124,9 @@ of bounds.
 -/
 @[inline, expose] def getD (xs : Vector α n) (i : Nat) (default : α) : α := xs.toArray.getD i default
 
+noncomputable instance : GetElemV (Vector α n) Nat α where
+  getElemV xs i := getD xs i Classical.ofNonempty
+
 /-- The last element of a vector. Panics if the vector is empty. -/
 @[inline, expose] def back! [Inhabited α] (xs : Vector α n) : α := xs.toArray.back!
 
