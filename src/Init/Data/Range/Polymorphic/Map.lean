@@ -125,11 +125,11 @@ theorem LawfulUpwardEnumerableLT.ofMap [LT α] [LT β] [LawfulUpwardEnumerableLT
 theorem LawfulUpwardEnumerableLeast?.ofMap [Least? α] [Least? β] [LawfulUpwardEnumerableLeast? β]
     (f : Map α β) [f.PreservesLeast?] : LawfulUpwardEnumerableLeast? α where
   least?_le a := by
-    haveI : Nonempty α := ⟨a⟩
     obtain ⟨l, hl, hl'⟩ := LawfulUpwardEnumerableLeast?.least?_le (f.toFun a)
     have : (Least?.least? (α := α)).isSome := by
       rw [← Option.isSome_map (f := f.toFun), Map.PreservesLeast?.map_least?,
         hl, Option.isSome_some]
+    have _ : Nonempty α := ⟨a⟩
     refine ⟨Option.get _ this, by simp [this], ?_⟩
     rw [f.le_iff, Option.apply_get (f := f.toFun)]
     simpa [Map.PreservesLeast?.map_least?, hl] using hl'
