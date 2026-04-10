@@ -140,8 +140,8 @@ two-level simpa
 theorem getLastV_take {l : List α} {i : Nat} (h : i ≠ 0 ∧ l ≠ []) :
     haveI : Nonempty α := ⟨(l.take i).head (by simpa using h)⟩
     (l.take i).getLastV = l[i - 1]?.getD l.getLastV := by
-have := getLast_take (l := l) (i := i) (by simpa using h)
-simpa
+  have := getLast_take (l := l) (i := i) (by simpa using h)
+  simpa
 
 @[grind =]
 theorem take_take : ∀ {i j} {l : List α}, take i (take j l) = take (min i j) l

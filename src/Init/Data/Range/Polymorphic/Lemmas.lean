@@ -2894,7 +2894,7 @@ private theorem Internal.iter_roc_eq_iter_rcc_of_isSome_succ?
     (h : (UpwardEnumerable.succ? lo).isSome) :
     Roc.Internal.iter (lo<...=hi) =
       Rcc.Internal.iter ((UpwardEnumerable.succ? lo |>.get h)...=hi) := by
-  simp [Roc.Internal.iter, Rcc.Internal.iter]
+  simp [Roc.Internal.iter, Rcc.Internal.iter, h]
 
 public theorem toList_roc_eq_toList_rcc_of_isSome_succ? [LE α] [DecidableLE α] [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [Rxc.IsAlwaysFinite α]
@@ -2912,7 +2912,7 @@ private theorem Internal.iter_roo_eq_iter_rco_of_isSome_succ?
     (h : (UpwardEnumerable.succ? lo).isSome) :
     Roo.Internal.iter (lo<...hi) =
       Rco.Internal.iter ((UpwardEnumerable.succ? lo |>.get h)...hi) := by
-  simp [Roo.Internal.iter, Rco.Internal.iter]
+  simp [Roo.Internal.iter, Rco.Internal.iter, h]
 
 public theorem toList_roo_eq_toList_rco_of_isSome_succ?
     [LT α] [DecidableLT α] [UpwardEnumerable α]
@@ -2932,7 +2932,7 @@ private theorem Internal.iter_roi_eq_iter_rci_of_isSome_succ?
     (h : (UpwardEnumerable.succ? lo).isSome) :
     Roi.Internal.iter (lo<...*) =
       Rci.Internal.iter ((UpwardEnumerable.succ? lo |>.get h)...*) := by
-  simp [Roi.Internal.iter, Rci.Internal.iter]
+  simp [Roi.Internal.iter, Rci.Internal.iter, h]
 
 public theorem toList_roi_eq_toList_rci_of_isSome_succ?
     [UpwardEnumerable α]

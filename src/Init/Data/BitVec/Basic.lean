@@ -139,7 +139,7 @@ theorem getElem_eq_testBit_toNat (x : BitVec w) (i : Nat) (h : i < w) :
 @[grind =_]
 theorem getElemV_eq_testBit_toNat (x : BitVec w) (i : Nat) (h : i < w) :
     x｢i｣ = x.toNat.testBit i := by
-  simp [getElemV_pos h]
+  simpa using getElem_eq_testBit_toNat _ _ h
 
 theorem getLsbD_eq_getElem {x : BitVec w} {i : Nat} (h : i < w) :
     x.getLsbD i = x[i] := rfl
@@ -147,7 +147,7 @@ theorem getLsbD_eq_getElem {x : BitVec w} {i : Nat} (h : i < w) :
 @[simp, grind =]
 theorem getLsbD_eq_getElemV {x : BitVec w} {i : Nat} (h : i < w) :
     x.getLsbD i = x｢i｣ := by
-  simp [getElemV_pos h]
+  simpa using getLsbD_eq_getElem h
 
 end getElem
 

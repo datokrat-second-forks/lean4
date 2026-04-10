@@ -81,7 +81,7 @@ theorem some_get! [Inhabited α] : (o : Option α) → o.isSome → some (o.get!
   | some _, _ => rfl
 
 @[simp, grind =]
-theorem some_getV {_ : Nonempty α} : (o : Option α) → o.isSome → some (o.getV) = o
+theorem some_getV : (o : Option α) → (h : o.isSome) → haveI : Nonempty α := ⟨o.get h⟩; some o.getV = o
   | some _, _ => (rfl)
 
 theorem get!_eq_getD [Inhabited α] (o : Option α) : o.get! = o.getD default := rfl
@@ -286,7 +286,16 @@ theorem get_bind {α β : Type _} {x : Option α} {f : α → Option β} (h : (x
       (isSome_apply_of_isSome_bind h) := by
   cases x <;> trivial
 
-@[simp, grind =] theorem getV_bind {_ : Nonempty α} {_ : Nonempty β} {x : Option α} {f : α → Option β} (h : x.isSome) :
+@[simp, grind =] theorem getV_bind {_ : Nonempty β} {x : Option α} {f : α → Option β} (h : (x.bind f).isSome) :
+    haveI : Nonempty α := ⟨x.get (isSome_of_isSome_bind h)⟩
+    haveI : Nonempty β := ⟨(x.bind f).get h⟩
+    (x.bind f).getV = (f x.getV).getV := by
+  cases x with
+  | none => simp at h
+  | some a => simp
+
+@[simp, grind =] theorem getV_bind_of_isSome_left {_ : Nonempty β} {x : Option α} {f : α → Option β} (h : x.isSome) :
+    haveI : Nonempty α := ⟨x.get h⟩
     (x.bind f).getV = (f x.getV).getV := by
   cases x with
   | none => simp at h
