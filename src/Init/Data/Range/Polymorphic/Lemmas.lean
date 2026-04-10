@@ -3064,13 +3064,30 @@ theorem isSome_succMany?_of_lt_size_toArray [LE α] [DecidableLE α] [UpwardEnum
   simp only [getElem?_toArray_eq, Option.isSome_filter] at this
   exact Option.isSome_of_any this
 
+theorem getElemV_toList_eq [LE α] [DecidableLE α] [UpwardEnumerable α]
+    [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [Rxc.IsAlwaysFinite α]
+    {i} (h : i < r.toList.length) :
+    haveI : Nonempty α := ⟨r.toList[i]⟩
+    r.toList｢i｣ = (UpwardEnumerable.succMany? i r.lower).getV := by
+  have : (succMany? i r.lower).isSome := isSome_succMany?_of_lt_length_toList h
+  -- PROBLEM: The side condition `(Option.filter (fun x => decide (x ≤ r.upper)) (succMany? i r.lower)).isSome = true` is quite nontrivial.
+  simp (discharger := trace_state; sorry) only [List.getElemV_eq_getV_getElem?, getElem?_toList_eq, Option.getV_filter]
+  simp only [← getElem_eq_getElemV _ _ sorry]
+  simp only [List.getElem_eq_getElem?_get, getElem?_toList_eq]
+  simp [- Option.get_eq_getV, Option.get_filter]
+  simp [List.getElemV_eq_getElem?_getD, getElem?_toList_eq]
+  simp only [← Option.get_eq_getV _ (h := sorry)]
+  simp [- Option.get_eq_getV]
+  simp [List.getElemV_eq_getElem?_getD, getElem?_toList_eq]
+
 theorem getElem_toList_eq [LE α] [DecidableLE α] [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [Rxc.IsAlwaysFinite α]
     {i h} :
     r.toList[i]'h = (UpwardEnumerable.succMany? i r.lower).get
         (isSome_succMany?_of_lt_length_toList h) := by
-  simp [List.getElem_eq_getElem?_get, getElem?_toList_eq]
-
+  simp [] at h
+  simp [List.getElemV_eq_getElem?_getD, getElem?_toList_eq]
+#exit
 theorem getElem_toArray_eq [LE α] [DecidableLE α] [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [Rxc.IsAlwaysFinite α] {i h} :
     r.toArray[i]'h = (UpwardEnumerable.succMany? i r.lower).get

@@ -10,6 +10,7 @@ prelude
 public import Init.Data.List.BasicAux
 import all Init.Data.List.BasicAux
 public import Init.Data.List.Control
+public import Init.Data.Option.BasicAux
 import all Init.Data.List.Control
 public import Init.BinderPredicates
 import Init.Grind.Annotated
@@ -210,8 +211,15 @@ theorem getElem!_eq_getElem?_getD [Inhabited α] {l : List α} {i : Nat} :
 
 /-! ### getElemV
 
-We simplify `l｢i｣` to `(l[i]?).getD Classical.ofNonempty`.
+We simplify `l｢i｣` to `(l[i]?).getV`.
 -/
+
+theorem getElemV_eq_getV_getElem? [Nonempty α] {l : List α} {i : Nat} :
+    l｢i｣ = (l[i]?).getV := by
+  simp only [getElemV_def]
+  match l[i]? with
+  | some _ => simp
+  | none => simp
 
 theorem getElemV_eq_getElem?_getD [Nonempty α] {l : List α} {i : Nat} :
     l｢i｣ = (l[i]?).getD (Classical.ofNonempty : α) := by
