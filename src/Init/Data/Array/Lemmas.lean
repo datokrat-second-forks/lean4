@@ -222,11 +222,11 @@ theorem getElem_push_lt {xs : Array α} {x : α} {i : Nat} (h : i < xs.size) :
 theorem getElem_push_eq {xs : Array α} {x : α} : (xs.push x)[xs.size] = x := by
   simp
 
-@[grind =] theorem getElemV_push {xs : Array α} {x : α} {i : Nat} (h : i ≤ xs.size) :
+@[grind =] theorem getElemV_push {xs : Array α} {x : α} {i : Nat} (h : i < xs.size + 1) :
     (xs.push x)｢i｣ = if i < xs.size then xs｢i｣ else x := by
   by_cases h' : i < xs.size
   · simp [getElemV_push_lt, h']
-  · simp [Nat.le_antisymm (Nat.le_of_lt_succ (Nat.lt_succ_of_le h)) (Nat.ge_of_not_lt h')]
+  · simp [Nat.le_antisymm (Nat.le_of_lt_succ h) (Nat.ge_of_not_lt h')]
 
 theorem getElem_push {xs : Array α} {x : α} {i : Nat} (h : i < (xs.push x).size) :
     (xs.push x)[i] = if h : i < xs.size then xs[i] else x := by

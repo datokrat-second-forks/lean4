@@ -62,14 +62,14 @@ instance : LawfulGetElemV (Vector α n) Nat α _ where
     · simp [getElem_mk]
     · simp
 
-@[simp] theorem getElemV_mk {_ : Nonempty α} {xs : Array α} {size : xs.size = n} {i : Nat} (h : i < n) :
-    (Vector.mk xs size)｢i｣ = xs｢i｣ := by
-  simpa using getElem_mk h
-
 @[simp] theorem getElem?_mk {xs : Array α} {size : xs.size = n} {i : Nat} :
     (Vector.mk xs size)[i]? = xs[i]? := by
   subst size
-  simp +contextual [getElem?_def]
+  simp [getElem?_def, - getElem_eq_getElemV, getElem_mk]
+
+@[simp] theorem getElemV_mk {_ : Nonempty α} {xs : Array α} {size : xs.size = n} {i : Nat} :
+    (Vector.mk xs size)｢i｣ = xs｢i｣ := by
+  simp [getElemV_def]
 
 @[simp] theorem mem_mk {xs : Array α} {size : xs.size = n} {a : α} :
     a ∈ Vector.mk xs size ↔ a ∈ xs :=
@@ -973,37 +973,36 @@ manual bounds proof
     (xs.push x)｢i｣ = xs｢i｣ := by
   rcases xs with ⟨xs, rfl⟩
   have : i < xs.size + 1 := by omega
-  simp [Array.getElemV_push_lt, h, this]
+  simp [Array.getElemV_push_lt, h]
 
 theorem getElem_push_lt {xs : Vector α n} {x : α} {i : Nat} (h : i < n) :
     (xs.push x)[i] = xs[i] := by
   simpa using getElemV_push_lt h
 
-set_option linter.indexVariables false in
-theorem getElem_push_eq {xs : Vector α n} {x : α} : (xs.push x)[n] = x := by
-  rcases xs with ⟨xs, rfl⟩
-  simp
-
-set_option linter.indexVariables false in
 @[simp] theorem getElemV_push_eq {_ : Nonempty α} {xs : Vector α n} {x : α} :
     (xs.push x)｢n｣ = x := by
-  rw [show (xs.push x)｢n｣ = (xs.push x)[n] from getElem_eq_getElemV ..]
-  exact getElem_push_eq
-
-theorem getElem_push {xs : Vector α n} {x : α} {i : Nat} (h : i < n + 1) :
-    (xs.push x)[i] = if h : i < n then xs[i] else x := by
   rcases xs with ⟨xs, rfl⟩
-  simp [Array.getElem_push]
+  simp [Array.getElemV_push]
+
+set_option linter.indexVariables false in
+theorem getElem_push_eq {xs : Vector α n} {x : α} : (xs.push x)[n] = x := by
+  simp
 
 @[grind =]
 theorem getElemV_push {xs : Vector α n} {x : α} {i : Nat} (h : i < n + 1) :
     haveI : Nonempty α := ⟨x⟩
     (xs.push x)｢i｣ = if i < n then xs｢i｣ else x := by
-  simp [getElemV_pos (by simpa using h)]
+  rcases xs with ⟨xs, rfl⟩
+  simp [Array.getElemV_push, h]
+
+theorem getElem_push {xs : Vector α n} {x : α} {i : Nat} (h : i < n + 1) :
+    (xs.push x)[i] = if h : i < n then xs[i] else x := by
+  simpa using getElemV_push h
 
 @[grind =]
-theorem getElem?_push {xs : Vector α n} {x : α} {i : Nat} : (xs.push x)[i]? = if i = n then some x else xs[i]? := by
-  simp [getElem?_def, getElem_push]
+theorem getElem?_push {xs : Vector α n} {x : α} {i : Nat} :
+    (xs.push x)[i]? = if i = n then some x else xs[i]? := by
+  simp +contextual [getElem?_def, getElemV_push]
   (repeat' split) <;> first | rfl | omega
 
 set_option linter.indexVariables false in
