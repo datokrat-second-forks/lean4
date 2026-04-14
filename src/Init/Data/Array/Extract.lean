@@ -175,6 +175,25 @@ theorem extract_size_left {as : Array α} :
   simp
   omega
 
+/-
+PLOG(push_extract_getElemV):
+I was quite confused when rewriting `getElemV_extract` that I could not prove the side condition
+until I noticed that the rewrite was in an `ite` arm. Now we split before rewriting.
+-/
+
+@[simp]
+theorem push_extract_getElemV {as : Array α} {i j : Nat} (h : j < as.size) :
+    (as.extract i j).push as｢j｣ = as.extract (min i j) (j + 1) := by
+  apply Array.ext_getElemV
+  · simp
+    omega
+  · intro i hi
+    simp only [size_push, size_extract] at hi
+    simp only [getElemV_push, size_extract, hi]
+    split
+    · rw [getElemV_extract, getElemV_extract] <;> (congr; omega)
+    · rw [getElemV_extract] <;> (congr; omega)
+
 @[simp]
 theorem push_extract_getElem {as : Array α} {i j : Nat} (h : j < as.size) :
     (as.extract i j).push as[j] = as.extract (min i j) (j + 1) := by
@@ -183,7 +202,9 @@ theorem push_extract_getElem {as : Array α} {i j : Nat} (h : j < as.size) :
     omega
   · simp only [size_push, size_extract] at h₁ h₂
     simp only [getElem_push, size_extract, getElem_extract]
-    split <;>
+    split
+    · congr
+      omega
     · congr
       omega
 
