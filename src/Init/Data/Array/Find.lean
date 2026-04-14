@@ -425,7 +425,7 @@ the un-namespaced general version, which is worse in infering `c` and `i`.
 theorem findIdx_getElemV {p : α → Bool} {xs : Array α}
     {w : xs.findIdx p < xs.size} :
     p xs｢xs.findIdx p｣ := by
-  exact xs.findIdx_of_getElem?_eq_some (getElem?_eq_some_getElemV xs _ w)
+  exact xs.findIdx_of_getElem?_eq_some (getElem?_eq_some_getElemV w)
 
 theorem findIdx_getElem {xs : Array α} {w : xs.findIdx p < xs.size} :
     p xs[xs.findIdx p] :=

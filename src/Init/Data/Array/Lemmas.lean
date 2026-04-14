@@ -135,7 +135,10 @@ theorem getElem?_eq_none {xs : Array α} (h : xs.size ≤ i) : xs[i]? = none := 
 grind_pattern Array.getElem?_eq_none => xs.size, xs[i]? where
   guard xs.size ≤ i
 
-@[simp] theorem getElem?_eq_getElem {xs : Array α} {i : Nat} (h : i < xs.size) : xs[i]? = some xs[i] :=
+@[simp] theorem getElem?_eq_some_getElemV {xs : Array α} {i : Nat} (h : i < xs.size) : xs[i]? = some xs｢i｣ :=
+  _root_.getElem?_eq_some_getElemV xs i h
+
+theorem getElem?_eq_getElem {xs : Array α} {i : Nat} (h : i < xs.size) : xs[i]? = some xs[i] :=
   getElem?_pos ..
 
 theorem getElem?_eq_some_iff {xs : Array α} : xs[i]? = some b ↔ ∃ h : i < xs.size, xs[i] = b :=
@@ -272,7 +275,8 @@ theorem ext_getElem? {xs ys : Array α} (h : ∀ i : Nat, xs[i]? = ys[i]?) : xs 
 
 @[simp] theorem pop_push {xs : Array α} {x : α} : (xs.push x).pop = xs := by simp [pop]
 
-@[simp, grind =] theorem getElemV_pop {xs : Array α} {i : Nat} (h : i < xs.pop.size) :
+@[simp, grind =] theorem getElemV_pop {xs : Array α} {i : Nat} (h : i < xs.size - 1) :
+    haveI : i < xs.pop.size := by simpa using h
     haveI : Nonempty α := ⟨xs.pop[i]⟩
     xs.pop｢i｣ = xs｢i｣ := by
   rcases xs with ⟨xs⟩
@@ -280,7 +284,7 @@ theorem ext_getElem? {xs ys : Array α} (h : ∀ i : Nat, xs[i]? = ys[i]?) : xs 
 
 @[simp, grind =] theorem getElem_pop {xs : Array α} {i : Nat} (h : i < xs.pop.size) :
     xs.pop[i] = xs[i]'(by simp at h; omega) := by
-  simpa using getElemV_pop h
+  simpa using getElemV_pop (by simpa using h)
 
 @[grind =] theorem getElem?_pop {xs : Array α} {i : Nat} :
     xs.pop[i]? = if i < xs.size - 1 then xs[i]? else none := by
@@ -1097,7 +1101,7 @@ theorem set_pop {xs : Array α} {x : α} {i : Nat} (h : i < xs.pop.size) :
   ext i h₁ h₂
   · simp
   · simp
-    rw [getElemV_set, getElemV_pop h₂, getElemV_pop (by simpa using h₂), getElemV_set]
+    rw [getElemV_set, getElemV_pop (by simpa using h₂), getElemV_pop (by simpa using h₂), getElemV_set]
 
 @[simp] theorem set_eq_empty_iff {xs : Array α} {i : Nat} {a : α} {h : i < xs.size} :
     xs.set i a = #[] ↔ xs = #[] := by
@@ -2079,7 +2083,7 @@ theorem getElemV_of_append {xs ys zs : Array α} {a : α} (eq : xs = ys.push a +
     (h : ys.size = i) :
     haveI : Nonempty α := ⟨a⟩; xs｢i｣ = a := by
   apply Option.some.inj
-  rw [← getElem?_eq_some_getElemV _ _ (by simp +arith [eq, h]), eq,
+  rw [← getElem?_eq_some_getElemV (by simp +arith [eq, h]), eq,
     getElem?_append_left (by simp; omega), ← h]
   simp
 
@@ -4052,12 +4056,12 @@ theorem pop_append {xs ys : Array α} :
   split <;> simp_all
 
 @[simp, grind =] theorem pop_replicate {n : Nat} {a : α} : (replicate n a).pop = replicate (n - 1) a := by
-  ext
+  apply ext_getElemV
   · simp
-  · simp only [getElem_eq_getElemV]
+  · intro i hi
     rw [getElemV_replicate, getElemV_pop, getElemV_replicate]
     · simp at *; omega
-    · assumption
+    · simpa using hi
     · simp at *; omega
 
 /-! ## Logic -/
