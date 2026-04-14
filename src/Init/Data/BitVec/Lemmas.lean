@@ -6271,6 +6271,22 @@ theorem toNat_lt_iff_getLsbD_eq_false {x : BitVec w} (i : Nat) (hi : i < w) :
 
 /-- If a bitvector interpreted as a natural number is strictly smaller than `2 ^ (k + 1)` and greater than or
   equal to 2 ^ k, then the bit at position `k` must be `true` -/
+theorem getElemV_eq_true_of_lt_of_le {x : BitVec w} (hk' : k < w) (hlt: x.toNat < 2 ^ (k + 1)) (hle : 2 ^ k ≤ x.toNat) :
+    x｢k｣ = true := by
+  have := le_toNat_iff_getLsbD_eq_true (x := x) (i := k) hk'
+  simp only [hle, true_iff] at this
+  obtain ⟨k',hk'⟩ := this
+  by_cases hkk' : k + k' < w
+  · have := Nat.ge_two_pow_of_testBit hk'
+    by_cases hzk' : k' = 0
+    · simpa [hzk', getLsbD_eq_getElemV (i := k) ‹_›] using hk'
+    · have := Nat.pow_lt_pow_of_lt (a := 2) (n := k) (m := k + k') (by omega) (by omega)
+      have := Nat.pow_le_pow_of_le (a := 2) (n := k + 1) (m := k + k') (by omega) (by omega)
+      omega
+  · simp [show w ≤ k + k' by omega] at hk'
+
+/-- If a bitvector interpreted as a natural number is strictly smaller than `2 ^ (k + 1)` and greater than or
+  equal to 2 ^ k, then the bit at position `k` must be `true` -/
 theorem getElem_eq_true_of_lt_of_le {x : BitVec w} (hk' : k < w) (hlt: x.toNat < 2 ^ (k + 1)) (hle : 2 ^ k ≤ x.toNat) :
     x[k] = true := by
   have := le_toNat_iff_getLsbD_eq_true (x := x) (i := k) hk'
