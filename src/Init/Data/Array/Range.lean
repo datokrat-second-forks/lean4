@@ -69,7 +69,7 @@ theorem mem_range' {n} : m ∈ range' s n step ↔ ∃ i < n, m = s + step * i :
 
 /-
 PLOG(pop_range'):
-Using `omega` discharger
+Using `first | omega | simpa` discharger
 -/
 
 @[simp, grind =]
@@ -78,7 +78,7 @@ theorem pop_range' : (range' s n step).pop = range' s (n - 1) step := by
   · simp
   · intro i h
     simp only [size_pop, size_range'] at h
-    simp (discharger := omega)
+    simp (discharger := first | omega | simpa)
 
 /-
 PLOG(map_add_range'):

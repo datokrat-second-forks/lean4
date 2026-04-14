@@ -18,6 +18,7 @@ public import Init.Data.Option.Instances
 import Init.Data.Bool
 import Init.Data.Option.Lemmas
 import Init.TacticsExtra
+public import Init.Data.Option.BasicAux
 
 grind_annotated "2025-01-24"
 
@@ -288,6 +289,10 @@ theorem getElem_eq_iff {l : List α} {i : Nat} (h : i < l.length) : l[i] = x ↔
 theorem getElemV_eq_iff {l : List α} {i : Nat} (h : i < l.length) :
     l｢i｣ = x ↔ l[i]? = some x := by
   simpa using getElem_eq_iff (x := x) h
+
+theorem getElemV_eq_getV_getElem? {_ : Nonempty α} {l : List α} {i : Nat} :
+    l｢i｣ = l[i]?.getV := by
+  simp
 
 theorem getElem_eq_getElem?_get {l : List α} {i : Nat} (h : i < l.length) :
     l[i] = l[i]?.get (by simp [h]) := by
