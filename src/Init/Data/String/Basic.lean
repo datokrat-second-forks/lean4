@@ -41,9 +41,14 @@ section
 theorem String.utf8ByteSize_singleton {c : Char} : (String.singleton c).utf8ByteSize = c.utf8Size := by
   simp [← size_toByteArray, List.utf8Encode_singleton]
 
+theorem List.isUTF8FirstByte_getElemV_utf8Encode_singleton {c : Char} {i : Nat} (hi : i < [c].utf8Encode.size) :
+    UInt8.IsUTF8FirstByte [c].utf8Encode｢i｣ ↔ i = 0 := by
+  have : i < (String.utf8EncodeChar c).length := by simpa [List.utf8Encode_singleton] using hi
+  simp [List.utf8Encode_singleton, UInt8.isUTF8FirstByte_getElemV_utf8EncodeChar this]
+
 theorem List.isUTF8FirstByte_getElem_utf8Encode_singleton {c : Char} {i : Nat} {hi : i < [c].utf8Encode.size} :
     UInt8.IsUTF8FirstByte [c].utf8Encode[i] ↔ i = 0 := by
-  simp [List.utf8Encode_singleton, UInt8.isUTF8FirstByte_getElem_utf8EncodeChar]
+  simpa using isUTF8FirstByte_getElemV_utf8Encode_singleton hi
 
 
 theorem ByteArray.IsValidUTF8.push {b : ByteArray} (h : IsValidUTF8 b) {c : Char} (hc : c.utf8Size = 1) :
@@ -94,15 +99,16 @@ where
     if hi : i < b.size then
       match h : validateUTF8At b i with
       | false => false
-      | true => go (i + b[i].utf8ByteSize (isUTF8FirstByte_of_validateUTF8At h)) ?_
+      | true => go (i + b[i].utf8ByteSize (by simpa using isUTF8FirstByte_of_validateUTF8At h)) ?_
     else
       true
   termination_by b.size - i
   decreasing_by
-    have := b[i].utf8ByteSize_pos (isUTF8FirstByte_of_validateUTF8At h); omega
+    have := b[i].utf8ByteSize_pos (by simpa using isUTF8FirstByte_of_validateUTF8At h); omega
 finally
   all_goals rw [ByteArray.validateUTF8At_eq_isSome_utf8DecodeChar?] at h
-  · rw [← ByteArray.utf8Size_utf8DecodeChar (h := h)]
+  · simp only [getElem_eq_getElemV]
+    rw [← ByteArray.utf8Size_utf8DecodeChar (h := h)]
     exact add_utf8Size_utf8DecodeChar_le_size
 
 theorem ByteArray.isSome_utf8Decode?Go_eq_validateUTF8Go {b : ByteArray}
@@ -123,6 +129,7 @@ theorem ByteArray.isSome_utf8Decode?Go_eq_validateUTF8Go {b : ByteArray}
     · rename_i heq
       simp [validateUTF8At_eq_isSome_utf8DecodeChar?, h₂] at heq
     · congr
+      simp only [getElem_eq_getElemV]
       rw [← ByteArray.utf8Size_utf8DecodeChar (h := by simp [h₂])]
       simp [utf8DecodeChar, h₂]
   | case3 => unfold validateUTF8.go; simp [*]
