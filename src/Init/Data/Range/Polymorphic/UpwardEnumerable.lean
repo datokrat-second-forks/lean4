@@ -276,7 +276,7 @@ theorem UpwardEnumerable.eq_of_succ?_eq {α : Type u} [UpwardEnumerable α] [Lin
 /--
 Maps elements of `α` to their immediate successor.
 -/
-@[always_inline, inline]
+@[always_inline, inline, expose, implicit_reducible]
 def UpwardEnumerable.succ {α : Type u} [UpwardEnumerable α] [InfinitelyUpwardEnumerable α]
     (a : α) : α :=
   (succ? a).get isSome_succ?
@@ -335,7 +335,7 @@ This function uses an `UpwardEnumerable α` instance.
 
 If no other implementation is provided in UpwardEnumerable instance, succMany? repeatedly applies succ?.
 -/
-@[always_inline, inline, expose]
+@[always_inline, inline, expose, implicit_reducible]
 def UpwardEnumerable.succMany {α : Type u} [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] [InfinitelyUpwardEnumerable α]
     (n : Nat) (a : α) :=

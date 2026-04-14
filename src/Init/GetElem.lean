@@ -223,12 +223,14 @@ theorem getElem!_pos [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem d
   have : Decidable (dom c i) := .isTrue h
   simp [getElem!_def, getElem?_pos, h]
 
+@[simp, grind =]
 theorem getElem!_eq_getElemV [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom]
     [Inhabited elem] (c : cont) (i : idx) (h : dom c i) :
     c[i]! = c｢i｣ := by
   simp [getElem!_pos c i h, getElem_eq_getElemV]
 
+@[simp, grind =]
 theorem getElem!_neg [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     [Inhabited elem] (c : cont) (i : idx) (h : ¬dom c i) : c[i]! = default := by
   have : Decidable (dom c i) := .isFalse h
