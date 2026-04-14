@@ -318,15 +318,14 @@ nontrivial side condition
 
 /-! ### toArray lemmas -/
 
-@[simp, grind =] theorem getElemV_toArray {α n} {xs : Vector α n} {i : Nat} (h : i < xs.size) :
-    haveI : Nonempty α := ⟨xs[i]⟩
+@[simp, grind =] theorem getElemV_toArray {α n} {_ : Nonempty α} {xs : Vector α n} {i : Nat} :
     xs.toArray｢i｣ = xs｢i｣ := by
   cases xs
   simp
 
 theorem getElem_toArray {α n} {xs : Vector α n} {i : Nat} (h : i < xs.toArray.size) :
     xs.toArray[i] = xs[i]'(by simpa using h) := by
-  simpa using getElemV_toArray (by simpa using h)
+  simp
 
 @[simp, grind =] theorem getElem?_toArray {α n} {xs : Vector α n} {i : Nat} :
     xs.toArray[i]? = xs[i]? := by

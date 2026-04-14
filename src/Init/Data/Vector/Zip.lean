@@ -164,7 +164,7 @@ theorem zipWith_eq_append_iff {f : α → β → γ} {as : Vector α (n + m)} {b
 theorem zipWith_replicate {a : α} {b : β} {n : Nat} :
     zipWith f (replicate n a) (replicate n b) = replicate n (f a b) := by
   ext
-  simp
+  simp [*]
 
 theorem map_uncurry_zip_eq_zipWith {f : α → β → γ} {as : Vector α n} {bs : Vector β n} :
     map (Function.uncurry f) (as.zip bs) = zipWith f as bs := by
@@ -187,15 +187,15 @@ theorem reverse_zipWith {f : α → β → γ} {as : Vector α n} {bs : Vector �
 
 /-! ### zip -/
 
-theorem getElem_zip {as : Vector α n} {bs : Vector β n} {i : Nat} {h : i < n} :
-    (zip as bs)[i] = (as[i], bs[i]) :=
-  getElem_zipWith ..
-
 @[simp, grind =]
 theorem getElemV_zip {_ : Nonempty (α × β)} {as : Vector α n} {bs : Vector β n} {i : Nat}
     (h : i < n) :
-    (zip as bs)｢i｣ = (as｢i｣, bs｢i｣) := by
-  simp [getElemV_pos h]
+    (zip as bs)｢i｣ = (as｢i｣, bs｢i｣) :=
+  getElemV_zipWith h
+
+theorem getElem_zip {as : Vector α n} {bs : Vector β n} {i : Nat} {h : i < n} :
+    (zip as bs)[i] = (as[i], bs[i]) :=
+  getElem_zipWith ..
 
 theorem zip_eq_zipWith {as : Vector α n} {bs : Vector β n} : zip as bs = zipWith Prod.mk as bs := by
   rcases as with ⟨as, rfl⟩
@@ -271,7 +271,7 @@ theorem zip_eq_append_iff {as : Vector α (n + m)} {bs : Vector β (n + m)} {xs 
 @[simp, grind =]
 theorem zip_replicate {a : α} {b : β} {n : Nat} :
     zip (replicate n a) (replicate n b) = replicate n (a, b) := by
-  ext <;> simp
+  ext <;> simp [*]
 
 /-! ### unzip -/
 
