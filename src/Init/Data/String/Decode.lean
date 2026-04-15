@@ -1074,6 +1074,8 @@ public def ByteArray.validateUTF8At (bytes : ByteArray) (i : Nat) : Bool :=
 PLOG(parseFirstByte_eq_done_of_utf8DecodeChar?_eq_some):
 `simp_all` and `simp at *` are bad at normalization: The don't rewrite hypotheses that other
 hypotheses depend on.
+
+Should fun_cases/fun_induction/... automatically normalize?
 -/
 
 theorem parseFirstByte_eq_done_of_utf8DecodeChar?_eq_some {b : ByteArray} {i : Nat} {c : Char}
