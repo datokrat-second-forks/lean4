@@ -765,6 +765,41 @@ lbool type_checker::quick_is_def_eq(expr const & t, expr const & s, bool use_has
 /** \brief Return true if arguments of \c t are definitionally equal to arguments of \c s.
     This method is used to implement an optimization in the method \c is_def_eq. */
 bool type_checker::is_def_eq_args(expr t, expr s) {
+    // §37/§38 experiments. Toggled at runtime via env vars.
+    //   LEAN_KERN_ARG_ORDER_FWD=1     -> visit args in forward order (§37)
+    //   LEAN_KERN_SKIP_PROOF_ARGS=1  -> skip Prop-typed args entirely (§38)
+    static int mode = -1;
+    if (mode == -1) {
+        const char * sk = std::getenv("LEAN_KERN_SKIP_PROOF_ARGS");
+        const char * fw = std::getenv("LEAN_KERN_ARG_ORDER_FWD");
+        if (sk && sk[0] == '1')      mode = 2;
+        else if (fw && fw[0] == '1') mode = 1;
+        else                          mode = 0;
+    }
+    if (mode == 2) {
+        while (is_app(t) && is_app(s)) {
+            expr const & arg_t = app_arg(t);
+            expr arg_t_type = infer_type(arg_t);
+            if (!is_prop(arg_t_type)) {
+                if (!is_def_eq(arg_t, app_arg(s)))
+                    return false;
+            }
+            t = app_fn(t);
+            s = app_fn(s);
+        }
+        return !is_app(t) && !is_app(s);
+    }
+    if (mode == 1) {
+        buffer<expr> t_args, s_args;
+        expr t_fn = get_app_args(t, t_args);
+        expr s_fn = get_app_args(s, s_args);
+        if (t_args.size() != s_args.size()) return false;
+        if (is_app(t_fn) || is_app(s_fn)) return false;
+        for (unsigned i = 0; i < t_args.size(); ++i) {
+            if (!is_def_eq(t_args[i], s_args[i])) return false;
+        }
+        return true;
+    }
     while (is_app(t) && is_app(s)) {
         if (!is_def_eq(app_arg(t), app_arg(s)))
             return false;
@@ -819,8 +854,24 @@ bool type_checker::is_def_eq_app(expr const & t, expr const & s) {
         expr t_fn = get_app_args(t, t_args);
         expr s_fn = get_app_args(s, s_args);
         if (is_def_eq(t_fn, s_fn) && t_args.size() == s_args.size()) {
+            // §39 experiment: skip Prop-typed args here too.
+            // Same env var as §38. Soundness: is_def_eq(t_fn, s_fn) above
+            // verified the heads are defeq, so the slot types at any proof
+            // position are determined (modulo substitution) by the earlier
+            // arg pairs, which the rest of this loop verifies for non-proof
+            // positions and trusts via congruence + irrelevance for proof
+            // positions.
+            static int skip_mode = -1;
+            if (skip_mode == -1) {
+                const char * v = std::getenv("LEAN_KERN_SKIP_PROOF_ARGS");
+                skip_mode = (v && v[0] == '1') ? 1 : 0;
+            }
             unsigned i = 0;
             for (; i < t_args.size(); i++) {
+                if (skip_mode) {
+                    expr arg_t_type = infer_type(t_args[i]);
+                    if (is_prop(arg_t_type)) continue;
+                }
                 if (!is_def_eq(t_args[i], s_args[i]))
                     break;
             }

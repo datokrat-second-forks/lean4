@@ -236,6 +236,25 @@ def getCongrSimpKindsForArgZero (info : FunInfo) : MetaM (Array CongrArgKind) :=
   return fixKindsForDependencies info result
 
 /--
+If `true`, `mkCongrSimpCore?` emits a per-position auxiliary lemma
+`<f>.congr_cast_<i>` for each `.cast` argument of a congruence theorem,
+encapsulating the `Eq.ndrec` chain so the kernel verifies it once at
+lemma definition time rather than re-reducing it at every use site.
+
+Experimental. Motivated by benchmark data in `src/test_simp_bench.lean`
+showing `n^{1.5–1.8}` kernel type-checking growth on tower-shaped dependent
+proof arguments where `mkCongrSimp?` introduces an inline `Eq.ndrec` cast
+through `mkCast`.
+-/
+register_option congrSimp.useCastAux : Bool := {
+  defValue := false
+  descr    := "emit auxiliary lemmas `<f>.congr_cast_<i>` for .cast positions \
+    in auto-generated congruence lemmas, encapsulating the Eq.ndrec chain so \
+    the kernel verifies it once at lemma definition time instead of at every \
+    use site"
+}
+
+/--
 Auxiliary type for applying `mkCast` at `mkCongrSimpCore?`
 -/
 private inductive EqInfo where
@@ -291,6 +310,73 @@ private partial def mkCast (fvarId : FVarId) (type : Expr) (deps : Array Nat) (e
   instantiateMVars mvar
 
 /--
+Suffix prefix used for per-position cast aux lemmas: `<f>.congr_cast_<i>`.
+-/
+def congrCastAuxPrefix : String := "congr_cast_"
+
+/--
+Try to emit (or reuse) a per-position auxiliary cast lemma
+`<f>.congr_cast_<i>` and return an application of it that has type `rhsType`.
+Returns `none` to indicate the caller should fall back to inline `mkCast`.
+
+The aux lemma is closed over the relevant dependency fvars:
+  - for each `d ∈ deps` with kind `.eq`: `lhss[d]`, `rhss[d]`, eq fvar
+  - for each `d ∈ deps` with kind `.fixed`: `lhss[d]`
+  - finally: `lhss[i]` (the original cast arg)
+We refuse (return `none`) if any dep has a kind we don't know how to close over
+(cast, heq, subsingletonInst, fixedNoParam), or if `f` is not a const, or if its
+level arguments don't match its declared level params (the aux has to be
+generic), or if the option is off, or if `deps` contributes no actual equality.
+-/
+private def mkCongrCastAux? (f : Expr) (i : Nat) (rhsType : Expr)
+    (lhss rhss : Array Expr) (kinds : Array CongrArgKind)
+    (deps : Array Nat) (eqs : Array (Option EqInfo)) : MetaM (Option Expr) := do
+  unless congrSimp.useCastAux.get (← getOptions) do return none
+  let .const p us := f | return none
+  if deps.isEmpty then return none
+  let hasEq := deps.any fun d => (eqs[d]!).isSome
+  unless hasEq do return none
+  for d in deps do
+    match kinds[d]! with
+    | .eq | .fixed => pure ()
+    | _ => return none
+  let cinfo ← getConstInfo p
+  -- Only safe to emit a parametric aux lemma when `us` matches the const's own
+  -- level parameters — that's the case when we're being invoked from the
+  -- reserved-name action path (see `executeReservedNameAction`).
+  let paramLevels : List Level := cinfo.levelParams.map mkLevelParam
+  unless us == paramLevels do return none
+  let auxName := Name.mkStr p s!"{congrCastAuxPrefix}{i}"
+  -- Collect abstraction fvars in order.
+  let mut absFvars : Array Expr := #[]
+  for d in deps do
+    match kinds[d]! with
+    | .eq =>
+      absFvars := absFvars.push lhss[d]! |>.push rhss[d]!
+      match eqs[d]! with
+      | some (.hyp eqFVarId) => absFvars := absFvars.push (mkFVar eqFVarId)
+      | _ => return none
+    | .fixed => absFvars := absFvars.push lhss[d]!
+    | _ => return none
+  absFvars := absFvars.push lhss[i]!
+  -- Emit the aux lemma if not already present on this env branch.
+  unless (← getEnv).containsOnBranch auxName do
+    try
+      let auxValueOpen ← mkCast lhss[i]!.fvarId! rhsType deps eqs
+      let auxType  ← mkForallFVars  absFvars rhsType
+      let auxValue ← mkLambdaFVars absFvars auxValueOpen
+      addDecl <| ← mkThmOrUnsafeDef {
+        name        := auxName
+        type        := auxType
+        value       := auxValue
+        levelParams := cinfo.levelParams
+      }
+      trace[congr.thm] "declared cast aux `{auxName}`"
+    catch _ =>
+      return none
+  return some (mkAppN (mkConst auxName us) absFvars)
+
+/--
 Creates a congruence theorem that is useful for the simplifier and `congr` tactic.
 -/
 partial def mkCongrSimpCore? (f : Expr) (info : FunInfo) (kinds : Array CongrArgKind) (subsingletonInstImplicitRhs : Bool := true) : MetaM (Option CongrTheorem) := do
@@ -334,7 +420,11 @@ where
             | .fixed => go (i+1) (rhss.push lhss[i]!) (eqs.push none) hyps
             | .cast =>
               let rhsType := (← inferType lhss[i]!).replaceFVars (lhss[*...rhss.size]) rhss
-              let rhs ← mkCast lhss[i]!.fvarId! rhsType info.paramInfo[i]!.backDeps eqs
+              let deps := info.paramInfo[i]!.backDeps
+              let rhs ←
+                match ← mkCongrCastAux? f i rhsType lhss rhss kinds deps eqs with
+                | some e => pure e
+                | none   => mkCast lhss[i]!.fvarId! rhsType deps eqs
               go (i+1) (rhss.push rhs) (eqs.push none) hyps
             | .subsingletonInst =>
               -- The `lhs` does not need to instance implicit since it can be inferred from the LHS
