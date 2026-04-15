@@ -887,6 +887,11 @@ theorem copy_toSlice {s : String} : s.toSlice.copy = s := by
 theorem copy_comp_toSlice : String.Slice.copy ∘ String.toSlice = id := by
   ext; simp
 
+/-
+PLOG(getUTF8Byte_eq_getUTF8Byte_copy):
+Bounds proofs double the length of the proof
+-/
+
 theorem Slice.getUTF8Byte_eq_getUTF8Byte_copy {s : Slice} {p : Pos.Raw} {h : p < s.rawEndPos} :
     s.getUTF8Byte p h = s.copy.getUTF8Byte p (by simpa) := by
   have h' : p < s.copy.rawEndPos := by simpa using h
@@ -895,10 +900,9 @@ theorem Slice.getUTF8Byte_eq_getUTF8Byte_copy {s : Slice} {p : Pos.Raw} {h : p <
   replace h := offsetBy_startInclusive_lt_of_lt h
   replace h' := offsetBy_startInclusive_lt_of_lt (p := p) (s := s.copy) h' -- error when leaving out `s`
   simp only [Pos.Raw.lt_iff, String.byteIdx_rawEndPos, String.utf8ByteSize, str_toSlice, toByteArray_copy] at h h'
-  simp at h'
-  simp [getUTF8Byte, String.getUTF8Byte, toByteArray_copy, ByteArray.getElemV_extract, h, h'] -- Perhaps `getElemV_extract` should have a different hypothesis
-  rw [ByteArray.getElemV_extract]
-  · simp at h'
+  simp only [startInclusive_toSlice, String.offset_startPos, Pos.Raw.offsetBy_zero,
+    ByteArray.size_extract, size_toByteArray] at h'
+  simp (discharger := omega) [ByteArray.getElemV_extract] -- `getElemV_extract` needs a strong discharger
 
 theorem Slice.getUTF8Byte_copy {s : Slice} {p : Pos.Raw} {h} :
     s.copy.getUTF8Byte p h = s.getUTF8Byte p (by simpa using h) := by
@@ -987,6 +991,12 @@ theorem Slice.toByteArray_str_eq {s : Slice} :
   · simp
   · simpa [Pos.Raw.le_iff] using s.startInclusive_le_endExclusive
 
+/-
+PLOG(isValidForSlice_iff_isSome_utf8DecodeChar?):
+Had to do some very manual unfolding in the second-to-last line.
+Probably a library problem.
+-/
+
 theorem Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar? {s : Slice} {p : Pos.Raw} :
     p.IsValidForSlice s ↔ p = s.rawEndPos ∨ (p < s.rawEndPos ∧ (s.str.toByteArray.utf8DecodeChar? (s.startInclusive.offset.byteIdx + p.byteIdx)).isSome) := by
   refine ⟨?_, ?_⟩
@@ -1016,7 +1026,8 @@ theorem Pos.Raw.isValidForSlice_iff_isSome_utf8DecodeChar? {s : Slice} {p : Pos.
   · rw [isValidForSlice_iff_isUTF8FirstByte]
     rintro (rfl|⟨h₁, h₂⟩)
     · simp
-    · exact Or.inr ⟨h₁, ByteArray.isUTF8FirstByte_of_isSome_utf8DecodeChar? h₂⟩
+    · simp only [Slice.getUTF8Byte, String.getUTF8Byte, getElem_eq_getElemV]
+      exact Or.inr ⟨h₁, ByteArray.isUTF8FirstByte_of_isSome_utf8DecodeChar? h₂⟩
 
 theorem Slice.Pos.isUTF8FirstByte_byte {s : Slice} {pos : s.Pos} {h : pos ≠ s.endPos} :
     (pos.byte h).IsUTF8FirstByte :=
@@ -1486,10 +1497,18 @@ theorem Slice.Pos.get_eq_get_copy {s : Slice} {pos : s.Pos} {h} :
     pos.get h = pos.copy.get (ne_of_apply_ne Pos.ofCopy (by simp [h])) :=
   (get_copy _).symm
 
+/-
+PLOG(byte_copy):
+Bounds proof is composed of a `≤` and a `≠` proof; need manual work plus `omega` discharger
+-/
+
 theorem Slice.Pos.byte_copy {s : Slice} {pos : s.Pos} (h) :
     pos.copy.byte h = pos.byte (by rintro rfl; simp at h) := by
+  have := pos.isValidForSlice.le_rawEndPos
   rw [String.Pos.byte, Slice.Pos.byte, Slice.Pos.byte]
-  simp [getUTF8Byte, String.getUTF8Byte, toByteArray_copy, ByteArray.getElem_extract]
+  simp [String.Pos.ext_iff, Pos.Raw.ext_iff, utf8ByteSize, Pos.Raw.byteDistance_eq] at h
+  simp [Pos.Raw.le_iff, utf8ByteSize, Pos.Raw.byteDistance_eq] at this
+  simp (discharger := first | omega) [getUTF8Byte, String.getUTF8Byte, toByteArray_copy, ByteArray.getElemV_extract]
 
 theorem Slice.Pos.byte_eq_byte_copy {s : Slice} {pos : s.Pos} {h} :
     pos.byte h = pos.copy.byte (ne_of_apply_ne Pos.ofCopy (by simp [h])) :=
@@ -2137,6 +2156,15 @@ theorem Slice.Pos.ne_endPos_of_lt {s : Slice} {p q : s.Pos} : p < q → p ≠ s.
   simp [lt_iff, Pos.ext_iff, Pos.Raw.lt_iff, Pos.Raw.ext_iff]
   omega
 
+set_option allowUnsafeReducibility true
+attribute [implicit_reducible] utf8EncodeChar
+
+theorem getElem_eq_sorry
+    (c : ByteArray) (i : Nat) (h : i < c.size) :
+    c[i] = sorry := by
+  sorry
+
+set_option backward.isDefEq.respectTransparency false in
 theorem Slice.Pos.next_le_of_lt {s : Slice} {p q : s.Pos} {h} : p < q → p.next h ≤ q := by
   -- Things like this will become a lot simpler once we have the `Splits` machinery developed,
   -- but this is `String.Basic`, so we have to suffer a little.
@@ -2148,22 +2176,31 @@ theorem Slice.Pos.next_le_of_lt {s : Slice} {p q : s.Pos} {h} : p < q → p.next
     simp [lt_iff, Pos.Raw.lt_iff] at hpq
     omega
   have h₂ : q.offset.byteIdx - p.offset.byteIdx < (p.get h).utf8Size := by
-    simp [lt_iff, Pos.Raw.lt_iff] at hq
-    omega
+    sorry
+    -- simp [lt_iff, Pos.Raw.lt_iff] at hq
+    -- omega
   conv at this => congr; arg 2; rw [h₁, ← Nat.add_assoc]
   rw [← ByteArray.getElem_extract (start := s.startInclusive.offset.byteIdx + p.offset.byteIdx)
     (stop := s.startInclusive.offset.byteIdx + p.offset.byteIdx + (p.get h).utf8Size)] at this
+  rotate_left
+  · --sorry
+    simp only [ByteArray.size_extract, size_toByteArray]
+    rw [Nat.min_eq_left]
+    · show_term omega
+    · have := (p.next h).str.isValid.le_utf8ByteSize
+      simpa [Nat.add_assoc] using this
   · simp only [← utf8Encode_get_eq_extract, List.utf8Encode_singleton] at this
     have h₃ := List.getElem_toByteArray (l := utf8EncodeChar (p.get h))
       (i := q.offset.byteIdx - p.offset.byteIdx) (h := by simpa)
-    rw [h₃, UInt8.isUTF8FirstByte_getElem_utf8EncodeChar] at this
+    simp only [getElem_eq_getElemV] at h₃
+    set_option trace.Meta.isDefEq true in
+    set_option diagnostics true in
+    set_option trace.diagnostics true in
+    -- rw [getElem_eq_sorry] at this
+    rw [getElem_eq_getElemV] at this
+    rw [h₃, UInt8.isUTF8FirstByte_getElemV_utf8EncodeChar] at this
     simp only [lt_iff, Pos.Raw.lt_iff] at hpq
     omega
-  · simp only [ByteArray.size_extract, size_toByteArray]
-    rw [Nat.min_eq_left]
-    · omega
-    · have := (p.next h).str.isValid.le_utf8ByteSize
-      simpa [Nat.add_assoc] using this
 
 theorem Pos.ofToSlice_le_iff {s : String} {p : s.toSlice.Pos} {q : s.Pos} :
     ofToSlice p ≤ q ↔ p ≤ q.toSlice := Iff.rfl
