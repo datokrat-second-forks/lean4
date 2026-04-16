@@ -35,7 +35,7 @@ theorem denote_mkAtom_cached {aig : AIG α} {hit} :
   have := hit.hvalid
   simp only [denote_mkAtom]
   unfold denote denote.go
-  split <;> simp_all
+  split <;> simp_all (config := { decide := false }) [-getElem_eq_getElemV]
 
 /--
 `mkAtomCached` does not modify the input AIG upon a cache hit.
@@ -107,8 +107,8 @@ theorem denote_mkConstCached {aig : AIG α} :
   unfold denote denote.go
   split
   · simp
-  next heq => simp [aig.hconst] at heq
-  next heq => simp [aig.hconst] at heq
+  next heq => simp only [aig.hconst] at heq; contradiction
+  next heq => simp only [aig.hconst] at heq; contradiction
 
 /--
 If we find a cached gate declaration in the AIG, denoting it is equivalent to denoting `AIG.mkGate`.
@@ -125,7 +125,7 @@ theorem denote_mkGate_cached {aig : AIG α} {input} {hit} :
   conv =>
     lhs
     unfold denote denote.go
-  split <;> simp_all [denote]
+  split <;> simp_all (config := { decide := false }) [-getElem_eq_getElemV, denote]
 
 theorem mkGateCached.go_le_size (aig : AIG α) (input : BinaryInput aig) :
     aig.decls.size ≤ (go aig input).aig.decls.size := by
