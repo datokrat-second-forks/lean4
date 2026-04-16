@@ -4787,7 +4787,7 @@ theorem maxKeyV_alter_eq_self [TransCmp cmp] [Nonempty α] {k f}
 
 theorem maxKeyV_eq_get_maxKey? [TransCmp cmp] [Nonempty α] (he : t.isEmpty = false) :
     t.maxKeyV = t.maxKey?.get (isSome_maxKey?_iff_isEmpty_eq_false.mpr he) := by
-  rw [← maxKey_eq_maxKeyV]; exact maxKey_eq_get_maxKey?
+  rw [← maxKey_eq_maxKeyV (he := he)]; exact maxKey_eq_get_maxKey?
 
 theorem maxKeyV_erase_eq_iff_not_compare_eq_maxKeyV [TransCmp cmp] [Nonempty α] {k}
     (he : (t.erase k).isEmpty = false) :
@@ -4798,11 +4798,11 @@ theorem maxKeyV_erase_eq_iff_not_compare_eq_maxKeyV [TransCmp cmp] [Nonempty α]
 
 theorem maxKeyV_eq_getLast_keys [TransCmp cmp] [Nonempty α] (he : t.isEmpty = false) :
     t.maxKeyV = t.keys.getLast (List.isEmpty_eq_false_iff.mp <| isEmpty_keys ▸ he) := by
-  rw [← maxKey_eq_maxKeyV]; exact maxKey_eq_getLast_keys
+  rw [← maxKey_eq_maxKeyV (he := he)]; exact maxKey_eq_getLast_keys
 
 theorem maxKeyV_eq_back_keysArray [TransCmp cmp] [Nonempty α] (he : t.isEmpty = false) :
     t.maxKeyV = t.keysArray.back (Nat.zero_lt_of_ne_zero (by simpa [size_keysArray, isEmpty_eq_size_eq_zero, - Array.size_eq_zero_iff] using he)) := by
-  rw [← maxKey_eq_maxKeyV]; exact maxKey_eq_back_keysArray
+  rw [← maxKey_eq_maxKeyV (he := he)]; exact maxKey_eq_back_keysArray
 
 @[simp, grind norm]
 theorem maxEntry_eq_maxEntryV [TransCmp cmp] {he : t.isEmpty = false} :
@@ -5601,7 +5601,7 @@ theorem getD_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
 theorem getElemV_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty γ]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f)｢k｣ = (t[k]?.bind (f k)).getD Classical.ofNonempty := by
-  simp [getElemV_filterMap]
+  simp only [getElemV_filterMap, getKey_eq, Option.pbind_eq_bind]
 
 theorem getD_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : t.getKey? k = some k') :
@@ -5797,7 +5797,7 @@ theorem getD_filter' [TransCmp cmp] [LawfulEqCmp cmp]
 theorem getElemV_filter' [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty β]
     {f : α → β → Bool} {k : α} :
     (t.filter f)｢k｣ = (t[k]?.filter (f k)).getD Classical.ofNonempty := by
-  simp [getElemV_filter]
+  simp only [getElemV_filter, getKey_eq, Option.pfilter_eq_filter]
 
 theorem getD_filter_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Bool} {k k' : α} {fallback : β} :
