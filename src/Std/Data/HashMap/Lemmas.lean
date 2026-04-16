@@ -3882,7 +3882,7 @@ theorem getKeyV_filterMap [EquivBEq α] [LawfulHashable α] [Nonempty α]
     (m.filterMap f).getKeyV k =
     ((m.getKey? k).pfilter (fun x h' =>
       (f x (m[x]'(mem_of_getKey?_eq_some h'))).isSome)).getD Classical.ofNonempty := by
-  simp only [HashMap.getKeyV]; exact getKeyD_filterMap
+  simpa only [HashMap.getKeyV] using getKeyD_filterMap
 
 end filterMap
 
@@ -4094,12 +4094,12 @@ theorem getKeyV_filter [EquivBEq α] [LawfulHashable α] [Nonempty α]
     (m.filter f).getKeyV k =
     ((m.getKey? k).pfilter (fun x h' =>
       (f x (m[x]'(mem_of_getKey?_eq_some h'))))).getD Classical.ofNonempty := by
-  simp only [HashMap.getKeyV]; exact getKeyD_filter
+  simpa only [HashMap.getKeyV] using getKeyD_filter
 
 theorem getKeyV_filter_key [EquivBEq α] [LawfulHashable α] [Nonempty α]
     {f : α → Bool} {k : α} :
     (m.filter fun k _ => f k).getKeyV k = ((m.getKey? k).filter f).getD Classical.ofNonempty := by
-  simp only [HashMap.getKeyV]; exact getKeyD_filter_key
+  simpa only [HashMap.getKeyV] using getKeyD_filter_key
 
 end filter
 

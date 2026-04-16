@@ -3680,7 +3680,8 @@ theorem get_alter [LawfulBEq α] {k k' : α} {f : Option (β k) → Option (β k
     (m.alter k f).get k' h =
       if heq : k == k' then
         haveI h' : (f (m.get? k)).isSome := mem_alter_of_beq heq |>.mp h
-        cast (congrArg β (eq_of_beq heq)) <| (f (m.get? k)).get <| h'
+        haveI : Nonempty (β k) := ⟨(f (m.get? k)).get h'⟩
+        cast (congrArg β (eq_of_beq heq)) <| (f (m.get? k)).getV
       else
         haveI h' : k' ∈ m := mem_alter_of_beq_eq_false (Bool.not_eq_true _ ▸ heq) |>.mp h
         m.get k' h' :=
@@ -3689,7 +3690,8 @@ theorem get_alter [LawfulBEq α] {k k' : α} {f : Option (β k) → Option (β k
 theorem get_alter_self [LawfulBEq α] {k : α} {f : Option (β k) → Option (β k)}
     {h : k ∈ m.alter k f} :
     haveI h' : (f (m.get? k)).isSome := mem_alter_self.mp h
-    (m.alter k f).get k h = (f (m.get? k)).get h' :=
+    haveI : Nonempty (β k) := ⟨(f (m.get? k)).get h'⟩
+    (m.alter k f).get k h = (f (m.get? k)).getV :=
   m.inductionOn (fun _ _ => DHashMap.get_alter_self) h
 
 @[grind =] theorem get!_alter [LawfulBEq α] {k k' : α} [hi : Inhabited (β k')]
@@ -3886,7 +3888,8 @@ theorem get_alter [EquivBEq α] [LawfulHashable α] {k k' : α} {f : Option β �
     Const.get (Const.alter m k f) k' h =
       if heq : k == k' then
         haveI h' : (f (Const.get? m k)).isSome := mem_alter_of_beq heq |>.mp h
-        f (Const.get? m k) |>.get h'
+        haveI : Nonempty β := ⟨(f (Const.get? m k)).get h'⟩
+        (f (Const.get? m k)).getV
       else
         haveI h' : k' ∈ m := mem_alter_of_beq_eq_false (Bool.not_eq_true _ ▸ heq) |>.mp h
         Const.get m k' h' :=
@@ -3895,7 +3898,8 @@ theorem get_alter [EquivBEq α] [LawfulHashable α] {k k' : α} {f : Option β �
 theorem get_alter_self [EquivBEq α] [LawfulHashable α] {k : α} {f : Option β → Option β}
     {h : k ∈ Const.alter m k f} :
     haveI h' : (f (Const.get? m k)).isSome := mem_alter_self.mp h
-    Const.get (Const.alter m k f) k h = (f (Const.get? m k)).get h' :=
+    haveI : Nonempty β := ⟨(f (Const.get? m k)).get h'⟩
+    Const.get (Const.alter m k f) k h = (f (Const.get? m k)).getV :=
   m.inductionOn (fun _ _ => DHashMap.Const.get_alter_self) h
 
 @[grind =] theorem get!_alter [EquivBEq α] [LawfulHashable α] {k k' : α} [Inhabited β]
@@ -4474,7 +4478,7 @@ theorem getKeyV_filterMap [LawfulBEq α] [Nonempty α]
     (m.filterMap f).getKeyV k =
     ((m.getKey? k).pfilter (fun x h' =>
       (f x (m.get x (mem_of_getKey?_eq_some h'))).isSome)).getD Classical.ofNonempty  := by
-  simpa [ExtDHashMap.getKeyV] using getKeyD_filterMap
+  simpa only [ExtDHashMap.getKeyV] using getKeyD_filterMap
 
 namespace Const
 
@@ -4514,7 +4518,7 @@ theorem get?_filterMap [EquivBEq α] [LawfulHashable α]
 theorem get?_filterMap' [LawfulBEq α]
     {f : α → β → Option γ} {k : α} :
     Const.get? (m.filterMap f) k = (Const.get? m k).bind (f k) := by
-  simp [get?_filterMap]
+  simp only [get?_filterMap, getKey_eq, Option.pbind_eq_bind]
 
 theorem get?_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → Option γ} {k k' : α} (h : m.getKey? k = some k') :
@@ -4539,8 +4543,9 @@ theorem get_filterMap [EquivBEq α] [LawfulHashable α]
 /-- Simpler variant of `get_filterMap` when `LawfulBEq` is available. -/
 theorem get_filterMap' [LawfulBEq α]
     {f : α → β → Option γ} {k : α} {h} :
-    Const.get (m.filterMap f) k h = (f k (Const.get m k (mem_of_mem_filterMap h))).get (by simpa using isSome_apply_of_mem_filterMap h) := by
-  simp [get_filterMap]
+    haveI : Nonempty γ := ⟨Const.get (m.filterMap f) k h⟩
+    Const.get (m.filterMap f) k h = (f k (Const.get m k (mem_of_mem_filterMap h))).getV := by
+  simp only [get_filterMap, getKey_eq, Option.get_eq_getV]
 
 theorem get!_filterMap [EquivBEq α] [LawfulHashable α] [Inhabited γ]
     {f : α → β → Option γ} {k : α} :
@@ -4554,7 +4559,7 @@ theorem get!_filterMap [EquivBEq α] [LawfulHashable α] [Inhabited γ]
 theorem get!_filterMap' [LawfulBEq α] [Inhabited γ]
     {f : α → β → Option γ} {k : α} :
     Const.get! (m.filterMap f) k = ((Const.get? m k).bind (f k)).get! := by
-  simp [get!_filterMap]
+  simp only [get!_filterMap, getKey_eq, Option.pbind_eq_bind]
 
 theorem get!_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Inhabited γ]
     {f : α → β → Option γ} {k k' : α} (h : m.getKey? k = some k') :
@@ -4574,21 +4579,21 @@ theorem getV_filterMap [EquivBEq α] [LawfulHashable α] [Nonempty γ]
       ((Const.get? m k).pbind (fun x h' =>
       f (m.getKey k (mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some h'))) x)).getD
         Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filterMap
+  simpa only [Const.getV] using getD_filterMap
 
 /-- Simpler variant of `getD_filterMap` when `LawfulBEq` is available. -/
 @[grind =]
 theorem getD_filterMap' [LawfulBEq α]
     {f : α → β → Option γ} {k : α} {fallback : γ} :
     Const.getD (m.filterMap f) k fallback = ((Const.get? m k).bind (f k)).getD fallback := by
-  simp [getD_filterMap]
+  simp only [getD_filterMap, getKey_eq, Option.pbind_eq_bind]
 
 /-- Simpler variant of `getV_filterMap` when `LawfulBEq` is available. -/
 @[grind =]
 theorem getV_filterMap' [LawfulBEq α] [Nonempty γ]
     {f : α → β → Option γ} {k : α} :
     Const.getV (m.filterMap f) k = ((Const.get? m k).bind (f k)).getD Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filterMap'
+  simpa only [Const.getV] using getD_filterMap'
 
 theorem getD_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : m.getKey? k = some k') :
@@ -4598,7 +4603,7 @@ theorem getD_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
 theorem getV_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Nonempty γ]
     {f : α → β → Option γ} {k k' : α} (h : m.getKey? k = some k') :
     Const.getV (m.filterMap f) k = ((Const.get? m k).bind (f k')).getD Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filterMap_of_getKey?_eq_some h
+  simpa only [Const.getV] using getD_filterMap_of_getKey?_eq_some h
 
 @[grind =]
 theorem getKey?_filterMap [EquivBEq α] [LawfulHashable α]
@@ -4629,7 +4634,7 @@ theorem getKeyV_filterMap [EquivBEq α] [LawfulHashable α] [Nonempty α]
     (m.filterMap f).getKeyV k =
     ((m.getKey? k).pfilter (fun x h' =>
       (f x (Const.get m x (mem_of_getKey?_eq_some h'))).isSome)).getD Classical.ofNonempty  := by
-  simpa [ExtDHashMap.getKeyV] using getKeyD_filterMap
+  simpa only [ExtDHashMap.getKeyV] using getKeyD_filterMap
 
 end Const
 
@@ -4764,7 +4769,7 @@ theorem getKeyV_filter [LawfulBEq α] [Nonempty α]
     (m.filter f).getKeyV k =
     ((m.getKey? k).pfilter (fun x h' =>
       f x (m.get x (mem_of_getKey?_eq_some h')))).getD Classical.ofNonempty  := by
-  simpa [ExtDHashMap.getKeyV] using getKeyD_filter
+  simpa only [ExtDHashMap.getKeyV] using getKeyD_filter
 
 theorem getKeyD_filter_key [EquivBEq α] [LawfulHashable α]
     {f : α → Bool} {k fallback : α} :
@@ -4774,7 +4779,7 @@ theorem getKeyD_filter_key [EquivBEq α] [LawfulHashable α]
 theorem getKeyV_filter_key [EquivBEq α] [LawfulHashable α] [Nonempty α]
     {f : α → Bool} {k : α} :
     (m.filter fun k _ => f k).getKeyV k = ((m.getKey? k).filter f).getD Classical.ofNonempty  := by
-  simpa [ExtDHashMap.getKeyV] using getKeyD_filter_key
+  simpa only [ExtDHashMap.getKeyV] using getKeyD_filter_key
 
 namespace Const
 
@@ -4818,7 +4823,7 @@ theorem get?_filter [EquivBEq α] [LawfulHashable α]
 theorem get?_filter' [LawfulBEq α]
     {f : α → β → Bool} {k : α} :
     Const.get? (m.filter f) k = (Const.get? m k).filter (f k) := by
-  simp [get?_filter]
+  simp only [get?_filter, getKey_eq, Option.pfilter_eq_filter]
 
 theorem get?_filter_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → Bool} {k k' : α} :
@@ -4843,7 +4848,7 @@ theorem get!_filter [EquivBEq α] [LawfulHashable α] [Inhabited β]
 theorem get!_filter' [LawfulBEq α] [Inhabited β]
     {f : α → β → Bool} {k : α} :
     Const.get! (m.filter f) k = ((Const.get? m k).filter (f k)).get! := by
-  simp [get!_filter]
+  simp only [get!_filter, getKey_eq, Option.pfilter_eq_filter]
 
 theorem get!_filter_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Inhabited β]
     {f : α → β → Bool} {k k' : α} :
@@ -4862,21 +4867,21 @@ theorem getV_filter [EquivBEq α] [LawfulHashable α] [Nonempty β]
     Const.getV (m.filter f) k = ((Const.get? m k).pfilter (fun x h' =>
       f (m.getKey k (mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some h'))) x)).getD
         Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filter
+  simpa only [Const.getV] using getD_filter
 
 /-- Simpler variant of `getD_filter` when `LawfulBEq` is available. -/
 @[grind =]
 theorem getD_filter' [LawfulBEq α]
     {f : α → β → Bool} {k : α} {fallback : β} :
     Const.getD (m.filter f) k fallback = ((Const.get? m k).filter (f k)).getD fallback := by
-  simp [getD_filter]
+  simp only [getD_filter, getKey_eq, Option.pfilter_eq_filter]
 
 /-- Simpler variant of `getV_filter` when `LawfulBEq` is available. -/
 @[grind =]
 theorem getV_filter' [LawfulBEq α] [Nonempty β]
     {f : α → β → Bool} {k : α} :
     Const.getV (m.filter f) k = ((Const.get? m k).filter (f k)).getD Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filter'
+  simpa only [Const.getV] using getD_filter'
 
 theorem getD_filter_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → Bool} {k k' : α} {fallback : β} :
@@ -4890,7 +4895,7 @@ theorem getV_filter_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Nonemp
     m.getKey? k = some k' →
       Const.getV (m.filter f) k =
         ((Const.get? m k).filter (fun x => f k' x)).getD Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filter_of_getKey?_eq_some
+  simpa only [Const.getV] using getD_filter_of_getKey?_eq_some
 
 @[grind =] theorem getKey?_filter [EquivBEq α] [LawfulHashable α]
     {f : α → β → Bool} {k : α} :
@@ -4918,7 +4923,7 @@ theorem getKeyV_filter [EquivBEq α] [LawfulHashable α] [Nonempty α]
     (m.filter f).getKeyV k =
     ((m.getKey? k).pfilter (fun x h' =>
       (f x (Const.get m x (mem_of_getKey?_eq_some h'))))).getD Classical.ofNonempty  := by
-  simpa [ExtDHashMap.getKeyV] using getKeyD_filter
+  simpa only [ExtDHashMap.getKeyV] using getKeyD_filter
 
 end Const
 
@@ -5108,7 +5113,7 @@ theorem getV_map' [EquivBEq α] [LawfulHashable α] [Nonempty γ]
       ((get? m k).pmap (fun v h => f (m.getKey k h) v)
         (fun _ h' => mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some h'))).getD
           Classical.ofNonempty := by
-  simpa [Const.getV] using getD_map'
+  simpa only [Const.getV] using getD_map'
 
 theorem getD_map_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → γ} {k k' : α} {fallback : γ} (h : m.getKey? k = some k') :
