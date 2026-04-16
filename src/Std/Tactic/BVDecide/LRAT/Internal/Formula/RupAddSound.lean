@@ -55,7 +55,7 @@ theorem contradiction_of_insertUnit_success {n : Nat} (assignments : Array Assig
           ]
         exact add_both_eq_both l.2
       next l_ne_i =>
-        simpa [Array.getElem_modify_of_ne l_ne_i] using h
+        simp only [Bool.false_eq_true, ↑reduceIte, Array.getElem_modify_of_ne l_ne_i]; exact h
     · apply Exists.intro l.1
       simp only [insertUnit, hl, ite_false, Array.getElem_modify_self, reduceCtorEq]
       simp only [getElem!_def, l_in_bounds, Array.getElem?_eq_getElem,
@@ -629,7 +629,7 @@ theorem confirmRupHint_preserves_motive {n : Nat} (f : DefaultFormula n) (rupHin
     next c hc =>
       have c_in_f : c ∈ toList f := by
         simp only [toList, List.mem_append, List.mem_filterMap, id_eq, exists_eq_right]
-        grind
+        exact Or.inl (Or.inl (Array.mem_toList_iff.mpr (Array.mem_of_getElem? hc)))
       split
       next heq =>
         simp only [ConfirmRupHintFoldEntailsMotive, h1, imp_self, and_self, hsize,
