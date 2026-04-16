@@ -5962,7 +5962,7 @@ theorem get?_filterMap [EquivBEq α] [LawfulHashable α]
 theorem get?_filterMap' [LawfulBEq α]
     {f : α → β → Option γ} {k : α} (h : m.WF) :
     Const.get? (m.filterMap f) k = (Const.get? m k).bind (f k) := by
-  simp [get?_filterMap, h]
+  simp only [get?_filterMap h, getKey_eq h, Option.pbind_eq_bind]
 
 theorem get?_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → Option γ} {k k' : α} (h : m.WF) :
@@ -5998,7 +5998,7 @@ theorem get!_filterMap [EquivBEq α] [LawfulHashable α] [Inhabited γ]
 theorem get!_filterMap' [LawfulBEq α] [Inhabited γ]
     {f : α → β → Option γ} {k : α} (h : m.WF) :
     Const.get! (m.filterMap f) k = ((Const.get? m k).bind (f k)).get! := by
-  simp [get!_filterMap, h]
+  simp only [get!_filterMap h, getKey_eq h, Option.pbind_eq_bind]
 
 theorem get!_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Inhabited γ]
     {f : α → β → Option γ} {k k' : α} (h : m.WF) :
@@ -6018,7 +6018,7 @@ theorem getD_filterMap [EquivBEq α] [LawfulHashable α]
 theorem getD_filterMap' [LawfulBEq α]
     {f : α → β → Option γ} {k : α} {fallback : γ} (h : m.WF) :
     Const.getD (m.filterMap f) k fallback = ((Const.get? m k).bind (f k)).getD fallback := by
-  simp [getD_filterMap, h]
+  simp only [getD_filterMap h, getKey_eq h, Option.pbind_eq_bind]
 
 theorem getD_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : m.WF) :
@@ -6345,7 +6345,7 @@ theorem get?_filter [EquivBEq α] [LawfulHashable α]
 theorem get?_filter' [LawfulBEq α]
     {f : α → β → Bool} {k : α} (h : m.WF) :
     Const.get? (m.filter f) k = (Const.get? m k).filter (f k) := by
-  simp [get?_filter, h]
+  simp only [get?_filter h, getKey_eq h, Option.pfilter_eq_filter]
 
 theorem get?_filter_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → Bool} {k k' : α} (h : m.WF) :
@@ -6370,7 +6370,7 @@ theorem get!_filter [EquivBEq α] [LawfulHashable α] [Inhabited β]
 theorem get!_filter' [LawfulBEq α] [Inhabited β]
     {f : α → β → Bool} {k : α} (h : m.WF) :
     Const.get! (m.filter f) k = ((Const.get? m k).filter (f k)).get! := by
-  simp [get!_filter, h]
+  simp only [get!_filter h, getKey_eq h, Option.pfilter_eq_filter]
 
 theorem get!_filter_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Inhabited β]
     {f : α → β → Bool} {k k' : α} (h : m.WF) :
@@ -6389,7 +6389,7 @@ theorem getD_filter [EquivBEq α] [LawfulHashable α]
 theorem getD_filter' [LawfulBEq α]
     {f : α → β → Bool} {k : α} {fallback : β} (h : m.WF) :
     Const.getD (m.filter f) k fallback = ((Const.get? m k).filter (f k)).getD fallback := by
-  simp [getD_filter, h]
+  simp only [getD_filter h, getKey_eq h, Option.pfilter_eq_filter]
 
 theorem getD_filter_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → Bool} {k k' : α} {fallback : β} (h : m.WF) :
