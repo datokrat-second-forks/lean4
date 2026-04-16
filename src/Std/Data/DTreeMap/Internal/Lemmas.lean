@@ -6526,7 +6526,8 @@ theorem get_alter [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k k' : α}
     (t.alter k f h.balanced).1.get k' hc =
       if heq : compare k k' = .eq then
         haveI h' : (f (t.get? k)).isSome := mem_alter_of_compare_eq h heq |>.mp hc
-        cast (congrArg β (compare_eq_iff_eq.mp heq)) <| (f (t.get? k)).get <| h'
+        haveI : Nonempty (β k) := ⟨(f (t.get? k)).get h'⟩
+        cast (congrArg β (compare_eq_iff_eq.mp heq)) <| (f (t.get? k)).getV
       else
         haveI h' : k' ∈ t := mem_alter_of_not_compare_eq h heq |>.mp hc
         t.get k' h' := by
@@ -6537,7 +6538,8 @@ theorem get_alter! [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k k' : α}
     (t.alter! k f).get k' hc =
       if heq : compare k k' = .eq then
         haveI h' : (f (t.get? k)).isSome := mem_alter!_of_compare_eq h heq |>.mp hc
-        cast (congrArg β (compare_eq_iff_eq.mp heq)) <| (f (t.get? k)).get <| h'
+        haveI : Nonempty (β k) := ⟨(f (t.get? k)).get h'⟩
+        cast (congrArg β (compare_eq_iff_eq.mp heq)) <| (f (t.get? k)).getV
       else
         haveI h' : k' ∈ t := mem_alter!_of_not_compare_eq h heq |>.mp hc
         t.get k' h' := by
@@ -6547,14 +6549,16 @@ theorem get_alter! [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k k' : α}
 theorem get_alter_self [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k : α}
     {f : Option (β k) → Option (β k)} {hc : k ∈ (t.alter k f h.balanced).1} :
     haveI h' : (f (t.get? k)).isSome := mem_alter_self h |>.mp hc
-    (t.alter k f h.balanced).1.get k hc = (f (t.get? k)).get h' := by
+    haveI : Nonempty (β k) := ⟨(f (t.get? k)).get h'⟩
+    (t.alter k f h.balanced).1.get k hc = (f (t.get? k)).getV := by
   simp_to_model [alter, get, get?] using List.getValueCast_alterKey_self
 
 @[simp]
 theorem get_alter!_self [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k : α}
     {f : Option (β k) → Option (β k)} {hc : k ∈ t.alter! k f} :
     haveI h' : (f (t.get? k)).isSome := mem_alter!_self h |>.mp hc
-    (t.alter! k f).get k hc = (f (t.get? k)).get h' := by
+    haveI : Nonempty (β k) := ⟨(f (t.get? k)).get h'⟩
+    (t.alter! k f).get k hc = (f (t.get? k)).getV := by
   simpa only [alter_eq_alter!] using get_alter_self h (hc := by simpa [alter_eq_alter!])
 
 theorem get!_alter [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k k' : α} [Inhabited (β k')]
@@ -6982,7 +6986,8 @@ theorem get_alter [TransOrd α] (h : t.WF) {k k' : α} {f : Option β → Option
     get (alter k f t h.balanced).1 k' hc =
       if heq : compare k k' = .eq then
         haveI h' : (f (get? t k)).isSome := mem_alter_of_compare_eq h heq |>.mp hc
-        (f (get? t k)).get h'
+        haveI : Nonempty β := ⟨(f (get? t k)).get h'⟩
+        (f (get? t k)).getV
       else
         haveI h' : k' ∈ t := mem_alter_of_not_compare_eq h heq |>.mp hc
         get t k' h' := by
@@ -6993,7 +6998,8 @@ theorem get_alter! [TransOrd α] (h : t.WF) {k k' : α} {f : Option β → Optio
     get (alter! k f t) k' hc =
       if heq : compare k k' = .eq then
         haveI h' : (f (get? t k)).isSome := mem_alter!_of_compare_eq h heq |>.mp hc
-        (f (get? t k)).get h'
+        haveI : Nonempty β := ⟨(f (get? t k)).get h'⟩
+        (f (get? t k)).getV
       else
         haveI h' : k' ∈ t := mem_alter!_of_not_compare_eq h heq |>.mp hc
         get t k' h' := by
@@ -7003,14 +7009,16 @@ theorem get_alter! [TransOrd α] (h : t.WF) {k k' : α} {f : Option β → Optio
 theorem get_alter_self [TransOrd α] (h : t.WF) {k : α} {f : Option β → Option β}
     {hc : k ∈ (alter k f t h.balanced).1} :
     haveI h' : (f (get? t k)).isSome := mem_alter_self h |>.mp hc
-    get (alter k f t h.balanced).1 k hc = (f (get? t k)).get h' := by
+    haveI : Nonempty β := ⟨(f (get? t k)).get h'⟩
+    get (alter k f t h.balanced).1 k hc = (f (get? t k)).getV := by
   simp_to_model [Const.alter, Const.get, Const.get?] using List.Const.getValue_alterKey_self
 
 @[simp]
 theorem get_alter!_self [TransOrd α] (h : t.WF) {k : α} {f : Option β → Option β}
     {hc : k ∈ alter! k f t} :
     haveI h' : (f (get? t k)).isSome := mem_alter!_self h |>.mp hc
-    get (alter! k f t) k hc = (f (get? t k)).get h' := by
+    haveI : Nonempty β := ⟨(f (get? t k)).get h'⟩
+    get (alter! k f t) k hc = (f (get? t k)).getV := by
   simpa only [alter_eq_alter!] using get_alter_self h (hc := by simpa [alter_eq_alter!])
 
 theorem get!_alter [TransOrd α] (h : t.WF) {k k' : α} [Inhabited β] {f : Option β → Option β} :

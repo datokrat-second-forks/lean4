@@ -418,7 +418,7 @@ theorem get_get? [LawfulBEq α] {a : α} {h} :
 @[grind =]
 theorem getV_get? [LawfulBEq α] {a : α} {_ : Nonempty (β a)} {h : (m.get? a).isSome} :
     (m.get? a).get h = m.getV a := by
-  rw [get_get?, get_eq_getV]
+  rw [get_get?]; simpa [DHashMap.getV] using get_eq_getD
 
 namespace Const
 
@@ -453,7 +453,7 @@ theorem get_get? [EquivBEq α] [LawfulHashable α] {a : α} {h} :
 theorem getV_get? [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {a : α}
     {h : (Const.get? m a).isSome} :
     (Const.get? m a).get h = Const.getV m a := by
-  rw [get_get?, get_eq_getV]
+  rw [get_get?]; simpa [Const.getV] using get_eq_getD
 
 theorem get_eq_get [LawfulBEq α] {a : α} {h} : get m a h = m.get a h :=
   Raw₀.Const.get_eq_get ⟨m.1, _⟩ m.2
