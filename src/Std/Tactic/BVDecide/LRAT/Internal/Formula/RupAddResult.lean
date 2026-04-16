@@ -75,7 +75,6 @@ def InsertUnitInvariant {n : Nat} (original_assignments : Array Assignment)
     units[j1] = ⟨⟨i.1, ⟨i_gt_zero, i.2⟩⟩, true⟩ ∧ units[j2] = ⟨⟨i.1, ⟨i_gt_zero, i.2⟩⟩, false⟩ ∧
     assignments_i = both ∧ original_assignments_i = unassigned ∧ ∀ k : Fin units.size, k ≠ j1 → k ≠ j2 → units[k].1.1 ≠ i.1)
 
-attribute [-simp] getElem_eq_getElemV in
 theorem insertUnitInvariant_insertUnit {n : Nat} (assignments0 : Array Assignment)
     (assignments0_size : assignments0.size = n) (units : Array (Literal (PosFin n)))
     (assignments : Array Assignment) (assignments_size : assignments.size = n)
