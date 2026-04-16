@@ -38,14 +38,24 @@ namespace Std.DHashMap.Internal
 section empty
 
 @[simp]
+theorem Raw₀.buckets_emptyWithCapacityV {c} {i : Nat} (h : i < (emptyWithCapacity c : Raw₀ α β).1.buckets.size) :
+    (emptyWithCapacity c : Raw₀ α β).1.buckets｢i｣ = AssocList.nil := by
+  simp [emptyWithCapacity, Array.getElemV_replicate (by simpa [emptyWithCapacity] using h)]
+
+@[simp]
 theorem Raw₀.buckets_emptyWithCapacity {c} {i : Nat} {h} :
     (emptyWithCapacity c : Raw₀ α β).1.buckets[i]'h = AssocList.nil := by
-  simp [emptyWithCapacity]
+  simpa using Raw₀.buckets_emptyWithCapacityV h
+
+@[simp]
+theorem Raw.buckets_emptyWithCapacityV {c} {i : Nat} (h : i < (Raw.emptyWithCapacity c : Raw α β).buckets.size) :
+    (Raw.emptyWithCapacity c : Raw α β).buckets｢i｣ = AssocList.nil := by
+  simp [Raw.emptyWithCapacity, Raw₀.buckets_emptyWithCapacityV (by simpa [Raw.emptyWithCapacity] using h)]
 
 @[simp]
 theorem Raw.buckets_emptyWithCapacity {c} {i : Nat} {h} :
     (Raw.emptyWithCapacity c : Raw α β).buckets[i]'h = AssocList.nil := by
-  simp [Raw.emptyWithCapacity]
+  simpa using Raw.buckets_emptyWithCapacityV h
 
 @[simp]
 theorem Raw.buckets_empty {i : Nat} {h} :
@@ -55,9 +65,14 @@ theorem Raw.buckets_empty {i : Nat} {h} :
 variable [BEq α] [Hashable α]
 
 @[simp]
+theorem buckets_emptyWithCapacityV {c} {i : Nat} (h : i < (emptyWithCapacity c : DHashMap α β).1.buckets.size) :
+    (emptyWithCapacity c : DHashMap α β).1.buckets｢i｣ = AssocList.nil := by
+  simp [emptyWithCapacity, Raw.buckets_emptyWithCapacityV (by simpa [emptyWithCapacity] using h)]
+
+@[simp]
 theorem buckets_emptyWithCapacity {c} {i : Nat} {h} :
     (emptyWithCapacity c : DHashMap α β).1.buckets[i]'h = AssocList.nil := by
-  simp [emptyWithCapacity]
+  simpa using buckets_emptyWithCapacityV h
 
 @[simp]
 theorem buckets_empty {i : Nat} {h} :
@@ -266,7 +281,7 @@ theorem size_insert_le [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {k : α} {
 
 @[simp]
 theorem erase_emptyWithCapacity {k : α} {c : Nat} : (emptyWithCapacity c : Raw₀ α β).erase k = emptyWithCapacity c := by
-  simp [erase, emptyWithCapacity]
+  simp [erase]; rfl
 
 theorem isEmpty_erase [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {k : α} :
     (m.erase k).1.isEmpty = (m.1.isEmpty || (m.1.size == 1 && m.contains k)) := by
@@ -468,7 +483,7 @@ end Const
 
 theorem get!_emptyWithCapacity [LawfulBEq α] {a : α} [Inhabited (β a)] {c} :
     (emptyWithCapacity c : Raw₀ α β).get! a = default := by
-  simp [get!, emptyWithCapacity]
+  simp [get!]
 
 theorem get!_of_isEmpty [LawfulBEq α] (h : m.1.WF) {a : α} [Inhabited (β a)] :
     m.1.isEmpty = true → m.get! a = default := by
@@ -513,7 +528,7 @@ variable {β : Type v} (m : Raw₀ α (fun _ => β)) (h : m.1.WF)
 
 theorem get!_emptyWithCapacity [Inhabited β] {a : α} {c} :
     get! (emptyWithCapacity c : Raw₀ α (fun _ => β)) a = default := by
-  simp [get!, emptyWithCapacity]
+  simp [get!]
 
 theorem get!_of_isEmpty [EquivBEq α] [LawfulHashable α] [Inhabited β] (h : m.1.WF) {a : α} :
     m.1.isEmpty = true → get! m a = default := by
@@ -563,7 +578,7 @@ end Const
 
 theorem getD_emptyWithCapacity [LawfulBEq α] {a : α} {fallback : β a} {c} :
     (emptyWithCapacity c : Raw₀ α β).getD a fallback = fallback := by
-  simp [getD, emptyWithCapacity]
+  simp [getD]
 
 theorem getD_of_isEmpty [LawfulBEq α] (h : m.1.WF) {a : α} {fallback : β a} :
     m.1.isEmpty = true → m.getD a fallback = fallback := by
@@ -612,7 +627,7 @@ variable {β : Type v} (m : Raw₀ α (fun _ => β)) (h : m.1.WF)
 
 theorem getD_emptyWithCapacity {a : α} {fallback : β} {c} :
     getD (emptyWithCapacity c : Raw₀ α (fun _ => β)) a fallback = fallback := by
-  simp [getD, emptyWithCapacity]
+  simp [getD]
 
 theorem getD_of_isEmpty [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {a : α} {fallback : β} :
     m.1.isEmpty = true → getD m a fallback = fallback := by
@@ -807,7 +822,7 @@ theorem getKey?_eq_some_getKey [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {a
 
 theorem getKey!_emptyWithCapacity {a : α} [Inhabited α] {c} :
     (emptyWithCapacity c : Raw₀ α β).getKey! a = default := by
-  simp [getKey!, emptyWithCapacity]
+  simp [getKey!]
 
 theorem getKey!_of_isEmpty [EquivBEq α] [LawfulHashable α] [Inhabited α] (h : m.1.WF) {a : α} :
     m.1.isEmpty = true → m.getKey! a = default := by
@@ -856,7 +871,7 @@ theorem getKey!_eq_of_contains [LawfulBEq α] [Inhabited α] (h : m.1.WF) {k : �
 
 theorem getKeyD_emptyWithCapacity {a : α} {fallback : α} {c} :
     (emptyWithCapacity c : Raw₀ α β).getKeyD a fallback = fallback := by
-  simp [getKeyD, emptyWithCapacity]
+  simp [getKeyD]
 
 theorem getKeyD_of_isEmpty [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {a fallback : α} :
     m.1.isEmpty = true → m.getKeyD a fallback = fallback := by
@@ -4169,7 +4184,8 @@ theorem get_alter [LawfulBEq α] (h : m.1.WF) {k k' : α} {f : Option (β k) →
     (m.alter k f).get k' hc =
       if heq : k == k' then
         haveI h' : (f (m.get? k)).isSome := by rwa [contains_alter _ h, if_pos heq] at hc
-        cast (congrArg β (eq_of_beq heq)) <| (f (m.get? k)).get <| h'
+        haveI : Nonempty (β k) := ⟨(f (m.get? k)).get h'⟩
+        cast (congrArg β (eq_of_beq heq)) <| (f (m.get? k)).getV
       else
         haveI h' : m.contains k' := by rwa [contains_alter _ h, if_neg heq] at hc
         m.get k' h' := by
@@ -4178,7 +4194,8 @@ theorem get_alter [LawfulBEq α] (h : m.1.WF) {k k' : α} {f : Option (β k) →
 theorem get_alter_self [LawfulBEq α] (h : m.1.WF) {k : α} {f : Option (β k) → Option (β k)}
     {hc : (m.alter k f).contains k} :
     haveI h' : (f (m.get? k)).isSome := by rwa [contains_alter _ h, beq_self_eq_true] at hc
-    (m.alter k f).get k hc = (f (m.get? k)).get h' := by
+    haveI : Nonempty (β k) := ⟨(f (m.get? k)).get h'⟩
+    (m.alter k f).get k hc = (f (m.get? k)).getV := by
   simp_to_model [alter, get, get?] using List.getValueCast_alterKey_self
 
 theorem get!_alter [LawfulBEq α] {k k' : α} (h : m.1.WF) [Inhabited (β k')]
@@ -4330,7 +4347,8 @@ theorem get_alter (h : m.1.WF) {k k' : α} {f : Option β → Option β}
     Const.get (Const.alter m k f) k' hc =
       if heq : k == k' then
         haveI h' : (f (Const.get? m k)).isSome := by rwa [contains_alter _ h, if_pos heq] at hc
-        (f (Const.get? m k)).get <| h'
+        haveI : Nonempty β := ⟨(f (Const.get? m k)).get h'⟩
+        (f (Const.get? m k)).getV
       else
         haveI h' : m.contains k' := by rwa [contains_alter _ h, if_neg heq] at hc
         Const.get m k' h' := by
@@ -4339,7 +4357,8 @@ theorem get_alter (h : m.1.WF) {k k' : α} {f : Option β → Option β}
 theorem get_alter_self (h : m.1.WF) {k : α} {f : Option β → Option β}
     {hc : (Const.alter m k f).contains k} :
     haveI h' : (f (Const.get? m k)).isSome := by rwa [contains_alter _ h, BEq.refl] at hc
-    Const.get (Const.alter m k f) k hc = (f (Const.get? m k)).get h' := by
+    haveI : Nonempty β := ⟨(f (Const.get? m k)).get h'⟩
+    Const.get (Const.alter m k f) k hc = (f (Const.get? m k)).getV := by
   simp_to_model [Const.alter, Const.get?, Const.get] using List.Const.getValue_alterKey_self
 
 theorem get!_alter {k k' : α} (h : m.1.WF) [Inhabited β] {f : Option β → Option β} :

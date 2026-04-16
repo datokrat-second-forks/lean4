@@ -86,7 +86,7 @@ theorem Bool.or_elim : ∀ (a b : Bool), (a || b) = !(!a && !b) := by decide
 
 theorem BitVec.or_elim (x y : BitVec w) : x ||| y = ~~~(~~~x &&& ~~~y) := by
   ext
-  simp
+  simp_all
 
 attribute [bv_normalize] BitVec.natCast_eq_ofNat
 attribute [bv_normalize] BitVec.append_eq
