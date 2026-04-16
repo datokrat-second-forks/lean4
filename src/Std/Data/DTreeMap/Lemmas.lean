@@ -5567,7 +5567,7 @@ theorem getKey?_minKeyV [TransCmp cmp] [Nonempty α] (he : t.isEmpty = false) :
 
 theorem getKey_minKeyV [TransCmp cmp] [Nonempty α] {hc} :
     t.getKey t.minKeyV hc = t.minKeyV := by
-  simpa [DTreeMap.minKeyV] using getKey_minKeyD
+  simp only [DTreeMap.minKeyV]; exact getKey_minKeyD
 
 theorem getKey!_minKeyV [TransCmp cmp] [Nonempty α] [Inhabited α] (he : t.isEmpty = false) :
     t.getKey! t.minKeyV = t.minKeyV := by
@@ -6409,7 +6409,7 @@ theorem getKey?_maxKeyV [TransCmp cmp] [Nonempty α] (he : t.isEmpty = false) :
 
 theorem getKey_maxKeyV [TransCmp cmp] [Nonempty α] {hc} :
     t.getKey t.maxKeyV hc = t.maxKeyV := by
-  simpa [DTreeMap.maxKeyV] using getKey_maxKeyD
+  simp only [DTreeMap.maxKeyV]; exact getKey_maxKeyD
 
 theorem getKey!_maxKeyV [TransCmp cmp] [Nonempty α] [Inhabited α] (he : t.isEmpty = false) :
     t.getKey! t.maxKeyV = t.maxKeyV := by
@@ -6459,22 +6459,22 @@ theorem maxKeyV_alter_eq_self [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] {k 
 
 theorem maxKeyV_eq_get_maxKey? [TransCmp cmp] [Nonempty α] (he : t.isEmpty = false) :
     t.maxKeyV = t.maxKey?.get (isSome_maxKey?_iff_isEmpty_eq_false.mpr he) := by
-  rw [← maxKey_eq_maxKeyV, maxKey_eq_get_maxKey?]
+  rw [← maxKey_eq_maxKeyV (he := he), maxKey_eq_get_maxKey?]
 
 theorem maxKeyV_erase_eq_iff_not_compare_eq_maxKeyV [TransCmp cmp] [Nonempty α] {k}
     (he : (t.erase k).isEmpty = false) :
     (t.erase k).maxKeyV = t.maxKeyV ↔ ¬ cmp k t.maxKeyV = .eq := by
-  haveI : Nonempty α := ‹_›
-  rw [← maxKey_eq_maxKeyV (he := he), ← maxKey_eq_maxKeyV (he := isEmpty_eq_false_of_isEmpty_erase_eq_false he)]
+  rw [← maxKey_eq_maxKeyV (he := he),
+    ← maxKey_eq_maxKeyV (he := isEmpty_eq_false_of_isEmpty_erase_eq_false he)]
   exact maxKey_erase_eq_iff_not_compare_eq_maxKey
 
 theorem maxKeyV_eq_getLast_keys [TransCmp cmp] [Nonempty α] (he : t.isEmpty = false) :
     t.maxKeyV = t.keys.getLast (List.isEmpty_eq_false_iff.mp <| isEmpty_keys ▸ he) := by
-  rw [← maxKey_eq_maxKeyV, maxKey_eq_getLast_keys]
+  rw [← maxKey_eq_maxKeyV (he := he), maxKey_eq_getLast_keys]
 
 theorem maxKeyV_eq_back_keysArray [TransCmp cmp] [Nonempty α] (he : t.isEmpty = false) :
     t.maxKeyV = t.keysArray.back (Nat.zero_lt_of_ne_zero (by simpa [size_keysArray, isEmpty_eq_size_eq_zero, - Array.size_eq_zero_iff] using he)) := by
-  rw [← maxKey_eq_maxKeyV, maxKey_eq_back_keysArray]
+  rw [← maxKey_eq_maxKeyV (he := he), maxKey_eq_back_keysArray]
 
 theorem maxKeyV_eq_maxKeyD_classicalOfNonempty [TransCmp cmp] [Nonempty α] :
     t.maxKeyV = t.maxKeyD Classical.ofNonempty :=
@@ -7571,7 +7571,7 @@ theorem getKeyV_filterMap [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α]
     (t.filterMap f).getKeyV k =
     ((t.getKey? k).pfilter (fun x h' =>
       (f x (t.get x (mem_of_getKey?_eq_some h'))).isSome)).getD Classical.ofNonempty := by
-  simpa [DTreeMap.getKeyV] using getKeyD_filterMap
+  simp only [DTreeMap.getKeyV]; exact getKeyD_filterMap
 
 namespace Const
 
@@ -7738,7 +7738,7 @@ theorem getKeyV_filterMap [TransCmp cmp] [Nonempty α]
     (t.filterMap f).getKeyV k =
     ((t.getKey? k).pfilter (fun x h' =>
       (f x (Const.get t x (mem_of_getKey?_eq_some h'))).isSome)).getD Classical.ofNonempty := by
-  simpa [DTreeMap.getKeyV] using getKeyD_filterMap
+  simp only [DTreeMap.getKeyV]; exact getKeyD_filterMap
 
 end Const
 
@@ -7923,7 +7923,7 @@ theorem getKeyV_filter [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α]
     (t.filter f).getKeyV k =
     ((t.getKey? k).pfilter (fun x h' =>
       f x (t.get x (mem_of_getKey?_eq_some h')))).getD Classical.ofNonempty := by
-  simpa [DTreeMap.getKeyV] using getKeyD_filter
+  simp only [DTreeMap.getKeyV]; exact getKeyD_filter
 
 theorem getKeyD_filter_key [TransCmp cmp]
     {f : α → Bool} {k fallback : α} :
@@ -7933,7 +7933,7 @@ theorem getKeyD_filter_key [TransCmp cmp]
 theorem getKeyV_filter_key [TransCmp cmp] [Nonempty α]
     {f : α → Bool} {k : α} :
     (t.filter fun k _ => f k).getKeyV k = ((t.getKey? k).filter f).getD Classical.ofNonempty := by
-  simpa [DTreeMap.getKeyV] using getKeyD_filter_key
+  simp only [DTreeMap.getKeyV]; exact getKeyD_filter_key
 
 namespace Const
 
@@ -8106,7 +8106,7 @@ theorem getKeyV_filter [TransCmp cmp] [Nonempty α]
     (t.filter f).getKeyV k =
     ((t.getKey? k).pfilter (fun x h' =>
       (f x (Const.get t x (mem_of_getKey?_eq_some h'))))).getD Classical.ofNonempty := by
-  simpa [DTreeMap.getKeyV] using getKeyD_filter
+  simp only [DTreeMap.getKeyV]; exact getKeyD_filter
 
 end Const
 
