@@ -6521,7 +6521,7 @@ theorem entryAtIdx_eq_entryAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
   have : Impl.entryAtIdx t.inner t.wf.balanced n h =
       t.inner.entryAtIdxD n Classical.ofNonempty := by
     rw [Impl.entryAtIdxD_eq_getD_entryAtIdx?,
-      ← Impl.entryAtIdx?_eq_some_entryAtIdx t.wf.balanced, Option.getD_some]
+      Impl.entryAtIdx?_eq_some_entryAtIdx t.wf.balanced, Option.getD_some]
   simpa [DTreeMap.entryAtIdxV] using this
 
 @[simp, grind norm]
@@ -6533,7 +6533,7 @@ theorem keyAtIdx_eq_keyAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
   have : Impl.keyAtIdx t.inner t.wf.balanced n h =
       t.inner.keyAtIdxD n Classical.ofNonempty := by
     rw [Impl.keyAtIdxD_eq_getD_keyAtIdx?, Impl.keyAtIdx?_eq_entryAtIdx?,
-      ← Impl.entryAtIdx?_eq_some_entryAtIdx t.wf.balanced, Option.map_some,
+      Impl.entryAtIdx?_eq_some_entryAtIdx t.wf.balanced, Option.map_some,
       Impl.keyAtIdx_eq_entryAtIdx_fst, Option.getD_some]
   simpa [DTreeMap.keyAtIdxV] using this
 
