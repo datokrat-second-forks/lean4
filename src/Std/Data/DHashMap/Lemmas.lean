@@ -1318,8 +1318,8 @@ theorem getKey?_insertIfNew [EquivBEq α] [LawfulHashable α] {k a : α} {v : β
 theorem getKey_insertIfNew [EquivBEq α] [LawfulHashable α] {k a : α} {v : β k} {h₁} :
     getKey (m.insertIfNew k v) a h₁ =
       if h₂ : k == a ∧ ¬k ∈ m then k else getKey m a (mem_of_mem_insertIfNew' h₁ h₂) := by
-  simp [← contains_iff_mem]
-  exact Raw₀.getKey_insertIfNew ⟨m.1, _⟩ m.2
+  haveI : Nonempty α := ⟨a⟩; simp [← contains_iff_mem]
+  exact Raw₀.getKeyV_insertIfNew ⟨m.1, _⟩ m.2
 
 @[grind =]
 theorem getKey!_insertIfNew [EquivBEq α] [LawfulHashable α] [Inhabited α] {k a : α} {v : β k} :
@@ -4330,7 +4330,8 @@ theorem get_alter [LawfulBEq α] {k k' : α} {f : Option (β k) → Option (β k
     (m.alter k f).get k' h =
       if heq : k == k' then
         haveI h' : (f (m.get? k)).isSome := mem_alter_of_beq heq |>.mp h
-        cast (congrArg β (eq_of_beq heq)) <| (f (m.get? k)).get <| h'
+        haveI : Nonempty (β k) := ⟨(f (m.get? k)).get h'⟩
+        cast (congrArg β (eq_of_beq heq)) <| (f (m.get? k)).getV
       else
         haveI h' : k' ∈ m := mem_alter_of_beq_eq_false (Bool.not_eq_true _ ▸ heq) |>.mp h
         m.get k' h' :=
@@ -4339,7 +4340,8 @@ theorem get_alter [LawfulBEq α] {k k' : α} {f : Option (β k) → Option (β k
 theorem get_alter_self [LawfulBEq α] {k : α} {f : Option (β k) → Option (β k)}
     {h : k ∈ m.alter k f} :
     haveI h' : (f (m.get? k)).isSome := mem_alter_self.mp h
-    (m.alter k f).get k h = (f (m.get? k)).get h' :=
+    haveI : Nonempty (β k) := ⟨(f (m.get? k)).get h'⟩
+    (m.alter k f).get k h = (f (m.get? k)).getV :=
   Raw₀.get_alter_self ⟨m.1, _⟩ m.2
 
 @[grind =]

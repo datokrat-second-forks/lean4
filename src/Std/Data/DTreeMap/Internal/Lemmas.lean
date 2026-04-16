@@ -8002,8 +8002,8 @@ theorem minKey_eq_head_keys [TransOrd α] (h : t.WF) {he} :
 
 theorem minKey_eq_getElem_keysArray [TransOrd α] (h : t.WF) {he} :
     t.minKey he = t.keysArray[0]'(Nat.zero_lt_of_ne_zero (by simpa [size_keysArray h, isEmpty_eq_size_eq_zero h] using he)) := by
-  simp [minKey_eq_head_keys h, List.head_eq_iff_head?_eq_some, ← toList_keysArray, List.head?_eq_getElem?, Array.getElem?_toList,
-    getElem?_eq_some_getElem_iff]
+  simp only [minKey_eq_head_keys h, List.head_eq_iff_head?_eq_some, ← toList_keysArray,
+    List.head?_eq_getElem?, Array.getElem?_toList, getElem?_eq_some_getElem_iff]
 
 theorem minKey_modify [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k f he} :
     (t.modify k f).minKey he = t.minKey (isEmpty_modify h ▸ he):= by
