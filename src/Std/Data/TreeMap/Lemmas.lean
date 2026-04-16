@@ -4809,8 +4809,11 @@ theorem maxEntry_eq_maxEntryV [TransCmp cmp] {he : t.isEmpty = false} :
     haveI : Nonempty (α × β) := ⟨t.maxEntry he⟩
     t.maxEntry he = t.maxEntryV := by
   haveI : Nonempty (α × β) := ⟨t.maxEntry he⟩
-  show TreeMap.maxEntry t he = TreeMap.maxEntryV t
-  simp [TreeMap.maxEntryV, TreeMap.maxEntry]
+  letI : Ord α := ⟨cmp⟩
+  simp only [TreeMap.maxEntryV, TreeMap.maxEntry, TreeMap.maxEntryD,
+    DTreeMap.Const.maxEntry, DTreeMap.Const.maxEntryD]
+  rw [DTreeMap.Internal.Impl.Const.maxEntryD_eq_getD_maxEntry?,
+    ← DTreeMap.Internal.Impl.Const.some_maxEntry_eq_maxEntry? (he := he), Option.getD_some]
 
 end Max
 
@@ -4835,33 +4838,49 @@ theorem keyAtIdx_eq_keyAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
 theorem getEntryGE_eq_getEntryGEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty (α × β) := ⟨t.getEntryGE k h⟩
     t.getEntryGE k h = t.getEntryGEV k := by
-  haveI : Nonempty (α × β) := ⟨t.getEntryGE k h⟩
-  show TreeMap.getEntryGE t k h = TreeMap.getEntryGEV t k
-  simp [TreeMap.getEntryGEV, TreeMap.getEntryGE]
+  letI : Ord α := ⟨cmp⟩; haveI : Nonempty (α × β) := ⟨t.getEntryGE k h⟩
+  simp only [TreeMap.getEntryGEV, TreeMap.getEntryGE, TreeMap.getEntryGED,
+    DTreeMap.Const.getEntryGE, DTreeMap.Const.getEntryGED,
+    DTreeMap.Internal.Impl.Const.getEntryGED_eq_getD_getEntryGE?,
+    DTreeMap.Internal.Impl.Const.getEntryGE_eq t.inner.wf.ordered,
+    DTreeMap.Internal.Impl.Const.getEntryGE?_eq_map]
+  rw [← DTreeMap.Internal.Impl.some_getEntryGE_eq_getEntryGE?, Option.map_some, Option.getD_some]
 
 @[simp, grind norm]
 theorem getEntryGT_eq_getEntryGTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty (α × β) := ⟨t.getEntryGT k h⟩
     t.getEntryGT k h = t.getEntryGTV k := by
-  haveI : Nonempty (α × β) := ⟨t.getEntryGT k h⟩
-  show TreeMap.getEntryGT t k h = TreeMap.getEntryGTV t k
-  simp [TreeMap.getEntryGTV, TreeMap.getEntryGT]
+  letI : Ord α := ⟨cmp⟩; haveI : Nonempty (α × β) := ⟨t.getEntryGT k h⟩
+  simp only [TreeMap.getEntryGTV, TreeMap.getEntryGT, TreeMap.getEntryGTD,
+    DTreeMap.Const.getEntryGT, DTreeMap.Const.getEntryGTD,
+    DTreeMap.Internal.Impl.Const.getEntryGTD_eq_getD_getEntryGT?,
+    DTreeMap.Internal.Impl.Const.getEntryGT_eq t.inner.wf.ordered,
+    DTreeMap.Internal.Impl.Const.getEntryGT?_eq_map]
+  rw [← DTreeMap.Internal.Impl.some_getEntryGT_eq_getEntryGT?, Option.map_some, Option.getD_some]
 
 @[simp, grind norm]
 theorem getEntryLE_eq_getEntryLEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty (α × β) := ⟨t.getEntryLE k h⟩
     t.getEntryLE k h = t.getEntryLEV k := by
-  haveI : Nonempty (α × β) := ⟨t.getEntryLE k h⟩
-  show TreeMap.getEntryLE t k h = TreeMap.getEntryLEV t k
-  simp [TreeMap.getEntryLEV, TreeMap.getEntryLE]
+  letI : Ord α := ⟨cmp⟩; haveI : Nonempty (α × β) := ⟨t.getEntryLE k h⟩
+  simp only [TreeMap.getEntryLEV, TreeMap.getEntryLE, TreeMap.getEntryLED,
+    DTreeMap.Const.getEntryLE, DTreeMap.Const.getEntryLED,
+    DTreeMap.Internal.Impl.Const.getEntryLED_eq_getD_getEntryLE?,
+    DTreeMap.Internal.Impl.Const.getEntryLE_eq t.inner.wf.ordered,
+    DTreeMap.Internal.Impl.Const.getEntryLE?_eq_map]
+  rw [← DTreeMap.Internal.Impl.some_getEntryLE_eq_getEntryLE?, Option.map_some, Option.getD_some]
 
 @[simp, grind norm]
 theorem getEntryLT_eq_getEntryLTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty (α × β) := ⟨t.getEntryLT k h⟩
     t.getEntryLT k h = t.getEntryLTV k := by
-  haveI : Nonempty (α × β) := ⟨t.getEntryLT k h⟩
-  show TreeMap.getEntryLT t k h = TreeMap.getEntryLTV t k
-  simp [TreeMap.getEntryLTV, TreeMap.getEntryLT]
+  letI : Ord α := ⟨cmp⟩; haveI : Nonempty (α × β) := ⟨t.getEntryLT k h⟩
+  simp only [TreeMap.getEntryLTV, TreeMap.getEntryLT, TreeMap.getEntryLTD,
+    DTreeMap.Const.getEntryLT, DTreeMap.Const.getEntryLTD,
+    DTreeMap.Internal.Impl.Const.getEntryLTD_eq_getD_getEntryLT?,
+    DTreeMap.Internal.Impl.Const.getEntryLT_eq t.inner.wf.ordered,
+    DTreeMap.Internal.Impl.Const.getEntryLT?_eq_map]
+  rw [← DTreeMap.Internal.Impl.some_getEntryLT_eq_getEntryLT?, Option.map_some, Option.getD_some]
 
 @[simp, grind norm]
 theorem getKeyGE_eq_getKeyGEV [TransCmp cmp] {k : α} {h} :
