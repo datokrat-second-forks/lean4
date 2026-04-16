@@ -2290,7 +2290,7 @@ theorem minKey?_eq_minKey? {_ : Ord α} [TransOrd α] {l : Impl α β} (hlo : l.
 theorem minKey_eq_minKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {l : Impl α β}
     (hlo : l.Ordered) {he} :
     l.minKey he = List.minKey l.toListModel (isEmpty_eq_isEmpty ▸ he) := by
-  simp [minKey_eq_get_minKey?, minKey_eq_minEntry_fst, minEntry_eq_get_minEntry?,
+  simp only [minKey_eq_get_minKey?, minKey_eq_minEntry_fst, minEntry_eq_get_minEntry?,
     minEntry?_eq_minEntry? hlo, List.minKey?, Option.get_map]
 
 theorem minKey!_eq_minKey! [Ord α] [TransOrd α] [Inhabited α] [BEq α] [LawfulBEqOrd α]

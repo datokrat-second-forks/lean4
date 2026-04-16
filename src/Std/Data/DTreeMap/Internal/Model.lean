@@ -525,7 +525,7 @@ theorem get_eq_get? [Ord α] [OrientedOrd α] [LawfulEqOrd α] (k : α) (l : Imp
 theorem get_eq_getₘ [Ord α] [OrientedOrd α] [LawfulEqOrd α] (k : α) (l : Impl α β) {h} (h') :
     l.get k h = l.getₘ k h' := by
   apply Option.some.inj
-  simp [get_eq_get?, get?_eq_get?ₘ, getₘ]
+  simp [get_eq_get?, get?_eq_get?ₘ, getₘ, Option.some_getV, h']
 
 theorem get!_eq_get!ₘ [Ord α] [OrientedOrd α] [LawfulEqOrd α] (k : α) [Inhabited (β k)] (l : Impl α β) :
     l.get! k = l.get!ₘ k := by
@@ -569,7 +569,7 @@ theorem getEntry_eq_getEntry? [Ord α] (k : α) (l : Impl α β) {h} :
 theorem getEntry_eq_getEntryₘ [Ord α] (k : α) (l : Impl α β) {h} (h') :
     l.getEntry k h = l.getEntryₘ k h' := by
   apply Option.some.inj
-  simp [getEntry_eq_getEntry?, getEntry?_eq_getEntry?ₘ, getEntryₘ]
+  simp [getEntry_eq_getEntry?, getEntry?_eq_getEntry?ₘ, getEntryₘ, Option.some_getV, h']
 
 theorem getEntry!_eq_getEntry!ₘ [Ord α] [Inhabited ((a : α) × (β a))] (k : α) (l : Impl α β) :
     l.getEntry! k = l.getEntry!ₘ k := by
@@ -597,7 +597,7 @@ theorem getKey_eq_getKey? [Ord α] (k : α) (l : Impl α β) {h} :
 theorem getKey_eq_getKeyₘ [Ord α] (k : α) (l : Impl α β) {h} (h') :
     l.getKey k h = l.getKeyₘ k h' := by
   apply Option.some.inj
-  simp [getKey_eq_getKey?, getKey?_eq_getKey?ₘ, getKeyₘ]
+  simp [getKey_eq_getKey?, getKey?_eq_getKey?ₘ, getKeyₘ, Option.some_getV, h']
 
 theorem getKey!_eq_getKey!ₘ [Ord α] (k : α) [Inhabited α] (l : Impl α β) :
     l.getKey! k = l.getKey!ₘ k := by
@@ -925,7 +925,7 @@ theorem get_eq_get? [Ord α] (k : α) (l : Impl α (fun _ => β)) {h} :
 theorem get_eq_getₘ [Ord α] (k : α) (l : Impl α (fun _ => β)) {h} (h') :
     get l k h = getₘ l k h' := by
   apply Option.some.inj
-  simp [get_eq_get?, get?_eq_get?ₘ, getₘ]
+  simp [get_eq_get?, get?_eq_get?ₘ, getₘ, Option.some_getV, h']
 
 theorem get!_eq_get!ₘ [Ord α] (k : α) [Inhabited β] (l : Impl α (fun _ => β)) :
     get! l k = get!ₘ l k := by
