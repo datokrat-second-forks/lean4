@@ -35,7 +35,7 @@ theorem denote_blastReverse (aig : AIG α) (target : RefVec aig w)
           =
         ⟦aig, target.get (w - 1 - idx) (by omega), assign⟧ := by
   intro idx hidx
-  simp [blastReverse, AIG.RefVec.get]
+  simp (config := { decide := false }) [-getElem_eq_getElemV, blastReverse, AIG.RefVec.get]
 
 
 end bitblast
