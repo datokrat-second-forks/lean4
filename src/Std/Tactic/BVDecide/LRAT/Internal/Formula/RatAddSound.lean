@@ -423,22 +423,38 @@ theorem existsRatHint_of_ratHintsExhaustive {n : Nat} (f : DefaultFormula n)
     rw [Array.mem_toList_iff]
     rw [Array.mem_filter]
     constructor
-    · exact Array.mem_toList_iff.mpr (Array.mem_of_getElem? (by rwa [← Array.getElem?_toList]))
-    · split
+    · simp only [getElem_eq_getElemV, Array.getElemV_range i_lt_f_clauses_size]
+      exact Array.mem_range.mpr i_lt_f_clauses_size
+    · simp only [getElem_eq_getElemV, Array.getElemV_range i_lt_f_clauses_size]
+      split
       next heq =>
-        -- heq : f.clauses[(Array.range ..)[i]]! = none contradicts c'_in_f
-        rw [getElem_eq_getElemV, Array.getElemV_range i_lt_f_clauses_size] at heq
-        simp only [getElem!_pos _ _ i_lt_f_clauses_size, getElem_eq_getElemV,
-          Array.getElemV_toList] at heq c'_in_f
+        -- heq : f.clauses[i]! = none contradicts c'_in_f
+        exfalso
+        rw [show f.clauses[i]! = getElemV f.clauses i from
+          getElem!_eq_getElemV f.clauses i i_lt_f_clauses_size] at heq
+        rw [← Array.getElemV_toList] at heq
+        simp only [getElem_eq_getElemV] at c'_in_f
         rw [heq] at c'_in_f; simp at c'_in_f
-      · simp [Clause.toList] at negPivot_in_c'
-        grind [contains_iff]
+      next c heq =>
+        have : c = c' := by
+          rw [show f.clauses[i]! = getElemV f.clauses i from
+            getElem!_eq_getElemV f.clauses i i_lt_f_clauses_size] at heq
+          rw [← Array.getElemV_toList] at heq
+          simp only [getElem_eq_getElemV] at c'_in_f
+          rw [c'_in_f] at heq; exact Option.some.inj heq.symm
+        subst this; exact (Clause.contains_iff c (Literal.negate pivot)).2 negPivot_in_c'
   rcases List.get_of_mem h with ⟨j, h'⟩
   have j_in_bounds : j < ratHints.size := by
     have j_property := j.2
     grind
   exists ⟨j.1, j_in_bounds⟩
-  grind
+  simp only [List.get_eq_getElem, Array.getElem_toList, Array.getElem_map] at h'
+  simp only [Fin.getElem_fin, getElem_eq_getElemV] at h' |-
+  rw [h']
+  rw [getElem!_eq_getElemV f.clauses i i_lt_f_clauses_size]
+  simp only [getElem_eq_getElemV] at c'_in_f
+  rw [Array.getElemV_toList] at c'_in_f
+  exact c'_in_f
 
 theorem performRatCheck_success_of_performRatCheck_fold_success {n : Nat} (f : DefaultFormula n)
     (hf : f.ratUnits = #[] ∧ f.assignments.size = n) (p : Literal (PosFin n))
