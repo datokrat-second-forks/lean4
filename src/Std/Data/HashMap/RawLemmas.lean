@@ -1336,48 +1336,52 @@ theorem all_eq_false_iff_exists_mem_getElem [LawfulBEq α] {p : α → β → Bo
 theorem any_eq_true_iff_exists_mem_getKeyV_getElemV [LawfulHashable α] [EquivBEq α]
     [Nonempty α] [Nonempty β] {p : α → β → Bool} (h : m.WF) :
     m.any p = true ↔ ∃ (a : α), a ∈ m ∧ p (m.getKeyV a) (m｢a｣) := by
-  simp_all only [getElem_eq_getElemV]
+  rw [any_eq_true_iff_exists_mem_getKey_getElem h]
+  simp_all only [getElem_eq_getElemV, getKey_eq_getKeyV]
   constructor <;> rintro ⟨a, h, hp⟩ <;> exact ⟨a, h, hp⟩
 
 theorem any_eq_true_iff_exists_mem_getElemV [LawfulBEq α]
     [Nonempty β] {p : α → β → Bool} (h : m.WF) :
     m.any p = true ↔ ∃ (a : α), a ∈ m ∧ p a (m｢a｣) := by
+  rw [any_eq_true_iff_exists_mem_getElem h]
   simp_all only [getElem_eq_getElemV]
   constructor <;> rintro ⟨a, h, hp⟩ <;> exact ⟨a, h, hp⟩
 
 theorem any_eq_false_iff_forall_mem_getKeyV_getElemV [LawfulHashable α] [EquivBEq α]
     [Nonempty α] [Nonempty β] {p : α → β → Bool} (h : m.WF) :
     m.any p = false ↔ ∀ (a : α), a ∈ m → p (m.getKeyV a) (m｢a｣) = false := by
+  rw [any_eq_false_iff_forall_mem_getKey_getElem h]
   simp_all only [getElem_eq_getElemV, getKey_eq_getKeyV]
-  exact any_eq_false_iff_forall_mem_getKey_getElem h
 
 theorem any_eq_false_iff_forall_mem_getElemV [LawfulBEq α]
     [Nonempty β] {p : α → β → Bool} (h : m.WF) :
     m.any p = false ↔ ∀ (a : α), a ∈ m → p a (m｢a｣) = false := by
+  rw [any_eq_false_iff_forall_mem_getElem h]
   simp_all only [getElem_eq_getElemV]
-  exact any_eq_false_iff_forall_mem_getElem h
 
 theorem all_eq_true_iff_forall_mem_getKeyV_getElemV [EquivBEq α] [LawfulHashable α]
     [Nonempty α] [Nonempty β] {p : α → β → Bool} (h : m.WF) :
     m.all p = true ↔ ∀ (a : α), a ∈ m → p (m.getKeyV a) (m｢a｣) := by
+  rw [all_eq_true_iff_forall_mem_getKey_getElem h]
   simp_all only [getElem_eq_getElemV, getKey_eq_getKeyV]
-  exact all_eq_true_iff_forall_mem_getKey_getElem h
 
 theorem all_eq_true_iff_forall_mem_getElemV [LawfulBEq α]
     [Nonempty β] {p : α → β → Bool} (h : m.WF) :
     m.all p = true ↔ ∀ (a : α), a ∈ m → p a (m｢a｣) := by
+  rw [all_eq_true_iff_forall_mem_getElem h]
   simp_all only [getElem_eq_getElemV]
-  exact all_eq_true_iff_forall_mem_getElem h
 
 theorem all_eq_false_iff_exists_mem_getKeyV_getElemV [EquivBEq α] [LawfulHashable α]
     [Nonempty α] [Nonempty β] {p : α → β → Bool} (h : m.WF) :
     m.all p = false ↔ ∃ (a : α), a ∈ m ∧ p (m.getKeyV a) (m｢a｣) = false := by
-  simp_all only [getElem_eq_getElemV]
+  rw [all_eq_false_iff_exists_mem_getKey_getElem h]
+  simp_all only [getElem_eq_getElemV, getKey_eq_getKeyV]
   constructor <;> rintro ⟨a, h, hp⟩ <;> exact ⟨a, h, hp⟩
 
 theorem all_eq_false_iff_exists_mem_getElemV [LawfulBEq α]
     [Nonempty β] {p : α → β → Bool} (h : m.WF) :
     m.all p = false ↔ ∃ (a : α), a ∈ m ∧ p a (m｢a｣) = false := by
+  rw [all_eq_false_iff_exists_mem_getElem h]
   simp_all only [getElem_eq_getElemV]
   constructor <;> rintro ⟨a, h, hp⟩ <;> exact ⟨a, h, hp⟩
 
