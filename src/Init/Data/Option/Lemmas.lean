@@ -70,6 +70,9 @@ theorem getD_eq_iff {o : Option α} {a b} : o.getD a = b ↔ (o = some b ∨ o =
 theorem get_eq_get! [Inhabited α] : (o : Option α) → {h : o.isSome} → o.get h = o.get!
   | some _, _ => rfl
 
+theorem getV_eq_get! [Inhabited α] : {o : Option α} → (h : o.isSome) → o.getV = o.get!
+  | some _, _ => rfl
+
 @[simp, grind norm]
 theorem get_eq_getV : (o : Option α) → {h : o.isSome} → haveI : Nonempty α := ⟨o.get h⟩; o.get h = o.getV
   | some _, _ => (rfl)
@@ -86,8 +89,13 @@ theorem some_getV : (o : Option α) → (h : o.isSome) → haveI : Nonempty α :
 
 theorem get!_eq_getD [Inhabited α] (o : Option α) : o.get! = o.getD default := rfl
 
-theorem getV_eq_getD {_ : Nonempty α} (o : Option α) :
+theorem getV_eq_getD_ofNonempty {_ : Nonempty α} (o : Option α) :
     o.getV = o.getD Classical.ofNonempty := (rfl)
+
+theorem getV_eq_getD (o : Option α) {fallback : α} (h : o.isSome) :
+    haveI : Nonempty α := ⟨fallback⟩
+    o.getV = o.getD fallback := by
+  simp only [← get_eq_getV (h := h), get_eq_getD (fallback := fallback)]
 
 @[simp, grind =]
 theorem getV_getElem? [Nonempty elem] [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom] [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom]
@@ -174,8 +182,12 @@ theorem not_comp_isNone : (!·) ∘ @Option.isNone α = Option.isSome := by
   funext x
   simp
 
-theorem eq_some_iff_get_eq : o = some a ↔ ∃ h : o.isSome, o.get h = a := by
+theorem eq_some_iff_getV_eq :
+    o = some a ↔ ∃ h : o.isSome, haveI : Nonempty _ := ⟨o.get h⟩; o.getV = a := by
   cases o <;> simp
+
+theorem eq_some_iff_get_eq : o = some a ↔ ∃ h : o.isSome, o.get h = a := by
+  simpa using eq_some_iff_getV_eq
 
 theorem eq_some_of_isSome : ∀ {o : Option α} (h : o.isSome), o = some (o.get h)
   | some _, _ => rfl
