@@ -543,7 +543,7 @@ def mkGate (aig : AIG α) (input : BinaryInput aig) : Entrypoint α :=
       simp [← hl, ← hr]
       omega
   have hzero := by simp [decls]
-  have hconst := by simp [decls, Array.getElemV_push, aig.hzero, aig.hconst]
+  have hconst : decls[0]'hzero = .false := by simp only [decls, Array.getElem_push, aig.hzero, ↓reduceDIte, aig.hconst]
   ⟨⟨decls, cache, hdag, hzero, hconst⟩, ⟨g, false, by simp [g, decls]⟩⟩
 
 /--
@@ -561,7 +561,7 @@ def mkAtom (aig : AIG α) (n : α) : Entrypoint α :=
     · apply aig.hdag <;> assumption
     · contradiction
   have hzero := by simp [decls]
-  have hconst := by simp [decls, Array.getElemV_push, aig.hzero, aig.hconst]
+  have hconst : decls[0]'hzero = .false := by simp only [decls, Array.getElem_push, aig.hzero, ↓reduceDIte, aig.hconst]
   ⟨⟨decls, cache, hdag, hzero, hconst⟩, ⟨g, false, by simp [g, decls]⟩⟩
 
 /--
@@ -579,7 +579,7 @@ def mkConst (aig : AIG α) (val : Bool) : Entrypoint α :=
     · apply aig.hdag <;> assumption
     · contradiction
   have hzero := by simp [decls]
-  have hconst := by simp [decls, Array.getElemV_push, aig.hzero, aig.hconst]
+  have hconst : decls[0]'hzero = .false := by simp only [decls, Array.getElem_push, aig.hzero, ↓reduceDIte, aig.hconst]
   ⟨⟨decls, cache, hdag, hzero, hconst⟩, ⟨g, val, by simp [g, decls]⟩⟩
 
 /--
