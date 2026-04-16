@@ -415,11 +415,6 @@ theorem get_get? [LawfulBEq α] {a : α} {h} :
     (m.get? a).get h = m.get a (mem_iff_isSome_get?.mpr h) :=
   get_eq_get_get?.symm
 
-@[grind =]
-theorem getV_get? [LawfulBEq α] {a : α} {_ : Nonempty (β a)} {h : (m.get? a).isSome} :
-    (m.get? a).get h = m.getV a := by
-  rw [get_get?]; simpa [DHashMap.getV] using get_eq_getD
-
 namespace Const
 
 variable {β : Type v} {m : DHashMap α (fun _ => β)}
@@ -448,12 +443,6 @@ theorem get_eq_get_get? [EquivBEq α] [LawfulHashable α] {a : α} {h} :
 theorem get_get? [EquivBEq α] [LawfulHashable α] {a : α} {h} :
     (get? m a).get h = get m a (mem_iff_isSome_get?.mpr h) :=
   get_eq_get_get?.symm
-
-@[grind =]
-theorem getV_get? [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {a : α}
-    {h : (Const.get? m a).isSome} :
-    (Const.get? m a).get h = Const.getV m a := by
-  rw [get_get?]; simpa [Const.getV] using get_eq_getD
 
 theorem get_eq_get [LawfulBEq α] {a : α} {h} : get m a h = m.get a h :=
   Raw₀.Const.get_eq_get ⟨m.1, _⟩ m.2
@@ -708,6 +697,11 @@ theorem getV_eq_get [LawfulBEq α] {a : α} {_ : Nonempty (β a)} (h : a ∈ m) 
     m.getV a = m.get a h :=
   (get_eq_getV).symm
 
+@[grind =]
+theorem getV_get? [LawfulBEq α] {a : α} {_ : Nonempty (β a)} {h : (m.get? a).isSome} :
+    (m.get? a).get h = m.getV a := by
+  rw [get_get?, get_eq_getV]
+
 namespace Const
 
 variable {β : Type v} {m : DHashMap α (fun _ => β)}
@@ -835,6 +829,12 @@ theorem get_eq_getV [EquivBEq α] [LawfulHashable α] {a : α} {h} :
 theorem getV_eq_get [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {a : α} (h : a ∈ m) :
     Const.getV m a = Const.get m a h :=
   (get_eq_getV).symm
+
+@[grind =]
+theorem getV_get? [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {a : α}
+    {h : (Const.get? m a).isSome} :
+    (Const.get? m a).get h = Const.getV m a := by
+  rw [get_get?, get_eq_getV]
 
 @[simp, grind norm]
 theorem getV_eq_getV [LawfulBEq α] [Nonempty β] {a : α} :
