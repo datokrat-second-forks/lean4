@@ -117,7 +117,7 @@ theorem Array.iterFromIdxM_equiv_iterM_drop_toList {α : Type w} {array : Array 
       · rw [← List.drop_drop (i := 1) (j := pos), heq, List.drop_succ_cons, List.drop_zero]
       · have:= List.getElem_drop' (xs := l) (i := pos) (j := 0)
         simp only [Nat.add_zero, heq, List.getElem_cons_zero] at this
-        exact (this hlt).symm
+        exact (this hlt).symm.trans (getElem_eq_getElemV l pos hlt)
 
 theorem Array.iterM_equiv_iterM_toList {α : Type w} {array : Array α} {m : Type w → Type w'}
     [Monad m] [LawfulMonad m] :
