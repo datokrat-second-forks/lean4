@@ -44,7 +44,7 @@ theorem IsPrefix.rfl {decls : Array (Decl α)} : IsPrefix decls decls := by
 theorem IsPrefix_push {decls : Array (Decl α)} : IsPrefix decls (decls.push decl) := by
   apply IsPrefix.of
   · intro idx hidx
-    simp [hidx, Array.getElem_push]
+    simp only [Array.getElem_push, hidx, ↓reduceDIte]
   · simp
 
 /--
@@ -61,24 +61,22 @@ theorem denote.go_eq_of_isPrefix (decls1 decls2 : Array (Decl α)) (start : Nat)
   split
   next heq =>
     rw [hidx1] at heq
-    split <;> simp_all
+    split <;> simp_all (config := { decide := false }) [-getElem_eq_getElemV]
   next heq =>
     rw [hidx1] at heq
-    split <;> simp_all
+    split <;> simp_all (config := { decide := false }) [-getElem_eq_getElemV]
   next lhs rhs heq =>
     rw [hidx1] at heq
     have := hdag1 hbounds1 heq
     have hidx2 := hprefix.idx_eq lhs.gate (by omega)
     have hidx3 := hprefix.idx_eq rhs.gate (by omega)
     split
-    · simp_all
-    · simp_all
-    · simp_all
+    · simp_all (config := { decide := false }) [-getElem_eq_getElemV]
+    · simp_all (config := { decide := false }) [-getElem_eq_getElemV]
+    · simp_all (config := { decide := false }) [-getElem_eq_getElemV]
       congr 2
-      · apply denote.go_eq_of_isPrefix
-        assumption
-      · apply denote.go_eq_of_isPrefix
-        assumption
+      · exact denote.go_eq_of_isPrefix _ _ _ hprefix
+      · exact denote.go_eq_of_isPrefix _ _ _ hprefix
 termination_by start
 
 variable {α : Type} [Hashable α] [DecidableEq α]
