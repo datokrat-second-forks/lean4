@@ -206,10 +206,48 @@ theorem ofArray.folder_foldl_mem_of_mem
         -- Then mem_of_mem_of_foldl_folder_eq_some preserves it through the fold
         apply ofArray.mem_of_mem_of_foldl_folder_eq_some h l
         -- Prove l ∈ m'.toList from hf : folder acc l = some m'
-        -- grind struggles with this after the getElemV refactor, so we help it
-        -- by first converting to getElem? = some form
+        -- The folder inserts l into the map; show m'[l.fst]? = some l.snd
         rw [HashMap.mem_toList_iff_getElem?_eq_some]
-        grind (config := { gen := 12 }) [DefaultClause.ofArray.folder.eq_def]
+        revert hf
+        rw [DefaultClause.ofArray.folder.eq_def]
+        cases acc with
+        | none => simp
+        | some old =>
+          simp only [HashMap.getThenInsertIfNew?]
+          -- Both branches produce m' with m'.inner = getThenInsertIfNew?.snd
+          -- We extract this and use DHashMap lemmas to conclude
+          have key : ∀ hf : (some ⟨(DHashMap.Const.getThenInsertIfNew?
+              old.inner l.fst l.snd).snd⟩ : Option (HashMap _ _)) = some m',
+              m'[l.fst]? = (old.insertIfNew l.fst l.snd)[l.fst]? := by
+            intro hf
+            have hinj := congrArg (·.inner) (Option.some.inj hf)
+            show DHashMap.Const.get? m'.inner l.fst = DHashMap.Const.get? (old.insertIfNew l.fst l.snd).inner l.fst
+            simp only at hinj
+            rw [← hinj, DHashMap.Const.getThenInsertIfNew?_snd]; rfl
+          split
+          · split
+            · simp
+            · intro hf; rw [key hf, HashMap.getElem?_insertIfNew]
+              rename_i heq hne
+              simp only [Bool.not_eq_true] at hne
+              simp [HashMap.getThenInsertIfNew?_fst] at heq
+              -- heq : old[l.fst]? = some val', hne : bne l.snd val' = false
+              -- Goal: if ... then some l.snd else old[l.fst]? = some l.snd
+              have hmem : l.fst ∈ old := HashMap.mem_iff_isSome_getElem?.mpr (by show (DHashMap.Const.get? old.inner l.fst).isSome; simp [heq])
+              simp only [BEq.refl, true_and, hmem, not_true, and_false, ite_false]
+              -- Goal: old[l.fst]? = some l.snd, heq : DHashMap.Const.get? old.inner l.fst = some val'
+              change DHashMap.Const.get? old.inner l.fst = some l.snd
+              rw [heq]; congr 1; exact (by simpa using hne : l.snd = _).symm
+          · intro hf; rw [key hf, HashMap.getElem?_insertIfNew]
+            rename_i hne
+            -- Key was not in old map → fresh insert, if-then branch
+            have hmem : ¬l.fst ∈ old := by
+              intro hmem
+              have hisSome := HashMap.mem_iff_isSome_getElem?.mp hmem
+              simp only [DHashMap.Const.getThenInsertIfNew?_fst] at hne
+              have : old[l.fst]? = none := Option.eq_none_iff_forall_not_mem.mpr fun v h => hne v h
+              simp [this] at hisSome
+            simp [hmem]
     · exact ih h hmem
 
 @[inline, local grind]
