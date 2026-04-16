@@ -4822,17 +4822,22 @@ theorem entryAtIdx_eq_entryAtIdxV [TransCmp cmp] {n : Nat}
     {h : n < t.size} :
     haveI : Nonempty (α × β) := ⟨t.entryAtIdx n h⟩
     t.entryAtIdx n h = t.entryAtIdxV n := by
-  haveI : Nonempty (α × β) := ⟨t.entryAtIdx n h⟩
-  show TreeMap.entryAtIdx t n h = TreeMap.entryAtIdxV t n
-  simp [TreeMap.entryAtIdxV, TreeMap.entryAtIdx]
+  letI : Ord α := ⟨cmp⟩; haveI : Nonempty (α × β) := ⟨t.entryAtIdx n h⟩
+  simp only [TreeMap.entryAtIdxV, TreeMap.entryAtIdx, TreeMap.entryAtIdxD,
+    DTreeMap.Const.entryAtIdx, DTreeMap.Const.entryAtIdxD]
+  rw [DTreeMap.Internal.Impl.Const.entryAtIdxD_eq_getD_entryAtIdx?,
+    DTreeMap.Internal.Impl.Const.entryAtIdx?_eq_map,
+    DTreeMap.Internal.Impl.entryAtIdx?_eq_some_entryAtIdx t.inner.wf.balanced,
+    Option.map_some, Option.getD_some,
+    ← DTreeMap.Internal.Impl.Const.entryAtIdx_eq t.inner.wf.balanced]
 
 @[simp, grind norm]
 theorem keyAtIdx_eq_keyAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
     haveI : Nonempty α := ⟨t.keyAtIdx n h⟩
     t.keyAtIdx n h = t.keyAtIdxV n := by
   haveI : Nonempty α := ⟨t.keyAtIdx n h⟩
-  show TreeMap.keyAtIdx t n h = TreeMap.keyAtIdxV t n
-  simp [TreeMap.keyAtIdxV, TreeMap.keyAtIdx]
+  show DTreeMap.keyAtIdx t.inner n h = DTreeMap.keyAtIdxV t.inner n
+  exact DTreeMap.keyAtIdx_eq_keyAtIdxV
 
 @[simp, grind norm]
 theorem getEntryGE_eq_getEntryGEV [TransCmp cmp] {k : α} {h} :
