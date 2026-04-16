@@ -28,7 +28,7 @@ variable [Hashable α] [DecidableEq α]
 
 def blastReverse (aig : AIG α) (s : AIG.RefVec aig w) : AIG.RefVecEntry α w :=
   let ⟨refs, hrefs⟩ := s
-  ⟨aig, ⟨refs.reverse, by simp [hrefs]⟩⟩
+  ⟨aig, ⟨refs.reverse, by intro i h; simp only [Vector.getElem_reverse]; exact hrefs _⟩⟩
 
 instance : AIG.LawfulVecOperator α AIG.RefVec blastReverse where
   le_size := by simp [blastReverse]
