@@ -144,13 +144,13 @@ theorem Inv2.property (decls : Array (Decl α)) (idx upper : Nat) (map : HashMap
     rename_i idx' _
     replace hidx : idx ≤ idx' := by omega
     cases Nat.eq_or_lt_of_le hidx with
-    | inl hidxeq => simp [hidxeq, ih3] at heq
+    | inl hidxeq => simp [-getElem_eq_getElemV, hidxeq, ih3] at heq
     | inr hlt => apply ih4 <;> assumption
   | gate ih1 ih2 ih3 ih4 =>
     rename_i idx' _ _ _
     replace hidx : idx ≤ idx' := by omega
     cases Nat.eq_or_lt_of_le hidx with
-    | inl hidxeq => simp [hidxeq, ih3] at heq
+    | inl hidxeq => simp [-getElem_eq_getElemV, hidxeq, ih3] at heq
     | inr hlt => apply ih4 <;> assumption
 
 end State

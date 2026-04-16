@@ -98,7 +98,7 @@ theorem get_push_ref_lt (s : RefVec aig len) (ref : AIG.Ref aig) (idx : Nat)
   cases ref
   simp only
   rw [Vector.getElem_push_lt]
-  · simp
+  · simp [-getElem_eq_getElemV]
   · simp [hidx]
 
 @[simp]
@@ -136,13 +136,13 @@ theorem get_append (lhs : RefVec aig lw) (rhs : RefVec aig rw) (idx : Nat)
       rhs.get (idx - lw) (by omega) := by
   simp only [get, append]
   split
-  · simp [Ref.mk.injEq]
+  · simp only [Ref.mk.injEq]
     rw [Vector.getElem_append_left]
-    · simp
+    · simp [-getElem_eq_getElemV]
     · assumption
   · simp only [Ref.mk.injEq]
     rw [Vector.getElem_append_right]
-    · simp
+    · simp [-getElem_eq_getElemV]
     · omega
 
 @[inline]

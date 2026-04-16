@@ -158,8 +158,33 @@ def insert [EquivBEq α] [LawfulHashable α] (map : IndexMultiMap α β) (key : 
 
   { entries, indexes, validity := ?_ }
 where finally
-  have _ := map.validity
-  grind
+  have hvalid := map.validity
+  intro k hk
+  show (indexes.get k hk).size > 0 ∧ ∀ (j : Nat), j ∈ indexes.get k hk → j < entries.size
+  rw [show (indexes.get k hk) = indexes[k] from rfl]
+  simp only [-getElem_eq_getElemV, indexes, f, HashMap.getElem_alter]
+  split
+  next hkk =>
+    simp only [Option.getV_eq_getD_ofNonempty]
+    rcases Option.eq_none_or_eq_some (map.indexes[key]?) with hc | ⟨idxs, hopt⟩
+    · simp [hc, entries]; omega
+    · simp only [hopt, Option.getD_some, Array.size_push]
+      have hm : key ∈ map.indexes := HashMap.mem_iff_isSome_getElem?.mpr (by simp [hopt])
+      have ⟨h1, h2⟩ := hvalid key hm
+      have : map.indexes.get key hm = idxs := by
+        have hge := HashMap.getElem?_eq_some_getElem (m := map.indexes) hm
+        rw [hopt] at hge
+        exact (Option.some.inj hge).symm
+      rw [this] at h1 h2
+      exact ⟨by omega, fun j hj => by
+        simp [Array.mem_push] at hj
+        rcases hj with hj | rfl
+        · exact Nat.lt_of_lt_of_le (h2 j hj) (by simp [entries])
+        · simp [entries]; omega⟩
+  next hkk =>
+    have hk' := (HashMap.mem_alter_of_beq_eq_false (by simpa using hkk)).mp hk
+    have ⟨h1, h2⟩ := hvalid k hk'
+    exact ⟨h1, fun j hj => Nat.lt_of_lt_of_le (h2 j hj) (by simp [entries])⟩
 
 /--
 Inserts multiple values for a given key, appending to any existing values.
