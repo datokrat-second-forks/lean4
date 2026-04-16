@@ -475,12 +475,6 @@ theorem get_get? [LawfulBEq α] (h : m.WF) {a : α} {h'} :
     (m.get? a).get h' = m.get a ((mem_iff_isSome_get? h).mpr h') :=
   (get_eq_get_get? h).symm
 
-@[grind =]
-theorem getV_get? [LawfulBEq α] (h : m.WF) {a : α} {_ : Nonempty (β a)}
-    {h' : (m.get? a).isSome} :
-    (m.get? a).get h' = m.getV a := by
-  rw [get_get? h, get_eq_getV h]
-
 namespace Const
 
 variable {β : Type v} {m : DHashMap.Raw α (fun _ => β)} (h : m.WF)
@@ -509,12 +503,6 @@ theorem get_eq_get_get? [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : α} {h
 theorem get_get? [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : α} {h'} :
     (get? m a).get h' = get m a ((mem_iff_isSome_get? h).mpr h') :=
   (get_eq_get_get? h).symm
-
-@[grind =]
-theorem getV_get? [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} (h : m.WF) {a : α}
-    {h' : (Const.get? m a).isSome} :
-    (Const.get? m a).get h' = Const.getV m a := by
-  rw [get_get? h, get_eq_getV h]
 
 theorem get_eq_get [LawfulBEq α] (h : m.WF) {a : α} {h} : get m a h = m.get a h := by
   simp_to_raw using Raw₀.Const.get_eq_get
@@ -718,6 +706,12 @@ theorem getV_eq_get [LawfulBEq α] (h : m.WF) {a : α} {_ : Nonempty (β a)} (h'
     m.getV a = m.get a h' :=
   (get_eq_getV h).symm
 
+@[grind =]
+theorem getV_get? [LawfulBEq α] (h : m.WF) {a : α} {_ : Nonempty (β a)}
+    {h' : (m.get? a).isSome} :
+    (m.get? a).get h' = m.getV a := by
+  rw [get_get? h, get_eq_getV h]
+
 theorem get!_eq_getD_default [LawfulBEq α] (h : m.WF) {a : α} [Inhabited (β a)] :
     m.get! a = m.getD a default := by
   simp_to_raw using Raw₀.get!_eq_getD_default
@@ -850,6 +844,12 @@ theorem getV_eq_get [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} (h : m.W
     (h' : a ∈ m) :
     Const.getV m a = Const.get m a h' :=
   (get_eq_getV h).symm
+
+@[grind =]
+theorem getV_get? [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} (h : m.WF) {a : α}
+    {h' : (Const.get? m a).isSome} :
+    (Const.get? m a).get h' = Const.getV m a := by
+  rw [get_get? h, get_eq_getV h]
 
 theorem getV_eq_getD_classicalOfNonempty [EquivBEq α] [LawfulHashable α] [Nonempty β] (h : m.WF)
     {a : α} : Const.getV m a = getD m a Classical.ofNonempty := by
