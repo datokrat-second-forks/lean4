@@ -5508,6 +5508,7 @@ theorem minKey_eq_minKeyV [TransCmp cmp] {he : t.isEmpty = false} :
 theorem minEntry_eq_minEntryV [TransCmp cmp] {he : t.isEmpty = false} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.minEntry he⟩
     t.minEntry he = t.minEntryV := by
+  haveI : Nonempty ((a : α) × β a) := ⟨t.minEntry he⟩
   have : t.inner.minEntry he = t.inner.minEntryD Classical.ofNonempty := by
     rw [Impl.minEntryD_eq_getD_minEntry?,
       ← Impl.some_minEntry_eq_minEntry? (he := he), Option.getD_some]
@@ -6349,6 +6350,7 @@ theorem maxKey_eq_maxKeyV [TransCmp cmp] {he : t.isEmpty = false} :
 theorem maxEntry_eq_maxEntryV [TransCmp cmp] {he : t.isEmpty = false} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.maxEntry he⟩
     t.maxEntry he = t.maxEntryV := by
+  haveI : Nonempty ((a : α) × β a) := ⟨t.maxEntry he⟩
   have : t.inner.maxEntry he = t.inner.maxEntryD Classical.ofNonempty := by
     rw [Impl.maxEntryD_eq_getD_maxEntry?,
       ← Impl.some_maxEntry_eq_maxEntry? (he := he), Option.getD_some]
@@ -6514,6 +6516,7 @@ end Max
 theorem entryAtIdx_eq_entryAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.entryAtIdx n h⟩
     t.entryAtIdx n h = t.entryAtIdxV n := by
+  haveI : Nonempty ((a : α) × β a) := ⟨t.entryAtIdx n h⟩
   have : Impl.entryAtIdx t.inner t.wf.balanced n h =
       t.inner.entryAtIdxD n Classical.ofNonempty := by
     rw [Impl.entryAtIdxD_eq_getD_entryAtIdx?,
@@ -6524,6 +6527,7 @@ theorem entryAtIdx_eq_entryAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
 theorem keyAtIdx_eq_keyAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
     haveI : Nonempty α := ⟨t.keyAtIdx n h⟩
     t.keyAtIdx n h = t.keyAtIdxV n := by
+  haveI : Nonempty α := ⟨t.keyAtIdx n h⟩
   have : Impl.keyAtIdx t.inner t.wf.balanced n h =
       t.inner.keyAtIdxD n Classical.ofNonempty := by
     rw [Impl.keyAtIdxD_eq_getD_keyAtIdx?, Impl.keyAtIdx?_eq_entryAtIdx?,
@@ -6536,6 +6540,7 @@ theorem getEntryGE_eq_getEntryGEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryGE k h⟩
     t.getEntryGE k h = t.getEntryGEV k := by
   letI : Ord α := ⟨cmp⟩
+  haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryGE k h⟩
   have : Impl.getEntryGE k t.inner t.wf.ordered h =
       Impl.getEntryGED k t.inner Classical.ofNonempty := by
     rw [Impl.getEntryGED_eq_getD_getEntryGE?,
@@ -6547,6 +6552,7 @@ theorem getEntryGT_eq_getEntryGTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryGT k h⟩
     t.getEntryGT k h = t.getEntryGTV k := by
   letI : Ord α := ⟨cmp⟩
+  haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryGT k h⟩
   have : Impl.getEntryGT k t.inner t.wf.ordered h =
       Impl.getEntryGTD k t.inner Classical.ofNonempty := by
     rw [Impl.getEntryGTD_eq_getD_getEntryGT?,
@@ -6558,6 +6564,7 @@ theorem getEntryLE_eq_getEntryLEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryLE k h⟩
     t.getEntryLE k h = t.getEntryLEV k := by
   letI : Ord α := ⟨cmp⟩
+  haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryLE k h⟩
   have : Impl.getEntryLE k t.inner t.wf.ordered h =
       Impl.getEntryLED k t.inner Classical.ofNonempty := by
     rw [Impl.getEntryLED_eq_getD_getEntryLE?,
@@ -6569,6 +6576,7 @@ theorem getEntryLT_eq_getEntryLTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryLT k h⟩
     t.getEntryLT k h = t.getEntryLTV k := by
   letI : Ord α := ⟨cmp⟩
+  haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryLT k h⟩
   have : Impl.getEntryLT k t.inner t.wf.ordered h =
       Impl.getEntryLTD k t.inner Classical.ofNonempty := by
     rw [Impl.getEntryLTD_eq_getD_getEntryLT?,
@@ -6580,6 +6588,7 @@ theorem getKeyGE_eq_getKeyGEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyGE k h⟩
     t.getKeyGE k h = t.getKeyGEV k := by
   letI : Ord α := ⟨cmp⟩
+  haveI : Nonempty α := ⟨t.getKeyGE k h⟩
   have : Impl.getKeyGE k t.inner t.wf.ordered h =
       Impl.getKeyGED k t.inner Classical.ofNonempty := by
     rw [Impl.getKeyGED_eq_getD_getKeyGE?, Impl.getKeyGE?_eq_getEntryGE?,
@@ -6592,6 +6601,7 @@ theorem getKeyGT_eq_getKeyGTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyGT k h⟩
     t.getKeyGT k h = t.getKeyGTV k := by
   letI : Ord α := ⟨cmp⟩
+  haveI : Nonempty α := ⟨t.getKeyGT k h⟩
   have : Impl.getKeyGT k t.inner t.wf.ordered h =
       Impl.getKeyGTD k t.inner Classical.ofNonempty := by
     rw [Impl.getKeyGTD_eq_getD_getKeyGT?, Impl.getKeyGT?_eq_getEntryGT?,
@@ -6604,6 +6614,7 @@ theorem getKeyLE_eq_getKeyLEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyLE k h⟩
     t.getKeyLE k h = t.getKeyLEV k := by
   letI : Ord α := ⟨cmp⟩
+  haveI : Nonempty α := ⟨t.getKeyLE k h⟩
   have : Impl.getKeyLE k t.inner t.wf.ordered h =
       Impl.getKeyLED k t.inner Classical.ofNonempty := by
     rw [Impl.getKeyLED_eq_getD_getKeyLE?, Impl.getKeyLE?_eq_getEntryLE?,
@@ -6616,6 +6627,7 @@ theorem getKeyLT_eq_getKeyLTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyLT k h⟩
     t.getKeyLT k h = t.getKeyLTV k := by
   letI : Ord α := ⟨cmp⟩
+  haveI : Nonempty α := ⟨t.getKeyLT k h⟩
   have : Impl.getKeyLT k t.inner t.wf.ordered h =
       Impl.getKeyLTD k t.inner Classical.ofNonempty := by
     rw [Impl.getKeyLTD_eq_getD_getKeyLT?, Impl.getKeyLT?_eq_getEntryLT?,
