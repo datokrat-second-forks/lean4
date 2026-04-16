@@ -382,7 +382,7 @@ theorem assignmentsInvariant_performRupCheck_of_assignmentsInvariant {n : Nat} (
     rw [Array.foldl_induction in_bounds_motive in_bounds_base in_bounds_inductive]
     exact i.2.2
   simp only [( · ⊨ ·)]
-  grind [cases Bool]
+  simp only [getElem_eq_getElemV] at h h1; grind [cases Bool]
 
 theorem c_without_negPivot_of_performRatCheck_success {n : Nat} (f : DefaultFormula n)
     (hf : f.ratUnits = #[] ∧ AssignmentsInvariant f) (negPivot : Literal (PosFin n))
@@ -418,14 +418,19 @@ theorem existsRatHint_of_ratHintsExhaustive {n : Nat} (f : DefaultFormula n)
   have i_lt_f_clauses_size : i < f.clauses.size := by grind
   have h : i ∈ (ratHints.map (fun x => x.1)).toList := by
     rw [← of_decide_eq_true ratHintsExhaustive_eq_true]
-    have i_eq_range_i : i = (Array.range f.clauses.size)[i]'i_in_bounds := by grind
+    have i_eq_range_i : i = (Array.range f.clauses.size)[i]'i_in_bounds := (Array.getElem_range i_in_bounds).symm
     rw [i_eq_range_i]
     rw [Array.mem_toList_iff]
     rw [Array.mem_filter]
     constructor
-    · grind
+    · exact Array.mem_toList_iff.mpr (Array.mem_of_getElem? (by rwa [← Array.getElem?_toList]))
     · split
-      · grind
+      next heq =>
+        -- heq : f.clauses[(Array.range ..)[i]]! = none contradicts c'_in_f
+        rw [getElem_eq_getElemV, Array.getElemV_range i_lt_f_clauses_size] at heq
+        simp only [getElem!_pos _ _ i_lt_f_clauses_size, getElem_eq_getElemV,
+          Array.getElemV_toList] at heq c'_in_f
+        rw [heq] at c'_in_f; simp at c'_in_f
       · simp [Clause.toList] at negPivot_in_c'
         grind [contains_iff]
   rcases List.get_of_mem h with ⟨j, h'⟩
