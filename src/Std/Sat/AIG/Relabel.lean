@@ -48,7 +48,7 @@ theorem relabel_atom {decls : Array (Decl α)} {r : α → β} {hidx : idx < dec
   next x heq =>
     injection h with h
     exists x
-    simp [heq, h]
+    simp only [heq, h, and_self]
   · contradiction
 
 theorem relabel_gate {decls : Array (Decl α)} {r : α → β} {hidx : idx < decls.size}
@@ -70,12 +70,12 @@ def relabel (r : α → β) (aig : AIG α) : AIG β :=
     cache,
     hdag := by
       intro idx lhs rhs hbound hgate
-      simp +zetaDelta at hgate
+      simp +zetaDelta [-getElem_eq_getElemV] at hgate
       have := Decl.relabel_gate hgate
       apply aig.hdag
       assumption
     hzero := by simp [decls, aig.hzero]
-    hconst := by simp [decls, aig.hconst, Decl.relabel]
+    hconst := by simp +zetaDelta [-getElem_eq_getElemV, aig.hconst, Decl.relabel]
   }
 
 @[simp]
@@ -87,20 +87,20 @@ theorem relabel_false {aig : AIG α} {r : α → β} {hidx : idx < (relabel r ai
     (h : (relabel r aig).decls[idx]'hidx = .false) :
     aig.decls[idx]'(by rw [← relabel_size_eq_size (r := r)]; omega) = .false := by
   apply Decl.relabel_false
-  simpa [relabel] using h
+  simpa [-getElem_eq_getElemV, relabel] using h
 
 
 theorem relabel_atom {aig : AIG α} {r : α → β} {hidx : idx < (relabel r aig).decls.size}
     (h : (relabel r aig).decls[idx]'hidx = .atom a) :
     ∃ x, aig.decls[idx]'(by rw [← relabel_size_eq_size (r := r)]; omega) = .atom x ∧ a = r x := by
   apply Decl.relabel_atom
-  simpa [relabel] using h
+  simpa [-getElem_eq_getElemV, relabel] using h
 
 theorem relabel_gate {aig : AIG α} {r : α → β} {hidx : idx < (relabel r aig).decls.size}
     (h : (relabel r aig).decls[idx]'hidx = .gate lhs rhs) :
     aig.decls[idx]'(by rw [← relabel_size_eq_size (r := r)]; omega) = .gate lhs rhs := by
   apply Decl.relabel_gate
-  simpa [relabel] using h
+  simpa [-getElem_eq_getElemV, relabel] using h
 
 @[simp]
 theorem denote_relabel (aig : AIG α) (r : α → β) (start : Nat) {hidx}
