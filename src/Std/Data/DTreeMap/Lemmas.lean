@@ -6516,6 +6516,7 @@ end Max
 theorem entryAtIdx_eq_entryAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.entryAtIdx n h⟩
     t.entryAtIdx n h = t.entryAtIdxV n := by
+  letI : Ord α := ⟨cmp⟩
   haveI : Nonempty ((a : α) × β a) := ⟨t.entryAtIdx n h⟩
   have : Impl.entryAtIdx t.inner t.wf.balanced n h =
       t.inner.entryAtIdxD n Classical.ofNonempty := by
@@ -6527,6 +6528,7 @@ theorem entryAtIdx_eq_entryAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
 theorem keyAtIdx_eq_keyAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
     haveI : Nonempty α := ⟨t.keyAtIdx n h⟩
     t.keyAtIdx n h = t.keyAtIdxV n := by
+  letI : Ord α := ⟨cmp⟩
   haveI : Nonempty α := ⟨t.keyAtIdx n h⟩
   have : Impl.keyAtIdx t.inner t.wf.balanced n h =
       t.inner.keyAtIdxD n Classical.ofNonempty := by
@@ -7612,7 +7614,7 @@ theorem get?_filterMap [TransCmp cmp]
 theorem get?_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} :
     Const.get? (t.filterMap f) k = (Const.get? t k).bind fun x => f k x := by
-  simp [get?_filterMap]
+  simp only [get?_filterMap, getKey_eq, Option.pbind_eq_bind]
 
 theorem get?_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} (h : t.getKey? k = some k') :
@@ -7637,9 +7639,10 @@ theorem get_filterMap [TransCmp cmp]
 /-- Simpler variant of `get_filterMap` when `LawfulEqCmp` is available. -/
 theorem get_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {h} :
+    haveI : Nonempty γ := ⟨Const.get (t.filterMap f) k h⟩
     Const.get (t.filterMap f) k h =
-      (f k (Const.get t k (mem_of_mem_filterMap h))).get (by simpa using isSome_apply_of_mem_filterMap h) := by
-  simp [get_filterMap]
+      (f k (Const.get t k (mem_of_mem_filterMap h))).getV := by
+  simp only [get_filterMap, getKey_eq, Option.get_eq_getV]
 
 theorem get!_filterMap [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} :
@@ -7653,7 +7656,7 @@ theorem get!_filterMap [TransCmp cmp] [Inhabited γ]
 theorem get!_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} :
     Const.get! (t.filterMap f) k = ((Const.get? t k).bind (f k) ).get!:= by
-  simp [get!_filterMap]
+  simp only [get!_filterMap, getKey_eq, Option.pbind_eq_bind]
 
 theorem get!_filterMap_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k k' : α} (h : t.getKey? k = some k') :
@@ -7672,7 +7675,7 @@ theorem getD_filterMap [TransCmp cmp]
 theorem getD_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {fallback : γ} :
     Const.getD (t.filterMap f) k fallback = ((Const.get? t k).bind (f k)).getD fallback := by
-  simp [getD_filterMap]
+  simp only [getD_filterMap, getKey_eq, Option.pbind_eq_bind]
 
 theorem getD_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : t.getKey? k = some k') :
@@ -7685,20 +7688,20 @@ theorem getV_filterMap [TransCmp cmp] [Nonempty γ]
       ((Const.get? t k).pbind (fun x h' =>
       f (t.getKey k (mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some h'))) x)).getD
         Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filterMap
+  simp only [Const.getV]; exact getD_filterMap
 
 /-- Simpler variant of `getV_filterMap` when `LawfulEqCmp` is available. -/
 @[grind =]
 theorem getV_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty γ]
     {f : α → β → Option γ} {k : α} :
     Const.getV (t.filterMap f) k = ((Const.get? t k).bind (f k)).getD Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filterMap'
+  simp only [Const.getV]; exact getD_filterMap'
 
 theorem getV_filterMap_of_getKey?_eq_some [TransCmp cmp] [Nonempty γ]
     {f : α → β → Option γ} {k k' : α} (h : t.getKey? k = some k') :
     Const.getV (t.filterMap f) k = ((Const.get? t k).bind (f k')).getD
       Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filterMap_of_getKey?_eq_some h
+  simp only [Const.getV]; exact getD_filterMap_of_getKey?_eq_some h
 
 theorem toList_filterMap
     {f : α → β → Option γ} :
@@ -7989,7 +7992,7 @@ theorem get?_filter [TransCmp cmp]
 theorem get?_filter' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Bool} {k : α} :
     Const.get? (t.filter f) k = (Const.get? t k).filter (f k) := by
-  simp [get?_filter]
+  simp only [get?_filter, getKey_eq, Option.pfilter_eq_filter]
 
 theorem get?_filter_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Bool} {k k' : α} :
@@ -8014,7 +8017,7 @@ theorem get!_filter [TransCmp cmp] [Inhabited β]
 theorem get!_filter' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited β]
     {f : α → β → Bool} {k : α} :
     Const.get! (t.filter f) k = ((Const.get? t k).filter (f k)).get! := by
-  simp [get!_filter]
+  simp only [get!_filter, getKey_eq, Option.pfilter_eq_filter]
 
 theorem get!_filter_of_getKey?_eq_some [TransCmp cmp] [Inhabited β]
     {f : α → β → Bool} {k k' : α} :
@@ -8033,7 +8036,7 @@ theorem getD_filter [TransCmp cmp]
 theorem getD_filter' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Bool} {k : α} {fallback : β} :
     Const.getD (t.filter f) k fallback = ((Const.get? t k).filter (f k)).getD fallback := by
-  simp [getD_filter]
+  simp only [getD_filter, getKey_eq, Option.pfilter_eq_filter]
 
 theorem getD_filter_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Bool} {k k' : α} {fallback : β} :
@@ -8047,21 +8050,21 @@ theorem getV_filter [TransCmp cmp] [Nonempty β]
     Const.getV (t.filter f) k = ((Const.get? t k).pfilter (fun x h' =>
       f (t.getKey k (mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some h'))) x)).getD
         Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filter
+  simp only [Const.getV]; exact getD_filter
 
 /-- Simpler variant of `getV_filter` when `LawfulEqCmp` is available. -/
 @[grind =]
 theorem getV_filter' [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty β]
     {f : α → β → Bool} {k : α} :
     Const.getV (t.filter f) k = ((Const.get? t k).filter (f k)).getD Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filter'
+  simp only [Const.getV]; exact getD_filter'
 
 theorem getV_filter_of_getKey?_eq_some [TransCmp cmp] [Nonempty β]
     {f : α → β → Bool} {k k' : α} :
     t.getKey? k = some k' →
       Const.getV (t.filter f) k =
         ((Const.get? t k).filter (fun x => f k' x)).getD Classical.ofNonempty := by
-  simpa [Const.getV] using getD_filter_of_getKey?_eq_some
+  simp only [Const.getV]; intro h; exact getD_filter_of_getKey?_eq_some h
 
 @[simp, grind =]
 theorem toList_filter {f : α → β → Bool} :
@@ -8314,7 +8317,7 @@ theorem getD_map_of_getKey?_eq_some [TransCmp cmp]
 theorem getV_map [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty γ]
     {f : α → β → γ} {k : α} :
     Const.getV (t.map f) k = ((Const.get? t k).map (f k)).getD Classical.ofNonempty := by
-  simpa [Const.getV] using getD_map
+  simp only [Const.getV]; exact getD_map
 
 /-- Variant of `getV_map` that holds without `LawfulEqCmp`. -/
 theorem getV_map' [TransCmp cmp] [Nonempty γ]
@@ -8323,13 +8326,13 @@ theorem getV_map' [TransCmp cmp] [Nonempty γ]
       ((get? t k).pmap (fun v h => f (t.getKey k h) v)
         (fun _ h' => mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some h'))).getD
           Classical.ofNonempty := by
-  simpa [Const.getV] using getD_map'
+  simp only [Const.getV]; exact getD_map'
 
 theorem getV_map_of_getKey?_eq_some [TransCmp cmp] [Nonempty γ]
     {f : α → β → γ} {k k' : α} (h : t.getKey? k = some k') :
     Const.getV (t.map f) k = ((Const.get? t k).map (f k')).getD
       Classical.ofNonempty := by
-  simpa [Const.getV] using getD_map_of_getKey?_eq_some h
+  simp only [Const.getV]; exact getD_map_of_getKey?_eq_some h
 
 @[simp, grind =]
 theorem toList_map {f : α → β → γ} :
