@@ -699,6 +699,7 @@ theorem getEntry_eq_getEntryV [TransCmp cmp] [LawfulEqCmp cmp] (h : t.WF) {a : �
     haveI : Nonempty ((a : α) × β a) := ⟨t.getEntry a h'⟩
     t.getEntry a h' = t.getEntryV a := by
   letI : Ord α := ⟨cmp⟩
+  haveI : Nonempty ((a : α) × β a) := ⟨t.getEntry a h'⟩
   have : t.inner.getEntry a h' = t.inner.getEntryD a Classical.ofNonempty := by
     have h1 := Impl.getEntry_eq_getEntry? a t.inner (h := h')
     rw [Impl.getEntryD_eq_getEntryDₘ, Impl.getEntryDₘ, ← Impl.getEntry?_eq_getEntry?ₘ,
@@ -4308,7 +4309,8 @@ theorem get_alter [TransCmp cmp] [LawfulEqCmp cmp] (h : t.WF) {k k' : α}
     (t.alter k f).get k' hc =
       if heq : cmp k k' = .eq then
         haveI h' : (f (t.get? k)).isSome := mem_alter_of_compare_eq h heq |>.mp hc
-        cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp heq)) <| (f (t.get? k)).get <| h'
+        haveI : Nonempty (β k) := ⟨(f (t.get? k)).get h'⟩
+        cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp heq)) <| (f (t.get? k)).getV
       else
         haveI h' : k' ∈ t := mem_alter_of_not_compare_eq h heq |>.mp hc
         t.get k' h' :=
@@ -4317,7 +4319,8 @@ theorem get_alter [TransCmp cmp] [LawfulEqCmp cmp] (h : t.WF) {k k' : α}
 theorem get_alter_self [TransCmp cmp] [LawfulEqCmp cmp] (h : t.WF) {k : α}
     {f : Option (β k) → Option (β k)} {hc : k ∈ t.alter k f} :
     haveI h' : (f (t.get? k)).isSome := mem_alter_self h |>.mp hc
-    (t.alter k f).get k hc = (f (t.get? k)).get h' :=
+    haveI : Nonempty (β k) := ⟨(f (t.get? k)).get h'⟩
+    (t.alter k f).get k hc = (f (t.get? k)).getV :=
   Impl.get_alter!_self h
 
 @[grind =]
@@ -4540,7 +4543,8 @@ theorem get_alter [TransCmp cmp] (h : t.WF) {k k' : α} {f : Option β → Optio
     get (alter t k f) k' hc =
       if heq : cmp k k' = .eq then
         haveI h' : (f (get? t k)).isSome := mem_alter_of_compare_eq h heq |>.mp hc
-        (f (get? t k)).get h'
+        haveI : Nonempty β := ⟨(f (get? t k)).get h'⟩
+        (f (get? t k)).getV
       else
         haveI h' : k' ∈ t := mem_alter_of_not_compare_eq h heq |>.mp hc
         get t k' h' :=
@@ -4549,7 +4553,8 @@ theorem get_alter [TransCmp cmp] (h : t.WF) {k k' : α} {f : Option β → Optio
 theorem get_alter_self [TransCmp cmp] (h : t.WF) {k : α} {f : Option β → Option β}
     {hc : k ∈ alter t k f} :
     haveI h' : (f (get? t k)).isSome := mem_alter_self h |>.mp hc
-    get (alter t k f) k hc = (f (get? t k)).get h' :=
+    haveI : Nonempty β := ⟨(f (get? t k)).get h'⟩
+    get (alter t k f) k hc = (f (get? t k)).getV :=
   Impl.Const.get_alter!_self h
 
 @[grind =]
@@ -5116,12 +5121,16 @@ theorem isSome_minKey?_of_mem [TransCmp cmp] (h : t.WF) {k} :
   Impl.isSome_minKey?_of_mem h
 
 theorem minKey?_le_of_contains [TransCmp cmp] (h : t.WF) {k km} :
-    (hc : t.contains k) → (hkm : (t.minKey?.get <| isSome_minKey?_of_contains h hc) = km) →
+    (hc : t.contains k) →
+    (hkm : haveI : Nonempty α := ⟨t.minKey?.get (isSome_minKey?_of_contains h hc)⟩;
+      t.minKey?.getV = km) →
     cmp km k |>.isLE :=
   Impl.minKey?_le_of_contains h
 
 theorem minKey?_le_of_mem [TransCmp cmp] (h : t.WF) {k km} :
-    (hc : k ∈ t) → (hkm : (t.minKey?.get <| isSome_minKey?_of_mem h hc) = km) →
+    (hc : k ∈ t) →
+    (hkm : haveI : Nonempty α := ⟨t.minKey?.get (isSome_minKey?_of_mem h hc)⟩;
+      t.minKey?.getV = km) →
     cmp km k |>.isLE :=
   Impl.minKey?_le_of_mem h
 
@@ -5135,7 +5144,8 @@ theorem getKey?_minKey? [TransCmp cmp] (h : t.WF) {km} :
   Impl.getKey?_minKey? h
 
 theorem getKey_minKey? [TransCmp cmp] (h : t.WF) {km hc} :
-    (hkm : t.minKey?.get (isSome_minKey?_of_contains h hc) = km) → t.getKey km hc = km :=
+    (hkm : haveI : Nonempty α := ⟨t.minKey?.get (isSome_minKey?_of_contains h hc)⟩;
+      t.minKey?.getV = km) → t.getKey km hc = km :=
   Impl.getKey_minKey? h
 
 theorem getKey!_minKey? [TransCmp cmp] [Inhabited α] (h : t.WF) {km} :
@@ -5172,8 +5182,8 @@ theorem isSome_minKey?_of_isSome_minKey?_erase [TransCmp cmp] (h : t.WF) {k} :
 
 theorem minKey?_le_minKey?_erase [TransCmp cmp] (h : t.WF) {k km kme} :
     (hkme : (t.erase k |>.minKey?) = some kme) →
-    (hkm : (t.minKey?.get <|
-      isSome_minKey?_of_isSome_minKey?_erase h <| hkme ▸ Option.isSome_some) = km) →
+    (hkm : haveI := isSome_minKey?_of_isSome_minKey?_erase h <| hkme ▸ Option.isSome_some;
+      haveI : Nonempty α := ⟨t.minKey?.get this⟩; t.minKey?.getV = km) →
     cmp km kme |>.isLE :=
   Impl.minKey?_le_minKey?_erase! h
 
@@ -5644,12 +5654,16 @@ theorem isSome_maxKey?_of_mem [TransCmp cmp] (h : t.WF) {k} :
   Impl.isSome_maxKey?_of_mem h
 
 theorem le_maxKey?_of_contains [TransCmp cmp] (h : t.WF) {k km} :
-    (hc : t.contains k) → (hkm : (t.maxKey?.get <| isSome_maxKey?_of_contains h hc) = km) →
+    (hc : t.contains k) →
+    (hkm : haveI : Nonempty α := ⟨t.maxKey?.get (isSome_maxKey?_of_contains h hc)⟩;
+      t.maxKey?.getV = km) →
     cmp k km |>.isLE :=
   Impl.le_maxKey?_of_contains h
 
 theorem le_maxKey?_of_mem [TransCmp cmp] (h : t.WF) {k km} :
-    (hc : k ∈ t) → (hkm : (t.maxKey?.get <| isSome_maxKey?_of_mem h hc) = km) →
+    (hc : k ∈ t) →
+    (hkm : haveI : Nonempty α := ⟨t.maxKey?.get (isSome_maxKey?_of_mem h hc)⟩;
+      t.maxKey?.getV = km) →
     cmp k km |>.isLE :=
   Impl.le_maxKey?_of_mem h
 
@@ -5663,7 +5677,8 @@ theorem getKey?_maxKey? [TransCmp cmp] (h : t.WF) {km} :
   Impl.getKey?_maxKey? h
 
 theorem getKey_maxKey? [TransCmp cmp] (h : t.WF) {km hc} :
-    (hkm : t.maxKey?.get (isSome_maxKey?_of_contains h hc) = km) → t.getKey km hc = km :=
+    (hkm : haveI : Nonempty α := ⟨t.maxKey?.get (isSome_maxKey?_of_contains h hc)⟩;
+      t.maxKey?.getV = km) → t.getKey km hc = km :=
   Impl.getKey_maxKey? h
 
 theorem getKey!_maxKey? [TransCmp cmp] [Inhabited α] (h : t.WF) {km} :
@@ -5700,8 +5715,8 @@ theorem isSome_maxKey?_of_isSome_maxKey?_erase [TransCmp cmp] (h : t.WF) {k} :
 
 theorem maxKey?_erase_le_maxKey? [TransCmp cmp] (h : t.WF) {k km kme} :
     (hkme : (t.erase k |>.maxKey?) = some kme) →
-    (hkm : (t.maxKey?.get <|
-      isSome_maxKey?_of_isSome_maxKey?_erase h <| hkme ▸ Option.isSome_some) = km) →
+    (hkm : haveI := isSome_maxKey?_of_isSome_maxKey?_erase h <| hkme ▸ Option.isSome_some;
+      haveI : Nonempty α := ⟨t.maxKey?.get this⟩; t.maxKey?.getV = km) →
     cmp kme km |>.isLE :=
   Impl.maxKey?_erase!_le_maxKey? h
 
@@ -6917,7 +6932,7 @@ theorem get?_filterMap [TransCmp cmp]
 theorem get?_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
     Const.get? (t.filterMap f) k = (Const.get? t k).bind (f k) := by
-  simp [get?_filterMap, h]
+  simp only [get?_filterMap h, getKey_eq h, Option.pbind_eq_bind]
 
 theorem get?_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} (h : t.WF) :
@@ -6952,7 +6967,7 @@ theorem get!_filterMap [TransCmp cmp] [Inhabited γ]
 theorem get!_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
     Const.get! (t.filterMap f) k = ((Const.get? t k).bind (f k)).get! := by
-  simp [get!_filterMap, h]
+  simp only [get!_filterMap h, getKey_eq h, Option.pbind_eq_bind]
 
 theorem get!_filterMap_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k k' : α} (h : t.WF) :
@@ -6972,7 +6987,7 @@ theorem getD_filterMap [TransCmp cmp]
 theorem getD_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {fallback : γ} (h : t.WF) :
     Const.getD (t.filterMap f) k fallback = ((Const.get? t k).bind (f k)).getD fallback := by
-  simp [getD_filterMap, h]
+  simp only [getD_filterMap h, getKey_eq h, Option.pbind_eq_bind]
 
 theorem getD_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : t.WF) :
@@ -7291,7 +7306,7 @@ theorem get?_filter [TransCmp cmp]
 theorem get?_filter' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Bool} {k : α} (h : t.WF) :
     Const.get? (t.filter f) k = (Const.get? t k).filter (f k) := by
-  simp [get?_filter, h]
+  simp only [get?_filter h, getKey_eq h, Option.pfilter_eq_filter]
 
 theorem get?_filter_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Bool} {k k' : α} (h : t.WF) :
@@ -7316,7 +7331,7 @@ theorem get!_filter [TransCmp cmp] [Inhabited β]
 theorem get!_filter' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited β]
     {f : α → β → Bool} {k : α} (h : t.WF) :
     Const.get! (t.filter f) k = ((Const.get? t k).filter (f k)).get! := by
-  simp [get!_filter, h]
+  simp only [get!_filter h, getKey_eq h, Option.pfilter_eq_filter]
 
 theorem get!_filter_of_getKey?_eq_some [TransCmp cmp] [Inhabited β]
     {f : α → β → Bool} {k k' : α} (h : t.WF) :
@@ -7335,7 +7350,7 @@ theorem getD_filter [TransCmp cmp]
 theorem getD_filter' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Bool} {k : α} {fallback : β} (h : t.WF) :
     Const.getD (t.filter f) k fallback = ((Const.get? t k).filter (f k)).getD fallback := by
-  simp [getD_filter, h]
+  simp only [getD_filter h, getKey_eq h, Option.pfilter_eq_filter]
 
 theorem getD_filter_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Bool} {k k' : α} {fallback : β} (h : t.WF) :
