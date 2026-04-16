@@ -110,6 +110,7 @@ theorem size_ofArray_fold_fn {n : Nat} (assignments : Array Assignment)
   rw [ofArray_fold_fn.eq_def]
   grind
 
+attribute [-simp] getElem_eq_getElemV in
 theorem readyForRupAdd_ofArray {n : Nat} (arr : Array (Option (DefaultClause n))) :
     ReadyForRupAdd (ofArray arr) := by
   constructor
@@ -129,7 +130,7 @@ theorem readyForRupAdd_ofArray {n : Nat} (arr : Array (Option (DefaultClause n))
       have hsize : (Array.replicate n unassigned).size = n := by simp only [Array.size_replicate]
       apply Exists.intro hsize
       intro i b h
-      by_cases hb : b <;> simp [hasAssignment, hb, hasPosAssignment, hasNegAssignment] at h
+      by_cases hb : b <;> simp (config := { decide := false }) [-getElem_eq_getElemV, hasAssignment, hb, hasPosAssignment, hasNegAssignment, Array.getElem_replicate] at h
     have hl (acc : Array Assignment) (ih : ModifiedAssignmentsInvariant acc) (cOpt : Option (DefaultClause n))
       (cOpt_in_arr : cOpt ∈ arr.toList) : ModifiedAssignmentsInvariant (ofArray_fold_fn acc cOpt) := by
       have hsize : (ofArray_fold_fn acc cOpt).size = n := by rw [size_ofArray_fold_fn, ih.1]
@@ -213,6 +214,7 @@ theorem size_assignments_insert {n : Nat} (f : DefaultFormula n) (c : DefaultCla
   simp only [insert]
   grind
 
+attribute [-simp] getElem_eq_getElemV in
 theorem readyForRupAdd_insert {n : Nat} (f : DefaultFormula n) (c : DefaultClause n) :
     ReadyForRupAdd f → ReadyForRupAdd (insert f c) := by
   intro f_readyForRupAdd
@@ -358,6 +360,7 @@ theorem deleteOne_preserves_assignments_size {n : Nat} (f : DefaultFormula n) (i
   simp only [deleteOne]
   grind
 
+attribute [-simp] getElem_eq_getElemV in
 theorem deleteOne_preserves_strongAssignmentsInvariant {n : Nat} (f : DefaultFormula n) (id : Nat) :
     StrongAssignmentsInvariant f → StrongAssignmentsInvariant (deleteOne f id) := by
   intro hf
