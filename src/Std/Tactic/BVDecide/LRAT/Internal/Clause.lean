@@ -10,6 +10,7 @@ public import Std.Sat.CNF.Basic
 public import Std.Tactic.BVDecide.LRAT.Internal.Assignment
 import Init.Data.List.Erase
 import Init.Data.List.Pairwise
+public meta import Init.Grind.Config
 @[expose] public section
 
 namespace Std.Tactic.BVDecide
@@ -155,6 +156,11 @@ theorem negate_eq (c : DefaultClause n) : negate c = (toList c).map Literal.nega
 -- Recall `@[local grind]` doesn't work for theorems in namespaces,
 -- so we add the attribute after the fact.
 attribute [local grind] DefaultClause.ofArray.folder
+-- Help grind reason about HashMap.toList membership after the getElemV refactor
+attribute [local grind =] HashMap.mem_toList_iff_getElem?_eq_some
+-- Help grind connect HashMap membership with getElem?/getThenInsertIfNew?
+attribute [local grind =] HashMap.mem_iff_isSome_getElem?
+attribute [local grind =] HashMap.getThenInsertIfNew?_fst
 
 -- This isn't a good global `grind` lemma, because it can cause a loop with `Pairwise.sublist`.
 attribute [local grind =] List.pairwise_iff_forall_sublist
@@ -180,6 +186,8 @@ theorem ofArray.mem_of_mem_of_foldl_folder_eq_some
 
 grind_pattern ofArray.mem_of_mem_of_foldl_folder_eq_some => l ∈ acc'.toList, List.foldl ofArray.folder (some acc) ls
 
+-- The getElemV refactor increases the search space for `grind` in this proof,
+-- requiring a higher term generation threshold for the HashMap membership reasoning.
 theorem ofArray.folder_foldl_mem_of_mem
     (h : List.foldl DefaultClause.ofArray.folder acc ls = some map) :
     ∀ l ∈ ls, l ∈ map.toList := by
@@ -188,7 +196,21 @@ theorem ofArray.folder_foldl_mem_of_mem
   | nil => grind
   | cons x xs ih =>
     simp at hl h
-    rcases hl <;> grind [DefaultClause.ofArray.folder.eq_def]
+    rcases hl with rfl | hmem
+    · -- l = x: need to show l was inserted into the map by folder
+      -- Split on whether folder acc l returns some or none
+      match hf : folder acc l, h with
+      | none, h => simp [ofArray.foldl_folder_none_eq_none] at h
+      | some m', h =>
+        -- m' contains l because folder inserts l
+        -- Then mem_of_mem_of_foldl_folder_eq_some preserves it through the fold
+        apply ofArray.mem_of_mem_of_foldl_folder_eq_some h l
+        -- Prove l ∈ m'.toList from hf : folder acc l = some m'
+        -- grind struggles with this after the getElemV refactor, so we help it
+        -- by first converting to getElem? = some form
+        rw [HashMap.mem_toList_iff_getElem?_eq_some]
+        grind (config := { gen := 12 }) [DefaultClause.ofArray.folder.eq_def]
+    · exact ih h hmem
 
 @[inline, local grind]
 def delete (c : DefaultClause n) (l : Literal (PosFin n)) : DefaultClause n where
