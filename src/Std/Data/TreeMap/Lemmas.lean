@@ -4887,32 +4887,32 @@ theorem getKeyGE_eq_getKeyGEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyGE k h⟩
     t.getKeyGE k h = t.getKeyGEV k := by
   haveI : Nonempty α := ⟨t.getKeyGE k h⟩
-  show TreeMap.getKeyGE t k h = TreeMap.getKeyGEV t k
-  simp [TreeMap.getKeyGEV, TreeMap.getKeyGE]
+  show DTreeMap.getKeyGE t.inner k h = DTreeMap.getKeyGEV t.inner k
+  exact DTreeMap.getKeyGE_eq_getKeyGEV
 
 @[simp, grind norm]
 theorem getKeyGT_eq_getKeyGTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyGT k h⟩
     t.getKeyGT k h = t.getKeyGTV k := by
   haveI : Nonempty α := ⟨t.getKeyGT k h⟩
-  show TreeMap.getKeyGT t k h = TreeMap.getKeyGTV t k
-  simp [TreeMap.getKeyGTV, TreeMap.getKeyGT]
+  show DTreeMap.getKeyGT t.inner k h = DTreeMap.getKeyGTV t.inner k
+  exact DTreeMap.getKeyGT_eq_getKeyGTV
 
 @[simp, grind norm]
 theorem getKeyLE_eq_getKeyLEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyLE k h⟩
     t.getKeyLE k h = t.getKeyLEV k := by
   haveI : Nonempty α := ⟨t.getKeyLE k h⟩
-  show TreeMap.getKeyLE t k h = TreeMap.getKeyLEV t k
-  simp [TreeMap.getKeyLEV, TreeMap.getKeyLE]
+  show DTreeMap.getKeyLE t.inner k h = DTreeMap.getKeyLEV t.inner k
+  exact DTreeMap.getKeyLE_eq_getKeyLEV
 
 @[simp, grind norm]
 theorem getKeyLT_eq_getKeyLTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyLT k h⟩
     t.getKeyLT k h = t.getKeyLTV k := by
   haveI : Nonempty α := ⟨t.getKeyLT k h⟩
-  show TreeMap.getKeyLT t k h = TreeMap.getKeyLTV t k
-  simp [TreeMap.getKeyLTV, TreeMap.getKeyLT]
+  show DTreeMap.getKeyLT t.inner k h = DTreeMap.getKeyLTV t.inner k
+  exact DTreeMap.getKeyLT_eq_getKeyLTV
 
 namespace Equiv
 
