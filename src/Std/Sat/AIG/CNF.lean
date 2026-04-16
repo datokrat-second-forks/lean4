@@ -163,7 +163,7 @@ The `Cache` invariant always holds for an empty CNF when all nodes are unmarked.
 theorem Cache.Inv_init : Inv aig .empty (.replicate aig.decls.size false)
     (by simp) := by
   intro assign _ idx hbound hmark
-  simp at hmark
+  simp only [Array.getElem_replicate, reduceCtorEq] at hmark
 
 /--
 The CNF cache. It keeps track of AIG nodes that we already turned into CNF to avoid adding the same
@@ -242,7 +242,7 @@ theorem Cache.IsExtensionBy_set (cache1 : Cache aig cnf1) (cache2 : Cache aig cn
     IsExtensionBy cache1 cache2 idx (by have := cache1.hmarks; omega) := by
   apply IsExtensionBy.mk
   · intro idx hidx hmark
-    simp [Array.getElem_set, hmark, h]
+    simp [-getElem_eq_getElemV, Array.getElem_set, hmark, h]
   · simp [h]
 
 /--
@@ -273,7 +273,7 @@ def Cache.addFalse (cache : Cache aig cnf) (idx : Nat) (h : idx < aig.decls.size
         rw [Array.getElem_set] at hmarked
         split at hmarked
         next heq =>
-          simp [heq] at htip heval
+          simp [-getElem_eq_getElemV, heq] at htip heval
           simp [denote_idx_false htip, heval]
         next heq =>
           simp only [CNF.eval_append, Decl.falseToCNF_eval, Bool.and_eq_true, beq_iff_eq] at heval
