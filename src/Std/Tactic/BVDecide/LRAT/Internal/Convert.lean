@@ -146,7 +146,7 @@ theorem CNF.unsat_of_convertLRAT_unsat (cnf : CNF Nat) :
     simp only [Option.some.injEq] at hrclause2
     rw [Array.mem_iff_getElem] at hrclause1
     rcases hrclause1 with ⟨i, h, rfl⟩
-    simp [CNF.Clause.convertLRAT_sat_of_sat _ hrclause2, h2 i h]
+    exact CNF.Clause.convertLRAT_sat_of_sat _ hrclause2 (h2 i h)
   · contradiction
 
 end Internal
