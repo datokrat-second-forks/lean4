@@ -166,7 +166,9 @@ theorem readyForRupAdd_ofArray {n : Nat} (arr : Array (Option (DefaultClause n))
               simp only [hasAssignment] at ih
               rw [b_eq_false, Subtype.ext i_eq_l]
               exact ih h
-          next i_ne_l => grind
+          next i_ne_l =>
+            simp only [Array.getElem_modify, Ne.symm i_ne_l, ↓reduceIte] at h
+            exact ih i b h
         | some (l, false) =>
           simp only [heq] at h
           rcases ih with ⟨hsize, ih⟩
@@ -179,7 +181,7 @@ theorem readyForRupAdd_ofArray {n : Nat} (arr : Array (Option (DefaultClause n))
               specialize ih l true
               simp only [hasAssignment] at ih
               rw [b_eq_true, Subtype.ext i_eq_l]
-              grind
+              exact ih h
             next b_eq_false =>
               rw [isUnit_iff, DefaultClause.toList] at heq
               simp only [toList, ofArray, List.map, List.append_nil, List.mem_filterMap, id_eq, exists_eq_right]
@@ -188,7 +190,9 @@ theorem readyForRupAdd_ofArray {n : Nat} (arr : Array (Option (DefaultClause n))
               have c_def : c = ⟨c.clause, c.nodupkey, c.nodup⟩ := rfl
               simp only [heq] at c_def
               grind
-          next i_ne_l => grind
+          next i_ne_l =>
+            simp only [Array.getElem_modify, Ne.symm i_ne_l, ↓reduceIte] at h
+            exact ih i b h
     rcases List.foldlRecOn arr.toList ofArray_fold_fn hb hl with ⟨_h_size, h'⟩
     grind [ofArray]
 
@@ -252,7 +256,8 @@ theorem readyForRupAdd_insert {n : Nat} (f : DefaultFormula n) (c : DefaultClaus
             next b_eq_false => grind
           simp only [hasAssignment, b_eq_false, l_eq_i, Array.getElem_modify_self, ite_false, hasNeg_addPos, reduceCtorEq] at hb
           grind [hasAssignment]
-        next l_ne_i => grind
+        next l_ne_i =>
+          simp only [Array.getElem_modify, l_ne_i, ↓reduceIte] at hb; exact hb
       specialize hf hb'
       simp only [toList] at hf ⊢
       grind
@@ -281,8 +286,10 @@ theorem readyForRupAdd_insert {n : Nat} (f : DefaultFormula n) (c : DefaultClaus
             · assumption
             next b_eq_false =>
               simp only [b_eq_false, Subtype.ext l_eq_i, not_true] at ib_ne_c
+          simp only [l_eq_i, Array.getElem_modify_self] at hb
           grind [hasAssignment, hasPos_addNeg]
-        next l_ne_i => grind
+        next l_ne_i =>
+          simp only [Array.getElem_modify, l_ne_i, ↓reduceIte] at hb; exact hb
       specialize hf hb'
       simp only [toList] at hf ⊢
       grind
@@ -403,7 +410,26 @@ theorem deleteOne_preserves_strongAssignmentsInvariant {n : Nat} (f : DefaultFor
             have idx_in_bounds : idx < List.length (List.set f.clauses.toList id none) := by grind
             rw [List.mem_iff_get]
             apply Exists.intro ⟨idx, idx_in_bounds⟩
-            grind [unit]
+            -- Need to show the set didn't affect index idx
+            simp only [Array.toList_set, List.get_eq_getElem, List.getElem_set]
+            have : id ≠ idx := by
+              intro h_eq; subst h_eq
+              -- f.clauses[id]! = some c but f.clauses.toList[id] = some (unit (i, b))
+              -- c = {clause := [l]} with l.snd = !b, unit (i,b) = {clause := [(i,b)]}
+              -- l = (i, b) gives l.snd = b = !b, contradiction
+              -- Connect f.clauses[id]! with f.clauses.toList[id]
+              have : f.clauses.toList[id] = some c := by
+                rw [← Array.getElem!_toList] at heq
+                simp only [List.getElem!_eq_getElem?_getD] at heq
+                rw [List.getElem?_eq_getElem hbound] at heq
+                simpa using heq
+              rw [hidx] at this
+              simp only [Option.some.injEq] at this
+              have hl' := this ▸ hl
+              simp [unit] at hl'
+              rw [← hl'] at l_ne_b
+              simp at l_ne_b
+            simp [this, hidx]
           · exact hf
         · exact Or.inr hf
       next l_ne_i =>
@@ -421,7 +447,25 @@ theorem deleteOne_preserves_strongAssignmentsInvariant {n : Nat} (f : DefaultFor
             rw [List.mem_iff_get]
             have idx_in_bounds : idx < List.length (List.set f.clauses.toList id none) := by grind
             apply Exists.intro ⟨idx, idx_in_bounds⟩
-            grind [unit]
+            simp only [Array.toList_set, List.get_eq_getElem, List.getElem_set]
+            have : id ≠ idx := by
+              intro h_eq; subst h_eq
+              -- Connect f.clauses[id]! with f.clauses.toList[id]
+              have : f.clauses.toList[id] = some c := by
+                rw [← Array.getElem!_toList] at heq
+                simp only [List.getElem!_eq_getElem?_getD] at heq
+                rw [List.getElem?_eq_getElem hbound] at heq
+                simpa using heq
+              rw [hidx] at this
+              simp only [Option.some.injEq] at this
+              have hl' := this ▸ hl
+              simp [unit] at hl'
+              -- In the l_eq_i branch, l_ne_b : l.snd = !b leads to contradiction
+              -- In the l_ne_i branch, l_ne_i : ¬l.fst.val = i.val contradicts hl' : (i, b) = l
+              first
+                | (rw [← hl'] at l_ne_b; simp at l_ne_b)
+                | (exact absurd (congrArg Subtype.val (congrArg (Prod.fst ·) hl').symm) l_ne_i)
+            simp [this, hidx]
           · exact hf
         · exact Or.inr hf
     · simp only [Prod.exists, Bool.exists_bool, not_exists, not_or, unit] at hl
