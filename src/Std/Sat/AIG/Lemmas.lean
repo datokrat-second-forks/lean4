@@ -223,7 +223,7 @@ If an index contains a `Decl.false` we know how to denote it.
 theorem denote_idx_false {aig : AIG α} {hstart} (h : aig.decls[start]'hstart = .false) :
     ⟦aig, ⟨start, invert, hstart⟩, assign⟧ = invert := by
   unfold denote denote.go
-  split <;> simp_all
+  split <;> simp_all (config := { decide := false }) [-getElem_eq_getElemV]
 
 /--
 If an index contains a `Decl.atom` we know how to denote it.
@@ -231,7 +231,7 @@ If an index contains a `Decl.atom` we know how to denote it.
 theorem denote_idx_atom {aig : AIG α} {hstart} (h : aig.decls[start] = .atom a) :
     ⟦aig, ⟨start, invert, hstart⟩, assign⟧ = (assign a ^^ invert) := by
   unfold denote denote.go
-  split <;> simp_all
+  split <;> simp_all (config := { decide := false }) [-getElem_eq_getElemV]
 
 /--
 If an index contains a `Decl.gate` we know how to denote it.
@@ -249,11 +249,11 @@ theorem denote_idx_gate {aig : AIG α} {hstart} (h : aig.decls[start] = .gate lh
     lhs
     unfold denote.go
   split
-  · simp_all
-  · simp_all
+  · simp_all (config := { decide := false }) [-getElem_eq_getElemV]
+  · simp_all (config := { decide := false }) [-getElem_eq_getElemV]
   next heq =>
     rw [h] at heq
-    simp_all
+    simp_all (config := { decide := false }) [-getElem_eq_getElemV]
 
 theorem idx_trichotomy (aig : AIG α) (hstart : start < aig.decls.size) {prop : Prop}
     (hfalse : aig.decls[start]'hstart = .false → prop)
@@ -292,7 +292,7 @@ theorem denote_congr (assign1 assign2 : α → Bool) (aig : AIG α) (idx : Nat) 
   · intro a heq
     simp only [denote_idx_atom heq, Bool.bne_left_inj]
     apply h
-    simp [mem_def, ← heq]
+    simp only [mem_def, ← heq, Array.getElem_mem]
   · intro lhs rhs heq
     simp only [denote_idx_gate heq]
     have := aig.hdag hidx heq
