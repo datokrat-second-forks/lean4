@@ -4791,7 +4791,8 @@ theorem get_alter [LawfulBEq α] {k k' : α} {f : Option (β k) → Option (β k
     (m.alter k f).get k' hc =
       if heq : k == k' then
         haveI h' : (f (m.get? k)).isSome := mem_alter_of_beq h heq |>.mp hc
-        cast (congrArg β (eq_of_beq heq)) <| (f (m.get? k)).get <| h'
+        haveI : Nonempty (β k) := ⟨(f (m.get? k)).get h'⟩
+        cast (congrArg β (eq_of_beq heq)) <| (f (m.get? k)).getV
       else
         haveI h' : k' ∈ m := mem_alter_of_beq_eq_false h (Bool.not_eq_true _ ▸ heq) |>.mp hc
         m.get k' h' := by
@@ -4802,7 +4803,8 @@ theorem get_alter [LawfulBEq α] {k k' : α} {f : Option (β k) → Option (β k
 theorem get_alter_self [LawfulBEq α] {k : α} {f : Option (β k) → Option (β k)}
     (h : m.WF) {hc : k ∈ m.alter k f} :
     haveI h' : (f (m.get? k)).isSome := mem_alter_self h |>.mp hc
-    (m.alter k f).get k hc = (f (m.get? k)).get h' := by
+    haveI : Nonempty (β k) := ⟨(f (m.get? k)).get h'⟩
+    (m.alter k f).get k hc = (f (m.get? k)).getV := by
   simp only [mem_iff_contains] at hc
   revert hc
   simp_to_raw using Raw₀.get_alter_self
@@ -5027,7 +5029,8 @@ theorem get_alter [EquivBEq α] [LawfulHashable α] {k k' : α} {f : Option β �
     Const.get (Const.alter m k f) k' hc =
       if heq : k == k' then
         haveI h' : (f (Const.get? m k)).isSome := mem_alter_of_beq h heq |>.mp hc
-        f (Const.get? m k) |>.get h'
+        haveI : Nonempty β := ⟨(f (Const.get? m k)).get h'⟩
+        f (Const.get? m k) |>.getV
       else
         haveI h' : k' ∈ m := mem_alter_of_beq_eq_false h (Bool.not_eq_true _ ▸ heq) |>.mp hc
         Const.get m k' h' := by
@@ -5038,7 +5041,8 @@ theorem get_alter [EquivBEq α] [LawfulHashable α] {k k' : α} {f : Option β �
 theorem get_alter_self [EquivBEq α] [LawfulHashable α] {k : α} {f : Option β → Option β}
     (h : m.WF) {hc : k ∈ Const.alter m k f} :
     haveI h' : (f (Const.get? m k)).isSome := mem_alter_self h |>.mp hc
-    Const.get (Const.alter m k f) k hc = (f (Const.get? m k)).get h' := by
+    haveI : Nonempty β := ⟨(f (Const.get? m k)).get h'⟩
+    Const.get (Const.alter m k f) k hc = (f (Const.get? m k)).getV := by
   simp only [mem_iff_contains] at hc
   revert hc
   simp [get_alter h]
