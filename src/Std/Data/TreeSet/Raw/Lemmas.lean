@@ -310,11 +310,6 @@ theorem get_get? [TransCmp cmp] (h : t.WF) {a : α} {h'} :
     (t.get? a).get h' = t.get a ((mem_iff_isSome_get? h).mpr h') :=
   TreeMap.Raw.get_getKey? h.out
 
-theorem getV_get? [TransCmp cmp] {_ : Nonempty α} (h : t.WF)
-    {k : α} {h' : (t.get? k).isSome} :
-    (t.get? k).getV = t.getV k := by
-  simp [Option.getV, getV_eq_getD_get? h]
-
 theorem compare_get_self [TransCmp cmp] (h : t.WF) {k : α} (h' : k ∈ t) :
     cmp (t.get k h') k = .eq :=
   TreeMap.Raw.compare_getKey_self h h'
@@ -498,8 +493,14 @@ theorem getV_eq_getD_get? [TransCmp cmp] [Nonempty α] (h : t.WF) {a : α} :
     t.getV a = (t.get? a).getD Classical.ofNonempty :=
   by simpa [getV] using getD_eq_getD_get? h
 
+theorem getV_get? [TransCmp cmp] {_ : Nonempty α} (h : t.WF)
+    {k : α} {h' : (t.get? k).isSome} :
+    (t.get? k).getV = t.getV k := by
+  simp only [getV_eq_getD_get? h, Option.getV_eq_getD_ofNonempty]
+
 @[simp, grind norm]
 theorem get_eq_getV [TransCmp cmp] (h : t.WF) {a : α} {h'} :
+    haveI : Nonempty α := ⟨t.get a h'⟩
     t.get a h' = t.getV a := by
   haveI : Nonempty α := ⟨t.get a h'⟩
   simpa [getV] using get_eq_getD h
@@ -1577,12 +1578,16 @@ theorem isSome_min?_of_mem [TransCmp cmp] (h : t.WF) {k} :
   TreeMap.Raw.isSome_minKey?_of_mem h
 
 theorem min?_le_of_contains [TransCmp cmp] (h : t.WF) {k km} :
-    (hc : t.contains k) → (hkm : (t.min?.get <| isSome_min?_of_contains h hc) = km) →
+    (hc : t.contains k) →
+    (hkm : haveI : Nonempty α := ⟨t.min?.get (isSome_min?_of_contains h hc)⟩;
+      t.min?.getV = km) →
     cmp km k |>.isLE :=
   TreeMap.Raw.minKey?_le_of_contains h
 
 theorem min?_le_of_mem [TransCmp cmp] (h : t.WF) {k km} :
-    (hc : k ∈ t) → (hkm : (t.min?.get <| isSome_min?_of_mem h hc) = km) →
+    (hc : k ∈ t) →
+    (hkm : haveI : Nonempty α := ⟨t.min?.get (isSome_min?_of_mem h hc)⟩;
+      t.min?.getV = km) →
     cmp km k |>.isLE :=
   TreeMap.Raw.minKey?_le_of_mem h
 
@@ -1595,7 +1600,8 @@ theorem get?_min? [TransCmp cmp] (h : t.WF) {km} :
   TreeMap.Raw.getKey?_minKey? h
 
 theorem get_min? [TransCmp cmp] (h : t.WF) {km hc} :
-    (hkm : t.min?.get (isSome_min?_of_contains h hc) = km) → t.get km hc = km :=
+    (hkm : haveI : Nonempty α := ⟨t.min?.get (isSome_min?_of_contains h hc)⟩;
+      t.min?.getV = km) → t.get km hc = km :=
   TreeMap.Raw.getKey_minKey? h
 
 theorem get!_min? [TransCmp cmp] [Inhabited α] (h : t.WF) {km} :
@@ -1632,8 +1638,8 @@ theorem isSome_min?_of_isSome_min?_erase [TransCmp cmp] (h : t.WF) {k} :
 
 theorem min?_le_min?_erase [TransCmp cmp] (h : t.WF) {k km kme} :
     (hkme : (t.erase k |>.min?) = some kme) →
-    (hkm : (t.min?.get <|
-      isSome_min?_of_isSome_min?_erase h <| hkme ▸ Option.isSome_some) = km) →
+    (hkm : haveI := isSome_min?_of_isSome_min?_erase h <| hkme ▸ Option.isSome_some;
+      haveI : Nonempty α := ⟨t.min?.get this⟩; t.min?.getV = km) →
     cmp km kme |>.isLE :=
   TreeMap.Raw.minKey?_le_minKey?_erase h
 
@@ -2005,12 +2011,16 @@ theorem isSome_max?_of_mem [TransCmp cmp] (h : t.WF) {k} :
   TreeMap.Raw.isSome_maxKey?_of_mem h
 
 theorem le_max?_of_contains [TransCmp cmp] (h : t.WF) {k km} :
-    (hc : t.contains k) → (hkm : (t.max?.get <| isSome_max?_of_contains h hc) = km) →
+    (hc : t.contains k) →
+    (hkm : haveI : Nonempty α := ⟨t.max?.get (isSome_max?_of_contains h hc)⟩;
+      t.max?.getV = km) →
     cmp k km |>.isLE :=
   TreeMap.Raw.le_maxKey?_of_contains h
 
 theorem le_max?_of_mem [TransCmp cmp] (h : t.WF) {k km} :
-    (hc : k ∈ t) → (hkm : (t.max?.get <| isSome_max?_of_mem h hc) = km) →
+    (hc : k ∈ t) →
+    (hkm : haveI : Nonempty α := ⟨t.max?.get (isSome_max?_of_mem h hc)⟩;
+      t.max?.getV = km) →
     cmp k km |>.isLE :=
   TreeMap.Raw.le_maxKey?_of_mem h
 
@@ -2023,7 +2033,8 @@ theorem get?_max? [TransCmp cmp] (h : t.WF) {km} :
   TreeMap.Raw.getKey?_maxKey? h
 
 theorem get_max? [TransCmp cmp] (h : t.WF) {km hc} :
-    (hkm : t.max?.get (isSome_max?_of_contains h hc) = km) → t.get km hc = km :=
+    (hkm : haveI : Nonempty α := ⟨t.max?.get (isSome_max?_of_contains h hc)⟩;
+      t.max?.getV = km) → t.get km hc = km :=
   TreeMap.Raw.getKey_maxKey? h
 
 theorem get!_max? [TransCmp cmp] [Inhabited α] (h : t.WF) {km} :
@@ -2060,8 +2071,8 @@ theorem isSome_max?_of_isSome_max?_erase [TransCmp cmp] (h : t.WF) {k} :
 
 theorem max?_erase_le_max? [TransCmp cmp] (h : t.WF) {k km kme} :
     (hkme : (t.erase k |>.max?) = some kme) →
-    (hkm : (t.max?.get <|
-      isSome_max?_of_isSome_max?_erase h <| hkme ▸ Option.isSome_some) = km) →
+    (hkm : haveI := isSome_max?_of_isSome_max?_erase h <| hkme ▸ Option.isSome_some;
+      haveI : Nonempty α := ⟨t.max?.get this⟩; t.max?.getV = km) →
     cmp kme km |>.isLE :=
   TreeMap.Raw.maxKey?_erase_le_maxKey? h
 
@@ -2355,35 +2366,8 @@ theorem maxV_eq_maxD_classicalOfNonempty [TransCmp cmp] [Nonempty α] :
 
 end Max
 
-@[simp, grind norm]
-theorem atIdx_eq_atIdxV [TransCmp cmp] (h : t.WF) {n : Nat} {h' : n < t.size} :
-    t.atIdx n h' = t.atIdxV n := by
-  haveI : Nonempty α := ⟨t.atIdx n h'⟩
-  exact TreeMap.Raw.keyAtIdx_eq_keyAtIdxV h
-
-@[simp, grind norm]
-theorem getGE_eq_getGEV [TransCmp cmp] (h : t.WF) {k : α} {h'} :
-    t.getGE k h' = t.getGEV k := by
-  haveI : Nonempty α := ⟨t.getGE k h'⟩
-  exact TreeMap.Raw.getKeyGE_eq_getKeyGEV h
-
-@[simp, grind norm]
-theorem getGT_eq_getGTV [TransCmp cmp] (h : t.WF) {k : α} {h'} :
-    t.getGT k h' = t.getGTV k := by
-  haveI : Nonempty α := ⟨t.getGT k h'⟩
-  exact TreeMap.Raw.getKeyGT_eq_getKeyGTV h
-
-@[simp, grind norm]
-theorem getLE_eq_getLEV [TransCmp cmp] (h : t.WF) {k : α} {h'} :
-    t.getLE k h' = t.getLEV k := by
-  haveI : Nonempty α := ⟨t.getLE k h'⟩
-  exact TreeMap.Raw.getKeyLE_eq_getKeyLEV h
-
-@[simp, grind norm]
-theorem getLT_eq_getLTV [TransCmp cmp] (h : t.WF) {k : α} {h'} :
-    t.getLT k h' = t.getLTV k := by
-  haveI : Nonempty α := ⟨t.getLT k h'⟩
-  exact TreeMap.Raw.getKeyLT_eq_getKeyLTV h
+-- Note: atIdx_eq_atIdxV, getGE/GT/LE/LT_eq_V removed because these
+-- proof-taking functions don't exist on TreeSet.Raw (only D/V/!/? variants).
 
 namespace Equiv
 
