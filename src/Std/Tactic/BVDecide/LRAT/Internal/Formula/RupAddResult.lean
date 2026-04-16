@@ -15,6 +15,10 @@ import Init.Data.Int.OfNat
 import Init.Data.Nat.Linear
 import Init.Data.Nat.Simproc
 
+-- The getElemV refactor causes grind to normalize Array accesses to getElemV form,
+-- but grind lacks the V-variant lemmas to complete proofs. Disable the normalization.
+attribute [-simp] getElem_eq_getElemV
+
 @[expose] public section
 
 /-!
