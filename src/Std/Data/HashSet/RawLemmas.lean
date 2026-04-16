@@ -320,11 +320,6 @@ theorem get_get? [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} {h'} :
     (m.get? k).get h' = m.get k ((mem_iff_isSome_get? h).mpr h') :=
   HashMap.Raw.get_getKey? h.out
 
-theorem getV_get? [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
-    (h : m.WF) {k : α} {h' : (m.get? k).isSome} :
-    (m.get? k).getV = m.getV k := by
-  simp [Option.getV, getV_eq_getD_get? h]
-
 @[simp]
 theorem get?_erase_self [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} :
     (m.erase k).get? k = none :=
@@ -524,6 +519,11 @@ theorem get_eq_getV [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : α} {h'} :
     haveI : Nonempty α := ⟨m.get a h'⟩
     m.get a h' = m.getV a :=
   by simpa [getV] using get_eq_getD h
+
+theorem getV_get? [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
+    (h : m.WF) {k : α} {h' : (m.get? k).isSome} :
+    (m.get? k).getV = m.getV k := by
+  simp only [getV_eq_getD_get? h, Option.getV_eq_getD_ofNonempty]
 
 theorem getV_eq_getD_classicalOfNonempty [EquivBEq α] [LawfulHashable α] [Nonempty α] (_h : m.WF)
     {a : α} :
