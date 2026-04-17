@@ -290,21 +290,26 @@ theorem isSome_of_isSome_bind {α β : Type _} {x : Option α} {f : α → Optio
   cases x <;> trivial
 
 theorem isSome_apply_of_isSome_bind {α β : Type _} {x : Option α} {f : α → Option β}
+    (h : (x.bind f).isSome) :
+    haveI : Nonempty α := ⟨x.get (isSome_of_isSome_bind h)⟩; (f x.getV).isSome := by
+  cases x <;> trivial
+
+theorem isSome_apply_get_of_isSome_bind {α β : Type _} {x : Option α} {f : α → Option β}
     (h : (x.bind f).isSome) : (f (x.get (isSome_of_isSome_bind h))).isSome := by
-  cases x <;> trivial
+  simpa using isSome_apply_of_isSome_bind h
 
-theorem get_bind {α β : Type _} {x : Option α} {f : α → Option β} (h : (x.bind f).isSome) :
-    (x.bind f).get h = (f (x.get (isSome_of_isSome_bind h))).get
-      (isSome_apply_of_isSome_bind h) := by
-  cases x <;> trivial
-
-@[simp, grind =] theorem getV_bind {_ : Nonempty β} {x : Option α} {f : α → Option β} (h : (x.bind f).isSome) :
+@[simp, grind =] theorem getV_bind {x : Option α} {f : α → Option β} (h : (x.bind f).isSome) :
     haveI : Nonempty α := ⟨x.get (isSome_of_isSome_bind h)⟩
     haveI : Nonempty β := ⟨(x.bind f).get h⟩
     (x.bind f).getV = (f x.getV).getV := by
   cases x with
   | none => simp at h
   | some a => simp
+
+theorem get_bind {α β : Type _} {x : Option α} {f : α → Option β} (h : (x.bind f).isSome) :
+    (x.bind f).get h = (f (x.get (isSome_of_isSome_bind h))).get
+      (isSome_apply_get_of_isSome_bind h) := by
+  simpa using getV_bind h
 
 @[simp, grind =] theorem getV_bind_of_isSome_left {_ : Nonempty β} {x : Option α} {f : α → Option β} (h : x.isSome) :
     haveI : Nonempty α := ⟨x.get h⟩
@@ -558,6 +563,10 @@ theorem any_eq_true (p : α → Bool) (x : Option α) :
 
 theorem any_eq_true_iff_get (p : α → Bool) (x : Option α) :
     x.any p = true ↔ ∃ h : x.isSome, p (x.get h) := by
+  cases x <;> simp
+
+theorem any_eq_true_iff_getV (p : α → Bool) (x : Option α) :
+    x.any p = true ↔ ∃ h : x.isSome, haveI : Nonempty α := ⟨x.get h⟩; p x.getV := by
   cases x <;> simp
 
 theorem any_eq_false (p : α → Bool) (x : Option α) :

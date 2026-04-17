@@ -295,11 +295,10 @@ theorem erase_emptyWithCapacity {k : α} {c : Nat} :
     (emptyWithCapacity c : Raw₀ α β).erase k = emptyWithCapacity c := by
   have : 0 < (Array.replicate (α := AssocList α β) (numBucketsForCapacity c).nextPowerOfTwo AssocList.nil).size := by
     simpa using Nat.pos_of_isPowerOfTwo (Nat.isPowerOfTwo_nextPowerOfTwo _)
-  have : (mkIdx (Array.replicate (α := AssocList α β) (numBucketsForCapacity c).nextPowerOfTwo AssocList.nil).size this (hash k)).val.toNat <
-  (numBucketsForCapacity c).nextPowerOfTwo := by
-    exact Nat.lt_of_lt_of_le (mkIdx_val_toNat_lt _ _ _) (by simp)
-    -- FIXME
-    -- Perhaps the proof would actually follow from the `mkIdx` property.
+  have :
+      (mkIdx (Array.replicate (α := AssocList α β) (numBucketsForCapacity c).nextPowerOfTwo AssocList.nil).size
+          this (hash k)).val.toNat < (numBucketsForCapacity c).nextPowerOfTwo :=
+    Nat.lt_of_lt_of_le (mkIdx_val_toNat_lt _ _ _) (by simp)
   simp [erase, emptyWithCapacity, this]
 
 theorem isEmpty_erase [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {k : α} :
@@ -4203,11 +4202,11 @@ theorem get_alter [LawfulBEq α] (h : m.1.WF) {k k' : α} {f : Option (β k) →
     (m.alter k f).get k' hc =
       if heq : k == k' then
         haveI h' : (f (m.get? k)).isSome := by rwa [contains_alter _ h, if_pos heq] at hc
-        haveI : Nonempty (β k) := ⟨(f (m.get? k)).get h'⟩
-        cast (congrArg β (eq_of_beq heq)) <| (f (m.get? k)).getV
+        cast (congrArg β (eq_of_beq heq)) <| (f (m.get? k)).get <| h'
       else
         haveI h' : m.contains k' := by rwa [contains_alter _ h, if_neg heq] at hc
         m.get k' h' := by
+  simp only [Option.get_eq_getV]
   simp_to_model [alter, contains, get, get?] using List.getValueCast_alterKey
 
 theorem get_alter_self [LawfulBEq α] (h : m.1.WF) {k : α} {f : Option (β k) → Option (β k)}
