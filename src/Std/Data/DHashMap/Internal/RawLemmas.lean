@@ -38,46 +38,51 @@ namespace Std.DHashMap.Internal
 section empty
 
 @[simp]
-theorem Raw₀.buckets_emptyWithCapacityV {c} {i : Nat} (h : i < (emptyWithCapacity c : Raw₀ α β).1.buckets.size) :
+theorem Raw₀.getElemV_buckets_emptyWithCapacity {c} {i : Nat} (h : i < (emptyWithCapacity c : Raw₀ α β).1.buckets.size) :
     (emptyWithCapacity c : Raw₀ α β).1.buckets｢i｣ = AssocList.nil := by
   simp [emptyWithCapacity, Array.getElemV_replicate (by simpa [emptyWithCapacity] using h)]
 
-@[simp]
-theorem Raw₀.buckets_emptyWithCapacity {c} {i : Nat} {h} :
+theorem Raw₀.getElem_buckets_emptyWithCapacity {c} {i : Nat} {h} :
     (emptyWithCapacity c : Raw₀ α β).1.buckets[i]'h = AssocList.nil := by
-  simpa using Raw₀.buckets_emptyWithCapacityV h
+  simpa using Raw₀.getElemV_buckets_emptyWithCapacity h
 
 @[simp]
-theorem Raw.buckets_emptyWithCapacityV {c} {i : Nat} (h : i < (Raw.emptyWithCapacity c : Raw α β).buckets.size) :
+theorem Raw.getElemV_buckets_emptyWithCapacity {c} {i : Nat} (h : i < (Raw.emptyWithCapacity c : Raw α β).buckets.size) :
     (Raw.emptyWithCapacity c : Raw α β).buckets｢i｣ = AssocList.nil := by
-  simp [Raw.emptyWithCapacity, Raw₀.buckets_emptyWithCapacityV (by simpa [Raw.emptyWithCapacity] using h)]
+  simp [Raw.emptyWithCapacity, Raw₀.getElemV_buckets_emptyWithCapacity (by simpa [Raw.emptyWithCapacity] using h)]
 
-@[simp]
-theorem Raw.buckets_emptyWithCapacity {c} {i : Nat} {h} :
+theorem Raw.getElem_buckets_emptyWithCapacity {c} {i : Nat} {h} :
     (Raw.emptyWithCapacity c : Raw α β).buckets[i]'h = AssocList.nil := by
-  simpa using Raw.buckets_emptyWithCapacityV h
+  simpa using Raw.getElemV_buckets_emptyWithCapacity h
 
 @[simp]
-theorem Raw.buckets_empty {i : Nat} {h} :
+theorem Raw.getElemV_buckets_empty {i : Nat} (h : i < (∅ : Raw α β).buckets.size) :
+    (∅ : Raw α β).buckets｢i｣ = AssocList.nil :=
+  getElemV_buckets_emptyWithCapacity h
+
+theorem Raw.getElem_buckets_empty {i : Nat} {h} :
     (∅ : Raw α β).buckets[i]'h = AssocList.nil :=
-  buckets_emptyWithCapacity
+  getElem_buckets_emptyWithCapacity
 
 variable [BEq α] [Hashable α]
 
 @[simp]
-theorem buckets_emptyWithCapacityV {c} {i : Nat} (h : i < (emptyWithCapacity c : DHashMap α β).1.buckets.size) :
+theorem getElemV_buckets_emptyWithCapacity {c} {i : Nat} (h : i < (emptyWithCapacity c : DHashMap α β).1.buckets.size) :
     (emptyWithCapacity c : DHashMap α β).1.buckets｢i｣ = AssocList.nil := by
-  simp [emptyWithCapacity, Raw.buckets_emptyWithCapacityV (by simpa [emptyWithCapacity] using h)]
+  simp [emptyWithCapacity, Raw.getElemV_buckets_emptyWithCapacity (by simpa [emptyWithCapacity] using h)]
 
-@[simp]
-theorem buckets_emptyWithCapacity {c} {i : Nat} {h} :
+theorem getElem_buckets_emptyWithCapacity {c} {i : Nat} {h} :
     (emptyWithCapacity c : DHashMap α β).1.buckets[i]'h = AssocList.nil := by
-  simpa using buckets_emptyWithCapacityV h
+  simpa using getElemV_buckets_emptyWithCapacity h
 
 @[simp]
-theorem buckets_empty {i : Nat} {h} :
+theorem getElemV_buckets_empty {i : Nat} (h : i < (∅ : DHashMap α β).1.buckets.size) :
+    (∅ : DHashMap α β).1.buckets｢i｣ = AssocList.nil :=
+  getElemV_buckets_emptyWithCapacity h
+
+theorem getElem_buckets_empty {i : Nat} {h} :
     (∅ : DHashMap α β).1.buckets[i]'h = AssocList.nil :=
-  buckets_emptyWithCapacity
+  getElem_buckets_emptyWithCapacity
 
 end empty
 
@@ -279,9 +284,23 @@ theorem size_insert_le [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {k : α} {
     (m.insert k v).1.size ≤ m.1.size + 1 := by
   simp_to_model [insert, size] using List.length_insertEntry_le
 
+/-
+PLOG(erase_emptyWithCapacity):
+Ugh, two nested ugly side conditions. The inner one I copied from `emptyWithCapacity`'s
+implementation. The outer one I don't even know where it's coming from.
+-/
+
 @[simp]
-theorem erase_emptyWithCapacity {k : α} {c : Nat} : (emptyWithCapacity c : Raw₀ α β).erase k = emptyWithCapacity c := by
-  simp [erase]; rfl
+theorem erase_emptyWithCapacity {k : α} {c : Nat} :
+    (emptyWithCapacity c : Raw₀ α β).erase k = emptyWithCapacity c := by
+  have : 0 < (Array.replicate (α := AssocList α β) (numBucketsForCapacity c).nextPowerOfTwo AssocList.nil).size := by
+    simpa using Nat.pos_of_isPowerOfTwo (Nat.isPowerOfTwo_nextPowerOfTwo _)
+  have : (mkIdx (Array.replicate (α := AssocList α β) (numBucketsForCapacity c).nextPowerOfTwo AssocList.nil).size this (hash k)).val.toNat <
+  (numBucketsForCapacity c).nextPowerOfTwo := by
+    exact Nat.lt_of_lt_of_le (mkIdx_val_toNat_lt _ _ _) (by simp)
+    -- FIXME
+    -- Perhaps the proof would actually follow from the `mkIdx` property.
+  simp [erase, emptyWithCapacity, this]
 
 theorem isEmpty_erase [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {k : α} :
     (m.erase k).1.isEmpty = (m.1.isEmpty || (m.1.size == 1 && m.contains k)) := by
