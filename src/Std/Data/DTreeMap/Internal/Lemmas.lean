@@ -8105,11 +8105,11 @@ theorem minKeyV_le_minKeyV_erase [TransOrd α] (h : t.WF) {k}
   revert he
   simp_to_model [minKey, minKeyV, erase, isEmpty] using List.minKeyV_le_minKeyV_erase
 
-theorem minKeyV_le_minKeyV_erase! [TransOrd α] (h : t.WF) {k}
-    (he : (t.erase! k).isEmpty = false) :
+theorem minKeyV_le_minKeyV_erase! [TransOrd α] (h : t.WF) {k} :
+    (he : (t.erase! k).isEmpty = false) →
     haveI : Nonempty α := ⟨k⟩
     compare t.minKeyV (t.erase! k).minKeyV |>.isLE := by
-  simpa only [erase_eq_erase!] using minKeyV_le_minKeyV_erase h (k := k) he
+  simpa only [erase_eq_erase!] using minKeyV_le_minKeyV_erase h (k := k)
 
 theorem minKey_le_minKey_erase [TransOrd α] (h : t.WF) {k he} :
     compare (t.minKey <| isEmpty_eq_false_of_isEmpty_erase_eq_false h he)
@@ -8119,7 +8119,7 @@ theorem minKey_le_minKey_erase [TransOrd α] (h : t.WF) {k he} :
 theorem minKey_le_minKey_erase! [TransOrd α] (h : t.WF) {k he} :
     compare (t.minKey <| isEmpty_eq_false_of_isEmpty_erase!_eq_false h he)
       (t.erase! k |>.minKey he) |>.isLE := by
-  simpa only [erase_eq_erase!] using minKey_le_minKey_erase h (k := k) (he := he)
+  simpa only [erase_eq_erase!] using minKey_le_minKey_erase h (k := k) (he := by simpa [erase_eq_erase!] using he)
 
 theorem minKeyV_insertIfNew [TransOrd α] (h : t.WF) {k v} :
     haveI : Nonempty α := ⟨k⟩
@@ -9316,10 +9316,21 @@ theorem maxKeyV_erase_le_maxKeyV [TransOrd α] (h : t.WF) {k}
   revert he
   simp_to_model [maxKey, maxKeyV, erase, isEmpty] using List.maxKeyV_eraseKey_le_maxKeyV
 
+theorem maxKeyV_erase!_le_maxKeyV [TransOrd α] (h : t.WF) {k} :
+    (he : (t.erase! k).isEmpty = false) →
+    haveI : Nonempty α := ⟨k⟩
+    compare (t.erase! k).maxKeyV t.maxKeyV |>.isLE := by
+  simpa only [erase_eq_erase!] using maxKeyV_erase_le_maxKeyV h (k := k)
+
 theorem maxKey_erase_le_maxKey [TransOrd α] (h : t.WF) {k he} :
     compare (t.erase k h.balanced |>.impl.maxKey he)
         (t.maxKey <| isEmpty_eq_false_of_isEmpty_erase_eq_false h he) |>.isLE := by
   simp_to_model [maxKey, erase] using List.maxKey_eraseKey_le_maxKey
+
+theorem maxKey_erase!_le_maxKey [TransOrd α] (h : t.WF) {k he} :
+    compare (t.erase! k |>.maxKey he)
+        (t.maxKey <| isEmpty_eq_false_of_isEmpty_erase!_eq_false h he) |>.isLE := by
+  simpa only [erase_eq_erase!] using maxKey_erase_le_maxKey h (k := k) (he := by simpa [erase_eq_erase!] using he)
 
 theorem maxKeyV_insertIfNew [TransOrd α] (h : t.WF) {k v} :
     haveI : Nonempty α := ⟨k⟩
@@ -10058,6 +10069,11 @@ theorem minKey?_eq [TransOrd α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m 
   simp_to_model [minKey?]
   rw [h.toListModel_eq h₁.ordered h₂.ordered]
 
+theorem minKeyV_eq [TransOrd α] {_ : Nonempty α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.minKeyV = t₂.minKeyV := by
+  simp_to_model [minKeyV]
+  rw [h.toListModel_eq h₁.ordered h₂.ordered]
+
 theorem minKey_eq [TransOrd α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) (h' : t₁.isEmpty = false) :
     t₁.minKey h' = t₂.minKey (h.isEmpty_eq.symm.trans h') := by
   simp_to_model [minKey]
@@ -10076,6 +10092,11 @@ theorem minKeyD_eq [TransOrd α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m 
 theorem maxKey?_eq [TransOrd α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.maxKey? = t₂.maxKey? := by
   simp_to_model [maxKey?]
+  rw [h.toListModel_eq h₁.ordered h₂.ordered]
+
+theorem maxKeyV_eq [TransOrd α] {_ : Nonempty α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.maxKeyV = t₂.maxKeyV := by
+  simp_to_model [maxKeyV]
   rw [h.toListModel_eq h₁.ordered h₂.ordered]
 
 theorem maxKey_eq [TransOrd α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) (h' : t₁.isEmpty = false) :
