@@ -3397,9 +3397,10 @@ theorem getValueCast?_insertList_of_mem [BEq α] [LawfulBEq α]
 theorem getValueCastV_insertList_of_mem [BEq α] [LawfulBEq α]
     {l toInsert : List ((a : α) × β a)}
     (distinct_l : DistinctKeys l)
-    {k k' : α} (k_beq : k == k') (v : β k) {_ : Nonempty (β k')}
+    {k k' : α} (k_beq : k == k') (v : β k)
     (distinct_toInsert : toInsert.Pairwise (fun a b => (a.1 == b.1) = false))
     (mem : ⟨k, v⟩ ∈ toInsert) :
+    haveI : Nonempty (β k') := beq_iff_eq.mp k_beq ▸ ⟨v⟩
     getValueCastV k' (insertList l toInsert) =
     cast (by congr; exact LawfulBEq.eq_of_beq k_beq) v := by
   simp [getValueCastV, getValueCast?_insertList_of_mem distinct_l k_beq distinct_toInsert mem]

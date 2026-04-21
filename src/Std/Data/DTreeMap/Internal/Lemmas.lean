@@ -2551,9 +2551,9 @@ theorem get_insertMany!_list_of_contains_eq_false [TransOrd α] [BEq α] [Lawful
 
 theorem getV_insertMany_list_of_mem [TransOrd α] [LawfulEqOrd α] (h : t.WF)
     {l : List ((a : α) × β a)} {k k' : α} : (k_beq : compare k k' = .eq) → {v : β k} →
-    {_ : Nonempty (β k')} →
     (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) →
     (mem : ⟨k, v⟩ ∈ l) →
+    haveI : Nonempty (β k') := compare_eq_iff_eq.mp k_beq ▸ ⟨v⟩
     (t.insertMany l h.balanced).1.getV k' =
       cast (by congr; apply compare_eq_iff_eq.mp k_beq) v := by
   simp_to_model [insertMany, getV, contains] using List.getValueCastV_insertList_of_mem
@@ -2570,12 +2570,13 @@ theorem get_insertMany_list_of_mem [TransOrd α] [LawfulEqOrd α] (h : t.WF)
 
 theorem getV_insertMany!_list_of_mem [TransOrd α] [LawfulEqOrd α] (h : t.WF)
     {l : List ((a : α) × β a)} {k k' : α} : (k_beq : compare k k' = .eq) → {v : β k} →
-    {_ : Nonempty (β k')} →
     (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) →
     (mem : ⟨k, v⟩ ∈ l) →
+    haveI : Nonempty (β k') := compare_eq_iff_eq.mp k_beq ▸ ⟨v⟩
     (t.insertMany! l).1.getV k' = cast (by congr; apply compare_eq_iff_eq.mp k_beq) v := by
-  simpa only [insertMany_eq_insertMany!] using getV_insertMany_list_of_mem h
 
+  simpa only [insertMany_eq_insertMany!] using getV_insertMany_list_of_mem h
+#exit
 theorem get_insertMany!_list_of_mem [TransOrd α] [LawfulEqOrd α] (h : t.WF)
     {l : List ((a : α) × β a)} {k k' : α} : (k_beq : compare k k' = .eq) → {v : β k} →
     (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) →
