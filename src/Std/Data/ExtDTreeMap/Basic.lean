@@ -255,7 +255,8 @@ def getKeyD [TransCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) (fallback : α) 
   t.lift (fun m => m.getKeyD a fallback) (fun _ _ h => h.getKeyD_eq)
 
 @[inherit_doc DTreeMap.getKeyV]
-noncomputable def getKeyV [TransCmp cmp] [Nonempty α] (t : ExtDTreeMap α β cmp) (a : α) : α :=
+noncomputable def getKeyV [TransCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) : α :=
+  haveI : Nonempty α := ⟨a⟩
   t.getKeyD a Classical.ofNonempty
 
 @[inline, inherit_doc DTreeMap.minEntry?]

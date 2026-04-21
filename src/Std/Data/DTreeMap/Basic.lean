@@ -286,7 +286,8 @@ Checks if a mapping for the given key exists and returns the key if it does, oth
 `Classical.ofNonempty`.
 If a mapping exists the result is guaranteed to be pointer equal to the key in the map.
 -/
-noncomputable def getKeyV [Nonempty α] (t : DTreeMap α β cmp) (a : α) : α :=
+noncomputable def getKeyV (t : DTreeMap α β cmp) (a : α) : α :=
+  haveI : Nonempty α := ⟨a⟩
   t.getKeyD a Classical.ofNonempty
 
 /--

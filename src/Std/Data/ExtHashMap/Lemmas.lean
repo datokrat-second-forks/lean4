@@ -390,38 +390,38 @@ theorem getD_congr [EquivBEq α] [LawfulHashable α] {a b : α} {fallback : β} 
   ExtDHashMap.Const.getD_congr hab
 
 @[simp, grind =]
-theorem getElemV_empty [EquivBEq α] [LawfulHashable α] [Nonempty β] {a : α} :
+theorem getElemV_empty [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {a : α} :
     (∅ : ExtHashMap α β)｢a｣ = (Classical.ofNonempty : β) :=
   ExtDHashMap.Const.getV_empty
 
-@[grind =] theorem getElemV_insert [EquivBEq α] [LawfulHashable α] [Nonempty β] {k a : α}
+@[grind =] theorem getElemV_insert [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k a : α}
     {v : β} : (m.insert k v)｢a｣ = if k == a then v else m｢a｣ :=
   ExtDHashMap.Const.getV_insert
 
 @[simp]
-theorem getElemV_insert_self [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α} {v : β} :
+theorem getElemV_insert_self [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α} {v : β} :
     (m.insert k v)｢k｣ = v :=
   ExtDHashMap.Const.getV_insert_self
 
 theorem getElemV_eq_classicalOfNonempty_of_contains_eq_false [EquivBEq α] [LawfulHashable α]
-    [Nonempty β] {a : α} :
+    {_ : Nonempty β} {a : α} :
     m.contains a = false → m｢a｣ = (Classical.ofNonempty : β) :=
   ExtDHashMap.Const.getV_eq_classicalOfNonempty_of_contains_eq_false
 
-theorem getElemV_eq_classicalOfNonempty [EquivBEq α] [LawfulHashable α] [Nonempty β] {a : α} :
+theorem getElemV_eq_classicalOfNonempty [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {a : α} :
     ¬a ∈ m → m｢a｣ = (Classical.ofNonempty : β) :=
   ExtDHashMap.Const.getV_eq_classicalOfNonempty
 
-@[grind =] theorem getElemV_erase [EquivBEq α] [LawfulHashable α] [Nonempty β] {k a : α} :
+@[grind =] theorem getElemV_erase [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k a : α} :
     (m.erase k)｢a｣ = if k == a then (Classical.ofNonempty : β) else m｢a｣ :=
   ExtDHashMap.Const.getV_erase
 
 @[simp]
-theorem getElemV_erase_self [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α} :
+theorem getElemV_erase_self [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α} :
     (m.erase k)｢k｣ = (Classical.ofNonempty : β) :=
   ExtDHashMap.Const.getV_erase_self
 
-theorem getElemV_eq_getD_getElem? [EquivBEq α] [LawfulHashable α] [Nonempty β] {a : α} :
+theorem getElemV_eq_getD_getElem? [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {a : α} :
     m｢a｣ = m[a]?.getD Classical.ofNonempty :=
   ExtDHashMap.Const.getV_eq_getD_get?
 
@@ -431,11 +431,11 @@ theorem getElem_eq_getElemV [EquivBEq α] [LawfulHashable α] {a : α} {h'} :
     m[a]'h' = m｢a｣ :=
   ExtDHashMap.Const.get_eq_getV (h := h')
 
-theorem getElemV_eq_getD_classicalOfNonempty [EquivBEq α] [LawfulHashable α] [Nonempty β]
+theorem getElemV_eq_getD_classicalOfNonempty [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
     {a : α} : m｢a｣ = m.getD a Classical.ofNonempty :=
   rfl
 
-theorem getElemV_congr [EquivBEq α] [LawfulHashable α] [Nonempty β] {a b : α} (hab : a == b) :
+theorem getElemV_congr [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {a b : α} (hab : a == b) :
     m｢a｣ = m｢b｣ :=
   ExtDHashMap.Const.getV_congr hab
 
@@ -606,7 +606,7 @@ theorem getKeyD_empty [EquivBEq α] [LawfulHashable α] {a : α} {fallback : α}
     (∅ : ExtHashMap α β).getKeyD a fallback = fallback :=
   ExtDHashMap.getKeyD_empty
 
-theorem getKeyV_empty [EquivBEq α] [LawfulHashable α] [Nonempty α] {a : α} :
+theorem getKeyV_empty [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {a : α} :
     (∅ : ExtHashMap α β).getKeyV a = Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_empty
 
@@ -614,7 +614,7 @@ theorem getKeyV_empty [EquivBEq α] [LawfulHashable α] [Nonempty α] {a : α} :
     (m.insert k v).getKeyD a fallback = if k == a then k else m.getKeyD a fallback :=
   ExtDHashMap.getKeyD_insert
 
-@[grind =] theorem getKeyV_insert [EquivBEq α] [LawfulHashable α] [Nonempty α] {k a : α} {v : β} :
+@[grind =] theorem getKeyV_insert [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k a : α} {v : β} :
     (m.insert k v).getKeyV a = if k == a then k else m.getKeyV a  :=
   ExtDHashMap.getKeyV_insert
 
@@ -623,7 +623,7 @@ theorem getKeyD_insert_self [EquivBEq α] [LawfulHashable α] {k fallback : α} 
    (m.insert k v).getKeyD k fallback = k :=
   ExtDHashMap.getKeyD_insert_self
 
-theorem getKeyV_insert_self [EquivBEq α] [LawfulHashable α] [Nonempty α] {k : α} {v : β} :
+theorem getKeyV_insert_self [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k : α} {v : β} :
     (m.insert k v).getKeyV k = k  :=
   ExtDHashMap.getKeyV_insert_self
 
@@ -631,7 +631,7 @@ theorem getKeyD_eq_fallback_of_contains_eq_false [EquivBEq α] [LawfulHashable �
     {fallback : α} : m.contains a = false → m.getKeyD a fallback = fallback :=
   ExtDHashMap.getKeyD_eq_fallback_of_contains_eq_false
 
-theorem getKeyV_eq_classicalOfNonempty_of_contains_eq_false [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_eq_classicalOfNonempty_of_contains_eq_false [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {a : α} : m.contains a = false → m.getKeyV a = Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_eq_classicalOfNonempty_of_contains_eq_false
 
@@ -639,7 +639,7 @@ theorem getKeyD_eq_fallback [EquivBEq α] [LawfulHashable α] {a : α} {fallback
     ¬a ∈ m → m.getKeyD a fallback = fallback :=
   ExtDHashMap.getKeyD_eq_fallback
 
-theorem getKeyV_eq_classicalOfNonempty [EquivBEq α] [LawfulHashable α] [Nonempty α] {a : α} :
+theorem getKeyV_eq_classicalOfNonempty [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {a : α} :
     ¬a ∈ m → m.getKeyV a = Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_eq_classicalOfNonempty
 
@@ -647,7 +647,7 @@ theorem getKeyV_eq_classicalOfNonempty [EquivBEq α] [LawfulHashable α] [Nonemp
     (m.erase k).getKeyD a fallback = if k == a then fallback else m.getKeyD a fallback :=
   ExtDHashMap.getKeyD_erase
 
-@[grind =] theorem getKeyV_erase [EquivBEq α] [LawfulHashable α] [Nonempty α] {k a : α} :
+@[grind =] theorem getKeyV_erase [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k a : α} :
     (m.erase k).getKeyV a = if k == a then Classical.ofNonempty else m.getKeyV a  :=
   ExtDHashMap.getKeyV_erase
 
@@ -656,7 +656,7 @@ theorem getKeyD_erase_self [EquivBEq α] [LawfulHashable α] {k : α} {fallback 
     (m.erase k).getKeyD k fallback = fallback :=
   ExtDHashMap.getKeyD_erase_self
 
-theorem getKeyV_erase_self [EquivBEq α] [LawfulHashable α] [Nonempty α] {k : α} :
+theorem getKeyV_erase_self [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k : α} :
     (m.erase k).getKeyV k = Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_erase_self
 
@@ -672,7 +672,7 @@ theorem getKeyD_eq_getD_getKey? [EquivBEq α] [LawfulHashable α] {a : α} {fall
     m.getKeyD a fallback = (m.getKey? a).getD fallback :=
   ExtDHashMap.getKeyD_eq_getD_getKey?
 
-theorem getKeyV_eq_getD_getKey? [EquivBEq α] [LawfulHashable α] [Nonempty α] {a : α} :
+theorem getKeyV_eq_getD_getKey? [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {a : α} :
     m.getKeyV a = (m.getKey? a).getD Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_eq_getD_getKey?
 
@@ -685,12 +685,12 @@ theorem getKey_eq_getKeyD [EquivBEq α] [LawfulHashable α] {a : α} {fallback :
     m.getKey a h' = m.getKeyD a fallback :=
   @ExtDHashMap.getKey_eq_getKeyD _ _ _ _ _ _ _ _ _ h'
 
-theorem getKey?_eq_some_getKeyV_of_contains [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKey?_eq_some_getKeyV_of_contains [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {a : α} :
     m.contains a = true → m.getKey? a = some (m.getKeyV a) :=
   ExtDHashMap.getKey?_eq_some_getKeyV_of_contains
 
-theorem getKey?_eq_some_getKeyV [EquivBEq α] [LawfulHashable α] [Nonempty α] {a : α} :
+theorem getKey?_eq_some_getKeyV [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {a : α} :
     a ∈ m → m.getKey? a = some (m.getKeyV a) :=
   ExtDHashMap.getKey?_eq_some_getKeyV
 
@@ -704,7 +704,7 @@ theorem getKey!_eq_getKeyD_default [EquivBEq α] [LawfulHashable α] [Inhabited 
     m.getKey! a = m.getKeyD a default :=
   ExtDHashMap.getKey!_eq_getKeyD_default
 
-theorem getKeyV_eq_getKeyD_classicalOfNonempty [EquivBEq α] [LawfulHashable α] [Nonempty α] {a : α} :
+theorem getKeyV_eq_getKeyD_classicalOfNonempty [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {a : α} :
     m.getKeyV a = m.getKeyD a Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_eq_getKeyD_classicalOfNonempty
 
@@ -712,7 +712,7 @@ theorem getKeyD_congr [EquivBEq α] [LawfulHashable α] {k k' fallback : α}
     (h : k == k') : m.getKeyD k fallback = m.getKeyD k' fallback :=
   ExtDHashMap.getKeyD_congr h
 
-theorem getKeyV_congr [EquivBEq α] [LawfulHashable α] [Nonempty α] {k k' : α} (h : k == k') :
+theorem getKeyV_congr [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k k' : α} (h : k == k') :
     m.getKeyV k = m.getKeyV k'  :=
   ExtDHashMap.getKeyV_congr h
 
@@ -720,7 +720,7 @@ theorem getKeyD_eq_of_contains [LawfulBEq α] {k fallback : α} (h : m.contains 
     m.getKeyD k fallback = k :=
   ExtDHashMap.getKeyD_eq_of_contains h
 
-theorem getKeyV_eq_of_contains [LawfulBEq α] [Nonempty α] {k : α} (h : m.contains k) :
+theorem getKeyV_eq_of_contains [LawfulBEq α] {_ : Nonempty α} {k : α} (h : m.contains k) :
     m.getKeyV k = k  :=
   ExtDHashMap.getKeyV_eq_of_contains h
 
@@ -728,8 +728,8 @@ theorem getKeyD_eq_of_mem [LawfulBEq α] {k fallback : α} (h : k ∈ m) :
     m.getKeyD k fallback = k :=
   ExtDHashMap.getKeyD_eq_of_mem h
 
-theorem getKeyV_eq_of_mem [LawfulBEq α] [Nonempty α] {k : α} (h : k ∈ m) : m.getKeyV k = k  :=
-  ExtDHashMap.getKeyV_eq_of_mem h
+theorem getKeyV_eq [LawfulBEq α] {_ : Nonempty α} {k : α} (h : k ∈ m) : m.getKeyV k = k  :=
+  ExtDHashMap.getKeyV_eq h
 
 @[simp]
 theorem not_insertIfNew_eq_empty [EquivBEq α] [LawfulHashable α] {k : α} {v : β} :
@@ -804,7 +804,7 @@ theorem getElem_insertIfNew [EquivBEq α] [LawfulHashable α] {k a : α} {v : β
       if k == a ∧ ¬k ∈ m then v else m.getD a fallback :=
   ExtDHashMap.Const.getD_insertIfNew
 
-@[grind =] theorem getElemV_insertIfNew [EquivBEq α] [LawfulHashable α] [Nonempty β] {k a : α}
+@[grind =] theorem getElemV_insertIfNew [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k a : α}
     {v : β} : (m.insertIfNew k v)｢a｣ = if k == a ∧ ¬k ∈ m then v else m｢a｣ :=
   ExtDHashMap.Const.getV_insertIfNew
 
@@ -825,7 +825,7 @@ theorem getKey_insertIfNew [EquivBEq α] [LawfulHashable α] {k a : α} {v : β}
     getKeyD (m.insertIfNew k v) a fallback = if k == a ∧ ¬k ∈ m then k else getKeyD m a fallback :=
   ExtDHashMap.getKeyD_insertIfNew
 
-@[grind =] theorem getKeyV_insertIfNew [EquivBEq α] [LawfulHashable α] [Nonempty α] {k a : α} {v : β} :
+@[grind =] theorem getKeyV_insertIfNew [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k a : α} {v : β} :
     getKeyV (m.insertIfNew k v) a = if k == a ∧ ¬k ∈ m then k else getKeyV m a  :=
   ExtDHashMap.getKeyV_insertIfNew
 
@@ -957,13 +957,13 @@ theorem getD_insertMany_list_of_mem [EquivBEq α] [LawfulHashable α]
     getD (insertMany m l) k' fallback = v :=
   ExtDHashMap.Const.getD_insertMany_list_of_mem k_beq distinct mem
 
-theorem getElemV_insertMany_list_of_contains_eq_false [EquivBEq α] [LawfulHashable α] [Nonempty β]
+theorem getElemV_insertMany_list_of_contains_eq_false [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
     {l : List (α × β)} {k : α}
     (contains_eq_false : (l.map Prod.fst).contains k = false) :
     (insertMany m l)｢k｣ = m｢k｣ :=
   ExtDHashMap.Const.getV_insertMany_list_of_contains_eq_false contains_eq_false
 
-theorem getElemV_insertMany_list_of_mem [EquivBEq α] [LawfulHashable α] [Nonempty β]
+theorem getElemV_insertMany_list_of_mem [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
     {l : List (α × β)} {k k' : α} (k_beq : k == k') {v : β}
     (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false)) (mem : ⟨k, v⟩ ∈ l) :
     (insertMany m l)｢k'｣ = v :=
@@ -1020,7 +1020,7 @@ theorem getKeyD_insertMany_list_of_contains_eq_false [EquivBEq α] [LawfulHashab
     (insertMany m l).getKeyD k fallback = m.getKeyD k fallback :=
   ExtDHashMap.Const.getKeyD_insertMany_list_of_contains_eq_false contains_eq_false
 
-theorem getKeyV_insertMany_list_of_contains_eq_false [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_insertMany_list_of_contains_eq_false [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {l : List (α × β)} {k : α}
     (contains_eq_false : (l.map Prod.fst).contains k = false) :
     (insertMany m l).getKeyV k = m.getKeyV k  :=
@@ -1034,7 +1034,7 @@ theorem getKeyD_insertMany_list_of_mem [EquivBEq α] [LawfulHashable α]
     (insertMany m l).getKeyD k' fallback = k :=
   ExtDHashMap.Const.getKeyD_insertMany_list_of_mem k_beq distinct mem
 
-theorem getKeyV_insertMany_list_of_mem [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_insertMany_list_of_mem [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {l : List (α × β)}
     {k k' : α} (k_beq : k == k')
     (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
@@ -1214,7 +1214,7 @@ theorem getKeyD_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false
     not_mem contains_eq_false
 
 theorem getKeyV_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false
-    [EquivBEq α] [LawfulHashable α] [Nonempty α] {l : List α} {k : α}
+    [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {l : List α} {k : α}
     (not_mem : ¬ k ∈ m) (contains_eq_false : l.contains k = false) :
     getKeyV (insertManyIfNewUnit m l) k = Classical.ofNonempty  :=
   ExtDHashMap.Const.getKeyV_insertManyIfNewUnit_list_of_not_mem_of_contains_eq_false
@@ -1229,7 +1229,7 @@ theorem getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem [EquivBEq α] [Lawful
     k_beq not_mem distinct mem
 
 theorem getKeyV_insertManyIfNewUnit_list_of_not_mem_of_mem [EquivBEq α] [LawfulHashable α]
-    [Nonempty α] {l : List α} {k k' : α} (k_beq : k == k')
+    {_ : Nonempty α} {l : List α} {k k' : α} (k_beq : k == k')
     (not_mem : ¬ k ∈ m)
     (distinct : l.Pairwise (fun a b => (a == b) = false)) (mem : k ∈ l) :
     getKeyV (insertManyIfNewUnit m l) k' = k  :=
@@ -1242,7 +1242,7 @@ theorem getKeyD_insertManyIfNewUnit_list_of_mem [EquivBEq α] [LawfulHashable α
   ExtDHashMap.Const.getKeyD_insertManyIfNewUnit_list_of_mem mem
 
 theorem getKeyV_insertManyIfNewUnit_list_of_mem [EquivBEq α] [LawfulHashable α]
-    [Nonempty α] {l : List α} {k : α} (mem : k ∈ m) :
+    {_ : Nonempty α} {l : List α} {k : α} (mem : k ∈ m) :
     getKeyV (insertManyIfNewUnit m l) k = getKeyV m k  :=
   ExtDHashMap.Const.getKeyV_insertManyIfNewUnit_list_of_mem mem
 
@@ -1364,13 +1364,13 @@ theorem getD_ofList_of_mem [EquivBEq α] [LawfulHashable α]
     getD (ofList l) k' fallback = v :=
   ExtDHashMap.Const.getD_ofList_of_mem k_beq distinct mem
 
-theorem getElemV_ofList_of_contains_eq_false [EquivBEq α] [LawfulHashable α] [Nonempty β]
+theorem getElemV_ofList_of_contains_eq_false [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
     {l : List (α × β)} {k : α}
     (contains_eq_false : (l.map Prod.fst).contains k = false) :
     (ofList l)｢k｣ = (Classical.ofNonempty : β) :=
   ExtDHashMap.Const.getV_ofList_of_contains_eq_false contains_eq_false
 
-theorem getElemV_ofList_of_mem [EquivBEq α] [LawfulHashable α] [Nonempty β]
+theorem getElemV_ofList_of_mem [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
     {l : List (α × β)} {k k' : α} (k_beq : k == k') {v : β}
     (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
     (mem : ⟨k, v⟩ ∈ l) :
@@ -1421,7 +1421,7 @@ theorem getKeyD_ofList_of_contains_eq_false [EquivBEq α] [LawfulHashable α]
   ExtDHashMap.Const.getKeyD_ofList_of_contains_eq_false contains_eq_false
 
 theorem getKeyV_ofList_of_contains_eq_false [EquivBEq α] [LawfulHashable α]
-    [Nonempty α] {l : List (α × β)} {k : α}
+    {_ : Nonempty α} {l : List (α × β)} {k : α}
     (contains_eq_false : (l.map Prod.fst).contains k = false) :
     (ofList l).getKeyV k = Classical.ofNonempty  :=
   ExtDHashMap.Const.getKeyV_ofList_of_contains_eq_false contains_eq_false
@@ -1434,7 +1434,7 @@ theorem getKeyD_ofList_of_mem [EquivBEq α] [LawfulHashable α]
     (ofList l).getKeyD k' fallback = k :=
   ExtDHashMap.Const.getKeyD_ofList_of_mem k_beq distinct mem
 
-theorem getKeyV_ofList_of_mem [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_ofList_of_mem [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {l : List (α × β)}
     {k k' : α} (k_beq : k == k')
     (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
@@ -1563,7 +1563,7 @@ theorem getKeyD_unitOfList_of_contains_eq_false [EquivBEq α] [LawfulHashable α
   ExtDHashMap.Const.getKeyD_unitOfList_of_contains_eq_false contains_eq_false
 
 theorem getKeyV_unitOfList_of_contains_eq_false [EquivBEq α] [LawfulHashable α]
-    [Nonempty α] {l : List α} {k : α}
+    {_ : Nonempty α} {l : List α} {k : α}
     (contains_eq_false : l.contains k = false) :
     getKeyV (unitOfList l) k = Classical.ofNonempty  :=
   ExtDHashMap.Const.getKeyV_unitOfList_of_contains_eq_false contains_eq_false
@@ -1576,7 +1576,7 @@ theorem getKeyD_unitOfList_of_mem [EquivBEq α] [LawfulHashable α]
   ExtDHashMap.Const.getKeyD_unitOfList_of_mem k_beq distinct mem
 
 theorem getKeyV_unitOfList_of_mem [EquivBEq α] [LawfulHashable α]
-    [Nonempty α] {l : List α} {k k' : α} (k_beq : k == k')
+    {_ : Nonempty α} {l : List α} {k k' : α} (k_beq : k == k')
     (distinct : l.Pairwise (fun a b => (a == b) = false))
     (mem : k ∈ l) :
     getKeyV (unitOfList l) k' = k  :=
@@ -1724,7 +1724,7 @@ theorem getD_union_of_not_mem_right [EquivBEq α] [LawfulHashable α]
   ExtDHashMap.Const.getD_union_of_not_mem_right not_mem
 
 /- getElemV -/
-theorem getElemV_union [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α} :
+theorem getElemV_union [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α} :
     (m₁ ∪ m₂)｢k｣ = m₂.getD k (m₁｢k｣) := -- TODO
   ExtDHashMap.Const.getV_union
 
@@ -1733,12 +1733,12 @@ theorem getElemV_union_of_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonem
     (m₁ ∪ m₂)｢k｣ = m₂｢k｣ := by
   rw [getElemV_union, ← getElem_eq_getD (h' := mem), getElem_eq_getElemV]
 
-theorem getElemV_union_of_not_mem_left [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α}
+theorem getElemV_union_of_not_mem_left [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α}
     (not_mem : ¬k ∈ m₁) :
     (m₁ ∪ m₂)｢k｣ = m₂｢k｣ :=
   ExtDHashMap.Const.getV_union_of_not_mem_left not_mem
 
-theorem getElemV_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α}
+theorem getElemV_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α}
     (not_mem : ¬k ∈ m₂) :
     (m₁ ∪ m₂)｢k｣ = m₁｢k｣ :=
   ExtDHashMap.Const.getV_union_of_not_mem_right not_mem
@@ -1805,7 +1805,7 @@ theorem getKeyD_union [EquivBEq α] [LawfulHashable α] {k fallback : α} :
     (m₁ ∪ m₂).getKeyD k fallback = m₂.getKeyD k (m₁.getKeyD k fallback) :=
   ExtDHashMap.getKeyD_union
 
-theorem getKeyV_union [EquivBEq α] [LawfulHashable α] [Nonempty α] {k : α} : (m₁ ∪ m₂).getKeyV k = m₂.getKeyD k (m₁.getKeyV k)  :=
+theorem getKeyV_union [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k : α} : (m₁ ∪ m₂).getKeyV k = m₂.getKeyD k (m₁.getKeyV k)  :=
   ExtDHashMap.getKeyV_union
 
 theorem getKeyD_union_of_not_mem_left [EquivBEq α] [LawfulHashable α]
@@ -1813,7 +1813,7 @@ theorem getKeyD_union_of_not_mem_left [EquivBEq α] [LawfulHashable α]
     (m₁ ∪ m₂).getKeyD k fallback = m₂.getKeyD k fallback :=
   ExtDHashMap.getKeyD_union_of_not_mem_left not_mem
 
-theorem getKeyV_union_of_not_mem_left [Nonempty α]
+theorem getKeyV_union_of_not_mem_left {_ : Nonempty α}
     [EquivBEq α] [LawfulHashable α] {k : α}
     (not_mem : ¬k ∈ m₁) :
     (m₁ ∪ m₂).getKeyV k = m₂.getKeyV k  :=
@@ -1824,7 +1824,7 @@ theorem getKeyD_union_of_not_mem_right [EquivBEq α] [LawfulHashable α]
     (m₁ ∪ m₂).getKeyD k fallback = m₁.getKeyD k fallback :=
   ExtDHashMap.getKeyD_union_of_not_mem_right not_mem
 
-theorem getKeyV_union_of_not_mem_right [Nonempty α]
+theorem getKeyV_union_of_not_mem_right {_ : Nonempty α}
     [EquivBEq α] [LawfulHashable α] {k : α}
     (not_mem : ¬k ∈ m₂) :
     (m₁ ∪ m₂).getKeyV k = m₁.getKeyV k  :=
@@ -1983,22 +1983,22 @@ theorem getD_inter_of_not_mem_left [EquivBEq α] [LawfulHashable α]
   ExtDHashMap.Const.getD_inter_of_not_mem_left not_mem
 
 /- getElemV -/
-@[grind =] theorem getElemV_inter [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α} :
+@[grind =] theorem getElemV_inter [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α} :
     (m₁ ∩ m₂)｢k｣ =
     if k ∈ m₂ then m₁｢k｣ else (Classical.ofNonempty : β) :=
   ExtDHashMap.Const.getV_inter
 
-theorem getElemV_inter_of_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α}
+theorem getElemV_inter_of_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α}
     (mem : k ∈ m₂) :
     (m₁ ∩ m₂)｢k｣ = m₁｢k｣ :=
   ExtDHashMap.Const.getV_inter_of_mem_right mem
 
-theorem getElemV_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α}
+theorem getElemV_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α}
     (not_mem : k ∉ m₂) :
     (m₁ ∩ m₂)｢k｣ = (Classical.ofNonempty : β) :=
   ExtDHashMap.Const.getV_inter_of_not_mem_right not_mem
 
-theorem getElemV_inter_of_not_mem_left [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α}
+theorem getElemV_inter_of_not_mem_left [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α}
     (not_mem : k ∉ m₁) :
     (m₁ ∩ m₂)｢k｣ = (Classical.ofNonempty : β) :=
   ExtDHashMap.Const.getV_inter_of_not_mem_left not_mem
@@ -2081,7 +2081,7 @@ theorem getKeyD_inter [EquivBEq α] [LawfulHashable α] {k fallback : α} :
     if k ∈ m₂ then m₁.getKeyD k fallback else fallback :=
   ExtDHashMap.getKeyD_inter
 
-theorem getKeyV_inter [EquivBEq α] [LawfulHashable α] [Nonempty α] {k : α} :
+theorem getKeyV_inter [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k : α} :
     (m₁ ∩ m₂).getKeyV k =
     if k ∈ m₂ then m₁.getKeyV k else Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_inter
@@ -2091,7 +2091,7 @@ theorem getKeyD_inter_of_mem_right [EquivBEq α] [LawfulHashable α]
     (m₁ ∩ m₂).getKeyD k fallback = m₁.getKeyD k fallback :=
   ExtDHashMap.getKeyD_inter_of_mem_right mem
 
-theorem getKeyV_inter_of_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_inter_of_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {k : α} (mem : k ∈ m₂) :
     (m₁ ∩ m₂).getKeyV k = m₁.getKeyV k  :=
   ExtDHashMap.getKeyV_inter_of_mem_right mem
@@ -2101,7 +2101,7 @@ theorem getKeyD_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α]
     (m₁ ∩ m₂).getKeyD k fallback = fallback :=
   ExtDHashMap.getKeyD_inter_of_not_mem_right not_mem
 
-theorem getKeyV_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {k : α} (not_mem : k ∉ m₂) :
     (m₁ ∩ m₂).getKeyV k = Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_inter_of_not_mem_right not_mem
@@ -2111,7 +2111,7 @@ theorem getKeyD_inter_of_not_mem_left [EquivBEq α] [LawfulHashable α]
     (m₁ ∩ m₂).getKeyD k fallback = fallback :=
   ExtDHashMap.getKeyD_inter_of_not_mem_left not_mem
 
-theorem getKeyV_inter_of_not_mem_left [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_inter_of_not_mem_left [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {k : α} (not_mem : k ∉ m₁) :
     (m₁ ∩ m₂).getKeyV k = Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_inter_of_not_mem_left not_mem
@@ -2260,22 +2260,22 @@ theorem getD_diff_of_not_mem_left [EquivBEq α] [LawfulHashable α]
   ExtDHashMap.Const.getD_diff_of_not_mem_left not_mem
 
 /- getElemV -/
-@[grind =] theorem getElemV_diff [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α} :
+@[grind =] theorem getElemV_diff [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α} :
     (m₁ \ m₂)｢k｣ =
     if k ∈ m₂ then (Classical.ofNonempty : β) else m₁｢k｣ :=
   ExtDHashMap.Const.getV_diff
 
-theorem getElemV_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α}
+theorem getElemV_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α}
     (not_mem : k ∉ m₂) :
     (m₁ \ m₂)｢k｣ = m₁｢k｣ :=
   ExtDHashMap.Const.getV_diff_of_not_mem_right not_mem
 
-theorem getElemV_diff_of_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α}
+theorem getElemV_diff_of_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α}
     (mem : k ∈ m₂) :
     (m₁ \ m₂)｢k｣ = (Classical.ofNonempty : β) :=
   ExtDHashMap.Const.getV_diff_of_mem_right mem
 
-theorem getElemV_diff_of_not_mem_left [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α}
+theorem getElemV_diff_of_not_mem_left [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α}
     (not_mem : k ∉ m₁) :
     (m₁ \ m₂)｢k｣ = (Classical.ofNonempty : β) :=
   ExtDHashMap.Const.getV_diff_of_not_mem_left not_mem
@@ -2335,7 +2335,7 @@ theorem getKeyD_diff [EquivBEq α] [LawfulHashable α] {k fallback : α} :
     if k ∈ m₂ then fallback else m₁.getKeyD k fallback :=
   ExtDHashMap.getKeyD_diff
 
-theorem getKeyV_diff [EquivBEq α] [LawfulHashable α] [Nonempty α] {k : α} :
+theorem getKeyV_diff [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k : α} :
     (m₁ \ m₂).getKeyV k =
     if k ∈ m₂ then Classical.ofNonempty else m₁.getKeyV k  :=
   ExtDHashMap.getKeyV_diff
@@ -2345,7 +2345,7 @@ theorem getKeyD_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α]
     (m₁ \ m₂).getKeyD k fallback = m₁.getKeyD k fallback :=
   ExtDHashMap.getKeyD_diff_of_not_mem_right not_mem
 
-theorem getKeyV_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {k : α} (not_mem : k ∉ m₂) :
     (m₁ \ m₂).getKeyV k = m₁.getKeyV k  :=
   ExtDHashMap.getKeyV_diff_of_not_mem_right not_mem
@@ -2355,7 +2355,7 @@ theorem getKeyD_diff_of_mem_right [EquivBEq α] [LawfulHashable α]
     (m₁ \ m₂).getKeyD k fallback = fallback :=
   ExtDHashMap.getKeyD_diff_of_mem_right mem
 
-theorem getKeyV_diff_of_mem_right [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_diff_of_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {k : α} (mem : k ∈ m₂) :
     (m₁ \ m₂).getKeyV k = Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_diff_of_mem_right mem
@@ -2365,7 +2365,7 @@ theorem getKeyD_diff_of_not_mem_left [EquivBEq α] [LawfulHashable α]
     (m₁ \ m₂).getKeyD k fallback = fallback :=
   ExtDHashMap.getKeyD_diff_of_not_mem_left not_mem
 
-theorem getKeyV_diff_of_not_mem_left [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_diff_of_not_mem_left [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {k : α} (not_mem : k ∉ m₁) :
     (m₁ \ m₂).getKeyV k = Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_diff_of_not_mem_left not_mem
@@ -2560,13 +2560,13 @@ theorem getD_alter_self [EquivBEq α] [LawfulHashable α] {k : α} {fallback : �
   ExtDHashMap.Const.getD_alter_self
 
 @[grind =]
-theorem getElemV_alter [EquivBEq α] [LawfulHashable α] [Nonempty β] {k k' : α}
+theorem getElemV_alter [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k k' : α}
     {f : Option β → Option β} :
     (alter m k f)｢k'｣ = if k == k' then f m[k]? |>.getD Classical.ofNonempty else m｢k'｣ :=
   ExtDHashMap.Const.getV_alter
 
 @[simp]
-theorem getElemV_alter_self [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α}
+theorem getElemV_alter_self [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α}
     {f : Option β → Option β} :
     (alter m k f)｢k｣ = (f m[k]?).getD Classical.ofNonempty := by
   simp [getElemV_alter]
@@ -2620,7 +2620,7 @@ theorem getKey_alter_self [EquivBEq α] [LawfulHashable α] [Inhabited α] {k : 
         m.getKeyD k' fallback :=
   ExtDHashMap.Const.getKeyD_alter
 
-@[grind =] theorem getKeyV_alter [EquivBEq α] [LawfulHashable α] [Nonempty α] {k k' : α}
+@[grind =] theorem getKeyV_alter [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k k' : α}
     {f : Option β → Option β} : (alter m k f).getKeyV k' =
       if k == k' then
         if (f m[k]?).isSome then k else Classical.ofNonempty
@@ -2633,7 +2633,7 @@ theorem getKeyD_alter_self [EquivBEq α] [LawfulHashable α] [Inhabited α] {k f
     (alter m k f).getKeyD k fallback = if (f m[k]?).isSome then k else fallback :=
   ExtDHashMap.Const.getKeyD_alter_self
 
-theorem getKeyV_alter_self [EquivBEq α] [LawfulHashable α] [Nonempty α] {k : α}
+theorem getKeyV_alter_self [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k : α}
     {f : Option β → Option β} :
     (alter m k f).getKeyV k = if (f m[k]?).isSome then k else Classical.ofNonempty  :=
   ExtDHashMap.Const.getKeyV_alter_self
@@ -2720,7 +2720,7 @@ theorem getD_modify_self [EquivBEq α] [LawfulHashable α] {k : α} {fallback : 
     getD (modify m k f) k fallback = (m[k]?.map f).getD fallback :=
   ExtDHashMap.Const.getD_modify_self
 
-@[grind =] theorem getElemV_modify [EquivBEq α] [LawfulHashable α] [Nonempty β] {k k' : α} {f : β → β} :
+@[grind =] theorem getElemV_modify [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k k' : α} {f : β → β} :
     (modify m k f)｢k'｣ =
       if k == k' then
         m[k]?.map f |>.getD Classical.ofNonempty
@@ -2729,7 +2729,7 @@ theorem getD_modify_self [EquivBEq α] [LawfulHashable α] {k : α} {fallback : 
   ExtDHashMap.Const.getV_modify
 
 @[simp]
-theorem getElemV_modify_self [EquivBEq α] [LawfulHashable α] [Nonempty β] {k : α} {f : β → β} :
+theorem getElemV_modify_self [EquivBEq α] [LawfulHashable α] {_ : Nonempty β} {k : α} {f : β → β} :
     (modify m k f)｢k｣ = (m[k]?.map f).getD Classical.ofNonempty :=
   ExtDHashMap.Const.getV_modify_self
 
@@ -2779,7 +2779,7 @@ theorem getKey_modify_self [EquivBEq α] [LawfulHashable α] [Inhabited α] {k :
         m.getKeyD k' fallback :=
   ExtDHashMap.Const.getKeyD_modify
 
-@[grind =] theorem getKeyV_modify [EquivBEq α] [LawfulHashable α] [Nonempty α] {k k' : α} {f : β → β} :
+@[grind =] theorem getKeyV_modify [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k k' : α} {f : β → β} :
     (modify m k f).getKeyV k' =
       if k == k' then
         if k ∈ m then k else Classical.ofNonempty
@@ -2791,7 +2791,7 @@ theorem getKeyD_modify_self [EquivBEq α] [LawfulHashable α] [Inhabited α] {k 
     {f : β → β} : (modify m k f).getKeyD k fallback = if k ∈ m then k else fallback :=
   ExtDHashMap.Const.getKeyD_modify_self
 
-theorem getKeyV_modify_self [EquivBEq α] [LawfulHashable α] [Nonempty α] {k : α} {f : β → β} :
+theorem getKeyV_modify_self [EquivBEq α] [LawfulHashable α] {_ : Nonempty α} {k : α} {f : β → β} :
     (modify m k f).getKeyV k = if k ∈ m then k else Classical.ofNonempty  :=
   ExtDHashMap.Const.getKeyV_modify_self
 
@@ -2933,7 +2933,7 @@ theorem getD_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     (m.filterMap f).getD k fallback = (m[k]?.bind (f k')).getD fallback :=
   ExtDHashMap.Const.getD_filterMap_of_getKey?_eq_some h
 
-@[grind =] theorem getElemV_filterMap [EquivBEq α] [LawfulHashable α] [Nonempty γ]
+@[grind =] theorem getElemV_filterMap [EquivBEq α] [LawfulHashable α] {_ : Nonempty γ}
     {f : α → β → Option γ} {k : α} :
     (m.filterMap f)｢k｣ =
       (m[k]?.pbind (fun x h' =>
@@ -2941,7 +2941,7 @@ theorem getD_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
         Classical.ofNonempty :=
   ExtDHashMap.Const.getV_filterMap
 
-theorem getElemV_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Nonempty γ]
+theorem getElemV_filterMap_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] {_ : Nonempty γ}
     {f : α → β → Option γ} {k k' : α} (h : m.getKey? k = some k') :
     (m.filterMap f)｢k｣ = (m[k]?.bind fun x => f k' x).getD Classical.ofNonempty :=
   ExtDHashMap.Const.getV_filterMap_of_getKey?_eq_some h
@@ -2972,7 +2972,7 @@ theorem getKey_filterMap [EquivBEq α] [LawfulHashable α]
       (f x (m[x]'(mem_of_getKey?_eq_some h'))).isSome)).getD fallback :=
   ExtDHashMap.Const.getKeyD_filterMap
 
-@[grind =] theorem getKeyV_filterMap [EquivBEq α] [LawfulHashable α] [Nonempty α]
+@[grind =] theorem getKeyV_filterMap [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {f : α → β → Option γ} {k : α} :
     (m.filterMap f).getKeyV k =
     ((m.getKey? k).pfilter (fun x h' =>
@@ -3089,7 +3089,7 @@ theorem getD_filter_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
         (m[k]?.filter (fun x => f k' x)).getD fallback :=
   ExtDHashMap.Const.getD_filter_of_getKey?_eq_some
 
-theorem getElemV_filter [EquivBEq α] [LawfulHashable α] [Nonempty β]
+theorem getElemV_filter [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
     {f : α → β → Bool} {k : α} :
     (m.filter f)｢k｣ = (m[k]?.pfilter (fun x h' =>
       f (m.getKey k (mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some h'))) x)).getD
@@ -3098,12 +3098,12 @@ theorem getElemV_filter [EquivBEq α] [LawfulHashable α] [Nonempty β]
 
 /-- Simpler variant of `getElemV_filter` when `LawfulBEq` is available. -/
 @[grind =]
-theorem getElemV_filter' [LawfulBEq α] [Nonempty β]
+theorem getElemV_filter' [LawfulBEq α] {_ : Nonempty β}
     {f : α → β → Bool} {k : α} :
     (m.filter f)｢k｣ = (m[k]?.filter (f k)).getD Classical.ofNonempty :=
   ExtDHashMap.Const.getV_filter'
 
-theorem getElemV_filter_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Nonempty β]
+theorem getElemV_filter_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
     {f : α → β → Bool} {k k' : α} :
     m.getKey? k = some k' →
       (m.filter f)｢k｣ = (m[k]?.filter (fun x => f k' x)).getD Classical.ofNonempty :=
@@ -3145,7 +3145,7 @@ theorem getKey!_filter_key [EquivBEq α] [LawfulHashable α] [Inhabited α]
       (f x (m[x]'(mem_of_getKey?_eq_some h'))))).getD fallback :=
   ExtDHashMap.Const.getKeyD_filter
 
-@[grind =] theorem getKeyV_filter [EquivBEq α] [LawfulHashable α] [Nonempty α]
+@[grind =] theorem getKeyV_filter [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {f : α → β → Bool} {k : α} :
     (m.filter f).getKeyV k =
     ((m.getKey? k).pfilter (fun x h' =>
@@ -3157,7 +3157,7 @@ theorem getKeyD_filter_key [EquivBEq α] [LawfulHashable α]
     (m.filter fun k _ => f k).getKeyD k fallback = ((m.getKey? k).filter f).getD fallback :=
   ExtDHashMap.getKeyD_filter_key
 
-theorem getKeyV_filter_key [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_filter_key [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {f : α → Bool} {k : α} :
     (m.filter fun k _ => f k).getKeyV k = ((m.getKey? k).filter f).getD Classical.ofNonempty  :=
   ExtDHashMap.getKeyV_filter_key
@@ -3286,19 +3286,19 @@ theorem getD_map_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Inhabited
   ExtDHashMap.Const.getD_map_of_getKey?_eq_some h
 
 @[grind =]
-theorem getElemV_map [LawfulBEq α] [Nonempty γ] {f : α → β → γ} {k : α} :
+theorem getElemV_map [LawfulBEq α] {_ : Nonempty γ} {f : α → β → γ} {k : α} :
     (m.map f)｢k｣ = (m[k]?.map (f k)).getD Classical.ofNonempty :=
   ExtDHashMap.Const.getV_map
 
 /-- Variant of `getElemV_map` that holds with `EquivBEq` (i.e. without `LawfulBEq`). -/
-theorem getElemV_map' [EquivBEq α] [LawfulHashable α] [Nonempty γ] {f : α → β → γ} {k : α} :
+theorem getElemV_map' [EquivBEq α] [LawfulHashable α] {_ : Nonempty γ} {f : α → β → γ} {k : α} :
     (m.map f)｢k｣ =
       (m[k]?.pmap (fun v h => f (m.getKey k h) v)
         (fun _ h' => mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some h'))).getD
           Classical.ofNonempty :=
   ExtDHashMap.Const.getV_map'
 
-theorem getElemV_map_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Nonempty γ]
+theorem getElemV_map_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] {_ : Nonempty γ}
     {f : α → β → γ} {k k' : α} (h : m.getKey? k = some k') :
     (m.map f)｢k｣ = (m[k]?.map (f k')).getD Classical.ofNonempty :=
   ExtDHashMap.Const.getV_map_of_getKey?_eq_some h
@@ -3326,7 +3326,7 @@ theorem getKeyD_map [EquivBEq α] [LawfulHashable α]
     (m.map f).getKeyD k fallback = m.getKeyD k fallback :=
   ExtDHashMap.getKeyD_map
 
-theorem getKeyV_map [EquivBEq α] [LawfulHashable α] [Nonempty α]
+theorem getKeyV_map [EquivBEq α] [LawfulHashable α] {_ : Nonempty α}
     {f : α → β → γ} {k : α} :
     (m.map f).getKeyV k = m.getKeyV k  :=
   ExtDHashMap.getKeyV_map

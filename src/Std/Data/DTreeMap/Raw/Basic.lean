@@ -224,7 +224,8 @@ def getKeyD (t : Raw α β cmp) (a : α) (fallback : α) : α :=
   letI : Ord α := ⟨cmp⟩; t.inner.getKeyD a fallback
 
 @[inherit_doc DTreeMap.getKeyV]
-noncomputable def getKeyV [Nonempty α] (t : Raw α β cmp) (a : α) : α :=
+noncomputable def getKeyV (t : Raw α β cmp) (a : α) : α :=
+  haveI : Nonempty α := ⟨a⟩
   t.getKeyD a Classical.ofNonempty
 
 @[inline, inherit_doc DTreeMap.minEntry?]
