@@ -1858,13 +1858,25 @@ theorem get?_insertIfNew! [TransOrd α] (h : t.WF) {k a : α} {v : β} :
         get? t a := by
   simpa only [insertIfNew_eq_insertIfNew!] using get?_insertIfNew h
 
+theorem getV_insertIfNew [TransOrd α] (h : t.WF) {k a : α} {v : β} :
+    haveI : Nonempty β := ⟨v⟩
+    getV (t.insertIfNew k v h.balanced).impl a =
+      if compare k a = .eq ∧ ¬ k ∈ t then v else getV t a := by
+  simp_to_model [insertIfNew, Const.getV, contains] using List.getValueV_insertEntryIfNew
+
 theorem get_insertIfNew [TransOrd α] (h : t.WF) {k a : α} {v : β} {h₁} :
     get (t.insertIfNew k v h.balanced).impl a h₁ =
       if h₂ : compare k a = .eq ∧ ¬ k ∈ t then
         v
       else
         get t a (mem_of_mem_insertIfNew' h h₁ h₂) := by
-  simp_to_model [insertIfNew, Const.get, contains] using List.getValue_insertEntryIfNew
+  simpa using getV_insertIfNew h (v := v)
+
+theorem getV_insertIfNew! [TransOrd α] (h : t.WF) {k a : α} {v : β} :
+    haveI : Nonempty β := ⟨v⟩
+    getV (t.insertIfNew! k v) a =
+      if compare k a = .eq ∧ ¬ k ∈ t then v else getV t a := by
+  simpa only [insertIfNew_eq_insertIfNew!] using getV_insertIfNew h (v := v)
 
 theorem get_insertIfNew! [TransOrd α] (h : t.WF) {k a : α} {v : β} {h₁} :
     get (t.insertIfNew! k v) a h₁ =
@@ -1872,8 +1884,7 @@ theorem get_insertIfNew! [TransOrd α] (h : t.WF) {k a : α} {v : β} {h₁} :
         v
       else
         get t a (mem_of_mem_insertIfNew!' h h₁ h₂) := by
-  simpa only [insertIfNew_eq_insertIfNew!] using
-    get_insertIfNew h (h₁ := by simpa [insertIfNew_eq_insertIfNew!])
+  simpa using getV_insertIfNew! h (v := v)
 
 theorem get!_insertIfNew [TransOrd α] [Inhabited β] (h : t.WF) {k a : α}
     {v : β} :
@@ -3199,6 +3210,22 @@ theorem contains_of_contains_insertMany_list' [TransOrd α] [BEq α] [LawfulBEqO
     contains k t = true :=
   contains_of_contains_insertMany_list h h' (by simpa [compare_eq_iff_beq, BEq.comm] using w)
 
+theorem getV_insertMany_list [TransOrd α] [BEq α] [LawfulBEqOrd α] (h : t.WF)
+    {l : List (α × β)} {k : α} (h' : k ∈ (insertMany t l h.balanced).1) :
+    haveI : Nonempty β := ⟨Const.get (insertMany t l h.balanced).1 k h'⟩
+    getV (insertMany t l h.balanced).1 k =
+      match l.findSomeRev? (fun ⟨a, b⟩ => if compare a k = .eq then some b else none) with
+      | some v => v
+      | none => getV t k := by
+  haveI : Nonempty β := ⟨Const.get (insertMany t l h.balanced).1 k h'⟩
+  apply Option.some_inj.mp
+  rw [getV_eq_get? _ _ h', get?_insertMany_list h]
+  split <;> rename_i p
+  · rw [p]
+    simp
+  · simp only [p, Option.none_or]
+    exact get?_eq_some_getV h (contains_of_contains_insertMany_list' h h' p)
+
 theorem get_insertMany_list [TransOrd α] [BEq α] [LawfulBEqOrd α] (h : t.WF)
     {l : List (α × β)} {k : α} (h') :
     get (insertMany t l h.balanced).1 k h' =
@@ -3208,10 +3235,19 @@ theorem get_insertMany_list [TransOrd α] [BEq α] [LawfulBEqOrd α] (h : t.WF)
   apply Option.some_inj.mp
   rw [get_eq_get?, get?_insertMany_list h]
   split <;> rename_i p
-  · rw [p]
-    simp
+  · rw [p]; simp
   · simp only [p, Option.none_or]
     exact get?_eq_some_get h
+
+theorem getV_insertMany!_list [TransOrd α] [BEq α] [LawfulBEqOrd α] (h : t.WF)
+    {l : List (α × β)} {k : α} (h' : k ∈ (insertMany! t l).1) :
+    haveI : Nonempty β := ⟨Const.get (insertMany! t l).1 k h'⟩
+    getV (insertMany! t l).1 k =
+      match l.findSomeRev? (fun ⟨a, b⟩ => if compare a k =.eq then some b else none) with
+      | some v => v
+      | none => getV t k := by
+  simpa only [insertMany_eq_insertMany!] using
+    getV_insertMany_list h (by simpa [insertMany_eq_insertMany!] using h')
 
 theorem get_insertMany!_list [TransOrd α] [BEq α] [LawfulBEqOrd α] (h : t.WF)
     {l : List (α × β)} {k : α} {h'} :
@@ -3219,7 +3255,8 @@ theorem get_insertMany!_list [TransOrd α] [BEq α] [LawfulBEqOrd α] (h : t.WF)
       match w : l.findSomeRev? (fun ⟨a, b⟩ => if compare a k =.eq then some b else none) with
       | some v => v
       | none => get t k (contains_of_contains_insertMany_list' h (by simpa [insertMany_eq_insertMany!] using h') w) := by
-  simpa only [insertMany_eq_insertMany!] using get_insertMany_list h (by simpa [insertMany_eq_insertMany!] using h')
+  simpa only [insertMany_eq_insertMany!] using
+    get_insertMany_list h (by simpa [insertMany_eq_insertMany!] using h')
 
 theorem get!_insertMany_list_of_contains_eq_false [TransOrd α] [BEq α] [LawfulBEqOrd α]
     [Inhabited β] (h : t.WF) {l : List (α × β)} {k : α}
@@ -7710,6 +7747,11 @@ theorem getKey!_modify_self (h : t.WF) [Inhabited α] {k : α} {f : β k → β 
     (t.modify k f).getKey! k = if k ∈ t then k else default := by
   simp_to_model [modify, getKey!, contains] using List.getKey!_modifyKey_self
 
+/-
+PLOG(getKeyV_modify):
+Should lemmas like this have `k' ∈ t` hypotheses instead?
+-/
+
 theorem getKeyV_modify (h : t.WF) {k k' : α} {f : β k → β k}
     (hc : k' ∈ t.modify k f) :
     (t.modify k f).getKeyV k' =
@@ -8395,9 +8437,20 @@ theorem minKey_insert_le_self [TransOrd α] (h : t.WF) {k v} :
     compare (t.insert k v h.balanced |>.impl.minKey <| isEmpty_insert h) k |>.isLE := by
   simp_to_model [minKey, insert] using List.minKey_insertEntry_le_self
 
+theorem contains_minKeyV [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
+    haveI : Nonempty α := ⟨t.minKey he⟩
+    t.contains t.minKeyV := by
+  revert he
+  simp_to_model [minKey, minKeyV, contains, isEmpty] using List.containsKey_minKeyV
+
 theorem contains_minKey [TransOrd α] (h : t.WF) {he} :
     t.contains (t.minKey he) := by
-  simp_to_model [minKey, contains] using List.containsKey_minKey
+  simpa using contains_minKeyV h he
+
+theorem minKeyV_mem [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
+    haveI : Nonempty α := ⟨t.minKey he⟩
+    t.minKeyV ∈ t :=
+  contains_minKeyV h he
 
 theorem minKey_mem [TransOrd α] (h : t.WF) {he} :
     t.minKey he ∈ t :=
@@ -9606,9 +9659,20 @@ theorem self_le_maxKey_insert [TransOrd α] (h : t.WF) {k v} :
     compare k (t.insert k v h.balanced |>.impl.maxKey <| isEmpty_insert h) |>.isLE := by
   simp_to_model [maxKey, insert] using List.self_le_maxKey_insertEntry
 
+theorem contains_maxKeyV [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
+    haveI : Nonempty α := ⟨t.maxKey he⟩
+    t.contains t.maxKeyV := by
+  revert he
+  simp_to_model [maxKey, maxKeyV, contains, isEmpty] using List.containsKey_maxKeyV
+
 theorem contains_maxKey [TransOrd α] (h : t.WF) {he} :
     t.contains (t.maxKey he) := by
-  simp_to_model [maxKey, contains] using List.containsKey_maxKey
+  simpa using contains_maxKeyV h he
+
+theorem maxKeyV_mem [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
+    haveI : Nonempty α := ⟨t.maxKey he⟩
+    t.maxKeyV ∈ t :=
+  contains_maxKeyV h he
 
 theorem maxKey_mem [TransOrd α] (h : t.WF) {he} :
     t.maxKey he ∈ t :=
