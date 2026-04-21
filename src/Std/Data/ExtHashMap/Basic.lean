@@ -198,8 +198,9 @@ def getKey! [EquivBEq α] [LawfulHashable α] [Inhabited α] (m : ExtHashMap α 
   ExtDHashMap.getKey! m.inner a
 
 @[inherit_doc ExtDHashMap.getKeyV]
-noncomputable def getKeyV [EquivBEq α] [LawfulHashable α] [Nonempty α] (m : ExtHashMap α β)
+noncomputable def getKeyV [EquivBEq α] [LawfulHashable α] (m : ExtHashMap α β)
     (a : α) : α :=
+  haveI : Nonempty α := ⟨a⟩
   m.getKeyD a Classical.ofNonempty
 
 @[inline, inherit_doc ExtDHashMap.erase]

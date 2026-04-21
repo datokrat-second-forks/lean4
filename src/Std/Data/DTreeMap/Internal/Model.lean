@@ -515,6 +515,21 @@ theorem get?_eq_get?ₘ [Ord α] [OrientedOrd α] [LawfulEqOrd α] (k : α) (l :
     split <;> simp_all [Cell.get?, Cell.ofEq]
   · simp [get?, applyCell]
 
+theorem getV_eq_get? [Ord α] [OrientedOrd α] [LawfulEqOrd α] (k : α) (l : Impl α β)
+    (h : k ∈ l) :
+    haveI : Nonempty (β k) := ⟨l.get k h⟩
+    some (l.getV k) = l.get? k := by
+  induction l with
+  | inner _ _ _ _ _ ih_l ih_r =>
+    simp only [Membership.mem, contains] at h
+    simp only [getV, getD, get?]
+    split
+    all_goals
+    · rename_i heq
+      simp only [heq] at h
+      simp_all [Membership.mem, getV]
+  | leaf => contradiction
+
 theorem get_eq_get? [Ord α] [OrientedOrd α] [LawfulEqOrd α] (k : α) (l : Impl α β) {h} :
     some (l.get k h) = l.get? k := by
   induction l
@@ -917,6 +932,11 @@ theorem get?_eq_get?ₘ [Ord α] (k : α) (l : Impl α (fun _ => β)) :
   simp only [Const.get?ₘ]
   induction l using tree_split_ind_no_gen (compare k) <;>
     simp only [*, get?, applyCell, Cell.Const.get?, Cell.empty_inner, Cell.ofEq_inner]
+
+theorem getV_eq_get? [Ord α] (k : α) (l : Impl α (fun _ => β)) [Nonempty β] (h : k ∈ l) :
+    some (getV l k) = get? l k := by
+  induction l using tree_split_ind_no_gen (compare k) <;>
+    simp_all [getV, getD, get?, mem_iff_contains, contains]
 
 theorem get_eq_get? [Ord α] (k : α) (l : Impl α (fun _ => β)) {h} :
     some (get l k h) = get? l k := by

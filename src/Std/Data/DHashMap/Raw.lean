@@ -317,7 +317,8 @@ Checks if a mapping for the given key exists and returns the key if it does, oth
 `Classical.ofNonempty`.
 If a mapping exists the result is guaranteed to be pointer equal to the key in the map.
 -/
-noncomputable def getKeyV [BEq α] [Hashable α] [Nonempty α] (m : Raw α β) (a : α) : α :=
+noncomputable def getKeyV [BEq α] [Hashable α] (m : Raw α β) (a : α) : α :=
+  haveI : Nonempty α := ⟨a⟩
   m.getKeyD a Classical.ofNonempty
 
 /--

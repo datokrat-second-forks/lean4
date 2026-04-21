@@ -608,7 +608,8 @@ def getKey! [BEq α] [Hashable α] [Inhabited α] (m : Raw₀ α β) (a : α) : 
   buckets[idx.1].getKey! a
 
 /-- Internal implementation detail of the hash map -/
-noncomputable def getKeyV [BEq α] [Hashable α] [Nonempty α] (m : Raw₀ α β) (a : α) : α :=
+noncomputable def getKeyV [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) : α :=
+  haveI : Nonempty α := ⟨a⟩
   m.getKeyD a Classical.ofNonempty
 
 end Raw₀
