@@ -1427,7 +1427,8 @@ theorem compare_getKey?_self [TransOrd α] (h : t.WF) {k : α} :
 
 theorem getKey?_congr [TransOrd α] (h : t.WF) {k k' : α} (h' : compare k k' = .eq) :
     t.getKey? k = t.getKey? k' := by
-  simp_to_model [getKey?] using List.getKey?_congr <| compare_eq_iff_beq.mp h'
+  revert h'
+  simp_to_model [getKey?] using List.getKey?_congr
 
 theorem getKey?_eq_some_of_contains [TransOrd α] [LawfulEqOrd α] (h : t.WF)
     {k : α} : (h' : t.contains k) → t.getKey? k = some k := by
@@ -1448,7 +1449,7 @@ theorem getKey_insert [TransOrd α] (h : t.WF) {k a : α} {v : β k} {h₁} :
         k
       else
         t.getKey a (contains_of_contains_insert h h₁ h₂) := by
-  simp_to_model [insert, getKey] using List.getKey_insertEntry
+  simpa using getKeyV_insert h
 
 theorem getKeyV_insert! [TransOrd α] (h : t.WF) {k a : α}
     {v : β k} :
@@ -1461,7 +1462,7 @@ theorem getKey_insert! [TransOrd α] (h : t.WF) {k a : α} {v : β k} {h₁} :
         k
       else
         t.getKey a (contains_of_contains_insert! h h₁ h₂) := by
-  simpa only [insert_eq_insert!] using getKey_insert h (h₁ := by simpa [insert_eq_insert!])
+  simpa using getKeyV_insert! h
 
 theorem getKeyV_insert_self [TransOrd α] (h : t.WF) {a : α}
     {b : β a} : (t.insert a b h.balanced).impl.getKeyV a = a := by
@@ -1469,7 +1470,7 @@ theorem getKeyV_insert_self [TransOrd α] (h : t.WF) {a : α}
 
 theorem getKey_insert_self [TransOrd α] (h : t.WF) {k : α} {v : β k} :
     (t.insert k v h.balanced).impl.getKey k (contains_insert_self h) = k := by
-  simp_to_model [insert, getKey] using List.getKey_insertEntry_self
+  simpa using getKeyV_insert_self h
 
 theorem getKeyV_insert!_self [TransOrd α] (h : t.WF) {a : α}
     {b : β a} : (t.insert! a b).getKeyV a = a := by
@@ -1477,26 +1478,26 @@ theorem getKeyV_insert!_self [TransOrd α] (h : t.WF) {a : α}
 
 theorem getKey_insert!_self [TransOrd α] (h : t.WF) {k : α} {v : β k} :
     (t.insert! k v).getKey k (contains_insert!_self h) = k := by
-  simpa only [insert_eq_insert!] using getKey_insert_self h
+  simpa using getKeyV_insert!_self h
 
+@[simp]
 theorem getKeyV_erase [TransOrd α] (h : t.WF) {k a : α}
     (h' : a ∈ (t.erase k h.balanced).impl) :
     (t.erase k h.balanced).impl.getKeyV a = t.getKeyV a := by
   revert h'; simp_to_model [erase, getKeyV, contains] using List.getKeyV_eraseKey
 
-@[simp]
 theorem getKey_erase [TransOrd α] (h : t.WF) {k a : α} {h'} :
     (t.erase k h.balanced).impl.getKey a h' = t.getKey a (contains_of_contains_erase h h') := by
-  simp_to_model [erase, getKey] using List.getKey_eraseKey
+  simpa using getKeyV_erase h h'
 
+@[simp]
 theorem getKeyV_erase! [TransOrd α] (h : t.WF) {k a : α} {h' : a ∈ t.erase! k} :
     (t.erase! k).getKeyV a = t.getKeyV a := by
   simpa only [erase_eq_erase!] using getKeyV_erase h (h' := by simpa [erase_eq_erase!])
 
-@[simp]
 theorem getKey_erase! [TransOrd α] (h : t.WF) {k a : α} {h'} :
     (t.erase! k).getKey a h' = t.getKey a (contains_of_contains_erase! h h') := by
-  simpa only [erase_eq_erase!] using getKey_erase h (h' := by simpa [erase_eq_erase!])
+  simpa using getKeyV_erase! h (h' := h')
 
 theorem getKey?_eq_some_getKey [TransOrd α] (h : t.WF) {a : α} {h'} :
     t.getKey? a = some (t.getKey a h') := by
@@ -1508,11 +1509,28 @@ theorem compare_getKey_self [TransOrd α] (h : t.WF) {k : α} (h' : k ∈ t) :
 
 theorem getKeyV_congr [TransOrd α] (h : t.WF) {k k' : α} (h' : compare k k' = .eq) :
     t.getKeyV k = t.getKeyV k' := by
-  simp_to_model [getKeyV] using List.getKeyV_congr <| compare_eq_iff_beq.mp h'
+  revert h'
+  simp_to_model [getKeyV] using List.getKeyV_congr
+
+/-
+PLOG(getKey_congr):
+`simp_to_model ... using List.getKey_congr` failed because of a spurious dependency:
+
+Tactic `apply` failed: could not unify the type of `List.getKey_congr`
+  (k₁ == k₂) = true → List.getKey k₁ ?m.36 ?m.37 = List.getKey k₂ ?m.36 ?m.38
+with the goal
+  ∀ (h' : (k₁ == k₂) = true), List.getKey k₁ t.toListModel ⋯ = List.getKey k₂ t.toListModel ⋯
+
+Here, `List.getKey_congr` used separate unconditional proofs that `k₁ ∈ t` and `k₂ ∈ t`,
+while `getKey_congr` derives the second proof from the first and `==`.
+
+Solution: Follow the same convention in `List.getKey_congr`.
+-/
 
 theorem getKey_congr [TransOrd α] (h : t.WF) {k₁ k₂ : α} (h' : compare k₁ k₂ = .eq)
     (h₁ : k₁ ∈ t) : t.getKey k₁ h₁ = t.getKey k₂ ((mem_congr h h').mp h₁) := by
-  simp_to_model [getKey] using List.getKey_congr <| compare_eq_iff_beq.mp h'
+  revert h'
+  simp_to_model [getKey] using List.getKey_congr (k := k₁) (k' := k₂)
 
 theorem getKeyV_eq [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k : α} :
     (h' : k ∈ t) → t.getKeyV k = k := by
@@ -1930,7 +1948,7 @@ theorem getKey_insertIfNew [TransOrd α] (h : t.WF) {k a : α} {v : β k} {h₁}
     (t.insertIfNew k v h.balanced).impl.getKey a h₁ =
       if h₂ : compare k a = .eq ∧ ¬ k ∈ t then k
       else t.getKey a (mem_of_mem_insertIfNew' h h₁ h₂) := by
-  simp_to_model [insertIfNew, getKey, contains] using List.getKey_insertEntryIfNew
+  simpa using getKeyV_insertIfNew h
 
 theorem getKeyV_insertIfNew! [TransOrd α] (h : t.WF) {k a : α}
     {v : β k} :
@@ -1942,8 +1960,7 @@ theorem getKey_insertIfNew! [TransOrd α] (h : t.WF) {k a : α} {v : β k} {h₁
     (t.insertIfNew! k v).getKey a h₁ =
       if h₂ : compare k a = .eq ∧ ¬ k ∈ t then k
       else t.getKey a (mem_of_mem_insertIfNew!' h h₁ h₂) := by
-  simpa only [insertIfNew_eq_insertIfNew!] using
-    getKey_insertIfNew h (h₁ := by simpa [insertIfNew_eq_insertIfNew!])
+  simpa using getKeyV_insertIfNew! h
 
 theorem getKey!_insertIfNew [TransOrd α] [Inhabited α] (h : t.WF) {k a : α}
     {v : β k} :
@@ -2576,7 +2593,7 @@ theorem getV_insertMany!_list_of_mem [TransOrd α] [LawfulEqOrd α] (h : t.WF)
     (t.insertMany! l).1.getV k' = cast (by congr; apply compare_eq_iff_eq.mp k_beq) v := by
 
   simpa only [insertMany_eq_insertMany!] using getV_insertMany_list_of_mem h
-#exit
+
 theorem get_insertMany!_list_of_mem [TransOrd α] [LawfulEqOrd α] (h : t.WF)
     {l : List ((a : α) × β a)} {k k' : α} : (k_beq : compare k k' = .eq) → {v : β k} →
     (distinct : l.Pairwise (fun a b => ¬ compare a.1 b.1 = .eq)) →
@@ -4488,9 +4505,7 @@ theorem getD_union [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.
 theorem getD_union! [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {fallback : β k} :
     (m₁.union! m₂).getD k fallback = m₂.getD k (m₁.getD k fallback) := by
-  rw [← union_eq_union!]
-  apply getD_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getD_union h₁ h₂
 
 theorem getD_union_of_contains_eq_false_left [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {fallback : β k} (contains_eq_false : m₁.contains k = false) :
@@ -4504,9 +4519,7 @@ theorem getD_union_of_contains_eq_false_left [TransOrd α] [LawfulEqOrd α] (h�
 theorem getD_union!_of_contains_eq_false_left [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {fallback : β k} (contains_eq_false : m₁.contains k = false) :
     (m₁.union! m₂).getD k fallback = m₂.getD k fallback := by
-  rw [← union_eq_union!]
-  apply getD_union_of_contains_eq_false_left h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getD_union_of_contains_eq_false_left h₁ h₂ contains_eq_false
 
 theorem getD_union_of_contains_eq_false_right [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {fallback : β k} (contains_eq_false : m₂.contains k = false) :
@@ -4521,9 +4534,7 @@ theorem getD_union_of_contains_eq_false_right [TransOrd α] [LawfulEqOrd α] (h�
 theorem getD_union!_of_contains_eq_false_right [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {fallback : β k} (contains_eq_false : m₂.contains k = false) :
     (m₁.union! m₂).getD k fallback = m₁.getD k fallback := by
-  rw [← union_eq_union!]
-  apply getD_union_of_contains_eq_false_right h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getD_union_of_contains_eq_false_right h₁ h₂ contains_eq_false
 
 /- get! -/
 theorem get!_union [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
@@ -4536,9 +4547,7 @@ theorem get!_union [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.
 theorem get!_union! [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} [Inhabited (β k)] :
     (m₁.union! m₂).get! k = m₂.getD k (m₁.get! k) := by
-  rw [← union_eq_union!]
-  apply get!_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using get!_union h₁ h₂
 
 theorem get!_union_of_contains_eq_false_left [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} [Inhabited (β k)] (contains_eq_false : m₁.contains k = false) :
@@ -4552,9 +4561,7 @@ theorem get!_union_of_contains_eq_false_left [TransOrd α] [LawfulEqOrd α] (h�
 theorem get!_union!_of_contains_eq_false_left [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} [Inhabited (β k)] (contains_eq_false : m₁.contains k = false) :
     (m₁.union! m₂).get! k = m₂.get! k := by
-  rw [← union_eq_union!]
-  apply get!_union_of_contains_eq_false_left h₁ h₂ contains_eq_false
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using get!_union_of_contains_eq_false_left h₁ h₂ contains_eq_false
 
 theorem get!_union_of_contains_eq_false_right [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} [Inhabited (β k)] (contains_eq_false : m₂.contains k = false)  :
@@ -4569,9 +4576,7 @@ theorem get!_union_of_contains_eq_false_right [TransOrd α] [LawfulEqOrd α] (h�
  theorem get!_union!_of_contains_eq_false_right [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} [Inhabited (β k)] (contains_eq_false : m₂.contains k = false)  :
     (m₁.union! m₂).get! k = m₁.get! k := by
-  rw [← union_eq_union!]
-  apply get!_union_of_contains_eq_false_right h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using get!_union_of_contains_eq_false_right h₁ h₂ contains_eq_false
 
 /- getKey? -/
 theorem getKey?_union [TransOrd α]
@@ -4584,9 +4589,7 @@ theorem getKey?_union! [TransOrd α]
     (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} :
     (m₁.union! m₂).getKey? k = (m₂.getKey? k).or (m₁.getKey? k) := by
-  rw [← union_eq_union!]
-  apply getKey?_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getKey?_union h₁ h₂
 
 theorem getKey?_union_of_contains_eq_false_left [TransOrd α]
     (h₁ : m₁.WF) (h₂ : m₂.WF)
@@ -4600,11 +4603,9 @@ theorem getKey?_union_of_contains_eq_false_left [TransOrd α]
 
 theorem getKey?_union!_of_contains_eq_false_left [TransOrd α]
     (h₁ : m₁.WF) (h₂ : m₂.WF)
-    {k : α} (not_mem : m₁.contains k = false) :
+    {k : α} (contains_eq_false : m₁.contains k = false) :
     (m₁.union! m₂).getKey? k = m₂.getKey? k := by
-  rw [← union_eq_union!]
-  apply getKey?_union_of_contains_eq_false_left h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getKey?_union_of_contains_eq_false_left h₁ h₂ contains_eq_false
 
 theorem getKey?_union_of_contains_eq_false_right [TransOrd α]
     (h₁ : m₁.WF) (h₂ : m₂.WF)
@@ -4618,20 +4619,16 @@ theorem getKey?_union_of_contains_eq_false_right [TransOrd α]
 
 theorem getKey?_union!_of_contains_eq_false_right [TransOrd α]
     (h₁ : m₁.WF) (h₂ : m₂.WF)
-    {k : α} (not_mem : m₂.contains k = false) :
+    {k : α} (contains_eq_false : m₂.contains k = false) :
     (m₁.union! m₂).getKey? k = m₁.getKey? k := by
-  rw [← union_eq_union!]
-  apply getKey?_union_of_contains_eq_false_right h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getKey?_union_of_contains_eq_false_right h₁ h₂ contains_eq_false
 
 /- getKey -/
 theorem getKeyV_union_of_contains_right [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (mem : m₂.contains k) :
     (m₁.union m₂ h₁.balanced h₂.balanced).getKeyV k = m₂.getKeyV k := by
   revert mem
-  simp_to_model [union, contains, getKeyV]
-  intro mem
-  exact List.getKeyV_insertList_of_contains_right (by wf_trivial) (by wf_trivial) mem
+  simp_to_model [union, contains, getKeyV] using List.getKeyV_insertList_of_contains_right (by wf_trivial) (by wf_trivial)
 
 theorem getKey_union_of_contains_right [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (mem : m₂.contains k) :
@@ -4641,8 +4638,7 @@ theorem getKey_union_of_contains_right [TransOrd α] (h₁ : m₁.WF) (h₂ : m�
 theorem getKeyV_union!_of_contains_right [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (mem : m₂.contains k) :
     (m₁.union! m₂).getKeyV k = m₂.getKeyV k := by
-  rw [← union_eq_union! h₁ h₂]
-  exact getKeyV_union_of_contains_right h₁ h₂ mem
+  simpa only [union_eq_union! h₁ h₂] using getKeyV_union_of_contains_right h₁ h₂ mem
 
 theorem getKey_union!_of_contains_right [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (mem : m₂.contains k) :
@@ -4666,8 +4662,7 @@ theorem getKey_union_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF) (h
 theorem getKeyV_union!_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₁.contains k = false) :
     (m₁.union! m₂).getKeyV k = m₂.getKeyV k := by
-  rw [← union_eq_union! h₁ h₂]
-  exact getKeyV_union_of_contains_eq_false_left h₁ h₂ contains_eq_false
+  simpa [union_eq_union! h₁ h₂] using getKeyV_union_of_contains_eq_false_left h₁ h₂ contains_eq_false
 
 theorem getKey_union!_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₁.contains k = false) {h'} :
@@ -4690,8 +4685,7 @@ theorem getKey_union_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF) (
 theorem getKeyV_union!_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₂.contains k = false) :
     (m₁.union! m₂).getKeyV k = m₁.getKeyV k := by
-  rw [← union_eq_union! h₁ h₂]
-  exact getKeyV_union_of_contains_eq_false_right h₁ h₂ contains_eq_false
+  simpa [union_eq_union! h₁ h₂] using getKeyV_union_of_contains_eq_false_right h₁ h₂ contains_eq_false
 
 theorem getKey_union!_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₂.contains k = false) {h'} :
@@ -4707,9 +4701,7 @@ theorem getKeyD_union [TransOrd α] (h₁ : m₁.WF)
 theorem getKeyD_union! [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} :
     (m₁.union! m₂).getKeyD k fallback = m₂.getKeyD k (m₁.getKeyD k fallback) := by
-  rw [← union_eq_union!]
-  apply getKeyD_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getKeyD_union h₁ h₂
 
 
 theorem getKeyD_union_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
@@ -4726,9 +4718,7 @@ theorem getKeyD_union_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
 theorem getKeyD_union!_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h' : m₁.contains k = false) :
     (m₁.union! m₂).getKeyD k fallback = m₂.getKeyD k fallback := by
-  rw [← union_eq_union!]
-  apply getKeyD_union_of_contains_eq_false_left h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getKeyD_union_of_contains_eq_false_left h₁ h₂ h'
 
 theorem getKeyD_union_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h' : m₂.contains k = false) :
@@ -4741,9 +4731,7 @@ theorem getKeyD_union_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
 theorem getKeyD_union!_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} (h' : m₂.contains k = false) :
     (m₁.union! m₂).getKeyD k fallback = m₁.getKeyD k fallback := by
-  rw [← union_eq_union!]
-  apply getKeyD_union_of_contains_eq_false_right h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getKeyD_union_of_contains_eq_false_right h₁ h₂ h'
 
 
 /- getKey! -/
@@ -4757,9 +4745,7 @@ theorem getKey!_union! [Inhabited α] [TransOrd α]
     (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k : α} :
     (m₁.union! m₂).getKey! k = m₂.getKeyD k (m₁.getKey! k) := by
-  rw [← union_eq_union!]
-  apply getKey!_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getKey!_union h₁ h₂
 
 theorem getKey!_union_of_contains_eq_false_left [Inhabited α]
     [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α}
@@ -4772,9 +4758,7 @@ theorem getKey!_union!_of_contains_eq_false_left [Inhabited α]
     [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α}
     (h' : m₁.contains k = false) :
     (m₁.union! m₂).getKey! k = m₂.getKey! k := by
-  rw [← union_eq_union!]
-  apply getKey!_union_of_contains_eq_false_left h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getKey!_union_of_contains_eq_false_left h₁ h₂ h'
 
 theorem getKey!_union_of_contains_eq_false_right [Inhabited α]
     [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α}
@@ -4787,9 +4771,7 @@ theorem getKey!_union!_of_contains_eq_false_right [Inhabited α]
     [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α}
     (h' : m₂.contains k = false) :
     (m₁.union! m₂).getKey! k = m₁.getKey! k := by
-  rw [← union_eq_union!]
-  apply getKey!_union_of_contains_eq_false_right h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getKey!_union_of_contains_eq_false_right h₁ h₂ h'
 
 /- size -/
 theorem size_union_of_not_mem [TransOrd α] (h₁ : m₁.WF)
@@ -4800,9 +4782,7 @@ theorem size_union_of_not_mem [TransOrd α] (h₁ : m₁.WF)
 theorem size_union!_of_not_mem [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) : (∀ (a : α), m₁.contains a → m₂.contains a = false) →
     (m₁.union! m₂).size = m₁.size + m₂.size := by
-  rw [← union_eq_union!]
-  apply size_union_of_not_mem h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using size_union_of_not_mem h₁ h₂
 
 theorem size_left_le_size_union [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) : m₁.size ≤ (m₁.union m₂ h₁.balanced h₂.balanced).size := by
@@ -4810,9 +4790,7 @@ theorem size_left_le_size_union [TransOrd α] (h₁ : m₁.WF)
 
 theorem size_left_le_size_union! [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) : m₁.size ≤ (m₁.union! m₂).size := by
-  rw [← union_eq_union!]
-  apply size_left_le_size_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using size_left_le_size_union h₁ h₂
 
 theorem size_right_le_size_union [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) : m₂.size ≤ (m₁.union m₂ h₁.balanced h₂.balanced).size := by
@@ -4820,9 +4798,7 @@ theorem size_right_le_size_union [TransOrd α] (h₁ : m₁.WF)
 
 theorem size_right_le_size_union! [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) : m₂.size ≤ (m₁.union! m₂).size := by
-  rw [← union_eq_union!]
-  apply size_right_le_size_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using size_right_le_size_union h₁ h₂
 
 theorem size_union_le_size_add_size [TransOrd α]
     (h₁ : m₁.WF) (h₂ : m₂.WF) :
@@ -4832,9 +4808,7 @@ theorem size_union_le_size_add_size [TransOrd α]
 theorem size_union!_le_size_add_size [TransOrd α]
     (h₁ : m₁.WF) (h₂ : m₂.WF) :
     (m₁.union! m₂).size ≤ m₁.size + m₂.size := by
-  rw [← union_eq_union!]
-  apply size_union_le_size_add_size h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using size_union_le_size_add_size h₁ h₂
 
 /- isEmpty -/
 @[simp]
@@ -4845,9 +4819,7 @@ theorem isEmpty_union [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) :
 @[simp]
 theorem isEmpty_union! [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) :
     (m₁.union! m₂).isEmpty = (m₁.isEmpty && m₂.isEmpty) := by
-  rw [← union_eq_union!]
-  apply isEmpty_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using isEmpty_union h₁ h₂
 
 end Union
 
@@ -4862,9 +4834,7 @@ theorem get?_union [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α} :
 
 theorem get?_union! [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α} :
     Const.get? (m₁.union! m₂) k = (Const.get? m₂ k).or (Const.get? m₁ k) := by
-  rw [← union_eq_union!]
-  apply get?_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using get?_union h₁ h₂
 
 theorem get?_union_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₁.contains k = false) :
@@ -4875,9 +4845,7 @@ theorem get?_union_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF) (h�
 theorem get?_union!_of_contains_eq_false_left [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₁.contains k = false) :
     Const.get? (m₁.union! m₂) k = Const.get? m₂ k := by
-  rw [← union_eq_union!]
-  apply get?_union_of_contains_eq_false_left h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using get?_union_of_contains_eq_false_left h₁ h₂ contains_eq_false
 
 theorem get?_union_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₂.contains k = false) :
@@ -4890,9 +4858,7 @@ theorem get?_union_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF) (h�
 theorem get?_union!_of_contains_eq_false_right [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₂.contains k = false) :
     Const.get? (m₁.union! m₂) k = Const.get? m₁ k := by
-  rw [← union_eq_union!]
-  apply get?_union_of_contains_eq_false_right h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using get?_union_of_contains_eq_false_right h₁ h₂ contains_eq_false
 
 /- get -/
 theorem getV_union_of_contains_right [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
@@ -4975,9 +4941,7 @@ theorem getD_union [TransOrd α](h₁ : m₁.WF) (h₂ : m₂.WF) {k : α} {fall
 
 theorem getD_union! [TransOrd α](h₁ : m₁.WF) (h₂ : m₂.WF) {k : α} {fallback : β} :
     Const.getD (m₁.union! m₂) k fallback = Const.getD m₂ k (Const.getD m₁ k fallback) := by
-  rw [← union_eq_union!]
-  apply getD_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getD_union h₁ h₂
 
 theorem getD_union_of_contains_eq_false_left [TransOrd α](h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {fallback : β} (contains_eq_false : m₁.contains k = false) :
@@ -4988,9 +4952,7 @@ theorem getD_union_of_contains_eq_false_left [TransOrd α](h₁ : m₁.WF) (h₂
 theorem getD_union!_of_contains_eq_false_left [TransOrd α](h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {fallback : β} (contains_eq_false : m₁.contains k = false) :
     Const.getD (m₁.union! m₂) k fallback = Const.getD m₂ k fallback  := by
-  rw [← union_eq_union!]
-  apply getD_union_of_contains_eq_false_left h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getD_union_of_contains_eq_false_left h₁ h₂ contains_eq_false
 
 theorem getD_union_of_contains_eq_false_right [TransOrd α](h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {fallback : β} (contains_eq_false : m₂.contains k = false) :
@@ -5003,9 +4965,7 @@ theorem getD_union_of_contains_eq_false_right [TransOrd α](h₁ : m₁.WF) (h�
 theorem getD_union!_of_contains_eq_false_right [TransOrd α](h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {fallback : β} (contains_eq_false : m₂.contains k = false) :
     Const.getD (m₁.union! m₂) k fallback = Const.getD m₁ k fallback := by
-  rw [← union_eq_union!]
-  apply getD_union_of_contains_eq_false_right h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using getD_union_of_contains_eq_false_right h₁ h₂ contains_eq_false
 
 /- get! -/
 theorem get!_union [TransOrd α] [Inhabited β] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α} :
@@ -5014,9 +4974,7 @@ theorem get!_union [TransOrd α] [Inhabited β] (h₁ : m₁.WF) (h₂ : m₂.WF
 
 theorem get!_union! [TransOrd α] [Inhabited β] (h₁ : m₁.WF) (h₂ : m₂.WF) {k : α} :
     Const.get! (m₁.union! m₂) k = Const.getD m₂ k (Const.get! m₁ k) := by
-  rw [← union_eq_union!]
-  apply get!_union h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using get!_union h₁ h₂
 
 theorem get!_union_of_contains_eq_false_left [TransOrd α] [Inhabited β] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₁.contains k = false) :
@@ -5027,9 +4985,7 @@ theorem get!_union_of_contains_eq_false_left [TransOrd α] [Inhabited β] (h₁ 
 theorem get!_union!_of_contains_eq_false_left [TransOrd α] [Inhabited β] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₁.contains k = false) :
     Const.get! (m₁.union! m₂) k = Const.get! m₂ k := by
-  rw [← union_eq_union!]
-  apply get!_union_of_contains_eq_false_left h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using get!_union_of_contains_eq_false_left h₁ h₂ contains_eq_false
 
 theorem get!_union_of_contains_eq_false_right [TransOrd α] [Inhabited β] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₂.contains k = false) :
@@ -5042,9 +4998,7 @@ theorem get!_union_of_contains_eq_false_right [TransOrd α] [Inhabited β] (h₁
 theorem get!_union!_of_contains_eq_false_right [TransOrd α] [Inhabited β] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₂.contains k = false) :
     Const.get! (m₁.union! m₂) k = Const.get! m₁ k := by
-  rw [← union_eq_union!]
-  apply get!_union_of_contains_eq_false_right h₁ h₂
-  all_goals assumption
+  simpa [union_eq_union! h₁ h₂] using get!_union_of_contains_eq_false_right h₁ h₂ contains_eq_false
 
 end Const
 
@@ -5065,7 +5019,7 @@ theorem contains_inter! [TransOrd α] (h₁ : m₁.WF)
   rw [← inter_eq_inter!]
   apply contains_inter h₁ h₂
   all_goals wf_trivial
-
+#exit
 theorem contains_inter_iff [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k : α} :
     (m₁.inter m₂ h₁.balanced).contains k ↔ m₁.contains k ∧ m₂.contains k := by
@@ -5401,26 +5355,26 @@ theorem getKey?_inter!_of_contains_eq_false_left [TransOrd α]
   all_goals wf_trivial
 
 /- getKey -/
-theorem getKeyV_inter [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+@[simp] theorem getKeyV_inter [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {h_contains : (m₁.inter m₂ h₁.balanced).contains k} :
     (m₁.inter m₂ h₁.balanced).getKeyV k = m₁.getKeyV k := by
   revert h_contains
   simp_to_model [inter, contains, getKeyV] using List.getKeyV_filter_containsKey
 
-@[simp] theorem getKey_inter [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+theorem getKey_inter [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {h_contains : (m₁.inter m₂ h₁.balanced).contains k} :
     (m₁.inter m₂ h₁.balanced).getKey k h_contains =
     m₁.getKey k (by simp [contains_inter_iff h₁ h₂] at h_contains; exact h_contains.1) := by
   simpa using getKeyV_inter h₁ h₂ (h_contains := h_contains)
 
-theorem getKeyV_inter! [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+@[simp] theorem getKeyV_inter! [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {h_contains : (m₁.inter! m₂).contains k} :
     (m₁.inter! m₂).getKeyV k = m₁.getKeyV k := by
   simpa only [← inter_eq_inter! (h := h₁.balanced)] using
     getKeyV_inter h₁ h₂
       (h_contains := by simpa only [← inter_eq_inter! (h := h₁.balanced)] using h_contains)
 
-@[simp] theorem getKey_inter! [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+theorem getKey_inter! [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {h_contains : (m₁.inter! m₂).contains k} :
     (m₁.inter! m₂).getKey k h_contains =
     m₁.getKey k (by simp [contains_inter!_iff h₁ h₂] at h_contains; exact h_contains.1) := by
@@ -7114,7 +7068,7 @@ theorem getKeyD_alter! [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k k' fallback 
 
 
 @[simp]
-theorem getKeyD_alter_self [TransOrd α] [LawfulEqOrd α] [Inhabited α] (h : t.WF) {k : α}
+theorem getKeyD_alter_self [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k : α}
     {fallback : α} {f : Option (β k) → Option (β k)} :
     (t.alter k f h.balanced).1.getKeyD k fallback =
       if (f (t.get? k)).isSome then k else fallback := by
@@ -7127,14 +7081,13 @@ theorem getKeyV_alter_self [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k : α}
   simp_to_model [alter, contains, getKeyV] using List.getKeyV_alterKey_self
 
 @[simp]
-theorem getKey_alter_self [TransOrd α] [LawfulEqOrd α] [Inhabited α] (h : t.WF) {k : α}
+theorem getKey_alter_self [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k : α}
     {f : Option (β k) → Option (β k)} {hc : k ∈ (t.alter k f h.balanced).1} :
     (t.alter k f h.balanced).1.getKey k hc = k := by
-  haveI : Nonempty α := ⟨k⟩
   simpa using getKeyV_alter_self h (hc := hc)
 
 @[simp]
-theorem getKeyD_alter!_self [TransOrd α] [LawfulEqOrd α] [Inhabited α] (h : t.WF) {k : α}
+theorem getKeyD_alter!_self [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k : α}
     {fallback : α} {f : Option (β k) → Option (β k)} :
     (t.alter! k f).getKeyD k fallback = if (f (t.get? k)).isSome then k else fallback := by
   simpa only [alter_eq_alter!] using getKeyD_alter_self h
@@ -7145,7 +7098,7 @@ theorem getKeyV_alter!_self [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k : α}
   simpa only [alter_eq_alter!] using getKeyV_alter_self h (by simpa [alter_eq_alter!])
 
 @[simp]
-theorem getKey_alter!_self [TransOrd α] [LawfulEqOrd α] [Inhabited α] (h : t.WF) {k : α}
+theorem getKey_alter!_self [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k : α}
     {f : Option (β k) → Option (β k)} {hc : k ∈ t.alter! k f} :
     (t.alter! k f).getKey k hc = k := by
   simpa only [alter_eq_alter!] using getKey_alter_self h (hc := by simpa [alter_eq_alter!])
@@ -7409,7 +7362,6 @@ theorem getV_alter_self [TransOrd α] (h : t.WF) {k : α} {f : Option β → Opt
   simp_to_model [Const.alter, Const.getV, Const.get?, contains] using
     List.Const.getValueV_alterKey_self
 
-@[simp]
 theorem get_alter_self [TransOrd α] (h : t.WF) {k : α} {f : Option β → Option β}
     {hc : k ∈ (alter k f t h.balanced).1} :
     haveI h' : (f (get? t k)).isSome := mem_alter_self h |>.mp hc
@@ -7425,7 +7377,6 @@ theorem getV_alter!_self [TransOrd α] (h : t.WF) {k : α} {f : Option β → Op
   simpa only [alter_eq_alter!] using
     getV_alter_self h (hc := by simpa only [alter_eq_alter!] using hc)
 
-@[simp]
 theorem get_alter!_self [TransOrd α] (h : t.WF) {k : α} {f : Option β → Option β}
     {hc : k ∈ alter! k f t} :
     haveI h' : (f (get? t k)).isSome := mem_alter!_self h |>.mp hc
@@ -7770,12 +7721,12 @@ theorem getKey_modify (h : t.WF) [Inhabited α] {k k' : α} {f : β k → β k}
         t.getKey k' h' := by
   simpa using getKeyV_modify h (hc := hc)
 
+@[simp]
 theorem getKeyV_modify_self (h : t.WF) {k : α} {f : β k → β k}
     (hc : k ∈ t.modify k f) : (t.modify k f).getKeyV k = k := by
   revert hc
   simp_to_model [modify, contains, getKeyV] using List.getKeyV_modifyKey_self
 
-@[simp]
 theorem getKey_modify_self (h : t.WF) [Inhabited α] {k : α} {f : β k → β k}
     {hc : k ∈ t.modify k f} : (t.modify k f).getKey k hc = k := by
   simpa using getKeyV_modify_self h (hc := hc)
@@ -7856,7 +7807,6 @@ theorem getV_modify_self (h : t.WF) {k : α} {f : β → β} (hc : k ∈ modify 
   revert hc
   simp_to_model [Const.modify, Const.getV, contains] using List.Const.getValueV_modifyKey_self
 
-@[simp]
 theorem get_modify_self (h : t.WF) {k : α} {f : β → β} {hc : k ∈ modify k f t} :
     haveI h' : k ∈ t := mem_modify h |>.mp hc
     get (modify k f t) k hc = f (get t k h') := by
@@ -8016,8 +7966,7 @@ theorem minKeyV_insert_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.isEmpty
 
 theorem minKey_insert_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.isEmpty) :
     (t.insert k v h.balanced).impl.minKey (isEmpty_insert h) = k := by
-  revert he
-  simp_to_model [isEmpty, insert, minKey] using List.minKey_insertEntry_of_isEmpty
+  simpa using minKeyV_insert_of_isEmpty h he
 
 theorem minKeyV_insert!_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.isEmpty) :
     haveI : Nonempty α := ⟨k⟩
@@ -8072,8 +8021,7 @@ theorem minKeyV_insertIfNew_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.is
 
 theorem minKey_insertIfNew_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.isEmpty) :
     (t.insertIfNew k v h.balanced).impl.minKey (isEmpty_insertIfNew h) = k := by
-  revert he
-  simp_to_model [isEmpty, insertIfNew, minKey] using List.minKey_insertEntryIfNew_of_isEmpty
+  simpa using minKeyV_insertIfNew_of_isEmpty h he
 
 theorem minKeyV_insertIfNew!_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.isEmpty) :
     haveI : Nonempty α := ⟨k⟩
@@ -8212,7 +8160,7 @@ theorem getKeyV_minKey? [TransOrd α] (h : t.WF) {km} :
 theorem getKey_minKey? [TransOrd α] (h : t.WF) {km hc} :
     (hkm : haveI : Nonempty α := ⟨t.minKey?.get (isSome_minKey?_of_contains h hc)⟩;
       t.minKey?.getV = km) → t.getKey km hc = km := by
-  simp_to_model [minKey?, getKey] using List.getKey_minKey?
+  intro hkm; simpa using getKeyV_minKey? h hkm
 
 
 @[simp]
@@ -8525,7 +8473,7 @@ theorem getKeyV_minKeyV [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
 
 theorem getKey_minKey [TransOrd α] (h : t.WF) {he hc} :
     t.getKey (t.minKey he) hc = t.minKey he := by
-  simp_to_model [getKey, minKey] using List.getKey_minKey
+  simpa using getKeyV_minKeyV h he
 
 
 theorem minKeyV_erase_eq_iff_not_compare_eq_minKeyV [TransOrd α] (h : t.WF) {k}
@@ -9256,8 +9204,7 @@ theorem maxKeyV_insert_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.isEmpty
 
 theorem maxKey_insert_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.isEmpty) :
     (t.insert k v h.balanced).impl.maxKey (isEmpty_insert h) = k := by
-  revert he
-  simp_to_model [isEmpty, insert, maxKey] using List.maxKey_insertEntry_of_isEmpty
+  simpa using maxKeyV_insert_of_isEmpty h he
 
 theorem maxKeyV_insert!_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.isEmpty) :
     haveI : Nonempty α := ⟨k⟩
@@ -9382,7 +9329,7 @@ theorem getKeyV_maxKey? [TransOrd α] (h : t.WF) {km} :
 theorem getKey_maxKey? [TransOrd α] (h : t.WF) {km hc} :
     (hkm : haveI : Nonempty α := ⟨t.maxKey?.get (isSome_maxKey?_of_contains h hc)⟩;
       t.maxKey?.getV = km) → t.getKey km hc = km := by
-  simp_to_model [maxKey?, getKey] using List.getKey_maxKey?
+  intro hkm; simpa using getKeyV_maxKey? h hkm
 
 
 @[simp]
@@ -9462,8 +9409,7 @@ theorem maxKeyV_insertIfNew_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.is
 
 theorem maxKey_insertIfNew_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.isEmpty) :
     (t.insertIfNew k v h.balanced).impl.maxKey (isEmpty_insertIfNew h) = k := by
-  revert he
-  simp_to_model [isEmpty, insertIfNew, maxKey] using List.maxKey_insertEntryIfNew_of_isEmpty
+  simpa using maxKeyV_insertIfNew_of_isEmpty h he
 
 theorem maxKeyV_insertIfNew!_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.isEmpty) :
     haveI : Nonempty α := ⟨k⟩
@@ -9747,7 +9693,7 @@ theorem getKeyV_maxKeyV [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
 
 theorem getKey_maxKey [TransOrd α] (h : t.WF) {he hc} :
     t.getKey (t.maxKey he) hc = t.maxKey he := by
-  simp_to_model [getKey, maxKey] using List.getKey_maxKey
+  simpa using getKeyV_maxKeyV h he
 
 
 theorem maxKeyV_erase_eq_iff_not_compare_eq_maxKeyV [TransOrd α] (h : t.WF) {k}
@@ -12659,24 +12605,22 @@ theorem get?_map' [TransOrd α]
       (fun _ h' => (mem_iff_isSome_get? h).mpr (Option.isSome_of_mem h')) := by
   simp_to_model [map, Const.get?, contains, getKey] using Const.getValue?_map
 
+/-
+PLOG(get?_map):
+Applying `getKeyV_eq` to `Option.map (f (t.getKeyV k)) (get? t k)` is tricky because we need `k ∈ t`.
+Solution: Don't apply `Option.pmap_eq_map` and use `simp +contextual`.
+We also need to add `mem_iff_contains` to the simp set to help the discharger.
+
+Next problem: But the RHS uses `Option.map`. We can't apply `← Option.pmap_eq_map` using `simp`
+because this requires a choice of predicate and a proof.
+Solution: Need a second `simp` that applies `Option.pmap_eq_map` after `getKeyV_eq` was applied.
+-/
+
 theorem get?_map [TransOrd α] [LawfulEqOrd α]
     {f : α → β → γ} {k : α} (h : t.WF) :
     Const.get? (t.map f) k = (Const.get? t k).map (f k) := by
-  rw [get?_map' h]
-  apply Option.ext
-  intro b
-  simp only [Option.pmap_eq_some_iff, Option.map_eq_some_iff]
-  constructor
-  · rintro ⟨v, _, hg, eq⟩
-    refine ⟨v, hg, ?_⟩
-    have : t.contains k = true :=
-      mem_iff_contains.mp <| (mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hg)
-    rw [eq, getKey_eq h this]
-  · rintro ⟨v, hg, eq⟩
-    have hc : t.contains k = true :=
-      mem_iff_contains.mp <| (mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hg)
-    refine ⟨v, (mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hg), hg, ?_⟩
-    rw [getKey_eq h hc]; exact eq.symm
+  simp +contextual only [get?_map' h, getKey_eq_getKeyV, mem_iff_contains, getKeyV_eq h]
+  simp
 
 theorem get?_map_of_getKey?_eq_some [TransOrd α]
     {f : α → β → γ} {k k' : α} (h : t.WF) :
@@ -12728,22 +12672,8 @@ theorem get!_map' [TransOrd α] [Inhabited γ]
 theorem get!_map [TransOrd α] [LawfulEqOrd α] [Inhabited γ]
     {f : α → β → γ} {k : α} (h : t.WF) :
     Const.get! (t.map f) k = ((Const.get? t k).map (f k)).get! := by
-  rw [get!_map' h]
-  congr 1
-  apply Option.ext
-  intro b
-  simp only [Option.pmap_eq_some_iff, Option.map_eq_some_iff]
-  constructor
-  · rintro ⟨v, _, hg, eq⟩
-    refine ⟨v, hg, ?_⟩
-    have : t.contains k = true :=
-      mem_iff_contains.mp <| (mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hg)
-    rw [eq, getKey_eq h this]
-  · rintro ⟨v, hg, eq⟩
-    have hc : t.contains k = true :=
-      mem_iff_contains.mp <| (mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hg)
-    refine ⟨v, (mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hg), hg, ?_⟩
-    rw [getKey_eq h hc]; exact eq.symm
+  simp +contextual only [get!_map' h, getKey_eq_getKeyV, mem_iff_contains, getKeyV_eq h]
+  simp
 
 theorem get!_map_of_getKey?_eq_some [TransOrd α] [Inhabited γ]
     {f : α → β → γ} {k k' : α} (h : t.WF) :
@@ -12761,22 +12691,8 @@ theorem getD_map' [TransOrd α]
 theorem getD_map [TransOrd α] [LawfulEqOrd α]
     {f : α → β → γ} {k : α} {fallback : γ} (h : t.WF) :
     Const.getD (t.map f) k fallback = ((Const.get? t k).map (f k)).getD fallback := by
-  rw [getD_map' h]
-  congr 1
-  apply Option.ext
-  intro b
-  simp only [Option.pmap_eq_some_iff, Option.map_eq_some_iff]
-  constructor
-  · rintro ⟨v, _, hg, eq⟩
-    refine ⟨v, hg, ?_⟩
-    have : t.contains k = true :=
-      mem_iff_contains.mp <| (mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hg)
-    rw [eq, getKey_eq h this]
-  · rintro ⟨v, hg, eq⟩
-    have hc : t.contains k = true :=
-      mem_iff_contains.mp <| (mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hg)
-    refine ⟨v, (mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hg), hg, ?_⟩
-    rw [getKey_eq h hc]; exact eq.symm
+  simp +contextual only [getD_map' h, getKey_eq_getKeyV, mem_iff_contains, getKeyV_eq h]
+  simp
 
 theorem getD_map_of_getKey?_eq_some [TransOrd α]
     {f : α → β → γ} {k k' : α} {fallback : γ} (h : t.WF) :
