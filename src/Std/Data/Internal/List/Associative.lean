@@ -9909,9 +9909,9 @@ theorem isSome_minKey?_insertEntryIfNew [Ord α] [TransOrd α] [BEq α] [LawfulB
 
 theorem minKey?_insertEntryIfNew_le_minKey? [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {k : α}
     {v : β k} {l : List ((a : α) × β a)} (hl : DistinctKeys l) {km kmi} (hkm : minKey? l = some km)
-    (hkmi : (insertEntryIfNew k v l |> minKey? |>.get <| isSome_minKey?_insertEntryIfNew hl) = kmi) :
+    (hkmi : haveI : Nonempty α := ⟨k⟩; (insertEntryIfNew k v l |> minKey? |>.getV) = kmi) :
     compare kmi km |>.isLE := by
-  simp only [← hkmi, minKey?_insertEntryIfNew hl, hkm, Option.get_some, Option.elim_some]
+  simp only [← hkmi, minKey?_insertEntryIfNew hl, hkm, Option.getV_some, Option.elim_some]
   split <;> simp [*]
 
 theorem minKey?_insertEntryIfNew_le_self [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {k kmi : α}
@@ -10310,9 +10310,8 @@ theorem minKeyV_insertEntryIfNew_le_minKeyV [Ord α] [TransOrd α] [BEq α] [Law
     haveI : Nonempty α := ⟨k⟩
     compare (minKeyV (insertEntryIfNew k v l)) (minKeyV l) |>.isLE := by
   simp only [minKeyV_eq_getV_minKey?]
-  have : (minKey? l).isSome := isSome_minKey?_iff_isEmpty_eq_false.mpr he
-  exact minKey?_insertEntryIfNew_le_minKey? hd
-    (by simpa using (Option.getV_eq_iff_eq_some this).mp rfl) (Option.get_eq_getV _)
+  have : (minKey? l).isSome := by simp [isSome_minKey?_eq_not_isEmpty, he]
+  exact minKey?_insertEntryIfNew_le_minKey? hd (by simp [this]) rfl
 
 theorem minKey_insertEntryIfNew_le_minKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k v he} :
@@ -11153,7 +11152,7 @@ theorem isSome_maxKey?_insertEntryIfNew [Ord α] [TransOrd α] [BEq α] [LawfulB
 
 theorem maxKey?_le_maxKey?_insertEntryIfNew [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {k : α}
     {v : β k} {l : List ((a : α) × β a)} (hd : DistinctKeys l) {km kmi} (hkm : maxKey? l = some km)
-    (hkmi : (insertEntryIfNew k v l |> maxKey? |>.get <| isSome_maxKey?_insertEntryIfNew hd) = kmi) :
+    (hkmi : haveI : Nonempty α := ⟨k⟩; (insertEntryIfNew k v l |> maxKey? |>.getV) = kmi) :
     compare km kmi |>.isLE :=
   letI : Ord α := .opposite inferInstance
   minKey?_insertEntryIfNew_le_minKey? hd hkm hkmi
@@ -11403,9 +11402,8 @@ theorem getKey?_maxKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
   letI : Ord α := .opposite inferInstance
   getKey?_minKey hd
 
-theorem getKeyV_maxKeyV [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
-    {l : List ((a : α) × β a)} (hd : DistinctKeys l) (he : l.isEmpty = false) :
-    haveI : Nonempty α := ⟨maxKey l he⟩
+theorem getKeyV_maxKeyV {_ : Nonempty α} [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
+    {l : List ((a : α) × β a)} (hd : DistinctKeys l) :
     getKeyV (maxKeyV l) l = maxKeyV l :=
   letI : Ord α := .opposite inferInstance
   getKeyV_minKeyV hd

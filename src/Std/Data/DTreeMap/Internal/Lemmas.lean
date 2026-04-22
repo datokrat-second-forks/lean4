@@ -194,26 +194,26 @@ private theorem getKey_eq_getKeyD_of_contains [Ord α] {t : Impl α β} {k : α}
       <;> (try exact ihr (h' := by simpa [contains, hcmp] using h'))
 
 @[simp]
-theorem getKey_eq_getKeyV [Ord α] {t : Impl α β} {k : α} {h' : t.contains k = true} :
+theorem getKey_eq_getKeyV {_ : Ord α} {t : Impl α β} {k : α} {h' : t.contains k = true} :
     t.getKey k h' = t.getKeyV k :=
   getKey_eq_getKeyD_of_contains
 
-private theorem minKey_eq_minKeyD_of_isEmpty_eq_false [Ord α] {t : Impl α β}
+private theorem minKey_eq_minKeyD_of_isEmpty_eq_false {t : Impl α β}
     {he : t.isEmpty = false} {fallback : α} : t.minKey he = t.minKeyD fallback := by
   induction t, he using minKey.induct_unfolding <;> simp_all [minKeyD]
 
 @[simp]
-theorem minKey_eq_minKeyV [Ord α] {t : Impl α β} {he : t.isEmpty = false} :
+theorem minKey_eq_minKeyV {t : Impl α β} {he : t.isEmpty = false} :
     haveI : Nonempty α := ⟨t.minKey he⟩
     t.minKey he = t.minKeyV :=
   minKey_eq_minKeyD_of_isEmpty_eq_false
 
-private theorem maxKey_eq_maxKeyD_of_isEmpty_eq_false [Ord α] {t : Impl α β}
+private theorem maxKey_eq_maxKeyD_of_isEmpty_eq_false {t : Impl α β}
     {he : t.isEmpty = false} {fallback : α} : t.maxKey he = t.maxKeyD fallback := by
   induction t, he using maxKey.induct_unfolding <;> simp_all [maxKeyD]
 
 @[simp]
-theorem maxKey_eq_maxKeyV [Ord α] {t : Impl α β} {he : t.isEmpty = false} :
+theorem maxKey_eq_maxKeyV {t : Impl α β} {he : t.isEmpty = false} :
     haveI : Nonempty α := ⟨t.maxKey he⟩
     t.maxKey he = t.maxKeyV :=
   maxKey_eq_maxKeyD_of_isEmpty_eq_false
@@ -230,7 +230,7 @@ private theorem get_eq_getD_of_contains [Ord α] [LawfulEqOrd α] {t : Impl α �
     · rfl
 
 @[simp]
-theorem get_eq_getV [Ord α] [LawfulEqOrd α] {t : Impl α β} {k : α}
+theorem get_eq_getV {_ : Ord α} [LawfulEqOrd α] {t : Impl α β} {k : α}
     {h' : t.contains k = true} :
     haveI : Nonempty (β k) := ⟨t.get k h'⟩
     t.get k h' = t.getV k :=
@@ -247,7 +247,7 @@ private theorem getEntry_eq_getEntryD_of_mem [Ord α] {t : Impl α β} {k : α} 
       <;> (try exact ihr (h' := by simpa [mem_iff_contains, contains, hcmp] using h'))
 
 @[simp]
-theorem getEntry_eq_getEntryV [Ord α] {t : Impl α β} {k : α} {h' : k ∈ t} :
+theorem getEntry_eq_getEntryV {_ : Ord α} {t : Impl α β} {k : α} {h' : k ∈ t} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.getEntry k h'⟩
     t.getEntry k h' = t.getEntryV k :=
   getEntry_eq_getEntryD_of_mem
@@ -267,7 +267,7 @@ private theorem get_eq_getD_of_contains [Ord α] {t : Impl α (fun _ => β)} {k 
       <;> (try exact ihr (h' := by simpa [contains, hcmp] using h'))
 
 @[simp]
-theorem get_eq_getV [Ord α] {t : Impl α (fun _ => β)} {k : α} {h' : t.contains k = true} :
+theorem get_eq_getV {_ : Ord α} {t : Impl α (fun _ => β)} {k : α} {h' : t.contains k = true} :
     haveI : Nonempty β := ⟨Const.get t k h'⟩
     Const.get t k h' = Const.getV t k :=
   Const.get_eq_getD_of_contains
@@ -8233,13 +8233,14 @@ theorem isSome_minKey?_insertIfNew! [TransOrd α] (h : t.WF) {k v} :
 
 theorem minKey?_insertIfNew_le_minKey? [TransOrd α] (h : t.WF) {k v km kmi} :
     (hkm : t.minKey? = some km) →
-    (hkmi : (t.insertIfNew k v h.balanced |>.impl.minKey? |>.get <| isSome_minKey?_insertIfNew h) = kmi) →
+    (hkmi : haveI : Nonempty α := ⟨k⟩;
+      (t.insertIfNew k v h.balanced |>.impl.minKey?).getV = kmi) →
     compare kmi km |>.isLE := by
   simp_to_model [insertIfNew, minKey?] using List.minKey?_insertEntryIfNew_le_minKey?
 
 theorem minKey?_insertIfNew!_le_minKey? [TransOrd α] (h : t.WF) {k v km kmi} :
     (hkm : t.minKey? = some km) →
-    (hkmi : (t.insertIfNew! k v |>.minKey? |>.get <| isSome_minKey?_insertIfNew! h) = kmi) →
+    (hkmi : haveI : Nonempty α := ⟨k⟩; (t.insertIfNew! k v |>.minKey?).getV = kmi) →
     compare kmi km |>.isLE := by
   simpa only [insertIfNew_eq_insertIfNew!] using minKey?_insertIfNew_le_minKey? h
 
@@ -8465,15 +8466,13 @@ theorem getKeyD_minKey [TransOrd α] (h : t.WF) {he fallback} :
     t.getKeyD (t.minKey he) fallback = t.minKey he := by
   simp_to_model [getKeyD, minKey] using List.getKeyD_minKey
 
-theorem getKeyV_minKeyV [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
-    haveI : Nonempty α := ⟨t.minKey he⟩
+theorem getKeyV_minKeyV {_ : Nonempty α} [TransOrd α] (h : t.WF) :
     t.getKeyV t.minKeyV = t.minKeyV := by
-  revert he
   simp_to_model [getKeyV, minKey, minKeyV, isEmpty] using List.getKeyV_minKeyV
 
 theorem getKey_minKey [TransOrd α] (h : t.WF) {he hc} :
     t.getKey (t.minKey he) hc = t.minKey he := by
-  simpa using getKeyV_minKeyV h he
+  simpa using getKeyV_minKeyV h
 
 
 theorem minKeyV_erase_eq_iff_not_compare_eq_minKeyV [TransOrd α] (h : t.WF) {k}
@@ -9457,13 +9456,14 @@ theorem maxKeyD_insertIfNew!_of_isEmpty [TransOrd α] (h : t.WF) {k v} (he : t.i
 
 theorem maxKey?_le_maxKey?_insertIfNew [TransOrd α] (h : t.WF) {k v km kmi} :
     (hkm : t.maxKey? = some km) →
-    (hkmi : (t.insertIfNew k v h.balanced |>.impl.maxKey? |>.get <| isSome_maxKey?_insertIfNew h) = kmi) →
+    (hkmi : haveI : Nonempty α := ⟨k⟩;
+      (t.insertIfNew k v h.balanced |>.impl.maxKey?).getV = kmi) →
     compare km kmi |>.isLE := by
   simp_to_model [insertIfNew, maxKey?] using List.maxKey?_le_maxKey?_insertEntryIfNew
 
 theorem maxKey?_le_maxKey?_insertIfNew! [TransOrd α] (h : t.WF) {k v km kmi} :
     (hkm : t.maxKey? = some km) →
-    (hkmi : (t.insertIfNew! k v |>.maxKey? |>.get <| isSome_maxKey?_insertIfNew! h) = kmi) →
+    (hkmi : haveI : Nonempty α := ⟨k⟩; (t.insertIfNew! k v |>.maxKey?).getV = kmi) →
     compare km kmi |>.isLE := by
   simpa only [insertIfNew_eq_insertIfNew!] using maxKey?_le_maxKey?_insertIfNew h
 
@@ -9685,15 +9685,13 @@ theorem getKeyD_maxKey [TransOrd α] (h : t.WF) {he fallback} :
     t.getKeyD (t.maxKey he) fallback = t.maxKey he := by
   simp_to_model [getKeyD, maxKey] using List.getKeyD_maxKey
 
-theorem getKeyV_maxKeyV [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
-    haveI : Nonempty α := ⟨t.maxKey he⟩
+theorem getKeyV_maxKeyV {_ : Nonempty α} [TransOrd α] (h : t.WF) :
     t.getKeyV t.maxKeyV = t.maxKeyV := by
-  revert he
   simp_to_model [getKeyV, maxKey, maxKeyV, isEmpty] using List.getKeyV_maxKeyV
 
 theorem getKey_maxKey [TransOrd α] (h : t.WF) {he hc} :
     t.getKey (t.maxKey he) hc = t.maxKey he := by
-  simpa using getKeyV_maxKeyV h he
+  simpa using getKeyV_maxKeyV h
 
 
 theorem maxKeyV_erase_eq_iff_not_compare_eq_maxKeyV [TransOrd α] (h : t.WF) {k}
