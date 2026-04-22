@@ -8270,6 +8270,15 @@ theorem get?_map [TransCmp cmp] [LawfulEqCmp cmp]
     (t.map f).get? k = (t.get? k).map (f k) :=
   Impl.get?_map t.wf
 
+@[grind =]
+theorem getV_map [TransCmp cmp] [LawfulEqCmp cmp]
+    {f : (a : α) → β a → γ a} {k : α} (h' : k ∈ t.map f) :
+    haveI h'' : k ∈ t := mem_of_mem_map h'
+    haveI : Nonempty (β k) := ⟨t.get k h''⟩
+    haveI : Nonempty (γ k) := ⟨f k (t.get k h'')⟩
+    (t.map f).getV k = f k (t.getV k) :=
+  Impl.getV_map t.wf h'
+
 theorem get_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → γ a} {k : α} {h'} :
     (t.map f).get k h' = f k (t.get k (mem_of_mem_map h')) :=
@@ -8286,12 +8295,6 @@ theorem getD_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → γ a} {k : α} {fallback : γ k} :
     (t.map f).getD k fallback = ((t.get? k).map (f k)).getD fallback :=
   Impl.getD_map t.wf
-
-@[grind =]
-theorem getV_map [TransCmp cmp] [LawfulEqCmp cmp]
-    {f : (a : α) → β a → γ a} {k : α} {_ : Nonempty (γ k)} :
-    (t.map f).getV k = ((t.get? k).map (f k)).getD Classical.ofNonempty := by
-  simpa [DTreeMap.getV] using getD_map
 
 @[simp, grind =]
 theorem getKey?_map [TransCmp cmp]
@@ -8343,10 +8346,28 @@ theorem get?_map_of_getKey?_eq_some [TransCmp cmp]
     Const.get? (t.map f) k = (Const.get? t k).map (f k') :=
   Impl.Const.get?_map_of_getKey?_eq_some t.wf h
 
+@[grind =]
+theorem getV_map [TransCmp cmp] [LawfulEqCmp cmp]
+    {f : α → β → γ} {k : α} (h' : k ∈ t.map f) :
+    haveI h'' : k ∈ t := mem_of_mem_map h'
+    haveI : Nonempty β := ⟨Const.get t k h''⟩
+    haveI : Nonempty γ := ⟨f (t.getKey k h'') (Const.get t k h'')⟩
+    Const.getV (t.map f) k = f k (Const.getV t k) :=
+  Impl.Const.getV_map t.wf h'
+
 theorem get_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → γ} {k : α} {h'} :
     Const.get (t.map f) k h' = f k (Const.get t k (mem_of_mem_map h')) :=
   Impl.Const.get_map t.wf
+
+/-- Variant of `getV_map` that holds without `LawfulEqCmp`. -/
+theorem getV_map' [TransCmp cmp]
+    {f : α → β → γ} {k : α} (h' : k ∈ t.map f) :
+    haveI h'' : k ∈ t := mem_of_mem_map h'
+    haveI : Nonempty β := ⟨Const.get t k h''⟩
+    haveI : Nonempty γ := ⟨f (t.getKey k h'') (Const.get t k h'')⟩
+    Const.getV (t.map f) k = f (t.getKeyV k) (Const.getV t k) :=
+  Impl.Const.getV_map' t.wf h'
 
 /-- Variant of `get_map` that holds without `LawfulEqCmp`. -/
 theorem get_map' [TransCmp cmp]
@@ -8392,27 +8413,6 @@ theorem getD_map_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → γ} {k k' : α} {fallback : γ} (h : t.getKey? k = some k') :
     Const.getD (t.map f) k fallback = ((Const.get? t k).map (f k')).getD fallback :=
   Impl.Const.getD_map_of_getKey?_eq_some t.wf h
-
-@[grind =]
-theorem getV_map [TransCmp cmp] [LawfulEqCmp cmp] {_ : Nonempty γ}
-    {f : α → β → γ} {k : α} :
-    Const.getV (t.map f) k = ((Const.get? t k).map (f k)).getD Classical.ofNonempty := by
-  simp only [Const.getV]; exact getD_map
-
-/-- Variant of `getV_map` that holds without `LawfulEqCmp`. -/
-theorem getV_map' [TransCmp cmp] {_ : Nonempty γ}
-    {f : α → β → γ} {k : α} :
-    Const.getV (t.map f) k =
-      ((get? t k).pmap (fun v h => f (t.getKey k h) v)
-        (fun _ h' => mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some h'))).getD
-          Classical.ofNonempty := by
-  simp only [Const.getV]; exact getD_map'
-
-theorem getV_map_of_getKey?_eq_some [TransCmp cmp] {_ : Nonempty γ}
-    {f : α → β → γ} {k k' : α} (h : t.getKey? k = some k') :
-    Const.getV (t.map f) k = ((Const.get? t k).map (f k')).getD
-      Classical.ofNonempty := by
-  simp only [Const.getV]; exact getD_map_of_getKey?_eq_some h
 
 @[simp, grind =]
 theorem toList_map {f : α → β → γ} :
