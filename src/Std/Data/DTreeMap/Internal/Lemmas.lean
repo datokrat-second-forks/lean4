@@ -1491,13 +1491,13 @@ theorem getKey_erase [TransOrd α] (h : t.WF) {k a : α} {h'} :
   simpa using getKeyV_erase h h'
 
 @[simp]
-theorem getKeyV_erase! [TransOrd α] (h : t.WF) {k a : α} {h' : a ∈ t.erase! k} :
+theorem getKeyV_erase! [TransOrd α] (h : t.WF) {k a : α} (h' : a ∈ t.erase! k) :
     (t.erase! k).getKeyV a = t.getKeyV a := by
   simpa only [erase_eq_erase!] using getKeyV_erase h (h' := by simpa [erase_eq_erase!])
 
 theorem getKey_erase! [TransOrd α] (h : t.WF) {k a : α} {h'} :
     (t.erase! k).getKey a h' = t.getKey a (contains_of_contains_erase! h h') := by
-  simpa using getKeyV_erase! h (h' := h')
+  simpa using getKeyV_erase! h h'
 
 theorem getKey?_eq_some_getKey [TransOrd α] (h : t.WF) {a : α} {h'} :
     t.getKey? a = some (t.getKey a h') := by
@@ -5019,7 +5019,7 @@ theorem contains_inter! [TransOrd α] (h₁ : m₁.WF)
   rw [← inter_eq_inter!]
   apply contains_inter h₁ h₂
   all_goals wf_trivial
-#exit
+
 theorem contains_inter_iff [TransOrd α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k : α} :
     (m₁.inter m₂ h₁.balanced).contains k ↔ m₁.contains k ∧ m₂.contains k := by
@@ -6203,7 +6203,7 @@ theorem getKey?_diff!_of_contains_right [TransOrd α]
 
 /- getKey -/
 theorem getKeyV_diff [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
-    {k : α} {h_contains : (m₁.diff m₂ h₁.balanced).contains k} :
+    {k : α} (h_contains : (m₁.diff m₂ h₁.balanced).contains k) :
     (m₁.diff m₂ h₁.balanced).getKeyV k = m₁.getKeyV k := by
   revert h_contains
   simp_to_model [diff, contains, getKeyV] using List.getKeyV_filter_not_contains_map_fst
@@ -6215,7 +6215,7 @@ theorem getKey_diff [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
   simpa using getKeyV_diff h₁ h₂ (h_contains := h_contains)
 
 theorem getKeyV_diff! [TransOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
-    {k : α} {h_contains : (m₁.diff! m₂).contains k} :
+    {k : α} (h_contains : (m₁.diff! m₂).contains k) :
     (m₁.diff! m₂).getKeyV k = m₁.getKeyV k := by
   simpa only [← diff_eq_diff! h₁] using
     getKeyV_diff h₁ h₂ (h_contains := by simpa only [← diff_eq_diff! h₁] using h_contains)
@@ -7638,7 +7638,7 @@ theorem get_modify (h : t.WF) {k k' : α} {f : β k → β k} {hc : k' ∈ t.mod
   simpa using getV_modify h hc
 
 @[simp]
-theorem getV_modify_self (h : t.WF) {k : α} {f : β k → β k} {hc : k ∈ t.modify k f} :
+theorem getV_modify_self (h : t.WF) {k : α} {f : β k → β k} (hc : k ∈ t.modify k f) :
     haveI : Nonempty (β k) := ⟨(t.modify k f).get k hc⟩
     (t.modify k f).getV k = f (t.getV k) := by
   revert hc
@@ -11448,7 +11448,7 @@ theorem getKey?_filterMap! [TransOrd α] [LawfulEqOrd α]
 
 theorem getKeyV_filterMap [TransOrd α]
     {f : (a : α) → β a → Option (γ a)} {k : α} (h : t.WF)
-    {h' : k ∈ (t.filterMap f h.balanced).1} :
+    (h' : k ∈ (t.filterMap f h.balanced).1) :
     (t.filterMap f h.balanced).1.getKeyV k = t.getKeyV k := by
   revert h'
   simp_to_model [filterMap, contains, getKeyV] using List.getKeyV_filterMap
@@ -11460,7 +11460,7 @@ theorem getKey_filterMap [TransOrd α]
 
 theorem getKeyV_filterMap! [TransOrd α]
     {f : (a : α) → β a → Option (γ a)} {k : α} (h : t.WF)
-    {h' : k ∈ t.filterMap! f} :
+    (h' : k ∈ t.filterMap! f) :
     (t.filterMap! f).getKeyV k = t.getKeyV k := by
   simpa only [filterMap_eq_filterMap!] using
     getKeyV_filterMap h (h' := by simpa only [filterMap_eq_filterMap!] using h')
@@ -12117,7 +12117,7 @@ theorem getKey?_filter!_key [TransOrd α]
 
 theorem getKeyV_filter [TransOrd α]
     {f : (a : α) → β a → Bool} {k : α} (h : t.WF)
-    {h' : (t.filter f h.balanced).1.contains k} :
+    (h' : (t.filter f h.balanced).1.contains k) :
     (t.filter f h.balanced).1.getKeyV k = t.getKeyV k := by
   revert h'
   simp_to_model [filter, contains, getKeyV] using List.getKeyV_filter
@@ -12129,7 +12129,7 @@ theorem getKey_filter [TransOrd α]
 
 theorem getKeyV_filter! [TransOrd α]
     {f : (a : α) → β a → Bool} {k : α} (h : t.WF)
-    {h' : (t.filter! f).contains k} :
+    (h' : (t.filter! f).contains k) :
     (t.filter! f).getKeyV k = t.getKeyV k := by
   simpa only [filter_eq_filter!] using
     getKeyV_filter h (h' := by simpa only [filter_eq_filter!] using h')
