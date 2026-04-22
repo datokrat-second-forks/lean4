@@ -1262,7 +1262,8 @@ theorem getKeyV_congr [BEq α] [EquivBEq α] {l : List ((a : α) × β a)}
   simp [getKeyV, getKey?_congr h]
 
 theorem getKey_congr [BEq α] [EquivBEq α] {l : List ((a : α) × β a)}
-    {k k' : α} (h : k == k') {h'} {h''} : getKey k l h' = getKey k' l h'' := by
+    {k k' : α} {h'} (h : k == k') : getKey k l h' = getKey k' l (containsKey_congr h ▸ h') := by
+  have h'' : containsKey k' l := containsKey_congr h ▸ h'
   simpa only [getKey?_eq_some_getKey, h', h'', Option.some.injEq] using getKey?_congr (l := l) h
 
 theorem getKeyV_of_mem [BEq α] [EquivBEq α] {l : List ((a : α) × β a)} {x : (a : α) × β a} (h : x ∈ l)
