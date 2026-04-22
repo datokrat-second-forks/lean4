@@ -436,7 +436,7 @@ theorem getD_eq_fallback_of_contains_eq_false [TransCmp cmp] {a : α} {fallback 
 
 theorem getElemV_eq_classicalOfNonempty_of_contains_eq_false [TransCmp cmp] {_ : Nonempty β} {a : α} :
     t.contains a = false → t｢a｣ = (Classical.ofNonempty : β) :=
-  DTreeMap.Const.getV_eq_classicalOfNonempty_of_contains_eq_false
+  DTreeMap.Const.getV_eq_ofNonempty_of_contains_eq_false
 
 theorem getD_eq_fallback [TransCmp cmp] {a : α} {fallback : β} :
     ¬ a ∈ t → getD t a fallback = fallback :=
@@ -444,7 +444,7 @@ theorem getD_eq_fallback [TransCmp cmp] {a : α} {fallback : β} :
 
 theorem getElemV_eq_classicalOfNonempty [TransCmp cmp] {_ : Nonempty β} {a : α} :
     ¬ a ∈ t → t｢a｣ = (Classical.ofNonempty : β) :=
-  DTreeMap.Const.getV_eq_classicalOfNonempty
+  DTreeMap.Const.getV_eq_ofNonempty
 
 @[grind =] theorem getD_erase [TransCmp cmp] {k a : α} {fallback : β} :
     getD (t.erase k) a fallback = if cmp k a = .eq then

@@ -677,11 +677,11 @@ theorem getV_insert_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α} {v : β k} :
     (t.insert k v).getV k = v :=
   Impl.getV_insert_self t.wf
 
-theorem getV_eq_classicalOfNonempty_of_contains_eq_false [TransCmp cmp] [LawfulEqCmp cmp] {a : α}
+theorem getV_eq_ofNonempty_of_contains_eq_false [TransCmp cmp] [LawfulEqCmp cmp] {a : α}
     {_ : Nonempty (β a)} : t.contains a = false → t.getV a = Classical.ofNonempty := by
   simpa [DTreeMap.getV] using getD_eq_fallback_of_contains_eq_false
 
-theorem getV_eq_classicalOfNonempty [TransCmp cmp] [LawfulEqCmp cmp] {a : α} {_ : Nonempty (β a)} :
+theorem getV_eq_ofNonempty [TransCmp cmp] [LawfulEqCmp cmp] {a : α} {_ : Nonempty (β a)} :
     ¬ a ∈ t → t.getV a = Classical.ofNonempty := by
   simpa [DTreeMap.getV] using getD_eq_fallback
 
@@ -793,7 +793,8 @@ theorem getV_of_isEmpty [TransCmp cmp] {_ : Nonempty β} {a : α} :
     t.isEmpty = true → getV t a = (Classical.ofNonempty : β) := by
   simpa [Const.getV] using getD_of_isEmpty
 
-@[grind =] theorem getV_insert [TransCmp cmp] {_ : Nonempty β} {k a : α} {v : β} :
+@[grind =] theorem getV_insert [TransCmp cmp] {k a : α} {v : β} :
+    haveI : Nonempty β := ⟨v⟩
     getV (t.insert k v) a = if cmp k a = .eq then v else getV t a :=
   Impl.Const.getV_insert t.wf
 
@@ -803,11 +804,11 @@ theorem getV_insert_self [TransCmp cmp] {k : α} {v : β} :
     getV (t.insert k v) k = v :=
   Impl.Const.getV_insert_self t.wf
 
-theorem getV_eq_classicalOfNonempty_of_contains_eq_false [TransCmp cmp] {_ : Nonempty β} {a : α} :
+theorem getV_eq_ofNonempty_of_contains_eq_false [TransCmp cmp] {_ : Nonempty β} {a : α} :
     t.contains a = false → getV t a = (Classical.ofNonempty : β) := by
   simpa [Const.getV] using getD_eq_fallback_of_contains_eq_false
 
-theorem getV_eq_classicalOfNonempty [TransCmp cmp] {_ : Nonempty β} {a : α} :
+theorem getV_eq_ofNonempty [TransCmp cmp] {_ : Nonempty β} {a : α} :
     ¬ a ∈ t → getV t a = (Classical.ofNonempty : β) := by
   simpa [Const.getV] using getD_eq_fallback
 
@@ -827,7 +828,7 @@ theorem get_eq_getV [TransCmp cmp] {a : α} {h} :
     get t a h = getV t a :=
   Impl.Const.get_eq_getV
 
-theorem getV_eq_getD_classicalOfNonempty [TransCmp cmp] {_ : Nonempty β} {a : α} :
+theorem getV_eq_getD_ofNonempty [TransCmp cmp] {_ : Nonempty β} {a : α} :
     getV t a = getD t a Classical.ofNonempty :=
   rfl
 
