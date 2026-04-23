@@ -1090,6 +1090,14 @@ theorem get!_eq_get!_get? [TransOrd α] [LawfulEqOrd α] (h : t.WF) {a : α} [In
     t.get! a = (t.get? a).get! := by
   simp_to_model [get!, get?] using List.getValueCast!_eq_getValueCast?
 
+theorem getV_eq_getV_get? [TransOrd α] [LawfulEqOrd α] (h : t.WF) {a : α} { _ : Nonempty (β a)} :
+    t.getV a = (t.get? a).getV := by
+  simp_to_model [getV, get?] using List.getValueCastV_eq_getV_getValueCast?
+
+theorem get_eq_get_get? [TransOrd α] [LawfulEqOrd α] (h : t.WF) {a : α} {h'} :
+    t.get a h' = (t.get? a).get (mem_iff_isSome_get? h |>.mp h') := by
+  simp_to_model [get, get?] using List.getValueCast_eq_get_getValueCast?
+
 theorem getV_eq_get! [TransOrd α] [LawfulEqOrd α] (h : t.WF) {a : α} [Inhabited (β a)]
     (h' : t.contains a) :
     t.getV a = t.get! a := by
@@ -1162,6 +1170,14 @@ theorem get?_eq_some_get! [TransOrd α] [Inhabited β] (h : t.WF) {a : α} :
 theorem get!_eq_get!_get? [TransOrd α] [Inhabited β] (h : t.WF) {a : α} :
     get! t a = (get? t a).get! := by
   simp_to_model [Const.get!, Const.get?] using List.getValue!_eq_getValue?
+
+theorem getV_eq_getV_get? [TransOrd α] (h : t.WF) {a : α} {_ : Nonempty β} :
+    getV t a = (get? t a).getV := by
+  simp_to_model [Const.getV, Const.get?] using List.Const.getValueV_eq_getV_getValue?
+
+theorem get_eq_get_get? [TransOrd α] (h : t.WF) {a : α} {h'} :
+    get t a h' = (get? t a).get (mem_iff_isSome_get? h |>.mp h') := by
+  simp_to_model [Const.get, Const.get?] using List.Const.getValue_eq_get_getValue?
 
 theorem getV_eq_get! [TransOrd α] [Inhabited β] (h : t.WF) {a : α} (h' : t.contains a) :
     getV t a = get! t a := by
@@ -1499,9 +1515,19 @@ theorem getKey_erase! [TransOrd α] (h : t.WF) {k a : α} {h'} :
     (t.erase! k).getKey a h' = t.getKey a (contains_of_contains_erase! h h') := by
   simpa using getKeyV_erase! h h'
 
+theorem getKey?_eq_some_getKeyV [TransOrd α] (h : t.WF) {a : α} (h' : contains a t) :
+    t.getKey? a = some (t.getKeyV a) := by
+  revert h'
+  simp_to_model [getKey?, getKeyV, contains] using List.getKey?_eq_some_getKeyV
+
 theorem getKey?_eq_some_getKey [TransOrd α] (h : t.WF) {a : α} {h'} :
     t.getKey? a = some (t.getKey a h') := by
   simp_to_model [getKey?, getKey] using List.getKey?_eq_some_getKey
+
+theorem compare_getKeyV_self [TransOrd α] (h : t.WF) {k : α} (h' : k ∈ t) :
+    compare (t.getKeyV k) k = .eq := by
+  revert h'
+  simp_to_model [getKeyV, contains] using List.getKeyV_beq
 
 theorem compare_getKey_self [TransOrd α] (h : t.WF) {k : α} (h' : k ∈ t) :
     compare (t.getKey k h') k = .eq := by
@@ -1601,6 +1627,20 @@ theorem getKey?_eq_some_getKey! [TransOrd α] [Inhabited α] (h : t.WF) {a : α}
 theorem getKey!_eq_get!_getKey? [TransOrd α] [Inhabited α] (h : t.WF) {a : α} :
     t.getKey! a = (t.getKey? a).get! := by
   simp_to_model [getKey?, getKey!] using List.getKey!_eq_getKey?
+
+theorem getKeyV_eq_getV_getKey? [TransOrd α] (h : t.WF) {a : α} :
+    haveI : Nonempty α := ⟨a⟩
+    t.getKeyV a = (t.getKey? a).getV := by
+  simp_to_model [getKey?, getKeyV] using List.getKeyV_eq_getKey?
+
+theorem getKey_eq_get_getKey? [TransOrd α] [Inhabited α] (h : t.WF) {a : α} (h' : t.contains a) :
+    t.getKey a h' = (t.getKey? a).get (mem_iff_isSome_getKey? h |>.mp h') := by
+  simp_to_model [getKey?, getKey] using List.getKey_eq_getKey?
+
+theorem getKeyV_eq_getKey! [TransOrd α] [Inhabited α] (h : t.WF) {a : α} {h' : t.contains a} :
+    t.getKeyV a = t.getKey! a := by
+  revert h'
+  simp_to_model [getKeyV, getKey!, contains] using List.getKeyV_eq_getKey!
 
 theorem getKey_eq_getKey! [TransOrd α] [Inhabited α] (h : t.WF) {a : α} {h} :
     t.getKey a h = t.getKey! a := by
@@ -8561,15 +8601,17 @@ theorem minKey_insertIfNew_le_self [TransOrd α] (h : t.WF) {k v} :
     compare (t.insertIfNew k v h.balanced |>.impl.minKey <| isEmpty_insertIfNew h) k |>.isLE := by
   simp_to_model [minKey, insertIfNew] using List.minKey_insertEntryIfNew_le_self
 
-theorem minKeyV_eq_headV_keys [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
-    haveI : Nonempty α := ⟨t.minKey he⟩
+theorem minKeyV_eq_headV_keys {_ : Nonempty α} [TransOrd α] (h : t.WF) :
     t.minKeyV = t.keys.headV := by
-  revert he
-  simp_to_model [minKey, minKeyV, keys, isEmpty] using List.minKeyV_eq_headV_keys h.ordered
+  simp_to_model [minKey, minKeyV, keys] using List.minKeyV_eq_headV_keys h.ordered
 
 theorem minKey_eq_head_keys [TransOrd α] (h : t.WF) {he} :
     t.minKey he = t.keys.head (List.isEmpty_eq_false_iff.mp <| isEmpty_keys ▸ he) := by
   simp_to_model [minKey, keys] using List.minKey_eq_head_keys h.ordered
+
+theorem minKeyV_eq_getElemV_keysArray {_ : Nonempty α} [TransOrd α] (h : t.WF) :
+    t.minKeyV = t.keysArray｢0｣ := by
+  simp [minKeyV_eq_headV_keys h, keysArray_eq_toArray_keys, List.headV_eq_getElemV, keys_eq_map, keys_eq_keys]
 
 theorem minKey_eq_getElem_keysArray [TransOrd α] (h : t.WF) {he} :
     t.minKey he = t.keysArray[0]'(Nat.zero_lt_of_ne_zero (by simpa [size_keysArray h, isEmpty_eq_size_eq_zero h] using he)) := by
@@ -8745,21 +8787,19 @@ theorem getKey?_minKey! [TransOrd α] [Inhabited α] (h : t.WF) :
     t.getKey? t.minKey! = some t.minKey! := by
   simp_to_model [minKey!, getKey?, isEmpty] using List.getKey?_minKey!
 
-theorem getKeyV_minKey! [TransOrd α] [Inhabited α] (h : t.WF) (he : t.contains t.minKey!) :
+theorem getKeyV_minKey! [TransOrd α] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) :
     t.getKeyV t.minKey! = t.minKey! := by
   revert he
-  simp_to_model [minKey!, contains, getKeyV] using List.getKeyV_minKey!
+  simp_to_model [minKey!, getKeyV, isEmpty] using List.getKeyV_minKey!
 
 theorem getKey_minKey! [TransOrd α] [Inhabited α] (h : t.WF) : ∀ {he},
     t.getKey t.minKey! he = t.minKey! := by
   simp_to_model [minKey!, contains, isEmpty, getKey] using List.getKey_minKey!
 
-theorem getKeyV_minKey!_eq_minKeyV [TransOrd α] [Inhabited α] (h : t.WF)
-    (he : t.contains t.minKey!) :
+theorem getKeyV_minKey!_eq_minKeyV [TransOrd α] [Inhabited α] (h : t.WF) :
     haveI : Nonempty α := ⟨t.minKey!⟩
     t.getKeyV t.minKey! = t.minKeyV := by
-  revert he
-  simp_to_model [minKey!, minKey, minKeyV, contains, getKeyV] using
+  simp_to_model [minKey!, minKey, minKeyV, getKeyV] using
     List.getKeyV_minKey!_eq_minKeyV
 
 theorem getKey_minKey!_eq_minKey [TransOrd α] [Inhabited α] (h : t.WF) : ∀ {hc},
@@ -9780,21 +9820,23 @@ theorem self_le_maxKey_insertIfNew [TransOrd α] (h : t.WF) {k v} :
     compare k (t.insertIfNew k v h.balanced |>.impl.maxKey <| isEmpty_insertIfNew h) |>.isLE := by
   simp_to_model [maxKey, insertIfNew] using List.self_le_maxKey_insertEntryIfNew
 
-theorem maxKeyV_eq_getLastV_keys [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
-    haveI : Nonempty α := ⟨t.maxKey he⟩
+theorem maxKeyV_eq_getLastV_keys {_ : Nonempty α} [TransOrd α] (h : t.WF) :
     t.maxKeyV = t.keys.getLastV := by
-  revert he
-  simp_to_model [maxKey, maxKeyV, keys, isEmpty] using
+  simp_to_model [maxKey, maxKeyV, keys] using
     List.maxKeyV_eq_getLastV_keys h.ordered.distinctKeys h.ordered
 
 theorem maxKey_eq_getLast_keys [TransOrd α] (h : t.WF) {he} :
     t.maxKey he = t.keys.getLast (List.isEmpty_eq_false_iff.mp <| isEmpty_keys ▸ he) := by
   simp_to_model [maxKey, keys] using List.maxKey_eq_getLast_keys h.ordered.distinctKeys h.ordered
 
+theorem maxKeyV_eq_backV_keysArray {_ : Nonempty α} [TransOrd α] (h : t.WF) :
+    t.maxKeyV = t.keysArray.backV := by
+  simp [maxKeyV_eq_getLastV_keys h, keysArray_eq_toArray_keys, keys_eq_keys]
+
 theorem maxKey_eq_back_keysArray [TransOrd α] (h : t.WF) {he} :
     t.maxKey he = t.keysArray.back (Nat.zero_lt_of_ne_zero (by simpa [size_keysArray h, isEmpty_eq_size_eq_zero h] using he)) := by
   simp only [← toArray_keys, Array.back_eq_backV, maxKey_eq_maxKeyV, List.backV_toArray]
-  exact maxKeyV_eq_getLastV_keys h he
+  exact maxKeyV_eq_getLastV_keys h
 
 theorem maxKeyV_modify [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k f}
     (he : (t.modify k f).isEmpty = false) :
@@ -9965,21 +10007,19 @@ theorem getKey?_maxKey! [TransOrd α] [Inhabited α] (h : t.WF) :
     t.getKey? t.maxKey! = some t.maxKey! := by
   simp_to_model [maxKey!, getKey?, isEmpty] using List.getKey?_maxKey!
 
-theorem getKeyV_maxKey! [TransOrd α] [Inhabited α] (h : t.WF) (he : t.contains t.maxKey!) :
+theorem getKeyV_maxKey! [TransOrd α] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) :
     t.getKeyV t.maxKey! = t.maxKey! := by
   revert he
-  simp_to_model [maxKey!, contains, getKeyV] using List.getKeyV_maxKey!
+  simp_to_model [maxKey!, isEmpty, getKeyV] using List.getKeyV_maxKey!
 
 theorem getKey_maxKey! [TransOrd α] [Inhabited α] (h : t.WF) : ∀ {he},
     t.getKey t.maxKey! he = t.maxKey! := by
   simp_to_model [maxKey!, contains, isEmpty, getKey] using List.getKey_maxKey!
 
-theorem getKeyV_maxKey!_eq_maxKeyV [TransOrd α] [Inhabited α] (h : t.WF)
-    (he : t.contains t.maxKey!) :
+theorem getKeyV_maxKey!_eq_maxKeyV [TransOrd α] [Inhabited α] (h : t.WF) :
     haveI : Nonempty α := ⟨t.maxKey!⟩
     t.getKeyV t.maxKey! = t.maxKeyV := by
-  revert he
-  simp_to_model [maxKey!, maxKey, maxKeyV, contains, getKeyV] using
+  simp_to_model [maxKey!, maxKey, maxKeyV, getKeyV] using
     List.getKeyV_maxKey!_eq_maxKeyV
 
 theorem getKey_maxKey!_eq_maxKey [TransOrd α] [Inhabited α] (h : t.WF) : ∀ {hc},
@@ -12335,16 +12375,38 @@ theorem get_filter! [TransOrd α]
 theorem get!_filter [TransOrd α] [Inhabited β]
     {f : α → β → Bool} {k : α} (h : t.WF) :
     Const.get! (t.filter f h.balanced).1 k =
-      ((Const.get? t k).pfilter (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x)).get! := by
-  simp_to_model [filter, Const.get!, getKey, Const.get?] using List.Const.getValue!_filter
+      ((Const.get? t k).filter (fun x =>
+      f (t.getKeyV k) x)).get! := by
+  simp_to_model [filter, Const.get!, getKeyV, Const.get?] using List.Const.getValue!_filter
+
+/-
+PLOG(get!_filter'):
+Tricky side condition, requiring `+contextual` with a complex discharging chain
+Had to ← pfilter_eq_filter so that `+contextual` works.
+Side condition was originally passed via `get!_filter` containing `getKey`, now using `getKeyV`.
+-/
+
+/-- Simpler variant of `get!_filter` when `LawfulEqOrd` is available. -/
+theorem get!_filter' [TransOrd α] [LawfulEqOrd α] [Inhabited β]
+    {f : α → β → Bool} {k : α} (h : t.WF) :
+    Const.get! (t.filter f h.balanced).1 k = ((Const.get? t k).filter (f k)).get! := by
+  have : ∀ a, get? t k = some a → k ∈ t := by
+    intro a h'
+    simp [mem_iff_isSome_get?, h, h']
+  simp +contextual only [get!_filter h, ← Option.pfilter_eq_filter, getKeyV_eq h, this, Option.some.injEq]
 
 theorem get!_filter! [TransOrd α] [Inhabited β]
     {f : α → β → Bool} {k : α} (h : t.WF) :
     Const.get! (t.filter! f) k =
-      ((Const.get? t k).pfilter (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x)).get! := by
+      ((Const.get? t k).filter (fun x =>
+      f (t.getKeyV k) x)).get! := by
   simpa only [filter_eq_filter!] using get!_filter h
+
+/-- Simpler variant of `get!_filter` when `LawfulEqOrd` is available. -/
+theorem get!_filter!' [TransOrd α] [LawfulEqOrd α] [Inhabited β]
+    {f : α → β → Bool} {k : α} (h : t.WF) :
+    Const.get! (t.filter! f) k = ((Const.get? t k).filter (f k)).get! := by
+  simpa only [filter_eq_filter!] using get!_filter' h
 
 theorem get!_filter_of_getKey?_eq_some [TransOrd α] [Inhabited β]
     {f : α → β → Bool} {k k' : α} (h : t.WF) :
@@ -12361,15 +12423,30 @@ theorem get!_filter!_of_getKey?_eq_some [TransOrd α] [Inhabited β]
 
 theorem getD_filter [TransOrd α]
     {f : α → β → Bool} {k : α} {fallback : β} (h : t.WF) :
-    Const.getD (t.filter f h.balanced).1 k fallback = ((Const.get? t k).pfilter (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x)).getD fallback := by
-  simp_to_model [filter, Const.getD, getKey, Const.get?] using List.Const.getValueD_filter
+    Const.getD (t.filter f h.balanced).1 k fallback = ((Const.get? t k).filter (fun x =>
+      f (t.getKeyV k) x)).getD fallback := by
+  simp_to_model [filter, Const.getD, getKeyV, Const.get?] using List.Const.getValueD_filter
+
+/-- Simpler variant of `getD_filter` when `LawfulEqOrd` is available. -/
+theorem getD_filter' [TransOrd α] [LawfulEqOrd α]
+    {f : α → β → Bool} {k : α} {fallback : β} (h : t.WF) :
+    Const.getD (t.filter f h.balanced).1 k fallback = ((Const.get? t k).filter (f k)).getD fallback := by
+  have : ∀ a, get? t k = some a → k ∈ t := by
+    intro a h'
+    simp [mem_iff_isSome_get?, h', h]
+  simp +contextual only [getD_filter h, ← Option.pfilter_eq_filter, getKeyV_eq h, this, Option.some.injEq]
 
 theorem getD_filter! [TransOrd α]
     {f : α → β → Bool} {k : α} {fallback : β} (h : t.WF) :
-    Const.getD (t.filter! f) k fallback = ((Const.get? t k).pfilter (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x)).getD fallback := by
+    Const.getD (t.filter! f) k fallback = ((Const.get? t k).filter (fun x =>
+      f (t.getKeyV k) x)).getD fallback := by
   simpa only [filter_eq_filter!] using getD_filter h
+
+/-- Simpler variant of `getD_filter` when `LawfulEqOrd` is available. -/
+theorem getD_filter!' [TransOrd α] [LawfulEqOrd α]
+    {f : α → β → Bool} {k : α} {fallback : β} (h : t.WF) :
+    Const.getD (t.filter! f) k fallback = ((Const.get? t k).filter (f k)).getD fallback := by
+  simpa only [filter_eq_filter!] using getD_filter' h
 
 theorem getD_filter_of_getKey?_eq_some [TransOrd α]
     {f : α → β → Bool} {k k' : α} {fallback : β} (h : t.WF) :
