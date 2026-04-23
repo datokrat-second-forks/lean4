@@ -356,7 +356,7 @@ theorem getElem_eq_get_getElem? [TransCmp cmp] (h : t.WF) {a : α} {h'} :
     t[a] = t[a]?.get ((mem_iff_isSome_getElem? h).mp h') :=
   DTreeMap.Raw.Const.get_eq_get_get? h
 
-theorem get_getElem? [TransCmp cmp] (h : t.WF) {a : α} {h'} :
+@[grind =] theorem get_getElem? [TransCmp cmp] (h : t.WF) {a : α} {h'} :
     t[a]?.get h' = t[a]'((mem_iff_isSome_getElem? h).mpr h') :=
   DTreeMap.Raw.Const.get_get? h
 
@@ -643,6 +643,7 @@ theorem getKey_eq_get_getKey? [TransCmp cmp] (h : t.WF) {a : α} {h' : a ∈ t} 
     t.getKey a h' = (t.getKey? a).get ((mem_iff_isSome_getKey? h).mp h') :=
   DTreeMap.Raw.getKey_eq_get_getKey? h.out
 
+@[simp, grind =]
 theorem get_getKey? [TransCmp cmp] (h : t.WF) {a : α} {h'} :
     (t.getKey? a).get h' = t.getKey a ((mem_iff_isSome_getKey? h).mpr h') :=
   DTreeMap.Raw.get_getKey? h.out
@@ -659,6 +660,7 @@ theorem getKey_congr [TransCmp cmp] (h : t.WF) {k₁ k₂ : α} (h' : cmp k₁ k
     (h₁ : k₁ ∈ t) : t.getKey k₁ h₁ = t.getKey k₂ ((mem_congr h h').mp h₁) :=
   DTreeMap.Raw.getKey_congr h h' h₁
 
+@[simp, grind =]
 theorem getKeyV_eq [TransCmp cmp] [LawfulEqCmp cmp] (h : t.WF) {k : α} (h' : k ∈ t) :
     t.getKeyV k = k :=
   DTreeMap.Raw.getKeyV_eq h h'
@@ -3141,6 +3143,7 @@ theorem getElem?_modify_self [TransCmp cmp] (h : t.WF) {k : α} {f : β → β} 
     (modify t k f)[k]? = t[k]?.map f :=
   DTreeMap.Raw.Const.get?_modify_self h
 
+@[grind =]
 theorem getElemV_modify [TransCmp cmp] (h : t.WF) {k k' : α} {f : β → β}
     (hc : k' ∈ modify t k f) :
     haveI : Nonempty β := ⟨(modify t k f)[k']'hc⟩
@@ -4914,6 +4917,7 @@ theorem isSome_apply_of_mem_filterMap_getKey_getElem [TransCmp cmp]
         (t[k]'(mem_of_mem_filterMap h h'))).isSome :=
   DTreeMap.Raw.Const.isSome_apply_of_mem_filterMap_getKey_get h.out
 
+@[simp, grind =]
 theorem getElemV_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} (h : t.WF) (h' : k ∈ t.filterMap f) :
     haveI h'' : k ∈ t := mem_of_mem_filterMap h h'
@@ -4987,6 +4991,7 @@ theorem getKey?_filterMap [TransCmp cmp]
       (f x (t[x]'(mem_of_getKey?_eq_some h h'))).isSome) :=
   DTreeMap.Raw.Const.getKey?_filterMap h.out
 
+@[simp, grind =]
 theorem getKeyV_filterMap [TransCmp cmp]
     {f : (a : α) → β → Option γ} {k : α} (h : t.WF)
     (h' : k ∈ t.filterMap f) :
@@ -5094,7 +5099,7 @@ theorem filter_equiv_self_iff [TransCmp cmp]
   ⟨fun h' => (DTreeMap.Raw.Const.filter_equiv_self_iff h.out).mp h'.1,
     fun h' => ⟨(DTreeMap.Raw.Const.filter_equiv_self_iff h.out).mpr h'⟩⟩
 
-@[simp]
+@[simp, grind =]
 theorem getElem?_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} (h : t.WF) :
     (t.filter f)[k]? = t[k]?.pfilter (fun x h' =>
@@ -5114,6 +5119,7 @@ theorem getElem?_filter_of_getKey?_eq_some [TransCmp cmp]
       (t.filter f)[k]? = t[k]?.filter (f k') :=
   DTreeMap.Raw.Const.get?_filter_of_getKey?_eq_some h.out
 
+@[simp, grind =]
 theorem getElemV_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} (h : t.WF) (h' : k ∈ t.filter f) :
     haveI h'' : k ∈ t := mem_of_mem_filter h h'
@@ -5184,6 +5190,7 @@ theorem getKey?_filter_key [TransCmp cmp]
     (t.filter fun k _ => f k).getKey? k = (t.getKey? k).filter f :=
   DTreeMap.Raw.getKey?_filter_key h.out
 
+@[simp, grind =]
 theorem getKeyV_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} (h : t.WF) (h' : k ∈ t.filter f) :
     (t.filter f).getKeyV k = t.getKeyV k :=
@@ -5288,6 +5295,7 @@ theorem getKey?_map [TransCmp cmp]
     (t.map f).getKey? k = t.getKey? k :=
   DTreeMap.Raw.getKey?_map h.out
 
+@[simp, grind =]
 theorem getKeyV_map [TransCmp cmp]
     {f : α → β → γ} {k : α} (h : t.WF) :
     (t.map f).getKeyV k = t.getKeyV k :=
@@ -5329,7 +5337,7 @@ theorem getElem?_map_of_getKey?_eq_some [TransCmp cmp]
     (t.map f)[k]? = t[k]?.map (f k') :=
   DTreeMap.Raw.Const.get?_map_of_getKey?_eq_some h.out h'
 
-@[grind =]
+@[simp, grind =]
 theorem getElemV_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → γ} {k : α} (h : t.WF) (h' : k ∈ t.map f) :
     haveI h'' : k ∈ t := mem_of_mem_map h h'
@@ -5345,6 +5353,7 @@ theorem getElem_map [TransCmp cmp] [LawfulEqCmp cmp]
   DTreeMap.Raw.Const.get_map h.out (h':= h')
 
 /-- Variant of `getElemV_map` that holds without `LawfulEqCmp`. -/
+@[simp (low)]
 theorem getElemV_map' [TransCmp cmp]
     {f : α → β → γ} {k : α} (h : t.WF) (h' : k ∈ t.map f) :
     haveI h'' : k ∈ t := mem_of_mem_map h h'
