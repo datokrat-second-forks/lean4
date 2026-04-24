@@ -5944,10 +5944,9 @@ theorem maxKey?_alter_eq_self [TransCmp cmp] {k f} :
 
 end Const
 
-theorem maxKeyV_eq_getV_maxKey? [TransCmp cmp] (he : t.isEmpty = false) :
-    haveI : Nonempty α := ⟨t.maxKey he⟩
+theorem maxKeyV_eq_getV_maxKey? [TransCmp cmp] {_ : Nonempty α} :
     t.maxKeyV = t.maxKey?.getV :=
-  Impl.maxKeyV_eq_getV_maxKey? t.wf he
+  Impl.maxKeyV_eq_getV_maxKey? t.wf
 
 theorem maxKey_eq_get_maxKey? [TransCmp cmp] {he} :
     t.maxKey he = t.maxKey?.get (isSome_maxKey?_iff_isEmpty_eq_false.mpr he) :=
@@ -6176,11 +6175,15 @@ theorem maxKey_eq_getLast_keys [TransCmp cmp] {he} :
     t.maxKey he = t.keys.getLast (List.isEmpty_eq_false_iff.mp <| isEmpty_keys ▸ he) :=
   Impl.maxKey_eq_getLast_keys t.wf
 
-@[grind =_] theorem maxKey_eq_back_keysArray [TransCmp cmp] {he} :
+@[grind =_] theorem maxKeyV_eq_backV_keysArray [TransCmp cmp] {_ : Nonempty α} :
+    t.maxKeyV = t.keysArray.backV :=
+  Impl.maxKeyV_eq_backV_keysArray t.wf
+
+theorem maxKey_eq_back_keysArray [TransCmp cmp] {he} :
     t.maxKey he = t.keysArray.back (Nat.zero_lt_of_ne_zero (by simpa [size_keysArray, isEmpty_eq_size_eq_zero, - Array.size_eq_zero_iff] using he)) :=
   Impl.maxKey_eq_back_keysArray t.wf
 
-@[simp] theorem maxKeyV_modify [TransCmp cmp] [LawfulEqCmp cmp] {k f}
+@[simp, grind =] theorem maxKeyV_modify [TransCmp cmp] [LawfulEqCmp cmp] {k f}
     (he : (t.modify k f).isEmpty = false) :
     haveI : Nonempty α := ⟨k⟩
     (t.modify k f).maxKeyV = t.maxKeyV :=
@@ -6241,8 +6244,7 @@ theorem compare_maxKey_modify_eq [TransCmp cmp] {k f he} :
   Impl.Const.compare_maxKey_modify_eq t.wf
 
 @[simp]
-theorem ordCompare_maxKeyV_modify_eq [Ord α] [TransOrd α] {t : DTreeMap α β} {k f}
-    (he : (modify t k f).isEmpty = false) :
+theorem ordCompare_maxKeyV_modify_eq [Ord α] [TransOrd α] {t : DTreeMap α β} {k f} :
     haveI : Nonempty α := ⟨k⟩
     compare (modify t k f).maxKeyV t.maxKeyV = .eq :=
   compare_maxKeyV_modify_eq (cmp := compare)
@@ -6339,6 +6341,10 @@ theorem getKey_maxKey! [TransCmp cmp] [Inhabited α] {hc} :
   Impl.getKey_maxKey! t.wf
 
 @[simp, grind =]
+theorem getKeyV_maxKey!_eq_maxKeyV [TransCmp cmp] [Inhabited α] :
+    t.getKeyV t.maxKey! = t.maxKeyV :=
+  Impl.getKeyV_maxKey!_eq_maxKeyV t.wf
+
 theorem getKey_maxKey!_eq_maxKey [TransCmp cmp] [Inhabited α] {hc} :
     t.getKey t.maxKey! hc = t.maxKey (isEmpty_eq_false_of_contains hc) :=
   Impl.getKey_maxKey!_eq_maxKey t.wf
