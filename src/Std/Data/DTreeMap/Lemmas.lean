@@ -2304,6 +2304,11 @@ theorem getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem [TransCmp cmp]
       getKeyD (insertManyIfNewUnit t l) k' fallback = k :=
   Impl.Const.getKeyD_insertManyIfNewUnit_list_of_not_mem_of_mem t.wf k_eq
 
+theorem getKeyD_insertManyIfNewUnit_list_of_mem [TransCmp cmp]
+    {l : List α} {k fallback : α} :
+    k ∈ t → getKeyD (insertManyIfNewUnit t l) k fallback = getKeyD t k fallback :=
+  Impl.Const.getKeyD_insertManyIfNewUnit_list_of_mem t.wf
+
 theorem size_insertManyIfNewUnit_list [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
     {l : List α}
     (distinct : l.Pairwise (fun a b => ¬ cmp a b = .eq)) :
