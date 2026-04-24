@@ -164,7 +164,8 @@ If the key is contained the result is guaranteed to be pointer equal to the key 
 def getD (t : Raw α cmp) (a : α) (fallback : α) : α :=
   t.inner.getKeyD a fallback
 
-noncomputable def getV [Nonempty α] (t : Raw α cmp) (a : α) : α :=
+noncomputable def getV (t : Raw α cmp) (a : α) : α :=
+  haveI : Nonempty α := ⟨a⟩
   t.getD a Classical.ofNonempty
 
 @[inline, inherit_doc TreeSet.min?]

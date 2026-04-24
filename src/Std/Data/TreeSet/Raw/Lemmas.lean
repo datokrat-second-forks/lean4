@@ -243,8 +243,13 @@ theorem mem_of_get?_eq_some [TransCmp cmp] (h : t.WF) {a a' : α} :
   TreeMap.Raw.mem_of_getKey?_eq_some h
 
 theorem get?_eq_some_iff [TransCmp cmp] (h : t.WF) {k k' : α} :
-    t.get? k = some k' ↔ ∃ h, t.get k h = k' :=
+    haveI : Nonempty α := ⟨k⟩
+    t.get? k = some k' ↔ t.contains k ∧ t.getV k = k' :=
   TreeMap.Raw.getKey?_eq_some_iff h
+
+theorem get?_eq_some_iff_get [TransCmp cmp] (h : t.WF) {k k' : α} :
+    t.get? k = some k' ↔ ∃ h, t.get k h = k' :=
+  TreeMap.Raw.getKey?_eq_some_iff_getKey h
 
 theorem get?_eq_none_of_contains_eq_false [TransCmp cmp] (h : t.WF) {a : α} :
     t.contains a = false → t.get? a = none :=
@@ -280,6 +285,12 @@ theorem get?_eq_some [TransCmp cmp] [LawfulEqCmp cmp] (h : t.WF) {k : α} (h' : 
     t.get? k = some k :=
   TreeMap.Raw.getKey?_eq_some_of_contains h h'
 
+@[grind =] theorem getV_insert [TransCmp cmp] (h : t.WF) {k a : α} :
+    haveI : Nonempty α := ⟨a⟩
+    (t.insert k).getV a =
+      if cmp k a = .eq ∧ ¬ k ∈ t then k else t.getV a :=
+  TreeMap.Raw.getKeyV_insertIfNew h
+
 theorem get_insert [TransCmp cmp] (h : t.WF) {k a : α} {h₁} :
     (t.insert k).get a h₁ =
       if h₂ : cmp k a = .eq ∧ ¬ k ∈ t then k
@@ -294,29 +305,66 @@ theorem toArray_insert_perm {t : Raw α cmp} [BEq α] [TransCmp cmp] [LawfulBEqC
     (t.insert k).toArray.Perm (if k ∈ t then t.toArray else t.toArray.push k) :=
   TreeMap.Raw.keysArray_insertIfNew_perm h
 
+@[simp, grind =] theorem getV_erase [TransCmp cmp] (h : t.WF) {k a : α}
+    (h' : a ∈ t.erase k) :
+    haveI : Nonempty α := ⟨a⟩
+    (t.erase k).getV a = t.getV a :=
+  TreeMap.Raw.getKeyV_erase h h'
+
 theorem get_erase [TransCmp cmp] (h : t.WF) {k a : α} {h'} :
     (t.erase k).get a h' = t.get a (mem_of_mem_erase h h') :=
   TreeMap.Raw.getKey_erase h
+
+theorem get?_eq_some_getV [TransCmp cmp] (h : t.WF) {a : α} (h' : a ∈ t) :
+    haveI : Nonempty α := ⟨a⟩
+    t.get? a = some (t.getV a) :=
+  TreeMap.Raw.getKey?_eq_some_getKeyV h h'
 
 theorem get?_eq_some_get [TransCmp cmp] (h : t.WF) {a : α} (h') :
     t.get? a = some (t.get a h') :=
   TreeMap.Raw.getKey?_eq_some_getKey h h'
 
+theorem getV_eq_getV_get? {_ : Nonempty α} [TransCmp cmp] (h : t.WF) {a : α} :
+    t.getV a = (t.get? a).getV :=
+  TreeMap.Raw.getKeyV_eq_getV_getKey? h.out
+
 theorem get_eq_get_get? [TransCmp cmp] (h : t.WF) {a : α} {h' : a ∈ t} :
     t.get a h' = (t.get? a).get ((mem_iff_isSome_get? h).mp h') :=
   TreeMap.Raw.getKey_eq_get_getKey? h.out
+
+@[simp, grind =]
+theorem getV_get? [TransCmp cmp] (h : t.WF) {a : α} :
+    haveI : Nonempty α := ⟨a⟩
+    (t.get? a).getV = t.getV a :=
+  TreeMap.Raw.getV_getKey? h.out
 
 theorem get_get? [TransCmp cmp] (h : t.WF) {a : α} {h'} :
     (t.get? a).get h' = t.get a ((mem_iff_isSome_get? h).mpr h') :=
   TreeMap.Raw.get_getKey? h.out
 
+theorem compare_getV_self [TransCmp cmp] (h : t.WF) {k : α} (h' : k ∈ t) :
+    haveI : Nonempty α := ⟨k⟩
+    cmp (t.getV k) k = .eq :=
+  TreeMap.Raw.compare_getKeyV_self h h'
+
 theorem compare_get_self [TransCmp cmp] (h : t.WF) {k : α} (h' : k ∈ t) :
     cmp (t.get k h') k = .eq :=
   TreeMap.Raw.compare_getKey_self h h'
 
+theorem getV_congr [TransCmp cmp] (h : t.WF) {k k' : α} (h' : cmp k k' = .eq) :
+    haveI : Nonempty α := ⟨k⟩
+    t.getV k = t.getV k' :=
+  TreeMap.Raw.getKeyV_congr h h'
+
 theorem get_congr [TransCmp cmp] (h : t.WF) {k₁ k₂ : α} (h' : cmp k₁ k₂ = .eq) (h₁ : k₁ ∈ t) :
     t.get k₁ h₁ = t.get k₂ ((mem_congr h h').mp h₁) :=
   TreeMap.Raw.getKey_congr h h' h₁
+
+@[simp, grind =]
+theorem getV_eq [TransCmp cmp] [LawfulEqCmp cmp] (h : t.WF) {k : α} (h' : k ∈ t) :
+    haveI : Nonempty α := ⟨k⟩
+    t.getV k = k :=
+  TreeMap.Raw.getKeyV_eq h h'
 
 theorem get_eq [TransCmp cmp] [LawfulEqCmp cmp] (h : t.WF) {k : α} (h' : k ∈ t) : t.get k h' = k :=
   TreeMap.Raw.getKey_eq h h'
@@ -386,9 +434,19 @@ theorem getD_emptyc {a : α} {fallback : α} :
     (∅ : Raw α cmp).getD a fallback = fallback :=
   TreeMap.Raw.getKeyD_emptyc
 
+theorem getV_emptyc {a : α} :
+    haveI : Nonempty α := ⟨a⟩
+    (∅ : Raw α cmp).getV a = Classical.ofNonempty :=
+  TreeMap.Raw.getKeyV_emptyc
+
 theorem getD_of_isEmpty [TransCmp cmp] (h : t.WF) {a fallback : α} :
     t.isEmpty = true → t.getD a fallback = fallback :=
   TreeMap.Raw.getKeyD_of_isEmpty h
+
+theorem getV_of_isEmpty [TransCmp cmp] (h : t.WF) {a : α} :
+    haveI : Nonempty α := ⟨a⟩
+    t.isEmpty = true → t.getV a = Classical.ofNonempty :=
+  TreeMap.Raw.getKeyV_of_isEmpty h
 
 @[grind =] theorem getD_insert [TransCmp cmp] (h : t.WF) {k a fallback : α} :
     (t.insert k).getD a fallback =
@@ -403,10 +461,20 @@ theorem getD_eq_fallback [TransCmp cmp] (h : t.WF) {a fallback : α} :
     ¬ a ∈ t → t.getD a fallback = fallback :=
   TreeMap.Raw.getKeyD_eq_fallback h
 
+theorem getV_eq_ofNonempty [TransCmp cmp] (h : t.WF) {a : α} :
+    haveI : Nonempty α := ⟨a⟩
+    ¬ a ∈ t → t.getV a = Classical.ofNonempty :=
+  TreeMap.Raw.getKeyV_eq_ofNonempty h
+
 @[grind =] theorem getD_erase [TransCmp cmp] (h : t.WF) {k a fallback : α} :
     (t.erase k).getD a fallback =
       if cmp k a = .eq then fallback else t.getD a fallback :=
   TreeMap.Raw.getKeyD_erase h
+
+theorem getV_erase_self [TransCmp cmp] (h : t.WF) {k : α} :
+    haveI : Nonempty α := ⟨k⟩
+    (t.erase k).getV k = Classical.ofNonempty :=
+  TreeMap.Raw.getKeyV_erase_self h
 
 @[simp]
 theorem getD_erase_self [TransCmp cmp] (h : t.WF) {k fallback : α} :
@@ -425,13 +493,29 @@ theorem getD_eq_getD_get? [TransCmp cmp] (h : t.WF) {a fallback : α} :
     t.getD a fallback = (t.get? a).getD fallback :=
   TreeMap.Raw.getKeyD_eq_getD_getKey? h
 
+theorem getV_eq_getD_get? [TransCmp cmp] (h : t.WF) {a : α} :
+    haveI : Nonempty α := ⟨a⟩
+    t.getV a = (t.get? a).getD Classical.ofNonempty :=
+  TreeMap.Raw.getKeyV_eq_getD_getKey? h
+
 theorem get_eq_getD [TransCmp cmp] (h : t.WF) {a fallback : α} {h'} :
     t.get a h' = t.getD a fallback :=
   TreeMap.Raw.getKey_eq_getKeyD h
 
+@[simp, grind norm]
+theorem get_eq_getV [TransCmp cmp] {a : α} {h'} :
+    haveI : Nonempty α := ⟨a⟩
+    t.get a h' = t.getV a :=
+  TreeMap.Raw.getKey_eq_getKeyV
+
 theorem get!_eq_getD_default [TransCmp cmp] [Inhabited α] (h : t.WF) {a : α} :
     t.get! a = t.getD a default :=
   TreeMap.Raw.getKey!_eq_getKeyD_default h
+
+theorem getV_eq_getD_ofNonempty [TransCmp cmp] (_h : t.WF) {a : α} :
+    haveI : Nonempty α := ⟨a⟩
+    t.getV a = t.getD a Classical.ofNonempty :=
+  TreeMap.Raw.getKeyV_eq_getKeyD_ofNonempty _h
 
 theorem getD_congr [TransCmp cmp] (h : t.WF) {k k' fallback : α} (h' : cmp k k' = .eq) :
     t.getD k fallback = t.getD k' fallback :=
@@ -445,79 +529,6 @@ theorem getD_eq_of_contains [TransCmp cmp] [LawfulEqCmp cmp] (h : t.WF) {k fallb
 theorem getD_eq_of_mem [TransCmp cmp] [LawfulEqCmp cmp] (h : t.WF) {k fallback : α} (h' : k ∈ t) :
     t.getD k fallback = k :=
   TreeMap.Raw.getKeyD_eq_of_contains h h'
-
-theorem getV_eq_getD_classicalOfNonempty [TransCmp cmp] [Nonempty α] (h : t.WF) {a : α} :
-    t.getV a = t.getD a Classical.ofNonempty :=
-  rfl
-
-@[simp, grind =]
-theorem getV_emptyc {a : α} [Nonempty α] :
-    (∅ : Raw α cmp).getV a = (Classical.ofNonempty : α) :=
-  by simpa [getV] using getD_emptyc
-
-theorem getV_of_isEmpty [TransCmp cmp] [Nonempty α] (h : t.WF) {a : α} :
-    t.isEmpty = true → t.getV a = (Classical.ofNonempty : α) :=
-  by simpa [getV] using getD_of_isEmpty h
-
-@[grind =] theorem getV_insert [TransCmp cmp] [Nonempty α] (h : t.WF) {k a : α} :
-    (t.insert k).getV a = if cmp k a = .eq ∧ ¬ k ∈ t then k else t.getV a :=
-  by simpa [getV] using getD_insert h
-
-theorem getV_eq_classicalOfNonempty_of_contains_eq_false [TransCmp cmp] [Nonempty α] (h : t.WF)
-    {a : α} :
-    t.contains a = false → t.getV a = (Classical.ofNonempty : α) :=
-  by simpa [getV] using getD_eq_fallback_of_contains_eq_false h
-
-theorem getV_eq_classicalOfNonempty [TransCmp cmp] [Nonempty α] (h : t.WF) {a : α} :
-    ¬ a ∈ t → t.getV a = (Classical.ofNonempty : α) :=
-  by simpa [getV] using getD_eq_fallback h
-
-@[grind =] theorem getV_erase [TransCmp cmp] [Nonempty α] (h : t.WF) {k a : α} :
-    (t.erase k).getV a = if cmp k a = .eq then (Classical.ofNonempty : α) else t.getV a :=
-  by simpa [getV] using getD_erase h
-
-@[simp]
-theorem getV_erase_self [TransCmp cmp] [Nonempty α] (h : t.WF) {k : α} :
-    (t.erase k).getV k = (Classical.ofNonempty : α) :=
-  by simpa [getV] using getD_erase_self h
-
-theorem get?_eq_some_getV_of_contains [TransCmp cmp] [Nonempty α] (h : t.WF) {a : α} :
-    t.contains a = true → t.get? a = some (t.getV a) :=
-  by simpa [getV] using get?_eq_some_getD_of_contains h
-
-theorem get?_eq_some_getV [TransCmp cmp] [Nonempty α] (h : t.WF) {a : α} :
-    a ∈ t → t.get? a = some (t.getV a) :=
-  by simpa [getV] using get?_eq_some_getD h
-
-theorem getV_eq_getD_get? [TransCmp cmp] [Nonempty α] (h : t.WF) {a : α} :
-    t.getV a = (t.get? a).getD Classical.ofNonempty :=
-  by simpa [getV] using getD_eq_getD_get? h
-
-theorem getV_get? [TransCmp cmp] {_ : Nonempty α} (h : t.WF)
-    {k : α} {h' : (t.get? k).isSome} :
-    (t.get? k).getV = t.getV k := by
-  simp only [getV_eq_getD_get? h, Option.getV_eq_getD_ofNonempty]
-
-@[simp, grind norm]
-theorem get_eq_getV [TransCmp cmp] (h : t.WF) {a : α} {h'} :
-    haveI : Nonempty α := ⟨t.get a h'⟩
-    t.get a h' = t.getV a := by
-  haveI : Nonempty α := ⟨t.get a h'⟩
-  simpa [getV] using get_eq_getD h
-
-theorem getV_congr [TransCmp cmp] [Nonempty α] (h : t.WF) {k k' : α} (h' : cmp k k' = .eq) :
-    t.getV k = t.getV k' :=
-  by simpa [getV] using getD_congr h h'
-
-theorem getV_eq_of_contains [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] (h : t.WF) {k : α}
-    (h' : t.contains k) :
-    t.getV k = k :=
-  by simpa [getV] using getD_eq_of_contains h h'
-
-theorem getV_eq_of_mem [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] (h : t.WF) {k : α}
-    (h' : k ∈ t) :
-    t.getV k = k :=
-  by simpa [getV] using getD_eq_of_mem h h'
 
 @[simp, grind =]
 theorem containsThenInsert_fst [TransCmp cmp] (h : t.WF) {k : α} :
@@ -679,6 +690,22 @@ theorem get_union_of_not_mem_right [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.
     (t₁ ∪ t₂).get k h' = t₁.get k (mem_of_mem_union_of_not_mem_right h₁ h₂ h' not_mem) :=
   TreeMap.Raw.getKey_union_of_not_mem_right h₁ h₂ not_mem
 
+/- getV -/
+theorem getV_union_of_mem_right [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
+    {k : α} (mem : k ∈ t₂) :
+    (t₁ ∪ t₂).getV k = t₂.getV k :=
+  TreeMap.Raw.getKeyV_union_of_mem_right h₁ h₂ mem
+
+theorem getV_union_of_not_mem_left [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
+    {k : α} (not_mem : ¬k ∈ t₁) :
+    (t₁ ∪ t₂).getV k = t₂.getV k :=
+  TreeMap.Raw.getKeyV_union_of_not_mem_left h₁ h₂ not_mem
+
+theorem getV_union_of_not_mem_right [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
+    {k : α} (not_mem : ¬k ∈ t₂) :
+    (t₁ ∪ t₂).getV k = t₁.getV k :=
+  TreeMap.Raw.getKeyV_union_of_not_mem_right h₁ h₂ not_mem
+
 /- getD -/
 theorem getD_union [TransCmp cmp] (h₁ : t₁.WF)
     (h₂ : t₂.WF) {k fallback : α} :
@@ -713,24 +740,6 @@ theorem getKey!_union_of_not_mem_right [Inhabited α]
     (not_mem : ¬k ∈ t₂) :
     (t₁ ∪ t₂).get! k = t₁.get! k :=
   TreeMap.Raw.getKey!_union_of_not_mem_right h₁ h₂ not_mem
-
-/- getV -/
-theorem getV_union [TransCmp cmp] [Nonempty α] (h₁ : t₁.WF)
-    (h₂ : t₂.WF) {k : α} :
-    (t₁ ∪ t₂).getV k = t₂.getD k (t₁.getV k) :=
-  by simpa [getV] using getD_union h₁ h₂
-
-theorem getV_union_of_not_mem_left [Nonempty α]
-    [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) {k : α}
-    (not_mem : ¬k ∈ t₁) :
-    (t₁ ∪ t₂).getV k = t₂.getV k :=
-  by simpa [getV] using getD_union_of_not_mem_left h₁ h₂ not_mem
-
-theorem getV_union_of_not_mem_right [Nonempty α]
-    [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) {k : α}
-    (not_mem : ¬k ∈ t₂) :
-    (t₁ ∪ t₂).getV k = t₁.getV k :=
-  by simpa [getV] using getD_union_of_not_mem_right h₁ h₂ not_mem
 
 /- size -/
 theorem size_union_of_not_mem [TransCmp cmp] (h₁ : t₁.WF)
@@ -836,6 +845,7 @@ theorem get?_inter_of_not_mem_right [TransCmp cmp]
   TreeMap.Raw.getKey?_inter_of_not_mem_right h₁ h₂ not_mem
 
 /- get -/
+@[simp]
 theorem get_inter [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
     {k : α} {h_mem : k ∈ t₁ ∩ t₂} :
     (t₁ ∩ t₂).get k h_mem =
@@ -889,32 +899,6 @@ theorem get!_inter_of_not_mem_left [Inhabited α]
     (not_mem : k ∉ t₁) :
     (t₁ ∩ t₂).get! k = default :=
   TreeMap.Raw.getKey!_inter_of_not_mem_left h₁ h₂ not_mem
-
-/- getV -/
-theorem getV_inter [TransCmp cmp] [Nonempty α]
-    (h₁ : t₁.WF)
-    (h₂ : t₂.WF) {k : α} :
-    (t₁ ∩ t₂).getV k =
-    if k ∈ t₂ then t₁.getV k else (Classical.ofNonempty : α) :=
-  by simpa [getV] using getD_inter h₁ h₂
-
-theorem getV_inter_of_mem_right [Nonempty α]
-    [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) {k : α}
-    (mem : k ∈ t₂) :
-    (t₁ ∩ t₂).getV k = t₁.getV k :=
-  by simpa [getV] using getD_inter_of_mem_right h₁ h₂ mem
-
-theorem getV_inter_of_not_mem_right [Nonempty α]
-    [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) {k : α}
-    (not_mem : k ∉ t₂) :
-    (t₁ ∩ t₂).getV k = (Classical.ofNonempty : α) :=
-  by simpa [getV] using getD_inter_of_not_mem_right h₁ h₂ not_mem
-
-theorem getV_inter_of_not_mem_left [Nonempty α]
-    [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) {k : α}
-    (not_mem : k ∉ t₁) :
-    (t₁ ∩ t₂).getV k = (Classical.ofNonempty : α) :=
-  by simpa [getV] using getD_inter_of_not_mem_left h₁ h₂ not_mem
 
 /- size -/
 theorem size_inter_le_size_left [TransCmp cmp] (h₁ : t₁.WF)
@@ -1061,6 +1045,12 @@ theorem get_diff [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
     t₁.get k ((mem_diff_iff h₁ h₂).1 h_mem).1 :=
   TreeMap.Raw.getKey_diff h₁ h₂
 
+/- getV -/
+theorem getV_diff [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
+    {k : α} {h_mem : k ∈ t₁ \ t₂} :
+    (t₁ \ t₂).getV k = t₁.getV k :=
+  TreeMap.Raw.getKeyV_diff h₁ h₂ (h_mem := h_mem)
+
 /- getD -/
 theorem getD_diff [TransCmp cmp] (h₁ : t₁.WF)
     (h₂ : t₂.WF) {k fallback : α} :
@@ -1108,32 +1098,6 @@ theorem get!_diff_of_not_mem_left [Inhabited α]
     (not_mem : k ∉ t₁) :
     (t₁ \ t₂).get! k = default :=
   TreeMap.Raw.getKey!_diff_of_not_mem_left h₁ h₂ not_mem
-
-/- getV -/
-theorem getV_diff [TransCmp cmp] [Nonempty α]
-    (h₁ : t₁.WF)
-    (h₂ : t₂.WF) {k : α} :
-    (t₁ \ t₂).getV k =
-    if k ∈ t₂ then (Classical.ofNonempty : α) else t₁.getV k :=
-  by simpa [getV] using getD_diff h₁ h₂
-
-theorem getV_diff_of_not_mem_right [Nonempty α]
-    [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) {k : α}
-    (not_mem : k ∉ t₂) :
-    (t₁ \ t₂).getV k = t₁.getV k :=
-  by simpa [getV] using getD_diff_of_not_mem_right h₁ h₂ not_mem
-
-theorem getV_diff_of_mem_right [Nonempty α]
-    [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) {k : α}
-    (mem : k ∈ t₂) :
-    (t₁ \ t₂).getV k = (Classical.ofNonempty : α) :=
-  by simpa [getV] using getD_diff_of_mem_right h₁ h₂ mem
-
-theorem getV_diff_of_not_mem_left [Nonempty α]
-    [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) {k : α}
-    (not_mem : k ∉ t₁) :
-    (t₁ \ t₂).getV k = (Classical.ofNonempty : α) :=
-  by simpa [getV] using getD_diff_of_not_mem_left h₁ h₂ not_mem
 
 /- size -/
 theorem size_diff_le_size_left [TransCmp cmp] (h₁ : t₁.WF)
@@ -1281,10 +1245,24 @@ theorem get?_insertMany_list_of_mem [TransCmp cmp]
     get? (insertMany t l) k = get? t k :=
   TreeMap.Raw.getKey?_insertManyIfNewUnit_list_of_mem h mem
 
+theorem getV_insertMany_list_of_mem [TransCmp cmp]
+    (h : t.WF) {l : List α} {k : α} (contains : k ∈ t) :
+    haveI : Nonempty α := ⟨k⟩
+    getV (insertMany t l) k = getV t k :=
+  TreeMap.Raw.getKeyV_insertManyIfNewUnit_list_of_mem h contains
+
 theorem get_insertMany_list_of_mem [TransCmp cmp]
     (h : t.WF) {l : List α} {k : α} {h'} (contains : k ∈ t) :
     get (insertMany t l) k h' = get t k contains :=
   TreeMap.Raw.getKey_insertManyIfNewUnit_list_of_mem h contains
+
+theorem getV_insertMany_list_of_not_mem_of_mem [TransCmp cmp]
+    (h : t.WF) {l : List α}
+    {k k' : α} (k_eq : cmp k k' = .eq) (not_mem : ¬ k ∈ t)
+    (distinct : l.Pairwise (fun a b => ¬ cmp a b = .eq)) (mem : k ∈ l) :
+    haveI : Nonempty α := ⟨k⟩
+    getV (insertMany t l) k' = k :=
+  TreeMap.Raw.getKeyV_insertManyIfNewUnit_list_of_not_mem_of_mem h k_eq not_mem distinct mem
 
 theorem get_insertMany_list_of_not_mem_of_mem [TransCmp cmp]
     (h : t.WF) {l : List α}
@@ -1328,24 +1306,6 @@ theorem getD_insertMany_list_of_mem [TransCmp cmp]
     (h : t.WF) {l : List α} {k fallback : α} (mem : k ∈ t) :
     getD (insertMany t l) k fallback = getD t k fallback :=
   TreeMap.Raw.getKeyD_insertManyIfNewUnit_list_of_mem h mem
-
-theorem getV_insertMany_list_of_not_mem_of_contains_eq_false
-    [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp] [Nonempty α] (h : t.WF) {l : List α} {k : α}
-    (not_mem : ¬ k ∈ t) (contains_eq_false : l.contains k = false) :
-    getV (insertMany t l) k = (Classical.ofNonempty : α) := by
-  simpa [getV] using getD_insertMany_list_of_not_mem_of_contains_eq_false
-    h not_mem contains_eq_false
-
-theorem getV_insertMany_list_of_not_mem_of_mem [TransCmp cmp]
-    [Nonempty α] (h : t.WF) {l : List α} {k k' : α} (k_eq : cmp k k' = .eq)
-    (not_mem : ¬ k ∈ t) (distinct : l.Pairwise (fun a b => ¬ cmp a b = .eq)) (mem : k ∈ l) :
-    getV (insertMany t l) k' = k := by
-  simpa [getV] using getD_insertMany_list_of_not_mem_of_mem h k_eq not_mem distinct mem
-
-theorem getV_insertMany_list_of_mem [TransCmp cmp]
-    [Nonempty α] (h : t.WF) {l : List α} {k : α} (mem : k ∈ t) :
-    getV (insertMany t l) k = getV t k := by
-  simpa [getV] using getD_insertMany_list_of_mem h mem
 
 theorem size_insertMany_list [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp] (h : t.WF)
     {l : List α}
@@ -1416,6 +1376,15 @@ theorem get?_ofList_of_mem [TransCmp cmp]
     get? (ofList l cmp) k' = some k :=
   TreeMap.Raw.getKey?_unitOfList_of_mem k_eq distinct mem
 
+theorem getV_ofList_of_mem [TransCmp cmp]
+    {l : List α}
+    {k k' : α} (k_eq : cmp k k' = .eq)
+    (distinct : l.Pairwise (fun a b => ¬ cmp a b = .eq))
+    (mem : k ∈ l) :
+    haveI : Nonempty α := ⟨k⟩
+    getV (ofList l cmp) k' = k :=
+  TreeMap.Raw.getKeyV_unitOfList_of_mem k_eq distinct mem
+
 theorem get_ofList_of_mem [TransCmp cmp]
     {l : List α}
     {k k' : α} (k_eq : cmp k k' = .eq)
@@ -1449,19 +1418,6 @@ theorem getD_ofList_of_mem [TransCmp cmp]
     (mem : k ∈ l) :
     getD (ofList l cmp) k' fallback = k :=
   TreeMap.Raw.getKeyD_unitOfList_of_mem k_eq distinct mem
-
-theorem getV_ofList_of_contains_eq_false [TransCmp cmp] [BEq α]
-    [LawfulBEqCmp cmp] [Nonempty α] {l : List α} {k : α}
-    (contains_eq_false : l.contains k = false) :
-    getV (ofList l cmp) k = (Classical.ofNonempty : α) := by
-  simpa [getV] using getD_ofList_of_contains_eq_false contains_eq_false
-
-theorem getV_ofList_of_mem [TransCmp cmp]
-    [Nonempty α] {l : List α} {k k' : α} (k_eq : cmp k k' = .eq)
-    (distinct : l.Pairwise (fun a b => ¬ cmp a b = .eq))
-    (mem : k ∈ l) :
-    getV (ofList l cmp) k' = k := by
-  simpa [getV] using getD_ofList_of_mem k_eq distinct mem
 
 theorem size_ofList [TransCmp cmp] {l : List α}
     (distinct : l.Pairwise (fun a b => ¬ cmp a b = .eq)) :
@@ -1541,6 +1497,11 @@ theorem isSome_min?_insert [TransCmp cmp] (h : t.WF) {k} :
     (t.insert k).min?.isSome :=
   TreeMap.Raw.isSome_minKey?_insertIfNew h
 
+theorem minV_insert_of_isEmpty [TransCmp cmp] (h : t.WF) {k} (he : t.isEmpty) :
+    haveI : Nonempty α := ⟨k⟩
+    (t.insert k).minV = k :=
+  TreeMap.Raw.minKeyV_insertIfNew_of_isEmpty h he
+
 theorem min?_insert_of_isEmpty [TransCmp cmp] (h : t.WF) {k} (he : t.isEmpty) :
     (t.insert k).min? = some k :=
   TreeMap.Raw.minKey?_insertIfNew_of_isEmpty h he
@@ -1555,12 +1516,12 @@ theorem minD_insert_of_isEmpty [TransCmp cmp] (h : t.WF) {k} (he : t.isEmpty) {f
 
 theorem min?_insert_le_min? [TransCmp cmp] (h : t.WF) {k km kmi} :
     (hkm : t.min? = some km) →
-    (hkmi : (t.insert k |>.min? |>.get <| isSome_min?_insert h) = kmi) →
+    (hkmi : haveI : Nonempty α := ⟨k⟩; (t.insert k |>.min?).getV = kmi) →
     cmp kmi km |>.isLE :=
   TreeMap.Raw.minKey?_insertIfNew_le_minKey? h
 
 theorem min?_insert_le_self [TransCmp cmp] (h : t.WF) {k kmi} :
-    (hkmi : (t.insert k |>.min?.get <| isSome_min?_insert h) = kmi) →
+    (hkmi : haveI : Nonempty α := ⟨k⟩; (t.insert k |>.min?).getV = kmi) →
     cmp kmi k |>.isLE :=
   TreeMap.Raw.minKey?_insertIfNew_le_self h
 
@@ -1599,6 +1560,11 @@ theorem get?_min? [TransCmp cmp] (h : t.WF) {km} :
     (hkm : t.min? = some km) → t.get? km = some km :=
   TreeMap.Raw.getKey?_minKey? h
 
+theorem getV_min? [TransCmp cmp] (h : t.WF) {km} :
+    (hkm : haveI : Nonempty α := ⟨km⟩;
+      t.min?.getV = km) → t.getV km = km :=
+  TreeMap.Raw.getKeyV_minKey? h
+
 theorem get_min? [TransCmp cmp] (h : t.WF) {km hc} :
     (hkm : haveI : Nonempty α := ⟨t.min?.get (isSome_min?_of_contains h hc)⟩;
       t.min?.getV = km) → t.get km hc = km :=
@@ -1611,10 +1577,6 @@ theorem get!_min? [TransCmp cmp] [Inhabited α] (h : t.WF) {km} :
 theorem getD_min? [TransCmp cmp] (h : t.WF) {km fallback} :
     (hkm : t.min? = some km) → t.getD km fallback = km :=
   TreeMap.Raw.getKeyD_minKey? h
-
-theorem getV_min? [TransCmp cmp] [Nonempty α] (h : t.WF) {km} :
-    (hkm : t.min? = some km) → t.getV km = km := by
-  simpa [getV] using getD_min? h
 
 @[simp]
 theorem min?_bind_get? [TransCmp cmp] (h : t.WF) :
@@ -1711,6 +1673,10 @@ theorem get?_min! [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = fal
     t.get? t.min! = some t.min! :=
   TreeMap.Raw.getKey?_minKey! h he
 
+theorem getV_min! [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) :
+    t.getV t.min! = t.min! :=
+  TreeMap.Raw.getKeyV_minKey! h he
+
 theorem get_min! [TransCmp cmp] [Inhabited α] (h : t.WF) {hc} :
     t.get t.min! hc = t.min! :=
   TreeMap.Raw.getKey_minKey! h
@@ -1722,10 +1688,6 @@ theorem get!_min! [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = fal
 theorem getD_min! [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) {fallback} :
     t.getD t.min! fallback = t.min! :=
   TreeMap.Raw.getKeyD_minKey! h he
-
-theorem getV_min! [TransCmp cmp] [Nonempty α] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) :
-    t.getV t.min! = t.min! := by
-  simpa [getV] using getD_min! h he
 
 theorem min!_erase_eq_of_not_compare_min!_eq [TransCmp cmp] [Inhabited α] (h : t.WF) {k}
     (he : (t.erase k).isEmpty = false) (heq : ¬ cmp k t.min! = .eq) :
@@ -1809,6 +1771,10 @@ theorem get?_minD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback} 
     t.get? (t.minD fallback) = some (t.minD fallback) :=
   TreeMap.Raw.getKey?_minKeyD h he
 
+theorem getV_minD [TransCmp cmp] {i : Nonempty α} (h : t.WF) (he : t.isEmpty = false) {fallback} :
+    t.getV (t.minD fallback) = t.minD fallback :=
+  TreeMap.Raw.getKeyV_minKeyD (i := i) h he
+
 theorem get_minD [TransCmp cmp] (h : t.WF) {fallback hc} :
     t.get (t.minD fallback) hc = t.minD fallback :=
   TreeMap.Raw.getKey_minKeyD h
@@ -1820,10 +1786,6 @@ theorem get!_minD [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = fal
 theorem getD_minD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback fallback'} :
     t.getD (t.minD fallback) fallback' = t.minD fallback :=
   TreeMap.Raw.getKeyD_minKeyD h he
-
-theorem getV_minD [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) {fallback} :
-    t.getV (t.minD fallback) = t.minD fallback := by
-  simpa [getV] using getD_minD h he
 
 theorem minD_erase_eq_of_not_compare_minD_eq [TransCmp cmp] (h : t.WF) {k fallback}
     (he : (t.erase k).isEmpty = false) (heq : ¬ cmp k (t.minD fallback) = .eq) :
@@ -1843,98 +1805,6 @@ theorem minD_eq_headD_toList [TransCmp cmp] (h : t.WF) {fallback} :
 theorem minD_eq_getD_toArray [TransCmp cmp] (h : t.WF) {fallback} :
     t.minD fallback = t.toArray.getD 0 fallback :=
   TreeMap.Raw.minKeyD_eq_getD_keysArray h
-
-theorem minV_insert_of_isEmpty [TransCmp cmp] [Nonempty α] (h : t.WF) {k} (he : t.isEmpty) :
-    (t.insert k).minV = k := by
-  simpa [Raw.minV] using minD_insert_of_isEmpty h he
-
-theorem min?_eq_some_minV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
-    t.min? = some t.minV := by
-  simpa [Raw.minV] using min?_eq_some_minD h he
-
-theorem minV_eq_classicalOfNonempty [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty) :
-    t.minV = Classical.ofNonempty := by
-  simpa [Raw.minV] using minD_eq_fallback h he
-
-theorem minV_eq_iff_get?_eq_self_and_forall [TransCmp cmp] [Nonempty α] (h : t.WF)
-    (he : t.isEmpty = false) {km} :
-    t.minV = km ↔ t.get? km = some km ∧ ∀ k, k ∈ t → (cmp km k).isLE := by
-  simpa [Raw.minV] using minD_eq_iff_get?_eq_self_and_forall h he
-
-theorem minV_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] (h : t.WF)
-    (he : t.isEmpty = false) {km} :
-    t.minV = km ↔ km ∈ t ∧ ∀ k, k ∈ t → (cmp km k).isLE := by
-  simpa [Raw.minV] using minD_eq_iff_mem_and_forall h he
-
-@[grind =] theorem minV_insert [TransCmp cmp] [Nonempty α] (h : t.WF) {k} :
-    (t.insert k |>.minV) =
-      t.min?.elim k fun k' => if cmp k k' = .lt then k else k' := by
-  simpa [Raw.minV] using minD_insert h
-
-theorem minV_insert_le_minV [TransCmp cmp] [Nonempty α] (h : t.WF)
-    (he : t.isEmpty = false) {k} :
-    cmp (t.insert k |>.minV) t.minV |>.isLE := by
-  simpa [Raw.minV] using minD_insert_le_minD h he
-
-theorem minV_insert_le_self [TransCmp cmp] [Nonempty α] (h : t.WF) {k} :
-    cmp (t.insert k |>.minV) k |>.isLE := by
-  simpa [Raw.minV] using minD_insert_le_self h
-
-@[grind =] theorem contains_minV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
-    t.contains t.minV := by
-  simpa [Raw.minV] using contains_minD h he
-
-theorem minV_mem [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
-    t.minV ∈ t := by
-  simpa [Raw.minV] using minD_mem h he
-
-grind_pattern minV_mem => t.minV ∈ t
-
-theorem minV_le_of_contains [TransCmp cmp] [Nonempty α] (h : t.WF) {k} (hc : t.contains k) :
-    cmp t.minV k |>.isLE := by
-  simpa [Raw.minV] using minD_le_of_contains h hc
-
-theorem minV_le_of_mem [TransCmp cmp] [Nonempty α] (h : t.WF) {k} (hc : k ∈ t) :
-    cmp t.minV k |>.isLE := by
-  simpa [Raw.minV] using minD_le_of_mem h hc
-
-theorem le_minV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) {k} :
-    (cmp k t.minV).isLE ↔ (∀ k', k' ∈ t → (cmp k k').isLE) := by
-  simpa [Raw.minV] using le_minD h he
-
-theorem get?_minV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
-    t.get? t.minV = some t.minV := by
-  simpa [Raw.minV] using get?_minD h he
-
-theorem get_minV [TransCmp cmp] [Nonempty α] (h : t.WF) {hc} :
-    t.get t.minV hc = t.minV := by
-  simpa [Raw.minV] using get_minD h
-
-theorem get!_minV [TransCmp cmp] [Nonempty α] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) :
-    t.get! t.minV = t.minV := by
-  simpa [Raw.minV] using get!_minD h he
-
-theorem getD_minV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) {fallback} :
-    t.getD t.minV fallback = t.minV := by
-  simpa [Raw.minV] using getD_minD h he
-
-theorem getV_minV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
-    t.getV t.minV = t.minV := by
-  simpa [Raw.getV] using getD_minV h he
-
-theorem minV_erase_eq_of_not_compare_minV_eq [TransCmp cmp] [Nonempty α] (h : t.WF) {k}
-    (he : (t.erase k).isEmpty = false) (heq : ¬ cmp k t.minV = .eq) :
-    (t.erase k |>.minV) = t.minV := by
-  simpa [Raw.minV] using minD_erase_eq_of_not_compare_minD_eq h he heq
-
-theorem minV_le_minV_erase [TransCmp cmp] [Nonempty α] (h : t.WF) {k}
-    (he : (t.erase k).isEmpty = false) :
-    cmp t.minV (t.erase k |>.minV) |>.isLE := by
-  simpa [Raw.minV] using minD_le_minD_erase h he
-
-theorem minV_eq_minD_classicalOfNonempty [TransCmp cmp] [Nonempty α] :
-    t.minV = t.minD Classical.ofNonempty :=
-  rfl
 
 end Min
 
@@ -1986,14 +1856,31 @@ theorem isSome_max?_insert [TransCmp cmp] (h : t.WF) {k} :
     (t.insert k).max?.isSome :=
   TreeMap.Raw.isSome_maxKey?_insertIfNew h
 
+theorem maxV_insert_of_isEmpty [TransCmp cmp] (h : t.WF) {k} (he : t.isEmpty) :
+    haveI : Nonempty α := ⟨k⟩
+    (t.insert k).maxV = k :=
+  TreeMap.Raw.maxKeyV_insertIfNew_of_isEmpty h he
+
+theorem max?_insert_of_isEmpty [TransCmp cmp] (h : t.WF) {k} (he : t.isEmpty) :
+    (t.insert k).max? = some k :=
+  TreeMap.Raw.maxKey?_insertIfNew_of_isEmpty h he
+
+theorem max!_insert_of_isEmpty [TransCmp cmp] [Inhabited α] (h : t.WF) {k} (he : t.isEmpty) :
+    (t.insert k).max! = k :=
+  TreeMap.Raw.maxKey!_insertIfNew_of_isEmpty h he
+
+theorem maxD_insert_of_isEmpty [TransCmp cmp] (h : t.WF) {k} (he : t.isEmpty) {fallback : α} :
+    (t.insert k).maxD fallback = k :=
+  TreeMap.Raw.maxKeyD_insertIfNew_of_isEmpty h he
+
 theorem max?_le_max?_insert [TransCmp cmp] (h : t.WF) {k km kmi} :
     (hkm : t.max? = some km) →
-    (hkmi : (t.insert k |>.max? |>.get <| isSome_max?_insert h) = kmi) →
+    (hkmi : haveI : Nonempty α := ⟨k⟩; (t.insert k |>.max?).getV = kmi) →
     cmp km kmi |>.isLE :=
   TreeMap.Raw.maxKey?_le_maxKey?_insertIfNew h
 
 theorem self_le_max?_insert [TransCmp cmp] (h : t.WF) {k kmi} :
-    (hkmi : (t.insert k |>.max?.get <| isSome_max?_insert h) = kmi) →
+    (hkmi : haveI : Nonempty α := ⟨k⟩; (t.insert k |>.max?).getV = kmi) →
     cmp k kmi |>.isLE :=
   TreeMap.Raw.self_le_maxKey?_insertIfNew h
 
@@ -2032,6 +1919,11 @@ theorem get?_max? [TransCmp cmp] (h : t.WF) {km} :
     (hkm : t.max? = some km) → t.get? km = some km :=
   TreeMap.Raw.getKey?_maxKey? h
 
+theorem getV_max? [TransCmp cmp] (h : t.WF) {km} :
+    (hkm : haveI : Nonempty α := ⟨km⟩;
+      t.max?.getV = km) → t.getV km = km :=
+  TreeMap.Raw.getKeyV_maxKey? h
+
 theorem get_max? [TransCmp cmp] (h : t.WF) {km hc} :
     (hkm : haveI : Nonempty α := ⟨t.max?.get (isSome_max?_of_contains h hc)⟩;
       t.max?.getV = km) → t.get km hc = km :=
@@ -2044,10 +1936,6 @@ theorem get!_max? [TransCmp cmp] [Inhabited α] (h : t.WF) {km} :
 theorem getD_max? [TransCmp cmp] (h : t.WF) {km fallback} :
     (hkm : t.max? = some km) → t.getD km fallback = km :=
   TreeMap.Raw.getKeyD_maxKey? h
-
-theorem getV_max? [TransCmp cmp] [Nonempty α] (h : t.WF) {km} :
-    (hkm : t.max? = some km) → t.getV km = km := by
-  simpa [getV] using getD_max? h
 
 @[simp]
 theorem max?_bind_get? [TransCmp cmp] (h : t.WF) :
@@ -2142,6 +2030,10 @@ theorem get?_max! [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = fal
     t.get? t.max! = some t.max! :=
   TreeMap.Raw.getKey?_maxKey! h he
 
+theorem getV_max! [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) :
+    t.getV t.max! = t.max! :=
+  TreeMap.Raw.getKeyV_maxKey! h he
+
 theorem get_max! [TransCmp cmp] [Inhabited α] (h : t.WF) {hc} :
     t.get t.max! hc = t.max! :=
   TreeMap.Raw.getKey_maxKey! h
@@ -2153,10 +2045,6 @@ theorem get!_max! [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = fal
 theorem getD_max! [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) {fallback} :
     t.getD t.max! fallback = t.max! :=
   TreeMap.Raw.getKeyD_maxKey! h he
-
-theorem getV_max! [TransCmp cmp] [Nonempty α] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) :
-    t.getV t.max! = t.max! := by
-  simpa [getV] using getD_max! h he
 
 theorem max!_erase_eq_of_not_compare_max!_eq [TransCmp cmp] [Inhabited α] (h : t.WF) {k}
     (he : (t.erase k).isEmpty = false) (heq : ¬ cmp k t.max! = .eq) :
@@ -2240,6 +2128,10 @@ theorem get?_maxD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback} 
     t.get? (t.maxD fallback) = some (t.maxD fallback) :=
   TreeMap.Raw.getKey?_maxKeyD h he
 
+theorem getV_maxD [TransCmp cmp] {i : Nonempty α} (h : t.WF) (he : t.isEmpty = false) {fallback} :
+    t.getV (t.maxD fallback) = t.maxD fallback :=
+  TreeMap.Raw.getKeyV_maxKeyD (i := i) h he
+
 theorem get_maxD [TransCmp cmp] (h : t.WF) {fallback hc} :
     t.get (t.maxD fallback) hc = t.maxD fallback :=
   TreeMap.Raw.getKey_maxKeyD h
@@ -2251,10 +2143,6 @@ theorem get!_maxD [TransCmp cmp] [Inhabited α] (h : t.WF) (he : t.isEmpty = fal
 theorem getD_maxD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback fallback'} :
     t.getD (t.maxD fallback) fallback' = t.maxD fallback :=
   TreeMap.Raw.getKeyD_maxKeyD h he
-
-theorem getV_maxD [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) {fallback} :
-    t.getV (t.maxD fallback) = t.maxD fallback :=
-  by simpa [getV] using getD_maxD h he
 
 theorem maxD_erase_eq_of_not_compare_maxD_eq [TransCmp cmp] (h : t.WF) {k fallback}
     (he : (t.erase k).isEmpty = false) (heq : ¬ cmp k (t.maxD fallback) = .eq) :
@@ -2276,98 +2164,7 @@ theorem maxD_eq_getD_back?_toArray [TransCmp cmp] (h : t.WF) {fallback} :
     t.maxD fallback = t.toArray.back?.getD fallback :=
   TreeMap.Raw.maxKeyD_eq_getD_back?_keysArray h
 
-theorem max?_eq_some_maxV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
-    t.max? = some t.maxV := by
-  simpa [Raw.maxV] using max?_eq_some_maxD h he
-
-theorem maxV_eq_classicalOfNonempty [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty) :
-    t.maxV = Classical.ofNonempty := by
-  simpa [Raw.maxV] using maxD_eq_fallback h he
-
-theorem maxV_eq_iff_get?_eq_self_and_forall [TransCmp cmp] [Nonempty α] (h : t.WF)
-    (he : t.isEmpty = false) {km} :
-    t.maxV = km ↔ t.get? km = some km ∧ ∀ k, k ∈ t → (cmp k km).isLE := by
-  simpa [Raw.maxV] using maxD_eq_iff_get?_eq_self_and_forall h he
-
-theorem maxV_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] [Nonempty α] (h : t.WF)
-    (he : t.isEmpty = false) {km} :
-    t.maxV = km ↔ km ∈ t ∧ ∀ k, k ∈ t → (cmp k km).isLE := by
-  simpa [Raw.maxV] using maxD_eq_iff_mem_and_forall h he
-
-@[grind =] theorem maxV_insert [TransCmp cmp] [Nonempty α] (h : t.WF) {k} :
-    (t.insert k |>.maxV) =
-      t.max?.elim k fun k' => if cmp k' k = .lt then k else k' := by
-  simpa [Raw.maxV] using maxD_insert h
-
-theorem maxV_le_maxV_insert [TransCmp cmp] [Nonempty α] (h : t.WF)
-    (he : t.isEmpty = false) {k} :
-    cmp t.maxV (t.insert k |>.maxV) |>.isLE := by
-  simpa [Raw.maxV] using maxD_le_maxD_insert h he
-
-theorem self_le_maxV_insert [TransCmp cmp] [Nonempty α] (h : t.WF) {k} :
-    cmp k (t.insert k |>.maxV) |>.isLE := by
-  simpa [Raw.maxV] using self_le_maxD_insert h
-
-@[grind =] theorem contains_maxV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
-    t.contains t.maxV := by
-  simpa [Raw.maxV] using contains_maxD h he
-
-theorem maxV_mem [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
-    t.maxV ∈ t := by
-  simpa [Raw.maxV] using maxD_mem h he
-
-grind_pattern maxV_mem => t.maxV ∈ t
-
-theorem le_maxV_of_contains [TransCmp cmp] [Nonempty α] (h : t.WF) {k} (hc : t.contains k) :
-    cmp k t.maxV |>.isLE := by
-  simpa [Raw.maxV] using le_maxD_of_contains h hc
-
-theorem le_maxV_of_mem [TransCmp cmp] [Nonempty α] (h : t.WF) {k} (hc : k ∈ t) :
-    cmp k t.maxV |>.isLE := by
-  simpa [Raw.maxV] using le_maxD_of_mem h hc
-
-theorem maxV_le [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) {k} :
-    (cmp t.maxV k).isLE ↔ (∀ k', k' ∈ t → (cmp k' k).isLE) := by
-  simpa [Raw.maxV] using maxD_le h he
-
-theorem get?_maxV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
-    t.get? t.maxV = some t.maxV := by
-  simpa [Raw.maxV] using get?_maxD h he
-
-theorem get_maxV [TransCmp cmp] [Nonempty α] (h : t.WF) {hc} :
-    t.get t.maxV hc = t.maxV := by
-  simpa [Raw.maxV] using get_maxD h
-
-theorem get!_maxV [TransCmp cmp] [Nonempty α] [Inhabited α] (h : t.WF) (he : t.isEmpty = false) :
-    t.get! t.maxV = t.maxV := by
-  simpa [Raw.maxV] using get!_maxD h he
-
-theorem getD_maxV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) {fallback} :
-    t.getD t.maxV fallback = t.maxV := by
-  simpa [Raw.maxV] using getD_maxD h he
-
-theorem getV_maxV [TransCmp cmp] [Nonempty α] (h : t.WF) (he : t.isEmpty = false) :
-    t.getV t.maxV = t.maxV := by
-  simpa [Raw.getV] using getD_maxV h he
-
-theorem maxV_erase_eq_of_not_compare_maxV_eq [TransCmp cmp] [Nonempty α] (h : t.WF) {k}
-    (he : (t.erase k).isEmpty = false) (heq : ¬ cmp k t.maxV = .eq) :
-    (t.erase k |>.maxV) = t.maxV := by
-  simpa [Raw.maxV] using maxD_erase_eq_of_not_compare_maxD_eq h he heq
-
-theorem maxV_erase_le_maxV [TransCmp cmp] [Nonempty α] (h : t.WF) {k}
-    (he : (t.erase k).isEmpty = false) :
-    cmp (t.erase k |>.maxV) t.maxV |>.isLE := by
-  simpa [Raw.maxV] using maxD_erase_le_maxD h he
-
-theorem maxV_eq_maxD_classicalOfNonempty [TransCmp cmp] [Nonempty α] :
-    t.maxV = t.maxD Classical.ofNonempty :=
-  rfl
-
 end Max
-
--- Note: atIdx_eq_atIdxV, getGE/GT/LE/LT_eq_V removed because these
--- proof-taking functions don't exist on TreeSet.Raw (only D/V/!/? variants).
 
 namespace Equiv
 
@@ -2419,6 +2216,10 @@ theorem getKey!_eq [TransCmp cmp] [Inhabited α] {k : α} (h₁ : t₁.WF) (h₂
 theorem getKeyD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getD k fallback = t₂.getD k fallback :=
   h.1.getKeyD_eq h₁.1 h₂.1
+
+theorem getV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.getV k = t₂.getV k :=
+  TreeMap.Raw.Equiv.getKeyV_eq h₁.1 h₂.1 h.1
 
 theorem toList_eq [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁.toList = t₂.toList :=
   h.1.keys_eq h₁.1 h₂.1
@@ -2477,9 +2278,9 @@ theorem minD_eq [TransCmp cmp] {fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
     t₁.minD fallback = t₂.minD fallback :=
   h.1.minKeyD_eq h₁.1 h₂.1
 
-theorem minV_eq [TransCmp cmp] [Nonempty α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
-    t₁.minV = t₂.minV := by
-  simpa [Raw.minV] using minD_eq h₁ h₂ h
+theorem minV_eq [TransCmp cmp] {_ : Nonempty α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.minV = t₂.minV :=
+  h.1.minKeyV_eq h₁.1 h₂.1
 
 theorem max?_eq [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.max? = t₂.max? :=
@@ -2493,9 +2294,9 @@ theorem maxD_eq [TransCmp cmp] {fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
     t₁.maxD fallback = t₂.maxD fallback :=
   h.1.maxKeyD_eq h₁.1 h₂.1
 
-theorem maxV_eq [TransCmp cmp] [Nonempty α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
-    t₁.maxV = t₂.maxV := by
-  simpa [Raw.maxV] using maxD_eq h₁ h₂ h
+theorem maxV_eq [TransCmp cmp] {_ : Nonempty α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.maxV = t₂.maxV :=
+  h.1.maxKeyV_eq h₁.1 h₂.1
 
 theorem atIdx?_eq [TransCmp cmp] {i : Nat} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.atIdx? i = t₂.atIdx? i :=
@@ -2509,9 +2310,9 @@ theorem atIdxD_eq [TransCmp cmp] {i : Nat} {fallback : α} (h₁ : t₁.WF) (h�
     (h : t₁ ~m t₂) : t₁.atIdxD i fallback = t₂.atIdxD i fallback :=
   h.1.keyAtIdxD_eq h₁.1 h₂.1
 
-theorem atIdxV_eq [TransCmp cmp] [Nonempty α] {i : Nat} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.atIdxV i = t₂.atIdxV i := by
-  simpa [Raw.atIdxV] using atIdxD_eq h₁ h₂ h
+theorem atIdxV_eq [TransCmp cmp] {_ : Nonempty α} {i : Nat} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.atIdxV i = t₂.atIdxV i :=
+  atIdxD_eq h₁ h₂ h
 
 theorem getGE?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getGE? k = t₂.getGE? k :=
@@ -2525,9 +2326,9 @@ theorem getGED_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂
     t₁.getGED k fallback = t₂.getGED k fallback :=
   h.1.getKeyGED_eq h₁.1 h₂.1
 
-theorem getGEV_eq [TransCmp cmp] [Nonempty α] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getGEV k = t₂.getGEV k := by
-  simpa [Raw.getGEV] using getGED_eq h₁ h₂ h
+theorem getGEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getGEV k = t₂.getGEV k :=
+  getGED_eq h₁ h₂ h
 
 theorem getGT?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getGT? k = t₂.getGT? k :=
@@ -2541,9 +2342,9 @@ theorem getGTD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂
     t₁.getGTD k fallback = t₂.getGTD k fallback :=
   h.1.getKeyGTD_eq h₁.1 h₂.1
 
-theorem getGTV_eq [TransCmp cmp] [Nonempty α] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getGTV k = t₂.getGTV k := by
-  simpa [Raw.getGTV] using getGTD_eq h₁ h₂ h
+theorem getGTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getGTV k = t₂.getGTV k :=
+  getGTD_eq h₁ h₂ h
 
 theorem getLE?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getLE? k = t₂.getLE? k :=
@@ -2557,9 +2358,9 @@ theorem getLED_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂
     t₁.getLED k fallback = t₂.getLED k fallback :=
   h.1.getKeyLED_eq h₁.1 h₂.1
 
-theorem getLEV_eq [TransCmp cmp] [Nonempty α] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getLEV k = t₂.getLEV k := by
-  simpa [Raw.getLEV] using getLED_eq h₁ h₂ h
+theorem getLEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getLEV k = t₂.getLEV k :=
+  getLED_eq h₁ h₂ h
 
 theorem getLT?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getLT? k = t₂.getLT? k :=
@@ -2573,9 +2374,9 @@ theorem getLTD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂
     t₁.getLTD k fallback = t₂.getLTD k fallback :=
   h.1.getKeyLTD_eq h₁.1 h₂.1
 
-theorem getLTV_eq [TransCmp cmp] [Nonempty α] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getLTV k = t₂.getLTV k := by
-  simpa [Raw.getLTV] using getLTD_eq h₁ h₂ h
+theorem getLTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) : t₁.getLTV k = t₂.getLTV k :=
+  getLTD_eq h₁ h₂ h
 
 theorem insert [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) (k : α) :
     t₁.insert k ~m t₂.insert k :=
@@ -2682,7 +2483,7 @@ theorem toArray_filter {f : α → Bool} (h : t.WF) :
     (t.filter f).toArray = t.toArray.filter f :=
   TreeMap.Raw.keysArray_filter_key h
 
-theorem isEmpty_filter_iff [TransCmp cmp]
+@[grind =] theorem isEmpty_filter_iff [TransCmp cmp]
     {f : α → Bool} (h : t.WF) :
     (t.filter f).isEmpty ↔
       ∀ (k : α) (h : k ∈ t), f (t.get k h) = false :=
@@ -2696,10 +2497,17 @@ theorem isEmpty_filter_eq_false_iff [TransCmp cmp]
 
 -- TODO: `contains_filter` is missing.
 
+@[simp, grind =]
 theorem mem_filter [TransCmp cmp]
     {f : α → Bool} {k : α} (h : t.WF) :
-    (k ∈ t.filter f) ↔ ∃ (h' : k ∈ t), f (t.get k h') :=
+    haveI : Nonempty α := ⟨k⟩
+    (k ∈ t.filter f) ↔ ∃ (_ : k ∈ t), f (t.getV k) :=
   TreeMap.Raw.mem_filter h.out
+
+theorem mem_filter_iff_get [TransCmp cmp]
+    {f : α → Bool} {k : α} (h : t.WF) :
+    (k ∈ t.filter f) ↔ ∃ (h' : k ∈ t), f (t.get k h') :=
+  TreeMap.Raw.mem_filter_iff_getKey_getElem h.out
 
 theorem mem_of_mem_filter [TransCmp cmp]
     {f : α → Bool} {k : α} (h : t.WF) :
@@ -2730,6 +2538,7 @@ theorem get?_filter [TransCmp cmp]
     (t.filter f).get? k = (t.get? k).filter f :=
   TreeMap.Raw.getKey?_filter_key h.out
 
+@[simp, grind =]
 theorem get_filter [TransCmp cmp]
     {f : α → Bool} {k : α} {h'} (h : t.WF) :
     (t.filter f).get k h' = (t.get k (mem_of_mem_filter h h')) :=
@@ -2744,11 +2553,6 @@ theorem get_filter [TransCmp cmp]
     {f : α → Bool} {k fallback : α} (h : t.WF) :
     (t.filter f).getD k fallback = ((t.get? k).filter f).getD fallback :=
   TreeMap.Raw.getKeyD_filter_key h.out
-
-@[grind =] theorem getV_filter [TransCmp cmp] [Nonempty α]
-    {f : α → Bool} {k : α} (h : t.WF) :
-    (t.filter f).getV k = ((t.get? k).filter f).getD Classical.ofNonempty :=
-  by simpa [getV] using getD_filter h
 
 end filter
 
