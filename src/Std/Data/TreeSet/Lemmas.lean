@@ -327,7 +327,8 @@ theorem get?_eq_some_get [TransCmp cmp] {a : α} (h') :
     t.get? a = some (t.get a h') :=
   TreeMap.getKey?_eq_some_getKey h'
 
-theorem getV_eq_getV_get? {_ : Nonempty α} [TransCmp cmp] {a : α} :
+theorem getV_eq_getV_get? [TransCmp cmp] {a : α} :
+    haveI : Nonempty α := ⟨a⟩
     t.getV a = (t.get? a).getV :=
   TreeMap.getKeyV_eq_getV_getKey?
 
@@ -2754,7 +2755,8 @@ theorem getGED_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getGED k fallback = t₂.getGED k fallback :=
   h.1.getKeyGED_eq
 
-theorem getGEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getGEV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getGEV k = t₂.getGEV k :=
   getGED_eq h
 
@@ -2774,7 +2776,8 @@ theorem getGTD_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getGTD k fallback = t₂.getGTD k fallback :=
   h.1.getKeyGTD_eq
 
-theorem getGTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getGTV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getGTV k = t₂.getGTV k :=
   getGTD_eq h
 
@@ -2794,7 +2797,8 @@ theorem getLED_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getLED k fallback = t₂.getLED k fallback :=
   h.1.getKeyLED_eq
 
-theorem getLEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getLEV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getLEV k = t₂.getLEV k :=
   getLED_eq h
 
@@ -2814,7 +2818,8 @@ theorem getLTD_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getLTD k fallback = t₂.getLTD k fallback :=
   h.1.getKeyLTD_eq
 
-theorem getLTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getLTV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getLTV k = t₂.getLTV k :=
   getLTD_eq h
 
@@ -2992,8 +2997,9 @@ theorem getD_filter [TransCmp cmp]
     (t.filter f).getD k fallback = ((t.get? k).filter f).getD fallback :=
   TreeMap.getKeyD_filter_key
 
-theorem getV_filter [TransCmp cmp] {_ : Nonempty α}
+theorem getV_filter [TransCmp cmp]
     {f : α → Bool} {k : α} :
+    haveI : Nonempty α := ⟨k⟩
     (t.filter f).getV k = ((t.get? k).filter f).getD Classical.ofNonempty :=
   TreeMap.getKeyV_filter_key
 

@@ -1000,7 +1000,8 @@ theorem getKey?_eq_some_getKey [TransCmp cmp] (h : t.WF) {a : α} (h') :
     t.getKey? a = some (t.getKey a h') :=
   Impl.getKey?_eq_some_getKey h
 
-theorem getKeyV_eq_getV_getKey? {_ : Nonempty α} [TransCmp cmp] (h : t.WF) {a : α} :
+theorem getKeyV_eq_getV_getKey? [TransCmp cmp] (h : t.WF) {a : α} :
+    haveI : Nonempty α := ⟨a⟩
     t.getKeyV a = (t.getKey? a).getV := by
   simp [getKeyV, getKeyD, Impl.getKeyD_eq_getD_getKey? h.out, Option.getV_eq_getD_ofNonempty, getKey?]
 
@@ -5491,7 +5492,7 @@ theorem getKey?_minKeyD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fall
     t.getKey? (t.minKeyD fallback) = some (t.minKeyD fallback) :=
   Impl.getKey?_minKeyD h he
 
-theorem getKeyV_minKeyD [TransCmp cmp] {_ : Nonempty α} (h : t.WF) (he : t.isEmpty = false) {fallback} :
+theorem getKeyV_minKeyD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback} :
     t.getKeyV (t.minKeyD fallback) = t.minKeyD fallback :=
   Impl.getKeyV_minKeyD h he
 
@@ -6060,7 +6061,7 @@ theorem getKey?_maxKeyD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fall
     t.getKey? (t.maxKeyD fallback) = some (t.maxKeyD fallback) :=
   Impl.getKey?_maxKeyD h he
 
-theorem getKeyV_maxKeyD [TransCmp cmp] {_ : Nonempty α} (h : t.WF) (he : t.isEmpty = false) {fallback} :
+theorem getKeyV_maxKeyD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback} :
     t.getKeyV (t.maxKeyD fallback) = t.maxKeyD fallback :=
   Impl.getKeyV_maxKeyD h he
 

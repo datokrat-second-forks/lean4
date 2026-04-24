@@ -963,7 +963,8 @@ theorem getKey?_eq_some_getKey [TransCmp cmp] {a : α} (h') :
     t.getKey? a = some (t.getKey a h') :=
   Impl.getKey?_eq_some_getKey t.wf
 
-theorem getKeyV_eq_getV_getKey? {_ : Nonempty α} [TransCmp cmp] {a : α} :
+theorem getKeyV_eq_getV_getKey? [TransCmp cmp] {a : α} :
+    haveI : Nonempty α := ⟨a⟩
     t.getKeyV a = (t.getKey? a).getV := by
   simp [getKeyV, getKeyD, Impl.getKeyD_eq_getD_getKey? t.wf, Option.getV_eq_getD_ofNonempty, getKey?]
 
@@ -7068,7 +7069,8 @@ theorem getKeyGED_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getKeyGED k fallback = t₂.getKeyGED k fallback :=
   h.1.getKeyGED_eq t₁.2 t₂.2
 
-theorem getKeyGEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getKeyGEV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getKeyGEV k = t₂.getKeyGEV k := by
   simpa [DTreeMap.getKeyGEV] using getKeyGED_eq h
 
@@ -7088,7 +7090,8 @@ theorem getKeyGTD_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getKeyGTD k fallback = t₂.getKeyGTD k fallback :=
   h.1.getKeyGTD_eq t₁.2 t₂.2
 
-theorem getKeyGTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getKeyGTV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getKeyGTV k = t₂.getKeyGTV k := by
   simpa [DTreeMap.getKeyGTV] using getKeyGTD_eq h
 
@@ -7108,7 +7111,8 @@ theorem getKeyLED_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getKeyLED k fallback = t₂.getKeyLED k fallback :=
   h.1.getKeyLED_eq t₁.2 t₂.2
 
-theorem getKeyLEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getKeyLEV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getKeyLEV k = t₂.getKeyLEV k := by
   simpa [DTreeMap.getKeyLEV] using getKeyLED_eq h
 
@@ -7128,7 +7132,8 @@ theorem getKeyLTD_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getKeyLTD k fallback = t₂.getKeyLTD k fallback :=
   h.1.getKeyLTD_eq t₁.2 t₂.2
 
-theorem getKeyLTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getKeyLTV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getKeyLTV k = t₂.getKeyLTV k := by
   simpa [DTreeMap.getKeyLTV] using getKeyLTD_eq h
 
