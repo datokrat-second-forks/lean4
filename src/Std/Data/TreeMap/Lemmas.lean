@@ -646,7 +646,8 @@ theorem getKey?_eq_some_getKey [TransCmp cmp] {a : α} (h') :
     t.getKey? a = some (t.getKey a h') :=
   DTreeMap.getKey?_eq_some_getKey h'
 
-theorem getKeyV_eq_getV_getKey? {_ : Nonempty α} [TransCmp cmp] {a : α} :
+theorem getKeyV_eq_getV_getKey? [TransCmp cmp] {a : α} :
+    haveI : Nonempty α := ⟨a⟩
     t.getKeyV a = (t.getKey? a).getV :=
   DTreeMap.getKeyV_eq_getV_getKey?
 
@@ -3694,7 +3695,8 @@ theorem minKey_modify [TransCmp cmp] {k f he} :
   DTreeMap.Const.minKey_modify
 
 @[simp]
-theorem minKeyV_modify_eq_minKeyV [TransCmp cmp] [LawfulEqCmp cmp] {_ : Nonempty α} {k f} :
+theorem minKeyV_modify_eq_minKeyV [TransCmp cmp] [LawfulEqCmp cmp] {k f} :
+    haveI : Nonempty α := ⟨k⟩
     (modify t k f).minKeyV = t.minKeyV :=
   DTreeMap.Const.minKeyV_modify_eq_minKeyV
 
@@ -3702,7 +3704,8 @@ theorem minKey_modify_eq_minKey [TransCmp cmp] [LawfulEqCmp cmp] {k f he} :
     (modify t k f).minKey he = t.minKey (cast (congrArg (· = false) isEmpty_modify) he) :=
   DTreeMap.Const.minKey_modify_eq_minKey
 
-theorem compare_minKeyV_modify_eq [TransCmp cmp] {_ : Nonempty α} {k f} :
+theorem compare_minKeyV_modify_eq [TransCmp cmp] {k f} :
+    haveI : Nonempty α := ⟨k⟩
     cmp (modify t k f).minKeyV t.minKeyV = .eq :=
   DTreeMap.Const.compare_minKeyV_modify_eq
 
@@ -3712,7 +3715,8 @@ theorem compare_minKey_modify_eq [TransCmp cmp] {k f he} :
   DTreeMap.Const.compare_minKey_modify_eq
 
 @[simp]
-theorem ordCompare_minKeyV_modify_eq [Ord α] [TransOrd α] {t : TreeMap α β} {_ : Nonempty α} {k f} :
+theorem ordCompare_minKeyV_modify_eq [Ord α] [TransOrd α] {t : TreeMap α β} {k f} :
+    haveI : Nonempty α := ⟨k⟩
     compare (modify t k f).minKeyV t.minKeyV = .eq :=
   compare_minKeyV_modify_eq
 
@@ -4519,8 +4523,9 @@ theorem maxKey_eq_back_keysArray [TransCmp cmp] {he} :
     t.maxKey he = t.keysArray.back (Nat.zero_lt_of_ne_zero (by simpa [size_keysArray, isEmpty_eq_size_eq_zero, - Array.size_eq_zero_iff] using he)) :=
   DTreeMap.maxKey_eq_back_keysArray
 
-@[grind =] theorem maxKeyV_modify [TransCmp cmp] {_ : Nonempty α} {k f}
+@[grind =] theorem maxKeyV_modify [TransCmp cmp] {k f}
     (he : (modify t k f).isEmpty = false) :
+    haveI : Nonempty α := ⟨k⟩
     (modify t k f).maxKeyV = if cmp t.maxKeyV k = .eq then k else t.maxKeyV :=
   DTreeMap.Const.maxKeyV_modify he
 
@@ -4533,7 +4538,8 @@ theorem maxKey_modify [TransCmp cmp] {k f he} :
   DTreeMap.Const.maxKey_modify
 
 @[simp]
-theorem maxKeyV_modify_eq_maxKeyV [TransCmp cmp] [LawfulEqCmp cmp] {_ : Nonempty α} {k f} :
+theorem maxKeyV_modify_eq_maxKeyV [TransCmp cmp] [LawfulEqCmp cmp] {k f} :
+    haveI : Nonempty α := ⟨k⟩
     (modify t k f).maxKeyV = t.maxKeyV :=
   DTreeMap.Const.maxKeyV_modify_eq_maxKeyV
 
@@ -4541,7 +4547,8 @@ theorem maxKey_modify_eq_maxKey [TransCmp cmp] [LawfulEqCmp cmp] {k f he} :
     (modify t k f).maxKey he = t.maxKey (cast (congrArg (· = false) isEmpty_modify) he) :=
   DTreeMap.Const.maxKey_modify_eq_maxKey
 
-theorem compare_maxKeyV_modify_eq [TransCmp cmp] {_ : Nonempty α} {k f} :
+theorem compare_maxKeyV_modify_eq [TransCmp cmp] {k f} :
+    haveI : Nonempty α := ⟨k⟩
     cmp (modify t k f).maxKeyV t.maxKeyV = .eq :=
   DTreeMap.Const.compare_maxKeyV_modify_eq
 
@@ -4551,7 +4558,8 @@ theorem compare_maxKey_modify_eq [TransCmp cmp] {k f he} :
   DTreeMap.Const.compare_maxKey_modify_eq
 
 @[simp]
-theorem ordCompare_maxKeyV_modify_eq [Ord α] [TransOrd α] {t : TreeMap α β} {_ : Nonempty α} {k f} :
+theorem ordCompare_maxKeyV_modify_eq [Ord α] [TransOrd α] {t : TreeMap α β} {k f} :
+    haveI : Nonempty α := ⟨k⟩
     compare (modify t k f).maxKeyV t.maxKeyV = .eq :=
   compare_maxKeyV_modify_eq
 
@@ -5300,7 +5308,8 @@ theorem getKeyGE?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getKeyGE? k = t₂.getKeyGE? k :=
   h.1.getKeyGE?_eq
 
-theorem getKeyGEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getKeyGEV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getKeyGEV k = t₂.getKeyGEV k :=
   h.1.getKeyGEV_eq
 
@@ -5324,7 +5333,8 @@ theorem getKeyGT_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     t₁.getKeyGT k h' = t₂.getKeyGT k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
   h.1.getKeyGT_eq
 
-theorem getKeyGTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getKeyGTV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getKeyGTV k = t₂.getKeyGTV k :=
   h.1.getKeyGTV_eq
 
@@ -5340,7 +5350,8 @@ theorem getKeyLE?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getKeyLE? k = t₂.getKeyLE? k :=
   h.1.getKeyLE?_eq
 
-theorem getKeyLEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getKeyLEV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getKeyLEV k = t₂.getKeyLEV k :=
   h.1.getKeyLEV_eq
 
@@ -5360,7 +5371,8 @@ theorem getKeyLT?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getKeyLT? k = t₂.getKeyLT? k :=
   h.1.getKeyLT?_eq
 
-theorem getKeyLTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h : t₁ ~m t₂) :
+theorem getKeyLTV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
     t₁.getKeyLTV k = t₂.getKeyLTV k :=
   h.1.getKeyLTV_eq
 
@@ -5743,8 +5755,9 @@ theorem getKeyD_filterMap [TransCmp cmp]
   DTreeMap.Const.getKeyD_filterMap
 
 @[grind =]
-theorem getKeyV_filterMap [TransCmp cmp] {_ : Nonempty α}
+theorem getKeyV_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} :
+    haveI : Nonempty α := ⟨k⟩
     (t.filterMap f).getKeyV k =
     ((t.getKey? k).pfilter (fun x h' =>
       (f x (t[x]'(mem_of_getKey?_eq_some h'))).isSome)).getD Classical.ofNonempty := by
@@ -5958,15 +5971,17 @@ theorem getKeyD_filter_key [TransCmp cmp]
   DTreeMap.getKeyD_filter_key
 
 @[grind =]
-theorem getKeyV_filter [TransCmp cmp] {_ : Nonempty α}
+theorem getKeyV_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} :
+    haveI : Nonempty α := ⟨k⟩
     (t.filter f).getKeyV k =
     ((t.getKey? k).pfilter (fun x h' =>
       (f x (t[x]'(mem_of_getKey?_eq_some h'))))).getD Classical.ofNonempty := by
   simpa only [TreeMap.getKeyV] using getKeyD_filter
 
-theorem getKeyV_filter_key [TransCmp cmp] {_ : Nonempty α}
+theorem getKeyV_filter_key [TransCmp cmp]
     {f : α → Bool} {k : α} :
+    haveI : Nonempty α := ⟨k⟩
     (t.filter fun k _ => f k).getKeyV k = ((t.getKey? k).filter f).getD Classical.ofNonempty := by
   simpa only [TreeMap.getKeyV] using getKeyD_filter_key
 
@@ -6155,8 +6170,9 @@ theorem getKeyD_map [TransCmp cmp]
   DTreeMap.getKeyD_map
 
 @[simp, grind =]
-theorem getKeyV_map [TransCmp cmp] {_ : Nonempty α}
+theorem getKeyV_map [TransCmp cmp]
     {f : α → β → γ} {k : α} :
+    haveI : Nonempty α := ⟨k⟩
     (t.map f).getKeyV k = t.getKeyV k := by
   simp [TreeMap.getKeyV]
 

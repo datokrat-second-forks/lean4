@@ -651,7 +651,8 @@ theorem getKey?_eq_some_getKey [TransCmp cmp] (h : t.WF) {a : α} (h') :
     t.getKey? a = some (t.getKey a h') :=
   DTreeMap.Raw.getKey?_eq_some_getKey h h'
 
-theorem getKeyV_eq_getV_getKey? {_ : Nonempty α} [TransCmp cmp] (h : t.WF) {a : α} :
+theorem getKeyV_eq_getV_getKey? [TransCmp cmp] (h : t.WF) {a : α} :
+    haveI : Nonempty α := ⟨a⟩
     t.getKeyV a = (t.getKey? a).getV :=
   DTreeMap.Raw.getKeyV_eq_getV_getKey? h.out
 
@@ -3708,9 +3709,9 @@ theorem getKey?_minKeyD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fall
     t.getKey? (t.minKeyD fallback) = some (t.minKeyD fallback) :=
   DTreeMap.Raw.getKey?_minKeyD h he
 
-theorem getKeyV_minKeyD [TransCmp cmp] {i : Nonempty α} (h : t.WF) (he : t.isEmpty = false) {fallback} :
+theorem getKeyV_minKeyD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback} :
     t.getKeyV (t.minKeyD fallback) = t.minKeyD fallback :=
-  @DTreeMap.Raw.getKeyV_minKeyD α (fun _ => β) cmp t.inner _ i h.out he fallback
+  DTreeMap.Raw.getKeyV_minKeyD h.out he
 
 theorem getKey_minKeyD [TransCmp cmp] (h : t.WF) {fallback hc} :
     t.getKey (t.minKeyD fallback) hc = t.minKeyD fallback :=
@@ -4216,9 +4217,9 @@ theorem getKey?_maxKeyD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fall
     t.getKey? (t.maxKeyD fallback) = some (t.maxKeyD fallback) :=
   DTreeMap.Raw.getKey?_maxKeyD h he
 
-theorem getKeyV_maxKeyD [TransCmp cmp] {i : Nonempty α} (h : t.WF) (he : t.isEmpty = false) {fallback} :
+theorem getKeyV_maxKeyD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback} :
     t.getKeyV (t.maxKeyD fallback) = t.maxKeyD fallback :=
-  @DTreeMap.Raw.getKeyV_maxKeyD α (fun _ => β) cmp t.inner _ i h.out he fallback
+  DTreeMap.Raw.getKeyV_maxKeyD h.out he
 
 theorem getKey_maxKeyD [TransCmp cmp] (h : t.WF) {fallback hc} :
     t.getKey (t.maxKeyD fallback) hc = t.maxKeyD fallback :=
@@ -4592,8 +4593,10 @@ theorem getKeyGED_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t
     t₁.getKeyGED k fallback = t₂.getKeyGED k fallback :=
   h.1.getKeyGED_eq h₁.1 h₂.1
 
-theorem getKeyGEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getKeyGEV k = t₂.getKeyGEV k :=
+theorem getKeyGEV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getKeyGEV k = t₂.getKeyGEV k :=
   getKeyGED_eq h₁ h₂ h
 
 theorem getKeyGT?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
@@ -4608,8 +4611,10 @@ theorem getKeyGTD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t
     t₁.getKeyGTD k fallback = t₂.getKeyGTD k fallback :=
   h.1.getKeyGTD_eq h₁.1 h₂.1
 
-theorem getKeyGTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getKeyGTV k = t₂.getKeyGTV k :=
+theorem getKeyGTV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getKeyGTV k = t₂.getKeyGTV k :=
   getKeyGTD_eq h₁ h₂ h
 
 theorem getKeyLE?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
@@ -4624,8 +4629,10 @@ theorem getKeyLED_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t
     t₁.getKeyLED k fallback = t₂.getKeyLED k fallback :=
   h.1.getKeyLED_eq h₁.1 h₂.1
 
-theorem getKeyLEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getKeyLEV k = t₂.getKeyLEV k :=
+theorem getKeyLEV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getKeyLEV k = t₂.getKeyLEV k :=
   getKeyLED_eq h₁ h₂ h
 
 theorem getKeyLT?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
@@ -4640,8 +4647,10 @@ theorem getKeyLTD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t
     t₁.getKeyLTD k fallback = t₂.getKeyLTD k fallback :=
   h.1.getKeyLTD_eq h₁.1 h₂.1
 
-theorem getKeyLTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getKeyLTV k = t₂.getKeyLTV k :=
+theorem getKeyLTV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getKeyLTV k = t₂.getKeyLTV k :=
   getKeyLTD_eq h₁ h₂ h
 
 theorem insert [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂)

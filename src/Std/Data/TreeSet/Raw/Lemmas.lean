@@ -324,7 +324,8 @@ theorem get?_eq_some_get [TransCmp cmp] (h : t.WF) {a : α} (h') :
     t.get? a = some (t.get a h') :=
   TreeMap.Raw.getKey?_eq_some_getKey h h'
 
-theorem getV_eq_getV_get? {_ : Nonempty α} [TransCmp cmp] (h : t.WF) {a : α} :
+theorem getV_eq_getV_get? [TransCmp cmp] (h : t.WF) {a : α} :
+    haveI : Nonempty α := ⟨a⟩
     t.getV a = (t.get? a).getV :=
   TreeMap.Raw.getKeyV_eq_getV_getKey? h.out
 
@@ -1771,9 +1772,9 @@ theorem get?_minD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback} 
     t.get? (t.minD fallback) = some (t.minD fallback) :=
   TreeMap.Raw.getKey?_minKeyD h he
 
-theorem getV_minD [TransCmp cmp] {i : Nonempty α} (h : t.WF) (he : t.isEmpty = false) {fallback} :
+theorem getV_minD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback} :
     t.getV (t.minD fallback) = t.minD fallback :=
-  TreeMap.Raw.getKeyV_minKeyD (i := i) h he
+  TreeMap.Raw.getKeyV_minKeyD h he
 
 theorem get_minD [TransCmp cmp] (h : t.WF) {fallback hc} :
     t.get (t.minD fallback) hc = t.minD fallback :=
@@ -2128,9 +2129,9 @@ theorem get?_maxD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback} 
     t.get? (t.maxD fallback) = some (t.maxD fallback) :=
   TreeMap.Raw.getKey?_maxKeyD h he
 
-theorem getV_maxD [TransCmp cmp] {i : Nonempty α} (h : t.WF) (he : t.isEmpty = false) {fallback} :
+theorem getV_maxD [TransCmp cmp] (h : t.WF) (he : t.isEmpty = false) {fallback} :
     t.getV (t.maxD fallback) = t.maxD fallback :=
-  TreeMap.Raw.getKeyV_maxKeyD (i := i) h he
+  TreeMap.Raw.getKeyV_maxKeyD h he
 
 theorem get_maxD [TransCmp cmp] (h : t.WF) {fallback hc} :
     t.get (t.maxD fallback) hc = t.maxD fallback :=
@@ -2326,8 +2327,10 @@ theorem getGED_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂
     t₁.getGED k fallback = t₂.getGED k fallback :=
   h.1.getKeyGED_eq h₁.1 h₂.1
 
-theorem getGEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getGEV k = t₂.getGEV k :=
+theorem getGEV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getGEV k = t₂.getGEV k :=
   getGED_eq h₁ h₂ h
 
 theorem getGT?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
@@ -2342,8 +2345,10 @@ theorem getGTD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂
     t₁.getGTD k fallback = t₂.getGTD k fallback :=
   h.1.getKeyGTD_eq h₁.1 h₂.1
 
-theorem getGTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getGTV k = t₂.getGTV k :=
+theorem getGTV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getGTV k = t₂.getGTV k :=
   getGTD_eq h₁ h₂ h
 
 theorem getLE?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
@@ -2358,8 +2363,10 @@ theorem getLED_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂
     t₁.getLED k fallback = t₂.getLED k fallback :=
   h.1.getKeyLED_eq h₁.1 h₂.1
 
-theorem getLEV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getLEV k = t₂.getLEV k :=
+theorem getLEV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getLEV k = t₂.getLEV k :=
   getLED_eq h₁ h₂ h
 
 theorem getLT?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
@@ -2374,8 +2381,10 @@ theorem getLTD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂
     t₁.getLTD k fallback = t₂.getLTD k fallback :=
   h.1.getKeyLTD_eq h₁.1 h₂.1
 
-theorem getLTV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
-    (h : t₁ ~m t₂) : t₁.getLTV k = t₂.getLTV k :=
+theorem getLTV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF)
+    (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getLTV k = t₂.getLTV k :=
   getLTD_eq h₁ h₂ h
 
 theorem insert [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) (k : α) :
