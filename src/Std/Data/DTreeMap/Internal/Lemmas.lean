@@ -8355,8 +8355,7 @@ theorem minKey?_alter!_eq_self [TransOrd α] (h : t.WF) {k f} :
 
 end Const
 
-theorem minKeyV_eq_getV_minKey? [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
-    haveI : Nonempty α := ⟨t.minKey he⟩
+theorem minKeyV_eq_getV_minKey? [TransOrd α] {_ : Nonempty α} (h : t.WF) :
     t.minKeyV = t.minKey?.getV := by
   simp_to_model [minKey, minKeyV, minKey?] using List.minKeyV_eq_getV_minKey?
 
@@ -8663,24 +8662,20 @@ theorem minKey_modify [TransOrd α] (h : t.WF) {k f he} :
         (t.minKey <| Const.isEmpty_modify h ▸ he) := by
   simp_to_model [minKey, Const.modify] using List.Const.minKey_modifyKey
 
-theorem minKeyV_modify_eq_minKeyV [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k f}
-    (he : (modify k f t).isEmpty = false) :
+theorem minKeyV_modify_eq_minKeyV [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k f} :
     haveI : Nonempty α := ⟨k⟩
     (modify k f t).minKeyV = t.minKeyV := by
-  revert he
-  simp_to_model [minKey, minKeyV, Const.modify, isEmpty] using
+  simp_to_model [minKey, minKeyV, Const.modify] using
     List.Const.minKeyV_modifyKey_eq_minKeyV
 
 theorem minKey_modify_eq_minKey [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k f he} :
     (modify k f t).minKey he = t.minKey (isEmpty_modify h ▸ he) := by
   simp_to_model [minKey, Const.modify] using List.Const.minKey_modifyKey_eq_minKey
 
-theorem compare_minKeyV_modify_eq [TransOrd α] (h : t.WF) {k f}
-    (he : (modify k f t).isEmpty = false) :
+theorem compare_minKeyV_modify_eq [TransOrd α] (h : t.WF) {k f} :
     haveI : Nonempty α := ⟨k⟩
     compare (modify k f t).minKeyV t.minKeyV = .eq := by
-  revert he
-  simp_to_model [minKey, minKeyV, Const.modify, isEmpty] using List.Const.minKeyV_modifyKey_beq
+  simp_to_model [minKey, minKeyV, Const.modify] using List.Const.minKeyV_modifyKey_beq
 
 theorem compare_minKey_modify_eq [TransOrd α] (h : t.WF) {k f he} :
     compare (modify k f t |>.minKey he) (t.minKey <| isEmpty_modify h ▸ he) = .eq := by
@@ -9883,24 +9878,20 @@ theorem maxKey_modify [TransOrd α] (h : t.WF) {k f he} :
         (t.maxKey <| Const.isEmpty_modify h ▸ he) := by
   simp_to_model [maxKey, Const.modify] using List.Const.maxKey_modifyKey
 
-theorem maxKeyV_modify_eq_maxKeyV [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k f}
-    (he : (modify k f t).isEmpty = false) :
+theorem maxKeyV_modify_eq_maxKeyV [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k f} :
     haveI : Nonempty α := ⟨k⟩
     (modify k f t).maxKeyV = t.maxKeyV := by
-  revert he
-  simp_to_model [maxKey, maxKeyV, Const.modify, isEmpty] using
+  simp_to_model [maxKey, maxKeyV, Const.modify] using
     List.Const.maxKeyV_modifyKey_eq_maxKeyV
 
 theorem maxKey_modify_eq_maxKey [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k f he} :
     (modify k f t).maxKey he = t.maxKey (isEmpty_modify h ▸ he) := by
   simp_to_model [maxKey, Const.modify] using List.Const.maxKey_modifyKey_eq_maxKey
 
-theorem compare_maxKeyV_modify_eq [TransOrd α] (h : t.WF) {k f}
-    (he : (modify k f t).isEmpty = false) :
+theorem compare_maxKeyV_modify_eq [TransOrd α] (h : t.WF) {k f} :
     haveI : Nonempty α := ⟨k⟩
     compare (modify k f t).maxKeyV t.maxKeyV = .eq := by
-  revert he
-  simp_to_model [maxKey, maxKeyV, Const.modify, isEmpty] using List.Const.maxKeyV_modifyKey_beq
+  simp_to_model [maxKey, maxKeyV, Const.modify] using List.Const.maxKeyV_modifyKey_beq
 
 theorem compare_maxKey_modify_eq [TransOrd α] (h : t.WF) {k f he} :
     compare (modify k f t |>.maxKey he) (t.maxKey <| isEmpty_modify h ▸ he) = .eq := by

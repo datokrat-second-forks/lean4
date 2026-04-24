@@ -3857,7 +3857,7 @@ theorem get?_diff_of_mem_right [TransCmp cmp] [LawfulEqCmp cmp] (h₁ : t₁.WF)
   Impl.get?_diff!_of_contains_right h₁ h₂ h
 
 /- get -/
-@[grind =] theorem getV_diff [TransCmp cmp] [LawfulEqCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
+theorem getV_diff [TransCmp cmp] [LawfulEqCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
     {k : α} (h_mem : k ∈ t₁ \ t₂) :
     haveI : Nonempty (β k) := ⟨(t₁ \ t₂).get k h_mem⟩
     (t₁ \ t₂).getV k = t₁.getV k := by
@@ -5052,6 +5052,8 @@ theorem minKeyV_insert_of_isEmpty [TransCmp cmp] (h : t.WF) {k v} (he : t.isEmpt
     (t.insert k v).minKeyV = k :=
   Impl.minKeyV_insert!_of_isEmpty h he
 
+-- TODO: minKeyV_modify? Or remove the minKeyV_insert lemmas?
+
 theorem minKey?_insert_of_isEmpty [TransCmp cmp] (h : t.WF) {k v} (he : t.isEmpty) :
     (t.insert k v).minKey? = some k :=
   Impl.minKey?_insert!_of_isEmpty h he
@@ -6212,6 +6214,10 @@ theorem getKey?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h 
     t₁.getKey? k = t₂.getKey? k :=
   h.1.getKey?_eq h₁.1 h₂.1
 
+theorem getKeyV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.getKeyV k = t₂.getKeyV k :=
+  h.1.getKeyV_eq h₁ h₂
+
 theorem getKey_eq [TransCmp cmp] {k : α} {hk : k ∈ t₁} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKey k hk = t₂.getKey k ((h.mem_iff h₁ h₂).mp hk) :=
   h.1.getKey_eq h₁.1 h₂.1 hk
@@ -6223,10 +6229,6 @@ theorem getKey!_eq [TransCmp cmp] [Inhabited α] {k : α} (h₁ : t₁.WF) (h₂
 theorem getKeyD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKeyD k fallback = t₂.getKeyD k fallback :=
   h.1.getKeyD_eq h₁.1 h₂.1
-
-theorem getKeyV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
-    t₁.getKeyV k = t₂.getKeyV k := by
-  simpa [Raw.getKeyV] using getKeyD_eq h₁ h₂ h
 
 theorem toList_eq [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁.toList = t₂.toList :=
   h.1.toList_eq h₁.1 h₂.1
@@ -7000,7 +7002,7 @@ theorem mem_filterMap [TransCmp cmp]
       (f (t.getKeyV k) (Const.getV t k)).isSome :=
   Impl.Const.contains_filterMap!_iff h
 
-theorem mem_filterMap_getKey_get [TransCmp cmp]
+theorem mem_filterMap_iff_getKey_get [TransCmp cmp]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
     k ∈ t.filterMap f ↔ ∃ h, (f (t.getKey k h) (Const.get t k h)).isSome :=
   Impl.Const.contains_filterMap!_iff_getKey_get h
