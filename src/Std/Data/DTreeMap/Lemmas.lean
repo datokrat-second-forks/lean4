@@ -951,6 +951,7 @@ theorem getKey_insert_self [TransCmp cmp] {k : α} {v : β k} :
     (t.insert k v).getKey k mem_insert_self = k :=
   Impl.getKey_insert_self t.wf
 
+-- TODO: the V companion should go here
 theorem getKey_erase [TransCmp cmp] {k a : α} {h'} :
     (t.erase k).getKey a h' = t.getKey a (mem_of_mem_erase h') :=
   Impl.getKey_erase t.wf
@@ -997,6 +998,8 @@ theorem getKeyV_congr [TransCmp cmp] {k k' : α} (h' : cmp k k' = .eq) :
 theorem getKey_congr [TransCmp cmp] {k₁ k₂ : α} (h' : cmp k₁ k₂ = .eq)
     (h₁ : k₁ ∈ t) : t.getKey k₁ h₁ = t.getKey k₂ ((mem_congr h').mp h₁) :=
   Impl.getKey_congr t.wf h' h₁
+
+-- TODO: getKeyV_eq should go here
 
 theorem getKey_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
     (h' : k ∈ t) : t.getKey k h' = k :=
@@ -8051,6 +8054,8 @@ theorem getKeyV_filter [TransCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} {h' : k ∈ t.filter f} :
     (t.filter f).getKeyV k = t.getKeyV k :=
   Impl.getKeyV_filter t.wf (h' := h')
+
+-- TODO: getKeyV_filter should come here (same for filterMap etc.)
 
 theorem getKey_filter [TransCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} {h'} :

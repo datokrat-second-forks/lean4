@@ -1283,9 +1283,9 @@ theorem min_eq_get_min? [TransCmp cmp] {he} :
     t.min he = t.min?.get (isSome_min?_iff_ne_empty.mpr he) :=
   ExtTreeMap.minKey_eq_get_minKey?
 
-theorem min?_eq_some_min [TransCmp cmp] (he) :
+theorem min?_eq_some_min [TransCmp cmp] {he} :
     t.min? = some (t.min he) :=
-  ExtTreeMap.minKey?_eq_some_minKey (mt ext he)
+  ExtTreeMap.minKey?_eq_some_minKey (he := mt ext he)
 
 theorem min_eq_iff_get?_eq_self_and_forall [TransCmp cmp] {he km} :
     t.min he = km ↔ t.get? km = some km ∧ ∀ k ∈ t, (cmp km k).isLE :=
@@ -1690,9 +1690,9 @@ theorem max_eq_get_max? [TransCmp cmp] {he} :
     t.max he = t.max?.get (isSome_max?_iff_ne_empty.mpr he) :=
   ExtTreeMap.maxKey_eq_get_maxKey?
 
-theorem max?_eq_some_max [TransCmp cmp] (he) :
+theorem max?_eq_some_max [TransCmp cmp] {he} :
     t.max? = some (t.max he) :=
-  ExtTreeMap.maxKey?_eq_some_maxKey (mt ext he)
+  ExtTreeMap.maxKey?_eq_some_maxKey (he := mt ext he)
 
 theorem max_eq_iff_get?_eq_self_and_forall [TransCmp cmp] {he km} :
     t.max he = km ↔ t.get? km = some km ∧ ∀ k ∈ t, (cmp k km).isLE :=
