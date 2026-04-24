@@ -3645,7 +3645,7 @@ theorem get?_diff_of_mem_right [TransCmp cmp] [LawfulEqCmp cmp]
   exact Impl.get?_diff_of_contains_right t₁.wf t₂.wf h
 
 /- get -/
-@[grind =] theorem getV_diff [TransCmp cmp] [LawfulEqCmp cmp]
+theorem getV_diff [TransCmp cmp] [LawfulEqCmp cmp]
     {k : α} (h_mem : k ∈ t₁ \ t₂) :
     haveI : Nonempty (β k) := ⟨(t₁ \ t₂).get k h_mem⟩
     (t₁ \ t₂).getV k = t₁.getV k := by
@@ -5023,10 +5023,9 @@ theorem minKey?_alter_eq_self [TransCmp cmp] {k f} :
 
 end Const
 
-theorem minKeyV_eq_getV_minKey? [TransCmp cmp] (he : t.isEmpty = false) :
-    haveI : Nonempty α := ⟨t.minKey he⟩
+theorem minKeyV_eq_getV_minKey? [TransCmp cmp] {_ : Nonempty α} :
     t.minKeyV = t.minKey?.getV :=
-  Impl.minKeyV_eq_getV_minKey? t.wf he
+  Impl.minKeyV_eq_getV_minKey? t.wf
 
 theorem minKey_eq_get_minKey? [TransCmp cmp] {he} :
     t.minKey he = t.minKey?.get (isSome_minKey?_iff_isEmpty_eq_false.mpr he) :=
@@ -5253,7 +5252,11 @@ theorem minKey_eq_head_keys [TransCmp cmp] {he} :
     t.minKey he = t.keys.head (List.isEmpty_eq_false_iff.mp <| isEmpty_keys ▸ he) :=
   Impl.minKey_eq_head_keys t.wf
 
-@[grind =_] theorem minKey_eq_getElem_keysArray [TransCmp cmp] {he} :
+@[grind =_] theorem minKeyV_eq_getElemV_keysArray [TransCmp cmp] {_ : Nonempty α} :
+    t.minKeyV = t.keysArray｢0｣ :=
+  Impl.minKeyV_eq_getElemV_keysArray t.wf
+
+theorem minKey_eq_getElem_keysArray [TransCmp cmp] {he} :
     t.minKey he = t.keysArray[0]'(Nat.zero_lt_of_ne_zero (by simpa [size_keysArray, isEmpty_eq_size_eq_zero, - Array.size_eq_zero_iff] using he)) :=
   Impl.minKey_eq_getElem_keysArray t.wf
 
@@ -5298,21 +5301,19 @@ theorem minKey_modify [TransCmp cmp] {k f he} :
         (t.minKey <| cast (congrArg (· = false) isEmpty_modify) he) :=
   Impl.Const.minKey_modify t.wf
 
-@[simp] theorem minKeyV_modify_eq_minKeyV [TransCmp cmp] [LawfulEqCmp cmp] {k f}
-    (he : (modify t k f).isEmpty = false) :
+@[simp] theorem minKeyV_modify_eq_minKeyV [TransCmp cmp] [LawfulEqCmp cmp] {k f} :
     haveI : Nonempty α := ⟨k⟩
     (modify t k f).minKeyV = t.minKeyV :=
-  Impl.Const.minKeyV_modify_eq_minKeyV t.wf he
+  Impl.Const.minKeyV_modify_eq_minKeyV t.wf
 
 theorem minKey_modify_eq_minKey [TransCmp cmp] [LawfulEqCmp cmp] {k f he} :
     (modify t k f).minKey he = t.minKey (cast (congrArg (· = false) isEmpty_modify) he) :=
   Impl.Const.minKey_modify_eq_minKey t.wf
 
-theorem compare_minKeyV_modify_eq [TransCmp cmp] {k f}
-    (he : (modify t k f).isEmpty = false) :
+theorem compare_minKeyV_modify_eq [TransCmp cmp] {k f} :
     haveI : Nonempty α := ⟨k⟩
     cmp (modify t k f).minKeyV t.minKeyV = .eq :=
-  Impl.Const.compare_minKeyV_modify_eq t.wf he
+  Impl.Const.compare_minKeyV_modify_eq t.wf
 
 theorem compare_minKey_modify_eq [TransCmp cmp] {k f he} :
     cmp (modify t k f |>.minKey he)
@@ -5320,11 +5321,10 @@ theorem compare_minKey_modify_eq [TransCmp cmp] {k f he} :
   Impl.Const.compare_minKey_modify_eq t.wf
 
 @[simp]
-theorem ordCompare_minKeyV_modify_eq [Ord α] [TransOrd α] {t : DTreeMap α β} {k f}
-    (he : (modify t k f).isEmpty = false) :
+theorem ordCompare_minKeyV_modify_eq [Ord α] [TransOrd α] {t : DTreeMap α β} {k f} :
     haveI : Nonempty α := ⟨k⟩
     compare (modify t k f).minKeyV t.minKeyV = .eq :=
-  compare_minKeyV_modify_eq (cmp := compare) he
+  compare_minKeyV_modify_eq (cmp := compare)
 
 theorem ordCompare_minKey_modify_eq [Ord α] [TransOrd α] {t : DTreeMap α β} {k f he} :
     compare (modify t k f |>.minKey he)
@@ -6221,21 +6221,19 @@ theorem maxKey_modify [TransCmp cmp] {k f he} :
         (t.maxKey <| cast (congrArg (· = false) isEmpty_modify) he) :=
   Impl.Const.maxKey_modify t.wf
 
-@[simp, grind =] theorem maxKeyV_modify_eq_maxKeyV [TransCmp cmp] [LawfulEqCmp cmp] {k f}
-    (he : (modify t k f).isEmpty = false) :
+@[simp, grind =] theorem maxKeyV_modify_eq_maxKeyV [TransCmp cmp] [LawfulEqCmp cmp] {k f} :
     haveI : Nonempty α := ⟨k⟩
     (modify t k f).maxKeyV = t.maxKeyV :=
-  Impl.Const.maxKeyV_modify_eq_maxKeyV t.wf he
+  Impl.Const.maxKeyV_modify_eq_maxKeyV t.wf
 
 theorem maxKey_modify_eq_maxKey [TransCmp cmp] [LawfulEqCmp cmp] {k f he} :
     (modify t k f).maxKey he = t.maxKey (cast (congrArg (· = false) isEmpty_modify) he) :=
   Impl.Const.maxKey_modify_eq_maxKey t.wf
 
-theorem compare_maxKeyV_modify_eq [TransCmp cmp] {k f}
-    (he : (modify t k f).isEmpty = false) :
+theorem compare_maxKeyV_modify_eq [TransCmp cmp] {k f} :
     haveI : Nonempty α := ⟨k⟩
     cmp (modify t k f).maxKeyV t.maxKeyV = .eq :=
-  Impl.Const.compare_maxKeyV_modify_eq t.wf he
+  Impl.Const.compare_maxKeyV_modify_eq t.wf
 
 theorem compare_maxKey_modify_eq [TransCmp cmp] {k f he} :
     cmp (modify t k f |>.maxKey he)
@@ -6247,7 +6245,7 @@ theorem ordCompare_maxKeyV_modify_eq [Ord α] [TransOrd α] {t : DTreeMap α β}
     (he : (modify t k f).isEmpty = false) :
     haveI : Nonempty α := ⟨k⟩
     compare (modify t k f).maxKeyV t.maxKeyV = .eq :=
-  compare_maxKeyV_modify_eq (cmp := compare) he
+  compare_maxKeyV_modify_eq (cmp := compare)
 
 theorem ordCompare_maxKey_modify_eq [Ord α] [TransOrd α] {t : DTreeMap α β} {k f he} :
     compare (modify t k f |>.maxKey he)
@@ -7724,7 +7722,7 @@ theorem mem_filterMap [TransCmp cmp]
       (f (t.getKeyV k) (Const.getV t k)).isSome :=
   Impl.Const.contains_filterMap_iff t.wf
 
-theorem mem_filterMap_getKey_get [TransCmp cmp]
+theorem mem_filterMap_iff_getKey_get [TransCmp cmp]
     {f : α → β → Option γ} {k : α} :
     k ∈ t.filterMap f ↔ ∃ h, (f (t.getKey k h) (Const.get t k h)).isSome :=
   Impl.Const.contains_filterMap_iff_getKey_get t.wf
