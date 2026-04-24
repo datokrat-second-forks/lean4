@@ -9573,8 +9573,7 @@ theorem maxKey?_alter!_eq_self [TransOrd α] (h : t.WF) {k f} :
 
 end Const
 
-theorem maxKeyV_eq_getV_maxKey? [TransOrd α] (h : t.WF) (he : t.isEmpty = false) :
-    haveI : Nonempty α := ⟨t.maxKey he⟩
+theorem maxKeyV_eq_getV_maxKey? [TransOrd α] {_ : Nonempty α} (h : t.WF) :
     t.maxKeyV = t.maxKey?.getV := by
   simp_to_model [maxKey, maxKeyV, maxKey?] using List.maxKeyV_eq_getV_maxKey?
 
