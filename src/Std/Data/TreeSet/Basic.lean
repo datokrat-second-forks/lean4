@@ -198,7 +198,8 @@ def getD (t : TreeSet α cmp) (a : α) (fallback : α) : α :=
 Checks if given key is contained and returns the key if it is, otherwise returns `Classical.ofNonempty`.
 If the key is contained the result is guaranteed to be pointer equal to the key in the set.
 -/
-noncomputable def getV [Nonempty α] (t : TreeSet α cmp) (a : α) : α :=
+noncomputable def getV (t : TreeSet α cmp) (a : α) : α :=
+  haveI : Nonempty α := ⟨a⟩
   t.getD a Classical.ofNonempty
 
 /--

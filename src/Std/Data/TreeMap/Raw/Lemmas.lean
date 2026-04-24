@@ -4352,7 +4352,7 @@ theorem getKey?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h 
     t₁.getKey? k = t₂.getKey? k :=
   h.1.getKey?_eq h₁.1 h₂.1
 
-theorem getKeyV_eq [TransCmp cmp] {_ : Nonempty α} {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+theorem getKeyV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKeyV k = t₂.getKeyV k :=
   h.1.getKeyV_eq h₁.1 h₂.1
 
