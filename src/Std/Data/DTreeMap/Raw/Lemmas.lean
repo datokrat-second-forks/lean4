@@ -5053,8 +5053,6 @@ theorem minKeyV_insert_of_isEmpty [TransCmp cmp] (h : t.WF) {k v} (he : t.isEmpt
     (t.insert k v).minKeyV = k :=
   Impl.minKeyV_insert!_of_isEmpty h he
 
--- TODO: minKeyV_modify? Or remove the minKeyV_insert lemmas?
-
 theorem minKey?_insert_of_isEmpty [TransCmp cmp] (h : t.WF) {k v} (he : t.isEmpty) :
     (t.insert k v).minKey? = some k :=
   Impl.minKey?_insert!_of_isEmpty h he
