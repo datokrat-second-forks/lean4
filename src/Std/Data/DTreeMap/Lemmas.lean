@@ -5679,12 +5679,9 @@ theorem minKey_eq_minKeyV [TransCmp cmp] {he : t.isEmpty = false} :
 @[simp, grind norm]
 theorem minEntry_eq_minEntryV [TransCmp cmp] {he : t.isEmpty = false} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.minEntry he⟩
-    t.minEntry he = t.minEntryV := by
-  haveI : Nonempty ((a : α) × β a) := ⟨t.minEntry he⟩
-  have : t.inner.minEntry he = t.inner.minEntryD Classical.ofNonempty := by
-    rw [Impl.minEntryD_eq_getD_minEntry?,
-      ← Impl.some_minEntry_eq_minEntry? (he := he), Option.getD_some]
-  simpa [DTreeMap.minEntryV] using this
+    t.minEntry he = t.minEntryV :=
+  letI : Ord α := ⟨cmp⟩
+  Impl.minEntry_eq_minEntryV
 
 end Min
 
@@ -6605,12 +6602,9 @@ theorem maxKey_eq_maxKeyV [TransCmp cmp] {he : t.isEmpty = false} :
 @[simp, grind norm]
 theorem maxEntry_eq_maxEntryV [TransCmp cmp] {he : t.isEmpty = false} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.maxEntry he⟩
-    t.maxEntry he = t.maxEntryV := by
-  haveI : Nonempty ((a : α) × β a) := ⟨t.maxEntry he⟩
-  have : t.inner.maxEntry he = t.inner.maxEntryD Classical.ofNonempty := by
-    rw [Impl.maxEntryD_eq_getD_maxEntry?,
-      ← Impl.some_maxEntry_eq_maxEntry? (he := he), Option.getD_some]
-  simpa [DTreeMap.maxEntryV] using this
+    t.maxEntry he = t.maxEntryV :=
+  letI : Ord α := ⟨cmp⟩
+  Impl.maxEntry_eq_maxEntryV
 
 end Max
 
@@ -6619,125 +6613,70 @@ theorem entryAtIdx_eq_entryAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.entryAtIdx n h⟩
     t.entryAtIdx n h = t.entryAtIdxV n := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty ((a : α) × β a) := ⟨t.entryAtIdx n h⟩
-  have : Impl.entryAtIdx t.inner t.wf.balanced n h =
-      t.inner.entryAtIdxD n Classical.ofNonempty := by
-    rw [Impl.entryAtIdxD_eq_getD_entryAtIdx?,
-      Impl.entryAtIdx?_eq_some_entryAtIdx t.wf.balanced, Option.getD_some]
-  simpa [DTreeMap.entryAtIdxV] using this
+  apply Impl.entryAtIdx_eq_entryAtIdxV
 
 @[simp, grind norm]
 theorem keyAtIdx_eq_keyAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
     haveI : Nonempty α := ⟨t.keyAtIdx n h⟩
     t.keyAtIdx n h = t.keyAtIdxV n := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty α := ⟨t.keyAtIdx n h⟩
-  have : Impl.keyAtIdx t.inner t.wf.balanced n h =
-      t.inner.keyAtIdxD n Classical.ofNonempty := by
-    rw [Impl.keyAtIdxD_eq_getD_keyAtIdx?, Impl.keyAtIdx?_eq_entryAtIdx?,
-      Impl.entryAtIdx?_eq_some_entryAtIdx t.wf.balanced, Option.map_some,
-      Impl.keyAtIdx_eq_entryAtIdx_fst, Option.getD_some]
-  simpa [DTreeMap.keyAtIdxV] using this
+  apply Impl.keyAtIdx_eq_keyAtIdxV
 
 @[simp, grind norm]
 theorem getEntryGE_eq_getEntryGEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryGE k h⟩
     t.getEntryGE k h = t.getEntryGEV k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryGE k h⟩
-  have : Impl.getEntryGE k t.inner t.wf.ordered h =
-      Impl.getEntryGED k t.inner Classical.ofNonempty := by
-    rw [Impl.getEntryGED_eq_getD_getEntryGE?,
-      (Impl.some_getEntryGE_eq_getEntryGE? k t.inner).symm, Option.getD_some]
-  simpa [DTreeMap.getEntryGEV] using this
+  apply Impl.getEntryGE_eq_getEntryGEV
 
 @[simp, grind norm]
 theorem getEntryGT_eq_getEntryGTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryGT k h⟩
     t.getEntryGT k h = t.getEntryGTV k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryGT k h⟩
-  have : Impl.getEntryGT k t.inner t.wf.ordered h =
-      Impl.getEntryGTD k t.inner Classical.ofNonempty := by
-    rw [Impl.getEntryGTD_eq_getD_getEntryGT?,
-      (Impl.some_getEntryGT_eq_getEntryGT? k t.inner).symm, Option.getD_some]
-  simpa [DTreeMap.getEntryGTV] using this
+  apply Impl.getEntryGT_eq_getEntryGTV
 
 @[simp, grind norm]
 theorem getEntryLE_eq_getEntryLEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryLE k h⟩
     t.getEntryLE k h = t.getEntryLEV k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryLE k h⟩
-  have : Impl.getEntryLE k t.inner t.wf.ordered h =
-      Impl.getEntryLED k t.inner Classical.ofNonempty := by
-    rw [Impl.getEntryLED_eq_getD_getEntryLE?,
-      (Impl.some_getEntryLE_eq_getEntryLE? k t.inner).symm, Option.getD_some]
-  simpa [DTreeMap.getEntryLEV] using this
+  apply Impl.getEntryLE_eq_getEntryLEV
 
 @[simp, grind norm]
 theorem getEntryLT_eq_getEntryLTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryLT k h⟩
     t.getEntryLT k h = t.getEntryLTV k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty ((a : α) × β a) := ⟨t.getEntryLT k h⟩
-  have : Impl.getEntryLT k t.inner t.wf.ordered h =
-      Impl.getEntryLTD k t.inner Classical.ofNonempty := by
-    rw [Impl.getEntryLTD_eq_getD_getEntryLT?,
-      (Impl.some_getEntryLT_eq_getEntryLT? k t.inner).symm, Option.getD_some]
-  simpa [DTreeMap.getEntryLTV] using this
+  apply Impl.getEntryLT_eq_getEntryLTV
 
 @[simp, grind norm]
 theorem getKeyGE_eq_getKeyGEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyGE k h⟩
     t.getKeyGE k h = t.getKeyGEV k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty α := ⟨t.getKeyGE k h⟩
-  have : Impl.getKeyGE k t.inner t.wf.ordered h =
-      Impl.getKeyGED k t.inner Classical.ofNonempty := by
-    rw [Impl.getKeyGED_eq_getD_getKeyGE?, Impl.getKeyGE?_eq_getEntryGE?,
-      (Impl.some_getEntryGE_eq_getEntryGE? k t.inner).symm, Option.map_some,
-      Impl.getKeyGE_eq_getEntryGE, Option.getD_some]
-  simpa [DTreeMap.getKeyGEV] using this
+  apply Impl.getKeyGE_eq_getKeyGEV
 
 @[simp, grind norm]
 theorem getKeyGT_eq_getKeyGTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyGT k h⟩
     t.getKeyGT k h = t.getKeyGTV k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty α := ⟨t.getKeyGT k h⟩
-  have : Impl.getKeyGT k t.inner t.wf.ordered h =
-      Impl.getKeyGTD k t.inner Classical.ofNonempty := by
-    rw [Impl.getKeyGTD_eq_getD_getKeyGT?, Impl.getKeyGT?_eq_getEntryGT?,
-      (Impl.some_getEntryGT_eq_getEntryGT? k t.inner).symm, Option.map_some,
-      Impl.getKeyGT_eq_getEntryGT, Option.getD_some]
-  simpa [DTreeMap.getKeyGTV] using this
+  apply Impl.getKeyGT_eq_getKeyGTV
 
 @[simp, grind norm]
 theorem getKeyLE_eq_getKeyLEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyLE k h⟩
     t.getKeyLE k h = t.getKeyLEV k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty α := ⟨t.getKeyLE k h⟩
-  have : Impl.getKeyLE k t.inner t.wf.ordered h =
-      Impl.getKeyLED k t.inner Classical.ofNonempty := by
-    rw [Impl.getKeyLED_eq_getD_getKeyLE?, Impl.getKeyLE?_eq_getEntryLE?,
-      (Impl.some_getEntryLE_eq_getEntryLE? k t.inner).symm, Option.map_some,
-      Impl.getKeyLE_eq_getEntryLE, Option.getD_some]
-  simpa [DTreeMap.getKeyLEV] using this
+  apply Impl.getKeyLE_eq_getKeyLEV
 
 @[simp, grind norm]
 theorem getKeyLT_eq_getKeyLTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty α := ⟨t.getKeyLT k h⟩
     t.getKeyLT k h = t.getKeyLTV k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty α := ⟨t.getKeyLT k h⟩
-  have : Impl.getKeyLT k t.inner t.wf.ordered h =
-      Impl.getKeyLTD k t.inner Classical.ofNonempty := by
-    rw [Impl.getKeyLTD_eq_getD_getKeyLT?, Impl.getKeyLT?_eq_getEntryLT?,
-      (Impl.some_getEntryLT_eq_getEntryLT? k t.inner).symm, Option.map_some,
-      Impl.getKeyLT_eq_getEntryLT, Option.getD_some]
-  simpa [DTreeMap.getKeyLTV] using this
+  apply Impl.getKeyLT_eq_getKeyLTV
 
 namespace Const
 
@@ -6748,66 +6687,35 @@ theorem entryAtIdx_eq_entryAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
     haveI : Nonempty (α × β) := ⟨Const.entryAtIdx t n h⟩
     Const.entryAtIdx t n h = Const.entryAtIdxV t n := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty (α × β) := ⟨Const.entryAtIdx t n h⟩
-  show Impl.Const.entryAtIdx t.inner t.wf.balanced n h =
-      Impl.Const.entryAtIdxD t.inner n Classical.ofNonempty
-  rw [Impl.Const.entryAtIdxD_eq_getD_entryAtIdx?,
-    Impl.Const.entryAtIdx?_eq_map,
-    Impl.entryAtIdx?_eq_some_entryAtIdx t.wf.balanced,
-    Option.map_some, Option.getD_some,
-    ← Impl.Const.entryAtIdx_eq t.wf.balanced]
+  apply Impl.Const.entryAtIdx_eq_entryAtIdxV
 
 @[simp, grind norm]
 theorem getEntryGE_eq_getEntryGEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty (α × β) := ⟨Const.getEntryGE t k h⟩
     Const.getEntryGE t k h = Const.getEntryGEV t k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty (α × β) := ⟨Const.getEntryGE t k h⟩
-  show Impl.Const.getEntryGE k t.inner t.wf.ordered h =
-      Impl.Const.getEntryGED k t.inner Classical.ofNonempty
-  rw [Impl.Const.getEntryGED_eq_getD_getEntryGE?,
-    Impl.Const.getEntryGE_eq t.wf.ordered,
-    Impl.Const.getEntryGE?_eq_map]
-  rw [← Impl.some_getEntryGE_eq_getEntryGE?, Option.map_some, Option.getD_some]
+  apply Impl.Const.getEntryGE_eq_getEntryGEV
 
 @[simp, grind norm]
 theorem getEntryGT_eq_getEntryGTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty (α × β) := ⟨Const.getEntryGT t k h⟩
     Const.getEntryGT t k h = Const.getEntryGTV t k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty (α × β) := ⟨Const.getEntryGT t k h⟩
-  show Impl.Const.getEntryGT k t.inner t.wf.ordered h =
-      Impl.Const.getEntryGTD k t.inner Classical.ofNonempty
-  rw [Impl.Const.getEntryGTD_eq_getD_getEntryGT?,
-    Impl.Const.getEntryGT_eq t.wf.ordered,
-    Impl.Const.getEntryGT?_eq_map]
-  rw [← Impl.some_getEntryGT_eq_getEntryGT?, Option.map_some, Option.getD_some]
+  apply Impl.Const.getEntryGT_eq_getEntryGTV
 
 @[simp, grind norm]
 theorem getEntryLE_eq_getEntryLEV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty (α × β) := ⟨Const.getEntryLE t k h⟩
     Const.getEntryLE t k h = Const.getEntryLEV t k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty (α × β) := ⟨Const.getEntryLE t k h⟩
-  show Impl.Const.getEntryLE k t.inner t.wf.ordered h =
-      Impl.Const.getEntryLED k t.inner Classical.ofNonempty
-  rw [Impl.Const.getEntryLED_eq_getD_getEntryLE?,
-    Impl.Const.getEntryLE_eq t.wf.ordered,
-    Impl.Const.getEntryLE?_eq_map]
-  rw [← Impl.some_getEntryLE_eq_getEntryLE?, Option.map_some, Option.getD_some]
+  apply Impl.Const.getEntryLE_eq_getEntryLEV
 
 @[simp, grind norm]
 theorem getEntryLT_eq_getEntryLTV [TransCmp cmp] {k : α} {h} :
     haveI : Nonempty (α × β) := ⟨Const.getEntryLT t k h⟩
     Const.getEntryLT t k h = Const.getEntryLTV t k := by
   letI : Ord α := ⟨cmp⟩
-  haveI : Nonempty (α × β) := ⟨Const.getEntryLT t k h⟩
-  show Impl.Const.getEntryLT k t.inner t.wf.ordered h =
-      Impl.Const.getEntryLTD k t.inner Classical.ofNonempty
-  rw [Impl.Const.getEntryLTD_eq_getD_getEntryLT?,
-    Impl.Const.getEntryLT_eq t.wf.ordered,
-    Impl.Const.getEntryLT?_eq_map]
-  rw [← Impl.some_getEntryLT_eq_getEntryLT?, Option.map_some, Option.getD_some]
+  apply Impl.Const.getEntryLT_eq_getEntryLTV
 
 end Const
 

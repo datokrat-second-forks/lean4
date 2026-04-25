@@ -10352,6 +10352,86 @@ theorem maxKeyD_alter!_eq_self [TransOrd α] [LawfulEqOrd α] (h : t.WF) {k f fa
       (f (t.get? k)).isSome ∧ ∀ k', k' ∈ t → (compare k' k).isLE := by
   simpa only [alter_eq_alter!] using maxKeyD_alter_eq_self h
 
+@[simp]
+theorem minEntry_eq_minEntryV [TransOrd α] {h} :
+    haveI : Nonempty _ := ⟨t.minEntry h⟩
+    t.minEntry h = t.minEntryV := by
+  simp [minEntry_eq_get_minEntry?, minEntryV, minEntryD_eq_getD_minEntry?, Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem maxEntry_eq_maxEntryV [TransOrd α] {h} :
+    haveI : Nonempty _ := ⟨t.maxEntry h⟩
+    t.maxEntry h = t.maxEntryV := by
+  simp [maxEntry_eq_get_maxEntry?, maxEntryV, maxEntryD_eq_getD_maxEntry?, Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem entryAtIdx_eq_entryAtIdxV [TransOrd α] (h : t.Balanced) {i : Nat} {h'} :
+    haveI : Nonempty _ := ⟨t.entryAtIdx h i h'⟩
+    t.entryAtIdx h i h' = t.entryAtIdxV i := by
+  simp [entryAtIdx_eq_get_entryAtIdx?, entryAtIdxV, entryAtIdxD_eq_getD_entryAtIdx?, Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem keyAtIdx_eq_keyAtIdxV [TransOrd α] (h : t.Balanced) {i : Nat} {h'} :
+    haveI : Nonempty _ := ⟨t.keyAtIdx h i h'⟩
+    t.keyAtIdx h i h' = t.keyAtIdxV i := by
+  simp [keyAtIdx_eq_get_keyAtIdx?, keyAtIdxV, keyAtIdxD_eq_getD_keyAtIdx?, Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getEntryGE_eq_getEntryGEV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getEntryGE k t hto he⟩
+    getEntryGE k t hto he = getEntryGEV k t := by
+  simp [getEntryGE_eq_get_getEntryGE?, getEntryGEV, getEntryGED_eq_getD_getEntryGE?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getEntryGT_eq_getEntryGTV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getEntryGT k t hto he⟩
+    getEntryGT k t hto he = getEntryGTV k t := by
+  simp [getEntryGT_eq_get_getEntryGT?, getEntryGTV, getEntryGTD_eq_getD_getEntryGT?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getEntryLE_eq_getEntryLEV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getEntryLE k t hto he⟩
+    getEntryLE k t hto he = getEntryLEV k t := by
+  simp [getEntryLE_eq_get_getEntryLE?, getEntryLEV, getEntryLED_eq_getD_getEntryLE?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getEntryLT_eq_getEntryLTV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getEntryLT k t hto he⟩
+    getEntryLT k t hto he = getEntryLTV k t := by
+  simp [getEntryLT_eq_get_getEntryLT?, getEntryLTV, getEntryLTD_eq_getD_getEntryLT?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getKeyGE_eq_getKeyGEV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getKeyGE k t hto he⟩
+    getKeyGE k t hto he = getKeyGEV k t := by
+  simp [getKeyGE_eq_get_getKeyGE?, getKeyGEV, getKeyGED_eq_getD_getKeyGE?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getKeyGT_eq_getKeyGTV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getKeyGT k t hto he⟩
+    getKeyGT k t hto he = getKeyGTV k t := by
+  simp [getKeyGT_eq_get_getKeyGT?, getKeyGTV, getKeyGTD_eq_getD_getKeyGT?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getKeyLE_eq_getKeyLEV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getKeyLE k t hto he⟩
+    getKeyLE k t hto he = getKeyLEV k t := by
+  simp [getKeyLE_eq_get_getKeyLE?, getKeyLEV, getKeyLED_eq_getD_getKeyLE?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getKeyLT_eq_getKeyLTV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getKeyLT k t hto he⟩
+    getKeyLT k t hto he = getKeyLTV k t := by
+  simp [getKeyLT_eq_get_getKeyLT?, getKeyLTV, getKeyLTD_eq_getD_getKeyLT?,
+    Option.getV_eq_getD_ofNonempty]
+
 namespace Const
 
 variable {β : Type v} {t : Impl α β}
@@ -10382,6 +10462,41 @@ theorem maxKeyD_alter!_eq_self [TransOrd α] (h : t.WF) {k f} :
     (alter! k f t |>.maxKeyD fallback) = k ↔
       (f (get? t k)).isSome ∧ ∀ k', k' ∈ t → (compare k' k).isLE := by
   simpa only [alter_eq_alter!] using maxKeyD_alter_eq_self h
+
+@[simp]
+theorem entryAtIdx_eq_entryAtIdxV [TransOrd α] (h : t.Balanced) {i : Nat} {h'} :
+    haveI : Nonempty _ := ⟨entryAtIdx t h i h'⟩
+    entryAtIdx t h i h' = entryAtIdxV t i := by
+  simp [entryAtIdx_eq_get_entryAtIdx?, entryAtIdxV, entryAtIdxD_eq_getD_entryAtIdx?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getEntryGE_eq_getEntryGEV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getEntryGE k t hto he⟩
+    getEntryGE k t hto he = getEntryGEV k t := by
+  simp [getEntryGE_eq_get_getEntryGE?, getEntryGEV, getEntryGED_eq_getD_getEntryGE?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getEntryGT_eq_getEntryGTV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getEntryGT k t hto he⟩
+    getEntryGT k t hto he = getEntryGTV k t := by
+  simp [getEntryGT_eq_get_getEntryGT?, getEntryGTV, getEntryGTD_eq_getD_getEntryGT?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getEntryLE_eq_getEntryLEV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getEntryLE k t hto he⟩
+    getEntryLE k t hto he = getEntryLEV k t := by
+  simp [getEntryLE_eq_get_getEntryLE?, getEntryLEV, getEntryLED_eq_getD_getEntryLE?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem getEntryLT_eq_getEntryLTV [Ord α] [TransOrd α] {k : α} {hto he} :
+    haveI : Nonempty _ := ⟨getEntryLT k t hto he⟩
+    getEntryLT k t hto he = getEntryLTV k t := by
+  simp [getEntryLT_eq_get_getEntryLT?, getEntryLTV, getEntryLTD_eq_getD_getEntryLT?,
+    Option.getV_eq_getD_ofNonempty]
 
 end Const
 
