@@ -5683,6 +5683,19 @@ theorem minEntry_eq_minEntryV [TransCmp cmp] {he : t.isEmpty = false} :
   letI : Ord α := ⟨cmp⟩
   Impl.minEntry_eq_minEntryV
 
+namespace Const
+
+variable {β : Type v} {t : DTreeMap α β cmp}
+
+@[simp, grind norm]
+theorem minEntry_eq_minEntryV [TransCmp cmp] {he : t.isEmpty = false} :
+    haveI : Nonempty (α × β) := ⟨Const.minEntry t he⟩
+    Const.minEntry t he = Const.minEntryV t := by
+  letI : Ord α := ⟨cmp⟩
+  apply Impl.Const.minEntry_eq_minEntryV
+
+end Const
+
 end Min
 
 section Max
@@ -6605,6 +6618,19 @@ theorem maxEntry_eq_maxEntryV [TransCmp cmp] {he : t.isEmpty = false} :
     t.maxEntry he = t.maxEntryV :=
   letI : Ord α := ⟨cmp⟩
   Impl.maxEntry_eq_maxEntryV
+
+namespace Const
+
+variable {β : Type v} {t : DTreeMap α β cmp}
+
+@[simp, grind norm]
+theorem maxEntry_eq_maxEntryV [TransCmp cmp] {he : t.isEmpty = false} :
+    haveI : Nonempty (α × β) := ⟨Const.maxEntry t he⟩
+    Const.maxEntry t he = Const.maxEntryV t := by
+  letI : Ord α := ⟨cmp⟩
+  apply Impl.Const.maxEntry_eq_maxEntryV
+
+end Const
 
 end Max
 

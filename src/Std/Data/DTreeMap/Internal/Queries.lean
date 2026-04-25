@@ -902,6 +902,10 @@ def minEntryD : Impl α β → α × β → α × β
   | .inner _ _ _ l@(.inner ..) _, fallback => minEntryD l fallback
 
 /-- Implementation detail of the tree map -/
+noncomputable def minEntryV [Nonempty (α × β)] (t : Impl α β) : α × β :=
+  minEntryD t Classical.ofNonempty
+
+/-- Implementation detail of the tree map -/
 def maxEntry? : Impl α β → Option (α × β)
   | .leaf => none
   | .inner _ k v _ .leaf => some ⟨k, v⟩
@@ -923,6 +927,10 @@ def maxEntryD : Impl α β → α × β → α × β
   | .leaf, fallback => fallback
   | .inner _ k v _ .leaf, _ => ⟨k, v⟩
   | .inner _ _ _ _ r@(.inner ..), fallback => maxEntryD r fallback
+
+/-- Implementation detail of the tree map -/
+noncomputable def maxEntryV [Nonempty (α × β)] (t : Impl α β) : α × β :=
+  maxEntryD t Classical.ofNonempty
 
 /-- Implementation detail of the tree map -/
 @[inline]

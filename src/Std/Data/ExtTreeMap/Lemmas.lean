@@ -3463,15 +3463,6 @@ theorem minKey_eq_head_keys [TransCmp cmp] {he} :
     t.minKey he = t.keys.head (mt keys_eq_nil_iff.mp he) :=
   ExtDTreeMap.minKey_eq_head_keys
 
-@[grind =_]
-theorem minKeyV_eq_getElemV_keysArray [TransCmp cmp] {_ : Nonempty α} :
-    t.minKeyV = t.keysArray｢0｣ :=
-  ExtDTreeMap.minKeyV_eq_getElemV_keysArray
-
-theorem minKey_eq_getElem_keysArray [TransCmp cmp] {he} :
-    t.minKey he = t.keysArray[0]'sorry :=
-  sorry
-
 @[grind =] theorem minKeyV_modify [TransCmp cmp] {k f}
     (he : (modify t k f) ≠ ∅) :
     haveI : Nonempty α := ⟨(modify t k f).minKey he⟩
@@ -3822,7 +3813,7 @@ theorem minKeyV_eq_ofNonempty [TransCmp cmp] {_ : Nonempty α} (he : t.isEmpty) 
 theorem minEntry_eq_minEntryV [TransCmp cmp] {he : t ≠ ∅} :
     haveI : Nonempty (α × β) := ⟨t.minEntry he⟩
     t.minEntry he = t.minEntryV :=
-  sorry
+  ExtDTreeMap.Const.minEntry_eq_minEntryV
 
 end Min
 
@@ -4293,15 +4284,6 @@ theorem maxKey_eq_getLast_keys [TransCmp cmp] {he} :
     t.maxKey he = t.keys.getLast (mt keys_eq_nil_iff.mp he) :=
   ExtDTreeMap.maxKey_eq_getLast_keys
 
-@[grind =_]
-theorem maxKeyV_eq_backV_keysArray [TransCmp cmp] {_ : Nonempty α} :
-    t.maxKeyV = t.keysArray.backV :=
-  ExtDTreeMap.maxKeyV_eq_backV_keysArray
-
-theorem maxKey_eq_back_keysArray [TransCmp cmp] {he} :
-    t.maxKey he = t.keysArray.back sorry :=
-  sorry
-
 @[grind =] theorem maxKeyV_modify [TransCmp cmp] {k f}
     (he : (modify t k f) ≠ ∅) :
     haveI : Nonempty α := ⟨(modify t k f).maxKey he⟩
@@ -4652,7 +4634,7 @@ theorem maxKeyV_eq_ofNonempty [TransCmp cmp] {_ : Nonempty α} (he : t.isEmpty) 
 theorem maxEntry_eq_maxEntryV [TransCmp cmp] {he : t ≠ ∅} :
     haveI : Nonempty (α × β) := ⟨t.maxEntry he⟩
     t.maxEntry he = t.maxEntryV :=
-  sorry
+  ExtDTreeMap.Const.maxEntry_eq_maxEntryV
 
 end Max
 
