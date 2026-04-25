@@ -676,36 +676,35 @@ theorem get?_union_of_not_mem_right [TransCmp cmp]
   TreeMap.Raw.getKey?_union_of_not_mem_right h₁ h₂ not_mem
 
 /- get -/
-theorem get_union_of_mem_right [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
-    {k : α} (mem : k ∈ t₂) :
-    (t₁ ∪ t₂).get k (mem_union_of_right h₁ h₂ mem) = t₂.get k mem :=
-  TreeMap.Raw.getKey_union_of_mem_right h₁ h₂ mem
-
-theorem get_union_of_not_mem_left [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
-    {k : α} (not_mem : ¬k ∈ t₁) {h'} :
-    (t₁ ∪ t₂).get k h' = t₂.get k (mem_of_mem_union_of_not_mem_left h₁ h₂ h' not_mem) :=
-  DTreeMap.Raw.getKey_union_of_not_mem_left h₁ h₂ not_mem
-
-theorem get_union_of_not_mem_right [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
-    {k : α} (not_mem : ¬k ∈ t₂) {h'} :
-    (t₁ ∪ t₂).get k h' = t₁.get k (mem_of_mem_union_of_not_mem_right h₁ h₂ h' not_mem) :=
-  TreeMap.Raw.getKey_union_of_not_mem_right h₁ h₂ not_mem
-
-/- getV -/
 theorem getV_union_of_mem_right [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
     {k : α} (mem : k ∈ t₂) :
     (t₁ ∪ t₂).getV k = t₂.getV k :=
   TreeMap.Raw.getKeyV_union_of_mem_right h₁ h₂ mem
+
+theorem get_union_of_mem_right [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
+    {k : α} (mem : k ∈ t₂) :
+    (t₁ ∪ t₂).get k (mem_union_of_right h₁ h₂ mem) = t₂.get k mem :=
+  TreeMap.Raw.getKey_union_of_mem_right h₁ h₂ mem
 
 theorem getV_union_of_not_mem_left [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
     {k : α} (not_mem : ¬k ∈ t₁) :
     (t₁ ∪ t₂).getV k = t₂.getV k :=
   TreeMap.Raw.getKeyV_union_of_not_mem_left h₁ h₂ not_mem
 
+theorem get_union_of_not_mem_left [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
+    {k : α} (not_mem : ¬k ∈ t₁) {h'} :
+    (t₁ ∪ t₂).get k h' = t₂.get k (mem_of_mem_union_of_not_mem_left h₁ h₂ h' not_mem) :=
+  DTreeMap.Raw.getKey_union_of_not_mem_left h₁ h₂ not_mem
+
 theorem getV_union_of_not_mem_right [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
     {k : α} (not_mem : ¬k ∈ t₂) :
     (t₁ ∪ t₂).getV k = t₁.getV k :=
   TreeMap.Raw.getKeyV_union_of_not_mem_right h₁ h₂ not_mem
+
+theorem get_union_of_not_mem_right [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
+    {k : α} (not_mem : ¬k ∈ t₂) {h'} :
+    (t₁ ∪ t₂).get k h' = t₁.get k (mem_of_mem_union_of_not_mem_right h₁ h₂ h' not_mem) :=
+  TreeMap.Raw.getKey_union_of_not_mem_right h₁ h₂ not_mem
 
 /- getD -/
 theorem getD_union [TransCmp cmp] (h₁ : t₁.WF)
@@ -1040,17 +1039,16 @@ theorem get?_diff_of_mem_right [TransCmp cmp]
   TreeMap.Raw.getKey?_diff_of_mem_right h₁ h₂ mem
 
 /- get -/
+theorem getV_diff [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
+    {k : α} {h_mem : k ∈ t₁ \ t₂} :
+    (t₁ \ t₂).getV k = t₁.getV k :=
+  TreeMap.Raw.getKeyV_diff h₁ h₂ (h_mem := h_mem)
+
 theorem get_diff [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
     {k : α} {h_mem : k ∈ t₁ \ t₂} :
     (t₁ \ t₂).get k h_mem =
     t₁.get k ((mem_diff_iff h₁ h₂).1 h_mem).1 :=
   TreeMap.Raw.getKey_diff h₁ h₂
-
-/- getV -/
-theorem getV_diff [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF)
-    {k : α} {h_mem : k ∈ t₁ \ t₂} :
-    (t₁ \ t₂).getV k = t₁.getV k :=
-  TreeMap.Raw.getKeyV_diff h₁ h₂ (h_mem := h_mem)
 
 /- getD -/
 theorem getD_diff [TransCmp cmp] (h₁ : t₁.WF)
@@ -2206,21 +2204,21 @@ theorem get?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t
     t₁.get? k = t₂.get? k :=
   h.1.getKey?_eq h₁.1 h₂.1
 
-theorem getKey_eq [TransCmp cmp] {k : α} {hk : k ∈ t₁} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
-    t₁.get k hk = t₂.get k ((h.mem_iff h₁ h₂).mp hk) :=
-  h.1.getKey_eq h₁.1 h₂.1
-
-theorem getKey!_eq [TransCmp cmp] [Inhabited α] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
-    t₁.get! k = t₂.get! k :=
-  h.1.getKey!_eq h₁.1 h₂.1
-
-theorem getKeyD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
-    t₁.getD k fallback = t₂.getD k fallback :=
-  h.1.getKeyD_eq h₁.1 h₂.1
-
 theorem getV_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getV k = t₂.getV k :=
   TreeMap.Raw.Equiv.getKeyV_eq h₁.1 h₂.1 h.1
+
+theorem get_eq [TransCmp cmp] {k : α} {hk : k ∈ t₁} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.get k hk = t₂.get k ((h.mem_iff h₁ h₂).mp hk) :=
+  h.1.getKey_eq h₁.1 h₂.1
+
+theorem get!_eq [TransCmp cmp] [Inhabited α] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.get! k = t₂.get! k :=
+  h.1.getKey!_eq h₁.1 h₂.1
+
+theorem getD_eq [TransCmp cmp] {k fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.getD k fallback = t₂.getD k fallback :=
+  h.1.getKeyD_eq h₁.1 h₂.1
 
 theorem toList_eq [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁.toList = t₂.toList :=
   h.1.keys_eq h₁.1 h₂.1

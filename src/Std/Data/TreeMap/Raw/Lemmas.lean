@@ -4333,6 +4333,10 @@ theorem getElem?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h
     t₁[k]? = t₂[k]? :=
   h.1.constGet?_eq h₁.1 h₂.1
 
+theorem getElemV_eq [TransCmp cmp] {_ : Nonempty β} {k : α} (h₁ : t₁.WF)
+    (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁｢k｣ = t₂｢k｣ :=
+  h.1.constGetV_eq h₁.1 h₂.1
+
 theorem getElem_eq [TransCmp cmp] {k : α} {hk : k ∈ t₁} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁[k] = t₂[k]'((h.mem_iff h₁ h₂).mp hk) :=
   h.1.constGet_eq h₁.1 h₂.1
@@ -4344,10 +4348,6 @@ theorem getElem!_eq [TransCmp cmp] [Inhabited β] {k : α} (h₁ : t₁.WF) (h�
 theorem getD_eq [TransCmp cmp] {k : α} {fallback : β} (h₁ : t₁.WF)
     (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁.getD k fallback = t₂.getD k fallback :=
   h.1.constGetD_eq h₁.1 h₂.1
-
-theorem getElemV_eq [TransCmp cmp] {_ : Nonempty β} {k : α} (h₁ : t₁.WF)
-    (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁｢k｣ = t₂｢k｣ := by
-  simpa [Raw.getV] using getD_eq h₁ h₂ h
 
 theorem getKey?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKey? k = t₂.getKey? k :=

@@ -4912,6 +4912,15 @@ theorem getKey?_filterMap [TransCmp cmp]
       (f x (t[x]'(mem_of_getKey?_eq_some h'))).isSome) :=
   ExtDTreeMap.Const.getKey?_filterMap
 
+@[grind =]
+theorem getKeyV_filterMap [TransCmp cmp]
+    {f : α → β → Option γ} {k : α} :
+    haveI : Nonempty α := ⟨k⟩
+    (t.filterMap f).getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (t[x]'(mem_of_getKey?_eq_some h'))).isSome)).getD Classical.ofNonempty := by
+  simpa only [ExtTreeMap.getKeyV] using ExtDTreeMap.Const.getKeyD_filterMap
+
 theorem getKey_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} {h'} :
     (t.filterMap f).getKey k h' = t.getKey k (mem_of_mem_filterMap h') :=
@@ -4932,15 +4941,6 @@ theorem getKeyD_filterMap [TransCmp cmp]
     ((t.getKey? k).pfilter (fun x h' =>
       (f x (t[x]'(mem_of_getKey?_eq_some h'))).isSome)).getD fallback :=
   ExtDTreeMap.Const.getKeyD_filterMap
-
-@[grind =]
-theorem getKeyV_filterMap [TransCmp cmp]
-    {f : α → β → Option γ} {k : α} :
-    haveI : Nonempty α := ⟨k⟩
-    (t.filterMap f).getKeyV k =
-    ((t.getKey? k).pfilter (fun x h' =>
-      (f x (t[x]'(mem_of_getKey?_eq_some h'))).isSome)).getD Classical.ofNonempty := by
-  simpa only [ExtTreeMap.getKeyV] using getKeyD_filterMap
 
 end filterMap
 
@@ -5028,6 +5028,14 @@ theorem getElem?_filter_of_getKey?_eq_some [TransCmp cmp]
       (t.filter f)[k]? = t[k]?.filter (fun x => f k' x) :=
   ExtDTreeMap.Const.get?_filter_of_getKey?_eq_some
 
+@[simp, grind =]
+theorem getElemV_filter [TransCmp cmp]
+    {f : α → β → Bool} {k : α} (h' : k ∈ t.filter f) :
+    haveI h'' : k ∈ t := mem_of_mem_filter h'
+    haveI : Nonempty β := ⟨t[k]'h''⟩
+    (t.filter f)｢k｣ = t｢k｣ :=
+  ExtDTreeMap.Const.getV_filter h'
+
 theorem getElem_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} {h'} :
     (t.filter f)[k]'(h') = t[k]'(mem_of_mem_filter h') :=
@@ -5058,14 +5066,6 @@ theorem getD_filter [TransCmp cmp]
     (t.filter f).getD k fallback = (t[k]?.filter (fun x =>
       f (t.getKeyV k) x)).getD fallback :=
   ExtDTreeMap.Const.getD_filter
-
-@[simp, grind =]
-theorem getElemV_filter [TransCmp cmp]
-    {f : α → β → Bool} {k : α} (h' : k ∈ t.filter f) :
-    haveI h'' : k ∈ t := mem_of_mem_filter h'
-    haveI : Nonempty β := ⟨t[k]'h''⟩
-    (t.filter f)｢k｣ = t｢k｣ :=
-  ExtDTreeMap.Const.getV_filter h'
 
 /-- Simpler variant of `getD_filter` when `LawfulEqCmp` is available. -/
 @[grind =]
@@ -5099,6 +5099,15 @@ theorem getKey?_filter_key [TransCmp cmp]
     (t.filter fun k _ => f k).getKey? k = (t.getKey? k).filter f :=
   ExtDTreeMap.getKey?_filter_key
 
+@[grind =]
+theorem getKeyV_filter [TransCmp cmp]
+    {f : α → β → Bool} {k : α} :
+    haveI : Nonempty α := ⟨k⟩
+    (t.filter f).getKeyV k =
+    ((t.getKey? k).pfilter (fun x h' =>
+      (f x (t[x]'(mem_of_getKey?_eq_some h'))))).getD Classical.ofNonempty := by
+  simpa only [ExtTreeMap.getKeyV] using ExtDTreeMap.Const.getKeyD_filter
+
 theorem getKey_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} {h'} :
     (t.filter f).getKey k h' = t.getKey k (mem_of_mem_filter h') :=
@@ -5129,15 +5138,6 @@ theorem getKeyD_filter_key [TransCmp cmp]
     {f : α → Bool} {k fallback : α} :
     (t.filter fun k _ => f k).getKeyD k fallback = ((t.getKey? k).filter f).getD fallback :=
   ExtDTreeMap.getKeyD_filter_key
-
-@[grind =]
-theorem getKeyV_filter [TransCmp cmp]
-    {f : α → β → Bool} {k : α} :
-    haveI : Nonempty α := ⟨k⟩
-    (t.filter f).getKeyV k =
-    ((t.getKey? k).pfilter (fun x h' =>
-      (f x (t[x]'(mem_of_getKey?_eq_some h'))))).getD Classical.ofNonempty := by
-  simpa only [ExtTreeMap.getKeyV] using getKeyD_filter
 
 theorem getKeyV_filter_key [TransCmp cmp]
     {f : α → Bool} {k : α} :
@@ -5226,11 +5226,30 @@ theorem getElem?_map_of_getKey?_eq_some [TransCmp cmp]
     (t.map f)[k]? = t[k]?.map (f k') :=
   ExtDTreeMap.Const.get?_map_of_getKey?_eq_some h
 
+@[simp, grind =]
+theorem getElemV_map [TransCmp cmp] [LawfulEqCmp cmp]
+    {f : α → β → γ} {k : α} (h' : k ∈ t.map f) :
+    haveI h'' : k ∈ t := mem_of_mem_map h'
+    haveI : Nonempty β := ⟨t[k]'h''⟩
+    haveI : Nonempty γ := ⟨f k (t[k]'h'')⟩
+    (t.map f)｢k｣ = f k t｢k｣ :=
+  ExtDTreeMap.Const.getV_map h'
+
 theorem getElem_map [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → γ} {k : α} {h'} :
     (t.map f)[k]'(h') =
       f k (t[k]'(mem_of_mem_map h')) :=
   ExtDTreeMap.Const.get_map (h' := h')
+
+/-- Variant of `getElemV_map` that holds without `LawfulEqCmp`. -/
+@[simp (low)]
+theorem getElemV_map' [TransCmp cmp]
+    {f : α → β → γ} {k : α} (h' : k ∈ t.map f) :
+    haveI h'' : k ∈ t := mem_of_mem_map h'
+    haveI : Nonempty β := ⟨t[k]'h''⟩
+    haveI : Nonempty γ := ⟨f (t.getKey k h'') (t[k]'h'')⟩
+    (t.map f)｢k｣ = f (t.getKeyV k) t｢k｣ :=
+  ExtDTreeMap.Const.getV_map' h'
 
 /-- Variant of `getElem_map` that holds without `LawfulEqCmp`. -/
 theorem getElem_map' [TransCmp cmp]
@@ -5266,15 +5285,6 @@ theorem getD_map [TransCmp cmp] [LawfulEqCmp cmp]
       (t[k]?.map (f k)).getD fallback :=
   ExtDTreeMap.Const.getD_map
 
-@[simp, grind =]
-theorem getElemV_map [TransCmp cmp] [LawfulEqCmp cmp]
-    {f : α → β → γ} {k : α} (h' : k ∈ t.map f) :
-    haveI h'' : k ∈ t := mem_of_mem_map h'
-    haveI : Nonempty β := ⟨t[k]'h''⟩
-    haveI : Nonempty γ := ⟨f k (t[k]'h'')⟩
-    (t.map f)｢k｣ = f k t｢k｣ :=
-  ExtDTreeMap.Const.getV_map h'
-
 /-- Variant of `getD_map` that holds without `LawfulEqCmp`. -/
 theorem getD_map' [TransCmp cmp]
     {f : α → β → γ} {k : α} {fallback : γ} :
@@ -5282,16 +5292,6 @@ theorem getD_map' [TransCmp cmp]
       (t[k]?.pmap (fun v h => f (t.getKey k h) v)
         (fun _ h' => mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some h'))).getD fallback :=
   ExtDTreeMap.Const.getD_map'
-
-/-- Variant of `getElemV_map` that holds without `LawfulEqCmp`. -/
-@[simp (low)]
-theorem getElemV_map' [TransCmp cmp]
-    {f : α → β → γ} {k : α} (h' : k ∈ t.map f) :
-    haveI h'' : k ∈ t := mem_of_mem_map h'
-    haveI : Nonempty β := ⟨t[k]'h''⟩
-    haveI : Nonempty γ := ⟨f (t.getKey k h'') (t[k]'h'')⟩
-    (t.map f)｢k｣ = f (t.getKeyV k) t｢k｣ :=
-  ExtDTreeMap.Const.getV_map' h'
 
 theorem getD_map_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → γ} {k k' : α} {fallback : γ} (h : t.getKey? k = some k') :
@@ -5303,6 +5303,13 @@ theorem getKey?_map [TransCmp cmp]
     {f : α → β → γ} {k : α} :
     (t.map f).getKey? k = t.getKey? k :=
   ExtDTreeMap.getKey?_map
+
+@[simp, grind =]
+theorem getKeyV_map [TransCmp cmp]
+    {f : α → β → γ} {k : α} :
+    haveI : Nonempty α := ⟨k⟩
+    (t.map f).getKeyV k = t.getKeyV k :=
+  ExtDTreeMap.getKeyV_map
 
 theorem getKey_map [TransCmp cmp]
     {f : α → β → γ} {k : α} {h'} :
@@ -5320,13 +5327,6 @@ theorem getKeyD_map [TransCmp cmp]
     {f : α → β → γ} {k fallback : α} :
     (t.map f).getKeyD k fallback = t.getKeyD k fallback :=
   ExtDTreeMap.getKeyD_map
-
-@[simp, grind =]
-theorem getKeyV_map [TransCmp cmp]
-    {f : α → β → γ} {k : α} :
-    haveI : Nonempty α := ⟨k⟩
-    (t.map f).getKeyV k = t.getKeyV k := by
-  simp [ExtTreeMap.getKeyV]
 
 end map
 

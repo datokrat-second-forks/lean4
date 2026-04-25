@@ -6195,6 +6195,10 @@ theorem get?_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α} (h₁ : t₁.WF) (h₂
     t₁.get? k = t₂.get? k :=
   h.1.get?_eq h₁.1 h₂.1
 
+theorem getV_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α} {_ : Nonempty (β k)} (h₁ : t₁.WF)
+    (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁.getV k = t₂.getV k := by
+  simpa [Raw.getV] using h.1.getD_eq h₁.1 h₂.1
+
 theorem get_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α} {hk : k ∈ t₁} (h₁ : t₁.WF) (h₂ : t₂.WF)
     (h : t₁ ~m t₂) : t₁.get k hk = t₂.get k ((h.mem_iff h₁ h₂).mp hk) :=
   h.1.get_eq h₁.1 h₂.1 hk
@@ -6206,10 +6210,6 @@ theorem get!_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α} [Inhabited (β k)] (h�
 theorem getD_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α} {fallback : β k} (h₁ : t₁.WF)
     (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁.getD k fallback = t₂.getD k fallback :=
   h.1.getD_eq h₁.1 h₂.1
-
-theorem getV_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α} {_ : Nonempty (β k)} (h₁ : t₁.WF)
-    (h₂ : t₂.WF) (h : t₁ ~m t₂) : t₁.getV k = t₂.getV k := by
-  simpa [Raw.getV] using getD_eq h₁ h₂ h
 
 theorem getKey?_eq [TransCmp cmp] {k : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.getKey? k = t₂.getKey? k :=
@@ -6289,10 +6289,6 @@ theorem minKey?_eq [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m
     t₁.minKey? = t₂.minKey? :=
   h.1.minKey?_eq h₁.1 h₂.1
 
-theorem minKeyV_eq [TransCmp cmp] {_ : Nonempty α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
-    t₁.minKeyV = t₂.minKeyV :=
-  h.1.minKeyV_eq h₁.1 h₂.1
-
 theorem minKey!_eq [TransCmp cmp] [Inhabited α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.minKey! = t₂.minKey! :=
   h.1.minKey!_eq h₁.1 h₂.1
@@ -6301,13 +6297,13 @@ theorem minKeyD_eq [TransCmp cmp] {fallback : α} (h₁ : t₁.WF) (h₂ : t₂.
     t₁.minKeyD fallback = t₂.minKeyD fallback :=
   h.1.minKeyD_eq h₁.1 h₂.1
 
+theorem minKeyV_eq [TransCmp cmp] {_ : Nonempty α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.minKeyV = t₂.minKeyV :=
+  h.1.minKeyV_eq h₁.1 h₂.1
+
 theorem maxKey?_eq [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.maxKey? = t₂.maxKey? :=
   h.1.maxKey?_eq h₁.1 h₂.1
-
-theorem maxKeyV_eq [TransCmp cmp] {_ : Nonempty α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
-    t₁.maxKeyV = t₂.maxKeyV :=
-  h.1.maxKeyV_eq h₁.1 h₂.1
 
 theorem maxKey!_eq [TransCmp cmp] [Inhabited α] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.maxKey! = t₂.maxKey! :=
@@ -6316,6 +6312,10 @@ theorem maxKey!_eq [TransCmp cmp] [Inhabited α] (h₁ : t₁.WF) (h₂ : t₂.W
 theorem maxKeyD_eq [TransCmp cmp] {fallback : α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.maxKeyD fallback = t₂.maxKeyD fallback :=
   h.1.maxKeyD_eq h₁.1 h₂.1
+
+theorem maxKeyV_eq [TransCmp cmp] {_ : Nonempty α} (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
+    t₁.maxKeyV = t₂.maxKeyV :=
+  h.1.maxKeyV_eq h₁.1 h₂.1
 
 theorem minEntry?_eq [TransCmp cmp] (h₁ : t₁.WF) (h₂ : t₂.WF) (h : t₁ ~m t₂) :
     t₁.minEntry? = t₂.minEntry? :=
