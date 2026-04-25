@@ -670,6 +670,10 @@ theorem maxEntryD_eq_getD_maxEntry? {l : Impl α β} {fallback : (a : α) × β 
 theorem some_maxEntry_eq_maxEntry? {l : Impl α β} {he} : some (l.maxEntry he) = l.maxEntry? := by
   induction l, he using maxEntry.induct_unfolding <;> simp only [maxEntry?] <;> assumption
 
+theorem maxEntry_eq_get_maxEntry? {l : Impl α β} {he} :
+    l.maxEntry he = l.maxEntry?.get (by simp [← some_maxEntry_eq_maxEntry? (he := he)]) := by
+  simp [← some_maxEntry_eq_maxEntry? (he := he)]
+
 theorem minKey?_eq_minEntry?_map_fst {l : Impl α β} : l.minKey? = l.minEntry?.map Sigma.fst := by
   induction l using minKey?.induct_unfolding <;> simp only [minEntry?] <;> trivial
 
@@ -975,6 +979,20 @@ theorem entryAtIdxD_eq_getD_entryAtIdx? {t : Impl α β} {i : Nat} {fallback : (
     t.entryAtIdxD i fallback = (t.entryAtIdx? i).getD fallback := by
   induction t, i using entryAtIdx?.induct_unfolding <;> simp only [entryAtIdxD, *] <;> trivial
 
+theorem some_entryAtIdx_eq_entryAtIdx? {t : Impl α β} {hl i h} :
+    some (t.entryAtIdx hl i h) = t.entryAtIdx? i := by
+  induction t, i using entryAtIdx?.induct_unfolding
+  · simp [size] at h
+  · simp only [entryAtIdx, *]
+  · simp only [entryAtIdx, *]
+  · simp only [entryAtIdx, *]
+
+theorem entryAtIdx_eq_get_entryAtIdx? {t : Impl α β} {hl i h} :
+    haveI : Nonempty _ := ⟨t.entryAtIdx hl i h⟩
+    t.entryAtIdx hl i h =
+      (t.entryAtIdx? i).get (by simp [← some_entryAtIdx_eq_entryAtIdx? (hl := hl) (h := h)]) := by
+  simp [← some_entryAtIdx_eq_entryAtIdx? (hl := hl) (h := h)]
+
 theorem keyAtIdx?_eq_entryAtIdx? {t : Impl α β} {i : Nat} :
     t.keyAtIdx? i = (t.entryAtIdx? i).map (·.1) := by
   induction t, i using entryAtIdx?.induct_unfolding <;> simp only [keyAtIdx?, *] <;> trivial
@@ -990,6 +1008,17 @@ theorem keyAtIdx!_eq_get!_keyAtIdx? [Inhabited α] {t : Impl α β} {i : Nat} :
 theorem keyAtIdxD_eq_getD_keyAtIdx? {t : Impl α β} {i : Nat} {fallback : α} :
     t.keyAtIdxD i fallback = (t.keyAtIdx? i).getD fallback := by
   induction t, i using keyAtIdx?.induct_unfolding <;> simp only [keyAtIdxD, *] <;> trivial
+
+theorem some_keyAtIdx_eq_keyAtIdx? {t : Impl α β} {hl i h} :
+    some (t.keyAtIdx hl i h) = t.keyAtIdx? i := by
+  rw [keyAtIdx_eq_entryAtIdx_fst, keyAtIdx?_eq_entryAtIdx?,
+    ← some_entryAtIdx_eq_entryAtIdx? (hl := hl) (h := h), Option.map_some]
+
+theorem keyAtIdx_eq_get_keyAtIdx? {t : Impl α β} {hl i h} :
+    haveI : Nonempty α := ⟨t.keyAtIdx hl i h⟩
+    t.keyAtIdx hl i h =
+      (t.keyAtIdx? i).get (by simp [← some_keyAtIdx_eq_keyAtIdx? (hl := hl) (h := h)]) := by
+  simp [← some_keyAtIdx_eq_keyAtIdx? (hl := hl) (h := h)]
 
 /-- Implementation detail of the tree map -/
 def getEntryGE?ₘ [Ord α] (k : α) (t : Impl α β) : Option ((a : α) × β a) :=
@@ -1125,6 +1154,30 @@ theorem some_getEntryLT_eq_getEntryLT? [Ord α] [TransOrd α] (k : α) (t : Impl
     simp only [*, getEntryLT?.go, getEntryLT, getEntryLTD, ← Option.or_some,
       getEntryLT?.eq_go, ↓reduceDIte, reduceCtorEq] <;> contradiction
 
+theorem getEntryGE_eq_get_getEntryGE? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {ho he} :
+    haveI : Nonempty _ := ⟨getEntryGE k t ho he⟩
+    getEntryGE k t ho he =
+      (getEntryGE? k t).get (by simp [← some_getEntryGE_eq_getEntryGE? k t (ho := ho) (he := he)]) := by
+  simp [← some_getEntryGE_eq_getEntryGE? k t (ho := ho) (he := he)]
+
+theorem getEntryGT_eq_get_getEntryGT? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {ho he} :
+    haveI : Nonempty _ := ⟨getEntryGT k t ho he⟩
+    getEntryGT k t ho he =
+      (getEntryGT? k t).get (by simp [← some_getEntryGT_eq_getEntryGT? k t (ho := ho) (he := he)]) := by
+  simp [← some_getEntryGT_eq_getEntryGT? k t (ho := ho) (he := he)]
+
+theorem getEntryLE_eq_get_getEntryLE? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {ho he} :
+    haveI : Nonempty _ := ⟨getEntryLE k t ho he⟩
+    getEntryLE k t ho he =
+      (getEntryLE? k t).get (by simp [← some_getEntryLE_eq_getEntryLE? k t (ho := ho) (he := he)]) := by
+  simp [← some_getEntryLE_eq_getEntryLE? k t (ho := ho) (he := he)]
+
+theorem getEntryLT_eq_get_getEntryLT? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {ho he} :
+    haveI : Nonempty _ := ⟨getEntryLT k t ho he⟩
+    getEntryLT k t ho he =
+      (getEntryLT? k t).get (by simp [← some_getEntryLT_eq_getEntryLT? k t (ho := ho) (he := he)]) := by
+  simp [← some_getEntryLT_eq_getEntryLT? k t (ho := ho) (he := he)]
+
 theorem getKeyGE?_eq_getEntryGE? [Ord α] {t : Impl α β} {k : α} :
     getKeyGE? k t = (getEntryGE? k t).map (·.1) := by
   rw [getKeyGE?, getEntryGE?]; symm
@@ -1203,6 +1256,50 @@ theorem getKeyLT_eq_getEntryLT [Ord α] [TransOrd α] {t : Impl α β} {k : α} 
   · rw [getKeyLTD, getEntryLTD, getKeyLT?_eq_getEntryLT?]; symm
     exact (Option.getD_map _ _ _).symm
 
+theorem some_getKeyGE_eq_getKeyGE? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {hto he} :
+    some (getKeyGE k t hto he) = getKeyGE? k t := by
+  rw [getKeyGE_eq_getEntryGE, getKeyGE?_eq_getEntryGE?,
+    ← some_getEntryGE_eq_getEntryGE? k t (ho := hto) (he := he), Option.map_some]
+
+theorem some_getKeyGT_eq_getKeyGT? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {hto he} :
+    some (getKeyGT k t hto he) = getKeyGT? k t := by
+  rw [getKeyGT_eq_getEntryGT, getKeyGT?_eq_getEntryGT?,
+    ← some_getEntryGT_eq_getEntryGT? k t (ho := hto) (he := he), Option.map_some]
+
+theorem some_getKeyLE_eq_getKeyLE? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {hto he} :
+    some (getKeyLE k t hto he) = getKeyLE? k t := by
+  rw [getKeyLE_eq_getEntryLE, getKeyLE?_eq_getEntryLE?,
+    ← some_getEntryLE_eq_getEntryLE? k t (ho := hto) (he := he), Option.map_some]
+
+theorem some_getKeyLT_eq_getKeyLT? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {hto he} :
+    some (getKeyLT k t hto he) = getKeyLT? k t := by
+  rw [getKeyLT_eq_getEntryLT, getKeyLT?_eq_getEntryLT?,
+    ← some_getEntryLT_eq_getEntryLT? k t (ho := hto) (he := he), Option.map_some]
+
+theorem getKeyGE_eq_get_getKeyGE? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {hto he} :
+    haveI : Nonempty α := ⟨getKeyGE k t hto he⟩
+    getKeyGE k t hto he =
+      (getKeyGE? k t).get (by simp [← some_getKeyGE_eq_getKeyGE? (hto := hto) (he := he)]) := by
+  simp [← some_getKeyGE_eq_getKeyGE? (hto := hto) (he := he)]
+
+theorem getKeyGT_eq_get_getKeyGT? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {hto he} :
+    haveI : Nonempty α := ⟨getKeyGT k t hto he⟩
+    getKeyGT k t hto he =
+      (getKeyGT? k t).get (by simp [← some_getKeyGT_eq_getKeyGT? (hto := hto) (he := he)]) := by
+  simp [← some_getKeyGT_eq_getKeyGT? (hto := hto) (he := he)]
+
+theorem getKeyLE_eq_get_getKeyLE? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {hto he} :
+    haveI : Nonempty α := ⟨getKeyLE k t hto he⟩
+    getKeyLE k t hto he =
+      (getKeyLE? k t).get (by simp [← some_getKeyLE_eq_getKeyLE? (hto := hto) (he := he)]) := by
+  simp [← some_getKeyLE_eq_getKeyLE? (hto := hto) (he := he)]
+
+theorem getKeyLT_eq_get_getKeyLT? [Ord α] [TransOrd α] {k : α} {t : Impl α β} {hto he} :
+    haveI : Nonempty α := ⟨getKeyLT k t hto he⟩
+    getKeyLT k t hto he =
+      (getKeyLT? k t).get (by simp [← some_getKeyLT_eq_getKeyLT? (hto := hto) (he := he)]) := by
+  simp [← some_getKeyLT_eq_getKeyLT? (hto := hto) (he := he)]
+
 namespace Const
 
 variable {β : Type v}
@@ -1214,6 +1311,19 @@ theorem entryAtIdx?_eq_map {t : Impl α fun _ => β} {i : Nat} :
 theorem entryAtIdx_eq {t : Impl α fun _ => β} (htb : t.Balanced) {i : Nat} {h} :
     entryAtIdx t htb i h = ((t.entryAtIdx htb i h).1, (t.entryAtIdx htb i h).2) := by
   induction t, htb, i, h using entryAtIdx.induct_unfolding <;> simp only [Impl.entryAtIdx, *]
+
+theorem some_entryAtIdx_eq_entryAtIdx? {t : Impl α fun _ => β} {i : Nat} {hl h} :
+    some (entryAtIdx t hl i h) = entryAtIdx? t i := by
+  induction t, i using entryAtIdx?.induct_unfolding
+  · simp [size] at h
+  · simp only [entryAtIdx, *]
+  · simp only [entryAtIdx, *]
+  · simp only [entryAtIdx, *]
+
+theorem entryAtIdx_eq_get_entryAtIdx? {t : Impl α fun _ => β} {i : Nat} {hl h} :
+    haveI : Nonempty _ := ⟨entryAtIdx t hl i h⟩
+    entryAtIdx t hl i h = (entryAtIdx? t i).get (by simp [← some_entryAtIdx_eq_entryAtIdx? (hl := hl) (h := h)]) := by
+  simp [← some_entryAtIdx_eq_entryAtIdx? (hl := hl) (h := h)]
 
 theorem entryAtIdx!_eq_get!_entryAtIdx? {t : Impl α fun _ => β} {i : Nat} [Inhabited (α × β)] :
     entryAtIdx! t i = (entryAtIdx? t i).get! := by
@@ -1304,6 +1414,54 @@ theorem getEntryLT_eq [Ord α] [TransOrd α] {t : Impl α fun _ => β} (hto : t.
   · rename_i r _ _
     rw [getEntryLTD, Impl.getEntryLTD, getEntryLT?_eq_map]
     exact Option.getD_map (fun x => (x.1, x.2)) ⟨_, _⟩ (Impl.getEntryLT? k r)
+
+theorem some_getEntryGE_eq_getEntryGE? [Ord α] [TransOrd α] {k : α} {t : Impl α fun _ => β}
+    {hto he} : some (getEntryGE k t hto he) = getEntryGE? k t := by
+  rw [getEntryGE_eq hto, getEntryGE?_eq_map,
+    ← Impl.some_getEntryGE_eq_getEntryGE? k t (ho := hto) (he := he), Option.map_some]
+
+theorem some_getEntryGT_eq_getEntryGT? [Ord α] [TransOrd α] {k : α} {t : Impl α fun _ => β}
+    {hto he} : some (getEntryGT k t hto he) = getEntryGT? k t := by
+  rw [getEntryGT_eq hto, getEntryGT?_eq_map,
+    ← Impl.some_getEntryGT_eq_getEntryGT? k t (ho := hto) (he := he), Option.map_some]
+
+theorem some_getEntryLE_eq_getEntryLE? [Ord α] [TransOrd α] {k : α} {t : Impl α fun _ => β}
+    {hto he} : some (getEntryLE k t hto he) = getEntryLE? k t := by
+  rw [getEntryLE_eq hto, getEntryLE?_eq_map,
+    ← Impl.some_getEntryLE_eq_getEntryLE? k t (ho := hto) (he := he), Option.map_some]
+
+theorem some_getEntryLT_eq_getEntryLT? [Ord α] [TransOrd α] {k : α} {t : Impl α fun _ => β}
+    {hto he} : some (getEntryLT k t hto he) = getEntryLT? k t := by
+  rw [getEntryLT_eq hto, getEntryLT?_eq_map,
+    ← Impl.some_getEntryLT_eq_getEntryLT? k t (ho := hto) (he := he), Option.map_some]
+
+theorem getEntryGE_eq_get_getEntryGE? [Ord α] [TransOrd α] {k : α} {t : Impl α fun _ => β}
+    {hto he} :
+    haveI : Nonempty _ := ⟨getEntryGE k t hto he⟩
+    getEntryGE k t hto he =
+      (getEntryGE? k t).get (by simp [← some_getEntryGE_eq_getEntryGE? (hto := hto) (he := he)]) := by
+  simp [← some_getEntryGE_eq_getEntryGE? (hto := hto) (he := he)]
+
+theorem getEntryGT_eq_get_getEntryGT? [Ord α] [TransOrd α] {k : α} {t : Impl α fun _ => β}
+    {hto he} :
+    haveI : Nonempty _ := ⟨getEntryGT k t hto he⟩
+    getEntryGT k t hto he =
+      (getEntryGT? k t).get (by simp [← some_getEntryGT_eq_getEntryGT? (hto := hto) (he := he)]) := by
+  simp [← some_getEntryGT_eq_getEntryGT? (hto := hto) (he := he)]
+
+theorem getEntryLE_eq_get_getEntryLE? [Ord α] [TransOrd α] {k : α} {t : Impl α fun _ => β}
+    {hto he} :
+    haveI : Nonempty _ := ⟨getEntryLE k t hto he⟩
+    getEntryLE k t hto he =
+      (getEntryLE? k t).get (by simp [← some_getEntryLE_eq_getEntryLE? (hto := hto) (he := he)]) := by
+  simp [← some_getEntryLE_eq_getEntryLE? (hto := hto) (he := he)]
+
+theorem getEntryLT_eq_get_getEntryLT? [Ord α] [TransOrd α] {k : α} {t : Impl α fun _ => β}
+    {hto he} :
+    haveI : Nonempty _ := ⟨getEntryLT k t hto he⟩
+    getEntryLT k t hto he =
+      (getEntryLT? k t).get (by simp [← some_getEntryLT_eq_getEntryLT? (hto := hto) (he := he)]) := by
+  simp [← some_getEntryLT_eq_getEntryLT? (hto := hto) (he := he)]
 
 end Const
 
