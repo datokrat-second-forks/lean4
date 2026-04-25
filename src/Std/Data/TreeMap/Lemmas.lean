@@ -3020,7 +3020,7 @@ theorem getKeyD_alter [TransCmp cmp] {k k' fallback : α} {f : Option β → Opt
   DTreeMap.Const.getKeyD_alter
 
 @[simp]
-theorem getKeyD_alter_self [TransCmp cmp] [Inhabited α] {k : α} {fallback : α}
+theorem getKeyD_alter_self [TransCmp cmp] {k : α} {fallback : α}
     {f : Option β → Option β} :
     (alter t k f).getKeyD k fallback = if (f t[k]?).isSome then k else fallback :=
   DTreeMap.Const.getKeyD_alter_self
@@ -6141,7 +6141,7 @@ theorem getElemV_map' [TransCmp cmp]
     (t.map f)｢k｣ = f (t.getKeyV k) t｢k｣ :=
   DTreeMap.Const.getV_map' h'
 
-theorem getD_map_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
+theorem getD_map_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → γ} {k k' : α} {fallback : γ} (h : t.getKey? k = some k') :
     (t.map f).getD k fallback = (t[k]?.map (f k')).getD fallback :=
   DTreeMap.Const.getD_map_of_getKey?_eq_some h

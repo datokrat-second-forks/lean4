@@ -500,6 +500,10 @@ theorem getD_congr [TransCmp cmp] {a b : α} {fallback : β}
 theorem getKey?_empty [TransCmp cmp] {a : α} : (∅ : ExtTreeMap α β cmp).getKey? a = none :=
   ExtDTreeMap.getKey?_empty
 
+theorem getKey?_of_isEmpty [TransCmp cmp] {a : α} :
+    t.isEmpty = true → t.getKey? a = none :=
+  ExtDTreeMap.getKey?_of_isEmpty
+
 @[grind =] theorem getKey?_insert [TransCmp cmp] {a k : α} {v : β} :
     (t.insert k v).getKey? a = if cmp k a = .eq then some k else t.getKey? a :=
   ExtDTreeMap.getKey?_insert
@@ -657,6 +661,10 @@ theorem getKey!_empty [TransCmp cmp] {a : α} [Inhabited α] :
     (∅ : ExtTreeMap α β cmp).getKey! a = default :=
   ExtDTreeMap.getKey!_empty
 
+theorem getKey!_of_isEmpty [TransCmp cmp] [Inhabited α] {a : α} :
+    t.isEmpty = true → t.getKey! a = default :=
+  ExtDTreeMap.getKey!_of_isEmpty
+
 @[grind =] theorem getKey!_insert [TransCmp cmp] [Inhabited α] {k a : α}
     {v : β} : (t.insert k v).getKey! a = if cmp k a = .eq then k else t.getKey! a :=
   ExtDTreeMap.getKey!_insert
@@ -721,6 +729,10 @@ theorem getKeyV_empty [TransCmp cmp] {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : ExtTreeMap α β cmp).getKeyV a = Classical.ofNonempty :=
   ExtDTreeMap.getKeyV_empty
+
+theorem getKeyD_of_isEmpty [TransCmp cmp] {a fallback : α} :
+    t.isEmpty = true → t.getKeyD a fallback = fallback :=
+  ExtDTreeMap.getKeyD_of_isEmpty
 
 theorem getKeyV_of_isEmpty [TransCmp cmp] {a : α} :
     haveI : Nonempty α := ⟨a⟩
@@ -2803,7 +2815,7 @@ theorem getKeyD_alter [TransCmp cmp] {k k' fallback : α} {f : Option β → Opt
   ExtDTreeMap.Const.getKeyD_alter
 
 @[simp]
-theorem getKeyD_alter_self [TransCmp cmp] [Inhabited α] {k : α} {fallback : α}
+theorem getKeyD_alter_self [TransCmp cmp] {k : α} {fallback : α}
     {f : Option β → Option β} :
     (alter t k f).getKeyD k fallback = if (f t[k]?).isSome then k else fallback :=
   ExtDTreeMap.Const.getKeyD_alter_self
@@ -4644,6 +4656,66 @@ theorem maxEntry_eq_maxEntryV [TransCmp cmp] {he : t ≠ ∅} :
 
 end Max
 
+@[simp, grind norm]
+theorem entryAtIdx_eq_entryAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
+    haveI : Nonempty (α × β) := ⟨t.entryAtIdx n h⟩
+    t.entryAtIdx n h = t.entryAtIdxV n :=
+  ExtDTreeMap.Const.entryAtIdx_eq_entryAtIdxV
+
+@[simp, grind norm]
+theorem keyAtIdx_eq_keyAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
+    haveI : Nonempty α := ⟨t.keyAtIdx n h⟩
+    t.keyAtIdx n h = t.keyAtIdxV n :=
+  ExtDTreeMap.keyAtIdx_eq_keyAtIdxV
+
+@[simp, grind norm]
+theorem getEntryGE_eq_getEntryGEV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty (α × β) := ⟨t.getEntryGE k h⟩
+    t.getEntryGE k h = t.getEntryGEV k :=
+  ExtDTreeMap.Const.getEntryGE_eq_getEntryGEV
+
+@[simp, grind norm]
+theorem getEntryGT_eq_getEntryGTV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty (α × β) := ⟨t.getEntryGT k h⟩
+    t.getEntryGT k h = t.getEntryGTV k :=
+  ExtDTreeMap.Const.getEntryGT_eq_getEntryGTV
+
+@[simp, grind norm]
+theorem getEntryLE_eq_getEntryLEV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty (α × β) := ⟨t.getEntryLE k h⟩
+    t.getEntryLE k h = t.getEntryLEV k :=
+  ExtDTreeMap.Const.getEntryLE_eq_getEntryLEV
+
+@[simp, grind norm]
+theorem getEntryLT_eq_getEntryLTV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty (α × β) := ⟨t.getEntryLT k h⟩
+    t.getEntryLT k h = t.getEntryLTV k :=
+  ExtDTreeMap.Const.getEntryLT_eq_getEntryLTV
+
+@[simp, grind norm]
+theorem getKeyGE_eq_getKeyGEV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty α := ⟨t.getKeyGE k h⟩
+    t.getKeyGE k h = t.getKeyGEV k :=
+  ExtDTreeMap.getKeyGE_eq_getKeyGEV
+
+@[simp, grind norm]
+theorem getKeyGT_eq_getKeyGTV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty α := ⟨t.getKeyGT k h⟩
+    t.getKeyGT k h = t.getKeyGTV k :=
+  ExtDTreeMap.getKeyGT_eq_getKeyGTV
+
+@[simp, grind norm]
+theorem getKeyLE_eq_getKeyLEV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty α := ⟨t.getKeyLE k h⟩
+    t.getKeyLE k h = t.getKeyLEV k :=
+  ExtDTreeMap.getKeyLE_eq_getKeyLEV
+
+@[simp, grind norm]
+theorem getKeyLT_eq_getKeyLTV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty α := ⟨t.getKeyLT k h⟩
+    t.getKeyLT k h = t.getKeyLTV k :=
+  ExtDTreeMap.getKeyLT_eq_getKeyLTV
+
 section Ext
 
 variable {t₁ t₂ : ExtTreeMap α β cmp}
@@ -5239,7 +5311,7 @@ theorem getElemV_map' [TransCmp cmp]
     (t.map f)｢k｣ = f (t.getKeyV k) t｢k｣ :=
   ExtDTreeMap.Const.getV_map' h'
 
-theorem getD_map_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
+theorem getD_map_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → γ} {k k' : α} {fallback : γ} (h : t.getKey? k = some k') :
     (t.map f).getD k fallback = (t[k]?.map (f k')).getD fallback :=
   ExtDTreeMap.Const.getD_map_of_getKey?_eq_some h

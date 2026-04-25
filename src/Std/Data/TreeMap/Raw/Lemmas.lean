@@ -3095,7 +3095,7 @@ theorem getKeyD_alter [TransCmp cmp] (h : t.WF) {k k' fallback : α} {f : Option
   DTreeMap.Raw.Const.getKeyD_alter h
 
 @[simp]
-theorem getKeyD_alter_self [TransCmp cmp] [Inhabited α] (h : t.WF) {k : α} {fallback : α}
+theorem getKeyD_alter_self [TransCmp cmp] (h : t.WF) {k : α} {fallback : α}
     {f : Option β → Option β} :
     (alter t k f).getKeyD k fallback = if (f t[k]?).isSome then k else fallback :=
   DTreeMap.Raw.Const.getKeyD_alter_self h
