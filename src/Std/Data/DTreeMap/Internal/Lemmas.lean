@@ -10464,6 +10464,20 @@ theorem maxKeyD_alter!_eq_self [TransOrd α] (h : t.WF) {k f} :
   simpa only [alter_eq_alter!] using maxKeyD_alter_eq_self h
 
 @[simp]
+theorem minEntry_eq_minEntryV [Ord α] [TransOrd α] {h} :
+    haveI : Nonempty _ := ⟨minEntry t h⟩
+    minEntry t h = minEntryV t := by
+  simp [minEntry_eq_get_minEntry?, minEntryV, minEntryD_eq_getD_minEntry?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
+theorem maxEntry_eq_maxEntryV [Ord α] [TransOrd α] {h} :
+    haveI : Nonempty _ := ⟨maxEntry t h⟩
+    maxEntry t h = maxEntryV t := by
+  simp [maxEntry_eq_get_maxEntry?, maxEntryV, maxEntryD_eq_getD_maxEntry?,
+    Option.getV_eq_getD_ofNonempty]
+
+@[simp]
 theorem entryAtIdx_eq_entryAtIdxV [TransOrd α] (h : t.Balanced) {i : Nat} {h'} :
     haveI : Nonempty _ := ⟨entryAtIdx t h i h'⟩
     entryAtIdx t h i h' = entryAtIdxV t i := by

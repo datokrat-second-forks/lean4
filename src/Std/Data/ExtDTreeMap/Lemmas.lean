@@ -5212,14 +5212,6 @@ theorem minKey_eq_head_keys [TransCmp cmp] {he} :
     t.minKey he = t.keys.head (mt keys_eq_nil_iff.mp he) :=
   t.inductionOn (fun _ _ => DTreeMap.minKey_eq_head_keys) he
 
-@[grind =_] theorem minKeyV_eq_getElemV_keysArray [TransCmp cmp] {_ : Nonempty α} :
-    t.minKeyV = t.keysArray｢0｣ :=
-  t.inductionOn fun _ => DTreeMap.minKeyV_eq_getElemV_keysArray
-
-theorem minKey_eq_getElem_keysArray [TransCmp cmp] {he} :
-    t.minKey he = t.keysArray[0]'sorry :=
-  sorry
-
 @[simp, grind =] theorem minKeyV_modify [TransCmp cmp] [LawfulEqCmp cmp] {k f}
     (he : t.modify k f ≠ ∅) :
     haveI : Nonempty α := ⟨k⟩
@@ -5639,6 +5631,19 @@ theorem minEntry_eq_minEntryV [TransCmp cmp] {he : t ≠ ∅} :
     t.minEntry he = t.minEntryV :=
   t.inductionOn (fun _ he =>
     DTreeMap.minEntry_eq_minEntryV (he := isEmpty_eq_false_iff.mpr he)) he
+
+namespace Const
+
+variable {β : Type v} {t : ExtDTreeMap α β cmp}
+
+@[simp, grind norm]
+theorem minEntry_eq_minEntryV [TransCmp cmp] {he : t ≠ ∅} :
+    haveI : Nonempty (α × β) := ⟨Const.minEntry t he⟩
+    Const.minEntry t he = Const.minEntryV t :=
+  t.inductionOn (fun _ he =>
+    DTreeMap.Const.minEntry_eq_minEntryV (he := isEmpty_eq_false_iff.mpr he)) he
+
+end Const
 
 end Min
 
@@ -6141,14 +6146,6 @@ theorem maxKey_eq_getLast_keys [TransCmp cmp] {he} :
     t.maxKey he = t.keys.getLast (mt keys_eq_nil_iff.mp he) :=
   t.inductionOn (fun _ _ => DTreeMap.maxKey_eq_getLast_keys) he
 
-@[grind =_] theorem maxKeyV_eq_backV_keysArray [TransCmp cmp] {_ : Nonempty α} :
-    t.maxKeyV = t.keysArray.backV :=
-  t.inductionOn fun _ => DTreeMap.maxKeyV_eq_backV_keysArray
-
-theorem maxKey_eq_back_keysArray [TransCmp cmp] {he} :
-    t.maxKey he = t.keysArray.back sorry :=
-  sorry
-
 @[simp, grind =] theorem maxKeyV_modify [TransCmp cmp] [LawfulEqCmp cmp] {k f}
     (he : t.modify k f ≠ ∅) :
     haveI : Nonempty α := ⟨k⟩
@@ -6571,6 +6568,19 @@ theorem maxEntry_eq_maxEntryV [TransCmp cmp] {he : t ≠ ∅} :
     t.maxEntry he = t.maxEntryV :=
   t.inductionOn (fun _ he =>
     DTreeMap.maxEntry_eq_maxEntryV (he := isEmpty_eq_false_iff.mpr he)) he
+
+namespace Const
+
+variable {β : Type v} {t : ExtDTreeMap α β cmp}
+
+@[simp, grind norm]
+theorem maxEntry_eq_maxEntryV [TransCmp cmp] {he : t ≠ ∅} :
+    haveI : Nonempty (α × β) := ⟨Const.maxEntry t he⟩
+    Const.maxEntry t he = Const.maxEntryV t :=
+  t.inductionOn (fun _ he =>
+    DTreeMap.Const.maxEntry_eq_maxEntryV (he := isEmpty_eq_false_iff.mpr he)) he
+
+end Const
 
 end Max
 

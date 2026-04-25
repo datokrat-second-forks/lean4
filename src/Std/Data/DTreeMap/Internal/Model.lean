@@ -726,6 +726,11 @@ theorem some_minEntry_eq_minEntry? [Ord α] {l : Impl α fun _ => β} {he} :
     some (minEntry l he) = minEntry? l := by
   induction l, he using minEntry.induct_unfolding <;> simp only [minEntry?] <;> trivial
 
+theorem minEntry_eq_get_minEntry? [Ord α] {l : Impl α fun _ => β} {he} :
+    haveI : Nonempty _ := ⟨minEntry l he⟩
+    minEntry l he = (minEntry? l).get (by simp [← some_minEntry_eq_minEntry? (he := he)]) := by
+  simp [← some_minEntry_eq_minEntry? (he := he)]
+
 theorem maxEntry?_eq_maxEntry? [Ord α] {l : Impl α fun _ => β} :
     maxEntry? l = l.maxEntry?.map (fun x => (x.1, x.2)) := by
   induction l using maxEntry?.induct_unfolding <;> simp only [Impl.maxEntry?] <;> trivial
@@ -741,6 +746,11 @@ theorem maxEntryD_eq_getD_maxEntry? [Ord α] {l : Impl α fun _ => β} {fallback
 theorem some_maxEntry_eq_maxEntry? [Ord α] {l : Impl α fun _ => β} {he} :
     some (maxEntry l he) = maxEntry? l := by
   induction l, he using maxEntry.induct_unfolding <;> simp only [maxEntry?] <;> trivial
+
+theorem maxEntry_eq_get_maxEntry? [Ord α] {l : Impl α fun _ => β} {he} :
+    haveI : Nonempty _ := ⟨maxEntry l he⟩
+    maxEntry l he = (maxEntry? l).get (by simp [← some_maxEntry_eq_maxEntry? (he := he)]) := by
+  simp [← some_maxEntry_eq_maxEntry? (he := he)]
 
 end Const
 
