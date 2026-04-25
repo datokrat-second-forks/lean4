@@ -784,6 +784,10 @@ end Const
 theorem getKey?_empty [TransCmp cmp] {a : α} : (∅ : ExtDTreeMap α β cmp).getKey? a = none :=
   DTreeMap.getKey?_emptyc
 
+theorem getKey?_of_isEmpty [TransCmp cmp] {a : α} :
+    t.isEmpty = true → t.getKey? a = none :=
+  t.inductionOn fun _ => DTreeMap.getKey?_of_isEmpty
+
 @[grind =] theorem getKey?_insert [TransCmp cmp] {a k : α} {v : β k} :
     (t.insert k v).getKey? a = if cmp k a = .eq then some k else t.getKey? a :=
   t.inductionOn fun _ => DTreeMap.getKey?_insert
@@ -928,6 +932,10 @@ theorem getKey_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
 theorem getKey!_empty [TransCmp cmp] {a : α} [Inhabited α] :
     (∅ : ExtDTreeMap α β cmp).getKey! a = default :=
   DTreeMap.getKey!_emptyc
+
+theorem getKey!_of_isEmpty [TransCmp cmp] [Inhabited α] {a : α} :
+    t.isEmpty = true → t.getKey! a = default :=
+  t.inductionOn fun _ => DTreeMap.getKey!_of_isEmpty
 
 @[grind =] theorem getKey!_insert [TransCmp cmp] [Inhabited α] {k a : α}
     {v : β k} : (t.insert k v).getKey! a = if cmp k a = .eq then k else t.getKey! a :=
@@ -4343,7 +4351,7 @@ theorem getKeyD_alter [TransCmp cmp] {k k' fallback : α} {f : Option β → Opt
   t.inductionOn fun _ => DTreeMap.Const.getKeyD_alter
 
 @[simp]
-theorem getKeyD_alter_self [TransCmp cmp] [Inhabited α] {k : α} {fallback : α}
+theorem getKeyD_alter_self [TransCmp cmp] {k : α} {fallback : α}
     {f : Option β → Option β} :
     (alter t k f).getKeyD k fallback = if (f (get? t k)).isSome then k else fallback :=
   t.inductionOn fun _ => DTreeMap.Const.getKeyD_alter_self
@@ -6626,6 +6634,42 @@ theorem getKeyLT_eq_getKeyLTV [TransCmp cmp] {k : α} {h} :
     t.getKeyLT k h = t.getKeyLTV k :=
   t.inductionOn (fun _ _ => DTreeMap.getKeyLT_eq_getKeyLTV) h
 
+namespace Const
+
+variable {β : Type v} {t : ExtDTreeMap α β cmp}
+
+@[simp, grind norm]
+theorem entryAtIdx_eq_entryAtIdxV [TransCmp cmp] {n : Nat} {h : n < t.size} :
+    haveI : Nonempty (α × β) := ⟨Const.entryAtIdx t n h⟩
+    Const.entryAtIdx t n h = Const.entryAtIdxV t n :=
+  t.inductionOn (fun _ _ => DTreeMap.Const.entryAtIdx_eq_entryAtIdxV) h
+
+@[simp, grind norm]
+theorem getEntryGE_eq_getEntryGEV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty (α × β) := ⟨Const.getEntryGE t k h⟩
+    Const.getEntryGE t k h = Const.getEntryGEV t k :=
+  t.inductionOn (fun _ _ => DTreeMap.Const.getEntryGE_eq_getEntryGEV) h
+
+@[simp, grind norm]
+theorem getEntryGT_eq_getEntryGTV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty (α × β) := ⟨Const.getEntryGT t k h⟩
+    Const.getEntryGT t k h = Const.getEntryGTV t k :=
+  t.inductionOn (fun _ _ => DTreeMap.Const.getEntryGT_eq_getEntryGTV) h
+
+@[simp, grind norm]
+theorem getEntryLE_eq_getEntryLEV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty (α × β) := ⟨Const.getEntryLE t k h⟩
+    Const.getEntryLE t k h = Const.getEntryLEV t k :=
+  t.inductionOn (fun _ _ => DTreeMap.Const.getEntryLE_eq_getEntryLEV) h
+
+@[simp, grind norm]
+theorem getEntryLT_eq_getEntryLTV [TransCmp cmp] {k : α} {h} :
+    haveI : Nonempty (α × β) := ⟨Const.getEntryLT t k h⟩
+    Const.getEntryLT t k h = Const.getEntryLTV t k :=
+  t.inductionOn (fun _ _ => DTreeMap.Const.getEntryLT_eq_getEntryLTV) h
+
+end Const
+
 section Ext
 
 variable {t₁ t₂ : ExtDTreeMap α β cmp}
@@ -7525,7 +7569,7 @@ theorem getD_map' [TransCmp cmp]
         (fun _ h' => mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some h'))).getD fallback :=
   t.inductionOn fun _ => DTreeMap.Const.getD_map'
 
-theorem getD_map_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
+theorem getD_map_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → γ} {k k' : α} {fallback : γ} (h : t.getKey? k = some k') :
     Const.getD (t.map f) k fallback = ((Const.get? t k).map (f k')).getD fallback :=
   t.inductionOn (fun _ => DTreeMap.Const.getD_map_of_getKey?_eq_some) h

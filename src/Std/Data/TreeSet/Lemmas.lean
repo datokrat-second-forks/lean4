@@ -1007,6 +1007,8 @@ theorem get_diff [TransCmp cmp]
     t₁.get k (mem_diff_iff.1 h_mem).1 :=
   TreeMap.getKey_diff
 
+-- TODO: move getV_diff and potentially others
+
 /- getV -/
 theorem getV_diff [TransCmp cmp]
     {k : α} {h_mem : k ∈ t₁ \ t₂} :

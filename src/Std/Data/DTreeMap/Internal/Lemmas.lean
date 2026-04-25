@@ -7576,7 +7576,7 @@ theorem getKeyD_alter! [TransOrd α] (h : t.WF) {k k' fallback : α} {f : Option
 
 
 @[simp]
-theorem getKeyD_alter_self [TransOrd α] [Inhabited α] (h : t.WF) {k : α} {fallback : α}
+theorem getKeyD_alter_self [TransOrd α] (h : t.WF) {k : α} {fallback : α}
     {f : Option β → Option β} :
     (alter k f t h.balanced).1.getKeyD k fallback =
       if (f (get? t k)).isSome then k else fallback := by
@@ -7596,7 +7596,7 @@ theorem getKey_alter_self [TransOrd α] [Inhabited α] (h : t.WF) {k : α} {f : 
   simpa using getKeyV_alter_self h (hc := hc)
 
 @[simp]
-theorem getKeyD_alter!_self [TransOrd α] [Inhabited α] (h : t.WF) {k : α} {fallback : α}
+theorem getKeyD_alter!_self [TransOrd α] (h : t.WF) {k : α} {fallback : α}
     {f : Option β → Option β} :
     (alter! k f t).getKeyD k fallback = if (f (get? t k)).isSome then k else fallback := by
   simpa only [alter_eq_alter!] using getKeyD_alter_self h
