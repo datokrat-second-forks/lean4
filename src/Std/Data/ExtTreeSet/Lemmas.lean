@@ -601,36 +601,35 @@ theorem get?_union_of_not_mem_left [TransCmp cmp]
   ExtTreeMap.getKey?_union_of_not_mem_left not_mem
 
 /- get -/
-theorem get_union_of_mem_right [TransCmp cmp]
-    {k : α} (mem : k ∈ t₂) :
-    (t₁ ∪ t₂).get k (mem_union_of_right mem) = t₂.get k mem :=
-  ExtTreeMap.getKey_union_of_mem_right mem
-
-theorem get_union_of_not_mem_left [TransCmp cmp]
-    {k : α} (not_mem : ¬k ∈ t₁) {h'} :
-    (t₁ ∪ t₂).get k h' = t₂.get k (mem_of_mem_union_of_not_mem_left h' not_mem) :=
-  ExtTreeMap.getKey_union_of_not_mem_left not_mem
-
-theorem get_union_of_not_mem_right [TransCmp cmp]
-    {k : α} (not_mem : ¬k ∈ t₂) {h'} :
-    (t₁ ∪ t₂).get k h' = t₁.get k (mem_of_mem_union_of_not_mem_right h' not_mem) :=
-  ExtTreeMap.getKey_union_of_not_mem_right not_mem
-
-/- getV -/
 theorem getV_union_of_mem_right [TransCmp cmp]
     {k : α} (mem : k ∈ t₂) :
     (t₁ ∪ t₂).getV k = t₂.getV k :=
   ExtTreeMap.getKeyV_union_of_mem_right mem
+
+theorem get_union_of_mem_right [TransCmp cmp]
+    {k : α} (mem : k ∈ t₂) :
+    (t₁ ∪ t₂).get k (mem_union_of_right mem) = t₂.get k mem :=
+  ExtTreeMap.getKey_union_of_mem_right mem
 
 theorem getV_union_of_not_mem_left [TransCmp cmp]
     {k : α} (not_mem : ¬k ∈ t₁) :
     (t₁ ∪ t₂).getV k = t₂.getV k :=
   ExtTreeMap.getKeyV_union_of_not_mem_left not_mem
 
+theorem get_union_of_not_mem_left [TransCmp cmp]
+    {k : α} (not_mem : ¬k ∈ t₁) {h'} :
+    (t₁ ∪ t₂).get k h' = t₂.get k (mem_of_mem_union_of_not_mem_left h' not_mem) :=
+  ExtTreeMap.getKey_union_of_not_mem_left not_mem
+
 theorem getV_union_of_not_mem_right [TransCmp cmp]
     {k : α} (not_mem : ¬k ∈ t₂) :
     (t₁ ∪ t₂).getV k = t₁.getV k :=
   ExtTreeMap.getKeyV_union_of_not_mem_right not_mem
+
+theorem get_union_of_not_mem_right [TransCmp cmp]
+    {k : α} (not_mem : ¬k ∈ t₂) {h'} :
+    (t₁ ∪ t₂).get k h' = t₁.get k (mem_of_mem_union_of_not_mem_right h' not_mem) :=
+  ExtTreeMap.getKey_union_of_not_mem_right not_mem
 
 /- getD -/
 theorem getD_union [TransCmp cmp] {k fallback : α} :
@@ -2532,6 +2531,12 @@ theorem get?_filter [TransCmp cmp]
     (t.filter f).get? k = (t.get? k).filter f :=
   ExtTreeMap.getKey?_filter_key
 
+theorem getV_filter [TransCmp cmp]
+    {f : α → Bool} {k : α} :
+    haveI : Nonempty α := ⟨k⟩
+    (t.filter f).getV k = ((t.get? k).filter f).getD Classical.ofNonempty :=
+  ExtTreeMap.getKeyV_filter_key
+
 @[simp, grind =]
 theorem get_filter [TransCmp cmp]
     {f : α → Bool} {k : α} {h} :
@@ -2549,12 +2554,6 @@ theorem getD_filter [TransCmp cmp]
     {f : α → Bool} {k fallback : α} :
     (t.filter f).getD k fallback = ((t.get? k).filter f).getD fallback :=
   ExtTreeMap.getKeyD_filter_key
-
-theorem getV_filter [TransCmp cmp]
-    {f : α → Bool} {k : α} :
-    haveI : Nonempty α := ⟨k⟩
-    (t.filter f).getV k = ((t.get? k).filter f).getD Classical.ofNonempty :=
-  ExtTreeMap.getKeyV_filter_key
 
 end filter
 

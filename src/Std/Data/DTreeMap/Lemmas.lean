@@ -934,6 +934,10 @@ theorem getKey?_eq_some [TransCmp cmp] [LawfulEqCmp cmp] {k : α} (h' : k ∈ t)
     t.getKey? k = some k :=
   Impl.getKey?_eq_some_of_contains t.wf h'
 
+@[grind =] theorem getKeyV_insert [TransCmp cmp] {k a : α} {v : β k} :
+    (t.insert k v).getKeyV a = if cmp k a = .eq then k else t.getKeyV a :=
+  Impl.getKeyV_insert t.wf
+
 theorem getKey_insert [TransCmp cmp] {k a : α} {v : β k} {h₁} :
     (t.insert k v).getKey a h₁ =
       if h₂ : cmp k a = .eq then
@@ -951,7 +955,11 @@ theorem getKey_insert_self [TransCmp cmp] {k : α} {v : β k} :
     (t.insert k v).getKey k mem_insert_self = k :=
   Impl.getKey_insert_self t.wf
 
--- TODO: the V companion should go here
+@[simp, grind =]
+theorem getKeyV_erase [TransCmp cmp] {k a : α} (h' : a ∈ t.erase k) :
+    (t.erase k).getKeyV a = t.getKeyV a :=
+  Impl.getKeyV_erase t.wf h'
+
 theorem getKey_erase [TransCmp cmp] {k a : α} {h'} :
     (t.erase k).getKey a h' = t.getKey a (mem_of_mem_erase h') :=
   Impl.getKey_erase t.wf
@@ -999,7 +1007,11 @@ theorem getKey_congr [TransCmp cmp] {k₁ k₂ : α} (h' : cmp k₁ k₂ = .eq)
     (h₁ : k₁ ∈ t) : t.getKey k₁ h₁ = t.getKey k₂ ((mem_congr h').mp h₁) :=
   Impl.getKey_congr t.wf h' h₁
 
--- TODO: getKeyV_eq should go here
+@[simp, grind =]
+theorem getKeyV_eq [TransCmp cmp] [LawfulEqCmp cmp]
+    {k : α} (h' : k ∈ t) :
+    t.getKeyV k = k :=
+  Impl.getKeyV_eq t.wf h'
 
 theorem getKey_eq [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
     (h' : k ∈ t) : t.getKey k h' = k :=
@@ -1090,10 +1102,6 @@ theorem getKeyV_of_isEmpty [TransCmp cmp] {a : α} :
     t.isEmpty = true → t.getKeyV a = Classical.ofNonempty :=
   Impl.getKeyV_of_isEmpty t.wf
 
-@[grind =] theorem getKeyV_insert [TransCmp cmp] {k a : α} {v : β k} :
-    (t.insert k v).getKeyV a = if cmp k a = .eq then k else t.getKeyV a :=
-  Impl.getKeyV_insert t.wf
-
 @[grind =] theorem getKeyD_insert [TransCmp cmp] {k a fallback : α} {v : β k} :
     (t.insert k v).getKeyD a fallback =
       if cmp k a = .eq then k else t.getKeyD a fallback :=
@@ -1121,11 +1129,6 @@ theorem getKeyV_eq_ofNonempty [TransCmp cmp] {a : α} :
     (t.erase k).getKeyD a fallback =
       if cmp k a = .eq then fallback else t.getKeyD a fallback :=
   Impl.getKeyD_erase t.wf
-
-@[simp, grind =]
-theorem getKeyV_erase [TransCmp cmp] {k a : α} (h' : a ∈ t.erase k) :
-    (t.erase k).getKeyV a = t.getKeyV a :=
-  Impl.getKeyV_erase t.wf h'
 
 @[simp]
 theorem getKeyV_erase_self [TransCmp cmp] {k : α} :
@@ -1185,12 +1188,6 @@ theorem getKeyD_eq_of_contains [TransCmp cmp] [LawfulEqCmp cmp] {k fallback : α
 theorem getKeyD_eq_of_mem [TransCmp cmp] [LawfulEqCmp cmp] {k fallback : α} (h' : k ∈ t) :
     t.getKeyD k fallback = k :=
   Impl.getKeyD_eq_of_contains t.wf h'
-
-@[simp, grind =]
-theorem getKeyV_eq [TransCmp cmp] [LawfulEqCmp cmp]
-    {k : α} (h' : k ∈ t) :
-    t.getKeyV k = k :=
-  Impl.getKeyV_eq t.wf h'
 
 @[simp, grind =]
 theorem isEmpty_insertIfNew [TransCmp cmp] {k : α} {v : β k} :
@@ -6907,6 +6904,10 @@ theorem maxKeyD_eq [TransCmp cmp] {fallback : α} (h : t₁ ~m t₂) :
 theorem minEntry?_eq [TransCmp cmp] (h : t₁ ~m t₂) : t₁.minEntry? = t₂.minEntry? :=
   h.1.minEntry?_eq t₁.2 t₂.2
 
+theorem minEntryV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} (h : t₁ ~m t₂) :
+    t₁.minEntryV = t₂.minEntryV := by
+  simpa [DTreeMap.minEntryV] using h.1.minEntryD_eq t₁.2 t₂.2
+
 theorem minEntry_eq [TransCmp cmp] {he : t₁.isEmpty = false} (h : t₁ ~m t₂) :
     t₁.minEntry he = t₂.minEntry (h.isEmpty_eq.symm.trans he) :=
   h.1.minEntry_eq t₁.2 t₂.2
@@ -6919,12 +6920,12 @@ theorem minEntryD_eq [TransCmp cmp] {fallback : (a : α) × β a} (h : t₁ ~m t
     t₁.minEntryD fallback = t₂.minEntryD fallback :=
   h.1.minEntryD_eq t₁.2 t₂.2
 
-theorem minEntryV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} (h : t₁ ~m t₂) :
-    t₁.minEntryV = t₂.minEntryV := by
-  simpa [DTreeMap.minEntryV] using minEntryD_eq h
-
 theorem maxEntry?_eq [TransCmp cmp] (h : t₁ ~m t₂) : t₁.maxEntry? = t₂.maxEntry? :=
   h.1.maxEntry?_eq t₁.2 t₂.2
+
+theorem maxEntryV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} (h : t₁ ~m t₂) :
+    t₁.maxEntryV = t₂.maxEntryV := by
+  simpa [DTreeMap.maxEntryV] using h.1.maxEntryD_eq t₁.2 t₂.2
 
 theorem maxEntry_eq [TransCmp cmp] {he : t₁.isEmpty = false} (h : t₁ ~m t₂) :
     t₁.maxEntry he = t₂.maxEntry (h.isEmpty_eq.symm.trans he) :=
@@ -6938,13 +6939,13 @@ theorem maxEntryD_eq [TransCmp cmp] {fallback : (a : α) × β a} (h : t₁ ~m t
     t₁.maxEntryD fallback = t₂.maxEntryD fallback :=
   h.1.maxEntryD_eq t₁.2 t₂.2
 
-theorem maxEntryV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} (h : t₁ ~m t₂) :
-    t₁.maxEntryV = t₂.maxEntryV := by
-  simpa [DTreeMap.maxEntryV] using maxEntryD_eq h
-
 theorem entryAtIdx?_eq [TransCmp cmp] {i : Nat} (h : t₁ ~m t₂) :
     t₁.entryAtIdx? i = t₂.entryAtIdx? i :=
   h.1.entryAtIdx?_eq t₁.2 t₂.2
+
+theorem entryAtIdxV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} {i : Nat} (h : t₁ ~m t₂) :
+    t₁.entryAtIdxV i = t₂.entryAtIdxV i := by
+  simpa [DTreeMap.entryAtIdxV] using h.1.entryAtIdxD_eq t₁.2 t₂.2
 
 theorem entryAtIdx_eq [TransCmp cmp] {i : Nat} {h' : i < t₁.size} (h : t₁ ~m t₂) :
     t₁.entryAtIdx i h' = t₂.entryAtIdx i (h.size_eq ▸ h') :=
@@ -6958,13 +6959,13 @@ theorem entryAtIdxD_eq [TransCmp cmp] {i : Nat} {fallback : (a : α) × β a} (h
     t₁.entryAtIdxD i fallback = t₂.entryAtIdxD i fallback :=
   h.1.entryAtIdxD_eq t₁.2 t₂.2
 
-theorem entryAtIdxV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} {i : Nat} (h : t₁ ~m t₂) :
-    t₁.entryAtIdxV i = t₂.entryAtIdxV i := by
-  simpa [DTreeMap.entryAtIdxV] using entryAtIdxD_eq h
-
 theorem keyAtIdx?_eq [TransCmp cmp] {i : Nat} (h : t₁ ~m t₂) :
     t₁.keyAtIdx? i = t₂.keyAtIdx? i :=
   h.1.keyAtIdx?_eq t₁.2 t₂.2
+
+theorem keyAtIdxV_eq [TransCmp cmp] {_ : Nonempty α} {i : Nat} (h : t₁ ~m t₂) :
+    t₁.keyAtIdxV i = t₂.keyAtIdxV i := by
+  simpa [DTreeMap.keyAtIdxV] using h.1.keyAtIdxD_eq t₁.2 t₂.2
 
 theorem keyAtIdx_eq [TransCmp cmp] {i : Nat} {h' : i < t₁.size} (h : t₁ ~m t₂) :
     t₁.keyAtIdx i h' = t₂.keyAtIdx i (h.size_eq ▸ h') :=
@@ -6978,13 +6979,13 @@ theorem keyAtIdxD_eq [TransCmp cmp] {i : Nat} {fallback : α} (h : t₁ ~m t₂)
     t₁.keyAtIdxD i fallback = t₂.keyAtIdxD i fallback :=
   h.1.keyAtIdxD_eq t₁.2 t₂.2
 
-theorem keyAtIdxV_eq [TransCmp cmp] {_ : Nonempty α} {i : Nat} (h : t₁ ~m t₂) :
-    t₁.keyAtIdxV i = t₂.keyAtIdxV i := by
-  simpa [DTreeMap.keyAtIdxV] using keyAtIdxD_eq h
-
 theorem getEntryGE?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getEntryGE? k = t₂.getEntryGE? k :=
   h.1.getEntryGE?_eq t₁.2 t₂.2
+
+theorem getEntryGEV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} {k : α} (h : t₁ ~m t₂) :
+    t₁.getEntryGEV k = t₂.getEntryGEV k := by
+  simpa [DTreeMap.getEntryGEV] using h.1.getEntryGED_eq t₁.2 t₂.2
 
 theorem getEntryGE_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     t₁.getEntryGE k h' = t₂.getEntryGE k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -6998,13 +6999,13 @@ theorem getEntryGED_eq [TransCmp cmp] {k : α} {fallback : (a : α) × β a} (h 
     t₁.getEntryGED k fallback = t₂.getEntryGED k fallback :=
   h.1.getEntryGED_eq t₁.2 t₂.2
 
-theorem getEntryGEV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} {k : α} (h : t₁ ~m t₂) :
-    t₁.getEntryGEV k = t₂.getEntryGEV k := by
-  simpa [DTreeMap.getEntryGEV] using getEntryGED_eq h
-
 theorem getEntryGT?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getEntryGT? k = t₂.getEntryGT? k :=
   h.1.getEntryGT?_eq t₁.2 t₂.2
+
+theorem getEntryGTV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} {k : α} (h : t₁ ~m t₂) :
+    t₁.getEntryGTV k = t₂.getEntryGTV k := by
+  simpa [DTreeMap.getEntryGTV] using h.1.getEntryGTD_eq t₁.2 t₂.2
 
 theorem getEntryGT_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     t₁.getEntryGT k h' = t₂.getEntryGT k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7018,13 +7019,13 @@ theorem getEntryGTD_eq [TransCmp cmp] {k : α} {fallback : (a : α) × β a} (h 
     t₁.getEntryGTD k fallback = t₂.getEntryGTD k fallback :=
   h.1.getEntryGTD_eq t₁.2 t₂.2
 
-theorem getEntryGTV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} {k : α} (h : t₁ ~m t₂) :
-    t₁.getEntryGTV k = t₂.getEntryGTV k := by
-  simpa [DTreeMap.getEntryGTV] using getEntryGTD_eq h
-
 theorem getEntryLE?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getEntryLE? k = t₂.getEntryLE? k :=
   h.1.getEntryLE?_eq t₁.2 t₂.2
+
+theorem getEntryLEV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} {k : α} (h : t₁ ~m t₂) :
+    t₁.getEntryLEV k = t₂.getEntryLEV k := by
+  simpa [DTreeMap.getEntryLEV] using h.1.getEntryLED_eq t₁.2 t₂.2
 
 theorem getEntryLE_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     t₁.getEntryLE k h' = t₂.getEntryLE k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7038,13 +7039,13 @@ theorem getEntryLED_eq [TransCmp cmp] {k : α} {fallback : (a : α) × β a} (h 
     t₁.getEntryLED k fallback = t₂.getEntryLED k fallback :=
   h.1.getEntryLED_eq t₁.2 t₂.2
 
-theorem getEntryLEV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} {k : α} (h : t₁ ~m t₂) :
-    t₁.getEntryLEV k = t₂.getEntryLEV k := by
-  simpa [DTreeMap.getEntryLEV] using getEntryLED_eq h
-
 theorem getEntryLT?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getEntryLT? k = t₂.getEntryLT? k :=
   h.1.getEntryLT?_eq t₁.2 t₂.2
+
+theorem getEntryLTV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} {k : α} (h : t₁ ~m t₂) :
+    t₁.getEntryLTV k = t₂.getEntryLTV k := by
+  simpa [DTreeMap.getEntryLTV] using h.1.getEntryLTD_eq t₁.2 t₂.2
 
 theorem getEntryLT_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     t₁.getEntryLT k h' = t₂.getEntryLT k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7058,13 +7059,14 @@ theorem getEntryLTD_eq [TransCmp cmp] {k : α} {fallback : (a : α) × β a} (h 
     t₁.getEntryLTD k fallback = t₂.getEntryLTD k fallback :=
   h.1.getEntryLTD_eq t₁.2 t₂.2
 
-theorem getEntryLTV_eq [TransCmp cmp] {_ : Nonempty ((a : α) × β a)} {k : α} (h : t₁ ~m t₂) :
-    t₁.getEntryLTV k = t₂.getEntryLTV k := by
-  simpa [DTreeMap.getEntryLTV] using getEntryLTD_eq h
-
 theorem getKeyGE?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getKeyGE? k = t₂.getKeyGE? k :=
   h.1.getKeyGE?_eq t₁.2 t₂.2
+
+theorem getKeyGEV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getKeyGEV k = t₂.getKeyGEV k := by
+  simpa [DTreeMap.getKeyGEV] using h.1.getKeyGED_eq t₁.2 t₂.2
 
 theorem getKeyGE_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     t₁.getKeyGE k h' = t₂.getKeyGE k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7078,14 +7080,14 @@ theorem getKeyGED_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getKeyGED k fallback = t₂.getKeyGED k fallback :=
   h.1.getKeyGED_eq t₁.2 t₂.2
 
-theorem getKeyGEV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
-    haveI : Nonempty α := ⟨k⟩
-    t₁.getKeyGEV k = t₂.getKeyGEV k := by
-  simpa [DTreeMap.getKeyGEV] using getKeyGED_eq h
-
 theorem getKeyGT?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getKeyGT? k = t₂.getKeyGT? k :=
   h.1.getKeyGT?_eq t₁.2 t₂.2
+
+theorem getKeyGTV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getKeyGTV k = t₂.getKeyGTV k := by
+  simpa [DTreeMap.getKeyGTV] using h.1.getKeyGTD_eq t₁.2 t₂.2
 
 theorem getKeyGT_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     t₁.getKeyGT k h' = t₂.getKeyGT k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7099,14 +7101,14 @@ theorem getKeyGTD_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getKeyGTD k fallback = t₂.getKeyGTD k fallback :=
   h.1.getKeyGTD_eq t₁.2 t₂.2
 
-theorem getKeyGTV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
-    haveI : Nonempty α := ⟨k⟩
-    t₁.getKeyGTV k = t₂.getKeyGTV k := by
-  simpa [DTreeMap.getKeyGTV] using getKeyGTD_eq h
-
 theorem getKeyLE?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getKeyLE? k = t₂.getKeyLE? k :=
   h.1.getKeyLE?_eq t₁.2 t₂.2
+
+theorem getKeyLEV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getKeyLEV k = t₂.getKeyLEV k := by
+  simpa [DTreeMap.getKeyLEV] using h.1.getKeyLED_eq t₁.2 t₂.2
 
 theorem getKeyLE_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     t₁.getKeyLE k h' = t₂.getKeyLE k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7120,14 +7122,14 @@ theorem getKeyLED_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getKeyLED k fallback = t₂.getKeyLED k fallback :=
   h.1.getKeyLED_eq t₁.2 t₂.2
 
-theorem getKeyLEV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
-    haveI : Nonempty α := ⟨k⟩
-    t₁.getKeyLEV k = t₂.getKeyLEV k := by
-  simpa [DTreeMap.getKeyLEV] using getKeyLED_eq h
-
 theorem getKeyLT?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     t₁.getKeyLT? k = t₂.getKeyLT? k :=
   h.1.getKeyLT?_eq t₁.2 t₂.2
+
+theorem getKeyLTV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
+    haveI : Nonempty α := ⟨k⟩
+    t₁.getKeyLTV k = t₂.getKeyLTV k := by
+  simpa [DTreeMap.getKeyLTV] using h.1.getKeyLTD_eq t₁.2 t₂.2
 
 theorem getKeyLT_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     t₁.getKeyLT k h' = t₂.getKeyLT k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7140,11 +7142,6 @@ theorem getKeyLT!_eq [TransCmp cmp] [Inhabited α] {k : α} (h : t₁ ~m t₂) :
 theorem getKeyLTD_eq [TransCmp cmp] {k fallback : α} (h : t₁ ~m t₂) :
     t₁.getKeyLTD k fallback = t₂.getKeyLTD k fallback :=
   h.1.getKeyLTD_eq t₁.2 t₂.2
-
-theorem getKeyLTV_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
-    haveI : Nonempty α := ⟨k⟩
-    t₁.getKeyLTV k = t₂.getKeyLTV k := by
-  simpa [DTreeMap.getKeyLTV] using getKeyLTD_eq h
 
 theorem insert [TransCmp cmp] (h : t₁ ~m t₂) (k : α) (v : β k) : t₁.insert k v ~m t₂.insert k v :=
   ⟨h.1.insert t₁.2 t₂.2⟩
@@ -7193,6 +7190,10 @@ variable {β : Type v} {t₁ t₂ t₃ t₄ : DTreeMap α β cmp} {δ : Type w} 
 theorem constGet?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) : Const.get? t₁ k = Const.get? t₂ k :=
   h.1.constGet?_eq t₁.2 t₂.2
 
+theorem constGetV_eq [TransCmp cmp] {_ : Nonempty β} {k : α} (h : t₁ ~m t₂) :
+    Const.getV t₁ k = Const.getV t₂ k := by
+  simpa [Const.getV] using h.1.constGetD_eq t₁.2 t₂.2
+
 theorem constGet_eq [TransCmp cmp] {k : α} {hk : k ∈ t₁} (h : t₁ ~m t₂) :
     Const.get t₁ k hk = Const.get t₂ k (h.mem_iff.mp hk) :=
   h.1.constGet_eq t₁.2 t₂.2 hk
@@ -7204,10 +7205,6 @@ theorem constGet!_eq [TransCmp cmp] [Inhabited β] {k : α} (h : t₁ ~m t₂) :
 theorem constGetD_eq [TransCmp cmp] {k : α} {fallback : β} (h : t₁ ~m t₂) :
     Const.getD t₁ k fallback = Const.getD t₂ k fallback :=
   h.1.constGetD_eq t₁.2 t₂.2
-
-theorem constGetV_eq [TransCmp cmp] {_ : Nonempty β} {k : α} (h : t₁ ~m t₂) :
-    Const.getV t₁ k = Const.getV t₂ k := by
-  simpa [Const.getV] using constGetD_eq h
 
 theorem constToList_eq [TransCmp cmp] (h : t₁ ~m t₂) : Const.toList t₁ = Const.toList t₂ :=
   h.1.constToList_eq t₁.2 t₂.2
@@ -7225,6 +7222,10 @@ theorem constMinEntry?_eq [TransCmp cmp] (h : t₁ ~m t₂) :
     Const.minEntry? t₁ = Const.minEntry? t₂ :=
   h.1.constMinEntry?_eq t₁.2 t₂.2
 
+theorem constMinEntryV_eq [TransCmp cmp] {_ : Nonempty (α × β)} (h : t₁ ~m t₂) :
+    Const.minEntryV t₁ = Const.minEntryV t₂ := by
+  simpa [Const.minEntryV] using h.1.constMinEntryD_eq t₁.2 t₂.2
+
 theorem constMinEntry_eq [TransCmp cmp] {he : t₁.isEmpty = false} (h : t₁ ~m t₂) :
     Const.minEntry t₁ he = Const.minEntry t₂ (h.isEmpty_eq.symm.trans he) :=
   h.1.constMinEntry_eq t₁.2 t₂.2
@@ -7237,13 +7238,13 @@ theorem constMinEntryD_eq [TransCmp cmp] {fallback : α × β} (h : t₁ ~m t₂
     Const.minEntryD t₁ fallback = Const.minEntryD t₂ fallback :=
   h.1.constMinEntryD_eq t₁.2 t₂.2
 
-theorem constMinEntryV_eq [TransCmp cmp] {_ : Nonempty (α × β)} (h : t₁ ~m t₂) :
-    Const.minEntryV t₁ = Const.minEntryV t₂ := by
-  simpa [Const.minEntryV] using constMinEntryD_eq h
-
 theorem constMaxEntry?_eq [TransCmp cmp] (h : t₁ ~m t₂) :
     Const.maxEntry? t₁ = Const.maxEntry? t₂ :=
   h.1.constMaxEntry?_eq t₁.2 t₂.2
+
+theorem constMaxEntryV_eq [TransCmp cmp] {_ : Nonempty (α × β)} (h : t₁ ~m t₂) :
+    Const.maxEntryV t₁ = Const.maxEntryV t₂ := by
+  simpa [Const.maxEntryV] using h.1.constMaxEntryD_eq t₁.2 t₂.2
 
 theorem constMaxEntry_eq [TransCmp cmp] {he : t₁.isEmpty = false} (h : t₁ ~m t₂) :
     Const.maxEntry t₁ he = Const.maxEntry t₂ (h.isEmpty_eq.symm.trans he) :=
@@ -7257,13 +7258,13 @@ theorem constMaxEntryD_eq [TransCmp cmp] {fallback : α × β} (h : t₁ ~m t₂
     Const.maxEntryD t₁ fallback = Const.maxEntryD t₂ fallback :=
   h.1.constMaxEntryD_eq t₁.2 t₂.2
 
-theorem constMaxEntryV_eq [TransCmp cmp] {_ : Nonempty (α × β)} (h : t₁ ~m t₂) :
-    Const.maxEntryV t₁ = Const.maxEntryV t₂ := by
-  simpa [Const.maxEntryV] using constMaxEntryD_eq h
-
 theorem constEntryAtIdx?_eq [TransCmp cmp] {i : Nat} (h : t₁ ~m t₂) :
     Const.entryAtIdx? t₁ i = Const.entryAtIdx? t₂ i :=
   h.1.constEntryAtIdx?_eq t₁.2 t₂.2
+
+theorem constEntryAtIdxV_eq [TransCmp cmp] {_ : Nonempty (α × β)} {i : Nat} (h : t₁ ~m t₂) :
+    Const.entryAtIdxV t₁ i = Const.entryAtIdxV t₂ i := by
+  simpa [Const.entryAtIdxV] using h.1.constEntryAtIdxD_eq t₁.2 t₂.2
 
 theorem constEntryAtIdx_eq [TransCmp cmp] {i : Nat} {h' : i < t₁.size} (h : t₁ ~m t₂) :
     Const.entryAtIdx t₁ i h' = Const.entryAtIdx t₂ i (h.size_eq ▸ h') :=
@@ -7277,13 +7278,13 @@ theorem constEntryAtIdxD_eq [TransCmp cmp] {i : Nat} {fallback : α × β} (h : 
     Const.entryAtIdxD t₁ i fallback = Const.entryAtIdxD t₂ i fallback :=
   h.1.constEntryAtIdxD_eq t₁.2 t₂.2
 
-theorem constEntryAtIdxV_eq [TransCmp cmp] {_ : Nonempty (α × β)} {i : Nat} (h : t₁ ~m t₂) :
-    Const.entryAtIdxV t₁ i = Const.entryAtIdxV t₂ i := by
-  simpa [Const.entryAtIdxV] using constEntryAtIdxD_eq h
-
 theorem constGetEntryGE?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     Const.getEntryGE? t₁ k = Const.getEntryGE? t₂ k :=
   h.1.constGetEntryGE?_eq t₁.2 t₂.2
+
+theorem constGetEntryGEV_eq [TransCmp cmp] {_ : Nonempty (α × β)} {k : α} (h : t₁ ~m t₂) :
+    Const.getEntryGEV t₁ k = Const.getEntryGEV t₂ k := by
+  simpa [Const.getEntryGEV] using h.1.constGetEntryGED_eq t₁.2 t₂.2
 
 theorem constGetEntryGE_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     Const.getEntryGE t₁ k h' = Const.getEntryGE t₂ k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7297,13 +7298,13 @@ theorem constGetEntryGED_eq [TransCmp cmp] {k : α} {fallback : α × β} (h : t
     Const.getEntryGED t₁ k fallback = Const.getEntryGED t₂ k fallback :=
   h.1.constGetEntryGED_eq t₁.2 t₂.2
 
-theorem constGetEntryGEV_eq [TransCmp cmp] {_ : Nonempty (α × β)} {k : α} (h : t₁ ~m t₂) :
-    Const.getEntryGEV t₁ k = Const.getEntryGEV t₂ k := by
-  simpa [Const.getEntryGEV] using constGetEntryGED_eq h
-
 theorem constGetEntryGT?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     Const.getEntryGT? t₁ k = Const.getEntryGT? t₂ k :=
   h.1.constGetEntryGT?_eq t₁.2 t₂.2
+
+theorem constGetEntryGTV_eq [TransCmp cmp] {_ : Nonempty (α × β)} {k : α} (h : t₁ ~m t₂) :
+    Const.getEntryGTV t₁ k = Const.getEntryGTV t₂ k := by
+  simpa [Const.getEntryGTV] using h.1.constGetEntryGTD_eq t₁.2 t₂.2
 
 theorem constGetEntryGT_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     Const.getEntryGT t₁ k h' = Const.getEntryGT t₂ k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7317,13 +7318,13 @@ theorem constGetEntryGTD_eq [TransCmp cmp] {k : α} {fallback : α × β} (h : t
     Const.getEntryGTD t₁ k fallback = Const.getEntryGTD t₂ k fallback :=
   h.1.constGetEntryGTD_eq t₁.2 t₂.2
 
-theorem constGetEntryGTV_eq [TransCmp cmp] {_ : Nonempty (α × β)} {k : α} (h : t₁ ~m t₂) :
-    Const.getEntryGTV t₁ k = Const.getEntryGTV t₂ k := by
-  simpa [Const.getEntryGTV] using constGetEntryGTD_eq h
-
 theorem constGetEntryLE?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     Const.getEntryLE? t₁ k = Const.getEntryLE? t₂ k :=
   h.1.constGetEntryLE?_eq t₁.2 t₂.2
+
+theorem constGetEntryLEV_eq [TransCmp cmp] {_ : Nonempty (α × β)} {k : α} (h : t₁ ~m t₂) :
+    Const.getEntryLEV t₁ k = Const.getEntryLEV t₂ k := by
+  simpa [Const.getEntryLEV] using h.1.constGetEntryLED_eq t₁.2 t₂.2
 
 theorem constGetEntryLE_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     Const.getEntryLE t₁ k h' = Const.getEntryLE t₂ k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7337,13 +7338,13 @@ theorem constGetEntryLED_eq [TransCmp cmp] {k : α} {fallback : α × β} (h : t
     Const.getEntryLED t₁ k fallback = Const.getEntryLED t₂ k fallback :=
   h.1.constGetEntryLED_eq t₁.2 t₂.2
 
-theorem constGetEntryLEV_eq [TransCmp cmp] {_ : Nonempty (α × β)} {k : α} (h : t₁ ~m t₂) :
-    Const.getEntryLEV t₁ k = Const.getEntryLEV t₂ k := by
-  simpa [Const.getEntryLEV] using constGetEntryLED_eq h
-
 theorem constGetEntryLT?_eq [TransCmp cmp] {k : α} (h : t₁ ~m t₂) :
     Const.getEntryLT? t₁ k = Const.getEntryLT? t₂ k :=
   h.1.constGetEntryLT?_eq t₁.2 t₂.2
+
+theorem constGetEntryLTV_eq [TransCmp cmp] {_ : Nonempty (α × β)} {k : α} (h : t₁ ~m t₂) :
+    Const.getEntryLTV t₁ k = Const.getEntryLTV t₂ k := by
+  simpa [Const.getEntryLTV] using h.1.constGetEntryLTD_eq t₁.2 t₂.2
 
 theorem constGetEntryLT_eq [TransCmp cmp] {k : α} {h'} (h : t₁ ~m t₂) :
     Const.getEntryLT t₁ k h' = Const.getEntryLT t₂ k (h'.imp fun _ ⟨h₁, h₂⟩ => ⟨h.mem_iff.mp h₁, h₂⟩) :=
@@ -7356,10 +7357,6 @@ theorem constGetEntryLT!_eq [TransCmp cmp] [Inhabited (α × β)] {k : α} (h : 
 theorem constGetEntryLTD_eq [TransCmp cmp] {k : α} {fallback : α × β} (h : t₁ ~m t₂) :
     Const.getEntryLTD t₁ k fallback = Const.getEntryLTD t₂ k fallback :=
   h.1.constGetEntryLTD_eq t₁.2 t₂.2
-
-theorem constGetEntryLTV_eq [TransCmp cmp] {_ : Nonempty (α × β)} {k : α} (h : t₁ ~m t₂) :
-    Const.getEntryLTV t₁ k = Const.getEntryLTV t₂ k := by
-  simpa [Const.getEntryLTV] using constGetEntryLTD_eq h
 
 theorem constAlter [TransCmp cmp] (h : t₁ ~m t₂) (k : α) (f : Option β → Option β) :
     Const.alter t₁ k f ~m Const.alter t₂ k f :=
@@ -8011,6 +8008,14 @@ theorem get?_filter [TransCmp cmp] [LawfulEqCmp cmp]
     (t.filter f).get? k = (t.get? k).filter (f k) :=
   Impl.get?_filter t.wf
 
+@[simp, grind =]
+theorem getV_filter [TransCmp cmp] [LawfulEqCmp cmp]
+    {f : (a : α) → β a → Bool} {k : α} (h' : k ∈ t.filter f) :
+    haveI h'' : k ∈ t := mem_of_mem_filter h'
+    haveI : Nonempty (β k) := ⟨t.get k h''⟩
+    (t.filter f).getV k = t.getV k :=
+  Impl.getV_filter t.wf h'
+
 theorem get_filter [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} {h'} :
     (t.filter f).get k h' = t.get k (mem_of_mem_filter h') :=
@@ -8027,14 +8032,6 @@ theorem getD_filter [TransCmp cmp] [LawfulEqCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} {fallback : β k} :
     (t.filter f).getD k fallback = ((t.get? k).filter (f k)).getD fallback :=
   Impl.getD_filter t.wf
-
-@[simp, grind =]
-theorem getV_filter [TransCmp cmp] [LawfulEqCmp cmp]
-    {f : (a : α) → β a → Bool} {k : α} (h' : k ∈ t.filter f) :
-    haveI h'' : k ∈ t := mem_of_mem_filter h'
-    haveI : Nonempty (β k) := ⟨t.get k h''⟩
-    (t.filter f).getV k = t.getV k :=
-  Impl.getV_filter t.wf h'
 
 theorem keys_filter [TransCmp cmp] [LawfulEqCmp cmp] {f : (a : α) → β a → Bool} :
     (t.filter f).keys =
@@ -8060,8 +8057,6 @@ theorem getKeyV_filter [TransCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} {h' : k ∈ t.filter f} :
     (t.filter f).getKeyV k = t.getKeyV k :=
   Impl.getKeyV_filter t.wf (h' := h')
-
--- TODO: getKeyV_filter should come here (same for filterMap etc.)
 
 theorem getKey_filter [TransCmp cmp]
     {f : (a : α) → β a → Bool} {k : α} {h'} :
