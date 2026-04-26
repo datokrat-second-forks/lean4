@@ -179,11 +179,6 @@ theorem getKey!_eq [BEq α] [Inhabited α] {l : AssocList α β} {a : α} :
   · simp_all [getKey!, List.getKey!, Bool.apply_cond Option.get!]
 
 @[simp]
-theorem getKeyV_eq [BEq α] [Nonempty α] {l : AssocList α β} {a : α} :
-    l.getKeyV a = List.getKeyD a l.toList Classical.ofNonempty := by
-  simp [getKeyV, getKeyD_eq]
-
-@[simp]
 theorem toList_replace [BEq α] {l : AssocList α β} {a : α} {b : β a} :
     (l.replace a b).toList = replaceEntry a b l.toList := by
   induction l

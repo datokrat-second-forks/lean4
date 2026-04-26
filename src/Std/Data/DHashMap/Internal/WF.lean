@@ -552,11 +552,6 @@ theorem getKeyD_eq_getKeyD [BEq α] [Hashable α] [EquivBEq α] [LawfulHashable 
     m.getKeyD a fallback = List.getKeyD a (toListModel m.1.buckets) fallback := by
   rw [getKeyD_eq_getKeyDₘ, getKeyDₘ_eq_getKeyD hm]
 
-theorem getKeyV_eq_getKeyV [BEq α] [Hashable α] [EquivBEq α] [LawfulHashable α] [Nonempty α]
-    {m : Raw₀ α β} (hm : Raw.WFImp m.1) {a : α} :
-    m.getKeyV a = List.getKeyD a (toListModel m.1.buckets) Classical.ofNonempty := by
-  exact getKeyD_eq_getKeyD hm
-
 section
 
 variable {β : Type v}
