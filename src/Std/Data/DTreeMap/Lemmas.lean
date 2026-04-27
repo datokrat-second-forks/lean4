@@ -7760,6 +7760,11 @@ theorem get?_filterMap [TransCmp cmp]
     Const.get? (t.filterMap f) k = (Const.get? t k).bind (fun x => f (t.getKeyV k) x) :=
   Impl.Const.get?_filterMap t.wf
 
+/-
+PLOG(get?_filterMap'):
+Not super nice that we need to use `rw/refine/rw` here. Why doesn't `simp +contextual only` work?
+-/
+
 /-- Simpler variant of `get?_filterMap` when `LawfulEqCmp` is available. -/
 @[grind =]
 theorem get?_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
@@ -7825,10 +7830,7 @@ theorem get!_filterMap [TransCmp cmp] [Inhabited γ]
 theorem get!_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} :
     Const.get! (t.filterMap f) k = ((Const.get? t k).bind (f k) ).get!:= by
-  rw [get!_filterMap]
-  congr 1
-  refine Option.bind_congr (fun x hx => ?_)
-  rw [getKeyV_eq (mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some hx))]
+  rw [get!_eq_get!_get?, get?_filterMap']
 
 theorem get!_filterMap_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k k' : α} (h : t.getKey? k = some k') :
@@ -7846,10 +7848,7 @@ theorem getD_filterMap [TransCmp cmp]
 theorem getD_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {fallback : γ} :
     Const.getD (t.filterMap f) k fallback = ((Const.get? t k).bind (f k)).getD fallback := by
-  rw [getD_filterMap]
-  congr 1
-  refine Option.bind_congr (fun x hx => ?_)
-  rw [getKeyV_eq (mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some hx))]
+  rw [getD_eq_getD_get?, get?_filterMap']
 
 theorem getD_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : t.getKey? k = some k') :

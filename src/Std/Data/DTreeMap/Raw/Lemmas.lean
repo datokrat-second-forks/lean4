@@ -12,6 +12,7 @@ public import Init.Data.Array.Perm
 import Init.Data.List.Find
 import Init.Data.List.Pairwise
 import Init.Data.Prod
+import Std.Data.DTreeMap.Raw.WF
 
 @[expose] public section
 
@@ -658,6 +659,9 @@ theorem get?_eq_some_get!_of_contains [TransCmp cmp] [Inhabited β] (h : t.WF) {
 theorem get?_eq_some_get! [TransCmp cmp] [Inhabited β] (h : t.WF) {a : α} :
     a ∈ t → get? t a = some (get! t a) :=
   Impl.Const.get?_eq_some_get! h
+
+-- TODO: get!_eq_get!_get? and others should use `{_ : Inhabited β}`
+
 
 theorem get!_eq_get!_get? [TransCmp cmp] [Inhabited β] (h : t.WF) {a : α} :
     get! t a = (get? t a).get! :=
@@ -7080,10 +7084,7 @@ theorem get!_filterMap [TransCmp cmp] [Inhabited γ]
 theorem get!_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
     Const.get! (t.filterMap f) k = ((Const.get? t k).bind (f k)).get! := by
-  rw [get!_filterMap h]
-  congr 1
-  refine Option.bind_congr (fun x hx => ?_)
-  rw [getKeyV_eq h ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hx))]
+  rw [get!_eq_get!_get? h.filterMap, get?_filterMap' h]
 
 theorem get!_filterMap_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k k' : α} (h : t.WF) :
@@ -7102,10 +7103,7 @@ theorem getD_filterMap [TransCmp cmp]
 theorem getD_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {fallback : γ} (h : t.WF) :
     Const.getD (t.filterMap f) k fallback = ((Const.get? t k).bind (f k)).getD fallback := by
-  rw [getD_filterMap h]
-  congr 1
-  refine Option.bind_congr (fun x hx => ?_)
-  rw [getKeyV_eq h ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some hx))]
+  rw [getD_eq_getD_get? h.filterMap, get?_filterMap' h]
 
 theorem getD_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : t.WF) :

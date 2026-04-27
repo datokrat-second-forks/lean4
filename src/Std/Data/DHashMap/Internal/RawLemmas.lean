@@ -5340,13 +5340,13 @@ theorem isEmpty_filter_eq_false_iff [LawfulBEq α]
 theorem isEmpty_filter_key_iff [EquivBEq α] [LawfulHashable α]
     {f : α → Bool} (h : m.1.WF) :
     (m.filter (fun a _ => f a)).1.isEmpty ↔
-      ∀ (k : α) (h : m.contains k), f (m.getKeyV k) = false := by
+      ∀ (k : α) (_ : m.contains k), f (m.getKeyV k) = false := by
   simp_to_model [filter, contains, getKeyV, isEmpty] using List.isEmpty_filter_key_iff
 
 theorem isEmpty_filter_key_eq_false_iff [EquivBEq α] [LawfulHashable α]
     {f : α → Bool} (h : m.1.WF) :
     (m.filter (fun a _ => f a)).1.isEmpty = false ↔
-      ∃ (k : α) (h : m.contains k = true), f (m.getKeyV k) := by
+      ∃ (k : α) (_ : m.contains k = true), f (m.getKeyV k) := by
   rw [← Bool.not_eq_true, isEmpty_filter_key_iff m h]
   simp only [Classical.not_forall, Bool.not_eq_false]
 
@@ -5381,23 +5381,23 @@ theorem size_filter_eq_size_iff [LawfulBEq α]
     (m.filter f).1.size = m.1.size ↔ ∀ (a : α) (h : m.contains a),
       haveI : Nonempty (β a) := ⟨m.get a h⟩
       (f a (m.getV a)) = true := by
-  simp_to_model [filter, size, contains, get, getV] using Internal.List.length_filter_eq_length_iff
+  simp_to_model [filter, size, contains, getV] using Internal.List.length_filter_eq_length_iff
 
 theorem filter_equiv_self_iff [LawfulBEq α]
     {f : (a : α) → β a → Bool} (h : m.1.WF) :
     (m.filter f).1.Equiv m.1 ↔ ∀ (a : α) (h : m.contains a),
       haveI : Nonempty (β a) := ⟨m.get a h⟩
       (f a (m.getV a)) = true := by
-  simp_to_model [filter, Equiv, contains, get, getV] using List.perm_filter_self_iff_forall_containsKey
+  simp_to_model [filter, Equiv, contains, getV] using List.perm_filter_self_iff_forall_containsKey
 
 theorem filter_key_equiv_self_iff [EquivBEq α] [LawfulHashable α]
     {f : (a : α) → Bool} (h : m.1.WF) :
-    (m.filter fun k _ => f k).1.Equiv m.1 ↔ ∀ (a : α) (h : m.contains a), f (m.getKeyV a) = true := by
+    (m.filter fun k _ => f k).1.Equiv m.1 ↔ ∀ (a : α) (_ : m.contains a), f (m.getKeyV a) = true := by
   simp_to_model [filter, Equiv, contains, getKeyV] using List.perm_filter_key_self_iff_forall_containsKey
 
 theorem size_filter_key_eq_size_iff [EquivBEq α] [LawfulHashable α]
     {f : α → Bool} (h : m.1.WF) :
-    (m.filter fun k _ => f k).1.size = m.1.size ↔ ∀ (k : α) (h : m.contains k), f (m.getKeyV k) := by
+    (m.filter fun k _ => f k).1.size = m.1.size ↔ ∀ (k : α) (_ : m.contains k), f (m.getKeyV k) := by
   simp_to_model [filter, size, contains, getKeyV] using List.length_filter_key_eq_length_iff
 
 theorem get?_filter [LawfulBEq α]

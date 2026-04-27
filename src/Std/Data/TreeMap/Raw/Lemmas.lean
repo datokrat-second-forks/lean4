@@ -4896,10 +4896,8 @@ theorem getElem?_filterMap [TransCmp cmp]
 @[grind =]
 theorem getElem?_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
-    (t.filterMap f)[k]? = t[k]?.bind fun x => f k x := by
-  rw [getElem?_filterMap h]
-  refine Option.bind_congr (fun x hx => ?_)
-  rw [getKeyV_eq h ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some hx))]
+    (t.filterMap f)[k]? = t[k]?.bind fun x => f k x :=
+  DTreeMap.Raw.Const.get?_filterMap' h.out
 
 theorem getElem?_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} (h : t.WF) :
@@ -4968,11 +4966,8 @@ theorem getElem!_filterMap [TransCmp cmp] [Inhabited γ]
 @[grind =]
 theorem getElem!_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
-    (t.filterMap f)[k]! = (t[k]?.bind (f k)).get! := by
-  rw [getElem!_filterMap h]
-  congr 1
-  refine Option.bind_congr (fun x hx => ?_)
-  rw [getKeyV_eq h ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some hx))]
+    (t.filterMap f)[k]! = (t[k]?.bind (f k)).get! :=
+  DTreeMap.Raw.Const.get!_filterMap' h.out
 
 theorem getElem!_filterMap_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k k' : α} (h : t.WF) :
@@ -4990,11 +4985,8 @@ theorem getD_filterMap [TransCmp cmp]
 @[grind =]
 theorem getD_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {fallback : γ} (h : t.WF) :
-    getD (t.filterMap f) k fallback = (t[k]?.bind (f k)).getD fallback := by
-  rw [getD_filterMap h]
-  congr 1
-  refine Option.bind_congr (fun x hx => ?_)
-  rw [getKeyV_eq h ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some hx))]
+    getD (t.filterMap f) k fallback = (t[k]?.bind (f k)).getD fallback :=
+  DTreeMap.Raw.Const.getD_filterMap' h.out
 
 theorem getD_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : t.WF) :
@@ -5134,11 +5126,8 @@ theorem getElem?_filter [TransCmp cmp]
 @[grind =]
 theorem getElem?_filter' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Bool} {k : α} (h : t.WF) :
-    (t.filter f)[k]? = t[k]?.filter (f k) := by
-  rw [getElem?_filter h]
-  rcases h' : t[k]? with _ | x
-  · simp
-  · simp [getKeyV_eq h ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some h'))]
+    (t.filter f)[k]? = t[k]?.filter (f k) :=
+  DTreeMap.Raw.Const.get?_filter' h.out
 
 theorem getElem?_filter_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Bool} {k k' : α} (h : t.WF) :
