@@ -570,6 +570,15 @@ theorem getEntry_eq_getEntryV [BEq α] {a : α} {l : List ((a : α) × β a)} {h
     getEntry a l h = getEntryV a l := by
   simp [getEntry, getEntryV]
 
+theorem getEntryV_eq_getEntryD_ofNonempty {_ : Nonempty ((a : α) × β a)} [BEq α] {a : α}
+    {l : List ((a : α) × β a)} :
+    getEntryV a l = getEntryD a Classical.ofNonempty l := by
+  simp only [getEntryV]
+  fun_induction getEntry? a l
+  · simp
+  · simp [getEntryD, *]
+  · simp [getEntryD, *]
+
 theorem getEntry?_eq_some_getEntryV [BEq α] {l : List ((a : α) × β a)} {a : α} (h : containsKey a l) :
     haveI : Nonempty ((a : α) × β a) := ⟨getEntry a l h⟩
     getEntry? a l = some (getEntryV a l) := by
