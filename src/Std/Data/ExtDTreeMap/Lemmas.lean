@@ -6932,9 +6932,7 @@ theorem get?_filterMap [TransCmp cmp]
 theorem get?_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} :
     Const.get? (t.filterMap f) k = (Const.get? t k).bind fun x => f k x := by
-  rw [get?_filterMap]
-  refine Option.bind_congr (fun x hx => ?_)
-  rw [getKeyV_eq (mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some hx))]
+  exact t.inductionOn fun _ => DTreeMap.Const.get?_filterMap'
 
 theorem get?_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} (h : t.getKey? k = some k') :
@@ -6991,11 +6989,8 @@ theorem get!_filterMap [TransCmp cmp] [Inhabited γ]
 @[grind =]
 theorem get!_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} :
-    Const.get! (t.filterMap f) k = ((Const.get? t k).bind (f k) ).get!:= by
-  rw [get!_filterMap]
-  congr 1
-  refine Option.bind_congr (fun x hx => ?_)
-  rw [getKeyV_eq (mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some hx))]
+    Const.get! (t.filterMap f) k = ((Const.get? t k).bind (f k) ).get!:=
+  t.inductionOn fun _ => DTreeMap.Const.get!_filterMap'
 
 theorem get!_filterMap_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k k' : α} (h : t.getKey? k = some k') :
@@ -7012,11 +7007,8 @@ theorem getD_filterMap [TransCmp cmp]
 @[grind =]
 theorem getD_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {fallback : γ} :
-    Const.getD (t.filterMap f) k fallback = ((Const.get? t k).bind (f k)).getD fallback := by
-  rw [getD_filterMap]
-  congr 1
-  refine Option.bind_congr (fun x hx => ?_)
-  rw [getKeyV_eq (mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some hx))]
+    Const.getD (t.filterMap f) k fallback = ((Const.get? t k).bind (f k)).getD fallback :=
+  t.inductionOn fun _ => DTreeMap.Const.getD_filterMap'
 
 theorem getD_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : t.getKey? k = some k') :
@@ -7284,11 +7276,8 @@ theorem get?_filter [TransCmp cmp]
 @[simp, grind =]
 theorem get?_filter' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Bool} {k : α} :
-    Const.get? (t.filter f) k = (Const.get? t k).filter (f k) := by
-  rw [get?_filter]
-  rcases h : Const.get? t k with _ | x
-  · simp
-  · simp [getKeyV_eq (mem_iff_isSome_get?.mpr (Option.isSome_of_eq_some h))]
+    Const.get? (t.filter f) k = (Const.get? t k).filter (f k) :=
+  t.inductionOn fun _ => DTreeMap.Const.get?_filter'
 
 theorem get?_filter_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Bool} {k k' : α} :
