@@ -273,9 +273,21 @@ theorem size_insert_le [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {k : α} {
     (m.insert k v).1.size ≤ m.1.size + 1 := by
   simp_to_model [insert, size] using List.length_insertEntry_le
 
+/-
+PLOG(erase_emptyWithCapacity):
+Ugh, two nested ugly side conditions. The inner one I copied from `emptyWithCapacity`'s
+implementation. The outer one I don't even know where it's coming from.
+-/
+
 @[simp]
 theorem erase_emptyWithCapacity {k : α} {c : Nat} : (emptyWithCapacity c : Raw₀ α β).erase k = emptyWithCapacity c := by
-  simp [erase, emptyWithCapacity, - getElem_eq_getElemV, Array.getElem_replicate]
+  have : 0 < (Array.replicate (α := AssocList α β) (numBucketsForCapacity c).nextPowerOfTwo AssocList.nil).size := by
+    simpa using Nat.pos_of_isPowerOfTwo (Nat.isPowerOfTwo_nextPowerOfTwo _)
+  have :
+      (mkIdx (Array.replicate (α := AssocList α β) (numBucketsForCapacity c).nextPowerOfTwo AssocList.nil).size
+          this (hash k)).val.toNat < (numBucketsForCapacity c).nextPowerOfTwo :=
+    Nat.lt_of_lt_of_le (mkIdx_val_toNat_lt _ _ _) (by simp)
+  simp [erase, emptyWithCapacity, this]
 
 theorem isEmpty_erase [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {k : α} :
     (m.erase k).1.isEmpty = (m.1.isEmpty || (m.1.size == 1 && m.contains k)) := by
@@ -3448,11 +3460,20 @@ theorem get?_inter_of_contains_eq_false_right [LawfulBEq α] (h₁ : m₁.val.WF
   simp_to_model [inter, get?, contains] using getValueCast?_filter_containsKey_of_containsKey_eq_false_right
 
 /- get -/
-@[simp] theorem get_inter [LawfulBEq α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
+@[simp]
+theorem getV_inter [LawfulBEq α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
+    {k : α} (h_contains : (m₁.inter m₂).contains k) :
+    haveI : Nonempty _ := ⟨(m₁.inter m₂).get k h_contains⟩
+    (m₁.inter m₂).getV k =
+      m₁.getV k := by
+  revert h_contains
+  simp_to_model [inter, getV, contains] using getValueCastV_filter_containsKey
+
+theorem get_inter [LawfulBEq α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
     {k : α} {h_contains : (m₁.inter m₂).contains k} :
     (m₁.inter m₂).get k h_contains =
     m₁.get k ((contains_inter_iff h₁ h₂).1 h_contains).1 := by
-  simp_to_model [inter, get, contains] using getValueCast_filter_containsKey
+  simpa using getV_inter h₁ h₂ h_contains
 
 /- getD -/
 theorem getD_inter [LawfulBEq α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
@@ -3530,11 +3551,18 @@ theorem getKey?_inter_of_contains_eq_false_left [EquivBEq α] [LawfulHashable α
   simp_to_model [contains, getKey?, inter] using getKey?_filter_containsKey_of_containsKey_eq_false_left
 
 /- getKey -/
-@[simp] theorem getKey_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
+@[simp] theorem getKeyV_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
+    {k : α} (h_contains : (m₁.inter m₂).contains k) :
+    (m₁.inter m₂).getKeyV k =
+      m₁.getKeyV k := by
+  revert h_contains
+  simp_to_model [inter, contains, getKeyV] using getKeyV_filter_containsKey
+
+theorem getKey_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
     {k : α} {h_contains : (m₁.inter m₂).contains k} :
     (m₁.inter m₂).getKey k h_contains =
     m₁.getKey k (by simp [contains_inter_iff h₁ h₂] at h_contains; exact h_contains.1) := by
-  simp_to_model [inter, contains, getKey] using getKey_filter_containsKey
+  simpa using getKeyV_inter h₁ h₂ h_contains
 
 /- getKeyD -/
 theorem getKeyD_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.val.WF)
@@ -3798,11 +3826,19 @@ theorem get?_diff_of_contains_right [LawfulBEq α] (h₁ : m₁.val.WF) (h₂ : 
   simp_to_model [diff, get?, contains] using List.getValueCast?_filter_not_contains_map_fst_of_containsKey_right
 
 /- get -/
+theorem getV_diff [LawfulBEq α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
+    {k : α} (h_contains : (m₁.diff m₂).contains k) :
+    haveI : Nonempty _ := ⟨(m₁.diff m₂).get k h_contains⟩
+    (m₁.diff m₂).getV k =
+      m₁.getV k := by
+  revert h_contains
+  simp_to_model [diff, getV, contains] using List.getValueCastV_filter_not_contains_map_fst
+
 theorem get_diff [LawfulBEq α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
     {k : α} {h_contains : (m₁.diff m₂).contains k} :
     (m₁.diff m₂).get k h_contains =
     m₁.get k ((contains_diff_iff h₁ h₂).1 h_contains).1 := by
-  simp_to_model [diff, get, contains] using List.getValueCast_filter_not_contains_map_fst
+  simpa using getV_diff h₁ h₂ h_contains
 
 /- getD -/
 theorem getD_diff [LawfulBEq α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
@@ -3878,11 +3914,18 @@ theorem getKey?_diff_of_contains_right [EquivBEq α] [LawfulHashable α]
   simp_to_model [contains, getKey?, diff] using List.getKey?_filter_not_contains_map_fst_of_containsKey_right
 
 /- getKey -/
+theorem getKeyV_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
+    {k : α} (h_contains : (m₁.diff m₂).contains k) :
+    (m₁.diff m₂).getKeyV k =
+      m₁.getKeyV k := by
+  revert h_contains
+  simp_to_model [diff, contains, getKeyV] using List.getKeyV_filter_not_contains_map_fst
+
 theorem getKey_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
     {k : α} {h_contains : (m₁.diff m₂).contains k} :
     (m₁.diff m₂).getKey k h_contains =
     m₁.getKey k ((contains_diff_iff h₁ h₂).1 h_contains).1 := by
-  simp_to_model [diff, contains, getKey] using List.getKey_filter_not_contains_map_fst
+  simpa using getKeyV_diff h₁ h₂ h_contains
 
 /- getKeyD -/
 theorem getKeyD_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.val.WF)
