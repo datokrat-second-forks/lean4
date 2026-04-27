@@ -11750,14 +11750,14 @@ theorem size_filterMap!_eq_size_iff [TransOrd α]
 
 theorem get?_filterMap [TransOrd α]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
-    Const.get? (t.filterMap f h.balanced).1 k = (Const.get? t k).pbind (fun x h' =>
-      f (t.getKey k ((Const.mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x) := by
-  simp_to_model [filterMap, getKey, Const.get?] using List.Const.getValue?_filterMap
+    Const.get? (t.filterMap f h.balanced).1 k =
+      (Const.get? t k).bind (fun x => f (t.getKeyV k) x) := by
+  simp_to_model [filterMap, getKeyV, Const.get?] using List.Const.getValue?_filterMap
 
 theorem get?_filterMap! [TransOrd α]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
-    Const.get? (t.filterMap! f) k = (Const.get? t k).pbind (fun x h' =>
-      f (t.getKey k ((Const.mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x) := by
+    Const.get? (t.filterMap! f) k =
+      (Const.get? t k).bind (fun x => f (t.getKeyV k) x) := by
   simpa only [filterMap_eq_filterMap!] using get?_filterMap h
 
 theorem get?_filterMap_of_getKey?_eq_some [TransOrd α]
@@ -11844,15 +11844,13 @@ theorem get_filterMap! [TransOrd α]
 theorem get!_filterMap [TransOrd α] [Inhabited γ]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
     Const.get! (t.filterMap f h.balanced).1 k =
-      ((Const.get? t k).pbind (fun x h' =>
-        f (t.getKey k ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x)).get! := by
-  simp_to_model [filterMap, Const.get!, getKey, Const.get?] using List.Const.getValue!_filterMap
+      ((Const.get? t k).bind (fun x => f (t.getKeyV k) x)).get! := by
+  simp_to_model [filterMap, Const.get!, getKeyV, Const.get?] using List.Const.getValue!_filterMap
 
 theorem get!_filterMap! [TransOrd α] [Inhabited γ]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
     Const.get! (t.filterMap! f) k =
-      ((Const.get? t k).pbind (fun x h' =>
-        f (t.getKey k ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x)).get! := by
+      ((Const.get? t k).bind (fun x => f (t.getKeyV k) x)).get! := by
   simpa only [filterMap_eq_filterMap!] using get!_filterMap h
 
 theorem get!_filterMap_of_getKey?_eq_some [TransOrd α] [Inhabited γ]
@@ -11871,15 +11869,13 @@ theorem get!_filterMap!_of_getKey?_eq_some [TransOrd α] [Inhabited γ]
 theorem getD_filterMap [TransOrd α]
     {f : α → β → Option γ} {k : α} {fallback : γ} (h : t.WF) :
     Const.getD (t.filterMap f h.balanced).1 k fallback =
-      ((Const.get? t k).pbind (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x)).getD fallback := by
-  simp_to_model [filterMap, Const.getD, getKey, Const.get?] using List.Const.getValueD_filterMap
+      ((Const.get? t k).bind (fun x => f (t.getKeyV k) x)).getD fallback := by
+  simp_to_model [filterMap, Const.getD, getKeyV, Const.get?] using List.Const.getValueD_filterMap
 
 theorem getD_filterMap! [TransOrd α]
     {f : α → β → Option γ} {k : α} {fallback : γ} (h : t.WF) :
     Const.getD (t.filterMap! f) k fallback =
-      ((Const.get? t k).pbind (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x)).getD fallback := by
+      ((Const.get? t k).bind (fun x => f (t.getKeyV k) x)).getD fallback := by
   simpa only [filterMap_eq_filterMap!] using getD_filterMap h
 
 theorem getD_filterMap_of_getKey?_eq_some [TransOrd α]
@@ -12012,50 +12008,58 @@ theorem keysArray_filter!_key {f : α → Bool} (h : t.WF) :
 theorem isEmpty_filter_iff [TransOrd α] [LawfulEqOrd α]
     {f : (a : α) → β a → Bool} (h : t.WF) :
     (t.filter f h.balanced).1.isEmpty = true ↔
-      ∀ (k : α) (h : t.contains k = true), f k (t.get k h) = false := by
-  simp_to_model [filter, contains, get, isEmpty] using List.isEmpty_filter_eq_true
+      ∀ (k : α) (h : t.contains k = true),
+        haveI : Nonempty (β k) := ⟨t.get k h⟩
+        f k (t.getV k) = false := by
+  simp_to_model [filter, contains, get, getV, isEmpty] using List.isEmpty_filter_eq_true
 
 theorem isEmpty_filter!_iff [TransOrd α] [LawfulEqOrd α]
     {f : (a : α) → β a → Bool} (h : t.WF) :
     (t.filter! f).isEmpty = true ↔
-      ∀ (k : α) (h : t.contains k = true), f k (t.get k h) = false := by
+      ∀ (k : α) (h : t.contains k = true),
+        haveI : Nonempty (β k) := ⟨t.get k h⟩
+        f k (t.getV k) = false := by
   simpa only [filter_eq_filter!] using isEmpty_filter_iff h
 
 theorem isEmpty_filter_eq_false_iff [TransOrd α] [LawfulEqOrd α]
     {f : (a : α) → β a → Bool} (h : t.WF) :
     (t.filter f h.balanced).1.isEmpty = false ↔
-      ∃ (k : α) (h : t.contains k = true), f k (t.get k h) = true := by
-  simp_to_model [filter, contains, get, isEmpty] using List.isEmpty_filter_eq_false
+      ∃ (k : α) (h : t.contains k = true),
+        haveI : Nonempty (β k) := ⟨t.get k h⟩
+        f k (t.getV k) = true := by
+  simp_to_model [filter, contains, get, getV, isEmpty] using List.isEmpty_filter_eq_false
 
 theorem isEmpty_filter!_eq_false_iff [TransOrd α] [LawfulEqOrd α]
     {f : (a : α) → β a → Bool} (h : t.WF) :
     (t.filter! f).isEmpty = false ↔
-      ∃ (k : α) (h : t.contains k = true), f k (t.get k h) = true := by
+      ∃ (k : α) (h : t.contains k = true),
+        haveI : Nonempty (β k) := ⟨t.get k h⟩
+        f k (t.getV k) = true := by
   simpa only [filter_eq_filter!] using isEmpty_filter_eq_false_iff h
 
 theorem isEmpty_filter_key_iff [TransOrd α]
     {f : α → Bool} (h : t.WF) :
     (t.filter (fun a _ => f a) h.balanced).1.isEmpty ↔
-      ∀ (k : α) (h : t.contains k), f (t.getKey k h) = false := by
-  simp_to_model [filter, contains, getKey, isEmpty] using List.isEmpty_filter_key_iff
+      ∀ (k : α) (h : t.contains k), f (t.getKeyV k) = false := by
+  simp_to_model [filter, contains, getKeyV, isEmpty] using List.isEmpty_filter_key_iff
 
 theorem isEmpty_filter!_key_iff [TransOrd α]
     {f : α → Bool} (h : t.WF) :
     (t.filter! (fun a _ => f a)).isEmpty ↔
-      ∀ (k : α) (h : t.contains k), f (t.getKey k h) = false := by
+      ∀ (k : α) (h : t.contains k), f (t.getKeyV k) = false := by
   simpa only [filter_eq_filter!] using isEmpty_filter_key_iff h
 
 theorem isEmpty_filter_key_eq_false_iff [TransOrd α]
     {f : α → Bool} (h : t.WF) :
     (t.filter (fun a _ => f a) h.balanced).1.isEmpty = false ↔
-      ∃ (k : α) (h : t.contains k = true), f (t.getKey k h) := by
+      ∃ (k : α) (h : t.contains k = true), f (t.getKeyV k) := by
   rw [← Bool.not_eq_true, isEmpty_filter_key_iff h]
   simp only [Classical.not_forall, Bool.not_eq_false]
 
 theorem isEmpty_filter!_key_eq_false_iff [TransOrd α]
     {f : α → Bool} (h : t.WF) :
     (t.filter! (fun a _ => f a)).isEmpty = false ↔
-      ∃ (k : α) (h : t.contains k = true), f (t.getKey k h) := by
+      ∃ (k : α) (h : t.contains k = true), f (t.getKeyV k) := by
   simpa only [filter_eq_filter!] using isEmpty_filter_key_eq_false_iff h
 
 theorem contains_filter [TransOrd α] [LawfulEqOrd α]
@@ -12110,42 +12114,50 @@ theorem size_filter!_le_size [TransOrd α]
 
 theorem size_filter_eq_size_iff [TransOrd α] [LawfulEqOrd α]
     {f : (a : α) → β a → Bool} (h : t.WF) :
-    (t.filter f h.balanced).1.size = t.size ↔ ∀ (a : α) (h : t.contains a), (f a (t.get a h)) = true := by
-  simp_to_model [filter, size, contains, get] using Internal.List.length_filter_eq_length_iff
+    (t.filter f h.balanced).1.size = t.size ↔ ∀ (a : α) (h : t.contains a),
+      haveI : Nonempty (β a) := ⟨t.get a h⟩
+      (f a (t.getV a)) = true := by
+  simp_to_model [filter, size, contains, get, getV] using Internal.List.length_filter_eq_length_iff
 
 theorem size_filter!_eq_size_iff [TransOrd α] [LawfulEqOrd α]
     {f : (a : α) → β a → Bool} (h : t.WF) :
-    (t.filter! f).size = t.size ↔ ∀ (a : α) (h : t.contains a), (f a (t.get a h)) = true := by
+    (t.filter! f).size = t.size ↔ ∀ (a : α) (h : t.contains a),
+      haveI : Nonempty (β a) := ⟨t.get a h⟩
+      (f a (t.getV a)) = true := by
   simpa only [filter_eq_filter!] using size_filter_eq_size_iff h
 
 theorem filter_equiv_self_iff [TransOrd α] [LawfulEqOrd α]
     {f : (a : α) → β a → Bool} (h : t.WF) :
-    (t.filter f h.balanced).1.Equiv t ↔ ∀ (a : α) (h : t.contains a), (f a (t.get a h)) = true := by
-  simp_to_model [filter, Equiv, contains, get] using List.perm_filter_self_iff_forall_containsKey
+    (t.filter f h.balanced).1.Equiv t ↔ ∀ (a : α) (h : t.contains a),
+      haveI : Nonempty (β a) := ⟨t.get a h⟩
+      (f a (t.getV a)) = true := by
+  simp_to_model [filter, Equiv, contains, get, getV] using List.perm_filter_self_iff_forall_containsKey
 
 theorem filter!_equiv_self_iff [TransOrd α] [LawfulEqOrd α]
     {f : (a : α) → β a → Bool} (h : t.WF) :
-    (t.filter! f).Equiv t ↔ ∀ (a : α) (h : t.contains a), (f a (t.get a h)) = true := by
+    (t.filter! f).Equiv t ↔ ∀ (a : α) (h : t.contains a),
+      haveI : Nonempty (β a) := ⟨t.get a h⟩
+      (f a (t.getV a)) = true := by
   simpa only [filter_eq_filter!] using filter_equiv_self_iff h
 
 theorem filter_key_equiv_self_iff [TransOrd α]
     {f : (a : α) → Bool} (h : t.WF) :
-    (t.filter (fun k _ => f k) h.balanced).1.Equiv t ↔ ∀ (a : α) (h : t.contains a), f (t.getKey a h) = true := by
-  simp_to_model [filter, Equiv, contains, getKey] using List.perm_filter_key_self_iff_forall_containsKey
+    (t.filter (fun k _ => f k) h.balanced).1.Equiv t ↔ ∀ (a : α) (h : t.contains a), f (t.getKeyV a) = true := by
+  simp_to_model [filter, Equiv, contains, getKeyV] using List.perm_filter_key_self_iff_forall_containsKey
 
 theorem filter!_key_equiv_self_iff [TransOrd α]
     {f : (a : α) → Bool} (h : t.WF) :
-    (t.filter! (fun k _ => f k)).Equiv t ↔ ∀ (a : α) (h : t.contains a), f (t.getKey a h) = true := by
+    (t.filter! (fun k _ => f k)).Equiv t ↔ ∀ (a : α) (h : t.contains a), f (t.getKeyV a) = true := by
   simpa only [filter_eq_filter!] using filter_key_equiv_self_iff h
 
 theorem size_filter_key_eq_size_iff [TransOrd α]
     {f : α → Bool} (h : t.WF) :
-    (t.filter (fun k _ => f k) h.balanced).1.size = t.size ↔ ∀ (k : α) (h : t.contains k), f (t.getKey k h) := by
-  simp_to_model [filter, size, contains, getKey] using List.length_filter_key_eq_length_iff
+    (t.filter (fun k _ => f k) h.balanced).1.size = t.size ↔ ∀ (k : α) (h : t.contains k), f (t.getKeyV k) := by
+  simp_to_model [filter, size, contains, getKeyV] using List.length_filter_key_eq_length_iff
 
 theorem size_filter!_key_eq_size_iff [TransOrd α]
     {f : α → Bool} (h : t.WF) :
-    (t.filter! (fun k _ => f k)).size = t.size ↔ ∀ (k : α) (h : t.contains k), f (t.getKey k h) := by
+    (t.filter! (fun k _ => f k)).size = t.size ↔ ∀ (k : α) (h : t.contains k), f (t.getKeyV k) := by
   simpa only [filter_eq_filter!] using size_filter_key_eq_size_iff h
 
 theorem get?_filter [TransOrd α] [LawfulEqOrd α]
@@ -12356,25 +12368,35 @@ variable {β : Type v} {γ : Type w} {t : Impl α (fun _ => β)}
 theorem isEmpty_filter_iff [TransOrd α]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter f h.balanced).1.isEmpty = true ↔
-      ∀ (k : α) (h : t.contains k = true), f (t.getKey k h) (Const.get t k h) = false := by
-  simp_to_model [filter, isEmpty, contains, getKey, Const.get] using List.Const.isEmpty_filter_eq_true
+      ∀ (k : α) (h : t.contains k = true),
+        haveI : Nonempty β := ⟨Const.get t k h⟩
+        f (t.getKeyV k) (Const.getV t k) = false := by
+  simp_to_model [filter, isEmpty, contains, getKeyV, Const.get, Const.getV]
+    using List.Const.isEmpty_filter_eq_true
 
 theorem isEmpty_filter!_iff [TransOrd α]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter! f).isEmpty = true ↔
-      ∀ (k : α) (h : t.contains k = true), f (t.getKey k h) (Const.get t k h) = false := by
+      ∀ (k : α) (h : t.contains k = true),
+        haveI : Nonempty β := ⟨Const.get t k h⟩
+        f (t.getKeyV k) (Const.getV t k) = false := by
   simpa only [filter_eq_filter!] using isEmpty_filter_iff h
 
 theorem isEmpty_filter_eq_false_iff [TransOrd α]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter f h.balanced).1.isEmpty = false ↔
-      ∃ (k : α) (h : t.contains k = true), (f (t.getKey k h) (Const.get t k h)) = true := by
-  simp_to_model [filter, isEmpty, contains, getKey, Const.get] using List.Const.isEmpty_filter_eq_false
+      ∃ (k : α) (h : t.contains k = true),
+        haveI : Nonempty β := ⟨Const.get t k h⟩
+        (f (t.getKeyV k) (Const.getV t k)) = true := by
+  simp_to_model [filter, isEmpty, contains, getKeyV, Const.get, Const.getV]
+    using List.Const.isEmpty_filter_eq_false
 
 theorem isEmpty_filter!_eq_false_iff [TransOrd α]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter! f).isEmpty = false ↔
-      ∃ (k : α) (h : t.contains k = true), (f (t.getKey k h) (Const.get t k h)) = true := by
+      ∃ (k : α) (h : t.contains k = true),
+        haveI : Nonempty β := ⟨Const.get t k h⟩
+        (f (t.getKeyV k) (Const.getV t k)) = true := by
   simpa only [filter_eq_filter!] using isEmpty_filter_eq_false_iff h
 
 theorem contains_filter_iff [TransOrd α]
@@ -12417,38 +12439,41 @@ theorem size_filter!_le_size [TransOrd α]
 theorem size_filter_eq_size_iff [TransOrd α]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter f h.balanced).1.size = t.size ↔ ∀ (a : α) (h : t.contains a),
-      f (t.getKey a h) (Const.get t a h) := by
-  simp_to_model [filter, size, contains, getKey, Const.get] using List.Const.length_filter_eq_length_iff
+      haveI : Nonempty β := ⟨Const.get t a h⟩
+      f (t.getKeyV a) (Const.getV t a) := by
+  simp_to_model [filter, size, contains, getKeyV, Const.get, Const.getV]
+    using List.Const.length_filter_eq_length_iff
 
 theorem size_filter!_eq_size_iff [TransOrd α]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter! f).size = t.size ↔ ∀ (a : α) (h : t.contains a),
-      f (t.getKey a h) (Const.get t a h) := by
+      haveI : Nonempty β := ⟨Const.get t a h⟩
+      f (t.getKeyV a) (Const.getV t a) := by
   simpa only [filter_eq_filter!] using size_filter_eq_size_iff h
 
 theorem filter_equiv_self_iff [TransOrd α]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter f h.balanced).1.Equiv t ↔ ∀ (a : α) (h : t.contains a),
-      f (t.getKey a h) (Const.get t a h) := by
-  simp_to_model [filter, Equiv, contains, getKey, Const.get] using
+      haveI : Nonempty β := ⟨Const.get t a h⟩
+      f (t.getKeyV a) (Const.getV t a) := by
+  simp_to_model [filter, Equiv, contains, getKeyV, Const.get, Const.getV] using
     List.Const.perm_filter_self_iff_forall_containsKey
 
 theorem filter!_equiv_self_iff [TransOrd α]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter! f).Equiv t ↔ ∀ (a : α) (h : t.contains a),
-      f (t.getKey a h) (Const.get t a h) := by
+      haveI : Nonempty β := ⟨Const.get t a h⟩
+      f (t.getKeyV a) (Const.getV t a) := by
   simpa only [filter_eq_filter!] using filter_equiv_self_iff h
 
 theorem get?_filter [TransOrd α]
     {f : α → β → Bool} {k : α} (h : t.WF) :
-    Const.get? (t.filter f h.balanced).1 k = (Const.get? t k).pfilter (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x) := by
-  simp_to_model [filter, Const.get?, getKey] using List.Const.getValue?_filter
+    Const.get? (t.filter f h.balanced).1 k = (Const.get? t k).filter (fun x => f (t.getKeyV k) x) := by
+  simp_to_model [filter, Const.get?, getKeyV] using List.Const.getValue?_filter
 
 theorem get?_filter! [TransOrd α]
     {f : α → β → Bool} {k : α} (h : t.WF) :
-    Const.get? (t.filter! f) k = (Const.get? t k).pfilter (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_get? h).mpr (Option.isSome_of_eq_some h'))) x) := by
+    Const.get? (t.filter! f) k = (Const.get? t k).filter (fun x => f (t.getKeyV k) x) := by
   simpa only [filter_eq_filter!] using get?_filter h
 
 theorem get?_filter_of_getKey?_eq_some [TransOrd α]

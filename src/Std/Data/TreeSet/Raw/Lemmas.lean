@@ -2493,13 +2493,13 @@ theorem toArray_filter {f : α → Bool} (h : t.WF) :
 @[grind =] theorem isEmpty_filter_iff [TransCmp cmp]
     {f : α → Bool} (h : t.WF) :
     (t.filter f).isEmpty ↔
-      ∀ (k : α) (h : k ∈ t), f (t.get k h) = false :=
+      ∀ (k : α) (_ : k ∈ t), f (t.getV k) = false :=
   TreeMap.Raw.isEmpty_filter_iff h.out
 
 theorem isEmpty_filter_eq_false_iff [TransCmp cmp]
     {f : α → Bool} (h : t.WF) :
     (t.filter f).isEmpty = false ↔
-      ∃ (k : α) (h : k ∈ t), f (t.get k h) :=
+      ∃ (k : α) (_ : k ∈ t), f (t.getV k) :=
   TreeMap.Raw.isEmpty_filter_eq_false_iff h.out
 
 -- TODO: `contains_filter` is missing.
@@ -2530,12 +2530,12 @@ grind_pattern size_filter_le_size => (t.filter f).size
 
 theorem size_filter_eq_size_iff [TransCmp cmp]
     {f : α → Bool} (h : t.WF) :
-    (t.filter f).size = t.size ↔ ∀ (k : α) (h : k ∈ t), f (t.get k h) :=
+    (t.filter f).size = t.size ↔ ∀ (k : α) (_ : k ∈ t), f (t.getV k) :=
   TreeMap.Raw.size_filter_eq_size_iff h.out
 
 theorem filter_equiv_self_iff [TransCmp cmp]
     {f : (a : α) → Bool} (h : t.WF) :
-    (t.filter f) ~m t ↔ ∀ (a : α) (h : a ∈ t), f (t.get a h) = true :=
+    (t.filter f) ~m t ↔ ∀ (a : α) (_ : a ∈ t), f (t.getV a) = true :=
   ⟨fun h' => (TreeMap.Raw.filter_equiv_self_iff h.out).mp h'.1,
     fun h' => ⟨(TreeMap.Raw.filter_equiv_self_iff h.out).mpr h'⟩⟩
 

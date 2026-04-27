@@ -2481,7 +2481,7 @@ theorem toList_filter [TransCmp cmp] {f : α → Bool} :
   ExtTreeMap.keys_filter_key
 
 theorem filter_eq_empty_iff [TransCmp cmp] {f : α → Bool} :
-    t.filter f = ∅ ↔ ∀ k h, f (t.get k h) = false :=
+    t.filter f = ∅ ↔ ∀ (k : α) (_ : k ∈ t), f (t.getV k) = false :=
   ext_iff.trans ExtTreeMap.filter_eq_empty_iff
 
 -- TODO: `contains_filter` is missing.
@@ -2517,12 +2517,12 @@ grind_pattern size_filter_le_size => (t.filter f).size
 
 theorem size_filter_eq_size_iff [TransCmp cmp]
     {f : α → Bool} :
-    (t.filter f).size = t.size ↔ ∀ k h, f (t.get k h) :=
+    (t.filter f).size = t.size ↔ ∀ (k : α) (_ : k ∈ t), f (t.getV k) :=
   ExtTreeMap.size_filter_eq_size_iff
 
 theorem filter_eq_self_iff [TransCmp cmp]
     {f : α → Bool} :
-    t.filter f = t ↔ ∀ k h, f (t.get k h) :=
+    t.filter f = t ↔ ∀ (k : α) (_ : k ∈ t), f (t.getV k) :=
   ext_iff.trans ExtTreeMap.filter_eq_self_iff
 
 @[simp, grind =]
