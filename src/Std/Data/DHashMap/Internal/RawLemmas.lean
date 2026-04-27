@@ -5265,62 +5265,6 @@ theorem keys_filter_key {f : α → Bool} :
 
 end raw
 
--- TODO: V-ify isEmpty_filter_iff, isEmpty_filter_eq_false_iff and more filter lemmas; this affects all hash/tree maps
-/-
-Full list:
-
-  Dependent filter
-
-  ┌─────┬──────┬─────────────────────────────────┬──────────────┬─────────────┐
-  │  #  │ Line │              Lemma              │     Uses     │ Should use  │
-  ├─────┼──────┼─────────────────────────────────┼──────────────┼─────────────┤
-  │ 3   │ 5271 │ isEmpty_filter_iff              │ m.get k h    │ m.getV k    │
-  ├─────┼──────┼─────────────────────────────────┼──────────────┼─────────────┤
-  │ 4   │ 5277 │ isEmpty_filter_eq_false_iff     │ m.get k h    │ m.getV k    │
-  ├─────┼──────┼─────────────────────────────────┼──────────────┼─────────────┤
-  │ 5   │ 5283 │ isEmpty_filter_key_iff          │ m.getKey k h │ m.getKeyV k │
-  ├─────┼──────┼─────────────────────────────────┼──────────────┼─────────────┤
-  │ 6   │ 5289 │ isEmpty_filter_key_eq_false_iff │ m.getKey k h │ m.getKeyV k │
-  ├─────┼──────┼─────────────────────────────────┼──────────────┼─────────────┤
-  │ 7   │ 5322 │ size_filter_eq_size_iff         │ m.get a h    │ m.getV a    │
-  ├─────┼──────┼─────────────────────────────────┼──────────────┼─────────────┤
-  │ 8   │ 5327 │ filter_equiv_self_iff           │ m.get a h    │ m.getV a    │
-  ├─────┼──────┼─────────────────────────────────┼──────────────┼─────────────┤
-  │ 9   │ 5332 │ filter_key_equiv_self_iff       │ m.getKey a h │ m.getKeyV a │
-  ├─────┼──────┼─────────────────────────────────┼──────────────┼─────────────┤
-  │ 10  │ 5337 │ size_filter_key_eq_size_iff     │ m.getKey k h │ m.getKeyV k │
-  └─────┴──────┴─────────────────────────────────┴──────────────┴─────────────┘
-
-  Const filter
-
-  ┌─────┬──────┬───────────────────────────────────┬─────────────────────┬─────────────────────┐
-  │  #  │ Line │               Lemma               │        Uses         │     Should use      │
-  ├─────┼──────┼───────────────────────────────────┼─────────────────────┼─────────────────────┤
-  │ 11  │ 5436 │ Const.isEmpty_filter_iff          │ getKey+Const.get    │ getKeyV+Const.getV  │
-  ├─────┼──────┼───────────────────────────────────┼─────────────────────┼─────────────────────┤
-  │ 12  │ 5442 │ Const.isEmpty_filter_eq_false_iff │ getKey+Const.get    │ getKeyV+Const.getV  │
-  ├─────┼──────┼───────────────────────────────────┼─────────────────────┼─────────────────────┤
-  │ 13  │ 5467 │ Const.size_filter_eq_size_iff     │ getKey+Const.get    │ getKeyV+Const.getV  │
-  ├─────┼──────┼───────────────────────────────────┼─────────────────────┼─────────────────────┤
-  │ 14  │ 5473 │ Const.filter_equiv_self_iff       │ getKey+Const.get    │ getKeyV+Const.getV  │
-  ├─────┼──────┼───────────────────────────────────┼─────────────────────┼─────────────────────┤
-  │ 15  │ 5480 │ Const.get?_filter                 │ pfilter with getKey │ filter with getKeyV │
-  └─────┴──────┴───────────────────────────────────┴─────────────────────┴─────────────────────┘
-
-  Const filterMap
-
-  ┌─────┬──────┬──────────────────────┬───────────────────┬───────────────────┐
-  │  #  │ Line │        Lemma         │       Uses        │    Should use     │
-  ├─────┼──────┼──────────────────────┼───────────────────┼───────────────────┤
-  │ 16  │ 5139 │ Const.get?_filterMap │ pbind with getKey │ bind with getKeyV │
-  ├─────┼──────┼──────────────────────┼───────────────────┼───────────────────┤
-  │ 17  │ 5187 │ Const.get!_filterMap │ pbind with getKey │ bind with getKeyV │
-  ├─────┼──────┼──────────────────────┼───────────────────┼───────────────────┤
-  │ 18  │ 5201 │ Const.getD_filterMap │ pbind with getKey │ bind with getKeyV │
-  └─────┴──────┴──────────────────────┴───────────────────┴───────────────────┘
-
--/
-
 theorem isEmpty_filter_iff [LawfulBEq α]
     {f : (a : α) → β a → Bool} (h : m.1.WF) :
     (m.filter f).1.isEmpty = true ↔
