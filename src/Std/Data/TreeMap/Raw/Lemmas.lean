@@ -4889,8 +4889,7 @@ theorem size_filterMap_eq_size_iff [TransCmp cmp]
 @[simp]
 theorem getElem?_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
-    (t.filterMap f)[k]? = t[k]?.pbind (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some h'))) x) :=
+    (t.filterMap f)[k]? = t[k]?.bind (fun x => f (t.getKeyV k) x) :=
   DTreeMap.Raw.Const.get?_filterMap h.out
 
 /-- Simpler variant of `getElem?_filterMap` when `LawfulEqCmp` is available. -/
@@ -4898,7 +4897,9 @@ theorem getElem?_filterMap [TransCmp cmp]
 theorem getElem?_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
     (t.filterMap f)[k]? = t[k]?.bind fun x => f k x := by
-  simp only [getElem?_filterMap h, getKey_eq h, Option.pbind_eq_bind]
+  rw [getElem?_filterMap h]
+  refine Option.bind_congr (fun x hx => ?_)
+  rw [getKeyV_eq h ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some hx))]
 
 theorem getElem?_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} (h : t.WF) :
@@ -4960,9 +4961,7 @@ theorem getElem_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
 theorem getElem!_filterMap [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
     (t.filterMap f)[k]! =
-      (t[k]?.pbind (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some h')))
-          x)).get! :=
+      (t[k]?.bind (fun x => f (t.getKeyV k) x)).get! :=
   DTreeMap.Raw.Const.get!_filterMap h.out
 
 /-- Simpler variant of `getElem!_filterMap` when `LawfulEqCmp` is available. -/
@@ -4970,7 +4969,10 @@ theorem getElem!_filterMap [TransCmp cmp] [Inhabited γ]
 theorem getElem!_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} (h : t.WF) :
     (t.filterMap f)[k]! = (t[k]?.bind (f k)).get! := by
-  simp only [getElem!_filterMap h, getKey_eq h, Option.pbind_eq_bind]
+  rw [getElem!_filterMap h]
+  congr 1
+  refine Option.bind_congr (fun x hx => ?_)
+  rw [getKeyV_eq h ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some hx))]
 
 theorem getElem!_filterMap_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k k' : α} (h : t.WF) :
@@ -4981,8 +4983,7 @@ theorem getElem!_filterMap_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
 theorem getD_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} {fallback : γ} (h : t.WF) :
     getD (t.filterMap f) k fallback =
-      (t[k]?.pbind (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some h'))) x)).getD fallback :=
+      (t[k]?.bind (fun x => f (t.getKeyV k) x)).getD fallback :=
   DTreeMap.Raw.Const.getD_filterMap h.out
 
 /-- Simpler variant of `getD_filterMap` when `LawfulEqCmp` is available. -/
@@ -4990,7 +4991,10 @@ theorem getD_filterMap [TransCmp cmp]
 theorem getD_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {fallback : γ} (h : t.WF) :
     getD (t.filterMap f) k fallback = (t[k]?.bind (f k)).getD fallback := by
-  simp only [getD_filterMap h, getKey_eq h, Option.pbind_eq_bind]
+  rw [getD_filterMap h]
+  congr 1
+  refine Option.bind_congr (fun x hx => ?_)
+  rw [getKeyV_eq h ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some hx))]
 
 theorem getD_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : t.WF) :
@@ -5064,13 +5068,17 @@ theorem keysArray_filter_key {f : α → Bool} (h : t.WF) :
 theorem isEmpty_filter_iff [TransCmp cmp]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter f).isEmpty = true ↔
-      ∀ (k : α) (h : k ∈ t), f (t.getKey k h) (t[k]' h) = false :=
+      ∀ (k : α) (h : k ∈ t),
+        haveI : Nonempty β := ⟨t[k]'h⟩
+        f (t.getKeyV k) t｢k｣ = false :=
   DTreeMap.Raw.Const.isEmpty_filter_iff h.out
 
 theorem isEmpty_filter_eq_false_iff [TransCmp cmp]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter f).isEmpty = false ↔
-      ∃ (k : α) (h : k ∈ t), f (t.getKey k h) (t[k]'h) :=
+      ∃ (k : α) (h : k ∈ t),
+        haveI : Nonempty β := ⟨t[k]'h⟩
+        f (t.getKeyV k) t｢k｣ :=
   DTreeMap.Raw.Const.isEmpty_filter_eq_false_iff h.out
 
 -- TODO: `contains_filter` is missing
@@ -5104,35 +5112,33 @@ grind_pattern size_filter_le_size => (t.filter f).size
 theorem size_filter_eq_size_iff [TransCmp cmp]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter f).size = t.size ↔ ∀ (a : α) (h : a ∈ t),
-      f (t.getKey a h) t[a] :=
+      haveI : Nonempty β := ⟨t[a]'h⟩
+      f (t.getKeyV a) t｢a｣ :=
   DTreeMap.Raw.Const.size_filter_eq_size_iff h.out
 
 theorem filter_equiv_self_iff [TransCmp cmp]
     {f : α → β → Bool} (h : t.WF) :
     (t.filter f) ~m t ↔ ∀ (a : α) (h : a ∈ t),
-      f (t.getKey a h) t[a] :=
+      haveI : Nonempty β := ⟨t[a]'h⟩
+      f (t.getKeyV a) t｢a｣ :=
   ⟨fun h' => (DTreeMap.Raw.Const.filter_equiv_self_iff h.out).mp h'.1,
     fun h' => ⟨(DTreeMap.Raw.Const.filter_equiv_self_iff h.out).mpr h'⟩⟩
 
 @[simp, grind =]
 theorem getElem?_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} (h : t.WF) :
-    (t.filter f)[k]? = t[k]?.pfilter (fun x h' =>
-      f (t.getKey k ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some h'))) x) :=
+    (t.filter f)[k]? = t[k]?.filter (fun x => f (t.getKeyV k) x) :=
   DTreeMap.Raw.Const.get?_filter h.out
-
-/-
-PLOG(getElem?_filter'):
-Implementation might be trickier if we refrain from using `getKey_eq` and use `V` lemmas;
-would have to deal with the whole `pfilter`/`+contextual` mess.
--/
 
 /-- Simpler variant of `getElem?_filter` when `LawfulEqCmp` is available. -/
 @[grind =]
 theorem getElem?_filter' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Bool} {k : α} (h : t.WF) :
     (t.filter f)[k]? = t[k]?.filter (f k) := by
-  simp only [getElem?_filter h, getKey_eq h, Option.pfilter_eq_filter]
+  rw [getElem?_filter h]
+  rcases h' : t[k]? with _ | x
+  · simp
+  · simp [getKeyV_eq h ((mem_iff_isSome_getElem? h).mpr (Option.isSome_of_eq_some h'))]
 
 theorem getElem?_filter_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Bool} {k k' : α} (h : t.WF) :

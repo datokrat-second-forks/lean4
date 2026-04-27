@@ -4799,8 +4799,7 @@ theorem size_filterMap_eq_size_iff [TransCmp cmp]
 @[simp]
 theorem getElem?_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} :
-    (t.filterMap f)[k]? = t[k]?.pbind (fun x h' =>
-      f (t.getKey k (mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some h'))) x) :=
+    (t.filterMap f)[k]? = t[k]?.bind (fun x => f (t.getKeyV k) x) :=
   ExtDTreeMap.Const.get?_filterMap
 
 /-- Simpler variant of `getElem?_filterMap` when `LawfulEqCmp` is available. -/
@@ -4808,7 +4807,9 @@ theorem getElem?_filterMap [TransCmp cmp]
 theorem getElem?_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f)[k]? = t[k]?.bind fun x => f k x := by
-  simp only [getElem?_filterMap, getKey_eq, Option.pbind_eq_bind]
+  rw [getElem?_filterMap]
+  refine Option.bind_congr (fun x hx => ?_)
+  rw [getKeyV_eq (mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some hx))]
 
 theorem getElem?_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} (h : t.getKey? k = some k') :
@@ -4869,8 +4870,7 @@ theorem getElem_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
 theorem getElem!_filterMap [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f)[k]! =
-      (t[k]?.pbind (fun x h' =>
-        f (t.getKey k (mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some h'))) x)).get! :=
+      (t[k]?.bind (fun x => f (t.getKeyV k) x)).get! :=
   ExtDTreeMap.Const.get!_filterMap
 
 /-- Simpler variant of `getElem!_filterMap` when `LawfulEqCmp` is available. -/
@@ -4878,7 +4878,10 @@ theorem getElem!_filterMap [TransCmp cmp] [Inhabited γ]
 theorem getElem!_filterMap' [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k : α} :
     (t.filterMap f)[k]! = (t[k]?.bind (f k)).get! := by
-  simp only [getElem!_filterMap, getKey_eq, Option.pbind_eq_bind]
+  rw [getElem!_filterMap]
+  congr 1
+  refine Option.bind_congr (fun x hx => ?_)
+  rw [getKeyV_eq (mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some hx))]
 
 theorem getElem!_filterMap_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
     {f : α → β → Option γ} {k k' : α} (h : t.getKey? k = some k') :
@@ -4888,8 +4891,7 @@ theorem getElem!_filterMap_of_getKey?_eq_some [TransCmp cmp] [Inhabited γ]
 theorem getD_filterMap [TransCmp cmp]
     {f : α → β → Option γ} {k : α} {fallback : γ} :
     (t.filterMap f).getD k fallback =
-      (t[k]?.pbind (fun x h' =>
-      f (t.getKey k (mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some h'))) x)).getD fallback :=
+      (t[k]?.bind (fun x => f (t.getKeyV k) x)).getD fallback :=
   ExtDTreeMap.Const.getD_filterMap
 
 /-- Simpler variant of `getD_filterMap` when `LawfulEqCmp` is available. -/
@@ -4897,7 +4899,10 @@ theorem getD_filterMap [TransCmp cmp]
 theorem getD_filterMap' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Option γ} {k : α} {fallback : γ} :
     (t.filterMap f).getD k fallback = (t[k]?.bind (f k)).getD fallback := by
-  simp only [getD_filterMap, getKey_eq, Option.pbind_eq_bind]
+  rw [getD_filterMap]
+  congr 1
+  refine Option.bind_congr (fun x hx => ?_)
+  rw [getKeyV_eq (mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some hx))]
 
 theorem getD_filterMap_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Option γ} {k k' : α} {fallback : γ} (h : t.getKey? k = some k') :
@@ -4962,7 +4967,9 @@ theorem keys_filter_key [TransCmp cmp] {f : α → Bool} :
   ExtDTreeMap.keys_filter_key
 
 theorem filter_eq_empty_iff [TransCmp cmp] {f : α → β → Bool} :
-    t.filter f = ∅ ↔ ∀ k h, f (t.getKey k h) (t[k]'h) = false :=
+    t.filter f = ∅ ↔ ∀ k h,
+      haveI : Nonempty β := ⟨t[k]'h⟩
+      f (t.getKeyV k) t｢k｣ = false :=
   ext_iff.trans ExtDTreeMap.Const.filter_eq_empty_iff
 
 -- TODO: `contains_filter` is missing
@@ -5000,19 +5007,22 @@ grind_pattern size_filter_le_size => (t.filter f).size
 
 theorem size_filter_eq_size_iff [TransCmp cmp]
     {f : α → β → Bool} :
-    (t.filter f).size = t.size ↔ ∀ k h, f (t.getKey k h) (t[k]'h) :=
+    (t.filter f).size = t.size ↔ ∀ k h,
+      haveI : Nonempty β := ⟨t[k]'h⟩
+      f (t.getKeyV k) t｢k｣ :=
   ExtDTreeMap.Const.size_filter_eq_size_iff
 
 theorem filter_eq_self_iff [TransCmp cmp]
     {f : α → β → Bool} :
-    t.filter f = t ↔ ∀ k h, f (t.getKey k h) (t[k]'h) :=
+    t.filter f = t ↔ ∀ k h,
+      haveI : Nonempty β := ⟨t[k]'h⟩
+      f (t.getKeyV k) t｢k｣ :=
   ext_iff.trans ExtDTreeMap.Const.filter_eq_self_iff
 
 @[simp, grind =]
 theorem getElem?_filter [TransCmp cmp]
     {f : α → β → Bool} {k : α} :
-    (t.filter f)[k]? = t[k]?.pfilter (fun x h' =>
-      f (t.getKey k (mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some h'))) x) :=
+    (t.filter f)[k]? = t[k]?.filter (fun x => f (t.getKeyV k) x) :=
   ExtDTreeMap.Const.get?_filter
 
 /-- Simpler variant of `getElem?_filter` when `LawfulEqCmp` is available. -/
@@ -5020,7 +5030,10 @@ theorem getElem?_filter [TransCmp cmp]
 theorem getElem?_filter' [TransCmp cmp] [LawfulEqCmp cmp]
     {f : α → β → Bool} {k : α} :
     (t.filter f)[k]? = t[k]?.filter (f k) := by
-  simp only [getElem?_filter, getKey_eq, Option.pfilter_eq_filter]
+  rw [getElem?_filter]
+  rcases h : t[k]? with _ | x
+  · simp
+  · simp [getKeyV_eq (mem_iff_isSome_getElem?.mpr (Option.isSome_of_eq_some h))]
 
 theorem getElem?_filter_of_getKey?_eq_some [TransCmp cmp]
     {f : α → β → Bool} {k k' : α} :
