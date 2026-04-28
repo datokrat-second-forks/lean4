@@ -2893,12 +2893,20 @@ theorem get?_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α]
   exact @Raw₀.Const.get?_inter_of_contains_eq_false_right _ _ _ _ ⟨m₁.1, m₁.2.size_buckets_pos⟩ ⟨m₂.1, m₂.2.size_buckets_pos⟩ _ _ m₁.2 m₂.2 k not_mem
 
 /- get -/
-@[simp] theorem get_inter [EquivBEq α] [LawfulHashable α]
+@[simp]
+theorem getV_inter [EquivBEq α] [LawfulHashable α]
+    {k : α} (h_mem : k ∈ m₁ ∩ m₂) :
+    haveI : Nonempty _ := ⟨Const.get _ k h_mem⟩
+    Const.getV (m₁.inter m₂) k =
+      Const.getV m₁ k := by
+  rw [mem_iff_contains] at h_mem
+  exact @Raw₀.Const.getV_inter _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ _ _ m₁.2 m₂.2 k h_mem
+
+theorem get_inter [EquivBEq α] [LawfulHashable α]
     {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
     Const.get (m₁.inter m₂) k h_mem =
-    Const.get m₁ k ((mem_inter_iff.1 h_mem).1) := by
-  rw [mem_iff_contains] at h_mem
-  exact @Raw₀.Const.get_inter _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ _ _ m₁.2 m₂.2 k h_mem
+      Const.get m₁ k ((mem_inter_iff.1 h_mem).1) := by
+  simpa using getV_inter h_mem
 
 /- getD -/
 theorem getD_inter [EquivBEq α] [LawfulHashable α] {k : α} {fallback : β} :
