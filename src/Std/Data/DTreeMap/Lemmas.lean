@@ -512,6 +512,10 @@ theorem getV_eq_getV [TransCmp cmp] [LawfulEqCmp cmp] {a : α} {_ : Nonempty β}
 theorem get_eq_get [TransCmp cmp] [LawfulEqCmp cmp] {a : α} {h} : get t a h = t.get a h :=
   Impl.Const.get_eq_get t.wf
 
+theorem getV_congr [TransCmp cmp] {a b : α} {_ : Nonempty β} (hab : cmp a b = .eq) :
+    getV t a = getV t b :=
+  Impl.Const.getV_congr t.wf hab
+
 theorem get_congr [TransCmp cmp] {a b : α} (hab : cmp a b = .eq) {h'} :
     get t a h' = get t b ((mem_congr hab).mp h') :=
   Impl.Const.get_congr t.wf hab
@@ -847,10 +851,6 @@ theorem get_eq_getV [TransCmp cmp] {a : α} {h} :
 theorem getV_eq_getD_ofNonempty [TransCmp cmp] {_ : Nonempty β} {a : α} :
     getV t a = getD t a Classical.ofNonempty :=
   rfl
-
-theorem getV_congr [TransCmp cmp] {a b : α} {_ : Nonempty β} (hab : cmp a b = .eq) :
-    getV t a = getV t b :=
-  Impl.Const.getV_congr t.wf hab
 
 end Const
 
