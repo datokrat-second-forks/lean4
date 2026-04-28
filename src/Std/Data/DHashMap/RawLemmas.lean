@@ -445,13 +445,13 @@ theorem get?_congr [EquivBEq α] [LawfulHashable α] (h : m.WF) {a b : α} (hab 
 
 end Const
 
--- NOTE: deviates from DTreeMap analog by adding `(h : m.WF)` because the
--- `Raw → Raw₀` bridge for `getV` needs `m.WF` (DTreeMap's `Impl.get_eq_getV` doesn't).
 @[simp, grind norm]
-theorem get_eq_getV [LawfulBEq α] (h : m.WF) {a : α} {h'} :
+theorem get_eq_getV [LawfulBEq α] {a : α} {h'} :
     haveI : Nonempty (β a) := ⟨m.get a h'⟩
     m.get a h' = m.getV a := by
-  simp_to_raw using Raw₀.get_eq_getV
+  simp only [get, getV]
+  have : 0 < m.buckets.size := by change dite .. = true at h'; split at h' <;> simp_all
+  simp [this]
 
 @[grind =] theorem getV_insert [LawfulBEq α] (h : m.WF) {k a : α} {v : β k}
     {_ : Nonempty (β a)} :
@@ -831,10 +831,12 @@ theorem get!_eq_getD_default [LawfulBEq α] (h : m.WF) {a : α} [Inhabited (β a
   simp_to_raw using Raw₀.get!_eq_getD_default
 
 @[simp, grind norm]
-theorem getEntry_eq_getEntryV [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : α} {h'} :
+theorem getEntry_eq_getEntryV [EquivBEq α] [LawfulHashable α] {a : α} {h'} :
     haveI : Nonempty ((a : α) × β a) := ⟨m.getEntry a h'⟩
     m.getEntry a h' = m.getEntryV a := by
-  simp_to_raw using Raw₀.getEntry_eq_getEntryV
+  simp only [getEntry, getEntryV]
+  have : 0 < m.buckets.size := by change dite .. = true at h'; split at h' <;> simp_all
+  simp [this]
 
 namespace Const
 
@@ -941,10 +943,12 @@ theorem getD_congr [EquivBEq α] [LawfulHashable α] (h : m.WF) {a b : α} {fall
   simp_to_raw using Raw₀.Const.getD_congr
 
 @[simp, grind norm]
-theorem get_eq_getV [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : α} {h'} :
+theorem get_eq_getV [EquivBEq α] [LawfulHashable α] {a : α} {h'} :
     haveI : Nonempty β := ⟨get m a h'⟩
     get m a h' = getV m a := by
-  simp_to_raw using Raw₀.Const.get_eq_getV
+  simp only [get, getV]
+  have : 0 < m.buckets.size := by change dite .. = true at h'; split at h' <;> simp_all
+  simp [this]
 
 end Const
 
@@ -1280,9 +1284,11 @@ theorem getKey_eq_getKeyD [EquivBEq α] [LawfulHashable α] (h : m.WF) {a fallba
   simp_to_raw using Raw₀.getKey_eq_getKeyD
 
 @[simp, grind norm]
-theorem getKey_eq_getKeyV [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : α} {h'} :
+theorem getKey_eq_getKeyV [EquivBEq α] [LawfulHashable α] {a : α} {h'} :
     m.getKey a h' = m.getKeyV a := by
-  simp_to_raw using Raw₀.getKey_eq_getKeyV
+  simp only [getKey, getKeyV]
+  have : 0 < m.buckets.size := by change dite .. = true at h'; split at h' <;> simp_all
+  simp [this]
 
 theorem getKey!_eq_getKeyD_default [EquivBEq α] [LawfulHashable α] [Inhabited α] (h : m.WF)
     {a : α} :
@@ -2486,6 +2492,17 @@ theorem get?_union_of_not_mem_right [LawfulBEq α] (h₁ : m₁.WF) (h₂ : m₂
   all_goals wf_trivial
 
 /- get -/
+theorem getV_union_of_mem_right [LawfulBEq α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (mem : k ∈ m₂) :
+    haveI : Nonempty (β k) := ⟨m₂.get k mem⟩
+    (m₁ ∪ m₂).getV k = m₂.getV k := by
+  rw [mem_iff_contains] at mem
+  revert mem
+  simp only [Union.union]
+  simp_to_raw
+  apply Raw₀.getV_union_of_contains_right
+  all_goals wf_trivial
+
 theorem get_union_of_mem_right [LawfulBEq α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (mem : k ∈ m₂) :
     (m₁ ∪ m₂).get k (mem_union_of_right h₁ h₂ mem) = m₂.get k mem := by
@@ -2494,6 +2511,17 @@ theorem get_union_of_mem_right [LawfulBEq α] (h₁ : m₁.WF) (h₂ : m₂.WF)
   simp only [Union.union]
   simp_to_raw
   apply Raw₀.get_union_of_contains_right
+  all_goals wf_trivial
+
+theorem getV_union_of_not_mem_left [LawfulBEq α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} {_ : Nonempty (β k)} (not_mem : ¬k ∈ m₁) :
+    (m₁ ∪ m₂).getV k = m₂.getV k := by
+  rw [← contains_eq_false_iff_not_mem] at not_mem
+  revert not_mem
+  simp only [Union.union]
+  simp_to_raw
+  intro contains_eq_false
+  apply Raw₀.getV_union_of_contains_eq_false_left
   all_goals wf_trivial
 
 theorem get_union_of_not_mem_left [LawfulBEq α] (h₁ : m₁.WF) (h₂ : m₂.WF)
@@ -2505,6 +2533,17 @@ theorem get_union_of_not_mem_left [LawfulBEq α] (h₁ : m₁.WF) (h₂ : m₂.W
   simp_to_raw
   intro contains_eq_false
   apply Raw₀.get_union_of_contains_eq_false_left
+  all_goals wf_trivial
+
+theorem getV_union_of_not_mem_right [LawfulBEq α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} {_ : Nonempty (β k)} (not_mem : ¬k ∈ m₂) :
+    (m₁ ∪ m₂).getV k = m₁.getV k := by
+  rw [← contains_eq_false_iff_not_mem] at not_mem
+  revert not_mem
+  simp only [Union.union]
+  simp_to_raw
+  intro not_mem
+  apply Raw₀.getV_union_of_contains_eq_false_right
   all_goals wf_trivial
 
 theorem get_union_of_not_mem_right [LawfulBEq α] (h₁ : m₁.WF) (h₂ : m₂.WF)
@@ -2591,6 +2630,14 @@ theorem getKey?_union_of_not_mem_right [EquivBEq α] [LawfulHashable α]
   simp_to_raw using Raw₀.getKey?_union_of_contains_eq_false_right
 
 /- getKey -/
+theorem getKeyV_union_of_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (mem : k ∈ m₂) :
+    (m₁ ∪ m₂).getKeyV k = m₂.getKeyV k := by
+  rw [mem_iff_contains] at mem
+  revert mem
+  simp only [Union.union]
+  simp_to_raw using Raw₀.getKeyV_union_of_contains_right
+
 theorem getKey_union_of_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (mem : k ∈ m₂) :
     (m₁ ∪ m₂).getKey k (mem_union_of_right h₁ h₂ mem) = m₂.getKey k mem := by
@@ -2598,6 +2645,14 @@ theorem getKey_union_of_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁
   revert mem
   simp only [Union.union]
   simp_to_raw using Raw₀.getKey_union_of_contains_right
+
+theorem getKeyV_union_of_not_mem_left [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (not_mem : ¬k ∈ m₁) :
+    (m₁ ∪ m₂).getKeyV k = m₂.getKeyV k := by
+  rw [← contains_eq_false_iff_not_mem] at not_mem
+  revert not_mem
+  simp only [Union.union]
+  simp_to_raw using Raw₀.getKeyV_union_of_contains_eq_false_left
 
 theorem getKey_union_of_not_mem_left [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (not_mem : ¬k ∈ m₁) {h'} :
@@ -2609,6 +2664,14 @@ theorem getKey_union_of_not_mem_left [EquivBEq α] [LawfulHashable α] (h₁ : m
   intro not_mem
   apply Raw₀.getKey_union_of_contains_eq_false_left
   all_goals wf_trivial
+
+theorem getKeyV_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (not_mem : ¬k ∈ m₂) :
+    (m₁ ∪ m₂).getKeyV k = m₁.getKeyV k := by
+  rw [← contains_eq_false_iff_not_mem] at not_mem
+  revert not_mem
+  simp only [Union.union]
+  simp_to_raw using Raw₀.getKeyV_union_of_contains_eq_false_right
 
 theorem getKey_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (not_mem : ¬k ∈ m₂) {h'} :
@@ -2742,6 +2805,17 @@ theorem get?_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m�
   simp_to_raw using Raw₀.Const.get?_union_of_contains_eq_false_right
 
 /- get -/
+theorem getV_union_of_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (mem : k ∈ m₂) :
+    haveI : Nonempty β := ⟨Const.get m₂ k mem⟩
+    Const.getV (m₁ ∪ m₂) k = Const.getV m₂ k := by
+  rw [mem_iff_contains] at mem
+  revert mem
+  simp only [Union.union]
+  simp_to_raw
+  apply Raw₀.Const.getV_union_of_contains_right
+  all_goals wf_trivial
+
 theorem get_union_of_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (mem : k ∈ m₂) :
     Const.get (m₁ ∪ m₂) k (mem_union_of_right h₁ h₂ mem) = Const.get m₂ k mem := by
@@ -2749,6 +2823,18 @@ theorem get_union_of_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF
   revert mem
   simp only [Union.union]
   simp_to_raw using Raw₀.Const.get_union_of_contains_right
+
+theorem getV_union_of_not_mem_left [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
+    (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (not_mem : ¬k ∈ m₁) :
+    Const.getV (m₁ ∪ m₂) k = Const.getV m₂ k := by
+  rw [← contains_eq_false_iff_not_mem] at not_mem
+  revert not_mem
+  simp only [Union.union]
+  simp_to_raw
+  intro not_mem
+  apply Raw₀.Const.getV_union_of_contains_eq_false_left
+  all_goals wf_trivial
 
 theorem get_union_of_not_mem_left [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (not_mem : ¬k ∈ m₁) {h'} :
@@ -2759,6 +2845,18 @@ theorem get_union_of_not_mem_left [EquivBEq α] [LawfulHashable α] (h₁ : m₁
   simp_to_raw
   intro not_mem
   apply Raw₀.Const.get_union_of_contains_eq_false_left
+  all_goals wf_trivial
+
+theorem getV_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
+    (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (not_mem : ¬k ∈ m₂) :
+    Const.getV (m₁ ∪ m₂) k = Const.getV m₁ k := by
+  rw [← contains_eq_false_iff_not_mem] at not_mem
+  revert not_mem
+  simp only [Union.union]
+  simp_to_raw
+  intro not_mem
+  apply Raw₀.Const.getV_union_of_contains_eq_false_right
   all_goals wf_trivial
 
 theorem get_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
@@ -3041,7 +3139,17 @@ theorem getKey?_inter_of_not_mem_left [EquivBEq α] [LawfulHashable α]
   simp_to_raw using Raw₀.getKey?_inter_of_contains_eq_false_left
 
 /- getKey -/
-@[simp] theorem getKey_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+@[simp] theorem getKeyV_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
+    (m₁ ∩ m₂).getKeyV k = m₁.getKeyV k := by
+  revert h_mem
+  simp only [Membership.mem, Inter.inter]
+  simp_to_raw
+  intro h_mem
+  apply Raw₀.getKeyV_inter
+  all_goals wf_trivial
+
+theorem getKey_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
     (m₁ ∩ m₂).getKey k h_mem =
     m₁.getKey k ((mem_inter_iff h₁ h₂).1 h_mem).1 := by
@@ -4298,6 +4406,14 @@ theorem get?_ofList_of_mem [LawfulBEq α]
     (ofList l).get? k' = some (cast (by congr; apply LawfulBEq.eq_of_beq k_beq) v) := by
   simp_to_raw using Raw₀.get?_insertMany_emptyWithCapacity_list_of_mem
 
+theorem getV_ofList_of_mem [LawfulBEq α]
+    {l : List ((a : α) × β a)} {k k' : α} (k_beq : k == k') {v : β k}
+    (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
+    (mem : ⟨k, v⟩ ∈ l) :
+    haveI : Nonempty (β k') := ⟨cast (by congr; apply LawfulBEq.eq_of_beq k_beq) v⟩
+    (ofList l).getV k' = cast (by congr; apply LawfulBEq.eq_of_beq k_beq) v := by
+  simp_to_raw using Raw₀.getV_insertMany_emptyWithCapacity_list_of_mem
+
 theorem get_ofList_of_mem [LawfulBEq α]
     {l : List ((a : α) × β a)} {k k' : α} (k_beq : k == k') {v : β k}
     (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
@@ -4345,6 +4461,14 @@ theorem getKey?_ofList_of_mem [EquivBEq α] [LawfulHashable α]
     (mem : k ∈ l.map Sigma.fst) :
     (ofList l).getKey? k' = some k := by
   simp_to_raw using Raw₀.getKey?_insertMany_emptyWithCapacity_list_of_mem
+
+theorem getKeyV_ofList_of_mem [EquivBEq α] [LawfulHashable α]
+    {l : List ((a : α) × β a)}
+    {k k' : α} (k_beq : k == k')
+    (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
+    (mem : k ∈ l.map Sigma.fst) :
+    (ofList l).getKeyV k' = k := by
+  simp_to_raw using Raw₀.getKeyV_insertMany_emptyWithCapacity_list_of_mem
 
 theorem getKey_ofList_of_mem [EquivBEq α] [LawfulHashable α]
     {l : List ((a : α) × β a)}
@@ -4456,6 +4580,14 @@ theorem get?_ofList_of_mem [EquivBEq α] [LawfulHashable α]
     get? (ofList l) k' = some v := by
   simp_to_raw using Raw₀.Const.get?_insertMany_emptyWithCapacity_list_of_mem
 
+theorem getV_ofList_of_mem [EquivBEq α] [LawfulHashable α]
+    {l : List (α × β)} {k k' : α} (k_beq : k == k') {v : β}
+    (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
+    (mem : ⟨k, v⟩ ∈ l) :
+    haveI : Nonempty β := ⟨v⟩
+    getV (ofList l) k' = v := by
+  simp_to_raw using Raw₀.Const.getV_insertMany_emptyWithCapacity_list_of_mem
+
 theorem get_ofList_of_mem [EquivBEq α] [LawfulHashable α]
     {l : List (α × β)} {k k' : α} (k_beq : k == k') {v : β}
     (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
@@ -4503,6 +4635,14 @@ theorem getKey?_ofList_of_mem [EquivBEq α] [LawfulHashable α]
     (mem : k ∈ l.map Prod.fst) :
     (ofList l).getKey? k' = some k := by
   simp_to_raw using Raw₀.Const.getKey?_insertMany_emptyWithCapacity_list_of_mem
+
+theorem getKeyV_ofList_of_mem [EquivBEq α] [LawfulHashable α]
+    {l : List (α × β)}
+    {k k' : α} (k_beq : k == k')
+    (distinct : l.Pairwise (fun a b => (a.1 == b.1) = false))
+    (mem : k ∈ l.map Prod.fst) :
+    (ofList l).getKeyV k' = k := by
+  simp_to_raw using Raw₀.Const.getKeyV_insertMany_emptyWithCapacity_list_of_mem
 
 theorem getKey_ofList_of_mem [EquivBEq α] [LawfulHashable α]
     {l : List (α × β)}
@@ -4608,6 +4748,14 @@ theorem getKey?_unitOfList_of_mem [EquivBEq α] [LawfulHashable α]
     getKey? (unitOfList l) k' = some k := by
   simp_to_raw using Raw₀.Const.getKey?_insertManyIfNewUnit_emptyWithCapacity_list_of_mem
 
+theorem getKeyV_unitOfList_of_mem [EquivBEq α] [LawfulHashable α]
+    {l : List α}
+    {k k' : α} (k_beq : k == k')
+    (distinct : l.Pairwise (fun a b => (a == b) = false))
+    (mem : k ∈ l) :
+    getKeyV (unitOfList l) k' = k := by
+  simp_to_raw using Raw₀.Const.getKeyV_insertManyIfNewUnit_emptyWithCapacity_list_of_mem
+
 theorem getKey_unitOfList_of_mem [EquivBEq α] [LawfulHashable α]
     {l : List α}
     {k k' : α} (k_beq : k == k')
@@ -4664,6 +4812,11 @@ theorem get?_unitOfList [EquivBEq α] [LawfulHashable α]
     {l : List α} {k : α} :
     get? (unitOfList l) k = if l.contains k then some () else none := by
   simp_to_raw using Raw₀.Const.get?_insertManyIfNewUnit_emptyWithCapacity_list
+
+@[simp]
+theorem getV_unitOfList {l : List α} {k : α} :
+    getV (unitOfList l) k = () := by
+  simp [Raw.Const.getV]
 
 @[simp]
 theorem get_unitOfList
@@ -4909,7 +5062,7 @@ theorem getKeyV_alter [LawfulBEq α] {k k' : α} {f : Option (β k) → Option (
   simp_to_raw using Raw₀.getKeyV_alter
 
 -- Note that in many use cases `getKey_eq` gives a simpler right hand side.
-theorem getKey_alter [LawfulBEq α] [Inhabited α] {k k' : α} {f : Option (β k) → Option (β k)}
+theorem getKey_alter [LawfulBEq α] {k k' : α} {f : Option (β k) → Option (β k)}
     (h : m.WF) {hc : k' ∈ m.alter k f} :
     (m.alter k f).getKey k' hc =
       if heq : k == k' then
@@ -4929,8 +5082,7 @@ theorem getKeyV_alter_self [LawfulBEq α] {k : α} {f : Option (β k) → Option
 
 theorem getKey_alter_self [LawfulBEq α] {k : α} {f : Option (β k) → Option (β k)}
     (h : m.WF) {hc : k ∈ m.alter k f} : (m.alter k f).getKey k hc = k := by
-  haveI : Inhabited α := ⟨k⟩
-  simp [getKey_alter h]
+  simpa [getKey_eq_getKeyV] using getKeyV_alter_self h hc
 
 @[grind =]
 theorem getKeyD_alter [LawfulBEq α] {k k' fallback : α} {f : Option (β k) → Option (β k)} (h : m.WF) :
@@ -5060,6 +5212,18 @@ theorem get?_alter_self [EquivBEq α] [LawfulHashable α] {k : α} {f : Option �
   simp [get?_alter h]
 
 @[grind =]
+theorem getV_alter [EquivBEq α] [LawfulHashable α] {k k' : α} {f : Option β → Option β}
+    (h : m.WF) (hc : k' ∈ Const.alter m k f) :
+    haveI : Nonempty β := ⟨Const.get (Const.alter m k f) k' hc⟩
+    Const.getV (Const.alter m k f) k' =
+      if k == k' then
+        f (Const.get? m k) |>.getV
+      else
+        Const.getV m k' := by
+  simp only [mem_iff_contains] at hc
+  revert hc
+  simp_to_raw using Raw₀.Const.getV_alter
+
 theorem get_alter [EquivBEq α] [LawfulHashable α] {k k' : α} {f : Option β → Option β}
     (h : m.WF) {hc : k' ∈ Const.alter m k f} :
     Const.get (Const.alter m k f) k' hc =
@@ -5069,18 +5233,22 @@ theorem get_alter [EquivBEq α] [LawfulHashable α] {k k' : α} {f : Option β �
       else
         haveI h' : k' ∈ m := mem_alter_of_beq_eq_false h (Bool.not_eq_true _ ▸ heq) |>.mp hc
         Const.get m k' h' := by
-  simp only [mem_iff_contains] at hc
-  revert hc
-  simp_to_raw using Raw₀.Const.get_alter
+  simpa using getV_alter h hc
 
 @[simp]
-theorem get_alter_self [EquivBEq α] [LawfulHashable α] {k : α} {f : Option β → Option β}
-    (h : m.WF) {hc : k ∈ Const.alter m k f} :
+theorem getV_alter_self [EquivBEq α] [LawfulHashable α] {k : α} {f : Option β → Option β}
+    (h : m.WF) (hc : k ∈ Const.alter m k f) :
     haveI h' : (f (Const.get? m k)).isSome := mem_alter_self h |>.mp hc
     Const.get (Const.alter m k f) k hc = (f (Const.get? m k)).get h' := by
   simp only [mem_iff_contains] at hc
   revert hc
-  simp [get_alter h]
+  simp [getV_alter h hc]
+
+theorem get_alter_self [EquivBEq α] [LawfulHashable α] {k : α} {f : Option β → Option β}
+    (h : m.WF) {hc : k ∈ Const.alter m k f} :
+    haveI h' : (f (Const.get? m k)).isSome := mem_alter_self h |>.mp hc
+    Const.get (Const.alter m k f) k hc = (f (Const.get? m k)).get h' := by
+  simpa using getV_alter_self h hc
 
 @[grind =]
 theorem get!_alter [EquivBEq α] [LawfulHashable α] {k k' : α} [Inhabited β]
@@ -5141,7 +5309,14 @@ theorem getKey!_alter_self [EquivBEq α] [LawfulHashable α] [Inhabited α] {k :
   simp [getKey!_alter h]
 
 @[grind =]
-theorem getKey_alter [EquivBEq α] [LawfulHashable α] [Inhabited α] {k k' : α}
+theorem getKeyV_alter [EquivBEq α] [LawfulHashable α] {k k' : α}
+    {f : Option β → Option β} (h : m.WF) (hc : k' ∈ Const.alter m k f) :
+    (Const.alter m k f).getKeyV k' = if k == k' then k else m.getKeyV k' := by
+  simp only [mem_iff_contains] at hc
+  revert hc
+  simp_to_raw using Raw₀.Const.getKeyV_alter
+
+theorem getKey_alter [EquivBEq α] [LawfulHashable α] {k k' : α}
     {f : Option β → Option β} (h : m.WF) {hc : k' ∈ Const.alter m k f} :
     (Const.alter m k f).getKey k' hc =
       if heq : k == k' then
@@ -5149,15 +5324,18 @@ theorem getKey_alter [EquivBEq α] [LawfulHashable α] [Inhabited α] {k k' : α
       else
         haveI h' : k' ∈ m := mem_alter_of_beq_eq_false h (Bool.not_eq_true _ ▸ heq) |>.mp hc
         m.getKey k' h' := by
-  simp only [mem_iff_contains] at hc
-  revert hc
-  simp_to_raw using Raw₀.Const.getKey_alter
+  simpa using getKeyV_alter h hc
 
 @[simp]
+theorem getKeyV_alter_self [EquivBEq α] [LawfulHashable α] [Inhabited α] {k : α}
+    {f : Option β → Option β} (h : m.WF) (hc : k ∈ Const.alter m k f) :
+    (Const.alter m k f).getKeyV k = k := by
+  simp [getKeyV_alter h hc]
+
 theorem getKey_alter_self [EquivBEq α] [LawfulHashable α] [Inhabited α] {k : α}
     {f : Option β → Option β} (h : m.WF) {hc : k ∈ Const.alter m k f} :
     (Const.alter m k f).getKey k hc = k := by
-  simp [getKey_alter h]
+  simpa using getKeyV_alter_self h hc
 
 @[grind =]
 theorem getKeyD_alter [EquivBEq α] [LawfulHashable α] {k k' fallback : α} {f : Option β → Option β}
@@ -6079,8 +6257,7 @@ theorem isSome_apply_of_mem_filterMap_getKey_get [EquivBEq α] [LawfulHashable �
     ∀ (h' : k ∈ m.filterMap f),
       (f (m.getKey k (mem_of_mem_filterMap h h'))
         (Const.get m k (mem_of_mem_filterMap h h'))).isSome := by
-  simp [← contains_iff_mem]
-  simp_to_raw using Raw₀.Const.isSome_apply_of_contains_filterMap_getKey_get
+  simpa using isSome_apply_of_mem_filterMap h
 
 @[simp, grind =]
 theorem getV_filterMap [EquivBEq α] [LawfulHashable α]
@@ -6217,14 +6394,14 @@ theorem isEmpty_filter_eq_false_iff [LawfulBEq α]
 theorem isEmpty_filter_key_iff [EquivBEq α] [LawfulHashable α]
     {f : α → Bool} (h : m.WF) :
     (m.filter (fun a _ => f a)).isEmpty ↔
-      ∀ (k : α) (h : k ∈ m), f (m.getKeyV k) = false := by
+      ∀ (k : α) (_ : k ∈ m), f (m.getKeyV k) = false := by
   simp only [mem_iff_contains]
   simp_to_raw using Raw₀.isEmpty_filter_key_iff
 
 theorem isEmpty_filter_key_eq_false_iff [EquivBEq α] [LawfulHashable α]
     {f : α → Bool} (h : m.WF) :
     (m.filter (fun a _ => f a)).isEmpty = false ↔
-      ∃ (k : α) (h : k ∈ m), f (m.getKeyV k) := by
+      ∃ (k : α) (_ : k ∈ m), f (m.getKeyV k) := by
   simp only [mem_iff_contains]
   simp_to_raw using Raw₀.isEmpty_filter_key_eq_false_iff
 
@@ -6295,7 +6472,7 @@ theorem filter_key_equiv_self_iff [EquivBEq α] [LawfulHashable α]
 
 theorem size_filter_key_eq_size_iff [EquivBEq α] [LawfulHashable α]
     {f : α → Bool} (h : m.WF) :
-    (m.filter fun k _ => f k).size = m.size ↔ ∀ (k : α) (h : k ∈ m), f (m.getKeyV k) := by
+    (m.filter fun k _ => f k).size = m.size ↔ ∀ (k : α) (_ : k ∈ m), f (m.getKeyV k) := by
   simp only [mem_iff_contains]
   simp_to_raw using Raw₀.size_filter_key_eq_size_iff
 
@@ -6720,7 +6897,7 @@ theorem get?_map' [EquivBEq α] [LawfulHashable α]
 theorem get?_map [LawfulBEq α]
     {f : α → β → γ} {k : α} (h : m.WF) :
     Const.get? (m.map f) k = (Const.get? m k).map (f k) := by
-  simp [get?_map' h, getKey_eq h]
+  simp_to_raw using Raw₀.Const.get?_map
 
 theorem get?_map_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → γ} {k k' : α} (h : m.WF) :
@@ -6778,7 +6955,7 @@ theorem get!_map' [EquivBEq α] [LawfulHashable α] [Inhabited γ]
 theorem get!_map [LawfulBEq α] [Inhabited γ]
     {f : α → β → γ} {k : α} (h : m.WF) :
     Const.get! (m.map f) k = ((Const.get? m k).map (f k)).get! := by
-  simp [get!_map' h, getKey_eq h]
+  simp_to_raw using Raw₀.Const.get!_map
 
 theorem get!_map_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α] [Inhabited γ]
     {f : α → β → γ} {k k' : α} (h : m.WF) :
@@ -6798,7 +6975,7 @@ theorem getD_map' [EquivBEq α] [LawfulHashable α]
 theorem getD_map [LawfulBEq α]
     {f : α → β → γ} {k : α} {fallback : γ} (h : m.WF) :
     Const.getD (m.map f) k fallback = ((Const.get? m k).map (f k)).getD fallback := by
-  simp [getD_map' h, getKey_eq h]
+  simp_to_raw using Raw₀.Const.getD_map
 
 theorem getD_map_of_getKey?_eq_some [EquivBEq α] [LawfulHashable α]
     {f : α → β → γ} {k k' : α} {fallback : γ} (h : m.WF) :
