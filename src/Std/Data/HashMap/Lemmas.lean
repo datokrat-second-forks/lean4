@@ -2304,10 +2304,6 @@ theorem Equiv.diff_congr {m₃ m₄ : HashMap α β} [EquivBEq α] [LawfulHashab
     (m₁ \ m₂) ~m (m₃ \ m₄) :=
   ⟨DHashMap.Equiv.diff_congr equiv₁.1 equiv₂.1⟩
 
-/- getElem -/
--- Diagnosis: `DHashMap.Const.getV_diff` does not exist; DHashMap only has the
--- dependent `DHashMap.getV_diff` requiring `[LawfulBEq α]`. Leaving this as a
--- failing proof for review.
 theorem getElemV_diff [EquivBEq α] [LawfulHashable α]
     {k : α} (h_mem : k ∈ m₁ \ m₂) :
     haveI : Nonempty β := ⟨(m₁ \ m₂)[k]'h_mem⟩
@@ -3855,14 +3851,10 @@ theorem mem_filter [EquivBEq α] [LawfulHashable α]
       f (m.getKeyV k) m｢k｣ :=
   DHashMap.Const.mem_filter
 
--- Diagnosis: `DHashMap.Const.mem_filter_iff_getKey_get` does not exist in the
--- current state of `Std.Data.DHashMap.Lemmas` (only `mem_filter_iff_getKey_get`
--- for the dependent `LawfulBEq` variant and `mem_filter_key_iff_getKey` for the
--- key-only filter exist). Leaving this as a failing proof for review.
 theorem mem_filter_iff_getKey_getElem [EquivBEq α] [LawfulHashable α]
     {f : α → β → Bool} {k : α} :
-    k ∈ m.filter f ↔ ∃ (h' : k ∈ m), f (m.getKey k h') m[k] :=
-  DHashMap.Const.mem_filter_iff_getKey_get
+    k ∈ m.filter f ↔ ∃ (h' : k ∈ m), f (m.getKey k h') m[k] := by
+  simpa using mem_filter
 
 theorem contains_of_contains_filter [EquivBEq α] [LawfulHashable α]
     {f : α → β → Bool} {k : α} :

@@ -2995,11 +2995,7 @@ theorem get_inter [LawfulBEq α]
     {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
     (m₁ ∩ m₂).get k h_mem =
     m₁.get k (mem_inter_iff.1 h_mem).1 := by
-  induction m₁
-  case mk a =>
-    induction m₂
-    case mk b =>
-      apply DHashMap.get_inter
+  simpa using getV_inter h_mem
 
 /- getD -/
 theorem getD_inter [LawfulBEq α] {k : α} {fallback : β k} :
@@ -3213,23 +3209,24 @@ theorem get?_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α]
   exact m₁.inductionOn₂ m₂ fun _ _ h => DHashMap.Const.get?_inter_of_not_mem_right h
 
 /- get -/
-theorem get_inter [EquivBEq α] [LawfulHashable α]
-    {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
-    Const.get (m₁ ∩ m₂) k h_mem =
-    Const.get m₁ k (mem_inter_iff.1 h_mem).1 := by
+@[simp]
+theorem getV_inter [EquivBEq α] [LawfulHashable α]
+    {k : α} (h_mem : k ∈ m₁ ∩ m₂) :
+    haveI : Nonempty _ := ⟨Const.get (m₁ ∩ m₂) k h_mem⟩
+    Const.getV (m₁ ∩ m₂) k =
+      Const.getV m₁ k := by
   induction m₁
   case mk a =>
     induction m₂
     case mk b =>
-      apply DHashMap.Const.get_inter
+      apply DHashMap.Const.getV_inter
+      exact h_mem
 
-@[simp] theorem getV_inter [EquivBEq α] [LawfulHashable α]
-    {k : α} (h_mem : k ∈ m₁ ∩ m₂) :
-    haveI : Nonempty β := ⟨Const.get (m₁ ∩ m₂) k h_mem⟩
-    Const.getV (m₁ ∩ m₂) k = Const.getV m₁ k := by
-  haveI : Nonempty β := ⟨Const.get (m₁ ∩ m₂) k h_mem⟩
-  rw [← get_eq_getV (h := h_mem), get_inter,
-    get_eq_getV (h := (mem_inter_iff.1 h_mem).1)]
+theorem get_inter [EquivBEq α] [LawfulHashable α]
+    {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
+    Const.get (m₁ ∩ m₂) k h_mem =
+    Const.get m₁ k (mem_inter_iff.1 h_mem).1 := by
+  simpa using getV_inter h_mem
 
 /- getD -/
 theorem getD_inter [EquivBEq α] [LawfulHashable α] {k : α} {fallback : β} :
@@ -3338,6 +3335,7 @@ theorem get?_diff_of_mem_right [LawfulBEq α]
   exact m₁.inductionOn₂ m₂ fun _ _ h => DHashMap.get?_diff_of_mem_right h
 
 /- get -/
+@[simp]
 theorem getV_diff [LawfulBEq α]
     {k : α} (h_mem : k ∈ m₁ \ m₂) :
     haveI : Nonempty (β k) := ⟨(m₁ \ m₂).get k h_mem⟩
@@ -3349,16 +3347,11 @@ theorem getV_diff [LawfulBEq α]
     | mk b =>
       apply DHashMap.getV_diff
 
-@[simp]
 theorem get_diff [LawfulBEq α]
     {k : α} {h_mem : k ∈ m₁ \ m₂} :
     (m₁ \ m₂).get k h_mem =
     m₁.get k (mem_diff_iff.1 h_mem).1 := by
-  induction m₁
-  case mk a =>
-    induction m₂
-    case mk b =>
-      apply DHashMap.get_diff
+  simpa using getV_diff h_mem
 
 /- getD -/
 theorem getD_diff [LawfulBEq α] {k : α} {fallback : β k} :
