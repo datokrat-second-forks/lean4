@@ -684,6 +684,11 @@ theorem getD_emptyWithCapacity [LawfulBEq α] {a : α} {fallback : β a} {c} :
     (emptyWithCapacity c : Raw₀ α β).getD a fallback = fallback := by
   simp [getD, emptyWithCapacity, - getElem_eq_getElemV, Array.getElem_replicate]
 
+theorem getV_emptyWithCapacity [LawfulBEq α] {a : α} {_ : Nonempty (β a)} {c} :
+    haveI : Nonempty α := ⟨a⟩
+    (emptyWithCapacity c : Raw₀ α β).getV a = Classical.ofNonempty := by
+  simpa [getV] using getD_emptyWithCapacity
+
 theorem getD_of_isEmpty [LawfulBEq α] (h : m.1.WF) {a : α} {fallback : β a} :
     m.1.isEmpty = true → m.getD a fallback = fallback := by
   simp_to_model [isEmpty, getD]; empty
