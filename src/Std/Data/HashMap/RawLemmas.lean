@@ -1940,11 +1940,13 @@ theorem get?_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m�
     get? (m₁ ∩ m₂) k = none :=
   @DHashMap.Raw.Const.get?_inter_of_not_mem_right _ _ _ _ m₁.inner m₂.inner _ _ h₁.out h₂.out k not_mem
 
-/- getElem -/
--- TODO: V-form `getElemV_inter` analogous to TreeMap diff is missing here because
--- `DHashMap.Raw.Const.getV_inter` doesn't exist (only the LawfulBEq dependent form
--- `DHashMap.Raw.getV_inter` exists in DHashMap.RawLemmas).
 @[simp]
+theorem getElemV_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
+    haveI : Nonempty _ := ⟨(m₁ ∩ m₂)[k]'h_mem⟩
+    (m₁ ∩ m₂)｢k｣ = m₁｢k｣ :=
+  @DHashMap.Raw.Const.getV_inter _ _ _ _ m₁.inner m₂.inner _ _ h₁.out h₂.out k h_mem
+
 theorem getElem_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
     (m₁ ∩ m₂)[k]'h_mem = m₁[k]'((mem_inter_iff h₁ h₂).1 h_mem).1 :=
@@ -2242,10 +2244,13 @@ theorem get?_diff_of_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF
     get? (m₁ \ m₂) k = none :=
   @DHashMap.Raw.Const.get?_diff_of_mem_right _ _ _ _ m₁.inner m₂.inner _ _ h₁.out h₂.out k mem
 
-/- getElem -/
--- TODO: V-form `getElemV_diff` analogous to TreeMap diff is missing here because
--- `DHashMap.Raw.Const.getV_diff` doesn't exist (only `DHashMap.Raw.getV_diff` for LawfulBEq).
 @[simp]
+theorem getElemV_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} {h_mem : k ∈ m₁ \ m₂} :
+    haveI : Nonempty _ := ⟨(m₁ \ m₂)[k]⟩
+    (m₁ \ m₂)｢k｣ = m₁｢k｣ :=
+  @DHashMap.Raw.Const.getV_diff _ _ _ _ m₁.inner m₂.inner _ _ h₁.out h₂.out k h_mem
+
 theorem getElem_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {h_mem : k ∈ m₁ \ m₂} :
     (m₁ \ m₂)[k]'h_mem = m₁[k]'((mem_diff_iff h₁ h₂).1 h_mem).1 :=
@@ -3126,9 +3131,6 @@ theorem getElem_alter [EquivBEq α] [LawfulHashable α] {k k' : α} {f : Option 
         m[k']'h' :=
   DHashMap.Raw.Const.get_alter h.out (hc := hc)
 
--- TODO: `DHashMap.Raw.Const.getV_alter_self` in DHashMap.RawLemmas has a non-V conclusion
--- (`Const.get ... = ... .get h'`) despite its name, so it cannot be used here directly.
--- Leaving the V-form lemma `getElemV_alter_self` as a failing proof for review.
 @[simp]
 theorem getElemV_alter_self [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α}
     {f : Option β → Option β} (hc : k ∈ alter m k f) :

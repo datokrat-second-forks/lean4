@@ -3230,12 +3230,19 @@ theorem get?_diff_of_mem_right [EquivBEq α] [LawfulHashable α]
   @Raw₀.Const.get?_diff_of_contains_right _ _ _ _ ⟨m₁.1, m₁.2.size_buckets_pos⟩ ⟨m₂.1, m₂.2.size_buckets_pos⟩ _ _ m₁.2 m₂.2 k mem
 
 /- get -/
-@[simp] theorem get_diff [EquivBEq α] [LawfulHashable α]
+@[simp] theorem getV_diff [EquivBEq α] [LawfulHashable α]
+    {k : α} (h_mem : k ∈ m₁ \ m₂) :
+    haveI : Nonempty _ := ⟨Const.get _ k h_mem⟩
+    Const.getV (m₁.diff m₂) k =
+      Const.getV m₁ k := by
+  rw [mem_iff_contains] at h_mem
+  exact @Raw₀.Const.getV_diff _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ _ _ m₁.2 m₂.2 k h_mem
+
+theorem get_diff [EquivBEq α] [LawfulHashable α]
     {k : α} {h_mem : k ∈ m₁ \ m₂} :
     Const.get (m₁.diff m₂) k h_mem =
     Const.get m₁ k ((mem_diff_iff.1 h_mem).1) := by
-  rw [mem_iff_contains] at h_mem
-  exact @Raw₀.Const.get_diff _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ _ _ m₁.2 m₂.2 k h_mem
+  simpa using getV_diff h_mem
 
 /- getD -/
 theorem getD_diff [EquivBEq α] [LawfulHashable α] {k : α} {fallback : β} :

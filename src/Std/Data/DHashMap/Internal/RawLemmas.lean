@@ -4146,11 +4146,19 @@ theorem get?_diff_of_contains_right [EquivBEq α] [LawfulHashable α] (h₁ : m�
   simp_to_model [diff, Const.get?, contains] using List.getValue?_filter_not_contains_map_fst_of_contains_right
 
 /- get -/
+theorem getV_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
+    {k : α} (h_contains : (m₁.diff m₂).contains k) :
+    haveI : Nonempty _ := ⟨Const.get _ k h_contains⟩
+    Const.getV (m₁.diff m₂) k =
+    Const.getV m₁ k := by
+  revert h_contains
+  simp_to_model [diff, Const.getV, contains] using List.getValueV_filter_not_contains
+
 theorem get_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
     {k : α} {h_contains : (m₁.diff m₂).contains k} :
     Const.get (m₁.diff m₂) k h_contains =
     Const.get m₁ k ((contains_diff_iff h₁ h₂).1 h_contains).1 := by
-  simp_to_model [diff, Const.get, contains] using List.getValue_filter_not_contains
+  simpa using getV_diff h₁ h₂ h_contains
 
 /- getD -/
 theorem getD_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)

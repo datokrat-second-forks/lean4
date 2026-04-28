@@ -3378,16 +3378,24 @@ theorem get?_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m�
   simp_to_raw using Raw₀.Const.get?_inter_of_contains_eq_false_right
 
 /- get -/
-@[simp] theorem get_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
-    {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
-    Const.get (m₁ ∩ m₂) k h_mem =
-    Const.get m₁ k ((mem_inter_iff h₁ h₂).1 h_mem).1 := by
+@[simp]
+theorem getV_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (h_mem : k ∈ m₁ ∩ m₂) :
+    haveI : Nonempty _ := ⟨Const.get _ k h_mem⟩
+    Const.getV (m₁ ∩ m₂) k =
+      Const.getV m₁ k := by
   revert h_mem
   simp only [Membership.mem, Inter.inter]
   simp_to_raw
   intro h_mem
-  apply Raw₀.Const.get_inter
+  apply Raw₀.Const.getV_inter
   all_goals wf_trivial
+
+theorem get_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
+    Const.get (m₁ ∩ m₂) k h_mem =
+    Const.get m₁ k ((mem_inter_iff h₁ h₂).1 h_mem).1 := by
+  simpa using getV_inter h₁ h₂ h_mem
 
 /- getD -/
 theorem getD_inter [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
@@ -3816,14 +3824,22 @@ theorem get?_diff_of_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF
   simp_to_raw using Raw₀.Const.get?_diff_of_contains_right
 
 /- get -/
-@[simp] theorem get_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
-    {k : α} {h_mem : k ∈ m₁ \ m₂} :
-    Const.get (m₁.diff m₂) k h_mem =
-    Const.get m₁ k ((mem_diff_iff h₁ h₂).1 h_mem).1 := by
+@[simp]
+theorem getV_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} (h_mem : k ∈ m₁ \ m₂) :
+    haveI : Nonempty _ := ⟨Const.get _ k h_mem⟩
+    Const.getV (m₁.diff m₂) k =
+      Const.getV m₁ k := by
   rw [mem_iff_contains] at h_mem
   revert h_mem
   simp only [SDiff.sdiff]
-  simp_to_raw using Raw₀.Const.get_diff
+  simp_to_raw using Raw₀.Const.getV_diff
+
+theorem get_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+    {k : α} {h_mem : k ∈ m₁ \ m₂} :
+    Const.get (m₁.diff m₂) k h_mem =
+    Const.get m₁ k ((mem_diff_iff h₁ h₂).1 h_mem).1 := by
+  simpa using getV_diff h₁ h₂ h_mem
 
 /- getD -/
 theorem getD_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
@@ -5274,8 +5290,8 @@ theorem get_alter [EquivBEq α] [LawfulHashable α] {k k' : α} {f : Option β �
 @[simp]
 theorem getV_alter_self [EquivBEq α] [LawfulHashable α] {k : α} {f : Option β → Option β}
     (h : m.WF) (hc : k ∈ Const.alter m k f) :
-    haveI h' : (f (Const.get? m k)).isSome := mem_alter_self h |>.mp hc
-    Const.get (Const.alter m k f) k hc = (f (Const.get? m k)).get h' := by
+    haveI : Nonempty _ := ⟨Const.get _ k hc⟩
+    Const.getV (Const.alter m k f) k = (f (Const.get? m k)).getV := by
   simp only [mem_iff_contains] at hc
   revert hc
   simp [getV_alter h hc]
