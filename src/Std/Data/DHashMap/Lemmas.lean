@@ -2353,9 +2353,7 @@ theorem getV_union_of_not_mem_left [LawfulBEq α]
 theorem get_union_of_not_mem_left [LawfulBEq α]
     {k : α} (not_mem : ¬k ∈ m₁) {h'} :
     (m₁ ∪ m₂).get k h' = m₂.get k (mem_of_mem_union_of_not_mem_left h' not_mem) := by
-  rw [← contains_eq_false_iff_not_mem] at not_mem
-  rw [mem_iff_contains] at h'
-  exact @Raw₀.get_union_of_contains_eq_false_left _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, m₂.2.size_buckets_pos⟩ _ m₁.2 m₂.2 k not_mem h'
+  simpa using getV_union_of_not_mem_left not_mem
 
 theorem getV_union_of_not_mem_right [LawfulBEq α]
     {k : α} {_ : Nonempty (β k)} (not_mem : ¬k ∈ m₂) :
@@ -2366,9 +2364,7 @@ theorem getV_union_of_not_mem_right [LawfulBEq α]
 theorem get_union_of_not_mem_right [LawfulBEq α]
     {k : α} (not_mem : ¬k ∈ m₂) {h'} :
     (m₁ ∪ m₂).get k h' = m₁.get k (mem_of_mem_union_of_not_mem_right h' not_mem) := by
-  rw [← contains_eq_false_iff_not_mem] at not_mem
-  rw [mem_iff_contains] at h'
-  exact @Raw₀.get_union_of_contains_eq_false_right _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, m₂.2.size_buckets_pos⟩ _ m₁.2 m₂.2 k not_mem h'
+  simpa using getV_union_of_not_mem_right not_mem
 
 /- getD -/
 theorem getD_union [LawfulBEq α] {k : α} {fallback : β k} :
@@ -2440,9 +2436,8 @@ theorem getKeyV_union_of_not_mem_left [EquivBEq α] [LawfulHashable α]
 
 theorem getKey_union_of_not_mem_left [EquivBEq α] [LawfulHashable α]
     {k : α} (not_mem : ¬k ∈ m₁) {h'} :
-    (m₁ ∪ m₂).getKey k h' = m₂.getKey k (mem_of_mem_union_of_not_mem_left h' not_mem) :=by
-  rw [← contains_eq_false_iff_not_mem] at not_mem
-  exact @Raw₀.getKey_union_of_contains_eq_false_left _ _ _ _ ⟨m₁.1, m₁.2.size_buckets_pos⟩ ⟨m₂.1, m₂.2.size_buckets_pos⟩ _ _ m₁.2 m₂.2 k not_mem h'
+    (m₁ ∪ m₂).getKey k h' = m₂.getKey k (mem_of_mem_union_of_not_mem_left h' not_mem) := by
+  simpa using getKeyV_union_of_not_mem_left not_mem
 
 theorem getKeyV_union_of_not_mem_right [EquivBEq α] [LawfulHashable α]
     {k : α} (not_mem : ¬k ∈ m₂) :
@@ -2453,8 +2448,7 @@ theorem getKeyV_union_of_not_mem_right [EquivBEq α] [LawfulHashable α]
 theorem getKey_union_of_not_mem_right [EquivBEq α] [LawfulHashable α]
     {k : α} (not_mem : ¬k ∈ m₂) {h'} :
     (m₁ ∪ m₂).getKey k h' = m₁.getKey k (mem_of_mem_union_of_not_mem_right h' not_mem) := by
-  rw [← contains_eq_false_iff_not_mem] at not_mem
-  exact @Raw₀.getKey_union_of_contains_eq_false_right _ _ _ _ ⟨m₁.1, m₁.2.size_buckets_pos⟩ ⟨m₂.1, m₂.2.size_buckets_pos⟩ _ _ m₁.2 m₂.2 k not_mem h'
+  simpa using getKeyV_union_of_not_mem_right not_mem
 
 /- getKeyD -/
 theorem getKeyD_union [EquivBEq α] [LawfulHashable α] {k fallback : α} :
@@ -2560,8 +2554,7 @@ theorem getV_union_of_not_mem_left [EquivBEq α] [LawfulHashable α] {_ : Nonemp
 theorem get_union_of_not_mem_left [EquivBEq α] [LawfulHashable α]
     {k : α} (not_mem : ¬k ∈ m₁) {h'} :
     Const.get (m₁.union m₂) k h' = Const.get m₂ k (mem_of_mem_union_of_not_mem_left h' not_mem) := by
-  rw [← contains_eq_false_iff_not_mem] at not_mem
-  exact @Raw₀.Const.get_union_of_contains_eq_false_left _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ _ _  m₁.2 m₂.2 k not_mem h'
+  simpa using getV_union_of_not_mem_left not_mem
 
 theorem getV_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
     {k : α} (not_mem : ¬k ∈ m₂) :
@@ -2572,8 +2565,7 @@ theorem getV_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonem
 theorem get_union_of_not_mem_right [EquivBEq α] [LawfulHashable α]
     {k : α} (not_mem : ¬k ∈ m₂) {h'} :
     Const.get (m₁.union m₂) k h' = Const.get m₁ k (mem_of_mem_union_of_not_mem_right h' not_mem) := by
-  rw [← contains_eq_false_iff_not_mem] at not_mem
-  exact @Raw₀.Const.get_union_of_contains_eq_false_right _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ _ _  m₁.2 m₂.2 k not_mem h'
+  simpa using getV_union_of_not_mem_right not_mem
 
 /- getD -/
 theorem getD_union [EquivBEq α] [LawfulHashable α] {k : α} {fallback : β} :
@@ -2694,8 +2686,7 @@ theorem get_inter [LawfulBEq α]
     {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
     (m₁ ∩ m₂).get k h_mem =
     m₁.get k ((mem_inter_iff.1 h_mem).1) := by
-  rw [mem_iff_contains] at h_mem
-  exact @Raw₀.get_inter _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ _ m₁.2 m₂.2 k h_mem
+  simpa using getV_inter h_mem
 
 /- getD -/
 theorem getD_inter [LawfulBEq α] {k : α} {fallback : β k} :
@@ -2777,8 +2768,7 @@ theorem getKey_inter [EquivBEq α] [LawfulHashable α]
     {k : α} {h_mem : k ∈ m₁ ∩ m₂} :
     (m₁ ∩ m₂).getKey k h_mem =
     m₁.getKey k ((mem_inter_iff.1 h_mem).1) := by
-  rw [mem_iff_contains] at h_mem
-  exact @Raw₀.getKey_inter _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ _ _ m₁.2 m₂.2 k h_mem
+  simpa using getKeyV_inter h_mem
 
 /- getKeyD -/
 theorem getKeyD_inter [EquivBEq α] [LawfulHashable α] {k fallback : α} :
@@ -3042,8 +3032,7 @@ theorem get_diff [LawfulBEq α]
     {k : α} {h_mem : k ∈ m₁ \ m₂} :
     (m₁ \ m₂).get k h_mem =
     m₁.get k ((mem_diff_iff.1 h_mem).1) := by
-  rw [mem_iff_contains] at h_mem
-  exact @Raw₀.get_diff _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ _ m₁.2 m₂.2 k h_mem
+  simpa using getV_diff h_mem
 
 /- getD -/
 theorem getD_diff [LawfulBEq α] {k : α} {fallback : β k} :
@@ -3125,8 +3114,7 @@ theorem getKey_diff [EquivBEq α] [LawfulHashable α]
     {k : α} {h_mem : k ∈ m₁ \ m₂} :
     (m₁ \ m₂).getKey k h_mem =
     m₁.getKey k ((mem_diff_iff.1 h_mem).1) := by
-  rw [mem_iff_contains] at h_mem
-  exact @Raw₀.getKey_diff _ _ _ _ ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ _ _ m₁.2 m₂.2 k h_mem
+  simpa using getKeyV_diff h_mem
 
 /- getKeyD -/
 theorem getKeyD_diff [EquivBEq α] [LawfulHashable α] {k fallback : α} :
@@ -4818,6 +4806,12 @@ theorem getKeyV_modify [LawfulBEq α] {k k' : α} {f : β k → β k}
       if k == k' then k else m.getKeyV k' :=
   Raw₀.getKeyV_modify ⟨m.1, _⟩ m.2 h
 
+theorem getKey_modify [LawfulBEq α] {k k' : α} {f : β k → β k}
+    {h : k' ∈ m.modify k f} :
+    (m.modify k f).getKey k' h =
+      if k == k' then k else m.getKey k' (mem_modify.mp h) :=
+  Raw₀.getKey_modify ⟨m.1, _⟩ m.2 h
+
 @[simp]
 theorem getKeyV_modify_self [LawfulBEq α] {k : α} {f : β k → β k}
     (h : k ∈ m.modify k f) : (m.modify k f).getKeyV k = k :=
@@ -5057,8 +5051,8 @@ theorem getV_eq [LawfulBEq α] {k : α} {_ : Nonempty (β k)} (h : m₁ ~m m₂)
   rw [DHashMap.getV_eq_getV_get?, DHashMap.getV_eq_getV_get?, h.get?_eq]
 
 theorem get_eq [LawfulBEq α] {k : α} (hk : k ∈ m₁) (h : m₁ ~m m₂) :
-    m₁.get k hk = m₂.get k (h.mem_iff.mp hk) :=
-  Raw₀.get_eq_of_equiv ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ m₁.2 m₂.2 h.1 hk
+    m₁.get k hk = m₂.get k (h.mem_iff.mp hk) := by
+  simpa using getV_eq h
 
 theorem get!_eq [LawfulBEq α] {k : α} [Inhabited (β k)] (h : m₁ ~m m₂) :
     m₁.get! k = m₂.get! k :=
@@ -5078,8 +5072,8 @@ theorem getKeyV_eq [EquivBEq α] [LawfulHashable α] {k : α} (h : m₁ ~m m₂)
   rw [DHashMap.getKeyV_eq_getV_getKey?, DHashMap.getKeyV_eq_getV_getKey?, h.getKey?_eq]
 
 theorem getKey_eq [EquivBEq α] [LawfulHashable α] {k : α} (hk : k ∈ m₁) (h : m₁ ~m m₂) :
-    m₁.getKey k hk = m₂.getKey k (h.mem_iff.mp hk) :=
-  Raw₀.getKey_eq_of_equiv ⟨m₁.1, _⟩ ⟨m₂.1, _⟩ m₁.2 m₂.2 h.1 hk
+    m₁.getKey k hk = m₂.getKey k (h.mem_iff.mp hk) := by
+  simpa using getKeyV_eq h
 
 theorem getKey!_eq [EquivBEq α] [LawfulHashable α] [Inhabited α] {k : α} (h : m₁ ~m m₂) :
     m₁.getKey! k = m₂.getKey! k :=

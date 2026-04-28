@@ -4666,7 +4666,7 @@ theorem getKeyV_modify (h : m.1.WF) {k k' : α} {f : β k → β k}
   revert hc
   simp_to_model [modify, contains, getKeyV] using List.getKeyV_modifyKey
 
-theorem getKey_modify (h : m.1.WF) [Inhabited α] {k k' : α} {f : β k → β k}
+theorem getKey_modify (h : m.1.WF) {k k' : α} {f : β k → β k}
     (hc : (m.modify k f).contains k') :
     (m.modify k f).getKey k' hc =
       if k == k' then
