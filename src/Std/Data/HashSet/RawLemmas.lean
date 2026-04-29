@@ -618,6 +618,11 @@ theorem mem_toArray [LawfulBEq α] {k : α} (h : m.WF) :
     k ∈ m.toArray ↔ k ∈ m :=
   HashMap.Raw.mem_keysArray h.out
 
+theorem forall_mem_toArray_iff_forall_mem_getV [EquivBEq α] [LawfulHashable α]
+    {p : α → Prop} (h : m.WF) :
+    (∀ k ∈ m.toArray, p k) ↔ ∀ (k : α), k ∈ m → p (m.getV k) :=
+  HashMap.Raw.forall_mem_keysArray_iff_forall_mem_getKeyV h.out
+
 theorem forall_mem_toArray_iff_forall_mem_get [EquivBEq α] [LawfulHashable α]
     {p : α → Prop} (h : m.WF) :
     (∀ k ∈ m.toArray, p k) ↔ ∀ (k : α) (h : k ∈ m), p (m.get k h) :=
@@ -692,6 +697,11 @@ theorem any_toList [LawfulHashable α] [EquivBEq α] {p : α → Bool} (h : m.WF
     m.toList.any p = m.any p :=
   HashMap.Raw.any_keys h.out
 
+theorem any_eq_true_iff_exists_mem_getV [LawfulHashable α] [EquivBEq α]
+    {p : α → Bool} (h : m.WF) :
+    m.any p = true ↔ ∃ (a : α), a ∈ m ∧ p (m.getV a) := by
+  simpa [← exists_prop] using HashMap.Raw.any_eq_true_iff_exists_mem_getKeyV_getElemV h.out
+
 theorem any_eq_true_iff_exists_mem_get [LawfulHashable α] [EquivBEq α]
     {p : α → Bool} (h : m.WF) :
     m.any p = true ↔ ∃ (a : α) (h : a ∈ m), p (m.get a h) :=
@@ -700,6 +710,12 @@ theorem any_eq_true_iff_exists_mem_get [LawfulHashable α] [EquivBEq α]
 theorem any_eq_true_iff_exists_mem [LawfulBEq α] {p : α → Bool} (h : m.WF) :
     m.any p = true ↔ ∃ (a : α), a ∈ m ∧ p a := by
   simpa using @HashMap.Raw.any_eq_true_iff_exists_mem_getElem _ _ _ _ _ _ (fun a b => p a) h.out
+
+theorem any_eq_false_iff_forall_mem_getV [LawfulHashable α] [EquivBEq α]
+    {p : α → Bool} (h : m.WF) :
+    m.any p = false ↔
+      ∀ (a : α), a ∈ m → p (m.getV a) = false :=
+  HashMap.Raw.any_eq_false_iff_forall_mem_getKeyV_getElemV h.out
 
 theorem any_eq_false_iff_forall_mem_get [LawfulHashable α] [EquivBEq α]
     {p : α → Bool} (h : m.WF) :
@@ -717,6 +733,11 @@ theorem all_toList [LawfulHashable α] [EquivBEq α] {p : α → Bool} (h : m.WF
     m.toList.all p = m.all p :=
   HashMap.Raw.all_keys h.out
 
+theorem all_eq_true_iff_forall_mem_getV [EquivBEq α] [LawfulHashable α]
+    {p : α → Bool} (h : m.WF) :
+    m.all p = true ↔ ∀ (a : α), a ∈ m → p (m.getV a) :=
+  HashMap.Raw.all_eq_true_iff_forall_mem_getKeyV_getElemV h.out
+
 theorem all_eq_true_iff_forall_mem_get [EquivBEq α] [LawfulHashable α]
     {p : α → Bool} (h : m.WF) :
     m.all p = true ↔ ∀ (a : α) (h : a ∈ m), p (m.get a h) :=
@@ -725,6 +746,11 @@ theorem all_eq_true_iff_forall_mem_get [EquivBEq α] [LawfulHashable α]
 theorem all_eq_true_iff_forall_mem [LawfulBEq α] {p : α → Bool} (h : m.WF) :
     m.all p = true ↔ ∀ (a : α), a ∈ m → p a := by
   simpa using HashMap.Raw.all_eq_true_iff_forall_mem_getElem h.out
+
+theorem all_eq_false_iff_exists_mem_getV [EquivBEq α] [LawfulHashable α]
+    {p : α → Bool} (h : m.WF) :
+    m.all p = false ↔ ∃ (a : α), a ∈ m ∧ p (m.getV a) = false := by
+  simpa [← exists_prop] using HashMap.Raw.all_eq_false_iff_exists_mem_getKeyV_getElemV h.out
 
 theorem all_eq_false_iff_exists_mem_get [EquivBEq α] [LawfulHashable α]
     {p : α → Bool} (h : m.WF) :
