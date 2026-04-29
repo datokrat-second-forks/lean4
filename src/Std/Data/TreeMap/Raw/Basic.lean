@@ -183,7 +183,7 @@ instance : GetElem? (Raw α β cmp) α β (fun m a => a ∈ m) where
   getElem? m a := m.get? a
   getElem! m a := m.get! a
 
-noncomputable instance [Nonempty β] : GetElemV (Raw α β cmp) α β where
+noncomputable instance : GetElemV (Raw α β cmp) α β where
   getElemV m a := m.getV a
 
 @[inline, inherit_doc DTreeMap.Raw.getKey?]
