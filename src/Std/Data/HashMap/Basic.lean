@@ -170,8 +170,7 @@ instance [BEq α] [Hashable α] : GetElem? (HashMap α β) α β (fun m a => a �
   getElem? m a := m.get? a
   getElem! m a := m.get! a
 
--- TODO: remove nonepty instances from these
-noncomputable instance [Nonempty β] : GetElemV (HashMap α β) α β where
+noncomputable instance : GetElemV (HashMap α β) α β where
   getElemV m a := m.getV a
 
 @[inline, inherit_doc DHashMap.getKey?] def getKey? (m : HashMap α β) (a : α) : Option α :=

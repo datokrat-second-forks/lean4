@@ -168,8 +168,7 @@ instance [TransCmp cmp] : GetElem? (ExtTreeMap α β cmp) α β (fun m a => a �
   getElem? m a := m.get? a
   getElem! m a := m.get! a
 
--- TODO: remove nonepty instances from these
-noncomputable instance [TransCmp cmp] [Nonempty β] : GetElemV (ExtTreeMap α β cmp) α β where
+noncomputable instance [TransCmp cmp] : GetElemV (ExtTreeMap α β cmp) α β where
   getElemV m a := m.getV a
 
 @[inline, inherit_doc ExtDTreeMap.getKey?]

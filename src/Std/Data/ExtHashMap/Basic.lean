@@ -175,8 +175,7 @@ instance [BEq α] [Hashable α] [EquivBEq α] [LawfulHashable α] :
   getElem? m a := m.get? a
   getElem! m a := m.get! a
 
--- TODO: remove nonepty instances from these
-noncomputable instance [BEq α] [Hashable α] [EquivBEq α] [LawfulHashable α] [Nonempty β] :
+noncomputable instance [BEq α] [Hashable α] [EquivBEq α] [LawfulHashable α] :
     GetElemV (ExtHashMap α β) α β where
   getElemV m a := m.getV a
 

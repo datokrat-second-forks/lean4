@@ -171,8 +171,7 @@ instance : GetElem? (TreeMap α β cmp) α β (fun m a => a ∈ m) where
   getElem? m a := m.get? a
   getElem! m a := m.get! a
 
--- TODO: remove nonepty instances from these
-noncomputable instance [Nonempty β] : GetElemV (TreeMap α β cmp) α β where
+noncomputable instance : GetElemV (TreeMap α β cmp) α β where
   getElemV m a := m.getV a
 
 @[inline, inherit_doc DTreeMap.getKey?]
