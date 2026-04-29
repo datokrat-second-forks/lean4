@@ -1329,7 +1329,8 @@ theorem any_toList {p : α → β → Bool} :
 
 theorem any_eq_true_iff_exists_mem_getKeyV_getElemV [LawfulHashable α] [EquivBEq α]
     {p : α → β → Bool} :
-    m.any p = true ↔ ∃ (a : α) (h : a ∈ m), haveI : Nonempty β := ⟨m[a]'h⟩;
+    m.any p = true ↔ ∃ (a : α) (h : a ∈ m),
+      haveI : Nonempty β := ⟨m[a]'h⟩
       p (m.getKeyV a) m｢a｣ :=
   DHashMap.Const.any_eq_true_iff_exists_mem_getKeyV_getV
 
