@@ -1682,13 +1682,13 @@ theorem get?_filter [EquivBEq α] [LawfulHashable α]
     (m.filter f).get? k = (m.get? k).filter f :=
   HashMap.getKey?_filter_key
 
+@[simp, grind =]
 theorem getV_filter [EquivBEq α] [LawfulHashable α]
     {f : α → Bool} {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (m.filter f).getV k = ((m.get? k).filter f).getD Classical.ofNonempty :=
   HashMap.getKeyV_filter_key
 
-@[simp, grind =]
 theorem get_filter [EquivBEq α] [LawfulHashable α]
     {f : α → Bool} {k : α} {h} :
     (m.filter f).get k h = m.get k (mem_of_mem_filter h) :=

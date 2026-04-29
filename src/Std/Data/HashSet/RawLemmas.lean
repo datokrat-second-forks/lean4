@@ -1362,12 +1362,13 @@ theorem get?_diff_of_mem_right [EquivBEq α] [LawfulHashable α]
   @HashMap.Raw.getKey?_diff_of_mem_right _ _ _ _ m₁.inner m₂.inner _ _ h₁.out h₂.out k mem
 
 /- get -/
+@[simp]
 theorem getV_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {h_mem : k ∈ m₁ \ m₂} :
     (m₁ \ m₂).getV k = m₁.getV k :=
   HashMap.Raw.getKeyV_diff h₁.out h₂.out (h_mem := h_mem)
 
-@[simp] theorem get_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
+theorem get_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} {h_mem : k ∈ m₁ \ m₂} :
     (m₁ \ m₂).get k h_mem =
     m₁.get k ((mem_diff_iff h₁ h₂).1 h_mem).1 :=
@@ -1611,6 +1612,10 @@ theorem get?_eq [EquivBEq α] [LawfulHashable α] {k : α} (h₁ : m₁.WF) (h�
     (h : m₁ ~m m₂) : m₁.get? k = m₂.get? k :=
   h.1.getKey?_eq h₁.1 h₂.1
 
+theorem getV_eq [EquivBEq α] [LawfulHashable α] {k : α} (h₁ : m₁.WF) (h₂ : m₂.WF)
+    (h : m₁ ~m m₂) : m₁.getV k = m₂.getV k :=
+  h.1.getKeyV_eq h₁.1 h₂.1
+
 theorem get_eq [EquivBEq α] [LawfulHashable α] {k : α} (h₁ : m₁.WF) (h₂ : m₂.WF)
     (hk : k ∈ m₁) (h : m₁ ~m m₂) : m₁.get k hk = m₂.get k ((h.mem_iff h₁ h₂).mp hk) :=
   h.1.getKey_eq h₁.1 h₂.1 hk
@@ -1622,10 +1627,6 @@ theorem get!_eq [EquivBEq α] [LawfulHashable α] [Inhabited α] {k : α} (h₁ 
 theorem getD_eq [EquivBEq α] [LawfulHashable α] {k fallback : α} (h₁ : m₁.WF) (h₂ : m₂.WF)
     (h : m₁ ~m m₂) : m₁.getD k fallback = m₂.getD k fallback :=
   h.1.getKeyD_eq h₁.1 h₂.1
-
-theorem getV_eq [EquivBEq α] [LawfulHashable α] {k : α} (h₁ : m₁.WF) (h₂ : m₂.WF)
-    (h : m₁ ~m m₂) : m₁.getV k = m₂.getV k :=
-  h.1.getKeyV_eq h₁.1 h₂.1
 
 theorem insert [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF) (h₂ : m₂.WF) (k : α)
     (h : m₁ ~m m₂) : m₁.insert k ~m m₂.insert k :=

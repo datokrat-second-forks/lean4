@@ -1477,6 +1477,11 @@ theorem mem_keysArray [LawfulBEq α] {k : α} :
     k ∈ m.keysArray ↔ k ∈ m :=
   Raw₀.mem_keysArray ⟨m.1, m.2.size_buckets_pos⟩ m.2
 
+theorem forall_mem_keysArray_iff_forall_mem_getKeyV [EquivBEq α] [LawfulHashable α]
+    {p : α → Prop} :
+    (∀ k ∈ m.keysArray, p k) ↔ ∀ (k : α), k ∈ m → p (m.getKeyV k) :=
+  Raw₀.forall_mem_keysArray_iff_forall_contains_getKeyV ⟨m.1, m.2.size_buckets_pos⟩ m.2
+
 theorem forall_mem_keysArray_iff_forall_mem_getKey [EquivBEq α] [LawfulHashable α]
     {p : α → Prop} :
     (∀ k ∈ m.keysArray, p k) ↔ ∀ (k : α) (h : k ∈ m), p (m.getKey k h) :=
@@ -5673,9 +5678,14 @@ theorem contains_filter [LawfulBEq α]
 @[grind =]
 theorem mem_filter [LawfulBEq α]
     {f : (a : α) → β a → Bool} {k : α} :
+    k ∈ m.filter f ↔ ∃ h, haveI : Nonempty _ := ⟨m.get k h⟩; f k (m.getV k) := by
+  simp only [mem_iff_contains, contains_filter, Option.any_eq_true_iff_getV,
+    ← contains_eq_isSome_get?, getV_get?]
+
+theorem mem_filter_iff_get [LawfulBEq α]
+    {f : (a : α) → β a → Bool} {k : α} :
     k ∈ m.filter f ↔ ∃ h, f k (m.get k h) := by
-  simp only [mem_iff_contains, contains_filter, Option.any_eq_true_iff_get,
-    ← contains_eq_isSome_get?, get_get?]
+  simpa using mem_filter
 
 theorem mem_filter_key [EquivBEq α] [LawfulHashable α]
     {f : α → Bool} {k : α} :
@@ -5849,6 +5859,12 @@ theorem mem_filter [EquivBEq α] [LawfulHashable α]
       haveI : Nonempty β := ⟨Const.get m k h'⟩
       f (m.getKeyV k) (Const.getV m k) :=
   Raw₀.Const.contains_filter_iff ⟨m.1, _⟩ m.2
+
+theorem mem_filter_iff_getKey_get [EquivBEq α] [LawfulHashable α]
+    {f : α → β → Bool} {k : α} :
+    k ∈ m.filter f ↔ ∃ (h' : k ∈ m),
+      f (m.getKey k h') (Const.get m k h') :=
+  Raw₀.Const.contains_filter_iff_getKey_get ⟨m.1, _⟩ m.2
 
 theorem size_filter_le_size [EquivBEq α] [LawfulHashable α]
     {f : α → β → Bool} :

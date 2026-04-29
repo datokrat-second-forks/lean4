@@ -1104,6 +1104,11 @@ theorem mem_keysArray [LawfulBEq α] {k : α} :
     k ∈ m.keysArray ↔ k ∈ m :=
   DHashMap.mem_keysArray
 
+theorem forall_mem_keysArray_iff_forall_mem_getKeyV [EquivBEq α] [LawfulHashable α]
+    {p : α → Prop} :
+    (∀ k ∈ m.keysArray, p k) ↔ ∀ (k : α), k ∈ m → p (m.getKeyV k) :=
+  DHashMap.forall_mem_keysArray_iff_forall_mem_getKeyV
+
 theorem forall_mem_keysArray_iff_forall_mem_getKey [EquivBEq α] [LawfulHashable α]
     {p : α → Prop} :
     (∀ k ∈ m.keysArray, p k) ↔ ∀ (k : α) (h : k ∈ m), p (m.getKey k h) :=
@@ -1322,20 +1327,42 @@ theorem any_toList {p : α → β → Bool} :
     m.toList.any (fun x => p x.1 x.2) = m.any p :=
   DHashMap.Const.any_toList
 
+theorem any_eq_true_iff_exists_mem_getKeyV_getElemV [LawfulHashable α] [EquivBEq α]
+    {p : α → β → Bool} :
+    m.any p = true ↔ ∃ (a : α) (h : a ∈ m), haveI : Nonempty β := ⟨m[a]'h⟩;
+      p (m.getKeyV a) m｢a｣ :=
+  DHashMap.Const.any_eq_true_iff_exists_mem_getKeyV_getV
+
 theorem any_eq_true_iff_exists_mem_getKey_getElem [LawfulHashable α] [EquivBEq α]
     {p : α → β → Bool} :
     m.any p = true ↔ ∃ (a : α) (h : a ∈ m), p (m.getKey a h) (m[a]'h) :=
   DHashMap.Const.any_eq_true_iff_exists_mem_getKey_get
 
+theorem any_eq_true_iff_exists_mem_getElemV [LawfulBEq α] {p : α → β → Bool} :
+    m.any p = true ↔ ∃ (a : α) (h : a ∈ m), haveI : Nonempty β := ⟨m[a]'h⟩; p a m｢a｣ :=
+  DHashMap.Const.any_eq_true_iff_exists_mem_getV
+
 theorem any_eq_true_iff_exists_mem_getElem [LawfulBEq α] {p : α → β → Bool} :
     m.any p = true ↔ ∃ (a : α) (h : a ∈ m), p a (m[a]'h) :=
   DHashMap.Const.any_eq_true_iff_exists_mem_get
+
+theorem any_eq_false_iff_forall_mem_getKeyV_getElemV [LawfulHashable α] [EquivBEq α]
+    {p : α → β → Bool} :
+    m.any p = false ↔
+      ∀ (a : α) (h : a ∈ m), haveI : Nonempty β := ⟨m[a]'h⟩;
+        p (m.getKeyV a) m｢a｣ = false :=
+  DHashMap.Const.any_eq_false_iff_forall_mem_getKeyV_getV
 
 theorem any_eq_false_iff_forall_mem_getKey_getElem [LawfulHashable α] [EquivBEq α]
     {p : α → β → Bool} :
     m.any p = false ↔
       ∀ (a : α) (h : a ∈ m), p (m.getKey a h) (m[a]'h) = false :=
   DHashMap.Const.any_eq_false_iff_forall_mem_getKey_get
+
+theorem any_eq_false_iff_forall_mem_getElemV [LawfulBEq α] {p : α → β → Bool} :
+    m.any p = false ↔
+      ∀ (a : α) (h : a ∈ m), haveI : Nonempty β := ⟨m[a]'h⟩; p a m｢a｣ = false :=
+  DHashMap.Const.any_eq_false_iff_forall_mem_getV
 
 theorem any_eq_false_iff_forall_mem_getElem [LawfulBEq α] {p : α → β → Bool} :
     m.any p = false ↔
@@ -1347,19 +1374,40 @@ theorem all_toList {p : α → β → Bool} :
     m.toList.all (fun x => p x.1 x.2) = m.all p :=
   DHashMap.Const.all_toList
 
+theorem all_eq_true_iff_forall_mem_getKeyV_getElemV [EquivBEq α] [LawfulHashable α]
+    {p : (a : α) → β → Bool} :
+    m.all p = true ↔ ∀ (a : α) (h : a ∈ m), haveI : Nonempty β := ⟨m[a]'h⟩;
+      p (m.getKeyV a) m｢a｣ :=
+  DHashMap.Const.all_eq_true_iff_forall_mem_getKeyV_getV
+
 theorem all_eq_true_iff_forall_mem_getKey_getElem [EquivBEq α] [LawfulHashable α]
     {p : (a : α) → β → Bool} :
     m.all p = true ↔ ∀ (a : α) (h : a ∈ m), p (m.getKey a h) (m[a]'h) :=
   DHashMap.Const.all_eq_true_iff_forall_mem_getKey_get
 
+theorem all_eq_true_iff_forall_mem_getElemV [LawfulBEq α] {p : α → β → Bool} :
+    m.all p = true ↔ ∀ (a : α) (h : a ∈ m), haveI : Nonempty β := ⟨m[a]'h⟩; p a m｢a｣ :=
+  DHashMap.Const.all_eq_true_iff_forall_mem_getV
+
 theorem all_eq_true_iff_forall_mem_getElem [LawfulBEq α] {p : α → β → Bool} :
     m.all p = true ↔ ∀ (a : α) (h : a ∈ m), p a (m[a]'h) :=
   DHashMap.Const.all_eq_true_iff_forall_mem_get
+
+theorem all_eq_false_iff_exists_mem_getKeyV_getElemV [EquivBEq α] [LawfulHashable α]
+    {p : (a : α) → β → Bool} :
+    m.all p = false ↔ ∃ (a : α) (h : a ∈ m), haveI : Nonempty β := ⟨m[a]'h⟩;
+      p (m.getKeyV a) m｢a｣ = false :=
+  DHashMap.Const.all_eq_false_iff_exists_mem_getKeyV_getV
 
 theorem all_eq_false_iff_exists_mem_getKey_getElem [EquivBEq α] [LawfulHashable α]
     {p : (a : α) → β → Bool} :
     m.all p = false ↔ ∃ (a : α) (h : a ∈ m), p (m.getKey a h) (m[a]'h) = false :=
   DHashMap.Const.all_eq_false_iff_exists_mem_getKey_get
+
+theorem all_eq_false_iff_exists_mem_getElemV [LawfulBEq α] {p : α → β → Bool} :
+    m.all p = false ↔ ∃ (a : α) (h : a ∈ m), haveI : Nonempty β := ⟨m[a]'h⟩;
+      p a m｢a｣ = false :=
+  DHashMap.Const.all_eq_false_iff_exists_mem_getV
 
 theorem all_eq_false_iff_exists_mem_getElem [LawfulBEq α] {p : α → β → Bool} :
     m.all p = false ↔ ∃ (a : α) (h : a ∈ m), p a (m[a]'h) = false :=

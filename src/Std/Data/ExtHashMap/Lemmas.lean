@@ -1752,6 +1752,11 @@ theorem getElemV_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] {_ : N
     (m₁ ∪ m₂)｢k｣ = m₁｢k｣ :=
   ExtDHashMap.Const.getV_union_of_not_mem_right not_mem
 
+theorem getElem_union_of_not_mem_right [EquivBEq α] [LawfulHashable α] {_ : Nonempty β}
+    {k : α} {h} (not_mem : ¬k ∈ m₂) :
+    (m₁ ∪ m₂)[k]'h = m₁[k]'(mem_of_mem_union_of_not_mem_right h not_mem) :=
+  ExtDHashMap.Const.get_union_of_not_mem_right not_mem (h' := h)
+
 /- get -/
 @[deprecated getElem_union_of_mem_right (since := "2025-12-10")]
 theorem get_union_of_mem_right [EquivBEq α] [LawfulHashable α]
@@ -2239,18 +2244,34 @@ theorem get?_diff_of_mem_right [EquivBEq α] [LawfulHashable α]
   ExtDHashMap.Const.get?_diff_of_mem_right mem
 
 /- getElem -/
+
+-- TODO: There are lots of `get` lemmas that should be about `getElem`.
+
+@[simp]
 theorem getElemV_diff [EquivBEq α] [LawfulHashable α]
     {k : α} (h_mem : k ∈ m₁ \ m₂) :
     haveI : Nonempty β := ⟨(m₁ \ m₂)[k]'h_mem⟩
     (m₁ \ m₂)｢k｣ = m₁｢k｣ :=
   ExtDHashMap.Const.getV_diff h_mem
 
-/- get -/
+theorem getElem_diff [EquivBEq α] [LawfulHashable α]
+    {k : α} {h_mem : k ∈ m₁ \ m₂} :
+    (m₁ \ m₂)[k]'h_mem =
+      m₁[k]'(mem_diff_iff.1 h_mem).1 :=
+  ExtDHashMap.Const.get_diff (h_mem := h_mem)
+
 @[simp]
+theorem getV_diff [EquivBEq α] [LawfulHashable α]
+    {k : α} (h_mem : k ∈ m₁ \ m₂) :
+    haveI : Nonempty β := ⟨(m₁ \ m₂)[k]'h_mem⟩
+    (m₁ \ m₂).getV k =
+      m₁.getV k :=
+  ExtDHashMap.Const.getV_diff h_mem
+
 theorem get_diff [EquivBEq α] [LawfulHashable α]
     {k : α} {h_mem : k ∈ m₁ \ m₂} :
     (m₁ \ m₂).get k h_mem =
-    m₁.get k (mem_diff_iff.1 h_mem).1 :=
+      m₁.get k (mem_diff_iff.1 h_mem).1 :=
   ExtDHashMap.Const.get_diff
 
 /- getD -/
@@ -3030,11 +3051,6 @@ theorem filter_eq_empty_iff [EquivBEq α] [LawfulHashable α] {f : α → β →
       f (m.getKeyV k) m｢k｣ :=
   ExtDHashMap.Const.mem_filter
 
--- TODO(V-norm): `ExtDHashMap.Const.mem_filter_iff_getKey_get` does not exist yet
--- (the underlying `DHashMap.Raw` version exists, but it has not been lifted to
--- `ExtDHashMap.Const`). The analogous tree-map lemma was added in this V-normalization
--- pass; mirroring it here requires a non-V change to `ExtDHashMap`, which is out of
--- scope for this pass.
 theorem mem_filter_iff_getKey_getElem [EquivBEq α] [LawfulHashable α]
     {f : α → β → Bool} {k : α} :
     k ∈ m.filter f ↔ ∃ (h' : k ∈ m), f (m.getKey k h') m[k] :=

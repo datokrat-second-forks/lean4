@@ -1567,6 +1567,13 @@ theorem mem_keysArray [LawfulBEq α] {k : α} (h : m.WF) :
   rw [mem_iff_contains]
   simp_to_raw using Raw₀.mem_keysArray ⟨m, h.size_buckets_pos⟩ h
 
+theorem forall_mem_keysArray_iff_forall_mem_getKeyV [EquivBEq α] [LawfulHashable α]
+    {p : α → Prop} (h : m.WF) :
+    (∀ k ∈ m.keysArray, p k) ↔ ∀ (k : α), k ∈ m → p (m.getKeyV k) := by
+  simp only [mem_iff_contains]
+  simp_to_raw using
+    Raw₀.forall_mem_keysArray_iff_forall_contains_getKeyV ⟨m, h.size_buckets_pos⟩ h
+
 theorem forall_mem_keysArray_iff_forall_mem_getKey [EquivBEq α] [LawfulHashable α]
     {p : α → Prop} (h : m.WF) :
     (∀ k ∈ m.keysArray, p k) ↔ ∀ (k : α) (h : k ∈ m), p (m.getKey k h) := by
@@ -6460,6 +6467,7 @@ theorem contains_filter [LawfulBEq α]
     (m.filter f).contains k = (m.get? k).any (f k) := by
   simp_to_raw using Raw₀.contains_filter
 
+-- TODO: This signature is inconsistent with DHashMap.Lemmas.
 @[grind =]
 theorem mem_filter [LawfulBEq α]
     {f : (a : α) → β a → Bool} {k : α} (h : m.WF) :
