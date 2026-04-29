@@ -4748,8 +4748,12 @@ theorem filter_key_eq_empty_iff [EquivBEq α] [LawfulHashable α] {f : α → Bo
   m.inductionOn fun _ => DHashMap.contains_filter
 
 @[grind =] theorem mem_filter [LawfulBEq α] {f : (a : α) → β a → Bool} {k : α} :
-    k ∈ m.filter f ↔ ∃ h, f k (m.get k h) :=
+    k ∈ m.filter f ↔ ∃ h, haveI : Nonempty _ := ⟨m.get k h⟩; f k (m.getV k) :=
   m.inductionOn fun _ => DHashMap.mem_filter
+
+theorem mem_filter_iff_get [LawfulBEq α] {f : (a : α) → β a → Bool} {k : α} :
+    k ∈ m.filter f ↔ ∃ h, f k (m.get k h) :=
+  m.inductionOn fun _ => DHashMap.mem_filter_iff_get
 
 theorem mem_filter_key [EquivBEq α] [LawfulHashable α] {f : α → Bool} {k : α} :
     k ∈ m.filter (fun a _ => f a) ↔ k ∈ m ∧ f (m.getKeyV k) :=
@@ -4887,6 +4891,11 @@ theorem filter_eq_empty_iff [EquivBEq α] [LawfulHashable α] {f : α → β →
       f (m.getKeyV k) (Const.getV m k) :=
   m.inductionOn fun _ => DHashMap.Const.mem_filter
 
+theorem mem_filter_iff_getKey_get [EquivBEq α] [LawfulHashable α]
+    {f : α → β → Bool} {k : α} :
+    k ∈ m.filter f ↔ ∃ (h' : k ∈ m),
+      f (m.getKey k h') (Const.get m k h') :=
+  m.inductionOn fun _ => DHashMap.Const.mem_filter_iff_getKey_get
 
 theorem size_filter_le_size [EquivBEq α] [LawfulHashable α]
     {f : α → β → Bool} :

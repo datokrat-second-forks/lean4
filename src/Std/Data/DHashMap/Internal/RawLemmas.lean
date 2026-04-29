@@ -1277,6 +1277,11 @@ theorem mem_keys [LawfulBEq α] (h : m.1.WF) {k : α} :
   simp_to_model [contains, keys]
   rw [List.containsKey_eq_keys_contains]
 
+theorem forall_mem_keys_iff_forall_contains_getKeyV [EquivBEq α] [LawfulHashable α]
+    (h : m.1.WF) {p : α → Prop} :
+    (∀ k ∈ m.1.keys, p k) ↔ ∀ (k : α), m.contains k → p (m.getKeyV k) := by
+  simp_to_model [keys, getKeyV, contains] using List.forall_mem_keys_iff_forall_containsKey_getKeyV
+
 theorem forall_mem_keys_iff_forall_contains_getKey [EquivBEq α] [LawfulHashable α]
     (h : m.1.WF) {p : α → Prop} :
     (∀ k ∈ m.1.keys, p k) ↔ ∀ (k : α) (h : m.contains k), p (m.getKey k h) := by
@@ -1402,6 +1407,11 @@ theorem contains_keysArray [EquivBEq α] [LawfulHashable α] (h : m.1.WF) {k : �
 theorem mem_keysArray [LawfulBEq α] (h : m.1.WF) {k : α} :
     k ∈ m.1.keysArray ↔ m.contains k := by
   simp [← toArray_keys_eq_keysArray, h]
+
+theorem forall_mem_keysArray_iff_forall_contains_getKeyV [EquivBEq α] [LawfulHashable α]
+    (h : m.1.WF) {p : α → Prop} :
+    (∀ k ∈ m.1.keysArray, p k) ↔ ∀ (k : α), m.contains k → p (m.getKeyV k) := by
+  simp [← toArray_keys_eq_keysArray, h, forall_mem_keys_iff_forall_contains_getKeyV]
 
 theorem forall_mem_keysArray_iff_forall_contains_getKey [EquivBEq α] [LawfulHashable α]
     (h : m.1.WF) {p : α → Prop} :
