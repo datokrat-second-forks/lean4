@@ -703,6 +703,10 @@ theorem getKey!_eq_get!_getKey? [TransCmp cmp] [Inhabited α] {a : α} :
     t.getKey! a = (t.getKey? a).get! :=
   ExtDTreeMap.getKey!_eq_get!_getKey?
 
+theorem getKeyV_eq_getKey! [TransCmp cmp] [Inhabited α] {a : α} (h' : t.contains a) :
+    t.getKeyV a = t.getKey! a :=
+  ExtDTreeMap.getKeyV_eq_getKey! h'
+
 theorem getKey_eq_getKey! [TransCmp cmp] [Inhabited α] {a : α} {h} :
     t.getKey a h = t.getKey! a :=
   ExtDTreeMap.getKey_eq_getKey!

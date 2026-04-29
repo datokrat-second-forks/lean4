@@ -742,6 +742,11 @@ theorem getKey!_eq_get!_getKey? [TransCmp cmp] [Inhabited α] (h : t.WF) {a : α
     t.getKey! a = (t.getKey? a).get! :=
   DTreeMap.Raw.getKey!_eq_get!_getKey? h
 
+theorem getKeyV_eq_getKey! [TransCmp cmp] [Inhabited α] (h : t.WF) {a : α}
+    (h' : t.contains a) :
+    t.getKeyV a = t.getKey! a :=
+  DTreeMap.Raw.getKeyV_eq_getKey! h h'
+
 theorem getKey_eq_getKey! [TransCmp cmp] [Inhabited α] (h : t.WF) {a : α} {h'} :
     t.getKey a h' = t.getKey! a :=
   DTreeMap.Raw.getKey_eq_getKey! h

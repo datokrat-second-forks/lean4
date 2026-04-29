@@ -412,6 +412,11 @@ theorem get!_eq_get!_get? [TransCmp cmp] [Inhabited α] (h : t.WF) {a : α} :
     t.get! a = (t.get? a).get! :=
   TreeMap.Raw.getKey!_eq_get!_getKey? h
 
+theorem getV_eq_get! [TransCmp cmp] [Inhabited α] (h : t.WF) {a : α}
+    (h' : t.contains a) :
+    t.getV a = t.get! a :=
+  TreeMap.Raw.getKeyV_eq_getKey! h h'
+
 theorem get_eq_get! [TransCmp cmp] [Inhabited α] (h : t.WF) {a : α} {h'} :
     t.get a h' = t.get! a :=
   TreeMap.Raw.getKey_eq_getKey! h
