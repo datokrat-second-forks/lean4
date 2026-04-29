@@ -376,6 +376,11 @@ theorem get!_eq_get!_get? [EquivBEq α] [LawfulHashable α] [Inhabited α] {a : 
     m.get! a = (m.get? a).get! :=
   ExtHashMap.getKey!_eq_get!_getKey?
 
+theorem getV_eq_get! [EquivBEq α] [LawfulHashable α] [Inhabited α] {a : α}
+    (h' : m.contains a) :
+    m.getV a = m.get! a :=
+  ExtHashMap.getKeyV_eq_getKey! h'
+
 theorem get_eq_get! [EquivBEq α] [LawfulHashable α] [Inhabited α] {a : α} {h'} :
     m.get a h' = m.get! a :=
   ExtHashMap.getKey_eq_getKey!

@@ -951,6 +951,11 @@ theorem getKey!_eq_get!_getKey? [EquivBEq α] [LawfulHashable α] [Inhabited α]
     m.getKey! a = (m.getKey? a).get! :=
   m.inductionOn fun _ => DHashMap.getKey!_eq_get!_getKey?
 
+theorem getKeyV_eq_getKey! [EquivBEq α] [LawfulHashable α] [Inhabited α] {a : α}
+    (h' : m.contains a) :
+    m.getKeyV a = m.getKey! a :=
+  m.inductionOn (fun _ h' => DHashMap.getKeyV_eq_getKey! h') h'
+
 theorem getKey_eq_getKey! [EquivBEq α] [LawfulHashable α] [Inhabited α] {a : α} {h} :
     m.getKey a h = m.getKey! a :=
   m.inductionOn (fun _ _ => DHashMap.getKey_eq_getKey!) h

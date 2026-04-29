@@ -1092,6 +1092,11 @@ theorem getKey!_eq_get!_getKey? [EquivBEq α] [LawfulHashable α] [Inhabited α]
     m.getKey! a = (m.getKey? a).get! :=
   Raw₀.getKey!_eq_get!_getKey? ⟨m.1, _⟩ m.2
 
+theorem getKeyV_eq_getKey! [EquivBEq α] [LawfulHashable α] [Inhabited α] {a : α}
+    (h' : m.contains a) :
+    m.getKeyV a = m.getKey! a :=
+  Raw₀.getKeyV_eq_getKey! ⟨m.1, _⟩ m.2 (h' := h')
+
 theorem getKey_eq_getKey! [EquivBEq α] [LawfulHashable α] [Inhabited α] {a : α} {h} :
     m.getKey a h = m.getKey! a :=
   Raw₀.getKey_eq_getKey! ⟨m.1, _⟩ m.2

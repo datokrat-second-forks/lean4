@@ -793,6 +793,11 @@ theorem getKey!_eq_get!_getKey? [EquivBEq α] [LawfulHashable α] [Inhabited α]
     m.getKey! a = (m.getKey? a).get! :=
   DHashMap.getKey!_eq_get!_getKey?
 
+theorem getKeyV_eq_getKey! [EquivBEq α] [LawfulHashable α] [Inhabited α] {a : α}
+    (h' : m.contains a) :
+    m.getKeyV a = m.getKey! a :=
+  DHashMap.getKeyV_eq_getKey! h'
+
 theorem getKey_eq_getKey! [EquivBEq α] [LawfulHashable α] [Inhabited α] {a : α} {h'} :
     m.getKey a h' = m.getKey! a :=
   @DHashMap.getKey_eq_getKey! _ _ _ _ _ _ _ _ _ h'

@@ -1064,6 +1064,10 @@ theorem getKey!_eq_get!_getKey? [TransCmp cmp] [Inhabited α] {a : α} :
     t.getKey! a = (t.getKey? a).get! :=
   Impl.getKey!_eq_get!_getKey? t.wf
 
+theorem getKeyV_eq_getKey! [TransCmp cmp] [Inhabited α] {a : α} (h' : t.contains a) :
+    t.getKeyV a = t.getKey! a :=
+  Impl.getKeyV_eq_getKey! t.wf (h' := h')
+
 theorem getKey_eq_getKey! [TransCmp cmp] [Inhabited α] {a : α} {h} :
     t.getKey a h = t.getKey! a :=
   Impl.getKey_eq_getKey! t.wf

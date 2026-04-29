@@ -433,6 +433,11 @@ theorem get!_eq_get!_get? [EquivBEq α] [LawfulHashable α] [Inhabited α] (h : 
     m.get! a = (m.get? a).get! :=
   HashMap.Raw.getKey!_eq_get!_getKey? h.out
 
+theorem getV_eq_get! [EquivBEq α] [LawfulHashable α] [Inhabited α] (h : m.WF) {a : α}
+    (h' : m.contains a) :
+    m.getV a = m.get! a :=
+  HashMap.Raw.getKeyV_eq_getKey! h.out h'
+
 theorem get_eq_get! [EquivBEq α] [LawfulHashable α] [Inhabited α] (h : m.WF) {a : α} {h'} :
     m.get a h' = m.get! a :=
   HashMap.Raw.getKey_eq_getKey! h.out
