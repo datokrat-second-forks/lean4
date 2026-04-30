@@ -120,7 +120,7 @@ def Cursor.tail (s : Cursor l) (h : 0 < s.suffix.length := by get_elem_tactic) :
   induction n with simp_all [Cursor.current]
 @[simp, grind =] theorem Cursor.tail_at (l : List α) (h : n < l.length) :
     (Cursor.at l n).tail (by simpa using Nat.sub_lt_sub_right (Nat.le_refl n) h) = Cursor.at l (n + 1) := by
-  simp [Cursor.tail, Cursor.at, Cursor.current, List.take_succ_eq_append_getElemV h]
+  simp [Cursor.tail, Cursor.at, Cursor.current, List.take_succ_eq_append_getElem h]
 
 /--
 The position of the cursor in the list.

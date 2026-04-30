@@ -158,17 +158,22 @@ def insert [EquivBEq α] [LawfulHashable α] (map : IndexMultiMap α β) (key : 
 
   { entries, indexes, validity := ?_ }
 where finally
+  -- TODO: This was just
+  /-
+  have _ := map.validity
+  grind
+  -/
   have hvalid := map.validity
   intro k hk
   show (indexes.get k hk).size > 0 ∧ ∀ (j : Nat), j ∈ indexes.get k hk → j < entries.size
   rw [show (indexes.get k hk) = indexes[k] from rfl]
-  simp only [-getElem_eq_getElemV, indexes, f, HashMap.getElem_alter]
+  simp only [indexes, f, HashMap.getElem_alter]
   split
   next hkk =>
-    simp only [Option.getV_eq_getD_ofNonempty]
+    simp only [Option.get_eq_getV]
     rcases Option.eq_none_or_eq_some (map.indexes[key]?) with hc | ⟨idxs, hopt⟩
     · simp [hc, entries]; omega
-    · simp only [hopt, Option.getD_some, Array.size_push]
+    · simp only [hopt, Option.getV_some, Array.size_push]
       have hm : key ∈ map.indexes := HashMap.mem_iff_isSome_getElem?.mpr (by simp [hopt])
       have ⟨h1, h2⟩ := hvalid key hm
       have : map.indexes.get key hm = idxs := by

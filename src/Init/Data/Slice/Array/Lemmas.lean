@@ -72,14 +72,14 @@ theorem toList_eq {α : Type u} {it : Iter (α := SubarrayIterator α) α} :
   induction it using Iter.inductSteps with | step it ihy ihs
   rw [Iter.toList_eq_match_step, SubarrayIterator.val_step_eq]
   by_cases h : it.internalState.xs.start < it.internalState.xs.stop
-  · simp only [h, ↓reduceDIte, getElem_eq_getElemV] -- TODO
+  · simp only [h, ↓reduceDIte, getElem_eq_getElemV]
     have := it.1.xs.start_le_stop
     have := it.1.xs.stop_le_array_size
     rw [ihy (out := it.internalState.xs.array[it.internalState.xs.start])]
     · simp only [Subarray.start]
       rw (occs := [2]) [List.drop_eq_getElem_cons]; rotate_left
       · rw [List.length_take]
-        simp [it.internalState.xs.stop_le_array_size]
+        simp only [Array.length_toList, it.internalState.xs.stop_le_array_size, Nat.min_eq_left]
         exact h
       · simp [Subarray.array, Subarray.stop]
         rw [List.getElemV_take]
@@ -106,8 +106,6 @@ namespace Subarray
 instance : LawfulGetElemV (Subarray α) Nat α _ where
   getElemV_def := by
     intro _ xs i
-    -- getElemV xs i is just defined via getElemV on xs.array
-    -- How can we show that xs[i]? is defined via getElem? on xs.array?
     have h₁ : xs｢i｣ = if h : xs.start + i < xs.stop then xs.array｢xs.start + i｣ else Classical.ofNonempty := by
       simp [getElemV]
     have h₂ : xs[i]? = if h : xs.start + i < xs.stop then some (xs.array[xs.start + i]'(Nat.lt_of_lt_of_le h xs.stop_le_array_size)) else none := by
@@ -117,8 +115,6 @@ instance : LawfulGetElemV (Subarray α) Nat α _ where
       simp only [size_eq, Nat.lt_sub_iff_add_lt, Nat.add_comm i]
     rw [h₁, h₂]
     split <;> simp
-
--- TODO: GetElemV
 
 theorem Internal.iter_eq {α : Type u} {s : Subarray α} :
     Internal.iter s = ⟨⟨s⟩⟩ :=

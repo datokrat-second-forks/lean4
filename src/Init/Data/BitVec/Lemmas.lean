@@ -41,7 +41,6 @@ theorem getElem_ofFin (x : Fin (2^n)) (i : Nat) (h : i < n) :
 @[simp]
 theorem getElemV_ofFin (x : Fin (2^n)) (i : Nat) (h : i < n) :
     (BitVec.ofFin x)｢i｣ = x.val.testBit i := by
-  -- Exception: getElem is defined as testBit, so we go through getElem here.
   simpa using getElem_ofFin x i h
 
 @[simp, grind =] theorem getMsbD_of_ge (x : BitVec w) (i : Nat) (ge : w ≤ i) : getMsbD x i = false := by

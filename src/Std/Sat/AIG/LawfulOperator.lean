@@ -33,23 +33,38 @@ structure IsPrefix (decls1 decls2 : Array (Decl α)) : Prop where
     /--
     The prefix and the other array must agree on all elements up until the bound of the prefix
     -/
-    idx_eq : ∀ idx (h : idx < decls1.size), decls2[idx]'(by omega) = decls1[idx]'h
+    idx_eq : ∀ idx, idx < decls1.size → decls2｢idx｣ = decls1｢idx｣
 
 theorem IsPrefix.rfl {decls : Array (Decl α)} : IsPrefix decls decls := by
   apply IsPrefix.of
   · simp
   · simp
 
+/-
+PLOG(IsPrefix_push):
+- discharge by omega
+- for some weird reason, modifying the signature of `IsPrefix.idx_eq` changed the ordering of these goals.
+  probable reason: `idx_eq`'s type no longer depends on `size_le`.
+-/
+
 @[simp]
 theorem IsPrefix_push {decls : Array (Decl α)} : IsPrefix decls (decls.push decl) := by
   apply IsPrefix.of
-  · intro idx hidx
-    simp only [Array.getElem_push, hidx, ↓reduceDIte]
   · simp
+  · intro idx hidx
+    have : idx < decls.size + 1 := by omega
+    simp [hidx, Array.getElemV_push this]
+
+/-
+PLOG(go_eq_of_isPrefix):
+Had to explicate the `simp_all`s in `split <;> simp_all` and prepend it with `simp only ... at ...`
+-/
 
 /--
 If `decls1` is a prefix of `decls2` and we start evaluating `decls2` at an
 index in bounds of `decls1` we can evaluate at `decls1`.
+
+Normalization before splitting doesn't work either because of dependencies on the discriminant.
 -/
 theorem denote.go_eq_of_isPrefix (decls1 decls2 : Array (Decl α)) (start : Nat) {hdag1} {hdag2}
     {hbounds1} {hbounds2} (hprefix : IsPrefix decls1 decls2) :
@@ -60,23 +75,38 @@ theorem denote.go_eq_of_isPrefix (decls1 decls2 : Array (Decl α)) (start : Nat)
   have hidx1 := hprefix.idx_eq start hbounds1
   split
   next heq =>
-    rw [hidx1] at heq
-    split <;> simp_all (config := { decide := false }) [-getElem_eq_getElemV]
+    rw [getElem_eq_getElemV, hidx1] at heq
+    split
+    · simp_all
+    · simp_all
+    · rename_i lhs' rhs' heq'
+      simp only [getElem_eq_getElemV] at lhs' rhs' heq'
+      simp_all
   next heq =>
-    rw [hidx1] at heq
-    split <;> simp_all (config := { decide := false }) [-getElem_eq_getElemV]
+    rw [getElem_eq_getElemV, hidx1] at heq
+    split
+    · simp_all
+    · simp_all
+    · rename_i lhs' rhs' heq'
+      simp only [getElem_eq_getElemV] at lhs' rhs' heq'
+      simp_all
   next lhs rhs heq =>
-    rw [hidx1] at heq
+    rw [getElem_eq_getElemV, hidx1] at heq
     have := hdag1 hbounds1 heq
     have hidx2 := hprefix.idx_eq lhs.gate (by omega)
     have hidx3 := hprefix.idx_eq rhs.gate (by omega)
+    simp only
     split
-    · simp_all (config := { decide := false }) [-getElem_eq_getElemV]
-    · simp_all (config := { decide := false }) [-getElem_eq_getElemV]
-    · simp_all (config := { decide := false }) [-getElem_eq_getElemV]
+    · simp_all
+    · simp_all
+    · rename_i lhs' rhs' heq'
+      simp only [getElem_eq_getElemV] at lhs' rhs' heq'
+      simp_all
       congr 2
-      · exact denote.go_eq_of_isPrefix _ _ _ hprefix
-      · exact denote.go_eq_of_isPrefix _ _ _ hprefix
+      · apply denote.go_eq_of_isPrefix
+        assumption
+      · apply denote.go_eq_of_isPrefix
+        assumption
 termination_by start
 
 variable {α : Type} [Hashable α] [DecidableEq α]
@@ -109,20 +139,29 @@ of the circuit, allowing us to perform local reasoning on the AIG.
 class LawfulOperator (α : Type) [Hashable α] [DecidableEq α]
     (β : AIG α → Type) (f : (aig : AIG α) → β aig → Entrypoint α)  where
   le_size : ∀ (aig : AIG α) (input : β aig), aig.decls.size ≤ (f aig input).aig.decls.size
-  decl_eq : ∀ (aig : AIG α) (input : β aig) (idx : Nat) (h1 : idx < aig.decls.size) (h2),
-    (f aig input).aig.decls[idx]'h2 = aig.decls[idx]'h1
+  decl_eq : ∀ (aig : AIG α) (input : β aig) (idx : Nat)
+    (_h1 : idx < aig.decls.size) (_h2 : idx < (f aig input).aig.decls.size),
+    (f aig input).aig.decls｢idx｣ = aig.decls｢idx｣
 
 namespace LawfulOperator
 
 variable {β : AIG α → Type}
 variable {f : (aig : AIG α) → β aig → Entrypoint α} [LawfulOperator α β f]
 
+/-
+PLOG(isPrefix_aig):
+must pass bounds proofs to `decl_eq` now
+-/
+
 theorem isPrefix_aig (aig : AIG α) (input : β aig) :
     IsPrefix aig.decls (f aig input).aig.decls := by
   apply IsPrefix.of
+  · apply le_size
   · intro idx h
     apply decl_eq
-  · apply le_size
+    · exact h
+    · have := LawfulOperator.le_size (f := f) aig input
+      omega
 
 theorem lt_size (entry : Entrypoint α) (input : β entry.aig) :
     entry.ref.gate < (f entry.aig input).aig.decls.size := by
