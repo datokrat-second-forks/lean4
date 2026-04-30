@@ -447,7 +447,7 @@ A vector of references into `aig`. This is the `AIG` analog of `BitVec`.
 -/
 structure RefVec (aig : AIG α) (w : Nat) where
   refs : Vector Fanin w
-  hrefs : ∀ (h : i < w), refs[i].gate < aig.decls.size
+  hrefs : i < w → refs｢i｣.gate < aig.decls.size
 
 /--
 A sequence of references bundled with their AIG.

@@ -140,7 +140,7 @@ class LawfulOperator (α : Type) [Hashable α] [DecidableEq α]
     (β : AIG α → Type) (f : (aig : AIG α) → β aig → Entrypoint α)  where
   le_size : ∀ (aig : AIG α) (input : β aig), aig.decls.size ≤ (f aig input).aig.decls.size
   decl_eq : ∀ (aig : AIG α) (input : β aig) (idx : Nat)
-    (_h1 : idx < aig.decls.size) (_h2 : idx < (f aig input).aig.decls.size),
+    (_h : idx < aig.decls.size),
     (f aig input).aig.decls｢idx｣ = aig.decls｢idx｣
 
 namespace LawfulOperator
@@ -148,20 +148,13 @@ namespace LawfulOperator
 variable {β : AIG α → Type}
 variable {f : (aig : AIG α) → β aig → Entrypoint α} [LawfulOperator α β f]
 
-/-
-PLOG(isPrefix_aig):
-must pass bounds proofs to `decl_eq` now
--/
-
 theorem isPrefix_aig (aig : AIG α) (input : β aig) :
     IsPrefix aig.decls (f aig input).aig.decls := by
   apply IsPrefix.of
   · apply le_size
   · intro idx h
     apply decl_eq
-    · exact h
-    · have := LawfulOperator.le_size (f := f) aig input
-      omega
+    assumption
 
 theorem lt_size (entry : Entrypoint α) (input : β entry.aig) :
     entry.ref.gate < (f entry.aig input).aig.decls.size := by
