@@ -702,6 +702,7 @@ theorem getKeyD_empty [EquivBEq α] [LawfulHashable α] {a : α} {fallback : α}
     (∅ : ExtHashMap α β).getKeyD a fallback = fallback :=
   ExtDHashMap.getKeyD_empty
 
+@[simp, grind =]
 theorem getKeyV_empty [EquivBEq α] [LawfulHashable α] {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : ExtHashMap α β).getKeyV a = Classical.ofNonempty :=
@@ -747,6 +748,7 @@ theorem getKeyD_erase_self [EquivBEq α] [LawfulHashable α] {k : α} {fallback 
     (m.erase k).getKeyD k fallback = fallback :=
   ExtDHashMap.getKeyD_erase_self
 
+@[simp]
 theorem getKeyV_erase_self [EquivBEq α] [LawfulHashable α] {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (m.erase k).getKeyV k = Classical.ofNonempty :=

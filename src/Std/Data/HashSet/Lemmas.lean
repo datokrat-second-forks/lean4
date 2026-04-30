@@ -444,6 +444,7 @@ theorem getV_emptyWithCapacity {a : α} {c} :
     (emptyWithCapacity c : HashSet α).getV a = Classical.ofNonempty :=
   HashMap.getKeyV_emptyWithCapacity
 
+@[simp, grind =]
 theorem getV_empty {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : HashSet α).getV a = Classical.ofNonempty :=
@@ -480,6 +481,7 @@ theorem getV_eq_ofNonempty [EquivBEq α] [LawfulHashable α] {a : α} :
     (m.erase k).getD a fallback = if k == a then fallback else m.getD a fallback :=
   HashMap.getKeyD_erase
 
+@[simp]
 theorem getV_erase_self [EquivBEq α] [LawfulHashable α] {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (m.erase k).getV k = Classical.ofNonempty :=

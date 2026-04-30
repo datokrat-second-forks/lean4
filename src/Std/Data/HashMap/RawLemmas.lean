@@ -808,6 +808,7 @@ theorem getKeyD_emptyWithCapacity {a fallback : α} {c} :
 theorem getKeyD_empty {a fallback : α} : (∅ : Raw α β).getKeyD a fallback = fallback :=
   DHashMap.Raw.getKeyD_empty
 
+@[simp, grind =]
 theorem getKeyV_empty {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : Raw α β).getKeyV a = Classical.ofNonempty :=
@@ -848,6 +849,7 @@ theorem getKeyV_eq_ofNonempty [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : 
     (m.erase k).getKeyD a fallback = if k == a then fallback else m.getKeyD a fallback :=
   DHashMap.Raw.getKeyD_erase h.out
 
+@[simp]
 theorem getKeyV_erase_self [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (m.erase k).getKeyV k = Classical.ofNonempty :=

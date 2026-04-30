@@ -461,6 +461,7 @@ theorem getD_emptyWithCapacity {a fallback : α} {c} : (emptyWithCapacity c : Ra
 theorem getD_empty {a fallback : α} : (∅ : Raw α).getD a fallback = fallback :=
   HashMap.Raw.getKeyD_empty
 
+@[simp, grind =]
 theorem getV_empty {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : Raw α).getV a = Classical.ofNonempty :=
@@ -497,6 +498,7 @@ theorem getV_eq_ofNonempty [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : α}
     (m.erase k).getD a fallback = if k == a then fallback else m.getD a fallback :=
   HashMap.Raw.getKeyD_erase h.out
 
+@[simp]
 theorem getV_erase_self [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (m.erase k).getV k = Classical.ofNonempty :=

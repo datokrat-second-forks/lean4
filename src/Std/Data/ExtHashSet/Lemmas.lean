@@ -400,6 +400,7 @@ theorem getD_empty [EquivBEq α] [LawfulHashable α] {a fallback : α} :
     (∅ : ExtHashSet α).getD a fallback = fallback :=
   ExtHashMap.getKeyD_empty
 
+@[simp, grind =]
 theorem getV_empty [EquivBEq α] [LawfulHashable α] {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : ExtHashSet α).getV a = Classical.ofNonempty :=
@@ -436,6 +437,7 @@ theorem getV_eq_ofNonempty [EquivBEq α] [LawfulHashable α] {a : α} :
     (m.erase k).getD a fallback = if k == a then fallback else m.getD a fallback :=
   ExtHashMap.getKeyD_erase
 
+@[simp]
 theorem getV_erase_self [EquivBEq α] [LawfulHashable α] {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (m.erase k).getV k = Classical.ofNonempty :=
