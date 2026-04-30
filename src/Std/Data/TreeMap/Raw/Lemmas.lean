@@ -770,6 +770,7 @@ theorem getKeyD_emptyc {a : α} {fallback : α} :
     (∅ : Raw α β cmp).getKeyD a fallback = fallback :=
   DTreeMap.Raw.getKeyD_emptyc
 
+@[simp, grind =]
 theorem getKeyV_emptyc {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : Raw α β cmp).getKeyV a = Classical.ofNonempty :=
@@ -812,6 +813,7 @@ theorem getKeyV_eq_ofNonempty [TransCmp cmp] (h : t.WF) {a : α} :
       if cmp k a = .eq then fallback else t.getKeyD a fallback :=
   DTreeMap.Raw.getKeyD_erase h
 
+@[simp]
 theorem getKeyV_erase_self [TransCmp cmp] (h : t.WF) {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (t.erase k).getKeyV k = Classical.ofNonempty :=
@@ -3788,7 +3790,6 @@ theorem minKeyD_alter_eq_self [TransCmp cmp] (h : t.WF) {k f}
     (alter t k f |>.minKeyD fallback) = k ↔
       (f t[k]?).isSome ∧ ∀ k', k' ∈ t → (cmp k k').isLE :=
   DTreeMap.Raw.Const.minKeyD_alter_eq_self h he
-
 
 end Min
 

@@ -729,6 +729,7 @@ theorem getKeyD_empty [TransCmp cmp] {a : α} {fallback : α} :
     (∅ : ExtTreeMap α β cmp).getKeyD a fallback = fallback :=
   ExtDTreeMap.getKeyD_empty
 
+@[simp, grind =]
 theorem getKeyV_empty [TransCmp cmp] {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : ExtTreeMap α β cmp).getKeyV a = Classical.ofNonempty :=
@@ -775,6 +776,7 @@ theorem getKeyD_erase_self [TransCmp cmp] {k fallback : α} :
     (t.erase k).getKeyD k fallback = fallback :=
   ExtDTreeMap.getKeyD_erase_self
 
+@[simp]
 theorem getKeyV_erase_self [TransCmp cmp] {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (t.erase k).getKeyV k = Classical.ofNonempty :=

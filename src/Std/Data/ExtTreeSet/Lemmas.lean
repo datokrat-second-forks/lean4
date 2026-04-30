@@ -419,6 +419,7 @@ theorem getD_empty [TransCmp cmp] {a : α} {fallback : α} :
     (∅ : ExtTreeSet α cmp).getD a fallback = fallback :=
   ExtTreeMap.getKeyD_empty
 
+@[simp, grind =]
 theorem getV_empty [TransCmp cmp] {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : ExtTreeSet α cmp).getV a = Classical.ofNonempty :=
@@ -456,6 +457,7 @@ theorem getV_eq_ofNonempty [TransCmp cmp] {a : α} :
       if cmp k a = .eq then fallback else t.getD a fallback :=
   ExtTreeMap.getKeyD_erase
 
+@[simp]
 theorem getV_erase_self [TransCmp cmp] {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (t.erase k).getV k = Classical.ofNonempty :=

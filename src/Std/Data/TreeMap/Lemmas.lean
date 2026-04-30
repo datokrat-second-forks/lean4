@@ -763,6 +763,7 @@ theorem getKeyD_emptyc {a : α} {fallback : α} :
     (∅ : TreeMap α β cmp).getKeyD a fallback = fallback :=
   DTreeMap.getKeyD_emptyc
 
+@[simp, grind =]
 theorem getKeyV_emptyc {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : TreeMap α β cmp).getKeyV a = Classical.ofNonempty :=
@@ -809,6 +810,7 @@ theorem getKeyD_erase_self [TransCmp cmp] {k fallback : α} :
     (t.erase k).getKeyD k fallback = fallback :=
   DTreeMap.getKeyD_erase_self
 
+@[simp]
 theorem getKeyV_erase_self [TransCmp cmp] {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (t.erase k).getKeyV k = Classical.ofNonempty :=

@@ -1219,6 +1219,7 @@ theorem getKeyD_empty {a fallback : α} :
     (∅ : Raw α β).getKeyD a fallback = fallback :=
   getKeyD_emptyWithCapacity
 
+@[simp, grind =]
 theorem getKeyV_emptyc {a : α} :
     haveI : Nonempty α := ⟨a⟩
     (∅ : Raw α β).getKeyV a = Classical.ofNonempty :=
@@ -1266,6 +1267,7 @@ theorem getKeyD_erase_self [EquivBEq α] [LawfulHashable α] (h : m.WF) {k fallb
     (m.erase k).getKeyD k fallback = fallback := by
   simp_to_raw using Raw₀.getKeyD_erase_self
 
+@[simp]
 theorem getKeyV_erase_self [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} :
     haveI : Nonempty α := ⟨k⟩
     (m.erase k).getKeyV k = Classical.ofNonempty :=
