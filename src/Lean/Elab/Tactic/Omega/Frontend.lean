@@ -129,6 +129,8 @@ We also transform the expression as we descend into it:
 * unfolding `emod`: `x % k` → `x - x / k`
 -/
 partial def asLinearComboImpl (e : Expr) : OmegaM (LinearCombo × OmegaM Expr × List Expr) := do
+  -- Strip `mdata` (e.g. `no_index`) from the head so the dispatch below sees through it.
+  let e := e.consumeMData
   trace[omega] "processing {e}"
   match groundInt? e with
   | some i =>
@@ -253,6 +255,8 @@ where
       pure (lc, prf', facts)
     | none => panic! "Invalid rewrite rule in 'asLinearCombo'"
   handleNatCast (e i n : Expr) : OmegaM (LinearCombo × OmegaM Expr × List Expr) := do
+    -- Strip `mdata` (e.g. `no_index`) from `n` so the structural match below sees through it.
+    let n := n.consumeMData
     match n with
     | .fvar h =>
       if let some v ← h.getValue? then
@@ -300,6 +304,7 @@ where
       handleFinVal e i n x
     | _ => mkAtomLinearCombo e
   handleFinVal (e i n x : Expr) : OmegaM (LinearCombo × OmegaM Expr × List Expr) := do
+    let x := x.consumeMData
     match x with
     | .fvar h =>
       if let some v ← h.getValue? then

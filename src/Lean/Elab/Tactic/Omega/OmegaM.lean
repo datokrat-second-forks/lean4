@@ -45,6 +45,23 @@ open Lean Meta Omega
 
 namespace Lean.Elab.Tactic.Omega
 
+/--
+Recursively strip `Expr.mdata` wrappers from `e`, including those nested inside subterms.
+
+This is needed for atom canonicalization: a parameter wrapped with `no_index` produces an `mdata`
+annotation around its index argument, so `f (no_index x)` and `f x` are defeq but differ as
+`Expr`s. Stripping mdata throughout ensures these collapse to the same atom and that pattern
+matches in `analyzeAtom` see through the wrapping.
+-/
+partial def stripMData : Expr → Expr
+  | .mdata _ e => stripMData e
+  | .app f a => .app (stripMData f) (stripMData a)
+  | .lam n t b bi => .lam n (stripMData t) (stripMData b) bi
+  | .forallE n t b bi => .forallE n (stripMData t) (stripMData b) bi
+  | .letE n t v b nd => .letE n (stripMData t) (stripMData v) (stripMData b) nd
+  | .proj n i e => .proj n i (stripMData e)
+  | e => e
+
 /-- Context for the `OmegaM` monad, containing the user configurable options. -/
 structure Context where
   /-- User configurable options for `omega`. -/
@@ -245,6 +262,10 @@ Return its index, and, if it is new, a collection of interesting facts about the
   `b ≤ a ∧ ((a - b : Nat) : Int) = a - b ∨ a < b ∧ ((a - b : Nat) : Int) = 0`
 -/
 def lookup (e : Expr) : OmegaM (Nat × Option (List Expr)) := do
+  -- Strip all `mdata` wrappers (e.g. `no_index`) so that defeq-equal expressions that differ
+  -- only in `mdata` annotations are recorded as the same atom, and so that `analyzeAtom` can
+  -- inspect the underlying structure (e.g. recognize `((a - b : Nat) : Int)` shapes).
+  let e := stripMData e
   let c ← getThe State
   let e ← canon e
   match c.atoms[e]? with
