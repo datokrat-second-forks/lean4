@@ -9,6 +9,7 @@ prelude
 public import Lean.Meta.AppBuilder
 public import Lean.Meta.MatchUtil
 public import Lean.Meta.Tactic.Assert
+public import Lean.Meta.Tactic.Replace
 
 public section
 
@@ -179,10 +180,11 @@ def substEq (mvarId : MVarId) (hFVarId : FVarId)
       m!"invalid equality proof, it is not of the form (x = t) or (t = x){indentExpr localDecl.type}"
     let some (_, lhs, rhs) ← matchEq? localDecl.type | error ()
     let substReduced (newType : Expr) (symm : Bool) : MetaM (FVarSubst × MVarId) := do
-      let mvarId ← mvarId.assert localDecl.userName newType (mkFVar hFVarId)
-      let (hFVarId', mvarId) ← mvarId.intro1P
-      let mvarId ← mvarId.clear hFVarId
-      substCore mvarId hFVarId' (symm := symm) (tryToSkip := true) (fvarSubst := fvarSubst)
+      -- Replace the type of `hFVarId` in place. We can't use `assert + intro + clear` here
+      -- because the goal may still reference `hFVarId` (e.g. when destructuring a dependent
+      -- structure via `rcases ⟨_, rfl⟩`), in which case the `clear` would fail.
+      let mvarId ← mvarId.replaceLocalDeclDefEq hFVarId newType
+      substCore mvarId hFVarId (symm := symm) (tryToSkip := true) (fvarSubst := fvarSubst)
     let rhs' ← whnf rhs
     if rhs'.isFVar then
       if rhs != rhs' then
