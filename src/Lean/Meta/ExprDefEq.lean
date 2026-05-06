@@ -403,8 +403,12 @@ private partial def isDefEqArgs (f : Expr) (args₁ args₂ : Array Expr) : Meta
     let a₂   := args₂[i]!
     if respectTransparency && (implicitBump || finfo.paramInfo[i]!.isInstance) then
       unless (← withImplicitConfig <| Meta.isExprDefEqAux a₁ a₂) do return false
-    else if !respectTransparency && finfo.paramInfo[i]!.isInstance then
-      -- Old behavior
+    else if !respectTransparency then
+      -- Old behavior: bump to default transparency for all HO postponed args, matching the
+      -- behavior of `postponedImplicit`. This unfolds semireducible definitions (e.g. `Nat.sub`,
+      -- `Nat.add`) so that, for instance, `(n + 1) - 1 + 1 =?= n + 1` succeeds when comparing
+      -- `outParam` predicates such as `GetElem.valid`. Only bumping for `isInstance` would miss
+      -- `outParam` parameters whose underlying type is not itself a class.
       unless (← withInferTypeConfig <| Meta.isExprDefEqAux a₁ a₂) do return false
     else
       unless (← Meta.isExprDefEqAux a₁ a₂) do return false
