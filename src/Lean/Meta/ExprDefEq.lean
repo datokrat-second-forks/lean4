@@ -223,7 +223,7 @@ def isDefEqStringLit (s t : Expr) : MetaM LBool := do
   Return `true` if `e` is of the form `fun (x_1 ... x_n) => ?m x_1 ... x_n)`, and `?m` is unassigned.
   Remark: `n` may be 0. -/
 def isEtaUnassignedMVar (e : Expr) : MetaM Bool := do
-  match e.etaExpanded? with
+  match e.consumeMData.etaExpanded? with
   | some (.mvar mvarId) =>
     if (← mvarId.isReadOnlyOrSyntheticOpaque) then
       pure false
