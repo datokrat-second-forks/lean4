@@ -91,6 +91,16 @@ register_builtin_option trace.Meta.isDefEq.printTransparency : Bool := {
   descr    := "if true, prefix `Meta.isDefEq` `=?=` trace messages with the current transparency level"
 }
 
+register_builtin_option trace.Meta.isDefEq.extra : Bool := {
+  defValue := false
+  descr    := "extra"
+}
+
+register_builtin_option trace.Meta.whnfCore : Bool := {
+  defValue := false
+  descr    := "extra"
+}
+
 /--
   Return `true` if `e` is of the form `fun (x_1 ... x_n) => ?m y_1 ... y_k)`, and `?m` is unassigned.
   Remark: `n`, `k` may be 0.
@@ -428,14 +438,12 @@ private partial def isDefEqArgs (f : Expr) (args₁ args₂ : Array Expr) : Meta
       discard <| trySynthPending a₂
     if respectTransparency && info.binderInfo.isInstImplicit then
       -- Instance-implicit `[..]` arguments: bump to `.implicit`
-      trace[Meta.isDefEq.transparency] "bumped transparency (1)"
       unless (← withImplicitConfig <| Meta.isExprDefEqAux a₁ a₂) do
         return false
     else if respectTransparency && implicitBump then
       -- Other implicit arguments: bump to `.implicit` so that `[instance_reducible]` definitions
       -- (e.g. `Nat.add`, `Array.size`) and user-marked `[implicit_reducible]` definitions both
       -- unfold for value-level defeq.
-      trace[Meta.isDefEq.transparency] "bumped transparency (2)"
       unless (← withImplicitConfig <| Meta.isExprDefEqAux a₁ a₂) do
         return false
     else if respectTransparency then
@@ -447,7 +455,6 @@ private partial def isDefEqArgs (f : Expr) (args₁ args₂ : Array Expr) : Meta
     let a₁   := args₁[i]!
     let a₂   := args₂[i]!
     if respectTransparency && finfo.paramInfo[i]!.isInstance then
-      trace[Meta.isDefEq.transparency] "bumped transparency to instances (3)"
       unless (← withInstanceConfig <| Meta.isExprDefEqAux a₁ a₂) do
         return false
     else if respectTransparency && implicitBumpHO then -- comment these two out?
@@ -1720,6 +1727,7 @@ where
   11- Otherwise, unfold `t` and `s` and continue.
   Remark: 9&10&11 are implemented by `unfoldComparingHeadsDefEq` -/
 private def isDefEqDelta (t s : Expr) : MetaM LBool := do
+  withTraceNodeBefore `Meta.isDefEq.extra (fun _ => do return m!"isDefEqDelta") do
   let tInfo? ← isDeltaCandidate? t
   let sInfo? ← isDeltaCandidate? s
   match tInfo?, sInfo? with
@@ -2135,6 +2143,7 @@ where
 
 private def isDefEqProj : Expr → Expr → MetaM Bool
   | .proj m i t, .proj n j s => do
+    withTraceNodeBefore `Meta.isDefEq.extra (fun _ => do return m!"isDefEqProj (.proj, .proj)") do
     /- When `m` is a class, the projection's parameter is instance-implicit.
        We bump the transparency to `.instances` (via `withInstanceConfig`) so that
        instance definitions (`[instance_reducible]`) can be unfolded when comparing
@@ -2147,6 +2156,7 @@ private def isDefEqProj : Expr → Expr → MetaM Bool
       if fromClass then withInstanceConfig x else x
     if (← read).inTypeClassResolution then
       -- See comment at `inTypeClassResolution`
+      trace[Meta.isDefEq.extra] "inTypeClassResolution"
       pure (i == j && m == n) <&&> isDefEqStructArgs (Meta.isExprDefEqAux t s)
     else if !backward.isDefEq.lazyProjDelta.get (← getOptions) then
       pure (i == j && m == n) <&&> isDefEqStructArgs (Meta.isExprDefEqAux t s)
@@ -2239,6 +2249,7 @@ private def isDefEqProjInst (t : Expr) (s : Expr) : MetaM LBool := do
     return .undef
 
 private def isExprDefEqExpensive (t : Expr) (s : Expr) : MetaM Bool := do
+  withTraceNodeBefore `Meta.isDefEq.extra (fun _ => do return m!"isExprDefEqExpensive") do
   whenUndefDo (isDefEqEta t s) do
   whenUndefDo (isDefEqEta s t) do
   if (← isDefEqProj t s) then return true
@@ -2311,6 +2322,7 @@ private def cacheResult (keyInfo : DefEqCacheKeyInfo) (result : Bool) : MetaM Un
     modifyDefEqTransientCache fun c => c.insert key result
 
 private def whnfCoreAtDefEq (e : Expr) : MetaM Expr := do
+  withTraceNodeBefore `Meta.isDefEq.extra (fun _ => do return m!"whnfCoreAtDefEq {e}") do
   if backward.isDefEq.lazyWhnfCore.get (← getOptions) then
     withConfig (fun ctx => { ctx with proj := .yesWithDeltaI }) <| whnfCore e
   else

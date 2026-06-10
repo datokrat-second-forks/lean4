@@ -646,6 +646,7 @@ Apply beta-reduction, zeta-reduction (i.e., unfold let local-decls), iota-reduct
 expand let-expressions, expand assigned meta-variables, unfold aux declarations.
 -/
 partial def whnfCore (e : Expr) : MetaM Expr :=
+  withTraceNodeBefore `Meta.whnfCore (fun _ => do return m!"whnfCore") do
   go e
 where
   go (e : Expr) : MetaM Expr := do
@@ -1139,5 +1140,6 @@ def reduceProjOf? (e : Expr) (p : Name → Bool) : MetaM (Option Expr) := do
 builtin_initialize
   registerTraceClass `Meta.whnf
   registerTraceClass `Meta.isDefEq.whnf.reduceBinOp
+  registerTraceClass `Meta.whnf.blocked
 
 end Lean.Meta

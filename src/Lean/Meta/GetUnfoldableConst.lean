@@ -27,6 +27,8 @@ def canUnfoldDefault (cfg : Config) (info : ConstantInfo) : CoreM Bool := do
     else if status == .implicitReducible && m == .implicit then
       return true
     else
+      -- if status != .irreducible then
+      --   trace[Meta.whnf.blocked] "{info.name} {status.toAttrString} blocked at {m}"
       return false
 
 def canUnfold (info : ConstantInfo) : MetaM Bool := do

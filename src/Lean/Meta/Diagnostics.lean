@@ -52,7 +52,7 @@ def mkDiagSummary (cls : Name) (counters : PHashMap Name Nat) (p : Name → Bool
 def mkDiagSummaryForUnfolded (counters : PHashMap Name Nat) (instances := false) : MetaM DiagSummary := do
   let env ← getEnv
   mkDiagSummary `reduction counters fun declName =>
-    getReducibilityStatusCore env declName matches .semireducible
+    getReducibilityStatusCore env declName matches .semireducible | .implicitReducible
     && isInstanceCore env declName == instances
 
 def mkDiagSummaryForUnfoldedReducible (counters : PHashMap Name Nat) : MetaM DiagSummary := do
