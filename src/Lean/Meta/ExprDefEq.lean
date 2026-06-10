@@ -1997,8 +1997,28 @@ private partial def isDefEqQuickOther (t s : Expr) : MetaM LBool := do
         | _ =>
           let cfg ← getConfig
           if cfg.isDefEqStuckEx then do
-            trace[Meta.isDefEq.stuck] "{t} =?= {s}"
-            Meta.throwIsDefEqStuck
+            /-
+            Before interrupting the enclosing search with the `isDefEqStuck` exception,
+            try to make progress by synthesizing a pending instance metavariable that is
+            blocking `t` or `s` — the same recovery `unstuckMVar` performs on the
+            `isDefEqOnFailure` path. This matters when a non-assignable instance
+            metavariable from an outer level is reached as a direct subterm comparison,
+            e.g. as a `.proj` struct argument during lazy delta reduction of class
+            projections: without this attempt, the exception aborts the entire
+            surrounding search (e.g. TC resolution), and viable later candidates are
+            never tried, even though synthesizing the blocker would have let this
+            comparison be decided.
+
+            Note that the concern documented above for the disabled eager
+            `trySynthPending` calls (a synthesized instance may not be definitionally
+            equal to a later direct assignment) does not apply here: neither side is
+            assignable at this point, so the only alternatives are throwing or `false`.
+            -/
+            if (← trySynthPending t <||> trySynthPending s) then
+              isDefEqQuick (← instantiateMVars t) (← instantiateMVars s)
+            else
+              trace[Meta.isDefEq.stuck] "{t} =?= {s}"
+              Meta.throwIsDefEqStuck
           else
             return LBool.false
       else
