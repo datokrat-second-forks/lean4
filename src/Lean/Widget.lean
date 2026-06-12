@@ -13,3 +13,4 @@ public import Lean.Widget.InteractiveGoal
 public import Lean.Widget.TaggedText
 public import Lean.Widget.UserWidget
 public import Lean.Widget.Commands
+public import Lean.Widget.TraceDiff
