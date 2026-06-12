@@ -64,13 +64,20 @@ open Elab Command in
     let left ← ofStoredTrace ta
     let right ← ofStoredTrace tb
     let res := compute left right
-    logInfo m!"trace diff `{a.getId}` ⇒ `{b.getId}`: {report left right res}"
-    -- in the editor, additionally show the interactive diff widget
+    -- Log a single message that renders as the interactive diff widget in the infoview and as
+    -- the textual report everywhere else (command line, `#guard_msgs`, …).
+    let pos := (← getRef).getPos?.getD 0
     let props := Json.mkObj [
-      ("left", toString (← liftCoreM <| realizeGlobalConstNoOverloadWithInfo a)),
-      ("right", toString (← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b))
+      ("pos", toJson ((← getFileMap).utf8PosToLspPos pos)),
+      ("left", Json.str (toString (← liftCoreM <| realizeGlobalConstNoOverloadWithInfo a))),
+      ("right", Json.str (toString (← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b)))
     ]
-    liftCoreM <| Widget.savePanelWidgetInfo traceDiffWidget.javascriptHash (pure props) (← getRef)
+    let wi : Widget.WidgetInstance := {
+      id := ``traceDiffWidget
+      javascriptHash := traceDiffWidget.javascriptHash
+      props := pure props
+    }
+    logInfo <| .ofWidget wi m!"trace diff `{a.getId}` ⇒ `{b.getId}`: {report left right res}"
   | _ => throwUnsupportedSyntax
 
 end Lean.Widget.TraceDiff
