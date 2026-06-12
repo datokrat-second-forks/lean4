@@ -9,6 +9,8 @@ prelude
 public import Lean.Elab.Command
 public import Lean.Widget.TraceDiff.Basic
 meta import Lean.Widget.TraceDiff.Basic
+public import Lean.Widget.TraceDiff.Rpc
+meta import Lean.Widget.TraceDiff.Rpc
 
 public section
 
@@ -45,7 +47,12 @@ private meta def resolveStoredTrace (id : Ident) : CommandElabM StoredTrace := d
 /--
 `#trace_diff t1 t2` compares two traces stored with `store_trace_as` and reports a summary of
 the matching: how many trace nodes are unchanged, changed, added, or removed; see
-`Lean.Widget.TraceDiff` for the algorithm.
+`Lean.Widget.TraceDiff.Basic` for the algorithm.
+
+In an editor, the command additionally shows an interactive side-by-side widget in the
+infoview: changed, added, and removed nodes are color-coded, hovering a node highlights its
+partner, and a wrong correspondence can be corrected manually by selecting a node and clicking
+a node on the opposite side, which pins the two together and recomputes the matching around it.
 -/
 syntax (name := traceDiffCmd) "#trace_diff " ident ppSpace ident : command
 
@@ -58,6 +65,12 @@ open Elab Command in
     let right ← ofStoredTrace tb
     let res := compute left right
     logInfo m!"trace diff `{a.getId}` ⇒ `{b.getId}`: {report left right res}"
+    -- in the editor, additionally show the interactive diff widget
+    let props := Json.mkObj [
+      ("left", toString (← liftCoreM <| realizeGlobalConstNoOverloadWithInfo a)),
+      ("right", toString (← liftCoreM <| realizeGlobalConstNoOverloadWithInfo b))
+    ]
+    liftCoreM <| Widget.savePanelWidgetInfo traceDiffWidget.javascriptHash (pure props) (← getRef)
   | _ => throwUnsupportedSyntax
 
 end Lean.Widget.TraceDiff
