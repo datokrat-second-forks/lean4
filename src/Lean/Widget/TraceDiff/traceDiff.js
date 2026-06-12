@@ -10,9 +10,29 @@ row and clicking a row on the opposite side pins the two together; the matching 
 server-side with the pins as hard constraints.
 */
 import * as React from 'react';
-import { RpcContext } from '@leanprover/infoview';
+import { RpcContext, InteractiveMessageData } from '@leanprover/infoview';
 
 const e = React.createElement;
+
+/* Fetches the head message of a trace node as an RPC reference and renders it with the
+   infoview's interactive message machinery (hover popups with types and implicit arguments,
+   go-to-definition, etc.). */
+function NodeDetail({ rs, pos, name, path, tag }) {
+  const [st, setSt] = React.useState({ state: 'loading' });
+  React.useEffect(() => {
+    let live = true;
+    setSt({ state: 'loading' });
+    rs.call('Lean.Widget.TraceDiff.getInteractiveLabel', { pos, name, path })
+      .then(ref => { if (live) setSt({ state: 'ok', ref }); })
+      .catch(ex => { if (live) setSt({ state: 'err', msg: String(ex?.message ?? ex) }); });
+    return () => { live = false; };
+  }, [name, path]);
+  return e('div', { className: 'detail-row' },
+    e('span', { className: 'detail-tag' }, tag),
+    st.state === 'ok' ? e(InteractiveMessageData, { msg: st.ref })
+      : st.state === 'loading' ? '…'
+      : e('span', { className: 'err' }, st.msg));
+}
 
 const CSS = `
 .tdw { font-family: var(--vscode-editor-font-family, monospace); font-size: 12px;
@@ -67,6 +87,10 @@ const CSS = `
 .tdw path.ln-hov { stroke: var(--vscode-focusBorder, #3794ff); stroke-width: 2; fill: none; }
 .tdw .actionbar { display: flex; align-items: center; gap: 8px; padding: 4px 2px;
   font-family: var(--vscode-font-family, sans-serif); font-size: 11px; }
+.tdw .detail { border: 1px dashed var(--vscode-panel-border, #444); border-radius: 4px;
+  padding: 4px 8px; margin: 2px 0 6px; }
+.tdw .detail-row { display: flex; align-items: baseline; gap: 6px; line-height: 1.5; }
+.tdw .detail-tag { opacity: 0.6; flex: none; }
 .tdw .err { color: var(--vscode-errorForeground, #f85149); padding: 4px; }
 `;
 
@@ -367,11 +391,23 @@ export default function TraceDiffWidget(props) {
     e('span', { className: 'chip' }, e('i', { style: { background: '#a371f7' } }),
       `pins ${pins.length}`)) : null;
 
-  const selNode = sel ? (sel.side === 'L' ? data.L : data.R).nodes.get(sel.id) : null;
   const selPinned = sel && pins.some(([l, r]) => (sel.side === 'L' ? l === sel.id : r === sel.id));
   const selUnm = sel && unmatched[sel.side].includes(sel.id);
+  // interactive detail pane for the selected node and its partner: labels rendered through the
+  // standard interactive-message machinery, so subterms can be inspected as usual
+  let detail = null;
+  if (sel) {
+    const partner = partnerOf(sel.side, sel.id);
+    const lPath = sel.side === 'L' ? sel.id : partner;
+    const rPath = sel.side === 'L' ? partner : sel.id;
+    detail = e('div', { className: 'detail' },
+      lPath !== undefined ? e(NodeDetail, { key: 'L' + lPath, rs, pos,
+        name: props.left, path: lPath, tag: 'A ·' }) : null,
+      rPath !== undefined ? e(NodeDetail, { key: 'R' + rPath, rs, pos,
+        name: props.right, path: rPath, tag: 'B ·' }) : null);
+  }
   const actionbar = sel ? e('div', { className: 'actionbar' },
-    e('span', null, `${sel.side === 'L' ? 'A' : 'B'} · `, e('b', null, selNode?.label ?? '')),
+    e('span', null, `${sel.side === 'L' ? 'A' : 'B'} #${sel.id}`),
     selPinned
       ? e('button', { onClick: () =>
           setPins(pins.filter(([l, r]) => (sel.side === 'L' ? l !== sel.id : r !== sel.id))) },
@@ -416,6 +452,7 @@ export default function TraceDiffWidget(props) {
       '⚠ trace too large: display truncated (the matching still covers all nodes); '
       + 'consider pre-filtering with a trace postprocessor') : null,
     actionbar ?? e('div', { className: 'hint' }, hint),
+    detail,
     e('div', { className: 'main' },
       renderPane('L'),
       e('div', { className: 'gutter' }, e('svg', { ref: svgRef })),

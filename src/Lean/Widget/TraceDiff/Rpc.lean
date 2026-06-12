@@ -69,6 +69,48 @@ meta def computeTraceDiff (params : ComputeTraceDiffParams) :
       numSame := res.numSame
     }
 
+/-- Parses a path id like `"0.3.2"` into child indices. -/
+private meta def parsePath (path : String) : Array Nat := Id.run do
+  let mut out := #[]
+  let mut cur := 0
+  for c in path.toList do
+    if c == '.' then
+      out := out.push cur
+      cur := 0
+    else if c.isDigit then
+      cur := cur * 10 + (c.toNat - '0'.toNat)
+  return out.push cur
+
+/-- Walks a stored trace forest to the node with the given path id. -/
+private meta def nodeAt? (roots : Array Lean.TraceView.TraceTree) (path : String) :
+    Option Lean.TraceView.TraceTree := do
+  let path := parsePath path
+  let mut cur ← roots[path[0]!]?
+  for i in path.toList.drop 1 do
+    cur ← cur.children[i]?
+  return cur
+
+/-- The head message of a trace node (without its children), with its context wrappers. -/
+private meta def headMsg : Lean.TraceView.TraceTree → MessageData
+  | .node data msg _ wrap => wrap (.trace data msg #[])
+  | .leaf msg             => msg
+
+/--
+Returns the head message of a trace node as `MessageData`, to be rendered interactively by the
+widget (with hover popups for subterms etc., via the standard
+`Lean.Widget.InteractiveDiagnostics.msgToInteractive` machinery).
+-/
+@[server_rpc_method]
+meta def getInteractiveLabel (params : GetInteractiveLabelParams) :
+    RequestM (RequestTask (WithRpcRef MessageData)) :=
+  withWaitFindSnapAtPos params.pos fun snap => do
+    let some t := findStoredTrace? snap.cmdState.env params.name.toName
+      | throw (RequestError.invalidParams s!"unknown stored trace `{params.name}`")
+    let some node := nodeAt? t.roots params.path
+      | throw (RequestError.invalidParams
+          s!"stored trace `{params.name}` has no node at `{params.path}`")
+    WithRpcRef.mk (headMsg node)
+
 /-- The trace diff widget; shown by the `#trace_diff` command. -/
 @[widget_module]
 def traceDiffWidget : Module where

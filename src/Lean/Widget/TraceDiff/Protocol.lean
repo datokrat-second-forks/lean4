@@ -121,4 +121,12 @@ where
       budget := budget'
     return ({ name := n.name, label := n.label, children }, budget)
 
+structure GetInteractiveLabelParams where
+  pos : Lsp.Position
+  /-- The declaration name of the stored trace. -/
+  name : String
+  /-- The path id of the node within the stored trace. -/
+  path : String
+  deriving FromJson, ToJson
+
 end Lean.Widget.TraceDiff
