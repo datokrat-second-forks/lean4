@@ -372,30 +372,6 @@ def tryResolve (mvar : Expr) (inst : Instance) : MetaM (Option (MetavarContext �
       -/
       let instVal ← mkLambdaFVars xs instVal (etaReduce := true)
       if (← isDefEq mvar instVal) then
-        /-
-        Ensure that each instance argument is either implicit-reducibly defeq to the synthesized
-        instance or its actual type is instance-reducibly defeq to the expected type.
-        This ensures that unification doesn't sneak in instances for another expected type, where by
-        "other" we mean "not defeq at instances".
-        This is intended to resolve #9077-like issues.
-        -/
-        for subgoal in subgoals do
-          unless (← subgoal.mvarId!.isAssigned) do continue
-          let val ← instantiateMVars subgoal
-          let actualType ← inferType val
-          let expectedType ← inferType subgoal
-          let ok ← withNewMCtxDepth do
-            -- we're good if the type is correct at instances
-            if (← withTransparency .instances (isDefEq expectedType actualType)) then return true
-            -- otherwise, we need to compare to the actually synthesized instance
-            let m ← mkFreshExprMVar expectedType
-            unless (← Meta.synthPending m.mvarId!) do
-              return false
-            unless (← withTransparency .implicit (isDefEq m val)) do
-              return false
-            return true
-          unless ok do return none
-
         return some ((← getMCtx), subgoals)
     return none
 
@@ -524,34 +500,10 @@ def consume (cNode : ConsumerNode) : SynthM Unit := do
       SetLike (@Submodule R M _inst_1 _inst_2 _inst_3) M
     ```
   -/
-  let (assigned, unassigned) ← withMCtx cNode.mctx do cNode.subgoals.partitionM (·.mvarId!.isAssigned)
-  let cNode := { cNode with subgoals := unassigned }
-
-  /-
-  Ensure that each instance argument is either implicit-reducibly defeq to the synthesized
-  instance or its actual type is instance-reducibly defeq to the expected type.
-  This ensures that unification doesn't sneak in instances for another expected type, where by
-  "other" we mean "not defeq at instances".
-  This is intended to resolve #9077-like issues.
-  -/
-  -- TODO: only do this for actual instance arguments!!
-  for subgoal in assigned do
-    unless (← subgoal.mvarId!.isAssigned) do continue
-    let val ← instantiateMVars subgoal
-    let actualType ← inferType val
-    let expectedType ← inferType subgoal
-    let ok ← withNewMCtxDepth do
-      -- we're good if the type is correct at instances
-      if (← withTransparency .instances (isDefEq expectedType actualType)) then return true
-      -- otherwise, we need to compare to the actually synthesized instance
-      let m ← mkFreshExprMVar expectedType
-      unless (← Meta.synthPending m.mvarId!) do
-        return false
-      unless (← withTransparency .implicit (isDefEq m val)) do
-        return false
-      return true
-    unless ok do return none -- What to do here? Can't return none...
-
+  let cNode := { cNode with
+    subgoals := ← withMCtx cNode.mctx do
+      cNode.subgoals.filterM (not <$> ·.mvarId!.isAssigned)
+  }
   match cNode.subgoals with
   | []      => addAnswer cNode
   | mvar::_ =>
