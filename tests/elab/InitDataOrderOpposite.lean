@@ -256,16 +256,10 @@ scoped instance (priority := low) instIsLinearPreorderOpposite {i : LE α} [IsLi
   letI := i.opposite
   { le_total _ _ := le_total }
 
-instance IsLinearOrder.myToIsLinearPreorder.{u} {α : Type u} {_ : LE α} [self : IsLinearOrder α] :
-    IsLinearPreorder α :=
-  sorry
-
-set_option trace.Meta.synthInstance true in
-set_option trace.Meta.isDefEq true in
 scoped instance (priority := low) instIsLinearOrderOpposite {i : LE α} [IsLinearOrder α] :
     haveI := i.opposite
     IsLinearOrder α :=
-  letI := i.opposite; {}
+  @IsLinearOrder.mk _ i.opposite inferInstance (inferInstance : Total _).total
 
 scoped instance (priority := low) instLawfulOrderOrdOpposite {il : LE α} {io : Ord α}
     [LawfulOrderOrd α] :
