@@ -54,6 +54,9 @@ structure InstanceEntry where
   globalName? : Option Name := none
   /-- The order in which the instance's arguments are to be synthesized. -/
   synthOrder  : Array Nat
+  /-- Instance arguments that cannot be inferred by unification from the expected type, so type class
+  resolution must synthesize them rather than let unification assign them. A subset of `synthOrder`. -/
+  synthOnlyArgs : Array Nat
   /-
   We store the attribute kind to be able to implement the API `getInstanceAttrKind`.
   TODO: add better support for retrieving the `attrKind` of any attribute.
@@ -147,7 +150,7 @@ To ensure `computeSynthOrder` works as expected, we should take
 this change into account while processing field `self`.
 This field is the one at position `projInfo?.numParams`.
 -/
-private partial def computeSynthOrder (inst : Expr) (projInfo? : Option ProjectionFunctionInfo) : MetaM (Array Nat) :=
+private partial def computeSynthOrder (inst : Expr) (projInfo? : Option ProjectionFunctionInfo) : MetaM (Array Nat × Array Nat) :=
   withReducible do
   let instTy ← inferType inst
 
@@ -191,6 +194,10 @@ private partial def computeSynthOrder (inst : Expr) (projInfo? : Option Projecti
   -- non-out-params are mvar-free.
   let mut synthed := #[]
   let mut toSynth := List.range argMVars.size |>.filter (argBIs[·]! == .instImplicit) |>.toArray
+  -- Arguments still unassigned once the conclusion's input positions are known cannot be inferred by
+  -- unification from the expected type; only these must be protected from assignment by unification
+  -- (see `withSynthesizableNonAssignable`). The remaining instance arguments are determined by the goal.
+  let synthOnly ← toSynth.filterM fun i => return !(← argMVars[i]!.mvarId!.isAssigned)
   while !toSynth.isEmpty do
     let next? ← toSynth.findM? fun i => do
       let argTy ← instantiateMVars (← inferType argMVars[i]!)
@@ -232,7 +239,7 @@ private partial def computeSynthOrder (inst : Expr) (projInfo? : Option Projecti
   trace[Meta.synthOrder] "synthesizing the arguments of {inst} in the order {synthed}:\
     {("" : MessageData).joinSep (← synthed.mapM fun i => return indentExpr (← inferType argVars[i]!)).toList}"
 
-  return synthed
+  return (synthed, synthOnly)
 
 def checkImpossibleInstance (cinfo : ConstantInfo): MetaM Unit := do
   -- Performantly check if any non-instance binder is unused.
@@ -290,8 +297,8 @@ def addInstance (declName : Name) (attrKind : AttributeKind) (prio : Nat) : Meta
     else if wasOriginallyDefn (← getEnv) declName then
       logWarning m!"instance `{declName}` must be marked with `@[expose]`"
   let projInfo? ← getProjectionFnInfo? declName
-  let synthOrder ← computeSynthOrder c projInfo?
-  instanceExtension.add { keys, val := c, priority := prio, globalName? := declName, attrKind, synthOrder } attrKind
+  let (synthOrder, synthOnlyArgs) ← computeSynthOrder c projInfo?
+  instanceExtension.add { keys, val := c, priority := prio, globalName? := declName, attrKind, synthOrder, synthOnlyArgs } attrKind
 
 /-
 Adds instance **and** marks it with reducibility status `@[instance_reducible]`. We use this function

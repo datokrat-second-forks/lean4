@@ -39,6 +39,9 @@ def getMaxHeartbeats (opts : Options) : Nat :=
 structure Instance where
   val : Expr
   synthOrder : Array Nat
+  /-- Subset of `synthOrder` that cannot be inferred by unification from the expected type and must
+  therefore be synthesized; these are protected from assignment during unification. -/
+  synthOnlyArgs : Array Nat
   deriving Inhabited
 
 structure GeneratorNode where
@@ -224,6 +227,7 @@ def getInstances (type : Expr) : MetaM (Array Instance) := do
             return some {
               val := e.val.updateConst! (← us.mapM (fun _ => mkFreshLevelMVar))
               synthOrder := e.synthOrder
+              synthOnlyArgs := e.synthOnlyArgs
             }
         | _ => panic! "global instance is not a constant"
       for linst in localInstances do
@@ -235,7 +239,8 @@ def getInstances (type : Expr) : MetaM (Array Instance) := do
               if (← getFVarLocalDecl x).binderInfo == .instImplicit then
                 order := order.push i
             return order
-          result := result.push { val := linst.fvar, synthOrder }
+          -- Local instances are not analyzed for unification-determined arguments; protect none for now.
+          result := result.push { val := linst.fvar, synthOrder, synthOnlyArgs := #[] }
       trace[Meta.synthInstance.instances] result.map (·.val)
       return result
 
@@ -295,6 +300,8 @@ def mkTableKeyFor (mctx : MetavarContext) (mvar : Expr) : SynthM Expr :=
    we have that `type.instantiateRevRange j args.size args` does not have loose bound variables. -/
 structure SubgoalsResult where
   subgoals     : List Expr
+  /-- Subgoals (a subset of `subgoals`) to protect from assignment during unification. -/
+  protectedSubgoals : List Expr
   instVal      : Expr
   instTypeBody : Expr
 
@@ -335,6 +342,7 @@ def getSubgoals (lctx : LocalContext) (localInsts : LocalInstances) (xs : Array 
     instVal := instVal.instantiateRev subst
     instTypeBody := instType.instantiateRev subst
     subgoals := inst.synthOrder.map (mvars[·]!) |>.toList
+    protectedSubgoals := inst.synthOnlyArgs.map (mvars[·]!) |>.toList
   }
 
 /--
@@ -350,12 +358,13 @@ def tryResolve (mvar : Expr) (inst : Instance) : MetaM (Option (MetavarContext �
   let lctx       ← getLCtx
   let localInsts ← getLocalInstances
   forallTelescopeReducing mvarType fun xs mvarTypeBody => do
-    let { subgoals, instVal, instTypeBody } ← getSubgoals lctx localInsts xs inst
+    let { subgoals, protectedSubgoals, instVal, instTypeBody } ← getSubgoals lctx localInsts xs inst
     withTraceNode `Meta.synthInstance.tryResolve (fun _ => do withMCtx (← getMCtx) do
         return m!"{← instantiateMVars mvarTypeBody} ≟ {← instantiateMVars instTypeBody}") do
-    -- Keep the instance arguments non-assignable during unification: a would-be assignment (e.g. from
-    -- defeq abuse picking an instance for the wrong type) triggers synthesis instead. Resolves #9077.
-    withSynthesizableNonAssignable (.ofList (subgoals.map (·.mvarId!))) do
+    -- Keep instance arguments the goal does not determine non-assignable during unification, so a
+    -- would-be assignment (e.g. defeq abuse picking an instance for the wrong type) triggers synthesis
+    -- instead. Arguments inferable from the expected type stay assignable. Resolves #9077.
+    withSynthesizableNonAssignable (.ofList (protectedSubgoals.map (·.mvarId!))) do
     if (← isDefEq mvarTypeBody instTypeBody) then
       /-
       We set `etaReduce := true`.
