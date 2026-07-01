@@ -9405,7 +9405,6 @@ section Max
 abbrev maxKey? [Ord α] (xs : List ((a : α) × β a)) : Option α :=
   letI : Ord α := .opposite inferInstance
   minKey? xs
-
 theorem maxKey?_eq_some_iff_getKey?_eq_self_and_forall [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     {k} {l : List ((a : α) × β a)} (hd : DistinctKeys l) :
     maxKey? l = some k ↔ getKey? k l = some k ∧ ∀ k' : α, containsKey k' l → (compare k' k).isLE :=
