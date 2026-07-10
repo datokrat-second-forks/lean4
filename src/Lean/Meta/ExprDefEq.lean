@@ -2198,6 +2198,16 @@ private def isDefEqProjInst (t : Expr) (s : Expr) : MetaM LBool := do
   else
     return .undef
 
+/-- Return `true` if `t` and `s` are (applications of) distinct constructors. -/
+private def hasDistinctCtorHeads (t s : Expr) : MetaM Bool := do
+  let .const tName _ := t.getAppFn | return false
+  let .const sName _ := s.getAppFn | return false
+  if tName == sName then return false
+  let env ← getEnv
+  let some tInfo := env.findAsync? tName | return false
+  let some sInfo := env.findAsync? sName | return false
+  return tInfo.kind == .ctor && sInfo.kind == .ctor
+
 private def isExprDefEqExpensive (t : Expr) (s : Expr) : MetaM Bool := do
   whenUndefDo (isDefEqEta t s) do
   whenUndefDo (isDefEqEta s t) do
@@ -2219,6 +2229,12 @@ private def isExprDefEqExpensive (t : Expr) (s : Expr) : MetaM Bool := do
       return true
     if t.isConst && s.isConst then
       if t.constName! == s.constName! then isListLevelDefEqAux t.constLevels! s.constLevels! else return false
+    else if (← hasDistinctCtorHeads t s) then
+      /- Applications of distinct constructors cannot be definitionally equal: the remaining ways
+         they could unify are proof irrelevance (tried at `isExprDefEqAuxImpl`), structure eta
+         (tried above, and moot since distinct constructors of a single-constructor type cannot
+         both occur), and unification hints, which `isDefEqOnFailure` still tries. -/
+      isDefEqOnFailure t s
     else if (← pure t.isApp <&&> pure s.isApp <&&> isDefEqApp t s) then
       return true
     else
