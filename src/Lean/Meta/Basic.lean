@@ -1306,7 +1306,7 @@ def withTrackingZetaDeltaSet (s : FVarIdSet) : n α → n α :=
 @[inline] def withoutProofIrrelevance (x : n α) : n α :=
   withConfig (fun cfg => { cfg with proofIrrelevance := false }) x
 
-@[inline] private def Context.setTransparency (ctx : Context) (transparency : TransparencyMode) : Context :=
+private def Context.setTransparency (ctx : Context) (transparency : TransparencyMode) : Context :=
   { ctx with keyedConfig := ctx.keyedConfig.setTransparency transparency }
 
 @[inline] def withTransparency (mode : TransparencyMode) : n α → n α :=
