@@ -255,10 +255,13 @@ def ConfigWithKey.withCanUnfoldAtMatcherPred : ConfigWithKey → ConfigWithKey
         k ||| ((1 : UInt64) <<< 23) }
 
 @[inline]
-def ConfigWithKey.setTransparency (transparency : TransparencyMode) : ConfigWithKey → ConfigWithKey
-  | { config := c, key := k } =>
-    { config := { c with transparency }
-      key := ((k >>> (3 : UInt64)) <<< 3) ||| transparency.toUInt64 }
+def ConfigWithKey.setTransparency (transparency : TransparencyMode) (c : ConfigWithKey) : ConfigWithKey :=
+  -- Field projections instead of a pattern match: the match lowers to a `cases`
+  -- destructure at every inline site, which the LCNF passes must analyze and then
+  -- eliminate again, measurably slowing down compilation of modules that inline
+  -- this function heavily (e.g. `Lean.Meta.WrapInstance`, ~20M instructions).
+  { config := { c.config with transparency }
+    key := ((c.key >>> (3 : UInt64)) <<< 3) ||| transparency.toUInt64 }
 
 /--
 Function parameter information cache.
