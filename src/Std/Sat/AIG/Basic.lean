@@ -136,8 +136,11 @@ inductive Cache.WF : Array (Decl α) → HashMap (Decl α) Nat → Prop where
 /--
 A cache for reusing elements from `decls` if they are available.
 -/
-def Cache (α : Type) [DecidableEq α] [Hashable α] (decls : Array (Decl α)) :=
-  { map : HashMap (Decl α) Nat // Cache.WF decls map }
+structure Cache (α : Type) [DecidableEq α] [Hashable α] (decls : Array (Decl α)) where
+  /-- The lookup map from declarations to their indices in `decls`. -/
+  val : HashMap (Decl α) Nat
+  /-- The map is a valid lookup table for `decls`. -/
+  property : Cache.WF decls val
 
 /--
 Create an empty `Cache`, valid with respect to any `Array Decl`.
