@@ -146,14 +146,14 @@ trace: [Compiler.saveMono] size: 5
       | EST.Out.error a.15 a.16 =>
         return _x.11
 [Compiler.saveMono] size: 7
-    def _private.elab.casesOnSameCtor.0._eval @&a @&a a.1 : EST.Out Exception lcAny PUnit :=
+    def _private.elab.casesOnSameCtor.0._eval @&a @&a _y.1 : EST.Out Exception lcAny PUnit :=
       let _x.2 := "List";
       let _x.3 := "match_on_same_ctor";
       let _x.4 := Name.mkStr2 _x.2 _x.3;
       let _x.5 := Name.mkStr1 _x.2;
       let _x.6 := PUnit.unit;
       let _f.7 := _eval._lam_0 _x.4 _x.5 _x.6;
-      let _x.8 := Lean.Elab.Command.liftTermElabM._redArg _f.7 a a a.1;
+      let _x.8 := Lean.Elab.Command.liftTermElabM._redArg _f.7 a a _y.1;
       return _x.8
 -/
 #guard_msgs in

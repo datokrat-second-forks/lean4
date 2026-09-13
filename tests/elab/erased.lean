@@ -41,7 +41,7 @@ trace: [Compiler.saveMono] size: 5
       | EST.Out.error (a.14 : Lean.Exception) (a.15 : lcVoid) =>
         return _x.10
 [Compiler.saveMono] size: 9
-    def _private.elab.erased.0._eval (a : @&Lean.Elab.Command.Context) (a : @&lcAny) (a.1 : lcVoid) : EST.Out
+    def _private.elab.erased.0._eval (a : @&Lean.Elab.Command.Context) (a : @&lcAny) (_y.1 : lcVoid) : EST.Out
       Lean.Exception lcAny PUnit :=
       let _x.2 : String := "ErasedS";
       let _x.3 : String := "mk";
@@ -54,7 +54,7 @@ trace: [Compiler.saveMono] size: 5
         lcAny →
           Lean.Meta.Context →
             lcAny → Lean.Core.Context → lcAny → lcVoid → EST.Out Lean.Exception lcAny PUnit := _eval._lam_0 _x.7 _x.8;
-      let _x.10 : EST.Out Lean.Exception lcAny lcAny := Lean.Elab.Command.liftTermElabM._redArg _f.9 a a a.1;
+      let _x.10 : EST.Out Lean.Exception lcAny lcAny := Lean.Elab.Command.liftTermElabM._redArg _f.9 a a _y.1;
       return _x.10
 -/
 #guard_msgs in

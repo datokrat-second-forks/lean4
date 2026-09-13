@@ -33,9 +33,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] size: 20
-    def test @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def test @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := instInhabitedNat;
-      let _x.3 := @ST.Prim.Ref.get _ _ a a.1;
+      let _x.3 := @ST.Prim.Ref.get _ _ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         let _x.6 := val.4 # 1;
@@ -61,9 +61,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `State.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] size: 21
-    def test @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def test @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a a.1;
+      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         cases val.4 : EST.Out IO.Error lcAny Nat
@@ -90,9 +90,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `State.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] size: 21
-    def test @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def test @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a a.1;
+      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         cases val.4 : EST.Out IO.Error lcAny Nat
@@ -129,9 +129,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 22
-    def testOpaqueGet @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testOpaqueGet @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := instInhabitedNat;
-      let _x.3 := getState a a.1;
+      let _x.3 := getState a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | EST.Out.ok a.4 a.5 =>
         let _x.6 := a.4 # 1;
@@ -161,9 +161,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 23
-    def testOpaqueGet @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testOpaqueGet @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := getState a a.1;
+      let _x.3 := getState a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | EST.Out.ok a.4 a.5 =>
         cases a.4 : EST.Out IO.Error lcAny Nat
@@ -194,9 +194,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 23
-    def testOpaqueGet @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testOpaqueGet @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := getState a a.1;
+      let _x.3 := getState a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | EST.Out.ok a.4 a.5 =>
         cases a.4 : EST.Out IO.Error lcAny Nat
@@ -235,9 +235,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.ok 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 15
-    def testOpaqueModify @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testOpaqueModify @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := instInhabitedNat;
-      let _x.3 := @ST.Prim.Ref.get _ _ a a.1;
+      let _x.3 := @ST.Prim.Ref.get _ _ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         let _x.6 := val.4 # 1;
@@ -258,9 +258,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.ok 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 16
-    def testOpaqueModify @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testOpaqueModify @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a a.1;
+      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         cases val.4 : EST.Out IO.Error lcAny Nat
@@ -282,9 +282,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.ok 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 16
-    def testOpaqueModify @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testOpaqueModify @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a a.1;
+      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         cases val.4 : EST.Out IO.Error lcAny Nat
@@ -317,9 +317,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 17
-    def testOpaqueBoth @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testOpaqueBoth @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := instInhabitedNat;
-      let _x.3 := getState a a.1;
+      let _x.3 := getState a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | EST.Out.ok a.4 a.5 =>
         let _x.6 := a.4 # 1;
@@ -344,9 +344,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 18
-    def testOpaqueBoth @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testOpaqueBoth @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := getState a a.1;
+      let _x.3 := getState a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | EST.Out.ok a.4 a.5 =>
         cases a.4 : EST.Out IO.Error lcAny Nat
@@ -372,9 +372,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 18
-    def testOpaqueBoth @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testOpaqueBoth @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := getState a a.1;
+      let _x.3 := getState a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | EST.Out.ok a.4 a.5 =>
         cases a.4 : EST.Out IO.Error lcAny Nat
@@ -411,9 +411,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 25
-    def testIOInBetween @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testIOInBetween @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := instInhabitedNat;
-      let _x.3 := @ST.Prim.Ref.get _ _ a a.1;
+      let _x.3 := @ST.Prim.Ref.get _ _ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         let _x.6 := val.4 # 1;
@@ -447,9 +447,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 26
-    def testIOInBetween @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testIOInBetween @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a a.1;
+      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         cases val.4 : EST.Out IO.Error lcAny Nat
@@ -484,9 +484,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `EST.Out.error 0
 [Compiler.floatLetIn] size: 26
-    def testIOInBetween @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def testIOInBetween @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a a.1;
+      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         cases val.4 : EST.Out IO.Error lcAny Nat
@@ -531,9 +531,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `Option.some 0
 [Compiler.floatLetIn] size: 25
-    def test' n @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def test' n @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := instInhabitedNat;
-      let _x.3 := @ST.Prim.Ref.get _ _ a a.1;
+      let _x.3 := @ST.Prim.Ref.get _ _ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         let _x.6 := testing n;
@@ -567,9 +567,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `Option.some 0
 [Compiler.floatLetIn] size: 26
-    def test' n @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def test' n @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a a.1;
+      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         let _x.6 := testing n;
@@ -604,9 +604,9 @@ trace: [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compile
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `ST.Out.mk 0
 [Compiler.floatLetIn] Size of code that was pushed into arm: Lean.Compiler.LCNF.FloatLetIn.Decision.arm `Option.some 0
 [Compiler.floatLetIn] size: 26
-    def test' n @&a a.1 : EST.Out IO.Error lcAny Nat :=
+    def test' n @&a _y.1 : EST.Out IO.Error lcAny Nat :=
       let _x.2 := 0;
-      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a a.1;
+      let _x.3 := @ST.Prim.Ref.get ◾ ◾ a _y.1;
       cases _x.3 : EST.Out IO.Error lcAny Nat
       | ST.Out.mk val.4 state.5 =>
         let _x.6 := testing n;
