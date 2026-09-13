@@ -69,19 +69,52 @@ abbrev LMVarId := LevelMVarId
 instance : Repr LMVarId where
   reprPrec n p := reprPrec n.name p
 
-@[expose] def LMVarIdSet := Std.TreeSet LMVarId (Name.quickCmp ·.name ·.name)
-  deriving Inhabited, EmptyCollection
+structure LMVarIdSet where
+  toTreeSet : Std.TreeSet LMVarId (Name.quickCmp ·.name ·.name)
+  deriving Inhabited
 
-instance [Monad m] : ForIn m LMVarIdSet LMVarId := inferInstanceAs (ForIn _ (Std.TreeSet _ _) ..)
+instance : EmptyCollection LMVarIdSet := ⟨⟨∅⟩⟩
 
-@[expose] def LMVarIdMap (α : Type) := Std.TreeMap LMVarId α (Name.quickCmp ·.name ·.name)
+instance [Monad m] : ForIn m LMVarIdSet LMVarId where
+  forIn s init f := forIn s.toTreeSet init f
 
-instance : EmptyCollection (LMVarIdMap α) := inferInstanceAs (EmptyCollection (Std.TreeMap _ _ _))
+def LMVarIdSet.insert (s : LMVarIdSet) (mvarId : LMVarId) : LMVarIdSet :=
+  ⟨s.toTreeSet.insert mvarId⟩
 
-instance [Monad m] : ForIn m (LMVarIdMap α) (LMVarId × α) := inferInstanceAs (ForIn _ (Std.TreeMap _ _ _) ..)
+def LMVarIdSet.contains (s : LMVarIdSet) (mvarId : LMVarId) : Bool :=
+  s.toTreeSet.contains mvarId
+
+def LMVarIdSet.size (s : LMVarIdSet) : Nat :=
+  s.toTreeSet.size
+
+def LMVarIdSet.isEmpty (s : LMVarIdSet) : Bool :=
+  s.toTreeSet.isEmpty
+
+def LMVarIdSet.toList (s : LMVarIdSet) : List LMVarId :=
+  s.toTreeSet.toList
+
+def LMVarIdSet.toArray (s : LMVarIdSet) : Array LMVarId :=
+  s.toTreeSet.toArray
+
+structure LMVarIdMap (α : Type) where
+  toTreeMap : Std.TreeMap LMVarId α (Name.quickCmp ·.name ·.name)
+
+instance : EmptyCollection (LMVarIdMap α) := ⟨⟨∅⟩⟩
+
+instance [Monad m] : ForIn m (LMVarIdMap α) (LMVarId × α) where
+  forIn s init f := forIn s.toTreeMap init f
 
 instance : Inhabited (LMVarIdMap α) where
   default := {}
+
+def LMVarIdMap.insert (s : LMVarIdMap α) (mvarId : LMVarId) (a : α) : LMVarIdMap α :=
+  ⟨s.toTreeMap.insert mvarId a⟩
+
+def LMVarIdMap.contains (s : LMVarIdMap α) (mvarId : LMVarId) : Bool :=
+  s.toTreeMap.contains mvarId
+
+def LMVarIdMap.get? (s : LMVarIdMap α) (mvarId : LMVarId) : Option α :=
+  s.toTreeMap.get? mvarId
 
 inductive Level where
   | zero   : Level

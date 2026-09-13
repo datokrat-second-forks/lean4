@@ -39,7 +39,7 @@ instance : ToString Options where
 instance [Monad m] : ForIn m Options (Name × DataValue) where
   forIn o init f := private forIn o.map init f
 instance : BEq Options where
-  beq o1 o2 := private o1.map.beq o2.map
+  beq o1 o2 := private (o1.map == o2.map)
 instance : EmptyCollection Options where
   emptyCollection := .empty
 
@@ -108,11 +108,27 @@ def OptionDecl.fullDescr (self : OptionDecl) : String := Id.run do
       Please report an issue if you rely on this option."
   pure descr
 
-@[expose] def OptionDecls := NameMap OptionDecl
+structure OptionDecls where
+  toNameMap : NameMap OptionDecl
 
-instance : Inhabited OptionDecls := ⟨({} : NameMap OptionDecl)⟩
+instance : Inhabited OptionDecls := ⟨⟨{}⟩⟩
 
-private builtin_initialize optionDeclsRef : IO.Ref OptionDecls ← IO.mkRef (mkNameMap OptionDecl)
+def OptionDecls.contains (decls : OptionDecls) (name : Name) : Bool :=
+  decls.toNameMap.contains name
+
+def OptionDecls.insert (decls : OptionDecls) (name : Name) (decl : OptionDecl) : OptionDecls :=
+  ⟨decls.toNameMap.insert name decl⟩
+
+def OptionDecls.find? (decls : OptionDecls) (name : Name) : Option OptionDecl :=
+  decls.toNameMap.find? name
+
+def OptionDecls.foldl (f : σ → Name → OptionDecl → σ) (init : σ) (decls : OptionDecls) : σ :=
+  decls.toNameMap.foldl f init
+
+instance [Monad m] : ForIn m OptionDecls (Name × OptionDecl) where
+  forIn decls init f := forIn decls.toNameMap init f
+
+private builtin_initialize optionDeclsRef : IO.Ref OptionDecls ← IO.mkRef ⟨mkNameMap OptionDecl⟩
 
 @[export lean_register_option]
 def registerOption (name : Name) (decl : OptionDecl) : IO Unit := do
