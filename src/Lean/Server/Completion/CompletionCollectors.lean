@@ -544,8 +544,7 @@ def optionCompletion
     (caps              : ClientCapabilities)
     : IO (Array ResolvableCompletionItem) :=
   ctx.runMetaM {} do
-    -- HACK(WN): unfold the type so ForIn works
-    let (decls : Std.TreeMap _ _ _) ← getOptionDecls
+    let decls ← getOptionDecls
     let opts ← getOptions
     -- `stx` is from `"set_option " >> ident`
     return trailingDotCompletion decls stx[1] caps ctx fun name decl textEdit? => {

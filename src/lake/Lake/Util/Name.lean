@@ -26,7 +26,7 @@ public def stringToLegalOrSimpleName (s : String) : Name :=
 
 @[inline] public def NameMap.empty : NameMap α := mkNameMap α
 
-instance : Coe (Std.TreeMap Name α Name.quickCmp) (NameMap α) := ⟨id⟩
+instance : Coe (Std.TreeMap Name α Name.quickCmp) (NameMap α) := ⟨NameMap.mk⟩
 
 public abbrev OrdNameMap α := RBArray Name α Name.quickCmp
 @[inline] public def OrdNameMap.empty : OrdNameMap α := RBArray.empty
