@@ -12,16 +12,17 @@ public section
 
 namespace Std
 
-private opaque RecursiveMutexImpl : NonemptyType.{0}
+opaque RecursiveMutexImpl : NonemptyType.{0}
 
 /--
 Recursive (or reentrant) exclusion primitive.
 
 If you want to guard shared state, use `RecursiveMutex α` instead.
 -/
-def BaseRecursiveMutex : Type := RecursiveMutexImpl.type
+structure BaseRecursiveMutex : Type where
+  ref : RecursiveMutexImpl.type
 
-instance : Nonempty BaseRecursiveMutex := by exact RecursiveMutexImpl.property
+instance : Nonempty BaseRecursiveMutex := ⟨⟨Classical.choice RecursiveMutexImpl.property⟩⟩
 
 /-- Creates a new `BaseRecursiveMutex`. -/
 @[extern "lean_io_baserecmutex_new"]

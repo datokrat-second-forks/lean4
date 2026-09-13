@@ -27,7 +27,7 @@ namespace Lean.Elab
 namespace Term
 
 -- Same pattern as for `Methods`/`MethodsRef` in `SimpM`. See `FixedTermElabRef`.
-private opaque FixedTermElabRefPointed : NonemptyType.{0}
+opaque FixedTermElabRefPointed : NonemptyType.{0}
 
 /--
 This type is an abbreviation for `Option Expr → TermElabM Expr`, but avoids a circular dependency
@@ -37,10 +37,11 @@ We store `FixedTermElabRef` in the `Context` of the `TermElabM` monad, inducing 
 dependency. This mechanism allows us to register semantic term elaborators in
 `el : Option Expr → TermElabM Expr` as scoped `s : Syntax`, such that `elabTerm s = el`.
 -/
-def FixedTermElabRef : Type := FixedTermElabRefPointed.type
+structure FixedTermElabRef : Type where
+  ref : FixedTermElabRefPointed.type
 
 instance : Nonempty FixedTermElabRef :=
-  by exact FixedTermElabRefPointed.property
+  ⟨⟨Classical.choice FixedTermElabRefPointed.property⟩⟩
 
 /-- Saved context for postponed terms and tactics to be executed. -/
 structure SavedContext where
