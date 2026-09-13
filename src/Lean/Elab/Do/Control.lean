@@ -150,7 +150,8 @@ def ControlStack.mkBreak (base : ControlStack) (hasContinue : Bool) : DoElabM Ex
   -- `OptionT` to `α`.
   let α := if hasContinue then mkApp (mkConst ``Option [mi.u]) α else α
   let mγ ← mkMonadApp (← read).doBlockResultType
-  let res ← base.runInBase <| mkApp3 (mkConst ``BreakT.break [mi.u, mi.v]) α mi.m inst
+  let res ← base.runInBase <| ← mkAppM ``OptionT.run
+    #[mkApp3 (mkConst ``BreakT.break [mi.u, mi.v]) α mi.m inst]
   let ty ← inferType res
   -- Now instantiate `α`
   synthUsingDefEq "break result type" mγ ty
@@ -161,7 +162,8 @@ def ControlStack.mkContinue (base : ControlStack) : DoElabM Expr := do
   let inst ← mkInstMonad mi
   let α ← mkFreshResultType `α
   let mγ ← mkMonadApp (← read).doBlockResultType
-  let res ← base.runInBase <| mkApp3 (mkConst ``ContinueT.continue [mi.u, mi.v]) α mi.m inst
+  let res ← base.runInBase <| ← mkAppM ``OptionT.run
+    #[mkApp3 (mkConst ``ContinueT.continue [mi.u, mi.v]) α mi.m inst]
   let ty ← inferType res
   -- Now instantiate `α`
   synthUsingDefEq "continue result type" mγ ty
@@ -175,7 +177,8 @@ def ControlStack.mkReturn (base : ControlStack) (r : Expr) : DoElabM Expr := do
   let mγ ← mkMonadApp (← read).doBlockResultType
   let mγ' := mkApp mi.m (mkApp2 (mkConst ``Except [mi.u, mi.v]) ρ δ)
   synthUsingDefEq "early return result type" mγ mγ'
-  base.runInBase <| mkApp5 (mkConst ``EarlyReturnT.return [mi.u, mi.v]) ρ mi.m δ instMonad r
+  base.runInBase <| ← mkAppM ``ExceptT.run
+    #[mkApp5 (mkConst ``EarlyReturnT.return [mi.u, mi.v]) ρ mi.m δ instMonad r]
 
 def ControlStack.mkPure (base : ControlStack) (resultName : Name) : DoElabM Expr := do
   let mi := { (← read).monadInfo with m := (← base.m) }
