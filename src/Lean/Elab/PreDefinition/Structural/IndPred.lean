@@ -50,7 +50,7 @@ partial def replaceIndPredRecApps (recArgInfos : Array RecArgInfo) (positions : 
     (params : Array Expr) (ctx : RecursionContext) (e : Expr) : IndPredM Expr := do
   let recFnNames := recArgInfos.map (·.fnName)
   let containsRecFn (e : Expr) : StateRefT (HasConstCache recFnNames) IndPredM Bool :=
-    modifyGet (·.contains e)
+    modifyGet (HasConstCache.contains e |>.run)
   let rec loop (ctx : RecursionContext) (e : Expr) : StateRefT (HasConstCache recFnNames) IndPredM Expr := do
     unless ← containsRecFn e do
       return e

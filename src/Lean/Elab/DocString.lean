@@ -1545,7 +1545,7 @@ public partial def elabInline (stx : TSyntax `inline) : DocM (Inline ElabInline)
     let expanders ← roleExpandersFor name
     for (exName, ex) in expanders do
       try
-        let res ← ex inl args <&> (·.1)
+        let res ← (ex inl).run args <&> (·.1)
         pushInfoLeaf <| .ofDocElabInfo {
           elaborator := exName,
           stx := name,
@@ -1613,7 +1613,7 @@ public partial def elabBlock (stx : TSyntax `block) : DocM (Block ElabInline Ela
     let expanders ← directiveExpandersFor name
     for (exName, ex) in expanders do
       try
-        let res ← ex content args <&> (·.1)
+        let res ← (ex content).run args <&> (·.1)
         pushInfoLeaf <| .ofDocElabInfo {
           elaborator := exName,
           stx := name,
@@ -1656,7 +1656,7 @@ public partial def elabBlock (stx : TSyntax `block) : DocM (Block ElabInline Ela
     let expanders ← codeBlockExpandersFor name
     for (exName, ex) in expanders do
       try
-        let res ← ex s args <&> (·.1)
+        let res ← (ex s).run args <&> (·.1)
         pushInfoLeaf <| .ofDocElabInfo {
           elaborator := exName,
           stx := name,
@@ -1675,7 +1675,7 @@ public partial def elabBlock (stx : TSyntax `block) : DocM (Block ElabInline Ela
     let expanders ← commandExpandersFor name
     for (exName, ex) in expanders do
       try
-        let res ← ex args <&> (·.1)
+        let res ← ex.run args <&> (·.1)
         pushInfoLeaf <| .ofDocElabInfo {
           elaborator := exName,
           stx := name,
