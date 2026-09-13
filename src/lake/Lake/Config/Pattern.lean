@@ -9,6 +9,7 @@ prelude
 public import Init.System.FilePath
 public import Std.Data.TreeMap.Basic
 public import Lean.Data.Name
+public import Lean.Data.NameMap.Basic
 import Lake.Util.Name
 import Init.Data.String.TakeDrop
 public import Init.Data.String.Basic

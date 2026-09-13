@@ -25,34 +25,34 @@ unsafe instance : BEq (Ptr α) where
 /--
 Set of pointers. It is a low-level auxiliary datastructure used for traversing DAGs.
 -/
-@[expose] unsafe def PtrSet (α : Type) :=
-  Std.HashSet (Ptr α)
+unsafe structure PtrSet (α : Type) where
+  toHashSet : Std.HashSet (Ptr α)
 
 unsafe def mkPtrSet {α : Type} (capacity : Nat := 64) : PtrSet α :=
-  Std.HashSet.emptyWithCapacity capacity
+  ⟨Std.HashSet.emptyWithCapacity capacity⟩
 
 unsafe abbrev PtrSet.insert (s : PtrSet α) (a : α) : PtrSet α :=
-  Std.HashSet.insert s { value := a }
+  ⟨s.toHashSet.insert { value := a }⟩
 
 unsafe abbrev PtrSet.contains (s : PtrSet α) (a : α) : Bool :=
-  Std.HashSet.contains s { value := a }
+  s.toHashSet.contains { value := a }
 
 /--
 Map of pointers. It is a low-level auxiliary datastructure used for traversing DAGs.
 -/
-@[expose] unsafe def PtrMap (α : Type) (β : Type) :=
-  Std.HashMap (Ptr α) β
+unsafe structure PtrMap (α : Type) (β : Type) where
+  toHashMap : Std.HashMap (Ptr α) β
 
 unsafe def mkPtrMap {α β : Type} (capacity : Nat := 64) : PtrMap α β :=
-  Std.HashMap.emptyWithCapacity capacity
+  ⟨Std.HashMap.emptyWithCapacity capacity⟩
 
 unsafe abbrev PtrMap.insert (s : PtrMap α β) (a : α) (b : β) : PtrMap α β :=
-  Std.HashMap.insert s { value := a } b
+  ⟨s.toHashMap.insert { value := a } b⟩
 
 unsafe abbrev PtrMap.contains (s : PtrMap α β) (a : α) : Bool :=
-  Std.HashMap.contains s { value := a }
+  s.toHashMap.contains { value := a }
 
 unsafe abbrev PtrMap.find? (s : PtrMap α β) (a : α) : Option β :=
-  Std.HashMap.get? s { value := a }
+  s.toHashMap.get? { value := a }
 
 end Lean
