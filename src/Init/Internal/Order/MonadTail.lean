@@ -110,18 +110,34 @@ set_option linter.missingDocs false in
 noncomputable def ST.bot' [Nonempty α] (s : Void σ) : @FlatOrder (ST.Out σ α) (.mk Classical.ofNonempty (Classical.choice ⟨s⟩)) :=
   .mk _ (.mk Classical.ofNonempty (Classical.choice ⟨s⟩))
 
+/-- `x` as an element of the pointwise flat order; the inverse of `ST.ofFlat`. -/
+@[expose] noncomputable def ST.toFlat [Nonempty α] (x : ST σ α) :
+    ∀ s : Void σ, FlatOrder (ST.bot' (σ := σ) (α := α) s) :=
+  fun s => x.run s
+
+/-- An element of the pointwise flat order as an `ST`; the inverse of `ST.toFlat`. -/
+@[expose] noncomputable def ST.ofFlat [Nonempty α]
+    (x : ∀ s : Void σ, FlatOrder (ST.bot' (σ := σ) (α := α) s)) : ST σ α :=
+  ST.mk fun s => x s
+
 instance [Nonempty α] : CCPO (ST σ α) where
-  rel := PartialOrder.rel (α := ∀ s, FlatOrder (ST.bot' s))
+  rel x y := ST.toFlat x ⊑ ST.toFlat y
   rel_refl := PartialOrder.rel_refl
-  rel_antisymm := PartialOrder.rel_antisymm
+  rel_antisymm {x y} h₁ h₂ :=
+    have h : ST.toFlat x = ST.toFlat y := PartialOrder.rel_antisymm h₁ h₂
+    congrArg ST.mk h
   rel_trans := PartialOrder.rel_trans
-  has_csup hchain := CCPO.has_csup (α := ∀ s, FlatOrder (ST.bot' s)) hchain
+  has_csup {c} hchain := by
+    have ⟨f, hf⟩ := CCPO.has_csup (α := ∀ s : Void σ, FlatOrder (ST.bot' (σ := σ) (α := α) s))
+      (c := fun f => c (ST.ofFlat f)) fun x y hx hy => hchain _ _ hx hy
+    exact ⟨ST.ofFlat f, fun x => (hf (ST.toFlat x)).trans
+      ⟨fun h y hy => h (ST.toFlat y) hy, fun h y hy => h (ST.ofFlat y) hy⟩⟩
 
 instance : MonadTail (ST σ) where
   instCCPO _ := inferInstance
   bind_mono_right {_ _ a f₁ f₂} _ h := by
     intro w
-    change FlatOrder.rel (ST.bind a f₁ w) (ST.bind a f₂ w)
+    change FlatOrder.rel ((ST.bind a f₁).run w) ((ST.bind a f₂).run w)
     simp only [ST.bind]
     apply h
 
