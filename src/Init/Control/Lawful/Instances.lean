@@ -481,6 +481,13 @@ end StateT
 
 namespace EStateM
 
+@[ext, grind ext] theorem ext {x y : EStateM ε σ α} (h : ∀ s, x.run s = y.run s) : x = y :=
+  congrArg EStateM.mk (funext h)
+
+-- not a `grind` lemma: `grind` reduces `run (.mk x) s` to `x s` on its own, which is not a pattern
+@[simp] theorem run_mk (x : σ → Result ε σ α) (s : σ) : run (.mk x) s = x s :=
+  rfl
+
 @[simp, grind =] theorem run_pure (a : α) (s : σ) :
     EStateM.run (pure a : EStateM ε σ α) s = .ok a s := rfl
 
@@ -514,19 +521,19 @@ theorem run_adaptExcept (f : ε → ε') (x : EStateM ε σ α) (s : σ)
      match EStateM.run x s with
      | .ok x s => .ok x s
      | .error e s => .error (f e) s := by
-  simp only [EStateM.run, EStateM.adaptExcept]
-  cases (x s) <;> rfl
+  simp only [EStateM.adaptExcept]
+  cases x.run s <;> rfl
 
 instance : LawfulMonad (EStateM ε σ) := .mk'
-  (id_map := fun x => funext <| fun s => by
+  (id_map := fun x => EStateM.ext fun s => by
     simp only [Functor.map, EStateM.map]
-    match x s with
+    match x.run s with
     | .ok _ _ => rfl
     | .error _ _ => rfl)
   (pure_bind := fun _ _ => by rfl)
-  (bind_assoc := fun x _ _ => funext <| fun s => by
+  (bind_assoc := fun x _ _ => EStateM.ext fun s => by
     simp only [bind, EStateM.bind]
-    match x s with
+    match x.run s with
     | .ok _ _ => rfl
     | .error _ _ => rfl)
   (map_const := fun _ _ => rfl)

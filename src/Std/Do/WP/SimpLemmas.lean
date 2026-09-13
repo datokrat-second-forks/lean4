@@ -516,8 +516,8 @@ open EStateM.Backtrackable in
 theorem tryCatch_EStateM {ε σ δ α x h Q} [EStateM.Backtrackable δ σ]:
     wp⟦MonadExceptOf.tryCatch x h : EStateM ε σ α⟧ Q = fun s => wp⟦x⟧ (Q.1, fun e s' => wp⟦h e⟧ Q (restore s' (save s)), Q.2.2) s := by
   ext s
-  simp only [PredTrans.apply, wp, EStateM.run, MonadExceptOf.tryCatch, EStateM.tryCatch]
-  cases x s <;> simp
+  simp only [PredTrans.apply, wp, MonadExceptOf.tryCatch, EStateM.tryCatch]
+  cases x.run s <;> simp
 
 @[simp]
 theorem tryCatch_ReaderT [WP m sh] [Monad m] [MonadExceptOf ε m] :
@@ -570,8 +570,8 @@ open EStateM.Backtrackable in
 theorem orElse_EStateM {ε σ δ α x h Q} [EStateM.Backtrackable δ σ]:
     wp⟦OrElse.orElse x h : EStateM ε σ α⟧ Q = fun s => wp⟦x⟧ (Q.1, fun _ s' => wp⟦h ()⟧ Q (restore s' (save s)), Q.2.2) s := by
   ext s
-  simp only [PredTrans.apply, wp, EStateM.run, OrElse.orElse, EStateM.orElse]
-  cases x s <;> simp
+  simp only [PredTrans.apply, wp, OrElse.orElse, EStateM.orElse]
+  cases x.run s <;> simp
 
 @[simp]
 theorem orElse_Except  :
