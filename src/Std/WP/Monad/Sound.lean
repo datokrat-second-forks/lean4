@@ -70,7 +70,7 @@ instance Except.instLawfulWPMonadAttach {ε : Type u} : LawfulWPMonadAttach (Exc
 instance EStateM.instLawfulWPMonadAttach {ε σ : Type} : LawfulWPMonadAttach (EStateM ε σ) (σ → Prop) (ε → σ → Prop) where
   of_canReturn_wp := @fun α x P a hcan hwp => by
     obtain ⟨s, s', heq⟩ := hcan
-    have hxs : x s = EStateM.Result.ok a s' := heq
+    have hxs : x.run s = EStateM.Result.ok a s' := heq
     have h := hwp s (by simp)
     simp only [wp, WP.wpTrans, hxs] at h
     simpa using h
@@ -248,8 +248,8 @@ theorem EStateM.of_run_eq_wp {ε σ α : Type} {x : EStateM.Result ε σ α}
   (hwp : wp prog (fun a s' => P (.ok a s')) (fun e s' => P (.error e s')) s) :
     P x := by
   rw [← h]
-  change P (prog s)
-  cases heq : prog s with
+  change P (prog.run s)
+  cases heq : prog.run s with
   | ok a s' =>
     simpa [wp, WP.wpTrans, heq] using hwp
   | error e s' =>

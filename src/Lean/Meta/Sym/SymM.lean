@@ -300,7 +300,7 @@ private def mkSharedExprs : AlphaShareCommonM SharedExprs := do
 
 def SymM.run (x : SymM α) : MetaM α := do
   let (sharedExprs, share) ←
-    match mkSharedExprs { env := (← getEnv) } {} with
+    match (mkSharedExprs { env := (← getEnv) }).run {} with
     | .ok sharedExprs share => pure (sharedExprs, share)
     | .error .. => unreachable! -- checks are disabled
   let debug := sym.debug.get (← getOptions)
@@ -342,7 +342,7 @@ individually satisfy the invariants.
 -/
 def runShareCommonM (k : AlphaShareCommonM α) (ctx : AlphaShareCommon.Context) : SymM (Except AlphaShareCommon.Cache α) := do
   let share ← modifyGet fun s => (s.share, { s with share := {} })
-  match k ctx share with
+  match (k ctx).run share with
   | .ok a share => modify fun s => { s with share }; return .ok a
   | .error cache share => modify fun s => { s with share }; return .error cache
 

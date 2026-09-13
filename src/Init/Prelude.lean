@@ -4674,37 +4674,51 @@ Instances of `EStateM.Backtrackable` provide a way to roll back some part of the
 
 `EStateM ε σ` is equivalent to `ExceptT ε (StateM σ)`, but it is more efficient.
 -/
-def EStateM (ε σ α : Type u) := σ → Result ε σ α
+-- the binder name `s` is part of `EStateM.run`'s type, so that `EStateM.run (s := ...)` works
+newtype EStateM (ε σ α : Type u) := (s : σ) → Result ε σ α with run
+
+attribute [always_inline, inline] EStateM.mk EStateM.run
+
+/--
+Interpret `σ → EStateM.Result ε σ α` as an element of `EStateM ε σ α`.
+-/
+add_decl_doc EStateM.mk
+
+/--
+Executes an `EStateM` action with the initial state `s`. The returned value includes the final state
+and indicates whether an exception was thrown or a value was returned.
+-/
+add_decl_doc EStateM.run
 
 namespace EStateM
 
 variable {ε σ α β : Type u}
 
 instance [Inhabited ε] : Inhabited (EStateM ε σ α) where
-  default := fun s => Result.error default s
+  default := EStateM.mk fun s => Result.error default s
 
 /--
 Returns a value without modifying the state or throwing an exception.
 -/
 @[always_inline, inline]
-protected def pure (a : α) : EStateM ε σ α := fun s =>
+protected def pure (a : α) : EStateM ε σ α := EStateM.mk fun s =>
   Result.ok a s
 
 @[always_inline, inline, inherit_doc MonadState.set]
-protected def set (s : σ) : EStateM ε σ PUnit := fun _ =>
+protected def set (s : σ) : EStateM ε σ PUnit := EStateM.mk fun _ =>
   Result.ok ⟨⟩ s
 
 @[always_inline, inline, inherit_doc MonadState.get]
-protected def get : EStateM ε σ σ := fun s =>
+protected def get : EStateM ε σ σ := EStateM.mk fun s =>
   Result.ok s s
 
 @[always_inline, inline, inherit_doc MonadState.modifyGet]
-protected def modifyGet (f : σ → Prod α σ) : EStateM ε σ α := fun s =>
+protected def modifyGet (f : σ → Prod α σ) : EStateM ε σ α := EStateM.mk fun s =>
   match f s with
   | (a, s) => Result.ok a s
 
 @[always_inline, inline, inherit_doc MonadExcept.throw]
-protected def throw (e : ε) : EStateM ε σ α := fun s =>
+protected def throw (e : ε) : EStateM ε σ α := EStateM.mk fun s =>
   Result.error e s
 
 /--
@@ -4731,10 +4745,10 @@ the state. If no instance of `Backtrackable` is provided, a fallback instance in
 is used, and no information is rolled back.
 -/
 @[always_inline, inline]
-protected def tryCatch {δ} [Backtrackable δ σ] {α} (x : EStateM ε σ α) (handle : ε → EStateM ε σ α) : EStateM ε σ α := fun s =>
+protected def tryCatch {δ} [Backtrackable δ σ] {α} (x : EStateM ε σ α) (handle : ε → EStateM ε σ α) : EStateM ε σ α := EStateM.mk fun s =>
   let d := Backtrackable.save s
-  match x s with
-  | Result.error e s => handle e (Backtrackable.restore s d)
+  match x.run s with
+  | Result.error e s => (handle e).run (Backtrackable.restore s d)
   | ok               => ok
 
 /--
@@ -4746,18 +4760,18 @@ the state. If no instance of `Backtrackable` is provided, a fallback instance in
 is used, and no information is rolled back.
 -/
 @[always_inline, inline]
-protected def orElse {δ} [Backtrackable δ σ] (x₁ : EStateM ε σ α) (x₂ : Unit → EStateM ε σ α) : EStateM ε σ α := fun s =>
+protected def orElse {δ} [Backtrackable δ σ] (x₁ : EStateM ε σ α) (x₂ : Unit → EStateM ε σ α) : EStateM ε σ α := EStateM.mk fun s =>
   let d := Backtrackable.save s;
-  match x₁ s with
-  | Result.error _ s => x₂ () (Backtrackable.restore s d)
+  match x₁.run s with
+  | Result.error _ s => (x₂ ()).run (Backtrackable.restore s d)
   | ok               => ok
 
 /--
 Transforms exceptions with a function, doing nothing on successful results.
 -/
 @[always_inline, inline]
-def adaptExcept {ε' : Type u} (f : ε → ε') (x : EStateM ε σ α) : EStateM ε' σ α := fun s =>
-  match x s with
+def adaptExcept {ε' : Type u} (f : ε → ε') (x : EStateM ε σ α) : EStateM ε' σ α := EStateM.mk fun s =>
+  match x.run s with
   | Result.error e s => Result.error (f e) s
   | Result.ok a s    => Result.ok a s
 
@@ -4765,17 +4779,17 @@ def adaptExcept {ε' : Type u} (f : ε → ε') (x : EStateM ε σ α) : EStateM
 Sequences two `EStateM ε σ` actions, passing the returned value from the first into the second.
 -/
 @[always_inline, inline]
-protected def bind (x : EStateM ε σ α) (f : α → EStateM ε σ β) : EStateM ε σ β := fun s =>
-  match x s with
-  | Result.ok a s    => f a s
+protected def bind (x : EStateM ε σ α) (f : α → EStateM ε σ β) : EStateM ε σ β := EStateM.mk fun s =>
+  match x.run s with
+  | Result.ok a s    => (f a).run s
   | Result.error e s => Result.error e s
 
 /--
 Transforms the value returned from an `EStateM ε σ` action using a function.
 -/
 @[always_inline, inline]
-protected def map (f : α → β) (x : EStateM ε σ α) : EStateM ε σ β := fun s =>
-  match x s with
+protected def map (f : α → β) (x : EStateM ε σ α) : EStateM ε σ β := EStateM.mk fun s =>
+  match x.run s with
   | Result.ok a s    => Result.ok (f a) s
   | Result.error e s => Result.error e s
 
@@ -4784,9 +4798,9 @@ Sequences two `EStateM ε σ` actions, running `x` before `y`. The first action'
 ignored.
 -/
 @[always_inline, inline]
-protected def seqRight (x : EStateM ε σ α) (y : Unit → EStateM ε σ β) : EStateM ε σ β := fun s =>
-  match x s with
-  | Result.ok _ s    => y () s
+protected def seqRight (x : EStateM ε σ α) (y : Unit → EStateM ε σ β) : EStateM ε σ β := EStateM.mk fun s =>
+  match x.run s with
+  | Result.ok _ s    => (y ()).run s
   | Result.error e s => Result.error e s
 
 @[always_inline]
@@ -4807,13 +4821,6 @@ instance : MonadStateOf σ (EStateM ε σ) where
 instance {δ} [Backtrackable δ σ] : MonadExceptOf ε (EStateM ε σ) where
   throw    := EStateM.throw
   tryCatch := EStateM.tryCatch
-
-/--
-Executes an `EStateM` action with the initial state `s`. The returned value includes the final state
-and indicates whether an exception was thrown or a value was returned.
--/
-@[always_inline, inline]
-def run (x : EStateM ε σ α) (s : σ) : Result ε σ α := x s
 
 /--
 Executes an `EStateM` with the initial state `s` for the returned value `α`, discarding the final

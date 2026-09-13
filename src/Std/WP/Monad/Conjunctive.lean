@@ -47,7 +47,7 @@ instance EStateM.instWPConjunctive {ε σ α : Type} (x : EStateM ε σ α) : WP
   wp_meet_wp_le Q₁ Q₂ E₁ E₂ := by
     intro s
     simp only [meet_apply, wp, WP.wpTrans]
-    cases x s <;> first | exact PartialOrder.rel_refl | exact meet_le_left _ _
+    cases x.run s <;> first | exact PartialOrder.rel_refl | exact meet_le_left _ _
 
 /-- A `StateT` program lifts conjunctivity from its base monad. -/
 instance StateT.instWPConjunctive {m : Type u → Type v} {σ : Type u} {Pred : Type w} {EPred : Type z}

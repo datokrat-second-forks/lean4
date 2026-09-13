@@ -94,9 +94,8 @@ public instance [Monad m] [MonadAttach m] [LawfulMonad m] [LawfulMonadAttach m] 
   inferInstanceAs (LawfulMonadAttach (ReaderT (ST.Ref ω σ) m))
 
 public instance {ε σ : Type u} : WeaklyLawfulMonadAttach (EStateM ε σ) where
-  map_attach {α} {x} := by
-    funext s
-    show EStateM.map Subtype.val (MonadAttach.attach x) s = x s
+  map_attach {α} {x} := congrArg EStateM.mk <| funext fun s => by
+    show EStateM.run (EStateM.map Subtype.val (MonadAttach.attach x)) s = x.run s
     simp only [EStateM.map, MonadAttach.attach]
     split
     · next a s' h =>
@@ -112,7 +111,7 @@ public instance {ε σ : Type u} : WeaklyLawfulMonadAttach (EStateM ε σ) where
 
 public instance {ε σ : Type u} : LawfulMonadAttach (EStateM ε σ) where
   canReturn_map_imp {α P x a} h := by
-    simp only [MonadAttach.CanReturn, Functor.map, EStateM.map, EStateM.run] at h
+    simp only [MonadAttach.CanReturn, Functor.map, EStateM.map] at h
     obtain ⟨s, s', heq⟩ := h
     split at heq
     · next a₀ _ _ => injection heq with ha _; cases ha; exact a₀.property
