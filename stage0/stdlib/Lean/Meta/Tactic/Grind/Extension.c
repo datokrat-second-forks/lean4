@@ -8058,7 +8058,7 @@ v___x_2563_ = l_Lean_registerSimpleScopedEnvExtension___redArg(v___x_2562_);
 return v___x_2563_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_mkExtension___boxed(lean_object* v_name_2564_, lean_object* v___y_2565_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_mkExtension___boxed(lean_object* v_name_2564_, lean_object* v_a_2565_){
 _start:
 {
 lean_object* v_res_2566_; 
@@ -8273,7 +8273,7 @@ v___x_2639_ = l_Lean_throwError___at___00Lean_Meta_Grind_throwNotMarkedWithGrind
 return v___x_2639_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_throwNotMarkedWithGrindAttribute___redArg___boxed(lean_object* v_declName_2640_, lean_object* v_a_2641_, lean_object* v_a_2642_, lean_object* v___y_2643_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_throwNotMarkedWithGrindAttribute___redArg___boxed(lean_object* v_declName_2640_, lean_object* v_a_2641_, lean_object* v_a_2642_, lean_object* v_a_2643_){
 _start:
 {
 lean_object* v_res_2644_; 
@@ -8291,7 +8291,7 @@ v___x_2650_ = l_Lean_Meta_Grind_throwNotMarkedWithGrindAttribute___redArg(v_decl
 return v___x_2650_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_throwNotMarkedWithGrindAttribute___boxed(lean_object* v_00_u03b1_2651_, lean_object* v_declName_2652_, lean_object* v_a_2653_, lean_object* v_a_2654_, lean_object* v___y_2655_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_throwNotMarkedWithGrindAttribute___boxed(lean_object* v_00_u03b1_2651_, lean_object* v_declName_2652_, lean_object* v_a_2653_, lean_object* v_a_2654_, lean_object* v_a_2655_){
 _start:
 {
 lean_object* v_res_2656_; 

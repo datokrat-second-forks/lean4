@@ -1457,7 +1457,7 @@ v___x_462_ = l_Lean_registerInternalExceptionId(v___x_461_);
 return v___x_462_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Exception_0__Lean_initFn_00___x40_Lean_Exception_2633972168____hygCtx___hyg_2____boxed(lean_object* v___y_463_){
+LEAN_EXPORT lean_object* l___private_Lean_Exception_0__Lean_initFn_00___x40_Lean_Exception_2633972168____hygCtx___hyg_2____boxed(lean_object* v_a_463_){
 _start:
 {
 lean_object* v_res_464_; 

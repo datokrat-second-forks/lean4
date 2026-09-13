@@ -1151,7 +1151,7 @@ return v___x_316_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_getCtorArity_x3f___boxed(lean_object* v_declName_319_, lean_object* v_a_320_, lean_object* v_a_321_, lean_object* v___y_322_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_getCtorArity_x3f___boxed(lean_object* v_declName_319_, lean_object* v_a_320_, lean_object* v_a_321_, lean_object* v_a_322_){
 _start:
 {
 lean_object* v_res_323_; 

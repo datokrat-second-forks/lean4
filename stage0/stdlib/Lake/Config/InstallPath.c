@@ -3570,7 +3570,7 @@ return v___x_1301_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_findElanInstall_x3f___boxed(lean_object* v___y_1302_){
+LEAN_EXPORT lean_object* l_Lake_findElanInstall_x3f___boxed(lean_object* v_a_1302_){
 _start:
 {
 lean_object* v_res_1303_; 
@@ -3681,7 +3681,7 @@ return v___x_1317_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_findLeanSysroot_x3f___boxed(lean_object* v_lean_1343_, lean_object* v___y_1344_){
+LEAN_EXPORT lean_object* l_Lake_findLeanSysroot_x3f___boxed(lean_object* v_lean_1343_, lean_object* v_a_1344_){
 _start:
 {
 lean_object* v_res_1345_; 
@@ -3747,7 +3747,7 @@ return v___x_1372_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Config_InstallPath_0__Lake_LeanInstall_get_getGithash___boxed(lean_object* v_sysroot_1373_, lean_object* v___y_1374_){
+LEAN_EXPORT lean_object* l___private_Lake_Config_InstallPath_0__Lake_LeanInstall_get_getGithash___boxed(lean_object* v_sysroot_1373_, lean_object* v_a_1374_){
 _start:
 {
 lean_object* v_res_1375_; 
@@ -3805,7 +3805,7 @@ return v___x_1383_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Config_InstallPath_0__Lake_LeanInstall_get_findAr___boxed(lean_object* v_sysroot_1389_, lean_object* v___y_1390_){
+LEAN_EXPORT lean_object* l___private_Lake_Config_InstallPath_0__Lake_LeanInstall_get_findAr___boxed(lean_object* v_sysroot_1389_, lean_object* v_a_1390_){
 _start:
 {
 lean_object* v_res_1391_; 
@@ -4309,7 +4309,7 @@ return v___x_1496_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Config_InstallPath_0__Lake_LeanInstall_get_setCc___boxed(lean_object* v_sysroot_1539_, lean_object* v_i_1540_, lean_object* v___y_1541_){
+LEAN_EXPORT lean_object* l___private_Lake_Config_InstallPath_0__Lake_LeanInstall_get_setCc___boxed(lean_object* v_sysroot_1539_, lean_object* v_i_1540_, lean_object* v_a_1541_){
 _start:
 {
 lean_object* v_res_1542_; 
@@ -4392,7 +4392,7 @@ return v___x_1572_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_LeanInstall_get___boxed(lean_object* v_sysroot_1575_, lean_object* v_collocated_1576_, lean_object* v___y_1577_){
+LEAN_EXPORT lean_object* l_Lake_LeanInstall_get___boxed(lean_object* v_sysroot_1575_, lean_object* v_collocated_1576_, lean_object* v_a_1577_){
 _start:
 {
 uint8_t v_collocated_boxed_1578_; lean_object* v_res_1579_; 
@@ -4458,7 +4458,7 @@ return v___x_1591_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_findLeanCmdInstall_x3f___boxed(lean_object* v_lean_1594_, lean_object* v___y_1595_){
+LEAN_EXPORT lean_object* l_Lake_findLeanCmdInstall_x3f___boxed(lean_object* v_lean_1594_, lean_object* v_a_1595_){
 _start:
 {
 lean_object* v_res_1596_; 
@@ -4521,7 +4521,7 @@ return v___x_1599_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_findLakeLeanJointHome_x3f___boxed(lean_object* v___y_1610_){
+LEAN_EXPORT lean_object* l_Lake_findLakeLeanJointHome_x3f___boxed(lean_object* v_a_1610_){
 _start:
 {
 lean_object* v_res_1611_; 
@@ -4674,7 +4674,7 @@ return v___x_1649_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_getLakeInstall_x3f___boxed(lean_object* v_lake_1650_, lean_object* v___y_1651_){
+LEAN_EXPORT lean_object* l_Lake_getLakeInstall_x3f___boxed(lean_object* v_lake_1650_, lean_object* v_a_1651_){
 _start:
 {
 lean_object* v_res_1652_; 
@@ -4841,7 +4841,7 @@ return v___x_1669_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_findLeanInstall_x3f___boxed(lean_object* v___y_1695_){
+LEAN_EXPORT lean_object* l_Lake_findLeanInstall_x3f___boxed(lean_object* v_a_1695_){
 _start:
 {
 lean_object* v_res_1696_; 
@@ -4963,7 +4963,7 @@ return v___x_1725_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_findLakeInstall_x3f___boxed(lean_object* v___y_1729_){
+LEAN_EXPORT lean_object* l_Lake_findLakeInstall_x3f___boxed(lean_object* v_a_1729_){
 _start:
 {
 lean_object* v_res_1730_; 
@@ -5185,7 +5185,7 @@ return v___x_1796_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_findInstall_x3f___boxed(lean_object* v___y_1797_){
+LEAN_EXPORT lean_object* l_Lake_findInstall_x3f___boxed(lean_object* v_a_1797_){
 _start:
 {
 lean_object* v_res_1798_; 

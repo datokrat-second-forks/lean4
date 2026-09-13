@@ -210,7 +210,7 @@ return v___x_40_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Param_applyRenaming___redArg___boxed(lean_object* v_pu_41_, lean_object* v_param_42_, lean_object* v_r_43_, lean_object* v_a_44_, lean_object* v___y_45_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Param_applyRenaming___redArg___boxed(lean_object* v_pu_41_, lean_object* v_param_42_, lean_object* v_r_43_, lean_object* v_a_44_, lean_object* v_a_45_){
 _start:
 {
 uint8_t v_pu_boxed_46_; lean_object* v_res_47_; 
@@ -229,7 +229,7 @@ v___x_56_ = l_Lean_Compiler_LCNF_Param_applyRenaming___redArg(v_pu_48_, v_param_
 return v___x_56_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Param_applyRenaming___boxed(lean_object* v_pu_57_, lean_object* v_param_58_, lean_object* v_r_59_, lean_object* v_a_60_, lean_object* v_a_61_, lean_object* v_a_62_, lean_object* v_a_63_, lean_object* v___y_64_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Param_applyRenaming___boxed(lean_object* v_pu_57_, lean_object* v_param_58_, lean_object* v_r_59_, lean_object* v_a_60_, lean_object* v_a_61_, lean_object* v_a_62_, lean_object* v_a_63_, lean_object* v_a_64_){
 _start:
 {
 uint8_t v_pu_boxed_65_; lean_object* v_res_66_; 
@@ -400,7 +400,7 @@ return v___x_107_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_LetDecl_applyRenaming___redArg___boxed(lean_object* v_pu_108_, lean_object* v_decl_109_, lean_object* v_r_110_, lean_object* v_a_111_, lean_object* v___y_112_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_LetDecl_applyRenaming___redArg___boxed(lean_object* v_pu_108_, lean_object* v_decl_109_, lean_object* v_r_110_, lean_object* v_a_111_, lean_object* v_a_112_){
 _start:
 {
 uint8_t v_pu_boxed_113_; lean_object* v_res_114_; 
@@ -419,7 +419,7 @@ v___x_123_ = l_Lean_Compiler_LCNF_LetDecl_applyRenaming___redArg(v_pu_115_, v_de
 return v___x_123_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_LetDecl_applyRenaming___boxed(lean_object* v_pu_124_, lean_object* v_decl_125_, lean_object* v_r_126_, lean_object* v_a_127_, lean_object* v_a_128_, lean_object* v_a_129_, lean_object* v_a_130_, lean_object* v___y_131_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_LetDecl_applyRenaming___boxed(lean_object* v_pu_124_, lean_object* v_decl_125_, lean_object* v_r_126_, lean_object* v_a_127_, lean_object* v_a_128_, lean_object* v_a_129_, lean_object* v_a_130_, lean_object* v_a_131_){
 _start:
 {
 uint8_t v_pu_boxed_132_; lean_object* v_res_133_; 
@@ -3023,7 +3023,7 @@ return v___x_718_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_FunDecl_applyRenaming___boxed(lean_object* v_pu_721_, lean_object* v_decl_722_, lean_object* v_r_723_, lean_object* v_a_724_, lean_object* v_a_725_, lean_object* v_a_726_, lean_object* v_a_727_, lean_object* v___y_728_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_FunDecl_applyRenaming___boxed(lean_object* v_pu_721_, lean_object* v_decl_722_, lean_object* v_r_723_, lean_object* v_a_724_, lean_object* v_a_725_, lean_object* v_a_726_, lean_object* v_a_727_, lean_object* v_a_728_){
 _start:
 {
 uint8_t v_pu_boxed_729_; lean_object* v_res_730_; 
@@ -3051,7 +3051,7 @@ lean_dec(v_r_732_);
 return v_res_741_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Code_applyRenaming___boxed(lean_object* v_pu_742_, lean_object* v_code_743_, lean_object* v_r_744_, lean_object* v_a_745_, lean_object* v_a_746_, lean_object* v_a_747_, lean_object* v_a_748_, lean_object* v___y_749_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Code_applyRenaming___boxed(lean_object* v_pu_742_, lean_object* v_code_743_, lean_object* v_r_744_, lean_object* v_a_745_, lean_object* v_a_746_, lean_object* v_a_747_, lean_object* v_a_748_, lean_object* v_a_749_){
 _start:
 {
 uint8_t v_pu_boxed_750_; lean_object* v_res_751_; 
@@ -3556,7 +3556,7 @@ return v___x_914_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Decl_applyRenaming___boxed(lean_object* v_pu_915_, lean_object* v_decl_916_, lean_object* v_r_917_, lean_object* v_a_918_, lean_object* v_a_919_, lean_object* v_a_920_, lean_object* v_a_921_, lean_object* v___y_922_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Decl_applyRenaming___boxed(lean_object* v_pu_915_, lean_object* v_decl_916_, lean_object* v_r_917_, lean_object* v_a_918_, lean_object* v_a_919_, lean_object* v_a_920_, lean_object* v_a_921_, lean_object* v_a_922_){
 _start:
 {
 uint8_t v_pu_boxed_923_; lean_object* v_res_924_; 

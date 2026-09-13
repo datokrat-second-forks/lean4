@@ -1274,7 +1274,7 @@ return v___x_337_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_registerSimplePersistentEnvExtension___redArg___boxed(lean_object* v_descr_350_, lean_object* v___y_351_){
+LEAN_EXPORT lean_object* l_Lean_registerSimplePersistentEnvExtension___redArg___boxed(lean_object* v_descr_350_, lean_object* v_a_351_){
 _start:
 {
 lean_object* v_res_352_; 
@@ -1290,7 +1290,7 @@ v___x_358_ = l_Lean_registerSimplePersistentEnvExtension___redArg(v_descr_356_);
 return v___x_358_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_registerSimplePersistentEnvExtension___boxed(lean_object* v_00_u03b1_359_, lean_object* v_00_u03c3_360_, lean_object* v_inst_361_, lean_object* v_descr_362_, lean_object* v___y_363_){
+LEAN_EXPORT lean_object* l_Lean_registerSimplePersistentEnvExtension___boxed(lean_object* v_00_u03b1_359_, lean_object* v_00_u03c3_360_, lean_object* v_inst_361_, lean_object* v_descr_362_, lean_object* v_a_363_){
 _start:
 {
 lean_object* v_res_364_; 
@@ -2051,7 +2051,7 @@ return v___x_652_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_mkTagDeclarationExtension___boxed(lean_object* v_name_655_, lean_object* v_asyncMode_656_, lean_object* v___y_657_){
+LEAN_EXPORT lean_object* l_Lean_mkTagDeclarationExtension___boxed(lean_object* v_name_655_, lean_object* v_asyncMode_656_, lean_object* v_a_657_){
 _start:
 {
 lean_object* v_res_658_; 
@@ -2866,7 +2866,7 @@ return v___x_979_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_mkMapDeclarationExtension___redArg___boxed(lean_object* v_name_982_, lean_object* v_asyncMode_983_, lean_object* v_exportEntriesFn_984_, lean_object* v___y_985_){
+LEAN_EXPORT lean_object* l_Lean_mkMapDeclarationExtension___redArg___boxed(lean_object* v_name_982_, lean_object* v_asyncMode_983_, lean_object* v_exportEntriesFn_984_, lean_object* v_a_985_){
 _start:
 {
 lean_object* v_res_986_; 
@@ -2882,7 +2882,7 @@ v___x_992_ = l_Lean_mkMapDeclarationExtension___redArg(v_name_988_, v_asyncMode_
 return v___x_992_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_mkMapDeclarationExtension___boxed(lean_object* v_00_u03b1_993_, lean_object* v_name_994_, lean_object* v_asyncMode_995_, lean_object* v_exportEntriesFn_996_, lean_object* v___y_997_){
+LEAN_EXPORT lean_object* l_Lean_mkMapDeclarationExtension___boxed(lean_object* v_00_u03b1_993_, lean_object* v_name_994_, lean_object* v_asyncMode_995_, lean_object* v_exportEntriesFn_996_, lean_object* v_a_997_){
 _start:
 {
 lean_object* v_res_998_; 

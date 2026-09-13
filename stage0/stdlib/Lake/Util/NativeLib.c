@@ -226,7 +226,7 @@ return v___x_57_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_getSearchPath___boxed(lean_object* v_envVar_58_, lean_object* v___y_59_){
+LEAN_EXPORT lean_object* l_Lake_getSearchPath___boxed(lean_object* v_envVar_58_, lean_object* v_a_59_){
 _start:
 {
 lean_object* v_res_60_; 

@@ -1244,7 +1244,7 @@ v___x_348_ = l_Lean_registerSimpleScopedEnvExtension___redArg(v___x_347_);
 return v___x_348_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_CoeAttr_0__Lean_Meta_initFn_00___x40_Lean_Meta_CoeAttr_477343235____hygCtx___hyg_2____boxed(lean_object* v___y_349_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_CoeAttr_0__Lean_Meta_initFn_00___x40_Lean_Meta_CoeAttr_477343235____hygCtx___hyg_2____boxed(lean_object* v_a_349_){
 _start:
 {
 lean_object* v_res_350_; 
@@ -1273,7 +1273,7 @@ lean_ctor_set(v___x_363_, 0, v___x_362_);
 return v___x_363_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_getCoeFnInfo_x3f___redArg___boxed(lean_object* v_fn_364_, lean_object* v_a_365_, lean_object* v___y_366_){
+LEAN_EXPORT lean_object* l_Lean_Meta_getCoeFnInfo_x3f___redArg___boxed(lean_object* v_fn_364_, lean_object* v_a_365_, lean_object* v_a_366_){
 _start:
 {
 lean_object* v_res_367_; 
@@ -1291,7 +1291,7 @@ v___x_372_ = l_Lean_Meta_getCoeFnInfo_x3f___redArg(v_fn_368_, v_a_370_);
 return v___x_372_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_getCoeFnInfo_x3f___boxed(lean_object* v_fn_373_, lean_object* v_a_374_, lean_object* v_a_375_, lean_object* v___y_376_){
+LEAN_EXPORT lean_object* l_Lean_Meta_getCoeFnInfo_x3f___boxed(lean_object* v_fn_373_, lean_object* v_a_374_, lean_object* v_a_375_, lean_object* v_a_376_){
 _start:
 {
 lean_object* v_res_377_; 
@@ -2669,7 +2669,7 @@ return v___x_786_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_registerCoercion___boxed(lean_object* v_name_842_, lean_object* v_info_843_, lean_object* v_a_844_, lean_object* v_a_845_, lean_object* v_a_846_, lean_object* v_a_847_, lean_object* v___y_848_){
+LEAN_EXPORT lean_object* l_Lean_Meta_registerCoercion___boxed(lean_object* v_name_842_, lean_object* v_info_843_, lean_object* v_a_844_, lean_object* v_a_845_, lean_object* v_a_846_, lean_object* v_a_847_, lean_object* v_a_848_){
 _start:
 {
 lean_object* v_res_849_; 
@@ -3344,7 +3344,7 @@ v___x_1218_ = l_Lean_registerBuiltinAttribute(v___x_1217_);
 return v___x_1218_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_CoeAttr_0__Lean_Meta_initFn_00___x40_Lean_Meta_CoeAttr_3842861879____hygCtx___hyg_2____boxed(lean_object* v___y_1219_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_CoeAttr_0__Lean_Meta_initFn_00___x40_Lean_Meta_CoeAttr_3842861879____hygCtx___hyg_2____boxed(lean_object* v_a_1219_){
 _start:
 {
 lean_object* v_res_1220_; 

@@ -688,7 +688,7 @@ return v___x_176_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_StreamMap_selector___redArg___boxed(lean_object* v_stream_197_, lean_object* v___y_198_){
+LEAN_EXPORT lean_object* l_Std_StreamMap_selector___redArg___boxed(lean_object* v_stream_197_, lean_object* v_a_198_){
 _start:
 {
 lean_object* v_res_199_; 
@@ -704,7 +704,7 @@ v___x_204_ = l_Std_StreamMap_selector___redArg(v_stream_202_);
 return v___x_204_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_StreamMap_selector___boxed(lean_object* v_00_u03b1_205_, lean_object* v_00_u03b2_206_, lean_object* v_stream_207_, lean_object* v___y_208_){
+LEAN_EXPORT lean_object* l_Std_StreamMap_selector___boxed(lean_object* v_00_u03b1_205_, lean_object* v_00_u03b2_206_, lean_object* v_stream_207_, lean_object* v_a_208_){
 _start:
 {
 lean_object* v_res_209_; 
@@ -743,7 +743,7 @@ v___x_229_ = l_Std_Async_Selectable_one___redArg(v_selectables_228_);
 return v___x_229_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_StreamMap_recv___redArg___boxed(lean_object* v_stream_230_, lean_object* v___y_231_){
+LEAN_EXPORT lean_object* l_Std_StreamMap_recv___redArg___boxed(lean_object* v_stream_230_, lean_object* v_a_231_){
 _start:
 {
 lean_object* v_res_232_; 
@@ -759,7 +759,7 @@ v___x_237_ = l_Std_StreamMap_recv___redArg(v_stream_235_);
 return v___x_237_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_StreamMap_recv___boxed(lean_object* v_00_u03b1_238_, lean_object* v_00_u03b2_239_, lean_object* v_stream_240_, lean_object* v___y_241_){
+LEAN_EXPORT lean_object* l_Std_StreamMap_recv___boxed(lean_object* v_00_u03b1_238_, lean_object* v_00_u03b2_239_, lean_object* v_stream_240_, lean_object* v_a_241_){
 _start:
 {
 lean_object* v_res_242_; 
@@ -778,7 +778,7 @@ v___x_248_ = l_Std_Async_Selectable_tryOne___redArg(v_selectables_247_);
 return v___x_248_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_StreamMap_tryRecv___redArg___boxed(lean_object* v_stream_249_, lean_object* v___y_250_){
+LEAN_EXPORT lean_object* l_Std_StreamMap_tryRecv___redArg___boxed(lean_object* v_stream_249_, lean_object* v_a_250_){
 _start:
 {
 lean_object* v_res_251_; 
@@ -794,7 +794,7 @@ v___x_256_ = l_Std_StreamMap_tryRecv___redArg(v_stream_254_);
 return v___x_256_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_StreamMap_tryRecv___boxed(lean_object* v_00_u03b1_257_, lean_object* v_00_u03b2_258_, lean_object* v_stream_259_, lean_object* v___y_260_){
+LEAN_EXPORT lean_object* l_Std_StreamMap_tryRecv___boxed(lean_object* v_00_u03b1_257_, lean_object* v_00_u03b2_258_, lean_object* v_stream_259_, lean_object* v_a_260_){
 _start:
 {
 lean_object* v_res_261_; 
@@ -1599,7 +1599,7 @@ return v___x_603_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_StreamMap_close___redArg___boxed(lean_object* v_sm_604_, lean_object* v___y_605_){
+LEAN_EXPORT lean_object* l_Std_StreamMap_close___redArg___boxed(lean_object* v_sm_604_, lean_object* v_a_605_){
 _start:
 {
 lean_object* v_res_606_; 
@@ -1616,7 +1616,7 @@ v___x_611_ = l_Std_StreamMap_close___redArg(v_sm_609_);
 return v___x_611_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_StreamMap_close___boxed(lean_object* v_00_u03b1_612_, lean_object* v_00_u03b2_613_, lean_object* v_sm_614_, lean_object* v___y_615_){
+LEAN_EXPORT lean_object* l_Std_StreamMap_close___boxed(lean_object* v_00_u03b1_612_, lean_object* v_00_u03b2_613_, lean_object* v_sm_614_, lean_object* v_a_615_){
 _start:
 {
 lean_object* v_res_616_; 

@@ -933,7 +933,7 @@ v___x_416_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_412_, v___x_41
 return v___x_416_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_Key_0__Lake_DSL_expandModuleTargetKeyLit___regBuiltin___private_Lake_DSL_Key_0__Lake_DSL_expandModuleTargetKeyLit__1___boxed(lean_object* v___y_417_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_Key_0__Lake_DSL_expandModuleTargetKeyLit___regBuiltin___private_Lake_DSL_Key_0__Lake_DSL_expandModuleTargetKeyLit__1___boxed(lean_object* v_a_417_){
 _start:
 {
 lean_object* v_res_418_; 
@@ -1338,7 +1338,7 @@ v___x_573_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_569_, v___x_57
 return v___x_573_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_Key_0__Lake_DSL_expandPackageTargetKeyLit___regBuiltin___private_Lake_DSL_Key_0__Lake_DSL_expandPackageTargetKeyLit__1___boxed(lean_object* v___y_574_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_Key_0__Lake_DSL_expandPackageTargetKeyLit___regBuiltin___private_Lake_DSL_Key_0__Lake_DSL_expandPackageTargetKeyLit__1___boxed(lean_object* v_a_574_){
 _start:
 {
 lean_object* v_res_575_; 

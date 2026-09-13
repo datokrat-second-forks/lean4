@@ -85,7 +85,7 @@ lean_ctor_set(v___x_4_, 0, v___x_3_);
 return v___x_4_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_DeclarationRange_0__Lean_initFn_00___x40_Lean_DeclarationRange_3757377111____hygCtx___hyg_2____boxed(lean_object* v___y_5_){
+LEAN_EXPORT lean_object* l___private_Lean_DeclarationRange_0__Lean_initFn_00___x40_Lean_DeclarationRange_3757377111____hygCtx___hyg_2____boxed(lean_object* v_a_5_){
 _start:
 {
 lean_object* v_res_6_; 
@@ -128,7 +128,7 @@ v___x_29_ = l_Lean_mkMapDeclarationExtension___redArg(v___x_27_, v___x_28_, v___
 return v___x_29_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_DeclarationRange_0__Lean_initFn_00___x40_Lean_DeclarationRange_1764327334____hygCtx___hyg_2____boxed(lean_object* v___y_30_){
+LEAN_EXPORT lean_object* l___private_Lean_DeclarationRange_0__Lean_initFn_00___x40_Lean_DeclarationRange_1764327334____hygCtx___hyg_2____boxed(lean_object* v_a_30_){
 _start:
 {
 lean_object* v_res_31_; 
@@ -149,7 +149,7 @@ lean_ctor_set(v___x_39_, 0, v___x_38_);
 return v___x_39_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_addBuiltinDeclarationRanges___boxed(lean_object* v_declName_40_, lean_object* v_declRanges_41_, lean_object* v___y_42_){
+LEAN_EXPORT lean_object* l_Lean_addBuiltinDeclarationRanges___boxed(lean_object* v_declName_40_, lean_object* v_declRanges_41_, lean_object* v_a_42_){
 _start:
 {
 lean_object* v_res_43_; 

@@ -492,7 +492,7 @@ v___x_177_ = l_Lean_registerPersistentEnvExtensionUnsafe___redArg(v___x_176_);
 return v___x_177_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_DocString_DeferredCheck_0__Lean_Doc_initFn_00___x40_Lean_DocString_DeferredCheck_4160150515____hygCtx___hyg_2____boxed(lean_object* v___y_178_){
+LEAN_EXPORT lean_object* l___private_Lean_DocString_DeferredCheck_0__Lean_Doc_initFn_00___x40_Lean_DocString_DeferredCheck_4160150515____hygCtx___hyg_2____boxed(lean_object* v_a_178_){
 _start:
 {
 lean_object* v_res_179_; 

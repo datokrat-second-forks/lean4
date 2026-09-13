@@ -427,7 +427,7 @@ return v___x_73_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_IR_compile___boxed(lean_object* v_decls_76_, lean_object* v_a_77_, lean_object* v_a_78_, lean_object* v___y_79_){
+LEAN_EXPORT lean_object* l_Lean_IR_compile___boxed(lean_object* v_decls_76_, lean_object* v_a_77_, lean_object* v_a_78_, lean_object* v_a_79_){
 _start:
 {
 lean_object* v_res_80_; 
@@ -471,7 +471,7 @@ return v___x_154_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_IR_0__Lean_IR_initFn_00___x40_Lean_Compiler_IR_640659120____hygCtx___hyg_2____boxed(lean_object* v___y_160_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_IR_0__Lean_IR_initFn_00___x40_Lean_Compiler_IR_640659120____hygCtx___hyg_2____boxed(lean_object* v_a_160_){
 _start:
 {
 lean_object* v_res_161_; 

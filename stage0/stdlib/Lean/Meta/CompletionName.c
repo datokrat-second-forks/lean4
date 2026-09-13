@@ -56,7 +56,7 @@ v___x_11_ = l_Lean_mkTagDeclarationExtension(v___x_9_, v___x_10_);
 return v___x_11_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_CompletionName_0__Lean_Meta_initFn_00___x40_Lean_Meta_CompletionName_3302084676____hygCtx___hyg_2____boxed(lean_object* v___y_12_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_CompletionName_0__Lean_Meta_initFn_00___x40_Lean_Meta_CompletionName_3302084676____hygCtx___hyg_2____boxed(lean_object* v_a_12_){
 _start:
 {
 lean_object* v_res_13_; 

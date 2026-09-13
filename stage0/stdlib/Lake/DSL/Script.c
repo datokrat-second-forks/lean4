@@ -1523,7 +1523,7 @@ v___x_587_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_583_, v___x_58
 return v___x_587_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_Script_0__Lake_DSL_expandScriptDecl___regBuiltin___private_Lake_DSL_Script_0__Lake_DSL_expandScriptDecl__1___boxed(lean_object* v___y_588_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_Script_0__Lake_DSL_expandScriptDecl___regBuiltin___private_Lake_DSL_Script_0__Lake_DSL_expandScriptDecl__1___boxed(lean_object* v_a_588_){
 _start:
 {
 lean_object* v_res_589_; 

@@ -580,7 +580,7 @@ return v___x_175_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_rawProc___boxed(lean_object* v_args_187_, lean_object* v_quiet_188_, lean_object* v_input_x3f_189_, lean_object* v_a_190_, lean_object* v___y_191_){
+LEAN_EXPORT lean_object* l_Lake_rawProc___boxed(lean_object* v_args_187_, lean_object* v_quiet_188_, lean_object* v_input_x3f_189_, lean_object* v_a_190_, lean_object* v_a_191_){
 _start:
 {
 uint8_t v_quiet_boxed_192_; lean_object* v_res_193_; 
@@ -929,7 +929,7 @@ goto v___jp_270_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_proc___boxed(lean_object* v_args_342_, lean_object* v_quiet_343_, lean_object* v_input_x3f_344_, lean_object* v_a_345_, lean_object* v___y_346_){
+LEAN_EXPORT lean_object* l_Lake_proc___boxed(lean_object* v_args_342_, lean_object* v_quiet_343_, lean_object* v_input_x3f_344_, lean_object* v_a_345_, lean_object* v_a_346_){
 _start:
 {
 uint8_t v_quiet_boxed_347_; lean_object* v_res_348_; 
@@ -1093,7 +1093,7 @@ return v___x_356_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_captureProc_x27___boxed(lean_object* v_args_411_, lean_object* v_a_412_, lean_object* v___y_413_){
+LEAN_EXPORT lean_object* l_Lake_captureProc_x27___boxed(lean_object* v_args_411_, lean_object* v_a_412_, lean_object* v_a_413_){
 _start:
 {
 lean_object* v_res_414_; 
@@ -1218,7 +1218,7 @@ return v___x_443_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_captureProc___boxed(lean_object* v_args_446_, lean_object* v_a_447_, lean_object* v___y_448_){
+LEAN_EXPORT lean_object* l_Lake_captureProc___boxed(lean_object* v_args_446_, lean_object* v_a_447_, lean_object* v_a_448_){
 _start:
 {
 lean_object* v_res_449_; 
@@ -1316,7 +1316,7 @@ return v___x_452_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_captureProc_x3f___boxed(lean_object* v_args_474_, lean_object* v___y_475_){
+LEAN_EXPORT lean_object* l_Lake_captureProc_x3f___boxed(lean_object* v_args_474_, lean_object* v_a_475_){
 _start:
 {
 lean_object* v_res_476_; 
@@ -1424,7 +1424,7 @@ goto v___jp_481_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_testProc___boxed(lean_object* v_args_505_, lean_object* v___y_506_){
+LEAN_EXPORT lean_object* l_Lake_testProc___boxed(lean_object* v_args_505_, lean_object* v_a_506_){
 _start:
 {
 uint8_t v_res_507_; lean_object* v_r_508_; 

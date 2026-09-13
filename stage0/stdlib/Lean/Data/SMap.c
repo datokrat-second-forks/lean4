@@ -1213,7 +1213,7 @@ return v___x_420_;
 LEAN_EXPORT lean_object* l_Lean_SMap_instForInProdOfMonad___redArg___lam__3(lean_object* v_inst_421_, lean_object* v_00_u03b2_422_, lean_object* v___y_423_, lean_object* v___y_424_, lean_object* v___y_425_){
 _start:
 {
-lean_object* v___f_426_; lean_object* v___f_427_; lean_object* v___f_428_; lean_object* v___f_429_; lean_object* v___x_430_; lean_object* v___x_431_; lean_object* v___x_432_; lean_object* v___x_433_; lean_object* v___x_434_; lean_object* v___x_435_; lean_object* v___f_436_; lean_object* v___f_437_; lean_object* v___f_438_; lean_object* v___f_439_; lean_object* v___x_440_; lean_object* v___x_441_; lean_object* v___x_442_; lean_object* v___x_443_; lean_object* v___x_444_; lean_object* v___x_445_; lean_object* v_toApplicative_446_; lean_object* v_toBind_447_; lean_object* v_toPure_448_; lean_object* v___f_449_; lean_object* v___f_450_; lean_object* v___f_451_; lean_object* v___x_142__overap_452_; lean_object* v___x_453_; lean_object* v___x_454_; 
+lean_object* v___f_426_; lean_object* v___f_427_; lean_object* v___f_428_; lean_object* v___f_429_; lean_object* v___x_430_; lean_object* v___x_431_; lean_object* v___x_432_; lean_object* v___x_433_; lean_object* v___x_434_; lean_object* v___x_435_; lean_object* v___f_436_; lean_object* v___f_437_; lean_object* v___f_438_; lean_object* v___f_439_; lean_object* v___x_440_; lean_object* v___x_441_; lean_object* v___x_442_; lean_object* v___x_443_; lean_object* v___x_444_; lean_object* v___x_445_; lean_object* v_toApplicative_446_; lean_object* v_toBind_447_; lean_object* v_toPure_448_; lean_object* v___f_449_; lean_object* v___f_450_; lean_object* v___f_451_; lean_object* v___x_143__overap_452_; lean_object* v___x_453_; lean_object* v___x_454_; 
 lean_inc_ref_n(v_inst_421_, 7);
 v___f_426_ = lean_alloc_closure((void*)(l_ExceptT_instMonad___redArg___lam__1), 5, 1);
 lean_closure_set(v___f_426_, 0, v_inst_421_);
@@ -1296,8 +1296,8 @@ v___f_451_ = lean_alloc_closure((void*)(l_Lean_SMap_instForInProdOfMonad___redAr
 lean_closure_set(v___f_451_, 0, v___y_425_);
 lean_closure_set(v___f_451_, 1, v_toBind_447_);
 lean_closure_set(v___f_451_, 2, v___f_450_);
-v___x_142__overap_452_ = l_Lean_SMap_forM___redArg(v___x_445_, v___y_423_, v___f_451_);
-v___x_453_ = lean_apply_1(v___x_142__overap_452_, v___y_424_);
+v___x_143__overap_452_ = l_Lean_SMap_forM___redArg(v___x_445_, v___y_423_, v___f_451_);
+v___x_453_ = lean_apply_1(v___x_143__overap_452_, v___y_424_);
 v___x_454_ = lean_apply_4(v_toBind_447_, lean_box(0), lean_box(0), v___x_453_, v___f_449_);
 return v___x_454_;
 }

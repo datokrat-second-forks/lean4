@@ -9192,18 +9192,18 @@ goto v___jp_3033_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_LocalContext_sanitizeNames(lean_object* v_lctx_3047_, lean_object* v_a_3048_){
+LEAN_EXPORT lean_object* l_Lean_LocalContext_sanitizeNames(lean_object* v_lctx_3047_, lean_object* v_s_3048_){
 _start:
 {
 lean_object* v_options_3049_; uint8_t v___x_3050_; 
-v_options_3049_ = lean_ctor_get(v_a_3048_, 0);
+v_options_3049_ = lean_ctor_get(v_s_3048_, 0);
 v___x_3050_ = l_Lean_getSanitizeNames(v_options_3049_);
 if (v___x_3050_ == 0)
 {
 lean_object* v___x_3051_; 
 v___x_3051_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_3051_, 0, v_lctx_3047_);
-lean_ctor_set(v___x_3051_, 1, v_a_3048_);
+lean_ctor_set(v___x_3051_, 1, v_s_3048_);
 return v___x_3051_;
 }
 else
@@ -9213,7 +9213,7 @@ v_decls_3052_ = lean_ctor_get(v_lctx_3047_, 1);
 v_size_3053_ = lean_ctor_get(v_decls_3052_, 2);
 lean_inc(v_size_3053_);
 v___x_3054_ = l_Lean_NameSet_empty;
-v___x_3055_ = l___private_Init_Data_Nat_Control_0__Nat_foldRevM_loop___at___00Lean_LocalContext_sanitizeNames_spec__0___redArg(v_size_3053_, v_lctx_3047_, v___x_3054_, v_a_3048_);
+v___x_3055_ = l___private_Init_Data_Nat_Control_0__Nat_foldRevM_loop___at___00Lean_LocalContext_sanitizeNames_spec__0___redArg(v_size_3053_, v_lctx_3047_, v___x_3054_, v_s_3048_);
 v_fst_3056_ = lean_ctor_get(v___x_3055_, 0);
 lean_inc(v_fst_3056_);
 v_snd_3057_ = lean_ctor_get(v___x_3055_, 1);

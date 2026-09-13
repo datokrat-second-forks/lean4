@@ -254,7 +254,7 @@ return v___x_26_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Option_register___at___00__private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_1849413889____hygCtx___hyg_4__spec__0___boxed(lean_object* v_name_29_, lean_object* v_decl_30_, lean_object* v_ref_31_, lean_object* v___y_32_){
+LEAN_EXPORT lean_object* l_Lean_Option_register___at___00__private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_1849413889____hygCtx___hyg_4__spec__0___boxed(lean_object* v_name_29_, lean_object* v_decl_30_, lean_object* v_ref_31_, lean_object* v_a_32_){
 _start:
 {
 lean_object* v_res_33_; 
@@ -274,7 +274,7 @@ v___x_56_ = l_Lean_Option_register___at___00__private_Lean_Compiler_Options_0__L
 return v___x_56_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_1849413889____hygCtx___hyg_4____boxed(lean_object* v___y_57_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_1849413889____hygCtx___hyg_4____boxed(lean_object* v_a_57_){
 _start:
 {
 lean_object* v_res_58_; 
@@ -293,7 +293,7 @@ v___x_78_ = l_Lean_Option_register___at___00__private_Lean_Compiler_Options_0__L
 return v___x_78_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_3304370316____hygCtx___hyg_4____boxed(lean_object* v___y_79_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_3304370316____hygCtx___hyg_4____boxed(lean_object* v_a_79_){
 _start:
 {
 lean_object* v_res_80_; 
@@ -312,7 +312,7 @@ v___x_100_ = l_Lean_Option_register___at___00__private_Lean_Compiler_Options_0__
 return v___x_100_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_3249429079____hygCtx___hyg_4____boxed(lean_object* v___y_101_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_3249429079____hygCtx___hyg_4____boxed(lean_object* v_a_101_){
 _start:
 {
 lean_object* v_res_102_; 
@@ -331,7 +331,7 @@ v___x_122_ = l_Lean_Option_register___at___00__private_Lean_Compiler_Options_0__
 return v___x_122_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_4218354360____hygCtx___hyg_4____boxed(lean_object* v___y_123_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_4218354360____hygCtx___hyg_4____boxed(lean_object* v_a_123_){
 _start:
 {
 lean_object* v_res_124_; 
@@ -350,7 +350,7 @@ v___x_144_ = l_Lean_Option_register___at___00__private_Lean_Compiler_Options_0__
 return v___x_144_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_17255182____hygCtx___hyg_4____boxed(lean_object* v___y_145_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_17255182____hygCtx___hyg_4____boxed(lean_object* v_a_145_){
 _start:
 {
 lean_object* v_res_146_; 
@@ -369,7 +369,7 @@ v___x_166_ = l_Lean_Option_register___at___00__private_Lean_Compiler_Options_0__
 return v___x_166_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_222989792____hygCtx___hyg_4____boxed(lean_object* v___y_167_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_222989792____hygCtx___hyg_4____boxed(lean_object* v_a_167_){
 _start:
 {
 lean_object* v_res_168_; 
@@ -388,7 +388,7 @@ v___x_188_ = l_Lean_Option_register___at___00__private_Lean_Compiler_Options_0__
 return v___x_188_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_3877235242____hygCtx___hyg_4____boxed(lean_object* v___y_189_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_Options_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_Options_3877235242____hygCtx___hyg_4____boxed(lean_object* v_a_189_){
 _start:
 {
 lean_object* v_res_190_; 

@@ -2808,7 +2808,7 @@ return v___x_829_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_Async_Signal_Waiter_mk___boxed(lean_object* v_signum_832_, lean_object* v_repeating_833_, lean_object* v___y_834_){
+LEAN_EXPORT lean_object* l_Std_Async_Signal_Waiter_mk___boxed(lean_object* v_signum_832_, lean_object* v_repeating_833_, lean_object* v_a_834_){
 _start:
 {
 uint8_t v_signum_boxed_835_; uint8_t v_repeating_boxed_836_; lean_object* v_res_837_; 
@@ -2969,7 +2969,7 @@ return v___x_874_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_Async_Signal_Waiter_wait___boxed(lean_object* v_s_877_, lean_object* v___y_878_){
+LEAN_EXPORT lean_object* l_Std_Async_Signal_Waiter_wait___boxed(lean_object* v_s_877_, lean_object* v_a_878_){
 _start:
 {
 lean_object* v_res_879_; 
@@ -2986,7 +2986,7 @@ v___x_882_ = lean_uv_signal_stop(v_s_880_);
 return v___x_882_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Async_Signal_Waiter_stop___boxed(lean_object* v_s_883_, lean_object* v___y_884_){
+LEAN_EXPORT lean_object* l_Std_Async_Signal_Waiter_stop___boxed(lean_object* v_s_883_, lean_object* v_a_884_){
 _start:
 {
 lean_object* v_res_885_; 

@@ -3869,7 +3869,7 @@ v___x_1464_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_1460_, v___x_
 return v___x_1464_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Mixfix_0__Lean_Elab_Command_expandMixfix___regBuiltin_Lean_Elab_Command_expandMixfix__1___boxed(lean_object* v___y_1465_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Mixfix_0__Lean_Elab_Command_expandMixfix___regBuiltin_Lean_Elab_Command_expandMixfix__1___boxed(lean_object* v_a_1465_){
 _start:
 {
 lean_object* v_res_1466_; 
@@ -3887,7 +3887,7 @@ v___x_1495_ = l_Lean_addBuiltinDeclarationRanges(v___x_1493_, v___x_1494_);
 return v___x_1495_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Mixfix_0__Lean_Elab_Command_expandMixfix___regBuiltin_Lean_Elab_Command_expandMixfix_declRange__3___boxed(lean_object* v___y_1496_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Mixfix_0__Lean_Elab_Command_expandMixfix___regBuiltin_Lean_Elab_Command_expandMixfix_declRange__3___boxed(lean_object* v_a_1496_){
 _start:
 {
 lean_object* v_res_1497_; 

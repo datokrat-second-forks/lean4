@@ -293,7 +293,7 @@ v___x_76_ = l_Lean_registerEnvExtension___redArg(v___f_73_, v___x_74_, v___x_75_
 return v___x_76_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_mkOrderedDeclSetExt___boxed(lean_object* v___y_77_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_mkOrderedDeclSetExt___boxed(lean_object* v_a_77_){
 _start:
 {
 lean_object* v_res_78_; 
@@ -309,7 +309,7 @@ v___x_80_ = l_Lean_Compiler_LCNF_mkOrderedDeclSetExt();
 return v___x_80_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_LCNF_PublicDeclsExt_0__Lean_Compiler_LCNF_initFn_00___x40_Lean_Compiler_LCNF_PublicDeclsExt_3962556520____hygCtx___hyg_2____boxed(lean_object* v___y_81_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_LCNF_PublicDeclsExt_0__Lean_Compiler_LCNF_initFn_00___x40_Lean_Compiler_LCNF_PublicDeclsExt_3962556520____hygCtx___hyg_2____boxed(lean_object* v_a_81_){
 _start:
 {
 lean_object* v_res_82_; 

@@ -13108,7 +13108,7 @@ return v___x_3604_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_ModuleSetup_load___boxed(lean_object* v_path_3607_, lean_object* v___y_3608_){
+LEAN_EXPORT lean_object* l_Lean_ModuleSetup_load___boxed(lean_object* v_path_3607_, lean_object* v_a_3608_){
 _start:
 {
 lean_object* v_res_3609_; 

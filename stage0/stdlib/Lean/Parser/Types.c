@@ -7101,7 +7101,7 @@ v___x_2176_ = l_Lean_addBuiltinDocString(v___x_2174_, v___x_2175_);
 return v___x_2176_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Types_0__Lean_Parser_withCache___regBuiltin_Lean_Parser_withCache_docString__1___boxed(lean_object* v___y_2177_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Types_0__Lean_Parser_withCache___regBuiltin_Lean_Parser_withCache_docString__1___boxed(lean_object* v_a_2177_){
 _start:
 {
 lean_object* v_res_2178_; 

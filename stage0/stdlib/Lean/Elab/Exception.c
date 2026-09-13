@@ -132,7 +132,7 @@ v___x_6_ = l_Lean_registerInternalExceptionId(v___x_5_);
 return v___x_6_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_3148402294____hygCtx___hyg_2____boxed(lean_object* v___y_7_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_3148402294____hygCtx___hyg_2____boxed(lean_object* v_a_7_){
 _start:
 {
 lean_object* v_res_8_; 
@@ -149,7 +149,7 @@ v___x_14_ = l_Lean_registerInternalExceptionId(v___x_13_);
 return v___x_14_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_2911972506____hygCtx___hyg_2____boxed(lean_object* v___y_15_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_2911972506____hygCtx___hyg_2____boxed(lean_object* v_a_15_){
 _start:
 {
 lean_object* v_res_16_; 
@@ -166,7 +166,7 @@ v___x_22_ = l_Lean_registerInternalExceptionId(v___x_21_);
 return v___x_22_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_3103249956____hygCtx___hyg_2____boxed(lean_object* v___y_23_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_3103249956____hygCtx___hyg_2____boxed(lean_object* v_a_23_){
 _start:
 {
 lean_object* v_res_24_; 
@@ -183,7 +183,7 @@ v___x_30_ = l_Lean_registerInternalExceptionId(v___x_29_);
 return v___x_30_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_125629251____hygCtx___hyg_2____boxed(lean_object* v___y_31_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_125629251____hygCtx___hyg_2____boxed(lean_object* v_a_31_){
 _start:
 {
 lean_object* v_res_32_; 
@@ -200,7 +200,7 @@ v___x_38_ = l_Lean_registerInternalExceptionId(v___x_37_);
 return v___x_38_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_3863513224____hygCtx___hyg_2____boxed(lean_object* v___y_39_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_3863513224____hygCtx___hyg_2____boxed(lean_object* v_a_39_){
 _start:
 {
 lean_object* v_res_40_; 
@@ -217,7 +217,7 @@ v___x_46_ = l_Lean_registerInternalExceptionId(v___x_45_);
 return v___x_46_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_3789179955____hygCtx___hyg_2____boxed(lean_object* v___y_47_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Exception_0__Lean_Elab_initFn_00___x40_Lean_Elab_Exception_3789179955____hygCtx___hyg_2____boxed(lean_object* v_a_47_){
 _start:
 {
 lean_object* v_res_48_; 

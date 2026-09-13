@@ -1997,7 +1997,7 @@ return v___x_509_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_GoToKind_determineTargetExprs___boxed(lean_object* v_kind_512_, lean_object* v_ti_513_, lean_object* v_a_514_, lean_object* v_a_515_, lean_object* v_a_516_, lean_object* v_a_517_, lean_object* v___y_518_){
+LEAN_EXPORT lean_object* l_Lean_Server_GoToKind_determineTargetExprs___boxed(lean_object* v_kind_512_, lean_object* v_ti_513_, lean_object* v_a_514_, lean_object* v_a_515_, lean_object* v_a_516_, lean_object* v_a_517_, lean_object* v_a_518_){
 _start:
 {
 uint8_t v_kind_boxed_519_; lean_object* v_res_520_; 
@@ -2288,7 +2288,7 @@ return v___x_611_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_getInstanceProjectionArg_x3f_reduceToProjection_x3f___boxed(lean_object* v_e_612_, lean_object* v_a_613_, lean_object* v_a_614_, lean_object* v_a_615_, lean_object* v_a_616_, lean_object* v___y_617_){
+LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_getInstanceProjectionArg_x3f_reduceToProjection_x3f___boxed(lean_object* v_e_612_, lean_object* v_a_613_, lean_object* v_a_614_, lean_object* v_a_615_, lean_object* v_a_616_, lean_object* v_a_617_){
 _start:
 {
 lean_object* v_res_618_; 
@@ -2568,7 +2568,7 @@ return v___x_670_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_getInstanceProjectionArg_x3f___boxed(lean_object* v_e_692_, lean_object* v_a_693_, lean_object* v_a_694_, lean_object* v_a_695_, lean_object* v_a_696_, lean_object* v___y_697_){
+LEAN_EXPORT lean_object* l_Lean_Server_getInstanceProjectionArg_x3f___boxed(lean_object* v_e_692_, lean_object* v_a_693_, lean_object* v_a_694_, lean_object* v_a_695_, lean_object* v_a_696_, lean_object* v_a_697_){
 _start:
 {
 lean_object* v_res_698_; 
@@ -2700,7 +2700,7 @@ return v___x_726_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_isInstanceProjection___boxed(lean_object* v_e_729_, lean_object* v_a_730_, lean_object* v_a_731_, lean_object* v_a_732_, lean_object* v_a_733_, lean_object* v___y_734_){
+LEAN_EXPORT lean_object* l_Lean_Server_isInstanceProjection___boxed(lean_object* v_e_729_, lean_object* v_a_730_, lean_object* v_a_731_, lean_object* v_a_732_, lean_object* v_a_733_, lean_object* v_a_734_){
 _start:
 {
 lean_object* v_res_735_; 
@@ -3120,7 +3120,7 @@ return v___x_825_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_isInstanceProjectionInfoFor___boxed(lean_object* v_kind_826_, lean_object* v_ti1_827_, lean_object* v_ti2_828_, lean_object* v_a_829_, lean_object* v_a_830_, lean_object* v_a_831_, lean_object* v_a_832_, lean_object* v___y_833_){
+LEAN_EXPORT lean_object* l_Lean_Server_isInstanceProjectionInfoFor___boxed(lean_object* v_kind_826_, lean_object* v_ti1_827_, lean_object* v_ti2_828_, lean_object* v_a_829_, lean_object* v_a_830_, lean_object* v_a_831_, lean_object* v_a_832_, lean_object* v_a_833_){
 _start:
 {
 uint8_t v_kind_boxed_834_; lean_object* v_res_835_; 
@@ -3142,7 +3142,7 @@ v___x_842_ = l_Lean_Elab_ContextInfo_runMetaM___redArg(v_ci_837_, v_lctx_838_, v
 return v___x_842_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_GoToM_run___redArg___boxed(lean_object* v_ctx_843_, lean_object* v_ci_844_, lean_object* v_lctx_845_, lean_object* v_act_846_, lean_object* v___y_847_){
+LEAN_EXPORT lean_object* l_Lean_Server_GoToM_run___redArg___boxed(lean_object* v_ctx_843_, lean_object* v_ci_844_, lean_object* v_lctx_845_, lean_object* v_act_846_, lean_object* v_a_847_){
 _start:
 {
 lean_object* v_res_848_; 
@@ -3158,7 +3158,7 @@ v___x_855_ = l_Lean_Server_GoToM_run___redArg(v_ctx_850_, v_ci_851_, v_lctx_852_
 return v___x_855_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_GoToM_run___boxed(lean_object* v_00_u03b1_856_, lean_object* v_ctx_857_, lean_object* v_ci_858_, lean_object* v_lctx_859_, lean_object* v_act_860_, lean_object* v___y_861_){
+LEAN_EXPORT lean_object* l_Lean_Server_GoToM_run___boxed(lean_object* v_00_u03b1_856_, lean_object* v_ctx_857_, lean_object* v_ci_858_, lean_object* v_lctx_859_, lean_object* v_act_860_, lean_object* v_a_861_){
 _start:
 {
 lean_object* v_res_862_; 
@@ -4408,7 +4408,7 @@ return v___x_1288_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromDecl_declMod_x3f___boxed(lean_object* v_declName_1291_, lean_object* v_a_1292_, lean_object* v_a_1293_, lean_object* v_a_1294_, lean_object* v_a_1295_, lean_object* v_a_1296_, lean_object* v___y_1297_){
+LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromDecl_declMod_x3f___boxed(lean_object* v_declName_1291_, lean_object* v_a_1292_, lean_object* v_a_1293_, lean_object* v_a_1294_, lean_object* v_a_1295_, lean_object* v_a_1296_, lean_object* v_a_1297_){
 _start:
 {
 lean_object* v_res_1298_; 
@@ -5146,7 +5146,7 @@ return v___x_1583_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromDecl___boxed(lean_object* v_declName_1586_, lean_object* v_a_1587_, lean_object* v_a_1588_, lean_object* v_a_1589_, lean_object* v_a_1590_, lean_object* v_a_1591_, lean_object* v___y_1592_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromDecl___boxed(lean_object* v_declName_1586_, lean_object* v_a_1587_, lean_object* v_a_1588_, lean_object* v_a_1589_, lean_object* v_a_1590_, lean_object* v_a_1591_, lean_object* v_a_1592_){
 _start:
 {
 lean_object* v_res_1593_; 
@@ -5281,7 +5281,7 @@ return v___x_1649_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromBinder_binderInfo_x3f___redArg___boxed(lean_object* v_id_1650_, lean_object* v_a_1651_, lean_object* v___y_1652_){
+LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromBinder_binderInfo_x3f___redArg___boxed(lean_object* v_id_1650_, lean_object* v_a_1651_, lean_object* v_a_1652_){
 _start:
 {
 lean_object* v_res_1653_; 
@@ -5298,7 +5298,7 @@ v___x_1661_ = l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromBinde
 return v___x_1661_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromBinder_binderInfo_x3f___boxed(lean_object* v_id_1662_, lean_object* v_a_1663_, lean_object* v_a_1664_, lean_object* v_a_1665_, lean_object* v_a_1666_, lean_object* v_a_1667_, lean_object* v___y_1668_){
+LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromBinder_binderInfo_x3f___boxed(lean_object* v_id_1662_, lean_object* v_a_1663_, lean_object* v_a_1664_, lean_object* v_a_1665_, lean_object* v_a_1666_, lean_object* v_a_1667_, lean_object* v_a_1668_){
 _start:
 {
 lean_object* v_res_1669_; 
@@ -5510,7 +5510,7 @@ return v___x_1717_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromBinder___redArg___boxed(lean_object* v_id_1720_, lean_object* v_a_1721_, lean_object* v___y_1722_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromBinder___redArg___boxed(lean_object* v_id_1720_, lean_object* v_a_1721_, lean_object* v_a_1722_){
 _start:
 {
 lean_object* v_res_1723_; 
@@ -5527,7 +5527,7 @@ v___x_1731_ = l_Lean_Server_locationLinksFromBinder___redArg(v_id_1724_, v_a_172
 return v___x_1731_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromBinder___boxed(lean_object* v_id_1732_, lean_object* v_a_1733_, lean_object* v_a_1734_, lean_object* v_a_1735_, lean_object* v_a_1736_, lean_object* v_a_1737_, lean_object* v___y_1738_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromBinder___boxed(lean_object* v_id_1732_, lean_object* v_a_1733_, lean_object* v_a_1734_, lean_object* v_a_1735_, lean_object* v_a_1736_, lean_object* v_a_1737_, lean_object* v_a_1738_){
 _start:
 {
 lean_object* v_res_1739_; 
@@ -5979,7 +5979,7 @@ goto v___jp_1846_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromImport___redArg___boxed(lean_object* v_i_1886_, lean_object* v_a_1887_, lean_object* v_a_1888_, lean_object* v___y_1889_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromImport___redArg___boxed(lean_object* v_i_1886_, lean_object* v_a_1887_, lean_object* v_a_1888_, lean_object* v_a_1889_){
 _start:
 {
 lean_object* v_res_1890_; 
@@ -5997,7 +5997,7 @@ v___x_1898_ = l_Lean_Server_locationLinksFromImport___redArg(v_i_1891_, v_a_1892
 return v___x_1898_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromImport___boxed(lean_object* v_i_1899_, lean_object* v_a_1900_, lean_object* v_a_1901_, lean_object* v_a_1902_, lean_object* v_a_1903_, lean_object* v_a_1904_, lean_object* v___y_1905_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromImport___boxed(lean_object* v_i_1899_, lean_object* v_a_1900_, lean_object* v_a_1901_, lean_object* v_a_1902_, lean_object* v_a_1903_, lean_object* v_a_1904_, lean_object* v_a_1905_){
 _start:
 {
 lean_object* v_res_1906_; 
@@ -6249,7 +6249,7 @@ return v___x_1932_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksDefault_defaultDeclNames___redArg___boxed(lean_object* v_a_1979_, lean_object* v_a_1980_, lean_object* v___y_1981_){
+LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksDefault_defaultDeclNames___redArg___boxed(lean_object* v_a_1979_, lean_object* v_a_1980_, lean_object* v_a_1981_){
 _start:
 {
 lean_object* v_res_1982_; 
@@ -6267,7 +6267,7 @@ v___x_1989_ = l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksDefault_d
 return v___x_1989_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksDefault_defaultDeclNames___boxed(lean_object* v_a_1990_, lean_object* v_a_1991_, lean_object* v_a_1992_, lean_object* v_a_1993_, lean_object* v_a_1994_, lean_object* v___y_1995_){
+LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksDefault_defaultDeclNames___boxed(lean_object* v_a_1990_, lean_object* v_a_1991_, lean_object* v_a_1992_, lean_object* v_a_1993_, lean_object* v_a_1994_, lean_object* v_a_1995_){
 _start:
 {
 lean_object* v_res_1996_; 
@@ -6478,7 +6478,7 @@ return v___x_2066_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksDefault___boxed(lean_object* v_a_2077_, lean_object* v_a_2078_, lean_object* v_a_2079_, lean_object* v_a_2080_, lean_object* v_a_2081_, lean_object* v___y_2082_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksDefault___boxed(lean_object* v_a_2077_, lean_object* v_a_2078_, lean_object* v_a_2079_, lean_object* v_a_2080_, lean_object* v_a_2081_, lean_object* v_a_2082_){
 _start:
 {
 lean_object* v_res_2083_; 
@@ -6915,7 +6915,7 @@ return v___x_2205_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromErrorNameInfo___boxed(lean_object* v_eni_2208_, lean_object* v_a_2209_, lean_object* v_a_2210_, lean_object* v_a_2211_, lean_object* v_a_2212_, lean_object* v_a_2213_, lean_object* v___y_2214_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromErrorNameInfo___boxed(lean_object* v_eni_2208_, lean_object* v_a_2209_, lean_object* v_a_2210_, lean_object* v_a_2211_, lean_object* v_a_2212_, lean_object* v_a_2213_, lean_object* v_a_2214_){
 _start:
 {
 lean_object* v_res_2215_; 
@@ -7152,7 +7152,7 @@ return v___x_2262_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromInstanceProjection_extractInstances___redArg___boxed(lean_object* v_e_2263_, lean_object* v_a_2264_, lean_object* v___y_2265_){
+LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromInstanceProjection_extractInstances___redArg___boxed(lean_object* v_e_2263_, lean_object* v_a_2264_, lean_object* v_a_2265_){
 _start:
 {
 lean_object* v_res_2266_; 
@@ -7169,7 +7169,7 @@ v___x_2274_ = l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromInsta
 return v___x_2274_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromInstanceProjection_extractInstances___boxed(lean_object* v_e_2275_, lean_object* v_a_2276_, lean_object* v_a_2277_, lean_object* v_a_2278_, lean_object* v_a_2279_, lean_object* v_a_2280_, lean_object* v___y_2281_){
+LEAN_EXPORT lean_object* l___private_Lean_Server_GoTo_0__Lean_Server_locationLinksFromInstanceProjection_extractInstances___boxed(lean_object* v_e_2275_, lean_object* v_a_2276_, lean_object* v_a_2277_, lean_object* v_a_2278_, lean_object* v_a_2279_, lean_object* v_a_2280_, lean_object* v_a_2281_){
 _start:
 {
 lean_object* v_res_2282_; 
@@ -7424,7 +7424,7 @@ return v___x_2338_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromInstanceProjection___boxed(lean_object* v_e_2339_, lean_object* v_a_2340_, lean_object* v_a_2341_, lean_object* v_a_2342_, lean_object* v_a_2343_, lean_object* v_a_2344_, lean_object* v___y_2345_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromInstanceProjection___boxed(lean_object* v_e_2339_, lean_object* v_a_2340_, lean_object* v_a_2341_, lean_object* v_a_2342_, lean_object* v_a_2343_, lean_object* v_a_2344_, lean_object* v_a_2345_){
 _start:
 {
 lean_object* v_res_2346_; 
@@ -7616,7 +7616,7 @@ return v___x_2407_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromTermInfo___boxed(lean_object* v_ti_2410_, lean_object* v_a_2411_, lean_object* v_a_2412_, lean_object* v_a_2413_, lean_object* v_a_2414_, lean_object* v_a_2415_, lean_object* v___y_2416_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromTermInfo___boxed(lean_object* v_ti_2410_, lean_object* v_a_2411_, lean_object* v_a_2412_, lean_object* v_a_2413_, lean_object* v_a_2414_, lean_object* v_a_2415_, lean_object* v_a_2416_){
 _start:
 {
 lean_object* v_res_2417_; 
@@ -7955,7 +7955,7 @@ return v___x_2497_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromDelabTermInfo___boxed(lean_object* v_dti_2498_, lean_object* v_a_2499_, lean_object* v_a_2500_, lean_object* v_a_2501_, lean_object* v_a_2502_, lean_object* v_a_2503_, lean_object* v___y_2504_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromDelabTermInfo___boxed(lean_object* v_dti_2498_, lean_object* v_a_2499_, lean_object* v_a_2500_, lean_object* v_a_2501_, lean_object* v_a_2502_, lean_object* v_a_2503_, lean_object* v_a_2504_){
 _start:
 {
 lean_object* v_res_2505_; 
@@ -8219,7 +8219,7 @@ return v___x_2585_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromFieldInfo___boxed(lean_object* v_fi_2588_, lean_object* v_a_2589_, lean_object* v_a_2590_, lean_object* v_a_2591_, lean_object* v_a_2592_, lean_object* v_a_2593_, lean_object* v___y_2594_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromFieldInfo___boxed(lean_object* v_fi_2588_, lean_object* v_a_2589_, lean_object* v_a_2590_, lean_object* v_a_2591_, lean_object* v_a_2592_, lean_object* v_a_2593_, lean_object* v_a_2594_){
 _start:
 {
 lean_object* v_res_2595_; 
@@ -8243,7 +8243,7 @@ v___x_2604_ = l_Lean_Server_locationLinksFromDecl(v_declName_2603_, v_a_2597_, v
 return v___x_2604_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromOptionInfo___boxed(lean_object* v_i_2605_, lean_object* v_a_2606_, lean_object* v_a_2607_, lean_object* v_a_2608_, lean_object* v_a_2609_, lean_object* v_a_2610_, lean_object* v___y_2611_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromOptionInfo___boxed(lean_object* v_i_2605_, lean_object* v_a_2606_, lean_object* v_a_2607_, lean_object* v_a_2608_, lean_object* v_a_2609_, lean_object* v_a_2610_, lean_object* v_a_2611_){
 _start:
 {
 lean_object* v_res_2612_; 
@@ -8316,7 +8316,7 @@ return v___x_2619_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromCommandInfo___redArg___boxed(lean_object* v_i_2629_, lean_object* v_a_2630_, lean_object* v_a_2631_, lean_object* v___y_2632_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromCommandInfo___redArg___boxed(lean_object* v_i_2629_, lean_object* v_a_2630_, lean_object* v_a_2631_, lean_object* v_a_2632_){
 _start:
 {
 lean_object* v_res_2633_; 
@@ -8334,7 +8334,7 @@ v___x_2641_ = l_Lean_Server_locationLinksFromCommandInfo___redArg(v_i_2634_, v_a
 return v___x_2641_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromCommandInfo___boxed(lean_object* v_i_2642_, lean_object* v_a_2643_, lean_object* v_a_2644_, lean_object* v_a_2645_, lean_object* v_a_2646_, lean_object* v_a_2647_, lean_object* v___y_2648_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksFromCommandInfo___boxed(lean_object* v_i_2642_, lean_object* v_a_2643_, lean_object* v_a_2644_, lean_object* v_a_2645_, lean_object* v_a_2646_, lean_object* v_a_2647_, lean_object* v_a_2648_){
 _start:
 {
 lean_object* v_res_2649_; 
@@ -8705,7 +8705,7 @@ v___x_2748_ = l_Lean_Server_GoToM_run___redArg(v_ctx_2746_, v_ctx_2739_, v___x_2
 return v___x_2748_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_locationLinksOfInfo___boxed(lean_object* v_doc_2749_, lean_object* v_kind_2750_, lean_object* v_ictx_2751_, lean_object* v_infoTree_x3f_2752_, lean_object* v___y_2753_){
+LEAN_EXPORT lean_object* l_Lean_Server_locationLinksOfInfo___boxed(lean_object* v_doc_2749_, lean_object* v_kind_2750_, lean_object* v_ictx_2751_, lean_object* v_infoTree_x3f_2752_, lean_object* v_a_2753_){
 _start:
 {
 uint8_t v_kind_boxed_2754_; lean_object* v_res_2755_; 

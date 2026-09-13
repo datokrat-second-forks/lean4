@@ -779,7 +779,7 @@ v___x_342_ = l_Lean_registerTraceClass(v___x_339_, v___x_340_, v___x_341_);
 return v___x_342_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_PreDefinition_Structural_Basic_0__initFn_00___x40_Lean_Elab_PreDefinition_Structural_Basic_2093547783____hygCtx___hyg_2____boxed(lean_object* v___y_343_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_PreDefinition_Structural_Basic_0__initFn_00___x40_Lean_Elab_PreDefinition_Structural_Basic_2093547783____hygCtx___hyg_2____boxed(lean_object* v_a_343_){
 _start:
 {
 lean_object* v_res_344_; 

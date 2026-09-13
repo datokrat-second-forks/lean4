@@ -2254,7 +2254,7 @@ v___x_331_ = l_Lean_addBuiltinDocString(v___x_329_, v___x_330_);
 return v___x_331_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_errorAtSavedPos___regBuiltin_Lean_Parser_errorAtSavedPos_docString__1___boxed(lean_object* v___y_332_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_errorAtSavedPos___regBuiltin_Lean_Parser_errorAtSavedPos_docString__1___boxed(lean_object* v_a_332_){
 _start:
 {
 lean_object* v_res_333_; 
@@ -3592,7 +3592,7 @@ v___x_761_ = l_Lean_addBuiltinDocString(v___x_759_, v___x_760_);
 return v___x_761_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_orelse___regBuiltin_Lean_Parser_orelse_docString__1___boxed(lean_object* v___y_762_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_orelse___regBuiltin_Lean_Parser_orelse_docString__1___boxed(lean_object* v_a_762_){
 _start:
 {
 lean_object* v_res_763_; 
@@ -3796,7 +3796,7 @@ v___x_822_ = l_Lean_addBuiltinDocString(v___x_820_, v___x_821_);
 return v___x_822_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_atomic___regBuiltin_Lean_Parser_atomic_docString__1___boxed(lean_object* v___y_823_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_atomic___regBuiltin_Lean_Parser_atomic_docString__1___boxed(lean_object* v_a_823_){
 _start:
 {
 lean_object* v_res_824_; 
@@ -4265,7 +4265,7 @@ v___x_1007_ = l_Lean_addBuiltinDocString(v___x_1005_, v___x_1006_);
 return v___x_1007_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_recover_x27___regBuiltin_Lean_Parser_recover_x27_docString__1___boxed(lean_object* v___y_1008_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_recover_x27___regBuiltin_Lean_Parser_recover_x27_docString__1___boxed(lean_object* v_a_1008_){
 _start:
 {
 lean_object* v_res_1009_; 
@@ -4310,7 +4310,7 @@ v___x_1028_ = l_Lean_addBuiltinDocString(v___x_1026_, v___x_1027_);
 return v___x_1028_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_recover___regBuiltin_Lean_Parser_recover_docString__1___boxed(lean_object* v___y_1029_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_recover___regBuiltin_Lean_Parser_recover_docString__1___boxed(lean_object* v_a_1029_){
 _start:
 {
 lean_object* v_res_1030_; 
@@ -4558,7 +4558,7 @@ v___x_1104_ = l_Lean_addBuiltinDocString(v___x_1102_, v___x_1103_);
 return v___x_1104_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_lookahead___regBuiltin_Lean_Parser_lookahead_docString__1___boxed(lean_object* v___y_1105_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_lookahead___regBuiltin_Lean_Parser_lookahead_docString__1___boxed(lean_object* v_a_1105_){
 _start:
 {
 lean_object* v_res_1106_; 
@@ -4671,7 +4671,7 @@ v___x_1151_ = l_Lean_addBuiltinDocString(v___x_1149_, v___x_1150_);
 return v___x_1151_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_notFollowedBy___regBuiltin_Lean_Parser_notFollowedBy_docString__1___boxed(lean_object* v___y_1152_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_notFollowedBy___regBuiltin_Lean_Parser_notFollowedBy_docString__1___boxed(lean_object* v_a_1152_){
 _start:
 {
 lean_object* v_res_1153_; 
@@ -10629,7 +10629,7 @@ v___x_3206_ = l_Lean_addBuiltinDocString(v___x_3204_, v___x_3205_);
 return v___x_3206_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkWsBefore___regBuiltin_Lean_Parser_checkWsBefore_docString__1___boxed(lean_object* v___y_3207_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkWsBefore___regBuiltin_Lean_Parser_checkWsBefore_docString__1___boxed(lean_object* v_a_3207_){
 _start:
 {
 lean_object* v_res_3208_; 
@@ -10935,7 +10935,7 @@ v___x_3320_ = l_Lean_addBuiltinDocString(v___x_3318_, v___x_3319_);
 return v___x_3320_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkLinebreakBefore___regBuiltin_Lean_Parser_checkLinebreakBefore_docString__1___boxed(lean_object* v___y_3321_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkLinebreakBefore___regBuiltin_Lean_Parser_checkLinebreakBefore_docString__1___boxed(lean_object* v_a_3321_){
 _start:
 {
 lean_object* v_res_3322_; 
@@ -11045,7 +11045,7 @@ v___x_3360_ = l_Lean_addBuiltinDocString(v___x_3358_, v___x_3359_);
 return v___x_3360_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkNoWsBefore___regBuiltin_Lean_Parser_checkNoWsBefore_docString__1___boxed(lean_object* v___y_3361_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkNoWsBefore___regBuiltin_Lean_Parser_checkNoWsBefore_docString__1___boxed(lean_object* v_a_3361_){
 _start:
 {
 lean_object* v_res_3362_; 
@@ -13070,7 +13070,7 @@ v___x_4031_ = l_Lean_addBuiltinDocString(v___x_4029_, v___x_4030_);
 return v___x_4031_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkColEq___regBuiltin_Lean_Parser_checkColEq_docString__1___boxed(lean_object* v___y_4032_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkColEq___regBuiltin_Lean_Parser_checkColEq_docString__1___boxed(lean_object* v_a_4032_){
 _start:
 {
 lean_object* v_res_4033_; 
@@ -13153,7 +13153,7 @@ v___x_4062_ = l_Lean_addBuiltinDocString(v___x_4060_, v___x_4061_);
 return v___x_4062_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkColGe___regBuiltin_Lean_Parser_checkColGe_docString__1___boxed(lean_object* v___y_4063_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkColGe___regBuiltin_Lean_Parser_checkColGe_docString__1___boxed(lean_object* v_a_4063_){
 _start:
 {
 lean_object* v_res_4064_; 
@@ -13236,7 +13236,7 @@ v___x_4093_ = l_Lean_addBuiltinDocString(v___x_4091_, v___x_4092_);
 return v___x_4093_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkColGt___regBuiltin_Lean_Parser_checkColGt_docString__1___boxed(lean_object* v___y_4094_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkColGt___regBuiltin_Lean_Parser_checkColGt_docString__1___boxed(lean_object* v_a_4094_){
 _start:
 {
 lean_object* v_res_4095_; 
@@ -13319,7 +13319,7 @@ v___x_4124_ = l_Lean_addBuiltinDocString(v___x_4122_, v___x_4123_);
 return v___x_4124_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkLineEq___regBuiltin_Lean_Parser_checkLineEq_docString__1___boxed(lean_object* v___y_4125_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkLineEq___regBuiltin_Lean_Parser_checkLineEq_docString__1___boxed(lean_object* v_a_4125_){
 _start:
 {
 lean_object* v_res_4126_; 
@@ -13466,7 +13466,7 @@ v___x_4171_ = l_Lean_addBuiltinDocString(v___x_4169_, v___x_4170_);
 return v___x_4171_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withPosition___regBuiltin_Lean_Parser_withPosition_docString__1___boxed(lean_object* v___y_4172_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withPosition___regBuiltin_Lean_Parser_withPosition_docString__1___boxed(lean_object* v_a_4172_){
 _start:
 {
 lean_object* v_res_4173_; 
@@ -13691,7 +13691,7 @@ v___x_4241_ = l_Lean_addBuiltinDocString(v___x_4239_, v___x_4240_);
 return v___x_4241_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withoutPosition___regBuiltin_Lean_Parser_withoutPosition_docString__1___boxed(lean_object* v___y_4242_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withoutPosition___regBuiltin_Lean_Parser_withoutPosition_docString__1___boxed(lean_object* v_a_4242_){
 _start:
 {
 lean_object* v_res_4243_; 
@@ -13794,7 +13794,7 @@ v___x_4277_ = l_Lean_addBuiltinDocString(v___x_4275_, v___x_4276_);
 return v___x_4277_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withForbidden___regBuiltin_Lean_Parser_withForbidden_docString__1___boxed(lean_object* v___y_4278_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withForbidden___regBuiltin_Lean_Parser_withForbidden_docString__1___boxed(lean_object* v_a_4278_){
 _start:
 {
 lean_object* v_res_4279_; 
@@ -14231,7 +14231,7 @@ v___x_4450_ = l_Lean_addBuiltinDocString(v___x_4448_, v___x_4449_);
 return v___x_4450_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withForbiddens___regBuiltin_Lean_Parser_withForbiddens_docString__1___boxed(lean_object* v___y_4451_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withForbiddens___regBuiltin_Lean_Parser_withForbiddens_docString__1___boxed(lean_object* v_a_4451_){
 _start:
 {
 lean_object* v_res_4452_; 
@@ -14315,7 +14315,7 @@ v___x_4482_ = l_Lean_addBuiltinDocString(v___x_4480_, v___x_4481_);
 return v___x_4482_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withoutForbidden___regBuiltin_Lean_Parser_withoutForbidden_docString__1___boxed(lean_object* v___y_4483_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withoutForbidden___regBuiltin_Lean_Parser_withoutForbidden_docString__1___boxed(lean_object* v_a_4483_){
 _start:
 {
 lean_object* v_res_4484_; 
@@ -16658,7 +16658,7 @@ lean_ctor_set(v___x_5109_, 0, v___x_5108_);
 return v___x_5109_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_initFn_00___x40_Lean_Parser_Basic_367397207____hygCtx___hyg_2____boxed(lean_object* v___y_5110_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_initFn_00___x40_Lean_Parser_Basic_367397207____hygCtx___hyg_2____boxed(lean_object* v_a_5110_){
 _start:
 {
 lean_object* v_res_5111_; 
@@ -16706,7 +16706,7 @@ v___x_5125_ = l_Lean_registerEnvExtension___redArg(v___f_5122_, v___x_5123_, v__
 return v___x_5125_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_initFn_00___x40_Lean_Parser_Basic_281847278____hygCtx___hyg_2____boxed(lean_object* v___y_5126_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_initFn_00___x40_Lean_Parser_Basic_281847278____hygCtx___hyg_2____boxed(lean_object* v_a_5126_){
 _start:
 {
 lean_object* v_res_5127_; 
@@ -16900,7 +16900,7 @@ v___x_5211_ = l_Lean_addBuiltinDocString(v___x_5209_, v___x_5210_);
 return v___x_5211_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkNoImmediateColon___regBuiltin_Lean_Parser_checkNoImmediateColon_docString__1___boxed(lean_object* v___y_5212_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_checkNoImmediateColon___regBuiltin_Lean_Parser_checkNoImmediateColon_docString__1___boxed(lean_object* v_a_5212_){
 _start:
 {
 lean_object* v_res_5213_; 
@@ -17653,7 +17653,7 @@ v___x_5482_ = l_Lean_addBuiltinDocString(v___x_5480_, v___x_5481_);
 return v___x_5482_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_mkAntiquot___regBuiltin_Lean_Parser_mkAntiquot_docString__1___boxed(lean_object* v___y_5483_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_mkAntiquot___regBuiltin_Lean_Parser_mkAntiquot_docString__1___boxed(lean_object* v_a_5483_){
 _start:
 {
 lean_object* v_res_5484_; 
@@ -17776,7 +17776,7 @@ v___x_5534_ = l_Lean_addBuiltinDocString(v___x_5532_, v___x_5533_);
 return v___x_5534_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withAntiquot___regBuiltin_Lean_Parser_withAntiquot_docString__1___boxed(lean_object* v___y_5535_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withAntiquot___regBuiltin_Lean_Parser_withAntiquot_docString__1___boxed(lean_object* v_a_5535_){
 _start:
 {
 lean_object* v_res_5536_; 
@@ -17886,7 +17886,7 @@ v___x_5585_ = l_Lean_addBuiltinDocString(v___x_5583_, v___x_5584_);
 return v___x_5585_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_mkAntiquotSplice___regBuiltin_Lean_Parser_mkAntiquotSplice_docString__1___boxed(lean_object* v___y_5586_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_mkAntiquotSplice___regBuiltin_Lean_Parser_mkAntiquotSplice_docString__1___boxed(lean_object* v_a_5586_){
 _start:
 {
 lean_object* v_res_5587_; 
@@ -18047,7 +18047,7 @@ v___x_5647_ = l_Lean_addBuiltinDocString(v___x_5645_, v___x_5646_);
 return v___x_5647_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withAntiquotSuffixSplice___regBuiltin_Lean_Parser_withAntiquotSuffixSplice_docString__1___boxed(lean_object* v___y_5648_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_Basic_0__Lean_Parser_withAntiquotSuffixSplice___regBuiltin_Lean_Parser_withAntiquotSuffixSplice_docString__1___boxed(lean_object* v_a_5648_){
 _start:
 {
 lean_object* v_res_5649_; 

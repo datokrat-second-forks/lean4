@@ -109,7 +109,7 @@ v___x_41_ = l_Lean_Linter_addBuiltinLinterSet(v___x_39_, v___x_40_);
 return v___x_41_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Linter_Extra_0__Lean_Linter_initFn_00___x40_Lean_Linter_Extra_4111276407____hygCtx___hyg_2____boxed(lean_object* v___y_42_){
+LEAN_EXPORT lean_object* l___private_Lean_Linter_Extra_0__Lean_Linter_initFn_00___x40_Lean_Linter_Extra_4111276407____hygCtx___hyg_2____boxed(lean_object* v_a_42_){
 _start:
 {
 lean_object* v_res_43_; 

@@ -50,7 +50,7 @@ return v___x_6_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_Time_Database_defaultGetZoneRules___boxed(lean_object* v_name_7_, lean_object* v___y_8_){
+LEAN_EXPORT lean_object* l_Std_Time_Database_defaultGetZoneRules___boxed(lean_object* v_name_7_, lean_object* v_a_8_){
 _start:
 {
 lean_object* v_res_9_; 
@@ -147,7 +147,7 @@ return v___x_27_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_Time_Database_defaultGetLocalZoneRules___boxed(lean_object* v___y_30_){
+LEAN_EXPORT lean_object* l_Std_Time_Database_defaultGetLocalZoneRules___boxed(lean_object* v_a_30_){
 _start:
 {
 lean_object* v_res_31_; 

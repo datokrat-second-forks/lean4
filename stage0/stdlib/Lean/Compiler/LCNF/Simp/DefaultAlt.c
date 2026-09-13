@@ -683,14 +683,14 @@ goto v_reusejp_189_;
 }
 v_reusejp_189_:
 {
-lean_object* v___x_191_; lean_object* v___x_192_; lean_object* v___x_193_; lean_object* v___x_194_; lean_object* v___f_195_; lean_object* v___x_2846__overap_196_; lean_object* v___x_197_; 
+lean_object* v___x_191_; lean_object* v___x_192_; lean_object* v___x_193_; lean_object* v___x_194_; lean_object* v___f_195_; lean_object* v___x_2708__overap_196_; lean_object* v___x_197_; 
 v___x_191_ = l_ReaderT_instMonad___redArg(v___x_190_);
 v___x_192_ = l_StateRefT_x27_instMonad___redArg(v___x_191_);
 v___x_193_ = lean_box(0);
 v___x_194_ = l_instInhabitedOfMonad___redArg(v___x_192_, v___x_193_);
 v___f_195_ = lean_alloc_closure((void*)(l_instInhabitedForall___redArg___lam__0___boxed), 2, 1);
 lean_closure_set(v___f_195_, 0, v___x_194_);
-v___x_2846__overap_196_ = lean_panic_fn_borrowed(v___f_195_, v_msg_133_);
+v___x_2708__overap_196_ = lean_panic_fn_borrowed(v___f_195_, v_msg_133_);
 lean_dec_ref(v___f_195_);
 lean_inc(v___y_140_);
 lean_inc_ref(v___y_139_);
@@ -699,7 +699,7 @@ lean_inc_ref(v___y_137_);
 lean_inc_ref(v___y_136_);
 lean_inc(v___y_135_);
 lean_inc_ref(v___y_134_);
-v___x_197_ = lean_apply_8(v___x_2846__overap_196_, v___y_134_, v___y_135_, v___y_136_, v___y_137_, v___y_138_, v___y_139_, v___y_140_, lean_box(0));
+v___x_197_ = lean_apply_8(v___x_2708__overap_196_, v___y_134_, v___y_135_, v___y_136_, v___y_137_, v___y_138_, v___y_139_, v___y_140_, lean_box(0));
 return v___x_197_;
 }
 }
@@ -1386,7 +1386,7 @@ return v___x_405_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_addDefaultAlt___boxed(lean_object* v_alts_414_, lean_object* v_a_415_, lean_object* v_a_416_, lean_object* v_a_417_, lean_object* v_a_418_, lean_object* v_a_419_, lean_object* v_a_420_, lean_object* v_a_421_, lean_object* v___y_422_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_addDefaultAlt___boxed(lean_object* v_alts_414_, lean_object* v_a_415_, lean_object* v_a_416_, lean_object* v_a_417_, lean_object* v_a_418_, lean_object* v_a_419_, lean_object* v_a_420_, lean_object* v_a_421_, lean_object* v_a_422_){
 _start:
 {
 lean_object* v_res_423_; 

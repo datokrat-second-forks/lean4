@@ -29055,14 +29055,14 @@ lean_ctor_set(v___x_8256_, 1, v_snd_8255_);
 return v___x_8256_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Expr_foldlM___redArg___lam__2(lean_object* v_f_8257_, lean_object* v_map_8258_, lean_object* v_e_x27_8259_, lean_object* v_a_8260_){
+LEAN_EXPORT lean_object* l_Lean_Expr_foldlM___redArg___lam__2(lean_object* v_f_8257_, lean_object* v_map_8258_, lean_object* v_e_x27_8259_, lean_object* v___y_8260_){
 _start:
 {
 lean_object* v___f_8261_; lean_object* v___x_8262_; lean_object* v___x_8263_; 
 lean_inc_ref(v_e_x27_8259_);
 v___f_8261_ = lean_alloc_closure((void*)(l_Lean_Expr_foldlM___redArg___lam__1), 2, 1);
 lean_closure_set(v___f_8261_, 0, v_e_x27_8259_);
-v___x_8262_ = lean_apply_2(v_f_8257_, v_a_8260_, v_e_x27_8259_);
+v___x_8262_ = lean_apply_2(v_f_8257_, v___y_8260_, v_e_x27_8259_);
 v___x_8263_ = lean_apply_4(v_map_8258_, lean_box(0), lean_box(0), v___f_8261_, v___x_8262_);
 return v___x_8263_;
 }
@@ -29188,9 +29188,9 @@ goto v_reusejp_8288_;
 }
 v_reusejp_8288_:
 {
-lean_object* v___x_30__overap_8290_; lean_object* v___x_8291_; lean_object* v___x_8292_; 
-v___x_30__overap_8290_ = l_Lean_Expr_traverseChildren___redArg(v___x_8289_, v___f_8279_, v_e_8268_);
-v___x_8291_ = lean_apply_1(v___x_30__overap_8290_, v_init_8267_);
+lean_object* v___x_39__overap_8290_; lean_object* v___x_8291_; lean_object* v___x_8292_; 
+v___x_39__overap_8290_ = l_Lean_Expr_traverseChildren___redArg(v___x_8289_, v___f_8279_, v_e_8268_);
+v___x_8291_ = lean_apply_1(v___x_39__overap_8290_, v_init_8267_);
 v___x_8292_ = lean_apply_4(v_map_8274_, lean_box(0), lean_box(0), v___f_8278_, v___x_8291_);
 return v___x_8292_;
 }

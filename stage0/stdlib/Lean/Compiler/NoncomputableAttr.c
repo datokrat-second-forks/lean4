@@ -40,7 +40,7 @@ v___x_9_ = l_Lean_mkTagDeclarationExtension(v___x_7_, v___x_8_);
 return v___x_9_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_NoncomputableAttr_0__Lean_initFn_00___x40_Lean_Compiler_NoncomputableAttr_174063325____hygCtx___hyg_2____boxed(lean_object* v___y_10_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_NoncomputableAttr_0__Lean_initFn_00___x40_Lean_Compiler_NoncomputableAttr_174063325____hygCtx___hyg_2____boxed(lean_object* v_a_10_){
 _start:
 {
 lean_object* v_res_11_; 

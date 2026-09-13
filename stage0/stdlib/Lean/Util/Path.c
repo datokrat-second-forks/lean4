@@ -488,7 +488,7 @@ return v___x_122_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_realPathNormalized___boxed(lean_object* v_p_132_, lean_object* v___y_133_){
+LEAN_EXPORT lean_object* l_Lean_realPathNormalized___boxed(lean_object* v_p_132_, lean_object* v_a_133_){
 _start:
 {
 lean_object* v_res_134_; 
@@ -749,7 +749,7 @@ return v___x_208_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_SearchPath_findWithExt___boxed(lean_object* v_sp_214_, lean_object* v_ext_215_, lean_object* v_mod_216_, lean_object* v___y_217_){
+LEAN_EXPORT lean_object* l_Lean_SearchPath_findWithExt___boxed(lean_object* v_sp_214_, lean_object* v_ext_215_, lean_object* v_mod_216_, lean_object* v_a_217_){
 _start:
 {
 lean_object* v_res_218_; 
@@ -831,7 +831,7 @@ goto v___jp_223_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_SearchPath_findModuleWithExt___boxed(lean_object* v_sp_237_, lean_object* v_ext_238_, lean_object* v_mod_239_, lean_object* v___y_240_){
+LEAN_EXPORT lean_object* l_Lean_SearchPath_findModuleWithExt___boxed(lean_object* v_sp_237_, lean_object* v_ext_238_, lean_object* v_mod_239_, lean_object* v_a_240_){
 _start:
 {
 lean_object* v_res_241_; 
@@ -1088,7 +1088,7 @@ v___x_327_ = l_List_forIn_x27_loop___at___00Lean_SearchPath_findAllWithExt_spec_
 return v___x_327_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_SearchPath_findAllWithExt___boxed(lean_object* v_sp_328_, lean_object* v_ext_329_, lean_object* v___y_330_){
+LEAN_EXPORT lean_object* l_Lean_SearchPath_findAllWithExt___boxed(lean_object* v_sp_328_, lean_object* v_ext_329_, lean_object* v_a_330_){
 _start:
 {
 lean_object* v_res_331_; 
@@ -1126,7 +1126,7 @@ lean_ctor_set(v___x_349_, 0, v___x_348_);
 return v___x_349_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Util_Path_0__Lean_initFn_00___x40_Lean_Util_Path_2007882598____hygCtx___hyg_2____boxed(lean_object* v___y_350_){
+LEAN_EXPORT lean_object* l___private_Lean_Util_Path_0__Lean_initFn_00___x40_Lean_Util_Path_2007882598____hygCtx___hyg_2____boxed(lean_object* v_a_350_){
 _start:
 {
 lean_object* v_res_351_; 
@@ -1232,7 +1232,7 @@ return v___x_362_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_getBuildDir___boxed(lean_object* v___y_378_){
+LEAN_EXPORT lean_object* l_Lean_getBuildDir___boxed(lean_object* v_a_378_){
 _start:
 {
 lean_object* v_res_379_; 
@@ -1282,7 +1282,7 @@ return v___x_393_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_getLibDir___boxed(lean_object* v_leanSysroot_399_, lean_object* v___y_400_){
+LEAN_EXPORT lean_object* l_Lean_getLibDir___boxed(lean_object* v_leanSysroot_399_, lean_object* v_a_400_){
 _start:
 {
 lean_object* v_res_401_; 
@@ -1339,7 +1339,7 @@ return v___x_412_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_getBuiltinSearchPath___boxed(lean_object* v_leanSysroot_415_, lean_object* v___y_416_){
+LEAN_EXPORT lean_object* l_Lean_getBuiltinSearchPath___boxed(lean_object* v_leanSysroot_415_, lean_object* v_a_416_){
 _start:
 {
 lean_object* v_res_417_; 
@@ -1407,7 +1407,7 @@ return v___x_431_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_addSearchPathFromEnv___boxed(lean_object* v_sp_434_, lean_object* v___y_435_){
+LEAN_EXPORT lean_object* l_Lean_addSearchPathFromEnv___boxed(lean_object* v_sp_434_, lean_object* v_a_435_){
 _start:
 {
 lean_object* v_res_436_; 
@@ -1515,7 +1515,7 @@ return v___x_460_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_initSearchPath___boxed(lean_object* v_leanSysroot_463_, lean_object* v_sp_464_, lean_object* v___y_465_){
+LEAN_EXPORT lean_object* l_Lean_initSearchPath___boxed(lean_object* v_leanSysroot_463_, lean_object* v_sp_464_, lean_object* v_a_465_){
 _start:
 {
 lean_object* v_res_466_; 
@@ -1581,7 +1581,7 @@ return v___x_477_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Util_Path_0__Lean_initSearchPathInternal___boxed(lean_object* v___y_480_){
+LEAN_EXPORT lean_object* l___private_Lean_Util_Path_0__Lean_initSearchPathInternal___boxed(lean_object* v_a_480_){
 _start:
 {
 lean_object* v_res_481_; 
@@ -1751,7 +1751,7 @@ return v___x_535_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_findOLean___boxed(lean_object* v_mod_538_, lean_object* v___y_539_){
+LEAN_EXPORT lean_object* l_Lean_findOLean___boxed(lean_object* v_mod_538_, lean_object* v_a_539_){
 _start:
 {
 lean_object* v_res_540_; 
@@ -1861,7 +1861,7 @@ return v___x_575_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_findLean___boxed(lean_object* v_sp_578_, lean_object* v_mod_579_, lean_object* v___y_580_){
+LEAN_EXPORT lean_object* l_Lean_findLean___boxed(lean_object* v_sp_578_, lean_object* v_mod_579_, lean_object* v_a_580_){
 _start:
 {
 lean_object* v_res_581_; 
@@ -2000,7 +2000,7 @@ return v___x_616_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_getSrcSearchPath___boxed(lean_object* v___y_622_){
+LEAN_EXPORT lean_object* l_Lean_getSrcSearchPath___boxed(lean_object* v_a_622_){
 _start:
 {
 lean_object* v_res_623_; 
@@ -2365,7 +2365,7 @@ return v___x_718_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_moduleNameOfFileName___boxed(lean_object* v_fname_721_, lean_object* v_rootDir_722_, lean_object* v___y_723_){
+LEAN_EXPORT lean_object* l_Lean_moduleNameOfFileName___boxed(lean_object* v_fname_721_, lean_object* v_rootDir_722_, lean_object* v_a_723_){
 _start:
 {
 lean_object* v_res_724_; 
@@ -2545,7 +2545,7 @@ return v___x_772_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_searchModuleNameOfFileName___boxed(lean_object* v_fname_775_, lean_object* v_rootDirs_776_, lean_object* v___y_777_){
+LEAN_EXPORT lean_object* l_Lean_searchModuleNameOfFileName___boxed(lean_object* v_fname_775_, lean_object* v_rootDirs_776_, lean_object* v_a_777_){
 _start:
 {
 lean_object* v_res_778_; 
@@ -2744,7 +2744,7 @@ return v___x_844_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_findSysroot___boxed(lean_object* v_lean_847_, lean_object* v___y_848_){
+LEAN_EXPORT lean_object* l_Lean_findSysroot___boxed(lean_object* v_lean_847_, lean_object* v_a_848_){
 _start:
 {
 lean_object* v_res_849_; 

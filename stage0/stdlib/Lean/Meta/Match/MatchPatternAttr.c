@@ -1496,7 +1496,7 @@ v___x_455_ = l_Lean_registerTagAttribute(v___x_450_, v___x_451_, v___f_449_, v__
 return v___x_455_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_MatchPatternAttr_0__Lean_initFn_00___x40_Lean_Meta_Match_MatchPatternAttr_2067758803____hygCtx___hyg_2____boxed(lean_object* v___y_456_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_MatchPatternAttr_0__Lean_initFn_00___x40_Lean_Meta_Match_MatchPatternAttr_2067758803____hygCtx___hyg_2____boxed(lean_object* v_a_456_){
 _start:
 {
 lean_object* v_res_457_; 
@@ -1625,7 +1625,7 @@ v___x_542_ = l_Lean_addBuiltinDocString(v___x_540_, v___x_541_);
 return v___x_542_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_MatchPatternAttr_0__Lean_matchPatternAttr___regBuiltin_Lean_matchPatternAttr_docString__1___boxed(lean_object* v___y_543_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_MatchPatternAttr_0__Lean_matchPatternAttr___regBuiltin_Lean_matchPatternAttr_docString__1___boxed(lean_object* v_a_543_){
 _start:
 {
 lean_object* v_res_544_; 
@@ -1643,7 +1643,7 @@ v___x_573_ = l_Lean_addBuiltinDeclarationRanges(v___x_571_, v___x_572_);
 return v___x_573_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_MatchPatternAttr_0__Lean_matchPatternAttr___regBuiltin_Lean_matchPatternAttr_declRange__3___boxed(lean_object* v___y_574_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_MatchPatternAttr_0__Lean_matchPatternAttr___regBuiltin_Lean_matchPatternAttr_declRange__3___boxed(lean_object* v_a_574_){
 _start:
 {
 lean_object* v_res_575_; 

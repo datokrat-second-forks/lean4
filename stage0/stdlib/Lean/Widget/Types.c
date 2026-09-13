@@ -220,7 +220,7 @@ lean_dec_ref(v_x_60_);
 return v_res_61_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Widget_instRpcEncodableWidgetInstance_enc_00___x40_Lean_Widget_Types_2243429567____hygCtx___hyg_1_(lean_object* v_a_64_, lean_object* v_a_65_){
+LEAN_EXPORT lean_object* l_Lean_Widget_instRpcEncodableWidgetInstance_enc_00___x40_Lean_Widget_Types_2243429567____hygCtx___hyg_1_(lean_object* v_a_64_, lean_object* v_s_65_){
 _start:
 {
 lean_object* v_id_66_; uint64_t v_javascriptHash_67_; lean_object* v_props_68_; lean_object* v___x_69_; lean_object* v_fst_70_; lean_object* v_snd_71_; lean_object* v___x_73_; uint8_t v_isShared_74_; uint8_t v_isSharedCheck_85_; 
@@ -230,7 +230,7 @@ v_javascriptHash_67_ = lean_ctor_get_uint64(v_a_64_, sizeof(void*)*2);
 v_props_68_ = lean_ctor_get(v_a_64_, 1);
 lean_inc_ref(v_props_68_);
 lean_dec_ref(v_a_64_);
-v___x_69_ = lean_apply_1(v_props_68_, v_a_65_);
+v___x_69_ = lean_apply_1(v_props_68_, v_s_65_);
 v_fst_70_ = lean_ctor_get(v___x_69_, 0);
 v_snd_71_ = lean_ctor_get(v___x_69_, 1);
 v_isSharedCheck_85_ = !lean_is_exclusive(v___x_69_);

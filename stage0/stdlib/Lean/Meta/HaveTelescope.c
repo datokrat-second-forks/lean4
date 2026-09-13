@@ -1771,7 +1771,7 @@ return v___x_402_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_HaveTelescope_0__Lean_Meta_getHaveTelescopeInfo_collect___boxed(lean_object* v_e_457_, lean_object* v_numHaves_458_, lean_object* v_info_459_, lean_object* v_lctx_460_, lean_object* v_fvars_461_, lean_object* v_a_462_, lean_object* v_a_463_, lean_object* v_a_464_, lean_object* v_a_465_, lean_object* v___y_466_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_HaveTelescope_0__Lean_Meta_getHaveTelescopeInfo_collect___boxed(lean_object* v_e_457_, lean_object* v_numHaves_458_, lean_object* v_info_459_, lean_object* v_lctx_460_, lean_object* v_fvars_461_, lean_object* v_a_462_, lean_object* v_a_463_, lean_object* v_a_464_, lean_object* v_a_465_, lean_object* v_a_466_){
 _start:
 {
 lean_object* v_res_467_; 
@@ -1886,7 +1886,7 @@ v___x_530_ = l___private_Lean_Meta_HaveTelescope_0__Lean_Meta_getHaveTelescopeIn
 return v___x_530_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_getHaveTelescopeInfo___boxed(lean_object* v_e_531_, lean_object* v_a_532_, lean_object* v_a_533_, lean_object* v_a_534_, lean_object* v_a_535_, lean_object* v___y_536_){
+LEAN_EXPORT lean_object* l_Lean_Meta_getHaveTelescopeInfo___boxed(lean_object* v_e_531_, lean_object* v_a_532_, lean_object* v_a_533_, lean_object* v_a_534_, lean_object* v_a_535_, lean_object* v_a_536_){
 _start:
 {
 lean_object* v_res_537_; 
@@ -2078,7 +2078,7 @@ v___x_625_ = l_WellFounded_opaqueFix_u2083___at___00__private_Lean_Meta_HaveTele
 return v___x_625_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_HaveTelescope_0__Lean_Meta_HaveTelescopeInfo_computeFixedUsed_go___boxed(lean_object* v_info_626_, lean_object* v_init_627_, lean_object* v_a_628_, lean_object* v_a_629_, lean_object* v_a_630_, lean_object* v_a_631_, lean_object* v___y_632_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_HaveTelescope_0__Lean_Meta_HaveTelescopeInfo_computeFixedUsed_go___boxed(lean_object* v_info_626_, lean_object* v_init_627_, lean_object* v_a_628_, lean_object* v_a_629_, lean_object* v_a_630_, lean_object* v_a_631_, lean_object* v_a_632_){
 _start:
 {
 lean_object* v_res_633_; 
@@ -2309,7 +2309,7 @@ return v___x_708_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_HaveTelescopeInfo_computeFixedUsed___boxed(lean_object* v_info_711_, lean_object* v_keepUnused_712_, lean_object* v_a_713_, lean_object* v_a_714_, lean_object* v_a_715_, lean_object* v_a_716_, lean_object* v___y_717_){
+LEAN_EXPORT lean_object* l_Lean_Meta_HaveTelescopeInfo_computeFixedUsed___boxed(lean_object* v_info_711_, lean_object* v_keepUnused_712_, lean_object* v_a_713_, lean_object* v_a_714_, lean_object* v_a_715_, lean_object* v_a_716_, lean_object* v_a_717_){
 _start:
 {
 uint8_t v_keepUnused_boxed_718_; lean_object* v_res_719_; 
@@ -5561,7 +5561,7 @@ v___x_2100_ = l_Lean_Meta_letTelescope___at___00Lean_Meta_zetaUnused_spec__1___r
 return v___x_2100_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_zetaUnused___boxed(lean_object* v_e_2101_, lean_object* v_a_2102_, lean_object* v_a_2103_, lean_object* v_a_2104_, lean_object* v_a_2105_, lean_object* v___y_2106_){
+LEAN_EXPORT lean_object* l_Lean_Meta_zetaUnused___boxed(lean_object* v_e_2101_, lean_object* v_a_2102_, lean_object* v_a_2103_, lean_object* v_a_2104_, lean_object* v_a_2105_, lean_object* v_a_2106_){
 _start:
 {
 lean_object* v_res_2107_; 
@@ -5934,7 +5934,7 @@ return v___x_2214_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_HaveTelescope_0__Lean_Meta_SimpHaveResult_toResult___boxed(lean_object* v_u_2215_, lean_object* v_source_2216_, lean_object* v_result_2217_, lean_object* v_keepUnused_2218_, lean_object* v_a_2219_, lean_object* v_a_2220_, lean_object* v_a_2221_, lean_object* v_a_2222_, lean_object* v___y_2223_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_HaveTelescope_0__Lean_Meta_SimpHaveResult_toResult___boxed(lean_object* v_u_2215_, lean_object* v_source_2216_, lean_object* v_result_2217_, lean_object* v_keepUnused_2218_, lean_object* v_a_2219_, lean_object* v_a_2220_, lean_object* v_a_2221_, lean_object* v_a_2222_, lean_object* v_a_2223_){
 _start:
 {
 uint8_t v_keepUnused_boxed_2224_; lean_object* v_res_2225_; 

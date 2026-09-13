@@ -2226,7 +2226,7 @@ v___x_670_ = l_Lean_registerParametricAttribute___redArg(v___x_669_);
 return v___x_670_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_ImplementedByAttr_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_ImplementedByAttr_2873759278____hygCtx___hyg_2____boxed(lean_object* v___y_671_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_ImplementedByAttr_0__Lean_Compiler_initFn_00___x40_Lean_Compiler_ImplementedByAttr_2873759278____hygCtx___hyg_2____boxed(lean_object* v_a_671_){
 _start:
 {
 lean_object* v_res_672_; 
@@ -2393,7 +2393,7 @@ v___x_787_ = l_Lean_addBuiltinDocString(v___x_785_, v___x_786_);
 return v___x_787_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_ImplementedByAttr_0__Lean_Compiler_implementedByAttr___regBuiltin_Lean_Compiler_implementedByAttr_docString__1___boxed(lean_object* v___y_788_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_ImplementedByAttr_0__Lean_Compiler_implementedByAttr___regBuiltin_Lean_Compiler_implementedByAttr_docString__1___boxed(lean_object* v_a_788_){
 _start:
 {
 lean_object* v_res_789_; 
@@ -2411,7 +2411,7 @@ v___x_818_ = l_Lean_addBuiltinDeclarationRanges(v___x_816_, v___x_817_);
 return v___x_818_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_ImplementedByAttr_0__Lean_Compiler_implementedByAttr___regBuiltin_Lean_Compiler_implementedByAttr_declRange__3___boxed(lean_object* v___y_819_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_ImplementedByAttr_0__Lean_Compiler_implementedByAttr___regBuiltin_Lean_Compiler_implementedByAttr_declRange__3___boxed(lean_object* v_a_819_){
 _start:
 {
 lean_object* v_res_820_; 

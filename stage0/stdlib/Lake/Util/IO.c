@@ -80,7 +80,7 @@ return v___x_7_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_createParentDirs___boxed(lean_object* v_path_8_, lean_object* v___y_9_){
+LEAN_EXPORT lean_object* l_Lake_createParentDirs___boxed(lean_object* v_path_8_, lean_object* v_a_9_){
 _start:
 {
 lean_object* v_res_10_; 
@@ -156,7 +156,7 @@ return v___x_13_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_removeFileIfExists___boxed(lean_object* v_path_24_, lean_object* v___y_25_){
+LEAN_EXPORT lean_object* l_Lake_removeFileIfExists___boxed(lean_object* v_path_24_, lean_object* v_a_25_){
 _start:
 {
 lean_object* v_res_26_; 
@@ -252,7 +252,7 @@ return v___x_43_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_writeFileIfNew___boxed(lean_object* v_path_46_, lean_object* v_content_47_, lean_object* v___y_48_){
+LEAN_EXPORT lean_object* l_Lake_writeFileIfNew___boxed(lean_object* v_path_46_, lean_object* v_content_47_, lean_object* v_a_48_){
 _start:
 {
 lean_object* v_res_49_; 
@@ -349,7 +349,7 @@ return v___x_66_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_writeBinFileIfNew___boxed(lean_object* v_path_69_, lean_object* v_content_70_, lean_object* v___y_71_){
+LEAN_EXPORT lean_object* l_Lake_writeBinFileIfNew___boxed(lean_object* v_path_69_, lean_object* v_content_70_, lean_object* v_a_71_){
 _start:
 {
 lean_object* v_res_72_; 
@@ -644,7 +644,7 @@ return v___x_130_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_removeDirAllIfExists___boxed(lean_object* v_path_133_, lean_object* v___y_134_){
+LEAN_EXPORT lean_object* l_Lake_removeDirAllIfExists___boxed(lean_object* v_path_133_, lean_object* v_a_134_){
 _start:
 {
 lean_object* v_res_135_; 
@@ -724,7 +724,7 @@ return v___x_155_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_copyFile___boxed(lean_object* v_src_158_, lean_object* v_dst_159_, lean_object* v___y_160_){
+LEAN_EXPORT lean_object* l_Lake_copyFile___boxed(lean_object* v_src_158_, lean_object* v_dst_159_, lean_object* v_a_160_){
 _start:
 {
 lean_object* v_res_161_; 
@@ -769,7 +769,7 @@ return v___x_170_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_resolvePath___boxed(lean_object* v_path_171_, lean_object* v___y_172_){
+LEAN_EXPORT lean_object* l_Lake_resolvePath___boxed(lean_object* v_path_171_, lean_object* v_a_172_){
 _start:
 {
 lean_object* v_res_173_; 
@@ -801,7 +801,7 @@ return v___x_181_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_resolvePath_x3f___boxed(lean_object* v_path_182_, lean_object* v___y_183_){
+LEAN_EXPORT lean_object* l_Lake_resolvePath_x3f___boxed(lean_object* v_path_182_, lean_object* v_a_183_){
 _start:
 {
 lean_object* v_res_184_; 

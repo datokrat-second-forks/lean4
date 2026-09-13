@@ -3370,7 +3370,7 @@ v_res_913_ = l_Std_Sat_AIG_toGraphviz_invEdgeStyle(v_isInv_boxed_912_);
 return v_res_913_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Sat_AIG_toGraphviz_go___redArg(lean_object* v_acc_918_, lean_object* v_decls_919_, lean_object* v_idx_920_, lean_object* v_a_921_){
+LEAN_EXPORT lean_object* l_Std_Sat_AIG_toGraphviz_go___redArg(lean_object* v_acc_918_, lean_object* v_decls_919_, lean_object* v_idx_920_, lean_object* v_s_921_){
 _start:
 {
 lean_object* v___x_922_; lean_object* v___x_923_; lean_object* v___f_924_; lean_object* v___f_925_; uint8_t v___x_926_; 
@@ -3382,13 +3382,13 @@ lean_closure_set(v___f_924_, 0, v___x_923_);
 v___f_925_ = ((lean_object*)(l_Std_Sat_AIG_toGraphviz_go___redArg___closed__0));
 lean_inc(v_idx_920_);
 lean_inc_ref(v___f_924_);
-v___x_926_ = l_Std_DHashMap_Internal_Raw_u2080_contains___redArg(v___f_924_, v___f_925_, v_a_921_, v_idx_920_);
+v___x_926_ = l_Std_DHashMap_Internal_Raw_u2080_contains___redArg(v___f_924_, v___f_925_, v_s_921_, v_idx_920_);
 if (v___x_926_ == 0)
 {
 lean_object* v___x_927_; lean_object* v___x_928_; lean_object* v___x_929_; 
 v___x_927_ = lean_box(0);
 lean_inc(v_idx_920_);
-v___x_928_ = l_Std_DHashMap_Internal_Raw_u2080_insertIfNew___redArg(v___f_924_, v___f_925_, v_a_921_, v_idx_920_, v___x_927_);
+v___x_928_ = l_Std_DHashMap_Internal_Raw_u2080_insertIfNew___redArg(v___f_924_, v___f_925_, v_s_921_, v_idx_920_, v___x_927_);
 v___x_929_ = lean_array_fget_borrowed(v_decls_919_, v_idx_920_);
 if (lean_obj_tag(v___x_929_) == 2)
 {
@@ -3451,7 +3451,7 @@ lean_inc(v_snd_958_);
 lean_dec_ref(v___x_956_);
 v_acc_918_ = v_fst_957_;
 v_idx_920_ = v___y_936_;
-v_a_921_ = v_snd_958_;
+v_s_921_ = v_snd_958_;
 goto _start;
 }
 v___jp_960_:
@@ -3497,33 +3497,33 @@ lean_dec_ref(v___f_924_);
 lean_dec(v_idx_920_);
 v___x_972_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_972_, 0, v_acc_918_);
-lean_ctor_set(v___x_972_, 1, v_a_921_);
+lean_ctor_set(v___x_972_, 1, v_s_921_);
 return v___x_972_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_Sat_AIG_toGraphviz_go___redArg___boxed(lean_object* v_acc_973_, lean_object* v_decls_974_, lean_object* v_idx_975_, lean_object* v_a_976_){
+LEAN_EXPORT lean_object* l_Std_Sat_AIG_toGraphviz_go___redArg___boxed(lean_object* v_acc_973_, lean_object* v_decls_974_, lean_object* v_idx_975_, lean_object* v_s_976_){
 _start:
 {
 lean_object* v_res_977_; 
-v_res_977_ = l_Std_Sat_AIG_toGraphviz_go___redArg(v_acc_973_, v_decls_974_, v_idx_975_, v_a_976_);
+v_res_977_ = l_Std_Sat_AIG_toGraphviz_go___redArg(v_acc_973_, v_decls_974_, v_idx_975_, v_s_976_);
 lean_dec_ref(v_decls_974_);
 return v_res_977_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Sat_AIG_toGraphviz_go(lean_object* v_00_u03b1_978_, lean_object* v_inst_979_, lean_object* v_inst_980_, lean_object* v_inst_981_, lean_object* v_acc_982_, lean_object* v_decls_983_, lean_object* v_hinv_984_, lean_object* v_idx_985_, lean_object* v_hidx_986_, lean_object* v_a_987_){
+LEAN_EXPORT lean_object* l_Std_Sat_AIG_toGraphviz_go(lean_object* v_00_u03b1_978_, lean_object* v_inst_979_, lean_object* v_inst_980_, lean_object* v_inst_981_, lean_object* v_acc_982_, lean_object* v_decls_983_, lean_object* v_hinv_984_, lean_object* v_idx_985_, lean_object* v_hidx_986_, lean_object* v_s_987_){
 _start:
 {
 lean_object* v___x_988_; 
-v___x_988_ = l_Std_Sat_AIG_toGraphviz_go___redArg(v_acc_982_, v_decls_983_, v_idx_985_, v_a_987_);
+v___x_988_ = l_Std_Sat_AIG_toGraphviz_go___redArg(v_acc_982_, v_decls_983_, v_idx_985_, v_s_987_);
 return v___x_988_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Sat_AIG_toGraphviz_go___boxed(lean_object* v_00_u03b1_989_, lean_object* v_inst_990_, lean_object* v_inst_991_, lean_object* v_inst_992_, lean_object* v_acc_993_, lean_object* v_decls_994_, lean_object* v_hinv_995_, lean_object* v_idx_996_, lean_object* v_hidx_997_, lean_object* v_a_998_){
+LEAN_EXPORT lean_object* l_Std_Sat_AIG_toGraphviz_go___boxed(lean_object* v_00_u03b1_989_, lean_object* v_inst_990_, lean_object* v_inst_991_, lean_object* v_inst_992_, lean_object* v_acc_993_, lean_object* v_decls_994_, lean_object* v_hinv_995_, lean_object* v_idx_996_, lean_object* v_hidx_997_, lean_object* v_s_998_){
 _start:
 {
 lean_object* v_res_999_; 
-v_res_999_ = l_Std_Sat_AIG_toGraphviz_go(v_00_u03b1_989_, v_inst_990_, v_inst_991_, v_inst_992_, v_acc_993_, v_decls_994_, v_hinv_995_, v_idx_996_, v_hidx_997_, v_a_998_);
+v_res_999_ = l_Std_Sat_AIG_toGraphviz_go(v_00_u03b1_989_, v_inst_990_, v_inst_991_, v_inst_992_, v_acc_993_, v_decls_994_, v_hinv_995_, v_idx_996_, v_hidx_997_, v_s_998_);
 lean_dec_ref(v_decls_994_);
 lean_dec_ref(v_inst_992_);
 lean_dec_ref(v_inst_991_);

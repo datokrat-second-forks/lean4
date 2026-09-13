@@ -200,7 +200,7 @@ lean_ctor_set(v___x_52_, 1, v___x_51_);
 return v___x_52_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_SharedMutex_new___redArg___boxed(lean_object* v_a_53_, lean_object* v___y_54_){
+LEAN_EXPORT lean_object* l_Std_SharedMutex_new___redArg___boxed(lean_object* v_a_53_, lean_object* v_a_54_){
 _start:
 {
 lean_object* v_res_55_; 
@@ -216,7 +216,7 @@ v___x_59_ = l_Std_SharedMutex_new___redArg(v_a_57_);
 return v___x_59_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_SharedMutex_new___boxed(lean_object* v_00_u03b1_60_, lean_object* v_a_61_, lean_object* v___y_62_){
+LEAN_EXPORT lean_object* l_Std_SharedMutex_new___boxed(lean_object* v_00_u03b1_60_, lean_object* v_a_61_, lean_object* v_a_62_){
 _start:
 {
 lean_object* v_res_63_; 

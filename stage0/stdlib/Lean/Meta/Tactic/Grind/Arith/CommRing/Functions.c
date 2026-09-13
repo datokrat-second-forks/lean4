@@ -575,7 +575,7 @@ return v___x_98_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CommRing_checkInst___boxed(lean_object* v_declName_101_, lean_object* v_inst_102_, lean_object* v_inst_x27_103_, lean_object* v_a_104_, lean_object* v_a_105_, lean_object* v_a_106_, lean_object* v_a_107_, lean_object* v___y_108_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CommRing_checkInst___boxed(lean_object* v_declName_101_, lean_object* v_inst_102_, lean_object* v_inst_x27_103_, lean_object* v_a_104_, lean_object* v_a_105_, lean_object* v_a_106_, lean_object* v_a_107_, lean_object* v_a_108_){
 _start:
 {
 lean_object* v_res_109_; 

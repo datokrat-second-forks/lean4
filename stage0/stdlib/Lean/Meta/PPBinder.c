@@ -224,7 +224,7 @@ return v___x_56_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_FVarId_ppAsBinder___redArg___boxed(lean_object* v_fvarId_59_, lean_object* v_a_60_, lean_object* v_a_61_, lean_object* v_a_62_, lean_object* v___y_63_){
+LEAN_EXPORT lean_object* l_Lean_FVarId_ppAsBinder___redArg___boxed(lean_object* v_fvarId_59_, lean_object* v_a_60_, lean_object* v_a_61_, lean_object* v_a_62_, lean_object* v_a_63_){
 _start:
 {
 lean_object* v_res_64_; 
@@ -326,7 +326,7 @@ return v___x_86_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_FVarId_ppAsBinder___boxed(lean_object* v_fvarId_89_, lean_object* v_a_90_, lean_object* v_a_91_, lean_object* v_a_92_, lean_object* v_a_93_, lean_object* v___y_94_){
+LEAN_EXPORT lean_object* l_Lean_FVarId_ppAsBinder___boxed(lean_object* v_fvarId_89_, lean_object* v_a_90_, lean_object* v_a_91_, lean_object* v_a_92_, lean_object* v_a_93_, lean_object* v_a_94_){
 _start:
 {
 lean_object* v_res_95_; 

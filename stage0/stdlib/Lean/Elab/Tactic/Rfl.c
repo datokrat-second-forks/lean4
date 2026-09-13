@@ -318,7 +318,7 @@ return v___x_120_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Rfl_evalApplyRfl___boxed(lean_object* v_stx_121_, lean_object* v_a_122_, lean_object* v_a_123_, lean_object* v_a_124_, lean_object* v_a_125_, lean_object* v_a_126_, lean_object* v_a_127_, lean_object* v_a_128_, lean_object* v_a_129_, lean_object* v___y_130_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Rfl_evalApplyRfl___boxed(lean_object* v_stx_121_, lean_object* v_a_122_, lean_object* v_a_123_, lean_object* v_a_124_, lean_object* v_a_125_, lean_object* v_a_126_, lean_object* v_a_127_, lean_object* v_a_128_, lean_object* v_a_129_, lean_object* v_a_130_){
 _start:
 {
 lean_object* v_res_131_; 
@@ -346,7 +346,7 @@ v___x_146_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_142_, v___x_14
 return v___x_146_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Rfl_0__Lean_Elab_Tactic_Rfl_evalApplyRfl___regBuiltin_Lean_Elab_Tactic_Rfl_evalApplyRfl__1___boxed(lean_object* v___y_147_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Rfl_0__Lean_Elab_Tactic_Rfl_evalApplyRfl___regBuiltin_Lean_Elab_Tactic_Rfl_evalApplyRfl__1___boxed(lean_object* v_a_147_){
 _start:
 {
 lean_object* v_res_148_; 
@@ -364,7 +364,7 @@ v___x_153_ = l_Lean_addBuiltinDocString(v___x_151_, v___x_152_);
 return v___x_153_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Rfl_0__Lean_Elab_Tactic_Rfl_evalApplyRfl___regBuiltin_Lean_Elab_Tactic_Rfl_evalApplyRfl_docString__3___boxed(lean_object* v___y_154_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Rfl_0__Lean_Elab_Tactic_Rfl_evalApplyRfl___regBuiltin_Lean_Elab_Tactic_Rfl_evalApplyRfl_docString__3___boxed(lean_object* v_a_154_){
 _start:
 {
 lean_object* v_res_155_; 
@@ -382,7 +382,7 @@ v___x_184_ = l_Lean_addBuiltinDeclarationRanges(v___x_182_, v___x_183_);
 return v___x_184_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Rfl_0__Lean_Elab_Tactic_Rfl_evalApplyRfl___regBuiltin_Lean_Elab_Tactic_Rfl_evalApplyRfl_declRange__5___boxed(lean_object* v___y_185_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Rfl_0__Lean_Elab_Tactic_Rfl_evalApplyRfl___regBuiltin_Lean_Elab_Tactic_Rfl_evalApplyRfl_declRange__5___boxed(lean_object* v_a_185_){
 _start:
 {
 lean_object* v_res_186_; 

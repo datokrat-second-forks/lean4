@@ -65,7 +65,7 @@ v___x_16_ = l_Lean_registerEnvExtension___redArg(v___f_13_, v___x_14_, v___x_15_
 return v___x_16_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_Extensions_0__Lake_initFn_00___x40_Lake_DSL_Extensions_855666303____hygCtx___hyg_2____boxed(lean_object* v___y_17_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_Extensions_0__Lake_initFn_00___x40_Lake_DSL_Extensions_855666303____hygCtx___hyg_2____boxed(lean_object* v_a_17_){
 _start:
 {
 lean_object* v_res_18_; 
@@ -101,7 +101,7 @@ v___x_31_ = l_Lean_registerEnvExtension___redArg(v___f_29_, v___x_28_, v___x_30_
 return v___x_31_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_Extensions_0__Lake_initFn_00___x40_Lake_DSL_Extensions_4018895451____hygCtx___hyg_2____boxed(lean_object* v___y_32_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_Extensions_0__Lake_initFn_00___x40_Lake_DSL_Extensions_4018895451____hygCtx___hyg_2____boxed(lean_object* v_a_32_){
 _start:
 {
 lean_object* v_res_33_; 
@@ -137,7 +137,7 @@ v___x_46_ = l_Lean_registerEnvExtension___redArg(v___f_44_, v___x_43_, v___x_45_
 return v___x_46_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_Extensions_0__Lake_initFn_00___x40_Lake_DSL_Extensions_3376486231____hygCtx___hyg_2____boxed(lean_object* v___y_47_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_Extensions_0__Lake_initFn_00___x40_Lake_DSL_Extensions_3376486231____hygCtx___hyg_2____boxed(lean_object* v_a_47_){
 _start:
 {
 lean_object* v_res_48_; 

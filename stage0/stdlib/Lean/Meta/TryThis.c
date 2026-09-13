@@ -1462,7 +1462,7 @@ return v___x_480_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Option_register___at___00__private_Lean_Meta_TryThis_0__Lean_Meta_Tactic_TryThis_initFn_00___x40_Lean_Meta_TryThis_1556063926____hygCtx___hyg_4__spec__0___boxed(lean_object* v_name_483_, lean_object* v_decl_484_, lean_object* v_ref_485_, lean_object* v___y_486_){
+LEAN_EXPORT lean_object* l_Lean_Option_register___at___00__private_Lean_Meta_TryThis_0__Lean_Meta_Tactic_TryThis_initFn_00___x40_Lean_Meta_TryThis_1556063926____hygCtx___hyg_4__spec__0___boxed(lean_object* v_name_483_, lean_object* v_decl_484_, lean_object* v_ref_485_, lean_object* v_a_486_){
 _start:
 {
 lean_object* v_res_487_; 
@@ -1482,7 +1482,7 @@ v___x_509_ = l_Lean_Option_register___at___00__private_Lean_Meta_TryThis_0__Lean
 return v___x_509_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_TryThis_0__Lean_Meta_Tactic_TryThis_initFn_00___x40_Lean_Meta_TryThis_1556063926____hygCtx___hyg_4____boxed(lean_object* v___y_510_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_TryThis_0__Lean_Meta_Tactic_TryThis_initFn_00___x40_Lean_Meta_TryThis_1556063926____hygCtx___hyg_4____boxed(lean_object* v_a_510_){
 _start:
 {
 lean_object* v_res_511_; 
@@ -1615,7 +1615,7 @@ return v___x_541_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_TryThis_SuggestionText_pretty___boxed(lean_object* v_x_544_, lean_object* v_a_545_, lean_object* v_a_546_, lean_object* v___y_547_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_TryThis_SuggestionText_pretty___boxed(lean_object* v_x_544_, lean_object* v_a_545_, lean_object* v_a_546_, lean_object* v_a_547_){
 _start:
 {
 lean_object* v_res_548_; 
@@ -1799,7 +1799,7 @@ return v___x_589_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_TryThis_SuggestionText_prettyExtra___boxed(lean_object* v_s_592_, lean_object* v_w_593_, lean_object* v_indent_594_, lean_object* v_column_595_, lean_object* v_a_596_, lean_object* v_a_597_, lean_object* v___y_598_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_TryThis_SuggestionText_prettyExtra___boxed(lean_object* v_s_592_, lean_object* v_w_593_, lean_object* v_indent_594_, lean_object* v_column_595_, lean_object* v_a_596_, lean_object* v_a_597_, lean_object* v_a_598_){
 _start:
 {
 lean_object* v_res_599_; 
@@ -1820,7 +1820,7 @@ v___x_608_ = l_Lean_Meta_Tactic_TryThis_SuggestionText_prettyExtra(v_suggestion_
 return v___x_608_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_TryThis_Suggestion_pretty___boxed(lean_object* v_s_609_, lean_object* v_w_610_, lean_object* v_indent_611_, lean_object* v_column_612_, lean_object* v_a_613_, lean_object* v_a_614_, lean_object* v___y_615_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_TryThis_Suggestion_pretty___boxed(lean_object* v_s_609_, lean_object* v_w_610_, lean_object* v_indent_611_, lean_object* v_column_612_, lean_object* v_a_613_, lean_object* v_a_614_, lean_object* v_a_615_){
 _start:
 {
 lean_object* v_res_616_; 
@@ -1939,7 +1939,7 @@ return v___x_644_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_TryThis_Suggestion_processEdit___boxed(lean_object* v_s_647_, lean_object* v_range_648_, lean_object* v_a_649_, lean_object* v_a_650_, lean_object* v___y_651_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_TryThis_Suggestion_processEdit___boxed(lean_object* v_s_647_, lean_object* v_range_648_, lean_object* v_a_649_, lean_object* v_a_650_, lean_object* v_a_651_){
 _start:
 {
 lean_object* v_res_652_; 

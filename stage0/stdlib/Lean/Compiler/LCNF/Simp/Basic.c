@@ -40,8 +40,8 @@ return v___x_8_;
 else
 {
 lean_object* v___x_10_; 
-lean_dec_ref_known(v___x_8_, 1);
 lean_dec(v_a_9_);
+lean_dec_ref_known(v___x_8_, 1);
 v___x_10_ = l_Lean_Compiler_LCNF_findLetValue_x3f___redArg(v_pu_1_, v_fvarId_2_, v_a_3_);
 lean_dec(v_fvarId_2_);
 if (lean_obj_tag(v___x_10_) == 0)
@@ -149,7 +149,7 @@ return v___x_7_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg___boxed(lean_object* v_pu_27_, lean_object* v_fvarId_28_, lean_object* v_a_29_, lean_object* v___y_30_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg___boxed(lean_object* v_pu_27_, lean_object* v_fvarId_28_, lean_object* v_a_29_, lean_object* v_a_30_){
 _start:
 {
 uint8_t v_pu_boxed_31_; lean_object* v_res_32_; 
@@ -167,7 +167,7 @@ v___x_40_ = l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg(v_pu_33_, v_f
 return v___x_40_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___boxed(lean_object* v_pu_41_, lean_object* v_fvarId_42_, lean_object* v_a_43_, lean_object* v_a_44_, lean_object* v_a_45_, lean_object* v_a_46_, lean_object* v___y_47_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___boxed(lean_object* v_pu_41_, lean_object* v_fvarId_42_, lean_object* v_a_43_, lean_object* v_a_44_, lean_object* v_a_45_, lean_object* v_a_46_, lean_object* v_a_47_){
 _start:
 {
 uint8_t v_pu_boxed_48_; lean_object* v_res_49_; 

@@ -46,7 +46,7 @@ lean_ctor_set(v___x_6_, 1, v___x_5_);
 return v___x_6_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_CancelToken_new___boxed(lean_object* v___y_7_){
+LEAN_EXPORT lean_object* l_IO_CancelToken_new___boxed(lean_object* v_a_7_){
 _start:
 {
 lean_object* v_res_8_; 
@@ -69,7 +69,7 @@ lean_dec(v___x_17_);
 return v___x_13_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_CancelToken_set___boxed(lean_object* v_tk_18_, lean_object* v___y_19_){
+LEAN_EXPORT lean_object* l_IO_CancelToken_set___boxed(lean_object* v_tk_18_, lean_object* v_a_19_){
 _start:
 {
 lean_object* v_res_20_; 
@@ -89,7 +89,7 @@ lean_dec(v___x_24_);
 return v___x_25_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_CancelToken_isSet___boxed(lean_object* v_tk_26_, lean_object* v___y_27_){
+LEAN_EXPORT lean_object* l_IO_CancelToken_isSet___boxed(lean_object* v_tk_26_, lean_object* v_a_27_){
 _start:
 {
 uint8_t v_res_28_; lean_object* v_r_29_; 
@@ -130,7 +130,7 @@ v___x_46_ = l_BaseIO_chainTask___redArg(v___x_43_, v___f_42_, v___x_44_, v___x_4
 return v___x_46_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_CancelToken_onSet___boxed(lean_object* v_tk_47_, lean_object* v_action_48_, lean_object* v___y_49_){
+LEAN_EXPORT lean_object* l_IO_CancelToken_onSet___boxed(lean_object* v_tk_47_, lean_object* v_action_48_, lean_object* v_a_49_){
 _start:
 {
 lean_object* v_res_50_; 
@@ -148,7 +148,7 @@ lean_dec_ref(v_tk_51_);
 return v___x_53_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Init_System_CancelToken_0__IO_CancelToken_isSetExport___boxed(lean_object* v_tk_54_, lean_object* v___y_55_){
+LEAN_EXPORT lean_object* l___private_Init_System_CancelToken_0__IO_CancelToken_isSetExport___boxed(lean_object* v_tk_54_, lean_object* v_a_55_){
 _start:
 {
 uint8_t v_res_56_; lean_object* v_r_57_; 

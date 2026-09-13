@@ -882,16 +882,16 @@ goto v_reusejp_263_;
 }
 v_reusejp_263_:
 {
-lean_object* v___x_265_; lean_object* v___x_266_; lean_object* v___x_2106__overap_267_; lean_object* v___x_268_; 
+lean_object* v___x_265_; lean_object* v___x_266_; lean_object* v___x_2054__overap_267_; lean_object* v___x_268_; 
 v___x_265_ = lean_box(0);
 v___x_266_ = l_instInhabitedOfMonad___redArg(v___x_264_, v___x_265_);
-v___x_2106__overap_267_ = lean_panic_fn_borrowed(v___x_266_, v_msg_210_);
+v___x_2054__overap_267_ = lean_panic_fn_borrowed(v___x_266_, v_msg_210_);
 lean_dec(v___x_266_);
 lean_inc(v___y_214_);
 lean_inc_ref(v___y_213_);
 lean_inc(v___y_212_);
 lean_inc_ref(v___y_211_);
-v___x_268_ = lean_apply_5(v___x_2106__overap_267_, v___y_211_, v___y_212_, v___y_213_, v___y_214_, lean_box(0));
+v___x_268_ = lean_apply_5(v___x_2054__overap_267_, v___y_211_, v___y_212_, v___y_213_, v___y_214_, lean_box(0));
 return v___x_268_;
 }
 }
@@ -1335,7 +1335,7 @@ return v___x_428_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_occursInCtorTypeMask___boxed(lean_object* v_ctorName_431_, lean_object* v_a_432_, lean_object* v_a_433_, lean_object* v_a_434_, lean_object* v_a_435_, lean_object* v___y_436_){
+LEAN_EXPORT lean_object* l_Lean_Meta_occursInCtorTypeMask___boxed(lean_object* v_ctorName_431_, lean_object* v_a_432_, lean_object* v_a_433_, lean_object* v_a_434_, lean_object* v_a_435_, lean_object* v_a_436_){
 _start:
 {
 lean_object* v_res_437_; 
@@ -1370,14 +1370,14 @@ return v_res_453_;
 LEAN_EXPORT lean_object* l_panic___at___00__private_Lean_Meta_SameCtorUtils_0__Lean_Meta_withSharedCtorIndices_go_spec__0___redArg(lean_object* v_msg_455_, lean_object* v___y_456_, lean_object* v___y_457_, lean_object* v___y_458_, lean_object* v___y_459_){
 _start:
 {
-lean_object* v___f_461_; lean_object* v___x_537__overap_462_; lean_object* v___x_463_; 
+lean_object* v___f_461_; lean_object* v___x_536__overap_462_; lean_object* v___x_463_; 
 v___f_461_ = ((lean_object*)(l_panic___at___00__private_Lean_Meta_SameCtorUtils_0__Lean_Meta_withSharedCtorIndices_go_spec__0___redArg___closed__0));
-v___x_537__overap_462_ = lean_panic_fn_borrowed(v___f_461_, v_msg_455_);
+v___x_536__overap_462_ = lean_panic_fn_borrowed(v___f_461_, v_msg_455_);
 lean_inc(v___y_459_);
 lean_inc_ref(v___y_458_);
 lean_inc(v___y_457_);
 lean_inc_ref(v___y_456_);
-v___x_463_ = lean_apply_5(v___x_537__overap_462_, v___y_456_, v___y_457_, v___y_458_, v___y_459_, lean_box(0));
+v___x_463_ = lean_apply_5(v___x_536__overap_462_, v___y_456_, v___y_457_, v___y_458_, v___y_459_, lean_box(0));
 return v___x_463_;
 }
 }
@@ -1821,7 +1821,7 @@ v___x_660_ = l___private_Lean_Meta_SameCtorUtils_0__Lean_Meta_withSharedCtorIndi
 return v___x_660_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_SameCtorUtils_0__Lean_Meta_withSharedCtorIndices_go___redArg___boxed(lean_object* v_ctor_661_, lean_object* v_k_662_, lean_object* v_zs_663_, lean_object* v_indices_664_, lean_object* v_zs2_665_, lean_object* v_mask_666_, lean_object* v_todo_667_, lean_object* v_acc_668_, lean_object* v_a_669_, lean_object* v_a_670_, lean_object* v_a_671_, lean_object* v_a_672_, lean_object* v___y_673_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_SameCtorUtils_0__Lean_Meta_withSharedCtorIndices_go___redArg___boxed(lean_object* v_ctor_661_, lean_object* v_k_662_, lean_object* v_zs_663_, lean_object* v_indices_664_, lean_object* v_zs2_665_, lean_object* v_mask_666_, lean_object* v_todo_667_, lean_object* v_acc_668_, lean_object* v_a_669_, lean_object* v_a_670_, lean_object* v_a_671_, lean_object* v_a_672_, lean_object* v_a_673_){
 _start:
 {
 lean_object* v_res_674_; 
@@ -1841,7 +1841,7 @@ v___x_689_ = l___private_Lean_Meta_SameCtorUtils_0__Lean_Meta_withSharedCtorIndi
 return v___x_689_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_SameCtorUtils_0__Lean_Meta_withSharedCtorIndices_go___boxed(lean_object* v_00_u03b1_690_, lean_object* v_ctor_691_, lean_object* v_k_692_, lean_object* v_zs_693_, lean_object* v_indices_694_, lean_object* v_zs2_695_, lean_object* v_mask_696_, lean_object* v_todo_697_, lean_object* v_acc_698_, lean_object* v_a_699_, lean_object* v_a_700_, lean_object* v_a_701_, lean_object* v_a_702_, lean_object* v___y_703_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_SameCtorUtils_0__Lean_Meta_withSharedCtorIndices_go___boxed(lean_object* v_00_u03b1_690_, lean_object* v_ctor_691_, lean_object* v_k_692_, lean_object* v_zs_693_, lean_object* v_indices_694_, lean_object* v_zs2_695_, lean_object* v_mask_696_, lean_object* v_todo_697_, lean_object* v_acc_698_, lean_object* v_a_699_, lean_object* v_a_700_, lean_object* v_a_701_, lean_object* v_a_702_, lean_object* v_a_703_){
 _start:
 {
 lean_object* v_res_704_; 
@@ -2440,7 +2440,7 @@ return v___x_940_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_withSharedCtorIndices___redArg___boxed(lean_object* v_ctor_943_, lean_object* v_k_944_, lean_object* v_a_945_, lean_object* v_a_946_, lean_object* v_a_947_, lean_object* v_a_948_, lean_object* v___y_949_){
+LEAN_EXPORT lean_object* l_Lean_Meta_withSharedCtorIndices___redArg___boxed(lean_object* v_ctor_943_, lean_object* v_k_944_, lean_object* v_a_945_, lean_object* v_a_946_, lean_object* v_a_947_, lean_object* v_a_948_, lean_object* v_a_949_){
 _start:
 {
 lean_object* v_res_950_; 
@@ -2460,7 +2460,7 @@ v___x_959_ = l_Lean_Meta_withSharedCtorIndices___redArg(v_ctor_952_, v_k_953_, v
 return v___x_959_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_withSharedCtorIndices___boxed(lean_object* v_00_u03b1_960_, lean_object* v_ctor_961_, lean_object* v_k_962_, lean_object* v_a_963_, lean_object* v_a_964_, lean_object* v_a_965_, lean_object* v_a_966_, lean_object* v___y_967_){
+LEAN_EXPORT lean_object* l_Lean_Meta_withSharedCtorIndices___boxed(lean_object* v_00_u03b1_960_, lean_object* v_ctor_961_, lean_object* v_k_962_, lean_object* v_a_963_, lean_object* v_a_964_, lean_object* v_a_965_, lean_object* v_a_966_, lean_object* v_a_967_){
 _start:
 {
 lean_object* v_res_968_; 

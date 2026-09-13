@@ -709,7 +709,7 @@ return v___x_186_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_main___boxed(lean_object* v_args_189_, lean_object* v___y_190_){
+LEAN_EXPORT lean_object* l_main___boxed(lean_object* v_args_189_, lean_object* v_a_190_){
 _start:
 {
 lean_object* v_res_191_; 

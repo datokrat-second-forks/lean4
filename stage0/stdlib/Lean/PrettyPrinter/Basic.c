@@ -173,7 +173,7 @@ v___x_6_ = l_Lean_registerInternalExceptionId(v___x_5_);
 return v___x_6_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_PrettyPrinter_Basic_0__Lean_PrettyPrinter_initFn_00___x40_Lean_PrettyPrinter_Basic_613194564____hygCtx___hyg_2____boxed(lean_object* v___y_7_){
+LEAN_EXPORT lean_object* l___private_Lean_PrettyPrinter_Basic_0__Lean_PrettyPrinter_initFn_00___x40_Lean_PrettyPrinter_Basic_613194564____hygCtx___hyg_2____boxed(lean_object* v_a_7_){
 _start:
 {
 lean_object* v_res_8_; 
@@ -1307,7 +1307,7 @@ return v___x_396_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_runForNodeKind___redArg___boxed(lean_object* v_attr_399_, lean_object* v_k_400_, lean_object* v_interp_401_, lean_object* v_a_402_, lean_object* v_a_403_, lean_object* v___y_404_){
+LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_runForNodeKind___redArg___boxed(lean_object* v_attr_399_, lean_object* v_k_400_, lean_object* v_interp_401_, lean_object* v_a_402_, lean_object* v_a_403_, lean_object* v_a_404_){
 _start:
 {
 lean_object* v_res_405_; 
@@ -1325,7 +1325,7 @@ v___x_413_ = l_Lean_PrettyPrinter_runForNodeKind___redArg(v_attr_407_, v_k_408_,
 return v___x_413_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_runForNodeKind___boxed(lean_object* v_00_u03b1_414_, lean_object* v_attr_415_, lean_object* v_k_416_, lean_object* v_interp_417_, lean_object* v_a_418_, lean_object* v_a_419_, lean_object* v___y_420_){
+LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_runForNodeKind___boxed(lean_object* v_00_u03b1_414_, lean_object* v_attr_415_, lean_object* v_k_416_, lean_object* v_interp_417_, lean_object* v_a_418_, lean_object* v_a_419_, lean_object* v_a_420_){
 _start:
 {
 lean_object* v_res_421_; 

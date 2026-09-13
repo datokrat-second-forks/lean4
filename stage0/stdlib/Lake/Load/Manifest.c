@@ -8359,7 +8359,7 @@ return v___x_2120_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Manifest_load___boxed(lean_object* v_file_2123_, lean_object* v___y_2124_){
+LEAN_EXPORT lean_object* l_Lake_Manifest_load___boxed(lean_object* v_file_2123_, lean_object* v_a_2124_){
 _start:
 {
 lean_object* v_res_2125_; 
@@ -8530,7 +8530,7 @@ return v___x_2132_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Manifest_load_x3f___boxed(lean_object* v_file_2164_, lean_object* v___y_2165_){
+LEAN_EXPORT lean_object* l_Lake_Manifest_load_x3f___boxed(lean_object* v_file_2164_, lean_object* v_a_2165_){
 _start:
 {
 lean_object* v_res_2166_; 
@@ -8552,7 +8552,7 @@ lean_dec_ref(v___x_2174_);
 return v___x_2175_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Manifest_save___boxed(lean_object* v_self_2176_, lean_object* v_manifestFile_2177_, lean_object* v___y_2178_){
+LEAN_EXPORT lean_object* l_Lake_Manifest_save___boxed(lean_object* v_self_2176_, lean_object* v_manifestFile_2177_, lean_object* v_a_2178_){
 _start:
 {
 lean_object* v_res_2179_; 
@@ -8910,7 +8910,7 @@ return v___x_2255_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Manifest_loadEntries___boxed(lean_object* v_file_2258_, lean_object* v___y_2259_){
+LEAN_EXPORT lean_object* l_Lake_Manifest_loadEntries___boxed(lean_object* v_file_2258_, lean_object* v_a_2259_){
 _start:
 {
 lean_object* v_res_2260_; 
@@ -9054,7 +9054,7 @@ return v___x_2272_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Manifest_tryLoadEntries___boxed(lean_object* v_file_2297_, lean_object* v___y_2298_){
+LEAN_EXPORT lean_object* l_Lake_Manifest_tryLoadEntries___boxed(lean_object* v_file_2297_, lean_object* v_a_2298_){
 _start:
 {
 lean_object* v_res_2299_; 
@@ -9102,7 +9102,7 @@ lean_dec_ref(v___x_2317_);
 return v___x_2318_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Manifest_saveEntries___boxed(lean_object* v_file_2319_, lean_object* v_entries_2320_, lean_object* v___y_2321_){
+LEAN_EXPORT lean_object* l_Lake_Manifest_saveEntries___boxed(lean_object* v_file_2319_, lean_object* v_entries_2320_, lean_object* v_a_2321_){
 _start:
 {
 lean_object* v_res_2322_; 

@@ -211,7 +211,7 @@ v___x_74_ = l_Lean_mkMapDeclarationExtension___redArg(v___x_72_, v___x_73_, v___
 return v___x_74_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_OriginalConstKind_0__Lean_initFn_00___x40_Lean_OriginalConstKind_2239415342____hygCtx___hyg_2____boxed(lean_object* v___y_75_){
+LEAN_EXPORT lean_object* l___private_Lean_OriginalConstKind_0__Lean_initFn_00___x40_Lean_OriginalConstKind_2239415342____hygCtx___hyg_2____boxed(lean_object* v_a_75_){
 _start:
 {
 lean_object* v_res_76_; 

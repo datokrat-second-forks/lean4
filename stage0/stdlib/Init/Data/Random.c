@@ -1105,7 +1105,7 @@ return v___x_339_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Init_Data_Random_0__initFn_00___x40_Init_Data_Random_2456098205____hygCtx___hyg_2____boxed(lean_object* v___y_342_){
+LEAN_EXPORT lean_object* l___private_Init_Data_Random_0__initFn_00___x40_Init_Data_Random_2456098205____hygCtx___hyg_2____boxed(lean_object* v_a_342_){
 _start:
 {
 lean_object* v_res_343_; 
@@ -1125,7 +1125,7 @@ lean_dec(v___x_349_);
 return v___x_348_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_setRandSeed___boxed(lean_object* v_n_350_, lean_object* v___y_351_){
+LEAN_EXPORT lean_object* l_IO_setRandSeed___boxed(lean_object* v_n_350_, lean_object* v_a_351_){
 _start:
 {
 lean_object* v_res_352_; 
@@ -1349,7 +1349,7 @@ lean_dec(v___x_428_);
 return v_fst_426_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_rand___boxed(lean_object* v_lo_429_, lean_object* v_hi_430_, lean_object* v___y_431_){
+LEAN_EXPORT lean_object* l_IO_rand___boxed(lean_object* v_lo_429_, lean_object* v_hi_430_, lean_object* v_a_431_){
 _start:
 {
 lean_object* v_res_432_; 

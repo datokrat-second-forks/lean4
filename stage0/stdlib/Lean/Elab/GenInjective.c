@@ -164,7 +164,7 @@ v___x_40_ = l_Lean_Elab_Command_liftTermElabM___redArg(v___f_39_, v_a_33_, v_a_3
 return v___x_40_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems___boxed(lean_object* v_stx_41_, lean_object* v_a_42_, lean_object* v_a_43_, lean_object* v___y_44_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems___boxed(lean_object* v_stx_41_, lean_object* v_a_42_, lean_object* v_a_43_, lean_object* v_a_44_){
 _start:
 {
 lean_object* v_res_45_; 
@@ -187,7 +187,7 @@ v___x_91_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_87_, v___x_88_,
 return v___x_91_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems___regBuiltin___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems__1___boxed(lean_object* v___y_92_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems___regBuiltin___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems__1___boxed(lean_object* v_a_92_){
 _start:
 {
 lean_object* v_res_93_; 

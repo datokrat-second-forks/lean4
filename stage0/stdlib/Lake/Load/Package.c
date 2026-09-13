@@ -254,7 +254,7 @@ return v___x_57_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_configFileExists___boxed(lean_object* v_cfgFile_58_, lean_object* v___y_59_){
+LEAN_EXPORT lean_object* l_Lake_configFileExists___boxed(lean_object* v_cfgFile_58_, lean_object* v_a_59_){
 _start:
 {
 uint8_t v_res_60_; lean_object* v_r_61_; 
@@ -303,7 +303,7 @@ return v___x_74_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_realConfigFile___boxed(lean_object* v_cfgFile_75_, lean_object* v___y_76_){
+LEAN_EXPORT lean_object* l_Lake_realConfigFile___boxed(lean_object* v_cfgFile_75_, lean_object* v_a_76_){
 _start:
 {
 lean_object* v_res_77_; 
@@ -895,7 +895,7 @@ return v___x_238_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_resolveConfigFile___boxed(lean_object* v_name_241_, lean_object* v_cfg_242_, lean_object* v_a_243_, lean_object* v___y_244_){
+LEAN_EXPORT lean_object* l_Lake_resolveConfigFile___boxed(lean_object* v_name_241_, lean_object* v_cfg_242_, lean_object* v_a_243_, lean_object* v_a_244_){
 _start:
 {
 lean_object* v_res_245_; 
@@ -924,7 +924,7 @@ return v___x_253_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_loadConfigFile___redArg___boxed(lean_object* v_cfg_254_, lean_object* v_a_255_, lean_object* v___y_256_){
+LEAN_EXPORT lean_object* l_Lake_loadConfigFile___redArg___boxed(lean_object* v_cfg_254_, lean_object* v_a_255_, lean_object* v_a_256_){
 _start:
 {
 lean_object* v_res_257_; 
@@ -940,7 +940,7 @@ v___x_262_ = l_Lake_loadConfigFile___redArg(v_cfg_258_, v_a_260_);
 return v___x_262_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake_loadConfigFile___boxed(lean_object* v_cfg_263_, lean_object* v_h_264_, lean_object* v_a_265_, lean_object* v___y_266_){
+LEAN_EXPORT lean_object* l_Lake_loadConfigFile___boxed(lean_object* v_cfg_263_, lean_object* v_h_264_, lean_object* v_a_265_, lean_object* v_a_266_){
 _start:
 {
 lean_object* v_res_267_; 
@@ -1109,7 +1109,7 @@ return v___x_307_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_loadPackage___boxed(lean_object* v_cfg_310_, lean_object* v_a_311_, lean_object* v___y_312_){
+LEAN_EXPORT lean_object* l_Lake_loadPackage___boxed(lean_object* v_cfg_310_, lean_object* v_a_311_, lean_object* v_a_312_){
 _start:
 {
 lean_object* v_res_313_; 

@@ -170,7 +170,7 @@ return v___x_13_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_findDocString_x3f___boxed(lean_object* v_env_36_, lean_object* v_declName_37_, lean_object* v_includeBuiltin_38_, lean_object* v_options_39_, lean_object* v_currNamespace_40_, lean_object* v_openDecls_41_, lean_object* v___y_42_){
+LEAN_EXPORT lean_object* l_Lean_findDocString_x3f___boxed(lean_object* v_env_36_, lean_object* v_declName_37_, lean_object* v_includeBuiltin_38_, lean_object* v_options_39_, lean_object* v_currNamespace_40_, lean_object* v_openDecls_41_, lean_object* v_a_42_){
 _start:
 {
 uint8_t v_includeBuiltin_boxed_43_; lean_object* v_res_44_; 
