@@ -110,8 +110,9 @@ structure AnchorRef where
 
 /-- Opaque solver extension state. -/
 opaque SolverExtensionStateSpec : (α : Type) × Inhabited α := ⟨Unit, ⟨()⟩⟩
-@[expose] def SolverExtensionState : Type := SolverExtensionStateSpec.fst
-instance : Inhabited SolverExtensionState := SolverExtensionStateSpec.snd
+structure SolverExtensionState : Type where
+  val : SolverExtensionStateSpec.fst
+instance : Inhabited SolverExtensionState := ⟨⟨SolverExtensionStateSpec.snd.default⟩⟩
 
 /--
 Case-split source. That is, where it came from.
@@ -291,9 +292,10 @@ structure State where
 instance : Nonempty State :=
   .intro {}
 
-private opaque MethodsRefPointed : NonemptyType.{0}
-def MethodsRef : Type := MethodsRefPointed.type
-instance : Nonempty MethodsRef := by exact MethodsRefPointed.property
+opaque MethodsRefPointed : NonemptyType.{0}
+structure MethodsRef : Type where
+  ref : MethodsRefPointed.type
+instance : Nonempty MethodsRef := ⟨⟨Classical.choice MethodsRefPointed.property⟩⟩
 
 abbrev GrindM := ReaderT MethodsRef $ ReaderT Context $ StateRefT State Sym.SymM
 

@@ -11,18 +11,19 @@ import Init.Tactics
 
 namespace Lake
 
-opaque POpaque.nonemptyType.{u} : NonemptyType.{u}
+public opaque POpaque.nonemptyType.{u} : NonemptyType.{u}
 
 /-- An value of unknown type in a specific universe. -/
-public def POpaque : Type u := POpaque.nonemptyType.type
+public structure POpaque : Type u where ofRef ::
+  ref : POpaque.nonemptyType.type
 
 /-- An value of unknown type. -/
 public abbrev Opaque : Type := POpaque
 
 namespace POpaque
 
-public instance instNonempty : Nonempty POpaque := by
-  exact POpaque.nonemptyType.property
+public instance instNonempty : Nonempty POpaque :=
+  ⟨⟨Classical.choice POpaque.nonemptyType.property⟩⟩
 
 /-- Cast away a value's type and universe. -/
 public opaque mk.{v,u} {α : Type u} (a : α) : POpaque.{v} :=

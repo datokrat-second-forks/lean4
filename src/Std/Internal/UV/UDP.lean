@@ -18,14 +18,15 @@ namespace UDP
 
 open Std.Net
 
-private opaque SocketImpl : NonemptyType.{0}
+opaque SocketImpl : NonemptyType.{0}
 
 /--
 Represents a UDP socket.
 -/
-def Socket : Type := SocketImpl.type
+structure Socket : Type where
+  ref : SocketImpl.type
 
-instance : Nonempty Socket := by exact SocketImpl.property
+instance : Nonempty Socket := ⟨⟨Classical.choice SocketImpl.property⟩⟩
 
 namespace Socket
 

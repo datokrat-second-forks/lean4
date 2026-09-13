@@ -258,12 +258,13 @@ structure Stats where
   diag : Diagnostics := {}
   deriving Inhabited
 
-private opaque MethodsRefPointed : NonemptyType.{0}
+opaque MethodsRefPointed : NonemptyType.{0}
 
-def MethodsRef : Type := MethodsRefPointed.type
+structure MethodsRef : Type where
+  ref : MethodsRefPointed.type
 
 instance : Nonempty MethodsRef :=
-  by exact MethodsRefPointed.property
+  ⟨⟨Classical.choice MethodsRefPointed.property⟩⟩
 
 abbrev SimpM := ReaderT MethodsRef $ ReaderT Context $ StateRefT State MetaM
 

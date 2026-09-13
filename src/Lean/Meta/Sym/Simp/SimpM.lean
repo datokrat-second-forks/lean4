@@ -192,9 +192,10 @@ def Result.withContextDependent : Result → Result
   | .rfl done _ => .rfl done true
   | .step e h done _ => .step e h done true
 
-private opaque MethodsRefPointed : NonemptyType.{0}
-def MethodsRef : Type := MethodsRefPointed.type
-instance : Nonempty MethodsRef := by exact MethodsRefPointed.property
+opaque MethodsRefPointed : NonemptyType.{0}
+structure MethodsRef : Type where
+  ref : MethodsRefPointed.type
+instance : Nonempty MethodsRef := ⟨⟨Classical.choice MethodsRefPointed.property⟩⟩
 
 /-- Read-only context for the simplifier. -/
 structure Context where
