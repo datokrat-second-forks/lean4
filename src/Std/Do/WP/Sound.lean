@@ -64,7 +64,8 @@ public instance [Monad m] [LawfulMonad m] [WP m ps] [WPSound m ps] :
   ensures_of_wp {α} {x} {P} hwp := by
     obtain ⟨X, hX⟩ := Classical.skolem.mp fun s =>
       (WPSound.ensures_of_wp (m := m) (ps := ps) (hwp s)).exists_refinement
-    refine ⟨⟨fun s => X s >>= fun r => pure (⟨r.val.1, r.property⟩, r.val.2), ⟨fun {β} k =>funext fun s => ?_⟩⟩⟩
+    refine ⟨⟨StateT.mk fun s => X s >>= fun r => pure (⟨r.val.1, r.property⟩, r.val.2),
+      ⟨fun {β} k => congrArg StateT.mk (funext fun s => ?_)⟩⟩⟩
     show (X s >>= fun r : {p : α × σ // P p.1} => pure (⟨r.val.1, r.property⟩, r.val.2)) >>=
          (fun (b : {a // P a} × σ) => (k b.1.val).run b.2) =
          x.run s >>= (fun (a : α × σ) => (k a.1).run a.2)

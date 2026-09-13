@@ -848,7 +848,7 @@ private partial def instantiateTheorem (c : Choice) : M Unit := withDefault do w
   if mvars.size != thm.numParams then
     reportEMatchIssue! "unexpected number of parameters at {thm.origin.pp}"
     return ()
-  let (some _, c) ← applyAssignment mvars |>.run c | return ()
+  let (some _, c) ← applyAssignment mvars |>.run.run c | return ()
   let some _ ← synthesizeInsts mvars bis | return ()
   if (← checkConstraints thm c.gen proof mvars) then
     let guards ← collectGuards thm proof mvars

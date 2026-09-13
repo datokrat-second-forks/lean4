@@ -238,9 +238,9 @@ def run (act : M α) : MetaM (α × Array Expr) := StateT.run act #[]
 def eval (act : M α) : MetaM α := do return (← run act).1
 def exec (act : M α) : MetaM (Array Expr) := do return (← run act).2
 
-def tell (x : Expr) : M Unit := fun xs => pure ((), xs.push x)
+def tell (x : Expr) : M Unit := .mk fun xs => pure ((), xs.push x)
 
-def localM (f : Array Expr → MetaM (Array Expr)) (act : M α) : M α := fun xs => do
+def localM (f : Array Expr → MetaM (Array Expr)) (act : M α) : M α := .mk fun xs => do
   let n := xs.size
   let (b, xs') ← StateT.run act xs
   pure (b, xs'[*...n] ++ (← f xs'[n...*]))

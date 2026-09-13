@@ -777,7 +777,7 @@ section MessageHandling
       let params ← RequestM.parseRequestParams Widget.GetInteractiveDiagnosticsParams params.params
       let resp ← handleGetInteractiveDiagnosticsRequest st.doc params
       let resp ← seshRef.modifyGet fun st =>
-        rpcEncode resp st.objects |>.map (·) ({st with objects := ·})
+        (rpcEncode resp).run st.objects |>.map (·) ({st with objects := ·})
       return some <| .pure { response? := resp, serialized := resp.compress, isComplete := true }
     | "codeAction/resolve" =>
       let jsonParams := params

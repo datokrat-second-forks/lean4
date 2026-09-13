@@ -756,7 +756,7 @@ partial def monitorTransfer
   if line.trimAscii.isEmpty then
     return s
   else
-    let s ← (·.2) <$> StateT.run (s := s) do
+    let s ← (·.2) <$> (StateT.run · s) do
       match Json.parse line >>= fromJson? with
       | .ok (out : JsonObject) =>
         let some info := getInfo? out
