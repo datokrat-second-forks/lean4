@@ -50,7 +50,13 @@ structure ShowMessageRequestParams where
   actions? : Option (Array MessageActionItem)
   deriving FromJson, ToJson
 
-@[expose] def ShowMessageResponse := Option MessageActionItem
-  deriving FromJson, ToJson
+structure ShowMessageResponse where
+  item? : Option MessageActionItem
+
+instance : FromJson ShowMessageResponse :=
+  ⟨(ShowMessageResponse.mk <$> fromJson? ·)⟩
+
+instance : ToJson ShowMessageResponse :=
+  ⟨(toJson ·.item?)⟩
 
 end Lean.Lsp

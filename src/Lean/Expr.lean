@@ -129,34 +129,30 @@ Cached hash code, cached results, and other data for `Expr`.
 Remark: this is mostly an internal datastructure used to implement `Expr`,
 most will never have to use it.
 -/
-@[expose] def Expr.Data := UInt64
-
-instance: Inhabited Expr.Data :=
-  inferInstanceAs (Inhabited UInt64)
+structure Expr.Data where
+  val : UInt64
+  deriving Inhabited, BEq
 
 def Expr.Data.hash (c : Expr.Data) : UInt64 :=
-  c.toUInt32.toUInt64
-
-instance : BEq Expr.Data where
-  beq (a b : UInt64) := a == b
+  c.val.toUInt32.toUInt64
 
 def Expr.Data.approxDepth (c : Expr.Data) : UInt8 :=
-  ((c.shiftRight 32).land 255).toUInt8
+  ((c.val.shiftRight 32).land 255).toUInt8
 
 def Expr.Data.looseBVarRange (c : Expr.Data) : UInt32 :=
-  (c.shiftRight 44).toUInt32
+  (c.val.shiftRight 44).toUInt32
 
 def Expr.Data.hasFVar (c : Expr.Data) : Bool :=
-  ((c.shiftRight 40).land 1) == 1
+  ((c.val.shiftRight 40).land 1) == 1
 
 def Expr.Data.hasExprMVar (c : Expr.Data) : Bool :=
-  ((c.shiftRight 41).land 1) == 1
+  ((c.val.shiftRight 41).land 1) == 1
 
 def Expr.Data.hasLevelMVar (c : Expr.Data) : Bool :=
-  ((c.shiftRight 42).land 1) == 1
+  ((c.val.shiftRight 42).land 1) == 1
 
 def Expr.Data.hasLevelParam (c : Expr.Data) : Bool :=
-  ((c.shiftRight 43).land 1) == 1
+  ((c.val.shiftRight 43).land 1) == 1
 
 -- NOTE: the `extern` clause of `BinderInfo.toUInt64` is ABI sensitive.
 -- It exploits the fact that a small enum compiles to `uint8`.

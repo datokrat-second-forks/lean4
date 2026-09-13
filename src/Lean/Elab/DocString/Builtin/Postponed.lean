@@ -137,7 +137,7 @@ private def collect (env : Environment) (inPackage : Name → Bool) :
   for i in [0:env.header.moduleNames.size] do
     let mod := env.header.moduleNames[i]!
     if inPackage mod then
-      out := out ++ (deferredCheckExt.getModuleEntries env i).map (mod, ·)
+      out := out ++ (deferredCheckExt.getModuleEntries env ⟨i⟩).map (mod, ·)
   let mod := env.mainModule
   if inPackage mod then
     out := out ++ (deferredCheckExt.getState env).map (mod, ·)

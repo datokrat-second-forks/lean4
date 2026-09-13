@@ -68,8 +68,8 @@ structure Histogram.Entry (α : Type u) (lsize rsize : Nat) where
   rightWF : rightCount = 0 ↔ rightIndex = none
 
 /-- A histogram for arrays maps each element to a count and, if applicable, an index.-/
-@[expose] def Histogram (α : Type u) (lsize rsize : Nat) [BEq α] [Hashable α] :=
-  Std.HashMap α (Histogram.Entry α lsize rsize)
+structure Histogram (α : Type u) (lsize rsize : Nat) [BEq α] [Hashable α] where
+  map : Std.HashMap α (Histogram.Entry α lsize rsize)
 
 
 section
@@ -79,31 +79,31 @@ variable [BEq α] [Hashable α]
 /-- Add an element from the left array to a histogram -/
 def Histogram.addLeft (histogram : Histogram α lsize rsize) (index : Fin lsize) (val : α)
     : Histogram α lsize rsize :=
-  match histogram.get? val with
-  | none => histogram.insert val {
+  match histogram.map.get? val with
+  | none => ⟨histogram.map.insert val {
       leftCount := 1, leftIndex := some index,
       leftWF := by simp,
       rightCount := 0, rightIndex := none
       rightWF := by simp
-    }
-  | some x => histogram.insert val {x with
+    }⟩
+  | some x => ⟨histogram.map.insert val {x with
       leftCount := x.leftCount + 1, leftIndex := some index, leftWF := by simp
-    }
+    }⟩
 
 /-- Add an element from the right array to a histogram -/
 def Histogram.addRight (histogram : Histogram α lsize rsize) (index : Fin rsize) (val : α)
     : Histogram α lsize rsize :=
-  match histogram.get? val with
-  | none => histogram.insert val {
+  match histogram.map.get? val with
+  | none => ⟨histogram.map.insert val {
       leftCount := 0, leftIndex := none,
       leftWF := by simp,
       rightCount := 1, rightIndex := some index,
       rightWF := by simp
-    }
-  | some x => histogram.insert val {x with
+    }⟩
+  | some x => ⟨histogram.map.insert val {x with
       rightCount := x.leftCount + 1, rightIndex := some index,
       rightWF := by simp
-    }
+    }⟩
 
 /-- Given two `Subarray`s, find their common prefix and return their differing suffixes -/
 def matchPrefix (left right : Subarray α) : Array α × Subarray α × Subarray α :=
@@ -142,13 +142,13 @@ cautious when applying it to larger workloads.
 partial def lcs (left right : Subarray α) : Array α := Id.run do
   let (pref, left, right) := matchPrefix left right
   let (left, right, suff) := matchSuffix left right
-  let mut hist : Histogram α left.size right.size := (∅ : Std.HashMap ..)
+  let mut hist : Histogram α left.size right.size := ⟨∅⟩
   for h : i in *...left.size do
     hist := hist.addLeft ⟨i, Std.Rio.Internal.get_elem_helper_upper_open h rfl⟩ left[i]
   for h : i in *...right.size do
     hist := hist.addRight ⟨i, Std.Rio.Internal.get_elem_helper_upper_open h rfl⟩ right[i]
   let mut best := none
-  for (k, v) in hist.toList do
+  for (k, v) in hist.map.toList do
     if let {leftCount := lc, leftIndex := some li, rightCount := rc, rightIndex := some ri, ..} := v then
       match best with
       | none =>

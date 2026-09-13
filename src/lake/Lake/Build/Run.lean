@@ -149,7 +149,7 @@ where
     else s!"{ms}ms"
 
 def drainQueue : MonitorM (Array OpaqueJob) := do
-  let newJobs ← (← read).jobs.modifyGet ((·, #[]))
+  let newJobs ← (← read).jobs.ref.modifyGet ((·, #[]))
   modify fun s => {s with totalJobs := s.totalJobs + newJobs.size}
   return newJobs
 
@@ -268,7 +268,7 @@ public def monitorJobs
   (updateFrequency := 100)
 : BaseIO MonitorResult := do
   let ctx := {
-    jobs, out, failLv, outLv, minAction, showOptional
+    jobs := ⟨jobs⟩, out, failLv, outLv, minAction, showOptional
     useAnsi, showProgress, showTime, updateFrequency
   }
   monitorJobs' ctx initJobs initFailures resetCtrl
