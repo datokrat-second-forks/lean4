@@ -24,9 +24,10 @@ def Meta.collectPrivateIn [Monad m] [MonadEnv m] [MonadError m]
 
 /-- Get the module index given a module name. -/
 def Environment.moduleIdxForModule? (env : Environment) (mod : Name) : Option ModuleIdx :=
-  env.allImportedModuleNames.idxOf? mod
+  env.allImportedModuleNames.idxOf? mod |>.map (⟨·⟩)
 
-instance : DecidableEq ModuleIdx := instDecidableEqNat
+instance : DecidableEq ModuleIdx := fun a b =>
+  decidable_of_iff (a.toNat = b.toNat) ⟨fun h => by cases a; cases b; cases h; rfl, fun h => h ▸ rfl⟩
 
 /-- Get the list of declarations in a module (referenced by index). -/
 def Environment.declsInModuleIdx (env : Environment) (idx : ModuleIdx) : List Name :=
