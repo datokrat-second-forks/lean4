@@ -38,8 +38,8 @@ open Toml
 @[specialize] public def decodeFieldCore
   (name : Name) (decode : Toml.Value → EDecodeM α) [field : ConfigField σ name α]
   (_ : Table) (val : Value) (cfg : σ)
-: DecodeM σ := fun es =>
-  match decode val es with
+: DecodeM σ := EStateM.mk fun es =>
+  match (decode val).run es with
   | .ok a es => .ok (field.set a cfg) es
   | .error _ es => .ok cfg es
 
@@ -164,7 +164,7 @@ public partial def decodeLeanOptionsAux
 public def decodeLeanOptions (v : Value) : EDecodeM (Array LeanOption) :=
   match v with
   | .array _ vs => decodeArray vs
-  | .table _ t => t.items.foldl (init := .ok #[]) fun vs (k,v) => decodeLeanOptionsAux v k vs
+  | .table _ t => t.items.foldl (init := pure #[]) fun vs (k,v) => decodeLeanOptionsAux v k vs
   | v => throwDecodeErrorAt v.ref "expected array or table"
 
 public instance : DecodeToml (Array LeanOption) := ⟨decodeLeanOptions⟩

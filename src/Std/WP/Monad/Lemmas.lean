@@ -191,7 +191,7 @@ theorem wp_tryCatch_EStateM_apply_eq (x : EStateM ε σ α) (h : ε → EStateM 
       fun s => wp x post (fun e s' => wp (h e) post epost s') s := by
   funext s
   simp only [wp, WP.wpTrans, MonadExceptOf.tryCatch, EStateM.tryCatch]
-  cases (x s) <;> simp
+  cases x.run s <;> simp
   rfl
 
 @[simp]
@@ -377,7 +377,7 @@ theorem wp_adaptExcept_EStateM_apply_eq (f : ε → ε') (x : EStateM ε σ α) 
       wp x post (fun e => epost (f e)) := by
   funext s
   simp only [wp, WP.wpTrans, EStateM.adaptExcept]
-  cases (x s) <;> simp
+  cases x.run s <;> simp
 
 /-! ## MonadControl simp lemmas -/
 
@@ -667,6 +667,6 @@ theorem wp_orElse_EStateM_apply_eq (x : EStateM ε σ α) (h : Unit → EStateM 
       fun s => wp x post (fun _ s' => wp (h ()) post epost s') s := by
   funext s
   simp only [wp, WP.wpTrans, OrElse.orElse, EStateM.orElse]
-  cases x s <;> simp; rfl
+  cases x.run s <;> simp; rfl
 
 end Std.WP.WPMonad

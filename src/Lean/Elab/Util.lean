@@ -196,13 +196,13 @@ def liftMacroM [Monad m] [MonadMacroAdapter m] [MonadEnv m] [MonadRecDepth m] [M
     resolveNamespace := fun n => return ResolveName.resolveNamespace env currNamespace openDecls n
     resolveGlobalName := fun n => return ResolveName.resolveGlobalName env opts currNamespace openDecls n
   }
-  match x { methods        := methods
-            ref            := ← getRef
-            currMacroScope := ← MonadQuotation.getCurrMacroScope
-            quotContext    := ← MonadQuotation.getContext
-            currRecDepth   := ← MonadRecDepth.getRecDepth
-            maxRecDepth    := ← MonadRecDepth.getMaxRecDepth
-          } { macroScope := (← MonadMacroAdapter.getNextMacroScope) } with
+  match (x { methods        := methods
+             ref            := ← getRef
+             currMacroScope := ← MonadQuotation.getCurrMacroScope
+             quotContext    := ← MonadQuotation.getContext
+             currRecDepth   := ← MonadRecDepth.getRecDepth
+             maxRecDepth    := ← MonadRecDepth.getMaxRecDepth
+           }).run { macroScope := (← MonadMacroAdapter.getNextMacroScope) } with
   | EStateM.Result.error Macro.Exception.unsupportedSyntax _ => throwUnsupportedSyntax
   | EStateM.Result.error (Macro.Exception.error ref msg) _   =>
     if msg == maxRecDepthErrorMessage then
