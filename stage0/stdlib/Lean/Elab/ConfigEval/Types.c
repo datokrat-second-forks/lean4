@@ -38,7 +38,7 @@ v___x_8_ = l_Lean_registerInternalExceptionId(v___x_7_);
 return v___x_8_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_ConfigEval_Types_0__Lean_Elab_ConfigEval_initFn_00___x40_Lean_Elab_ConfigEval_Types_3111895740____hygCtx___hyg_2____boxed(lean_object* v_a_9_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_ConfigEval_Types_0__Lean_Elab_ConfigEval_initFn_00___x40_Lean_Elab_ConfigEval_Types_3111895740____hygCtx___hyg_2____boxed(lean_object* v___y_9_){
 _start:
 {
 lean_object* v_res_10_; 

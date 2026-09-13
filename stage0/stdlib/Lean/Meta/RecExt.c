@@ -54,7 +54,7 @@ v___x_9_ = l_Lean_mkTagDeclarationExtension(v___x_7_, v___x_8_);
 return v___x_9_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_RecExt_0__Lean_Meta_initFn_00___x40_Lean_Meta_RecExt_2067193597____hygCtx___hyg_2____boxed(lean_object* v_a_10_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_RecExt_0__Lean_Meta_initFn_00___x40_Lean_Meta_RecExt_2067193597____hygCtx___hyg_2____boxed(lean_object* v___y_10_){
 _start:
 {
 lean_object* v_res_11_; 
@@ -170,7 +170,7 @@ return v___x_39_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_markAsRecursive___redArg___boxed(lean_object* v_declName_43_, lean_object* v_a_44_, lean_object* v_a_45_){
+LEAN_EXPORT lean_object* l_Lean_Meta_markAsRecursive___redArg___boxed(lean_object* v_declName_43_, lean_object* v_a_44_, lean_object* v___y_45_){
 _start:
 {
 lean_object* v_res_46_; 
@@ -187,7 +187,7 @@ v___x_51_ = l_Lean_Meta_markAsRecursive___redArg(v_declName_47_, v_a_49_);
 return v___x_51_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_markAsRecursive___boxed(lean_object* v_declName_52_, lean_object* v_a_53_, lean_object* v_a_54_, lean_object* v_a_55_){
+LEAN_EXPORT lean_object* l_Lean_Meta_markAsRecursive___boxed(lean_object* v_declName_52_, lean_object* v_a_53_, lean_object* v_a_54_, lean_object* v___y_55_){
 _start:
 {
 lean_object* v_res_56_; 
@@ -215,7 +215,7 @@ lean_ctor_set(v___x_67_, 0, v___x_66_);
 return v___x_67_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_isRecursiveDefinition___redArg___boxed(lean_object* v_declName_68_, lean_object* v_a_69_, lean_object* v_a_70_){
+LEAN_EXPORT lean_object* l_Lean_Meta_isRecursiveDefinition___redArg___boxed(lean_object* v_declName_68_, lean_object* v_a_69_, lean_object* v___y_70_){
 _start:
 {
 lean_object* v_res_71_; 
@@ -232,7 +232,7 @@ v___x_76_ = l_Lean_Meta_isRecursiveDefinition___redArg(v_declName_72_, v_a_74_);
 return v___x_76_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_isRecursiveDefinition___boxed(lean_object* v_declName_77_, lean_object* v_a_78_, lean_object* v_a_79_, lean_object* v_a_80_){
+LEAN_EXPORT lean_object* l_Lean_Meta_isRecursiveDefinition___boxed(lean_object* v_declName_77_, lean_object* v_a_78_, lean_object* v_a_79_, lean_object* v___y_80_){
 _start:
 {
 lean_object* v_res_81_; 

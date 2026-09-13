@@ -4074,7 +4074,7 @@ v___x_1558_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_1554_, v___x_
 return v___x_1558_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_MatchExpr_0__Lean_Elab_Term_expandMatchExpr___regBuiltin_Lean_Elab_Term_expandMatchExpr__1___boxed(lean_object* v_a_1559_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_MatchExpr_0__Lean_Elab_Term_expandMatchExpr___regBuiltin_Lean_Elab_Term_expandMatchExpr__1___boxed(lean_object* v___y_1559_){
 _start:
 {
 lean_object* v_res_1560_; 
@@ -4092,7 +4092,7 @@ v___x_1589_ = l_Lean_addBuiltinDeclarationRanges(v___x_1587_, v___x_1588_);
 return v___x_1589_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_MatchExpr_0__Lean_Elab_Term_expandMatchExpr___regBuiltin_Lean_Elab_Term_expandMatchExpr_declRange__3___boxed(lean_object* v_a_1590_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_MatchExpr_0__Lean_Elab_Term_expandMatchExpr___regBuiltin_Lean_Elab_Term_expandMatchExpr_declRange__3___boxed(lean_object* v___y_1590_){
 _start:
 {
 lean_object* v_res_1591_; 
@@ -4207,7 +4207,7 @@ v___x_1666_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_1662_, v___x_
 return v___x_1666_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_MatchExpr_0__Lean_Elab_Term_expandLetExpr___regBuiltin_Lean_Elab_Term_expandLetExpr__1___boxed(lean_object* v_a_1667_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_MatchExpr_0__Lean_Elab_Term_expandLetExpr___regBuiltin_Lean_Elab_Term_expandLetExpr__1___boxed(lean_object* v___y_1667_){
 _start:
 {
 lean_object* v_res_1668_; 
@@ -4225,7 +4225,7 @@ v___x_1697_ = l_Lean_addBuiltinDeclarationRanges(v___x_1695_, v___x_1696_);
 return v___x_1697_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_MatchExpr_0__Lean_Elab_Term_expandLetExpr___regBuiltin_Lean_Elab_Term_expandLetExpr_declRange__3___boxed(lean_object* v_a_1698_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_MatchExpr_0__Lean_Elab_Term_expandLetExpr___regBuiltin_Lean_Elab_Term_expandLetExpr_declRange__3___boxed(lean_object* v___y_1698_){
 _start:
 {
 lean_object* v_res_1699_; 

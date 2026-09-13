@@ -1361,7 +1361,7 @@ v___x_373_ = l_Lean_registerSimplePersistentEnvExtension___redArg(v___x_372_);
 return v___x_373_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_ErrorExplanation_0__Lean_initFn_00___x40_Lean_ErrorExplanation_3643637962____hygCtx___hyg_2____boxed(lean_object* v_a_374_){
+LEAN_EXPORT lean_object* l___private_Lean_ErrorExplanation_0__Lean_initFn_00___x40_Lean_ErrorExplanation_3643637962____hygCtx___hyg_2____boxed(lean_object* v___y_374_){
 _start:
 {
 lean_object* v_res_375_; 

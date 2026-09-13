@@ -5657,7 +5657,7 @@ return v___x_1530_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_parseImports_x27___boxed(lean_object* v_input_1531_, lean_object* v_fileName_1532_, lean_object* v_a_1533_){
+LEAN_EXPORT lean_object* l_Lean_parseImports_x27___boxed(lean_object* v_input_1531_, lean_object* v_fileName_1532_, lean_object* v___y_1533_){
 _start:
 {
 lean_object* v_res_1534_; 
@@ -6051,7 +6051,7 @@ v___x_1687_ = lean_apply_2(v_putStr_1686_, v_s_1683_, lean_box(0));
 return v___x_1687_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_print___at___00IO_println___at___00Lean_printImportsJson_spec__1_spec__1___boxed(lean_object* v_s_1688_, lean_object* v_a_1689_){
+LEAN_EXPORT lean_object* l_IO_print___at___00IO_println___at___00Lean_printImportsJson_spec__1_spec__1___boxed(lean_object* v_s_1688_, lean_object* v___y_1689_){
 _start:
 {
 lean_object* v_res_1690_; 
@@ -6069,7 +6069,7 @@ v___x_1695_ = l_IO_print___at___00IO_println___at___00Lean_printImportsJson_spec
 return v___x_1695_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_println___at___00Lean_printImportsJson_spec__1___boxed(lean_object* v_s_1696_, lean_object* v_a_1697_){
+LEAN_EXPORT lean_object* l_IO_println___at___00Lean_printImportsJson_spec__1___boxed(lean_object* v_s_1696_, lean_object* v___y_1697_){
 _start:
 {
 lean_object* v_res_1698_; 
@@ -6138,7 +6138,7 @@ return v___x_1713_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_printImportsJson___boxed(lean_object* v_fileNames_1716_, lean_object* v_a_1717_){
+LEAN_EXPORT lean_object* l_Lean_printImportsJson___boxed(lean_object* v_fileNames_1716_, lean_object* v___y_1717_){
 _start:
 {
 lean_object* v_res_1718_; 

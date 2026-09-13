@@ -495,7 +495,7 @@ v___x_171_ = l_Lean_mkMapDeclarationExtension___redArg(v___x_169_, v___x_170_, v
 return v___x_171_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_ProjFns_0__Lean_initFn_00___x40_Lean_ProjFns_2268652983____hygCtx___hyg_2____boxed(lean_object* v_a_172_){
+LEAN_EXPORT lean_object* l___private_Lean_ProjFns_0__Lean_initFn_00___x40_Lean_ProjFns_2268652983____hygCtx___hyg_2____boxed(lean_object* v___y_172_){
 _start:
 {
 lean_object* v_res_173_; 
@@ -987,7 +987,7 @@ v___x_379_ = l_Lean_mkMapDeclarationExtension___redArg(v___x_377_, v___x_378_, v
 return v___x_379_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_ProjFns_0__Lean_initFn_00___x40_Lean_ProjFns_496916995____hygCtx___hyg_2____boxed(lean_object* v_a_380_){
+LEAN_EXPORT lean_object* l___private_Lean_ProjFns_0__Lean_initFn_00___x40_Lean_ProjFns_496916995____hygCtx___hyg_2____boxed(lean_object* v___y_380_){
 _start:
 {
 lean_object* v_res_381_; 

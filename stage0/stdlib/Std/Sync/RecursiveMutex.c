@@ -154,7 +154,7 @@ lean_ctor_set(v___x_36_, 1, v___x_35_);
 return v___x_36_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_RecursiveMutex_new___redArg___boxed(lean_object* v_a_37_, lean_object* v_a_38_){
+LEAN_EXPORT lean_object* l_Std_RecursiveMutex_new___redArg___boxed(lean_object* v_a_37_, lean_object* v___y_38_){
 _start:
 {
 lean_object* v_res_39_; 
@@ -170,7 +170,7 @@ v___x_43_ = l_Std_RecursiveMutex_new___redArg(v_a_41_);
 return v___x_43_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_RecursiveMutex_new___boxed(lean_object* v_00_u03b1_44_, lean_object* v_a_45_, lean_object* v_a_46_){
+LEAN_EXPORT lean_object* l_Std_RecursiveMutex_new___boxed(lean_object* v_00_u03b1_44_, lean_object* v_a_45_, lean_object* v___y_46_){
 _start:
 {
 lean_object* v_res_47_; 

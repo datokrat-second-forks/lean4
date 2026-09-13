@@ -238,7 +238,7 @@ return v___y_34_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Util_Lock_0__Lake_busyAcquireLockFile_busyLoop___boxed(lean_object* v_lockFile_51_, lean_object* v_firstTime_52_, lean_object* v_a_53_){
+LEAN_EXPORT lean_object* l___private_Lake_Util_Lock_0__Lake_busyAcquireLockFile_busyLoop___boxed(lean_object* v_lockFile_51_, lean_object* v_firstTime_52_, lean_object* v___y_53_){
 _start:
 {
 uint8_t v_firstTime_boxed_54_; lean_object* v_res_55_; 
@@ -256,7 +256,7 @@ v___x_59_ = l___private_Lake_Util_Lock_0__Lake_busyAcquireLockFile_busyLoop(v_lo
 return v___x_59_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake_busyAcquireLockFile___boxed(lean_object* v_lockFile_60_, lean_object* v_a_61_){
+LEAN_EXPORT lean_object* l_Lake_busyAcquireLockFile___boxed(lean_object* v_lockFile_60_, lean_object* v___y_61_){
 _start:
 {
 lean_object* v_res_62_; 

@@ -109,7 +109,7 @@ lean_ctor_set(v___x_17_, 0, v___x_16_);
 return v___x_17_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_InternalExceptionId_0__Lean_initFn_00___x40_Lean_InternalExceptionId_3474817028____hygCtx___hyg_2____boxed(lean_object* v_a_18_){
+LEAN_EXPORT lean_object* l___private_Lean_InternalExceptionId_0__Lean_initFn_00___x40_Lean_InternalExceptionId_3474817028____hygCtx___hyg_2____boxed(lean_object* v___y_18_){
 _start:
 {
 lean_object* v_res_19_; 
@@ -238,7 +238,7 @@ return v___x_69_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_registerInternalExceptionId___boxed(lean_object* v_name_70_, lean_object* v_a_71_){
+LEAN_EXPORT lean_object* l_Lean_registerInternalExceptionId___boxed(lean_object* v_name_70_, lean_object* v___y_71_){
 _start:
 {
 lean_object* v_res_72_; 
@@ -294,7 +294,7 @@ return v___x_90_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_InternalExceptionId_getName___boxed(lean_object* v_id_91_, lean_object* v_a_92_){
+LEAN_EXPORT lean_object* l_Lean_InternalExceptionId_getName___boxed(lean_object* v_id_91_, lean_object* v___y_92_){
 _start:
 {
 lean_object* v_res_93_; 

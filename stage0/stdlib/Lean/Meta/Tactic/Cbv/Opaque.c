@@ -585,7 +585,7 @@ v___x_144_ = l_Lean_registerSimpleScopedEnvExtension___redArg(v___x_143_);
 return v___x_144_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_Tactic_Cbv_Opaque_0__Lean_Meta_Tactic_Cbv_initFn_00___x40_Lean_Meta_Tactic_Cbv_Opaque_1973793274____hygCtx___hyg_2____boxed(lean_object* v_a_145_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_Tactic_Cbv_Opaque_0__Lean_Meta_Tactic_Cbv_initFn_00___x40_Lean_Meta_Tactic_Cbv_Opaque_1973793274____hygCtx___hyg_2____boxed(lean_object* v___y_145_){
 _start:
 {
 lean_object* v_res_146_; 
@@ -1531,7 +1531,7 @@ v___x_500_ = l_Lean_registerBuiltinAttribute(v___x_499_);
 return v___x_500_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_Tactic_Cbv_Opaque_0__Lean_Meta_Tactic_Cbv_initFn_00___x40_Lean_Meta_Tactic_Cbv_Opaque_2610012288____hygCtx___hyg_2____boxed(lean_object* v_a_501_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_Tactic_Cbv_Opaque_0__Lean_Meta_Tactic_Cbv_initFn_00___x40_Lean_Meta_Tactic_Cbv_Opaque_2610012288____hygCtx___hyg_2____boxed(lean_object* v___y_501_){
 _start:
 {
 lean_object* v_res_502_; 
@@ -1628,7 +1628,7 @@ lean_ctor_set(v___x_551_, 0, v___x_550_);
 return v___x_551_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_Cbv_cbvOpaque___redArg___boxed(lean_object* v_a_552_, lean_object* v_a_553_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_Cbv_cbvOpaque___redArg___boxed(lean_object* v_a_552_, lean_object* v___y_553_){
 _start:
 {
 lean_object* v_res_554_; 
@@ -1645,7 +1645,7 @@ v___x_558_ = l_Lean_Meta_Tactic_Cbv_cbvOpaque___redArg(v_a_556_);
 return v___x_558_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_Cbv_cbvOpaque___boxed(lean_object* v_a_559_, lean_object* v_a_560_, lean_object* v_a_561_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_Cbv_cbvOpaque___boxed(lean_object* v_a_559_, lean_object* v_a_560_, lean_object* v___y_561_){
 _start:
 {
 lean_object* v_res_562_; 
@@ -1728,7 +1728,7 @@ lean_ctor_set(v___x_601_, 0, v___x_600_);
 return v___x_601_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_Cbv_isCbvOpaque___redArg___boxed(lean_object* v_name_602_, lean_object* v_a_603_, lean_object* v_a_604_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_Cbv_isCbvOpaque___redArg___boxed(lean_object* v_name_602_, lean_object* v_a_603_, lean_object* v___y_604_){
 _start:
 {
 lean_object* v_res_605_; 
@@ -1746,7 +1746,7 @@ v___x_610_ = l_Lean_Meta_Tactic_Cbv_isCbvOpaque___redArg(v_name_606_, v_a_608_);
 return v___x_610_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_Cbv_isCbvOpaque___boxed(lean_object* v_name_611_, lean_object* v_a_612_, lean_object* v_a_613_, lean_object* v_a_614_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_Cbv_isCbvOpaque___boxed(lean_object* v_name_611_, lean_object* v_a_612_, lean_object* v_a_613_, lean_object* v___y_614_){
 _start:
 {
 lean_object* v_res_615_; 

@@ -447,7 +447,7 @@ return v___x_143_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_mkMessageString___boxed(lean_object* v_msg_146_, lean_object* v_includeEndPos_147_, lean_object* v_infoWithPos_148_, lean_object* v_a_149_){
+LEAN_EXPORT lean_object* l_Lake_mkMessageString___boxed(lean_object* v_msg_146_, lean_object* v_includeEndPos_147_, lean_object* v_infoWithPos_148_, lean_object* v___y_149_){
 _start:
 {
 uint8_t v_includeEndPos_boxed_150_; uint8_t v_infoWithPos_boxed_151_; lean_object* v_res_152_; 
@@ -501,7 +501,7 @@ v___x_171_ = l_List_foldlM___at___00Lake_mkMessageLogString_spec__0(v___x_169_, 
 return v___x_171_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake_mkMessageLogString___boxed(lean_object* v_log_172_, lean_object* v_a_173_){
+LEAN_EXPORT lean_object* l_Lake_mkMessageLogString___boxed(lean_object* v_log_172_, lean_object* v___y_173_){
 _start:
 {
 lean_object* v_res_174_; 

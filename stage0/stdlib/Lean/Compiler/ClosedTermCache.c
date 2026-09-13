@@ -1020,7 +1020,7 @@ v___x_296_ = l_Lean_registerEnvExtension___redArg(v___f_293_, v___x_294_, v___x_
 return v___x_296_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_ClosedTermCache_0__Lean_initFn_00___x40_Lean_Compiler_ClosedTermCache_3608529163____hygCtx___hyg_2____boxed(lean_object* v_a_297_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_ClosedTermCache_0__Lean_initFn_00___x40_Lean_Compiler_ClosedTermCache_3608529163____hygCtx___hyg_2____boxed(lean_object* v___y_297_){
 _start:
 {
 lean_object* v_res_298_; 

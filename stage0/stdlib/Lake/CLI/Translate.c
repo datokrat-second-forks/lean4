@@ -881,7 +881,7 @@ goto v___jp_147_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Package_mkConfigString___boxed(lean_object* v_pkg_262_, lean_object* v_lang_263_, lean_object* v_a_264_, lean_object* v_a_265_){
+LEAN_EXPORT lean_object* l_Lake_Package_mkConfigString___boxed(lean_object* v_pkg_262_, lean_object* v_lang_263_, lean_object* v_a_264_, lean_object* v___y_265_){
 _start:
 {
 uint8_t v_lang_boxed_266_; lean_object* v_res_267_; 

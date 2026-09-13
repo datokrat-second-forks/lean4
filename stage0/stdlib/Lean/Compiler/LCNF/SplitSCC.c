@@ -950,7 +950,7 @@ v___x_240_ = l___private_Lean_Compiler_LCNF_Basic_0__Lean_Compiler_LCNF_Code_for
 return v___x_240_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_LCNF_SplitSCC_0__Lean_Compiler_LCNF_SplitScc_findSccCalls_goCode___boxed(lean_object* v_pu_241_, lean_object* v_scc_242_, lean_object* v_c_243_, lean_object* v_a_244_, lean_object* v_a_245_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_LCNF_SplitSCC_0__Lean_Compiler_LCNF_SplitScc_findSccCalls_goCode___boxed(lean_object* v_pu_241_, lean_object* v_scc_242_, lean_object* v_c_243_, lean_object* v_a_244_, lean_object* v___y_245_){
 _start:
 {
 uint8_t v_pu_boxed_246_; lean_object* v_res_247_; 
@@ -1082,7 +1082,7 @@ return v___x_299_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_LCNF_SplitSCC_0__Lean_Compiler_LCNF_SplitScc_findSccCalls___boxed(lean_object* v_pu_300_, lean_object* v_scc_301_, lean_object* v_decl_302_, lean_object* v_a_303_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_LCNF_SplitSCC_0__Lean_Compiler_LCNF_SplitScc_findSccCalls___boxed(lean_object* v_pu_300_, lean_object* v_scc_301_, lean_object* v_decl_302_, lean_object* v___y_303_){
 _start:
 {
 uint8_t v_pu_boxed_304_; lean_object* v_res_305_; 
@@ -3763,7 +3763,7 @@ return v___x_1182_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_splitScc___boxed(lean_object* v_pu_1183_, lean_object* v_scc_1184_, lean_object* v_a_1185_, lean_object* v_a_1186_, lean_object* v_a_1187_, lean_object* v_a_1188_, lean_object* v_a_1189_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_splitScc___boxed(lean_object* v_pu_1183_, lean_object* v_scc_1184_, lean_object* v_a_1185_, lean_object* v_a_1186_, lean_object* v_a_1187_, lean_object* v_a_1188_, lean_object* v___y_1189_){
 _start:
 {
 uint8_t v_pu_boxed_1190_; lean_object* v_res_1191_; 
@@ -3920,7 +3920,7 @@ v___x_1339_ = l_Lean_registerTraceClass(v___x_1336_, v___x_1337_, v___x_1338_);
 return v___x_1339_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_LCNF_SplitSCC_0__Lean_Compiler_LCNF_initFn_00___x40_Lean_Compiler_LCNF_SplitSCC_1807176231____hygCtx___hyg_2____boxed(lean_object* v_a_1340_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_LCNF_SplitSCC_0__Lean_Compiler_LCNF_initFn_00___x40_Lean_Compiler_LCNF_SplitSCC_1807176231____hygCtx___hyg_2____boxed(lean_object* v___y_1340_){
 _start:
 {
 lean_object* v_res_1341_; 

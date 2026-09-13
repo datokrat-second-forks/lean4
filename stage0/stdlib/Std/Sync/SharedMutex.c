@@ -200,7 +200,7 @@ lean_ctor_set(v___x_52_, 1, v___x_51_);
 return v___x_52_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_SharedMutex_new___redArg___boxed(lean_object* v_a_53_, lean_object* v_a_54_){
+LEAN_EXPORT lean_object* l_Std_SharedMutex_new___redArg___boxed(lean_object* v_a_53_, lean_object* v___y_54_){
 _start:
 {
 lean_object* v_res_55_; 
@@ -216,7 +216,7 @@ v___x_59_ = l_Std_SharedMutex_new___redArg(v_a_57_);
 return v___x_59_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_SharedMutex_new___boxed(lean_object* v_00_u03b1_60_, lean_object* v_a_61_, lean_object* v_a_62_){
+LEAN_EXPORT lean_object* l_Std_SharedMutex_new___boxed(lean_object* v_00_u03b1_60_, lean_object* v_a_61_, lean_object* v___y_62_){
 _start:
 {
 lean_object* v_res_63_; 
@@ -589,9 +589,9 @@ return v___x_253_;
 LEAN_EXPORT lean_object* l_Std_SharedMutex_tryAtomicallyRead___redArg___lam__1___boxed(lean_object* v_toPure_254_, lean_object* v_toFunctor_255_, lean_object* v_inst_256_, lean_object* v___f_257_, lean_object* v_toBind_258_, lean_object* v___f_259_, lean_object* v_mutex_260_, lean_object* v_inst_261_, lean_object* v___f_262_, lean_object* v_____do__lift_263_){
 _start:
 {
-uint8_t v_____do__lift_120__boxed_264_; lean_object* v_res_265_; 
-v_____do__lift_120__boxed_264_ = lean_unbox(v_____do__lift_263_);
-v_res_265_ = l_Std_SharedMutex_tryAtomicallyRead___redArg___lam__1(v_toPure_254_, v_toFunctor_255_, v_inst_256_, v___f_257_, v_toBind_258_, v___f_259_, v_mutex_260_, v_inst_261_, v___f_262_, v_____do__lift_120__boxed_264_);
+uint8_t v_____do__lift_121__boxed_264_; lean_object* v_res_265_; 
+v_____do__lift_121__boxed_264_ = lean_unbox(v_____do__lift_263_);
+v_res_265_ = l_Std_SharedMutex_tryAtomicallyRead___redArg___lam__1(v_toPure_254_, v_toFunctor_255_, v_inst_256_, v___f_257_, v_toBind_258_, v___f_259_, v_mutex_260_, v_inst_261_, v___f_262_, v_____do__lift_121__boxed_264_);
 return v_res_265_;
 }
 }

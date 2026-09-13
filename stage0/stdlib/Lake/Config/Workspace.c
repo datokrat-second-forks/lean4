@@ -4308,7 +4308,7 @@ return v___x_1488_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Workspace_clean___boxed(lean_object* v_self_1489_, lean_object* v_a_1490_){
+LEAN_EXPORT lean_object* l_Lake_Workspace_clean___boxed(lean_object* v_self_1489_, lean_object* v___y_1490_){
 _start:
 {
 lean_object* v_res_1491_; 

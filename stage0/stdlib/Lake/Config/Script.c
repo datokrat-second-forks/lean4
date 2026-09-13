@@ -71,7 +71,7 @@ v___x_33_ = lean_apply_3(v_fn_32_, v_args_28_, v_a_30_, lean_box(0));
 return v___x_33_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Script_run___boxed(lean_object* v_args_34_, lean_object* v_self_35_, lean_object* v_a_36_, lean_object* v_a_37_){
+LEAN_EXPORT lean_object* l_Lake_Script_run___boxed(lean_object* v_args_34_, lean_object* v_self_35_, lean_object* v_a_36_, lean_object* v___y_37_){
 _start:
 {
 lean_object* v_res_38_; 

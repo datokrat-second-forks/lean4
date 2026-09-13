@@ -134,7 +134,7 @@ lean_ctor_set(v___x_4_, 0, v___x_3_);
 return v___x_4_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_IO_throwServerError___redArg___boxed(lean_object* v_err_5_, lean_object* v_a_6_){
+LEAN_EXPORT lean_object* l_Lean_IO_throwServerError___redArg___boxed(lean_object* v_err_5_, lean_object* v___y_6_){
 _start:
 {
 lean_object* v_res_7_; 
@@ -150,7 +150,7 @@ v___x_11_ = l_Lean_IO_throwServerError___redArg(v_err_9_);
 return v___x_11_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_IO_throwServerError___boxed(lean_object* v_00_u03b1_12_, lean_object* v_err_13_, lean_object* v_a_14_){
+LEAN_EXPORT lean_object* l_Lean_IO_throwServerError___boxed(lean_object* v_00_u03b1_12_, lean_object* v_err_13_, lean_object* v___y_14_){
 _start:
 {
 lean_object* v_res_15_; 
@@ -1876,7 +1876,7 @@ return v___x_510_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_documentUriFromModule_x3f___boxed(lean_object* v_modName_513_, lean_object* v_a_514_){
+LEAN_EXPORT lean_object* l_Lean_Server_documentUriFromModule_x3f___boxed(lean_object* v_modName_513_, lean_object* v___y_514_){
 _start:
 {
 lean_object* v_res_515_; 
@@ -2172,7 +2172,7 @@ return v___x_578_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_moduleFromDocumentUri___boxed(lean_object* v_uri_579_, lean_object* v_a_580_){
+LEAN_EXPORT lean_object* l_Lean_Server_moduleFromDocumentUri___boxed(lean_object* v_uri_579_, lean_object* v___y_580_){
 _start:
 {
 lean_object* v_res_581_; 

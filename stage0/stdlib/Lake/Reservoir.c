@@ -3046,7 +3046,7 @@ return v___x_758_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Reservoir_fetchPkg_x3f___boxed(lean_object* v_lakeEnv_761_, lean_object* v_owner_762_, lean_object* v_pkg_763_, lean_object* v_a_764_, lean_object* v_a_765_){
+LEAN_EXPORT lean_object* l_Lake_Reservoir_fetchPkg_x3f___boxed(lean_object* v_lakeEnv_761_, lean_object* v_owner_762_, lean_object* v_pkg_763_, lean_object* v_a_764_, lean_object* v___y_765_){
 _start:
 {
 lean_object* v_res_766_; 
@@ -4450,7 +4450,7 @@ return v___x_1140_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Reservoir_fetchPkgVersions___boxed(lean_object* v_lakeEnv_1143_, lean_object* v_owner_1144_, lean_object* v_pkg_1145_, lean_object* v_a_1146_, lean_object* v_a_1147_){
+LEAN_EXPORT lean_object* l_Lake_Reservoir_fetchPkgVersions___boxed(lean_object* v_lakeEnv_1143_, lean_object* v_owner_1144_, lean_object* v_pkg_1145_, lean_object* v_a_1146_, lean_object* v___y_1147_){
 _start:
 {
 lean_object* v_res_1148_; 

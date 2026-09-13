@@ -6662,7 +6662,7 @@ v___x_1997_ = l_Lean_registerSimplePersistentEnvExtension___redArg(v___x_1996_);
 return v___x_1997_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_MatcherInfo_0__Lean_Meta_Match_Extension_initFn_00___x40_Lean_Meta_Match_MatcherInfo_207521612____hygCtx___hyg_2____boxed(lean_object* v_a_1998_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_MatcherInfo_0__Lean_Meta_Match_Extension_initFn_00___x40_Lean_Meta_Match_MatcherInfo_207521612____hygCtx___hyg_2____boxed(lean_object* v___y_1998_){
 _start:
 {
 lean_object* v_res_1999_; 
@@ -7474,7 +7474,7 @@ v___x_2323_ = l_Lean_mkTagDeclarationExtension(v___x_2321_, v___x_2322_);
 return v___x_2323_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_MatcherInfo_0__Lean_Meta_initFn_00___x40_Lean_Meta_Match_MatcherInfo_3189009982____hygCtx___hyg_2____boxed(lean_object* v_a_2324_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_MatcherInfo_0__Lean_Meta_initFn_00___x40_Lean_Meta_Match_MatcherInfo_3189009982____hygCtx___hyg_2____boxed(lean_object* v___y_2324_){
 _start:
 {
 lean_object* v_res_2325_; 

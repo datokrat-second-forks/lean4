@@ -27,7 +27,7 @@ lean_ctor_set(v___x_5_, 0, v___x_4_);
 return v___x_5_;
 }
 }
-LEAN_EXPORT lean_object* l_main___boxed(lean_object* v_args_6_, lean_object* v_a_7_){
+LEAN_EXPORT lean_object* l_main___boxed(lean_object* v_args_6_, lean_object* v___y_7_){
 _start:
 {
 lean_object* v_res_8_; 

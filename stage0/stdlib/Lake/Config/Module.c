@@ -1705,7 +1705,7 @@ return v___x_472_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_LeanLib_getModuleArray___boxed(lean_object* v_self_491_, lean_object* v_a_492_){
+LEAN_EXPORT lean_object* l_Lake_LeanLib_getModuleArray___boxed(lean_object* v_self_491_, lean_object* v___y_492_){
 _start:
 {
 lean_object* v_res_493_; 

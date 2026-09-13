@@ -84,7 +84,7 @@ return v___x_15_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_loadLeanConfig___boxed(lean_object* v_cfg_18_, lean_object* v_a_19_, lean_object* v_a_20_){
+LEAN_EXPORT lean_object* l_Lake_loadLeanConfig___boxed(lean_object* v_cfg_18_, lean_object* v_a_19_, lean_object* v___y_20_){
 _start:
 {
 lean_object* v_res_21_; 

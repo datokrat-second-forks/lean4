@@ -59,7 +59,7 @@ lean_ctor_set(v___x_8_, 2, v_numThreads_3_);
 return v___x_8_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Barrier_new___boxed(lean_object* v_numThreads_9_, lean_object* v_a_10_){
+LEAN_EXPORT lean_object* l_Std_Barrier_new___boxed(lean_object* v_numThreads_9_, lean_object* v___y_10_){
 _start:
 {
 lean_object* v_res_11_; 
@@ -132,9 +132,9 @@ return v___x_43_;
 LEAN_EXPORT lean_object* l_Std_Barrier_wait___lam__0___boxed(lean_object* v_generationId_44_, lean_object* v___x_45_, lean_object* v___y_46_, lean_object* v___y_47_){
 _start:
 {
-uint8_t v___x_2417__boxed_48_; uint8_t v_res_49_; lean_object* v_r_50_; 
-v___x_2417__boxed_48_ = lean_unbox(v___x_45_);
-v_res_49_ = l_Std_Barrier_wait___lam__0(v_generationId_44_, v___x_2417__boxed_48_, v___y_46_);
+uint8_t v___x_2423__boxed_48_; uint8_t v_res_49_; lean_object* v_r_50_; 
+v___x_2423__boxed_48_ = lean_unbox(v___x_45_);
+v_res_49_ = l_Std_Barrier_wait___lam__0(v_generationId_44_, v___x_2423__boxed_48_, v___y_46_);
 lean_dec(v___y_46_);
 lean_dec(v_generationId_44_);
 v_r_50_ = lean_box(v_res_49_);
@@ -358,7 +358,7 @@ lean_dec(v___x_136_);
 return v___x_137_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Barrier_wait___boxed(lean_object* v_barrier_138_, lean_object* v_a_139_){
+LEAN_EXPORT lean_object* l_Std_Barrier_wait___boxed(lean_object* v_barrier_138_, lean_object* v___y_139_){
 _start:
 {
 uint8_t v_res_140_; lean_object* v_r_141_; 

@@ -740,7 +740,7 @@ lean_ctor_set(v___x_144_, 0, v___x_143_);
 return v___x_144_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Server_Rpc_Basic_0__Lean_Server_initFn_00___x40_Lean_Server_Rpc_Basic_1605303199____hygCtx___hyg_2____boxed(lean_object* v_a_145_){
+LEAN_EXPORT lean_object* l___private_Lean_Server_Rpc_Basic_0__Lean_Server_initFn_00___x40_Lean_Server_Rpc_Basic_1605303199____hygCtx___hyg_2____boxed(lean_object* v___y_145_){
 _start:
 {
 lean_object* v_res_146_; 
@@ -767,7 +767,7 @@ lean_ctor_set_usize(v___x_156_, 1, v___x_157_);
 return v___x_156_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_WithRpcRef_mk___redArg___boxed(lean_object* v_val_158_, lean_object* v_a_159_){
+LEAN_EXPORT lean_object* l_Lean_Server_WithRpcRef_mk___redArg___boxed(lean_object* v_val_158_, lean_object* v___y_159_){
 _start:
 {
 lean_object* v_res_160_; 
@@ -783,7 +783,7 @@ v___x_164_ = l_Lean_Server_WithRpcRef_mk___redArg(v_val_162_);
 return v___x_164_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_WithRpcRef_mk___boxed(lean_object* v_00_u03b1_165_, lean_object* v_val_166_, lean_object* v_a_167_){
+LEAN_EXPORT lean_object* l_Lean_Server_WithRpcRef_mk___boxed(lean_object* v_00_u03b1_165_, lean_object* v_val_166_, lean_object* v___y_167_){
 _start:
 {
 lean_object* v_res_168_; 

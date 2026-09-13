@@ -364,7 +364,7 @@ v___x_27_ = l_Lake_registerOrderedTagAttribute(v___x_24_, v___x_25_, v___f_23_, 
 return v___x_27_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_3272526623____hygCtx___hyg_2____boxed(lean_object* v_a_28_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_3272526623____hygCtx___hyg_2____boxed(lean_object* v___y_28_){
 _start:
 {
 lean_object* v_res_29_; 
@@ -384,7 +384,7 @@ v___x_43_ = l_Lake_registerOrderedTagAttribute(v___x_40_, v___x_41_, v___f_39_, 
 return v___x_43_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_2767938986____hygCtx___hyg_2____boxed(lean_object* v_a_44_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_2767938986____hygCtx___hyg_2____boxed(lean_object* v___y_44_){
 _start:
 {
 lean_object* v_res_45_; 
@@ -404,7 +404,7 @@ v___x_59_ = l_Lake_registerOrderedTagAttribute(v___x_56_, v___x_57_, v___f_55_, 
 return v___x_59_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_1620868245____hygCtx___hyg_2____boxed(lean_object* v_a_60_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_1620868245____hygCtx___hyg_2____boxed(lean_object* v___y_60_){
 _start:
 {
 lean_object* v_res_61_; 
@@ -424,7 +424,7 @@ v___x_75_ = l_Lake_registerOrderedTagAttribute(v___x_72_, v___x_73_, v___f_71_, 
 return v___x_75_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_3623187058____hygCtx___hyg_2____boxed(lean_object* v_a_76_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_3623187058____hygCtx___hyg_2____boxed(lean_object* v___y_76_){
 _start:
 {
 lean_object* v_res_77_; 
@@ -913,7 +913,7 @@ v___x_250_ = l_Lake_registerOrderedTagAttribute(v___x_247_, v___x_248_, v___f_24
 return v___x_250_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_2501670873____hygCtx___hyg_2____boxed(lean_object* v_a_251_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_2501670873____hygCtx___hyg_2____boxed(lean_object* v___y_251_){
 _start:
 {
 lean_object* v_res_252_; 
@@ -951,7 +951,7 @@ v___x_278_ = l_Lake_registerOrderedTagAttribute(v___x_275_, v___x_276_, v___f_27
 return v___x_278_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_1207319905____hygCtx___hyg_2____boxed(lean_object* v_a_279_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_1207319905____hygCtx___hyg_2____boxed(lean_object* v___y_279_){
 _start:
 {
 lean_object* v_res_280_; 
@@ -971,7 +971,7 @@ v___x_294_ = l_Lake_registerOrderedTagAttribute(v___x_291_, v___x_292_, v___f_29
 return v___x_294_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_3537518125____hygCtx___hyg_2____boxed(lean_object* v_a_295_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_3537518125____hygCtx___hyg_2____boxed(lean_object* v___y_295_){
 _start:
 {
 lean_object* v_res_296_; 
@@ -991,7 +991,7 @@ v___x_310_ = l_Lake_registerOrderedTagAttribute(v___x_307_, v___x_308_, v___f_30
 return v___x_310_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_914944953____hygCtx___hyg_2____boxed(lean_object* v_a_311_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_914944953____hygCtx___hyg_2____boxed(lean_object* v___y_311_){
 _start:
 {
 lean_object* v_res_312_; 
@@ -1011,7 +1011,7 @@ v___x_326_ = l_Lake_registerOrderedTagAttribute(v___x_323_, v___x_324_, v___f_32
 return v___x_326_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_2342384104____hygCtx___hyg_2____boxed(lean_object* v_a_327_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_2342384104____hygCtx___hyg_2____boxed(lean_object* v___y_327_){
 _start:
 {
 lean_object* v_res_328_; 
@@ -1031,7 +1031,7 @@ v___x_342_ = l_Lake_registerOrderedTagAttribute(v___x_339_, v___x_340_, v___f_33
 return v___x_342_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_2316908844____hygCtx___hyg_2____boxed(lean_object* v_a_343_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_2316908844____hygCtx___hyg_2____boxed(lean_object* v___y_343_){
 _start:
 {
 lean_object* v_res_344_; 
@@ -1051,7 +1051,7 @@ v___x_358_ = l_Lake_registerOrderedTagAttribute(v___x_355_, v___x_356_, v___f_35
 return v___x_358_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_2750287618____hygCtx___hyg_2____boxed(lean_object* v_a_359_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_2750287618____hygCtx___hyg_2____boxed(lean_object* v___y_359_){
 _start:
 {
 lean_object* v_res_360_; 
@@ -1216,7 +1216,7 @@ v___x_420_ = l_Lake_registerOrderedTagAttribute(v___x_417_, v___x_418_, v___f_41
 return v___x_420_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_736500823____hygCtx___hyg_2____boxed(lean_object* v_a_421_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_736500823____hygCtx___hyg_2____boxed(lean_object* v___y_421_){
 _start:
 {
 lean_object* v_res_422_; 
@@ -1410,7 +1410,7 @@ v___x_488_ = l_Lake_registerOrderedTagAttribute(v___x_485_, v___x_486_, v___f_48
 return v___x_488_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_3062214538____hygCtx___hyg_2____boxed(lean_object* v_a_489_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_3062214538____hygCtx___hyg_2____boxed(lean_object* v___y_489_){
 _start:
 {
 lean_object* v_res_490_; 
@@ -1587,7 +1587,7 @@ v___x_552_ = l_Lake_registerOrderedTagAttribute(v___x_549_, v___x_550_, v___f_54
 return v___x_552_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_587736814____hygCtx___hyg_2____boxed(lean_object* v_a_553_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_587736814____hygCtx___hyg_2____boxed(lean_object* v___y_553_){
 _start:
 {
 lean_object* v_res_554_; 
@@ -1607,7 +1607,7 @@ v___x_568_ = l_Lake_registerOrderedTagAttribute(v___x_565_, v___x_566_, v___f_56
 return v___x_568_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_3793002438____hygCtx___hyg_2____boxed(lean_object* v_a_569_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_3793002438____hygCtx___hyg_2____boxed(lean_object* v___y_569_){
 _start:
 {
 lean_object* v_res_570_; 
@@ -1627,7 +1627,7 @@ v___x_584_ = l_Lake_registerOrderedTagAttribute(v___x_581_, v___x_582_, v___f_58
 return v___x_584_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_1817870049____hygCtx___hyg_2____boxed(lean_object* v_a_585_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_1817870049____hygCtx___hyg_2____boxed(lean_object* v___y_585_){
 _start:
 {
 lean_object* v_res_586_; 
@@ -1647,7 +1647,7 @@ v___x_600_ = l_Lake_registerOrderedTagAttribute(v___x_597_, v___x_598_, v___f_59
 return v___x_600_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_1787873690____hygCtx___hyg_2____boxed(lean_object* v_a_601_){
+LEAN_EXPORT lean_object* l___private_Lake_DSL_AttributesCore_0__Lake_initFn_00___x40_Lake_DSL_AttributesCore_1787873690____hygCtx___hyg_2____boxed(lean_object* v___y_601_){
 _start:
 {
 lean_object* v_res_602_; 

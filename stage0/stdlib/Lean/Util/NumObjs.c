@@ -732,7 +732,7 @@ lean_ctor_set(v___x_244_, 0, v___x_243_);
 return v___x_244_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Expr_numObjs___boxed(lean_object* v_e_245_, lean_object* v_a_246_){
+LEAN_EXPORT lean_object* l_Lean_Expr_numObjs___boxed(lean_object* v_e_245_, lean_object* v___y_246_){
 _start:
 {
 lean_object* v_res_247_; 

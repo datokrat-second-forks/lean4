@@ -41,7 +41,7 @@ v___x_13_ = l_Lean_Meta_registerSimpAttr(v___x_10_, v___x_11_, v___x_12_);
 return v___x_13_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_BoolToPropSimps_0__Lean_initFn_00___x40_Lean_Elab_Tactic_BoolToPropSimps_428426324____hygCtx___hyg_2____boxed(lean_object* v_a_14_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_BoolToPropSimps_0__Lean_initFn_00___x40_Lean_Elab_Tactic_BoolToPropSimps_428426324____hygCtx___hyg_2____boxed(lean_object* v___y_14_){
 _start:
 {
 lean_object* v_res_15_; 

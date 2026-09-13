@@ -4728,7 +4728,7 @@ goto v___jp_1216_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_CtorInfo_checkValid___boxed(lean_object* v_info_1260_, lean_object* v_a_1261_, lean_object* v_a_1262_, lean_object* v_a_1263_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_CtorInfo_checkValid___boxed(lean_object* v_info_1260_, lean_object* v_a_1261_, lean_object* v_a_1262_, lean_object* v___y_1263_){
 _start:
 {
 lean_object* v_res_1264_; 
@@ -27959,7 +27959,7 @@ return v___x_8397_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_hasLocalInst___redArg___boxed(lean_object* v_type_8398_, lean_object* v_a_8399_, lean_object* v_a_8400_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_hasLocalInst___redArg___boxed(lean_object* v_type_8398_, lean_object* v_a_8399_, lean_object* v___y_8400_){
 _start:
 {
 lean_object* v_res_8401_; 
@@ -27976,7 +27976,7 @@ v___x_8406_ = l_Lean_Compiler_LCNF_hasLocalInst___redArg(v_type_8402_, v_a_8404_
 return v___x_8406_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_hasLocalInst___boxed(lean_object* v_type_8407_, lean_object* v_a_8408_, lean_object* v_a_8409_, lean_object* v_a_8410_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_hasLocalInst___boxed(lean_object* v_type_8407_, lean_object* v_a_8408_, lean_object* v_a_8409_, lean_object* v___y_8410_){
 _start:
 {
 lean_object* v_res_8411_; 
@@ -28256,7 +28256,7 @@ return v___x_8443_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Decl_isTemplateLike___redArg___boxed(lean_object* v_decl_8481_, lean_object* v_a_8482_, lean_object* v_a_8483_, lean_object* v_a_8484_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Decl_isTemplateLike___redArg___boxed(lean_object* v_decl_8481_, lean_object* v_a_8482_, lean_object* v_a_8483_, lean_object* v___y_8484_){
 _start:
 {
 lean_object* v_res_8485_; 
@@ -28274,7 +28274,7 @@ v___x_8491_ = l_Lean_Compiler_LCNF_Decl_isTemplateLike___redArg(v_decl_8487_, v_
 return v___x_8491_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Decl_isTemplateLike___boxed(lean_object* v_pu_8492_, lean_object* v_decl_8493_, lean_object* v_a_8494_, lean_object* v_a_8495_, lean_object* v_a_8496_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Decl_isTemplateLike___boxed(lean_object* v_pu_8492_, lean_object* v_decl_8493_, lean_object* v_a_8494_, lean_object* v_a_8495_, lean_object* v___y_8496_){
 _start:
 {
 uint8_t v_pu_boxed_8497_; lean_object* v_res_8498_; 

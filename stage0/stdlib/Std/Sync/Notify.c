@@ -362,9 +362,9 @@ return v___x_88_;
 LEAN_EXPORT lean_object* l_Std_Notify_Consumer_resolve___redArg___lam__0___boxed(lean_object* v___x_90_, lean_object* v___y_91_){
 _start:
 {
-uint8_t v___x_406__boxed_92_; uint8_t v_res_93_; lean_object* v_r_94_; 
-v___x_406__boxed_92_ = lean_unbox(v___x_90_);
-v_res_93_ = l_Std_Notify_Consumer_resolve___redArg___lam__0(v___x_406__boxed_92_);
+uint8_t v___x_365__boxed_92_; uint8_t v_res_93_; lean_object* v_r_94_; 
+v___x_365__boxed_92_ = lean_unbox(v___x_90_);
+v_res_93_ = l_Std_Notify_Consumer_resolve___redArg___lam__0(v___x_365__boxed_92_);
 v_r_94_ = lean_box(v_res_93_);
 return v_r_94_;
 }
@@ -390,7 +390,7 @@ return v___x_106_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_Notify_Consumer_resolve___redArg___boxed(lean_object* v_c_107_, lean_object* v_x_108_, lean_object* v_a_109_){
+LEAN_EXPORT lean_object* l_Std_Notify_Consumer_resolve___redArg___boxed(lean_object* v_c_107_, lean_object* v_x_108_, lean_object* v___y_109_){
 _start:
 {
 uint8_t v_res_110_; lean_object* v_r_111_; 
@@ -408,7 +408,7 @@ v___x_116_ = l_Std_Notify_Consumer_resolve___redArg(v_c_113_, v_x_114_);
 return v___x_116_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Notify_Consumer_resolve___boxed(lean_object* v_00_u03b1_117_, lean_object* v_c_118_, lean_object* v_x_119_, lean_object* v_a_120_){
+LEAN_EXPORT lean_object* l_Std_Notify_Consumer_resolve___boxed(lean_object* v_00_u03b1_117_, lean_object* v_c_118_, lean_object* v_x_119_, lean_object* v___y_120_){
 _start:
 {
 uint8_t v_res_121_; lean_object* v_r_122_; 
@@ -435,7 +435,7 @@ v___x_126_ = l_Std_Mutex_new___redArg(v___x_125_);
 return v___x_126_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Notify_new___boxed(lean_object* v_a_127_){
+LEAN_EXPORT lean_object* l_Std_Notify_new___boxed(lean_object* v___y_127_){
 _start:
 {
 lean_object* v_res_128_; 
@@ -554,7 +554,7 @@ v___x_179_ = l_Std_Mutex_atomically___at___00Std_Notify_notify_spec__1___redArg(
 return v___x_179_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Notify_notify___boxed(lean_object* v_x_180_, lean_object* v_a_181_){
+LEAN_EXPORT lean_object* l_Std_Notify_notify___boxed(lean_object* v_x_180_, lean_object* v___y_181_){
 _start:
 {
 lean_object* v_res_182_; 
@@ -633,7 +633,7 @@ lean_dec(v___x_212_);
 return v___x_213_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Notify_notifyOne___boxed(lean_object* v_x_214_, lean_object* v_a_215_){
+LEAN_EXPORT lean_object* l_Std_Notify_notifyOne___boxed(lean_object* v_x_214_, lean_object* v___y_215_){
 _start:
 {
 uint8_t v_res_216_; lean_object* v_r_217_; 
@@ -894,7 +894,7 @@ v___x_304_ = l_Std_Mutex_atomically___at___00Std_Notify_wait_spec__0___redArg(v_
 return v___x_304_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Notify_wait___boxed(lean_object* v_x_305_, lean_object* v_a_306_){
+LEAN_EXPORT lean_object* l_Std_Notify_wait___boxed(lean_object* v_x_305_, lean_object* v___y_306_){
 _start:
 {
 lean_object* v_res_307_; 
