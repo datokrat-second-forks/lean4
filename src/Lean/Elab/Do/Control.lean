@@ -50,7 +50,7 @@ def ControlStack.stateT (baseMonadInfo : MonadInfo) (muts : Array MutVar) (σ : 
     let (tuple, tupleTy) ← mkProdMkN mutExprs baseMonadInfo.u
     unless ← isDefEq tupleTy σ do -- just for sanity; maybe delete in the future
       throwError "State tuple type mismatch: expected {σ}, got {tupleTy}. This is a bug in the `do` elaborator."
-    base.runInBase <| mkApp e tuple
+    base.runInBase <| mkApp (← mkAppM ``StateT.run #[e]) tuple
   restoreCont dec := do
     -- Wrap `dec` such that the result type is `(dec.resultType × σ)` by unpacking the state tuple
     -- before calling `dec.k`. See also `StateT.monadControl.restoreM`.
