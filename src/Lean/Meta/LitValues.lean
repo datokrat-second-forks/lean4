@@ -83,8 +83,8 @@ def getStringValue? (e : Expr) : (Option String) :=
 
 /-- Return `some ⟨n, v⟩` if `e` is an `OfNat.ofNat` application encoding a `Fin n` with value `v` -/
 def getFinValue? (e : Expr) : MetaM (Option ((n : Nat) × Fin n)) := OptionT.run do
-  let (v, type) ← getOfNatValue? e ``Fin
-  let n ← getNatValue? (← whnfD type.appArg!)
+  let (v, type) ← OptionT.mk (getOfNatValue? e ``Fin)
+  let n ← OptionT.mk (getNatValue? (← whnfD type.appArg!))
   match n with
   | 0 => failure
   | m+1 => return ⟨m+1, Fin.ofNat _ v⟩
@@ -99,16 +99,16 @@ that encode a `BitVec n` with value `v`.
 def getBitVecValue? (e : Expr) : MetaM (Option ((n : Nat) × BitVec n)) := OptionT.run do
   match_expr e with
   | BitVec.ofNat nExpr vExpr =>
-    let n ← getNatValue? nExpr
-    let v ← getNatValue? vExpr
+    let n ← OptionT.mk (getNatValue? nExpr)
+    let v ← OptionT.mk (getNatValue? vExpr)
     return ⟨n, BitVec.ofNat n v⟩
   | BitVec.ofNatLT nExpr vExpr _ =>
-    let n ← getNatValue? nExpr
-    let v ← getNatValue? vExpr
+    let n ← OptionT.mk (getNatValue? nExpr)
+    let v ← OptionT.mk (getNatValue? vExpr)
     return ⟨n, BitVec.ofNat n v⟩
   | _ =>
-    let (v, type) ← getOfNatValue? e ``BitVec
-    let n ← getNatValue? (← whnfD type.appArg!)
+    let (v, type) ← OptionT.mk (getOfNatValue? e ``BitVec)
+    let n ← OptionT.mk (getNatValue? (← whnfD type.appArg!))
     return ⟨n, BitVec.ofNat n v⟩
 
 /--
@@ -134,22 +134,22 @@ def getLitValueModulus? (α : Expr) : MetaM (Option Nat) := do
 
 /-- Return `some n` if `e` is an `OfNat.ofNat`-application encoding the `UInt8` with value `n`. -/
 def getUInt8Value? (e : Expr) : MetaM (Option UInt8) := OptionT.run do
-  let (n, _) ← getOfNatValue? e ``UInt8
+  let (n, _) ← OptionT.mk (getOfNatValue? e ``UInt8)
   return UInt8.ofNat n
 
 /-- Return `some n` if `e` is an `OfNat.ofNat`-application encoding the `UInt16` with value `n`. -/
 def getUInt16Value? (e : Expr) : MetaM (Option UInt16) := OptionT.run do
-  let (n, _) ← getOfNatValue? e ``UInt16
+  let (n, _) ← OptionT.mk (getOfNatValue? e ``UInt16)
   return UInt16.ofNat n
 
 /-- Return `some n` if `e` is an `OfNat.ofNat`-application encoding the `UInt32` with value `n`. -/
 def getUInt32Value? (e : Expr) : MetaM (Option UInt32) := OptionT.run do
-  let (n, _) ← getOfNatValue? e ``UInt32
+  let (n, _) ← OptionT.mk (getOfNatValue? e ``UInt32)
   return UInt32.ofNat n
 
 /-- Return `some n` if `e` is an `OfNat.ofNat`-application encoding the `UInt64` with value `n`. -/
 def getUInt64Value? (e : Expr) : MetaM (Option UInt64) := OptionT.run do
-  let (n, _) ← getOfNatValue? e ``UInt64
+  let (n, _) ← OptionT.mk (getOfNatValue? e ``UInt64)
   return UInt64.ofNat n
 
 /-- Return `some b` if `e` is the boolean literal `true` or `false`. -/
@@ -165,9 +165,9 @@ private def getFloatLit? (e : Expr) : MetaM (Option Float) := OptionT.run do
   | OfScientific.ofScientific type _ m s exp =>
     guard ((← whnfD type).isConstOf ``Float)
     let some s := getBoolLit? s | failure
-    return Float.ofScientific (← getNatValue? m) s (← getNatValue? exp)
+    return Float.ofScientific (← OptionT.mk (getNatValue? m)) s (← OptionT.mk (getNatValue? exp))
   | _ =>
-    let (n, _) ← getOfNatValue? e ``Float
+    let (n, _) ← OptionT.mk (getOfNatValue? e ``Float)
     return Float.ofNat n
 
 /--
@@ -186,9 +186,9 @@ private def getFloat32Lit? (e : Expr) : MetaM (Option Float32) := OptionT.run do
   | OfScientific.ofScientific type _ m s exp =>
     guard ((← whnfD type).isConstOf ``Float32)
     let some s := getBoolLit? s | failure
-    return Float32.ofScientific (← getNatValue? m) s (← getNatValue? exp)
+    return Float32.ofScientific (← OptionT.mk (getNatValue? m)) s (← OptionT.mk (getNatValue? exp))
   | _ =>
-    let (n, _) ← getOfNatValue? e ``Float32
+    let (n, _) ← OptionT.mk (getOfNatValue? e ``Float32)
     return Float32.ofNat n
 
 /--

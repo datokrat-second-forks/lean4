@@ -325,7 +325,7 @@ by calling `findLeanSysroot?`. See `LeanInstall.get` for how it assumes the
 Lean install is organized.
 -/
 public def findLeanCmdInstall? (lean := "lean") : BaseIO (Option LeanInstall) :=
-  OptionT.run do LeanInstall.get (← findLeanSysroot? lean)
+  OptionT.run do LeanInstall.get (← OptionT.mk (findLeanSysroot? lean))
 
 /--
 Check if the running Lake's executable is co-located with Lean, and, if so,

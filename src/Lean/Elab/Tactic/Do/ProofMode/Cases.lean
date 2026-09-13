@@ -117,7 +117,7 @@ partial def mCasesCore (u : Level) (σs : Expr) (H : Expr) (pat : MCasesPat) (k 
   | .tuple [] => mCasesCore u σs H .clear k
   | .tuple [p] => mCasesCore u σs H p k
   | .tuple (p :: ps) => do
-    if let some (H₁, H₂, hand) ← synthIsAnd u σs H then
+    if let some (H₁, H₂, hand) ← (synthIsAnd u σs H).run then
       -- goal is Q ∧ H ⊢ₛ T, where `hand : H ⊣⊢ₛ H₁ ∧ H₂`. Plan:
       -- 1. Recurse on H₁ and H₂.
       -- 2. The inner callback sees H₁' and H₂' and calls k on H₁₂', where H₁₂' = mkAnd H₁' H₂'

@@ -817,10 +817,11 @@ where
   The array `toClear` contains variables that must be cleared before elaborating the `rhs` because
   they have been generalized/refined.
 -/
-private def elabMatchAltView (discrs : Array Discr) (alt : TermMatchAltView) (matchType : Expr) (toClear : Array FVarId) : ExceptT PatternElabException TermElabM (AltLHS × Expr) := withRef alt.ref do
+private def elabMatchAltView (discrs : Array Discr) (alt : TermMatchAltView) (matchType : Expr) (toClear : Array FVarId) : ExceptT PatternElabException TermElabM (AltLHS × Expr) :=
+    ExceptT.mk <| withRef alt.ref do
     let (patternVars, alt) ← collectPatternVars alt
     trace[Elab.match] "patternVars: {patternVars}"
-    withPatternVars patternVars fun patternVarDecls => do
+    withPatternVars patternVars fun patternVarDecls => ExceptT.run do
       withElaboratedLHS patternVarDecls alt.patterns alt.lhs discrs.size matchType fun altLHS matchType =>
         withEqs discrs altLHS.patterns fun eqs =>
           withLocalInstances altLHS.fvarDecls do

@@ -84,8 +84,8 @@ public instance [Monad m] [LawfulMonad m] [WP m .pure] [WPSound m .pure] :
     refine ⟨⟨ExceptT.mk (X >>= fun ⟨r, h⟩ => match r, h with
       | .ok a, hp => pure (.ok ⟨a, hp⟩)
       | .error e, _ => pure (.error e)), ⟨fun {β} k =>?_⟩⟩⟩
-    show ExceptT.mk _ >>= _ = x >>= k
-    simp only [Bind.bind, ExceptT.bind, ExceptT.mk]; rw [bind_assoc]
+    refine ExceptT.ext ?_
+    simp only [Bind.bind, ExceptT.bind, ExceptT.run_mk]; rw [bind_assoc]
     refine Eq.trans ?_ (hX.bind_eq (β := Except ε β) (ExceptT.bindCont k))
     exact bind_congr fun ⟨r, _⟩ => by cases r <;> simp [pure_bind, ExceptT.bindCont]
 
@@ -101,11 +101,11 @@ public instance [Monad m] [LawfulMonad m] [WP m .pure] [WPSound m .pure] :
     refine ⟨⟨OptionT.mk (X >>= fun ⟨r, h⟩ => match r, h with
       | some a, hp => pure (some ⟨a, hp⟩)
       | none, _ => pure none), ⟨fun {β} k =>?_⟩⟩⟩
-    show OptionT.mk _ >>= _ = x >>= k
-    simp only [Bind.bind, OptionT.bind, OptionT.mk]; rw [bind_assoc]
+    refine OptionT.ext ?_
+    simp only [Bind.bind, OptionT.bind, OptionT.run_mk]; rw [bind_assoc]
     refine Eq.trans ?_
       (hX.bind_eq (β := Option β) (fun r => match r with | some a => (k a).run | none => pure none))
-    exact bind_congr fun ⟨r, _⟩ => by cases r <;> simp [pure_bind, OptionT.run]
+    exact bind_congr fun ⟨r, _⟩ => by cases r <;> simp [pure_bind]
 
 public instance : WPSound (EStateM ε σ) (.except ε (.arg σ .pure)) where
   ensures_of_wp {α} {x} {P} hwp :=
@@ -229,7 +229,7 @@ public theorem ExceptT.of_wp_run
 public theorem Except.of_wp_eq {ε α : Type} {x prog : Except ε α}
     (h : prog = x) (P : Except ε α → Prop) :
     (⊢ₛ wp⟦prog⟧ post⟨fun a => ⌜P (.ok a)⌝, fun e => ⌜P (.error e)⌝⟩) → P x := fun hwp =>
-  ExceptT.of_wp_run (m := _root_.Id) (prog := prog) (x := x) P h hwp
+  ExceptT.of_wp_run (m := _root_.Id) (prog := ExceptT.mk prog) (x := x) P h hwp
 
 /-- Soundness lemma for `Except` without the equality hypothesis (deprecated). -/
 @[deprecated Except.of_wp_eq +typeChanged (since := "2026-01-26")]
@@ -266,6 +266,6 @@ public theorem OptionT.of_wp_run
 public theorem Option.of_wp_eq {α : Type} {x prog : Option α}
     (h : prog = x) (P : Option α → Prop) :
     (⊢ₛ wp⟦prog⟧ post⟨fun a => ⌜P (some a)⌝, fun _ => ⌜P none⌝⟩) → P x := fun hwp =>
-  OptionT.of_wp_run (m := _root_.Id) (prog := prog) (x := x) P h hwp
+  OptionT.of_wp_run (m := _root_.Id) (prog := OptionT.mk prog) (x := x) P h hwp
 
 end Std.Do

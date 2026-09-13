@@ -108,7 +108,7 @@ deriving Monad, Alternative
 
 public
 instance [ExecTraceTypes]: MonadLift Err Traceful := {
-  monadLift x := Traceful.mk fun tr => (x, ⟨ tr, by grind ⟩ )
+  monadLift x := Traceful.mk fun tr => (x.run, ⟨ tr, by grind ⟩ )
 }
 
 public

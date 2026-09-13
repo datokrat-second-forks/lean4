@@ -1541,11 +1541,11 @@ def delabSorry : Delab := whenPPOption getPPNotation <| whenNotPPOption getPPExp
   else
     withOverApp 2 `(sorry)
 
-private unsafe def evalSyntaxConstantUnsafe (env : Environment) (opts : Options) (constName : Name) : ExceptT String Id Syntax :=
+private unsafe def evalSyntaxConstantUnsafe (env : Environment) (opts : Options) (constName : Name) : Except String Syntax :=
   env.evalConstCheck Syntax opts ``Syntax constName
 
 @[implemented_by evalSyntaxConstantUnsafe]
-private opaque evalSyntaxConstant (env : Environment) (opts : Options) (constName : Name) : ExceptT String Id Syntax := throw ""
+private opaque evalSyntaxConstant (env : Environment) (opts : Options) (constName : Name) : Except String Syntax := throw ""
 
 /--
 Pretty-prints the parameters of a `forall`. The pretty-printed parameters are passed to

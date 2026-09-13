@@ -248,8 +248,8 @@ def race [Inhabited α] (x : ContextAsync α) (y : ContextAsync α)
   let task2 ← async (y ctx2) prio
 
   let promise ← IO.Promise.new
-  BaseIO.chainTask task1 fun result => liftM (promise.resolve result) *> ctx2.cancel .cancel
-  BaseIO.chainTask task2 fun result => liftM (promise.resolve result) *> ctx1.cancel .cancel
+  BaseIO.chainTask task1.run fun result => liftM (promise.resolve result) *> ctx2.cancel .cancel
+  BaseIO.chainTask task2.run fun result => liftM (promise.resolve result) *> ctx1.cancel .cancel
 
   let result ← MonadAwait.await promise
   Async.ofExcept result

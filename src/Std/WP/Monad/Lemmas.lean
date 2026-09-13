@@ -199,7 +199,7 @@ theorem le_wp_tryCatch_OptionT_apply (x : OptionT m α)
     (h : PUnit → OptionT m α) :
   wp x post ⟨fun _ => wp (h ⟨⟩) post epost, epost.snd⟩ ⊑
     wp (MonadExceptOf.tryCatch x h : OptionT m α) post epost := by
-  simp only [wp, MonadExceptOf.tryCatch, OptionT.tryCatch, OptionT.mk]
+  simp only [wp, MonadExceptOf.tryCatch, OptionT.tryCatch]
   apply PartialOrder.rel_trans; rotate_left; apply WPMonad.bind_le_wp_bind
   apply WP.wp_consequence (x := x.run); intro o; cases o with
   | some a =>
@@ -280,7 +280,7 @@ theorem le_wp_monadLift_ExceptT_apply (x : m α) (post : α → Pred)
     (epost : (ε → Pred) × EPred) :
     wp x post epost.snd ⊑
       wp (MonadLift.monadLift x : ExceptT ε m α) post epost := by
-  simp only [wp, MonadLift.monadLift, ExceptT.lift, ExceptT.mk]
+  simp only [wp, MonadLift.monadLift, ExceptT.lift]
   apply PartialOrder.rel_trans; rotate_left
   · exact WPMonad.map_le_wp_map (m := m) Except.ok x _ _
   · exact PartialOrder.rel_refl
@@ -301,7 +301,7 @@ theorem wp_lift_ExceptT_apply_eq (x : m α) :
 theorem le_wp_monadLift_OptionT_apply (x : m α) :
   wp x post epost.snd ⊑
     wp (MonadLift.monadLift x : OptionT m α) post epost := by
-  simp only [wp, MonadLift.monadLift, OptionT.mk, OptionT.lift]
+  simp only [wp, MonadLift.monadLift, OptionT.lift]
   apply PartialOrder.rel_trans; rotate_left; apply WPMonad.bind_le_wp_bind
   apply WP.wp_consequence; intro a
   apply PartialOrder.rel_trans; rotate_left; apply WPMonad.pure_le_wp_pure
@@ -336,14 +336,14 @@ theorem wp_monadMap_ExceptT_apply_eq
     (epost : (ε → Pred) × EPred) :
     wp (MonadFunctor.monadMap (m:=m) f x : ExceptT ε m α) post epost =
       wp (f x.run) (pushExcept post epost.fst) epost.snd := by
-  simp [MonadFunctor.monadMap, ExceptT.run]
+  simp [MonadFunctor.monadMap]
 
 @[simp]
 theorem wp_monadMap_OptionT_apply_eq
   (f : ∀{β}, m β → m β) {α} (x : OptionT m α) (post : α → Pred) (epost : (Unit → Pred) × EPred) :
   wp (MonadFunctor.monadMap (m:=m) f x : OptionT m α) post epost =
     wp (f x.run) (pushOption post epost.fst) epost.snd := by
-  simp only [wp, MonadFunctor.monadMap, OptionT.run]; rfl
+  simp only [wp, MonadFunctor.monadMap]; rfl
 
 @[simp]
 theorem wp_withReader_ReaderT_apply_eq (f : ρ → ρ) (x : ReaderT ρ m α) :
@@ -366,9 +366,9 @@ theorem wp_withTheReader_ReaderT_apply_eq (f : ρ → ρ) (x : ReaderT ρ m α) 
 theorem le_wp_adapt_ExceptT_apply (f : ε → ε') (x : ExceptT ε m α) :
     wp x post ⟨fun e => epost.fst (f e), epost.snd⟩ ⊑
       wp (ExceptT.adapt f x : ExceptT ε' m α) post epost := by
-  simp only [wp, ExceptT.adapt, ExceptT.mk]
+  simp only [wp, ExceptT.adapt]
   apply PartialOrder.rel_trans; rotate_left
-  · exact WPMonad.map_le_wp_map (m := m) (Except.mapError f) x _ _
+  · exact WPMonad.map_le_wp_map (m := m) (Except.mapError f) x.run _ _
   · apply WP.wp_consequence (x := x.run); intro r; cases r <;> exact PartialOrder.rel_refl
 
 @[simp]
@@ -441,7 +441,7 @@ theorem wp_restoreM_ReaderT_apply_eq (x : m α) :
 theorem wp_restoreM_ExceptT_apply_eq (x : m (Except ε α)) :
     wp (MonadControl.restoreM (m:=m) x : ExceptT ε m α) post epost =
       wp x (pushExcept post epost.fst) epost.snd := by
-  simp [MonadControl.restoreM, ExceptT.run]
+  simp [MonadControl.restoreM]
 
 @[simp]
 theorem wp_restoreM_OptionT_apply_eq (x : m (Option α)) :
@@ -579,14 +579,14 @@ theorem wp_throw_lift_OptionT_apply_eq (err : ε) :
 @[simp]
 theorem wp_tryCatch_lift_ExceptT_apply_eq (x : ExceptT ε' m α) (h : ε → ExceptT ε' m α) :
     wp (MonadExceptOf.tryCatch (ε:=ε) x h : ExceptT ε' m α) post epost =
-      wp (MonadExceptOf.tryCatch (ε:=ε) x h : m (Except ε' α))
+      wp (MonadExceptOf.tryCatch (ε:=ε) x.run (fun e => (h e).run) : m (Except ε' α))
         (pushExcept post epost.fst) epost.snd := by
   rfl
 
 @[simp]
 theorem wp_tryCatch_lift_OptionT_apply_eq (x : OptionT m α) (h : ε → OptionT m α) :
   wp (MonadExceptOf.tryCatch (ε:=ε) x h : OptionT m α) post epost =
-    wp (MonadExceptOf.tryCatch (ε:=ε) x h : m (Option α))
+    wp (MonadExceptOf.tryCatch (ε:=ε) x.run (fun e => (h e).run) : m (Option α))
       (pushOption post epost.fst) epost.snd := by
   rfl
 

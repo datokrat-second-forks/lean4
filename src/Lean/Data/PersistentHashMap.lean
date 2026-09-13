@@ -379,8 +379,8 @@ protected def forIn {_ : BEq α} {_ : Hashable α} [Monad m]
   let intoError : ForInStep σ → Except σ σ
   | .done s => .error s
   | .yield s => .ok s
-  let result ← foldlM (m := ExceptT σ m) map (init := init) fun s a b =>
-    (intoError <$> f (a, b) s : m _)
+  let result ← ExceptT.run <| foldlM (m := ExceptT σ m) map (init := init) fun s a b =>
+    ExceptT.mk (intoError <$> f (a, b) s)
   match result with
   | .ok s | .error s => pure s
 

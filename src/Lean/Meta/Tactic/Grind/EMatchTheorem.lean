@@ -75,7 +75,7 @@ private def detectOffsets (pat : Expr) : MetaM Expr := do
     else match e with
       | .letE .. | .lam .. | .forallE .. => return .done e
       | _ =>
-        let some (e, k) ← isOffset? e
+        let some (e, k) ← (isOffset? e).run
           | return .continue e
         if k == 0 then return .continue e
         return .continue <| mkOffsetPattern e k
