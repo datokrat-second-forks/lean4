@@ -30,8 +30,9 @@ as `Grind.SolverExtension` in `Lean/Meta/Tactic/Grind/Types.lean`.
 
 /-- Opaque extension state type used to store type-erased extension values. -/
 opaque SymExtensionStateSpec : (α : Type) × Inhabited α := ⟨Unit, ⟨()⟩⟩
-@[expose] def SymExtensionState : Type := SymExtensionStateSpec.fst
-instance : Inhabited SymExtensionState := SymExtensionStateSpec.snd
+structure SymExtensionState : Type where
+  val : SymExtensionStateSpec.fst
+instance : Inhabited SymExtensionState := ⟨⟨SymExtensionStateSpec.snd.default⟩⟩
 
 /--
 A registered extension for `SymM`. Each extension gets a unique index into the

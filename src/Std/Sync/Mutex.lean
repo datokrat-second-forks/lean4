@@ -13,16 +13,17 @@ public section
 
 namespace Std
 
-private opaque BaseMutexImpl : NonemptyType.{0}
+opaque BaseMutexImpl : NonemptyType.{0}
 
 /--
 Mutual exclusion primitive (a lock).
 
 If you want to guard shared state, use `Mutex α` instead.
 -/
-def BaseMutex : Type := BaseMutexImpl.type
+structure BaseMutex : Type where
+  ref : BaseMutexImpl.type
 
-instance : Nonempty BaseMutex := by exact BaseMutexImpl.property
+instance : Nonempty BaseMutex := ⟨⟨Classical.choice BaseMutexImpl.property⟩⟩
 
 /-- Creates a new `BaseMutex`. -/
 @[extern "lean_io_basemutex_new"]
@@ -61,7 +62,7 @@ If this is unavoidable in your code, consider using `BaseRecursiveMutex`.
 @[extern "lean_io_basemutex_unlock"]
 opaque BaseMutex.unlock (mutex : @& BaseMutex) : BaseIO Unit
 
-private opaque CondvarImpl : NonemptyType.{0}
+opaque CondvarImpl : NonemptyType.{0}
 
 /--
 Condition variable, a synchronization primitive to be used with a `BaseMutex` or `Mutex`.
@@ -84,9 +85,10 @@ to wait until a condition is true. If working with a `BaseMutex` it must:
        condition variable is notified.
     3. Check the condition and resume waiting if not satisfied.
 -/
-def Condvar : Type := CondvarImpl.type
+structure Condvar : Type where
+  ref : CondvarImpl.type
 
-instance : Nonempty Condvar := by exact CondvarImpl.property
+instance : Nonempty Condvar := ⟨⟨Classical.choice CondvarImpl.property⟩⟩
 
 /-- Creates a new condition variable. -/
 @[extern "lean_io_condvar_new"]

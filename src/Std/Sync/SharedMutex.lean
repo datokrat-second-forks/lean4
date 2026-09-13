@@ -12,16 +12,17 @@ public section
 
 namespace Std
 
-private opaque SharedMutexImpl : NonemptyType.{0}
+opaque SharedMutexImpl : NonemptyType.{0}
 
 /--
 An exclusion primitive that allows a number of readers or at most one writer.
 
 If you want to guard shared state, use `SharedMutex α` instead.
 -/
-def BaseSharedMutex : Type := SharedMutexImpl.type
+structure BaseSharedMutex : Type where
+  ref : SharedMutexImpl.type
 
-instance : Nonempty BaseSharedMutex := by exact SharedMutexImpl.property
+instance : Nonempty BaseSharedMutex := ⟨⟨Classical.choice SharedMutexImpl.property⟩⟩
 
 /-- Creates a new `BaseSharedMutex`. -/
 @[extern "lean_io_basesharedmutex_new"]

@@ -22,8 +22,9 @@ namespace Lean.Elab.Command
 Opaque linter state. Similar to `EnvExtensionState` for environment extensions.
 -/
 opaque LinterStateSpec : (α : Type) × Inhabited α := ⟨Unit, ⟨()⟩⟩
-@[expose] def LinterState : Type := LinterStateSpec.fst
-instance : Inhabited LinterState := LinterStateSpec.snd
+structure LinterState : Type where
+  val : LinterStateSpec.fst
+instance : Inhabited LinterState := ⟨⟨LinterStateSpec.snd.default⟩⟩
 
 structure State where
   env            : Environment
