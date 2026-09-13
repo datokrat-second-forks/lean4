@@ -28,10 +28,10 @@ partial def mRefineCore (goal : MGoal) (pat : MRefinePat) (k : MGoal → TSyntax
   | .stateful name => liftMetaM do
     match name with
     | `(binderIdent| $name:ident) => do
-      let some prf ← goal.exact name | throwError "unknown hypothesis `{repr name}`"
+      let some prf ← (goal.exact name).run | throwError "unknown hypothesis `{repr name}`"
       return prf
     | _ => do
-      let some prf ← goal.assumption | throwError "could not solve {goal.target} by assumption"
+      let some prf ← goal.assumption.run | throwError "could not solve {goal.target} by assumption"
       return prf
   | .pure t => do
     goal.exactPure t
@@ -57,7 +57,7 @@ partial def mRefineCore (goal : MGoal) (pat : MRefinePat) (k : MGoal → TSyntax
     else if f.isConstOf ``SPred.exists && args.size >= 3 then
       let α := args[0]!
       let ψ := args[2]!
-      let some witness ← patAsTerm p (some α) | throwError "pattern does not elaborate to a term to instantiate ψ"
+      let some witness ← (patAsTerm p (some α)).run | throwError "pattern does not elaborate to a term to instantiate ψ"
       let prf ← mRefineCore { goal with target := ψ.beta (#[witness] ++ args[3...*]) } (.tuple ps) k
       let u ← getLevel α
       return mkApp6 (mkConst ``SPred.exists_intro' [u, goal.u]) α goal.σs goal.hyps ψ witness prf

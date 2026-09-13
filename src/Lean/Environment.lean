@@ -2540,7 +2540,7 @@ such as in `#eval`.
     evalCheckMeta env constName
   evalConstCore α env opts constName
 
-private def throwUnexpectedType {α} (typeName : Name) (constName : Name) : ExceptT String Id α :=
+private def throwUnexpectedType {α} (typeName : Name) (constName : Name) : Except String α :=
   throw ("unexpected type at '" ++ toString constName ++ "', `" ++ toString typeName ++ "` expected")
 
 /--
@@ -2618,7 +2618,7 @@ where
 
 /-- Like `evalConst`, but first check that `constName` indeed is a declaration of type `typeName`.
     Note that this function cannot guarantee that `typeName` is in fact the name of the type `α`. -/
-unsafe def evalConstCheck (α) (env : Environment) (opts : Options) (typeName : Name) (constName : Name) : ExceptT String Id α :=
+unsafe def evalConstCheck (α) (env : Environment) (opts : Options) (typeName : Name) (constName : Name) : Except String α :=
   match env.find? constName with
   | none      => throw ("Unknown constant `" ++ toString constName ++ "`")
   | some info =>

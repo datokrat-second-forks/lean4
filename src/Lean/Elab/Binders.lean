@@ -375,7 +375,7 @@ partial def expandFunBinders (binders : Array Syntax) (body : Syntax) : MacroM (
       | ``Lean.Parser.Term.hole | `ident => loop body (i+1) (newBinders.push binder)
       | ``Lean.Parser.Term.paren =>
         let term := binder[1]
-        match (← getFunBinderIds? term) with
+        match (← (getFunBinderIds? term).run) with
         | some idents =>
           -- `fun (x ...) ...` ~> `fun (x : _) ...`
           -- Interpret `(x ...)` as sequence of binders instead of pattern only if none of the idents
@@ -391,7 +391,7 @@ partial def expandFunBinders (binders : Array Syntax) (body : Syntax) : MacroM (
       | ``Lean.Parser.Term.typeAscription =>
         let term := binder[1]
         let type := binder[3].getOptional?.getD (mkHole binder)
-        match (← getFunBinderIds? term) with
+        match (← (getFunBinderIds? term).run) with
         | some idents => loop body (i+1) (newBinders ++ idents.map (fun ident => mkExplicitBinder ident type))
         | none        => processAsPattern ()
       | _ => processAsPattern ()
