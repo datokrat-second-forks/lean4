@@ -41,7 +41,7 @@ protected def Parser.run (p : Parser α) (s : String) : Except String α :=
 /--
 Parses the given string.
 -/
-def pstring (s : String) : Parser String := fun it =>
+def pstring (s : String) : Parser String := Parsec.mk fun it =>
   if (it.1.sliceFrom it.2).startsWith s then
     .success ⟨_, it.2.nextn s.length⟩ s
   else
@@ -81,7 +81,7 @@ Convert a byte representing `'0'..'9'` to a `Nat`.
 private def digitToNat (b : Char) : Nat := b.toNat - '0'.toNat
 
 @[inline]
-private def digitsCore (acc : Nat) : Parser Nat := fun it =>
+private def digitsCore (acc : Nat) : Parser Nat := Parsec.mk fun it =>
   /-
   With this design instead of combinators we can avoid allocating and branching over .success values
   all of the time.
@@ -143,13 +143,13 @@ termination_by it
 Skip whitespace: tabs, newlines, carriage returns, and spaces.
 -/
 @[inline]
-def ws : Parser Unit := fun it =>
+def ws : Parser Unit := Parsec.mk fun it =>
   .success ⟨_, skipWs it.2⟩ ()
 
 /--
 Takes a fixed amount of chars from the iterator.
 -/
-def take (n : Nat) : Parser String := fun it =>
+def take (n : Nat) : Parser String := Parsec.mk fun it =>
   let right := it.2.nextn n
   let substr := String.Slice.mk it.1 it.2 right String.Pos.le_nextn |>.copy
   if substr.length != n then
