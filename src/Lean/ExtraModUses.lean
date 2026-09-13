@@ -29,7 +29,7 @@ public builtin_initialize indirectModUseExt : SimplePersistentEnvExtension Indir
       let mut s := {}
       for es in es, modIdx in 0...* do
         for e in es do
-          s := s.alter e.declName (·.getD #[] |>.push modIdx)
+          s := s.alter e.declName (·.getD #[] |>.push ⟨modIdx⟩)
       return s
     asyncMode := .sync
   }

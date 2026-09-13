@@ -83,7 +83,9 @@ deriving instance BEq for SourceInfo
 inductive IsNode : Syntax → Prop where
   | mk (info : SourceInfo) (kind : SyntaxNodeKind) (args : Array Syntax) : IsNode (Syntax.node info kind args)
 
-@[expose] def SyntaxNode : Type := {s : Syntax // IsNode s }
+structure SyntaxNode : Type where
+  val : Syntax
+  property : IsNode val
 
 def unreachIsNodeMissing {β} : IsNode Syntax.missing → β := nofun
 def unreachIsNodeAtom {β} {info val} : IsNode (Syntax.atom info val) → β := nofun

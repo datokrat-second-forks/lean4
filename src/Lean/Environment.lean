@@ -84,12 +84,11 @@ structure EnvExtensionState : Type where
   val : EnvExtensionStateSpec.fst
 instance : Inhabited EnvExtensionState := ⟨⟨EnvExtensionStateSpec.snd.default⟩⟩
 
-@[expose] def ModuleIdx := Nat
-  deriving BEq, ToString, Hashable
+structure ModuleIdx where
+  toNat : Nat
+  deriving BEq, Hashable, Inhabited
 
-abbrev ModuleIdx.toNat (midx : ModuleIdx) : Nat := midx
-
-instance : Inhabited ModuleIdx where default := (0 : Nat)
+instance : ToString ModuleIdx := ⟨fun midx => toString midx.toNat⟩
 
 instance : GetElem (Array α) ModuleIdx α (fun a i => i.toNat < a.size) where
   getElem a i h := a[i.toNat]
@@ -165,7 +164,7 @@ structure EnvironmentHeader where
     let mut m := {}
     for _h : idx in [0:modules.size] do
       let mod := modules[idx]
-      m := m.insert mod.module idx
+      m := m.insert mod.module ⟨idx⟩
     return m
   /--
   Subset of `modules` for which `importAll` is `true`. This is assumed to be a much smaller set so
@@ -2344,10 +2343,10 @@ def finalizeImport (s : ImportState) (imports : Array Import) (opts : Options) (
             privateConstantMap := privateConstantMap.insert cname cinfo
           else if !subsumesInfo privateConstantMap cinfoPrev cinfo then
             throwAlreadyImported s const2ModIdx modIdx cname
-      const2ModIdx := const2ModIdx.insertIfNew cname modIdx
+      const2ModIdx := const2ModIdx.insertIfNew cname ⟨modIdx⟩
     if let some data := irData[modIdx]? then
       for cname in data.extraConstNames do
-        const2ModIdx := const2ModIdx.insertIfNew cname modIdx
+        const2ModIdx := const2ModIdx.insertIfNew cname ⟨modIdx⟩
 
   if isModule then
     for mod in modules.filter (·.isExported) do
