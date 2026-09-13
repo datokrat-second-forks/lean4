@@ -34,7 +34,7 @@ Components are composed of alphanumerics or a `*`.
 @[inline] def parseVerComponents
   (s : String)
 : EStateM String s.Pos (Array String.Slice) :=
-  fun p => go #[] p p (String.Pos.le_refl _)
+  EStateM.mk fun p => go #[] p p (String.Pos.le_refl _)
 where
   go cs iniPos p (iniPos_le : iniPos ≤ p) :=
     if h : p = s.endPos then
@@ -115,7 +115,7 @@ def parseSpecialDescr (s : String) : EStateM String s.Pos String := do
   (s : String) (x : (s : String) → EStateM String s.Pos α)
   (startPos := s.startPos) (endPos := s.endPos)
 : Except String α :=
-  match x s startPos with
+  match (x s).run startPos with
   | .ok v p =>
     if p = endPos then
       return v
@@ -360,7 +360,7 @@ namespace ComparatorOp
 
 def parseM
   (s : String)
-: EStateM String s.Pos ComparatorOp := fun p =>
+: EStateM String s.Pos ComparatorOp := EStateM.mk fun p =>
   if let some (tk, op) := trie.matchPrefix s p.offset then
     let p' := p.offset + tk
     if h : p'.IsValid s then
@@ -383,7 +383,7 @@ where trie :=
   |> add "≠"  .ne
 
 public def ofString? (s : String) : Option ComparatorOp :=
-  match parseM s s.startPos with
+  match (parseM s).run s.startPos with
   | .ok op p => if p = s.endPos then some op else none
   | .error .. => none
 
@@ -501,7 +501,7 @@ where
         s!"{s}, {v}"
 
 @[inline] partial def parseM (s : String) : EStateM String s.Pos VerRange := do
-  let clauses ← go true #[] #[]
+  let clauses ← EStateM.mk (go true #[] #[])
   return {toString := s, clauses}
 where
   go needsRange ors (ands : Array VerComparator) p :=
@@ -513,7 +513,7 @@ where
     else
       let c := p.get h
       if c.isAlphanum || c == '*' then
-        match parseWild s ands p with
+        match (parseWild s ands).run p with
         | .ok ands p =>
           go false ors ands p
         | .error e p => .error e p
@@ -522,7 +522,7 @@ where
         if p = s.endPos then
           .error  "invalid caret range: expected version after `^`" p
         else
-          match parseCaret s ands p with
+          match (parseCaret s ands).run p with
           | .ok ands p =>
             go false ors ands p
           | .error e p => .error e p
@@ -531,7 +531,7 @@ where
         if p = s.endPos then
           .error "invalid tilde range: expected version after `~`" p
         else
-          match parseTilde s ands p with
+          match (parseTilde s ands).run p with
           | .ok ands p =>
             go false ors ands p
           | .error e p => .error e p
@@ -554,7 +554,7 @@ where
         else
           .error "expected '|' after first '|'" p
       else
-        match VerComparator.parseM s p with
+        match (VerComparator.parseM s).run p with
         | .ok cmp p =>
           go false ors (ands.push cmp) p
         | .error e p => .error e p

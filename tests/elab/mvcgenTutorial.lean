@@ -185,7 +185,7 @@ theorem mkFreshN_correct (n : Nat) :
     | .ok    l _  => l.Nodup
     | .error _ s' => s'.counter = s'.limit := by
   generalize h : (mkFreshN n).run s = x
-  apply EStateM.of_wp_run_eq h
+  apply EStateM.of_wp_run_eq (prog := mkFreshN n) h
   mvcgen
 
 end FreshBounded

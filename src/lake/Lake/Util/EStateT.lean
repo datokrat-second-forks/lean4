@@ -261,10 +261,10 @@ public instance [Monad m] : MonadFinally (EStateT ε σ m) where
 
 /-- `EStateM` is analogous to `Lake.EStateT` with `m := Id`. -/
 public def ofEStateM {ε σ α} (f : EStateM ε σ α) : Lake.EStateT ε σ Id α :=
-  fun s => return .ofEStateMResult <| f s
+  fun s => return .ofEStateMResult <| f.run s
 
 /-- `Lake.EStateT` with `m := Id` and all the types in the same universe is analogous to `EStateM`. -/
 public def toEStateM {ε σ α} (f : Lake.EStateT ε σ Id α) : EStateM ε σ α :=
-  fun s => (f s).run.toEStateMResult
+  EStateM.mk fun s => (f s).run.toEStateMResult
 
 end EStateT

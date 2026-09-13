@@ -3,11 +3,11 @@ import all Init.Prelude
 
 open Lean
 def exec (x : MacroM α) : Option α :=
-  match x {
+  match (x {
       quotContext := `Expander
       currMacroScope := 0
       ref := default
-      methods := default } { macroScope := 0 } with
+      methods := default }).run { macroScope := 0 } with
     | EStateM.Result.ok a s => a
     | _ => none
 

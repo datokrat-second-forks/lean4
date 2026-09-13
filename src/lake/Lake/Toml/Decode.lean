@@ -40,19 +40,19 @@ public abbrev decodeToml [DecodeToml α] (v : Toml.Value) : Toml.EDecodeM α :=
 namespace Toml
 
 /-- Run the decode action. If there were errors, throw. Otherwise, return the result. -/
-@[inline] public  def ensureDecode (x : DecodeM α) : EDecodeM α := fun es =>
-  match x es with
+@[inline] public  def ensureDecode (x : DecodeM α) : EDecodeM α := EStateM.mk fun es =>
+  match x.run es with
   | .ok a es => if es.isEmpty then .ok a es else .error () es
 
 /-- Run the decode action. If it fails, keep the errors but return `default`. -/
-@[inline] public  def tryDecodeD (default : α) (x : EDecodeM α) : DecodeM α := fun es =>
-  match x es with
+@[inline] public  def tryDecodeD (default : α) (x : EDecodeM α) : DecodeM α := EStateM.mk fun es =>
+  match x.run es with
   | .ok a es => .ok a es
   | .error _ es => .ok default es
 
 /-- Run the decode action. If it fails, keep the errors but  return `none`. -/
-@[inline] public def tryDecode? (x : EDecodeM α) : DecodeM (Option α) := fun es =>
-   match x es with
+@[inline] public def tryDecode? (x : EDecodeM α) : DecodeM (Option α) := EStateM.mk fun es =>
+   match x.run es with
   | .ok a es => .ok (some a) es
   | .error _ es => .ok none es
 
@@ -88,19 +88,19 @@ Otherwise, return the result in `some`.
 If either action errors, throw the concatenated errors.
 Otherwise, if no errors, combine the results with `f`.
 -/
-public def mergeErrors (x₁ : EDecodeM α) (x₂ : EDecodeM β) (f : α → β → γ) : EDecodeM γ := fun es =>
-  match x₁ es with
+public def mergeErrors (x₁ : EDecodeM α) (x₂ : EDecodeM β) (f : α → β → γ) : EDecodeM γ := EStateM.mk fun es =>
+  match x₁.run es with
   | .ok a es =>
-    match x₂ es with
+    match x₂.run es with
     | .ok b es => .ok (f a b) es
     | .error _ es => .error () es
   | .error _ es => .error () es
 
 @[inline] public def logDecodeErrorAt (ref : Syntax) (msg : String) : DecodeM Unit :=
-  fun es => .ok () (es.push {ref, msg})
+  EStateM.mk fun es => .ok () (es.push {ref, msg})
 
 @[inline] public def throwDecodeErrorAt (ref : Syntax) (msg : String) : EDecodeM α :=
-  fun es => .error () (es.push {ref, msg})
+  EStateM.mk fun es => .error () (es.push {ref, msg})
 
 /-- Decode an array of TOML values, merging any errors from the elements into a single array. -/
 public def decodeArray [dec : DecodeToml α] (vs : Array Value) : EDecodeM (Array α) :=
@@ -113,7 +113,7 @@ namespace Value
 
 public def decodeString (v : Value) : EDecodeM String :=
   match v with
-  | .string _ v => .ok v
+  | .string _ v => pure v
   | x => throwDecodeErrorAt x.ref "expected string"
 
 public instance : DecodeToml String := ⟨decodeString⟩
@@ -128,41 +128,41 @@ public instance : DecodeToml Lean.Name := ⟨decodeName⟩
 
 public def decodeInt (v : Value) : EDecodeM Int :=
   match v with
-  | .integer _ v => .ok v
+  | .integer _ v => pure v
   | x => throwDecodeErrorAt x.ref "expected integer"
 
 public instance : DecodeToml Int := ⟨decodeInt⟩
 
 public def decodeNat : Value → EDecodeM Nat
-  | .integer _ (.ofNat v) => .ok v
+  | .integer _ (.ofNat v) => pure v
   | x => throwDecodeErrorAt x.ref "expected nonnegative integer"
 
 public instance : DecodeToml Nat := ⟨decodeNat⟩
 
 public def decodeFloat (v : Value) : EDecodeM Float :=
   match v with
-  | .float _ v => .ok v
+  | .float _ v => pure v
   | x => throwDecodeErrorAt x.ref "expected float"
 
 public instance : DecodeToml Float := ⟨decodeFloat⟩
 
 public def decodeBool (v : Value) : EDecodeM Bool :=
   match v with
-  | .boolean _ v => .ok v
+  | .boolean _ v => pure v
   | x => throwDecodeErrorAt x.ref "expected boolean"
 
 public instance : DecodeToml Bool := ⟨decodeBool⟩
 
 public def decodeDateTime (v : Value) : EDecodeM DateTime :=
   match v with
-  | .dateTime _ v => .ok v
+  | .dateTime _ v => pure v
   | x => throwDecodeErrorAt x.ref "expected date-time"
 
 public instance : DecodeToml DateTime := ⟨decodeDateTime⟩
 
 public def decodeValueArray (v : Value) : EDecodeM (Array Value) :=
   match v with
-  | .array _ vs => .ok vs
+  | .array _ vs => pure vs
   | x => throwDecodeErrorAt x.ref "expected array"
 
 @[inline] public protected def decodeArray [dec : DecodeToml α] (v : Value) : EDecodeM (Array α) := do
@@ -177,18 +177,18 @@ public instance [DecodeToml α] : DecodeToml (Array α) := ⟨Value.decodeArray�
 
 public def decodeTable (v : Value) : EDecodeM Table :=
   match v with
-  | .table _ t => .ok t
+  | .table _ t => pure t
   | x => throwDecodeErrorAt x.ref "expected table"
 
 instance : DecodeToml Table := ⟨(·.decodeTable)⟩
 
 end Value
 
-public def decodeKeyval [dec : DecodeToml α] (k : Name) (v : Value) : EDecodeM α := fun es =>
+public def decodeKeyval [dec : DecodeToml α] (k : Name) (v : Value) : EDecodeM α := EStateM.mk fun es =>
   let iniPos := es.size
   let f es := es.mapIdx fun i e =>
     if iniPos ≤ i then {e with msg := s!"key {ppKey k}: {e.msg}"} else e
-  match dec.decode v es with
+  match (dec.decode v).run es with
   | .ok a es => .ok a (f es)
   | .error e es => .error e (f es)
 
