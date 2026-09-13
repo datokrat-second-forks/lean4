@@ -14,7 +14,7 @@ namespace Std
 namespace Internal
 namespace UV
 
-private opaque TimerImpl : NonemptyType.{0}
+opaque TimerImpl : NonemptyType.{0}
 
 /--
 `Timer`s are used to generate `IO.Promise`s that resolve after some time.
@@ -27,9 +27,10 @@ A `Timer` can be in one of 3 states:
 This together with whether it was set up as `repeating` with `Timer.new` determines the behavior
 of all functions on `Timer`s.
 -/
-def Timer : Type := TimerImpl.type
+structure Timer : Type where ofRef ::
+  ref : TimerImpl.type
 
-instance : Nonempty Timer := by exact TimerImpl.property
+instance : Nonempty Timer := ⟨⟨Classical.choice TimerImpl.property⟩⟩
 
 namespace Timer
 
