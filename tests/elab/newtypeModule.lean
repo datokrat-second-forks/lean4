@@ -22,3 +22,20 @@ run_meta do
 
 example (n : Nat) : Exposed.toNat (Exposed.mk n) = n := rfl
 example (x : Priv) : Priv.mk (Priv.toNat x) = x := rfl
+
+section
+public section
+
+-- The visibility of a `public section` is not visible in the declaration's modifiers, so the
+-- elaborator has to consult the environment for it, as `def` does.
+@[expose] newtype InPublicSection := Nat with toNat
+
+open Lean in
+run_meta do
+  let env ← getEnv
+  for n in [``InPublicSection, ``InPublicSection.mk, ``InPublicSection.toNat] do
+    unless env.hasExposedBody n do throwError "expected {n} to be exposed"
+
+example (n : Nat) : InPublicSection.toNat (InPublicSection.mk n) = n := rfl
+
+end

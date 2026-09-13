@@ -51,7 +51,11 @@ private def addNewtypeCtorProj (declName ctorName projName fieldName : Name) : T
 @[builtin_command_elab Lean.Parser.Command.newtypeCmd]
 def elabNewtype : CommandElab
   | `($mods:declModifiers newtype $declId $params* := $ty with $projId:ident) => do
+    -- as in `elabDeclaration`: the name and the generated declarations follow the visibility the
+    -- `def` will get, which in a `public section` is not visible in `mods`
+    withExporting (isExporting := (← getScope).isPublic) do
     let modifiers ← elabModifiers mods
+    withExporting (isExporting := modifiers.isInferredPublic (← getEnv)) do
     let { declName, .. } ← liftTermElabM <|
       Term.expandDeclId (← getCurrNamespace) (← getLevelNames) declId modifiers
     let ctorName := declName ++ `mk
