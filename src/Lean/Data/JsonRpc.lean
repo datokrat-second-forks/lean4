@@ -116,7 +116,8 @@ inductive Message where
   | responseError (id : RequestID) (code : ErrorCode) (message : String) (data? : Option Json)
   deriving Inhabited
 
-@[expose] def Batch := Array Message
+structure Batch where
+  messages : Array Message
 
 /-- Generic version of `Message.request`.
 

@@ -157,7 +157,7 @@ def declareBuiltin (forDecl : Name) (value : Expr) : CoreM Unit :=
     IO.ofExcept (setBuiltinInitAttr (← getEnv) name) >>= setEnv
 
 private unsafe def runInitAttrForMod
-    (env : Environment) (opts : Options) (mod : EffectiveImport) (modIdx : Nat) : IO Unit := do
+    (env : Environment) (opts : Options) (mod : EffectiveImport) (modIdx : ModuleIdx) : IO Unit := do
   let initRuntime := Elab.inServer.get opts || mod.irPhases != .runtime
 
   -- any native Lean code reachable by the interpreter (i.e. from shared
@@ -200,7 +200,7 @@ private unsafe def runInitAttrs (env : Environment) (opts : Options) : IO Unit :
   if !(← isInitializerExecutionEnabled) then
     throw <| IO.userError "`enableInitializersExecution` must be run before calling `importModules (loadExts := true)`"
   for mod in env.header.modules, modIdx in 0...* do
-    runInitAttrForMod env opts mod modIdx
+    runInitAttrForMod env opts mod ⟨modIdx⟩
 
 /--
 Like `runInitAttrs`, but walks only the given module indices. Used by `--incr-load`: the indices
@@ -215,7 +215,7 @@ unsafe def runInitAttrsForModules
     throw <| IO.userError "`enableInitializersExecution` must be run before reusing a `--incr-load` snapshot"
   for modIdx in modIdxs do
     if h : modIdx < env.header.modules.size then
-      runInitAttrForMod env opts env.header.modules[modIdx] modIdx
+      runInitAttrForMod env opts env.header.modules[modIdx] ⟨modIdx⟩
 
 /--
 Returns the indices of modules in `env.header.modules` whose `regularInitAttr` has non-empty
@@ -225,8 +225,8 @@ entries. Computed at `--incr-(header-)save` time and consumed by `runInitAttrsFo
 def getRegularInitAttrModIdxs (env : Environment) : Array Nat := Id.run do
   let mut idxs := Array.emptyWithCapacity env.header.modules.size
   for modIdx in 0...env.header.modules.size do
-    if !(regularInitAttr.ext.getModuleEntries env modIdx).isEmpty
-        || !(regularInitAttr.ext.getModuleIREntries env modIdx).isEmpty then
+    if !(regularInitAttr.ext.getModuleEntries env ⟨modIdx⟩).isEmpty
+        || !(regularInitAttr.ext.getModuleIREntries env ⟨modIdx⟩).isEmpty then
       idxs := idxs.push modIdx
   idxs
 
