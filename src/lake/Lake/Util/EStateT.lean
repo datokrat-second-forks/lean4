@@ -118,11 +118,11 @@ public def run' {σ : Type max u w} [Functor m] (init : σ) (x : EStateT ε σ m
 
 /-- Convert an `EStateT` to a `StateT`, returning an `Except` result. -/
 @[inline] public def toStateT {ε σ α : Type u} [Functor m] (x : EStateT ε σ m α) : StateT σ m (Except ε α) :=
-  fun s => EResult.toProd <$> x s
+  StateT.mk fun s => EResult.toProd <$> x s
 
 /-- Convert an `EStateT` to a `StateT`, returning an `Option` result. -/
 @[inline] public def toStateT? {ε σ α : Type u} [Functor m] (x : EStateT ε σ m α) : StateT σ m (Option α) :=
-  fun s => EResult.toProd? <$> x s
+  StateT.mk fun s => EResult.toProd? <$> x s
 
 /--
 Execute an `EStateT` on initial state `init`
@@ -142,7 +142,7 @@ public def run?' {ε σ α : Type u} [Functor m] (init : σ) (x : EStateT ε σ 
 
 @[inline] public def catchExceptions {ε σ α : Type u}
   [Monad m] (x : EStateT ε σ m α) (h : ε → StateT σ m α)
-: StateT σ m α := fun s => do
+: StateT σ m α := StateT.mk fun s => do
   match (← x s) with
   | .ok a s => return (a, s)
   | .error e s => StateT.run (h e) s

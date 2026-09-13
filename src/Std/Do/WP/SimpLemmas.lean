@@ -262,7 +262,7 @@ open MonadFunctor renaming monadMap → mmap
 theorem monadMap_StateT [Monad m] [WP m ps]
   (f : ∀{β}, m β → m β) {α} (x : StateT σ m α) (Q : PostCond α (.arg σ ps)) :
     wp⟦mmap (m:=m) f x⟧ Q = fun s => wp⟦f (x.run s)⟧ (fun (a, s) => Q.1 a s, Q.2) := by
-  simp [wp, MonadFunctor.monadMap, StateT.run]
+  simp [wp, MonadFunctor.monadMap]
 
 @[simp]
 theorem monadMap_ReaderT [Monad m] [WP m ps]
@@ -322,7 +322,7 @@ section MonadControl
 theorem liftWith_StateT [Monad m] [WPMonad m ps]
   (f : (∀{β}, StateT σ m β → m (β × σ)) → m α) :
     wp⟦MonadControl.liftWith (m:=m) f⟧ Q = fun s => wp⟦f (fun x => x.run s)⟧ (fun a => Q.1 a s, Q.2) := by
-  simp [MonadControl.liftWith, StateT.run]
+  simp [MonadControl.liftWith]
 
 @[simp]
 theorem liftWith_ReaderT [Monad m] [WPMonad m ps]
@@ -545,7 +545,7 @@ theorem tryCatch_ReaderT [WP m sh] [Monad m] [MonadExceptOf ε m] :
 @[simp]
 theorem tryCatch_StateT [WP m sh] [Monad m] [MonadExceptOf ε m] :
     wp⟦MonadExceptOf.tryCatch (ε:=ε) x h : StateT σ m α⟧ Q = fun s => wp⟦MonadExceptOf.tryCatch (ε:=ε) (x.run s) (fun e => (h e).run s) : m (α × σ)⟧ (fun xs => Q.1 xs.1 xs.2, Q.2) := by
-  simp [wp, MonadExceptOf.tryCatch, tryCatchThe, StateT.run]
+  simp [wp, MonadExceptOf.tryCatch, tryCatchThe]
 
 @[simp]
 theorem tryCatch_lift_ExceptT [WP m sh] [Monad m] [MonadExceptOf ε m] :

@@ -9,10 +9,10 @@
             | x_1 => EarlyReturnT.return 0
           else
             let x := 5;
-            ExceptT.run (pure () x))
+            ExceptT.run ((pure ()).run x))
           fun e =>
           let x := x + 1;
-          ExceptT.run (pure () x)
+          ExceptT.run ((pure ()).run x)
     EarlyReturn.runK e (fun r => pure r) fun p =>
         let __r := p.fst;
         let x := p.snd;

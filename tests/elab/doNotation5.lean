@@ -28,7 +28,7 @@ info: nat exception 1010
 info: (Except.ok (Except.ok 1010), 1000)
 -/
 #guard_msgs in
-#eval (f 10 20).run 1000
+#eval (f 10 20).run.run.run 1000
 
 /--
 info: string exception balance is zero
@@ -36,8 +36,8 @@ info: string exception balance is zero
 info: (Except.ok (Except.ok 1000), 20)
 -/
 #guard_msgs in
-#eval (f 10 200).run 10
+#eval (f 10 200).run.run.run 10
 
 /-- info: (Except.ok (Except.ok 20), 20) -/
 #guard_msgs in
-#eval (f 10 20).run 30
+#eval (f 10 20).run.run.run 30

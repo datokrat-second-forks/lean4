@@ -117,8 +117,8 @@ instance [MonadAsync t m] : MonadAsync t (StateRefT' s n m) where
 
 @[default_instance]
 instance [Monad m] [Functor t] [inst : MonadAsync t m] : MonadAsync t (StateT s m) where
-  async p prio := fun s => do
-    let t ← inst.async (prio := prio) (p s)
+  async p prio := StateT.mk fun s => do
+    let t ← inst.async (prio := prio) (p.run s)
     pure (t <&> Prod.fst, s)
 
 /--

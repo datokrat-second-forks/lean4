@@ -490,13 +490,14 @@ def parseItem (line : String) : M Unit := do
   | _ => fail s!"Unknown export object with keys {obj.keys}"
 
 partial def parseItems : M Unit :=
-  go
+  go ()
 where
-  go : M Unit := do
+  -- takes a `Unit` because `partial` requires a function type and `M Unit` is not one
+  go (_ : Unit) : M Unit := do
     let line ← (← get).stream.getLine
     unless line.isEmpty do
       parseItem line
-      go
+      go ()
 
 def parseMdata : M Unit := do
   let _line ← (← get).stream.getLine

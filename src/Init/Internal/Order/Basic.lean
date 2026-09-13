@@ -1101,8 +1101,31 @@ theorem monotone_stateRefT'Run [PartialOrder γ]
     · exact monotone_apply _ _ hmono
     · apply monotone_const
 
-instance [inst : ∀ α, PartialOrder (m α)] : PartialOrder (StateT σ m α) := instOrderPi
-instance [inst : ∀ α, CCPO (m α)] : CCPO (StateT σ m α) := instCCPOPi
+-- as for `EST` below, the orders are transported along the definitional isomorphism
+-- `StateT.mk`/`StateT.run`
+
+/-- Transports a partial order on `σ → m (α × σ)` to `StateT σ m α`. -/
+@[expose, instance_reducible] def StateT.partialOrder.{u', v'} {σ : Type u'} {m : Type u' → Type v'}
+    {α : Type u'} [PartialOrder (σ → m (α × σ))] : PartialOrder (StateT σ m α) where
+  rel x y := x.run ⊑ y.run
+  rel_refl := PartialOrder.rel_refl
+  rel_trans := PartialOrder.rel_trans
+  rel_antisymm h₁ h₂ := congrArg StateT.mk (PartialOrder.rel_antisymm h₁ h₂)
+
+/-- Transports a chain-complete partial order on `σ → m (α × σ)` to `StateT σ m α`. -/
+@[expose, instance_reducible] def StateT.ccpo.{u', v'} {σ : Type u'} {m : Type u' → Type v'} {α : Type u'}
+    [CCPO (σ → m (α × σ))] : CCPO (StateT σ m α) where
+  toPartialOrder := StateT.partialOrder (σ := σ) (m := m) (α := α)
+  has_csup {c} hchain := by
+    have ⟨f, hf⟩ := CCPO.has_csup (α := σ → m (α × σ))
+      (c := fun f => c (StateT.mk f)) fun x y hx hy => hchain _ _ hx hy
+    exact ⟨StateT.mk f, fun x => (hf x.run).trans
+      ⟨fun h y hy => h y.run hy, fun h y hy => h (StateT.mk y) hy⟩⟩
+
+instance [inst : ∀ α, PartialOrder (m α)] : PartialOrder (StateT σ m α) :=
+  StateT.partialOrder (σ := σ) (m := m) (α := α)
+instance [inst : ∀ α, CCPO (m α)] : CCPO (StateT σ m α) :=
+  StateT.ccpo (σ := σ) (m := m) (α := α)
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (StateT ρ m) where
   bind_mono_left h₁₂ := by
     intro x
