@@ -320,7 +320,7 @@ theorem wp_monadMap_StateT_apply_eq
     wp (MonadFunctor.monadMap (m:=m) f x : StateT σ m α) post epost =
       fun s => wp (f (x.run s)) (fun (a, s') => post a s') epost := by
   funext s
-  simp [MonadFunctor.monadMap, StateT.run]
+  simp [MonadFunctor.monadMap]
 
 @[simp]
 theorem wp_monadMap_ReaderT_apply_eq

@@ -78,10 +78,10 @@ instance Id.instWP : WP Id .pure where
   wp x := pure x.run
 
 instance StateT.instWP [WP m ps] : WP (StateT σ m) (.arg σ ps) where
-  wp x := PredTrans.pushArg (fun s => wp (x.run s))
+  wp x := PredTrans.pushArg (.mk fun s => wp (x.run s))
 
 instance ReaderT.instWP [WP m ps] : WP (ReaderT ρ m) (.arg ρ ps) where
-  wp x := PredTrans.pushArg (fun s => (·, s) <$> wp (x.run s))
+  wp x := PredTrans.pushArg (.mk fun s => (·, s) <$> wp (x.run s))
 
 instance ExceptT.instWP [WP m ps] : WP (ExceptT ε m) (.except ε ps) where
   wp x := PredTrans.pushExcept (wp x.run)

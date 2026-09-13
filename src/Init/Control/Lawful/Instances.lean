@@ -388,9 +388,10 @@ instance [Monad m] [LawfulMonad m] : LawfulMonad (StateRefT' ω σ m) :=
 namespace StateT
 
 @[ext, grind ext] theorem ext {x y : StateT σ m α} (h : ∀ s, x.run s = y.run s) : x = y :=
-  funext h
+  congrArg StateT.mk (funext h)
 
-@[simp, grind =] theorem run_mk [Monad m] (x : σ → m (α × σ)) (s : σ) : run (.mk x) s = x s :=
+-- not a `grind` lemma: `grind` reduces `run (.mk x) s` to `x s` on its own, which is not a pattern
+@[simp] theorem run_mk [Monad m] (x : σ → m (α × σ)) (s : σ) : run (.mk x) s = x s :=
   rfl
 
 @[simp, grind =] theorem run'_eq [Monad m] (x : StateT σ m α) (s : σ) : run' x s = (·.1) <$> run x s :=

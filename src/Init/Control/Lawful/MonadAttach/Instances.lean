@@ -31,14 +31,14 @@ public instance [Monad m] [LawfulMonad m] [MonadAttach m] [WeaklyLawfulMonadAtta
     WeaklyLawfulMonadAttach (StateT σ m) where
   map_attach := by
     intro α x
-    simp only [Functor.map, StateT, funext_iff, StateT.map, bind_pure_comp, MonadAttach.attach,
-      Functor.map_map, MonadAttach.CanReturn]
-    exact fun s => WeaklyLawfulMonadAttach.map_attach
+    refine congrArg StateT.mk (funext fun s => ?_)
+    simp only [bind_pure_comp, MonadAttach.attach, Functor.map_map, MonadAttach.CanReturn]
+    exact WeaklyLawfulMonadAttach.map_attach
 
 public instance [Monad m] [LawfulMonad m] [MonadAttach m] [LawfulMonadAttach m] :
     LawfulMonadAttach (StateT σ m) where
   canReturn_map_imp := by
-    simp only [Functor.map, MonadAttach.CanReturn, StateT.run, StateT.map, bind_pure_comp]
+    simp only [Functor.map, MonadAttach.CanReturn, StateT.map, bind_pure_comp]
     rintro _ _ x a ⟨s, s', h⟩
     obtain ⟨a, h, h'⟩ := LawfulMonadAttach.canReturn_map_imp' h
     cases h'

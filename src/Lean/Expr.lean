@@ -2218,7 +2218,7 @@ def traverseChildren [Applicative M] (f : Expr → M Expr) : Expr → M Expr
 /-- `e.foldlM f a` folds the monadic function `f` over the subterms of the expression `e`,
 with initial value `a`. -/
 def foldlM {α : Type} {m} [Monad m] (f : α → Expr → m α) (init : α) (e : Expr) : m α :=
-  Prod.snd <$> StateT.run (e.traverseChildren (fun e' => fun a => Prod.mk e' <$> f a e')) init
+  Prod.snd <$> StateT.run (e.traverseChildren (fun e' => .mk fun a => Prod.mk e' <$> f a e')) init
 
 /--
 Returns the size of `e` as a tree, i.e. nodes reachable via multiple paths are counted multiple
