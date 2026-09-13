@@ -18,4 +18,4 @@ theorem Pos.stringRoundtrip :
     some x == (Except.toOption $ Pos.fromString? $ Pos.toString $ x)
   ) := by native_decide
 
-#guard Pos.toString Nat.zero == "/"
+#guard Pos.toString ⟨0⟩ == "/"

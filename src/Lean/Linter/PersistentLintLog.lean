@@ -34,7 +34,7 @@ builtin_initialize lintLogExt :
 
 def getAllLints (env : Environment) : Array (Name × Array LintEntry) :=
   env.header.moduleNames.mapIdx fun i mod =>
-    (mod, lintLogExt.getModuleEntries env i (level := .server))
+    (mod, lintLogExt.getModuleEntries env ⟨i⟩ (level := .server))
 
 /--
 A code quality entry recorded into `codeQualityLogExt`, together with the option name of the
@@ -58,7 +58,7 @@ builtin_initialize codeQualityLogExt :
 
 def getAllCodeQualityEntries (env : Environment) : Array (Name × Array CodeQualityLogEntry) :=
   env.header.moduleNames.mapIdx fun i mod =>
-    (mod, codeQualityLogExt.getModuleEntries env i (level := .server))
+    (mod, codeQualityLogExt.getModuleEntries env ⟨i⟩ (level := .server))
 
 instance : MonadFileMap (ReaderT FileMap BaseIO) := ⟨read⟩
 

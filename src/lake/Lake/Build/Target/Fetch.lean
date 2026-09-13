@@ -19,7 +19,7 @@ variable (defaultPkg : Package) (root : PartialBuildKey) in
 def PartialBuildKey.fetchInCoreAux
   (self : PartialBuildKey) (facetless : Bool := false)
 : FetchM ((key : BuildKey) × Job (BuildData key)) := do
-  match self with
+  match h : self.key with
   | .module modName =>
     let some mod ← findModule? modName
       | error s!"invalid target '{root}': module '{modName}' not found in workspace"
@@ -52,7 +52,7 @@ def PartialBuildKey.fetchInCoreAux
       let job ← (pkg.target target).fetch
       return ⟨key, cast (by simp) job⟩
   | .facet target shortFacet =>
-      let ⟨key, job⟩ ← PartialBuildKey.fetchInCoreAux target false
+      let ⟨key, job⟩ ← PartialBuildKey.fetchInCoreAux ⟨target⟩ false
       let kind := job.kind
       if h : kind.isAnonymous then
         error s!"invalid target '{root}': targets of opaque data kinds do not support facets"
@@ -64,6 +64,8 @@ def PartialBuildKey.fetchInCoreAux
         let job ← (job.cast h).bindM (kind := cfg.outKind) fun data =>
           fetch (.facet target kind data facet)
         return ⟨.facet target facet, cast (by simp) job⟩
+termination_by self.key
+decreasing_by rw [h]; simp; omega
 where
   @[inline] resolveTargetPackageD  (name : Name) : FetchM Package := do
     match name with

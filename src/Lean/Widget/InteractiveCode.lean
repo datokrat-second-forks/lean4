@@ -60,7 +60,7 @@ def SubexprInfo.withDiffTag (tag : DiffTag) (c : SubexprInfo) : SubexprInfo :=
   { c with diffStatus? := some tag }
 
 /-- Tags pretty-printed code with infos from the delaborator. -/
-partial def tagCodeInfos (ctx : Elab.ContextInfo) (infos : SubExpr.PosMap Elab.Info) (tt : TaggedText (Nat × Nat))
+partial def tagCodeInfos (ctx : Elab.ContextInfo) (infos : PrettyPrinter.InfoPerPos) (tt : TaggedText (Nat × Nat))
     : BaseIO CodeWithInfos :=
   go tt
 where
@@ -71,7 +71,7 @@ where
       | some i =>
         let t : SubexprInfo := {
           info := ← WithRpcRef.mk { ctx, info := i, children := .empty }
-          subexprPos := n
+          subexprPos := ⟨n⟩
         }
         return TaggedText.tag t (← go subTt)
 

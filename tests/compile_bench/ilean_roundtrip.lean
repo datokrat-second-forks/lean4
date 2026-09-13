@@ -13,7 +13,7 @@ def genModuleRefs (n : Nat) : IO Lean.Lsp.ModuleRefs := do
       usages := someUsages
     }
 
-  let mut refs : Lean.Lsp.ModuleRefs := .empty
+  let mut refs : Lean.Lsp.ModuleRefs := ∅
   for i in *...n do
     let someIdent := Lean.Lsp.RefIdent.const s!"A.Reasonably.Long.Module.Name{i}" s!"A.Reasonably.Long.Declaration.Name.foobar{i}"
     refs := refs.insert someIdent someInfo

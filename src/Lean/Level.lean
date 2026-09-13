@@ -26,25 +26,21 @@ def Nat.imax (n m : Nat) : Nat :=
    hasMVar   : 1-bit
    hasParam  : 1-bit
    depth     : 24-bits -/
-@[expose] def Level.Data := UInt64
-
-instance : Inhabited Level.Data :=
-  inferInstanceAs (Inhabited UInt64)
+structure Level.Data where
+  val : UInt64
+  deriving Inhabited, BEq
 
 def Level.Data.hash (c : Level.Data) : UInt64 :=
-  c.toUInt32.toUInt64
-
-instance : BEq Level.Data :=
-  ⟨fun (a b : UInt64) => a == b⟩
+  c.val.toUInt32.toUInt64
 
 def Level.Data.depth (c : Level.Data) : UInt32 :=
-  (c.shiftRight 40).toUInt32
+  (c.val.shiftRight 40).toUInt32
 
 def Level.Data.hasMVar (c : Level.Data) : Bool :=
-  ((c.shiftRight 32).land 1) == 1
+  ((c.val.shiftRight 32).land 1) == 1
 
 def Level.Data.hasParam (c : Level.Data) : Bool :=
-  ((c.shiftRight 33).land 1) == 1
+  ((c.val.shiftRight 33).land 1) == 1
 
 @[extern "lean_level_mk_data"]
 opaque Level.mkData (h : UInt64) (depth : Nat := 0) (hasMVar hasParam : Bool := false) : Level.Data

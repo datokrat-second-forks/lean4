@@ -265,16 +265,17 @@ public instance [ComputeHash α m] [Monad m] : ComputeHash (Array α) m := ⟨co
 open IO.FS (SystemTime)
 
 /-- A modification time (e.g., of a file). -/
-@[expose] public def MTime := SystemTime
+public structure MTime where
+  toSystemTime : SystemTime
+  deriving BEq
 
 namespace MTime
 
-public instance : OfNat MTime (nat_lit 0) := ⟨⟨0,0⟩⟩
+public instance : OfNat MTime (nat_lit 0) := ⟨⟨⟨0,0⟩⟩⟩
 
-public instance : BEq MTime := inferInstanceAs (BEq SystemTime)
-public instance : Repr MTime := inferInstanceAs (Repr SystemTime)
+public instance : Repr MTime := ⟨(reprPrec ·.toSystemTime)⟩
 
-public instance : Ord MTime := inferInstanceAs (Ord SystemTime)
+public instance : Ord MTime := ⟨(compare ·.toSystemTime ·.toSystemTime)⟩
 public instance : LT MTime := ltOfOrd
 public instance : LE MTime := leOfOrd
 public instance : Min MTime := minOfLe
@@ -294,7 +295,7 @@ instance [GetMTime α] : ComputeTrace α IO MTime := ⟨getMTime⟩
 
 /-- Return the modification time of a file recorded by the OS. -/
 @[inline] public def getFileMTime (file : FilePath) : IO MTime :=
-  return (← file.metadata).modified
+  return ⟨(← file.metadata).modified⟩
 
 public instance : GetMTime FilePath := ⟨getFileMTime⟩
 public instance : GetMTime TextFilePath := ⟨(getFileMTime ·.path)⟩

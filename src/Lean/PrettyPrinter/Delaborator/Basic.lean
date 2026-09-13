@@ -196,7 +196,7 @@ def withOptionAtCurrPos (k : Name) (v : DataValue) (x : DelabM α) : DelabM α :
     x
 
 def annotatePos (pos : Pos) (stx : Term) : Term :=
-  ⟨stx.raw.setInfo (SourceInfo.synthetic ⟨pos⟩ ⟨pos⟩)⟩
+  ⟨stx.raw.setInfo (SourceInfo.synthetic ⟨pos.asNat⟩ ⟨pos.asNat⟩)⟩
 
 def annotateCurPos (stx : Term) : Delab :=
   return annotatePos (← getPos) stx
@@ -261,7 +261,7 @@ and associated `Info` already.
 -/
 def annotateTermInfoUnlessAnnotated (stx : Term) : Delab := do
   if let some (.synthetic ⟨pos⟩ ⟨pos'⟩) := stx.raw.getInfo? then
-    if pos == pos' && (← get).infos.contains pos then
+    if pos == pos' && (← get).infos.contains ⟨pos⟩ then
       return stx
   annotateTermInfo stx
 

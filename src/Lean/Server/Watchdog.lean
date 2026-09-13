@@ -1214,12 +1214,12 @@ def handleRename (p : RenameParams) : ReaderT ReferenceRequestContext IO Lsp.Wor
   -- remove any duplicates or overlapping ranges, or else the rename will not apply
   let changes := refs.fold (init := ∅) fun changes uri map => Id.run do
     let mut last := ⟨0, 0⟩
-    let mut arr := #[]
+    let mut arr : Array TextEdit := #[]
     for (start, stop) in map do
       if last ≤ start then
         arr := arr.push { range := ⟨start, stop⟩, newText := p.newName }
         last := stop
-    return changes.insert uri arr
+    return changes.insert uri ⟨arr⟩
   return { changes? := some changes }
 
 end RequestHandling

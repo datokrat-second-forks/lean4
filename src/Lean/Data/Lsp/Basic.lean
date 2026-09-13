@@ -122,21 +122,22 @@ structure TextEdit where
   deriving ToJson, FromJson
 
 /-- An array of `TextEdit`s to be performed in sequence. -/
-@[expose] def TextEditBatch := Array TextEdit
+structure TextEditBatch where
+  toArray : Array TextEdit
 
 instance : FromJson TextEditBatch :=
-  ⟨@fromJson? (Array TextEdit) _⟩
+  ⟨(TextEditBatch.mk <$> fromJson? ·)⟩
 
 instance : ToJson TextEditBatch :=
-  ⟨@toJson (Array TextEdit) _⟩
+  ⟨(toJson ·.toArray)⟩
 
-instance : EmptyCollection TextEditBatch := ⟨#[]⟩
+instance : EmptyCollection TextEditBatch := ⟨⟨#[]⟩⟩
 
 instance : Append TextEditBatch :=
-  inferInstanceAs (Append (Array _))
+  ⟨fun a b => ⟨a.toArray ++ b.toArray⟩⟩
 
 instance : Coe TextEdit TextEditBatch where
-  coe te := #[te]
+  coe te := ⟨#[te]⟩
 
 structure TextDocumentIdentifier where
   uri : DocumentUri
@@ -278,7 +279,7 @@ def ofTextDocumentEdit (e : TextDocumentEdit) : WorkspaceEdit :=
   { documentChanges? := #[DocumentChange.edit e]}
 
 def ofTextEdit (doc : VersionedTextDocumentIdentifier) (te : TextEdit) : WorkspaceEdit :=
-  ofTextDocumentEdit { textDocument := doc, edits := #[te]}
+  ofTextDocumentEdit { textDocument := doc, edits := ⟨#[te]⟩}
 
 end WorkspaceEdit
 
@@ -323,13 +324,14 @@ structure DocumentFilter where
   pattern?  : Option String := none
   deriving ToJson, FromJson
 
-@[expose] def DocumentSelector := Array DocumentFilter
+structure DocumentSelector where
+  toArray : Array DocumentFilter
 
 instance : FromJson DocumentSelector :=
-  ⟨@fromJson? (Array DocumentFilter) _⟩
+  ⟨(DocumentSelector.mk <$> fromJson? ·)⟩
 
 instance : ToJson DocumentSelector :=
-  ⟨@toJson (Array DocumentFilter) _⟩
+  ⟨(toJson ·.toArray)⟩
 
 structure StaticRegistrationOptions where
   id? : Option String := none
