@@ -1121,34 +1121,51 @@ theorem monotone_stateTRun [PartialOrder γ]
     monotone (fun (x : γ) => StateT.run (f x) s) :=
   monotone_apply s _ hmono
 
-noncomputable def EST.bot [Nonempty ε] : EST ε σ α :=
-  fun s => .error Classical.ofNonempty (Classical.choice ⟨s⟩)
+noncomputable def EST.bot [Nonempty ε] (s : Void σ) : EST.Out ε σ α :=
+  .error Classical.ofNonempty (Classical.choice ⟨s⟩)
 
 -- Essentially
 --   instance [Nonempty ε] : CCPO (EST ε σ α) :=
 --     inferInstanceAs (CCPO ((s : _) → FlatOrder (EST.bot s)))
--- but hat would incur a noncomputable on the instance
+-- but hat would incur a noncomputable on the instance; the order is transported along the
+-- definitional isomorphism `EST.mk`/`EST.run`
+
+/-- `x` as an element of the pointwise flat order; the inverse of `EST.ofFlat`. -/
+@[expose] noncomputable def EST.toFlat [Nonempty ε] (x : EST ε σ α) :
+    ∀ s : Void σ, FlatOrder (EST.bot (ε := ε) (σ := σ) (α := α) s) :=
+  fun s => x.run s
+
+/-- An element of the pointwise flat order as an `EST`; the inverse of `EST.toFlat`. -/
+@[expose] noncomputable def EST.ofFlat [Nonempty ε]
+    (x : ∀ s : Void σ, FlatOrder (EST.bot (ε := ε) (σ := σ) (α := α) s)) : EST ε σ α :=
+  EST.mk fun s => x s
 
 instance [Nonempty ε] : CCPO (EST ε σ α) where
-  rel := PartialOrder.rel (α := ∀ s, FlatOrder (EST.bot s))
+  rel x y := EST.toFlat x ⊑ EST.toFlat y
   rel_refl := PartialOrder.rel_refl
-  rel_antisymm := PartialOrder.rel_antisymm
+  rel_antisymm {x y} h₁ h₂ :=
+    have h : EST.toFlat x = EST.toFlat y := PartialOrder.rel_antisymm h₁ h₂
+    congrArg EST.mk h
   rel_trans := PartialOrder.rel_trans
-  has_csup hchain := CCPO.has_csup (α := ∀ s, FlatOrder (EST.bot s)) hchain
+  has_csup {c} hchain := by
+    have ⟨f, hf⟩ := CCPO.has_csup (α := ∀ s, FlatOrder (EST.bot (ε := ε) (α := α) s))
+      (c := fun f => c (EST.ofFlat f)) fun x y hx hy => hchain _ _ hx hy
+    exact ⟨EST.ofFlat f, fun x => (hf (EST.toFlat x)).trans
+      ⟨fun h y hy => h (EST.toFlat y) hy, fun h y hy => h (EST.ofFlat y) hy⟩⟩
 
 instance [Nonempty ε] : MonoBind (EST ε σ) where
   bind_mono_left {_ _ a₁ a₂ f} h₁₂ := by
     intro s
-    specialize h₁₂ s
-    change FlatOrder.rel (a₁.bind f s) (a₂.bind f s)
+    replace h₁₂ : FlatOrder.rel (b := EST.bot s) (a₁.run s) (a₂.run s) := h₁₂ s
+    change FlatOrder.rel ((a₁.bind f).run s) ((a₂.bind f).run s)
     simp only [EST.bind]
-    generalize a₁ s = a₁ at h₁₂; generalize a₂ s = a₂ at h₁₂
+    generalize a₁.run s = a₁ at h₁₂; generalize a₂.run s = a₂ at h₁₂
     cases h₁₂
     · exact .bot
     · exact .refl
   bind_mono_right {_ _ a f₁ f₂} h₁₂ := by
     intro w
-    change FlatOrder.rel (a.bind f₁ w) (a.bind f₂ w)
+    change FlatOrder.rel ((a.bind f₁).run w) ((a.bind f₂).run w)
     simp only [EST.bind]
     split
     · apply h₁₂
