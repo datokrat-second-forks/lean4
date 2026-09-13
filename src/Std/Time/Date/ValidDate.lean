@@ -23,14 +23,19 @@ set_option linter.all true
 Represents a valid date for a given year, considering whether it is a leap year. Example: `(2, 29)`
 is valid only if `leap` is `true`.
 -/
-@[expose] def ValidDate (leap : Bool) := { val : Month.Ordinal × Day.Ordinal // Valid leap (Prod.fst val) (Prod.snd val) }
+structure ValidDate (leap : Bool) where
+  /-- The month and day. -/
+  val : Month.Ordinal × Day.Ordinal
+  /-- The day exists in the month, taking leap years into account. -/
+  property : Valid leap (Prod.fst val) (Prod.snd val)
 
 instance : Inhabited (ValidDate l) where
   default := ⟨⟨1, 1⟩, (by cases l <;> decide)⟩
 
 attribute [local instance] lexOrd
 
-instance : DecidableEq (ValidDate leap) := Subtype.instDecidableEq
+instance : DecidableEq (ValidDate leap) := fun a b =>
+  decidable_of_iff (a.val = b.val) ⟨fun h => by cases a; cases b; cases h; rfl, fun h => h ▸ rfl⟩
 
 instance : Ord (ValidDate leap) where
   compare a b := compare a.val b.val
@@ -42,7 +47,8 @@ instance : TransOrd (ValidDate leap) where
   isLE_trans := TransOrd.isLE_trans (α := Month.Ordinal × Day.Ordinal)
 
 instance : LawfulEqOrd (ValidDate leap) where
-  eq_of_compare := Subtype.ext ∘ LawfulEqOrd.eq_of_compare (α := Month.Ordinal × Day.Ordinal)
+  eq_of_compare {a b} h := by
+    cases a; cases b; cases LawfulEqOrd.eq_of_compare (α := Month.Ordinal × Day.Ordinal) h; rfl
 
 namespace ValidDate
 
