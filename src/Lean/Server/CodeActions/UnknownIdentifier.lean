@@ -308,13 +308,13 @@ def handleUnknownIdentifierCodeAction
           kind? := kind
           edit? := WorkspaceEdit.ofTextDocumentEdit {
             textDocument := doc.versionedIdentifier
-            edits := #[
+            edits := ⟨#[
               {
                 range := importInsertionRange
                 newText := mkImportText query.ctx mod
               },
               insertion.edit
-            ]
+            ]⟩
           }
           data? := some <| toJson <| mkUnknownIdentifierCodeActionData params
         }
@@ -326,7 +326,7 @@ def handleUnknownIdentifierCodeAction
           kind? := kind
           edit? := WorkspaceEdit.ofTextDocumentEdit {
             textDocument := doc.versionedIdentifier
-            edits := #[insertion.edit]
+            edits := ⟨#[insertion.edit]⟩
           }
           data? := some <| toJson <| mkUnknownIdentifierCodeActionData params
         }
@@ -382,6 +382,6 @@ def handleResolveImportAllUnknownIdentifiersCodeAction?
   return some { action with
     edit? := WorkspaceEdit.ofTextDocumentEdit {
       textDocument := doc.versionedIdentifier
-      edits
+      edits := ⟨edits⟩
     }
   }

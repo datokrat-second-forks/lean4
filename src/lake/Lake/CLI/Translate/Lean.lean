@@ -221,9 +221,9 @@ protected def PathPatDescr.toLean? (p : PathPatDescr) : Option Term :=
 instance : ToLean? PathPatDescr := ⟨PathPatDescr.toLean?⟩
 
 @[inline] protected def PartialBuildKey.toLean (k : PartialBuildKey) : Term :=
-  go k []
+  go k.key []
 where
-  go k (fs : List Name) := Unhygienic.run do
+  go (k : BuildKey) (fs : List Name) := Unhygienic.run do
     match k with
     | .module n =>
       `(`+$(mkIdent n)$(mkSuffixes fs)*)

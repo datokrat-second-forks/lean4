@@ -22,7 +22,9 @@ by computing the value of the 4-ary representation `1 :: childIdxs`, since n-ary
 without leading zeros are unique. Note that `pos` is initialized to `1` (case `childIdxs == []`).
 
 See also `SubExpr`. -/
-@[expose] def SubExpr.Pos := Nat
+structure SubExpr.Pos where
+  asNat : Nat
+  deriving DecidableEq
 
 namespace SubExpr.Pos
 
@@ -32,10 +34,8 @@ def maxChildren := 4
 reserved to denote the type of the expression. -/
 def typeCoord : Nat := maxChildren - 1
 
-def asNat : Pos → Nat := id
-
 /-- The Pos representing the root subexpression. -/
-def root : Pos := (1 : Nat)
+def root : Pos := ⟨1⟩
 
 instance : Inhabited Pos := ⟨root⟩
 
@@ -48,11 +48,11 @@ def head (p : Pos) : Nat :=
 
 def tail (p : Pos) : Pos :=
   if p.isRoot then panic! "already at top"
-  else (p.asNat - p.head) / maxChildren
+  else ⟨(p.asNat - p.head) / maxChildren⟩
 
 def push (p : Pos) (c : Nat) : Pos :=
   if c >= maxChildren then panic! s!"invalid coordinate {c}"
-  else p.asNat * maxChildren + c
+  else ⟨p.asNat * maxChildren + c⟩
 
 variable {α : Type} [Inhabited α]
 
@@ -104,10 +104,10 @@ def pushProj          (p : Pos) := p.push 0
 def pushType          (p : Pos) := p.push Pos.typeCoord
 
 def pushNaryFn (numArgs : Nat) (p : Pos) : Pos :=
-  p.asNat * (maxChildren ^ numArgs)
+  ⟨p.asNat * (maxChildren ^ numArgs)⟩
 
 def pushNaryArg (numArgs argIdx : Nat) (p : Pos) : Pos :=
-  show Nat from p.asNat * (maxChildren ^ (numArgs - argIdx)) + 1
+  ⟨p.asNat * (maxChildren ^ (numArgs - argIdx)) + 1⟩
 
 def pushNthBindingDomain : (binderIdx : Nat) → Pos → Pos
   | 0, p => p.pushBindingDomain
@@ -139,8 +139,7 @@ protected def fromString! (s : String) : Pos :=
   | .ok a => a
   | .error e => panic! e
 
-instance : Ord Pos := show Ord Nat by infer_instance
-instance : DecidableEq Pos := show DecidableEq Nat by infer_instance
+instance : Ord Pos := ⟨fun p q => compare p.asNat q.asNat⟩
 instance : ToString Pos := ⟨Pos.toString⟩
 instance : EmptyCollection Pos := ⟨root⟩
 instance : Repr Pos where

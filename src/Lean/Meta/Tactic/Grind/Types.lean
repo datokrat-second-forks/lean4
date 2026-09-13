@@ -562,10 +562,19 @@ def NewFact.toExpr : NewFact → MetaM Expr
   | .fact p _ _ => return p
 
 -- This type should be considered opaque outside this module.
-@[expose]  -- for codegen
-def ENodeMap := PHashMap ExprPtr ENode
+structure ENodeMap where
+  map : PHashMap ExprPtr ENode
 instance : Inhabited ENodeMap where
-  default := private (id {})  -- TODO(sullrich): `id` works around `private` not respecting the expected type
+  default := private (ENodeMap.mk {})
+
+def ENodeMap.find? (m : ENodeMap) (k : ExprPtr) : Option ENode :=
+  m.map.find? k
+
+def ENodeMap.contains (m : ENodeMap) (k : ExprPtr) : Bool :=
+  m.map.contains k
+
+def ENodeMap.insert (m : ENodeMap) (k : ExprPtr) (n : ENode) : ENodeMap :=
+  ⟨m.map.insert k n⟩
 
 /--
 Key for the congruence table.
