@@ -582,7 +582,9 @@ Supports only bounded buffering and an asynchronous API.
 
 It's the sync version of `Broadcast`.
 -/
-@[expose] def Sync (α : Type) : Type := Broadcast α
+structure Sync (α : Type) where
+  private mk ::
+  private inner : Broadcast α
 
 /--
 A receiver for a `Broadcast` channel that can asynchronously receive messages.
@@ -592,35 +594,48 @@ and each will receive all messages independently.
 
 It's the sync version of `Broadcast.Receiver`.
 -/
-@[expose] def Sync.Receiver (α : Type) : Type := Broadcast.Receiver α
+structure Sync.Receiver (α : Type) where
+  private mk ::
+  private inner : Broadcast.Receiver α
 
 namespace Sync
 
 @[inherit_doc Broadcast.new, inline]
 def new (capacity : Nat := 16) (h : capacity > 0 := by decide) : BaseIO (Sync α) :=
-  Broadcast.new capacity h
+  Sync.mk <$> Broadcast.new capacity h
 
 @[inherit_doc Broadcast.trySend, inline]
 def trySend (ch : Sync α) (v : α) : BaseIO (Option Nat) :=
-  Broadcast.trySend ch v
+  Broadcast.trySend ch.inner v
+
+@[inherit_doc Broadcast.subscribe, inline]
+def subscribe (ch : Sync α) : IO (Sync.Receiver α) :=
+  Sync.Receiver.mk <$> Broadcast.subscribe ch.inner
+
+@[inherit_doc Broadcast.close, inline]
+def close (ch : Sync α) : IO Unit :=
+  Broadcast.close ch.inner
 
 /--
 Send a value through the channel, blocking until the transmission could be completed.
 -/
 @[inline]
 def send (ch : Sync α) (v : α) : IO Nat := do
-  IO.ofExcept =<< IO.wait (← Broadcast.send ch v)
+  IO.ofExcept =<< IO.wait (← Broadcast.send ch.inner v)
 
 namespace Receiver
 
 @[inherit_doc Broadcast.Receiver.tryRecv, inline]
-def tryRecv (ch : Sync.Receiver α) : BaseIO (Option α) := Broadcast.Receiver.tryRecv ch
+def tryRecv (ch : Sync.Receiver α) : BaseIO (Option α) := Broadcast.Receiver.tryRecv ch.inner
 
 /--
 Receive a value from the channel, blocking until the transmission could be completed.
 -/
 def recv [Inhabited α] (ch : Sync.Receiver α) : BaseIO (Option α) := do
-  IO.wait (← Broadcast.Receiver.recv ch)
+  IO.wait (← Broadcast.Receiver.recv ch.inner)
+
+@[inherit_doc Broadcast.Receiver.unsubscribe, inline]
+def unsubscribe (ch : Sync.Receiver α) : IO Unit := Broadcast.Receiver.unsubscribe ch.inner
 
 partial def forIn [Inhabited α] [Monad m] [MonadLiftT BaseIO m]
     (ch : Sync.Receiver α) (f : α → β → m (ForInStep β)) : β → m β := fun b => do
