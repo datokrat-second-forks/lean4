@@ -54,12 +54,10 @@ instance {σ : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
     letI : CCPO (σ → m (α × σ)) := @instCCPOPi _ _ fun s =>
       haveI : Nonempty σ := ⟨s⟩
       MonadTail.instCCPO _
-    inferInstanceAs (CCPO (σ → m (α × σ)))
+    StateT.ccpo (σ := σ) (m := m) (α := α)
   bind_mono_right h := by
     intro s
     have : Nonempty σ := ⟨s⟩
-    show StateT.bind _ _ s ⊑ StateT.bind _ _ s
-    simp only [StateT.bind]
     apply MonadTail.bind_mono_right (m := m)
     intro ⟨x, s'⟩
     exact h x s'

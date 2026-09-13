@@ -104,7 +104,7 @@ partial def expandHash : Syntax → StateT Bool MacroM Syntax
 
 @[macro Lean.Parser.Term.do] def expandDo : Macro :=
 fun stx => do
-  let (stx, expanded) ← expandHash stx false;
+  let (stx, expanded) ← (expandHash stx).run false;
   if expanded then pure stx
   else Macro.throwUnsupported
 
