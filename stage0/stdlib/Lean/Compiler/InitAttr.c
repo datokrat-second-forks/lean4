@@ -2241,10 +2241,10 @@ return v___x_580_;
 LEAN_EXPORT lean_object* l_Lean_registerInitAttrUnsafe___lam__3___boxed(lean_object* v_runAfterImport_581_, lean_object* v___x_582_, lean_object* v_env_583_, lean_object* v_declName_584_, lean_object* v_x_585_){
 _start:
 {
-uint8_t v_runAfterImport_boxed_586_; uint8_t v___x_5278__boxed_587_; uint8_t v_res_588_; lean_object* v_r_589_; 
+uint8_t v_runAfterImport_boxed_586_; uint8_t v___x_5292__boxed_587_; uint8_t v_res_588_; lean_object* v_r_589_; 
 v_runAfterImport_boxed_586_ = lean_unbox(v_runAfterImport_581_);
-v___x_5278__boxed_587_ = lean_unbox(v___x_582_);
-v_res_588_ = l_Lean_registerInitAttrUnsafe___lam__3(v_runAfterImport_boxed_586_, v___x_5278__boxed_587_, v_env_583_, v_declName_584_, v_x_585_);
+v___x_5292__boxed_587_ = lean_unbox(v___x_582_);
+v_res_588_ = l_Lean_registerInitAttrUnsafe___lam__3(v_runAfterImport_boxed_586_, v___x_5292__boxed_587_, v_env_583_, v_declName_584_, v_x_585_);
 lean_dec(v_x_585_);
 v_r_589_ = lean_box(v_res_588_);
 return v_r_589_;

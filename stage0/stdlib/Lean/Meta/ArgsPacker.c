@@ -2056,8 +2056,8 @@ if (v___x_753_ == 0)
 lean_dec_ref(v___x_752_);
 lean_dec(v_head_738_);
 lean_del_object(v___x_736_);
-lean_dec(v_head_734_);
 lean_dec_ref_known(v_tail_728_, 2);
+lean_dec(v_head_734_);
 lean_dec_ref(v_alt_721_);
 lean_dec_ref(v_codomain_720_);
 lean_dec(v_u_719_);
@@ -2081,8 +2081,8 @@ lean_dec_ref(v___x_755_);
 lean_dec_ref(v_arg_754_);
 lean_dec(v_head_738_);
 lean_del_object(v___x_736_);
-lean_dec(v_head_734_);
 lean_dec_ref_known(v_tail_728_, 2);
+lean_dec(v_head_734_);
 lean_dec_ref(v_alt_721_);
 lean_dec_ref(v_codomain_720_);
 lean_dec(v_u_719_);
@@ -2250,8 +2250,8 @@ lean_dec_ref(v_arg_757_);
 lean_dec_ref(v_arg_754_);
 lean_dec(v_head_738_);
 lean_del_object(v___x_736_);
-lean_dec(v_head_734_);
 lean_dec_ref_known(v_tail_728_, 2);
+lean_dec(v_head_734_);
 lean_dec_ref(v_alt_721_);
 lean_dec(v_u_719_);
 lean_dec_ref(v_e_718_);
@@ -2266,8 +2266,8 @@ else
 lean_dec(v_a_740_);
 lean_dec(v_head_738_);
 lean_del_object(v___x_736_);
-lean_dec(v_head_734_);
 lean_dec_ref_known(v_tail_728_, 2);
+lean_dec(v_head_734_);
 lean_dec_ref(v_alt_721_);
 lean_dec_ref(v_codomain_720_);
 lean_dec(v_u_719_);
@@ -2290,8 +2290,8 @@ else
 {
 lean_dec(v_head_738_);
 lean_del_object(v___x_736_);
-lean_dec(v_head_734_);
 lean_dec_ref_known(v_tail_728_, 2);
+lean_dec(v_head_734_);
 lean_dec_ref(v_alt_721_);
 lean_dec_ref(v_codomain_720_);
 lean_dec(v_u_719_);
@@ -8244,11 +8244,11 @@ v___jp_3215_:
 {
 lean_object* v___x_3222_; lean_object* v___x_3223_; lean_object* v___x_3224_; 
 lean_inc(v_i_3202_);
-v___x_3222_ = l_List_get_x21Internal___redArg(v___x_3208_, v___y_3216_, v_i_3202_);
-lean_dec(v___y_3216_);
+v___x_3222_ = l_List_get_x21Internal___redArg(v___x_3208_, v___y_3217_, v_i_3202_);
+lean_dec(v___y_3217_);
 v___x_3223_ = l_Lean_Expr_bindingName_x21(v_a_3214_);
 lean_dec(v_a_3214_);
-v___x_3224_ = l_Lean_Meta_withLocalDeclD___at___00Lean_Meta_ArgsPacker_Unary_uncurryType_spec__1___redArg(v___x_3223_, v___x_3222_, v___y_3217_, v___y_3218_, v___y_3219_, v___y_3220_, v___y_3221_);
+v___x_3224_ = l_Lean_Meta_withLocalDeclD___at___00Lean_Meta_ArgsPacker_Unary_uncurryType_spec__1___redArg(v___x_3223_, v___x_3222_, v___y_3216_, v___y_3218_, v___y_3219_, v___y_3220_, v___y_3221_);
 if (lean_obj_tag(v___x_3224_) == 0)
 {
 lean_object* v_a_3225_; lean_object* v___x_3226_; lean_object* v___x_3227_; 
@@ -8337,8 +8337,8 @@ return v___x_3246_;
 }
 else
 {
-v___y_3216_ = v_a_3235_;
-v___y_3217_ = v___f_3236_;
+v___y_3216_ = v___f_3236_;
+v___y_3217_ = v_a_3235_;
 v___y_3218_ = v___y_3229_;
 v___y_3219_ = v___y_3230_;
 v___y_3220_ = v___y_3231_;
@@ -9199,7 +9199,7 @@ v___jp_3640_:
 lean_object* v___x_3647_; lean_object* v___x_3648_; 
 v___x_3647_ = l_Lean_Expr_bindingName_x21(v_type_3633_);
 lean_dec_ref(v_type_3633_);
-v___x_3648_ = l___private_Lean_Meta_ArgsPacker_0__Lean_Meta_ArgsPacker_withCurriedDecl___redArg(v_argsPacker_3631_, v___x_3647_, v___y_3642_, v___y_3641_, v___y_3643_, v___y_3644_, v___y_3645_, v___y_3646_);
+v___x_3648_ = l___private_Lean_Meta_ArgsPacker_0__Lean_Meta_ArgsPacker_withCurriedDecl___redArg(v_argsPacker_3631_, v___x_3647_, v___y_3641_, v___y_3642_, v___y_3643_, v___y_3644_, v___y_3645_, v___y_3646_);
 return v___x_3648_;
 }
 v___jp_3649_:
@@ -9268,8 +9268,8 @@ return v___x_3666_;
 }
 else
 {
-v___y_3641_ = v___f_3655_;
-v___y_3642_ = v_packedMotiveType_3654_;
+v___y_3641_ = v_packedMotiveType_3654_;
+v___y_3642_ = v___f_3655_;
 v___y_3643_ = v___y_3650_;
 v___y_3644_ = v___y_3651_;
 v___y_3645_ = v___y_3652_;

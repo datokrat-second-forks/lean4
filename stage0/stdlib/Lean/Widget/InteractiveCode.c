@@ -1483,15 +1483,15 @@ lean_dec_ref(v_a_399_);
 return v_res_400_;
 }
 }
-LEAN_EXPORT uint8_t l_Lean_Widget_CodeWithInfos_mergePosMap___redArg___lam__0(lean_object* v_x_407_, lean_object* v_y_408_){
+LEAN_EXPORT uint8_t l_Lean_Widget_CodeWithInfos_mergePosMap___redArg___lam__0(lean_object* v_p_407_, lean_object* v_q_408_){
 _start:
 {
 uint8_t v___x_409_; 
-v___x_409_ = lean_nat_dec_lt(v_x_407_, v_y_408_);
+v___x_409_ = lean_nat_dec_lt(v_p_407_, v_q_408_);
 if (v___x_409_ == 0)
 {
 uint8_t v___x_410_; 
-v___x_410_ = lean_nat_dec_eq(v_x_407_, v_y_408_);
+v___x_410_ = lean_nat_dec_eq(v_p_407_, v_q_408_);
 if (v___x_410_ == 0)
 {
 uint8_t v___x_411_; 
@@ -1513,13 +1513,13 @@ return v___x_413_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Widget_CodeWithInfos_mergePosMap___redArg___lam__0___boxed(lean_object* v_x_414_, lean_object* v_y_415_){
+LEAN_EXPORT lean_object* l_Lean_Widget_CodeWithInfos_mergePosMap___redArg___lam__0___boxed(lean_object* v_p_414_, lean_object* v_q_415_){
 _start:
 {
 uint8_t v_res_416_; lean_object* v_r_417_; 
-v_res_416_ = l_Lean_Widget_CodeWithInfos_mergePosMap___redArg___lam__0(v_x_414_, v_y_415_);
-lean_dec(v_y_415_);
-lean_dec(v_x_414_);
+v_res_416_ = l_Lean_Widget_CodeWithInfos_mergePosMap___redArg___lam__0(v_p_414_, v_q_415_);
+lean_dec(v_q_415_);
+lean_dec(v_p_414_);
 v_r_417_ = lean_box(v_res_416_);
 return v_r_417_;
 }

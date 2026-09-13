@@ -3181,7 +3181,7 @@ return v___x_1075_;
 }
 else
 {
-lean_object* v___x_1076_; lean_object* v___x_1077_; lean_object* v___x_1078_; lean_object* v___x_1079_; lean_object* v___x_1080_; lean_object* v___x_1081_; lean_object* v_array_1082_; lean_object* v_start_1083_; lean_object* v_stop_1084_; lean_object* v___x_1085_; lean_object* v___y_1097_; uint8_t v___y_1098_; lean_object* v___y_1099_; lean_object* v___y_1100_; uint8_t v___y_1106_; uint8_t v___x_1116_; lean_object* v___y_1118_; 
+lean_object* v___x_1076_; lean_object* v___x_1077_; lean_object* v___x_1078_; lean_object* v___x_1079_; lean_object* v___x_1080_; lean_object* v___x_1081_; lean_object* v_array_1082_; lean_object* v_start_1083_; lean_object* v_stop_1084_; lean_object* v___x_1085_; lean_object* v___y_1097_; lean_object* v___y_1098_; uint8_t v___y_1099_; lean_object* v___y_1100_; uint8_t v___y_1106_; uint8_t v___x_1116_; lean_object* v___y_1118_; 
 lean_dec_ref(v_b_1043_);
 v___x_1076_ = lean_obj_once(&l_WellFounded_opaqueFix_u2083___at___00WellFounded_opaqueFix_u2083___at___00__private_Lean_Structure_0__Lean_mergeStructureResolutionOrders_selectParent___at___00Lean_mergeStructureResolutionOrders___at___00Lean_computeStructureResolutionOrder___at___00Lean_getStructureResolutionOrder___at___00Lean_getAllParentStructures___at___00__private_Lean_Server_Completion_CompletionUtils_0__Lean_Server_Completion_getDotCompletionTypeNames_visit_spec__0_spec__0_spec__1_spec__4_spec__8_spec__14_spec__19___redArg___closed__0, &l_WellFounded_opaqueFix_u2083___at___00WellFounded_opaqueFix_u2083___at___00__private_Lean_Structure_0__Lean_mergeStructureResolutionOrders_selectParent___at___00Lean_mergeStructureResolutionOrders___at___00Lean_computeStructureResolutionOrder___at___00Lean_getStructureResolutionOrder___at___00Lean_getAllParentStructures___at___00__private_Lean_Server_Completion_CompletionUtils_0__Lean_Server_Completion_getDotCompletionTypeNames_visit_spec__0_spec__0_spec__1_spec__4_spec__8_spec__14_spec__19___redArg___closed__0_once, _init_l_WellFounded_opaqueFix_u2083___at___00WellFounded_opaqueFix_u2083___at___00__private_Lean_Structure_0__Lean_mergeStructureResolutionOrders_selectParent___at___00Lean_mergeStructureResolutionOrders___at___00Lean_computeStructureResolutionOrder___at___00Lean_getStructureResolutionOrder___at___00Lean_getAllParentStructures___at___00__private_Lean_Server_Completion_CompletionUtils_0__Lean_Server_Completion_getDotCompletionTypeNames_visit_spec__0_spec__0_spec__1_spec__4_spec__8_spec__14_spec__19___redArg___closed__0);
 v___x_1077_ = lean_box(0);
@@ -3256,22 +3256,22 @@ goto v___jp_1050_;
 v___jp_1096_:
 {
 uint8_t v___x_1101_; 
-v___x_1101_ = lean_nat_dec_lt(v___y_1099_, v___y_1100_);
+v___x_1101_ = lean_nat_dec_lt(v___y_1098_, v___y_1100_);
 if (v___x_1101_ == 0)
 {
 lean_dec(v___y_1100_);
-lean_dec(v___y_1099_);
+lean_dec(v___y_1098_);
 lean_dec_ref(v___y_1097_);
 goto v___jp_1086_;
 }
 else
 {
 size_t v___x_1102_; size_t v___x_1103_; uint8_t v___x_1104_; 
-v___x_1102_ = lean_usize_of_nat(v___y_1099_);
-lean_dec(v___y_1099_);
+v___x_1102_ = lean_usize_of_nat(v___y_1098_);
+lean_dec(v___y_1098_);
 v___x_1103_ = lean_usize_of_nat(v___y_1100_);
 lean_dec(v___y_1100_);
-v___x_1104_ = l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00__private_Lean_Structure_0__Lean_mergeStructureResolutionOrders_selectParent___at___00Lean_mergeStructureResolutionOrders___at___00Lean_computeStructureResolutionOrder___at___00Lean_getStructureResolutionOrder___at___00Lean_getAllParentStructures___at___00__private_Lean_Server_Completion_CompletionUtils_0__Lean_Server_Completion_getDotCompletionTypeNames_visit_spec__0_spec__0_spec__1_spec__4_spec__8_spec__12(v_a_1042_, v_upperBound_1038_, v___x_1080_, v___y_1098_, v___y_1097_, v___x_1102_, v___x_1103_);
+v___x_1104_ = l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00__private_Lean_Structure_0__Lean_mergeStructureResolutionOrders_selectParent___at___00Lean_mergeStructureResolutionOrders___at___00Lean_computeStructureResolutionOrder___at___00Lean_getStructureResolutionOrder___at___00Lean_getAllParentStructures___at___00__private_Lean_Server_Completion_CompletionUtils_0__Lean_Server_Completion_getDotCompletionTypeNames_visit_spec__0_spec__0_spec__1_spec__4_spec__8_spec__12(v_a_1042_, v_upperBound_1038_, v___x_1080_, v___y_1099_, v___y_1097_, v___x_1102_, v___x_1103_);
 lean_dec_ref(v___y_1097_);
 if (v___x_1104_ == 0)
 {
@@ -3315,16 +3315,16 @@ if (v___x_1115_ == 0)
 {
 lean_dec(v_stop_1112_);
 v___y_1097_ = v_array_1110_;
-v___y_1098_ = v___y_1106_;
-v___y_1099_ = v_start_1111_;
+v___y_1098_ = v_start_1111_;
+v___y_1099_ = v___y_1106_;
 v___y_1100_ = v___x_1114_;
 goto v___jp_1096_;
 }
 else
 {
 v___y_1097_ = v_array_1110_;
-v___y_1098_ = v___y_1106_;
-v___y_1099_ = v_start_1111_;
+v___y_1098_ = v_start_1111_;
+v___y_1099_ = v___y_1106_;
 v___y_1100_ = v_stop_1112_;
 goto v___jp_1096_;
 }

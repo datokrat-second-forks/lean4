@@ -2046,8 +2046,8 @@ lean_dec(v_a_801_);
 lean_dec(v_snd_782_);
 lean_inc_ref(v_type_792_);
 v___y_754_ = v_type_802_;
-v___y_755_ = v_type_792_;
-v___y_756_ = v___f_807_;
+v___y_755_ = v___f_807_;
+v___y_756_ = v_type_792_;
 goto v___jp_753_;
 }
 else
@@ -2068,8 +2068,8 @@ lean_dec(v_a_801_);
 lean_dec(v_snd_782_);
 lean_inc_ref(v_type_792_);
 v___y_754_ = v_type_802_;
-v___y_755_ = v_type_792_;
-v___y_756_ = v___f_807_;
+v___y_755_ = v___f_807_;
+v___y_756_ = v_type_792_;
 goto v___jp_753_;
 }
 }
@@ -2428,9 +2428,9 @@ v_options_758_ = lean_ctor_get(v_toCold_757_, 2);
 v_hasTrace_759_ = lean_ctor_get_uint8(v_options_758_, sizeof(void*)*1);
 if (v_hasTrace_759_ == 0)
 {
-lean_dec_ref(v___y_755_);
+lean_dec_ref(v___y_756_);
 lean_dec_ref(v___y_754_);
-v___y_750_ = v___y_756_;
+v___y_750_ = v___y_755_;
 goto v___jp_749_;
 }
 else
@@ -2442,15 +2442,15 @@ v___x_762_ = lean_obj_once(&l_WellFounded_opaqueFix_u2083___at___00Lean_Meta_Tac
 v___x_763_ = l___private_Lean_Util_Trace_0__Lean_checkTraceOption_go(v_inheritedTraceOptions_760_, v_options_758_, v___x_762_);
 if (v___x_763_ == 0)
 {
-lean_dec_ref(v___y_755_);
+lean_dec_ref(v___y_756_);
 lean_dec_ref(v___y_754_);
-v___y_750_ = v___y_756_;
+v___y_750_ = v___y_755_;
 goto v___jp_749_;
 }
 else
 {
 lean_object* v___x_764_; lean_object* v___x_765_; lean_object* v___x_766_; lean_object* v___x_767_; lean_object* v___x_768_; lean_object* v___x_769_; 
-v___x_764_ = l_Lean_MessageData_ofExpr(v___y_755_);
+v___x_764_ = l_Lean_MessageData_ofExpr(v___y_756_);
 v___x_765_ = lean_obj_once(&l_WellFounded_opaqueFix_u2083___at___00Lean_Meta_Tactic_BVDecide_Normalize_embeddedConstraintPass_spec__4___redArg___closed__7, &l_WellFounded_opaqueFix_u2083___at___00Lean_Meta_Tactic_BVDecide_Normalize_embeddedConstraintPass_spec__4___redArg___closed__7_once, _init_l_WellFounded_opaqueFix_u2083___at___00Lean_Meta_Tactic_BVDecide_Normalize_embeddedConstraintPass_spec__4___redArg___closed__7);
 v___x_766_ = lean_alloc_ctor(7, 2, 0);
 lean_ctor_set(v___x_766_, 0, v___x_764_);
@@ -2477,14 +2477,14 @@ lean_inc_ref(v___y_717_);
 lean_inc(v___y_716_);
 lean_inc(v___y_715_);
 lean_inc_ref(v___y_714_);
-v___x_771_ = lean_apply_13(v___y_756_, v_a_770_, v___y_714_, v___y_715_, v___y_716_, v___y_717_, v___y_718_, v___y_719_, v___y_720_, v___y_721_, v___y_722_, v___y_723_, v___y_724_, lean_box(0));
+v___x_771_ = lean_apply_13(v___y_755_, v_a_770_, v___y_714_, v___y_715_, v___y_716_, v___y_717_, v___y_718_, v___y_719_, v___y_720_, v___y_721_, v___y_722_, v___y_723_, v___y_724_, lean_box(0));
 v___y_727_ = v___x_771_;
 goto v___jp_726_;
 }
 else
 {
 lean_object* v_a_772_; lean_object* v___x_774_; uint8_t v_isShared_775_; uint8_t v_isSharedCheck_779_; 
-lean_dec_ref(v___y_756_);
+lean_dec_ref(v___y_755_);
 lean_dec(v_a_712_);
 lean_dec_ref(v___x_711_);
 lean_dec_ref(v___x_709_);
@@ -4114,20 +4114,20 @@ v___x_1463_ = lean_nat_dec_le(v_snd_1404_, v___x_1462_);
 if (v___x_1463_ == 0)
 {
 lean_dec(v_snd_1404_);
-v___y_1422_ = v_fst_1455_;
+v___y_1422_ = v___x_1459_;
 v___y_1423_ = v_snd_1456_;
 v___y_1424_ = v___x_1460_;
-v___y_1425_ = v___x_1459_;
+v___y_1425_ = v_fst_1455_;
 v___y_1426_ = v___x_1462_;
 goto v___jp_1421_;
 }
 else
 {
 lean_dec(v___x_1462_);
-v___y_1422_ = v_fst_1455_;
+v___y_1422_ = v___x_1459_;
 v___y_1423_ = v_snd_1456_;
 v___y_1424_ = v___x_1460_;
-v___y_1425_ = v___x_1459_;
+v___y_1425_ = v_fst_1455_;
 v___y_1426_ = v_snd_1404_;
 goto v___jp_1421_;
 }
@@ -4225,9 +4225,9 @@ lean_inc_ref(v_value_1420_);
 v___x_1427_ = lean_alloc_ctor(0, 1, 1);
 lean_ctor_set(v___x_1427_, 0, v_value_1420_);
 lean_ctor_set_uint8(v___x_1427_, sizeof(void*)*1, v___y_1423_);
-v___x_1428_ = l_Lean_PersistentHashMap_insert___at___00Lean_Meta_Tactic_BVDecide_Normalize_embeddedConstraintPass_spec__8___redArg(v_fst_1395_, v___y_1422_, v___x_1427_);
+v___x_1428_ = l_Lean_PersistentHashMap_insert___at___00Lean_Meta_Tactic_BVDecide_Normalize_embeddedConstraintPass_spec__8___redArg(v_fst_1395_, v___y_1425_, v___x_1427_);
 v___x_1429_ = lean_alloc_ctor(0, 2, 0);
-lean_ctor_set(v___x_1429_, 0, v___y_1425_);
+lean_ctor_set(v___x_1429_, 0, v___y_1422_);
 lean_ctor_set(v___x_1429_, 1, v___y_1426_);
 v___x_1430_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_1430_, 0, v___y_1424_);

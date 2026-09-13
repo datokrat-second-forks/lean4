@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 lean_object* lean_st_mk_ref(lean_object*);
-LEAN_EXPORT lean_object* l___private_Std_Sync_RecursiveMutex_0__Std_RecursiveMutexImpl;
+LEAN_EXPORT lean_object* l_Std_RecursiveMutexImpl;
 lean_object* lean_io_baserecmutex_new();
 LEAN_EXPORT lean_object* l_Std_BaseRecursiveMutex_new___boxed(lean_object*);
 lean_object* lean_io_baserecmutex_lock(lean_object*);
@@ -56,7 +56,7 @@ static const lean_closure_object l_Std_RecursiveMutex_tryAtomically___redArg___c
 static const lean_object* l_Std_RecursiveMutex_tryAtomically___redArg___closed__1 = (const lean_object*)&l_Std_RecursiveMutex_tryAtomically___redArg___closed__1_value;
 LEAN_EXPORT lean_object* l_Std_RecursiveMutex_tryAtomically___redArg(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Std_RecursiveMutex_tryAtomically(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-static lean_object* _init_l___private_Std_Sync_RecursiveMutex_0__Std_RecursiveMutexImpl(void){
+static lean_object* _init_l_Std_RecursiveMutexImpl(void){
 _start:
 {
 lean_object* v___x_1_; 
@@ -415,7 +415,7 @@ lean_initialize_runtime_module();
 res = runtime_initialize_Std_Sync_Basic(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
-l___private_Std_Sync_RecursiveMutex_0__Std_RecursiveMutexImpl = _init_l___private_Std_Sync_RecursiveMutex_0__Std_RecursiveMutexImpl();
+l_Std_RecursiveMutexImpl = _init_l_Std_RecursiveMutexImpl();
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;

@@ -1525,8 +1525,8 @@ goto v___jp_306_;
 }
 else
 {
-lean_dec_ref_known(v_fn_320_, 2);
 lean_dec_ref(v_fn_321_);
+lean_dec_ref_known(v_fn_320_, 2);
 lean_dec_ref_known(v_target_319_, 2);
 lean_dec(v_val_318_);
 lean_dec(v_mvar_300_);

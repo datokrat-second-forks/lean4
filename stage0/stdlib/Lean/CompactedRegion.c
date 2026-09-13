@@ -13,14 +13,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-LEAN_EXPORT lean_object* l___private_Lean_CompactedRegion_0__Lean_CompactorSpec;
+LEAN_EXPORT lean_object* l_Lean_CompactorSpec;
 lean_object* lean_compacted_region_free(lean_object*);
 LEAN_EXPORT lean_object* l_Lean_CompactedRegion_free___boxed(lean_object*, lean_object*);
 lean_object* lean_compacted_region_save(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, uint8_t);
 LEAN_EXPORT lean_object* l_Lean_CompactedRegion_save___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* lean_compacted_region_read(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lean_CompactedRegion_read___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
-static lean_object* _init_l___private_Lean_CompactedRegion_0__Lean_CompactorSpec(void){
+static lean_object* _init_l_Lean_CompactorSpec(void){
 _start:
 {
 lean_object* v___x_1_; 
@@ -74,7 +74,7 @@ lean_dec_ref(res);
 res = runtime_initialize_Lean_Data_Name(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
-l___private_Lean_CompactedRegion_0__Lean_CompactorSpec = _init_l___private_Lean_CompactedRegion_0__Lean_CompactorSpec();
+l_Lean_CompactorSpec = _init_l_Lean_CompactorSpec();
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;

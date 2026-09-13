@@ -2797,14 +2797,14 @@ v___f_914_ = lean_alloc_closure((void*)(l_Lean_Meta_Grind_Arith_Linear_IneqCnstr
 lean_closure_set(v___f_914_, 0, v___y_902_);
 lean_closure_set(v___f_914_, 1, v_c_832_);
 lean_closure_set(v___f_914_, 2, v___y_898_);
-v___x_915_ = l_Lean_Grind_Linarith_Poly_updateOccs(v___y_901_, v___y_902_, v___y_903_, v___y_904_, v___y_905_, v___y_906_, v___y_907_, v___y_908_, v___y_909_, v___y_910_, v___y_911_, v___y_912_);
+v___x_915_ = l_Lean_Grind_Linarith_Poly_updateOccs(v___y_900_, v___y_902_, v___y_903_, v___y_904_, v___y_905_, v___y_906_, v___y_907_, v___y_908_, v___y_909_, v___y_910_, v___y_911_, v___y_912_);
 if (lean_obj_tag(v___x_915_) == 0)
 {
 lean_object* v___x_916_; uint8_t v___x_917_; 
 lean_dec_ref_known(v___x_915_, 1);
 v___x_916_ = lean_obj_once(&l_Lean_Meta_Grind_Arith_Linear_IneqCnstr_assert___closed__0, &l_Lean_Meta_Grind_Arith_Linear_IneqCnstr_assert___closed__0_once, _init_l_Lean_Meta_Grind_Arith_Linear_IneqCnstr_assert___closed__0);
-v___x_917_ = lean_int_dec_lt(v___y_900_, v___x_916_);
-lean_dec(v___y_900_);
+v___x_917_ = lean_int_dec_lt(v___y_901_, v___x_916_);
+lean_dec(v___y_901_);
 if (v___x_917_ == 0)
 {
 lean_object* v___x_918_; lean_object* v___x_919_; 
@@ -2870,7 +2870,7 @@ else
 {
 lean_dec_ref(v___f_914_);
 lean_dec_ref(v___f_913_);
-lean_dec(v___y_900_);
+lean_dec(v___y_901_);
 lean_dec(v___y_899_);
 lean_dec_ref(v_c_832_);
 return v___x_915_;
@@ -3100,13 +3100,13 @@ if (v_hasTrace_980_ == 0)
 lean_object* v_k_981_; lean_object* v_v_982_; 
 v_k_981_ = lean_ctor_get(v_p_938_, 0);
 v_v_982_ = lean_ctor_get(v_p_938_, 1);
-lean_inc_ref(v_p_938_);
 lean_inc(v_k_981_);
+lean_inc_ref(v_p_938_);
 lean_inc_n(v_v_982_, 2);
 v___y_898_ = v_v_982_;
 v___y_899_ = v_v_982_;
-v___y_900_ = v_k_981_;
-v___y_901_ = v_p_938_;
+v___y_900_ = v_p_938_;
+v___y_901_ = v_k_981_;
 v___y_902_ = v___y_927_;
 v___y_903_ = v___y_928_;
 v___y_904_ = v___y_929_;
@@ -3131,13 +3131,13 @@ v___x_987_ = lean_obj_once(&l_Lean_Meta_Grind_Arith_Linear_IneqCnstr_assert___cl
 v___x_988_ = l___private_Lean_Util_Trace_0__Lean_checkTraceOption_go(v_inheritedTraceOptions_985_, v_options_979_, v___x_987_);
 if (v___x_988_ == 0)
 {
-lean_inc_ref(v_p_938_);
 lean_inc(v_k_983_);
+lean_inc_ref(v_p_938_);
 lean_inc_n(v_v_984_, 2);
 v___y_898_ = v_v_984_;
 v___y_899_ = v_v_984_;
-v___y_900_ = v_k_983_;
-v___y_901_ = v_p_938_;
+v___y_900_ = v_p_938_;
+v___y_901_ = v_k_983_;
 v___y_902_ = v___y_927_;
 v___y_903_ = v___y_928_;
 v___y_904_ = v___y_929_;
@@ -3166,13 +3166,13 @@ v___x_992_ = l_Lean_addTrace___at___00Lean_Meta_Grind_Arith_Linear_IneqCnstr_ass
 if (lean_obj_tag(v___x_992_) == 0)
 {
 lean_dec_ref_known(v___x_992_, 1);
-lean_inc_ref(v_p_938_);
 lean_inc(v_k_983_);
+lean_inc_ref(v_p_938_);
 lean_inc_n(v_v_984_, 2);
 v___y_898_ = v_v_984_;
 v___y_899_ = v_v_984_;
-v___y_900_ = v_k_983_;
-v___y_901_ = v_p_938_;
+v___y_900_ = v_p_938_;
+v___y_901_ = v_k_983_;
 v___y_902_ = v___y_927_;
 v___y_903_ = v___y_928_;
 v___y_904_ = v___y_929_;

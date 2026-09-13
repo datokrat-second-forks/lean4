@@ -13,7 +13,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-LEAN_EXPORT lean_object* l___private_Std_Internal_UV_UDP_0__Std_Internal_UV_UDP_SocketImpl;
+LEAN_EXPORT lean_object* l_Std_Internal_UV_UDP_SocketImpl;
 lean_object* lean_uv_udp_new();
 LEAN_EXPORT lean_object* l_Std_Internal_UV_UDP_Socket_new___boxed(lean_object*);
 lean_object* lean_uv_udp_bind(lean_object*, lean_object*);
@@ -44,7 +44,7 @@ lean_object* lean_uv_udp_set_multicast_interface(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Std_Internal_UV_UDP_Socket_setMulticastInterface___boxed(lean_object*, lean_object*, lean_object*);
 lean_object* lean_uv_udp_set_ttl(lean_object*, uint32_t);
 LEAN_EXPORT lean_object* l_Std_Internal_UV_UDP_Socket_setTTL___boxed(lean_object*, lean_object*, lean_object*);
-static lean_object* _init_l___private_Std_Internal_UV_UDP_0__Std_Internal_UV_UDP_SocketImpl(void){
+static lean_object* _init_l_Std_Internal_UV_UDP_SocketImpl(void){
 _start:
 {
 lean_object* v___x_1_; 
@@ -216,7 +216,7 @@ lean_dec_ref(res);
 res = runtime_initialize_Std_Net(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
-l___private_Std_Internal_UV_UDP_0__Std_Internal_UV_UDP_SocketImpl = _init_l___private_Std_Internal_UV_UDP_0__Std_Internal_UV_UDP_SocketImpl();
+l_Std_Internal_UV_UDP_SocketImpl = _init_l_Std_Internal_UV_UDP_SocketImpl();
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;

@@ -13,7 +13,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-LEAN_EXPORT lean_object* l___private_Std_Internal_UV_Timer_0__Std_Internal_UV_TimerImpl;
+LEAN_EXPORT lean_object* l_Std_Internal_UV_TimerImpl;
 lean_object* lean_uv_timer_mk(uint64_t, uint8_t);
 LEAN_EXPORT lean_object* l_Std_Internal_UV_Timer_mk___boxed(lean_object*, lean_object*, lean_object*);
 lean_object* lean_uv_timer_next(lean_object*);
@@ -24,7 +24,7 @@ lean_object* lean_uv_timer_stop(lean_object*);
 LEAN_EXPORT lean_object* l_Std_Internal_UV_Timer_stop___boxed(lean_object*, lean_object*);
 lean_object* lean_uv_timer_cancel(lean_object*);
 LEAN_EXPORT lean_object* l_Std_Internal_UV_Timer_cancel___boxed(lean_object*, lean_object*);
-static lean_object* _init_l___private_Std_Internal_UV_Timer_0__Std_Internal_UV_TimerImpl(void){
+static lean_object* _init_l_Std_Internal_UV_TimerImpl(void){
 _start:
 {
 lean_object* v___x_1_; 
@@ -90,7 +90,7 @@ lean_initialize_runtime_module();
 res = runtime_initialize_Init_System_Promise(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
-l___private_Std_Internal_UV_Timer_0__Std_Internal_UV_TimerImpl = _init_l___private_Std_Internal_UV_Timer_0__Std_Internal_UV_TimerImpl();
+l_Std_Internal_UV_TimerImpl = _init_l_Std_Internal_UV_TimerImpl();
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;

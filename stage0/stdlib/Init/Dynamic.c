@@ -25,7 +25,7 @@ LEAN_EXPORT lean_object* l___private_Init_Dynamic_0__TypeName_typeNameImpl___red
 LEAN_EXPORT lean_object* l___private_Init_Dynamic_0__TypeName_typeNameImpl___redArg___boxed(lean_object*);
 LEAN_EXPORT lean_object* l___private_Init_Dynamic_0__TypeName_typeNameImpl(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l___private_Init_Dynamic_0__TypeName_typeNameImpl___boxed(lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l___private_Init_Dynamic_0__DynamicPointed;
+LEAN_EXPORT lean_object* l_DynamicPointed;
 LEAN_EXPORT lean_object* l___private_Init_Dynamic_0__Dynamic_typeNameImpl(lean_object*);
 LEAN_EXPORT lean_object* l___private_Init_Dynamic_0__Dynamic_typeNameImpl___boxed(lean_object*);
 LEAN_EXPORT lean_object* l___private_Init_Dynamic_0__Dynamic_get_x3fImpl___redArg(lean_object*, lean_object*);
@@ -122,7 +122,7 @@ lean_dec(v_inst_21_);
 return v_res_22_;
 }
 }
-static lean_object* _init_l___private_Init_Dynamic_0__DynamicPointed(void){
+static lean_object* _init_l_DynamicPointed(void){
 _start:
 {
 lean_object* v___x_23_; 
@@ -234,7 +234,7 @@ lean_dec_ref(res);
 res = runtime_initialize_Init_Core(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
-l___private_Init_Dynamic_0__DynamicPointed = _init_l___private_Init_Dynamic_0__DynamicPointed();
+l_DynamicPointed = _init_l_DynamicPointed();
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;

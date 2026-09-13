@@ -51,7 +51,7 @@ lean_object* lean_nat_div(lean_object*, lean_object*);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 lean_object* l_Lean_Compiler_LCNF_getBinderName(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 uint8_t l_Lean_Name_isInternal(lean_object*);
-lean_object* l_Std_DTreeMap_Internal_Impl_insert___at___00Lean_instSingletonFVarIdFVarIdSet_spec__1___redArg(lean_object*, lean_object*, lean_object*);
+lean_object* l_Std_DTreeMap_Internal_Impl_insert___at___00Lean_FVarIdSet_insert_spec__1___redArg(lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_Compiler_LCNF_getConfig___redArg(lean_object*);
 uint8_t l_Lean_Compiler_LCNF_Code_sizeLe(uint8_t, lean_object*, lean_object*);
 lean_object* l_Lean_Name_mkStr1(lean_object*);
@@ -3009,7 +3009,7 @@ lean_object* v___x_992_; lean_object* v___x_993_; lean_object* v___x_994_;
 v___x_992_ = lean_unsigned_to_nat(1u);
 v___x_993_ = lean_nat_add(v___y_991_, v___x_992_);
 lean_dec(v___y_991_);
-v___x_994_ = l_Lean_Compiler_LCNF_getPhase___redArg(v___y_987_);
+v___x_994_ = l_Lean_Compiler_LCNF_getPhase___redArg(v___y_990_);
 if (lean_obj_tag(v___x_994_) == 0)
 {
 lean_object* v_a_995_; uint8_t v___x_996_; lean_object* v___x_997_; 
@@ -3019,7 +3019,7 @@ lean_dec_ref_known(v___x_994_, 1);
 v___x_996_ = lean_unbox(v_a_995_);
 lean_dec(v_a_995_);
 lean_inc(v_declName_897_);
-v___x_997_ = l_Lean_Compiler_LCNF_getDeclAt_x3f(v_declName_897_, v___x_996_, v___y_988_, v___y_990_);
+v___x_997_ = l_Lean_Compiler_LCNF_getDeclAt_x3f(v_declName_897_, v___x_996_, v___y_988_, v___y_986_);
 if (lean_obj_tag(v___x_997_) == 0)
 {
 lean_object* v_a_998_; 
@@ -3036,13 +3036,13 @@ v___x_1000_ = l_Lean_Compiler_LCNF_Decl_inlineIfReduceAttr___redArg(v_val_999_);
 lean_dec(v_val_999_);
 v___y_907_ = v___x_993_;
 v_inlineIfReduce_908_ = v___x_1000_;
-v___y_909_ = v___y_985_;
-v___y_910_ = v___y_984_;
-v___y_911_ = v___y_989_;
-v___y_912_ = v___y_987_;
-v___y_913_ = v___y_986_;
+v___y_909_ = v___y_987_;
+v___y_910_ = v___y_989_;
+v___y_911_ = v___y_984_;
+v___y_912_ = v___y_990_;
+v___y_913_ = v___y_985_;
 v___y_914_ = v___y_988_;
-v___y_915_ = v___y_990_;
+v___y_915_ = v___y_986_;
 goto v___jp_906_;
 }
 else
@@ -3052,13 +3052,13 @@ lean_dec(v_a_998_);
 v___x_1001_ = 0;
 v___y_907_ = v___x_993_;
 v_inlineIfReduce_908_ = v___x_1001_;
-v___y_909_ = v___y_985_;
-v___y_910_ = v___y_984_;
-v___y_911_ = v___y_989_;
-v___y_912_ = v___y_987_;
-v___y_913_ = v___y_986_;
+v___y_909_ = v___y_987_;
+v___y_910_ = v___y_989_;
+v___y_911_ = v___y_984_;
+v___y_912_ = v___y_990_;
+v___y_913_ = v___y_985_;
 v___y_914_ = v___y_988_;
-v___y_915_ = v___y_990_;
+v___y_915_ = v___y_986_;
 goto v___jp_906_;
 }
 }
@@ -3159,13 +3159,13 @@ if (lean_obj_tag(v___x_1027_) == 0)
 {
 lean_object* v___x_1028_; 
 v___x_1028_ = lean_unsigned_to_nat(0u);
-v___y_984_ = v___y_1020_;
-v___y_985_ = v___y_1019_;
-v___y_986_ = v___y_1023_;
-v___y_987_ = v___y_1022_;
+v___y_984_ = v___y_1021_;
+v___y_985_ = v___y_1023_;
+v___y_986_ = v___y_1025_;
+v___y_987_ = v___y_1019_;
 v___y_988_ = v___y_1024_;
-v___y_989_ = v___y_1021_;
-v___y_990_ = v___y_1025_;
+v___y_989_ = v___y_1020_;
+v___y_990_ = v___y_1022_;
 v___y_991_ = v___x_1028_;
 goto v___jp_983_;
 }
@@ -3175,13 +3175,13 @@ lean_object* v_val_1029_;
 v_val_1029_ = lean_ctor_get(v___x_1027_, 0);
 lean_inc(v_val_1029_);
 lean_dec_ref_known(v___x_1027_, 1);
-v___y_984_ = v___y_1020_;
-v___y_985_ = v___y_1019_;
-v___y_986_ = v___y_1023_;
-v___y_987_ = v___y_1022_;
+v___y_984_ = v___y_1021_;
+v___y_985_ = v___y_1023_;
+v___y_986_ = v___y_1025_;
+v___y_987_ = v___y_1019_;
 v___y_988_ = v___y_1024_;
-v___y_989_ = v___y_1021_;
-v___y_990_ = v___y_1025_;
+v___y_989_ = v___y_1020_;
+v___y_990_ = v___y_1022_;
 v___y_991_ = v_val_1029_;
 goto v___jp_983_;
 }
@@ -5868,7 +5868,7 @@ v_resetjp_2115_:
 {
 lean_object* v___x_2118_; lean_object* v___x_2119_; lean_object* v___x_2121_; 
 v___x_2118_ = lean_box(0);
-v___x_2119_ = l_Std_DTreeMap_Internal_Impl_insert___at___00Lean_instSingletonFVarIdFVarIdSet_spec__1___redArg(v_fvarId_x27_2066_, v_a_2091_, v_binderRenaming_2109_);
+v___x_2119_ = l_Std_DTreeMap_Internal_Impl_insert___at___00Lean_FVarIdSet_insert_spec__1___redArg(v_fvarId_x27_2066_, v_a_2091_, v_binderRenaming_2109_);
 if (v_isShared_2117_ == 0)
 {
 lean_ctor_set(v___x_2116_, 2, v___x_2119_);

@@ -13,7 +13,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-LEAN_EXPORT lean_object* l___private_Lake_Util_Opaque_0__Lake_POpaque_nonemptyType;
+LEAN_EXPORT lean_object* l_Lake_POpaque_nonemptyType;
 LEAN_EXPORT lean_object* l___private_Lake_Util_Opaque_0__Lake_POpaque_mk_unsafe__1___redArg(lean_object*);
 LEAN_EXPORT lean_object* l___private_Lake_Util_Opaque_0__Lake_POpaque_mk_unsafe__1___redArg___boxed(lean_object*);
 LEAN_EXPORT lean_object* l___private_Lake_Util_Opaque_0__Lake_POpaque_mk_unsafe__1(lean_object*, lean_object*);
@@ -34,7 +34,7 @@ LEAN_EXPORT lean_object* l_Lake_POpaque_castTo___redArg(lean_object*);
 LEAN_EXPORT lean_object* l_Lake_POpaque_castTo___redArg___boxed(lean_object*);
 LEAN_EXPORT lean_object* l_Lake_POpaque_castTo(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lake_POpaque_castTo___boxed(lean_object*, lean_object*);
-static lean_object* _init_l___private_Lake_Util_Opaque_0__Lake_POpaque_nonemptyType(void){
+static lean_object* _init_l_Lake_POpaque_nonemptyType(void){
 _start:
 {
 lean_object* v___x_1_; 
@@ -217,7 +217,7 @@ lean_dec_ref(res);
 res = runtime_initialize_Init_Tactics(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
-l___private_Lake_Util_Opaque_0__Lake_POpaque_nonemptyType = _init_l___private_Lake_Util_Opaque_0__Lake_POpaque_nonemptyType();
+l_Lake_POpaque_nonemptyType = _init_l_Lake_POpaque_nonemptyType();
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;

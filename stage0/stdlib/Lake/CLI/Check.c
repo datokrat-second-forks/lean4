@@ -15792,8 +15792,8 @@ if (lean_obj_tag(v_fst_4608_) == 0)
 {
 if (v___y_4604_ == 0)
 {
-v___y_4590_ = v___y_4605_;
-v_externalKernels_4591_ = v___y_4606_;
+v___y_4590_ = v___y_4606_;
+v_externalKernels_4591_ = v___y_4605_;
 goto v___jp_4589_;
 }
 else
@@ -15801,8 +15801,8 @@ else
 lean_object* v___x_4609_; lean_object* v___x_4610_; lean_object* v___x_4611_; 
 v___x_4609_ = ((lean_object*)(l___private_Lake_CLI_Check_0__Lake_Check_resolveExternalKernels___closed__0));
 v___x_4610_ = ((lean_object*)(l___private_Lake_CLI_Check_0__Lake_Check_resolveExternalKernels___closed__2));
-v___x_4611_ = l_Std_DTreeMap_Internal_Impl_insert___at___00__private_Lake_CLI_Check_0__Lake_Check_resolveExternalKernels_spec__1___redArg(v___x_4609_, v___x_4610_, v___y_4606_);
-v___y_4590_ = v___y_4605_;
+v___x_4611_ = l_Std_DTreeMap_Internal_Impl_insert___at___00__private_Lake_CLI_Check_0__Lake_Check_resolveExternalKernels_spec__1___redArg(v___x_4609_, v___x_4610_, v___y_4605_);
+v___y_4590_ = v___y_4606_;
 v_externalKernels_4591_ = v___x_4611_;
 goto v___jp_4589_;
 }
@@ -15810,8 +15810,8 @@ goto v___jp_4589_;
 else
 {
 lean_object* v_val_4612_; lean_object* v___x_4614_; uint8_t v_isShared_4615_; uint8_t v_isSharedCheck_4619_; 
-lean_dec(v___y_4606_);
-lean_dec_ref(v___y_4605_);
+lean_dec_ref(v___y_4606_);
+lean_dec(v___y_4605_);
 v_val_4612_ = lean_ctor_get(v_fst_4608_, 0);
 v_isSharedCheck_4619_ = !lean_is_exclusive(v_fst_4608_);
 if (v_isSharedCheck_4619_ == 0)
@@ -15867,8 +15867,8 @@ v_a_4626_ = lean_ctor_get(v_a_4625_, 0);
 lean_inc(v_a_4626_);
 lean_dec(v_a_4625_);
 v___y_4604_ = v___y_4621_;
-v___y_4605_ = v___x_4623_;
-v___y_4606_ = v___y_4622_;
+v___y_4605_ = v___y_4622_;
+v___y_4606_ = v___x_4623_;
 v_a_4607_ = v_a_4626_;
 goto v___jp_4603_;
 }

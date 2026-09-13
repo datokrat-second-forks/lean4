@@ -3421,8 +3421,8 @@ goto v___jp_644_;
 }
 else
 {
-lean_dec(v_tail_687_);
 lean_dec_ref_known(v___x_686_, 2);
+lean_dec(v_tail_687_);
 lean_dec_ref(v_arg_671_);
 lean_dec_ref(v_arg_660_);
 lean_dec_ref(v_arg_657_);

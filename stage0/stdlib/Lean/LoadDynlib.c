@@ -25,11 +25,11 @@ lean_object* lean_string_append(lean_object*, lean_object*);
 lean_object* lean_mk_io_user_error(lean_object*);
 lean_object* l_System_FilePath_fileStem(lean_object*);
 lean_object* l_String_Slice_toString(lean_object*);
-LEAN_EXPORT lean_object* l___private_Lean_LoadDynlib_0__Lean_DynlibImpl;
-LEAN_EXPORT lean_object* l___private_Lean_LoadDynlib_0__Lean_Dynlib_SymbolImpl___redArg();
-LEAN_EXPORT lean_object* l___private_Lean_LoadDynlib_0__Lean_Dynlib_SymbolImpl___redArg___boxed(lean_object*);
-LEAN_EXPORT lean_object* l___private_Lean_LoadDynlib_0__Lean_Dynlib_SymbolImpl(lean_object*);
-LEAN_EXPORT lean_object* l___private_Lean_LoadDynlib_0__Lean_Dynlib_SymbolImpl___boxed(lean_object*);
+LEAN_EXPORT lean_object* l_Lean_DynlibImpl;
+LEAN_EXPORT lean_object* l_Lean_Dynlib_SymbolImpl___redArg();
+LEAN_EXPORT lean_object* l_Lean_Dynlib_SymbolImpl___redArg___boxed(lean_object*);
+LEAN_EXPORT lean_object* l_Lean_Dynlib_SymbolImpl(lean_object*);
+LEAN_EXPORT lean_object* l_Lean_Dynlib_SymbolImpl___boxed(lean_object*);
 lean_object* lean_dynlib_load(lean_object*);
 LEAN_EXPORT lean_object* l_Lean_Dynlib_load___boxed(lean_object*, lean_object*);
 lean_object* lean_dynlib_get(lean_object*, lean_object*);
@@ -68,7 +68,7 @@ LEAN_EXPORT lean_object* lean_load_plugin(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lean_loadPlugin___boxed(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_String_Slice_dropPrefix___at___00String_dropPrefix___at___00Lean_loadPlugin_spec__0_spec__0(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_String_Slice_dropPrefix___at___00String_dropPrefix___at___00Lean_loadPlugin_spec__0_spec__0___boxed(lean_object*, lean_object*);
-static lean_object* _init_l___private_Lean_LoadDynlib_0__Lean_DynlibImpl(void){
+static lean_object* _init_l_Lean_DynlibImpl(void){
 _start:
 {
 lean_object* v___x_1_; 
@@ -76,7 +76,7 @@ v___x_1_ = lean_box(0);
 return v___x_1_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_LoadDynlib_0__Lean_Dynlib_SymbolImpl___redArg(){
+LEAN_EXPORT lean_object* l_Lean_Dynlib_SymbolImpl___redArg(){
 _start:
 {
 lean_object* v___x_3_; 
@@ -84,15 +84,15 @@ v___x_3_ = lean_box(0);
 return v___x_3_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_LoadDynlib_0__Lean_Dynlib_SymbolImpl___redArg___boxed(lean_object* v___dummy_4_){
+LEAN_EXPORT lean_object* l_Lean_Dynlib_SymbolImpl___redArg___boxed(lean_object* v___dummy_4_){
 _start:
 {
 lean_object* v_res_5_; 
-v_res_5_ = l___private_Lean_LoadDynlib_0__Lean_Dynlib_SymbolImpl___redArg();
+v_res_5_ = l_Lean_Dynlib_SymbolImpl___redArg();
 return v_res_5_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_LoadDynlib_0__Lean_Dynlib_SymbolImpl(lean_object* v_dynlib_6_){
+LEAN_EXPORT lean_object* l_Lean_Dynlib_SymbolImpl(lean_object* v_dynlib_6_){
 _start:
 {
 lean_object* v___x_7_; 
@@ -100,11 +100,11 @@ v___x_7_ = lean_box(0);
 return v___x_7_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_LoadDynlib_0__Lean_Dynlib_SymbolImpl___boxed(lean_object* v_dynlib_8_){
+LEAN_EXPORT lean_object* l_Lean_Dynlib_SymbolImpl___boxed(lean_object* v_dynlib_8_){
 _start:
 {
 lean_object* v_res_9_; 
-v_res_9_ = l___private_Lean_LoadDynlib_0__Lean_Dynlib_SymbolImpl(v_dynlib_8_);
+v_res_9_ = l_Lean_Dynlib_SymbolImpl(v_dynlib_8_);
 lean_dec(v_dynlib_8_);
 return v_res_9_;
 }
@@ -804,7 +804,7 @@ lean_dec_ref(res);
 res = runtime_initialize_Init_Data_ToString_Macro(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
-l___private_Lean_LoadDynlib_0__Lean_DynlibImpl = _init_l___private_Lean_LoadDynlib_0__Lean_DynlibImpl();
+l_Lean_DynlibImpl = _init_l_Lean_DynlibImpl();
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;

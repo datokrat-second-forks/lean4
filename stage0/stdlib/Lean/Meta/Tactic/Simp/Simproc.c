@@ -5930,8 +5930,8 @@ goto v___jp_1643_;
 }
 else
 {
-lean_dec(v_pre_1664_);
 lean_dec_ref_known(v_pre_1663_, 2);
+lean_dec(v_pre_1664_);
 lean_dec_ref_known(v_pre_1662_, 2);
 lean_dec_ref_known(v_declName_1661_, 2);
 goto v___jp_1643_;
@@ -5939,16 +5939,16 @@ goto v___jp_1643_;
 }
 else
 {
+lean_dec_ref_known(v_pre_1662_, 2);
 lean_dec(v_pre_1663_);
-lean_dec_ref_known(v_pre_1662_, 2);
 lean_dec_ref_known(v_declName_1661_, 2);
 goto v___jp_1643_;
 }
 }
 else
 {
-lean_dec_ref_known(v_declName_1661_, 2);
 lean_dec(v_pre_1662_);
+lean_dec_ref_known(v_declName_1661_, 2);
 goto v___jp_1643_;
 }
 }
@@ -14583,9 +14583,9 @@ return v___x_4685_;
 LEAN_EXPORT lean_object* l___private_Lean_Meta_Tactic_Simp_Simproc_0__Lean_Meta_Simp_addBuiltin___lam__0___boxed(lean_object* v_addDeclName_4690_, lean_object* v_declName_4691_, lean_object* v___y_4692_, lean_object* v_procExpr_4693_, lean_object* v___y_4694_, lean_object* v___y_4695_, lean_object* v___y_4696_, lean_object* v___y_4697_, lean_object* v___y_4698_){
 _start:
 {
-uint8_t v___y_4338__boxed_4699_; lean_object* v_res_4700_; 
-v___y_4338__boxed_4699_ = lean_unbox(v___y_4692_);
-v_res_4700_ = l___private_Lean_Meta_Tactic_Simp_Simproc_0__Lean_Meta_Simp_addBuiltin___lam__0(v_addDeclName_4690_, v_declName_4691_, v___y_4338__boxed_4699_, v_procExpr_4693_, v___y_4694_, v___y_4695_, v___y_4696_, v___y_4697_);
+uint8_t v___y_4358__boxed_4699_; lean_object* v_res_4700_; 
+v___y_4358__boxed_4699_ = lean_unbox(v___y_4692_);
+v_res_4700_ = l___private_Lean_Meta_Tactic_Simp_Simproc_0__Lean_Meta_Simp_addBuiltin___lam__0(v_addDeclName_4690_, v_declName_4691_, v___y_4358__boxed_4699_, v_procExpr_4693_, v___y_4694_, v___y_4695_, v___y_4696_, v___y_4697_);
 lean_dec(v___y_4697_);
 lean_dec_ref(v___y_4696_);
 lean_dec(v___y_4695_);
@@ -15873,8 +15873,8 @@ goto v___jp_5098_;
 else
 {
 lean_object* v___x_5178_; 
-lean_dec(v_pre_5127_);
 lean_dec_ref_known(v_pre_5126_, 2);
+lean_dec(v_pre_5127_);
 lean_dec_ref_known(v_pre_5125_, 2);
 lean_dec_ref_known(v_declName_5124_, 2);
 lean_dec(v_addDeclName_5094_);

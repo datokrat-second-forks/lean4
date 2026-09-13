@@ -2130,9 +2130,9 @@ return v___x_492_;
 LEAN_EXPORT lean_object* l_Lake_BuildType_leanOptions___boxed(lean_object* v_x_493_){
 _start:
 {
-uint8_t v_x_66__boxed_494_; lean_object* v_res_495_; 
-v_x_66__boxed_494_ = lean_unbox(v_x_493_);
-v_res_495_ = l_Lake_BuildType_leanOptions(v_x_66__boxed_494_);
+uint8_t v_x_70__boxed_494_; lean_object* v_res_495_; 
+v_x_70__boxed_494_ = lean_unbox(v_x_493_);
+v_res_495_ = l_Lake_BuildType_leanOptions(v_x_70__boxed_494_);
 return v_res_495_;
 }
 }

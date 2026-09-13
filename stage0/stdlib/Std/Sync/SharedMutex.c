@@ -15,7 +15,7 @@ extern "C" {
 #endif
 lean_object* lean_st_mk_ref(lean_object*);
 lean_object* lean_st_ref_get(lean_object*);
-LEAN_EXPORT lean_object* l___private_Std_Sync_SharedMutex_0__Std_SharedMutexImpl;
+LEAN_EXPORT lean_object* l_Std_SharedMutexImpl;
 lean_object* lean_io_basesharedmutex_new();
 LEAN_EXPORT lean_object* l_Std_BaseSharedMutex_new___boxed(lean_object*);
 lean_object* lean_io_basesharedmutex_write(lean_object*);
@@ -74,7 +74,7 @@ LEAN_EXPORT lean_object* l_Std_SharedMutex_tryAtomicallyRead___redArg___lam__1(l
 LEAN_EXPORT lean_object* l_Std_SharedMutex_tryAtomicallyRead___redArg___lam__1___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Std_SharedMutex_tryAtomicallyRead___redArg(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Std_SharedMutex_tryAtomicallyRead(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-static lean_object* _init_l___private_Std_Sync_SharedMutex_0__Std_SharedMutexImpl(void){
+static lean_object* _init_l_Std_SharedMutexImpl(void){
 _start:
 {
 lean_object* v___x_1_; 
@@ -659,7 +659,7 @@ lean_initialize_runtime_module();
 res = runtime_initialize_Std_Sync_Basic(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
-l___private_Std_Sync_SharedMutex_0__Std_SharedMutexImpl = _init_l___private_Std_Sync_SharedMutex_0__Std_SharedMutexImpl();
+l_Std_SharedMutexImpl = _init_l_Std_SharedMutexImpl();
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;

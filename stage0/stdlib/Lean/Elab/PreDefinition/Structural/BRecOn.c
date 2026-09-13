@@ -1325,8 +1325,8 @@ return v___x_188_;
 else
 {
 lean_object* v___x_189_; 
-lean_dec_ref(v_fn_112_);
 lean_dec_ref_known(v_a_111_, 2);
+lean_dec_ref(v_fn_112_);
 lean_inc(v_a_108_);
 lean_inc_ref(v_a_107_);
 lean_inc(v_a_106_);
@@ -5954,8 +5954,8 @@ goto v___jp_1786_;
 v___jp_1721_:
 {
 lean_object* v___x_1725_; 
-lean_inc(v___y_1723_);
-v___x_1725_ = l___private_Lean_Util_Trace_0__Lean_addTraceNode___at___00__private_Lean_Util_Trace_0__Lean_withTraceNode_postCallback___at___00Lean_Elab_Structural_toBelow_spec__2_spec__2(v_oldTraces_1711_, v_data_1724_, v___y_1723_, v___y_1722_, v___y_1714_, v___y_1715_, v___y_1716_, v___y_1717_);
+lean_inc(v___y_1722_);
+v___x_1725_ = l___private_Lean_Util_Trace_0__Lean_addTraceNode___at___00__private_Lean_Util_Trace_0__Lean_withTraceNode_postCallback___at___00Lean_Elab_Structural_toBelow_spec__2_spec__2(v_oldTraces_1711_, v_data_1724_, v___y_1722_, v___y_1723_, v___y_1714_, v___y_1715_, v___y_1716_, v___y_1717_);
 if (lean_obj_tag(v___x_1725_) == 0)
 {
 lean_object* v___x_1726_; 
@@ -6031,8 +6031,8 @@ lean_dec(v_snd_1736_);
 lean_dec(v_fst_1735_);
 lean_dec_ref(v_tag_1708_);
 lean_dec(v_cls_1706_);
-v___y_1722_ = v_a_1741_;
-v___y_1723_ = v___y_1740_;
+v___y_1722_ = v___y_1740_;
+v___y_1723_ = v_a_1741_;
 v_data_1724_ = v_data_1746_;
 goto v___jp_1721_;
 }
@@ -6051,8 +6051,8 @@ v___x_1749_ = lean_unbox_float(v_snd_1736_);
 lean_dec(v_snd_1736_);
 lean_ctor_set_float(v_data_1747_, sizeof(void*)*3 + 8, v___x_1749_);
 lean_ctor_set_uint8(v_data_1747_, sizeof(void*)*3 + 16, v_collapsed_1707_);
-v___y_1722_ = v_a_1741_;
-v___y_1723_ = v___y_1740_;
+v___y_1722_ = v___y_1740_;
+v___y_1723_ = v_a_1741_;
 v_data_1724_ = v_data_1747_;
 goto v___jp_1721_;
 }
@@ -9636,10 +9636,10 @@ return v___x_3103_;
 LEAN_EXPORT lean_object* l___private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop___lam__0___boxed(lean_object* v_body_3110_, lean_object* v_recArgInfos_3111_, lean_object* v_positions_3112_, lean_object* v_recFnNames_3113_, lean_object* v_containsRecFn_3114_, lean_object* v_below_3115_, lean_object* v___x_3116_, lean_object* v_a_3117_, lean_object* v_x_3118_, lean_object* v___y_3119_, lean_object* v___y_3120_, lean_object* v___y_3121_, lean_object* v___y_3122_, lean_object* v___y_3123_, lean_object* v___y_3124_){
 _start:
 {
-uint8_t v___x_28473__boxed_3125_; uint8_t v_a_28474__boxed_3126_; lean_object* v_res_3127_; 
-v___x_28473__boxed_3125_ = lean_unbox(v___x_3116_);
-v_a_28474__boxed_3126_ = lean_unbox(v_a_3117_);
-v_res_3127_ = l___private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop___lam__0(v_body_3110_, v_recArgInfos_3111_, v_positions_3112_, v_recFnNames_3113_, v_containsRecFn_3114_, v_below_3115_, v___x_28473__boxed_3125_, v_a_28474__boxed_3126_, v_x_3118_, v___y_3119_, v___y_3120_, v___y_3121_, v___y_3122_, v___y_3123_);
+uint8_t v___x_28485__boxed_3125_; uint8_t v_a_28486__boxed_3126_; lean_object* v_res_3127_; 
+v___x_28485__boxed_3125_ = lean_unbox(v___x_3116_);
+v_a_28486__boxed_3126_ = lean_unbox(v_a_3117_);
+v_res_3127_ = l___private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop___lam__0(v_body_3110_, v_recArgInfos_3111_, v_positions_3112_, v_recFnNames_3113_, v_containsRecFn_3114_, v_below_3115_, v___x_28485__boxed_3125_, v_a_28486__boxed_3126_, v_x_3118_, v___y_3119_, v___y_3120_, v___y_3121_, v___y_3122_, v___y_3123_);
 lean_dec(v___y_3123_);
 lean_dec_ref(v___y_3122_);
 lean_dec(v___y_3121_);
@@ -9680,10 +9680,10 @@ return v___x_3144_;
 LEAN_EXPORT lean_object* l___private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop___lam__1___boxed(lean_object* v_body_3151_, lean_object* v_recArgInfos_3152_, lean_object* v_positions_3153_, lean_object* v_recFnNames_3154_, lean_object* v_containsRecFn_3155_, lean_object* v_below_3156_, lean_object* v___x_3157_, lean_object* v_a_3158_, lean_object* v_x_3159_, lean_object* v___y_3160_, lean_object* v___y_3161_, lean_object* v___y_3162_, lean_object* v___y_3163_, lean_object* v___y_3164_, lean_object* v___y_3165_){
 _start:
 {
-uint8_t v___x_28491__boxed_3166_; uint8_t v_a_28492__boxed_3167_; lean_object* v_res_3168_; 
-v___x_28491__boxed_3166_ = lean_unbox(v___x_3157_);
-v_a_28492__boxed_3167_ = lean_unbox(v_a_3158_);
-v_res_3168_ = l___private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop___lam__1(v_body_3151_, v_recArgInfos_3152_, v_positions_3153_, v_recFnNames_3154_, v_containsRecFn_3155_, v_below_3156_, v___x_28491__boxed_3166_, v_a_28492__boxed_3167_, v_x_3159_, v___y_3160_, v___y_3161_, v___y_3162_, v___y_3163_, v___y_3164_);
+uint8_t v___x_28503__boxed_3166_; uint8_t v_a_28504__boxed_3167_; lean_object* v_res_3168_; 
+v___x_28503__boxed_3166_ = lean_unbox(v___x_3157_);
+v_a_28504__boxed_3167_ = lean_unbox(v_a_3158_);
+v_res_3168_ = l___private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop___lam__1(v_body_3151_, v_recArgInfos_3152_, v_positions_3153_, v_recFnNames_3154_, v_containsRecFn_3155_, v_below_3156_, v___x_28503__boxed_3166_, v_a_28504__boxed_3167_, v_x_3159_, v___y_3160_, v___y_3161_, v___y_3162_, v___y_3163_, v___y_3164_);
 lean_dec(v___y_3164_);
 lean_dec_ref(v___y_3163_);
 lean_dec(v___y_3162_);
@@ -9996,10 +9996,10 @@ lean_object* v___y_3298_ = _args[18];
 lean_object* v___y_3299_ = _args[19];
 _start:
 {
-uint8_t v___x_28567__boxed_3300_; uint8_t v_a_28568__boxed_3301_; lean_object* v_res_3302_; 
-v___x_28567__boxed_3300_ = lean_unbox(v___x_3286_);
-v_a_28568__boxed_3301_ = lean_unbox(v_a_3287_);
-v_res_3302_ = l_Array_zipWithMAux___at___00__private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop_spec__10___lam__0(v___x_3280_, v_b_3281_, v_recArgInfos_3282_, v_positions_3283_, v_recFnNames_3284_, v_containsRecFn_3285_, v___x_28567__boxed_3300_, v_a_28568__boxed_3301_, v___x_3288_, v_a_3289_, v_e_3290_, v___x_3291_, v_xs_3292_, v_altBody_3293_, v___y_3294_, v___y_3295_, v___y_3296_, v___y_3297_, v___y_3298_);
+uint8_t v___x_28579__boxed_3300_; uint8_t v_a_28580__boxed_3301_; lean_object* v_res_3302_; 
+v___x_28579__boxed_3300_ = lean_unbox(v___x_3286_);
+v_a_28580__boxed_3301_ = lean_unbox(v_a_3287_);
+v_res_3302_ = l_Array_zipWithMAux___at___00__private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop_spec__10___lam__0(v___x_3280_, v_b_3281_, v_recArgInfos_3282_, v_positions_3283_, v_recFnNames_3284_, v_containsRecFn_3285_, v___x_28579__boxed_3300_, v_a_28580__boxed_3301_, v___x_3288_, v_a_3289_, v_e_3290_, v___x_3291_, v_xs_3292_, v_altBody_3293_, v___y_3294_, v___y_3295_, v___y_3296_, v___y_3297_, v___y_3298_);
 lean_dec(v___y_3298_);
 lean_dec_ref(v___y_3297_);
 lean_dec(v___y_3296_);
@@ -11406,9 +11406,9 @@ return v_res_3636_;
 LEAN_EXPORT lean_object* l_Array_zipWithMAux___at___00__private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop_spec__10___boxed(lean_object* v_recArgInfos_3637_, lean_object* v_positions_3638_, lean_object* v_recFnNames_3639_, lean_object* v_containsRecFn_3640_, lean_object* v_a_3641_, lean_object* v_e_3642_, lean_object* v_as_3643_, lean_object* v_bs_3644_, lean_object* v_i_3645_, lean_object* v_cs_3646_, lean_object* v___y_3647_, lean_object* v___y_3648_, lean_object* v___y_3649_, lean_object* v___y_3650_, lean_object* v___y_3651_, lean_object* v___y_3652_){
 _start:
 {
-uint8_t v_a_28525__boxed_3653_; lean_object* v_res_3654_; 
-v_a_28525__boxed_3653_ = lean_unbox(v_a_3641_);
-v_res_3654_ = l_Array_zipWithMAux___at___00__private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop_spec__10(v_recArgInfos_3637_, v_positions_3638_, v_recFnNames_3639_, v_containsRecFn_3640_, v_a_28525__boxed_3653_, v_e_3642_, v_as_3643_, v_bs_3644_, v_i_3645_, v_cs_3646_, v___y_3647_, v___y_3648_, v___y_3649_, v___y_3650_, v___y_3651_);
+uint8_t v_a_28537__boxed_3653_; lean_object* v_res_3654_; 
+v_a_28537__boxed_3653_ = lean_unbox(v_a_3641_);
+v_res_3654_ = l_Array_zipWithMAux___at___00__private_Lean_Elab_PreDefinition_Structural_BRecOn_0__Lean_Elab_Structural_replaceRecApps_loop_spec__10(v_recArgInfos_3637_, v_positions_3638_, v_recFnNames_3639_, v_containsRecFn_3640_, v_a_28537__boxed_3653_, v_e_3642_, v_as_3643_, v_bs_3644_, v_i_3645_, v_cs_3646_, v___y_3647_, v___y_3648_, v___y_3649_, v___y_3650_, v___y_3651_);
 lean_dec(v___y_3651_);
 lean_dec_ref(v___y_3650_);
 lean_dec(v___y_3649_);

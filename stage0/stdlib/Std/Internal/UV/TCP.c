@@ -13,7 +13,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-LEAN_EXPORT lean_object* l___private_Std_Internal_UV_TCP_0__Std_Internal_UV_TCP_SocketImpl;
+LEAN_EXPORT lean_object* l_Std_Internal_UV_TCP_SocketImpl;
 lean_object* lean_uv_tcp_new();
 LEAN_EXPORT lean_object* l_Std_Internal_UV_TCP_Socket_new___boxed(lean_object*);
 lean_object* lean_uv_tcp_connect(lean_object*, lean_object*);
@@ -46,7 +46,7 @@ lean_object* lean_uv_tcp_nodelay(lean_object*);
 LEAN_EXPORT lean_object* l_Std_Internal_UV_TCP_Socket_noDelay___boxed(lean_object*, lean_object*);
 lean_object* lean_uv_tcp_keepalive(lean_object*, uint8_t, uint32_t);
 LEAN_EXPORT lean_object* l_Std_Internal_UV_TCP_Socket_keepAlive___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
-static lean_object* _init_l___private_Std_Internal_UV_TCP_0__Std_Internal_UV_TCP_SocketImpl(void){
+static lean_object* _init_l_Std_Internal_UV_TCP_SocketImpl(void){
 _start:
 {
 lean_object* v___x_1_; 
@@ -225,7 +225,7 @@ lean_dec_ref(res);
 res = runtime_initialize_Std_Net(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
-l___private_Std_Internal_UV_TCP_0__Std_Internal_UV_TCP_SocketImpl = _init_l___private_Std_Internal_UV_TCP_0__Std_Internal_UV_TCP_SocketImpl();
+l_Std_Internal_UV_TCP_SocketImpl = _init_l_Std_Internal_UV_TCP_SocketImpl();
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;

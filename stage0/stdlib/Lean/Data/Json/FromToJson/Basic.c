@@ -66,7 +66,7 @@ lean_object* l_Lean_JsonNumber_fromFloat_x3f(double);
 lean_object* l_Lean_JsonNumber_fromInt(lean_object*);
 lean_object* l_Lean_Name_toString(lean_object*, uint8_t);
 lean_object* l_Std_DTreeMap_Internal_Impl_insert_x21___redArg(lean_object*, lean_object*, lean_object*, lean_object*);
-lean_object* l_Std_DTreeMap_Internal_Impl_foldl___redArg(lean_object*, lean_object*, lean_object*);
+lean_object* l_Std_DTreeMap_Internal_Impl_foldlM___at___00Std_DTreeMap_Internal_Impl_foldl___at___00Lean_NameMap_foldl_spec__0_spec__0___redArg(lean_object*, lean_object*, lean_object*);
 lean_object* lean_array_mk(lean_object*);
 lean_object* l_Lean_Json_getObjValD(lean_object*, lean_object*);
 extern lean_object* l_System_Platform_numBits;
@@ -1810,7 +1810,7 @@ lean_object* v___f_511_; lean_object* v___x_512_; lean_object* v___x_513_; lean_
 v___f_511_ = lean_alloc_closure((void*)(l_Lean_NameMap_toJson___redArg___lam__0), 4, 1);
 lean_closure_set(v___f_511_, 0, v_inst_509_);
 v___x_512_ = lean_box(1);
-v___x_513_ = l_Std_DTreeMap_Internal_Impl_foldl___redArg(v___f_511_, v___x_512_, v_m_510_);
+v___x_513_ = l_Std_DTreeMap_Internal_Impl_foldlM___at___00Std_DTreeMap_Internal_Impl_foldl___at___00Lean_NameMap_foldl_spec__0_spec__0___redArg(v___f_511_, v___x_512_, v_m_510_);
 v___x_514_ = lean_alloc_ctor(5, 1, 0);
 lean_ctor_set(v___x_514_, 0, v___x_513_);
 return v___x_514_;

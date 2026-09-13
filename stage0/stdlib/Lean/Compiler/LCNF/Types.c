@@ -2279,9 +2279,9 @@ return v___x_674_;
 LEAN_EXPORT lean_object* l___private_Lean_Compiler_LCNF_Types_0__Lean_Compiler_LCNF_toLCNFType_go___lam__0___boxed(lean_object* v_binderType_693_, lean_object* v_body_694_, lean_object* v_binderName_695_, lean_object* v_binderInfo_696_, lean_object* v_x_697_, lean_object* v___y_698_, lean_object* v___y_699_, lean_object* v___y_700_, lean_object* v___y_701_, lean_object* v___y_702_){
 _start:
 {
-uint8_t v_binderInfo_8827__boxed_703_; lean_object* v_res_704_; 
-v_binderInfo_8827__boxed_703_ = lean_unbox(v_binderInfo_696_);
-v_res_704_ = l___private_Lean_Compiler_LCNF_Types_0__Lean_Compiler_LCNF_toLCNFType_go___lam__0(v_binderType_693_, v_body_694_, v_binderName_695_, v_binderInfo_8827__boxed_703_, v_x_697_, v___y_698_, v___y_699_, v___y_700_, v___y_701_);
+uint8_t v_binderInfo_8835__boxed_703_; lean_object* v_res_704_; 
+v_binderInfo_8835__boxed_703_ = lean_unbox(v_binderInfo_696_);
+v_res_704_ = l___private_Lean_Compiler_LCNF_Types_0__Lean_Compiler_LCNF_toLCNFType_go___lam__0(v_binderType_693_, v_body_694_, v_binderName_695_, v_binderInfo_8835__boxed_703_, v_x_697_, v___y_698_, v___y_699_, v___y_700_, v___y_701_);
 lean_dec(v___y_701_);
 lean_dec_ref(v___y_700_);
 lean_dec(v___y_699_);
@@ -2385,9 +2385,9 @@ return v___x_719_;
 LEAN_EXPORT lean_object* l___private_Lean_Compiler_LCNF_Types_0__Lean_Compiler_LCNF_toLCNFType_visitForall___lam__0___boxed(lean_object* v_xs_734_, lean_object* v_body_735_, lean_object* v_binderName_736_, lean_object* v_binderInfo_737_, lean_object* v_d_738_, lean_object* v_x_739_, lean_object* v___y_740_, lean_object* v___y_741_, lean_object* v___y_742_, lean_object* v___y_743_, lean_object* v___y_744_){
 _start:
 {
-uint8_t v_binderInfo_8849__boxed_745_; lean_object* v_res_746_; 
-v_binderInfo_8849__boxed_745_ = lean_unbox(v_binderInfo_737_);
-v_res_746_ = l___private_Lean_Compiler_LCNF_Types_0__Lean_Compiler_LCNF_toLCNFType_visitForall___lam__0(v_xs_734_, v_body_735_, v_binderName_736_, v_binderInfo_8849__boxed_745_, v_d_738_, v_x_739_, v___y_740_, v___y_741_, v___y_742_, v___y_743_);
+uint8_t v_binderInfo_8857__boxed_745_; lean_object* v_res_746_; 
+v_binderInfo_8857__boxed_745_ = lean_unbox(v_binderInfo_737_);
+v_res_746_ = l___private_Lean_Compiler_LCNF_Types_0__Lean_Compiler_LCNF_toLCNFType_visitForall___lam__0(v_xs_734_, v_body_735_, v_binderName_736_, v_binderInfo_8857__boxed_745_, v_d_738_, v_x_739_, v___y_740_, v___y_741_, v___y_742_, v___y_743_);
 lean_dec(v___y_743_);
 lean_dec_ref(v___y_742_);
 lean_dec(v___y_741_);
@@ -2762,8 +2762,8 @@ goto v___jp_785_;
 }
 else
 {
-lean_dec(v_pre_830_);
 lean_dec_ref_known(v_declName_829_, 2);
+lean_dec(v_pre_830_);
 lean_dec_ref_known(v_fn_828_, 2);
 lean_del_object(v___x_817_);
 goto v___jp_785_;

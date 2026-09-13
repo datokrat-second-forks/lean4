@@ -1412,8 +1412,8 @@ return v___x_443_;
 else
 {
 lean_object* v___x_445_; 
-lean_dec(v_a_444_);
 lean_dec_ref_known(v___x_443_, 1);
+lean_dec(v_a_444_);
 lean_inc(v_a_388_);
 lean_inc_ref(v_a_387_);
 lean_inc(v_a_386_);

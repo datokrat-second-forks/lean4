@@ -9286,8 +9286,8 @@ goto v___jp_2631_;
 }
 else
 {
-lean_dec(v_pre_2717_);
 lean_dec_ref_known(v_fn_2654_, 2);
+lean_dec(v_pre_2717_);
 lean_dec_ref_known(v___x_2716_, 1);
 lean_dec(v_fvarId_2634_);
 lean_dec_ref(v_k_2618_);

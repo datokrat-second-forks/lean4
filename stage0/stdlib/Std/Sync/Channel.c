@@ -14277,7 +14277,7 @@ _start:
 lean_object* v___x_4919_; lean_object* v___x_4920_; lean_object* v___x_4921_; lean_object* v___x_4922_; lean_object* v___x_4923_; lean_object* v___x_4924_; 
 v___x_4919_ = ((lean_object*)(l_Std_Channel_send___redArg___lam__0___closed__2));
 v___x_4920_ = lean_unsigned_to_nat(21u);
-v___x_4921_ = lean_unsigned_to_nat(869u);
+v___x_4921_ = lean_unsigned_to_nat(867u);
 v___x_4922_ = ((lean_object*)(l_Std_Channel_send___redArg___lam__0___closed__1));
 v___x_4923_ = ((lean_object*)(l_Std_Channel_send___redArg___lam__0___closed__0));
 v___x_4924_ = l_mkPanicMessageWithDecl(v___x_4923_, v___x_4922_, v___x_4921_, v___x_4920_, v___x_4919_);
@@ -14385,7 +14385,7 @@ _start:
 lean_object* v___x_4971_; lean_object* v___x_4972_; lean_object* v___x_4973_; lean_object* v___x_4974_; lean_object* v___x_4975_; lean_object* v___x_4976_; 
 v___x_4971_ = ((lean_object*)(l_Std_Channel_send___redArg___lam__0___closed__2));
 v___x_4972_ = lean_unsigned_to_nat(16u);
-v___x_4973_ = lean_unsigned_to_nat(880u);
+v___x_4973_ = lean_unsigned_to_nat(878u);
 v___x_4974_ = ((lean_object*)(l_Std_Channel_recv___redArg___lam__0___closed__0));
 v___x_4975_ = ((lean_object*)(l_Std_Channel_send___redArg___lam__0___closed__0));
 v___x_4976_ = l_mkPanicMessageWithDecl(v___x_4975_, v___x_4974_, v___x_4973_, v___x_4972_, v___x_4971_);
