@@ -69,7 +69,7 @@ lifting](lean-manual://section/lifting-monads) rather being than called explicit
 -/
 @[always_inline, inline]
 def BaseIO.toEIO (act : BaseIO α) : EIO ε α :=
-  fun s => match act s with
+  EST.mk fun s => match ST.run act s with
   | .mk a s => .ok a s
 
 instance : MonadLift BaseIO (EIO ε) := ⟨BaseIO.toEIO⟩
@@ -80,7 +80,7 @@ action that returns an `Except` value.
 -/
 @[always_inline, inline]
 def EIO.toBaseIO (act : EIO ε α) : BaseIO (Except ε α) :=
-  fun s => match act s with
+  ST.mk fun s => match EST.run act s with
   | .ok a s     => .mk (.ok a) s
   | .error ex s => .mk (.error ex) s
 
@@ -90,9 +90,9 @@ exception-free `BaseIO` action.
 -/
 @[always_inline, inline]
 def EIO.catchExceptions (act : EIO ε α) (h : ε → BaseIO α) : BaseIO α :=
-  fun s => match act s with
+  ST.mk fun s => match EST.run act s with
   | .ok a s     => .mk a s
-  | .error ex s => h ex s
+  | .error ex s => ST.run (h ex) s
 
 instance : Monad (EIO ε) := inferInstanceAs (Monad (EST ε IO.RealWorld))
 instance : MonadFinally (EIO ε) := inferInstanceAs (MonadFinally (EST ε IO.RealWorld))
@@ -126,7 +126,7 @@ def EIO.ofExcept (e : Except ε α) : EIO ε α :=
 
 @[always_inline, inline]
 def EIO.adapt (f : ε → ε') (m : EIO ε α) : EIO ε' α :=
-  fun s => match m s with
+  EST.mk fun s => match EST.run m s with
   | .ok a s => .ok a s
   | .error e s => .error (f e) s
 
@@ -186,7 +186,7 @@ duplicate, or delete calls to this function. The side effect may even be hoisted
 causing the side effect to occur at initialization time, even if it would otherwise never be called.
 -/
 @[noinline] unsafe def unsafeBaseIO (fn : BaseIO α) : α :=
-  match fn (unsafeCast Unit.unit) with
+  match ST.run fn (unsafeCast Unit.unit) with
   | .mk a _ => a
 
 /--
@@ -432,7 +432,7 @@ Pauses execution for the specified number of milliseconds.
 -/
 opaque sleep (ms : UInt32) : BaseIO Unit :=
   -- TODO: add a proper primitive for IO.sleep
-  fun s => dbgSleep ms fun _ => .mk () s
+  ST.mk fun s => dbgSleep ms fun _ => .mk () s
 
 /--
 Runs `act` in a separate `Task`, with priority `prio`. Because `IO` actions may throw an exception
@@ -1662,9 +1662,7 @@ the `IO` monad.
 abbrev Ref (α : Type) := ST.Ref IO.RealWorld α
 
 instance : MonadLift (ST IO.RealWorld) BaseIO where
-  monadLift mx := fun s =>
-    match mx s with
-    | .mk s a => .mk s a
+  monadLift mx := mx
 
 /--
 Creates a new mutable reference cell that contains `a`.
