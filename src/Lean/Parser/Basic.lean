@@ -1637,21 +1637,26 @@ def eoi : Parser := {
 }
 
 /-- A multimap indexed by tokens. Used for indexing parsers by their leading token. -/
-@[expose] def TokenMap (α : Type) := Std.TreeMap Name (List α) Name.quickCmp
+structure TokenMap (α : Type) where
+  toTreeMap : Std.TreeMap Name (List α) Name.quickCmp
 
 namespace TokenMap
 
+def get? (map : TokenMap α) (k : Name) : Option (List α) :=
+  map.toTreeMap.get? k
+
 def insert (map : TokenMap α) (k : Name) (v : α) : TokenMap α :=
   match map.get? k with
-  | none    => Std.TreeMap.insert map k [v]
-  | some vs => Std.TreeMap.insert map k (v::vs)
+  | none    => ⟨map.toTreeMap.insert k [v]⟩
+  | some vs => ⟨map.toTreeMap.insert k (v::vs)⟩
 
 instance : Inhabited (TokenMap α) where
-  default := Std.TreeMap.empty
+  default := ⟨Std.TreeMap.empty⟩
 
-instance : EmptyCollection (TokenMap α) := ⟨Std.TreeMap.empty⟩
+instance : EmptyCollection (TokenMap α) := ⟨⟨Std.TreeMap.empty⟩⟩
 
-instance [Monad m] : ForIn m (TokenMap α) (Name × List α) := inferInstanceAs (ForIn _ (Std.TreeMap _ _ _) _)
+instance [Monad m] : ForIn m (TokenMap α) (Name × List α) where
+  forIn map init f := forIn map.toTreeMap init f
 
 end TokenMap
 

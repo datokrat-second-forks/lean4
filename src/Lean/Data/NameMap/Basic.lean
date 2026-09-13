@@ -15,50 +15,120 @@ public section
 
 namespace Lean
 
-@[expose] def NameMap (α : Type) := Std.TreeMap Name α Name.quickCmp
+structure NameMap (α : Type) where
+  toTreeMap : Std.TreeMap Name α Name.quickCmp
 
-@[inline] def mkNameMap (α : Type) : NameMap α := Std.TreeMap.empty
+@[inline] def mkNameMap (α : Type) : NameMap α := ⟨Std.TreeMap.empty⟩
 
 namespace NameMap
 variable {α : Type}
 
-instance [Repr α] : Repr (NameMap α) := inferInstanceAs (Repr (Std.TreeMap _ _ _))
+instance [Repr α] : Repr (NameMap α) := ⟨(reprPrec ·.toTreeMap)⟩
 
 instance (α : Type) : EmptyCollection (NameMap α) := ⟨mkNameMap α⟩
 
 instance (α : Type) : Inhabited (NameMap α) where
   default := {}
 
-def insert (m : NameMap α) (n : Name) (a : α) := Std.TreeMap.insert m n a
+instance [BEq α] : BEq (NameMap α) := ⟨(·.toTreeMap == ·.toTreeMap)⟩
 
-def contains (m : NameMap α) (n : Name) : Bool := Std.TreeMap.contains m n
+def insert (m : NameMap α) (n : Name) (a : α) : NameMap α := ⟨m.toTreeMap.insert n a⟩
 
-def find? (m : NameMap α) (n : Name) : Option α := Std.TreeMap.get? m n
+def erase (m : NameMap α) (n : Name) : NameMap α := ⟨m.toTreeMap.erase n⟩
+
+def alter (m : NameMap α) (n : Name) (f : Option α → Option α) : NameMap α := ⟨m.toTreeMap.alter n f⟩
+
+def contains (m : NameMap α) (n : Name) : Bool := m.toTreeMap.contains n
+
+def find? (m : NameMap α) (n : Name) : Option α := m.toTreeMap.get? n
+
+def get? (m : NameMap α) (n : Name) : Option α := m.toTreeMap.get? n
+
+def get! [Inhabited α] (m : NameMap α) (n : Name) : α := m.toTreeMap.get! n
+
+def getD (m : NameMap α) (n : Name) (fallback : α) : α := m.toTreeMap.getD n fallback
+
+instance : Membership Name (NameMap α) := ⟨fun m n => n ∈ m.toTreeMap⟩
+
+instance : GetElem? (NameMap α) Name α (fun m n => n ∈ m) where
+  getElem m n h := m.toTreeMap[n]'h
+  getElem? m n := m.toTreeMap[n]?
+  getElem! m n := m.toTreeMap[n]!
+
+def size (m : NameMap α) : Nat := m.toTreeMap.size
+
+def isEmpty (m : NameMap α) : Bool := m.toTreeMap.isEmpty
+
+def any (m : NameMap α) (p : Name → α → Bool) : Bool := m.toTreeMap.any p
+
+def all (m : NameMap α) (p : Name → α → Bool) : Bool := m.toTreeMap.all p
+
+def foldl (f : σ → Name → α → σ) (init : σ) (m : NameMap α) : σ := m.toTreeMap.foldl f init
+
+def foldlM [Monad m'] (f : σ → Name → α → m' σ) (init : σ) (m : NameMap α) : m' σ :=
+  m.toTreeMap.foldlM f init
+
+def forM [Monad m'] (f : Name → α → m' PUnit) (m : NameMap α) : m' PUnit := m.toTreeMap.forM f
+
+def keys (m : NameMap α) : List Name := m.toTreeMap.keys
+
+def keysArray (m : NameMap α) : Array Name := m.toTreeMap.keysArray
+
+def values (m : NameMap α) : List α := m.toTreeMap.values
+
+def valuesArray (m : NameMap α) : Array α := m.toTreeMap.valuesArray
+
+def toList (m : NameMap α) : List (Name × α) := m.toTreeMap.toList
+
+def toArray (m : NameMap α) : Array (Name × α) := m.toTreeMap.toArray
+
+def ofList (l : List (Name × α)) : NameMap α := ⟨Std.TreeMap.ofList l _⟩
+
+def ofArray (l : Array (Name × α)) : NameMap α := ⟨Std.TreeMap.ofArray l _⟩
+
+def mergeWith (f : Name → α → α → α) (m₁ m₂ : NameMap α) : NameMap α :=
+  ⟨m₁.toTreeMap.mergeWith f m₂.toTreeMap⟩
 
 instance : Insert (Name × α) (NameMap α) where
   insert e s := s.insert e.1 e.2
 
-instance [Monad m] : ForIn m (NameMap α) (Name × α) :=
-  inferInstanceAs (ForIn _ (Std.TreeMap _ _ _) ..)
+instance [Monad m] : ForIn m (NameMap α) (Name × α) where
+  forIn m init f := forIn m.toTreeMap init f
 
 /-- `filter f m` returns the `NameMap` consisting of all
 "`key`/`val`"-pairs in `m` where `f key val` returns `true`. -/
-def filter (f : Name → α → Bool) (m : NameMap α) : NameMap α := Std.TreeMap.filter f m
+def filter (f : Name → α → Bool) (m : NameMap α) : NameMap α := ⟨m.toTreeMap.filter f⟩
 
 end NameMap
 
-@[expose] def NameSet := Std.TreeSet Name Name.quickCmp
+structure NameSet where
+  toTreeSet : Std.TreeSet Name Name.quickCmp
 
 namespace NameSet
-def empty : NameSet := Std.TreeSet.empty
+def empty : NameSet := ⟨Std.TreeSet.empty⟩
 instance : EmptyCollection NameSet := ⟨empty⟩
 instance : Inhabited NameSet := ⟨empty⟩
-def insert (s : NameSet) (n : Name) : NameSet := Std.TreeSet.insert s n
-def contains (s : NameSet) (n : Name) : Bool := Std.TreeSet.contains s n
+def insert (s : NameSet) (n : Name) : NameSet := ⟨s.toTreeSet.insert n⟩
+def containsThenInsert (s : NameSet) (n : Name) : Bool × NameSet :=
+  let (b, s) := s.toTreeSet.containsThenInsert n
+  (b, ⟨s⟩)
+def erase (s : NameSet) (n : Name) : NameSet := ⟨s.toTreeSet.erase n⟩
+def contains (s : NameSet) (n : Name) : Bool := s.toTreeSet.contains n
+instance : Membership Name NameSet := ⟨fun s n => n ∈ s.toTreeSet⟩
+def size (s : NameSet) : Nat := s.toTreeSet.size
+def isEmpty (s : NameSet) : Bool := s.toTreeSet.isEmpty
+def any (s : NameSet) (p : Name → Bool) : Bool := s.toTreeSet.any p
+def all (s : NameSet) (p : Name → Bool) : Bool := s.toTreeSet.all p
+def foldl (f : σ → Name → σ) (init : σ) (s : NameSet) : σ := s.toTreeSet.foldl f init
+def foldlM [Monad m] (f : σ → Name → m σ) (init : σ) (s : NameSet) : m σ := s.toTreeSet.foldlM f init
+def toList (s : NameSet) : List Name := s.toTreeSet.toList
+def toArray (s : NameSet) : Array Name := s.toTreeSet.toArray
+def merge (s t : NameSet) : NameSet := ⟨s.toTreeSet.merge t.toTreeSet⟩
+def union (s t : NameSet) : NameSet := ⟨s.toTreeSet.union t.toTreeSet⟩
 instance : Insert Name NameSet where
   insert n s := s.insert n
-instance [Monad m] : ForIn m NameSet Name :=
-  inferInstanceAs (ForIn _ (Std.TreeSet _ _) ..)
+instance [Monad m] : ForIn m NameSet Name where
+  forIn s init f := forIn s.toTreeSet init f
 
 /-- The union of two `NameSet`s. -/
 def append (s t : NameSet) : NameSet :=
@@ -80,35 +150,37 @@ instance : SDiff NameSet where
   sdiff := fun s t => t.foldl (fun s n => s.erase n) s
 
 /-- `filter f s` returns the `NameSet` consisting of all `x` in `s` where `f x` returns `true`. -/
-def filter (f : Name → Bool) (s : NameSet) : NameSet := Std.TreeSet.filter f s
+def filter (f : Name → Bool) (s : NameSet) : NameSet := ⟨s.toTreeSet.filter f⟩
 
-def ofList (l : List Name) : NameSet := Std.TreeSet.ofList l _
+def ofList (l : List Name) : NameSet := ⟨Std.TreeSet.ofList l _⟩
 
-def ofArray (l : Array Name) : NameSet := Std.TreeSet.ofArray l _
+def ofArray (l : Array Name) : NameSet := ⟨Std.TreeSet.ofArray l _⟩
 
 end NameSet
 
-@[expose] def NameSSet := SSet Name
+structure NameSSet where
+  toSSet : SSet Name
 
 namespace NameSSet
-abbrev empty : NameSSet := SSet.empty
+abbrev empty : NameSSet := ⟨SSet.empty⟩
 instance : EmptyCollection NameSSet := ⟨empty⟩
 instance : Inhabited NameSSet := ⟨empty⟩
-abbrev insert (s : NameSSet) (n : Name) : NameSSet := SSet.insert s n
-abbrev contains (s : NameSSet) (n : Name) : Bool := SSet.contains s n
+abbrev insert (s : NameSSet) (n : Name) : NameSSet := ⟨s.toSSet.insert n⟩
+abbrev contains (s : NameSSet) (n : Name) : Bool := s.toSSet.contains n
 end NameSSet
 
-@[expose] def NameHashSet := Std.HashSet Name
+structure NameHashSet where
+  toHashSet : Std.HashSet Name
 
 namespace NameHashSet
-@[inline] def empty : NameHashSet := (∅ : Std.HashSet Name)
+@[inline] def empty : NameHashSet := ⟨∅⟩
 instance : EmptyCollection NameHashSet := ⟨empty⟩
 instance : Inhabited NameHashSet := ⟨{}⟩
-def insert (s : NameHashSet) (n : Name) := Std.HashSet.insert s n
-def contains (s : NameHashSet) (n : Name) : Bool := Std.HashSet.contains s n
+def insert (s : NameHashSet) (n : Name) : NameHashSet := ⟨s.toHashSet.insert n⟩
+def contains (s : NameHashSet) (n : Name) : Bool := s.toHashSet.contains n
 
 /-- `filter f s` returns the `NameHashSet` consisting of all `x` in `s` where `f x` returns `true`. -/
-def filter (f : Name → Bool) (s : NameHashSet) : NameHashSet := Std.HashSet.filter f s
+def filter (f : Name → Bool) (s : NameHashSet) : NameHashSet := ⟨s.toHashSet.filter f⟩
 end NameHashSet
 
 def MacroScopesView.isPrefixOf (v₁ v₂ : MacroScopesView) : Bool :=
