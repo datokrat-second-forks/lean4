@@ -61,4 +61,4 @@ def applyImplementedBy? (e : LetValue .pure) : OptionT SimpM (LetValue .pure) :=
 /-- Try to apply simple simplifications. -/
 def simpValue? (e : LetValue .pure) : SimpM (Option (LetValue .pure)) :=
   -- TODO: more simplifications
-  simpProj? e <|> simpAppApp? e <|> simpCtorDiscr? e <|> applyImplementedBy? e
+  (simpProj? e <|> simpAppApp? e <|> simpCtorDiscr? e <|> applyImplementedBy? e).run

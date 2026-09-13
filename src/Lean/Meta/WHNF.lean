@@ -217,7 +217,7 @@ we create a new expression `Nat.succ e'` where `e'` is `a` for `k = 1`, or `a + 
 See issue #3022
 -/
 private def cleanupNatOffsetMajor (e : Expr) : MetaM Expr := do
-  let some (e, k) ← isOffset? e | return e
+  let some (e, k) ← (isOffset? e).run | return e
   if k = 0 then
     return e
   else if k = 1 then
@@ -776,7 +776,7 @@ where
       else
         go e
     | ReduceMatcherResult.stuck e' =>
-      let mvarId ← getStuckMVar? e'
+      let mvarId ← OptionT.mk (getStuckMVar? e')
       /- Try to "unstuck" by resolving pending TC problems -/
       if (← Meta.synthPending mvarId) then
         goMatch e

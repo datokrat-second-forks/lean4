@@ -64,8 +64,11 @@ instance {σ : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
 
 instance {ε : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
     MonadTail (ExceptT ε m) where
-  instCCPO β := MonadTail.instCCPO (Except ε β)
+  instCCPO β :=
+    letI : CCPO (m (Except ε β)) := MonadTail.instCCPO (Except ε β)
+    ExceptT.ccpo
   bind_mono_right h := by
+    show ExceptT.run _ ⊑ ExceptT.run _
     apply MonadTail.bind_mono_right (m := m)
     intro x
     cases x with
@@ -81,8 +84,11 @@ instance : MonadTail (Except ε) where
 
 instance {m : Type u → Type v} [Monad m] [MonadTail m] :
     MonadTail (OptionT m) where
-  instCCPO β := MonadTail.instCCPO (Option β)
+  instCCPO β :=
+    letI : CCPO (m (Option β)) := MonadTail.instCCPO (Option β)
+    OptionT.ccpo
   bind_mono_right h := by
+    show OptionT.run _ ⊑ OptionT.run _
     apply MonadTail.bind_mono_right (m := m)
     intro x
     cases x with

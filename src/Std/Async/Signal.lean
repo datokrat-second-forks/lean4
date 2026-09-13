@@ -236,7 +236,7 @@ def selector (s : Signal.Waiter) : Selector Unit :=
   {
     tryFn := do
       let signalWaiter : AsyncTask _ ← async s.wait
-      if ← IO.hasFinished signalWaiter then
+      if ← IO.hasFinished signalWaiter.run then
         return some ()
       else
         s.native.cancel

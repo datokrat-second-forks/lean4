@@ -27,9 +27,9 @@ structure UnifyEqResult where
   numNewEqs : Nat := 0
 
 private def toOffset? (e : Expr) : MetaM (Option (Expr × Nat)) := do
-  match (← evalNat e) with
+  match (← (evalNat e).run) with
   | some k => return some (mkNatLit 0, k)
-  | none => isOffset? e
+  | none => (isOffset? e).run
 
 /--
   Helper method for methods such as `Cases.unifyEqs?`.

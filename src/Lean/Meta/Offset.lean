@@ -81,7 +81,7 @@ This function always succeeds in finding such `s` and `k`
 (as a last resort it returns `e` and `0`).
 -/
 private partial def getOffset (e : Expr) : MetaM (Expr × Nat) :=
-  return (← isOffset? e).getD (e, 0)
+  return (← (isOffset? e).run).getD (e, 0)
 
 /--
 Similar to `getOffset` but returns `none` if the expression is not an offset.
@@ -103,7 +103,7 @@ partial def isOffset? (e : Expr) : OptionT MetaM (Expr × Nat) := do
 end
 
 private def isNatZero (e : Expr) : MetaM Bool := do
-  match (← evalNat e) with
+  match (← (evalNat e).run) with
   | some v => return v == 0
   | _      => return false
 
@@ -128,9 +128,9 @@ def isDefEqOffset (s t : Expr) : MetaM LBool := do
   if !(← getConfig).offsetCnstrs then
     return LBool.undef
   else
-    match (← isOffset? s) with
+    match (← (isOffset? s).run) with
     | some (s, k₁) =>
-      match (← isOffset? t) with
+      match (← (isOffset? t).run) with
       | some (t, k₂) => -- s+k₁ =?= t+k₂
         if k₁ == k₂ then
           isDefEq s t
@@ -139,7 +139,7 @@ def isDefEqOffset (s t : Expr) : MetaM LBool := do
         else
           isDefEq (← mkOffset s (k₁ - k₂)) t
       | none =>
-        match (← evalNat t) with
+        match (← (evalNat t).run) with
         | some v₂ => -- s+k₁ =?= v₂
           if v₂ ≥ k₁ then
             isDefEq s (mkNatLit <| v₂ - k₁)
@@ -148,16 +148,16 @@ def isDefEqOffset (s t : Expr) : MetaM LBool := do
         | none =>
           return LBool.undef
     | none =>
-      match (← evalNat s) with
+      match (← (evalNat s).run) with
       | some v₁ =>
-        match (← isOffset? t) with
+        match (← (isOffset? t).run) with
         | some (t, k₂) => -- v₁ =?= t+k₂
           if v₁ ≥ k₂ then
             isDefEq (mkNatLit <| v₁ - k₂) t
           else
             ifNatExpr <| return LBool.false
         | none =>
-          match (← evalNat t) with
+          match (← (evalNat t).run) with
           | some v₂ => ifNatExpr <| return (v₁ == v₂).toLBool -- v₁ =?= v₂
           | none    => return LBool.undef
       | none => return LBool.undef

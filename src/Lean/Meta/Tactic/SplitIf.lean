@@ -72,7 +72,7 @@ unsafe def visit (e : Expr) : OptionT FindM Expr := do
     | .mdata _ b       => visit b
     | .forallE _ d b _ => visit d <|> visit b -- We want to look for candidates at `A → B`
     | .letE _ _ v b _  => visit v <|> visit b
-    | .app ..          => visitApp? e
+    | .app ..          => OptionT.mk (visitApp? e)
     | _                => failure
 where
   visitApp? (e : Expr) : FindM (Option Expr) :=
@@ -89,12 +89,12 @@ where
         let info := info.paramInfo[i]
         unless info.isProp do
           if info.isExplicit then
-            let some found ← visit arg | pure ()
+            let some found ← (visit arg).run | pure ()
             return found
       else
-        let some found ← visit arg | pure ()
+        let some found ← (visit arg).run | pure ()
         return found
-    visit f
+    (visit f).run
 
 end FindSplitImpl
 
@@ -114,7 +114,7 @@ where
       return none
 
   find? (e : Expr) : MetaM (Option Expr) := do
-    let some candidate ← unsafe FindSplitImpl.visit e { kind, exceptionSet } |>.run' mkPtrSet
+    let some candidate ← unsafe (FindSplitImpl.visit e).run { kind, exceptionSet } |>.run' mkPtrSet
       | return none
     trace[split.debug] "candidate:{indentExpr candidate}"
     return some candidate
