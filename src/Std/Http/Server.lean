@@ -104,7 +104,7 @@ Waits for the server to shut down. Blocks until another task or async operation 
 -/
 @[inline]
 def waitShutdown (s : Server) : Async Unit := do
-  Async.ofAsyncTask ((← s.shutdownPromise.recv).map Except.ok)
+  Async.ofAsyncTask <| ExceptT.mk <| (← s.shutdownPromise.recv).map Except.ok
 
 /--
 Returns a `Selector` that waits for the server to shut down.

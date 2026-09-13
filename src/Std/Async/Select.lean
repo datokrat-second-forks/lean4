@@ -161,7 +161,7 @@ def Selectable.combine (selectables : Array (Selectable α)) : IO (Selector α) 
               catch e =>
                 waiter.promise.resolve (.error e)
 
-            deliver.toBaseIO
+            ExceptT.run <$> deliver.toBaseIO
 
     unregisterFn := do
       for selectable in selectables do

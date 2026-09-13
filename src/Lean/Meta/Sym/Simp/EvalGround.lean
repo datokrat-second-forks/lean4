@@ -553,42 +553,42 @@ abbrev mkBitVecType (w : Expr) : Expr :=
   mkApp (mkConst ``BitVec) w
 
 def evalInt8ToBitVec (a : Expr) : SimpM Result := do
-  let some v ← getInt8Value? a |>.run | return .rfl
+  let some v := getInt8Value? a | return .rfl
   let v ← share <| toExpr v.toBitVec
   return .step v (mkRflBitVec v 8) (done := true)
 
 def evalInt16ToBitVec (a : Expr) : SimpM Result := do
-  let some v ← getInt16Value? a |>.run | return .rfl
+  let some v := getInt16Value? a | return .rfl
   let v ← share <| toExpr v.toBitVec
   return .step v (mkRflBitVec v 16) (done := true)
 
 def evalInt32ToBitVec (a : Expr) : SimpM Result := do
-  let some v ← getInt32Value? a |>.run | return .rfl
+  let some v := getInt32Value? a | return .rfl
   let v ← share <| toExpr v.toBitVec
   return .step v (mkRflBitVec v 32) (done := true)
 
 def evalInt64ToBitVec (a : Expr) : SimpM Result := do
-  let some v ← getInt64Value? a |>.run | return .rfl
+  let some v := getInt64Value? a | return .rfl
   let v ← share <| toExpr v.toBitVec
   return .step v (mkRflBitVec v 64) (done := true)
 
 def evalUInt8ToBitVec (a : Expr) : SimpM Result := do
-  let some v ← getUInt8Value? a |>.run | return .rfl
+  let some v := getUInt8Value? a | return .rfl
   let v ← share <| toExpr v.toBitVec
   return .step v (mkRflBitVec v 8) (done := true)
 
 def evalUInt16ToBitVec (a : Expr) : SimpM Result := do
-  let some v ← getUInt16Value? a |>.run | return .rfl
+  let some v := getUInt16Value? a | return .rfl
   let v ← share <| toExpr v.toBitVec
   return .step v (mkRflBitVec v 16) (done := true)
 
 def evalUInt32ToBitVec (a : Expr) : SimpM Result := do
-  let some v ← getUInt32Value? a |>.run | return .rfl
+  let some v := getUInt32Value? a | return .rfl
   let v ← share <| toExpr v.toBitVec
   return .step v (mkRflBitVec v 32) (done := true)
 
 def evalUInt64ToBitVec (a : Expr) : SimpM Result := do
-  let some v ← getUInt64Value? a |>.run | return .rfl
+  let some v := getUInt64Value? a | return .rfl
   let v ← share <| toExpr v.toBitVec
   return .step v (mkRflBitVec v 64) (done := true)
 
@@ -598,8 +598,8 @@ def evalBitVecToNat (a : Expr) : SimpM Result := do
   return .step a (mkApp2 (mkConst ``Eq.refl [1]) Nat.mkType a) (done := true)
 
 def evalBitVecOfNat (n a : Expr) : SimpM Result := do
-  let some a ← getNatValue? a |>.run | return .rfl
-  if (← getNatValue? n |>.run).isSome then return .rfl -- already in normal form
+  let some a := getNatValue? a | return .rfl
+  if (getNatValue? n).isSome then return .rfl -- already in normal form
   let some n ← evalNat n |>.run | return .rfl -- TODO: consider using dsimp
   let r ← share <| toExpr (BitVec.ofNat n a)
   return .step r (mkRflBitVec r n) (done := true)

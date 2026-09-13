@@ -143,7 +143,7 @@ def rpcStoreRef [TypeName α] (obj : WithRpcRef α) : StateM RpcObjectStore Lsp.
     return ref
 
 def rpcGetRef (α) [TypeName α] (r : Lsp.RpcRef)
-    : ReaderT RpcObjectStore (ExceptT String Id) (WithRpcRef α) := do
+    : ExceptT String (ReaderT RpcObjectStore Id) (WithRpcRef α) := do
   let some referencedObj := (← read).aliveRefs.find? r
     | throw s!"RPC reference '{r}' is not valid"
   let some val := referencedObj.obj.get? α

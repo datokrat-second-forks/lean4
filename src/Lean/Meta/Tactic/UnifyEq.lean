@@ -30,9 +30,9 @@ structure UnifyEqResult where
   numNewEqs : Nat := 0
 
 private def toOffset? (e : Expr) : MetaM (Option (Expr × Nat)) := do
-  match (← evalNat e) with
+  match (← (evalNat e).run) with
   | some k => return some (mkNatLit 0, k)
-  | none => isOffset? e
+  | none => (isOffset? e).run
 
 /--
 Replaces the equation `eqDecl : b x = t` or `t = b x`, where `b` is a chain of one-field-structure

@@ -764,7 +764,7 @@ instance [Inhabited α] : AsyncRead (CloseableChannel α) (Option α) where
 instance [Inhabited α] : AsyncWrite (CloseableChannel α) α where
   write receiver x := do
     let task ← receiver.send x
-    Async.ofAsyncTask <| task.map (Except.mapError (IO.userError ∘ toString))
+    Async.ofAsyncTask <| ExceptT.mk <| task.map (Except.mapError (IO.userError ∘ toString))
 
 /--
 This function is a no-op and just a convenient way to expose the synchronous API of the channel.

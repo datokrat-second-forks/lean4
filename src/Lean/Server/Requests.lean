@@ -438,20 +438,20 @@ partial def findInfoTreeAtPos
 open Elab.Command in
 def runCommandElabM (snap : Snapshot) (c : RequestT CommandElabM α) : RequestM α := do
   let rc ← readThe RequestContext
-  match ← snap.runCommandElabM rc.doc.meta (c.run rc) with
+  match ← snap.runCommandElabM rc.doc.meta (c.run rc).run with
   | .ok v => return v
   | .error e => throw e
 
 def runCoreM (snap : Snapshot) (c : RequestT CoreM α) : RequestM α := do
   let rc ← readThe RequestContext
-  match ← snap.runCoreM rc.doc.meta (c.run rc) with
+  match ← snap.runCoreM rc.doc.meta (c.run rc).run with
   | .ok v => return v
   | .error e => throw e
 
 open Elab.Term in
 def runTermElabM (snap : Snapshot) (c : RequestT TermElabM α) : RequestM α := do
   let rc ← readThe RequestContext
-  match ← snap.runTermElabM rc.doc.meta (c.run rc) with
+  match ← snap.runTermElabM rc.doc.meta (c.run rc).run with
   | .ok v => return v
   | .error e => throw e
 

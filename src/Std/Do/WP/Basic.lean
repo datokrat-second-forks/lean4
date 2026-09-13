@@ -84,10 +84,10 @@ instance ReaderT.instWP [WP m ps] : WP (ReaderT ρ m) (.arg ρ ps) where
   wp x := PredTrans.pushArg (.mk fun s => (·, s) <$> wp (x.run s))
 
 instance ExceptT.instWP [WP m ps] : WP (ExceptT ε m) (.except ε ps) where
-  wp x := PredTrans.pushExcept (wp x.run)
+  wp x := PredTrans.pushExcept (.mk (wp x.run))
 
 instance OptionT.instWP [WP m ps] : WP (OptionT m) (.except PUnit ps) where
-  wp x := PredTrans.pushOption (wp x.run)
+  wp x := PredTrans.pushOption (.mk (wp x.run))
 
 instance EStateM.instWP : WP (EStateM ε σ) (.except ε (.arg σ .pure)) where
   wp x := -- Could define as PredTrans.mkExcept (PredTrans.modifyGetM (fun s => pure (EStateM.Result.toExceptState (x s))))
@@ -106,10 +106,10 @@ instance State.instWP : WP (StateM σ) (.arg σ .pure) :=
   inferInstanceAs (WP (StateT σ Id) (.arg σ .pure))
 instance Reader.instWP : WP (ReaderM ρ) (.arg ρ .pure) :=
   inferInstanceAs (WP (ReaderT ρ Id) (.arg ρ .pure))
-instance Except.instWP : WP (Except ε) (.except ε .pure) :=
-  inferInstanceAs (WP (ExceptT ε Id) (.except ε .pure))
-instance Option.instWP : WP Option (.except PUnit .pure) :=
-  inferInstanceAs (WP (OptionT Id) (.except PUnit .pure))
+instance Except.instWP : WP (Except ε) (.except ε .pure) where
+  wp x := PredTrans.pushExcept (.mk (pure x))
+instance Option.instWP : WP Option (.except PUnit .pure) where
+  wp x := PredTrans.pushOption (.mk (pure x))
 
 /--
 Soundness lemma for `EStateM.run`.

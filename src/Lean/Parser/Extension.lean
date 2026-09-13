@@ -39,7 +39,7 @@ builtin_initialize
 
 builtin_initialize builtinParserCategoriesRef : IO.Ref ParserCategories ← IO.mkRef {}
 
-private def throwParserCategoryAlreadyDefined {α} (catName : Name) : ExceptT String Id α :=
+private def throwParserCategoryAlreadyDefined {α} (catName : Name) : Except String α :=
   throw s!"parser category `{catName}` has already been defined"
 
 private def addParserCategoryCore (categories : ParserCategories) (catName : Name) (initial : ParserCategory) : Except String ParserCategories :=
@@ -100,7 +100,7 @@ private def addTokenConfig (tokens : TokenTable) (tk : Token) : Except String To
     | none   => pure $ tokens.insert tk tk
     | some _ => pure tokens
 
-def throwUnknownParserCategory {α} (catName : Name) : ExceptT String Id α :=
+def throwUnknownParserCategory {α} (catName : Name) : Except String α :=
   throw s!"unknown parser category `{catName}`"
 
 abbrev getCategory (categories : ParserCategories) (catName : Name) : Option ParserCategory :=

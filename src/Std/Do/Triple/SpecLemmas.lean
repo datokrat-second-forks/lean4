@@ -659,7 +659,8 @@ theorem Spec.tryCatch_ExceptT_lift [WP m ps] [MonadExceptOf ε m] (Q : PostCond 
     Triple
       (ps:=.except ε' ps)
       (MonadExceptOf.tryCatch x h : ExceptT ε' m α)
-      (wp⟦MonadExceptOf.tryCatch (ε:=ε) x h : m (Except ε' α)⟧ (fun e => e.casesOn Q.2.1 Q.1, Q.2.2))
+      (wp⟦MonadExceptOf.tryCatch (ε:=ε) x.run (fun e => (h e).run) : m (Except ε' α)⟧
+        (fun e => e.casesOn Q.2.1 Q.1, Q.2.2))
       Q := by
   simp only [Triple.iff]
   apply (wp _).mono
@@ -672,7 +673,8 @@ theorem Spec.tryCatch_OptionT_lift [WP m ps] [MonadExceptOf ε m] (Q : PostCond 
     Triple
       (ps:=.except PUnit ps)
       (MonadExceptOf.tryCatch x h : OptionT m α)
-      (wp⟦MonadExceptOf.tryCatch (ε:=ε) x h : m (Option α)⟧ (fun o => o.casesOn (Q.2.1 ⟨⟩) Q.1, Q.2.2))
+      (wp⟦MonadExceptOf.tryCatch (ε:=ε) x.run (fun e => (h e).run) : m (Option α)⟧
+        (fun o => o.casesOn (Q.2.1 ⟨⟩) Q.1, Q.2.2))
       Q := by
   simp only [Triple.iff]
   apply (wp _).mono

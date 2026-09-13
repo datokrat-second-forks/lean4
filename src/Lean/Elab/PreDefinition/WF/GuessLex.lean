@@ -551,7 +551,7 @@ try first, when the mutually recursive functions have similar argument structure
 -/
 partial def generateCombinations? (numMeasures : Array Nat) (threshold : Nat := 32) :
     Option (Array (Array Nat)) :=
-  (do goUniform 0; go 0 #[]) |>.run.run #[] |>.2
+  (do goUniform 0; OptionT.mk ((go 0).run #[])) |>.run.run #[] |>.2
 where
   -- Enumerate all permissible uniform combinations
   goUniform (idx : Nat) : OptionT (StateM (Array (Array Nat))) Unit  := do

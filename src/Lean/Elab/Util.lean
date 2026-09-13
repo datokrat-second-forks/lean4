@@ -104,11 +104,11 @@ def syntaxNodeKindOfAttrParam (defaultParserNamespace : Name) (stx : Syntax) : A
   <|>
   throwError "invalid syntax node kind `{k}`"
 
-private unsafe def evalSyntaxConstantUnsafe (env : Environment) (opts : Options) (constName : Name) : ExceptT String Id Syntax :=
+private unsafe def evalSyntaxConstantUnsafe (env : Environment) (opts : Options) (constName : Name) : Except String Syntax :=
   env.evalConstCheck Syntax opts `Lean.Syntax constName
 
 @[implemented_by evalSyntaxConstantUnsafe]
-opaque evalSyntaxConstant (env : Environment) (opts : Options) (constName : Name) : ExceptT String Id Syntax := throw ""
+opaque evalSyntaxConstant (env : Environment) (opts : Options) (constName : Name) : Except String Syntax := throw ""
 
 /-- safety: requires that `mkConst typeName _` and `γ` are definitionally equal -/
 unsafe def mkElabAttribute (γ) (attrBuiltinName attrName : Name) (parserNamespace : Name) (typeName : Name) (kind : String)

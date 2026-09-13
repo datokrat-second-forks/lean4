@@ -48,14 +48,14 @@ structure UnificationHint where
   pattern     : UnificationConstraint
   constraints : List UnificationConstraint
 
-private partial def decodeUnificationHint (e : Expr) : ExceptT MessageData Id UnificationHint := do
+private partial def decodeUnificationHint (e : Expr) : Except MessageData UnificationHint := do
   decode e #[]
 where
-  decodeConstraint (e : Expr) : ExceptT MessageData Id UnificationConstraint :=
+  decodeConstraint (e : Expr) : Except MessageData UnificationConstraint :=
     match e.eq? with
     | some (_, lhs, rhs) => return UnificationConstraint.mk lhs rhs
     | none => throw m!"invalid unification hint constraint, unexpected term{indentExpr e}"
-  decode (e : Expr) (cs : Array UnificationConstraint) : ExceptT MessageData Id UnificationHint := do
+  decode (e : Expr) (cs : Array UnificationConstraint) : Except MessageData UnificationHint := do
     match e with
     | Expr.forallE _ d b _ => do
       let c ← decodeConstraint d

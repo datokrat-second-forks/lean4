@@ -59,9 +59,10 @@ public instance {ε : Type u} : LawfulMonadAttach (Except ε) where
 public instance [Monad m] [LawfulMonad m] [MonadAttach m] [WeaklyLawfulMonadAttach m] :
     WeaklyLawfulMonadAttach (ExceptT ε m) where
   map_attach {α} x := by
-    simp only [Functor.map, MonadAttach.attach, ExceptT.map, MonadAttach.CanReturn]
+    refine congrArg ExceptT.mk ?_
+    simp only [MonadAttach.attach, MonadAttach.CanReturn]
     simp
-    conv => rhs; rw [← WeaklyLawfulMonadAttach.map_attach (m := m) (x := x)]
+    conv => rhs; rw [← WeaklyLawfulMonadAttach.map_attach (m := m) (x := x.run)]
     simp only [map_eq_pure_bind]
     apply bind_congr; intro a
     match a with
@@ -71,8 +72,8 @@ public instance [Monad m] [LawfulMonad m] [MonadAttach m] [WeaklyLawfulMonadAtta
 public instance [Monad m] [LawfulMonad m] [MonadAttach m] [LawfulMonadAttach m] :
     LawfulMonadAttach (ExceptT ε m) where
   canReturn_map_imp {α P x a} := by
-    simp only [Functor.map, MonadAttach.CanReturn, ExceptT.map, ExceptT.mk]
-    let x' := (fun a => show Subtype (fun a : Except _ _ => match a with | .ok a => P a | .error e => True) from ⟨match a with | .ok a => .ok a.1 | .error e => .error e, by cases a <;> simp [Subtype.property]⟩) <$> show m _ from x
+    simp only [Functor.map, MonadAttach.CanReturn, ExceptT.map]
+    let x' := (fun a => show Subtype (fun a : Except _ _ => match a with | .ok a => P a | .error e => True) from ⟨match a with | .ok a => .ok a.1 | .error e => .error e, by cases a <;> simp [Subtype.property]⟩) <$> x.run
     have := LawfulMonadAttach.canReturn_map_imp (m := m) (x := x') (a := .ok a)
     simp only at this
     intro h

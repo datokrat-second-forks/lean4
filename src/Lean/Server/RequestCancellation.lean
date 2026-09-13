@@ -67,7 +67,7 @@ abbrev CancellableM := CancellableT IO
 
 def CancellableT.run (tk : RequestCancellationToken) (x : CancellableT m α) :
     m (Except RequestCancellation α) :=
-  x tk
+  ExceptT.run (ReaderT.run x tk)
 
 def CancellableM.run (tk : RequestCancellationToken) (x : CancellableM α) :
     IO (Except RequestCancellation α) :=
