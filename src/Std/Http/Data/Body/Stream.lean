@@ -276,7 +276,7 @@ private def recv' (stream : Stream) : BaseIO (AsyncTask (Option Chunk)) := do
 
     if closed then
       match closeError with
-      | some err => return Task.pure (.error err)
+      | some err => return ExceptT.mk <| Task.pure (.error err)
       | none => return AsyncTask.pure none
 
     if let some chunk ← Channel.tryRecv' then
@@ -285,12 +285,12 @@ private def recv' (stream : Stream) : BaseIO (AsyncTask (Option Chunk)) := do
     let st ← get
 
     if st.pendingConsumer.isSome then
-      return Task.pure (.error (IO.Error.userError "only one blocked consumer is allowed"))
+      return ExceptT.mk <| Task.pure (.error (IO.Error.userError "only one blocked consumer is allowed"))
 
     let promise ← IO.Promise.new
     set { st with pendingConsumer := some (.normal promise) }
     Channel.signalInterest
-    return promise.result?.map (sync := true) fun
+    return ExceptT.mk <| promise.result?.map (sync := true) fun
       | none => .error (IO.Error.userError "the promise linked to the consumer was dropped")
       | some res => res
 

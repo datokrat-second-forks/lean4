@@ -5,8 +5,8 @@
           (if true = true then
             let x := 10;
             match h : x with
-            | 2 => EarlyReturnT.return ⟨x, ⋯⟩
-            | x_1 => EarlyReturnT.return 0
+            | 2 => ExceptT.run (EarlyReturnT.return ⟨x, ⋯⟩)
+            | x_1 => ExceptT.run (EarlyReturnT.return 0)
           else
             let x := 5;
             ExceptT.run ((pure ()).run x))

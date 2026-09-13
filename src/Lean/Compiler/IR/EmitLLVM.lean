@@ -1643,7 +1643,7 @@ def emitLLVM (env : Environment) (modName : Name) (filepath : String) : IO Unit 
   let module ← LLVM.createModule llvmctx modName.toString
   let emitLLVMCtx : EmitLLVM.Context llvmctx := {env := env, modName := modName, llvmmodule := module}
   let initState := { var2val := default, jp2bb := default : EmitLLVM.State llvmctx}
-  let out? ← ((EmitLLVM.main (llvmctx := llvmctx)).run initState).run emitLLVMCtx
+  let out? ← ExceptT.run <| ((EmitLLVM.main (llvmctx := llvmctx)).run initState).run emitLLVMCtx
   match out? with
   | .ok _ => do
          let membuf ← LLVM.createMemoryBufferWithContentsOfFile (← getLeanHBcPath).toString

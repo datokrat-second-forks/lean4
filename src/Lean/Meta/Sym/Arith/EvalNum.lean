@@ -44,7 +44,7 @@ private partial def evalNatCore (e : Expr) : OptionT SymM Nat := do
   | HDiv.hDiv _ _ _ inst a b => guard (← isInstHDivNat inst); return (← evalNatCore a) / (← evalNatCore b)
   | HMod.hMod _ _ _ inst a b => guard (← isInstHModNat inst); return (← evalNatCore a) % (← evalNatCore b)
   | OfNat.ofNat _ _ _ =>
-    let some n := Sym.getNatValue? e |>.run | failure
+    let some n := Sym.getNatValue? e | failure
     return n
   | HPow.hPow _ _ _ inst a k =>
     guard (← isInstHPowNat inst)
@@ -69,7 +69,7 @@ private partial def evalIntCore (e : Expr) : OptionT SymM Int := do
     checkExp k
     return a ^ k
   | OfNat.ofNat _ _ _ =>
-    let some n := Sym.getIntValue? e |>.run | failure
+    let some n := Sym.getIntValue? e | failure
     return n
   | NatCast.natCast _ i a =>
     let_expr instNatCastInt ← i | failure
@@ -95,14 +95,14 @@ This function always succeeds in finding such `s` and `k`
 (as a last resort it returns `e` and `0`).
 -/
 private partial def getOffset (e : Expr) : SymM (Expr × Nat) :=
-  return (← isOffset? e).getD (e, 0)
+  return (← (isOffset? e).run).getD (e, 0)
 
 /--
 Similar to `getOffset` but returns `none` if the expression is not an offset.
 -/
 partial def isOffset? (e : Expr) : OptionT SymM (Expr × Nat) := do
   let add (a b : Expr) := do
-    let v ← evalNat? b
+    let v ← OptionT.mk (evalNat? b)
     let (s, k) ← getOffset a
     return (s, k+v)
   match_expr e with

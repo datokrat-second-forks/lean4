@@ -32,7 +32,8 @@ partial def MGoal.assumption (goal : MGoal) : OptionT MetaM Expr := do
 def MGoal.assumptionPure (goal : MGoal) : OptionT MetaM Expr := do
   let φ := mkApp2 (mkConst ``tautological [goal.u]) goal.σs goal.target
   let fvarId ← OptionT.mk (findLocalDeclWithType? φ)
-  let inst ← synthInstance? (mkApp3 (mkConst ``PropAsSPredTautology [goal.u]) φ goal.σs goal.target)
+  let inst ← OptionT.mk <|
+    synthInstance? (mkApp3 (mkConst ``PropAsSPredTautology [goal.u]) φ goal.σs goal.target)
   return mkApp6 (mkConst ``Exact.from_tautology [goal.u]) goal.σs φ goal.hyps goal.target inst (.fvar fvarId)
 
 @[builtin_tactic Lean.Parser.Tactic.massumption]
@@ -43,7 +44,7 @@ def elabMAssumption : Tactic | _ => do
   let some goal := parseMGoal? g | throwError "not in proof mode"
 
   let some proof ← liftMetaM <|
-    goal.assumption <|> goal.assumptionPure
+    (goal.assumption <|> goal.assumptionPure).run
     | throwError "hypothesis not found"
   mvar.assign proof
   replaceMainGoal []
