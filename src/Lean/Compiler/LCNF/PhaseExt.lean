@@ -80,15 +80,14 @@ private abbrev findDeclAtSorted? (decls : Array (Decl pu)) (declName : Name) : O
   let tmpDecl := { tmpDecl with name := declName }
   decls.binSearch tmpDecl declLt
 
-@[expose] def DeclExt (pu : Purity) :=
-   PersistentEnvExtension (Decl pu) (Decl pu) (DeclExtState pu)
+structure DeclExt (pu : Purity) extends PersistentEnvExtension (Decl pu) (Decl pu) (DeclExtState pu)
 
 instance : Inhabited (DeclExt pu) :=
-  inferInstanceAs (Inhabited (PersistentEnvExtension (Decl pu) (Decl pu) (DeclExtState pu)))
+  ⟨⟨default⟩⟩
 
 def mkDeclExt (phase : Phase) (name : Name := by exact decl_name%) :
     IO (DeclExt phase.toPurity) :=
-  registerPersistentEnvExtension {
+  .mk <$> registerPersistentEnvExtension {
     name,
     mkInitial := pure {},
     addImportedFn := fun _ => pure {},
@@ -116,11 +115,10 @@ builtin_initialize impureExt : EnvExtension (DeclExtState .impure) ←
 
 abbrev SigExtState (pu : Purity) := AbstractDeclExtState pu Signature
 
-@[expose] def SigExt (pu : Purity) :=
-   PersistentEnvExtension (Signature pu) (Signature pu) (SigExtState pu)
+structure SigExt (pu : Purity) extends PersistentEnvExtension (Signature pu) (Signature pu) (SigExtState pu)
 
 instance : Inhabited (SigExt pu) :=
-  inferInstanceAs (Inhabited (PersistentEnvExtension (Signature pu) (Signature pu) (SigExtState pu)))
+  ⟨⟨default⟩⟩
 
 private abbrev sigLt (a b : Signature pu) :=
   Name.quickLt a.name b.name
@@ -132,7 +130,7 @@ private abbrev findSigAtSorted? (sigs : Array (Signature pu)) (declName : Name) 
 
 def mkSigDeclExt (phase : Phase) (name : Name := by exact decl_name%) :
     IO (SigExt phase.toPurity) :=
-  registerPersistentEnvExtension {
+  .mk <$> registerPersistentEnvExtension {
     name,
     mkInitial := pure {},
     addImportedFn := fun _ => pure {},
@@ -151,10 +149,10 @@ def mkSigDeclExt (phase : Phase) (name : Name := by exact decl_name%) :
 builtin_initialize impureSigExt : SigExt .impure ← mkSigDeclExt .impure
 
 def getDeclCore? (env : Environment) (ext : DeclExt pu) (declName : Name) : Option (Decl pu) :=
-  findExtEntry? env ext declName findDeclAtSorted? (·.find?)
+  findExtEntry? env ext.toPersistentEnvExtension declName findDeclAtSorted? (·.find?)
 
 def getSigCore? (env : Environment) (ext : SigExt pu) (declName : Name) : Option (Signature pu) :=
-  findExtEntry? env ext declName findSigAtSorted? (·.find?)
+  findExtEntry? env ext.toPersistentEnvExtension declName findSigAtSorted? (·.find?)
 
 def getBaseDecl? (declName : Name) : CoreM (Option (Decl .pure)) := do
   return getDeclCore? (← getEnv) baseExt declName
