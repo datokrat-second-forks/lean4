@@ -44,7 +44,7 @@ protected def Parser.run (p : Parser α) (arr : ByteArray) : Except String α :=
 Parse a single byte equal to `b`, fails if different.
 -/
 @[inline]
-def pbyte (b : UInt8) : Parser UInt8 := fun it =>
+def pbyte (b : UInt8) : Parser UInt8 := Parsec.mk fun it =>
   if h : it.hasNext then
     let got := it.curr' h
     if got = b then
@@ -64,7 +64,7 @@ def skipByte (b : UInt8) : Parser Unit :=
 /--
 Skip a sequence of bytes equal to the given `ByteArray`.
 -/
-def skipBytes (arr : ByteArray) : Parser Unit := fun it =>
+def skipBytes (arr : ByteArray) : Parser Unit := Parsec.mk fun it =>
   let rec go (idx : Nat) (it : ByteArray.Iterator) : ParseResult Unit ByteArray.Iterator :=
     if h : idx < arr.size then
       if hnext : it.hasNext then
@@ -127,7 +127,7 @@ private def digitToNat (b : UInt8) : Nat :=
 Parse zero or more ASCII digits into a `Nat`, continuing until non-digit or EOF.
 -/
 @[inline]
-private partial def digitsCore (acc : Nat) : Parser Nat := fun it =>
+private partial def digitsCore (acc : Nat) : Parser Nat := Parsec.mk fun it =>
   /-
   With this design instead of combinators we can avoid allocating and branching over .success values
   all of the time.
@@ -201,13 +201,13 @@ private partial def skipWs (it : ByteArray.Iterator) : ByteArray.Iterator :=
 Skip whitespace: tabs, newlines, carriage returns, and spaces.
 -/
 @[inline]
-def ws : Parser Unit := fun it =>
+def ws : Parser Unit := Parsec.mk fun it =>
   .success (skipWs it) ()
 
 /--
 Parse `n` bytes from the input into a `ByteSlice`, errors if not enough bytes.
 -/
-def take (n : Nat) : Parser ByteSlice := fun it =>
+def take (n : Nat) : Parser ByteSlice := Parsec.mk fun it =>
   if it.remainingBytes < n then
     .error it .eof
   else
@@ -248,7 +248,7 @@ Fails with `.eof` if input ends while the predicate still holds.
 -/
 @[inline]
 partial def takeWhile (pred : UInt8 → Bool) : Parser ByteSlice :=
-  fun it =>
+  Parsec.mk fun it =>
     let (length, newIt, hitEof) := scanWhile pred 0 it
     if hitEof then
       .error newIt .eof
@@ -268,7 +268,7 @@ Fails with `.eof` if input ends while the predicate still holds.
 -/
 @[inline]
 partial def skipWhile (pred : UInt8 → Bool) : Parser Unit :=
-  fun it =>
+  Parsec.mk fun it =>
     let (_, newIt, hitEof) := scanWhile pred 0 it
     if hitEof then
       .error newIt .eof
@@ -288,7 +288,7 @@ Fails with `.eof` if input ends before stopping or reaching the limit.
 -/
 @[inline]
 partial def takeWhileUpTo (pred : UInt8 → Bool) (limit : Nat) : Parser ByteSlice :=
-  fun it =>
+  Parsec.mk fun it =>
     let (length, newIt, hitEof) := scanWhileUpTo pred limit 0 it
 
     if hitEof then
@@ -302,7 +302,7 @@ Fails with `.eof` if input ends before stopping or reaching the limit.
 -/
 @[inline]
 def takeWhileUpTo1 (pred : UInt8 → Bool) (limit : Nat) : Parser ByteSlice :=
-  fun it =>
+  Parsec.mk fun it =>
     let (length, newIt, hitEof) := scanWhileUpTo pred limit 0 it
 
     if hitEof then
@@ -325,7 +325,7 @@ Unlike `takeWhileUpTo`, succeeds even if input ends before the predicate stops h
 -/
 @[inline]
 def takeWhileAtMost (pred : UInt8 → Bool) (limit : Nat) : Parser ByteSlice :=
-  fun it =>
+  Parsec.mk fun it =>
     let (length, newIt, _) := scanWhileUpTo pred limit 0 it
     .success newIt (it.array[it.idx...(it.idx + length)])
 
@@ -335,7 +335,7 @@ Unlike `takeWhileUpTo1`, succeeds even if input ends before the predicate stops 
 -/
 @[inline]
 def takeWhile1AtMost (pred : UInt8 → Bool) (limit : Nat) : Parser ByteSlice :=
-  fun it =>
+  Parsec.mk fun it =>
     let (length, newIt, _) := scanWhileUpTo pred limit 0 it
     if length = 0 then
       .error it (.other "expected at least one char")
@@ -348,7 +348,7 @@ Fails with `.eof` if input ends before stopping or reaching the limit.
 -/
 @[inline]
 partial def skipWhileUpTo (pred : UInt8 → Bool) (limit : Nat) : Parser Unit :=
-  fun it =>
+  Parsec.mk fun it =>
     let (_, newIt, hitEof) := scanWhileUpTo pred limit 0 it
 
     if hitEof then
