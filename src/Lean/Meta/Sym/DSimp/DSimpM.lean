@@ -48,9 +48,10 @@ inductive Result where
   | step (e' : Expr) (done : Bool := false)
   deriving Inhabited
 
-private opaque MethodsRefPointed : NonemptyType.{0}
-def MethodsRef : Type := MethodsRefPointed.type
-instance : Nonempty MethodsRef := by exact MethodsRefPointed.property
+opaque MethodsRefPointed : NonemptyType.{0}
+structure MethodsRef : Type where
+  ref : MethodsRefPointed.type
+instance : Nonempty MethodsRef := ⟨⟨Classical.choice MethodsRefPointed.property⟩⟩
 
 /-- Read-only context for the definitional simplifier. -/
 structure Context where

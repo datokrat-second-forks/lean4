@@ -80,8 +80,9 @@ register_builtin_option debug.skipKernelTC : Bool := {
 
 /-- Opaque environment extension state. -/
 opaque EnvExtensionStateSpec : (α : Type) × Inhabited α := ⟨Unit, ⟨()⟩⟩
-@[expose] def EnvExtensionState : Type := EnvExtensionStateSpec.fst
-instance : Inhabited EnvExtensionState := EnvExtensionStateSpec.snd
+structure EnvExtensionState : Type where
+  val : EnvExtensionStateSpec.fst
+instance : Inhabited EnvExtensionState := ⟨⟨EnvExtensionStateSpec.snd.default⟩⟩
 
 @[expose] def ModuleIdx := Nat
   deriving BEq, ToString, Hashable
@@ -101,8 +102,9 @@ abbrev ConstMap := SMap Name ConstantInfo
 
 /-- Opaque persistent environment extension entry. -/
 opaque EnvExtensionEntrySpec : NonemptyType.{0}
-@[expose] def EnvExtensionEntry : Type := EnvExtensionEntrySpec.type
-instance : Nonempty EnvExtensionEntry := EnvExtensionEntrySpec.property
+structure EnvExtensionEntry : Type where
+  ref : EnvExtensionEntrySpec.type
+instance : Nonempty EnvExtensionEntry := ⟨⟨Classical.choice EnvExtensionEntrySpec.property⟩⟩
 
 /-- Content of a .olean file.
    We use `compact.cpp` to generate the image of this object in disk. -/

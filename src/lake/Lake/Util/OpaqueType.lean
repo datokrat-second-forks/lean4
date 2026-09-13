@@ -31,10 +31,11 @@ macro (name := nonemptyTypeCmd)
   let nonemptyInst := mkIdentFrom id <| id.getId.modifyBase (·.str "instNonempty")
   let nonemptyTypeApp := Syntax.mkApp nonemptyType args
   `(
-  private opaque $nonemptyType $[$bs]* : NonemptyType.{0}
-  $[$doc?:docComment]? $[$vis?:visibility]? def $id $[$bs]* : Type := $nonemptyTypeApp |>.type
-  $[$vis?:visibility]? instance $nonemptyInst:ident : Nonempty $(Syntax.mkApp id args) := by
-    exact $nonemptyTypeApp |>.property
+  $[$vis?:visibility]? opaque $nonemptyType $[$bs]* : NonemptyType.{0}
+  $[$doc?:docComment]? $[$vis?:visibility]? structure $id $[$bs]* : Type where ofRef ::
+    ref : $nonemptyTypeApp |>.type
+  $[$vis?:visibility]? instance $nonemptyInst:ident : Nonempty $(Syntax.mkApp id args) :=
+    ⟨⟨Classical.choice ($nonemptyTypeApp |>.property)⟩⟩
   )
 
 macro (name := hydrateOpaqueTypeCmd)

@@ -49,7 +49,7 @@ public structure CompactedRegion where
   private root         : NonScalar
   deriving Nonempty
 
-opaque CompactorSpec : NonemptyType.{0}
+public opaque CompactorSpec : NonemptyType.{0}
 /--
 Holds an opaque compactor handle returned by `CompactedRegion.save`, used to chain subsequent saves
 so that objects shared between parts are emitted exactly once.
@@ -59,7 +59,8 @@ Not thread-safe: a `Compactor` value must not be used concurrently from multiple
 `Compactor`; if any are freed (via `CompactedRegion.free`) while the `Compactor` is still in use,
 subsequent saves will dereference dangling pointers.
 -/
-public def Compactor := CompactorSpec.type
+public structure Compactor where
+  ref : CompactorSpec.type
 
 /--
 Frees a compacted region and its contents. No live references to the contents may exist at the
