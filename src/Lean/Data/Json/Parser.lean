@@ -202,7 +202,7 @@ def num : Parser JsonNumber := do
 mutual
 
   partial def arrayCore (acc : Array Json) : Parser (Array Json) := do
-    let hd ← anyCore
+    let hd ← anyCore' ()
     let acc' := acc.push hd
     let c ← any
     if c == ']' then
@@ -219,7 +219,7 @@ mutual
     lookahead (fun c => c == '"') "\""; skip;
     let k ← str; ws
     lookahead (fun c => c == ':') ":"; skip; ws
-    let v ← anyCore
+    let v ← anyCore' ()
     let c ← any
     if c == '}' then
       ws
@@ -230,7 +230,8 @@ mutual
     else
       fail "unexpected character in object"
 
-  partial def anyCore : Parser Json := do
+  -- takes a `Unit` because `partial` requires a function type and `Parser` is a `newtype`
+  private partial def anyCore' (_ : Unit) : Parser Json := do
     let c ← peek!
     if c == '[' then
       skip; ws
@@ -272,6 +273,9 @@ mutual
       fail "unexpected input"
 
 end
+
+/-- Parses a single JSON value, without requiring that the input is exhausted afterwards. -/
+def anyCore : Parser Json := anyCore' ()
 
 def any : Parser Json := do
   ws

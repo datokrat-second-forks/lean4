@@ -58,8 +58,12 @@ A `Parsec ι α` represents a parser that consumes input of type `ι` and, produ
 `ParseResult` containing a value of type `α` (the result of parsing) and the remaining input.
 -/
 @[expose]
-def Parsec (ι : Type) (α : Type) : Type :=
-  ι → Parsec.ParseResult α ι
+newtype Parsec (ι : Type) (α : Type) := ι → Parsec.ParseResult α ι with run
+
+attribute [always_inline, inline] Parsec.mk Parsec.run
+
+/-- A parser can be applied to its input directly, unwrapping it with `Parsec.run`. -/
+instance : CoeFun (Parsec ι α) (fun _ => ι → Parsec.ParseResult α ι) := ⟨Parsec.run⟩
 
 namespace Parsec
 
@@ -78,14 +82,14 @@ variable {α : Type} {ι : Type} {elem : Type} {idx : Type}
 variable [DecidableEq idx] [DecidableEq elem] [Input ι elem idx]
 
 instance : Inhabited (Parsec ι α) where
-  default := fun it => ParseResult.error it (.other "")
+  default := Parsec.mk fun it => ParseResult.error it (.other "")
 
 @[always_inline, inline]
-protected def pure (a : α) : Parsec ι α := fun it =>
+protected def pure (a : α) : Parsec ι α := Parsec.mk fun it =>
   .success it a
 
 @[always_inline, inline]
-protected def bind {α β : Type} (f : Parsec ι α) (g : α → Parsec ι β) : Parsec ι β := fun it =>
+protected def bind {α β : Type} (f : Parsec ι α) (g : α → Parsec ι β) : Parsec ι β := Parsec.mk fun it =>
   match f it with
   | .success rem a => g a rem
   | .error pos msg => .error pos msg
@@ -94,7 +98,7 @@ protected def bind {α β : Type} (f : Parsec ι α) (g : α → Parsec ι β) :
 Parser that always fails with the given error message.
 -/
 @[always_inline, inline]
-def fail (msg : String) : Parsec ι α := fun it =>
+def fail (msg : String) : Parsec ι α := Parsec.mk fun it =>
   .error it (.other msg)
 
 /--
@@ -102,7 +106,7 @@ Try `p`, then decide what to do based on success or failure without consuming in
 -/
 @[inline]
 def tryCatch (p : Parsec ι α) (csuccess : α → Parsec ι β) (cerror : Unit → Parsec ι β)
-    : Parsec ι β := fun it =>
+    : Parsec ι β := Parsec.mk fun it =>
   match p it with
   | .success rem a => csuccess a rem
   | .error rem err =>
@@ -125,7 +129,7 @@ def orElse (p : Parsec ι α) (q : Unit → Parsec ι α) : Parsec ι α :=
 Attempt to parse with `p`, but don't consume input on failure.
 -/
 @[always_inline, inline]
-def attempt (p : Parsec ι α) : Parsec ι α := fun it =>
+def attempt (p : Parsec ι α) : Parsec ι α := Parsec.mk fun it =>
   match p it with
   | .success rem res => .success rem res
   | .error _ err => .error it err
@@ -139,14 +143,14 @@ instance : Alternative (Parsec ι) where
 Succeeds only if input is at end-of-file.
 -/
 @[inline]
-def eof : Parsec ι Unit := fun it =>
+def eof : Parsec ι Unit := Parsec.mk fun it =>
   if Input.hasNext it then
     .error it (.other "expected end of input")
   else
     .success it ()
 
 @[inline]
-def isEof : Parsec ι Bool := fun it =>
+def isEof : Parsec ι Bool := Parsec.mk fun it =>
   .success it (!Input.hasNext it)
 
 @[specialize]
@@ -163,7 +167,7 @@ def many1 (p : Parsec ι α) : Parsec ι <| Array α := do manyCore p #[← p]
 Gets the next input element.
 -/
 @[inline]
-def any : Parsec ι elem := fun it =>
+def any : Parsec ι elem := Parsec.mk fun it =>
   if h : Input.hasNext it then
     let c := Input.curr' it h
     let it' := Input.next' it h
@@ -183,7 +187,7 @@ def satisfy (p : elem → Bool) : Parsec ι elem := attempt do
 Fails if `p` succeeds, otherwise succeeds without consuming input.
 -/
 @[inline]
-def notFollowedBy (p : Parsec ι α) : Parsec ι Unit := fun it =>
+def notFollowedBy (p : Parsec ι α) : Parsec ι Unit := Parsec.mk fun it =>
   match p it with
   | .success _ _ => .error it (.other "")
   | .error _ _ => .success it ()
@@ -192,7 +196,7 @@ def notFollowedBy (p : Parsec ι α) : Parsec ι Unit := fun it =>
 Peeks at the next element, returns `some` if exists else `none`, does not consume input.
 -/
 @[inline]
-def peek? : Parsec ι (Option elem) := fun it =>
+def peek? : Parsec ι (Option elem) := Parsec.mk fun it =>
   if h : Input.hasNext it then
     .success it (some <| Input.curr' it h)
   else
@@ -215,7 +219,7 @@ def peekWhen? (p : elem → Bool) : Parsec ι (Option elem) := do
 Peeks at the next element, errors on EOF, does not consume input.
 -/
 @[inline]
-def peek! : Parsec ι elem := fun it =>
+def peek! : Parsec ι elem := Parsec.mk fun it =>
   if h : Input.hasNext it then
     .success it (Input.curr' it h)
   else
@@ -225,7 +229,7 @@ def peek! : Parsec ι elem := fun it =>
 Peeks at the next element or returns a default if at EOF, does not consume input.
 -/
 @[inline]
-def peekD (default : elem) : Parsec ι elem := fun it =>
+def peekD (default : elem) : Parsec ι elem := Parsec.mk fun it =>
   if h : Input.hasNext it then
     .success it (Input.curr' it h)
   else
@@ -235,7 +239,7 @@ def peekD (default : elem) : Parsec ι elem := fun it =>
 Consumes one element if available, otherwise errors on EOF.
 -/
 @[inline]
-def skip : Parsec ι Unit := fun it =>
+def skip : Parsec ι Unit := Parsec.mk fun it =>
   if h : Input.hasNext it then
     .success (Input.next' it h) ()
   else
