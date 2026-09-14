@@ -90,7 +90,7 @@ instance (priority := low) : MonadReaderOf SubExpr DelabM where
   read := Context.subExpr <$> read
 
 instance (priority := low) : MonadWithReaderOf SubExpr DelabM where
-  withReader f x := fun ctx => x { ctx with subExpr := f ctx.subExpr }
+  withReader f x := .mk fun ctx => x.run { ctx with subExpr := f ctx.subExpr }
 
 instance (priority := low) : MonadStateOf SubExpr.HoleIterator DelabM where
   get         := State.holeIter <$> get
@@ -359,8 +359,8 @@ Runs the delaborator `act` with increased depth.
 The depth is used when `pp.deepTerms` is `false` to determine what is a deep term.
 See also `Lean.PrettyPrinter.Delaborator.Context.depth`.
 -/
-def withIncDepth (act : DelabM α) : DelabM α := fun ctx =>
-  act { ctx with depth := ctx.depth + 1 }
+def withIncDepth (act : DelabM α) : DelabM α := .mk fun ctx =>
+  act.run { ctx with depth := ctx.depth + 1 }
 
 /--
 Returns true if `e` is a "shallow" expression.
@@ -525,7 +525,7 @@ def delabCore (e : Expr) (optionsPerPos : OptionsPerPos := {}) (delab : DelabM �
       else pure optionsPerPos
     let (stx, {infos := infos, ..}) ← catchInternalId Delaborator.delabFailureId
         -- Clear the ref to ensure that quotations in delaborators start with blank source info.
-        (MonadRef.withRef .missing delab
+        ((MonadRef.withRef .missing delab).run
           { optionsPerPos := optionsPerPos
             currNamespace := (← getCurrNamespace)
             openDecls := (← getOpenDecls)

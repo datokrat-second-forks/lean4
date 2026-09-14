@@ -18,7 +18,7 @@ true
 info: 10
 -/
 #guard_msgs in
-#eval (f "hello").run' 10 true
+#eval ((f.run "hello").run' 10).run true
 
 def g : M Nat :=
 let a : M Nat := withTheReader Bool not f
@@ -31,4 +31,4 @@ false
 info: 10
 -/
 #guard_msgs in
-#eval (g "hello").run' 10 true
+#eval ((g.run "hello").run' 10).run true

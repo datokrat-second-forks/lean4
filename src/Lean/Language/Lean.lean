@@ -247,10 +247,10 @@ abbrev LeanProcessingT m := ReaderT LeanProcessingContext m
 abbrev LeanProcessingM := LeanProcessingT BaseIO
 
 instance : MonadLift LeanProcessingM (LeanProcessingT IO) where
-  monadLift := fun act ctx => act ctx
+  monadLift := fun act => ReaderT.mk fun ctx => (ReaderT.run act ctx : BaseIO _)
 
 instance : MonadLift (ProcessingT m) (LeanProcessingT m) where
-  monadLift := fun act ctx => act ctx.toProcessingContext
+  monadLift := fun act => ReaderT.mk fun ctx => ReaderT.run act ctx.toProcessingContext
 
 /--
 Embeds a `LeanProcessingM` action into `ProcessingM`, optionally using the old input string to speed
@@ -275,7 +275,7 @@ def isBeforeEditPos (pos : String.Pos.Raw) : LeanProcessingM Bool := do
   errors should already have been caught earlier. -/
 private def withHeaderExceptions (ex : Snapshot → α) (act : LeanProcessingT IO α) :
     LeanProcessingM α := do
-  match (← (act (← read)).toBaseIO) with
+  match (← (ReaderT.run act (← read)).toBaseIO) with
   | .error e => return ex { diagnostics := (← diagnosticsOfHeaderError e.toString) }
   | .ok a => return a
 
@@ -420,8 +420,8 @@ where
                     (cancelTk? := none) (reportingRange := progressRange?) fun oldCmd => do
                   let prom ← IO.Promise.new
                   let cancelTk ← IO.CancelToken.new
-                  parseCmd oldCmd newParserState oldProcSuccess.cmdState prom (sync := true)
-                    cancelTk #[] ctx
+                  ReaderT.run (parseCmd oldCmd newParserState oldProcSuccess.cmdState prom
+                    (sync := true) cancelTk #[]) ctx
                   return .finished none {
                     diagnostics := .empty
                     metaSnap := .finished newStx {
@@ -541,7 +541,7 @@ where
       }
       let prom ← IO.Promise.new
       let cancelTk ← IO.CancelToken.new
-      parseCmd none parserState cmdState prom (sync := true) cancelTk #[] ctx
+      ReaderT.run (parseCmd none parserState cmdState prom (sync := true) cancelTk #[]) ctx
       return {
         diagnostics := .empty
         metaSnap := .finished stx {
@@ -572,8 +572,8 @@ where
           -- also wait on old command parse snapshot as parsing is cheap and may allow for
           -- elaboration reuse
           BaseIO.chainTask (sync := true) oldNext.task fun oldNext => do
-            parseCmd oldNext newParserState oldResult.cmdState newProm sync cancelTk
-              (cmds.push old.stx) ctx
+            ReaderT.run (parseCmd oldNext newParserState oldResult.cmdState newProm sync cancelTk
+              (cmds.push old.stx)) ctx
         prom.resolve <| { old with nextCmdSnap? := some {
           stx? := none
           reportingRange := .some ⟨newParserState.pos, ctx.endPos⟩
@@ -678,9 +678,9 @@ where
           reportSnap := { stx? := none, reportingRange := initRange?, task := reportPromise.result!, cancelTk? := none }
         }
       }
-      let cmdState ← doElab stx cmds cmdState beginPos
+      let cmdState ← ReaderT.run (doElab stx cmds cmdState beginPos
         { old? := old?.map fun old => ⟨old.stx, old.elabSnap.elabSnap⟩, new := elabPromise }
-        elabCmdCancelTk ctx
+        elabCmdCancelTk) ctx
 
       let mut reportedCmdState := cmdState
       let cmdline := internal.cmdlineSnapshots.get scope.opts && !Parser.isTerminalCommand stx
@@ -748,7 +748,8 @@ where
           }
       if let some next := next? then
         -- We're definitely off the fast-forwarding path now
-        parseCmd none parserState cmdState next (sync := false) elabCmdCancelTk (cmds.push stx) ctx
+        ReaderT.run (parseCmd none parserState cmdState next (sync := false) elabCmdCancelTk
+          (cmds.push stx)) ctx
 
   doElab (stx : Syntax) (cmds : Array Syntax) (cmdState : Command.State) (beginPos : String.Pos.Raw)
       (snap : SnapshotBundle DynamicSnapshot) (cancelTk : IO.CancelToken) :
@@ -766,9 +767,8 @@ where
     let (output, _) ←
       IO.FS.withIsolatedStreams (isolateStderr := Core.stderrAsMessages.get scope.opts) do
         EIO.toBaseIO do
-          withLoggingExceptions
-            (getResetInfoTrees *> Elab.Command.elabCommandTopLevel stx cmds)
-            cmdCtx cmdStateRef
+          ReaderT.run (ReaderT.run (withLoggingExceptions
+            (getResetInfoTrees *> Elab.Command.elabCommandTopLevel stx cmds)) cmdCtx) cmdStateRef
     let cmdState ← cmdStateRef.get
     let mut messages := cmdState.messages
     if !output.isEmpty then

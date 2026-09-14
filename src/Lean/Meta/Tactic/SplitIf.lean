@@ -114,7 +114,7 @@ where
       return none
 
   find? (e : Expr) : MetaM (Option Expr) := do
-    let some candidate ← unsafe (FindSplitImpl.visit e).run { kind, exceptionSet } |>.run' mkPtrSet
+    let some candidate ← unsafe ReaderT.run (FindSplitImpl.visit e).run { kind, exceptionSet } |>.run' mkPtrSet
       | return none
     trace[split.debug] "candidate:{indentExpr candidate}"
     return some candidate

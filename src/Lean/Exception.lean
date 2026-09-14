@@ -209,9 +209,9 @@ class MonadRecDepth (m : Type → Type) where
   getMaxRecDepth   : m Nat
 
 instance [MonadRecDepth m] : MonadRecDepth (ReaderT ρ m) where
-  withRecDepth d x := fun ctx => MonadRecDepth.withRecDepth d (x ctx)
-  getRecDepth      := fun _ => MonadRecDepth.getRecDepth
-  getMaxRecDepth   := fun _ => MonadRecDepth.getMaxRecDepth
+  withRecDepth d x := .mk fun ctx => MonadRecDepth.withRecDepth d (x.run ctx)
+  getRecDepth      := .mk fun _ => MonadRecDepth.getRecDepth
+  getMaxRecDepth   := .mk fun _ => MonadRecDepth.getMaxRecDepth
 
 instance [Monad m] [MonadRecDepth m] : MonadRecDepth (StateRefT' ω σ m) :=
   inferInstanceAs (MonadRecDepth (ReaderT _ _))

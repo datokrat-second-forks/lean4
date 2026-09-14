@@ -32,14 +32,17 @@ public abbrev JobM := FetchT <| EStateT Log.Pos JobState BaseIO
 @[inline] public def JobM.ofFn
   (f : IndexBuildFn RecBuildM → Option Package → CallStack BuildKey →
     IO.Ref BuildStore → BuildContext → JobState → BaseIO (EResult Log.Pos JobState α))
-: JobM α := .mk fun fetch => fun pkg? stack store ctx => .mk fun s =>
-  f fetch pkg? stack store ctx s
+: JobM α := .mk fun fetch => ReaderT.mk fun pkg? => ReaderT.mk fun stack =>
+  ReaderT.mk fun store => ReaderT.mk fun ctx => .mk fun s =>
+    f fetch pkg? stack store ctx s
 
 /-- Convert a `JobM` monad to its full functional representation. -/
 @[inline] public def JobM.toFn (self : JobM α) :
   IndexBuildFn RecBuildM → Option Package → CallStack BuildKey →
     IO.Ref BuildStore → BuildContext → JobState → BaseIO (EResult Log.Pos JobState α)
-:= fun fetch pkg? stack store ctx s => self.run fetch pkg? stack store ctx |>.run s
+:= fun fetch pkg? stack store ctx s =>
+  ReaderT.run (ReaderT.run (ReaderT.run (ReaderT.run (self.run fetch) pkg?) stack) store) ctx
+    |>.run s
 
 public instance (priority := high) : MonadStateOf JobState JobM := inferInstance
 
@@ -103,14 +106,17 @@ public abbrev SpawnM := FetchT <| ReaderT BuildTrace <| BaseIO
 @[inline] public def SpawnM.ofFn
   (f : IndexBuildFn RecBuildM → Option Package → CallStack BuildKey →
     IO.Ref BuildStore → BuildContext → BuildTrace → BaseIO α)
-: SpawnM α := .mk fun fetch => fun pkg? stack store ctx s =>
-  f fetch pkg? stack store ctx s
+: SpawnM α := .mk fun fetch => ReaderT.mk fun pkg? => ReaderT.mk fun stack =>
+  ReaderT.mk fun store => ReaderT.mk fun ctx => ReaderT.mk fun s =>
+    f fetch pkg? stack store ctx s
 
 /-- Convert a `SpawnM` monad to its full functional representation. -/
 @[inline] public def SpawnM.toFn (self : SpawnM α) :
   IndexBuildFn RecBuildM → Option Package → CallStack BuildKey →
     IO.Ref BuildStore → BuildContext → BuildTrace → BaseIO α
-:= fun fetch pkg? stack store ctx s => self.run fetch pkg? stack store ctx |>.run s
+:= fun fetch pkg? stack store ctx s =>
+  ReaderT.run (ReaderT.run (ReaderT.run (ReaderT.run (self.run fetch) pkg?) stack) store) ctx
+    |>.run s
 
 @[inline] public def JobM.runSpawnM (x : SpawnM α) : JobM α := .ofFn fun fn pkg? stack store ctx s =>
   return .ok (← x.toFn fn pkg? stack store ctx s.trace) s

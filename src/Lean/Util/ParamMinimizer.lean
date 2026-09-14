@@ -192,7 +192,7 @@ public def search
     : m Result := do
   if (← test initialMask) then
     return { paramMask := initialMask, numCalls := 1, status := .precise }
-  let (r, s) ← main { initialMask, test, maxCalls} |>.run |>.run { cur := initialMask, numCalls := 1 }
+  let (r, s) ← ReaderT.run main { initialMask, test, maxCalls} |>.run |>.run { cur := initialMask, numCalls := 1 }
   let status := if s.found then
     match r with
     | .ok _ => .precise

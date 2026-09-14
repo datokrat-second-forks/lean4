@@ -89,7 +89,7 @@ mutual
 end
 
 def PullM.run (x : PullM α) (isCandidateFn : LetDecl .pure → FVarIdSet → CompilerM Bool) : CompilerM α :=
-  x { isCandidateFn } |>.run' {}
+  ReaderT.run x { isCandidateFn } |>.run' {}
 
 end PullLetDecls
 

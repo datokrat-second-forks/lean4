@@ -106,7 +106,7 @@ public abbrev MonadBuild (m : Type → Type u) :=
   MonadReaderOf BuildContext m
 
 public instance [Pure m] : MonadLift LakeM (BuildT m) where
-  monadLift x := fun ctx => pure <| x.run ctx.toContext
+  monadLift x := .mk fun ctx => pure <| x.run ctx.toContext
 
 @[inline] public def getBuildContext [MonadBuild m] : m BuildContext :=
   readThe BuildContext

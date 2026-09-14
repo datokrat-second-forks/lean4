@@ -211,14 +211,14 @@ Similar to `shareCommon`, but handles alpha-equivalence.
 (see `AlphaShareCommonM`); seeding the retry with it avoids revisiting the subterms
 that were processed before the failure.
 -/
-@[inline] def shareCommonAlpha (e : Expr) (cache : AlphaShareCommon.Cache := {}) : AlphaShareCommonM Expr := fun ctx => EStateM.mk fun s =>
+@[inline] def shareCommonAlpha (e : Expr) (cache : AlphaShareCommon.Cache := {}) : AlphaShareCommonM Expr := .mk fun ctx => EStateM.mk fun s =>
   if let some r := s.set.find? { expr := e } then
     .ok r.expr s
   else
     -- On error, we keep the partial state and throw the accumulated cache: terms
     -- hash-consed before the failure individually satisfy the invariants, so a
     -- retry can reuse them.
-    match (go e ctx).run { map := cache, set := s.set } with
+    match ((go e).run ctx).run { map := cache, set := s.set } with
     | .ok e { set, .. } => .ok e { set }
     | .error _ { map, set } => .error map { set }
 

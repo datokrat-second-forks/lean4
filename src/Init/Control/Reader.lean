@@ -22,14 +22,14 @@ Recovers from errors. The same local value is provided to both branches. Typical
 -/
 @[always_inline, inline]
 protected def orElse [Alternative m] (x₁ : ReaderT ρ m α) (x₂ : Unit → ReaderT ρ m α) : ReaderT ρ m α :=
-  fun s => x₁ s <|> x₂ () s
+  ReaderT.mk fun s => x₁.run s <|> (x₂ ()).run s
 
 /--
 Fails with a recoverable error.
 -/
 @[always_inline, inline]
 protected def failure [Alternative m] : ReaderT ρ m α :=
-  fun _ => failure
+  ReaderT.mk fun _ => failure
 
 instance [Alternative m] [Monad m] : Alternative (ReaderT ρ m) where
   failure := ReaderT.failure
@@ -39,12 +39,12 @@ end ReaderT
 
 instance : MonadControl m (ReaderT ρ m) where
   stM      := id
-  liftWith f ctx := f fun x => x ctx
-  restoreM x _ := x
+  liftWith f := ReaderT.mk fun ctx => f fun x => x.run ctx
+  restoreM x := ReaderT.mk fun _ => x
 
 @[always_inline]
 instance ReaderT.tryFinally [MonadFinally m] : MonadFinally (ReaderT ρ m) where
-  tryFinally' x h ctx := tryFinally' (x ctx) (fun a? => h a? ctx)
+  tryFinally' x h := ReaderT.mk fun ctx => tryFinally' (x.run ctx) (fun a? => (h a?).run ctx)
 
 /--
 A monad with access to a read-only value of type `ρ`. The value can be locally overridden by
@@ -54,4 +54,4 @@ abbrev ReaderM (ρ : Type u) := ReaderT ρ Id
 
 instance [Monad m] [MonadAttach m] : MonadAttach (ReaderT ρ m) where
   CanReturn x a := Exists (fun r => MonadAttach.CanReturn (x.run r) a)
-  attach x := fun r => (fun ⟨a, h⟩ => ⟨a, r, h⟩) <$> MonadAttach.attach (x.run r)
+  attach x := ReaderT.mk fun r => (fun ⟨a, h⟩ => ⟨a, r, h⟩) <$> MonadAttach.attach (x.run r)

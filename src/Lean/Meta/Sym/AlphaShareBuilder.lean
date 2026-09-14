@@ -57,7 +57,7 @@ Helper function for lifting a `AlphaShareBuilderM` action to `GrindM`
 -/
 abbrev liftBuilderM (k : AlphaShareBuilderM α) : SymM α := do
   -- The builder functions are a trusted layer, so invariant checks are disabled.
-  match (← runShareCommonM (k (← isDebugEnabled)) { env := (← getEnv) }) with
+  match (← runShareCommonM (ReaderT.run k (← isDebugEnabled)) { env := (← getEnv) }) with
   | .ok a => return a
   | .error _ => unreachable! -- checks are disabled
 

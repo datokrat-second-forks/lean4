@@ -149,7 +149,7 @@ structure InductiveElabStep2 where
   /-- Step to do final term elaboration error reporting, done immediately after universe levels are fully elaborated, but before the final level checks. -/
   finalizeTermElab : TermElabM Unit := pure ()
   /-- Like `finalize`, but occurs before `afterTypeChecking` attributes. -/
-  prefinalize (levelParams : List Name) (params : Array Expr) (replaceIndFVars : Expr → MetaM Expr) : TermElabM InductiveElabStep3 := fun _ _ _ => pure {}
+  prefinalize (levelParams : List Name) (params : Array Expr) (replaceIndFVars : Expr → MetaM Expr) : TermElabM InductiveElabStep3 := pure {}
   deriving Inhabited
 
 /-- An intermediate step for mutual inductive elaboration. See `InductiveElabDescr`. -/

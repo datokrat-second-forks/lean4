@@ -84,7 +84,7 @@ def wrapRpcProcedure (method : Name) paramType respType
                                 message := s!"Outdated RPC session" }
 
     let v ← do
-      match (rpcDecode j).run (← seshRef.get).objects with
+      match ReaderT.run (rpcDecode j).run (← seshRef.get).objects with
       | Except.ok v => pure v
       | Except.error e => throwThe RequestError {
         code := JsonRpc.ErrorCode.invalidParams

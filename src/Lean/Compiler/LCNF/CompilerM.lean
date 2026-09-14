@@ -524,11 +524,11 @@ mutual
 end
 
 @[inline] def normFunDecl [MonadLiftT CompilerM m] [Monad m] [MonadFVarSubst m pu t] (decl : FunDecl pu) : m (FunDecl pu) := do
-  normFunDeclImp (t := t) decl (← getSubst)
+  (normFunDeclImp (t := t) decl).run (← getSubst)
 
 /-- Similar to `internalize`, but does not refresh `FVarId`s. -/
 @[inline] def normCode [MonadLiftT CompilerM m] [Monad m] [MonadFVarSubst m pu t] (code : Code pu) : m (Code pu) := do
-  normCodeImp (t := t) code (← getSubst)
+  (normCodeImp (t := t) code).run (← getSubst)
 
 def replaceExprFVars (e : Expr) (s : FVarSubst pu) (translator : Bool) : CompilerM Expr :=
   (normExpr e : NormalizerM pu translator Expr).run s
@@ -546,7 +546,7 @@ def getConfig : CompilerM ConfigOptions :=
   return (← read).config
 
 def CompilerM.run (x : CompilerM α) (s : State := {}) (phase : Phase := .base) : CoreM α := do
-  x { phase, config := toConfigOptions (← getOptions) } |>.run' s
+  ReaderT.run x { phase, config := toConfigOptions (← getOptions) } |>.run' s
 
 /-- Environment extension for local caching of key-value pairs, not persisted in .olean files. -/
 structure CacheExtension (α β : Type) [BEq α] [Hashable α] extends EnvExtension (List α × PHashMap α β)

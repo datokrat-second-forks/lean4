@@ -42,7 +42,7 @@ namespace NormalizeIds
 
 abbrev M := ReaderT IndexRenaming Id
 
-def normIndex (x : Index) : M Index := fun m =>
+def normIndex (x : Index) : M Index := .mk fun m =>
   match m.get? x with
   | some y => y
   | none   => x
@@ -57,43 +57,44 @@ def normArg : Arg → M Arg
   | .var x => .var <$> normVar x
   | .erased => pure .erased
 
-def normArgs (as : Array Arg) : M (Array Arg) := fun m =>
-  as.map fun a => normArg a m
+def normArgs (as : Array Arg) : M (Array Arg) := .mk fun m =>
+  as.map fun a => (normArg a).run m
 
-def normExpr : Expr → M Expr
-  | Expr.ctor c ys,      m => Expr.ctor c (normArgs ys m)
-  | Expr.reset n x,      m => Expr.reset n (normVar x m)
-  | Expr.reuse x c u ys, m => Expr.reuse (normVar x m) c u (normArgs ys m)
-  | Expr.proj i x,       m => Expr.proj i (normVar x m)
-  | Expr.uproj i x,      m => Expr.uproj i (normVar x m)
-  | Expr.sproj n o x,    m => Expr.sproj n o (normVar x m)
-  | Expr.fap c ys,       m => Expr.fap c (normArgs ys m)
-  | Expr.pap c ys,       m => Expr.pap c (normArgs ys m)
-  | Expr.ap x ys,        m => Expr.ap (normVar x m) (normArgs ys m)
-  | Expr.box t x,        m => Expr.box t (normVar x m)
-  | Expr.unbox x,        m => Expr.unbox (normVar x m)
-  | Expr.isShared x,     m => Expr.isShared (normVar x m)
-  | e@(Expr.lit _),      _ =>  e
+def normExpr (e : Expr) : M Expr := .mk fun m =>
+  match e with
+  | Expr.ctor c ys      => Expr.ctor c ((normArgs ys).run m)
+  | Expr.reset n x      => Expr.reset n ((normVar x).run m)
+  | Expr.reuse x c u ys => Expr.reuse ((normVar x).run m) c u ((normArgs ys).run m)
+  | Expr.proj i x       => Expr.proj i ((normVar x).run m)
+  | Expr.uproj i x      => Expr.uproj i ((normVar x).run m)
+  | Expr.sproj n o x    => Expr.sproj n o ((normVar x).run m)
+  | Expr.fap c ys       => Expr.fap c ((normArgs ys).run m)
+  | Expr.pap c ys       => Expr.pap c ((normArgs ys).run m)
+  | Expr.ap x ys        => Expr.ap ((normVar x).run m) ((normArgs ys).run m)
+  | Expr.box t x        => Expr.box t ((normVar x).run m)
+  | Expr.unbox x        => Expr.unbox ((normVar x).run m)
+  | Expr.isShared x     => Expr.isShared ((normVar x).run m)
+  | e@(Expr.lit _)      => e
 
 abbrev N := ReaderT IndexRenaming (StateM Nat)
 
-@[inline] def withVar {α : Type} (x : VarId) (k : VarId → N α) : N α := fun m => do
+@[inline] def withVar {α : Type} (x : VarId) (k : VarId → N α) : N α := .mk fun m => do
   let n ← getModify (fun n => n + 1)
-  k { idx := n } (m.insert x.idx n)
+  (k { idx := n }).run (m.insert x.idx n)
 
-@[inline] def withJP {α : Type} (x : JoinPointId) (k : JoinPointId → N α) : N α := fun m => do
+@[inline] def withJP {α : Type} (x : JoinPointId) (k : JoinPointId → N α) : N α := .mk fun m => do
   let n ← getModify (fun n => n + 1)
-  k { idx := n } (m.insert x.idx n)
+  (k { idx := n }).run (m.insert x.idx n)
 
-@[inline] def withParams {α : Type} (ps : Array Param) (k : Array Param → N α) : N α := fun m => do
+@[inline] def withParams {α : Type} (ps : Array Param) (k : Array Param → N α) : N α := .mk fun m => do
   let m ← ps.foldlM (init := m) fun m p => do
     let n ← getModify fun n => n + 1
     return m.insert p.x.idx n
-  let ps := ps.map fun p => { p with x := normVar p.x m }
-  k ps m
+  let ps := ps.map fun p => { p with x := (normVar p.x).run m }
+  (k ps).run m
 
 instance : MonadLift M N :=
-  ⟨fun x m => return x m⟩
+  ⟨fun x => .mk fun m => return x.run m⟩
 
 partial def normFnBody : FnBody → N FnBody
   | FnBody.vdecl x t v b    => do let v ← normExpr v; withVar x fun x => return FnBody.vdecl x t v (← normFnBody b)
@@ -124,7 +125,7 @@ end NormalizeIds
 
 /-- Create a declaration equivalent to `d` s.t. `d.normalizeIds.uniqueIds == true` -/
 def Decl.normalizeIds (d : Decl) : Decl :=
-  (NormalizeIds.normDecl d {}).run' 1
+  ((NormalizeIds.normDecl d).run {}).run' 1
 
 /-! Apply a function `f : VarId → VarId` to variable occurrences.
    The following functions assume the IR code does not have variable shadowing. -/

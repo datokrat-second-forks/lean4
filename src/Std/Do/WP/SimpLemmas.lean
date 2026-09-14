@@ -268,7 +268,7 @@ theorem monadMap_StateT [Monad m] [WP m ps]
 theorem monadMap_ReaderT [Monad m] [WP m ps]
   (f : ∀{β}, m β → m β) {α} (x : ReaderT ρ m α) (Q : PostCond α (.arg ρ ps)) :
     wp⟦mmap (m:=m) f x⟧ Q = fun s => wp⟦f (x.run s)⟧ (fun a => Q.1 a s, Q.2) := by
-  simp [wp, MonadFunctor.monadMap, ReaderT.run]
+  simp [wp, MonadFunctor.monadMap]
 
 @[simp]
 theorem monadMap_ExceptT [Monad m] [WP m ps]
@@ -328,7 +328,7 @@ theorem liftWith_StateT [Monad m] [WPMonad m ps]
 theorem liftWith_ReaderT [Monad m] [WPMonad m ps]
   (f : (∀{β}, ReaderT ρ m β → m β) → m α) :
     wp⟦MonadControl.liftWith (m:=m) f⟧ Q = fun s => wp⟦f (fun x => x.run s)⟧ (fun a => Q.1 a s, Q.2) := by
-  simp [wp, MonadControl.liftWith, ReaderT.run]
+  simp [wp, MonadControl.liftWith]
 
 @[simp]
 theorem liftWith_ExceptT [Monad m] [WPMonad m ps]
@@ -362,7 +362,7 @@ theorem restoreM_StateT [Monad m] [WPMonad m ps] (x : m (α × σ)) :
 @[simp]
 theorem restoreM_ReaderT [Monad m] [WPMonad m ps] (x : m α) :
     wp⟦MonadControl.restoreM (m:=m) x : ReaderT ρ m α⟧ Q = fun s => wp⟦x⟧ (fun a => Q.1 a s, Q.2) := by
-  simp [wp, ReaderT.run, MonadControl.restoreM]
+  simp [wp, MonadControl.restoreM]
 
 @[simp]
 theorem restoreM_ExceptT [Monad m] [WPMonad m ps] (x : m (Except ε α)) :
@@ -522,7 +522,7 @@ theorem tryCatch_EStateM {ε σ δ α x h Q} [EStateM.Backtrackable δ σ]:
 @[simp]
 theorem tryCatch_ReaderT [WP m sh] [Monad m] [MonadExceptOf ε m] :
     wp⟦MonadExceptOf.tryCatch (ε:=ε) x h : ReaderT ρ m α⟧ Q = fun r => wp⟦MonadExceptOf.tryCatch (ε:=ε) (x.run r) (fun e => (h e).run r) : m α⟧ (fun a => Q.1 a r, Q.2) := by
-  simp [wp, MonadExceptOf.tryCatch, tryCatchThe, ReaderT.run]
+  simp [wp, MonadExceptOf.tryCatch, tryCatchThe]
 
 @[simp]
 theorem tryCatch_StateT [WP m sh] [Monad m] [MonadExceptOf ε m] :

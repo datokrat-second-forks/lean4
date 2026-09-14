@@ -651,7 +651,7 @@ def format (formatter : Formatter) (stx : Syntax) : CoreM Format := do
   let table := Parser.getTokenTable (← getEnv)
   catchInternalId backtrackExceptionId
     (do
-      let (_, st) ← (concat formatter { table, options }).run { stxTrav := .fromSyntax stx }
+      let (_, st) ← (ReaderT.run (concat formatter) { table, options }).run { stxTrav := .fromSyntax stx }
       let mut f := st.stack[0]!
       if pp.oneline.get options then
         f := OneLine.pretty f (Std.Format.format.width.get options)

@@ -16,14 +16,14 @@ public import Init.Ext
 public instance [Monad m] [LawfulMonad m] [MonadAttach m] [WeaklyLawfulMonadAttach m] :
     WeaklyLawfulMonadAttach (ReaderT ρ m) where
   map_attach := by
+    intros
     simp only [Functor.map, MonadAttach.attach, Functor.map_map, WeaklyLawfulMonadAttach.map_attach,
       MonadAttach.CanReturn]
-    intros; rfl
 
 public instance [Monad m] [LawfulMonad m] [MonadAttach m] [LawfulMonadAttach m] :
     LawfulMonadAttach (ReaderT ρ m) where
   canReturn_map_imp := by
-    simp only [Functor.map, MonadAttach.CanReturn, ReaderT.run]
+    simp only [Functor.map, MonadAttach.CanReturn]
     rintro _ _ x a ⟨r, h⟩
     apply LawfulMonadAttach.canReturn_map_imp h
 

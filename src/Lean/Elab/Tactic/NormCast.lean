@@ -35,7 +35,7 @@ def proveEqUsing (s : SimpTheorems) (a b : Expr) : MetaM (Option Simp.Result) :=
     let ctx ← Simp.mkContext
         (simpTheorems := #[s])
         (congrTheorems := ← Meta.getSimpCongrTheorems)
-    (go (← Simp.mkDefaultMethods).toMethodsRef ctx).run' {}
+    (ReaderT.run (ReaderT.run go (← Simp.mkDefaultMethods).toMethodsRef) ctx).run' {}
 
 /-- Proves `a = b` by simplifying using move and squash lemmas. -/
 def proveEqUsingDown (a b : Expr) : MetaM (Option Simp.Result) := do

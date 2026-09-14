@@ -31,7 +31,7 @@ def runTacticTest {α : Type} (test : Lean.Elab.Tactic.TacticM α) : IO α := do
   let (coreCtx, coreState) ← mkCoreState #[{module := `Init}] (loadExts := true)
   let (result, _) ← (do
     let goal ← Lean.Meta.mkFreshExprMVar (Lean.mkConst ``True)
-    (((test { elaborator := .anonymous }).run' { goals := [goal.mvarId!] }) {}).run' {}).run' |>.toIO coreCtx coreState
+    (ReaderT.run ((ReaderT.run test { elaborator := .anonymous }).run' { goals := [goal.mvarId!] }) {}).run' {}).run' |>.toIO coreCtx coreState
   return result
 
 /-- Create a tactic task: sleep, run tactic, return name. -/

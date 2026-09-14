@@ -102,7 +102,7 @@ builtin_initialize sineQuaNonExt : PersistentEnvExtension (NameMap (List (Name Ã
   registerPersistentEnvExtension {
     name            := `sineQueNon
     mkInitial       := pure âˆ…
-    addImportedFn   := fun mapss _ => pure mapss
+    addImportedFn   := fun mapss => pure mapss
     addEntryFn      := nofun
     -- TODO: it would be nice to avoid the `toArray` here, e.g. via iterators.
     exportEntriesFnEx := fun env _ => unsafe

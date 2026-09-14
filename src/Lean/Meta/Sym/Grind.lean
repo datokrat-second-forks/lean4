@@ -174,7 +174,7 @@ re-internalizing the common local context prefix for every side condition; only 
 declarations introduced after `goal` was created are internalized per attempt.
 -/
 def mkSymSimpDischarger (goal : Goal) (methods : MethodsRef) (ctx : Context) (s : State) : Sym.Simp.Discharger := fun e => do
-  goal.dischargeSymSimp e methods ctx |>.run' s
+  ReaderT.run (ReaderT.run (goal.dischargeSymSimp e) methods) ctx |>.run' s
 
 /--
 Creates a `Sym.simp` discharger that attempts to prove side conditions using `grind`,

@@ -245,9 +245,9 @@ def recvConditions : Async Unit := do
   let subs2 ← channel.subscribe
   let subs3 ← channel.subscribe
 
-  discard <| EAsync.ofETask (← channel.send 1)
-  discard <| EAsync.ofETask (← channel.send 2)
-  discard <| EAsync.ofETask (← channel.send 3)
+  discard <| EAsync.ofETask (ExceptT.mk (← channel.send 1))
+  discard <| EAsync.ofETask (ExceptT.mk (← channel.send 2))
+  discard <| EAsync.ofETask (ExceptT.mk (← channel.send 3))
 
   channel.close
 
@@ -308,9 +308,9 @@ def selectableConditions : Async Unit := do
   let subs2 ← channel.subscribe
   let subs3 ← channel.subscribe
 
-  discard <| EAsync.ofETask (← channel.send 1)
-  discard <| EAsync.ofETask (← channel.send 2)
-  discard <| EAsync.ofETask (← channel.send 3)
+  discard <| EAsync.ofETask (ExceptT.mk (← channel.send 1))
+  discard <| EAsync.ofETask (ExceptT.mk (← channel.send 2))
+  discard <| EAsync.ofETask (ExceptT.mk (← channel.send 3))
 
   channel.close
 
@@ -319,64 +319,64 @@ def selectableConditions : Async Unit := do
     .case channel1.recvSelector pure
   ]
 
-  assert! (← IO.getTaskState recv) == IO.TaskState.finished
-  assert! (← IO.ofExcept recv.get) == some 1
+  assert! (← IO.getTaskState recv.run) == IO.TaskState.finished
+  assert! (← IO.ofExcept recv.run.get) == some 1
 
   let recv ← Async.toIO <| Selectable.one #[
     .case subs1.recvSelector pure,
     .case channel1.recvSelector pure
   ]
 
-  assert! (← IO.getTaskState recv) == IO.TaskState.finished
-  assert! (← IO.ofExcept recv.get) == some 2
+  assert! (← IO.getTaskState recv.run) == IO.TaskState.finished
+  assert! (← IO.ofExcept recv.run.get) == some 2
 
   let recv ← Async.toIO <| Selectable.one #[
     .case subs1.recvSelector pure,
     .case channel1.recvSelector pure
   ]
 
-  assert! (← IO.getTaskState recv) == IO.TaskState.finished
-  assert! (← IO.ofExcept recv.get) == some 3
+  assert! (← IO.getTaskState recv.run) == IO.TaskState.finished
+  assert! (← IO.ofExcept recv.run.get) == some 3
 
   let recv ← Async.toIO <| Selectable.one #[
     .case subs1.recvSelector pure,
     .case channel1.recvSelector pure
   ]
 
-  assert! (← IO.getTaskState recv) == IO.TaskState.finished
-  assert! (← IO.ofExcept recv.get) == none
+  assert! (← IO.getTaskState recv.run) == IO.TaskState.finished
+  assert! (← IO.ofExcept recv.run.get) == none
 
   let recv ← Async.toIO <| Selectable.one #[
     .case subs2.recvSelector pure,
     .case channel1.recvSelector pure
   ]
 
-  assert! (← IO.getTaskState recv) == IO.TaskState.finished
-  assert! (← IO.ofExcept recv.get) == some 1
+  assert! (← IO.getTaskState recv.run) == IO.TaskState.finished
+  assert! (← IO.ofExcept recv.run.get) == some 1
 
   let recv ← Async.toIO <| Selectable.one #[
     .case subs2.recvSelector pure,
     .case channel1.recvSelector pure
   ]
 
-  assert! (← IO.getTaskState recv) == IO.TaskState.finished
-  assert! (← IO.ofExcept recv.get) == some 2
+  assert! (← IO.getTaskState recv.run) == IO.TaskState.finished
+  assert! (← IO.ofExcept recv.run.get) == some 2
 
   let recv ← Async.toIO <| Selectable.one #[
     .case subs2.recvSelector pure,
     .case channel1.recvSelector pure
   ]
 
-  assert! (← IO.getTaskState recv) == IO.TaskState.finished
-  assert! (← IO.ofExcept recv.get) == some 3
+  assert! (← IO.getTaskState recv.run) == IO.TaskState.finished
+  assert! (← IO.ofExcept recv.run.get) == some 3
 
   let recv ← Async.toIO <| Selectable.one #[
     .case subs2.recvSelector pure,
     .case channel1.recvSelector pure
   ]
 
-  assert! (← IO.getTaskState recv) == IO.TaskState.finished
-  assert! (← IO.ofExcept recv.get) == none
+  assert! (← IO.getTaskState recv.run) == IO.TaskState.finished
+  assert! (← IO.ofExcept recv.run.get) == none
 
   subs3.unsubscribe
 
@@ -385,7 +385,7 @@ def selectableConditions : Async Unit := do
     .case channel1.recvSelector pure
   ]
 
-  assert! (← IO.getTaskState recv) == IO.TaskState.finished
-  assert! (← IO.ofExcept recv.get) == none
+  assert! (← IO.getTaskState recv.run) == IO.TaskState.finished
+  assert! (← IO.ofExcept recv.run.get) == none
 
 #eval selectableConditions.block
