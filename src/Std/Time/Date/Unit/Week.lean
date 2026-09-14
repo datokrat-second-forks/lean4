@@ -20,8 +20,38 @@ set_option linter.all true
 /--
 `Offset` represents an offset in weeks.
 -/
-@[expose] def Offset : Type := UnitVal (86400 * 7)
-deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString
+@[expose] newtype Offset := UnitVal (86400 * 7) with toUnitVal
+
+/--
+The underlying value of the offset, in the unit's own scale.
+-/
+@[expose, inline] def Offset.val (offset : Offset) : Int := offset.toUnitVal.val
+
+theorem Offset.toUnitVal_inj {x y : Offset} (h : x.toUnitVal = y.toUnitVal) : x = y :=
+  congrArg Offset.mk h
+
+instance : Repr Offset where reprPrec offset prec := reprPrec offset.toUnitVal prec
+
+instance : ToString Offset where toString offset := toString offset.toUnitVal
+
+instance : Inhabited Offset where default := .mk default
+
+instance : DecidableEq Offset := fun x y =>
+  decidable_of_iff (x.toUnitVal = y.toUnitVal) ⟨Offset.toUnitVal_inj, congrArg Offset.toUnitVal⟩
+
+instance : Add Offset where add x y := .mk (x.toUnitVal + y.toUnitVal)
+
+instance : Sub Offset where sub x y := .mk (x.toUnitVal - y.toUnitVal)
+
+instance : Neg Offset where neg x := .mk (-x.toUnitVal)
+
+instance : LE Offset where le x y := x.val ≤ y.val
+
+instance : LT Offset where lt x y := x.val < y.val
+
+instance : Ord Offset where compare x y := compare x.toUnitVal y.toUnitVal
+
+instance : OfNat Offset n := ⟨.mk (UnitVal.ofNat n)⟩
 
 instance {x y : Offset} : Decidable (x ≤ y) :=
   inferInstanceAs (Decidable (x.val ≤ y.val))
@@ -29,13 +59,12 @@ instance {x y : Offset} : Decidable (x ≤ y) :=
 instance {x y : Offset} : Decidable (x < y) :=
   inferInstanceAs (Decidable (x.val < y.val))
 
-instance : OfNat Offset n := ⟨UnitVal.ofNat n⟩
+instance : OrientedOrd Offset := ⟨OrientedOrd.eq_swap (α := UnitVal (86400 * 7))⟩
 
-instance : Ord Offset := inferInstanceAs <| Ord (UnitVal _)
+instance : TransOrd Offset := ⟨TransOrd.isLE_trans (α := UnitVal (86400 * 7))⟩
 
-instance : TransOrd Offset := inferInstanceAs <| TransOrd (UnitVal _)
-
-instance : LawfulEqOrd Offset := inferInstanceAs <| LawfulEqOrd (UnitVal _)
+instance : LawfulEqOrd Offset :=
+  ⟨fun {_ _} h => Offset.toUnitVal_inj (LawfulEqOrd.eq_of_compare h)⟩
 
 namespace OfYear
 
@@ -91,7 +120,7 @@ Converts an `Ordinal` to an `Offset`.
 -/
 @[inline]
 def toOffset (ordinal : Ordinal) : Week.Offset :=
-  UnitVal.ofInt ordinal.val
+  .mk (UnitVal.ofInt ordinal.val)
 
 end Ordinal
 end OfYear
@@ -143,98 +172,98 @@ Creates an `Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Week.Offset :=
-  UnitVal.ofInt data
+  .mk (UnitVal.ofInt data)
 
 /--
 Creates an `Offset` from an integer.
 -/
 @[inline]
 def ofInt (data : Int) : Week.Offset :=
-  UnitVal.ofInt data
+  .mk (UnitVal.ofInt data)
 
 /--
 Convert `Week.Offset` into `Millisecond.Offset`.
 -/
 @[inline]
 def toMilliseconds (weeks : Week.Offset) : Millisecond.Offset :=
-  weeks.mul 604800000 |>.cast (by decide +kernel)
+  .mk (weeks.toUnitVal.mul 604800000 |>.cast (by decide +kernel))
 
 /--
 Convert `Millisecond.Offset` into `Week.Offset`.
 -/
 @[inline]
 def ofMilliseconds (millis : Millisecond.Offset) : Week.Offset :=
-  millis.ediv 604800000 |>.cast (by decide +kernel)
+  .mk (millis.toUnitVal.ediv 604800000 |>.cast (by decide +kernel))
 
 /--
 Convert `Week.Offset` into `Nanosecond.Offset`.
 -/
 @[inline]
 def toNanoseconds (weeks : Week.Offset) : Nanosecond.Offset :=
-  weeks.mul 604800000000000 |>.cast (by decide +kernel)
+  .mk (weeks.toUnitVal.mul 604800000000000 |>.cast (by decide +kernel))
 
 /--
 Convert `Nanosecond.Offset` into `Week.Offset`.
 -/
 @[inline]
 def ofNanoseconds (nanos : Nanosecond.Offset) : Week.Offset :=
-  nanos.ediv 604800000000000 |>.cast (by decide +kernel)
+  .mk (nanos.toUnitVal.ediv 604800000000000 |>.cast (by decide +kernel))
 
 /--
 Convert `Week.Offset` into `Second.Offset`.
 -/
 @[inline]
 def toSeconds (weeks : Week.Offset) : Second.Offset :=
-  weeks.mul 604800 |>.cast (by decide +kernel)
+  .mk (weeks.toUnitVal.mul 604800 |>.cast (by decide +kernel))
 
 /--
 Convert `Second.Offset` into `Week.Offset`.
 -/
 @[inline]
 def ofSeconds (secs : Second.Offset) : Week.Offset :=
-  secs.ediv 604800 |>.cast (by decide +kernel)
+  .mk (secs.toUnitVal.ediv 604800 |>.cast (by decide +kernel))
 
 /--
 Convert `Week.Offset` into `Minute.Offset`.
 -/
 @[inline]
 def toMinutes (weeks : Week.Offset) : Minute.Offset :=
-  weeks.mul 10080 |>.cast (by decide +kernel)
+  .mk (weeks.toUnitVal.mul 10080 |>.cast (by decide +kernel))
 
 /--
 Convert `Minute.Offset` into `Week.Offset`.
 -/
 @[inline]
 def ofMinutes (minutes : Minute.Offset) : Week.Offset :=
-  minutes.ediv 10080 |>.cast (by decide +kernel)
+  .mk (minutes.toUnitVal.ediv 10080 |>.cast (by decide +kernel))
 
 /--
 Convert `Week.Offset` into `Hour.Offset`.
 -/
 @[inline]
 def toHours (weeks : Week.Offset) : Hour.Offset :=
-  weeks.mul 168 |>.cast (by decide +kernel)
+  .mk (weeks.toUnitVal.mul 168 |>.cast (by decide +kernel))
 
 /--
 Convert `Hour.Offset` into `Week.Offset`.
 -/
 @[inline]
 def ofHours (hours : Hour.Offset) : Week.Offset :=
-  hours.ediv 168 |>.cast (by decide +kernel)
+  .mk (hours.toUnitVal.ediv 168 |>.cast (by decide +kernel))
 
 /--
 Convert `Week.Offset` into `Day.Offset`.
 -/
 @[inline]
 def toDays (weeks : Week.Offset) : Day.Offset :=
-  weeks.mul 7 |>.cast (by decide +kernel)
+  .mk (weeks.toUnitVal.mul 7 |>.cast (by decide +kernel))
 
 /--
 Convert `Day.Offset` into `Week.Offset`.
 -/
 @[inline]
 def ofDays (days : Day.Offset) : Week.Offset :=
-  days.ediv 7
+  .mk (days.toUnitVal.ediv 7)
 
 end Offset
 end Week

@@ -619,19 +619,19 @@ def dateUTC₁ := DateTime.ofPlainDateTimeWithZone PlainDate .UTC
 -- ──────────────────────────────────────────────────────────────────────────────
 
 /-- info: "0053-06-19" -/
-#guard_msgs in #eval Formats.sqlDate.format (DateTime.ofLocalDateWithZone (PlainDate.ofEpochDay ⟨-700000⟩) .UTC)
+#guard_msgs in #eval Formats.sqlDate.format (DateTime.ofLocalDateWithZone (PlainDate.ofEpochDay (.ofInt (-700000))) .UTC)
 
 /-- info: "-0002-09-16" -/
-#guard_msgs in #eval Formats.sqlDate.format (DateTime.ofLocalDateWithZone (PlainDate.ofEpochDay ⟨-720000⟩) .UTC)
+#guard_msgs in #eval Formats.sqlDate.format (DateTime.ofLocalDateWithZone (PlainDate.ofEpochDay (.ofInt (-720000))) .UTC)
 
 /-- info: "-0084-07-28" -/
-#guard_msgs in #eval Formats.sqlDate.format (DateTime.ofLocalDateWithZone (PlainDate.ofEpochDay ⟨-750000⟩) .UTC)
+#guard_msgs in #eval Formats.sqlDate.format (DateTime.ofLocalDateWithZone (PlainDate.ofEpochDay (.ofInt (-750000))) .UTC)
 
 /-- info: "-0221-09-04" -/
-#guard_msgs in #eval Formats.sqlDate.format (DateTime.ofLocalDateWithZone (PlainDate.ofEpochDay ⟨-800000⟩) .UTC)
+#guard_msgs in #eval Formats.sqlDate.format (DateTime.ofLocalDateWithZone (PlainDate.ofEpochDay (.ofInt (-800000))) .UTC)
 
 /-- info: date("-0221-09-04") -/
-#guard_msgs in #eval PlainDate.ofEpochDay ⟨-800000⟩
+#guard_msgs in #eval PlainDate.ofEpochDay (.ofInt (-800000))
 
 -- ──────────────────────────────────────────────────────────────────────────────
 -- Macro literals
