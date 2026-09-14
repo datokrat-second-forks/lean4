@@ -2436,12 +2436,12 @@ private def isDefEqAppFallback (t : Expr) (s : Expr) : MetaM Bool := do
 Virtual analog of `isDefEqProj.isDefEqSingleton` for `newtype`-generated projectors: solves
 `projName params (?m ...) =?= v` as `?m ... =?= ctorName params v`.
 
-Declined when `v` is an application of the same projector, so that `isDefEqApp` gets to solve
-`projName params (?m ...) =?= projName params w` first-order as `?m ... =?= w`. A real structure's
-projection reaches `isDefEqProj.isDefEqSingleton` only as a `.proj` node, i.e. after the
-application has had its turn; without this the eta-expanded assignment `ctorName params (projName
-params w)` wins instead, which is definitionally equal but syntactically larger, so a congruence
-step over the projector grows its goal by a `mk`/`proj` layer rather than stripping the projector.
+Like the other eta rules, this is a last resort: the assignment it manufactures is definitionally
+equal to any competing one but syntactically larger, so whenever the other side can be brought into
+the form `projName params w` we prefer `?m ... =?= w`. A real structure's projection only reaches
+`isDefEqProj.isDefEqSingleton` as a `.proj` node, i.e. after `whnfCore`, lazy delta reduction and
+`isDefEqApp` have had their turn; hence the call site below and the check declining an application
+of the same projector, which `isDefEqApp` solves first-order.
 -/
 private def isDefEqVirtualProj (t v : Expr) : MetaM Bool := do
   let .const projName us := t.getAppFn | return false
@@ -2461,7 +2461,6 @@ private def isExprDefEqExpensive (t : Expr) (s : Expr) : MetaM Bool := do
   whenUndefDo (isDefEqEta t s) do
   whenUndefDo (isDefEqEta s t) do
   if (← isDefEqProj t s) then return true
-  if (← (isDefEqVirtualProj t s <||> isDefEqVirtualProj s t)) then return true
   let t' ← whnfCore t
   let s' ← whnfCore s
   if t != t' || s != s' then
@@ -2478,6 +2477,7 @@ private def isExprDefEqExpensive (t : Expr) (s : Expr) : MetaM Bool := do
       return true
     if (← (isDefEqVirtualEtaStruct t s <||> isDefEqVirtualEtaStruct s t)) then
       return true
+    if (← (isDefEqVirtualProj t s <||> isDefEqVirtualProj s t)) then return true
     if t.isConst && s.isConst then
       if t.constName! == s.constName! then isListLevelDefEqAux t.constLevels! s.constLevels! else return false
     else if (← pure t.isApp <&&> pure s.isApp) then
