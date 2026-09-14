@@ -372,14 +372,14 @@ private def expandUserTactic (tac : TSyntax `tactic) (goal : MVarId) : MetaM (Ar
         let env ← getEnv
         let suggestions := newTrees.foldl (init := #[]) fun acc tree =>
           tree.foldInfo (init := acc) fun _ info acc => Id.run do
-            let .ofCustomInfo { value, .. } := info | acc
-            let some tti := value.get? Meta.Tactic.TryThis.TryThisInfo | acc
+            let .ofCustomInfo { value, .. } := info | return acc
+            let some tti := value.get? Meta.Tactic.TryThis.TryThisInfo | return acc
             match tti.suggestion.suggestion with
-            | .tsyntax stx => acc.push ⟨stx.raw⟩
+            | .tsyntax stx => return acc.push ⟨stx.raw⟩
             | .string s =>
               match Parser.runParserCategory env `tactic s with
-              | .ok stx => acc.push ⟨stx⟩
-              | .error _ => acc
+              | .ok stx => return acc.push ⟨stx⟩
+              | .error _ => return acc
 
         pure (some suggestions))
       (fun _ => pure none)

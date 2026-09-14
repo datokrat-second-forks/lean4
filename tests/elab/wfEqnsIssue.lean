@@ -43,7 +43,7 @@ inductive Res (ω α : Type _) : (b c : Bool) → Type _ where
   | rcont : Res ω α b true
 
 instance : Coe α (Res ω α b c) := ⟨Res.val⟩
-instance : Coe (Id α) (Res ω α b c) := ⟨Res.val⟩
+instance : Coe (Id α) (Res ω α b c) := ⟨(Res.val ·.run)⟩
 
 def Ctx.extendBot (x : α) : {Γ : _} → HList Γ → HList (Γ ++ [α])
   | [],     _               => HList.cons x HList.nil

@@ -165,7 +165,7 @@ private def HandleOverlapState.untilToken (st : HandleOverlapState) (nextToken? 
       else
         -- Nothing is current, and nothing is surrounding. We're done.
         break
-  st
+  return st
 where
   /--
   The best token is the nonempty token with the highest priority; given equal priorities, earlier
@@ -334,7 +334,7 @@ private partial def collectVersoTokens
     (text : FileMap)
     (stx : Syntax) (getTokens : (stx : Syntax) → Array LeanSemanticToken) :
     Array LeanSemanticToken :=
-  go stx |>.run #[] |>.2
+  go stx |>.run #[] |>.run.2
 where
   tok (tk : Syntax) (k : SemanticTokenType) : StateM (Array LeanSemanticToken) Unit :=
     let priority :=
@@ -525,7 +525,7 @@ def dbgShowTokens (text : FileMap) (toks : Array LeanSemanticToken) : String := 
   for (l, vals) in byLine.toList.mergeSort (fun x y => x.1 ≤ y.1) do
     let vals := vals.toList.mergeSort fun x y => x.1 ≤ y.1
     out := out ++ s!"{l}:\t{vals.map (fun (c1, c2, ⟨stx, tok, prio⟩) => (c1, c2, stx, toJson tok, prio))}\n"
-  out
+  return out
 
 def computeSemanticTokens  (doc : EditableDocument) (beginPos : String.Pos.Raw)
     (endPos? : Option String.Pos.Raw) (snaps : List Snapshots.Snapshot) : RequestM SemanticTokens := do

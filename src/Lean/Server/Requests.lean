@@ -371,12 +371,12 @@ open Language.Lean in
 partial def findCmdParsedSnap (doc : EditableDocument) (hoverPos : String.Pos.Raw)
     : ServerTask (Option CommandParsedSnapshot) := Id.run do
   let some headerParsed := doc.initSnap.result?
-    | .pure none
-  headerParsed.processedSnap.task.asServerTask.bindCheap fun headerProcessed => Id.run do
+    | return .pure none
+  return headerParsed.processedSnap.task.asServerTask.bindCheap fun headerProcessed => Id.run do
     let some headerSuccess := headerProcessed.result?
       | return .pure none
     let firstCmdSnapTask : ServerTask CommandParsedSnapshot := headerSuccess.firstCmdSnap.task
-    firstCmdSnapTask.bindCheap go
+    return firstCmdSnapTask.bindCheap go
 where
   go (cmdParsed : CommandParsedSnapshot) : ServerTask (Option CommandParsedSnapshot) := Id.run do
     if containsHoverPos cmdParsed then
@@ -388,8 +388,8 @@ where
       return .pure none
     match cmdParsed.nextCmdSnap? with
     | some next =>
-      next.task.asServerTask.bindCheap go
-    | none => .pure none
+      return next.task.asServerTask.bindCheap go
+    | none => return .pure none
 
   containsHoverPos (cmdParsed : CommandParsedSnapshot) : Bool := Id.run do
     let some range := cmdParsed.stx.getRangeWithTrailing? (canonicalOnly := true)

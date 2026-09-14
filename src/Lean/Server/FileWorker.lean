@@ -106,14 +106,14 @@ def WorkerContext.modifyGetPartialHandler (ctx : WorkerContext) (method : String
   ctx.partialHandlersRef.modifyGet fun partialHandlers => Id.run do
     let h := partialHandlers.get! method
     let (r, h) := f h
-    (r, partialHandlers.insert method h)
+    return (r, partialHandlers.insert method h)
 
 def WorkerContext.modifyPartialHandler (ctx : WorkerContext) (method : String)
     (f : PartialHandlerInfo → PartialHandlerInfo) : BaseIO Unit :=
   ctx.partialHandlersRef.modify fun partialHandlers => Id.run do
   let some h := partialHandlers.get? method
     | return partialHandlers
-  partialHandlers.insert method <| f h
+  return partialHandlers.insert method <| f h
 
 def WorkerContext.updateRequestsInFlight (ctx : WorkerContext) (method : String) (f : Nat → Nat) : BaseIO Unit :=
     ctx.modifyPartialHandler method fun h => { h with requestsInFlight := f h.requestsInFlight }
@@ -530,7 +530,7 @@ section Initialization
     getImportClosure? (snap : Language.Lean.InitialSnapshot) : Array Name := Id.run do
       let some snap := snap.result?
         | return #[]
-      let some snap ← snap.processedSnap.get.result?
+      let some snap := snap.processedSnap.get.result?
         | return #[]
       let importClosure := snap.cmdState.env.allImportedModuleNames
       return importClosure
@@ -645,7 +645,7 @@ def handleRpcRelease (p : Lsp.RpcReleaseParams) : WorkerM Unit := do
       let .ok p := ref.getObjVal? wireFormat.refFieldName >>= fromJson?
         | ctx.hLog.putStrLn s!"malformed RPC ref (wire format {toJson wireFormat}): {ref.compress}"
       seshRef.modify fun st =>
-        let (_, objects) := rpcReleaseRef ⟨p⟩ |>.run st.objects
+        let (_, objects) := rpcReleaseRef ⟨p⟩ |>.run st.objects |>.run
         { st with objects }
 
 def handleRpcKeepAlive (p : Lsp.RpcKeepAliveParams) : WorkerM Unit := do
@@ -777,7 +777,7 @@ section MessageHandling
       let params ← RequestM.parseRequestParams Widget.GetInteractiveDiagnosticsParams params.params
       let resp ← handleGetInteractiveDiagnosticsRequest st.doc params
       let resp ← seshRef.modifyGet fun st =>
-        (rpcEncode resp).run st.objects |>.map (·) ({st with objects := ·})
+        (rpcEncode resp).run st.objects |>.run.map (·) ({st with objects := ·})
       return some <| .pure { response? := resp, serialized := resp.compress, isComplete := true }
     | "codeAction/resolve" =>
       let jsonParams := params
@@ -1012,7 +1012,7 @@ def runRefreshTasks : WorkerM (Array (ServerTask Unit)) := do
               successiveRefreshAttempts := pendingRefreshInfo.successiveRefreshAttempts + 1
             }
           }
-          (true, h)
+          return (true, h)
         if ! canRefresh then
           let cancelled ← sleepWithCancellation refreshIntervalMs.toUInt32
           if cancelled then

@@ -241,7 +241,7 @@ private def similarNames (x : Name) (xs : Array Name) : Array Name := Id.run do
   let mut threshold := if s.length < 5 then 1 else if s.length < 8 then 2 else 3
   let mut candidates := #[]
   for x in xs do
-    if let some d ← levenshtein s x.toString threshold then
+    if let some d := levenshtein s x.toString threshold then
       if d < threshold then threshold := d
       if d ≤ threshold then candidates := candidates.push (x, d)
   -- Only keep the smallest distance

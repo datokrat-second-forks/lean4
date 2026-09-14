@@ -54,7 +54,8 @@ private partial def mkErrorMessage (c : InputContext) (pos : String.Pos.Raw) (st
     if let some trailing := lastTrailing stk then
       if trailing.stopPos == pos then
         pos := trailing.startPos
-  { fileName := c.fileName
+  return {
+    fileName := c.fileName
     pos := c.fileMap.toPosition pos
     endPos := c.fileMap.toPosition <$> endPos?
     keepFullRange := true
@@ -64,10 +65,10 @@ where
   lastTrailing (s : SyntaxStack) : Option Substring.Raw :=
     Id.run <| s.toSubarray.findSomeRevM? fun stx =>
       if let .original (trailing := trailing) .. := stx.getTailInfo then pure (some trailing)
-        else none
+        else pure none
 
 private def setStartOfFileLeading (stx : Syntax) : Syntax × Bool := Id.run do
-  let some (.original leading pos trailing endPos) ← stx.getHeadInfo?
+  let some (.original leading pos trailing endPos) := stx.getHeadInfo?
     | return (stx, false)
   let info := .original { leading with startPos := 0 } pos trailing endPos
   return (stx.setHeadInfo info, true)

@@ -101,7 +101,7 @@ def handleHover (p : HoverParams)
           return docStr.map (·, stx.getRange?.get!)
         | none => pure none
       -- now try info tree
-      if let some result := snap.infoTree.hoverableInfoAtM? (m := Id) hoverPos then
+      if let some result := snap.infoTree.hoverableInfoAtM? (m := Id) hoverPos |>.run then
         let ctx := result.ctx
         let info := result.info
         if let some range := info.range? then
@@ -260,7 +260,7 @@ partial def handleDocumentHighlight (p : DocumentHighlightParams)
       if let some range := i.getRange? then
         if range.contains pos then
           return some { range := doRange?.getD (range.toLspRange text), kind? := DocumentHighlightKind.text }
-      highlightReturn? doRange? e
+      return highlightReturn? doRange? e
     | `(do%$i $elems) => highlightReturn? (i.getRange?.get!.toLspRange text) elems
     | stx => stx.getArgs.findSome? (highlightReturn? doRange?)
 

@@ -277,7 +277,7 @@ private partial def highlightTaggedText (query : String) (tt : TaggedText α) (h
       StateM TaggedTextHighlightState β) :
     TaggedText β × Bool :=
   let ms := findTaggedTextMatches query tt toText
-  let (tt, s) := go tt |>.run { query, p := ⟨0⟩, ms := ms.reverse, anyHighlight := false }
+  let (tt, s) := go tt |>.run { query, p := ⟨0⟩, ms := ms.reverse, anyHighlight := false } |>.run
   (tt, s.anyHighlight)
 where
   go (tt : TaggedText α) : StateM TaggedTextHighlightState (TaggedText β) := do

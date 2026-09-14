@@ -242,7 +242,7 @@ instance : ToSnapshotTree TacticFinishedSnapshot where
 
 /-- Applies the given transformation to the `TacticFinishedSnapshot`. -/
 def TacticFinishedSnapshot.transform (s : TacticFinishedSnapshot) (trans : SnapshotTreeTransform) : TacticFinishedSnapshot :=
-  { s with moreSnaps := s.moreSnaps.map (·.map (sync := true) (·.transform.run trans)) }
+  { s with moreSnaps := s.moreSnaps.map (·.map (sync := true) (·.transform.run trans |>.run)) }
 
 /-- Snapshot just before execution of a tactic. -/
 structure TacticParsedSnapshotInner (α : Type) extends Language.Snapshot where
@@ -273,7 +273,7 @@ Pushes the transformation inwards by one level, allowing transformation-correct 
 -/
 def TacticParsedSnapshot.applyTransform (s : TacticParsedSnapshot) :
     TacticParsedSnapshotInner TacticParsedSnapshot where
-  toSnapshot := s.transformed.raw.toSnapshot.transform.run s.transformed.transform
+  toSnapshot := s.transformed.raw.toSnapshot.transform.run s.transformed.transform |>.run
   stx := s.transformed.transform.transformSyntax s.transformed.raw.stx
   inner? := s.transformed.raw.inner?.map (·.map (sync := true) ({ transformed := ·.transformed.compose s.transformed.transform }))
   finished := s.transformed.raw.finished.map (sync := true) (·.transform s.transformed.transform)

@@ -224,7 +224,7 @@ def ScopedEnvExtension.activateScoped (ext : ScopedEnvExtension α β σ) (env :
             let mut state := top.state
             for b in bs do
               state := ext.descr.addEntry state b
-            { state := state, activeScopes := activeScopes }
+            return { state := state, activeScopes := activeScopes }
         { s with stateStack := top :: stack }
     | _ => s
 

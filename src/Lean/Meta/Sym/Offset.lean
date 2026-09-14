@@ -104,11 +104,11 @@ partial def toOffset (e : Expr) : Offset :=
   match_expr e with
   | Nat.succ a => toOffset a |>.inc 1
   | HAdd.hAdd _ _ _ _ a b => Id.run do
-    let some n := getNatValue? b | .add e 0
-    toOffset a |>.inc n
+    let some n := getNatValue? b | return .add e 0
+    return toOffset a |>.inc n
   | OfNat.ofNat _ n _ => Id.run do
-    let .lit (.natVal n) := n | .add e 0
-    .num n
+    let .lit (.natVal n) := n | return .add e 0
+    return .num n
   | _ => .add e 0
 
 private def isNatExpr (e : Expr) : Bool :=

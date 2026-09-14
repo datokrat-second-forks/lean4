@@ -230,9 +230,9 @@ def orelseFnCore (p q : ParserFn) (antiquotBehavior := OrElseOnAntiquotBehavior.
   match s.errorMsg with
   | some errorMsg =>
     if s.pos == iniPos then
-      mergeOrElseErrors (q c (s.restore iniSz iniPos)) errorMsg iniPos true
+      return mergeOrElseErrors (q c (s.restore iniSz iniPos)) errorMsg iniPos true
     else
-      s
+      return s
   | none =>
     let pBack := s.stxStack.back
     if antiquotBehavior == .acceptLhs || s.stackSize != iniSz + 1 || !pBack.isAntiquots then
@@ -261,7 +261,7 @@ def orelseFnCore (p q : ParserFn) (antiquotBehavior := OrElseOnAntiquotBehavior.
         s.pushSyntax stx
     s := pushAntiquots pBack s
     s := pushAntiquots qBack s
-    s.mkNode choiceKind iniSz
+    return s.mkNode choiceKind iniSz
 
 def orelseFn (p q : ParserFn) : ParserFn :=
   orelseFnCore p q
@@ -418,7 +418,7 @@ partial def manyAux (p : ParserFn) : ParserFn := fun c s => Id.run do
     return s.mkUnexpectedError "invalid 'many' parser combinator application, parser did not consume anything"
   if s.stackSize > iniSz + 1 then
     s := s.mkNode nullKind iniSz
-  manyAux p c s
+  return manyAux p c s
 
 def manyFn (p : ParserFn) : ParserFn := fun c s =>
   let iniSz  := s.stackSize
@@ -462,7 +462,7 @@ private partial def sepByFnAux (p : ParserFn) (sep : ParserFn) (allowTrailingSep
       return s.mkNode nullKind iniSz
     if s.stackSize > sz + 1 then
       s := s.mkNode nullKind sz
-    parse allowTrailingSep c s
+    return parse allowTrailingSep c s
   parse pOpt
 
 def sepByFn (allowTrailingSep : Bool) (p : ParserFn) (sep : ParserFn) : ParserFn := fun c s =>
@@ -699,7 +699,7 @@ def mkNodeToken (n : SyntaxNodeKind) (startPos : String.Pos.Raw)
   let wsStopPos := s.pos
   let trailing  := c.substring (startPos := stopPos) (stopPos := wsStopPos)
   let info      := SourceInfo.original leading startPos trailing stopPos
-  s.pushSyntax (Syntax.mkLit n val info)
+  return s.pushSyntax (Syntax.mkLit n val info)
 
 def charLitFnAux (startPos : String.Pos.Raw) : ParserFn := fun c s =>
   let i := s.pos
@@ -1097,7 +1097,7 @@ def satisfySymbolFn (p : String → Bool) (expected : List String) : ParserFn :=
     if p sym then
       return s
   -- this is a very hot `mkUnexpectedTokenErrors` call, so explicitly pass `iniPos`
-  s.mkUnexpectedTokenErrors expected iniPos
+  return s.mkUnexpectedTokenErrors expected iniPos
 
 def symbolFnAux (sym : String) (errorMsg : String) : ParserFn :=
   satisfySymbolFn (fun s => s == sym) [errorMsg]
@@ -1134,8 +1134,8 @@ def nonReservedSymbolFnAux (sym : String) (errorMsg : String) : ParserFn := fun 
     if sym == rawVal.toString then
       let s := s.popSyntax
       return s.pushSyntax (Syntax.atom info sym)
-  | _ => ()
-  s.mkUnexpectedTokenError errorMsg
+  | _ => pure ()
+  return s.mkUnexpectedTokenError errorMsg
 
 def nonReservedSymbolFn (sym : String) : ParserFn :=
   nonReservedSymbolFnAux sym ("'" ++ sym ++ "'")
@@ -1354,7 +1354,7 @@ def hygieneInfoFn : ParserFn := fun c s => Id.run do
   -- The stack can be empty if this is either the first token, or if we are in a fresh cache.
   -- In that case we just put the hygieneInfo at the current location.
   let str := c.mkEmptySubstringAt s.pos
-  finish s.pos str str s
+  return finish s.pos str str s
 
 def hygieneInfoNoAntiquot : Parser := {
   fn   := hygieneInfoFn
@@ -1420,13 +1420,13 @@ def runLongestMatchParser (left? : Option Syntax) (startLhsPrec : Nat) (p : Pars
   s := p c s
   -- stack contains `[..., result ]`
   if s.stackSize == startSize + 1 then
-    s -- success or error with the expected number of nodes
+    return s -- success or error with the expected number of nodes
   else if s.hasError then
     -- error with an unexpected number of nodes.
-    s.shrinkStack startSize |>.pushSyntax Syntax.missing
+    return s.shrinkStack startSize |>.pushSyntax Syntax.missing
   else
     -- parser succeeded with incorrect number of nodes
-    invalidLongestMatchParser s
+    return invalidLongestMatchParser s
 
 def longestMatchStep (left? : Option Syntax) (startSize startLhsPrec : Nat) (startPos : String.Pos.Raw) (prevPrio : Nat) (prio : Nat) (p : ParserFn)
     : ParserContext → ParserState → ParserState × Nat := fun c s =>
@@ -1826,7 +1826,7 @@ def tokenAntiquotFn : ParserFn := fun c s => Id.run do
   let s      := (checkNoWsBefore >> symbolNoAntiquot "%" >> symbolNoAntiquot "$" >> checkNoWsBefore >> antiquotExpr).fn c s
   if s.hasError then
     return s.restore iniSz iniPos
-  s.mkNode (`token_antiquot) (iniSz - 1)
+  return s.mkNode (`token_antiquot) (iniSz - 1)
 
 def tokenWithAntiquot : Parser → Parser := withFn fun f c s =>
   let s := f c s
@@ -1912,7 +1912,7 @@ private def withAntiquotSuffixSpliceFn (kind : SyntaxNodeKind) (suffix : ParserF
   let s      := suffix c s
   if s.hasError then
     return s.restore iniSz iniPos
-  s.mkNode (kind ++ `antiquot_suffix_splice) (s.stxStack.size - 2)
+  return s.mkNode (kind ++ `antiquot_suffix_splice) (s.stxStack.size - 2)
 
 /-- Parse `suffix` after an antiquotation, e.g. `$x,*`, and put both into a new node. -/
 @[builtin_doc] def withAntiquotSuffixSplice (kind : SyntaxNodeKind) (p suffix : Parser) : Parser where
@@ -1962,7 +1962,7 @@ def leadingParserAux (kind : Name) (tables : PrattParsingTables) (behavior : Lea
       return s
     return s.mkUnexpectedTokenError (toString kind)
   let s := longestMatchFn none ps c s
-  mkResult s iniSz
+  return mkResult s iniSz
 
 def leadingParser (kind : Name) (tables : PrattParsingTables) (behavior : LeadingIdentBehavior) (antiquotParser : ParserFn) : ParserFn :=
   withAntiquotFn (isCatAntiquot := true) antiquotParser (leadingParserAux kind tables behavior)
@@ -1988,7 +1988,7 @@ partial def trailingLoop (tables : PrattParsingTables) (c : ParserContext) (s : 
     -- Discard non-consuming parse errors and break the trailing loop instead, restoring `left`.
     -- This is necessary for fallback parsers like `app` that pretend to be always applicable.
     return if s.pos == iniPos then s.restore (iniSz - 1) iniPos |>.pushSyntax left else s
-  trailingLoop tables c s
+  return trailingLoop tables c s
 
 /--
 

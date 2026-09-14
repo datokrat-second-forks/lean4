@@ -867,7 +867,7 @@ private def accLevelAtCtor (ctorParam : Expr) (r : Level) (rOffset : Nat) (typeL
     StateT AccLevelState TermElabM Unit := do
   let type ← inferType ctorParam
   let u ← instantiateLevelMVars (← getLevel type)
-  match (← modifyGet fun s => accLevel u r rOffset typeLMVarIds |>.run |>.run s) with
+  match (← modifyGet fun s => accLevel u r rOffset typeLMVarIds |>.run |>.run s |>.run) with
   | .ok _ => pure ()
   | .error msg =>
     throwError "Failed to infer universe level for resulting type due to the constructor argument `{ctorParam}`: {msg}"

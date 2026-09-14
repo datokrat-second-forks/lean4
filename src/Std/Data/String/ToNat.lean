@@ -104,6 +104,7 @@ theorem isNat_iff' {s : String.Slice} :
         (∀ c ∈ s.copy.toList, c.isDigit ∨ c = '_') ∧
         NoRepetition '_' ('_' :: s.copy.toList ++ ['_']) := by
   generalize h : s.isNat = res
+  unfold String.Slice.isNat at h
   apply Id.of_wp_run_eq h
   simp only [↓Char.isValue, Bool.not_eq_eq_eq_not, Bool.not_true, forIn_eq_forIn_toList, ne_eq,
     WP.bind, SPred.entails_nil, SPred.down_pure, forall_const]
@@ -131,7 +132,7 @@ theorem isNat_iff' {s : String.Slice} :
     rw [← List.cons_append]
     exact NoRepetition.append_singleton_of_not_suffix h₂.2.2.2 h₂.2.1
   next pref c suff h b hc hc' h₁ =>
-    simp only [↓Char.isValue, eq_iff_iff, reduceCtorEq, h, List.mem_append, List.mem_cons, ne_eq,
+    simp only [↓Char.isValue, eq_iff_iff, reduceCtorEq, List.mem_append, List.mem_cons, ne_eq,
       false_and, and_false, exists_const, or_false, List.singleton_suffix_cons_append_singleton_iff,
       Ne.symm hc, not_false_eq_true, List.not_mem_nil, forall_or_eq_imp, hc', true_or, and_true,
       true_and] at ⊢ h₁

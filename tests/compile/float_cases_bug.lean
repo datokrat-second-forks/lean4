@@ -32,6 +32,6 @@ partial def foo : MyState -> Term -> Term -> List Term
 
   } ;
 
-  (stateT.run ⟨[]⟩).2.ts.reverse
+  (stateT.run ⟨[]⟩).run.2.ts.reverse
 
 def main : IO Unit := IO.println $ foo ⟨[]⟩ (app []) (app [])

@@ -234,7 +234,7 @@ def diffInteractiveGoal (useAfter : Bool) (g₀ : MVarId) (i₁ : InteractiveGoa
   let mctx ← getMCtx
   let some md₀ := mctx.findDecl? g₀
     | throwError "Failed to find decl for {g₀}."
-  let lctx₀ := md₀.lctx |>.sanitizeNames.run' {options := (← getOptions)}
+  let lctx₀ := md₀.lctx |>.sanitizeNames.run' {options := (← getOptions)} |>.run
   let hs₁ ← diffHypotheses useAfter lctx₀ i₁.hyps
   let i₁ := {i₁ with hyps := hs₁}
   let g₁ := i₁.mvarId

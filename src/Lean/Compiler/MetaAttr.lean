@@ -76,16 +76,16 @@ def getIRPhases (env : Environment) (declName : Name) : IRPhases := Id.run do
   match env.getModuleIdxFor? declName with
   | some idx =>
     if isMarkedMeta env declName then
-      .comptime
+      return .comptime
     else
-      env.header.modules[idx]?.map (·.irPhases) |>.get!
+      return env.header.modules[idx]?.map (·.irPhases) |>.get!
   | none =>
     if env.find? declName |>.all (·.isCtor) then
       -- Do not check ctors (trivial) or decls not in env (compiler-generated)
-      .all
+      return .all
     else if isMarkedMeta env declName then
-      .comptime
+      return .comptime
     else
-      .runtime
+      return .runtime
 
 end Lean

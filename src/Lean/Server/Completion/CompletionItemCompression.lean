@@ -29,7 +29,7 @@ def compressItemDataFast (acc : String) (data : ResolvableCompletionItemData) :
     | .fvar id =>
       acc := acc ++ "\"f"
       acc := Json.escape id.name.toString acc ++ "\""
-  acc ++ "]"
+  return acc ++ "]"
 
 @[inline]
 def compressMarkupContentFast (acc : String) (c : MarkupContent) : String :=

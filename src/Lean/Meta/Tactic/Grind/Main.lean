@@ -256,7 +256,7 @@ Walks the proof term collecting `Origin`s of E-matching instances that appear,
 using the `mdata` markers placed by `markTheoremInstanceProof`.
 -/
 private partial def collectUsedOrigins (e : Expr) (map : EMatch.InstanceMap) : Std.HashSet Origin :=
-  let (_, s) := go e |>.run ({}, {})
+  let (_, s) := go e |>.run ({}, {}) |>.run
   s.2
 where
   go (e : Expr) : StateM (Std.HashSet ExprPtr × Std.HashSet Origin) Unit := do

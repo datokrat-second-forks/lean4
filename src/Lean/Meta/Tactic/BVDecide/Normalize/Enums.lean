@@ -352,7 +352,7 @@ def getMatchEqCondFor (declName : Name) : MetaM Name := do
 builtin_initialize
   registerReservedNamePredicate fun env name => Id.run do
     let .str p s := name | return false
-    s == enumToBitVecSuffix || s == eqIffEnumToBitVecEqSuffix || s == enumToBitVecLeSuffix ||
+    return s == enumToBitVecSuffix || s == eqIffEnumToBitVecEqSuffix || s == enumToBitVecLeSuffix ||
     (s == matchEqCondSuffix && isMatcherCore env p)
 
 builtin_initialize

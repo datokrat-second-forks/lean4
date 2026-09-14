@@ -107,7 +107,7 @@ An absolute path starts at the root directory or a drive letter. Accessing files
 path does not depend on the current working directory.
 -/
 def isAbsolute (p : FilePath) : Bool := Id.run do
-  pathSeparators.contains p.toString.front || (isWindows && p.toString.chars.atIdxSlow? 1 == some ':')
+  return pathSeparators.contains p.toString.front || (isWindows && p.toString.chars.atIdxSlow? 1 == some ':')
 
 /--
 A relative path is one that depends on the current working directory for interpretation. Relative
