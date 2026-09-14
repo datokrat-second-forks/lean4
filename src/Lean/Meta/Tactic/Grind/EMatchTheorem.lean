@@ -699,7 +699,7 @@ where
           pure dontCare
 
 def main (patterns : List Expr) (symPrios : SymbolPriorities) (minPrio : Nat) : MetaM (List Expr × List HeadIndex × Std.HashSet Nat) := do
-  let (patterns, s) ← patterns.mapM (go (inSupport := false) (root := true)) { symPrios, minPrio } |>.run {}
+  let (patterns, s) ← patterns.mapM (go (inSupport := false) (root := true)) |>.run { symPrios, minPrio } |>.run {}
   return (patterns, s.symbols.toList, s.bvarsFound)
 
 private def normalizePattern (e : Expr) : M Expr := do
@@ -1170,7 +1170,7 @@ private def collectPatterns? (proof : Expr) (xs : Array Expr) (searchPlaces : Ar
         return some ((← get).patterns.toList)
     return none
   let collect? (useOld : Bool) : MetaM (Option (List Expr × List HeadIndex)) := do
-    let (some ps, s) ← go useOld { proof, xs } |>.run' {} { symPrios, minPrio } |>.run {}
+    let (some ps, s) ← go useOld |>.run { proof, xs } |>.run' {} |>.run { symPrios, minPrio } |>.run {}
       | return none
     return some (ps, s.symbols.toList)
   let useOld := backward.grind.inferPattern.get (← getOptions)
@@ -1203,7 +1203,7 @@ private partial def collectGroundPattern? (proof : Expr) (xs : Array Expr) (sear
       if let some r ← visit? place then
         return r
     return none
-  let (some p, s) ← go? { proof, xs } |>.run' {} { symPrios, minPrio } |>.run {}
+  let (some p, s) ← go? |>.run { proof, xs } |>.run' {} |>.run { symPrios, minPrio } |>.run {}
     | return none
   return some (p, s.symbols.toList)
 where
@@ -1296,7 +1296,7 @@ def mkEMatchTheoremUsingSingletonPatterns (origin : Origin) (levelParams : Array
     (showInfo := false) : MetaM (Array EMatchTheorem) := do
   let type ← inferEMatchProofType proof (gen := false)
   withReducible <| forallTelescopeReducing type fun xs type => withDefault do
-    let (_, s) ← go xs type |>.run {} |>.run { proof, xs } |>.run' {} { symPrios, minPrio } |>.run' {}
+    let (_, s) ← go xs type |>.run {} |>.run { proof, xs } |>.run' {} |>.run { symPrios, minPrio } |>.run' {}
     let numParams := xs.size
     let mut thms := #[]
     for (p, symbols) in s do

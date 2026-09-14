@@ -1530,7 +1530,7 @@ def signExtend (oldWidthExpr newWidthExpr targetExpr : Expr) : SimprocM (Sym.Sim
     return .step expr proof
 
 public def rewriteSimproc (cache : ST.Ref IO.RealWorld OpCache) : Sym.Simp.Simproc := fun e => do
-  go e cache
+  ReaderT.run (go e) cache
 where
   go (e : Expr) : SimprocM Sym.Simp.Result := do
     match_expr e with

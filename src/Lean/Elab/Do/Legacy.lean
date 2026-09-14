@@ -1182,7 +1182,7 @@ where
         `(let discr := $d; $body)
 
 def run (code : Code) (m : Syntax) (returnType : Syntax) (uvars : Array Var := #[]) (kind := Kind.regular) : MacroM Syntax :=
-  toTerm code { m, returnType, kind, uvars }
+  ReaderT.run (toTerm code) { m, returnType, kind, uvars }
 
 /-- Given
    - `a` is true if the code block has a `Code.action _` exit point

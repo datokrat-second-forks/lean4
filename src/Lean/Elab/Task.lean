@@ -123,7 +123,7 @@ returning
 * a monadic value with the cached result (and subsequent state as it was after running).
 -/
 def asTask (t : TacticM α) : TacticM (BaseIO Unit × Task (TacticM α)) := do
-  let (cancel, task) ← (t (← read) |>.run (← get)).asTask
+  let (cancel, task) ← (ReaderT.run t (← read) |>.run (← get)).asTask
   return (cancel, task.map (prio := .max)
     fun c : TermElabM (α × Tactic.State) => do let (a, s) ← c; set s; pure a)
 

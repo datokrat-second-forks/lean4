@@ -690,7 +690,7 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
     throw <| .userError "`lake shake` only works with `module`s currently"
   -- the one env ext we want to initialize
   let is := indirectModUseExt.toEnvExtension.getState env
-  let newState ← indirectModUseExt.addImportedFn is.importedEntries { env := env, opts := {} }
+  let newState ← (indirectModUseExt.addImportedFn is.importedEntries).run { env := env, opts := {} }
   env := indirectModUseExt.toEnvExtension.setState (asyncMode := .sync) env { is with state := newState }
 
   StateT.run' (s := initStateFromEnv env) do

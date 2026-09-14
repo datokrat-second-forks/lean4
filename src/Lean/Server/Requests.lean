@@ -225,7 +225,7 @@ abbrev RequestT m := ReaderT RequestContext <| ExceptT RequestError m
 abbrev RequestM := ReaderT RequestContext <| EIO RequestError
 
 def RequestM.run (act : RequestM α) (rc : RequestContext) : EIO RequestError α :=
-  act rc
+  ReaderT.run act rc
 
 abbrev RequestTask.pure (a : α) : RequestTask α := ServerTask.pure (.ok a)
 
@@ -265,24 +265,24 @@ def asTask (t : RequestM α) : RequestM (RequestTask α) := do
   ServerTask.EIO.asTask <| t.run rc
 
 def pureTask (t : RequestM α) : RequestM (RequestTask α) := do
-  let r ← t.run
+  let r ← t
   return ServerTask.pure <| .ok r
 
 def mapTaskCheap (t : ServerTask α) (f : α → RequestM β) : RequestM (RequestTask β) := do
   let rc ← readThe RequestContext
-  ServerTask.EIO.mapTaskCheap (f · rc) t
+  ServerTask.EIO.mapTaskCheap (fun a => ReaderT.run (f a) rc) t
 
 def mapTaskCostly (t : ServerTask α) (f : α → RequestM β) : RequestM (RequestTask β) := do
   let rc ← readThe RequestContext
-  ServerTask.EIO.mapTaskCostly (f · rc) t
+  ServerTask.EIO.mapTaskCostly (fun a => ReaderT.run (f a) rc) t
 
 def bindTaskCheap (t : ServerTask α) (f : α → RequestM (RequestTask β)) : RequestM (RequestTask β) := do
   let rc ← readThe RequestContext
-  ServerTask.EIO.bindTaskCheap t (f · rc)
+  ServerTask.EIO.bindTaskCheap t (fun a => ReaderT.run (f a) rc)
 
 def bindTaskCostly (t : ServerTask α) (f : α → RequestM (RequestTask β)) : RequestM (RequestTask β) := do
   let rc ← readThe RequestContext
-  ServerTask.EIO.bindTaskCostly t (f · rc)
+  ServerTask.EIO.bindTaskCostly t (fun a => ReaderT.run (f a) rc)
 
 def mapRequestTaskCheap (t : RequestTask α) (f : α → RequestM β) : RequestM (RequestTask β) := do
   mapTaskCheap (t := t) fun

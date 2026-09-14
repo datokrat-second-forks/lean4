@@ -190,7 +190,7 @@ def serve {σ : Type} [Handler σ]
           break
     )
 
-  background (runServer httpServer.context)
+  background (runServer.runIn httpServer.context)
 
   return httpServer
 

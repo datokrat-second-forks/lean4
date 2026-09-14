@@ -4313,24 +4313,23 @@ overridden by `withReader`, but it cannot be mutated.
 Actions in the resulting monad are functions that take the local value as a parameter, returning
 ordinary actions in `m`.
 -/
-@[implicit_reducible] def ReaderT (ρ : Type u) (m : Type u → Type v) (α : Type u) : Type (max u v) :=
-  (a : @&ρ) → m α
+-- the binder name `r` is part of `ReaderT.run`'s type, so that `ReaderT.run (r := ...)` works
+newtype ReaderT (ρ : Type u) (m : Type u → Type v) (α : Type u) := (r : @&ρ) → m α with run
+
+attribute [always_inline, inline] ReaderT.mk ReaderT.run
 
 /--
 Interpret `ρ → m α` as an element of `ReaderT ρ m α`.
 -/
-@[always_inline, inline]
-def ReaderT.mk {ρ : Type u} {m : Type u → Type v} {α : Type u} (x : ρ → m α) : ReaderT ρ m α := x
-
-instance (ρ : Type u) (m : Type u → Type v) (α : Type u) [Inhabited (m α)] : Inhabited (ReaderT ρ m α) where
-  default := fun _ => default
+add_decl_doc ReaderT.mk
 
 /--
 Executes an action from a monad with a read-only value in the underlying monad `m`.
 -/
-@[always_inline, inline]
-def ReaderT.run {ρ : Type u} {m : Type u → Type v} {α : Type u} (x : ReaderT ρ m α) (r : ρ) : m α :=
-  x r
+add_decl_doc ReaderT.run
+
+instance (ρ : Type u) (m : Type u → Type v) (α : Type u) [Inhabited (m α)] : Inhabited (ReaderT ρ m α) where
+  default := ReaderT.mk fun _ => default
 
 namespace ReaderT
 
@@ -4338,12 +4337,12 @@ section
 variable {ρ : Type u} {m : Type u → Type v} {α : Type u}
 
 instance  : MonadLift m (ReaderT ρ m) where
-  monadLift x := fun _ => x
+  monadLift x := ReaderT.mk fun _ => x
 
 @[always_inline]
 instance (ε) [MonadExceptOf ε m] : MonadExceptOf ε (ReaderT ρ m) where
   throw e  := liftM (m := m) (throw e)
-  tryCatch := fun x c r => tryCatchThe ε (x r) (fun e => (c e) r)
+  tryCatch := fun x c => ReaderT.mk fun r => tryCatchThe ε (x.run r) (fun e => (c e).run r)
 
 end
 
@@ -4356,7 +4355,7 @@ than one local value is available.
 -/
 @[always_inline, inline]
 protected def read [Monad m] : ReaderT ρ m ρ :=
-  pure
+  ReaderT.mk pure
 
 /--
 Returns the provided value `a`, ignoring the reader monad's local value. Typically used via
@@ -4364,7 +4363,7 @@ Returns the provided value `a`, ignoring the reader monad's local value. Typical
 -/
 @[always_inline, inline]
 protected def pure [Monad m] {α} (a : α) : ReaderT ρ m α :=
-  fun _ => pure a
+  ReaderT.mk fun _ => pure a
 
 /--
 Sequences two reader monad computations. Both are provided with the local value, and the second is
@@ -4372,25 +4371,25 @@ passed the value of the first. Typically used via the `>>=` operator.
 -/
 @[always_inline, inline]
 protected def bind [Monad m] {α β} (x : ReaderT ρ m α) (f : α → ReaderT ρ m β) : ReaderT ρ m β :=
-  fun r => bind (x r) fun a => f a r
+  ReaderT.mk fun r => bind (x.run r) fun a => (f a).run r
 
 @[always_inline]
 instance [Monad m] : Functor (ReaderT ρ m) where
-  map      f x r := Functor.map f (x r)
-  mapConst a x r := Functor.mapConst a (x r)
+  map      f x := ReaderT.mk fun r => Functor.map f (x.run r)
+  mapConst a x := ReaderT.mk fun r => Functor.mapConst a (x.run r)
 
 @[always_inline]
 instance [Monad m] : Applicative (ReaderT ρ m) where
-  pure           := ReaderT.pure
-  seq      f x r := Seq.seq (f r) fun _ => x () r
-  seqLeft  a b r := SeqLeft.seqLeft (a r) fun _ => b () r
-  seqRight a b r := SeqRight.seqRight (a r) fun _ => b () r
+  pure         := ReaderT.pure
+  seq      f x := ReaderT.mk fun r => Seq.seq (f.run r) fun _ => (x ()).run r
+  seqLeft  a b := ReaderT.mk fun r => SeqLeft.seqLeft (a.run r) fun _ => (b ()).run r
+  seqRight a b := ReaderT.mk fun r => SeqRight.seqRight (a.run r) fun _ => (b ()).run r
 
 instance [Monad m] : Monad (ReaderT ρ m) where
   bind := ReaderT.bind
 
 instance (ρ m) : MonadFunctor m (ReaderT ρ m) where
-  monadMap f x := fun ctx => f (x ctx)
+  monadMap f x := ReaderT.mk fun ctx => f (x.run ctx)
 
 /--
 Modifies a reader monad's local value with `f`. The resulting computation applies `f` to the
@@ -4398,7 +4397,7 @@ incoming local value and passes the result to the inner computation.
 -/
 @[always_inline, inline]
 protected def adapt {ρ' α : Type u} (f : ρ' → ρ) : ReaderT ρ m α → ReaderT ρ' m α :=
-  fun x r => x (f r)
+  fun x => ReaderT.mk fun r => x.run (f r)
 
 end
 end ReaderT
@@ -4510,7 +4509,7 @@ instance {ρ : Type u} {m : Type u → Type v} {n : Type u → Type v} [MonadFun
   withReader f := monadMap (m := m) (withTheReader ρ f)
 
 instance {ρ : Type u} {m : Type u → Type v} : MonadWithReaderOf ρ (ReaderT ρ m) where
-  withReader f x := fun ctx => x (f ctx)
+  withReader f x := ReaderT.mk fun ctx => x.run (f ctx)
 
 /--
 State monads provide a value of a given type (the _state_) that can be retrieved or replaced.
@@ -6089,8 +6088,8 @@ scope is fresh.
   | false => withReader (fun ctx => { ctx with currRecDepth := hAdd ctx.currRecDepth 1 }) x
 
 instance : MonadQuotation MacroM where
-  getCurrMacroScope ctx := pure ctx.currMacroScope
-  getContext        ctx := pure ctx.quotContext
+  getCurrMacroScope := ReaderT.mk fun ctx => pure ctx.currMacroScope
+  getContext        := ReaderT.mk fun ctx => pure ctx.quotContext
   withFreshMacroScope   := Macro.withFreshMacroScope
 
 /-- Add a new macro scope to the name `n`. -/

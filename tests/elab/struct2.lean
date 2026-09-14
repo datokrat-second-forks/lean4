@@ -52,8 +52,8 @@ class MonadControl (m : Type u → Type v) (n : Type u → Type w) where
 
 instance : MonadControl m (ReaderT ρ m) where
   stM        := id
-  liftWith f := fun ctx => f fun x => x ctx
-  restoreM x := fun ctx => x
+  liftWith f := .mk fun ctx => f fun x => ReaderT.run x ctx
+  restoreM x := .mk fun _ => x
 
 instance [Monad m] : MonadControl m (StateT σ m) where
   stM α := α × σ

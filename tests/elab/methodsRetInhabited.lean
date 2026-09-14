@@ -3,7 +3,7 @@ import all Init.Prelude
 
 open Lean
 def exec (x : MacroM α) : Option α :=
-  match (x {
+  match (ReaderT.run x {
       quotContext := `Expander
       currMacroScope := 0
       ref := default

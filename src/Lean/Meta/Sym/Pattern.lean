@@ -1067,7 +1067,7 @@ abbrev DefEqM.run (unify := true) (zetaDelta := true) (mvarsNew : Array MVarId :
     (mvarsToCheckType : Array MVarId := #[]) (x : DefEqM α) : SymM α := do
   let lctx ← getLCtx
   let lctxInitialNextIndex := lctx.decls.size
-  x { zetaDelta, lctxInitialNextIndex, unify, mvarsNew, mvarsToCheckType }
+  ReaderT.run x { zetaDelta, lctxInitialNextIndex, unify, mvarsNew, mvarsToCheckType }
 
 /--
 A lightweight structural definitional equality for the symbolic simulation framework.
@@ -1207,7 +1207,7 @@ abbrev UnifyM.run (pattern : Pattern) (unify : Bool) (zetaDelta : Bool) (k : Uni
   let eAssignment := pattern.varTypes.map fun _ => none
   let uAssignment := pattern.levelParams.toArray.map fun _ => none
   let mvarCounterSaved := (← getMCtx).mvarCounter
-  k { unify, zetaDelta, pattern, mvarCounterSaved } |>.run' { eAssignment, uAssignment }
+  ReaderT.run k { unify, zetaDelta, pattern, mvarCounterSaved } |>.run' { eAssignment, uAssignment }
 
 public structure MatchUnifyResult where
   us : List Level

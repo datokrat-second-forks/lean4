@@ -580,6 +580,6 @@ eta reduction is applied only inside types. Instances are re-synthesized.
 Runs at reducible transparency.
 -/
 public def canon (e : Expr) : SymM Expr := do profileitM Exception "sym canon" (← getOptions) do
-  withReducible do Canon.canon e {}
+  withReducible do ReaderT.run (Canon.canon e) {}
 
 end Lean.Meta.Sym
