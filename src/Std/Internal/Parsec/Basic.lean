@@ -60,8 +60,6 @@ A `Parsec ι α` represents a parser that consumes input of type `ι` and, produ
 @[expose]
 newtype Parsec (ι : Type) (α : Type) := ι → Parsec.ParseResult α ι with run
 
-attribute [always_inline, inline] Parsec.mk Parsec.run
-
 /-- A parser can be applied to its input directly, unwrapping it with `Parsec.run`. -/
 instance : CoeFun (Parsec ι α) (fun _ => ι → Parsec.ParseResult α ι) := ⟨Parsec.run⟩
 

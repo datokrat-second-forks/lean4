@@ -38,8 +38,6 @@ true
 -/
 @[expose] newtype Id (α : Type u) := α with run
 
-attribute [always_inline, inline] Id.mk Id.run
-
 /--
 Interpret a value as a computation in the identity monad.
 -/

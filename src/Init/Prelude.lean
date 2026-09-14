@@ -4318,8 +4318,6 @@ ordinary actions in `m`.
 -- the binder name `r` is part of `ReaderT.run`'s type, so that `ReaderT.run (r := ...)` works
 newtype ReaderT (ρ : Type u) (m : Type u → Type v) (α : Type u) := (r : @&ρ) → m α with run
 
-attribute [always_inline, inline] ReaderT.mk ReaderT.run
-
 /--
 Interpret `ρ → m α` as an element of `ReaderT ρ m α`.
 -/
@@ -4677,8 +4675,6 @@ Instances of `EStateM.Backtrackable` provide a way to roll back some part of the
 -/
 -- the binder name `s` is part of `EStateM.run`'s type, so that `EStateM.run (s := ...)` works
 newtype EStateM (ε σ α : Type u) := (s : σ) → Result ε σ α with run
-
-attribute [always_inline, inline] EStateM.mk EStateM.run
 
 /--
 Interpret `σ → EStateM.Result ε σ α` as an element of `EStateM ε σ α`.

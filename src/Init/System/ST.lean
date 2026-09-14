@@ -33,8 +33,6 @@ It is possible to run `ST` computations in a non-monadic context using `runST`.
 -/
 @[expose] newtype ST (σ : Type) (α : Type) := Void σ → ST.Out σ α with run
 
-attribute [always_inline, inline] ST.mk ST.run
-
 namespace ST
 
 @[always_inline, inline]
@@ -77,8 +75,6 @@ A restricted version of `IO` in which mutable state and exceptions are the only 
 It is possible to run `EST` computations in a non-monadic context using `runEST`.
 -/
 @[expose] newtype EST (ε : Type) (σ : Type) (α : Type) := Void σ → EST.Out ε σ α with run
-
-attribute [always_inline, inline] EST.mk EST.run
 
 namespace EST
 

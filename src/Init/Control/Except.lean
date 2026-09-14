@@ -130,8 +130,6 @@ Adds exceptions of type `ε` to a monad `m`.
 -/
 newtype ExceptT (ε : Type u) (m : Type u → Type v) (α : Type u) := m (Except ε α) with run
 
-attribute [always_inline, inline] ExceptT.mk ExceptT.run
-
 /--
 Use a monadic action that may return an exception's value as an action in the transformed monad that
 may throw the corresponding exception.
