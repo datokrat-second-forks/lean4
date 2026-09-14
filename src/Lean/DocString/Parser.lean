@@ -28,7 +28,7 @@ partial def atLeastAux (n : Nat) (p : ParserFn) : ParserFn := fun c s => Id.run 
     return s.mkUnexpectedError "invalid 'atLeast' parser combinator application, parser did not consume anything"
   if s.stackSize > iniSz + 1 then
     s := s.mkNode nullKind iniSz
-  atLeastAux (n - 1) p c s
+  return atLeastAux (n - 1) p c s
 
 def atLeastFn (n : Nat) (p : ParserFn) : ParserFn := fun c s =>
   let iniSz  := s.stackSize
@@ -68,7 +68,7 @@ partial def atMostAux (n : Nat) (p : ParserFn) (msg : String) : ParserFn :=
         consume anything"
     if s.stackSize > iniSz + 1 then
       s := s.mkNode nullKind iniSz
-    atMostAux (n - 1) p msg c s
+    return atMostAux (n - 1) p msg c s
 
 def atMostFn (n : Nat) (p : ParserFn) (msg : String) : ParserFn := fun c s =>
   let iniSz  := s.stackSize
@@ -131,7 +131,7 @@ def unescapeStr (str : String) : String := Id.run do
         iter := iter.next h
     else
       out := out.push c
-  out
+  return out
 
 def asStringAux (quoted : Bool) (startPos : String.Pos.Raw) (transform : String → String) :
     ParserFn := fun c s =>
@@ -199,7 +199,7 @@ def onlyBlockOpeners : ParserFn := fun c s =>
       else if iter.get h == '+' then iter := iter.next h
       else if iter.get h == '-' then iter := iter.next h
       else return false
-    true
+    return true
 
   if ok then s
   else s.mkErrorAt "beginning of line or sequence of nestable block openers" s.pos
@@ -975,7 +975,7 @@ public def BlockCtxt.forDocString (text : FileMap)
           else
             break
         return pos.offset
-      else text.source.rawEndPos
+      else return text.source.rawEndPos
     { docStartPosition := text.toPosition pos, baseColumn }
 
 def bol (ctxt : BlockCtxt) : ParserFn := fun c s =>
@@ -1226,7 +1226,7 @@ mutual
       let mut out := ""
       for line in str.split '\n' do
         out := out ++ line.drop n ++ "\n"
-      out
+      return out
 
     codeFrom (col width : Nat) :=
       atomicFn (bol ctxt >> takeWhileFn (· == ' ') >> guardMinColumn col >>

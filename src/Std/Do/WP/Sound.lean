@@ -160,7 +160,7 @@ public theorem ReaderT.of_wp_run [Monad m] [LawfulMonad m] [WP m ps] [WPSound m 
 
 /-- Soundness lemma for `ReaderM.run`: `Id`-specialization of `ReaderT.of_wp_run`. -/
 public theorem ReaderM.of_wp_run_eq {α ρ : Type u} {x : α} {r : ρ} {prog : ReaderM ρ α}
-    (h : ReaderT.run prog r = x) (P : α → Prop) :
+    (h : (ReaderT.run prog r).run = x) (P : α → Prop) :
     (⊢ₛ wp⟦prog⟧ (⇓ a _ => ⌜P a⌝) r) → P x := fun hwp =>
   ReaderT.of_wp_run (m := _root_.Id) (a := x) P h hwp
 
@@ -188,16 +188,16 @@ public theorem StateT.of_wp_run [Monad m] [LawfulMonad m] [WP m ps] [WPSound m p
 
 /-- Soundness lemma for `StateM.run`: `Id`-specialization of `StateT.of_wp_run`. -/
 public theorem StateM.of_wp_run_eq {α σ : Type} {x : α × σ} {s : σ} {prog : StateM σ α}
-    (h : StateT.run prog s = x) (P : α × σ → Prop) :
+    (h : (StateT.run prog s).run = x) (P : α × σ → Prop) :
     (⊢ₛ wp⟦prog⟧ (⇓ a s' => ⌜P (a, s')⌝) s) → P x := fun hwp =>
   StateT.of_wp_run (m := _root_.Id) (p := x) P h hwp
 
 /-- Soundness lemma for `StateM.run'`: `Id`-specialization of `StateT.of_wp_run`. -/
 public theorem StateM.of_wp_run'_eq {α σ : Type} {x : α} {s : σ} {prog : StateM σ α}
-    (h : StateT.run' prog s = x) (P : α → Prop) :
+    (h : (StateT.run' prog s).run = x) (P : α → Prop) :
     (⊢ₛ wp⟦prog⟧ (⇓ a => ⌜P a⌝) s) → P x := fun hwp => by
   have hwp' : ⊢ₛ wp⟦prog⟧ (⇓ a s' => ⌜(fun p : α × σ => P p.1) (a, s')⌝) s := hwp
-  have := StateT.of_wp_run (m := _root_.Id) (prog := prog) (s := s) (p := StateT.run prog s)
+  have := StateT.of_wp_run (m := _root_.Id) (prog := prog) (s := s) (p := (StateT.run prog s).run)
     (fun p => P p.1) rfl hwp'
   exact h ▸ this
 
@@ -230,7 +230,7 @@ public theorem ExceptT.of_wp_run
 public theorem Except.of_wp_eq {ε α : Type} {x prog : Except ε α}
     (h : prog = x) (P : Except ε α → Prop) :
     (⊢ₛ wp⟦prog⟧ post⟨fun a => ⌜P (.ok a)⌝, fun e => ⌜P (.error e)⌝⟩) → P x := fun hwp =>
-  ExceptT.of_wp_run (m := _root_.Id) (prog := ExceptT.mk prog) (x := x) P h hwp
+  ExceptT.of_wp_run (m := _root_.Id) (prog := ExceptT.mk (Id.mk prog)) (x := x) P h hwp
 
 /-- Soundness lemma for `Except` without the equality hypothesis (deprecated). -/
 @[deprecated Except.of_wp_eq +typeChanged (since := "2026-01-26")]
@@ -267,6 +267,6 @@ public theorem OptionT.of_wp_run
 public theorem Option.of_wp_eq {α : Type} {x prog : Option α}
     (h : prog = x) (P : Option α → Prop) :
     (⊢ₛ wp⟦prog⟧ post⟨fun a => ⌜P (some a)⌝, fun _ => ⌜P none⌝⟩) → P x := fun hwp =>
-  OptionT.of_wp_run (m := _root_.Id) (prog := OptionT.mk prog) (x := x) P h hwp
+  OptionT.of_wp_run (m := _root_.Id) (prog := OptionT.mk (Id.mk prog)) (x := x) P h hwp
 
 end Std.Do

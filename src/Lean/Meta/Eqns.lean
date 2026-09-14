@@ -101,9 +101,9 @@ builtin_initialize registerReservedNamePredicate fun env n => Id.run do
     -- The reserved name predicate has to be precise, as `resolveExact`
     -- will believe it. So make sure that `n` is exactly the name we expect,
     -- including the private prefix.
-    n == mkEqLikeNameFor env declName suffix
+    return n == mkEqLikeNameFor env declName suffix
   else
-    false
+    return false
 
 @[expose] def GetEqnsFn := Name → MetaM (Option (Array Name))
 

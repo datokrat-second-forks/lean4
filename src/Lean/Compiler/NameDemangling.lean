@@ -97,7 +97,7 @@ def processSpecContext (comps : Array NamePart) : SpecEntry := Id.run do
     | none =>
       if isSpecIndex c then pure ()
       else parts := parts.push c
-  { name := formatNameParts parts, flags }
+  return { name := formatNameParts parts, flags }
 
 def postprocessNameParts (components : Array NamePart) : String := Id.run do
   if components.isEmpty then return ""

@@ -56,7 +56,7 @@ public def checkPropagate (s : State) (assign : Assignment) (rupHints : Array Na
 
 public def checkRup (s : State) (clause : CNF.Clause Nat) (rupHints : Array Nat) : Bool := Id.run do
   let some assignment := Assignment.ofClause clause | return true
-  checkPropagate s assignment rupHints
+  return checkPropagate s assignment rupHints
 
 set_option linter.deprecated.syntax false in
 theorem propagateHints_spec (s : State) (assign : Assignment) (hints : Array Nat) :
@@ -220,7 +220,7 @@ public theorem entails_clause_of_checkRup {s : State} {clause : CNF.Clause Nat}
   unfold checkRup at h
   match h1 : Assignment.ofClause clause with
   | some assign =>
-    simp only [h1, Id.run] at h
+    simp only [h1] at h
     exact Assignment.entails_clause_of_unsat_of_ofClause_eq_some h1 (unsat_of_checkPropagate h)
   | none =>
     apply CNF.entails_clause_of_forall_sat

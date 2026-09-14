@@ -256,7 +256,7 @@ private def mkImportText (ctx : Elab.ContextInfo) (mod : Name) :
     else if ctx.env.isExporting then
       -- Outside `meta`, add `public` only from public scope
       text := s!"public {text}"
-  text
+  return text
 
 def handleUnknownIdentifierCodeAction
     (id             : JsonRpc.RequestID)

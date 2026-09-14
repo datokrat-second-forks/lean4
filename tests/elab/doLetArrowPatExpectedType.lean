@@ -5,14 +5,14 @@ def test1 : Id (Nat × String) := do
   let ⟨x, y⟩ : Nat × String ← pure ⟨1, "hello"⟩
   return (x, y)
 
-example : test1 = (1, "hello") := rfl
+example : test1.run = (1, "hello") := rfl
 
 -- Tuple pattern with expected type
 def test2 : Id (Nat × Nat) := do
   let (a, b) : Nat × Nat ← pure (2, 3)
   return (a + b, a * b)
 
-example : test2 = (5, 6) := rfl
+example : test2.run = (5, 6) := rfl
 
 -- The expected type helps resolve what would otherwise be ambiguous
 structure Dims where

@@ -260,7 +260,7 @@ where
     unless r.includes range do return none
     for child in stx.getArgs do
       if let some result := walkAndFind child then return some result
-    outermostSeqInSubtree stx
+    return outermostSeqInSubtree stx
   outermostSeqInSubtree (stx : Syntax) : Option (Syntax × String.Pos.Raw) := Id.run do
     if let some result := seqBodyAndInsertPos? stx then return some result
     for child in stx.getArgs do

@@ -16,14 +16,14 @@ instance {n} : Add (NFloatArray n) :=
    let mut x := x.1
    for i in *...n do
      x := x.set i (x[i]'sorry+y.1[i]'sorry) sorry
-   ⟨x,sorry⟩⟩
+   return ⟨x,sorry⟩⟩
 
 instance {n} : HMul Float (NFloatArray n) (NFloatArray n) :=
  ⟨λ s x => Id.run do
    let mut x := x.1
    for i in *...n do
      x := x.set i (s*x[i]'sorry) sorry
-   ⟨x,sorry⟩⟩
+   return ⟨x,sorry⟩⟩
 
 def FloatVector : Nat → Type
   | 0 => Unit

@@ -88,7 +88,7 @@ def run (proof : Array IntAction) (x : M α) : Except String α := do
   let used := Nat.fold proof.size (init := ByteArray.emptyWithCapacity proof.size) (fun _ _ acc => acc.push 0)
   let lastUse := Array.replicate (initialId + proof.size) (-1)
   let mapped := Array.replicate proof.size 0
-  return ReaderT.run x { initialId, addEmptyId } |>.run' { proof, used, mapped, lastUse }
+  return ReaderT.run x { initialId, addEmptyId } |>.run' { proof, used, mapped, lastUse } |>.run
 
 @[inline]
 def getInitialId : M Nat := do

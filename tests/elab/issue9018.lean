@@ -81,9 +81,8 @@ structure Foo3 where
   raw : BaseFoo Box Foo3
 
 /--
-error: maximum recursion depth has been reached
-use `set_option maxRecDepth <num>` to increase limit
-use `set_option diagnostics true` to get diagnostic information
+error: failed to generate `SizeOf` instance for `Foo4`:
+  failed to generate sizeOf theorem for Foo4.mk, (use `set_option genSizeOfSpec false` to disable theorem generation)
 -/
 #guard_msgs(pass trace, all) in
 structure Foo4 where

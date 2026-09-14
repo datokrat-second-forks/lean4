@@ -328,7 +328,7 @@ instead of pushing new samples.
 -/
 private partial def collideThreads (thread : ThreadWithCollideMaps) (add : Thread) :
     ThreadWithCollideMaps :=
-  StateT.run collideSamples thread |>.2
+  StateT.run collideSamples thread |>.run.2
 where
   collideSamples : StateM ThreadWithCollideMaps Unit := do
     for oldSampleIdx in *...add.samples.length do

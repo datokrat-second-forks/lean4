@@ -703,7 +703,7 @@ where
       if let .const declName .. := d.getAppFn then
         if hasOutParams env declName then
           return true
-    hasLocalInstanceWithOutParams env b
+    return hasLocalInstanceWithOutParams env b
 
   isOutParamOfLocalInstance (x : Expr) (type : Expr) : MetaM Bool := do
     let .forallE _ d b bi := type | return false

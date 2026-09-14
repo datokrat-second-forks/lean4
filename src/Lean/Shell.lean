@@ -124,7 +124,7 @@ def versionHeader : String := Id.run do
     ver := s!"{ver}, {Platform.target}"
   if githash ≠ "" then
     ver := s!"{ver}, commit {githash}"
-  s!"Lean (version {ver}, {Internal.getBuildType ()})"
+  return s!"Lean (version {ver}, {Internal.getBuildType ()})"
 
 /--
 A string containing the list of additional features Lean was built with.

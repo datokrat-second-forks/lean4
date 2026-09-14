@@ -82,8 +82,8 @@ private def detectOffsets (pat : Expr) : MetaM Expr := do
   Core.transform pat (pre := pre)
 
 def isOffsetPattern? (pat : Expr) : Option (Expr × Nat) := Id.run do
-  let_expr Grind.offset pat k := pat | none
-  let .lit (.natVal k) := k | none
+  let_expr Grind.offset pat k := pat | return none
+  let .lit (.natVal k) := k | return none
   return some (pat, k)
 
 /--
@@ -985,7 +985,7 @@ private def addNewPattern (p : Expr) : CollectorM Unit := do
 
 /-- Collect the pattern (i.e., de Bruijn) variables in the given pattern. -/
 private def collectPatternBVars (p : Expr) : List Nat :=
-  go p |>.run [] |>.2
+  go p |>.run [] |>.run.2
 where
   go (e : Expr) : StateM (List Nat) Unit := do
     match e with

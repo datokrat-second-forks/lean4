@@ -39,10 +39,10 @@ section Utils
     -- TODO: the following code is assuming all characters are ASCII
     for i in [2:string.length] do
       result := result.push <| f (String.Pos.Raw.get string ⟨i - 2⟩) (String.Pos.Raw.get string ⟨i - 1⟩) (String.Pos.Raw.get string ⟨i⟩)
-    result.push <| f (String.Pos.Raw.get string ⟨string.length - 2⟩) (String.Pos.Raw.get string ⟨string.length - 1⟩) none
+    return result.push <| f (String.Pos.Raw.get string ⟨string.length - 2⟩) (String.Pos.Raw.get string ⟨string.length - 1⟩) none
 
 private partial def containsInOrderLower (a b : String) : Bool := Id.run do
-  go ⟨0⟩ ⟨0⟩
+  return go ⟨0⟩ ⟨0⟩
 where
   go (aPos bPos : String.Pos.Raw) : Bool :=
     if ha : aPos.atEnd a then
@@ -277,7 +277,7 @@ def fuzzyMatchScore? (pattern word : String) : Option Float := Id.run do
     return none
 
   let some score := fuzzyMatchCore pattern word (stringInfo pattern) (stringInfo word)
-    | none
+    | return none
   let mut score := score
 
   /- Bonus if every character is matched. -/
