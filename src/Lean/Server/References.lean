@@ -167,7 +167,7 @@ where
 
 /-- Checks whether any of the ranges in `self.definition?` or `self.usages` contains `pos`. -/
 def contains (self : RefInfo) (pos : Lsp.Position) (includeStop := false) : Bool := Id.run do
-  (self.findReferenceLocation? pos includeStop).isSome
+  return (self.findReferenceLocation? pos includeStop).isSome
 
 end Lean.Lsp.RefInfo
 
@@ -186,7 +186,7 @@ def findAt
   for (ident, info) in self do
     if info.contains pos includeStop then
       result := result.push ident
-  result
+  return result
 
 /-- Finds the first range in `self` that contains `pos`. -/
 def findRange? (self : ModuleRefs) (pos : Lsp.Position) (includeStop := false) : Option Range := do
@@ -302,7 +302,7 @@ partial def combineIdents (trees : Array InfoTree) (refs : Array Reference) : Ar
       refs' := refs'.push { ref with ident := findCanonicalRepresentative idMap id, aliases := #[id] }
     else if !idMap.contains id then
       refs' := refs'.push ref
-  refs'
+  return refs'
 where
   useConstRepresentatives (idMap : Std.HashMap RefIdent RefIdent)
       : Std.HashMap RefIdent RefIdent := Id.run do
@@ -398,7 +398,7 @@ def findModuleRefs (text : FileMap) (trees : Array InfoTree) (localVars : Bool :
     refs := refs.filter fun
       | { ident := RefIdent.fvar .., .. } => false
       | _ => true
-  refs.foldl (init := Std.TreeMap.empty) fun m ref => m.addRef ref
+  return refs.foldl (init := Std.TreeMap.empty) fun m ref => m.addRef ref
 
 /-! # Collecting and maintaining reference info from different sources -/
 
@@ -743,7 +743,7 @@ def allRefsFor
 def findAt (self : References) (module : Name) (pos : Lsp.Position) (includeStop := false) : Array RefIdent := Id.run do
   if let some (_, refs, _) := self.getModuleRefs? module then
     return refs.findAt pos includeStop
-  #[]
+  return #[]
 
 /-- Yields the first reference in `module` at `pos`. -/
 def findRange? (self : References) (module : Name) (pos : Lsp.Position) (includeStop := false) : Option Range := do

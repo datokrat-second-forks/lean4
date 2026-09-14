@@ -192,7 +192,7 @@ Compute the initial new arms. This will just set up a map from all arms of
 def initialNewArms (cs : Cases .pure) : Std.HashMap Decision (List (CodeDecl .pure)) := Id.run do
   let mut map := Std.HashMap.emptyWithCapacity (cs.alts.size + 1)
   map := map.insert .dont []
-  cs.alts.foldr (init := map) fun val acc => acc.insert (.ofAlt val) []
+  return cs.alts.foldr (init := map) fun val acc => acc.insert (.ofAlt val) []
 
 /--
 Will:

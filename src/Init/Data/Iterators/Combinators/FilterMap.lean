@@ -83,7 +83,7 @@ returned `Option` value.
 @[always_inline, inline, expose]
 def Iter.filterMapWithPostcondition {α β γ : Type w} [Iterator α Id β] {m : Type w → Type w'}
     [Monad m] (f : β → PostconditionT m (Option γ)) (it : Iter (α := α) β) :=
-  (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.filterMapWithPostcondition f : IterM m γ)
+  (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.filterMapWithPostcondition f : IterM m γ)
 
 /--
 *Note: This is a very general combinator that requires an advanced understanding of monads,
@@ -128,7 +128,7 @@ For each value emitted by the base iterator `it`, this combinator calls `f`.
 @[always_inline, inline, expose]
 def Iter.filterWithPostcondition {α β : Type w} [Iterator α Id β] {m : Type w → Type w'}
     [Monad m] (f : β → PostconditionT m (ULift Bool)) (it : Iter (α := α) β) :=
-  (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.filterWithPostcondition f : IterM m β)
+  (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.filterWithPostcondition f : IterM m β)
 
 /--
 *Note: This is a very general combinator that requires an advanced understanding of monads,
@@ -172,7 +172,7 @@ For each value emitted by the base iterator `it`, this combinator calls `f`.
 @[always_inline, inline, expose]
 def Iter.mapWithPostcondition {α β γ : Type w} [Iterator α Id β] {m : Type w → Type w'}
     [Monad m] (f : β → PostconditionT m γ) (it : Iter (α := α) β) :=
-  (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.mapWithPostcondition f : IterM m γ)
+  (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.mapWithPostcondition f : IterM m γ)
 
 /--
 If `it` is an iterator, then `it.filterMapM f` is another iterator that applies a monadic
@@ -209,7 +209,7 @@ returned `Option` value.
 @[always_inline, inline, expose]
 def Iter.filterMapM {α β γ : Type w} [Iterator α Id β] {m : Type w → Type w'}
     [Monad m] [MonadAttach m] (f : β → m (Option γ)) (it : Iter (α := α) β) :=
-  (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.filterMapM f : IterM m γ)
+  (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.filterMapM f : IterM m γ)
 
 /--
 If `it` is an iterator, then `it.filterM f` is another iterator that applies a monadic
@@ -243,7 +243,7 @@ For each value emitted by the base iterator `it`, this combinator calls `f`.
 @[always_inline, inline, expose]
 def Iter.filterM {α β : Type w} [Iterator α Id β] {m : Type w → Type w'}
     [Monad m] [MonadAttach m] (f : β → m (ULift Bool)) (it : Iter (α := α) β) :=
-  (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.filterM f : IterM m β)
+  (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.filterM f : IterM m β)
 
 /--
 If `it` is an iterator, then `it.mapM f` is another iterator that applies a monadic
@@ -280,7 +280,7 @@ For each value emitted by the base iterator `it`, this combinator calls `f`.
 @[always_inline, inline, expose]
 def Iter.mapM {α β γ : Type w} [Iterator α Id β] {m : Type w → Type w'}
     [Monad m] [MonadAttach m] (f : β → m γ) (it : Iter (α := α) β) :=
-  (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.mapM f : IterM m γ)
+  (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.mapM f : IterM m γ)
 
 @[cbv_opaque, always_inline, inline, inherit_doc IterM.filterMap, expose]
 def Iter.filterMap {α : Type w} {β : Type w} {γ : Type w} [Iterator α Id β]

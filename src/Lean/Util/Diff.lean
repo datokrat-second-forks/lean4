@@ -162,7 +162,7 @@ partial def lcs (left right : Subarray α) : Array α := Id.run do
   let lefts := left.split ⟨li.val, by cases li; omega⟩
   let rights := right.split ⟨ri.val, by cases ri; omega⟩
 
-  pref ++ lcs lefts.1 rights.1 ++ #[v] ++ lcs (lefts.2.drop 1) (rights.2.drop 1) ++ suff
+  return pref ++ lcs lefts.1 rights.1 ++ #[v] ++ lcs (lefts.2.drop 1) (rights.2.drop 1) ++ suff
 
 /--
 Computes an edit script to transform `left` into `right`.
@@ -195,7 +195,7 @@ def diff [Inhabited α] (original edited : Array α) : Array (Action × α) :=
     while h : j < edited.size do
       out := out.push <| (.insert, edited[j])
       j := j.succ
-    out
+    return out
 
 /-- Shows a line-by-line edit script with markers for added and removed lines. -/
 def linesToString [ToString α] (lines : Array (Action × α)) : String := Id.run do
@@ -206,4 +206,4 @@ def linesToString [ToString α] (lines : Array (Action × α)) : String := Id.ru
       out := out ++ s!"{act.linePrefix}\n"
     else
       out := out ++ s!"{act.linePrefix} {lineStr}\n"
-  out
+  return out

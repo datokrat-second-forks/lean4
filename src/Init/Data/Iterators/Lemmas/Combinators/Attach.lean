@@ -30,9 +30,9 @@ theorem Iter.unattach_toList_attachWith [Iterator α Id β]
     {it : Iter (α := α) β} {hP}
     [Finite α Id] :
     (it.attachWith P hP).toList.unattach = it.toList := by
-  simp [Iter.unattach_eq_toIter_unattach_toIterM,
-    ← Id.run_map (f := List.unattach), IterM.map_unattach_toList_attachWith,
+  rw [Iter.unattach_eq_toIter_unattach_toIterM, Iter.toList_eq_toList_toIterM,
     Iter.toList_eq_toList_toIterM]
+  exact congrArg Id.run IterM.map_unattach_toList_attachWith
 
 @[cbv_eval, simp]
 theorem Iter.toList_attachWith [Iterator α Id β]

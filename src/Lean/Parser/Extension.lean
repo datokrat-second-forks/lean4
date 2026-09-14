@@ -747,7 +747,7 @@ private def resolveParserNameCore (env : Environment) (opts : Options) (currName
   if isParserCategory env erased then
     return [.category erased]
 
-  let resolved ← ResolveName.resolveGlobalName env opts currNamespace openDecls val |>.filterMap fun
+  let resolved := ResolveName.resolveGlobalName env opts currNamespace openDecls val |>.filterMap fun
     | (name, []) => (isParser name).map fun isDescr => .parser name isDescr
     | _ => none
   unless resolved.isEmpty do
@@ -773,27 +773,27 @@ def parserOfStackFn (offset : Nat) : ParserFn := fun ctx s => Id.run do
   if stack.size < offset + 1 then
     return s.mkUnexpectedError ("failed to determine parser using syntax stack, stack is too small")
   let parserName@(.ident ..) := stack.get! (stack.size - offset - 1)
-    | s.mkUnexpectedError ("failed to determine parser using syntax stack, the specified element on the stack is not an identifier")
+    | return s.mkUnexpectedError ("failed to determine parser using syntax stack, the specified element on the stack is not an identifier")
   let iniSz := s.stackSize
   let s ← match ctx.resolveParserName ⟨parserName⟩ (unsetExporting := true) with
     | [.category cat] =>
-      categoryParserFn cat ctx s
+      pure <| categoryParserFn cat ctx s
     | [.parser parserName _] =>
-      adaptUncacheableContextFn (fun ctx =>
+      pure <| adaptUncacheableContextFn (fun ctx =>
         -- static quotations such as `(e) do not use the interpreter unless the above option is set,
         -- so for consistency neither should dynamic quotations using this function
         { ctx with options := ctx.options.set `interpreter.prefer_native (!internal.parseQuotWithCurrentStage.get ctx.options) })
         (evalParserConst parserName) ctx s
     | [.alias alias] =>
       match alias with
-      | .const p => p.fn ctx s
+      | .const p => pure <| p.fn ctx s
       | _ =>
         return s.mkUnexpectedError s!"parser alias {parserName}, must not take parameters"
     | _::_::_ => return s.mkUnexpectedError s!"ambiguous parser name {parserName}"
     | [] => return s.mkUnexpectedError s!"unknown parser {parserName}"
   if !s.hasError && s.stackSize != iniSz + 1 then
     return s.mkUnexpectedError "expected parser to return exactly one syntax object"
-  s
+  return s
 
 def parserOfStack (offset : Nat) (prec : Nat := 0) : Parser where
   fn := adaptCacheableContextFn ({ · with prec }) (parserOfStackFn offset)

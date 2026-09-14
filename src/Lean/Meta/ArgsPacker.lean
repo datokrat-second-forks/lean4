@@ -124,7 +124,7 @@ private def mkTupleElems (t : Expr) (arity : Nat) : Array Expr := Id.run do
   for _ in *...(arity - 1 : Nat) do
     result := result.push (mkProj ``PSigma 0 t)
     t := mkProj ``PSigma 1 t
-  result.push t
+  return result.push t
 
 /--
 Given a type `t` of the form `(x : A) → (y : B[x]) → … → (z : D[x,y]) → R[x,y,z]`

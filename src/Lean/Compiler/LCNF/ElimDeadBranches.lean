@@ -69,8 +69,8 @@ instance : Repr Value where
   reprPrec v _ := Value.toFormat v
 
 def inductValOfCtor (ctorName : Name) (env : Environment) : InductiveVal := Id.run do
-  let some (.ctorInfo info) ← env.find? ctorName | unreachable!
-  let some (.inductInfo info) ← env.find? info.induct | unreachable!
+  let some (.ctorInfo info) := env.find? ctorName | unreachable!
+  let some (.inductInfo info) := env.find? info.induct | unreachable!
   return info
 
 mutual
@@ -121,20 +121,20 @@ where
     if vs.all eligible then
       let .ctor ctorName .. := vs.head! | unreachable!
       if inductHasNumCtors ctorName env vs.length then
-        top
+        return top
       else
-        choice vs
+        return choice vs
     else
-      choice vs
+      return choice vs
 
   inductHasNumCtors (ctorName : Name) (env : Environment) (n : Nat) : Bool := Id.run do
     let induct := inductValOfCtor ctorName env
-    n == induct.numCtors
+    return n == induct.numCtors
 
   @[inline]
   eligible (value : Value) : Bool := Id.run do
     let .ctor _ args := value | return false
-    args.all (· == .top)
+    return args.all (· == .top)
 
 end
 

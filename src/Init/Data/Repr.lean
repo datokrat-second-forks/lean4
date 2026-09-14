@@ -232,7 +232,7 @@ protected def _root_.USize.repr (n : USize) : String :=
   String.ofList (toDigits 10 n.toNat)
 
 /-- We statically allocate and memoize reprs for small natural numbers. -/
-private def reprArray : Array String := Id.run do
+private def reprArray : Array String :=
   List.range 128 |>.map (·.toUSize.repr) |> Array.mk
 
 def reprFast (n : Nat) : String :=

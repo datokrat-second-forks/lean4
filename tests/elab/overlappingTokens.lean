@@ -33,7 +33,7 @@ by their start position.
 
 partial def permutations (xs : Array α) :=
   if h : xs.size > 0 then
-    go h ⟨xs.size, by grind⟩ xs.toVector |>.run #[] |>.2
+    go h ⟨xs.size, by grind⟩ xs.toVector |>.run #[] |>.run.2
   else #[]
 where
   go (h : xs.size > 0) (k : Fin (xs.size + 1)) (ys : Vector α xs.size) : StateM (Array (Array α)) Unit := do

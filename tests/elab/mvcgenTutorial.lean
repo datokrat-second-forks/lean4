@@ -58,8 +58,8 @@ def mkFreshN (n : Nat) : StateM Supply (List Nat) := do
 
 namespace Noncompositional
 
-theorem mkFreshN_correct (n : Nat) : ((mkFreshN n).run' s).Nodup := by
-  generalize h : (mkFreshN n).run' s = x
+theorem mkFreshN_correct (n : Nat) : ((mkFreshN n).run' s).run.Nodup := by
+  generalize h : ((mkFreshN n).run' s).run = x
   apply StateM.of_wp_run'_eq h
   mvcgen [mkFreshN, mkFresh]
   case inv1 => exact ⇓⟨xs, acc⟩ state => ⌜(∀ x ∈ acc, x < state.counter) ∧ acc.toList.Nodup⌝
@@ -88,7 +88,7 @@ theorem mkFreshN_spec (n : Nat) : ⦃⌜True⌝⦄ mkFreshN n ⦃⇓ r => ⌜r.N
   case inv1 => exact ⇓⟨xs, acc⟩ state => ⌜(∀ x ∈ acc, x < state.counter) ∧ acc.toList.Nodup⌝
   all_goals mleave; grind
 
-theorem mkFreshN_correct (n : Nat) : ((mkFreshN n).run' s).Nodup :=
+theorem mkFreshN_correct (n : Nat) : ((mkFreshN n).run' s).run.Nodup :=
   mkFreshN_spec n s True.intro
 
 end Compositional
@@ -134,7 +134,7 @@ theorem mkFreshN_spec (n : Nat) : ⦃⌜True⌝⦄ mkFreshN n ⦃⇓ r => ⌜r.N
   case inv1 => exact ⇓⟨xs, acc⟩ _ state => ⌜(∀ n ∈ acc, n < state.counter) ∧ acc.toList.Nodup⌝
   all_goals mleave; grind
 
-theorem mkFreshN_correct (n : Nat) : (((StateT.run' (mkFreshN n) b).run' c).run' s).Nodup :=
+theorem mkFreshN_correct (n : Nat) : (((StateT.run' (mkFreshN n) b).run' c).run' s).run.Nodup :=
   mkFreshN_spec n _ _ _ True.intro
 
 end FreshStack

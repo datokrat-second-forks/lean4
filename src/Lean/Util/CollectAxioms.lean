@@ -21,7 +21,7 @@ structure State where
 abbrev M := ReaderT Environment $ StateM State
 
 def runM (env : Environment) (x : M α) : α :=
-  x.run env |>.run' {}
+  x.run env |>.run' {} |>.run
 
 private def insertArray (s : NameSet) (axs : Array Name) : NameSet :=
   axs.foldl (init := s) fun acc ax => acc.insert ax

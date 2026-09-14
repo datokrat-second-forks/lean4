@@ -18,7 +18,7 @@ def f4 (b : Bool) (n : Nat) (v : Vector' Nat n) : Vector' Nat (n+1) := Id.run <|
 let mut v := v
 if b then
   v := Vector'.cons 1 v
-Vector'.cons 1 v
+return Vector'.cons 1 v
 def f5 (y : Nat) (xs : List Nat) : List Bool := Id.run <| do
 let mut y := y
 for x in xs do

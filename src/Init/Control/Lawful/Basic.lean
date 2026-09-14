@@ -258,7 +258,7 @@ theorem LawfulMonad.mk' (m : Type u → Type v) [Monad m]
 
 namespace Id
 
-@[ext] theorem ext {x y : Id α} (h : x.run = y.run) : x = y := h
+@[ext] theorem ext {x y : Id α} (h : x.run = y.run) : x = y := congrArg Id.mk h
 
 instance : LawfulMonad Id := by
   refine LawfulMonad.mk' _ ?_ ?_ ?_ <;> intros <;> rfl

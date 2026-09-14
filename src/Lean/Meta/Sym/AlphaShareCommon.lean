@@ -33,25 +33,25 @@ private def alphaHash (e : Expr) : UInt64 :=
 private def alphaEq (e₁ e₂ : Expr) : Bool := Id.run do
   match e₁ with
   | .bvar .. | .mvar .. | .const .. | .fvar .. | .sort .. | .lit .. =>
-    e₁ == e₂
+    return e₁ == e₂
   | .app f₁ a₁ =>
-    let .app f₂ a₂ := e₂ | false
-    isSameExpr f₁ f₂ && isSameExpr a₁ a₂
+    let .app f₂ a₂ := e₂ | return false
+    return isSameExpr f₁ f₂ && isSameExpr a₁ a₂
   | .letE _ _ v₁ b₁ nondep₁ =>
-    let .letE _ _ v₂ b₂ nondep₂ := e₂ | false
-    nondep₁ == nondep₂ && isSameExpr v₁ v₂ && isSameExpr b₁ b₂
+    let .letE _ _ v₂ b₂ nondep₂ := e₂ | return false
+    return nondep₁ == nondep₂ && isSameExpr v₁ v₂ && isSameExpr b₁ b₂
   | .forallE _ d₁ b₁ _ =>
-    let .forallE _ d₂ b₂ _ := e₂ | false
-    isSameExpr d₁ d₂ && isSameExpr b₁ b₂
+    let .forallE _ d₂ b₂ _ := e₂ | return false
+    return isSameExpr d₁ d₂ && isSameExpr b₁ b₂
   | .lam _ d₁ b₁ _ =>
-    let .lam _ d₂ b₂ _ := e₂ | false
-    isSameExpr d₁ d₂ && isSameExpr b₁ b₂
+    let .lam _ d₂ b₂ _ := e₂ | return false
+    return isSameExpr d₁ d₂ && isSameExpr b₁ b₂
   | .mdata d₁ b₁ =>
-    let .mdata d₂ b₂ := e₂ | false
+    let .mdata d₂ b₂ := e₂ | return false
     return isSameExpr b₁ b₂ && d₁ == d₂
   | .proj n₁ i₁ b₁ =>
-    let .proj n₂ i₂ b₂ := e₂ | false
-    n₁ == n₂ && i₁ == i₂ && isSameExpr b₁ b₂
+    let .proj n₂ i₂ b₂ := e₂ | return false
+    return n₁ == n₂ && i₁ == i₂ && isSameExpr b₁ b₂
 
 /--
 Returns `true` if `declName` is the name of a grind helper declaration that

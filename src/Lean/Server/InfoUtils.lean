@@ -483,7 +483,7 @@ where
         -- ignore nested infos of the same tactic, e.g. from expansion
         if tailPos' > hoverPos && (pos', tailPos') != (pos, tailPos) then
           return true
-      cs.any (hasNestedTactic pos tailPos)
+      return cs.any (hasNestedTactic pos tailPos)
     | InfoTree.node (Info.ofMacroExpansionInfo _) cs =>
       cs.any (hasNestedTactic pos tailPos)
     | _ => false
@@ -496,9 +496,9 @@ partial def InfoTree.termGoalAt? (t : InfoTree) (hoverPos : String.Pos.Raw) : Op
   -- In the case `f a b`, where `f` is an identifier, the term goal at `f` should be the goal for the full application `f a b`.
   let filter ctx info children results :=
     if info.stx.isOfKind ``Parser.Term.app && info.stx[0].isIdent then
-      results.filter (·.2.info.stx != info.stx[0])
+      pure (results.filter (·.2.info.stx != info.stx[0]))
     else
-      results
-  hoverableInfoAtM? (m := Id) t hoverPos (includeStop := true) (filter := filter)
+      pure results
+  hoverableInfoAtM? (m := Id) t hoverPos (includeStop := true) (filter := filter) |>.run
 
 end Lean.Elab

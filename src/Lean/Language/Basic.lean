@@ -266,7 +266,7 @@ partial def SnapshotTree.transform (t : SnapshotTree) : ToSnapshotTreeM Snapshot
     return t
   let element ← Snapshot.transform t.element
   let trans ← read
-  let children := t.children.map (·.map (sync := true) (·.transform.run trans))
+  let children := t.children.map (·.map (sync := true) (·.transform.run trans |>.run))
   return { element, children }
 
 /--
@@ -284,7 +284,7 @@ Converts a typed snapshot to a `SnapshotTree` using the default (identity) trans
 `ToSnapshotTree`.
 -/
 def toSnapshotTree [ToSnapshotTree α] (a : α) : SnapshotTree :=
-  toSnapshotTreeM a |>.run default
+  toSnapshotTreeM a |>.run default |>.run
 
 /-- A typed snapshot paired with a `SnapshotTreeTransform`. -/
 structure TransformedSnap (α : Type) where
@@ -316,7 +316,7 @@ the recursive type is not yet available and `f` is the local recursive function.
 def SnapshotTask.transformWith (t : SnapshotTask α)
     (f : α → ToSnapshotTreeM SnapshotTree) :
     ToSnapshotTreeM (SnapshotTask SnapshotTree) :=
-  return t.map (sync := true) (f · |>.run (← read))
+  return t.map (sync := true) (f · |>.run (← read) |>.run)
 
 /-- Lifts a typed snapshot inside a task to a `SnapshotTree` task via `ToSnapshotTree`. -/
 def SnapshotTask.transform [ToSnapshotTree α] (t : SnapshotTask α) :

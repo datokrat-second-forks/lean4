@@ -44,7 +44,7 @@ theorem foldlM_toList.aux [Monad m]
 
 @[simp, grind =] theorem foldl_toList (f : β → α → β) {init : β} {xs : Array α} :
     xs.toList.foldl f init = xs.foldl f init :=
-  List.foldl_eq_foldlM .. ▸ foldlM_toList ..
+  List.foldl_eq_foldlM .. ▸ congrArg Id.run foldlM_toList
 
 theorem foldrM_eq_reverse_foldlM_toList.aux [Monad m]
     {f : α → β → m β} {xs : Array α} {init : β} {i} (h) :
@@ -71,7 +71,7 @@ theorem foldrM_eq_reverse_foldlM_toList [Monad m] {f : α → β → m β} {init
 
 @[simp, grind =] theorem foldr_toList (f : α → β → β) {init : β} {xs : Array α} :
     xs.toList.foldr f init = xs.foldr f init :=
-  List.foldr_eq_foldrM .. ▸ foldrM_toList ..
+  List.foldr_eq_foldrM .. ▸ congrArg Id.run foldrM_toList
 
 @[simp, grind =] theorem toList_push {xs : Array α} {x : α} : (xs.push x).toList = xs.toList ++ [x] := by
   rcases xs with ⟨xs⟩

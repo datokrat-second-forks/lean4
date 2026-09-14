@@ -57,10 +57,7 @@ final state.
 def StateM (σ α : Type u) : Type u := StateT σ Id α
 
 instance {σ α} [Subsingleton σ] [Subsingleton α] : Subsingleton (StateM σ α) where
-  allEq x y := congrArg StateT.mk <| funext fun s => by
-    match x.run s, y.run s with
-    | (a₁, s₁), (a₂, s₂) =>
-      rw [Subsingleton.elim a₁ a₂, Subsingleton.elim s₁ s₂]
+  allEq _ _ := congrArg StateT.mk <| funext fun _ => congrArg Id.mk <| Subsingleton.elim _ _
 
 namespace StateT
 section

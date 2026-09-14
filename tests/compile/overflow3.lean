@@ -16,5 +16,5 @@ def OverflowLoop
   return out
 
 def main : IO Unit :=
-  let x := (StateT.run (@OverflowLoop Id _ longArray) 0).fst
+  let x := (StateT.run (@OverflowLoop Id _ longArray) 0).run.fst
   IO.println x

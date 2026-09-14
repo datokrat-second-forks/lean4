@@ -23,7 +23,7 @@ open Lean.IO
 private partial def mkCmdSnaps (initSnap : Language.Lean.InitialSnapshot) :
     AsyncList IO.Error Snapshot := Id.run do
   let some headerParsed := initSnap.result? | return .nil
-  .delayed <| headerParsed.processedSnap.task.asServerTask.bindCheap fun headerProcessed => Id.run do
+  return .delayed <| headerParsed.processedSnap.task.asServerTask.bindCheap fun headerProcessed => Id.run do
     let some headerSuccess := headerProcessed.result? | return .pure <| .ok .nil
     return .pure <| .ok <| .cons {
       stx := initSnap.stx

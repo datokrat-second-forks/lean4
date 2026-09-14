@@ -364,7 +364,7 @@ theorem findM?_pure {m} [Monad m] [LawfulMonad m] (p : α → Bool) (as : List �
 @[simp, grind =]
 theorem idRun_findM? (p : α → Id Bool) (as : List α) :
     (findM? p as).run = as.find? (p · |>.run) :=
-  findM?_pure _ _
+  congrArg Id.run (findM?_pure _ _)
 
 /--
 Returns the first non-`none` result of applying the monadic function `f` to each element of the
@@ -426,7 +426,7 @@ theorem findSomeM?_pure [Monad m] [LawfulMonad m] {f : α → Option β} {as : L
 @[simp, grind =]
 theorem idRun_findSomeM? (f : α → Id (Option β)) (as : List α) :
     (findSomeM? f as).run = as.findSome? (f · |>.run) :=
-  findSomeM?_pure
+  congrArg Id.run findSomeM?_pure
 
 theorem findSome?_eq_findSomeM? {f : α → Option β} {as : List α} :
     as.findSome? f = (as.findSomeM? (pure (f := Id) <| f ·)).run := by

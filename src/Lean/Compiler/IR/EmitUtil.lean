@@ -67,7 +67,7 @@ def collectDeclLoop (decls : List Decl) : M Unit := do
 end CollectUsedDecls
 
 def collectUsedDecls (env : Environment) (decls : List Decl) : Array Name :=
-  ((CollectUsedDecls.collectDeclLoop decls).run env).run {} |>.snd.order
+  ((CollectUsedDecls.collectDeclLoop decls).run env).run {} |>.run.snd.order
 
 abbrev VarTypeMap  := Std.HashMap VarId IRType
 abbrev JPParamsMap := Std.HashMap JoinPointId (Array Param)

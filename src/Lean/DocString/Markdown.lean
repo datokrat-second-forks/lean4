@@ -273,7 +273,7 @@ def codeBlockLines (str : String) : Array String := Id.run do
   let body := splitNewlines str
   -- Drop a trailing empty so the closing fence isn't preceded by a blank line.
   let body := if body.size > 0 && body.back!.isEmpty then body.pop else body
-  #[fence] ++ body ++ #[fence]
+  return #[fence] ++ body ++ #[fence]
 
 /--
 Splits off the leading run of whitespace from an inline tree, returning the whitespace as a plain

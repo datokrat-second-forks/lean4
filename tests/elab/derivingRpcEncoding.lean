@@ -5,7 +5,7 @@ open Lean Server
 abbrev M := StateM RpcObjectStore
 
 def M.run (x : ExceptT String M α) : Except String α :=
-  x.run.run' {}
+  x.run.run' {} |>.run
 
 def test (α : Type) [RpcEncodable α] (a : α) := M.run do
   let json ← rpcEncode a

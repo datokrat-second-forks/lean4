@@ -182,7 +182,7 @@ def isHBinOp (e : Expr) : Bool := Id.run do
     `HAppend.hAppend, `HOrElse.hOrElse, `HAndThen.hAndThen,
     `HAdd.hAdd, `HSub.hSub, `HMul.hMul, `HDiv.hDiv, `HMod.hMod,
     `HShiftLeft.hShiftLeft, `HShiftRight]
-  ops.any fun op => op == f.constName!
+  return ops.any fun op => op == f.constName!
 
 def replaceLPsWithVars (e : Expr) : MetaM Expr := do
   if !e.hasLevelParam then return e

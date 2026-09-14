@@ -50,9 +50,9 @@ def CompletionItem.resolve
   if item.documentation?.isNone then
     let docStringPrefix? := Id.run do
       let .const declName := id
-        | none
+        | return none
       let some param := Linter.deprecatedAttr.getParam? env declName
-        | none
+        | return none
       let docstringPrefix :=
         if let some text := param.text? then
           text
@@ -60,7 +60,7 @@ def CompletionItem.resolve
           s!"`{declName}` has been deprecated, use `{newName}` instead."
         else
           s!"`{declName}` has been deprecated."
-      some docstringPrefix
+      return some docstringPrefix
     let docString? ← do
       let .const declName := id
         | pure none

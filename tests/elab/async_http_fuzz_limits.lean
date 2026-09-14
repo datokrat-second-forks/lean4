@@ -65,14 +65,14 @@ def randomTokenBytes (seed : Nat) (len : Nat) : ByteArray × Nat := Id.run do
     let (r, s') := randBelow s 36; s := s'
     let code := if r < 26 then 97 + r else 48 + (r - 26)
     out := out.push (UInt8.ofNat code)
-  (out, s)
+  return (out, s)
 
 def randomAsciiBytes (seed : Nat) (len : Nat) : ByteArray × Nat := Id.run do
   let mut s := seed; let mut out := ByteArray.empty
   for _ in [0:len] do
     let (r, s') := randBelow s 26; s := s'
     out := out.push (UInt8.ofNat (97 + r))
-  (out, s)
+  return (out, s)
 
 private def toHexAux : Nat → Nat → String → String
   | 0, _, acc => acc

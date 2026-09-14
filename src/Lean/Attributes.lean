@@ -276,7 +276,7 @@ def registerParametricAttributeExt (ref : Name) (preserveOrder : Bool := false)
         let r := m.foldl (fun a n p => a.push (n, p)) #[]
         r.qsort (fun a b => Name.quickLt a.1 b.1)
       let exported := all.filter (fun ⟨n, a⟩ => filterExport env n a)
-      { exported, server := exported, «private» := all }
+      return { exported, server := exported, «private» := all }
     statsFn         := fun (_, m) => "parametric attribute" ++ Format.line ++ "number of local entries: " ++ format m.size
   }
 

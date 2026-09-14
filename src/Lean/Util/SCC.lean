@@ -108,7 +108,7 @@ def scc (vertices : List α) (successorsOf : α → List α) : List (List α) :=
   let main : M α Unit := vertices.forM fun a => do
     let aData ← getDataOf a
     if aData.index?.isNone then sccAux successorsOf a
-  let (_, s) := main.run {}
+  let (_, s) := (main.run {}).run
   s.sccs.reverse
 
 end Lean.SCC

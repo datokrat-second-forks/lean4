@@ -842,7 +842,7 @@ def truncateToHeader (snap : InitialSnapshot) : InitialSnapshot := Id.run do
   let newProcessed : HeaderProcessedSnapshot := { processed with
     result? := some { hps with
       firstCmdSnap := .finished none termCmd } }
-  { snap with
+  return { snap with
     result? := some { parsed with
       processedSnap := .finished none newProcessed } }
 

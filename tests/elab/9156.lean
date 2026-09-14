@@ -11,5 +11,5 @@ def groupAssignmentsBySymVars (assignments : List (Std.HashMap Nat BVExpr.Packed
   for (const, _) in ex.toArray do
     let constVar : BVExpr w := BVExpr.var const
     let _ := res.getD constVar []
-  res
+  return res
 

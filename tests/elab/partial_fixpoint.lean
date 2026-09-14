@@ -363,10 +363,10 @@ error: Could not prove 'Tree.rev'''' to be monotone in its recursive calls:
   Cannot eliminate recursive call `Tree.rev''' my_tree.cs.toArray` enclosed in
     ts.reverse.mapFinIdxM fun my_idx my_tree x =>
       id
-        (if my_idx < 0 then my_tree
+        (if my_idx < 0 then pure my_tree
         else do
           let ts ← rev''' my_tree.cs.toArray
-          { cs := ts.toList })
+          pure { cs := ts.toList })
   Tried to apply 'Lean.Order.Array.monotone_mapFinIdxM', but failed.
   Possible cause: A missing `Lean.Order.MonoBind` instance.
   Use `set_option trace.Elab.Tactic.monotonicity true` to debug.
@@ -374,7 +374,7 @@ error: Could not prove 'Tree.rev'''' to be monotone in its recursive calls:
 #guard_msgs in
 def Tree.rev''' (ts : Array Tree) : Id (Array Tree) := do
   ts.reverse.mapFinIdxM
-    (fun my_idx my_tree _ => id (if my_idx < 0 then my_tree else (Tree.rev''' my_tree.cs.toArray) >>= (fun ts => ⟨ts.toList⟩)))
+    (fun my_idx my_tree _ => id (if my_idx < 0 then pure my_tree else (Tree.rev''' my_tree.cs.toArray) >>= (fun ts => pure ⟨ts.toList⟩)))
 partial_fixpoint
 
 def List.findIndex (xs : List α) (p : α → Bool) : Option Nat := match xs with

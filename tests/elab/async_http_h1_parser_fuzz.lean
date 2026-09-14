@@ -35,7 +35,7 @@ private def randomToken (gen : StdGen) (len : Nat) : String × StdGen := Id.run 
       else if r = 36 then '-'
       else '_'
     out := out.push c
-  (out, g)
+  return (out, g)
 
 private def randomReason (gen : StdGen) (len : Nat) : String × StdGen := Id.run do
   let mut g := gen
@@ -45,7 +45,7 @@ private def randomReason (gen : StdGen) (len : Nat) : String × StdGen := Id.run
     g := g'
     let c := if r < 26 then Char.ofNat (65 + r) else ' '
     out := out.push c
-  (out.trimAscii.toString, g)
+  return (out.trimAscii.toString, g)
 
 private def pad3 (n : Nat) : String :=
   if n < 10 then s!"00{n}" else if n < 100 then s!"0{n}" else s!"{n}"

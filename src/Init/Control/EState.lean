@@ -72,7 +72,7 @@ Converts a state monad action into a state monad action with exceptions.
 The resulting action does not throw an exception.
 -/
 @[always_inline, inline] def fromStateM {ε σ α : Type} (x : StateM σ α) : EStateM ε σ α := EStateM.mk fun s =>
-  match x.run s with
+  match (x.run s).run with
   | (a, s') => EStateM.Result.ok a s'
 
 end EStateM
