@@ -2435,11 +2435,19 @@ private def isDefEqAppFallback (t : Expr) (s : Expr) : MetaM Bool := do
 /--
 Virtual analog of `isDefEqProj.isDefEqSingleton` for `newtype`-generated projectors: solves
 `projName params (?m ...) =?= v` as `?m ... =?= ctorName params v`.
+
+Declined when `v` is an application of the same projector, so that `isDefEqApp` gets to solve
+`projName params (?m ...) =?= projName params w` first-order as `?m ... =?= w`. A real structure's
+projection reaches `isDefEqProj.isDefEqSingleton` only as a `.proj` node, i.e. after the
+application has had its turn; without this the eta-expanded assignment `ctorName params (projName
+params w)` wins instead, which is definitionally equal but syntactically larger, so a congruence
+step over the projector grows its goal by a `mk`/`proj` layer rather than stripping the projector.
 -/
 private def isDefEqVirtualProj (t v : Expr) : MetaM Bool := do
   let .const projName us := t.getAppFn | return false
   let some info ← getVirtualProjInfo? projName | return false
   unless t.getAppNumArgs == info.numParams + 1 do return false
+  if v.isAppOfArity projName (info.numParams + 1) then return false
   let s ← whnf (t.getArg! info.numParams)
   let sFn := s.getAppFn
   unless sFn.isMVar do return false
