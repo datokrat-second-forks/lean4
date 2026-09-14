@@ -386,8 +386,6 @@ An asynchronous computation that never fails.
 -/
 @[expose] newtype BaseAsync (α : Type) := BaseIO (MaybeTask α) with toRawBaseIO
 
-attribute [always_inline, inline] BaseAsync.mk BaseAsync.toRawBaseIO
-
 /--
 Converts a `BaseIO` into a `BaseAsync`
 -/
@@ -564,8 +562,6 @@ end BaseAsync
 An asynchronous computation that may produce an error of type `ε`.
 -/
 @[expose] newtype EAsync (ε : Type) (α : Type) := BaseAsync (Except ε α) with toBaseAsync
-
-attribute [always_inline, inline] EAsync.mk EAsync.toBaseAsync
 
 /--
 Converts a `BaseAsync` returning an `Except` into an `EAsync`.

@@ -26,8 +26,6 @@ of a value and a state.
 @[expose] newtype StateT (σ : Type u) (m : Type u → Type v) (α : Type u) :=
   (s : σ) → m (α × σ) with run
 
-attribute [always_inline, inline] StateT.mk StateT.run
-
 /--
 Interpret `σ → m (α × σ)` as an element of `StateT σ m α`.
 -/
