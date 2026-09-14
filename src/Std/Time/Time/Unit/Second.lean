@@ -58,8 +58,38 @@ instance : LawfulEqOrd (Ordinal leap) := inferInstanceAs <| LawfulEqOrd (Bounded
 /--
 `Offset` represents an offset in seconds. It is defined as an `Int`.
 -/
-def Offset : Type := UnitVal 1
-deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString
+newtype Offset := UnitVal 1 with toUnitVal
+
+/--
+The underlying value of the offset, in the unit's own scale.
+-/
+@[inline] def Offset.val (offset : Offset) : Int := offset.toUnitVal.val
+
+theorem Offset.toUnitVal_inj {x y : Offset} (h : x.toUnitVal = y.toUnitVal) : x = y :=
+  congrArg Offset.mk h
+
+instance : Repr Offset where reprPrec offset prec := reprPrec offset.toUnitVal prec
+
+instance : ToString Offset where toString offset := toString offset.toUnitVal
+
+instance : Inhabited Offset where default := .mk default
+
+instance : DecidableEq Offset := fun x y =>
+  decidable_of_iff (x.toUnitVal = y.toUnitVal) ⟨Offset.toUnitVal_inj, congrArg Offset.toUnitVal⟩
+
+instance : Add Offset where add x y := .mk (x.toUnitVal + y.toUnitVal)
+
+instance : Sub Offset where sub x y := .mk (x.toUnitVal - y.toUnitVal)
+
+instance : Neg Offset where neg x := .mk (-x.toUnitVal)
+
+instance : LE Offset where le x y := x.val ≤ y.val
+
+instance : LT Offset where lt x y := x.val < y.val
+
+instance : Ord Offset where compare x y := compare x.toUnitVal y.toUnitVal
+
+instance : OfNat Offset n := ⟨.mk (UnitVal.ofNat n)⟩
 
 instance {x y : Offset} : Decidable (x ≤ y) :=
   inferInstanceAs (Decidable (x.val ≤ y.val))
@@ -67,14 +97,12 @@ instance {x y : Offset} : Decidable (x ≤ y) :=
 instance {x y : Offset} : Decidable (x < y) :=
   inferInstanceAs (Decidable (x.val < y.val))
 
-instance : OfNat Offset n :=
-  ⟨UnitVal.ofNat n⟩
+instance : OrientedOrd Offset := ⟨OrientedOrd.eq_swap (α := UnitVal 1)⟩
 
-instance : Ord Offset := inferInstanceAs <| Ord (UnitVal _)
+instance : TransOrd Offset := ⟨TransOrd.isLE_trans (α := UnitVal 1)⟩
 
-instance : TransOrd Offset := inferInstanceAs <| TransOrd (UnitVal _)
-
-instance : LawfulEqOrd Offset := inferInstanceAs <| LawfulEqOrd (UnitVal _)
+instance : LawfulEqOrd Offset :=
+  ⟨fun {_ _} h => Offset.toUnitVal_inj (LawfulEqOrd.eq_of_compare h)⟩
 
 namespace Offset
 
@@ -83,14 +111,14 @@ Creates an `Second.Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Second.Offset :=
-  UnitVal.ofInt data
+  .mk (UnitVal.ofInt data)
 
 /--
 Creates an `Second.Offset` from an integer.
 -/
 @[inline]
 def ofInt (data : Int) : Second.Offset :=
-  UnitVal.ofInt data
+  .mk (UnitVal.ofInt data)
 
 end Offset
 
@@ -124,7 +152,7 @@ Converts an `Ordinal` to an `Second.Offset`.
 -/
 @[inline]
 def toOffset (ordinal : Ordinal leap) : Second.Offset :=
-  UnitVal.ofInt ordinal.val
+  .mk (UnitVal.ofInt ordinal.val)
 
 end Ordinal
 end Second
