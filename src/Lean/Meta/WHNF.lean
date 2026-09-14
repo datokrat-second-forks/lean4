@@ -568,18 +568,26 @@ This mirrors `reduceProj?`, but for virtual (`def`-based) structures rather than
 instead consult the `newtype` registry. Like real projection-of-constructor reduction, this is
 independent of `ctorName`/`projName`'s reducibility status, even though `newtype` marks both
 `@[irreducible]` (so that they do *not* unfold on their own).
+
+`whnfMajor` exposes the constructor application in the major premise. Callers that honor
+`Meta.Config.proj` should pass the reducer that the corresponding `.proj` mode selects for a real
+projection, so that virtual projections reduce exactly as often as real ones.
 -/
-def reduceVirtualProj? (e : Expr) : MetaM (Option Expr) := do
+def reduceVirtualProjCore? (e : Expr) (whnfMajor : Expr → MetaM Expr) : MetaM (Option Expr) := do
   let .const projName _ := e.getAppFn | return none
   let some projInfo ← getVirtualProjInfo? projName | return none
   let args := e.getAppArgs
   let some majorArg := args[projInfo.numParams]? | return none
-  let major ← whnf majorArg
+  let major ← whnfMajor majorArg
   let .const ctorName _ := major.getAppFn | return none
   unless ctorName == projInfo.ctorName && major.getAppNumArgs == projInfo.numParams + 1 do
     return none
   -- The projector may be over-applied if the wrapped value is a function.
   return some (mkAppN major.appArg! (args.extract (projInfo.numParams + 1)))
+
+/-- `reduceVirtualProjCore?` with the major premise reduced by `whnf`, mirroring `project?`. -/
+def reduceVirtualProj? (e : Expr) : MetaM (Option Expr) :=
+  reduceVirtualProjCore? e whnf
 
 /--
   Auxiliary method for reducing terms of the form `?m t_1 ... t_n` where `?m` is delayed assigned.
@@ -684,11 +692,12 @@ where
         else
           let e := if f == f' then e else e.updateFn f'
           -- Virtual projection-of-constructor reduction is gated like real `.proj`-node
-          -- reduction (`cfg.proj`), not like matcher/recursor reduction (`cfg.iota`): a
-          -- `newtype`-generated projector never becomes a real `Expr.proj` node (it stays an
-          -- irreducible `.app`), so this is the only place its "iota" ever gets applied.
+          -- reduction (`cfg.proj`), not like matcher/recursor reduction (`cfg.iota`). Only the
+          -- iota step belongs here: a real projection *function* is never unfolded by `whnfCore`,
+          -- so the major premise must not be delta-reduced either. The delta-level counterpart
+          -- lives in `unfoldDefinition?`.
           unless cfg.proj matches .no do
-            if let some eNew ← reduceVirtualProj? e then
+            if let some eNew ← reduceVirtualProjCore? e go then
               return ← go eNew
           unless cfg.iota do return e
           match (← reduceMatcher? e) with
@@ -871,6 +880,19 @@ private def unfoldDefault (fInfo : ConstantInfo) (us : List Level) (e : Expr) : 
       recordUnfoldAxiom fInfo.name
     return none
 
+/--
+Delta-level counterpart of the `whnfCore` virtual projection step: a real projection *function* is
+an ordinary definition, so `whnf` unfolds it and then reduces the resulting `.proj` node according
+to `Meta.Config.proj`. A `newtype` projector is `@[irreducible]` and has no `.proj` node, so both
+steps happen here at once, with the major premise reduced the way `Meta.Config.proj` prescribes.
+-/
+def reduceVirtualProjWithDelta? (e : Expr) : MetaM (Option Expr) := do
+  match (← getConfig).proj with
+  | .no            => return none
+  | .yes           => reduceVirtualProjCore? e whnfCore
+  | .yesWithDelta  => reduceVirtualProjCore? e whnf
+  | .yesWithDeltaI => reduceVirtualProjCore? e whnfAtMostI
+
 mutual
   /--
   Unfold definition using "smart unfolding" if possible.
@@ -879,7 +901,11 @@ mutual
   partial def unfoldDefinition? (e : Expr) (ignoreTransparency := false) : MetaM (Option Expr) :=
     match e with
     | .app f _ =>
-      matchConstAux (ignoreTransparency := ignoreTransparency) f.getAppFn (fun _ => unfoldProjInstWhenInstances? e) fun fInfo fLvls => do
+      -- `newtype` projectors are `@[irreducible]`, so they always take this branch
+      let onFailure (_ : Unit) : MetaM (Option Expr) := do
+        if let some e' ← reduceVirtualProjWithDelta? e then return some e'
+        unfoldProjInstWhenInstances? e
+      matchConstAux (ignoreTransparency := ignoreTransparency) f.getAppFn onFailure fun fInfo fLvls => do
         if fInfo.levelParams.length != fLvls.length then
           return none
         else

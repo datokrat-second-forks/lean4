@@ -1563,7 +1563,12 @@ private def processAssignment' (mvarApp : Expr) (v : Expr) : MetaM Bool := do
 
 private def isDeltaCandidate? (t : Expr) : MetaM (Option ConstantInfo) := do
   match t.getAppFn with
-  | .const c _ => getUnfoldableConst? c
+  | .const c _ =>
+    if let some info ← getUnfoldableConst? c then return some info
+    -- A `newtype` projector is `@[irreducible]`, but `unfoldDefinition?` still reduces it on a
+    -- constructor application, just as it unfolds a real structure's projection function.
+    if (← getVirtualProjInfo? c).isSome then return (← getEnv).find? c
+    return none
   | _ => pure none
 
 /-- Auxiliary method for isDefEqDelta -/
