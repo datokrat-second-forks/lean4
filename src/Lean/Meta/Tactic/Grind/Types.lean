@@ -595,7 +595,7 @@ private def hasSameRoot (enodes : ENodeMap) (a b : Expr) : Bool := Id.run do
   else
     let some n1 := enodes.find? { expr := a } | return false
     let some n2 := enodes.find? { expr := b } | return false
-    isSameExpr n1.root n2.root
+    return isSameExpr n1.root n2.root
 
 private def useFunCC' (enodes : ENodeMap) (e : Expr) : Bool :=
   if let some n := enodes.find? { expr := e } then
@@ -678,16 +678,16 @@ private partial def isCongruent (enodes : ENodeMap) (e₁ e₂ : Expr) : Bool :=
       **Note**: We are not in `MetaM` here. Thus, we cannot check whether `f` and `g` have the same type.
       So, we approximate and try to handle this issue when generating the proof term.
       -/
-      useFunCC' enodes e₂ && hasSameRoot enodes a b && hasSameRoot enodes f g
+      return useFunCC' enodes e₂ && hasSameRoot enodes a b && hasSameRoot enodes f g
     else if useFunCC' enodes e₂ then
       /-
       Mismatched `funCC` flags: `e₁` uses first-order congruence, `e₂` uses higher-order.
       They hash differently (via `congrHash`), so declaring them congruent here would violate
       the `BEq`/`Hashable` consistency invariant required by `PHashSet`.
       -/
-      false
+      return false
     else
-      hasSameRoot enodes a b && go f g
+      return hasSameRoot enodes a b && go f g
 where
   goEq (lhs₁ rhs₁ lhs₂ rhs₂ : Expr) : Bool :=
     (hasSameRoot enodes lhs₁ lhs₂ && hasSameRoot enodes rhs₁ rhs₂)
@@ -1228,7 +1228,7 @@ def isRoot (e : Expr) : GoalM Bool := do
 
 /-- Returns the root element in the equivalence class of `e` IF `e` has been internalized. -/
 def Goal.getRoot? (goal : Goal) (e : Expr) : Option Expr := Id.run do
-  let some n ← goal.getENode? e | return none
+  let some n := goal.getENode? e | return none
   return some n.root
 
 @[inline, inherit_doc Goal.getRoot?]
@@ -1263,7 +1263,7 @@ Returns the next element in the equivalence class of `e`
 if `e` has been internalized in the given goal.
 -/
 def Goal.getNext? (goal : Goal) (e : Expr) : Option Expr := Id.run do
-  let some n ← goal.getENode? e | return none
+  let some n := goal.getENode? e | return none
   return some n.next
 
 /-- Returns the next element in the equivalence class of `e`. -/
@@ -1279,7 +1279,7 @@ def alreadyInternalized (e : Expr) : GoalM Bool :=
   return (← get).enodeMap.contains { expr := e }
 
 def Goal.getTarget? (goal : Goal) (e : Expr) : Option Expr := Id.run do
-  let some n ← goal.getENode? e | return none
+  let some n := goal.getENode? e | return none
   return n.target?
 
 @[inline] def getTarget? (e : Expr) : GoalM (Option Expr) := do
@@ -1675,12 +1675,12 @@ partial def Goal.getEqc (goal : Goal) (e : Expr) (sort := false) : List Expr :=
     eqc.toList
 where
   go (first : Expr) (e : Expr) (acc : Array Expr) : Array Expr := Id.run do
-    let some next := goal.getNext? e | acc
+    let some next := goal.getNext? e | return acc
     let acc := acc.push e
     if isSameExpr first next then
       return acc
     else
-      go first next acc
+      return go first next acc
 
 @[inline, inherit_doc Goal.getEqc]
 partial def getEqc (e : Expr) (sort := false) : GoalM (List Expr) :=

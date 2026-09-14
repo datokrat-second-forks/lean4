@@ -12,22 +12,22 @@ namespace Lean.Meta.Grind.Arith
 
 /-- Returns `true` if `e` is a numeral and has type `Nat`. -/
 def isNatNum (e : Expr) : Bool := Id.run do
-  let_expr OfNat.ofNat _ _ inst := e | false
-  let_expr instOfNatNat _ := inst | false
-  true
+  let_expr OfNat.ofNat _ _ inst := e | return false
+  let_expr instOfNatNat _ := inst | return false
+  return true
 
 /-- Returns `true` if `e` is a nonnegative numeral and has type `Int`. -/
 def isNonnegIntNum (e : Expr) : Bool := Id.run do
-  let_expr OfNat.ofNat _ _ inst := e | false
-  let_expr instOfNat _ := inst | false
-  true
+  let_expr OfNat.ofNat _ _ inst := e | return false
+  let_expr instOfNat _ := inst | return false
+  return true
 
 /-- Returns `true` if `e` is a numeral and has type `Int`. -/
 def isIntNum (e : Expr) : Bool :=
   match_expr e with
   | Neg.neg _ inst e => Id.run do
-    let_expr Int.instNegInt := inst | false
-    isNonnegIntNum e
+    let_expr Int.instNegInt := inst | return false
+    return isNonnegIntNum e
   | _ => isNonnegIntNum e
 
 /-- Returns `true` if `e` is a numeral supported by cutsat. -/
@@ -73,10 +73,10 @@ def isNatAdd (e : Expr) : Bool :=
 
 /-- Returns `some k` if `e` `@OfNat.ofNat Nat _ (instOfNatNat k)` -/
 def isNatNum? (e : Expr) : Option Nat := Id.run do
-  let_expr OfNat.ofNat _ _ inst := e | none
-  let_expr instOfNatNat k := inst | none
-  let .lit (.natVal k) := k | none
-  some k
+  let_expr OfNat.ofNat _ _ inst := e | return none
+  let_expr instOfNatNat k := inst | return none
+  let .lit (.natVal k) := k | return none
+  return some k
 
 def isArithTerm (e : Expr) : Bool :=
   match_expr e with
@@ -140,7 +140,7 @@ def markAsFound (fvarId : FVarId) : CollectDecVarsM Unit := do
   modify fun s => { s with found := s.found.insert fvarId }
 
 abbrev CollectDecVarsM.run (x : CollectDecVarsM Unit) (decVars : FVarIdSet) : FVarIdSet :=
-  let (_, s) := ReaderT.run x decVars |>.run {}
+  let (_, s) := ReaderT.run x decVars |>.run {} |>.run
   s.found
 
 end CollectDecVars

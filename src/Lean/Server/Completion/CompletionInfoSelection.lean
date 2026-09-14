@@ -23,7 +23,7 @@ private def filterDuplicateCompletionInfos
     if deduplicatedInfos.any (fun di => eq di.info i.info) then
       continue
     deduplicatedInfos := deduplicatedInfos.push i
-  deduplicatedInfos
+  return deduplicatedInfos
 where
   eq : CompletionInfo → CompletionInfo → Bool
     | .dot ti₁ .., .dot ti₂ .. =>

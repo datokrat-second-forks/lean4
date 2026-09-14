@@ -314,8 +314,8 @@ def tryFinally {m : Type u → Type v} {α β : Type u} [MonadFinally m] [Functo
 @[always_inline]
 instance Id.finally : MonadFinally Id where
   tryFinally' := fun x h =>
-   let a := x
-   let b := h (some x)
+   let a := x.run
+   let b := (h (some a)).run
    pure (a, b)
 
 @[always_inline]

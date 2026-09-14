@@ -211,7 +211,7 @@ theorem Option.of_eq_wp {α : Type u} {x prog : Option α}
 /-- Soundness for `StateM`: if `wp prog P s` holds, then `P` holds of the value and final state of
 `StateT.run prog s`. -/
 theorem StateM.of_run_eq_wp {x : α × σ} {prog : StateM σ α} {s : σ}
-  (h : StateT.run prog s = x) (P : α × σ → Prop)
+  (h : (StateT.run prog s).run = x) (P : α × σ → Prop)
   (hwp : wp prog (fun a s' => P (a, s')) () s) : P x := by
   rw [← h]
   exact hwp
@@ -219,14 +219,14 @@ theorem StateM.of_run_eq_wp {x : α × σ} {prog : StateM σ α} {s : σ}
 /-- Soundness for `StateM`, at the value alone: if `wp prog P s` holds, then `P` holds of
 `StateT.run' prog s`. -/
 theorem StateM.of_run'_eq_wp {α σ : Type} {x : α} {prog : StateM σ α} {s : σ}
-  (h : StateT.run' prog s = x) (P : α → Prop)
+  (h : (StateT.run' prog s).run = x) (P : α → Prop)
   (hwp : wp prog (fun a _ => P a) () s) : P x := by
   rw [← h]
   exact hwp
 
 /-- Soundness for `ReaderM`: if `wp prog P r` holds, then `P` holds of `ReaderT.run prog r`. -/
 theorem ReaderM.of_run_eq_wp {α ρ : Type} {x : α} {prog : ReaderM ρ α} {r : ρ}
-  (h : ReaderT.run prog r = x) (P : α → Prop)
+  (h : (ReaderT.run prog r).run = x) (P : α → Prop)
   (hwp : wp prog (fun a _ => P a) () r) : P x := by
   rw [← h]
   exact hwp

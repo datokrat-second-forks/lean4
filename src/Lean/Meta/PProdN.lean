@@ -128,9 +128,9 @@ def proj (n i : Nat) (t e : Expr) : Expr := Id.run <| do
       value := mkPProdSnd t value
       t := mkTypeSnd t
   if i+1 < n then
-    mkPProdFst t value
+    return mkPProdFst t value
   else
-    value
+    return value
 
 /-- Given a value `e` of type `t = t₁ ×' … ×' tᵢ ×' … ×' tₙ`, return the values of type `tᵢ` -/
 def projs (n : Nat) (t e : Expr) : Array Expr :=

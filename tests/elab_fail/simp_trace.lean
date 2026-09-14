@@ -48,7 +48,6 @@ def g (x : Nat) : Nat := Id.run <| do
 
 example : g x = x := by
   simp [g, bind, pure]
-  rfl
 
 def f1 : StateM Nat Unit := do
   modify fun x => g x

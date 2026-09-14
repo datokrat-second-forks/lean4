@@ -366,7 +366,7 @@ where
         | .insert, .delete | .delete, .insert =>
           -- "Substitution point": don't include any whitespace, since we're switching this word
           inSubst := true
-    withWs
+    return withWs
       |> joinEdits
       |>.map fun (act, ss) => (act, ss.foldl (· ++ ·) "")
 

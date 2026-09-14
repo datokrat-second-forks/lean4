@@ -137,7 +137,7 @@ It is equivalent to `it.toList.foldl`.
 def Iter.fold {α : Type w} {β : Type w} {γ : Type x} [Iterator α Id β]
     [IteratorLoop α Id Id] (f : γ → β → γ)
     (init : γ) (it : Iter (α := α) β) : γ :=
-  ForIn.forIn (m := Id) it init (fun x acc => ForInStep.yield (f acc x))
+  ForIn.forIn (m := Id) it init (fun x acc => pure (ForInStep.yield (f acc x))) |>.run
 
 /--
 Folds a function over an iterator from the left, accumulating a value starting with `init`.

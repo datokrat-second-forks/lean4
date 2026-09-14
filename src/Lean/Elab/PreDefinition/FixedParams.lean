@@ -118,7 +118,7 @@ partial def Info.setVarying (funIdx paramIdx : Nat) (info : Info) : Info := Id.r
     -- Propagate along type dependencies edges
     for dependingParam in info.revDeps[funIdx]![paramIdx]! do
       info := Info.setVarying funIdx dependingParam info
-  info
+  return info
 
 def Info.getCallerParam? (calleeIdx argIdx callerIdx : Nat) (info : Info) : Option Nat :=
   info.graph[calleeIdx]![argIdx]!.bind (·[callerIdx]!)

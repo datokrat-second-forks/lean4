@@ -695,14 +695,14 @@ If there is no RHS, it is filled in with a hole.
 -/
 def expandAlt? (alt : Syntax) : Option (Array Syntax) := Id.run do
   if shouldExpandAlt alt then
-    some <| alt[0].getArgs.map fun lhs =>
+    return some <| alt[0].getArgs.map fun lhs =>
       let alt := alt.setArg 0 (mkNullNode #[lhs])
       if 1 < alt.getNumArgs && alt[1].getNumArgs == 0 then
         alt.setArg 1 <| mkNullNode #[mkAtomFrom lhs "=>", mkHole lhs]
       else
         alt
   else
-    none
+    return none
 
 /--
 Given `inductionAlts` of the form
@@ -723,9 +723,9 @@ def expandInductionAlts? (inductionAlts : Syntax) : Option Syntax := Id.run do
         altsNew := altsNew ++ alt'
       else
         altsNew := altsNew.push alt
-    some <| inductionAlts.setArg 2 (mkNullNode altsNew)
+    return some <| inductionAlts.setArg 2 (mkNullNode altsNew)
   else
-    none
+    return none
 
 def inductionAltsPos (stx : Syntax) : Nat :=
   if stx.getKind == ``Lean.Parser.Tactic.induction then

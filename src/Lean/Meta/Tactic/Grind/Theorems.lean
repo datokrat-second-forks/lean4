@@ -201,9 +201,9 @@ def TheoremsArray.retrieve? (s : TheoremsArray α) (sym : Name) : Option (List �
 def TheoremsArray.insert [TheoremLike α] (s : TheoremsArray α) (thm : α) : TheoremsArray α := Id.run do
   if s.isEmpty then
     let thms := { : Theorems α}
-    #[thms.insert thm]
+    return #[thms.insert thm]
   else
-    s.modify 0 (·.insert thm)
+    return s.modify 0 (·.insert thm)
 
 def TheoremsArray.isErased (s : TheoremsArray α) (origin : Origin) : Bool :=
   s.any fun thms => thms.erased.contains origin

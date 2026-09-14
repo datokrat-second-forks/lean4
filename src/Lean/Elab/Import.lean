@@ -83,7 +83,7 @@ def checkDeprecatedImports
     | _ => pure ()
   if !linter.deprecated.module.get opts then
     return messages
-  imports.foldl (init := messages) fun messages imp =>
+  return imports.foldl (init := messages) fun messages imp =>
     if ignoreDeprecatedImports.contains imp.module then
       messages
     else

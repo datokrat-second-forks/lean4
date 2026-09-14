@@ -222,7 +222,7 @@ def addTransitiveImps (transImps : Needs) (imp : Import) (j : ModuleIdx) (impTra
       -- `j ∈ transDeps[i].metaPriv` if `i -(import ...)-> i'` and `j ∈ transDeps[i'].metaPub`
       transImps := transImps.union .metaPriv (impTransImps.get .metaPub)
 
-  transImps
+  return transImps
 
 def isDeclMeta' (env : Environment) (declName : Name) : Bool :=
   -- Matchers are not compiled by themselves but inlined by the compiler, so there is no IR decl
@@ -644,7 +644,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
 
   if args.explain then
     let explanation := getExplanations s i
-    let sanitize n := if n.hasMacroScopes then (sanitizeName n).run' { options := {} } else n
+    let sanitize n := if n.hasMacroScopes then (sanitizeName n).run' { options := {} } |>.run else n
     let run (imp : Import) := do
       let j := s.env.getModuleIdx? imp.module |>.get!
       let k := NeedsKind.ofImport imp

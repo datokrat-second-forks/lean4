@@ -38,7 +38,7 @@ Note: This function will add `1` to all literal identifiers by default. This is 
 illegal identifier in the DIMACS format and we can avoid producing invalid DIMACS like this.
 -/
 public def dimacs (cnf : CNF Nat) : String :=
-  let (str, state) := go cnf |>.run {}
+  let (str, state) := go cnf |>.run {} |>.run
   s!"p cnf {state.maxLit + 1} {state.numClauses}\n" ++ str
 where
   go (cnf : CNF Nat) : DimacsM String := do

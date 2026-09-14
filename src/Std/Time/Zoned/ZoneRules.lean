@@ -213,10 +213,10 @@ def timezoneAt (rule : RecurringRule) (tm : Timestamp) : TimeZone := Id.run do
   let dstEnd   := transitionUtcSeconds endRule year dst.offset
 
   if dstStart ≤ dstEnd then
-    if dstStart ≤ secs && secs < dstEnd then dstTz else stdTz
+    if dstStart ≤ secs && secs < dstEnd then return dstTz else return stdTz
   else
     -- Southern Hemisphere: DST spans the year boundary
-    if secs < dstEnd || dstStart ≤ secs then dstTz else stdTz
+    if secs < dstEnd || dstStart ≤ secs then return dstTz else return stdTz
 
 end RecurringRule
 

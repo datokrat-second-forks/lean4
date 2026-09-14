@@ -190,7 +190,7 @@ instance : Repr Expr.Data where
       r := r ++ " (hasExprMVar := " ++ toString v.hasExprMVar ++ ")"
     if v.hasLevelMVar then
       r := r ++ " (hasLevelMVar := " ++ toString v.hasLevelMVar ++ ")"
-    Repr.addAppParen r prec
+    return Repr.addAppParen r prec
 
 open Expr
 

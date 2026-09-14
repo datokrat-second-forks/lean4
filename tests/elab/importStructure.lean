@@ -62,7 +62,7 @@ def analyzeModuleData (data : Array (Name × ModuleData)) : ImportGraph := Id.ru
           (fun arr => some <| (arr.getD #[]).push fromString)
       }
 
-  result
+  return result
 
 def computeOrphanedModules (importGraph : ImportGraph) :
     IO (Array String) := do

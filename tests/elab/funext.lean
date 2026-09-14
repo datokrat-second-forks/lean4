@@ -16,9 +16,12 @@ theorem ex4 : (fun (x : Nat × Nat) (y : Nat × Nat) => x.1 + y.2) = (fun (x : N
   show a + d = d + a
   rw [Nat.add_comm]
 
-theorem ex5 : (fun (x : Id Nat) => x.succ + 0) = (fun (x : Id Nat) => 0 + x.succ) := by
+/-- A reducible alias, so that the binder type is defeq to `Nat` without being syntactically it. -/
+abbrev MyNat := Nat
+
+theorem ex5 : (fun (x : MyNat) => x.succ + 0) = (fun (x : MyNat) => 0 + x.succ) := by
   funext (x : Nat)
-  have y := x + 1 -- if `(x : Nat)` is not used at `funext`, then `x+1` would fail to be elaborated since we don't have the instance `Add (Id Nat)`
+  have y := x + 1 -- if `(x : Nat)` is not used at `funext`, then `x+1` would fail to be elaborated since we don't have the instance `Add (MyNat)`
   rw [Nat.add_comm]
 
 theorem ex6 : (fun (x : Nat) y z => x + y + z) = (fun x y z => x + (y + z)) := by

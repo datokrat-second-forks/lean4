@@ -54,7 +54,7 @@ instance : Repr Level.Data where
       r := r ++ " (hasMVar := " ++ toString v.hasMVar ++ ")"
     if v.hasParam then
       r := r ++ " (hasParam := " ++ toString v.hasParam ++ ")"
-    Repr.addAppParen r prec
+    return Repr.addAppParen r prec
 
 open Level
 
@@ -529,7 +529,7 @@ protected partial def Result.quote (r : Result) (prec : Nat) : Syntax.Level :=
 end PP
 
 protected def format (u : Level) (mvars : Bool) (lIndex? : LMVarId → Option Nat) : Format :=
-  (PP.toResult u) |>.run { mvars, lIndex? } |>.format true
+  (PP.toResult u) |>.run { mvars, lIndex? } |>.run |>.format true
 
 instance : ToFormat Level where
   format u := Level.format u (mvars := true) (lIndex? := fun _ => none)
@@ -538,7 +538,7 @@ instance : ToString Level where
   toString u := Format.pretty (format u)
 
 protected def quote (u : Level) (prec : Nat := 0) (mvars : Bool := true) (lIndex? : LMVarId → Option Nat) : Syntax.Level :=
-  (PP.toResult u) |>.run { mvars, lIndex? } |>.quote prec
+  (PP.toResult u) |>.run { mvars, lIndex? } |>.run |>.quote prec
 
 instance : Quote Level `level where
   quote := Level.quote (lIndex? := fun _ => none)

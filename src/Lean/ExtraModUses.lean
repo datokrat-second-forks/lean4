@@ -82,7 +82,7 @@ public def copyExtraModUses (src dest : Environment) : Environment := Id.run do
   for entry in extraModUses.getEntries (asyncMode := .local) src do
     if !(extraModUses.getState (asyncMode := .local) env).contains entry then
       env := extraModUses.addEntry env entry
-  env
+  return env
 
 def recordExtraModUseCore (mod : Name) (isMeta : Bool) (hint : Name := .anonymous) : m Unit := do
   let entry := { module := mod, isExported := (← getEnv).isExporting, isMeta }

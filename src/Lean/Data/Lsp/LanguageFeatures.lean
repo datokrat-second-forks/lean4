@@ -141,7 +141,7 @@ instance : ToJson ResolvableCompletionItemData where
       arr := arr.push <| toJson cPos
     if let some id := d.id? then
       arr := arr.push <| toJson id
-    Json.arr arr
+    return Json.arr arr
 
 instance : FromJson ResolvableCompletionItemData where
   fromJson?

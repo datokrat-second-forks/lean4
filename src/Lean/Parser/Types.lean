@@ -422,7 +422,7 @@ def mkErrorsAt (s : ParserState) (ex : List String) (pos : String.Pos.Raw) (init
   if let some sz := initStackSz? then
     s := s.shrinkStack sz
   s := s.setError { expected := ex }
-  s.pushSyntax .missing
+  return s.pushSyntax .missing
 
 def mkErrorAt (s : ParserState) (msg : String) (pos : String.Pos.Raw) (initStackSz? : Option Nat := none) : ParserState :=
   s.mkErrorsAt [msg] pos initStackSz?
@@ -455,7 +455,7 @@ def toErrorMsg (ctx : InputContext) (s : ParserState) : String := Id.run do
     if errStr != "" then errStr := errStr ++ "\n"
     let pos := ctx.fileMap.toPosition pos
     errStr := errStr ++ mkErrorStringWithPos ctx.fileName pos (toString err)
-  errStr
+  return errStr
 
 end ParserState
 

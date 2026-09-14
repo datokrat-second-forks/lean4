@@ -152,7 +152,7 @@ This function is used to create jumps from the join point satisfying `isJpCases?
 -/
 private def mkJmpArgsAtJp (params : Array (Param .pure)) (targetParamIdx : Nat)
     (fields : Array (Param .pure)) (dependsOnTarget : Bool) : Array (Arg .pure) := Id.run do
-  mkJmpNewArgs (params.map (Arg.fvar ·.fvarId)) targetParamIdx (fields.map (Arg.fvar ·.fvarId)) dependsOnTarget
+  return mkJmpNewArgs (params.map (Arg.fvar ·.fvarId)) targetParamIdx (fields.map (Arg.fvar ·.fvarId)) dependsOnTarget
 
 /--
 Try to optimize `jpCases` join points.

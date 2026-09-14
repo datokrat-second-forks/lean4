@@ -84,7 +84,7 @@ def ppGoal (mvarId : MVarId) : MetaM Format := do
     -- and tactics should always be creating synthetic opaque metavariables for new goals.
     let tactic         := mvarDecl.kind.isSyntheticOpaque
     let lctx           := mvarDecl.lctx
-    let lctx           := lctx.sanitizeNames.run' { options := (← getOptions) }
+    let lctx           := lctx.sanitizeNames.run' { options := (← getOptions) } |>.run
     withLCtx lctx mvarDecl.localInstances do
       -- The following two `let rec`s are being used to control the generated code size.
       -- Then should be remove after we rewrite the compiler in Lean

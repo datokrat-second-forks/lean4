@@ -47,7 +47,7 @@ private partial def countDigits (n : Nat) : Nat :=
 -- convert mantissa * 10^-exponent to 0.mantissa * 10^exponent
 protected def normalize : JsonNumber → Int × Nat × Int
   | ⟨m, e⟩ => Id.run do
-    if m = 0 then (0, 0, 0)
+    if m = 0 then return (0, 0, 0)
     else
       let sign : Int := if m > 0 then 1 else -1
       let mut mAbs := m.natAbs
@@ -58,7 +58,7 @@ protected def normalize : JsonNumber → Int × Nat × Int
           mAbs := mAbs / 10
         else
           break
-      (sign, mAbs, -(e : Int) + nDigits)
+      return (sign, mAbs, -(e : Int) + nDigits)
 
 -- todo (Dany): We should have an Ordering version of this.
 def lt (a b : JsonNumber) : Bool :=

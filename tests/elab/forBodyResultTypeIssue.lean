@@ -13,10 +13,10 @@ for x in xs do
 #guard_msgs in
 #eval f [1, 0, 3] |>.run.run' 0
 
-theorem ex1 : (f [1, 2, 3] |>.run.run' 0) = Except.ok () :=
+theorem ex1 : (f [1, 2, 3] |>.run.run' 0).run = Except.ok () :=
 rfl
 
-theorem ex2 : (f [1, 0, 3] |>.run.run' 0) = Except.error "contains zero" :=
+theorem ex2 : (f [1, 0, 3] |>.run.run' 0).run = Except.error "contains zero" :=
 rfl
 
 universe u

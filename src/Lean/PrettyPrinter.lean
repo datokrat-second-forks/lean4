@@ -19,13 +19,13 @@ namespace Lean.PrettyPrinter
 
 def ppCategory (cat : Name) (stx : Syntax) : CoreM Format := do
   let opts ← getOptions
-  let stx := (sanitizeSyntax stx).run' { options := opts }
+  let stx := (sanitizeSyntax stx).run' { options := opts } |>.run
   parenthesizeCategory cat stx >>= formatCategory cat
 
 def ppTerm (stx : Term) : CoreM Format := ppCategory `term stx
 
 def ppUsing (e : Expr) (delab : Expr → MetaM Term) : MetaM Format := do
-  let lctx := (← getLCtx).sanitizeNames.run' { options := (← getOptions) }
+  let lctx := (← getLCtx).sanitizeNames.run' { options := (← getOptions) } |>.run
   Meta.withLCtx' lctx do
     ppTerm (← delab e)
 
@@ -52,7 +52,7 @@ def InfoPerPos.ofPosMap (infos : SubExpr.PosMap Elab.Info) : InfoPerPos :=
 to `Elab.Info` nodes produced by the delaborator at various subexpressions of `e`. -/
 def ppExprWithInfos (e : Expr) (optsPerPos : Delaborator.OptionsPerPos := {}) (delab := Delaborator.delab)
     : MetaM FormatWithInfos := do
-  let lctx := (← getLCtx).sanitizeNames.run' { options := (← getOptions) }
+  let lctx := (← getLCtx).sanitizeNames.run' { options := (← getOptions) } |>.run
   Meta.withLCtx' lctx do
     let (stx, infos) ← delabCore e optsPerPos delab
     let fmt ← ppTerm stx >>= maybePrependExprSizes e
@@ -66,7 +66,7 @@ def ppConstNameWithInfos (constName : Name) : MetaM FormatWithInfos := do
   else
     -- Still, let's sanitize the name.
     let stx := mkIdent constName
-    let stx := (sanitizeSyntax stx).run' { options := (← getOptions) }
+    let stx := (sanitizeSyntax stx).run' { options := (← getOptions) } |>.run
     formatCategory `term stx
 
 def ppExprLegacy (env : Environment) (mctx : MetavarContext) (lctx : LocalContext) (opts : Options) (e : Expr) : IO Format :=

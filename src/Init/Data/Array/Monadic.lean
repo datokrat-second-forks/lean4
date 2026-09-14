@@ -38,7 +38,7 @@ theorem map_toList_inj [Monad m] [LawfulMonad m]
   induction xs; simp_all
 
 @[simp, grind =] theorem idRun_mapM {xs : Array α} {f : α → Id β} : (xs.mapM f).run = xs.map (f · |>.run) :=
-  mapM_pure
+  congrArg Id.run mapM_pure
 
 @[simp, grind =] theorem mapM_map [Monad m] [LawfulMonad m] {f : α → β} {g : β → m γ} {xs : Array α} :
     (xs.map f).mapM g = xs.mapM (g ∘ f) := by

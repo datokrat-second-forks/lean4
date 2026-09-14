@@ -213,13 +213,13 @@ public instance [ComputeHash α m] : ComputeTrace α m Hash := ⟨ComputeHash.co
 
 /-- Compute the hash of object `a` in a pure context. -/
 @[inline] public def pureHash [ComputeHash α Id] (a : α) : Hash :=
-  ComputeHash.computeHash a
+  (ComputeHash.computeHash a).run
 
 /-- Compute the hash an object in an supporting monad. -/
 @[inline] public def computeHash [ComputeHash α m] [MonadLiftT m n] (a : α) : n Hash :=
   liftM <| ComputeHash.computeHash a
 
-public instance [Hashable α] : ComputeHash α Id := ⟨Hash.ofHashable⟩
+public instance [Hashable α] : ComputeHash α Id := ⟨fun a => pure (Hash.ofHashable a)⟩
 
 /--
 Compute the hash of a binary file.

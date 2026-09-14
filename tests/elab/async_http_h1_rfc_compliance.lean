@@ -114,7 +114,7 @@ def drainBody (t : MachineTester dir) (fuel : Nat := 4096) : MachineTester dir :
   while remaining > 0 && t.machine.canPullBodyNow do
     remaining := remaining - 1
     t := t.pullBody
-  t
+  return t
 
 /-- Set the known outgoing body size (forwarded to the writer). -/
 def setKnownSize (t : MachineTester dir) (size : Body.Length) : MachineTester dir :=

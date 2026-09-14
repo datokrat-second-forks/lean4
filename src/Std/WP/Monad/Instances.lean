@@ -41,8 +41,8 @@ variable {m : Type u → Type z}
 
 /-- `Id`'s `WP` interpretation: `Prop` assertions and no exceptions. -/
 instance Id.wpInst {α : Type u} : WP (Id α) α Prop EStack⟨⟩ where
-  wpTrans x := ⟨fun post _epost => post x⟩
-  wp_trans_monotone x := fun _ _ _ _ _ hpost => hpost x
+  wpTrans x := ⟨fun post _epost => post x.run⟩
+  wp_trans_monotone x := fun _ _ _ _ _ hpost => hpost x.run
 
 /-- `Id` is a WPMonad with `Prop` assertions and no exceptions. -/
 instance Id.instWPMonad : WPMonad Id.{u} Prop EStack⟨⟩ where

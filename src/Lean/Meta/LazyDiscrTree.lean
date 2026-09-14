@@ -116,7 +116,7 @@ partial def isNumeral (e : Expr) : Bool :=
 
 partial def toNatLit? (e : Expr) : Option Literal :=
   if isNumeral e then
-    if let some n := (loop e).run then
+    if let some n := (loop e).run |>.run then
       some (.natVal n)
     else
       none

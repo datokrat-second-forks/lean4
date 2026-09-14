@@ -158,7 +158,7 @@ end MkTableKey
 
 /-- Remark: `mkTableKey` assumes `e` does not contain assigned metavariables. -/
 def mkTableKey [Monad m] [MonadMCtx m] (e : Expr) : m Expr := do
-  let (r, s) := MkTableKey.normExpr e |>.run { mctx := (← getMCtx) }
+  let (r, s) := MkTableKey.normExpr e |>.run { mctx := (← getMCtx) } |>.run
   setMCtx s.mctx
   return r
 

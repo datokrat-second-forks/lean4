@@ -864,7 +864,7 @@ private partial def fixpoint : Unit → M Unit
       fixpoint ()
 
 def run (letRecFVarIds : Array FVarId) (usedFVarsMap : UsedFVarsMap) : UsedFVarsMap :=
-  let (_, s) := fixpoint () |>.run letRecFVarIds |>.run { usedFVarsMap := usedFVarsMap }
+  let (_, s) := fixpoint () |>.run letRecFVarIds |>.run { usedFVarsMap := usedFVarsMap } |>.run
   s.usedFVarsMap
 
 end FixPoint

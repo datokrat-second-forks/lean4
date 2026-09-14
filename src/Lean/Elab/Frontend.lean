@@ -262,7 +262,7 @@ private def setMainModule (snap : Language.Lean.InitialSnapshot) (m : Name) :
     auxDeclNGen := { hps.cmdState.auxDeclNGen with namePrefix := mkPrivateName newEnv .anonymous } }
   let newProcessed : Language.Lean.HeaderProcessedSnapshot := { processed with
     result? := some { hps with cmdState := newCmdState } }
-  { snap with
+  return { snap with
     result? := some { parsed with
       processedSnap := .finished none newProcessed } }
 

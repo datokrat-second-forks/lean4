@@ -228,6 +228,6 @@ def getRegularInitAttrModIdxs (env : Environment) : Array Nat := Id.run do
     if !(regularInitAttr.ext.getModuleEntries env ⟨modIdx⟩).isEmpty
         || !(regularInitAttr.ext.getModuleIREntries env ⟨modIdx⟩).isEmpty then
       idxs := idxs.push modIdx
-  idxs
+  return idxs
 
 end Lean
