@@ -216,8 +216,10 @@ instance [MonadRecDepth m] : MonadRecDepth (ReaderT ρ m) where
 instance [Monad m] [MonadRecDepth m] : MonadRecDepth (StateRefT' ω σ m) :=
   inferInstanceAs (MonadRecDepth (ReaderT _ _))
 
-instance [BEq α] [Hashable α] [Monad m] [STWorld ω m] [MonadRecDepth m] : MonadRecDepth (MonadCacheT α β m) :=
-  inferInstanceAs (MonadRecDepth (StateRefT' _ _ _))
+instance [BEq α] [Hashable α] [Monad m] [STWorld ω m] [MonadRecDepth m] : MonadRecDepth (MonadCacheT α β m) where
+  withRecDepth d x := .mk (MonadRecDepth.withRecDepth d x.toStateRefT)
+  getRecDepth      := .mk MonadRecDepth.getRecDepth
+  getMaxRecDepth   := .mk MonadRecDepth.getMaxRecDepth
 
 /--
 Throw a "maximum recursion depth has been reached" exception using the given reference syntax.
