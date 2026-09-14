@@ -304,7 +304,7 @@ Implementation of the `extractLets` function.
 -/
 private def extractLetsImp (es : Array Expr) (givenNames : List Name)
     (k : Array FVarId → Array Expr → List Name → MetaM α) (config : ExtractLetsConfig) : MetaM α := do
-  let (es, st) ← ExtractLets.extract es |>.run config |>.run' {} |>.run { givenNames }
+  let (es, st) ← ExtractLets.extract es |>.run config |>.toStateRefT.run' {} |>.run { givenNames }
   let givenNames' := st.givenNames
   let decls := st.decls.map (·.decl)
   withExistingLocalDecls decls.toList <| k (decls.map (·.fvarId)) es givenNames'
@@ -324,7 +324,7 @@ def extractLets [Monad m] [MonadControlT MetaM m] (es : Array Expr) (givenNames 
 Lifts `let` and `have` expressions in the given expression as far out as possible.
 -/
 def liftLets (e : Expr) (config : LiftLetsConfig := {}) : MetaM Expr := do
-  let (es, st) ← ExtractLets.extract #[e] |>.run { config with onlyGivenNames := true } |>.run' {} |>.run { givenNames := [] }
+  let (es, st) ← ExtractLets.extract #[e] |>.run { config with onlyGivenNames := true } |>.toStateRefT.run' {} |>.run { givenNames := [] }
   return ExtractLets.mkLetDecls st.decls es[0]!
 
 end Lean.Meta
