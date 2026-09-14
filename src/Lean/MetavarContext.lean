@@ -756,7 +756,7 @@ end DependsOn
   2- If `?m` is unassigned, then we consider the worst case and check whether `x` is in the local context of `?m`.
      This case is a "may dependency". That is, we may assign a term `t` to `?m` s.t. `t` contains `x`. -/
 @[inline] def findExprDependsOn [Monad m] [MonadMCtx m] (e : Expr) (pf : FVarId → Bool := fun _ => false) (pm : MVarId → Bool := fun _ => false) : m Bool := do
-  let (result, { mctx, .. }) := DependsOn.main pf pm e |>.run { mctx := (← getMCtx) }
+  let (result, { mctx, .. }) := DependsOn.main pf pm e |>.run { mctx := (← getMCtx) } |>.run
   setMCtx mctx
   return result
 
@@ -773,7 +773,7 @@ depends on a free variable `x` s.t. `pf x` is `true` or an unassigned metavariab
     if generalizeNondepLet && nondep then
       findExprDependsOn t pf pm
     else
-      let (result, { mctx, .. }) := (DependsOn.main pf pm t <||> DependsOn.main pf pm v).run { mctx := (← getMCtx) }
+      let (result, { mctx, .. }) := (DependsOn.main pf pm t <||> DependsOn.main pf pm v).run { mctx := (← getMCtx) } |>.run
       setMCtx mctx
       return result
 
@@ -1513,7 +1513,7 @@ structure UnivMVarParamResult where
 
 def levelMVarToParam (mctx : MetavarContext) (alreadyUsedPred : Name → Bool) (except : LMVarId → Bool) (e : Expr) (paramNamePrefix : Name := `u) (nextParamIdx : Nat := 1)
     : UnivMVarParamResult :=
-  let (e, s) := (LevelMVarToParam.main e).run { except, paramNamePrefix, alreadyUsedPred } |>.run { mctx, nextParamIdx }
+  let (e, s) := (LevelMVarToParam.main e).run { except, paramNamePrefix, alreadyUsedPred } |>.run { mctx, nextParamIdx } |>.run
   { mctx          := s.mctx
     newParamNames := s.paramNames
     nextParamIdx  := s.nextParamIdx

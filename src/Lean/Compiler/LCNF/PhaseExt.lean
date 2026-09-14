@@ -43,7 +43,7 @@ def isDeclTransparent (env : Environment) (phase : Phase) (declName : Name) : Bo
   if !env.header.isModule then
     return true
   let (_, map) := getTransparencyExt phase |>.getState env
-  map.contains declName
+  return map.contains declName
 
 def setDeclTransparent (env : Environment) (phase : Phase) (declName : Name) : Environment :=
   if isDeclTransparent env phase declName then

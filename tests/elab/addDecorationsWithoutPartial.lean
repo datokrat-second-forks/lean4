@@ -43,7 +43,7 @@ unsafe def initCache : State :=
     results := Array.replicate cacheSize.toNat default }
 
 unsafe def replaceUnsafe (e : Expr) (f? : (e' : Expr) → sizeOf e' ≤ sizeOf e → Option Expr) : Expr :=
-  (replaceUnsafeM cacheSize e f?).run' initCache
+  (replaceUnsafeM cacheSize e f?).run' initCache |>.run
 
 end ReplaceImpl'
 

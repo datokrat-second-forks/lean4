@@ -33,7 +33,7 @@ structure NormalizeState where
 
 abbrev NormalizeM α := StateM NormalizeState α
 
-def NormalizeM.run (x : NormalizeM α) (s : NormalizeState) : α := StateT.run' x s
+def NormalizeM.run (x : NormalizeM α) (s : NormalizeState) : α := StateT.run' x s |>.run
 
 def normalizedRef (ref : RpcRef) : NormalizeM RpcRef := do
   let ptr ← modifyGet fun s =>
@@ -252,7 +252,7 @@ def _root_.Lean.Widget.GetWidgetsResponse.debugJson (r : Widget.GetWidgetsRespon
       Json.mkObj [
         ("id", toJson w.id),
         ("javascriptHash", toJson w.javascriptHash),
-        ("props", w.props.run' {}),
+        ("props", w.props.run' {} |>.run),
         ("range", toJson w.range?),
       ])
     )

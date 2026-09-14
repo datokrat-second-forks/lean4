@@ -2,7 +2,7 @@ def build (n : Nat) : Array Unit := Id.run <| do
   let mut out := #[]
   for _ in *...n do
     out := out.push ()
-  out
+  return out
 
 @[noinline] def size : IO Nat := pure 50000
 

@@ -308,7 +308,7 @@ instance Iterator.instProductive [UpwardEnumerable α] [LE α] [DecidableLE α]
 instance Iterator.instIteratorAccess [UpwardEnumerable α] [LE α] [DecidableLE α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] :
     IteratorAccess (Rxc.Iterator α) Id where
-  nextAtIdx? it n := ⟨match it.internalState.next.bind (UpwardEnumerable.succMany? n) with
+  nextAtIdx? it n := pure ⟨match it.internalState.next.bind (UpwardEnumerable.succMany? n) with
     | none => .done
     | some next => if next ≤ it.internalState.upperBound then
         .yield ⟨⟨UpwardEnumerable.succ? next, it.internalState.upperBound⟩⟩ next
@@ -888,7 +888,7 @@ instance Iterator.instProductive [UpwardEnumerable α] [LT α] [DecidableLT α]
 instance Iterator.instIteratorAccess [UpwardEnumerable α] [LT α] [DecidableLT α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] :
     IteratorAccess (Rxo.Iterator α) Id where
-  nextAtIdx? it n := ⟨match it.internalState.next.bind (UpwardEnumerable.succMany? n) with
+  nextAtIdx? it n := pure ⟨match it.internalState.next.bind (UpwardEnumerable.succMany? n) with
     | none => .done
     | some next => if next < it.internalState.upperBound then
         .yield ⟨⟨UpwardEnumerable.succ? next, it.internalState.upperBound⟩⟩ next
@@ -1395,7 +1395,7 @@ instance Iterator.instProductive [UpwardEnumerable α]
 instance Iterator.instIteratorAccess [UpwardEnumerable α]
     [LawfulUpwardEnumerable α] :
     IteratorAccess (Rxi.Iterator α) Id where
-  nextAtIdx? it n := ⟨match it.internalState.next.bind (UpwardEnumerable.succMany? n) with
+  nextAtIdx? it n := pure ⟨match it.internalState.next.bind (UpwardEnumerable.succMany? n) with
     | none => .done
     | some next =>
         .yield ⟨⟨UpwardEnumerable.succ? next⟩⟩ next, (by

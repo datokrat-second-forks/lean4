@@ -287,7 +287,7 @@ private def updateLeadingAux : Syntax → StateM String.Pos.Raw (Option Syntax)
     Note that the `SourceInfo.trailing` fields must be correct.
     The implementation of this Function relies on this property. -/
 def updateLeading : Syntax → Syntax :=
-  fun stx => (replaceM updateLeadingAux stx).run' 0
+  fun stx => Id.run <| (replaceM updateLeadingAux stx).run' 0
 
 partial def updateTrailing (trailing : Substring.Raw) : Syntax → Syntax
   | Syntax.atom info val               => Syntax.atom (info.updateTrailing trailing) val
@@ -370,12 +370,12 @@ def identComponents (stx : Syntax) (nFields? : Option Nat := none) : List Syntax
         return components
       -- if re-parsing failed, just give them all the same span
       let nameComps := nameComps val nFields?
-      nameComps.map fun n => ident si n.toString.toRawSubstring n []
+      return nameComps.map fun n => ident si n.toString.toRawSubstring n []
     | _ =>
       /- With non-original info:
       - `rawStr` can take all kinds of forms so we only use `val`.
       - there is no source extent to offset, so we pass it as-is. -/
-      nameComps val nFields? |>.map fun n => ident si n.toString.toRawSubstring n []
+      return nameComps val nFields? |>.map fun n => ident si n.toString.toRawSubstring n []
   | _ => unreachable!
   where
     nameComps (n : Name) (nFields? : Option Nat) : List Name :=
