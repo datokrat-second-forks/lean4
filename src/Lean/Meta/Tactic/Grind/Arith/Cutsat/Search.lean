@@ -538,7 +538,7 @@ private def searchQLiaAssignment : GoalM Bool := do
     resetDecisionStack
     saveSteps
     return precise
-  go .rat |>.run' {}
+  go.run .rat |>.run' {}
 
 private def traceActiveCnstrs : GoalM Unit := do
   unless (← isTracingEnabledFor `grind.debug.lia.search.cnstrs) do return ()
@@ -562,7 +562,7 @@ private def searchLiaAssignment : GoalM Unit := do
   traceActiveCnstrs
   reorderVars
   traceActiveCnstrs
-  go .int |>.run' {}
+  go.run .int |>.run' {}
 
 def searchAssignment : GoalM Unit := do
   let precise ← searchQLiaAssignment

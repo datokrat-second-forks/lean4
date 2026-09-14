@@ -33,7 +33,7 @@ The monad `m` must support `ST` effects in order to create and mutate reference 
 @[always_inline, inline]
 def StateRefT'.run {ω σ : Type} {m : Type → Type} [Monad m] [MonadLiftT (ST ω) m] {α : Type} (x : StateRefT' ω σ m α) (s : σ) : m (α × σ) := do
   let ref ← ST.mkRef s
-  let a ← x ref
+  let a ← ReaderT.run x ref
   let s ← ref.get
   pure (a, s)
 
@@ -59,7 +59,7 @@ lifting](lean-manual://section/monad-lifting).
 -/
 @[always_inline, inline]
 protected def lift (x : m α) : StateRefT' ω σ m α :=
-  fun _ => x
+  ReaderT.mk fun _ => x
 
 instance [Monad m] : Monad (StateRefT' ω σ m) := inferInstanceAs (Monad (ReaderT _ _))
 instance : MonadLift m (StateRefT' ω σ m) := ⟨StateRefT'.lift⟩
@@ -74,14 +74,14 @@ This increments the reference count of the state, which may inhibit in-place upd
 -/
 @[inline]
 protected def get [MonadLiftT (ST ω) m] : StateRefT' ω σ m σ :=
-  fun ref => ref.get
+  ReaderT.mk fun ref => ref.get
 
 /--
 Replaces the mutable state with a new value.
 -/
 @[inline]
 protected def set [MonadLiftT (ST ω) m] (s : σ) : StateRefT' ω σ m PUnit :=
-  fun ref => ref.set s
+  ReaderT.mk fun ref => ref.set s
 
 /--
 Applies a function to the current state that both computes a new state and a value. The new state
@@ -93,7 +93,7 @@ inhibit in-place updates of data.
 -/
 @[inline]
 protected def modifyGet [MonadLiftT (ST ω) m] (f : σ → α × σ) : StateRefT' ω σ m α :=
-  fun ref => ref.modifyGet f
+  ReaderT.mk fun ref => ref.modifyGet f
 
 instance [MonadLiftT (ST ω) m] : MonadStateOf σ (StateRefT' ω σ m) where
   get       := StateRefT'.get
@@ -103,7 +103,7 @@ instance [MonadLiftT (ST ω) m] : MonadStateOf σ (StateRefT' ω σ m) where
 @[always_inline]
 instance (ε) [MonadExceptOf ε m] : MonadExceptOf ε (StateRefT' ω σ m) where
   throw    := StateRefT'.lift ∘ throwThe ε
-  tryCatch := fun x c s => tryCatchThe ε (x s) (fun e => c e s)
+  tryCatch := fun x c => ReaderT.mk fun s => tryCatchThe ε (ReaderT.run x s) (fun e => ReaderT.run (c e) s)
 
 end StateRefT'
 

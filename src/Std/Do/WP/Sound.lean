@@ -57,7 +57,8 @@ public instance [Monad m] [WP m ps] [WPSound m ps] :
   ensures_of_wp hwp := by
     obtain ⟨X, hX⟩ := Classical.skolem.mp fun r =>
       (WPSound.ensures_of_wp (m := m) (ps := ps) (hwp r)).exists_refinement
-    exact ⟨X, ⟨fun {β} k =>funext fun r => (hX r).bind_eq (fun a => (k a).run r)⟩⟩
+    exact ⟨ReaderT.mk X, ⟨fun {β} k =>
+      congrArg ReaderT.mk <| funext fun r => (hX r).bind_eq (fun a => (k a).run r)⟩⟩
 
 public instance [Monad m] [LawfulMonad m] [WP m ps] [WPSound m ps] :
     WPSound (StateT σ m) (.arg σ ps) where

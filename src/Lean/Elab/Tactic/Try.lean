@@ -251,8 +251,8 @@ abbrev TryTacticM := ReaderT Ctx TacticM
 abbrev TryTactic := TSyntax `tactic → TryTacticM (TSyntax `tactic)
 
 instance : MonadBacktrack SavedState TryTacticM where
-  saveState := fun _ => saveState
-  restoreState s := fun _ => restoreState s
+  saveState := ReaderT.mk fun _ => saveState
+  restoreState s := ReaderT.mk fun _ => restoreState s
 
 abbrev withNonTerminal (x : TryTacticM α) : TryTacticM α :=
   withReader (fun c => { c with terminal := false}) x
@@ -388,7 +388,7 @@ private def expandUserTactic (tac : TSyntax `tactic) (goal : MVarId) : MetaM (Ar
     return #[tac] ++ (result.getD #[])
 
 -- TODO: polymorphic `Tactic.focus`
-abbrev focus (x : TryTacticM α) : TryTacticM α := fun ctx => Tactic.focus (x ctx)
+abbrev focus (x : TryTacticM α) : TryTacticM α := .mk fun ctx => Tactic.focus (ReaderT.run x ctx)
 
 def observing (x : TryTacticM α) : TryTacticM (TacticResult α) := do
   let s ← saveState
@@ -752,7 +752,7 @@ private partial def evalSuggestAttemptAllPar (tacs : Array (TSyntax ``Parser.Tac
 
   -- Create jobs that each try one tactic and return the suggestion
   let jobs : List (TacticM (TSyntax `tactic)) := tacs.toList.map fun tacSeq =>
-    withOriginalHeartbeats (evalSuggestTacticSeq tacSeq) ctx
+    withOriginalHeartbeats (evalSuggestTacticSeq tacSeq) |>.run ctx
 
   -- Run all jobs in parallel - par returns (result, SavedState) for each
   let results ← TacticM.par jobs
@@ -782,7 +782,7 @@ private partial def evalSuggestFirstPar (tacs : Array (TSyntax ``Parser.Tactic.t
     throwError "invalid occurrence of `first_par` in non-terminal position for `try?` script{indentD (← read).root}"
   let ctx ← read
   let jobs : List (TacticM (TSyntax `tactic)) := tacs.toList.map fun tacSeq =>
-    withOriginalHeartbeats (evalSuggestTacticSeq tacSeq) ctx
+    withOriginalHeartbeats (evalSuggestTacticSeq tacSeq) |>.run ctx
   TacticM.parFirst jobs
 
 /-! `@[builtin_try_tactic]` registrations for the built-in combinators and trace wrappers. -/

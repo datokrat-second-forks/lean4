@@ -109,11 +109,11 @@ instance [Monad m] [MonadAwait t m] : MonadAwait t (StateT s m) where
 
 @[default_instance]
 instance [MonadAsync t m] : MonadAsync t (ReaderT n m) where
-  async p prio := MonadAsync.async (prio := prio) ∘ p
+  async p prio := ReaderT.mk (MonadAsync.async (prio := prio) ∘ p.run)
 
 @[default_instance]
 instance [MonadAsync t m] : MonadAsync t (StateRefT' s n m) where
-  async p prio := MonadAsync.async (prio := prio) ∘ p
+  async p prio := ReaderT.mk (MonadAsync.async (prio := prio) ∘ ReaderT.run p)
 
 @[default_instance]
 instance [Monad m] [Functor t] [inst : MonadAsync t m] : MonadAsync t (StateT s m) where

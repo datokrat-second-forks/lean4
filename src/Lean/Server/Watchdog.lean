@@ -744,7 +744,7 @@ section ServerM
   /-- Creates a Task which forwards a worker's messages into the output stream until an event
   which must be handled in the main watchdog thread (e.g. an I/O error) happens. -/
   private partial def forwardMessages (fw : FileWorker) : ServerM (ServerTask WorkerEvent) := do
-    let task ← ServerTask.IO.asTask (loop $ ←read)
+    let task ← ServerTask.IO.asTask (ReaderT.run loop (← read))
     return task.mapCheap fun
       | Except.ok ev   => ev
       | Except.error e => WorkerEvent.ioError e

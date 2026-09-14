@@ -1106,8 +1106,26 @@ theorem monotone_optionTRun [PartialOrder γ]
     monotone (fun (x : γ) => OptionT.run (f x)) :=
   hmono
 
-instance [inst : PartialOrder (m α)] : PartialOrder (ReaderT ρ m α) := instOrderPi
-instance [inst : CCPO (m α)] : CCPO (ReaderT ρ m α) := instCCPOPi
+/-- Transports a partial order on `ρ → m α` to `ReaderT ρ m α`. -/
+@[expose, instance_reducible] def ReaderT.partialOrder {ρ : Type u} {m : Type u → Type v}
+    {α : Type u} [PartialOrder (m α)] : PartialOrder (ReaderT ρ m α) where
+  rel x y := x.run ⊑ y.run
+  rel_refl := PartialOrder.rel_refl
+  rel_trans := PartialOrder.rel_trans
+  rel_antisymm h₁ h₂ := congrArg ReaderT.mk (PartialOrder.rel_antisymm h₁ h₂)
+
+/-- Transports a chain-complete partial order on `ρ → m α` to `ReaderT ρ m α`. -/
+@[expose, instance_reducible] def ReaderT.ccpo {ρ : Type u} {m : Type u → Type v} {α : Type u}
+    [CCPO (m α)] : CCPO (ReaderT ρ m α) where
+  toPartialOrder := ReaderT.partialOrder
+  has_csup {c} hchain := by
+    have ⟨f, hf⟩ := CCPO.has_csup (α := ρ → m α)
+      (c := fun f => c (ReaderT.mk f)) fun x y hx hy => hchain _ _ hx hy
+    exact ⟨ReaderT.mk f, fun x => (hf x.run).trans
+      ⟨fun h y hy => h y.run hy, fun h y hy => h (ReaderT.mk y) hy⟩⟩
+
+instance [inst : PartialOrder (m α)] : PartialOrder (ReaderT ρ m α) := ReaderT.partialOrder
+instance [inst : CCPO (m α)] : CCPO (ReaderT ρ m α) := ReaderT.ccpo
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (ReaderT ρ m) where
   bind_mono_left h₁₂ := by
     intro x
@@ -1126,8 +1144,8 @@ theorem monotone_readerTRun [PartialOrder γ]
     monotone (fun (x : γ) => ReaderT.run (f x) s) :=
   monotone_apply s _ hmono
 
-instance [inst : PartialOrder (m α)] : PartialOrder (StateRefT' ω σ m α) := instOrderPi
-instance [inst : CCPO (m α)] : CCPO (StateRefT' ω σ m α) := instCCPOPi
+instance [inst : PartialOrder (m α)] : PartialOrder (StateRefT' ω σ m α) := ReaderT.partialOrder
+instance [inst : CCPO (m α)] : CCPO (StateRefT' ω σ m α) := ReaderT.ccpo
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (StateRefT' ω σ m) :=
   inferInstanceAs (MonoBind (ReaderT (ST.Ref ω σ) m))
 
@@ -1140,7 +1158,7 @@ theorem monotone_stateRefT'Run [PartialOrder γ]
   · apply monotone_const
   · refine monotone_of_monotone_apply _ fun ref => ?_
     apply monotone_bind
-    · exact monotone_apply _ _ hmono
+    · exact monotone_readerTRun _ hmono ref
     · apply monotone_const
 
 -- as for `EST` below, the orders are transported along the definitional isomorphism

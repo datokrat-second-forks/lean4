@@ -33,7 +33,7 @@ def run? (type : Expr) (x : M α) : MetaM (Option α) := do
   let isCharP := mkApp3 (mkConst ``Grind.IsCharP [u]) type semiringInst (mkNatLit 0)
   checkWithKernel isCharP
   let some isChar0Inst ← synthInstanceMeta? isCharP | return none
-  x.run { u, type, fieldInst, ringInst, semiringInst, isChar0Inst }
+  x.run.run { u, type, fieldInst, ringInst, semiringInst, isChar0Inst }
 
 def isAddInst (inst : Expr) : M Bool := do
   let ctx ← read

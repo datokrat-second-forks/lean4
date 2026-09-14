@@ -78,7 +78,7 @@ def elabMFrame : Tactic | _ => do
   mvar.withContext do
   let g ← instantiateMVars <| ← mvar.getType
   let some goal := parseMGoal? g | throwError "not in proof mode"
-  let prf ← mFrameCore goal (fun _ => throwError "Could not infer frame") fun _ _ goal => do
+  let prf ← mFrameCore goal (throwError "Could not infer frame") fun _ _ goal => do
     let m ← mkFreshExprSyntheticOpaqueMVar goal.toExpr
     replaceMainGoal [m.mvarId!]
     return m

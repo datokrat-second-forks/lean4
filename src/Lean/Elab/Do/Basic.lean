@@ -399,8 +399,8 @@ Like `controlAt TermElabM`, but it maintains the state using the `DoElabM`'s ref
 in the `TermElabM` result. This makes it possible to run multiple `DoElabM` computations in a row.
 -/
 @[inline]
-def controlAtTermElabM (k : (runInBase : ∀ {β}, DoElabM β → TermElabM β) → TermElabM α) : DoElabM α := fun ctx => do
-  k (· ctx)
+def controlAtTermElabM (k : (runInBase : ∀ {β}, DoElabM β → TermElabM β) → TermElabM α) : DoElabM α := .mk fun ctx => do
+  k (ReaderT.run · ctx)
 
 @[inline]
 def mapTermElabM (f : ∀{α}, TermElabM α → TermElabM α) {α} (k : DoElabM α) : DoElabM α :=
@@ -1055,7 +1055,7 @@ partial def elabDoElems1 (doElems : Array DoElem) (cont : DoElemCont) (catchExPo
     throwError "Empty array of `do` elements passed to `elabDoElems1`."
   else
   let back := doElems.back
-  let initCont ← DoElemCont.mkUnit (fun _ => throwError "always replaced")
+  let initCont ← DoElemCont.mkUnit (throwError "always replaced")
   let mkCont el k := { initCont with k }
   let init := (back, elabDoElem back cont catchExPostpone)
   let (_, res) := doElems.pop.foldr (init := init) fun el (prev, k) =>

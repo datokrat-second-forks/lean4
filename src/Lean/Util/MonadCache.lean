@@ -28,8 +28,8 @@ def checkCache {α β : Type} {m : Type → Type} [MonadCache α β m] [Monad m]
     pure b
 
 instance {α β ρ : Type} {m : Type → Type} [MonadCache α β m] : MonadCache α β (ReaderT ρ m) where
-  findCached? a _ := MonadCache.findCached? a
-  cache a b _ := MonadCache.cache a b
+  findCached? a := ReaderT.mk fun _ => MonadCache.findCached? a
+  cache a b := ReaderT.mk fun _ => MonadCache.cache a b
 
 @[always_inline]
 instance {α β ε : Type} {m : Type → Type} [MonadCache α β m] [Monad m] : MonadCache α β (ExceptT ε m) where

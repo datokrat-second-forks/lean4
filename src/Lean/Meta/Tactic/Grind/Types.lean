@@ -1898,9 +1898,9 @@ def registerSolverExtension {σ : Type} (mkInitial : IO σ) : IO (SolverExtensio
     newEq := fun _ _ => return ()
     newDiseq := fun _ _ => return ()
     action := Action.notApplicable
-    check := fun _ _ => return false
-    checkInv := fun _ _ => return ()
-    mbtc := fun _ _ => return false
+    check := return false
+    checkInv := return ()
+    mbtc := return false
   }
   solverExtensionsRef.modify fun exts => exts.push (unsafe unsafeCast ext)
   return ext

@@ -598,7 +598,7 @@ def parenthesize (parenthesizer : Parenthesizer) (stx : Syntax) : CoreM Syntax :
   let opts ← getOptions
   catchInternalId backtrackExceptionId
     (do
-      let (_, st) ← (parenthesizer { forceParens := getPPParens opts }).run { stxTrav := Syntax.Traverser.fromSyntax stx }
+      let (_, st) ← (ReaderT.run parenthesizer { forceParens := getPPParens opts }).run { stxTrav := Syntax.Traverser.fromSyntax stx }
       pure st.stxTrav.cur)
     (fun _ => throwError "parenthesize: uncaught backtrack exception")
 

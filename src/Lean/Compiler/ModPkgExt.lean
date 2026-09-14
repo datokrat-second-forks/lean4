@@ -22,7 +22,7 @@ public def registerModuleEnvExtension
   .mk <$> registerPersistentEnvExtension {
     name            := name
     mkInitial       := mkInitial
-    addImportedFn   := fun _ _ => mkInitial
+    addImportedFn   := fun _ => .mk fun _ => mkInitial
     addEntryFn      := fun s _ => s
     exportEntriesFn := fun s => #[s]
   }

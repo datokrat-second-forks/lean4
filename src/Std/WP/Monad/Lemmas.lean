@@ -328,7 +328,7 @@ theorem wp_monadMap_ReaderT_apply_eq
     wp (MonadFunctor.monadMap (m:=m) f x : ReaderT ρ m α) post epost =
       fun r => wp (f (x.run r)) (fun a => post a r) epost := by
   funext r
-  simp [MonadFunctor.monadMap, ReaderT.run]
+  simp [MonadFunctor.monadMap]
 
 @[simp]
 theorem wp_monadMap_ExceptT_apply_eq
@@ -393,7 +393,7 @@ theorem wp_liftWith_ReaderT_apply_eq
     (f : (∀{β}, ReaderT ρ m β → m β) → m α) :
     wp (MonadControl.liftWith (m:=m) f : ReaderT ρ m α) post epost r =
       wp (f (fun x => x.run r)) (fun a => post a r) epost := by
-  simp [MonadControl.liftWith, ReaderT.run]
+  simp [MonadControl.liftWith]
 
 @[simp]
 theorem wp_liftWith_ExceptT_apply_eq
@@ -435,7 +435,7 @@ theorem wp_restoreM_ReaderT_apply_eq (x : m α) :
     wp (MonadControl.restoreM (m:=m) x : ReaderT ρ m α) post epost =
       fun r => wp x (fun a => post a r) epost := by
   funext r
-  simp [MonadControl.restoreM, ReaderT.run]
+  simp [MonadControl.restoreM]
 
 @[simp]
 theorem wp_restoreM_ExceptT_apply_eq (x : m (Except ε α)) :

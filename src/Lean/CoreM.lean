@@ -275,7 +275,7 @@ abbrev CoreM := ReaderT Context <| StateRefT State (EIO Exception)
 instance : Monad CoreM := let i : Monad CoreM := inferInstance; { pure := i.pure, bind := i.bind }
 
 instance : Inhabited (CoreM α) where
-  default := fun _ _ => throw default
+  default := ReaderT.mk fun _ => ReaderT.mk fun _ => throw default
 
 instance : MonadRef CoreM where
   getRef := return (← read).ref
@@ -442,7 +442,7 @@ def mkFreshUserName (n : Name) : CoreM Name :=
   mkFreshNameImp n
 
 @[inline] def CoreM.run (x : CoreM α) (ctx : Context) (s : State) : EIO Exception (α × State) :=
-  ((withConsistentCtx x) ctx).run s
+  (ReaderT.run (withConsistentCtx x) ctx).run s
 
 @[inline] def CoreM.run' (x : CoreM α) (ctx : Context) (s : State) : EIO Exception α :=
   Prod.fst <$> x.run ctx s
@@ -838,10 +838,10 @@ instance : MonadRuntimeException CoreM where
   tryCatchRuntimeEx := Core.tryCatchRuntimeEx
 
 @[inline] instance [MonadRuntimeException m] : MonadRuntimeException (ReaderT ρ m) where
-  tryCatchRuntimeEx := fun x c r => tryCatchRuntimeEx (x r) (fun e => (c e) r)
+  tryCatchRuntimeEx := fun x c => .mk fun r => tryCatchRuntimeEx (x.run r) (fun e => (c e).run r)
 
 @[inline] instance [MonadRuntimeException m] : MonadRuntimeException (StateRefT' ω σ m) where
-  tryCatchRuntimeEx := fun x c s => tryCatchRuntimeEx (x s) (fun e => c e s)
+  tryCatchRuntimeEx := fun x c => ReaderT.mk fun s => tryCatchRuntimeEx (ReaderT.run x s) (fun e => ReaderT.run (c e) s)
 
 @[inline] def mapCoreM [MonadControlT CoreM m] [Monad m] (f : forall {α}, CoreM α → CoreM α) {α} (x : m α) : m α :=
   controlAt CoreM fun runInBase => f <| runInBase x

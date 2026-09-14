@@ -128,7 +128,7 @@ def GrindM.run (x : GrindM α) (params : Params) (evalTactic? : Option EvalTacti
   let anchorRefs? := params.anchorRefs?
   let debug := grind.debug.get (← getOptions)
   let ematchDiag := grind.ematch.diagnostics.get (← getOptions)
-  x (← mkMethods evalTactic?).toMethodsRef
+  ReaderT.run (ReaderT.run x (← mkMethods evalTactic?).toMethodsRef)
     { config, anchorRefs?, simpMethods, simp, extensions, symPrios, debug, ematchDiag }
     |>.run' {}
 

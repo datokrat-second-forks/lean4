@@ -68,10 +68,10 @@ The definitionally equality tests are performed using the given transparency mod
 We claim `TransparencyMode.instances` is a good setting for most applications.
 -/
 def CanonM.run' (x : CanonM α) (transparency := TransparencyMode.instances) (s : State := {}) : MetaM α :=
-  StateRefT'.run' (x transparency) s
+  StateRefT'.run' (ReaderT.run x transparency) s
 
 def CanonM.run (x : CanonM α) (transparency := TransparencyMode.instances) (s : State := {}) : MetaM (α × State) :=
-  StateRefT'.run (x transparency) s
+  StateRefT'.run (ReaderT.run x transparency) s
 
 private partial def mkKey (e : Expr) : CanonM UInt64 := do
   if let some hash := unsafe (← get).cache.get? { e } then

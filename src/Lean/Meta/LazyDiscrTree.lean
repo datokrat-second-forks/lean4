@@ -634,7 +634,7 @@ partial def getMatchLoop (cases : Array PartialMatch) (result : MatchResult α) 
         | none   => cases
         | some c => cases.push { todo := todo ++ args, score := ca.score + 1, c }
       let cases := pushStar cases
-      let (k, args) ← MatchClone.getMatchKeyArgs e (root := false) (← read)
+      let (k, args) ← MatchClone.getMatchKeyArgs e (root := false)
       let cases :=
         match k with
         | .star  => cases
@@ -675,7 +675,7 @@ def pushRootCase (r : Std.HashMap Key TrieIndex) (k : Key) (args : Array Expr)
 def getMatchCore (root : Std.HashMap Key TrieIndex) (e : Expr) :
     MatchM α (MatchResult α) := do
   let result ← getStarResult root
-  let (k, args) ← MatchClone.getMatchKeyArgs e (root := true) (← read)
+  let (k, args) ← MatchClone.getMatchKeyArgs e (root := true)
   let cases :=
     match k with
     | .star  =>

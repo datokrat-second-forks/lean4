@@ -157,7 +157,7 @@ end
 
 def run (x : ClosureM α) (inScope : FVarId → Bool) (abstract : FVarId → Bool := fun _ => true) :
     CompilerM (α × Array (Param .pure) × Array (CodeDecl .pure)) := do
-  let (a, s) ← x { inScope, abstract } |>.run {}
+  let (a, s) ← ReaderT.run x { inScope, abstract } |>.run {}
   -- If we've abstracted an fvar into a param, exclude its definition. Note that this still allows
   -- for other decls the removed decl depends upon to be included, but they will be removed later
   -- for having no users.

@@ -266,7 +266,7 @@ partial def SnapshotTree.transform (t : SnapshotTree) : ToSnapshotTreeM Snapshot
     return t
   let element ← Snapshot.transform t.element
   let trans ← read
-  let children := t.children.map (·.map (sync := true) (·.transform trans))
+  let children := t.children.map (·.map (sync := true) (·.transform.run trans))
   return { element, children }
 
 /--
@@ -471,7 +471,7 @@ abbrev ProcessingT m := ReaderT ProcessingContext m
 abbrev ProcessingM := ProcessingT BaseIO
 
 instance : MonadLift ProcessingM (ProcessingT IO) where
-  monadLift := fun act ctx => act ctx
+  monadLift := fun act => .mk fun ctx => act.run ctx
 
 /--
 Creates snapshot message log from non-interactive message log, also allocating a mutable cell
@@ -495,7 +495,7 @@ def diagnosticsOfHeaderError (msg : String) : ProcessingM Snapshot.Diagnostics :
   Adds unexpected exceptions from header processing to the message log as a last resort; standard
   errors should already have been caught earlier. -/
 def withHeaderExceptions (ex : Snapshot → α) (act : ProcessingT IO α) : ProcessingM α := do
-  match (← (act (← read)).toBaseIO) with
+  match (← (act.run (← read)).toBaseIO) with
   | .error e => return ex { diagnostics := (← diagnosticsOfHeaderError e.toString) }
   | .ok a => return a
 
@@ -508,6 +508,6 @@ def Language.mkIncrementalProcessor (process : Option InitSnap → ProcessingM I
     BaseIO (Parser.InputContext → BaseIO InitSnap) := do
   let oldRef ← IO.mkRef none
   return fun ictx => do
-    let snap ← process (← oldRef.get) { ictx with }
+    let snap ← (process (← oldRef.get)).run { ictx with }
     oldRef.set (some snap)
     return snap

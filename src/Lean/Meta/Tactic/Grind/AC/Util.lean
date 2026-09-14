@@ -40,7 +40,7 @@ instance (m n) [MonadLift m n] [MonadGetStruct m] : MonadGetStruct n where
 abbrev ACM := ReaderT ACM.Context GoalM
 
 abbrev ACM.run (opId : Nat) (x : ACM α) : GoalM α :=
-  x { opId }
+  ReaderT.run x { opId }
 
 abbrev getOpId : ACM Nat :=
   return (← read).opId
