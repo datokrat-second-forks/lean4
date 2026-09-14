@@ -247,7 +247,7 @@ abbrev LeanProcessingT m := ReaderT LeanProcessingContext m
 abbrev LeanProcessingM := LeanProcessingT BaseIO
 
 instance : MonadLift LeanProcessingM (LeanProcessingT IO) where
-  monadLift := fun act => ReaderT.mk fun ctx => (ReaderT.run act ctx : BaseIO _)
+  monadLift := fun act => ReaderT.mk fun ctx => liftM (ReaderT.run act ctx)
 
 instance : MonadLift (ProcessingT m) (LeanProcessingT m) where
   monadLift := fun act => ReaderT.mk fun ctx => ReaderT.run act ctx.toProcessingContext
