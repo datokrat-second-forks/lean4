@@ -478,7 +478,7 @@ v___x_147_ = l_Lean_addBuiltinDocString(v___x_145_, v___x_146_);
 return v___x_147_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Parser_StrInterpolation_0__Lean_Parser_interpolatedStr___regBuiltin_Lean_Parser_interpolatedStr_docString__1___boxed(lean_object* v_a_148_){
+LEAN_EXPORT lean_object* l___private_Lean_Parser_StrInterpolation_0__Lean_Parser_interpolatedStr___regBuiltin_Lean_Parser_interpolatedStr_docString__1___boxed(lean_object* v___y_148_){
 _start:
 {
 lean_object* v_res_149_; 

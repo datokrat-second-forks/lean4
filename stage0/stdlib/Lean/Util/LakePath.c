@@ -183,7 +183,7 @@ return v___x_38_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_determineLakePath___boxed(lean_object* v_a_41_){
+LEAN_EXPORT lean_object* l_Lean_determineLakePath___boxed(lean_object* v___y_41_){
 _start:
 {
 lean_object* v_res_42_; 

@@ -496,7 +496,7 @@ return v___x_26_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Option_register___at___00__private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_3257731387____hygCtx___hyg_4__spec__0___boxed(lean_object* v_name_29_, lean_object* v_decl_30_, lean_object* v_ref_31_, lean_object* v_a_32_){
+LEAN_EXPORT lean_object* l_Lean_Option_register___at___00__private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_3257731387____hygCtx___hyg_4__spec__0___boxed(lean_object* v_name_29_, lean_object* v_decl_30_, lean_object* v_ref_31_, lean_object* v___y_32_){
 _start:
 {
 lean_object* v_res_33_; 
@@ -516,7 +516,7 @@ v___x_57_ = l_Lean_Option_register___at___00__private_Lean_Elab_DocString_Builti
 return v___x_57_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_3257731387____hygCtx___hyg_4____boxed(lean_object* v_a_58_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_3257731387____hygCtx___hyg_4____boxed(lean_object* v___y_58_){
 _start:
 {
 lean_object* v_res_59_; 
@@ -759,7 +759,7 @@ v___x_181_ = l_Lean_registerSimplePersistentEnvExtension___redArg(v___x_180_);
 return v___x_181_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_3792406048____hygCtx___hyg_2____boxed(lean_object* v_a_182_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_3792406048____hygCtx___hyg_2____boxed(lean_object* v___y_182_){
 _start:
 {
 lean_object* v_res_183_; 
@@ -778,7 +778,7 @@ lean_ctor_set(v___x_187_, 0, v___x_186_);
 return v___x_187_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_3985216099____hygCtx___hyg_2____boxed(lean_object* v_a_188_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_3985216099____hygCtx___hyg_2____boxed(lean_object* v___y_188_){
 _start:
 {
 lean_object* v_res_189_; 
@@ -799,7 +799,7 @@ lean_ctor_set(v___x_197_, 0, v___x_196_);
 return v___x_197_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Doc_DeferredCheck_addBuiltinHandler___boxed(lean_object* v_key_198_, lean_object* v_impl_199_, lean_object* v_a_200_){
+LEAN_EXPORT lean_object* l_Lean_Doc_DeferredCheck_addBuiltinHandler___boxed(lean_object* v_key_198_, lean_object* v_impl_199_, lean_object* v___y_200_){
 _start:
 {
 lean_object* v_res_201_; 
@@ -1189,7 +1189,7 @@ v___x_332_ = l_Lean_evalConstCheck___at___00__private_Lean_Elab_DocString_Builti
 return v___x_332_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_getHandlerUnsafe___boxed(lean_object* v_declName_333_, lean_object* v_a_334_, lean_object* v_a_335_, lean_object* v_a_336_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_getHandlerUnsafe___boxed(lean_object* v_declName_333_, lean_object* v_a_334_, lean_object* v_a_335_, lean_object* v___y_336_){
 _start:
 {
 lean_object* v_res_337_; 
@@ -1708,7 +1708,7 @@ v___x_623_ = l_Lean_registerBuiltinAttribute(v___x_622_);
 return v___x_623_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_1993970768____hygCtx___hyg_2____boxed(lean_object* v_a_624_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_1993970768____hygCtx___hyg_2____boxed(lean_object* v___y_624_){
 _start:
 {
 lean_object* v_res_625_; 
@@ -2029,7 +2029,7 @@ v___x_760_ = l_Lean_registerBuiltinAttribute(v___x_759_);
 return v___x_760_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_195487833____hygCtx___hyg_2____boxed(lean_object* v_a_761_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_initFn_00___x40_Lean_Elab_DocString_Builtin_Postponed_195487833____hygCtx___hyg_2____boxed(lean_object* v___y_761_){
 _start:
 {
 lean_object* v_res_762_; 
@@ -2096,7 +2096,7 @@ v___x_787_ = lean_apply_3(v_act_764_, v___x_786_, v_a_766_, lean_box(0));
 return v___x_787_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_withScope___redArg___boxed(lean_object* v_c_788_, lean_object* v_act_789_, lean_object* v_a_790_, lean_object* v_a_791_, lean_object* v_a_792_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_withScope___redArg___boxed(lean_object* v_c_788_, lean_object* v_act_789_, lean_object* v_a_790_, lean_object* v_a_791_, lean_object* v___y_792_){
 _start:
 {
 lean_object* v_res_793_; 
@@ -2115,7 +2115,7 @@ v___x_800_ = l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_Defer
 return v___x_800_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_withScope___boxed(lean_object* v_00_u03b1_801_, lean_object* v_c_802_, lean_object* v_act_803_, lean_object* v_a_804_, lean_object* v_a_805_, lean_object* v_a_806_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_Builtin_Postponed_0__Lean_Doc_DeferredCheck_withScope___boxed(lean_object* v_00_u03b1_801_, lean_object* v_c_802_, lean_object* v_act_803_, lean_object* v_a_804_, lean_object* v_a_805_, lean_object* v___y_806_){
 _start:
 {
 lean_object* v_res_807_; 
@@ -2996,7 +2996,7 @@ return v___x_1122_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Doc_DeferredCheck_run___boxed(lean_object* v_inPackage_1132_, lean_object* v_shouldCheck_1133_, lean_object* v_a_1134_, lean_object* v_a_1135_, lean_object* v_a_1136_){
+LEAN_EXPORT lean_object* l_Lean_Doc_DeferredCheck_run___boxed(lean_object* v_inPackage_1132_, lean_object* v_shouldCheck_1133_, lean_object* v_a_1134_, lean_object* v_a_1135_, lean_object* v___y_1136_){
 _start:
 {
 lean_object* v_res_1137_; 

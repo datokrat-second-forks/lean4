@@ -4037,7 +4037,7 @@ lean_dec_ref(v___x_1093_);
 return v___x_1094_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake_Package_clean___boxed(lean_object* v_self_1095_, lean_object* v_a_1096_){
+LEAN_EXPORT lean_object* l_Lake_Package_clean___boxed(lean_object* v_self_1095_, lean_object* v___y_1096_){
 _start:
 {
 lean_object* v_res_1097_; 

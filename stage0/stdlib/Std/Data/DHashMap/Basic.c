@@ -814,7 +814,7 @@ v___x_140_ = l_String_toRawSubstring_x27(v___x_139_);
 return v___x_140_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1(lean_object* v_x_161_, lean_object* v_a_162_, lean_object* v_a_163_){
+LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1(lean_object* v_x_161_, lean_object* v_a_162_, lean_object* v___y_163_){
 _start:
 {
 lean_object* v___x_164_; uint8_t v___x_165_; 
@@ -828,7 +828,7 @@ lean_dec(v_x_161_);
 v___x_166_ = lean_box(1);
 v___x_167_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_167_, 0, v___x_166_);
-lean_ctor_set(v___x_167_, 1, v_a_163_);
+lean_ctor_set(v___x_167_, 1, v___y_163_);
 return v___x_167_;
 }
 else
@@ -862,21 +862,21 @@ v___x_184_ = l_Lean_Syntax_node2(v___x_176_, v___x_183_, v___x_172_, v___x_174_)
 v___x_185_ = l_Lean_Syntax_node2(v___x_176_, v___x_177_, v___x_182_, v___x_184_);
 v___x_186_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_186_, 0, v___x_185_);
-lean_ctor_set(v___x_186_, 1, v_a_163_);
+lean_ctor_set(v___x_186_, 1, v___y_163_);
 return v___x_186_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1___boxed(lean_object* v_x_187_, lean_object* v_a_188_, lean_object* v_a_189_){
+LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1___boxed(lean_object* v_x_187_, lean_object* v_a_188_, lean_object* v___y_189_){
 _start:
 {
 lean_object* v_res_190_; 
-v_res_190_ = l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1(v_x_187_, v_a_188_, v_a_189_);
+v_res_190_ = l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1(v_x_187_, v_a_188_, v___y_189_);
 lean_dec_ref(v_a_188_);
 return v_res_190_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1(lean_object* v_x_194_, lean_object* v_a_195_, lean_object* v_a_196_){
+LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1(lean_object* v_x_194_, lean_object* v_a_195_, lean_object* v___y_196_){
 _start:
 {
 lean_object* v___x_197_; uint8_t v___x_198_; 
@@ -890,7 +890,7 @@ lean_dec(v_x_194_);
 v___x_199_ = lean_box(0);
 v___x_200_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_200_, 0, v___x_199_);
-lean_ctor_set(v___x_200_, 1, v_a_196_);
+lean_ctor_set(v___x_200_, 1, v___y_196_);
 return v___x_200_;
 }
 else
@@ -909,7 +909,7 @@ lean_dec(v_x_194_);
 v___x_205_ = lean_box(0);
 v___x_206_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_206_, 0, v___x_205_);
-lean_ctor_set(v___x_206_, 1, v_a_196_);
+lean_ctor_set(v___x_206_, 1, v___y_196_);
 return v___x_206_;
 }
 else
@@ -929,7 +929,7 @@ lean_dec(v___x_202_);
 v___x_211_ = lean_box(0);
 v___x_212_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_212_, 0, v___x_211_);
-lean_ctor_set(v___x_212_, 1, v_a_196_);
+lean_ctor_set(v___x_212_, 1, v___y_196_);
 return v___x_212_;
 }
 else
@@ -952,18 +952,18 @@ lean_ctor_set(v___x_220_, 1, v___x_219_);
 v___x_221_ = l_Lean_Syntax_node3(v___x_217_, v___x_218_, v___x_213_, v___x_220_, v___x_214_);
 v___x_222_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_222_, 0, v___x_221_);
-lean_ctor_set(v___x_222_, 1, v_a_196_);
+lean_ctor_set(v___x_222_, 1, v___y_196_);
 return v___x_222_;
 }
 }
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1___boxed(lean_object* v_x_223_, lean_object* v_a_224_, lean_object* v_a_225_){
+LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1___boxed(lean_object* v_x_223_, lean_object* v_a_224_, lean_object* v___y_225_){
 _start:
 {
 lean_object* v_res_226_; 
-v_res_226_ = l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1(v_x_223_, v_a_224_, v_a_225_);
+v_res_226_ = l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1(v_x_223_, v_a_224_, v___y_225_);
 lean_dec(v_a_224_);
 return v_res_226_;
 }

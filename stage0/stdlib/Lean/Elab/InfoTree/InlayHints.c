@@ -482,7 +482,7 @@ return v___x_148_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_InlayHint_resolveDeferred___boxed(lean_object* v_i_152_, lean_object* v_a_153_, lean_object* v_a_154_, lean_object* v_a_155_, lean_object* v_a_156_, lean_object* v_a_157_){
+LEAN_EXPORT lean_object* l_Lean_Elab_InlayHint_resolveDeferred___boxed(lean_object* v_i_152_, lean_object* v_a_153_, lean_object* v_a_154_, lean_object* v_a_155_, lean_object* v_a_156_, lean_object* v___y_157_){
 _start:
 {
 lean_object* v_res_158_; 

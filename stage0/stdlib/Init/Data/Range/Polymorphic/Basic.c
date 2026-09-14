@@ -848,7 +848,7 @@ v___x_380_ = l_String_toRawSubstring_x27(v___x_379_);
 return v___x_380_;
 }
 }
-LEAN_EXPORT lean_object* l_Std___aux__Init__Data__Range__Polymorphic__Basic______macroRules__tacticGet__elem__tactic__extensible__1(lean_object* v_x_399_, lean_object* v_a_400_, lean_object* v_a_401_){
+LEAN_EXPORT lean_object* l_Std___aux__Init__Data__Range__Polymorphic__Basic______macroRules__tacticGet__elem__tactic__extensible__1(lean_object* v_x_399_, lean_object* v_a_400_, lean_object* v___y_401_){
 _start:
 {
 lean_object* v___x_402_; uint8_t v___x_403_; 
@@ -860,7 +860,7 @@ lean_object* v___x_404_; lean_object* v___x_405_;
 v___x_404_ = lean_box(1);
 v___x_405_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_405_, 0, v___x_404_);
-lean_ctor_set(v___x_405_, 1, v_a_401_);
+lean_ctor_set(v___x_405_, 1, v___y_401_);
 return v___x_405_;
 }
 else
@@ -1010,16 +1010,16 @@ v___x_502_ = l_Lean_Syntax_node4(v___x_410_, v___x_414_, v___x_471_, v___x_482_,
 v___x_503_ = l_Lean_Syntax_node2(v___x_410_, v___x_412_, v___x_413_, v___x_502_);
 v___x_504_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_504_, 0, v___x_503_);
-lean_ctor_set(v___x_504_, 1, v_a_401_);
+lean_ctor_set(v___x_504_, 1, v___y_401_);
 return v___x_504_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std___aux__Init__Data__Range__Polymorphic__Basic______macroRules__tacticGet__elem__tactic__extensible__1___boxed(lean_object* v_x_505_, lean_object* v_a_506_, lean_object* v_a_507_){
+LEAN_EXPORT lean_object* l_Std___aux__Init__Data__Range__Polymorphic__Basic______macroRules__tacticGet__elem__tactic__extensible__1___boxed(lean_object* v_x_505_, lean_object* v_a_506_, lean_object* v___y_507_){
 _start:
 {
 lean_object* v_res_508_; 
-v_res_508_ = l_Std___aux__Init__Data__Range__Polymorphic__Basic______macroRules__tacticGet__elem__tactic__extensible__1(v_x_505_, v_a_506_, v_a_507_);
+v_res_508_ = l_Std___aux__Init__Data__Range__Polymorphic__Basic______macroRules__tacticGet__elem__tactic__extensible__1(v_x_505_, v_a_506_, v___y_507_);
 lean_dec_ref(v_a_506_);
 return v_res_508_;
 }

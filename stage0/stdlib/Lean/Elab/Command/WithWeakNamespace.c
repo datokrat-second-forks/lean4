@@ -703,7 +703,7 @@ return v___x_147_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Command_withWeakNamespace___redArg___boxed(lean_object* v_ns_150_, lean_object* v_m_151_, lean_object* v_a_152_, lean_object* v_a_153_, lean_object* v_a_154_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Command_withWeakNamespace___redArg___boxed(lean_object* v_ns_150_, lean_object* v_m_151_, lean_object* v_a_152_, lean_object* v_a_153_, lean_object* v___y_154_){
 _start:
 {
 lean_object* v_res_155_; 
@@ -721,7 +721,7 @@ v___x_162_ = l___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Comman
 return v___x_162_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Command_withWeakNamespace___boxed(lean_object* v_00_u03b1_163_, lean_object* v_ns_164_, lean_object* v_m_165_, lean_object* v_a_166_, lean_object* v_a_167_, lean_object* v_a_168_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Command_withWeakNamespace___boxed(lean_object* v_00_u03b1_163_, lean_object* v_ns_164_, lean_object* v_m_165_, lean_object* v_a_166_, lean_object* v_a_167_, lean_object* v___y_168_){
 _start:
 {
 lean_object* v_res_169_; 
@@ -825,7 +825,7 @@ return v___x_216_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Command_elabWithWeakNamespace___boxed(lean_object* v_x_217_, lean_object* v_a_218_, lean_object* v_a_219_, lean_object* v_a_220_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Command_elabWithWeakNamespace___boxed(lean_object* v_x_217_, lean_object* v_a_218_, lean_object* v_a_219_, lean_object* v___y_220_){
 _start:
 {
 lean_object* v_res_221_; 
@@ -847,7 +847,7 @@ v___x_261_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_257_, v___x_25
 return v___x_261_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Command_elabWithWeakNamespace___regBuiltin___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Command_elabWithWeakNamespace__1___boxed(lean_object* v_a_262_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Command_elabWithWeakNamespace___regBuiltin___private_Lean_Elab_Command_WithWeakNamespace_0__Lean_Elab_Command_elabWithWeakNamespace__1___boxed(lean_object* v___y_262_){
 _start:
 {
 lean_object* v_res_263_; 

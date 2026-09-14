@@ -417,7 +417,7 @@ return v___x_61_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_CtorIdxHInj_0__Lean_Meta_mkHInjectiveTheorem_x3f_repeatIntroSubstRefl___boxed(lean_object* v_mvarId_64_, lean_object* v_a_65_, lean_object* v_a_66_, lean_object* v_a_67_, lean_object* v_a_68_, lean_object* v_a_69_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_CtorIdxHInj_0__Lean_Meta_mkHInjectiveTheorem_x3f_repeatIntroSubstRefl___boxed(lean_object* v_mvarId_64_, lean_object* v_a_65_, lean_object* v_a_66_, lean_object* v_a_67_, lean_object* v_a_68_, lean_object* v___y_69_){
 _start:
 {
 lean_object* v_res_70_; 
@@ -2207,7 +2207,7 @@ return v___x_778_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_CtorIdxHInj_0__Lean_Meta_mkHInjectiveTheorem_x3f___boxed(lean_object* v_thmName_782_, lean_object* v_indVal_783_, lean_object* v_a_784_, lean_object* v_a_785_, lean_object* v_a_786_, lean_object* v_a_787_, lean_object* v_a_788_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_CtorIdxHInj_0__Lean_Meta_mkHInjectiveTheorem_x3f___boxed(lean_object* v_thmName_782_, lean_object* v_indVal_783_, lean_object* v_a_784_, lean_object* v_a_785_, lean_object* v_a_786_, lean_object* v_a_787_, lean_object* v___y_788_){
 _start:
 {
 lean_object* v_res_789_; 
@@ -2327,7 +2327,7 @@ v___x_850_ = l_Lean_registerReservedNamePredicate(v___f_849_);
 return v___x_850_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_CtorIdxHInj_0__Lean_Meta_initFn_00___x40_Lean_Meta_CtorIdxHInj_3745005406____hygCtx___hyg_2____boxed(lean_object* v_a_851_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_CtorIdxHInj_0__Lean_Meta_initFn_00___x40_Lean_Meta_CtorIdxHInj_3745005406____hygCtx___hyg_2____boxed(lean_object* v___y_851_){
 _start:
 {
 lean_object* v_res_852_; 
@@ -2853,7 +2853,7 @@ v___x_1013_ = l_Lean_registerReservedNameAction(v___f_1012_);
 return v___x_1013_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_CtorIdxHInj_0__Lean_Meta_initFn_00___x40_Lean_Meta_CtorIdxHInj_1686831688____hygCtx___hyg_2____boxed(lean_object* v_a_1014_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_CtorIdxHInj_0__Lean_Meta_initFn_00___x40_Lean_Meta_CtorIdxHInj_1686831688____hygCtx___hyg_2____boxed(lean_object* v___y_1014_){
 _start:
 {
 lean_object* v_res_1015_; 

@@ -413,7 +413,7 @@ return v___x_103_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_mkSorry___boxed(lean_object* v_type_119_, lean_object* v_synthetic_120_, lean_object* v_a_121_, lean_object* v_a_122_, lean_object* v_a_123_, lean_object* v_a_124_, lean_object* v_a_125_){
+LEAN_EXPORT lean_object* l_Lean_Meta_mkSorry___boxed(lean_object* v_type_119_, lean_object* v_synthetic_120_, lean_object* v_a_121_, lean_object* v_a_122_, lean_object* v_a_123_, lean_object* v_a_124_, lean_object* v___y_125_){
 _start:
 {
 uint8_t v_synthetic_boxed_126_; lean_object* v_res_127_; 
@@ -487,7 +487,7 @@ return v___x_137_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_SorryLabelView_encode___boxed(lean_object* v_view_156_, lean_object* v_a_157_, lean_object* v_a_158_, lean_object* v_a_159_){
+LEAN_EXPORT lean_object* l_Lean_Meta_SorryLabelView_encode___boxed(lean_object* v_view_156_, lean_object* v_a_157_, lean_object* v_a_158_, lean_object* v___y_159_){
 _start:
 {
 lean_object* v_res_160_; 
@@ -603,8 +603,8 @@ return v___x_187_;
 else
 {
 lean_object* v___x_188_; 
-lean_dec_ref_known(v_pre_173_, 2);
 lean_dec(v_pre_174_);
+lean_dec_ref_known(v_pre_173_, 2);
 lean_dec_ref_known(v_pre_172_, 2);
 lean_dec_ref_known(v_pre_171_, 2);
 lean_dec_ref_known(v_pre_170_, 2);
@@ -616,8 +616,8 @@ return v___x_188_;
 else
 {
 lean_object* v___x_189_; 
-lean_dec_ref_known(v_pre_172_, 2);
 lean_dec(v_pre_173_);
+lean_dec_ref_known(v_pre_172_, 2);
 lean_dec_ref_known(v_pre_171_, 2);
 lean_dec_ref_known(v_pre_170_, 2);
 lean_dec_ref_known(v_pre_165_, 2);
@@ -628,8 +628,8 @@ return v___x_189_;
 else
 {
 lean_object* v___x_190_; 
-lean_dec(v_pre_172_);
 lean_dec_ref_known(v_pre_171_, 2);
+lean_dec(v_pre_172_);
 lean_dec_ref_known(v_pre_170_, 2);
 lean_dec_ref_known(v_pre_165_, 2);
 v___x_190_ = lean_box(0);
@@ -1248,7 +1248,7 @@ goto v___jp_308_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_mkLabeledSorry___boxed(lean_object* v_type_384_, lean_object* v_synthetic_385_, lean_object* v_unique_386_, lean_object* v_a_387_, lean_object* v_a_388_, lean_object* v_a_389_, lean_object* v_a_390_, lean_object* v_a_391_){
+LEAN_EXPORT lean_object* l_Lean_Meta_mkLabeledSorry___boxed(lean_object* v_type_384_, lean_object* v_synthetic_385_, lean_object* v_unique_386_, lean_object* v_a_387_, lean_object* v_a_388_, lean_object* v_a_389_, lean_object* v_a_390_, lean_object* v___y_391_){
 _start:
 {
 uint8_t v_synthetic_boxed_392_; uint8_t v_unique_boxed_393_; lean_object* v_res_394_; 

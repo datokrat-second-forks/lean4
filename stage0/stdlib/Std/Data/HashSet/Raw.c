@@ -511,7 +511,7 @@ v___x_88_ = l_String_toRawSubstring_x27(v___x_87_);
 return v___x_88_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______macroRules__Std__HashSet__Raw__term___x7em____1(lean_object* v_x_110_, lean_object* v_a_111_, lean_object* v_a_112_){
+LEAN_EXPORT lean_object* l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______macroRules__Std__HashSet__Raw__term___x7em____1(lean_object* v_x_110_, lean_object* v_a_111_, lean_object* v___y_112_){
 _start:
 {
 lean_object* v___x_113_; uint8_t v___x_114_; 
@@ -525,7 +525,7 @@ lean_dec(v_x_110_);
 v___x_115_ = lean_box(1);
 v___x_116_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_116_, 0, v___x_115_);
-lean_ctor_set(v___x_116_, 1, v_a_112_);
+lean_ctor_set(v___x_116_, 1, v___y_112_);
 return v___x_116_;
 }
 else
@@ -559,21 +559,21 @@ v___x_133_ = l_Lean_Syntax_node2(v___x_125_, v___x_132_, v___x_121_, v___x_123_)
 v___x_134_ = l_Lean_Syntax_node2(v___x_125_, v___x_126_, v___x_131_, v___x_133_);
 v___x_135_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_135_, 0, v___x_134_);
-lean_ctor_set(v___x_135_, 1, v_a_112_);
+lean_ctor_set(v___x_135_, 1, v___y_112_);
 return v___x_135_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______macroRules__Std__HashSet__Raw__term___x7em____1___boxed(lean_object* v_x_136_, lean_object* v_a_137_, lean_object* v_a_138_){
+LEAN_EXPORT lean_object* l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______macroRules__Std__HashSet__Raw__term___x7em____1___boxed(lean_object* v_x_136_, lean_object* v_a_137_, lean_object* v___y_138_){
 _start:
 {
 lean_object* v_res_139_; 
-v_res_139_ = l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______macroRules__Std__HashSet__Raw__term___x7em____1(v_x_136_, v_a_137_, v_a_138_);
+v_res_139_ = l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______macroRules__Std__HashSet__Raw__term___x7em____1(v_x_136_, v_a_137_, v___y_138_);
 lean_dec_ref(v_a_137_);
 return v_res_139_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______unexpand__Std__HashSet__Raw__Equiv__1(lean_object* v_x_143_, lean_object* v_a_144_, lean_object* v_a_145_){
+LEAN_EXPORT lean_object* l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______unexpand__Std__HashSet__Raw__Equiv__1(lean_object* v_x_143_, lean_object* v_a_144_, lean_object* v___y_145_){
 _start:
 {
 lean_object* v___x_146_; uint8_t v___x_147_; 
@@ -587,7 +587,7 @@ lean_dec(v_x_143_);
 v___x_148_ = lean_box(0);
 v___x_149_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_149_, 0, v___x_148_);
-lean_ctor_set(v___x_149_, 1, v_a_145_);
+lean_ctor_set(v___x_149_, 1, v___y_145_);
 return v___x_149_;
 }
 else
@@ -606,7 +606,7 @@ lean_dec(v_x_143_);
 v___x_154_ = lean_box(0);
 v___x_155_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_155_, 0, v___x_154_);
-lean_ctor_set(v___x_155_, 1, v_a_145_);
+lean_ctor_set(v___x_155_, 1, v___y_145_);
 return v___x_155_;
 }
 else
@@ -626,7 +626,7 @@ lean_dec(v___x_151_);
 v___x_160_ = lean_box(0);
 v___x_161_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_161_, 0, v___x_160_);
-lean_ctor_set(v___x_161_, 1, v_a_145_);
+lean_ctor_set(v___x_161_, 1, v___y_145_);
 return v___x_161_;
 }
 else
@@ -649,18 +649,18 @@ lean_ctor_set(v___x_169_, 1, v___x_168_);
 v___x_170_ = l_Lean_Syntax_node3(v___x_166_, v___x_167_, v___x_162_, v___x_169_, v___x_163_);
 v___x_171_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_171_, 0, v___x_170_);
-lean_ctor_set(v___x_171_, 1, v_a_145_);
+lean_ctor_set(v___x_171_, 1, v___y_145_);
 return v___x_171_;
 }
 }
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______unexpand__Std__HashSet__Raw__Equiv__1___boxed(lean_object* v_x_172_, lean_object* v_a_173_, lean_object* v_a_174_){
+LEAN_EXPORT lean_object* l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______unexpand__Std__HashSet__Raw__Equiv__1___boxed(lean_object* v_x_172_, lean_object* v_a_173_, lean_object* v___y_174_){
 _start:
 {
 lean_object* v_res_175_; 
-v_res_175_ = l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______unexpand__Std__HashSet__Raw__Equiv__1(v_x_172_, v_a_173_, v_a_174_);
+v_res_175_ = l_Std_HashSet_Raw___aux__Std__Data__HashSet__Raw______unexpand__Std__HashSet__Raw__Equiv__1(v_x_172_, v_a_173_, v___y_174_);
 lean_dec(v_a_173_);
 return v_res_175_;
 }

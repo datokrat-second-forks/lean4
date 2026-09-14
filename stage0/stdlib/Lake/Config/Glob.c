@@ -612,7 +612,7 @@ v___x_207_ = l_String_toRawSubstring_x27(v___x_206_);
 return v___x_207_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2a__1(lean_object* v_x_237_, lean_object* v_a_238_, lean_object* v_a_239_){
+LEAN_EXPORT lean_object* l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2a__1(lean_object* v_x_237_, lean_object* v_a_238_, lean_object* v___y_239_){
 _start:
 {
 lean_object* v___x_240_; uint8_t v___x_241_; 
@@ -626,7 +626,7 @@ lean_dec(v_x_237_);
 v___x_242_ = lean_box(1);
 v___x_243_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_243_, 0, v___x_242_);
-lean_ctor_set(v___x_243_, 1, v_a_239_);
+lean_ctor_set(v___x_243_, 1, v___y_239_);
 return v___x_243_;
 }
 else
@@ -667,16 +667,16 @@ v___x_264_ = l_Lean_Syntax_node1(v___x_250_, v___x_257_, v___x_263_);
 v___x_265_ = l_Lean_Syntax_node2(v___x_250_, v___x_251_, v___x_256_, v___x_264_);
 v___x_266_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_266_, 0, v___x_265_);
-lean_ctor_set(v___x_266_, 1, v_a_239_);
+lean_ctor_set(v___x_266_, 1, v___y_239_);
 return v___x_266_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2a__1___boxed(lean_object* v_x_267_, lean_object* v_a_268_, lean_object* v_a_269_){
+LEAN_EXPORT lean_object* l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2a__1___boxed(lean_object* v_x_267_, lean_object* v_a_268_, lean_object* v___y_269_){
 _start:
 {
 lean_object* v_res_270_; 
-v_res_270_ = l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2a__1(v_x_267_, v_a_268_, v_a_269_);
+v_res_270_ = l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2a__1(v_x_267_, v_a_268_, v___y_269_);
 lean_dec_ref(v_a_268_);
 return v_res_270_;
 }
@@ -690,7 +690,7 @@ v___x_289_ = l_String_toRawSubstring_x27(v___x_288_);
 return v___x_289_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2b__1(lean_object* v_x_309_, lean_object* v_a_310_, lean_object* v_a_311_){
+LEAN_EXPORT lean_object* l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2b__1(lean_object* v_x_309_, lean_object* v_a_310_, lean_object* v___y_311_){
 _start:
 {
 lean_object* v___x_312_; uint8_t v___x_313_; 
@@ -704,7 +704,7 @@ lean_dec(v_x_309_);
 v___x_314_ = lean_box(1);
 v___x_315_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_315_, 0, v___x_314_);
-lean_ctor_set(v___x_315_, 1, v_a_311_);
+lean_ctor_set(v___x_315_, 1, v___y_311_);
 return v___x_315_;
 }
 else
@@ -745,16 +745,16 @@ v___x_336_ = l_Lean_Syntax_node1(v___x_322_, v___x_329_, v___x_335_);
 v___x_337_ = l_Lean_Syntax_node2(v___x_322_, v___x_323_, v___x_328_, v___x_336_);
 v___x_338_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_338_, 0, v___x_337_);
-lean_ctor_set(v___x_338_, 1, v_a_311_);
+lean_ctor_set(v___x_338_, 1, v___y_311_);
 return v___x_338_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2b__1___boxed(lean_object* v_x_339_, lean_object* v_a_340_, lean_object* v_a_341_){
+LEAN_EXPORT lean_object* l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2b__1___boxed(lean_object* v_x_339_, lean_object* v_a_340_, lean_object* v___y_341_){
 _start:
 {
 lean_object* v_res_342_; 
-v_res_342_ = l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2b__1(v_x_339_, v_a_340_, v_a_341_);
+v_res_342_ = l_Lake___aux__Lake__Config__Glob______macroRules__Lake__term_____x2e_x2b__1(v_x_339_, v_a_340_, v___y_341_);
 lean_dec_ref(v_a_340_);
 return v_res_342_;
 }

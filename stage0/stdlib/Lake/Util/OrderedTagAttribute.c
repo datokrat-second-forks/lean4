@@ -1473,7 +1473,7 @@ return v___x_449_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_registerOrderedTagAttribute___boxed(lean_object* v_name_452_, lean_object* v_descr_453_, lean_object* v_validate_454_, lean_object* v_ref_455_, lean_object* v_a_456_){
+LEAN_EXPORT lean_object* l_Lake_registerOrderedTagAttribute___boxed(lean_object* v_name_452_, lean_object* v_descr_453_, lean_object* v_validate_454_, lean_object* v_ref_455_, lean_object* v___y_456_){
 _start:
 {
 lean_object* v_res_457_; 

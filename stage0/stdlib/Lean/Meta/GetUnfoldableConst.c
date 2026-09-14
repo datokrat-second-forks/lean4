@@ -644,7 +644,7 @@ return v___x_107_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_canUnfoldDefault___boxed(lean_object* v_cfg_120_, lean_object* v_info_121_, lean_object* v_a_122_, lean_object* v_a_123_, lean_object* v_a_124_){
+LEAN_EXPORT lean_object* l_Lean_Meta_canUnfoldDefault___boxed(lean_object* v_cfg_120_, lean_object* v_info_121_, lean_object* v_a_122_, lean_object* v_a_123_, lean_object* v___y_124_){
 _start:
 {
 lean_object* v_res_125_; 
@@ -1378,7 +1378,7 @@ return v___x_217_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_canUnfoldAtMatcher___boxed(lean_object* v_cfg_363_, lean_object* v_info_364_, lean_object* v_a_365_, lean_object* v_a_366_, lean_object* v_a_367_){
+LEAN_EXPORT lean_object* l_Lean_Meta_canUnfoldAtMatcher___boxed(lean_object* v_cfg_363_, lean_object* v_info_364_, lean_object* v_a_365_, lean_object* v_a_366_, lean_object* v___y_367_){
 _start:
 {
 lean_object* v_res_368_; 
@@ -1429,7 +1429,7 @@ return v___x_380_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_canUnfold___redArg___boxed(lean_object* v_info_381_, lean_object* v_a_382_, lean_object* v_a_383_, lean_object* v_a_384_, lean_object* v_a_385_){
+LEAN_EXPORT lean_object* l_Lean_Meta_canUnfold___redArg___boxed(lean_object* v_info_381_, lean_object* v_a_382_, lean_object* v_a_383_, lean_object* v_a_384_, lean_object* v___y_385_){
 _start:
 {
 lean_object* v_res_386_; 
@@ -1448,7 +1448,7 @@ v___x_393_ = l_Lean_Meta_canUnfold___redArg(v_info_387_, v_a_388_, v_a_390_, v_a
 return v___x_393_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_canUnfold___boxed(lean_object* v_info_394_, lean_object* v_a_395_, lean_object* v_a_396_, lean_object* v_a_397_, lean_object* v_a_398_, lean_object* v_a_399_){
+LEAN_EXPORT lean_object* l_Lean_Meta_canUnfold___boxed(lean_object* v_info_394_, lean_object* v_a_395_, lean_object* v_a_396_, lean_object* v_a_397_, lean_object* v_a_398_, lean_object* v___y_399_){
 _start:
 {
 lean_object* v_res_400_; 
@@ -2313,7 +2313,7 @@ return v___x_700_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_getUnfoldableConst_x3f___boxed(lean_object* v_constName_701_, lean_object* v_a_702_, lean_object* v_a_703_, lean_object* v_a_704_, lean_object* v_a_705_, lean_object* v_a_706_){
+LEAN_EXPORT lean_object* l_Lean_Meta_getUnfoldableConst_x3f___boxed(lean_object* v_constName_701_, lean_object* v_a_702_, lean_object* v_a_703_, lean_object* v_a_704_, lean_object* v_a_705_, lean_object* v___y_706_){
 _start:
 {
 lean_object* v_res_707_; 
@@ -2707,8 +2707,8 @@ return v___x_856_;
 }
 default: 
 {
-lean_dec_ref_known(v___x_808_, 1);
 lean_dec(v_val_809_);
+lean_dec_ref_known(v___x_808_, 1);
 lean_dec(v_constName_796_);
 goto v___jp_802_;
 }
@@ -2730,7 +2730,7 @@ return v___x_804_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_getUnfoldableConstNoEx_x3f___boxed(lean_object* v_constName_859_, lean_object* v_a_860_, lean_object* v_a_861_, lean_object* v_a_862_, lean_object* v_a_863_, lean_object* v_a_864_){
+LEAN_EXPORT lean_object* l_Lean_Meta_getUnfoldableConstNoEx_x3f___boxed(lean_object* v_constName_859_, lean_object* v_a_860_, lean_object* v_a_861_, lean_object* v_a_862_, lean_object* v_a_863_, lean_object* v___y_864_){
 _start:
 {
 lean_object* v_res_865_; 

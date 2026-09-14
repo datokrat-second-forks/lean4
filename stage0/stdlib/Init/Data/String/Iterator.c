@@ -1057,7 +1057,7 @@ v___x_288_ = l_String_toRawSubstring_x27(v___x_287_);
 return v___x_288_;
 }
 }
-LEAN_EXPORT lean_object* l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__1(lean_object* v_x_311_, lean_object* v_a_312_, lean_object* v_a_313_){
+LEAN_EXPORT lean_object* l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__1(lean_object* v_x_311_, lean_object* v_a_312_, lean_object* v___y_313_){
 _start:
 {
 lean_object* v___x_314_; uint8_t v___x_315_; 
@@ -1069,7 +1069,7 @@ lean_object* v___x_316_; lean_object* v___x_317_;
 v___x_316_ = lean_box(1);
 v___x_317_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_317_, 0, v___x_316_);
-lean_ctor_set(v___x_317_, 1, v_a_313_);
+lean_ctor_set(v___x_317_, 1, v___y_313_);
 return v___x_317_;
 }
 else
@@ -1122,16 +1122,16 @@ v___x_346_ = l_Lean_Syntax_node1(v___x_322_, v___x_326_, v___x_345_);
 v___x_347_ = l_Lean_Syntax_node2(v___x_322_, v___x_323_, v___x_325_, v___x_346_);
 v___x_348_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_348_, 0, v___x_347_);
-lean_ctor_set(v___x_348_, 1, v_a_313_);
+lean_ctor_set(v___x_348_, 1, v___y_313_);
 return v___x_348_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__1___boxed(lean_object* v_x_349_, lean_object* v_a_350_, lean_object* v_a_351_){
+LEAN_EXPORT lean_object* l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__1___boxed(lean_object* v_x_349_, lean_object* v_a_350_, lean_object* v___y_351_){
 _start:
 {
 lean_object* v_res_352_; 
-v_res_352_ = l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__1(v_x_349_, v_a_350_, v_a_351_);
+v_res_352_ = l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__1(v_x_349_, v_a_350_, v___y_351_);
 lean_dec_ref(v_a_350_);
 return v_res_352_;
 }
@@ -1145,7 +1145,7 @@ v___x_355_ = l_String_toRawSubstring_x27(v___x_354_);
 return v___x_355_;
 }
 }
-LEAN_EXPORT lean_object* l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__2(lean_object* v_x_368_, lean_object* v_a_369_, lean_object* v_a_370_){
+LEAN_EXPORT lean_object* l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__2(lean_object* v_x_368_, lean_object* v_a_369_, lean_object* v___y_370_){
 _start:
 {
 lean_object* v___x_371_; uint8_t v___x_372_; 
@@ -1157,7 +1157,7 @@ lean_object* v___x_373_; lean_object* v___x_374_;
 v___x_373_ = lean_box(1);
 v___x_374_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_374_, 0, v___x_373_);
-lean_ctor_set(v___x_374_, 1, v_a_370_);
+lean_ctor_set(v___x_374_, 1, v___y_370_);
 return v___x_374_;
 }
 else
@@ -1210,16 +1210,16 @@ v___x_403_ = l_Lean_Syntax_node1(v___x_379_, v___x_383_, v___x_402_);
 v___x_404_ = l_Lean_Syntax_node2(v___x_379_, v___x_380_, v___x_382_, v___x_403_);
 v___x_405_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_405_, 0, v___x_404_);
-lean_ctor_set(v___x_405_, 1, v_a_370_);
+lean_ctor_set(v___x_405_, 1, v___y_370_);
 return v___x_405_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__2___boxed(lean_object* v_x_406_, lean_object* v_a_407_, lean_object* v_a_408_){
+LEAN_EXPORT lean_object* l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__2___boxed(lean_object* v_x_406_, lean_object* v_a_407_, lean_object* v___y_408_){
 _start:
 {
 lean_object* v_res_409_; 
-v_res_409_ = l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__2(v_x_406_, v_a_407_, v_a_408_);
+v_res_409_ = l_String_Legacy_Iterator___aux__Init__Data__String__Iterator______macroRules__tacticDecreasing__trivial__2(v_x_406_, v_a_407_, v___y_408_);
 lean_dec_ref(v_a_407_);
 return v_res_409_;
 }

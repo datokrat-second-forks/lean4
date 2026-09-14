@@ -144,7 +144,7 @@ return v___x_52_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_IO_Promise_isResolved___redArg___boxed(lean_object* v_promise_53_, lean_object* v_a_54_){
+LEAN_EXPORT lean_object* l_IO_Promise_isResolved___redArg___boxed(lean_object* v_promise_53_, lean_object* v___y_54_){
 _start:
 {
 uint8_t v_res_55_; lean_object* v_r_56_; 
@@ -162,7 +162,7 @@ v___x_60_ = l_IO_Promise_isResolved___redArg(v_promise_58_);
 return v___x_60_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_Promise_isResolved___boxed(lean_object* v_00_u03b1_61_, lean_object* v_promise_62_, lean_object* v_a_63_){
+LEAN_EXPORT lean_object* l_IO_Promise_isResolved___boxed(lean_object* v_00_u03b1_61_, lean_object* v_promise_62_, lean_object* v___y_63_){
 _start:
 {
 uint8_t v_res_64_; lean_object* v_r_65_; 

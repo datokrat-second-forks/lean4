@@ -100,7 +100,7 @@ v___x_40_ = l_String_toRawSubstring_x27(v___x_39_);
 return v___x_40_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__Heyting______macroRules__Lean__Order__term___u21e8____1(lean_object* v_x_56_, lean_object* v_a_57_, lean_object* v_a_58_){
+LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__Heyting______macroRules__Lean__Order__term___u21e8____1(lean_object* v_x_56_, lean_object* v_a_57_, lean_object* v___y_58_){
 _start:
 {
 lean_object* v___x_59_; uint8_t v___x_60_; 
@@ -114,7 +114,7 @@ lean_dec(v_x_56_);
 v___x_61_ = lean_box(1);
 v___x_62_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_62_, 0, v___x_61_);
-lean_ctor_set(v___x_62_, 1, v_a_58_);
+lean_ctor_set(v___x_62_, 1, v___y_58_);
 return v___x_62_;
 }
 else
@@ -148,21 +148,21 @@ v___x_79_ = l_Lean_Syntax_node2(v___x_71_, v___x_78_, v___x_67_, v___x_69_);
 v___x_80_ = l_Lean_Syntax_node2(v___x_71_, v___x_72_, v___x_77_, v___x_79_);
 v___x_81_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_81_, 0, v___x_80_);
-lean_ctor_set(v___x_81_, 1, v_a_58_);
+lean_ctor_set(v___x_81_, 1, v___y_58_);
 return v___x_81_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__Heyting______macroRules__Lean__Order__term___u21e8____1___boxed(lean_object* v_x_82_, lean_object* v_a_83_, lean_object* v_a_84_){
+LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__Heyting______macroRules__Lean__Order__term___u21e8____1___boxed(lean_object* v_x_82_, lean_object* v_a_83_, lean_object* v___y_84_){
 _start:
 {
 lean_object* v_res_85_; 
-v_res_85_ = l_Lean_Order___aux__Std__Internal__Order__Heyting______macroRules__Lean__Order__term___u21e8____1(v_x_82_, v_a_83_, v_a_84_);
+v_res_85_ = l_Lean_Order___aux__Std__Internal__Order__Heyting______macroRules__Lean__Order__term___u21e8____1(v_x_82_, v_a_83_, v___y_84_);
 lean_dec_ref(v_a_83_);
 return v_res_85_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__Heyting______unexpand__Lean__Order__himp__1(lean_object* v_x_89_, lean_object* v_a_90_, lean_object* v_a_91_){
+LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__Heyting______unexpand__Lean__Order__himp__1(lean_object* v_x_89_, lean_object* v_a_90_, lean_object* v___y_91_){
 _start:
 {
 lean_object* v___x_92_; uint8_t v___x_93_; 
@@ -176,7 +176,7 @@ lean_dec(v_x_89_);
 v___x_94_ = lean_box(0);
 v___x_95_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_95_, 0, v___x_94_);
-lean_ctor_set(v___x_95_, 1, v_a_91_);
+lean_ctor_set(v___x_95_, 1, v___y_91_);
 return v___x_95_;
 }
 else
@@ -195,7 +195,7 @@ lean_dec(v_x_89_);
 v___x_100_ = lean_box(0);
 v___x_101_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_101_, 0, v___x_100_);
-lean_ctor_set(v___x_101_, 1, v_a_91_);
+lean_ctor_set(v___x_101_, 1, v___y_91_);
 return v___x_101_;
 }
 else
@@ -215,7 +215,7 @@ lean_dec(v___x_97_);
 v___x_106_ = lean_box(0);
 v___x_107_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_107_, 0, v___x_106_);
-lean_ctor_set(v___x_107_, 1, v_a_91_);
+lean_ctor_set(v___x_107_, 1, v___y_91_);
 return v___x_107_;
 }
 else
@@ -238,18 +238,18 @@ lean_ctor_set(v___x_115_, 1, v___x_114_);
 v___x_116_ = l_Lean_Syntax_node3(v___x_112_, v___x_113_, v___x_108_, v___x_115_, v___x_109_);
 v___x_117_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_117_, 0, v___x_116_);
-lean_ctor_set(v___x_117_, 1, v_a_91_);
+lean_ctor_set(v___x_117_, 1, v___y_91_);
 return v___x_117_;
 }
 }
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__Heyting______unexpand__Lean__Order__himp__1___boxed(lean_object* v_x_118_, lean_object* v_a_119_, lean_object* v_a_120_){
+LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__Heyting______unexpand__Lean__Order__himp__1___boxed(lean_object* v_x_118_, lean_object* v_a_119_, lean_object* v___y_120_){
 _start:
 {
 lean_object* v_res_121_; 
-v_res_121_ = l_Lean_Order___aux__Std__Internal__Order__Heyting______unexpand__Lean__Order__himp__1(v_x_118_, v_a_119_, v_a_120_);
+v_res_121_ = l_Lean_Order___aux__Std__Internal__Order__Heyting______unexpand__Lean__Order__himp__1(v_x_118_, v_a_119_, v___y_120_);
 lean_dec(v_a_119_);
 return v_res_121_;
 }

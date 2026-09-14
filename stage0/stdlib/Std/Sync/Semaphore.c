@@ -71,7 +71,7 @@ v___x_4_ = lean_io_promise_resolve(v_a_1_, v___x_3_);
 return v___x_3_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Std_Sync_Semaphore_0__Std_mkResolvedPromise___redArg___boxed(lean_object* v_a_5_, lean_object* v_a_6_){
+LEAN_EXPORT lean_object* l___private_Std_Sync_Semaphore_0__Std_mkResolvedPromise___redArg___boxed(lean_object* v_a_5_, lean_object* v___y_6_){
 _start:
 {
 lean_object* v_res_7_; 
@@ -87,7 +87,7 @@ v___x_12_ = l___private_Std_Sync_Semaphore_0__Std_mkResolvedPromise___redArg(v_a
 return v___x_12_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Std_Sync_Semaphore_0__Std_mkResolvedPromise___boxed(lean_object* v_00_u03b1_13_, lean_object* v_inst_14_, lean_object* v_a_15_, lean_object* v_a_16_){
+LEAN_EXPORT lean_object* l___private_Std_Sync_Semaphore_0__Std_mkResolvedPromise___boxed(lean_object* v_00_u03b1_13_, lean_object* v_inst_14_, lean_object* v_a_15_, lean_object* v___y_16_){
 _start:
 {
 lean_object* v_res_17_; 
@@ -115,7 +115,7 @@ v___x_23_ = l_Std_Mutex_new___redArg(v___x_22_);
 return v___x_23_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Semaphore_new___boxed(lean_object* v_permits_24_, lean_object* v_a_25_){
+LEAN_EXPORT lean_object* l_Std_Semaphore_new___boxed(lean_object* v_permits_24_, lean_object* v___y_25_){
 _start:
 {
 lean_object* v_res_26_; 
@@ -272,7 +272,7 @@ v___x_83_ = l_Std_Mutex_atomically___at___00Std_Semaphore_acquire_spec__0___redA
 return v___x_83_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Semaphore_acquire___boxed(lean_object* v_sem_84_, lean_object* v_a_85_){
+LEAN_EXPORT lean_object* l_Std_Semaphore_acquire___boxed(lean_object* v_sem_84_, lean_object* v___y_85_){
 _start:
 {
 lean_object* v_res_86_; 
@@ -368,7 +368,7 @@ lean_dec(v___x_112_);
 return v___x_113_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Semaphore_tryAcquire___boxed(lean_object* v_sem_114_, lean_object* v_a_115_){
+LEAN_EXPORT lean_object* l_Std_Semaphore_tryAcquire___boxed(lean_object* v_sem_114_, lean_object* v___y_115_){
 _start:
 {
 uint8_t v_res_116_; lean_object* v_r_117_; 
@@ -542,7 +542,7 @@ return v___x_160_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_Semaphore_release___boxed(lean_object* v_sem_161_, lean_object* v_a_162_){
+LEAN_EXPORT lean_object* l_Std_Semaphore_release___boxed(lean_object* v_sem_161_, lean_object* v___y_162_){
 _start:
 {
 lean_object* v_res_163_; 
@@ -579,7 +579,7 @@ v___x_175_ = l_Std_Mutex_atomically___at___00Std_Semaphore_acquire_spec__0___red
 return v___x_175_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_Semaphore_availablePermits___boxed(lean_object* v_sem_176_, lean_object* v_a_177_){
+LEAN_EXPORT lean_object* l_Std_Semaphore_availablePermits___boxed(lean_object* v_sem_176_, lean_object* v___y_177_){
 _start:
 {
 lean_object* v_res_178_; 

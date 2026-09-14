@@ -154,7 +154,7 @@ v___x_34_ = l_Lean_PrettyPrinter_Formatter_orelse_formatter(v___x_32_, v___x_33_
 return v___x_34_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter___boxed(lean_object* v_a_35_, lean_object* v_a_36_, lean_object* v_a_37_, lean_object* v_a_38_, lean_object* v_a_39_){
+LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter___boxed(lean_object* v_a_35_, lean_object* v_a_36_, lean_object* v_a_37_, lean_object* v_a_38_, lean_object* v___y_39_){
 _start:
 {
 lean_object* v_res_40_; 
@@ -178,7 +178,7 @@ v___x_53_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_49_, v___x_50_,
 return v___x_53_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_PrettyPrinter_Delaborator_DeclWithSig_0__Lean_PrettyPrinter_Delaborator_declSigWithId___regBuiltin_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter__3___boxed(lean_object* v_a_54_){
+LEAN_EXPORT lean_object* l___private_Lean_PrettyPrinter_Delaborator_DeclWithSig_0__Lean_PrettyPrinter_Delaborator_declSigWithId___regBuiltin_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter__3___boxed(lean_object* v___y_54_){
 _start:
 {
 lean_object* v_res_55_; 
@@ -232,7 +232,7 @@ v___x_80_ = l_Lean_PrettyPrinter_Parenthesizer_withAntiquot_parenthesizer(v___x_
 return v___x_80_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer___boxed(lean_object* v_a_81_, lean_object* v_a_82_, lean_object* v_a_83_, lean_object* v_a_84_, lean_object* v_a_85_){
+LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer___boxed(lean_object* v_a_81_, lean_object* v_a_82_, lean_object* v_a_83_, lean_object* v_a_84_, lean_object* v___y_85_){
 _start:
 {
 lean_object* v_res_86_; 
@@ -256,7 +256,7 @@ v___x_99_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_95_, v___x_96_,
 return v___x_99_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_PrettyPrinter_Delaborator_DeclWithSig_0__Lean_PrettyPrinter_Delaborator_declSigWithId___regBuiltin_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer__7___boxed(lean_object* v_a_100_){
+LEAN_EXPORT lean_object* l___private_Lean_PrettyPrinter_Delaborator_DeclWithSig_0__Lean_PrettyPrinter_Delaborator_declSigWithId___regBuiltin_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer__7___boxed(lean_object* v___y_100_){
 _start:
 {
 lean_object* v_res_101_; 

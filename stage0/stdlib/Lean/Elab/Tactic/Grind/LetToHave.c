@@ -536,7 +536,7 @@ v___x_146_ = l_Lean_Elab_Tactic_Grind_withMainContext___redArg(v___f_145_, v_a_1
 return v___x_146_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Grind_LetToHave_0__Lean_Elab_Tactic_Grind_evalSymLetToHave___redArg___boxed(lean_object* v_a_147_, lean_object* v_a_148_, lean_object* v_a_149_, lean_object* v_a_150_, lean_object* v_a_151_, lean_object* v_a_152_, lean_object* v_a_153_, lean_object* v_a_154_, lean_object* v_a_155_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Grind_LetToHave_0__Lean_Elab_Tactic_Grind_evalSymLetToHave___redArg___boxed(lean_object* v_a_147_, lean_object* v_a_148_, lean_object* v_a_149_, lean_object* v_a_150_, lean_object* v_a_151_, lean_object* v_a_152_, lean_object* v_a_153_, lean_object* v_a_154_, lean_object* v___y_155_){
 _start:
 {
 lean_object* v_res_156_; 
@@ -560,7 +560,7 @@ v___x_167_ = l___private_Lean_Elab_Tactic_Grind_LetToHave_0__Lean_Elab_Tactic_Gr
 return v___x_167_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Grind_LetToHave_0__Lean_Elab_Tactic_Grind_evalSymLetToHave___boxed(lean_object* v_x_168_, lean_object* v_a_169_, lean_object* v_a_170_, lean_object* v_a_171_, lean_object* v_a_172_, lean_object* v_a_173_, lean_object* v_a_174_, lean_object* v_a_175_, lean_object* v_a_176_, lean_object* v_a_177_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Grind_LetToHave_0__Lean_Elab_Tactic_Grind_evalSymLetToHave___boxed(lean_object* v_x_168_, lean_object* v_a_169_, lean_object* v_a_170_, lean_object* v_a_171_, lean_object* v_a_172_, lean_object* v_a_173_, lean_object* v_a_174_, lean_object* v_a_175_, lean_object* v_a_176_, lean_object* v___y_177_){
 _start:
 {
 lean_object* v_res_178_; 
@@ -613,7 +613,7 @@ v___x_259_ = l_Lean_KeyedDeclsAttribute_addBuiltin___redArg(v___x_255_, v___x_25
 return v___x_259_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Grind_LetToHave_0__Lean_Elab_Tactic_Grind_evalSymLetToHave___regBuiltin___private_Lean_Elab_Tactic_Grind_LetToHave_0__Lean_Elab_Tactic_Grind_evalSymLetToHave__1___boxed(lean_object* v_a_260_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Grind_LetToHave_0__Lean_Elab_Tactic_Grind_evalSymLetToHave___regBuiltin___private_Lean_Elab_Tactic_Grind_LetToHave_0__Lean_Elab_Tactic_Grind_evalSymLetToHave__1___boxed(lean_object* v___y_260_){
 _start:
 {
 lean_object* v_res_261_; 

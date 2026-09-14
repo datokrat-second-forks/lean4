@@ -1008,7 +1008,7 @@ v___x_372_ = lean_uv_get_process_title();
 return v___x_372_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_getProcessTitle___boxed(lean_object* v_a_373_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_getProcessTitle___boxed(lean_object* v___y_373_){
 _start:
 {
 lean_object* v_res_374_; 
@@ -1024,7 +1024,7 @@ v___x_377_ = lean_uv_set_process_title(v_title_375_);
 return v___x_377_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_setProcessTitle___boxed(lean_object* v_title_378_, lean_object* v_a_379_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_setProcessTitle___boxed(lean_object* v_title_378_, lean_object* v___y_379_){
 _start:
 {
 lean_object* v_res_380_; 
@@ -1122,7 +1122,7 @@ return v___x_396_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_getId___boxed(lean_object* v_a_399_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_getId___boxed(lean_object* v___y_399_){
 _start:
 {
 lean_object* v_res_400_; 
@@ -1219,7 +1219,7 @@ return v___x_416_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_getParentId___boxed(lean_object* v_a_419_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_getParentId___boxed(lean_object* v___y_419_){
 _start:
 {
 lean_object* v_res_420_; 
@@ -1316,7 +1316,7 @@ return v___x_436_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_getCwd___boxed(lean_object* v_a_439_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_getCwd___boxed(lean_object* v___y_439_){
 _start:
 {
 lean_object* v_res_440_; 
@@ -1332,7 +1332,7 @@ v___x_443_ = lean_uv_chdir(v_path_441_);
 return v___x_443_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_setCwd___boxed(lean_object* v_path_444_, lean_object* v_a_445_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_setCwd___boxed(lean_object* v_path_444_, lean_object* v___y_445_){
 _start:
 {
 lean_object* v_res_446_; 
@@ -1349,7 +1349,7 @@ v___x_449_ = lean_uv_os_getpriority(v_pid_447_);
 return v___x_449_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_getPriority___boxed(lean_object* v_pid_450_, lean_object* v_a_451_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_getPriority___boxed(lean_object* v_pid_450_, lean_object* v___y_451_){
 _start:
 {
 uint64_t v_pid_boxed_452_; lean_object* v_res_453_; 
@@ -1367,7 +1367,7 @@ v___x_457_ = lean_uv_os_setpriority(v_pid_454_, v_priority_455_);
 return v___x_457_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_setPriority___boxed(lean_object* v_pid_458_, lean_object* v_priority_459_, lean_object* v_a_460_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_setPriority___boxed(lean_object* v_pid_458_, lean_object* v_priority_459_, lean_object* v___y_460_){
 _start:
 {
 uint64_t v_pid_boxed_461_; uint64_t v_priority_boxed_462_; lean_object* v_res_463_; 
@@ -1455,7 +1455,7 @@ v___x_498_ = lean_apply_1(v___x_56__overap_497_, lean_box(0));
 return v___x_498_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_getResourceUsage___boxed(lean_object* v_a_499_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_getResourceUsage___boxed(lean_object* v___y_499_){
 _start:
 {
 lean_object* v_res_500_; 
@@ -1552,7 +1552,7 @@ return v___x_516_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_getExecutablePath___boxed(lean_object* v_a_519_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_getExecutablePath___boxed(lean_object* v___y_519_){
 _start:
 {
 lean_object* v_res_520_; 
@@ -1568,7 +1568,7 @@ v___x_522_ = lean_uv_get_free_memory();
 return v___x_522_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_freeMemory___boxed(lean_object* v_a_523_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_freeMemory___boxed(lean_object* v___y_523_){
 _start:
 {
 lean_object* v_res_524_; 
@@ -1584,7 +1584,7 @@ v___x_526_ = lean_uv_get_total_memory();
 return v___x_526_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_totalMemory___boxed(lean_object* v_a_527_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_totalMemory___boxed(lean_object* v___y_527_){
 _start:
 {
 lean_object* v_res_528_; 
@@ -1600,7 +1600,7 @@ v___x_530_ = lean_uv_get_constrained_memory();
 return v___x_530_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_constrainedMemory___boxed(lean_object* v_a_531_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_constrainedMemory___boxed(lean_object* v___y_531_){
 _start:
 {
 lean_object* v_res_532_; 
@@ -1616,7 +1616,7 @@ v___x_534_ = lean_uv_get_available_memory();
 return v___x_534_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_IO_Process_availableMemory___boxed(lean_object* v_a_535_){
+LEAN_EXPORT lean_object* l_Std_IO_Process_availableMemory___boxed(lean_object* v___y_535_){
 _start:
 {
 lean_object* v_res_536_; 

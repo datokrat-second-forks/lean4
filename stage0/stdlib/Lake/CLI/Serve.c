@@ -133,10 +133,10 @@ return v___x_6_;
 LEAN_EXPORT lean_object* l_panic___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_print_x21_spec__1(lean_object* v_msg_7_){
 _start:
 {
-lean_object* v___x_9_; lean_object* v___x_284__overap_10_; lean_object* v___x_11_; 
+lean_object* v___x_9_; lean_object* v___x_285__overap_10_; lean_object* v___x_11_; 
 v___x_9_ = lean_obj_once(&l_panic___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_print_x21_spec__1___closed__0, &l_panic___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_print_x21_spec__1___closed__0_once, _init_l_panic___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_print_x21_spec__1___closed__0);
-v___x_284__overap_10_ = lean_panic_fn_borrowed(v___x_9_, v_msg_7_);
-v___x_11_ = lean_apply_1(v___x_284__overap_10_, lean_box(0));
+v___x_285__overap_10_ = lean_panic_fn_borrowed(v___x_9_, v_msg_7_);
+v___x_11_ = lean_apply_1(v___x_285__overap_10_, lean_box(0));
 return v___x_11_;
 }
 }
@@ -160,7 +160,7 @@ v___x_19_ = lean_apply_2(v_putStr_18_, v_s_15_, lean_box(0));
 return v___x_19_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_print___at___00IO_println___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_print_x21_spec__0_spec__0___boxed(lean_object* v_s_20_, lean_object* v_a_21_){
+LEAN_EXPORT lean_object* l_IO_print___at___00IO_println___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_print_x21_spec__0_spec__0___boxed(lean_object* v_s_20_, lean_object* v___y_21_){
 _start:
 {
 lean_object* v_res_22_; 
@@ -178,7 +178,7 @@ v___x_27_ = l_IO_print___at___00IO_println___at___00__private_Lake_CLI_Serve_0__
 return v___x_27_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_println___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_print_x21_spec__0___boxed(lean_object* v_s_28_, lean_object* v_a_29_){
+LEAN_EXPORT lean_object* l_IO_println___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_print_x21_spec__0___boxed(lean_object* v_s_28_, lean_object* v___y_29_){
 _start:
 {
 lean_object* v_res_30_; 
@@ -220,7 +220,7 @@ return v___x_48_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_CLI_Serve_0__Lake_setupFile_print_x21___boxed(lean_object* v_msg_49_, lean_object* v_a_50_){
+LEAN_EXPORT lean_object* l___private_Lake_CLI_Serve_0__Lake_setupFile_print_x21___boxed(lean_object* v_msg_49_, lean_object* v___y_50_){
 _start:
 {
 uint32_t v_res_51_; lean_object* v_r_52_; 
@@ -241,7 +241,7 @@ v___x_57_ = lean_apply_2(v_putStr_56_, v_s_53_, lean_box(0));
 return v___x_57_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_eprint___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_eprint_x21_spec__0___boxed(lean_object* v_s_58_, lean_object* v_a_59_){
+LEAN_EXPORT lean_object* l_IO_eprint___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_eprint_x21_spec__0___boxed(lean_object* v_s_58_, lean_object* v___y_59_){
 _start:
 {
 lean_object* v_res_60_; 
@@ -289,7 +289,7 @@ return v___x_80_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_CLI_Serve_0__Lake_setupFile_eprint_x21___boxed(lean_object* v_msg_81_, lean_object* v_a_82_){
+LEAN_EXPORT lean_object* l___private_Lake_CLI_Serve_0__Lake_setupFile_eprint_x21___boxed(lean_object* v_msg_81_, lean_object* v___y_82_){
 _start:
 {
 lean_object* v_res_83_; 
@@ -308,10 +308,10 @@ return v___x_89_;
 LEAN_EXPORT lean_object* l_Lake_setupFile___lam__0___boxed(lean_object* v_val_90_, lean_object* v_outLv_91_, lean_object* v_val_92_, lean_object* v_e_93_, lean_object* v___y_94_){
 _start:
 {
-uint8_t v_outLv_boxed_95_; uint8_t v_val_1040__boxed_96_; lean_object* v_res_97_; 
+uint8_t v_outLv_boxed_95_; uint8_t v_val_1041__boxed_96_; lean_object* v_res_97_; 
 v_outLv_boxed_95_ = lean_unbox(v_outLv_91_);
-v_val_1040__boxed_96_ = lean_unbox(v_val_92_);
-v_res_97_ = l_Lake_setupFile___lam__0(v_val_90_, v_outLv_boxed_95_, v_val_1040__boxed_96_, v_e_93_);
+v_val_1041__boxed_96_ = lean_unbox(v_val_92_);
+v_res_97_ = l_Lake_setupFile___lam__0(v_val_90_, v_outLv_boxed_95_, v_val_1041__boxed_96_, v_e_93_);
 lean_dec_ref(v_e_93_);
 return v_res_97_;
 }
@@ -477,7 +477,7 @@ return v___x_161_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_setupFile___boxed(lean_object* v_loadConfig_162_, lean_object* v_leanFile_163_, lean_object* v_header_x3f_164_, lean_object* v_buildConfig_165_, lean_object* v_a_166_){
+LEAN_EXPORT lean_object* l_Lake_setupFile___boxed(lean_object* v_loadConfig_162_, lean_object* v_leanFile_163_, lean_object* v_header_x3f_164_, lean_object* v_buildConfig_165_, lean_object* v___y_166_){
 _start:
 {
 uint32_t v_res_167_; lean_object* v_r_168_; 
@@ -537,7 +537,7 @@ v___x_196_ = l_IO_eprint___at___00__private_Lake_CLI_Serve_0__Lake_setupFile_epr
 return v___x_196_;
 }
 }
-LEAN_EXPORT lean_object* l_IO_eprintln___at___00Lake_serve_spec__0___boxed(lean_object* v_s_197_, lean_object* v_a_198_){
+LEAN_EXPORT lean_object* l_IO_eprintln___at___00Lake_serve_spec__0___boxed(lean_object* v_s_197_, lean_object* v___y_198_){
 _start:
 {
 lean_object* v_res_199_; 
@@ -834,7 +834,7 @@ return v___x_268_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lake_serve___boxed(lean_object* v_config_287_, lean_object* v_args_288_, lean_object* v_a_289_){
+LEAN_EXPORT lean_object* l_Lake_serve___boxed(lean_object* v_config_287_, lean_object* v_args_288_, lean_object* v___y_289_){
 _start:
 {
 lean_object* v_res_290_; 

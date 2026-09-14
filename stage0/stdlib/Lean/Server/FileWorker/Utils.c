@@ -718,7 +718,7 @@ v___x_178_ = l_Std_Mutex_atomically___at___00Lean_Server_FileWorker_EditableDocu
 return v___x_178_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_EditableDocumentCore_appendDiagnostics___boxed(lean_object* v_doc_179_, lean_object* v_diags_180_, lean_object* v_a_181_){
+LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_EditableDocumentCore_appendDiagnostics___boxed(lean_object* v_doc_179_, lean_object* v_diags_180_, lean_object* v___y_181_){
 _start:
 {
 lean_object* v_res_182_; 
@@ -956,12 +956,12 @@ return v___x_280_;
 LEAN_EXPORT lean_object* l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Server_FileWorker_EditableDocumentCore_appendStickyDiagnostic_spec__0_spec__0___boxed(lean_object* v_diagnostic_281_, lean_object* v_x_282_, lean_object* v_x_283_, lean_object* v_x_284_, lean_object* v_x_285_){
 _start:
 {
-size_t v_x_1595__boxed_286_; size_t v_x_1596__boxed_287_; lean_object* v_res_288_; 
-v_x_1595__boxed_286_ = lean_unbox_usize(v_x_283_);
+size_t v_x_1596__boxed_286_; size_t v_x_1597__boxed_287_; lean_object* v_res_288_; 
+v_x_1596__boxed_286_ = lean_unbox_usize(v_x_283_);
 lean_dec(v_x_283_);
-v_x_1596__boxed_287_ = lean_unbox_usize(v_x_284_);
+v_x_1597__boxed_287_ = lean_unbox_usize(v_x_284_);
 lean_dec(v_x_284_);
-v_res_288_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Server_FileWorker_EditableDocumentCore_appendStickyDiagnostic_spec__0_spec__0(v_diagnostic_281_, v_x_282_, v_x_1595__boxed_286_, v_x_1596__boxed_287_, v_x_285_);
+v_res_288_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Server_FileWorker_EditableDocumentCore_appendStickyDiagnostic_spec__0_spec__0(v_diagnostic_281_, v_x_282_, v_x_1596__boxed_286_, v_x_1597__boxed_287_, v_x_285_);
 lean_dec_ref(v_x_282_);
 return v_res_288_;
 }
@@ -1175,7 +1175,7 @@ v___x_367_ = l_Std_Mutex_atomically___at___00Lean_Server_FileWorker_EditableDocu
 return v___x_367_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_EditableDocumentCore_appendStickyDiagnostic___boxed(lean_object* v_doc_368_, lean_object* v_diagnostic_369_, lean_object* v_a_370_){
+LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_EditableDocumentCore_appendStickyDiagnostic___boxed(lean_object* v_doc_368_, lean_object* v_diagnostic_369_, lean_object* v___y_370_){
 _start:
 {
 lean_object* v_res_371_; 
@@ -1221,7 +1221,7 @@ v___x_387_ = l_Std_Mutex_atomically___at___00Lean_Server_FileWorker_EditableDocu
 return v___x_387_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_EditableDocumentCore_collectCurrentDiagnostics___boxed(lean_object* v_doc_388_, lean_object* v_a_389_){
+LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_EditableDocumentCore_collectCurrentDiagnostics___boxed(lean_object* v_doc_388_, lean_object* v___y_389_){
 _start:
 {
 lean_object* v_res_390_; 
@@ -1319,7 +1319,7 @@ return v___x_416_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_EditableDocumentCore_update___boxed(lean_object* v_doc_422_, lean_object* v_newMeta_423_, lean_object* v_newInitSnap_424_, lean_object* v_a_425_){
+LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_EditableDocumentCore_update___boxed(lean_object* v_doc_422_, lean_object* v_newMeta_423_, lean_object* v_newInitSnap_424_, lean_object* v___y_425_){
 _start:
 {
 lean_object* v_res_426_; 
@@ -1518,12 +1518,12 @@ return v___x_510_;
 LEAN_EXPORT lean_object* l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Server_FileWorker_EditableDocumentCore_publishDiagnostics_spec__0_spec__0___boxed(lean_object* v_x_511_, lean_object* v_x_512_, lean_object* v_x_513_, lean_object* v_x_514_){
 _start:
 {
-size_t v_x_2408__boxed_515_; size_t v_x_2409__boxed_516_; lean_object* v_res_517_; 
-v_x_2408__boxed_515_ = lean_unbox_usize(v_x_512_);
+size_t v_x_2409__boxed_515_; size_t v_x_2410__boxed_516_; lean_object* v_res_517_; 
+v_x_2409__boxed_515_ = lean_unbox_usize(v_x_512_);
 lean_dec(v_x_512_);
-v_x_2409__boxed_516_ = lean_unbox_usize(v_x_513_);
+v_x_2410__boxed_516_ = lean_unbox_usize(v_x_513_);
 lean_dec(v_x_513_);
-v_res_517_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Server_FileWorker_EditableDocumentCore_publishDiagnostics_spec__0_spec__0(v_x_511_, v_x_2408__boxed_515_, v_x_2409__boxed_516_, v_x_514_);
+v_res_517_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Server_FileWorker_EditableDocumentCore_publishDiagnostics_spec__0_spec__0(v_x_511_, v_x_2409__boxed_515_, v_x_2410__boxed_516_, v_x_514_);
 lean_dec_ref(v_x_511_);
 return v_res_517_;
 }
@@ -1863,7 +1863,7 @@ v___x_645_ = l_Std_Mutex_atomically___at___00Lean_Server_FileWorker_EditableDocu
 return v___x_645_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_EditableDocumentCore_publishDiagnostics___boxed(lean_object* v_doc_646_, lean_object* v_incrementalDiagnosticSupport_647_, lean_object* v_writeDiagnostics_648_, lean_object* v_a_649_){
+LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_EditableDocumentCore_publishDiagnostics___boxed(lean_object* v_doc_646_, lean_object* v_incrementalDiagnosticSupport_647_, lean_object* v_writeDiagnostics_648_, lean_object* v___y_649_){
 _start:
 {
 uint8_t v_incrementalDiagnosticSupport_boxed_650_; lean_object* v_res_651_; 
@@ -2068,7 +2068,7 @@ return v___x_697_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_RpcSession_new___boxed(lean_object* v_wireFormat_700_, lean_object* v_a_701_){
+LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_RpcSession_new___boxed(lean_object* v_wireFormat_700_, lean_object* v___y_701_){
 _start:
 {
 uint8_t v_wireFormat_boxed_702_; lean_object* v_res_703_; 
@@ -2150,7 +2150,7 @@ lean_ctor_set(v___x_726_, 0, v___x_725_);
 return v___x_726_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_RpcSession_hasExpired___boxed(lean_object* v_s_727_, lean_object* v_a_728_){
+LEAN_EXPORT lean_object* l_Lean_Server_FileWorker_RpcSession_hasExpired___boxed(lean_object* v_s_727_, lean_object* v___y_728_){
 _start:
 {
 lean_object* v_res_729_; 

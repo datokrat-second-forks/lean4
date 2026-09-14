@@ -551,10 +551,10 @@ return v___x_147_;
 LEAN_EXPORT lean_object* l_Lean_Elab_Term_evalTerm___redArg___lam__0___boxed(lean_object* v_value_150_, lean_object* v___x_151_, lean_object* v___x_152_, lean_object* v___x_153_, lean_object* v_type_154_, lean_object* v_safety_155_, lean_object* v___y_156_, lean_object* v___y_157_, lean_object* v___y_158_, lean_object* v___y_159_, lean_object* v___y_160_, lean_object* v___y_161_, lean_object* v___y_162_){
 _start:
 {
-uint8_t v___x_3594__boxed_163_; uint8_t v_safety_boxed_164_; lean_object* v_res_165_; 
-v___x_3594__boxed_163_ = lean_unbox(v___x_152_);
+uint8_t v___x_3595__boxed_163_; uint8_t v_safety_boxed_164_; lean_object* v_res_165_; 
+v___x_3595__boxed_163_ = lean_unbox(v___x_152_);
 v_safety_boxed_164_ = lean_unbox(v_safety_155_);
-v_res_165_ = l_Lean_Elab_Term_evalTerm___redArg___lam__0(v_value_150_, v___x_151_, v___x_3594__boxed_163_, v___x_153_, v_type_154_, v_safety_boxed_164_, v___y_156_, v___y_157_, v___y_158_, v___y_159_, v___y_160_, v___y_161_);
+v_res_165_ = l_Lean_Elab_Term_evalTerm___redArg___lam__0(v_value_150_, v___x_151_, v___x_3595__boxed_163_, v___x_153_, v_type_154_, v_safety_boxed_164_, v___y_156_, v___y_157_, v___y_158_, v___y_159_, v___y_160_, v___y_161_);
 lean_dec(v___y_161_);
 lean_dec_ref(v___y_160_);
 lean_dec(v___y_159_);
@@ -910,7 +910,7 @@ v___x_282_ = l_Lean_withEnv___at___00Lean_Elab_Term_evalTerm_spec__2___redArg(v_
 return v___x_282_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Term_evalTerm___redArg___boxed(lean_object* v_type_283_, lean_object* v_value_284_, lean_object* v_safety_285_, lean_object* v_a_286_, lean_object* v_a_287_, lean_object* v_a_288_, lean_object* v_a_289_, lean_object* v_a_290_, lean_object* v_a_291_, lean_object* v_a_292_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Term_evalTerm___redArg___boxed(lean_object* v_type_283_, lean_object* v_value_284_, lean_object* v_safety_285_, lean_object* v_a_286_, lean_object* v_a_287_, lean_object* v_a_288_, lean_object* v_a_289_, lean_object* v_a_290_, lean_object* v_a_291_, lean_object* v___y_292_){
 _start:
 {
 uint8_t v_safety_boxed_293_; lean_object* v_res_294_; 
@@ -933,7 +933,7 @@ v___x_306_ = l_Lean_Elab_Term_evalTerm___redArg(v_type_296_, v_value_297_, v_saf
 return v___x_306_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Term_evalTerm___boxed(lean_object* v_00_u03b1_307_, lean_object* v_type_308_, lean_object* v_value_309_, lean_object* v_safety_310_, lean_object* v_a_311_, lean_object* v_a_312_, lean_object* v_a_313_, lean_object* v_a_314_, lean_object* v_a_315_, lean_object* v_a_316_, lean_object* v_a_317_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Term_evalTerm___boxed(lean_object* v_00_u03b1_307_, lean_object* v_type_308_, lean_object* v_value_309_, lean_object* v_safety_310_, lean_object* v_a_311_, lean_object* v_a_312_, lean_object* v_a_313_, lean_object* v_a_314_, lean_object* v_a_315_, lean_object* v_a_316_, lean_object* v___y_317_){
 _start:
 {
 uint8_t v_safety_boxed_318_; lean_object* v_res_319_; 

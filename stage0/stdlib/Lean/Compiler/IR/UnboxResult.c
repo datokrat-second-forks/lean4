@@ -1085,7 +1085,7 @@ v___x_334_ = l_Lean_registerTagAttribute(v___x_329_, v___x_330_, v___f_328_, v__
 return v___x_334_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_IR_UnboxResult_0__Lean_IR_UnboxResult_initFn_00___x40_Lean_Compiler_IR_UnboxResult_1925234477____hygCtx___hyg_2____boxed(lean_object* v_a_335_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_IR_UnboxResult_0__Lean_IR_UnboxResult_initFn_00___x40_Lean_Compiler_IR_UnboxResult_1925234477____hygCtx___hyg_2____boxed(lean_object* v___y_335_){
 _start:
 {
 lean_object* v_res_336_; 
@@ -1214,7 +1214,7 @@ v___x_421_ = l_Lean_addBuiltinDocString(v___x_419_, v___x_420_);
 return v___x_421_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_IR_UnboxResult_0__Lean_IR_UnboxResult_unboxAttr___regBuiltin_Lean_IR_UnboxResult_unboxAttr_docString__1___boxed(lean_object* v_a_422_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_IR_UnboxResult_0__Lean_IR_UnboxResult_unboxAttr___regBuiltin_Lean_IR_UnboxResult_unboxAttr_docString__1___boxed(lean_object* v___y_422_){
 _start:
 {
 lean_object* v_res_423_; 
@@ -1232,7 +1232,7 @@ v___x_452_ = l_Lean_addBuiltinDeclarationRanges(v___x_450_, v___x_451_);
 return v___x_452_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_IR_UnboxResult_0__Lean_IR_UnboxResult_unboxAttr___regBuiltin_Lean_IR_UnboxResult_unboxAttr_declRange__3___boxed(lean_object* v_a_453_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_IR_UnboxResult_0__Lean_IR_UnboxResult_unboxAttr___regBuiltin_Lean_IR_UnboxResult_unboxAttr_declRange__3___boxed(lean_object* v___y_453_){
 _start:
 {
 lean_object* v_res_454_; 

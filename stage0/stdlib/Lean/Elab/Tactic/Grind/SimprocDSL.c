@@ -154,7 +154,7 @@ v___x_40_ = l_Lean_Elab_mkElabAttribute___redArg(v___x_34_, v___x_36_, v___x_37_
 return v___x_40_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Grind_SimprocDSL_0__Lean_Elab_Tactic_Grind_initFn_00___x40_Lean_Elab_Tactic_Grind_SimprocDSL_3970955078____hygCtx___hyg_2____boxed(lean_object* v_a_41_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Grind_SimprocDSL_0__Lean_Elab_Tactic_Grind_initFn_00___x40_Lean_Elab_Tactic_Grind_SimprocDSL_3970955078____hygCtx___hyg_2____boxed(lean_object* v___y_41_){
 _start:
 {
 lean_object* v_res_42_; 
@@ -176,7 +176,7 @@ v___x_70_ = l_Lean_Elab_mkElabAttribute___redArg(v___x_64_, v___x_66_, v___x_67_
 return v___x_70_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Grind_SimprocDSL_0__Lean_Elab_Tactic_Grind_initFn_00___x40_Lean_Elab_Tactic_Grind_SimprocDSL_2342394239____hygCtx___hyg_2____boxed(lean_object* v_a_71_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Grind_SimprocDSL_0__Lean_Elab_Tactic_Grind_initFn_00___x40_Lean_Elab_Tactic_Grind_SimprocDSL_2342394239____hygCtx___hyg_2____boxed(lean_object* v___y_71_){
 _start:
 {
 lean_object* v_res_72_; 
@@ -866,7 +866,7 @@ return v___x_293_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Grind_elabSymSimproc___boxed(lean_object* v_stx_296_, lean_object* v_a_297_, lean_object* v_a_298_, lean_object* v_a_299_, lean_object* v_a_300_, lean_object* v_a_301_, lean_object* v_a_302_, lean_object* v_a_303_, lean_object* v_a_304_, lean_object* v_a_305_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Grind_elabSymSimproc___boxed(lean_object* v_stx_296_, lean_object* v_a_297_, lean_object* v_a_298_, lean_object* v_a_299_, lean_object* v_a_300_, lean_object* v_a_301_, lean_object* v_a_302_, lean_object* v_a_303_, lean_object* v_a_304_, lean_object* v___y_305_){
 _start:
 {
 lean_object* v_res_306_; 
@@ -1485,7 +1485,7 @@ return v___x_526_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Grind_elabSymDischarger___boxed(lean_object* v_stx_529_, lean_object* v_a_530_, lean_object* v_a_531_, lean_object* v_a_532_, lean_object* v_a_533_, lean_object* v_a_534_, lean_object* v_a_535_, lean_object* v_a_536_, lean_object* v_a_537_, lean_object* v_a_538_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Grind_elabSymDischarger___boxed(lean_object* v_stx_529_, lean_object* v_a_530_, lean_object* v_a_531_, lean_object* v_a_532_, lean_object* v_a_533_, lean_object* v_a_534_, lean_object* v_a_535_, lean_object* v_a_536_, lean_object* v_a_537_, lean_object* v___y_538_){
 _start:
 {
 lean_object* v_res_539_; 

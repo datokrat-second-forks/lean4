@@ -844,7 +844,7 @@ v___x_423_ = l_String_toRawSubstring_x27(v___x_422_);
 return v___x_423_;
 }
 }
-LEAN_EXPORT lean_object* l___aux__Init__Data__SInt__Bitwise______macroRules__commandDeclare__bitwise__int__theorems______1(lean_object* v_x_426_, lean_object* v_a_427_, lean_object* v_a_428_){
+LEAN_EXPORT lean_object* l___aux__Init__Data__SInt__Bitwise______macroRules__commandDeclare__bitwise__int__theorems______1(lean_object* v_x_426_, lean_object* v_a_427_, lean_object* v___y_428_){
 _start:
 {
 lean_object* v___y_430_; lean_object* v___x_449_; uint8_t v___x_450_; 
@@ -858,7 +858,7 @@ lean_dec(v_x_426_);
 v___x_451_ = lean_box(1);
 v___x_452_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_452_, 0, v___x_451_);
-lean_ctor_set(v___x_452_, 1, v_a_428_);
+lean_ctor_set(v___x_452_, 1, v___y_428_);
 return v___x_452_;
 }
 else
@@ -1243,7 +1243,7 @@ lean_dec(v___x_684_);
 if (v_isISize_461_ == 0)
 {
 lean_object* v___x_686_; lean_object* v_a_687_; lean_object* v_a_688_; lean_object* v___x_690_; uint8_t v_isShared_691_; uint8_t v_isSharedCheck_719_; 
-v___x_686_ = l___aux__Init__Data__SInt__Bitwise______macroRules__commandDeclare__bitwise__int__theorems______1___lam__0(v_ref_453_, v_a_427_, v_a_428_);
+v___x_686_ = l___aux__Init__Data__SInt__Bitwise______macroRules__commandDeclare__bitwise__int__theorems______1___lam__0(v_ref_453_, v_a_427_, v___y_428_);
 v_a_687_ = lean_ctor_get(v___x_686_, 0);
 v_a_688_ = lean_ctor_get(v___x_686_, 1);
 v_isSharedCheck_719_ = !lean_is_exclusive(v___x_686_);
@@ -1336,7 +1336,7 @@ else
 lean_object* v___x_720_; lean_object* v___x_721_; 
 lean_dec(v___x_459_);
 v___x_720_ = lean_box(0);
-v___x_721_ = l___aux__Init__Data__SInt__Bitwise______macroRules__commandDeclare__bitwise__int__theorems______1___lam__1(v___f_454_, v_typeName_456_, v___x_720_, v___x_685_, v_a_427_, v_a_428_);
+v___x_721_ = l___aux__Init__Data__SInt__Bitwise______macroRules__commandDeclare__bitwise__int__theorems______1___lam__1(v___f_454_, v_typeName_456_, v___x_720_, v___x_685_, v_a_427_, v___y_428_);
 v___y_430_ = v___x_721_;
 goto v___jp_429_;
 }
@@ -1434,11 +1434,11 @@ return v___x_446_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___aux__Init__Data__SInt__Bitwise______macroRules__commandDeclare__bitwise__int__theorems______1___boxed(lean_object* v_x_722_, lean_object* v_a_723_, lean_object* v_a_724_){
+LEAN_EXPORT lean_object* l___aux__Init__Data__SInt__Bitwise______macroRules__commandDeclare__bitwise__int__theorems______1___boxed(lean_object* v_x_722_, lean_object* v_a_723_, lean_object* v___y_724_){
 _start:
 {
 lean_object* v_res_725_; 
-v_res_725_ = l___aux__Init__Data__SInt__Bitwise______macroRules__commandDeclare__bitwise__int__theorems______1(v_x_722_, v_a_723_, v_a_724_);
+v_res_725_ = l___aux__Init__Data__SInt__Bitwise______macroRules__commandDeclare__bitwise__int__theorems______1(v_x_722_, v_a_723_, v___y_724_);
 lean_dec_ref(v_a_723_);
 return v_res_725_;
 }

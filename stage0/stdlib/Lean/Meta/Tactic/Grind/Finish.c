@@ -314,7 +314,7 @@ return v___x_241_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Action_mkFinish___boxed(lean_object* v_maxIterations_256_, lean_object* v_a_257_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Action_mkFinish___boxed(lean_object* v_maxIterations_256_, lean_object* v___y_257_){
 _start:
 {
 lean_object* v_res_258_; 

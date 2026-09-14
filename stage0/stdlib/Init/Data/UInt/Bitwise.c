@@ -957,7 +957,7 @@ v___x_483_ = l_String_toRawSubstring_x27(v___x_482_);
 return v___x_483_;
 }
 }
-LEAN_EXPORT lean_object* l___aux__Init__Data__UInt__Bitwise______macroRules__commandDeclare__bitwise__uint__theorems______1(lean_object* v_x_486_, lean_object* v_a_487_, lean_object* v_a_488_){
+LEAN_EXPORT lean_object* l___aux__Init__Data__UInt__Bitwise______macroRules__commandDeclare__bitwise__uint__theorems______1(lean_object* v_x_486_, lean_object* v_a_487_, lean_object* v___y_488_){
 _start:
 {
 lean_object* v___y_490_; lean_object* v___x_509_; uint8_t v___x_510_; 
@@ -971,7 +971,7 @@ lean_dec(v_x_486_);
 v___x_511_ = lean_box(1);
 v___x_512_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_512_, 0, v___x_511_);
-lean_ctor_set(v___x_512_, 1, v_a_488_);
+lean_ctor_set(v___x_512_, 1, v___y_488_);
 return v___x_512_;
 }
 else
@@ -1500,7 +1500,7 @@ lean_dec_ref_known(v___x_839_, 3);
 if (v_isUSize_521_ == 0)
 {
 lean_object* v___x_841_; lean_object* v_a_842_; lean_object* v_a_843_; lean_object* v___x_845_; uint8_t v_isShared_846_; uint8_t v_isSharedCheck_873_; 
-v___x_841_ = l___aux__Init__Data__UInt__Bitwise______macroRules__commandDeclare__bitwise__uint__theorems______1___lam__0(v_ref_513_, v_a_487_, v_a_488_);
+v___x_841_ = l___aux__Init__Data__UInt__Bitwise______macroRules__commandDeclare__bitwise__uint__theorems______1___lam__0(v_ref_513_, v_a_487_, v___y_488_);
 v_a_842_ = lean_ctor_get(v___x_841_, 0);
 v_a_843_ = lean_ctor_get(v___x_841_, 1);
 v_isSharedCheck_873_ = !lean_is_exclusive(v___x_841_);
@@ -1592,7 +1592,7 @@ else
 lean_object* v___x_874_; lean_object* v___x_875_; 
 lean_dec(v___x_519_);
 v___x_874_ = lean_box(0);
-v___x_875_ = l___aux__Init__Data__UInt__Bitwise______macroRules__commandDeclare__bitwise__uint__theorems______1___lam__1(v___f_514_, v_typeName_516_, v___x_874_, v___x_840_, v_a_487_, v_a_488_);
+v___x_875_ = l___aux__Init__Data__UInt__Bitwise______macroRules__commandDeclare__bitwise__uint__theorems______1___lam__1(v___f_514_, v_typeName_516_, v___x_874_, v___x_840_, v_a_487_, v___y_488_);
 v___y_490_ = v___x_875_;
 goto v___jp_489_;
 }
@@ -1690,11 +1690,11 @@ return v___x_506_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___aux__Init__Data__UInt__Bitwise______macroRules__commandDeclare__bitwise__uint__theorems______1___boxed(lean_object* v_x_876_, lean_object* v_a_877_, lean_object* v_a_878_){
+LEAN_EXPORT lean_object* l___aux__Init__Data__UInt__Bitwise______macroRules__commandDeclare__bitwise__uint__theorems______1___boxed(lean_object* v_x_876_, lean_object* v_a_877_, lean_object* v___y_878_){
 _start:
 {
 lean_object* v_res_879_; 
-v_res_879_ = l___aux__Init__Data__UInt__Bitwise______macroRules__commandDeclare__bitwise__uint__theorems______1(v_x_876_, v_a_877_, v_a_878_);
+v_res_879_ = l___aux__Init__Data__UInt__Bitwise______macroRules__commandDeclare__bitwise__uint__theorems______1(v_x_876_, v_a_877_, v___y_878_);
 lean_dec_ref(v_a_877_);
 return v_res_879_;
 }

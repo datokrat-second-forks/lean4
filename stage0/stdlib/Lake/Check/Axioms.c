@@ -318,7 +318,7 @@ v_r_72_ = lean_box(v_res_71_);
 return v_r_72_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop_validateConst(lean_object* v_n_76_, lean_object* v_a_77_, lean_object* v_s_78_){
+LEAN_EXPORT lean_object* l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop_validateConst(lean_object* v_n_76_, lean_object* v_a_77_, lean_object* v___y_78_){
 _start:
 {
 lean_object* v___y_80_; lean_object* v_solution_100_; lean_object* v_legalAxioms_101_; lean_object* v_constMap_102_; lean_object* v___x_103_; 
@@ -365,7 +365,7 @@ lean_dec(v_name_110_);
 if (v___x_111_ == 0)
 {
 uint8_t v___x_112_; lean_object* v___x_113_; lean_object* v___x_114_; lean_object* v___x_115_; lean_object* v___x_116_; lean_object* v___x_117_; lean_object* v___x_119_; 
-lean_dec_ref(v_s_78_);
+lean_dec_ref(v___y_78_);
 v___x_112_ = 1;
 v___x_113_ = ((lean_object*)(l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop_validateConst___closed__0));
 v___x_114_ = l_Lean_Name_toStringWithToken___at___00Lean_Name_toString_spec__0(v_n_76_, v___x_112_);
@@ -395,7 +395,7 @@ return v___x_119_;
 else
 {
 lean_del_object(v___x_107_);
-v___y_80_ = v_s_78_;
+v___y_80_ = v___y_78_;
 goto v___jp_79_;
 }
 }
@@ -403,7 +403,7 @@ goto v___jp_79_;
 else
 {
 lean_dec(v_val_104_);
-v___y_80_ = v_s_78_;
+v___y_80_ = v___y_78_;
 goto v___jp_79_;
 }
 }
@@ -411,7 +411,7 @@ else
 {
 lean_object* v___x_122_; uint8_t v___x_123_; lean_object* v___x_124_; lean_object* v___x_125_; lean_object* v___x_126_; lean_object* v___x_127_; lean_object* v___x_128_; 
 lean_dec(v___x_103_);
-lean_dec_ref(v_s_78_);
+lean_dec_ref(v___y_78_);
 v___x_122_ = ((lean_object*)(l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop_validateConst___closed__2));
 v___x_123_ = 1;
 v___x_124_ = l_Lean_Name_toStringWithToken___at___00Lean_Name_toString_spec__0(v_n_76_, v___x_123_);
@@ -500,11 +500,11 @@ return v___x_99_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop_validateConst___boxed(lean_object* v_n_129_, lean_object* v_a_130_, lean_object* v_s_131_){
+LEAN_EXPORT lean_object* l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop_validateConst___boxed(lean_object* v_n_129_, lean_object* v_a_130_, lean_object* v___y_131_){
 _start:
 {
 lean_object* v_res_132_; 
-v_res_132_ = l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop_validateConst(v_n_129_, v_a_130_, v_s_131_);
+v_res_132_ = l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop_validateConst(v_n_129_, v_a_130_, v___y_131_);
 lean_dec_ref(v_a_130_);
 return v_res_132_;
 }
@@ -1322,12 +1322,12 @@ lean_dec_ref(v___y_412_);
 return v_res_414_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop(lean_object* v_a_416_, lean_object* v_s_417_){
+LEAN_EXPORT lean_object* l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop(lean_object* v_a_416_, lean_object* v___y_417_){
 _start:
 {
 lean_object* v_worklist_418_; lean_object* v_checked_419_; lean_object* v___x_420_; lean_object* v___x_421_; uint8_t v___x_422_; 
-v_worklist_418_ = lean_ctor_get(v_s_417_, 0);
-v_checked_419_ = lean_ctor_get(v_s_417_, 1);
+v_worklist_418_ = lean_ctor_get(v___y_417_, 0);
+v_checked_419_ = lean_ctor_get(v___y_417_, 1);
 v___x_420_ = lean_array_get_size(v_worklist_418_);
 v___x_421_ = lean_unsigned_to_nat(0u);
 v___x_422_ = lean_nat_dec_eq(v___x_420_, v___x_421_);
@@ -1336,21 +1336,21 @@ if (v___x_422_ == 0)
 lean_object* v___x_424_; uint8_t v_isShared_425_; uint8_t v_isSharedCheck_463_; 
 lean_inc_ref(v_checked_419_);
 lean_inc_ref(v_worklist_418_);
-v_isSharedCheck_463_ = !lean_is_exclusive(v_s_417_);
+v_isSharedCheck_463_ = !lean_is_exclusive(v___y_417_);
 if (v_isSharedCheck_463_ == 0)
 {
 lean_object* v_unused_464_; lean_object* v_unused_465_; 
-v_unused_464_ = lean_ctor_get(v_s_417_, 1);
+v_unused_464_ = lean_ctor_get(v___y_417_, 1);
 lean_dec(v_unused_464_);
-v_unused_465_ = lean_ctor_get(v_s_417_, 0);
+v_unused_465_ = lean_ctor_get(v___y_417_, 0);
 lean_dec(v_unused_465_);
-v___x_424_ = v_s_417_;
+v___x_424_ = v___y_417_;
 v_isShared_425_ = v_isSharedCheck_463_;
 goto v_resetjp_423_;
 }
 else
 {
-lean_dec(v_s_417_);
+lean_dec(v___y_417_);
 v___x_424_ = lean_box(0);
 v_isShared_425_ = v_isSharedCheck_463_;
 goto v_resetjp_423_;
@@ -1453,7 +1453,7 @@ goto v_reusejp_449_;
 }
 v_reusejp_449_:
 {
-v_s_417_ = v___x_450_;
+v___y_417_ = v___x_450_;
 goto _start;
 }
 }
@@ -1479,7 +1479,7 @@ return v___x_460_;
 else
 {
 lean_dec(v___x_429_);
-v_s_417_ = v___x_432_;
+v___y_417_ = v___x_432_;
 goto _start;
 }
 }
@@ -1491,18 +1491,18 @@ lean_object* v___x_466_; lean_object* v___x_467_; lean_object* v___x_468_;
 v___x_466_ = lean_box(0);
 v___x_467_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_467_, 0, v___x_466_);
-lean_ctor_set(v___x_467_, 1, v_s_417_);
+lean_ctor_set(v___x_467_, 1, v___y_417_);
 v___x_468_ = lean_alloc_ctor(1, 1, 0);
 lean_ctor_set(v___x_468_, 0, v___x_467_);
 return v___x_468_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop___boxed(lean_object* v_a_469_, lean_object* v_s_470_){
+LEAN_EXPORT lean_object* l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop___boxed(lean_object* v_a_469_, lean_object* v___y_470_){
 _start:
 {
 lean_object* v_res_471_; 
-v_res_471_ = l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop(v_a_469_, v_s_470_);
+v_res_471_ = l___private_Lake_Check_Axioms_0__Lake_Check_Axioms_loop(v_a_469_, v___y_470_);
 lean_dec_ref(v_a_469_);
 return v_res_471_;
 }

@@ -119,7 +119,7 @@ v___x_61_ = l_Lean_registerTraceClass(v___x_58_, v___x_59_, v___x_60_);
 return v___x_61_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_0__Lean_initFn_00___x40_Lean_Meta_Match_3442551600____hygCtx___hyg_2____boxed(lean_object* v_a_62_){
+LEAN_EXPORT lean_object* l___private_Lean_Meta_Match_0__Lean_initFn_00___x40_Lean_Meta_Match_3442551600____hygCtx___hyg_2____boxed(lean_object* v___y_62_){
 _start:
 {
 lean_object* v_res_63_; 

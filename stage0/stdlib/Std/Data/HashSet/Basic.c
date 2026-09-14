@@ -543,7 +543,7 @@ v___x_102_ = l_String_toRawSubstring_x27(v___x_101_);
 return v___x_102_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_HashSet___aux__Std__Data__HashSet__Basic______macroRules__Std__HashSet__term___x7em____1(lean_object* v_x_123_, lean_object* v_a_124_, lean_object* v_a_125_){
+LEAN_EXPORT lean_object* l_Std_HashSet___aux__Std__Data__HashSet__Basic______macroRules__Std__HashSet__term___x7em____1(lean_object* v_x_123_, lean_object* v_a_124_, lean_object* v___y_125_){
 _start:
 {
 lean_object* v___x_126_; uint8_t v___x_127_; 
@@ -557,7 +557,7 @@ lean_dec(v_x_123_);
 v___x_128_ = lean_box(1);
 v___x_129_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_129_, 0, v___x_128_);
-lean_ctor_set(v___x_129_, 1, v_a_125_);
+lean_ctor_set(v___x_129_, 1, v___y_125_);
 return v___x_129_;
 }
 else
@@ -591,21 +591,21 @@ v___x_146_ = l_Lean_Syntax_node2(v___x_138_, v___x_145_, v___x_134_, v___x_136_)
 v___x_147_ = l_Lean_Syntax_node2(v___x_138_, v___x_139_, v___x_144_, v___x_146_);
 v___x_148_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_148_, 0, v___x_147_);
-lean_ctor_set(v___x_148_, 1, v_a_125_);
+lean_ctor_set(v___x_148_, 1, v___y_125_);
 return v___x_148_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_HashSet___aux__Std__Data__HashSet__Basic______macroRules__Std__HashSet__term___x7em____1___boxed(lean_object* v_x_149_, lean_object* v_a_150_, lean_object* v_a_151_){
+LEAN_EXPORT lean_object* l_Std_HashSet___aux__Std__Data__HashSet__Basic______macroRules__Std__HashSet__term___x7em____1___boxed(lean_object* v_x_149_, lean_object* v_a_150_, lean_object* v___y_151_){
 _start:
 {
 lean_object* v_res_152_; 
-v_res_152_ = l_Std_HashSet___aux__Std__Data__HashSet__Basic______macroRules__Std__HashSet__term___x7em____1(v_x_149_, v_a_150_, v_a_151_);
+v_res_152_ = l_Std_HashSet___aux__Std__Data__HashSet__Basic______macroRules__Std__HashSet__term___x7em____1(v_x_149_, v_a_150_, v___y_151_);
 lean_dec_ref(v_a_150_);
 return v_res_152_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_HashSet___aux__Std__Data__HashSet__Basic______unexpand__Std__HashSet__Equiv__1(lean_object* v_x_156_, lean_object* v_a_157_, lean_object* v_a_158_){
+LEAN_EXPORT lean_object* l_Std_HashSet___aux__Std__Data__HashSet__Basic______unexpand__Std__HashSet__Equiv__1(lean_object* v_x_156_, lean_object* v_a_157_, lean_object* v___y_158_){
 _start:
 {
 lean_object* v___x_159_; uint8_t v___x_160_; 
@@ -619,7 +619,7 @@ lean_dec(v_x_156_);
 v___x_161_ = lean_box(0);
 v___x_162_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_162_, 0, v___x_161_);
-lean_ctor_set(v___x_162_, 1, v_a_158_);
+lean_ctor_set(v___x_162_, 1, v___y_158_);
 return v___x_162_;
 }
 else
@@ -638,7 +638,7 @@ lean_dec(v_x_156_);
 v___x_167_ = lean_box(0);
 v___x_168_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_168_, 0, v___x_167_);
-lean_ctor_set(v___x_168_, 1, v_a_158_);
+lean_ctor_set(v___x_168_, 1, v___y_158_);
 return v___x_168_;
 }
 else
@@ -658,7 +658,7 @@ lean_dec(v___x_164_);
 v___x_173_ = lean_box(0);
 v___x_174_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_174_, 0, v___x_173_);
-lean_ctor_set(v___x_174_, 1, v_a_158_);
+lean_ctor_set(v___x_174_, 1, v___y_158_);
 return v___x_174_;
 }
 else
@@ -681,18 +681,18 @@ lean_ctor_set(v___x_182_, 1, v___x_181_);
 v___x_183_ = l_Lean_Syntax_node3(v___x_179_, v___x_180_, v___x_175_, v___x_182_, v___x_176_);
 v___x_184_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_184_, 0, v___x_183_);
-lean_ctor_set(v___x_184_, 1, v_a_158_);
+lean_ctor_set(v___x_184_, 1, v___y_158_);
 return v___x_184_;
 }
 }
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_HashSet___aux__Std__Data__HashSet__Basic______unexpand__Std__HashSet__Equiv__1___boxed(lean_object* v_x_185_, lean_object* v_a_186_, lean_object* v_a_187_){
+LEAN_EXPORT lean_object* l_Std_HashSet___aux__Std__Data__HashSet__Basic______unexpand__Std__HashSet__Equiv__1___boxed(lean_object* v_x_185_, lean_object* v_a_186_, lean_object* v___y_187_){
 _start:
 {
 lean_object* v_res_188_; 
-v_res_188_ = l_Std_HashSet___aux__Std__Data__HashSet__Basic______unexpand__Std__HashSet__Equiv__1(v_x_185_, v_a_186_, v_a_187_);
+v_res_188_ = l_Std_HashSet___aux__Std__Data__HashSet__Basic______unexpand__Std__HashSet__Equiv__1(v_x_185_, v_a_186_, v___y_187_);
 lean_dec(v_a_186_);
 return v_res_188_;
 }

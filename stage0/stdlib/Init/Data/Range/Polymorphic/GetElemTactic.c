@@ -653,7 +653,7 @@ v___x_374_ = l_String_toRawSubstring_x27(v___x_373_);
 return v___x_374_;
 }
 }
-LEAN_EXPORT lean_object* l___aux__Init__Data__Range__Polymorphic__GetElemTactic______macroRules__tacticGet__elem__tactic__extensible__1(lean_object* v_x_397_, lean_object* v_a_398_, lean_object* v_a_399_){
+LEAN_EXPORT lean_object* l___aux__Init__Data__Range__Polymorphic__GetElemTactic______macroRules__tacticGet__elem__tactic__extensible__1(lean_object* v_x_397_, lean_object* v_a_398_, lean_object* v___y_399_){
 _start:
 {
 lean_object* v___x_400_; uint8_t v___x_401_; 
@@ -665,7 +665,7 @@ lean_object* v___x_402_; lean_object* v___x_403_;
 v___x_402_ = lean_box(1);
 v___x_403_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_403_, 0, v___x_402_);
-lean_ctor_set(v___x_403_, 1, v_a_399_);
+lean_ctor_set(v___x_403_, 1, v___y_399_);
 return v___x_403_;
 }
 else
@@ -1122,16 +1122,16 @@ v___x_719_ = l_Lean_Syntax_node2(v___x_408_, v___x_412_, v___x_710_, v___x_718_)
 v___x_720_ = l_Lean_Syntax_node2(v___x_408_, v___x_410_, v___x_411_, v___x_719_);
 v___x_721_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_721_, 0, v___x_720_);
-lean_ctor_set(v___x_721_, 1, v_a_399_);
+lean_ctor_set(v___x_721_, 1, v___y_399_);
 return v___x_721_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___aux__Init__Data__Range__Polymorphic__GetElemTactic______macroRules__tacticGet__elem__tactic__extensible__1___boxed(lean_object* v_x_722_, lean_object* v_a_723_, lean_object* v_a_724_){
+LEAN_EXPORT lean_object* l___aux__Init__Data__Range__Polymorphic__GetElemTactic______macroRules__tacticGet__elem__tactic__extensible__1___boxed(lean_object* v_x_722_, lean_object* v_a_723_, lean_object* v___y_724_){
 _start:
 {
 lean_object* v_res_725_; 
-v_res_725_ = l___aux__Init__Data__Range__Polymorphic__GetElemTactic______macroRules__tacticGet__elem__tactic__extensible__1(v_x_722_, v_a_723_, v_a_724_);
+v_res_725_ = l___aux__Init__Data__Range__Polymorphic__GetElemTactic______macroRules__tacticGet__elem__tactic__extensible__1(v_x_722_, v_a_723_, v___y_724_);
 lean_dec_ref(v_a_723_);
 return v_res_725_;
 }

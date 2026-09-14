@@ -215,16 +215,16 @@ return v___x_1_;
 LEAN_EXPORT lean_object* l_panic___at___00Lean_Elab_WF_checkCodomains_spec__0(lean_object* v_msg_2_, lean_object* v___y_3_, lean_object* v___y_4_, lean_object* v___y_5_, lean_object* v___y_6_, lean_object* v___y_7_, lean_object* v___y_8_){
 _start:
 {
-lean_object* v___x_10_; lean_object* v___x_6145__overap_11_; lean_object* v___x_12_; 
+lean_object* v___x_10_; lean_object* v___x_6146__overap_11_; lean_object* v___x_12_; 
 v___x_10_ = lean_obj_once(&l_panic___at___00Lean_Elab_WF_checkCodomains_spec__0___closed__0, &l_panic___at___00Lean_Elab_WF_checkCodomains_spec__0___closed__0_once, _init_l_panic___at___00Lean_Elab_WF_checkCodomains_spec__0___closed__0);
-v___x_6145__overap_11_ = lean_panic_fn_borrowed(v___x_10_, v_msg_2_);
+v___x_6146__overap_11_ = lean_panic_fn_borrowed(v___x_10_, v_msg_2_);
 lean_inc(v___y_8_);
 lean_inc_ref(v___y_7_);
 lean_inc(v___y_6_);
 lean_inc_ref(v___y_5_);
 lean_inc(v___y_4_);
 lean_inc_ref(v___y_3_);
-v___x_12_ = lean_apply_7(v___x_6145__overap_11_, v___y_3_, v___y_4_, v___y_5_, v___y_6_, v___y_7_, v___y_8_, lean_box(0));
+v___x_12_ = lean_apply_7(v___x_6146__overap_11_, v___y_3_, v___y_4_, v___y_5_, v___y_6_, v___y_7_, v___y_8_, lean_box(0));
 return v___x_12_;
 }
 }
@@ -2432,7 +2432,7 @@ return v___x_786_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_WF_checkCodomains___boxed(lean_object* v_names_789_, lean_object* v_fixedParamPerms_790_, lean_object* v_fixedArgs_791_, lean_object* v_arities_792_, lean_object* v_termMeasures_793_, lean_object* v_a_794_, lean_object* v_a_795_, lean_object* v_a_796_, lean_object* v_a_797_, lean_object* v_a_798_, lean_object* v_a_799_, lean_object* v_a_800_){
+LEAN_EXPORT lean_object* l_Lean_Elab_WF_checkCodomains___boxed(lean_object* v_names_789_, lean_object* v_fixedParamPerms_790_, lean_object* v_fixedArgs_791_, lean_object* v_arities_792_, lean_object* v_termMeasures_793_, lean_object* v_a_794_, lean_object* v_a_795_, lean_object* v_a_796_, lean_object* v_a_797_, lean_object* v_a_798_, lean_object* v_a_799_, lean_object* v___y_800_){
 _start:
 {
 lean_object* v_res_801_; 
@@ -3206,7 +3206,7 @@ v___x_1121_ = l_Lean_Elab_Term_withDeclName___redArg(v_unaryPreDefName_1106_, v_
 return v___x_1121_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_WF_elabWFRel___redArg___boxed(lean_object* v_declNames_1122_, lean_object* v_unaryPreDefName_1123_, lean_object* v_fixedParamPerms_1124_, lean_object* v_fixedArgs_1125_, lean_object* v_argsPacker_1126_, lean_object* v_argType_1127_, lean_object* v_termMeasures_1128_, lean_object* v_k_1129_, lean_object* v_a_1130_, lean_object* v_a_1131_, lean_object* v_a_1132_, lean_object* v_a_1133_, lean_object* v_a_1134_, lean_object* v_a_1135_, lean_object* v_a_1136_){
+LEAN_EXPORT lean_object* l_Lean_Elab_WF_elabWFRel___redArg___boxed(lean_object* v_declNames_1122_, lean_object* v_unaryPreDefName_1123_, lean_object* v_fixedParamPerms_1124_, lean_object* v_fixedArgs_1125_, lean_object* v_argsPacker_1126_, lean_object* v_argType_1127_, lean_object* v_termMeasures_1128_, lean_object* v_k_1129_, lean_object* v_a_1130_, lean_object* v_a_1131_, lean_object* v_a_1132_, lean_object* v_a_1133_, lean_object* v_a_1134_, lean_object* v_a_1135_, lean_object* v___y_1136_){
 _start:
 {
 lean_object* v_res_1137_; 
@@ -3228,7 +3228,7 @@ v___x_1154_ = l_Lean_Elab_WF_elabWFRel___redArg(v_declNames_1139_, v_unaryPreDef
 return v___x_1154_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_WF_elabWFRel___boxed(lean_object* v_00_u03b1_1155_, lean_object* v_declNames_1156_, lean_object* v_unaryPreDefName_1157_, lean_object* v_fixedParamPerms_1158_, lean_object* v_fixedArgs_1159_, lean_object* v_argsPacker_1160_, lean_object* v_argType_1161_, lean_object* v_termMeasures_1162_, lean_object* v_k_1163_, lean_object* v_a_1164_, lean_object* v_a_1165_, lean_object* v_a_1166_, lean_object* v_a_1167_, lean_object* v_a_1168_, lean_object* v_a_1169_, lean_object* v_a_1170_){
+LEAN_EXPORT lean_object* l_Lean_Elab_WF_elabWFRel___boxed(lean_object* v_00_u03b1_1155_, lean_object* v_declNames_1156_, lean_object* v_unaryPreDefName_1157_, lean_object* v_fixedParamPerms_1158_, lean_object* v_fixedArgs_1159_, lean_object* v_argsPacker_1160_, lean_object* v_argType_1161_, lean_object* v_termMeasures_1162_, lean_object* v_k_1163_, lean_object* v_a_1164_, lean_object* v_a_1165_, lean_object* v_a_1166_, lean_object* v_a_1167_, lean_object* v_a_1168_, lean_object* v_a_1169_, lean_object* v___y_1170_){
 _start:
 {
 lean_object* v_res_1171_; 

@@ -431,7 +431,7 @@ v___x_188_ = l_String_toRawSubstring_x27(v___x_187_);
 return v___x_188_;
 }
 }
-LEAN_EXPORT lean_object* l_String_Internal___aux__Init__Data__String__OrderInstances______macroRules__String__Internal__tacticOrder__1(lean_object* v_x_246_, lean_object* v_a_247_, lean_object* v_a_248_){
+LEAN_EXPORT lean_object* l_String_Internal___aux__Init__Data__String__OrderInstances______macroRules__String__Internal__tacticOrder__1(lean_object* v_x_246_, lean_object* v_a_247_, lean_object* v___y_248_){
 _start:
 {
 lean_object* v___x_249_; uint8_t v___x_250_; 
@@ -443,7 +443,7 @@ lean_object* v___x_251_; lean_object* v___x_252_;
 v___x_251_ = lean_box(1);
 v___x_252_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_252_, 0, v___x_251_);
-lean_ctor_set(v___x_252_, 1, v_a_248_);
+lean_ctor_set(v___x_252_, 1, v___y_248_);
 return v___x_252_;
 }
 else
@@ -648,16 +648,16 @@ lean_ctor_set(v___x_378_, 1, v___x_377_);
 v___x_379_ = l_Lean_Syntax_node3(v___x_257_, v___x_258_, v___x_260_, v___x_376_, v___x_378_);
 v___x_380_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_380_, 0, v___x_379_);
-lean_ctor_set(v___x_380_, 1, v_a_248_);
+lean_ctor_set(v___x_380_, 1, v___y_248_);
 return v___x_380_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_String_Internal___aux__Init__Data__String__OrderInstances______macroRules__String__Internal__tacticOrder__1___boxed(lean_object* v_x_381_, lean_object* v_a_382_, lean_object* v_a_383_){
+LEAN_EXPORT lean_object* l_String_Internal___aux__Init__Data__String__OrderInstances______macroRules__String__Internal__tacticOrder__1___boxed(lean_object* v_x_381_, lean_object* v_a_382_, lean_object* v___y_383_){
 _start:
 {
 lean_object* v_res_384_; 
-v_res_384_ = l_String_Internal___aux__Init__Data__String__OrderInstances______macroRules__String__Internal__tacticOrder__1(v_x_381_, v_a_382_, v_a_383_);
+v_res_384_ = l_String_Internal___aux__Init__Data__String__OrderInstances______macroRules__String__Internal__tacticOrder__1(v_x_381_, v_a_382_, v___y_383_);
 lean_dec_ref(v_a_382_);
 return v_res_384_;
 }

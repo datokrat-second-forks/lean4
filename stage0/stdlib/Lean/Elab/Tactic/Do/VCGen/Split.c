@@ -3372,7 +3372,7 @@ return v___x_1649_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Do_SplitInfo_simpDiscrs_x3f___boxed(lean_object* v_info_1650_, lean_object* v_e_1651_, lean_object* v_a_1652_, lean_object* v_a_1653_, lean_object* v_a_1654_, lean_object* v_a_1655_, lean_object* v_a_1656_, lean_object* v_a_1657_, lean_object* v_a_1658_, lean_object* v_a_1659_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Do_SplitInfo_simpDiscrs_x3f___boxed(lean_object* v_info_1650_, lean_object* v_e_1651_, lean_object* v_a_1652_, lean_object* v_a_1653_, lean_object* v_a_1654_, lean_object* v_a_1655_, lean_object* v_a_1656_, lean_object* v_a_1657_, lean_object* v_a_1658_, lean_object* v___y_1659_){
 _start:
 {
 lean_object* v_res_1660_; 
@@ -4295,16 +4295,16 @@ goto v_reusejp_2009_;
 }
 v_reusejp_2009_:
 {
-lean_object* v___x_2011_; lean_object* v___x_2012_; lean_object* v___x_2730__overap_2013_; lean_object* v___x_2014_; 
+lean_object* v___x_2011_; lean_object* v___x_2012_; lean_object* v___x_2787__overap_2013_; lean_object* v___x_2014_; 
 v___x_2011_ = l_Lean_Meta_Match_instInhabitedAltParamInfo_default;
 v___x_2012_ = l_instInhabitedOfMonad___redArg(v___x_2010_, v___x_2011_);
-v___x_2730__overap_2013_ = lean_panic_fn_borrowed(v___x_2012_, v_msg_1965_);
+v___x_2787__overap_2013_ = lean_panic_fn_borrowed(v___x_2012_, v_msg_1965_);
 lean_dec(v___x_2012_);
 lean_inc(v___y_1969_);
 lean_inc_ref(v___y_1968_);
 lean_inc(v___y_1967_);
 lean_inc_ref(v___y_1966_);
-v___x_2014_ = lean_apply_5(v___x_2730__overap_2013_, v___y_1966_, v___y_1967_, v___y_1968_, v___y_1969_, lean_box(0));
+v___x_2014_ = lean_apply_5(v___x_2787__overap_2013_, v___y_1966_, v___y_1967_, v___y_1968_, v___y_1969_, lean_box(0));
 return v___x_2014_;
 }
 }
@@ -5395,7 +5395,7 @@ return v___x_2333_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Do_getSplitInfo_x3f___boxed(lean_object* v_e_2334_, lean_object* v_a_2335_, lean_object* v_a_2336_, lean_object* v_a_2337_, lean_object* v_a_2338_, lean_object* v_a_2339_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Do_getSplitInfo_x3f___boxed(lean_object* v_e_2334_, lean_object* v_a_2335_, lean_object* v_a_2336_, lean_object* v_a_2337_, lean_object* v_a_2338_, lean_object* v___y_2339_){
 _start:
 {
 lean_object* v_res_2340_; 
@@ -5872,7 +5872,7 @@ goto v___jp_2475_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Do_rwIfOrMatcher___boxed(lean_object* v_idx_2552_, lean_object* v_e_2553_, lean_object* v_a_2554_, lean_object* v_a_2555_, lean_object* v_a_2556_, lean_object* v_a_2557_, lean_object* v_a_2558_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Do_rwIfOrMatcher___boxed(lean_object* v_idx_2552_, lean_object* v_e_2553_, lean_object* v_a_2554_, lean_object* v_a_2555_, lean_object* v_a_2556_, lean_object* v_a_2557_, lean_object* v___y_2558_){
 _start:
 {
 lean_object* v_res_2559_; 
