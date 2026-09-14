@@ -469,8 +469,11 @@ Catches and logs exceptions occurring in `x`. Unlike `try catch` in `CommandElab
 catches interrupt exceptions as well and thus is intended for use at the top level of elaboration.
 Interrupt and abort exceptions are caught but not logged.
 -/
-@[inline] def withLoggingExceptions (x : CommandElabM Unit) : CommandElabM Unit := fun ctx ref =>
-  EIO.catchExceptions (withLogging x ctx ref) (fun _ => pure ())
+@[inline] def withLoggingExceptions (x : CommandElabM Unit) : CommandElabM Unit :=
+  -- ascribed so that the `MonadLog` instance is found at `CommandElabM`, not at the unfolded stack
+  let logged : CommandElabM Unit := withLogging x
+  .mk fun ctx => ReaderT.mk fun ref =>
+    EIO.catchExceptions (ReaderT.run (ReaderT.run logged ctx) ref) (fun _ => pure ())
 
 @[inherit_doc Core.wrapAsync]
 def wrapAsync {α β : Type} (act : α → CommandElabM β) (cancelTk? : Option IO.CancelToken) :

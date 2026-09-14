@@ -76,10 +76,10 @@ instance : MonadCodeBind CompilerM where
   codeBind := CompilerM.codeBind
 
 instance [MonadCodeBind m] : MonadCodeBind (ReaderT ρ m) where
-  codeBind c f ctx := c.bind fun fvarId => f fvarId ctx
+  codeBind c f := .mk fun ctx => c.bind fun fvarId => (f fvarId).run ctx
 
 instance [STWorld ω m] [MonadCodeBind m] : MonadCodeBind (StateRefT' ω σ m) where
-  codeBind c f sref := c.bind fun fvarId => f fvarId sref
+  codeBind c f := ReaderT.mk fun sref => c.bind fun fvarId => ReaderT.run (f fvarId) sref
 
 /--
 Create new parameters for the given arrow type.

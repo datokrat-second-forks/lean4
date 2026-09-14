@@ -64,7 +64,7 @@ public abbrev CallStackT κ m := ReaderT (CallStack κ) m
 
 public instance [Monad m] : MonadCallStackOf κ (CallStackT κ m) where
   getCallStack := read
-  withCallStack s x := x s
+  withCallStack s x := x.run s
 
 /-- A transformer that equips a monad with a `CallStack` to detect cycles. -/
 public abbrev CycleT κ m := CallStackT κ <| ExceptT (Cycle κ) m

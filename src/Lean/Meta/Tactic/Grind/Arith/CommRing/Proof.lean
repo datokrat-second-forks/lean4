@@ -275,7 +275,7 @@ private def mkSemiringContext (h : Expr) : ProofM Expr := do
 private abbrev withProofContext (x : ProofM Expr) : RingM Expr := do
   let ctx := mkFVar (← mkFreshFVarId)
   let sctx? ← if (← getCommRing).semiringId?.isSome then pure <| some (mkFVar (← mkFreshFVarId)) else pure none
-  go { ctx, sctx? } |>.run' {}
+  go.run { ctx, sctx? } |>.run' {}
 where
   go : ProofM Expr := do
     let h ← x

@@ -16,7 +16,7 @@ structure NonCommSemiringM.Context where
 abbrev NonCommSemiringM := ReaderT NonCommSemiringM.Context GoalM
 
 abbrev NonCommSemiringM.run (semiringId : Nat) (x : NonCommSemiringM α) : GoalM α :=
-  x { semiringId }
+  ReaderT.run x { semiringId }
 
 instance : MonadCanon NonCommSemiringM where
   canonExpr e := do shareCommon (← canon e)

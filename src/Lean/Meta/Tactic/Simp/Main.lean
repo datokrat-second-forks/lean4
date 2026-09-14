@@ -255,7 +255,7 @@ private partial def reduce (e : Expr) : SimpM Expr := withIncRecDepth do
     reduce e'
 
 instance : Inhabited (SimpM α) where
-  default := fun _ _ _ => default
+  default := ReaderT.mk fun _ => ReaderT.mk fun _ => ReaderT.mk fun _ => default
 
 partial def lambdaTelescopeDSimp (e : Expr) (k : Array Expr → Expr → SimpM α) : SimpM α := do
   go #[] e

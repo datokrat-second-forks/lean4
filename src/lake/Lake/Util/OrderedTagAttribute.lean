@@ -21,7 +21,7 @@ public def registerOrderedTagAttribute (name : Name) (descr : String)
   let ext ← registerPersistentEnvExtension {
     name            := ref
     mkInitial       := pure {}
-    addImportedFn   := fun _ _ => pure {}
+    addImportedFn   := fun _ => pure {}
     addEntryFn      := fun s n => s.push n
     exportEntriesFn := fun es => es
     statsFn         := fun s => "tag attribute" ++ Format.line ++ "number of local entries: " ++ format s.size

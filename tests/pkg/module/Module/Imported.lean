@@ -199,7 +199,7 @@ attribute [local delab Nat] noMetaDelab
 
 @[noinline] meta def pap (f : α → β) (a : α) : β := f a
 public meta def delab' : Lean.PrettyPrinter.Delaborator.Delab :=
-  pap delab
+  .mk (pap (ReaderT.run delab))
 
 -- Used to complain about `_boxed` not being meta
 attribute [local delab Nat] delab'

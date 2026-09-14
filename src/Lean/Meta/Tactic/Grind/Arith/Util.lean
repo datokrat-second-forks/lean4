@@ -140,7 +140,7 @@ def markAsFound (fvarId : FVarId) : CollectDecVarsM Unit := do
   modify fun s => { s with found := s.found.insert fvarId }
 
 abbrev CollectDecVarsM.run (x : CollectDecVarsM Unit) (decVars : FVarIdSet) : FVarIdSet :=
-  let (_, s) := x decVars |>.run {}
+  let (_, s) := ReaderT.run x decVars |>.run {}
   s.found
 
 end CollectDecVars

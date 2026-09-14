@@ -248,10 +248,10 @@ info: have this :=
     withFinalizer (pure ())
         (if true = true then
           let s := "then";
-          pure () s
+          (pure ()).run s
         else
           let s := "else";
-          pure () s)
+          (pure ()).run s)
   let s : String := p.snd
   let s : String := "after-" ++ s
   pure s;
