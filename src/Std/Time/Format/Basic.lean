@@ -702,26 +702,26 @@ private def parseOneOrTwoNum : Parser Nat := do
 
 private def parseOffset (withMinutes : Reason) (withSeconds : Reason) (withColon : Bool) : Parser Offset := do
   let sign ← (pchar '+' *> pure 1) <|> (pchar '-' *> pure (-1))
-  let hours : Hour.Offset ← UnitVal.ofInt <$> parseOneOrTwoNum
+  let hours : Hour.Offset ← Hour.Offset.ofNat <$> parseOneOrTwoNum
 
   if hours.val < 0 ∨ hours.val > 23 then
     fail s!"invalid hour offset: {hours.val}. Must be between 0 and 23."
 
   let colon := if withColon then pchar ':' else pure ':'
 
-  let parseUnit {n} (reason : Reason) : Parser (Option (UnitVal n)) :=
+  let parseUnit {α} (ofNat : Nat → α) (reason : Reason) : Parser (Option α) :=
     match reason with
-    | .yes => some <$> (colon *> UnitVal.ofInt <$> parseOneOrTwoNum)
+    | .yes => some <$> (colon *> ofNat <$> parseOneOrTwoNum)
     | .no => pure none
-    | .optional => optional (colon *> UnitVal.ofInt <$> parseOneOrTwoNum)
+    | .optional => optional (colon *> ofNat <$> parseOneOrTwoNum)
 
-  let minutes : Option Minute.Offset ← parseUnit withMinutes
+  let minutes : Option Minute.Offset ← parseUnit Minute.Offset.ofNat withMinutes
 
   if let some m := minutes then
     if m.val > 59 then
       fail s!"invalid minute offset: {m.val}. Must be between 0 and 59."
 
-  let seconds : Option Second.Offset ← parseUnit withSeconds
+  let seconds : Option Second.Offset ← parseUnit Second.Offset.ofNat withSeconds
 
   if let some s := seconds then
     if s.val > 59 then
@@ -729,7 +729,7 @@ private def parseOffset (withMinutes : Reason) (withSeconds : Reason) (withColon
 
   let hours := hours.toSeconds + (minutes.getD 0).toSeconds + (seconds.getD 0)
 
-  return Offset.ofSeconds ⟨hours.val * sign⟩
+  return Offset.ofSeconds (.ofInt (hours.val * sign))
 
 private def parseWith (config : FormatConfig) : (mod : Modifier) → Parser (TypeFormat mod)
   | .G format =>
@@ -739,22 +739,22 @@ private def parseWith (config : FormatConfig) : (mod : Modifier) → Parser (Typ
     | .narrow => parseEraNarrow config.dateformat.symbols
   | .y format =>
     match format with
-    | .any => Int.ofNat <$> parseAtLeastNum 1
-    | .twoDigit => (2000 + ·) <$> Int.ofNat <$> parseNum 2
-    | .fourDigit => Int.ofNat <$> parseNum 4
-    | .extended n => Int.ofNat <$> parseNum n
+    | .any => Year.Offset.ofNat <$> parseAtLeastNum 1
+    | .twoDigit => (Year.Offset.ofInt <| 2000 + ·) <$> Int.ofNat <$> parseNum 2
+    | .fourDigit => Year.Offset.ofNat <$> parseNum 4
+    | .extended n => Year.Offset.ofNat <$> parseNum n
   | .u format =>
     match format with
-    | .any => parseSigned <| parseAtLeastNum 1
-    | .twoDigit => (2000 + ·) <$> Int.ofNat <$> parseNum 2
-    | .fourDigit => parseSigned <| parseNum 4
-    | .extended n => parseSigned <| parseNum n
+    | .any => Year.Offset.ofInt <$> (parseSigned <| parseAtLeastNum 1)
+    | .twoDigit => (Year.Offset.ofInt <| 2000 + ·) <$> Int.ofNat <$> parseNum 2
+    | .fourDigit => Year.Offset.ofInt <$> (parseSigned <| parseNum 4)
+    | .extended n => Year.Offset.ofInt <$> (parseSigned <| parseNum n)
   | .Y format =>
     match format with
-    | .any => parseSigned <| parseAtLeastNum 1
-    | .twoDigit => (2000 + ·) <$> Int.ofNat <$> parseNum 2
-    | .fourDigit => parseSigned <| parseNum 4
-    | .extended n => parseSigned <| parseNum n
+    | .any => Year.Offset.ofInt <$> (parseSigned <| parseAtLeastNum 1)
+    | .twoDigit => (Year.Offset.ofInt <| 2000 + ·) <$> Int.ofNat <$> parseNum 2
+    | .fourDigit => Year.Offset.ofInt <$> (parseSigned <| parseNum 4)
+    | .extended n => Year.Offset.ofInt <$> (parseSigned <| parseNum n)
   | .D format => Sigma.mk true <$> parseNatToBounded (parseFlexibleNum format.padding)
   | .M format | .L format =>
     match format with

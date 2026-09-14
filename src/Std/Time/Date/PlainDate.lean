@@ -95,7 +95,7 @@ def ofYearOrdinal (year : Year.Offset) (ordinal : Day.Ordinal.OfYear year.isLeap
 Creates a `PlainDate` from the number of days since January 1st, 1970.
 -/
 def ofEpochDay (day : Day.Offset) : PlainDate :=
-  let z := day.toInt + 719468
+  let z := day.val + 719468
   let era := (if z ≥ 0 then z else z - 146096).tdiv 146097
   let doe := z - era * 146097
   let yoe := (doe - doe.tdiv 1460 + doe.tdiv 36524 - doe.tdiv 146096).tdiv 365
@@ -105,7 +105,7 @@ def ofEpochDay (day : Day.Offset) : PlainDate :=
   let d := doy - (153 * mp + 2).tdiv 5 + 1
   let m := mp + (if mp < 10 then 3 else -9)
   let y := y + (if m <= 2 then 1 else 0)
-  .ofYearMonthDayClip y (.clip m (by decide)) (.clip d (by decide))
+  .ofYearMonthDayClip (.ofInt y) (.clip m (by decide)) (.clip d (by decide))
 
 /--
 Returns the aligned week of the month for a `PlainDate`. Weeks are fixed 7-day slots
@@ -144,7 +144,7 @@ def inLeapYear (date : PlainDate) : Bool :=
 Converts a `PlainDate` to the number of days since 1970-01-01T00:00:00.
 -/
 def toEpochDay (date : PlainDate) : Day.Offset :=
-  let y : Int := if date.month.toInt > 2 then date.year else date.year.toInt - 1
+  let y : Int := if date.month.toInt > 2 then date.year.toInt else date.year.toInt - 1
   let era : Int := (if y ≥ 0 then y else y - 399).tdiv 400
   let yoe : Int := y - era * 400
   let m : Int := date.month.toInt
@@ -190,10 +190,10 @@ Adds a given number of months to a `PlainDate`, clipping the day to the last val
 -/
 def addMonthsClip (date : PlainDate) (months : Month.Offset) : PlainDate :=
   let totalMonths := (date.month.toOffset - 1) + months
-  let totalMonths : Int := totalMonths
+  let totalMonths : Int := totalMonths.toInt
   let wrappedMonths := Bounded.LE.byEmod totalMonths 12 (by decide) |>.add 1
   let yearsOffset := totalMonths / 12
-  PlainDate.ofYearMonthDayClip (date.year.add yearsOffset) wrappedMonths date.day
+  PlainDate.ofYearMonthDayClip (date.year + .ofInt yearsOffset) wrappedMonths date.day
 
 /--
 Subtracts `Month.Offset` from a `PlainDate`, it clips the day to the last valid day of that month.
@@ -243,28 +243,28 @@ Adds `Year.Offset` to a `PlainDate`, rolling over excess days to the next month,
 -/
 @[inline]
 def addYearsRollOver (date : PlainDate) (years : Year.Offset) : PlainDate :=
-  addMonthsRollOver date (years.mul 12)
+  addMonthsRollOver date years.toMonths
 
 /--
 Subtracts `Year.Offset` from a `PlainDate`, rolling over excess days to the next month.
 -/
 @[inline]
 def subYearsRollOver (date : PlainDate) (years : Year.Offset) : PlainDate :=
-  addMonthsRollOver date (- years.mul 12)
+  addMonthsRollOver date (-years.toMonths)
 
 /--
 Adds `Year.Offset` to a `PlainDate`, clipping the day to the last valid day of the month.
 -/
 @[inline]
 def addYearsClip (date : PlainDate) (years : Year.Offset) : PlainDate :=
-  addMonthsClip date (years.mul 12)
+  addMonthsClip date years.toMonths
 
 /--
 Subtracts `Year.Offset` from a `PlainDate`, clipping the day to the last valid day of the month.
 -/
 @[inline]
 def subYearsClip (date : PlainDate) (years : Year.Offset) : PlainDate :=
-  addMonthsClip date (- years.mul 12)
+  addMonthsClip date (-years.toMonths)
 
 /--
 Creates a new `PlainDate` by adjusting the day of the month to the given `days` value, with any

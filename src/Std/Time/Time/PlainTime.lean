@@ -132,7 +132,7 @@ def toHours (time : PlainTime) : Hour.Offset :=
 Creates a `PlainTime` value from a total number of nanoseconds.
 -/
 def ofNanoseconds (nanos : Nanosecond.Offset) : PlainTime :=
-  have totalSeconds := nanos.ediv 1000000000
+  have totalSeconds := nanos.toUnitVal.ediv 1000000000
   have remainingNanos := Bounded.LE.byEmod nanos.val 1000000000 (by decide)
   have hours := Bounded.LE.byEmod (totalSeconds.val / 3600) 24 (by decide)
   have minutes := (Bounded.LE.byEmod totalSeconds.val 3600 (by decide)).ediv 60 (by decide)

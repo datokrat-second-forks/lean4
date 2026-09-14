@@ -32,7 +32,7 @@ This function only initializes but does not yet start the timer.
 -/
 @[inline]
 def mk (duration : Std.Time.Millisecond.Offset) : Async Sleep := do
-  let native ← Internal.UV.Timer.mk duration.toInt.toNat.toUInt64 false
+  let native ← Internal.UV.Timer.mk duration.val.toNat.toUInt64 false
   return ofNative native
 
 /--
@@ -124,7 +124,7 @@ This function only initializes but does not yet start the timer.
 -/
 @[inline]
 def mk (duration : Std.Time.Millisecond.Offset) (_ : 0 < duration := by decide) : IO Interval := do
-  let native ← Internal.UV.Timer.mk duration.toInt.toNat.toUInt64 true
+  let native ← Internal.UV.Timer.mk duration.val.toNat.toUInt64 true
   return ofNative native
 
 /--
