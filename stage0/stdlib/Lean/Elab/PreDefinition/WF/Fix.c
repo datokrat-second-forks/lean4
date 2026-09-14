@@ -1473,12 +1473,12 @@ LEAN_EXPORT lean_object* l___private_Lean_Elab_PreDefinition_WF_Fix_0__Lean_Elab
 _start:
 {
 lean_object* v___x_274_; lean_object* v___x_275_; lean_object* v___x_276_; lean_object* v___x_277_; lean_object* v___x_278_; lean_object* v_fst_279_; lean_object* v_snd_280_; lean_object* v___x_281_; lean_object* v___x_282_; 
-v___x_274_ = lean_unsigned_to_nat(1u);
-v___x_275_ = lean_mk_empty_array_with_capacity(v___x_274_);
-v___x_276_ = lean_array_push(v___x_275_, v_recFnName_270_);
-v___x_277_ = lean_st_ref_take(v___y_272_);
-v___x_278_ = l_Lean_HasConstCache_containsUnsafe(v___x_276_, v_e_271_, v___x_277_);
-lean_dec_ref(v___x_276_);
+v___x_274_ = lean_st_ref_take(v___y_272_);
+v___x_275_ = lean_unsigned_to_nat(1u);
+v___x_276_ = lean_mk_empty_array_with_capacity(v___x_275_);
+v___x_277_ = lean_array_push(v___x_276_, v_recFnName_270_);
+v___x_278_ = l_Lean_HasConstCache_containsUnsafe(v___x_277_, v_e_271_, v___x_274_);
+lean_dec_ref(v___x_277_);
 v_fst_279_ = lean_ctor_get(v___x_278_, 0);
 lean_inc(v_fst_279_);
 v_snd_280_ = lean_ctor_get(v___x_278_, 1);
@@ -10641,8 +10641,8 @@ goto v___jp_3941_;
 }
 else
 {
-lean_dec_ref_known(v_tail_3973_, 2);
 lean_dec(v_tail_3974_);
+lean_dec_ref_known(v_tail_3973_, 2);
 lean_dec(v___x_3955_);
 lean_dec_ref(v_k_3933_);
 lean_dec_ref(v_val_3932_);

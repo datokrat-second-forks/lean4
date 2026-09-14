@@ -12489,9 +12489,9 @@ return v___x_4195_;
 LEAN_EXPORT lean_object* l_Std_Http_Body_stream___lam__3___boxed(lean_object* v_gen_4196_, lean_object* v_a_4197_, lean_object* v___x_4198_, lean_object* v___x_4199_, lean_object* v___f_4200_, lean_object* v___f_4201_, lean_object* v___y_4202_){
 _start:
 {
-uint8_t v___x_1067__boxed_4203_; lean_object* v_res_4204_; 
-v___x_1067__boxed_4203_ = lean_unbox(v___x_4199_);
-v_res_4204_ = l_Std_Http_Body_stream___lam__3(v_gen_4196_, v_a_4197_, v___x_4198_, v___x_1067__boxed_4203_, v___f_4200_, v___f_4201_);
+uint8_t v___x_1076__boxed_4203_; lean_object* v_res_4204_; 
+v___x_1076__boxed_4203_ = lean_unbox(v___x_4199_);
+v_res_4204_ = l_Std_Http_Body_stream___lam__3(v_gen_4196_, v_a_4197_, v___x_4198_, v___x_1076__boxed_4203_, v___f_4200_, v___f_4201_);
 return v_res_4204_;
 }
 }

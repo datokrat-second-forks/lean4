@@ -1705,13 +1705,13 @@ return v_res_518_;
 LEAN_EXPORT lean_object* l_Std_Time_PlainTime_addMilliseconds(lean_object* v_time_519_, lean_object* v_millisToAdd_520_){
 _start:
 {
-lean_object* v___x_521_; lean_object* v_total_522_; lean_object* v___x_523_; lean_object* v___x_524_; lean_object* v___x_525_; 
+lean_object* v___x_521_; lean_object* v___x_522_; lean_object* v___x_523_; lean_object* v___x_524_; lean_object* v___x_525_; 
 v___x_521_ = l_Std_Time_PlainTime_toMilliseconds(v_time_519_);
-v_total_522_ = lean_int_add(v___x_521_, v_millisToAdd_520_);
+v___x_522_ = lean_int_add(v___x_521_, v_millisToAdd_520_);
 lean_dec(v___x_521_);
 v___x_523_ = lean_obj_once(&l_Std_Time_PlainTime_toMilliseconds___closed__3, &l_Std_Time_PlainTime_toMilliseconds___closed__3_once, _init_l_Std_Time_PlainTime_toMilliseconds___closed__3);
-v___x_524_ = lean_int_mul(v_total_522_, v___x_523_);
-lean_dec(v_total_522_);
+v___x_524_ = lean_int_mul(v___x_522_, v___x_523_);
+lean_dec(v___x_522_);
 v___x_525_ = l_Std_Time_PlainTime_ofNanoseconds(v___x_524_);
 lean_dec(v___x_524_);
 return v___x_525_;

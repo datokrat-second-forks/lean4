@@ -1306,7 +1306,7 @@ return v_res_385_;
 LEAN_EXPORT uint8_t l___private_Lean_Data_FuzzyMatching_0__Lean_FuzzyMatching_iterateLookaround___at___00__private_Lean_Data_FuzzyMatching_0__Lean_FuzzyMatching_stringInfo_spec__0___lam__0(lean_object* v_prev_x3f_386_, uint32_t v_curr_387_, lean_object* v_next_x3f_388_){
 _start:
 {
-uint8_t v___y_390_; lean_object* v___y_391_; lean_object* v___y_392_; lean_object* v___y_407_; 
+lean_object* v___y_390_; uint8_t v___y_391_; lean_object* v___y_392_; lean_object* v___y_407_; 
 if (lean_obj_tag(v_prev_x3f_386_) == 0)
 {
 lean_object* v___x_421_; 
@@ -1363,17 +1363,17 @@ goto v___jp_406_;
 }
 v___jp_389_:
 {
-if (v___y_390_ == 2)
+if (v___y_391_ == 2)
 {
 uint8_t v___x_393_; 
 lean_dec(v___y_392_);
-lean_dec(v___y_391_);
+lean_dec(v___y_390_);
 v___x_393_ = 2;
 return v___x_393_;
 }
 else
 {
-if (lean_obj_tag(v___y_391_) == 0)
+if (lean_obj_tag(v___y_390_) == 0)
 {
 uint8_t v___x_394_; 
 lean_dec(v___y_392_);
@@ -1383,9 +1383,9 @@ return v___x_394_;
 else
 {
 lean_object* v_val_395_; uint8_t v___x_396_; 
-v_val_395_ = lean_ctor_get(v___y_391_, 0);
+v_val_395_ = lean_ctor_get(v___y_390_, 0);
 lean_inc(v_val_395_);
-lean_dec_ref_known(v___y_391_, 1);
+lean_dec_ref_known(v___y_390_, 1);
 v___x_396_ = lean_unbox(v_val_395_);
 if (v___x_396_ == 2)
 {
@@ -1397,7 +1397,7 @@ return v___x_397_;
 }
 else
 {
-if (v___y_390_ == 0)
+if (v___y_391_ == 0)
 {
 uint8_t v___x_398_; 
 lean_dec(v_val_395_);
@@ -1461,8 +1461,8 @@ if (lean_obj_tag(v_next_x3f_388_) == 0)
 {
 lean_object* v___x_409_; 
 v___x_409_ = lean_box(0);
-v___y_390_ = v___x_408_;
-v___y_391_ = v___y_407_;
+v___y_390_ = v___y_407_;
+v___y_391_ = v___x_408_;
 v___y_392_ = v___x_409_;
 goto v___jp_389_;
 }
@@ -1508,8 +1508,8 @@ goto v_reusejp_417_;
 }
 v_reusejp_417_:
 {
-v___y_390_ = v___x_408_;
-v___y_391_ = v___y_407_;
+v___y_390_ = v___y_407_;
+v___y_391_ = v___x_408_;
 v___y_392_ = v___x_418_;
 goto v___jp_389_;
 }

@@ -924,10 +924,10 @@ return v___x_177_;
 v___jp_179_:
 {
 lean_object* v_seen_185_; lean_object* v___x_186_; 
-v_seen_185_ = lean_ctor_get(v___y_181_, 0);
+v_seen_185_ = lean_ctor_get(v___y_183_, 0);
 lean_inc(v_seen_185_);
-lean_dec_ref(v___y_181_);
-v___x_186_ = l___private_Init_Data_Array_QSort_Basic_0__Array_qsort_sort___at___00__private_Lean_Util_CollectAxioms_0__Lean_CollectAxioms_collect_spec__1___redArg(v___y_182_, v___y_180_, v___y_183_, v___y_184_);
+lean_dec_ref(v___y_183_);
+v___x_186_ = l___private_Init_Data_Array_QSort_Basic_0__Array_qsort_sort___at___00__private_Lean_Util_CollectAxioms_0__Lean_CollectAxioms_collect_spec__1___redArg(v___y_182_, v___y_181_, v___y_180_, v___y_184_);
 lean_dec(v___y_184_);
 lean_dec(v___y_182_);
 v_seen_170_ = v_seen_185_;
@@ -937,25 +937,25 @@ goto v___jp_169_;
 v___jp_187_:
 {
 uint8_t v___x_193_; 
-v___x_193_ = lean_nat_dec_le(v___y_192_, v___y_189_);
+v___x_193_ = lean_nat_dec_le(v___y_192_, v___y_191_);
 if (v___x_193_ == 0)
 {
-lean_dec(v___y_189_);
+lean_dec(v___y_191_);
 lean_inc(v___y_192_);
-v___y_180_ = v___y_188_;
-v___y_181_ = v___y_190_;
-v___y_182_ = v___y_191_;
-v___y_183_ = v___y_192_;
+v___y_180_ = v___y_192_;
+v___y_181_ = v___y_188_;
+v___y_182_ = v___y_189_;
+v___y_183_ = v___y_190_;
 v___y_184_ = v___y_192_;
 goto v___jp_179_;
 }
 else
 {
-v___y_180_ = v___y_188_;
-v___y_181_ = v___y_190_;
-v___y_182_ = v___y_191_;
-v___y_183_ = v___y_192_;
-v___y_184_ = v___y_189_;
+v___y_180_ = v___y_192_;
+v___y_181_ = v___y_188_;
+v___y_182_ = v___y_189_;
+v___y_183_ = v___y_190_;
+v___y_184_ = v___y_191_;
 goto v___jp_179_;
 }
 }
@@ -977,18 +977,18 @@ if (v___x_204_ == 0)
 {
 lean_inc(v___x_203_);
 v___y_188_ = v___x_198_;
-v___y_189_ = v___x_203_;
+v___y_189_ = v___x_199_;
 v___y_190_ = v___y_195_;
-v___y_191_ = v___x_199_;
+v___y_191_ = v___x_203_;
 v___y_192_ = v___x_203_;
 goto v___jp_187_;
 }
 else
 {
 v___y_188_ = v___x_198_;
-v___y_189_ = v___x_203_;
+v___y_189_ = v___x_199_;
 v___y_190_ = v___y_195_;
-v___y_191_ = v___x_199_;
+v___y_191_ = v___x_203_;
 v___y_192_ = v___x_200_;
 goto v___jp_187_;
 }

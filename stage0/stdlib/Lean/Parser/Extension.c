@@ -15491,8 +15491,8 @@ return v___x_5108_;
 else
 {
 lean_object* v___x_5109_; 
-lean_dec_ref_known(v_declName_5070_, 2);
 lean_dec(v_pre_5071_);
+lean_dec_ref_known(v_declName_5070_, 2);
 lean_del_object(v___x_5067_);
 v___x_5109_ = lean_box(0);
 return v___x_5109_;
@@ -16183,9 +16183,9 @@ return v___x_5303_;
 LEAN_EXPORT lean_object* l_Lean_Parser_parserOfStackFn___lam__0___boxed(lean_object* v___x_5311_, lean_object* v_ctx_5312_){
 _start:
 {
-uint8_t v___x_1069__boxed_5313_; lean_object* v_res_5314_; 
-v___x_1069__boxed_5313_ = lean_unbox(v___x_5311_);
-v_res_5314_ = l_Lean_Parser_parserOfStackFn___lam__0(v___x_1069__boxed_5313_, v_ctx_5312_);
+uint8_t v___x_1276__boxed_5313_; lean_object* v_res_5314_; 
+v___x_1276__boxed_5313_ = lean_unbox(v___x_5311_);
+v_res_5314_ = l_Lean_Parser_parserOfStackFn___lam__0(v___x_1276__boxed_5313_, v_ctx_5312_);
 return v_res_5314_;
 }
 }

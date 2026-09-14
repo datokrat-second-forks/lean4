@@ -3392,7 +3392,7 @@ v___x_928_ = l_Std_DHashMap_Internal_Raw_u2080_insertIfNew___redArg(v___f_924_, 
 v___x_929_ = lean_array_fget_borrowed(v_decls_919_, v_idx_920_);
 if (lean_obj_tag(v___x_929_) == 2)
 {
-lean_object* v_l_930_; lean_object* v_r_931_; lean_object* v___x_932_; lean_object* v___x_933_; lean_object* v___y_935_; uint8_t v___y_936_; uint8_t v___y_937_; uint8_t v___y_961_; lean_object* v___x_967_; lean_object* v___x_968_; uint8_t v___x_969_; 
+lean_object* v_l_930_; lean_object* v_r_931_; lean_object* v___x_932_; lean_object* v___x_933_; uint8_t v___y_935_; lean_object* v___y_936_; uint8_t v___y_937_; uint8_t v___y_961_; lean_object* v___x_967_; lean_object* v___x_968_; uint8_t v___x_969_; 
 v_l_930_ = lean_ctor_get(v___x_929_, 0);
 v_r_931_ = lean_ctor_get(v___x_929_, 1);
 v___x_932_ = lean_unsigned_to_nat(1u);
@@ -3424,7 +3424,7 @@ lean_inc(v___x_933_);
 v___x_941_ = l_Nat_reprFast(v___x_933_);
 v___x_942_ = lean_string_append(v___x_940_, v___x_941_);
 lean_dec_ref(v___x_941_);
-v___x_943_ = l_Std_Sat_AIG_toGraphviz_invEdgeStyle(v___y_936_);
+v___x_943_ = l_Std_Sat_AIG_toGraphviz_invEdgeStyle(v___y_935_);
 v___x_944_ = lean_string_append(v___x_942_, v___x_943_);
 lean_dec_ref(v___x_943_);
 v___x_945_ = ((lean_object*)(l_Std_Sat_AIG_toGraphviz_go___redArg___closed__2));
@@ -3432,8 +3432,8 @@ v___x_946_ = lean_string_append(v___x_944_, v___x_945_);
 v___x_947_ = lean_string_append(v___x_946_, v___x_938_);
 lean_dec_ref(v___x_938_);
 v___x_948_ = lean_string_append(v___x_947_, v___x_939_);
-lean_inc(v___y_935_);
-v___x_949_ = l_Nat_reprFast(v___y_935_);
+lean_inc(v___y_936_);
+v___x_949_ = l_Nat_reprFast(v___y_936_);
 v___x_950_ = lean_string_append(v___x_948_, v___x_949_);
 lean_dec_ref(v___x_949_);
 v___x_951_ = l_Std_Sat_AIG_toGraphviz_invEdgeStyle(v___y_937_);
@@ -3450,7 +3450,7 @@ v_snd_958_ = lean_ctor_get(v___x_956_, 1);
 lean_inc(v_snd_958_);
 lean_dec_ref(v___x_956_);
 v_acc_918_ = v_fst_957_;
-v_idx_920_ = v___y_935_;
+v_idx_920_ = v___y_936_;
 v___y_921_ = v_snd_958_;
 goto _start;
 }
@@ -3466,15 +3466,15 @@ if (v___x_965_ == 0)
 {
 uint8_t v___x_966_; 
 v___x_966_ = 1;
-v___y_935_ = v___x_962_;
-v___y_936_ = v___y_961_;
+v___y_935_ = v___y_961_;
+v___y_936_ = v___x_962_;
 v___y_937_ = v___x_966_;
 goto v___jp_934_;
 }
 else
 {
-v___y_935_ = v___x_962_;
-v___y_936_ = v___y_961_;
+v___y_935_ = v___y_961_;
+v___y_936_ = v___x_962_;
 v___y_937_ = v___x_926_;
 goto v___jp_934_;
 }

@@ -8330,14 +8330,14 @@ v___jp_2859_:
 if (v___y_2864_ == 0)
 {
 lean_object* v___x_2865_; 
-lean_dec_ref(v___y_2861_);
-v___x_2865_ = l_Lean_setEnv___at___00Lean_registerParametricAttributeForExt_spec__0___redArg(v___y_2860_, v___y_2863_);
+lean_dec_ref(v___y_2860_);
+v___x_2865_ = l_Lean_setEnv___at___00Lean_registerParametricAttributeForExt_spec__0___redArg(v___y_2862_, v___y_2861_);
 return v___x_2865_;
 }
 else
 {
-lean_dec_ref(v___y_2860_);
-return v___y_2861_;
+lean_dec_ref(v___y_2862_);
+return v___y_2860_;
 }
 }
 v___jp_2866_:
@@ -8446,20 +8446,20 @@ if (v___x_2894_ == 0)
 {
 uint8_t v___x_2895_; 
 v___x_2895_ = l_Lean_Exception_isRuntime(v_a_2893_);
-v___y_2860_ = v___y_2867_;
-v___y_2861_ = v___x_2892_;
-v___y_2862_ = v___y_2868_;
-v___y_2863_ = v___y_2869_;
+v___y_2860_ = v___x_2892_;
+v___y_2861_ = v___y_2869_;
+v___y_2862_ = v___y_2867_;
+v___y_2863_ = v___y_2868_;
 v___y_2864_ = v___x_2895_;
 goto v___jp_2859_;
 }
 else
 {
 lean_dec(v_a_2893_);
-v___y_2860_ = v___y_2867_;
-v___y_2861_ = v___x_2892_;
-v___y_2862_ = v___y_2868_;
-v___y_2863_ = v___y_2869_;
+v___y_2860_ = v___x_2892_;
+v___y_2861_ = v___y_2869_;
+v___y_2862_ = v___y_2867_;
+v___y_2863_ = v___y_2868_;
 v___y_2864_ = v___x_2894_;
 goto v___jp_2859_;
 }
@@ -11374,8 +11374,8 @@ goto v___jp_3956_;
 }
 else
 {
-lean_dec(v_pre_3970_);
 lean_dec_ref_known(v_declName_3969_, 2);
+lean_dec(v_pre_3970_);
 lean_dec(v_declName_3955_);
 lean_dec_ref(v_env_3953_);
 goto v___jp_3956_;

@@ -2065,8 +2065,8 @@ v___x_572_ = l___private_Lean_Meta_DiscrTree_Main_0__Lean_Meta_DiscrTree_toNatLi
 if (lean_obj_tag(v___x_572_) == 1)
 {
 lean_object* v_val_573_; 
-lean_dec_ref_known(v___x_530_, 2);
 lean_dec(v_declName_564_);
+lean_dec_ref_known(v___x_530_, 2);
 lean_dec(v_a_526_);
 v_val_573_ = lean_ctor_get(v___x_572_, 0);
 lean_inc(v_val_573_);
@@ -2115,8 +2115,8 @@ goto v___jp_565_;
 else
 {
 lean_object* v___x_580_; lean_object* v___x_581_; lean_object* v___x_583_; 
-lean_dec_ref_known(v___x_530_, 2);
 lean_dec(v_declName_564_);
+lean_dec_ref_known(v___x_530_, 2);
 lean_dec(v_a_526_);
 v___x_580_ = lean_box(0);
 v___x_581_ = lean_alloc_ctor(0, 2, 0);

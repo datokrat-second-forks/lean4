@@ -1790,10 +1790,10 @@ return v___x_575_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Meta_Match_isMatchEqnTheorem_spec__0_spec__0___redArg___boxed(lean_object* v_x_576_, lean_object* v_x_577_, lean_object* v_x_578_){
 _start:
 {
-size_t v_x_298__boxed_579_; uint8_t v_res_580_; lean_object* v_r_581_; 
-v_x_298__boxed_579_ = lean_unbox_usize(v_x_577_);
+size_t v_x_340__boxed_579_; uint8_t v_res_580_; lean_object* v_r_581_; 
+v_x_340__boxed_579_ = lean_unbox_usize(v_x_577_);
 lean_dec(v_x_577_);
-v_res_580_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Meta_Match_isMatchEqnTheorem_spec__0_spec__0___redArg(v_x_576_, v_x_298__boxed_579_, v_x_578_);
+v_res_580_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Meta_Match_isMatchEqnTheorem_spec__0_spec__0___redArg(v_x_576_, v_x_340__boxed_579_, v_x_578_);
 lean_dec(v_x_578_);
 lean_dec_ref(v_x_576_);
 v_r_581_ = lean_box(v_res_580_);
@@ -1923,10 +1923,10 @@ return v___x_625_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Meta_Match_isMatchEqnTheorem_spec__0_spec__0___boxed(lean_object* v_00_u03b2_626_, lean_object* v_x_627_, lean_object* v_x_628_, lean_object* v_x_629_){
 _start:
 {
-size_t v_x_388__boxed_630_; uint8_t v_res_631_; lean_object* v_r_632_; 
-v_x_388__boxed_630_ = lean_unbox_usize(v_x_628_);
+size_t v_x_430__boxed_630_; uint8_t v_res_631_; lean_object* v_r_632_; 
+v_x_430__boxed_630_ = lean_unbox_usize(v_x_628_);
 lean_dec(v_x_628_);
-v_res_631_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Meta_Match_isMatchEqnTheorem_spec__0_spec__0(v_00_u03b2_626_, v_x_627_, v_x_388__boxed_630_, v_x_629_);
+v_res_631_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Meta_Match_isMatchEqnTheorem_spec__0_spec__0(v_00_u03b2_626_, v_x_627_, v_x_430__boxed_630_, v_x_629_);
 lean_dec(v_x_629_);
 lean_dec_ref(v_x_627_);
 v_r_632_ = lean_box(v_res_631_);

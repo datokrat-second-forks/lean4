@@ -9103,11 +9103,11 @@ goto v___jp_3039_;
 v___jp_3012_:
 {
 lean_object* v___x_3017_; 
-v___x_3017_ = l_Lean_LocalContext_setUserName(v_a_3000_, v___y_3016_, v___y_3013_);
+v___x_3017_ = l_Lean_LocalContext_setUserName(v_a_3000_, v___y_3016_, v___y_3014_);
 v_i_2999_ = v_n_3011_;
 v_a_3000_ = v___x_3017_;
-v___y_3001_ = v___y_3014_;
-v___y_3002_ = v___y_3015_;
+v___y_3001_ = v___y_3015_;
+v___y_3002_ = v___y_3013_;
 goto _start;
 }
 v___jp_3019_:
@@ -9124,9 +9124,9 @@ lean_dec_ref(v___x_3023_);
 v_fvarId_3026_ = lean_ctor_get(v___y_3020_, 1);
 lean_inc(v_fvarId_3026_);
 lean_dec_ref(v___y_3020_);
-v___y_3013_ = v_fst_3024_;
-v___y_3014_ = v___x_3022_;
-v___y_3015_ = v_snd_3025_;
+v___y_3013_ = v_snd_3025_;
+v___y_3014_ = v_fst_3024_;
+v___y_3015_ = v___x_3022_;
 v___y_3016_ = v_fvarId_3026_;
 goto v___jp_3012_;
 }

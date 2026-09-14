@@ -2508,8 +2508,8 @@ return v___x_774_;
 default: 
 {
 uint8_t v___x_777_; lean_object* v___x_778_; lean_object* v___x_779_; 
-lean_dec_ref(v___x_738_);
 lean_dec_ref_known(v_e_703_, 2);
+lean_dec_ref(v___x_738_);
 v___x_777_ = 3;
 v___x_778_ = lean_box(v___x_777_);
 v___x_779_ = lean_alloc_ctor(0, 1, 0);
