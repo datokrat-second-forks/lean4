@@ -178,52 +178,52 @@ lean_dec_ref(v___y_33_);
 return v_res_42_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_evalExposeNames___redArg(lean_object* v_a_44_, lean_object* v_a_45_, lean_object* v_a_46_, lean_object* v_a_47_, lean_object* v_a_48_, lean_object* v_a_49_, lean_object* v_a_50_, lean_object* v_a_51_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_evalExposeNames___redArg(lean_object* v___y_44_, lean_object* v___y_45_, lean_object* v___y_46_, lean_object* v___y_47_, lean_object* v___y_48_, lean_object* v___y_49_, lean_object* v___y_50_, lean_object* v___y_51_){
 _start:
 {
 lean_object* v___f_53_; lean_object* v___x_54_; 
 v___f_53_ = ((lean_object*)(l_Lean_Elab_Tactic_evalExposeNames___redArg___closed__0));
-v___x_54_ = l_Lean_Elab_Tactic_withMainContext___redArg(v___f_53_, v_a_44_, v_a_45_, v_a_46_, v_a_47_, v_a_48_, v_a_49_, v_a_50_, v_a_51_);
+v___x_54_ = l_Lean_Elab_Tactic_withMainContext___redArg(v___f_53_, v___y_44_, v___y_45_, v___y_46_, v___y_47_, v___y_48_, v___y_49_, v___y_50_, v___y_51_);
 return v___x_54_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_evalExposeNames___redArg___boxed(lean_object* v_a_55_, lean_object* v_a_56_, lean_object* v_a_57_, lean_object* v_a_58_, lean_object* v_a_59_, lean_object* v_a_60_, lean_object* v_a_61_, lean_object* v_a_62_, lean_object* v___y_63_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_evalExposeNames___redArg___boxed(lean_object* v___y_55_, lean_object* v___y_56_, lean_object* v___y_57_, lean_object* v___y_58_, lean_object* v___y_59_, lean_object* v___y_60_, lean_object* v___y_61_, lean_object* v___y_62_, lean_object* v___y_63_){
 _start:
 {
 lean_object* v_res_64_; 
-v_res_64_ = l_Lean_Elab_Tactic_evalExposeNames___redArg(v_a_55_, v_a_56_, v_a_57_, v_a_58_, v_a_59_, v_a_60_, v_a_61_, v_a_62_);
-lean_dec(v_a_62_);
-lean_dec_ref(v_a_61_);
-lean_dec(v_a_60_);
-lean_dec_ref(v_a_59_);
-lean_dec(v_a_58_);
-lean_dec_ref(v_a_57_);
-lean_dec(v_a_56_);
-lean_dec_ref(v_a_55_);
+v_res_64_ = l_Lean_Elab_Tactic_evalExposeNames___redArg(v___y_55_, v___y_56_, v___y_57_, v___y_58_, v___y_59_, v___y_60_, v___y_61_, v___y_62_);
+lean_dec(v___y_62_);
+lean_dec_ref(v___y_61_);
+lean_dec(v___y_60_);
+lean_dec_ref(v___y_59_);
+lean_dec(v___y_58_);
+lean_dec_ref(v___y_57_);
+lean_dec(v___y_56_);
+lean_dec_ref(v___y_55_);
 return v_res_64_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_evalExposeNames(lean_object* v_x_65_, lean_object* v_a_66_, lean_object* v_a_67_, lean_object* v_a_68_, lean_object* v_a_69_, lean_object* v_a_70_, lean_object* v_a_71_, lean_object* v_a_72_, lean_object* v_a_73_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_evalExposeNames(lean_object* v_x_65_, lean_object* v___y_66_, lean_object* v___y_67_, lean_object* v___y_68_, lean_object* v___y_69_, lean_object* v___y_70_, lean_object* v___y_71_, lean_object* v___y_72_, lean_object* v___y_73_){
 _start:
 {
 lean_object* v___x_75_; 
-v___x_75_ = l_Lean_Elab_Tactic_evalExposeNames___redArg(v_a_66_, v_a_67_, v_a_68_, v_a_69_, v_a_70_, v_a_71_, v_a_72_, v_a_73_);
+v___x_75_ = l_Lean_Elab_Tactic_evalExposeNames___redArg(v___y_66_, v___y_67_, v___y_68_, v___y_69_, v___y_70_, v___y_71_, v___y_72_, v___y_73_);
 return v___x_75_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_evalExposeNames___boxed(lean_object* v_x_76_, lean_object* v_a_77_, lean_object* v_a_78_, lean_object* v_a_79_, lean_object* v_a_80_, lean_object* v_a_81_, lean_object* v_a_82_, lean_object* v_a_83_, lean_object* v_a_84_, lean_object* v___y_85_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_evalExposeNames___boxed(lean_object* v_x_76_, lean_object* v___y_77_, lean_object* v___y_78_, lean_object* v___y_79_, lean_object* v___y_80_, lean_object* v___y_81_, lean_object* v___y_82_, lean_object* v___y_83_, lean_object* v___y_84_, lean_object* v___y_85_){
 _start:
 {
 lean_object* v_res_86_; 
-v_res_86_ = l_Lean_Elab_Tactic_evalExposeNames(v_x_76_, v_a_77_, v_a_78_, v_a_79_, v_a_80_, v_a_81_, v_a_82_, v_a_83_, v_a_84_);
-lean_dec(v_a_84_);
-lean_dec_ref(v_a_83_);
-lean_dec(v_a_82_);
-lean_dec_ref(v_a_81_);
-lean_dec(v_a_80_);
-lean_dec_ref(v_a_79_);
-lean_dec(v_a_78_);
-lean_dec_ref(v_a_77_);
+v_res_86_ = l_Lean_Elab_Tactic_evalExposeNames(v_x_76_, v___y_77_, v___y_78_, v___y_79_, v___y_80_, v___y_81_, v___y_82_, v___y_83_, v___y_84_);
+lean_dec(v___y_84_);
+lean_dec_ref(v___y_83_);
+lean_dec(v___y_82_);
+lean_dec_ref(v___y_81_);
+lean_dec(v___y_80_);
+lean_dec_ref(v___y_79_);
+lean_dec(v___y_78_);
+lean_dec_ref(v___y_77_);
 lean_dec(v_x_76_);
 return v_res_86_;
 }

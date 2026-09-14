@@ -814,7 +814,7 @@ v___x_140_ = l_String_toRawSubstring_x27(v___x_139_);
 return v___x_140_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1(lean_object* v_x_161_, lean_object* v_a_162_, lean_object* v___y_163_){
+LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1(lean_object* v_x_161_, lean_object* v___y_162_, lean_object* v___y_163_){
 _start:
 {
 lean_object* v___x_164_; uint8_t v___x_165_; 
@@ -834,9 +834,9 @@ return v___x_167_;
 else
 {
 lean_object* v_quotContext_168_; lean_object* v_currMacroScope_169_; lean_object* v_ref_170_; lean_object* v___x_171_; lean_object* v___x_172_; lean_object* v___x_173_; lean_object* v___x_174_; uint8_t v___x_175_; lean_object* v___x_176_; lean_object* v___x_177_; lean_object* v___x_178_; lean_object* v___x_179_; lean_object* v___x_180_; lean_object* v___x_181_; lean_object* v___x_182_; lean_object* v___x_183_; lean_object* v___x_184_; lean_object* v___x_185_; lean_object* v___x_186_; 
-v_quotContext_168_ = lean_ctor_get(v_a_162_, 1);
-v_currMacroScope_169_ = lean_ctor_get(v_a_162_, 2);
-v_ref_170_ = lean_ctor_get(v_a_162_, 5);
+v_quotContext_168_ = lean_ctor_get(v___y_162_, 1);
+v_currMacroScope_169_ = lean_ctor_get(v___y_162_, 2);
+v_ref_170_ = lean_ctor_get(v___y_162_, 5);
 v___x_171_ = lean_unsigned_to_nat(0u);
 v___x_172_ = l_Lean_Syntax_getArg(v_x_161_, v___x_171_);
 v___x_173_ = lean_unsigned_to_nat(2u);
@@ -867,16 +867,16 @@ return v___x_186_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1___boxed(lean_object* v_x_187_, lean_object* v_a_188_, lean_object* v___y_189_){
+LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1___boxed(lean_object* v_x_187_, lean_object* v___y_188_, lean_object* v___y_189_){
 _start:
 {
 lean_object* v_res_190_; 
-v_res_190_ = l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1(v_x_187_, v_a_188_, v___y_189_);
-lean_dec_ref(v_a_188_);
+v_res_190_ = l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______macroRules__Std__DHashMap__term___x7em____1(v_x_187_, v___y_188_, v___y_189_);
+lean_dec_ref(v___y_188_);
 return v_res_190_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1(lean_object* v_x_194_, lean_object* v_a_195_, lean_object* v___y_196_){
+LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1(lean_object* v_x_194_, lean_object* v___y_195_, lean_object* v___y_196_){
 _start:
 {
 lean_object* v___x_197_; uint8_t v___x_198_; 
@@ -938,7 +938,7 @@ lean_object* v___x_213_; lean_object* v___x_214_; lean_object* v_ref_215_; uint8
 v___x_213_ = l_Lean_Syntax_getArg(v___x_208_, v___x_201_);
 v___x_214_ = l_Lean_Syntax_getArg(v___x_208_, v___x_207_);
 lean_dec(v___x_208_);
-v_ref_215_ = l_Lean_replaceRef(v___x_202_, v_a_195_);
+v_ref_215_ = l_Lean_replaceRef(v___x_202_, v___y_195_);
 lean_dec(v___x_202_);
 v___x_216_ = 0;
 v___x_217_ = l_Lean_SourceInfo_fromRef(v_ref_215_, v___x_216_);
@@ -959,12 +959,12 @@ return v___x_222_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1___boxed(lean_object* v_x_223_, lean_object* v_a_224_, lean_object* v___y_225_){
+LEAN_EXPORT lean_object* l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1___boxed(lean_object* v_x_223_, lean_object* v___y_224_, lean_object* v___y_225_){
 _start:
 {
 lean_object* v_res_226_; 
-v_res_226_ = l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1(v_x_223_, v_a_224_, v___y_225_);
-lean_dec(v_a_224_);
+v_res_226_ = l_Std_DHashMap___aux__Std__Data__DHashMap__Basic______unexpand__Std__DHashMap__Equiv__1(v_x_223_, v___y_224_, v___y_225_);
+lean_dec(v___y_224_);
 return v_res_226_;
 }
 }

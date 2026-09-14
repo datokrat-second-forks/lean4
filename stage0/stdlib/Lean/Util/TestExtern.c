@@ -1051,9 +1051,9 @@ return v___x_307_;
 LEAN_EXPORT lean_object* l_Lean_elabTestExtern___lam__0___boxed(lean_object* v___x_310_, lean_object* v___x_311_, lean_object* v___x_312_, lean_object* v___y_313_, lean_object* v___y_314_, lean_object* v___y_315_, lean_object* v___y_316_, lean_object* v___y_317_, lean_object* v___y_318_, lean_object* v___y_319_){
 _start:
 {
-uint8_t v___x_4082__boxed_320_; lean_object* v_res_321_; 
-v___x_4082__boxed_320_ = lean_unbox(v___x_312_);
-v_res_321_ = l_Lean_elabTestExtern___lam__0(v___x_310_, v___x_311_, v___x_4082__boxed_320_, v___y_313_, v___y_314_, v___y_315_, v___y_316_, v___y_317_, v___y_318_);
+uint8_t v___x_3910__boxed_320_; lean_object* v_res_321_; 
+v___x_3910__boxed_320_ = lean_unbox(v___x_312_);
+v_res_321_ = l_Lean_elabTestExtern___lam__0(v___x_310_, v___x_311_, v___x_3910__boxed_320_, v___y_313_, v___y_314_, v___y_315_, v___y_316_, v___y_317_, v___y_318_);
 lean_dec(v___y_318_);
 lean_dec_ref(v___y_317_);
 lean_dec(v___y_316_);
@@ -1063,7 +1063,7 @@ lean_dec_ref(v___y_313_);
 return v_res_321_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_elabTestExtern(lean_object* v_x_322_, lean_object* v_a_323_, lean_object* v_a_324_){
+LEAN_EXPORT lean_object* l_Lean_elabTestExtern(lean_object* v_x_322_, lean_object* v___y_323_, lean_object* v___y_324_){
 _start:
 {
 lean_object* v___x_326_; uint8_t v___x_327_; 
@@ -1089,18 +1089,18 @@ v___f_333_ = lean_alloc_closure((void*)(l_Lean_elabTestExtern___lam__0___boxed),
 lean_closure_set(v___f_333_, 0, v___x_330_);
 lean_closure_set(v___f_333_, 1, v___x_331_);
 lean_closure_set(v___f_333_, 2, v___x_332_);
-v___x_334_ = l_Lean_Elab_Command_liftTermElabM___redArg(v___f_333_, v_a_323_, v_a_324_);
+v___x_334_ = l_Lean_Elab_Command_liftTermElabM___redArg(v___f_333_, v___y_323_, v___y_324_);
 return v___x_334_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_elabTestExtern___boxed(lean_object* v_x_335_, lean_object* v_a_336_, lean_object* v_a_337_, lean_object* v___y_338_){
+LEAN_EXPORT lean_object* l_Lean_elabTestExtern___boxed(lean_object* v_x_335_, lean_object* v___y_336_, lean_object* v___y_337_, lean_object* v___y_338_){
 _start:
 {
 lean_object* v_res_339_; 
-v_res_339_ = l_Lean_elabTestExtern(v_x_335_, v_a_336_, v_a_337_);
-lean_dec(v_a_337_);
-lean_dec_ref(v_a_336_);
+v_res_339_ = l_Lean_elabTestExtern(v_x_335_, v___y_336_, v___y_337_);
+lean_dec(v___y_337_);
+lean_dec_ref(v___y_336_);
 return v_res_339_;
 }
 }

@@ -1413,7 +1413,7 @@ lean_dec_ref(v_as_376_);
 return v_res_384_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_Completion_find_x3f(lean_object* v_uri_385_, lean_object* v_pos_386_, lean_object* v_fileMap_387_, lean_object* v_hoverPos_388_, lean_object* v_cmdStx_389_, lean_object* v_infoTree_390_, lean_object* v_caps_391_, lean_object* v_a_392_){
+LEAN_EXPORT lean_object* l_Lean_Server_Completion_find_x3f(lean_object* v_uri_385_, lean_object* v_pos_386_, lean_object* v_fileMap_387_, lean_object* v_hoverPos_388_, lean_object* v_cmdStx_389_, lean_object* v_infoTree_390_, lean_object* v_caps_391_, lean_object* v___y_392_){
 _start:
 {
 lean_object* v___x_394_; lean_object* v_fst_395_; lean_object* v_snd_396_; lean_object* v_allCompletions_397_; size_t v_sz_398_; size_t v___x_399_; lean_object* v___x_400_; 
@@ -1426,7 +1426,7 @@ lean_dec_ref(v___x_394_);
 v_allCompletions_397_ = ((lean_object*)(l___private_Lean_Server_Completion_0__Lean_Server_Completion_filterDuplicateCompletionItems___closed__0));
 v_sz_398_ = lean_array_size(v_fst_395_);
 v___x_399_ = ((size_t)0ULL);
-v___x_400_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_Server_Completion_find_x3f_spec__1(v_uri_385_, v_pos_386_, v_caps_391_, v_fst_395_, v_sz_398_, v___x_399_, v_allCompletions_397_, v_a_392_);
+v___x_400_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_Server_Completion_find_x3f_spec__1(v_uri_385_, v_pos_386_, v_caps_391_, v_fst_395_, v_sz_398_, v___x_399_, v_allCompletions_397_, v___y_392_);
 lean_dec(v_fst_395_);
 if (lean_obj_tag(v___x_400_) == 0)
 {
@@ -1640,12 +1640,12 @@ return v___x_440_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Server_Completion_find_x3f___boxed(lean_object* v_uri_443_, lean_object* v_pos_444_, lean_object* v_fileMap_445_, lean_object* v_hoverPos_446_, lean_object* v_cmdStx_447_, lean_object* v_infoTree_448_, lean_object* v_caps_449_, lean_object* v_a_450_, lean_object* v___y_451_){
+LEAN_EXPORT lean_object* l_Lean_Server_Completion_find_x3f___boxed(lean_object* v_uri_443_, lean_object* v_pos_444_, lean_object* v_fileMap_445_, lean_object* v_hoverPos_446_, lean_object* v_cmdStx_447_, lean_object* v_infoTree_448_, lean_object* v_caps_449_, lean_object* v___y_450_, lean_object* v___y_451_){
 _start:
 {
 lean_object* v_res_452_; 
-v_res_452_ = l_Lean_Server_Completion_find_x3f(v_uri_443_, v_pos_444_, v_fileMap_445_, v_hoverPos_446_, v_cmdStx_447_, v_infoTree_448_, v_caps_449_, v_a_450_);
-lean_dec_ref(v_a_450_);
+v_res_452_ = l_Lean_Server_Completion_find_x3f(v_uri_443_, v_pos_444_, v_fileMap_445_, v_hoverPos_446_, v_cmdStx_447_, v_infoTree_448_, v_caps_449_, v___y_450_);
+lean_dec_ref(v___y_450_);
 return v_res_452_;
 }
 }

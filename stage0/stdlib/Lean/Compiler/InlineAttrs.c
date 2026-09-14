@@ -1417,12 +1417,12 @@ lean_dec_ref(v___y_387_);
 return v_res_390_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_InlineAttrs_0__Lean_Compiler_isValidMacroInline(lean_object* v_declName_391_, lean_object* v_a_392_, lean_object* v_a_393_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_InlineAttrs_0__Lean_Compiler_isValidMacroInline(lean_object* v_declName_391_, lean_object* v___y_392_, lean_object* v___y_393_){
 _start:
 {
 lean_object* v___x_395_; 
 lean_inc(v_declName_391_);
-v___x_395_ = l_Lean_getConstInfo___at___00__private_Lean_Compiler_InlineAttrs_0__Lean_Compiler_isValidMacroInline_spec__0(v_declName_391_, v_a_392_, v_a_393_);
+v___x_395_ = l_Lean_getConstInfo___at___00__private_Lean_Compiler_InlineAttrs_0__Lean_Compiler_isValidMacroInline_spec__0(v_declName_391_, v___y_392_, v___y_393_);
 if (lean_obj_tag(v___x_395_) == 0)
 {
 lean_object* v_a_396_; lean_object* v___x_398_; uint8_t v_isShared_399_; uint8_t v_isSharedCheck_430_; 
@@ -1486,7 +1486,7 @@ else
 {
 lean_object* v___x_409_; 
 lean_del_object(v___x_398_);
-v___x_409_ = l_Lean_Meta_isRecursiveDefinition___redArg(v_declName_391_, v_a_393_);
+v___x_409_ = l_Lean_Meta_isRecursiveDefinition___redArg(v_declName_391_, v___y_393_);
 if (lean_obj_tag(v___x_409_) == 0)
 {
 lean_object* v_a_410_; lean_object* v___x_412_; uint8_t v_isShared_413_; uint8_t v_isSharedCheck_424_; 
@@ -1638,13 +1638,13 @@ return v___x_436_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Compiler_InlineAttrs_0__Lean_Compiler_isValidMacroInline___boxed(lean_object* v_declName_439_, lean_object* v_a_440_, lean_object* v_a_441_, lean_object* v___y_442_){
+LEAN_EXPORT lean_object* l___private_Lean_Compiler_InlineAttrs_0__Lean_Compiler_isValidMacroInline___boxed(lean_object* v_declName_439_, lean_object* v___y_440_, lean_object* v___y_441_, lean_object* v___y_442_){
 _start:
 {
 lean_object* v_res_443_; 
-v_res_443_ = l___private_Lean_Compiler_InlineAttrs_0__Lean_Compiler_isValidMacroInline(v_declName_439_, v_a_440_, v_a_441_);
-lean_dec(v_a_441_);
-lean_dec_ref(v_a_440_);
+v_res_443_ = l___private_Lean_Compiler_InlineAttrs_0__Lean_Compiler_isValidMacroInline(v_declName_439_, v___y_440_, v___y_441_);
+lean_dec(v___y_441_);
+lean_dec_ref(v___y_440_);
 return v_res_443_;
 }
 }

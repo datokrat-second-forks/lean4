@@ -21,11 +21,11 @@ LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg(
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f(uint8_t, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg(uint8_t v_pu_1_, lean_object* v_fvarId_2_, lean_object* v_a_3_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg(uint8_t v_pu_1_, lean_object* v_fvarId_2_, lean_object* v___y_3_){
 _start:
 {
 lean_object* v___x_8_; 
-v___x_8_ = l_Lean_Compiler_LCNF_findFunDecl_x3f___redArg(v_pu_1_, v_fvarId_2_, v_a_3_);
+v___x_8_ = l_Lean_Compiler_LCNF_findFunDecl_x3f___redArg(v_pu_1_, v_fvarId_2_, v___y_3_);
 if (lean_obj_tag(v___x_8_) == 0)
 {
 lean_object* v_a_9_; 
@@ -40,9 +40,9 @@ return v___x_8_;
 else
 {
 lean_object* v___x_10_; 
-lean_dec_ref_known(v___x_8_, 1);
 lean_dec(v_a_9_);
-v___x_10_ = l_Lean_Compiler_LCNF_findLetValue_x3f___redArg(v_pu_1_, v_fvarId_2_, v_a_3_);
+lean_dec_ref_known(v___x_8_, 1);
+v___x_10_ = l_Lean_Compiler_LCNF_findLetValue_x3f___redArg(v_pu_1_, v_fvarId_2_, v___y_3_);
 lean_dec(v_fvarId_2_);
 if (lean_obj_tag(v___x_10_) == 0)
 {
@@ -149,34 +149,34 @@ return v___x_7_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg___boxed(lean_object* v_pu_27_, lean_object* v_fvarId_28_, lean_object* v_a_29_, lean_object* v___y_30_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg___boxed(lean_object* v_pu_27_, lean_object* v_fvarId_28_, lean_object* v___y_29_, lean_object* v___y_30_){
 _start:
 {
 uint8_t v_pu_boxed_31_; lean_object* v_res_32_; 
 v_pu_boxed_31_ = lean_unbox(v_pu_27_);
-v_res_32_ = l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg(v_pu_boxed_31_, v_fvarId_28_, v_a_29_);
-lean_dec(v_a_29_);
+v_res_32_ = l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg(v_pu_boxed_31_, v_fvarId_28_, v___y_29_);
+lean_dec(v___y_29_);
 return v_res_32_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f(uint8_t v_pu_33_, lean_object* v_fvarId_34_, lean_object* v_a_35_, lean_object* v_a_36_, lean_object* v_a_37_, lean_object* v_a_38_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f(uint8_t v_pu_33_, lean_object* v_fvarId_34_, lean_object* v___y_35_, lean_object* v___y_36_, lean_object* v___y_37_, lean_object* v___y_38_){
 _start:
 {
 lean_object* v___x_40_; 
-v___x_40_ = l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg(v_pu_33_, v_fvarId_34_, v_a_36_);
+v___x_40_ = l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___redArg(v_pu_33_, v_fvarId_34_, v___y_36_);
 return v___x_40_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___boxed(lean_object* v_pu_41_, lean_object* v_fvarId_42_, lean_object* v_a_43_, lean_object* v_a_44_, lean_object* v_a_45_, lean_object* v_a_46_, lean_object* v___y_47_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f___boxed(lean_object* v_pu_41_, lean_object* v_fvarId_42_, lean_object* v___y_43_, lean_object* v___y_44_, lean_object* v___y_45_, lean_object* v___y_46_, lean_object* v___y_47_){
 _start:
 {
 uint8_t v_pu_boxed_48_; lean_object* v_res_49_; 
 v_pu_boxed_48_ = lean_unbox(v_pu_41_);
-v_res_49_ = l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f(v_pu_boxed_48_, v_fvarId_42_, v_a_43_, v_a_44_, v_a_45_, v_a_46_);
-lean_dec(v_a_46_);
-lean_dec_ref(v_a_45_);
-lean_dec(v_a_44_);
-lean_dec_ref(v_a_43_);
+v_res_49_ = l_Lean_Compiler_LCNF_Simp_findFunDecl_x27_x3f(v_pu_boxed_48_, v_fvarId_42_, v___y_43_, v___y_44_, v___y_45_, v___y_46_);
+lean_dec(v___y_46_);
+lean_dec_ref(v___y_45_);
+lean_dec(v___y_44_);
+lean_dec_ref(v___y_43_);
 return v_res_49_;
 }
 }

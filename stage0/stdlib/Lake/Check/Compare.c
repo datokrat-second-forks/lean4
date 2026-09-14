@@ -304,7 +304,7 @@ return v___x_57_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_addWorklist(lean_object* v_n_58_, lean_object* v_a_59_, lean_object* v___y_60_){
+LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_addWorklist(lean_object* v_n_58_, lean_object* v___y_59_, lean_object* v___y_60_){
 _start:
 {
 lean_object* v___x_61_; 
@@ -312,12 +312,12 @@ v___x_61_ = l___private_Lake_Check_Compare_0__Lake_Check_Compare_addWorklist___r
 return v___x_61_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_addWorklist___boxed(lean_object* v_n_62_, lean_object* v_a_63_, lean_object* v___y_64_){
+LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_addWorklist___boxed(lean_object* v_n_62_, lean_object* v___y_63_, lean_object* v___y_64_){
 _start:
 {
 lean_object* v_res_65_; 
-v_res_65_ = l___private_Lake_Check_Compare_0__Lake_Check_Compare_addWorklist(v_n_62_, v_a_63_, v___y_64_);
-lean_dec_ref(v_a_63_);
+v_res_65_ = l___private_Lake_Check_Compare_0__Lake_Check_Compare_addWorklist(v_n_62_, v___y_63_, v___y_64_);
+lean_dec_ref(v___y_63_);
 return v_res_65_;
 }
 }
@@ -820,21 +820,21 @@ lean_dec_ref(v___y_231_);
 return v_res_233_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts(lean_object* v_info_235_, lean_object* v_a_236_, lean_object* v___y_237_){
+LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts(lean_object* v_info_235_, lean_object* v___y_236_, lean_object* v___y_237_){
 _start:
 {
 lean_object* v___x_238_; lean_object* v___x_239_; 
 v___x_238_ = ((lean_object*)(l___private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts___closed__0));
-v___x_239_ = l_Lake_Check_runForUsedConsts___at___00__private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts_spec__0(v_info_235_, v___x_238_, v_a_236_, v___y_237_);
+v___x_239_ = l_Lake_Check_runForUsedConsts___at___00__private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts_spec__0(v_info_235_, v___x_238_, v___y_236_, v___y_237_);
 return v___x_239_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts___boxed(lean_object* v_info_240_, lean_object* v_a_241_, lean_object* v___y_242_){
+LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts___boxed(lean_object* v_info_240_, lean_object* v___y_241_, lean_object* v___y_242_){
 _start:
 {
 lean_object* v_res_243_; 
-v_res_243_ = l___private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts(v_info_240_, v_a_241_, v___y_242_);
-lean_dec_ref(v_a_241_);
+v_res_243_ = l___private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts(v_info_240_, v___y_241_, v___y_242_);
+lean_dec_ref(v___y_241_);
 return v_res_243_;
 }
 }
@@ -1267,7 +1267,7 @@ lean_dec_ref(v_as_394_);
 return v_res_401_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_loop(lean_object* v_a_406_, lean_object* v___y_407_){
+LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_loop(lean_object* v___y_406_, lean_object* v___y_407_){
 _start:
 {
 lean_object* v_worklist_408_; lean_object* v_checked_409_; lean_object* v___x_410_; lean_object* v___x_411_; uint8_t v___x_412_; 
@@ -1318,10 +1318,10 @@ v___x_441_ = l_Std_DHashMap_Internal_Raw_u2080_contains___at___00__private_Lake_
 if (v___x_441_ == 0)
 {
 lean_object* v_challenge_442_; lean_object* v_solution_443_; lean_object* v_definitionTargets_444_; lean_object* v_theoremTargets_445_; lean_object* v_constMap_446_; lean_object* v___x_447_; 
-v_challenge_442_ = lean_ctor_get(v_a_406_, 0);
-v_solution_443_ = lean_ctor_get(v_a_406_, 1);
-v_definitionTargets_444_ = lean_ctor_get(v_a_406_, 2);
-v_theoremTargets_445_ = lean_ctor_get(v_a_406_, 3);
+v_challenge_442_ = lean_ctor_get(v___y_406_, 0);
+v_solution_443_ = lean_ctor_get(v___y_406_, 1);
+v_definitionTargets_444_ = lean_ctor_get(v___y_406_, 2);
+v_theoremTargets_445_ = lean_ctor_get(v___y_406_, 3);
 v_constMap_446_ = lean_ctor_get(v_challenge_442_, 0);
 v___x_447_ = l_Std_DHashMap_Internal_Raw_u2080_Const_get_x3f___at___00__private_Lake_Check_Compare_0__Lake_Check_Compare_loop_spec__1___redArg(v_constMap_446_, v___x_419_);
 if (lean_obj_tag(v___x_447_) == 1)
@@ -1422,7 +1422,7 @@ else
 {
 lean_object* v___x_484_; 
 lean_del_object(v___x_456_);
-v___x_484_ = l___private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts(v_val_454_, v_a_406_, v___x_440_);
+v___x_484_ = l___private_Lake_Check_Compare_0__Lake_Check_Compare_addRelevantConsts(v_val_454_, v___y_406_, v___x_440_);
 if (lean_obj_tag(v___x_484_) == 0)
 {
 lean_dec(v___x_419_);
@@ -1438,7 +1438,7 @@ lean_dec_ref_known(v___x_484_, 1);
 v_snd_486_ = lean_ctor_get(v_a_485_, 1);
 lean_inc(v_snd_486_);
 lean_dec(v_a_485_);
-v___y_431_ = v_a_406_;
+v___y_431_ = v___y_406_;
 v___y_432_ = v_snd_486_;
 goto v___jp_430_;
 }
@@ -1470,7 +1470,7 @@ if (v___x_462_ == 0)
 {
 lean_dec_ref(v___x_460_);
 lean_dec_ref_known(v___x_440_, 2);
-v___y_421_ = v_a_406_;
+v___y_421_ = v___y_406_;
 v_worklist_422_ = v___x_439_;
 v_checked_423_ = v_checked_409_;
 goto v___jp_420_;
@@ -1486,7 +1486,7 @@ if (v___x_462_ == 0)
 {
 lean_dec_ref(v___x_460_);
 lean_dec_ref_known(v___x_440_, 2);
-v___y_421_ = v_a_406_;
+v___y_421_ = v___y_406_;
 v_worklist_422_ = v___x_439_;
 v_checked_423_ = v_checked_409_;
 goto v___jp_420_;
@@ -1610,7 +1610,7 @@ goto v_reusejp_426_;
 }
 v_reusejp_426_:
 {
-v_a_406_ = v___y_421_;
+v___y_406_ = v___y_421_;
 v___y_407_ = v___x_427_;
 goto _start;
 }
@@ -1645,7 +1645,7 @@ lean_dec_ref_known(v___y_436_, 1);
 v_snd_438_ = lean_ctor_get(v_a_437_, 1);
 lean_inc(v_snd_438_);
 lean_dec(v_a_437_);
-v___y_431_ = v_a_406_;
+v___y_431_ = v___y_406_;
 v___y_432_ = v_snd_438_;
 goto v___jp_430_;
 }
@@ -1665,12 +1665,12 @@ return v___x_511_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_loop___boxed(lean_object* v_a_512_, lean_object* v___y_513_){
+LEAN_EXPORT lean_object* l___private_Lake_Check_Compare_0__Lake_Check_Compare_loop___boxed(lean_object* v___y_512_, lean_object* v___y_513_){
 _start:
 {
 lean_object* v_res_514_; 
-v_res_514_ = l___private_Lake_Check_Compare_0__Lake_Check_Compare_loop(v_a_512_, v___y_513_);
-lean_dec_ref(v_a_512_);
+v_res_514_ = l___private_Lake_Check_Compare_0__Lake_Check_Compare_loop(v___y_512_, v___y_513_);
+lean_dec_ref(v___y_512_);
 return v_res_514_;
 }
 }
@@ -2232,8 +2232,8 @@ goto v___jp_714_;
 }
 else
 {
-lean_dec(v_val_737_);
 lean_dec_ref_known(v_val_731_, 1);
+lean_dec(v_val_737_);
 lean_dec_ref(v_b_702_);
 goto v___jp_707_;
 }

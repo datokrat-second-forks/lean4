@@ -438,13 +438,13 @@ v___x_59_ = l_Lean_stringToMessageData(v___x_58_);
 return v___x_59_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CommRing_checkInst(lean_object* v_declName_60_, lean_object* v_inst_61_, lean_object* v_inst_x27_62_, lean_object* v_a_63_, lean_object* v_a_64_, lean_object* v_a_65_, lean_object* v_a_66_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CommRing_checkInst(lean_object* v_declName_60_, lean_object* v_inst_61_, lean_object* v_inst_x27_62_, lean_object* v___y_63_, lean_object* v___y_64_, lean_object* v___y_65_, lean_object* v___y_66_){
 _start:
 {
 lean_object* v___x_68_; 
 lean_inc_ref(v_inst_x27_62_);
 lean_inc_ref(v_inst_61_);
-v___x_68_ = l_Lean_Meta_isDefEqI(v_inst_61_, v_inst_x27_62_, v_a_63_, v_a_64_, v_a_65_, v_a_66_);
+v___x_68_ = l_Lean_Meta_isDefEqI(v_inst_61_, v_inst_x27_62_, v___y_63_, v___y_64_, v___y_65_, v___y_66_);
 if (lean_obj_tag(v___x_68_) == 0)
 {
 lean_object* v_a_69_; lean_object* v___x_71_; uint8_t v_isShared_72_; uint8_t v_isSharedCheck_92_; 
@@ -498,7 +498,7 @@ v___x_85_ = lean_obj_once(&l_Lean_Meta_Grind_Arith_CommRing_checkInst___closed__
 v___x_86_ = lean_alloc_ctor(7, 2, 0);
 lean_ctor_set(v___x_86_, 0, v___x_84_);
 lean_ctor_set(v___x_86_, 1, v___x_85_);
-v___x_87_ = l_Lean_throwError___at___00Lean_Meta_Grind_Arith_CommRing_checkInst_spec__0___redArg(v___x_86_, v_a_63_, v_a_64_, v_a_65_, v_a_66_);
+v___x_87_ = l_Lean_throwError___at___00Lean_Meta_Grind_Arith_CommRing_checkInst_spec__0___redArg(v___x_86_, v___y_63_, v___y_64_, v___y_65_, v___y_66_);
 return v___x_87_;
 }
 else
@@ -575,15 +575,15 @@ return v___x_98_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CommRing_checkInst___boxed(lean_object* v_declName_101_, lean_object* v_inst_102_, lean_object* v_inst_x27_103_, lean_object* v_a_104_, lean_object* v_a_105_, lean_object* v_a_106_, lean_object* v_a_107_, lean_object* v___y_108_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CommRing_checkInst___boxed(lean_object* v_declName_101_, lean_object* v_inst_102_, lean_object* v_inst_x27_103_, lean_object* v___y_104_, lean_object* v___y_105_, lean_object* v___y_106_, lean_object* v___y_107_, lean_object* v___y_108_){
 _start:
 {
 lean_object* v_res_109_; 
-v_res_109_ = l_Lean_Meta_Grind_Arith_CommRing_checkInst(v_declName_101_, v_inst_102_, v_inst_x27_103_, v_a_104_, v_a_105_, v_a_106_, v_a_107_);
-lean_dec(v_a_107_);
-lean_dec_ref(v_a_106_);
-lean_dec(v_a_105_);
-lean_dec_ref(v_a_104_);
+v_res_109_ = l_Lean_Meta_Grind_Arith_CommRing_checkInst(v_declName_101_, v_inst_102_, v_inst_x27_103_, v___y_104_, v___y_105_, v___y_106_, v___y_107_);
+lean_dec(v___y_107_);
+lean_dec_ref(v___y_106_);
+lean_dec(v___y_105_);
+lean_dec_ref(v___y_104_);
 return v_res_109_;
 }
 }

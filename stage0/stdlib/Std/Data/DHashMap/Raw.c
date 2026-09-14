@@ -744,7 +744,7 @@ v___x_116_ = l_String_toRawSubstring_x27(v___x_115_);
 return v___x_116_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______macroRules__Std__DHashMap__Raw__term___x7em____1(lean_object* v_x_140_, lean_object* v_a_141_, lean_object* v___y_142_){
+LEAN_EXPORT lean_object* l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______macroRules__Std__DHashMap__Raw__term___x7em____1(lean_object* v_x_140_, lean_object* v___y_141_, lean_object* v___y_142_){
 _start:
 {
 lean_object* v___x_143_; uint8_t v___x_144_; 
@@ -764,9 +764,9 @@ return v___x_146_;
 else
 {
 lean_object* v_quotContext_147_; lean_object* v_currMacroScope_148_; lean_object* v_ref_149_; lean_object* v___x_150_; lean_object* v___x_151_; lean_object* v___x_152_; lean_object* v___x_153_; uint8_t v___x_154_; lean_object* v___x_155_; lean_object* v___x_156_; lean_object* v___x_157_; lean_object* v___x_158_; lean_object* v___x_159_; lean_object* v___x_160_; lean_object* v___x_161_; lean_object* v___x_162_; lean_object* v___x_163_; lean_object* v___x_164_; lean_object* v___x_165_; 
-v_quotContext_147_ = lean_ctor_get(v_a_141_, 1);
-v_currMacroScope_148_ = lean_ctor_get(v_a_141_, 2);
-v_ref_149_ = lean_ctor_get(v_a_141_, 5);
+v_quotContext_147_ = lean_ctor_get(v___y_141_, 1);
+v_currMacroScope_148_ = lean_ctor_get(v___y_141_, 2);
+v_ref_149_ = lean_ctor_get(v___y_141_, 5);
 v___x_150_ = lean_unsigned_to_nat(0u);
 v___x_151_ = l_Lean_Syntax_getArg(v_x_140_, v___x_150_);
 v___x_152_ = lean_unsigned_to_nat(2u);
@@ -797,16 +797,16 @@ return v___x_165_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______macroRules__Std__DHashMap__Raw__term___x7em____1___boxed(lean_object* v_x_166_, lean_object* v_a_167_, lean_object* v___y_168_){
+LEAN_EXPORT lean_object* l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______macroRules__Std__DHashMap__Raw__term___x7em____1___boxed(lean_object* v_x_166_, lean_object* v___y_167_, lean_object* v___y_168_){
 _start:
 {
 lean_object* v_res_169_; 
-v_res_169_ = l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______macroRules__Std__DHashMap__Raw__term___x7em____1(v_x_166_, v_a_167_, v___y_168_);
-lean_dec_ref(v_a_167_);
+v_res_169_ = l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______macroRules__Std__DHashMap__Raw__term___x7em____1(v_x_166_, v___y_167_, v___y_168_);
+lean_dec_ref(v___y_167_);
 return v_res_169_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______unexpand__Std__DHashMap__Raw__Equiv__1(lean_object* v_x_173_, lean_object* v_a_174_, lean_object* v___y_175_){
+LEAN_EXPORT lean_object* l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______unexpand__Std__DHashMap__Raw__Equiv__1(lean_object* v_x_173_, lean_object* v___y_174_, lean_object* v___y_175_){
 _start:
 {
 lean_object* v___x_176_; uint8_t v___x_177_; 
@@ -868,7 +868,7 @@ lean_object* v___x_192_; lean_object* v___x_193_; lean_object* v_ref_194_; uint8
 v___x_192_ = l_Lean_Syntax_getArg(v___x_187_, v___x_180_);
 v___x_193_ = l_Lean_Syntax_getArg(v___x_187_, v___x_186_);
 lean_dec(v___x_187_);
-v_ref_194_ = l_Lean_replaceRef(v___x_181_, v_a_174_);
+v_ref_194_ = l_Lean_replaceRef(v___x_181_, v___y_174_);
 lean_dec(v___x_181_);
 v___x_195_ = 0;
 v___x_196_ = l_Lean_SourceInfo_fromRef(v_ref_194_, v___x_195_);
@@ -889,12 +889,12 @@ return v___x_201_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______unexpand__Std__DHashMap__Raw__Equiv__1___boxed(lean_object* v_x_202_, lean_object* v_a_203_, lean_object* v___y_204_){
+LEAN_EXPORT lean_object* l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______unexpand__Std__DHashMap__Raw__Equiv__1___boxed(lean_object* v_x_202_, lean_object* v___y_203_, lean_object* v___y_204_){
 _start:
 {
 lean_object* v_res_205_; 
-v_res_205_ = l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______unexpand__Std__DHashMap__Raw__Equiv__1(v_x_202_, v_a_203_, v___y_204_);
-lean_dec(v_a_203_);
+v_res_205_ = l_Std_DHashMap_Raw___aux__Std__Data__DHashMap__Raw______unexpand__Std__DHashMap__Raw__Equiv__1(v_x_202_, v___y_203_, v___y_204_);
+lean_dec(v___y_203_);
 return v_res_205_;
 }
 }

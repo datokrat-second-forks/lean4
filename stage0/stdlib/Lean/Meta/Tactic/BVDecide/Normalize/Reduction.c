@@ -1200,9 +1200,9 @@ return v___x_434_;
 LEAN_EXPORT lean_object* l_WellFounded_opaqueFix_u2083___at___00Lean_Meta_Tactic_BVDecide_Normalize_reductionPass_spec__1___redArg___lam__5___boxed(lean_object* v___x_437_, lean_object* v___f_438_, lean_object* v_____r_439_, lean_object* v___y_440_, lean_object* v___y_441_, lean_object* v___y_442_, lean_object* v___y_443_, lean_object* v___y_444_, lean_object* v___y_445_, lean_object* v___y_446_, lean_object* v___y_447_, lean_object* v___y_448_, lean_object* v___y_449_, lean_object* v___y_450_, lean_object* v___y_451_){
 _start:
 {
-uint8_t v___x_11369__boxed_452_; lean_object* v_res_453_; 
-v___x_11369__boxed_452_ = lean_unbox(v___x_437_);
-v_res_453_ = l_WellFounded_opaqueFix_u2083___at___00Lean_Meta_Tactic_BVDecide_Normalize_reductionPass_spec__1___redArg___lam__5(v___x_11369__boxed_452_, v___f_438_, v_____r_439_, v___y_440_, v___y_441_, v___y_442_, v___y_443_, v___y_444_, v___y_445_, v___y_446_, v___y_447_, v___y_448_, v___y_449_, v___y_450_);
+uint8_t v___x_12233__boxed_452_; lean_object* v_res_453_; 
+v___x_12233__boxed_452_ = lean_unbox(v___x_437_);
+v_res_453_ = l_WellFounded_opaqueFix_u2083___at___00Lean_Meta_Tactic_BVDecide_Normalize_reductionPass_spec__1___redArg___lam__5(v___x_12233__boxed_452_, v___f_438_, v_____r_439_, v___y_440_, v___y_441_, v___y_442_, v___y_443_, v___y_444_, v___y_445_, v___y_446_, v___y_447_, v___y_448_, v___y_449_, v___y_450_);
 lean_dec(v___y_450_);
 lean_dec_ref(v___y_449_);
 lean_dec(v___y_448_);

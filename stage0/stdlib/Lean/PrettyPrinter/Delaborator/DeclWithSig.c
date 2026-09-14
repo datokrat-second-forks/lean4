@@ -144,25 +144,25 @@ lean_closure_set(v___x_26_, 2, v___x_23_);
 return v___x_26_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter(lean_object* v_a_27_, lean_object* v_a_28_, lean_object* v_a_29_, lean_object* v_a_30_){
+LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter(lean_object* v___y_27_, lean_object* v___y_28_, lean_object* v___y_29_, lean_object* v___y_30_){
 _start:
 {
 lean_object* v___x_32_; lean_object* v___x_33_; lean_object* v___x_34_; 
 v___x_32_ = ((lean_object*)(l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter___closed__5));
 v___x_33_ = lean_obj_once(&l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter___closed__9, &l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter___closed__9_once, _init_l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter___closed__9);
-v___x_34_ = l_Lean_PrettyPrinter_Formatter_orelse_formatter(v___x_32_, v___x_33_, v_a_27_, v_a_28_, v_a_29_, v_a_30_);
+v___x_34_ = l_Lean_PrettyPrinter_Formatter_orelse_formatter(v___x_32_, v___x_33_, v___y_27_, v___y_28_, v___y_29_, v___y_30_);
 return v___x_34_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter___boxed(lean_object* v_a_35_, lean_object* v_a_36_, lean_object* v_a_37_, lean_object* v_a_38_, lean_object* v___y_39_){
+LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter___boxed(lean_object* v___y_35_, lean_object* v___y_36_, lean_object* v___y_37_, lean_object* v___y_38_, lean_object* v___y_39_){
 _start:
 {
 lean_object* v_res_40_; 
-v_res_40_ = l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter(v_a_35_, v_a_36_, v_a_37_, v_a_38_);
-lean_dec(v_a_38_);
-lean_dec_ref(v_a_37_);
-lean_dec(v_a_36_);
-lean_dec_ref(v_a_35_);
+v_res_40_ = l_Lean_PrettyPrinter_Delaborator_declSigWithId_formatter(v___y_35_, v___y_36_, v___y_37_, v___y_38_);
+lean_dec(v___y_38_);
+lean_dec_ref(v___y_37_);
+lean_dec(v___y_36_);
+lean_dec_ref(v___y_35_);
 return v_res_40_;
 }
 }
@@ -222,25 +222,25 @@ lean_closure_set(v___x_72_, 2, v___x_69_);
 return v___x_72_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer(lean_object* v_a_73_, lean_object* v_a_74_, lean_object* v_a_75_, lean_object* v_a_76_){
+LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer(lean_object* v___y_73_, lean_object* v___y_74_, lean_object* v___y_75_, lean_object* v___y_76_){
 _start:
 {
 lean_object* v___x_78_; lean_object* v___x_79_; lean_object* v___x_80_; 
 v___x_78_ = ((lean_object*)(l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer___closed__0));
 v___x_79_ = lean_obj_once(&l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer___closed__4, &l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer___closed__4_once, _init_l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer___closed__4);
-v___x_80_ = l_Lean_PrettyPrinter_Parenthesizer_withAntiquot_parenthesizer(v___x_78_, v___x_79_, v_a_73_, v_a_74_, v_a_75_, v_a_76_);
+v___x_80_ = l_Lean_PrettyPrinter_Parenthesizer_withAntiquot_parenthesizer(v___x_78_, v___x_79_, v___y_73_, v___y_74_, v___y_75_, v___y_76_);
 return v___x_80_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer___boxed(lean_object* v_a_81_, lean_object* v_a_82_, lean_object* v_a_83_, lean_object* v_a_84_, lean_object* v___y_85_){
+LEAN_EXPORT lean_object* l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer___boxed(lean_object* v___y_81_, lean_object* v___y_82_, lean_object* v___y_83_, lean_object* v___y_84_, lean_object* v___y_85_){
 _start:
 {
 lean_object* v_res_86_; 
-v_res_86_ = l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer(v_a_81_, v_a_82_, v_a_83_, v_a_84_);
-lean_dec(v_a_84_);
-lean_dec_ref(v_a_83_);
-lean_dec(v_a_82_);
-lean_dec_ref(v_a_81_);
+v_res_86_ = l_Lean_PrettyPrinter_Delaborator_declSigWithId_parenthesizer(v___y_81_, v___y_82_, v___y_83_, v___y_84_);
+lean_dec(v___y_84_);
+lean_dec_ref(v___y_83_);
+lean_dec(v___y_82_);
+lean_dec_ref(v___y_81_);
 return v_res_86_;
 }
 }

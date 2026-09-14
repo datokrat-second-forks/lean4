@@ -2888,11 +2888,11 @@ v___x_936_ = l_Lean_stringToMessageData(v___x_935_);
 return v___x_936_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor___redArg(lean_object* v_attr_937_, lean_object* v_parserDecl_938_, lean_object* v_a_939_, lean_object* v_a_940_){
+LEAN_EXPORT lean_object* l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor___redArg(lean_object* v_attr_937_, lean_object* v_parserDecl_938_, lean_object* v___y_939_, lean_object* v___y_940_){
 _start:
 {
 lean_object* v___x_942_; lean_object* v_env_943_; lean_object* v___x_944_; 
-v___x_942_ = lean_st_ref_get(v_a_940_);
+v___x_942_ = lean_st_ref_get(v___y_940_);
 v_env_943_ = lean_ctor_get(v___x_942_, 0);
 lean_inc_ref(v_env_943_);
 lean_dec(v___x_942_);
@@ -2906,7 +2906,7 @@ v_val_945_ = lean_ctor_get(v___x_944_, 0);
 lean_inc(v_val_945_);
 lean_dec_ref_known(v___x_944_, 1);
 v___x_946_ = 1;
-v___x_947_ = l_Lean_evalConst___at___00Lean_ParserCompiler_CombinatorAttribute_runDeclFor_spec__0___redArg(v_val_945_, v___x_946_, v_a_939_, v_a_940_);
+v___x_947_ = l_Lean_evalConst___at___00Lean_ParserCompiler_CombinatorAttribute_runDeclFor_spec__0___redArg(v_val_945_, v___x_946_, v___y_939_, v___y_940_);
 return v___x_947_;
 }
 else
@@ -2975,38 +2975,38 @@ v___x_962_ = lean_obj_once(&l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor
 v___x_963_ = lean_alloc_ctor(7, 2, 0);
 lean_ctor_set(v___x_963_, 0, v___x_961_);
 lean_ctor_set(v___x_963_, 1, v___x_962_);
-v___x_964_ = l_Lean_throwError___at___00Lean_ParserCompiler_registerCombinatorAttribute_spec__0___redArg(v___x_963_, v_a_939_, v_a_940_);
+v___x_964_ = l_Lean_throwError___at___00Lean_ParserCompiler_registerCombinatorAttribute_spec__0___redArg(v___x_963_, v___y_939_, v___y_940_);
 return v___x_964_;
 }
 }
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor___redArg___boxed(lean_object* v_attr_968_, lean_object* v_parserDecl_969_, lean_object* v_a_970_, lean_object* v_a_971_, lean_object* v___y_972_){
+LEAN_EXPORT lean_object* l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor___redArg___boxed(lean_object* v_attr_968_, lean_object* v_parserDecl_969_, lean_object* v___y_970_, lean_object* v___y_971_, lean_object* v___y_972_){
 _start:
 {
 lean_object* v_res_973_; 
-v_res_973_ = l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor___redArg(v_attr_968_, v_parserDecl_969_, v_a_970_, v_a_971_);
-lean_dec(v_a_971_);
-lean_dec_ref(v_a_970_);
+v_res_973_ = l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor___redArg(v_attr_968_, v_parserDecl_969_, v___y_970_, v___y_971_);
+lean_dec(v___y_971_);
+lean_dec_ref(v___y_970_);
 return v_res_973_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor(lean_object* v_00_u03b1_974_, lean_object* v_attr_975_, lean_object* v_parserDecl_976_, lean_object* v_a_977_, lean_object* v_a_978_){
+LEAN_EXPORT lean_object* l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor(lean_object* v_00_u03b1_974_, lean_object* v_attr_975_, lean_object* v_parserDecl_976_, lean_object* v___y_977_, lean_object* v___y_978_){
 _start:
 {
 lean_object* v___x_980_; 
-v___x_980_ = l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor___redArg(v_attr_975_, v_parserDecl_976_, v_a_977_, v_a_978_);
+v___x_980_ = l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor___redArg(v_attr_975_, v_parserDecl_976_, v___y_977_, v___y_978_);
 return v___x_980_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor___boxed(lean_object* v_00_u03b1_981_, lean_object* v_attr_982_, lean_object* v_parserDecl_983_, lean_object* v_a_984_, lean_object* v_a_985_, lean_object* v___y_986_){
+LEAN_EXPORT lean_object* l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor___boxed(lean_object* v_00_u03b1_981_, lean_object* v_attr_982_, lean_object* v_parserDecl_983_, lean_object* v___y_984_, lean_object* v___y_985_, lean_object* v___y_986_){
 _start:
 {
 lean_object* v_res_987_; 
-v_res_987_ = l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor(v_00_u03b1_981_, v_attr_982_, v_parserDecl_983_, v_a_984_, v_a_985_);
-lean_dec(v_a_985_);
-lean_dec_ref(v_a_984_);
+v_res_987_ = l_Lean_ParserCompiler_CombinatorAttribute_runDeclFor(v_00_u03b1_981_, v_attr_982_, v_parserDecl_983_, v___y_984_, v___y_985_);
+lean_dec(v___y_985_);
+lean_dec_ref(v___y_984_);
 return v_res_987_;
 }
 }

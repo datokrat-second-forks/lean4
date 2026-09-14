@@ -99,7 +99,7 @@ v___x_49_ = l_String_toRawSubstring_x27(v___x_48_);
 return v___x_49_;
 }
 }
-LEAN_EXPORT lean_object* l___aux__Init__Data__ToString__Macro______macroRules__termS_x21____1(lean_object* v_x_62_, lean_object* v_a_63_, lean_object* v___y_64_){
+LEAN_EXPORT lean_object* l___aux__Init__Data__ToString__Macro______macroRules__termS_x21____1(lean_object* v_x_62_, lean_object* v___y_63_, lean_object* v___y_64_){
 _start:
 {
 lean_object* v___x_65_; uint8_t v___x_66_; 
@@ -119,9 +119,9 @@ return v___x_68_;
 else
 {
 lean_object* v_quotContext_69_; lean_object* v_currMacroScope_70_; lean_object* v_ref_71_; lean_object* v___x_72_; lean_object* v_interpStr_73_; uint8_t v___x_74_; lean_object* v___x_75_; lean_object* v___x_76_; lean_object* v___x_77_; lean_object* v___x_78_; lean_object* v___x_79_; lean_object* v___x_80_; lean_object* v___x_81_; lean_object* v___x_82_; lean_object* v___x_83_; lean_object* v___x_84_; lean_object* v___x_85_; lean_object* v___x_86_; 
-v_quotContext_69_ = lean_ctor_get(v_a_63_, 1);
-v_currMacroScope_70_ = lean_ctor_get(v_a_63_, 2);
-v_ref_71_ = lean_ctor_get(v_a_63_, 5);
+v_quotContext_69_ = lean_ctor_get(v___y_63_, 1);
+v_currMacroScope_70_ = lean_ctor_get(v___y_63_, 2);
+v_ref_71_ = lean_ctor_get(v___y_63_, 5);
 v___x_72_ = lean_unsigned_to_nat(1u);
 v_interpStr_73_ = l_Lean_Syntax_getArg(v_x_62_, v___x_72_);
 lean_dec(v_x_62_);
@@ -149,7 +149,7 @@ lean_ctor_set(v___x_85_, 1, v___x_81_);
 lean_ctor_set(v___x_85_, 2, v___x_83_);
 lean_ctor_set(v___x_85_, 3, v___x_84_);
 lean_inc_ref(v___x_85_);
-v___x_86_ = l_Lean_TSyntax_expandInterpolatedStr(v_interpStr_73_, v___x_80_, v___x_85_, v___x_85_, v_a_63_, v___y_64_);
+v___x_86_ = l_Lean_TSyntax_expandInterpolatedStr(v_interpStr_73_, v___x_80_, v___x_85_, v___x_85_, v___y_63_, v___y_64_);
 lean_dec(v_interpStr_73_);
 if (lean_obj_tag(v___x_86_) == 0)
 {
@@ -242,12 +242,12 @@ return v___x_102_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___aux__Init__Data__ToString__Macro______macroRules__termS_x21____1___boxed(lean_object* v_x_105_, lean_object* v_a_106_, lean_object* v___y_107_){
+LEAN_EXPORT lean_object* l___aux__Init__Data__ToString__Macro______macroRules__termS_x21____1___boxed(lean_object* v_x_105_, lean_object* v___y_106_, lean_object* v___y_107_){
 _start:
 {
 lean_object* v_res_108_; 
-v_res_108_ = l___aux__Init__Data__ToString__Macro______macroRules__termS_x21____1(v_x_105_, v_a_106_, v___y_107_);
-lean_dec_ref(v_a_106_);
+v_res_108_ = l___aux__Init__Data__ToString__Macro______macroRules__termS_x21____1(v_x_105_, v___y_106_, v___y_107_);
+lean_dec_ref(v___y_106_);
 return v_res_108_;
 }
 }

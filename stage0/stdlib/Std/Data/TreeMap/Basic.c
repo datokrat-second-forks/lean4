@@ -941,7 +941,7 @@ v___x_149_ = l_String_toRawSubstring_x27(v___x_148_);
 return v___x_149_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______macroRules__Std__TreeMap__term___x7em____1(lean_object* v_x_167_, lean_object* v_a_168_, lean_object* v___y_169_){
+LEAN_EXPORT lean_object* l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______macroRules__Std__TreeMap__term___x7em____1(lean_object* v_x_167_, lean_object* v___y_168_, lean_object* v___y_169_){
 _start:
 {
 lean_object* v___x_170_; uint8_t v___x_171_; 
@@ -961,9 +961,9 @@ return v___x_173_;
 else
 {
 lean_object* v_quotContext_174_; lean_object* v_currMacroScope_175_; lean_object* v_ref_176_; lean_object* v___x_177_; lean_object* v___x_178_; lean_object* v___x_179_; lean_object* v___x_180_; uint8_t v___x_181_; lean_object* v___x_182_; lean_object* v___x_183_; lean_object* v___x_184_; lean_object* v___x_185_; lean_object* v___x_186_; lean_object* v___x_187_; lean_object* v___x_188_; lean_object* v___x_189_; lean_object* v___x_190_; lean_object* v___x_191_; lean_object* v___x_192_; 
-v_quotContext_174_ = lean_ctor_get(v_a_168_, 1);
-v_currMacroScope_175_ = lean_ctor_get(v_a_168_, 2);
-v_ref_176_ = lean_ctor_get(v_a_168_, 5);
+v_quotContext_174_ = lean_ctor_get(v___y_168_, 1);
+v_currMacroScope_175_ = lean_ctor_get(v___y_168_, 2);
+v_ref_176_ = lean_ctor_get(v___y_168_, 5);
 v___x_177_ = lean_unsigned_to_nat(0u);
 v___x_178_ = l_Lean_Syntax_getArg(v_x_167_, v___x_177_);
 v___x_179_ = lean_unsigned_to_nat(2u);
@@ -994,16 +994,16 @@ return v___x_192_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______macroRules__Std__TreeMap__term___x7em____1___boxed(lean_object* v_x_193_, lean_object* v_a_194_, lean_object* v___y_195_){
+LEAN_EXPORT lean_object* l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______macroRules__Std__TreeMap__term___x7em____1___boxed(lean_object* v_x_193_, lean_object* v___y_194_, lean_object* v___y_195_){
 _start:
 {
 lean_object* v_res_196_; 
-v_res_196_ = l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______macroRules__Std__TreeMap__term___x7em____1(v_x_193_, v_a_194_, v___y_195_);
-lean_dec_ref(v_a_194_);
+v_res_196_ = l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______macroRules__Std__TreeMap__term___x7em____1(v_x_193_, v___y_194_, v___y_195_);
+lean_dec_ref(v___y_194_);
 return v_res_196_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______unexpand__Std__TreeMap__Equiv__1(lean_object* v_x_200_, lean_object* v_a_201_, lean_object* v___y_202_){
+LEAN_EXPORT lean_object* l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______unexpand__Std__TreeMap__Equiv__1(lean_object* v_x_200_, lean_object* v___y_201_, lean_object* v___y_202_){
 _start:
 {
 lean_object* v___x_203_; uint8_t v___x_204_; 
@@ -1065,7 +1065,7 @@ lean_object* v___x_219_; lean_object* v___x_220_; lean_object* v_ref_221_; uint8
 v___x_219_ = l_Lean_Syntax_getArg(v___x_214_, v___x_207_);
 v___x_220_ = l_Lean_Syntax_getArg(v___x_214_, v___x_213_);
 lean_dec(v___x_214_);
-v_ref_221_ = l_Lean_replaceRef(v___x_208_, v_a_201_);
+v_ref_221_ = l_Lean_replaceRef(v___x_208_, v___y_201_);
 lean_dec(v___x_208_);
 v___x_222_ = 0;
 v___x_223_ = l_Lean_SourceInfo_fromRef(v_ref_221_, v___x_222_);
@@ -1086,12 +1086,12 @@ return v___x_228_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______unexpand__Std__TreeMap__Equiv__1___boxed(lean_object* v_x_229_, lean_object* v_a_230_, lean_object* v___y_231_){
+LEAN_EXPORT lean_object* l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______unexpand__Std__TreeMap__Equiv__1___boxed(lean_object* v_x_229_, lean_object* v___y_230_, lean_object* v___y_231_){
 _start:
 {
 lean_object* v_res_232_; 
-v_res_232_ = l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______unexpand__Std__TreeMap__Equiv__1(v_x_229_, v_a_230_, v___y_231_);
-lean_dec(v_a_230_);
+v_res_232_ = l_Std_TreeMap___aux__Std__Data__TreeMap__Basic______unexpand__Std__TreeMap__Equiv__1(v_x_229_, v___y_230_, v___y_231_);
+lean_dec(v___y_230_);
 return v_res_232_;
 }
 }

@@ -416,7 +416,7 @@ v_dummy_95_ = l_Lean_Expr_sort___override(v___x_94_);
 return v_dummy_95_;
 }
 }
-LEAN_EXPORT lean_object* l_reduceCtorIdx(lean_object* v_e_96_, lean_object* v_a_97_, lean_object* v_a_98_, lean_object* v_a_99_, lean_object* v_a_100_, lean_object* v_a_101_, lean_object* v_a_102_, lean_object* v_a_103_){
+LEAN_EXPORT lean_object* l_reduceCtorIdx(lean_object* v_e_96_, lean_object* v___y_97_, lean_object* v___y_98_, lean_object* v___y_99_, lean_object* v___y_100_, lean_object* v___y_101_, lean_object* v___y_102_, lean_object* v___y_103_){
 _start:
 {
 lean_object* v_dummy_105_; lean_object* v_nargs_106_; lean_object* v___x_107_; lean_object* v___x_108_; lean_object* v___x_109_; lean_object* v___x_110_; 
@@ -427,22 +427,22 @@ v___x_107_ = lean_mk_array(v_nargs_106_, v_dummy_105_);
 v___x_108_ = lean_unsigned_to_nat(1u);
 v___x_109_ = lean_nat_sub(v_nargs_106_, v___x_108_);
 lean_dec(v_nargs_106_);
-v___x_110_ = l_Lean_Expr_withAppAux___at___00reduceCtorIdx_spec__0___redArg(v_e_96_, v___x_107_, v___x_109_, v_a_100_, v_a_101_, v_a_102_, v_a_103_);
+v___x_110_ = l_Lean_Expr_withAppAux___at___00reduceCtorIdx_spec__0___redArg(v_e_96_, v___x_107_, v___x_109_, v___y_100_, v___y_101_, v___y_102_, v___y_103_);
 return v___x_110_;
 }
 }
-LEAN_EXPORT lean_object* l_reduceCtorIdx___boxed(lean_object* v_e_111_, lean_object* v_a_112_, lean_object* v_a_113_, lean_object* v_a_114_, lean_object* v_a_115_, lean_object* v_a_116_, lean_object* v_a_117_, lean_object* v_a_118_, lean_object* v___y_119_){
+LEAN_EXPORT lean_object* l_reduceCtorIdx___boxed(lean_object* v_e_111_, lean_object* v___y_112_, lean_object* v___y_113_, lean_object* v___y_114_, lean_object* v___y_115_, lean_object* v___y_116_, lean_object* v___y_117_, lean_object* v___y_118_, lean_object* v___y_119_){
 _start:
 {
 lean_object* v_res_120_; 
-v_res_120_ = l_reduceCtorIdx(v_e_111_, v_a_112_, v_a_113_, v_a_114_, v_a_115_, v_a_116_, v_a_117_, v_a_118_);
-lean_dec(v_a_118_);
-lean_dec_ref(v_a_117_);
-lean_dec(v_a_116_);
-lean_dec_ref(v_a_115_);
-lean_dec(v_a_114_);
-lean_dec_ref(v_a_113_);
-lean_dec(v_a_112_);
+v_res_120_ = l_reduceCtorIdx(v_e_111_, v___y_112_, v___y_113_, v___y_114_, v___y_115_, v___y_116_, v___y_117_, v___y_118_);
+lean_dec(v___y_118_);
+lean_dec_ref(v___y_117_);
+lean_dec(v___y_116_);
+lean_dec_ref(v___y_115_);
+lean_dec(v___y_114_);
+lean_dec_ref(v___y_113_);
+lean_dec(v___y_112_);
 return v_res_120_;
 }
 }

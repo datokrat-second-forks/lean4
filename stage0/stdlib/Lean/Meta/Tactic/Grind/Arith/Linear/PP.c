@@ -310,7 +310,7 @@ v___x_86_ = l_Lean_stringToMessageData(v___x_85_);
 return v___x_86_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_Linear_ppStruct_x3f(lean_object* v_goal_87_, lean_object* v_s_88_, lean_object* v_a_89_, lean_object* v_a_90_, lean_object* v_a_91_, lean_object* v_a_92_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_Linear_ppStruct_x3f(lean_object* v_goal_87_, lean_object* v_s_88_, lean_object* v___y_89_, lean_object* v___y_90_, lean_object* v___y_91_, lean_object* v___y_92_){
 _start:
 {
 lean_object* v_id_94_; lean_object* v_type_95_; lean_object* v___x_96_; 
@@ -319,7 +319,7 @@ lean_inc(v_id_94_);
 v_type_95_ = lean_ctor_get(v_s_88_, 2);
 lean_inc_ref(v_type_95_);
 lean_dec_ref(v_s_88_);
-v___x_96_ = l_Lean_Meta_Grind_Arith_Linear_mkModel(v_goal_87_, v_id_94_, v_a_89_, v_a_90_, v_a_91_, v_a_92_);
+v___x_96_ = l_Lean_Meta_Grind_Arith_Linear_mkModel(v_goal_87_, v_id_94_, v___y_89_, v___y_90_, v___y_91_, v___y_92_);
 lean_dec(v_id_94_);
 if (lean_obj_tag(v___x_96_) == 0)
 {
@@ -527,15 +527,15 @@ return v___x_142_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_Linear_ppStruct_x3f___boxed(lean_object* v_goal_145_, lean_object* v_s_146_, lean_object* v_a_147_, lean_object* v_a_148_, lean_object* v_a_149_, lean_object* v_a_150_, lean_object* v___y_151_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_Linear_ppStruct_x3f___boxed(lean_object* v_goal_145_, lean_object* v_s_146_, lean_object* v___y_147_, lean_object* v___y_148_, lean_object* v___y_149_, lean_object* v___y_150_, lean_object* v___y_151_){
 _start:
 {
 lean_object* v_res_152_; 
-v_res_152_ = l_Lean_Meta_Grind_Arith_Linear_ppStruct_x3f(v_goal_145_, v_s_146_, v_a_147_, v_a_148_, v_a_149_, v_a_150_);
-lean_dec(v_a_150_);
-lean_dec_ref(v_a_149_);
-lean_dec(v_a_148_);
-lean_dec_ref(v_a_147_);
+v_res_152_ = l_Lean_Meta_Grind_Arith_Linear_ppStruct_x3f(v_goal_145_, v_s_146_, v___y_147_, v___y_148_, v___y_149_, v___y_150_);
+lean_dec(v___y_150_);
+lean_dec_ref(v___y_149_);
+lean_dec(v___y_148_);
+lean_dec_ref(v___y_147_);
 lean_dec_ref(v_goal_145_);
 return v_res_152_;
 }
@@ -687,11 +687,11 @@ v___x_222_ = l_Lean_MessageData_ofFormat(v___x_221_);
 return v___x_222_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_Linear_pp_x3f(lean_object* v_goal_223_, lean_object* v_a_224_, lean_object* v_a_225_, lean_object* v_a_226_, lean_object* v_a_227_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_Linear_pp_x3f(lean_object* v_goal_223_, lean_object* v___y_224_, lean_object* v___y_225_, lean_object* v___y_226_, lean_object* v___y_227_){
 _start:
 {
 lean_object* v_ref_229_; lean_object* v___x_230_; lean_object* v_msgs_231_; lean_object* v___x_232_; lean_object* v___x_233_; 
-v_ref_229_ = lean_ctor_get(v_a_226_, 2);
+v_ref_229_ = lean_ctor_get(v___y_226_, 2);
 v___x_230_ = lean_unsigned_to_nat(0u);
 v_msgs_231_ = ((lean_object*)(l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_Meta_Grind_Arith_Linear_ppStruct_x3f_spec__0___redArg___closed__0));
 v___x_232_ = l_Lean_Meta_Grind_Arith_Linear_linearExt;
@@ -707,7 +707,7 @@ lean_inc_ref(v_structs_235_);
 lean_dec(v_a_234_);
 v_sz_236_ = lean_array_size(v_structs_235_);
 v___x_237_ = ((size_t)0ULL);
-v___x_238_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_Meta_Grind_Arith_Linear_pp_x3f_spec__0(v_goal_223_, v_structs_235_, v_sz_236_, v___x_237_, v_msgs_231_, v_a_224_, v_a_225_, v_a_226_, v_a_227_);
+v___x_238_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_Meta_Grind_Arith_Linear_pp_x3f_spec__0(v_goal_223_, v_structs_235_, v_sz_236_, v___x_237_, v_msgs_231_, v___y_224_, v___y_225_, v___y_226_, v___y_227_);
 lean_dec_ref(v_structs_235_);
 if (lean_obj_tag(v___x_238_) == 0)
 {
@@ -915,15 +915,15 @@ return v___x_281_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_Linear_pp_x3f___boxed(lean_object* v_goal_284_, lean_object* v_a_285_, lean_object* v_a_286_, lean_object* v_a_287_, lean_object* v_a_288_, lean_object* v___y_289_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_Linear_pp_x3f___boxed(lean_object* v_goal_284_, lean_object* v___y_285_, lean_object* v___y_286_, lean_object* v___y_287_, lean_object* v___y_288_, lean_object* v___y_289_){
 _start:
 {
 lean_object* v_res_290_; 
-v_res_290_ = l_Lean_Meta_Grind_Arith_Linear_pp_x3f(v_goal_284_, v_a_285_, v_a_286_, v_a_287_, v_a_288_);
-lean_dec(v_a_288_);
-lean_dec_ref(v_a_287_);
-lean_dec(v_a_286_);
-lean_dec_ref(v_a_285_);
+v_res_290_ = l_Lean_Meta_Grind_Arith_Linear_pp_x3f(v_goal_284_, v___y_285_, v___y_286_, v___y_287_, v___y_288_);
+lean_dec(v___y_288_);
+lean_dec_ref(v___y_287_);
+lean_dec(v___y_286_);
+lean_dec_ref(v___y_285_);
 lean_dec_ref(v_goal_284_);
 return v_res_290_;
 }

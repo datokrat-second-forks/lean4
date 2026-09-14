@@ -46,7 +46,7 @@ static const lean_ctor_object l_Lean_Grind_leftInvUnexpander___closed__9_value =
 static const lean_object* l_Lean_Grind_leftInvUnexpander___closed__9 = (const lean_object*)&l_Lean_Grind_leftInvUnexpander___closed__9_value;
 LEAN_EXPORT lean_object* l_Lean_Grind_leftInvUnexpander(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lean_Grind_leftInvUnexpander___boxed(lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Lean_Grind_leftInvUnexpander(lean_object* v_stx_17_, lean_object* v_a_18_, lean_object* v___y_19_){
+LEAN_EXPORT lean_object* l_Lean_Grind_leftInvUnexpander(lean_object* v_stx_17_, lean_object* v___y_18_, lean_object* v___y_19_){
 _start:
 {
 lean_object* v___x_20_; uint8_t v___x_21_; 
@@ -95,7 +95,7 @@ lean_object* v___x_33_; lean_object* v___x_34_; lean_object* v___x_35_; lean_obj
 v___x_33_ = l_Lean_Syntax_getArg(v___x_26_, v___x_24_);
 v___x_34_ = l_Lean_Syntax_getArg(v___x_26_, v___x_27_);
 lean_dec(v___x_26_);
-v___x_35_ = l_Lean_SourceInfo_fromRef(v_a_18_, v___x_28_);
+v___x_35_ = l_Lean_SourceInfo_fromRef(v___y_18_, v___x_28_);
 v___x_36_ = ((lean_object*)(l_Lean_Grind_leftInvUnexpander___closed__6));
 v___x_37_ = ((lean_object*)(l_Lean_Grind_leftInvUnexpander___closed__7));
 lean_inc_n(v___x_35_, 3);
@@ -118,7 +118,7 @@ lean_object* v___x_44_; uint8_t v___x_45_; lean_object* v___x_46_; lean_object* 
 v___x_44_ = l_Lean_Syntax_getArg(v___x_26_, v___x_24_);
 lean_dec(v___x_26_);
 v___x_45_ = 0;
-v___x_46_ = l_Lean_SourceInfo_fromRef(v_a_18_, v___x_45_);
+v___x_46_ = l_Lean_SourceInfo_fromRef(v___y_18_, v___x_45_);
 v___x_47_ = ((lean_object*)(l_Lean_Grind_leftInvUnexpander___closed__6));
 v___x_48_ = ((lean_object*)(l_Lean_Grind_leftInvUnexpander___closed__7));
 lean_inc(v___x_46_);
@@ -134,12 +134,12 @@ return v___x_51_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Grind_leftInvUnexpander___boxed(lean_object* v_stx_52_, lean_object* v_a_53_, lean_object* v___y_54_){
+LEAN_EXPORT lean_object* l_Lean_Grind_leftInvUnexpander___boxed(lean_object* v_stx_52_, lean_object* v___y_53_, lean_object* v___y_54_){
 _start:
 {
 lean_object* v_res_55_; 
-v_res_55_ = l_Lean_Grind_leftInvUnexpander(v_stx_52_, v_a_53_, v___y_54_);
-lean_dec(v_a_53_);
+v_res_55_ = l_Lean_Grind_leftInvUnexpander(v_stx_52_, v___y_53_, v___y_54_);
+lean_dec(v___y_53_);
 return v_res_55_;
 }
 }

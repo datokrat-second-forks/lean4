@@ -340,7 +340,7 @@ lean_dec_ref(v_c_117_);
 return v_res_118_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_InlayHint_resolveDeferred(lean_object* v_i_119_, lean_object* v_a_120_, lean_object* v_a_121_, lean_object* v_a_122_, lean_object* v_a_123_){
+LEAN_EXPORT lean_object* l_Lean_Elab_InlayHint_resolveDeferred(lean_object* v_i_119_, lean_object* v___y_120_, lean_object* v___y_121_, lean_object* v___y_122_, lean_object* v___y_123_){
 _start:
 {
 lean_object* v_toInlayHintInfo_125_; lean_object* v_lctx_126_; lean_object* v_deferredResolution_127_; lean_object* v___x_129_; uint8_t v_isShared_130_; uint8_t v_isSharedCheck_151_; 
@@ -368,11 +368,11 @@ v_resetjp_128_:
 {
 lean_object* v___x_131_; 
 lean_inc_ref(v_deferredResolution_127_);
-lean_inc(v_a_123_);
-lean_inc_ref(v_a_122_);
-lean_inc(v_a_121_);
-lean_inc_ref(v_a_120_);
-v___x_131_ = lean_apply_6(v_deferredResolution_127_, v_toInlayHintInfo_125_, v_a_120_, v_a_121_, v_a_122_, v_a_123_, lean_box(0));
+lean_inc(v___y_123_);
+lean_inc_ref(v___y_122_);
+lean_inc(v___y_121_);
+lean_inc_ref(v___y_120_);
+v___x_131_ = lean_apply_6(v_deferredResolution_127_, v_toInlayHintInfo_125_, v___y_120_, v___y_121_, v___y_122_, v___y_123_, lean_box(0));
 if (lean_obj_tag(v___x_131_) == 0)
 {
 lean_object* v_a_132_; lean_object* v___x_134_; uint8_t v_isShared_135_; uint8_t v_isSharedCheck_142_; 
@@ -482,15 +482,15 @@ return v___x_148_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_InlayHint_resolveDeferred___boxed(lean_object* v_i_152_, lean_object* v_a_153_, lean_object* v_a_154_, lean_object* v_a_155_, lean_object* v_a_156_, lean_object* v___y_157_){
+LEAN_EXPORT lean_object* l_Lean_Elab_InlayHint_resolveDeferred___boxed(lean_object* v_i_152_, lean_object* v___y_153_, lean_object* v___y_154_, lean_object* v___y_155_, lean_object* v___y_156_, lean_object* v___y_157_){
 _start:
 {
 lean_object* v_res_158_; 
-v_res_158_ = l_Lean_Elab_InlayHint_resolveDeferred(v_i_152_, v_a_153_, v_a_154_, v_a_155_, v_a_156_);
-lean_dec(v_a_156_);
-lean_dec_ref(v_a_155_);
-lean_dec(v_a_154_);
-lean_dec_ref(v_a_153_);
+v_res_158_ = l_Lean_Elab_InlayHint_resolveDeferred(v_i_152_, v___y_153_, v___y_154_, v___y_155_, v___y_156_);
+lean_dec(v___y_156_);
+lean_dec_ref(v___y_155_);
+lean_dec(v___y_154_);
+lean_dec_ref(v___y_153_);
 return v_res_158_;
 }
 }

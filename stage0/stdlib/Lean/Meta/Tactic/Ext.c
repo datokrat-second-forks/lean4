@@ -3500,7 +3500,7 @@ return v_x1_1069_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Ext_getExtTheorems(lean_object* v_ty_1097_, lean_object* v_a_1098_, lean_object* v_a_1099_, lean_object* v_a_1100_, lean_object* v_a_1101_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Ext_getExtTheorems(lean_object* v_ty_1097_, lean_object* v___y_1098_, lean_object* v___y_1099_, lean_object* v___y_1100_, lean_object* v___y_1101_){
 _start:
 {
 lean_object* v___f_1103_; lean_object* v___x_1104_; lean_object* v___x_1105_; lean_object* v___x_1106_; lean_object* v___x_1107_; lean_object* v_env_1108_; lean_object* v___x_1109_; lean_object* v_ext_1110_; lean_object* v_toEnvExtension_1111_; lean_object* v_asyncMode_1112_; lean_object* v___x_1113_; lean_object* v_tree_1114_; lean_object* v___f_1115_; lean_object* v___x_1116_; 
@@ -3508,7 +3508,7 @@ v___f_1103_ = ((lean_object*)(l_Lean_Meta_Ext_getExtTheorems___closed__0));
 v___x_1104_ = l_Lean_Meta_Ext_instInhabitedExtTheorems_default;
 v___x_1105_ = ((lean_object*)(l_Lean_Meta_Ext_getExtTheorems___closed__1));
 v___x_1106_ = ((lean_object*)(l_Lean_Meta_Ext_getExtTheorems___closed__2));
-v___x_1107_ = lean_st_ref_get(v_a_1101_);
+v___x_1107_ = lean_st_ref_get(v___y_1101_);
 v_env_1108_ = lean_ctor_get(v___x_1107_, 0);
 lean_inc_ref(v_env_1108_);
 lean_dec(v___x_1107_);
@@ -3523,7 +3523,7 @@ v___f_1115_ = lean_alloc_closure((void*)(l_Lean_Meta_Ext_getExtTheorems___lam__1
 lean_closure_set(v___f_1115_, 0, v___x_1113_);
 lean_closure_set(v___f_1115_, 1, v___x_1105_);
 lean_closure_set(v___f_1115_, 2, v___x_1106_);
-v___x_1116_ = l_Lean_Meta_DiscrTree_getMatch___redArg(v_tree_1114_, v_ty_1097_, v_a_1098_, v_a_1099_, v_a_1100_, v_a_1101_);
+v___x_1116_ = l_Lean_Meta_DiscrTree_getMatch___redArg(v_tree_1114_, v_ty_1097_, v___y_1098_, v___y_1099_, v___y_1100_, v___y_1101_);
 lean_dec_ref(v_tree_1114_);
 if (lean_obj_tag(v___x_1116_) == 0)
 {
@@ -3627,15 +3627,15 @@ return v___x_1116_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Ext_getExtTheorems___boxed(lean_object* v_ty_1143_, lean_object* v_a_1144_, lean_object* v_a_1145_, lean_object* v_a_1146_, lean_object* v_a_1147_, lean_object* v___y_1148_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Ext_getExtTheorems___boxed(lean_object* v_ty_1143_, lean_object* v___y_1144_, lean_object* v___y_1145_, lean_object* v___y_1146_, lean_object* v___y_1147_, lean_object* v___y_1148_){
 _start:
 {
 lean_object* v_res_1149_; 
-v_res_1149_ = l_Lean_Meta_Ext_getExtTheorems(v_ty_1143_, v_a_1144_, v_a_1145_, v_a_1146_, v_a_1147_);
-lean_dec(v_a_1147_);
-lean_dec_ref(v_a_1146_);
-lean_dec(v_a_1145_);
-lean_dec_ref(v_a_1144_);
+v_res_1149_ = l_Lean_Meta_Ext_getExtTheorems(v_ty_1143_, v___y_1144_, v___y_1145_, v___y_1146_, v___y_1147_);
+lean_dec(v___y_1147_);
+lean_dec_ref(v___y_1146_);
+lean_dec(v___y_1145_);
+lean_dec_ref(v___y_1144_);
 return v_res_1149_;
 }
 }
@@ -4932,12 +4932,12 @@ v_r_1689_ = lean_box(v_res_1688_);
 return v_r_1689_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Ext_isExtTheorem___redArg(lean_object* v_declName_1690_, lean_object* v_a_1691_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Ext_isExtTheorem___redArg(lean_object* v_declName_1690_, lean_object* v___y_1691_){
 _start:
 {
 lean_object* v___x_1693_; lean_object* v___x_1694_; lean_object* v_env_1695_; lean_object* v___x_1696_; lean_object* v_ext_1697_; lean_object* v_toEnvExtension_1698_; lean_object* v_asyncMode_1699_; lean_object* v___x_1700_; uint8_t v___x_1701_; lean_object* v___x_1702_; lean_object* v___x_1703_; 
 v___x_1693_ = l_Lean_Meta_Ext_instInhabitedExtTheorems_default;
-v___x_1694_ = lean_st_ref_get(v_a_1691_);
+v___x_1694_ = lean_st_ref_get(v___y_1691_);
 v_env_1695_ = lean_ctor_get(v___x_1694_, 0);
 lean_inc_ref(v_env_1695_);
 lean_dec(v___x_1694_);
@@ -4954,30 +4954,30 @@ lean_ctor_set(v___x_1703_, 0, v___x_1702_);
 return v___x_1703_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Ext_isExtTheorem___redArg___boxed(lean_object* v_declName_1704_, lean_object* v_a_1705_, lean_object* v___y_1706_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Ext_isExtTheorem___redArg___boxed(lean_object* v_declName_1704_, lean_object* v___y_1705_, lean_object* v___y_1706_){
 _start:
 {
 lean_object* v_res_1707_; 
-v_res_1707_ = l_Lean_Meta_Ext_isExtTheorem___redArg(v_declName_1704_, v_a_1705_);
-lean_dec(v_a_1705_);
+v_res_1707_ = l_Lean_Meta_Ext_isExtTheorem___redArg(v_declName_1704_, v___y_1705_);
+lean_dec(v___y_1705_);
 return v_res_1707_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Ext_isExtTheorem(lean_object* v_declName_1708_, lean_object* v_a_1709_, lean_object* v_a_1710_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Ext_isExtTheorem(lean_object* v_declName_1708_, lean_object* v___y_1709_, lean_object* v___y_1710_){
 _start:
 {
 lean_object* v___x_1712_; 
-v___x_1712_ = l_Lean_Meta_Ext_isExtTheorem___redArg(v_declName_1708_, v_a_1710_);
+v___x_1712_ = l_Lean_Meta_Ext_isExtTheorem___redArg(v_declName_1708_, v___y_1710_);
 return v___x_1712_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Ext_isExtTheorem___boxed(lean_object* v_declName_1713_, lean_object* v_a_1714_, lean_object* v_a_1715_, lean_object* v___y_1716_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Ext_isExtTheorem___boxed(lean_object* v_declName_1713_, lean_object* v___y_1714_, lean_object* v___y_1715_, lean_object* v___y_1716_){
 _start:
 {
 lean_object* v_res_1717_; 
-v_res_1717_ = l_Lean_Meta_Ext_isExtTheorem(v_declName_1713_, v_a_1714_, v_a_1715_);
-lean_dec(v_a_1715_);
-lean_dec_ref(v_a_1714_);
+v_res_1717_ = l_Lean_Meta_Ext_isExtTheorem(v_declName_1713_, v___y_1714_, v___y_1715_);
+lean_dec(v___y_1715_);
+lean_dec_ref(v___y_1714_);
 return v_res_1717_;
 }
 }

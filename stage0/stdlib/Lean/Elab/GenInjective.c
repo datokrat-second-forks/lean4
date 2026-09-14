@@ -150,7 +150,7 @@ lean_dec_ref(v___y_24_);
 return v_res_31_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems(lean_object* v_stx_32_, lean_object* v_a_33_, lean_object* v_a_34_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems(lean_object* v_stx_32_, lean_object* v___y_33_, lean_object* v___y_34_){
 _start:
 {
 lean_object* v___x_36_; lean_object* v___x_37_; lean_object* v___x_38_; lean_object* v___f_39_; lean_object* v___x_40_; 
@@ -160,17 +160,17 @@ v___x_38_ = lean_box(0);
 v___f_39_ = lean_alloc_closure((void*)(l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems___lam__0___boxed), 9, 2);
 lean_closure_set(v___f_39_, 0, v___x_37_);
 lean_closure_set(v___f_39_, 1, v___x_38_);
-v___x_40_ = l_Lean_Elab_Command_liftTermElabM___redArg(v___f_39_, v_a_33_, v_a_34_);
+v___x_40_ = l_Lean_Elab_Command_liftTermElabM___redArg(v___f_39_, v___y_33_, v___y_34_);
 return v___x_40_;
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems___boxed(lean_object* v_stx_41_, lean_object* v_a_42_, lean_object* v_a_43_, lean_object* v___y_44_){
+LEAN_EXPORT lean_object* l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems___boxed(lean_object* v_stx_41_, lean_object* v___y_42_, lean_object* v___y_43_, lean_object* v___y_44_){
 _start:
 {
 lean_object* v_res_45_; 
-v_res_45_ = l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems(v_stx_41_, v_a_42_, v_a_43_);
-lean_dec(v_a_43_);
-lean_dec_ref(v_a_42_);
+v_res_45_ = l___private_Lean_Elab_GenInjective_0__Lean_Elab_Command_elabGenInjectiveTheorems(v_stx_41_, v___y_42_, v___y_43_);
+lean_dec(v___y_43_);
+lean_dec_ref(v___y_42_);
 lean_dec(v_stx_41_);
 return v_res_45_;
 }

@@ -21,24 +21,24 @@ static const lean_ctor_object l_Lean_Meta_Sym_Simp_simpTelescope___closed__0_val
 static const lean_object* l_Lean_Meta_Sym_Simp_simpTelescope___closed__0 = (const lean_object*)&l_Lean_Meta_Sym_Simp_simpTelescope___closed__0_value;
 LEAN_EXPORT lean_object* l_Lean_Meta_Sym_Simp_simpTelescope___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lean_Meta_Sym_Simp_simpTelescope(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Lean_Meta_Sym_Simp_simpTelescope___boxed(lean_object* v_e_3_, lean_object* v_a_4_, lean_object* v_a_5_, lean_object* v_a_6_, lean_object* v_a_7_, lean_object* v_a_8_, lean_object* v_a_9_, lean_object* v_a_10_, lean_object* v_a_11_, lean_object* v_a_12_, lean_object* v___y_13_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Sym_Simp_simpTelescope___boxed(lean_object* v_e_3_, lean_object* v___y_4_, lean_object* v___y_5_, lean_object* v___y_6_, lean_object* v___y_7_, lean_object* v___y_8_, lean_object* v___y_9_, lean_object* v___y_10_, lean_object* v___y_11_, lean_object* v___y_12_, lean_object* v___y_13_){
 _start:
 {
 lean_object* v_res_14_; 
-v_res_14_ = l_Lean_Meta_Sym_Simp_simpTelescope(v_e_3_, v_a_4_, v_a_5_, v_a_6_, v_a_7_, v_a_8_, v_a_9_, v_a_10_, v_a_11_, v_a_12_);
-lean_dec(v_a_12_);
-lean_dec_ref(v_a_11_);
-lean_dec(v_a_10_);
-lean_dec_ref(v_a_9_);
-lean_dec(v_a_8_);
-lean_dec_ref(v_a_7_);
-lean_dec(v_a_6_);
-lean_dec_ref(v_a_5_);
-lean_dec(v_a_4_);
+v_res_14_ = l_Lean_Meta_Sym_Simp_simpTelescope(v_e_3_, v___y_4_, v___y_5_, v___y_6_, v___y_7_, v___y_8_, v___y_9_, v___y_10_, v___y_11_, v___y_12_);
+lean_dec(v___y_12_);
+lean_dec_ref(v___y_11_);
+lean_dec(v___y_10_);
+lean_dec_ref(v___y_9_);
+lean_dec(v___y_8_);
+lean_dec_ref(v___y_7_);
+lean_dec(v___y_6_);
+lean_dec_ref(v___y_5_);
+lean_dec(v___y_4_);
 return v_res_14_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Sym_Simp_simpTelescope(lean_object* v_e_15_, lean_object* v_a_16_, lean_object* v_a_17_, lean_object* v_a_18_, lean_object* v_a_19_, lean_object* v_a_20_, lean_object* v_a_21_, lean_object* v_a_22_, lean_object* v_a_23_, lean_object* v_a_24_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Sym_Simp_simpTelescope(lean_object* v_e_15_, lean_object* v___y_16_, lean_object* v___y_17_, lean_object* v___y_18_, lean_object* v___y_19_, lean_object* v___y_20_, lean_object* v___y_21_, lean_object* v___y_22_, lean_object* v___y_23_, lean_object* v___y_24_){
 _start:
 {
 switch(lean_obj_tag(v_e_15_))
@@ -49,7 +49,7 @@ lean_object* v___x_26_; lean_object* v___x_27_; lean_object* v___x_28_;
 v___x_26_ = lean_alloc_closure((void*)(l_Lean_Meta_Sym_Simp_simpTelescope___boxed), 11, 0);
 v___x_27_ = lean_alloc_closure((void*)(l_Lean_Meta_Sym_Simp_simpLambda_x27___boxed), 12, 1);
 lean_closure_set(v___x_27_, 0, v___x_26_);
-v___x_28_ = l_Lean_Meta_Sym_Simp_simpLet_x27(v___x_27_, v_e_15_, v_a_16_, v_a_17_, v_a_18_, v_a_19_, v_a_20_, v_a_21_, v_a_22_, v_a_23_, v_a_24_);
+v___x_28_ = l_Lean_Meta_Sym_Simp_simpLet_x27(v___x_27_, v_e_15_, v___y_16_, v___y_17_, v___y_18_, v___y_19_, v___y_20_, v___y_21_, v___y_22_, v___y_23_, v___y_24_);
 return v___x_28_;
 }
 case 7:
@@ -61,7 +61,7 @@ v___x_30_ = lean_alloc_closure((void*)(l_Lean_Meta_Sym_Simp_simpArrowTelescope__
 lean_closure_set(v___x_30_, 0, v___x_29_);
 v___x_31_ = lean_alloc_closure((void*)(l_Lean_Meta_Sym_Simp_simpLambda_x27___boxed), 12, 1);
 lean_closure_set(v___x_31_, 0, v___x_29_);
-v___x_32_ = l_Lean_Meta_Sym_Simp_simpForall_x27(v___x_30_, v___x_31_, v_e_15_, v_a_16_, v_a_17_, v_a_18_, v_a_19_, v_a_20_, v_a_21_, v_a_22_, v_a_23_, v_a_24_);
+v___x_32_ = l_Lean_Meta_Sym_Simp_simpForall_x27(v___x_30_, v___x_31_, v_e_15_, v___y_16_, v___y_17_, v___y_18_, v___y_19_, v___y_20_, v___y_21_, v___y_22_, v___y_23_, v___y_24_);
 return v___x_32_;
 }
 default: 

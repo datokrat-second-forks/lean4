@@ -2076,7 +2076,7 @@ lean_dec(v_c_561_);
 return v_res_563_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CollectDecVars_alreadyVisited(lean_object* v_00_u03b1_564_, lean_object* v_c_565_, lean_object* v_a_566_, lean_object* v___y_567_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CollectDecVars_alreadyVisited(lean_object* v_00_u03b1_564_, lean_object* v_c_565_, lean_object* v___y_566_, lean_object* v___y_567_){
 _start:
 {
 lean_object* v___x_568_; 
@@ -2084,12 +2084,12 @@ v___x_568_ = l_Lean_Meta_Grind_Arith_CollectDecVars_alreadyVisited___redArg(v_c_
 return v___x_568_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CollectDecVars_alreadyVisited___boxed(lean_object* v_00_u03b1_569_, lean_object* v_c_570_, lean_object* v_a_571_, lean_object* v___y_572_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CollectDecVars_alreadyVisited___boxed(lean_object* v_00_u03b1_569_, lean_object* v_c_570_, lean_object* v___y_571_, lean_object* v___y_572_){
 _start:
 {
 lean_object* v_res_573_; 
-v_res_573_ = l_Lean_Meta_Grind_Arith_CollectDecVars_alreadyVisited(v_00_u03b1_569_, v_c_570_, v_a_571_, v___y_572_);
-lean_dec(v_a_571_);
+v_res_573_ = l_Lean_Meta_Grind_Arith_CollectDecVars_alreadyVisited(v_00_u03b1_569_, v_c_570_, v___y_571_, v___y_572_);
+lean_dec(v___y_571_);
 lean_dec(v_c_570_);
 return v_res_573_;
 }
@@ -2229,7 +2229,7 @@ return v___x_628_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CollectDecVars_markAsFound(lean_object* v_fvarId_631_, lean_object* v_a_632_, lean_object* v___y_633_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CollectDecVars_markAsFound(lean_object* v_fvarId_631_, lean_object* v___y_632_, lean_object* v___y_633_){
 _start:
 {
 lean_object* v___x_634_; 
@@ -2237,12 +2237,12 @@ v___x_634_ = l_Lean_Meta_Grind_Arith_CollectDecVars_markAsFound___redArg(v_fvarI
 return v___x_634_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CollectDecVars_markAsFound___boxed(lean_object* v_fvarId_635_, lean_object* v_a_636_, lean_object* v___y_637_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_Arith_CollectDecVars_markAsFound___boxed(lean_object* v_fvarId_635_, lean_object* v___y_636_, lean_object* v___y_637_){
 _start:
 {
 lean_object* v_res_638_; 
-v_res_638_ = l_Lean_Meta_Grind_Arith_CollectDecVars_markAsFound(v_fvarId_635_, v_a_636_, v___y_637_);
-lean_dec(v_a_636_);
+v_res_638_ = l_Lean_Meta_Grind_Arith_CollectDecVars_markAsFound(v_fvarId_635_, v___y_636_, v___y_637_);
+lean_dec(v___y_636_);
 return v_res_638_;
 }
 }

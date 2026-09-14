@@ -22,7 +22,6 @@ lean_object* lean_nat_mul(lean_object*, lean_object*);
 uint32_t lean_uint32_sub(uint32_t, uint32_t);
 lean_object* lean_uint32_to_nat(uint32_t);
 lean_object* lean_nat_add(lean_object*, lean_object*);
-lean_object* lean_mk_empty_array_with_capacity(lean_object*);
 uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
 lean_object* lean_string_push(lean_object*, uint32_t);
 uint32_t lean_uint32_add(uint32_t, uint32_t);
@@ -46,6 +45,7 @@ lean_object* l___private_Std_Internal_Parsec_String_0__Std_Internal_Parsec_Strin
 lean_object* l_Lean_JsonNumber_shiftl(lean_object*, lean_object*);
 lean_object* l_Lean_JsonNumber_shiftr(lean_object*, lean_object*);
 lean_object* l_Std_Internal_Parsec_String_pstring(lean_object*, lean_object*);
+lean_object* lean_mk_empty_array_with_capacity(lean_object*);
 lean_object* lean_array_push(lean_object*, lean_object*);
 uint8_t lean_string_compare(lean_object*, lean_object*);
 lean_object* l_mkPanicMessageWithDecl(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
@@ -150,16 +150,16 @@ static const lean_string_object l_Lean_Json_Parser_arrayCore___closed__0_value =
 static const lean_object* l_Lean_Json_Parser_arrayCore___closed__0 = (const lean_object*)&l_Lean_Json_Parser_arrayCore___closed__0_value;
 static const lean_ctor_object l_Lean_Json_Parser_arrayCore___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*1 + 0, .m_other = 1, .m_tag = 1}, .m_objs = {((lean_object*)&l_Lean_Json_Parser_arrayCore___closed__0_value)}};
 static const lean_object* l_Lean_Json_Parser_arrayCore___closed__1 = (const lean_object*)&l_Lean_Json_Parser_arrayCore___closed__1_value;
-static const lean_string_object l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 17, .m_capacity = 17, .m_length = 16, .m_data = "unexpected input"};
-static const lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__0 = (const lean_object*)&l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__0_value;
-static const lean_ctor_object l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*1 + 0, .m_other = 1, .m_tag = 1}, .m_objs = {((lean_object*)&l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__0_value)}};
-static const lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__1 = (const lean_object*)&l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__1_value;
-static const lean_string_object l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__2_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 5, .m_capacity = 5, .m_length = 4, .m_data = "null"};
-static const lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__2 = (const lean_object*)&l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__2_value;
-static const lean_string_object l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 5, .m_capacity = 5, .m_length = 4, .m_data = "true"};
-static const lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__3 = (const lean_object*)&l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__3_value;
-static const lean_string_object l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__4_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 6, .m_capacity = 6, .m_length = 5, .m_data = "false"};
-static const lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__4 = (const lean_object*)&l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__4_value;
+static const lean_string_object l_Lean_Json_Parser_anyCore___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 17, .m_capacity = 17, .m_length = 16, .m_data = "unexpected input"};
+static const lean_object* l_Lean_Json_Parser_anyCore___closed__0 = (const lean_object*)&l_Lean_Json_Parser_anyCore___closed__0_value;
+static const lean_ctor_object l_Lean_Json_Parser_anyCore___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*1 + 0, .m_other = 1, .m_tag = 1}, .m_objs = {((lean_object*)&l_Lean_Json_Parser_anyCore___closed__0_value)}};
+static const lean_object* l_Lean_Json_Parser_anyCore___closed__1 = (const lean_object*)&l_Lean_Json_Parser_anyCore___closed__1_value;
+static const lean_string_object l_Lean_Json_Parser_anyCore___closed__2_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 5, .m_capacity = 5, .m_length = 4, .m_data = "null"};
+static const lean_object* l_Lean_Json_Parser_anyCore___closed__2 = (const lean_object*)&l_Lean_Json_Parser_anyCore___closed__2_value;
+static const lean_string_object l_Lean_Json_Parser_anyCore___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 5, .m_capacity = 5, .m_length = 4, .m_data = "true"};
+static const lean_object* l_Lean_Json_Parser_anyCore___closed__3 = (const lean_object*)&l_Lean_Json_Parser_anyCore___closed__3_value;
+static const lean_string_object l_Lean_Json_Parser_anyCore___closed__4_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 6, .m_capacity = 6, .m_length = 5, .m_data = "false"};
+static const lean_object* l_Lean_Json_Parser_anyCore___closed__4 = (const lean_object*)&l_Lean_Json_Parser_anyCore___closed__4_value;
 static const lean_string_object l_Lean_Json_Parser_objectCore___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 11, .m_capacity = 11, .m_length = 10, .m_data = "expected \""};
 static const lean_object* l_Lean_Json_Parser_objectCore___closed__0 = (const lean_object*)&l_Lean_Json_Parser_objectCore___closed__0_value;
 static const lean_ctor_object l_Lean_Json_Parser_objectCore___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*1 + 0, .m_other = 1, .m_tag = 1}, .m_objs = {((lean_object*)&l_Lean_Json_Parser_objectCore___closed__0_value)}};
@@ -173,18 +173,16 @@ static const lean_object* l_Lean_Json_Parser_objectCore___closed__4 = (const lea
 static const lean_ctor_object l_Lean_Json_Parser_objectCore___closed__5_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*1 + 0, .m_other = 1, .m_tag = 1}, .m_objs = {((lean_object*)&l_Lean_Json_Parser_objectCore___closed__4_value)}};
 static const lean_object* l_Lean_Json_Parser_objectCore___closed__5 = (const lean_object*)&l_Lean_Json_Parser_objectCore___closed__5_value;
 LEAN_EXPORT lean_object* l_Lean_Json_Parser_objectCore(lean_object*, lean_object*);
-static const lean_ctor_object l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__5_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*1 + 0, .m_other = 1, .m_tag = 5}, .m_objs = {((lean_object*)(((size_t)(1) << 1) | 1))}};
-static const lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__5 = (const lean_object*)&l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__5_value;
-static const lean_array_object l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__6_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_array_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 246}, .m_size = 0, .m_capacity = 0, .m_data = {}};
-static const lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__6 = (const lean_object*)&l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__6_value;
-static const lean_ctor_object l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__7_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*1 + 0, .m_other = 1, .m_tag = 4}, .m_objs = {((lean_object*)&l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__6_value)}};
-static const lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__7 = (const lean_object*)&l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__7_value;
-LEAN_EXPORT lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg(lean_object*);
+static const lean_ctor_object l_Lean_Json_Parser_anyCore___closed__5_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*1 + 0, .m_other = 1, .m_tag = 5}, .m_objs = {((lean_object*)(((size_t)(1) << 1) | 1))}};
+static const lean_object* l_Lean_Json_Parser_anyCore___closed__5 = (const lean_object*)&l_Lean_Json_Parser_anyCore___closed__5_value;
+static const lean_array_object l_Lean_Json_Parser_anyCore___closed__6_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_array_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 246}, .m_size = 0, .m_capacity = 0, .m_data = {}};
+static const lean_object* l_Lean_Json_Parser_anyCore___closed__6 = (const lean_object*)&l_Lean_Json_Parser_anyCore___closed__6_value;
+static const lean_ctor_object l_Lean_Json_Parser_anyCore___closed__7_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*1 + 0, .m_other = 1, .m_tag = 4}, .m_objs = {((lean_object*)&l_Lean_Json_Parser_anyCore___closed__6_value)}};
+static const lean_object* l_Lean_Json_Parser_anyCore___closed__7 = (const lean_object*)&l_Lean_Json_Parser_anyCore___closed__7_value;
+LEAN_EXPORT lean_object* l_Lean_Json_Parser_anyCore(lean_object*);
 LEAN_EXPORT lean_object* l_Lean_Json_Parser_arrayCore(lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_panic___at___00Std_DTreeMap_Internal_Impl_insert_x21___at___00Lean_Json_Parser_objectCore_spec__2_spec__2(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Std_DTreeMap_Internal_Impl_insert_x21___at___00Lean_Json_Parser_objectCore_spec__2(lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Lean_Json_Parser_anyCore(lean_object*);
 static const lean_string_object l_Lean_Json_Parser_any___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 22, .m_capacity = 22, .m_length = 21, .m_data = "expected end of input"};
 static const lean_object* l_Lean_Json_Parser_any___closed__0 = (const lean_object*)&l_Lean_Json_Parser_any___closed__0_value;
 static const lean_ctor_object l_Lean_Json_Parser_any___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*1 + 0, .m_other = 1, .m_tag = 1}, .m_objs = {((lean_object*)&l_Lean_Json_Parser_any___closed__0_value)}};
@@ -5863,9 +5861,9 @@ goto v___jp_1480_;
 v___jp_1469_:
 {
 lean_object* v___x_1473_; lean_object* v___x_1475_; 
-v___x_1473_ = lean_nat_add(v___y_1471_, v___y_1472_);
+v___x_1473_ = lean_nat_add(v___y_1470_, v___y_1472_);
 lean_dec(v___y_1472_);
-lean_dec(v___y_1471_);
+lean_dec(v___y_1470_);
 if (v_isShared_1465_ == 0)
 {
 lean_ctor_set(v___x_1464_, 4, v_r_1441_);
@@ -5894,7 +5892,7 @@ lean_object* v___x_1477_;
 if (v_isShared_1453_ == 0)
 {
 lean_ctor_set(v___x_1452_, 4, v___x_1475_);
-lean_ctor_set(v___x_1452_, 3, v___y_1470_);
+lean_ctor_set(v___x_1452_, 3, v___y_1471_);
 lean_ctor_set(v___x_1452_, 2, v_v_1456_);
 lean_ctor_set(v___x_1452_, 1, v_k_1455_);
 lean_ctor_set(v___x_1452_, 0, v___x_1468_);
@@ -5908,7 +5906,7 @@ v_reuseFailAlloc_1478_ = lean_alloc_ctor(0, 5, 0);
 lean_ctor_set(v_reuseFailAlloc_1478_, 0, v___x_1468_);
 lean_ctor_set(v_reuseFailAlloc_1478_, 1, v_k_1455_);
 lean_ctor_set(v_reuseFailAlloc_1478_, 2, v_v_1456_);
-lean_ctor_set(v_reuseFailAlloc_1478_, 3, v___y_1470_);
+lean_ctor_set(v_reuseFailAlloc_1478_, 3, v___y_1471_);
 lean_ctor_set(v_reuseFailAlloc_1478_, 4, v___x_1475_);
 v___x_1477_ = v_reuseFailAlloc_1478_;
 goto v_reusejp_1476_;
@@ -5953,8 +5951,8 @@ if (lean_obj_tag(v_r_1458_) == 0)
 lean_object* v_size_1486_; 
 v_size_1486_ = lean_ctor_get(v_r_1458_, 0);
 lean_inc(v_size_1486_);
-v___y_1470_ = v___x_1484_;
-v___y_1471_ = v___x_1485_;
+v___y_1470_ = v___x_1485_;
+v___y_1471_ = v___x_1484_;
 v___y_1472_ = v_size_1486_;
 goto v___jp_1469_;
 }
@@ -5962,8 +5960,8 @@ else
 {
 lean_object* v___x_1487_; 
 v___x_1487_ = lean_unsigned_to_nat(0u);
-v___y_1470_ = v___x_1484_;
-v___y_1471_ = v___x_1485_;
+v___y_1470_ = v___x_1485_;
+v___y_1471_ = v___x_1484_;
 v___y_1472_ = v___x_1487_;
 goto v___jp_1469_;
 }
@@ -6725,7 +6723,7 @@ v___x_1674_ = l___private_Std_Internal_Parsec_String_0__Std_Internal_Parsec_Stri
 v___x_1675_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_1675_, 0, v_fst_1653_);
 lean_ctor_set(v___x_1675_, 1, v___x_1674_);
-v___x_1676_ = l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg(v___x_1675_);
+v___x_1676_ = l_Lean_Json_Parser_anyCore(v___x_1675_);
 if (lean_obj_tag(v___x_1676_) == 0)
 {
 lean_object* v_pos_1677_; lean_object* v_res_1678_; lean_object* v___x_1680_; uint8_t v_isShared_1681_; uint8_t v_isSharedCheck_1720_; 
@@ -7075,7 +7073,7 @@ return v___x_1747_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg(lean_object* v___y_1754_){
+LEAN_EXPORT lean_object* l_Lean_Json_Parser_anyCore(lean_object* v___y_1754_){
 _start:
 {
 lean_object* v_fst_1789_; lean_object* v_snd_1790_; lean_object* v___x_1791_; uint8_t v_decide_1792_; 
@@ -7151,7 +7149,7 @@ goto v___jp_1755_;
 else
 {
 lean_object* v___x_1812_; lean_object* v___x_1813_; 
-v___x_1812_ = ((lean_object*)(l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__2));
+v___x_1812_ = ((lean_object*)(l_Lean_Json_Parser_anyCore___closed__2));
 v___x_1813_ = l_Std_Internal_Parsec_String_pstring(v___x_1812_, v___y_1754_);
 if (lean_obj_tag(v___x_1813_) == 0)
 {
@@ -7292,7 +7290,7 @@ return v___x_1840_;
 else
 {
 lean_object* v___x_1843_; lean_object* v___x_1844_; 
-v___x_1843_ = ((lean_object*)(l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__3));
+v___x_1843_ = ((lean_object*)(l_Lean_Json_Parser_anyCore___closed__3));
 v___x_1844_ = l_Std_Internal_Parsec_String_pstring(v___x_1843_, v___y_1754_);
 if (lean_obj_tag(v___x_1844_) == 0)
 {
@@ -7434,7 +7432,7 @@ return v___x_1871_;
 else
 {
 lean_object* v___x_1874_; lean_object* v___x_1875_; 
-v___x_1874_ = ((lean_object*)(l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__4));
+v___x_1874_ = ((lean_object*)(l_Lean_Json_Parser_anyCore___closed__4));
 v___x_1875_ = l_Std_Internal_Parsec_String_pstring(v___x_1874_, v___y_1754_);
 if (lean_obj_tag(v___x_1875_) == 0)
 {
@@ -7949,7 +7947,7 @@ v___x_1982_ = l___private_Std_Internal_Parsec_String_0__Std_Internal_Parsec_Stri
 v___x_1983_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_1983_, 0, v_fst_1789_);
 lean_ctor_set(v___x_1983_, 1, v___x_1982_);
-v___x_1984_ = ((lean_object*)(l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__5));
+v___x_1984_ = ((lean_object*)(l_Lean_Json_Parser_anyCore___closed__5));
 v___x_1985_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_1985_, 0, v___x_1983_);
 lean_ctor_set(v___x_1985_, 1, v___x_1984_);
@@ -8136,7 +8134,7 @@ v___x_2028_ = l___private_Std_Internal_Parsec_String_0__Std_Internal_Parsec_Stri
 v___x_2029_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_2029_, 0, v_fst_1789_);
 lean_ctor_set(v___x_2029_, 1, v___x_2028_);
-v___x_2030_ = ((lean_object*)(l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__7));
+v___x_2030_ = ((lean_object*)(l_Lean_Json_Parser_anyCore___closed__7));
 v___x_2031_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_2031_, 0, v___x_2029_);
 lean_ctor_set(v___x_2031_, 1, v___x_2030_);
@@ -8314,7 +8312,7 @@ return v___x_1783_;
 v___jp_1786_:
 {
 lean_object* v___x_1787_; lean_object* v___x_1788_; 
-v___x_1787_ = ((lean_object*)(l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg___closed__1));
+v___x_1787_ = ((lean_object*)(l_Lean_Json_Parser_anyCore___closed__1));
 v___x_1788_ = lean_alloc_ctor(1, 2, 0);
 lean_ctor_set(v___x_1788_, 0, v___y_1754_);
 lean_ctor_set(v___x_1788_, 1, v___x_1787_);
@@ -8326,7 +8324,7 @@ LEAN_EXPORT lean_object* l_Lean_Json_Parser_arrayCore(lean_object* v_acc_2038_, 
 _start:
 {
 lean_object* v___x_2040_; 
-v___x_2040_ = l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg(v___y_2039_);
+v___x_2040_ = l_Lean_Json_Parser_anyCore(v___y_2039_);
 if (lean_obj_tag(v___x_2040_) == 0)
 {
 lean_object* v_pos_2041_; lean_object* v_res_2042_; lean_object* v___x_2044_; uint8_t v_isShared_2045_; uint8_t v_isSharedCheck_2086_; 
@@ -8589,161 +8587,145 @@ return v___x_2093_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27(lean_object* v_x_2096_, lean_object* v___y_2097_){
+LEAN_EXPORT lean_object* l_panic___at___00Std_DTreeMap_Internal_Impl_insert_x21___at___00Lean_Json_Parser_objectCore_spec__2_spec__2(lean_object* v_00_u03b2_2096_, lean_object* v_msg_2097_){
 _start:
 {
 lean_object* v___x_2098_; 
-v___x_2098_ = l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg(v___y_2097_);
+v___x_2098_ = l_panic___at___00Std_DTreeMap_Internal_Impl_insert_x21___at___00Lean_Json_Parser_objectCore_spec__2_spec__2___redArg(v_msg_2097_);
 return v___x_2098_;
 }
 }
-LEAN_EXPORT lean_object* l_panic___at___00Std_DTreeMap_Internal_Impl_insert_x21___at___00Lean_Json_Parser_objectCore_spec__2_spec__2(lean_object* v_00_u03b2_2099_, lean_object* v_msg_2100_){
+LEAN_EXPORT lean_object* l_Std_DTreeMap_Internal_Impl_insert_x21___at___00Lean_Json_Parser_objectCore_spec__2(lean_object* v_00_u03b2_2099_, lean_object* v_k_2100_, lean_object* v_v_2101_, lean_object* v_t_2102_){
 _start:
 {
-lean_object* v___x_2101_; 
-v___x_2101_ = l_panic___at___00Std_DTreeMap_Internal_Impl_insert_x21___at___00Lean_Json_Parser_objectCore_spec__2_spec__2___redArg(v_msg_2100_);
-return v___x_2101_;
+lean_object* v___x_2103_; 
+v___x_2103_ = l_Std_DTreeMap_Internal_Impl_insert_x21___at___00Lean_Json_Parser_objectCore_spec__2___redArg(v_k_2100_, v_v_2101_, v_t_2102_);
+return v___x_2103_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_DTreeMap_Internal_Impl_insert_x21___at___00Lean_Json_Parser_objectCore_spec__2(lean_object* v_00_u03b2_2102_, lean_object* v_k_2103_, lean_object* v_v_2104_, lean_object* v_t_2105_){
+LEAN_EXPORT lean_object* l_Lean_Json_Parser_any(lean_object* v___y_2107_){
 _start:
 {
-lean_object* v___x_2106_; 
-v___x_2106_ = l_Std_DTreeMap_Internal_Impl_insert_x21___at___00Lean_Json_Parser_objectCore_spec__2___redArg(v_k_2103_, v_v_2104_, v_t_2105_);
-return v___x_2106_;
+lean_object* v_fst_2108_; lean_object* v_snd_2109_; lean_object* v___x_2111_; uint8_t v_isShared_2112_; uint8_t v_isSharedCheck_2133_; 
+v_fst_2108_ = lean_ctor_get(v___y_2107_, 0);
+v_snd_2109_ = lean_ctor_get(v___y_2107_, 1);
+v_isSharedCheck_2133_ = !lean_is_exclusive(v___y_2107_);
+if (v_isSharedCheck_2133_ == 0)
+{
+v___x_2111_ = v___y_2107_;
+v_isShared_2112_ = v_isSharedCheck_2133_;
+goto v_resetjp_2110_;
+}
+else
+{
+lean_inc(v_snd_2109_);
+lean_inc(v_fst_2108_);
+lean_dec(v___y_2107_);
+v___x_2111_ = lean_box(0);
+v_isShared_2112_ = v_isSharedCheck_2133_;
+goto v_resetjp_2110_;
+}
+v_resetjp_2110_:
+{
+lean_object* v___x_2113_; lean_object* v___x_2115_; 
+v___x_2113_ = l___private_Std_Internal_Parsec_String_0__Std_Internal_Parsec_String_skipWs(v_fst_2108_, v_snd_2109_);
+if (v_isShared_2112_ == 0)
+{
+lean_ctor_set(v___x_2111_, 1, v___x_2113_);
+v___x_2115_ = v___x_2111_;
+goto v_reusejp_2114_;
+}
+else
+{
+lean_object* v_reuseFailAlloc_2132_; 
+v_reuseFailAlloc_2132_ = lean_alloc_ctor(0, 2, 0);
+lean_ctor_set(v_reuseFailAlloc_2132_, 0, v_fst_2108_);
+lean_ctor_set(v_reuseFailAlloc_2132_, 1, v___x_2113_);
+v___x_2115_ = v_reuseFailAlloc_2132_;
+goto v_reusejp_2114_;
+}
+v_reusejp_2114_:
+{
+lean_object* v___x_2116_; 
+v___x_2116_ = l_Lean_Json_Parser_anyCore(v___x_2115_);
+if (lean_obj_tag(v___x_2116_) == 0)
+{
+lean_object* v_pos_2117_; lean_object* v_fst_2118_; lean_object* v_snd_2119_; lean_object* v___x_2120_; uint8_t v_decide_2121_; 
+v_pos_2117_ = lean_ctor_get(v___x_2116_, 0);
+lean_inc(v_pos_2117_);
+v_fst_2118_ = lean_ctor_get(v_pos_2117_, 0);
+v_snd_2119_ = lean_ctor_get(v_pos_2117_, 1);
+v___x_2120_ = lean_string_utf8_byte_size(v_fst_2118_);
+v_decide_2121_ = lean_nat_dec_eq(v_snd_2119_, v___x_2120_);
+if (v_decide_2121_ == 0)
+{
+lean_object* v___x_2123_; uint8_t v_isShared_2124_; uint8_t v_isSharedCheck_2129_; 
+v_isSharedCheck_2129_ = !lean_is_exclusive(v___x_2116_);
+if (v_isSharedCheck_2129_ == 0)
+{
+lean_object* v_unused_2130_; lean_object* v_unused_2131_; 
+v_unused_2130_ = lean_ctor_get(v___x_2116_, 1);
+lean_dec(v_unused_2130_);
+v_unused_2131_ = lean_ctor_get(v___x_2116_, 0);
+lean_dec(v_unused_2131_);
+v___x_2123_ = v___x_2116_;
+v_isShared_2124_ = v_isSharedCheck_2129_;
+goto v_resetjp_2122_;
+}
+else
+{
+lean_dec(v___x_2116_);
+v___x_2123_ = lean_box(0);
+v_isShared_2124_ = v_isSharedCheck_2129_;
+goto v_resetjp_2122_;
+}
+v_resetjp_2122_:
+{
+lean_object* v___x_2125_; lean_object* v___x_2127_; 
+v___x_2125_ = ((lean_object*)(l_Lean_Json_Parser_any___closed__1));
+if (v_isShared_2124_ == 0)
+{
+lean_ctor_set_tag(v___x_2123_, 1);
+lean_ctor_set(v___x_2123_, 1, v___x_2125_);
+v___x_2127_ = v___x_2123_;
+goto v_reusejp_2126_;
+}
+else
+{
+lean_object* v_reuseFailAlloc_2128_; 
+v_reuseFailAlloc_2128_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v_reuseFailAlloc_2128_, 0, v_pos_2117_);
+lean_ctor_set(v_reuseFailAlloc_2128_, 1, v___x_2125_);
+v___x_2127_ = v_reuseFailAlloc_2128_;
+goto v_reusejp_2126_;
+}
+v_reusejp_2126_:
+{
+return v___x_2127_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Json_Parser_anyCore(lean_object* v___y_2107_){
+}
+else
+{
+lean_dec(v_pos_2117_);
+return v___x_2116_;
+}
+}
+else
+{
+return v___x_2116_;
+}
+}
+}
+}
+}
+LEAN_EXPORT lean_object* l_Lean_Json_parse(lean_object* v_s_2134_){
 _start:
 {
-lean_object* v___x_2108_; 
-v___x_2108_ = l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg(v___y_2107_);
-return v___x_2108_;
-}
-}
-LEAN_EXPORT lean_object* l_Lean_Json_Parser_any(lean_object* v___y_2112_){
-_start:
-{
-lean_object* v_fst_2113_; lean_object* v_snd_2114_; lean_object* v___x_2116_; uint8_t v_isShared_2117_; uint8_t v_isSharedCheck_2138_; 
-v_fst_2113_ = lean_ctor_get(v___y_2112_, 0);
-v_snd_2114_ = lean_ctor_get(v___y_2112_, 1);
-v_isSharedCheck_2138_ = !lean_is_exclusive(v___y_2112_);
-if (v_isSharedCheck_2138_ == 0)
-{
-v___x_2116_ = v___y_2112_;
-v_isShared_2117_ = v_isSharedCheck_2138_;
-goto v_resetjp_2115_;
-}
-else
-{
-lean_inc(v_snd_2114_);
-lean_inc(v_fst_2113_);
-lean_dec(v___y_2112_);
-v___x_2116_ = lean_box(0);
-v_isShared_2117_ = v_isSharedCheck_2138_;
-goto v_resetjp_2115_;
-}
-v_resetjp_2115_:
-{
-lean_object* v___x_2118_; lean_object* v___x_2120_; 
-v___x_2118_ = l___private_Std_Internal_Parsec_String_0__Std_Internal_Parsec_String_skipWs(v_fst_2113_, v_snd_2114_);
-if (v_isShared_2117_ == 0)
-{
-lean_ctor_set(v___x_2116_, 1, v___x_2118_);
-v___x_2120_ = v___x_2116_;
-goto v_reusejp_2119_;
-}
-else
-{
-lean_object* v_reuseFailAlloc_2137_; 
-v_reuseFailAlloc_2137_ = lean_alloc_ctor(0, 2, 0);
-lean_ctor_set(v_reuseFailAlloc_2137_, 0, v_fst_2113_);
-lean_ctor_set(v_reuseFailAlloc_2137_, 1, v___x_2118_);
-v___x_2120_ = v_reuseFailAlloc_2137_;
-goto v_reusejp_2119_;
-}
-v_reusejp_2119_:
-{
-lean_object* v___x_2121_; 
-v___x_2121_ = l___private_Lean_Data_Json_Parser_0__Lean_Json_Parser_anyCore_x27___redArg(v___x_2120_);
-if (lean_obj_tag(v___x_2121_) == 0)
-{
-lean_object* v_pos_2122_; lean_object* v_fst_2123_; lean_object* v_snd_2124_; lean_object* v___x_2125_; uint8_t v_decide_2126_; 
-v_pos_2122_ = lean_ctor_get(v___x_2121_, 0);
-lean_inc(v_pos_2122_);
-v_fst_2123_ = lean_ctor_get(v_pos_2122_, 0);
-v_snd_2124_ = lean_ctor_get(v_pos_2122_, 1);
-v___x_2125_ = lean_string_utf8_byte_size(v_fst_2123_);
-v_decide_2126_ = lean_nat_dec_eq(v_snd_2124_, v___x_2125_);
-if (v_decide_2126_ == 0)
-{
-lean_object* v___x_2128_; uint8_t v_isShared_2129_; uint8_t v_isSharedCheck_2134_; 
-v_isSharedCheck_2134_ = !lean_is_exclusive(v___x_2121_);
-if (v_isSharedCheck_2134_ == 0)
-{
-lean_object* v_unused_2135_; lean_object* v_unused_2136_; 
-v_unused_2135_ = lean_ctor_get(v___x_2121_, 1);
-lean_dec(v_unused_2135_);
-v_unused_2136_ = lean_ctor_get(v___x_2121_, 0);
-lean_dec(v_unused_2136_);
-v___x_2128_ = v___x_2121_;
-v_isShared_2129_ = v_isSharedCheck_2134_;
-goto v_resetjp_2127_;
-}
-else
-{
-lean_dec(v___x_2121_);
-v___x_2128_ = lean_box(0);
-v_isShared_2129_ = v_isSharedCheck_2134_;
-goto v_resetjp_2127_;
-}
-v_resetjp_2127_:
-{
-lean_object* v___x_2130_; lean_object* v___x_2132_; 
-v___x_2130_ = ((lean_object*)(l_Lean_Json_Parser_any___closed__1));
-if (v_isShared_2129_ == 0)
-{
-lean_ctor_set_tag(v___x_2128_, 1);
-lean_ctor_set(v___x_2128_, 1, v___x_2130_);
-v___x_2132_ = v___x_2128_;
-goto v_reusejp_2131_;
-}
-else
-{
-lean_object* v_reuseFailAlloc_2133_; 
-v_reuseFailAlloc_2133_ = lean_alloc_ctor(1, 2, 0);
-lean_ctor_set(v_reuseFailAlloc_2133_, 0, v_pos_2122_);
-lean_ctor_set(v_reuseFailAlloc_2133_, 1, v___x_2130_);
-v___x_2132_ = v_reuseFailAlloc_2133_;
-goto v_reusejp_2131_;
-}
-v_reusejp_2131_:
-{
-return v___x_2132_;
-}
-}
-}
-else
-{
-lean_dec(v_pos_2122_);
-return v___x_2121_;
-}
-}
-else
-{
-return v___x_2121_;
-}
-}
-}
-}
-}
-LEAN_EXPORT lean_object* l_Lean_Json_parse(lean_object* v_s_2139_){
-_start:
-{
-lean_object* v___x_2140_; lean_object* v___x_2141_; 
-v___x_2140_ = lean_alloc_closure((void*)(l_Lean_Json_Parser_any), 1, 0);
-v___x_2141_ = l_Std_Internal_Parsec_String_Parser_run___redArg(v___x_2140_, v_s_2139_);
-return v___x_2141_;
+lean_object* v___x_2135_; lean_object* v___x_2136_; 
+v___x_2135_ = lean_alloc_closure((void*)(l_Lean_Json_Parser_any), 1, 0);
+v___x_2136_ = l_Std_Internal_Parsec_String_Parser_run___redArg(v___x_2135_, v_s_2134_);
+return v___x_2136_;
 }
 }
 lean_object* runtime_initialize_Lean_Data_Json_Basic(uint8_t builtin);

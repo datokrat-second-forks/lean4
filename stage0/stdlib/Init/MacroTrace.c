@@ -183,7 +183,7 @@ v___x_96_ = l_String_toRawSubstring_x27(v___x_95_);
 return v___x_96_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean___aux__Init__MacroTrace______macroRules__Lean__termMacro_x2etrace_x5b___x5d____1(lean_object* v_x_117_, lean_object* v_a_118_, lean_object* v___y_119_){
+LEAN_EXPORT lean_object* l_Lean___aux__Init__MacroTrace______macroRules__Lean__termMacro_x2etrace_x5b___x5d____1(lean_object* v_x_117_, lean_object* v___y_118_, lean_object* v___y_119_){
 _start:
 {
 lean_object* v___x_120_; uint8_t v___x_121_; 
@@ -203,9 +203,9 @@ return v___x_123_;
 else
 {
 lean_object* v_quotContext_124_; lean_object* v_currMacroScope_125_; lean_object* v_ref_126_; lean_object* v___x_127_; lean_object* v_id_128_; lean_object* v___x_129_; lean_object* v___x_130_; uint8_t v___x_131_; lean_object* v___x_132_; lean_object* v___x_133_; lean_object* v___x_134_; lean_object* v___x_135_; lean_object* v___x_136_; lean_object* v___x_137_; lean_object* v___x_138_; lean_object* v___x_139_; lean_object* v___x_140_; lean_object* v___y_142_; lean_object* v___x_165_; lean_object* v___x_166_; lean_object* v___x_167_; 
-v_quotContext_124_ = lean_ctor_get(v_a_118_, 1);
-v_currMacroScope_125_ = lean_ctor_get(v_a_118_, 2);
-v_ref_126_ = lean_ctor_get(v_a_118_, 5);
+v_quotContext_124_ = lean_ctor_get(v___y_118_, 1);
+v_currMacroScope_125_ = lean_ctor_get(v___y_118_, 2);
+v_ref_126_ = lean_ctor_get(v___y_118_, 5);
 v___x_127_ = lean_unsigned_to_nat(1u);
 v_id_128_ = l_Lean_Syntax_getArg(v_x_117_, v___x_127_);
 v___x_129_ = lean_unsigned_to_nat(3u);
@@ -310,12 +310,12 @@ return v___x_164_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean___aux__Init__MacroTrace______macroRules__Lean__termMacro_x2etrace_x5b___x5d____1___boxed(lean_object* v_x_180_, lean_object* v_a_181_, lean_object* v___y_182_){
+LEAN_EXPORT lean_object* l_Lean___aux__Init__MacroTrace______macroRules__Lean__termMacro_x2etrace_x5b___x5d____1___boxed(lean_object* v_x_180_, lean_object* v___y_181_, lean_object* v___y_182_){
 _start:
 {
 lean_object* v_res_183_; 
-v_res_183_ = l_Lean___aux__Init__MacroTrace______macroRules__Lean__termMacro_x2etrace_x5b___x5d____1(v_x_180_, v_a_181_, v___y_182_);
-lean_dec_ref(v_a_181_);
+v_res_183_ = l_Lean___aux__Init__MacroTrace______macroRules__Lean__termMacro_x2etrace_x5b___x5d____1(v_x_180_, v___y_181_, v___y_182_);
+lean_dec_ref(v___y_181_);
 return v_res_183_;
 }
 }

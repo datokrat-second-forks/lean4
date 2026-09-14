@@ -2811,12 +2811,12 @@ return v___x_772_;
 LEAN_EXPORT lean_object* l_Lean_Widget_TaggedText_instRpcEncodable___redArg___lam__0(lean_object* v_inst_773_, lean_object* v___x_774_, lean_object* v___x_775_, lean_object* v_a_776_, lean_object* v___y_777_){
 _start:
 {
-lean_object* v_rpcEncode_778_; lean_object* v___x_648__overap_779_; lean_object* v___x_780_; lean_object* v_fst_781_; lean_object* v_snd_782_; lean_object* v___x_784_; uint8_t v_isShared_785_; uint8_t v_isSharedCheck_790_; 
+lean_object* v_rpcEncode_778_; lean_object* v___x_654__overap_779_; lean_object* v___x_780_; lean_object* v_fst_781_; lean_object* v_snd_782_; lean_object* v___x_784_; uint8_t v_isShared_785_; uint8_t v_isSharedCheck_790_; 
 v_rpcEncode_778_ = lean_ctor_get(v_inst_773_, 0);
 lean_inc_ref(v_rpcEncode_778_);
 lean_dec_ref(v_inst_773_);
-v___x_648__overap_779_ = l_Lean_Widget_TaggedText_mapM___redArg(v___x_774_, v_rpcEncode_778_, v_a_776_);
-v___x_780_ = lean_apply_1(v___x_648__overap_779_, v___y_777_);
+v___x_654__overap_779_ = l_Lean_Widget_TaggedText_mapM___redArg(v___x_774_, v_rpcEncode_778_, v_a_776_);
+v___x_780_ = lean_apply_1(v___x_654__overap_779_, v___y_777_);
 v_fst_781_ = lean_ctor_get(v___x_780_, 0);
 v_snd_782_ = lean_ctor_get(v___x_780_, 1);
 v_isSharedCheck_790_ = !lean_is_exclusive(v___x_780_);
@@ -2911,16 +2911,16 @@ return v___x_802_;
 }
 else
 {
-lean_object* v_a_805_; lean_object* v_rpcDecode_806_; lean_object* v___x_661__overap_807_; lean_object* v___x_808_; 
+lean_object* v_a_805_; lean_object* v_rpcDecode_806_; lean_object* v___x_667__overap_807_; lean_object* v___x_808_; 
 v_a_805_ = lean_ctor_get(v___x_796_, 0);
 lean_inc(v_a_805_);
 lean_dec_ref_known(v___x_796_, 1);
 v_rpcDecode_806_ = lean_ctor_get(v_inst_792_, 1);
 lean_inc_ref(v_rpcDecode_806_);
 lean_dec_ref(v_inst_792_);
-v___x_661__overap_807_ = l_Lean_Widget_TaggedText_mapM___redArg(v___x_793_, v_rpcDecode_806_, v_a_805_);
+v___x_667__overap_807_ = l_Lean_Widget_TaggedText_mapM___redArg(v___x_793_, v_rpcDecode_806_, v_a_805_);
 lean_inc_ref(v___y_795_);
-v___x_808_ = lean_apply_1(v___x_661__overap_807_, v___y_795_);
+v___x_808_ = lean_apply_1(v___x_667__overap_807_, v___y_795_);
 return v___x_808_;
 }
 }

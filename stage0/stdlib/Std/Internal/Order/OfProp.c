@@ -114,7 +114,7 @@ v___x_46_ = l_String_toRawSubstring_x27(v___x_45_);
 return v___x_46_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__OfProp______macroRules__Lean__Order__term_u231c___u231d__1(lean_object* v_x_66_, lean_object* v_a_67_, lean_object* v___y_68_){
+LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__OfProp______macroRules__Lean__Order__term_u231c___u231d__1(lean_object* v_x_66_, lean_object* v___y_67_, lean_object* v___y_68_){
 _start:
 {
 lean_object* v___x_69_; uint8_t v___x_70_; 
@@ -134,9 +134,9 @@ return v___x_72_;
 else
 {
 lean_object* v_quotContext_73_; lean_object* v_currMacroScope_74_; lean_object* v_ref_75_; lean_object* v___x_76_; lean_object* v___x_77_; uint8_t v___x_78_; lean_object* v___x_79_; lean_object* v___x_80_; lean_object* v___x_81_; lean_object* v___x_82_; lean_object* v___x_83_; lean_object* v___x_84_; lean_object* v___x_85_; lean_object* v___x_86_; lean_object* v___x_87_; lean_object* v___x_88_; lean_object* v___x_89_; 
-v_quotContext_73_ = lean_ctor_get(v_a_67_, 1);
-v_currMacroScope_74_ = lean_ctor_get(v_a_67_, 2);
-v_ref_75_ = lean_ctor_get(v_a_67_, 5);
+v_quotContext_73_ = lean_ctor_get(v___y_67_, 1);
+v_currMacroScope_74_ = lean_ctor_get(v___y_67_, 2);
+v_ref_75_ = lean_ctor_get(v___y_67_, 5);
 v___x_76_ = lean_unsigned_to_nat(1u);
 v___x_77_ = l_Lean_Syntax_getArg(v_x_66_, v___x_76_);
 lean_dec(v_x_66_);
@@ -165,16 +165,16 @@ return v___x_89_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__OfProp______macroRules__Lean__Order__term_u231c___u231d__1___boxed(lean_object* v_x_90_, lean_object* v_a_91_, lean_object* v___y_92_){
+LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__OfProp______macroRules__Lean__Order__term_u231c___u231d__1___boxed(lean_object* v_x_90_, lean_object* v___y_91_, lean_object* v___y_92_){
 _start:
 {
 lean_object* v_res_93_; 
-v_res_93_ = l_Lean_Order___aux__Std__Internal__Order__OfProp______macroRules__Lean__Order__term_u231c___u231d__1(v_x_90_, v_a_91_, v___y_92_);
-lean_dec_ref(v_a_91_);
+v_res_93_ = l_Lean_Order___aux__Std__Internal__Order__OfProp______macroRules__Lean__Order__term_u231c___u231d__1(v_x_90_, v___y_91_, v___y_92_);
+lean_dec_ref(v___y_91_);
 return v_res_93_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__OfProp______unexpand__Lean__Order__CompleteLattice__ofProp__1(lean_object* v_x_97_, lean_object* v_a_98_, lean_object* v___y_99_){
+LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__OfProp______unexpand__Lean__Order__CompleteLattice__ofProp__1(lean_object* v_x_97_, lean_object* v___y_98_, lean_object* v___y_99_){
 _start:
 {
 lean_object* v___x_100_; uint8_t v___x_101_; 
@@ -234,7 +234,7 @@ else
 lean_object* v___x_115_; lean_object* v_ref_116_; uint8_t v___x_117_; lean_object* v___x_118_; lean_object* v___x_119_; lean_object* v___x_120_; lean_object* v___x_121_; lean_object* v___x_122_; lean_object* v___x_123_; lean_object* v___x_124_; lean_object* v___x_125_; 
 v___x_115_ = l_Lean_Syntax_getArg(v___x_111_, v___x_104_);
 lean_dec(v___x_111_);
-v_ref_116_ = l_Lean_replaceRef(v___x_105_, v_a_98_);
+v_ref_116_ = l_Lean_replaceRef(v___x_105_, v___y_98_);
 lean_dec(v___x_105_);
 v___x_117_ = 0;
 v___x_118_ = l_Lean_SourceInfo_fromRef(v_ref_116_, v___x_117_);
@@ -259,12 +259,12 @@ return v___x_125_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__OfProp______unexpand__Lean__Order__CompleteLattice__ofProp__1___boxed(lean_object* v_x_126_, lean_object* v_a_127_, lean_object* v___y_128_){
+LEAN_EXPORT lean_object* l_Lean_Order___aux__Std__Internal__Order__OfProp______unexpand__Lean__Order__CompleteLattice__ofProp__1___boxed(lean_object* v_x_126_, lean_object* v___y_127_, lean_object* v___y_128_){
 _start:
 {
 lean_object* v_res_129_; 
-v_res_129_ = l_Lean_Order___aux__Std__Internal__Order__OfProp______unexpand__Lean__Order__CompleteLattice__ofProp__1(v_x_126_, v_a_127_, v___y_128_);
-lean_dec(v_a_127_);
+v_res_129_ = l_Lean_Order___aux__Std__Internal__Order__OfProp______unexpand__Lean__Order__CompleteLattice__ofProp__1(v_x_126_, v___y_127_, v___y_128_);
+lean_dec(v___y_127_);
 return v_res_129_;
 }
 }

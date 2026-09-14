@@ -2598,9 +2598,9 @@ return v___x_899_;
 LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_withLocation___lam__0___boxed(lean_object* v_atLocal_902_, lean_object* v_a_903_, lean_object* v_failed_904_, lean_object* v___y_905_, lean_object* v___y_906_, lean_object* v___y_907_, lean_object* v___y_908_, lean_object* v___y_909_, lean_object* v___y_910_, lean_object* v___y_911_, lean_object* v___y_912_, lean_object* v___y_913_){
 _start:
 {
-uint8_t v_a_16807__boxed_914_; lean_object* v_res_915_; 
-v_a_16807__boxed_914_ = lean_unbox(v_a_903_);
-v_res_915_ = l_Lean_Elab_Tactic_withLocation___lam__0(v_atLocal_902_, v_a_16807__boxed_914_, v_failed_904_, v___y_905_, v___y_906_, v___y_907_, v___y_908_, v___y_909_, v___y_910_, v___y_911_, v___y_912_);
+uint8_t v_a_18535__boxed_914_; lean_object* v_res_915_; 
+v_a_18535__boxed_914_ = lean_unbox(v_a_903_);
+v_res_915_ = l_Lean_Elab_Tactic_withLocation___lam__0(v_atLocal_902_, v_a_18535__boxed_914_, v_failed_904_, v___y_905_, v___y_906_, v___y_907_, v___y_908_, v___y_909_, v___y_910_, v___y_911_, v___y_912_);
 return v_res_915_;
 }
 }
@@ -2742,7 +2742,7 @@ lean_dec_ref(v_as_974_);
 return v_res_989_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_withLocation(lean_object* v_loc_990_, lean_object* v_atLocal_991_, lean_object* v_atTarget_992_, lean_object* v_failed_993_, lean_object* v_a_994_, lean_object* v_a_995_, lean_object* v_a_996_, lean_object* v_a_997_, lean_object* v_a_998_, lean_object* v_a_999_, lean_object* v_a_1000_, lean_object* v_a_1001_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_withLocation(lean_object* v_loc_990_, lean_object* v_atLocal_991_, lean_object* v_atTarget_992_, lean_object* v_failed_993_, lean_object* v___y_994_, lean_object* v___y_995_, lean_object* v___y_996_, lean_object* v___y_997_, lean_object* v___y_998_, lean_object* v___y_999_, lean_object* v___y_1000_, lean_object* v___y_1001_){
 _start:
 {
 if (lean_obj_tag(v_loc_990_) == 0)
@@ -2754,7 +2754,7 @@ lean_closure_set(v___x_1003_, 1, v_atTarget_992_);
 v___x_1004_ = lean_alloc_closure((void*)(l_Lean_Elab_withSaveInfoContext___at___00Lean_Elab_Tactic_withLocation_spec__0___boxed), 11, 2);
 lean_closure_set(v___x_1004_, 0, lean_box(0));
 lean_closure_set(v___x_1004_, 1, v___x_1003_);
-v___x_1005_ = l_Lean_Elab_Tactic_tryTactic___redArg(v___x_1004_, v_a_994_, v_a_995_, v_a_996_, v_a_997_, v_a_998_, v_a_999_, v_a_1000_, v_a_1001_);
+v___x_1005_ = l_Lean_Elab_Tactic_tryTactic___redArg(v___x_1004_, v___y_994_, v___y_995_, v___y_996_, v___y_997_, v___y_998_, v___y_999_, v___y_1000_, v___y_1001_);
 if (lean_obj_tag(v___x_1005_) == 0)
 {
 lean_object* v_a_1006_; lean_object* v___f_1007_; lean_object* v___x_1008_; 
@@ -2765,14 +2765,14 @@ v___f_1007_ = lean_alloc_closure((void*)(l_Lean_Elab_Tactic_withLocation___lam__
 lean_closure_set(v___f_1007_, 0, v_atLocal_991_);
 lean_closure_set(v___f_1007_, 1, v_a_1006_);
 lean_closure_set(v___f_1007_, 2, v_failed_993_);
-v___x_1008_ = l_Lean_Elab_Tactic_saveState___redArg(v_a_995_, v_a_997_, v_a_999_, v_a_1001_);
+v___x_1008_ = l_Lean_Elab_Tactic_saveState___redArg(v___y_995_, v___y_997_, v___y_999_, v___y_1001_);
 if (lean_obj_tag(v___x_1008_) == 0)
 {
 lean_object* v_a_1009_; lean_object* v___x_1010_; 
 v_a_1009_ = lean_ctor_get(v___x_1008_, 0);
 lean_inc(v_a_1009_);
 lean_dec_ref_known(v___x_1008_, 1);
-v___x_1010_ = l_Lean_Elab_Tactic_getMainGoal___redArg(v_a_995_, v_a_998_, v_a_999_, v_a_1000_, v_a_1001_);
+v___x_1010_ = l_Lean_Elab_Tactic_getMainGoal___redArg(v___y_995_, v___y_998_, v___y_999_, v___y_1000_, v___y_1001_);
 if (lean_obj_tag(v___x_1010_) == 0)
 {
 lean_object* v_a_1011_; lean_object* v___x_1012_; 
@@ -2780,7 +2780,7 @@ lean_dec(v_a_1009_);
 v_a_1011_ = lean_ctor_get(v___x_1010_, 0);
 lean_inc(v_a_1011_);
 lean_dec_ref_known(v___x_1010_, 1);
-v___x_1012_ = l_Lean_MVarId_withContext___at___00Lean_Elab_Tactic_withLocation_spec__2___redArg(v_a_1011_, v___f_1007_, v_a_994_, v_a_995_, v_a_996_, v_a_997_, v_a_998_, v_a_999_, v_a_1000_, v_a_1001_);
+v___x_1012_ = l_Lean_MVarId_withContext___at___00Lean_Elab_Tactic_withLocation_spec__2___redArg(v_a_1011_, v___f_1007_, v___y_994_, v___y_995_, v___y_996_, v___y_997_, v___y_998_, v___y_999_, v___y_1000_, v___y_1001_);
 return v___x_1012_;
 }
 else
@@ -2827,7 +2827,7 @@ if (v___y_1018_ == 0)
 lean_object* v___x_1019_; 
 lean_del_object(v___x_1015_);
 lean_dec(v_a_1013_);
-v___x_1019_ = l_Lean_Elab_Tactic_SavedState_restore___redArg(v_a_1009_, v___y_1018_, v_a_995_, v_a_996_, v_a_997_, v_a_998_, v_a_999_, v_a_1000_, v_a_1001_);
+v___x_1019_ = l_Lean_Elab_Tactic_SavedState_restore___redArg(v_a_1009_, v___y_1018_, v___y_995_, v___y_996_, v___y_997_, v___y_998_, v___y_999_, v___y_1000_, v___y_1001_);
 if (lean_obj_tag(v___x_1019_) == 0)
 {
 lean_object* v___x_1021_; uint8_t v_isShared_1022_; uint8_t v_isSharedCheck_1027_; 
@@ -3021,7 +3021,7 @@ else
 size_t v___x_1064_; size_t v___x_1065_; lean_object* v___x_1066_; 
 v___x_1064_ = ((size_t)0ULL);
 v___x_1065_ = lean_usize_of_nat(v___x_1060_);
-v___x_1066_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Elab_Tactic_withLocation_spec__3(v_atLocal_991_, v_hypotheses_1051_, v___x_1064_, v___x_1065_, v___x_1062_, v_a_994_, v_a_995_, v_a_996_, v_a_997_, v_a_998_, v_a_999_, v_a_1000_, v_a_1001_);
+v___x_1066_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Elab_Tactic_withLocation_spec__3(v_atLocal_991_, v_hypotheses_1051_, v___x_1064_, v___x_1065_, v___x_1062_, v___y_994_, v___y_995_, v___y_996_, v___y_997_, v___y_998_, v___y_999_, v___y_1000_, v___y_1001_);
 v___y_1058_ = v___x_1066_;
 goto v___jp_1057_;
 }
@@ -3031,7 +3031,7 @@ else
 size_t v___x_1067_; size_t v___x_1068_; lean_object* v___x_1069_; 
 v___x_1067_ = ((size_t)0ULL);
 v___x_1068_ = lean_usize_of_nat(v___x_1060_);
-v___x_1069_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Elab_Tactic_withLocation_spec__3(v_atLocal_991_, v_hypotheses_1051_, v___x_1067_, v___x_1068_, v___x_1062_, v_a_994_, v_a_995_, v_a_996_, v_a_997_, v_a_998_, v_a_999_, v_a_1000_, v_a_1001_);
+v___x_1069_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Elab_Tactic_withLocation_spec__3(v_atLocal_991_, v_hypotheses_1051_, v___x_1067_, v___x_1068_, v___x_1062_, v___y_994_, v___y_995_, v___y_996_, v___y_997_, v___y_998_, v___y_999_, v___y_1000_, v___y_1001_);
 v___y_1058_ = v___x_1069_;
 goto v___jp_1057_;
 }
@@ -3050,7 +3050,7 @@ return v___x_1055_;
 else
 {
 lean_object* v___x_1056_; 
-v___x_1056_ = l_Lean_Elab_Tactic_withMainContext___redArg(v_atTarget_992_, v_a_994_, v_a_995_, v_a_996_, v_a_997_, v_a_998_, v_a_999_, v_a_1000_, v_a_1001_);
+v___x_1056_ = l_Lean_Elab_Tactic_withMainContext___redArg(v_atTarget_992_, v___y_994_, v___y_995_, v___y_996_, v___y_997_, v___y_998_, v___y_999_, v___y_1000_, v___y_1001_);
 return v___x_1056_;
 }
 }
@@ -3070,19 +3070,19 @@ return v___y_1058_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_withLocation___boxed(lean_object* v_loc_1070_, lean_object* v_atLocal_1071_, lean_object* v_atTarget_1072_, lean_object* v_failed_1073_, lean_object* v_a_1074_, lean_object* v_a_1075_, lean_object* v_a_1076_, lean_object* v_a_1077_, lean_object* v_a_1078_, lean_object* v_a_1079_, lean_object* v_a_1080_, lean_object* v_a_1081_, lean_object* v___y_1082_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_withLocation___boxed(lean_object* v_loc_1070_, lean_object* v_atLocal_1071_, lean_object* v_atTarget_1072_, lean_object* v_failed_1073_, lean_object* v___y_1074_, lean_object* v___y_1075_, lean_object* v___y_1076_, lean_object* v___y_1077_, lean_object* v___y_1078_, lean_object* v___y_1079_, lean_object* v___y_1080_, lean_object* v___y_1081_, lean_object* v___y_1082_){
 _start:
 {
 lean_object* v_res_1083_; 
-v_res_1083_ = l_Lean_Elab_Tactic_withLocation(v_loc_1070_, v_atLocal_1071_, v_atTarget_1072_, v_failed_1073_, v_a_1074_, v_a_1075_, v_a_1076_, v_a_1077_, v_a_1078_, v_a_1079_, v_a_1080_, v_a_1081_);
-lean_dec(v_a_1081_);
-lean_dec_ref(v_a_1080_);
-lean_dec(v_a_1079_);
-lean_dec_ref(v_a_1078_);
-lean_dec(v_a_1077_);
-lean_dec_ref(v_a_1076_);
-lean_dec(v_a_1075_);
-lean_dec_ref(v_a_1074_);
+v_res_1083_ = l_Lean_Elab_Tactic_withLocation(v_loc_1070_, v_atLocal_1071_, v_atTarget_1072_, v_failed_1073_, v___y_1074_, v___y_1075_, v___y_1076_, v___y_1077_, v___y_1078_, v___y_1079_, v___y_1080_, v___y_1081_);
+lean_dec(v___y_1081_);
+lean_dec_ref(v___y_1080_);
+lean_dec(v___y_1079_);
+lean_dec_ref(v___y_1078_);
+lean_dec(v___y_1077_);
+lean_dec_ref(v___y_1076_);
+lean_dec(v___y_1075_);
+lean_dec_ref(v___y_1074_);
 lean_dec(v_loc_1070_);
 return v_res_1083_;
 }

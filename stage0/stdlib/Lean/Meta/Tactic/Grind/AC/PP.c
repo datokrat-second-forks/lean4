@@ -46,11 +46,11 @@ lean_object* l___private_Lean_Meta_Tactic_Grind_Types_0__Lean_Meta_Grind_SolverE
 lean_object* lean_array_fget(lean_object*, lean_object*);
 lean_object* lean_io_error_to_string(lean_object*);
 lean_object* l_Lean_Meta_instMonadMetaM___lam__0___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-lean_object* l_ReaderT_instFunctorOfMonad___redArg___lam__0(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-lean_object* l_ReaderT_instFunctorOfMonad___redArg___lam__1(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-lean_object* l_ReaderT_instApplicativeOfMonad___redArg___lam__1(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-lean_object* l_ReaderT_instApplicativeOfMonad___redArg___lam__3(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-lean_object* l_ReaderT_instApplicativeOfMonad___redArg___lam__4(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+lean_object* l_ReaderT_instFunctorOfMonad___redArg___lam__0___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+lean_object* l_ReaderT_instFunctorOfMonad___redArg___lam__1___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+lean_object* l_ReaderT_instApplicativeOfMonad___redArg___lam__1___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+lean_object* l_ReaderT_instApplicativeOfMonad___redArg___lam__3___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+lean_object* l_ReaderT_instApplicativeOfMonad___redArg___lam__4___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* l_StateT_get(lean_object*, lean_object*, lean_object*, lean_object*);
 static lean_once_cell_t l___private_Lean_Meta_Tactic_Grind_AC_PP_0__Lean_Meta_Grind_AC_instMonadGetStructM___closed__0_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l___private_Lean_Meta_Tactic_Grind_AC_PP_0__Lean_Meta_Grind_AC_instMonadGetStructM___closed__0;
@@ -237,21 +237,21 @@ v_toSeqRight_13_ = lean_ctor_get(v_toApplicative_9_, 4);
 v___f_14_ = ((lean_object*)(l___private_Lean_Meta_Tactic_Grind_AC_PP_0__Lean_Meta_Grind_AC_instMonadGetStructM___closed__2));
 v___f_15_ = ((lean_object*)(l___private_Lean_Meta_Tactic_Grind_AC_PP_0__Lean_Meta_Grind_AC_instMonadGetStructM___closed__3));
 lean_inc_ref_n(v_toFunctor_10_, 2);
-v___f_16_ = lean_alloc_closure((void*)(l_ReaderT_instFunctorOfMonad___redArg___lam__0), 6, 1);
+v___f_16_ = lean_alloc_closure((void*)(l_ReaderT_instFunctorOfMonad___redArg___lam__0___boxed), 6, 1);
 lean_closure_set(v___f_16_, 0, v_toFunctor_10_);
-v___f_17_ = lean_alloc_closure((void*)(l_ReaderT_instFunctorOfMonad___redArg___lam__1), 6, 1);
+v___f_17_ = lean_alloc_closure((void*)(l_ReaderT_instFunctorOfMonad___redArg___lam__1___boxed), 6, 1);
 lean_closure_set(v___f_17_, 0, v_toFunctor_10_);
 v___x_18_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_18_, 0, v___f_16_);
 lean_ctor_set(v___x_18_, 1, v___f_17_);
 lean_inc(v_toSeqRight_13_);
-v___f_19_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__1), 6, 1);
+v___f_19_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__1___boxed), 6, 1);
 lean_closure_set(v___f_19_, 0, v_toSeqRight_13_);
 lean_inc(v_toSeqLeft_12_);
-v___f_20_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__3), 6, 1);
+v___f_20_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__3___boxed), 6, 1);
 lean_closure_set(v___f_20_, 0, v_toSeqLeft_12_);
 lean_inc(v_toSeq_11_);
-v___f_21_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__4), 6, 1);
+v___f_21_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__4___boxed), 6, 1);
 lean_closure_set(v___f_21_, 0, v_toSeq_11_);
 v___x_22_ = lean_alloc_ctor(0, 5, 0);
 lean_ctor_set(v___x_22_, 0, v___x_18_);
@@ -316,18 +316,18 @@ lean_object* v___f_36_; lean_object* v___f_37_; lean_object* v___f_38_; lean_obj
 v___f_36_ = ((lean_object*)(l___private_Lean_Meta_Tactic_Grind_AC_PP_0__Lean_Meta_Grind_AC_instMonadGetStructM___closed__4));
 v___f_37_ = ((lean_object*)(l___private_Lean_Meta_Tactic_Grind_AC_PP_0__Lean_Meta_Grind_AC_instMonadGetStructM___closed__5));
 lean_inc_ref(v_toFunctor_29_);
-v___f_38_ = lean_alloc_closure((void*)(l_ReaderT_instFunctorOfMonad___redArg___lam__0), 6, 1);
+v___f_38_ = lean_alloc_closure((void*)(l_ReaderT_instFunctorOfMonad___redArg___lam__0___boxed), 6, 1);
 lean_closure_set(v___f_38_, 0, v_toFunctor_29_);
-v___f_39_ = lean_alloc_closure((void*)(l_ReaderT_instFunctorOfMonad___redArg___lam__1), 6, 1);
+v___f_39_ = lean_alloc_closure((void*)(l_ReaderT_instFunctorOfMonad___redArg___lam__1___boxed), 6, 1);
 lean_closure_set(v___f_39_, 0, v_toFunctor_29_);
 v___x_40_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_40_, 0, v___f_38_);
 lean_ctor_set(v___x_40_, 1, v___f_39_);
-v___f_41_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__1), 6, 1);
+v___f_41_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__1___boxed), 6, 1);
 lean_closure_set(v___f_41_, 0, v_toSeqRight_32_);
-v___f_42_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__3), 6, 1);
+v___f_42_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__3___boxed), 6, 1);
 lean_closure_set(v___f_42_, 0, v_toSeqLeft_31_);
-v___f_43_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__4), 6, 1);
+v___f_43_ = lean_alloc_closure((void*)(l_ReaderT_instApplicativeOfMonad___redArg___lam__4___boxed), 6, 1);
 lean_closure_set(v___f_43_, 0, v_toSeq_30_);
 if (v_isShared_35_ == 0)
 {
@@ -3650,11 +3650,11 @@ v___x_1141_ = l_Lean_MessageData_ofFormat(v___x_1140_);
 return v___x_1141_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_AC_pp_x3f(lean_object* v_goal_1142_, lean_object* v_a_1143_, lean_object* v_a_1144_, lean_object* v_a_1145_, lean_object* v_a_1146_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_AC_pp_x3f(lean_object* v_goal_1142_, lean_object* v___y_1143_, lean_object* v___y_1144_, lean_object* v___y_1145_, lean_object* v___y_1146_){
 _start:
 {
 lean_object* v_ref_1148_; lean_object* v___x_1149_; lean_object* v_msgs_1150_; lean_object* v___x_1151_; lean_object* v___x_1152_; 
-v_ref_1148_ = lean_ctor_get(v_a_1145_, 2);
+v_ref_1148_ = lean_ctor_get(v___y_1145_, 2);
 v___x_1149_ = lean_unsigned_to_nat(0u);
 v_msgs_1150_ = ((lean_object*)(l_Lean_toTraceElem___at___00__private_Lean_Meta_Tactic_Grind_AC_PP_0__Lean_Meta_Grind_AC_ppBasis_x3f_spec__1___closed__0));
 v___x_1151_ = l_Lean_Meta_Grind_AC_acExt;
@@ -3670,7 +3670,7 @@ lean_inc_ref(v_structs_1154_);
 lean_dec(v_a_1153_);
 v_sz_1155_ = lean_array_size(v_structs_1154_);
 v___x_1156_ = ((size_t)0ULL);
-v___x_1157_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_Meta_Grind_AC_pp_x3f_spec__0(v_structs_1154_, v_sz_1155_, v___x_1156_, v_msgs_1150_, v_a_1143_, v_a_1144_, v_a_1145_, v_a_1146_);
+v___x_1157_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_Meta_Grind_AC_pp_x3f_spec__0(v_structs_1154_, v_sz_1155_, v___x_1156_, v_msgs_1150_, v___y_1143_, v___y_1144_, v___y_1145_, v___y_1146_);
 lean_dec_ref(v_structs_1154_);
 if (lean_obj_tag(v___x_1157_) == 0)
 {
@@ -3878,15 +3878,15 @@ return v___x_1200_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Grind_AC_pp_x3f___boxed(lean_object* v_goal_1203_, lean_object* v_a_1204_, lean_object* v_a_1205_, lean_object* v_a_1206_, lean_object* v_a_1207_, lean_object* v___y_1208_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Grind_AC_pp_x3f___boxed(lean_object* v_goal_1203_, lean_object* v___y_1204_, lean_object* v___y_1205_, lean_object* v___y_1206_, lean_object* v___y_1207_, lean_object* v___y_1208_){
 _start:
 {
 lean_object* v_res_1209_; 
-v_res_1209_ = l_Lean_Meta_Grind_AC_pp_x3f(v_goal_1203_, v_a_1204_, v_a_1205_, v_a_1206_, v_a_1207_);
-lean_dec(v_a_1207_);
-lean_dec_ref(v_a_1206_);
-lean_dec(v_a_1205_);
-lean_dec_ref(v_a_1204_);
+v_res_1209_ = l_Lean_Meta_Grind_AC_pp_x3f(v_goal_1203_, v___y_1204_, v___y_1205_, v___y_1206_, v___y_1207_);
+lean_dec(v___y_1207_);
+lean_dec_ref(v___y_1206_);
+lean_dec(v___y_1205_);
+lean_dec_ref(v___y_1204_);
 lean_dec_ref(v_goal_1203_);
 return v_res_1209_;
 }

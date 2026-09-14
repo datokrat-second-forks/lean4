@@ -866,7 +866,7 @@ lean_dec(v_decl_233_);
 return v_res_237_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake_registerOrderedTagAttribute___lam__5(lean_object* v___x_238_, lean_object* v_x_239_, lean_object* v_x_240_){
+LEAN_EXPORT lean_object* l_Lake_registerOrderedTagAttribute___lam__5(lean_object* v___x_238_, lean_object* v_x_239_, lean_object* v___y_240_){
 _start:
 {
 lean_object* v___x_242_; 
@@ -875,12 +875,12 @@ lean_ctor_set(v___x_242_, 0, v___x_238_);
 return v___x_242_;
 }
 }
-LEAN_EXPORT lean_object* l_Lake_registerOrderedTagAttribute___lam__5___boxed(lean_object* v___x_243_, lean_object* v_x_244_, lean_object* v_x_245_, lean_object* v___y_246_){
+LEAN_EXPORT lean_object* l_Lake_registerOrderedTagAttribute___lam__5___boxed(lean_object* v___x_243_, lean_object* v_x_244_, lean_object* v___y_245_, lean_object* v___y_246_){
 _start:
 {
 lean_object* v_res_247_; 
-v_res_247_ = l_Lake_registerOrderedTagAttribute___lam__5(v___x_243_, v_x_244_, v_x_245_);
-lean_dec_ref(v_x_245_);
+v_res_247_ = l_Lake_registerOrderedTagAttribute___lam__5(v___x_243_, v_x_244_, v___y_245_);
+lean_dec_ref(v___y_245_);
 lean_dec_ref(v_x_244_);
 return v_res_247_;
 }

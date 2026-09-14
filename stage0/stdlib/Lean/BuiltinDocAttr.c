@@ -422,15 +422,15 @@ v___x_110_ = l_Lean_mkConst(v___x_109_, v___x_108_);
 return v___x_110_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_declareBuiltinDocStringAndRanges(lean_object* v_declName_111_, lean_object* v_a_112_, lean_object* v_a_113_){
+LEAN_EXPORT lean_object* l_Lean_declareBuiltinDocStringAndRanges(lean_object* v_declName_111_, lean_object* v___y_112_, lean_object* v___y_113_){
 _start:
 {
 lean_object* v___y_116_; lean_object* v___y_117_; lean_object* v___x_207_; lean_object* v_env_208_; lean_object* v_ref_209_; uint8_t v___x_210_; lean_object* v___x_211_; lean_object* v___x_212_; lean_object* v___x_213_; lean_object* v___x_214_; lean_object* v___x_215_; 
-v___x_207_ = lean_st_ref_get(v_a_113_);
+v___x_207_ = lean_st_ref_get(v___y_113_);
 v_env_208_ = lean_ctor_get(v___x_207_, 0);
 lean_inc_ref(v_env_208_);
 lean_dec(v___x_207_);
-v_ref_209_ = lean_ctor_get(v_a_112_, 2);
+v_ref_209_ = lean_ctor_get(v___y_112_, 2);
 v___x_210_ = 0;
 v___x_211_ = l_Lean_Options_empty;
 v___x_212_ = lean_box(0);
@@ -462,12 +462,12 @@ v___x_225_ = lean_array_push(v___x_224_, v___x_221_);
 v___x_226_ = lean_array_push(v___x_225_, v___x_222_);
 v___x_227_ = l_Lean_mkAppN(v___x_220_, v___x_226_);
 lean_dec_ref(v___x_226_);
-v___x_228_ = l_Lean_declareBuiltin(v___x_219_, v___x_227_, v_a_112_, v_a_113_);
+v___x_228_ = l_Lean_declareBuiltin(v___x_219_, v___x_227_, v___y_112_, v___y_113_);
 if (lean_obj_tag(v___x_228_) == 0)
 {
 lean_dec_ref_known(v___x_228_, 1);
-v___y_116_ = v_a_112_;
-v___y_117_ = v_a_113_;
+v___y_116_ = v___y_112_;
+v___y_117_ = v___y_113_;
 goto v___jp_115_;
 }
 else
@@ -479,8 +479,8 @@ return v___x_228_;
 else
 {
 lean_dec(v_a_216_);
-v___y_116_ = v_a_112_;
-v___y_117_ = v_a_113_;
+v___y_116_ = v___y_112_;
+v___y_117_ = v___y_113_;
 goto v___jp_115_;
 }
 }
@@ -748,13 +748,13 @@ return v___x_204_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_declareBuiltinDocStringAndRanges___boxed(lean_object* v_declName_241_, lean_object* v_a_242_, lean_object* v_a_243_, lean_object* v___y_244_){
+LEAN_EXPORT lean_object* l_Lean_declareBuiltinDocStringAndRanges___boxed(lean_object* v_declName_241_, lean_object* v___y_242_, lean_object* v___y_243_, lean_object* v___y_244_){
 _start:
 {
 lean_object* v_res_245_; 
-v_res_245_ = l_Lean_declareBuiltinDocStringAndRanges(v_declName_241_, v_a_242_, v_a_243_);
-lean_dec(v_a_243_);
-lean_dec_ref(v_a_242_);
+v_res_245_ = l_Lean_declareBuiltinDocStringAndRanges(v_declName_241_, v___y_242_, v___y_243_);
+lean_dec(v___y_243_);
+lean_dec_ref(v___y_242_);
 return v_res_245_;
 }
 }

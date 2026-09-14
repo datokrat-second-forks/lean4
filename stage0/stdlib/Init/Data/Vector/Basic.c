@@ -1023,7 +1023,7 @@ v___x_162_ = l_String_toRawSubstring_x27(v___x_161_);
 return v___x_162_;
 }
 }
-LEAN_EXPORT lean_object* l_Vector___aux__Init__Data__Vector__Basic______macroRules__Vector__term_x23v_x5b___x2c_x5d__1(lean_object* v_x_171_, lean_object* v_a_172_, lean_object* v___y_173_){
+LEAN_EXPORT lean_object* l_Vector___aux__Init__Data__Vector__Basic______macroRules__Vector__term_x23v_x5b___x2c_x5d__1(lean_object* v_x_171_, lean_object* v___y_172_, lean_object* v___y_173_){
 _start:
 {
 lean_object* v___x_174_; uint8_t v___x_175_; 
@@ -1043,9 +1043,9 @@ return v___x_177_;
 else
 {
 lean_object* v_quotContext_178_; lean_object* v_currMacroScope_179_; lean_object* v_ref_180_; lean_object* v___x_181_; lean_object* v___x_182_; lean_object* v_elems_183_; uint8_t v___x_184_; lean_object* v___x_185_; lean_object* v___x_186_; lean_object* v___x_187_; lean_object* v___x_188_; lean_object* v___x_189_; lean_object* v___x_190_; lean_object* v___x_191_; lean_object* v___x_192_; lean_object* v___x_193_; lean_object* v___x_194_; lean_object* v___x_195_; lean_object* v___x_196_; lean_object* v___x_197_; lean_object* v___x_198_; lean_object* v___x_199_; lean_object* v___x_200_; lean_object* v___x_201_; lean_object* v___x_202_; lean_object* v___x_203_; lean_object* v___x_204_; lean_object* v___x_205_; lean_object* v___x_206_; lean_object* v___x_207_; lean_object* v___x_208_; lean_object* v___x_209_; lean_object* v___x_210_; lean_object* v___x_211_; lean_object* v___x_212_; lean_object* v___x_213_; lean_object* v___x_214_; lean_object* v___x_215_; lean_object* v___x_216_; lean_object* v___x_217_; lean_object* v___x_218_; lean_object* v___x_219_; lean_object* v___x_220_; lean_object* v___x_221_; lean_object* v___x_222_; lean_object* v___x_223_; lean_object* v___x_224_; lean_object* v___x_225_; lean_object* v___x_226_; lean_object* v___x_227_; 
-v_quotContext_178_ = lean_ctor_get(v_a_172_, 1);
-v_currMacroScope_179_ = lean_ctor_get(v_a_172_, 2);
-v_ref_180_ = lean_ctor_get(v_a_172_, 5);
+v_quotContext_178_ = lean_ctor_get(v___y_172_, 1);
+v_currMacroScope_179_ = lean_ctor_get(v___y_172_, 2);
+v_ref_180_ = lean_ctor_get(v___y_172_, 5);
 v___x_181_ = lean_unsigned_to_nat(1u);
 v___x_182_ = l_Lean_Syntax_getArg(v_x_171_, v___x_181_);
 lean_dec(v_x_171_);
@@ -1131,16 +1131,16 @@ return v___x_227_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Vector___aux__Init__Data__Vector__Basic______macroRules__Vector__term_x23v_x5b___x2c_x5d__1___boxed(lean_object* v_x_228_, lean_object* v_a_229_, lean_object* v___y_230_){
+LEAN_EXPORT lean_object* l_Vector___aux__Init__Data__Vector__Basic______macroRules__Vector__term_x23v_x5b___x2c_x5d__1___boxed(lean_object* v_x_228_, lean_object* v___y_229_, lean_object* v___y_230_){
 _start:
 {
 lean_object* v_res_231_; 
-v_res_231_ = l_Vector___aux__Init__Data__Vector__Basic______macroRules__Vector__term_x23v_x5b___x2c_x5d__1(v_x_228_, v_a_229_, v___y_230_);
-lean_dec_ref(v_a_229_);
+v_res_231_ = l_Vector___aux__Init__Data__Vector__Basic______macroRules__Vector__term_x23v_x5b___x2c_x5d__1(v_x_228_, v___y_229_, v___y_230_);
+lean_dec_ref(v___y_229_);
 return v_res_231_;
 }
 }
-LEAN_EXPORT lean_object* l_Vector_unexpandMk(lean_object* v_x_232_, lean_object* v_a_233_, lean_object* v___y_234_){
+LEAN_EXPORT lean_object* l_Vector_unexpandMk(lean_object* v_x_232_, lean_object* v___y_233_, lean_object* v___y_234_){
 _start:
 {
 lean_object* v___x_235_; uint8_t v___x_236_; 
@@ -1203,7 +1203,7 @@ lean_dec(v___x_246_);
 v___x_252_ = l_Lean_Syntax_getArgs(v___x_251_);
 lean_dec(v___x_251_);
 v___x_253_ = 0;
-v___x_254_ = l_Lean_SourceInfo_fromRef(v_a_233_, v___x_253_);
+v___x_254_ = l_Lean_SourceInfo_fromRef(v___y_233_, v___x_253_);
 v___x_255_ = ((lean_object*)(l_Vector_term_x23v_x5b___x2c_x5d___closed__2));
 v___x_256_ = ((lean_object*)(l_Vector_term_x23v_x5b___x2c_x5d___closed__5));
 lean_inc_n(v___x_254_, 3);
@@ -1232,12 +1232,12 @@ return v___x_265_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Vector_unexpandMk___boxed(lean_object* v_x_266_, lean_object* v_a_267_, lean_object* v___y_268_){
+LEAN_EXPORT lean_object* l_Vector_unexpandMk___boxed(lean_object* v_x_266_, lean_object* v___y_267_, lean_object* v___y_268_){
 _start:
 {
 lean_object* v_res_269_; 
-v_res_269_ = l_Vector_unexpandMk(v_x_266_, v_a_267_, v___y_268_);
-lean_dec(v_a_267_);
+v_res_269_ = l_Vector_unexpandMk(v_x_266_, v___y_267_, v___y_268_);
+lean_dec(v___y_267_);
 return v_res_269_;
 }
 }

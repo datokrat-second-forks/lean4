@@ -297,7 +297,7 @@ lean_dec_ref(v___y_84_);
 return v_res_93_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Rfl_evalApplyRfl(lean_object* v_stx_106_, lean_object* v_a_107_, lean_object* v_a_108_, lean_object* v_a_109_, lean_object* v_a_110_, lean_object* v_a_111_, lean_object* v_a_112_, lean_object* v_a_113_, lean_object* v_a_114_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Rfl_evalApplyRfl(lean_object* v_stx_106_, lean_object* v___y_107_, lean_object* v___y_108_, lean_object* v___y_109_, lean_object* v___y_110_, lean_object* v___y_111_, lean_object* v___y_112_, lean_object* v___y_113_, lean_object* v___y_114_){
 _start:
 {
 lean_object* v___x_116_; uint8_t v___x_117_; 
@@ -313,24 +313,24 @@ else
 {
 lean_object* v___f_119_; lean_object* v___x_120_; 
 v___f_119_ = ((lean_object*)(l_Lean_Elab_Tactic_Rfl_evalApplyRfl___closed__6));
-v___x_120_ = l_Lean_Elab_Tactic_withMainContext___redArg(v___f_119_, v_a_107_, v_a_108_, v_a_109_, v_a_110_, v_a_111_, v_a_112_, v_a_113_, v_a_114_);
+v___x_120_ = l_Lean_Elab_Tactic_withMainContext___redArg(v___f_119_, v___y_107_, v___y_108_, v___y_109_, v___y_110_, v___y_111_, v___y_112_, v___y_113_, v___y_114_);
 return v___x_120_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Rfl_evalApplyRfl___boxed(lean_object* v_stx_121_, lean_object* v_a_122_, lean_object* v_a_123_, lean_object* v_a_124_, lean_object* v_a_125_, lean_object* v_a_126_, lean_object* v_a_127_, lean_object* v_a_128_, lean_object* v_a_129_, lean_object* v___y_130_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Rfl_evalApplyRfl___boxed(lean_object* v_stx_121_, lean_object* v___y_122_, lean_object* v___y_123_, lean_object* v___y_124_, lean_object* v___y_125_, lean_object* v___y_126_, lean_object* v___y_127_, lean_object* v___y_128_, lean_object* v___y_129_, lean_object* v___y_130_){
 _start:
 {
 lean_object* v_res_131_; 
-v_res_131_ = l_Lean_Elab_Tactic_Rfl_evalApplyRfl(v_stx_121_, v_a_122_, v_a_123_, v_a_124_, v_a_125_, v_a_126_, v_a_127_, v_a_128_, v_a_129_);
-lean_dec(v_a_129_);
-lean_dec_ref(v_a_128_);
-lean_dec(v_a_127_);
-lean_dec_ref(v_a_126_);
-lean_dec(v_a_125_);
-lean_dec_ref(v_a_124_);
-lean_dec(v_a_123_);
-lean_dec_ref(v_a_122_);
+v_res_131_ = l_Lean_Elab_Tactic_Rfl_evalApplyRfl(v_stx_121_, v___y_122_, v___y_123_, v___y_124_, v___y_125_, v___y_126_, v___y_127_, v___y_128_, v___y_129_);
+lean_dec(v___y_129_);
+lean_dec_ref(v___y_128_);
+lean_dec(v___y_127_);
+lean_dec_ref(v___y_126_);
+lean_dec(v___y_125_);
+lean_dec_ref(v___y_124_);
+lean_dec(v___y_123_);
+lean_dec_ref(v___y_122_);
 return v_res_131_;
 }
 }

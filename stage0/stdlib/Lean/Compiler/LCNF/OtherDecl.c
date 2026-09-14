@@ -278,11 +278,11 @@ v___x_75_ = l_Lean_stringToMessageData(v___x_74_);
 return v___x_75_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_getOtherDeclType(lean_object* v_declName_76_, lean_object* v_us_77_, lean_object* v_a_78_, lean_object* v_a_79_, lean_object* v_a_80_, lean_object* v_a_81_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_getOtherDeclType(lean_object* v_declName_76_, lean_object* v_us_77_, lean_object* v___y_78_, lean_object* v___y_79_, lean_object* v___y_80_, lean_object* v___y_81_){
 _start:
 {
 lean_object* v___x_83_; 
-v___x_83_ = l_Lean_Compiler_LCNF_getPhase___redArg(v_a_78_);
+v___x_83_ = l_Lean_Compiler_LCNF_getPhase___redArg(v___y_78_);
 if (lean_obj_tag(v___x_83_) == 0)
 {
 lean_object* v_a_84_; uint8_t v___x_85_; 
@@ -296,14 +296,14 @@ switch(v___x_85_)
 case 0:
 {
 lean_object* v___x_86_; 
-v___x_86_ = l_Lean_Compiler_LCNF_getOtherDeclBaseType(v_declName_76_, v_us_77_, v_a_80_, v_a_81_);
+v___x_86_ = l_Lean_Compiler_LCNF_getOtherDeclBaseType(v_declName_76_, v_us_77_, v___y_80_, v___y_81_);
 return v___x_86_;
 }
 case 1:
 {
 lean_object* v___x_87_; 
 lean_dec(v_us_77_);
-v___x_87_ = l_Lean_Compiler_LCNF_getOtherDeclMonoType(v_declName_76_, v_a_80_, v_a_81_);
+v___x_87_ = l_Lean_Compiler_LCNF_getOtherDeclMonoType(v_declName_76_, v___y_80_, v___y_81_);
 return v___x_87_;
 }
 default: 
@@ -312,7 +312,7 @@ lean_object* v___x_88_; lean_object* v___x_89_;
 lean_dec(v_us_77_);
 lean_dec(v_declName_76_);
 v___x_88_ = lean_obj_once(&l_Lean_Compiler_LCNF_getOtherDeclType___closed__1, &l_Lean_Compiler_LCNF_getOtherDeclType___closed__1_once, _init_l_Lean_Compiler_LCNF_getOtherDeclType___closed__1);
-v___x_89_ = l_Lean_throwError___at___00Lean_Compiler_LCNF_getOtherDeclType_spec__0___redArg(v___x_88_, v_a_78_, v_a_79_, v_a_80_, v_a_81_);
+v___x_89_ = l_Lean_throwError___at___00Lean_Compiler_LCNF_getOtherDeclType_spec__0___redArg(v___x_88_, v___y_78_, v___y_79_, v___y_80_, v___y_81_);
 return v___x_89_;
 }
 }
@@ -362,15 +362,15 @@ return v___x_95_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_getOtherDeclType___boxed(lean_object* v_declName_98_, lean_object* v_us_99_, lean_object* v_a_100_, lean_object* v_a_101_, lean_object* v_a_102_, lean_object* v_a_103_, lean_object* v___y_104_){
+LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_getOtherDeclType___boxed(lean_object* v_declName_98_, lean_object* v_us_99_, lean_object* v___y_100_, lean_object* v___y_101_, lean_object* v___y_102_, lean_object* v___y_103_, lean_object* v___y_104_){
 _start:
 {
 lean_object* v_res_105_; 
-v_res_105_ = l_Lean_Compiler_LCNF_getOtherDeclType(v_declName_98_, v_us_99_, v_a_100_, v_a_101_, v_a_102_, v_a_103_);
-lean_dec(v_a_103_);
-lean_dec_ref(v_a_102_);
-lean_dec(v_a_101_);
-lean_dec_ref(v_a_100_);
+v_res_105_ = l_Lean_Compiler_LCNF_getOtherDeclType(v_declName_98_, v_us_99_, v___y_100_, v___y_101_, v___y_102_, v___y_103_);
+lean_dec(v___y_103_);
+lean_dec_ref(v___y_102_);
+lean_dec(v___y_101_);
+lean_dec_ref(v___y_100_);
 return v_res_105_;
 }
 }

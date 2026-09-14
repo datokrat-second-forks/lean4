@@ -1872,9 +1872,9 @@ goto v___jp_642_;
 }
 v___jp_648_:
 {
-if (v___y_650_ == 0)
+if (v___y_649_ == 0)
 {
-v___y_646_ = v___y_649_;
+v___y_646_ = v___y_650_;
 v___y_647_ = v___y_651_;
 goto v___jp_645_;
 }
@@ -1888,7 +1888,7 @@ goto v___jp_642_;
 }
 else
 {
-v___y_646_ = v___y_649_;
+v___y_646_ = v___y_650_;
 v___y_647_ = v___y_651_;
 goto v___jp_645_;
 }
@@ -1912,15 +1912,15 @@ lean_dec(v_line_658_);
 lean_dec(v_line_656_);
 if (v___x_659_ == 0)
 {
-v___y_649_ = v___y_654_;
-v___y_650_ = v___y_653_;
+v___y_649_ = v___y_653_;
+v___y_650_ = v___y_654_;
 v___y_651_ = v___x_636_;
 goto v___jp_648_;
 }
 else
 {
-v___y_649_ = v___y_654_;
-v___y_650_ = v___y_653_;
+v___y_649_ = v___y_653_;
+v___y_650_ = v___y_654_;
 v___y_651_ = v___x_641_;
 goto v___jp_648_;
 }
@@ -2003,9 +2003,9 @@ v___x_546_ = l_Lean_Syntax_matchesNull(v___x_545_, v___y_543_);
 if (v___x_546_ == 0)
 {
 lean_object* v___x_547_; uint8_t v___x_548_; 
-v___x_547_ = lean_array_get_size(v___y_542_);
-lean_dec_ref(v___y_542_);
-v___x_548_ = lean_nat_dec_le(v___x_547_, v___y_541_);
+v___x_547_ = lean_array_get_size(v___y_541_);
+lean_dec_ref(v___y_541_);
+v___x_548_ = lean_nat_dec_le(v___x_547_, v___y_542_);
 if (v___x_548_ == 0)
 {
 lean_object* v___x_549_; 
@@ -2024,7 +2024,7 @@ goto v___jp_527_;
 else
 {
 lean_object* v___x_551_; 
-lean_dec_ref(v___y_542_);
+lean_dec_ref(v___y_541_);
 v___x_551_ = ((lean_object*)(l___private_Lean_Server_FileWorker_SignatureHelp_0__Lean_Server_FileWorker_SignatureHelp_findSignatureHelp_x3f_determineCandidateKind___closed__1));
 v_kind_x3f_528_ = v___x_551_;
 goto v___jp_527_;
@@ -2357,8 +2357,8 @@ goto v___jp_527_;
 else
 {
 lean_inc_ref(v_args_583_);
-v___y_541_ = v___x_621_;
-v___y_542_ = v_args_583_;
+v___y_541_ = v_args_583_;
+v___y_542_ = v___x_621_;
 v___y_543_ = v___x_620_;
 goto v___jp_540_;
 }
@@ -2366,8 +2366,8 @@ goto v___jp_540_;
 else
 {
 lean_inc_ref(v_args_583_);
-v___y_541_ = v___x_621_;
-v___y_542_ = v_args_583_;
+v___y_541_ = v_args_583_;
+v___y_542_ = v___x_621_;
 v___y_543_ = v___x_620_;
 goto v___jp_540_;
 }

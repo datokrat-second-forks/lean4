@@ -344,7 +344,7 @@ v___x_77_ = lean_obj_once(&l_Lean_registerModuleEnvExtension___auto__1___closed_
 return v___x_77_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_registerModuleEnvExtension___redArg___lam__0(lean_object* v_mkInitial_78_, lean_object* v_x_79_, lean_object* v_x_80_){
+LEAN_EXPORT lean_object* l_Lean_registerModuleEnvExtension___redArg___lam__0(lean_object* v_mkInitial_78_, lean_object* v_x_79_, lean_object* v___y_80_){
 _start:
 {
 lean_object* v___x_82_; 
@@ -352,12 +352,12 @@ v___x_82_ = lean_apply_1(v_mkInitial_78_, lean_box(0));
 return v___x_82_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_registerModuleEnvExtension___redArg___lam__0___boxed(lean_object* v_mkInitial_83_, lean_object* v_x_84_, lean_object* v_x_85_, lean_object* v___y_86_){
+LEAN_EXPORT lean_object* l_Lean_registerModuleEnvExtension___redArg___lam__0___boxed(lean_object* v_mkInitial_83_, lean_object* v_x_84_, lean_object* v___y_85_, lean_object* v___y_86_){
 _start:
 {
 lean_object* v_res_87_; 
-v_res_87_ = l_Lean_registerModuleEnvExtension___redArg___lam__0(v_mkInitial_83_, v_x_84_, v_x_85_);
-lean_dec_ref(v_x_85_);
+v_res_87_ = l_Lean_registerModuleEnvExtension___redArg___lam__0(v_mkInitial_83_, v_x_84_, v___y_85_);
+lean_dec_ref(v___y_85_);
 lean_dec_ref(v_x_84_);
 return v_res_87_;
 }

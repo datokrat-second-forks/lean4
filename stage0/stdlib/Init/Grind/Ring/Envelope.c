@@ -1138,7 +1138,7 @@ lean_dec_ref(v_inst_392_);
 return v_res_394_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Grind_CommRing_OfCommSemiring_toQUnexpander(lean_object* v_stx_408_, lean_object* v_a_409_, lean_object* v___y_410_){
+LEAN_EXPORT lean_object* l_Lean_Grind_CommRing_OfCommSemiring_toQUnexpander(lean_object* v_stx_408_, lean_object* v___y_409_, lean_object* v___y_410_){
 _start:
 {
 lean_object* v___x_411_; uint8_t v___x_412_; 
@@ -1180,7 +1180,7 @@ v___x_420_ = lean_unsigned_to_nat(0u);
 v___x_421_ = l_Lean_Syntax_getArg(v___x_416_, v___x_420_);
 lean_dec(v___x_416_);
 v___x_422_ = 0;
-v___x_423_ = l_Lean_SourceInfo_fromRef(v_a_409_, v___x_422_);
+v___x_423_ = l_Lean_SourceInfo_fromRef(v___y_409_, v___x_422_);
 v___x_424_ = ((lean_object*)(l_Lean_Grind_CommRing_OfCommSemiring_toQUnexpander___closed__6));
 v___x_425_ = ((lean_object*)(l_Lean_Grind_CommRing_OfCommSemiring_toQUnexpander___closed__7));
 lean_inc(v___x_423_);
@@ -1196,12 +1196,12 @@ return v___x_428_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Grind_CommRing_OfCommSemiring_toQUnexpander___boxed(lean_object* v_stx_429_, lean_object* v_a_430_, lean_object* v___y_431_){
+LEAN_EXPORT lean_object* l_Lean_Grind_CommRing_OfCommSemiring_toQUnexpander___boxed(lean_object* v_stx_429_, lean_object* v___y_430_, lean_object* v___y_431_){
 _start:
 {
 lean_object* v_res_432_; 
-v_res_432_ = l_Lean_Grind_CommRing_OfCommSemiring_toQUnexpander(v_stx_429_, v_a_430_, v___y_431_);
-lean_dec(v_a_430_);
+v_res_432_ = l_Lean_Grind_CommRing_OfCommSemiring_toQUnexpander(v_stx_429_, v___y_430_, v___y_431_);
+lean_dec(v___y_430_);
 return v_res_432_;
 }
 }

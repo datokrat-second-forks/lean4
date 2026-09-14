@@ -407,10 +407,10 @@ return v___x_96_;
 LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Conv_evalRewrite___lam__1___boxed(lean_object* v_term_99_, lean_object* v_symm_100_, lean_object* v_a_101_, lean_object* v___x_102_, lean_object* v___y_103_, lean_object* v___y_104_, lean_object* v___y_105_, lean_object* v___y_106_, lean_object* v___y_107_, lean_object* v___y_108_, lean_object* v___y_109_, lean_object* v___y_110_, lean_object* v___y_111_){
 _start:
 {
-uint8_t v_symm_boxed_112_; uint8_t v___x_1185__boxed_113_; lean_object* v_res_114_; 
+uint8_t v_symm_boxed_112_; uint8_t v___x_1197__boxed_113_; lean_object* v_res_114_; 
 v_symm_boxed_112_ = lean_unbox(v_symm_100_);
-v___x_1185__boxed_113_ = lean_unbox(v___x_102_);
-v_res_114_ = l_Lean_Elab_Tactic_Conv_evalRewrite___lam__1(v_term_99_, v_symm_boxed_112_, v_a_101_, v___x_1185__boxed_113_, v___y_103_, v___y_104_, v___y_105_, v___y_106_, v___y_107_, v___y_108_, v___y_109_, v___y_110_);
+v___x_1197__boxed_113_ = lean_unbox(v___x_102_);
+v_res_114_ = l_Lean_Elab_Tactic_Conv_evalRewrite___lam__1(v_term_99_, v_symm_boxed_112_, v_a_101_, v___x_1197__boxed_113_, v___y_103_, v___y_104_, v___y_105_, v___y_106_, v___y_107_, v___y_108_, v___y_109_, v___y_110_);
 lean_dec(v___y_110_);
 lean_dec_ref(v___y_109_);
 lean_dec(v___y_108_);
@@ -453,7 +453,7 @@ lean_dec_ref(v___y_135_);
 return v_res_145_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Conv_evalRewrite(lean_object* v_stx_151_, lean_object* v_a_152_, lean_object* v_a_153_, lean_object* v_a_154_, lean_object* v_a_155_, lean_object* v_a_156_, lean_object* v_a_157_, lean_object* v_a_158_, lean_object* v_a_159_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Conv_evalRewrite(lean_object* v_stx_151_, lean_object* v___y_152_, lean_object* v___y_153_, lean_object* v___y_154_, lean_object* v___y_155_, lean_object* v___y_156_, lean_object* v___y_157_, lean_object* v___y_158_, lean_object* v___y_159_){
 _start:
 {
 lean_object* v___x_161_; lean_object* v___x_162_; uint8_t v___x_163_; lean_object* v___x_164_; lean_object* v___x_165_; 
@@ -461,7 +461,7 @@ v___x_161_ = lean_unsigned_to_nat(1u);
 v___x_162_ = l_Lean_Syntax_getArg(v_stx_151_, v___x_161_);
 v___x_163_ = 1;
 v___x_164_ = ((lean_object*)(l_Lean_Elab_Tactic_Conv_evalRewrite___closed__0));
-v___x_165_ = l_Lean_Elab_Tactic_elabRewriteConfig___redArg(v___x_162_, v___x_164_, v___x_163_, v_a_152_, v_a_158_, v_a_159_);
+v___x_165_ = l_Lean_Elab_Tactic_elabRewriteConfig___redArg(v___x_162_, v___x_164_, v___x_163_, v___y_152_, v___y_158_, v___y_159_);
 if (lean_obj_tag(v___x_165_) == 0)
 {
 lean_object* v_a_166_; lean_object* v___f_167_; lean_object* v___x_168_; lean_object* v___x_169_; lean_object* v___x_170_; lean_object* v___x_171_; lean_object* v___x_172_; 
@@ -474,7 +474,7 @@ v___x_168_ = lean_unsigned_to_nat(0u);
 v___x_169_ = l_Lean_Syntax_getArg(v_stx_151_, v___x_168_);
 v___x_170_ = lean_unsigned_to_nat(2u);
 v___x_171_ = l_Lean_Syntax_getArg(v_stx_151_, v___x_170_);
-v___x_172_ = l_Lean_Elab_Tactic_withRWRulesSeq(v___x_169_, v___x_171_, v___f_167_, v_a_152_, v_a_153_, v_a_154_, v_a_155_, v_a_156_, v_a_157_, v_a_158_, v_a_159_);
+v___x_172_ = l_Lean_Elab_Tactic_withRWRulesSeq(v___x_169_, v___x_171_, v___f_167_, v___y_152_, v___y_153_, v___y_154_, v___y_155_, v___y_156_, v___y_157_, v___y_158_, v___y_159_);
 lean_dec(v___x_171_);
 return v___x_172_;
 }
@@ -521,19 +521,19 @@ return v___x_178_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Conv_evalRewrite___boxed(lean_object* v_stx_181_, lean_object* v_a_182_, lean_object* v_a_183_, lean_object* v_a_184_, lean_object* v_a_185_, lean_object* v_a_186_, lean_object* v_a_187_, lean_object* v_a_188_, lean_object* v_a_189_, lean_object* v___y_190_){
+LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_Conv_evalRewrite___boxed(lean_object* v_stx_181_, lean_object* v___y_182_, lean_object* v___y_183_, lean_object* v___y_184_, lean_object* v___y_185_, lean_object* v___y_186_, lean_object* v___y_187_, lean_object* v___y_188_, lean_object* v___y_189_, lean_object* v___y_190_){
 _start:
 {
 lean_object* v_res_191_; 
-v_res_191_ = l_Lean_Elab_Tactic_Conv_evalRewrite(v_stx_181_, v_a_182_, v_a_183_, v_a_184_, v_a_185_, v_a_186_, v_a_187_, v_a_188_, v_a_189_);
-lean_dec(v_a_189_);
-lean_dec_ref(v_a_188_);
-lean_dec(v_a_187_);
-lean_dec_ref(v_a_186_);
-lean_dec(v_a_185_);
-lean_dec_ref(v_a_184_);
-lean_dec(v_a_183_);
-lean_dec_ref(v_a_182_);
+v_res_191_ = l_Lean_Elab_Tactic_Conv_evalRewrite(v_stx_181_, v___y_182_, v___y_183_, v___y_184_, v___y_185_, v___y_186_, v___y_187_, v___y_188_, v___y_189_);
+lean_dec(v___y_189_);
+lean_dec_ref(v___y_188_);
+lean_dec(v___y_187_);
+lean_dec_ref(v___y_186_);
+lean_dec(v___y_185_);
+lean_dec_ref(v___y_184_);
+lean_dec(v___y_183_);
+lean_dec_ref(v___y_182_);
 lean_dec(v_stx_181_);
 return v_res_191_;
 }
