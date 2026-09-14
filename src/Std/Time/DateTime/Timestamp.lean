@@ -125,7 +125,7 @@ Converts a `Timestamp` to nanoseconds as `Nanosecond.Offset`.
 -/
 @[inline]
 def toNanosecondsSinceUnixEpoch (tm : Timestamp) : Nanosecond.Offset :=
-  let nanos := tm.toSecondsSinceUnixEpoch.mul 1000000000
+  let nanos : Nanosecond.Offset := .mk (tm.toSecondsSinceUnixEpoch.toUnitVal.mul 1000000000)
   let nanos := nanos + (.ofInt tm.val.nano.val)
   nanos
 

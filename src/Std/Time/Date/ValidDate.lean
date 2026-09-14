@@ -58,7 +58,7 @@ Transforms a tuple of a `Month` and a `Day` into a `Day.Ordinal.OfYear`.
 def dayOfYear (ordinal : ValidDate leap) : Day.Ordinal.OfYear leap :=
   let days := cumulativeDays leap ordinal.val.fst
   let proof := cumulativeDays_le leap ordinal.val.fst
-  let bounded := Bounded.LE.mk days.toInt proof |>.addBounds ordinal.val.snd
+  let bounded := Bounded.LE.mk days.val proof |>.addBounds ordinal.val.snd
   match leap, bounded with
   | true, bounded => bounded
   | false, bounded => bounded
