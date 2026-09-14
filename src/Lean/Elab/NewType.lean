@@ -43,6 +43,10 @@ private def addNewtypeCtorProj (declName ctorName projName fieldName : Name) : T
           let hints := .regular (getMaxHeight (← getEnv) value + 1)
           let decl := .defnDecl (← mkDefinitionValInferringUnsafe name info.levelParams type value hints)
           addDecl decl (forceExpose := exposed)
+          -- Both are identity functions, so inlining them is what keeps a `newtype`'s calling
+          -- convention the same as its underlying type's. `always_inline` rather than `inline`
+          -- because the latter is only consulted after the inliner's own heuristics decline.
+          setInlineAttribute name .alwaysInline
           compileDecl decl
       addIdentity ctorName fieldName underlying self
       addIdentity projName `self self underlying
