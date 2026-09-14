@@ -260,12 +260,13 @@ invocations). The `persistentCache` and `funext` cache are preserved from `s`. -
 def SimpM.run (x : SimpM α) (methods : Methods := {}) (config : Config := {})
     (s : State := {}) : SymM (α × State) := do
   let initialLCtxSize := (← getLCtx).decls.size
-  x methods.toMethodsRef { initialLCtxSize, config } |>.run { s with transientCache := {}, numSteps := 0 }
+  ReaderT.run (ReaderT.run x methods.toMethodsRef) { initialLCtxSize, config }
+    |>.run { s with transientCache := {}, numSteps := 0 }
 
 /-- Runs a `SimpM` computation with the given methods and configuration. -/
 def SimpM.run' (x : SimpM α) (methods : Methods := {}) (config : Config := {}) : SymM α := do
   let initialLCtxSize := (← getLCtx).decls.size
-  x methods.toMethodsRef { initialLCtxSize, config } |>.run' {}
+  ReaderT.run (ReaderT.run x methods.toMethodsRef) { initialLCtxSize, config } |>.run' {}
 
 set_option compiler.ignoreBorrowAnnotation true in
 @[extern "lean_sym_simp"] -- Forward declaration

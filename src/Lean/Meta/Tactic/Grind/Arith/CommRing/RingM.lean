@@ -51,7 +51,7 @@ structure RingM.Context where
 abbrev RingM := ReaderT RingM.Context GoalM
 
 abbrev RingM.run (ringId : Nat) (x : RingM α) : GoalM α :=
-  x { ringId }
+  ReaderT.run x { ringId }
 
 abbrev getRingId : RingM Nat :=
   return (← read).ringId

@@ -16,7 +16,7 @@ structure NonCommRingM.Context where
 abbrev NonCommRingM := ReaderT NonCommRingM.Context GoalM
 
 abbrev NonCommRingM.run (ringId : Nat) (x : NonCommRingM α) : GoalM α :=
-  x { ringId }
+  ReaderT.run x { ringId }
 
 instance : MonadCanon NonCommRingM where
   canonExpr e := do shareCommon (← canon e)

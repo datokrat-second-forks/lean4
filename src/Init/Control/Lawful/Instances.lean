@@ -305,11 +305,11 @@ instance : LawfulFunctor Option := inferInstance
 
 namespace ReaderT
 
-@[ext, grind ext] theorem ext {x y : ReaderT ρ m α} (h : ∀ ctx, x.run ctx = y.run ctx) : x = y := by
-  simp [run] at h
-  exact funext h
+@[ext, grind ext] theorem ext {x y : ReaderT ρ m α} (h : ∀ ctx, x.run ctx = y.run ctx) : x = y :=
+  congrArg ReaderT.mk (funext h)
 
-@[simp, grind =] theorem run_mk (x : ρ → m α) (ctx : ρ) : run (.mk x : ReaderT ρ m α) ctx = x ctx :=
+-- not a `grind` lemma: `grind` reduces `run (.mk x) ctx` to `x ctx` on its own, which is not a pattern
+@[simp] theorem run_mk (x : ρ → m α) (ctx : ρ) : run (.mk x : ReaderT ρ m α) ctx = x ctx :=
   rfl
 
 @[simp, grind =] theorem run_pure [Monad m] (a : α) (ctx : ρ) : (pure a : ReaderT ρ m α).run ctx = pure a := rfl

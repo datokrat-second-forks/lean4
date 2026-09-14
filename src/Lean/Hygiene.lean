@@ -43,7 +43,7 @@ instance : MonadQuotation Unhygienic where
     withReader ({ · with scope := fresh}) x
 
 @[inline]
-protected def run {α : Type} (x : Unhygienic α) : α := (x ⟨Syntax.missing, firstFrontendMacroScope⟩).run' (firstFrontendMacroScope+1)
+protected def run {α : Type} (x : Unhygienic α) : α := (ReaderT.run x ⟨Syntax.missing, firstFrontendMacroScope⟩).run' (firstFrontendMacroScope+1)
 end Unhygienic
 
 private def mkInaccessibleUserNameAux (unicode : Bool) (name : Name) (idx : Nat) : Name :=

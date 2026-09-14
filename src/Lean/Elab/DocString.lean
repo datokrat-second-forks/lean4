@@ -124,7 +124,8 @@ The monad in which documentation is elaborated.
 -/
 abbrev DocM := ReaderT Context (StateRefT InternalState (StateRefT Lean.Doc.State TermElabM))
 
-private def DocM.mk (act : Context → IO.Ref InternalState → IO.Ref State → TermElabM α) : DocM α := act
+private def DocM.mk (act : Context → IO.Ref InternalState → IO.Ref State → TermElabM α) : DocM α :=
+  ReaderT.mk fun ctx => ReaderT.mk fun s₁ => ReaderT.mk fun s₂ => act ctx s₁ s₂
 
 instance : MonadStateOf InternalState DocM :=
   inferInstanceAs <| MonadStateOf InternalState (ReaderT Context (StateRefT InternalState (StateRefT Lean.Doc.State TermElabM)))

@@ -99,11 +99,11 @@ instance : MonadTail Option where
 
 instance {ρ : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
     MonadTail (ReaderT ρ m) where
-  instCCPO α := inferInstanceAs (CCPO (ρ → m α))
+  instCCPO α :=
+    letI : CCPO (m α) := MonadTail.instCCPO α
+    ReaderT.ccpo
   bind_mono_right h := by
     intro r
-    show ReaderT.bind _ _ r ⊑ ReaderT.bind _ _ r
-    simp only [ReaderT.bind]
     apply MonadTail.bind_mono_right (m := m)
     intro x
     exact h x r

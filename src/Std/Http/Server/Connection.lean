@@ -315,7 +315,7 @@ private def dispatchPendingRequest
     : Async (ConnectionState (Handler.ResponseBody σ)) := do
   if let some line := state.pendingHead then
 
-    let task ← Handler.onRequest handler { line, body := state.requestStream, extensions } connectionContext
+    let task ← (Handler.onRequest handler { line, body := state.requestStream, extensions }).runIn connectionContext
       |>.asTask
 
     BaseIO.chainTask task.run (discard ∘ state.response.send)

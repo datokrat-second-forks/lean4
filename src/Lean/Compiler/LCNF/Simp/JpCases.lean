@@ -206,7 +206,7 @@ partial def simpJpCases? (code : Code .pure) : CompilerM (Option (Code .pure)) :
     for (fvarId, info) in map.toList do
       msg := msg ++ indentD m!"{mkFVar fvarId} ↦ {info.ctorNames.toList}"
     return msg
-  visit code map |>.run' {} |>.run {}
+  ReaderT.run (visit code) map |>.run' {} |>.run {}
 where
   visit (code : Code .pure) : ReaderT JpCasesInfoMap (StateRefT Ctor2JpCasesAlt DiscrM) (Code .pure) := do
     match code with
