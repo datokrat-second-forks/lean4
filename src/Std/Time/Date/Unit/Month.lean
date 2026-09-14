@@ -45,23 +45,50 @@ instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 1 _
 /--
 `Offset` represents an offset in months. It is defined as an `Int`.
 -/
-@[expose] def Offset : Type := Int
-deriving Repr, DecidableEq, Inhabited, Add, Sub, Mul, Div, Neg, ToString, LT, LE
+@[expose] newtype Offset := Int with toInt
+
+theorem Offset.toInt_inj {x y : Offset} (h : x.toInt = y.toInt) : x = y :=
+  congrArg Offset.mk h
+
+instance : Repr Offset where reprPrec offset prec := reprPrec offset.toInt prec
+
+instance : ToString Offset where toString offset := toString offset.toInt
+
+instance : Inhabited Offset where default := .mk default
+
+instance : DecidableEq Offset := fun x y =>
+  decidable_of_iff (x.toInt = y.toInt) ⟨Offset.toInt_inj, congrArg Offset.toInt⟩
+
+instance : Add Offset where add x y := .mk (x.toInt + y.toInt)
+
+instance : Sub Offset where sub x y := .mk (x.toInt - y.toInt)
+
+instance : Neg Offset where neg x := .mk (-x.toInt)
+
+instance : Mul Offset where mul x y := .mk (x.toInt * y.toInt)
+
+instance : Div Offset where div x y := .mk (x.toInt / y.toInt)
+
+instance : LE Offset where le x y := x.toInt ≤ y.toInt
+
+instance : LT Offset where lt x y := x.toInt < y.toInt
+
+instance : Ord Offset where compare x y := compare x.toInt y.toInt
+
+instance : OfNat Offset n := ⟨.mk (Int.ofNat n)⟩
 
 instance {x y : Offset} : Decidable (x ≤ y) :=
-  Int.decLe x y
+  inferInstanceAs (Decidable (x.toInt ≤ y.toInt))
 
 instance {x y : Offset} : Decidable (x < y) :=
-  Int.decLt x y
+  inferInstanceAs (Decidable (x.toInt < y.toInt))
 
-instance : OfNat Offset n :=
-  ⟨Int.ofNat n⟩
+instance : OrientedOrd Offset := ⟨OrientedOrd.eq_swap (α := Int)⟩
 
-instance : Ord Offset := inferInstanceAs <| Ord Int
+instance : TransOrd Offset := ⟨TransOrd.isLE_trans (α := Int)⟩
 
-instance : TransOrd Offset := inferInstanceAs <| TransOrd Int
-
-instance : LawfulEqOrd Offset := inferInstanceAs <| LawfulEqOrd Int
+instance : LawfulEqOrd Offset :=
+  ⟨fun {_ _} h => Offset.toInt_inj (LawfulEqOrd.eq_of_compare h)⟩
 
 /--
 `Quarter` represents a value between 1 and 4, inclusive, corresponding to the four quarters of a year.
@@ -100,14 +127,14 @@ Creates an `Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Offset :=
-  Int.ofNat data
+  .mk (Int.ofNat data)
 
 /--
 Creates an `Offset` from an integer.
 -/
 @[inline]
 def ofInt (data : Int) : Offset :=
-  data
+  .mk data
 
 end Offset
 
@@ -178,7 +205,7 @@ Converts a `Ordinal` into a `Offset`.
 -/
 @[inline]
 def toOffset (month : Ordinal) : Offset :=
-  month.val
+  .mk month.val
 
 /--
 Creates an `Ordinal` from an integer, ensuring the value is within bounds.
@@ -241,7 +268,7 @@ Transforms `Month.Ordinal` into `Day.Offset`.
 -/
 @[inline]
 def toDays (leap : Bool) (month : Ordinal) : Day.Offset :=
-  toSeconds leap month |>.convert
+  .mk (toSeconds leap month |>.toUnitVal.convert)
 
 /--
 Size in days of each month if the year is not a leap year.
@@ -282,12 +309,11 @@ theorem days_gt_27 (leap : Bool) (i : Month.Ordinal) : days leap i > 27 := by
 /--
 Returns the number of days until the `month`.
 -/
-def cumulativeDays (leap : Bool) (month : Ordinal) : Day.Offset := by
+def cumulativeDays (leap : Bool) (month : Ordinal) : Day.Offset :=
   let ⟨months, p⟩ := cumulativeSizes
   let index : Fin 12 := (month.sub 1).toFin (by decide)
-  rw [← p] at index
-  let res := months[index]
-  exact res + (if leap ∧ month.val > 2 then 1 else 0)
+  let idx : Fin months.size := index.cast (by rw [p])
+  months[idx] + (if leap ∧ month.val > 2 then 1 else 0)
 
 theorem cumulativeDays_le (leap : Bool) (month : Month.Ordinal) : cumulativeDays leap month ≥ 0 ∧ cumulativeDays leap month ≤ 334 + (if leap then 1 else 0) := by
   match month with

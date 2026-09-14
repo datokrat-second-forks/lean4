@@ -466,13 +466,13 @@ theorem week_week_week_sub : (1 : Week.Offset) - (1 : Week.Offset) = (0 : Week.O
 Of and To basic units
 -/
 
-example : (1 : Nanosecond.Offset).toInt = (1 : Int) := rfl
-example : (1 : Millisecond.Offset).toInt = (1 : Int) := rfl
-example : (1 : Second.Offset).toInt = (1 : Int) := rfl
-example : (1 : Minute.Offset).toInt = (1 : Int) := rfl
-example : (1 : Hour.Offset).toInt = (1 : Int) := rfl
-example : (1 : Day.Offset).toInt = (1 : Int) := rfl
-example : (1 : Week.Offset).toInt = (1 : Int) := rfl
+example : (1 : Nanosecond.Offset).val = (1 : Int) := rfl
+example : (1 : Millisecond.Offset).val = (1 : Int) := rfl
+example : (1 : Second.Offset).val = (1 : Int) := rfl
+example : (1 : Minute.Offset).val = (1 : Int) := rfl
+example : (1 : Hour.Offset).val = (1 : Int) := rfl
+example : (1 : Day.Offset).val = (1 : Int) := rfl
+example : (1 : Week.Offset).val = (1 : Int) := rfl
 
 example : Nanosecond.Offset.ofInt 1 = (1 : Nanosecond.Offset) := rfl
 example : Millisecond.Offset.ofInt 1 = (1 : Millisecond.Offset) := rfl

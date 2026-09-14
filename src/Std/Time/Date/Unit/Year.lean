@@ -36,26 +36,51 @@ instance : ToString Era where
 /--
 `Offset` represents a year offset, defined as an `Int`.
 -/
-@[expose, implicit_reducible] def Offset : Type := Int
-deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString
+@[expose] newtype Offset := Int with toInt
 
-set_option backward.inferInstanceAs.wrap.instances false in
+/--
+Converts the `Year` offset to an `Int`.
+-/
+add_decl_doc Offset.toInt
+
+theorem Offset.toInt_inj {x y : Offset} (h : x.toInt = y.toInt) : x = y :=
+  congrArg Offset.mk h
+
+instance : Repr Offset where reprPrec offset prec := reprPrec offset.toInt prec
+
+instance : ToString Offset where toString offset := toString offset.toInt
+
+instance : Inhabited Offset where default := .mk default
+
+instance : DecidableEq Offset := fun x y =>
+  decidable_of_iff (x.toInt = y.toInt) ⟨Offset.toInt_inj, congrArg Offset.toInt⟩
+
+instance : Add Offset where add x y := .mk (x.toInt + y.toInt)
+
+instance : Sub Offset where sub x y := .mk (x.toInt - y.toInt)
+
+instance : Neg Offset where neg x := .mk (-x.toInt)
+
+instance : LE Offset where le x y := x.toInt ≤ y.toInt
+
+instance : LT Offset where lt x y := x.toInt < y.toInt
+
+instance : Ord Offset where compare x y := compare x.toInt y.toInt
+
+instance : OfNat Offset n := ⟨.mk (Int.ofNat n)⟩
+
 instance {x y : Offset} : Decidable (x ≤ y) :=
-  let x : Int := x
-  inferInstanceAs (Decidable (x ≤ y))
+  inferInstanceAs (Decidable (x.toInt ≤ y.toInt))
 
-set_option backward.inferInstanceAs.wrap.instances false in
 instance {x y : Offset} : Decidable (x < y) :=
-  let x : Int := x
-  inferInstanceAs (Decidable (x < y))
+  inferInstanceAs (Decidable (x.toInt < y.toInt))
 
-instance : OfNat Offset n := ⟨Int.ofNat n⟩
+instance : OrientedOrd Offset := ⟨OrientedOrd.eq_swap (α := Int)⟩
 
-instance : Ord Offset := inferInstanceAs <| Ord Int
+instance : TransOrd Offset := ⟨TransOrd.isLE_trans (α := Int)⟩
 
-instance : TransOrd Offset := inferInstanceAs <| TransOrd Int
-
-instance : LawfulEqOrd Offset := inferInstanceAs <| LawfulEqOrd Int
+instance : LawfulEqOrd Offset :=
+  ⟨fun {_ _} h => Offset.toInt_inj (LawfulEqOrd.eq_of_compare h)⟩
 
 namespace Offset
 
@@ -64,28 +89,21 @@ Creates an `Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Offset :=
-  Int.ofNat data
+  .mk (Int.ofNat data)
 
 /--
 Creates an `Offset` from an integer.
 -/
 @[inline]
 def ofInt (data : Int) : Offset :=
-  data
-
-/--
-Converts the `Year` offset to an `Int`.
--/
-@[inline]
-def toInt (offset : Offset) : Int :=
-  offset
+  .mk data
 
 /--
 Converts the `Year` offset to a `Month` offset.
 -/
 @[inline]
 def toMonths (val : Offset) : Month.Offset :=
-  val.mul 12
+  .mk (val.toInt.mul 12)
 
 /--
 Determines if a year is a leap year in the proleptic Gregorian calendar.

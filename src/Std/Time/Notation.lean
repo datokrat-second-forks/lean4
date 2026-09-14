@@ -125,17 +125,17 @@ private meta def syntaxInt (n : Int) : MacroM (TSyntax `term) := do
 private meta def syntaxBounded (n : Int) : MacroM (TSyntax `term) := do
  `(Std.Time.Internal.Bounded.LE.ofNatWrapping $(← syntaxInt n) (by decide))
 
-private meta def syntaxVal (n : Int) : MacroM (TSyntax `term) := do
- `(Std.Time.Internal.UnitVal.ofInt $(← syntaxInt n))
+private meta def syntaxSecondOffset (n : Int) : MacroM (TSyntax `term) := do
+ `(Std.Time.Second.Offset.ofInt $(← syntaxInt n))
 
 private meta def convertOffset (offset : Std.Time.TimeZone.Offset) : MacroM (TSyntax `term) := do
- `(Std.Time.TimeZone.Offset.ofSeconds $(← syntaxVal offset.second.val))
+ `(Std.Time.TimeZone.Offset.ofSeconds $(← syntaxSecondOffset offset.second.val))
 
 private meta def convertTimezone (tz : Std.Time.TimeZone) : MacroM (TSyntax `term) := do
  `(Std.Time.TimeZone.mk $(← convertOffset tz.offset) $(Syntax.mkStrLit tz.name) $(Syntax.mkStrLit tz.abbreviation) false)
 
 private meta def convertPlainDate (d : Std.Time.PlainDate) : MacroM (TSyntax `term) := do
- `(Std.Time.PlainDate.ofYearMonthDayClip $(← syntaxInt d.year) $(← syntaxBounded d.month.val) $(← syntaxBounded d.day.val))
+ `(Std.Time.PlainDate.ofYearMonthDayClip (Std.Time.Year.Offset.ofInt $(← syntaxInt d.year.toInt)) $(← syntaxBounded d.month.val) $(← syntaxBounded d.day.val))
 
 private meta def convertPlainTime (d : Std.Time.PlainTime) : MacroM (TSyntax `term) := do
  `(Std.Time.PlainTime.mk $(← syntaxBounded d.hour.val) $(← syntaxBounded d.minute.val) $(← syntaxBounded d.second.val) $(← syntaxBounded d.nanosecond.val))
