@@ -79,7 +79,7 @@ protected theorem MonadTail.ext {inst : Bind m} {i j : @MonadTail m inst}
 instance : MonadTail Id where
   instCCPO α :=
     letI : CCPO α := inferInstanceAs (CCPO (FlatOrder (b := Classical.ofNonempty)))
-    Id.ccpo
+    inferInstanceAs (CCPO α)
   bind_mono_right h := h _
 
 instance {σ : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
@@ -88,7 +88,7 @@ instance {σ : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
     letI : CCPO (σ → m (α × σ)) := @instCCPOPi _ _ fun s =>
       haveI : Nonempty σ := ⟨s⟩
       MonadTail.instCCPO _
-    StateT.ccpo (σ := σ) (m := m) (α := α)
+    inferInstanceAs (CCPO (σ → m (α × σ)))
   bind_mono_right h := by
     intro s
     have : Nonempty σ := ⟨s⟩
@@ -100,7 +100,7 @@ instance {ε : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
     MonadTail (ExceptT ε m) where
   instCCPO β :=
     letI : CCPO (m (Except ε β)) := MonadTail.instCCPO (Except ε β)
-    ExceptT.ccpo
+    inferInstanceAs (CCPO (m (Except ε β)))
   bind_mono_right h := by
     show ExceptT.run _ ⊑ ExceptT.run _
     apply MonadTail.bind_mono_right (m := m)
@@ -120,7 +120,7 @@ instance {m : Type u → Type v} [Monad m] [MonadTail m] :
     MonadTail (OptionT m) where
   instCCPO β :=
     letI : CCPO (m (Option β)) := MonadTail.instCCPO (Option β)
-    OptionT.ccpo
+    inferInstanceAs (CCPO (m (Option β)))
   bind_mono_right h := by
     show OptionT.run _ ⊑ OptionT.run _
     apply MonadTail.bind_mono_right (m := m)
@@ -137,7 +137,7 @@ instance {ρ : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
     MonadTail (ReaderT ρ m) where
   instCCPO α :=
     letI : CCPO (m α) := MonadTail.instCCPO α
-    ReaderT.ccpo
+    inferInstanceAs (CCPO (ρ → m α))
   bind_mono_right h := by
     intro r
     apply MonadTail.bind_mono_right (m := m)
