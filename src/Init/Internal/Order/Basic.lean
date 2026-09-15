@@ -97,17 +97,21 @@ protected theorem PartialOrder.ext {α : Sort u} {i j : PartialOrder α} (h : i.
   cases i; cases j; cases h; rfl
 
 /-- Transfers a partial order along an equivalence, comparing elements of `β` through `e.invFun`. -/
-protected abbrev PartialOrder.map {α : Sort u} {β : Sort v} (e : α ≃ β) (i : PartialOrder α) :
+protected abbrev PartialOrder.ofEquiv {α : Sort u} {β : Sort v} (e : α ≃ β) (i : PartialOrder α) :
     PartialOrder β where
   rel x y := i.rel (e.invFun x) (e.invFun y)
   rel_refl := i.rel_refl
   rel_trans := i.rel_trans
   rel_antisymm h₁ h₂ := e.invFun_injective (i.rel_antisymm h₁ h₂)
 
+theorem PartialOrder.ofEquiv_rel {α : Sort u} {β : Sort v} (e : α ≃ β) (i : PartialOrder α)
+    (x y : β) : @PartialOrder.rel β (PartialOrder.ofEquiv e i) x y = i.rel (e.invFun x) (e.invFun y) :=
+  rfl
+
 @[transport] protected abbrev PartialOrder.congr {α : Sort u} {β : Sort v} (e : α ≃ β) :
     PartialOrder α ≃ PartialOrder β where
-  toFun := PartialOrder.map e
-  invFun := PartialOrder.map e.symm
+  toFun := PartialOrder.ofEquiv e
+  invFun := PartialOrder.ofEquiv e.symm
   left_inv i := PartialOrder.ext <| funext fun x => funext fun y =>
     show i.rel (e.invFun (e.toFun x)) (e.invFun (e.toFun y)) = i.rel x y by
       rw [e.left_inv x, e.left_inv y]
@@ -171,9 +175,9 @@ protected theorem CCPO.ext {α : Sort u} {i j : CCPO α} (h : i.toPartialOrder =
     i = j := by
   cases i; cases j; cases h; rfl
 
-/-- Transfers a chain-complete partial order along an equivalence; see `PartialOrder.map`. -/
-protected abbrev CCPO.map {α : Sort u} {β : Sort v} (e : α ≃ β) (i : CCPO α) : CCPO β where
-  toPartialOrder := PartialOrder.map e i.toPartialOrder
+/-- Transfers a chain-complete partial order along an equivalence; see `PartialOrder.ofEquiv`. -/
+protected abbrev CCPO.ofEquiv {α : Sort u} {β : Sort v} (e : α ≃ β) (i : CCPO α) : CCPO β where
+  toPartialOrder := PartialOrder.ofEquiv e i.toPartialOrder
   has_csup {c} hc := by
     have ⟨s, hs⟩ := i.has_csup (c := fun x => c (e.toFun x)) fun x y hx hy => by
       have h : i.rel (e.invFun (e.toFun x)) (e.invFun (e.toFun y)) ∨
@@ -188,8 +192,8 @@ protected abbrev CCPO.map {α : Sort u} {β : Sort v} (e : α ≃ β) (i : CCPO 
 
 @[transport] protected abbrev CCPO.congr {α : Sort u} {β : Sort v} (e : α ≃ β) :
     CCPO α ≃ CCPO β where
-  toFun := CCPO.map e
-  invFun := CCPO.map e.symm
+  toFun := CCPO.ofEquiv e
+  invFun := CCPO.ofEquiv e.symm
   left_inv i := CCPO.ext ((PartialOrder.congr e).left_inv i.toPartialOrder)
   right_inv i := CCPO.ext ((PartialOrder.congr e).right_inv i.toPartialOrder)
 
@@ -1043,6 +1047,46 @@ class MonoBind (m : Type u → Type v) [Bind m] [∀ α, PartialOrder (m α)] wh
   bind_mono_left {a₁ a₂ : m α} {f : α → m β} (h : a₁ ⊑ a₂) : a₁ >>= f ⊑ a₂ >>= f
   bind_mono_right {a : m α} {f₁ f₂ : α → m β} (h : ∀ x, f₁ x ⊑ f₂ x) : a >>= f₁ ⊑ a >>= f₂
 
+@[transport] protected abbrev MonoBind.congr {m n : Type u → Type v} (e : ∀ α, m α ≃ n α)
+    [b : Bind m] [j : ∀ α, PartialOrder (m α)] :
+    @MonoBind m b j ≃ @MonoBind n (Bind.ofEquiv e b) fun α => PartialOrder.ofEquiv (e α) (j α) where
+  toFun h :=
+    have hl : ∀ α (x : m α), (e α).invFun ((e α).toFun x) = x := fun α => (e α).left_inv
+    @MonoBind.mk n (Bind.ofEquiv e b) (fun α => PartialOrder.ofEquiv (e α) (j α))
+    (fun {_ _ a₁ a₂ f} h₁₂ => by
+      show (j _).rel ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a₁ f))
+        ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a₂ f))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact h.bind_mono_left (a₁ := (e _).invFun a₁) (a₂ := (e _).invFun a₂)
+        (f := fun a => (e _).invFun (f a)) h₁₂)
+    (fun {_ _ a f₁ f₂} h₁₂ => by
+      show (j _).rel ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a f₁))
+        ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a f₂))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact h.bind_mono_right (a := (e _).invFun a) (f₁ := fun x => (e _).invFun (f₁ x))
+        (f₂ := fun x => (e _).invFun (f₂ x)) h₁₂)
+  invFun h :=
+    have hl : ∀ α (x : m α), (e α).invFun ((e α).toFun x) = x := fun α => (e α).left_inv
+    @MonoBind.mk m b j
+    (fun {_ _ a₁ a₂ f} h₁₂ => by
+      have h₁₂' : (j _).rel ((e _).invFun ((e _).toFun a₁)) ((e _).invFun ((e _).toFun a₂)) := by
+        rw [hl, hl]; exact h₁₂
+      have this := h.bind_mono_left (a₁ := (e _).toFun a₁) (a₂ := (e _).toFun a₂)
+        (f := fun a => (e _).toFun (f a)) h₁₂'
+      rw [PartialOrder.ofEquiv_rel, Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
+      simp only [hl] at this
+      exact this)
+    (fun {_ _ a f₁ f₂} h₁₂ => by
+      have this := h.bind_mono_right (a := (e _).toFun a) (f₁ := fun x => (e _).toFun (f₁ x))
+        (f₂ := fun x => (e _).toFun (f₂ x)) fun x => by
+          show (j _).rel ((e _).invFun ((e _).toFun (f₁ x))) ((e _).invFun ((e _).toFun (f₂ x)))
+          rw [hl, hl]; exact h₁₂ x
+      rw [PartialOrder.ofEquiv_rel, Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
+      simp only [hl] at this
+      exact this)
+  left_inv _ := rfl
+  right_inv _ := rfl
+
 @[partial_fixpoint_monotone]
 theorem monotone_bind
     (m : Type u → Type v) [Bind m] [∀ α, PartialOrder (m α)] [MonoBind m]
@@ -1327,9 +1371,8 @@ instance [Nonempty ε] : MonoBind (EST ε σ) where
 instance [Nonempty ε] : CCPO (EIO ε α) :=
   inferInstanceAs (CCPO (EST ε IO.RealWorld α))
 
-instance [Nonempty ε] : MonoBind (EIO ε) where
-  bind_mono_left h₁₂ := MonoBind.bind_mono_left (m := EST ε IO.RealWorld) h₁₂
-  bind_mono_right h₁₂ := MonoBind.bind_mono_right (m := EST ε IO.RealWorld) h₁₂
+instance [Nonempty ε] : MonoBind (EIO ε) :=
+  inferInstanceAs (MonoBind (EST ε IO.RealWorld))
 
 instance : CCPO (IO α) :=
   inferInstanceAs (CCPO (EIO IO.Error α))
