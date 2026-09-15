@@ -64,8 +64,8 @@ class ReprAtom (α : Type u)
 instance [Repr α] : Repr (id α) :=
   inferInstanceAs (Repr α)
 
-instance [Repr α] : Repr (Id α) :=
-  inferInstanceAs (Repr α)
+instance [Repr α] : Repr (Id α) where
+  reprPrec x prec := reprPrec x.run prec
 
 /-
 This instance allows us to use `Empty` as a type parameter without causing instance synthesis to fail.
