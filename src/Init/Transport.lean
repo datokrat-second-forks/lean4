@@ -242,3 +242,21 @@ protected abbrev MonadExceptOf.ofEquiv {ε : Type w} (i : MonadExceptOf ε m) :
       congrArg (MonadExceptOf.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
 end
+
+section
+variable {m : Type u → Type v} {n n' : Type u → Type w} (e : ∀ α, n α ≃ n' α)
+
+protected abbrev MonadLift.ofEquiv (i : MonadLift m n) : MonadLift m n' where
+  monadLift x := (e _).toFun (i.monadLift x)
+
+@[transport] protected abbrev MonadLift.congr : MonadLift m n ≃ MonadLift m n' where
+  toFun := MonadLift.ofEquiv e
+  invFun := MonadLift.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show MonadLift.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadLift.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadLift.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadLift.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+end
