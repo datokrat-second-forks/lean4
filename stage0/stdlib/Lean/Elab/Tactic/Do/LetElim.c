@@ -4166,7 +4166,7 @@ goto v_resetjp_1162_;
 }
 v_resetjp_1162_:
 {
-uint8_t v___y_1166_; lean_object* v___y_1167_; lean_object* v___y_1168_; lean_object* v_fst_1183_; lean_object* v_snd_1184_; 
+lean_object* v___y_1166_; uint8_t v___y_1167_; lean_object* v___y_1168_; lean_object* v_fst_1183_; lean_object* v_snd_1184_; 
 if (lean_obj_tag(v_val_x3f_1146_) == 0)
 {
 lean_object* v___x_1194_; 
@@ -4252,13 +4252,13 @@ lean_object* v___x_1169_; lean_object* v___x_1170_; lean_object* v___x_1171_; le
 v___x_1169_ = l_Std_DHashMap_Internal_Raw_u2080_erase___at___00Lean_Elab_Tactic_Do_countUsesDecl_spec__1___redArg(v___y_1168_, v_fvarId_1144_);
 v___x_1170_ = lean_box(0);
 v___x_1171_ = ((lean_object*)(l_Lean_Elab_Tactic_Do_countUsesDecl___closed__2));
-v___x_1172_ = l_Lean_Elab_Tactic_Do_Uses_toNat(v___y_1166_);
+v___x_1172_ = l_Lean_Elab_Tactic_Do_Uses_toNat(v___y_1167_);
 v___x_1173_ = l_Lean_KVMap_setNat(v___x_1170_, v___x_1171_, v___x_1172_);
 v___x_1174_ = l_Lean_Elab_Tactic_Do_addMData(v___x_1173_, v_fst_1160_);
 if (v_isShared_1164_ == 0)
 {
 lean_ctor_set(v___x_1163_, 1, v___x_1169_);
-lean_ctor_set(v___x_1163_, 0, v___y_1167_);
+lean_ctor_set(v___x_1163_, 0, v___y_1166_);
 v___x_1176_ = v___x_1163_;
 goto v_reusejp_1175_;
 }
@@ -4266,7 +4266,7 @@ else
 {
 lean_object* v_reuseFailAlloc_1181_; 
 v_reuseFailAlloc_1181_ = lean_alloc_ctor(0, 2, 0);
-lean_ctor_set(v_reuseFailAlloc_1181_, 0, v___y_1167_);
+lean_ctor_set(v_reuseFailAlloc_1181_, 0, v___y_1166_);
 lean_ctor_set(v_reuseFailAlloc_1181_, 1, v___x_1169_);
 v___x_1176_ = v_reuseFailAlloc_1181_;
 goto v_reusejp_1175_;
@@ -4315,8 +4315,8 @@ v___x_1191_ = l_Lean_Elab_Tactic_Do_FVarUses_add(v___x_1190_, v_snd_1184_);
 lean_dec_ref(v___x_1190_);
 v___x_1192_ = lean_unbox(v___x_1187_);
 lean_dec(v___x_1187_);
-v___y_1166_ = v___x_1192_;
-v___y_1167_ = v_fst_1183_;
+v___y_1166_ = v_fst_1183_;
+v___y_1167_ = v___x_1192_;
 v___y_1168_ = v___x_1191_;
 goto v___jp_1165_;
 }
@@ -4327,8 +4327,8 @@ lean_dec_ref(v_snd_1184_);
 lean_dec(v_snd_1161_);
 v___x_1193_ = lean_unbox(v___x_1187_);
 lean_dec(v___x_1187_);
-v___y_1166_ = v___x_1193_;
-v___y_1167_ = v_fst_1183_;
+v___y_1166_ = v_fst_1183_;
+v___y_1167_ = v___x_1193_;
 v___y_1168_ = v_bodyUses_1147_;
 goto v___jp_1165_;
 }

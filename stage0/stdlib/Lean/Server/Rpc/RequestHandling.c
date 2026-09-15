@@ -504,10 +504,10 @@ return v___x_6_;
 LEAN_EXPORT lean_object* l_Lean_Server_instInhabitedRpcProcedure_default___lam__0___boxed(lean_object* v_x_7_, lean_object* v___y_8_, lean_object* v___y_9_, lean_object* v___y_10_){
 _start:
 {
-uint64_t v_x_57__boxed_11_; lean_object* v_res_12_; 
-v_x_57__boxed_11_ = lean_unbox_uint64(v_x_7_);
+uint64_t v_x_71__boxed_11_; lean_object* v_res_12_; 
+v_x_71__boxed_11_ = lean_unbox_uint64(v_x_7_);
 lean_dec_ref(v_x_7_);
-v_res_12_ = l_Lean_Server_instInhabitedRpcProcedure_default___lam__0(v_x_57__boxed_11_, v___y_8_, v___y_9_);
+v_res_12_ = l_Lean_Server_instInhabitedRpcProcedure_default___lam__0(v_x_71__boxed_11_, v___y_8_, v___y_9_);
 lean_dec_ref(v___y_9_);
 lean_dec(v___y_8_);
 return v_res_12_;
@@ -812,10 +812,10 @@ return v___x_137_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_existsBuiltinRpcProcedure_spec__0_spec__0___redArg___boxed(lean_object* v_x_138_, lean_object* v_x_139_, lean_object* v_x_140_){
 _start:
 {
-size_t v_x_238__boxed_141_; uint8_t v_res_142_; lean_object* v_r_143_; 
-v_x_238__boxed_141_ = lean_unbox_usize(v_x_139_);
+size_t v_x_441__boxed_141_; uint8_t v_res_142_; lean_object* v_r_143_; 
+v_x_441__boxed_141_ = lean_unbox_usize(v_x_139_);
 lean_dec(v_x_139_);
-v_res_142_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_existsBuiltinRpcProcedure_spec__0_spec__0___redArg(v_x_138_, v_x_238__boxed_141_, v_x_140_);
+v_res_142_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_existsBuiltinRpcProcedure_spec__0_spec__0___redArg(v_x_138_, v_x_441__boxed_141_, v_x_140_);
 lean_dec(v_x_140_);
 lean_dec_ref(v_x_138_);
 v_r_143_ = lean_box(v_res_142_);
@@ -913,10 +913,10 @@ return v___x_179_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_existsBuiltinRpcProcedure_spec__0_spec__0___boxed(lean_object* v_00_u03b2_180_, lean_object* v_x_181_, lean_object* v_x_182_, lean_object* v_x_183_){
 _start:
 {
-size_t v_x_316__boxed_184_; uint8_t v_res_185_; lean_object* v_r_186_; 
-v_x_316__boxed_184_ = lean_unbox_usize(v_x_182_);
+size_t v_x_519__boxed_184_; uint8_t v_res_185_; lean_object* v_r_186_; 
+v_x_519__boxed_184_ = lean_unbox_usize(v_x_182_);
 lean_dec(v_x_182_);
-v_res_185_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_existsBuiltinRpcProcedure_spec__0_spec__0(v_00_u03b2_180_, v_x_181_, v_x_316__boxed_184_, v_x_183_);
+v_res_185_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_existsBuiltinRpcProcedure_spec__0_spec__0(v_00_u03b2_180_, v_x_181_, v_x_519__boxed_184_, v_x_183_);
 lean_dec(v_x_183_);
 lean_dec_ref(v_x_181_);
 v_r_186_ = lean_box(v_res_185_);
@@ -1275,11 +1275,11 @@ return v___x_315_;
 LEAN_EXPORT lean_object* l_Lean_Server_handleRpcCall___lam__3___boxed(lean_object* v___x_316_, lean_object* v_method_317_, lean_object* v___x_318_, lean_object* v___x_319_, lean_object* v_sessionId_320_, lean_object* v_params_321_, lean_object* v___x_322_, lean_object* v_snap_323_, lean_object* v___y_324_, lean_object* v___y_325_){
 _start:
 {
-uint8_t v___x_2334__boxed_326_; uint64_t v_sessionId_boxed_327_; lean_object* v_res_328_; 
-v___x_2334__boxed_326_ = lean_unbox(v___x_319_);
+uint8_t v___x_2998__boxed_326_; uint64_t v_sessionId_boxed_327_; lean_object* v_res_328_; 
+v___x_2998__boxed_326_ = lean_unbox(v___x_319_);
 v_sessionId_boxed_327_ = lean_unbox_uint64(v_sessionId_320_);
 lean_dec_ref(v_sessionId_320_);
-v_res_328_ = l_Lean_Server_handleRpcCall___lam__3(v___x_316_, v_method_317_, v___x_318_, v___x_2334__boxed_326_, v_sessionId_boxed_327_, v_params_321_, v___x_322_, v_snap_323_, v___y_324_);
+v_res_328_ = l_Lean_Server_handleRpcCall___lam__3(v___x_316_, v_method_317_, v___x_318_, v___x_2998__boxed_326_, v_sessionId_boxed_327_, v_params_321_, v___x_322_, v_snap_323_, v___y_324_);
 lean_dec_ref(v___y_324_);
 lean_dec_ref(v_snap_323_);
 lean_dec_ref(v___x_318_);
@@ -1405,10 +1405,10 @@ return v___x_370_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0___redArg___boxed(lean_object* v_x_371_, lean_object* v_x_372_, lean_object* v_x_373_){
 _start:
 {
-size_t v_x_2425__boxed_374_; lean_object* v_res_375_; 
-v_x_2425__boxed_374_ = lean_unbox_usize(v_x_372_);
+size_t v_x_3089__boxed_374_; lean_object* v_res_375_; 
+v_x_3089__boxed_374_ = lean_unbox_usize(v_x_372_);
 lean_dec(v_x_372_);
-v_res_375_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0___redArg(v_x_371_, v_x_2425__boxed_374_, v_x_373_);
+v_res_375_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0___redArg(v_x_371_, v_x_3089__boxed_374_, v_x_373_);
 lean_dec(v_x_373_);
 lean_dec_ref(v_x_371_);
 return v_res_375_;
@@ -1572,10 +1572,10 @@ return v___x_442_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0___boxed(lean_object* v_00_u03b2_443_, lean_object* v_x_444_, lean_object* v_x_445_, lean_object* v_x_446_){
 _start:
 {
-size_t v_x_2561__boxed_447_; lean_object* v_res_448_; 
-v_x_2561__boxed_447_ = lean_unbox_usize(v_x_445_);
+size_t v_x_3225__boxed_447_; lean_object* v_res_448_; 
+v_x_3225__boxed_447_ = lean_unbox_usize(v_x_445_);
 lean_dec(v_x_445_);
-v_res_448_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0(v_00_u03b2_443_, v_x_444_, v_x_2561__boxed_447_, v_x_446_);
+v_res_448_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0(v_00_u03b2_443_, v_x_444_, v_x_3225__boxed_447_, v_x_446_);
 lean_dec(v_x_446_);
 lean_dec_ref(v_x_444_);
 return v_res_448_;

@@ -1911,12 +1911,12 @@ return v___x_415_;
 LEAN_EXPORT lean_object* l_panic___at___00__private_Lean_Compiler_LCNF_ToImpureType_0__Lean_Compiler_LCNF_computeImpureType_spec__0(lean_object* v_msg_416_, lean_object* v___y_417_, lean_object* v___y_418_){
 _start:
 {
-lean_object* v___x_420_; lean_object* v___x_6184__overap_421_; lean_object* v___x_422_; 
+lean_object* v___x_420_; lean_object* v___x_6992__overap_421_; lean_object* v___x_422_; 
 v___x_420_ = lean_obj_once(&l_panic___at___00__private_Lean_Compiler_LCNF_ToImpureType_0__Lean_Compiler_LCNF_computeImpureType_spec__0___closed__0, &l_panic___at___00__private_Lean_Compiler_LCNF_ToImpureType_0__Lean_Compiler_LCNF_computeImpureType_spec__0___closed__0_once, _init_l_panic___at___00__private_Lean_Compiler_LCNF_ToImpureType_0__Lean_Compiler_LCNF_computeImpureType_spec__0___closed__0);
-v___x_6184__overap_421_ = lean_panic_fn_borrowed(v___x_420_, v_msg_416_);
+v___x_6992__overap_421_ = lean_panic_fn_borrowed(v___x_420_, v_msg_416_);
 lean_inc(v___y_418_);
 lean_inc_ref(v___y_417_);
-v___x_422_ = lean_apply_3(v___x_6184__overap_421_, v___y_417_, v___y_418_, lean_box(0));
+v___x_422_ = lean_apply_3(v___x_6992__overap_421_, v___y_417_, v___y_418_, lean_box(0));
 return v___x_422_;
 }
 }
@@ -2523,9 +2523,9 @@ return v___x_618_;
 LEAN_EXPORT lean_object* l_List_forIn_x27_loop___at___00__private_Lean_Compiler_LCNF_ToImpureType_0__Lean_Compiler_LCNF_computeImpureType_spec__3___redArg___lam__0___boxed(lean_object* v___x_623_, lean_object* v_numParams_624_, lean_object* v___x_625_, lean_object* v_params_626_, lean_object* v_x_627_, lean_object* v___y_628_, lean_object* v___y_629_, lean_object* v___y_630_, lean_object* v___y_631_, lean_object* v___y_632_){
 _start:
 {
-uint8_t v___x_7635__boxed_633_; lean_object* v_res_634_; 
-v___x_7635__boxed_633_ = lean_unbox(v___x_623_);
-v_res_634_ = l_List_forIn_x27_loop___at___00__private_Lean_Compiler_LCNF_ToImpureType_0__Lean_Compiler_LCNF_computeImpureType_spec__3___redArg___lam__0(v___x_7635__boxed_633_, v_numParams_624_, v___x_625_, v_params_626_, v_x_627_, v___y_628_, v___y_629_, v___y_630_, v___y_631_);
+uint8_t v___x_8443__boxed_633_; lean_object* v_res_634_; 
+v___x_8443__boxed_633_ = lean_unbox(v___x_623_);
+v_res_634_ = l_List_forIn_x27_loop___at___00__private_Lean_Compiler_LCNF_ToImpureType_0__Lean_Compiler_LCNF_computeImpureType_spec__3___redArg___lam__0(v___x_8443__boxed_633_, v_numParams_624_, v___x_625_, v_params_626_, v_x_627_, v___y_628_, v___y_629_, v___y_630_, v___y_631_);
 lean_dec(v___y_631_);
 lean_dec_ref(v___y_630_);
 lean_dec(v___y_629_);
@@ -3976,12 +3976,12 @@ return v_r_1067_;
 LEAN_EXPORT lean_object* l_panic___at___00Lean_Compiler_LCNF_toImpureType_spec__1(lean_object* v_msg_1068_, lean_object* v___y_1069_, lean_object* v___y_1070_){
 _start:
 {
-lean_object* v___x_1072_; lean_object* v___x_865__overap_1073_; lean_object* v___x_1074_; 
+lean_object* v___x_1072_; lean_object* v___x_1067__overap_1073_; lean_object* v___x_1074_; 
 v___x_1072_ = lean_obj_once(&l_panic___at___00__private_Lean_Compiler_LCNF_ToImpureType_0__Lean_Compiler_LCNF_computeImpureType_spec__0___closed__0, &l_panic___at___00__private_Lean_Compiler_LCNF_ToImpureType_0__Lean_Compiler_LCNF_computeImpureType_spec__0___closed__0_once, _init_l_panic___at___00__private_Lean_Compiler_LCNF_ToImpureType_0__Lean_Compiler_LCNF_computeImpureType_spec__0___closed__0);
-v___x_865__overap_1073_ = lean_panic_fn_borrowed(v___x_1072_, v_msg_1068_);
+v___x_1067__overap_1073_ = lean_panic_fn_borrowed(v___x_1072_, v_msg_1068_);
 lean_inc(v___y_1070_);
 lean_inc_ref(v___y_1069_);
-v___x_1074_ = lean_apply_3(v___x_865__overap_1073_, v___y_1069_, v___y_1070_, lean_box(0));
+v___x_1074_ = lean_apply_3(v___x_1067__overap_1073_, v___y_1069_, v___y_1070_, lean_box(0));
 return v___x_1074_;
 }
 }
@@ -4069,8 +4069,8 @@ return v___x_1112_;
 else
 {
 lean_object* v___x_1113_; lean_object* v___x_1114_; 
-lean_dec_ref(v___x_1104_);
 lean_dec_ref_known(v_type_1097_, 2);
+lean_dec_ref(v___x_1104_);
 v___x_1113_ = lean_obj_once(&l_Lean_Compiler_LCNF_toImpureType___closed__3, &l_Lean_Compiler_LCNF_toImpureType___closed__3_once, _init_l_Lean_Compiler_LCNF_toImpureType___closed__3);
 v___x_1114_ = l_panic___at___00Lean_Compiler_LCNF_toImpureType_spec__1(v___x_1113_, v___y_1098_, v___y_1099_);
 return v___x_1114_;

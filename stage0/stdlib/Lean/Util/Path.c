@@ -961,9 +961,9 @@ return v___x_282_;
 LEAN_EXPORT lean_object* l_List_forIn_x27_loop___at___00Lean_SearchPath_findAllWithExt_spec__2___redArg___lam__0___boxed(lean_object* v_val_283_, lean_object* v_x_284_, lean_object* v___y_285_){
 _start:
 {
-uint8_t v_val_901__boxed_286_; lean_object* v_res_287_; 
-v_val_901__boxed_286_ = lean_unbox(v_val_283_);
-v_res_287_ = l_List_forIn_x27_loop___at___00Lean_SearchPath_findAllWithExt_spec__2___redArg___lam__0(v_val_901__boxed_286_, v_x_284_);
+uint8_t v_val_1799__boxed_286_; lean_object* v_res_287_; 
+v_val_1799__boxed_286_ = lean_unbox(v_val_283_);
+v_res_287_ = l_List_forIn_x27_loop___at___00Lean_SearchPath_findAllWithExt_spec__2___redArg___lam__0(v_val_1799__boxed_286_, v_x_284_);
 lean_dec_ref(v_x_284_);
 return v_res_287_;
 }
@@ -2231,7 +2231,7 @@ return v___x_677_;
 v___jp_678_:
 {
 lean_object* v___x_681_; 
-v___x_681_ = lean_string_append(v___y_680_, v___y_679_);
+v___x_681_ = lean_string_append(v___y_679_, v___y_680_);
 v_rootDir_660_ = v___x_681_;
 goto v___jp_659_;
 }
@@ -2251,8 +2251,8 @@ v___x_688_ = lean_obj_once(&l_Lean_moduleNameOfFileName___closed__4, &l_Lean_mod
 v___x_689_ = lean_nat_dec_le(v___x_688_, v___x_687_);
 if (v___x_689_ == 0)
 {
-v___y_679_ = v___x_686_;
-v___y_680_ = v_a_685_;
+v___y_679_ = v_a_685_;
+v___y_680_ = v___x_686_;
 goto v___jp_678_;
 }
 else
@@ -2264,8 +2264,8 @@ v___x_692_ = lean_string_memcmp(v_a_685_, v___x_686_, v___x_691_, v___x_690_, v_
 lean_dec(v___x_691_);
 if (v___x_692_ == 0)
 {
-v___y_679_ = v___x_686_;
-v___y_680_ = v_a_685_;
+v___y_679_ = v_a_685_;
+v___y_680_ = v___x_686_;
 goto v___jp_678_;
 }
 else

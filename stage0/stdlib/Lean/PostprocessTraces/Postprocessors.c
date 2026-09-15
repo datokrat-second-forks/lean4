@@ -1503,9 +1503,9 @@ return v___x_504_;
 LEAN_EXPORT lean_object* l___private_Lean_PostprocessTraces_Postprocessors_0__Lean_PostprocessTraces_exposeSubtrees_go___lam__0___boxed(lean_object* v_a_507_, lean_object* v_x_508_){
 _start:
 {
-uint8_t v_a_1069__boxed_509_; lean_object* v_res_510_; 
-v_a_1069__boxed_509_ = lean_unbox(v_a_507_);
-v_res_510_ = l___private_Lean_PostprocessTraces_Postprocessors_0__Lean_PostprocessTraces_exposeSubtrees_go___lam__0(v_a_1069__boxed_509_, v_x_508_);
+uint8_t v_a_1271__boxed_509_; lean_object* v_res_510_; 
+v_a_1271__boxed_509_ = lean_unbox(v_a_507_);
+v_res_510_ = l___private_Lean_PostprocessTraces_Postprocessors_0__Lean_PostprocessTraces_exposeSubtrees_go___lam__0(v_a_1271__boxed_509_, v_x_508_);
 return v_res_510_;
 }
 }

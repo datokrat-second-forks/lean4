@@ -5778,7 +5778,7 @@ return v___x_1820_;
 }
 else
 {
-lean_object* v___x_1821_; lean_object* v_a_1822_; lean_object* v___f_1823_; lean_object* v_r_1824_; 
+lean_object* v___x_1821_; lean_object* v_a_1822_; lean_object* v___f_1823_; lean_object* v___x_1824_; 
 v___x_1821_ = l_Lean_Elab_getResetInfoTrees___at___00Lean_Elab_withInfoContext_x27___at___00Lean_Elab_Tactic_Do_ProofMode_addLocalVarInfo_spec__0_spec__0___redArg(v___y_1815_);
 v_a_1822_ = lean_ctor_get(v___x_1821_, 0);
 lean_inc(v_a_1822_);
@@ -5789,22 +5789,22 @@ lean_inc(v___y_1815_);
 lean_inc_ref(v___y_1814_);
 lean_inc(v___y_1813_);
 lean_inc_ref(v___y_1812_);
-v_r_1824_ = lean_apply_5(v_x_1809_, v___y_1812_, v___y_1813_, v___y_1814_, v___y_1815_, lean_box(0));
-if (lean_obj_tag(v_r_1824_) == 0)
+v___x_1824_ = lean_apply_5(v_x_1809_, v___y_1812_, v___y_1813_, v___y_1814_, v___y_1815_, lean_box(0));
+if (lean_obj_tag(v___x_1824_) == 0)
 {
 lean_object* v_a_1825_; lean_object* v___x_1827_; uint8_t v_isShared_1828_; uint8_t v_isSharedCheck_1849_; 
-v_a_1825_ = lean_ctor_get(v_r_1824_, 0);
-v_isSharedCheck_1849_ = !lean_is_exclusive(v_r_1824_);
+v_a_1825_ = lean_ctor_get(v___x_1824_, 0);
+v_isSharedCheck_1849_ = !lean_is_exclusive(v___x_1824_);
 if (v_isSharedCheck_1849_ == 0)
 {
-v___x_1827_ = v_r_1824_;
+v___x_1827_ = v___x_1824_;
 v_isShared_1828_ = v_isSharedCheck_1849_;
 goto v_resetjp_1826_;
 }
 else
 {
 lean_inc(v_a_1825_);
-lean_dec(v_r_1824_);
+lean_dec(v___x_1824_);
 v___x_1827_ = lean_box(0);
 v_isShared_1828_ = v_isSharedCheck_1849_;
 goto v_resetjp_1826_;
@@ -5922,9 +5922,9 @@ return v___x_1845_;
 else
 {
 lean_object* v_a_1850_; lean_object* v___x_1851_; lean_object* v___x_1852_; 
-v_a_1850_ = lean_ctor_get(v_r_1824_, 0);
+v_a_1850_ = lean_ctor_get(v___x_1824_, 0);
 lean_inc(v_a_1850_);
-lean_dec_ref_known(v_r_1824_, 1);
+lean_dec_ref_known(v___x_1824_, 1);
 v___x_1851_ = lean_box(0);
 v___x_1852_ = l_Lean_Elab_withInfoContext_x27___at___00Lean_Elab_Tactic_Do_ProofMode_addLocalVarInfo_spec__0___redArg___lam__1(v_mkInfoOnError_1811_, v___y_1812_, v___y_1813_, v___y_1814_, v___y_1815_, v___f_1823_, v_mkInfo_1810_, v___x_1851_);
 if (lean_obj_tag(v___x_1852_) == 0)

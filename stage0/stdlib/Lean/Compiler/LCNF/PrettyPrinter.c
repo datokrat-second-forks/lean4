@@ -7789,25 +7789,25 @@ return v___x_2398_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_runCompilerWithoutModifyingState___redArg(uint8_t v_phase_2399_, lean_object* v_x_2400_, lean_object* v___y_2401_, lean_object* v___y_2402_){
 _start:
 {
-lean_object* v___x_2404_; lean_object* v___x_2405_; lean_object* v_r_2406_; 
+lean_object* v___x_2404_; lean_object* v___x_2405_; lean_object* v___x_2406_; 
 v___x_2404_ = lean_st_ref_get(v___y_2402_);
 v___x_2405_ = lean_obj_once(&l_Lean_Compiler_LCNF_runCompilerWithoutModifyingState___redArg___closed__3, &l_Lean_Compiler_LCNF_runCompilerWithoutModifyingState___redArg___closed__3_once, _init_l_Lean_Compiler_LCNF_runCompilerWithoutModifyingState___redArg___closed__3);
-v_r_2406_ = l_Lean_Compiler_LCNF_CompilerM_run___redArg(v_x_2400_, v___x_2405_, v_phase_2399_, v___y_2401_, v___y_2402_);
-if (lean_obj_tag(v_r_2406_) == 0)
+v___x_2406_ = l_Lean_Compiler_LCNF_CompilerM_run___redArg(v_x_2400_, v___x_2405_, v_phase_2399_, v___y_2401_, v___y_2402_);
+if (lean_obj_tag(v___x_2406_) == 0)
 {
 lean_object* v_a_2407_; lean_object* v___x_2409_; uint8_t v_isShared_2410_; uint8_t v_isSharedCheck_2423_; 
-v_a_2407_ = lean_ctor_get(v_r_2406_, 0);
-v_isSharedCheck_2423_ = !lean_is_exclusive(v_r_2406_);
+v_a_2407_ = lean_ctor_get(v___x_2406_, 0);
+v_isSharedCheck_2423_ = !lean_is_exclusive(v___x_2406_);
 if (v_isSharedCheck_2423_ == 0)
 {
-v___x_2409_ = v_r_2406_;
+v___x_2409_ = v___x_2406_;
 v_isShared_2410_ = v_isSharedCheck_2423_;
 goto v_resetjp_2408_;
 }
 else
 {
 lean_inc(v_a_2407_);
-lean_dec(v_r_2406_);
+lean_dec(v___x_2406_);
 v___x_2409_ = lean_box(0);
 v_isShared_2410_ = v_isSharedCheck_2423_;
 goto v_resetjp_2408_;
@@ -7880,9 +7880,9 @@ return v___x_2418_;
 else
 {
 lean_object* v_a_2424_; lean_object* v___x_2425_; lean_object* v___x_2426_; lean_object* v___x_2428_; uint8_t v_isShared_2429_; uint8_t v_isSharedCheck_2433_; 
-v_a_2424_ = lean_ctor_get(v_r_2406_, 0);
+v_a_2424_ = lean_ctor_get(v___x_2406_, 0);
 lean_inc(v_a_2424_);
-lean_dec_ref_known(v_r_2406_, 1);
+lean_dec_ref_known(v___x_2406_, 1);
 v___x_2425_ = lean_box(0);
 v___x_2426_ = l_Lean_Compiler_LCNF_runCompilerWithoutModifyingState___redArg___lam__0(v___y_2402_, v___x_2404_, v___x_2425_);
 v_isSharedCheck_2433_ = !lean_is_exclusive(v___x_2426_);

@@ -1085,7 +1085,7 @@ lean_object* v___x_227_;
 v___x_227_ = l_Lean_Meta_saveState___redArg(v___y_223_, v___y_225_);
 if (lean_obj_tag(v___x_227_) == 0)
 {
-lean_object* v_a_228_; lean_object* v_r_229_; 
+lean_object* v_a_228_; lean_object* v___x_229_; 
 v_a_228_ = lean_ctor_get(v___x_227_, 0);
 lean_inc(v_a_228_);
 lean_dec_ref_known(v___x_227_, 1);
@@ -1093,13 +1093,13 @@ lean_inc(v___y_225_);
 lean_inc_ref(v___y_224_);
 lean_inc(v___y_223_);
 lean_inc_ref(v___y_222_);
-v_r_229_ = lean_apply_5(v_x_221_, v___y_222_, v___y_223_, v___y_224_, v___y_225_, lean_box(0));
-if (lean_obj_tag(v_r_229_) == 0)
+v___x_229_ = lean_apply_5(v_x_221_, v___y_222_, v___y_223_, v___y_224_, v___y_225_, lean_box(0));
+if (lean_obj_tag(v___x_229_) == 0)
 {
 lean_object* v_a_230_; lean_object* v___x_231_; 
-v_a_230_ = lean_ctor_get(v_r_229_, 0);
+v_a_230_ = lean_ctor_get(v___x_229_, 0);
 lean_inc(v_a_230_);
-lean_dec_ref_known(v_r_229_, 1);
+lean_dec_ref_known(v___x_229_, 1);
 v___x_231_ = l_Lean_Meta_SavedState_restore___redArg(v_a_228_, v___y_223_, v___y_225_);
 lean_dec(v_a_228_);
 if (lean_obj_tag(v___x_231_) == 0)
@@ -1191,9 +1191,9 @@ return v___x_245_;
 else
 {
 lean_object* v_a_248_; lean_object* v___x_249_; 
-v_a_248_ = lean_ctor_get(v_r_229_, 0);
+v_a_248_ = lean_ctor_get(v___x_229_, 0);
 lean_inc(v_a_248_);
-lean_dec_ref_known(v_r_229_, 1);
+lean_dec_ref_known(v___x_229_, 1);
 v___x_249_ = l_Lean_Meta_SavedState_restore___redArg(v_a_228_, v___y_223_, v___y_225_);
 lean_dec(v_a_228_);
 if (lean_obj_tag(v___x_249_) == 0)
@@ -1539,9 +1539,9 @@ return v___x_320_;
 LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_GuardExpr_MatchKind_isEq___lam__0___boxed(lean_object* v_red_347_, lean_object* v_a_348_, lean_object* v_b_349_, lean_object* v___y_350_, lean_object* v___y_351_, lean_object* v___y_352_, lean_object* v___y_353_, lean_object* v___y_354_){
 _start:
 {
-uint8_t v_red_1951__boxed_355_; lean_object* v_res_356_; 
-v_red_1951__boxed_355_ = lean_unbox(v_red_347_);
-v_res_356_ = l_Lean_Elab_Tactic_GuardExpr_MatchKind_isEq___lam__0(v_red_1951__boxed_355_, v_a_348_, v_b_349_, v___y_350_, v___y_351_, v___y_352_, v___y_353_);
+uint8_t v_red_2169__boxed_355_; lean_object* v_res_356_; 
+v_red_2169__boxed_355_ = lean_unbox(v_red_347_);
+v_res_356_ = l_Lean_Elab_Tactic_GuardExpr_MatchKind_isEq___lam__0(v_red_2169__boxed_355_, v_a_348_, v_b_349_, v___y_350_, v___y_351_, v___y_352_, v___y_353_);
 lean_dec(v___y_353_);
 lean_dec_ref(v___y_352_);
 lean_dec(v___y_351_);

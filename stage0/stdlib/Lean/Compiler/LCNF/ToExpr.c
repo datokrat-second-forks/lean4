@@ -1913,9 +1913,9 @@ goto v___jp_773_;
 v___jp_752_:
 {
 lean_object* v___x_756_; lean_object* v___x_757_; lean_object* v___x_758_; uint8_t v___x_759_; lean_object* v___x_760_; lean_object* v___x_762_; 
-lean_inc_ref(v___y_753_);
 lean_inc_ref(v___y_754_);
-v___x_756_ = l_Lean_mkApp5(v___x_749_, v___x_750_, v___x_751_, v___y_754_, v___y_753_, v___y_755_);
+lean_inc_ref(v___y_753_);
+v___x_756_ = l_Lean_mkApp5(v___x_749_, v___x_750_, v___x_751_, v___y_753_, v___y_754_, v___y_755_);
 v___x_757_ = ((lean_object*)(l_Lean_Compiler_LCNF_Code_toExprM___closed__10));
 v___x_758_ = lean_obj_once(&l_Lean_Compiler_LCNF_Code_toExprM___closed__13, &l_Lean_Compiler_LCNF_Code_toExprM___closed__13_once, _init_l_Lean_Compiler_LCNF_Code_toExprM___closed__13);
 v___x_759_ = 1;
@@ -1948,8 +1948,8 @@ if (lean_obj_tag(v_objs_x3f_738_) == 0)
 {
 lean_object* v___x_768_; 
 v___x_768_ = lean_obj_once(&l_Lean_Compiler_LCNF_Code_toExprM___closed__44, &l_Lean_Compiler_LCNF_Code_toExprM___closed__44_once, _init_l_Lean_Compiler_LCNF_Code_toExprM___closed__44);
-v___y_753_ = v___y_766_;
-v___y_754_ = v___y_765_;
+v___y_753_ = v___y_765_;
+v___y_754_ = v___y_766_;
 v___y_755_ = v___x_768_;
 goto v___jp_752_;
 }
@@ -1962,8 +1962,8 @@ lean_dec_ref_known(v_objs_x3f_738_, 1);
 v___x_770_ = lean_obj_once(&l_Lean_Compiler_LCNF_Code_toExprM___closed__47, &l_Lean_Compiler_LCNF_Code_toExprM___closed__47_once, _init_l_Lean_Compiler_LCNF_Code_toExprM___closed__47);
 v___x_771_ = l_Lean_mkNatLit(v_val_769_);
 v___x_772_ = l_Lean_mkAppB(v___x_770_, v___x_767_, v___x_771_);
-v___y_753_ = v___y_766_;
-v___y_754_ = v___y_765_;
+v___y_753_ = v___y_765_;
+v___y_754_ = v___y_766_;
 v___y_755_ = v___x_772_;
 goto v___jp_752_;
 }

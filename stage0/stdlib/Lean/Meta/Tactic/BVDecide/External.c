@@ -4152,12 +4152,12 @@ v___jp_1142_:
 {
 lean_object* v___x_1145_; lean_object* v___x_1146_; lean_object* v___x_1147_; lean_object* v___x_1148_; lean_object* v___x_1149_; lean_object* v___x_1150_; lean_object* v___x_1151_; lean_object* v___x_1152_; 
 v___x_1145_ = ((lean_object*)(l_Lean_Meta_Tactic_BVDecide_External_satQuery___closed__0));
-v___x_1146_ = lean_string_append(v___x_1145_, v___y_1144_);
-lean_dec_ref(v___y_1144_);
+v___x_1146_ = lean_string_append(v___x_1145_, v___y_1143_);
+lean_dec_ref(v___y_1143_);
 v___x_1147_ = ((lean_object*)(l_Lean_Meta_Tactic_BVDecide_External_satQuery___closed__1));
 v___x_1148_ = lean_string_append(v___x_1146_, v___x_1147_);
-v___x_1149_ = lean_string_append(v___x_1148_, v___y_1143_);
-lean_dec_ref(v___y_1143_);
+v___x_1149_ = lean_string_append(v___x_1148_, v___y_1144_);
+lean_dec_ref(v___y_1144_);
 v___x_1150_ = lean_alloc_ctor(3, 1, 0);
 lean_ctor_set(v___x_1150_, 0, v___x_1149_);
 v___x_1151_ = l_Lean_MessageData_ofFormat(v___x_1150_);
@@ -4168,31 +4168,31 @@ v___jp_1153_:
 {
 lean_object* v___x_1157_; lean_object* v___x_1158_; lean_object* v___x_1159_; uint8_t v___x_1160_; 
 v___x_1157_ = ((lean_object*)(l___private_Lean_Meta_Tactic_BVDecide_External_0__Lean_Meta_Tactic_BVDecide_External_ModelParser_parseHeader___closed__0));
-v___x_1158_ = lean_string_utf8_byte_size(v___y_1156_);
+v___x_1158_ = lean_string_utf8_byte_size(v___y_1154_);
 v___x_1159_ = lean_obj_once(&l_Lean_Meta_Tactic_BVDecide_External_satQuery___closed__2, &l_Lean_Meta_Tactic_BVDecide_External_satQuery___closed__2_once, _init_l_Lean_Meta_Tactic_BVDecide_External_satQuery___closed__2);
 v___x_1160_ = lean_nat_dec_le(v___x_1159_, v___x_1158_);
 if (v___x_1160_ == 0)
 {
-v___y_1143_ = v___y_1155_;
+v___y_1143_ = v___y_1154_;
 v___y_1144_ = v___y_1156_;
 goto v___jp_1142_;
 }
 else
 {
 uint8_t v___x_1161_; 
-v___x_1161_ = lean_string_memcmp(v___y_1156_, v___x_1157_, v___y_1154_, v___y_1154_, v___x_1159_);
+v___x_1161_ = lean_string_memcmp(v___y_1154_, v___x_1157_, v___y_1155_, v___y_1155_, v___x_1159_);
 if (v___x_1161_ == 0)
 {
-v___y_1143_ = v___y_1155_;
+v___y_1143_ = v___y_1154_;
 v___y_1144_ = v___y_1156_;
 goto v___jp_1142_;
 }
 else
 {
 lean_object* v___x_1162_; lean_object* v___x_1163_; lean_object* v___x_1164_; 
-lean_dec_ref(v___y_1155_);
+lean_dec_ref(v___y_1156_);
 v___x_1162_ = lean_alloc_closure((void*)(l___private_Lean_Meta_Tactic_BVDecide_External_0__Lean_Meta_Tactic_BVDecide_External_ModelParser_parse), 1, 0);
-v___x_1163_ = lean_string_to_utf8(v___y_1156_);
+v___x_1163_ = lean_string_to_utf8(v___y_1154_);
 v___x_1164_ = l_Std_Internal_Parsec_ByteArray_Parser_run___redArg(v___x_1162_, v___x_1163_);
 if (lean_obj_tag(v___x_1164_) == 0)
 {
@@ -4221,8 +4221,8 @@ v___x_1170_ = lean_string_append(v___x_1169_, v_a_1165_);
 lean_dec(v_a_1165_);
 v___x_1171_ = ((lean_object*)(l_Lean_Meta_Tactic_BVDecide_External_satQuery___closed__4));
 v___x_1172_ = lean_string_append(v___x_1170_, v___x_1171_);
-v___x_1173_ = lean_string_append(v___x_1172_, v___y_1156_);
-lean_dec_ref(v___y_1156_);
+v___x_1173_ = lean_string_append(v___x_1172_, v___y_1154_);
+lean_dec_ref(v___y_1154_);
 if (v_isShared_1168_ == 0)
 {
 lean_ctor_set_tag(v___x_1167_, 3);
@@ -4250,7 +4250,7 @@ return v___x_1177_;
 else
 {
 lean_object* v_a_1180_; lean_object* v___x_1182_; uint8_t v_isShared_1183_; uint8_t v_isSharedCheck_1188_; 
-lean_dec_ref(v___y_1156_);
+lean_dec_ref(v___y_1154_);
 v_a_1180_ = lean_ctor_get(v___x_1164_, 0);
 v_isSharedCheck_1188_ = !lean_is_exclusive(v___x_1164_);
 if (v_isSharedCheck_1188_ == 0)
@@ -4390,9 +4390,9 @@ v___x_1230_ = lean_nat_dec_le(v___x_1229_, v___x_1228_);
 if (v___x_1230_ == 0)
 {
 lean_del_object(v___x_1216_);
-v___y_1154_ = v___x_1208_;
-v___y_1155_ = v_stderr_1224_;
-v___y_1156_ = v_stdout_1223_;
+v___y_1154_ = v_stdout_1223_;
+v___y_1155_ = v___x_1208_;
+v___y_1156_ = v_stderr_1224_;
 goto v___jp_1153_;
 }
 else
@@ -4402,9 +4402,9 @@ v___x_1231_ = lean_string_memcmp(v_stdout_1223_, v___x_1227_, v___x_1208_, v___x
 if (v___x_1231_ == 0)
 {
 lean_del_object(v___x_1216_);
-v___y_1154_ = v___x_1208_;
-v___y_1155_ = v_stderr_1224_;
-v___y_1156_ = v_stdout_1223_;
+v___y_1154_ = v_stdout_1223_;
+v___y_1155_ = v___x_1208_;
+v___y_1156_ = v_stderr_1224_;
 goto v___jp_1153_;
 }
 else

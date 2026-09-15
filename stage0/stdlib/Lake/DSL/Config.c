@@ -1248,7 +1248,7 @@ return v___x_299_;
 }
 else
 {
-lean_object* v___x_300_; lean_object* v_a_301_; lean_object* v_r_302_; 
+lean_object* v___x_300_; lean_object* v_a_301_; lean_object* v___x_302_; 
 v___x_300_ = l_Lean_Elab_getResetInfoTrees___at___00Lean_Elab_withInfoTreeContext___at___00Lean_Elab_withMacroExpansionInfo___at___00Lean_Elab_Term_withMacroExpansion___at___00__private_Lake_DSL_Config_0__Lake_DSL_elabNameConst_spec__0_spec__0_spec__1_spec__4___redArg(v___y_294_);
 v_a_301_ = lean_ctor_get(v___x_300_, 0);
 lean_inc(v_a_301_);
@@ -1259,22 +1259,22 @@ lean_inc(v___y_292_);
 lean_inc_ref(v___y_291_);
 lean_inc(v___y_290_);
 lean_inc_ref(v___y_289_);
-v_r_302_ = lean_apply_7(v_x_287_, v___y_289_, v___y_290_, v___y_291_, v___y_292_, v___y_293_, v___y_294_, lean_box(0));
-if (lean_obj_tag(v_r_302_) == 0)
+v___x_302_ = lean_apply_7(v_x_287_, v___y_289_, v___y_290_, v___y_291_, v___y_292_, v___y_293_, v___y_294_, lean_box(0));
+if (lean_obj_tag(v___x_302_) == 0)
 {
 lean_object* v_a_303_; lean_object* v___x_305_; uint8_t v_isShared_306_; uint8_t v_isSharedCheck_327_; 
-v_a_303_ = lean_ctor_get(v_r_302_, 0);
-v_isSharedCheck_327_ = !lean_is_exclusive(v_r_302_);
+v_a_303_ = lean_ctor_get(v___x_302_, 0);
+v_isSharedCheck_327_ = !lean_is_exclusive(v___x_302_);
 if (v_isSharedCheck_327_ == 0)
 {
-v___x_305_ = v_r_302_;
+v___x_305_ = v___x_302_;
 v_isShared_306_ = v_isSharedCheck_327_;
 goto v_resetjp_304_;
 }
 else
 {
 lean_inc(v_a_303_);
-lean_dec(v_r_302_);
+lean_dec(v___x_302_);
 v___x_305_ = lean_box(0);
 v_isShared_306_ = v_isSharedCheck_327_;
 goto v_resetjp_304_;
@@ -1393,9 +1393,9 @@ return v___x_323_;
 else
 {
 lean_object* v_a_328_; lean_object* v___x_329_; lean_object* v___x_330_; 
-v_a_328_ = lean_ctor_get(v_r_302_, 0);
+v_a_328_ = lean_ctor_get(v___x_302_, 0);
 lean_inc(v_a_328_);
-lean_dec_ref_known(v_r_302_, 1);
+lean_dec_ref_known(v___x_302_, 1);
 v___x_329_ = lean_box(0);
 v___x_330_ = l_Lean_Elab_withInfoTreeContext___at___00Lean_Elab_withMacroExpansionInfo___at___00Lean_Elab_Term_withMacroExpansion___at___00__private_Lake_DSL_Config_0__Lake_DSL_elabNameConst_spec__0_spec__0_spec__1___redArg___lam__0(v___y_294_, v_mkInfoTree_288_, v___y_289_, v___y_290_, v___y_291_, v___y_292_, v___y_293_, v_a_301_, v___x_329_);
 if (lean_obj_tag(v___x_330_) == 0)

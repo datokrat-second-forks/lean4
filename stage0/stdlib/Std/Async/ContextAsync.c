@@ -6665,9 +6665,9 @@ return v___x_2266_;
 LEAN_EXPORT lean_object* l_Std_Async_ContextAsync_race___redArg___lam__4___boxed(lean_object* v_a_2270_, lean_object* v___f_2271_, lean_object* v___x_2272_, lean_object* v___x_2273_, lean_object* v___f_2274_, lean_object* v_x_2275_, lean_object* v___y_2276_){
 _start:
 {
-uint8_t v___x_4684__boxed_2277_; lean_object* v_res_2278_; 
-v___x_4684__boxed_2277_ = lean_unbox(v___x_2273_);
-v_res_2278_ = l_Std_Async_ContextAsync_race___redArg___lam__4(v_a_2270_, v___f_2271_, v___x_2272_, v___x_4684__boxed_2277_, v___f_2274_, v_x_2275_);
+uint8_t v___x_4860__boxed_2277_; lean_object* v_res_2278_; 
+v___x_4860__boxed_2277_ = lean_unbox(v___x_2273_);
+v_res_2278_ = l_Std_Async_ContextAsync_race___redArg___lam__4(v_a_2270_, v___f_2271_, v___x_2272_, v___x_4860__boxed_2277_, v___f_2274_, v_x_2275_);
 return v_res_2278_;
 }
 }

@@ -837,7 +837,7 @@ lean_dec(v_a_273_);
 v___x_275_ = l_Lean_Meta_Sym_Arith_setExpThreshold___redArg(v_exp_263_, v___y_266_);
 if (lean_obj_tag(v___x_275_) == 0)
 {
-lean_object* v_r_276_; 
+lean_object* v___x_276_; 
 lean_dec_ref_known(v___x_275_, 1);
 lean_inc(v___y_270_);
 lean_inc_ref(v___y_269_);
@@ -845,13 +845,13 @@ lean_inc(v___y_268_);
 lean_inc_ref(v___y_267_);
 lean_inc(v___y_266_);
 lean_inc_ref(v___y_265_);
-v_r_276_ = lean_apply_7(v_k_264_, v___y_265_, v___y_266_, v___y_267_, v___y_268_, v___y_269_, v___y_270_, lean_box(0));
-if (lean_obj_tag(v_r_276_) == 0)
+v___x_276_ = lean_apply_7(v_k_264_, v___y_265_, v___y_266_, v___y_267_, v___y_268_, v___y_269_, v___y_270_, lean_box(0));
+if (lean_obj_tag(v___x_276_) == 0)
 {
 lean_object* v_a_277_; lean_object* v___x_278_; 
-v_a_277_ = lean_ctor_get(v_r_276_, 0);
+v_a_277_ = lean_ctor_get(v___x_276_, 0);
 lean_inc(v_a_277_);
-lean_dec_ref_known(v_r_276_, 1);
+lean_dec_ref_known(v___x_276_, 1);
 v___x_278_ = l_Lean_Meta_Sym_Arith_setExpThreshold___redArg(v_exp_274_, v___y_266_);
 if (lean_obj_tag(v___x_278_) == 0)
 {
@@ -942,9 +942,9 @@ return v___x_292_;
 else
 {
 lean_object* v_a_295_; lean_object* v___x_296_; 
-v_a_295_ = lean_ctor_get(v_r_276_, 0);
+v_a_295_ = lean_ctor_get(v___x_276_, 0);
 lean_inc(v_a_295_);
-lean_dec_ref_known(v_r_276_, 1);
+lean_dec_ref_known(v___x_276_, 1);
 v___x_296_ = l_Lean_Meta_Sym_Arith_setExpThreshold___redArg(v_exp_274_, v___y_266_);
 if (lean_obj_tag(v___x_296_) == 0)
 {

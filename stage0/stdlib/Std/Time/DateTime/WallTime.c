@@ -489,8 +489,6 @@ _start:
 {
 uint8_t v_res_105_; lean_object* v_r_106_; 
 v_res_105_ = l_Std_Time_instDecidableEqWallTime_decEq(v_x_103_, v_x_104_);
-lean_dec_ref(v_x_104_);
-lean_dec_ref(v_x_103_);
 v_r_106_ = lean_box(v_res_105_);
 return v_r_106_;
 }
@@ -508,8 +506,6 @@ _start:
 {
 uint8_t v_res_112_; lean_object* v_r_113_; 
 v_res_112_ = l_Std_Time_instDecidableEqWallTime(v_x_110_, v_x_111_);
-lean_dec_ref(v_x_111_);
-lean_dec_ref(v_x_110_);
 v_r_113_ = lean_box(v_res_112_);
 return v_r_113_;
 }

@@ -523,7 +523,7 @@ lean_object* v___x_86_;
 v___x_86_ = l_Lean_Meta_saveState___redArg(v___y_82_, v___y_84_);
 if (lean_obj_tag(v___x_86_) == 0)
 {
-lean_object* v_a_87_; lean_object* v_r_88_; 
+lean_object* v_a_87_; lean_object* v___x_88_; 
 v_a_87_ = lean_ctor_get(v___x_86_, 0);
 lean_inc(v_a_87_);
 lean_dec_ref_known(v___x_86_, 1);
@@ -531,13 +531,13 @@ lean_inc(v___y_84_);
 lean_inc_ref(v___y_83_);
 lean_inc(v___y_82_);
 lean_inc_ref(v___y_81_);
-v_r_88_ = lean_apply_5(v_x_80_, v___y_81_, v___y_82_, v___y_83_, v___y_84_, lean_box(0));
-if (lean_obj_tag(v_r_88_) == 0)
+v___x_88_ = lean_apply_5(v_x_80_, v___y_81_, v___y_82_, v___y_83_, v___y_84_, lean_box(0));
+if (lean_obj_tag(v___x_88_) == 0)
 {
 lean_object* v_a_89_; lean_object* v___x_90_; 
-v_a_89_ = lean_ctor_get(v_r_88_, 0);
+v_a_89_ = lean_ctor_get(v___x_88_, 0);
 lean_inc(v_a_89_);
-lean_dec_ref_known(v_r_88_, 1);
+lean_dec_ref_known(v___x_88_, 1);
 v___x_90_ = l_Lean_Meta_SavedState_restore___redArg(v_a_87_, v___y_82_, v___y_84_);
 lean_dec(v_a_87_);
 if (lean_obj_tag(v___x_90_) == 0)
@@ -629,9 +629,9 @@ return v___x_104_;
 else
 {
 lean_object* v_a_107_; lean_object* v___x_108_; 
-v_a_107_ = lean_ctor_get(v_r_88_, 0);
+v_a_107_ = lean_ctor_get(v___x_88_, 0);
 lean_inc(v_a_107_);
-lean_dec_ref_known(v_r_88_, 1);
+lean_dec_ref_known(v___x_88_, 1);
 v___x_108_ = l_Lean_Meta_SavedState_restore___redArg(v_a_87_, v___y_82_, v___y_84_);
 lean_dec(v_a_87_);
 if (lean_obj_tag(v___x_108_) == 0)

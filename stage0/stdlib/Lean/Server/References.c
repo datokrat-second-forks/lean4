@@ -22086,8 +22086,8 @@ goto v___jp_6256_;
 }
 else
 {
-lean_dec(v_definition_x3f_6263_);
 lean_dec_ref_known(v_k_6252_, 2);
+lean_dec(v_definition_x3f_6263_);
 v___y_6257_ = v___x_6261_;
 goto v___jp_6256_;
 }

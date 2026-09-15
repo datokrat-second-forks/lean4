@@ -636,7 +636,7 @@ v_ref_128_ = lean_ctor_get(v___y_125_, 2);
 v___x_129_ = lean_io_create_tempfile();
 if (lean_obj_tag(v___x_129_) == 0)
 {
-lean_object* v_a_130_; lean_object* v_fst_131_; lean_object* v_snd_132_; lean_object* v_r_133_; 
+lean_object* v_a_130_; lean_object* v_fst_131_; lean_object* v_snd_132_; lean_object* v___x_133_; 
 v_a_130_ = lean_ctor_get(v___x_129_, 0);
 lean_inc(v_a_130_);
 lean_dec_ref_known(v___x_129_, 1);
@@ -653,22 +653,22 @@ lean_inc(v___y_122_);
 lean_inc_ref(v___y_121_);
 lean_inc(v___y_120_);
 lean_inc_ref(v___y_119_);
-v_r_133_ = lean_apply_11(v_f_118_, v_fst_131_, v_snd_132_, v___y_119_, v___y_120_, v___y_121_, v___y_122_, v___y_123_, v___y_124_, v___y_125_, v___y_126_, lean_box(0));
-if (lean_obj_tag(v_r_133_) == 0)
+v___x_133_ = lean_apply_11(v_f_118_, v_fst_131_, v_snd_132_, v___y_119_, v___y_120_, v___y_121_, v___y_122_, v___y_123_, v___y_124_, v___y_125_, v___y_126_, lean_box(0));
+if (lean_obj_tag(v___x_133_) == 0)
 {
 lean_object* v_a_134_; lean_object* v___x_136_; uint8_t v_isShared_137_; uint8_t v_isSharedCheck_158_; 
-v_a_134_ = lean_ctor_get(v_r_133_, 0);
-v_isSharedCheck_158_ = !lean_is_exclusive(v_r_133_);
+v_a_134_ = lean_ctor_get(v___x_133_, 0);
+v_isSharedCheck_158_ = !lean_is_exclusive(v___x_133_);
 if (v_isSharedCheck_158_ == 0)
 {
-v___x_136_ = v_r_133_;
+v___x_136_ = v___x_133_;
 v_isShared_137_ = v_isSharedCheck_158_;
 goto v_resetjp_135_;
 }
 else
 {
 lean_inc(v_a_134_);
-lean_dec(v_r_133_);
+lean_dec(v___x_133_);
 v___x_136_ = lean_box(0);
 v_isShared_137_ = v_isSharedCheck_158_;
 goto v_resetjp_135_;
@@ -789,9 +789,9 @@ return v___x_154_;
 else
 {
 lean_object* v_a_159_; lean_object* v___x_160_; lean_object* v___x_161_; 
-v_a_159_ = lean_ctor_get(v_r_133_, 0);
+v_a_159_ = lean_ctor_get(v___x_133_, 0);
 lean_inc(v_a_159_);
-lean_dec_ref_known(v_r_133_, 1);
+lean_dec_ref_known(v___x_133_, 1);
 v___x_160_ = lean_box(0);
 lean_inc(v_ref_128_);
 v___x_161_ = l_IO_FS_withTempFile___at___00__private_Lean_Elab_Tactic_Grind_BVDecide_0__Lean_Elab_Tactic_Grind_evalBvDecide_spec__1___redArg___lam__0(v_snd_132_, v_ref_128_, v___x_160_);

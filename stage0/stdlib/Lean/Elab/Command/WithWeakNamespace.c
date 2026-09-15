@@ -419,17 +419,17 @@ v___x_93_ = lean_st_ref_put(v___y_65_, v___x_92_);
 v___x_94_ = l_Lean_Elab_Command_modifyScope___redArg(v___f_72_, v___y_65_);
 if (lean_obj_tag(v___x_94_) == 0)
 {
-lean_object* v_r_95_; 
+lean_object* v___x_95_; 
 lean_dec_ref_known(v___x_94_, 1);
 lean_inc(v___y_65_);
 lean_inc_ref(v___y_64_);
-v_r_95_ = lean_apply_3(v_m_63_, v___y_64_, v___y_65_, lean_box(0));
-if (lean_obj_tag(v_r_95_) == 0)
+v___x_95_ = lean_apply_3(v_m_63_, v___y_64_, v___y_65_, lean_box(0));
+if (lean_obj_tag(v___x_95_) == 0)
 {
 lean_object* v_a_96_; lean_object* v___x_97_; 
-v_a_96_ = lean_ctor_get(v_r_95_, 0);
+v_a_96_ = lean_ctor_get(v___x_95_, 0);
 lean_inc(v_a_96_);
-lean_dec_ref_known(v_r_95_, 1);
+lean_dec_ref_known(v___x_95_, 1);
 v___x_97_ = l_Lean_Elab_Command_modifyScope___redArg(v___f_70_, v___y_65_);
 if (lean_obj_tag(v___x_97_) == 0)
 {
@@ -520,9 +520,9 @@ return v___x_111_;
 else
 {
 lean_object* v_a_114_; lean_object* v___x_115_; 
-v_a_114_ = lean_ctor_get(v_r_95_, 0);
+v_a_114_ = lean_ctor_get(v___x_95_, 0);
 lean_inc(v_a_114_);
-lean_dec_ref_known(v_r_95_, 1);
+lean_dec_ref_known(v___x_95_, 1);
 v___x_115_ = l_Lean_Elab_Command_modifyScope___redArg(v___f_70_, v___y_65_);
 if (lean_obj_tag(v___x_115_) == 0)
 {

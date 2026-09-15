@@ -4158,7 +4158,7 @@ return v___x_947_;
 }
 else
 {
-lean_object* v___x_948_; lean_object* v_a_949_; lean_object* v_r_950_; 
+lean_object* v___x_948_; lean_object* v_a_949_; lean_object* v___x_950_; 
 v___x_948_ = l_Lean_Elab_getResetInfoTrees___at___00Lean_Elab_withInfoTreeContext___at___00__private_Lean_Elab_Tactic_Grind_BuiltinTactic_0__Lean_Elab_Tactic_Grind_evalGrindSeqBracketed_spec__0_spec__0___redArg(v___y_942_);
 v_a_949_ = lean_ctor_get(v___x_948_, 0);
 lean_inc(v_a_949_);
@@ -4171,22 +4171,22 @@ lean_inc(v___y_938_);
 lean_inc_ref(v___y_937_);
 lean_inc(v___y_936_);
 lean_inc_ref(v___y_935_);
-v_r_950_ = lean_apply_9(v_x_933_, v___y_935_, v___y_936_, v___y_937_, v___y_938_, v___y_939_, v___y_940_, v___y_941_, v___y_942_, lean_box(0));
-if (lean_obj_tag(v_r_950_) == 0)
+v___x_950_ = lean_apply_9(v_x_933_, v___y_935_, v___y_936_, v___y_937_, v___y_938_, v___y_939_, v___y_940_, v___y_941_, v___y_942_, lean_box(0));
+if (lean_obj_tag(v___x_950_) == 0)
 {
 lean_object* v_a_951_; lean_object* v___x_953_; uint8_t v_isShared_954_; uint8_t v_isSharedCheck_975_; 
-v_a_951_ = lean_ctor_get(v_r_950_, 0);
-v_isSharedCheck_975_ = !lean_is_exclusive(v_r_950_);
+v_a_951_ = lean_ctor_get(v___x_950_, 0);
+v_isSharedCheck_975_ = !lean_is_exclusive(v___x_950_);
 if (v_isSharedCheck_975_ == 0)
 {
-v___x_953_ = v_r_950_;
+v___x_953_ = v___x_950_;
 v_isShared_954_ = v_isSharedCheck_975_;
 goto v_resetjp_952_;
 }
 else
 {
 lean_inc(v_a_951_);
-lean_dec(v_r_950_);
+lean_dec(v___x_950_);
 v___x_953_ = lean_box(0);
 v_isShared_954_ = v_isSharedCheck_975_;
 goto v_resetjp_952_;
@@ -4305,9 +4305,9 @@ return v___x_971_;
 else
 {
 lean_object* v_a_976_; lean_object* v___x_977_; lean_object* v___x_978_; 
-v_a_976_ = lean_ctor_get(v_r_950_, 0);
+v_a_976_ = lean_ctor_get(v___x_950_, 0);
 lean_inc(v_a_976_);
-lean_dec_ref_known(v_r_950_, 1);
+lean_dec_ref_known(v___x_950_, 1);
 v___x_977_ = lean_box(0);
 v___x_978_ = l_Lean_Elab_withInfoTreeContext___at___00__private_Lean_Elab_Tactic_Grind_BuiltinTactic_0__Lean_Elab_Tactic_Grind_evalGrindSeqBracketed_spec__0___redArg___lam__0(v___y_942_, v_mkInfoTree_934_, v___y_935_, v___y_936_, v___y_937_, v___y_938_, v___y_939_, v___y_940_, v___y_941_, v_a_949_, v___x_977_);
 if (lean_obj_tag(v___x_978_) == 0)
@@ -26892,7 +26892,7 @@ return v___x_9721_;
 }
 else
 {
-lean_object* v___x_9722_; lean_object* v_a_9723_; lean_object* v_r_9724_; 
+lean_object* v___x_9722_; lean_object* v_a_9723_; lean_object* v___x_9724_; 
 v___x_9722_ = l_Lean_Elab_getResetInfoTrees___at___00Lean_Elab_withInfoTreeContext___at___00__private_Lean_Elab_Tactic_Grind_BuiltinTactic_0__Lean_Elab_Tactic_Grind_evalNestedTactic_spec__0_spec__0___redArg(v___y_9716_);
 v_a_9723_ = lean_ctor_get(v___x_9722_, 0);
 lean_inc(v_a_9723_);
@@ -26905,22 +26905,22 @@ lean_inc(v___y_9712_);
 lean_inc_ref(v___y_9711_);
 lean_inc(v___y_9710_);
 lean_inc_ref(v___y_9709_);
-v_r_9724_ = lean_apply_9(v_x_9707_, v___y_9709_, v___y_9710_, v___y_9711_, v___y_9712_, v___y_9713_, v___y_9714_, v___y_9715_, v___y_9716_, lean_box(0));
-if (lean_obj_tag(v_r_9724_) == 0)
+v___x_9724_ = lean_apply_9(v_x_9707_, v___y_9709_, v___y_9710_, v___y_9711_, v___y_9712_, v___y_9713_, v___y_9714_, v___y_9715_, v___y_9716_, lean_box(0));
+if (lean_obj_tag(v___x_9724_) == 0)
 {
 lean_object* v_a_9725_; lean_object* v___x_9727_; uint8_t v_isShared_9728_; uint8_t v_isSharedCheck_9749_; 
-v_a_9725_ = lean_ctor_get(v_r_9724_, 0);
-v_isSharedCheck_9749_ = !lean_is_exclusive(v_r_9724_);
+v_a_9725_ = lean_ctor_get(v___x_9724_, 0);
+v_isSharedCheck_9749_ = !lean_is_exclusive(v___x_9724_);
 if (v_isSharedCheck_9749_ == 0)
 {
-v___x_9727_ = v_r_9724_;
+v___x_9727_ = v___x_9724_;
 v_isShared_9728_ = v_isSharedCheck_9749_;
 goto v_resetjp_9726_;
 }
 else
 {
 lean_inc(v_a_9725_);
-lean_dec(v_r_9724_);
+lean_dec(v___x_9724_);
 v___x_9727_ = lean_box(0);
 v_isShared_9728_ = v_isSharedCheck_9749_;
 goto v_resetjp_9726_;
@@ -27039,9 +27039,9 @@ return v___x_9745_;
 else
 {
 lean_object* v_a_9750_; lean_object* v___x_9751_; lean_object* v___x_9752_; 
-v_a_9750_ = lean_ctor_get(v_r_9724_, 0);
+v_a_9750_ = lean_ctor_get(v___x_9724_, 0);
 lean_inc(v_a_9750_);
-lean_dec_ref_known(v_r_9724_, 1);
+lean_dec_ref_known(v___x_9724_, 1);
 v___x_9751_ = lean_box(0);
 v___x_9752_ = l_Lean_Elab_withInfoTreeContext___at___00__private_Lean_Elab_Tactic_Grind_BuiltinTactic_0__Lean_Elab_Tactic_Grind_evalNestedTactic_spec__0___redArg___lam__0(v___y_9716_, v_mkInfoTree_9708_, v___y_9709_, v___y_9710_, v___y_9711_, v___y_9712_, v___y_9713_, v___y_9714_, v___y_9715_, v_a_9723_, v___x_9751_);
 if (lean_obj_tag(v___x_9752_) == 0)

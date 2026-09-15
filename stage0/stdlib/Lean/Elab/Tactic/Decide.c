@@ -3232,7 +3232,7 @@ lean_object* v___x_845_;
 v___x_845_ = l_Lean_Meta_saveState___redArg(v___y_841_, v___y_843_);
 if (lean_obj_tag(v___x_845_) == 0)
 {
-lean_object* v_a_846_; lean_object* v_r_847_; 
+lean_object* v_a_846_; lean_object* v___x_847_; 
 v_a_846_ = lean_ctor_get(v___x_845_, 0);
 lean_inc(v_a_846_);
 lean_dec_ref_known(v___x_845_, 1);
@@ -3240,13 +3240,13 @@ lean_inc(v___y_843_);
 lean_inc_ref(v___y_842_);
 lean_inc(v___y_841_);
 lean_inc_ref(v___y_840_);
-v_r_847_ = lean_apply_5(v_x_839_, v___y_840_, v___y_841_, v___y_842_, v___y_843_, lean_box(0));
-if (lean_obj_tag(v_r_847_) == 0)
+v___x_847_ = lean_apply_5(v_x_839_, v___y_840_, v___y_841_, v___y_842_, v___y_843_, lean_box(0));
+if (lean_obj_tag(v___x_847_) == 0)
 {
 lean_object* v_a_848_; lean_object* v___x_849_; 
-v_a_848_ = lean_ctor_get(v_r_847_, 0);
+v_a_848_ = lean_ctor_get(v___x_847_, 0);
 lean_inc(v_a_848_);
-lean_dec_ref_known(v_r_847_, 1);
+lean_dec_ref_known(v___x_847_, 1);
 v___x_849_ = l_Lean_Meta_SavedState_restore___redArg(v_a_846_, v___y_841_, v___y_843_);
 lean_dec(v_a_846_);
 if (lean_obj_tag(v___x_849_) == 0)
@@ -3338,9 +3338,9 @@ return v___x_863_;
 else
 {
 lean_object* v_a_866_; lean_object* v___x_867_; 
-v_a_866_ = lean_ctor_get(v_r_847_, 0);
+v_a_866_ = lean_ctor_get(v___x_847_, 0);
 lean_inc(v_a_866_);
-lean_dec_ref_known(v_r_847_, 1);
+lean_dec_ref_known(v___x_847_, 1);
 v___x_867_ = l_Lean_Meta_SavedState_restore___redArg(v_a_846_, v___y_841_, v___y_843_);
 lean_dec(v_a_846_);
 if (lean_obj_tag(v___x_867_) == 0)
@@ -5847,9 +5847,9 @@ goto v___jp_1645_;
 LEAN_EXPORT lean_object* l___private_Lean_Elab_Tactic_Decide_0__Lean_Elab_Tactic_evalDecideCore_diagnose___lam__1___boxed(lean_object* v___f_1715_, lean_object* v_s_1716_, lean_object* v___x_1717_, lean_object* v___y_1718_, lean_object* v___y_1719_, lean_object* v___y_1720_, lean_object* v___y_1721_, lean_object* v___y_1722_){
 _start:
 {
-uint8_t v___x_11249__boxed_1723_; lean_object* v_res_1724_; 
-v___x_11249__boxed_1723_ = lean_unbox(v___x_1717_);
-v_res_1724_ = l___private_Lean_Elab_Tactic_Decide_0__Lean_Elab_Tactic_evalDecideCore_diagnose___lam__1(v___f_1715_, v_s_1716_, v___x_11249__boxed_1723_, v___y_1718_, v___y_1719_, v___y_1720_, v___y_1721_);
+uint8_t v___x_11467__boxed_1723_; lean_object* v_res_1724_; 
+v___x_11467__boxed_1723_ = lean_unbox(v___x_1717_);
+v_res_1724_ = l___private_Lean_Elab_Tactic_Decide_0__Lean_Elab_Tactic_evalDecideCore_diagnose___lam__1(v___f_1715_, v_s_1716_, v___x_11467__boxed_1723_, v___y_1718_, v___y_1719_, v___y_1720_, v___y_1721_);
 lean_dec(v___y_1721_);
 lean_dec_ref(v___y_1720_);
 lean_dec(v___y_1719_);

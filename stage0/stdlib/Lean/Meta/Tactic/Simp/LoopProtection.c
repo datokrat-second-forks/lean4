@@ -583,7 +583,7 @@ goto v_reusejp_114_;
 }
 v_reusejp_114_:
 {
-lean_object* v___x_116_; lean_object* v_r_117_; 
+lean_object* v___x_116_; lean_object* v___x_117_; 
 v___x_116_ = lean_st_ref_put(v___y_96_, v___x_115_);
 lean_inc(v___y_100_);
 lean_inc_ref(v___y_99_);
@@ -592,22 +592,22 @@ lean_inc_ref(v___y_97_);
 lean_inc(v___y_96_);
 lean_inc_ref(v___y_95_);
 lean_inc(v___y_94_);
-v_r_117_ = lean_apply_8(v_x_93_, v___y_94_, v___y_95_, v___y_96_, v___y_97_, v___y_98_, v___y_99_, v___y_100_, lean_box(0));
-if (lean_obj_tag(v_r_117_) == 0)
+v___x_117_ = lean_apply_8(v_x_93_, v___y_94_, v___y_95_, v___y_96_, v___y_97_, v___y_98_, v___y_99_, v___y_100_, lean_box(0));
+if (lean_obj_tag(v___x_117_) == 0)
 {
 lean_object* v_a_118_; lean_object* v___x_120_; uint8_t v_isShared_121_; uint8_t v_isSharedCheck_134_; 
-v_a_118_ = lean_ctor_get(v_r_117_, 0);
-v_isSharedCheck_134_ = !lean_is_exclusive(v_r_117_);
+v_a_118_ = lean_ctor_get(v___x_117_, 0);
+v_isSharedCheck_134_ = !lean_is_exclusive(v___x_117_);
 if (v_isSharedCheck_134_ == 0)
 {
-v___x_120_ = v_r_117_;
+v___x_120_ = v___x_117_;
 v_isShared_121_ = v_isSharedCheck_134_;
 goto v_resetjp_119_;
 }
 else
 {
 lean_inc(v_a_118_);
-lean_dec(v_r_117_);
+lean_dec(v___x_117_);
 v___x_120_ = lean_box(0);
 v_isShared_121_ = v_isSharedCheck_134_;
 goto v_resetjp_119_;
@@ -680,9 +680,9 @@ return v___x_129_;
 else
 {
 lean_object* v_a_135_; lean_object* v___x_136_; lean_object* v___x_137_; lean_object* v___x_139_; uint8_t v_isShared_140_; uint8_t v_isSharedCheck_144_; 
-v_a_135_ = lean_ctor_get(v_r_117_, 0);
+v_a_135_ = lean_ctor_get(v___x_117_, 0);
 lean_inc(v_a_135_);
-lean_dec_ref_known(v_r_117_, 1);
+lean_dec_ref_known(v___x_117_, 1);
 v___x_136_ = lean_box(0);
 v___x_137_ = l_Lean_Meta_Simp_withFreshUsedTheorems___redArg___lam__0(v___y_96_, v_usedTheorems_103_, v___x_136_);
 v_isSharedCheck_144_ = !lean_is_exclusive(v___x_137_);
@@ -806,7 +806,7 @@ goto v_reusejp_181_;
 }
 v_reusejp_181_:
 {
-lean_object* v___x_183_; lean_object* v_r_184_; 
+lean_object* v___x_183_; lean_object* v___x_184_; 
 v___x_183_ = lean_st_ref_put(v___y_163_, v___x_182_);
 lean_inc(v___y_167_);
 lean_inc_ref(v___y_166_);
@@ -815,22 +815,22 @@ lean_inc_ref(v___y_164_);
 lean_inc(v___y_163_);
 lean_inc_ref(v___y_162_);
 lean_inc(v___y_161_);
-v_r_184_ = lean_apply_8(v_x_160_, v___y_161_, v___y_162_, v___y_163_, v___y_164_, v___y_165_, v___y_166_, v___y_167_, lean_box(0));
-if (lean_obj_tag(v_r_184_) == 0)
+v___x_184_ = lean_apply_8(v_x_160_, v___y_161_, v___y_162_, v___y_163_, v___y_164_, v___y_165_, v___y_166_, v___y_167_, lean_box(0));
+if (lean_obj_tag(v___x_184_) == 0)
 {
 lean_object* v_a_185_; lean_object* v___x_187_; uint8_t v_isShared_188_; uint8_t v_isSharedCheck_201_; 
-v_a_185_ = lean_ctor_get(v_r_184_, 0);
-v_isSharedCheck_201_ = !lean_is_exclusive(v_r_184_);
+v_a_185_ = lean_ctor_get(v___x_184_, 0);
+v_isSharedCheck_201_ = !lean_is_exclusive(v___x_184_);
 if (v_isSharedCheck_201_ == 0)
 {
-v___x_187_ = v_r_184_;
+v___x_187_ = v___x_184_;
 v_isShared_188_ = v_isSharedCheck_201_;
 goto v_resetjp_186_;
 }
 else
 {
 lean_inc(v_a_185_);
-lean_dec(v_r_184_);
+lean_dec(v___x_184_);
 v___x_187_ = lean_box(0);
 v_isShared_188_ = v_isSharedCheck_201_;
 goto v_resetjp_186_;
@@ -903,9 +903,9 @@ return v___x_196_;
 else
 {
 lean_object* v_a_202_; lean_object* v___x_203_; lean_object* v___x_204_; lean_object* v___x_206_; uint8_t v_isShared_207_; uint8_t v_isSharedCheck_211_; 
-v_a_202_ = lean_ctor_get(v_r_184_, 0);
+v_a_202_ = lean_ctor_get(v___x_184_, 0);
 lean_inc(v_a_202_);
-lean_dec_ref_known(v_r_184_, 1);
+lean_dec_ref_known(v___x_184_, 1);
 v___x_203_ = lean_box(0);
 v___x_204_ = l_Lean_Meta_Simp_withFreshUsedTheorems___redArg___lam__0(v___y_163_, v_usedTheorems_170_, v___x_203_);
 v_isSharedCheck_211_ = !lean_is_exclusive(v___x_204_);

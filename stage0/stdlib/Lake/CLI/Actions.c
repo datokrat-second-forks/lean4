@@ -1448,8 +1448,8 @@ v_resetjp_510_:
 lean_object* v___x_513_; lean_object* v___f_514_; lean_object* v___x_515_; lean_object* v___x_517_; 
 v___x_513_ = lean_alloc_ctor(0, 3, 0);
 lean_ctor_set(v___x_513_, 0, v_fst_476_);
-lean_ctor_set(v___x_513_, 1, v___y_485_);
-lean_ctor_set(v___x_513_, 2, v___y_484_);
+lean_ctor_set(v___x_513_, 1, v___y_484_);
+lean_ctor_set(v___x_513_, 2, v___y_485_);
 lean_inc(v___y_482_);
 v___f_514_ = lean_alloc_closure((void*)(l_Lake_Package_test___lam__0___boxed), 11, 4);
 lean_closure_set(v___f_514_, 0, v_keyName_479_);
@@ -1673,8 +1673,8 @@ lean_dec(v_args_463_);
 lean_inc(v_name_557_);
 v___y_482_ = v___x_560_;
 v___y_483_ = v_name_557_;
-v___y_484_ = v_config_559_;
-v___y_485_ = v_name_557_;
+v___y_484_ = v_name_557_;
+v___y_485_ = v_config_559_;
 v___y_486_ = v___x_564_;
 goto v___jp_481_;
 }
@@ -1686,8 +1686,8 @@ lean_dec(v_args_463_);
 lean_inc(v_name_557_);
 v___y_482_ = v___x_560_;
 v___y_483_ = v_name_557_;
-v___y_484_ = v_config_559_;
-v___y_485_ = v_name_557_;
+v___y_484_ = v_name_557_;
+v___y_485_ = v_config_559_;
 v___y_486_ = v___x_565_;
 goto v___jp_481_;
 }

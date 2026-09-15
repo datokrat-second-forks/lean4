@@ -2015,7 +2015,7 @@ return v___x_562_;
 }
 else
 {
-lean_object* v___x_563_; lean_object* v_a_564_; lean_object* v_r_565_; 
+lean_object* v___x_563_; lean_object* v_a_564_; lean_object* v___x_565_; 
 v___x_563_ = l_Lean_Elab_getResetInfoTrees___at___00Lean_Elab_withInfoTreeContext___at___00Lean_Elab_Tactic_evalCalc_spec__3_spec__3___redArg(v___y_557_);
 v_a_564_ = lean_ctor_get(v___x_563_, 0);
 lean_inc(v_a_564_);
@@ -2028,22 +2028,22 @@ lean_inc(v___y_553_);
 lean_inc_ref(v___y_552_);
 lean_inc(v___y_551_);
 lean_inc_ref(v___y_550_);
-v_r_565_ = lean_apply_9(v_x_548_, v___y_550_, v___y_551_, v___y_552_, v___y_553_, v___y_554_, v___y_555_, v___y_556_, v___y_557_, lean_box(0));
-if (lean_obj_tag(v_r_565_) == 0)
+v___x_565_ = lean_apply_9(v_x_548_, v___y_550_, v___y_551_, v___y_552_, v___y_553_, v___y_554_, v___y_555_, v___y_556_, v___y_557_, lean_box(0));
+if (lean_obj_tag(v___x_565_) == 0)
 {
 lean_object* v_a_566_; lean_object* v___x_568_; uint8_t v_isShared_569_; uint8_t v_isSharedCheck_590_; 
-v_a_566_ = lean_ctor_get(v_r_565_, 0);
-v_isSharedCheck_590_ = !lean_is_exclusive(v_r_565_);
+v_a_566_ = lean_ctor_get(v___x_565_, 0);
+v_isSharedCheck_590_ = !lean_is_exclusive(v___x_565_);
 if (v_isSharedCheck_590_ == 0)
 {
-v___x_568_ = v_r_565_;
+v___x_568_ = v___x_565_;
 v_isShared_569_ = v_isSharedCheck_590_;
 goto v_resetjp_567_;
 }
 else
 {
 lean_inc(v_a_566_);
-lean_dec(v_r_565_);
+lean_dec(v___x_565_);
 v___x_568_ = lean_box(0);
 v_isShared_569_ = v_isSharedCheck_590_;
 goto v_resetjp_567_;
@@ -2162,9 +2162,9 @@ return v___x_586_;
 else
 {
 lean_object* v_a_591_; lean_object* v___x_592_; lean_object* v___x_593_; 
-v_a_591_ = lean_ctor_get(v_r_565_, 0);
+v_a_591_ = lean_ctor_get(v___x_565_, 0);
 lean_inc(v_a_591_);
-lean_dec_ref_known(v_r_565_, 1);
+lean_dec_ref_known(v___x_565_, 1);
 v___x_592_ = lean_box(0);
 v___x_593_ = l_Lean_Elab_withInfoTreeContext___at___00Lean_Elab_Tactic_evalCalc_spec__3___redArg___lam__0(v___y_557_, v_mkInfoTree_549_, v___y_550_, v___y_551_, v___y_552_, v___y_553_, v___y_554_, v___y_555_, v___y_556_, v_a_564_, v___x_592_);
 if (lean_obj_tag(v___x_593_) == 0)

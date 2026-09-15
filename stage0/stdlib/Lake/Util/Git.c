@@ -841,10 +841,10 @@ return v___x_197_;
 LEAN_EXPORT lean_object* l___private_Lake_Util_Git_0__Lake_GitRepo_testExecGit___lam__0___boxed(lean_object* v___x_198_, lean_object* v___x_199_, lean_object* v___y_200_, lean_object* v___y_201_, lean_object* v___y_202_){
 _start:
 {
-uint8_t v___x_1994__boxed_203_; uint8_t v___x_1995__boxed_204_; lean_object* v_res_205_; 
-v___x_1994__boxed_203_ = lean_unbox(v___x_198_);
-v___x_1995__boxed_204_ = lean_unbox(v___x_199_);
-v_res_205_ = l___private_Lake_Util_Git_0__Lake_GitRepo_testExecGit___lam__0(v___x_1994__boxed_203_, v___x_1995__boxed_204_, v___y_200_, v___y_201_);
+uint8_t v___x_2921__boxed_203_; uint8_t v___x_2922__boxed_204_; lean_object* v_res_205_; 
+v___x_2921__boxed_203_ = lean_unbox(v___x_198_);
+v___x_2922__boxed_204_ = lean_unbox(v___x_199_);
+v_res_205_ = l___private_Lake_Util_Git_0__Lake_GitRepo_testExecGit___lam__0(v___x_2921__boxed_203_, v___x_2922__boxed_204_, v___y_200_, v___y_201_);
 return v_res_205_;
 }
 }
