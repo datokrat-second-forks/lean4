@@ -497,7 +497,7 @@ private def dateFromModifier (dateformat : DateFormat) (date : DateTime) : TypeF
   | .D _ => Sigma.mk _ date.dayOfYear
   | .M _ | .L _ => date.month
   | .d _ => date.day
-  | .Q _ | .q _ => .mk date.quarter
+  | .Q _ | .q _ => date.quarter
   | .w _ => date.weekOfYear firstDay minDays
   | .W _ => date.weekOfMonth firstDay
   | .E _ | .e _ | .c _ => date.weekday
