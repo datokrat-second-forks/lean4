@@ -146,7 +146,9 @@ end
 end Transport
 
 /-- Constructs an equivalence `src ≃ tgt` from the `@[transport]` declarations. -/
-def mkTransportEquiv (src tgt : Expr) : MetaM Expr :=
+def mkTransportEquiv (src tgt : Expr) : MetaM Expr := do
+  unless (← getEnv).contains ``Equiv do
+    throwError "`Equiv` is not available, transporting requires `Init.Data.Function`"
   Transport.mkEquiv src tgt (fuel := 8)
 
 /-- Moves `e` to type `tgt` along `mkTransportEquiv`. -/
