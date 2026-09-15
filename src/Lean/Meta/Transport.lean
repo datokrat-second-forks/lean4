@@ -23,10 +23,11 @@ as the `Foo.equiv : Int ≃ Foo` a `newtype` registers automatically, and congru
 by unifying conclusions with the goal, solving the equivalence arguments recursively, synthesizing
 instance arguments, and chaining through intermediate types with `Equiv.trans`.
 
-Two types are only ever identified by `isDefEq` at `instances` transparency, so unlike
-`inferInstanceAs`'s instance wrapping this never depends on unfolding a semireducible or
-irreducible definition; a congruence for a lawful class such as `TransOrd` therefore only applies
-to the instance obtained by transporting along the same equivalence.
+Types are identified by `isDefEq` at default transparency, which never unfolds the irreducible
+definition a `newtype` is; unlike `inferInstanceAs`'s instance wrapping this never depends on the
+kernel unfolding what the elaborator may not. A congruence for a lawful class such as `TransOrd`
+concludes at the transported instance of its parent class and therefore only applies to an
+instance definitionally equal to it.
 -/
 
 namespace Lean.Meta
@@ -95,7 +96,7 @@ instance arguments by `synthInstance`.
 private partial def applyDecl (declName : Name) (goal : Expr) (fuel : Nat) : MetaM Expr := do
   let decl ← mkConstWithFreshMVarLevels declName
   let (args, bis, concl) ← withReducible <| forallMetaTelescopeReducing (← inferType decl)
-  unless ← withTransparency .instances <| isDefEq concl goal do
+  unless ← withDefault <| isDefEq concl goal do
     throwError "`{.ofConstName declName}` does not apply"
   for arg in args, bi in bis do
     if ← arg.mvarId!.isAssigned then
@@ -118,7 +119,7 @@ partial def mkEquiv (src tgt : Expr) (fuel : Nat) : MetaM Expr := do
   let src ← instantiateMVars src
   let tgt ← instantiateMVars tgt
   withTraceNode `Meta.transport (fun _ => return m!"{src} ≃ {tgt}") do
-  if ← withTransparency .instances <| isDefEq src tgt then
+  if ← withDefault <| isDefEq src tgt then
     return ← mkAppM ``Equiv.refl #[src]
   if fuel == 0 then
     throwError "transport depth exhausted at{indentExpr src}\n≃{indentExpr tgt}"
@@ -132,7 +133,7 @@ partial def mkEquiv (src tgt : Expr) (fuel : Nat) : MetaM Expr := do
   let chained ← firstSuccess (← dt.getUnify midGoal) fun declName => do
     let e₂ ← applyDecl declName midGoal (fuel - 1)
     let mid ← instantiateMVars mid
-    if ← withTransparency .instances <| isDefEq mid tgt then
+    if ← withDefault <| isDefEq mid tgt then
       throwError "`{.ofConstName declName}` does not lead anywhere"
     let e₁ ← mkEquiv src mid (fuel - 1)
     mkAppM ``Equiv.trans #[e₁, e₂]
