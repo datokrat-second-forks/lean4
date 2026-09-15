@@ -89,6 +89,15 @@ deriving instance DecidableLE, LawfulLE for Baz
 example : (default : Baz) = Baz.mk 0 := rfl
 example : Baz.mk 1 ≤ Baz.mk 2 := by decide
 
+/-! Arithmetic: a transported operation rewraps the underlying result, so it reduces. -/
+
+newtype Num := Int with toInt
+  deriving Add, Sub, Mul, Div, Neg
+
+example : Num.mk 2 + Num.mk 3 = Num.mk 5 := rfl
+example : Num.mk 7 / Num.mk 2 - Num.mk 1 * Num.mk 3 = Num.mk 0 := rfl
+example : -Num.mk 2 = Num.mk (-2) := rfl
+
 /-!
 Families of equivalences: a congruence for a class on a type constructor takes `∀ α, m α ≃ n α`,
 which is solved under the binder.
