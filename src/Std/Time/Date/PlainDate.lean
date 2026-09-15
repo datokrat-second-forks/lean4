@@ -117,8 +117,8 @@ def alignedWeekOfMonth (date : PlainDate) : Week.Aligned.Ordinal :=
 /--
 Determines the quarter of the year for the given `PlainDate`.
 -/
-def quarter (date : PlainDate) : Bounded.LE 1 4 :=
-  date.month.toBounded.sub 1 |>.ediv 3 (by decide) |>.add 1
+def quarter (date : PlainDate) : Month.Quarter :=
+  Month.Quarter.ofMonth date.month
 
 /--
 Transforms a `PlainDate` into a `Day.Ordinal.OfYear`.

@@ -532,7 +532,7 @@ def dayOfYear (date : PlainDateTime) : Day.Ordinal.OfYear date.year.isLeap :=
 Determines the quarter of the year for the given `PlainDateTime`.
 -/
 @[inline]
-def quarter (date : PlainDateTime) : Bounded.LE 1 4 :=
+def quarter (date : PlainDateTime) : Month.Quarter :=
   date.date.quarter
 
 /--
