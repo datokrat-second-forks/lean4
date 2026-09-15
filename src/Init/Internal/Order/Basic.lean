@@ -1118,29 +1118,13 @@ theorem Option.admissible_eq_some (P : Prop) (y : α) :
   change admissible fun x : FlatOrder none => x = .mk _ (some y) → P
   apply admissible_flatOrder; simp
 
--- as for `StateT` below, the orders are transported along the definitional isomorphism
--- `ExceptT.mk`/`ExceptT.run`
-
-/-- Transports a partial order on `m (Except ε α)` to `ExceptT ε m α`. -/
-@[expose, instance_reducible] def ExceptT.partialOrder {ε : Type u} {m : Type u → Type v}
-    {α : Type u} [PartialOrder (m (Except ε α))] : PartialOrder (ExceptT ε m α) where
-  rel x y := x.run ⊑ y.run
-  rel_refl := PartialOrder.rel_refl
-  rel_trans := PartialOrder.rel_trans
-  rel_antisymm h₁ h₂ := congrArg ExceptT.mk (PartialOrder.rel_antisymm h₁ h₂)
-
-/-- Transports a chain-complete partial order on `m (Except ε α)` to `ExceptT ε m α`. -/
-@[expose, instance_reducible] def ExceptT.ccpo {ε : Type u} {m : Type u → Type v} {α : Type u}
-    [CCPO (m (Except ε α))] : CCPO (ExceptT ε m α) where
-  toPartialOrder := ExceptT.partialOrder
-  has_csup {c} hchain := by
-    have ⟨f, hf⟩ := CCPO.has_csup (α := m (Except ε α))
-      (c := fun f => c (ExceptT.mk f)) fun x y hx hy => hchain _ _ hx hy
-    exact ⟨ExceptT.mk f, fun x => (hf x.run).trans
-      ⟨fun h y hy => h y.run hy, fun h y hy => h (ExceptT.mk y) hy⟩⟩
-
-instance [inst : ∀ α, PartialOrder (m α)] : PartialOrder (ExceptT ε m α) := ExceptT.partialOrder
-instance [inst : ∀ α, CCPO (m α)] : CCPO (ExceptT ε m α) := ExceptT.ccpo
+-- Universes pinned explicitly: auto-bound ones would make `Except ε α` live in `max u_1 u_2`.
+instance {ε : Type u} {m : Type u → Type v} {α : Type u} [inst : ∀ α, PartialOrder (m α)] :
+    PartialOrder (ExceptT ε m α) :=
+  inferInstanceAs (PartialOrder (m (Except ε α)))
+instance {ε : Type u} {m : Type u → Type v} {α : Type u} [inst : ∀ α, CCPO (m α)] :
+    CCPO (ExceptT ε m α) :=
+  inferInstanceAs (CCPO (m (Except ε α)))
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (ExceptT ε m) where
   bind_mono_left h₁₂ := by
     apply MonoBind.bind_mono_left (m := m)
@@ -1159,29 +1143,9 @@ theorem monotone_exceptTRun [PartialOrder γ]
     monotone (fun (x : γ) => ExceptT.run (f x)) :=
   hmono
 
--- as for `StateT` below, the orders are transported along the definitional isomorphism
--- `OptionT.mk`/`OptionT.run`
-
-/-- Transports a partial order on `m (Option α)` to `OptionT m α`. -/
-@[expose, instance_reducible] def OptionT.partialOrder {m : Type u → Type v} {α : Type u}
-    [PartialOrder (m (Option α))] : PartialOrder (OptionT m α) where
-  rel x y := x.run ⊑ y.run
-  rel_refl := PartialOrder.rel_refl
-  rel_trans := PartialOrder.rel_trans
-  rel_antisymm h₁ h₂ := congrArg OptionT.mk (PartialOrder.rel_antisymm h₁ h₂)
-
-/-- Transports a chain-complete partial order on `m (Option α)` to `OptionT m α`. -/
-@[expose, instance_reducible] def OptionT.ccpo {m : Type u → Type v} {α : Type u}
-    [CCPO (m (Option α))] : CCPO (OptionT m α) where
-  toPartialOrder := OptionT.partialOrder
-  has_csup {c} hchain := by
-    have ⟨f, hf⟩ := CCPO.has_csup (α := m (Option α))
-      (c := fun f => c (OptionT.mk f)) fun x y hx hy => hchain _ _ hx hy
-    exact ⟨OptionT.mk f, fun x => (hf x.run).trans
-      ⟨fun h y hy => h y.run hy, fun h y hy => h (OptionT.mk y) hy⟩⟩
-
-instance [inst : ∀ α, PartialOrder (m α)] : PartialOrder (OptionT m α) := OptionT.partialOrder
-instance [inst : ∀ α, CCPO (m α)] : CCPO (OptionT m α) := OptionT.ccpo
+instance [inst : ∀ α, PartialOrder (m α)] : PartialOrder (OptionT m α) :=
+  inferInstanceAs (PartialOrder (m (Option α)))
+instance [inst : ∀ α, CCPO (m α)] : CCPO (OptionT m α) := inferInstanceAs (CCPO (m (Option α)))
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (OptionT m) where
   bind_mono_left h₁₂ := by
     apply MonoBind.bind_mono_left (m := m)
@@ -1200,26 +1164,9 @@ theorem monotone_optionTRun [PartialOrder γ]
     monotone (fun (x : γ) => OptionT.run (f x)) :=
   hmono
 
-/-- Transports a partial order on `ρ → m α` to `ReaderT ρ m α`. -/
-@[expose, instance_reducible] def ReaderT.partialOrder {ρ : Type u} {m : Type u → Type v}
-    {α : Type u} [PartialOrder (m α)] : PartialOrder (ReaderT ρ m α) where
-  rel x y := x.run ⊑ y.run
-  rel_refl := PartialOrder.rel_refl
-  rel_trans := PartialOrder.rel_trans
-  rel_antisymm h₁ h₂ := congrArg ReaderT.mk (PartialOrder.rel_antisymm h₁ h₂)
-
-/-- Transports a chain-complete partial order on `ρ → m α` to `ReaderT ρ m α`. -/
-@[expose, instance_reducible] def ReaderT.ccpo {ρ : Type u} {m : Type u → Type v} {α : Type u}
-    [CCPO (m α)] : CCPO (ReaderT ρ m α) where
-  toPartialOrder := ReaderT.partialOrder
-  has_csup {c} hchain := by
-    have ⟨f, hf⟩ := CCPO.has_csup (α := ρ → m α)
-      (c := fun f => c (ReaderT.mk f)) fun x y hx hy => hchain _ _ hx hy
-    exact ⟨ReaderT.mk f, fun x => (hf x.run).trans
-      ⟨fun h y hy => h y.run hy, fun h y hy => h (ReaderT.mk y) hy⟩⟩
-
-instance [inst : PartialOrder (m α)] : PartialOrder (ReaderT ρ m α) := ReaderT.partialOrder
-instance [inst : CCPO (m α)] : CCPO (ReaderT ρ m α) := ReaderT.ccpo
+instance [inst : PartialOrder (m α)] : PartialOrder (ReaderT ρ m α) :=
+  inferInstanceAs (PartialOrder (ρ → m α))
+instance [inst : CCPO (m α)] : CCPO (ReaderT ρ m α) := inferInstanceAs (CCPO (ρ → m α))
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (ReaderT ρ m) where
   bind_mono_left h₁₂ := by
     intro x
@@ -1238,8 +1185,10 @@ theorem monotone_readerTRun [PartialOrder γ]
     monotone (fun (x : γ) => ReaderT.run (f x) s) :=
   monotone_apply s _ hmono
 
-instance [inst : PartialOrder (m α)] : PartialOrder (StateRefT' ω σ m α) := ReaderT.partialOrder
-instance [inst : CCPO (m α)] : CCPO (StateRefT' ω σ m α) := ReaderT.ccpo
+instance [inst : PartialOrder (m α)] : PartialOrder (StateRefT' ω σ m α) :=
+  inferInstanceAs (PartialOrder (ReaderT (ST.Ref ω σ) m α))
+instance [inst : CCPO (m α)] : CCPO (StateRefT' ω σ m α) :=
+  inferInstanceAs (CCPO (ReaderT (ST.Ref ω σ) m α))
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (StateRefT' ω σ m) :=
   inferInstanceAs (MonoBind (ReaderT (ST.Ref ω σ) m))
 
@@ -1255,51 +1204,13 @@ theorem monotone_stateRefT'Run [PartialOrder γ]
     · exact monotone_readerTRun _ hmono ref
     · apply monotone_const
 
--- as for `EST` below, the orders are transported along the definitional isomorphism
--- `Id.mk`/`Id.run`
-
-/-- Transports a partial order on `α` to `Id α`. -/
-@[expose, instance_reducible] def Id.partialOrder {α : Type u} [PartialOrder α] :
-    PartialOrder (Id α) where
-  rel x y := x.run ⊑ y.run
-  rel_refl := PartialOrder.rel_refl
-  rel_trans := PartialOrder.rel_trans
-  rel_antisymm h₁ h₂ := congrArg Id.mk (PartialOrder.rel_antisymm h₁ h₂)
-
-/-- Transports a chain-complete partial order on `α` to `Id α`. -/
-@[expose, instance_reducible] def Id.ccpo {α : Type u} [CCPO α] : CCPO (Id α) where
-  toPartialOrder := Id.partialOrder
-  has_csup {c} hchain := by
-    have ⟨f, hf⟩ := CCPO.has_csup (α := α)
-      (c := fun f => c (Id.mk f)) fun x y hx hy => hchain _ _ hx hy
-    exact ⟨Id.mk f, fun x => (hf x.run).trans
-      ⟨fun h y hy => h y.run hy, fun h y hy => h (Id.mk y) hy⟩⟩
-
--- as for `EST` below, the orders are transported along the definitional isomorphism
--- `StateT.mk`/`StateT.run`
-
-/-- Transports a partial order on `σ → m (α × σ)` to `StateT σ m α`. -/
-@[expose, instance_reducible] def StateT.partialOrder.{u', v'} {σ : Type u'} {m : Type u' → Type v'}
-    {α : Type u'} [PartialOrder (σ → m (α × σ))] : PartialOrder (StateT σ m α) where
-  rel x y := x.run ⊑ y.run
-  rel_refl := PartialOrder.rel_refl
-  rel_trans := PartialOrder.rel_trans
-  rel_antisymm h₁ h₂ := congrArg StateT.mk (PartialOrder.rel_antisymm h₁ h₂)
-
-/-- Transports a chain-complete partial order on `σ → m (α × σ)` to `StateT σ m α`. -/
-@[expose, instance_reducible] def StateT.ccpo.{u', v'} {σ : Type u'} {m : Type u' → Type v'} {α : Type u'}
-    [CCPO (σ → m (α × σ))] : CCPO (StateT σ m α) where
-  toPartialOrder := StateT.partialOrder (σ := σ) (m := m) (α := α)
-  has_csup {c} hchain := by
-    have ⟨f, hf⟩ := CCPO.has_csup (α := σ → m (α × σ))
-      (c := fun f => c (StateT.mk f)) fun x y hx hy => hchain _ _ hx hy
-    exact ⟨StateT.mk f, fun x => (hf x.run).trans
-      ⟨fun h y hy => h y.run hy, fun h y hy => h (StateT.mk y) hy⟩⟩
-
-instance [inst : ∀ α, PartialOrder (m α)] : PartialOrder (StateT σ m α) :=
-  StateT.partialOrder (σ := σ) (m := m) (α := α)
-instance [inst : ∀ α, CCPO (m α)] : CCPO (StateT σ m α) :=
-  StateT.ccpo (σ := σ) (m := m) (α := α)
+-- Universes pinned explicitly: auto-bound ones would make `α × σ` live in `max u_1 u_2`.
+instance {σ : Type u} {m : Type u → Type v} {α : Type u} [inst : ∀ α, PartialOrder (m α)] :
+    PartialOrder (StateT σ m α) :=
+  inferInstanceAs (PartialOrder (σ → m (α × σ)))
+instance {σ : Type u} {m : Type u → Type v} {α : Type u} [inst : ∀ α, CCPO (m α)] :
+    CCPO (StateT σ m α) :=
+  inferInstanceAs (CCPO (σ → m (α × σ)))
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (StateT ρ m) where
   bind_mono_left h₁₂ := by
     intro x
