@@ -7,6 +7,7 @@ module
 
 prelude
 public import Std.Time.Internal
+public import Init.Transport
 
 public section
 
@@ -20,26 +21,17 @@ set_option linter.all true
 /--
 `Ordinal` represents a nanosecond value that is bounded between 0 and 999,999,999 nanoseconds.
 -/
-@[expose] def Ordinal := Bounded.LE 0 999999999
-deriving Repr, DecidableEq, LE, LT
+@[expose] newtype Ordinal := Bounded.LE 0 999999999 with toBounded
+  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
+
+/-- The underlying integer of the ordinal. -/
+abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
 instance : OfNat Ordinal n where
-  ofNat := Bounded.LE.ofFin (Fin.ofNat _ n)
+  ofNat := .mk (Bounded.LE.ofFin (Fin.ofNat _ n))
 
 instance : Inhabited Ordinal where
   default := 0
-
-instance {x y : Ordinal} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
-
-instance {x y : Ordinal} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
-
-instance : Ord Ordinal := inferInstanceAs <| Ord (Bounded.LE 0 _)
-
-instance : TransOrd Ordinal := inferInstanceAs <| TransOrd (Bounded.LE 0 _)
-
-instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 0 _)
 
 /--
 `Offset` represents a time offset in nanoseconds.
@@ -112,22 +104,13 @@ end Offset
 `Span` represents a bounded value for nanoseconds, ranging between -999999999 and 999999999.
 This can be used for operations that involve differences or adjustments within this range.
 -/
-@[expose] def Span := Bounded.LE (-999999999) 999999999
-deriving Repr, DecidableEq, LE, LT
+@[expose] newtype Span := Bounded.LE (-999999999) 999999999 with toBounded
+  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
-instance : Inhabited Span where default := Bounded.LE.mk 0 (by decide)
+/-- The underlying integer of the span. -/
+abbrev Span.val (span : Span) : Int := span.toBounded.val
 
-instance {x y : Span} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
-
-instance {x y : Span} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
-
-instance : Ord Span := inferInstanceAs <| Ord (Bounded.LE _ _)
-
-instance : TransOrd Span := inferInstanceAs <| TransOrd (Bounded.LE _ _)
-
-instance : LawfulEqOrd Span := inferInstanceAs <| LawfulEqOrd (Bounded.LE _ _)
+instance : Inhabited Span where default := .mk (Bounded.LE.mk 0 (by decide))
 
 namespace Span
 
@@ -144,43 +127,34 @@ namespace Ordinal
 /--
 `Ordinal` represents a bounded value for nanoseconds in a day, which ranges between 0 and 86400000000000.
 -/
-@[expose] def OfDay := Bounded.LE 0 86400000000000
-deriving Repr, DecidableEq, LE, LT
+@[expose] newtype OfDay := Bounded.LE 0 86400000000000 with toBounded
+  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
-instance : Inhabited OfDay where default := Bounded.LE.mk 0 (by decide)
+/-- The underlying integer of the ordinal. -/
+abbrev OfDay.val (ordinal : OfDay) : Int := ordinal.toBounded.val
 
-instance {x y : OfDay} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
-
-instance {x y : OfDay} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
-
-instance : Ord OfDay := inferInstanceAs <| Ord (Bounded.LE _ _)
-
-instance : TransOrd OfDay := inferInstanceAs <| TransOrd (Bounded.LE _ _)
-
-instance : LawfulEqOrd OfDay := inferInstanceAs <| LawfulEqOrd (Bounded.LE _ _)
+instance : Inhabited OfDay where default := .mk (Bounded.LE.mk 0 (by decide))
 
 /--
 Creates an `Ordinal` from an integer, ensuring the value is within bounds.
 -/
 @[inline]
 def ofInt (data : Int) (h : 0 ≤ data ∧ data ≤ 999999999) : Ordinal :=
-  Bounded.LE.mk data h
+  .mk (Bounded.LE.mk data h)
 
 /--
 Creates an `Ordinal` from a natural number, ensuring the value is within bounds.
 -/
 @[inline]
 def ofNat (data : Nat) (h : data ≤ 999999999) : Ordinal :=
-  Bounded.LE.ofNat data h
+  .mk (Bounded.LE.ofNat data h)
 
 /--
 Creates an `Ordinal` from a `Fin`, ensuring the value is within bounds.
 -/
 @[inline]
 def ofFin (data : Fin 1000000000) : Ordinal :=
-  Bounded.LE.ofFin data
+  .mk (Bounded.LE.ofFin data)
 
 /--
 Converts an `Ordinal` to an `Offset`.

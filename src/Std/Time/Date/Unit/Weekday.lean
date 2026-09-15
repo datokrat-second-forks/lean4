@@ -7,6 +7,7 @@ module
 
 prelude
 public import Std.Time.Date.Unit.Day
+public import Init.Transport
 
 public section
 
@@ -47,14 +48,11 @@ namespace Weekday
 /--
 `Ordinal` represents a bounded value for weekdays, which ranges between 1 and 7.
 -/
-@[expose] def Ordinal := Bounded.LE 1 7
-deriving Repr, DecidableEq, LT, LE
+@[expose] newtype Ordinal := Bounded.LE 1 7 with toBounded
+  deriving Repr, DecidableEq, LT, LE, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
-instance {x y : Ordinal} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
-
-instance {x y : Ordinal} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+/-- The underlying integer of the ordinal. -/
+abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 1 (1 + (6 : Nat))) n)
@@ -62,24 +60,19 @@ instance : OfNat Ordinal n :=
 instance : Inhabited Ordinal where
   default := 1
 
-instance : Ord Ordinal := inferInstanceAs <| Ord (Bounded.LE 1 _)
-
-instance : TransOrd Ordinal := inferInstanceAs <| TransOrd (Bounded.LE 1 _)
-
-instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 1 _)
-
 /--
 Converts a `Ordinal` representing a day index into a corresponding `Weekday`. This function is useful
 for mapping numerical representations to days of the week.
 -/
-def ofOrdinal : Ordinal → Weekday
-  | 1 => .monday
-  | 2 => .tuesday
-  | 3 => .wednesday
-  | 4 => .thursday
-  | 5 => .friday
-  | 6 => .saturday
-  | 7 => .sunday
+def ofOrdinal (ordinal : Ordinal) : Weekday :=
+  match ordinal.toBounded with
+  | ⟨1, _⟩ => .monday
+  | ⟨2, _⟩ => .tuesday
+  | ⟨3, _⟩ => .wednesday
+  | ⟨4, _⟩ => .thursday
+  | ⟨5, _⟩ => .friday
+  | ⟨6, _⟩ => .saturday
+  | ⟨7, _⟩ => .sunday
 
 /--
 Converts a `Weekday` to a `Ordinal`.

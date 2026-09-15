@@ -46,8 +46,8 @@ private def posixParseHMS (maxHour : Nat := 24) : Parser Second.Offset := do
     | some b => pure b
     | none   => fail s!"hour {rawH} out of range 0-{167}"
 
-  let m : Minute.Ordinal ← attempt (pchar ':' *> parseBoundedNat "minute") <|> pure (Bounded.LE.mk 0 (by decide))
-  let s : Second.Ordinal false ← attempt (pchar ':' *> parseBoundedNat "second") <|> pure (Bounded.LE.mk 0 (by decide))
+  let m : Minute.Ordinal ← .mk <$> (attempt (pchar ':' *> parseBoundedNat "minute") <|> pure (Bounded.LE.mk 0 (by decide)))
+  let s : Second.Ordinal false ← .mk <$> (attempt (pchar ':' *> parseBoundedNat "second") <|> pure (Bounded.LE.mk 0 (by decide)))
   return (Hour.Offset.ofInt h.val).toSeconds + m.toOffset.toSeconds + s.toOffset
 
 -- <offset> ::= [ "+" | "-" ] <time>
@@ -72,15 +72,15 @@ private def posixParseName : Parser String := do
 private def posixParseMwdSpec : Parser TransitionSpec := do
   skipChar 'M'
 
-  let month ← parseBoundedNat "month" <* skipChar '.'
-  let week ← parseBoundedNat "week" (· ≤ 5) <* skipChar '.'
+  let month ← Month.Ordinal.mk <$> parseBoundedNat "month" <* skipChar '.'
+  let week ← Week.Aligned.Ordinal.mk <$> parseBoundedNat "week" (· ≤ 5) <* skipChar '.'
 
   -- Convert POSIX day (0=Sunday … 6=Saturday) to ISO ordinal (1=Monday … 7=Sunday).
   let d ← digits
   if d > 6 then fail s!"day {d} out of range 0-6"
 
   let day ← match (Bounded.LE.ofInt (if d == 0 then 7 else Int.ofNat d)) with
-    | some wd => pure wd
+    | some wd => pure (Weekday.Ordinal.mk wd)
     | none => fail s!"day {d} out of range 0-6"
 
   return .mwd month week day

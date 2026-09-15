@@ -135,10 +135,10 @@ private meta def convertTimezone (tz : Std.Time.TimeZone) : MacroM (TSyntax `ter
  `(Std.Time.TimeZone.mk $(← convertOffset tz.offset) $(Syntax.mkStrLit tz.name) $(Syntax.mkStrLit tz.abbreviation) false)
 
 private meta def convertPlainDate (d : Std.Time.PlainDate) : MacroM (TSyntax `term) := do
- `(Std.Time.PlainDate.ofYearMonthDayClip (Std.Time.Year.Offset.ofInt $(← syntaxInt d.year.toInt)) $(← syntaxBounded d.month.val) $(← syntaxBounded d.day.val))
+ `(Std.Time.PlainDate.ofYearMonthDayClip (Std.Time.Year.Offset.ofInt $(← syntaxInt d.year.toInt)) (.mk $(← syntaxBounded d.month.val)) (.mk $(← syntaxBounded d.day.val)))
 
 private meta def convertPlainTime (d : Std.Time.PlainTime) : MacroM (TSyntax `term) := do
- `(Std.Time.PlainTime.mk $(← syntaxBounded d.hour.val) $(← syntaxBounded d.minute.val) $(← syntaxBounded d.second.val) $(← syntaxBounded d.nanosecond.val))
+ `(Std.Time.PlainTime.mk (.mk $(← syntaxBounded d.hour.val)) (.mk $(← syntaxBounded d.minute.val)) (.mk $(← syntaxBounded d.second.val)) (.mk $(← syntaxBounded d.nanosecond.val)))
 
 private meta def convertPlainDateTime (d : Std.Time.PlainDateTime) : MacroM (TSyntax `term) := do
  `(Std.Time.PlainDateTime.mk $(← convertPlainDate d.date) $(← convertPlainTime d.time))

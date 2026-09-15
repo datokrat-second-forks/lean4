@@ -149,7 +149,7 @@ def ofWallTime (stamp : WallTime) : PlainDateTime := Id.run do
 
   return {
     date := PlainDate.ofYearMonthDayClip (.ofInt year) hmon (Day.Ordinal.ofFin (Fin.succ mday))
-    time := PlainTime.ofHourMinuteSecondsNano (hour.expandTop (by decide)) minute (second.expandTop (by decide)) nano
+    time := PlainTime.ofHourMinuteSecondsNano (.mk (hour.expandTop (by decide))) (.mk minute) (.mk (second.expandTop (by decide))) (.mk nano)
   }
 
 /--

@@ -58,10 +58,10 @@ Transforms a tuple of a `Month` and a `Day` into a `Day.Ordinal.OfYear`.
 def dayOfYear (ordinal : ValidDate leap) : Day.Ordinal.OfYear leap :=
   let days := cumulativeDays leap ordinal.val.fst
   let proof := cumulativeDays_le leap ordinal.val.fst
-  let bounded := Bounded.LE.mk days.val proof |>.addBounds ordinal.val.snd
+  let bounded := Bounded.LE.mk days.val proof |>.addBounds ordinal.val.snd.toBounded
   match leap, bounded with
-  | true, bounded => bounded
-  | false, bounded => bounded
+  | true, bounded => .mk bounded
+  | false, bounded => .mk bounded
 
 set_option backward.isDefEq.respectTransparency false in
 /--
@@ -73,14 +73,14 @@ def ofOrdinal (ordinal : Day.Ordinal.OfYear leap) : ValidDate leap :=
       if h₁ : ordinal.val ≤ acc + monthDays.val then
         let bounded := Bounded.LE.mk ordinal.val (And.intro h h₁) |>.sub acc
         let bounded : Bounded.LE 1 monthDays.val := bounded.cast (by omega) (by omega)
-        let days₁ : Day.Ordinal := ⟨bounded.val, And.intro bounded.property.left (Int.le_trans bounded.property.right monthDays.property.right)⟩
+        let days₁ : Day.Ordinal := .mk ⟨bounded.val, And.intro bounded.property.left (Int.le_trans bounded.property.right monthDays.toBounded.property.right)⟩
         ⟨⟨idx, days₁⟩, Int.le_trans bounded.property.right (by simp +zetaDelta)⟩
       else by
         let h₂ := Int.not_le.mp h₁
 
         have h₃ : idx.val < 12 := Int.not_le.mp <| λh₃ => by
-          have h₅ := ordinal.property.right
-          let eq := Int.eq_iff_le_and_ge.mpr (And.intro idx.property.right h₃)
+          have h₅ : ordinal.val ≤ _ := ordinal.toBounded.property.right
+          let eq := Int.eq_iff_le_and_ge.mpr (And.intro idx.toBounded.property.right h₃)
           simp [monthDays, days, eq] at h₂
           simp [cumulativeDays, eq] at p
           simp [p] at h₂
@@ -91,7 +91,7 @@ def ofOrdinal (ordinal : Day.Ordinal.OfYear leap) : ValidDate leap :=
           · have h₂ : 366 < ordinal.val := h₂
             omega
 
-        let idx₂ := idx.truncateTop (Int.le_sub_one_of_lt h₃) |>.addTop 1 (by decide)
+        let idx₂ : Month.Ordinal := .mk (idx.toBounded.truncateTop (Int.le_sub_one_of_lt h₃) |>.addTop 1 (by decide))
         refine go idx₂ (acc + monthDays.val) h₂ ?_
         simp [monthDays, p]
         rw [difference_eq (Int.le_of_lt_add_one h₃)]
@@ -99,15 +99,15 @@ def ofOrdinal (ordinal : Day.Ordinal.OfYear leap) : ValidDate leap :=
       termination_by 12 - idx.val.toNat
       decreasing_by
         simp_wf
-        simp [Bounded.LE.addTop]
-        let gt0 : idx.val ≥ 0 := Int.le_trans (by decide) idx.property.left
+        simp [Bounded.LE.addTop, Month.Ordinal.val] at h₃ ⊢
+        let gt0 : idx.toBounded.val ≥ 0 := Int.le_trans (by decide) idx.toBounded.property.left
         refine Nat.sub_lt_sub_left (Int.toNat_lt gt0 |>.mpr h₃) ?_
         let toNat_lt_lt {n z : Int} (h : 0 ≤ z) (h₁ : 0 ≤ n) : z.toNat < n.toNat ↔ z < n := by
           rw [← Int.not_le, ← Nat.not_le, ← Int.ofNat_le, Int.toNat_of_nonneg h, Int.toNat_of_nonneg h₁]
         rw [toNat_lt_lt (by omega) (by omega)]
         omega
 
-    go 1 0 (Int.le_trans (by decide) ordinal.property.left) (by cases leap <;> decide)
+    go 1 0 (Int.le_trans (by decide) ordinal.toBounded.property.left) (by cases leap <;> decide)
 
 end ValidDate
 end Time
