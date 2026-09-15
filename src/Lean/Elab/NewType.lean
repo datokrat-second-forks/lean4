@@ -69,6 +69,10 @@ private def addNewtypeCtorProj (declName ctorName projName equivName fieldName :
         addDecl decl (forceExpose := exposed)
         -- Reducible so that `N.equiv.toFun`/`.invFun` are seen as the constructor/projector.
         setReducibilityStatus equivName .reducible
+        -- `macro_inline` substitutes the structure literal before compilation, so a transported
+        -- instance's `N.equiv.toFun`/`.invFun` fold to the identities; `inline` would only reach
+        -- the closed term the equivalence itself is compiled to.
+        setInlineAttribute equivName .macroInline
         compileDecl decl
         Transport.addTransportDecl equivName .global
     return params.size
