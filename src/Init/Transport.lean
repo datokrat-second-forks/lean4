@@ -80,6 +80,46 @@ applies to that instance only.
   left_inv i := congrArg OfNat.mk (e.left_inv i.ofNat)
   right_inv i := congrArg OfNat.mk (e.right_inv i.ofNat)
 
+@[transport] protected abbrev Add.congr (e : α ≃ β) : Add α ≃ Add β where
+  toFun i := ⟨fun x y => e.toFun (i.add (e.invFun x) (e.invFun y))⟩
+  invFun i := ⟨fun x y => e.invFun (i.add (e.toFun x) (e.toFun y))⟩
+  left_inv i := congrArg Add.mk <| funext fun x => funext fun y =>
+    (e.left_inv _).trans (congr (congrArg i.add (e.left_inv x)) (e.left_inv y))
+  right_inv i := congrArg Add.mk <| funext fun x => funext fun y =>
+    (e.right_inv _).trans (congr (congrArg i.add (e.right_inv x)) (e.right_inv y))
+
+@[transport] protected abbrev Sub.congr (e : α ≃ β) : Sub α ≃ Sub β where
+  toFun i := ⟨fun x y => e.toFun (i.sub (e.invFun x) (e.invFun y))⟩
+  invFun i := ⟨fun x y => e.invFun (i.sub (e.toFun x) (e.toFun y))⟩
+  left_inv i := congrArg Sub.mk <| funext fun x => funext fun y =>
+    (e.left_inv _).trans (congr (congrArg i.sub (e.left_inv x)) (e.left_inv y))
+  right_inv i := congrArg Sub.mk <| funext fun x => funext fun y =>
+    (e.right_inv _).trans (congr (congrArg i.sub (e.right_inv x)) (e.right_inv y))
+
+@[transport] protected abbrev Mul.congr (e : α ≃ β) : Mul α ≃ Mul β where
+  toFun i := ⟨fun x y => e.toFun (i.mul (e.invFun x) (e.invFun y))⟩
+  invFun i := ⟨fun x y => e.invFun (i.mul (e.toFun x) (e.toFun y))⟩
+  left_inv i := congrArg Mul.mk <| funext fun x => funext fun y =>
+    (e.left_inv _).trans (congr (congrArg i.mul (e.left_inv x)) (e.left_inv y))
+  right_inv i := congrArg Mul.mk <| funext fun x => funext fun y =>
+    (e.right_inv _).trans (congr (congrArg i.mul (e.right_inv x)) (e.right_inv y))
+
+@[transport] protected abbrev Div.congr (e : α ≃ β) : Div α ≃ Div β where
+  toFun i := ⟨fun x y => e.toFun (i.div (e.invFun x) (e.invFun y))⟩
+  invFun i := ⟨fun x y => e.invFun (i.div (e.toFun x) (e.toFun y))⟩
+  left_inv i := congrArg Div.mk <| funext fun x => funext fun y =>
+    (e.left_inv _).trans (congr (congrArg i.div (e.left_inv x)) (e.left_inv y))
+  right_inv i := congrArg Div.mk <| funext fun x => funext fun y =>
+    (e.right_inv _).trans (congr (congrArg i.div (e.right_inv x)) (e.right_inv y))
+
+@[transport] protected abbrev Neg.congr (e : α ≃ β) : Neg α ≃ Neg β where
+  toFun i := ⟨fun x => e.toFun (i.neg (e.invFun x))⟩
+  invFun i := ⟨fun x => e.invFun (i.neg (e.toFun x))⟩
+  left_inv i := congrArg Neg.mk <| funext fun x =>
+    (e.left_inv _).trans (congrArg i.neg (e.left_inv x))
+  right_inv i := congrArg Neg.mk <| funext fun x =>
+    (e.right_inv _).trans (congrArg i.neg (e.right_inv x))
+
 @[transport] protected abbrev Repr.congr (e : α ≃ β) : Repr α ≃ Repr β where
   toFun i := ⟨fun x prec => i.reprPrec (e.invFun x) prec⟩
   invFun i := ⟨fun x prec => i.reprPrec (e.toFun x) prec⟩

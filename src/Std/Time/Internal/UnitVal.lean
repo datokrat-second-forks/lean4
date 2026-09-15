@@ -138,6 +138,9 @@ instance : LE (UnitVal α) where le x y := x.val ≤ y.val
 
 instance : LT (UnitVal α) where lt x y := x.val < y.val
 
+instance {x y : UnitVal α} : Decidable (x < y) :=
+  inferInstanceAs (Decidable (x.val < y.val))
+
 instance : Add (UnitVal α) where add := UnitVal.add
 
 instance : Sub (UnitVal α) where sub := UnitVal.sub
