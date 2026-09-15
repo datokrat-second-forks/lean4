@@ -3833,10 +3833,10 @@ return v___x_1220_;
 LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_BVDecide_evalBvDecide___lam__0___boxed(lean_object* v___x_1223_, lean_object* v___x_1224_, lean_object* v___x_1225_, lean_object* v___x_1226_, lean_object* v_a_1227_, lean_object* v___y_1228_, lean_object* v___y_1229_, lean_object* v___y_1230_, lean_object* v___y_1231_, lean_object* v___y_1232_, lean_object* v___y_1233_, lean_object* v___y_1234_, lean_object* v___y_1235_, lean_object* v___y_1236_){
 _start:
 {
-uint8_t v___x_6658__boxed_1237_; uint8_t v___x_6659__boxed_1238_; lean_object* v_res_1239_; 
-v___x_6658__boxed_1237_ = lean_unbox(v___x_1223_);
-v___x_6659__boxed_1238_ = lean_unbox(v___x_1224_);
-v_res_1239_ = l_Lean_Elab_Tactic_BVDecide_evalBvDecide___lam__0(v___x_6658__boxed_1237_, v___x_6659__boxed_1238_, v___x_1225_, v___x_1226_, v_a_1227_, v___y_1228_, v___y_1229_, v___y_1230_, v___y_1231_, v___y_1232_, v___y_1233_, v___y_1234_, v___y_1235_);
+uint8_t v___x_7076__boxed_1237_; uint8_t v___x_7077__boxed_1238_; lean_object* v_res_1239_; 
+v___x_7076__boxed_1237_ = lean_unbox(v___x_1223_);
+v___x_7077__boxed_1238_ = lean_unbox(v___x_1224_);
+v_res_1239_ = l_Lean_Elab_Tactic_BVDecide_evalBvDecide___lam__0(v___x_7076__boxed_1237_, v___x_7077__boxed_1238_, v___x_1225_, v___x_1226_, v_a_1227_, v___y_1228_, v___y_1229_, v___y_1230_, v___y_1231_, v___y_1232_, v___y_1233_, v___y_1234_, v___y_1235_);
 lean_dec(v___y_1235_);
 lean_dec_ref(v___y_1234_);
 lean_dec(v___y_1233_);
@@ -3935,10 +3935,10 @@ lean_object* v___y_1286_ = _args[15];
 lean_object* v___y_1287_ = _args[16];
 _start:
 {
-uint8_t v___x_6809__boxed_1288_; uint8_t v___x_6810__boxed_1289_; lean_object* v_res_1290_; 
-v___x_6809__boxed_1288_ = lean_unbox(v___x_1273_);
-v___x_6810__boxed_1289_ = lean_unbox(v___x_1274_);
-v_res_1290_ = l_Lean_Elab_Tactic_BVDecide_evalBvDecide___lam__1(v_a_1271_, v_a_1272_, v___x_6809__boxed_1288_, v___x_6810__boxed_1289_, v___x_1275_, v___x_1276_, v_x_1277_, v_lratFile_1278_, v___y_1279_, v___y_1280_, v___y_1281_, v___y_1282_, v___y_1283_, v___y_1284_, v___y_1285_, v___y_1286_);
+uint8_t v___x_7227__boxed_1288_; uint8_t v___x_7228__boxed_1289_; lean_object* v_res_1290_; 
+v___x_7227__boxed_1288_ = lean_unbox(v___x_1273_);
+v___x_7228__boxed_1289_ = lean_unbox(v___x_1274_);
+v_res_1290_ = l_Lean_Elab_Tactic_BVDecide_evalBvDecide___lam__1(v_a_1271_, v_a_1272_, v___x_7227__boxed_1288_, v___x_7228__boxed_1289_, v___x_1275_, v___x_1276_, v_x_1277_, v_lratFile_1278_, v___y_1279_, v___y_1280_, v___y_1281_, v___y_1282_, v___y_1283_, v___y_1284_, v___y_1285_, v___y_1286_);
 lean_dec(v___y_1286_);
 lean_dec_ref(v___y_1285_);
 lean_dec(v___y_1284_);

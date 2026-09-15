@@ -3230,14 +3230,14 @@ return v___x_1001_;
 LEAN_EXPORT lean_object* l_panic___at___00Lean_Elab_getFixedParamsInfo_spec__7(lean_object* v_msg_1002_, lean_object* v___y_1003_, lean_object* v___y_1004_, lean_object* v___y_1005_, lean_object* v___y_1006_){
 _start:
 {
-lean_object* v___x_1008_; lean_object* v___x_29092__overap_1009_; lean_object* v___x_1010_; 
+lean_object* v___x_1008_; lean_object* v___x_29189__overap_1009_; lean_object* v___x_1010_; 
 v___x_1008_ = lean_obj_once(&l_panic___at___00Lean_Elab_getFixedParamsInfo_spec__7___closed__0, &l_panic___at___00Lean_Elab_getFixedParamsInfo_spec__7___closed__0_once, _init_l_panic___at___00Lean_Elab_getFixedParamsInfo_spec__7___closed__0);
-v___x_29092__overap_1009_ = lean_panic_fn_borrowed(v___x_1008_, v_msg_1002_);
+v___x_29189__overap_1009_ = lean_panic_fn_borrowed(v___x_1008_, v_msg_1002_);
 lean_inc(v___y_1006_);
 lean_inc_ref(v___y_1005_);
 lean_inc(v___y_1004_);
 lean_inc_ref(v___y_1003_);
-v___x_1010_ = lean_apply_5(v___x_29092__overap_1009_, v___y_1003_, v___y_1004_, v___y_1005_, v___y_1006_, lean_box(0));
+v___x_1010_ = lean_apply_5(v___x_29189__overap_1009_, v___y_1003_, v___y_1004_, v___y_1005_, v___y_1006_, lean_box(0));
 return v___x_1010_;
 }
 }

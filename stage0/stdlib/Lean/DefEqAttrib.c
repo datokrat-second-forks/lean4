@@ -2831,9 +2831,9 @@ return v___x_780_;
 LEAN_EXPORT lean_object* l_Lean_validateDefEqAttr___lam__0___boxed(lean_object* v_lhs_783_, lean_object* v_rhs_784_, lean_object* v___x_785_, lean_object* v___y_786_, lean_object* v___y_787_, lean_object* v___y_788_, lean_object* v___y_789_, lean_object* v___y_790_){
 _start:
 {
-uint8_t v___x_7220__boxed_791_; lean_object* v_res_792_; 
-v___x_7220__boxed_791_ = lean_unbox(v___x_785_);
-v_res_792_ = l_Lean_validateDefEqAttr___lam__0(v_lhs_783_, v_rhs_784_, v___x_7220__boxed_791_, v___y_786_, v___y_787_, v___y_788_, v___y_789_);
+uint8_t v___x_7629__boxed_791_; lean_object* v_res_792_; 
+v___x_7629__boxed_791_ = lean_unbox(v___x_785_);
+v_res_792_ = l_Lean_validateDefEqAttr___lam__0(v_lhs_783_, v_rhs_784_, v___x_7629__boxed_791_, v___y_786_, v___y_787_, v___y_788_, v___y_789_);
 lean_dec(v___y_789_);
 lean_dec_ref(v___y_788_);
 lean_dec(v___y_787_);

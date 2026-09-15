@@ -17,7 +17,7 @@ extern lean_object* l_Std_Time_DateFormat_enUS;
 lean_object* l_Std_Time_GenericFormat_formatBuilder___redArg(lean_object*);
 lean_object* l_Repr_addAppParen(lean_object*, lean_object*);
 lean_object* l_Std_Time_Month_Ordinal_days(uint8_t, lean_object*);
-uint8_t l_Std_Time_Day_instDecidableLEOrdinal(lean_object*, lean_object*);
+uint8_t lean_int_dec_le(lean_object*, lean_object*);
 lean_object* lean_nat_to_int(lean_object*);
 lean_object* lean_int_mod(lean_object*, lean_object*);
 uint8_t lean_int_dec_eq(lean_object*, lean_object*);
@@ -49,7 +49,6 @@ lean_object* lean_int_emod(lean_object*, lean_object*);
 lean_object* l_Std_Time_PlainTime_toMilliseconds(lean_object*);
 lean_object* l_Std_Time_PlainTime_toNanoseconds(lean_object*);
 lean_object* l_Std_Time_HourMarker_toAbsolute(uint8_t, lean_object*);
-uint8_t lean_int_dec_le(lean_object*, lean_object*);
 lean_object* l_Std_Time_ValidDate_dayOfYear(uint8_t, lean_object*);
 lean_object* l_Std_Time_PlainDateTime_alignedWeekOfMonth(lean_object*);
 extern lean_object* l_Std_Time_TimeZone_UTC;
@@ -2058,8 +2057,8 @@ v___jp_928_:
 {
 lean_object* v___x_930_; uint8_t v___x_931_; 
 v___x_930_ = l_Std_Time_Month_Ordinal_days(v___y_929_, v_m_925_);
-lean_inc(v_d_926_);
-v___x_931_ = l_Std_Time_Day_instDecidableLEOrdinal(v_d_926_, v___x_930_);
+v___x_931_ = lean_int_dec_le(v_d_926_, v___x_930_);
+lean_dec(v___x_930_);
 if (v___x_931_ == 0)
 {
 lean_object* v___x_932_; 
@@ -2157,8 +2156,8 @@ v___jp_963_:
 {
 lean_object* v___x_965_; uint8_t v___x_966_; 
 v___x_965_ = l_Std_Time_Month_Ordinal_days(v___y_964_, v___y_961_);
-lean_inc(v___y_962_);
-v___x_966_ = l_Std_Time_Day_instDecidableLEOrdinal(v___y_962_, v___x_965_);
+v___x_966_ = lean_int_dec_le(v___y_962_, v___x_965_);
+lean_dec(v___x_965_);
 if (v___x_966_ == 0)
 {
 lean_object* v___x_967_; 

@@ -908,9 +908,9 @@ return v___x_64_;
 LEAN_EXPORT lean_object* l___private_Std_Http_Data_Body_Stream_0__Std_Http_Body_Channel_Consumer_resolve___lam__0___boxed(lean_object* v___x_66_, lean_object* v___y_67_){
 _start:
 {
-uint8_t v___x_647__boxed_68_; uint8_t v_res_69_; lean_object* v_r_70_; 
-v___x_647__boxed_68_ = lean_unbox(v___x_66_);
-v_res_69_ = l___private_Std_Http_Data_Body_Stream_0__Std_Http_Body_Channel_Consumer_resolve___lam__0(v___x_647__boxed_68_);
+uint8_t v___x_907__boxed_68_; uint8_t v_res_69_; lean_object* v_r_70_; 
+v___x_907__boxed_68_ = lean_unbox(v___x_66_);
+v_res_69_ = l___private_Std_Http_Data_Body_Stream_0__Std_Http_Body_Channel_Consumer_resolve___lam__0(v___x_907__boxed_68_);
 v_r_70_ = lean_box(v_res_69_);
 return v_r_70_;
 }

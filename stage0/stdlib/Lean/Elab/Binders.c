@@ -3280,13 +3280,13 @@ goto _start;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_Elab_Term_quoteAutoTactic_spec__2___boxed(lean_object* v_kind_531_, lean_object* v___x_532_, lean_object* v_as_533_, lean_object* v_sz_534_, lean_object* v_i_535_, lean_object* v_b_536_, lean_object* v___y_537_, lean_object* v___y_538_, lean_object* v___y_539_){
 _start:
 {
-uint8_t v___x_3845__boxed_540_; size_t v_sz_boxed_541_; size_t v_i_boxed_542_; lean_object* v_res_543_; 
-v___x_3845__boxed_540_ = lean_unbox(v___x_532_);
+uint8_t v___x_4120__boxed_540_; size_t v_sz_boxed_541_; size_t v_i_boxed_542_; lean_object* v_res_543_; 
+v___x_4120__boxed_540_ = lean_unbox(v___x_532_);
 v_sz_boxed_541_ = lean_unbox_usize(v_sz_534_);
 lean_dec(v_sz_534_);
 v_i_boxed_542_ = lean_unbox_usize(v_i_535_);
 lean_dec(v_i_535_);
-v_res_543_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_Elab_Term_quoteAutoTactic_spec__2(v_kind_531_, v___x_3845__boxed_540_, v_as_533_, v_sz_boxed_541_, v_i_boxed_542_, v_b_536_, v___y_537_, v___y_538_);
+v_res_543_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_Elab_Term_quoteAutoTactic_spec__2(v_kind_531_, v___x_4120__boxed_540_, v_as_533_, v_sz_boxed_541_, v_i_boxed_542_, v_b_536_, v___y_537_, v___y_538_);
 lean_dec(v___y_538_);
 lean_dec_ref(v___y_537_);
 lean_dec_ref(v_as_533_);

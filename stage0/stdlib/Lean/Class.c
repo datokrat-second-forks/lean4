@@ -5662,16 +5662,16 @@ return v___x_1890_;
 v___jp_1894_:
 {
 size_t v_sz_1900_; size_t v___x_1901_; lean_object* v___x_1902_; lean_object* v___x_1903_; lean_object* v___x_1904_; lean_object* v___x_1905_; lean_object* v_a_1906_; lean_object* v_fst_1907_; lean_object* v___x_1908_; 
-v_sz_1900_ = lean_array_size(v___y_1898_);
+v_sz_1900_ = lean_array_size(v___y_1899_);
 v___x_1901_ = ((size_t)0ULL);
-v___x_1902_ = l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Class_0__Lean_initFn_00___x40_Lean_Class_1274053790____hygCtx___hyg_2__spec__3(v_sz_1900_, v___x_1901_, v___y_1898_);
+v___x_1902_ = l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Class_0__Lean_initFn_00___x40_Lean_Class_1274053790____hygCtx___hyg_2__spec__3(v_sz_1900_, v___x_1901_, v___y_1899_);
 v___x_1903_ = lean_mk_empty_array_with_capacity(v_i_1856_);
 lean_inc_ref(v___x_1903_);
 v___x_1904_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_1904_, 0, v___x_1903_);
 lean_ctor_set(v___x_1904_, 1, v_i_1856_);
-v___x_1905_ = l_List_forIn_x27_loop___at___00__private_Lean_Class_0__Lean_initFn_00___x40_Lean_Class_1274053790____hygCtx___hyg_2__spec__4___redArg(v___x_1902_, v___y_1899_, v___x_1904_);
-lean_dec(v___y_1899_);
+v___x_1905_ = l_List_forIn_x27_loop___at___00__private_Lean_Class_0__Lean_initFn_00___x40_Lean_Class_1274053790____hygCtx___hyg_2__spec__4___redArg(v___x_1902_, v___y_1896_, v___x_1904_);
+lean_dec(v___y_1896_);
 lean_dec_ref(v___x_1902_);
 v_a_1906_ = lean_ctor_get(v___x_1905_, 0);
 lean_inc(v_a_1906_);
@@ -5707,16 +5707,16 @@ if (lean_obj_tag(v___y_1916_) == 0)
 lean_dec_ref_known(v___y_1916_, 1);
 v___y_1895_ = v___y_1911_;
 v___y_1896_ = v___y_1912_;
-v___y_1897_ = v___y_1913_;
-v___y_1898_ = v___y_1914_;
+v___y_1897_ = v___y_1914_;
+v___y_1898_ = v___y_1913_;
 v___y_1899_ = v___y_1915_;
 goto v___jp_1894_;
 }
 else
 {
-lean_dec(v___y_1915_);
+lean_dec_ref(v___y_1915_);
 lean_dec_ref(v___y_1914_);
-lean_dec_ref(v___y_1913_);
+lean_dec(v___y_1912_);
 lean_dec(v_decl_1858_);
 lean_dec(v_i_1856_);
 lean_dec(v___x_1855_);
@@ -5745,10 +5745,10 @@ v___x_1928_ = lean_nat_dec_lt(v_i_1856_, v___x_1927_);
 if (v___x_1928_ == 0)
 {
 v___y_1895_ = v___y_1920_;
-v___y_1896_ = v___y_1919_;
+v___y_1896_ = v___x_1923_;
 v___y_1897_ = v___y_1918_;
-v___y_1898_ = v___x_1926_;
-v___y_1899_ = v___x_1923_;
+v___y_1898_ = v___y_1919_;
+v___y_1899_ = v___x_1926_;
 goto v___jp_1894_;
 }
 else
@@ -5761,10 +5761,10 @@ if (v___x_1930_ == 0)
 if (v___x_1928_ == 0)
 {
 v___y_1895_ = v___y_1920_;
-v___y_1896_ = v___y_1919_;
+v___y_1896_ = v___x_1923_;
 v___y_1897_ = v___y_1918_;
-v___y_1898_ = v___x_1926_;
-v___y_1899_ = v___x_1923_;
+v___y_1898_ = v___y_1919_;
+v___y_1899_ = v___x_1926_;
 goto v___jp_1894_;
 }
 else
@@ -5775,10 +5775,10 @@ v___x_1932_ = lean_usize_of_nat(v___x_1927_);
 lean_inc(v_decl_1858_);
 v___x_1933_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00__private_Lean_Class_0__Lean_initFn_00___x40_Lean_Class_1274053790____hygCtx___hyg_2__spec__5(v___x_1923_, v_decl_1858_, v___x_1926_, v___x_1931_, v___x_1932_, v___x_1929_, v___y_1919_, v___y_1920_);
 v___y_1911_ = v___y_1920_;
-v___y_1912_ = v___y_1919_;
-v___y_1913_ = v___y_1918_;
-v___y_1914_ = v___x_1926_;
-v___y_1915_ = v___x_1923_;
+v___y_1912_ = v___x_1923_;
+v___y_1913_ = v___y_1919_;
+v___y_1914_ = v___y_1918_;
+v___y_1915_ = v___x_1926_;
 v___y_1916_ = v___x_1933_;
 goto v___jp_1910_;
 }
@@ -5791,10 +5791,10 @@ v___x_1935_ = lean_usize_of_nat(v___x_1927_);
 lean_inc(v_decl_1858_);
 v___x_1936_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00__private_Lean_Class_0__Lean_initFn_00___x40_Lean_Class_1274053790____hygCtx___hyg_2__spec__5(v___x_1923_, v_decl_1858_, v___x_1926_, v___x_1934_, v___x_1935_, v___x_1929_, v___y_1919_, v___y_1920_);
 v___y_1911_ = v___y_1920_;
-v___y_1912_ = v___y_1919_;
-v___y_1913_ = v___y_1918_;
-v___y_1914_ = v___x_1926_;
-v___y_1915_ = v___x_1923_;
+v___y_1912_ = v___x_1923_;
+v___y_1913_ = v___y_1919_;
+v___y_1914_ = v___y_1918_;
+v___y_1915_ = v___x_1926_;
 v___y_1916_ = v___x_1936_;
 goto v___jp_1910_;
 }

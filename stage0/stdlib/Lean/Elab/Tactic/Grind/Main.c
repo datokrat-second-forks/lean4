@@ -7921,9 +7921,9 @@ return v___x_2465_;
 LEAN_EXPORT lean_object* l_Lean_Elab_Tactic_elabInitGrindNorm___lam__2___boxed(lean_object* v___x_2466_, lean_object* v_stx_2467_, lean_object* v___x_2468_, lean_object* v___y_2469_, lean_object* v___y_2470_, lean_object* v___y_2471_){
 _start:
 {
-uint8_t v___x_6168__boxed_2472_; lean_object* v_res_2473_; 
-v___x_6168__boxed_2472_ = lean_unbox(v___x_2466_);
-v_res_2473_ = l_Lean_Elab_Tactic_elabInitGrindNorm___lam__2(v___x_6168__boxed_2472_, v_stx_2467_, v___x_2468_, v___y_2469_, v___y_2470_);
+uint8_t v___x_6808__boxed_2472_; lean_object* v_res_2473_; 
+v___x_6808__boxed_2472_ = lean_unbox(v___x_2466_);
+v_res_2473_ = l_Lean_Elab_Tactic_elabInitGrindNorm___lam__2(v___x_6808__boxed_2472_, v_stx_2467_, v___x_2468_, v___y_2469_, v___y_2470_);
 lean_dec(v___y_2470_);
 lean_dec_ref(v___y_2469_);
 lean_dec(v_stx_2467_);

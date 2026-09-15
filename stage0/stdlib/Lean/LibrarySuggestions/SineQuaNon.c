@@ -3871,9 +3871,9 @@ lean_internal_panic_unreachable();
 LEAN_EXPORT lean_object* l___private_Lean_LibrarySuggestions_SineQuaNon_0__Lean_LibrarySuggestions_SineQuaNon_initFn___lam__1_00___x40_Lean_LibrarySuggestions_SineQuaNon_1591182015____hygCtx___hyg_2____boxed(lean_object* v_a_1467_, lean_object* v_a_1468_){
 _start:
 {
-uint8_t v_a_989__boxed_1469_; lean_object* v_res_1470_; 
-v_a_989__boxed_1469_ = lean_unbox(v_a_1468_);
-v_res_1470_ = l___private_Lean_LibrarySuggestions_SineQuaNon_0__Lean_LibrarySuggestions_SineQuaNon_initFn___lam__1_00___x40_Lean_LibrarySuggestions_SineQuaNon_1591182015____hygCtx___hyg_2_(v_a_1467_, v_a_989__boxed_1469_);
+uint8_t v_a_1090__boxed_1469_; lean_object* v_res_1470_; 
+v_a_1090__boxed_1469_ = lean_unbox(v_a_1468_);
+v_res_1470_ = l___private_Lean_LibrarySuggestions_SineQuaNon_0__Lean_LibrarySuggestions_SineQuaNon_initFn___lam__1_00___x40_Lean_LibrarySuggestions_SineQuaNon_1591182015____hygCtx___hyg_2_(v_a_1467_, v_a_1090__boxed_1469_);
 lean_dec_ref(v_a_1467_);
 return v_res_1470_;
 }
@@ -3973,10 +3973,10 @@ return v___x_1495_;
 LEAN_EXPORT lean_object* l___private_Lean_LibrarySuggestions_SineQuaNon_0__Lean_LibrarySuggestions_SineQuaNon_initFn___lam__2_00___x40_Lean_LibrarySuggestions_SineQuaNon_1591182015____hygCtx___hyg_2____boxed(lean_object* v___x_1498_, lean_object* v___x_1499_, lean_object* v___x_1500_, lean_object* v___y_1501_, lean_object* v___y_1502_, lean_object* v___y_1503_, lean_object* v___y_1504_, lean_object* v___y_1505_){
 _start:
 {
-double v___x_995__boxed_1506_; lean_object* v_res_1507_; 
-v___x_995__boxed_1506_ = lean_unbox_float(v___x_1499_);
+double v___x_1096__boxed_1506_; lean_object* v_res_1507_; 
+v___x_1096__boxed_1506_ = lean_unbox_float(v___x_1499_);
 lean_dec_ref(v___x_1499_);
-v_res_1507_ = l___private_Lean_LibrarySuggestions_SineQuaNon_0__Lean_LibrarySuggestions_SineQuaNon_initFn___lam__2_00___x40_Lean_LibrarySuggestions_SineQuaNon_1591182015____hygCtx___hyg_2_(v___x_1498_, v___x_995__boxed_1506_, v___x_1500_, v___y_1501_, v___y_1502_, v___y_1503_, v___y_1504_);
+v_res_1507_ = l___private_Lean_LibrarySuggestions_SineQuaNon_0__Lean_LibrarySuggestions_SineQuaNon_initFn___lam__2_00___x40_Lean_LibrarySuggestions_SineQuaNon_1591182015____hygCtx___hyg_2_(v___x_1498_, v___x_1096__boxed_1506_, v___x_1500_, v___y_1501_, v___y_1502_, v___y_1503_, v___y_1504_);
 lean_dec(v___y_1504_);
 lean_dec_ref(v___y_1503_);
 lean_dec(v___y_1502_);

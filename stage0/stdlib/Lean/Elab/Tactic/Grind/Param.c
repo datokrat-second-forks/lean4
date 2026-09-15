@@ -948,15 +948,15 @@ v___jp_79_:
 {
 lean_object* v___x_89_; lean_object* v___x_90_; 
 v___x_89_ = lean_alloc_ctor(0, 9, 0);
-lean_ctor_set(v___x_89_, 0, v___y_81_);
+lean_ctor_set(v___x_89_, 0, v___y_87_);
 lean_ctor_set(v___x_89_, 1, v___y_88_);
-lean_ctor_set(v___x_89_, 2, v___y_82_);
-lean_ctor_set(v___x_89_, 3, v___y_85_);
-lean_ctor_set(v___x_89_, 4, v___y_80_);
-lean_ctor_set(v___x_89_, 5, v___y_87_);
-lean_ctor_set(v___x_89_, 6, v___y_86_);
-lean_ctor_set(v___x_89_, 7, v___y_84_);
-lean_ctor_set(v___x_89_, 8, v___y_83_);
+lean_ctor_set(v___x_89_, 2, v___y_86_);
+lean_ctor_set(v___x_89_, 3, v___y_83_);
+lean_ctor_set(v___x_89_, 4, v___y_82_);
+lean_ctor_set(v___x_89_, 5, v___y_80_);
+lean_ctor_set(v___x_89_, 6, v___y_81_);
+lean_ctor_set(v___x_89_, 7, v___y_85_);
+lean_ctor_set(v___x_89_, 8, v___y_84_);
 v___x_90_ = lean_alloc_ctor(0, 1, 0);
 lean_ctor_set(v___x_90_, 0, v___x_89_);
 return v___x_90_;
@@ -970,14 +970,14 @@ v___x_103_ = lean_nat_dec_lt(v___x_101_, v___x_102_);
 if (v___x_103_ == 0)
 {
 lean_dec(v_declName_75_);
-v___y_80_ = v_extraFacts_95_;
-v___y_81_ = v_config_91_;
-v___y_82_ = v_extra_93_;
-v___y_83_ = v_anchorRefs_x3f_99_;
-v___y_84_ = v_normProcs_98_;
-v___y_85_ = v_extraInj_94_;
-v___y_86_ = v_norm_97_;
-v___y_87_ = v_symPrios_96_;
+v___y_80_ = v_symPrios_96_;
+v___y_81_ = v_norm_97_;
+v___y_82_ = v_extraFacts_95_;
+v___y_83_ = v_extraInj_94_;
+v___y_84_ = v_anchorRefs_x3f_99_;
+v___y_85_ = v_normProcs_98_;
+v___y_86_ = v_extra_93_;
+v___y_87_ = v_config_91_;
 v___y_88_ = v_extensions_92_;
 goto v___jp_79_;
 }
@@ -1038,14 +1038,14 @@ v_reusejp_116_:
 {
 lean_object* v___x_118_; 
 v___x_118_ = lean_array_fset(v_xs_x27_114_, v___x_101_, v___x_117_);
-v___y_80_ = v_extraFacts_95_;
-v___y_81_ = v_config_91_;
-v___y_82_ = v_extra_93_;
-v___y_83_ = v_anchorRefs_x3f_99_;
-v___y_84_ = v_normProcs_98_;
-v___y_85_ = v_extraInj_94_;
-v___y_86_ = v_norm_97_;
-v___y_87_ = v_symPrios_96_;
+v___y_80_ = v_symPrios_96_;
+v___y_81_ = v_norm_97_;
+v___y_82_ = v_extraFacts_95_;
+v___y_83_ = v_extraInj_94_;
+v___y_84_ = v_anchorRefs_x3f_99_;
+v___y_85_ = v_normProcs_98_;
+v___y_86_ = v_extra_93_;
+v___y_87_ = v_config_91_;
 v___y_88_ = v___x_118_;
 goto v___jp_79_;
 }
