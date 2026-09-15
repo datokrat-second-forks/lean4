@@ -14,34 +14,7 @@ newtype Foo := Int with toInt
 example (x : Foo) : Foo.equivDef.toFun x = x.toInt := rfl
 example (a : Int) : Foo.equivDef.invFun a = Foo.mk a := rfl
 
-/-! Congruences, as they would be declared next to the classes. -/
-
-@[transport] protected abbrev LE.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
-    Lean.CanonicalEquivalence (LE α) (LE β) where
-  toFun i := ⟨fun x y => i.le (e.invFun x) (e.invFun y)⟩
-  invFun i := ⟨fun x y => i.le (e.toFun x) (e.toFun y)⟩
-  left_inv i := congrArg LE.mk <| funext fun x => funext fun y =>
-    show i.le (e.invFun (e.toFun x)) (e.invFun (e.toFun y)) = i.le x y by
-      rw [e.left_inv x, e.left_inv y]
-  right_inv i := congrArg LE.mk <| funext fun x => funext fun y =>
-    show i.le (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = i.le x y by
-      rw [e.right_inv x, e.right_inv y]
-
-@[transport] protected abbrev DecidableLE.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : LE β] :
-    Lean.CanonicalEquivalence (@DecidableLE α ((LE.canonicalCongr e).invFun i)) (@DecidableLE β i) where
-  toFun d x y := decidable_of_iff (i.le (e.toFun (e.invFun x)) (e.toFun (e.invFun y))) (by
-    rw [e.right_inv x, e.right_inv y])
-  invFun d x y := d (e.toFun x) (e.toFun y)
-  left_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
-  right_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
-
-@[transport] protected abbrev Inhabited.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
-    Lean.CanonicalEquivalence (Inhabited α) (Inhabited β) where
-  toFun i := ⟨e.toFun i.default⟩
-  invFun i := ⟨e.invFun i.default⟩
-  left_inv i := congrArg Inhabited.mk (e.left_inv i.default)
-  right_inv i := congrArg Inhabited.mk (e.right_inv i.default)
-
+/-! Congruences beyond those of `Init.Transport`. -/
 
 /-- A congruence for a type constructor rather than a class. -/
 @[transport] protected abbrev Option.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
