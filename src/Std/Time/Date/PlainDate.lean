@@ -105,20 +105,20 @@ def ofEpochDay (day : Day.Offset) : PlainDate :=
   let d := doy - (153 * mp + 2).tdiv 5 + 1
   let m := mp + (if mp < 10 then 3 else -9)
   let y := y + (if m <= 2 then 1 else 0)
-  .ofYearMonthDayClip (.ofInt y) (.clip m (by decide)) (.clip d (by decide))
+  .ofYearMonthDayClip (.ofInt y) (.mk (.clip m (by decide))) (.mk (.clip d (by decide)))
 
 /--
 Returns the aligned week of the month for a `PlainDate`. Weeks are fixed 7-day slots
 starting from day 1: days 1–7 are week 1, days 8–14 are week 2, etc.
 -/
 def alignedWeekOfMonth (date : PlainDate) : Week.Aligned.Ordinal :=
-  date.day.sub 1 |>.ediv 7 (by decide) |>.add 1
+  .mk (date.day.toBounded.sub 1 |>.ediv 7 (by decide) |>.add 1)
 
 /--
 Determines the quarter of the year for the given `PlainDate`.
 -/
 def quarter (date : PlainDate) : Bounded.LE 1 4 :=
-  date.month.sub 1 |>.ediv 3 (by decide) |>.add 1
+  date.month.toBounded.sub 1 |>.ediv 3 (by decide) |>.add 1
 
 /--
 Transforms a `PlainDate` into a `Day.Ordinal.OfYear`.
@@ -144,11 +144,11 @@ def inLeapYear (date : PlainDate) : Bool :=
 Converts a `PlainDate` to the number of days since 1970-01-01T00:00:00.
 -/
 def toEpochDay (date : PlainDate) : Day.Offset :=
-  let y : Int := if date.month.toInt > 2 then date.year.toInt else date.year.toInt - 1
+  let y : Int := if date.month.val > 2 then date.year.toInt else date.year.toInt - 1
   let era : Int := (if y ≥ 0 then y else y - 399).tdiv 400
   let yoe : Int := y - era * 400
-  let m : Int := date.month.toInt
-  let d : Int := date.day.toInt
+  let m : Int := date.month.val
+  let d : Int := date.day.val
   let doy := (153 * (m + (if m > 2 then -3 else 9)) + 2).tdiv 5 + d - 1
   let doe := yoe * 365 + yoe.tdiv 4 - yoe.tdiv 100 + doy
 
@@ -193,7 +193,7 @@ def addMonthsClip (date : PlainDate) (months : Month.Offset) : PlainDate :=
   let totalMonths : Int := totalMonths.toInt
   let wrappedMonths := Bounded.LE.byEmod totalMonths 12 (by decide) |>.add 1
   let yearsOffset := totalMonths / 12
-  PlainDate.ofYearMonthDayClip (date.year + .ofInt yearsOffset) wrappedMonths date.day
+  PlainDate.ofYearMonthDayClip (date.year + .ofInt yearsOffset) (.mk wrappedMonths) date.day
 
 /--
 Subtracts `Month.Offset` from a `PlainDate`, it clips the day to the last valid day of that month.
@@ -304,7 +304,7 @@ Calculates the `Weekday` of a given `PlainDate` using Zeller's Congruence for th
 def weekday (date : PlainDate) : Weekday :=
   let days := date.toEpochDay.val
   let res := if days ≥ -4 then (days + 4) % 7 else (days + 5) % 7 + 6
-  .ofOrdinal (Bounded.LE.ofNatWrapping res (by decide))
+  .ofOrdinal (.mk (Bounded.LE.ofNatWrapping res (by decide)))
 
 /--
 Returns the week of the month for the given `PlainDate`, where weeks start on `firstDay`.
@@ -313,7 +313,7 @@ The first partial week containing day 1 is week 1, so weeks may span fewer than 
 def weekOfMonth (date : PlainDate) (firstDay : Weekday := .monday) : Week.Ordinal :=
   let day1Ord := (date.withDaysClip 1).weekday.toOrdinal.val
   let offset := (day1Ord - firstDay.toOrdinal.val + 7) % 7
-  Bounded.LE.ofNatWrapping ((date.day.val - 1 + offset) / 7 + 1) (by decide)
+  .mk (Bounded.LE.ofNatWrapping ((date.day.val - 1 + offset) / 7 + 1) (by decide))
 
 /--
 Sets the date to the specified `desiredWeekday`. If the `desiredWeekday` is the same as the current weekday,
@@ -321,8 +321,8 @@ the original `date` is returned without modification. If the `desiredWeekday` is
 function adjusts the date forward to the next occurrence of that weekday.
 -/
 def withWeekday (date : PlainDate) (desiredWeekday : Weekday) : PlainDate :=
-  let weekday := date |>.weekday |>.toOrdinal
-  let offset := desiredWeekday.toOrdinal |>.subBounds weekday
+  let weekday := date |>.weekday |>.toOrdinal |>.toBounded
+  let offset := desiredWeekday.toOrdinal.toBounded |>.subBounds weekday
 
   let offset : Bounded.LE 0 6 :=
     if h : offset.val < 0 then
@@ -335,8 +335,8 @@ def withWeekday (date : PlainDate) (desiredWeekday : Weekday) : PlainDate :=
   date.addDays (Day.Offset.ofInt offset.toInt)
 
 private def localizedDayOfWeek (weekday firstDay : Weekday) : Bounded.LE 0 6 :=
-  weekday.toOrdinal
-  |>.subBounds firstDay.toOrdinal
+  weekday.toOrdinal.toBounded
+  |>.subBounds firstDay.toOrdinal.toBounded
   |>.emod 7 (by decide)
 
 /--
@@ -369,7 +369,7 @@ def weekOfYear (date : PlainDate) (firstDay : Weekday := .monday) (minDaysBounde
     let interval := date.toEpochDay - prevYearStart.toEpochDay
     let interval := Bounded.LE.ofNatWrapping interval.val (by decide) (lo := 0) (hi := 370)
     let w := interval.ediv 7 (by decide)
-    w.add 1
+    .mk (w.add 1)
   else
     let nextYearStart := startOfWeekBasedYear (year + 1) firstDay minDaysBounded
     if date.toEpochDay >= nextYearStart.toEpochDay then
@@ -378,7 +378,7 @@ def weekOfYear (date : PlainDate) (firstDay : Weekday := .monday) (minDaysBounde
       let interval := date.toEpochDay - thisYearStart.toEpochDay
       let interval := Bounded.LE.ofNatWrapping interval.val (by decide) (lo := 0) (hi := 370)
       let w := interval.ediv 7 (by decide)
-      w.add 1
+      .mk (w.add 1)
 
 /--
 Returns the week-based year for the given `PlainDate`, using `firstDay` as the start of the week
