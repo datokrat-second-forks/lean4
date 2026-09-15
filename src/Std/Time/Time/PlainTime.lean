@@ -44,7 +44,7 @@ structure PlainTime where
 deriving Repr, DecidableEq
 
 instance : Inhabited PlainTime where
-  default := ⟨0, 0, 0, 0, by decide⟩
+  default := ⟨0, 0, 0, 0⟩
 
 instance : Ord PlainTime where
   compare := compareLex (compareOn (·.hour)) <| compareLex (compareOn (·.minute)) <|
@@ -141,7 +141,7 @@ def ofNanoseconds (nanos : Nanosecond.Offset) : PlainTime :=
   have seconds := seconds.expandTop (by decide)
 
   let nanos := Bounded.LE.byEmod nanos.val 1000000000 (by decide)
-  PlainTime.mk hours minutes seconds nanos
+  PlainTime.mk (.mk hours) (.mk minutes) (.mk seconds) (.mk nanos)
 
 /--
 Creates a `PlainTime` value from a total number of millisecond.
@@ -261,9 +261,9 @@ Creates a new `PlainTime` by adjusting the milliseconds component inside the `na
 -/
 @[inline]
 def withMilliseconds (pt : PlainTime) (millis : Millisecond.Ordinal) : PlainTime :=
-  let minorPart := pt.nanosecond.emod 1000 (by decide)
-  let majorPart := millis.mul_pos 1000000 (by decide) |>.addBounds minorPart
-  { pt with nanosecond := majorPart |>.expandTop (by decide) }
+  let minorPart := pt.nanosecond.toBounded.emod 1000 (by decide)
+  let majorPart := millis.toBounded.mul_pos 1000000 (by decide) |>.addBounds minorPart
+  { pt with nanosecond := .mk (majorPart |>.expandTop (by decide)) }
 
 /--
 Creates a new `PlainTime` by adjusting the `nano` component to the given value.
@@ -284,7 +284,7 @@ def withHours (pt : PlainTime) (hour : Hour.Ordinal) : PlainTime :=
 -/
 @[inline]
 def millisecond (pt : PlainTime) : Millisecond.Ordinal :=
-  pt.nanosecond.ediv 1000000 (by decide)
+  .mk (pt.nanosecond.toBounded.ediv 1000000 (by decide))
 
 instance : HAdd PlainTime Nanosecond.Offset PlainTime where
   hAdd := addNanoseconds
