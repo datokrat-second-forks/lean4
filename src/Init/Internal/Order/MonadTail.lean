@@ -147,15 +147,20 @@ instance : MonadTail (ST σ) where
     simp only [ST.bind]
     apply h
 
-instance : MonadTail BaseIO :=
-  inferInstanceAs (MonadTail (ST IO.RealWorld))
+instance [Nonempty α] : CCPO (BaseIO α) :=
+  inferInstanceAs (CCPO (ST IO.RealWorld α))
+
+instance : MonadTail BaseIO where
+  instCCPO _ := inferInstance
+  bind_mono_right h := MonadTail.bind_mono_right (m := ST IO.RealWorld) h
 
 instance [Nonempty ε] : MonadTail (EST ε σ) where
   instCCPO _ := inferInstance
   bind_mono_right h := MonoBind.bind_mono_right h
 
-instance [Nonempty ε] : MonadTail (EIO ε) :=
-  inferInstanceAs (MonadTail (EST ε IO.RealWorld))
+instance [Nonempty ε] : MonadTail (EIO ε) where
+  instCCPO _ := inferInstance
+  bind_mono_right h := MonoBind.bind_mono_right h
 
 instance : MonadTail IO :=
   inferInstanceAs (MonadTail (EIO IO.Error))

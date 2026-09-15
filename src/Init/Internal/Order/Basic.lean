@@ -8,6 +8,7 @@ module
 prelude
 
 public import Init.System.IO  -- for `MonoBind` instance
+public import Init.Transport
 import all Init.Control.Except  -- for `MonoBind` instance
 import all Init.Control.StateRef  -- for `MonoBind` instance
 import all Init.Control.Option  -- for `MonoBind` instance
@@ -91,6 +92,29 @@ This is intended to be used in the construction of the strong induction principl
 
 end PartialOrder
 
+protected theorem PartialOrder.ext {α : Sort u} {i j : PartialOrder α} (h : i.rel = j.rel) :
+    i = j := by
+  cases i; cases j; cases h; rfl
+
+/-- Transfers a partial order along an equivalence, comparing elements of `β` through `e.invFun`. -/
+protected abbrev PartialOrder.map {α : Sort u} {β : Sort v} (e : α ≃ β) (i : PartialOrder α) :
+    PartialOrder β where
+  rel x y := i.rel (e.invFun x) (e.invFun y)
+  rel_refl := i.rel_refl
+  rel_trans := i.rel_trans
+  rel_antisymm h₁ h₂ := e.invFun_injective (i.rel_antisymm h₁ h₂)
+
+@[transport] protected abbrev PartialOrder.congr {α : Sort u} {β : Sort v} (e : α ≃ β) :
+    PartialOrder α ≃ PartialOrder β where
+  toFun := PartialOrder.map e
+  invFun := PartialOrder.map e.symm
+  left_inv i := PartialOrder.ext <| funext fun x => funext fun y =>
+    show i.rel (e.invFun (e.toFun x)) (e.invFun (e.toFun y)) = i.rel x y by
+      rw [e.left_inv x, e.left_inv y]
+  right_inv i := PartialOrder.ext <| funext fun x => funext fun y =>
+    show i.rel (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = i.rel x y by
+      rw [e.right_inv x, e.right_inv y]
+
 section CCPO
 
 open PartialOrder
@@ -142,6 +166,32 @@ theorem bot_le (x : α) : ⊥ ⊑ x := by
   intro x y; contradiction
 
 end CCPO
+
+protected theorem CCPO.ext {α : Sort u} {i j : CCPO α} (h : i.toPartialOrder = j.toPartialOrder) :
+    i = j := by
+  cases i; cases j; cases h; rfl
+
+/-- Transfers a chain-complete partial order along an equivalence; see `PartialOrder.map`. -/
+protected abbrev CCPO.map {α : Sort u} {β : Sort v} (e : α ≃ β) (i : CCPO α) : CCPO β where
+  toPartialOrder := PartialOrder.map e i.toPartialOrder
+  has_csup {c} hc := by
+    have ⟨s, hs⟩ := i.has_csup (c := fun x => c (e.toFun x)) fun x y hx hy => by
+      have h : i.rel (e.invFun (e.toFun x)) (e.invFun (e.toFun y)) ∨
+          i.rel (e.invFun (e.toFun y)) (e.invFun (e.toFun x)) := hc _ _ hx hy
+      rwa [e.left_inv x, e.left_inv y] at h
+    refine ⟨e.toFun s, fun x => ?_⟩
+    show i.rel (e.invFun (e.toFun s)) (e.invFun x) ↔ ∀ y, c y → i.rel (e.invFun y) (e.invFun x)
+    rw [e.left_inv s]
+    exact (hs (e.invFun x)).trans
+      ⟨fun h y hy => h (e.invFun y) (by show c (e.toFun (e.invFun y)); rwa [e.right_inv y]),
+       fun h y hy => by have := h (e.toFun y) hy; rwa [e.left_inv y] at this⟩
+
+@[transport] protected abbrev CCPO.congr {α : Sort u} {β : Sort v} (e : α ≃ β) :
+    CCPO α ≃ CCPO β where
+  toFun := CCPO.map e
+  invFun := CCPO.map e.symm
+  left_inv i := CCPO.ext ((PartialOrder.congr e).left_inv i.toPartialOrder)
+  right_inv i := CCPO.ext ((PartialOrder.congr e).right_inv i.toPartialOrder)
 
 
 section CompleteLattice
@@ -1277,8 +1327,9 @@ instance [Nonempty ε] : MonoBind (EST ε σ) where
 instance [Nonempty ε] : CCPO (EIO ε α) :=
   inferInstanceAs (CCPO (EST ε IO.RealWorld α))
 
-instance [Nonempty ε] : MonoBind (EIO ε) :=
-  inferInstanceAs (MonoBind (EST ε IO.RealWorld))
+instance [Nonempty ε] : MonoBind (EIO ε) where
+  bind_mono_left h₁₂ := MonoBind.bind_mono_left (m := EST ε IO.RealWorld) h₁₂
+  bind_mono_right h₁₂ := MonoBind.bind_mono_right (m := EST ε IO.RealWorld) h₁₂
 
 instance : CCPO (IO α) :=
   inferInstanceAs (CCPO (EIO IO.Error α))
