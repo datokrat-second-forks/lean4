@@ -15,7 +15,7 @@ namespace Lake
 The monad in Lake for `main`-like functions.
 Supports IO, logging, and `exit`.
 -/
-@[expose] public def MainM := EIO ExitCode
+@[expose] public newtype MainM (α : Type) := EIO ExitCode α with toEIO
 
 public instance : Monad MainM := inferInstanceAs (Monad (EIO ExitCode))
 public instance : MonadFinally MainM := inferInstanceAs (MonadFinally (EIO ExitCode))
@@ -24,12 +24,6 @@ public instance : MonadLift BaseIO MainM := inferInstanceAs (MonadLift BaseIO (E
 namespace MainM
 
 /-! # Basics -/
-
-@[inline] public def mk (x : EIO ExitCode α) : MainM α :=
-  x
-
-@[inline] public def toEIO (self : MainM α) : EIO ExitCode α :=
-  self
 
 @[inline] public def toBaseIO (self : MainM α) : BaseIO (Except ExitCode α) :=
   self.toEIO.toBaseIO
@@ -47,7 +41,7 @@ public instance : MonadExit MainM := ⟨MainM.exit⟩
 
 /-- Try this and catch exits. -/
 @[inline] public def tryCatchExit (f : ExitCode → MainM α) (self : MainM α) : MainM α :=
-  self.toEIO.tryCatch f
+  .mk <| self.toEIO.tryCatch fun rc => (f rc).toEIO
 
 /-- Try this and catch error codes (i.e., non-zero exits). -/
 @[inline] public def tryCatchError (f : ExitCode → MainM α) (self : MainM α) : MainM α :=
