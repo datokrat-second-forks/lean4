@@ -157,3 +157,42 @@ theorem Injective.leftInverse
   hf.exists_leftInverse
 
 end Function
+
+/--
+An equivalence `α ≃ β` between two types: a function `toFun : α → β` together with an inverse
+`invFun`.
+
+Declarations concluding in an equivalence can be tagged with `@[transport]`. Congruences such as
+`(e : α ≃ β) → LE α ≃ LE β` then let the `transport` tactic, and `inferInstanceAs` and `deriving`
+where definitional unfolding does not apply, move instances between equivalent types without unfolding
+either of them.
+-/
+structure Equiv (α : Sort u) (β : Sort v) where
+  toFun : α → β
+  invFun : β → α
+  left_inv : Function.LeftInverse invFun toFun
+  right_inv : Function.RightInverse invFun toFun
+
+@[inherit_doc] infixl:25 " ≃ " => Equiv
+
+namespace Equiv
+
+protected abbrev refl (α : Sort u) : α ≃ α :=
+  ⟨id, id, fun _ => rfl, fun _ => rfl⟩
+
+protected abbrev symm (e : α ≃ β) : β ≃ α :=
+  ⟨e.invFun, e.toFun, e.right_inv, e.left_inv⟩
+
+protected abbrev trans (e₁ : α ≃ β) (e₂ : β ≃ γ) : α ≃ γ where
+  toFun := e₂.toFun ∘ e₁.toFun
+  invFun := e₁.invFun ∘ e₂.invFun
+  left_inv x := (congrArg e₁.invFun (e₂.left_inv (e₁.toFun x))).trans (e₁.left_inv x)
+  right_inv y := (congrArg e₂.toFun (e₁.right_inv (e₂.invFun y))).trans (e₂.right_inv y)
+
+theorem toFun_injective (e : α ≃ β) : Function.Injective e.toFun :=
+  e.left_inv.injective
+
+theorem invFun_injective (e : α ≃ β) : Function.Injective e.invFun :=
+  e.right_inv.injective
+
+end Equiv
