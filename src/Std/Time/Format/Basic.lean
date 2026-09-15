@@ -151,25 +151,25 @@ private def eraIndex : Year.Era → Fin 2
   | .ce => 1
 
 private def formatMonthLong (symbols : DateFormatSymbols) (month : Month.Ordinal) : String :=
-  symbols.monthLong.get (month.sub 1 |>.toFin (by decide))
+  symbols.monthLong.get (month.toBounded.sub 1 |>.toFin (by decide))
 
 private def formatMonthShort (symbols : DateFormatSymbols) (month : Month.Ordinal) : String :=
-  symbols.monthShort.get (month.sub 1 |>.toFin (by decide))
+  symbols.monthShort.get (month.toBounded.sub 1 |>.toFin (by decide))
 
 private def formatMonthNarrow (symbols : DateFormatSymbols) (month : Month.Ordinal) : String :=
-  symbols.monthNarrow.get (month.sub 1 |>.toFin (by decide))
+  symbols.monthNarrow.get (month.toBounded.sub 1 |>.toFin (by decide))
 
 private def formatWeekdayLong (symbols : DateFormatSymbols) (wd : Weekday) : String :=
-  symbols.weekdayLong.get (wd.toOrdinal.sub 1 |>.toFin (by decide))
+  symbols.weekdayLong.get (wd.toOrdinal.toBounded.sub 1 |>.toFin (by decide))
 
 private def formatWeekdayShort (symbols : DateFormatSymbols) (wd : Weekday) : String :=
-  symbols.weekdayShort.get (wd.toOrdinal.sub 1 |>.toFin (by decide))
+  symbols.weekdayShort.get (wd.toOrdinal.toBounded.sub 1 |>.toFin (by decide))
 
 private def formatWeekdayNarrow (symbols : DateFormatSymbols) (wd : Weekday) : String :=
-  symbols.weekdayNarrow.get (wd.toOrdinal.sub 1 |>.toFin (by decide))
+  symbols.weekdayNarrow.get (wd.toOrdinal.toBounded.sub 1 |>.toFin (by decide))
 
 private def formatWeekdayTwoLetter (symbols : DateFormatSymbols) (wd : Weekday) : String :=
-  symbols.weekdayTwoLetter.get (wd.toOrdinal.sub 1 |>.toFin (by decide))
+  symbols.weekdayTwoLetter.get (wd.toOrdinal.toBounded.sub 1 |>.toFin (by decide))
 
 private def formatEraShort (symbols : DateFormatSymbols) (era : Year.Era) : String :=
   symbols.eraShort.get (eraIndex era)
@@ -180,20 +180,21 @@ private def formatEraLong (symbols : DateFormatSymbols) (era : Year.Era) : Strin
 private def formatEraNarrow (symbols : DateFormatSymbols) (era : Year.Era) : String :=
   symbols.eraNarrow.get (eraIndex era)
 
-private def formatQuarterNumber : Month.Quarter → String
+private def formatQuarterNumber (q : Month.Quarter) : String :=
+  match q.toBounded with
   | ⟨1, _⟩ => "1"
   | ⟨2, _⟩ => "2"
   | ⟨3, _⟩ => "3"
   | ⟨4, _⟩ => "4"
 
 private def formatQuarterShort (symbols : DateFormatSymbols) (q : Month.Quarter) : String :=
-  symbols.quarterShort.get (q.sub 1 |>.toFin (by decide))
+  symbols.quarterShort.get (q.toBounded.sub 1 |>.toFin (by decide))
 
 private def formatQuarterLong (symbols : DateFormatSymbols) (q : Month.Quarter) : String :=
-  symbols.quarterLong.get (q.sub 1 |>.toFin (by decide))
+  symbols.quarterLong.get (q.toBounded.sub 1 |>.toFin (by decide))
 
 private def formatQuarterNarrow (symbols : DateFormatSymbols) (q : Month.Quarter) : String :=
-  symbols.quarterNarrow.get (q.sub 1 |>.toFin (by decide))
+  symbols.quarterNarrow.get (q.toBounded.sub 1 |>.toFin (by decide))
 
 private def formatMarkerShort (symbols : DateFormatSymbols) (marker : HourMarker) : String :=
   match marker with
@@ -496,7 +497,7 @@ private def dateFromModifier (dateformat : DateFormat) (date : DateTime) : TypeF
   | .D _ => Sigma.mk _ date.dayOfYear
   | .M _ | .L _ => date.month
   | .d _ => date.day
-  | .Q _ | .q _ => date.quarter
+  | .Q _ | .q _ => .mk date.quarter
   | .w _ => date.weekOfYear firstDay minDays
   | .W _ => date.weekOfMonth firstDay
   | .E _ | .e _ | .c _ => date.weekday
@@ -505,7 +506,7 @@ private def dateFromModifier (dateformat : DateFormat) (date : DateTime) : TypeF
   | .b _ => classifyDayPeriod date.hour date.minute date.date.get.time.second
   | .B _ => classifyExtendedDayPeriod date.hour date.minute date.date.get.time.second
   | .h _ => HourMarker.toRelative date.hour |>.fst
-  | .K _ => date.hour.emod 12 (by decide)
+  | .K _ => date.hour.toBounded.emod 12 (by decide)
   | .k _ => date.hour.shiftTo1BasedHour
   | .H _ => date.hour
   | .m _ => date.minute
@@ -548,7 +549,7 @@ private def parseFromSymbols {α : Type} (pairs : Array (String × α)) : Parser
   pairs.foldl (fun acc (s, v) => acc <|> pstring s *> pure v) (fail "no match")
 
 private def monthPairs (arr : Vector String 12) : Array (String × Month.Ordinal) :=
-  arr.mapFinIdx (fun idx val n => (val, Bounded.LE.ofFin ⟨idx, n⟩ |>.add 1)) |>.toArray
+  arr.mapFinIdx (fun idx val n => (val, .mk (Bounded.LE.ofFin ⟨idx, n⟩ |>.add 1))) |>.toArray
 
 private def weekdayOfIndex : Nat → Weekday
   | 0 => .sunday
@@ -560,7 +561,7 @@ private def weekdayOfIndex : Nat → Weekday
   | _ => .saturday
 
 private def weekdayPairs (arr : Vector String 7) : Array (String × Weekday) :=
-  arr.mapFinIdx (fun idx val n => (val, .ofOrdinal <| Bounded.LE.ofFin ⟨idx, n⟩ |>.add 1)) |>.toArray
+  arr.mapFinIdx (fun idx val n => (val, .ofOrdinal <| .mk (Bounded.LE.ofFin ⟨idx, n⟩ |>.add 1))) |>.toArray
 
 private def eraOfIndex : Nat → Year.Era
   | 0 => .bce
@@ -570,7 +571,7 @@ private def eraPairs (arr : Vector String 2) : Array (String × Year.Era) :=
   arr.mapFinIdx (fun idx val _ => (val, eraOfIndex idx)) |>.toArray
 
 private def quarterPairs (arr : Vector String 4) : Array (String × Month.Quarter) :=
-  arr.mapFinIdx (fun idx val n => (val, Bounded.LE.ofFin ⟨idx, n⟩ |>.add 1)) |>.toArray
+  arr.mapFinIdx (fun idx val n => (val, .mk (Bounded.LE.ofFin ⟨idx, n⟩ |>.add 1))) |>.toArray
 
 private def parseMonthLong (symbols : DateFormatSymbols) : Parser Month.Ordinal :=
   parseFromSymbols (monthPairs symbols.monthLong)
@@ -606,10 +607,10 @@ private def parseEraNarrow (symbols : DateFormatSymbols) : Parser Year.Era :=
   parseFromSymbols (eraPairs symbols.eraNarrow)
 
 private def parseQuarterNumber : Parser Month.Quarter
-   := pstring "1" *> pure ⟨1, by decide⟩
-  <|> pstring "2" *> pure ⟨2, by decide⟩
-  <|> pstring "3" *> pure ⟨3, by decide⟩
-  <|> pstring "4" *> pure ⟨4, by decide⟩
+   := pstring "1" *> pure (.mk ⟨1, by decide⟩)
+  <|> pstring "2" *> pure (.mk ⟨2, by decide⟩)
+  <|> pstring "3" *> pure (.mk ⟨3, by decide⟩)
+  <|> pstring "4" *> pure (.mk ⟨4, by decide⟩)
 
 private def parseQuarterLong (symbols : DateFormatSymbols) : Parser Month.Quarter :=
   parseFromSymbols (quarterPairs symbols.quarterLong)
@@ -755,22 +756,22 @@ private def parseWith (config : FormatConfig) : (mod : Modifier) → Parser (Typ
     | .twoDigit => (Year.Offset.ofInt <| 2000 + ·) <$> Int.ofNat <$> parseNum 2
     | .fourDigit => Year.Offset.ofInt <$> (parseSigned <| parseNum 4)
     | .extended n => Year.Offset.ofInt <$> (parseSigned <| parseNum n)
-  | .D format => Sigma.mk true <$> parseNatToBounded (parseFlexibleNum format.padding)
+  | .D format => (Sigma.mk true <| Day.Ordinal.OfYear.mk ·) <$> parseNatToBounded (parseFlexibleNum format.padding)
   | .M format | .L format =>
     match format with
-    | .inl fmt  => parseNatToBounded (parseFlexibleNum fmt.padding)
+    | .inl fmt  => Month.Ordinal.mk <$> parseNatToBounded (parseFlexibleNum fmt.padding)
     | .inr .short | .inr .twoLetterShort => parseMonthShort config.dateformat.symbols
     | .inr .full   => parseMonthLong config.dateformat.symbols
     | .inr .narrow => parseMonthNarrow config.dateformat.symbols
-  | .d format => parseNatToBounded (parseFlexibleNum format.padding)
+  | .d format => Day.Ordinal.mk <$> parseNatToBounded (parseFlexibleNum format.padding)
   | .Q format | .q format =>
     match format with
-    | .inl fmt  => parseNatToBounded (parseFlexibleNum fmt.padding)
+    | .inl fmt  => Month.Quarter.mk <$> parseNatToBounded (parseFlexibleNum fmt.padding)
     | .inr .short => parseQuarterShort config.dateformat.symbols
     | .inr .full  => parseQuarterLong config.dateformat.symbols
     | .inr .narrow | .inr .twoLetterShort => parseQuarterNarrow config.dateformat.symbols
-  | .w format => parseNatToBounded (parseFlexibleNum format.padding)
-  | .W format => parseNatToBounded (parseFlexibleNum format.padding)
+  | .w format => Week.OfYear.Ordinal.mk <$> parseNatToBounded (parseFlexibleNum format.padding)
+  | .W format => Week.Ordinal.mk <$> parseNatToBounded (parseFlexibleNum format.padding)
   | .E format =>
     match format with
     | .short | .twoLetterShort => parseWeekdayShort config.dateformat.symbols
@@ -783,12 +784,12 @@ private def parseWith (config : FormatConfig) : (mod : Modifier) → Parser (Typ
       if ¬ (1 ≤ n ∧ n ≤ 7) then fail "need a natural number in the interval of 1 to 7"
       let firstOrd : Int := config.dateformat.firstDayOfWeek.toOrdinal.val
       let absOrd : Int := ((n : Int) - 1 + firstOrd - 1) % 7 + 1
-      return Weekday.ofOrdinal (Bounded.LE.ofNatWrapping absOrd (by decide))
+      return Weekday.ofOrdinal (.mk (Bounded.LE.ofNatWrapping absOrd (by decide)))
     | .inr .short => parseWeekdayShort config.dateformat.symbols
     | .inr .full  => parseWeekdayLong config.dateformat.symbols
     | .inr .narrow => parseWeekdayNarrow config.dateformat.symbols
     | .inr .twoLetterShort => parseWeekdayTwoLetter config.dateformat.symbols
-  | .F format => parseNatToBounded (parseFlexibleNum format.padding)
+  | .F format => Week.Aligned.Ordinal.mk <$> parseNatToBounded (parseFlexibleNum format.padding)
   | .a format =>
     match format with
     | .short | .twoLetterShort => parseMarkerShort config.dateformat.symbols
@@ -807,20 +808,20 @@ private def parseWith (config : FormatConfig) : (mod : Modifier) → Parser (Typ
   | .h format => parseNatToBounded (parseFlexibleNum format.padding)
   | .K format => parseNatToBounded (parseFlexibleNum format.padding)
   | .k format => parseNatToBounded (parseFlexibleNum format.padding)
-  | .H format => parseNatToBounded (parseFlexibleNum format.padding)
-  | .m format => parseNatToBounded (parseFlexibleNum format.padding)
+  | .H format => Hour.Ordinal.mk <$> parseNatToBounded (parseFlexibleNum format.padding)
+  | .m format => Minute.Ordinal.mk <$> parseNatToBounded (parseFlexibleNum format.padding)
   | .s format =>
     if config.allowLeapSeconds then
-      parseNatToBounded (parseFlexibleNum format.padding)
+      Second.Ordinal.mk <$> parseNatToBounded (parseFlexibleNum format.padding)
     else do
       let res : Bounded.LE 0 59 ← parseNatToBounded (parseFlexibleNum format.padding)
-      return res.expandTop (by decide)
+      return .mk (res.expandTop (by decide))
   | .S format =>
     match format with
-    | .nano => parseNatToBounded (parseFlexibleNum 9)
-    | .truncated n => parseNatToBounded (parseFractionNum n 9)
+    | .nano => Nanosecond.Ordinal.mk <$> parseNatToBounded (parseFlexibleNum 9)
+    | .truncated n => Nanosecond.Ordinal.mk <$> parseNatToBounded (parseFractionNum n 9)
   | .A format => Millisecond.Offset.ofNat <$> (parseFlexibleNum format.padding)
-  | .n format => parseNatToBounded (parseFlexibleNum format.padding)
+  | .n format => Nanosecond.Ordinal.mk <$> parseNatToBounded (parseFlexibleNum format.padding)
   | .N format => Nanosecond.Offset.ofNat <$> (parseFlexibleNum format.padding)
   | .V format =>
     match format with
@@ -900,7 +901,7 @@ private structure DateBuilder where
   E : Option Weekday := none
   e : Option Weekday := none
   c : Option Weekday := none
-  F : Option (Bounded.LE 1 5) := none
+  F : Option Week.Aligned.Ordinal := none
   a : Option HourMarker := none
   b : Option DayPeriod := none
   B : Option ExtendedDayPeriod := none
@@ -1008,7 +1009,7 @@ private def build (builder : DateBuilder) (aw : Awareness) : Option DateTime :=
     <|> (markerOfDayPeriod <$> builder.b)
     <|> (markerOfExtendedDayPeriod <$> builder.B)
 
-  let hour : Option (Bounded.LE 0 23) :=
+  let hour : Option Hour.Ordinal :=
     if let some marker := markerOpt then
       marker.toAbsolute <$> builder.h
       <|> marker.toAbsolute <$> ((Bounded.LE.add · 1) <$> builder.K)
@@ -1017,10 +1018,10 @@ private def build (builder : DateBuilder) (aw : Awareness) : Option DateTime :=
 
   let hour :=
     hour <|> (
-      let one : Option (Bounded.LE 0 23) := builder.H
-      let other : Option (Bounded.LE 0 23) := (Bounded.LE.sub · 1) <$> builder.k
+      let one : Option Hour.Ordinal := builder.H
+      let other : Option Hour.Ordinal := (Hour.Ordinal.mk <| Bounded.LE.sub · 1) <$> builder.k
       (one <|> other))
-      |>.getD ⟨0, by decide⟩
+      |>.getD 0
 
   let minute := builder.m |>.getD 0
   let second := builder.s |>.getD 0

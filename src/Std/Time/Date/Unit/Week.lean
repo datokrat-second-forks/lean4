@@ -7,6 +7,7 @@ module
 
 prelude
 public import Std.Time.Date.Unit.Day
+public import Init.Transport
 
 public section
 
@@ -71,26 +72,17 @@ namespace OfYear
 /--
 `Ordinal` represents a bounded value for weeks of a year, which ranges between 1 and 53.
 -/
-@[expose] def Ordinal := Bounded.LE 1 53
-deriving Repr, DecidableEq, LE, LT
+@[expose] newtype Ordinal := Bounded.LE 1 53 with toBounded
+  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
+
+/-- The underlying integer of the ordinal. -/
+abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 1 (1 + (52 : Nat))) n)
 
-instance {x y : Ordinal} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
-
-instance {x y : Ordinal} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
-
 instance : Inhabited Ordinal where
   default := 1
-
-instance : Ord Ordinal := inferInstanceAs <| Ord (Bounded.LE 1 _)
-
-instance : TransOrd Ordinal := inferInstanceAs <| TransOrd (Bounded.LE 1 _)
-
-instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 1 _)
 
 namespace Ordinal
 
@@ -99,21 +91,21 @@ Creates an `Ordinal` from an integer, ensuring the value is within bounds.
 -/
 @[inline]
 def ofInt (data : Int) (h : 1 ≤ data ∧ data ≤ 53) : Ordinal :=
-  Bounded.LE.mk data h
+  .mk (Bounded.LE.mk data h)
 
 /--
 Creates an `Ordinal` from a natural number, ensuring the value is within bounds.
 -/
 @[inline]
 def ofNat (data : Nat) (h : data ≥ 1 ∧ data ≤ 53 := by decide) : Ordinal :=
-  Bounded.LE.ofNat' data h
+  .mk (Bounded.LE.ofNat' data h)
 
 /--
 Creates an `Ordinal` from a `Fin`, ensuring the value is within bounds.
 -/
 @[inline]
 def ofFin (data : Fin 54) : Ordinal :=
-  Bounded.LE.ofFin' data (by decide)
+  .mk (Bounded.LE.ofFin' data (by decide))
 
 /--
 Converts an `Ordinal` to an `Offset`.
@@ -132,38 +124,32 @@ namespace Aligned
 Aligned weeks are fixed 7-day slots counted from day 1 of the month: days 1-7 are
 week 1, days 8-14 are week 2, and so on, independent of which weekday starts the month.
 -/
-@[expose] def Ordinal := Bounded.LE 1 5
-deriving Repr, DecidableEq
+@[expose] newtype Ordinal := Bounded.LE 1 5 with toBounded
+  deriving Repr, DecidableEq, Ord, TransOrd, LawfulEqOrd
+
+/-- The underlying integer of the ordinal. -/
+abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
 instance : OfNat Ordinal n := inferInstanceAs (OfNat (Bounded.LE 1 (1 + (4 : Nat))) n)
 
 instance : Inhabited Ordinal where
   default := 1
 
-instance : Ord Ordinal := inferInstanceAs <| Ord (Bounded.LE 1 _)
-
-instance : TransOrd Ordinal := inferInstanceAs <| TransOrd (Bounded.LE 1 _)
-
-instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 1 _)
-
 end Aligned
 
 /--
 `Ordinal` represents the number of weeks within a month, ranging between 1 and 6.
 -/
-@[expose] def Ordinal := Bounded.LE 1 6
-deriving Repr, DecidableEq
+@[expose] newtype Ordinal := Bounded.LE 1 6 with toBounded
+  deriving Repr, DecidableEq, Ord, TransOrd, LawfulEqOrd
+
+/-- The underlying integer of the ordinal. -/
+abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
 instance : OfNat Ordinal n := inferInstanceAs (OfNat (Bounded.LE 1 (1 + (5 : Nat))) n)
 
 instance : Inhabited Ordinal where
   default := 1
-
-instance : Ord Ordinal := inferInstanceAs <| Ord (Bounded.LE 1 _)
-
-instance : TransOrd Ordinal := inferInstanceAs <| TransOrd (Bounded.LE 1 _)
-
-instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 1 _)
 
 namespace Offset
 

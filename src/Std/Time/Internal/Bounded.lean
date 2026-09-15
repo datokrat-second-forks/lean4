@@ -51,6 +51,10 @@ instance : DecidableEq (Bounded rel n m) := Subtype.instDecidableEq
 instance {x y : Bounded rel a b} : Decidable (x ≤ y) :=
   inferInstanceAs (Decidable (x.val ≤ y.val))
 
+@[always_inline]
+instance {x y : Bounded rel a b} : Decidable (x < y) :=
+  inferInstanceAs (Decidable (x.val < y.val))
+
 instance : OrientedOrd (Bounded rel n m) where
   eq_swap := OrientedOrd.eq_swap (α := Int)
 

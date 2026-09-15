@@ -7,6 +7,7 @@ module
 
 prelude
 public import Std.Time.Time.Unit.Minute
+public import Init.Transport
 
 public section
 
@@ -20,26 +21,17 @@ set_option linter.all true
 /--
 `Ordinal` represents a bounded value for hours, ranging from 0 to 23.
 -/
-@[expose] def Ordinal := Bounded.LE 0 23
-deriving Repr, DecidableEq, LE, LT
+@[expose] newtype Ordinal := Bounded.LE 0 23 with toBounded
+  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
+
+/-- The underlying integer of the ordinal. -/
+abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 0 (0 + (23 : Nat))) n)
 
 instance : Inhabited Ordinal where
   default := 0
-
-instance {x y : Ordinal} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
-
-instance {x y : Ordinal} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
-
-instance : Ord Ordinal := inferInstanceAs <| Ord (Bounded.LE 0 _)
-
-instance : TransOrd Ordinal := inferInstanceAs <| TransOrd (Bounded.LE 0 _)
-
-instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 0 _)
 
 /--
 `Offset` represents an offset in hours, defined as an `Int`. This can be used to express durations
@@ -98,13 +90,13 @@ Creates an `Ordinal` from an integer, ensuring the value is within bounds.
 -/
 @[inline]
 def ofInt (data : Int) (h : 0 ≤ data ∧ data ≤ 23) : Ordinal :=
-  Bounded.LE.mk data h
+  .mk (Bounded.LE.mk data h)
 
 /--
 Converts an `Ordinal` into a relative hour in the range of 1 to 12.
 -/
 def toRelative (ordinal : Ordinal) : Bounded.LE 1 12 :=
-  (ordinal.add 11).emod 12 (by decide) |>.add 1
+  (ordinal.toBounded.add 11).emod 12 (by decide) |>.add 1
 
 /--
 Converts an Ordinal into a 1-based hour representation within the range of 1 to 24.
@@ -112,20 +104,20 @@ Converts an Ordinal into a 1-based hour representation within the range of 1 to 
 def shiftTo1BasedHour (ordinal : Ordinal) : Bounded.LE 1 24 :=
   if h : ordinal.val < 1
     then Internal.Bounded.LE.ofNatWrapping 24 (by decide)
-    else ordinal.truncateBottom (Int.not_lt.mp h) |>.expandTop (by decide)
+    else ordinal.toBounded.truncateBottom (Int.not_lt.mp h) |>.expandTop (by decide)
 /--
 Creates an `Ordinal` from a natural number, ensuring the value is within the valid bounds for hours.
 -/
 @[inline]
 def ofNat (data : Nat) (h : data ≤ 23) : Ordinal :=
-  Bounded.LE.ofNat data h
+  .mk (Bounded.LE.ofNat data h)
 
 /--
 Creates an `Ordinal` from a `Fin` value.
 -/
 @[inline]
 def ofFin (data : Fin 24) : Ordinal :=
-  Bounded.LE.ofFin data
+  .mk (Bounded.LE.ofFin data)
 
 /--
 Converts an `Ordinal` to an `Offset`, which represents the duration in hours as an integer value.
