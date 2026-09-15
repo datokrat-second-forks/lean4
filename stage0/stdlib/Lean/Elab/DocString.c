@@ -57251,9 +57251,9 @@ return v___x_19519_;
 LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_0__Lean_Doc_mkSuggestion___redArg___boxed(lean_object* v_ref_19520_, lean_object* v_hintTitle_19521_, lean_object* v_newStrings_19522_, lean_object* v___y_19523_, lean_object* v___y_19524_, lean_object* v___y_19525_, lean_object* v___y_19526_, lean_object* v___y_19527_){
 _start:
 {
-uint8_t v___y_28110__boxed_19528_; lean_object* v_res_19529_; 
-v___y_28110__boxed_19528_ = lean_unbox(v___y_19523_);
-v_res_19529_ = l___private_Lean_Elab_DocString_0__Lean_Doc_mkSuggestion___redArg(v_ref_19520_, v_hintTitle_19521_, v_newStrings_19522_, v___y_28110__boxed_19528_, v___y_19524_, v___y_19525_, v___y_19526_);
+uint8_t v___y_27715__boxed_19528_; lean_object* v_res_19529_; 
+v___y_27715__boxed_19528_ = lean_unbox(v___y_19523_);
+v_res_19529_ = l___private_Lean_Elab_DocString_0__Lean_Doc_mkSuggestion___redArg(v_ref_19520_, v_hintTitle_19521_, v_newStrings_19522_, v___y_27715__boxed_19528_, v___y_19524_, v___y_19525_, v___y_19526_);
 lean_dec(v___y_19526_);
 lean_dec_ref(v___y_19525_);
 lean_dec(v___y_19524_);
@@ -57271,9 +57271,9 @@ return v___x_19543_;
 LEAN_EXPORT lean_object* l___private_Lean_Elab_DocString_0__Lean_Doc_mkSuggestion___boxed(lean_object* v_ref_19544_, lean_object* v_hintTitle_19545_, lean_object* v_newStrings_19546_, lean_object* v___y_19547_, lean_object* v___y_19548_, lean_object* v___y_19549_, lean_object* v___y_19550_, lean_object* v___y_19551_, lean_object* v___y_19552_, lean_object* v___y_19553_, lean_object* v___y_19554_, lean_object* v___y_19555_, lean_object* v___y_19556_){
 _start:
 {
-uint8_t v___y_28224__boxed_19557_; lean_object* v_res_19558_; 
-v___y_28224__boxed_19557_ = lean_unbox(v___y_19547_);
-v_res_19558_ = l___private_Lean_Elab_DocString_0__Lean_Doc_mkSuggestion(v_ref_19544_, v_hintTitle_19545_, v_newStrings_19546_, v___y_28224__boxed_19557_, v___y_19548_, v___y_19549_, v___y_19550_, v___y_19551_, v___y_19552_, v___y_19553_, v___y_19554_, v___y_19555_);
+uint8_t v___y_27829__boxed_19557_; lean_object* v_res_19558_; 
+v___y_27829__boxed_19557_ = lean_unbox(v___y_19547_);
+v_res_19558_ = l___private_Lean_Elab_DocString_0__Lean_Doc_mkSuggestion(v_ref_19544_, v_hintTitle_19545_, v_newStrings_19546_, v___y_27829__boxed_19557_, v___y_19548_, v___y_19549_, v___y_19550_, v___y_19551_, v___y_19552_, v___y_19553_, v___y_19554_, v___y_19555_);
 lean_dec(v___y_19555_);
 lean_dec_ref(v___y_19554_);
 lean_dec(v___y_19553_);

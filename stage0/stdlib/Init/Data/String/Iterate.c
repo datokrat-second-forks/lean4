@@ -2371,14 +2371,14 @@ uint8_t v_decide_873_;
 v_decide_873_ = lean_nat_dec_eq(v_a_871_, v___x_869_);
 if (v_decide_873_ == 0)
 {
-uint32_t v___x_874_; lean_object* v___x_875_; lean_object* v___x_876_; lean_object* v___x_877_; 
-v___x_874_ = lean_string_utf8_get_fast(v_s_870_, v_a_871_);
-v___x_875_ = lean_string_utf8_next_fast(v_s_870_, v_a_871_);
+lean_object* v___x_874_; uint32_t v___x_875_; lean_object* v___x_876_; lean_object* v___x_877_; 
+v___x_874_ = lean_string_utf8_next_fast(v_s_870_, v_a_871_);
+v___x_875_ = lean_string_utf8_get_fast(v_s_870_, v_a_871_);
 lean_dec(v_a_871_);
-v___x_876_ = lean_box_uint32(v___x_874_);
+v___x_876_ = lean_box_uint32(v___x_875_);
 lean_inc_ref(v_f_868_);
 v___x_877_ = lean_apply_2(v_f_868_, v_b_872_, v___x_876_);
-v_a_871_ = v___x_875_;
+v_a_871_ = v___x_874_;
 v_b_872_ = v___x_877_;
 goto _start;
 }

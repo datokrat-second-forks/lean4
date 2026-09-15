@@ -15,8 +15,8 @@ extern "C" {
 #endif
 lean_object* lean_array_push(lean_object*, lean_object*);
 uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
-uint32_t lean_string_utf8_get_fast(lean_object*, lean_object*);
 lean_object* lean_string_utf8_next_fast(lean_object*, lean_object*);
+uint32_t lean_string_utf8_get_fast(lean_object*, lean_object*);
 lean_object* lean_uint32_to_nat(uint32_t);
 lean_object* lean_nat_shiftr(lean_object*, lean_object*);
 uint32_t l_Nat_digitChar(lean_object*);
@@ -398,11 +398,11 @@ uint8_t v_decide_605_;
 v_decide_605_ = lean_nat_dec_eq(v_it_601_, v___x_599_);
 if (v_decide_605_ == 0)
 {
-uint32_t v___x_606_; lean_object* v___x_607_; lean_object* v___x_608_; lean_object* v___x_609_; 
-v___x_606_ = lean_string_utf8_get_fast(v_s_600_, v_it_601_);
-v___x_607_ = lean_string_utf8_next_fast(v_s_600_, v_it_601_);
-v___x_608_ = l___private_Lean_Data_Json_Printer_0__Lean_Json_escapeAux(v_acc_602_, v___x_606_);
-v___x_609_ = lean_apply_4(v_recur_604_, v___x_607_, v___x_608_, lean_box(0), lean_box(0));
+lean_object* v___x_606_; uint32_t v___x_607_; lean_object* v___x_608_; lean_object* v___x_609_; 
+v___x_606_ = lean_string_utf8_next_fast(v_s_600_, v_it_601_);
+v___x_607_ = lean_string_utf8_get_fast(v_s_600_, v_it_601_);
+v___x_608_ = l___private_Lean_Data_Json_Printer_0__Lean_Json_escapeAux(v_acc_602_, v___x_607_);
+v___x_609_ = lean_apply_4(v_recur_604_, v___x_606_, v___x_608_, lean_box(0), lean_box(0));
 return v___x_609_;
 }
 else
@@ -492,12 +492,12 @@ uint8_t v_decide_644_;
 v_decide_644_ = lean_nat_dec_eq(v_a_642_, v___x_640_);
 if (v_decide_644_ == 0)
 {
-uint32_t v___x_645_; lean_object* v___x_646_; lean_object* v___x_647_; 
-v___x_645_ = lean_string_utf8_get_fast(v_k_641_, v_a_642_);
-v___x_646_ = lean_string_utf8_next_fast(v_k_641_, v_a_642_);
+lean_object* v___x_645_; uint32_t v___x_646_; lean_object* v___x_647_; 
+v___x_645_ = lean_string_utf8_next_fast(v_k_641_, v_a_642_);
+v___x_646_ = lean_string_utf8_get_fast(v_k_641_, v_a_642_);
 lean_dec(v_a_642_);
-v___x_647_ = l___private_Lean_Data_Json_Printer_0__Lean_Json_escapeAux(v_b_643_, v___x_645_);
-v_a_642_ = v___x_646_;
+v___x_647_ = l___private_Lean_Data_Json_Printer_0__Lean_Json_escapeAux(v_b_643_, v___x_646_);
+v_a_642_ = v___x_645_;
 v_b_643_ = v___x_647_;
 goto _start;
 }

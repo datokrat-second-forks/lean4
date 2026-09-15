@@ -1,6 +1,6 @@
 // Lean compiler output
 // Module: Std.Data.Iterators.Lemmas.Equivalence.Basic
-// Imports: public import Init.Internal.Order public import Init.Data.Iterators.Basic public import Std.Data.Iterators.Lemmas.Equivalence.HetT
+// Imports: public import Init.Internal.Order public import Init.Data.Iterators.Basic public import Init.Data.Iterators.Transport public import Std.Data.Iterators.Lemmas.Equivalence.HetT
 #include <lean/lean.h>
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -113,6 +113,7 @@ return v_res_35_;
 }
 lean_object* runtime_initialize_Init_Internal_Order(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_Iterators_Basic(uint8_t builtin);
+lean_object* runtime_initialize_Init_Data_Iterators_Transport(uint8_t builtin);
 lean_object* runtime_initialize_Std_Data_Iterators_Lemmas_Equivalence_HetT(uint8_t builtin);
 void lean_initialize_runtime_module();
 static bool _G_runtime_initialized = false;
@@ -125,6 +126,9 @@ res = runtime_initialize_Init_Internal_Order(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = runtime_initialize_Init_Data_Iterators_Basic(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
+res = runtime_initialize_Init_Data_Iterators_Transport(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = runtime_initialize_Std_Data_Iterators_Lemmas_Equivalence_HetT(builtin);
@@ -141,6 +145,7 @@ return lean_io_result_mk_ok(lean_box(0));
 }
 lean_object* initialize_Init_Internal_Order(uint8_t builtin);
 lean_object* initialize_Init_Data_Iterators_Basic(uint8_t builtin);
+lean_object* initialize_Init_Data_Iterators_Transport(uint8_t builtin);
 lean_object* initialize_Std_Data_Iterators_Lemmas_Equivalence_HetT(uint8_t builtin);
 static bool _G_initialized = false;
 LEAN_EXPORT lean_object* initialize_Std_Data_Iterators_Lemmas_Equivalence_Basic(uint8_t builtin) {
@@ -151,6 +156,9 @@ res = initialize_Init_Internal_Order(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = initialize_Init_Data_Iterators_Basic(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
+res = initialize_Init_Data_Iterators_Transport(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = initialize_Std_Data_Iterators_Lemmas_Equivalence_HetT(builtin);
