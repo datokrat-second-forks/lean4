@@ -195,4 +195,14 @@ theorem toFun_injective (e : α ≃ β) : Function.Injective e.toFun :=
 theorem invFun_injective (e : α ≃ β) : Function.Injective e.invFun :=
   e.right_inv.injective
 
+protected theorem ext {e₁ e₂ : α ≃ β} (h₁ : e₁.toFun = e₂.toFun) (h₂ : e₁.invFun = e₂.invFun) :
+    e₁ = e₂ := by
+  cases e₁; cases e₂; cases h₁; cases h₂; rfl
+
+theorem trans_symm (e : α ≃ β) : e.trans e.symm = Equiv.refl α :=
+  Equiv.ext (funext e.left_inv) (funext e.left_inv)
+
+theorem symm_trans (e : α ≃ β) : e.symm.trans e = Equiv.refl β :=
+  Equiv.ext (funext e.right_inv) (funext e.right_inv)
+
 end Equiv

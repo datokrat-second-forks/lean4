@@ -89,6 +89,40 @@ deriving instance DecidableLE, LawfulLE for Baz
 example : (default : Baz) = Baz.mk 0 := rfl
 example : Baz.mk 1 ≤ Baz.mk 2 := by decide
 
+/-!
+Families of equivalences: a congruence for a class on a type constructor takes `∀ α, m α ≃ n α`,
+which is solved under the binder.
+-/
+
+class Pointed (m : Type → Type) where
+  point : (α : Type) → α → m α
+
+@[transport] protected abbrev Pointed.congr {m n : Type → Type} (e : ∀ α, m α ≃ n α) :
+    Pointed m ≃ Pointed n where
+  toFun i := ⟨fun α a => (e α).toFun (i.point α a)⟩
+  invFun i := ⟨fun α a => (e α).invFun (i.point α a)⟩
+  left_inv i := congrArg Pointed.mk <| funext fun α => funext fun a => (e α).left_inv (i.point α a)
+  right_inv i := congrArg Pointed.mk <| funext fun α => funext fun a => (e α).right_inv (i.point α a)
+
+instance : Pointed Option := ⟨fun _ => some⟩
+
+newtype Opt (α : Type) := Option α with toOption
+
+instance : Pointed Opt := inferInstanceAs (Pointed Option)
+
+example : Pointed.point (m := Opt) Nat 1 = Opt.mk (some 1) := rfl
+
+-- The family is `fun α => Opt.equiv`, the equivalence of the parametrized `newtype`.
+example : (inferInstance : Pointed Opt) = (Pointed.congr fun α => Opt.equiv (α := α)).toFun inferInstance :=
+  rfl
+
+-- Chaining under the binder: `Option α ≃ Opt α ≃ Opt2 α`.
+newtype Opt2 (α : Type) := Opt α with toOpt
+
+instance : Pointed Opt2 := by transport (Pointed Option)
+
+example : Pointed.point (m := Opt2) Nat 1 = Opt2.mk (Opt.mk (some 1)) := rfl
+
 /-! Failures. -/
 
 newtype Bar := Int with toInt
@@ -126,7 +160,7 @@ error: invalid `@[transport]` declaration `notAnEquiv`, its conclusion must be a
 @[transport] def notAnEquiv : Nat := 0
 
 /--
-error: invalid `@[transport]` declaration `badArg`, its explicit arguments must be equivalences, but `n` has type
+error: invalid `@[transport]` declaration `badArg`, its explicit arguments must be equivalences or families of equivalences, but `n` has type
   Nat
 -/
 #guard_msgs in

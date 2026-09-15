@@ -18,10 +18,12 @@ public section
 
 `@[transport]` collects declarations that conclude in an equivalence `α ≃ β`: plain equivalences such
 as the `Foo.equiv : Int ≃ Foo` a `newtype` registers automatically, and congruences such as
-`LE.congr : (α ≃ β) → LE α ≃ LE β` whose explicit arguments are themselves equivalences.
+`LE.congr : (α ≃ β) → LE α ≃ LE β` whose explicit arguments are themselves equivalences, or
+families of equivalences such as the `∀ α, m α ≃ n α` that `Monad.congr` takes.
 `mkTransportEquiv src tgt` assembles `src ≃ tgt` from them the way `congr` assembles an equality:
-by unifying conclusions with the goal, solving the equivalence arguments recursively, synthesizing
-instance arguments, and chaining through intermediate types with `Equiv.trans`.
+by unifying conclusions with the goal, solving the equivalence arguments recursively (a family
+under its binders), synthesizing instance arguments, and chaining through intermediate types with
+`Equiv.trans`.
 
 Types are identified by `isDefEq` at default transparency, which never unfolds the irreducible
 definition a `newtype` is; unlike `inferInstanceAs`'s instance wrapping this never depends on the
@@ -43,9 +45,13 @@ builtin_initialize transportExt :
     initial := {}
   }
 
+/-- Whether `type` is an equivalence `α ≃ β` or a family `∀ xs, α ≃ β` of them. -/
+private def isEquivFamily (type : Expr) : MetaM Bool :=
+  withReducible <| forallTelescopeReducing type fun _ body => return body.isAppOfArity ``Equiv 2
+
 /--
 Registers `declName` for `mkTransportEquiv`. Its type must be of the form
-`∀ …, α ≃ β`, with every explicit argument an equivalence.
+`∀ …, α ≃ β`, with every explicit argument an equivalence or a family `∀ xs, α ≃ β` of them.
 -/
 def addTransportDecl (declName : Name) (kind : AttributeKind) : MetaM Unit := do
   let type := (← getConstInfo declName).type
@@ -57,9 +63,10 @@ def addTransportDecl (declName : Name) (kind : AttributeKind) : MetaM Unit := do
     if bi.isExplicit then
       let xDecl ← x.mvarId!.getDecl
       let xType ← instantiateMVars xDecl.type
-      unless xType.isAppOfArity ``Equiv 2 do
+      unless ← isEquivFamily xType do
         throwError "invalid `@[transport]` declaration `{.ofConstName declName}`, its explicit \
-          arguments must be equivalences, but `{xDecl.userName}` has type{indentExpr xType}"
+          arguments must be equivalences or families of equivalences, but `{xDecl.userName}` has \
+          type{indentExpr xType}"
   let keys ← withReducible <| DiscrTree.mkPath concl
   transportExt.add (declName, keys) kind
 
@@ -90,8 +97,8 @@ mutual
 
 /--
 Instantiates the `@[transport]` declaration `declName` so that it proves `goal : α ≃ β`: its
-conclusion is unified with `goal`, then its equivalence arguments are solved by `mkEquiv` and its
-instance arguments by `synthInstance`.
+conclusion is unified with `goal`, then its equivalence arguments are solved by `mkEquiv` (a family
+`∀ xs, α ≃ β` under its binders) and its instance arguments by `synthInstance`.
 -/
 private partial def applyDecl (declName : Name) (goal : Expr) (fuel : Nat) : MetaM Expr := do
   let decl ← mkConstWithFreshMVarLevels declName
@@ -105,8 +112,9 @@ private partial def applyDecl (declName : Name) (goal : Expr) (fuel : Nat) : Met
     let argType ← instantiateMVars argDecl.type
     if bi.isInstImplicit then
       arg.mvarId!.assign (← synthInstance argType)
-    else if argType.isAppOfArity ``Equiv 2 then
-      arg.mvarId!.assign (← mkEquiv argType.appFn!.appArg! argType.appArg! fuel)
+    else if ← isEquivFamily argType then
+      arg.mvarId!.assign (← forallTelescopeReducing argType fun xs body => do
+        mkLambdaFVars xs (← mkEquiv body.appFn!.appArg! body.appArg! fuel))
     else
       throwError "cannot infer argument `{argDecl.userName}` of `{.ofConstName declName}`"
   instantiateMVars (mkAppN decl args)
