@@ -38,49 +38,10 @@ instance : Inhabited Ordinal where
 `Offset` represents an offset in months. It is defined as an `Int`.
 -/
 @[expose] newtype Offset := Int with toInt
+  deriving Repr, DecidableEq, Inhabited, Add, Sub, Mul, Div, Neg, ToString, LT, LE, DecidableLE,
+    DecidableLT, Ord, TransOrd, LawfulEqOrd
 
-theorem Offset.toInt_inj {x y : Offset} (h : x.toInt = y.toInt) : x = y :=
-  congrArg Offset.mk h
-
-instance : Repr Offset where reprPrec offset prec := reprPrec offset.toInt prec
-
-instance : ToString Offset where toString offset := toString offset.toInt
-
-instance : Inhabited Offset where default := .mk default
-
-instance : DecidableEq Offset := fun x y =>
-  decidable_of_iff (x.toInt = y.toInt) ⟨Offset.toInt_inj, congrArg Offset.toInt⟩
-
-instance : Add Offset where add x y := .mk (x.toInt + y.toInt)
-
-instance : Sub Offset where sub x y := .mk (x.toInt - y.toInt)
-
-instance : Neg Offset where neg x := .mk (-x.toInt)
-
-instance : Mul Offset where mul x y := .mk (x.toInt * y.toInt)
-
-instance : Div Offset where div x y := .mk (x.toInt / y.toInt)
-
-instance : LE Offset where le x y := x.toInt ≤ y.toInt
-
-instance : LT Offset where lt x y := x.toInt < y.toInt
-
-instance : Ord Offset where compare x y := compare x.toInt y.toInt
-
-instance : OfNat Offset n := ⟨.mk (Int.ofNat n)⟩
-
-instance {x y : Offset} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.toInt ≤ y.toInt))
-
-instance {x y : Offset} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.toInt < y.toInt))
-
-instance : OrientedOrd Offset := ⟨OrientedOrd.eq_swap (α := Int)⟩
-
-instance : TransOrd Offset := ⟨TransOrd.isLE_trans (α := Int)⟩
-
-instance : LawfulEqOrd Offset :=
-  ⟨fun {_ _} h => Offset.toInt_inj (LawfulEqOrd.eq_of_compare h)⟩
+instance : OfNat Offset n := inferInstanceAs (OfNat Int n)
 
 /--
 `Quarter` represents a value between 1 and 4, inclusive, corresponding to the four quarters of a year.
