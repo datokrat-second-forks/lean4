@@ -123,6 +123,13 @@ instance : Pointed Opt2 := by transport (Pointed Option)
 
 example : Pointed.point (m := Opt2) Nat 1 = Opt2.mk (Opt.mk (some 1)) := rfl
 
+-- `MonadLift.congr` transports the target monad of a lift.
+instance : MonadLift Id Option := ⟨fun x => some x.run⟩
+
+instance : MonadLift Id Opt := inferInstanceAs (MonadLift Id Option)
+
+example : (monadLift (Id.mk 1) : Opt Nat) = Opt.mk (some 1) := rfl
+
 /-! Failures. -/
 
 newtype Bar := Int with toInt
