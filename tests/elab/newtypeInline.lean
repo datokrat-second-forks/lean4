@@ -75,3 +75,27 @@ trace: [Compiler.IR] [result]
 #guard_msgs in
 set_option trace.compiler.ir.result true in
 def stepW2 (x : W2) : W2 := Step.step x
+
+newtype M (α : Type) := StateT Nat Id α with run
+
+instance : Monad M := inferInstanceAs (Monad (StateT Nat Id))
+
+def viaM (k : Nat) : M Nat := do
+  let n ← M.mk get
+  M.mk (set (n + k))
+  return n * 2
+
+def viaStateT (k : Nat) : StateT Nat Id Nat := do
+  let n ← get
+  set (n + k)
+  return n * 2
+
+open Lean in
+run_meta do
+  let some m := IR.findEnvDecl (← getEnv) ``viaM | throwError "no IR for `viaM`"
+  let some s := IR.findEnvDecl (← getEnv) ``viaStateT | throwError "no IR for `viaStateT`"
+  let irM := (toString (format m)).replace "viaM" "viaStateT"
+  if (irM.splitOn "equiv").length != 1 then
+    throwError "the transported `bind` did not inline:{indentD (format m)}"
+  unless irM == toString (format s) do
+    throwError "IR differs:{indentD (format m)}\n{indentD (format s)}"

@@ -44,6 +44,38 @@ theorem MonadTail.monotone_bind_right
     monotone (fun (x : γ) => f >>= g x) :=
   fun _ _ h => MonadTail.bind_mono_right (hmono _ _ h)
 
+protected theorem MonadTail.ext {inst : Bind m} {i j : @MonadTail m inst}
+    (h : ∀ β [Nonempty β], i.instCCPO β = j.instCCPO β) : i = j := by
+  obtain ⟨ci, _⟩ := i
+  obtain ⟨cj, _⟩ := j
+  have : ci = cj := funext fun β => funext fun inst => @h β inst
+  subst this
+  rfl
+
+/-- Transports `MonadTail` along a family of equivalences, to the transported `Bind` instance. -/
+@[transport] protected abbrev MonadTail.congr {m n : Type u → Type v} (e : ∀ α, m α ≃ n α)
+    [b : Bind m] : @MonadTail m b ≃ @MonadTail n (Bind.ofEquiv e b) where
+  toFun i :=
+    have hl : ∀ α (x : m α), (e α).invFun ((e α).toFun x) = x := fun α => (e α).left_inv
+    @MonadTail.mk n (Bind.ofEquiv e b) (fun β _ => CCPO.ofEquiv (e β) (i.instCCPO β))
+    (fun {_ _ a f₁ f₂} _ h => by
+      show (i.instCCPO _).rel ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a f₁))
+        ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a f₂))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact i.bind_mono_right (a := (e _).invFun a) (f₁ := fun x => (e _).invFun (f₁ x))
+        (f₂ := fun x => (e _).invFun (f₂ x)) h)
+  invFun i :=
+    have hl : ∀ α (x : m α), (e α).invFun ((e α).toFun x) = x := fun α => (e α).left_inv
+    @MonadTail.mk m b (fun β _ => CCPO.ofEquiv (e β).symm (i.instCCPO β))
+    (fun {_ _ a f₁ f₂} _ h => by
+      have this := i.bind_mono_right (a := (e _).toFun a) (f₁ := fun x => (e _).toFun (f₁ x))
+        (f₂ := fun x => (e _).toFun (f₂ x)) h
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
+      simp only [hl] at this
+      exact this)
+  left_inv i := MonadTail.ext fun β _ => (CCPO.congr (e β)).left_inv _
+  right_inv i := MonadTail.ext fun β _ => (CCPO.congr (e β)).right_inv _
+
 instance : MonadTail Id where
   instCCPO α :=
     letI : CCPO α := inferInstanceAs (CCPO (FlatOrder (b := Classical.ofNonempty)))
@@ -145,20 +177,15 @@ instance : MonadTail (ST σ) where
     simp only [ST.bind]
     apply h
 
-instance [Nonempty α] : CCPO (BaseIO α) :=
-  inferInstanceAs (CCPO (ST IO.RealWorld α))
-
-instance : MonadTail BaseIO where
-  instCCPO _ := inferInstance
-  bind_mono_right h := MonadTail.bind_mono_right (m := ST IO.RealWorld) h
+instance : MonadTail BaseIO :=
+  inferInstanceAs (MonadTail (ST IO.RealWorld))
 
 instance [Nonempty ε] : MonadTail (EST ε σ) where
   instCCPO _ := inferInstance
   bind_mono_right h := MonoBind.bind_mono_right h
 
-instance [Nonempty ε] : MonadTail (EIO ε) where
-  instCCPO _ := inferInstance
-  bind_mono_right h := MonoBind.bind_mono_right h
+instance [Nonempty ε] : MonadTail (EIO ε) :=
+  inferInstanceAs (MonadTail (EST ε IO.RealWorld))
 
 instance : MonadTail IO :=
   inferInstanceAs (MonadTail (EIO IO.Error))

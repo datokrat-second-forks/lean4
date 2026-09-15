@@ -13,7 +13,7 @@ import Init.Data.String.TakeDrop
 import Init.Data.String.Search
 public import Init.Data.Ord.Basic
 public import Init.Data.String.Basic
-public import Init.Data.Function
+public import Init.Transport
 import Init.Data.List.MapIdx
 import Init.Data.Ord.UInt
 import Init.Data.ToString.Macro
@@ -39,18 +39,9 @@ An `IO` monad that cannot throw exceptions.
 -/
 @[expose] newtype BaseIO (α : Type) := ST IO.RealWorld α with toST
 
-@[always_inline]
-instance : Monad BaseIO where
-  pure a := .mk (ST.pure a)
-  bind x f := .mk (ST.bind x.toST fun a => (f a).toST)
-
-@[always_inline]
-instance : MonadFinally BaseIO where
-  tryFinally' x f := .mk (tryFinally' x.toST fun a? => (f a?).toST)
-
-instance : MonadAttach BaseIO where
-  CanReturn x a := MonadAttach.CanReturn x.toST a
-  attach x := .mk (MonadAttach.attach x.toST)
+instance : Monad BaseIO := inferInstanceAs (Monad (ST IO.RealWorld))
+instance : MonadFinally BaseIO := inferInstanceAs (MonadFinally (ST IO.RealWorld))
+instance : MonadAttach BaseIO := inferInstanceAs (MonadAttach (ST IO.RealWorld))
 
 @[always_inline, inline]
 def BaseIO.map (f : α → β) (x : BaseIO α) : BaseIO β :=
@@ -104,26 +95,12 @@ def EIO.catchExceptions (act : EIO ε α) (h : ε → BaseIO α) : BaseIO α :=
   | .ok a s     => .mk a s
   | .error ex s => ST.run (h ex).toST s
 
-@[always_inline]
-instance : Monad (EIO ε) where
-  pure a := .mk (EST.pure a)
-  bind x f := .mk (EST.bind x.toEST fun a => (f a).toEST)
-
-@[always_inline]
-instance : MonadFinally (EIO ε) where
-  tryFinally' x f := .mk (tryFinally' x.toEST fun a? => (f a?).toEST)
-
-instance : MonadAttach (EIO ε) where
-  CanReturn x a := MonadAttach.CanReturn x.toEST a
-  attach x := .mk (MonadAttach.attach x.toEST)
-
-@[always_inline]
-instance : MonadExceptOf ε (EIO ε) where
-  throw e := .mk (EST.throw e)
-  tryCatch x handle := .mk (EST.tryCatch x.toEST fun e => (handle e).toEST)
-
+instance : Monad (EIO ε) := inferInstanceAs (Monad (EST ε IO.RealWorld))
+instance : MonadFinally (EIO ε) := inferInstanceAs (MonadFinally (EST ε IO.RealWorld))
+instance : MonadAttach (EIO ε) := inferInstanceAs (MonadAttach (EST ε IO.RealWorld))
+instance : MonadExceptOf ε (EIO ε) := inferInstanceAs (MonadExceptOf ε (EST ε IO.RealWorld))
 instance : OrElse (EIO ε α) := ⟨MonadExcept.orElse⟩
-instance [Inhabited ε] : Inhabited (EIO ε α) := ⟨.mk default⟩
+instance [Inhabited ε] : Inhabited (EIO ε α) := inferInstanceAs (Inhabited (EST ε IO.RealWorld α))
 
 @[always_inline, inline]
 def EIO.map (f : α → β) (x : EIO ε α) : EIO ε β :=

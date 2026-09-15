@@ -8,6 +8,8 @@ module
 prelude
 public import Init.Data.Function
 public import Init.Data.Order.Ord
+public import Init.Control.Except
+public import Init.Control.MonadAttach
 
 public section
 
@@ -154,3 +156,89 @@ namespace Std
   right_inv _ := rfl
 
 end Std
+
+/-!
+## Classes on type constructors
+
+An instance of a class on `m : Type u → Type v` is transported along a family `∀ α, m α ≃ n α` by
+conjugating each operation. `C.ofEquiv e` moves an instance forward; `C.congr e` pairs it with
+`C.ofEquiv (e ·).symm`, and its inverse laws reduce to `Equiv.trans_symm` and `Equiv.symm_trans`.
+-/
+
+universe u v w
+
+section
+variable {m n : Type u → Type v} (e : ∀ α, m α ≃ n α)
+
+protected abbrev Bind.ofEquiv (i : Bind m) : Bind n where
+  bind x f := (e _).toFun (i.bind ((e _).invFun x) fun a => (e _).invFun (f a))
+
+theorem Bind.ofEquiv_bind (i : Bind m) {α β : Type u} (x : n α) (f : α → n β) :
+    @Bind.bind n (Bind.ofEquiv e i) α β x f =
+      (e β).toFun (i.bind ((e α).invFun x) fun a => (e β).invFun (f a)) :=
+  rfl
+
+protected abbrev Monad.ofEquiv (i : Monad m) : Monad n where
+  toBind := Bind.ofEquiv e i.toBind
+  map f x := (e _).toFun (i.map f ((e _).invFun x))
+  mapConst a x := (e _).toFun (i.mapConst a ((e _).invFun x))
+  pure a := (e _).toFun (i.pure a)
+  seq f x := (e _).toFun (i.seq ((e _).invFun f) fun u => (e _).invFun (x u))
+  seqLeft x y := (e _).toFun (i.seqLeft ((e _).invFun x) fun u => (e _).invFun (y u))
+  seqRight x y := (e _).toFun (i.seqRight ((e _).invFun x) fun u => (e _).invFun (y u))
+
+@[transport] protected abbrev Monad.congr : Monad m ≃ Monad n where
+  toFun := Monad.ofEquiv e
+  invFun := Monad.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show Monad.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (Monad.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show Monad.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (Monad.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+protected abbrev MonadFinally.ofEquiv (i : MonadFinally m) : MonadFinally n where
+  tryFinally' x f := (e _).toFun (i.tryFinally' ((e _).invFun x) fun a? => (e _).invFun (f a?))
+
+@[transport] protected abbrev MonadFinally.congr : MonadFinally m ≃ MonadFinally n where
+  toFun := MonadFinally.ofEquiv e
+  invFun := MonadFinally.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show MonadFinally.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadFinally.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadFinally.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadFinally.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+protected abbrev MonadAttach.ofEquiv (i : MonadAttach m) : MonadAttach n where
+  CanReturn x a := i.CanReturn ((e _).invFun x) a
+  attach x := (e _).toFun (i.attach ((e _).invFun x))
+
+@[transport] protected abbrev MonadAttach.congr : MonadAttach m ≃ MonadAttach n where
+  toFun := MonadAttach.ofEquiv e
+  invFun := MonadAttach.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show MonadAttach.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadAttach.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadAttach.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadAttach.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+protected abbrev MonadExceptOf.ofEquiv {ε : Type w} (i : MonadExceptOf ε m) :
+    MonadExceptOf ε n where
+  throw ex := (e _).toFun (i.throw ex)
+  tryCatch body handler :=
+    (e _).toFun (i.tryCatch ((e _).invFun body) fun ex => (e _).invFun (handler ex))
+
+@[transport] protected abbrev MonadExceptOf.congr {ε : Type w} :
+    MonadExceptOf ε m ≃ MonadExceptOf ε n where
+  toFun := MonadExceptOf.ofEquiv e
+  invFun := MonadExceptOf.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show MonadExceptOf.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadExceptOf.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadExceptOf.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadExceptOf.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+end
