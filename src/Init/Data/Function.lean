@@ -68,20 +68,12 @@ theorem Surjective.comp {α β γ} {g : β → γ} {f : α → β} (hg : Surject
     Exists.elim (hf b) fun a ha =>
       Exists.intro a (show g (f a) = c from Eq.trans (congrArg g ha) hb)
 
-/-- `LeftInverse g f` means that `g` is a left inverse to `f`. That is, `g ∘ f = id`. -/
-@[expose, grind, implicit_reducible]
-def LeftInverse {α β} (g : β → α) (f : α → β) : Prop :=
-  ∀ x, g (f x) = x
+attribute [grind] LeftInverse RightInverse
 
 /-- `HasLeftInverse f` means that `f` has an unspecified left inverse. -/
 @[expose]
 def HasLeftInverse {α β} (f : α → β) : Prop :=
   Exists fun finv : β → α => LeftInverse finv f
-
-/-- `RightInverse g f` means that `g` is a right inverse to `f`. That is, `f ∘ g = id`. -/
-@[expose, grind, implicit_reducible]
-def RightInverse {α β} (g : β → α) (f : α → β) : Prop :=
-  LeftInverse f g
 
 /-- `HasRightInverse f` means that `f` has an unspecified right inverse. -/
 @[expose]
@@ -157,23 +149,6 @@ theorem Injective.leftInverse
   hf.exists_leftInverse
 
 end Function
-
-/--
-An equivalence `α ≃ β` between two types: a function `toFun : α → β` together with an inverse
-`invFun`.
-
-Declarations concluding in an equivalence can be tagged with `@[transport]`. Congruences such as
-`(e : α ≃ β) → LE α ≃ LE β` then let the `transport` tactic, and `inferInstanceAs` and `deriving`
-where definitional unfolding does not apply, move instances between equivalent types without unfolding
-either of them.
--/
-structure Equiv (α : Sort u) (β : Sort v) where
-  toFun : α → β
-  invFun : β → α
-  left_inv : Function.LeftInverse invFun toFun
-  right_inv : Function.RightInverse invFun toFun
-
-@[inherit_doc] infixl:25 " ≃ " => Equiv
 
 namespace Equiv
 

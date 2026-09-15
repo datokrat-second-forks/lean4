@@ -724,6 +724,35 @@ structure Subtype {α : Sort u} (p : α → Prop) where
 
 grind_pattern Subtype.property => self.val
 
+/-- `LeftInverse g f` means that `g` is a left inverse to `f`. That is, `g ∘ f = id`. -/
+@[implicit_reducible]
+def Function.LeftInverse {α : Sort u} {β : Sort v} (g : β → α) (f : α → β) : Prop :=
+  ∀ x, Eq (g (f x)) x
+
+/-- `RightInverse g f` means that `g` is a right inverse to `f`. That is, `f ∘ g = id`. -/
+@[implicit_reducible]
+def Function.RightInverse {α : Sort u} {β : Sort v} (g : β → α) (f : α → β) : Prop :=
+  Function.LeftInverse f g
+
+/--
+An equivalence `α ≃ β` between two types: a function `toFun : α → β` together with an inverse
+`invFun`.
+
+Declarations concluding in an equivalence can be tagged with `@[transport]`. Congruences such as
+`(e : α ≃ β) → LE α ≃ LE β` then let the `transport` tactic, and `inferInstanceAs` and `deriving`
+where definitional unfolding does not apply, move instances between equivalent types without unfolding
+either of them. Every `newtype` registers the equivalence with its underlying type this way.
+-/
+structure Equiv (α : Sort u) (β : Sort v) where
+  /-- The forward map. -/
+  toFun : α → β
+  /-- The backward map. -/
+  invFun : β → α
+  /-- `invFun` undoes `toFun`. -/
+  left_inv : Function.LeftInverse invFun toFun
+  /-- `toFun` undoes `invFun`. -/
+  right_inv : Function.RightInverse invFun toFun
+
 set_option linter.unusedVariables.funArgs false in
 /--
 Gadget for optional parameter support.

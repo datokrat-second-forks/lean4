@@ -55,26 +55,24 @@ private def addNewtypeCtorProj (declName ctorName projName equivName fieldName :
           compileDecl decl
       addIdentity ctorName fieldName underlying self
       addIdentity projName `self self underlying
-      -- `Equiv` is not available yet for the `newtype`s of the prelude.
-      if (← getEnv).contains ``Equiv then
-        let ctor := mkAppN (mkConst ctorName us) params
-        let proj := mkAppN (mkConst projName us) params
-        -- Both inverse laws hold by virtual iota resp. eta.
-        let leftInv ← withLocalDeclD fieldName underlying fun a => do mkLambdaFVars #[a] (← mkEqRefl a)
-        let rightInv ← withLocalDeclD `self self fun x => do mkLambdaFVars #[x] (← mkEqRefl x)
-        let value ← mkAppM ``Equiv.mk #[ctor, proj, leftInv, rightInv]
-        let type ← mkForallFVars params (← inferType value)
-        let value ← mkLambdaFVars params value
-        let decl := .defnDecl (← mkDefinitionValInferringUnsafe equivName info.levelParams type value .abbrev)
-        addDecl decl (forceExpose := exposed)
-        -- Reducible so that `N.equiv.toFun`/`.invFun` are seen as the constructor/projector.
-        setReducibilityStatus equivName .reducible
-        -- `macro_inline` substitutes the structure literal before compilation, so a transported
-        -- instance's `N.equiv.toFun`/`.invFun` fold to the identities; `inline` would only reach
-        -- the closed term the equivalence itself is compiled to.
-        setInlineAttribute equivName .macroInline
-        compileDecl decl
-        Transport.addTransportDecl equivName .global
+      let ctor := mkAppN (mkConst ctorName us) params
+      let proj := mkAppN (mkConst projName us) params
+      -- Both inverse laws hold by virtual iota resp. eta.
+      let leftInv ← withLocalDeclD fieldName underlying fun a => do mkLambdaFVars #[a] (← mkEqRefl a)
+      let rightInv ← withLocalDeclD `self self fun x => do mkLambdaFVars #[x] (← mkEqRefl x)
+      let value ← mkAppM ``Equiv.mk #[ctor, proj, leftInv, rightInv]
+      let type ← mkForallFVars params (← inferType value)
+      let value ← mkLambdaFVars params value
+      let decl := .defnDecl (← mkDefinitionValInferringUnsafe equivName info.levelParams type value .abbrev)
+      addDecl decl (forceExpose := exposed)
+      -- Reducible so that `N.equiv.toFun`/`.invFun` are seen as the constructor/projector.
+      setReducibilityStatus equivName .reducible
+      -- `macro_inline` substitutes the structure literal before compilation, so a transported
+      -- instance's `N.equiv.toFun`/`.invFun` fold to the identities; `inline` would only reach
+      -- the closed term the equivalence itself is compiled to.
+      setInlineAttribute equivName .macroInline
+      compileDecl decl
+      Transport.addTransportDecl equivName .global
     return params.size
 
 @[builtin_command_elab Lean.Parser.Command.newtypeCmd]
@@ -108,9 +106,8 @@ def elabNewtype : CommandElab := fun stx => do
   modifyEnv (registerVirtualStructure · { typeName := declName, ctorName, projName, numParams })
   for n in [ctorName, projName] do
     liftCoreM <| enableRealizationsForConst n
-  if (← getEnv).contains equivName then
-    addDeclarationRangesFromSyntax equivName declId
-    liftCoreM <| enableRealizationsForConst equivName
+  addDeclarationRangesFromSyntax equivName declId
+  liftCoreM <| enableRealizationsForConst equivName
   -- As `MutualDef.processDeriving` for `def`; for a `newtype` this always means transport.
   let classes ← liftCoreM <| getOptDerivingClasses optDeriving
   unless classes.isEmpty do
