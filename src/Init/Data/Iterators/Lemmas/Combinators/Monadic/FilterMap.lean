@@ -80,7 +80,7 @@ theorem IterM.step_filterWithPostcondition {f : β → PostconditionT n (ULift B
 
 theorem IterM.mapState_mapWithPostcondition {γ : Type w} {f : β → PostconditionT n γ}
     [Monad n] [MonadLiftT m n] :
-    (it.mapWithPostcondition f).mapState Map.equiv.invFun =
+    (it.mapWithPostcondition f).mapState Map.toFilterMap =
       it.filterMapWithPostcondition (PostconditionT.map some <| f ·) :=
   rfl
 
@@ -95,12 +95,8 @@ theorem IterM.step_mapWithPostcondition {γ : Type w} {f : β → PostconditionT
       pure <| .deflate <| .skip (it'.mapWithPostcondition f) (.skip h)
     | .done h =>
       pure <| .deflate <| .done (.done h)) := by
-  rw [step_ofEquiv]
-  show (fun s => Shrink.deflate
-      (PlausibleIterStep.ofEquiv Map.equiv (it := it.mapWithPostcondition f) s.inflate)) <$>
-    (it.filterMapWithPostcondition (PostconditionT.map some <| f ·)).step = _
-  rw [step_filterMapWithPostcondition]
-  simp only [map_eq_pure_bind, bind_assoc]
+  simp only [step_ofEquiv, mapState_mapWithPostcondition, step_filterMapWithPostcondition,
+    map_eq_pure_bind, bind_assoc]
   apply bind_congr
   intro step
   match step.inflate with
@@ -747,8 +743,8 @@ theorem IterM.toList_map {α β β' : Type w} {m : Type w → Type w'} [Monad m]
     (it.map f).toList = (fun x => x.map f) <$> it.toList := by
   rw [← List.filterMap_eq_map, ← toList_filterMap, map, filterMap,
     toList_mapWithPostcondition_eq_toList_filterMapWithPostcondition,
-    show (fun x => PostconditionT.map some (pure (f x)) : β → PostconditionT m (Option β')) =
-      fun b => pure ((some ∘ f) b) from funext fun _ => PostconditionT.map_pure]
+    funext fun x => PostconditionT.map_pure (a := f x)]
+  rfl
 
 @[simp]
 theorem IterM.toList_filter {α : Type w} {m : Type w → Type w'} [Monad m] [LawfulMonad m]
