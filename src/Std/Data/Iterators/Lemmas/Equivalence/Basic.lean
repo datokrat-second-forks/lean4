@@ -8,6 +8,7 @@ module
 prelude
 public import Init.Internal.Order
 public import Init.Data.Iterators.Basic
+public import Init.Data.Iterators.Transport
 public import Std.Data.Iterators.Lemmas.Equivalence.HetT
 
 @[expose] public section
@@ -281,5 +282,32 @@ theorem IterM.Equiv.of_morphism {α₁ α₂} {m : Type w → Type w'} [Monad m]
       exact ⟨it, rfl, rfl⟩
   case hf =>
     exact ⟨ita, rfl, rfl⟩
+
+/--
+An iterator whose instance was obtained by `Iterator.ofEquiv` is equivalent to the iterator it was
+transported from.
+-/
+theorem IterM.Equiv.mapState_ofEquiv {α α' : Type w} {m : Type w → Type w'} [Monad m]
+    [LawfulMonad m] {β : Type w} [i : Iterator α m β] (e : α ≃ α') (it : IterM (α := α') m β) :
+    letI : Iterator α' m β := Iterator.ofEquiv e i
+    IterM.Equiv it (it.mapState e.invFun) := by
+  letI : Iterator α' m β := Iterator.ofEquiv e i
+  refine IterM.Equiv.of_morphism it (IterM.mapState e.invFun) ?_
+  intro it
+  simp only [HetT.ext_iff, Equivalence.property_step, Equivalence.prun_step]
+  refine ⟨?_, ?_⟩
+  · ext step
+    constructor
+    · intro h
+      exact ⟨step.mapIterator (IterM.mapState e.toFun),
+        (Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h), by simp⟩
+    · rintro ⟨a, ha, rfl⟩
+      exact ha
+  · intro γ f
+    simp only [Functor.map, HetT.map, HetT.prun_pmap, Equivalence.prun_step]
+    rw [IterM.step_ofEquiv]
+    simp only [map_eq_pure_bind, bind_assoc, pure_bind, Shrink.inflate_deflate,
+      PlausibleIterStep.val_ofEquiv, IterStep.mapIterator_mapIterator,
+      IterM.mapState_symm_comp_mapState, IterStep.mapIterator_id]
 
 end Std

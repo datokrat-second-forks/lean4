@@ -8,6 +8,7 @@ module
 prelude
 public import Init.Data.Iterators.PostconditionMonad
 public import Init.Data.Iterators.Consumers.Monadic.Loop
+public import Init.Data.Iterators.Transport
 import Init.PropLemmas
 
 public section
@@ -50,10 +51,10 @@ structure FilterMap (α : Type w) {β γ : Type w}
 Internal state of the `map` combinator. Do not depend on its internals.
 -/
 @[expose]
-def Map (α : Type w) {β γ : Type w} (m : Type w → Type w') (n : Type w → Type w'')
+newtype Map (α : Type w) {β γ : Type w} (m : Type w → Type w') (n : Type w → Type w'')
     (lift : ⦃α : Type w⦄ → m α → n α) [Functor n]
     (f : β → PostconditionT n γ) :=
-  FilterMap α m n lift (fun b => PostconditionT.map some (f b))
+  FilterMap α m n lift (fun b => PostconditionT.map some (f b)) with toFilterMap
 
 end Iterators.Types
 
@@ -71,7 +72,7 @@ def IterM.InternalCombinators.map {α β γ : Type w} {m : Type w → Type w'}
     {n : Type w → Type w''} [Monad n] (lift : ⦃α : Type w⦄ → m α → n α)
     [Iterator α m β] (f : β → PostconditionT n γ)
     (it : IterM (α := α) m β) : IterM (α := Map α m n lift f) n γ :=
-  ⟨⟨it⟩⟩
+  ⟨.mk ⟨it⟩⟩
 
 /--
 *Note: This is a very general combinator that requires an advanced understanding of monads,
@@ -166,14 +167,7 @@ instance FilterMap.instIterator {α β γ : Type w} {m : Type w → Type w'}
 instance Map.instIterator {α β γ : Type w} {m : Type w → Type w'} {n : Type w → Type w''} [Monad n]
     [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α} {f : β → PostconditionT n γ} :
     Iterator (Map α m n lift f) n γ :=
-  inferInstanceAs <| Iterator (FilterMap α m n lift _) n γ
-
-theorem Map.instIterator_eq_filterMapInstIterator {α β γ : Type w} {m : Type w → Type w'}
-    {n : Type w → Type w''} [Monad n]
-    [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α} {f : β → PostconditionT n γ} :
-    Map.instIterator (α := α) (β := β) (γ := γ) (m := m) (n := n) (lift := lift) (f := f) =
-      FilterMap.instIterator :=
-  rfl
+  Iterator.ofEquiv Map.equiv inferInstance
 
 private def FilterMap.instFinitenessRelation {α β γ : Type w} {m : Type w → Type w'}
     {n : Type w → Type w''} [Monad n] [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α}
@@ -204,15 +198,21 @@ instance FilterMap.instFinite {α β γ : Type w} {m : Type w → Type w'}
 instance Map.instFinite {α β γ : Type w} {m : Type w → Type w'} {n : Type w → Type w''} [Monad n]
     [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α} {f : β → PostconditionT n γ} [Finite α m] :
     Finite (Map α m n lift f) n :=
-  Finite.of_finitenessRelation FilterMap.instFinitenessRelation
+  Finite.ofEquiv Map.equiv
 
 private def Map.instProductivenessRelation {α β γ : Type w} {m : Type w → Type w'}
     {n : Type w → Type w''} [Monad n] [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α}
     {f : β → PostconditionT n γ} [Productive α m] :
     ProductivenessRelation (Map α m n lift f) n where
-  Rel := InvImage IterM.IsPlausibleSkipSuccessorOf (FilterMap.inner ∘ IterM.internalState)
+  Rel := InvImage IterM.IsPlausibleSkipSuccessorOf
+    (FilterMap.inner ∘ IterM.internalState ∘ IterM.mapState Map.equiv.invFun)
   wf := InvImage.wf _ Productive.wf
   subrelation {it it'} h := by
+    suffices ∀ jt jt' : IterM (α := FilterMap α m n lift fun b => PostconditionT.map some (f b)) n γ,
+        jt'.IsPlausibleSkipSuccessorOf jt →
+          jt'.internalState.inner.IsPlausibleSkipSuccessorOf jt.internalState.inner from
+      this _ _ h
+    intro jt jt' h
     cases h
     case yieldNone it' out h h' =>
       simp at h'
