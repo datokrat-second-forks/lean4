@@ -86,7 +86,7 @@ LEAN_EXPORT lean_object* l_Lean_Order_instMonadTailStateRefT_x27___redArg();
 LEAN_EXPORT lean_object* l_Lean_Order_instMonadTailStateRefT_x27___redArg___boxed(lean_object*);
 LEAN_EXPORT lean_object* l_Lean_Order_instMonadTailStateRefT_x27(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lean_Order_instMonadTailStateRefT_x27___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Lean_Order_instMonadTailId___lam__0(lean_object* v_x_1_, lean_object* v_inst_2_){
+LEAN_EXPORT lean_object* l_Lean_Order_instMonadTailId___lam__0(lean_object* v_00_u03b1_1_, lean_object* v_inst_2_){
 _start:
 {
 lean_object* v___x_3_; 
