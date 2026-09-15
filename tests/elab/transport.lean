@@ -14,32 +14,7 @@ newtype Foo := Int with toInt
 example (a : Int) : Foo.equiv.toFun a = Foo.mk a := rfl
 example (x : Foo) : Foo.equiv.invFun x = x.toInt := rfl
 
-/-! Congruences, as they would be declared next to the classes. -/
-
-@[transport] protected abbrev LE.congr (e : α ≃ β) : LE α ≃ LE β where
-  toFun i := ⟨fun x y => i.le (e.invFun x) (e.invFun y)⟩
-  invFun i := ⟨fun x y => i.le (e.toFun x) (e.toFun y)⟩
-  left_inv i := congrArg LE.mk <| funext fun x => funext fun y =>
-    show i.le (e.invFun (e.toFun x)) (e.invFun (e.toFun y)) = i.le x y by
-      rw [e.left_inv x, e.left_inv y]
-  right_inv i := congrArg LE.mk <| funext fun x => funext fun y =>
-    show i.le (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = i.le x y by
-      rw [e.right_inv x, e.right_inv y]
-
-@[transport] protected abbrev DecidableLE.congr (e : α ≃ β) [i : LE α] :
-    @DecidableLE α i ≃ @DecidableLE β ((LE.congr e).toFun i) where
-  toFun d x y := d (e.invFun x) (e.invFun y)
-  invFun d x y := decidable_of_iff (i.le (e.invFun (e.toFun x)) (e.invFun (e.toFun y))) (by
-    rw [e.left_inv x, e.left_inv y])
-  left_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
-  right_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
-
-@[transport] protected abbrev Inhabited.congr (e : α ≃ β) : Inhabited α ≃ Inhabited β where
-  toFun i := ⟨e.toFun i.default⟩
-  invFun i := ⟨e.invFun i.default⟩
-  left_inv i := congrArg Inhabited.mk (e.left_inv i.default)
-  right_inv i := congrArg Inhabited.mk (e.right_inv i.default)
-
+/-! Congruences beyond those of `Init.Transport`. -/
 
 /-- A congruence for a type constructor rather than a class. -/
 @[transport] protected abbrev Option.congr (e : α ≃ β) : Option α ≃ Option β where
