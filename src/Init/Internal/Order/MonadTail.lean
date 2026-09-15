@@ -45,7 +45,9 @@ theorem MonadTail.monotone_bind_right
   fun _ _ h => MonadTail.bind_mono_right (hmono _ _ h)
 
 instance : MonadTail Id where
-  instCCPO _ := inferInstanceAs (CCPO (FlatOrder (b := Classical.ofNonempty)))
+  instCCPO α :=
+    letI : CCPO α := inferInstanceAs (CCPO (FlatOrder (b := Classical.ofNonempty)))
+    Id.ccpo
   bind_mono_right h := h _
 
 instance {σ : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :

@@ -1162,6 +1162,26 @@ theorem monotone_stateRefT'Run [PartialOrder γ]
     · apply monotone_const
 
 -- as for `EST` below, the orders are transported along the definitional isomorphism
+-- `Id.mk`/`Id.run`
+
+/-- Transports a partial order on `α` to `Id α`. -/
+@[expose, instance_reducible] def Id.partialOrder {α : Type u} [PartialOrder α] :
+    PartialOrder (Id α) where
+  rel x y := x.run ⊑ y.run
+  rel_refl := PartialOrder.rel_refl
+  rel_trans := PartialOrder.rel_trans
+  rel_antisymm h₁ h₂ := congrArg Id.mk (PartialOrder.rel_antisymm h₁ h₂)
+
+/-- Transports a chain-complete partial order on `α` to `Id α`. -/
+@[expose, instance_reducible] def Id.ccpo {α : Type u} [CCPO α] : CCPO (Id α) where
+  toPartialOrder := Id.partialOrder
+  has_csup {c} hchain := by
+    have ⟨f, hf⟩ := CCPO.has_csup (α := α)
+      (c := fun f => c (Id.mk f)) fun x y hx hy => hchain _ _ hx hy
+    exact ⟨Id.mk f, fun x => (hf x.run).trans
+      ⟨fun h y hy => h y.run hy, fun h y hy => h (Id.mk y) hy⟩⟩
+
+-- as for `EST` below, the orders are transported along the definitional isomorphism
 -- `StateT.mk`/`StateT.run`
 
 /-- Transports a partial order on `σ → m (α × σ)` to `StateT σ m α`. -/
