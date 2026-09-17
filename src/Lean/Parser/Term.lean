@@ -841,6 +841,10 @@ disabled to help with porting:
 * `backward.inferInstanceAs.wrap.data`: wrap data fields in auxiliary definitions (proof fields are
   always wrapped)
 
+If the source type is not definitionally equal to the target type even at `semireducible`
+transparency, as for a `newtype`, the instance is instead transported along the equivalences and
+congruences registered with `@[transport]`, exactly as by the `transport` tactic.
+
 If you just need to synthesize an instance without transporting between types, use `inferInstance`
 instead, potentially with a type annotation for the expected type.
 -/

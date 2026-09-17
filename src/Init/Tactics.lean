@@ -1703,6 +1703,16 @@ syntax (name := symm) "symm" (location)? : tactic
 add a hypothesis `h_symm : b ~ a`. -/
 syntax (name := symmSaturate) "symm_saturate" : tactic
 
+/--
+`transport T` closes a goal `T'` by synthesizing an instance of `T` and moving it to `T'` along an
+equivalence `T ≃ T'` assembled from the declarations tagged `@[transport]`. For example, with
+`newtype Foo := Int with toInt`, whose `Foo.equiv : Int ≃ Foo` is registered automatically, and a
+congruence `LE.congr : (α ≃ β) → LE α ≃ LE β`, `transport (LE Int)` proves `LE Foo`.
+
+Unlike `inferInstanceAs`, `T` and `T'` are never identified by unfolding definitions.
+-/
+syntax (name := transport) "transport " term : tactic
+
 namespace SolveByElim
 
 /-- Syntax for omitting a local hypothesis in `solve_by_elim`. -/
