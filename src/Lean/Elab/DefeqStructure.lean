@@ -14,6 +14,9 @@ import Lean.Elab.ConfigEval
 import Lean.Meta.Injective
 import Lean.Elab.MutualInductive
 import Lean.DocString.Add
+import Init.Data.Function
+import Lean.Elab.Deriving.Basic
+import Lean.Meta.Transport
 
 public section
 
@@ -30,11 +33,12 @@ def isDefeqStructure (stx : Syntax) : CoreM Bool := do
 
 /--
 Adds the constructor `ctorName` and projection `projName` of the already elaborated `+defeq`
-structure `declName`, whose field type is the body of its definition. Reading the parameters off
-the elaborated `declName` (instead of re-elaborating its binders) is what makes section variables,
+structure `declName`, whose field type is the body of its definition, as well as the equivalence
+`equivName` between the two types, registered with `@[transport]`. Reading the parameters off the
+elaborated `declName` (instead of re-elaborating its binders) is what makes section variables,
 auto-bound implicits and universe parameters behave exactly as for `def`.
 -/
-private def addDefeqStructureCtorProj (declName ctorName projName fieldName : Name)
+private def addDefeqStructureCtorProj (declName ctorName projName equivName fieldName : Name)
     (ctorBinders : Array Syntax) : TermElabM Nat := do
   let info ← withoutExporting <| getConstInfoDefn declName
   let us := info.levelParams.map mkLevelParam
@@ -67,6 +71,24 @@ private def addDefeqStructureCtorProj (declName ctorName projName fieldName : Na
       addIdentity ctorName fieldName underlying self
     withNewBinderInfos implicitParams do
       addIdentity projName `self self underlying
+      let ctor := mkAppN (mkConst ctorName us) params
+      let proj := mkAppN (mkConst projName us) params
+      -- Both inverse laws hold by virtual iota resp. eta.
+      let leftInv ← withLocalDeclD fieldName underlying fun a => do mkLambdaFVars #[a] (← mkEqRefl a)
+      let rightInv ← withLocalDeclD `self self fun x => do mkLambdaFVars #[x] (← mkEqRefl x)
+      let value ← mkAppM ``Equiv.mk #[ctor, proj, leftInv, rightInv]
+      let type ← mkForallFVars params (← inferType value)
+      let value ← mkLambdaFVars params value
+      let decl := .defnDecl (← mkDefinitionValInferringUnsafe equivName info.levelParams type value .abbrev)
+      addDecl decl (forceExpose := exposed)
+      -- Reducible so that `N.equiv.toFun`/`.invFun` are seen as the constructor/projector.
+      setReducibilityStatus equivName .reducible
+      -- `macro_inline` substitutes the structure literal before compilation, so a transported
+      -- instance's `N.equiv.toFun`/`.invFun` fold to the identities; `inline` would only reach
+      -- the closed term the equivalence itself is compiled to.
+      setInlineAttribute equivName .macroInline
+      compileDecl decl
+      Transport.addTransportDecl equivName .global
     return params.size
 
 /--
@@ -95,8 +117,6 @@ def elabDefeqStructure (modifiers : Modifiers) (stx : Syntax) : CommandElabM Uni
     else pure ⟨stx[2]⟩
   unless stx[3].isNone do
     throwErrorAt stx[3] "A `+defeq` structure cannot extend other structures"
-  unless stx[5][0].isNone do
-    throwErrorAt stx[5] "A `+defeq` structure does not support `deriving` clauses"
   -- `optional structCtor`, then `structFields`
   let (ctor?, fields) := if stx[4].isNone then (none, #[]) else
     (if stx[4][1].isNone then none else some stx[4][1][0], stx[4][2][0].getArgs)
@@ -111,6 +131,7 @@ def elabDefeqStructure (modifiers : Modifiers) (stx : Syntax) : CommandElabM Uni
   let projId : Ident := ⟨field[1]⟩
   -- `typeSpec`: `" : " >> termParser`
   let ty : Term := ⟨field[2][1][0][1]⟩
+  let optDeriving := stx[5]
   let ctorDoc? ← match ctor? with
     | some ctor => memberDocComment? ctor[0] "constructor"
     | none => pure none
@@ -125,11 +146,13 @@ def elabDefeqStructure (modifiers : Modifiers) (stx : Syntax) : CommandElabM Uni
     | some ctor => ctor[1].getId
     | none => `mk)
   let projName := declName ++ projId.getId
+  let equivName := declName ++ `equiv
   if projName == ctorName then
     throwErrorAt projId "Invalid field name `{projId.getId}`: This is the name of the structure \
       constructor"
-  for n in [ctorName, projName] do
-    withRef (if n == projName then projId else ctorRef) <| checkNotAlreadyDeclared n
+  for n in [ctorName, projName, equivName] do
+    withRef (if n == projName then projId else if n == ctorName then ctorRef else declId) <|
+      checkNotAlreadyDeclared n
   for attr in modifiers.attrs do
     if attr.name matches `reducible | `semireducible | `implicit_reducible | `instance_reducible |
         `irreducible then
@@ -144,7 +167,7 @@ def elabDefeqStructure (modifiers : Modifiers) (stx : Syntax) : CommandElabM Uni
     | some ctor => ctor[2].getArgs
     | none => #[]
   let numParams ← liftTermElabM <| withRef ctorRef <|
-    addDefeqStructureCtorProj declName ctorName projName projId.getId ctorBinders
+    addDefeqStructureCtorProj declName ctorName projName equivName projId.getId ctorBinders
   addDeclarationRangesFromSyntax ctorName ctorRef
   addDeclarationRangesFromSyntax projName projId
   liftTermElabM do
@@ -159,5 +182,16 @@ def elabDefeqStructure (modifiers : Modifiers) (stx : Syntax) : CommandElabM Uni
   liftTermElabM <| mkVirtualInjectiveTheorems ctorName projName numParams
   for n in [ctorName, projName] do
     liftCoreM <| enableRealizationsForConst n
+  addDeclarationRangesFromSyntax equivName declId
+  liftCoreM <| enableRealizationsForConst equivName
+  -- As `MutualDef.processDeriving` for `def`; for a `newtype` this always means transport.
+  let classes ← liftCoreM <| getOptDerivingClasses optDeriving
+  unless classes.isEmpty do
+    liftTermElabM <| withLCtx {} {} do
+      let info ← withoutExporting <| getConstInfo declName
+      lambdaTelescope info.value! fun xs _ => do
+        let decl := mkAppN (.const declName (info.levelParams.map mkLevelParam)) xs
+        for view in classes do
+          withRef view.ref <| withLogging <| Term.processDefDeriving view decl
 
 end Lean.Elab.Command

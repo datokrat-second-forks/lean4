@@ -68,20 +68,12 @@ theorem Surjective.comp {α β γ} {g : β → γ} {f : α → β} (hg : Surject
     Exists.elim (hf b) fun a ha =>
       Exists.intro a (show g (f a) = c from Eq.trans (congrArg g ha) hb)
 
-/-- `LeftInverse g f` means that `g` is a left inverse to `f`. That is, `g ∘ f = id`. -/
-@[expose, grind, implicit_reducible]
-def LeftInverse {α β} (g : β → α) (f : α → β) : Prop :=
-  ∀ x, g (f x) = x
+attribute [grind] LeftInverse RightInverse
 
 /-- `HasLeftInverse f` means that `f` has an unspecified left inverse. -/
 @[expose]
 def HasLeftInverse {α β} (f : α → β) : Prop :=
   Exists fun finv : β → α => LeftInverse finv f
-
-/-- `RightInverse g f` means that `g` is a right inverse to `f`. That is, `f ∘ g = id`. -/
-@[expose, grind, implicit_reducible]
-def RightInverse {α β} (g : β → α) (f : α → β) : Prop :=
-  LeftInverse f g
 
 /-- `HasRightInverse f` means that `f` has an unspecified right inverse. -/
 @[expose]
@@ -157,3 +149,35 @@ theorem Injective.leftInverse
   hf.exists_leftInverse
 
 end Function
+
+namespace Equiv
+
+protected abbrev refl (α : Sort u) : α ≃ α :=
+  ⟨id, id, fun _ => rfl, fun _ => rfl⟩
+
+protected abbrev symm (e : α ≃ β) : β ≃ α :=
+  ⟨e.invFun, e.toFun, e.right_inv, e.left_inv⟩
+
+protected abbrev trans (e₁ : α ≃ β) (e₂ : β ≃ γ) : α ≃ γ where
+  toFun := e₂.toFun ∘ e₁.toFun
+  invFun := e₁.invFun ∘ e₂.invFun
+  left_inv x := (congrArg e₁.invFun (e₂.left_inv (e₁.toFun x))).trans (e₁.left_inv x)
+  right_inv y := (congrArg e₂.toFun (e₁.right_inv (e₂.invFun y))).trans (e₂.right_inv y)
+
+theorem toFun_injective (e : α ≃ β) : Function.Injective e.toFun :=
+  e.left_inv.injective
+
+theorem invFun_injective (e : α ≃ β) : Function.Injective e.invFun :=
+  e.right_inv.injective
+
+protected theorem ext {e₁ e₂ : α ≃ β} (h₁ : e₁.toFun = e₂.toFun) (h₂ : e₁.invFun = e₂.invFun) :
+    e₁ = e₂ := by
+  cases e₁; cases e₂; cases h₁; cases h₂; rfl
+
+theorem trans_symm (e : α ≃ β) : e.trans e.symm = Equiv.refl α :=
+  Equiv.ext (funext e.left_inv) (funext e.left_inv)
+
+theorem symm_trans (e : α ≃ β) : e.symm.trans e = Equiv.refl β :=
+  Equiv.ext (funext e.right_inv) (funext e.right_inv)
+
+end Equiv

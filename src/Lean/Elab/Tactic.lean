@@ -37,6 +37,7 @@ public import Lean.Elab.Tactic.Omega
 public import Lean.Elab.Tactic.Simpa
 public import Lean.Elab.Tactic.NormCast
 public import Lean.Elab.Tactic.Symm
+public import Lean.Elab.Tactic.Transport
 public import Lean.Elab.Tactic.SolveByElim
 public import Lean.Elab.Tactic.LibrarySearch
 public import Lean.Elab.Tactic.ShowTerm

@@ -10,6 +10,7 @@ public import Lean.Elab.App
 public import Lean.Elab.DeclNameGen
 import Lean.Compiler.NoncomputableAttr
 import Lean.Meta.WrapInstance
+import Lean.Meta.Transport
 
 public section
 
@@ -56,7 +57,8 @@ The abstraction is not done by this function.
 
 Expects to be run with an empty message log.
 -/
-private partial def mkInst (classExpr : Expr) (declName : Name) (declVal val : Expr) : TermElabM MkInstResult := do
+private partial def mkInst (classExpr : Expr) (declName : Name) (declVal val : Expr)
+    (transport : Bool) : TermElabM MkInstResult := do
   let classExpr ← whnfCore classExpr
   let cls := classExpr.getAppFn
   let (xs, bis, _) ← forallMetaTelescopeReducing (← inferType cls)
@@ -137,7 +139,11 @@ private partial def mkInst (classExpr : Expr) (declName : Name) (declVal val : E
           let argTy ← instantiateMVars (← inferType xs[j]!)
           let targetArgTy := argTy.replace fun e =>
             if e == val then declVal else none
-          if let some targetInst ← synthInstance? targetArgTy then
+          if transport then
+            -- The target type's own instances go into the instance type; whether they are related
+            -- to `origInst` is checked when the congruence's conclusion is unified with it.
+            xs' := xs'.set! j (← synthInstance targetArgTy)
+          else if let some targetInst ← synthInstance? targetArgTy then
             unless ← isDefEq origInst targetInst do
               throwDeltaDeriveFailure className declName
                 (m!"instance diamond: the instance for the target type\
@@ -210,7 +216,11 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
           -- (Possibly `classExpr` is not a type due to being underapplied, but `forallTelescopeReducing` tolerates this.)
           -- We don't reduce because of abbreviations such as `DecidableEq`
           forallTelescope classExpr fun _ classExpr => do
-            let result ← mkInst classExpr declName decl value
+            -- Delta deriving is only justified where `decl` actually unfolds to `value`; for an
+            -- irreducible definition such as a `newtype` the wrapping below would rest on the
+            -- kernel alone, so the instance is transported along `@[transport]` equivalences instead.
+            let transport := !(← withDefault <| isDefEqGuarded decl value)
+            let result ← mkInst classExpr declName decl value transport
             -- Save the pre-wrapping value for the noncomputable check below,
             -- since `wrapInstance` may inline noncomputable constants.
             let preNormClosure ← Closure.mkValueTypeClosure result.instType result.instVal (zetaDelta := true)
@@ -221,7 +231,9 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
             if isPrivateName declName then
               instName := mkPrivateName env instName
             let isMeta := (← read).isMetaSection || isMarkedMeta (← getEnv) declName
-            let inst ← if backward.inferInstanceAs.wrap.get (← getOptions) then
+            let inst ← if transport then
+              Meta.transport (← instantiateMVars result.instVal) result.instType
+            else if backward.inferInstanceAs.wrap.get (← getOptions) then
               withDeclNameForAuxNaming instName <| withNewMCtxDepth <|
                 wrapInstance result.instVal result.instType
                   (logCompileErrors := false)  -- covered by noncomputable check below

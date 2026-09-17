@@ -81,9 +81,6 @@ set_option hygiene false in
 /-- error: A `+defeq` structure cannot extend other structures -/
 #guard_msgs in structure +defeq Extends extends Plain where val' : Nat
 
-/-- error: A `+defeq` structure does not support `deriving` clauses -/
-#guard_msgs in structure +defeq Derives where val : Nat deriving Repr
-
 /--
 error: Invalid field: The field of a `+defeq` structure must be of the form `name : type`, without binders or default value
 -/
