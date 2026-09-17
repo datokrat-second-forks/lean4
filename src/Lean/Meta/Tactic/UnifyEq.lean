@@ -10,6 +10,7 @@ public import Lean.Meta.Tactic.Injection
 import Init.Data.Nat.Internal.Linear
 import Lean.Structure
 import Lean.ProjFns
+import Lean.Meta.VirtualStructure
 
 public section
 
@@ -34,7 +35,8 @@ private def toOffset? (e : Expr) : MetaM (Option (Expr × Nat)) := do
   | none => isOffset? e
 
 /--
-The constructor or the projector of a one-field structure, applied to the parameters. The two are inverse to each other by (virtual)
+The constructor or the projector of a one-field structure or of a `newtype` (see
+`VirtualStructureInfo`), applied to the parameters. The two are inverse to each other by (virtual)
 iota and eta, so both are definitional bijections.
 -/
 private structure Bijection where
@@ -90,12 +92,18 @@ private partial def bijectionChain? (e : Expr) (outer : List Bijection := []) :
       push true (← structCtorProj? ctorVal.induct us (args.extract 0 ctorVal.numParams))
         args[ctorVal.numParams]!
     else
-      return none
+      let some (isCtor, info) := (env.getVirtualCtorInfo? declName).map ((true, ·)) <|>
+        (env.getVirtualProjInfo? declName).map ((false, ·)) | return none
+      unless args.size == info.numParams + 1 do return none
+      let params := args.extract 0 info.numParams
+      push isCtor (some (mkAppN (mkConst info.ctorName us) params, mkAppN (mkConst info.projName us) params))
+        args[info.numParams]!
   | _ => return none
 
 /--
 Solves the equation `eqDecl : a = b` of type `α` if it is of the form `c x = t` or `t = c x`, where
-`c` is a chain of constructors and projections of one-field structures and `x` is a free variable not occurring in `t`, by the definitional change of variables `x := c⁻¹ t`: the
+`c` is a chain of constructors and projections of one-field structures or `newtype`s and `x` is a
+free variable not occurring in `t`, by the definitional change of variables `x := c⁻¹ t`: the
 equation is replaced by `x = c⁻¹ t`, which `unifyEq?` substitutes in its next round.
 -/
 private def changeOfVariables? (mvarId : MVarId) (eqDecl : LocalDecl) (subst : FVarSubst)
@@ -124,7 +132,7 @@ private def changeOfVariables? (mvarId : MVarId) (eqDecl : LocalDecl) (subst : F
      - If `a` (`b`) is a free variable not occurring in `b` (`a`), replace it everywhere.
      - If `a` and `b` are distinct constructors, return `none` to indicate that the goal has been closed.
      - If `a` and `b` are the same constructor, apply `injection`, the result contains the number of new equalities introduced in the goal.
-     - If `a` (`b`) is a chain of constructors and projections of one-field structures applied to a free variable
+     - If `a` (`b`) is a chain of constructors and projections of one-field structures or `newtype`s applied to a free variable
        not occurring in `b` (`a`), replace the equation by one that substitutes the variable, see `changeOfVariables?`.
      - It also tries to apply the given `acyclic` method to try to close the goal.
        Remark: It is a parameter because `simp` uses `unifyEq?`, and `acyclic` depends on `simp`.

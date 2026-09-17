@@ -14,6 +14,7 @@ import Init.Data.Nat.Order
 import Init.Data.Order.Lemmas
 import Lean.Elab.Binders
 import Lean.Meta.Tactic.Generalize
+import Lean.Meta.VirtualStructure
 
 
 public section
@@ -1007,7 +1008,7 @@ If `x` is an fvar, we'd like to transform the goal such that the context contain
 an fvar `y` that stands for `⟨x⟩`, so `x` becomes `y.1`.
 
 Payoff: An index of an induction target or index that is built from an fvar by constructors and
-projections of one-field structures becomes a plain fvar, a form that is required for
+projections of one-field structures or `newtype`s becomes a plain fvar, a form that is required for
 the application of induction.
 
 In contrast to `generalize`, the reparametrization is purely definitional and does not introduce
@@ -1095,34 +1096,77 @@ private def reparametrize (mvarId : MVarId) (x y : FVarId) (xInTermsOfY yInTerms
   let rename (e : Expr) : Expr := e.replaceFVars (#[mkFVar y] ++ dependentLDecls) (fvarIds.map mkFVar)
   return some { mvarId := newGoalId, newFVarId := fvarIds[0]!, transport := rename ∘ transport }
 
+/-- A one-field structure or a `newtype` (see `VirtualStructureInfo`), whose constructor and
+projector are inverse to each other by (virtual) iota and eta. -/
+private inductive IndexStructure where
+  | real (ctorVal : ConstructorVal)
+  | virtual (info : VirtualStructureInfo)
+
+/-- The constructor or the projector of `struct` applied to the parameters `params`. -/
+private structure IndexBijection where
+  isCtor : Bool
+  struct : IndexStructure
+  us : List Level
+  params : Array Expr
+
+private def IndexBijection.ctor (struct : IndexStructure) (us : List Level) (params : Array Expr) :
+    IndexBijection :=
+  { isCtor := true, struct, us, params }
+
+private def IndexBijection.proj (struct : IndexStructure) (us : List Level) (params : Array Expr) :
+    IndexBijection :=
+  { isCtor := false, struct, us, params }
+
+/-- The structure type `S params`. -/
+private def IndexBijection.mkType (b : IndexBijection) : Expr :=
+  let typeName := match b.struct with
+    | .real ctorVal => ctorVal.induct
+    | .virtual info => info.typeName
+  mkAppN (mkConst typeName b.us) b.params
+
+/-- The constructor application `⟨field⟩`. -/
+private def IndexBijection.mkCtor (b : IndexBijection) (field : Expr) : Expr :=
+  let ctorName := match b.struct with
+    | .real ctorVal => ctorVal.name
+    | .virtual info => info.ctorName
+  mkAppN (mkConst ctorName b.us) (b.params.push field)
+
+/-- The projection `major.f`, spelled with the projection function where there is one. -/
+private def IndexBijection.mkProj (b : IndexBijection) (major : Expr) : CoreM Expr :=
+  match b.struct with
+  | .real ctorVal => mkProjFn ctorVal b.us b.params 0 major
+  | .virtual info => return mkApp (mkAppN (mkConst info.projName b.us) b.params) major
+
 /--
 Replaces `x : S params` by `⟨y⟩`, where `y` is a fresh variable named like `x`. The projections
 `⟨y⟩.f` created by the substitution fold back to `y`.
 -/
-private def replaceByCtor (mvarId : MVarId) (x : FVarId) (ctorVal : ConstructorVal) (us : List Level)
-    (params : Array Expr) : MetaM (Option Result) := do
-  let yInTermsOfX ← mkProjFn ctorVal us params 0 (mkFVar x)
+private def replaceByCtor (mvarId : MVarId) (x : FVarId) (b : IndexBijection) :
+    MetaM (Option Result) := do
+  let yInTermsOfX ← b.mkProj (mkFVar x)
   -- The field type of a one-field structure depends on the params only.
   withLocalDeclD (← x.getUserName) (← inferType yInTermsOfX) fun y => do
-    let xInTermsOfY := mkAppN (mkConst ctorVal.name us) (params.push y)
-    -- `⟨y⟩.f` may be spelled with the projection function or as `Expr.proj`.
-    let projApp ← mkProjFn ctorVal us params 0 xInTermsOfY
+    let xInTermsOfY := b.mkCtor y
+    -- `⟨y⟩.f` may be spelled with the projection function or, for a real structure, as `Expr.proj`.
+    let projApp ← b.mkProj xInTermsOfY
+    let projNode? := match b.struct with
+      | .real ctorVal => some (Expr.proj ctorVal.induct 0 xInTermsOfY)
+      | .virtual _ => none
     reparametrize mvarId x y.fvarId! xInTermsOfY yInTermsOfX fun e =>
       let e := e.consumeMData
-      if e == projApp || e == .proj ctorVal.induct 0 xInTermsOfY then some y else none
+      if e == projApp || projNode? == some e then some y else none
 
 /--
 Replaces `x` by `y.f`, where `y : S params` is a fresh variable named like `x`. The constructor
 applications `⟨y.f⟩` created by the substitution fold back to `y`.
 -/
-private def replaceByProj (mvarId : MVarId) (x : FVarId) (ctorVal : ConstructorVal) (us : List Level)
-    (params : Array Expr) : MetaM (Option Result) := do
-  withLocalDeclD (← x.getUserName) (mkAppN (mkConst ctorVal.induct us) params) fun y => do
-    let xInTermsOfY ← mkProjFn ctorVal us params 0 y
-    let yInTermsOfX := mkAppN (mkConst ctorVal.name us) (params.push (mkFVar x))
+private def replaceByProj (mvarId : MVarId) (x : FVarId) (b : IndexBijection) :
+    MetaM (Option Result) := do
+  withLocalDeclD (← x.getUserName) b.mkType fun y => do
+    let xInTermsOfY ← b.mkProj y
+    let yInTermsOfX := b.mkCtor (mkFVar x)
     reparametrize mvarId x y.fvarId! xInTermsOfY yInTermsOfX fun e =>
-      if e.consumeMData == mkAppN (mkConst ctorVal.name us) (params.push xInTermsOfY) then y
-      else none
+      if e.consumeMData == b.mkCtor xInTermsOfY then y else none
 
 /--
 The goal of `induction` together with the expressions that have to be kept in sync with it while
@@ -1142,27 +1186,13 @@ private def IndexState.apply (s : IndexState) (r : Result) : IndexState where
     elimExpr := r.transport s.elimInfo.elimExpr, elimType := r.transport s.elimInfo.elimType }
   toTag    := s.toTag.map fun (id, x) => (id, (r.transport (mkFVar x)).fvarId!)
 
-private structure IndexBijection where
-  isCtor : Bool
-  ctorVal : ConstructorVal
-  us : List Level
-  params : Array Expr
-
-private def IndexBijection.ctor (ctorVal : ConstructorVal) (us : List Level) (params : Array Expr) :
-    IndexBijection :=
-  { isCtor := true, ctorVal, us, params }
-
-private def IndexBijection.proj (ctorVal : ConstructorVal) (us : List Level) (params : Array Expr) :
-    IndexBijection :=
-  { isCtor := false, ctorVal, us, params }
-
 /-- Turns `b x` into a fresh variable by replacing the base `x`, see `replaceByProj`/`replaceByCtor`. -/
 private def IndexBijection.invertBijection (b : IndexBijection) (mvarId : MVarId) (x : FVarId) :
     MetaM (Option Result) :=
   if b.isCtor then
-    replaceByProj mvarId x b.ctorVal b.us b.params
+    replaceByProj mvarId x b
   else
-    replaceByCtor mvarId x b.ctorVal b.us b.params
+    replaceByCtor mvarId x b
 
 private structure BijectionTower where
   fvarId : FVarId
@@ -1197,7 +1227,7 @@ private partial def bijectionTower? (e : Expr) (outerBijections : List IndexBije
     let xType ← whnfD (← inferType x)
     let .const _ us := xType.getAppFn | return none
     let params := xType.getAppArgs
-    let outerBijections := .proj ctorVal us params :: outerBijections
+    let outerBijections := .proj (.real ctorVal) us params :: outerBijections
     bijectionTower? x outerBijections
   | .app .. =>
     let .const declName us := e.getAppFn | return none
@@ -1207,23 +1237,33 @@ private partial def bijectionTower? (e : Expr) (outerBijections : List IndexBije
       if ctorVal.numFields ≠ 1 then return none
       if args.size ≠ projInfo.numParams + 1 ∨ !isNonRecStructure env ctorVal.induct then return none
       let params := args.extract 0 projInfo.numParams
-      let outerBijections := .proj ctorVal us params :: outerBijections
+      let outerBijections := .proj (.real ctorVal) us params :: outerBijections
       bijectionTower? args[projInfo.numParams]! outerBijections
+    else if let some info := env.getVirtualProjInfo? declName then
+      if args.size ≠ info.numParams + 1 then return none
+      let params := args.extract 0 info.numParams
+      let outerBijections := .proj (.virtual info) us params :: outerBijections
+      bijectionTower? args[info.numParams]! outerBijections
+    else if let some info := env.getVirtualCtorInfo? declName then
+      if args.size ≠ info.numParams + 1 then return none
+      let params := args.extract 0 info.numParams
+      let outerBijections := .ctor (.virtual info) us params :: outerBijections
+      bijectionTower? args[info.numParams]! outerBijections
     else
       let some ctorVal ← isCtor? declName | return none
       if ctorVal.numFields ≠ 1 then return none
       if args.size ≠ ctorVal.numParams + ctorVal.numFields ∨ !isNonRecStructure env ctorVal.induct then return none
       let params := args.extract 0 ctorVal.numParams
       let field := args[ctorVal.numParams]!
-      let outerBijections := .ctor ctorVal us params :: outerBijections
+      let outerBijections := .ctor (.real ctorVal) us params :: outerBijections
       bijectionTower? field outerBijections
   | _ =>
     return none
 
 /--
 Makes the implicit targets (the indices of the explicit `targets`) variables where a definitional
-change of variables suffices: a target `⟨x⟩` resp. `x.f` over a one-field structure becomes a fresh
-variable `y` by `x ↦ y.f` resp. `x ↦ ⟨y⟩`, from the innermost operation outwards. Targets of any
+change of variables suffices: a target `⟨x⟩` resp. `x.f` over a one-field structure or a `newtype`
+becomes a fresh variable `y` by `x ↦ y.f` resp. `x ↦ ⟨y⟩`, from the innermost operation outwards. Targets of any
 other shape are left to `checkInductionTargets`. Returns all targets and the updated `toTag` and
 `elimInfo`.
 -/
