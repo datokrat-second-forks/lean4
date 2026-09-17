@@ -23,20 +23,8 @@ end Std.Data.Nat.Basic
 
 section Mathlib.Logic.Equiv.Defs
 
-structure Equiv (α : Sort _) (β : Sort _) where
-  protected toFun : α → β
-  protected invFun : β → α
-
-infixl:25 " ≃ " => Equiv
-
-namespace Equiv
-
-protected def symm (e : α ≃ β) : β ≃ α := ⟨e.invFun, e.toFun⟩
-
-def sigmaEquivProd (α β : Type _) : (Σ _ : α, β) ≃ α × β :=
-  ⟨fun a => ⟨a.1, a.2⟩, fun a => ⟨a.1, a.2⟩⟩
-
-end Equiv
+def Equiv.sigmaEquivProd (α β : Type _) : (Σ _ : α, β) ≃ α × β :=
+  ⟨fun a => ⟨a.1, a.2⟩, fun a => ⟨a.1, a.2⟩, fun _ => rfl, fun _ => rfl⟩
 
 end Mathlib.Logic.Equiv.Defs
 
@@ -326,7 +314,7 @@ def ofNatCode : Nat → Code
   | _ => zero -- garbage value!
 
 instance instDenumerable : Denumerable Code :=
-  mk' ⟨encodeCode, ofNatCode⟩
+  mk' ⟨encodeCode, ofNatCode, sorry, sorry⟩
 
 open Primrec
 
