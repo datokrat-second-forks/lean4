@@ -333,6 +333,10 @@ Modifiers, parameters, universe parameters, section variables and auto-bound imp
 exactly as for `def`; as for `structure`, explicit parameters become implicit in the constructor
 and projector.
 
+The equivalence `N.equiv : ty ≃ N` is registered with `@[transport]`, so an optional
+`deriving C, D` clause, as well as `deriving instance … for N` and `inferInstanceAs`, obtain
+instances for `N` by transporting those of `ty` along it (see `Lean.Meta.transport`).
+
 This is the "irreducible type alias" pattern used to avoid defeq abuse while keeping a
 zero-overhead representation identical to `ty` (e.g. to cast `List ty` to `List N`). Unlike a
 hand-written version of this pattern, `newtype` also registers `N.mk`/`N.proj` as a virtual
@@ -342,7 +346,7 @@ irreducible otherwise. Use `unsealing_newtype N => ...` to locally lift the irre
 -/
 @[builtin_command_parser] def newtypeCmd := leading_parser
   declModifiers false >> "newtype " >> declId >> many (ppSpace >> Term.bracketedBinder) >>
-  " := " >> termParser >> " with " >> ident
+  " := " >> termParser >> " with " >> ident >> optDeriving
 
 /--
 `recall` restates a previous declaration for illustrative purposes and checks that its type and
