@@ -7,6 +7,7 @@ module
 
 prelude
 public import Lean.Meta.Basic
+public import Lean.Meta.VirtualStructure
 import Lean.Meta.WHNF
 import Lean.Structure
 import Lean.ProjFns
@@ -15,13 +16,17 @@ public section
 
 namespace Lean.Meta.OneFieldStructure
 
+inductive OneFieldStructureInfo where
+  | realStructure : ConstructorVal → OneFieldStructureInfo
+  | virtualStructure : VirtualStructureInfo → OneFieldStructureInfo
+
 /--
-A one-field-structure constructor or projection, together with
+A one-field-structure or newtype constructor or projection, together with
 a choice of parameters and universe levels for the underlying structure.
 -/
 structure Bijection where
   isCtor : Bool
-  ctorVal : ConstructorVal
+  structureInfo : OneFieldStructureInfo
   us : List Level
   params : Array Expr
 
@@ -29,10 +34,15 @@ def Bijection.inv (b : Bijection) : Bijection :=
   { b with isCtor := !b.isCtor }
 
 protected def Bijection.mkApp (b : Bijection) (e : Expr) : MetaM Expr :=
-  if b.isCtor then
-    return mkApp (mkAppN (mkConst b.ctorVal.name b.us) b.params) e
-  else
-    mkProjFn b.ctorVal b.us b.params 0 e
+  match b.isCtor, b.structureInfo with
+  | true, .realStructure ctorVal =>
+    return mkApp (mkAppN (mkConst ctorVal.name b.us) b.params) e
+  | false, .realStructure ctorVal =>
+    mkProjFn ctorVal b.us b.params 0 e
+  | true, .virtualStructure structureInfo =>
+    return mkApp (mkAppN (mkConst structureInfo.ctorName b.us) b.params) e
+  | false, .virtualStructure structureInfo =>
+    return mkApp (mkAppN (mkConst structureInfo.projName b.us) b.params) e
 
 /--
 Given a bijection `b` and an expression `e`, return `x` if `e` syntactically matches `b x`.
@@ -49,9 +59,11 @@ private def Bijection.unapply? (b : Bijection) (e : Expr) : MetaM (Option Expr) 
     let x := e.appArg!
     return if (← b.mkApp x) == e then some x else none
   else if let .proj structName 0 x := e then
-    if !b.isCtor && structName == b.ctorVal.induct then
+    let .realStructure ctorVal := b.structureInfo
+      | return none
+    if !b.isCtor && structName == ctorVal.induct then
       let xType ← whnfD (← inferType x)
-      if xType == mkAppN (mkConst b.ctorVal.induct b.us) b.params then
+      if xType == mkAppN (mkConst ctorVal.induct b.us) b.params then
         return some x
     return none
   else
@@ -62,13 +74,15 @@ protected def Bijection.mkAppAndSimplify (b : Bijection) (e : Expr) : MetaM Expr
   if let some x ← b.inv.unapply? e then return x
   b.mkApp e
 
-private def buildBijection? (isCtor : Bool) (structName : Name) (us : List Level)
+private def buildOneFieldStructureBijection? (isCtor : Bool) (structName : Name) (us : List Level)
     (params : Array Expr) :
     MetaM (Option Bijection) := do
   let env ← getEnv
-  let some ctorVal := getNonRecStructureCtor? env structName | return none
-  if ctorVal.numFields ≠ 1 then return none
-  return some { isCtor, ctorVal, us, params }
+  if let some ctorVal := getNonRecStructureCtor? env structName then
+    if ctorVal.numFields ≠ 1 then return none
+    return some { isCtor, structureInfo := .realStructure ctorVal, us, params }
+  else
+    return none
 
 structure BijectionWrappedFVar where
   fvarId : FVarId
@@ -87,7 +101,7 @@ partial def bijectionWrappedFVar? (e : Expr) (outer : List Bijection := []) :
   | .proj structName 0 x =>
     let xType ← whnfD (← inferType x)
     let .const _ us := xType.getAppFn | return none
-    let some b ← buildBijection? (isCtor := false) structName us xType.getAppArgs
+    let some b ← buildOneFieldStructureBijection? (isCtor := false) structName us xType.getAppArgs
       | return none
     bijectionWrappedFVar? x (b :: outer)
   | .app .. =>
@@ -99,15 +113,27 @@ partial def bijectionWrappedFVar? (e : Expr) (outer : List Bijection := []) :
       if args.size ≠ ctorVal.numParams + 1 then return none
       let params := args.extract 0 ctorVal.numParams
       let x := args[ctorVal.numParams]!
-      let some b ← buildBijection? (isCtor := false) ctorVal.induct us params
+      let some b ← buildOneFieldStructureBijection? (isCtor := false) ctorVal.induct us params
         | return none
       bijectionWrappedFVar? x (b :: outer)
     else if let some ctorVal ← isCtor? declName then
       if args.size ≠ ctorVal.numParams + 1 then return none
       let params := args.extract 0 ctorVal.numParams
       let x := args[ctorVal.numParams]!
-      let some b ← buildBijection? (isCtor := true) ctorVal.induct us params
+      let some b ← buildOneFieldStructureBijection? (isCtor := true) ctorVal.induct us params
         | return none
+      bijectionWrappedFVar? x (b :: outer)
+    else if let some info := env.getVirtualProjInfo? declName then
+      if args.size ≠ info.numParams + 1 then return none
+      let params := args.extract 0 info.numParams
+      let x := args[info.numParams]!
+      let b := { isCtor := false, structureInfo := .virtualStructure info, us := us, params := params }
+      bijectionWrappedFVar? x (b :: outer)
+    else if let some info := env.getVirtualCtorInfo? declName then
+      if args.size ≠ info.numParams + 1 then return none
+      let params := args.extract 0 info.numParams
+      let x := args[info.numParams]!
+      let b := { isCtor := true, structureInfo := .virtualStructure info, us := us, params := params }
       bijectionWrappedFVar? x (b :: outer)
     else
       return none

@@ -1010,7 +1010,7 @@ If `x` is an fvar, we'd like to transform the goal such that the context contain
 an fvar `y` that stands for `⟨x⟩`, so `x` becomes `y.1`.
 
 Payoff: An index of an induction target or index that is built from an fvar by constructors and
-projections of one-field structures becomes a plain fvar, a form that is required for
+projections of one-field structures or `newtype`s becomes a plain fvar, a form that is required for
 the application of induction.
 
 In contrast to `generalize`, the reparametrization is purely definitional and does not introduce
@@ -1130,10 +1130,14 @@ private def invertBijection (b : Bijection) (mvarId : MVarId) (x : FVarId) :
     let xInTermsOfY ← b.inv.mkApp y
     -- A projection `⟨y⟩.f` may be spelled with the projection function or as `Expr.proj`.
     let redexToSimplify ← b.mkApp xInTermsOfY
-    reparametrize mvarId x y.fvarId! xInTermsOfY yInTermsOfX fun e =>
+    reparametrize mvarId x y.fvarId! xInTermsOfY yInTermsOfX fun e => do
       let e := e.consumeMData
-      if e == redexToSimplify || (!b.isCtor && e == .proj b.ctorVal.induct 0 xInTermsOfY) then some y
-      else none
+      if e == redexToSimplify then
+        return y
+      else if let .realStructure ctorVal := b.structureInfo then
+        if !b.isCtor && e == .proj ctorVal.induct 0 xInTermsOfY then
+          return y
+      failure
 
 /--
 Updates a bijection-wrapped fvar `x`, and its bijections, to use the variables in the goal that
@@ -1162,7 +1166,7 @@ private def bijectionWrappedFVarForInduction? (e : Expr) :
 
 /--
 Applies a definitional change of variables that turns the given targets into variables if they
-are composed of one-field-structure constructors and projections.
+are composed of one-field-structure or newtype constructors and projections.
 If the change of variables introduces reducible compositions of constructors and projections,
 such as `X.mk (y.fieldProjection)` where `y : X`, such occurrences are simplified.
 Currently, the simplification step matches strictly syntactically.
