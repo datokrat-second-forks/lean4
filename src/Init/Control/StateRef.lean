@@ -61,6 +61,9 @@ lifting](lean-manual://section/monad-lifting).
 protected def lift (x : m α) : StateRefT' ω σ m α :=
   ReaderT.mk fun _ => x
 
+instance [Inhabited (m α)] : Inhabited (StateRefT' ω σ m α) :=
+  inferInstanceAs (Inhabited (ReaderT (ST.Ref ω σ) m α))
+
 instance [Monad m] : Monad (StateRefT' ω σ m) := inferInstanceAs (Monad (ReaderT _ _))
 instance : MonadLift m (StateRefT' ω σ m) := ⟨StateRefT'.lift⟩
 instance (σ m) : MonadFunctor m (StateRefT' ω σ m) := inferInstanceAs (MonadFunctor m (ReaderT _ _))
