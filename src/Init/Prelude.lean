@@ -735,15 +735,17 @@ def Function.RightInverse {α : Sort u} {β : Sort v} (g : β → α) (f : α �
   Function.LeftInverse f g
 
 /--
-An equivalence `α ≃ β` between two types: a function `toFun : α → β` together with an inverse
-`invFun`.
+An equivalence for canonical transport between two types: a function `toFun : α → β`
+together with an inverse `invFun`. This is separate from a general-purpose mathematical
+equivalence type, so libraries can supply their own type and notation.
 
 Declarations concluding in an equivalence can be tagged with `@[transport]`. Congruences such as
-`(e : α ≃ β) → LE α ≃ LE β` then let the `transport` tactic, and `inferInstanceAs` and `deriving`
-where definitional unfolding does not apply, move instances between equivalent types without unfolding
-either of them. Every `newtype` registers the equivalence with its underlying type this way.
+`(e : Lean.CanonicalEquivalence α β) → Lean.CanonicalEquivalence (LE α) (LE β)`
+let `transport`, `inferInstanceAs`, and `deriving` move instances between equivalent types
+without unfolding either type. Every `newtype` registers its underlying type equivalence
+as `N.equivDef`.
 -/
-structure Equiv (α : Sort u) (β : Sort v) where
+structure Lean.CanonicalEquivalence (α : Sort u) (β : Sort v) where
   /-- The forward map. -/
   toFun : α → β
   /-- The backward map. -/

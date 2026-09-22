@@ -28,14 +28,14 @@ example (l : List Nat) : (Control.mk l).toList = l := rfl
 
 /-!
 The equivalence is `macro_inline`, so that an instance transported along it compiles as if it had
-been written on the underlying type: `Wrapper.equiv.toFun`/`.invFun` fold to the identities before
+been written on the underlying type: `Wrapper.equivDef.toFun`/`.invFun` fold to the identities before
 the compiler sees them, whereas `inline` would only reach the closed term the equivalence itself is
 compiled to.
 -/
 
 open Lean Compiler in
 run_meta do
-  let some k := getInlineAttribute? (← getEnv) ``Wrapper.equiv
-    | throwError "`Wrapper.equiv` carries no inline attribute"
+  let some k := getInlineAttribute? (← getEnv) ``Wrapper.equivDef
+    | throwError "`Wrapper.equivDef` carries no inline attribute"
   unless k matches .macroInline do
-    throwError "`Wrapper.equiv` is not `macro_inline`"
+    throwError "`Wrapper.equivDef` is not `macro_inline`"
