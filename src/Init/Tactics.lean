@@ -1705,9 +1705,11 @@ syntax (name := symmSaturate) "symm_saturate" : tactic
 
 /--
 `transport T` closes a goal `T'` by synthesizing an instance of `T` and moving it to `T'` along an
-equivalence `T ≃ T'` assembled from the declarations tagged `@[transport]`. For example, with
-`newtype Foo := Int with toInt`, whose `Foo.equiv : Int ≃ Foo` is registered automatically, and a
-congruence `LE.congr : (α ≃ β) → LE α ≃ LE β`, `transport (LE Int)` proves `LE Foo`.
+equivalence `Lean.CanonicalEquivalence T T'` assembled from declarations tagged `@[transport]`.
+For example, `newtype Foo := Int with toInt` registers
+`Foo.equivDef : Lean.CanonicalEquivalence Int Foo` automatically. Given a congruence
+`LE.canonicalCongr : Lean.CanonicalEquivalence α β → Lean.CanonicalEquivalence (LE α) (LE β)`,
+`transport (LE Int)` proves `LE Foo`.
 
 Unlike `inferInstanceAs`, `T` and `T'` are never identified by unfolding definitions.
 -/
