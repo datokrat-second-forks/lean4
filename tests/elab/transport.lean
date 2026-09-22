@@ -8,15 +8,16 @@ equivalence with the underlying type is registered automatically.
 
 newtype Foo := Int with toInt
 
-/-- info: Foo.equiv : Int ≃ Foo -/
-#guard_msgs in #check Foo.equiv
+/-- info: Foo.equivDef : Lean.CanonicalEquivalence Int Foo -/
+#guard_msgs in #check Foo.equivDef
 
-example (a : Int) : Foo.equiv.toFun a = Foo.mk a := rfl
-example (x : Foo) : Foo.equiv.invFun x = x.toInt := rfl
+example (a : Int) : Foo.equivDef.toFun a = Foo.mk a := rfl
+example (x : Foo) : Foo.equivDef.invFun x = x.toInt := rfl
 
 /-! Congruences, as they would be declared next to the classes. -/
 
-@[transport] protected abbrev LE.congr (e : α ≃ β) : LE α ≃ LE β where
+@[transport] protected abbrev LE.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (LE α) (LE β) where
   toFun i := ⟨fun x y => i.le (e.invFun x) (e.invFun y)⟩
   invFun i := ⟨fun x y => i.le (e.toFun x) (e.toFun y)⟩
   left_inv i := congrArg LE.mk <| funext fun x => funext fun y =>
@@ -26,15 +27,16 @@ example (x : Foo) : Foo.equiv.invFun x = x.toInt := rfl
     show i.le (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = i.le x y by
       rw [e.right_inv x, e.right_inv y]
 
-@[transport] protected abbrev DecidableLE.congr (e : α ≃ β) [i : LE α] :
-    @DecidableLE α i ≃ @DecidableLE β ((LE.congr e).toFun i) where
+@[transport] protected abbrev DecidableLE.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : LE α] :
+    Lean.CanonicalEquivalence (@DecidableLE α i) (@DecidableLE β ((LE.canonicalCongr e).toFun i)) where
   toFun d x y := d (e.invFun x) (e.invFun y)
   invFun d x y := decidable_of_iff (i.le (e.invFun (e.toFun x)) (e.invFun (e.toFun y))) (by
     rw [e.left_inv x, e.left_inv y])
   left_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
   right_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
 
-@[transport] protected abbrev Inhabited.congr (e : α ≃ β) : Inhabited α ≃ Inhabited β where
+@[transport] protected abbrev Inhabited.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (Inhabited α) (Inhabited β) where
   toFun i := ⟨e.toFun i.default⟩
   invFun i := ⟨e.invFun i.default⟩
   left_inv i := congrArg Inhabited.mk (e.left_inv i.default)
@@ -42,7 +44,8 @@ example (x : Foo) : Foo.equiv.invFun x = x.toInt := rfl
 
 
 /-- A congruence for a type constructor rather than a class. -/
-@[transport] protected abbrev Option.congr (e : α ≃ β) : Option α ≃ Option β where
+@[transport] protected abbrev Option.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (Option α) (Option β) where
   toFun := Option.map e.toFun
   invFun := Option.map e.invFun
   left_inv
@@ -56,9 +59,9 @@ class LawfulLE (α : Type) [LE α] : Prop where
   le_refl : ∀ x : α, x ≤ x
 
 /-- The conclusion mentions the transported `LE` instance, so it only applies to that one. -/
-@[transport] protected abbrev LawfulLE.congr (e : α ≃ β) [i : LE α] :
-    @LawfulLE α i ≃ @LawfulLE β ((LE.congr e).toFun i) where
-  toFun h := @LawfulLE.mk β ((LE.congr e).toFun i) fun x => h.le_refl (e.invFun x)
+@[transport] protected abbrev LawfulLE.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : LE α] :
+    Lean.CanonicalEquivalence (@LawfulLE α i) (@LawfulLE β ((LE.canonicalCongr e).toFun i)) where
+  toFun h := @LawfulLE.mk β ((LE.canonicalCongr e).toFun i) fun x => h.le_refl (e.invFun x)
   invFun h := @LawfulLE.mk α i fun x => (e.left_inv x ▸ h.le_refl (e.toFun x) : x ≤ x)
   left_inv _ := rfl
   right_inv _ := rfl
@@ -72,13 +75,13 @@ instance : DecidableLE Foo := by transport (DecidableLE Int)
 instance : LawfulLE Foo := by transport (LawfulLE Int)
 
 -- The instance is the congruence applied to the underlying instance, nothing is unfolded.
-example : (inferInstance : LE Foo) = (LE.congr Foo.equiv).toFun inferInstance := rfl
+example : (inferInstance : LE Foo) = (LE.canonicalCongr Foo.equivDef).toFun inferInstance := rfl
 
 example : Foo.mk 1 ≤ Foo.mk 2 := by decide
 example : ¬ Foo.mk 2 ≤ Foo.mk 1 := by decide
 example (x : Foo) : x ≤ x := LawfulLE.le_refl x
 
-/-! Chaining: through nested `newtype`s with `Equiv.trans`, and through type constructors. -/
+/-! Chaining: through nested `newtype`s with `Lean.CanonicalEquivalence.trans`, and through type constructors. -/
 
 newtype Foo2 := Foo with toFoo
 
@@ -115,15 +118,15 @@ example : (default : Baz) = Baz.mk 0 := rfl
 example : Baz.mk 1 ≤ Baz.mk 2 := by decide
 
 /-!
-Families of equivalences: a congruence for a class on a type constructor takes `∀ α, m α ≃ n α`,
+Families of equivalences: a congruence for a class on a type constructor takes `∀ α, Lean.CanonicalEquivalence (m α) (n α)`,
 which is solved under the binder.
 -/
 
 class Pointed (m : Type → Type) where
   point : (α : Type) → α → m α
 
-@[transport] protected abbrev Pointed.congr {m n : Type → Type} (e : ∀ α, m α ≃ n α) :
-    Pointed m ≃ Pointed n where
+@[transport] protected abbrev Pointed.canonicalCongr {m n : Type → Type} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α)) :
+    Lean.CanonicalEquivalence (Pointed m) (Pointed n) where
   toFun i := ⟨fun α a => (e α).toFun (i.point α a)⟩
   invFun i := ⟨fun α a => (e α).invFun (i.point α a)⟩
   left_inv i := congrArg Pointed.mk <| funext fun α => funext fun a => (e α).left_inv (i.point α a)
@@ -137,11 +140,12 @@ instance : Pointed Opt := inferInstanceAs (Pointed Option)
 
 example : Pointed.point (m := Opt) Nat 1 = Opt.mk (some 1) := rfl
 
--- The family is `fun α => Opt.equiv`, the equivalence of the parametrized `newtype`.
-example : (inferInstance : Pointed Opt) = (Pointed.congr fun α => Opt.equiv (α := α)).toFun inferInstance :=
+-- The family is `fun α => Opt.equivDef`, the equivalence of the parametrized `newtype`.
+example : (inferInstance : Pointed Opt) =
+    (Pointed.canonicalCongr fun α => Opt.equivDef (α := α)).toFun inferInstance :=
   rfl
 
--- Chaining under the binder: `Option α ≃ Opt α ≃ Opt2 α`.
+-- Chaining under the binder: `Option α → Opt α → Opt2 α`.
 newtype Opt2 (α : Type) := Opt α with toOpt
 
 instance : Pointed Opt2 := by transport (Pointed Option)
@@ -161,7 +165,7 @@ error: failed to transport
 to
   LawfulLE Bar
 
-Note: `LawfulLE.congr` does not apply
+Note: `LawfulLE.canonicalCongr` does not apply
 -/
 #guard_msgs in
 instance : LawfulLE Bar := by transport (LawfulLE Int)
@@ -178,7 +182,7 @@ Note: no `@[transport]` declaration applies
 instance : Hashable Foo := by transport (Hashable Int)
 
 /--
-error: invalid `@[transport]` declaration `notAnEquiv`, its conclusion must be an equivalence `α ≃ β`, but is
+error: invalid `@[transport]` declaration `notAnEquiv`, its conclusion must be an equivalence `Lean.CanonicalEquivalence α β`, but is
   Nat
 -/
 #guard_msgs in
@@ -189,4 +193,23 @@ error: invalid `@[transport]` declaration `badArg`, its explicit arguments must 
   Nat
 -/
 #guard_msgs in
-@[transport] def badArg (n : Nat) : Fin (n + 1) ≃ Fin (n + 1) := Equiv.refl _
+@[transport] def badArg (n : Nat) : Lean.CanonicalEquivalence (Fin (n + 1)) (Fin (n + 1)) := Lean.CanonicalEquivalence.refl _
+
+/-! Library-owned equivalences, notation, and names coexist with canonical transport. -/
+
+structure Equiv (α β : Type) where
+  toFun : α → β
+  invFun : β → α
+
+infixl:25 " ≃ " => Equiv
+
+def Foo.equiv : Int ≃ Foo := ⟨Foo.mk, Foo.toInt⟩
+def LE.congr : Nat := 7
+
+newtype Independent := Int with toInt deriving LE, Inhabited
+
+example : Independent.mk 1 ≤ Independent.mk 2 := by decide
+example : (default : Independent) = Independent.mk 0 := rfl
+example : Lean.CanonicalEquivalence Int Independent := Independent.equivDef
+example (x : Int) : Foo.equiv.toFun x = Foo.equivDef.toFun x := rfl
+example : LE.congr = 7 := rfl

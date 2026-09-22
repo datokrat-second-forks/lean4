@@ -543,9 +543,10 @@ structure StructureConfig where
   implicit in both, and binders after the constructor's name update the binder kinds of the
   parameters in the constructor, as in `toLp (p) ::`.
 
-  The equivalence `N.equiv : ty ≃ N` is registered with `@[transport]`, so an optional
-  `deriving C, D` clause, as well as `deriving instance … for N` and `inferInstanceAs`, obtain
-  instances for `N` by transporting those of `ty` along it (see `Lean.Meta.transport`).
+  The equivalence `N.equivDef : Lean.CanonicalEquivalence ty N` is registered with `@[transport]`,
+  so an optional `deriving C, D` clause, as well as `deriving instance … for N` and
+  `inferInstanceAs`, obtain instances for `N` by transporting those of `ty` along it (see
+  `Lean.Meta.transport`).
 
   This is the "irreducible type alias" pattern used to avoid defeq abuse while keeping a
   zero-overhead representation identical to `ty` (e.g. to cast `List ty` to `List N`). Unlike a

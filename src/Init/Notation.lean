@@ -379,7 +379,6 @@ macro_rules | `($x <= $y)  => `(binrel% LE.le $x $y)
 @[inherit_doc] infix:50 " = "                  => Eq
 @[inherit_doc] infix:50 " == "                 => BEq.beq
 @[inherit_doc] infix:50 " ≍ "                  => HEq
-@[inherit_doc] infixl:25 " ≃ "                 => Equiv
 
 /-!
   Remark: the infix commands above ensure a delaborator is generated for each relations.

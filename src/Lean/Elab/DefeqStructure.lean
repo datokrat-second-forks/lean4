@@ -76,15 +76,15 @@ private def addDefeqStructureCtorProj (declName ctorName projName equivName fiel
       -- Both inverse laws hold by virtual iota resp. eta.
       let leftInv ← withLocalDeclD fieldName underlying fun a => do mkLambdaFVars #[a] (← mkEqRefl a)
       let rightInv ← withLocalDeclD `self self fun x => do mkLambdaFVars #[x] (← mkEqRefl x)
-      let value ← mkAppM ``Equiv.mk #[ctor, proj, leftInv, rightInv]
+      let value ← mkAppM ``Lean.CanonicalEquivalence.mk #[ctor, proj, leftInv, rightInv]
       let type ← mkForallFVars params (← inferType value)
       let value ← mkLambdaFVars params value
       let decl := .defnDecl (← mkDefinitionValInferringUnsafe equivName info.levelParams type value .abbrev)
       addDecl decl (forceExpose := exposed)
-      -- Reducible so that `N.equiv.toFun`/`.invFun` are seen as the constructor/projector.
+      -- Reducible so that `N.equivDef.toFun`/`.invFun` are seen as the constructor/projector.
       setReducibilityStatus equivName .reducible
       -- `macro_inline` substitutes the structure literal before compilation, so a transported
-      -- instance's `N.equiv.toFun`/`.invFun` fold to the identities; `inline` would only reach
+      -- instance's `N.equivDef.toFun`/`.invFun` fold to the identities; `inline` would only reach
       -- the closed term the equivalence itself is compiled to.
       setInlineAttribute equivName .macroInline
       compileDecl decl
@@ -146,7 +146,7 @@ def elabDefeqStructure (modifiers : Modifiers) (stx : Syntax) : CommandElabM Uni
     | some ctor => ctor[1].getId
     | none => `mk)
   let projName := declName ++ projId.getId
-  let equivName := declName ++ `equiv
+  let equivName := declName ++ `equivDef
   if projName == ctorName then
     throwErrorAt projId "Invalid field name `{projId.getId}`: This is the name of the structure \
       constructor"
