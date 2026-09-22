@@ -152,19 +152,13 @@ end Function
 
 namespace Lean.CanonicalEquivalence
 
-/-- Any type is equivalent to itself. -/
-@[expose]
-protected def refl (α : Sort u) : Lean.CanonicalEquivalence α α :=
+protected abbrev refl (α : Sort u) : Lean.CanonicalEquivalence α α :=
   ⟨id, id, fun _ => rfl, fun _ => rfl⟩
 
-/-- Inverse of an equivalence. -/
-@[expose, implicit_reducible]
-protected def symm (e : Lean.CanonicalEquivalence α β) : Lean.CanonicalEquivalence β α :=
+protected abbrev symm (e : Lean.CanonicalEquivalence α β) : Lean.CanonicalEquivalence β α :=
   ⟨e.invFun, e.toFun, e.right_inv, e.left_inv⟩
 
-/-- Composition of equivalences. -/
-@[expose]
-protected def trans (e₁ : Lean.CanonicalEquivalence α β) (e₂ : Lean.CanonicalEquivalence β γ) :
+protected abbrev trans (e₁ : Lean.CanonicalEquivalence α β) (e₂ : Lean.CanonicalEquivalence β γ) :
     Lean.CanonicalEquivalence α γ where
   toFun := e₂.toFun ∘ e₁.toFun
   invFun := e₁.invFun ∘ e₂.invFun
@@ -177,23 +171,16 @@ theorem toFun_injective (e : Lean.CanonicalEquivalence α β) : Function.Injecti
 theorem invFun_injective (e : Lean.CanonicalEquivalence α β) : Function.Injective e.invFun :=
   e.right_inv.injective
 
-/-- Equivalences are equal when their forward maps agree pointwise. -/
-theorem ext {e₁ e₂ : Lean.CanonicalEquivalence α β} (h : ∀ x, e₁.toFun x = e₂.toFun x) : e₁ = e₂ := by
-  have h₁ : e₁.toFun = e₂.toFun := funext h
-  have h₂ : e₁.invFun = e₂.invFun := funext fun x =>
-    e₁.toFun_injective ((e₁.right_inv x).trans
-      ((h (e₂.invFun x)).trans (e₂.right_inv x)).symm)
+protected theorem ext {e₁ e₂ : Lean.CanonicalEquivalence α β}
+    (h₁ : e₁.toFun = e₂.toFun) (h₂ : e₁.invFun = e₂.invFun) : e₁ = e₂ := by
   cases e₁; cases e₂; cases h₁; cases h₂; rfl
 
-theorem self_trans_symm (e : Lean.CanonicalEquivalence α β) :
+theorem trans_symm (e : Lean.CanonicalEquivalence α β) :
     e.trans e.symm = Lean.CanonicalEquivalence.refl α :=
-  Lean.CanonicalEquivalence.ext e.left_inv
+  Lean.CanonicalEquivalence.ext (funext e.left_inv) (funext e.left_inv)
 
-theorem symm_trans_self (e : Lean.CanonicalEquivalence α β) :
+theorem symm_trans (e : Lean.CanonicalEquivalence α β) :
     e.symm.trans e = Lean.CanonicalEquivalence.refl β :=
-  Lean.CanonicalEquivalence.ext e.right_inv
-
-theorem symm_trans (e₁ : Lean.CanonicalEquivalence α β) (e₂ : Lean.CanonicalEquivalence β γ) :
-    (e₁.trans e₂).symm = e₂.symm.trans e₁.symm := rfl
+  Lean.CanonicalEquivalence.ext (funext e.right_inv) (funext e.right_inv)
 
 end Lean.CanonicalEquivalence
