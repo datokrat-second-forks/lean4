@@ -14,16 +14,16 @@ public section
 
 namespace Lean
 
-opaque DynlibImpl : NonemptyType.{0}
+private opaque DynlibImpl : NonemptyType.{0}
 /-- A dynamic library handle. -/
 structure Dynlib where
-  ref : DynlibImpl.type
+  private ref : DynlibImpl.type
 instance : Nonempty Dynlib := ⟨⟨Classical.choice DynlibImpl.property⟩⟩
 
-opaque Dynlib.SymbolImpl (dynlib : Dynlib) : NonemptyType.{0}
+private opaque Dynlib.SymbolImpl (dynlib : Dynlib) : NonemptyType.{0}
 /-- A reference to a symbol within a dynamic library. -/
 structure Dynlib.Symbol (dynlib : Dynlib) where
-  ref : (SymbolImpl dynlib).type
+  private ref : (SymbolImpl dynlib).type
 instance : Nonempty (Dynlib.Symbol dynlib) := ⟨⟨Classical.choice (Dynlib.SymbolImpl dynlib).property⟩⟩
 
 /--
