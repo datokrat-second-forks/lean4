@@ -89,7 +89,7 @@ private def showParserName [Monad m] [MonadEnv m] (firsts : NameMap String) (n :
   let params :=
     env.constants.find?' n |>.map (·.levelParams.map Level.param) |>.getD []
 
-  let tok := ((← customTacticName n) <|> firsts.get? n).map Std.Format.text |>.getD (format n)
+  let tok := ((← customTacticName n) <|> firsts.find? n).map Std.Format.text |>.getD (format n)
   pure m!"`{.withExprHover tok (.const n params) {}}`"
 
 /--
@@ -167,7 +167,7 @@ def allTacticDocs (includeUnnamed : Bool := true) : MetaM (Array TacticDoc) := d
     -- Skip noncanonical tactics
     if let some _ := alternativeOfTactic env tac then continue
 
-    let userName? : Option String := firstTokens.get? tac
+    let userName? : Option String := firstTokens.find? tac
     let userName ←
       if let some n := userName? then pure n
       else if includeUnnamed then pure tac.toString
