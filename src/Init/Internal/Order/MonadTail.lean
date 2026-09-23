@@ -53,7 +53,7 @@ protected theorem MonadTail.ext {inst : Bind m} {i j : @MonadTail m inst}
   rfl
 
 /-- Transports `MonadTail` along a family of equivalences, to the transported `Bind` instance. -/
-@[transport] protected abbrev MonadTail.congr {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
+@[transport] protected abbrev MonadTail.canonicalCongr {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
     [b : Bind m] : Lean.CanonicalEquivalence (@MonadTail m b) (@MonadTail n (Bind.ofEquiv e b)) where
   toFun i :=
     have hl : ∀ α (x : m α), (e α).invFun ((e α).toFun x) = x := fun α => (e α).left_inv
@@ -73,8 +73,8 @@ protected theorem MonadTail.ext {inst : Bind m} {i j : @MonadTail m inst}
       rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
       simp only [hl] at this
       exact this)
-  left_inv i := MonadTail.ext fun β _ => (CCPO.congr (e β)).left_inv _
-  right_inv i := MonadTail.ext fun β _ => (CCPO.congr (e β)).right_inv _
+  left_inv i := MonadTail.ext fun β _ => (CCPO.canonicalCongr (e β)).left_inv _
+  right_inv i := MonadTail.ext fun β _ => (CCPO.canonicalCongr (e β)).right_inv _
 
 instance : MonadTail Id where
   instCCPO _ := inferInstanceAs (CCPO (FlatOrder (b := Classical.ofNonempty)))
