@@ -27,6 +27,16 @@ newtype Ordinal := Bounded.LE 1 31 with toBounded
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
+/-- Converts the ordinal to an `Int`. -/
+abbrev Ordinal.toInt (ordinal : Ordinal) : Int := ordinal.toBounded.toInt
+
+/-- Converts the ordinal to a `Nat`. -/
+abbrev Ordinal.toNat (ordinal : Ordinal) : Nat := ordinal.toBounded.toNat
+
+/-- Converts the ordinal to a `Fin`. -/
+abbrev Ordinal.toFin (ordinal : Ordinal) (h₀ : 0 ≤ (1 : Int)) : Fin ((31 : Int) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
+
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 1 (1 + (30 : Nat))) n)
 
@@ -43,7 +53,10 @@ newtype Offset := UnitVal 86400 with toUnitVal
 /--
 The underlying value of the offset, in the unit's own scale.
 -/
-@[expose, inline] def Offset.val (offset : Offset) : Int := offset.toUnitVal.val
+abbrev Offset.val (offset : Offset) : Int := offset.toUnitVal.val
+
+/-- Converts the offset to an `Int`, in the unit's own scale. -/
+abbrev Offset.toInt (offset : Offset) : Int := offset.toUnitVal.toInt
 
 instance : OfNat Offset n := inferInstanceAs (OfNat (UnitVal 86400) n)
 
@@ -66,6 +79,17 @@ newtype OfYear (leap : Bool) := Bounded.LE 1 (.ofNat (if leap then 366 else 365)
 
 /-- The underlying integer of the ordinal. -/
 abbrev OfYear.val (ordinal : OfYear leap) : Int := ordinal.toBounded.val
+
+/-- Converts the ordinal to an `Int`. -/
+abbrev OfYear.toInt (ordinal : OfYear leap) : Int := ordinal.toBounded.toInt
+
+/-- Converts the ordinal to a `Nat`. -/
+abbrev OfYear.toNat (ordinal : OfYear leap) : Nat := ordinal.toBounded.toNat
+
+/-- Converts the ordinal to a `Fin`. -/
+abbrev OfYear.toFin (ordinal : OfYear leap) (h₀ : 0 ≤ (1 : Int)) :
+    Fin (Int.ofNat (if leap then 366 else 365) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
 
 namespace OfYear
 

@@ -27,6 +27,20 @@ newtype Ordinal := Bounded.LE 0 23 with toBounded
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
+/-- Converts the ordinal to an `Int`. -/
+abbrev Ordinal.toInt (ordinal : Ordinal) : Int := ordinal.toBounded.toInt
+
+/-- Converts the ordinal to a `Nat`. -/
+abbrev Ordinal.toNat (ordinal : Ordinal) : Nat := ordinal.toBounded.toNat
+
+/-- Converts the ordinal to a `Fin`. -/
+abbrev Ordinal.toFin (ordinal : Ordinal) (h₀ : 0 ≤ (0 : Int)) : Fin ((23 : Int) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
+
+/-- Raises the lower bound of the ordinal to a bound it is known to satisfy. -/
+abbrev Ordinal.truncateBottom (ordinal : Ordinal) (h : ordinal.val ≥ j) : Bounded.LE j 23 :=
+  ordinal.toBounded.truncateBottom h
+
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 0 (0 + (23 : Nat))) n)
 
@@ -44,7 +58,10 @@ newtype Offset := UnitVal 3600 with toUnitVal
 /--
 The underlying value of the offset, in the unit's own scale.
 -/
-@[expose, inline] def Offset.val (offset : Offset) : Int := offset.toUnitVal.val
+abbrev Offset.val (offset : Offset) : Int := offset.toUnitVal.val
+
+/-- Converts the offset to an `Int`, in the unit's own scale. -/
+abbrev Offset.toInt (offset : Offset) : Int := offset.toUnitVal.toInt
 
 instance : OfNat Offset n := inferInstanceAs (OfNat (UnitVal 3600) n)
 
@@ -69,7 +86,7 @@ Converts an Ordinal into a 1-based hour representation within the range of 1 to 
 def shiftTo1BasedHour (ordinal : Ordinal) : Bounded.LE 1 24 :=
   if h : ordinal.val < 1
     then Internal.Bounded.LE.ofNatWrapping 24 (by decide)
-    else ordinal.toBounded.truncateBottom (Int.not_lt.mp h) |>.expandTop (by decide)
+    else ordinal.truncateBottom (Int.not_lt.mp h) |>.expandTop (by decide)
 /--
 Creates an `Ordinal` from a natural number, ensuring the value is within the valid bounds for hours.
 -/
