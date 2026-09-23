@@ -13,25 +13,15 @@ public section
 namespace Lean
 
 /--
-Registered by the `newtype` command for a declaration such as
-```
-newtype N := Nat with toNat
-```
-Associates the auto-generated constructor (`N.mk`) and projector (`N.toNat`) with each other and
-with the type they wrap (`N`), so that `Lean.Meta.whnf`/`isDefEq` can treat `N.toNat (N.mk a)` and
-`N.mk (N.toNat x)` like the iota/eta reduction of a real one-field structure's constructor and
-projector, even though `N`, `N.mk` and `N.toNat` are ordinary `def`s (marked `@[irreducible]`)
-rather than a genuine inductive type.
+Registered by `newtype N := Nat with toNat`, so that `whnf` and `isDefEq` treat `N.toNat (N.mk a)`
+and `N.mk (N.toNat x)` like iota and eta for a one-field structure, although `N`, `N.mk` and
+`N.toNat` are irreducible definitions.
 -/
 structure VirtualStructureInfo where
-  /-- The `newtype`-declared type. -/
   typeName : Name
-  /-- The auto-generated constructor, wrapping a value of the underlying type as `typeName`. -/
   ctorName : Name
-  /-- The auto-generated projector, unwrapping a `typeName` value back to the underlying type. -/
   projName : Name
-  /-- The number of parameters of `typeName`. The constructor and projector take them as their
-  leading arguments, followed by the wrapped value resp. the `typeName` value. -/
+  /-- The number of parameters of `typeName`, which `ctorName` and `projName` take first. -/
   numParams : Nat
   deriving Inhabited, Repr
 

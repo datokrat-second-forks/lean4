@@ -205,19 +205,15 @@ where
         return false
 
 /--
-Virtual analog of `isDefEqEtaStruct`, for types declared by the `newtype` command
-(`VirtualStructureInfo`). Recognizes `b := ctorName arg`, where `ctorName` is a `newtype`-generated
-constructor, and — provided `a` is not itself such a constructor application, in which case
-`isDefEqArgs` handles the comparison more directly — reduces `a =?= b` to `projName a =?= arg`.
-Combined with `reduceVirtualProj?`, this gives `newtype`-declared types the same iota/eta behavior
-as a real one-field structure, even though `N`, `N.mk` and `N.toNat` never unfold.
+`isDefEqEtaStruct` for `newtype`s: reduces `a =?= N.mk params arg` to `N.proj params a =?= arg`,
+unless `a` is an `N.mk` application as well, which `isDefEqArgs` handles.
 -/
 private def isDefEqVirtualEtaStruct (a b : Expr) : MetaM Bool := do
   let .const ctorName us := b.getAppFn | return false
   let some info ← getVirtualCtorInfo? ctorName | return false
+  unless ← useEtaStruct info.typeName do return false
   unless b.getAppNumArgs == info.numParams + 1 do return false
-  if let .const ctorName' _ := a.getAppFn then
-    if ctorName' == info.ctorName then return false
+  if a.getAppFn.isConstOf ctorName then return false
   if (← isDefEq (← inferType a) (← inferType b)) then
     let params := b.getAppArgs.extract 0 info.numParams
     checkpointDefEq <| isDefEq (mkApp (mkAppN (mkConst info.projName us) params) a) b.appArg!
@@ -2446,6 +2442,8 @@ of the same projector, which `isDefEqApp` solves first-order.
 private def isDefEqVirtualProj (t v : Expr) : MetaM Bool := do
   let .const projName us := t.getAppFn | return false
   let some info ← getVirtualProjInfo? projName | return false
+  -- As in `isDefEqProj.isDefEqSingleton`, see issue #2011.
+  if isClass (← getEnv) info.typeName then return false
   unless t.getAppNumArgs == info.numParams + 1 do return false
   if v.isAppOfArity projName (info.numParams + 1) then return false
   let s ← whnf (t.getArg! info.numParams)

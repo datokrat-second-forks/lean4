@@ -10,6 +10,7 @@ public import Lean.Elab.Command
 public import Lean.Elab.DeclModifiers
 public import Lean.Elab.DeclarationRange
 public import Lean.Meta.VirtualStructure
+import Lean.Meta.Injective
 
 public section
 
@@ -23,7 +24,7 @@ elaborated `declName` (instead of re-elaborating its binders) is what makes sect
 auto-bound implicits and universe parameters behave exactly as for `def`.
 -/
 private def addNewtypeCtorProj (declName ctorName projName fieldName : Name) : TermElabM Nat := do
-  let info ← getConstInfoDefn declName
+  let info ← withoutExporting <| getConstInfoDefn declName
   let us := info.levelParams.map mkLevelParam
   forallTelescope info.type fun params resultType => do
     unless (← whnf resultType).isSort do
@@ -32,8 +33,7 @@ private def addNewtypeCtorProj (declName ctorName projName fieldName : Name) : T
     let self := mkAppN (mkConst declName us) params
     let implicitParams ← params.filterMapM fun p => do
       return if (← p.fvarId!.getDecl).binderInfo.isExplicit then some (p.fvarId!, .implicit) else none
-    -- Importers can only reduce `projName (ctorName a)` in the kernel if both bodies are exposed,
-    -- so mirror whatever the `def` elaborator decided for `declName`.
+    -- Importers can only reduce `projName (ctorName a)` in the kernel if both bodies are exposed.
     let exposed := (← getEnv).hasExposedBody declName
     withNewBinderInfos implicitParams do
       let addIdentity (name argName : Name) (argType resultType : Expr) : TermElabM Unit :=
@@ -65,12 +65,25 @@ def elabNewtype : CommandElab := fun stx => do
   -- `def` will get, which in a `public section` is not visible in `mods`
   withExporting (isExporting := (← getScope).isPublic) do
   let modifiers ← elabModifiers mods
-  withExporting (isExporting := modifiers.isInferredPublic (← getEnv)) do
+  let isPublic := modifiers.isInferredPublic (← getEnv)
+  withExporting (isExporting := isPublic) do
   let { declName, .. } ← liftTermElabM <|
     Term.expandDeclId (← getCurrNamespace) (← getLevelNames) declId modifiers
   let ctorName := declName ++ `mk
   let projName := declName ++ projId.getId
-  elabCommand <| ← `($mods:declModifiers def $declId $params* := $ty)
+  if projName == ctorName then
+    throwErrorAt projId "invalid `newtype`, the projector cannot be named `mk`, the name of the constructor"
+  for n in [ctorName, projName] do
+    withRef (if n == projName then projId else declId) <| checkNotAlreadyDeclared n
+  for attr in modifiers.attrs do
+    if attr.name matches `reducible | `semireducible | `implicit_reducible | `instance_reducible |
+        `irreducible then
+      throwError "invalid `newtype`, a `newtype` is always irreducible, `@[{attr.name}]` is not allowed"
+  -- Like a structure's field types, a public `newtype`'s underlying type is always visible.
+  withScope (fun sc => if isPublic then
+      { sc with attrs := Unhygienic.run `(Parser.Term.attrInstance| expose) :: sc.attrs }
+    else sc) do
+    elabCommand <| ← `($mods:declModifiers def $declId $params* := $ty)
   let numParams ← liftTermElabM <| addNewtypeCtorProj declName ctorName projName projId.getId
   addDeclarationRangesFromSyntax ctorName declId
   addDeclarationRangesFromSyntax projName projId
@@ -78,6 +91,7 @@ def elabNewtype : CommandElab := fun stx => do
   for n in [declName, ctorName, projName] do
     setIrreducibleAttribute n
   modifyEnv (registerVirtualStructure · { typeName := declName, ctorName, projName, numParams })
+  liftTermElabM <| mkVirtualInjectiveTheorems ctorName projName numParams
   for n in [ctorName, projName] do
     liftCoreM <| enableRealizationsForConst n
 

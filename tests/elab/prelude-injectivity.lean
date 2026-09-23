@@ -24,6 +24,7 @@ gen_injective_theorems% Parser.Tactic.ConstructorConfig
 gen_injective_theorems% Parser.Tactic.DecideConfig
 gen_injective_theorems% Parser.Tactic.ImpossibleConfig
 gen_injective_theorems% Parser.Tactic.LibrarySearchConfig
+gen_injective_theorems% Parser.Tactic.UnsealingNewtypeConfig
 -/
 #guard_msgs in
 run_meta

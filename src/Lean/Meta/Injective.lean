@@ -202,6 +202,44 @@ def mkInjectiveTheorems (declName : Name) : MetaM Unit := do
             mkInjectiveTheorem ctorVal
             mkInjectiveEqTheorem ctorVal
 
+/--
+Generates `ctorName.inj` and `ctorName.injEq` for the constructor `ctorName` of a `newtype`, as
+`mkInjectiveTheorems` does for a one-field structure. The proofs apply the projector `projName`.
+-/
+def mkVirtualInjectiveTheorems (ctorName projName : Name) (numParams : Nat) : MetaM Unit := do
+  unless (← getEnv).contains ``Eq.propIntro && genInjectivity.get (← getOptions) do return
+  let ctorInfo ← getConstInfo ctorName
+  if ctorInfo.isUnsafe then return
+  let levelParams := ctorInfo.levelParams
+  let us := levelParams.map mkLevelParam
+  withLCtx {} {} <| withExporting (isExporting := !isPrivateName ctorName) do
+  forallBoundedTelescope ctorInfo.type numParams fun params type => do
+    let .forallE n d _ _ := type | throwError "unexpected constructor type for `{ctorName}`"
+    if ← isProp d then return
+    let ctor := mkAppN (mkConst ctorName us) params
+    let proj := mkAppN (mkConst projName us) params
+    let addThm (name : Name) (bi : BinderInfo) (mkType : Expr → Expr → MetaM Expr)
+        (mkValue : Expr → Expr → Expr → Expr → MetaM Expr) : MetaM Unit :=
+      withLocalDecl n bi d fun a => withLocalDecl n bi d fun b => do
+        let ctorEq ← mkEq (mkApp ctor a) (mkApp ctor b)
+        let argEq ← mkEq a b
+        let xs := params ++ #[a, b]
+        addDecl <| .thmDecl {
+          name, levelParams
+          type := ← mkForallFVars xs (← mkType ctorEq argEq)
+          value := ← mkLambdaFVars xs (← mkValue a b ctorEq argEq)
+        }
+    let injName := mkInjectiveTheoremNameFor ctorName
+    addThm injName .implicit (mkArrow · ·) fun _ _ ctorEq _ =>
+      withLocalDeclD `h ctorEq fun h => do mkLambdaFVars #[h] (← mkCongrArg proj h)
+    let injEqName := mkInjectiveEqTheoremNameFor ctorName
+    addThm injEqName .default mkEq fun a b ctorEq argEq => do
+      let inj := mkAppN (mkConst injName us) (params ++ #[a, b])
+      let inv ← withLocalDeclD `h argEq fun h => do mkLambdaFVars #[h] (← mkCongrArg ctor h)
+      return mkApp4 (mkConst ``Eq.propIntro) ctorEq argEq inj inv
+    addSimpTheorem (ext := simpExtension) injEqName (post := true) (inv := false) AttributeKind.global
+      (prio := eval_prio default)
+
 builtin_initialize
   registerTraceClass `Meta.injective
 
