@@ -165,6 +165,12 @@ protected abbrev trans (e₁ : Lean.CanonicalEquivalence α β) (e₂ : Lean.Can
   left_inv x := (congrArg e₁.invFun (e₂.left_inv (e₁.toFun x))).trans (e₁.left_inv x)
   right_inv y := (congrArg e₂.toFun (e₁.right_inv (e₂.invFun y))).trans (e₂.right_inv y)
 
+theorem invFun_toFun (e : Lean.CanonicalEquivalence α β) (x : α) : e.invFun (e.toFun x) = x :=
+  e.left_inv x
+
+theorem toFun_invFun (e : Lean.CanonicalEquivalence α β) (y : β) : e.toFun (e.invFun y) = y :=
+  e.right_inv y
+
 theorem toFun_injective (e : Lean.CanonicalEquivalence α β) : Function.Injective e.toFun :=
   e.left_inv.injective
 

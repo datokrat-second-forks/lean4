@@ -225,6 +225,39 @@ universe u v w
 section
 variable {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
 
+protected abbrev Functor.ofEquiv (i : Functor m) : Functor n where
+  map f x := (e _).toFun (i.map f ((e _).invFun x))
+  mapConst a x := (e _).toFun (i.mapConst a ((e _).invFun x))
+
+@[transport] protected abbrev Functor.canonicalCongr :
+    Lean.CanonicalEquivalence (Functor m) (Functor n) where
+  toFun := Functor.ofEquiv e
+  invFun := Functor.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show Functor.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (Functor.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show Functor.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (Functor.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+protected abbrev Applicative.ofEquiv (i : Applicative m) : Applicative n where
+  toFunctor := Functor.ofEquiv e i.toFunctor
+  pure a := (e _).toFun (i.pure a)
+  seq f x := (e _).toFun (i.seq ((e _).invFun f) fun u => (e _).invFun (x u))
+  seqLeft x y := (e _).toFun (i.seqLeft ((e _).invFun x) fun u => (e _).invFun (y u))
+  seqRight x y := (e _).toFun (i.seqRight ((e _).invFun x) fun u => (e _).invFun (y u))
+
+@[transport] protected abbrev Applicative.canonicalCongr :
+    Lean.CanonicalEquivalence (Applicative m) (Applicative n) where
+  toFun := Applicative.ofEquiv e
+  invFun := Applicative.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show Applicative.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (Applicative.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show Applicative.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (Applicative.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
 protected abbrev Bind.ofEquiv (i : Bind m) : Bind n where
   bind x f := (e _).toFun (i.bind ((e _).invFun x) fun a => (e _).invFun (f a))
 
