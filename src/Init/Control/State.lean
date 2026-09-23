@@ -37,6 +37,10 @@ state, it returns a value paired with the final state.
 -/
 add_decl_doc StateT.run
 
+instance {σ : Type u} {m : Type u → Type v} {α : Type u} [Inhabited (m (α × σ))] :
+    Inhabited (StateT σ m α) where
+  default := StateT.mk fun _ => default
+
 /--
 Executes an action from a monad with added state in the underlying monad `m`. Given an initial
 state, it returns a value, discarding the final state.
