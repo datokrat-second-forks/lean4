@@ -12,13 +12,13 @@ elab "#delab_docstrings " t:term : command => Command.runTermElabM fun _ => do
   Term.synthesizeSyntheticMVars (postpone := .partial)
   logInfo m!"Expression: {e}"
   let { infos, .. } ← Meta.ppExprWithInfos e
-  let infos := Array.qsort infos.toArray (lt := fun (p, _) (p', _) => p < p')
+  let infos := Array.qsort infos.toArray (lt := fun (p, _) (p', _) => p.asNat < p'.asNat)
   for (p, info) in infos do
     if let .ofDelabTermInfo ti := info then
       if let some doc ← ti.docString? (← Meta.getPPContext) then
         let header ← Meta.withLCtx ti.lctx {} do
           addMessageContext m!"{ti.expr}"
-        logInfo m!"{p}. {header}\n{doc}"
+        logInfo m!"{p.asNat}. {header}\n{doc}"
 
 /-!
 Natural metavariable.
@@ -95,13 +95,13 @@ elab "#delab_docstrings " t:term : tactic => withMainContext do
   let e ← Tactic.elabTerm t none
   logInfo m!"{e}"
   let { infos, .. } ← Meta.ppExprWithInfos e
-  let infos := Array.qsort infos.toArray (lt := fun (p, _) (p', _) => p < p')
+  let infos := Array.qsort infos.toArray (lt := fun (p, _) (p', _) => p.asNat < p'.asNat)
   for (p, info) in infos do
     if let .ofDelabTermInfo ti := info then
       if let some doc ← ti.docString? (← Meta.getPPContext) then
         let header ← Meta.withLCtx ti.lctx {} do
           addMessageContext m!"{ti.expr}"
-        logInfo m!"{p}. {header}\n{doc}"
+        logInfo m!"{p.asNat}. {header}\n{doc}"
 
 /-!
 Metavariable shadowing. The `case'` tactic creates a new metavariablewith the same name.

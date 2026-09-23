@@ -7,6 +7,7 @@ module
 
 prelude
 public import Lean.Elab.InfoTree.Types
+public import Lean.SubExpr.Pos
 import Init.Data.Format.Macro
 
 public section
@@ -29,14 +30,13 @@ register_builtin_option pp.rawOnError : Bool := {
   descr    := "(pretty printer) fallback to 'raw' printer when pretty printer fails"
 }
 
-abbrev PrettyPrinter.InfoPerPos := Std.TreeMap Nat Elab.Info
 /-- A format tree with `Elab.Info` annotations.
 Each `.tag n _` node is annotated with `infos[n]`.
 This is used to attach semantic data such as expressions
 to pretty-printer outputs. -/
 structure FormatWithInfos where
   fmt : Format
-  infos : PrettyPrinter.InfoPerPos
+  infos : SubExpr.PosMap Elab.Info
 instance : Coe Format FormatWithInfos where
   coe fmt := { fmt, infos := ∅ }
 
