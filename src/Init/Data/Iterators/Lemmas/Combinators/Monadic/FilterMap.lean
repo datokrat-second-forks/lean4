@@ -316,7 +316,7 @@ theorem IterM.toList_mapWithPostcondition_eq_toList_filterMapWithPostcondition {
     {f : β → PostconditionT n γ} {it : IterM (α := α) m β} :
     (it.mapWithPostcondition f).toList =
       (it.filterMapWithPostcondition (PostconditionT.map some <| f ·)).toList :=
-  toList_ofEquiv Map.equiv
+  toList_ofEquiv Map.equivDef
 
 theorem IterM.toList_filterMapM_eq_toList_filterMapWithPostcondition {α β γ : Type w}
     {m : Type w → Type w'} {n : Type w → Type w''}
@@ -387,7 +387,7 @@ theorem IterM.toList_map_eq_toList_filterMapM {α β γ : Type w} {m : Type w �
 theorem IterM.toList_filterMapWithPostcondition_ofEquiv {α α' β γ : Type w}
     {m : Type w → Type w'} {n : Type w → Type w''}
     [Monad m] [LawfulMonad m] [Monad n] [LawfulMonad n] [MonadLiftT m n] [LawfulMonadLiftT m n]
-    [i : Iterator α m β] [Finite α m] (e : α ≃ α')
+    [i : Iterator α m β] [Finite α m] (e : Lean.CanonicalEquivalence α α')
     {f : β → PostconditionT n (Option γ)} {it : IterM (α := α') m β} :
     letI : Iterator α' m β := Iterator.ofEquiv e i
     (it.filterMapWithPostcondition f).toList =
@@ -496,7 +496,7 @@ theorem IterM.toList_mapWithPostcondition_mapWithPostcondition {α β γ δ : Ty
     ((it.mapWithPostcondition f).mapWithPostcondition g).toList =
       (it.mapWithPostcondition (n := o) (f · >>= g)).toList := by
   simp only [toList_mapWithPostcondition_eq_toList_filterMapWithPostcondition]
-  rw [toList_filterMapWithPostcondition_ofEquiv Map.equiv, mapState_mapWithPostcondition]
+  rw [toList_filterMapWithPostcondition_ofEquiv Map.equivDef, mapState_mapWithPostcondition]
   apply toList_filterMapWithPostcondition_filterMapWithPostcondition'
   intro b
   simp [liftM, monadLift, MonadLift.monadLift, PostconditionT.run_eq_map, PostconditionT.operation_bind']
@@ -555,7 +555,7 @@ theorem IterM.toList_filterMapM_mapM {α β γ δ : Type w}
     haveI : MonadLift n o := ⟨monadLift⟩
     ((it.mapM f).filterMapM g).toList =
       (it.filterMapM (n := o) (fun b => do g (← f b))).toList := by
-  rw [mapM, filterMapM, toList_filterMapWithPostcondition_ofEquiv Map.equiv,
+  rw [mapM, filterMapM, toList_filterMapWithPostcondition_ofEquiv Map.equivDef,
     mapState_mapWithPostcondition]
   apply toList_filterMapWithPostcondition_filterMapWithPostcondition'
   intro b
@@ -766,7 +766,7 @@ theorem IterM.toListRev_mapWithPostcondition_eq_toListRev_filterMapWithPostcondi
     {f : β → PostconditionT n γ} {it : IterM (α := α) m β} :
     (it.mapWithPostcondition f).toListRev =
       (it.filterMapWithPostcondition (PostconditionT.map some <| f ·)).toListRev :=
-  toListRev_ofEquiv Map.equiv
+  toListRev_ofEquiv Map.equivDef
 
 theorem IterM.toListRev_filterMapM_eq_toListRev_filterMapWithPostcondition {α β γ : Type w}
     {m : Type w → Type w'} {n : Type w → Type w''}
@@ -1023,7 +1023,7 @@ theorem IterM.toArray_mapWithPostcondition_eq_toArray_filterMapWithPostcondition
     {f : β → PostconditionT n γ} {it : IterM (α := α) m β} :
     (it.mapWithPostcondition f).toArray =
       (it.filterMapWithPostcondition (PostconditionT.map some <| f ·)).toArray :=
-  toArray_ofEquiv Map.equiv
+  toArray_ofEquiv Map.equivDef
 
 theorem IterM.toArray_filterMapM_eq_toArray_filterMapWithPostcondition {α β γ : Type w}
     {m : Type w → Type w'} {n : Type w → Type w''}
@@ -1344,7 +1344,7 @@ theorem IterM.forIn_mapWithPostcondition
     haveI : MonadLift n o := ⟨monadLift⟩
     forIn (it.mapWithPostcondition f) init g =
       forIn it init (fun out acc => do g (← (f out).run) acc) := by
-  rw [forIn_ofEquiv Map.equiv, mapState_mapWithPostcondition, forIn_filterMapWithPostcondition]
+  rw [forIn_ofEquiv Map.equivDef, mapState_mapWithPostcondition, forIn_filterMapWithPostcondition]
   simp
 
 theorem IterM.forIn_mapM

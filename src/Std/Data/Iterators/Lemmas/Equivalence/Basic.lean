@@ -288,7 +288,7 @@ An iterator whose instance was obtained by `Iterator.ofEquiv` is equivalent to t
 transported from.
 -/
 theorem IterM.Equiv.mapState_ofEquiv {α α' : Type w} {m : Type w → Type w'} [Monad m]
-    [LawfulMonad m] {β : Type w} [i : Iterator α m β] (e : α ≃ α') (it : IterM (α := α') m β) :
+    [LawfulMonad m] {β : Type w} [i : Iterator α m β] (e : Lean.CanonicalEquivalence α α') (it : IterM (α := α') m β) :
     letI : Iterator α' m β := Iterator.ofEquiv e i
     IterM.Equiv it (it.mapState e.invFun) := by
   letI : Iterator α' m β := Iterator.ofEquiv e i
