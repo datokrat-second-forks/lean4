@@ -21,7 +21,7 @@ set_option linter.all true
 /--
 `Ordinal` represents a bounded value for milliseconds, ranging from 0 to 999 milliseconds.
 -/
-@[expose] newtype Ordinal := Bounded.LE 0 999 with toBounded
+newtype Ordinal := Bounded.LE 0 999 with toBounded
   deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
@@ -36,7 +36,7 @@ instance : Inhabited Ordinal where
 /--
 `Offset` represents a duration offset in milliseconds.
 -/
-@[expose] newtype Offset := UnitVal (1 / 1000) with toUnitVal
+newtype Offset := UnitVal (1 / 1000) with toUnitVal
   deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
     Ord, TransOrd, LawfulEqOrd
 

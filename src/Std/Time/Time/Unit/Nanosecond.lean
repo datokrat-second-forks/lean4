@@ -21,7 +21,7 @@ set_option linter.all true
 /--
 `Ordinal` represents a nanosecond value that is bounded between 0 and 999,999,999 nanoseconds.
 -/
-@[expose] newtype Ordinal := Bounded.LE 0 999999999 with toBounded
+newtype Ordinal := Bounded.LE 0 999999999 with toBounded
   deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
@@ -36,7 +36,7 @@ instance : Inhabited Ordinal where
 /--
 `Offset` represents a time offset in nanoseconds.
 -/
-@[expose] newtype Offset := UnitVal (1 / 1000000000) with toUnitVal
+newtype Offset := UnitVal (1 / 1000000000) with toUnitVal
   deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
     Ord, TransOrd, LawfulEqOrd
 
@@ -69,7 +69,7 @@ end Offset
 `Span` represents a bounded value for nanoseconds, ranging between -999999999 and 999999999.
 This can be used for operations that involve differences or adjustments within this range.
 -/
-@[expose] newtype Span := Bounded.LE (-999999999) 999999999 with toBounded
+newtype Span := Bounded.LE (-999999999) 999999999 with toBounded
   deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the span. -/
@@ -92,7 +92,7 @@ namespace Ordinal
 /--
 `Ordinal` represents a bounded value for nanoseconds in a day, which ranges between 0 and 86400000000000.
 -/
-@[expose] newtype OfDay := Bounded.LE 0 86400000000000 with toBounded
+newtype OfDay := Bounded.LE 0 86400000000000 with toBounded
   deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
