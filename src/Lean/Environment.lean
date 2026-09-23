@@ -86,7 +86,7 @@ instance : Inhabited EnvExtensionState := ⟨⟨EnvExtensionStateSpec.snd.defaul
 
 structure ModuleIdx where
   toNat : Nat
-  deriving BEq, Hashable, Inhabited
+  deriving BEq, DecidableEq, Hashable, Inhabited, Ord
 
 instance : ToString ModuleIdx := ⟨fun midx => toString midx.toNat⟩
 
