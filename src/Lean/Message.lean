@@ -313,7 +313,7 @@ def withExprHover (fmt : Format) (expr : Expr) (lctx : LocalContext)
   .ofFormatWithInfos {
       fmt := .tag 0 fmt
       infos :=
-        .ofList [(0, Elab.Info.ofDelabTermInfo {
+        .ofList [(SubExpr.Pos.mk 0, Elab.Info.ofDelabTermInfo {
           expr, lctx, location?, explicit,
           stx := .missing, -- unused for delaborator hovers
           expectedType? := none, -- unused for delaborator hovers

@@ -8,23 +8,11 @@ module
 prelude
 public import Lean.Meta.Basic
 public import Init.Data.Format.Macro
+public import Lean.SubExpr.Pos
 
 public section
 
 namespace Lean
-
-/-- A position of a subexpression in an expression.
-
-We use a simple encoding scheme for expression positions `Pos`:
-every `Expr` constructor has at most 3 direct expression children. Considering an expression's type
-to be one extra child as well, we can injectively map a path of `childIdxs` to a natural number
-by computing the value of the 4-ary representation `1 :: childIdxs`, since n-ary representations
-without leading zeros are unique. Note that `pos` is initialized to `1` (case `childIdxs == []`).
-
-See also `SubExpr`. -/
-structure SubExpr.Pos where
-  asNat : Nat
-  deriving DecidableEq
 
 namespace SubExpr.Pos
 
@@ -139,7 +127,6 @@ protected def fromString! (s : String) : Pos :=
   | .ok a => a
   | .error e => panic! e
 
-instance : Ord Pos := ⟨fun p q => compare p.asNat q.asNat⟩
 instance : ToString Pos := ⟨Pos.toString⟩
 instance : EmptyCollection Pos := ⟨root⟩
 instance : Repr Pos where
@@ -168,9 +155,6 @@ def mkRoot (e : Expr) : SubExpr := ⟨e, Pos.root⟩
 
 /-- Returns true if the selected subexpression is the topmost one. -/
 def isRoot (s : SubExpr) : Bool := s.pos.isRoot
-
-/-- Map from subexpr positions to values. -/
-abbrev PosMap (α : Type u) := Std.TreeMap Pos α
 
 def bindingBody! : SubExpr → SubExpr
   | ⟨.forallE _ _ b _, p⟩ => ⟨b, p.pushBindingBody⟩
