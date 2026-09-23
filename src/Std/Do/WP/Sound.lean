@@ -159,10 +159,10 @@ public theorem ReaderT.of_wp_run [Monad m] [LawfulMonad m] [WP m ps] [WPSound m 
   (Internal.MayReturn.of_canReturn hcan).imp (ReaderT.ensures_of_wp_run r P hwp)
 
 /-- Soundness lemma for `ReaderM.run`: `Id`-specialization of `ReaderT.of_wp_run`. -/
-public theorem ReaderM.of_wp_run_eq {α ρ : Type u} {x : α} {r : ρ} {prog : ReaderM ρ α}
-    (h : (ReaderT.run prog r).run = x) (P : α → Prop) :
-    (⊢ₛ wp⟦prog⟧ (⇓ a _ => ⌜P a⌝) r) → P x := fun hwp =>
-  ReaderT.of_wp_run (m := _root_.Id) (a := x) P h hwp
+public theorem ReaderM.of_wp_run_eq {α ρ : Type u} {x : _root_.Id α} {r : ρ} {prog : ReaderM ρ α}
+    (h : ReaderT.run prog r = x) (P : α → Prop) :
+    (⊢ₛ wp⟦prog⟧ (⇓ a _ => ⌜P a⌝) r) → P x.run := fun hwp =>
+  ReaderT.of_wp_run (m := _root_.Id) (a := x.run) P (congrArg _root_.Id.run h) hwp
 
 /--
 A `wp`-provable postcondition refines the post-run computation `prog.run s : m (α × σ)`
@@ -187,19 +187,20 @@ public theorem StateT.of_wp_run [Monad m] [LawfulMonad m] [WP m ps] [WPSound m p
   (Internal.MayReturn.of_canReturn hcan).imp (StateT.ensures_of_wp_run s P hwp)
 
 /-- Soundness lemma for `StateM.run`: `Id`-specialization of `StateT.of_wp_run`. -/
-public theorem StateM.of_wp_run_eq {α σ : Type} {x : α × σ} {s : σ} {prog : StateM σ α}
-    (h : (StateT.run prog s).run = x) (P : α × σ → Prop) :
-    (⊢ₛ wp⟦prog⟧ (⇓ a s' => ⌜P (a, s')⌝) s) → P x := fun hwp =>
-  StateT.of_wp_run (m := _root_.Id) (p := x) P h hwp
+public theorem StateM.of_wp_run_eq {α σ : Type} {x : _root_.Id (α × σ)} {s : σ} {prog : StateM σ α}
+    (h : StateT.run prog s = x) (P : α × σ → Prop) :
+    (⊢ₛ wp⟦prog⟧ (⇓ a s' => ⌜P (a, s')⌝) s) → P x.run := fun hwp =>
+  StateT.of_wp_run (m := _root_.Id) (p := x.run) P (congrArg _root_.Id.run h) hwp
 
 /-- Soundness lemma for `StateM.run'`: `Id`-specialization of `StateT.of_wp_run`. -/
-public theorem StateM.of_wp_run'_eq {α σ : Type} {x : α} {s : σ} {prog : StateM σ α}
-    (h : (StateT.run' prog s).run = x) (P : α → Prop) :
-    (⊢ₛ wp⟦prog⟧ (⇓ a => ⌜P a⌝) s) → P x := fun hwp => by
+public theorem StateM.of_wp_run'_eq {α σ : Type} {x : _root_.Id α} {s : σ} {prog : StateM σ α}
+    (h : StateT.run' prog s = x) (P : α → Prop) :
+    (⊢ₛ wp⟦prog⟧ (⇓ a => ⌜P a⌝) s) → P x.run := fun hwp => by
   have hwp' : ⊢ₛ wp⟦prog⟧ (⇓ a s' => ⌜(fun p : α × σ => P p.1) (a, s')⌝) s := hwp
   have := StateT.of_wp_run (m := _root_.Id) (prog := prog) (s := s) (p := (StateT.run prog s).run)
     (fun p => P p.1) rfl hwp'
-  exact h ▸ this
+  subst h
+  exact this
 
 /--
 A `wp`-provable postcondition with split `.ok`/`.error` cases refines the post-run computation

@@ -59,7 +59,7 @@ def mkFreshN (n : Nat) : StateM Supply (List Nat) := do
 namespace Noncompositional
 
 theorem mkFreshN_correct (n : Nat) : ((mkFreshN n).run' s).run.Nodup := by
-  generalize h : ((mkFreshN n).run' s).run = x
+  generalize h : (mkFreshN n).run' s = x
   apply StateM.of_wp_run'_eq h
   mvcgen [mkFreshN, mkFresh]
   case inv1 => exact ⇓⟨xs, acc⟩ state => ⌜(∀ x ∈ acc, x < state.counter) ∧ acc.toList.Nodup⌝
