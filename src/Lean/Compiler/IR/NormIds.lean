@@ -42,10 +42,10 @@ namespace NormalizeIds
 
 abbrev M := ReaderT IndexRenaming Id
 
-def normIndex (x : Index) : M Index := .mk fun m =>
-  return match m.get? x with
-  | some y => y
-  | none   => x
+def normIndex (x : Index) : M Index := do
+  match (← read).get? x with
+  | some y => return y
+  | none   => return x
 
 def normVar (x : VarId) : M VarId :=
   VarId.mk <$> normIndex x.idx
@@ -57,44 +57,43 @@ def normArg : Arg → M Arg
   | .var x => .var <$> normVar x
   | .erased => pure .erased
 
-def normArgs (as : Array Arg) : M (Array Arg) := .mk fun m =>
-  return as.map fun a => ((normArg a).run m).run
+def normArgs (as : Array Arg) : M (Array Arg) :=
+  as.mapM normArg
 
-def normExpr (e : Expr) : M Expr := .mk fun m =>
-  return match e with
-  | Expr.ctor c ys      => Expr.ctor c ((normArgs ys).run m).run
-  | Expr.reset n x      => Expr.reset n ((normVar x).run m).run
-  | Expr.reuse x c u ys => Expr.reuse ((normVar x).run m).run c u ((normArgs ys).run m).run
-  | Expr.proj i x       => Expr.proj i ((normVar x).run m).run
-  | Expr.uproj i x      => Expr.uproj i ((normVar x).run m).run
-  | Expr.sproj n o x    => Expr.sproj n o ((normVar x).run m).run
-  | Expr.fap c ys       => Expr.fap c ((normArgs ys).run m).run
-  | Expr.pap c ys       => Expr.pap c ((normArgs ys).run m).run
-  | Expr.ap x ys        => Expr.ap ((normVar x).run m).run ((normArgs ys).run m).run
-  | Expr.box t x        => Expr.box t ((normVar x).run m).run
-  | Expr.unbox x        => Expr.unbox ((normVar x).run m).run
-  | Expr.isShared x     => Expr.isShared ((normVar x).run m).run
-  | e@(Expr.lit _)      => e
+def normExpr : Expr → M Expr
+  | Expr.ctor c ys      => return Expr.ctor c (← normArgs ys)
+  | Expr.reset n x      => return Expr.reset n (← normVar x)
+  | Expr.reuse x c u ys => return Expr.reuse (← normVar x) c u (← normArgs ys)
+  | Expr.proj i x       => return Expr.proj i (← normVar x)
+  | Expr.uproj i x      => return Expr.uproj i (← normVar x)
+  | Expr.sproj n o x    => return Expr.sproj n o (← normVar x)
+  | Expr.fap c ys       => return Expr.fap c (← normArgs ys)
+  | Expr.pap c ys       => return Expr.pap c (← normArgs ys)
+  | Expr.ap x ys        => return Expr.ap (← normVar x) (← normArgs ys)
+  | Expr.box t x        => return Expr.box t (← normVar x)
+  | Expr.unbox x        => return Expr.unbox (← normVar x)
+  | Expr.isShared x     => return Expr.isShared (← normVar x)
+  | e@(Expr.lit _)      => return e
 
 abbrev N := ReaderT IndexRenaming (StateM Nat)
 
-@[inline] def withVar {α : Type} (x : VarId) (k : VarId → N α) : N α := .mk fun m => do
-  let n ← getModify (fun n => n + 1)
-  (k { idx := n }).run (m.insert x.idx n)
+instance : MonadLift M N :=
+  ⟨fun x => return (x.run (← read)).run⟩
 
-@[inline] def withJP {α : Type} (x : JoinPointId) (k : JoinPointId → N α) : N α := .mk fun m => do
+@[inline] def withVar {α : Type} (x : VarId) (k : VarId → N α) : N α := do
   let n ← getModify (fun n => n + 1)
-  (k { idx := n }).run (m.insert x.idx n)
+  withReader (·.insert x.idx n) (k { idx := n })
 
-@[inline] def withParams {α : Type} (ps : Array Param) (k : Array Param → N α) : N α := .mk fun m => do
-  let m ← ps.foldlM (init := m) fun m p => do
+@[inline] def withJP {α : Type} (x : JoinPointId) (k : JoinPointId → N α) : N α := do
+  let n ← getModify (fun n => n + 1)
+  withReader (·.insert x.idx n) (k { idx := n })
+
+@[inline] def withParams {α : Type} (ps : Array Param) (k : Array Param → N α) : N α := do
+  let m ← ps.foldlM (init := ← read) fun m p => do
     let n ← getModify fun n => n + 1
     return m.insert p.x.idx n
-  let ps := ps.map fun p => { p with x := ((normVar p.x).run m).run }
-  (k ps).run m
-
-instance : MonadLift M N :=
-  ⟨fun x => .mk fun m => return (x.run m).run⟩
+  withReader (fun _ => m) do
+    k (← ps.mapM fun p => return { p with x := ← normVar p.x })
 
 partial def normFnBody : FnBody → N FnBody
   | FnBody.vdecl x t v b    => do let v ← normExpr v; withVar x fun x => return FnBody.vdecl x t v (← normFnBody b)
