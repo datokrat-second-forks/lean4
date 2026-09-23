@@ -230,7 +230,7 @@ public theorem ExceptT.of_wp_run
 public theorem Except.of_wp_eq {ε α : Type} {x prog : Except ε α}
     (h : prog = x) (P : Except ε α → Prop) :
     (⊢ₛ wp⟦prog⟧ post⟨fun a => ⌜P (.ok a)⌝, fun e => ⌜P (.error e)⌝⟩) → P x := fun hwp =>
-  ExceptT.of_wp_run (m := _root_.Id) (prog := ExceptT.mk (Id.mk prog)) (x := x) P h hwp
+  ExceptT.of_wp_run (m := _root_.Id) (prog := ExceptT.mk (pure prog)) (x := x) P h hwp
 
 /-- Soundness lemma for `Except` without the equality hypothesis (deprecated). -/
 @[deprecated Except.of_wp_eq +typeChanged (since := "2026-01-26")]
@@ -267,6 +267,6 @@ public theorem OptionT.of_wp_run
 public theorem Option.of_wp_eq {α : Type} {x prog : Option α}
     (h : prog = x) (P : Option α → Prop) :
     (⊢ₛ wp⟦prog⟧ post⟨fun a => ⌜P (some a)⌝, fun _ => ⌜P none⌝⟩) → P x := fun hwp =>
-  OptionT.of_wp_run (m := _root_.Id) (prog := OptionT.mk (Id.mk prog)) (x := x) P h hwp
+  OptionT.of_wp_run (m := _root_.Id) (prog := OptionT.mk (pure prog)) (x := x) P h hwp
 
 end Std.Do

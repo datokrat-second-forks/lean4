@@ -47,7 +47,7 @@ def g (x : Nat) : Nat := Id.run <| do
   return x
 
 example : g x = x := by
-  simp [g, bind, pure]
+  simp [g, bind]
 
 def f1 : StateM Nat Unit := do
   modify fun x => g x
@@ -59,7 +59,7 @@ def f2 : StateM Nat Unit := do
 -- Note: prior to PR #2489, the `Try this` suggestion reported by this `simp`
 -- call was incomplete.
 example : f1 = f2 := by
-  simp (config := {unfoldPartialApp := true}) [f1, f2, bind, StateT.bind, get, getThe, MonadStateOf.get, StateT.get, pure, set, StateT.set, modify, modifyGet, MonadStateOf.modifyGet, StateT.modifyGet]
+  simp (config := {unfoldPartialApp := true}) [f1, f2, bind, StateT.bind, get, getThe, MonadStateOf.get, StateT.get, set, StateT.set, modify, modifyGet, MonadStateOf.modifyGet, StateT.modifyGet]
 
 def h (x : Nat) : Sum (Nat × Nat) Nat := Sum.inl (x, x)
 
