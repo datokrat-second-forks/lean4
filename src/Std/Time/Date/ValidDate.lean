@@ -91,7 +91,7 @@ def ofOrdinal (ordinal : Day.Ordinal.OfYear leap) : ValidDate leap :=
           · have h₂ : 366 < ordinal.val := h₂
             omega
 
-        let idx₂ : Month.Ordinal := .mk (idx.toBounded.truncateTop (Int.le_sub_one_of_lt h₃) |>.addTop 1 (by decide))
+        let idx₂ : Month.Ordinal := .mk (idx.truncateTop (Int.le_sub_one_of_lt h₃) |>.addTop 1 (by decide))
         refine go idx₂ (acc + monthDays.val) h₂ ?_
         simp [monthDays, p]
         rw [difference_eq (Int.le_of_lt_add_one h₃)]

@@ -48,6 +48,8 @@ add_decl_doc Offset.toInt
 
 instance : OfNat Offset n := inferInstanceAs (OfNat Int n)
 
+instance : Coe Offset Int := ⟨Offset.toInt⟩
+
 namespace Offset
 
 /--

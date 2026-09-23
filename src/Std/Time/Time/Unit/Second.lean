@@ -28,6 +28,17 @@ newtype Ordinal (leap : Bool) := Bounded.LE 0 (.ofNat (if leap then 60 else 59))
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal leap) : Int := ordinal.toBounded.val
 
+/-- Converts the ordinal to an `Int`. -/
+abbrev Ordinal.toInt (ordinal : Ordinal leap) : Int := ordinal.toBounded.toInt
+
+/-- Converts the ordinal to a `Nat`. -/
+abbrev Ordinal.toNat (ordinal : Ordinal leap) : Nat := ordinal.toBounded.toNat
+
+/-- Converts the ordinal to a `Fin`. -/
+abbrev Ordinal.toFin (ordinal : Ordinal leap) (h₀ : 0 ≤ (0 : Int)) :
+    Fin (Int.ofNat (if leap then 60 else 59) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
+
 instance : OfNat (Ordinal leap) n := by
   have inst : OfNat (Bounded.LE 0 (0 + (59 : Nat))) n := inferInstance
   cases leap
@@ -44,7 +55,10 @@ newtype Offset := UnitVal 1 with toUnitVal
 /--
 The underlying value of the offset, in the unit's own scale.
 -/
-@[inline] def Offset.val (offset : Offset) : Int := offset.toUnitVal.val
+abbrev Offset.val (offset : Offset) : Int := offset.toUnitVal.val
+
+/-- Converts the offset to an `Int`, in the unit's own scale. -/
+abbrev Offset.toInt (offset : Offset) : Int := offset.toUnitVal.toInt
 
 instance : OfNat Offset n := inferInstanceAs (OfNat (UnitVal 1) n)
 

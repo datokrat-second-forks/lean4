@@ -54,6 +54,16 @@ newtype Ordinal := Bounded.LE 1 7 with toBounded
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
+/-- Converts the ordinal to an `Int`. -/
+abbrev Ordinal.toInt (ordinal : Ordinal) : Int := ordinal.toBounded.toInt
+
+/-- Converts the ordinal to a `Nat`. -/
+abbrev Ordinal.toNat (ordinal : Ordinal) : Nat := ordinal.toBounded.toNat
+
+/-- Converts the ordinal to a `Fin`. -/
+abbrev Ordinal.toFin (ordinal : Ordinal) (h₀ : 0 ≤ (1 : Int)) : Fin ((7 : Int) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
+
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 1 (1 + (6 : Nat))) n)
 
