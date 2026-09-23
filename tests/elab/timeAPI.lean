@@ -466,13 +466,15 @@ theorem week_week_week_sub : (1 : Week.Offset) - (1 : Week.Offset) = (0 : Week.O
 Of and To basic units
 -/
 
-example : (1 : Nanosecond.Offset).val = (1 : Int) := rfl
-example : (1 : Millisecond.Offset).val = (1 : Int) := rfl
-example : (1 : Second.Offset).val = (1 : Int) := rfl
-example : (1 : Minute.Offset).val = (1 : Int) := rfl
-example : (1 : Hour.Offset).val = (1 : Int) := rfl
-example : (1 : Day.Offset).val = (1 : Int) := rfl
-example : (1 : Week.Offset).val = (1 : Int) := rfl
+example : (1 : Nanosecond.Offset).toInt = (1 : Int) := rfl
+example : (1 : Millisecond.Offset).toInt = (1 : Int) := rfl
+example : (1 : Second.Offset).toInt = (1 : Int) := rfl
+example : (1 : Minute.Offset).toInt = (1 : Int) := rfl
+example : (1 : Hour.Offset).toInt = (1 : Int) := rfl
+example : (1 : Day.Offset).toInt = (1 : Int) := rfl
+example : (1 : Week.Offset).toInt = (1 : Int) := rfl
+example : ((1 : Month.Offset) : Int) = 1 := rfl
+example : ((1 : Year.Offset) : Int) = 1 := rfl
 
 example : Nanosecond.Offset.ofInt 1 = (1 : Nanosecond.Offset) := rfl
 example : Millisecond.Offset.ofInt 1 = (1 : Millisecond.Offset) := rfl
@@ -526,32 +528,32 @@ example := Hour.Ordinal.toOffset 1
 example := Day.Ordinal.toOffset 1
 example := Week.OfYear.Ordinal.toOffset 1
 
-example : (1 : Nanosecond.Ordinal).toBounded.toInt = (1 : Int) := rfl
-example : (1 : Millisecond.Ordinal).toBounded.toInt = (1 : Int) := rfl
-example : (1 : Second.Ordinal false).toBounded.toInt = (1 : Int) := rfl
-example : (1 : Second.Ordinal true).toBounded.toInt = (1 : Int) := rfl
-example : (1 : Minute.Ordinal).toBounded.toInt = (1 : Int) := rfl
-example : (1 : Hour.Ordinal).toBounded.toInt = (1 : Int) := rfl
-example : (1 : Day.Ordinal).toBounded.toInt = (1 : Int) := rfl
-example : (1 : Week.OfYear.Ordinal).toBounded.toInt = (1 : Int) := rfl
+example : (1 : Nanosecond.Ordinal).toInt = (1 : Int) := rfl
+example : (1 : Millisecond.Ordinal).toInt = (1 : Int) := rfl
+example : (1 : Second.Ordinal false).toInt = (1 : Int) := rfl
+example : (1 : Second.Ordinal true).toInt = (1 : Int) := rfl
+example : (1 : Minute.Ordinal).toInt = (1 : Int) := rfl
+example : (1 : Hour.Ordinal).toInt = (1 : Int) := rfl
+example : (1 : Day.Ordinal).toInt = (1 : Int) := rfl
+example : (1 : Week.OfYear.Ordinal).toInt = (1 : Int) := rfl
 
-example : ((1 : Nanosecond.Ordinal).toBounded.toFin (by decide) |>.val) = 1 := rfl
-example : ((1 : Millisecond.Ordinal).toBounded.toFin (by decide) |>.val) = 1 := rfl
-example : ((1 : Second.Ordinal false).toBounded.toFin (by decide) |>.val) = 1 := rfl
-example : ((1 : Second.Ordinal true).toBounded.toFin (by decide) |>.val) = 1 := rfl
-example : ((1 : Minute.Ordinal).toBounded.toFin (by decide) |>.val) = 1 := rfl
-example : ((1 : Hour.Ordinal).toBounded.toFin (by decide) |>.val) = 1 := rfl
-example : ((1 : Day.Ordinal).toBounded.toFin (by decide) |>.val) = 1 := rfl
-example : ((1 : Week.OfYear.Ordinal).toBounded.toFin (by decide) |>.val) = 1 := rfl
+example : ((1 : Nanosecond.Ordinal).toFin (by decide) |>.val) = 1 := rfl
+example : ((1 : Millisecond.Ordinal).toFin (by decide) |>.val) = 1 := rfl
+example : ((1 : Second.Ordinal false).toFin (by decide) |>.val) = 1 := rfl
+example : ((1 : Second.Ordinal true).toFin (by decide) |>.val) = 1 := rfl
+example : ((1 : Minute.Ordinal).toFin (by decide) |>.val) = 1 := rfl
+example : ((1 : Hour.Ordinal).toFin (by decide) |>.val) = 1 := rfl
+example : ((1 : Day.Ordinal).toFin (by decide) |>.val) = 1 := rfl
+example : ((1 : Week.OfYear.Ordinal).toFin (by decide) |>.val) = 1 := rfl
 
-example : (1 : Nanosecond.Ordinal).toBounded.toNat = 1 := rfl
-example : (1 : Millisecond.Ordinal).toBounded.toNat = 1 := rfl
-example : (1 : Second.Ordinal false).toBounded.toNat = 1 := rfl
-example : (1 : Second.Ordinal true).toBounded.toNat = 1 := rfl
-example : (1 : Minute.Ordinal).toBounded.toNat = 1 := rfl
-example : (1 : Hour.Ordinal).toBounded.toNat = 1 := rfl
-example : (1 : Day.Ordinal).toBounded.toNat = 1 := rfl
-example : (1 : Week.OfYear.Ordinal).toBounded.toNat = 1 := rfl
+example : (1 : Nanosecond.Ordinal).toNat = 1 := rfl
+example : (1 : Millisecond.Ordinal).toNat = 1 := rfl
+example : (1 : Second.Ordinal false).toNat = 1 := rfl
+example : (1 : Second.Ordinal true).toNat = 1 := rfl
+example : (1 : Minute.Ordinal).toNat = 1 := rfl
+example : (1 : Hour.Ordinal).toNat = 1 := rfl
+example : (1 : Day.Ordinal).toNat = 1 := rfl
+example : (1 : Week.OfYear.Ordinal).toNat = 1 := rfl
 
 /--
 info: 9

@@ -28,7 +28,10 @@ newtype Offset := UnitVal (86400 * 7) with toUnitVal
 /--
 The underlying value of the offset, in the unit's own scale.
 -/
-@[expose, inline] def Offset.val (offset : Offset) : Int := offset.toUnitVal.val
+abbrev Offset.val (offset : Offset) : Int := offset.toUnitVal.val
+
+/-- Converts the offset to an `Int`, in the unit's own scale. -/
+abbrev Offset.toInt (offset : Offset) : Int := offset.toUnitVal.toInt
 
 instance : OfNat Offset n := inferInstanceAs (OfNat (UnitVal (86400 * 7)) n)
 
@@ -42,6 +45,16 @@ newtype Ordinal := Bounded.LE 1 53 with toBounded
 
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
+
+/-- Converts the ordinal to an `Int`. -/
+abbrev Ordinal.toInt (ordinal : Ordinal) : Int := ordinal.toBounded.toInt
+
+/-- Converts the ordinal to a `Nat`. -/
+abbrev Ordinal.toNat (ordinal : Ordinal) : Nat := ordinal.toBounded.toNat
+
+/-- Converts the ordinal to a `Fin`. -/
+abbrev Ordinal.toFin (ordinal : Ordinal) (h₀ : 0 ≤ (1 : Int)) : Fin ((53 : Int) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
 
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 1 (1 + (52 : Nat))) n)
@@ -95,6 +108,16 @@ newtype Ordinal := Bounded.LE 1 5 with toBounded
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
+/-- Converts the ordinal to an `Int`. -/
+abbrev Ordinal.toInt (ordinal : Ordinal) : Int := ordinal.toBounded.toInt
+
+/-- Converts the ordinal to a `Nat`. -/
+abbrev Ordinal.toNat (ordinal : Ordinal) : Nat := ordinal.toBounded.toNat
+
+/-- Converts the ordinal to a `Fin`. -/
+abbrev Ordinal.toFin (ordinal : Ordinal) (h₀ : 0 ≤ (1 : Int)) : Fin ((5 : Int) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
+
 instance : OfNat Ordinal n := inferInstanceAs (OfNat (Bounded.LE 1 (1 + (4 : Nat))) n)
 
 instance : Inhabited Ordinal where
@@ -110,6 +133,16 @@ newtype Ordinal := Bounded.LE 1 6 with toBounded
 
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
+
+/-- Converts the ordinal to an `Int`. -/
+abbrev Ordinal.toInt (ordinal : Ordinal) : Int := ordinal.toBounded.toInt
+
+/-- Converts the ordinal to a `Nat`. -/
+abbrev Ordinal.toNat (ordinal : Ordinal) : Nat := ordinal.toBounded.toNat
+
+/-- Converts the ordinal to a `Fin`. -/
+abbrev Ordinal.toFin (ordinal : Ordinal) (h₀ : 0 ≤ (1 : Int)) : Fin ((6 : Int) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
 
 instance : OfNat Ordinal n := inferInstanceAs (OfNat (Bounded.LE 1 (1 + (5 : Nat))) n)
 

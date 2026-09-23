@@ -28,6 +28,17 @@ newtype Ordinal := Bounded.LE 1 12 with toBounded
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
 
+/-- Converts the ordinal to an `Int`. -/
+abbrev Ordinal.toInt (ordinal : Ordinal) : Int := ordinal.toBounded.toInt
+
+/-- Converts the ordinal to a `Fin`. -/
+abbrev Ordinal.toFin (ordinal : Ordinal) (h₀ : 0 ≤ (1 : Int)) : Fin ((12 : Int) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
+
+/-- Lowers the upper bound of the ordinal to a bound it is known to satisfy. -/
+abbrev Ordinal.truncateTop (ordinal : Ordinal) (h : ordinal.val ≤ j) : Bounded.LE 1 j :=
+  ordinal.toBounded.truncateTop h
+
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 1 (1 + (11 : Nat))) n)
 
@@ -43,6 +54,8 @@ newtype Offset := Int with toInt
 
 instance : OfNat Offset n := inferInstanceAs (OfNat Int n)
 
+instance : Coe Offset Int := ⟨Offset.toInt⟩
+
 /--
 `Quarter` represents a value between 1 and 4, inclusive, corresponding to the four quarters of a year.
 -/
@@ -51,6 +64,16 @@ newtype Quarter := Bounded.LE 1 4 with toBounded
 
 /-- The underlying integer of the quarter. -/
 abbrev Quarter.val (quarter : Quarter) : Int := quarter.toBounded.val
+
+/-- Converts the quarter to an `Int`. -/
+abbrev Quarter.toInt (quarter : Quarter) : Int := quarter.toBounded.toInt
+
+/-- Converts the quarter to a `Nat`. -/
+abbrev Quarter.toNat (quarter : Quarter) : Nat := quarter.toBounded.toNat
+
+/-- Converts the quarter to a `Fin`. -/
+abbrev Quarter.toFin (quarter : Quarter) (h₀ : 0 ≤ (1 : Int)) : Fin ((4 : Int) + 1).toNat :=
+  quarter.toBounded.toFin h₀
 
 instance : OfNat Quarter n := inferInstanceAs <| OfNat (Bounded.LE 1 (1 + (3 : Nat))) n
 
@@ -276,7 +299,7 @@ theorem cumulativeDays_le (leap : Bool) (month : Month.Ordinal) : cumulativeDays
     all_goals decide +revert
 
 theorem difference_eq (p : month.val ≤ 11) :
-  let next : Ordinal := .mk (month.toBounded.truncateTop p |>.addTop 1 (by decide))
+  let next : Ordinal := .mk (month.truncateTop p |>.addTop 1 (by decide))
   (cumulativeDays leap next).val = (cumulativeDays leap month).val + (days leap month).val := by
   obtain ⟨month, rfl⟩ : ∃ b, month = Ordinal.mk b := ⟨_, (Ordinal.equivDef.right_inv month).symm⟩
   match month with
