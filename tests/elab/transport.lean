@@ -403,3 +403,33 @@ def OptM.run (x : OptM α) : Option (α × Nat) := x.toStateT.run 0 |>.run |>.ru
 
 /-- info: some (3, 0) -/
 #guard_msgs in #eval (controlAt (OptionT (ReaderT Lean.Syntax Id)) fun run => run (pure 3) : OptM Nat).run
+
+/-! The core congruences for `MonadFunctor` and the `MonadAttach` laws. -/
+
+newtype RM (α : Type) := ReaderT Nat Id α with toReaderT
+
+instance : Monad RM := inferInstanceAs (Monad (ReaderT Nat Id))
+instance : LawfulMonad RM := inferInstanceAs (LawfulMonad (ReaderT Nat Id))
+instance : MonadFunctor Id RM := inferInstanceAs (MonadFunctor Id (ReaderT Nat Id))
+instance : MonadAttach RM := inferInstanceAs (MonadAttach (ReaderT Nat Id))
+instance : WeaklyLawfulMonadAttach RM := inferInstanceAs (WeaklyLawfulMonadAttach (ReaderT Nat Id))
+instance : LawfulMonadAttach RM := inferInstanceAs (LawfulMonadAttach (ReaderT Nat Id))
+
+example : (monadMap (m := Id) (fun x => x) (pure 1 : RM Nat)).toReaderT.run 0 = Id.mk 1 := rfl
+
+/-! `MonadLift` and `LawfulMonadLift` along equivalences of both monads. -/
+
+newtype IdN (α : Type) := Id α with toId
+
+instance : Monad IdN := inferInstanceAs (Monad Id)
+instance : MonadLift IdN RM := inferInstanceAs (MonadLift Id (ReaderT Nat Id))
+instance : LawfulMonadLift IdN RM := inferInstanceAs (LawfulMonadLift Id (ReaderT Nat Id))
+
+example : (monadLift (IdN.mk (Id.mk 1)) : RM Nat).toReaderT.run 0 = Id.mk 1 := rfl
+
+instance {ε σ : Type} : LawfulMonadLift (ST σ) (EST ε σ) where
+  monadLift_pure _ := rfl
+  monadLift_bind _ _ := rfl
+
+instance : LawfulMonadLift BaseIO (EIO ε) :=
+  inferInstanceAs (LawfulMonadLift (ST IO.RealWorld) (EST ε IO.RealWorld))
