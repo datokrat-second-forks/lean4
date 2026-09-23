@@ -193,13 +193,22 @@ theorem Le.ind {motive : (a b : Wrap) → Le a b → Prop}
   all a b h
 
 /--
-error: Invalid target: The variable `x✝¹` occurs in more than one target (or index), consider using the `cases` tactic instead
-  x✝¹
+error: Invalid target: Target (or one of its indices) occurs more than once
   x✝¹
 -/
 #guard_msgs in
 example (a : Nat) (h : Le ⟨a⟩ ⟨a⟩) : True := by
   induction Wrap.mk a, (id h) using Le.ind
+
+/--
+error: Invalid target: The variable `a` occurs in more than one target (or index), consider using the `cases` tactic instead
+  { inner := a }
+  { inner := a }
+-/
+#guard_msgs in
+example (a : Nat) (h : Le ⟨a⟩ ⟨a⟩) : True := by
+  induction h with
+  | _ => trivial
 
 -- Let-bound hypotheses depending on the replaced variable are reverted and reintroduced.
 example {a b} (h : Relation.TransGen (fun a b : Wrap => a = b) (.mk a) (.mk b)) : a ≤ b := by
@@ -288,7 +297,7 @@ example {a : Nat} (p : Prop) (hp : p) (o : Outer p hp)
 
 /--
 error: Invalid target: Index in target's type is not a variable (consider using the `cases` tactic instead)
-  { inner := a }
+  { inner := { inner := a } }
 -/
 #guard_msgs in
 example {a : Nat} (ha : 0 < a) (o : Outer (0 < a) ha)
@@ -299,7 +308,7 @@ example {a : Nat} (ha : 0 < a) (o : Outer (0 < a) ha)
 
 /--
 error: Invalid target: Index in target's type is not a variable (consider using the `cases` tactic instead)
-  { inner := a }
+  { inner := { inner := a } }
 -/
 #guard_msgs in
 example {a : Nat} (ha : 0 < a) : True := by
@@ -407,3 +416,36 @@ example : True := by
     | single hr => trace_state; trivial
     | tail _ _ _ => trivial
   exact aux
+
+-- Two indices over a universe-polymorphic structure with a parameter.
+structure PBox.{u} (α : Type u) where
+  val : α
+
+inductive Rel2.{u} {α : Type u} : PBox α → PBox α → Prop
+  | mk (a b : α) : Rel2 ⟨a⟩ ⟨b⟩
+
+example {α : Type u} (a b : α) (h : Rel2 ⟨a⟩ ⟨b⟩) : ∃ x y : α, x = a ∧ y = b := by
+  induction h with
+  | mk x y => exact ⟨x, y, rfl, rfl⟩
+
+-- One-constructor-one-field inductives that are not declared as structures work as well.
+inductive IWrap where
+  | mk : Nat → IWrap
+
+example {a b : Nat} (h : Relation.TransGen (fun a b : IWrap => a = b) (.mk a) (.mk b)) :
+    a = b := by
+  induction h with
+  | single hr => cases hr; rfl
+  | tail _ hr ih => cases hr; exact ih
+
+-- Classes are not inverted: that would replace the local instance by a plain variable.
+/--
+error: Invalid target: Index in target's type is not a variable (consider using the `cases` tactic instead)
+  0
+-/
+#guard_msgs in
+example {α} [OfNat α 0] (a : α) (p : α → Prop) (hp : p 0)
+    (h : Relation.TransGen (· = ·) a 0) : p 0 := by
+  induction h with
+  | single _ => exact hp
+  | tail _ _ ih => exact ih

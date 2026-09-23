@@ -76,8 +76,7 @@ example (w : Wrap) (h : IsZero w.1) : w = .mk 0 := by
   trace_state
   rfl
 
--- A class with one field is a one-field structure as well, so its constructor and projection
--- are inverted, too.
+-- Classes are not inverted: that would replace the local instance by a plain variable.
 class Origin (α : Type) where
   origin : α
 
@@ -85,14 +84,24 @@ inductive IsOne : Nat → Prop
   | mk : IsOne 1
 
 /--
-trace: case mk
-⊢ { origin := 1 } = { origin := 1 }
+error: Dependent elimination failed: Failed to solve equation
+  inst.1 = 1
 -/
 #guard_msgs in
 example [inst : Origin Nat] (h : IsOne Origin.origin) : inst = ⟨1⟩ := by
   cases h
-  trace_state
-  rfl
+
+-- An equation left over after an inversion is reported as it stands.
+inductive Pair : Nat → Nat → Prop
+  | mk : Pair 0 2
+
+/--
+error: Dependent elimination failed: Failed to solve equation
+  f { val := 0 }.val = 2
+-/
+#guard_msgs in
+example (b : Box Nat) (f : Nat → Nat) (h : Pair b.val (f b.val)) : False := by
+  cases h
 
 -- If a variable occurs in two different indices of the target, no change of variable can help.
 inductive Occurs (b : Box Nat) : Box Nat → Prop

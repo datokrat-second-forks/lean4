@@ -976,7 +976,9 @@ The code path shared between `induction` and `fun_induct`; when we already have 
 and the `targets` contains the implicit targets
 -/
 def evalInductionCore (stx : Syntax) (elimInfo : ElimInfo) (targets : Array Expr)
-    (mkInitInfo : TacticM Info) (toTag : Array (Ident × FVarId) := #[]) : TacticM Unit := do
+    (toTag : Array (Ident × FVarId) := #[]) (mkInitInfo? : Option (TacticM Info) := none) :
+    TacticM Unit := do
+  let mkInitInfo ← mkInitInfo?.getDM (mkInitialTacticInfoForInduction stx)
   let mvarId ← getMainGoal
   let tag ← mvarId.getTag
   mvarId.withContext do
@@ -1137,10 +1139,8 @@ private def invertBijection (b : Bijection) (mvarId : MVarId) (x : FVarId) :
       else none
 
 /--
-Updates a bijection-wrapped fvar `x`, and its bijections, to use the variables in the goal that
-`reparametrize` returned.
-
-`r` must have been obtained by `reparametrize`.
+Updates the bijection-wrapped fvar `t`, and its bijections, to use the variables in the goal that
+`reparametrize` returned after changing the variable `x`.
 -/
 private def transportWrappedFVar (t : BijectionWrappedFVar) (x : FVarId) (r : Result) : BijectionWrappedFVar :=
   /-
@@ -1185,18 +1185,27 @@ private def makeTargetsFVars (elimInfo : ElimInfo) (targets : Array Expr)
     let some tower ← mvarId.withContext (bijectionWrappedFVarForInduction? target)
       | wrappedFVars := wrappedFVars.push none; continue
     -- Two targets over the same variable can never become independent variables.
+    -- Duplicate plain variables are left to `checkInductionTargets`.
     if let some j := wrappedFVars.findIdx? (·.any (·.fvarId == tower.fvarId)) then
-      mvarId.withContext do
-        throwError "Invalid target: The variable `{mkFVar tower.fvarId}` occurs in more than one \
-          target (or index), consider using the `cases` tactic instead{indentExpr allTargets[j]!}{indentExpr target}"
+      unless tower.bijectionsInsideOut.isEmpty && wrappedFVars[j]!.any (·.bijectionsInsideOut.isEmpty) do
+        mvarId.withContext do
+          throwError "Invalid target: The variable `{mkFVar tower.fvarId}` occurs in more than one \
+            target (or index), consider using the `cases` tactic instead{indentExpr allTargets[j]!}{indentExpr target}"
     wrappedFVars := wrappedFVars.push (some tower)
   for i in *...wrappedFVars.size do
     let some tower := wrappedFVars[i]! | continue
+    -- A partially inverted tower is still not a variable; undo it so that errors show the target
+    -- as written.
+    let (savedS, savedWrappedFVars, savedMCtx) := (s, wrappedFVars, ← getMCtx)
     let mut x := tower.fvarId
     for k in *...tower.bijectionsInsideOut.length do
-      -- `towers` is transported after every step, so the current one has to be re-read.
+      -- `wrappedFVars` is transported after every step, so the current tower has to be re-read.
       let some bijection := wrappedFVars[i]!.bind (·.bijectionsInsideOut[k]?) | break
-      let some r ← s.mvarId.withContext (invertBijection bijection s.mvarId x) | break
+      let some r ← s.mvarId.withContext (invertBijection bijection s.mvarId x) | do
+        s := savedS
+        wrappedFVars := savedWrappedFVars
+        setMCtx savedMCtx
+        break
       s := s.apply r
       wrappedFVars := wrappedFVars.map (·.map (transportWrappedFVar · x r))
       x := r.newFVarId
@@ -1217,7 +1226,7 @@ def evalInduction : Tactic := fun stx =>
       let (targets, toTag) ← elabElimTargets stx[1].getSepArgs
       let elimInfo ← withMainContext <| getElimNameInfo stx[2] targets (induction := true)
       Induction.Reparametrize.makeTargetsFVars elimInfo targets toTag
-    evalInductionCore stx elimInfo targets mkInitInfo toTag
+    evalInductionCore stx elimInfo targets toTag mkInitInfo
 
 
 register_builtin_option tactic.fun_induction.unfolding : Bool := {
@@ -1301,14 +1310,16 @@ def evalFunInduction : Tactic := fun stx =>
       let (elimInfo, targets) ← elabFunTarget (cases := false) stx[1]
       let targets ← generalizeTargets targets
       return (elimInfo, targets)
-    evalInductionCore stx elimInfo targets mkInitInfo
+    evalInductionCore stx elimInfo targets (mkInitInfo? := mkInitInfo)
 
 /--
 The code path shared between `cases` and `fun_cases`; when we already have an `elimInfo`
 and the `targets` contains the implicit targets
 -/
 def evalCasesCore (stx : Syntax) (elimInfo : ElimInfo) (targets : Array Expr)
-    (mkInitInfo : TacticM Info) (toTag : Array (Ident × FVarId) := #[]) : TacticM Unit := do
+    (toTag : Array (Ident × FVarId) := #[]) (mkInitInfo? : Option (TacticM Info) := none) :
+    TacticM Unit := do
+  let mkInitInfo ← mkInitInfo?.getDM (mkInitialTacticInfoForInduction stx)
   let targetRef := stx[1]
   let mvarId ← getMainGoal
   let tag ← mvarId.getTag
@@ -1344,7 +1355,7 @@ def evalCases : Tactic := fun stx =>
       let elimInfo ← withMainContext <| getElimNameInfo stx[2] targets (induction := false)
       let targets ← withMainContext <| addImplicitTargets elimInfo targets
       return (targets, toTag, elimInfo)
-    evalCasesCore stx elimInfo targets mkInitInfo toTag
+    evalCasesCore stx elimInfo targets toTag mkInitInfo
 
 @[builtin_tactic Lean.Parser.Tactic.funCases, builtin_incremental]
 def evalFunCases : Tactic := fun stx =>
@@ -1356,7 +1367,7 @@ def evalFunCases : Tactic := fun stx =>
       let (elimInfo, targets) ← elabFunTarget (cases := true) stx[1]
       let targets ← generalizeTargets targets
       return (elimInfo, targets)
-    evalCasesCore stx elimInfo targets mkInitInfo
+    evalCasesCore stx elimInfo targets (mkInitInfo? := mkInitInfo)
 
 builtin_initialize
   registerTraceClass `Elab.cases

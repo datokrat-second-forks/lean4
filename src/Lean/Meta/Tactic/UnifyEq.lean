@@ -36,9 +36,8 @@ private def toOffset? (e : Expr) : MetaM (Option (Expr × Nat)) := do
 
 /--
 Replaces the equation `eqDecl : b x = t` or `t = b x`, where `b` is a chain of one-field-structure
-constructors and projections and `x` is a free variable not occurring in `t`, by replacing the
-equation by `x = b⁻¹ t`.
-`x` will be subsituted by `b⁻¹ t` by the next `unifyEq?` call.
+constructors and projections and `x` is a free variable not occurring in `t`, by `x = b⁻¹ t`.
+The next `unifyEq?` call substitutes `x` by `b⁻¹ t`.
 -/
 private def unifyEqInvertingBijections? (mvarId : MVarId) (eqDecl : LocalDecl) (subst : FVarSubst)
     (α a b : Expr) : MetaM (Option UnifyEqResult) := do

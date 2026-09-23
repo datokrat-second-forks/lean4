@@ -28,7 +28,7 @@ structure Bijection where
 def Bijection.inv (b : Bijection) : Bijection :=
   { b with isCtor := !b.isCtor }
 
-protected def Bijection.mkApp (b : Bijection) (e : Expr) : MetaM Expr :=
+protected def Bijection.mkApp (b : Bijection) (e : Expr) : CoreM Expr :=
   if b.isCtor then
     return mkApp (mkAppN (mkConst b.ctorVal.name b.us) b.params) e
   else
@@ -66,6 +66,8 @@ private def buildBijection? (isCtor : Bool) (structName : Name) (us : List Level
     (params : Array Expr) :
     MetaM (Option Bijection) := do
   let env ← getEnv
+  -- Inverting a class would replace a local instance by a plain variable.
+  if isClass env structName then return none
   let some ctorVal := getNonRecStructureCtor? env structName | return none
   if ctorVal.numFields ≠ 1 then return none
   return some { isCtor, ctorVal, us, params }
@@ -93,22 +95,17 @@ partial def bijectionWrappedFVar? (e : Expr) (outer : List Bijection := []) :
   | .app .. =>
     let .const declName us := e.getAppFn | return none
     let args := e.getAppArgs
-    let env ← getEnv
-    if let some projInfo := env.getProjectionFnInfo? declName then
+    -- `args` must be the structure's parameters followed by the argument `x` of the bijection.
+    let step (isCtor : Bool) (ctorVal : ConstructorVal) := do
+      if args.size ≠ ctorVal.numParams + 1 then return none
+      let some b ← buildBijection? isCtor ctorVal.induct us (args.extract 0 ctorVal.numParams)
+        | return none
+      bijectionWrappedFVar? args[ctorVal.numParams]! (b :: outer)
+    if let some projInfo := (← getEnv).getProjectionFnInfo? declName then
       let some ctorVal ← isCtor? projInfo.ctorName | return none
-      if args.size ≠ ctorVal.numParams + 1 then return none
-      let params := args.extract 0 ctorVal.numParams
-      let x := args[ctorVal.numParams]!
-      let some b ← buildBijection? (isCtor := false) ctorVal.induct us params
-        | return none
-      bijectionWrappedFVar? x (b :: outer)
+      step (isCtor := false) ctorVal
     else if let some ctorVal ← isCtor? declName then
-      if args.size ≠ ctorVal.numParams + 1 then return none
-      let params := args.extract 0 ctorVal.numParams
-      let x := args[ctorVal.numParams]!
-      let some b ← buildBijection? (isCtor := true) ctorVal.induct us params
-        | return none
-      bijectionWrappedFVar? x (b :: outer)
+      step (isCtor := true) ctorVal
     else
       return none
   | _ =>
