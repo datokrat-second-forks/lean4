@@ -168,6 +168,21 @@ instance Map.instIterator {α β γ : Type w} {m : Type w → Type w'} {n : Type
     Iterator (Map α m n lift f) n γ :=
   Iterator.ofEquiv Map.equivDef inferInstance
 
+theorem Map.instIterator_eq_ofEquiv {α β γ : Type w} {m : Type w → Type w'}
+    {n : Type w → Type w''} [Monad n]
+    [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α} {f : β → PostconditionT n γ} :
+    Map.instIterator (α := α) (β := β) (γ := γ) (m := m) (n := n) (lift := lift) (f := f) =
+      Iterator.ofEquiv Map.equivDef FilterMap.instIterator :=
+  rfl
+
+@[deprecated Map.instIterator_eq_ofEquiv (since := "2026-09-23")]
+theorem Map.instIterator_eq_filterMapInstIterator {α β γ : Type w} {m : Type w → Type w'}
+    {n : Type w → Type w''} [Monad n]
+    [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α} {f : β → PostconditionT n γ} :
+    Map.instIterator (α := α) (β := β) (γ := γ) (m := m) (n := n) (lift := lift) (f := f) =
+      Iterator.ofEquiv Map.equivDef FilterMap.instIterator :=
+  rfl
+
 private def FilterMap.instFinitenessRelation {α β γ : Type w} {m : Type w → Type w'}
     {n : Type w → Type w''} [Monad n] [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α}
     {f : β → PostconditionT n (Option γ)} [Finite α m] :
