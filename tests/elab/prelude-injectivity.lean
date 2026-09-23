@@ -9,8 +9,8 @@ set_option Elab.async false
 
 /--
 info: Possible candidates for Init/Core.lean (these do not need to be added if they are irrelevant for verification):
-gen_injective_theorems% CanonicalEquivalence
 gen_injective_theorems% Dynamic
+gen_injective_theorems% CanonicalEquivalence
 gen_injective_theorems% MacroScopesView
 gen_injective_theorems% ParserDescr
 gen_injective_theorems% SourceInfo
