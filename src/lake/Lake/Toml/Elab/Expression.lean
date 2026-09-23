@@ -99,7 +99,7 @@ def elabHeaderKeys (ks : Array (TSyntax ``simpleKey)) : TomlElabM Name := do
       s with
       arrKeyTys
       currArrKey := .anonymous
-      keyTys := arrKeyTys.get? .anonymous |>.getD {}
+      keyTys := arrKeyTys.find? .anonymous |>.getD {}
     }
   ks.foldlM (init := Name.anonymous) fun k kStx => do
     let k ← k.str <$> elabSimpleKey kStx

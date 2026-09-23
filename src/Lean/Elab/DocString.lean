@@ -1212,10 +1212,10 @@ resolution (`realizeGlobalConstNoOverload`) won't find them.
 This is called as a fallback when the identifier can't be resolved.
 -/
 def resolveBuiltinDocName {α : Type} (builtins : NameMap α) (x : Name) : TermElabM (Option α) := do
-  if let some v := builtins.get? x then return some v
+  if let some v := builtins.find? x then return some v
 
   -- Builtins shouldn't require a prefix, as they're part of the language.
-  if let some v := builtins.get? (`Lean.Doc ++ x) then return some v
+  if let some v := builtins.find? (`Lean.Doc ++ x) then return some v
 
   -- If this fails, try resolving through open namespaces so that {Doc.lit}`foo` will work when
   -- `Lean` is opened.
@@ -1224,18 +1224,18 @@ def resolveBuiltinDocName {α : Type} (builtins : NameMap α) (x : Name) : TermE
     match decl with
     | .simple ns exs =>
       if !exs.any (· == x) then
-        if let some v := builtins.get? (ns ++ x) then return some v
+        if let some v := builtins.find? (ns ++ x) then return some v
     | .explicit openedId declName =>
       if openedId == x then
-        if let some v := builtins.get? declName then return some v
+        if let some v := builtins.find? declName then return some v
       else if openedId.isPrefixOf x then
         let candidate := x.replacePrefix openedId declName
-        if let some v := builtins.get? candidate then return some v
+        if let some v := builtins.find? candidate then return some v
 
   -- Try resolving through current namespace hierarchy
   let mut ns ← getCurrNamespace
   while !ns.isAnonymous do
-    if let some v := builtins.get? (ns ++ x) then return some v
+    if let some v := builtins.find? (ns ++ x) then return some v
     ns := ns.getPrefix
 
   return none
@@ -1246,8 +1246,8 @@ unsafe def roleExpandersForUnsafe (roleName : Ident) :
     try some <$> realizeGlobalConstNoOverload roleName
     catch | _ => pure none
   if let some x := x? then
-    let names := (docRoleExt.getState (← getEnv)).get? x |>.getD #[]
-    let builtins := (← builtinDocRoles.get).get? x |>.getD #[]
+    let names := (docRoleExt.getState (← getEnv)).find? x |>.getD #[]
+    let builtins := (← builtinDocRoles.get).find? x |>.getD #[]
     return (← names.mapM (fun x => do return (x, ← evalConst _ x))) ++ builtins
   else
     -- Builtin roles are not necessarily in the environment at a
@@ -1269,8 +1269,8 @@ unsafe def codeBlockExpandersForUnsafe (codeBlockName : Ident) :
     try some <$> realizeGlobalConstNoOverload codeBlockName
     catch | _ => pure none
   if let some x := x? then
-    let names := (docCodeBlockExt.getState (← getEnv)).get? x |>.getD #[]
-    let names' := (← builtinDocCodeBlocks.get).get? x |>.getD #[]
+    let names := (docCodeBlockExt.getState (← getEnv)).find? x |>.getD #[]
+    let names' := (← builtinDocCodeBlocks.get).find? x |>.getD #[]
     return (← names.mapM (fun x => do return (x, ← evalConst _ x))) ++ names'
   else
     let x := codeBlockName.getId.eraseMacroScopes
@@ -1288,8 +1288,8 @@ unsafe def directiveExpandersForUnsafe (directiveName : Ident) :
     try some <$> realizeGlobalConstNoOverload directiveName
     catch | _ => pure none
   if let some x := x? then
-    let names := (docDirectiveExt.getState (← getEnv)).get? x |>.getD #[]
-    let names' := (← builtinDocDirectives.get).get? x |>.getD #[]
+    let names := (docDirectiveExt.getState (← getEnv)).find? x |>.getD #[]
+    let names' := (← builtinDocDirectives.get).find? x |>.getD #[]
     return (← names.mapM (fun x => do return (x, ← evalConst _ x))) ++ names'
   else
     let x := directiveName.getId.eraseMacroScopes
@@ -1306,13 +1306,13 @@ unsafe def commandExpandersForUnsafe (commandName : Ident) :
     try some <$> realizeGlobalConstNoOverload commandName
     catch | _ => pure none
   if let some x := x? then
-    let names := (docCommandExt.getState (← getEnv)).get? x |>.getD #[]
-    let names' := (← builtinDocCommands.get).get? x |>.getD #[]
+    let names := (docCommandExt.getState (← getEnv)).find? x |>.getD #[]
+    let names' := (← builtinDocCommands.get).find? x |>.getD #[]
     return (← names.mapM (fun x => do return (x, ← evalConst _ x))) ++ names'
   else
     let x := commandName.getId.eraseMacroScopes
     let hasBuiltin :=
-      (← builtinDocCommands.get).get? x <|> (← builtinDocCommands.get).get? (`Lean.Doc ++ x)
+      (← builtinDocCommands.get).find? x <|> (← builtinDocCommands.get).find? (`Lean.Doc ++ x)
     return hasBuiltin.toArray.flatten
 
 @[implemented_by commandExpandersForUnsafe]

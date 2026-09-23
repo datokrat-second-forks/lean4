@@ -617,7 +617,7 @@ private partial def collectStructFields
       unless ← pure (← read).inPattern <||> getPPOption getPPStructureInstancesDefaults do
         if let some defFn := getEffectiveDefaultFnForField? (← getEnv) structName fieldName then
           -- Use `withNewMCtxDepth` to prevent delaborator from solving metavariables.
-          if let some (_, defValue) ← withNewMCtxDepth <| instantiateStructDefaultValueFn? defFn levels params (pure ∘ fieldValues.get?) then
+          if let some (_, defValue) ← withNewMCtxDepth <| instantiateStructDefaultValueFn? defFn levels params (pure ∘ fieldValues.find?) then
             if ← withReducible <| withNewMCtxDepth <| isDefEq defValue (← getExpr) then
               -- Default value matches, skip the field.
               return (i + 1, fieldValues, fields)

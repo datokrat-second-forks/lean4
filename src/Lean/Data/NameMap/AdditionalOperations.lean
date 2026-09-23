@@ -18,7 +18,10 @@ namespace NameMap
 
 It takes a function `f : Name → α → Option β` and applies `f name` to the value with key `name`.
 The resulting entries with non-`none` value are collected to form the output `NameMap`. -/
-def filterMap (f : Name → α → Option β) (m : NameMap α) : NameMap β := ⟨m.toTreeMap.filterMap f⟩
+@[inline] def filterMap (f : Name → α → Option β) (m : NameMap α) : NameMap β :=
+  ⟨m.toTreeMap.filterMap f⟩
+
+@[inline] def map (f : Name → α → β) (m : NameMap α) : NameMap β := ⟨m.toTreeMap.map f⟩
 
 end NameMap
 end Lean
