@@ -39,3 +39,39 @@ run_meta do
     | throwError "`Wrapper.equivDef` carries no inline attribute"
   unless k matches .macroInline do
     throwError "`Wrapper.equivDef` is not `macro_inline`"
+
+/-! An instance transported through a chain of `newtype`s compiles to the underlying code. -/
+
+class Step (α : Type) where
+  step : α → α
+
+@[transport] protected abbrev Step.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (Step α) (Step β) where
+  toFun i := ⟨fun x => e.toFun (i.step (e.invFun x))⟩
+  invFun i := ⟨fun x => e.invFun (i.step (e.toFun x))⟩
+  left_inv i := congrArg Step.mk <| funext fun x =>
+    show e.invFun (e.toFun (i.step (e.invFun (e.toFun x)))) = i.step x by rw [e.left_inv, e.left_inv]
+  right_inv i := congrArg Step.mk <| funext fun x =>
+    show e.toFun (e.invFun (i.step (e.toFun (e.invFun x)))) = i.step x by rw [e.right_inv, e.right_inv]
+
+instance : Step Nat := ⟨(· + 1)⟩
+
+newtype W1 := Nat with toNat
+newtype W2 := W1 with toW1
+
+instance : Step W2 := inferInstanceAs (Step Nat)
+
+/--
+trace: [Compiler.IR] [result]
+    def stepW2 (x_1 : @& tobj) : tobj :=
+      let x_2 : tagged := 1;
+      let x_3 : tobj := Nat.add x_1 x_2;
+      ret x_3
+    def stepW2._boxed (x_1 : tobj) : tobj :=
+      let x_2 : tobj := stepW2 x_1;
+      dec x_1;
+      ret x_2
+-/
+#guard_msgs in
+set_option trace.compiler.ir.result true in
+def stepW2 (x : W2) : W2 := Step.step x

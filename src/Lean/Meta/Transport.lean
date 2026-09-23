@@ -27,11 +27,14 @@ It unifies conclusions with the goal, solves equivalence arguments recursively (
 their binders), synthesizes instance arguments, and chains through intermediate types with
 `Lean.CanonicalEquivalence.trans`.
 
-Types are identified by `isDefEq` at default transparency, which never unfolds the irreducible
+Types are identified by `isDefEq` at implicit transparency, which never unfolds the irreducible
 definition a `newtype` is; unlike `inferInstanceAs`'s instance wrapping this never depends on the
 kernel unfolding what the elaborator may not. A congruence for a lawful class such as `TransOrd`
 concludes at the transported instance of its parent class and therefore only applies to an
 instance definitionally equal to it.
+
+Equivalences are only used in their stated direction, like unfolding: `Foo.equivDef` moves
+instances from `Int` to `Foo`, but not back, and not between two `newtype`s of `Int`.
 -/
 
 namespace Lean.Meta
@@ -82,6 +85,13 @@ builtin_initialize registerBuiltinAttribute {
 }
 
 /--
+Aborts the whole search instead of trying the next candidate: running out of fuel points to cyclic
+`@[transport]` declarations rather than to a dead end.
+-/
+builtin_initialize depthExceptionId : InternalExceptionId ←
+  registerInternalExceptionId `transportDepth
+
+/--
 Runs `k` on each candidate, restoring the state after a failed attempt, and returns the first
 success. The error of the last attempt is kept as an explanation if all of them fail.
 -/
@@ -93,6 +103,8 @@ private def firstSuccess (candidates : Array Name) (k : Name → MetaM Expr) :
     try
       return .ok (← k c)
     catch ex =>
+      if let .internal id _ := ex then
+        if id == depthExceptionId then throw ex
       s.restore
       lastError := ex.toMessageData
   return .error (lastError.getD m!"no `@[transport]` declaration applies")
@@ -107,7 +119,7 @@ conclusion is unified with `goal`, then its equivalence arguments are solved by 
 private partial def applyDecl (declName : Name) (goal : Expr) (fuel : Nat) : MetaM Expr := do
   let decl ← mkConstWithFreshMVarLevels declName
   let (args, bis, concl) ← withReducible <| forallMetaTelescopeReducing (← inferType decl)
-  unless ← withDefault <| isDefEq concl goal do
+  unless ← isDefEq concl goal do
     throwError "`{.ofConstName declName}` does not apply"
   for arg in args, bi in bis do
     if ← arg.mvarId!.isAssigned then
@@ -132,10 +144,10 @@ partial def mkEquiv (src tgt : Expr) (fuel : Nat) : MetaM Expr := do
   let src ← instantiateMVars src
   let tgt ← instantiateMVars tgt
   withTraceNode `Meta.transport (fun _ => return m!"Lean.CanonicalEquivalence {src} {tgt}") do
-  if ← withDefault <| isDefEq src tgt then
+  if ← isDefEq src tgt then
     return ← mkAppM ``Lean.CanonicalEquivalence.refl #[src]
   if fuel == 0 then
-    throwError "transport depth exhausted at{indentExpr src}\nto{indentExpr tgt}"
+    throw <| .internal depthExceptionId
   let goal ← mkAppM ``Lean.CanonicalEquivalence #[src, tgt]
   let dt := transportExt.getState (← getEnv)
   match ← firstSuccess (← dt.getUnify goal) (applyDecl · goal (fuel - 1)) with
@@ -146,8 +158,10 @@ partial def mkEquiv (src tgt : Expr) (fuel : Nat) : MetaM Expr := do
   let chained ← firstSuccess (← dt.getUnify midGoal) fun declName => do
     let e₂ ← applyDecl declName midGoal (fuel - 1)
     let mid ← instantiateMVars mid
-    if ← withDefault <| isDefEq mid tgt then
+    if ← isDefEq mid tgt then
       throwError "`{.ofConstName declName}` does not lead anywhere"
+    if ← isDefEq src mid then
+      return e₂
     let e₁ ← mkEquiv src mid (fuel - 1)
     mkAppM ``Lean.CanonicalEquivalence.trans #[e₁, e₂]
   match chained with
@@ -163,7 +177,17 @@ end Transport
 def mkTransportEquiv (src tgt : Expr) : MetaM Expr := do
   unless (← getEnv).contains ``Lean.CanonicalEquivalence do
     throwError "`Lean.CanonicalEquivalence` is not available, transporting requires `Init.Data.Function`"
-  Transport.mkEquiv src tgt (fuel := 8)
+  -- Transport cannot rewrap fields like `inferInstanceAs`, so it unfolds no more than elaboration
+  -- does implicitly.
+  withImplicit do
+  try
+    Transport.mkEquiv src tgt (fuel := 8)
+  catch ex =>
+    if let .internal id _ := ex then
+      if id == Transport.depthExceptionId then
+        throwError "failed to transport{indentExpr src}\nto{indentExpr tgt}\nbecause the search \
+          exceeded its depth; the `@[transport]` declarations may form a cycle"
+    throw ex
 
 /-- Moves `e` to type `tgt` along `mkTransportEquiv`. -/
 def transport (e tgt : Expr) : MetaM Expr := do

@@ -213,3 +213,128 @@ example : (default : Independent) = Independent.mk 0 := rfl
 example : Lean.CanonicalEquivalence Int Independent := Independent.equivDef
 example (x : Int) : Foo.equiv.toFun x = Foo.equivDef.toFun x := rfl
 example : LE.congr = 7 := rfl
+
+/-!
+An irreducible definition seals its type like a `newtype`, but registers no equivalence, so neither
+`inferInstanceAs` nor `deriving` can cross it.
+-/
+
+@[irreducible] def Sealed := Int
+
+/--
+error: `inferInstanceAs` failed, the source type
+  LE Int
+is not definitionally equal to the expected type
+  LE Sealed
+and cannot be transported to it:
+  failed to transport
+    LE Int
+  to
+    LE Sealed
+  
+  Note: failed to transport
+    Int
+  to
+    Sealed
+  
+  Note: no `@[transport]` declaration applies
+
+Hint: The types are only equal by unfolding irreducible definitions, which seal them. Instances cross such a seal only along `@[transport]` declarations, which `newtype` provides for its underlying type.
+-/
+#guard_msgs in
+instance : LE Sealed := inferInstanceAs (LE Int)
+
+/--
+error: failed to transport
+  LE Int
+to
+  LE Sealed
+
+Note: failed to transport
+  Int
+to
+  Sealed
+
+Note: no `@[transport]` declaration applies
+
+Hint: `Sealed` is an irreducible definition, which seals it. Declare it with `newtype` instead, which registers an equivalence with its underlying type.
+-/
+#guard_msgs in
+deriving instance LE for Sealed
+
+/-! Equivalences are only used in their stated direction, so there is none between siblings. -/
+
+newtype SibA := Int with toInt
+newtype SibB := Int with toInt
+
+instance : LE SibA := by transport (LE Int)
+
+/--
+error: failed to transport
+  LE SibA
+to
+  LE SibB
+
+Note: failed to transport
+  SibA
+to
+  SibB
+
+Note: no `@[transport]` declaration applies
+-/
+#guard_msgs in
+instance : LE SibB := by transport (LE SibA)
+
+/-! A cycle of `@[transport]` declarations exhausts the search. -/
+
+structure CycA where x : Nat
+structure CycB where x : Nat
+
+@[transport] abbrev CycA.toB : Lean.CanonicalEquivalence CycA CycB where
+  toFun a := ⟨a.x⟩
+  invFun b := ⟨b.x⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+@[transport] abbrev CycB.toA : Lean.CanonicalEquivalence CycB CycA where
+  toFun b := ⟨b.x⟩
+  invFun a := ⟨a.x⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+/--
+error: failed to transport
+  Inhabited Nat
+to
+  Inhabited CycB
+because the search exceeded its depth; the `@[transport]` declarations may form a cycle
+-/
+#guard_msgs in
+instance : Inhabited CycB := by transport (Inhabited Nat)
+
+/-!
+A congruence for a lawful class on a type constructor, concluding at the transported instance of
+its parent class, as `LawfulMonad` does.
+-/
+
+class LawfulPointed (m : Type → Type) [Pointed m] : Prop where
+  point_inj : ∀ α (a b : α), Pointed.point (m := m) α a = Pointed.point α b → a = b
+
+@[transport] protected abbrev LawfulPointed.canonicalCongr {m n : Type → Type}
+    (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α)) [i : Pointed m] :
+    Lean.CanonicalEquivalence (@LawfulPointed m i)
+      (@LawfulPointed n ((Pointed.canonicalCongr e).toFun i)) where
+  toFun h := @LawfulPointed.mk n ((Pointed.canonicalCongr e).toFun i) fun α a b hab =>
+    h.point_inj α a b <| by
+      have := congrArg (e α).invFun hab
+      change (e α).invFun ((e α).toFun (i.point α a)) = (e α).invFun ((e α).toFun (i.point α b)) at this
+      rwa [(e α).left_inv, (e α).left_inv] at this
+  invFun h := @LawfulPointed.mk m i fun α a b hab =>
+    h.point_inj α a b (congrArg (e α).toFun hab)
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+instance : LawfulPointed Option := ⟨fun _ _ _ h => Option.some.inj h⟩
+
+instance : LawfulPointed Opt := inferInstanceAs (LawfulPointed Option)
+instance : LawfulPointed Opt2 := by transport (LawfulPointed Option)
