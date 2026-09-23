@@ -16,7 +16,7 @@ public section
 /-!
 # Transport of iterator instances along equivalences of state types
 
-If `α ≃ α'`, then an `Iterator α m β` instance yields an `Iterator α' m β` instance whose steps
+If `Lean.CanonicalEquivalence α α'`, then an `Iterator α m β` instance yields an `Iterator α' m β` instance whose steps
 are those of the original iterator with the states converted. `Finite` and `Productive` are carried
 along. This is how a `newtype` wrapping an iterator state type obtains its instances.
 -/
@@ -32,22 +32,22 @@ def IterM.mapState (f : α → α') (it : IterM (α := α) m β) : IterM (α := 
   ⟨f it.internalState⟩
 
 @[simp]
-theorem IterM.mapState_symm_mapState (e : α ≃ α') {it : IterM (α := α) m β} :
+theorem IterM.mapState_symm_mapState (e : Lean.CanonicalEquivalence α α') {it : IterM (α := α) m β} :
     (it.mapState e.toFun).mapState e.invFun = it :=
   congrArg IterM.mk (e.left_inv it.internalState)
 
 @[simp]
-theorem IterM.mapState_mapState_symm (e : α ≃ α') {it : IterM (α := α') m β} :
+theorem IterM.mapState_mapState_symm (e : Lean.CanonicalEquivalence α α') {it : IterM (α := α') m β} :
     (it.mapState e.invFun).mapState e.toFun = it :=
   congrArg IterM.mk (e.right_inv it.internalState)
 
 @[simp]
-theorem IterM.mapState_symm_comp_mapState (e : α ≃ α') :
+theorem IterM.mapState_symm_comp_mapState (e : Lean.CanonicalEquivalence α α') :
     IterM.mapState (m := m) (β := β) e.invFun ∘ IterM.mapState e.toFun = id :=
   funext fun _ => IterM.mapState_symm_mapState e
 
 @[simp]
-theorem IterM.mapState_comp_mapState_symm (e : α ≃ α') :
+theorem IterM.mapState_comp_mapState_symm (e : Lean.CanonicalEquivalence α α') :
     IterM.mapState (m := m) (β := β) e.toFun ∘ IterM.mapState e.invFun = id :=
   funext fun _ => IterM.mapState_mapState_symm e
 
@@ -56,40 +56,41 @@ namespace Iterators
 /-- The plausibility relation of `Iterator.ofEquiv`: a step is plausible if it is plausible for
 the original iterator after converting the states back. -/
 @[expose]
-def Iterator.IsPlausibleStepOfEquiv (e : α ≃ α') (i : Iterator α m β)
+def Iterator.IsPlausibleStepOfEquiv (e : Lean.CanonicalEquivalence α α') (i : Iterator α m β)
     (it : IterM (α := α') m β) (step : IterStep (IterM (α := α') m β) β) : Prop :=
   i.IsPlausibleStep (it.mapState e.invFun) (step.mapIterator (IterM.mapState e.invFun))
 
 /-- Converts the states in a plausible step of the original iterator. -/
 @[always_inline, inline, expose]
-def PlausibleIterStep.ofEquiv (e : α ≃ α') {i : Iterator α m β} {it : IterM (α := α') m β}
-    (s : PlausibleIterStep (i.IsPlausibleStep (it.mapState e.invFun))) :
+def PlausibleIterStep.ofEquiv (e : Lean.CanonicalEquivalence α α') {i : Iterator α m β}
+    {it : IterM (α := α') m β} (s : PlausibleIterStep (i.IsPlausibleStep (it.mapState e.invFun))) :
     PlausibleIterStep (Iterator.IsPlausibleStepOfEquiv e i it) :=
   ⟨s.val.mapIterator (IterM.mapState e.toFun), by
     simpa [Iterator.IsPlausibleStepOfEquiv] using s.property⟩
 
 @[simp]
-theorem PlausibleIterStep.val_ofEquiv (e : α ≃ α') {i : Iterator α m β} {it : IterM (α := α') m β}
-    {s : PlausibleIterStep (i.IsPlausibleStep (it.mapState e.invFun))} :
+theorem PlausibleIterStep.val_ofEquiv (e : Lean.CanonicalEquivalence α α') {i : Iterator α m β}
+    {it : IterM (α := α') m β} {s : PlausibleIterStep (i.IsPlausibleStep (it.mapState e.invFun))} :
     (PlausibleIterStep.ofEquiv e s).val = s.val.mapIterator (IterM.mapState e.toFun) :=
   rfl
 
 /-- Moves an `Iterator` instance along an equivalence of state types. -/
 @[always_inline]
-protected abbrev Iterator.ofEquiv [Functor m] (e : α ≃ α') (i : Iterator α m β) : Iterator α' m β where
+protected abbrev Iterator.ofEquiv [Functor m] (e : Lean.CanonicalEquivalence α α')
+    (i : Iterator α m β) : Iterator α' m β where
   IsPlausibleStep := Iterator.IsPlausibleStepOfEquiv e i
   step it := (fun s => Shrink.deflate (PlausibleIterStep.ofEquiv e s.inflate)) <$>
     i.step (it.mapState e.invFun)
 
-theorem Iterator.isPlausibleStep_ofEquiv [Functor m] (e : α ≃ α') {i : Iterator α m β}
-    {it : IterM (α := α') m β} {step : IterStep (IterM (α := α') m β) β} :
+theorem Iterator.isPlausibleStep_ofEquiv [Functor m] (e : Lean.CanonicalEquivalence α α')
+    {i : Iterator α m β} {it : IterM (α := α') m β} {step : IterStep (IterM (α := α') m β) β} :
     @Iterator.IsPlausibleStep α' m β (Iterator.ofEquiv e i) it step ↔
       i.IsPlausibleStep (it.mapState e.invFun) (step.mapIterator (IterM.mapState e.invFun)) :=
   Iff.rfl
 
 /-- `Finite` is preserved by `Iterator.ofEquiv`. -/
-theorem Finite.ofEquiv [Functor m] (e : α ≃ α') [i : Iterator α m β] [Finite α m] :
-    @Finite α' m β (Iterator.ofEquiv e i) :=
+theorem Finite.ofEquiv [Functor m] (e : Lean.CanonicalEquivalence α α') [i : Iterator α m β]
+    [Finite α m] : @Finite α' m β (Iterator.ofEquiv e i) :=
   letI := Iterator.ofEquiv e i
   Finite.of_finitenessRelation {
     Rel := InvImage IterM.IsPlausibleSuccessorOf (IterM.mapState e.invFun)
@@ -98,7 +99,7 @@ theorem Finite.ofEquiv [Functor m] (e : α ≃ α') [i : Iterator α m β] [Fini
       ⟨step.mapIterator (IterM.mapState e.invFun), by cases step <;> simp_all, hp⟩ }
 
 /-- `Productive` is preserved by `Iterator.ofEquiv`. -/
-theorem Productive.ofEquiv [Functor m] (e : α ≃ α') [i : Iterator α m β] [Productive α m] :
+theorem Productive.ofEquiv [Functor m] (e : Lean.CanonicalEquivalence α α') [i : Iterator α m β] [Productive α m] :
     @Productive α' m β (Iterator.ofEquiv e i) :=
   letI := Iterator.ofEquiv e i
   Productive.of_productivenessRelation {
@@ -108,7 +109,7 @@ theorem Productive.ofEquiv [Functor m] (e : α ≃ α') [i : Iterator α m β] [
 
 end Iterators
 
-theorem IterM.step_ofEquiv [Functor m] (e : α ≃ α') {i : Iterator α m β}
+theorem IterM.step_ofEquiv [Functor m] (e : Lean.CanonicalEquivalence α α') {i : Iterator α m β}
     {it : IterM (α := α') m β} :
     @IterM.step α' m β (Iterator.ofEquiv e i) it =
       (fun s => Shrink.deflate (PlausibleIterStep.ofEquiv e s.inflate)) <$>

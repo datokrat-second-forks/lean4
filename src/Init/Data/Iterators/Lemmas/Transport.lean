@@ -28,7 +28,7 @@ open Std.Iterators
 variable {α α' β : Type w} {m : Type w → Type w'} [Monad m] [LawfulMonad m]
   [i : Iterator α m β] [Finite α m]
 
-theorem IterM.toArray_ofEquiv (e : α ≃ α') {it : IterM (α := α') m β} :
+theorem IterM.toArray_ofEquiv (e : Lean.CanonicalEquivalence α α') {it : IterM (α := α') m β} :
     letI : Iterator α' m β := Iterator.ofEquiv e i
     it.toArray = (it.mapState e.invFun).toArray := by
   letI : Iterator α' m β := Iterator.ofEquiv e i
@@ -46,7 +46,7 @@ theorem IterM.toArray_ofEquiv (e : α ≃ α') {it : IterM (α := α') m β} :
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
   | .done h => simp
 
-theorem IterM.toList_ofEquiv (e : α ≃ α') {it : IterM (α := α') m β} :
+theorem IterM.toList_ofEquiv (e : Lean.CanonicalEquivalence α α') {it : IterM (α := α') m β} :
     letI : Iterator α' m β := Iterator.ofEquiv e i
     it.toList = (it.mapState e.invFun).toList := by
   letI : Iterator α' m β := Iterator.ofEquiv e i
@@ -64,7 +64,7 @@ theorem IterM.toList_ofEquiv (e : α ≃ α') {it : IterM (α := α') m β} :
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
   | .done h => simp
 
-theorem IterM.toListRev_ofEquiv (e : α ≃ α') {it : IterM (α := α') m β} :
+theorem IterM.toListRev_ofEquiv (e : Lean.CanonicalEquivalence α α') {it : IterM (α := α') m β} :
     letI : Iterator α' m β := Iterator.ofEquiv e i
     it.toListRev = (it.mapState e.invFun).toListRev := by
   letI : Iterator α' m β := Iterator.ofEquiv e i
@@ -84,7 +84,7 @@ theorem IterM.toListRev_ofEquiv (e : α ≃ α') {it : IterM (α := α') m β} :
 
 theorem IterM.forIn_ofEquiv {n : Type w → Type w''} [Monad n] [LawfulMonad n]
     [MonadLiftT m n] [LawfulMonadLiftT m n] [IteratorLoop α m n] [LawfulIteratorLoop α m n]
-    (e : α ≃ α') {it : IterM (α := α') m β} {γ : Type w} {init : γ} {f : β → γ → n (ForInStep γ)} :
+    (e : Lean.CanonicalEquivalence α α') {it : IterM (α := α') m β} {γ : Type w} {init : γ} {f : β → γ → n (ForInStep γ)} :
     letI : Iterator α' m β := Iterator.ofEquiv e i
     ∀ [IteratorLoop α' m n] [LawfulIteratorLoop α' m n],
       ForIn.forIn it init f = ForIn.forIn (it.mapState e.invFun) init f := by
