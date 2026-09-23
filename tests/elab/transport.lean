@@ -377,3 +377,29 @@ example : compare (Ordered.mk 1) (Ordered.mk 2) = .lt := by decide
 example (a b c : Ordered) (h₁ : (compare a b).isLE) (h₂ : (compare b c).isLE) :
     (compare a c).isLE := Std.TransOrd.isLE_trans h₁ h₂
 example (a b : Ordered) (h : compare a b = .eq) : a = b := Std.LawfulEqOrd.eq_of_compare h
+
+/-! The core congruences for `Alternative`, `MonadRef` and `MonadControl`. -/
+
+newtype OptM (α : Type) := StateT Nat (OptionT (ReaderT Lean.Syntax Id)) α with toStateT
+
+instance : Lean.MonadRef (ReaderT Lean.Syntax Id) where
+  getRef := read
+  withRef ref x := withReader (fun _ => ref) x
+
+instance : Monad OptM := inferInstanceAs (Monad (StateT _ _))
+instance : Alternative OptM := inferInstanceAs (Alternative (StateT _ _))
+instance : Lean.MonadRef OptM := inferInstanceAs (Lean.MonadRef (StateT _ _))
+instance : MonadControl (OptionT (ReaderT Lean.Syntax Id)) OptM :=
+  inferInstanceAs (MonadControl _ (StateT _ _))
+
+def OptM.run (x : OptM α) : Option (α × Nat) := x.toStateT.run 0 |>.run |>.run .missing |>.run
+
+/-- info: some (2, 0) -/
+#guard_msgs in #eval (failure <|> pure 2 : OptM Nat).run
+
+/-- info: some (true, 0) -/
+#guard_msgs in
+#eval (Lean.MonadRef.withRef (.atom .none "x") do return (← Lean.getRef).isAtom : OptM Bool).run
+
+/-- info: some (3, 0) -/
+#guard_msgs in #eval (controlAt (OptionT (ReaderT Lean.Syntax Id)) fun run => run (pure 3) : OptM Nat).run
