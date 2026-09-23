@@ -108,7 +108,7 @@ theorem PartialOrder.ofEquiv_rel {α : Sort u} {β : Sort v} (e : Lean.Canonical
     (x y : β) : @PartialOrder.rel β (PartialOrder.ofEquiv e i) x y = i.rel (e.invFun x) (e.invFun y) :=
   rfl
 
-@[transport] protected abbrev PartialOrder.congr {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) :
+@[transport] protected abbrev PartialOrder.canonicalCongr {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (PartialOrder α) (PartialOrder β) where
   toFun := PartialOrder.ofEquiv e
   invFun := PartialOrder.ofEquiv e.symm
@@ -190,12 +190,12 @@ protected abbrev CCPO.ofEquiv {α : Sort u} {β : Sort v} (e : Lean.CanonicalEqu
       ⟨fun h y hy => h (e.invFun y) (by show c (e.toFun (e.invFun y)); rwa [e.right_inv y]),
        fun h y hy => by have := h (e.toFun y) hy; rwa [e.left_inv y] at this⟩
 
-@[transport] protected abbrev CCPO.congr {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) :
+@[transport] protected abbrev CCPO.canonicalCongr {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (CCPO α) (CCPO β) where
   toFun := CCPO.ofEquiv e
   invFun := CCPO.ofEquiv e.symm
-  left_inv i := CCPO.ext ((PartialOrder.congr e).left_inv i.toPartialOrder)
-  right_inv i := CCPO.ext ((PartialOrder.congr e).right_inv i.toPartialOrder)
+  left_inv i := CCPO.ext ((PartialOrder.canonicalCongr e).left_inv i.toPartialOrder)
+  right_inv i := CCPO.ext ((PartialOrder.canonicalCongr e).right_inv i.toPartialOrder)
 
 
 section CompleteLattice
@@ -1047,7 +1047,7 @@ class MonoBind (m : Type u → Type v) [Bind m] [∀ α, PartialOrder (m α)] wh
   bind_mono_left {a₁ a₂ : m α} {f : α → m β} (h : a₁ ⊑ a₂) : a₁ >>= f ⊑ a₂ >>= f
   bind_mono_right {a : m α} {f₁ f₂ : α → m β} (h : ∀ x, f₁ x ⊑ f₂ x) : a >>= f₁ ⊑ a >>= f₂
 
-@[transport] protected abbrev MonoBind.congr {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
+@[transport] protected abbrev MonoBind.canonicalCongr {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
     [b : Bind m] [j : ∀ α, PartialOrder (m α)] :
     Lean.CanonicalEquivalence (@MonoBind m b j)
       (@MonoBind n (Bind.ofEquiv e b) fun α => PartialOrder.ofEquiv (e α) (j α)) where
