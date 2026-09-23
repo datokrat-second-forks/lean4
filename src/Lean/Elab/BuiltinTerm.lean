@@ -366,15 +366,18 @@ private def resynthInstImplicitArgs (type : Expr) : TermElabM Expr := do
     -- Unify with expected type to resolve metavariables (e.g., `_` placeholders)
     discard <| isDefEq type expectedType
     return type
-  -- Definitional equality as the kernel sees it within this module, i.e. with unexposed bodies
-  -- visible. Where even that fails (e.g. for a `newtype`), wrapping below would rest on the kernel
-  -- unfolding what the elaborator may not, so move the instance along `@[transport]` equivalences
-  -- instead.
+  -- Checked with unexposed bodies visible. Where even that fails, an irreducible definition such as
+  -- a `newtype` seals the type: wrapping below would unfold it, so move the instance along
+  -- `@[transport]` equivalences instead.
   unless ← withoutExporting <| isDefEqGuarded type expectedType do
     let inst ← try Meta.transportInstance type expectedType catch ex =>
+      let sealed ← withoutExporting <| withTransparency .all <| isDefEqGuarded type expectedType
       throwError m!"`inferInstanceAs` failed, the source type{indentExpr type}\nis not \
         definitionally equal to the expected type{indentExpr expectedType}\nand cannot be \
-        transported to it:{indentD ex.toMessageData}"
+        transported to it:{indentD ex.toMessageData}" ++
+        if sealed then .hint' m!"The types are only equal by unfolding irreducible definitions, \
+          which seal them. Instances cross such a seal only along `@[transport]` declarations, \
+          which `newtype` provides for its underlying type." else .nil
     return ← ensureHasType expectedType? inst
   -- Re-infer instance-implicit args, so that synthesis is not influenced by the expected type's
   -- instance choices.

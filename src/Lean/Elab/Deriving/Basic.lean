@@ -11,6 +11,7 @@ public import Lean.Elab.DeclNameGen
 import Lean.Compiler.NoncomputableAttr
 import Lean.Meta.WrapInstance
 import Lean.Meta.Transport
+import Lean.Meta.VirtualStructure
 
 public section
 
@@ -232,7 +233,12 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
               instName := mkPrivateName env instName
             let isMeta := (← read).isMetaSection || isMarkedMeta (← getEnv) declName
             let inst ← if transport then
-              Meta.transport (← instantiateMVars result.instVal) result.instType
+              try Meta.transport (← instantiateMVars result.instVal) result.instType catch ex =>
+                if ex matches .internal .. || ((← getEnv).getVirtualStructureInfo? declName).isSome then
+                  throw ex
+                throwError ex.toMessageData ++ .hint' m!"`{.ofConstName declName}` is an \
+                  irreducible definition, which seals it. Declare it with `newtype` instead, \
+                  which registers an equivalence with its underlying type."
             else if backward.inferInstanceAs.wrap.get (← getOptions) then
               withDeclNameForAuxNaming instName <| withNewMCtxDepth <|
                 wrapInstance result.instVal result.instType
