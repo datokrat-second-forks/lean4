@@ -73,7 +73,7 @@ def BaseIO.toEIO (act : BaseIO α) : EIO ε α :=
   .mk <| EST.mk fun s => match ST.run act.toST s with
   | .mk a s => .ok a s
 
-instance : MonadLift BaseIO (EIO ε) := ⟨BaseIO.toEIO⟩
+instance : MonadLift BaseIO (EIO ε) := inferInstanceAs (MonadLift (ST IO.RealWorld) (EST ε IO.RealWorld))
 
 /--
 Converts an `EIO ε` action that might throw an exception of type `ε` into an exception-free `BaseIO`

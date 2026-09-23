@@ -387,6 +387,20 @@ protected abbrev MonadLift.ofEquiv (i : MonadLift m n) : MonadLift m n' where
     show MonadLift.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadLift.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
+protected abbrev MonadFunctor.ofEquiv (i : MonadFunctor m n) : MonadFunctor m n' where
+  monadMap f x := (e _).toFun (i.monadMap f ((e _).invFun x))
+
+@[transport] protected abbrev MonadFunctor.canonicalCongr :
+    Lean.CanonicalEquivalence (MonadFunctor m n) (MonadFunctor m n') where
+  toFun := MonadFunctor.ofEquiv e
+  invFun := MonadFunctor.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show MonadFunctor.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadFunctor.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadFunctor.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadFunctor.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
 protected abbrev MonadControl.ofEquiv (i : MonadControl m n) : MonadControl m n' where
   stM := i.stM
   liftWith f := (e _).toFun (i.liftWith fun run => f fun x => run ((e _).invFun x))
@@ -402,5 +416,29 @@ protected abbrev MonadControl.ofEquiv (i : MonadControl m n) : MonadControl m n'
   right_inv i :=
     show MonadControl.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadControl.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+end
+
+section
+variable {m m' : Type u → Type v} {n n' : Type u → Type w}
+  (e₁ : ∀ α, Lean.CanonicalEquivalence (m α) (m' α))
+  (e₂ : ∀ α, Lean.CanonicalEquivalence (n α) (n' α))
+
+/-- Like `MonadLift.ofEquiv`, but also changes the lifted monad. -/
+protected abbrev MonadLift.ofEquiv₂ (i : MonadLift m n) : MonadLift m' n' where
+  monadLift x := (e₂ _).toFun (i.monadLift ((e₁ _).invFun x))
+
+@[transport] protected abbrev MonadLift.canonicalCongr₂ :
+    Lean.CanonicalEquivalence (MonadLift m n) (MonadLift m' n') where
+  toFun := MonadLift.ofEquiv₂ e₁ e₂
+  invFun := MonadLift.ofEquiv₂ (fun α => (e₁ α).symm) fun α => (e₂ α).symm
+  left_inv i :=
+    show MonadLift.ofEquiv₂ (fun α => (e₁ α).trans (e₁ α).symm)
+        (fun α => (e₂ α).trans (e₂ α).symm) i = i by
+      rw [funext fun α => (e₁ α).trans_symm, funext fun α => (e₂ α).trans_symm]; rfl
+  right_inv i :=
+    show MonadLift.ofEquiv₂ (fun α => (e₁ α).symm.trans (e₁ α))
+        (fun α => (e₂ α).symm.trans (e₂ α)) i = i by
+      rw [funext fun α => (e₁ α).symm_trans, funext fun α => (e₂ α).symm_trans]; rfl
 
 end
