@@ -39,15 +39,19 @@ Try this: simp only [foo]
       10 + x = 10 + x
     ==>
       True
-Try this: simp only [g, pure]
+Try this: simp only [g, Id.run_pure]
 [Meta.Tactic.simp.rewrite] unfold g, g x ==> (have x := x;
       pure x).run
+[Meta.Tactic.simp.rewrite] Id.run_pure:1000:
+      (pure x).run
+    ==>
+      x
 [Meta.Tactic.simp.rewrite] eq_self:1000:
       x = x
     ==>
       True
 Try this: simp (config := { unfoldPartialApp := true }) only [f1, modify, modifyGet, MonadStateOf.modifyGet,
-  StateT.modifyGet, pure, f2, bind, StateT.bind, set, StateT.set, get, getThe, MonadStateOf.get, StateT.get]
+  StateT.modifyGet, f2, bind, StateT.bind, set, StateT.set, get, getThe, MonadStateOf.get, StateT.get, Id.run_pure]
 [Meta.Tactic.simp.rewrite] unfold f1, f1 ==> modify fun x => g x
 [Meta.Tactic.simp.rewrite] unfold modify, modify fun x => g x ==> modifyGet fun s => (PUnit.unit, (fun x => g x) s)
 [Meta.Tactic.simp.rewrite] unfold StateT.modifyGet, StateT.modifyGet fun s =>
@@ -63,8 +67,12 @@ Try this: simp (config := { unfoldPartialApp := true }) only [f1, modify, modify
       (g (StateT.run get s).run.fst) ==> StateT.mk fun x => pure (PUnit.unit, g (StateT.run get s).run.fst)
 [Meta.Tactic.simp.rewrite] unfold getThe, getThe Nat ==> MonadStateOf.get
 [Meta.Tactic.simp.rewrite] unfold StateT.get, StateT.get ==> StateT.mk fun s => pure (s, s)
+[Meta.Tactic.simp.rewrite] Id.run_pure:1000:
+      (pure (s, s)).run
+    ==>
+      (s, s)
 [Meta.Tactic.simp.rewrite] eq_self:1000:
-      (StateT.mk fun s => Id.mk (PUnit.unit, g s)) = StateT.mk fun s => Id.mk (PUnit.unit, g s)
+      (StateT.mk fun s => pure (PUnit.unit, g s)) = StateT.mk fun s => pure (PUnit.unit, g s)
     ==>
       True
 Try this: simp only [bla, h]

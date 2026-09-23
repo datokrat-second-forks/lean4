@@ -117,7 +117,7 @@ theorem scanrM_map [Monad m] [LawfulMonad m]
 
 @[simp]
 theorem length_scanl {f : β → α → β} : (scanl f init as).length = as.length + 1 := by
-  induction as generalizing init <;> simp_all [scanl, pure, bind]
+  induction as generalizing init <;> simp_all [scanl, bind]
 
 grind_pattern length_scanl => scanl f init as
 
