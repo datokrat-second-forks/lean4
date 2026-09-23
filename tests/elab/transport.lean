@@ -366,3 +366,14 @@ instance : LawfulPointed Option := ⟨fun _ _ _ h => Option.some.inj h⟩
 
 instance : LawfulPointed Opt := inferInstanceAs (LawfulPointed Option)
 instance : LawfulPointed Opt2 := by transport (LawfulPointed Option)
+
+/-! Deriving the core order classes on a `newtype`. -/
+
+newtype Ordered := Int with toInt
+  deriving DecidableEq, Ord, Std.TransOrd, Std.LawfulEqOrd
+
+example : Ordered.mk 1 ≠ Ordered.mk 2 := by decide
+example : compare (Ordered.mk 1) (Ordered.mk 2) = .lt := by decide
+example (a b c : Ordered) (h₁ : (compare a b).isLE) (h₂ : (compare b c).isLE) :
+    (compare a c).isLE := Std.TransOrd.isLE_trans h₁ h₂
+example (a b : Ordered) (h : compare a b = .eq) : a = b := Std.LawfulEqOrd.eq_of_compare h

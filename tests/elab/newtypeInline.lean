@@ -99,3 +99,23 @@ run_meta do
     throwError "the transported `bind` did not inline:{indentD (format m)}"
   unless irM == toString (format s) do
     throwError "IR differs:{indentD (format m)}\n{indentD (format s)}"
+
+-- The same through a chain of two `newtype`s.
+newtype M2 (α : Type) := M α with run
+
+instance : Monad M2 := inferInstanceAs (Monad (StateT Nat Id))
+
+def viaM2 (k : Nat) : M2 Nat := do
+  let n ← M2.mk (M.mk get)
+  M2.mk (M.mk (set (n + k)))
+  return n * 2
+
+open Lean in
+run_meta do
+  let some m := IR.findEnvDecl (← getEnv) ``viaM2 | throwError "no IR for `viaM2`"
+  let some s := IR.findEnvDecl (← getEnv) ``viaStateT | throwError "no IR for `viaStateT`"
+  let irM := (toString (format m)).replace "viaM2" "viaStateT"
+  if (irM.splitOn "equiv").length != 1 then
+    throwError "the transported `bind` did not inline:{indentD (format m)}"
+  unless irM == toString (format s) do
+    throwError "IR differs:{indentD (format m)}\n{indentD (format s)}"
