@@ -78,6 +78,13 @@ instance of its parent class and hence applies to that instance only.
   left_inv i := congrArg Inhabited.mk (e.left_inv i.default)
   right_inv i := congrArg Inhabited.mk (e.right_inv i.default)
 
+@[transport] protected abbrev Nonempty.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (Nonempty α) (Nonempty β) where
+  toFun | ⟨a⟩ => ⟨e.toFun a⟩
+  invFun | ⟨b⟩ => ⟨e.invFun b⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
 @[transport] protected abbrev OfNat.canonicalCongr (e : Lean.CanonicalEquivalence α β) {n : Nat} :
     Lean.CanonicalEquivalence (OfNat α n) (OfNat β n) where
   toFun i := ⟨e.toFun i.ofNat⟩
