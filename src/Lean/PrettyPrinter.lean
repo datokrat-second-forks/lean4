@@ -44,10 +44,6 @@ private def maybePrependExprSizes (e : Expr) (f : Format) : MetaM Format := do
 def ppExpr (e : Expr) : MetaM Format := do
   ppUsing e delab >>= maybePrependExprSizes e
 
-/-- Converts a position map from the delaborator into the `Nat`-keyed map of `FormatWithInfos`. -/
-def InfoPerPos.ofPosMap (infos : SubExpr.PosMap Elab.Info) : InfoPerPos :=
-  infos.foldl (fun m p i => m.insert p.asNat i) ∅
-
 /-- Return a `fmt` representing pretty-printed `e` together with a map from tags in `fmt`
 to `Elab.Info` nodes produced by the delaborator at various subexpressions of `e`. -/
 def ppExprWithInfos (e : Expr) (optsPerPos : Delaborator.OptionsPerPos := {}) (delab := Delaborator.delab)
@@ -56,7 +52,7 @@ def ppExprWithInfos (e : Expr) (optsPerPos : Delaborator.OptionsPerPos := {}) (d
   Meta.withLCtx' lctx do
     let (stx, infos) ← delabCore e optsPerPos delab
     let fmt ← ppTerm stx >>= maybePrependExprSizes e
-    return ⟨fmt, .ofPosMap infos⟩
+    return ⟨fmt, infos⟩
 
 open Delaborator in
 def ppConstNameWithInfos (constName : Name) : MetaM FormatWithInfos := do
@@ -93,7 +89,7 @@ def ppSignature (c : Name) : MetaM FormatWithInfos := do
     return s!"{e} : {decl.type}"
   else
     let (stx, infos) ← delabCore e (delab := delabConstWithSignature)
-    return ⟨← ppTerm ⟨stx⟩, .ofPosMap infos⟩  -- HACK: not a term
+    return ⟨← ppTerm ⟨stx⟩, infos⟩  -- HACK: not a term
 
 private partial def noContext : MessageData → MessageData
   | MessageData.withContext _   msg => noContext msg

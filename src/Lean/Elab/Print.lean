@@ -189,7 +189,7 @@ private partial def printStructure (id : Name) (levelParams : List Name) (numPar
       -- Signature
       m := m ++ " " ++ .ofFormatWithInfosM do
         let (stx, infos) ← PrettyPrinter.delabCore s (delab := PrettyPrinter.Delaborator.delabConstWithSignature)
-        pure ⟨← PrettyPrinter.ppTerm ⟨stx⟩, .ofPosMap infos⟩
+        pure ⟨← PrettyPrinter.ppTerm ⟨stx⟩, infos⟩
       m := m ++ Format.line ++ m!"number of parameters: {numParams}"
       -- Parents
       let parents := getStructureParentInfo env id
