@@ -258,10 +258,10 @@ structure Stats where
   diag : Diagnostics := {}
   deriving Inhabited
 
-opaque MethodsRefPointed : NonemptyType.{0}
+private opaque MethodsRefPointed : NonemptyType.{0}
 
 structure MethodsRef : Type where
-  ref : MethodsRefPointed.type
+  private ref : MethodsRefPointed.type
 
 instance : Nonempty MethodsRef :=
   ⟨⟨Classical.choice MethodsRefPointed.property⟩⟩

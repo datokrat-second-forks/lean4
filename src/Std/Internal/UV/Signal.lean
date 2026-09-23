@@ -16,7 +16,7 @@ namespace Std
 namespace Internal
 namespace UV
 
-opaque SignalImpl : NonemptyType.{0}
+private opaque SignalImpl : NonemptyType.{0}
 
 /--
 `Signal`s are used to generate `IO.Promise`s that resolve when a specific signal is received.
@@ -29,8 +29,8 @@ A `Signal` can be in one of 3 states:
 This together with whether it was set up as `repeating` with `Signal.mk` determines the behavior
 of all functions on `Signal`s.
 -/
-structure Signal : Type where ofRef ::
-  ref : SignalImpl.type
+structure Signal : Type where private ofRef ::
+  private ref : SignalImpl.type
 
 instance : Nonempty Signal := ⟨⟨Classical.choice SignalImpl.property⟩⟩
 

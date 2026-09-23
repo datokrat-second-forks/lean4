@@ -27,7 +27,7 @@ namespace Lean.Elab
 namespace Term
 
 -- Same pattern as for `Methods`/`MethodsRef` in `SimpM`. See `FixedTermElabRef`.
-opaque FixedTermElabRefPointed : NonemptyType.{0}
+private opaque FixedTermElabRefPointed : NonemptyType.{0}
 
 /--
 This type is an abbreviation for `Option Expr → TermElabM Expr`, but avoids a circular dependency
@@ -38,7 +38,7 @@ dependency. This mechanism allows us to register semantic term elaborators in
 `el : Option Expr → TermElabM Expr` as scoped `s : Syntax`, such that `elabTerm s = el`.
 -/
 structure FixedTermElabRef : Type where
-  ref : FixedTermElabRefPointed.type
+  private ref : FixedTermElabRefPointed.type
 
 instance : Nonempty FixedTermElabRef :=
   ⟨⟨Classical.choice FixedTermElabRefPointed.property⟩⟩

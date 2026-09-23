@@ -292,9 +292,9 @@ structure State where
 instance : Nonempty State :=
   .intro {}
 
-opaque MethodsRefPointed : NonemptyType.{0}
+private opaque MethodsRefPointed : NonemptyType.{0}
 structure MethodsRef : Type where
-  ref : MethodsRefPointed.type
+  private ref : MethodsRefPointed.type
 instance : Nonempty MethodsRef := ⟨⟨Classical.choice MethodsRefPointed.property⟩⟩
 
 abbrev GrindM := ReaderT MethodsRef $ ReaderT Context $ StateRefT State Sym.SymM
@@ -567,13 +567,13 @@ structure ENodeMap where
 instance : Inhabited ENodeMap where
   default := private (ENodeMap.mk {})
 
-def ENodeMap.find? (m : ENodeMap) (k : ExprPtr) : Option ENode :=
+private def ENodeMap.find? (m : ENodeMap) (k : ExprPtr) : Option ENode :=
   m.map.find? k
 
 def ENodeMap.contains (m : ENodeMap) (k : ExprPtr) : Bool :=
   m.map.contains k
 
-def ENodeMap.insert (m : ENodeMap) (k : ExprPtr) (n : ENode) : ENodeMap :=
+private def ENodeMap.insert (m : ENodeMap) (k : ExprPtr) (n : ENode) : ENodeMap :=
   ⟨m.map.insert k n⟩
 
 /--
