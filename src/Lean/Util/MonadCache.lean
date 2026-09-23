@@ -7,6 +7,7 @@ module
 
 prelude
 public import Std.Data.HashMap.Basic
+public import Init.Transport
 
 public section
 
@@ -73,33 +74,13 @@ instance  : MonadHashMapCacheAdapter α β (MonadCacheT α β m) where
 @[inline] def run {σ} (x : MonadCacheT α β m σ) : m σ :=
   x.toStateRefT.run' ∅
 
-instance : Monad (MonadCacheT α β m) where
-  map f x := .mk (f <$> x.toStateRefT)
-  pure a := .mk (pure a)
-  bind x f := .mk (x.toStateRefT >>= fun a => (f a).toStateRefT)
-
-instance : MonadLift m (MonadCacheT α β m) where
-  monadLift x := .mk (monadLift x)
-
-instance (ε) [MonadExceptOf ε m] : MonadExceptOf ε (MonadCacheT α β m) where
-  throw e := .mk (throwThe ε e)
-  tryCatch x h := .mk (tryCatchThe ε x.toStateRefT fun e => (h e).toStateRefT)
-
-instance : MonadControl m (MonadCacheT α β m) where
-  stM γ := stM m (StateRefT' ω (Std.HashMap α β) m) γ
-  liftWith f := .mk (MonadControl.liftWith fun runInBase => f fun x => runInBase x.toStateRefT)
-  restoreM x := .mk (MonadControl.restoreM x)
-
-instance [MonadFinally m] : MonadFinally (MonadCacheT α β m) where
-  tryFinally' x h := .mk (tryFinally' x.toStateRefT fun a => (h a).toStateRefT)
-
-instance [MonadRef m] : MonadRef (MonadCacheT α β m) where
-  getRef := .mk getRef
-  withRef ref x := .mk (withRef ref x.toStateRefT)
-
-instance [Alternative m] : Alternative (MonadCacheT α β m) where
-  failure := .mk failure
-  orElse x y := .mk (x.toStateRefT <|> (y ()).toStateRefT)
+instance : Monad (MonadCacheT α β m) := inferInstanceAs (Monad (StateRefT' _ _ _))
+instance : MonadLift m (MonadCacheT α β m) := inferInstanceAs (MonadLift m (StateRefT' _ _ _))
+instance (ε) [MonadExceptOf ε m] : MonadExceptOf ε (MonadCacheT α β m) := inferInstanceAs (MonadExceptOf ε (StateRefT' _ _ _))
+instance : MonadControl m (MonadCacheT α β m) := inferInstanceAs (MonadControl m (StateRefT' _ _ _))
+instance [MonadFinally m] : MonadFinally (MonadCacheT α β m) := inferInstanceAs (MonadFinally (StateRefT' _ _ _))
+instance [MonadRef m] : MonadRef (MonadCacheT α β m) := inferInstanceAs (MonadRef (StateRefT' _ _ _))
+instance [Alternative m] : Alternative (MonadCacheT α β m) := inferInstanceAs (Alternative (StateRefT' _ _ _))
 
 end MonadCacheT
 
@@ -118,29 +99,12 @@ instance  : MonadHashMapCacheAdapter α β (MonadStateCacheT α β m) where
 @[always_inline, inline] def run {σ} (x : MonadStateCacheT α β m σ) : m σ :=
   x.toStateT.run' ∅
 
-instance : Monad (MonadStateCacheT α β m) where
-  map f x := .mk (f <$> x.toStateT)
-  pure a := .mk (pure a)
-  bind x f := .mk (x.toStateT >>= fun a => (f a).toStateT)
-
-instance : MonadLift m (MonadStateCacheT α β m) where
-  monadLift x := .mk (monadLift x)
-
-instance (ε) [MonadExceptOf ε m] : MonadExceptOf ε (MonadStateCacheT α β m) where
-  throw e := .mk (throwThe ε e)
-  tryCatch x h := .mk (tryCatchThe ε x.toStateT fun e => (h e).toStateT)
-
-instance : MonadControl m (MonadStateCacheT α β m) where
-  stM γ := stM m (StateT (Std.HashMap α β) m) γ
-  liftWith f := .mk (MonadControl.liftWith fun runInBase => f fun x => runInBase x.toStateT)
-  restoreM x := .mk (MonadControl.restoreM x)
-
-instance [MonadFinally m] : MonadFinally (MonadStateCacheT α β m) where
-  tryFinally' x h := .mk (tryFinally' x.toStateT fun a => (h a).toStateT)
-
-instance [MonadRef m] : MonadRef (MonadStateCacheT α β m) where
-  getRef := .mk getRef
-  withRef ref x := .mk (withRef ref x.toStateT)
+instance : Monad (MonadStateCacheT α β m) := inferInstanceAs (Monad (StateT _ _))
+instance : MonadLift m (MonadStateCacheT α β m) := inferInstanceAs (MonadLift m (StateT _ _))
+instance (ε) [MonadExceptOf ε m] : MonadExceptOf ε (MonadStateCacheT α β m) := inferInstanceAs (MonadExceptOf ε (StateT _ _))
+instance : MonadControl m (MonadStateCacheT α β m) := inferInstanceAs (MonadControl m (StateT _ _))
+instance [MonadFinally m] : MonadFinally (MonadStateCacheT α β m) := inferInstanceAs (MonadFinally (StateT _ _))
+instance [MonadRef m] : MonadRef (MonadStateCacheT α β m) := inferInstanceAs (MonadRef (StateT _ _))
 
 end MonadStateCacheT
 

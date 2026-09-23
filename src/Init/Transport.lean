@@ -258,6 +258,22 @@ protected abbrev Applicative.ofEquiv (i : Applicative m) : Applicative n where
     show Applicative.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (Applicative.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
+protected abbrev Alternative.ofEquiv (i : Alternative m) : Alternative n where
+  toApplicative := Applicative.ofEquiv e i.toApplicative
+  failure := (e _).toFun i.failure
+  orElse x y := (e _).toFun (i.orElse ((e _).invFun x) fun u => (e _).invFun (y u))
+
+@[transport] protected abbrev Alternative.canonicalCongr :
+    Lean.CanonicalEquivalence (Alternative m) (Alternative n) where
+  toFun := Alternative.ofEquiv e
+  invFun := Alternative.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show Alternative.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (Alternative.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show Alternative.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (Alternative.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
 protected abbrev Bind.ofEquiv (i : Bind m) : Bind n where
   bind x f := (e _).toFun (i.bind ((e _).invFun x) fun a => (e _).invFun (f a))
 
@@ -335,6 +351,26 @@ protected abbrev MonadExceptOf.ofEquiv {ε : Type w} (i : MonadExceptOf ε m) :
 end
 
 section
+variable {m n : Type → Type} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
+
+protected abbrev Lean.MonadRef.ofEquiv (i : Lean.MonadRef m) : Lean.MonadRef n where
+  getRef := (e _).toFun i.getRef
+  withRef ref x := (e _).toFun (i.withRef ref ((e _).invFun x))
+
+@[transport] protected abbrev Lean.MonadRef.canonicalCongr :
+    Lean.CanonicalEquivalence (Lean.MonadRef m) (Lean.MonadRef n) where
+  toFun := Lean.MonadRef.ofEquiv e
+  invFun := Lean.MonadRef.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show Lean.MonadRef.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (Lean.MonadRef.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show Lean.MonadRef.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (Lean.MonadRef.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+end
+
+section
 variable {m : Type u → Type v} {n n' : Type u → Type w} (e : ∀ α, Lean.CanonicalEquivalence (n α) (n' α))
 
 protected abbrev MonadLift.ofEquiv (i : MonadLift m n) : MonadLift m n' where
@@ -350,5 +386,21 @@ protected abbrev MonadLift.ofEquiv (i : MonadLift m n) : MonadLift m n' where
   right_inv i :=
     show MonadLift.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadLift.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+protected abbrev MonadControl.ofEquiv (i : MonadControl m n) : MonadControl m n' where
+  stM := i.stM
+  liftWith f := (e _).toFun (i.liftWith fun run => f fun x => run ((e _).invFun x))
+  restoreM x := (e _).toFun (i.restoreM x)
+
+@[transport] protected abbrev MonadControl.canonicalCongr :
+    Lean.CanonicalEquivalence (MonadControl m n) (MonadControl m n') where
+  toFun := MonadControl.ofEquiv e
+  invFun := MonadControl.ofEquiv fun α => (e α).symm
+  left_inv i :=
+    show MonadControl.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadControl.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadControl.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadControl.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
 end
