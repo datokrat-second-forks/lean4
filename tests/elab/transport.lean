@@ -67,6 +67,8 @@ instance : Inhabited (Option Foo) := by transport (Inhabited (Option Int))
 
 example : (default : Option Foo) = none := rfl
 
+instance : Nonempty Foo := by transport (Nonempty Int)
+
 /-! `inferInstanceAs` falls back to transport, also resolving placeholders through it. -/
 
 newtype Wrap (n : Nat) := Fin n with toFin
