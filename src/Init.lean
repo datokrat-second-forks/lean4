@@ -36,6 +36,7 @@ public import Init.BinderPredicates
 public import Init.Ext
 public import Init.Omega
 public import Init.Transport
+public import Init.Control.Lawful.Transport
 public import Init.MacroTrace
 public import Init.Grind
 public import Init.GrindInstances
