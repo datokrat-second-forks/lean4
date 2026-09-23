@@ -248,7 +248,7 @@ def days (leap : Bool) (month : Ordinal) : Day.Ordinal :=
     months[idx]
 
 theorem days_gt_27 (leap : Bool) (i : Month.Ordinal) : days leap i > 27 := by
-  obtain ⟨i, rfl⟩ : ∃ b, i = Ordinal.mk b := ⟨_, (Ordinal.equiv.right_inv i).symm⟩
+  obtain ⟨i, rfl⟩ : ∃ b, i = Ordinal.mk b := ⟨_, (Ordinal.equivDef.right_inv i).symm⟩
   match i with
   | ⟨2, _⟩ =>
     simp [days, Ordinal.val]
@@ -268,7 +268,7 @@ def cumulativeDays (leap : Bool) (month : Ordinal) : Day.Offset :=
   months[idx] + (if leap ∧ month.val > 2 then 1 else 0)
 
 theorem cumulativeDays_le (leap : Bool) (month : Month.Ordinal) : cumulativeDays leap month ≥ 0 ∧ cumulativeDays leap month ≤ 334 + (if leap then 1 else 0) := by
-  obtain ⟨month, rfl⟩ : ∃ b, month = Ordinal.mk b := ⟨_, (Ordinal.equiv.right_inv month).symm⟩
+  obtain ⟨month, rfl⟩ : ∃ b, month = Ordinal.mk b := ⟨_, (Ordinal.equivDef.right_inv month).symm⟩
   match month with
   | ⟨1, _⟩ | ⟨2, _⟩ | ⟨3, _⟩  | ⟨4, _⟩  | ⟨5, _⟩  | ⟨6, _⟩  | ⟨7, _⟩  | ⟨8, _⟩  | ⟨9, _⟩  | ⟨10, _⟩  | ⟨11, _⟩ | ⟨12, _⟩ =>
     simp [cumulativeSizes, Bounded.LE.sub, Bounded.LE.add, Bounded.LE.toFin, cumulativeDays, Ordinal.val]
@@ -278,7 +278,7 @@ theorem cumulativeDays_le (leap : Bool) (month : Month.Ordinal) : cumulativeDays
 theorem difference_eq (p : month.val ≤ 11) :
   let next : Ordinal := .mk (month.toBounded.truncateTop p |>.addTop 1 (by decide))
   (cumulativeDays leap next).val = (cumulativeDays leap month).val + (days leap month).val := by
-  obtain ⟨month, rfl⟩ : ∃ b, month = Ordinal.mk b := ⟨_, (Ordinal.equiv.right_inv month).symm⟩
+  obtain ⟨month, rfl⟩ : ∃ b, month = Ordinal.mk b := ⟨_, (Ordinal.equivDef.right_inv month).symm⟩
   match month with
   | ⟨1, _⟩ | ⟨2, _⟩ | ⟨3, _⟩  | ⟨4, _⟩  | ⟨5, _⟩  | ⟨6, _⟩  | ⟨7, _⟩  | ⟨8, _⟩  | ⟨9, _⟩  | ⟨10, _⟩  | ⟨11, _⟩ =>
     simp [cumulativeDays, Bounded.LE.addTop, days, monthSizesNonLeap, Ordinal.val];

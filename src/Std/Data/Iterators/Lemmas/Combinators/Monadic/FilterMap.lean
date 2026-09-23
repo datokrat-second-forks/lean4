@@ -147,9 +147,9 @@ theorem IterM.Equiv.mapWithPostcondition {α₁ α₂ β γ : Type w}
     {f : β → PostconditionT n γ} {ita : IterM (α := α₁) m β} {itb : IterM (α := α₂) m β}
     (h : IterM.Equiv ita itb) :
     IterM.Equiv (ita.mapWithPostcondition f) (itb.mapWithPostcondition f) :=
-  (IterM.Equiv.mapState_ofEquiv Types.Map.equiv (ita.mapWithPostcondition f)).trans <|
+  (IterM.Equiv.mapState_ofEquiv Types.Map.equivDef (ita.mapWithPostcondition f)).trans <|
     (IterM.Equiv.filterMapWithPostcondition h).trans
-      (IterM.Equiv.mapState_ofEquiv Types.Map.equiv (itb.mapWithPostcondition f)).symm
+      (IterM.Equiv.mapState_ofEquiv Types.Map.equivDef (itb.mapWithPostcondition f)).symm
 
 theorem IterM.Equiv.filterMapM {α₁ α₂ β γ : Type w}
     {m : Type w → Type w'} {n : Type w → Type w''} [Monad m] [LawfulMonad m]

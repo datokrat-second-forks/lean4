@@ -97,19 +97,19 @@ protected theorem PartialOrder.ext {α : Sort u} {i j : PartialOrder α} (h : i.
   cases i; cases j; cases h; rfl
 
 /-- Transfers a partial order along an equivalence, comparing elements of `β` through `e.invFun`. -/
-protected abbrev PartialOrder.ofEquiv {α : Sort u} {β : Sort v} (e : α ≃ β) (i : PartialOrder α) :
+protected abbrev PartialOrder.ofEquiv {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : PartialOrder α) :
     PartialOrder β where
   rel x y := i.rel (e.invFun x) (e.invFun y)
   rel_refl := i.rel_refl
   rel_trans := i.rel_trans
   rel_antisymm h₁ h₂ := e.invFun_injective (i.rel_antisymm h₁ h₂)
 
-theorem PartialOrder.ofEquiv_rel {α : Sort u} {β : Sort v} (e : α ≃ β) (i : PartialOrder α)
+theorem PartialOrder.ofEquiv_rel {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : PartialOrder α)
     (x y : β) : @PartialOrder.rel β (PartialOrder.ofEquiv e i) x y = i.rel (e.invFun x) (e.invFun y) :=
   rfl
 
-@[transport] protected abbrev PartialOrder.congr {α : Sort u} {β : Sort v} (e : α ≃ β) :
-    PartialOrder α ≃ PartialOrder β where
+@[transport] protected abbrev PartialOrder.congr {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (PartialOrder α) (PartialOrder β) where
   toFun := PartialOrder.ofEquiv e
   invFun := PartialOrder.ofEquiv e.symm
   left_inv i := PartialOrder.ext <| funext fun x => funext fun y =>
@@ -176,7 +176,7 @@ protected theorem CCPO.ext {α : Sort u} {i j : CCPO α} (h : i.toPartialOrder =
   cases i; cases j; cases h; rfl
 
 /-- Transfers a chain-complete partial order along an equivalence; see `PartialOrder.ofEquiv`. -/
-protected abbrev CCPO.ofEquiv {α : Sort u} {β : Sort v} (e : α ≃ β) (i : CCPO α) : CCPO β where
+protected abbrev CCPO.ofEquiv {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : CCPO α) : CCPO β where
   toPartialOrder := PartialOrder.ofEquiv e i.toPartialOrder
   has_csup {c} hc := by
     have ⟨s, hs⟩ := i.has_csup (c := fun x => c (e.toFun x)) fun x y hx hy => by
@@ -190,8 +190,8 @@ protected abbrev CCPO.ofEquiv {α : Sort u} {β : Sort v} (e : α ≃ β) (i : C
       ⟨fun h y hy => h (e.invFun y) (by show c (e.toFun (e.invFun y)); rwa [e.right_inv y]),
        fun h y hy => by have := h (e.toFun y) hy; rwa [e.left_inv y] at this⟩
 
-@[transport] protected abbrev CCPO.congr {α : Sort u} {β : Sort v} (e : α ≃ β) :
-    CCPO α ≃ CCPO β where
+@[transport] protected abbrev CCPO.congr {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (CCPO α) (CCPO β) where
   toFun := CCPO.ofEquiv e
   invFun := CCPO.ofEquiv e.symm
   left_inv i := CCPO.ext ((PartialOrder.congr e).left_inv i.toPartialOrder)
@@ -1047,9 +1047,10 @@ class MonoBind (m : Type u → Type v) [Bind m] [∀ α, PartialOrder (m α)] wh
   bind_mono_left {a₁ a₂ : m α} {f : α → m β} (h : a₁ ⊑ a₂) : a₁ >>= f ⊑ a₂ >>= f
   bind_mono_right {a : m α} {f₁ f₂ : α → m β} (h : ∀ x, f₁ x ⊑ f₂ x) : a >>= f₁ ⊑ a >>= f₂
 
-@[transport] protected abbrev MonoBind.congr {m n : Type u → Type v} (e : ∀ α, m α ≃ n α)
+@[transport] protected abbrev MonoBind.congr {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
     [b : Bind m] [j : ∀ α, PartialOrder (m α)] :
-    @MonoBind m b j ≃ @MonoBind n (Bind.ofEquiv e b) fun α => PartialOrder.ofEquiv (e α) (j α) where
+    Lean.CanonicalEquivalence (@MonoBind m b j)
+      (@MonoBind n (Bind.ofEquiv e b) fun α => PartialOrder.ofEquiv (e α) (j α)) where
   toFun h :=
     have hl : ∀ α (x : m α), (e α).invFun ((e α).toFun x) = x := fun α => (e α).left_inv
     @MonoBind.mk n (Bind.ofEquiv e b) (fun α => PartialOrder.ofEquiv (e α) (j α))

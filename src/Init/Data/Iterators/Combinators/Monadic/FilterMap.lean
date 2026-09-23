@@ -167,7 +167,7 @@ instance FilterMap.instIterator {α β γ : Type w} {m : Type w → Type w'}
 instance Map.instIterator {α β γ : Type w} {m : Type w → Type w'} {n : Type w → Type w''} [Monad n]
     [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α} {f : β → PostconditionT n γ} :
     Iterator (Map α m n lift f) n γ :=
-  Iterator.ofEquiv Map.equiv inferInstance
+  Iterator.ofEquiv Map.equivDef inferInstance
 
 private def FilterMap.instFinitenessRelation {α β γ : Type w} {m : Type w → Type w'}
     {n : Type w → Type w''} [Monad n] [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α}
@@ -198,14 +198,14 @@ instance FilterMap.instFinite {α β γ : Type w} {m : Type w → Type w'}
 instance Map.instFinite {α β γ : Type w} {m : Type w → Type w'} {n : Type w → Type w''} [Monad n]
     [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α} {f : β → PostconditionT n γ} [Finite α m] :
     Finite (Map α m n lift f) n :=
-  Finite.ofEquiv Map.equiv
+  Finite.ofEquiv Map.equivDef
 
 private def Map.instProductivenessRelation {α β γ : Type w} {m : Type w → Type w'}
     {n : Type w → Type w''} [Monad n] [Iterator α m β] {lift : ⦃α : Type w⦄ → m α → n α}
     {f : β → PostconditionT n γ} [Productive α m] :
     ProductivenessRelation (Map α m n lift f) n where
   Rel := InvImage IterM.IsPlausibleSkipSuccessorOf
-    (FilterMap.inner ∘ IterM.internalState ∘ IterM.mapState Map.equiv.invFun)
+    (FilterMap.inner ∘ IterM.internalState ∘ IterM.mapState Map.equivDef.invFun)
   wf := InvImage.wf _ Productive.wf
   subrelation {it it'} h := by
     cases h
