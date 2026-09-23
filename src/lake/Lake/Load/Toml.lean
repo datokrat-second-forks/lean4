@@ -462,7 +462,7 @@ where
         let exeRoots ← id do
           if h : kind = LeanExe.configKind then
             let exeConfig : LeanExeConfig name := cast (by rw [h]; rfl) config
-            if let some origExe := r.exeRoots.get? exeConfig.root then
+            if let some origExe := r.exeRoots.find? exeConfig.root then
               logDecodeErrorAt val.ref s!"{prettyName}: \
                 executable '{name}' has the same root module '{exeConfig.root}' as \
                 executable '{origExe}'"
@@ -540,9 +540,9 @@ def loadLakeConfigCore (path : FilePath) (lakeEnv : Lake.Env) : LogIO LoadedLake
       let defaultCacheService ← id do
         let name := config.cache.defaultService
         if name.isEmpty then
-          return cacheServices.get? `reservoir |>.getD defaultService
+          return cacheServices.find? `reservoir |>.getD defaultService
         else
-          let some service := cacheServices.get? (.mkSimple name)
+          let some service := cacheServices.find? (.mkSimple name)
             | error s!"the configured default cache service `{name}` is not defined; \
                 please add a `cache.service` with that name"
           return service
@@ -551,7 +551,7 @@ def loadLakeConfigCore (path : FilePath) (lakeEnv : Lake.Env) : LogIO LoadedLake
         if name.isEmpty then
           return none
         else
-          let some service := cacheServices.get? (.mkSimple name)
+          let some service := cacheServices.find? (.mkSimple name)
             | error s!"the configured default cache upload service `{name}` is not defined; \
                 please add a `cache.service` with that name"
           return some service

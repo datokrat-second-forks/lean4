@@ -237,11 +237,23 @@ def FVarIdSet.size (s : FVarIdSet) : Nat :=
 def FVarIdSet.isEmpty (s : FVarIdSet) : Bool :=
   s.toTreeSet.isEmpty
 
-def FVarIdSet.foldl (f : σ → FVarId → σ) (init : σ) (s : FVarIdSet) : σ :=
+@[inline] def FVarIdSet.foldl (f : σ → FVarId → σ) (init : σ) (s : FVarIdSet) : σ :=
   s.toTreeSet.foldl f init
 
-def FVarIdSet.foldlM [Monad m] (f : σ → FVarId → m σ) (init : σ) (s : FVarIdSet) : m σ :=
+@[inline] def FVarIdSet.foldlM [Monad m] (f : σ → FVarId → m σ) (init : σ) (s : FVarIdSet) : m σ :=
   s.toTreeSet.foldlM f init
+
+@[inline] def FVarIdSet.forM [Monad m] (f : FVarId → m PUnit) (s : FVarIdSet) : m PUnit :=
+  s.toTreeSet.forM f
+
+@[inline] def FVarIdSet.any (s : FVarIdSet) (p : FVarId → Bool) : Bool :=
+  s.toTreeSet.any p
+
+@[inline] def FVarIdSet.all (s : FVarIdSet) (p : FVarId → Bool) : Bool :=
+  s.toTreeSet.all p
+
+@[inline] def FVarIdSet.filter (f : FVarId → Bool) (s : FVarIdSet) : FVarIdSet :=
+  ⟨s.toTreeSet.filter f⟩
 
 def FVarIdSet.toList (s : FVarIdSet) : List FVarId :=
   s.toTreeSet.toList
@@ -274,7 +286,7 @@ instance : EmptyCollection FVarIdHashSet := ⟨⟨∅⟩⟩
 def FVarIdHashSet.insert (s : FVarIdHashSet) (fvarId : FVarId) : FVarIdHashSet :=
   ⟨s.toHashSet.insert fvarId⟩
 
-def FVarIdHashSet.insertMany [ForIn Id ρ FVarId] (s : FVarIdHashSet) (fvarIds : ρ) : FVarIdHashSet :=
+@[inline] def FVarIdHashSet.insertMany [ForIn Id ρ FVarId] (s : FVarIdHashSet) (fvarIds : ρ) : FVarIdHashSet :=
   ⟨s.toHashSet.insertMany fvarIds⟩
 
 def FVarIdHashSet.erase (s : FVarIdHashSet) (fvarId : FVarId) : FVarIdHashSet :=
@@ -289,10 +301,10 @@ def FVarIdHashSet.size (s : FVarIdHashSet) : Nat :=
 def FVarIdHashSet.isEmpty (s : FVarIdHashSet) : Bool :=
   s.toHashSet.isEmpty
 
-def FVarIdHashSet.fold (f : σ → FVarId → σ) (init : σ) (s : FVarIdHashSet) : σ :=
+@[inline] def FVarIdHashSet.fold (f : σ → FVarId → σ) (init : σ) (s : FVarIdHashSet) : σ :=
   s.toHashSet.fold f init
 
-def FVarIdHashSet.forM [Monad m] (f : FVarId → m PUnit) (s : FVarIdHashSet) : m PUnit :=
+@[inline] def FVarIdHashSet.forM [Monad m] (f : FVarId → m PUnit) (s : FVarIdHashSet) : m PUnit :=
   s.toHashSet.forM f
 
 def FVarIdHashSet.toList (s : FVarIdHashSet) : List FVarId :=
@@ -337,11 +349,31 @@ def FVarIdMap.size (s : FVarIdMap α) : Nat :=
 def FVarIdMap.isEmpty (s : FVarIdMap α) : Bool :=
   s.toTreeMap.isEmpty
 
-def FVarIdMap.any (s : FVarIdMap α) (p : FVarId → α → Bool) : Bool :=
+@[inline] def FVarIdMap.alter (s : FVarIdMap α) (fvarId : FVarId) (f : Option α → Option α) :
+    FVarIdMap α :=
+  ⟨s.toTreeMap.alter fvarId f⟩
+
+@[inline] def FVarIdMap.modify (s : FVarIdMap α) (fvarId : FVarId) (f : α → α) : FVarIdMap α :=
+  ⟨s.toTreeMap.modify fvarId f⟩
+
+@[inline] def FVarIdMap.any (s : FVarIdMap α) (p : FVarId → α → Bool) : Bool :=
   s.toTreeMap.any p
 
-def FVarIdMap.foldl (f : σ → FVarId → α → σ) (init : σ) (s : FVarIdMap α) : σ :=
+@[inline] def FVarIdMap.all (s : FVarIdMap α) (p : FVarId → α → Bool) : Bool :=
+  s.toTreeMap.all p
+
+@[inline] def FVarIdMap.filter (f : FVarId → α → Bool) (s : FVarIdMap α) : FVarIdMap α :=
+  ⟨s.toTreeMap.filter f⟩
+
+@[inline] def FVarIdMap.foldl (f : σ → FVarId → α → σ) (init : σ) (s : FVarIdMap α) : σ :=
   s.toTreeMap.foldl f init
+
+@[inline] def FVarIdMap.foldlM [Monad m] (f : σ → FVarId → α → m σ) (init : σ) (s : FVarIdMap α) :
+    m σ :=
+  s.toTreeMap.foldlM f init
+
+@[inline] def FVarIdMap.forM [Monad m] (f : FVarId → α → m PUnit) (s : FVarIdMap α) : m PUnit :=
+  s.toTreeMap.forM f
 
 def FVarIdMap.toList (s : FVarIdMap α) : List (FVarId × α) :=
   s.toTreeMap.toList
@@ -386,8 +418,23 @@ def MVarIdSet.size (s : MVarIdSet) : Nat :=
 def MVarIdSet.isEmpty (s : MVarIdSet) : Bool :=
   s.toTreeSet.isEmpty
 
-def MVarIdSet.foldl (f : σ → MVarId → σ) (init : σ) (s : MVarIdSet) : σ :=
+@[inline] def MVarIdSet.foldl (f : σ → MVarId → σ) (init : σ) (s : MVarIdSet) : σ :=
   s.toTreeSet.foldl f init
+
+@[inline] def MVarIdSet.foldlM [Monad m] (f : σ → MVarId → m σ) (init : σ) (s : MVarIdSet) : m σ :=
+  s.toTreeSet.foldlM f init
+
+@[inline] def MVarIdSet.forM [Monad m] (f : MVarId → m PUnit) (s : MVarIdSet) : m PUnit :=
+  s.toTreeSet.forM f
+
+@[inline] def MVarIdSet.any (s : MVarIdSet) (p : MVarId → Bool) : Bool :=
+  s.toTreeSet.any p
+
+@[inline] def MVarIdSet.all (s : MVarIdSet) (p : MVarId → Bool) : Bool :=
+  s.toTreeSet.all p
+
+@[inline] def MVarIdSet.filter (f : MVarId → Bool) (s : MVarIdSet) : MVarIdSet :=
+  ⟨s.toTreeSet.filter f⟩
 
 def MVarIdSet.toList (s : MVarIdSet) : List MVarId :=
   s.toTreeSet.toList
@@ -425,7 +472,7 @@ def MVarIdMap.size (s : MVarIdMap α) : Nat :=
 def MVarIdMap.isEmpty (s : MVarIdMap α) : Bool :=
   s.toTreeMap.isEmpty
 
-def MVarIdMap.foldl (f : σ → MVarId → α → σ) (init : σ) (s : MVarIdMap α) : σ :=
+@[inline] def MVarIdMap.foldl (f : σ → MVarId → α → σ) (init : σ) (s : MVarIdMap α) : σ :=
   s.toTreeMap.foldl f init
 
 def MVarIdMap.toList (s : MVarIdMap α) : List (MVarId × α) :=
