@@ -55,20 +55,20 @@ structure MonadInfo where
     if u matches .zero then mkConst ``Unit.unit else mkConst ``PUnit.unit [mkLevelSucc u]
 
 -- Same pattern as for `Methods`/`MethodsRef` in `SimpM`.
-opaque ContInfoRefPointed : NonemptyType.{0}
+private opaque ContInfoRefPointed : NonemptyType.{0}
 
 structure ContInfoRef : Type where
-  ref : ContInfoRefPointed.type
+  private ref : ContInfoRefPointed.type
 
 instance : Nonempty ContInfoRef :=
   ⟨⟨Classical.choice ContInfoRefPointed.property⟩⟩
 
 -- Same pattern as `ContInfoRef` above; used so `Context` can carry `DoOps` without
 -- depending on `DoElabM`.
-opaque DoOpsRefPointed : NonemptyType.{0}
+private opaque DoOpsRefPointed : NonemptyType.{0}
 
 structure DoOpsRef : Type where
-  ref : DoOpsRefPointed.type
+  private ref : DoOpsRefPointed.type
 
 instance : Nonempty DoOpsRef :=
   ⟨⟨Classical.choice DoOpsRefPointed.property⟩⟩

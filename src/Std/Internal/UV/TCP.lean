@@ -19,13 +19,13 @@ namespace TCP
 
 open Std.Net
 
-opaque SocketImpl : NonemptyType.{0}
+private opaque SocketImpl : NonemptyType.{0}
 
 /--
 Represents a TCP socket.
 -/
 structure Socket : Type where
-  ref : SocketImpl.type
+  private ref : SocketImpl.type
 
 instance : Nonempty Socket := ⟨⟨Classical.choice SocketImpl.property⟩⟩
 

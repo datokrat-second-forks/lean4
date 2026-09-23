@@ -60,7 +60,7 @@ Returns a declaration name of the type.
 @[implemented_by TypeName.typeNameImpl]
 opaque TypeName.typeName (α) [TypeName α] : Name
 
-opaque DynamicPointed : NonemptyType.{0} :=
+private opaque DynamicPointed : NonemptyType.{0} :=
   ⟨Name × NonScalar, inferInstance⟩
 
 /--
@@ -70,8 +70,8 @@ This is roughly equivalent to `(α : Type) × TypeName α × α`, but without th
 `Dynamic.mk` to inject a value into `Dynamic` from another type, and `Dynamic.get?` to extract a
 value from `Dynamic` if it has some expected type.
 -/
-structure Dynamic : Type where ofRef ::
-  ref : DynamicPointed.type
+structure Dynamic : Type where private ofRef ::
+  private ref : DynamicPointed.type
 
 instance : Nonempty Dynamic := ⟨⟨Classical.choice DynamicPointed.property⟩⟩
 
