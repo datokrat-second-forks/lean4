@@ -2829,10 +2829,8 @@ theorem any_eq_not_all_not {xs : Vector α n} {p : α → Bool} : xs.any p = !xs
 @[congr] theorem any_congr
     {xs ys : Vector α n} (w : xs = ys) {p q : α → Bool} (h : ∀ a, p a = q a) :
     xs.any p = ys.any q := by
-  have : p = q := by funext a; apply h
-  subst this
-  subst w
-  rfl
+  unfold any
+  exact congrArg Id.run (anyM_congr w (fun a => by rw [h]))
 
 @[congr] theorem allM_congr [Monad m]
     {xs ys : Vector α n} (w : xs = ys) {p q : α → m Bool} (h : ∀ a, p a = q a) :
@@ -2845,10 +2843,8 @@ theorem any_eq_not_all_not {xs : Vector α n} {p : α → Bool} : xs.any p = !xs
 @[congr] theorem all_congr
     {xs ys : Vector α n} (w : xs = ys) {p q : α → Bool} (h : ∀ a, p a = q a) :
     xs.all p = ys.all q := by
-  have : p = q := by funext a; apply h
-  subst this
-  subst w
-  rfl
+  unfold all
+  exact congrArg Id.run (allM_congr w (fun a => by rw [h]))
 
 @[simp, grind =] theorem any_flatten {xss : Vector (Vector α n) m} : xss.flatten.any f = xss.any (any · f) := by
   cases xss using vector₂_induction
