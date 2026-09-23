@@ -89,7 +89,7 @@ end EResult
 `EStateT ε σ m` is a combined error and state monad transformer,
 equivalent to `ExceptT ε (StateT σ m)` but more efficient.
 -/
-@[expose] public newtype EStateT (ε : Type u) (σ : Type v) (m : Type max u v w → Type x) (α : Type w) :=
+public newtype EStateT (ε : Type u) (σ : Type v) (m : Type max u v w → Type x) (α : Type w) :=
   σ → m (EResult ε σ α) with toFn
 
 /-- Construct an `EStateT` from its functional representation. -/

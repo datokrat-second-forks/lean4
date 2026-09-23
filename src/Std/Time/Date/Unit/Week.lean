@@ -21,7 +21,7 @@ set_option linter.all true
 /--
 `Offset` represents an offset in weeks.
 -/
-@[expose] newtype Offset := UnitVal (86400 * 7) with toUnitVal
+newtype Offset := UnitVal (86400 * 7) with toUnitVal
   deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
     Ord, TransOrd, LawfulEqOrd
 
@@ -37,7 +37,7 @@ namespace OfYear
 /--
 `Ordinal` represents a bounded value for weeks of a year, which ranges between 1 and 53.
 -/
-@[expose] newtype Ordinal := Bounded.LE 1 53 with toBounded
+newtype Ordinal := Bounded.LE 1 53 with toBounded
   deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
@@ -89,7 +89,7 @@ namespace Aligned
 Aligned weeks are fixed 7-day slots counted from day 1 of the month: days 1-7 are
 week 1, days 8-14 are week 2, and so on, independent of which weekday starts the month.
 -/
-@[expose] newtype Ordinal := Bounded.LE 1 5 with toBounded
+newtype Ordinal := Bounded.LE 1 5 with toBounded
   deriving Repr, DecidableEq, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
@@ -105,7 +105,7 @@ end Aligned
 /--
 `Ordinal` represents the number of weeks within a month, ranging between 1 and 6.
 -/
-@[expose] newtype Ordinal := Bounded.LE 1 6 with toBounded
+newtype Ordinal := Bounded.LE 1 6 with toBounded
   deriving Repr, DecidableEq, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/

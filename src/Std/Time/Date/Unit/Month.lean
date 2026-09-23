@@ -22,7 +22,7 @@ set_option linter.all true
 /--
 `Ordinal` represents a bounded value for months, which ranges between 1 and 12.
 -/
-@[expose] newtype Ordinal := Bounded.LE 1 12 with toBounded
+newtype Ordinal := Bounded.LE 1 12 with toBounded
   deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
@@ -37,7 +37,7 @@ instance : Inhabited Ordinal where
 /--
 `Offset` represents an offset in months. It is defined as an `Int`.
 -/
-@[expose] newtype Offset := Int with toInt
+newtype Offset := Int with toInt
   deriving Repr, DecidableEq, Inhabited, Add, Sub, Mul, Div, Neg, ToString, LT, LE, DecidableLE,
     DecidableLT, Ord, TransOrd, LawfulEqOrd
 
@@ -46,7 +46,7 @@ instance : OfNat Offset n := inferInstanceAs (OfNat Int n)
 /--
 `Quarter` represents a value between 1 and 4, inclusive, corresponding to the four quarters of a year.
 -/
-@[expose] newtype Quarter := Bounded.LE 1 4 with toBounded
+newtype Quarter := Bounded.LE 1 4 with toBounded
   deriving Repr, DecidableEq, LT, LE, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the quarter. -/
