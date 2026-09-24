@@ -54,25 +54,25 @@ protected theorem MonadTail.ext {inst : Bind m} {i j : @MonadTail m inst}
 
 /-- Transports `MonadTail` along a family of equivalences, to the transported `Bind` instance. -/
 @[transport] protected abbrev MonadTail.canonicalCongr {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
-    [b : Bind m] : Lean.CanonicalEquivalence (@MonadTail m b) (@MonadTail n (Bind.ofEquiv e b)) where
+    [b : Bind n] : Lean.CanonicalEquivalence (@MonadTail m (Bind.ofEquiv e b)) (@MonadTail n b) where
   toFun i :=
-    have hl : ∀ α (x : m α), (e α).invFun ((e α).toFun x) = x := fun α => (e α).left_inv
-    @MonadTail.mk n (Bind.ofEquiv e b) (fun β _ => CCPO.ofEquiv (e β) (i.instCCPO β))
+    have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+    @MonadTail.mk n b (fun β _ => CCPO.ofEquiv (e β).symm (i.instCCPO β))
     (fun {_ _ a f₁ f₂} _ h => by
-      show (i.instCCPO _).rel ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a f₁))
-        ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a f₂))
-      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
-      exact i.bind_mono_right (a := (e _).invFun a) (f₁ := fun x => (e _).invFun (f₁ x))
-        (f₂ := fun x => (e _).invFun (f₂ x)) h)
-  invFun i :=
-    have hl : ∀ α (x : m α), (e α).invFun ((e α).toFun x) = x := fun α => (e α).left_inv
-    @MonadTail.mk m b (fun β _ => CCPO.ofEquiv (e β).symm (i.instCCPO β))
-    (fun {_ _ a f₁ f₂} _ h => by
-      have this := i.bind_mono_right (a := (e _).toFun a) (f₁ := fun x => (e _).toFun (f₁ x))
-        (f₂ := fun x => (e _).toFun (f₂ x)) h
+      have this := i.bind_mono_right (a := (e _).invFun a) (f₁ := fun x => (e _).invFun (f₁ x))
+        (f₂ := fun x => (e _).invFun (f₂ x)) h
       rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
       simp only [hl] at this
       exact this)
+  invFun i :=
+    have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+    @MonadTail.mk m (Bind.ofEquiv e b) (fun β _ => CCPO.ofEquiv (e β) (i.instCCPO β))
+    (fun {_ _ a f₁ f₂} _ h => by
+      show (i.instCCPO _).rel ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₁))
+        ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₂))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact i.bind_mono_right (a := (e _).toFun a) (f₁ := fun x => (e _).toFun (f₁ x))
+        (f₂ := fun x => (e _).toFun (f₂ x)) h)
   left_inv i := MonadTail.ext fun β _ => (CCPO.canonicalCongr (e β)).left_inv _
   right_inv i := MonadTail.ext fun β _ => (CCPO.canonicalCongr (e β)).right_inv _
 
