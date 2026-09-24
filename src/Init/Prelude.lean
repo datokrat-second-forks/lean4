@@ -5241,6 +5241,9 @@ lists; list syntax is required only for empty or non-singleton sets of kinds.
 -/
 @[expose, implicit_reducible] def SyntaxNodeKinds := List SyntaxNodeKind
 
+/-- Interprets a list of kinds as `SyntaxNodeKinds`. -/
+@[expose, reducible] def SyntaxNodeKinds.mk (ks : List SyntaxNodeKind) : SyntaxNodeKinds := ks
+
 /--
 Typed syntax, which tracks the potential kinds of the `Syntax` it contains.
 

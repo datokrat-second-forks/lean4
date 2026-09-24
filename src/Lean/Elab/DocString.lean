@@ -597,6 +597,12 @@ private inductive ArgSpec where
   | flag (name : Name) (default : Bool)
 deriving Repr
 
+/-- The `SyntaxNodeKinds` consisting of `ks`, as an expression. -/
+def mkSyntaxNodeKindsLit (ks : List SyntaxNodeKind) : Expr :=
+  let kind := Expr.const ``SyntaxNodeKind []
+  .app (.const ``SyntaxNodeKinds.mk []) <|
+    ks.foldr (mkApp3 (.const ``List.cons [0]) kind <| toExpr ·) (.app (.const ``List.nil [0]) kind)
+
 open Meta in
 private def genWrapper (declName : Name) (argType : Option Expr) (retType : Expr) : TermElabM Name := do
   if let some c := (← getEnv).constants.find? declName then
@@ -633,7 +639,7 @@ private def genWrapper (declName : Name) (argType : Option Expr) (retType : Expr
           throwError "Expected return type of `{.ofConstName declName}` to be `{.ofExpr expected}` but got `{.ofExpr ret}`"
 
       pure argSpec
-    let inls ← mkAppM ``TSyntaxArray #[← mkListLit (.const ``SyntaxNodeKind []) [toExpr `inline]]
+    let inls ← mkAppM ``TSyntaxArray #[mkSyntaxNodeKindsLit [`inline]]
     let parser ←
       if let some argType := argType then
         withLocalDecl (← mkFreshBinderName) .default argType fun i => do
@@ -680,7 +686,7 @@ where
         mkAppM ``Bind.bind #[arg, k]
     else
       let last ← mkAppM ``Lean.Doc.done #[]
-      let m ← mkAppM ``StateT #[← mkAppM ``Array #[← mkAppM ``TSyntax #[← mkListLit (.const ``SyntaxNodeKind []) [toExpr `doc_arg]]], ← mkAppM ``DocM #[]]
+      let m ← mkAppM ``StateT #[← mkAppM ``Array #[← mkAppM ``TSyntax #[mkSyntaxNodeKindsLit [`doc_arg]]], ← mkAppM ``DocM #[]]
       let k ← withLocalDecl (← mkFreshBinderName) .default (.const ``Unit []) fun u => do
         let args := body.map (args.push ·) |>.getD args
         mkLambdaFVars #[u] (← mkAppOptM ``liftM #[none, some m, none, none, (← mkAppM declName args)])
@@ -861,9 +867,7 @@ builtin_initialize registerBuiltinAttribute {
         realizeGlobalConstNoOverloadWithInfo x
       else
         pure decl
-    let argTy : Expr :=
-      .app (.const ``TSyntaxArray [])
-        (mkApp3 (.const ``List.cons [0]) (.const ``SyntaxNodeKind []) (toExpr `inline) (.app (.const ``List.nil [0]) (.const ``SyntaxNodeKind [])))
+    let argTy : Expr := .app (.const ``TSyntaxArray []) (mkSyntaxNodeKindsLit [`inline])
     let ret := .app (.const ``Inline [0]) (.const ``ElabInline [])
     let ((wrapper, _), _) ← genWrapper decl (some argTy) ret |>.run {} {} |>.run {} {}
     docRoleExt.add (roleName, wrapper)
@@ -889,9 +893,7 @@ builtin_initialize registerBuiltinAttribute {
         realizeGlobalConstNoOverloadWithInfo x
       else
         pure decl
-    let argTy : Expr :=
-      .app (.const ``TSyntaxArray [])
-        (mkApp3 (.const ``List.cons [0]) (.const ``SyntaxNodeKind []) (toExpr `inline) (.app (.const ``List.nil [0]) (.const ``SyntaxNodeKind [])))
+    let argTy : Expr := .app (.const ``TSyntaxArray []) (mkSyntaxNodeKindsLit [`inline])
     let ret := .app (.const ``Inline [0]) (.const ``ElabInline [])
     let ((wrapper, _), _) ← genWrapper decl (some argTy) ret |>.run {} {} |>.run {} {}
     addDeclarationRangesFromSyntax wrapper stx
@@ -1023,9 +1025,7 @@ builtin_initialize registerBuiltinAttribute {
         realizeGlobalConstNoOverloadWithInfo x
       else
         pure decl
-    let argTy : Expr :=
-      .app (.const ``TSyntaxArray [])
-        (mkApp3 (.const ``List.cons [0]) (.const ``SyntaxNodeKind []) (toExpr `block) (.app (.const ``List.nil [0]) (.const ``SyntaxNodeKind [])))
+    let argTy : Expr := .app (.const ``TSyntaxArray []) (mkSyntaxNodeKindsLit [`block])
     let ret := mkApp2 (.const ``Block [0, 0]) (.const ``ElabInline []) (.const ``ElabBlock [])
     let ((wrapper, _), _) ← genWrapper decl (some argTy) ret |>.run {} {} |>.run {} {}
     docDirectiveExt.add (directiveName, wrapper)
@@ -1052,9 +1052,7 @@ builtin_initialize registerBuiltinAttribute {
         realizeGlobalConstNoOverloadWithInfo x
       else
         pure decl
-    let argTy : Expr :=
-      .app (.const ``TSyntaxArray [])
-        (mkApp3 (.const ``List.cons [0]) (.const ``SyntaxNodeKind []) (toExpr `block) (.app (.const ``List.nil [0]) (.const ``SyntaxNodeKind [])))
+    let argTy : Expr := .app (.const ``TSyntaxArray []) (mkSyntaxNodeKindsLit [`block])
     let ret := mkApp2 (.const ``Block [0, 0]) (.const ``ElabInline []) (.const ``ElabBlock [])
     let ((wrapper, _), _) ← genWrapper decl (some argTy) ret |>.run {} {} |>.run {} {}
     addDeclarationRangesFromSyntax wrapper stx
