@@ -152,6 +152,28 @@ instance : Pointed Opt2 := by transport (Pointed Option)
 
 example : Pointed.point (m := Opt2) Nat 1 = Opt2.mk (Opt.mk (some 1)) := rfl
 
+/-!
+Equations as arguments: `ha` and `hb` are checked by `rfl` after `e` has been found for the types
+that the conclusion determines.
+-/
+@[transport] protected abbrev Decidable.canonicalCongr' {p q : Prop}
+    (e : Lean.CanonicalEquivalence p q) :
+    Lean.CanonicalEquivalence (Decidable p) (Decidable q) where
+  toFun d := @decidable_of_iff q p ⟨e.toFun, e.invFun⟩ d
+  invFun d := @decidable_of_iff p q ⟨e.invFun, e.toFun⟩ d
+  left_inv _ := Subsingleton.elim _ _
+  right_inv _ := Subsingleton.elim _ _
+
+@[transport] protected abbrev Eq.canonicalCongr' (e : Lean.CanonicalEquivalence α β) {a b : α}
+    {a' b' : β} (ha : e.invFun a' = a) (hb : e.invFun b' = b) :
+    Lean.CanonicalEquivalence (a = b) (a' = b') where
+  toFun h := e.invFun_injective (ha.trans (h.trans hb.symm))
+  invFun h := ha.symm.trans ((congrArg e.invFun h).trans hb)
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+example : Decidable (Foo.mk 3 = Foo.mk 4) := by transport Decidable ((3 : Int) = 4)
+
 /-! Failures. -/
 
 newtype Bar := Int with toInt
@@ -182,6 +204,23 @@ Note: no `@[transport]` declaration applies
 instance : Hashable Foo := by transport (Hashable Int)
 
 /--
+error: failed to transport
+  Decidable (3 = 4)
+to
+  Decidable (Foo.mk 3 = Foo.mk 5)
+
+Note: failed to transport
+  3 = 4
+to
+  Foo.mk 3 = Foo.mk 5
+
+Note: `Eq.canonicalCongr'` does not apply, its argument `hb` does not hold by `rfl`:
+  Foo.equivDef.invFun (Foo.mk 5) = 4
+-/
+#guard_msgs in
+example : Decidable (Foo.mk 3 = Foo.mk 5) := by transport Decidable ((3 : Int) = 4)
+
+/--
 error: invalid `@[transport]` declaration `notAnEquiv`, its conclusion must be an equivalence `Lean.CanonicalEquivalence α β`, but is
   Nat
 -/
@@ -189,7 +228,7 @@ error: invalid `@[transport]` declaration `notAnEquiv`, its conclusion must be a
 @[transport] def notAnEquiv : Nat := 0
 
 /--
-error: invalid `@[transport]` declaration `badArg`, its explicit arguments must be equivalences or families of equivalences, but `n` has type
+error: invalid `@[transport]` declaration `badArg`, its explicit arguments must be equivalences, families of equivalences or equations, but `n` has type
   Nat
 -/
 #guard_msgs in
