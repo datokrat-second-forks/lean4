@@ -543,7 +543,7 @@ structure StructureConfig where
   implicit in both, and binders after the constructor's name update the binder kinds of the
   parameters in the constructor, as in `toLp (p) ::`.
 
-  The equivalence `N.equivDef : Lean.CanonicalEquivalence ty N` is registered with `@[transport]`,
+  The equivalence `N.equivDef : Lean.CanonicalEquivalence N ty` is registered with `@[transport]`,
   so an optional `deriving C, D` clause, as well as `deriving instance … for N` and
   `inferInstanceAs`, obtain instances for `N` by transporting those of `ty` along it (see
   `Lean.Meta.transport`).
