@@ -296,7 +296,7 @@ private def introduceAntiquotes (stx : Syntax) : DocM Unit :=
     match stx' with
     | .node _ (.str k "antiquot") #[_dollar, _, name, _] => do
       let k := if let .str k' "pseudo" := k then k' else k
-      let ty ← Meta.mkAppM ``TSyntax #[← Meta.mkListLit (.const ``SyntaxNodeKind []) [toExpr k]]
+      let ty ← Meta.mkAppM ``TSyntax #[mkSyntaxNodeKindsLit [k]]
       let lctx ← do
         let lctx ← getLCtx
         let fv ← mkFreshFVarId
