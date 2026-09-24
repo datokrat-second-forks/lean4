@@ -742,8 +742,8 @@ equivalence type, so libraries can supply their own type and notation.
 Declarations concluding in an equivalence can be tagged with `@[transport]`. Congruences such as
 `(e : Lean.CanonicalEquivalence α β) → Lean.CanonicalEquivalence (LE α) (LE β)`
 let `transport`, `inferInstanceAs`, and `deriving` move instances between equivalent types
-without unfolding either type. Every `newtype` registers its underlying type equivalence
-as `N.equivDef`.
+without unfolding either type. Like a simp lemma or an `eq_def` theorem, a registered equivalence
+unfolds its left-hand side: every `newtype N := ty` registers `N.equivDef : Lean.CanonicalEquivalence N ty`.
 -/
 structure Lean.CanonicalEquivalence (α : Sort u) (β : Sort v) where
   /-- The forward map. -/
