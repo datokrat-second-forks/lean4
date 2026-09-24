@@ -96,22 +96,22 @@ protected theorem PartialOrder.ext {α : Sort u} {i j : PartialOrder α} (h : i.
     i = j := by
   cases i; cases j; cases h; rfl
 
-/-- Transfers a partial order along an equivalence, comparing elements of `β` through `e.invFun`. -/
-protected abbrev PartialOrder.ofEquiv {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : PartialOrder α) :
-    PartialOrder β where
-  rel x y := i.rel (e.invFun x) (e.invFun y)
+/-- Transfers a partial order along an equivalence, comparing elements of `α` through `e.toFun`. -/
+protected abbrev PartialOrder.ofEquiv {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : PartialOrder β) :
+    PartialOrder α where
+  rel x y := i.rel (e.toFun x) (e.toFun y)
   rel_refl := i.rel_refl
   rel_trans := i.rel_trans
-  rel_antisymm h₁ h₂ := e.invFun_injective (i.rel_antisymm h₁ h₂)
+  rel_antisymm h₁ h₂ := e.toFun_injective (i.rel_antisymm h₁ h₂)
 
-theorem PartialOrder.ofEquiv_rel {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : PartialOrder α)
-    (x y : β) : @PartialOrder.rel β (PartialOrder.ofEquiv e i) x y = i.rel (e.invFun x) (e.invFun y) :=
+theorem PartialOrder.ofEquiv_rel {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : PartialOrder β)
+    (x y : α) : @PartialOrder.rel α (PartialOrder.ofEquiv e i) x y = i.rel (e.toFun x) (e.toFun y) :=
   rfl
 
 @[transport] protected abbrev PartialOrder.canonicalCongr {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (PartialOrder α) (PartialOrder β) where
-  toFun := PartialOrder.ofEquiv e
-  invFun := PartialOrder.ofEquiv e.symm
+  toFun := PartialOrder.ofEquiv e.symm
+  invFun := PartialOrder.ofEquiv e
   left_inv i := PartialOrder.ext <| funext fun x => funext fun y =>
     show i.rel (e.invFun (e.toFun x)) (e.invFun (e.toFun y)) = i.rel x y by
       rw [e.left_inv x, e.left_inv y]
@@ -176,24 +176,24 @@ protected theorem CCPO.ext {α : Sort u} {i j : CCPO α} (h : i.toPartialOrder =
   cases i; cases j; cases h; rfl
 
 /-- Transfers a chain-complete partial order along an equivalence; see `PartialOrder.ofEquiv`. -/
-protected abbrev CCPO.ofEquiv {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : CCPO α) : CCPO β where
+protected abbrev CCPO.ofEquiv {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : CCPO β) : CCPO α where
   toPartialOrder := PartialOrder.ofEquiv e i.toPartialOrder
   has_csup {c} hc := by
-    have ⟨s, hs⟩ := i.has_csup (c := fun x => c (e.toFun x)) fun x y hx hy => by
-      have h : i.rel (e.invFun (e.toFun x)) (e.invFun (e.toFun y)) ∨
-          i.rel (e.invFun (e.toFun y)) (e.invFun (e.toFun x)) := hc _ _ hx hy
-      rwa [e.left_inv x, e.left_inv y] at h
-    refine ⟨e.toFun s, fun x => ?_⟩
-    show i.rel (e.invFun (e.toFun s)) (e.invFun x) ↔ ∀ y, c y → i.rel (e.invFun y) (e.invFun x)
-    rw [e.left_inv s]
-    exact (hs (e.invFun x)).trans
-      ⟨fun h y hy => h (e.invFun y) (by show c (e.toFun (e.invFun y)); rwa [e.right_inv y]),
-       fun h y hy => by have := h (e.toFun y) hy; rwa [e.left_inv y] at this⟩
+    have ⟨s, hs⟩ := i.has_csup (c := fun x => c (e.invFun x)) fun x y hx hy => by
+      have h : i.rel (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) ∨
+          i.rel (e.toFun (e.invFun y)) (e.toFun (e.invFun x)) := hc _ _ hx hy
+      rwa [e.right_inv x, e.right_inv y] at h
+    refine ⟨e.invFun s, fun x => ?_⟩
+    show i.rel (e.toFun (e.invFun s)) (e.toFun x) ↔ ∀ y, c y → i.rel (e.toFun y) (e.toFun x)
+    rw [e.right_inv s]
+    exact (hs (e.toFun x)).trans
+      ⟨fun h y hy => h (e.toFun y) (by show c (e.invFun (e.toFun y)); rwa [e.left_inv y]),
+       fun h y hy => by have := h (e.invFun y) hy; rwa [e.right_inv y] at this⟩
 
 @[transport] protected abbrev CCPO.canonicalCongr {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (CCPO α) (CCPO β) where
-  toFun := CCPO.ofEquiv e
-  invFun := CCPO.ofEquiv e.symm
+  toFun := CCPO.ofEquiv e.symm
+  invFun := CCPO.ofEquiv e
   left_inv i := CCPO.ext ((PartialOrder.canonicalCongr e).left_inv i.toPartialOrder)
   right_inv i := CCPO.ext ((PartialOrder.canonicalCongr e).right_inv i.toPartialOrder)
 
@@ -1048,43 +1048,44 @@ class MonoBind (m : Type u → Type v) [Bind m] [∀ α, PartialOrder (m α)] wh
   bind_mono_right {a : m α} {f₁ f₂ : α → m β} (h : ∀ x, f₁ x ⊑ f₂ x) : a >>= f₁ ⊑ a >>= f₂
 
 @[transport] protected abbrev MonoBind.canonicalCongr {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
-    [b : Bind m] [j : ∀ α, PartialOrder (m α)] :
-    Lean.CanonicalEquivalence (@MonoBind m b j)
-      (@MonoBind n (Bind.ofEquiv e b) fun α => PartialOrder.ofEquiv (e α) (j α)) where
+    [b : Bind n] [j : ∀ α, PartialOrder (n α)] :
+    Lean.CanonicalEquivalence
+      (@MonoBind m (Bind.ofEquiv e b) fun α => PartialOrder.ofEquiv (e α) (j α))
+      (@MonoBind n b j) where
   toFun h :=
-    have hl : ∀ α (x : m α), (e α).invFun ((e α).toFun x) = x := fun α => (e α).left_inv
-    @MonoBind.mk n (Bind.ofEquiv e b) (fun α => PartialOrder.ofEquiv (e α) (j α))
+    have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+    @MonoBind.mk n b j
     (fun {_ _ a₁ a₂ f} h₁₂ => by
-      show (j _).rel ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a₁ f))
-        ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a₂ f))
-      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
-      exact h.bind_mono_left (a₁ := (e _).invFun a₁) (a₂ := (e _).invFun a₂)
-        (f := fun a => (e _).invFun (f a)) h₁₂)
-    (fun {_ _ a f₁ f₂} h₁₂ => by
-      show (j _).rel ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a f₁))
-        ((e _).invFun (@Bind.bind n (Bind.ofEquiv e b) _ _ a f₂))
-      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
-      exact h.bind_mono_right (a := (e _).invFun a) (f₁ := fun x => (e _).invFun (f₁ x))
-        (f₂ := fun x => (e _).invFun (f₂ x)) h₁₂)
-  invFun h :=
-    have hl : ∀ α (x : m α), (e α).invFun ((e α).toFun x) = x := fun α => (e α).left_inv
-    @MonoBind.mk m b j
-    (fun {_ _ a₁ a₂ f} h₁₂ => by
-      have h₁₂' : (j _).rel ((e _).invFun ((e _).toFun a₁)) ((e _).invFun ((e _).toFun a₂)) := by
+      have h₁₂' : (j _).rel ((e _).toFun ((e _).invFun a₁)) ((e _).toFun ((e _).invFun a₂)) := by
         rw [hl, hl]; exact h₁₂
-      have this := h.bind_mono_left (a₁ := (e _).toFun a₁) (a₂ := (e _).toFun a₂)
-        (f := fun a => (e _).toFun (f a)) h₁₂'
+      have this := h.bind_mono_left (a₁ := (e _).invFun a₁) (a₂ := (e _).invFun a₂)
+        (f := fun a => (e _).invFun (f a)) h₁₂'
       rw [PartialOrder.ofEquiv_rel, Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
       simp only [hl] at this
       exact this)
     (fun {_ _ a f₁ f₂} h₁₂ => by
-      have this := h.bind_mono_right (a := (e _).toFun a) (f₁ := fun x => (e _).toFun (f₁ x))
-        (f₂ := fun x => (e _).toFun (f₂ x)) fun x => by
-          show (j _).rel ((e _).invFun ((e _).toFun (f₁ x))) ((e _).invFun ((e _).toFun (f₂ x)))
+      have this := h.bind_mono_right (a := (e _).invFun a) (f₁ := fun x => (e _).invFun (f₁ x))
+        (f₂ := fun x => (e _).invFun (f₂ x)) fun x => by
+          show (j _).rel ((e _).toFun ((e _).invFun (f₁ x))) ((e _).toFun ((e _).invFun (f₂ x)))
           rw [hl, hl]; exact h₁₂ x
       rw [PartialOrder.ofEquiv_rel, Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
       simp only [hl] at this
       exact this)
+  invFun h :=
+    have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+    @MonoBind.mk m (Bind.ofEquiv e b) (fun α => PartialOrder.ofEquiv (e α) (j α))
+    (fun {_ _ a₁ a₂ f} h₁₂ => by
+      show (j _).rel ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a₁ f))
+        ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a₂ f))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact h.bind_mono_left (a₁ := (e _).toFun a₁) (a₂ := (e _).toFun a₂)
+        (f := fun a => (e _).toFun (f a)) h₁₂)
+    (fun {_ _ a f₁ f₂} h₁₂ => by
+      show (j _).rel ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₁))
+        ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₂))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact h.bind_mono_right (a := (e _).toFun a) (f₁ := fun x => (e _).toFun (f₁ x))
+        (f₂ := fun x => (e _).toFun (f₂ x)) h₁₂)
   left_inv _ := rfl
   right_inv _ := rfl
 

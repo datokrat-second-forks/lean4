@@ -288,18 +288,18 @@ An iterator whose instance was obtained by `Iterator.ofEquiv` is equivalent to t
 transported from.
 -/
 theorem IterM.Equiv.mapState_ofEquiv {α α' : Type w} {m : Type w → Type w'} [Monad m]
-    [LawfulMonad m] {β : Type w} [i : Iterator α m β] (e : Lean.CanonicalEquivalence α α') (it : IterM (α := α') m β) :
+    [LawfulMonad m] {β : Type w} [i : Iterator α m β] (e : Lean.CanonicalEquivalence α' α) (it : IterM (α := α') m β) :
     letI : Iterator α' m β := Iterator.ofEquiv e i
-    IterM.Equiv it (it.mapState e.invFun) := by
+    IterM.Equiv it (it.mapState e.toFun) := by
   letI : Iterator α' m β := Iterator.ofEquiv e i
-  refine IterM.Equiv.of_morphism it (IterM.mapState e.invFun) ?_
+  refine IterM.Equiv.of_morphism it (IterM.mapState e.toFun) ?_
   intro it
   simp only [HetT.ext_iff, Equivalence.property_step, Equivalence.prun_step]
   refine ⟨?_, ?_⟩
   · ext step
     constructor
     · intro h
-      exact ⟨step.mapIterator (IterM.mapState e.toFun),
+      exact ⟨step.mapIterator (IterM.mapState e.invFun),
         (Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h), by simp⟩
     · rintro ⟨a, ha, rfl⟩
       exact ha
@@ -308,6 +308,6 @@ theorem IterM.Equiv.mapState_ofEquiv {α α' : Type w} {m : Type w → Type w'} 
     rw [IterM.step_ofEquiv]
     simp only [map_eq_pure_bind, bind_assoc, pure_bind, Shrink.inflate_deflate,
       PlausibleIterStep.val_ofEquiv, IterStep.mapIterator_mapIterator,
-      IterM.mapState_symm_comp_mapState, IterStep.mapIterator_id]
+      IterM.mapState_comp_mapState_symm, IterStep.mapIterator_id]
 
 end Std

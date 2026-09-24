@@ -188,19 +188,19 @@ to
   DecidableLE Bar
 
 Note: failed to transport
-  (b : Int) → Decidable (Bar.equivDef.invFun a' ≤ b)
+  (b : Int) → Decidable (Bar.equivDef.toFun a ≤ b)
 to
-  (b : Bar) → Decidable (a' ≤ b)
+  (b : Bar) → Decidable (a ≤ b)
 
 Note: failed to transport
-  Decidable (Bar.equivDef.invFun a'✝ ≤ Bar.equivDef.invFun a')
+  Decidable (Bar.equivDef.toFun a✝ ≤ Bar.equivDef.toFun a)
 to
-  Decidable (a'✝ ≤ a')
+  Decidable (a✝ ≤ a)
 
 Note: failed to transport
-  Bar.equivDef.invFun a'✝ ≤ Bar.equivDef.invFun a'
+  Bar.equivDef.toFun a✝ ≤ Bar.equivDef.toFun a
 to
-  a'✝ ≤ a'
+  a✝ ≤ a
 
 Note: no `@[transport]` declaration applies
 -/

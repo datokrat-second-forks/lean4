@@ -219,7 +219,7 @@ private def Map.instProductivenessRelation {α β γ : Type w} {m : Type w → T
     {f : β → PostconditionT n γ} [Productive α m] :
     ProductivenessRelation (Map α m n lift f) n where
   Rel := InvImage IterM.IsPlausibleSkipSuccessorOf
-    (FilterMap.inner ∘ IterM.internalState ∘ IterM.mapState Map.equivDef.invFun)
+    (FilterMap.inner ∘ IterM.internalState ∘ IterM.mapState Map.equivDef.toFun)
   wf := InvImage.wf _ Productive.wf
   subrelation {it it'} h := by
     cases h

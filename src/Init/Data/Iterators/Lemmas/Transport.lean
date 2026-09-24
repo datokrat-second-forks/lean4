@@ -28,9 +28,9 @@ open Std.Iterators
 variable {α α' β : Type w} {m : Type w → Type w'} [Monad m] [LawfulMonad m]
   [i : Iterator α m β] [Finite α m]
 
-theorem IterM.toArray_ofEquiv (e : Lean.CanonicalEquivalence α α') {it : IterM (α := α') m β} :
+theorem IterM.toArray_ofEquiv (e : Lean.CanonicalEquivalence α' α) {it : IterM (α := α') m β} :
     letI : Iterator α' m β := Iterator.ofEquiv e i
-    it.toArray = (it.mapState e.invFun).toArray := by
+    it.toArray = (it.mapState e.toFun).toArray := by
   letI : Iterator α' m β := Iterator.ofEquiv e i
   haveI : Finite α' m := Finite.ofEquiv e
   induction it using IterM.inductSteps with | step it ihy ihs
@@ -40,15 +40,15 @@ theorem IterM.toArray_ofEquiv (e : Lean.CanonicalEquivalence α α') {it : IterM
   apply bind_congr
   intro s
   match s.inflate with
-  | .yield it' out h => simp [ihy (it' := it'.mapState e.toFun) (out := out)
+  | .yield it' out h => simp [ihy (it' := it'.mapState e.invFun) (out := out)
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
-  | .skip it' h => simp [ihs (it' := it'.mapState e.toFun)
+  | .skip it' h => simp [ihs (it' := it'.mapState e.invFun)
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
   | .done h => simp
 
-theorem IterM.toList_ofEquiv (e : Lean.CanonicalEquivalence α α') {it : IterM (α := α') m β} :
+theorem IterM.toList_ofEquiv (e : Lean.CanonicalEquivalence α' α) {it : IterM (α := α') m β} :
     letI : Iterator α' m β := Iterator.ofEquiv e i
-    it.toList = (it.mapState e.invFun).toList := by
+    it.toList = (it.mapState e.toFun).toList := by
   letI : Iterator α' m β := Iterator.ofEquiv e i
   haveI : Finite α' m := Finite.ofEquiv e
   induction it using IterM.inductSteps with | step it ihy ihs
@@ -58,15 +58,15 @@ theorem IterM.toList_ofEquiv (e : Lean.CanonicalEquivalence α α') {it : IterM 
   apply bind_congr
   intro s
   match s.inflate with
-  | .yield it' out h => simp [ihy (it' := it'.mapState e.toFun) (out := out)
+  | .yield it' out h => simp [ihy (it' := it'.mapState e.invFun) (out := out)
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
-  | .skip it' h => simp [ihs (it' := it'.mapState e.toFun)
+  | .skip it' h => simp [ihs (it' := it'.mapState e.invFun)
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
   | .done h => simp
 
-theorem IterM.toListRev_ofEquiv (e : Lean.CanonicalEquivalence α α') {it : IterM (α := α') m β} :
+theorem IterM.toListRev_ofEquiv (e : Lean.CanonicalEquivalence α' α) {it : IterM (α := α') m β} :
     letI : Iterator α' m β := Iterator.ofEquiv e i
-    it.toListRev = (it.mapState e.invFun).toListRev := by
+    it.toListRev = (it.mapState e.toFun).toListRev := by
   letI : Iterator α' m β := Iterator.ofEquiv e i
   haveI : Finite α' m := Finite.ofEquiv e
   induction it using IterM.inductSteps with | step it ihy ihs
@@ -76,18 +76,18 @@ theorem IterM.toListRev_ofEquiv (e : Lean.CanonicalEquivalence α α') {it : Ite
   apply bind_congr
   intro s
   match s.inflate with
-  | .yield it' out h => simp [ihy (it' := it'.mapState e.toFun) (out := out)
+  | .yield it' out h => simp [ihy (it' := it'.mapState e.invFun) (out := out)
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
-  | .skip it' h => simp [ihs (it' := it'.mapState e.toFun)
+  | .skip it' h => simp [ihs (it' := it'.mapState e.invFun)
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
   | .done h => simp
 
 theorem IterM.forIn_ofEquiv {n : Type w → Type w''} [Monad n] [LawfulMonad n]
     [MonadLiftT m n] [LawfulMonadLiftT m n] [IteratorLoop α m n] [LawfulIteratorLoop α m n]
-    (e : Lean.CanonicalEquivalence α α') {it : IterM (α := α') m β} {γ : Type w} {init : γ} {f : β → γ → n (ForInStep γ)} :
+    (e : Lean.CanonicalEquivalence α' α) {it : IterM (α := α') m β} {γ : Type w} {init : γ} {f : β → γ → n (ForInStep γ)} :
     letI : Iterator α' m β := Iterator.ofEquiv e i
     ∀ [IteratorLoop α' m n] [LawfulIteratorLoop α' m n],
-      ForIn.forIn it init f = ForIn.forIn (it.mapState e.invFun) init f := by
+      ForIn.forIn it init f = ForIn.forIn (it.mapState e.toFun) init f := by
   letI : Iterator α' m β := Iterator.ofEquiv e i
   haveI : Finite α' m := Finite.ofEquiv e
   intro _ _
@@ -101,10 +101,10 @@ theorem IterM.forIn_ofEquiv {n : Type w → Type w''} [Monad n] [LawfulMonad n]
     simp only [PlausibleIterStep.ofEquiv]
     apply bind_congr
     intro r
-    cases r <;> simp [ihy (it' := it'.mapState e.toFun) (out := out)
+    cases r <;> simp [ihy (it' := it'.mapState e.invFun) (out := out)
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
   | .skip it' h =>
-    simp [PlausibleIterStep.ofEquiv, ihs (it' := it'.mapState e.toFun)
+    simp [PlausibleIterStep.ofEquiv, ihs (it' := it'.mapState e.invFun)
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
   | .done h => simp [PlausibleIterStep.ofEquiv]
 
