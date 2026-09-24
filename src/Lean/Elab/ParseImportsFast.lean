@@ -28,9 +28,9 @@ structure State where
   importAll     : Bool := false
   deriving Inhabited
 
-@[expose] def Parser := String → State → State
+newtype Parser := String → State → State with run
 
-@[inline] def skip : Parser := fun _ s => s
+@[inline] def skip : Parser := .mk fun _ s => s
 
 instance : Inhabited Parser := ⟨skip⟩
 
@@ -52,7 +52,7 @@ def State.mkEOIError (s : State) : State :=
 @[inline] def State.next' (s : State) (input : String) (pos : String.Pos.Raw) (h : ¬ pos.atEnd input) : State :=
   { s with pos := pos.next' input h }
 
-partial def finishCommentBlock (nesting : Nat) : Parser := fun input s =>
+partial def finishCommentBlock (nesting : Nat) : Parser := .mk fun input s =>
   let input := input
   let i     := s.pos
   if h : i.atEnd input then eoi s
@@ -65,47 +65,47 @@ partial def finishCommentBlock (nesting : Nat) : Parser := fun input s =>
         let curr := i.get' input h
         if curr == '/' then -- "-/" end of comment
           if nesting == 1 then s.next input i
-          else finishCommentBlock (nesting-1) input (s.next' input i h)
+          else (finishCommentBlock (nesting-1)).run input (s.next' input i h)
         else
-          finishCommentBlock nesting input (s.setPos i)
+          (finishCommentBlock nesting).run input (s.setPos i)
     else if curr == '/' then
       if h : i.atEnd input then eoi s
       else
         let curr := i.get' input h
-        if curr == '-' then finishCommentBlock (nesting+1) input (s.next' input i h)
-        else finishCommentBlock nesting input (s.setPos i)
-    else finishCommentBlock nesting input (s.setPos i)
+        if curr == '-' then (finishCommentBlock (nesting+1)).run input (s.next' input i h)
+        else (finishCommentBlock nesting).run input (s.setPos i)
+    else (finishCommentBlock nesting).run input (s.setPos i)
 where
   eoi s := s.mkError "unterminated comment"
 
-@[specialize] partial def takeUntil (p : Char → Bool) : Parser := fun input s =>
+@[specialize] partial def takeUntil (p : Char → Bool) : Parser := .mk fun input s =>
   let i := s.pos
   if h : i.atEnd input then s
   else if p (i.get' input h) then s
-  else takeUntil p input (s.next' input i h)
+  else (takeUntil p).run input (s.next' input i h)
 
 @[inline] def takeWhile (p : Char → Bool) : Parser :=
   takeUntil (fun c => !p c)
 
-@[inline] def andthen (p q : Parser) : Parser := fun input s =>
-  let s := p input s
-  if s.error? matches some .. then s else q input s
+@[inline] def andthen (p q : Parser) : Parser := .mk fun input s =>
+  let s := p.run input s
+  if s.error? matches some .. then s else q.run input s
 
 instance : AndThen Parser where
   andThen p q := andthen p (q ())
 
-partial def whitespace : Parser := fun input s =>
+partial def whitespace : Parser := .mk fun input s =>
   let i := s.pos
   if h : i.atEnd input then s
   else
     let curr := i.get' input h
     if curr == '\t' then
       s.mkError "tabs are not allowed; please configure your editor to expand them"
-    else if curr.isWhitespace then whitespace input (s.next input i)
+    else if curr.isWhitespace then whitespace.run input (s.next input i)
     else if curr == '-' then
       let i    := i.next' input h
       let curr := i.get input
-      if curr == '-' then andthen (takeUntil (fun c => c = '\n')) whitespace input (s.next input i)
+      if curr == '-' then (andthen (takeUntil (fun c => c = '\n')) whitespace).run input (s.next input i)
       else s
     else if curr == '/' then
       let i        := i.next' input h
@@ -114,27 +114,27 @@ partial def whitespace : Parser := fun input s =>
         let i    := i.next input
         let curr := i.get input
         if curr == '-' || curr == '!' then s -- "/--" and "/-!" doc comment are actual tokens
-        else andthen (finishCommentBlock 1) whitespace input (s.next input i)
+        else (andthen (finishCommentBlock 1) whitespace).run input (s.next input i)
       else s
     else s
 
-@[inline] partial def keywordCore (k : String) (failure : Parser) (success : Parser) : Parser := fun input s =>
+@[inline] partial def keywordCore (k : String) (failure : Parser) (success : Parser) : Parser := .mk fun input s =>
   let rec @[specialize] go (i j : String.Pos.Raw) : State :=
     if h₁ : i.atEnd k then
-      success input <| whitespace input (s.setPos j)
+      success.run input <| whitespace.run input (s.setPos j)
     else if h₂ : j.atEnd input then
-      failure input s
+      failure.run input s
     else
       let curr₁ := i.get' k h₁
       let curr₂ := j.get' input h₂
       if curr₁ != curr₂ then
-        failure input s
+        failure.run input s
       else
         go (i.next' k h₁) (j.next' input h₂)
   go 0 s.pos
 
 @[inline] def keyword (k : String) : Parser :=
-  keywordCore k (fun _ s => s.mkError s!"`{k}` expected") skip
+  keywordCore k (.mk fun _ s => s.mkError s!"`{k}` expected") skip
 
 @[inline] def isIdCont : String → State → Bool := fun input s =>
   let i := s.pos
@@ -158,10 +158,10 @@ def State.pushImport (i : Import) (s : State) : State :=
 @[inline] def isIdRestFast (c : Char) : Bool :=
   c.isAlphanum || (c != '.' && c != '\n' && c != ' ' && isIdRestCold c)
 
-partial def moduleIdent : Parser := fun input s =>
-  let finalize (module : Name) : Parser := fun input s =>
+partial def moduleIdent : Parser := .mk fun input s =>
+  let finalize (module : Name) : Parser := .mk fun input s =>
     let imp := { module, isMeta := s.isMeta, importAll := s.importAll, isExported := s.isExported }
-    let s := whitespace input (s.pushImport imp)
+    let s := whitespace.run input (s.pushImport imp)
     {s with isMeta := false, importAll := false, isExported := !s.isModule}
   let rec parse (module : Name) (s : State) :=
     let i := s.pos
@@ -171,7 +171,7 @@ partial def moduleIdent : Parser := fun input s =>
       let curr := i.get' input h
       if isIdBeginEscape curr then
         let startPart := i.next' input h
-        let s         := takeUntil isIdEndEscape input (s.setPos startPart)
+        let s         := (takeUntil isIdEndEscape).run input (s.setPos startPart)
         if h : s.pos.atEnd input then
           s.mkError "unterminated identifier escape"
         else
@@ -182,53 +182,53 @@ partial def moduleIdent : Parser := fun input s =>
             let s := s.next input s.pos
             parse module s
           else
-            finalize module input s
+            (finalize module).run input s
       else if isIdFirst curr then
         let startPart := i
-        let s         := takeWhile isIdRestFast input (s.next' input i h)
+        let s         := (takeWhile isIdRestFast).run input (s.next' input i h)
         let stopPart  := s.pos
         let module    := .str module (String.Pos.Raw.extract input startPart stopPart)
         if isIdCont input s then
           let s := s.next input s.pos
           parse module s
         else
-          finalize module input s
+          (finalize module).run input s
       else
         s.mkError "expected identifier"
   parse .anonymous s
 
-@[inline] def atomic (p : Parser) : Parser := fun input s =>
+@[inline] def atomic (p : Parser) : Parser := .mk fun input s =>
   let pos := s.pos
-  let s := p input s
+  let s := p.run input s
   if s.error? matches some .. then {s with pos} else s
 
-@[specialize] partial def manyImports (p : Parser) : Parser := fun input s =>
+@[specialize] partial def manyImports (p : Parser) : Parser := .mk fun input s =>
   let pos := s.pos
-  let s := p input s
+  let s := p.run input s
   if s.error? matches some .. then
     if s.pos == pos then s.clearError else s
   else if s.badModifier then
     let err := "cannot use 'public', 'meta', or 'all' without 'module'"
     {s with pos, badModifier := false, error? := some err}
   else
-    manyImports p input s
+    (manyImports p).run input s
 
-def setIsModule (isModule : Bool) : Parser := fun _ s =>
+def setIsModule (isModule : Bool) : Parser := .mk fun _ s =>
   { s with isModule, isExported := !isModule }
 
-def setMeta : Parser := fun _ s =>
+def setMeta : Parser := .mk fun _ s =>
   if s.isModule then
     { s with isMeta := true }
   else
     { s with badModifier := true }
 
-def setExported : Parser := fun _ s =>
+def setExported : Parser := .mk fun _ s =>
   if s.isModule then
     { s with isExported := true }
   else
     { s with badModifier := true }
 
-def setImportAll : Parser := fun _ s =>
+def setImportAll : Parser := .mk fun _ s =>
   if s.isModule then
     { s with importAll := true }
   else
@@ -236,7 +236,7 @@ def setImportAll : Parser := fun _ s =>
 
 def main : Parser :=
   keywordCore "module" (setIsModule false) (setIsModule true) >>
-  keywordCore "prelude" (fun _ s => (s.pushImport `Init).pushImport { module := `Init, isMeta := true }) skip >>
+  keywordCore "prelude" (.mk fun _ s => (s.pushImport `Init).pushImport { module := `Init, isMeta := true }) skip >>
   manyImports (atomic (keywordCore "public" skip setExported >>
     keywordCore "meta" skip setMeta >>
     keyword "import") >>
@@ -249,7 +249,7 @@ end ParseImports
 Simpler and faster version of `parseImports`. We use it to implement Lake.
 -/
 def parseImports' (input : String) (fileName : String) : IO ModuleHeader := do
-  let s := ParseImports.main input (ParseImports.whitespace input {})
+  let s := ParseImports.main.run input (ParseImports.whitespace.run input {})
   let some err := s.error?
     | return { s with }
   let fileMap := input.toFileMap
