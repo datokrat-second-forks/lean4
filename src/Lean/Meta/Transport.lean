@@ -16,16 +16,17 @@ public section
 /-!
 # Transport along equivalences
 
-`@[transport]` collects declarations that conclude in `Lean.CanonicalEquivalence α β`.
-A `newtype` registers `Foo.equivDef : Lean.CanonicalEquivalence Int Foo` automatically.
+`@[transport]` collects declarations that conclude in `Lean.CanonicalEquivalence α β`. Like a simp
+lemma or an `eq_def` theorem, such a declaration unfolds its left-hand side `α` towards `β`:
+a `newtype` registers `Foo.equivDef : Lean.CanonicalEquivalence Foo Int` automatically.
 Congruences such as `LE.canonicalCongr` accept canonical equivalences as explicit arguments.
 Congruences for type constructors can also accept families
 `∀ α, Lean.CanonicalEquivalence (m α) (n α)`.
 
-`mkTransportEquiv src tgt` assembles `Lean.CanonicalEquivalence src tgt` from these declarations.
+`mkTransportEquiv lhs rhs` assembles `Lean.CanonicalEquivalence lhs rhs` from these declarations.
 It unifies conclusions with the goal, solves equivalence arguments recursively (families under
 their binders), synthesizes instance arguments, and chains through intermediate types with
-`Lean.CanonicalEquivalence.trans`.
+`Lean.CanonicalEquivalence.trans`. An instance of `rhs` is moved to `lhs` along `invFun`.
 
 Types are identified by `isDefEq` at implicit transparency, which never unfolds the irreducible
 definition a `newtype` is; unlike `inferInstanceAs`'s instance wrapping this never depends on the
@@ -33,8 +34,9 @@ kernel unfolding what the elaborator may not. A congruence for a lawful class su
 concludes at the transported instance of its parent class and therefore only applies to an
 instance definitionally equal to it.
 
-Equivalences are only used in their stated direction, like unfolding: `Foo.equivDef` moves
-instances from `Int` to `Foo`, but not back, and not between two `newtype`s of `Int`.
+Equivalences are only used in their stated direction, like unfolding: `Foo.equivDef` unfolds `Foo`
+to `Int` and so moves instances from `Int` to `Foo`, but not back, and not between two `newtype`s
+of `Int`.
 -/
 
 namespace Lean.Meta
@@ -143,63 +145,63 @@ private partial def applyDecl (declName : Name) (goal : Expr) (fuel : Nat) : Met
   instantiateMVars (mkAppN decl args)
 
 /--
-Builds `Lean.CanonicalEquivalence src tgt`, trying reflexivity, a direct `@[transport]` match,
-and a chain through an intermediate `mid` with `Lean.CanonicalEquivalence mid tgt` registered.
+Builds `Lean.CanonicalEquivalence lhs rhs`, trying reflexivity, a direct `@[transport]` match,
+and a chain through an intermediate `mid` with `Lean.CanonicalEquivalence lhs mid` registered.
 The `fuel` parameter bounds recursion.
 -/
-partial def mkEquiv (src tgt : Expr) (fuel : Nat) : MetaM Expr := do
-  let src ← instantiateMVars src
-  let tgt ← instantiateMVars tgt
-  withTraceNode `Meta.transport (fun _ => return m!"Lean.CanonicalEquivalence {src} {tgt}") do
-  if ← isDefEq src tgt then
-    return ← mkAppM ``Lean.CanonicalEquivalence.refl #[src]
+partial def mkEquiv (lhs rhs : Expr) (fuel : Nat) : MetaM Expr := do
+  let lhs ← instantiateMVars lhs
+  let rhs ← instantiateMVars rhs
+  withTraceNode `Meta.transport (fun _ => return m!"Lean.CanonicalEquivalence {lhs} {rhs}") do
+  if ← isDefEq lhs rhs then
+    return ← mkAppM ``Lean.CanonicalEquivalence.refl #[lhs]
   if fuel == 0 then
     throw <| .internal depthExceptionId
-  let goal ← mkAppM ``Lean.CanonicalEquivalence #[src, tgt]
+  let goal ← mkAppM ``Lean.CanonicalEquivalence #[lhs, rhs]
   let dt := transportExt.getState (← getEnv)
   match ← firstSuccess (← dt.getUnify goal) (applyDecl · goal (fuel - 1)) with
   | .ok e => return e
   | .error directError =>
   let mid ← mkFreshExprMVar (mkSort (← mkFreshLevelMVar))
-  let midGoal ← mkAppM ``Lean.CanonicalEquivalence #[mid, tgt]
+  let midGoal ← mkAppM ``Lean.CanonicalEquivalence #[lhs, mid]
   let chained ← firstSuccess (← dt.getUnify midGoal) fun declName => do
-    let e₂ ← applyDecl declName midGoal (fuel - 1)
+    let e₁ ← applyDecl declName midGoal (fuel - 1)
     let mid ← instantiateMVars mid
-    if ← isDefEq mid tgt then
+    if ← isDefEq mid lhs then
       throwError "`{.ofConstName declName}` does not lead anywhere"
-    if ← isDefEq src mid then
-      return e₂
-    let e₁ ← mkEquiv src mid (fuel - 1)
+    if ← isDefEq mid rhs then
+      return e₁
+    let e₂ ← mkEquiv mid rhs (fuel - 1)
     mkAppM ``Lean.CanonicalEquivalence.trans #[e₁, e₂]
   match chained with
   | .ok e => return e
   | .error _ =>
-    throwError m!"failed to transport{indentExpr src}\nto{indentExpr tgt}" ++ .note directError
+    throwError m!"failed to transport{indentExpr rhs}\nto{indentExpr lhs}" ++ .note directError
 
 end
 
 end Transport
 
-/-- Constructs an equivalence `Lean.CanonicalEquivalence src tgt` from the `@[transport]` declarations. -/
-def mkTransportEquiv (src tgt : Expr) : MetaM Expr := do
+/-- Constructs an equivalence `Lean.CanonicalEquivalence lhs rhs` from the `@[transport]` declarations. -/
+def mkTransportEquiv (lhs rhs : Expr) : MetaM Expr := do
   unless (← getEnv).contains ``Lean.CanonicalEquivalence do
     throwError "`Lean.CanonicalEquivalence` is not available, transporting requires `Init.Data.Function`"
   -- Transport cannot rewrap fields like `inferInstanceAs`, so it unfolds no more than elaboration
   -- does implicitly.
   withImplicit do
   try
-    Transport.mkEquiv src tgt (fuel := 8)
+    Transport.mkEquiv lhs rhs (fuel := 8)
   catch ex =>
     if let .internal id _ := ex then
       if id == Transport.depthExceptionId then
-        throwError "failed to transport{indentExpr src}\nto{indentExpr tgt}\nbecause the search \
+        throwError "failed to transport{indentExpr rhs}\nto{indentExpr lhs}\nbecause the search \
           exceeded its depth; the `@[transport]` declarations may form a cycle"
     throw ex
 
-/-- Moves `e` to type `tgt` along `mkTransportEquiv`. -/
+/-- Moves `e` to type `tgt` along `mkTransportEquiv tgt (← inferType e)`. -/
 def transport (e tgt : Expr) : MetaM Expr := do
-  let equiv ← mkTransportEquiv (← inferType e) tgt
-  mkAppM ``Lean.CanonicalEquivalence.toFun #[equiv, e]
+  let equiv ← mkTransportEquiv tgt (← inferType e)
+  mkAppM ``Lean.CanonicalEquivalence.invFun #[equiv, e]
 
 /--
 Moves an instance of `src` to `tgt` along `mkTransportEquiv`. The equivalence is constructed first,
@@ -207,8 +209,8 @@ so that metavariables in `src` (such as `_` placeholders in the argument of `inf
 instantiated by unification with the registered declarations before the instance is synthesized.
 -/
 def transportInstance (src tgt : Expr) : MetaM Expr := do
-  let equiv ← mkTransportEquiv src tgt
+  let equiv ← mkTransportEquiv tgt src
   let inst ← synthInstance (← instantiateMVars src)
-  mkAppM ``Lean.CanonicalEquivalence.toFun #[equiv, inst]
+  mkAppM ``Lean.CanonicalEquivalence.invFun #[equiv, inst]
 
 end Lean.Meta

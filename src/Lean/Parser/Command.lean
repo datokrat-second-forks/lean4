@@ -333,7 +333,7 @@ Modifiers, parameters, universe parameters, section variables and auto-bound imp
 exactly as for `def`; as for `structure`, explicit parameters become implicit in the constructor
 and projector.
 
-The equivalence `N.equivDef : Lean.CanonicalEquivalence ty N` is registered with `@[transport]`, so an optional
+The equivalence `N.equivDef : Lean.CanonicalEquivalence N ty` is registered with `@[transport]`, so an optional
 `deriving C, D` clause, as well as `deriving instance … for N` and `inferInstanceAs`, obtain
 instances for `N` by transporting those of `ty` along it (see `Lean.Meta.transport`).
 

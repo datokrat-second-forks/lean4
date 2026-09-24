@@ -57,15 +57,15 @@ private def addNewtypeCtorProj (declName ctorName projName equivName fieldName :
       addIdentity projName `self self underlying
       let ctor := mkAppN (mkConst ctorName us) params
       let proj := mkAppN (mkConst projName us) params
-      -- Both inverse laws hold by virtual iota resp. eta.
-      let leftInv ← withLocalDeclD fieldName underlying fun a => do mkLambdaFVars #[a] (← mkEqRefl a)
-      let rightInv ← withLocalDeclD `self self fun x => do mkLambdaFVars #[x] (← mkEqRefl x)
-      let value ← mkAppM ``Lean.CanonicalEquivalence.mk #[ctor, proj, leftInv, rightInv]
+      -- Both inverse laws hold by virtual eta resp. iota.
+      let leftInv ← withLocalDeclD `self self fun x => do mkLambdaFVars #[x] (← mkEqRefl x)
+      let rightInv ← withLocalDeclD fieldName underlying fun a => do mkLambdaFVars #[a] (← mkEqRefl a)
+      let value ← mkAppM ``Lean.CanonicalEquivalence.mk #[proj, ctor, leftInv, rightInv]
       let type ← mkForallFVars params (← inferType value)
       let value ← mkLambdaFVars params value
       let decl := .defnDecl (← mkDefinitionValInferringUnsafe equivName info.levelParams type value .abbrev)
       addDecl decl (forceExpose := exposed)
-      -- Reducible so that `N.equivDef.toFun`/`.invFun` are seen as the constructor/projector.
+      -- Reducible so that `N.equivDef.toFun`/`.invFun` are seen as the projector/constructor.
       setReducibilityStatus equivName .reducible
       -- `macro_inline` substitutes the structure literal before compilation, so a transported
       -- instance's `N.equivDef.toFun`/`.invFun` fold to the identities; `inline` would only reach
