@@ -46,30 +46,47 @@ instance of its parent class and hence applies to that instance only.
     show i.lt (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = i.lt x y by
       rw [e.right_inv x, e.right_inv y]
 
-@[transport] protected abbrev DecidableLE.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : LE α] :
-    Lean.CanonicalEquivalence (@DecidableLE α i) (@DecidableLE β ((LE.canonicalCongr e).toFun i)) where
-  toFun d x y := d (e.invFun x) (e.invFun y)
-  invFun d x y := decidable_of_iff (i.le (e.invFun (e.toFun x)) (e.invFun (e.toFun y))) (by
-    rw [e.left_inv x, e.left_inv y])
-  left_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
-  right_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
+/--
+Transports a dependent function along an equivalence of its domain and equivalences of its
+codomains. Classes such as `DecidableEq` and `DecidableLE` are Π-types and transport through it.
+-/
+@[transport] protected abbrev Pi.canonicalCongr {β : α → Sort v} {β' : α' → Sort v'}
+    (e : Lean.CanonicalEquivalence α α')
+    (f : ∀ a', Lean.CanonicalEquivalence (β (e.invFun a')) (β' a')) :
+    Lean.CanonicalEquivalence ((a : α) → β a) ((a' : α') → β' a') where
+  toFun g a' := (f a').toFun (g (e.invFun a'))
+  invFun h a := cast (congrArg β (e.left_inv a)) ((f (e.toFun a)).invFun (h (e.toFun a)))
+  left_inv g := funext fun a =>
+    show cast _ ((f (e.toFun a)).invFun ((f (e.toFun a)).toFun (g (e.invFun (e.toFun a))))) = g a by
+      rw [(f _).left_inv]
+      exact (fun x (h : x = a) => by subst h; rfl : ∀ x (h : x = a), cast (congrArg β h) (g x) = g a)
+        _ (e.left_inv a)
+  right_inv h := funext fun a' =>
+    (fun y (hy : y = a') (p : e.invFun y = e.invFun a') => by
+        subst hy; rw [cast_eq]; exact (f y).right_inv (h y) :
+      ∀ y (hy : y = a') (p : e.invFun y = e.invFun a'),
+        (f a').toFun (cast (congrArg β p) ((f y).invFun (h y))) = h a')
+      _ (e.right_inv a') (e.left_inv (e.invFun a'))
 
-@[transport] protected abbrev DecidableLT.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : LT α] :
-    Lean.CanonicalEquivalence (@DecidableLT α i) (@DecidableLT β ((LT.canonicalCongr e).toFun i)) where
-  toFun d x y := d (e.invFun x) (e.invFun y)
-  invFun d x y := decidable_of_iff (i.lt (e.invFun (e.toFun x)) (e.invFun (e.toFun y))) (by
-    rw [e.left_inv x, e.left_inv y])
-  left_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
-  right_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
+@[transport] protected abbrev Decidable.canonicalCongr {p q : Prop}
+    (e : Lean.CanonicalEquivalence p q) :
+    Lean.CanonicalEquivalence (Decidable p) (Decidable q) where
+  toFun d := @decidable_of_iff q p ⟨e.toFun, e.invFun⟩ d
+  invFun d := @decidable_of_iff p q ⟨e.invFun, e.toFun⟩ d
+  left_inv _ := Subsingleton.elim _ _
+  right_inv _ := Subsingleton.elim _ _
 
-@[transport] protected abbrev DecidableEq.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
-    Lean.CanonicalEquivalence (DecidableEq α) (DecidableEq β) where
-  toFun _ x y :=
-    decidable_of_iff (e.invFun x = e.invFun y) ⟨fun h => e.invFun_injective h, congrArg e.invFun⟩
-  invFun _ x y :=
-    decidable_of_iff (e.toFun x = e.toFun y) ⟨fun h => e.toFun_injective h, congrArg e.toFun⟩
-  left_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
-  right_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
+/--
+Relates equality on both sides of an equivalence, e.g. for transporting `DecidableEq`. The
+conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then checked by `rfl`.
+-/
+@[transport] protected abbrev Eq.canonicalCongr (e : Lean.CanonicalEquivalence α β) {a b : α}
+    {a' b' : β} (ha : e.invFun a' = a) (hb : e.invFun b' = b) :
+    Lean.CanonicalEquivalence (a = b) (a' = b') where
+  toFun h := e.invFun_injective (ha.trans (h.trans hb.symm))
+  invFun h := ha.symm.trans ((congrArg e.invFun h).trans hb)
+  left_inv _ := rfl
+  right_inv _ := rfl
 
 @[transport] protected abbrev Inhabited.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Inhabited α) (Inhabited β) where
