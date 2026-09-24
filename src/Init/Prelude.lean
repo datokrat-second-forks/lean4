@@ -5241,10 +5241,7 @@ def Syntax.node8 (info : SourceInfo) (kind : SyntaxNodeKind) (a₁ a₂ a₃ a�
 Singleton `SyntaxNodeKinds` are extremely common. They are written as name literals, rather than as
 lists; list syntax is required only for empty or non-singleton sets of kinds.
 -/
-@[expose, implicit_reducible] def SyntaxNodeKinds := List SyntaxNodeKind
-
-/-- Interprets a list of kinds as `SyntaxNodeKinds`. -/
-@[expose, reducible] def SyntaxNodeKinds.mk (ks : List SyntaxNodeKind) : SyntaxNodeKinds := ks
+newtype SyntaxNodeKinds := List SyntaxNodeKind with toList
 
 /--
 Typed syntax, which tracks the potential kinds of the `Syntax` it contains.
@@ -5343,7 +5340,7 @@ in `s!"value = {x}"`.
 abbrev interpolatedStrKind : SyntaxNodeKind := `interpolatedStrKind
 
 /-- Creates an info-less node of the given kind and children. -/
-@[inline, expose] def mkNode (k : SyntaxNodeKind) (args : Array Syntax) : TSyntax (.cons k .nil) :=
+@[inline, expose] def mkNode (k : SyntaxNodeKind) (args : Array Syntax) : TSyntax (.mk (.cons k .nil)) :=
   ⟨Syntax.node SourceInfo.none k args⟩
 
 /-- Creates an info-less `nullKind` node with the given children, if any. -/
