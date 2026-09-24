@@ -22,8 +22,9 @@ namespace Lean.Elab.Command
 Opaque linter state. Similar to `EnvExtensionState` for environment extensions.
 -/
 opaque LinterStateSpec : (α : Type) × Inhabited α := ⟨Unit, ⟨()⟩⟩
-@[expose] def LinterState : Type := LinterStateSpec.fst
-instance : Inhabited LinterState := LinterStateSpec.snd
+structure LinterState : Type where
+  val : LinterStateSpec.fst
+instance : Inhabited LinterState := ⟨⟨LinterStateSpec.snd.default⟩⟩
 
 structure State where
   env            : Environment
@@ -468,8 +469,11 @@ Catches and logs exceptions occurring in `x`. Unlike `try catch` in `CommandElab
 catches interrupt exceptions as well and thus is intended for use at the top level of elaboration.
 Interrupt and abort exceptions are caught but not logged.
 -/
-@[inline] def withLoggingExceptions (x : CommandElabM Unit) : CommandElabM Unit := fun ctx ref =>
-  EIO.catchExceptions (withLogging x ctx ref) (fun _ => pure ())
+@[inline] def withLoggingExceptions (x : CommandElabM Unit) : CommandElabM Unit :=
+  .mk fun ctx => .mk fun ref =>
+    -- the ascription lets `MonadLog CommandElabM` be found
+    EIO.catchExceptions (ReaderT.run ((withLogging x : CommandElabM Unit).run ctx) ref)
+      (fun _ => pure ())
 
 @[inherit_doc Core.wrapAsync]
 def wrapAsync {α β : Type} (act : α → CommandElabM β) (cancelTk? : Option IO.CancelToken) :

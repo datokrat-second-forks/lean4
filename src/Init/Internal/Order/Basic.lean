@@ -8,6 +8,7 @@ module
 prelude
 
 public import Init.System.IO  -- for `MonoBind` instance
+public import Init.Transport
 import all Init.Control.Except  -- for `MonoBind` instance
 import all Init.Control.StateRef  -- for `MonoBind` instance
 import all Init.Control.Option  -- for `MonoBind` instance
@@ -91,6 +92,33 @@ This is intended to be used in the construction of the strong induction principl
 
 end PartialOrder
 
+protected theorem PartialOrder.ext {α : Sort u} {i j : PartialOrder α} (h : i.rel = j.rel) :
+    i = j := by
+  cases i; cases j; cases h; rfl
+
+/-- Transfers a partial order along an equivalence, comparing elements of `α` through `e.toFun`. -/
+protected abbrev PartialOrder.ofEquiv {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : PartialOrder β) :
+    PartialOrder α where
+  rel x y := i.rel (e.toFun x) (e.toFun y)
+  rel_refl := i.rel_refl
+  rel_trans := i.rel_trans
+  rel_antisymm h₁ h₂ := e.toFun_injective (i.rel_antisymm h₁ h₂)
+
+theorem PartialOrder.ofEquiv_rel {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : PartialOrder β)
+    (x y : α) : @PartialOrder.rel α (PartialOrder.ofEquiv e i) x y = i.rel (e.toFun x) (e.toFun y) :=
+  rfl
+
+@[transport] protected abbrev PartialOrder.canonicalCongr {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (PartialOrder α) (PartialOrder β) where
+  toFun := PartialOrder.ofEquiv e.symm
+  invFun := PartialOrder.ofEquiv e
+  left_inv i := PartialOrder.ext <| funext fun x => funext fun y =>
+    show i.rel (e.invFun (e.toFun x)) (e.invFun (e.toFun y)) = i.rel x y by
+      rw [e.left_inv x, e.left_inv y]
+  right_inv i := PartialOrder.ext <| funext fun x => funext fun y =>
+    show i.rel (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = i.rel x y by
+      rw [e.right_inv x, e.right_inv y]
+
 section CCPO
 
 open PartialOrder
@@ -142,6 +170,32 @@ theorem bot_le (x : α) : ⊥ ⊑ x := by
   intro x y; contradiction
 
 end CCPO
+
+protected theorem CCPO.ext {α : Sort u} {i j : CCPO α} (h : i.toPartialOrder = j.toPartialOrder) :
+    i = j := by
+  cases i; cases j; cases h; rfl
+
+/-- Transfers a chain-complete partial order along an equivalence; see `PartialOrder.ofEquiv`. -/
+protected abbrev CCPO.ofEquiv {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) (i : CCPO β) : CCPO α where
+  toPartialOrder := PartialOrder.ofEquiv e i.toPartialOrder
+  has_csup {c} hc := by
+    have ⟨s, hs⟩ := i.has_csup (c := fun x => c (e.invFun x)) fun x y hx hy => by
+      have h : i.rel (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) ∨
+          i.rel (e.toFun (e.invFun y)) (e.toFun (e.invFun x)) := hc _ _ hx hy
+      rwa [e.right_inv x, e.right_inv y] at h
+    refine ⟨e.invFun s, fun x => ?_⟩
+    show i.rel (e.toFun (e.invFun s)) (e.toFun x) ↔ ∀ y, c y → i.rel (e.toFun y) (e.toFun x)
+    rw [e.right_inv s]
+    exact (hs (e.toFun x)).trans
+      ⟨fun h y hy => h (e.toFun y) (by show c (e.invFun (e.toFun y)); rwa [e.left_inv y]),
+       fun h y hy => by have := h (e.invFun y) hy; rwa [e.right_inv y] at this⟩
+
+@[transport] protected abbrev CCPO.canonicalCongr {α : Sort u} {β : Sort v} (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (CCPO α) (CCPO β) where
+  toFun := CCPO.ofEquiv e.symm
+  invFun := CCPO.ofEquiv e
+  left_inv i := CCPO.ext ((PartialOrder.canonicalCongr e).left_inv i.toPartialOrder)
+  right_inv i := CCPO.ext ((PartialOrder.canonicalCongr e).right_inv i.toPartialOrder)
 
 
 section CompleteLattice
@@ -993,6 +1047,48 @@ class MonoBind (m : Type u → Type v) [Bind m] [∀ α, PartialOrder (m α)] wh
   bind_mono_left {a₁ a₂ : m α} {f : α → m β} (h : a₁ ⊑ a₂) : a₁ >>= f ⊑ a₂ >>= f
   bind_mono_right {a : m α} {f₁ f₂ : α → m β} (h : ∀ x, f₁ x ⊑ f₂ x) : a >>= f₁ ⊑ a >>= f₂
 
+@[transport] protected abbrev MonoBind.canonicalCongr {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
+    [b : Bind n] [j : ∀ α, PartialOrder (n α)] :
+    Lean.CanonicalEquivalence
+      (@MonoBind m (Bind.ofEquiv e b) fun α => PartialOrder.ofEquiv (e α) (j α))
+      (@MonoBind n b j) where
+  toFun h :=
+    have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+    @MonoBind.mk n b j
+    (fun {_ _ a₁ a₂ f} h₁₂ => by
+      have h₁₂' : (j _).rel ((e _).toFun ((e _).invFun a₁)) ((e _).toFun ((e _).invFun a₂)) := by
+        rw [hl, hl]; exact h₁₂
+      have this := h.bind_mono_left (a₁ := (e _).invFun a₁) (a₂ := (e _).invFun a₂)
+        (f := fun a => (e _).invFun (f a)) h₁₂'
+      rw [PartialOrder.ofEquiv_rel, Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
+      simp only [hl] at this
+      exact this)
+    (fun {_ _ a f₁ f₂} h₁₂ => by
+      have this := h.bind_mono_right (a := (e _).invFun a) (f₁ := fun x => (e _).invFun (f₁ x))
+        (f₂ := fun x => (e _).invFun (f₂ x)) fun x => by
+          show (j _).rel ((e _).toFun ((e _).invFun (f₁ x))) ((e _).toFun ((e _).invFun (f₂ x)))
+          rw [hl, hl]; exact h₁₂ x
+      rw [PartialOrder.ofEquiv_rel, Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
+      simp only [hl] at this
+      exact this)
+  invFun h :=
+    have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+    @MonoBind.mk m (Bind.ofEquiv e b) (fun α => PartialOrder.ofEquiv (e α) (j α))
+    (fun {_ _ a₁ a₂ f} h₁₂ => by
+      show (j _).rel ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a₁ f))
+        ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a₂ f))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact h.bind_mono_left (a₁ := (e _).toFun a₁) (a₂ := (e _).toFun a₂)
+        (f := fun a => (e _).toFun (f a)) h₁₂)
+    (fun {_ _ a f₁ f₂} h₁₂ => by
+      show (j _).rel ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₁))
+        ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₂))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact h.bind_mono_right (a := (e _).toFun a) (f₁ := fun x => (e _).toFun (f₁ x))
+        (f₂ := fun x => (e _).toFun (f₂ x)) h₁₂)
+  left_inv _ := rfl
+  right_inv _ := rfl
+
 @[partial_fixpoint_monotone]
 theorem monotone_bind
     (m : Type u → Type v) [Bind m] [∀ α, PartialOrder (m α)] [MonoBind m]
@@ -1024,8 +1120,13 @@ theorem Option.admissible_eq_some (P : Prop) (y : α) :
   change admissible fun x : FlatOrder none => x = .mk _ (some y) → P
   apply admissible_flatOrder; simp
 
-instance [inst : ∀ α, PartialOrder (m α)] : PartialOrder (ExceptT ε m α) := inst _
-instance [inst : ∀ α, CCPO (m α)] : CCPO (ExceptT ε m α) := inst _
+-- Universes pinned explicitly: auto-bound ones would make `Except ε α` live in `max u_1 u_2`.
+instance {ε : Type u} {m : Type u → Type v} {α : Type u} [inst : ∀ α, PartialOrder (m α)] :
+    PartialOrder (ExceptT ε m α) :=
+  inferInstanceAs (PartialOrder (m (Except ε α)))
+instance {ε : Type u} {m : Type u → Type v} {α : Type u} [inst : ∀ α, CCPO (m α)] :
+    CCPO (ExceptT ε m α) :=
+  inferInstanceAs (CCPO (m (Except ε α)))
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (ExceptT ε m) where
   bind_mono_left h₁₂ := by
     apply MonoBind.bind_mono_left (m := m)
@@ -1044,8 +1145,9 @@ theorem monotone_exceptTRun [PartialOrder γ]
     monotone (fun (x : γ) => ExceptT.run (f x)) :=
   hmono
 
-instance [inst : ∀ α, PartialOrder (m α)] : PartialOrder (OptionT m α) := inst _
-instance [inst : ∀ α, CCPO (m α)] : CCPO (OptionT m α) := inst _
+instance [inst : ∀ α, PartialOrder (m α)] : PartialOrder (OptionT m α) :=
+  inferInstanceAs (PartialOrder (m (Option α)))
+instance [inst : ∀ α, CCPO (m α)] : CCPO (OptionT m α) := inferInstanceAs (CCPO (m (Option α)))
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (OptionT m) where
   bind_mono_left h₁₂ := by
     apply MonoBind.bind_mono_left (m := m)
@@ -1064,8 +1166,9 @@ theorem monotone_optionTRun [PartialOrder γ]
     monotone (fun (x : γ) => OptionT.run (f x)) :=
   hmono
 
-instance [inst : PartialOrder (m α)] : PartialOrder (ReaderT ρ m α) := instOrderPi
-instance [inst : CCPO (m α)] : CCPO (ReaderT ρ m α) := instCCPOPi
+instance [inst : PartialOrder (m α)] : PartialOrder (ReaderT ρ m α) :=
+  inferInstanceAs (PartialOrder (ρ → m α))
+instance [inst : CCPO (m α)] : CCPO (ReaderT ρ m α) := inferInstanceAs (CCPO (ρ → m α))
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (ReaderT ρ m) where
   bind_mono_left h₁₂ := by
     intro x
@@ -1084,8 +1187,10 @@ theorem monotone_readerTRun [PartialOrder γ]
     monotone (fun (x : γ) => ReaderT.run (f x) s) :=
   monotone_apply s _ hmono
 
-instance [inst : PartialOrder (m α)] : PartialOrder (StateRefT' ω σ m α) := instOrderPi
-instance [inst : CCPO (m α)] : CCPO (StateRefT' ω σ m α) := instCCPOPi
+instance [inst : PartialOrder (m α)] : PartialOrder (StateRefT' ω σ m α) :=
+  inferInstanceAs (PartialOrder (ReaderT (ST.Ref ω σ) m α))
+instance [inst : CCPO (m α)] : CCPO (StateRefT' ω σ m α) :=
+  inferInstanceAs (CCPO (ReaderT (ST.Ref ω σ) m α))
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (StateRefT' ω σ m) :=
   inferInstanceAs (MonoBind (ReaderT (ST.Ref ω σ) m))
 
@@ -1098,11 +1203,16 @@ theorem monotone_stateRefT'Run [PartialOrder γ]
   · apply monotone_const
   · refine monotone_of_monotone_apply _ fun ref => ?_
     apply monotone_bind
-    · exact monotone_apply _ _ hmono
+    · exact monotone_readerTRun _ hmono ref
     · apply monotone_const
 
-instance [inst : ∀ α, PartialOrder (m α)] : PartialOrder (StateT σ m α) := instOrderPi
-instance [inst : ∀ α, CCPO (m α)] : CCPO (StateT σ m α) := instCCPOPi
+-- Universes pinned explicitly: auto-bound ones would make `α × σ` live in `max u_1 u_2`.
+instance {σ : Type u} {m : Type u → Type v} {α : Type u} [inst : ∀ α, PartialOrder (m α)] :
+    PartialOrder (StateT σ m α) :=
+  inferInstanceAs (PartialOrder (σ → m (α × σ)))
+instance {σ : Type u} {m : Type u → Type v} {α : Type u} [inst : ∀ α, CCPO (m α)] :
+    CCPO (StateT σ m α) :=
+  inferInstanceAs (CCPO (σ → m (α × σ)))
 instance [Monad m] [∀ α, PartialOrder (m α)] [MonoBind m] : MonoBind (StateT ρ m) where
   bind_mono_left h₁₂ := by
     intro x
@@ -1122,33 +1232,50 @@ theorem monotone_stateTRun [PartialOrder γ]
   monotone_apply s _ hmono
 
 noncomputable def EST.bot [Nonempty ε] : EST ε σ α :=
-  fun s => .error Classical.ofNonempty (Classical.choice ⟨s⟩)
+  .mk fun s => .error Classical.ofNonempty (Classical.choice ⟨s⟩)
 
 -- Essentially
 --   instance [Nonempty ε] : CCPO (EST ε σ α) :=
---     inferInstanceAs (CCPO ((s : _) → FlatOrder (EST.bot s)))
--- but hat would incur a noncomputable on the instance
+--     inferInstanceAs (CCPO ((s : _) → FlatOrder (EST.bot.run s)))
+-- but hat would incur a noncomputable on the instance; the order is transported along the
+-- definitional isomorphism `EST.mk`/`EST.run`
+
+/-- `x` as an element of the pointwise flat order; the inverse of `EST.ofFlat`. -/
+@[expose] noncomputable def EST.toFlat [Nonempty ε] (x : EST ε σ α) :
+    ∀ s : Void σ, FlatOrder ((EST.bot (ε := ε) (σ := σ) (α := α)).run s) :=
+  fun s => x.run s
+
+/-- An element of the pointwise flat order as an `EST`; the inverse of `EST.toFlat`. -/
+@[expose] noncomputable def EST.ofFlat [Nonempty ε]
+    (x : ∀ s : Void σ, FlatOrder ((EST.bot (ε := ε) (σ := σ) (α := α)).run s)) : EST ε σ α :=
+  EST.mk fun s => x s
 
 instance [Nonempty ε] : CCPO (EST ε σ α) where
-  rel := PartialOrder.rel (α := ∀ s, FlatOrder (EST.bot s))
+  rel x y := EST.toFlat x ⊑ EST.toFlat y
   rel_refl := PartialOrder.rel_refl
-  rel_antisymm := PartialOrder.rel_antisymm
+  rel_antisymm {x y} h₁ h₂ :=
+    have h : EST.toFlat x = EST.toFlat y := PartialOrder.rel_antisymm h₁ h₂
+    congrArg EST.mk h
   rel_trans := PartialOrder.rel_trans
-  has_csup hchain := CCPO.has_csup (α := ∀ s, FlatOrder (EST.bot s)) hchain
+  has_csup {c} hchain := by
+    have ⟨f, hf⟩ := CCPO.has_csup (α := ∀ s, FlatOrder ((EST.bot (ε := ε) (σ := σ) (α := α)).run s))
+      (c := fun f => c (EST.ofFlat f)) fun x y hx hy => hchain _ _ hx hy
+    exact ⟨EST.ofFlat f, fun x => (hf (EST.toFlat x)).trans
+      ⟨fun h y hy => h (EST.toFlat y) hy, fun h y hy => h (EST.ofFlat y) hy⟩⟩
 
 instance [Nonempty ε] : MonoBind (EST ε σ) where
   bind_mono_left {_ _ a₁ a₂ f} h₁₂ := by
     intro s
-    specialize h₁₂ s
-    change FlatOrder.rel (a₁.bind f s) (a₂.bind f s)
+    replace h₁₂ : FlatOrder.rel (b := EST.bot.run s) (a₁.run s) (a₂.run s) := h₁₂ s
+    change FlatOrder.rel ((a₁.bind f).run s) ((a₂.bind f).run s)
     simp only [EST.bind]
-    generalize a₁ s = a₁ at h₁₂; generalize a₂ s = a₂ at h₁₂
+    generalize a₁.run s = a₁ at h₁₂; generalize a₂.run s = a₂ at h₁₂
     cases h₁₂
     · exact .bot
     · exact .refl
   bind_mono_right {_ _ a f₁ f₂} h₁₂ := by
     intro w
-    change FlatOrder.rel (a.bind f₁ w) (a.bind f₂ w)
+    change FlatOrder.rel ((a.bind f₁).run w) ((a.bind f₂).run w)
     simp only [EST.bind]
     split
     · apply h₁₂

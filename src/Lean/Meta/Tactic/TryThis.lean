@@ -39,14 +39,14 @@ apply the replacement.
 @[builtin_code_action_provider] private def tryThisProvider : CodeActionProvider := fun params snap => do
   let doc ← readDoc
   pure <| snap.infoTree.foldInfo (init := #[]) fun _ctx info result => Id.run do
-    let .ofCustomInfo { stx, value } := info | result
+    let .ofCustomInfo { stx, value } := info | return result
     let some { edit, codeActionTitle, .. } :=
-      value.get? TryThisInfo | result
-    let some stxRange := stx.getRange? | result
+      value.get? TryThisInfo | return result
+    let some stxRange := stx.getRange? | return result
     let stxRange := doc.meta.text.utf8RangeToLspRange stxRange
     unless stxRange.start.line ≤ params.range.end.line do return result
     unless params.range.start.line ≤ stxRange.end.line do return result
-    result.push {
+    return result.push {
       eager.title := codeActionTitle
       eager.kind? := "quickfix"
       eager.edit? := some <| .ofTextEdit doc.versionedIdentifier edit

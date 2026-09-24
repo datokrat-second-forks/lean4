@@ -54,7 +54,7 @@ def coeLinter : Linter where
                 logLint linter.deprecatedCoercions ci.stx <| .tagged ``deprecatedAttr <|
                   m!"This term uses the deprecated coercion `{.ofConstName coeDecl true}`."
         | _ => pure ()
-        return true) (fun _ _ _ _ => return)
+        return true) (fun _ _ _ => return)
 
 builtin_initialize addLinter coeLinter
 

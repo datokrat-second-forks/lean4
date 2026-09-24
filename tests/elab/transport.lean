@@ -14,34 +14,7 @@ newtype Foo := Int with toInt
 example (x : Foo) : Foo.equivDef.toFun x = x.toInt := rfl
 example (a : Int) : Foo.equivDef.invFun a = Foo.mk a := rfl
 
-/-! Congruences, as they would be declared next to the classes. -/
-
-@[transport] protected abbrev LE.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
-    Lean.CanonicalEquivalence (LE α) (LE β) where
-  toFun i := ⟨fun x y => i.le (e.invFun x) (e.invFun y)⟩
-  invFun i := ⟨fun x y => i.le (e.toFun x) (e.toFun y)⟩
-  left_inv i := congrArg LE.mk <| funext fun x => funext fun y =>
-    show i.le (e.invFun (e.toFun x)) (e.invFun (e.toFun y)) = i.le x y by
-      rw [e.left_inv x, e.left_inv y]
-  right_inv i := congrArg LE.mk <| funext fun x => funext fun y =>
-    show i.le (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = i.le x y by
-      rw [e.right_inv x, e.right_inv y]
-
-@[transport] protected abbrev DecidableLE.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : LE β] :
-    Lean.CanonicalEquivalence (@DecidableLE α ((LE.canonicalCongr e).invFun i)) (@DecidableLE β i) where
-  toFun d x y := decidable_of_iff (i.le (e.toFun (e.invFun x)) (e.toFun (e.invFun y))) (by
-    rw [e.right_inv x, e.right_inv y])
-  invFun d x y := d (e.toFun x) (e.toFun y)
-  left_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
-  right_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
-
-@[transport] protected abbrev Inhabited.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
-    Lean.CanonicalEquivalence (Inhabited α) (Inhabited β) where
-  toFun i := ⟨e.toFun i.default⟩
-  invFun i := ⟨e.invFun i.default⟩
-  left_inv i := congrArg Inhabited.mk (e.left_inv i.default)
-  right_inv i := congrArg Inhabited.mk (e.right_inv i.default)
-
+/-! Congruences beyond those of `Init.Transport`. -/
 
 /-- A congruence for a type constructor rather than a class. -/
 @[transport] protected abbrev Option.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
@@ -94,6 +67,8 @@ instance : Inhabited (Option Foo) := by transport (Inhabited (Option Int))
 
 example : (default : Option Foo) = none := rfl
 
+instance : Nonempty Foo := by transport (Nonempty Int)
+
 /-! `inferInstanceAs` falls back to transport, also resolving placeholders through it. -/
 
 newtype Wrap (n : Nat) := Fin n with toFin
@@ -116,6 +91,15 @@ deriving instance DecidableLE, LawfulLE for Baz
 
 example : (default : Baz) = Baz.mk 0 := rfl
 example : Baz.mk 1 ≤ Baz.mk 2 := by decide
+
+/-! Arithmetic: a transported operation rewraps the underlying result, so it reduces. -/
+
+newtype Num := Int with toInt
+  deriving Add, Sub, Mul, Div, Neg
+
+example : Num.mk 2 + Num.mk 3 = Num.mk 5 := rfl
+example : Num.mk 7 / Num.mk 2 - Num.mk 1 * Num.mk 3 = Num.mk 0 := rfl
+example : -Num.mk 2 = Num.mk (-2) := rfl
 
 /-!
 Families of equivalences: a congruence for a class on a type constructor takes `∀ α, Lean.CanonicalEquivalence (m α) (n α)`,
@@ -152,25 +136,29 @@ instance : Pointed Opt2 := by transport (Pointed Option)
 
 example : Pointed.point (m := Opt2) Nat 1 = Opt2.mk (Opt.mk (some 1)) := rfl
 
-/-!
-Equations as arguments: `ha` and `hb` are checked by `rfl` after `e` has been found for the types
-that the conclusion determines.
--/
-@[transport] protected abbrev Decidable.canonicalCongr' {p q : Prop}
-    (e : Lean.CanonicalEquivalence p q) :
-    Lean.CanonicalEquivalence (Decidable p) (Decidable q) where
-  toFun d := @decidable_of_iff q p ⟨e.toFun, e.invFun⟩ d
-  invFun d := @decidable_of_iff p q ⟨e.invFun, e.toFun⟩ d
-  left_inv _ := Subsingleton.elim _ _
-  right_inv _ := Subsingleton.elim _ _
+-- `MonadLift.canonicalCongr` transports the target monad of a lift.
+instance : MonadLift Id Option := ⟨fun x => some x.run⟩
 
-@[transport] protected abbrev Eq.canonicalCongr' (e : Lean.CanonicalEquivalence α β) {a b : α}
-    {a' b' : β} (ha : e.toFun a = a') (hb : e.toFun b = b') :
-    Lean.CanonicalEquivalence (a = b) (a' = b') where
-  toFun h := ha.symm.trans ((congrArg e.toFun h).trans hb)
-  invFun h := e.toFun_injective (ha.trans (h.trans hb.symm))
-  left_inv _ := rfl
-  right_inv _ := rfl
+instance : MonadLift Id Opt := inferInstanceAs (MonadLift Id Option)
+
+example : (monadLift (Id.mk 1) : Opt Nat) = Opt.mk (some 1) := rfl
+
+/-!
+Decidability classes are Π-types of `Decidable`s: they transport through `Pi.canonicalCongr` and
+`Decidable.canonicalCongr`, needing only propositions that agree up to defeq, or equations, which
+`Eq.canonicalCongr` relates by `rfl` side conditions.
+-/
+
+newtype Qux := Int with toInt
+
+-- Written by hand, but pointwise definitionally equal to the transported order.
+instance : LE Qux := ⟨fun x y => x.toInt ≤ y.toInt⟩
+instance : DecidableLE Qux := by transport (DecidableLE Int)
+instance : DecidableEq Qux := by transport (DecidableEq Int)
+
+example : Qux.mk 1 ≤ Qux.mk 2 := by decide
+example : ¬ Qux.mk 2 ≤ Qux.mk 1 := by decide
+example : Qux.mk 1 ≠ Qux.mk 2 := by decide
 
 example : Decidable (Foo.mk 3 = Foo.mk 4) := by transport Decidable ((3 : Int) = 4)
 
@@ -191,6 +179,55 @@ Note: `LawfulLE.canonicalCongr` does not apply
 -/
 #guard_msgs in
 instance : LawfulLE Bar := by transport (LawfulLE Int)
+
+-- `DecidableLE` is a Π-type of `Decidable`s, whose propositions must agree up to defeq.
+/--
+error: failed to transport
+  DecidableLE Int
+to
+  DecidableLE Bar
+
+Note: failed to transport
+  (b : Int) → Decidable (Bar.equivDef.toFun a ≤ b)
+to
+  (b : Bar) → Decidable (a ≤ b)
+
+Note: failed to transport
+  Decidable (Bar.equivDef.toFun a✝ ≤ Bar.equivDef.toFun a)
+to
+  Decidable (a✝ ≤ a)
+
+Note: failed to transport
+  Bar.equivDef.toFun a✝ ≤ Bar.equivDef.toFun a
+to
+  a✝ ≤ a
+
+Note: no `@[transport]` declaration applies
+-/
+#guard_msgs in
+instance : DecidableLE Bar := by transport (DecidableLE Int)
+
+@[irreducible] def Sealed' := Int
+
+unseal Sealed' in
+instance : LE Sealed' := inferInstanceAs (LE Int)
+
+-- Without an equivalence the domain of the Π-type cannot be transported.
+/--
+error: failed to transport
+  DecidableLE Int
+to
+  DecidableLE Sealed'
+
+Note: failed to transport
+  Int
+to
+  Sealed'
+
+Note: no `@[transport]` declaration applies
+-/
+#guard_msgs in
+instance : DecidableLE Sealed' := by transport (DecidableLE Int)
 
 /--
 error: failed to transport
@@ -214,7 +251,7 @@ Note: failed to transport
 to
   Foo.mk 3 = Foo.mk 5
 
-Note: `Eq.canonicalCongr'` does not apply, its argument `hb` does not hold by `rfl`:
+Note: `Eq.canonicalCongr` does not apply, its argument `hb` does not hold by `rfl`:
   Foo.equivDef.toFun (Foo.mk 5) = 4
 -/
 #guard_msgs in
@@ -377,3 +414,70 @@ instance : LawfulPointed Option := ⟨fun _ _ _ h => Option.some.inj h⟩
 
 instance : LawfulPointed Opt := inferInstanceAs (LawfulPointed Option)
 instance : LawfulPointed Opt2 := by transport (LawfulPointed Option)
+
+/-! Deriving the core order classes on a `newtype`. -/
+
+newtype Ordered := Int with toInt
+  deriving DecidableEq, Ord, Std.TransOrd, Std.LawfulEqOrd
+
+example : Ordered.mk 1 ≠ Ordered.mk 2 := by decide
+example : compare (Ordered.mk 1) (Ordered.mk 2) = .lt := by decide
+example (a b c : Ordered) (h₁ : (compare a b).isLE) (h₂ : (compare b c).isLE) :
+    (compare a c).isLE := Std.TransOrd.isLE_trans h₁ h₂
+example (a b : Ordered) (h : compare a b = .eq) : a = b := Std.LawfulEqOrd.eq_of_compare h
+
+/-! The core congruences for `Alternative`, `MonadRef` and `MonadControl`. -/
+
+newtype OptM (α : Type) := StateT Nat (OptionT (ReaderT Lean.Syntax Id)) α with toStateT
+
+instance : Lean.MonadRef (ReaderT Lean.Syntax Id) where
+  getRef := read
+  withRef ref x := withReader (fun _ => ref) x
+
+instance : Monad OptM := inferInstanceAs (Monad (StateT _ _))
+instance : Alternative OptM := inferInstanceAs (Alternative (StateT _ _))
+instance : Lean.MonadRef OptM := inferInstanceAs (Lean.MonadRef (StateT _ _))
+instance : MonadControl (OptionT (ReaderT Lean.Syntax Id)) OptM :=
+  inferInstanceAs (MonadControl _ (StateT _ _))
+
+def OptM.run (x : OptM α) : Option (α × Nat) := x.toStateT.run 0 |>.run |>.run .missing |>.run
+
+/-- info: some (2, 0) -/
+#guard_msgs in #eval (failure <|> pure 2 : OptM Nat).run
+
+/-- info: some (true, 0) -/
+#guard_msgs in
+#eval (Lean.MonadRef.withRef (.atom .none "x") do return (← Lean.getRef).isAtom : OptM Bool).run
+
+/-- info: some (3, 0) -/
+#guard_msgs in #eval (controlAt (OptionT (ReaderT Lean.Syntax Id)) fun run => run (pure 3) : OptM Nat).run
+
+/-! The core congruences for `MonadFunctor` and the `MonadAttach` laws. -/
+
+newtype RM (α : Type) := ReaderT Nat Id α with toReaderT
+
+instance : Monad RM := inferInstanceAs (Monad (ReaderT Nat Id))
+instance : LawfulMonad RM := inferInstanceAs (LawfulMonad (ReaderT Nat Id))
+instance : MonadFunctor Id RM := inferInstanceAs (MonadFunctor Id (ReaderT Nat Id))
+instance : MonadAttach RM := inferInstanceAs (MonadAttach (ReaderT Nat Id))
+instance : WeaklyLawfulMonadAttach RM := inferInstanceAs (WeaklyLawfulMonadAttach (ReaderT Nat Id))
+instance : LawfulMonadAttach RM := inferInstanceAs (LawfulMonadAttach (ReaderT Nat Id))
+
+example : (monadMap (m := Id) (fun x => x) (pure 1 : RM Nat)).toReaderT.run 0 = Id.mk 1 := rfl
+
+/-! `MonadLift` and `LawfulMonadLift` along equivalences of both monads. -/
+
+newtype IdN (α : Type) := Id α with toId
+
+instance : Monad IdN := inferInstanceAs (Monad Id)
+instance : MonadLift IdN RM := inferInstanceAs (MonadLift Id (ReaderT Nat Id))
+instance : LawfulMonadLift IdN RM := inferInstanceAs (LawfulMonadLift Id (ReaderT Nat Id))
+
+example : (monadLift (IdN.mk (Id.mk 1)) : RM Nat).toReaderT.run 0 = Id.mk 1 := rfl
+
+instance {ε σ : Type} : LawfulMonadLift (ST σ) (EST ε σ) where
+  monadLift_pure _ := rfl
+  monadLift_bind _ _ := rfl
+
+instance : LawfulMonadLift BaseIO (EIO ε) :=
+  inferInstanceAs (LawfulMonadLift (ST IO.RealWorld) (EST ε IO.RealWorld))

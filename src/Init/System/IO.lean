@@ -13,6 +13,7 @@ import Init.Data.String.TakeDrop
 import Init.Data.String.Search
 public import Init.Data.Ord.Basic
 public import Init.Data.String.Basic
+public import Init.Transport
 import Init.Data.List.MapIdx
 import Init.Data.Ord.UInt
 import Init.Data.ToString.Macro
@@ -36,7 +37,7 @@ instance IO.RealWorld.instNonempty : Nonempty IO.RealWorld :=
 /--
 An `IO` monad that cannot throw exceptions.
 -/
-@[expose] def BaseIO (α : Type) := ST IO.RealWorld α
+newtype BaseIO (α : Type) := ST IO.RealWorld α with toST
 
 instance : Monad BaseIO := inferInstanceAs (Monad (ST IO.RealWorld))
 instance : MonadFinally BaseIO := inferInstanceAs (MonadFinally (ST IO.RealWorld))
@@ -59,7 +60,7 @@ A monad that can have side effects on the external world or throw exceptions of 
    def getWorld : IO (IO.RealWorld) := get
    ```
 -/
-@[expose] def EIO (ε : Type) (α : Type) : Type := EST ε IO.RealWorld α
+newtype EIO (ε : Type) (α : Type) := EST ε IO.RealWorld α with toEST
 
 /--
 Runs a `BaseIO` action, which cannot throw an exception, in any other `EIO` monad.
@@ -69,10 +70,10 @@ lifting](lean-manual://section/lifting-monads) rather being than called explicit
 -/
 @[always_inline, inline]
 def BaseIO.toEIO (act : BaseIO α) : EIO ε α :=
-  fun s => match act s with
+  .mk <| EST.mk fun s => match ST.run act.toST s with
   | .mk a s => .ok a s
 
-instance : MonadLift BaseIO (EIO ε) := ⟨BaseIO.toEIO⟩
+instance : MonadLift BaseIO (EIO ε) := inferInstanceAs (MonadLift (ST IO.RealWorld) (EST ε IO.RealWorld))
 
 /--
 Converts an `EIO ε` action that might throw an exception of type `ε` into an exception-free `BaseIO`
@@ -80,7 +81,7 @@ action that returns an `Except` value.
 -/
 @[always_inline, inline]
 def EIO.toBaseIO (act : EIO ε α) : BaseIO (Except ε α) :=
-  fun s => match act s with
+  .mk <| ST.mk fun s => match EST.run act.toEST s with
   | .ok a s     => .mk (.ok a) s
   | .error ex s => .mk (.error ex) s
 
@@ -90,9 +91,9 @@ exception-free `BaseIO` action.
 -/
 @[always_inline, inline]
 def EIO.catchExceptions (act : EIO ε α) (h : ε → BaseIO α) : BaseIO α :=
-  fun s => match act s with
+  .mk <| ST.mk fun s => match EST.run act.toEST s with
   | .ok a s     => .mk a s
-  | .error ex s => h ex s
+  | .error ex s => ST.run (h ex).toST s
 
 instance : Monad (EIO ε) := inferInstanceAs (Monad (EST ε IO.RealWorld))
 instance : MonadFinally (EIO ε) := inferInstanceAs (MonadFinally (EST ε IO.RealWorld))
@@ -126,7 +127,7 @@ def EIO.ofExcept (e : Except ε α) : EIO ε α :=
 
 @[always_inline, inline]
 def EIO.adapt (f : ε → ε') (m : EIO ε α) : EIO ε' α :=
-  fun s => match m s with
+  .mk <| EST.mk fun s => match EST.run m.toEST s with
   | .ok a s => .ok a s
   | .error e s => .error (f e) s
 
@@ -186,7 +187,7 @@ duplicate, or delete calls to this function. The side effect may even be hoisted
 causing the side effect to occur at initialization time, even if it would otherwise never be called.
 -/
 @[noinline] unsafe def unsafeBaseIO (fn : BaseIO α) : α :=
-  match fn (unsafeCast Unit.unit) with
+  match ST.run fn.toST (unsafeCast Unit.unit) with
   | .mk a _ => a
 
 /--
@@ -432,7 +433,7 @@ Pauses execution for the specified number of milliseconds.
 -/
 opaque sleep (ms : UInt32) : BaseIO Unit :=
   -- TODO: add a proper primitive for IO.sleep
-  fun s => dbgSleep ms fun _ => .mk () s
+  .mk <| ST.mk fun s => dbgSleep ms fun _ => .mk () s
 
 /--
 Runs `act` in a separate `Task`, with priority `prio`. Because `IO` actions may throw an exception
@@ -1662,9 +1663,7 @@ the `IO` monad.
 abbrev Ref (α : Type) := ST.Ref IO.RealWorld α
 
 instance : MonadLift (ST IO.RealWorld) BaseIO where
-  monadLift mx := fun s =>
-    match mx s with
-    | .mk s a => .mk s a
+  monadLift mx := .mk mx
 
 /--
 Creates a new mutable reference cell that contains `a`.

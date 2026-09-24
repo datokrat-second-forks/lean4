@@ -617,7 +617,7 @@ private partial def collectStructFields
       unless ← pure (← read).inPattern <||> getPPOption getPPStructureInstancesDefaults do
         if let some defFn := getEffectiveDefaultFnForField? (← getEnv) structName fieldName then
           -- Use `withNewMCtxDepth` to prevent delaborator from solving metavariables.
-          if let some (_, defValue) ← withNewMCtxDepth <| instantiateStructDefaultValueFn? defFn levels params (pure ∘ fieldValues.get?) then
+          if let some (_, defValue) ← withNewMCtxDepth <| instantiateStructDefaultValueFn? defFn levels params (pure ∘ fieldValues.find?) then
             if ← withReducible <| withNewMCtxDepth <| isDefEq defValue (← getExpr) then
               -- Default value matches, skip the field.
               return (i + 1, fieldValues, fields)
@@ -1541,11 +1541,11 @@ def delabSorry : Delab := whenPPOption getPPNotation <| whenNotPPOption getPPExp
   else
     withOverApp 2 `(sorry)
 
-private unsafe def evalSyntaxConstantUnsafe (env : Environment) (opts : Options) (constName : Name) : ExceptT String Id Syntax :=
+private unsafe def evalSyntaxConstantUnsafe (env : Environment) (opts : Options) (constName : Name) : Except String Syntax :=
   env.evalConstCheck Syntax opts ``Syntax constName
 
 @[implemented_by evalSyntaxConstantUnsafe]
-private opaque evalSyntaxConstant (env : Environment) (opts : Options) (constName : Name) : ExceptT String Id Syntax := throw ""
+private opaque evalSyntaxConstant (env : Environment) (opts : Options) (constName : Name) : Except String Syntax := throw ""
 
 /--
 Pretty-prints the parameters of a `forall`. The pretty-printed parameters are passed to

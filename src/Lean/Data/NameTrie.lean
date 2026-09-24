@@ -35,7 +35,8 @@ def NamePart.lt : NamePart → NamePart → Bool
   | NamePart.num _, NamePart.str _ => true
   | _, _ => false
 
-@[expose] def NameTrie (β : Type u) := PrefixTree NamePart β NamePart.cmp
+structure NameTrie (β : Type u) where
+  toPrefixTree : PrefixTree NamePart β NamePart.cmp
 
 private def toKey (n : Name) : List NamePart :=
   loop n []
@@ -46,10 +47,10 @@ where
     | Name.anonymous, parts => parts
 
 def NameTrie.insert (t : NameTrie β) (n : Name) (b : β) : NameTrie β :=
-  PrefixTree.insert t (toKey n) b
+  ⟨t.toPrefixTree.insert (toKey n) b⟩
 
 def NameTrie.empty : NameTrie β :=
-  PrefixTree.empty
+  ⟨PrefixTree.empty⟩
 
 instance : Inhabited (NameTrie β) where
   default := NameTrie.empty
@@ -58,15 +59,15 @@ instance : EmptyCollection (NameTrie β) where
   emptyCollection := NameTrie.empty
 
 def NameTrie.find? (t : NameTrie β) (k : Name) : Option β :=
-  PrefixTree.find? t (toKey k)
+  t.toPrefixTree.find? (toKey k)
 
 @[inline, inherit_doc PrefixTree.findLongestPrefix?]
 def NameTrie.findLongestPrefix? (t : NameTrie β) (k : Name) : Option β :=
-  PrefixTree.findLongestPrefix? t (toKey k)
+  t.toPrefixTree.findLongestPrefix? (toKey k)
 
 @[inline]
 def NameTrie.foldMatchingM [Monad m] (t : NameTrie β) (k : Name) (init : σ) (f : β → σ → m σ) : m σ :=
-  PrefixTree.foldMatchingM t (toKey k) init f
+  t.toPrefixTree.foldMatchingM (toKey k) init f
 
 @[inline]
 def NameTrie.foldM [Monad m] (t : NameTrie β) (init : σ) (f : β → σ → m σ) : m σ :=
@@ -74,7 +75,7 @@ def NameTrie.foldM [Monad m] (t : NameTrie β) (init : σ) (f : β → σ → m 
 
 @[inline]
 def NameTrie.forMatchingM [Monad m] (t : NameTrie β) (k : Name) (f : β → m Unit) : m Unit :=
-  PrefixTree.forMatchingM t (toKey k) f
+  t.toPrefixTree.forMatchingM (toKey k) f
 
 @[inline]
 def NameTrie.forM [Monad m] (t : NameTrie β) (f : β → m Unit) : m Unit :=

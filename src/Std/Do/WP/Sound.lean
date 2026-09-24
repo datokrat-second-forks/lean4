@@ -57,14 +57,16 @@ public instance [Monad m] [WP m ps] [WPSound m ps] :
   ensures_of_wp hwp := by
     obtain ⟨X, hX⟩ := Classical.skolem.mp fun r =>
       (WPSound.ensures_of_wp (m := m) (ps := ps) (hwp r)).exists_refinement
-    exact ⟨X, ⟨fun {β} k =>funext fun r => (hX r).bind_eq (fun a => (k a).run r)⟩⟩
+    exact ⟨ReaderT.mk X, ⟨fun {β} k =>
+      congrArg ReaderT.mk <| funext fun r => (hX r).bind_eq (fun a => (k a).run r)⟩⟩
 
 public instance [Monad m] [LawfulMonad m] [WP m ps] [WPSound m ps] :
     WPSound (StateT σ m) (.arg σ ps) where
   ensures_of_wp {α} {x} {P} hwp := by
     obtain ⟨X, hX⟩ := Classical.skolem.mp fun s =>
       (WPSound.ensures_of_wp (m := m) (ps := ps) (hwp s)).exists_refinement
-    refine ⟨⟨fun s => X s >>= fun r => pure (⟨r.val.1, r.property⟩, r.val.2), ⟨fun {β} k =>funext fun s => ?_⟩⟩⟩
+    refine ⟨⟨StateT.mk fun s => X s >>= fun r => pure (⟨r.val.1, r.property⟩, r.val.2),
+      ⟨fun {β} k => congrArg StateT.mk (funext fun s => ?_)⟩⟩⟩
     show (X s >>= fun r : {p : α × σ // P p.1} => pure (⟨r.val.1, r.property⟩, r.val.2)) >>=
          (fun (b : {a // P a} × σ) => (k b.1.val).run b.2) =
          x.run s >>= (fun (a : α × σ) => (k a.1).run a.2)
@@ -83,8 +85,8 @@ public instance [Monad m] [LawfulMonad m] [WP m .pure] [WPSound m .pure] :
     refine ⟨⟨ExceptT.mk (X >>= fun ⟨r, h⟩ => match r, h with
       | .ok a, hp => pure (.ok ⟨a, hp⟩)
       | .error e, _ => pure (.error e)), ⟨fun {β} k =>?_⟩⟩⟩
-    show ExceptT.mk _ >>= _ = x >>= k
-    simp only [Bind.bind, ExceptT.bind, ExceptT.mk]; rw [bind_assoc]
+    refine ExceptT.ext ?_
+    simp only [Bind.bind, ExceptT.bind, ExceptT.run_mk]; rw [bind_assoc]
     refine Eq.trans ?_ (hX.bind_eq (β := Except ε β) (ExceptT.bindCont k))
     exact bind_congr fun ⟨r, _⟩ => by cases r <;> simp [pure_bind, ExceptT.bindCont]
 
@@ -100,11 +102,11 @@ public instance [Monad m] [LawfulMonad m] [WP m .pure] [WPSound m .pure] :
     refine ⟨⟨OptionT.mk (X >>= fun ⟨r, h⟩ => match r, h with
       | some a, hp => pure (some ⟨a, hp⟩)
       | none, _ => pure none), ⟨fun {β} k =>?_⟩⟩⟩
-    show OptionT.mk _ >>= _ = x >>= k
-    simp only [Bind.bind, OptionT.bind, OptionT.mk]; rw [bind_assoc]
+    refine OptionT.ext ?_
+    simp only [Bind.bind, OptionT.bind, OptionT.run_mk]; rw [bind_assoc]
     refine Eq.trans ?_
       (hX.bind_eq (β := Option β) (fun r => match r with | some a => (k a).run | none => pure none))
-    exact bind_congr fun ⟨r, _⟩ => by cases r <;> simp [pure_bind, OptionT.run]
+    exact bind_congr fun ⟨r, _⟩ => by cases r <;> simp [pure_bind]
 
 public instance : WPSound (EStateM ε σ) (.except ε (.arg σ .pure)) where
   ensures_of_wp {α} {x} {P} hwp :=
@@ -157,10 +159,10 @@ public theorem ReaderT.of_wp_run [Monad m] [LawfulMonad m] [WP m ps] [WPSound m 
   (Internal.MayReturn.of_canReturn hcan).imp (ReaderT.ensures_of_wp_run r P hwp)
 
 /-- Soundness lemma for `ReaderM.run`: `Id`-specialization of `ReaderT.of_wp_run`. -/
-public theorem ReaderM.of_wp_run_eq {α ρ : Type u} {x : α} {r : ρ} {prog : ReaderM ρ α}
+public theorem ReaderM.of_wp_run_eq {α ρ : Type u} {x : _root_.Id α} {r : ρ} {prog : ReaderM ρ α}
     (h : ReaderT.run prog r = x) (P : α → Prop) :
-    (⊢ₛ wp⟦prog⟧ (⇓ a _ => ⌜P a⌝) r) → P x := fun hwp =>
-  ReaderT.of_wp_run (m := _root_.Id) (a := x) P h hwp
+    (⊢ₛ wp⟦prog⟧ (⇓ a _ => ⌜P a⌝) r) → P x.run := fun hwp =>
+  ReaderT.of_wp_run (m := _root_.Id) (a := x.run) P (congrArg _root_.Id.run h) hwp
 
 /--
 A `wp`-provable postcondition refines the post-run computation `prog.run s : m (α × σ)`
@@ -185,19 +187,20 @@ public theorem StateT.of_wp_run [Monad m] [LawfulMonad m] [WP m ps] [WPSound m p
   (Internal.MayReturn.of_canReturn hcan).imp (StateT.ensures_of_wp_run s P hwp)
 
 /-- Soundness lemma for `StateM.run`: `Id`-specialization of `StateT.of_wp_run`. -/
-public theorem StateM.of_wp_run_eq {α σ : Type} {x : α × σ} {s : σ} {prog : StateM σ α}
+public theorem StateM.of_wp_run_eq {α σ : Type} {x : _root_.Id (α × σ)} {s : σ} {prog : StateM σ α}
     (h : StateT.run prog s = x) (P : α × σ → Prop) :
-    (⊢ₛ wp⟦prog⟧ (⇓ a s' => ⌜P (a, s')⌝) s) → P x := fun hwp =>
-  StateT.of_wp_run (m := _root_.Id) (p := x) P h hwp
+    (⊢ₛ wp⟦prog⟧ (⇓ a s' => ⌜P (a, s')⌝) s) → P x.run := fun hwp =>
+  StateT.of_wp_run (m := _root_.Id) (p := x.run) P (congrArg _root_.Id.run h) hwp
 
 /-- Soundness lemma for `StateM.run'`: `Id`-specialization of `StateT.of_wp_run`. -/
-public theorem StateM.of_wp_run'_eq {α σ : Type} {x : α} {s : σ} {prog : StateM σ α}
+public theorem StateM.of_wp_run'_eq {α σ : Type} {x : _root_.Id α} {s : σ} {prog : StateM σ α}
     (h : StateT.run' prog s = x) (P : α → Prop) :
-    (⊢ₛ wp⟦prog⟧ (⇓ a => ⌜P a⌝) s) → P x := fun hwp => by
+    (⊢ₛ wp⟦prog⟧ (⇓ a => ⌜P a⌝) s) → P x.run := fun hwp => by
   have hwp' : ⊢ₛ wp⟦prog⟧ (⇓ a s' => ⌜(fun p : α × σ => P p.1) (a, s')⌝) s := hwp
-  have := StateT.of_wp_run (m := _root_.Id) (prog := prog) (s := s) (p := StateT.run prog s)
+  have := StateT.of_wp_run (m := _root_.Id) (prog := prog) (s := s) (p := (StateT.run prog s).run)
     (fun p => P p.1) rfl hwp'
-  exact h ▸ this
+  subst h
+  exact this
 
 /--
 A `wp`-provable postcondition with split `.ok`/`.error` cases refines the post-run computation
@@ -228,7 +231,7 @@ public theorem ExceptT.of_wp_run
 public theorem Except.of_wp_eq {ε α : Type} {x prog : Except ε α}
     (h : prog = x) (P : Except ε α → Prop) :
     (⊢ₛ wp⟦prog⟧ post⟨fun a => ⌜P (.ok a)⌝, fun e => ⌜P (.error e)⌝⟩) → P x := fun hwp =>
-  ExceptT.of_wp_run (m := _root_.Id) (prog := prog) (x := x) P h hwp
+  ExceptT.of_wp_run (m := _root_.Id) (prog := ExceptT.mk (pure prog)) (x := x) P h hwp
 
 /-- Soundness lemma for `Except` without the equality hypothesis (deprecated). -/
 @[deprecated Except.of_wp_eq +typeChanged (since := "2026-01-26")]
@@ -265,6 +268,6 @@ public theorem OptionT.of_wp_run
 public theorem Option.of_wp_eq {α : Type} {x prog : Option α}
     (h : prog = x) (P : Option α → Prop) :
     (⊢ₛ wp⟦prog⟧ post⟨fun a => ⌜P (some a)⌝, fun _ => ⌜P none⌝⟩) → P x := fun hwp =>
-  OptionT.of_wp_run (m := _root_.Id) (prog := prog) (x := x) P h hwp
+  OptionT.of_wp_run (m := _root_.Id) (prog := OptionT.mk (pure prog)) (x := x) P h hwp
 
 end Std.Do

@@ -57,14 +57,14 @@ def toEpochDayMWD (year : Year.Offset) (month : Month.Ordinal) (week : Week.Alig
     let lastDay := month.days year.isLeap
     let lastOfMonth := PlainDate.ofYearMonthDayClip year month lastDay
     let lastWday := lastOfMonth.weekday.toOrdinal -- 1 = Monday … 7 = Sunday
-    let diff : Bounded.LE 0 6 := (lastWday.subBounds day).emod 7 (by decide)
+    let diff : Bounded.LE 0 6 := (lastWday.toBounded.subBounds day.toBounded).emod 7 (by decide)
     lastOfMonth.toEpochDay - Day.Offset.ofInt diff.val
   else
     let firstOfMonth := PlainDate.ofYearMonthDayClip year month 1 -- First day of the month
     let firstWday := firstOfMonth.weekday.toOrdinal -- Weekday of the first day (1 = Monday … 7 = Sunday)
-    let diff : Bounded.LE 0 6 := (day.subBounds firstWday).emod 7 (by decide)
+    let diff : Bounded.LE 0 6 := (day.toBounded.subBounds firstWday.toBounded).emod 7 (by decide)
     let firstOccurrence := firstOfMonth.toEpochDay + Day.Offset.ofInt diff.val
-    let extra : Bounded.LE 0 28 := ((week.sub 1).mul_pos 7 (by decide))
+    let extra : Bounded.LE 0 28 := ((week.toBounded.sub 1).mul_pos 7 (by decide))
     let extra := Day.Offset.ofInt extra.val
     firstOccurrence + extra
 

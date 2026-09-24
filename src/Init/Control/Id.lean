@@ -36,15 +36,28 @@ def containsFive (xs : List Nat) : Bool := Id.run do
 true
 ```
 -/
-@[expose, implicit_reducible] def Id (type : Type u) : Type u := type
+newtype Id (α : Type u) := α with run
+
+/--
+Interpret a value as a computation in the identity monad.
+-/
+add_decl_doc Id.mk
+
+/--
+Runs a computation in the identity monad.
+
+This function is the identity function. Because its parameter has type `Id α`, it causes
+`do`-notation in its arguments to use the `Monad Id` instance.
+-/
+add_decl_doc Id.run
 
 namespace Id
 
 @[always_inline]
 instance : Monad Id where
-  pure x := x
-  bind x f := f x
-  map f x := f x
+  pure x := .mk x
+  bind x f := f x.run
+  map f x := .mk (f x.run)
 
 /--
 The identity monad has a `bind` operator.
@@ -53,17 +66,8 @@ The identity monad has a `bind` operator.
 def hasBind : Bind Id :=
   inferInstance
 
-/--
-Runs a computation in the identity monad.
-
-This function is the identity function. Because its parameter has type `Id α`, it causes
-`do`-notation in its arguments to use the `Monad Id` instance.
--/
-@[always_inline, inline, expose, implicit_reducible]
-protected def run (x : Id α) : α := x
-
 instance [OfNat α n] : OfNat (Id α) n :=
-  inferInstanceAs (OfNat α n)
+  ⟨.mk (OfNat.ofNat n)⟩
 
 instance {m : Type u → Type v} [Pure m] : MonadLiftT Id m where
   monadLift x := pure x.run

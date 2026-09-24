@@ -191,6 +191,6 @@ end AlphaEqv
 Return `true` if `c₁` and `c₂` are alpha equivalent.
 -/
 def Code.alphaEqv (c₁ c₂ : Code pu) : Bool :=
-  AlphaEqv.eqv c₁ c₂ |>.run {}
+  AlphaEqv.eqv c₁ c₂ |>.run {} |>.run
 
 end Lean.Compiler.LCNF

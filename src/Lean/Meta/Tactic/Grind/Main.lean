@@ -128,7 +128,7 @@ def GrindM.run (x : GrindM α) (params : Params) (evalTactic? : Option EvalTacti
   let anchorRefs? := params.anchorRefs?
   let debug := grind.debug.get (← getOptions)
   let ematchDiag := grind.ematch.diagnostics.get (← getOptions)
-  x (← mkMethods evalTactic?).toMethodsRef
+  ReaderT.run (ReaderT.run x (← mkMethods evalTactic?).toMethodsRef)
     { config, anchorRefs?, simpMethods, simp, extensions, symPrios, debug, ematchDiag }
     |>.run' {}
 
@@ -256,7 +256,7 @@ Walks the proof term collecting `Origin`s of E-matching instances that appear,
 using the `mdata` markers placed by `markTheoremInstanceProof`.
 -/
 private partial def collectUsedOrigins (e : Expr) (map : EMatch.InstanceMap) : Std.HashSet Origin :=
-  let (_, s) := go e |>.run ({}, {})
+  let (_, s) := go e |>.run ({}, {}) |>.run
   s.2
 where
   go (e : Expr) : StateM (Std.HashSet ExprPtr × Std.HashSet Origin) Unit := do

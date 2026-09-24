@@ -191,8 +191,8 @@ def pushArg {σ : Type u} (x : StateT σ (PredTrans ps) α) : PredTrans (.arg σ
     intro Q₁ Q₂
     apply SPred.bientails.of_eq
     ext s
-    dsimp only [SPred.and_cons, ExceptConds.and, StateT.run]
-    rw [← ((x s).conjunctive _ _).to_eq]
+    dsimp only [SPred.and_cons, ExceptConds.and]
+    rw [← ((x.run s).conjunctive _ _).to_eq]
 
 /--
 Adds the ability to make assertions about exceptions of type `ε` to a predicate transformer with
@@ -203,12 +203,12 @@ This can be used for all kinds of exception-like effects, such as early terminat
 them as exceptions.
 -/
 def pushExcept {ps : PostShape} {α ε} (x : ExceptT ε (PredTrans ps) α) : PredTrans (.except ε ps) α where
-  trans Q := x.apply (fun | .ok a => Q.1 a | .error e => Q.2.1 e, Q.2.2)
+  trans Q := x.run.apply (fun | .ok a => Q.1 a | .error e => Q.2.1 e, Q.2.2)
   conjunctiveRaw := by
     intro Q₁ Q₂
     apply SPred.bientails.of_eq
     dsimp
-    rw[← (x.conjunctive _ _).to_eq]
+    rw[← (x.run.conjunctive _ _).to_eq]
     congr
     ext x
     cases x <;> simp
@@ -220,27 +220,29 @@ interpreting `OptionT (PredTrans ps) α` into `PredTrans (.except PUnit ps) α`,
 `Option` as being equivalent to `Except PUnit`.
 -/
 def pushOption {ps : PostShape} {α} (x : OptionT (PredTrans ps) α) : PredTrans (.except PUnit ps) α where
-  trans Q := x.apply (fun | .some a => Q.1 a | .none => Q.2.1 ⟨⟩, Q.2.2)
+  trans Q := x.run.apply (fun | .some a => Q.1 a | .none => Q.2.1 ⟨⟩, Q.2.2)
   conjunctiveRaw := by
     intro Q₁ Q₂
     apply SPred.bientails.of_eq
     dsimp
-    rw[← (x.conjunctive _ _).to_eq]
+    rw[← (x.run.conjunctive _ _).to_eq]
     congr
     ext x
     cases x <;> simp
 
 @[simp, grind =]
-theorem apply_pushArg {ps} {α σ : Type u} {Q : PostCond α (.arg σ ps)} (f : σ → PredTrans ps (α × σ)) :
-  (pushArg f).apply Q = fun s => (f s).apply (fun ⟨a, s⟩ => Q.1 a s, Q.2) := rfl
+theorem apply_pushArg {ps} {α σ : Type u} {Q : PostCond α (.arg σ ps)} (x : StateT σ (PredTrans ps) α) :
+  (pushArg x).apply Q = fun s => (x.run s).apply (fun ⟨a, s⟩ => Q.1 a s, Q.2) := rfl
 
 @[simp, grind =]
-theorem apply_pushExcept {ps} {α ε : Type u} {Q : PostCond α (.except ε ps)} (x : PredTrans ps (Except ε α)) :
-  (pushExcept x).apply Q = x.apply (fun | .ok a => Q.1 a | .error e => Q.2.1 e, Q.2.2) := rfl
+theorem apply_pushExcept {ps} {α ε : Type u} {Q : PostCond α (.except ε ps)}
+    (x : ExceptT ε (PredTrans ps) α) :
+  (pushExcept x).apply Q = x.run.apply (fun | .ok a => Q.1 a | .error e => Q.2.1 e, Q.2.2) := rfl
 
 @[simp, grind =]
-theorem apply_pushOption {ps} {α : Type u} {Q : PostCond α (.except PUnit ps)} (x : PredTrans ps (Option α)) :
-  (pushOption x).apply Q = x.apply (fun | .some a => Q.1 a | .none => Q.2.1 ⟨⟩, Q.2.2) := rfl
+theorem apply_pushOption {ps} {α : Type u} {Q : PostCond α (.except PUnit ps)}
+    (x : OptionT (PredTrans ps) α) :
+  (pushOption x).apply Q = x.run.apply (fun | .some a => Q.1 a | .none => Q.2.1 ⟨⟩, Q.2.2) := rfl
 
 @[simp]
 theorem apply_dite {ps} {Q : PostCond α ps} (c : Prop) [Decidable c] (t : c → PredTrans ps α) (e : ¬ c → PredTrans ps α) :

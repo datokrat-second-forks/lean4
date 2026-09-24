@@ -156,7 +156,7 @@ private def handleContinueEvent
   let continueChannel : Std.Channel Bool ← Std.Channel.new
   let continueTask ← Handler.onContinue handler head |>.asTask
 
-  BaseIO.chainTask continueTask fun
+  BaseIO.chainTask continueTask.run fun
     | .ok v => discard <| continueChannel.send v
     | .error _ => discard <| continueChannel.send false
 
@@ -315,10 +315,10 @@ private def dispatchPendingRequest
     : Async (ConnectionState (Handler.ResponseBody σ)) := do
   if let some line := state.pendingHead then
 
-    let task ← Handler.onRequest handler { line, body := state.requestStream, extensions } connectionContext
+    let task ← (Handler.onRequest handler { line, body := state.requestStream, extensions }).runIn connectionContext
       |>.asTask
 
-    BaseIO.chainTask task (discard ∘ state.response.send)
+    BaseIO.chainTask task.run (discard ∘ state.response.send)
     return { state with pendingHead := none, handlerDispatched := true }
   else
     return state

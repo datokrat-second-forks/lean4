@@ -93,13 +93,13 @@ public def main (args : List String) : IO UInt32 := do
 
   let initExt {α β σ} [Inhabited σ] (ext : PersistentEnvExtension α β σ) (env : Environment) : IO Environment := do
     let s := ext.toEnvExtension.getState env
-    let newState ← ext.addImportedFn s.importedEntries { env := env, opts := {} }
+    let newState ← ext.addImportedFn s.importedEntries |>.run { env := env, opts := {} }
     return ext.toEnvExtension.setState (asyncMode := .sync) env { s with state := newState }
 
   let env ← initExt Lean.Compiler.CSimp.ext.ext env
   let env ← initExt Meta.instanceExtension.ext env
-  let env ← initExt classExtension env
-  let env ← initExt Meta.Match.Extension.extension env
+  let env ← initExt classExtension.toPersistentEnvExtension env
+  let env ← initExt Meta.Match.Extension.extension.toPersistentEnvExtension env
 
   let some modIdx := env.getModuleIdx? modName
     | throw <| IO.userError s!"module '{modName}' not found"

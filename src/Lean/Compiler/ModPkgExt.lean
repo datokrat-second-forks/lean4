@@ -14,15 +14,15 @@ set_option doc.verso true
 namespace Lean
 
 /-- Persistent environment extension for storing a single serializable value per module. -/
-@[expose] public def ModuleEnvExtension (σ : Type) := PersistentEnvExtension σ σ σ
+public structure ModuleEnvExtension (σ : Type) extends PersistentEnvExtension σ σ σ
 
 public def registerModuleEnvExtension
   [Inhabited σ] (mkInitial : IO σ) (name : Name := by exact decl_name%)
 : IO (ModuleEnvExtension σ) :=
-  registerPersistentEnvExtension {
+  .mk <$> registerPersistentEnvExtension {
     name            := name
     mkInitial       := mkInitial
-    addImportedFn   := fun _ _ => mkInitial
+    addImportedFn   := fun _ => .mk fun _ => mkInitial
     addEntryFn      := fun s _ => s
     exportEntriesFn := fun s => #[s]
   }
@@ -30,7 +30,7 @@ public def registerModuleEnvExtension
 namespace ModuleEnvExtension
 
 public instance [Inhabited σ] : Inhabited (ModuleEnvExtension σ) :=
-  inferInstanceAs (Inhabited (PersistentEnvExtension ..))
+  ⟨⟨default⟩⟩
 
 public def getStateByIdx? [Inhabited σ] (ext : ModuleEnvExtension σ) (env : Environment) (idx : ModuleIdx) : Option σ :=
   (ext.getModuleEntries env idx)[0]?

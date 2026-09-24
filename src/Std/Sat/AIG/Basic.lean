@@ -136,8 +136,11 @@ inductive Cache.WF : Array (Decl α) → HashMap (Decl α) Nat → Prop where
 /--
 A cache for reusing elements from `decls` if they are available.
 -/
-def Cache (α : Type) [DecidableEq α] [Hashable α] (decls : Array (Decl α)) :=
-  { map : HashMap (Decl α) Nat // Cache.WF decls map }
+structure Cache (α : Type) [DecidableEq α] [Hashable α] (decls : Array (Decl α)) where
+  /-- The lookup map from declarations to their indices in `decls`. -/
+  val : HashMap (Decl α) Nat
+  /-- The map is a valid lookup table for `decls`. -/
+  property : Cache.WF decls val
 
 /--
 Create an empty `Cache`, valid with respect to any `Array Decl`.
@@ -403,7 +406,7 @@ Transform an `Entrypoint` into a graphviz string. Useful for debugging purposes.
 def toGraphviz {α : Type} [DecidableEq α] [ToString α] [Hashable α] (entry : Entrypoint α) :
     String :=
   let ⟨⟨decls, _, hinv, _, _⟩, ⟨idx, invert, h⟩⟩ := entry
-  let (dag, s) := go "" decls hinv idx h |>.run ∅
+  let (dag, s) := go "" decls hinv idx h |>.run ∅ |>.run
   let nodes := s.fold (fun x y ↦ x ++ toGraphvizString decls y) ""
   "Digraph AIG {" ++ nodes ++ dag ++ "}"
 where

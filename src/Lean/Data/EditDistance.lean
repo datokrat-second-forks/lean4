@@ -59,4 +59,4 @@ public def levenshtein (str1 str2 : String) (cutoff : Nat) : Option Nat := Id.ru
     -- Terminate early if it's impossible that the result is below the cutoff
     if v1.all (· > cutoff) then return none
     v0 := v1
-  some v0[len2]
+  return some v0[len2]

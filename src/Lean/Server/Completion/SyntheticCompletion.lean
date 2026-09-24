@@ -19,7 +19,7 @@ private def findBest?
     (gt : α → α → Bool)
     (f : ContextInfo → Info → PersistentArray InfoTree → Option α)
     : Option α :=
-  (Id.run <| infoTree.visitM (postNode := choose)).join
+  (Id.run <| infoTree.visitM (postNode := (pure <| choose · · · ·))).join
 where
   choose
       (ctx : ContextInfo)
@@ -117,7 +117,7 @@ private partial def isSyntheticTacticCompletion
     (cmdStx   : Syntax)
     : Bool := Id.run do
   let hoverFilePos := fileMap.toPosition hoverPos
-  go hoverFilePos cmdStx 0 none
+  return go hoverFilePos cmdStx 0 none
 where
   go
       (hoverFilePos         : Position)

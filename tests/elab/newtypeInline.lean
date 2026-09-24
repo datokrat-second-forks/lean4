@@ -75,3 +75,47 @@ trace: [Compiler.IR] [result]
 #guard_msgs in
 set_option trace.compiler.ir.result true in
 def stepW2 (x : W2) : W2 := Step.step x
+
+newtype M (α : Type) := StateT Nat Id α with run
+
+instance : Monad M := inferInstanceAs (Monad (StateT Nat Id))
+
+def viaM (k : Nat) : M Nat := do
+  let n ← M.mk get
+  M.mk (set (n + k))
+  return n * 2
+
+def viaStateT (k : Nat) : StateT Nat Id Nat := do
+  let n ← get
+  set (n + k)
+  return n * 2
+
+open Lean in
+run_meta do
+  let some m := IR.findEnvDecl (← getEnv) ``viaM | throwError "no IR for `viaM`"
+  let some s := IR.findEnvDecl (← getEnv) ``viaStateT | throwError "no IR for `viaStateT`"
+  let irM := (toString (format m)).replace "viaM" "viaStateT"
+  if (irM.splitOn "equiv").length != 1 then
+    throwError "the transported `bind` did not inline:{indentD (format m)}"
+  unless irM == toString (format s) do
+    throwError "IR differs:{indentD (format m)}\n{indentD (format s)}"
+
+-- The same through a chain of two `newtype`s.
+newtype M2 (α : Type) := M α with run
+
+instance : Monad M2 := inferInstanceAs (Monad (StateT Nat Id))
+
+def viaM2 (k : Nat) : M2 Nat := do
+  let n ← M2.mk (M.mk get)
+  M2.mk (M.mk (set (n + k)))
+  return n * 2
+
+open Lean in
+run_meta do
+  let some m := IR.findEnvDecl (← getEnv) ``viaM2 | throwError "no IR for `viaM2`"
+  let some s := IR.findEnvDecl (← getEnv) ``viaStateT | throwError "no IR for `viaStateT`"
+  let irM := (toString (format m)).replace "viaM2" "viaStateT"
+  if (irM.splitOn "equiv").length != 1 then
+    throwError "the transported `bind` did not inline:{indentD (format m)}"
+  unless irM == toString (format s) do
+    throwError "IR differs:{indentD (format m)}\n{indentD (format s)}"

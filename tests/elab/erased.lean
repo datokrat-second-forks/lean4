@@ -41,21 +41,21 @@ trace: [Compiler.saveMono] size: 5
       | EST.Out.error (a.14 : Lean.Exception) (a.15 : lcVoid) =>
         return _x.10
 [Compiler.saveMono] size: 9
-    def _private.elab.erased.0._eval (a : @&Lean.Elab.Command.Context) (a : @&lcAny) (a.1 : lcVoid) : EST.Out
+    def _private.elab.erased.0._eval (_y.1 : @&Lean.Elab.Command.Context) (_y.2 : @&lcAny) (_y.3 : lcVoid) : EST.Out
       Lean.Exception lcAny PUnit :=
-      let _x.2 : String := "ErasedS";
-      let _x.3 : String := "mk";
-      let _x.4 : Lean.Name := Lean.Name.mkStr2 _x.2 _x.3;
-      let _x.5 : Nat := 1;
-      let _x.6 : Array Lean.Name := Array.mkEmpty ◾ _x.5;
-      let _x.7 : Array Lean.Name := Array.push ◾ _x.6 _x.4;
-      let _x.8 : PUnit := PUnit.unit;
-      let _f.9 : Lean.Elab.Term.Context →
+      let _x.4 : String := "ErasedS";
+      let _x.5 : String := "mk";
+      let _x.6 : Lean.Name := Lean.Name.mkStr2 _x.4 _x.5;
+      let _x.7 : Nat := 1;
+      let _x.8 : Array Lean.Name := Array.mkEmpty ◾ _x.7;
+      let _x.9 : Array Lean.Name := Array.push ◾ _x.8 _x.6;
+      let _x.10 : PUnit := PUnit.unit;
+      let _f.11 : Lean.Elab.Term.Context →
         lcAny →
           Lean.Meta.Context →
-            lcAny → Lean.Core.Context → lcAny → lcVoid → EST.Out Lean.Exception lcAny PUnit := _eval._lam_0 _x.7 _x.8;
-      let _x.10 : EST.Out Lean.Exception lcAny lcAny := Lean.Elab.Command.liftTermElabM._redArg _f.9 a a a.1;
-      return _x.10
+            lcAny → Lean.Core.Context → lcAny → lcVoid → EST.Out Lean.Exception lcAny PUnit := _eval._lam_0 _x.9 _x.10;
+      let _x.12 : EST.Out Lean.Exception lcAny lcAny := Lean.Elab.Command.liftTermElabM._redArg _f.11 _y.1 _y.2 _y.3;
+      return _x.12
 -/
 #guard_msgs in
 run_meta Lean.Compiler.compile #[``ErasedS.mk]

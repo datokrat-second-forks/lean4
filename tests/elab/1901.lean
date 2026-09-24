@@ -5,7 +5,7 @@ instance [Funny F A B] : CoeFun F fun _ => A → B where coe := Funny.toFun
 
 class MulHomClass (F) (A B : outParam _) [Mul A] [Mul B] extends Funny F A B
 class Monoid (M) extends Mul M
-instance [Mul A] : Mul (Id A) := ‹_›
+instance [Mul A] : Mul (Id A) := ⟨fun a b => .mk (a.run * b.run)⟩
 
 #check Funny.toFun
 #check MulHomClass.toFunny

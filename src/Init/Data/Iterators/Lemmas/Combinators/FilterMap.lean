@@ -28,28 +28,28 @@ variable {α β γ : Type w} [Iterator α Id β] {it : Iter (α := α) β}
 
 theorem Iter.filterMapWithPostcondition_eq_toIter_filterMapWithPostcondition_toIterM [Monad m]
     {f : β → PostconditionT m (Option γ)} :
-    it.filterMapWithPostcondition f = (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.filterMapWithPostcondition f) :=
+    it.filterMapWithPostcondition f = (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.filterMapWithPostcondition f) :=
   rfl
 
 theorem Iter.filterWithPostcondition_eq_toIter_filterMapWithPostcondition_toIterM [Monad m]
     {f : β → PostconditionT m (ULift Bool)} :
-    it.filterWithPostcondition f = (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.filterWithPostcondition f) :=
+    it.filterWithPostcondition f = (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.filterWithPostcondition f) :=
   rfl
 
 theorem Iter.mapWithPostcondition_eq_toIter_mapWithPostcondition_toIterM [Monad m] {f : β → PostconditionT m γ} :
-    it.mapWithPostcondition f = (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.mapWithPostcondition f) :=
+    it.mapWithPostcondition f = (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.mapWithPostcondition f) :=
   rfl
 
 theorem Iter.filterMapM_eq_toIter_filterMapM_toIterM [Monad m] [MonadAttach m] {f : β → m (Option γ)} :
-    it.filterMapM f = (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.filterMapM f) :=
+    it.filterMapM f = (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.filterMapM f) :=
   rfl
 
 theorem Iter.filterM_eq_toIter_filterM_toIterM [Monad m] [MonadAttach m] {f : β → m (ULift Bool)} :
-    it.filterM f = (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.filterM f) :=
+    it.filterM f = (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.filterM f) :=
   rfl
 
 theorem Iter.mapM_eq_toIter_mapM_toIterM [Monad m] [MonadAttach m] {f : β → m γ} :
-    it.mapM f = (letI : MonadLift Id m := ⟨pure⟩; it.toIterM.mapM f) :=
+    it.mapM f = (letI : MonadLift Id m := ⟨fun x => pure x.run⟩; it.toIterM.mapM f) :=
   rfl
 
 theorem Iter.filterMap_eq_toIter_filterMap_toIterM {f : β → Option γ} :
@@ -82,7 +82,7 @@ theorem Iter.step_filterMapWithPostcondition {f : β → PostconditionT n (Optio
     step]
   simp only [liftM, monadLift, pure_bind]
   generalize it.toIterM.step = step
-  match step.inflate with
+  match step.run.inflate with
   | .yield it' out h =>
     apply bind_congr
     intro step
@@ -107,7 +107,7 @@ theorem Iter.step_filterWithPostcondition {f : β → PostconditionT n (ULift Bo
   simp only [filterWithPostcondition_eq_toIter_filterMapWithPostcondition_toIterM, IterM.step_filterWithPostcondition, step]
   simp only [liftM, monadLift, pure_bind]
   generalize it.toIterM.step = step
-  match step.inflate with
+  match step.run.inflate with
   | .yield it' out h =>
     apply bind_congr
     intro step
@@ -129,7 +129,7 @@ theorem Iter.step_mapWithPostcondition {f : β → PostconditionT n γ}
   simp only [mapWithPostcondition_eq_toIter_mapWithPostcondition_toIterM, IterM.step_mapWithPostcondition, step]
   simp only [liftM, monadLift, pure_bind]
   generalize it.toIterM.step = step
-  match step.inflate with
+  match step.run.inflate with
   | .yield it' out h =>
     simp only [bind_pure_comp]
     rfl
@@ -153,7 +153,7 @@ theorem Iter.step_filterMapM {β' : Type w} {f : β → n (Option β')}
   simp only [filterMapM_eq_toIter_filterMapM_toIterM, IterM.step_filterMapM, step]
   simp only [liftM, monadLift, pure_bind]
   generalize it.toIterM.step = step
-  match step.inflate with
+  match step.run.inflate with
   | .yield it' out h =>
     apply bind_congr
     intro step
@@ -178,7 +178,7 @@ theorem Iter.step_filterM {f : β → n (ULift Bool)}
   simp only [filterM_eq_toIter_filterM_toIterM, IterM.step_filterM, step]
   simp only [liftM, monadLift, pure_bind]
   generalize it.toIterM.step = step
-  match step.inflate with
+  match step.run.inflate with
   | .yield it' out h =>
     simp only
     apply bind_congr; intro step
@@ -200,7 +200,7 @@ theorem Iter.step_mapM {f : β → n γ}
   simp only [mapM_eq_toIter_mapM_toIterM, IterM.step_mapM, step]
   simp only [liftM, monadLift, pure_bind]
   generalize it.toIterM.step = step
-  match step.inflate with
+  match step.run.inflate with
   | .yield it' out h =>
     simp only [bind_pure_comp]
     rfl

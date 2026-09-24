@@ -8,8 +8,8 @@ public meta import Lean.Elab.Tactic.Basic
 -/
 
 meta def resetExtraModUses : Lean.CoreM Unit := do
-  Lean.modifyEnv (Lean.PersistentEnvExtension.setState Lean.extraModUses · ⟨[], ∅⟩)
-  Lean.modifyEnv (Lean.PersistentEnvExtension.setState Lean.isExtraRevModUseExt · ⟨[], ()⟩)
+  Lean.modifyEnv (Lean.PersistentEnvExtension.setState Lean.extraModUses.toPersistentEnvExtension · ⟨[], ∅⟩)
+  Lean.modifyEnv (Lean.PersistentEnvExtension.setState Lean.isExtraRevModUseExt.toPersistentEnvExtension · ⟨[], ()⟩)
 
 meta def Lean.ExtraModUse.toImport (e : ExtraModUse) : Import :=
   { e with }
@@ -299,7 +299,7 @@ Is rev mod use: false
 Similarly with formatters...
 -/
 
-public meta def myFormatter : Lean.PrettyPrinter.Formatter := fun _ => pure ()
+public meta def myFormatter : Lean.PrettyPrinter.Formatter := pure ()
 
 #eval resetExtraModUses
 
@@ -315,7 +315,7 @@ Is rev mod use: false
 ... and parenthesizers
 -/
 
-public meta def myParenthesizer : Lean.PrettyPrinter.Parenthesizer := fun _ => pure ()
+public meta def myParenthesizer : Lean.PrettyPrinter.Parenthesizer := pure ()
 
 #eval resetExtraModUses
 

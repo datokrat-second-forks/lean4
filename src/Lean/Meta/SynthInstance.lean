@@ -158,7 +158,7 @@ end MkTableKey
 
 /-- Remark: `mkTableKey` assumes `e` does not contain assigned metavariables. -/
 def mkTableKey [Monad m] [MonadMCtx m] (e : Expr) : m Expr := do
-  let (r, s) := MkTableKey.normExpr e |>.run { mctx := (← getMCtx) }
+  let (r, s) := MkTableKey.normExpr e |>.run { mctx := (← getMCtx) } |>.run
   setMCtx s.mctx
   return r
 
@@ -196,7 +196,7 @@ def checkSystem : SynthM Unit := do
   Core.checkMaxHeartbeatsCore "typeclass" `synthInstance.maxHeartbeats (← read).maxHeartbeats
 
 instance : Inhabited (SynthM α) where
-  default := fun _ _ => default
+  default := ReaderT.mk fun _ => ReaderT.mk fun _ => default
 
 /-- Return globals and locals instances that may unify with `type` -/
 def getInstances (type : Expr) : MetaM (Array Instance) := do

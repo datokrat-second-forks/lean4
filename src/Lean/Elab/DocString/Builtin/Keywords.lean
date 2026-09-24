@@ -178,7 +178,7 @@ def withAtom (cat : Name) (atom : String) : DocM (Array Name) := do
   return found
 
 partial def isAtoms (atoms : List String) (stx : Syntax) : Bool :=
-  StateT.run (go [stx]) atoms |>.fst
+  StateT.run (go [stx]) atoms |>.run.fst
 where
   go (stxs : List Syntax) : StateM (List String) Bool := do
     match ← get with

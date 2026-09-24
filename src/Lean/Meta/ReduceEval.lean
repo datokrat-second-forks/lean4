@@ -27,7 +27,7 @@ private def throwFailedToEval (e : Expr) : MetaM α :=
 instance : ReduceEval Nat where
   reduceEval e := private do
     let e ← whnf e
-    let some n ← evalNat e | throwFailedToEval e
+    let some n ← (evalNat e).run | throwFailedToEval e
     pure n
 
 instance [ReduceEval α] : ReduceEval (Option α) where

@@ -608,7 +608,7 @@ def any (t : Raw α β cmp) (p : (a : α) → β a → Bool) : Bool :=
   t.inner.any p
 
 @[inline, inherit_doc DTreeMap.all]
-def all (t : Raw α β cmp) (p : (a : α) → β a → Bool) : Bool := Id.run $ do
+def all (t : Raw α β cmp) (p : (a : α) → β a → Bool) : Bool :=
   t.inner.all p
 
 @[inline, inherit_doc DTreeMap.keys]

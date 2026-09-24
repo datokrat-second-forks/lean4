@@ -1258,7 +1258,7 @@ unsafe def checkImpl
   if !e.hasExprMVar && !e.hasFVar then
     true
   else
-    visit e |>.run' mkPtrSet
+    visit e |>.run' mkPtrSet |>.run
 
 def check (hasCtxLocals : Bool) (mctx : MetavarContext) (lctx : LocalContext) (mvarDecl : MetavarDecl) (mvarId : MVarId) (fvars : Array Expr) (e : Expr) : Bool :=
   unsafe checkImpl hasCtxLocals mctx lctx mvarDecl mvarId fvars e
@@ -1268,7 +1268,7 @@ end CheckAssignmentQuick
 /-- `typeOccursCheck` implementation using unsafe (i.e., pointer equality) features. -/
 private unsafe def typeOccursCheckImp (mctx : MetavarContext) (mvarId : MVarId) (v : Expr) : Bool :=
   if v.hasExprMVar then
-    visit v |>.run' mkPtrSet
+    visit v |>.run' mkPtrSet |>.run
   else
     true
 where
@@ -1284,7 +1284,7 @@ where
     -- Remark: it is ok to discard the "updated" `MetavarContext` because
     -- this function assumes all assigned metavariables have already been
     -- instantiated.
-    go.run' mctx
+    go.run' mctx |>.run
   visitMVar (mvarId' : MVarId) : Bool :=
     if let some mvarDecl := mctx.findDecl? mvarId' then
       occursCheck mvarDecl.type

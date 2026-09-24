@@ -7,6 +7,7 @@ module
 
 prelude
 public import Std.Time.Time.Unit.Nanosecond
+public import Init.Transport
 
 @[expose] public section
 
@@ -21,60 +22,45 @@ set_option linter.all true
 `Ordinal` represents a bounded value for second, which ranges between 0 and 59 or 60. This accounts
 for potential leap second.
 -/
-def Ordinal (leap : Bool) := Bounded.LE 0 (.ofNat (if leap then 60 else 59))
+newtype Ordinal (leap : Bool) := Bounded.LE 0 (.ofNat (if leap then 60 else 59)) with toBounded
+  deriving LE, LT, Repr, ToString, DecidableLE, DecidableLT, DecidableEq, Ord, TransOrd, LawfulEqOrd
 
-instance : LE (Ordinal leap) where
-  le x y := LE.le x.val y.val
+/-- The underlying integer of the ordinal. -/
+abbrev Ordinal.val (ordinal : Ordinal leap) : Int := ordinal.toBounded.val
 
-instance : LT (Ordinal leap) where
-  lt x y := LT.lt x.val y.val
+/-- Converts the ordinal to an `Int`. -/
+abbrev Ordinal.toInt (ordinal : Ordinal leap) : Int := ordinal.toBounded.toInt
 
-instance : Repr (Ordinal leap) where
-  reprPrec r := reprPrec r.val
+/-- Converts the ordinal to a `Nat`. -/
+abbrev Ordinal.toNat (ordinal : Ordinal leap) : Nat := ordinal.toBounded.toNat
 
-instance : ToString (Ordinal leap) where
-  toString r := toString r.val
+/-- Converts the ordinal to a `Fin`. -/
+abbrev Ordinal.toFin (ordinal : Ordinal leap) (h₀ : 0 ≤ (0 : Int)) :
+    Fin (Int.ofNat (if leap then 60 else 59) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
 
 instance : OfNat (Ordinal leap) n := by
   have inst : OfNat (Bounded.LE 0 (0 + (59 : Nat))) n := inferInstance
   cases leap
-  · exact inst
-  · exact ⟨inst.ofNat.expandTop (by decide)⟩
-
-instance {x y : Ordinal leap} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
-
-instance {x y : Ordinal leap} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
-
-instance : DecidableEq (Ordinal leap) := inferInstanceAs <| DecidableEq (Bounded.LE 0 _)
-
-instance : Ord (Ordinal leap) := inferInstanceAs <| Ord (Bounded.LE 0 _)
-
-instance : TransOrd (Ordinal leap) := inferInstanceAs <| TransOrd (Bounded.LE 0 _)
-
-instance : LawfulEqOrd (Ordinal leap) := inferInstanceAs <| LawfulEqOrd (Bounded.LE 0 _)
+  · exact ⟨.mk inst.ofNat⟩
+  · exact ⟨.mk (inst.ofNat.expandTop (by decide))⟩
 
 /--
 `Offset` represents an offset in seconds. It is defined as an `Int`.
 -/
-def Offset : Type := UnitVal 1
-deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString
+newtype Offset := UnitVal 1 with toUnitVal
+  deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
+    Ord, TransOrd, LawfulEqOrd
 
-instance {x y : Offset} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+/--
+The underlying value of the offset, in the unit's own scale.
+-/
+abbrev Offset.val (offset : Offset) : Int := offset.toUnitVal.val
 
-instance {x y : Offset} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+/-- Converts the offset to an `Int`, in the unit's own scale. -/
+abbrev Offset.toInt (offset : Offset) : Int := offset.toUnitVal.toInt
 
-instance : OfNat Offset n :=
-  ⟨UnitVal.ofNat n⟩
-
-instance : Ord Offset := inferInstanceAs <| Ord (UnitVal _)
-
-instance : TransOrd Offset := inferInstanceAs <| TransOrd (UnitVal _)
-
-instance : LawfulEqOrd Offset := inferInstanceAs <| LawfulEqOrd (UnitVal _)
+instance : OfNat Offset n := inferInstanceAs (OfNat (UnitVal 1) n)
 
 namespace Offset
 
@@ -83,14 +69,14 @@ Creates an `Second.Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Second.Offset :=
-  UnitVal.ofInt data
+  .mk (UnitVal.ofInt data)
 
 /--
 Creates an `Second.Offset` from an integer.
 -/
 @[inline]
 def ofInt (data : Int) : Second.Offset :=
-  UnitVal.ofInt data
+  .mk (UnitVal.ofInt data)
 
 end Offset
 
@@ -101,14 +87,14 @@ Creates an `Ordinal` from an integer, ensuring the value is within bounds.
 -/
 @[inline]
 def ofInt (data : Int) (h : 0 ≤ data ∧ data ≤ Int.ofNat (if leap then 60 else 59)) : Ordinal leap :=
-  Bounded.LE.mk data h
+  .mk (Bounded.LE.mk data h)
 
 /--
 Creates an `Ordinal` from a natural number, ensuring the value is within bounds.
 -/
 @[inline]
 def ofNat (data : Nat) (h : data ≤ (if leap then 60 else 59)) : Ordinal leap :=
-  Bounded.LE.ofNat data h
+  .mk (Bounded.LE.ofNat data h)
 
 /--
 Creates an `Ordinal` from a `Fin`, ensuring the value is within bounds.
@@ -116,15 +102,15 @@ Creates an `Ordinal` from a `Fin`, ensuring the value is within bounds.
 @[inline]
 def ofFin (data : Fin (if leap then 61 else 60)) : Ordinal leap :=
   match leap with
-  | true => Bounded.LE.ofFin data
-  | false => Bounded.LE.ofFin data
+  | true => .mk (Bounded.LE.ofFin data)
+  | false => .mk (Bounded.LE.ofFin data)
 
 /--
 Converts an `Ordinal` to an `Second.Offset`.
 -/
 @[inline]
 def toOffset (ordinal : Ordinal leap) : Second.Offset :=
-  UnitVal.ofInt ordinal.val
+  .mk (UnitVal.ofInt ordinal.val)
 
 end Ordinal
 end Second

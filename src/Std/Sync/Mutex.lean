@@ -20,9 +20,10 @@ Mutual exclusion primitive (a lock).
 
 If you want to guard shared state, use `Mutex α` instead.
 -/
-def BaseMutex : Type := BaseMutexImpl.type
+structure BaseMutex : Type where
+  private ref : BaseMutexImpl.type
 
-instance : Nonempty BaseMutex := by exact BaseMutexImpl.property
+instance : Nonempty BaseMutex := ⟨⟨Classical.choice BaseMutexImpl.property⟩⟩
 
 /-- Creates a new `BaseMutex`. -/
 @[extern "lean_io_basemutex_new"]
@@ -84,9 +85,10 @@ to wait until a condition is true. If working with a `BaseMutex` it must:
        condition variable is notified.
     3. Check the condition and resume waiting if not satisfied.
 -/
-def Condvar : Type := CondvarImpl.type
+structure Condvar : Type where
+  private ref : CondvarImpl.type
 
-instance : Nonempty Condvar := by exact CondvarImpl.property
+instance : Nonempty Condvar := ⟨⟨Classical.choice CondvarImpl.property⟩⟩
 
 /-- Creates a new condition variable. -/
 @[extern "lean_io_condvar_new"]
@@ -137,7 +139,7 @@ def Mutex.atomically [Monad m] [MonadLiftT BaseIO m] [MonadFinally m]
     (mutex : Mutex α) (k : AtomicT α m β) : m β := do
   try
     mutex.mutex.lock
-    k mutex.ref
+    ReaderT.run k mutex.ref
   finally
     mutex.mutex.unlock
 
@@ -153,7 +155,7 @@ def Mutex.tryAtomically [Monad m] [MonadLiftT BaseIO m] [MonadFinally m]
     (mutex : Mutex α) (k : AtomicT α m β) : m (Option β) := do
   if ← mutex.mutex.tryLock then
     try
-      some <$> k mutex.ref
+      some <$> ReaderT.run k mutex.ref
     finally
       mutex.mutex.unlock
   else

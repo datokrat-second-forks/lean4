@@ -39,7 +39,7 @@ builtin_initialize
 
 builtin_initialize builtinParserCategoriesRef : IO.Ref ParserCategories ← IO.mkRef {}
 
-private def throwParserCategoryAlreadyDefined {α} (catName : Name) : ExceptT String Id α :=
+private def throwParserCategoryAlreadyDefined {α} (catName : Name) : Except String α :=
   throw s!"parser category `{catName}` has already been defined"
 
 private def addParserCategoryCore (categories : ParserCategories) (catName : Name) (initial : ParserCategory) : Except String ParserCategories :=
@@ -100,7 +100,7 @@ private def addTokenConfig (tokens : TokenTable) (tk : Token) : Except String To
     | none   => pure $ tokens.insert tk tk
     | some _ => pure tokens
 
-def throwUnknownParserCategory {α} (catName : Name) : ExceptT String Id α :=
+def throwUnknownParserCategory {α} (catName : Name) : Except String α :=
   throw s!"unknown parser category `{catName}`"
 
 abbrev getCategory (categories : ParserCategories) (catName : Name) : Option ParserCategory :=
@@ -372,7 +372,7 @@ def leadingIdentBehavior (env : Environment) (catName : Name) : LeadingIdentBeha
 
 unsafe def evalParserConstUnsafe (declName : Name) (evalFallback? : Option ParserFn := none) : ParserFn := fun ctx s => unsafeBaseIO do
   let categories := (parserExtension.getState ctx.env).categories
-  match (← (mkParserOfConstant categories declName { env := ctx.env, opts := ctx.options }).toBaseIO) with
+  match (← ((mkParserOfConstant categories declName).run { env := ctx.env, opts := ctx.options }).toBaseIO) with
   | .ok (_, p) =>
     -- We should manually register `p`'s tokens before invoking it as it might not be part of any syntax category (yet)
     return adaptUncacheableContextFn (fun ctx => { ctx with tokens := p.info.collectTokens [] |>.foldl (fun tks tk => tks.insert tk tk) ctx.tokens }) p.fn ctx s
@@ -747,7 +747,7 @@ private def resolveParserNameCore (env : Environment) (opts : Options) (currName
   if isParserCategory env erased then
     return [.category erased]
 
-  let resolved ← ResolveName.resolveGlobalName env opts currNamespace openDecls val |>.filterMap fun
+  let resolved := ResolveName.resolveGlobalName env opts currNamespace openDecls val |>.filterMap fun
     | (name, []) => (isParser name).map fun isDescr => .parser name isDescr
     | _ => none
   unless resolved.isEmpty do
@@ -773,27 +773,27 @@ def parserOfStackFn (offset : Nat) : ParserFn := fun ctx s => Id.run do
   if stack.size < offset + 1 then
     return s.mkUnexpectedError ("failed to determine parser using syntax stack, stack is too small")
   let parserName@(.ident ..) := stack.get! (stack.size - offset - 1)
-    | s.mkUnexpectedError ("failed to determine parser using syntax stack, the specified element on the stack is not an identifier")
+    | return s.mkUnexpectedError ("failed to determine parser using syntax stack, the specified element on the stack is not an identifier")
   let iniSz := s.stackSize
   let s ← match ctx.resolveParserName ⟨parserName⟩ (unsetExporting := true) with
     | [.category cat] =>
-      categoryParserFn cat ctx s
+      pure <| categoryParserFn cat ctx s
     | [.parser parserName _] =>
-      adaptUncacheableContextFn (fun ctx =>
+      pure <| adaptUncacheableContextFn (fun ctx =>
         -- static quotations such as `(e) do not use the interpreter unless the above option is set,
         -- so for consistency neither should dynamic quotations using this function
         { ctx with options := ctx.options.set `interpreter.prefer_native (!internal.parseQuotWithCurrentStage.get ctx.options) })
         (evalParserConst parserName) ctx s
     | [.alias alias] =>
       match alias with
-      | .const p => p.fn ctx s
+      | .const p => pure <| p.fn ctx s
       | _ =>
         return s.mkUnexpectedError s!"parser alias {parserName}, must not take parameters"
     | _::_::_ => return s.mkUnexpectedError s!"ambiguous parser name {parserName}"
     | [] => return s.mkUnexpectedError s!"unknown parser {parserName}"
   if !s.hasError && s.stackSize != iniSz + 1 then
     return s.mkUnexpectedError "expected parser to return exactly one syntax object"
-  s
+  return s
 
 def parserOfStack (offset : Nat) (prec : Nat := 0) : Parser where
   fn := adaptCacheableContextFn ({ · with prec }) (parserOfStackFn offset)

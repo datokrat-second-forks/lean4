@@ -222,7 +222,7 @@ def weekOfMonth (date : DateTime) (firstDay : Weekday := .monday) : Week.Ordinal
 Determines the quarter of the year for the given `DateTime`.
 -/
 @[inline]
-def quarter (date : DateTime) : Internal.Bounded.LE 1 4 :=
+def quarter (date : DateTime) : Month.Quarter :=
   date.date.get.quarter
 
 /--

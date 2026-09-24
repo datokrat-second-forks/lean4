@@ -644,11 +644,11 @@ def applyFolders (decl : LetDecl .pure) (folders : SMap Name Folder) : CompilerM
     return none
   | _ => return none
 
-private unsafe def getFolderCoreUnsafe (env : Environment) (opts : Options) (declName : Name) : ExceptT String Id Folder :=
+private unsafe def getFolderCoreUnsafe (env : Environment) (opts : Options) (declName : Name) : Except String Folder :=
   env.evalConstCheck Folder opts ``Folder declName
 
 @[implemented_by getFolderCoreUnsafe]
-private opaque getFolderCore (env : Environment) (opts : Options) (declName : Name) : ExceptT String Id Folder
+private opaque getFolderCore (env : Environment) (opts : Options) (declName : Name) : Except String Folder
 
 private def getFolder (declName : Name) : CoreM Folder := do
   ofExcept <| getFolderCore (← getEnv) (← getOptions) declName

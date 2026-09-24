@@ -61,7 +61,11 @@ interesting fields:
 * `className`: the CSS classes applied to the link
 * `style`: A `Json` object with additional inline CSS styles such as `color` or `textDecoration`.
 -/
-@[expose] def SuggestionStyle := Json deriving Inhabited, ToJson
+structure SuggestionStyle where
+  toJson : Json
+  deriving Inhabited
+
+instance : ToJson SuggestionStyle := ⟨SuggestionStyle.toJson⟩
 
 /-- Style as an error. By default, decorates the text with an undersquiggle; providing the argument
 `decorated := false` turns this off. -/
@@ -74,35 +78,35 @@ def SuggestionStyle.error (decorated := true) : SuggestionStyle :=
       textDecoration: "underline wavy var(--vscode-editorError-foreground) 1pt"
     }
   else json% { color: "var(--vscode-errorForeground)" }
-  json% { className: "pointer dim", style: $style }
+  ⟨json% { className: "pointer dim", style: $style }⟩
 
 /-- Style as a warning. By default, decorates the text with an undersquiggle; providing the
 argument `decorated := false` turns this off. -/
 @[deprecated "`SuggestionStyle` is not used anymore." (since := "2025-08-14")]
 def SuggestionStyle.warning (decorated := true) : SuggestionStyle :=
   if decorated then
-    json% {
+    ⟨json% {
       -- The `.gold` CSS class, which the infoview uses when e.g. building a file.
       className: "gold pointer dim",
       style: { textDecoration: "underline wavy var(--vscode-editorWarning-foreground) 1pt" }
-    }
-  else json% { className: "gold pointer dim" }
+    }⟩
+  else ⟨json% { className: "gold pointer dim" }⟩
 
 /-- Style as a success. -/
 @[deprecated "`SuggestionStyle` is not used anymore." (since := "2025-08-14")]
 def SuggestionStyle.success : SuggestionStyle :=
   -- The `.information` CSS class, which the infoview uses on successes.
-  json% { className: "information pointer dim" }
+  ⟨json% { className: "information pointer dim" }⟩
 
 /-- Style the same way as a hypothesis appearing in the infoview. -/
 @[deprecated "`SuggestionStyle` is not used anymore." (since := "2025-08-14")]
 def SuggestionStyle.asHypothesis : SuggestionStyle :=
-  json% { className: "goal-hyp pointer dim" }
+  ⟨json% { className: "goal-hyp pointer dim" }⟩
 
 /-- Style the same way as an inaccessible hypothesis appearing in the infoview. -/
 @[deprecated "`SuggestionStyle` is not used anymore." (since := "2025-08-14")]
 def SuggestionStyle.asInaccessible : SuggestionStyle :=
-  json% { className: "goal-inaccessible pointer dim" }
+  ⟨json% { className: "goal-inaccessible pointer dim" }⟩
 
 /-- Draws the color from a red-yellow-green color gradient with red at `0.0`, yellow at `0.5`, and
 green at `1.0`. Values outside the range `[0.0, 1.0]` are clipped to lie within this range.
@@ -112,13 +116,13 @@ the HTML element (which appears on hover). -/
 @[deprecated "`SuggestionStyle` is not used anymore." (since := "2025-08-14")]
 def SuggestionStyle.value (t : Float) (showValueInHoverText := true) : SuggestionStyle :=
   let t := min (max t 0) 1
-  json% {
+  ⟨json% {
     className: "pointer dim",
     -- interpolates linearly from 0º to 120º with 95% saturation and lightness
     -- varying around 50% in HSL space
     style: { color: $(s!"hsl({(t * 120).round} 95% {60 * ((t - 0.5)^2 + 0.75)}%)") },
     title: $(if showValueInHoverText then s!"Apply suggestion ({t})" else "Apply suggestion")
-  }
+  }⟩
 
 /-- Holds a `suggestion` for replacement, along with `preInfo` and `postInfo` strings to be printed
 immediately before and after that suggestion, respectively. It also includes an optional

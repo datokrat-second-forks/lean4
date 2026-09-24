@@ -37,10 +37,11 @@ We store `FixedTermElabRef` in the `Context` of the `TermElabM` monad, inducing 
 dependency. This mechanism allows us to register semantic term elaborators in
 `el : Option Expr → TermElabM Expr` as scoped `s : Syntax`, such that `elabTerm s = el`.
 -/
-def FixedTermElabRef : Type := FixedTermElabRefPointed.type
+structure FixedTermElabRef : Type where
+  private ref : FixedTermElabRefPointed.type
 
 instance : Nonempty FixedTermElabRef :=
-  by exact FixedTermElabRefPointed.property
+  ⟨⟨Classical.choice FixedTermElabRefPointed.property⟩⟩
 
 /-- Saved context for postponed terms and tactics to be executed. -/
 structure SavedContext where
@@ -241,7 +242,7 @@ instance : ToSnapshotTree TacticFinishedSnapshot where
 
 /-- Applies the given transformation to the `TacticFinishedSnapshot`. -/
 def TacticFinishedSnapshot.transform (s : TacticFinishedSnapshot) (trans : SnapshotTreeTransform) : TacticFinishedSnapshot :=
-  { s with moreSnaps := s.moreSnaps.map (·.map (sync := true) (·.transform trans)) }
+  { s with moreSnaps := s.moreSnaps.map (·.map (sync := true) (·.transform.run trans |>.run)) }
 
 /-- Snapshot just before execution of a tactic. -/
 structure TacticParsedSnapshotInner (α : Type) extends Language.Snapshot where
@@ -272,7 +273,7 @@ Pushes the transformation inwards by one level, allowing transformation-correct 
 -/
 def TacticParsedSnapshot.applyTransform (s : TacticParsedSnapshot) :
     TacticParsedSnapshotInner TacticParsedSnapshot where
-  toSnapshot := s.transformed.raw.toSnapshot.transform s.transformed.transform
+  toSnapshot := s.transformed.raw.toSnapshot.transform.run s.transformed.transform |>.run
   stx := s.transformed.transform.transformSyntax s.transformed.raw.stx
   inner? := s.transformed.raw.inner?.map (·.map (sync := true) ({ transformed := ·.transformed.compose s.transformed.transform }))
   finished := s.transformed.raw.finished.map (sync := true) (·.transform s.transformed.transform)
@@ -817,7 +818,7 @@ def liftLevelM (x : LevelElabM α) : TermElabM α := do
     ref := (← getRef),
     autoBoundImplicit := ctx.autoBoundImplicitContext.map (·.autoImplicitEnabled) |>.getD false
   }
-  match (x lvlCtx).run { ngen := ngen, mctx := mctx, levelNames := (← getLevelNames) } with
+  match (x.run lvlCtx).run { ngen := ngen, mctx := mctx, levelNames := (← getLevelNames) } with
   | .ok a newS  => setMCtx newS.mctx; setNGen newS.ngen; setLevelNames newS.levelNames; pure a
   | .error ex _ => throw ex
 
@@ -1035,7 +1036,7 @@ partial def forEachExprWithExposedLevelMVars (e : Expr) (f : Expr → TermElabM 
         | .const _ us    => (if head then id else withExpr e) <| us.forM (visitLevel · (← read))
         | .app ..        => withExpr e do e.withApp fun f args => do visit f true; args.forM visit
         | _              => pure ()
-  visit e |>.run e |>.run {}
+  visit e |>.run e |>.run
 
 /-- Ensure metavariables registered using `registerMVarErrorInfos` (and used in the given declaration) have been assigned. -/
 def ensureNoUnassignedMVars (decl : Declaration) : TermElabM Unit := do
@@ -2253,7 +2254,7 @@ def resolveId? (stx : Syntax) (kind := "term") (withInfo := false) : TermElabM (
   | _ => throwError "identifier expected"
 
 def TermElabM.run (x : TermElabM α) (ctx : Context := {}) (s : State := {}) : MetaM (α × State) :=
-  withConfig setElabConfig (x ctx |>.run s)
+  withConfig setElabConfig (ReaderT.run x ctx |>.run s)
 
 @[inline] def TermElabM.run' (x : TermElabM α) (ctx : Context := {}) (s : State := {}) : MetaM α :=
   (·.1) <$> x.run ctx s

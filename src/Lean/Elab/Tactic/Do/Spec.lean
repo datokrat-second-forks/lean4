@@ -149,9 +149,9 @@ def dischargeMGoal (goal : MGoal) (goalTag : Name) (tryTrivial : Bool) : n Expr 
   -- it might assign metavariables as above.
   let some prf ← liftMetaM <| -- withDefault <|
       if tryTrivial then
-        goal.pureTrivial <|> goal.assumption <|> goal.assumptionPure
+        (goal.pureTrivial <|> goal.assumption <|> goal.assumptionPure).run
       else
-        goal.pureRflAndAndIntro
+        goal.pureRflAndAndIntro.run
     | mkFreshExprSyntheticOpaqueMVar goal.toExpr goalTag
   liftMetaM <| do trace[Elab.Tactic.Do.spec] "proof: {prf}"
   return prf

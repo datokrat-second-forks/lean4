@@ -31,18 +31,18 @@ A restricted version of `IO` in which mutable state is the only side effect.
 
 It is possible to run `ST` computations in a non-monadic context using `runST`.
 -/
-@[expose] def ST (σ : Type) (α : Type) := Void σ → ST.Out σ α
+newtype ST (σ : Type) (α : Type) := Void σ → ST.Out σ α with run
 
 namespace ST
 
 @[always_inline, inline]
-protected def pure (x : α) : ST σ α := fun s => .mk x s
+protected def pure (x : α) : ST σ α := ST.mk fun s => .mk x s
 
 @[always_inline, inline]
 protected def bind (x : ST σ α) (f : α → ST σ β) : ST σ β :=
-  fun s =>
-    match x s with
-    | .mk x s => f x s
+  ST.mk fun s =>
+    match x.run s with
+    | .mk x s => (f x).run s
 
 end ST
 
@@ -52,18 +52,18 @@ instance (σ : Type) : Monad (ST σ) where
 
 @[always_inline]
 instance : MonadFinally (ST σ) where
-  tryFinally' x f := fun s =>
-    match x s with
+  tryFinally' x f := ST.mk fun s =>
+    match x.run s with
     | .mk x s =>
-      match f (some x) s with
+      match (f (some x)).run s with
       | .mk y s => .mk (x, y) s
 
 instance {σ : Type} {α : Type} [Inhabited α] : Inhabited (ST σ α) where
-  default := fun s => .mk default s
+  default := ST.mk fun s => .mk default s
 
 instance {σ : Type} : MonadAttach (ST σ) where
-  CanReturn x a := ∃ s s', x s = ⟨a, s'⟩
-  attach x s := match h : x s with | ⟨a, s'⟩ => ⟨⟨a, s, s', h⟩, s'⟩
+  CanReturn x a := ∃ s s', x.run s = ⟨a, s'⟩
+  attach x := ST.mk fun s => match h : x.run s with | ⟨a, s'⟩ => ⟨⟨a, s, s', h⟩, s'⟩
 
 inductive EST.Out (ε : Type) (σ : Type) (α : Type) where
   | ok : α → Void σ → EST.Out ε σ α
@@ -74,27 +74,27 @@ A restricted version of `IO` in which mutable state and exceptions are the only 
 
 It is possible to run `EST` computations in a non-monadic context using `runEST`.
 -/
-@[expose] def EST (ε : Type) (σ : Type) (α : Type) : Type := Void σ → EST.Out ε σ α
+newtype EST (ε : Type) (σ : Type) (α : Type) := Void σ → EST.Out ε σ α with run
 
 namespace EST
 
 @[always_inline, inline]
-protected def pure (a : α) : EST ε σ α := fun s => .ok a s
+protected def pure (a : α) : EST ε σ α := EST.mk fun s => .ok a s
 
 @[always_inline, inline]
 protected def bind (x : EST ε σ α) (f : α → EST ε σ β) : EST ε σ β :=
-  fun s => match x s with
-  | .ok a s    => f a s
+  EST.mk fun s => match x.run s with
+  | .ok a s    => (f a).run s
   | .error e s => .error e s
 
 @[always_inline, inline]
-protected def throw (e : ε) : EST ε σ α := fun s => .error e s
+protected def throw (e : ε) : EST ε σ α := EST.mk fun s => .error e s
 
 @[always_inline, inline]
 protected def tryCatch (x : EST ε σ α) (handle : ε → EST ε σ α) : EST ε σ α :=
-  fun s => match x s with
+  EST.mk fun s => match x.run s with
   | .ok a s => .ok a s
-  | .error e s => handle e s
+  | .error e s => (handle e).run s
 
 end EST
 
@@ -104,21 +104,21 @@ instance (ε σ : Type) : Monad (EST ε σ) where
 
 @[always_inline]
 instance : MonadFinally (EST ε σ) where
-  tryFinally' x f := fun s =>
-    let r := x s
+  tryFinally' x f := EST.mk fun s =>
+    let r := x.run s
     match r with
     | .ok x s =>
-      match f (some x) s with
+      match (f (some x)).run s with
       | .ok y s => .ok (x, y) s
       | .error e s => .error e s
     | .error e s =>
-      match f none s with
+      match (f none).run s with
       | .ok _ s => .error e s
       | .error e s => .error e s
 
 instance {ε σ : Type} : MonadAttach (EST ε σ) where
-  CanReturn x a := ∃ s s', x s = .ok a s'
-  attach x s := match h : x s with
+  CanReturn x a := ∃ s s', x.run s = .ok a s'
+  attach x := EST.mk fun s => match h : x.run s with
     | .ok a s' => .ok ⟨a, s, s', h⟩ s'
     | .error e s' => .error e s'
 
@@ -127,7 +127,7 @@ instance (ε σ : Type) : MonadExceptOf ε (EST ε σ) where
   tryCatch := EST.tryCatch
 
 instance {ε σ : Type} {α : Type} [Inhabited ε] : Inhabited (EST ε σ α) where
-  default := fun s => .error default s
+  default := EST.mk fun s => .error default s
 
 /--
 An auxiliary class used to infer the “state” of `EST` and `ST` monads.
@@ -143,7 +143,7 @@ Runs an `EST` computation, in which mutable state and exceptions are the only si
 -/
 @[noinline, nospecialize]
 def runEST {ε α : Type} (x : (σ : Type) → EST ε σ α) : Except ε α :=
-  match x Unit (Void.mk ()) with
+  match (x Unit).run (Void.mk ()) with
   | .ok a _     => Except.ok a
   | .error ex _ => Except.error ex
 
@@ -152,12 +152,12 @@ Runs an `ST` computation, in which mutable state via `ST.Ref` is the only side e
 -/
 @[noinline, nospecialize]
 def runST {α : Type} (x : (σ : Type) → ST σ α) : α :=
-  match x Unit (Void.mk ()) with
+  match (x Unit).run (Void.mk ()) with
   | .mk a _ => a
 
 @[always_inline]
-instance {ε σ} : MonadLift (ST σ) (EST ε σ) := ⟨fun x s =>
-  match x s with
+instance {ε σ} : MonadLift (ST σ) (EST ε σ) := ⟨fun x => EST.mk fun s =>
+  match x.run s with
   | .mk a s => .ok a s⟩
 
 namespace ST

@@ -24,7 +24,7 @@ ended
 info: ((Except.error "ERROR", "world"), 1011)
 -/
 #guard_msgs in
-#eval (((tst.run true).run "world").run 1000).run 11
+#eval ((((tst.run true).run.run "world").run 1000).run 11)
 
 @[inline] def g {α} (s : String) (x : Nat → IO α) : IO α := do
 IO.println "started";
@@ -49,4 +49,4 @@ ended
 info: ((Except.ok (1015, true), "world"), 1016)
 -/
 #guard_msgs in
-#eval (((tst2.run true).run "world").run 1000).run 10
+#eval ((((tst2.run true).run.run "world").run 1000).run 10)

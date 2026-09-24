@@ -16,14 +16,14 @@ public import Init.Ext
 public instance [Monad m] [LawfulMonad m] [MonadAttach m] [WeaklyLawfulMonadAttach m] :
     WeaklyLawfulMonadAttach (ReaderT ρ m) where
   map_attach := by
+    intros
     simp only [Functor.map, MonadAttach.attach, Functor.map_map, WeaklyLawfulMonadAttach.map_attach,
       MonadAttach.CanReturn]
-    intros; rfl
 
 public instance [Monad m] [LawfulMonad m] [MonadAttach m] [LawfulMonadAttach m] :
     LawfulMonadAttach (ReaderT ρ m) where
   canReturn_map_imp := by
-    simp only [Functor.map, MonadAttach.CanReturn, ReaderT.run]
+    simp only [Functor.map, MonadAttach.CanReturn]
     rintro _ _ x a ⟨r, h⟩
     apply LawfulMonadAttach.canReturn_map_imp h
 
@@ -31,14 +31,14 @@ public instance [Monad m] [LawfulMonad m] [MonadAttach m] [WeaklyLawfulMonadAtta
     WeaklyLawfulMonadAttach (StateT σ m) where
   map_attach := by
     intro α x
-    simp only [Functor.map, StateT, funext_iff, StateT.map, bind_pure_comp, MonadAttach.attach,
-      Functor.map_map, MonadAttach.CanReturn]
-    exact fun s => WeaklyLawfulMonadAttach.map_attach
+    refine congrArg StateT.mk (funext fun s => ?_)
+    simp only [bind_pure_comp, MonadAttach.attach, Functor.map_map, MonadAttach.CanReturn]
+    exact WeaklyLawfulMonadAttach.map_attach
 
 public instance [Monad m] [LawfulMonad m] [MonadAttach m] [LawfulMonadAttach m] :
     LawfulMonadAttach (StateT σ m) where
   canReturn_map_imp := by
-    simp only [Functor.map, MonadAttach.CanReturn, StateT.run, StateT.map, bind_pure_comp]
+    simp only [Functor.map, MonadAttach.CanReturn, StateT.map, bind_pure_comp]
     rintro _ _ x a ⟨s, s', h⟩
     obtain ⟨a, h, h'⟩ := LawfulMonadAttach.canReturn_map_imp' h
     cases h'
@@ -59,9 +59,10 @@ public instance {ε : Type u} : LawfulMonadAttach (Except ε) where
 public instance [Monad m] [LawfulMonad m] [MonadAttach m] [WeaklyLawfulMonadAttach m] :
     WeaklyLawfulMonadAttach (ExceptT ε m) where
   map_attach {α} x := by
-    simp only [Functor.map, MonadAttach.attach, ExceptT.map, MonadAttach.CanReturn]
+    refine congrArg ExceptT.mk ?_
+    simp only [MonadAttach.attach, MonadAttach.CanReturn]
     simp
-    conv => rhs; rw [← WeaklyLawfulMonadAttach.map_attach (m := m) (x := x)]
+    conv => rhs; rw [← WeaklyLawfulMonadAttach.map_attach (m := m) (x := x.run)]
     simp only [map_eq_pure_bind]
     apply bind_congr; intro a
     match a with
@@ -71,8 +72,8 @@ public instance [Monad m] [LawfulMonad m] [MonadAttach m] [WeaklyLawfulMonadAtta
 public instance [Monad m] [LawfulMonad m] [MonadAttach m] [LawfulMonadAttach m] :
     LawfulMonadAttach (ExceptT ε m) where
   canReturn_map_imp {α P x a} := by
-    simp only [Functor.map, MonadAttach.CanReturn, ExceptT.map, ExceptT.mk]
-    let x' := (fun a => show Subtype (fun a : Except _ _ => match a with | .ok a => P a | .error e => True) from ⟨match a with | .ok a => .ok a.1 | .error e => .error e, by cases a <;> simp [Subtype.property]⟩) <$> show m _ from x
+    simp only [Functor.map, MonadAttach.CanReturn, ExceptT.map]
+    let x' := (fun a => show Subtype (fun a : Except _ _ => match a with | .ok a => P a | .error e => True) from ⟨match a with | .ok a => .ok a.1 | .error e => .error e, by cases a <;> simp [Subtype.property]⟩) <$> x.run
     have := LawfulMonadAttach.canReturn_map_imp (m := m) (x := x') (a := .ok a)
     simp only at this
     intro h
@@ -92,10 +93,8 @@ public instance [Monad m] [MonadAttach m] [LawfulMonad m] [LawfulMonadAttach m] 
   inferInstanceAs (LawfulMonadAttach (ReaderT (ST.Ref ω σ) m))
 
 public instance {ε σ : Type u} : WeaklyLawfulMonadAttach (EStateM ε σ) where
-  map_attach {α} {x} := by
-    funext s
-    show EStateM.map Subtype.val (MonadAttach.attach x) s = x s
-    simp only [EStateM.map, MonadAttach.attach]
+  map_attach {α} {x} := congrArg EStateM.mk <| funext fun s => by
+    simp only [MonadAttach.attach]
     split
     · next a s' h =>
       split at h
@@ -110,7 +109,7 @@ public instance {ε σ : Type u} : WeaklyLawfulMonadAttach (EStateM ε σ) where
 
 public instance {ε σ : Type u} : LawfulMonadAttach (EStateM ε σ) where
   canReturn_map_imp {α P x a} h := by
-    simp only [MonadAttach.CanReturn, Functor.map, EStateM.map, EStateM.run] at h
+    simp only [MonadAttach.CanReturn, Functor.map, EStateM.map] at h
     obtain ⟨s, s', heq⟩ := h
     split at heq
     · next a₀ _ _ => injection heq with ha _; cases ha; exact a₀.property

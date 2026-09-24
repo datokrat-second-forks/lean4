@@ -30,8 +30,9 @@ as `Grind.SolverExtension` in `Lean/Meta/Tactic/Grind/Types.lean`.
 
 /-- Opaque extension state type used to store type-erased extension values. -/
 opaque SymExtensionStateSpec : (α : Type) × Inhabited α := ⟨Unit, ⟨()⟩⟩
-@[expose] def SymExtensionState : Type := SymExtensionStateSpec.fst
-instance : Inhabited SymExtensionState := SymExtensionStateSpec.snd
+structure SymExtensionState : Type where
+  val : SymExtensionStateSpec.fst
+instance : Inhabited SymExtensionState := ⟨⟨SymExtensionStateSpec.snd.default⟩⟩
 
 /--
 A registered extension for `SymM`. Each extension gets a unique index into the
@@ -299,12 +300,12 @@ private def mkSharedExprs : AlphaShareCommonM SharedExprs := do
 
 def SymM.run (x : SymM α) : MetaM α := do
   let (sharedExprs, share) ←
-    match mkSharedExprs { env := (← getEnv) } {} with
+    match (ReaderT.run mkSharedExprs { env := (← getEnv) }).run {} with
     | .ok sharedExprs share => pure (sharedExprs, share)
     | .error .. => unreachable! -- checks are disabled
   let debug := sym.debug.get (← getOptions)
   let extensions ← SymExtensions.mkInitialStates
-  x { sharedExprs } |>.run' { debug, share, extensions }
+  ReaderT.run x { sharedExprs } |>.run' { debug, share, extensions }
 
 /-- Returns maximally shared commonly used terms -/
 def getSharedExprs : SymM SharedExprs :=
@@ -341,7 +342,7 @@ individually satisfy the invariants.
 -/
 def runShareCommonM (k : AlphaShareCommonM α) (ctx : AlphaShareCommon.Context) : SymM (Except AlphaShareCommon.Cache α) := do
   let share ← modifyGet fun s => (s.share, { s with share := {} })
-  match k ctx share with
+  match (k.run ctx).run share with
   | .ok a share => modify fun s => { s with share }; return .ok a
   | .error cache share => modify fun s => { s with share }; return .error cache
 

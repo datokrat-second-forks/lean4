@@ -601,7 +601,7 @@ abbrev MetaM  := ReaderT Context $ StateRefT State CoreM
 instance : Monad MetaM := let i : Monad MetaM := inferInstance; { pure := i.pure, bind := i.bind }
 
 instance : Inhabited (MetaM α) where
-  default := fun _ _ => default
+  default := ReaderT.mk fun _ => ReaderT.mk fun _ => default
 
 instance : MonadLCtx MetaM where
   getLCtx := return (← read).lctx
@@ -640,7 +640,7 @@ instance : MonadBacktrack SavedState MetaM where
   restoreState s := s.restore
 
 @[inline] def MetaM.run (x : MetaM α) (ctx : Context := {}) (s : State := {}) : CoreM (α × State) :=
-  x ctx |>.run s
+  ReaderT.run x ctx |>.run s
 
 @[inline] def MetaM.run' (x : MetaM α) (ctx : Context := {}) (s : State := {}) : CoreM α :=
   Prod.fst <$> x.run ctx s
@@ -1121,7 +1121,7 @@ def getFVarFromUserName (userName : Name) : MetaM Expr := do
 Lift a `MkBindingM` monadic action `x` to `MetaM`.
 -/
 @[inline] def liftMkBindingM (x : MetavarContext.MkBindingM α) : MetaM α := do
-  match x { lctx := (← getLCtx), quotContext := (← readThe Core.Context).quotContext } { mctx := (← getMCtx), ngen := (← getNGen), nextMacroScope := (← getThe Core.State).nextMacroScope } with
+  match (x.run { lctx := (← getLCtx), quotContext := (← readThe Core.Context).quotContext }).run { mctx := (← getMCtx), ngen := (← getNGen), nextMacroScope := (← getThe Core.State).nextMacroScope } with
   | .ok e sNew => do
     setMCtx sNew.mctx
     modifyThe Core.State fun s => { s with ngen := sNew.ngen, nextMacroScope := sNew.nextMacroScope }

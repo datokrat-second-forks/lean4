@@ -38,7 +38,7 @@ partial def Expr.instantiateBetaRevRange (e : Expr) (start : Nat) (stop : Nat) (
   if e.hasLooseBVars && stop > start then
     assert! stop ≤ args.size
     if args.any (·.consumeMData.isLambda) start stop then
-      visit e 0 |>.run
+      visit e 0 |>.run |>.run
     else
       -- If there are no lambdas, then `instantiateRevRange` suffices.
       instantiateRevRange e start stop args

@@ -15,7 +15,7 @@
 def tst (x : Nat) : Nat := Id.run <| do
   let x := if !c1 x || (!c2 x && c3 x) then f x else f (x+2)
   match x with
-  | 0   => f (x+1)
-  | y+1 => f (y+3)
+  | 0   => return f (x+1)
+  | y+1 => return f (y+3)
 
 #eval tst 10

@@ -152,7 +152,7 @@ This function is used to create jumps from the join point satisfying `isJpCases?
 -/
 private def mkJmpArgsAtJp (params : Array (Param .pure)) (targetParamIdx : Nat)
     (fields : Array (Param .pure)) (dependsOnTarget : Bool) : Array (Arg .pure) := Id.run do
-  mkJmpNewArgs (params.map (Arg.fvar ·.fvarId)) targetParamIdx (fields.map (Arg.fvar ·.fvarId)) dependsOnTarget
+  return mkJmpNewArgs (params.map (Arg.fvar ·.fvarId)) targetParamIdx (fields.map (Arg.fvar ·.fvarId)) dependsOnTarget
 
 /--
 Try to optimize `jpCases` join points.
@@ -206,7 +206,7 @@ partial def simpJpCases? (code : Code .pure) : CompilerM (Option (Code .pure)) :
     for (fvarId, info) in map.toList do
       msg := msg ++ indentD m!"{mkFVar fvarId} ↦ {info.ctorNames.toList}"
     return msg
-  visit code map |>.run' {} |>.run {}
+  ReaderT.run (visit code) map |>.run' {} |>.run {}
 where
   visit (code : Code .pure) : ReaderT JpCasesInfoMap (StateRefT Ctor2JpCasesAlt DiscrM) (Code .pure) := do
     match code with

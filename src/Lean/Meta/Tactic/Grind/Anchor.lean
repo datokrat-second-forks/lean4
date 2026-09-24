@@ -116,7 +116,7 @@ where
         if let some b := found[a']? then
           -- **Note**: if the full anchors are equal, expanding the number of digits does not help.
           if b != a then
-            return (← go (numDigits+1))
+            return go (numDigits+1)
         else
           found  := found.insert a' a
       return numDigits

@@ -7,6 +7,7 @@ module
 
 prelude
 public import Std.Time.Time.Unit.Second
+public import Init.Transport
 
 public section
 
@@ -20,8 +21,21 @@ set_option linter.all true
 /--
 `Ordinal` represents a bounded value for minutes, ranging from 0 to 59. This is useful for representing the minute component of a time.
 -/
-@[expose] def Ordinal := Bounded.LE 0 59
-deriving Repr, DecidableEq, LE, LT
+newtype Ordinal := Bounded.LE 0 59 with toBounded
+  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
+
+/-- The underlying integer of the ordinal. -/
+abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
+
+/-- Converts the ordinal to an `Int`. -/
+abbrev Ordinal.toInt (ordinal : Ordinal) : Int := ordinal.toBounded.toInt
+
+/-- Converts the ordinal to a `Nat`. -/
+abbrev Ordinal.toNat (ordinal : Ordinal) : Nat := ordinal.toBounded.toNat
+
+/-- Converts the ordinal to a `Fin`. -/
+abbrev Ordinal.toFin (ordinal : Ordinal) (h₀ : 0 ≤ (0 : Int)) : Fin ((59 : Int) + 1).toNat :=
+  ordinal.toBounded.toFin h₀
 
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 0 (0 + (59 : Nat))) n)
@@ -29,38 +43,22 @@ instance : OfNat Ordinal n :=
 instance : Inhabited Ordinal where
   default := 0
 
-instance {x y : Ordinal} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
-
-instance {x y : Ordinal} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
-
-instance : Ord Ordinal := inferInstanceAs <| Ord (Bounded.LE 0 _)
-
-instance : TransOrd Ordinal := inferInstanceAs <| TransOrd (Bounded.LE 0 _)
-
-instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 0 _)
-
 /--
 `Offset` represents a duration offset in minutes.
 -/
-@[expose] def Offset : Type := UnitVal 60
-deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, ToString, LT, LE
+newtype Offset := UnitVal 60 with toUnitVal
+  deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
+    Ord, TransOrd, LawfulEqOrd
 
-instance {x y : Offset} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+/--
+The underlying value of the offset, in the unit's own scale.
+-/
+abbrev Offset.val (offset : Offset) : Int := offset.toUnitVal.val
 
-instance {x y : Offset} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+/-- Converts the offset to an `Int`, in the unit's own scale. -/
+abbrev Offset.toInt (offset : Offset) : Int := offset.toUnitVal.toInt
 
-instance : OfNat Offset n :=
-  ⟨UnitVal.ofInt <| Int.ofNat n⟩
-
-instance : Ord Offset := inferInstanceAs <| Ord (UnitVal _)
-
-instance : TransOrd Offset := inferInstanceAs <| TransOrd (UnitVal _)
-
-instance : LawfulEqOrd Offset := inferInstanceAs <| LawfulEqOrd (UnitVal _)
+instance : OfNat Offset n := inferInstanceAs (OfNat (UnitVal 60) n)
 
 namespace Ordinal
 
@@ -69,28 +67,28 @@ Creates an `Ordinal` from an integer, ensuring the value is within bounds.
 -/
 @[inline]
 def ofInt (data : Int) (h : 0 ≤ data ∧ data ≤ 59) : Ordinal :=
-  Bounded.LE.mk data h
+  .mk (Bounded.LE.mk data h)
 
 /--
 Creates an `Ordinal` from a natural number, ensuring the value is within bounds.
 -/
 @[inline]
 def ofNat (data : Nat) (h : data ≤ 59) : Ordinal :=
-  Bounded.LE.ofNat data h
+  .mk (Bounded.LE.ofNat data h)
 
 /--
 Creates an `Ordinal` from a `Fin`, ensuring the value is within bounds.
 -/
 @[inline]
 def ofFin (data : Fin 60) : Ordinal :=
-  Bounded.LE.ofFin data
+  .mk (Bounded.LE.ofFin data)
 
 /--
 Converts an `Ordinal` to an `Offset`.
 -/
 @[inline]
 def toOffset (ordinal : Ordinal) : Offset :=
-  UnitVal.ofInt ordinal.val
+  .mk (UnitVal.ofInt ordinal.val)
 
 end Ordinal
 namespace Offset
@@ -100,14 +98,14 @@ Creates an `Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Offset :=
-  UnitVal.ofInt data
+  .mk (UnitVal.ofInt data)
 
 /--
 Creates an `Offset` from an integer.
 -/
 @[inline]
 def ofInt (data : Int) : Offset :=
-  UnitVal.ofInt data
+  .mk (UnitVal.ofInt data)
 
 end Offset
 end Minute

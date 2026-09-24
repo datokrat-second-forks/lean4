@@ -29,9 +29,10 @@ A `Signal` can be in one of 3 states:
 This together with whether it was set up as `repeating` with `Signal.mk` determines the behavior
 of all functions on `Signal`s.
 -/
-def Signal : Type := SignalImpl.type
+structure Signal : Type where private ofRef ::
+  private ref : SignalImpl.type
 
-instance : Nonempty Signal := by exact SignalImpl.property
+instance : Nonempty Signal := ⟨⟨Classical.choice SignalImpl.property⟩⟩
 
 namespace Signal
 

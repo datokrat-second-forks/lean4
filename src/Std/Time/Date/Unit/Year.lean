@@ -7,6 +7,7 @@ module
 
 prelude
 public import Std.Time.Date.Unit.Month
+public import Init.Transport
 
 public section
 
@@ -36,26 +37,18 @@ instance : ToString Era where
 /--
 `Offset` represents a year offset, defined as an `Int`.
 -/
-@[expose, implicit_reducible] def Offset : Type := Int
-deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString
+newtype Offset := Int with toInt
+  deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
+    Ord, TransOrd, LawfulEqOrd
 
-set_option backward.inferInstanceAs.wrap.instances false in
-instance {x y : Offset} : Decidable (x ≤ y) :=
-  let x : Int := x
-  inferInstanceAs (Decidable (x ≤ y))
+/--
+Converts the `Year` offset to an `Int`.
+-/
+add_decl_doc Offset.toInt
 
-set_option backward.inferInstanceAs.wrap.instances false in
-instance {x y : Offset} : Decidable (x < y) :=
-  let x : Int := x
-  inferInstanceAs (Decidable (x < y))
+instance : OfNat Offset n := inferInstanceAs (OfNat Int n)
 
-instance : OfNat Offset n := ⟨Int.ofNat n⟩
-
-instance : Ord Offset := inferInstanceAs <| Ord Int
-
-instance : TransOrd Offset := inferInstanceAs <| TransOrd Int
-
-instance : LawfulEqOrd Offset := inferInstanceAs <| LawfulEqOrd Int
+instance : Coe Offset Int := ⟨Offset.toInt⟩
 
 namespace Offset
 
@@ -64,28 +57,21 @@ Creates an `Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Offset :=
-  Int.ofNat data
+  .mk (Int.ofNat data)
 
 /--
 Creates an `Offset` from an integer.
 -/
 @[inline]
 def ofInt (data : Int) : Offset :=
-  data
-
-/--
-Converts the `Year` offset to an `Int`.
--/
-@[inline]
-def toInt (offset : Offset) : Int :=
-  offset
+  .mk data
 
 /--
 Converts the `Year` offset to a `Month` offset.
 -/
 @[inline]
 def toMonths (val : Offset) : Month.Offset :=
-  val.mul 12
+  .mk (val.toInt.mul 12)
 
 /--
 Determines if a year is a leap year in the proleptic Gregorian calendar.

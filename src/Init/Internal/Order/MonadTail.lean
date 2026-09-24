@@ -44,6 +44,38 @@ theorem MonadTail.monotone_bind_right
     monotone (fun (x : γ) => f >>= g x) :=
   fun _ _ h => MonadTail.bind_mono_right (hmono _ _ h)
 
+protected theorem MonadTail.ext {inst : Bind m} {i j : @MonadTail m inst}
+    (h : ∀ β [Nonempty β], i.instCCPO β = j.instCCPO β) : i = j := by
+  obtain ⟨ci, _⟩ := i
+  obtain ⟨cj, _⟩ := j
+  have : ci = cj := funext fun β => funext fun inst => @h β inst
+  subst this
+  rfl
+
+/-- Transports `MonadTail` along a family of equivalences, to the transported `Bind` instance. -/
+@[transport] protected abbrev MonadTail.canonicalCongr {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
+    [b : Bind n] : Lean.CanonicalEquivalence (@MonadTail m (Bind.ofEquiv e b)) (@MonadTail n b) where
+  toFun i :=
+    have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+    @MonadTail.mk n b (fun β _ => CCPO.ofEquiv (e β).symm (i.instCCPO β))
+    (fun {_ _ a f₁ f₂} _ h => by
+      have this := i.bind_mono_right (a := (e _).invFun a) (f₁ := fun x => (e _).invFun (f₁ x))
+        (f₂ := fun x => (e _).invFun (f₂ x)) h
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
+      simp only [hl] at this
+      exact this)
+  invFun i :=
+    have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+    @MonadTail.mk m (Bind.ofEquiv e b) (fun β _ => CCPO.ofEquiv (e β) (i.instCCPO β))
+    (fun {_ _ a f₁ f₂} _ h => by
+      show (i.instCCPO _).rel ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₁))
+        ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₂))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact i.bind_mono_right (a := (e _).toFun a) (f₁ := fun x => (e _).toFun (f₁ x))
+        (f₂ := fun x => (e _).toFun (f₂ x)) h)
+  left_inv i := MonadTail.ext fun β _ => (CCPO.canonicalCongr (e β)).left_inv _
+  right_inv i := MonadTail.ext fun β _ => (CCPO.canonicalCongr (e β)).right_inv _
+
 instance : MonadTail Id where
   instCCPO _ := inferInstanceAs (CCPO (FlatOrder (b := Classical.ofNonempty)))
   bind_mono_right h := h _
@@ -58,15 +90,13 @@ instance {σ : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
   bind_mono_right h := by
     intro s
     have : Nonempty σ := ⟨s⟩
-    show StateT.bind _ _ s ⊑ StateT.bind _ _ s
-    simp only [StateT.bind]
     apply MonadTail.bind_mono_right (m := m)
     intro ⟨x, s'⟩
     exact h x s'
 
 instance {ε : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
     MonadTail (ExceptT ε m) where
-  instCCPO β := MonadTail.instCCPO (Except ε β)
+  instCCPO β := inferInstanceAs (CCPO (m (Except ε β)))
   bind_mono_right h := by
     apply MonadTail.bind_mono_right (m := m)
     intro x
@@ -83,7 +113,7 @@ instance : MonadTail (Except ε) where
 
 instance {m : Type u → Type v} [Monad m] [MonadTail m] :
     MonadTail (OptionT m) where
-  instCCPO β := MonadTail.instCCPO (Option β)
+  instCCPO β := inferInstanceAs (CCPO (m (Option β)))
   bind_mono_right h := by
     apply MonadTail.bind_mono_right (m := m)
     intro x
@@ -100,8 +130,6 @@ instance {ρ : Type u} {m : Type u → Type v} [Monad m] [MonadTail m] :
   instCCPO α := inferInstanceAs (CCPO (ρ → m α))
   bind_mono_right h := by
     intro r
-    show ReaderT.bind _ _ r ⊑ ReaderT.bind _ _ r
-    simp only [ReaderT.bind]
     apply MonadTail.bind_mono_right (m := m)
     intro x
     exact h x r
@@ -110,18 +138,34 @@ set_option linter.missingDocs false in
 noncomputable def ST.bot' [Nonempty α] (s : Void σ) : @FlatOrder (ST.Out σ α) (.mk Classical.ofNonempty (Classical.choice ⟨s⟩)) :=
   .mk _ (.mk Classical.ofNonempty (Classical.choice ⟨s⟩))
 
+/-- `x` as an element of the pointwise flat order; the inverse of `ST.ofFlat`. -/
+@[expose] noncomputable def ST.toFlat [Nonempty α] (x : ST σ α) :
+    ∀ s : Void σ, FlatOrder (ST.bot' (σ := σ) (α := α) s) :=
+  fun s => x.run s
+
+/-- An element of the pointwise flat order as an `ST`; the inverse of `ST.toFlat`. -/
+@[expose] noncomputable def ST.ofFlat [Nonempty α]
+    (x : ∀ s : Void σ, FlatOrder (ST.bot' (σ := σ) (α := α) s)) : ST σ α :=
+  ST.mk fun s => x s
+
 instance [Nonempty α] : CCPO (ST σ α) where
-  rel := PartialOrder.rel (α := ∀ s, FlatOrder (ST.bot' s))
+  rel x y := ST.toFlat x ⊑ ST.toFlat y
   rel_refl := PartialOrder.rel_refl
-  rel_antisymm := PartialOrder.rel_antisymm
+  rel_antisymm {x y} h₁ h₂ :=
+    have h : ST.toFlat x = ST.toFlat y := PartialOrder.rel_antisymm h₁ h₂
+    congrArg ST.mk h
   rel_trans := PartialOrder.rel_trans
-  has_csup hchain := CCPO.has_csup (α := ∀ s, FlatOrder (ST.bot' s)) hchain
+  has_csup {c} hchain := by
+    have ⟨f, hf⟩ := CCPO.has_csup (α := ∀ s : Void σ, FlatOrder (ST.bot' (σ := σ) (α := α) s))
+      (c := fun f => c (ST.ofFlat f)) fun x y hx hy => hchain _ _ hx hy
+    exact ⟨ST.ofFlat f, fun x => (hf (ST.toFlat x)).trans
+      ⟨fun h y hy => h (ST.toFlat y) hy, fun h y hy => h (ST.ofFlat y) hy⟩⟩
 
 instance : MonadTail (ST σ) where
   instCCPO _ := inferInstance
   bind_mono_right {_ _ a f₁ f₂} _ h := by
     intro w
-    change FlatOrder.rel (ST.bind a f₁ w) (ST.bind a f₂ w)
+    change FlatOrder.rel ((ST.bind a f₁).run w) ((ST.bind a f₂).run w)
     simp only [ST.bind]
     apply h
 

@@ -208,7 +208,7 @@ The parent projection name is a single-component name.
 Note: this relies on the fact that projection names are checked to be consistent across all parents.
 -/
 partial def findParentProjStruct? (env : Environment) (structName : Name) (projName : Name) : Option Name :=
-  go structName |>.run' {}
+  go structName |>.run' {} |>.run
 where
   -- Use a cache to navigate the DAG in polynomial time
   go (structName : Name) : StateM NameSet (Option Name) := do
@@ -336,7 +336,7 @@ If `baseStructName` is an ancestor structure for `structName`, then returns a se
 to go from `structName` to `baseStructName`. Returns `[]` if `baseStructName == structName`.
 -/
 partial def getPathToBaseStructure? (env : Environment) (baseStructName : Name) (structName : Name) : Option (List Name) :=
-  OptionT.run (go structName []) |>.run' {}
+  OptionT.run (go structName []) |>.run' {} |>.run
 where
   go (structName : Name) (path : List Name) : OptionT (StateM NameSet) (List Name) := do
     if baseStructName == structName then
