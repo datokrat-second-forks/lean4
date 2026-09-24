@@ -387,11 +387,11 @@ theorem IterM.toList_map_eq_toList_filterMapM {α β γ : Type w} {m : Type w �
 theorem IterM.toList_filterMapWithPostcondition_ofEquiv {α α' β γ : Type w}
     {m : Type w → Type w'} {n : Type w → Type w''}
     [Monad m] [LawfulMonad m] [Monad n] [LawfulMonad n] [MonadLiftT m n] [LawfulMonadLiftT m n]
-    [i : Iterator α m β] [Finite α m] (e : Lean.CanonicalEquivalence α α')
+    [i : Iterator α m β] [Finite α m] (e : Lean.CanonicalEquivalence α' α)
     {f : β → PostconditionT n (Option γ)} {it : IterM (α := α') m β} :
     letI : Iterator α' m β := Iterator.ofEquiv e i
     (it.filterMapWithPostcondition f).toList =
-      ((it.mapState e.invFun).filterMapWithPostcondition f).toList := by
+      ((it.mapState e.toFun).filterMapWithPostcondition f).toList := by
   letI : Iterator α' m β := Iterator.ofEquiv e i
   haveI : Finite α' m := Finite.ofEquiv e
   induction it using IterM.inductSteps with | step it ihy ihs
@@ -405,12 +405,12 @@ theorem IterM.toList_filterMapWithPostcondition_ofEquiv {α α' β γ : Type w}
       bind_assoc]
     apply bind_congr; intro fx
     match fx with
-    | ⟨none, _⟩ => simp [ihy (it' := it'.mapState e.toFun) (out := out)
+    | ⟨none, _⟩ => simp [ihy (it' := it'.mapState e.invFun) (out := out)
         ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
-    | ⟨some _, _⟩ => simp [ihy (it' := it'.mapState e.toFun) (out := out)
+    | ⟨some _, _⟩ => simp [ihy (it' := it'.mapState e.invFun) (out := out)
         ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
   | .skip it' h =>
-    simp [PlausibleIterStep.ofEquiv, PlausibleIterStep.skip, ihs (it' := it'.mapState e.toFun)
+    simp [PlausibleIterStep.ofEquiv, PlausibleIterStep.skip, ihs (it' := it'.mapState e.invFun)
       ((Iterator.isPlausibleStep_ofEquiv e).mpr (by simpa using h))]
   | .done h => simp [PlausibleIterStep.ofEquiv, PlausibleIterStep.done]
 

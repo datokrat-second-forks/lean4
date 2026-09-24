@@ -32,11 +32,11 @@ def wrap (l : List α) : IterM (α := Wrapped α) Id α :=
   return s
 
 example (l : List Nat) : (wrap l).toList = (l.iterM Id).toList := by
-  rw [wrap, IterM.toList_ofEquiv Wrapped.equivDef, IterM.mapState_symm_mapState]
+  rw [wrap, IterM.toList_ofEquiv Wrapped.equivDef, IterM.mapState_mapState_symm]
 
 example (l : List Nat) : (wrap l).toArray = (l.iterM Id).toArray := by
-  rw [wrap, IterM.toArray_ofEquiv Wrapped.equivDef, IterM.mapState_symm_mapState]
+  rw [wrap, IterM.toArray_ofEquiv Wrapped.equivDef, IterM.mapState_mapState_symm]
 
 example (l : List Nat) (f : Nat → Nat → Id (ForInStep Nat)) :
     forIn (wrap l) 0 f = forIn (l.iterM Id) 0 f := by
-  rw [wrap, IterM.forIn_ofEquiv Wrapped.equivDef, IterM.mapState_symm_mapState]
+  rw [wrap, IterM.forIn_ofEquiv Wrapped.equivDef, IterM.mapState_mapState_symm]
