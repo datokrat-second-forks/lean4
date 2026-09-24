@@ -144,24 +144,21 @@ instance : MonadLift Id Opt := inferInstanceAs (MonadLift Id Option)
 example : (monadLift (Id.mk 1) : Opt Nat) = Opt.mk (some 1) := rfl
 
 /-!
-Equations as arguments: `ha` and `hb` are checked by `rfl` after `e` has been found for the types
-that the conclusion determines.
+Decidability classes are Π-types of `Decidable`s: they transport through `Pi.canonicalCongr` and
+`Decidable.canonicalCongr`, needing only propositions that agree up to defeq, or equations, which
+`Eq.canonicalCongr` relates by `rfl` side conditions.
 -/
-@[transport] protected abbrev Decidable.canonicalCongr' {p q : Prop}
-    (e : Lean.CanonicalEquivalence p q) :
-    Lean.CanonicalEquivalence (Decidable p) (Decidable q) where
-  toFun d := @decidable_of_iff q p ⟨e.toFun, e.invFun⟩ d
-  invFun d := @decidable_of_iff p q ⟨e.invFun, e.toFun⟩ d
-  left_inv _ := Subsingleton.elim _ _
-  right_inv _ := Subsingleton.elim _ _
 
-@[transport] protected abbrev Eq.canonicalCongr' (e : Lean.CanonicalEquivalence α β) {a b : α}
-    {a' b' : β} (ha : e.toFun a = a') (hb : e.toFun b = b') :
-    Lean.CanonicalEquivalence (a = b) (a' = b') where
-  toFun h := ha.symm.trans ((congrArg e.toFun h).trans hb)
-  invFun h := e.toFun_injective (ha.trans (h.trans hb.symm))
-  left_inv _ := rfl
-  right_inv _ := rfl
+newtype Qux := Int with toInt
+
+-- Written by hand, but pointwise definitionally equal to the transported order.
+instance : LE Qux := ⟨fun x y => x.toInt ≤ y.toInt⟩
+instance : DecidableLE Qux := by transport (DecidableLE Int)
+instance : DecidableEq Qux := by transport (DecidableEq Int)
+
+example : Qux.mk 1 ≤ Qux.mk 2 := by decide
+example : ¬ Qux.mk 2 ≤ Qux.mk 1 := by decide
+example : Qux.mk 1 ≠ Qux.mk 2 := by decide
 
 example : Decidable (Foo.mk 3 = Foo.mk 4) := by transport Decidable ((3 : Int) = 4)
 
@@ -182,6 +179,55 @@ Note: `LawfulLE.canonicalCongr` does not apply
 -/
 #guard_msgs in
 instance : LawfulLE Bar := by transport (LawfulLE Int)
+
+-- `DecidableLE` is a Π-type of `Decidable`s, whose propositions must agree up to defeq.
+/--
+error: failed to transport
+  DecidableLE Int
+to
+  DecidableLE Bar
+
+Note: failed to transport
+  (b : Int) → Decidable (Bar.equivDef.invFun a' ≤ b)
+to
+  (b : Bar) → Decidable (a' ≤ b)
+
+Note: failed to transport
+  Decidable (Bar.equivDef.invFun a'✝ ≤ Bar.equivDef.invFun a')
+to
+  Decidable (a'✝ ≤ a')
+
+Note: failed to transport
+  Bar.equivDef.invFun a'✝ ≤ Bar.equivDef.invFun a'
+to
+  a'✝ ≤ a'
+
+Note: no `@[transport]` declaration applies
+-/
+#guard_msgs in
+instance : DecidableLE Bar := by transport (DecidableLE Int)
+
+@[irreducible] def Sealed' := Int
+
+unseal Sealed' in
+instance : LE Sealed' := inferInstanceAs (LE Int)
+
+-- Without an equivalence the domain of the Π-type cannot be transported.
+/--
+error: failed to transport
+  DecidableLE Int
+to
+  DecidableLE Sealed'
+
+Note: failed to transport
+  Int
+to
+  Sealed'
+
+Note: no `@[transport]` declaration applies
+-/
+#guard_msgs in
+instance : DecidableLE Sealed' := by transport (DecidableLE Int)
 
 /--
 error: failed to transport
@@ -205,7 +251,7 @@ Note: failed to transport
 to
   Foo.mk 3 = Foo.mk 5
 
-Note: `Eq.canonicalCongr'` does not apply, its argument `hb` does not hold by `rfl`:
+Note: `Eq.canonicalCongr` does not apply, its argument `hb` does not hold by `rfl`:
   Foo.equivDef.toFun (Foo.mk 5) = 4
 -/
 #guard_msgs in
