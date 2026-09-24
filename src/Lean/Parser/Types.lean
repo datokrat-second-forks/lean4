@@ -459,10 +459,10 @@ def toErrorMsg (ctx : InputContext) (s : ParserState) : String := Id.run do
 
 end ParserState
 
-@[expose] def ParserFn := ParserContext → ParserState → ParserState
+newtype ParserFn := ParserContext → ParserState → ParserState with toFn
 
 instance : Inhabited ParserFn where
-  default := fun _ s => s
+  default := .mk fun _ s => s
 
 inductive FirstTokens where
   | epsilon   : FirstTokens
@@ -521,24 +521,24 @@ abbrev TrailingParser := Parser
 @[inline]
 def withFn (f : ParserFn → ParserFn) (p : Parser) : Parser := { p with fn := f p.fn }
 
-def adaptCacheableContextFn (f : CacheableParserContext → CacheableParserContext) (p : ParserFn) : ParserFn := fun c s =>
-  p { c with toCacheableParserContext := f c.toCacheableParserContext } s
+def adaptCacheableContextFn (f : CacheableParserContext → CacheableParserContext) (p : ParserFn) : ParserFn := .mk fun c s =>
+  p.toFn { c with toCacheableParserContext := f c.toCacheableParserContext } s
 
 def adaptCacheableContext (f : CacheableParserContext → CacheableParserContext) : Parser → Parser :=
   withFn (adaptCacheableContextFn f)
 
-private def withStackDrop (drop : Nat) (p : ParserFn) : ParserFn := fun c s =>
+private def withStackDrop (drop : Nat) (p : ParserFn) : ParserFn := .mk fun c s =>
   let initDrop := s.stxStack.drop
-  let s := p c { s with stxStack.drop := drop }
+  let s := p.toFn c { s with stxStack.drop := drop }
   { s with stxStack.drop := initDrop }
 
 /--
 Run `p` with a fresh cache, restore outer cache afterwards.
 `p` may access the entire syntax stack.
 -/
-def withResetCacheFn (p : ParserFn) : ParserFn := withStackDrop 0 fun c s =>
+def withResetCacheFn (p : ParserFn) : ParserFn := withStackDrop 0 <| .mk fun c s =>
   let parserCache := s.cache.parserCache
-  let s' := p c { s with cache.parserCache := {} }
+  let s' := p.toFn c { s with cache.parserCache := {} }
   { s' with cache.parserCache := parserCache }
 
 @[inherit_doc withResetCacheFn]
@@ -546,7 +546,7 @@ def withResetCache : Parser → Parser := withFn withResetCacheFn
 
 /-- Run `p` under the given context transformation with a fresh cache (see also `withResetCacheFn`). -/
 def adaptUncacheableContextFn (f : ParserContextCore → ParserContextCore) (p : ParserFn) : ParserFn :=
-  withResetCacheFn (fun c s => p ⟨f c.toParserContextCore⟩ s)
+  withResetCacheFn (.mk fun c s => p.toFn ⟨f c.toParserContextCore⟩ s)
 
 /--
 Run `p` and record result in parser cache for any further invocation with this `parserName`, parser context, and parser state.
@@ -555,14 +555,14 @@ As this excludes trailing parsers from being cached, we also reset `lhsPrec`, wh
 in order to increase cache hits. Finally, `errorMsg` is also reset to `none` as a leading parser should not be called in the first
 place if there was an error.
 -/
-def withCacheFn (parserName : Name) (p : ParserFn) : ParserFn := fun c s => Id.run do
+def withCacheFn (parserName : Name) (p : ParserFn) : ParserFn := .mk fun c s => Id.run do
   let key := ⟨c.toCacheableParserContext, parserName, s.pos⟩
   if let some r := s.cache.parserCache[key]? then
     -- TODO: turn this into a proper trace once we have these in the parser
     --dbg_trace "parser cache hit: {parserName}:{s.pos} -> {r.stx}"
     return ⟨s.stxStack.push r.stx, r.lhsPrec, r.newPos, s.cache, r.errorMsg, s.recoveredErrors⟩
   let initStackSz := s.stxStack.raw.size
-  let s := withStackDrop initStackSz p c { s with lhsPrec := 0, errorMsg := none }
+  let s := (withStackDrop initStackSz p).toFn c { s with lhsPrec := 0, errorMsg := none }
   if s.stxStack.raw.size != initStackSz + 1 then
     panic! s!"withCacheFn: unexpected stack growth {s.stxStack.raw}"
   return { s with cache.parserCache := s.cache.parserCache.insert key ⟨s.stxStack.back, s.lhsPrec, s.pos, s.errorMsg⟩ }
@@ -571,7 +571,7 @@ def withCacheFn (parserName : Name) (p : ParserFn) : ParserFn := fun c s => Id.r
 def withCache (parserName : Name) : Parser → Parser := withFn (withCacheFn parserName)
 
 def ParserFn.run (p : ParserFn) (ictx : InputContext) (pmctx : ParserModuleContext) (tokens : TokenTable) (s : ParserState) : ParserState :=
-  p { pmctx with
+  p.toFn { pmctx with
     prec           := 0
     toInputContext := ictx
     tokens
