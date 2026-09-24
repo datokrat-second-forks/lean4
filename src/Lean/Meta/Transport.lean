@@ -57,8 +57,9 @@ private def isEquivFamily (type : Expr) : MetaM Bool :=
 
 /--
 Registers `declName` for `mkTransportEquiv`. Its type must be of the form
-`∀ …, Lean.CanonicalEquivalence α β`. Every explicit argument must be a canonical equivalence
-or a family of canonical equivalences.
+`∀ …, Lean.CanonicalEquivalence α β`. Every explicit argument must be a canonical equivalence,
+a family of canonical equivalences, or an equation, which must hold definitionally once the other
+arguments are determined.
 -/
 def addTransportDecl (declName : Name) (kind : AttributeKind) : MetaM Unit := do
   let type := (← getConstInfo declName).type
@@ -70,10 +71,10 @@ def addTransportDecl (declName : Name) (kind : AttributeKind) : MetaM Unit := do
     if bi.isExplicit then
       let xDecl ← x.mvarId!.getDecl
       let xType ← instantiateMVars xDecl.type
-      unless ← isEquivFamily xType do
+      unless xType.isEq || (← isEquivFamily xType) do
         throwError "invalid `@[transport]` declaration `{.ofConstName declName}`, its explicit \
-          arguments must be equivalences or families of equivalences, but `{xDecl.userName}` has \
-          type{indentExpr xType}"
+          arguments must be equivalences, families of equivalences or equations, but \
+          `{xDecl.userName}` has type{indentExpr xType}"
   let keys ← withReducible <| DiscrTree.mkPath concl
   transportExt.add (declName, keys) kind
 
@@ -114,7 +115,8 @@ mutual
 /--
 Instantiates the `@[transport]` declaration `declName` to prove a canonical equivalence: its
 conclusion is unified with `goal`, then its equivalence arguments are solved by `mkEquiv` (a family
-`∀ xs, Lean.CanonicalEquivalence α β` under its binders) and its instance arguments by `synthInstance`.
+`∀ xs, Lean.CanonicalEquivalence α β` under its binders), its instance arguments by `synthInstance`
+and its equations by `rfl`.
 -/
 private partial def applyDecl (declName : Name) (goal : Expr) (fuel : Nat) : MetaM Expr := do
   let decl ← mkConstWithFreshMVarLevels declName
@@ -131,6 +133,11 @@ private partial def applyDecl (declName : Name) (goal : Expr) (fuel : Nat) : Met
     else if ← isEquivFamily argType then
       arg.mvarId!.assign (← forallTelescopeReducing argType fun xs body => do
         mkLambdaFVars xs (← mkEquiv body.appFn!.appArg! body.appArg! fuel))
+    else if let some (_, lhs, rhs) := argType.eq? then
+      unless ← isDefEq lhs rhs do
+        throwError "`{.ofConstName declName}` does not apply, its argument `{argDecl.userName}` \
+          does not hold by `rfl`:{indentExpr argType}"
+      arg.mvarId!.assign (← mkEqRefl lhs)
     else
       throwError "cannot infer argument `{argDecl.userName}` of `{.ofConstName declName}`"
   instantiateMVars (mkAppN decl args)
