@@ -130,6 +130,24 @@ private partial def resolvePrivateName (env : Environment) (opts : Options) (dec
     guard <| containsDeclOrReserved env n
     return n
 
+/--
+Declarations `t ++ rest` for an alias `ns ++ pre ~> t`, where `id = pre ++ rest` and `rest` is
+nonempty, trying the longest `pre` first. For example, `export B (S)` in `A` resolves `A.S.foo` to
+`A.B.S.foo`.
+-/
+private def resolveAliasPrefix (env : Environment) (ns : Name) (id : Name) : List Name :=
+  go id []
+where
+  go : Name → List String → List Name
+    | .str pre s, rest =>
+      let rest := s :: rest
+      if pre.isAnonymous then [] else
+      let found := getAliases env (ns ++ pre) (skipProtected := false) |>.filterMap fun t =>
+        let c := rest.foldl Name.mkStr t
+        if containsDeclOrReserved env c then some c else none
+      if found.isEmpty then go pre rest else found
+    | _, _ => []
+
 /-- Check whether `ns ++ id` is a valid namespace name and/or there are aliases names `ns ++ id`. -/
 private def resolveQualifiedName (env : Environment) (opts : Options) (ns : Name) (id : Name) : List Name := Id.run do
   let resolvedId    := ns ++ id
@@ -140,6 +158,8 @@ private def resolveQualifiedName (env : Environment) (opts : Options) (ns : Name
       return resolvedId :: resolvedIds
     else if let some resolvedIdPrv := resolvePrivateName env opts resolvedId then
       return resolvedIdPrv :: resolvedIds
+  if resolvedIds.isEmpty then
+    return resolveAliasPrefix env ns id
   return resolvedIds
 
 /-- Check surrounding namespaces -/
@@ -209,6 +229,7 @@ def resolveGlobalName (env : Environment) (opts : Options) (ns : Name) (openDecl
           let resolvedIds := if let some idPrv := resolvePrivateName env opts id then [idPrv] ++ resolvedIds else resolvedIds
           let resolvedIds := resolveOpenDecls env opts id openDecls resolvedIds
           let resolvedIds := getAliases env id (skipProtected := id.isAtomic) ++ resolvedIds
+          let resolvedIds := if resolvedIds.isEmpty then resolveAliasPrefix env .anonymous id else resolvedIds
           match resolvedIds with
           | _ :: _ => resolvedIds.eraseDups.map fun id => (id, projs)
           | []     => loop p (s::projs)
