@@ -28,9 +28,9 @@ example (l : List Nat) : (Wrapper.mk l).toList = l := rfl
 example (l : List Nat) : (Control.mk l).toList = l := rfl
 
 /-!
-The equivalence is `macro_inline`, so that an instance transported along it compiles as if it had
-been written on the underlying type: `Wrapper.equivDef.toFun`/`.invFun` fold to the identities before
-the compiler sees them, whereas `inline` would only reach the closed term the equivalence itself is
+The equivalence is `macro_inline`, so that code using it directly compiles as if it had been written
+on the underlying type: `Wrapper.equivDef.toFun`/`.invFun` fold to the identities before the
+compiler sees them, whereas `inline` would only reach the closed term the equivalence itself is
 compiled to.
 -/
 
