@@ -606,6 +606,9 @@ instance : MonadReaderOf Context MetaM := inferInstanceAs (MonadReaderOf _ (Read
 instance : MonadWithReaderOf Context MetaM := inferInstanceAs (MonadWithReaderOf _ (ReaderT Context _))
 instance : MonadStateOf State MetaM := inferInstanceAs (MonadStateOf _ (ReaderT Context _))
 instance : MonadLift (StateRefT State CoreM) MetaM := inferInstanceAs (MonadLift _ (ReaderT Context _))
+instance : LawfulMonadLift (StateRefT State CoreM) MetaM where
+  monadLift_pure _ := rfl
+  monadLift_bind _ _ := rfl
 instance : MonadFunctor (StateRefT State CoreM) MetaM :=
   inferInstanceAs (MonadFunctor _ (ReaderT Context _))
 instance : MonadControl (StateRefT State CoreM) MetaM :=
