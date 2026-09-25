@@ -31,7 +31,7 @@ trace: [Compiler.saveMono] size: 1
 ---
 trace: [Compiler.saveMono] size: 5
     def _private.elab.erased.0._eval._lam_0 (_x.1 : Array
-       Lean.Name) (_x.2 : PUnit) (_y.3 : Lean.Elab.Term.Context) (_y.4 : @&lcAny) (_y.5 : @&Lean.Meta.Context) (_y.6 : @&lcAny) (_y.7 : @&Lean.Core.Context) (_y.8 : @&lcAny) (_y.9 : lcVoid) : EST.Out
+       Lean.Name) (_x.2 : PUnit) (_y.3 : Lean.Elab.Term.Context) (_y.4 : lcAny) (_y.5 : Lean.Meta.Context) (_y.6 : lcAny) (_y.7 : Lean.Core.Context) (_y.8 : lcAny) (_y.9 : lcVoid) : EST.Out
       Lean.Exception lcAny PUnit :=
       let _x.10 : EST.Out Lean.Exception lcAny PUnit := compile _x.1 _y.7 _y.8 _y.9;
       cases _x.10 : EST.Out Lean.Exception lcAny PUnit
