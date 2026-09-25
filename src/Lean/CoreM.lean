@@ -869,12 +869,12 @@ instance : MonadRuntimeException CoreM where
 section
 variable {m n : Type → Type} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
 
-protected abbrev MonadRuntimeException.ofEquiv (i : MonadRuntimeException n) :
+@[expose, reducible, macro_inline] protected def MonadRuntimeException.ofEquiv (i : MonadRuntimeException n) :
     MonadRuntimeException m where
   tryCatchRuntimeEx body handler :=
     (e _).invFun (i.tryCatchRuntimeEx ((e _).toFun body) fun ex => (e _).toFun (handler ex))
 
-@[transport] protected abbrev MonadRuntimeException.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def MonadRuntimeException.canonicalCongr :
     Lean.CanonicalEquivalence (MonadRuntimeException m) (MonadRuntimeException n) where
   toFun := MonadRuntimeException.ofEquiv fun α => (e α).symm
   invFun := MonadRuntimeException.ofEquiv e

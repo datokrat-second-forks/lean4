@@ -274,11 +274,11 @@ instance [always : MonadAlwaysExcept ε m] [STWorld ω m] [BEq α] [Hashable α]
 section
 variable {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
 
-protected abbrev MonadAlwaysExcept.ofEquiv {ε : Type u} (i : MonadAlwaysExcept ε n) :
+@[expose, reducible, macro_inline] protected def MonadAlwaysExcept.ofEquiv {ε : Type u} (i : MonadAlwaysExcept ε n) :
     MonadAlwaysExcept ε m where
   except := MonadExceptOf.ofEquiv e i.except
 
-@[transport] protected abbrev MonadAlwaysExcept.canonicalCongr {ε : Type u} :
+@[transport, expose, reducible, macro_inline] protected def MonadAlwaysExcept.canonicalCongr {ε : Type u} :
     Lean.CanonicalEquivalence (MonadAlwaysExcept ε m) (MonadAlwaysExcept ε n) where
   toFun := MonadAlwaysExcept.ofEquiv fun α => (e α).symm
   invFun := MonadAlwaysExcept.ofEquiv e
