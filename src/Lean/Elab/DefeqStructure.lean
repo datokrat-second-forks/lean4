@@ -83,9 +83,9 @@ private def addDefeqStructureCtorProj (declName ctorName projName equivName fiel
       addDecl decl (forceExpose := exposed)
       -- Reducible so that `N.equivDef.toFun`/`.invFun` are seen as the projector/constructor.
       setReducibilityStatus equivName .reducible
-      -- `macro_inline` substitutes the structure literal before compilation, so a transported
-      -- instance's `N.equivDef.toFun`/`.invFun` fold to the identities; `inline` would only reach
-      -- the closed term the equivalence itself is compiled to.
+      -- `macro_inline` substitutes the structure literal before compilation, so that code using
+      -- `N.equivDef.toFun`/`.invFun` directly (e.g. `Iter.map`'s instance) folds them to the
+      -- identities; `inline` would only reach the closed term the equivalence is compiled to.
       setInlineAttribute equivName .macroInline
       compileDecl decl
       Transport.addTransportDecl equivName .global
