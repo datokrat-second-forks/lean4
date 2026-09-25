@@ -216,6 +216,27 @@ instance [MonadRecDepth m] : MonadRecDepth (ReaderT ρ m) where
 instance [Monad m] [MonadRecDepth m] : MonadRecDepth (StateRefT' ω σ m) :=
   inferInstanceAs (MonadRecDepth (ReaderT _ _))
 
+section
+variable {m n : Type → Type} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
+
+protected abbrev MonadRecDepth.ofEquiv (i : MonadRecDepth n) : MonadRecDepth m where
+  withRecDepth d x := (e _).invFun (i.withRecDepth d ((e _).toFun x))
+  getRecDepth := (e _).invFun i.getRecDepth
+  getMaxRecDepth := (e _).invFun i.getMaxRecDepth
+
+@[transport] protected abbrev MonadRecDepth.canonicalCongr :
+    Lean.CanonicalEquivalence (MonadRecDepth m) (MonadRecDepth n) where
+  toFun := MonadRecDepth.ofEquiv fun α => (e α).symm
+  invFun := MonadRecDepth.ofEquiv e
+  left_inv i :=
+    show MonadRecDepth.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadRecDepth.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadRecDepth.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadRecDepth.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+end
+
 instance [BEq α] [Hashable α] [Monad m] [STWorld ω m] [MonadRecDepth m] : MonadRecDepth (MonadCacheT α β m) where
   withRecDepth d x := .mk (MonadRecDepth.withRecDepth d x.toStateRefT)
   getRecDepth      := .mk MonadRecDepth.getRecDepth

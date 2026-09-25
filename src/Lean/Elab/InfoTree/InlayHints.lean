@@ -47,7 +47,7 @@ structure InlayHintInfo where
 
 structure InlayHint extends InlayHintInfo where
   lctx               : LocalContext
-  deferredResolution : InlayHintInfo → MetaM InlayHintInfo := fun i => .pure i
+  deferredResolution : InlayHintInfo → MetaM InlayHintInfo := fun i => pure i
   deriving TypeName
 
 namespace InlayHint
