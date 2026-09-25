@@ -372,6 +372,53 @@ protected abbrev MonadExceptOf.ofEquiv {ε : Type w} (i : MonadExceptOf ε n) :
     show MonadExceptOf.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadExceptOf.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
+protected abbrev MonadReaderOf.ofEquiv {ρ : Type u} (i : MonadReaderOf ρ n) :
+    MonadReaderOf ρ m where
+  read := (e _).invFun i.read
+
+@[transport] protected abbrev MonadReaderOf.canonicalCongr {ρ : Type u} :
+    Lean.CanonicalEquivalence (MonadReaderOf ρ m) (MonadReaderOf ρ n) where
+  toFun := MonadReaderOf.ofEquiv fun α => (e α).symm
+  invFun := MonadReaderOf.ofEquiv e
+  left_inv i :=
+    show MonadReaderOf.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadReaderOf.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadReaderOf.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadReaderOf.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+protected abbrev MonadWithReaderOf.ofEquiv {ρ : Type u} (i : MonadWithReaderOf ρ n) :
+    MonadWithReaderOf ρ m where
+  withReader f x := (e _).invFun (i.withReader f ((e _).toFun x))
+
+@[transport] protected abbrev MonadWithReaderOf.canonicalCongr {ρ : Type u} :
+    Lean.CanonicalEquivalence (MonadWithReaderOf ρ m) (MonadWithReaderOf ρ n) where
+  toFun := MonadWithReaderOf.ofEquiv fun α => (e α).symm
+  invFun := MonadWithReaderOf.ofEquiv e
+  left_inv i :=
+    show MonadWithReaderOf.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadWithReaderOf.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadWithReaderOf.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadWithReaderOf.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+protected abbrev MonadStateOf.ofEquiv {σ : Type u} (i : MonadStateOf σ n) :
+    MonadStateOf σ m where
+  get := (e _).invFun i.get
+  set s := (e _).invFun (i.set s)
+  modifyGet f := (e _).invFun (i.modifyGet f)
+
+@[transport] protected abbrev MonadStateOf.canonicalCongr {σ : Type u} :
+    Lean.CanonicalEquivalence (MonadStateOf σ m) (MonadStateOf σ n) where
+  toFun := MonadStateOf.ofEquiv fun α => (e α).symm
+  invFun := MonadStateOf.ofEquiv e
+  left_inv i :=
+    show MonadStateOf.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadStateOf.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadStateOf.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadStateOf.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
 end
 
 section

@@ -271,6 +271,26 @@ instance [always : MonadAlwaysExcept ε m] [STWorld ω m] [BEq α] [Hashable α]
     MonadAlwaysExcept ε (MonadCacheT α β m) where
   except := let _ := always.except; inferInstance
 
+section
+variable {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
+
+protected abbrev MonadAlwaysExcept.ofEquiv {ε : Type u} (i : MonadAlwaysExcept ε n) :
+    MonadAlwaysExcept ε m where
+  except := MonadExceptOf.ofEquiv e i.except
+
+@[transport] protected abbrev MonadAlwaysExcept.canonicalCongr {ε : Type u} :
+    Lean.CanonicalEquivalence (MonadAlwaysExcept ε m) (MonadAlwaysExcept ε n) where
+  toFun := MonadAlwaysExcept.ofEquiv fun α => (e α).symm
+  invFun := MonadAlwaysExcept.ofEquiv e
+  left_inv i :=
+    show MonadAlwaysExcept.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadAlwaysExcept.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadAlwaysExcept.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadAlwaysExcept.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+end
+
 def bombEmoji := "💥️"
 def checkEmoji := "✅️"
 def crossEmoji := "❌️"

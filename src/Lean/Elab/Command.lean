@@ -73,14 +73,10 @@ structure Context where
 newtype CommandElabM (α : Type) := ReaderT Context (StateRefT State (EIO Exception)) α
   with toReaderT
 
-instance : MonadReaderOf Context CommandElabM where
-  read := .mk read
-instance : MonadWithReaderOf Context CommandElabM where
-  withReader f x := .mk <| withReader f x.toReaderT
-instance : MonadStateOf State CommandElabM where
-  get           := .mk get
-  set s         := .mk <| set s
-  modifyGet f   := .mk <| modifyGet f
+instance : MonadReaderOf Context CommandElabM := inferInstanceAs (MonadReaderOf _ (ReaderT Context _))
+instance : MonadWithReaderOf Context CommandElabM :=
+  inferInstanceAs (MonadWithReaderOf _ (ReaderT Context _))
+instance : MonadStateOf State CommandElabM := inferInstanceAs (MonadStateOf _ (ReaderT Context _))
 instance : MonadLift (StateRefT State (EIO Exception)) CommandElabM :=
   inferInstanceAs (MonadLift _ (ReaderT Context _))
 instance : MonadFunctor (StateRefT State (EIO Exception)) CommandElabM :=
@@ -168,10 +164,8 @@ instance : MonadExceptOf Exception CommandElabM where
   tryCatch := Command.tryCatch
 
 -- unlike `Command.tryCatch`, also catches interrupts
-instance : MonadAlwaysExcept Exception CommandElabM where
-  except := {
-    throw ex := .mk <| throw ex
-    tryCatch x h := .mk <| tryCatch x.toReaderT (h · |>.toReaderT) }
+instance : MonadAlwaysExcept Exception CommandElabM :=
+  inferInstanceAs (MonadAlwaysExcept _ (ReaderT Context _))
 
 def mkState (env : Environment) (messages : MessageLog := {}) (opts : Options := {}) : State := {
   env         := env
