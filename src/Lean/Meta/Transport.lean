@@ -133,8 +133,10 @@ private partial def applyDecl (declName : Name) (goal : Expr) (fuel : Nat) : Met
     if bi.isInstImplicit then
       arg.mvarId!.assign (← synthInstance argType)
     else if ← isEquivFamily argType then
+      -- Eta-reduced, a family such as `@N.equivDef` is substituted as a constant when the
+      -- `macro_inline` congruence is expanded, so that each `(e _).invFun` folds to `N.mk`.
       arg.mvarId!.assign (← forallTelescopeReducing argType fun xs body => do
-        mkLambdaFVars xs (← mkEquiv body.appFn!.appArg! body.appArg! fuel))
+        return (← mkLambdaFVars xs (← mkEquiv body.appFn!.appArg! body.appArg! fuel)).eta)
     else if let some (_, lhs, rhs) := argType.eq? then
       unless ← isDefEq lhs rhs do
         throwError "`{.ofConstName declName}` does not apply, its argument `{argDecl.userName}` \
