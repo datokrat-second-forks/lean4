@@ -379,7 +379,40 @@ structure Context where
   -/
   fixedTermElabs : Array FixedTermElabRef := #[]
 
-abbrev TermElabM := ReaderT Context $ StateRefT State MetaM
+newtype TermElabM (α : Type) := ReaderT Context (StateRefT State MetaM) α with toReaderT
+
+/-
+Make the compiler generate specialized `pure`/`bind` so we do not have to optimize through the
+whole monad stack at every use site. May eventually be covered by `deriving`.
+-/
+@[always_inline]
+instance : Monad TermElabM :=
+  let i : Monad TermElabM := inferInstanceAs (Monad (ReaderT Context _))
+  { pure := i.pure, bind := i.bind }
+
+instance : MonadReaderOf Context TermElabM := inferInstanceAs (MonadReaderOf _ (ReaderT Context _))
+instance : MonadWithReaderOf Context TermElabM :=
+  inferInstanceAs (MonadWithReaderOf _ (ReaderT Context _))
+instance : MonadStateOf State TermElabM := inferInstanceAs (MonadStateOf _ (ReaderT Context _))
+instance : MonadLift (StateRefT State MetaM) TermElabM :=
+  inferInstanceAs (MonadLift _ (ReaderT Context _))
+instance : MonadFunctor (StateRefT State MetaM) TermElabM :=
+  inferInstanceAs (MonadFunctor _ (ReaderT Context _))
+instance : MonadControl (StateRefT State MetaM) TermElabM :=
+  inferInstanceAs (MonadControl _ (ReaderT Context _))
+instance : MonadFinally TermElabM := inferInstanceAs (MonadFinally (ReaderT Context _))
+instance : MonadAttach TermElabM := inferInstanceAs (MonadAttach (ReaderT Context _))
+instance : MonadExceptOf Exception TermElabM := inferInstanceAs (MonadExceptOf _ (ReaderT Context _))
+instance : MonadAlwaysExcept Exception TermElabM :=
+  inferInstanceAs (MonadAlwaysExcept _ (ReaderT Context _))
+instance : MonadRuntimeException TermElabM :=
+  inferInstanceAs (MonadRuntimeException (ReaderT Context _))
+instance : MonadRecDepth TermElabM := inferInstanceAs (MonadRecDepth (ReaderT Context _))
+instance : Alternative TermElabM := inferInstanceAs (Alternative (ReaderT Context _))
+
+instance : Inhabited (TermElabM α) where
+  default := throw default
+
 abbrev TermElab  := Syntax → Option Expr → TermElabM Expr
 
 @[deprecated "replace with a check of autoBoundImplicitContext" (since := "2025-11-11")]
@@ -402,18 +435,7 @@ unsafe def FixedTermElabRef.toFixedTermElabImpl (m : FixedTermElabRef) : FixedTe
 @[implemented_by FixedTermElabRef.toFixedTermElabImpl]
 opaque FixedTermElabRef.toFixedTermElab (m : FixedTermElabRef) : FixedTermElab
 
-/-
-Make the compiler generate specialized `pure`/`bind` so we do not have to optimize through the
-whole monad stack at every use site. May eventually be covered by `deriving`.
--/
-@[always_inline]
-instance : Monad TermElabM :=
-  let i : Monad TermElabM := inferInstance
-  { pure := i.pure, bind := i.bind }
-
 open Meta
-instance : Inhabited (TermElabM α) where
-  default := throw default
 
 protected def saveState : TermElabM SavedState :=
   return { «meta» := (← Meta.saveState), «elab» := (← get) }
@@ -561,7 +583,7 @@ def wrapAsyncAsSnapshot {α : Type} (act : α → TermElabM Unit) (cancelTk? : O
   let metaCtx ← readThe Meta.Context
   let metaSt ← getThe Meta.State
   Core.wrapAsyncAsSnapshot (cancelTk? := cancelTk?) (desc := desc) fun a =>
-    act a |>.run ctx |>.run' st |>.run' metaCtx metaSt
+    act a |>.toReaderT.run ctx |>.run' st |>.run' metaCtx metaSt
 
 abbrev TermElabResult (α : Type) := EStateM.Result Exception SavedState α
 
@@ -2254,7 +2276,7 @@ def resolveId? (stx : Syntax) (kind := "term") (withInfo := false) : TermElabM (
   | _ => throwError "identifier expected"
 
 def TermElabM.run (x : TermElabM α) (ctx : Context := {}) (s : State := {}) : MetaM (α × State) :=
-  withConfig setElabConfig (ReaderT.run x ctx |>.run s)
+  withConfig setElabConfig (x.toReaderT.run ctx |>.run s)
 
 @[inline] def TermElabM.run' (x : TermElabM α) (ctx : Context := {}) (s : State := {}) : MetaM α :=
   (·.1) <$> x.run ctx s
