@@ -21,7 +21,14 @@ Adds exceptions of type `ε` to a monad `m`.
 Instead of using `Except ε` to model exceptions, this implementation uses continuation passing
 style. This has different performance characteristics from `ExceptT ε`.
 -/
-@[expose, instance_reducible] def ExceptCpsT (ε : Type u) (m : Type u → Type v) (α : Type u) := (β : Type u) → (α → m β) → (ε → m β) → m β
+newtype ExceptCpsT (ε : Type u) (m : Type u → Type v) (α : Type u) :=
+  (β : Type u) → (α → m β) → (ε → m β) → m β with toFn
+
+/-- Interpret a CPS exception function as an element of `ExceptCpsT ε m α`. -/
+add_decl_doc ExceptCpsT.mk
+
+/-- The CPS exception function underlying an `ExceptCpsT` action. -/
+add_decl_doc ExceptCpsT.toFn
 
 namespace ExceptCpsT
 
@@ -30,7 +37,7 @@ Use a monadic action that may throw an exception as an action that may return an
 -/
 @[always_inline, inline, expose]
 def run {ε α : Type u} [Monad m] (x : ExceptCpsT ε m α) : m (Except ε α) :=
-  x _ (fun a => pure (Except.ok a)) (fun e => pure (Except.error e))
+  x.toFn _ (fun a => pure (Except.ok a)) (fun e => pure (Except.error e))
 
 /--
 Use a monadic action that may throw an exception by providing explicit success and failure
@@ -38,7 +45,7 @@ continuations.
 -/
 @[always_inline, inline, expose, deprecated_arg s (since := "2026-07-16")]
 def runK {ε α : Type u} (x : ExceptCpsT ε m α) (ok : α → m β) (error : ε → m β) : m β :=
-  x _ ok error
+  x.toFn _ ok error
 
 /--
 Returns the value of a computation, forgetting whether it was an exception or a success.
@@ -47,33 +54,33 @@ This corresponds to early return.
 -/
 @[always_inline, inline, expose]
 def runCatch [Monad m] (x : ExceptCpsT α m α) : m α :=
-  x α pure pure
+  x.toFn α pure pure
 
 @[always_inline]
 instance : Monad (ExceptCpsT ε m) where
-  map f x  := fun _ k₁ k₂ => x _ (fun a => k₁ (f a)) k₂
-  pure a   := fun _ k _ => k a
-  bind x f := fun _ k₁ k₂ => x _ (fun a => f a _ k₁ k₂) k₂
+  map f x  := .mk fun _ k₁ k₂ => x.toFn _ (fun a => k₁ (f a)) k₂
+  pure a   := .mk fun _ k _ => k a
+  bind x f := .mk fun _ k₁ k₂ => x.toFn _ (fun a => (f a).toFn _ k₁ k₂) k₂
 
 instance : LawfulMonad (ExceptCpsT σ m) := by
   refine LawfulMonad.mk' _ ?_ ?_ ?_ <;> intros <;> rfl
 
 instance : MonadExceptOf ε (ExceptCpsT ε m) where
-  throw e  := fun _ _ k => k e
-  tryCatch x handle := fun _ k₁ k₂ => x _ k₁ (fun e => handle e _ k₁ k₂)
+  throw e  := .mk fun _ _ k => k e
+  tryCatch x handle := .mk fun _ k₁ k₂ => x.toFn _ k₁ (fun e => (handle e).toFn _ k₁ k₂)
 
 /--
 Run an action from the transformed monad in the exception monad.
 -/
 @[always_inline, inline, expose]
 def lift [Monad m] (x : m α) : ExceptCpsT ε m α :=
-  fun _ k _ => x >>= k
+  .mk fun _ k _ => x >>= k
 
 instance [Monad m] : MonadLift m (ExceptCpsT σ m) where
   monadLift := ExceptCpsT.lift
 
 instance [Inhabited ε] : Inhabited (ExceptCpsT ε m α) where
-  default := fun _ _ k₂ => k₂ default
+  default := .mk fun _ _ k₂ => k₂ default
 
 /--
 For continuation monads, it is not possible to provide a computable `MonadAttach` instance that
