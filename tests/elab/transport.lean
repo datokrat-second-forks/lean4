@@ -170,6 +170,7 @@ instance : DecidableEq Qux := by transport (DecidableEq Int)
 example : Qux.mk 1 ≤ Qux.mk 2 := by decide
 example : ¬ Qux.mk 2 ≤ Qux.mk 1 := by decide
 example : Qux.mk 1 ≠ Qux.mk 2 := by decide
+instance : LawfulLE Qux := by transport (LawfulLE Int)
 
 example : Decidable (Foo.mk 3 = Foo.mk 4) := by transport Decidable ((3 : Int) = 4)
 

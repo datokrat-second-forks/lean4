@@ -24,6 +24,20 @@ instance : LawfulMonadLift Id M := inferInstanceAs (LawfulMonadLift Id (StateT N
 -- The laws are usable on the `newtype`.
 example (x : M Nat) : (x >>= pure) = x := bind_pure x
 
+-- A hand-written `Monad` instance that agrees with the transported one inherits lawfulness.
+newtype Good (α : Type) := StateT Nat Id α with run
+
+instance : Monad Good where
+  map f x := .mk (f <$> x.run)
+  mapConst a x := .mk (Functor.mapConst a x.run)
+  pure a := .mk (pure a)
+  bind x f := .mk (x.run >>= fun a => (f a).run)
+  seq f x := .mk (f.run <*> (x ()).run)
+  seqLeft x y := .mk (x.run <* (y ()).run)
+  seqRight x y := .mk (x.run *> (y ()).run)
+
+instance : LawfulMonad Good := inferInstanceAs (LawfulMonad (StateT Nat Id))
+
 -- A `Monad` instance that is not the transported one does not inherit lawfulness.
 newtype Bad (α : Type) := StateT Nat Id α with run
 
@@ -42,7 +56,8 @@ and cannot be transported to it:
   to
     LawfulMonad Bad
   
-  Note: `LawfulMonad.canonicalCongr` does not apply
+  Note: `LawfulMonad.canonicalCongr` does not apply, its argument `hi` does not hold by `rfl`:
+    instMonadBad = (Monad.canonicalCongr @Bad.equivDef).invFun StateT.instMonad
 -/
 #guard_msgs in
 instance : LawfulMonad Bad := inferInstanceAs (LawfulMonad (StateT Nat Id))
