@@ -219,12 +219,12 @@ instance [Monad m] [MonadRecDepth m] : MonadRecDepth (StateRefT' ω σ m) :=
 section
 variable {m n : Type → Type} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
 
-@[expose, reducible, macro_inline] protected def MonadRecDepth.ofEquiv (i : MonadRecDepth n) : MonadRecDepth m where
+protected abbrev MonadRecDepth.ofEquiv (i : MonadRecDepth n) : MonadRecDepth m where
   withRecDepth d x := (e _).invFun (i.withRecDepth d ((e _).toFun x))
   getRecDepth := (e _).invFun i.getRecDepth
   getMaxRecDepth := (e _).invFun i.getMaxRecDepth
 
-@[transport, expose, reducible, macro_inline] protected def MonadRecDepth.canonicalCongr :
+@[transport] protected abbrev MonadRecDepth.canonicalCongr :
     Lean.CanonicalEquivalence (MonadRecDepth m) (MonadRecDepth n) where
   toFun := MonadRecDepth.ofEquiv fun α => (e α).symm
   invFun := MonadRecDepth.ofEquiv e
