@@ -396,6 +396,9 @@ instance : MonadWithReaderOf Context TermElabM :=
 instance : MonadStateOf State TermElabM := inferInstanceAs (MonadStateOf _ (ReaderT Context _))
 instance : MonadLift (StateRefT State MetaM) TermElabM :=
   inferInstanceAs (MonadLift _ (ReaderT Context _))
+instance : LawfulMonadLift (StateRefT State MetaM) TermElabM where
+  monadLift_pure _ := rfl
+  monadLift_bind _ _ := rfl
 instance : MonadFunctor (StateRefT State MetaM) TermElabM :=
   inferInstanceAs (MonadFunctor _ (ReaderT Context _))
 instance : MonadControl (StateRefT State MetaM) TermElabM :=

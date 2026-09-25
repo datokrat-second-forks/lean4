@@ -281,6 +281,9 @@ instance : MonadWithReaderOf Context CoreM := inferInstanceAs (MonadWithReaderOf
 instance : MonadStateOf State CoreM := inferInstanceAs (MonadStateOf _ (ReaderT Context _))
 instance : MonadLift (StateRefT State (EIO Exception)) CoreM :=
   inferInstanceAs (MonadLift _ (ReaderT Context _))
+instance : LawfulMonadLift (StateRefT State (EIO Exception)) CoreM where
+  monadLift_pure _ := rfl
+  monadLift_bind _ _ := rfl
 instance : MonadFunctor (StateRefT State (EIO Exception)) CoreM :=
   inferInstanceAs (MonadFunctor _ (ReaderT Context _))
 instance : MonadControl (StateRefT State (EIO Exception)) CoreM :=

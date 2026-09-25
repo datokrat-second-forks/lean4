@@ -145,6 +145,10 @@ instance : Monad CommandElabM :=
   let i : Monad CommandElabM := inferInstanceAs (Monad (ReaderT Context _))
   { pure := i.pure, bind := i.bind }
 
+instance : LawfulMonadLift (StateRefT State (EIO Exception)) CommandElabM where
+  monadLift_pure _ := rfl
+  monadLift_bind _ _ := rfl
+
 /--
 Like `Core.tryCatchRuntimeEx`; runtime errors are generally used to abort term elaboration, so we do
 want to catch and process them at the command level.
