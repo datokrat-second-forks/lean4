@@ -31,8 +31,8 @@ their binders), synthesizes instance arguments, and chains through intermediate 
 Types are identified by `isDefEq` at implicit transparency, which never unfolds the irreducible
 definition a `newtype` is; unlike `inferInstanceAs`'s instance wrapping this never depends on the
 kernel unfolding what the elaborator may not. A congruence for a lawful class such as `TransOrd`
-concludes at the transported instance of its parent class and therefore only applies to an
-instance definitionally equal to it.
+takes the instance of its parent class as an implicit argument, with an equation stating that it
+is the transported instance; it therefore applies to any instance definitionally equal to it.
 
 Equivalences are only used in their stated direction, like unfolding: `Foo.equivDef` unfolds `Foo`
 to `Int` and so moves instances from `Int` to `Foo`, but not back, and not between two `newtype`s
@@ -61,7 +61,8 @@ private def isEquivFamily (type : Expr) : MetaM Bool :=
 Registers `declName` for `mkTransportEquiv`. Its type must be of the form
 `∀ …, Lean.CanonicalEquivalence α β`. Every explicit argument must be a canonical equivalence,
 a family of canonical equivalences, or an equation, which must hold definitionally once the other
-arguments are determined.
+arguments are determined. The conclusion must not mention the equivalence arguments: they are only
+sought between the types the conclusion fixes, never inferred from terms.
 -/
 def addTransportDecl (declName : Name) (kind : AttributeKind) : MetaM Unit := do
   let type := (← getConstInfo declName).type
@@ -77,6 +78,13 @@ def addTransportDecl (declName : Name) (kind : AttributeKind) : MetaM Unit := do
         throwError "invalid `@[transport]` declaration `{.ofConstName declName}`, its explicit \
           arguments must be equivalences, families of equivalences or equations, but \
           `{xDecl.userName}` has type{indentExpr xType}"
+  let concl ← instantiateMVars concl
+  for x in xs do
+    let xDecl ← x.mvarId!.getDecl
+    if (← isEquivFamily (← instantiateMVars xDecl.type)) && (concl.find? (· == x)).isSome then
+      throwError "invalid `@[transport]` declaration `{.ofConstName declName}`, its conclusion \
+        mentions the equivalence `{xDecl.userName}`; state terms built from it as implicit \
+        arguments determined by the conclusion, with equations, as `Eq.canonicalCongr` does"
   let keys ← withReducible <| DiscrTree.mkPath concl
   transportExt.add (declName, keys) kind
 
