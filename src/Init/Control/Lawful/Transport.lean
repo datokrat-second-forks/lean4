@@ -15,8 +15,9 @@ public section
 /-!
 # Congruences for transporting lawfulness instances
 
-Each congruence concludes at the transported instance of its parent class (see `Init.Transport`),
-so it only applies to an instance that was itself transported.
+Each congruence takes the instances of the parent classes on the transported side as implicit
+arguments, determined by its conclusion, together with equations stating that they are the
+transported instances (see `Init.Transport`), which are checked by `rfl`.
 -/
 
 universe u v w
@@ -111,30 +112,36 @@ theorem LawfulMonad.ofEquiv [i : Monad n] [h : LawfulMonad n] :
         (e _).invFun ((e _).toFun f <*> (e _).toFun x) by
         simp only [toFun_invFun, bind_map])
 
-@[transport] protected abbrev LawfulFunctor.canonicalCongr [i : Functor n] :
-    Lean.CanonicalEquivalence (@LawfulFunctor m ((Functor.canonicalCongr e).invFun i))
-      (@LawfulFunctor n i) where
-  toFun h := (Functor.canonicalCongr e).right_inv i ▸
-    LawfulFunctor.ofEquiv (i := Functor.ofEquiv e i) (h := h) fun α => (e α).symm
-  invFun _ := LawfulFunctor.ofEquiv e
+@[transport] protected abbrev LawfulFunctor.canonicalCongr [i : Functor n] {i' : Functor m}
+    (hi : i' = (Functor.canonicalCongr e).invFun i) :
+    Lean.CanonicalEquivalence (@LawfulFunctor m i') (@LawfulFunctor n i) where
+  toFun h := by
+    subst hi
+    exact (Functor.canonicalCongr e).right_inv i ▸
+      LawfulFunctor.ofEquiv (i := Functor.ofEquiv e i) (h := h) fun α => (e α).symm
+  invFun _ := by subst hi; exact LawfulFunctor.ofEquiv e
   left_inv _ := rfl
   right_inv _ := rfl
 
-@[transport] protected abbrev LawfulApplicative.canonicalCongr [i : Applicative n] :
-    Lean.CanonicalEquivalence (@LawfulApplicative m ((Applicative.canonicalCongr e).invFun i))
-      (@LawfulApplicative n i) where
-  toFun h := (Applicative.canonicalCongr e).right_inv i ▸
-    LawfulApplicative.ofEquiv (i := Applicative.ofEquiv e i) (h := h) fun α => (e α).symm
-  invFun _ := LawfulApplicative.ofEquiv e
+@[transport] protected abbrev LawfulApplicative.canonicalCongr [i : Applicative n] {i' : Applicative m}
+    (hi : i' = (Applicative.canonicalCongr e).invFun i) :
+    Lean.CanonicalEquivalence (@LawfulApplicative m i') (@LawfulApplicative n i) where
+  toFun h := by
+    subst hi
+    exact (Applicative.canonicalCongr e).right_inv i ▸
+      LawfulApplicative.ofEquiv (i := Applicative.ofEquiv e i) (h := h) fun α => (e α).symm
+  invFun _ := by subst hi; exact LawfulApplicative.ofEquiv e
   left_inv _ := rfl
   right_inv _ := rfl
 
-@[transport] protected abbrev LawfulMonad.canonicalCongr [i : Monad n] :
-    Lean.CanonicalEquivalence (@LawfulMonad m ((Monad.canonicalCongr e).invFun i))
-      (@LawfulMonad n i) where
-  toFun h := (Monad.canonicalCongr e).right_inv i ▸
-    LawfulMonad.ofEquiv (i := Monad.ofEquiv e i) (h := h) fun α => (e α).symm
-  invFun _ := LawfulMonad.ofEquiv e
+@[transport] protected abbrev LawfulMonad.canonicalCongr [i : Monad n] {i' : Monad m}
+    (hi : i' = (Monad.canonicalCongr e).invFun i) :
+    Lean.CanonicalEquivalence (@LawfulMonad m i') (@LawfulMonad n i) where
+  toFun h := by
+    subst hi
+    exact (Monad.canonicalCongr e).right_inv i ▸
+      LawfulMonad.ofEquiv (i := Monad.ofEquiv e i) (h := h) fun α => (e α).symm
+  invFun _ := by subst hi; exact LawfulMonad.ofEquiv e
   left_inv _ := rfl
   right_inv _ := rfl
 
@@ -159,29 +166,30 @@ theorem LawfulMonadAttach.ofEquiv [iM : Monad n] [iA : MonadAttach n] [h : Lawfu
       exact LawfulMonadAttach.canReturn_map_imp hc }
 
 @[transport] protected abbrev WeaklyLawfulMonadAttach.canonicalCongr [iM : Monad n]
-    [iA : MonadAttach n] :
-    Lean.CanonicalEquivalence
-      (@WeaklyLawfulMonadAttach m ((Monad.canonicalCongr e).invFun iM)
-        ((MonadAttach.canonicalCongr e).invFun iA))
-      (@WeaklyLawfulMonadAttach n iM iA) where
-  toFun h :=
-    (Monad.canonicalCongr e).right_inv iM ▸ (MonadAttach.canonicalCongr e).right_inv iA ▸
+    [iA : MonadAttach n] {iM' : Monad m} {iA' : MonadAttach m}
+    (hM : iM' = (Monad.canonicalCongr e).invFun iM)
+    (hA : iA' = (MonadAttach.canonicalCongr e).invFun iA) :
+    Lean.CanonicalEquivalence (@WeaklyLawfulMonadAttach m iM' iA') (@WeaklyLawfulMonadAttach n iM iA) where
+  toFun h := by
+    subst hM hA
+    exact (Monad.canonicalCongr e).right_inv iM ▸ (MonadAttach.canonicalCongr e).right_inv iA ▸
       WeaklyLawfulMonadAttach.ofEquiv (iM := Monad.ofEquiv e iM) (iA := MonadAttach.ofEquiv e iA)
         (h := h) fun α => (e α).symm
-  invFun _ := WeaklyLawfulMonadAttach.ofEquiv e
+  invFun _ := by subst hM hA; exact WeaklyLawfulMonadAttach.ofEquiv e
   left_inv _ := rfl
   right_inv _ := rfl
 
-@[transport] protected abbrev LawfulMonadAttach.canonicalCongr [iM : Monad n] [iA : MonadAttach n] :
-    Lean.CanonicalEquivalence
-      (@LawfulMonadAttach m ((Monad.canonicalCongr e).invFun iM)
-        ((MonadAttach.canonicalCongr e).invFun iA))
-      (@LawfulMonadAttach n iM iA) where
-  toFun h :=
-    (Monad.canonicalCongr e).right_inv iM ▸ (MonadAttach.canonicalCongr e).right_inv iA ▸
+@[transport] protected abbrev LawfulMonadAttach.canonicalCongr [iM : Monad n]
+    [iA : MonadAttach n] {iM' : Monad m} {iA' : MonadAttach m}
+    (hM : iM' = (Monad.canonicalCongr e).invFun iM)
+    (hA : iA' = (MonadAttach.canonicalCongr e).invFun iA) :
+    Lean.CanonicalEquivalence (@LawfulMonadAttach m iM' iA') (@LawfulMonadAttach n iM iA) where
+  toFun h := by
+    subst hM hA
+    exact (Monad.canonicalCongr e).right_inv iM ▸ (MonadAttach.canonicalCongr e).right_inv iA ▸
       LawfulMonadAttach.ofEquiv (iM := Monad.ofEquiv e iM) (iA := MonadAttach.ofEquiv e iA)
         (h := h) fun α => (e α).symm
-  invFun _ := LawfulMonadAttach.ofEquiv e
+  invFun _ := by subst hM hA; exact LawfulMonadAttach.ofEquiv e
   left_inv _ := rfl
   right_inv _ := rfl
 
@@ -206,16 +214,15 @@ theorem LawfulMonadLift.ofEquiv [Monad m] [iN : Monad n'] [iL : MonadLift m n']
         simp only [toFun_invFun, LawfulMonadLift.monadLift_bind] }
 
 @[transport] protected abbrev LawfulMonadLift.canonicalCongr [Monad m] [iN : Monad n']
-    [iL : MonadLift m n'] :
-    Lean.CanonicalEquivalence
-      (@LawfulMonadLift m n _ ((Monad.canonicalCongr e).invFun iN)
-        ((MonadLift.canonicalCongr e).invFun iL))
-      (@LawfulMonadLift m n' _ iN iL) where
-  toFun h :=
-    (Monad.canonicalCongr e).right_inv iN ▸ (MonadLift.canonicalCongr e).right_inv iL ▸
+    [iL : MonadLift m n'] {iN' : Monad n} {iL' : MonadLift m n}
+    (hN : iN' = (Monad.canonicalCongr e).invFun iN) (hL : iL' = (MonadLift.canonicalCongr e).invFun iL) :
+    Lean.CanonicalEquivalence (@LawfulMonadLift m n _ iN' iL') (@LawfulMonadLift m n' _ iN iL) where
+  toFun h := by
+    subst hN hL
+    exact (Monad.canonicalCongr e).right_inv iN ▸ (MonadLift.canonicalCongr e).right_inv iL ▸
       LawfulMonadLift.ofEquiv (iN := Monad.ofEquiv e iN) (iL := MonadLift.ofEquiv e iL) (h := h)
         fun α => (e α).symm
-  invFun _ := LawfulMonadLift.ofEquiv e
+  invFun _ := by subst hN hL; exact LawfulMonadLift.ofEquiv e
   left_inv _ := rfl
   right_inv _ := rfl
 
@@ -245,17 +252,17 @@ theorem LawfulMonadLift.ofEquiv₂ [iM : Monad m'] [iN : Monad n'] [iL : MonadLi
         simp only [toFun_invFun, LawfulMonadLift.monadLift_bind] }
 
 @[transport] protected abbrev LawfulMonadLift.canonicalCongr₂ [iM : Monad m'] [iN : Monad n']
-    [iL : MonadLift m' n'] :
-    Lean.CanonicalEquivalence
-      (@LawfulMonadLift m n ((Monad.canonicalCongr e₁).invFun iM)
-        ((Monad.canonicalCongr e₂).invFun iN) ((MonadLift.canonicalCongr₂ e₁ e₂).invFun iL))
-      (@LawfulMonadLift m' n' iM iN iL) where
-  toFun h :=
-    (Monad.canonicalCongr e₁).right_inv iM ▸ (Monad.canonicalCongr e₂).right_inv iN ▸
+    [iL : MonadLift m' n'] {iM' : Monad m} {iN' : Monad n} {iL' : MonadLift m n}
+    (hM : iM' = (Monad.canonicalCongr e₁).invFun iM) (hN : iN' = (Monad.canonicalCongr e₂).invFun iN)
+    (hL : iL' = (MonadLift.canonicalCongr₂ e₁ e₂).invFun iL) :
+    Lean.CanonicalEquivalence (@LawfulMonadLift m n iM' iN' iL') (@LawfulMonadLift m' n' iM iN iL) where
+  toFun h := by
+    subst hM hN hL
+    exact (Monad.canonicalCongr e₁).right_inv iM ▸ (Monad.canonicalCongr e₂).right_inv iN ▸
       (MonadLift.canonicalCongr₂ e₁ e₂).right_inv iL ▸
       LawfulMonadLift.ofEquiv₂ (iM := Monad.ofEquiv e₁ iM) (iN := Monad.ofEquiv e₂ iN)
         (iL := MonadLift.ofEquiv₂ e₁ e₂ iL) (h := h) (fun α => (e₁ α).symm) fun α => (e₂ α).symm
-  invFun _ := LawfulMonadLift.ofEquiv₂ e₁ e₂
+  invFun _ := by subst hM hN hL; exact LawfulMonadLift.ofEquiv₂ e₁ e₂
   left_inv _ := rfl
   right_inv _ := rfl
 

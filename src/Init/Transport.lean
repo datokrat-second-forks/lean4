@@ -185,21 +185,26 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
 
 namespace Std
 
-@[transport, expose, reducible, macro_inline] protected def OrientedOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β] :
-    Lean.CanonicalEquivalence (@OrientedOrd α ((Ord.canonicalCongr e).invFun i)) (@OrientedOrd β i) where
-  toFun h := ⟨fun {x y} => by
-    have this : i.compare (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) =
-        (i.compare (e.toFun (e.invFun y)) (e.toFun (e.invFun x))).swap :=
-      OrientedCmp.eq_swap (self := h)
-    rwa [e.right_inv x, e.right_inv y] at this⟩
-  invFun h := ⟨fun {x y} => h.eq_swap (a := e.toFun x) (b := e.toFun y)⟩
+@[transport, expose, reducible, macro_inline] protected def OrientedOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β]
+    {i' : Ord α} (hi : i' = (Ord.canonicalCongr e).invFun i) :
+    Lean.CanonicalEquivalence (@OrientedOrd α i') (@OrientedOrd β i) where
+  toFun h := by
+    subst hi
+    exact ⟨fun {x y} => by
+      have this : i.compare (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) =
+          (i.compare (e.toFun (e.invFun y)) (e.toFun (e.invFun x))).swap :=
+        OrientedCmp.eq_swap (self := h)
+      rwa [e.right_inv x, e.right_inv y] at this⟩
+  invFun h := by subst hi; exact ⟨fun {x y} => h.eq_swap (a := e.toFun x) (b := e.toFun y)⟩
   left_inv _ := rfl
   right_inv _ := rfl
 
-@[transport, expose, reducible, macro_inline] protected def TransOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β] :
-    Lean.CanonicalEquivalence (@TransOrd α ((Ord.canonicalCongr e).invFun i)) (@TransOrd β i) where
-  toFun h :=
-    { (OrientedOrd.canonicalCongr e).toFun h.toOrientedCmp with
+@[transport, expose, reducible, macro_inline] protected def TransOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β]
+    {i' : Ord α} (hi : i' = (Ord.canonicalCongr e).invFun i) :
+    Lean.CanonicalEquivalence (@TransOrd α i') (@TransOrd β i) where
+  toFun h := by
+    subst hi
+    exact { (OrientedOrd.canonicalCongr e rfl).toFun h.toOrientedCmp with
       isLE_trans := fun {x y z} h₁ h₂ => by
         have h₁ : (i.compare (e.toFun (e.invFun x)) (e.toFun (e.invFun y))).isLE := by
           rwa [e.right_inv x, e.right_inv y]
@@ -208,27 +213,33 @@ namespace Std
         have this : (i.compare (e.toFun (e.invFun x)) (e.toFun (e.invFun z))).isLE :=
           TransCmp.isLE_trans (self := h) h₁ h₂
         rwa [e.right_inv x, e.right_inv z] at this }
-  invFun h :=
-    { (OrientedOrd.canonicalCongr e).invFun h.toOrientedCmp with
+  invFun h := by
+    subst hi
+    exact { (OrientedOrd.canonicalCongr e rfl).invFun h.toOrientedCmp with
       isLE_trans := fun {x y z} =>
         h.isLE_trans (a := e.toFun x) (b := e.toFun y) (c := e.toFun z) }
   left_inv _ := rfl
   right_inv _ := rfl
 
-@[transport, expose, reducible, macro_inline] protected def LawfulEqOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β] :
-    Lean.CanonicalEquivalence (@LawfulEqOrd α ((Ord.canonicalCongr e).invFun i)) (@LawfulEqOrd β i) where
-  toFun h :=
-    { compare_self := fun {x} => by
-        have this : i.compare (e.toFun (e.invFun x)) (e.toFun (e.invFun x)) = .eq :=
-          h.compare_self
-        rwa [e.right_inv x] at this
-      eq_of_compare := fun {x y} hxy =>
-        e.invFun_injective (LawfulEqCmp.eq_of_compare (self := h) (a := e.invFun x) (b := e.invFun y) (by
-          show i.compare (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = .eq
-          rwa [e.right_inv x, e.right_inv y])) }
-  invFun h :=
-    { compare_self := fun {x} => h.compare_self (a := e.toFun x)
-      eq_of_compare := fun {x y} hxy => e.toFun_injective (h.eq_of_compare hxy) }
+@[transport, expose, reducible, macro_inline] protected def LawfulEqOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β]
+    {i' : Ord α} (hi : i' = (Ord.canonicalCongr e).invFun i) :
+    Lean.CanonicalEquivalence (@LawfulEqOrd α i') (@LawfulEqOrd β i) where
+  toFun h := by
+    subst hi
+    exact
+      { compare_self := fun {x} => by
+          have this : i.compare (e.toFun (e.invFun x)) (e.toFun (e.invFun x)) = .eq :=
+            h.compare_self
+          rwa [e.right_inv x] at this
+        eq_of_compare := fun {x y} hxy =>
+          e.invFun_injective (LawfulEqCmp.eq_of_compare (self := h) (a := e.invFun x) (b := e.invFun y) (by
+            show i.compare (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = .eq
+            rwa [e.right_inv x, e.right_inv y])) }
+  invFun h := by
+    subst hi
+    exact
+      { compare_self := fun {x} => h.compare_self (a := e.toFun x)
+        eq_of_compare := fun {x y} hxy => e.toFun_injective (h.eq_of_compare hxy) }
   left_inv _ := rfl
   right_inv _ := rfl
 
