@@ -10,6 +10,8 @@ public import Init.Data.Function
 public import Lean.Meta.DiscrTree.Main
 public import Lean.Meta.SynthInstance
 import Lean.Meta.AppBuilder
+import Lean.ProjFns
+import Init.While
 
 public section
 
@@ -26,7 +28,9 @@ Congruences for type constructors can also accept families
 `mkTransportEquiv lhs rhs` assembles `Lean.CanonicalEquivalence lhs rhs` from these declarations.
 It unifies conclusions with the goal, solves equivalence arguments recursively (families under
 their binders), synthesizes instance arguments, and chains through intermediate types with
-`Lean.CanonicalEquivalence.trans`. An instance of `rhs` is moved to `lhs` along `invFun`.
+`Lean.CanonicalEquivalence.trans`. An instance of `rhs` is moved to `lhs` along `invFun`. Unless it
+is a proof, the equivalence is then unfolded, leaving the instance conjugated by the `newtype`
+constructors and projectors, which compiles like the instance of `rhs`.
 
 Types are identified by `isDefEq` at implicit transparency, which never unfolds the irreducible
 definition a `newtype` is; unlike `inferInstanceAs`'s instance wrapping this never depends on the
@@ -208,10 +212,80 @@ def mkTransportEquiv (lhs rhs : Expr) : MetaM Expr := do
           exceeded its depth; the `@[transport]` declarations may form a cycle"
     throw ex
 
+namespace Transport
+
+/-- Whether `c` is part of the gluing: a reducible definition that is neither a projection nor a type. -/
+private def isGlue (env : Environment) (c : Name) : Bool := Id.run do
+  if c == ``id || c == ``Function.comp then return true
+  unless getReducibilityStatusCore env c matches .reducible do return false
+  if env.isProjectionFn c then return false
+  let some (.defnInfo d) := env.find? c | return false
+  let mut t := d.type
+  while t.isForall do t := t.bindingBody!
+  return !t.isSort
+
+private def ctorField? (env : Environment) (s : Expr) (i : Nat) : Option Expr := do
+  let .const c _ := s.getAppFn | none
+  let .ctorInfo cv ← env.find? c | none
+  guard (s.getAppNumArgs == cv.numParams + cv.numFields)
+  s.getAppArgs[cv.numParams + i]?
+
+/-- Reduces the head of `e` by beta, unfolding glue and projecting constructor applications. -/
+private partial def whnfGlue (e : Expr) : CoreM Expr := do
+  let env ← getEnv
+  let args := e.getAppArgs
+  match e.getAppFn with
+  | .lam .. => if args.isEmpty then return e else whnfGlue e.headBeta
+  | .proj n i s =>
+    let s ← whnfGlue s
+    match ctorField? env s i with
+    | some v => whnfGlue (mkAppN v args)
+    | none => return mkAppN (.proj n i s) args
+  | f@(.const c us) =>
+    if let some info := env.getProjectionFnInfo? c then
+      let some s := args[info.numParams]? | return e
+      let s ← whnfGlue s
+      match ctorField? env s info.i with
+      | some v => return ← whnfGlue (mkAppN v args[info.numParams + 1:])
+      | none => return mkAppN f (args.set! info.numParams s)
+    unless isGlue env c do return e
+    -- not visible, e.g. the unexposed body of a `newtype` of another module
+    let some (.defnInfo d) := env.find? c | return e
+    whnfGlue <| (d.value.instantiateLevelParams d.levelParams us).beta args
+  | _ => return e
+
+private partial def unfoldGlue (e : Expr) : CoreM Expr := do
+  match ← whnfGlue e with
+  | e@(.app ..) => return mkAppN (← unfoldGlue e.getAppFn) (← e.getAppArgs.mapM unfoldGlue)
+  | .lam n t b bi => return .lam n (← unfoldGlue t) (← unfoldGlue b) bi
+  | .forallE n t b bi => return .forallE n (← unfoldGlue t) (← unfoldGlue b) bi
+  | .letE n t v b nondep => return .letE n (← unfoldGlue t) (← unfoldGlue v) (← unfoldGlue b) nondep
+  | .mdata d e => return .mdata d (← unfoldGlue e)
+  | .proj n i s => return .proj n i (← unfoldGlue s)
+  | e => return e
+
+/--
+Returns `equiv.invFun e`. For data, the equivalence is unfolded, so that the result is `e`
+conjugated by the `newtype` constructors and projectors themselves and compiles like `e`.
+-/
+private def moveAlong (equiv e : Expr) : MetaM Expr := do
+  let moved ← mkAppM ``Lean.CanonicalEquivalence.invFun #[equiv, e]
+  if ← isProp (← inferType moved) then return moved
+  -- A local stands in for `e`, so that only the gluing is unfolded.
+  withLocalDeclD `x (← inferType e) fun x => do
+    let r ← unfoldGlue (← instantiateMVars (← mkAppM ``Lean.CanonicalEquivalence.invFun #[equiv, x]))
+    -- Casts such as those of `MonadTail.canonicalCongr` block the unfolding.
+    if (r.find? fun e => e.isConstOf ``Lean.CanonicalEquivalence.invFun ||
+        e.isConstOf ``Lean.CanonicalEquivalence.toFun).isSome then
+      return moved
+    return r.replaceFVar x e
+
+end Transport
+
 /-- Moves `e` to type `tgt` along `mkTransportEquiv tgt (← inferType e)`. -/
 def transport (e tgt : Expr) : MetaM Expr := do
   let equiv ← mkTransportEquiv tgt (← inferType e)
-  mkAppM ``Lean.CanonicalEquivalence.invFun #[equiv, e]
+  Transport.moveAlong equiv e
 
 /--
 Moves an instance of `src` to `tgt` along `mkTransportEquiv`. The equivalence is constructed first,
@@ -221,6 +295,6 @@ instantiated by unification with the registered declarations before the instance
 def transportInstance (src tgt : Expr) : MetaM Expr := do
   let equiv ← mkTransportEquiv tgt src
   let inst ← synthInstance (← instantiateMVars src)
-  mkAppM ``Lean.CanonicalEquivalence.invFun #[equiv, inst]
+  Transport.moveAlong equiv inst
 
 end Lean.Meta
