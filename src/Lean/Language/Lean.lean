@@ -767,7 +767,7 @@ where
     let (output, _) ←
       IO.FS.withIsolatedStreams (isolateStderr := Core.stderrAsMessages.get scope.opts) do
         EIO.toBaseIO do
-          ReaderT.run (ReaderT.run (withLoggingExceptions
+          ReaderT.run (Elab.Command.CommandElabM.run (withLoggingExceptions
             (getResetInfoTrees *> Elab.Command.elabCommandTopLevel stx cmds)) cmdCtx) cmdStateRef
     let cmdState ← cmdStateRef.get
     let mut messages := cmdState.messages

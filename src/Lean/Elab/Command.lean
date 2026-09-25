@@ -70,7 +70,31 @@ structure Context where
   -/
   suppressElabErrors : Bool := false
 
-abbrev CommandElabM := ReaderT Context $ StateRefT State $ EIO Exception
+newtype CommandElabM (α : Type) := ReaderT Context (StateRefT State (EIO Exception)) α
+  with toReaderT
+
+instance : MonadReaderOf Context CommandElabM where
+  read := .mk read
+instance : MonadWithReaderOf Context CommandElabM where
+  withReader f x := .mk <| withReader f x.toReaderT
+instance : MonadStateOf State CommandElabM where
+  get           := .mk get
+  set s         := .mk <| set s
+  modifyGet f   := .mk <| modifyGet f
+instance : MonadLift (StateRefT State (EIO Exception)) CommandElabM :=
+  inferInstanceAs (MonadLift _ (ReaderT Context _))
+instance : MonadFunctor (StateRefT State (EIO Exception)) CommandElabM :=
+  inferInstanceAs (MonadFunctor _ (ReaderT Context _))
+instance : MonadControl (StateRefT State (EIO Exception)) CommandElabM :=
+  inferInstanceAs (MonadControl _ (ReaderT Context _))
+instance : MonadFinally CommandElabM := inferInstanceAs (MonadFinally (ReaderT Context _))
+instance : MonadAttach CommandElabM := inferInstanceAs (MonadAttach (ReaderT Context _))
+instance : Inhabited (CommandElabM α) := inferInstanceAs (Inhabited (ReaderT Context _ α))
+
+@[always_inline, inline]
+def CommandElabM.run (x : CommandElabM α) (ctx : Context) : StateRefT State (EIO Exception) α :=
+  x.toReaderT.run ctx
+
 abbrev CommandElab  := Syntax → CommandElabM Unit
 structure Linter where
   run : Syntax → CommandElabM Unit
@@ -121,25 +145,33 @@ whole monad stack at every use site. May eventually be covered by `deriving`.
 Remark: see comment at TermElabM
 -/
 @[always_inline]
-instance : Monad CommandElabM := let i : Monad CommandElabM := inferInstance; { pure := i.pure, bind := i.bind }
+instance : Monad CommandElabM :=
+  let i : Monad CommandElabM := inferInstanceAs (Monad (ReaderT Context _))
+  { pure := i.pure, bind := i.bind }
 
 /--
 Like `Core.tryCatchRuntimeEx`; runtime errors are generally used to abort term elaboration, so we do
 want to catch and process them at the command level.
 -/
 @[inline] protected def tryCatch (x : CommandElabM α) (h : Exception → CommandElabM α) :
-    CommandElabM α := do
+    CommandElabM α := .mk do
   try
-    x
+    x.toReaderT
   catch ex =>
     if ex.isInterrupt then
       throw ex
     else
-      h ex
+      (h ex).toReaderT
 
 instance : MonadExceptOf Exception CommandElabM where
-  throw    := throw
+  throw ex := .mk <| throw ex
   tryCatch := Command.tryCatch
+
+-- unlike `Command.tryCatch`, also catches interrupts
+instance : MonadAlwaysExcept Exception CommandElabM where
+  except := {
+    throw ex := .mk <| throw ex
+    tryCatch x h := .mk <| tryCatch x.toReaderT (h · |>.toReaderT) }
 
 def mkState (env : Environment) (messages : MessageLog := {}) (opts : Options := {}) : State := {
   env         := env
@@ -470,7 +502,7 @@ catches interrupt exceptions as well and thus is intended for use at the top lev
 Interrupt and abort exceptions are caught but not logged.
 -/
 @[inline] def withLoggingExceptions (x : CommandElabM Unit) : CommandElabM Unit :=
-  .mk fun ctx => .mk fun ref =>
+  .mk <| .mk fun ctx => .mk fun ref =>
     -- the ascription lets `MonadLog CommandElabM` be found
     EIO.catchExceptions (ReaderT.run ((withLogging x : CommandElabM Unit).run ctx) ref)
       (fun _ => pure ())
