@@ -20,8 +20,8 @@ trace: [Compiler.saveMono] size: 8
       return _x.8
 ---
 trace: [Compiler.saveMono] size: 1
-    def _private.elab.inlineApp.0._eval._lam_0 _x.1 _y.2 @&_y.3 @&_y.4 @&_y.5 @&_y.6 @&_y.7 _y.8 : EST.Out
-      Lean.Exception lcAny PUnit :=
+    def _private.elab.inlineApp.0._eval._lam_0 _x.1 _y.2 _y.3 _y.4 _y.5 _y.6 _y.7 _y.8 : EST.Out Lean.Exception lcAny
+      PUnit :=
       let _x.9 := Lean.Compiler.compile _x.1 _y.6 _y.7 _y.8;
       return _x.9
 [Compiler.saveMono] size: 7

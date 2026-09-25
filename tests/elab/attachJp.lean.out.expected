@@ -78,7 +78,7 @@
       let _x.7 := @Array.mkEmpty _ _x.6;
       let _x.8 := @Array.push _ _x.7 _x.5;
       let _x.9 := PUnit.unit;
-      fun _f.10 _y.11 @&_y.12 @&_y.13 @&_y.14 @&_y.15 @&_y.16 _y.17 : EST.Out Lean.Exception lcAny PUnit :=
+      fun _f.10 _y.11 _y.12 _y.13 _y.14 _y.15 _y.16 _y.17 : EST.Out Lean.Exception lcAny PUnit :=
         let _x.18 := Lean.Compiler.compile _x.8 _y.15 _y.16 _y.17;
         cases _x.18 : EST.Out Lean.Exception lcAny PUnit
         | EST.Out.ok a.19 a.20 =>
@@ -96,7 +96,7 @@
       let _x.7 := @Array.mkEmpty _ _x.6;
       let _x.8 := @Array.push _ _x.7 _x.5;
       let _x.9 := PUnit.unit;
-      fun _f.10 _y.11 @&_y.12 @&_y.13 @&_y.14 @&_y.15 @&_y.16 _y.17 : EST.Out Lean.Exception lcAny PUnit :=
+      fun _f.10 _y.11 _y.12 _y.13 _y.14 _y.15 _y.16 _y.17 : EST.Out Lean.Exception lcAny PUnit :=
         let _x.18 := Lean.Compiler.compile _x.8 _y.15 _y.16 _y.17;
         cases _x.18 : EST.Out Lean.Exception lcAny PUnit
         | EST.Out.ok a.19 a.20 =>
@@ -114,7 +114,7 @@
       let _x.7 := @Array.mkEmpty _ _x.6;
       let _x.8 := @Array.push _ _x.7 _x.5;
       let _x.9 := PUnit.unit;
-      fun _f.10 _y.11 @&_y.12 @&_y.13 @&_y.14 @&_y.15 @&_y.16 _y.17 : EST.Out Lean.Exception lcAny PUnit :=
+      fun _f.10 _y.11 _y.12 _y.13 _y.14 _y.15 _y.16 _y.17 : EST.Out Lean.Exception lcAny PUnit :=
         let _x.18 := Lean.Compiler.compile _x.8 _y.15 _y.16 _y.17;
         cases _x.18 : EST.Out Lean.Exception lcAny PUnit
         | EST.Out.ok a.19 a.20 =>
@@ -132,7 +132,7 @@
       let _x.7 := Array.mkEmpty ◾ _x.6;
       let _x.8 := Array.push ◾ _x.7 _x.5;
       let _x.9 := PUnit.unit;
-      fun _f.10 _y.11 @&_y.12 @&_y.13 @&_y.14 @&_y.15 @&_y.16 _y.17 : EST.Out Lean.Exception lcAny PUnit :=
+      fun _f.10 _y.11 _y.12 _y.13 _y.14 _y.15 _y.16 _y.17 : EST.Out Lean.Exception lcAny PUnit :=
         let _x.18 := Lean.Compiler.compile _x.8 _y.15 _y.16 _y.17;
         cases _x.18 : EST.Out Lean.Exception lcAny PUnit
         | EST.Out.ok a.19 a.20 =>
@@ -150,7 +150,7 @@
       let _x.7 := Array.mkEmpty ◾ _x.6;
       let _x.8 := Array.push ◾ _x.7 _x.5;
       let _x.9 := PUnit.unit;
-      fun _f.10 _y.11 @&_y.12 @&_y.13 @&_y.14 @&_y.15 @&_y.16 _y.17 : EST.Out Lean.Exception lcAny PUnit :=
+      fun _f.10 _y.11 _y.12 _y.13 _y.14 _y.15 _y.16 _y.17 : EST.Out Lean.Exception lcAny PUnit :=
         let _x.18 := Lean.Compiler.compile _x.8 _y.15 _y.16 _y.17;
         cases _x.18 : EST.Out Lean.Exception lcAny PUnit
         | EST.Out.ok a.19 a.20 =>
@@ -161,8 +161,8 @@
       let _x.24 := Lean.Elab.Command.liftTermElabM._redArg _f.10 _y.1 _y.2 _y.3;
       return _x.24
 [Compiler.simp] size: 5
-    def _private.elab.attachJp.0._eval._lam_0 _x.1 _x.2 _y.3 @&_y.4 @&_y.5 @&_y.6 @&_y.7 @&_y.8 _y.9 : EST.Out
-      Lean.Exception lcAny PUnit :=
+    def _private.elab.attachJp.0._eval._lam_0 _x.1 _x.2 _y.3 _y.4 _y.5 _y.6 _y.7 _y.8 _y.9 : EST.Out Lean.Exception
+      lcAny PUnit :=
       let _x.10 := Lean.Compiler.compile _x.1 _y.7 _y.8 _y.9;
       cases _x.10 : EST.Out Lean.Exception lcAny PUnit
       | EST.Out.ok a.11 a.12 =>
