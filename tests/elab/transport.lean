@@ -27,11 +27,16 @@ example (a : Int) : Foo.equivDef.invFun a = Foo.mk a := rfl
     show i.le (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = i.le x y by
       rw [e.right_inv x, e.right_inv y]
 
-@[transport] protected abbrev DecidableLE.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : LE β] :
-    Lean.CanonicalEquivalence (@DecidableLE α ((LE.canonicalCongr e).invFun i)) (@DecidableLE β i) where
-  toFun d x y := decidable_of_iff (i.le (e.toFun (e.invFun x)) (e.toFun (e.invFun y))) (by
-    rw [e.right_inv x, e.right_inv y])
-  invFun d x y := d (e.toFun x) (e.toFun y)
+@[transport] protected abbrev DecidableLE.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : LE β]
+    {i' : LE α} (hi : i' = (LE.canonicalCongr e).invFun i) :
+    Lean.CanonicalEquivalence (@DecidableLE α i') (@DecidableLE β i) where
+  toFun d := by
+    subst hi
+    exact fun x y => decidable_of_iff (i.le (e.toFun (e.invFun x)) (e.toFun (e.invFun y))) (by
+      rw [e.right_inv x, e.right_inv y])
+  invFun d := by
+    subst hi
+    exact fun x y => d (e.toFun x) (e.toFun y)
   left_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
   right_inv _ := funext fun _ => funext fun _ => Subsingleton.elim _ _
 
@@ -58,11 +63,16 @@ example (a : Int) : Foo.equivDef.invFun a = Foo.mk a := rfl
 class LawfulLE (α : Type) [LE α] : Prop where
   le_refl : ∀ x : α, x ≤ x
 
-/-- The conclusion mentions the transported `LE` instance, so it only applies to that one. -/
-@[transport] protected abbrev LawfulLE.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : LE β] :
-    Lean.CanonicalEquivalence (@LawfulLE α ((LE.canonicalCongr e).invFun i)) (@LawfulLE β i) where
-  toFun h := @LawfulLE.mk β i fun x => (e.right_inv x ▸ h.le_refl (e.invFun x) : x ≤ x)
-  invFun h := @LawfulLE.mk α ((LE.canonicalCongr e).invFun i) fun x => h.le_refl (e.toFun x)
+/-- Applies to any `LE` instance definitionally equal to the transported one, as `hi` states. -/
+@[transport] protected abbrev LawfulLE.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : LE β]
+    {i' : LE α} (hi : i' = (LE.canonicalCongr e).invFun i) :
+    Lean.CanonicalEquivalence (@LawfulLE α i') (@LawfulLE β i) where
+  toFun h := by
+    subst hi
+    exact @LawfulLE.mk β i fun x => (e.right_inv x ▸ h.le_refl (e.invFun x) : x ≤ x)
+  invFun h := by
+    subst hi
+    exact @LawfulLE.mk α ((LE.canonicalCongr e).invFun i) fun x => h.le_refl (e.toFun x)
   left_inv _ := rfl
   right_inv _ := rfl
 
@@ -187,7 +197,8 @@ error: failed to transport
 to
   LawfulLE Bar
 
-Note: `LawfulLE.canonicalCongr` does not apply
+Note: `LawfulLE.canonicalCongr` does not apply, its argument `hi` does not hold by `rfl`:
+  instLEBar = (LE.canonicalCongr Bar.equivDef).invFun Int.instLEInt
 -/
 #guard_msgs in
 instance : LawfulLE Bar := by transport (LawfulLE Int)
@@ -233,6 +244,13 @@ error: invalid `@[transport]` declaration `badArg`, its explicit arguments must 
 -/
 #guard_msgs in
 @[transport] def badArg (n : Nat) : Lean.CanonicalEquivalence (Fin (n + 1)) (Fin (n + 1)) := Lean.CanonicalEquivalence.refl _
+
+/--
+error: invalid `@[transport]` declaration `mentionsEquiv`, its conclusion mentions the equivalence `e`; state terms built from it as implicit arguments determined by the conclusion, with equations, as `Eq.canonicalCongr` does
+-/
+#guard_msgs in
+@[transport] def mentionsEquiv (e : Lean.CanonicalEquivalence Nat Int) :
+    Lean.CanonicalEquivalence (e.toFun 0 = 0) (e.toFun 0 = 0) := Lean.CanonicalEquivalence.refl _
 
 /-! Library-owned equivalences, notation, and names coexist with canonical transport. -/
 
@@ -352,24 +370,28 @@ because the search exceeded its depth; the `@[transport]` declarations may form 
 instance : Inhabited CycB := by transport (Inhabited Nat)
 
 /-!
-A congruence for a lawful class on a type constructor, concluding at the transported instance of
-its parent class, as `LawfulMonad` does.
+A congruence for a lawful class on a type constructor, taking the instance of its parent class
+with an equation stating that it is the transported one, as `LawfulMonad` does.
 -/
 
 class LawfulPointed (m : Type → Type) [Pointed m] : Prop where
   point_inj : ∀ α (a b : α), Pointed.point (m := m) α a = Pointed.point α b → a = b
 
 @[transport] protected abbrev LawfulPointed.canonicalCongr {m n : Type → Type}
-    (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α)) [i : Pointed n] :
-    Lean.CanonicalEquivalence (@LawfulPointed m ((Pointed.canonicalCongr e).invFun i))
-      (@LawfulPointed n i) where
-  toFun h := @LawfulPointed.mk n i fun α a b hab =>
-    h.point_inj α a b (congrArg (e α).invFun hab)
-  invFun h := @LawfulPointed.mk m ((Pointed.canonicalCongr e).invFun i) fun α a b hab =>
-    h.point_inj α a b <| by
-      have := congrArg (e α).toFun hab
-      change (e α).toFun ((e α).invFun (i.point α a)) = (e α).toFun ((e α).invFun (i.point α b)) at this
-      rwa [(e α).right_inv, (e α).right_inv] at this
+    (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α)) [i : Pointed n] {i' : Pointed m}
+    (hi : i' = (Pointed.canonicalCongr e).invFun i) :
+    Lean.CanonicalEquivalence (@LawfulPointed m i') (@LawfulPointed n i) where
+  toFun h := by
+    subst hi
+    exact @LawfulPointed.mk n i fun α a b hab =>
+      h.point_inj α a b (congrArg (e α).invFun hab)
+  invFun h := by
+    subst hi
+    exact @LawfulPointed.mk m ((Pointed.canonicalCongr e).invFun i) fun α a b hab =>
+      h.point_inj α a b <| by
+        have := congrArg (e α).toFun hab
+        change (e α).toFun ((e α).invFun (i.point α a)) = (e α).toFun ((e α).invFun (i.point α b)) at this
+        rwa [(e α).right_inv, (e α).right_inv] at this
   left_inv _ := rfl
   right_inv _ := rfl
 
