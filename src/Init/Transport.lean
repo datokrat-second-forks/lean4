@@ -24,7 +24,7 @@ computes on the projected value. A congruence for a lawful class concludes at th
 instance of its parent class and hence applies to that instance only.
 -/
 
-@[transport] protected abbrev LE.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def LE.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (LE α) (LE β) where
   toFun i := ⟨fun x y => i.le (e.invFun x) (e.invFun y)⟩
   invFun i := ⟨fun x y => i.le (e.toFun x) (e.toFun y)⟩
@@ -35,7 +35,7 @@ instance of its parent class and hence applies to that instance only.
     show i.le (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) = i.le x y by
       rw [e.right_inv x, e.right_inv y]
 
-@[transport] protected abbrev LT.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def LT.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (LT α) (LT β) where
   toFun i := ⟨fun x y => i.lt (e.invFun x) (e.invFun y)⟩
   invFun i := ⟨fun x y => i.lt (e.toFun x) (e.toFun y)⟩
@@ -50,7 +50,7 @@ instance of its parent class and hence applies to that instance only.
 Transports a dependent function along an equivalence of its domain and equivalences of its
 codomains. Classes such as `DecidableEq` and `DecidableLE` are Π-types and transport through it.
 -/
-@[transport] protected abbrev Pi.canonicalCongr {β : α → Sort v} {β' : α' → Sort v'}
+@[transport, expose, reducible, macro_inline] protected def Pi.canonicalCongr {β : α → Sort v} {β' : α' → Sort v'}
     (e : Lean.CanonicalEquivalence α α')
     (f : ∀ a, Lean.CanonicalEquivalence (β a) (β' (e.toFun a))) :
     Lean.CanonicalEquivalence ((a : α) → β a) ((a' : α') → β' a') where
@@ -68,7 +68,7 @@ codomains. Classes such as `DecidableEq` and `DecidableLE` are Π-types and tran
       exact (fun x (h' : x = a') => by subst h'; rfl :
         ∀ x (h' : x = a'), cast (congrArg β' h') (h x) = h a') _ (e.right_inv a')
 
-@[transport] protected abbrev Decidable.canonicalCongr {p q : Prop}
+@[transport, expose, reducible, macro_inline] protected def Decidable.canonicalCongr {p q : Prop}
     (e : Lean.CanonicalEquivalence p q) :
     Lean.CanonicalEquivalence (Decidable p) (Decidable q) where
   toFun d := @decidable_of_iff q p ⟨e.toFun, e.invFun⟩ d
@@ -80,7 +80,7 @@ codomains. Classes such as `DecidableEq` and `DecidableLE` are Π-types and tran
 Relates equality on both sides of an equivalence, e.g. for transporting `DecidableEq`. The
 conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then checked by `rfl`.
 -/
-@[transport] protected abbrev Eq.canonicalCongr (e : Lean.CanonicalEquivalence α β) {a b : α}
+@[transport, expose, reducible, macro_inline] protected def Eq.canonicalCongr (e : Lean.CanonicalEquivalence α β) {a b : α}
     {a' b' : β} (ha : e.toFun a = a') (hb : e.toFun b = b') :
     Lean.CanonicalEquivalence (a = b) (a' = b') where
   toFun h := ha.symm.trans ((congrArg e.toFun h).trans hb)
@@ -88,28 +88,28 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
   left_inv _ := rfl
   right_inv _ := rfl
 
-@[transport] protected abbrev Inhabited.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def Inhabited.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Inhabited α) (Inhabited β) where
   toFun i := ⟨e.toFun i.default⟩
   invFun i := ⟨e.invFun i.default⟩
   left_inv i := congrArg Inhabited.mk (e.left_inv i.default)
   right_inv i := congrArg Inhabited.mk (e.right_inv i.default)
 
-@[transport] protected abbrev Nonempty.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def Nonempty.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Nonempty α) (Nonempty β) where
   toFun | ⟨a⟩ => ⟨e.toFun a⟩
   invFun | ⟨b⟩ => ⟨e.invFun b⟩
   left_inv _ := rfl
   right_inv _ := rfl
 
-@[transport] protected abbrev OfNat.canonicalCongr (e : Lean.CanonicalEquivalence α β) {n : Nat} :
+@[transport, expose, reducible, macro_inline] protected def OfNat.canonicalCongr (e : Lean.CanonicalEquivalence α β) {n : Nat} :
     Lean.CanonicalEquivalence (OfNat α n) (OfNat β n) where
   toFun i := ⟨e.toFun i.ofNat⟩
   invFun i := ⟨e.invFun i.ofNat⟩
   left_inv i := congrArg OfNat.mk (e.left_inv i.ofNat)
   right_inv i := congrArg OfNat.mk (e.right_inv i.ofNat)
 
-@[transport] protected abbrev Add.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def Add.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Add α) (Add β) where
   toFun i := ⟨fun x y => e.toFun (i.add (e.invFun x) (e.invFun y))⟩
   invFun i := ⟨fun x y => e.invFun (i.add (e.toFun x) (e.toFun y))⟩
@@ -118,7 +118,7 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
   right_inv i := congrArg Add.mk <| funext fun x => funext fun y =>
     (e.right_inv _).trans (congr (congrArg i.add (e.right_inv x)) (e.right_inv y))
 
-@[transport] protected abbrev Sub.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def Sub.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Sub α) (Sub β) where
   toFun i := ⟨fun x y => e.toFun (i.sub (e.invFun x) (e.invFun y))⟩
   invFun i := ⟨fun x y => e.invFun (i.sub (e.toFun x) (e.toFun y))⟩
@@ -127,7 +127,7 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
   right_inv i := congrArg Sub.mk <| funext fun x => funext fun y =>
     (e.right_inv _).trans (congr (congrArg i.sub (e.right_inv x)) (e.right_inv y))
 
-@[transport] protected abbrev Mul.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def Mul.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Mul α) (Mul β) where
   toFun i := ⟨fun x y => e.toFun (i.mul (e.invFun x) (e.invFun y))⟩
   invFun i := ⟨fun x y => e.invFun (i.mul (e.toFun x) (e.toFun y))⟩
@@ -136,7 +136,7 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
   right_inv i := congrArg Mul.mk <| funext fun x => funext fun y =>
     (e.right_inv _).trans (congr (congrArg i.mul (e.right_inv x)) (e.right_inv y))
 
-@[transport] protected abbrev Div.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def Div.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Div α) (Div β) where
   toFun i := ⟨fun x y => e.toFun (i.div (e.invFun x) (e.invFun y))⟩
   invFun i := ⟨fun x y => e.invFun (i.div (e.toFun x) (e.toFun y))⟩
@@ -145,7 +145,7 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
   right_inv i := congrArg Div.mk <| funext fun x => funext fun y =>
     (e.right_inv _).trans (congr (congrArg i.div (e.right_inv x)) (e.right_inv y))
 
-@[transport] protected abbrev Neg.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def Neg.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Neg α) (Neg β) where
   toFun i := ⟨fun x => e.toFun (i.neg (e.invFun x))⟩
   invFun i := ⟨fun x => e.invFun (i.neg (e.toFun x))⟩
@@ -154,7 +154,7 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
   right_inv i := congrArg Neg.mk <| funext fun x =>
     (e.right_inv _).trans (congrArg i.neg (e.right_inv x))
 
-@[transport] protected abbrev Repr.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def Repr.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Repr α) (Repr β) where
   toFun i := ⟨fun x prec => i.reprPrec (e.invFun x) prec⟩
   invFun i := ⟨fun x prec => i.reprPrec (e.toFun x) prec⟩
@@ -163,7 +163,7 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
   right_inv i := congrArg Repr.mk <| funext fun x => funext fun prec =>
     show i.reprPrec (e.toFun (e.invFun x)) prec = i.reprPrec x prec by rw [e.right_inv x]
 
-@[transport] protected abbrev ToString.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def ToString.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (ToString α) (ToString β) where
   toFun i := ⟨fun x => i.toString (e.invFun x)⟩
   invFun i := ⟨fun x => i.toString (e.toFun x)⟩
@@ -172,7 +172,7 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
   right_inv i := congrArg ToString.mk <| funext fun x =>
     show i.toString (e.toFun (e.invFun x)) = i.toString x by rw [e.right_inv x]
 
-@[transport] protected abbrev Ord.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+@[transport, expose, reducible, macro_inline] protected def Ord.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Ord α) (Ord β) where
   toFun i := ⟨fun x y => i.compare (e.invFun x) (e.invFun y)⟩
   invFun i := ⟨fun x y => i.compare (e.toFun x) (e.toFun y)⟩
@@ -185,7 +185,7 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
 
 namespace Std
 
-@[transport] protected abbrev OrientedOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β] :
+@[transport, expose, reducible, macro_inline] protected def OrientedOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β] :
     Lean.CanonicalEquivalence (@OrientedOrd α ((Ord.canonicalCongr e).invFun i)) (@OrientedOrd β i) where
   toFun h := ⟨fun {x y} => by
     have this : i.compare (e.toFun (e.invFun x)) (e.toFun (e.invFun y)) =
@@ -196,7 +196,7 @@ namespace Std
   left_inv _ := rfl
   right_inv _ := rfl
 
-@[transport] protected abbrev TransOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β] :
+@[transport, expose, reducible, macro_inline] protected def TransOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β] :
     Lean.CanonicalEquivalence (@TransOrd α ((Ord.canonicalCongr e).invFun i)) (@TransOrd β i) where
   toFun h :=
     { (OrientedOrd.canonicalCongr e).toFun h.toOrientedCmp with
@@ -215,7 +215,7 @@ namespace Std
   left_inv _ := rfl
   right_inv _ := rfl
 
-@[transport] protected abbrev LawfulEqOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β] :
+@[transport, expose, reducible, macro_inline] protected def LawfulEqOrd.canonicalCongr (e : Lean.CanonicalEquivalence α β) [i : Ord β] :
     Lean.CanonicalEquivalence (@LawfulEqOrd α ((Ord.canonicalCongr e).invFun i)) (@LawfulEqOrd β i) where
   toFun h :=
     { compare_self := fun {x} => by
@@ -249,11 +249,11 @@ universe u v w
 section
 variable {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
 
-protected abbrev Functor.ofEquiv (i : Functor n) : Functor m where
+@[expose, reducible, macro_inline] protected def Functor.ofEquiv (i : Functor n) : Functor m where
   map f x := (e _).invFun (i.map f ((e _).toFun x))
   mapConst a x := (e _).invFun (i.mapConst a ((e _).toFun x))
 
-@[transport] protected abbrev Functor.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def Functor.canonicalCongr :
     Lean.CanonicalEquivalence (Functor m) (Functor n) where
   toFun := Functor.ofEquiv fun α => (e α).symm
   invFun := Functor.ofEquiv e
@@ -264,14 +264,14 @@ protected abbrev Functor.ofEquiv (i : Functor n) : Functor m where
     show Functor.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (Functor.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev Applicative.ofEquiv (i : Applicative n) : Applicative m where
+@[expose, reducible, macro_inline] protected def Applicative.ofEquiv (i : Applicative n) : Applicative m where
   toFunctor := Functor.ofEquiv e i.toFunctor
   pure a := (e _).invFun (i.pure a)
   seq f x := (e _).invFun (i.seq ((e _).toFun f) fun u => (e _).toFun (x u))
   seqLeft x y := (e _).invFun (i.seqLeft ((e _).toFun x) fun u => (e _).toFun (y u))
   seqRight x y := (e _).invFun (i.seqRight ((e _).toFun x) fun u => (e _).toFun (y u))
 
-@[transport] protected abbrev Applicative.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def Applicative.canonicalCongr :
     Lean.CanonicalEquivalence (Applicative m) (Applicative n) where
   toFun := Applicative.ofEquiv fun α => (e α).symm
   invFun := Applicative.ofEquiv e
@@ -282,12 +282,12 @@ protected abbrev Applicative.ofEquiv (i : Applicative n) : Applicative m where
     show Applicative.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (Applicative.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev Alternative.ofEquiv (i : Alternative n) : Alternative m where
+@[expose, reducible, macro_inline] protected def Alternative.ofEquiv (i : Alternative n) : Alternative m where
   toApplicative := Applicative.ofEquiv e i.toApplicative
   failure := (e _).invFun i.failure
   orElse x y := (e _).invFun (i.orElse ((e _).toFun x) fun u => (e _).toFun (y u))
 
-@[transport] protected abbrev Alternative.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def Alternative.canonicalCongr :
     Lean.CanonicalEquivalence (Alternative m) (Alternative n) where
   toFun := Alternative.ofEquiv fun α => (e α).symm
   invFun := Alternative.ofEquiv e
@@ -298,7 +298,7 @@ protected abbrev Alternative.ofEquiv (i : Alternative n) : Alternative m where
     show Alternative.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (Alternative.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev Bind.ofEquiv (i : Bind n) : Bind m where
+@[expose, reducible, macro_inline] protected def Bind.ofEquiv (i : Bind n) : Bind m where
   bind x f := (e _).invFun (i.bind ((e _).toFun x) fun a => (e _).toFun (f a))
 
 theorem Bind.ofEquiv_bind (i : Bind n) {α β : Type u} (x : m α) (f : α → m β) :
@@ -306,7 +306,7 @@ theorem Bind.ofEquiv_bind (i : Bind n) {α β : Type u} (x : m α) (f : α → m
       (e β).invFun (i.bind ((e α).toFun x) fun a => (e β).toFun (f a)) :=
   rfl
 
-protected abbrev Monad.ofEquiv (i : Monad n) : Monad m where
+@[expose, reducible, macro_inline] protected def Monad.ofEquiv (i : Monad n) : Monad m where
   toBind := Bind.ofEquiv e i.toBind
   map f x := (e _).invFun (i.map f ((e _).toFun x))
   mapConst a x := (e _).invFun (i.mapConst a ((e _).toFun x))
@@ -315,7 +315,7 @@ protected abbrev Monad.ofEquiv (i : Monad n) : Monad m where
   seqLeft x y := (e _).invFun (i.seqLeft ((e _).toFun x) fun u => (e _).toFun (y u))
   seqRight x y := (e _).invFun (i.seqRight ((e _).toFun x) fun u => (e _).toFun (y u))
 
-@[transport] protected abbrev Monad.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def Monad.canonicalCongr :
     Lean.CanonicalEquivalence (Monad m) (Monad n) where
   toFun := Monad.ofEquiv fun α => (e α).symm
   invFun := Monad.ofEquiv e
@@ -326,10 +326,10 @@ protected abbrev Monad.ofEquiv (i : Monad n) : Monad m where
     show Monad.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (Monad.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev MonadFinally.ofEquiv (i : MonadFinally n) : MonadFinally m where
+@[expose, reducible, macro_inline] protected def MonadFinally.ofEquiv (i : MonadFinally n) : MonadFinally m where
   tryFinally' x f := (e _).invFun (i.tryFinally' ((e _).toFun x) fun a? => (e _).toFun (f a?))
 
-@[transport] protected abbrev MonadFinally.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def MonadFinally.canonicalCongr :
     Lean.CanonicalEquivalence (MonadFinally m) (MonadFinally n) where
   toFun := MonadFinally.ofEquiv fun α => (e α).symm
   invFun := MonadFinally.ofEquiv e
@@ -340,11 +340,11 @@ protected abbrev MonadFinally.ofEquiv (i : MonadFinally n) : MonadFinally m wher
     show MonadFinally.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadFinally.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev MonadAttach.ofEquiv (i : MonadAttach n) : MonadAttach m where
+@[expose, reducible, macro_inline] protected def MonadAttach.ofEquiv (i : MonadAttach n) : MonadAttach m where
   CanReturn x a := i.CanReturn ((e _).toFun x) a
   attach x := (e _).invFun (i.attach ((e _).toFun x))
 
-@[transport] protected abbrev MonadAttach.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def MonadAttach.canonicalCongr :
     Lean.CanonicalEquivalence (MonadAttach m) (MonadAttach n) where
   toFun := MonadAttach.ofEquiv fun α => (e α).symm
   invFun := MonadAttach.ofEquiv e
@@ -355,13 +355,13 @@ protected abbrev MonadAttach.ofEquiv (i : MonadAttach n) : MonadAttach m where
     show MonadAttach.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadAttach.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev MonadExceptOf.ofEquiv {ε : Type w} (i : MonadExceptOf ε n) :
+@[expose, reducible, macro_inline] protected def MonadExceptOf.ofEquiv {ε : Type w} (i : MonadExceptOf ε n) :
     MonadExceptOf ε m where
   throw ex := (e _).invFun (i.throw ex)
   tryCatch body handler :=
     (e _).invFun (i.tryCatch ((e _).toFun body) fun ex => (e _).toFun (handler ex))
 
-@[transport] protected abbrev MonadExceptOf.canonicalCongr {ε : Type w} :
+@[transport, expose, reducible, macro_inline] protected def MonadExceptOf.canonicalCongr {ε : Type w} :
     Lean.CanonicalEquivalence (MonadExceptOf ε m) (MonadExceptOf ε n) where
   toFun := MonadExceptOf.ofEquiv fun α => (e α).symm
   invFun := MonadExceptOf.ofEquiv e
@@ -372,11 +372,11 @@ protected abbrev MonadExceptOf.ofEquiv {ε : Type w} (i : MonadExceptOf ε n) :
     show MonadExceptOf.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadExceptOf.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev MonadReaderOf.ofEquiv {ρ : Type u} (i : MonadReaderOf ρ n) :
+@[expose, reducible, macro_inline] protected def MonadReaderOf.ofEquiv {ρ : Type u} (i : MonadReaderOf ρ n) :
     MonadReaderOf ρ m where
   read := (e _).invFun i.read
 
-@[transport] protected abbrev MonadReaderOf.canonicalCongr {ρ : Type u} :
+@[transport, expose, reducible, macro_inline] protected def MonadReaderOf.canonicalCongr {ρ : Type u} :
     Lean.CanonicalEquivalence (MonadReaderOf ρ m) (MonadReaderOf ρ n) where
   toFun := MonadReaderOf.ofEquiv fun α => (e α).symm
   invFun := MonadReaderOf.ofEquiv e
@@ -387,11 +387,11 @@ protected abbrev MonadReaderOf.ofEquiv {ρ : Type u} (i : MonadReaderOf ρ n) :
     show MonadReaderOf.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadReaderOf.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev MonadWithReaderOf.ofEquiv {ρ : Type u} (i : MonadWithReaderOf ρ n) :
+@[expose, reducible, macro_inline] protected def MonadWithReaderOf.ofEquiv {ρ : Type u} (i : MonadWithReaderOf ρ n) :
     MonadWithReaderOf ρ m where
   withReader f x := (e _).invFun (i.withReader f ((e _).toFun x))
 
-@[transport] protected abbrev MonadWithReaderOf.canonicalCongr {ρ : Type u} :
+@[transport, expose, reducible, macro_inline] protected def MonadWithReaderOf.canonicalCongr {ρ : Type u} :
     Lean.CanonicalEquivalence (MonadWithReaderOf ρ m) (MonadWithReaderOf ρ n) where
   toFun := MonadWithReaderOf.ofEquiv fun α => (e α).symm
   invFun := MonadWithReaderOf.ofEquiv e
@@ -402,13 +402,13 @@ protected abbrev MonadWithReaderOf.ofEquiv {ρ : Type u} (i : MonadWithReaderOf 
     show MonadWithReaderOf.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadWithReaderOf.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev MonadStateOf.ofEquiv {σ : Type u} (i : MonadStateOf σ n) :
+@[expose, reducible, macro_inline] protected def MonadStateOf.ofEquiv {σ : Type u} (i : MonadStateOf σ n) :
     MonadStateOf σ m where
   get := (e _).invFun i.get
   set s := (e _).invFun (i.set s)
   modifyGet f := (e _).invFun (i.modifyGet f)
 
-@[transport] protected abbrev MonadStateOf.canonicalCongr {σ : Type u} :
+@[transport, expose, reducible, macro_inline] protected def MonadStateOf.canonicalCongr {σ : Type u} :
     Lean.CanonicalEquivalence (MonadStateOf σ m) (MonadStateOf σ n) where
   toFun := MonadStateOf.ofEquiv fun α => (e α).symm
   invFun := MonadStateOf.ofEquiv e
@@ -424,11 +424,11 @@ end
 section
 variable {m n : Type → Type} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
 
-protected abbrev Lean.MonadRef.ofEquiv (i : Lean.MonadRef n) : Lean.MonadRef m where
+@[expose, reducible, macro_inline] protected def Lean.MonadRef.ofEquiv (i : Lean.MonadRef n) : Lean.MonadRef m where
   getRef := (e _).invFun i.getRef
   withRef ref x := (e _).invFun (i.withRef ref ((e _).toFun x))
 
-@[transport] protected abbrev Lean.MonadRef.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def Lean.MonadRef.canonicalCongr :
     Lean.CanonicalEquivalence (Lean.MonadRef m) (Lean.MonadRef n) where
   toFun := Lean.MonadRef.ofEquiv fun α => (e α).symm
   invFun := Lean.MonadRef.ofEquiv e
@@ -444,10 +444,10 @@ end
 section
 variable {m : Type u → Type v} {n n' : Type u → Type w} (e : ∀ α, Lean.CanonicalEquivalence (n α) (n' α))
 
-protected abbrev MonadLift.ofEquiv (i : MonadLift m n') : MonadLift m n where
+@[expose, reducible, macro_inline] protected def MonadLift.ofEquiv (i : MonadLift m n') : MonadLift m n where
   monadLift x := (e _).invFun (i.monadLift x)
 
-@[transport] protected abbrev MonadLift.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def MonadLift.canonicalCongr :
     Lean.CanonicalEquivalence (MonadLift m n) (MonadLift m n') where
   toFun := MonadLift.ofEquiv fun α => (e α).symm
   invFun := MonadLift.ofEquiv e
@@ -458,10 +458,10 @@ protected abbrev MonadLift.ofEquiv (i : MonadLift m n') : MonadLift m n where
     show MonadLift.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadLift.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev MonadFunctor.ofEquiv (i : MonadFunctor m n') : MonadFunctor m n where
+@[expose, reducible, macro_inline] protected def MonadFunctor.ofEquiv (i : MonadFunctor m n') : MonadFunctor m n where
   monadMap f x := (e _).invFun (i.monadMap f ((e _).toFun x))
 
-@[transport] protected abbrev MonadFunctor.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def MonadFunctor.canonicalCongr :
     Lean.CanonicalEquivalence (MonadFunctor m n) (MonadFunctor m n') where
   toFun := MonadFunctor.ofEquiv fun α => (e α).symm
   invFun := MonadFunctor.ofEquiv e
@@ -472,12 +472,12 @@ protected abbrev MonadFunctor.ofEquiv (i : MonadFunctor m n') : MonadFunctor m n
     show MonadFunctor.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
       congrArg (MonadFunctor.ofEquiv · i) (funext fun α => (e α).symm_trans)
 
-protected abbrev MonadControl.ofEquiv (i : MonadControl m n') : MonadControl m n where
+@[expose, reducible, macro_inline] protected def MonadControl.ofEquiv (i : MonadControl m n') : MonadControl m n where
   stM := i.stM
   liftWith f := (e _).invFun (i.liftWith fun run => f fun x => run ((e _).toFun x))
   restoreM x := (e _).invFun (i.restoreM x)
 
-@[transport] protected abbrev MonadControl.canonicalCongr :
+@[transport, expose, reducible, macro_inline] protected def MonadControl.canonicalCongr :
     Lean.CanonicalEquivalence (MonadControl m n) (MonadControl m n') where
   toFun := MonadControl.ofEquiv fun α => (e α).symm
   invFun := MonadControl.ofEquiv e
@@ -496,10 +496,10 @@ variable {m m' : Type u → Type v} {n n' : Type u → Type w}
   (e₂ : ∀ α, Lean.CanonicalEquivalence (n α) (n' α))
 
 /-- Like `MonadLift.ofEquiv`, but also changes the lifted monad. -/
-protected abbrev MonadLift.ofEquiv₂ (i : MonadLift m' n') : MonadLift m n where
+@[expose, reducible, macro_inline] protected def MonadLift.ofEquiv₂ (i : MonadLift m' n') : MonadLift m n where
   monadLift x := (e₂ _).invFun (i.monadLift ((e₁ _).toFun x))
 
-@[transport] protected abbrev MonadLift.canonicalCongr₂ :
+@[transport, expose, reducible, macro_inline] protected def MonadLift.canonicalCongr₂ :
     Lean.CanonicalEquivalence (MonadLift m n) (MonadLift m' n') where
   toFun := MonadLift.ofEquiv₂ (fun α => (e₁ α).symm) fun α => (e₂ α).symm
   invFun := MonadLift.ofEquiv₂ e₁ e₂
