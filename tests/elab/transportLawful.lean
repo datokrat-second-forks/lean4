@@ -57,7 +57,7 @@ and cannot be transported to it:
     LawfulMonad Bad
   
   Note: `LawfulMonad.canonicalCongr` does not apply, its argument `hi` does not hold by `rfl`:
-    instMonadBad = (Monad.canonicalCongr @Bad.equivDef).invFun StateT.instMonad
+    instMonadBad = (Monad.canonicalCongr fun α => Bad.equivDef).invFun StateT.instMonad
 -/
 #guard_msgs in
 instance : LawfulMonad Bad := inferInstanceAs (LawfulMonad (StateT Nat Id))
