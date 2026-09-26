@@ -57,8 +57,10 @@ class Step (α : Type) where
 
 instance : Step Nat := ⟨(· + 1)⟩
 
-newtype W1 := Nat with toNat
-newtype W2 := W1 with toW1
+newtype W1 where
+  toNat : Nat
+newtype W2 where
+  toW1 : W1
 
 instance : Step W2 := inferInstanceAs (Step Nat)
 

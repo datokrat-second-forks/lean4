@@ -6,7 +6,8 @@ back to transport where their definitional unfolding does not apply, i.e. on `ne
 equivalence with the underlying type is registered automatically.
 -/
 
-newtype Foo := Int with toInt
+newtype Foo where
+  toInt : Int
 
 /-- info: Foo.equivDef : Lean.CanonicalEquivalence Foo Int -/
 #guard_msgs in #check Foo.equivDef
@@ -93,7 +94,8 @@ example (x : Foo) : x ≤ x := LawfulLE.le_refl x
 
 /-! Chaining: through nested `newtype`s with `Lean.CanonicalEquivalence.trans`, and through type constructors. -/
 
-newtype Foo2 := Foo with toFoo
+newtype Foo2 where
+  toFoo : Foo
 
 instance : LE Foo2 := by transport (LE Int)
 instance : DecidableLE Foo2 := by transport (DecidableLE Int)
@@ -106,7 +108,8 @@ example : (default : Option Foo) = none := rfl
 
 /-! `inferInstanceAs` falls back to transport, also resolving placeholders through it. -/
 
-newtype Wrap (n : Nat) := Fin n with toFin
+newtype Wrap (n : Nat) where
+  toFin : Fin n
 
 instance : Inhabited (Wrap 3) := inferInstanceAs (Inhabited (Fin _))
 instance : LE (Wrap 3) := inferInstanceAs (LE (Fin _))
@@ -119,7 +122,8 @@ instance : LE Alias := inferInstanceAs (LE Int)
 
 /-! `deriving` falls back to transport, both as a clause and as a command. -/
 
-newtype Baz := Int with toInt
+newtype Baz where
+  toInt : Int
   deriving LE, Inhabited
 
 deriving instance DecidableLE, LawfulLE for Baz
@@ -144,7 +148,8 @@ class Pointed (m : Type → Type) where
 
 instance : Pointed Option := ⟨fun _ => some⟩
 
-newtype Opt (α : Type) := Option α with toOption
+newtype Opt (α : Type) where
+  toOption : Option α
 
 instance : Pointed Opt := inferInstanceAs (Pointed Option)
 
@@ -156,7 +161,8 @@ example : (inferInstance : Pointed Opt) =
   rfl
 
 -- Chaining under the binder: `Opt2 α` unfolds to `Opt α`, which unfolds to `Option α`.
-newtype Opt2 (α : Type) := Opt α with toOpt
+newtype Opt2 (α : Type) where
+  toOpt : Opt α
 
 instance : Pointed Opt2 := by transport (Pointed Option)
 
@@ -186,7 +192,8 @@ example : Decidable (Foo.mk 3 = Foo.mk 4) := by transport Decidable ((3 : Int) =
 
 /-! Failures. -/
 
-newtype Bar := Int with toInt
+newtype Bar where
+  toInt : Int
 
 -- Not the transported order, so the law does not carry over.
 instance : LE Bar := ⟨fun x y => y.toInt ≤ x.toInt⟩
@@ -263,7 +270,9 @@ infixl:25 " ≃ " => Equiv
 def Foo.equiv : Int ≃ Foo := ⟨Foo.mk, Foo.toInt⟩
 def LE.congr : Nat := 7
 
-newtype Independent := Int with toInt deriving LE, Inhabited
+newtype Independent where
+  toInt : Int
+deriving LE, Inhabited
 
 example : Independent.mk 1 ≤ Independent.mk 2 := by decide
 example : (default : Independent) = Independent.mk 0 := rfl
@@ -321,8 +330,10 @@ deriving instance LE for Sealed
 
 /-! Equivalences are only used in their stated direction, so there is none between siblings. -/
 
-newtype SibA := Int with toInt
-newtype SibB := Int with toInt
+newtype SibA where
+  toInt : Int
+newtype SibB where
+  toInt : Int
 
 instance : LE SibA := by transport (LE Int)
 
