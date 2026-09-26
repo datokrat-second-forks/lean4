@@ -111,6 +111,10 @@ example : Num.mk 2 + Num.mk 3 = Num.mk 5 := rfl
 example : Num.mk 7 / Num.mk 2 - Num.mk 1 * Num.mk 3 = Num.mk 0 := rfl
 example : -Num.mk 2 = Num.mk (-2) := rfl
 
+instance : SMul Int Num := inferInstanceAs (SMul Int Int)
+
+example : (3 : Int) • Num.mk 2 = Num.mk 6 := rfl
+
 /-!
 Families of equivalences: a congruence for a class on a type constructor takes `∀ α, Lean.CanonicalEquivalence (m α) (n α)`,
 which is solved under the binder.
