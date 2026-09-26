@@ -12,7 +12,8 @@ back instead of the program.
 
 structure Box (α : Type) where mk :: run : α
 
-newtype N (type : Type) := type with run
+newtype N (type : Type) where
+  run : type
 
 opaque payload : Nat
 

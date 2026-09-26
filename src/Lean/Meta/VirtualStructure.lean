@@ -13,7 +13,7 @@ public section
 namespace Lean
 
 /--
-Registered by `newtype N := Nat with toNat`, so that `whnf` and `isDefEq` treat `N.toNat (N.mk a)`
+Registered by `newtype N where toNat : Nat`, so that `whnf` and `isDefEq` treat `N.toNat (N.mk a)`
 and `N.mk (N.toNat x)` like iota and eta for a one-field structure, although `N`, `N.mk` and
 `N.toNat` are irreducible definitions.
 -/

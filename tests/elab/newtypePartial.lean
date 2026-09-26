@@ -4,7 +4,8 @@ monad sealed with `newtype` is: the check that a `partial` definition is a funct
 the irreducible `newtype`.
 -/
 
-newtype M (α : Type) := Nat → α with run
+newtype M (α : Type) where
+  run : Nat → α
 
 instance [Inhabited α] : Inhabited (M α) := ⟨M.mk fun _ => default⟩
 

@@ -9,11 +9,14 @@ without `@[expose]`. Importers can only reduce `N.proj (N.mk a)` in the kernel i
 are visible.
 -/
 
-public newtype Pub := Nat with toNat
+public newtype Pub where
+  toNat : Nat
 /-- warning: `@[expose]` has no effect; this declaration would be exposed by default -/
 #guard_msgs in
-@[expose] public newtype Exposed := Nat with toNat
-newtype Priv := Nat with toNat
+@[expose] public newtype Exposed where
+  toNat : Nat
+newtype Priv where
+  toNat : Nat
 
 open Lean in
 run_meta do
@@ -32,7 +35,8 @@ public section
 
 -- The visibility of a `public section` is not visible in the declaration's modifiers, so the
 -- elaborator has to consult the environment for it, as `def` does.
-newtype InPublicSection := Nat with toNat
+newtype InPublicSection where
+  toNat : Nat
 
 open Lean in
 run_meta do

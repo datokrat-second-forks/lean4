@@ -5,7 +5,8 @@ duration of the tactic block (e.g. to prove `N = Nat`, which requires unfolding 
 and restores the original `[irreducible]` status afterward.
 -/
 
-newtype N := Nat with toNat
+newtype N where
+  toNat : Nat
 
 -- Inside the block, `N` unfolds to `Nat`.
 example : N = Nat := by unsealing_newtype N => rfl

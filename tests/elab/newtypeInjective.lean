@@ -3,7 +3,8 @@ Tests the injectivity theorems `N.mk.inj` and `N.mk.injEq` generated for a `newt
 one-field structure, and the checks `newtype` performs before adding any declaration.
 -/
 
-newtype N (α : Type u) := List α with toList
+newtype N (α : Type u) where
+  toList : List α
 
 /-- info: N.mk.inj.{u} {α : Type u} {toList toList✝ : List α} : N.mk toList = N.mk toList✝ → toList = toList✝ -/
 #guard_msgs in #check N.mk.inj
@@ -16,7 +17,8 @@ example (a b : List Nat) (h : N.mk a = N.mk b) : a = b := by simpa using h
 example (a b : List Nat) (h : N.mk a = N.mk b) : a = b := by grind [N.mk.inj]
 
 -- No injectivity theorems for a proposition.
-newtype P := True with proof
+newtype P where
+  proof : True
 /-- error: Unknown constant `P.mk.inj` -/
 #guard_msgs in #check P.mk.inj
 
@@ -24,13 +26,16 @@ newtype P := True with proof
 def Clash.toNat : Nat := 0
 
 /-- error: `Clash.toNat` has already been declared -/
-#guard_msgs in newtype Clash := Nat with toNat
+#guard_msgs in newtype Clash where toNat : Nat
 
 /-- error: Unknown identifier `Clash` -/
 #guard_msgs in #check Clash
 
-/-- error: invalid `newtype`, the projector cannot be named `mk`, the name of the constructor -/
-#guard_msgs in newtype M := Nat with mk
+/-- error: invalid `newtype`, the projector and the constructor cannot have the same name -/
+#guard_msgs in newtype M where mk : Nat
+
+/-- error: invalid `newtype`, the projector and the constructor cannot have the same name -/
+#guard_msgs in newtype M where val :: val : Nat
 
 /-- error: invalid `newtype`, a `newtype` is always irreducible, `@[reducible]` is not allowed -/
-#guard_msgs in @[reducible] newtype R := Nat with toNat
+#guard_msgs in @[reducible] newtype R where toNat : Nat

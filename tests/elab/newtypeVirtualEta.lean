@@ -8,7 +8,8 @@ Tests virtual structure eta for `newtype`-declared types (`Lean.Meta.isDefEqVirt
 (`Lean.Meta.reduceVirtualProj?`, wired into `Simp.reduceStep`).
 -/
 
-newtype N := Nat with toNat
+newtype N where
+  toNat : Nat
 
 -- Virtual eta.
 example (x : N) : N.mk (N.toNat x) = x := rfl

@@ -6,7 +6,8 @@ projection, as for real single-field structures (`isDefEqProj.isDefEqSingleton`)
 is solved by `?m := N.mk v`.
 -/
 
-newtype N (α : Type) := α with val
+newtype N (α : Type) where
+  val : α
 
 example (x : α) : ∃ y : N α, y.val = x := ⟨_, rfl⟩
 
@@ -18,7 +19,8 @@ example [OfNat α 1] {a : N α} : a.val = 1 ↔ a = 1 := val_inj (b := 1)
 end N
 
 -- Without parameters.
-newtype M := Nat with toNat
+newtype M where
+  toNat : Nat
 
 example : ∃ y : M, y.toNat = 5 := ⟨_, rfl⟩
 example : ∃ y : M, 5 = y.toNat := ⟨_, rfl⟩

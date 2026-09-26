@@ -7,7 +7,8 @@ chain of constructors and projections of one-field structures or `newtype`s appl
 structure Box (α : Type) where
   val : α
 
-newtype Sealed := Nat with toNat
+newtype Sealed where
+  toNat : Nat
 
 inductive IsZero : Nat → Prop
   | mk : IsZero 0
@@ -52,7 +53,8 @@ projection chain of the variable.
 structure Inner where
   n : Nat
 
-newtype Mid := Inner with toInner
+newtype Mid where
+  toInner : Inner
 
 structure Outer where
   mid : Mid

@@ -5,7 +5,8 @@ of a `newtype`, as it does for one-field structures (see `inductionStructIndex.l
 by substituting `Wrap.mk y` for `x`.
 -/
 
-newtype Wrap := Nat with inner
+newtype Wrap where
+  inner : Nat
 
 /--
 trace: case single
@@ -60,7 +61,8 @@ example {a b} (h : Relation.TransGen (fun a b : Wrap => a = b) (.mk a) (.mk b)) 
 structure Box where
   w : Wrap
 
-newtype Wrap2 := Box with box
+newtype Wrap2 where
+  box : Box
 
 example {a b} (h : Relation.TransGen (fun a b : Box => a = b) ⟨.mk a⟩ ⟨.mk b⟩) : a = b := by
   induction h with

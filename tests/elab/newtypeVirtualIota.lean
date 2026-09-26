@@ -5,14 +5,17 @@ structure" so that `whnf`/`isDefEq` reduce `N.toNat (N.mk n)` to `n` (virtual io
 `N`, `N.mk` and `N.toNat` are otherwise irreducible (so `N` does not unify with `Nat` in general).
 -/
 
-newtype N := Nat with toNat
+newtype N where
+  toNat : Nat
 
 -- Virtual iota: projector-of-constructor reduces by `rfl`, without unfolding `N`/`N.mk`/`N.toNat`.
 example (n : Nat) : N.toNat (N.mk n) = n := rfl
 
 -- Over-applied projector, when the wrapped value is a function.
-newtype F := Nat → Nat with get
-newtype G (α : Type) := α → α → α with get
+newtype F where
+  get : Nat → Nat
+newtype G (α : Type) where
+  get : α → α → α
 
 example (f : Nat → Nat) (x : Nat) : (F.mk f).get x = f x := rfl
 example (f : Nat → Nat) (x : Nat) : (F.mk f).get x = f x := by simp only

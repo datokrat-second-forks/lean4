@@ -9,7 +9,8 @@ work in the presence of parameters.
 
 universe u
 
-newtype OrderDual (α : Type u) := α with ofDual
+newtype OrderDual (α : Type u) where
+  ofDual : α
 
 /-- info: OrderDual.{u} (α : Type u) : Type u -/
 #guard_msgs in #check OrderDual
@@ -26,7 +27,8 @@ example : OrderDual α = α := by unsealing_newtype OrderDual => rfl
 section
 variable (β : Type) [Inhabited β]
 
-newtype Wrap := List β with toList
+newtype Wrap where
+  toList : List β
 
 /-- info: Wrap (β : Type) : Type -/
 #guard_msgs in #check Wrap
@@ -38,7 +40,8 @@ example (l : List β) : (Wrap.mk l).toList = l := rfl
 end
 
 -- Auto-bound universe levels in the binders, as for `def`.
-newtype Wrap' (γ : Type _) := Option γ with get
+newtype Wrap' (γ : Type _) where
+  get : Option γ
 
 /-- info: Wrap'.{u_1} (γ : Type u_1) : Type u_1 -/
 #guard_msgs in #check Wrap'
@@ -48,10 +51,11 @@ newtype Wrap' (γ : Type _) := Option γ with get
 example (o : Option γ) : (Wrap'.mk o).get = o := rfl
 
 /-- doc -/
-private newtype Priv (n : Nat) := Fin n with val
+private newtype Priv (n : Nat) where
+  val : Fin n
 
 example (i : Fin 3) : (Priv.mk i).val = i := rfl
 
-/-- error: invalid `newtype`, the right-hand side must be a type, but has type
+/-- error: invalid `newtype`, the underlying type must be a type, but has type
   Nat -/
-#guard_msgs in newtype Bad := 5 with val
+#guard_msgs in newtype Bad where val : 5

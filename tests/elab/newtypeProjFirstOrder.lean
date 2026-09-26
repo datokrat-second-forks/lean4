@@ -10,7 +10,8 @@ Eta-expanding is still the right answer when the other side is not the same proj
 that case is `newtypeProjMVar.lean`.
 -/
 
-newtype N (type : Type) := type with run
+newtype N (type : Type) where
+  run : type
 
 structure Box (α : Type) where mk :: run : α
 

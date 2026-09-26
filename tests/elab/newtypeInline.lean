@@ -9,7 +9,8 @@ error. `always_inline` rather than `inline` because the latter is only consulted
 own heuristics decline.
 -/
 
-newtype Wrapper (α : Type) := List α with toList
+newtype Wrapper (α : Type) where
+  toList : List α
 
 structure Control (α : Type) where mk :: toList : List α
 

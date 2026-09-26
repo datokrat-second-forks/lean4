@@ -6,6 +6,7 @@ normalization (`Lean.Meta.Grind.simpCore`/`dsimpCore`) reuses `Simp.mainCore`/`S
 which already knows how to reduce virtual projections (see `newtypeVirtualIota.lean`).
 -/
 
-newtype N := Nat with toNat
+newtype N where
+  toNat : Nat
 
 example (n : Nat) : N.toNat (N.mk n) = n := by grind
