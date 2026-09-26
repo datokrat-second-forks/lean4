@@ -154,6 +154,15 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
   right_inv i := congrArg Neg.mk <| funext fun x =>
     (e.right_inv _).trans (congrArg i.neg (e.right_inv x))
 
+@[transport] protected abbrev SMul.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (SMul M α) (SMul M β) where
+  toFun i := ⟨fun m x => e.toFun (i.smul m (e.invFun x))⟩
+  invFun i := ⟨fun m x => e.invFun (i.smul m (e.toFun x))⟩
+  left_inv i := congrArg SMul.mk <| funext fun m => funext fun x =>
+    (e.left_inv _).trans (congrArg (i.smul m) (e.left_inv x))
+  right_inv i := congrArg SMul.mk <| funext fun m => funext fun x =>
+    (e.right_inv _).trans (congrArg (i.smul m) (e.right_inv x))
+
 @[transport] protected abbrev Repr.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Repr α) (Repr β) where
   toFun i := ⟨fun x prec => i.reprPrec (e.invFun x) prec⟩
