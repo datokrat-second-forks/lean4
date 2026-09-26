@@ -21,8 +21,9 @@ set_option linter.all true
 /--
 `Ordinal` represents a bounded value for days, which ranges between 1 and 31.
 -/
-newtype Ordinal := Bounded.LE 1 31 with toBounded
-  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
+newtype Ordinal where
+  toBounded : Bounded.LE 1 31
+deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
@@ -46,8 +47,9 @@ instance : Inhabited Ordinal where default := 1
 `Offset` represents an offset in days. It is defined as an `Int` with a base unit of 86400
 (the number of seconds in a day).
 -/
-newtype Offset := UnitVal 86400 with toUnitVal
-  deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
+newtype Offset where
+  toUnitVal : UnitVal 86400
+deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
     Ord, TransOrd, LawfulEqOrd
 
 /--
@@ -73,9 +75,9 @@ def ofInt (data : Int) (h : 1 ≤ data ∧ data ≤ 31) : Ordinal :=
 `OfYear` represents the day ordinal within a year, which can be bounded between 1 and 365 or 366,
 depending on whether it's a leap year.
 -/
-newtype OfYear (leap : Bool) := Bounded.LE 1 (.ofNat (if leap then 366 else 365))
-  with toBounded
-  deriving Repr, ToString, DecidableEq, Ord, TransOrd, LawfulEqOrd
+newtype OfYear (leap : Bool) where
+  toBounded : Bounded.LE 1 (.ofNat (if leap then 366 else 365))
+deriving Repr, ToString, DecidableEq, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
 abbrev OfYear.val (ordinal : OfYear leap) : Int := ordinal.toBounded.val

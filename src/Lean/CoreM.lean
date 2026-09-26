@@ -267,7 +267,8 @@ The main features it provides are:
 - Lean options context
 - the current open namespace
 -/
-newtype CoreM (α : Type) := ReaderT Context (StateRefT State (EIO Exception)) α with toReaderT
+newtype CoreM (α : Type) where
+  toReaderT : ReaderT Context (StateRefT State (EIO Exception)) α
 
 -- Make the compiler generate specialized `pure`/`bind` so we do not have to optimize through the
 -- whole monad stack at every use site. May eventually be covered by `deriving`.

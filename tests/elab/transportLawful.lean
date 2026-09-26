@@ -4,7 +4,8 @@ Tests the congruences for `LawfulFunctor`, `LawfulApplicative`, `LawfulMonad` an
 including through a chain of `newtype`s.
 -/
 
-newtype M (α : Type) := StateT Nat Id α with run
+newtype M (α : Type) where
+  run : StateT Nat Id α
 
 instance : Monad M := inferInstanceAs (Monad (StateT Nat Id))
 instance : LawfulMonad M := inferInstanceAs (LawfulMonad (StateT Nat Id))
@@ -13,7 +14,8 @@ example : LawfulApplicative M := inferInstance
 example : LawfulFunctor M := inferInstanceAs (LawfulFunctor (StateT Nat Id))
 example : LawfulApplicative M := inferInstanceAs (LawfulApplicative (StateT Nat Id))
 
-newtype M2 (α : Type) := M α with run
+newtype M2 (α : Type) where
+  run : M α
 
 instance : Monad M2 := inferInstanceAs (Monad (StateT Nat Id))
 instance : LawfulMonad M2 := by transport (LawfulMonad (StateT Nat Id))
@@ -25,7 +27,8 @@ instance : LawfulMonadLift Id M := inferInstanceAs (LawfulMonadLift Id (StateT N
 example (x : M Nat) : (x >>= pure) = x := bind_pure x
 
 -- A hand-written `Monad` instance that agrees with the transported one inherits lawfulness.
-newtype Good (α : Type) := StateT Nat Id α with run
+newtype Good (α : Type) where
+  run : StateT Nat Id α
 
 instance : Monad Good where
   map f x := .mk (f <$> x.run)
@@ -39,7 +42,8 @@ instance : Monad Good where
 instance : LawfulMonad Good := inferInstanceAs (LawfulMonad (StateT Nat Id))
 
 -- A `Monad` instance that is not the transported one does not inherit lawfulness.
-newtype Bad (α : Type) := StateT Nat Id α with run
+newtype Bad (α : Type) where
+  run : StateT Nat Id α
 
 instance : Monad Bad where
   pure a := Bad.mk (pure a)

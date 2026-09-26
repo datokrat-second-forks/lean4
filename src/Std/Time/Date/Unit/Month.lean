@@ -22,8 +22,9 @@ set_option linter.all true
 /--
 `Ordinal` represents a bounded value for months, which ranges between 1 and 12.
 -/
-newtype Ordinal := Bounded.LE 1 12 with toBounded
-  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
+newtype Ordinal where
+  toBounded : Bounded.LE 1 12
+deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
@@ -48,8 +49,9 @@ instance : Inhabited Ordinal where
 /--
 `Offset` represents an offset in months. It is defined as an `Int`.
 -/
-newtype Offset := Int with toInt
-  deriving Repr, DecidableEq, Inhabited, Add, Sub, Mul, Div, Neg, ToString, LT, LE, DecidableLE,
+newtype Offset where
+  toInt : Int
+deriving Repr, DecidableEq, Inhabited, Add, Sub, Mul, Div, Neg, ToString, LT, LE, DecidableLE,
     DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 instance : OfNat Offset n := inferInstanceAs (OfNat Int n)
@@ -59,8 +61,9 @@ instance : Coe Offset Int := ⟨Offset.toInt⟩
 /--
 `Quarter` represents a value between 1 and 4, inclusive, corresponding to the four quarters of a year.
 -/
-newtype Quarter := Bounded.LE 1 4 with toBounded
-  deriving Repr, DecidableEq, LT, LE, Ord, TransOrd, LawfulEqOrd
+newtype Quarter where
+  toBounded : Bounded.LE 1 4
+deriving Repr, DecidableEq, LT, LE, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the quarter. -/
 abbrev Quarter.val (quarter : Quarter) : Int := quarter.toBounded.val

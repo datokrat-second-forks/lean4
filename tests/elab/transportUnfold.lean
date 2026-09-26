@@ -17,17 +17,21 @@ def checkNoGlue (inst : Name) : MetaM Unit := do
   unless glue.isEmpty do
     throwError "`{inst}` still contains {glue}:{indentExpr v}"
 
-newtype M (α : Type) := StateT Nat Id α with run
-newtype M2 (α : Type) := M α with run
+newtype M (α : Type) where
+  run : StateT Nat Id α
+newtype M2 (α : Type) where
+  run : M α
 
 instance instMonadM : Monad M := inferInstanceAs (Monad (StateT Nat Id))
 instance instMonadM2 : Monad M2 := inferInstanceAs (Monad (StateT Nat Id))
 instance instControlM2 : MonadControl Id M2 := inferInstanceAs (MonadControl Id (StateT Nat Id))
 instance instLiftM2 : MonadLift Id M2 := by transport (MonadLift Id (StateT Nat Id))
 
-newtype W := Nat with toNat
-  deriving Ord
-newtype W2 := W with toW
+newtype W where
+  toNat : Nat
+deriving Ord
+newtype W2 where
+  toW : W
 
 instance instDecEqW2 : DecidableEq W2 := inferInstanceAs (DecidableEq Nat)
 instance instAddW2 : Add W2 := inferInstanceAs (Add Nat)

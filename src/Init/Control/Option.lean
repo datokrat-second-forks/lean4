@@ -21,7 +21,8 @@ instance : ToBool (Option α) := ⟨Option.isSome⟩
 Adds the ability to fail to a monad. Unlike ordinary exceptions, there is no way to signal why a
 failure occurred.
 -/
-newtype OptionT (m : Type u → Type v) (α : Type u) := m (Option α) with run
+newtype OptionT (m : Type u → Type v) (α : Type u) where
+  run : m (Option α)
 
 /--
 Executes an action that might fail in the underlying monad `m`, returning `none` in case of failure.

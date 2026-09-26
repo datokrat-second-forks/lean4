@@ -459,7 +459,8 @@ def toErrorMsg (ctx : InputContext) (s : ParserState) : String := Id.run do
 
 end ParserState
 
-newtype ParserFn := ParserContext → ParserState → ParserState with toFn
+newtype ParserFn where
+  toFn : ParserContext → ParserState → ParserState
 
 instance : Inhabited ParserFn where
   default := .mk fun _ s => s

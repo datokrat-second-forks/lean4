@@ -31,7 +31,8 @@ A restricted version of `IO` in which mutable state is the only side effect.
 
 It is possible to run `ST` computations in a non-monadic context using `runST`.
 -/
-newtype ST (σ : Type) (α : Type) := Void σ → ST.Out σ α with run
+newtype ST (σ : Type) (α : Type) where
+  run : Void σ → ST.Out σ α
 
 namespace ST
 
@@ -74,7 +75,8 @@ A restricted version of `IO` in which mutable state and exceptions are the only 
 
 It is possible to run `EST` computations in a non-monadic context using `runEST`.
 -/
-newtype EST (ε : Type) (σ : Type) (α : Type) := Void σ → EST.Out ε σ α with run
+newtype EST (ε : Type) (σ : Type) (α : Type) where
+  run : Void σ → EST.Out ε σ α
 
 namespace EST
 

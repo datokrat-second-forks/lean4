@@ -379,7 +379,8 @@ structure Context where
   -/
   fixedTermElabs : Array FixedTermElabRef := #[]
 
-newtype TermElabM (α : Type) := ReaderT Context (StateRefT State MetaM) α with toReaderT
+newtype TermElabM (α : Type) where
+  toReaderT : ReaderT Context (StateRefT State MetaM) α
 
 /-
 Make the compiler generate specialized `pure`/`bind` so we do not have to optimize through the

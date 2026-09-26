@@ -37,8 +37,9 @@ instance : ToString Era where
 /--
 `Offset` represents a year offset, defined as an `Int`.
 -/
-newtype Offset := Int with toInt
-  deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
+newtype Offset where
+  toInt : Int
+deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
     Ord, TransOrd, LawfulEqOrd
 
 /--

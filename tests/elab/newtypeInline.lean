@@ -79,7 +79,8 @@ trace: [Compiler.IR] [result]
 set_option trace.compiler.ir.result true in
 def stepW2 (x : W2) : W2 := Step.step x
 
-newtype M (α : Type) := StateT Nat Id α with run
+newtype M (α : Type) where
+  run : StateT Nat Id α
 
 instance : Monad M := inferInstanceAs (Monad (StateT Nat Id))
 
@@ -104,7 +105,8 @@ run_meta do
     throwError "IR differs:{indentD (format m)}\n{indentD (format s)}"
 
 -- The same through a chain of two `newtype`s.
-newtype M2 (α : Type) := M α with run
+newtype M2 (α : Type) where
+  run : M α
 
 instance : Monad M2 := inferInstanceAs (Monad (StateT Nat Id))
 

@@ -743,7 +743,7 @@ Declarations concluding in an equivalence can be tagged with `@[transport]`. Con
 `(e : Lean.CanonicalEquivalence α β) → Lean.CanonicalEquivalence (LE α) (LE β)`
 let `transport`, `inferInstanceAs`, and `deriving` move instances between equivalent types
 without unfolding either type. Like a simp lemma or an `eq_def` theorem, a registered equivalence
-unfolds its left-hand side: every `newtype N := ty` registers `N.equivDef : Lean.CanonicalEquivalence N ty`.
+unfolds its left-hand side: every `newtype N where proj : ty` registers `N.equivDef : Lean.CanonicalEquivalence N ty`.
 -/
 structure Lean.CanonicalEquivalence (α : Sort u) (β : Sort v) where
   /-- The forward map. -/
@@ -4316,7 +4316,8 @@ Actions in the resulting monad are functions that take the local value as a para
 ordinary actions in `m`.
 -/
 -- the binder name `r` is part of `ReaderT.run`'s type, so that `ReaderT.run (r := ...)` works
-newtype ReaderT (ρ : Type u) (m : Type u → Type v) (α : Type u) := (r : @&ρ) → m α with run
+newtype ReaderT (ρ : Type u) (m : Type u → Type v) (α : Type u) where
+  run : (r : @&ρ) → m α
 
 /--
 Interpret `ρ → m α` as an element of `ReaderT ρ m α`.
@@ -4674,7 +4675,8 @@ Instances of `EStateM.Backtrackable` provide a way to roll back some part of the
 `EStateM ε σ` is equivalent to `ExceptT ε (StateM σ)`, but it is more efficient.
 -/
 -- the binder name `s` is part of `EStateM.run`'s type, so that `EStateM.run (s := ...)` works
-newtype EStateM (ε σ α : Type u) := (s : σ) → Result ε σ α with run
+newtype EStateM (ε σ α : Type u) where
+  run : (s : σ) → Result ε σ α
 
 /--
 Interpret `σ → EStateM.Result ε σ α` as an element of `EStateM ε σ α`.
@@ -5241,7 +5243,8 @@ def Syntax.node8 (info : SourceInfo) (kind : SyntaxNodeKind) (a₁ a₂ a₃ a�
 Singleton `SyntaxNodeKinds` are extremely common. They are written as name literals, rather than as
 lists; list syntax is required only for empty or non-singleton sets of kinds.
 -/
-newtype SyntaxNodeKinds := List SyntaxNodeKind with toList
+newtype SyntaxNodeKinds where
+  toList : List SyntaxNodeKind
 
 /--
 Typed syntax, which tracks the potential kinds of the `Syntax` it contains.

@@ -48,8 +48,9 @@ namespace Weekday
 /--
 `Ordinal` represents a bounded value for weekdays, which ranges between 1 and 7.
 -/
-newtype Ordinal := Bounded.LE 1 7 with toBounded
-  deriving Repr, DecidableEq, LT, LE, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
+newtype Ordinal where
+  toBounded : Bounded.LE 1 7
+deriving Repr, DecidableEq, LT, LE, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
