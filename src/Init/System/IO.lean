@@ -37,7 +37,8 @@ instance IO.RealWorld.instNonempty : Nonempty IO.RealWorld :=
 /--
 An `IO` monad that cannot throw exceptions.
 -/
-newtype BaseIO (α : Type) := ST IO.RealWorld α with toST
+newtype BaseIO (α : Type) where
+  toST : ST IO.RealWorld α
 
 instance : Monad BaseIO := inferInstanceAs (Monad (ST IO.RealWorld))
 instance : MonadFinally BaseIO := inferInstanceAs (MonadFinally (ST IO.RealWorld))
@@ -60,7 +61,8 @@ A monad that can have side effects on the external world or throw exceptions of 
    def getWorld : IO (IO.RealWorld) := get
    ```
 -/
-newtype EIO (ε : Type) (α : Type) := EST ε IO.RealWorld α with toEST
+newtype EIO (ε : Type) (α : Type) where
+  toEST : EST ε IO.RealWorld α
 
 /--
 Runs a `BaseIO` action, which cannot throw an exception, in any other `EIO` monad.

@@ -593,7 +593,8 @@ run_meta
   | none => IO.println "no limit found"
 ```
 -/
-newtype MetaM (α : Type) := ReaderT Context (StateRefT State CoreM) α with toReaderT
+newtype MetaM (α : Type) where
+  toReaderT : ReaderT Context (StateRefT State CoreM) α
 
 -- Make the compiler generate specialized `pure`/`bind` so we do not have to optimize through the
 -- whole monad stack at every use site. May eventually be covered by `deriving`.

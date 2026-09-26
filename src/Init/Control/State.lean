@@ -23,8 +23,8 @@ Actions in the resulting monad are functions that take an initial state and retu
 of a value and a state.
 -/
 -- the binder name `s` is part of `StateT.run`'s type, so that `StateT.run (s := ...)` works
-newtype StateT (σ : Type u) (m : Type u → Type v) (α : Type u) :=
-  (s : σ) → m (α × σ) with run
+newtype StateT (σ : Type u) (m : Type u → Type v) (α : Type u) where
+  run : (s : σ) → m (α × σ)
 
 /--
 Interpret `σ → m (α × σ)` as an element of `StateT σ m α`.

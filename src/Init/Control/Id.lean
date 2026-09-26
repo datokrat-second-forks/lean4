@@ -36,7 +36,8 @@ def containsFive (xs : List Nat) : Bool := Id.run do
 true
 ```
 -/
-newtype Id (α : Type u) := α with run
+newtype Id (α : Type u) where
+  run : α
 
 /--
 Interpret a value as a computation in the identity monad.

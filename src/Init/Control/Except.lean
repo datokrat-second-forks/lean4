@@ -128,7 +128,8 @@ end Except
 /--
 Adds exceptions of type `ε` to a monad `m`.
 -/
-newtype ExceptT (ε : Type u) (m : Type u → Type v) (α : Type u) := m (Except ε α) with run
+newtype ExceptT (ε : Type u) (m : Type u → Type v) (α : Type u) where
+  run : m (Except ε α)
 
 /--
 Use a monadic action that may return an exception's value as an action in the transformed monad that

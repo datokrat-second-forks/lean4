@@ -9,7 +9,8 @@ the transported iterator agree with those of the underlying one.
 
 open Std Std.Iterators
 
-newtype Wrapped (α : Type) := Types.ListIterator α with toListIterator
+newtype Wrapped (α : Type) where
+  toListIterator : Types.ListIterator α
 
 instance : Iterator (Wrapped α) Id α := Iterator.ofEquiv Wrapped.equivDef inferInstance
 instance : Finite (Wrapped α) Id := Finite.ofEquiv Wrapped.equivDef

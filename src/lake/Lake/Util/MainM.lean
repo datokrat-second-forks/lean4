@@ -15,7 +15,8 @@ namespace Lake
 The monad in Lake for `main`-like functions.
 Supports IO, logging, and `exit`.
 -/
-public newtype MainM (α : Type) := EIO ExitCode α with toEIO
+public newtype MainM (α : Type) where
+  toEIO : EIO ExitCode α
 
 public instance : Monad MainM := inferInstanceAs (Monad (EIO ExitCode))
 public instance : MonadFinally MainM := inferInstanceAs (MonadFinally (EIO ExitCode))

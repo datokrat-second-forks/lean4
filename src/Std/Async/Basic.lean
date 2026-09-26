@@ -384,7 +384,8 @@ end MaybeTask
 /--
 An asynchronous computation that never fails.
 -/
-newtype BaseAsync (α : Type) := BaseIO (MaybeTask α) with toRawBaseIO
+newtype BaseAsync (α : Type) where
+  toRawBaseIO : BaseIO (MaybeTask α)
 
 /--
 Converts a `BaseIO` into a `BaseAsync`
@@ -561,7 +562,8 @@ end BaseAsync
 /--
 An asynchronous computation that may produce an error of type `ε`.
 -/
-newtype EAsync (ε : Type) (α : Type) := BaseAsync (Except ε α) with toBaseAsync
+newtype EAsync (ε : Type) (α : Type) where
+  toBaseAsync : BaseAsync (Except ε α)
 
 /--
 Converts a `BaseAsync` returning an `Except` into an `EAsync`.

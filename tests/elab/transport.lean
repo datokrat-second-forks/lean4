@@ -103,8 +103,9 @@ example : Baz.mk 1 ≤ Baz.mk 2 := by decide
 
 /-! Arithmetic: a transported operation rewraps the underlying result, so it reduces. -/
 
-newtype Num := Int with toInt
-  deriving Add, Sub, Mul, Div, Neg
+newtype Num where
+  toInt : Int
+deriving Add, Sub, Mul, Div, Neg
 
 example : Num.mk 2 + Num.mk 3 = Num.mk 5 := rfl
 example : Num.mk 7 / Num.mk 2 - Num.mk 1 * Num.mk 3 = Num.mk 0 := rfl
@@ -160,7 +161,8 @@ Decidability classes are Π-types of `Decidable`s: they transport through `Pi.ca
 `Eq.canonicalCongr` relates by `rfl` side conditions.
 -/
 
-newtype Qux := Int with toInt
+newtype Qux where
+  toInt : Int
 
 -- Written by hand, but pointwise definitionally equal to the transported order.
 instance : LE Qux := ⟨fun x y => x.toInt ≤ y.toInt⟩
@@ -446,8 +448,9 @@ instance : LawfulPointed Opt2 := by transport (LawfulPointed Option)
 
 /-! Deriving the core order classes on a `newtype`. -/
 
-newtype Ordered := Int with toInt
-  deriving DecidableEq, Ord, Std.TransOrd, Std.LawfulEqOrd
+newtype Ordered where
+  toInt : Int
+deriving DecidableEq, Ord, Std.TransOrd, Std.LawfulEqOrd
 
 example : Ordered.mk 1 ≠ Ordered.mk 2 := by decide
 example : compare (Ordered.mk 1) (Ordered.mk 2) = .lt := by decide
@@ -457,7 +460,8 @@ example (a b : Ordered) (h : compare a b = .eq) : a = b := Std.LawfulEqOrd.eq_of
 
 /-! The core congruences for `Alternative`, `MonadRef` and `MonadControl`. -/
 
-newtype OptM (α : Type) := StateT Nat (OptionT (ReaderT Lean.Syntax Id)) α with toStateT
+newtype OptM (α : Type) where
+  toStateT : StateT Nat (OptionT (ReaderT Lean.Syntax Id)) α
 
 instance : Lean.MonadRef (ReaderT Lean.Syntax Id) where
   getRef := read
@@ -483,7 +487,8 @@ def OptM.run (x : OptM α) : Option (α × Nat) := x.toStateT.run 0 |>.run |>.ru
 
 /-! The core congruences for `MonadFunctor` and the `MonadAttach` laws. -/
 
-newtype RM (α : Type) := ReaderT Nat Id α with toReaderT
+newtype RM (α : Type) where
+  toReaderT : ReaderT Nat Id α
 
 instance : Monad RM := inferInstanceAs (Monad (ReaderT Nat Id))
 instance : LawfulMonad RM := inferInstanceAs (LawfulMonad (ReaderT Nat Id))
@@ -496,7 +501,8 @@ example : (monadMap (m := Id) (fun x => x) (pure 1 : RM Nat)).toReaderT.run 0 = 
 
 /-! `MonadLift` and `LawfulMonadLift` along equivalences of both monads. -/
 
-newtype IdN (α : Type) := Id α with toId
+newtype IdN (α : Type) where
+  toId : Id α
 
 instance : Monad IdN := inferInstanceAs (Monad Id)
 instance : MonadLift IdN RM := inferInstanceAs (MonadLift Id (ReaderT Nat Id))

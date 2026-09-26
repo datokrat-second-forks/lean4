@@ -21,8 +21,8 @@ The State monad transformer using CPS style.
 An alternative implementation of a state monad transformer that internally uses continuation passing
 style instead of tuples.
 -/
-newtype StateCpsT (σ : Type u) (m : Type u → Type v) (α : Type u) :=
-  (δ : Type u) → σ → (α → σ → m δ) → m δ with toFn
+newtype StateCpsT (σ : Type u) (m : Type u → Type v) (α : Type u) where
+  toFn : (δ : Type u) → σ → (α → σ → m δ) → m δ
 
 /-- Interpret a CPS state function as an element of `StateCpsT σ m α`. -/
 add_decl_doc StateCpsT.mk

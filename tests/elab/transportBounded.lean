@@ -8,8 +8,9 @@ transported instead, and the lawful `Ord` classes carry over to the transported 
 
 open Std Std.Time Std.Time.Internal
 
-newtype DayOrd := Bounded.LE 1 31 with toBounded
-  deriving Repr, DecidableEq, LE, LT, Ord, TransOrd, LawfulEqOrd
+newtype DayOrd where
+  toBounded : Bounded.LE 1 31
+deriving Repr, DecidableEq, LE, LT, Ord, TransOrd, LawfulEqOrd
 
 -- As in `Std.Time`: the generic `OfNat` instance is stated for `Bounded.LE lo (lo + k)`.
 instance : OfNat DayOrd n :=

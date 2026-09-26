@@ -21,8 +21,9 @@ set_option linter.all true
 /--
 `Ordinal` represents a nanosecond value that is bounded between 0 and 999,999,999 nanoseconds.
 -/
-newtype Ordinal := Bounded.LE 0 999999999 with toBounded
-  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
+newtype Ordinal where
+  toBounded : Bounded.LE 0 999999999
+deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
 abbrev Ordinal.val (ordinal : Ordinal) : Int := ordinal.toBounded.val
@@ -47,8 +48,9 @@ instance : Inhabited Ordinal where
 /--
 `Offset` represents a time offset in nanoseconds.
 -/
-newtype Offset := UnitVal (1 / 1000000000) with toUnitVal
-  deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
+newtype Offset where
+  toUnitVal : UnitVal (1 / 1000000000)
+deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
     Ord, TransOrd, LawfulEqOrd
 
 /--
@@ -83,8 +85,9 @@ end Offset
 `Span` represents a bounded value for nanoseconds, ranging between -999999999 and 999999999.
 This can be used for operations that involve differences or adjustments within this range.
 -/
-newtype Span := Bounded.LE (-999999999) 999999999 with toBounded
-  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
+newtype Span where
+  toBounded : Bounded.LE (-999999999) 999999999
+deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the span. -/
 abbrev Span.val (span : Span) : Int := span.toBounded.val
@@ -109,8 +112,9 @@ namespace Ordinal
 /--
 `Ordinal` represents a bounded value for nanoseconds in a day, which ranges between 0 and 86400000000000.
 -/
-newtype OfDay := Bounded.LE 0 86400000000000 with toBounded
-  deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
+newtype OfDay where
+  toBounded : Bounded.LE 0 86400000000000
+deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
 /-- The underlying integer of the ordinal. -/
 abbrev OfDay.val (ordinal : OfDay) : Int := ordinal.toBounded.val
