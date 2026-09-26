@@ -111,6 +111,14 @@ example : Num.mk 2 + Num.mk 3 = Num.mk 5 := rfl
 example : Num.mk 7 / Num.mk 2 - Num.mk 1 * Num.mk 3 = Num.mk 0 := rfl
 example : -Num.mk 2 = Num.mk (-2) := rfl
 
+instance : Inv Int := ⟨fun x => -x⟩
+
+deriving instance Zero, One, Inv for Num
+
+example : (0 : Num) = Num.mk 0 := rfl
+example : (1 : Num) = Num.mk 1 := rfl
+example : (Num.mk 2)⁻¹ = Num.mk (-2) := rfl
+
 instance : SMul Int Num := inferInstanceAs (SMul Int Int)
 
 example : (3 : Int) • Num.mk 2 = Num.mk 6 := rfl
@@ -520,6 +528,7 @@ instance {ε σ : Type} : LawfulMonadLift (ST σ) (EST ε σ) where
 
 instance : LawfulMonadLift BaseIO (EIO ε) :=
   inferInstanceAs (LawfulMonadLift (ST IO.RealWorld) (EST ε IO.RealWorld))
+
 /-!
 A congruence whose data does not reduce to a constructor application leaves the transported
 instance folded, with a warning.
