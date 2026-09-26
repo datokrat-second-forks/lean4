@@ -1050,45 +1050,47 @@ class MonoBind (m : Type u → Type v) [Bind m] [∀ α, PartialOrder (m α)] wh
 @[transport] protected abbrev MonoBind.canonicalCongr {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
     [b : Bind n] [j : ∀ α, PartialOrder (n α)] {b' : Bind m} {j' : ∀ α, PartialOrder (m α)}
     (hb : b' = Bind.ofEquiv e b) (hj : j' = fun α => PartialOrder.ofEquiv (e α) (j α)) :
-    Lean.CanonicalEquivalence (@MonoBind m b' j') (@MonoBind n b j) := by
-  subst hb hj
-  exact
-    { toFun h :=
-        have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
-        @MonoBind.mk n b j
-        (fun {_ _ a₁ a₂ f} h₁₂ => by
-          have h₁₂' : (j _).rel ((e _).toFun ((e _).invFun a₁)) ((e _).toFun ((e _).invFun a₂)) := by
-            rw [hl, hl]; exact h₁₂
-          have this := h.bind_mono_left (a₁ := (e _).invFun a₁) (a₂ := (e _).invFun a₂)
-            (f := fun a => (e _).invFun (f a)) h₁₂'
-          rw [PartialOrder.ofEquiv_rel, Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
-          simp only [hl] at this
-          exact this)
-        (fun {_ _ a f₁ f₂} h₁₂ => by
-          have this := h.bind_mono_right (a := (e _).invFun a) (f₁ := fun x => (e _).invFun (f₁ x))
-            (f₂ := fun x => (e _).invFun (f₂ x)) fun x => by
-              show (j _).rel ((e _).toFun ((e _).invFun (f₁ x))) ((e _).toFun ((e _).invFun (f₂ x)))
-              rw [hl, hl]; exact h₁₂ x
-          rw [PartialOrder.ofEquiv_rel, Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
-          simp only [hl] at this
-          exact this)
-      invFun h :=
-        have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
-        @MonoBind.mk m (Bind.ofEquiv e b) (fun α => PartialOrder.ofEquiv (e α) (j α))
-        (fun {_ _ a₁ a₂ f} h₁₂ => by
-          show (j _).rel ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a₁ f))
-            ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a₂ f))
-          rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
-          exact h.bind_mono_left (a₁ := (e _).toFun a₁) (a₂ := (e _).toFun a₂)
-            (f := fun a => (e _).toFun (f a)) h₁₂)
-        (fun {_ _ a f₁ f₂} h₁₂ => by
-          show (j _).rel ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₁))
-            ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₂))
-          rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
-          exact h.bind_mono_right (a := (e _).toFun a) (f₁ := fun x => (e _).toFun (f₁ x))
-            (f₂ := fun x => (e _).toFun (f₂ x)) h₁₂)
-      left_inv _ := rfl
-      right_inv _ := rfl }
+    Lean.CanonicalEquivalence (@MonoBind m b' j') (@MonoBind n b j) where
+  toFun h := @MonoBind.mk n b j
+    (fun {_ _ a₁ a₂ f} h₁₂ => by
+      subst hb hj
+      have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+      have h₁₂' : (j _).rel ((e _).toFun ((e _).invFun a₁)) ((e _).toFun ((e _).invFun a₂)) := by
+        rw [hl, hl]; exact h₁₂
+      have this := h.bind_mono_left (a₁ := (e _).invFun a₁) (a₂ := (e _).invFun a₂)
+        (f := fun a => (e _).invFun (f a)) h₁₂'
+      rw [PartialOrder.ofEquiv_rel, Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
+      simp only [hl] at this
+      exact this)
+    (fun {_ _ a f₁ f₂} h₁₂ => by
+      subst hb hj
+      have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+      have this := h.bind_mono_right (a := (e _).invFun a) (f₁ := fun x => (e _).invFun (f₁ x))
+        (f₂ := fun x => (e _).invFun (f₂ x)) fun x => by
+          show (j _).rel ((e _).toFun ((e _).invFun (f₁ x))) ((e _).toFun ((e _).invFun (f₂ x)))
+          rw [hl, hl]; exact h₁₂ x
+      rw [PartialOrder.ofEquiv_rel, Bind.ofEquiv_bind, Bind.ofEquiv_bind] at this
+      simp only [hl] at this
+      exact this)
+  invFun h := @MonoBind.mk m b' j'
+    (fun {_ _ a₁ a₂ f} h₁₂ => by
+      subst hb hj
+      have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+      show (j _).rel ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a₁ f))
+        ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a₂ f))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact h.bind_mono_left (a₁ := (e _).toFun a₁) (a₂ := (e _).toFun a₂)
+        (f := fun a => (e _).toFun (f a)) h₁₂)
+    (fun {_ _ a f₁ f₂} h₁₂ => by
+      subst hb hj
+      have hl : ∀ α (x : n α), (e α).toFun ((e α).invFun x) = x := fun α => (e α).right_inv
+      show (j _).rel ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₁))
+        ((e _).toFun (@Bind.bind m (Bind.ofEquiv e b) _ _ a f₂))
+      rw [Bind.ofEquiv_bind, Bind.ofEquiv_bind, hl, hl]
+      exact h.bind_mono_right (a := (e _).toFun a) (f₁ := fun x => (e _).toFun (f₁ x))
+        (f₂ := fun x => (e _).toFun (f₂ x)) h₁₂)
+  left_inv _ := rfl
+  right_inv _ := rfl
 
 @[partial_fixpoint_monotone]
 theorem monotone_bind
