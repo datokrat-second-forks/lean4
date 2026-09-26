@@ -10229,11 +10229,11 @@ return v___x_3247_;
 LEAN_EXPORT lean_object* l_Lake_Cache_saveArtifact___lam__0___boxed(lean_object* v___x_3250_, lean_object* v___x_3251_, lean_object* v_file_3252_, lean_object* v___x_3253_, lean_object* v___x_3254_, lean_object* v_useLocalFile_3255_, lean_object* v_____r_3256_, lean_object* v___y_3257_){
 _start:
 {
-uint64_t v___x_2111__boxed_3258_; uint8_t v_useLocalFile_boxed_3259_; lean_object* v_res_3260_; 
-v___x_2111__boxed_3258_ = lean_unbox_uint64(v___x_3253_);
+uint64_t v___x_2117__boxed_3258_; uint8_t v_useLocalFile_boxed_3259_; lean_object* v_res_3260_; 
+v___x_2117__boxed_3258_ = lean_unbox_uint64(v___x_3253_);
 lean_dec_ref(v___x_3253_);
 v_useLocalFile_boxed_3259_ = lean_unbox(v_useLocalFile_3255_);
-v_res_3260_ = l_Lake_Cache_saveArtifact___lam__0(v___x_3250_, v___x_3251_, v_file_3252_, v___x_2111__boxed_3258_, v___x_3254_, v_useLocalFile_boxed_3259_, v_____r_3256_);
+v_res_3260_ = l_Lake_Cache_saveArtifact___lam__0(v___x_3250_, v___x_3251_, v_file_3252_, v___x_2117__boxed_3258_, v___x_3254_, v_useLocalFile_boxed_3259_, v_____r_3256_);
 lean_dec_ref(v___x_3251_);
 return v_res_3260_;
 }
