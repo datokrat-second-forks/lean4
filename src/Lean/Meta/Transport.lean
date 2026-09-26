@@ -10,6 +10,7 @@ public import Init.Data.Function
 public import Lean.Meta.DiscrTree.Main
 public import Lean.Meta.SynthInstance
 import Lean.Meta.AppBuilder
+import Lean.Meta.Transform
 import Lean.ProjFns
 import Init.While
 
@@ -46,6 +47,11 @@ of `Int`.
 namespace Lean.Meta
 
 builtin_initialize registerTraceClass `Meta.transport
+
+register_builtin_option linter.transport.unfold : Bool := {
+  defValue := true
+  descr := "if true, warn when a transported value cannot be unfolded to the underlying value"
+}
 
 namespace Transport
 
@@ -263,8 +269,26 @@ private partial def unfoldGlue (e : Expr) : CoreM Expr := do
   | e => return e
 
 /--
+Whether the data of `e` still mentions an equivalence or the `Lean.CanonicalEquivalence` API.
+Proofs in `e` may mention them.
+-/
+private def hasEquivInData (e : Expr) : MetaM Bool := do
+  let found ← IO.mkRef false
+  discard <| Meta.transform e (pre := fun s => do
+    if (← found.get) || (← isProof s) then return .done s
+    if let .const c _ := s then
+      if c.getPrefix == ``Lean.CanonicalEquivalence ||
+          (← isEquivFamily (← getConstInfo c).type) then
+        found.set true
+    return .continue)
+  found.get
+
+/--
 Returns `equiv.invFun e`. For data, the equivalence is unfolded, so that the result is `e`
 conjugated by the `newtype` constructors and projectors themselves and compiles like `e`.
+If the unfolding does not eliminate the equivalence from the data, for instance because a
+congruence casts its data or builds it with a non-reducible definition, the result stays
+`equiv.invFun e` and `linter.transport.unfold` warns.
 -/
 private def moveAlong (equiv e : Expr) : MetaM Expr := do
   let moved ← mkAppM ``Lean.CanonicalEquivalence.invFun #[equiv, e]
@@ -272,11 +296,17 @@ private def moveAlong (equiv e : Expr) : MetaM Expr := do
   -- A local stands in for `e`, so that only the gluing is unfolded.
   withLocalDeclD `x (← inferType e) fun x => do
     let r ← unfoldGlue (← instantiateMVars (← mkAppM ``Lean.CanonicalEquivalence.invFun #[equiv, x]))
-    -- Casts such as those of `MonadTail.canonicalCongr` block the unfolding.
-    if (r.find? fun e => e.isConstOf ``Lean.CanonicalEquivalence.invFun ||
-        e.isConstOf ``Lean.CanonicalEquivalence.toFun).isSome then
-      return moved
-    return r.replaceFVar x e
+    let blocked ← hasEquivInData r
+    let r := r.replaceFVar x e
+    unless blocked do
+      return r
+    if linter.transport.unfold.get (← getOptions) then
+      logWarning m!"the transported value is not unfolded, since its data still contains an \
+        equivalence:{indentExpr r}\n\
+        The data of `@[transport]` declarations must reduce to constructor applications by \
+        unfolding reducible definitions, without casts.\n\n\
+        Note: This linter can be disabled with `set_option {linter.transport.unfold.name} false`"
+    return moved
 
 end Transport
 

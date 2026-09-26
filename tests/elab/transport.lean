@@ -410,3 +410,39 @@ instance : LawfulPointed Option := ⟨fun _ _ _ h => Option.some.inj h⟩
 
 instance : LawfulPointed Opt := inferInstanceAs (LawfulPointed Option)
 instance : LawfulPointed Opt2 := by transport (LawfulPointed Option)
+
+/-!
+A congruence whose data does not reduce to a constructor application leaves the transported
+instance folded, with a warning.
+-/
+
+class Point (α : Type) where
+  point : α
+
+def backward (e : Lean.CanonicalEquivalence α β) (b : β) : α := e.invFun b
+
+@[transport] protected abbrev Point.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (Point α) (Point β) where
+  toFun i := ⟨e.toFun i.point⟩
+  invFun i := ⟨backward e i.point⟩
+  left_inv i := congrArg Point.mk (e.left_inv i.point)
+  right_inv i := congrArg Point.mk (e.right_inv i.point)
+
+instance : Point Nat := ⟨0⟩
+
+newtype Pt where
+  toNat : Nat
+
+/--
+warning: the transported value is not unfolded, since its data still contains an equivalence:
+  { point := backward { toFun := Pt.toNat, invFun := Pt.mk, left_inv := ⋯, right_inv := ⋯ } Point.point }
+The data of `@[transport]` declarations must reduce to constructor applications by unfolding reducible definitions, without casts.
+
+Note: This linter can be disabled with `set_option linter.transport.unfold false`
+-/
+#guard_msgs in
+instance : Point Pt := inferInstanceAs (Point Nat)
+
+#guard_msgs in
+set_option linter.transport.unfold false in
+instance : Point Pt := inferInstanceAs (Point Nat)
