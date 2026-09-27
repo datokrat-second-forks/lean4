@@ -177,14 +177,15 @@ conclusion only fixes the types for which `e` is sought; `ha` and `hb` are then 
   right_inv i := congrArg Inv.mk <| funext fun x =>
     (e.right_inv _).trans (congrArg i.inv (e.right_inv x))
 
-@[transport] protected abbrev SMul.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
-    Lean.CanonicalEquivalence (SMul M α) (SMul M β) where
-  toFun i := ⟨fun m x => e.toFun (i.smul m (e.invFun x))⟩
-  invFun i := ⟨fun m x => e.invFun (i.smul m (e.toFun x))⟩
+@[transport] protected abbrev SMul.canonicalCongr (e₁ : Lean.CanonicalEquivalence M N)
+    (e₂ : Lean.CanonicalEquivalence α β) :
+    Lean.CanonicalEquivalence (SMul M α) (SMul N β) where
+  toFun i := ⟨fun m x => e₂.toFun (i.smul (e₁.invFun m) (e₂.invFun x))⟩
+  invFun i := ⟨fun m x => e₂.invFun (i.smul (e₁.toFun m) (e₂.toFun x))⟩
   left_inv i := congrArg SMul.mk <| funext fun m => funext fun x =>
-    (e.left_inv _).trans (congrArg (i.smul m) (e.left_inv x))
+    (e₂.left_inv _).trans (congr (congrArg i.smul (e₁.left_inv m)) (e₂.left_inv x))
   right_inv i := congrArg SMul.mk <| funext fun m => funext fun x =>
-    (e.right_inv _).trans (congrArg (i.smul m) (e.right_inv x))
+    (e₂.right_inv _).trans (congr (congrArg i.smul (e₁.right_inv m)) (e₂.right_inv x))
 
 @[transport] protected abbrev Repr.canonicalCongr (e : Lean.CanonicalEquivalence α β) :
     Lean.CanonicalEquivalence (Repr α) (Repr β) where
