@@ -196,50 +196,17 @@ theorem LawfulMonadAttach.ofEquiv [iM : Monad n] [iA : MonadAttach n] [h : Lawfu
 end
 
 section
-variable {m : Type u → Type v} {n n' : Type u → Type w}
-  (e : ∀ α, Lean.CanonicalEquivalence (n α) (n' α))
-
-theorem LawfulMonadLift.ofEquiv [Monad m] [iN : Monad n'] [iL : MonadLift m n']
-    [h : LawfulMonadLift m n'] :
-    @LawfulMonadLift m n _ (Monad.ofEquiv e iN) (MonadLift.ofEquiv e iL) :=
-  letI := Monad.ofEquiv e iN
-  letI := MonadLift.ofEquiv e iL
-  { monadLift_pure a :=
-      show (e _).invFun (iL.monadLift (pure a)) = (e _).invFun (pure a) by
-        rw [LawfulMonadLift.monadLift_pure]
-    monadLift_bind ma f :=
-      show (e _).invFun (iL.monadLift (ma >>= f)) =
-        (e _).invFun ((e _).toFun ((e _).invFun (iL.monadLift ma)) >>= fun x =>
-          (e _).toFun ((e _).invFun (iL.monadLift (f x)))) by
-        simp only [toFun_invFun, LawfulMonadLift.monadLift_bind] }
-
-@[transport] protected abbrev LawfulMonadLift.canonicalCongr [Monad m] [iN : Monad n']
-    [iL : MonadLift m n'] {iN' : Monad n} {iL' : MonadLift m n}
-    (hN : iN' = (Monad.canonicalCongr e).invFun iN) (hL : iL' = (MonadLift.canonicalCongr e).invFun iL) :
-    Lean.CanonicalEquivalence (@LawfulMonadLift m n _ iN' iL') (@LawfulMonadLift m n' _ iN iL) where
-  toFun h := by
-    subst hN hL
-    exact (Monad.canonicalCongr e).right_inv iN ▸ (MonadLift.canonicalCongr e).right_inv iL ▸
-      LawfulMonadLift.ofEquiv (iN := Monad.ofEquiv e iN) (iL := MonadLift.ofEquiv e iL) (h := h)
-        fun α => (e α).symm
-  invFun _ := by subst hN hL; exact LawfulMonadLift.ofEquiv e
-  left_inv _ := rfl
-  right_inv _ := rfl
-
-end
-
-section
 variable {m m' : Type u → Type v} {n n' : Type u → Type w}
   (e₁ : ∀ α, Lean.CanonicalEquivalence (m α) (m' α))
   (e₂ : ∀ α, Lean.CanonicalEquivalence (n α) (n' α))
 
-theorem LawfulMonadLift.ofEquiv₂ [iM : Monad m'] [iN : Monad n'] [iL : MonadLift m' n']
+theorem LawfulMonadLift.ofEquiv [iM : Monad m'] [iN : Monad n'] [iL : MonadLift m' n']
     [h : LawfulMonadLift m' n'] :
     @LawfulMonadLift m n (Monad.ofEquiv e₁ iM) (Monad.ofEquiv e₂ iN)
-      (MonadLift.ofEquiv₂ e₁ e₂ iL) :=
+      (MonadLift.ofEquiv e₁ e₂ iL) :=
   letI := Monad.ofEquiv e₁ iM
   letI := Monad.ofEquiv e₂ iN
-  letI := MonadLift.ofEquiv₂ e₁ e₂ iL
+  letI := MonadLift.ofEquiv e₁ e₂ iL
   { monadLift_pure a :=
       show (e₂ _).invFun (iL.monadLift ((e₁ _).toFun ((e₁ _).invFun (pure a)))) =
         (e₂ _).invFun (pure a) by
@@ -251,18 +218,18 @@ theorem LawfulMonadLift.ofEquiv₂ [iM : Monad m'] [iN : Monad n'] [iL : MonadLi
           (e₂ _).toFun ((e₂ _).invFun (iL.monadLift ((e₁ _).toFun (f x))))) by
         simp only [toFun_invFun, LawfulMonadLift.monadLift_bind] }
 
-@[transport] protected abbrev LawfulMonadLift.canonicalCongr₂ [iM : Monad m'] [iN : Monad n']
+@[transport] protected abbrev LawfulMonadLift.canonicalCongr [iM : Monad m'] [iN : Monad n']
     [iL : MonadLift m' n'] {iM' : Monad m} {iN' : Monad n} {iL' : MonadLift m n}
     (hM : iM' = (Monad.canonicalCongr e₁).invFun iM) (hN : iN' = (Monad.canonicalCongr e₂).invFun iN)
-    (hL : iL' = (MonadLift.canonicalCongr₂ e₁ e₂).invFun iL) :
+    (hL : iL' = (MonadLift.canonicalCongr e₁ e₂).invFun iL) :
     Lean.CanonicalEquivalence (@LawfulMonadLift m n iM' iN' iL') (@LawfulMonadLift m' n' iM iN iL) where
   toFun h := by
     subst hM hN hL
     exact (Monad.canonicalCongr e₁).right_inv iM ▸ (Monad.canonicalCongr e₂).right_inv iN ▸
-      (MonadLift.canonicalCongr₂ e₁ e₂).right_inv iL ▸
-      LawfulMonadLift.ofEquiv₂ (iM := Monad.ofEquiv e₁ iM) (iN := Monad.ofEquiv e₂ iN)
-        (iL := MonadLift.ofEquiv₂ e₁ e₂ iL) (h := h) (fun α => (e₁ α).symm) fun α => (e₂ α).symm
-  invFun _ := by subst hM hN hL; exact LawfulMonadLift.ofEquiv₂ e₁ e₂
+      (MonadLift.canonicalCongr e₁ e₂).right_inv iL ▸
+      LawfulMonadLift.ofEquiv (iM := Monad.ofEquiv e₁ iM) (iN := Monad.ofEquiv e₂ iN)
+        (iL := MonadLift.ofEquiv e₁ e₂ iL) (h := h) (fun α => (e₁ α).symm) fun α => (e₂ α).symm
+  invFun _ := by subst hM hN hL; exact LawfulMonadLift.ofEquiv e₁ e₂
   left_inv _ := rfl
   right_inv _ := rfl
 

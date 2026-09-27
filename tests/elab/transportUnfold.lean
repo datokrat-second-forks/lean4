@@ -12,7 +12,7 @@ def checkNoGlue (inst : Name) : MetaM Unit := do
   let some v := (← getConstInfo inst).value? | throwError "`{inst}` has no value"
   let glue := v.getUsedConstants.filter fun c =>
     c.getPrefix == ``Lean.CanonicalEquivalence || match c with
-      | .str _ s => ["ofEquiv", "ofEquiv₂", "canonicalCongr", "canonicalCongr₂", "equivDef"].contains s
+      | .str _ s => ["ofEquiv", "canonicalCongr", "equivDef"].contains s
       | _ => false
   unless glue.isEmpty do
     throwError "`{inst}` still contains {glue}:{indentExpr v}"

@@ -541,6 +541,41 @@ instance : LawfulMonadLift BaseIO (EIO ε) :=
   inferInstanceAs (LawfulMonadLift (ST IO.RealWorld) (EST ε IO.RealWorld))
 
 /-!
+Congruences take an equivalence for every argument of the class: the inner monad of
+`MonadFunctor` and `MonadControl`, the exception type of `MonadExceptOf` and the context of
+`MonadWithReaderOf`.
+-/
+
+instance : MonadFunctor IdN RM := inferInstanceAs (MonadFunctor Id (ReaderT Nat Id))
+instance : MonadControl IdN RM := inferInstanceAs (MonadControl Id (ReaderT Nat Id))
+
+example : (monadMap (m := IdN) (fun x => x) (pure 1 : RM Nat)).toReaderT.run 0 = Id.mk 1 := rfl
+
+/-- info: 3 -/
+#guard_msgs in #eval ((controlAt IdN fun run => run (pure 3) : RM Nat).toReaderT.run 0).run
+
+newtype Err where
+  msg : String
+
+instance : MonadExceptOf Err (Except String) :=
+  inferInstanceAs (MonadExceptOf String (Except String))
+
+example : (throw (Err.mk "e") : Except String Nat) = .error "e" := rfl
+example : (tryCatch (throw (Err.mk "e")) fun e => pure e.msg : Except String String) = .ok "e" :=
+  rfl
+
+newtype Ctx where
+  toNat : Nat
+
+instance : MonadWithReaderOf Ctx (ReaderT Nat Id) :=
+  inferInstanceAs (MonadWithReaderOf Nat (ReaderT Nat Id))
+
+example :
+    (withTheReader Ctx (fun c => Ctx.mk (c.toNat + 1)) (read : ReaderT Nat Id Nat)).run 1 =
+      Id.mk 2 :=
+  rfl
+
+/-!
 A congruence whose data does not reduce to a constructor application leaves the transported
 instance folded, with a warning.
 -/
