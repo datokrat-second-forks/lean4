@@ -272,22 +272,23 @@ instance [always : MonadAlwaysExcept ε m] [STWorld ω m] [BEq α] [Hashable α]
   except := let _ := always.except; inferInstance
 
 section
-variable {m n : Type u → Type v} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
+variable {m n : Type u → Type v} {ε ε' : Type u} (e₁ : Lean.CanonicalEquivalence ε ε')
+  (e₂ : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
 
-protected abbrev MonadAlwaysExcept.ofEquiv {ε : Type u} (i : MonadAlwaysExcept ε n) :
+protected abbrev MonadAlwaysExcept.ofEquiv (i : MonadAlwaysExcept ε' n) :
     MonadAlwaysExcept ε m where
-  except := MonadExceptOf.ofEquiv e i.except
+  except := MonadExceptOf.ofEquiv e₁ e₂ i.except
 
-@[transport] protected abbrev MonadAlwaysExcept.canonicalCongr {ε : Type u} :
-    Lean.CanonicalEquivalence (MonadAlwaysExcept ε m) (MonadAlwaysExcept ε n) where
-  toFun := MonadAlwaysExcept.ofEquiv fun α => (e α).symm
-  invFun := MonadAlwaysExcept.ofEquiv e
+@[transport] protected abbrev MonadAlwaysExcept.canonicalCongr :
+    Lean.CanonicalEquivalence (MonadAlwaysExcept ε m) (MonadAlwaysExcept ε' n) where
+  toFun := MonadAlwaysExcept.ofEquiv e₁.symm fun α => (e₂ α).symm
+  invFun := MonadAlwaysExcept.ofEquiv e₁ e₂
   left_inv i :=
-    show MonadAlwaysExcept.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
-      congrArg (MonadAlwaysExcept.ofEquiv · i) (funext fun α => (e α).trans_symm)
+    show MonadAlwaysExcept.ofEquiv (e₁.trans e₁.symm) (fun α => (e₂ α).trans (e₂ α).symm) i = i by
+      rw [e₁.trans_symm, funext fun α => (e₂ α).trans_symm]; rfl
   right_inv i :=
-    show MonadAlwaysExcept.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
-      congrArg (MonadAlwaysExcept.ofEquiv · i) (funext fun α => (e α).symm_trans)
+    show MonadAlwaysExcept.ofEquiv (e₁.symm.trans e₁) (fun α => (e₂ α).symm.trans (e₂ α)) i = i by
+      rw [e₁.symm_trans, funext fun α => (e₂ α).symm_trans]; rfl
 
 end
 
