@@ -239,7 +239,7 @@ partial def simp (code : Code .pure) : SimpM (Code .pure) := withIncRecDepth do
       markSimplified
       let k ← simp k
       attachCodeDecls decls k
-    else if let some funDecl ← etaPolyApp? decl then
+    else if let some funDecl ← (etaPolyApp? decl).run then
       simp (.fun funDecl k)
     else if let some fvarId ← elimVar? decl.value then
       /- Eliminate `let _x_i := _x_j;` -/

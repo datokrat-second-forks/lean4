@@ -94,11 +94,11 @@ theorem scanrM_pure [Monad m] [LawfulMonad m] {f : α → β → β} {as : List 
 
 theorem idRun_scanlM {f : β → α → Id β} {as : List α} :
     (as.scanlM f init).run = as.scanl (f · · |>.run) init :=
-  scanlM_pure
+  congrArg Id.run scanlM_pure
 
 theorem idRun_scanrM {f : α → β → Id β} {as : List α} :
     (as.scanrM f init).run = as.scanr (f · · |>.run) init :=
-  scanrM_pure
+  congrArg Id.run scanrM_pure
 
 @[simp, grind =]
 theorem scanlM_map [Monad m] [LawfulMonad m]
@@ -117,7 +117,7 @@ theorem scanrM_map [Monad m] [LawfulMonad m]
 
 @[simp]
 theorem length_scanl {f : β → α → β} : (scanl f init as).length = as.length + 1 := by
-  induction as generalizing init <;> simp_all [scanl, pure, bind, Id.run]
+  induction as generalizing init <;> simp_all [scanl, bind]
 
 grind_pattern length_scanl => scanl f init as
 
@@ -223,7 +223,7 @@ theorem scanl_map {f : β → γ → β} {g : α → γ} {as : List α} :
 
 theorem scanl_eq_scanr_reverse {f : β → α → β} :
     scanl f init as = reverse (scanr (flip f) init as.reverse) := by
-  simp only [scanl, scanr, Id.run, scanrM_reverse, Functor.map, reverse_reverse]
+  simp only [scanl, scanr, scanrM_reverse, Functor.map, reverse_reverse]
   rfl
 
 theorem scanr_eq_scanl_reverse  {f : α → β → β} :

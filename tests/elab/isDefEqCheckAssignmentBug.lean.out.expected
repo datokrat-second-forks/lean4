@@ -21,13 +21,6 @@
       [Meta.isDefEq] ✅️ Type ?u =?= Type
   [Meta.isDefEq] ❌️ Elab.Command.CommandElabM =?= MetaM
     [Meta.isDefEq] ❌️ Elab.Command.CommandElabM =?= MetaM
-      [Meta.isDefEq] ❌️ ReaderT Elab.Command.Context
-            (StateRefT' IO.RealWorld Elab.Command.State
-              (EIO Exception)) =?= ReaderT Context (StateRefT' IO.RealWorld State CoreM)
-        [Meta.isDefEq] ❌️ Elab.Command.Context =?= Context
-        [Meta.isDefEq.onFailure] ❌️ ReaderT Elab.Command.Context
-              (StateRefT' IO.RealWorld Elab.Command.State
-                (EIO Exception)) =?= ReaderT Context (StateRefT' IO.RealWorld State CoreM)
   [Meta.isDefEq.onFailure] ❌️ MonadEvalT MetaM Elab.Command.CommandElabM =?= MonadEvalT ?m ?m
 [Meta.isDefEq] ✅️ MonadEvalT MetaM Elab.Command.CommandElabM =?= MonadEvalT ?m ?m
   [Meta.isDefEq] ✅️ MetaM =?= ?m
@@ -69,11 +62,6 @@
       [Meta.isDefEq] ✅️ Type ?u =?= Type
   [Meta.isDefEq] ❌️ Elab.TermElabM =?= MetaM
     [Meta.isDefEq] ❌️ Elab.TermElabM =?= MetaM
-      [Meta.isDefEq] ❌️ ReaderT Elab.Term.Context
-            (StateRefT' IO.RealWorld Elab.Term.State MetaM) =?= ReaderT Context (StateRefT' IO.RealWorld State CoreM)
-        [Meta.isDefEq] ❌️ Elab.Term.Context =?= Context
-        [Meta.isDefEq.onFailure] ❌️ ReaderT Elab.Term.Context
-              (StateRefT' IO.RealWorld Elab.Term.State MetaM) =?= ReaderT Context (StateRefT' IO.RealWorld State CoreM)
   [Meta.isDefEq.onFailure] ❌️ MonadEvalT MetaM Elab.TermElabM =?= MonadEvalT ?m ?m
 [Meta.isDefEq] ✅️ MonadEvalT MetaM Elab.TermElabM =?= MonadEvalT ?m ?m
   [Meta.isDefEq] ✅️ MetaM =?= ?m
@@ -106,40 +94,26 @@
   [Meta.isDefEq] ✅️ MonadEval ?m Elab.TermElabM =?= MonadEval ?m Elab.TermElabM
     [Meta.isDefEq] ✅️ ?m =?= ?m
     [Meta.isDefEq] ✅️ Elab.TermElabM =?= Elab.TermElabM
-[Meta.isDefEq] ✅️ MonadLift ?m Elab.TermElabM =?= MonadLift ?m (ReaderT ?m ?m)
-  [Meta.isDefEq] ✅️ ?m =?= ?m
-    [Meta.isDefEq] ?m [assignable] =?= ?m [assignable]
+[Meta.isDefEq] ✅️ MonadLift ?m
+      Elab.TermElabM =?= MonadLift (StateRefT' IO.RealWorld Elab.Term.State MetaM) Elab.TermElabM
+  [Meta.isDefEq] ✅️ ?m =?= StateRefT' IO.RealWorld Elab.Term.State MetaM
+    [Meta.isDefEq] ?m [assignable] =?= StateRefT' IO.RealWorld Elab.Term.State MetaM [nonassignable]
     [Meta.isDefEq.transparency] raising transparency instances → implicit
-    [Meta.isDefEq] ✅️ Type → Type ?u =?= Type ?u → Type ?u
-      [Meta.isDefEq] ✅️ Type =?= Type ?u
-      [Meta.isDefEq] ✅️ Type ?u =?= Type ?u
-  [Meta.isDefEq] ✅️ Elab.TermElabM =?= ReaderT ?m ?m
-    [Meta.isDefEq] ✅️ ReaderT Elab.Term.Context (StateRefT' IO.RealWorld Elab.Term.State MetaM) =?= ReaderT ?m ?m
-      [Meta.isDefEq] ✅️ Elab.Term.Context =?= ?m
-        [Meta.isDefEq] Elab.Term.Context [nonassignable] =?= ?m [assignable]
-        [Meta.isDefEq.transparency] raising transparency instances → implicit
-        [Meta.isDefEq] ✅️ Type =?= Type
-      [Meta.isDefEq] ✅️ StateRefT' IO.RealWorld Elab.Term.State MetaM =?= ?m
-        [Meta.isDefEq] StateRefT' IO.RealWorld Elab.Term.State MetaM [nonassignable] =?= ?m [assignable]
-        [Meta.isDefEq.transparency] raising transparency instances → implicit
-        [Meta.isDefEq] ✅️ Type → Type ?u =?= Type → Type
-          [Meta.isDefEq] ✅️ Type =?= Type
-          [Meta.isDefEq] ✅️ Type ?u =?= Type
-[Meta.isDefEq] ✅️ ?m =?= ReaderT.instMonadLift
-  [Meta.isDefEq] ?m [assignable] =?= ReaderT.instMonadLift [nonassignable]
+    [Meta.isDefEq] ✅️ Type → Type ?u =?= Type → Type
+      [Meta.isDefEq] ✅️ Type =?= Type
+      [Meta.isDefEq] ✅️ Type ?u =?= Type
+  [Meta.isDefEq] ✅️ Elab.TermElabM =?= Elab.TermElabM
+[Meta.isDefEq] ✅️ ?m =?= Elab.Term.instMonadLiftStateRefT'RealWorldStateMetaMTermElabM
+  [Meta.isDefEq] ?m [assignable] =?= Elab.Term.instMonadLiftStateRefT'RealWorldStateMetaMTermElabM [nonassignable]
   [Meta.isDefEq] ✅️ MonadLift ?m
-        Elab.TermElabM =?= MonadLift (StateRefT' IO.RealWorld Elab.Term.State MetaM)
-        (ReaderT Elab.Term.Context (StateRefT' IO.RealWorld Elab.Term.State MetaM))
+        Elab.TermElabM =?= MonadLift (StateRefT' IO.RealWorld Elab.Term.State MetaM) Elab.TermElabM
     [Meta.isDefEq] ✅️ ?m =?= StateRefT' IO.RealWorld Elab.Term.State MetaM
       [Meta.isDefEq] ?m [assignable] =?= StateRefT' IO.RealWorld Elab.Term.State MetaM [nonassignable]
       [Meta.isDefEq.transparency] raising transparency instances → implicit
       [Meta.isDefEq] ✅️ Type → Type ?u =?= Type → Type
         [Meta.isDefEq] ✅️ Type =?= Type
         [Meta.isDefEq] ✅️ Type ?u =?= Type
-    [Meta.isDefEq] ✅️ Elab.TermElabM =?= ReaderT Elab.Term.Context (StateRefT' IO.RealWorld Elab.Term.State MetaM)
-      [Meta.isDefEq] ✅️ ReaderT Elab.Term.Context
-            (StateRefT' IO.RealWorld Elab.Term.State
-              MetaM) =?= ReaderT Elab.Term.Context (StateRefT' IO.RealWorld Elab.Term.State MetaM)
+    [Meta.isDefEq] ✅️ Elab.TermElabM =?= Elab.TermElabM
 [Meta.isDefEq] ✅️ ?m =?= instMonadEvalOfMonadLift
   [Meta.isDefEq] ?m [assignable] =?= instMonadEvalOfMonadLift [nonassignable]
   [Meta.isDefEq] ✅️ MonadEval ?m
@@ -160,21 +134,12 @@
       [Meta.isDefEq] ✅️ Type ?u =?= Type
   [Meta.isDefEq] ❌️ StateRefT' IO.RealWorld Elab.Term.State MetaM =?= MetaM
     [Meta.isDefEq] ❌️ StateRefT' IO.RealWorld Elab.Term.State MetaM =?= MetaM
-      [Meta.isDefEq] ❌️ StateRefT' IO.RealWorld Elab.Term.State
-            MetaM =?= ReaderT Context (StateRefT' IO.RealWorld State CoreM)
-        [Meta.isDefEq] ❌️ fun α =>
-              ReaderT (ST.Ref IO.RealWorld Elab.Term.State) MetaM
-                α =?= ReaderT Context (StateRefT' IO.RealWorld State CoreM)
-          [Meta.isDefEq] ❌️ fun α =>
-                ReaderT (ST.Ref IO.RealWorld Elab.Term.State) MetaM
-                  α =?= fun α => ReaderT Context (StateRefT' IO.RealWorld State CoreM) α
-            [Meta.isDefEq] ✅️ Type =?= Type
-            [Meta.isDefEq] ❌️ ReaderT (ST.Ref IO.RealWorld Elab.Term.State) MetaM
-                  α =?= ReaderT Context (StateRefT' IO.RealWorld State CoreM) α
-              [Meta.isDefEq] ❌️ ST.Ref IO.RealWorld Elab.Term.State =?= Context
-                [Meta.isDefEq.onFailure] ❌️ ST.Ref IO.RealWorld Elab.Term.State =?= Context
-              [Meta.isDefEq.onFailure] ❌️ ReaderT (ST.Ref IO.RealWorld Elab.Term.State) MetaM
-                    α =?= ReaderT Context (StateRefT' IO.RealWorld State CoreM) α
+      [Meta.isDefEq] ❌️ fun α => ReaderT (ST.Ref IO.RealWorld Elab.Term.State) MetaM α =?= MetaM
+        [Meta.isDefEq] ❌️ fun α => ReaderT (ST.Ref IO.RealWorld Elab.Term.State) MetaM α =?= fun α => MetaM α
+          [Meta.isDefEq] ✅️ Type =?= Type
+          [Meta.isDefEq] ❌️ ReaderT (ST.Ref IO.RealWorld Elab.Term.State) MetaM α =?= MetaM α
+            [Meta.isDefEq] ❌️ ReaderT =?= MetaM
+            [Meta.isDefEq.onFailure] ❌️ ReaderT (ST.Ref IO.RealWorld Elab.Term.State) MetaM α =?= MetaM α
   [Meta.isDefEq.onFailure] ❌️ MonadEvalT MetaM
         (StateRefT' IO.RealWorld Elab.Term.State MetaM) =?= MonadEvalT ?m ?m
 [Meta.isDefEq] ✅️ MonadEvalT MetaM (StateRefT' IO.RealWorld Elab.Term.State MetaM) =?= MonadEvalT ?m ?m

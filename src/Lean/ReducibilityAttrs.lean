@@ -52,7 +52,7 @@ builtin_initialize reducibilityCoreExt : PersistentEnvExtension (Name × Reducib
   registerPersistentEnvExtension {
     name            := `reducibilityCore
     mkInitial       := pure {}
-    addImportedFn   := fun _ _ => pure {}
+    addImportedFn   := fun _ => pure {}
     addEntryFn      := fun (s : NameMap ReducibilityStatus) (p : Name × ReducibilityStatus) => s.insert p.1 p.2
     exportEntriesFn := fun m =>
       let r : Array (Name × ReducibilityStatus) := m.foldl (fun a n p => a.push (n, p)) #[]

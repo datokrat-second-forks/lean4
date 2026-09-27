@@ -17,8 +17,17 @@ namespace Lean.Linter
 /-- Linter sets are represented as a map from linter name to set name,
 to make it easy to look up which sets to check for enabling a linter.
 -/
-@[expose] def LinterSets := NameMap (Array Name)
-  deriving EmptyCollection, Inhabited
+structure LinterSets where
+  toNameMap : NameMap (Array Name)
+  deriving Inhabited
+
+instance : EmptyCollection LinterSets := ⟨⟨{}⟩⟩
+
+def LinterSets.insert (sets : LinterSets) (linterName : Name) (setNames : Array Name) : LinterSets :=
+  ⟨sets.toNameMap.insert linterName setNames⟩
+
+def LinterSets.getD (sets : LinterSets) (linterName : Name) (fallback : Array Name) : Array Name :=
+  sets.toNameMap.getD linterName fallback
 
 /-- Insert a set into a `LinterSets` map.
 

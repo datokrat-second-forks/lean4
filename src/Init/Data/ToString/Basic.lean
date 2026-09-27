@@ -31,8 +31,8 @@ export ToString (toString)
 instance {α} [ToString α] : ToString (id α) :=
   inferInstanceAs (ToString α)
 
-instance {α} [ToString α] : ToString (Id α) :=
-  inferInstanceAs (ToString α)
+instance {α} [ToString α] : ToString (Id α) where
+  toString x := toString x.run
 
 instance : ToString String :=
   ⟨fun s => s⟩

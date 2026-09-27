@@ -29,7 +29,7 @@ public builtin_initialize indirectModUseExt : SimplePersistentEnvExtension Indir
       let mut s := {}
       for es in es, modIdx in 0...* do
         for e in es do
-          s := s.alter e.declName (·.getD #[] |>.push modIdx)
+          s := s.alter e.declName (·.getD #[] |>.push ⟨modIdx⟩)
       return s
     asyncMode := .sync
   }
@@ -82,7 +82,7 @@ public def copyExtraModUses (src dest : Environment) : Environment := Id.run do
   for entry in extraModUses.getEntries (asyncMode := .local) src do
     if !(extraModUses.getState (asyncMode := .local) env).contains entry then
       env := extraModUses.addEntry env entry
-  env
+  return env
 
 def recordExtraModUseCore (mod : Name) (isMeta : Bool) (hint : Name := .anonymous) : m Unit := do
   let entry := { module := mod, isExported := (← getEnv).isExporting, isMeta }

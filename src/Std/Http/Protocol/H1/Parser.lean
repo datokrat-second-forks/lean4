@@ -425,7 +425,7 @@ public def parseChunkPartial (limits : H1.Config) : Parser (Option (Nat × Array
 /--
 Parses fixed-size data that can be incomplete.
 -/
-public def parseFixedSizeData (size : Nat) : Parser TakeResult := fun it =>
+public def parseFixedSizeData (size : Nat) : Parser TakeResult := Parsec.mk fun it =>
   if it.remainingBytes = 0 then
     .error it .eof
   else if it.remainingBytes < size then

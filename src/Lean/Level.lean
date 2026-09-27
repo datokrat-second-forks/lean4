@@ -26,25 +26,21 @@ def Nat.imax (n m : Nat) : Nat :=
    hasMVar   : 1-bit
    hasParam  : 1-bit
    depth     : 24-bits -/
-@[expose] def Level.Data := UInt64
-
-instance : Inhabited Level.Data :=
-  inferInstanceAs (Inhabited UInt64)
+structure Level.Data where
+  val : UInt64
+  deriving Inhabited, BEq
 
 def Level.Data.hash (c : Level.Data) : UInt64 :=
-  c.toUInt32.toUInt64
-
-instance : BEq Level.Data :=
-  ⟨fun (a b : UInt64) => a == b⟩
+  c.val.toUInt32.toUInt64
 
 def Level.Data.depth (c : Level.Data) : UInt32 :=
-  (c.shiftRight 40).toUInt32
+  (c.val.shiftRight 40).toUInt32
 
 def Level.Data.hasMVar (c : Level.Data) : Bool :=
-  ((c.shiftRight 32).land 1) == 1
+  ((c.val.shiftRight 32).land 1) == 1
 
 def Level.Data.hasParam (c : Level.Data) : Bool :=
-  ((c.shiftRight 33).land 1) == 1
+  ((c.val.shiftRight 33).land 1) == 1
 
 @[extern "lean_level_mk_data"]
 opaque Level.mkData (h : UInt64) (depth : Nat := 0) (hasMVar hasParam : Bool := false) : Level.Data
@@ -58,7 +54,7 @@ instance : Repr Level.Data where
       r := r ++ " (hasMVar := " ++ toString v.hasMVar ++ ")"
     if v.hasParam then
       r := r ++ " (hasParam := " ++ toString v.hasParam ++ ")"
-    Repr.addAppParen r prec
+    return Repr.addAppParen r prec
 
 open Level
 
@@ -73,19 +69,52 @@ abbrev LMVarId := LevelMVarId
 instance : Repr LMVarId where
   reprPrec n p := reprPrec n.name p
 
-@[expose] def LMVarIdSet := Std.TreeSet LMVarId (Name.quickCmp ·.name ·.name)
-  deriving Inhabited, EmptyCollection
+structure LMVarIdSet where
+  toTreeSet : Std.TreeSet LMVarId (Name.quickCmp ·.name ·.name)
+  deriving Inhabited
 
-instance [Monad m] : ForIn m LMVarIdSet LMVarId := inferInstanceAs (ForIn _ (Std.TreeSet _ _) ..)
+instance : EmptyCollection LMVarIdSet := ⟨⟨∅⟩⟩
 
-@[expose] def LMVarIdMap (α : Type) := Std.TreeMap LMVarId α (Name.quickCmp ·.name ·.name)
+instance [Monad m] : ForIn m LMVarIdSet LMVarId where
+  forIn s init f := forIn s.toTreeSet init f
 
-instance : EmptyCollection (LMVarIdMap α) := inferInstanceAs (EmptyCollection (Std.TreeMap _ _ _))
+def LMVarIdSet.insert (s : LMVarIdSet) (mvarId : LMVarId) : LMVarIdSet :=
+  ⟨s.toTreeSet.insert mvarId⟩
 
-instance [Monad m] : ForIn m (LMVarIdMap α) (LMVarId × α) := inferInstanceAs (ForIn _ (Std.TreeMap _ _ _) ..)
+def LMVarIdSet.contains (s : LMVarIdSet) (mvarId : LMVarId) : Bool :=
+  s.toTreeSet.contains mvarId
+
+def LMVarIdSet.size (s : LMVarIdSet) : Nat :=
+  s.toTreeSet.size
+
+def LMVarIdSet.isEmpty (s : LMVarIdSet) : Bool :=
+  s.toTreeSet.isEmpty
+
+def LMVarIdSet.toList (s : LMVarIdSet) : List LMVarId :=
+  s.toTreeSet.toList
+
+def LMVarIdSet.toArray (s : LMVarIdSet) : Array LMVarId :=
+  s.toTreeSet.toArray
+
+structure LMVarIdMap (α : Type) where
+  toTreeMap : Std.TreeMap LMVarId α (Name.quickCmp ·.name ·.name)
+
+instance : EmptyCollection (LMVarIdMap α) := ⟨⟨∅⟩⟩
+
+instance [Monad m] : ForIn m (LMVarIdMap α) (LMVarId × α) where
+  forIn s init f := forIn s.toTreeMap init f
 
 instance : Inhabited (LMVarIdMap α) where
   default := {}
+
+def LMVarIdMap.insert (s : LMVarIdMap α) (mvarId : LMVarId) (a : α) : LMVarIdMap α :=
+  ⟨s.toTreeMap.insert mvarId a⟩
+
+def LMVarIdMap.contains (s : LMVarIdMap α) (mvarId : LMVarId) : Bool :=
+  s.toTreeMap.contains mvarId
+
+def LMVarIdMap.get? (s : LMVarIdMap α) (mvarId : LMVarId) : Option α :=
+  s.toTreeMap.get? mvarId
 
 inductive Level where
   | zero   : Level
@@ -500,7 +529,7 @@ protected partial def Result.quote (r : Result) (prec : Nat) : Syntax.Level :=
 end PP
 
 protected def format (u : Level) (mvars : Bool) (lIndex? : LMVarId → Option Nat) : Format :=
-  (PP.toResult u) |>.run { mvars, lIndex? } |>.format true
+  (PP.toResult u) |>.run { mvars, lIndex? } |>.run |>.format true
 
 instance : ToFormat Level where
   format u := Level.format u (mvars := true) (lIndex? := fun _ => none)
@@ -509,7 +538,7 @@ instance : ToString Level where
   toString u := Format.pretty (format u)
 
 protected def quote (u : Level) (prec : Nat := 0) (mvars : Bool := true) (lIndex? : LMVarId → Option Nat) : Syntax.Level :=
-  (PP.toResult u) |>.run { mvars, lIndex? } |>.quote prec
+  (PP.toResult u) |>.run { mvars, lIndex? } |>.run |>.quote prec
 
 instance : Quote Level `level where
   quote := Level.quote (lIndex? := fun _ => none)

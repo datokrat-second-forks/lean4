@@ -36,16 +36,16 @@ end UniqueIds
 
 /-- Return true if variable, parameter and join point ids are unique -/
 def Decl.uniqueIds (d : Decl) : Bool :=
-  (UniqueIds.checkDecl d).run' {}
+  (UniqueIds.checkDecl d).run' {} |>.run
 
 namespace NormalizeIds
 
 abbrev M := ReaderT IndexRenaming Id
 
-def normIndex (x : Index) : M Index := fun m =>
-  match m.get? x with
-  | some y => y
-  | none   => x
+def normIndex (x : Index) : M Index := do
+  match (← read).get? x with
+  | some y => return y
+  | none   => return x
 
 def normVar (x : VarId) : M VarId :=
   VarId.mk <$> normIndex x.idx
@@ -57,43 +57,43 @@ def normArg : Arg → M Arg
   | .var x => .var <$> normVar x
   | .erased => pure .erased
 
-def normArgs (as : Array Arg) : M (Array Arg) := fun m =>
-  as.map fun a => normArg a m
+def normArgs (as : Array Arg) : M (Array Arg) :=
+  as.mapM normArg
 
 def normExpr : Expr → M Expr
-  | Expr.ctor c ys,      m => Expr.ctor c (normArgs ys m)
-  | Expr.reset n x,      m => Expr.reset n (normVar x m)
-  | Expr.reuse x c u ys, m => Expr.reuse (normVar x m) c u (normArgs ys m)
-  | Expr.proj i x,       m => Expr.proj i (normVar x m)
-  | Expr.uproj i x,      m => Expr.uproj i (normVar x m)
-  | Expr.sproj n o x,    m => Expr.sproj n o (normVar x m)
-  | Expr.fap c ys,       m => Expr.fap c (normArgs ys m)
-  | Expr.pap c ys,       m => Expr.pap c (normArgs ys m)
-  | Expr.ap x ys,        m => Expr.ap (normVar x m) (normArgs ys m)
-  | Expr.box t x,        m => Expr.box t (normVar x m)
-  | Expr.unbox x,        m => Expr.unbox (normVar x m)
-  | Expr.isShared x,     m => Expr.isShared (normVar x m)
-  | e@(Expr.lit _),      _ =>  e
+  | Expr.ctor c ys      => return Expr.ctor c (← normArgs ys)
+  | Expr.reset n x      => return Expr.reset n (← normVar x)
+  | Expr.reuse x c u ys => return Expr.reuse (← normVar x) c u (← normArgs ys)
+  | Expr.proj i x       => return Expr.proj i (← normVar x)
+  | Expr.uproj i x      => return Expr.uproj i (← normVar x)
+  | Expr.sproj n o x    => return Expr.sproj n o (← normVar x)
+  | Expr.fap c ys       => return Expr.fap c (← normArgs ys)
+  | Expr.pap c ys       => return Expr.pap c (← normArgs ys)
+  | Expr.ap x ys        => return Expr.ap (← normVar x) (← normArgs ys)
+  | Expr.box t x        => return Expr.box t (← normVar x)
+  | Expr.unbox x        => return Expr.unbox (← normVar x)
+  | Expr.isShared x     => return Expr.isShared (← normVar x)
+  | e@(Expr.lit _)      => return e
 
 abbrev N := ReaderT IndexRenaming (StateM Nat)
 
-@[inline] def withVar {α : Type} (x : VarId) (k : VarId → N α) : N α := fun m => do
-  let n ← getModify (fun n => n + 1)
-  k { idx := n } (m.insert x.idx n)
+instance : MonadLift M N :=
+  ⟨fun x => return (x.run (← read)).run⟩
 
-@[inline] def withJP {α : Type} (x : JoinPointId) (k : JoinPointId → N α) : N α := fun m => do
+@[inline] def withVar {α : Type} (x : VarId) (k : VarId → N α) : N α := do
   let n ← getModify (fun n => n + 1)
-  k { idx := n } (m.insert x.idx n)
+  withReader (·.insert x.idx n) (k { idx := n })
 
-@[inline] def withParams {α : Type} (ps : Array Param) (k : Array Param → N α) : N α := fun m => do
-  let m ← ps.foldlM (init := m) fun m p => do
+@[inline] def withJP {α : Type} (x : JoinPointId) (k : JoinPointId → N α) : N α := do
+  let n ← getModify (fun n => n + 1)
+  withReader (·.insert x.idx n) (k { idx := n })
+
+@[inline] def withParams {α : Type} (ps : Array Param) (k : Array Param → N α) : N α := do
+  let m ← ps.foldlM (init := ← read) fun m p => do
     let n ← getModify fun n => n + 1
     return m.insert p.x.idx n
-  let ps := ps.map fun p => { p with x := normVar p.x m }
-  k ps m
-
-instance : MonadLift M N :=
-  ⟨fun x m => return x m⟩
+  withReader (fun _ => m) do
+    k (← ps.mapM fun p => return { p with x := ← normVar p.x })
 
 partial def normFnBody : FnBody → N FnBody
   | FnBody.vdecl x t v b    => do let v ← normExpr v; withVar x fun x => return FnBody.vdecl x t v (← normFnBody b)
@@ -124,7 +124,7 @@ end NormalizeIds
 
 /-- Create a declaration equivalent to `d` s.t. `d.normalizeIds.uniqueIds == true` -/
 def Decl.normalizeIds (d : Decl) : Decl :=
-  (NormalizeIds.normDecl d {}).run' 1
+  ((NormalizeIds.normDecl d).run {}).run' 1 |>.run
 
 /-! Apply a function `f : VarId → VarId` to variable occurrences.
    The following functions assume the IR code does not have variable shadowing. -/

@@ -71,8 +71,8 @@ def getRecommendedSpellingsForName (env : Environment) (declName : Name) :
 the docstring. -/
 def getRecommendedSpellingString (env : Environment) (declName : Name) : String := Id.run do
   let spellings := getRecommendedSpellingsForName env declName
-  if spellings.size == 0 then ""
-  else "\n\nConventions for notations in identifiers:\n\n" ++ String.join (spellings.toList.map bullet) |>.trimAsciiEnd |>.copy
+  if spellings.size == 0 then return ""
+  else return "\n\nConventions for notations in identifiers:\n\n" ++ String.join (spellings.toList.map bullet) |>.trimAsciiEnd |>.copy
 where
   indentLine (str : String) : String :=
     (if str.all Char.isWhitespace then str else "   " ++ str) ++ "\n"

@@ -44,7 +44,7 @@ It also uses `isOffset?` for `Nat`.
 See also `Lean.Meta.constructorApp'?`.
 -/
 def isConstructorApp'? (e : Expr) : MetaM (Option ConstructorVal) := do
-  if let some (_, k) ← isOffset? e then
+  if let some (_, k) ← (isOffset? e).run then
     if k = 0 then
       return none
     else
@@ -95,7 +95,7 @@ It also uses `isOffset?` for `Nat`.
 See also `Lean.Meta.isConstructorApp'?`.
 -/
 def constructorApp'? (e : Expr) : MetaM (Option (ConstructorVal × Array Expr)) := do
-  if let some (e, k) ← isOffset? e then
+  if let some (e, k) ← (isOffset? e).run then
     if k = 0 then
       return none
     else

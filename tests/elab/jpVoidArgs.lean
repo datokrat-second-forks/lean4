@@ -14,7 +14,7 @@ inductive Enum where
 
 /--
 trace: [Compiler.saveMono] size: 25
-    def test x y a.1 : ST.Out lcAny Nat :=
+    def test x y _y.1 : ST.Out lcAny Nat :=
       jp _jp.2 _y.3 : ST.Out lcAny Nat :=
         let _x.4 := 3;
         let _x.5 := y _x.4 _y.3;
@@ -26,24 +26,24 @@ trace: [Compiler.saveMono] size: 25
       cases x : ST.Out lcAny Nat
       | Enum.A =>
         let _x.10 := 0;
-        let _x.11 := y _x.10 a.1;
+        let _x.11 := y _x.10 _y.1;
         cases _x.11 : ST.Out lcAny Nat
         | ST.Out.mk val.12 state.13 =>
           goto _jp.2 state.13
       | Enum.B =>
         let _x.14 := 1;
-        let _x.15 := y _x.14 a.1;
+        let _x.15 := y _x.14 _y.1;
         cases _x.15 : ST.Out lcAny Nat
         | ST.Out.mk val.16 state.17 =>
           goto _jp.2 state.17
       | Enum.C =>
         let _x.18 := 2;
-        let _x.19 := y _x.18 a.1;
+        let _x.19 := y _x.18 _y.1;
         cases _x.19 : ST.Out lcAny Nat
         | ST.Out.mk val.20 state.21 =>
           goto _jp.2 state.21
 [Compiler.saveImpure] size: 19
-    def test x y a.1 : tobj :=
+    def test x y _y.1 : tobj :=
       jp _jp.2 : tobj :=
         let _x.3 := 3;
         let _x.4 := y _x.3 ◾;
@@ -66,9 +66,9 @@ trace: [Compiler.saveMono] size: 25
         let _x.11 := y _x.10 ◾;
         goto _jp.2
 [Compiler.saveImpure] size: 2
-    def test._boxed x y a.1 : tobj :=
+    def test._boxed x y _y.1 : tobj :=
       let x.boxed := unbox x;
-      let res := test x.boxed y a.1;
+      let res := test x.boxed y _y.1;
       return res
 -/
 #guard_msgs in

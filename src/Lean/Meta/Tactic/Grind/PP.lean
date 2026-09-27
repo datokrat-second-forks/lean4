@@ -261,7 +261,7 @@ private def ppCasesTrace : M Unit := do
 
 def goalDiagToMessageData (goal : Goal) (config : Grind.Config) (header := "Goal diagnostics") (collapsedMain := true)
      : MetaM MessageData := do
-  let (_, m) ← go goal |>.run #[]
+  let (_, m) ← go.run goal |>.run #[]
   let gm := MessageData.trace { cls := `grind, collapsed := false } header m
   return gm
 where

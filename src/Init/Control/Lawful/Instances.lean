@@ -26,14 +26,14 @@ open Function
 
 namespace ExceptT
 
-@[ext, grind ext] theorem ext {x y : ExceptT ε m α} (h : x.run = y.run) : x = y := by
-  simp [run] at h
-  assumption
+@[ext, grind ext] theorem ext {x y : ExceptT ε m α} (h : x.run = y.run) : x = y :=
+  congrArg ExceptT.mk h
 
 @[simp] theorem stM_eq [Monad m] : stM m (ExceptT ε m) α = Except ε α := rfl
 
 set_option linter.checkUnivs false in
-@[simp, grind =] theorem run_mk (x : m (Except ε α)) : run (mk x : ExceptT ε m α) = x := rfl
+-- not a `grind` lemma: `grind` reduces `run (mk x)` to `x` on its own, which is not a pattern
+@[simp] theorem run_mk (x : m (Except ε α)) : run (mk x : ExceptT ε m α) = x := rfl
 
 @[simp, grind =] theorem run_pure [Monad m] (x : α) : run (pure x : ExceptT ε m α) = pure (Except.ok x) := rfl
 
@@ -42,10 +42,10 @@ set_option linter.checkUnivs false in
 @[simp, grind =] theorem run_throw [Monad m] : run (throw e : ExceptT ε m β) = pure (Except.error e) := rfl
 
 @[simp, grind =] theorem run_bind_lift [Monad m] [LawfulMonad m] (x : m α) (f : α → ExceptT ε m β) : run (ExceptT.lift x >>= f : ExceptT ε m β) = x >>= fun a => run (f a) := by
-  simp [ExceptT.run, ExceptT.lift, bind, ExceptT.bind, ExceptT.mk, ExceptT.bindCont]
+  simp [ExceptT.lift, bind, ExceptT.bind, ExceptT.bindCont]
 
 @[simp, grind =] theorem bind_throw [Monad m] [LawfulMonad m] (f : α → ExceptT ε m β) : (throw e >>= f) = throw e := by
-  simp [throw, throwThe, MonadExceptOf.throw, bind, ExceptT.bind, ExceptT.bindCont, ExceptT.mk]
+  simp [throw, throwThe, MonadExceptOf.throw, bind, ExceptT.bind, ExceptT.bindCont]
 
 @[grind =]
 theorem run_bind [Monad m] (x : ExceptT ε m α) (f : α → ExceptT ε m β)
@@ -107,8 +107,7 @@ instance [Monad m] [LawfulMonad m] : LawfulMonad (ExceptT ε m) where
 
 @[simp] theorem map_throw [Monad m] [LawfulMonad m] {α β : Type _} (f : α → β) (e : ε) :
     f <$> (throw e : ExceptT ε m α) = (throw e : ExceptT ε m β) := by
-  simp only [Functor.map, ExceptT.map, ExceptT.mk, throw, throwThe, MonadExceptOf.throw,
-    pure_bind]
+  simp only [Functor.map, ExceptT.map, throw, throwThe, MonadExceptOf.throw, pure_bind]
 
 /-! Note that the `MonadControl` instance for `ExceptT` is not monad-generic. -/
 
@@ -170,27 +169,27 @@ instance : LawfulFunctor (Except ε) := inferInstance
 
 namespace OptionT
 
-@[ext] theorem ext {x y : OptionT m α} (h : x.run = y.run) : x = y := by
-  simp [run] at h
-  assumption
+@[ext] theorem ext {x y : OptionT m α} (h : x.run = y.run) : x = y :=
+  congrArg OptionT.mk h
 
-@[simp, grind =] theorem run_mk {m : Type u → Type v} (x : m (Option α)) :
+-- not a `grind` lemma: `grind` reduces `run (mk x)` to `x` on its own, which is not a pattern
+@[simp] theorem run_mk {m : Type u → Type v} (x : m (Option α)) :
     OptionT.run (OptionT.mk x) = x := by rfl
 
 @[simp, grind =] theorem run_pure [Monad m] (x : α) : run (pure x : OptionT m α) = pure (some x) := by
-  simp [run, pure, OptionT.pure, OptionT.mk]
+  simp [pure, OptionT.pure]
 
 @[simp, grind =] theorem run_lift  [Monad.{u, v} m] (x : m α) : run (OptionT.lift x : OptionT m α) = (return some (← x) : m (Option α)) := by
-  simp [run, OptionT.lift, OptionT.mk]
+  simp [OptionT.lift]
 
 @[simp, grind =] theorem run_throw [Monad m] : run (throw e : OptionT m β) = pure none := by
-  simp [run, throw, throwThe, MonadExceptOf.throw, OptionT.fail, OptionT.mk]
+  simp [throw, throwThe, MonadExceptOf.throw, OptionT.fail]
 
 @[simp, grind =] theorem run_bind_lift [Monad m] [LawfulMonad m] (x : m α) (f : α → OptionT m β) : run (OptionT.lift x >>= f : OptionT m β) = x >>= fun a => run (f a) := by
-  simp [OptionT.run, OptionT.lift, bind, OptionT.bind, OptionT.mk]
+  simp [OptionT.lift, bind, OptionT.bind]
 
 @[simp, grind =] theorem bind_throw [Monad m] [LawfulMonad m] (f : α → OptionT m β) : (throw e >>= f) = throw e := by
-  simp [throw, throwThe, MonadExceptOf.throw, bind, OptionT.bind, OptionT.mk, OptionT.fail]
+  simp [throw, throwThe, MonadExceptOf.throw, bind, OptionT.bind, OptionT.fail]
 
 @[simp, grind =] theorem run_bind (f : α → OptionT m β) [Monad m] :
     (x >>= f).run = Option.elimM x.run (pure none) (fun x => (f x).run) := by
@@ -199,13 +198,13 @@ namespace OptionT
   exact bind_congr fun |some _ => rfl | none => rfl
 
 @[simp, grind =] theorem lift_pure [Monad m] [LawfulMonad m] {α : Type u} (a : α) : OptionT.lift (pure a : m α) = pure a := by
-  simp only [OptionT.lift, OptionT.mk, bind_pure_comp, map_pure, pure, OptionT.pure]
+  simp only [OptionT.lift, bind_pure_comp, map_pure, pure, OptionT.pure]
 
 @[simp, grind =] theorem run_map [Monad m] [LawfulMonad m] (f : α → β) (x : OptionT m α)
     : (f <$> x).run = Option.map f <$> x.run := by
   simp [Functor.map, Option.map, ←bind_pure_comp]
   apply bind_congr
-  intro a; cases a <;> simp [OptionT.pure, OptionT.mk]
+  intro a; cases a <;> simp [OptionT.pure]
 
 @[simp, grind =] theorem run_monadMap [MonadFunctorT n m] (f : {β : Type u} → n β → n β) (x : OptionT m α)
     : (monadMap @f x : OptionT m α).run = monadMap @f (x.run) := rfl
@@ -265,7 +264,7 @@ instance [Monad m] [LawfulMonad m] : LawfulMonad (OptionT m) where
 
 @[simp] theorem map_failure [Monad m] [LawfulMonad m] {α β : Type _} (f : α → β) :
     f <$> (failure : OptionT m α) = (failure : OptionT m β) := by
-  simp [OptionT.mk, Functor.map, Alternative.failure, OptionT.fail, OptionT.bind]
+  simp [Functor.map, Alternative.failure, OptionT.fail, OptionT.bind]
 
 @[simp] theorem run_orElse [Monad m] (x : OptionT m α) (y : OptionT m α) :
     (x <|> y).run = Option.elimM x.run y.run (fun x => pure (some x)) :=
@@ -306,11 +305,11 @@ instance : LawfulFunctor Option := inferInstance
 
 namespace ReaderT
 
-@[ext, grind ext] theorem ext {x y : ReaderT ρ m α} (h : ∀ ctx, x.run ctx = y.run ctx) : x = y := by
-  simp [run] at h
-  exact funext h
+@[ext, grind ext] theorem ext {x y : ReaderT ρ m α} (h : ∀ ctx, x.run ctx = y.run ctx) : x = y :=
+  congrArg ReaderT.mk (funext h)
 
-@[simp, grind =] theorem run_mk (x : ρ → m α) (ctx : ρ) : run (.mk x : ReaderT ρ m α) ctx = x ctx :=
+-- not a `grind` lemma: `grind` reduces `run (.mk x) ctx` to `x ctx` on its own, which is not a pattern
+@[simp] theorem run_mk (x : ρ → m α) (ctx : ρ) : run (.mk x : ReaderT ρ m α) ctx = x ctx :=
   rfl
 
 @[simp, grind =] theorem run_pure [Monad m] (a : α) (ctx : ρ) : (pure a : ReaderT ρ m α).run ctx = pure a := rfl
@@ -388,9 +387,10 @@ instance [Monad m] [LawfulMonad m] : LawfulMonad (StateRefT' ω σ m) :=
 namespace StateT
 
 @[ext, grind ext] theorem ext {x y : StateT σ m α} (h : ∀ s, x.run s = y.run s) : x = y :=
-  funext h
+  congrArg StateT.mk (funext h)
 
-@[simp, grind =] theorem run_mk [Monad m] (x : σ → m (α × σ)) (s : σ) : run (.mk x) s = x s :=
+-- not a `grind` lemma: `grind` reduces `run (.mk x) s` to `x s` on its own, which is not a pattern
+@[simp] theorem run_mk [Monad m] (x : σ → m (α × σ)) (s : σ) : run (.mk x) s = x s :=
   rfl
 
 @[simp, grind =] theorem run'_eq [Monad m] (x : StateT σ m α) (s : σ) : run' x s = (·.1) <$> run x s :=
@@ -481,6 +481,13 @@ end StateT
 
 namespace EStateM
 
+@[ext, grind ext] theorem ext {x y : EStateM ε σ α} (h : ∀ s, x.run s = y.run s) : x = y :=
+  congrArg EStateM.mk (funext h)
+
+-- not a `grind` lemma: `grind` reduces `run (.mk x) s` to `x s` on its own, which is not a pattern
+@[simp] theorem run_mk (x : σ → Result ε σ α) (s : σ) : run (.mk x) s = x s :=
+  rfl
+
 @[simp, grind =] theorem run_pure (a : α) (s : σ) :
     EStateM.run (pure a : EStateM ε σ α) s = .ok a s := rfl
 
@@ -514,19 +521,19 @@ theorem run_adaptExcept (f : ε → ε') (x : EStateM ε σ α) (s : σ)
      match EStateM.run x s with
      | .ok x s => .ok x s
      | .error e s => .error (f e) s := by
-  simp only [EStateM.run, EStateM.adaptExcept]
-  cases (x s) <;> rfl
+  simp only [EStateM.adaptExcept]
+  cases x.run s <;> rfl
 
 instance : LawfulMonad (EStateM ε σ) := .mk'
-  (id_map := fun x => funext <| fun s => by
+  (id_map := fun x => EStateM.ext fun s => by
     simp only [Functor.map, EStateM.map]
-    match x s with
+    match x.run s with
     | .ok _ _ => rfl
     | .error _ _ => rfl)
   (pure_bind := fun _ _ => by rfl)
-  (bind_assoc := fun x _ _ => funext <| fun s => by
+  (bind_assoc := fun x _ _ => EStateM.ext fun s => by
     simp only [bind, EStateM.bind]
-    match x s with
+    match x.run s with
     | .ok _ _ => rfl
     | .error _ _ => rfl)
   (map_const := fun _ _ => rfl)

@@ -70,7 +70,7 @@ where
       k
 
 @[inline] def run (x : ToExprM α) (offset : Nat := 0) (levelMap : LevelMap := {}) : α :=
-  x |>.run offset |>.run' levelMap
+  x |>.run offset |>.run' levelMap |>.run
 
 @[inline] def run' (x : ToExprM α) (xs : Array FVarId) : α :=
   let map := xs.foldl (init := {}) fun map x => map.insert x map.size

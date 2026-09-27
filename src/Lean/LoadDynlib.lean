@@ -16,13 +16,15 @@ namespace Lean
 
 private opaque DynlibImpl : NonemptyType.{0}
 /-- A dynamic library handle. -/
-def Dynlib := DynlibImpl.type
-instance : Nonempty Dynlib := by exact DynlibImpl.property
+structure Dynlib where
+  private ref : DynlibImpl.type
+instance : Nonempty Dynlib := ⟨⟨Classical.choice DynlibImpl.property⟩⟩
 
 private opaque Dynlib.SymbolImpl (dynlib : Dynlib) : NonemptyType.{0}
 /-- A reference to a symbol within a dynamic library. -/
-def Dynlib.Symbol (dynlib : Dynlib) := SymbolImpl dynlib |>.type
-instance : Nonempty (Dynlib.Symbol dynlib) := by exact Dynlib.SymbolImpl dynlib |>.property
+structure Dynlib.Symbol (dynlib : Dynlib) where
+  private ref : (SymbolImpl dynlib).type
+instance : Nonempty (Dynlib.Symbol dynlib) := ⟨⟨Classical.choice (Dynlib.SymbolImpl dynlib).property⟩⟩
 
 /--
 Dynamically loads a shared library.

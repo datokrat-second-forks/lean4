@@ -744,7 +744,7 @@ section ServerM
   /-- Creates a Task which forwards a worker's messages into the output stream until an event
   which must be handled in the main watchdog thread (e.g. an I/O error) happens. -/
   private partial def forwardMessages (fw : FileWorker) : ServerM (ServerTask WorkerEvent) := do
-    let task ← ServerTask.IO.asTask (loop $ ←read)
+    let task ← ServerTask.IO.asTask (ReaderT.run loop (← read))
     return task.mapCheap fun
       | Except.ok ev   => ev
       | Except.error e => WorkerEvent.ioError e
@@ -1214,12 +1214,12 @@ def handleRename (p : RenameParams) : ReaderT ReferenceRequestContext IO Lsp.Wor
   -- remove any duplicates or overlapping ranges, or else the rename will not apply
   let changes := refs.fold (init := ∅) fun changes uri map => Id.run do
     let mut last := ⟨0, 0⟩
-    let mut arr := #[]
+    let mut arr : Array TextEdit := #[]
     for (start, stop) in map do
       if last ≤ start then
         arr := arr.push { range := ⟨start, stop⟩, newText := p.newName }
         last := stop
-    return changes.insert uri arr
+    return changes.insert uri ⟨arr⟩
   return { changes? := some changes }
 
 end RequestHandling

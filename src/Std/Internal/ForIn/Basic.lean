@@ -69,7 +69,7 @@ theorem ForIn.toList_eq_of_forIn_eq {ρ : Type w} {α : Type u₁} [ForIn Id ρ 
     (h : ∀ (init : Array α) (f : α → Array α → Id (ForInStep (Array α))),
       forIn xs init f = forIn l init f) :
     ForIn.toList xs = l := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, h, List.forIn_pure_yield_eq_foldl]
+  simp only [ForIn.toList, ForIn.toArray, h, List.forIn_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a) #[] l).toList = l
   rw [foldl_push_toList]; simp
 

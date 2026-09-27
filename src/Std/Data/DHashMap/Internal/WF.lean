@@ -180,7 +180,7 @@ theorem fold_induction {δ : Type w}
   | cons hd tl ih =>
     apply ih
     induction hd generalizing init with
-    | nil => simp [AssocList.foldlM, pure, base]
+    | nil => simp [AssocList.foldlM, base]
     | cons hda hdb tl ih =>
       simp only [AssocList.foldlM, pure_bind]
       apply ih

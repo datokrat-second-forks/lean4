@@ -49,7 +49,7 @@ def addShrinks (n : Nat) : TestResult p → TestResult p
   | TestResult.failure p xs m => TestResult.failure p xs (m + n)
   | p => p
 
-instance [Pure m] : Inhabited (OptionT m α) := ⟨(pure none : m (Option α))⟩
+instance [Pure m] : Inhabited (OptionT m α) := ⟨OptionT.mk (pure none : m (Option α))⟩
 
 class Shrinkable (α : Type u) where
   shrink : (x : α) → List α := fun _ ↦ []

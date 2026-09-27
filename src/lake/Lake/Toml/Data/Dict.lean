@@ -124,4 +124,4 @@ public instance : Append (RBDict α β cmp) := ⟨RBDict.append⟩
   t.items.foldlM (init := init) fun s ⟨k, v⟩ => f s k v
 
 @[inline] public def fold (f : σ → α → β → σ) (init : σ) (t : RBDict α β cmp) : σ :=
-  Id.run <| t.foldM f init
+  Id.run <| t.foldM (fun s k v => pure (f s k v)) init

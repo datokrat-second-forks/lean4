@@ -460,10 +460,10 @@ export Syntax (Term Command DoElem DoSeq Prec Prio Ident StrLit CharLit NameLit 
 
 namespace TSyntax
 
-instance : Coe (TSyntax [k]) (TSyntax (k :: ks)) where
+instance : Coe (TSyntax (.mk [k])) (TSyntax (.mk (k :: ks))) where
   coe stx := ⟨stx⟩
 
-instance : Coe (TSyntax ks) (TSyntax (k' :: ks)) where
+instance : Coe (TSyntax (.mk ks)) (TSyntax (.mk (k' :: ks))) where
   coe stx := ⟨stx⟩
 
 instance : Coe Ident Term where

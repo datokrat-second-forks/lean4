@@ -19,7 +19,7 @@ structure SemiringM.Context where
 abbrev SemiringM := ReaderT SemiringM.Context GoalM
 
 abbrev SemiringM.run (semiringId : Nat) (x : SemiringM α) : GoalM α :=
-  x { semiringId }
+  ReaderT.run x { semiringId }
 
 abbrev getSemiringId : SemiringM Nat :=
   return (← read).semiringId

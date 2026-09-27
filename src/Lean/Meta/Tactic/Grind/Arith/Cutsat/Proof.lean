@@ -193,7 +193,7 @@ private def withProofContext (x : ProofM Expr) : GoalM Expr := do
   let ctx := mkFVar (← mkFreshFVarId)
   let ctx' := mkFVar (← mkFreshFVarId)
   let ringCtx := mkFVar (← mkFreshFVarId)
-  go { ctx, ctx', ringCtx } |>.run' {}
+  go.run { ctx, ctx', ringCtx } |>.run' {}
 where
   go : ProofM Expr := do
     let h ← x
@@ -228,6 +228,7 @@ private inductive MulEqProof where
   | const (k : Int) (h : Expr)
   | mulVar (k : Int) (a : Expr) (h : Expr)
   | none
+  deriving Inhabited
 
 set_option compiler.ignoreBorrowAnnotation true in
 @[extern "lean_cutsat_eq_cnstr_to_proof"] -- forward definition

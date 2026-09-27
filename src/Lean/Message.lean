@@ -313,7 +313,7 @@ def withExprHover (fmt : Format) (expr : Expr) (lctx : LocalContext)
   .ofFormatWithInfos {
       fmt := .tag 0 fmt
       infos :=
-        .ofList [(0, Elab.Info.ofDelabTermInfo {
+        .ofList [(SubExpr.Pos.mk 0, Elab.Info.ofDelabTermInfo {
           expr, lctx, location?, explicit,
           stx := .missing, -- unused for delaborator hovers
           expectedType? := none, -- unused for delaborator hovers
@@ -690,7 +690,7 @@ def add (msg : Message) (log : MessageLog) : MessageLog :=
 protected def append (l₁ l₂ : MessageLog) : MessageLog where
   reported := l₁.reported ++ l₂.reported
   unreported := l₁.unreported ++ l₂.unreported
-  loggedKinds := l₁.loggedKinds.merge l₂.loggedKinds
+  loggedKinds := l₁.loggedKinds.union l₂.loggedKinds
 
 instance : Append MessageLog :=
   ⟨MessageLog.append⟩

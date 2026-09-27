@@ -36,7 +36,7 @@ private def formatCtorInfo : CtorInfo → Format
       r := f!"{r}.{usize}.{ssize}"
     if name != Name.anonymous then
       r := f!"{r}[{name}]"
-    r
+    return r
 
 instance : ToFormat CtorInfo := ⟨private_decl% formatCtorInfo⟩
 

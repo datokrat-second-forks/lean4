@@ -156,7 +156,7 @@ def randomAsciiBytes (seed : Nat) (len : Nat) : ByteArray × Nat := Id.run do
 
     out := out.push (UInt8.ofNat code)
 
-  (out, s)
+  return (out, s)
 
 
 def randomTokenBytes (seed : Nat) (len : Nat) : ByteArray × Nat := Id.run do
@@ -175,7 +175,7 @@ def randomTokenBytes (seed : Nat) (len : Nat) : ByteArray × Nat := Id.run do
 
     out := out.push (UInt8.ofNat code)
 
-  (out, s)
+  return (out, s)
 
 
 def randomSplit (seed : Nat) (data : ByteArray) (maxPart : Nat := 17) : Array ByteArray × Nat := Id.run do
@@ -192,7 +192,7 @@ def randomSplit (seed : Nat) (data : ByteArray) (maxPart : Nat := 17) : Array By
     out := out.push (data.extract i (i + partLen))
     i := i + partLen
 
-  (out, s)
+  return (out, s)
 
 
 def randomChunkedPayload (seed : Nat) (body : ByteArray) : ByteArray × Nat := Id.run do
@@ -212,7 +212,7 @@ def randomChunkedPayload (seed : Nat) (body : ByteArray) : ByteArray × Nat := I
     i := i + chunkLen
 
   out := out ++ "0\x0d\n\x0d\n".toUTF8
-  (out, s)
+  return (out, s)
 
 
 def mkContentLengthHead (path : String) (bodySize : Nat) : ByteArray :=
@@ -242,7 +242,7 @@ def randomChunkExtensionList (seed : Nat) (count : Nat) : String × Nat := Id.ru
     let value := String.fromUTF8! valueBytes
     ext := ext ++ s!";{name}={value}"
 
-  (ext, s)
+  return (ext, s)
 
 
 def randomTrailerLines (seed : Nat) (count : Nat) : String × Nat := Id.run do
@@ -264,7 +264,7 @@ def randomTrailerLines (seed : Nat) (count : Nat) : String × Nat := Id.run do
     let value := String.fromUTF8! valueBytes
     lines := lines ++ s!"X{i}-{name}: {value}\x0d\n"
 
-  (lines, s)
+  return (lines, s)
 
 
 def echoBodyHandler : TestHandler := fun req => do

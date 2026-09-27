@@ -215,26 +215,26 @@ where
           nextIdx := nextIdx + 1
           pure <| .object i irFieldType
         | ImpureType.usize => pure <| .usize 0
-        | ImpureType.erased => .pure <| .erased
-        | ImpureType.void => .pure <| .void
+        | ImpureType.erased => pure <| .erased
+        | ImpureType.void => pure <| .void
         | ImpureType.uint8 =>
           has1BScalar := true
-          .pure <| .scalar 1 0 ImpureType.uint8
+          pure <| .scalar 1 0 ImpureType.uint8
         | ImpureType.uint16 =>
           has2BScalar := true
-          .pure <| .scalar 2 0 ImpureType.uint16
+          pure <| .scalar 2 0 ImpureType.uint16
         | ImpureType.uint32 =>
           has4BScalar := true
-          .pure <| .scalar 4 0 ImpureType.uint32
+          pure <| .scalar 4 0 ImpureType.uint32
         | ImpureType.uint64 =>
           has8BScalar := true
-          .pure <| .scalar 8 0 ImpureType.uint64
+          pure <| .scalar 8 0 ImpureType.uint64
         | ImpureType.float32 =>
           has4BScalar := true
-          .pure <| .scalar 4 0 ImpureType.float32
+          pure <| .scalar 4 0 ImpureType.float32
         | ImpureType.float =>
           has8BScalar := true
-          .pure <| .scalar 8 0 ImpureType.float
+          pure <| .scalar 8 0 ImpureType.float
         | _ => unreachable!
         fields := fields.push ctorField
       let numObjs := nextIdx

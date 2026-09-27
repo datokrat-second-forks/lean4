@@ -104,11 +104,11 @@ def syntaxNodeKindOfAttrParam (defaultParserNamespace : Name) (stx : Syntax) : A
   <|>
   throwError "invalid syntax node kind `{k}`"
 
-private unsafe def evalSyntaxConstantUnsafe (env : Environment) (opts : Options) (constName : Name) : ExceptT String Id Syntax :=
+private unsafe def evalSyntaxConstantUnsafe (env : Environment) (opts : Options) (constName : Name) : Except String Syntax :=
   env.evalConstCheck Syntax opts `Lean.Syntax constName
 
 @[implemented_by evalSyntaxConstantUnsafe]
-opaque evalSyntaxConstant (env : Environment) (opts : Options) (constName : Name) : ExceptT String Id Syntax := throw ""
+opaque evalSyntaxConstant (env : Environment) (opts : Options) (constName : Name) : Except String Syntax := throw ""
 
 /-- safety: requires that `mkConst typeName _` and `γ` are definitionally equal -/
 unsafe def mkElabAttribute (γ) (attrBuiltinName attrName : Name) (parserNamespace : Name) (typeName : Name) (kind : String)
@@ -196,13 +196,13 @@ def liftMacroM [Monad m] [MonadMacroAdapter m] [MonadEnv m] [MonadRecDepth m] [M
     resolveNamespace := fun n => return ResolveName.resolveNamespace env currNamespace openDecls n
     resolveGlobalName := fun n => return ResolveName.resolveGlobalName env opts currNamespace openDecls n
   }
-  match x { methods        := methods
-            ref            := ← getRef
-            currMacroScope := ← MonadQuotation.getCurrMacroScope
-            quotContext    := ← MonadQuotation.getContext
-            currRecDepth   := ← MonadRecDepth.getRecDepth
-            maxRecDepth    := ← MonadRecDepth.getMaxRecDepth
-          } { macroScope := (← MonadMacroAdapter.getNextMacroScope) } with
+  match (x.run { methods        := methods
+                 ref            := ← getRef
+                 currMacroScope := ← MonadQuotation.getCurrMacroScope
+                 quotContext    := ← MonadQuotation.getContext
+                 currRecDepth   := ← MonadRecDepth.getRecDepth
+                 maxRecDepth    := ← MonadRecDepth.getMaxRecDepth
+               }).run { macroScope := (← MonadMacroAdapter.getNextMacroScope) } with
   | EStateM.Result.error Macro.Exception.unsupportedSyntax _ => throwUnsupportedSyntax
   | EStateM.Result.error (Macro.Exception.error ref msg) _   =>
     if msg == maxRecDepthErrorMessage then

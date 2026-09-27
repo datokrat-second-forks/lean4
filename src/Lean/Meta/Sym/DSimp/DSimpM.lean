@@ -49,8 +49,9 @@ inductive Result where
   deriving Inhabited
 
 private opaque MethodsRefPointed : NonemptyType.{0}
-def MethodsRef : Type := MethodsRefPointed.type
-instance : Nonempty MethodsRef := by exact MethodsRefPointed.property
+structure MethodsRef : Type where
+  private ref : MethodsRefPointed.type
+instance : Nonempty MethodsRef := ⟨⟨Classical.choice MethodsRefPointed.property⟩⟩
 
 /-- Read-only context for the definitional simplifier. -/
 structure Context where
@@ -100,11 +101,11 @@ The `cache` and `numSteps` from `s` are preserved (cache entries persist across
 invocations because results are not context-dependent). -/
 def DSimpM.run (x : DSimpM α) (methods : Methods := {}) (config : Config := {})
     (s : State := {}) : SymM (α × State) := do
-  x methods.toMethodsRef { config } |>.run { s with numSteps := 0 }
+  ReaderT.run (ReaderT.run x methods.toMethodsRef) { config } |>.run { s with numSteps := 0 }
 
 /-- Runs a `DSimpM` computation with the given methods and configuration. -/
 def DSimpM.run' (x : DSimpM α) (methods : Methods := {}) (config : Config := {}) : SymM α := do
-  x methods.toMethodsRef { config } |>.run' {}
+  ReaderT.run (ReaderT.run x methods.toMethodsRef) { config } |>.run' {}
 
 set_option compiler.ignoreBorrowAnnotation true in
 @[extern "lean_sym_dsimp"] -- Forward declaration

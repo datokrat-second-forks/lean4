@@ -109,7 +109,7 @@ def wait (x : Notify) : IO (AsyncTask Unit) :=
   x.state.atomically do
     let promise ← IO.Promise.new
     modify fun st => { st with consumers := st.consumers.enqueue (.normal promise) }
-    IO.bindTask promise.result? fun
+    ExceptT.mk <$> IO.bindTask promise.result? fun
       | some res => pure <| Task.pure (.ok res)
       | none => throw (IO.userError "notify dropped")
 

@@ -170,8 +170,32 @@ instance : FromJson DeclInfo where
     | _ => throw "Expected list"
 
 /-- Declarations of a file with associated position information. -/
-@[expose] def Decls := Std.TreeMap String DeclInfo
-  deriving EmptyCollection, ForIn Id
+structure Decls where
+  /-- The underlying map from declaration name to position information. -/
+  toTreeMap : Std.TreeMap String DeclInfo
+
+namespace Decls
+
+instance : EmptyCollection Decls := ⟨⟨∅⟩⟩
+
+instance [Monad m] : ForIn m Decls (String × DeclInfo) where
+  forIn ds init f := forIn ds.toTreeMap init f
+
+/-- Inserts the position information of a declaration. -/
+def insert (ds : Decls) (declName : String) (info : DeclInfo) : Decls :=
+  ⟨ds.toTreeMap.insert declName info⟩
+
+/-- Inserts all declarations of `other`. -/
+def insertMany (ds other : Decls) : Decls :=
+  ⟨ds.toTreeMap.insertMany other.toTreeMap⟩
+
+/-- Looks up the position information of a declaration. -/
+def get? (ds : Decls) (declName : String) : Option DeclInfo :=
+  ds.toTreeMap.get? declName
+
+/-- Lists all declarations with their position information. -/
+def toList (ds : Decls) : List (String × DeclInfo) :=
+  ds.toTreeMap.toList
 
 instance : ToJson Decls where
   toJson m := Json.mkObj <| m.toList.map fun (declName, info) => (declName, toJson info)
@@ -181,6 +205,8 @@ instance : FromJson Decls where
     let node ← j.getObj?
     node.foldlM (init := ∅) fun m k v =>
       return m.insert k (← fromJson? v)
+
+end Decls
 
 /--
 Denotes the range of a reference, as well as the parent declaration of the reference.
@@ -277,13 +303,40 @@ instance : FromJson RefInfo where
     pure { definition?, usages }
 
 /-- References from a single module/file -/
-@[expose] def ModuleRefs := Std.TreeMap RefIdent RefInfo
-  deriving EmptyCollection
+structure ModuleRefs where
+  /-- The underlying map from identifier to its references. -/
+  toTreeMap : Std.TreeMap RefIdent RefInfo
+
+namespace ModuleRefs
+
+instance : EmptyCollection ModuleRefs := ⟨⟨∅⟩⟩
 
 instance [Monad m] : ForIn m ModuleRefs (RefIdent × RefInfo) where
-  forIn map init f :=
-    let map : Std.TreeMap RefIdent RefInfo := map
-    forIn map init f
+  forIn map init f := forIn map.toTreeMap init f
+
+/-- Inserts the references of an identifier. -/
+def insert (refs : ModuleRefs) (ident : RefIdent) (info : RefInfo) : ModuleRefs :=
+  ⟨refs.toTreeMap.insert ident info⟩
+
+/-- Looks up the references of an identifier. -/
+def get? (refs : ModuleRefs) (ident : RefIdent) : Option RefInfo :=
+  refs.toTreeMap.get? ident
+
+/-- Looks up the references of an identifier, returning `fallback` if there are none. -/
+def getD (refs : ModuleRefs) (ident : RefIdent) (fallback : RefInfo) : RefInfo :=
+  refs.toTreeMap.getD ident fallback
+
+/-- Folds over all identifiers and their references. -/
+def foldl (f : γ → RefIdent → RefInfo → γ) (init : γ) (refs : ModuleRefs) : γ :=
+  refs.toTreeMap.foldl f init
+
+/-- Lists all identifiers with their references. -/
+def toList (refs : ModuleRefs) : List (RefIdent × RefInfo) :=
+  refs.toTreeMap.toList
+
+/-- Lists all identifiers with their references. -/
+def toArray (refs : ModuleRefs) : Array (RefIdent × RefInfo) :=
+  refs.toTreeMap.toArray
 
 instance : ToJson ModuleRefs where
   toJson m := Json.mkObj <| m.toList.map fun (ident, info) => (ident.toJson.compress, toJson info)
@@ -293,6 +346,8 @@ instance : FromJson ModuleRefs where
     let node ← j.getObj?
     node.foldlM (init := ∅) fun m k v =>
       return m.insert (← RefIdent.fromJson? (← Json.parse k)) (← fromJson? v)
+
+end ModuleRefs
 
 /--
 Used in the `$/lean/ileanHeaderSetupInfo` watchdog <- worker notifications.

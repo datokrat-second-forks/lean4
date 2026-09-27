@@ -570,7 +570,7 @@ theorem Spec.tryCatch_StateT [MonadExceptOf ε m] (x : StateT σ m α) (h : ε �
 theorem Spec.tryCatch_ExceptT_lift [MonadExceptOf ε m] (x : ExceptT ε' m α) (h : ε → ExceptT ε' m α)
     (post : α → Pred) (epost : (ε' → Pred) × EPred) :
     Triple (MonadExceptOf.tryCatch (ε:=ε) x h : ExceptT ε' m α)
-      (wp (MonadExceptOf.tryCatch (ε:=ε) x h : m (@Except.{u, u} ε' α))
+      (wp (MonadExceptOf.tryCatch (ε:=ε) x.run (fun e => (h e).run) : m (@Except.{u, u} ε' α))
         (fun | .ok a => post a | .error e => epost.fst e) epost.snd) post epost :=
   Triple.intro (by rw [WPMonad.wp_tryCatch_lift_ExceptT_apply_eq]; apply WP.wp_consequence; intro r; cases r <;> rfl)
 
@@ -579,7 +579,7 @@ theorem Spec.tryCatch_ExceptT_lift [MonadExceptOf ε m] (x : ExceptT ε' m α) (
 theorem Spec.tryCatch_OptionT_lift [MonadExceptOf ε m] (x : OptionT m α) (h : ε → OptionT m α)
     (post : α → Pred) (epost : (Unit → Pred) × EPred) :
     Triple (MonadExceptOf.tryCatch (ε:=ε) x h : OptionT m α)
-      (wp (MonadExceptOf.tryCatch (ε:=ε) x h : m (Option α))
+      (wp (MonadExceptOf.tryCatch (ε:=ε) x.run (fun e => (h e).run) : m (Option α))
         (pushOption post epost.fst) epost.snd) post epost :=
   Triple.intro (by rw [WPMonad.wp_tryCatch_lift_OptionT_apply_eq])
 

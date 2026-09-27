@@ -77,7 +77,7 @@ def onesChunked (n : Nat) : String := Id.run do
   let mut body := ""
   for i in [0:n] do
     body := body ++ s!"{toString i |>.length}\x0d\n{toString i}\x0d\n"
-  body ++ "0\x0d\n\x0d\n"
+  return body ++ "0\x0d\n\x0d\n"
 
 def ignoreHandler : TestHandler := fun _ => Response.ok |>.text "ok"
 

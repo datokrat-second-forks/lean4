@@ -300,11 +300,11 @@ def evalExpr (e : Expr) : EvalM Val := do
 
 /-- info: (Except.ok (), [("x", Val.int 8), ("y", Val.int 5)]) -/
 #guard_msgs in
-#eval `[Stmt| x := 3; y := 5; x := x + y;].eval |>.run {}
+#eval `[Stmt| x := 3; y := 5; x := x + y;].eval |>.run |>.run {}
 
 /-- info: (Except.error "out of fuel", [("x", Val.int 98)]) -/
 #guard_msgs in
-#eval `[Stmt| x := 0; while (true) { x := x + 1; }].eval |>.run {}
+#eval `[Stmt| x := 0; while (true) { x := x + 1; }].eval |>.run |>.run {}
 
 instance : Repr State where
   reprPrec a n :=
@@ -318,7 +318,7 @@ instance : Repr State where
 
 /-- info: (Except.ok (), [x ↦ 8, y ↦ 5]) -/
 #guard_msgs in
-#eval `[Stmt| x := 3; y := 5; x := x + y; ].eval |>.run {}
+#eval `[Stmt| x := 3; y := 5; x := x + y; ].eval |>.run |>.run {}
 
 @[simp] def BinOp.simplify : BinOp → Expr → Expr → Expr
   | .eq,  .val v₁,  .val  v₂ => .val (.bool (v₁ = v₂))

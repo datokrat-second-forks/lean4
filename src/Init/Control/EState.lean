@@ -28,7 +28,7 @@ instance [Repr ε] [Repr α] : Repr (Result ε σ α) where
 
 instance : MonadAttach (EStateM ε σ) where
   CanReturn x a := Exists fun s => Exists fun s' => x.run s = .ok a s'
-  attach x s := match h : x s with
+  attach x := EStateM.mk fun s => match h : x.run s with
     | .ok a s' => .ok ⟨a, s, s', h⟩ s'
     | .error e s' => .error e s'
 
@@ -44,24 +44,24 @@ operations fail. The default is to use the first exception since the standard `o
 second.
 -/
 @[always_inline, inline]
-protected def orElse' {δ} [Backtrackable δ σ] (x₁ x₂ : EStateM ε σ α) (useFirstEx := true) : EStateM ε σ α := fun s =>
+protected def orElse' {δ} [Backtrackable δ σ] (x₁ x₂ : EStateM ε σ α) (useFirstEx := true) : EStateM ε σ α := EStateM.mk fun s =>
   let d := Backtrackable.save s;
-  match x₁ s with
+  match x₁.run s with
   | Result.error e₁ s₁ =>
-    match x₂ (Backtrackable.restore s₁ d) with
+    match x₂.run (Backtrackable.restore s₁ d) with
     | Result.error e₂ s₂ => Result.error (if useFirstEx then e₁ else e₂) s₂
     | ok                 => ok
   | ok                 => ok
 
 @[always_inline]
 instance : MonadFinally (EStateM ε σ) := {
-  tryFinally' := fun x h s =>
-    let r := x s
+  tryFinally' := fun x h => EStateM.mk fun s =>
+    let r := x.run s
     match r with
-    | Result.ok a s    => match h (some a) s with
+    | Result.ok a s    => match (h (some a)).run s with
       | Result.ok b s    => Result.ok (a, b) s
       | Result.error e s => Result.error e s
-    | Result.error e₁ s => match h none s with
+    | Result.error e₁ s => match (h none).run s with
       | Result.ok _ s     => Result.error e₁ s
       | Result.error e₂ s => Result.error e₂ s
 }
@@ -71,8 +71,8 @@ Converts a state monad action into a state monad action with exceptions.
 
 The resulting action does not throw an exception.
 -/
-@[always_inline, inline] def fromStateM {ε σ α : Type} (x : StateM σ α) : EStateM ε σ α := fun s =>
-  match x.run s with
+@[always_inline, inline] def fromStateM {ε σ α : Type} (x : StateM σ α) : EStateM ε σ α := EStateM.mk fun s =>
+  match (x.run s).run with
   | (a, s') => EStateM.Result.ok a s'
 
 end EStateM

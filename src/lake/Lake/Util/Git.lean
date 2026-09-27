@@ -208,7 +208,8 @@ public def setRemoteUrl (remote : String) (url : String) (repo : GitRepo) : LogI
 
 public def getFilteredRemoteUrl?
   (remote := Git.defaultRemote) (repo : GitRepo)
-: BaseIO (Option String) := OptionT.run do Git.filterUrl? (← repo.getRemoteUrl? remote)
+: BaseIO (Option String) :=
+  OptionT.run do Git.filterUrl? (← OptionT.mk (repo.getRemoteUrl? remote))
 
 public def pruneRemote (remote : String) (repo : GitRepo) : LogIO Unit :=
   repo.execGit #["remote", "prune", remote]

@@ -86,7 +86,7 @@ Attach the given array of local function declarations and join points to `k`.
 -/
 partial def attach (ps : Array ToPull) (k : Code .pure) : Code .pure := Id.run do
   let visited := ps.map fun _ => false
-  let (_, (k, _)) := go |>.run (k, visited)
+  let (_, (k, _)) := go |>.run (k, visited) |>.run
   return k
 where
   go : StateM (Code .pure × Array Bool) Unit := do

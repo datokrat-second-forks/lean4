@@ -86,7 +86,7 @@ Normalize universe level parameter names in the given expression.
 The function also returns the list of universe level parameter names that have been normalized.
 -/
 def normLevelParams (e : Expr) : Expr × List Name :=
-  let (e, s) := NormLevelParam.normExpr e |>.run {}
+  let (e, s) := NormLevelParam.normExpr e |>.run {} |>.run
   (e, s.paramNames.toList)
 
 namespace CollectLevelParams

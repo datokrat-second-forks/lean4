@@ -200,7 +200,10 @@ private theorem incRefN_eq (rc : Int32) (n : USize) :
       (if n > LEAN_RC_INC_MAX then incRefHugeN rc n
        else if isSt rc then rc + n.toUInt32.toInt32
        else if rc.toUInt32 > LEAN_RC_STICKY.toUInt32 then rc - n.toUInt32.toInt32
-       else rc) := rfl
+       else rc) := by
+  simp only [incRefN]
+  repeat' split
+  all_goals rfl
 
 /--
 {lit}`lean_inc_ref_n` spec: a single-threaded count takes the increment exactly or gets stuck, never
@@ -412,7 +415,11 @@ private theorem decRef_keeps (rc rc' : Int32) (h : decRef rc = some rc') :
       (if rc != 1 then
         (if rc ≤ LEAN_RC_STICKY_DROP then some rc
          else if rc != -1 then some (rc + 1) else none)
-       else none) := fun _ => rfl
+       else none) := by
+    intro rc
+    simp only [decRefCold]
+    repeat' split
+    all_goals rfl
   simp only [decRef, hcold] at h
   repeat' split at h
   all_goals

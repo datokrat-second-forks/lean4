@@ -80,9 +80,9 @@ Returns false if `op'` fails to parse.
 Note that the width of the operation is *not* compared.
  -/
 def isSameKind (op : Op) (op' : Expr) : Bool := Id.run do
-  let some op' := ofExpr? op' | false
+  let some op' := ofExpr? op' | return false
   match op, op' with
-  | .mul _, .mul _ => true
+  | .mul _, .mul _ => return true
 
 instance : ToMessageData Op where
   toMessageData op := m!"{toExpr op}"

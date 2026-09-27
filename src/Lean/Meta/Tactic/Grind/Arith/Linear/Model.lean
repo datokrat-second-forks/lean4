@@ -34,7 +34,7 @@ Helper function for evaluating terms that have been processed by `internalize`, 
 we did not added them to constraints. See comment at `assignTerms`.
 -/
 private partial def evalTermAt? (e : Expr) (s : Struct) (model : Std.HashMap Expr Rat) : MetaM (Option Rat) := do
-  go e
+  (go e).run
 where
   go (e : Expr) : OptionT MetaM Rat := do
     if let some val := model.get? e then
@@ -46,15 +46,15 @@ where
     | HMul.hMul _ _ _ i a b => if isHomoMulInst s i then return (← go a) * (← go b) else failure
     | HSMul.hSMul _ _ _ i a b =>
       if isSMulIntInst s i then
-        let k ← getIntValue? a
+        let k ← OptionT.mk <| getIntValue? a
         return k * (← go b)
       else if isSMulNatInst s i then
-        let k ← getNatValue? a
+        let k ← OptionT.mk <| getNatValue? a
         return k * (← go b)
       else
         failure
     | Zero.zero _ i => if isZeroInst s i then return 0 else failure
-    | OfNat.ofNat _ n _ => let k ← getNatValue? n; return k
+    | OfNat.ofNat _ n _ => let k ← OptionT.mk <| getNatValue? n; return k
     | _ => failure
 
 /--

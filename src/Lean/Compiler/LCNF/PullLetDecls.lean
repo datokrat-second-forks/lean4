@@ -47,7 +47,7 @@ partial def withCheckpoint (x : PullM (Code .pure)) : PullM (Code .pure) := do
         go (i+1) included
     else
       return c
-  let (c, keep) := go toPullSizeSaved (← read).included |>.run #[]
+  let (c, keep) := go toPullSizeSaved (← read).included |>.run #[] |>.run
   modify fun s => { s with toPull := s.toPull.shrink toPullSizeSaved ++ keep }
   return c
 
@@ -89,7 +89,7 @@ mutual
 end
 
 def PullM.run (x : PullM α) (isCandidateFn : LetDecl .pure → FVarIdSet → CompilerM Bool) : CompilerM α :=
-  x { isCandidateFn } |>.run' {}
+  ReaderT.run x { isCandidateFn } |>.run' {}
 
 end PullLetDecls
 

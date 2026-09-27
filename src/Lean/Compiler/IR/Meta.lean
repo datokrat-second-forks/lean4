@@ -13,7 +13,7 @@ public section
 namespace Lean.IR
 
 private partial def collectUsedFDecls (decl : IR.Decl) : NameSet :=
-  collectDecl decl |>.run {} |>.2
+  collectDecl decl |>.run {} |>.run.2
 where
   collectDecl : Decl → StateM NameSet Unit
     | .fdecl (body := b) .. => collectFnBody b

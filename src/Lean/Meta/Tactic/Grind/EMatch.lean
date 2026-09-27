@@ -109,10 +109,10 @@ structure SearchState where
 abbrev M := ReaderT Context $ StateRefT SearchState GoalM
 
 def M.run' (x : M α) : GoalM α :=
-  x {} |>.run' {}
+  ReaderT.run x {} |>.run' {}
 
 def M.run (x : M α) : GoalM (α × SearchState) :=
-  x {} |>.run {}
+  ReaderT.run x {} |>.run {}
 
 @[inline] private abbrev withInitApp (e : Expr) (x : M α) : M α :=
   withReader (fun ctx => { ctx with initApp := e }) x
@@ -848,8 +848,8 @@ private partial def instantiateTheorem (c : Choice) : M Unit := withDefault do w
   if mvars.size != thm.numParams then
     reportEMatchIssue! "unexpected number of parameters at {thm.origin.pp}"
     return ()
-  let (some _, c) ← applyAssignment mvars |>.run c | return ()
-  let some _ ← synthesizeInsts mvars bis | return ()
+  let (some _, c) ← applyAssignment mvars |>.run.run c | return ()
+  let some _ ← (synthesizeInsts mvars bis).run | return ()
   if (← checkConstraints thm c.gen proof mvars) then
     let guards ← collectGuards thm proof mvars
     let proof := mkAppN proof mvars

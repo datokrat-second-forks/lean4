@@ -593,15 +593,37 @@ run_meta
   | none => IO.println "no limit found"
 ```
 -/
-abbrev MetaM  := ReaderT Context $ StateRefT State CoreM
+newtype MetaM (α : Type) where
+  toReaderT : ReaderT Context (StateRefT State CoreM) α
 
 -- Make the compiler generate specialized `pure`/`bind` so we do not have to optimize through the
 -- whole monad stack at every use site. May eventually be covered by `deriving`.
 @[always_inline]
-instance : Monad MetaM := let i : Monad MetaM := inferInstance; { pure := i.pure, bind := i.bind }
+instance : Monad MetaM :=
+  let i : Monad MetaM := inferInstanceAs (Monad (ReaderT Context _))
+  { pure := i.pure, bind := i.bind }
+
+instance : MonadReaderOf Context MetaM := inferInstanceAs (MonadReaderOf _ (ReaderT Context _))
+instance : MonadWithReaderOf Context MetaM := inferInstanceAs (MonadWithReaderOf _ (ReaderT Context _))
+instance : MonadStateOf State MetaM := inferInstanceAs (MonadStateOf _ (ReaderT Context _))
+instance : MonadLift (StateRefT State CoreM) MetaM := inferInstanceAs (MonadLift _ (ReaderT Context _))
+instance : LawfulMonadLift (StateRefT State CoreM) MetaM where
+  monadLift_pure _ := rfl
+  monadLift_bind _ _ := rfl
+instance : MonadFunctor (StateRefT State CoreM) MetaM :=
+  inferInstanceAs (MonadFunctor _ (ReaderT Context _))
+instance : MonadControl (StateRefT State CoreM) MetaM :=
+  inferInstanceAs (MonadControl _ (ReaderT Context _))
+instance : MonadFinally MetaM := inferInstanceAs (MonadFinally (ReaderT Context _))
+instance : MonadAttach MetaM := inferInstanceAs (MonadAttach (ReaderT Context _))
+instance : MonadExceptOf Exception MetaM := inferInstanceAs (MonadExceptOf _ (ReaderT Context _))
+instance : MonadAlwaysExcept Exception MetaM :=
+  inferInstanceAs (MonadAlwaysExcept _ (ReaderT Context _))
+instance : MonadRuntimeException MetaM := inferInstanceAs (MonadRuntimeException (ReaderT Context _))
+instance : MonadRecDepth MetaM := inferInstanceAs (MonadRecDepth (ReaderT Context _))
 
 instance : Inhabited (MetaM α) where
-  default := fun _ _ => default
+  default := .mk <| ReaderT.mk fun _ => ReaderT.mk fun _ => default
 
 instance : MonadLCtx MetaM where
   getLCtx := return (← read).lctx
@@ -640,7 +662,7 @@ instance : MonadBacktrack SavedState MetaM where
   restoreState s := s.restore
 
 @[inline] def MetaM.run (x : MetaM α) (ctx : Context := {}) (s : State := {}) : CoreM (α × State) :=
-  x ctx |>.run s
+  x.toReaderT.run ctx |>.run s
 
 @[inline] def MetaM.run' (x : MetaM α) (ctx : Context := {}) (s : State := {}) : CoreM α :=
   Prod.fst <$> x.run ctx s
@@ -1121,7 +1143,7 @@ def getFVarFromUserName (userName : Name) : MetaM Expr := do
 Lift a `MkBindingM` monadic action `x` to `MetaM`.
 -/
 @[inline] def liftMkBindingM (x : MetavarContext.MkBindingM α) : MetaM α := do
-  match x { lctx := (← getLCtx), quotContext := (← readThe Core.Context).quotContext } { mctx := (← getMCtx), ngen := (← getNGen), nextMacroScope := (← getThe Core.State).nextMacroScope } with
+  match (x.run { lctx := (← getLCtx), quotContext := (← readThe Core.Context).quotContext }).run { mctx := (← getMCtx), ngen := (← getNGen), nextMacroScope := (← getThe Core.State).nextMacroScope } with
   | .ok e sNew => do
     setMCtx sNew.mctx
     modifyThe Core.State fun s => { s with ngen := sNew.ngen, nextMacroScope := sNew.nextMacroScope }

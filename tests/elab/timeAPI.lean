@@ -473,6 +473,8 @@ example : (1 : Minute.Offset).toInt = (1 : Int) := rfl
 example : (1 : Hour.Offset).toInt = (1 : Int) := rfl
 example : (1 : Day.Offset).toInt = (1 : Int) := rfl
 example : (1 : Week.Offset).toInt = (1 : Int) := rfl
+example : ((1 : Month.Offset) : Int) = 1 := rfl
+example : ((1 : Year.Offset) : Int) = 1 := rfl
 
 example : Nanosecond.Offset.ofInt 1 = (1 : Nanosecond.Offset) := rfl
 example : Millisecond.Offset.ofInt 1 = (1 : Millisecond.Offset) := rfl

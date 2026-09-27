@@ -31,13 +31,13 @@ Convert `Week.Offset` into `Day.Offset`.
 -/
 @[inline]
 def ofWeeks (week : Week.Offset) : Day.Offset :=
-  week.mul 7 |>.cast (by decide +kernel)
+  .mk (week.toUnitVal.mul 7 |>.cast (by decide +kernel))
 
 /--
 Convert `Day.Offset` into `Week.Offset`.
 -/
 @[inline]
 def toWeeks (day : Day.Offset) : Week.Offset :=
-  day.ediv 7
+  .mk (day.toUnitVal.ediv 7)
 
 end Day.Offset

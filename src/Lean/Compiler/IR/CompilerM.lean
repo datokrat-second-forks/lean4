@@ -140,7 +140,7 @@ private def exportIREntries (env : Environment) : Array (Name × Array EnvExtens
     (modPkgExt.name, modPkg)]
 
 def findEnvDecl (env : Environment) (declName : Name) : Option Decl :=
-  Compiler.LCNF.findExtEntry? env declMapExt declName findAtSorted? (·.2.find?)
+  Compiler.LCNF.findExtEntry? env declMapExt.toPersistentEnvExtension declName findAtSorted? (·.2.find?)
 
 @[export lean_ir_find_env_decl]
 private def findInterpDecl (env : Environment) (declName : Name) : Option Decl :=

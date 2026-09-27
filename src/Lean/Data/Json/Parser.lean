@@ -230,6 +230,7 @@ mutual
     else
       fail "unexpected character in object"
 
+  /-- Parses a single JSON value, without requiring that the input is exhausted afterwards. -/
   partial def anyCore : Parser Json := do
     let c ← peek!
     if c == '[' then

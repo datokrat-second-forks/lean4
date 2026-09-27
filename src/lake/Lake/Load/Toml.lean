@@ -38,8 +38,8 @@ open Toml
 @[specialize] public def decodeFieldCore
   (name : Name) (decode : Toml.Value → EDecodeM α) [field : ConfigField σ name α]
   (_ : Table) (val : Value) (cfg : σ)
-: DecodeM σ := fun es =>
-  match decode val es with
+: DecodeM σ := EStateM.mk fun es =>
+  match (decode val).run es with
   | .ok a es => .ok (field.set a cfg) es
   | .error _ es => .ok cfg es
 
@@ -164,7 +164,7 @@ public partial def decodeLeanOptionsAux
 public def decodeLeanOptions (v : Value) : EDecodeM (Array LeanOption) :=
   match v with
   | .array _ vs => decodeArray vs
-  | .table _ t => t.items.foldl (init := .ok #[]) fun vs (k,v) => decodeLeanOptionsAux v k vs
+  | .table _ t => t.items.foldl (init := pure #[]) fun vs (k,v) => decodeLeanOptionsAux v k vs
   | v => throwDecodeErrorAt v.ref "expected array or table"
 
 public instance : DecodeToml (Array LeanOption) := ⟨decodeLeanOptions⟩
@@ -462,7 +462,7 @@ where
         let exeRoots ← id do
           if h : kind = LeanExe.configKind then
             let exeConfig : LeanExeConfig name := cast (by rw [h]; rfl) config
-            if let some origExe := r.exeRoots.get? exeConfig.root then
+            if let some origExe := r.exeRoots.find? exeConfig.root then
               logDecodeErrorAt val.ref s!"{prettyName}: \
                 executable '{name}' has the same root module '{exeConfig.root}' as \
                 executable '{origExe}'"
@@ -540,9 +540,9 @@ def loadLakeConfigCore (path : FilePath) (lakeEnv : Lake.Env) : LogIO LoadedLake
       let defaultCacheService ← id do
         let name := config.cache.defaultService
         if name.isEmpty then
-          return cacheServices.get? `reservoir |>.getD defaultService
+          return cacheServices.find? `reservoir |>.getD defaultService
         else
-          let some service := cacheServices.get? (.mkSimple name)
+          let some service := cacheServices.find? (.mkSimple name)
             | error s!"the configured default cache service `{name}` is not defined; \
                 please add a `cache.service` with that name"
           return service
@@ -551,7 +551,7 @@ def loadLakeConfigCore (path : FilePath) (lakeEnv : Lake.Env) : LogIO LoadedLake
         if name.isEmpty then
           return none
         else
-          let some service := cacheServices.get? (.mkSimple name)
+          let some service := cacheServices.find? (.mkSimple name)
             | error s!"the configured default cache upload service `{name}` is not defined; \
                 please add a `cache.service` with that name"
           return some service

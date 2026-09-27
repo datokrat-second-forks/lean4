@@ -129,34 +129,30 @@ Cached hash code, cached results, and other data for `Expr`.
 Remark: this is mostly an internal datastructure used to implement `Expr`,
 most will never have to use it.
 -/
-@[expose] def Expr.Data := UInt64
-
-instance: Inhabited Expr.Data :=
-  inferInstanceAs (Inhabited UInt64)
+structure Expr.Data where
+  val : UInt64
+  deriving Inhabited, BEq
 
 def Expr.Data.hash (c : Expr.Data) : UInt64 :=
-  c.toUInt32.toUInt64
-
-instance : BEq Expr.Data where
-  beq (a b : UInt64) := a == b
+  c.val.toUInt32.toUInt64
 
 def Expr.Data.approxDepth (c : Expr.Data) : UInt8 :=
-  ((c.shiftRight 32).land 255).toUInt8
+  ((c.val.shiftRight 32).land 255).toUInt8
 
 def Expr.Data.looseBVarRange (c : Expr.Data) : UInt32 :=
-  (c.shiftRight 44).toUInt32
+  (c.val.shiftRight 44).toUInt32
 
 def Expr.Data.hasFVar (c : Expr.Data) : Bool :=
-  ((c.shiftRight 40).land 1) == 1
+  ((c.val.shiftRight 40).land 1) == 1
 
 def Expr.Data.hasExprMVar (c : Expr.Data) : Bool :=
-  ((c.shiftRight 41).land 1) == 1
+  ((c.val.shiftRight 41).land 1) == 1
 
 def Expr.Data.hasLevelMVar (c : Expr.Data) : Bool :=
-  ((c.shiftRight 42).land 1) == 1
+  ((c.val.shiftRight 42).land 1) == 1
 
 def Expr.Data.hasLevelParam (c : Expr.Data) : Bool :=
-  ((c.shiftRight 43).land 1) == 1
+  ((c.val.shiftRight 43).land 1) == 1
 
 -- NOTE: the `extern` clause of `BinderInfo.toUInt64` is ABI sensitive.
 -- It exploits the fact that a small enum compiles to `uint8`.
@@ -194,7 +190,7 @@ instance : Repr Expr.Data where
       r := r ++ " (hasExprMVar := " ++ toString v.hasExprMVar ++ ")"
     if v.hasLevelMVar then
       r := r ++ " (hasLevelMVar := " ++ toString v.hasLevelMVar ++ ")"
-    Repr.addAppParen r prec
+    return Repr.addAppParen r prec
 
 open Expr
 
@@ -216,42 +212,182 @@ instance : Repr FVarId where
 /--
 A set of unique free variable identifiers.
 This is a persistent data structure implemented using `Std.TreeSet`. -/
-@[expose] def FVarIdSet := Std.TreeSet FVarId (Name.quickCmp ·.name ·.name)
-  deriving Inhabited, EmptyCollection, Singleton
+structure FVarIdSet where
+  toTreeSet : Std.TreeSet FVarId (Name.quickCmp ·.name ·.name)
+  deriving Inhabited
 
-instance [Monad m] : ForIn m FVarIdSet FVarId := inferInstanceAs (ForIn _ (Std.TreeSet _ _) ..)
+instance : EmptyCollection FVarIdSet := ⟨⟨∅⟩⟩
+instance : Singleton FVarId FVarIdSet := ⟨fun fvarId => ⟨{fvarId}⟩⟩
+
+instance [Monad m] : ForIn m FVarIdSet FVarId where
+  forIn s init f := forIn s.toTreeSet init f
 
 def FVarIdSet.insert (s : FVarIdSet) (fvarId : FVarId) : FVarIdSet :=
-  Std.TreeSet.insert s fvarId
+  ⟨s.toTreeSet.insert fvarId⟩
+
+def FVarIdSet.erase (s : FVarIdSet) (fvarId : FVarId) : FVarIdSet :=
+  ⟨s.toTreeSet.erase fvarId⟩
+
+def FVarIdSet.contains (s : FVarIdSet) (fvarId : FVarId) : Bool :=
+  s.toTreeSet.contains fvarId
+
+def FVarIdSet.size (s : FVarIdSet) : Nat :=
+  s.toTreeSet.size
+
+def FVarIdSet.isEmpty (s : FVarIdSet) : Bool :=
+  s.toTreeSet.isEmpty
+
+@[inline] def FVarIdSet.foldl (f : σ → FVarId → σ) (init : σ) (s : FVarIdSet) : σ :=
+  s.toTreeSet.foldl f init
+
+@[inline] def FVarIdSet.foldlM [Monad m] (f : σ → FVarId → m σ) (init : σ) (s : FVarIdSet) : m σ :=
+  s.toTreeSet.foldlM f init
+
+@[inline] def FVarIdSet.forM [Monad m] (f : FVarId → m PUnit) (s : FVarIdSet) : m PUnit :=
+  s.toTreeSet.forM f
+
+@[inline] def FVarIdSet.any (s : FVarIdSet) (p : FVarId → Bool) : Bool :=
+  s.toTreeSet.any p
+
+@[inline] def FVarIdSet.all (s : FVarIdSet) (p : FVarId → Bool) : Bool :=
+  s.toTreeSet.all p
+
+@[inline] def FVarIdSet.filter (f : FVarId → Bool) (s : FVarIdSet) : FVarIdSet :=
+  ⟨s.toTreeSet.filter f⟩
+
+def FVarIdSet.toList (s : FVarIdSet) : List FVarId :=
+  s.toTreeSet.toList
+
+def FVarIdSet.toArray (s : FVarIdSet) : Array FVarId :=
+  s.toTreeSet.toArray
+
+def FVarIdSet.merge (vs₁ vs₂ : FVarIdSet) : FVarIdSet :=
+  ⟨vs₁.toTreeSet.merge vs₂.toTreeSet⟩
 
 def FVarIdSet.union (vs₁ vs₂ : FVarIdSet) : FVarIdSet :=
   vs₁.foldl (init := vs₂) (·.insert ·)
 
 def FVarIdSet.ofList (l : List FVarId) : FVarIdSet :=
-  Std.TreeSet.ofList l _
+  ⟨Std.TreeSet.ofList l _⟩
 
 def FVarIdSet.ofArray (l : Array FVarId) : FVarIdSet :=
-  Std.TreeSet.ofArray l _
+  ⟨Std.TreeSet.ofArray l _⟩
 
 /--
 A set of unique free variable identifiers implemented using hashtables.
 Hashtables are faster than red-black trees if they are used linearly.
 They are not persistent data-structures. -/
-@[expose] def FVarIdHashSet := Std.HashSet FVarId
-  deriving Inhabited, EmptyCollection
+structure FVarIdHashSet where
+  toHashSet : Std.HashSet FVarId
+  deriving Inhabited
+
+instance : EmptyCollection FVarIdHashSet := ⟨⟨∅⟩⟩
+
+def FVarIdHashSet.insert (s : FVarIdHashSet) (fvarId : FVarId) : FVarIdHashSet :=
+  ⟨s.toHashSet.insert fvarId⟩
+
+@[inline] def FVarIdHashSet.insertMany [ForIn Id ρ FVarId] (s : FVarIdHashSet) (fvarIds : ρ) : FVarIdHashSet :=
+  ⟨s.toHashSet.insertMany fvarIds⟩
+
+def FVarIdHashSet.erase (s : FVarIdHashSet) (fvarId : FVarId) : FVarIdHashSet :=
+  ⟨s.toHashSet.erase fvarId⟩
+
+def FVarIdHashSet.contains (s : FVarIdHashSet) (fvarId : FVarId) : Bool :=
+  s.toHashSet.contains fvarId
+
+def FVarIdHashSet.size (s : FVarIdHashSet) : Nat :=
+  s.toHashSet.size
+
+def FVarIdHashSet.isEmpty (s : FVarIdHashSet) : Bool :=
+  s.toHashSet.isEmpty
+
+@[inline] def FVarIdHashSet.fold (f : σ → FVarId → σ) (init : σ) (s : FVarIdHashSet) : σ :=
+  s.toHashSet.fold f init
+
+@[inline] def FVarIdHashSet.forM [Monad m] (f : FVarId → m PUnit) (s : FVarIdHashSet) : m PUnit :=
+  s.toHashSet.forM f
+
+def FVarIdHashSet.toList (s : FVarIdHashSet) : List FVarId :=
+  s.toHashSet.toList
+
+def FVarIdHashSet.toArray (s : FVarIdHashSet) : Array FVarId :=
+  s.toHashSet.toArray
+
+def FVarIdHashSet.union (s t : FVarIdHashSet) : FVarIdHashSet :=
+  ⟨s.toHashSet.union t.toHashSet⟩
+
+instance [Monad m] : ForIn m FVarIdHashSet FVarId where
+  forIn s init f := forIn s.toHashSet init f
 
 /--
 A mapping from free variable identifiers to values of type `α`.
 This is a persistent data structure implemented using `Std.TreeMap`. -/
-@[expose] def FVarIdMap (α : Type) := Std.TreeMap FVarId α (Name.quickCmp ·.name ·.name)
+structure FVarIdMap (α : Type) where
+  toTreeMap : Std.TreeMap FVarId α (Name.quickCmp ·.name ·.name)
 
 def FVarIdMap.insert (s : FVarIdMap α) (fvarId : FVarId) (a : α) : FVarIdMap α :=
-  Std.TreeMap.insert s fvarId a
+  ⟨s.toTreeMap.insert fvarId a⟩
 
-instance : EmptyCollection (FVarIdMap α) := inferInstanceAs (EmptyCollection (Std.TreeMap _ _ _))
+def FVarIdMap.erase (s : FVarIdMap α) (fvarId : FVarId) : FVarIdMap α :=
+  ⟨s.toTreeMap.erase fvarId⟩
+
+def FVarIdMap.contains (s : FVarIdMap α) (fvarId : FVarId) : Bool :=
+  s.toTreeMap.contains fvarId
+
+def FVarIdMap.get? (s : FVarIdMap α) (fvarId : FVarId) : Option α :=
+  s.toTreeMap.get? fvarId
+
+def FVarIdMap.get! [Inhabited α] (s : FVarIdMap α) (fvarId : FVarId) : α :=
+  s.toTreeMap.get! fvarId
+
+def FVarIdMap.getD (s : FVarIdMap α) (fvarId : FVarId) (fallback : α) : α :=
+  s.toTreeMap.getD fvarId fallback
+
+def FVarIdMap.size (s : FVarIdMap α) : Nat :=
+  s.toTreeMap.size
+
+def FVarIdMap.isEmpty (s : FVarIdMap α) : Bool :=
+  s.toTreeMap.isEmpty
+
+@[inline] def FVarIdMap.alter (s : FVarIdMap α) (fvarId : FVarId) (f : Option α → Option α) :
+    FVarIdMap α :=
+  ⟨s.toTreeMap.alter fvarId f⟩
+
+@[inline] def FVarIdMap.modify (s : FVarIdMap α) (fvarId : FVarId) (f : α → α) : FVarIdMap α :=
+  ⟨s.toTreeMap.modify fvarId f⟩
+
+@[inline] def FVarIdMap.any (s : FVarIdMap α) (p : FVarId → α → Bool) : Bool :=
+  s.toTreeMap.any p
+
+@[inline] def FVarIdMap.all (s : FVarIdMap α) (p : FVarId → α → Bool) : Bool :=
+  s.toTreeMap.all p
+
+@[inline] def FVarIdMap.filter (f : FVarId → α → Bool) (s : FVarIdMap α) : FVarIdMap α :=
+  ⟨s.toTreeMap.filter f⟩
+
+@[inline] def FVarIdMap.foldl (f : σ → FVarId → α → σ) (init : σ) (s : FVarIdMap α) : σ :=
+  s.toTreeMap.foldl f init
+
+@[inline] def FVarIdMap.foldlM [Monad m] (f : σ → FVarId → α → m σ) (init : σ) (s : FVarIdMap α) :
+    m σ :=
+  s.toTreeMap.foldlM f init
+
+@[inline] def FVarIdMap.forM [Monad m] (f : FVarId → α → m PUnit) (s : FVarIdMap α) : m PUnit :=
+  s.toTreeMap.forM f
+
+def FVarIdMap.toList (s : FVarIdMap α) : List (FVarId × α) :=
+  s.toTreeMap.toList
+
+def FVarIdMap.toArray (s : FVarIdMap α) : Array (FVarId × α) :=
+  s.toTreeMap.toArray
+
+instance : EmptyCollection (FVarIdMap α) := ⟨⟨∅⟩⟩
 
 instance : Inhabited (FVarIdMap α) where
   default := {}
+
+instance [Monad m] : ForIn m (FVarIdMap α) (FVarId × α) where
+  forIn s init f := forIn s.toTreeMap init f
 
 /-- Expression metavariable Id   -/
 structure MVarId where
@@ -261,28 +397,94 @@ structure MVarId where
 instance : Repr MVarId where
   reprPrec n p := reprPrec n.name p
 
-@[expose] def MVarIdSet := Std.TreeSet MVarId (Name.quickCmp ·.name ·.name)
-  deriving Inhabited, EmptyCollection
+structure MVarIdSet where
+  toTreeSet : Std.TreeSet MVarId (Name.quickCmp ·.name ·.name)
+  deriving Inhabited
+
+instance : EmptyCollection MVarIdSet := ⟨⟨∅⟩⟩
 
 def MVarIdSet.insert (s : MVarIdSet) (mvarId : MVarId) : MVarIdSet :=
-  Std.TreeSet.insert s mvarId
+  ⟨s.toTreeSet.insert mvarId⟩
+
+def MVarIdSet.erase (s : MVarIdSet) (mvarId : MVarId) : MVarIdSet :=
+  ⟨s.toTreeSet.erase mvarId⟩
+
+def MVarIdSet.contains (s : MVarIdSet) (mvarId : MVarId) : Bool :=
+  s.toTreeSet.contains mvarId
+
+def MVarIdSet.size (s : MVarIdSet) : Nat :=
+  s.toTreeSet.size
+
+def MVarIdSet.isEmpty (s : MVarIdSet) : Bool :=
+  s.toTreeSet.isEmpty
+
+@[inline] def MVarIdSet.foldl (f : σ → MVarId → σ) (init : σ) (s : MVarIdSet) : σ :=
+  s.toTreeSet.foldl f init
+
+@[inline] def MVarIdSet.foldlM [Monad m] (f : σ → MVarId → m σ) (init : σ) (s : MVarIdSet) : m σ :=
+  s.toTreeSet.foldlM f init
+
+@[inline] def MVarIdSet.forM [Monad m] (f : MVarId → m PUnit) (s : MVarIdSet) : m PUnit :=
+  s.toTreeSet.forM f
+
+@[inline] def MVarIdSet.any (s : MVarIdSet) (p : MVarId → Bool) : Bool :=
+  s.toTreeSet.any p
+
+@[inline] def MVarIdSet.all (s : MVarIdSet) (p : MVarId → Bool) : Bool :=
+  s.toTreeSet.all p
+
+@[inline] def MVarIdSet.filter (f : MVarId → Bool) (s : MVarIdSet) : MVarIdSet :=
+  ⟨s.toTreeSet.filter f⟩
+
+def MVarIdSet.toList (s : MVarIdSet) : List MVarId :=
+  s.toTreeSet.toList
+
+def MVarIdSet.toArray (s : MVarIdSet) : Array MVarId :=
+  s.toTreeSet.toArray
 
 def MVarIdSet.ofList (l : List MVarId) : MVarIdSet :=
-  Std.TreeSet.ofList l _
+  ⟨Std.TreeSet.ofList l _⟩
 
 def MVarIdSet.ofArray (l : Array MVarId) : MVarIdSet :=
-  Std.TreeSet.ofArray l _
+  ⟨Std.TreeSet.ofArray l _⟩
 
-instance [Monad m] : ForIn m MVarIdSet MVarId := inferInstanceAs (ForIn _ (Std.TreeSet _ _) ..)
+instance [Monad m] : ForIn m MVarIdSet MVarId where
+  forIn s init f := forIn s.toTreeSet init f
 
-@[expose] def MVarIdMap (α : Type) := Std.TreeMap MVarId α (Name.quickCmp ·.name ·.name)
+structure MVarIdMap (α : Type) where
+  toTreeMap : Std.TreeMap MVarId α (Name.quickCmp ·.name ·.name)
 
 def MVarIdMap.insert (s : MVarIdMap α) (mvarId : MVarId) (a : α) : MVarIdMap α :=
-  Std.TreeMap.insert s mvarId a
+  ⟨s.toTreeMap.insert mvarId a⟩
 
-instance : EmptyCollection (MVarIdMap α) := inferInstanceAs (EmptyCollection (Std.TreeMap _ _ _))
+def MVarIdMap.erase (s : MVarIdMap α) (mvarId : MVarId) : MVarIdMap α :=
+  ⟨s.toTreeMap.erase mvarId⟩
 
-instance [Monad m] : ForIn m (MVarIdMap α) (MVarId × α) := inferInstanceAs (ForIn _ (Std.TreeMap _ _ _) ..)
+def MVarIdMap.contains (s : MVarIdMap α) (mvarId : MVarId) : Bool :=
+  s.toTreeMap.contains mvarId
+
+def MVarIdMap.get? (s : MVarIdMap α) (mvarId : MVarId) : Option α :=
+  s.toTreeMap.get? mvarId
+
+def MVarIdMap.size (s : MVarIdMap α) : Nat :=
+  s.toTreeMap.size
+
+def MVarIdMap.isEmpty (s : MVarIdMap α) : Bool :=
+  s.toTreeMap.isEmpty
+
+@[inline] def MVarIdMap.foldl (f : σ → MVarId → α → σ) (init : σ) (s : MVarIdMap α) : σ :=
+  s.toTreeMap.foldl f init
+
+def MVarIdMap.toList (s : MVarIdMap α) : List (MVarId × α) :=
+  s.toTreeMap.toList
+
+def MVarIdMap.toArray (s : MVarIdMap α) : Array (MVarId × α) :=
+  s.toTreeMap.toArray
+
+instance : EmptyCollection (MVarIdMap α) := ⟨⟨∅⟩⟩
+
+instance [Monad m] : ForIn m (MVarIdMap α) (MVarId × α) where
+  forIn s init f := forIn s.toTreeMap init f
 
 instance : Inhabited (MVarIdMap α) where
   default := {}
@@ -2063,7 +2265,7 @@ def traverseChildren [Applicative M] (f : Expr → M Expr) : Expr → M Expr
 /-- `e.foldlM f a` folds the monadic function `f` over the subterms of the expression `e`,
 with initial value `a`. -/
 def foldlM {α : Type} {m} [Monad m] (f : α → Expr → m α) (init : α) (e : Expr) : m α :=
-  Prod.snd <$> StateT.run (e.traverseChildren (fun e' => fun a => Prod.mk e' <$> f a e')) init
+  Prod.snd <$> StateT.run (e.traverseChildren (fun e' => .mk fun a => Prod.mk e' <$> f a e')) init
 
 /--
 Returns the size of `e` as a tree, i.e. nodes reachable via multiple paths are counted multiple

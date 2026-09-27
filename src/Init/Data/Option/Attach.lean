@@ -460,10 +460,11 @@ instance [Monad m] [MonadAttach m] [LawfulMonad m] [WeaklyLawfulMonadAttach m] :
   map_attach {α} x := by
     apply OptionT.ext
     conv => rhs; rw [← WeaklyLawfulMonadAttach.map_attach (x := x.run)]
-    simp only [Functor.map, OptionT.bind, OptionT.mk, MonadAttach.attach, map_eq_pure_bind, bind_assoc]
+    simp only [Functor.map, OptionT.bind, OptionT.run_mk, MonadAttach.attach, map_eq_pure_bind,
+      bind_assoc]
     apply bind_congr; intro a
     match a with
-    | ⟨some a, _⟩ => simp [OptionT.pure, OptionT.mk]
+    | ⟨some a, _⟩ => simp [OptionT.pure, OptionT.run_mk]
     | ⟨none, _⟩ => simp
 
 instance [Monad m] [MonadAttach m] [LawfulMonad m] [LawfulMonadAttach m] :

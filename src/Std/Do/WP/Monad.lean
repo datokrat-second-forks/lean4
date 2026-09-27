@@ -93,12 +93,18 @@ instance EStateM.instWPMonad : WPMonad (EStateM ε σ) (.except ε (.arg σ .pur
     cases (x.run _) <;> rfl
 
 instance Except.instWPMonad : WPMonad (Except ε) (.except ε .pure) where
-  wp_pure a := rfl
-  wp_bind x f := by cases x <;> rfl
+  wp_pure a := by ext Q; simp only [wp, PredTrans.apply_pushExcept]; rfl
+  wp_bind x f := by
+    ext Q
+    simp only [wp, PredTrans.apply_pushExcept, PredTrans.apply_Bind_bind]
+    cases x <;> rfl
 
 instance Option.instWPMonad : WPMonad Option (.except PUnit .pure) where
-  wp_pure a := rfl
-  wp_bind x f := by cases x <;> rfl
+  wp_pure a := by ext Q; simp only [wp, PredTrans.apply_pushOption]; rfl
+  wp_bind x f := by
+    ext Q
+    simp only [wp, PredTrans.apply_pushOption, PredTrans.apply_Bind_bind]
+    cases x <;> rfl
 
 instance State.instWPMonad : WPMonad (StateM σ) (.arg σ .pure) :=
   inferInstanceAs (WPMonad (StateT σ Id) (.arg σ .pure))

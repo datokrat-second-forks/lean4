@@ -68,7 +68,7 @@ instance : Monad TacticM :=
   { pure := i.pure, bind := i.bind }
 
 instance : Inhabited (TacticM α) where
-  default := fun _ _ => default
+  default := ReaderT.mk fun _ => ReaderT.mk fun _ => default
 
 /-- Returns the list of goals. Goals may or may not already be assigned. -/
 def getGoals : TacticM (List MVarId) :=
@@ -87,7 +87,7 @@ def getUnsolvedGoals : TacticM (List MVarId) := do
   getGoals
 
 @[inline] private def TacticM.runCore (x : TacticM α) (ctx : Context) (s : State) : TermElabM (α × State) :=
-  x ctx |>.run s
+  ReaderT.run x ctx |>.run s
 
 @[inline] private def TacticM.runCore' (x : TacticM α) (ctx : Context) (s : State) : TermElabM α :=
   Prod.fst <$> x.runCore ctx s

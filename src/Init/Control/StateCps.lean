@@ -21,7 +21,14 @@ The State monad transformer using CPS style.
 An alternative implementation of a state monad transformer that internally uses continuation passing
 style instead of tuples.
 -/
-@[expose, implicit_reducible] def StateCpsT (σ : Type u) (m : Type u → Type v) (α : Type u) := (δ : Type u) → σ → (α → σ → m δ) → m δ
+newtype StateCpsT (σ : Type u) (m : Type u → Type v) (α : Type u) where
+  toFn : (δ : Type u) → σ → (α → σ → m δ) → m δ
+
+/-- Interpret a CPS state function as an element of `StateCpsT σ m α`. -/
+add_decl_doc StateCpsT.mk
+
+/-- The CPS state function underlying a `StateCpsT` action. -/
+add_decl_doc StateCpsT.toFn
 
 namespace StateCpsT
 
@@ -33,7 +40,7 @@ an initial state and a continuation.
 -/
 @[always_inline, inline, expose]
 def runK (x : StateCpsT σ m α) (s : σ) (k : α → σ → m β) : m β :=
-  x _ s k
+  x.toFn _ s k
 
 /--
 Executes an action from a monad with added state in the underlying monad `m`. Given an initial
@@ -56,18 +63,18 @@ def run' [Monad m] (x : StateCpsT σ m α) (s : σ) : m α :=
 
 @[always_inline]
 instance : Monad (StateCpsT σ m) where
-  map  f x := fun δ s k => x δ s fun a s => k (f a) s
-  pure a   := fun _ s k => k a s
-  bind x f := fun δ s k => x δ s fun a s => f a δ s k
+  map  f x := .mk fun δ s k => x.toFn δ s fun a s => k (f a) s
+  pure a   := .mk fun _ s k => k a s
+  bind x f := .mk fun δ s k => x.toFn δ s fun a s => (f a).toFn δ s k
 
 instance : LawfulMonad (StateCpsT σ m) := by
   refine LawfulMonad.mk' _ ?_ ?_ ?_ <;> intros <;> rfl
 
 @[always_inline]
 instance : MonadStateOf σ (StateCpsT σ m) where
-  get   := fun _ s k => k s s
-  set s := fun _ _ k => k ⟨⟩ s
-  modifyGet f := fun _ s k => let (a, s) := f s; k a s
+  get   := .mk fun _ s k => k s s
+  set s := .mk fun _ _ k => k ⟨⟩ s
+  modifyGet f := .mk fun _ s k => let (a, s) := f s; k a s
 
 /--
 For continuation monads, it is not possible to provide a computable `MonadAttach` instance that
@@ -84,7 +91,7 @@ lifting](lean-manual://section/monad-lifting).
 -/
 @[always_inline, inline, expose]
 protected def lift [Monad m] (x : m α) : StateCpsT σ m α :=
-  fun _ s k => x >>= (k . s)
+  .mk fun _ s k => x >>= (k . s)
 
 instance [Monad m] : MonadLift m (StateCpsT σ m) where
   monadLift := StateCpsT.lift

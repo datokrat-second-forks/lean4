@@ -260,10 +260,11 @@ structure Stats where
 
 private opaque MethodsRefPointed : NonemptyType.{0}
 
-def MethodsRef : Type := MethodsRefPointed.type
+structure MethodsRef : Type where
+  private ref : MethodsRefPointed.type
 
 instance : Nonempty MethodsRef :=
-  by exact MethodsRefPointed.property
+  ⟨⟨Classical.choice MethodsRefPointed.property⟩⟩
 
 abbrev SimpM := ReaderT MethodsRef $ ReaderT Context $ StateRefT State MetaM
 
@@ -991,7 +992,7 @@ private def updateUsedSimpsWithZetaDelta (ctx : Context) (stats : Stats) : MetaM
 def SimpM.run (ctx : Context) (s : State := {}) (methods : Methods := {}) (k : SimpM α) : MetaM (α × State) := do
   let ctx ← ctx.setLctxInitIndices
   withSimpContext ctx do
-    let (r, s) ← k methods.toMethodsRef ctx |>.run s
+    let (r, s) ← ReaderT.run (ReaderT.run k methods.toMethodsRef) ctx |>.run s
     trace[Meta.Tactic.simp.numSteps] "{s.numSteps}"
     let stats ← updateUsedSimpsWithZetaDelta ctx { s with }
     let s := { s with diag := stats.diag, usedTheorems := stats.usedTheorems }

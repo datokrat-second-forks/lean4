@@ -87,7 +87,7 @@ Converts the given ring expression into a multivariate polynomial.
 If the ring has a nonzero characteristic, it is used during normalization.
 -/
 @[inline] def _root_.Lean.Grind.CommRing.Expr.toPolyM? (e : RingExpr) : RingM (Option Poly) := do
-  toPoly e
+  (toPoly e).run
 
 @[inline] def _root_.Lean.Grind.CommRing.Poly.mulConstM (p : Poly) (k : Int) : RingM Poly :=
   mulConst k p

@@ -8,7 +8,7 @@ def cancellableSelector [Monad m] [MonadLift IO m] [MonadAsync AsyncTask m] (fn 
   let promise ← IO.Promise.new
   let result : AsyncTask α ← async (fn signal)
 
-  IO.chainTask result (promise.resolve ·)
+  IO.chainTask result.run (promise.resolve ·)
 
   return {
     tryFn := do

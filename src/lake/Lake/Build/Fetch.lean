@@ -64,7 +64,7 @@ public abbrev RecBuildM := RecBuildT LogIO
 @[inline] public def RecBuildT.run
   [Monad m] [MonadLiftT (ST IO.RealWorld) m]
   (stack : CallStack BuildKey) (store : BuildStore) (build : RecBuildT m α)
-: BuildT m (α × BuildStore) := build none stack |>.run store
+: BuildT m (α × BuildStore) := ReaderT.run (ReaderT.run build none) stack |>.run store
 
 /-- Run a recursive build in a fresh build store. -/
 @[inline] public def RecBuildT.run'
@@ -89,14 +89,17 @@ public abbrev FetchM := FetchT LogIO
 @[inline] public def FetchM.ofFn
   (f : IndexBuildFn RecBuildM → Option Package → CallStack BuildKey →
     IO.Ref BuildStore → BuildContext → Log → BaseIO (EResult Log.Pos Log α))
-: FetchM α := .mk fun fetch => fun pkg? stack store ctx => .mk fun log =>
-  f fetch pkg? stack store ctx log
+: FetchM α := .mk fun fetch => ReaderT.mk fun pkg? => ReaderT.mk fun stack =>
+  ReaderT.mk fun store => ReaderT.mk fun ctx => .mk fun log =>
+    f fetch pkg? stack store ctx log
 
 /-- Convert a `FetchM` monad to its full functional representation. -/
 @[inline] public def FetchM.toFn (self : FetchM α) :
   IndexBuildFn RecBuildM → Option Package → CallStack BuildKey →
     IO.Ref BuildStore → BuildContext → Log → BaseIO (EResult Log.Pos Log α)
-:= fun fetch pkg? stack store ctx log => self.run fetch pkg? stack store ctx |>.run log
+:= fun fetch pkg? stack store ctx log =>
+  ReaderT.run (ReaderT.run (ReaderT.run (ReaderT.run (self.run fetch) pkg?) stack) store) ctx
+    |>.run log
 
 /-- Fetch the result associated with the info using the Lake build index. -/
 @[inline] public def BuildInfo.fetch (self : BuildInfo) [FamilyOut BuildData self.key α] : FetchM (Job α) :=

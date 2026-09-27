@@ -163,7 +163,7 @@ partial def transformWithCache {m} [Monad m] [MonadLiftT MetaM m] [MonadControlT
         | .mdata _ b     => visitPost (e.updateMData! (← visit b))
         | .proj _ _ b    => visitPost (e.updateProj! (← visit b))
         | _              => visitPost e
-  StateRefT'.run (visit input) cache
+  StateRefT'.run (visit input).toStateRefT cache
 
 /--
 Similar to `Core.transform`, but terms provided to `pre` and `post` do not contain loose bound variables.

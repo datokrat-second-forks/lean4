@@ -8,11 +8,11 @@ def mk (n : Nat) : Lean.PersistentArray Nat :=
   List.range n |>.toPArray'
 
 def sum1 (start : Nat) (s : List Nat) : Nat :=
-  let (_, s) := StateT.run (m := Id) (s.drop start |>.forM fun val => modify (· + val)) 0
+  let (_, s) := StateT.run (m := Id) (s.drop start |>.forM fun val => modify (· + val)) 0 |>.run
   s
 
 def sum2 (start : Nat) (s : Lean.PArray Nat) : Nat :=
-  let (_, s) := StateT.run (m := Id)  (s.forM (start := start) (fun val => modify (· + val))) 0
+  let (_, s) := StateT.run (m := Id)  (s.forM (start := start) (fun val => modify (· + val))) 0 |>.run
   s
 
 def check (s₁ : List Nat) : IO Unit := do

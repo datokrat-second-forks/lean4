@@ -274,7 +274,7 @@ def format (time : PlainTime) (format : String) : String :=
       | .b _ => some (classifyDayPeriod time.hour time.minute time.second)
       | .B _ => some (classifyExtendedDayPeriod time.hour time.minute time.second)
       | .h _ => some time.hour.toRelative
-      | .K _ => some (time.hour.emod 12 (by decide))
+      | .K _ => some (time.hour.toBounded.emod 12 (by decide))
       | .S _ => some time.nanosecond
       | .A _ => some time.toMilliseconds
       | .N _ => some time.toNanoseconds
@@ -322,7 +322,7 @@ def fromTime12Hour (input : String) : Except String PlainTime := do
 Formats a `PlainTime` value into a 12-hour format string (`hh:mm:ss aa`).
 -/
 def toTime12Hour (input : PlainTime) : String :=
-  Formats.time12Hour.formatBuilder (input.hour.emod 12 (by decide) |>.add 1) input.minute input.second (if input.hour.val ≥ 12 then HourMarker.pm else HourMarker.am)
+  Formats.time12Hour.formatBuilder (input.hour.toBounded.emod 12 (by decide) |>.add 1) input.minute input.second (if input.hour.val ≥ 12 then HourMarker.pm else HourMarker.am)
 
 /--
 Parses a `String` in the `Time12Hour` or `Time24Hour` format and returns a `PlainTime`.
@@ -473,7 +473,7 @@ def format (date : PlainDateTime) (format : String) (locale : DateFormat := .enU
       | .b _ => some (classifyDayPeriod date.hour date.minute date.time.second)
       | .B _ => some (classifyExtendedDayPeriod date.hour date.minute date.time.second)
       | .h _ => some date.hour.toRelative
-      | .K _ => some (date.hour.emod 12 (by decide))
+      | .K _ => some (date.hour.toBounded.emod 12 (by decide))
       | .S _ => some date.nanosecond
       | .A _ => some date.time.toMilliseconds
       | .N _ => some date.time.toNanoseconds

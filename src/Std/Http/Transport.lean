@@ -118,7 +118,7 @@ def recvJoined (recvChan : Std.CloseableChannel ByteArray) (expect : Option UInt
 Sends a single ByteArray through a channel.
 -/
 def send (sendChan : Std.CloseableChannel ByteArray) (data : ByteArray) : Async Unit := do
-  Async.ofAsyncTask ((← sendChan.send data) |>.map (Except.mapError (IO.userError ∘ toString)))
+  Async.ofAsyncTask <| ExceptT.mk <| (← sendChan.send data).map (Except.mapError (IO.userError ∘ toString))
 
 /--
 Sends ByteArrays through a channel.

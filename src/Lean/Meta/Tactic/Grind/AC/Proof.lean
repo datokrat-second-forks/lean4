@@ -131,7 +131,7 @@ private def mkContext (h : Expr) : ProofM Expr := do
 
 private abbrev withProofContext (x : ProofM Expr) : ACM Expr := do
   let ctx := mkFVar (← mkFreshFVarId)
-  go { ctx } |>.run' {}
+  go.run { ctx } |>.run' {}
 where
   go : ProofM Expr := do
     mkContext (← x)

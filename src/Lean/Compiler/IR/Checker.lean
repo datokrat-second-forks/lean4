@@ -230,7 +230,7 @@ def checkDecl : Decl → M Unit
 end Checker
 
 def checkDecl (decls : Array Decl) (decl : Decl) : CompilerM Unit := do
-  Checker.checkDecl decl { decls, currentDecl := decl } |>.run' {}
+  (Checker.checkDecl decl).run { decls, currentDecl := decl } |>.run' {}
 
 def checkDecls (decls : Array Decl) : CompilerM Unit :=
   decls.forM (checkDecl decls)

@@ -54,11 +54,11 @@ instance : Repr Duration where
   reprPrec s := reprPrec (toString s)
 
 instance : Inhabited Duration where
-  default := ⟨0, Bounded.LE.mk 0 (by decide), by decide⟩
+  default := ⟨0, .mk (Bounded.LE.mk 0 (by decide)), by decide⟩
 
 instance : OfNat Duration n where
   ofNat := by
-    refine ⟨.ofInt n, ⟨0, by decide⟩, ?_⟩
+    refine ⟨.ofInt n, .mk ⟨0, by decide⟩, ?_⟩
     simp ; exact Int.le_total n 0 |>.symm
 
 instance : Ord Duration where
@@ -83,7 +83,7 @@ Negates a `Duration`, flipping its second and nanosecond values.
 -/
 @[inline]
 protected def neg (duration : Duration) : Duration := by
-  refine ⟨-duration.second, duration.nano.neg, ?_⟩
+  refine ⟨-duration.second, .mk duration.nano.toBounded.neg, ?_⟩
   cases duration.proof with
   | inl n => exact Or.inr (n.imp Int.neg_le_neg Int.neg_le_neg)
   | inr n => exact Or.inl (n.imp Int.neg_le_neg Int.neg_le_neg)
@@ -93,7 +93,7 @@ Creates a new `Duration` out of `Second.Offset`.
 -/
 @[inline]
 def ofSeconds (s : Second.Offset) : Duration := by
-  refine ⟨s, ⟨0, by decide⟩, ?_⟩
+  refine ⟨s, .mk ⟨0, by decide⟩, ?_⟩
   simp ; exact Int.le_total s.val 0 |>.symm
 
 /--
@@ -101,7 +101,7 @@ Creates a new `Duration` out of `Nanosecond.Offset`.
 -/
 def ofNanoseconds (s : Nanosecond.Offset) : Duration := by
   -- TODO: we should be using `s.toSeconds` here, but the proof below depends on this form.
-  refine ⟨s.tdiv 1000000000 |>.cast (by decide +kernel), Bounded.LE.byMod s.val 1000000000 (by decide), ?_⟩
+  refine ⟨.mk (s.toUnitVal.tdiv 1000000000 |>.cast (by decide +kernel)), .mk (Bounded.LE.byMod s.val 1000000000 (by decide)), ?_⟩
 
   cases Int.le_total s.val 0
   next n => exact Or.inr (And.intro (tdiv_neg n (by decide)) (mod_nonpos 1000000000 n (by decide)))
@@ -142,8 +142,8 @@ Converts a `Duration` to a `Millisecond.Offset`
 -/
 @[inline]
 def toMilliseconds (duration : Duration) : Millisecond.Offset :=
-  let secMillis := duration.second.mul 1000
-  let nanosMillis := duration.nano.ediv 1000000 (by decide)
+  let secMillis : Millisecond.Offset := .mk (duration.second.toUnitVal.mul 1000)
+  let nanosMillis := duration.nano.toBounded.ediv 1000000 (by decide)
   let millis := secMillis + (.ofInt nanosMillis.val)
   millis
 
@@ -152,7 +152,7 @@ Converts a `Duration` to a `Nanosecond.Offset`
 -/
 @[inline]
 def toNanoseconds (duration : Duration) : Nanosecond.Offset :=
-  let nanos := duration.second.mul 1000000000
+  let nanos : Nanosecond.Offset := .mk (duration.second.toUnitVal.mul 1000000000)
   let nanos := nanos + (.ofInt duration.nano.val)
   nanos
 

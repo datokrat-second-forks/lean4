@@ -70,9 +70,10 @@ This is roughly equivalent to `(α : Type) × TypeName α × α`, but without th
 `Dynamic.mk` to inject a value into `Dynamic` from another type, and `Dynamic.get?` to extract a
 value from `Dynamic` if it has some expected type.
 -/
-def Dynamic : Type := DynamicPointed.type
+structure Dynamic : Type where private ofRef ::
+  private ref : DynamicPointed.type
 
-instance : Nonempty Dynamic := by exact DynamicPointed.property
+instance : Nonempty Dynamic := ⟨⟨Classical.choice DynamicPointed.property⟩⟩
 
 private unsafe def Dynamic.typeNameImpl (any : Dynamic) : Name :=
   (unsafeCast any : Name × NonScalar).1

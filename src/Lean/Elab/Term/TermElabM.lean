@@ -37,10 +37,11 @@ We store `FixedTermElabRef` in the `Context` of the `TermElabM` monad, inducing 
 dependency. This mechanism allows us to register semantic term elaborators in
 `el : Option Expr → TermElabM Expr` as scoped `s : Syntax`, such that `elabTerm s = el`.
 -/
-def FixedTermElabRef : Type := FixedTermElabRefPointed.type
+structure FixedTermElabRef : Type where
+  private ref : FixedTermElabRefPointed.type
 
 instance : Nonempty FixedTermElabRef :=
-  by exact FixedTermElabRefPointed.property
+  ⟨⟨Classical.choice FixedTermElabRefPointed.property⟩⟩
 
 /-- Saved context for postponed terms and tactics to be executed. -/
 structure SavedContext where
@@ -241,7 +242,7 @@ instance : ToSnapshotTree TacticFinishedSnapshot where
 
 /-- Applies the given transformation to the `TacticFinishedSnapshot`. -/
 def TacticFinishedSnapshot.transform (s : TacticFinishedSnapshot) (trans : SnapshotTreeTransform) : TacticFinishedSnapshot :=
-  { s with moreSnaps := s.moreSnaps.map (·.map (sync := true) (·.transform trans)) }
+  { s with moreSnaps := s.moreSnaps.map (·.map (sync := true) (·.transform.run trans |>.run)) }
 
 /-- Snapshot just before execution of a tactic. -/
 structure TacticParsedSnapshotInner (α : Type) extends Language.Snapshot where
@@ -272,7 +273,7 @@ Pushes the transformation inwards by one level, allowing transformation-correct 
 -/
 def TacticParsedSnapshot.applyTransform (s : TacticParsedSnapshot) :
     TacticParsedSnapshotInner TacticParsedSnapshot where
-  toSnapshot := s.transformed.raw.toSnapshot.transform s.transformed.transform
+  toSnapshot := s.transformed.raw.toSnapshot.transform.run s.transformed.transform |>.run
   stx := s.transformed.transform.transformSyntax s.transformed.raw.stx
   inner? := s.transformed.raw.inner?.map (·.map (sync := true) ({ transformed := ·.transformed.compose s.transformed.transform }))
   finished := s.transformed.raw.finished.map (sync := true) (·.transform s.transformed.transform)
@@ -378,7 +379,44 @@ structure Context where
   -/
   fixedTermElabs : Array FixedTermElabRef := #[]
 
-abbrev TermElabM := ReaderT Context $ StateRefT State MetaM
+newtype TermElabM (α : Type) where
+  toReaderT : ReaderT Context (StateRefT State MetaM) α
+
+/-
+Make the compiler generate specialized `pure`/`bind` so we do not have to optimize through the
+whole monad stack at every use site. May eventually be covered by `deriving`.
+-/
+@[always_inline]
+instance : Monad TermElabM :=
+  let i : Monad TermElabM := inferInstanceAs (Monad (ReaderT Context _))
+  { pure := i.pure, bind := i.bind }
+
+instance : MonadReaderOf Context TermElabM := inferInstanceAs (MonadReaderOf _ (ReaderT Context _))
+instance : MonadWithReaderOf Context TermElabM :=
+  inferInstanceAs (MonadWithReaderOf _ (ReaderT Context _))
+instance : MonadStateOf State TermElabM := inferInstanceAs (MonadStateOf _ (ReaderT Context _))
+instance : MonadLift (StateRefT State MetaM) TermElabM :=
+  inferInstanceAs (MonadLift _ (ReaderT Context _))
+instance : LawfulMonadLift (StateRefT State MetaM) TermElabM where
+  monadLift_pure _ := rfl
+  monadLift_bind _ _ := rfl
+instance : MonadFunctor (StateRefT State MetaM) TermElabM :=
+  inferInstanceAs (MonadFunctor _ (ReaderT Context _))
+instance : MonadControl (StateRefT State MetaM) TermElabM :=
+  inferInstanceAs (MonadControl _ (ReaderT Context _))
+instance : MonadFinally TermElabM := inferInstanceAs (MonadFinally (ReaderT Context _))
+instance : MonadAttach TermElabM := inferInstanceAs (MonadAttach (ReaderT Context _))
+instance : MonadExceptOf Exception TermElabM := inferInstanceAs (MonadExceptOf _ (ReaderT Context _))
+instance : MonadAlwaysExcept Exception TermElabM :=
+  inferInstanceAs (MonadAlwaysExcept _ (ReaderT Context _))
+instance : MonadRuntimeException TermElabM :=
+  inferInstanceAs (MonadRuntimeException (ReaderT Context _))
+instance : MonadRecDepth TermElabM := inferInstanceAs (MonadRecDepth (ReaderT Context _))
+instance : Alternative TermElabM := inferInstanceAs (Alternative (ReaderT Context _))
+
+instance : Inhabited (TermElabM α) where
+  default := throw default
+
 abbrev TermElab  := Syntax → Option Expr → TermElabM Expr
 
 @[deprecated "replace with a check of autoBoundImplicitContext" (since := "2025-11-11")]
@@ -401,18 +439,7 @@ unsafe def FixedTermElabRef.toFixedTermElabImpl (m : FixedTermElabRef) : FixedTe
 @[implemented_by FixedTermElabRef.toFixedTermElabImpl]
 opaque FixedTermElabRef.toFixedTermElab (m : FixedTermElabRef) : FixedTermElab
 
-/-
-Make the compiler generate specialized `pure`/`bind` so we do not have to optimize through the
-whole monad stack at every use site. May eventually be covered by `deriving`.
--/
-@[always_inline]
-instance : Monad TermElabM :=
-  let i : Monad TermElabM := inferInstance
-  { pure := i.pure, bind := i.bind }
-
 open Meta
-instance : Inhabited (TermElabM α) where
-  default := throw default
 
 protected def saveState : TermElabM SavedState :=
   return { «meta» := (← Meta.saveState), «elab» := (← get) }
@@ -560,7 +587,7 @@ def wrapAsyncAsSnapshot {α : Type} (act : α → TermElabM Unit) (cancelTk? : O
   let metaCtx ← readThe Meta.Context
   let metaSt ← getThe Meta.State
   Core.wrapAsyncAsSnapshot (cancelTk? := cancelTk?) (desc := desc) fun a =>
-    act a |>.run ctx |>.run' st |>.run' metaCtx metaSt
+    act a |>.toReaderT.run ctx |>.run' st |>.run' metaCtx metaSt
 
 abbrev TermElabResult (α : Type) := EStateM.Result Exception SavedState α
 
@@ -817,7 +844,7 @@ def liftLevelM (x : LevelElabM α) : TermElabM α := do
     ref := (← getRef),
     autoBoundImplicit := ctx.autoBoundImplicitContext.map (·.autoImplicitEnabled) |>.getD false
   }
-  match (x lvlCtx).run { ngen := ngen, mctx := mctx, levelNames := (← getLevelNames) } with
+  match (x.run lvlCtx).run { ngen := ngen, mctx := mctx, levelNames := (← getLevelNames) } with
   | .ok a newS  => setMCtx newS.mctx; setNGen newS.ngen; setLevelNames newS.levelNames; pure a
   | .error ex _ => throw ex
 
@@ -1035,7 +1062,7 @@ partial def forEachExprWithExposedLevelMVars (e : Expr) (f : Expr → TermElabM 
         | .const _ us    => (if head then id else withExpr e) <| us.forM (visitLevel · (← read))
         | .app ..        => withExpr e do e.withApp fun f args => do visit f true; args.forM visit
         | _              => pure ()
-  visit e |>.run e |>.run {}
+  visit e |>.run e |>.run
 
 /-- Ensure metavariables registered using `registerMVarErrorInfos` (and used in the given declaration) have been assigned. -/
 def ensureNoUnassignedMVars (decl : Declaration) : TermElabM Unit := do
@@ -2253,7 +2280,7 @@ def resolveId? (stx : Syntax) (kind := "term") (withInfo := false) : TermElabM (
   | _ => throwError "identifier expected"
 
 def TermElabM.run (x : TermElabM α) (ctx : Context := {}) (s : State := {}) : MetaM (α × State) :=
-  withConfig setElabConfig (x ctx |>.run s)
+  withConfig setElabConfig (x.toReaderT.run ctx |>.run s)
 
 @[inline] def TermElabM.run' (x : TermElabM α) (ctx : Context := {}) (s : State := {}) : MetaM α :=
   (·.1) <$> x.run ctx s

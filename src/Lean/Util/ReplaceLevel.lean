@@ -66,7 +66,7 @@ unsafe def initCache : State :=
     results := .replicate cacheSize.toNat default }
 
 unsafe def replaceUnsafe (f? : Level → Option Level) (e : Expr) : Expr :=
-  (replaceUnsafeM f? cacheSize e).run' initCache
+  (replaceUnsafeM f? cacheSize e).run' initCache |>.run
 
 end ReplaceLevelImpl
 

@@ -28,7 +28,7 @@ example : Id Unit := do
 example (arr : Array Nat) : Unit := Id.run do
   let mut abc := 0
   if 0 = 0 then
-    ()
+    pure ()
   for (i, j) in [(0, 0)] do
     let a : Nat := i + 2
     if h : arr.size ≤ 4 then

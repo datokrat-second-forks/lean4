@@ -30,18 +30,14 @@ A build key with some missing info.
 * Facet names are unqualified (they do not include the input target kind)
   and may also be ellided.
 -/
-@[expose]  -- for codegen
-public def PartialBuildKey := BuildKey
+public structure PartialBuildKey where
+  key : BuildKey
 
 namespace PartialBuildKey
 
-/-- Cast a `BuildKey` to a `PartialBuildKey`. -/
-@[inline] public def mk (key : BuildKey) : PartialBuildKey := key
-
 public instance : Coe BuildKey PartialBuildKey := ⟨mk⟩
 
-public instance : Repr PartialBuildKey :=
-  private_decl% (@id (Repr PartialBuildKey) (inferInstanceAs (Repr BuildKey)))
+public instance : Repr PartialBuildKey := ⟨(reprPrec ·.key)⟩
 
 public instance : Inhabited PartialBuildKey := ⟨mk <| .package .anonymous⟩
 
@@ -55,11 +51,12 @@ public def parse (s : String) : Except String PartialBuildKey := do
   match s.split ':' |>.toStringList with
   | target :: facets =>
     let target ← parseTarget target
-    facets.foldlM (init := target) fun target facet => do
+    let key ← facets.foldlM (init := target) fun target facet => do
       if facet.isEmpty then
         throw "ill-formed target: empty facet"
       else
         return .facet target (stringToLegalOrSimpleName facet)
+    return ⟨key⟩
   | [] =>
     -- ∀ str, length (str.splitOn sep) > 0
     unreachable!
@@ -101,13 +98,15 @@ where
       let target := stringToLegalOrSimpleName target.copy
       return .packageTarget pkg target
 
-public def toString : (self : PartialBuildKey) → String
-| .module m => s!"+{m}"
-| .package p => match (getPkgName p) with | .anonymous => "" | p => s!"@{p}"
-| .packageModule p m => match (getPkgName p) with | .anonymous => s!"+{m}" | p => s!"{p}/+{m}"
-| .packageTarget p t => match (getPkgName p) with | .anonymous => t.toString | p => s!"{p}/{t}"
-| .facet t f => if f.isAnonymous then toString t else s!"{toString t}:{f}"
+public def toString (self : PartialBuildKey) : String :=
+  go self.key
 where
+  go : BuildKey → String
+  | .module m => s!"+{m}"
+  | .package p => match (getPkgName p) with | .anonymous => "" | p => s!"@{p}"
+  | .packageModule p m => match (getPkgName p) with | .anonymous => s!"+{m}" | p => s!"{p}/+{m}"
+  | .packageTarget p t => match (getPkgName p) with | .anonymous => t.toString | p => s!"{p}/{t}"
+  | .facet t f => if f.isAnonymous then go t else s!"{go t}:{f}"
   /-- Utility for extracting a package's base name from its key name. -/
   getPkgName (p : Name) : Name :=
     match p with

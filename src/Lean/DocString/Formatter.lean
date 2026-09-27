@@ -211,7 +211,7 @@ def formatMetadata : Formatter := do
     visitAtom .anonymous
 
 def versoSyntaxToString (stx : Syntax) : String :=
-  versoSyntaxToString' stx |>.run 0 |>.run "" |>.2
+  versoSyntaxToString' stx |>.run 0 |>.run "" |>.run.2
 
 public def document.formatter : Formatter := concat do
   let stx ← getCur
