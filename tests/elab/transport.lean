@@ -123,6 +123,17 @@ instance : SMul Int Num := inferInstanceAs (SMul Int Int)
 
 example : (3 : Int) • Num.mk 2 = Num.mk 6 := rfl
 
+/-! One congruence covers both arguments of `SMul`: the scalar, the acted-on type, or both. -/
+
+newtype Scalar where
+  toInt : Int
+
+instance : SMul Scalar Int := inferInstanceAs (SMul Int Int)
+instance : SMul Scalar Num := inferInstanceAs (SMul Int Int)
+
+example : Scalar.mk 3 • (2 : Int) = 6 := rfl
+example : Scalar.mk 3 • Num.mk 2 = Num.mk 6 := rfl
+
 /-!
 Families of equivalences: a congruence for a class on a type constructor takes `∀ α, Lean.CanonicalEquivalence (m α) (n α)`,
 which is solved under the binder.
