@@ -35,18 +35,19 @@ section Test
 set_option maxHeartbeats 1000 -- for the health of the machine
 
 structure MyChar where
-  val : UInt32
+  val : Nat
 
 def MyChar.toUpper (c : MyChar) : MyChar :=
-  if 97 ≤ c.val ∧ c.val ≤ 122 then ⟨c.val + (65 - 97)⟩ else c
+  if 97 ≤ c.val ∧ c.val ≤ 122 then ⟨(c.val + 4294967264) % 4294967296⟩ else c
 
 def MyChar.isLower (c : MyChar) : Bool :=
   if 97 ≤ c.val ∧ c.val ≤ 122 then true else false
 
 /-!
-After `split`, the instance of the `if` from `isLower` is `instDecidableAnd (UInt32.decLe 97 {val := c.val + (65 - 97)}.val) ..`.
-`grind` normalizes the condition to `97 ≤ c.val + 4294967264 ∧ ..` and wraps the instance with the
-projection reduced, so the kernel has to check the two instances against each other.
+After `split`, the instance of the `if` from `isLower` is
+`instDecidableAnd (Nat.decLe 97 {val := (c.val + 4294967264) % 4294967296}.val) ..`.
+`grind` reduces the projections, both in the condition and in the instance it wraps, so the kernel
+has to check the two instances against each other.
 -/
 theorem MyChar.isLower_toUpper (c : MyChar) : c.toUpper.isLower = false := by
   unfold MyChar.isLower MyChar.toUpper
