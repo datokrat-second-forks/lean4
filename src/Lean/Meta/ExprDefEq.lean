@@ -208,9 +208,9 @@ where
 `isDefEqEtaStruct` for `newtype`s: reduces `a =?= N.mk params arg` to `N.proj params a =?= arg`,
 unless `a` is an `N.mk` application as well, which `isDefEqArgs` handles.
 -/
-private def isDefEqVirtualEtaStruct (a b : Expr) : MetaM Bool := do
+@[inline] private def isDefEqVirtualEtaStruct (a b : Expr) : MetaM Bool := do
   let .const ctorName us := b.getAppFn | return false
-  let some info ← getVirtualCtorInfo? ctorName | return false
+  let some info := (← getEnv).getVirtualCtorInfo? ctorName | return false
   unless ← useEtaStruct info.typeName do return false
   unless b.getAppNumArgs == info.numParams + 1 do return false
   if a.getAppFn.isConstOf ctorName then return false
@@ -1563,7 +1563,7 @@ private def isDeltaCandidate? (t : Expr) : MetaM (Option ConstantInfo) := do
     if let some info ← getUnfoldableConst? c then return some info
     -- A `newtype` projector is `@[irreducible]`, but `unfoldDefinition?` still reduces it on a
     -- constructor application, just as it unfolds a real structure's projection function.
-    if (← getVirtualProjInfo? c).isSome then return (← getEnv).find? c
+    if ((← getEnv).getVirtualProjInfo? c).isSome then return (← getEnv).find? c
     return none
   | _ => pure none
 
@@ -2439,9 +2439,9 @@ the form `projName params w` we prefer `?m ... =?= w`. A real structure's projec
 `isDefEqApp` have had their turn; hence the call site below and the check declining an application
 of the same projector, which `isDefEqApp` solves first-order.
 -/
-private def isDefEqVirtualProj (t v : Expr) : MetaM Bool := do
+@[inline] private def isDefEqVirtualProj (t v : Expr) : MetaM Bool := do
   let .const projName us := t.getAppFn | return false
-  let some info ← getVirtualProjInfo? projName | return false
+  let some info := (← getEnv).getVirtualProjInfo? projName | return false
   -- As in `isDefEqProj.isDefEqSingleton`, see issue #2011.
   if isClass (← getEnv) info.typeName then return false
   unless t.getAppNumArgs == info.numParams + 1 do return false

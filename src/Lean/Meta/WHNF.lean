@@ -372,7 +372,7 @@ mutual
                 return mvarId
             return none
           -- `newtype` projectors behave like `.proj` nodes, which are stuck iff their major is.
-          else if let some projInfo ← getVirtualProjInfo? fName then
+          else if let some projInfo := (← getEnv).getVirtualProjInfo? fName then
             if let some major := args[projInfo.numParams]? then
               getStuckMVar? (← whnf major)
             else
@@ -565,9 +565,9 @@ Reduces `N.proj (N.mk a)` to `a` for a `newtype` `N`, like `reduceProj?` for a s
 regardless of the irreducibility of `N.mk` and `N.proj`. `whnfMajor` puts the major premise in
 normal form; callers honoring `Meta.Config.proj` pass the reducer that `.proj` mode selects.
 -/
-def reduceVirtualProjCore? (e : Expr) (whnfMajor : Expr → MetaM Expr) : MetaM (Option Expr) := do
+@[inline] def reduceVirtualProjCore? (e : Expr) (whnfMajor : Expr → MetaM Expr) : MetaM (Option Expr) := do
   let .const projName _ := e.getAppFn | return none
-  let some projInfo ← getVirtualProjInfo? projName | return none
+  let some projInfo := (← getEnv).getVirtualProjInfo? projName | return none
   let args := e.getAppArgs
   let some majorArg := args[projInfo.numParams]? | return none
   let major ← whnfMajor majorArg
@@ -578,7 +578,7 @@ def reduceVirtualProjCore? (e : Expr) (whnfMajor : Expr → MetaM Expr) : MetaM 
   return some (mkAppN major.appArg! (args.extract (projInfo.numParams + 1)))
 
 /-- `reduceVirtualProjCore?` with the major premise reduced by `whnf`, mirroring `project?`. -/
-def reduceVirtualProj? (e : Expr) : MetaM (Option Expr) :=
+@[inline] def reduceVirtualProj? (e : Expr) : MetaM (Option Expr) :=
   reduceVirtualProjCore? e whnf
 
 /--
@@ -875,7 +875,7 @@ an ordinary definition, so `whnf` unfolds it and then reduces the resulting `.pr
 to `Meta.Config.proj`. A `newtype` projector is `@[irreducible]` and has no `.proj` node, so both
 steps happen here at once, with the major premise reduced the way `Meta.Config.proj` prescribes.
 -/
-def reduceVirtualProjWithDelta? (e : Expr) : MetaM (Option Expr) := do
+@[inline] def reduceVirtualProjWithDelta? (e : Expr) : MetaM (Option Expr) := do
   match (← getConfig).proj with
   | .no            => return none
   | .yes           => reduceVirtualProjCore? e whnfCore
