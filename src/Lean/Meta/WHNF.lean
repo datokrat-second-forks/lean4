@@ -683,11 +683,6 @@ where
           go eNew
         else
           let e := if f == f' then e else e.updateFn f'
-          -- Gated like `.proj` nodes. As for projection functions, the delta-level counterpart
-          -- lives in `unfoldDefinition?`.
-          unless cfg.proj matches .no do
-            if let some eNew ← reduceVirtualProjCore? e go then
-              return ← go eNew
           unless cfg.iota do return e
           match (← reduceMatcher? e) with
           | .reduced eNew => go eNew
@@ -870,9 +865,9 @@ private def unfoldDefault (fInfo : ConstantInfo) (us : List Level) (e : Expr) : 
     return none
 
 /--
-Delta-level counterpart of the `whnfCore` virtual projection step: a real projection *function* is
-an ordinary definition, so `whnf` unfolds it and then reduces the resulting `.proj` node according
-to `Meta.Config.proj`. A `newtype` projector is `@[irreducible]` and has no `.proj` node, so both
+Unfolds a `newtype` projector the way `whnf` unfolds a projection function: a real projection
+*function* is an ordinary definition, so `whnf` unfolds it and then reduces the resulting `.proj`
+node according to `Meta.Config.proj`. A `newtype` projector is `@[irreducible]` and has no `.proj` node, so both
 steps happen here at once, with the major premise reduced the way `Meta.Config.proj` prescribes.
 -/
 @[inline] def reduceVirtualProjWithDelta? (e : Expr) : MetaM (Option Expr) := do
