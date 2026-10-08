@@ -1690,7 +1690,7 @@ def addEntry {α β σ : Type} (ext : PersistentEnvExtension α β σ) (env : En
     { s with state := state }
 
 /-- Get the current state of the given extension in the given environment. -/
-def getState {α β σ : Type} [Inhabited σ] (ext : PersistentEnvExtension α β σ) (env : Environment)
+@[inline] def getState {α β σ : Type} [Inhabited σ] (ext : PersistentEnvExtension α β σ) (env : Environment)
     (asyncMode := ext.toEnvExtension.asyncMode) (asyncDecl : Name := .anonymous) : σ :=
   (ext.toEnvExtension.getState (asyncMode := asyncMode) (asyncDecl := asyncDecl) env).state
 

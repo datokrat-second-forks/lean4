@@ -71,7 +71,7 @@ def getEntries {α σ : Type} [Inhabited σ] (ext : SimplePersistentEnvExtension
   (PersistentEnvExtension.getState (asyncMode := asyncMode) ext env).1
 
 /-- Get the current state of the given `SimplePersistentEnvExtension`. -/
-def getState {α σ : Type} [Inhabited σ] (ext : SimplePersistentEnvExtension α σ) (env : Environment)
+@[inline] def getState {α σ : Type} [Inhabited σ] (ext : SimplePersistentEnvExtension α σ) (env : Environment)
     (asyncMode := ext.toEnvExtension.asyncMode) (asyncDecl : Name := .anonymous) : σ :=
   (PersistentEnvExtension.getState (asyncMode := asyncMode) (asyncDecl := asyncDecl) ext env).2
 
