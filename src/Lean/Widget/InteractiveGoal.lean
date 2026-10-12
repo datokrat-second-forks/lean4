@@ -95,7 +95,7 @@ def InteractiveGoalCore.pretty (g : InteractiveGoalCore) (userName? : Option Str
       | none =>
         ret := ret ++ Format.group f!"{names} :{Format.nest indent (Format.line ++ hyp.type.stripTags)}"
   ret := addLine ret
-  ret ++ f!"{goalPrefix}{Format.nest indent g.type.stripTags}"
+  return ret ++ f!"{goalPrefix}{Format.nest indent g.type.stripTags}"
 where
   addLine (fmt : Format) : Format :=
     if fmt.isNil then fmt else fmt ++ Format.line
@@ -152,7 +152,7 @@ def withGoalCtx (goal : MVarId) (action : LocalContext → MetavarDecl → n α)
   let mctx ← getMCtx
   let some mvarDecl := mctx.findDecl? goal
     | throwError "unknown goal {goal.name}"
-  let lctx := mvarDecl.lctx |>.sanitizeNames.run' {options := (← getOptions)}
+  let lctx := mvarDecl.lctx |>.sanitizeNames.run' {options := (← getOptions)} |>.run
   withLCtx lctx mvarDecl.localInstances (action lctx mvarDecl)
 
 open Meta in

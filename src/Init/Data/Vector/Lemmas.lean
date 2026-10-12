@@ -540,7 +540,7 @@ theorem toArray_toList {xs : Vector α n} : xs.toList.toArray = xs.toArray := rf
 
 @[simp, grind =] theorem foldl_toList (f : β → α → β) {init : β} {xs : Vector α n} :
     xs.toList.foldl f init = xs.foldl f init :=
-  List.foldl_eq_foldlM .. ▸ foldlM_toList ..
+  List.foldl_eq_foldlM .. ▸ congrArg Id.run foldlM_toList
 
 @[simp, grind =] theorem foldrM_toList [Monad m]
     {f : α → β → m β} {init : β} {xs : Vector α n} :
@@ -549,7 +549,7 @@ theorem toArray_toList {xs : Vector α n} : xs.toList.toArray = xs.toArray := rf
 
 @[simp, grind =] theorem foldr_toList (f : α → β → β) {init : β} {xs : Vector α n} :
     xs.toList.foldr f init = xs.foldr f init :=
-  List.foldr_eq_foldrM .. ▸ foldrM_toList ..
+  List.foldr_eq_foldrM .. ▸ congrArg Id.run foldrM_toList
 
 @[simp, grind =] theorem toList_mk : (Vector.mk xs h).toList = xs.toList := rfl
 
@@ -2461,10 +2461,10 @@ theorem foldr_map_hom {g : α → β} {f : α → α → α} {f' : β → β →
   simp
 
 @[simp, grind _=_] theorem foldl_append {β : Type _} {f : β → α → β} {b} {xs : Vector α n} {ys : Vector α k} :
-    (xs ++ ys).foldl f b = ys.foldl f (xs.foldl f b) := foldlM_append
+    (xs ++ ys).foldl f b = ys.foldl f (xs.foldl f b) := congrArg Id.run foldlM_append
 
 @[simp, grind _=_] theorem foldr_append {f : α → β → β} {b} {xs : Vector α n} {ys : Vector α k} :
-    (xs ++ ys).foldr f b = xs.foldr f (ys.foldr f b) := foldrM_append
+    (xs ++ ys).foldr f b = xs.foldr f (ys.foldr f b) := congrArg Id.run foldrM_append
 
 @[simp, grind =] theorem foldl_flatten {f : β → α → β} {b} {xss : Vector (Vector α m) n} :
     (flatten xss).foldl f b = xss.foldl (fun b xs => xs.foldl f b) b := by
@@ -2478,7 +2478,7 @@ theorem foldr_map_hom {g : α → β} {f : α → α → α} {f' : β → β →
 
 @[simp, grind =] theorem foldl_reverse {xs : Vector α n} {f : β → α → β} {b} :
     xs.reverse.foldl f b = xs.foldr (fun x y => f y x) b :=
-  foldlM_reverse
+  congrArg Id.run foldlM_reverse
 
 @[simp, grind =] theorem foldr_reverse {xs : Vector α n} {f : α → β → β} {b} :
     xs.reverse.foldr f b = xs.foldl (fun x y => f y x) b :=
@@ -2830,7 +2830,7 @@ theorem any_eq_not_all_not {xs : Vector α n} {p : α → Bool} : xs.any p = !xs
     {xs ys : Vector α n} (w : xs = ys) {p q : α → Bool} (h : ∀ a, p a = q a) :
     xs.any p = ys.any q := by
   unfold any
-  apply anyM_congr w h
+  exact congrArg Id.run (anyM_congr w (fun a => by rw [h]))
 
 @[congr] theorem allM_congr [Monad m]
     {xs ys : Vector α n} (w : xs = ys) {p q : α → m Bool} (h : ∀ a, p a = q a) :
@@ -2844,7 +2844,7 @@ theorem any_eq_not_all_not {xs : Vector α n} {p : α → Bool} : xs.any p = !xs
     {xs ys : Vector α n} (w : xs = ys) {p q : α → Bool} (h : ∀ a, p a = q a) :
     xs.all p = ys.all q := by
   unfold all
-  apply allM_congr w h
+  exact congrArg Id.run (allM_congr w (fun a => by rw [h]))
 
 @[simp, grind =] theorem any_flatten {xss : Vector (Vector α n) m} : xss.flatten.any f = xss.any (any · f) := by
   cases xss using vector₂_induction

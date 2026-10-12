@@ -155,8 +155,8 @@ private partial def insertAux [BEq α] (keys : Array Key) (v : α) : Nat → Tri
       let k := keys[i]
       let c := Id.run $ cs.binInsertM
           (fun a b => a.1 < b.1)
-          (fun ⟨_, s⟩ => let c := insertAux keys v (i+1) s; (k, c)) -- merge with existing
-          (fun _ => let c := createNodes keys v (i+1); (k, c))
+          (fun ⟨_, s⟩ => let c := insertAux keys v (i+1) s; pure (k, c)) -- merge with existing
+          (fun _ => let c := createNodes keys v (i+1); pure (k, c))
           (k, default)
       .node vs c
     else

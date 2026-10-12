@@ -72,19 +72,19 @@ partial def reifyRing? (e : Expr) (skipVar : Bool := true) : m (Option RingExpr)
     | HSub.hSub _ _ _ i a b =>
       if (← isSubInst i) then return .sub (← go a) (← go b) else asVar e
     | HPow.hPow _ _ _ i a b =>
-      let some k := Sym.getNatValue? b |>.run | toVar e
+      let some k := Sym.getNatValue? b | toVar e
       if (← isPowInst i) then return .pow (← go a) k else asVar e
     | Neg.neg _ i a =>
       if (← isNegInst i) then return .neg (← go a) else asVar e
     | IntCast.intCast _ i a =>
       if (← isIntCastInst i) then
-        let some k := Sym.getIntValue? a |>.run | toVar e
+        let some k := Sym.getIntValue? a | toVar e
         return .intCast k
       else
         asVar e
     | NatCast.natCast _ i a =>
       if (← isNatCastInst i) then
-        let some k := Sym.getNatValue? a |>.run | toVar e
+        let some k := Sym.getNatValue? a | toVar e
         return .natCast k
       else
         asVar e
@@ -117,19 +117,19 @@ partial def reifyRing? (e : Expr) (skipVar : Bool := true) : m (Option RingExpr)
   | HSub.hSub _ _ _ i a b =>
     if (← isSubInst i) then return some (.sub (← go a) (← go b)) else asTopVar e
   | HPow.hPow _ _ _ i a b =>
-    let some k := Sym.getNatValue? b |>.run | asTopVar e
+    let some k := Sym.getNatValue? b | asTopVar e
     if (← isPowInst i) then return some (.pow (← go a) k) else asTopVar e
   | Neg.neg _ i a =>
     if (← isNegInst i) then return some (.neg (← go a)) else asTopVar e
   | IntCast.intCast _ i a =>
     if (← isIntCastInst i) then
-      let some k := Sym.getIntValue? a |>.run | toTopVar e
+      let some k := Sym.getIntValue? a | toTopVar e
       return some (.intCast k)
     else
       asTopVar e
   | NatCast.natCast _ i a =>
     if (← isNatCastInst i) then
-      let some k := Sym.getNatValue? a |>.run | toTopVar e
+      let some k := Sym.getNatValue? a | toTopVar e
       return some (.natCast k)
     else
       asTopVar e
@@ -164,11 +164,11 @@ partial def reifySemiring? (e : Expr) : m (Option SemiringExpr) := do
     | HMul.hMul _ _ _ i a b =>
       if isSameExpr (← getMulFn').appArg! i then return .mul (← go a) (← go b) else asVar e
     | HPow.hPow _ _ _ i a b =>
-      let some k := Sym.getNatValue? b |>.run | toVar e
+      let some k := Sym.getNatValue? b | toVar e
       if isSameExpr (← getPowFn').appArg! i then return .pow (← go a) k else asVar e
     | NatCast.natCast _ i a =>
       if isSameExpr (← getNatCastFn').appArg! i then
-        let some k := Sym.getNatValue? a |>.run | toVar e
+        let some k := Sym.getNatValue? a | toVar e
         return .num k
       else
         asVar e
@@ -187,11 +187,11 @@ partial def reifySemiring? (e : Expr) : m (Option SemiringExpr) := do
   | HMul.hMul _ _ _ i a b =>
     if isSameExpr (← getMulFn').appArg! i then return some (.mul (← go a) (← go b)) else asTopVar e
   | HPow.hPow _ _ _ i a b =>
-    let some k := Sym.getNatValue? b |>.run | return none
+    let some k := Sym.getNatValue? b | return none
     if isSameExpr (← getPowFn').appArg! i then return some (.pow (← go a) k) else asTopVar e
   | NatCast.natCast _ i a =>
     if isSameExpr (← getNatCastFn').appArg! i then
-      let some k := Sym.getNatValue? a |>.run | toTopVar e
+      let some k := Sym.getNatValue? a | toTopVar e
       return some (.num k)
     else
       asTopVar e

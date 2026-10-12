@@ -34,7 +34,7 @@ def Offset.inc : Offset → Nat → Offset
   | .add e k, k' => .add e (k+k')
 
 -- **Note**: This function assumes `e` is a `Nat`, and instances were not overloaded.
-private partial def evalNat? (e : Expr) : OptionT Id Nat :=
+private partial def evalNat? (e : Expr) : Option Nat :=
   match e with
   | .lit (.natVal n)     => some n
   | .mdata _ e           => evalNat? e
@@ -62,7 +62,7 @@ Returns `some offset` if `e` is an offset term. That is, it is of the form
 
 Assumption: standard instances are used for `OfNat Nat n` and `HAdd Nat Nat Nat`
 -/
-partial def isOffset? (e : Expr) : OptionT Id Offset :=
+partial def isOffset? (e : Expr) : Option Offset :=
   match_expr e with
   | Nat.succ a => do
     return get a |>.inc 1
@@ -76,7 +76,7 @@ where
     isOffset? e |>.getD (.add e 0)
 
 /-- Variant of `isOffset?` that first checks if `declName` is `Nat.succ` or `HAdd.hAdd`. -/
-def isOffset?' (declName : Name) (p : Expr) : OptionT Id Offset := do
+def isOffset?' (declName : Name) (p : Expr) : Option Offset := do
   guard (declName == ``Nat.succ || declName == ``HAdd.hAdd)
   isOffset? p
 
@@ -104,11 +104,11 @@ partial def toOffset (e : Expr) : Offset :=
   match_expr e with
   | Nat.succ a => toOffset a |>.inc 1
   | HAdd.hAdd _ _ _ _ a b => Id.run do
-    let some n := getNatValue? b | .add e 0
-    toOffset a |>.inc n
+    let some n := getNatValue? b | return .add e 0
+    return toOffset a |>.inc n
   | OfNat.ofNat _ n _ => Id.run do
-    let .lit (.natVal n) := n | .add e 0
-    .num n
+    let .lit (.natVal n) := n | return .add e 0
+    return .num n
   | _ => .add e 0
 
 private def isNatExpr (e : Expr) : Bool :=

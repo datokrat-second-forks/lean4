@@ -19,9 +19,9 @@ namespace Parser
 namespace Command
 
 open Lean.Parser in
-def versoCommentBodyFn : ParserFn := fun c s =>
+def versoCommentBodyFn : ParserFn := .mk fun c s =>
   let startPos := s.pos
-  let s := finishCommentBlock (pushMissingOnError := true) 1 c s
+  let s := (finishCommentBlock (pushMissingOnError := true) 1).toFn c s
   if !s.hasError then
     let iniSz := s.stackSize
     let commentEndPos := s.pos
@@ -29,7 +29,7 @@ def versoCommentBodyFn : ParserFn := fun c s =>
     let endPos := if endPos ≤ c.inputString.rawEndPos then endPos else c.inputString.rawEndPos
     let c' := c.setEndPos endPos (by unfold endPos; split <;> simp [*])
     let blockCtxt := Doc.Parser.BlockCtxt.forDocString c.fileMap startPos endPos
-    let s := Doc.Parser.document blockCtxt c' (s.setPos startPos)
+    let s := (Doc.Parser.document blockCtxt).toFn c' (s.setPos startPos)
     let s :=
       if !s.allErrors.isEmpty || !c'.atEnd s.pos then
         -- Docstring parsing must always succeed, or else later error messages are atrocious! Syntax
@@ -47,11 +47,11 @@ def versoCommentBodyFn : ParserFn := fun c s =>
         let s := s.mkNode `Lean.Doc.Syntax.parseFailure iniSz
         {s with recoveredErrors := #[]}
       else s
-    rawFn (Doc.Parser.ignoreFn <| chFn '-' >> chFn '/') (trailingWs := true) c s
+    (rawFn (Doc.Parser.ignoreFn <| chFn '-' >> chFn '/') (trailingWs := true)).toFn c s
   else s
 
 def versoCommentBody : Parser where
-  fn := fun c s => nodeFn `Lean.Parser.Command.versoCommentBody versoCommentBodyFn c s
+  fn := nodeFn `Lean.Parser.Command.versoCommentBody versoCommentBodyFn
 
 
 @[combinator_parenthesizer versoCommentBody, expose]

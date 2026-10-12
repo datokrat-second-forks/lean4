@@ -115,7 +115,7 @@ public def LakefileConfig.loadFromEnv
   let _ ← targetDecls.foldlM (init := ({} : Lean.NameMap Name)) fun exeRoots decl => do
     if let some exeConfig := decl.config? LeanExe.configKind then
       let root := exeConfig.root
-      if let some origExe := exeRoots.get? root then
+      if let some origExe := exeRoots.find? root then
         error s!"{prettyName}: executable '{decl.name}' has the same root module '{root}' \
           as executable '{origExe}'"
       else
@@ -130,7 +130,7 @@ public def LakefileConfig.loadFromEnv
     let fn ← IO.ofExcept <| evalConstCheck env opts ScriptFn scriptName
     return {name, fn, doc? := ← findDocString? env scriptName : Script}
   let defaultScripts ← defaultScriptAttr.getAllEntries env |>.mapM fun name =>
-    if let some script := scripts.get? name then pure script else
+    if let some script := scripts.find? name then pure script else
       error s!"{prettyName}: package is missing script '{name}' marked as a default"
   let postUpdateHooks ← postUpdateAttr.getAllEntries env |>.mapM fun name =>
     match evalConstCheck env opts PostUpdateHookDecl name with

@@ -35,11 +35,11 @@ where
   go (body : Expr) (m : Nat) (i : Nat) : Expr := Id.run do
     match m with
     | 0 =>
-      if hasLooseBVarsInRange body n then default
-      else body.lowerLooseBVars n n
+      if hasLooseBVarsInRange body n then return default
+      else return body.lowerLooseBVars n n
     | m+1 =>
-      let .app f (.bvar j) := body | default
-      if j == i then go f m (i+1) else default
+      let .app f (.bvar j) := body | return default
+      if j == i then return go f m (i+1) else return default
 
 /--
 If `e` is of the form `(fun x₁ ... xₙ => f x₁ ... xₙ)` and `f` does not contain `x₁`, ..., `xₙ`,

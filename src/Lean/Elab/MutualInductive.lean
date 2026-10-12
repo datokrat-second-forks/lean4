@@ -149,7 +149,7 @@ structure InductiveElabStep2 where
   /-- Step to do final term elaboration error reporting, done immediately after universe levels are fully elaborated, but before the final level checks. -/
   finalizeTermElab : TermElabM Unit := pure ()
   /-- Like `finalize`, but occurs before `afterTypeChecking` attributes. -/
-  prefinalize (levelParams : List Name) (params : Array Expr) (replaceIndFVars : Expr → MetaM Expr) : TermElabM InductiveElabStep3 := fun _ _ _ => pure {}
+  prefinalize (levelParams : List Name) (params : Array Expr) (replaceIndFVars : Expr → MetaM Expr) : TermElabM InductiveElabStep3 := pure {}
   deriving Inhabited
 
 /-- An intermediate step for mutual inductive elaboration. See `InductiveElabDescr`. -/
@@ -867,7 +867,7 @@ private def accLevelAtCtor (ctorParam : Expr) (r : Level) (rOffset : Nat) (typeL
     StateT AccLevelState TermElabM Unit := do
   let type ← inferType ctorParam
   let u ← instantiateLevelMVars (← getLevel type)
-  match (← modifyGet fun s => accLevel u r rOffset typeLMVarIds |>.run |>.run s) with
+  match (← modifyGet fun s => accLevel u r rOffset typeLMVarIds |>.run |>.run s |>.run) with
   | .ok _ => pure ()
   | .error msg =>
     throwError "Failed to infer universe level for resulting type due to the constructor argument `{ctorParam}`: {msg}"

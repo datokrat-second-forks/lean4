@@ -209,15 +209,38 @@ class MonadRecDepth (m : Type → Type) where
   getMaxRecDepth   : m Nat
 
 instance [MonadRecDepth m] : MonadRecDepth (ReaderT ρ m) where
-  withRecDepth d x := fun ctx => MonadRecDepth.withRecDepth d (x ctx)
-  getRecDepth      := fun _ => MonadRecDepth.getRecDepth
-  getMaxRecDepth   := fun _ => MonadRecDepth.getMaxRecDepth
+  withRecDepth d x := .mk fun ctx => MonadRecDepth.withRecDepth d (x.run ctx)
+  getRecDepth      := .mk fun _ => MonadRecDepth.getRecDepth
+  getMaxRecDepth   := .mk fun _ => MonadRecDepth.getMaxRecDepth
 
 instance [Monad m] [MonadRecDepth m] : MonadRecDepth (StateRefT' ω σ m) :=
   inferInstanceAs (MonadRecDepth (ReaderT _ _))
 
-instance [BEq α] [Hashable α] [Monad m] [STWorld ω m] [MonadRecDepth m] : MonadRecDepth (MonadCacheT α β m) :=
-  inferInstanceAs (MonadRecDepth (StateRefT' _ _ _))
+section
+variable {m n : Type → Type} (e : ∀ α, Lean.CanonicalEquivalence (m α) (n α))
+
+protected abbrev MonadRecDepth.ofEquiv (i : MonadRecDepth n) : MonadRecDepth m where
+  withRecDepth d x := (e _).invFun (i.withRecDepth d ((e _).toFun x))
+  getRecDepth := (e _).invFun i.getRecDepth
+  getMaxRecDepth := (e _).invFun i.getMaxRecDepth
+
+@[transport] protected abbrev MonadRecDepth.canonicalCongr :
+    Lean.CanonicalEquivalence (MonadRecDepth m) (MonadRecDepth n) where
+  toFun := MonadRecDepth.ofEquiv fun α => (e α).symm
+  invFun := MonadRecDepth.ofEquiv e
+  left_inv i :=
+    show MonadRecDepth.ofEquiv (fun α => (e α).trans (e α).symm) i = i from
+      congrArg (MonadRecDepth.ofEquiv · i) (funext fun α => (e α).trans_symm)
+  right_inv i :=
+    show MonadRecDepth.ofEquiv (fun α => (e α).symm.trans (e α)) i = i from
+      congrArg (MonadRecDepth.ofEquiv · i) (funext fun α => (e α).symm_trans)
+
+end
+
+instance [BEq α] [Hashable α] [Monad m] [STWorld ω m] [MonadRecDepth m] : MonadRecDepth (MonadCacheT α β m) where
+  withRecDepth d x := .mk (MonadRecDepth.withRecDepth d x.toStateRefT)
+  getRecDepth      := .mk MonadRecDepth.getRecDepth
+  getMaxRecDepth   := .mk MonadRecDepth.getMaxRecDepth
 
 /--
 Throw a "maximum recursion depth has been reached" exception using the given reference syntax.

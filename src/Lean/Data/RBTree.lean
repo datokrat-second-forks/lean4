@@ -14,14 +14,14 @@ public section
 namespace Lean
 universe u v w
 
-@[expose] def RBTree (α : Type u) (cmp : α → α → Ordering) : Type u :=
-  RBMap α Unit cmp
+structure RBTree (α : Type u) (cmp : α → α → Ordering) : Type u where
+  toRBMap : RBMap α Unit cmp
 
 instance : Inhabited (RBTree α p) where
-  default := RBMap.empty
+  default := ⟨RBMap.empty⟩
 
 @[inline] def mkRBTree (α : Type u) (cmp : α → α → Ordering) : RBTree α cmp :=
-  mkRBMap α Unit cmp
+  ⟨mkRBMap α Unit cmp⟩
 
 instance (α : Type u) (cmp : α → α → Ordering) : EmptyCollection (RBTree α cmp) :=
   ⟨mkRBTree α cmp⟩
@@ -30,31 +30,31 @@ namespace RBTree
 variable {α : Type u} {β : Type v} {cmp : α → α → Ordering}
 
 @[inline] def empty : RBTree α cmp :=
-  RBMap.empty
+  ⟨RBMap.empty⟩
 
 @[inline] def depth (f : Nat → Nat → Nat) (t : RBTree α cmp) : Nat :=
-  RBMap.depth f t
+  RBMap.depth f t.toRBMap
 
 @[inline] def fold (f : β → α → β) (init : β) (t : RBTree α cmp) : β :=
-  RBMap.fold (fun r a _ => f r a) init t
+  RBMap.fold (fun r a _ => f r a) init t.toRBMap
 
 @[inline] def revFold (f : β → α → β) (init : β) (t : RBTree α cmp) : β :=
-  RBMap.revFold (fun r a _ => f r a) init t
+  RBMap.revFold (fun r a _ => f r a) init t.toRBMap
 
 @[inline] def foldM {m : Type v → Type w} [Monad m] (f : β → α → m β) (init : β) (t : RBTree α cmp) : m β :=
-  RBMap.foldM (fun r a _ => f r a) init t
+  RBMap.foldM (fun r a _ => f r a) init t.toRBMap
 
 @[inline] def forM {m : Type v → Type w} [Monad m] (f : α → m PUnit) (t : RBTree α cmp) : m PUnit :=
   t.foldM (fun _ a => f a) ⟨⟩
 
 @[inline] protected def forIn [Monad m] (t : RBTree α cmp) (init : σ) (f : α → σ → m (ForInStep σ)) : m σ :=
-  t.val.forIn init (fun a _ acc => f a acc)
+  t.toRBMap.val.forIn init (fun a _ acc => f a acc)
 
 instance [Monad m] : ForIn m (RBTree α cmp) α where
   forIn := RBTree.forIn
 
 @[inline] def isEmpty (t : RBTree α cmp) : Bool :=
-  RBMap.isEmpty t
+  RBMap.isEmpty t.toRBMap
 
 @[specialize] def toList (t : RBTree α cmp) : List α :=
   t.revFold (fun as a => a::as) []
@@ -63,12 +63,12 @@ instance [Monad m] : ForIn m (RBTree α cmp) α where
   t.fold (fun as a => as.push a) #[]
 
 @[inline] protected def min (t : RBTree α cmp) : Option α :=
-  match RBMap.min t with
+  match RBMap.min t.toRBMap with
   | some ⟨a, _⟩ => some a
   | none        => none
 
 @[inline] protected def max (t : RBTree α cmp) : Option α :=
-  match RBMap.max t with
+  match RBMap.max t.toRBMap with
   | some ⟨a, _⟩ => some a
   | none        => none
 
@@ -76,17 +76,17 @@ instance [Repr α] : Repr (RBTree α cmp) where
   reprPrec t prec := Repr.addAppParen ("Lean.rbtreeOf " ++ repr t.toList) prec
 
 @[inline] def insert (t : RBTree α cmp) (a : α) : RBTree α cmp :=
-  RBMap.insert t a ()
+  ⟨RBMap.insert t.toRBMap a ()⟩
 
 @[inline] def erase (t : RBTree α cmp) (a : α) : RBTree α cmp :=
-  RBMap.erase t a
+  ⟨RBMap.erase t.toRBMap a⟩
 
 @[specialize] def ofList : List α → RBTree α cmp
   | []    => mkRBTree ..
   | x::xs => (ofList xs).insert x
 
 @[inline] def find? (t : RBTree α cmp) (a : α) : Option α :=
-  match RBMap.findCore? t a with
+  match RBMap.findCore? t.toRBMap a with
   | some ⟨a, _⟩ => some a
   | none        => none
 
@@ -100,10 +100,10 @@ def fromArray (l : Array α) (cmp : α → α → Ordering) : RBTree α cmp :=
   l.foldl insert (mkRBTree α cmp)
 
 @[inline] def all (t : RBTree α cmp) (p : α → Bool) : Bool :=
-  RBMap.all t (fun a _ => p a)
+  RBMap.all t.toRBMap (fun a _ => p a)
 
 @[inline] def any (t : RBTree α cmp) (p : α → Bool) : Bool :=
-  RBMap.any t (fun a _ => p a)
+  RBMap.any t.toRBMap (fun a _ => p a)
 
 def subset (t₁ t₂ : RBTree α cmp) : Bool :=
   t₁.all fun a => (t₂.find? a).isSome
@@ -125,7 +125,7 @@ def diff (t₁ t₂ : RBTree α cmp) : RBTree α cmp :=
 `x` in `m` where `f x` returns `true`.
 -/
 def filter (f : α → Bool) (m : RBTree α cmp) : RBTree α cmp :=
-  RBMap.filter (fun a _ => f a) m
+  ⟨RBMap.filter (fun a _ => f a) m.toRBMap⟩
 
 end RBTree
 

@@ -66,12 +66,12 @@ partial def tagCodeInfos (ctx : Elab.ContextInfo) (infos : SubExpr.PosMap Elab.I
 where
   go (tt : TaggedText (Nat × Nat)) : BaseIO (TaggedText SubexprInfo) :=
     tt.rewriteM fun (n, _) subTt => do
-      match infos.get? n with
+      match infos.get? ⟨n⟩ with
       | none   => go subTt
       | some i =>
         let t : SubexprInfo := {
           info := ← WithRpcRef.mk { ctx, info := i, children := .empty }
-          subexprPos := n
+          subexprPos := ⟨n⟩
         }
         return TaggedText.tag t (← go subTt)
 

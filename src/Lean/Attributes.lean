@@ -20,7 +20,7 @@ inductive AttributeApplicationTime where
 abbrev AttrM := CoreM
 
 instance : MonadLift ImportM AttrM where
-  monadLift x := do liftM (m := IO) (x { env := (← getEnv), opts := (← getOptions) })
+  monadLift x := do liftM (m := IO) (x.run { env := (← getEnv), opts := (← getOptions) })
 
 structure AttributeImplCore where
   /-- This is used as the target for go-to-definition queries for simple attributes -/
@@ -184,7 +184,7 @@ def registerTagAttribute (name : Name) (descr : String)
   let ext : PersistentEnvExtension Name Name NameSet ← registerPersistentEnvExtension {
     name            := ref
     mkInitial       := pure {}
-    addImportedFn   := fun _ _ => pure {}
+    addImportedFn   := fun _ => pure {}
     addEntryFn      := fun (s : NameSet) n => s.insert n
     exportEntriesFnEx := fun env es =>
       let all : Array Name := es.foldl (fun a e => a.push e) #[] |>.qsort Name.quickLt
@@ -247,7 +247,7 @@ structure ParametricAttribute (α : Type) where
 
 structure ParametricAttributeImpl (α : Type) extends AttributeImplCore where
   getParam : Name → Syntax → AttrM α
-  afterSet : Name → α → AttrM Unit := fun _ _ _ => pure ()
+  afterSet : Name → α → AttrM Unit := fun _ _ => pure ()
   /--
   If set, entries are not resorted on export and `getParam?` will fall back to a linear instead of
   binary search inside an imported module's entries.
@@ -276,7 +276,7 @@ def registerParametricAttributeExt (ref : Name) (preserveOrder : Bool := false)
         let r := m.foldl (fun a n p => a.push (n, p)) #[]
         r.qsort (fun a b => Name.quickLt a.1 b.1)
       let exported := all.filter (fun ⟨n, a⟩ => filterExport env n a)
-      { exported, server := exported, «private» := all }
+      return { exported, server := exported, «private» := all }
     statsFn         := fun (_, m) => "parametric attribute" ++ Format.line ++ "number of local entries: " ++ format m.size
   }
 
@@ -350,7 +350,7 @@ def registerEnumAttributes (attrDescrs : List (Name × String × α))
   let ext : PersistentEnvExtension (Name × α) (Name × α) (NameMap α) ← registerPersistentEnvExtension {
     name            := ref
     mkInitial       := pure {}
-    addImportedFn   := fun _ _ => pure {}
+    addImportedFn   := fun _ => pure {}
     addEntryFn      := fun (s : NameMap α) (p : Name × α) => s.insert p.1 p.2
     exportEntriesFnEx := fun env m =>
       let all : Array (Name × α) := m.foldl (fun a n p => a.push (n, p)) #[] |>.qsort (fun a b => Name.quickLt a.1 b.1)

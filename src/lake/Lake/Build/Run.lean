@@ -149,7 +149,7 @@ where
     else s!"{ms}ms"
 
 def drainQueue : MonitorM (Array OpaqueJob) := do
-  let newJobs ← (← read).jobs.modifyGet ((·, #[]))
+  let newJobs ← (← read).jobs.ref.modifyGet ((·, #[]))
   modify fun s => {s with totalJobs := s.totalJobs + newJobs.size}
   return newJobs
 
@@ -268,7 +268,7 @@ public def monitorJobs
   (updateFrequency := 100)
 : BaseIO MonitorResult := do
   let ctx := {
-    jobs, out, failLv, outLv, minAction, showOptional
+    jobs := ⟨jobs⟩, out, failLv, outLv, minAction, showOptional
     useAnsi, showProgress, showTime, updateFrequency
   }
   monitorJobs' ctx initJobs initFailures resetCtrl
@@ -285,7 +285,7 @@ def Workspace.saveOutputs
       the artifact cache is not enabled for this package, so the artifacts described \
       by the mappings produced by `-o` will not necessarily be available in the cache."
   if let some ref := outputsRef? then
-    match (← (← ref.get).writeFile outputsFile ws.root.isPlatformIndependent ∅) with
+    match (← (← ref.get).writeFile outputsFile ws.root.isPlatformIndependent |>.run ∅) with
     | .ok _ log =>
       if !log.isEmpty && isVerbose then
         print! out "There were issues saving input-to-output mappings from the build:\n"

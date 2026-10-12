@@ -38,7 +38,7 @@ unsafe def visit (e : Expr) : M Unit :=
       | _                => return ()
 
 unsafe def main (e : Expr) : NameMap Nat :=
-  let (_, s) := NumApps.visit e |>.run {}
+  let (_, s) := NumApps.visit e |>.run {} |>.run
   s.counters
 
 end NumApps

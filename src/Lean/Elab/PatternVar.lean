@@ -203,9 +203,9 @@ private def samePatternsVariables (startingAt : Nat) (s₁ s₂ : State) : Bool 
     for h₂ : i in startingAt...s₁.vars.size do
       if s₁.vars[i] != s₂.vars[i] then
         return false
-    true
+    return true
   else
-    false
+    return false
 
 open TSyntax.Compat in
 partial def collect (stx : Syntax) : M Syntax := withRef stx <| withFreshMacroScope do

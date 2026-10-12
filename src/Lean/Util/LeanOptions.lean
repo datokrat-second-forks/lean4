@@ -106,7 +106,7 @@ def LeanOptions.toOptions (leanOptions : LeanOptions) : Options := Id.run do
   return options
 
 def LeanOptions.fromOptions? (options : Options) : Option LeanOptions := do
-  let mut values := Std.TreeMap.empty
+  let mut values : NameMap LeanOptionValue := {}
   for ⟨name, dataValue⟩ in options do
     let optionValue ← LeanOptionValue.ofDataValue? dataValue
     values := values.insert name optionValue

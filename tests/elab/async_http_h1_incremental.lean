@@ -51,7 +51,7 @@ private def splitEveryByte (data : ByteArray) : Array ByteArray := Id.run do
   let mut parts : Array ByteArray := #[]
   for i in [0:data.size] do
     parts := parts.push (data.extract i (i + 1))
-  parts
+  return parts
 
 private def nextSeed (seed : Nat) : Nat :=
   (1664525 * seed + 1013904223) % 4294967296
@@ -82,7 +82,7 @@ private def randomAsciiBytes (seed : Nat) (len : Nat) : ByteArray × Nat := Id.r
       else if r = 36 then 45
       else 95
     out := out.push (UInt8.ofNat code)
-  (out, s)
+  return (out, s)
 
 private def randomSplit (seed : Nat) (data : ByteArray) (maxPart : Nat := 13) : Array ByteArray × Nat := Id.run do
   let mut s := seed
@@ -95,7 +95,7 @@ private def randomSplit (seed : Nat) (data : ByteArray) (maxPart : Nat := 13) : 
     s := s'
     out := out.push (data.extract i (i + partLen))
     i := i + partLen
-  (out, s)
+  return (out, s)
 
 private def randomChunkedPayload (seed : Nat) (body : ByteArray) : ByteArray × Nat := Id.run do
   let mut s := seed
@@ -111,7 +111,7 @@ private def randomChunkedPayload (seed : Nat) (body : ByteArray) : ByteArray × 
     out := out ++ "\r\n".toUTF8
     i := i + chunkLen
   out := out ++ "0\r\n\r\n".toUTF8
-  (out, s)
+  return (out, s)
 
 private def mkContentLengthRequest (path : String) (body : ByteArray) : ByteArray :=
   s!"POST {path} HTTP/1.1\r\nHost: example.com\r\nContent-Length: {body.size}\r\nConnection: keep-alive\r\n\r\n".toUTF8 ++ body

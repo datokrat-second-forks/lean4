@@ -5,11 +5,11 @@ open Lean Server
 abbrev M := StateM RpcObjectStore
 
 def M.run (x : ExceptT String M α) : Except String α :=
-  x.run' {}
+  x.run.run' {} |>.run
 
 def test (α : Type) [RpcEncodable α] (a : α) := M.run do
   let json ← rpcEncode a
-  let _a : α ← ofExcept (rpcDecode json (← get))
+  let _a : α ← ofExcept (Id.run (ReaderT.run (rpcDecode json).run (← get)))
   return json
 
 structure FooRef where
@@ -92,7 +92,7 @@ structure UnusedStruct (α : Type)
 #eval test (UnusedStruct NoRpcEncodable) default
 
 deriving instance Repr, RpcEncodable for Empty
-#eval rpcDecode (α := Empty) .null {}
+#eval ReaderT.run (rpcDecode (α := Empty) .null).run {}
 
 /--
 error: '__rpcref' is reserved and cannot be used as a field name. See the `RpcEncodable` docstring.

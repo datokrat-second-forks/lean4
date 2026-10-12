@@ -100,7 +100,7 @@ that would effectively require reimplementing the (stateful, to keep track of in
 
 private inductive EmbedFmt
   /-- Nested tags denote `Info` objects in `infos`. -/
-  | code (ctx : Elab.ContextInfo) (infos : Std.TreeMap Nat Elab.Info)
+  | code (ctx : Elab.ContextInfo) (infos : SubExpr.PosMap Elab.Info)
   /-- Nested text is ignored. -/
   | goal (ctx : Elab.ContextInfo) (lctx : LocalContext) (g : MVarId)
   /-- Nested text is ignored. -/

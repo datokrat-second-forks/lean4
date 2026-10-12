@@ -44,7 +44,7 @@ def setCommandState (commandState : Command.State) : FrontendM Unit :=
     snap?        := none
     cancelTk?    := none
   }
-  match (← liftM <| EIO.toIO' <| (x cmdCtx).run s.commandState) with
+  match (← liftM <| EIO.toIO' <| (x.run cmdCtx).run s.commandState) with
   | Except.error e      => throw <| IO.Error.userError s!"unexpected internal error: {← e.toMessageData.toString}"
   | Except.ok (a, sNew) => setCommandState sNew; return a
 
@@ -262,7 +262,7 @@ private def setMainModule (snap : Language.Lean.InitialSnapshot) (m : Name) :
     auxDeclNGen := { hps.cmdState.auxDeclNGen with namePrefix := mkPrivateName newEnv .anonymous } }
   let newProcessed : Language.Lean.HeaderProcessedSnapshot := { processed with
     result? := some { hps with cmdState := newCmdState } }
-  { snap with
+  return { snap with
     result? := some { parsed with
       processedSnap := .finished none newProcessed } }
 
@@ -333,7 +333,7 @@ def runFrontend
       unsafe enableInitializersExecution
     return snap
   let processor := Language.Lean.process
-  let snap ← processor setup old? ctx
+  let snap ← processor setup old? |>.run ctx
   let snaps := Language.toSnapshotTree snap
   let severityOverrides := errorOnKinds.foldl (·.insert · .error) {}
 

@@ -106,7 +106,7 @@ instance ShareCommonT.monadShareCommon [Monad m] : MonadShareCommon (ShareCommon
   withShareCommon := ShareCommonT.withShareCommon
 
 @[inline] def ShareCommonT.run [Monad m] (x : ShareCommonT σ m α) : m α := x.run' default
-@[inline] def ShareCommonM.run (x : ShareCommonM σ α) : α := ShareCommonT.run x
+@[inline] def ShareCommonM.run (x : ShareCommonM σ α) : α := (ShareCommonT.run x).run
 
 /--
 A more restrictive but efficient max sharing primitive.

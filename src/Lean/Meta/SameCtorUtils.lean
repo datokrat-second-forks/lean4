@@ -45,8 +45,8 @@ public def occursOrInType (lctx : LocalContext) (e : Expr) (t : Expr) : Bool :=
   t.find? go |>.isSome
 where
   go s := Id.run do
-    let .fvar fvarId := s | s == e
-    let some decl := lctx.find? fvarId | s == e
+    let .fvar fvarId := s | return s == e
+    let some decl := lctx.find? fvarId | return s == e
     return s == e || e.occurs decl.type
 
 /--

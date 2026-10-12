@@ -111,7 +111,7 @@ instance : Monad GrindTacticM :=
   { pure := i.pure, bind := i.bind }
 
 instance : Inhabited (GrindTacticM α) where
-  default := fun _ _ => default
+  default := ReaderT.mk fun _ => ReaderT.mk fun _ => default
 
 unsafe builtin_initialize grindTacElabAttribute : KeyedDeclsAttribute GrindTactic ←
   mkElabAttribute GrindTactic `builtin_grind_tactic `grind_tactic
@@ -332,7 +332,9 @@ open Lean.Meta.Grind
 def liftGrindM (k : GrindM α) : GrindTacticM α := do
   let ctx ← read
   let s ← get
-  let ((a, grindState), symState) ← liftMetaM <| StateRefT'.run (((Grind.withGTransparency k) ctx.methods.toMethodsRef ctx.ctx |>.run s.grindState) ctx.sctx) s.symState
+  let ((a, grindState), symState) ← liftMetaM <| StateRefT'.run
+    (ReaderT.run (ReaderT.run (ReaderT.run (Grind.withGTransparency k) ctx.methods.toMethodsRef)
+      ctx.ctx |>.run s.grindState) ctx.sctx) s.symState
   modify fun s => { s with grindState, symState }
   return a
 
@@ -409,7 +411,7 @@ def closeUsingOrAdmit (tac : GrindTacticM Unit) : GrindTacticM Unit := do
         throw ex
 
 def GrindTacticM.run (x : GrindTacticM α) (ctx : Context) (s : State) : TermElabM (α × State) :=
-  x ctx |>.run s
+  ReaderT.run x ctx |>.run s
 
 def mkEvalTactic' (elaborator : Name) (params : Params) : TermElabM (Goal → TSyntax `grind → GrindM (List Goal)) := do
   let termState ← getThe Term.State
@@ -469,6 +471,6 @@ def GrindTacticM.runAtGoal (mvarId : MVarId) (params : Params) (k : GrindTacticM
       let symState ← getThe Sym.State
       return (methods, ctx, sctx, { grindState, symState, goals })
   let tctx ← read
-  k { tctx with methods, ctx, sctx, params, sym } |>.run state
+  k.run { tctx with methods, ctx, sctx, params, sym } state
 
 end Lean.Elab.Tactic.Grind

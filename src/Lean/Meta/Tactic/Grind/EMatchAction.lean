@@ -48,7 +48,7 @@ structure CollectState where
   thms          : Array EMatchTheorem := #[]
 
 def collect (e : Expr) (map : EMatch.InstanceMap) : Array EMatchTheorem :=
-  let (_, s) := go e |>.run {}
+  let (_, s) := go e |>.run {} |>.run
   s.thms
 where
   go (e : Expr) : StateM CollectState Unit := do

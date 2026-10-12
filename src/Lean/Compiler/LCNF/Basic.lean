@@ -1204,7 +1204,7 @@ computes strongly connected components.
 See comment at `recursive` field.
 -/
 partial def markRecDecls (decls : Array (Decl pu)) : Array (Decl pu)  :=
-  let (_, isRec) := go |>.run {}
+  let (_, isRec) := go |>.run {} |>.run
   decls.map fun decl =>
     if isRec.contains decl.name then
       { decl with recursive := true }

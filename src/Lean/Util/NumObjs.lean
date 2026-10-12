@@ -33,7 +33,7 @@ unsafe def visit (e : Expr) : M Unit :=
       | _                => return ()
 
 unsafe def main (e : Expr) : Nat :=
-  let (_, s) := NumObjs.visit e |>.run {}
+  let (_, s) := NumObjs.visit e |>.run {} |>.run
   s.counter
 
 end NumObjs

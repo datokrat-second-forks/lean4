@@ -145,7 +145,7 @@ private partial def computeOutLevelParams (type : Expr) (outParams : Array Nat) 
     unless nonOutLevels.contains name do
       result := result.push i
     i := i + 1
-  result
+  return result
 where
   go (type : Expr) (i : Nat) (s : CollectLevelParams.State) : CollectLevelParams.State :=
     match type with

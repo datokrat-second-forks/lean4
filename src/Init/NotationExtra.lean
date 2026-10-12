@@ -201,6 +201,11 @@ end Lean
   | `($(_) fun $x:ident => $p)            => `({ $x // $p })
   | _                                     => throw ()
 
+@[app_unexpander SyntaxNodeKinds.mk] meta def unexpandSyntaxNodeKindsMk :
+    Lean.PrettyPrinter.Unexpander
+  | `($(_) $ks)  => pure ks
+  | _           => throw ()
+
 @[app_unexpander TSyntax] meta def unexpandTSyntax : Lean.PrettyPrinter.Unexpander
   | `($f [$k])  => `($f $k)
   | _           => throw ()

@@ -91,12 +91,12 @@ def uvarPrefix : Name := `_uvar
 /-- Returns `true` if the `i`th argument / pattern variable is an instance. -/
 def Pattern.isInstance (p : Pattern) (i : Nat) : Bool := Id.run do
   let some varInfos := p.varInfos? | return false
-  varInfos.argsInfo[i]!.isInstance
+  return varInfos.argsInfo[i]!.isInstance
 
 /-- Returns `true` if the `i`th argument / pattern variable is a proof. -/
 def Pattern.isProof (p : Pattern) (i : Nat) : Bool := Id.run do
   let some varInfos := p.varInfos? | return false
-  varInfos.argsInfo[i]!.isProof
+  return varInfos.argsInfo[i]!.isProof
 
 def isUVar (n : Name) : Bool := Id.run do
   let .num p _ := n | return false
@@ -349,13 +349,13 @@ where
   go (u : Level) : Bool := Id.run do
     unless u.hasParam do return false
     match u with
-    | .succ u₁ => go u₁
-    | .max u₁ u₂ | .imax u₁ u₂ => go u₁ || go u₂
+    | .succ u₁ => return go u₁
+    | .max u₁ u₂ | .imax u₁ u₂ => return go u₁ || go u₂
     | .param name =>
       let some uidx := isUVar? name | return false
       if h : uidx < assignment.size then return assignment[uidx].isSome
       return false
-    | _ => false
+    | _ => return false
 
 /-- Substitutes uvars in `u` with their assignments. -/
 def substAssignedUVars (assignment : Array (Option Level)) (u : Level) : Level :=
@@ -1067,7 +1067,7 @@ abbrev DefEqM.run (unify := true) (zetaDelta := true) (mvarsNew : Array MVarId :
     (mvarsToCheckType : Array MVarId := #[]) (x : DefEqM α) : SymM α := do
   let lctx ← getLCtx
   let lctxInitialNextIndex := lctx.decls.size
-  x { zetaDelta, lctxInitialNextIndex, unify, mvarsNew, mvarsToCheckType }
+  ReaderT.run x { zetaDelta, lctxInitialNextIndex, unify, mvarsNew, mvarsToCheckType }
 
 /--
 A lightweight structural definitional equality for the symbolic simulation framework.
@@ -1207,7 +1207,7 @@ abbrev UnifyM.run (pattern : Pattern) (unify : Bool) (zetaDelta : Bool) (k : Uni
   let eAssignment := pattern.varTypes.map fun _ => none
   let uAssignment := pattern.levelParams.toArray.map fun _ => none
   let mvarCounterSaved := (← getMCtx).mvarCounter
-  k { unify, zetaDelta, pattern, mvarCounterSaved } |>.run' { eAssignment, uAssignment }
+  ReaderT.run k { unify, zetaDelta, pattern, mvarCounterSaved } |>.run' { eAssignment, uAssignment }
 
 public structure MatchUnifyResult where
   us : List Level

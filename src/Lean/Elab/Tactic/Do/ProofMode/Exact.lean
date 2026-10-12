@@ -40,7 +40,7 @@ def elabMExact : Tactic
     mvar.withContext do
       let g ← instantiateMVars <| ← mvar.getType
       let some goal := parseMGoal? g | throwError "not in proof mode"
-      if let some prf ← liftMetaM (goal.exact hyp) then
+      if let some prf ← liftMetaM (goal.exact hyp).run then
     mvar.assign prf
       else
         mvar.assign (← goal.exactPure hyp)

@@ -213,13 +213,13 @@ public instance [ComputeHash α m] : ComputeTrace α m Hash := ⟨ComputeHash.co
 
 /-- Compute the hash of object `a` in a pure context. -/
 @[inline] public def pureHash [ComputeHash α Id] (a : α) : Hash :=
-  ComputeHash.computeHash a
+  (ComputeHash.computeHash a).run
 
 /-- Compute the hash an object in an supporting monad. -/
 @[inline] public def computeHash [ComputeHash α m] [MonadLiftT m n] (a : α) : n Hash :=
   liftM <| ComputeHash.computeHash a
 
-public instance [Hashable α] : ComputeHash α Id := ⟨Hash.ofHashable⟩
+public instance [Hashable α] : ComputeHash α Id := ⟨fun a => pure (Hash.ofHashable a)⟩
 
 /--
 Compute the hash of a binary file.
@@ -265,16 +265,17 @@ public instance [ComputeHash α m] [Monad m] : ComputeHash (Array α) m := ⟨co
 open IO.FS (SystemTime)
 
 /-- A modification time (e.g., of a file). -/
-@[expose] public def MTime := SystemTime
+public structure MTime where
+  toSystemTime : SystemTime
+  deriving BEq
 
 namespace MTime
 
-public instance : OfNat MTime (nat_lit 0) := ⟨⟨0,0⟩⟩
+public instance : OfNat MTime (nat_lit 0) := ⟨⟨⟨0,0⟩⟩⟩
 
-public instance : BEq MTime := inferInstanceAs (BEq SystemTime)
-public instance : Repr MTime := inferInstanceAs (Repr SystemTime)
+public instance : Repr MTime := ⟨(reprPrec ·.toSystemTime)⟩
 
-public instance : Ord MTime := inferInstanceAs (Ord SystemTime)
+public instance : Ord MTime := ⟨(compare ·.toSystemTime ·.toSystemTime)⟩
 public instance : LT MTime := ltOfOrd
 public instance : LE MTime := leOfOrd
 public instance : Min MTime := minOfLe
@@ -294,7 +295,7 @@ instance [GetMTime α] : ComputeTrace α IO MTime := ⟨getMTime⟩
 
 /-- Return the modification time of a file recorded by the OS. -/
 @[inline] public def getFileMTime (file : FilePath) : IO MTime :=
-  return (← file.metadata).modified
+  return ⟨(← file.metadata).modified⟩
 
 public instance : GetMTime FilePath := ⟨getFileMTime⟩
 public instance : GetMTime TextFilePath := ⟨(getFileMTime ·.path)⟩

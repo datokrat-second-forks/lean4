@@ -15,7 +15,7 @@ structure OrderM.Context where
 abbrev OrderM := ReaderT OrderM.Context GoalM
 
 abbrev OrderM.run (structId : Nat) (x : OrderM α) : GoalM α :=
-  x { structId }
+  ReaderT.run x { structId }
 
 abbrev getStructId : OrderM Nat :=
   return (← read).structId

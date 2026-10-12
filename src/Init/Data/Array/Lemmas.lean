@@ -1318,7 +1318,7 @@ theorem map_eq_iff {f : α → β} {xs : Array α} {ys : Array β} :
 
 theorem map_eq_foldl {f : α → β} {xs : Array α} :
     map f xs = foldl (fun bs a => bs.push (f a)) #[] xs := by
-  simpa using! mapM_eq_foldlM
+  simpa [foldl] using! congrArg Id.run (mapM_eq_foldlM (m := Id) (f := (pure <| f ·)))
 
 @[simp] theorem map_set {f : α → β} {xs : Array α} {i : Nat} {h : i < xs.size} {a : α} :
     (xs.set i a).map f = (xs.map f).set i (f a) (by simpa using h) := by
@@ -3191,7 +3191,7 @@ theorem foldl_induction
     (hf : ∀ i : Fin as.size, ∀ b, motive i.1 b → motive (i.1 + 1) (f b as[i])) :
     motive as.size (as.foldl f init) := by
   let rec go {i j b} (h₁ : j ≤ as.size) (h₂ : as.size ≤ i + j) (H : motive j b) :
-    (motive as.size) (foldlM.loop (m := Id) f as as.size (Nat.le_refl _) i j b) := by
+    (motive as.size) (foldlM.loop (m := Id) (pure <| f · ·) as as.size (Nat.le_refl _) i j b).run := by
     unfold foldlM.loop; split
     next hj =>
       split
@@ -3205,7 +3205,7 @@ theorem foldr_induction
     (hf : ∀ i : Fin as.size, ∀ b, motive (i.1 + 1) b → motive i.1 (f as[i] b)) :
     motive 0 (as.foldr f init) := by
   let rec go {i b} (hi : i ≤ as.size) (H : motive i b) :
-    (motive 0) (foldrM.fold (m := Id) f as 0 i hi b) := by
+    (motive 0) (foldrM.fold (m := Id) (pure <| f · ·) as 0 i hi b).run := by
     unfold foldrM.fold; simp; split
     next hi => exact (hi ▸ H)
     next hi =>
@@ -3229,7 +3229,7 @@ theorem foldr_congr {as bs : Array α} (h₀ : as = bs) {f g : α → β → β}
 
 theorem foldl_push {f : β → α → β} {init : β} {xs : Array α} {a : α} :
     (xs.push a).foldl f init = f (xs.foldl f init) a :=
-  foldlM_push ..
+  congrArg Id.run foldlM_push
 
 /-- Variant of `foldl_push` with a side condition for the `stop` argument. -/
 @[simp, grind =] theorem foldl_push' {f : β → α → β} {init : β} {xs : Array α} {a : α} {stop : Nat}
@@ -3239,7 +3239,7 @@ theorem foldl_push {f : β → α → β} {init : β} {xs : Array α} {a : α} :
   simp [← foldl_push]
 
 theorem foldr_push {f : α → β → β} {init : β} {xs : Array α} {a : α} :
-    (xs.push a).foldr f init = xs.foldr f (f a init) := foldrM_push ..
+    (xs.push a).foldr f init = xs.foldr f (f a init) := congrArg Id.run foldrM_push
 
 /--
 Variant of `foldr_push` with the `h : start = arr.size + 1`
@@ -3247,7 +3247,7 @@ rather than `(arr.push a).size` as the argument.
 -/
 @[simp, grind =] theorem foldr_push' {f : α → β → β} {init : β} {xs : Array α} {a : α} {start : Nat}
     (h : start = xs.size + 1) : (xs.push a).foldr f init start = xs.foldr f (f a init) :=
-  foldrM_push' h
+  congrArg Id.run (foldrM_push' h)
 
 -- TODO: a multi-pattern is being selected there because E-matching does not go inside lambdas.
 @[simp, grind! ←] theorem foldl_push_eq_append {as : Array α} {bs : Array β} {f : α → β} (w : stop = as.size) :
@@ -3435,15 +3435,15 @@ theorem foldrM_append [Monad m] [LawfulMonad m] {f : α → β → m β} {b} {xs
 @[simp] theorem foldr_append' {f : α → β → β} {b} {xs ys : Array α} {start : Nat}
     (w : start = xs.size + ys.size) :
     (xs ++ ys).foldr f b start 0 = xs.foldr f (ys.foldr f b) :=
-  foldrM_append' w
+  congrArg Id.run (foldrM_append' w)
 
 @[grind _=_] theorem foldl_append {β : Type _} {f : β → α → β} {b} {xs ys : Array α} :
     (xs ++ ys).foldl f b = ys.foldl f (xs.foldl f b) :=
-  foldlM_append
+  congrArg Id.run foldlM_append
 
 @[grind _=_] theorem foldr_append {f : α → β → β} {b} {xs ys : Array α} :
     (xs ++ ys).foldr f b = xs.foldr f (ys.foldr f b) :=
-  foldrM_append
+  congrArg Id.run foldrM_append
 
 @[simp] theorem foldl_flatten' {f : β → α → β} {b} {xss : Array (Array α)} {stop : Nat}
     (w : stop = xss.flatten.size) :
@@ -3473,21 +3473,21 @@ theorem foldrM_append [Monad m] [LawfulMonad m] {f : α → β → m β} {b} {xs
 @[simp] theorem foldl_reverse' {xs : Array α} {f : β → α → β} {b} {stop : Nat}
     (w : stop = xs.size) :
     xs.reverse.foldl f b 0 stop = xs.foldr (fun x y => f y x) b :=
-  foldlM_reverse' w
+  congrArg Id.run (foldlM_reverse' w)
 
 /-- Variant of `foldr_reverse` with a side condition for the `start` argument. -/
 @[simp] theorem foldr_reverse' {xs : Array α} {f : α → β → β} {b} {start : Nat}
     (w : start = xs.size) :
     xs.reverse.foldr f b start 0 = xs.foldl (fun x y => f y x) b :=
-  foldrM_reverse' w
+  congrArg Id.run (foldrM_reverse' w)
 
 @[grind =] theorem foldl_reverse {xs : Array α} {f : β → α → β} {b} :
     xs.reverse.foldl f b = xs.foldr (fun x y => f y x) b :=
-  foldlM_reverse
+  congrArg Id.run foldlM_reverse
 
 @[grind =] theorem foldr_reverse {xs : Array α} {f : α → β → β} {b} :
     xs.reverse.foldr f b = xs.foldl (fun x y => f y x) b :=
-  foldrM_reverse
+  congrArg Id.run foldrM_reverse
 
 theorem foldl_eq_foldr_reverse {xs : Array α} {f : β → α → β} {b} :
     xs.foldl f b = xs.reverse.foldr (fun x y => f y x) b := by simp
@@ -3902,7 +3902,7 @@ theorem all_filterMap {xs : Array α} {f : α → Option β} {p : β → Bool} :
     {xs ys : Array α} (w : xs = ys) {p q : α → Bool} (h : ∀ a, p a = q a) (wstart : start₁ = start₂) (wstop : stop₁ = stop₂) :
     xs.any p start₁ stop₁ = ys.any q start₂ stop₂ := by
   unfold any
-  apply anyM_congr w h wstart wstop
+  exact congrArg Id.run (anyM_congr w (fun a => by rw [h]) wstart wstop)
 
 @[congr] theorem allM_congr [Monad m]
     {xs ys : Array α} (w : xs = ys) {p q : α → m Bool} (h : ∀ a, p a = q a) (wstart : start₁ = start₂) (wstop : stop₁ = stop₂) :
@@ -3918,7 +3918,7 @@ theorem all_filterMap {xs : Array α} {f : α → Option β} {p : β → Bool} :
     {xs ys : Array α} (w : xs = ys) {p q : α → Bool} (h : ∀ a, p a = q a) (wstart : start₁ = start₂) (wstop : stop₁ = stop₂) :
     xs.all p start₁ stop₁ = ys.all q start₂ stop₂ := by
   unfold all
-  apply allM_congr w h wstart wstop
+  exact congrArg Id.run (allM_congr w (fun a => by rw [h]) wstart wstop)
 
 @[simp] theorem any_flatten' {xss : Array (Array α)} (w : stop = xss.flatten.size) : xss.flatten.any f 0 stop = xss.any (any · f) := by
   subst w

@@ -59,7 +59,7 @@ def randomFullBytes (seed : Nat) (len : Nat) : ByteArray × Nat := Id.run do
   for _ in [0:len] do
     let (r, s') := randBelow s 256; s := s'
     out := out.push (UInt8.ofNat r)
-  (out, s)
+  return (out, s)
 
 -- Server-generated responses are always valid ASCII. Verify the response is
 -- either empty or starts with the HTTP/1.1 status-line prefix.

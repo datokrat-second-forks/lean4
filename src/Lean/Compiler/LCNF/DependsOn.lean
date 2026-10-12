@@ -55,16 +55,16 @@ private partial def depOn (c : Code pu) : M Bool :=
     fvarDepOn fvarId <||> depOn k
 
 @[inline] def Arg.dependsOn (arg : Arg pu) (s : FVarIdSet) :  Bool :=
-  argDepOn arg s
+  (argDepOn arg).run s |>.run
 
 @[inline] def LetValue.dependsOn (value : LetValue pu) (s : FVarIdSet) :  Bool :=
-  letValueDepOn value s
+  (letValueDepOn value).run s |>.run
 
 @[inline] def LetDecl.dependsOn (decl : LetDecl pu) (s : FVarIdSet) :  Bool :=
-  decl.depOn s
+  decl.depOn.run s |>.run
 
 @[inline] def FunDecl.dependsOn (decl : FunDecl pu) (s : FVarIdSet) :  Bool :=
-  typeDepOn decl.type s || depOn decl.value s
+  ((typeDepOn decl.type).run s).run || ((depOn decl.value).run s).run
 
 def CodeDecl.dependsOn (decl : CodeDecl pu) (s : FVarIdSet) : Bool :=
   match decl with
@@ -83,6 +83,6 @@ def CodeDecl.dependsOn (decl : CodeDecl pu) (s : FVarIdSet) : Bool :=
 Return `true` is `c` depends on a free variable in `s`.
 -/
 def Code.dependsOn (c : Code pu) (s : FVarIdSet) : Bool :=
-  depOn c s
+  (depOn c).run s |>.run
 
 end Lean.Compiler.LCNF

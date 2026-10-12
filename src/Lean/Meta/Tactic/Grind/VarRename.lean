@@ -43,6 +43,6 @@ def mkVarRename (new2old : Array Var) : VarRename := Id.run do
   for old in new2old do
     old2new := old2new.insert old new
     new := new + 1
-  { map := old2new }
+  return { map := old2new }
 
 end Lean.Meta.Grind

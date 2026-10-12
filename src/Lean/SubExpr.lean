@@ -8,21 +8,11 @@ module
 prelude
 public import Lean.Meta.Basic
 public import Init.Data.Format.Macro
+public import Lean.SubExpr.Pos
 
 public section
 
 namespace Lean
-
-/-- A position of a subexpression in an expression.
-
-We use a simple encoding scheme for expression positions `Pos`:
-every `Expr` constructor has at most 3 direct expression children. Considering an expression's type
-to be one extra child as well, we can injectively map a path of `childIdxs` to a natural number
-by computing the value of the 4-ary representation `1 :: childIdxs`, since n-ary representations
-without leading zeros are unique. Note that `pos` is initialized to `1` (case `childIdxs == []`).
-
-See also `SubExpr`. -/
-@[expose] def SubExpr.Pos := Nat
 
 namespace SubExpr.Pos
 
@@ -32,10 +22,8 @@ def maxChildren := 4
 reserved to denote the type of the expression. -/
 def typeCoord : Nat := maxChildren - 1
 
-def asNat : Pos → Nat := id
-
 /-- The Pos representing the root subexpression. -/
-def root : Pos := (1 : Nat)
+def root : Pos := ⟨1⟩
 
 instance : Inhabited Pos := ⟨root⟩
 
@@ -48,11 +36,11 @@ def head (p : Pos) : Nat :=
 
 def tail (p : Pos) : Pos :=
   if p.isRoot then panic! "already at top"
-  else (p.asNat - p.head) / maxChildren
+  else ⟨(p.asNat - p.head) / maxChildren⟩
 
 def push (p : Pos) (c : Nat) : Pos :=
   if c >= maxChildren then panic! s!"invalid coordinate {c}"
-  else p.asNat * maxChildren + c
+  else ⟨p.asNat * maxChildren + c⟩
 
 variable {α : Type} [Inhabited α]
 
@@ -104,10 +92,10 @@ def pushProj          (p : Pos) := p.push 0
 def pushType          (p : Pos) := p.push Pos.typeCoord
 
 def pushNaryFn (numArgs : Nat) (p : Pos) : Pos :=
-  p.asNat * (maxChildren ^ numArgs)
+  ⟨p.asNat * (maxChildren ^ numArgs)⟩
 
 def pushNaryArg (numArgs argIdx : Nat) (p : Pos) : Pos :=
-  show Nat from p.asNat * (maxChildren ^ (numArgs - argIdx)) + 1
+  ⟨p.asNat * (maxChildren ^ (numArgs - argIdx)) + 1⟩
 
 def pushNthBindingDomain : (binderIdx : Nat) → Pos → Pos
   | 0, p => p.pushBindingDomain
@@ -139,8 +127,6 @@ protected def fromString! (s : String) : Pos :=
   | .ok a => a
   | .error e => panic! e
 
-instance : Ord Pos := show Ord Nat by infer_instance
-instance : DecidableEq Pos := show DecidableEq Nat by infer_instance
 instance : ToString Pos := ⟨Pos.toString⟩
 instance : EmptyCollection Pos := ⟨root⟩
 instance : Repr Pos where
@@ -169,9 +155,6 @@ def mkRoot (e : Expr) : SubExpr := ⟨e, Pos.root⟩
 
 /-- Returns true if the selected subexpression is the topmost one. -/
 def isRoot (s : SubExpr) : Bool := s.pos.isRoot
-
-/-- Map from subexpr positions to values. -/
-abbrev PosMap (α : Type u) := Std.TreeMap Pos α
 
 def bindingBody! : SubExpr → SubExpr
   | ⟨.forallE _ _ b _, p⟩ => ⟨b, p.pushBindingBody⟩

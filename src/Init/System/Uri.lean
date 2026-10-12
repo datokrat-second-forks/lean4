@@ -108,7 +108,7 @@ def pathToUri (fname : System.FilePath) : String := Id.run do
     uri := uri.map (fun c => if c == '\\' then '/' else c)
   uri := uri.foldl (fun s c => s ++ UriEscape.uriEscapeAsciiChar c) ""
   let result := if uri.startsWith "/" then "file://" ++ uri else "file:///" ++ uri
-  result
+  return result
 
 -- On Windows, the path "/c:/temp" needs to become "C:/temp"
 private def normalizeDriveExpression (p : String.Slice) : String :=

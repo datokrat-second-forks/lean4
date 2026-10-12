@@ -9,6 +9,7 @@ prelude
 public import Init.Data.Int.DivMod.Lemmas
 public import Init.Data.Order.Ord
 public import Init.Data.Int.Repr
+public import Init.Data.Int.ToString
 public import Init.Omega
 import Init.Ext
 
@@ -24,7 +25,15 @@ set_option linter.all true in
 A `Bounded` is represented by an `Int` that is constrained by a lower and higher bounded using some
 relation `rel`. It includes all the integers that `rel lo val ∧ rel val hi`.
 -/
-def Bounded (rel : Int → Int → Prop) (lo : Int) (hi : Int) := { val : Int // rel lo val ∧ rel val hi }
+@[ext]
+structure Bounded (rel : Int → Int → Prop) (lo : Int) (hi : Int) where
+  /-- Creates a new `Bounded` Integer. -/
+  mk ::
+  /-- The underlying integer. -/
+  val : Int
+  /-- The integer is within the bounds. -/
+  property : rel lo val ∧ rel val hi
+  deriving DecidableEq
 
 namespace Bounded
 
@@ -45,11 +54,16 @@ instance : Repr (Bounded rel m n) where
   reprPrec n := reprPrec n.val
 
 @[always_inline]
-instance : DecidableEq (Bounded rel n m) := Subtype.instDecidableEq
+instance : ToString (Bounded rel m n) where
+  toString n := toString n.val
 
 @[always_inline]
 instance {x y : Bounded rel a b} : Decidable (x ≤ y) :=
   inferInstanceAs (Decidable (x.val ≤ y.val))
+
+@[always_inline]
+instance {x y : Bounded rel a b} : Decidable (x < y) :=
+  inferInstanceAs (Decidable (x.val < y.val))
 
 instance : OrientedOrd (Bounded rel n m) where
   eq_swap := OrientedOrd.eq_swap (α := Int)
@@ -58,7 +72,7 @@ instance : TransOrd (Bounded rel n m) where
   isLE_trans := TransOrd.isLE_trans (α := Int)
 
 instance : LawfulEqOrd (Bounded rel n m) where
-  eq_of_compare := Subtype.ext ∘ LawfulEqOrd.eq_of_compare (α := Int)
+  eq_of_compare := Bounded.ext ∘ LawfulEqOrd.eq_of_compare (α := Int)
 
 variable {rel a b}
 
@@ -80,13 +94,6 @@ A `Bounded` integer where the relation used is the less-than relation, so it inc
 integers that `lo < val < hi`.
 -/
 abbrev LT := @Bounded LT.lt
-
-/--
-Creates a new `Bounded` Integer.
--/
-@[inline]
-def mk {rel : Int → Int → Prop} (val : Int) (proof : rel lo val ∧ rel val hi) : @Bounded rel lo hi :=
-  ⟨val, proof⟩
 
 /--
 Convert a `Int` to a `Bounded` if it checks.

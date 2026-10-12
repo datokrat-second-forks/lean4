@@ -52,7 +52,7 @@ Specification: `i ∈ e.collectLooseBVars offset ↔ e.hasLooseBVar (i + offset)
 -/
 def collectLooseBVars (e : Expr) (offset : Nat := 0) : Std.HashSet Nat :=
   if e.hasLooseBVars then
-    let (_, s) := CollectLooseBVars.main e offset |>.run {}
+    let (_, s) := CollectLooseBVars.main e offset |>.run {} |>.run
     s.bvars
   else
     {}

@@ -14,5 +14,5 @@ def OverflowFold
       | _ => return len + 1) 0
 
 def main : IO Unit :=
-  let x := (StateT.run (@OverflowFold Id _ longArray) 0).fst
+  let x := (StateT.run (@OverflowFold Id _ longArray) 0).run.fst
   IO.println x

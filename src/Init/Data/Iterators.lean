@@ -14,6 +14,7 @@ public import Init.Data.Iterators.Combinators
 public import Init.Data.Iterators.Lemmas
 public import Init.Data.Iterators.ToIterator
 public import Init.Data.Iterators.Internal
+public import Init.Data.Iterators.Transport
 
 public section
 

@@ -148,13 +148,13 @@ def wait (x : CancellationToken) : IO (AsyncTask Unit) :=
     let st ← get
 
     if st.reason.isSome then
-      return Task.pure (.ok ())
+      return ExceptT.mk <| Task.pure (.ok ())
 
     let promise ← IO.Promise.new
 
     modify fun st => { st with consumers := st.consumers.enqueue (.normal promise) }
 
-    IO.bindTask promise.result? fun
+    ExceptT.mk <$> IO.bindTask promise.result? fun
       | some _ => pure <| Task.pure (.ok ())
       | none => throw (IO.userError "cancellation token dropped")
 

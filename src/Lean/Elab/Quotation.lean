@@ -75,35 +75,36 @@ def resolveSectionVariable (sectionVars : NameMap Name) (id : Name) : List (Name
   loop extractionResult.name []
 
 /-- Transform sequence of pushes and appends into acceptable code -/
-@[expose] def ArrayStxBuilder := Sum (Array Term) Term
+structure ArrayStxBuilder where
+  val : Sum (Array Term) Term
 
 namespace ArrayStxBuilder
 
-def empty : ArrayStxBuilder := .inl #[]
+def empty : ArrayStxBuilder := ⟨.inl #[]⟩
 
 def build : ArrayStxBuilder → Term
-  | .inl elems => quote elems
-  | .inr arr   => arr
+  | ⟨.inl elems⟩ => quote elems
+  | ⟨.inr arr⟩   => arr
 
 def push (b : ArrayStxBuilder) (elem : Syntax) : ArrayStxBuilder :=
   match b with
-  | .inl elems => .inl <| elems.push elem
-  | .inr arr   => .inr <| mkCApp ``Array.push #[arr, elem]
+  | ⟨.inl elems⟩ => ⟨.inl <| elems.push elem⟩
+  | ⟨.inr arr⟩   => ⟨.inr <| mkCApp ``Array.push #[arr, elem]⟩
 
 def append (b : ArrayStxBuilder) (arr : Syntax) (appendName := ``Array.append) : ArrayStxBuilder :=
-  .inr <| mkCApp appendName #[b.build, arr]
+  ⟨.inr <| mkCApp appendName #[b.build, arr]⟩
 
 def mkNode (b : ArrayStxBuilder) (k : SyntaxNodeKind) : TermElabM Term := do
   let k := quote k
   match b with
-  | .inl #[a₁] => `(Syntax.node1 info $(k) $(a₁))
-  | .inl #[a₁, a₂] => `(Syntax.node2 info $(k) $(a₁) $(a₂))
-  | .inl #[a₁, a₂, a₃] => `(Syntax.node3 info $(k) $(a₁) $(a₂) $(a₃))
-  | .inl #[a₁, a₂, a₃, a₄] => `(Syntax.node4 info $(k) $(a₁) $(a₂) $(a₃) $(a₄))
-  | .inl #[a₁, a₂, a₃, a₄, a₅] => `(Syntax.node5 info $(k) $(a₁) $(a₂) $(a₃) $(a₄) $(a₅))
-  | .inl #[a₁, a₂, a₃, a₄, a₅, a₆] => `(Syntax.node6 info $(k) $(a₁) $(a₂) $(a₃) $(a₄) $(a₅) $(a₆))
-  | .inl #[a₁, a₂, a₃, a₄, a₅, a₆, a₇] => `(Syntax.node7 info $(k) $(a₁) $(a₂) $(a₃) $(a₄) $(a₅) $(a₆) $(a₇))
-  | .inl #[a₁, a₂, a₃, a₄, a₅, a₆, a₇, a₈] => `(Syntax.node8 info $(k) $(a₁) $(a₂) $(a₃) $(a₄) $(a₅) $(a₆) $(a₇) $(a₈))
+  | ⟨.inl #[a₁]⟩ => `(Syntax.node1 info $(k) $(a₁))
+  | ⟨.inl #[a₁, a₂]⟩ => `(Syntax.node2 info $(k) $(a₁) $(a₂))
+  | ⟨.inl #[a₁, a₂, a₃]⟩ => `(Syntax.node3 info $(k) $(a₁) $(a₂) $(a₃))
+  | ⟨.inl #[a₁, a₂, a₃, a₄]⟩ => `(Syntax.node4 info $(k) $(a₁) $(a₂) $(a₃) $(a₄))
+  | ⟨.inl #[a₁, a₂, a₃, a₄, a₅]⟩ => `(Syntax.node5 info $(k) $(a₁) $(a₂) $(a₃) $(a₄) $(a₅))
+  | ⟨.inl #[a₁, a₂, a₃, a₄, a₅, a₆]⟩ => `(Syntax.node6 info $(k) $(a₁) $(a₂) $(a₃) $(a₄) $(a₅) $(a₆))
+  | ⟨.inl #[a₁, a₂, a₃, a₄, a₅, a₆, a₇]⟩ => `(Syntax.node7 info $(k) $(a₁) $(a₂) $(a₃) $(a₄) $(a₅) $(a₆) $(a₇))
+  | ⟨.inl #[a₁, a₂, a₃, a₄, a₅, a₆, a₇, a₈]⟩ => `(Syntax.node8 info $(k) $(a₁) $(a₂) $(a₃) $(a₄) $(a₅) $(a₆) $(a₇) $(a₈))
   | _ => `(Syntax.node info $(k) $(b.build))
 
 end ArrayStxBuilder

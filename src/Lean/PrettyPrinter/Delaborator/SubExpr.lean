@@ -153,7 +153,7 @@ variable {m : Type → Type} [Monad m]
 variable [MonadStateOf HoleIterator m]
 
 def HoleIterator.toPos (iter : HoleIterator) : Pos :=
-  iter.curr
+  ⟨iter.curr⟩
 
 def HoleIterator.next (iter : HoleIterator) : HoleIterator :=
   if (iter.curr+1) == iter.top then

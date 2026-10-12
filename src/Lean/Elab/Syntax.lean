@@ -119,7 +119,8 @@ open TSyntax.Compat in
 partial def toParserDescr (stx : Syntax) (catName : Name) : TermElabM (Term × Option Nat) := do
   let env ← getEnv
   let behavior := Parser.leadingIdentBehavior env catName
-  let ((newStx, _), lhsPrec?) ← (process stx { catName := catName, first := true, leftRec := true, behavior := behavior }).run none
+  let ((newStx, _), lhsPrec?) ←
+    (ReaderT.run (process stx) { catName := catName, first := true, leftRec := true, behavior := behavior }).run none
   return (newStx, lhsPrec?)
 where
   process (stx : Syntax) : ToParserDescr := withRef stx do

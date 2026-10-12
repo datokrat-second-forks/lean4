@@ -51,10 +51,10 @@ namespace Bitset
 instance : EmptyCollection Bitset where
   emptyCollection := { toNat := 0 }
 
-instance : Insert Nat Bitset where
-  insert i s := { toNat := s.toNat ||| (1 <<< i) }
+instance : Insert ModuleIdx Bitset where
+  insert i s := { toNat := s.toNat ||| (1 <<< i.toNat) }
 
-instance : Singleton Nat Bitset where
+instance : Singleton ModuleIdx Bitset where
   singleton i := insert i ∅
 
 instance : Inter Bitset where
@@ -66,7 +66,7 @@ instance : Union Bitset where
 instance : XorOp Bitset where
   xor a b := { toNat := a.toNat ^^^ b.toNat }
 
-def has (s : Bitset) (i : Nat) : Bool := s.toNat.testBit i
+def has (s : Bitset) (i : ModuleIdx) : Bool := s.toNat.testBit i.toNat
 
 end Bitset
 
@@ -191,7 +191,7 @@ Given module `j`'s transitive dependencies, computes the union of `transImps` an
 dependencies resulting from importing the module via `imp` according to the rules of
 `State.transDeps`.
 -/
-def addTransitiveImps (transImps : Needs) (imp : Import) (j : Nat) (impTransImps : Needs) : Needs := Id.run do
+def addTransitiveImps (transImps : Needs) (imp : Import) (j : ModuleIdx) (impTransImps : Needs) : Needs := Id.run do
   let mut transImps := transImps
 
   -- `j ∈ transDeps[i].pub` if `i -(public import)->+ j`
@@ -222,7 +222,7 @@ def addTransitiveImps (transImps : Needs) (imp : Import) (j : Nat) (impTransImps
       -- `j ∈ transDeps[i].metaPriv` if `i -(import ...)-> i'` and `j ∈ transDeps[i'].metaPub`
       transImps := transImps.union .metaPriv (impTransImps.get .metaPub)
 
-  transImps
+  return transImps
 
 def isDeclMeta' (env : Environment) (declName : Name) : Bool :=
   -- Matchers are not compiled by themselves but inlined by the compiler, so there is no IR decl
@@ -264,7 +264,7 @@ def calcNeeds (s : State) (i : ModuleIdx) : Needs := Id.run do
       needs := visitExpr k e needs
 
   for use in getExtraModUses env i do
-    let j : Nat := env.getModuleIdx? use.module |>.get!
+    let j := env.getModuleIdx? use.module |>.get!
     needs := needs.union { use with } {j}
 
   return needs
@@ -275,11 +275,11 @@ where
     Lean.Expr.foldConsts e deps fun c deps => Id.run do
       let mut deps := deps
       if let some c := getDepConstName? s c then
-        if let some (j : Nat) := env.getModuleIdxFor? c then
+        if let some j := env.getModuleIdxFor? c then
           let k := { k with isMeta := k.isMeta && !isDeclMeta' env c }
           if j != i then
             deps := deps.union k {j}
-            for (indMod : Nat) in s.indirectModUses[c]?.getD #[] do
+            for indMod in s.indirectModUses[c]?.getD #[] do
               if s.transDeps[i]!.has k indMod then
                 deps := deps.union k {indMod}
       return deps
@@ -410,7 +410,7 @@ def decodeImport : TSyntax ``Parser.Module.import → Import
 * `addOnly`: if true, only add missing imports, do not remove unused ones
 -/
 def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
-    (i : Nat) (needs : Needs) (headerStx : TSyntax ``Parser.Module.header) (args : Args)
+    (i : ModuleIdx) (needs : Needs) (headerStx : TSyntax ``Parser.Module.header) (args : Args)
     (addOnly := false) : StateT State IO Unit := do
   let modName := (← get).modNames[i]!
   if isExtraRevModUse (← get).env i then
@@ -438,7 +438,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   -- Add additional preserved imports
   for impStx in imports do
     let imp := decodeImport impStx
-    let j : Nat := s.env.getModuleIdx? imp.module |>.get!
+    let j := s.env.getModuleIdx? imp.module |>.get!
     let k := NeedsKind.ofImport imp
     let reason? :=
       if impStx.raw.getTrailing?.any (·.toString.contains "shake: keep") then
@@ -455,6 +455,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
       if args.trace then
         IO.eprintln s!"Adding `{imp}` as additional dependency"
   for j in [0:s.mods.size] do
+    let j : ModuleIdx := ⟨j⟩
     for k in NeedsKind.all do
       -- Remove `meta` while preserving, no use-case for preserving `meta` so far.
       -- Downgrade to private unless `--add-public` is used.
@@ -468,6 +469,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   -- Do transitive reduction of `needs` in `deps`.
   if !addOnly then
     for j in [0:s.mods.size] do
+      let j : ModuleIdx := ⟨j⟩
       let transDeps := s.transDeps[j]!
       for k in NeedsKind.all do
         if deps.has k j then
@@ -476,7 +478,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
             deps := deps.sub k' (transDeps.sub k' {j} |>.get k')
 
   if prelude?.isNone then
-    let j : Nat := s.env.getModuleIdx? `Init |>.get!
+    let j := s.env.getModuleIdx? `Init |>.get!
     deps := deps.union .pub {j}
     deps := deps.union .metaPub {j}
 
@@ -484,7 +486,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   let mut transDeps := Needs.empty
   let mut alwaysAdd : Array Import := #[]  -- to be added even if implied by other imports
   for imp in s.mods[i]!.imports do
-    let j : Nat := s.env.getModuleIdx? imp.module |>.get!
+    let j := s.env.getModuleIdx? imp.module |>.get!
     let k := NeedsKind.ofImport imp
     if deps.has k j || imp.importAll then
       let wasInDeps := deps.has k j
@@ -511,6 +513,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   let mut newTransDeps := transDeps
   let mut toAdd : Array Import := #[]
   for j in (0...s.mods.size).toArray.reverse do
+    let j : ModuleIdx := ⟨j⟩
     for k in NeedsKind.all do
       if deps.has k j && !newTransDeps.has k j && !newTransDeps.has { k with isExported := true } j then
         -- `add-public/keep-prefix` may change the import and even module we're considering
@@ -556,6 +559,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
     -- dependency order anymore and so we have to redo the transitive closure checking
     newTransDeps := transDeps
     for j in (0...s.mods.size).toArray.reverse do
+      let j : ModuleIdx := ⟨j⟩
       for k in NeedsKind.all do
         if deps.has k j then
           let mut imp : Import := { k with module := s.modNames[j]! }
@@ -636,11 +640,11 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
     let j := s.env.getModuleIdx? imp.module |>.get!
     newTransDepsI := addTransitiveImps newTransDepsI imp j s.transDeps[j]!
 
-  modify fun s => { s with transDeps := s.transDeps.set! i newTransDepsI }
+  modify fun s => { s with transDeps := s.transDeps.set! i.toNat newTransDepsI }
 
   if args.explain then
     let explanation := getExplanations s i
-    let sanitize n := if n.hasMacroScopes then (sanitizeName n).run' { options := {} } else n
+    let sanitize n := if n.hasMacroScopes then (sanitizeName n).run' { options := {} } |>.run else n
     let run (imp : Import) := do
       let j := s.env.getModuleIdx? imp.module |>.get!
       let k := NeedsKind.ofImport imp
@@ -686,7 +690,7 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
     throw <| .userError "`lake shake` only works with `module`s currently"
   -- the one env ext we want to initialize
   let is := indirectModUseExt.toEnvExtension.getState env
-  let newState ← indirectModUseExt.addImportedFn is.importedEntries { env := env, opts := {} }
+  let newState ← (indirectModUseExt.addImportedFn is.importedEntries).run { env := env, opts := {} }
   env := indirectModUseExt.toEnvExtension.setState (asyncMode := .sync) env { is with state := newState }
 
   StateT.run' (s := initStateFromEnv env) do
@@ -694,7 +698,7 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
   let s ← get
   -- Run the calculation of the `needs` array in parallel
   let needs := s.mods.mapIdx fun i _ =>
-    Task.spawn fun _ => calcNeeds s i
+    Task.spawn fun _ => calcNeeds s ⟨i⟩
 
   -- Parse headers in parallel
   let headers ← s.mods.mapIdxM fun i _ =>
@@ -710,7 +714,7 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
   for i in [0:s.mods.size], t in needs, header in headers do
     match header.get with
     | .ok ⟨_, _, stx, _⟩ =>
-      visitModule pkgs srcSearchPath i t.get stx args
+      visitModule pkgs srcSearchPath ⟨i⟩ t.get stx args
     | .error e =>
       println! e.toString
 

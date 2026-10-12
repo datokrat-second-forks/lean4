@@ -22,7 +22,7 @@ structure OfNatModuleM.Context where
 abbrev OfNatModuleM := ReaderT OfNatModuleM.Context GoalM
 
 abbrev OfNatModuleM.run (natStructId : Nat) (x : OfNatModuleM α) : GoalM α :=
-  x { natStructId }
+  ReaderT.run x { natStructId }
 
 abbrev getNatStructId : OfNatModuleM Nat :=
   return (← read).natStructId

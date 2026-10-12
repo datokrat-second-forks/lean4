@@ -632,8 +632,10 @@ Additionally `Std.CloseableChannel` can be closed if necessary, unlike `Std.Chan
 This introduces a need for error handling in some cases, thus it is usually easier to use
 `Std.Channel` if applicable.
 -/
-@[expose] -- for codegen
-def CloseableChannel (α : Type) : Type := CloseableChannel.Flavors α
+structure CloseableChannel (α : Type) where
+  private mk ::
+  private inner : CloseableChannel.Flavors α
+deriving Nonempty
 
 /--
 A multi-producer multi-consumer FIFO channel that offers both bounded and unbounded buffering
@@ -644,14 +646,10 @@ Additionally `Std.CloseableChannel.Sync` can be closed if necessary, unlike `Std
 This introduces the need to handle errors in some cases, thus it is usually easier to use
 `Std.Channel` if applicable.
 -/
-@[expose] -- for codegen
-def CloseableChannel.Sync (α : Type) : Type := CloseableChannel α
-
-instance : Nonempty (CloseableChannel α) :=
-  by exact inferInstanceAs (Nonempty (CloseableChannel.Flavors α))
-
-instance : Nonempty (CloseableChannel.Sync α) :=
-  by exact inferInstanceAs (Nonempty (CloseableChannel α))
+structure CloseableChannel.Sync (α : Type) where
+  private mk ::
+  private inner : CloseableChannel α
+deriving Nonempty
 
 namespace CloseableChannel
 
@@ -664,16 +662,16 @@ Create a new channel. If:
 -/
 def new (capacity : Option Nat := none) : BaseIO (CloseableChannel α) := do
   match capacity with
-  | none => return .unbounded (← CloseableChannel.Unbounded.new)
-  | some 0 => return .zero (← CloseableChannel.Zero.new)
-  | some (n + 1) => return .bounded (← CloseableChannel.Bounded.new (n + 1) (by omega))
+  | none => return ⟨.unbounded (← CloseableChannel.Unbounded.new)⟩
+  | some 0 => return ⟨.zero (← CloseableChannel.Zero.new)⟩
+  | some (n + 1) => return ⟨.bounded (← CloseableChannel.Bounded.new (n + 1) (by omega))⟩
 
 /--
 Try to send a value to the channel. If this can be completed right away without blocking return
 `true`; otherwise, don't send the value and return `false`.
 -/
 def trySend (ch : CloseableChannel α) (v : α) : BaseIO Bool :=
-  match ch with
+  match ch.inner with
   | .unbounded ch => CloseableChannel.Unbounded.trySend ch v
   | .zero ch => CloseableChannel.Zero.trySend ch v
   | .bounded ch => CloseableChannel.Bounded.trySend ch v
@@ -684,7 +682,7 @@ completed. Note that the task may resolve to `Except.error` if the channel was c
 could be completed.
 -/
 def send (ch : CloseableChannel α) (v : α) : BaseIO (Task (Except Error Unit)) :=
-  match ch with
+  match ch.inner with
   | .unbounded ch => CloseableChannel.Unbounded.send ch v
   | .zero ch => CloseableChannel.Zero.send ch v
   | .bounded ch => CloseableChannel.Bounded.send ch v
@@ -699,7 +697,7 @@ When a channel is closed:
   calls
 -/
 def close (ch : CloseableChannel α) : EIO Error Unit :=
-  match ch with
+  match ch.inner with
   | .unbounded ch => CloseableChannel.Unbounded.close ch
   | .zero ch => CloseableChannel.Zero.close ch
   | .bounded ch => CloseableChannel.Bounded.close ch
@@ -708,7 +706,7 @@ def close (ch : CloseableChannel α) : EIO Error Unit :=
 Return `true` if the channel is closed.
 -/
 def isClosed (ch : CloseableChannel α) : BaseIO Bool :=
-  match ch with
+  match ch.inner with
   | .unbounded ch => CloseableChannel.Unbounded.isClosed ch
   | .zero ch => CloseableChannel.Zero.isClosed ch
   | .bounded ch => CloseableChannel.Bounded.isClosed ch
@@ -718,7 +716,7 @@ Try to receive a value from the channel, if this can be completed right away wit
 `some value`, otherwise return `none`.
 -/
 def tryRecv (ch : CloseableChannel α) : BaseIO (Option α) :=
-  match ch with
+  match ch.inner with
   | .unbounded ch => CloseableChannel.Unbounded.tryRecv ch
   | .zero ch => CloseableChannel.Zero.tryRecv ch
   | .bounded ch => CloseableChannel.Bounded.tryRecv ch
@@ -729,7 +727,7 @@ completed. Note that the task may resolve to `none` if the channel was closed be
 completed.
 -/
 def recv (ch : CloseableChannel α) : BaseIO (Task (Option α)) :=
-  match ch with
+  match ch.inner with
   | .unbounded ch => CloseableChannel.Unbounded.recv ch
   | .zero ch => CloseableChannel.Zero.recv ch
   | .bounded ch => CloseableChannel.Bounded.recv ch
@@ -741,7 +739,7 @@ In particular if `ch` is closed while waiting on this `Selector` and no data is 
 this will resolve to `none`.
 -/
 def recvSelector (ch : CloseableChannel α) : Selector (Option α) :=
-  match ch with
+  match ch.inner with
   | .unbounded ch => CloseableChannel.Unbounded.recvSelector ch
   | .zero ch => CloseableChannel.Zero.recvSelector ch
   | .bounded ch => CloseableChannel.Bounded.recvSelector ch
@@ -766,44 +764,44 @@ instance [Inhabited α] : AsyncRead (CloseableChannel α) (Option α) where
 instance [Inhabited α] : AsyncWrite (CloseableChannel α) α where
   write receiver x := do
     let task ← receiver.send x
-    Async.ofAsyncTask <| task.map (Except.mapError (IO.userError ∘ toString))
+    Async.ofAsyncTask <| ExceptT.mk <| task.map (Except.mapError (IO.userError ∘ toString))
 
 /--
 This function is a no-op and just a convenient way to expose the synchronous API of the channel.
 -/
 @[inline]
-def sync (ch : CloseableChannel α) : CloseableChannel.Sync α := ch
+def sync (ch : CloseableChannel α) : CloseableChannel.Sync α := ⟨ch⟩
 
 namespace Sync
 
 @[inherit_doc CloseableChannel.new, inline]
-def new (capacity : Option Nat := none) : BaseIO (Sync α) := CloseableChannel.new capacity
+def new (capacity : Option Nat := none) : BaseIO (Sync α) := Sync.mk <$> CloseableChannel.new capacity
 
 @[inherit_doc CloseableChannel.trySend, inline]
-def trySend (ch : Sync α) (v : α) : BaseIO Bool := CloseableChannel.trySend ch v
+def trySend (ch : Sync α) (v : α) : BaseIO Bool := CloseableChannel.trySend ch.inner v
 
 /--
 Send a value through the channel, blocking until the transmission could be completed. Note that this
 function may throw an error when trying to send to an already closed channel.
 -/
 def send (ch : Sync α) (v : α) : EIO Error Unit := do
-  EIO.ofExcept (← IO.wait (← CloseableChannel.send ch v))
+  EIO.ofExcept (← IO.wait (← CloseableChannel.send ch.inner v))
 
 @[inherit_doc CloseableChannel.close, inline]
-def close (ch : Sync α) : EIO Error Unit := CloseableChannel.close ch
+def close (ch : Sync α) : EIO Error Unit := CloseableChannel.close ch.inner
 
 @[inherit_doc CloseableChannel.isClosed, inline]
-def isClosed (ch : Sync α) : BaseIO Bool := CloseableChannel.isClosed ch
+def isClosed (ch : Sync α) : BaseIO Bool := CloseableChannel.isClosed ch.inner
 
 @[inherit_doc CloseableChannel.tryRecv, inline]
-def tryRecv (ch : Sync α) : BaseIO (Option α) := CloseableChannel.tryRecv ch
+def tryRecv (ch : Sync α) : BaseIO (Option α) := CloseableChannel.tryRecv ch.inner
 
 /--
 Receive a value from the channel, blocking until the transmission could be completed. Note that the
 return value may be `none` if the channel was closed before it could be completed.
 -/
 def recv (ch : Sync α) : BaseIO (Option α) := do
-  IO.wait (← CloseableChannel.recv ch)
+  IO.wait (← CloseableChannel.recv ch.inner)
 
 private partial def forIn [Monad m] [MonadLiftT BaseIO m]
     (ch : Sync α) (f : α → β → m (ForInStep β)) : β → m β := fun b => do
@@ -843,10 +841,10 @@ If a channel needs to be closed to indicate some sort of completion event use
 `Std.CloseableChannel.Sync` instead. Note that `Std.CloseableChannel.Sync` introduces a need for error
 handling in some cases, thus `Std.Channel.Sync` is usually easier to use if applicable.
 -/
-@[expose] def Channel.Sync (α : Type) : Type := Channel α
-
-instance : Nonempty (Channel.Sync α) :=
-  inferInstanceAs (Nonempty (Channel α))
+structure Channel.Sync (α : Type) where
+  private mk ::
+  private inner : Channel α
+deriving Nonempty
 
 namespace Channel
 
@@ -919,30 +917,30 @@ instance [Inhabited α] : AsyncWrite (Channel α) α where
     Async.ofTask task
 
 @[inherit_doc CloseableChannel.sync, inline]
-def sync (ch : Channel α) : Channel.Sync α := ch
+def sync (ch : Channel α) : Channel.Sync α := ⟨ch⟩
 
 namespace Sync
 
 @[inherit_doc Channel.new, inline]
-def new (capacity : Option Nat := none) : BaseIO (Sync α) := Channel.new capacity
+def new (capacity : Option Nat := none) : BaseIO (Sync α) := Sync.mk <$> Channel.new capacity
 
 @[inherit_doc Channel.trySend, inline]
-def trySend (ch : Sync α) (v : α) : BaseIO Bool := Channel.trySend ch v
+def trySend (ch : Sync α) (v : α) : BaseIO Bool := Channel.trySend ch.inner v
 
 /--
 Send a value through the channel, blocking until the transmission could be completed.
 -/
 def send (ch : Sync α) (v : α) : BaseIO Unit := do
-  IO.wait (← Channel.send ch v)
+  IO.wait (← Channel.send ch.inner v)
 
 @[inherit_doc Channel.tryRecv, inline]
-def tryRecv (ch : Sync α) : BaseIO (Option α) := Channel.tryRecv ch
+def tryRecv (ch : Sync α) : BaseIO (Option α) := Channel.tryRecv ch.inner
 
 /--
 Receive a value from the channel, blocking until the transmission could be completed.
 -/
 def recv [Inhabited α] (ch : Sync α) : BaseIO α := do
-  IO.wait (← Channel.recv ch)
+  IO.wait (← Channel.recv ch.inner)
 
 private partial def forIn [Inhabited α] [Monad m] [MonadLiftT BaseIO m]
     (ch : Sync α) (f : α → β → m (ForInStep β)) : β → m β := fun b => do

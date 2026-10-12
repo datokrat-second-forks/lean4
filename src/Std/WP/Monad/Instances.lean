@@ -41,8 +41,8 @@ variable {m : Type u → Type z}
 
 /-- `Id`'s `WP` interpretation: `Prop` assertions and no exceptions. -/
 instance Id.wpInst {α : Type u} : WP (Id α) α Prop EStack⟨⟩ where
-  wpTrans x := ⟨fun post _epost => post x⟩
-  wp_trans_monotone x := fun _ _ _ _ _ hpost => hpost x
+  wpTrans x := ⟨fun post _epost => post x.run⟩
+  wp_trans_monotone x := fun _ _ _ _ _ hpost => hpost x.run
 
 /-- `Id` is a WPMonad with `Prop` assertions and no exceptions. -/
 instance Id.instWPMonad : WPMonad Id.{u} Prop EStack⟨⟩ where
@@ -220,11 +220,11 @@ instance Except.instWPMonad : WPMonad (Except ε) Prop (ε → Prop) where
 
 /-- `EStateM ε σ`'s `WP` interpretation combining state and exceptions. -/
 instance EStateM.wpInst {α : Type} : WP (EStateM ε σ α) α (σ → Prop) (ε → σ → Prop) where
-  wpTrans x := ⟨fun post epost s => match x s with
+  wpTrans x := ⟨fun post epost s => match x.run s with
     | .ok a s' => post a s'
     | .error el s' => epost el s'⟩
   wp_trans_monotone x := fun post post' epost epost' hepost hpost s => by
-    cases hxs : x s with
+    cases hxs : x.run s with
     | ok a s' =>
       simpa [hxs] using hpost a s'
     | error el s' =>
@@ -236,6 +236,6 @@ instance EStateM.instWPMonad : WPMonad (EStateM ε σ) (σ → Prop) (ε → σ 
   pure_le_wp_pure x := fun post epost s => PartialOrder.rel_refl
   bind_le_wp_bind x f := fun post epost s => by
     simp only [WP.wp, WP.wpTrans, bind, EStateM.bind]
-    cases (x s) <;> exact PartialOrder.rel_refl
+    cases x.run s <;> exact PartialOrder.rel_refl
 
 end Std.WP

@@ -45,7 +45,7 @@ private theorem forIn'_cast {γ : Type u₁} {δ : Type u} {n : Type u → Type 
 section List
 
 @[simp, grind =] theorem ForIn.toList_list {γ : Type u₁} (xs : List γ) : ForIn.toList xs = xs := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, List.forIn_pure_yield_eq_foldl]
+  simp only [ForIn.toList, ForIn.toArray, List.forIn_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a) #[] xs).toList = xs
   rw [foldl_push_toList]; simp
 
@@ -64,7 +64,7 @@ section Array
 
 @[simp, grind =] theorem ForIn.toList_array {γ : Type u₁} (xs : Array γ) :
     ForIn.toList xs = xs.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, ← Array.forIn_toList,
+  simp only [ForIn.toList, ForIn.toArray, ← Array.forIn_toList,
     List.forIn_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a) #[] xs.toList).toList = xs.toList
   rw [foldl_push_toList]; simp
@@ -86,7 +86,7 @@ section LegacyRange
 
 @[simp, grind =] theorem ForIn.toList_range (r : Std.Legacy.Range) :
     ForIn.toList r = List.range' r.start r.size r.step := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, Std.Legacy.Range.forIn_eq_forIn_range',
+  simp only [ForIn.toList, ForIn.toArray, Std.Legacy.Range.forIn_eq_forIn_range',
     List.forIn_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a) #[]
     (List.range' r.start r.size r.step)).toList = _
@@ -132,7 +132,7 @@ loop iterates its `Std.ToIterator` reaches the iterator lemmas through this one 
 @[simp, grind =] theorem ForIn.toList_iter {α γ : Type w} [Iterator α Id γ]
     [Finite α Id] [IteratorLoop α Id Id] [LawfulIteratorLoop α Id Id] (it : Iter (α := α) γ) :
     ForIn.toList it = it.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, ← Iter.forIn_toList,
+  simp only [ForIn.toList, ForIn.toArray, ← Iter.forIn_toList,
     List.forIn_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a) #[] it.toList).toList = it.toList
   rw [foldl_push_toList]; simp
@@ -153,7 +153,7 @@ open Std.Iterators in
 @[simp, grind =] theorem ForIn.toList_iterM_id {α γ : Type w} [Iterator α Id γ] [Finite α Id]
     [IteratorLoop α Id Id] [LawfulIteratorLoop α Id Id] (it : IterM (α := α) Id γ) :
     ForIn.toList it = it.toList.run := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, ← IterM.forIn_toList,
+  simp only [ForIn.toList, ForIn.toArray, ← IterM.forIn_toList,
     List.forIn_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a) #[] it.toList.run).toList = it.toList.run
   rw [foldl_push_toList]; simp
@@ -175,7 +175,7 @@ variable {α : Type u} [LE α] [DecidableLE α] [UpwardEnumerable α] [Rxc.IsAlw
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
 
 theorem ForIn.toList_rcc (r : Rcc α) : ForIn.toList r = r.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, forIn, Rcc.forIn'_eq_forIn'_toList,
+  simp only [ForIn.toList, ForIn.toArray, forIn, Rcc.forIn'_eq_forIn'_toList,
     List.forIn'_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a.val) #[] r.toList.attach).toList = r.toList
   rw [← List.foldl_map (f := Subtype.val) (g := fun acc a => Array.push acc a),
@@ -204,7 +204,7 @@ variable {α : Type u} [LE α] [LT α] [DecidableLT α] [UpwardEnumerable α] [R
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [LawfulUpwardEnumerableLT α]
 
 theorem ForIn.toList_rco (r : Rco α) : ForIn.toList r = r.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, forIn, Rco.forIn'_eq_forIn'_toList,
+  simp only [ForIn.toList, ForIn.toArray, forIn, Rco.forIn'_eq_forIn'_toList,
     List.forIn'_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a.val) #[] r.toList.attach).toList = r.toList
   rw [← List.foldl_map (f := Subtype.val) (g := fun acc a => Array.push acc a),
@@ -233,7 +233,7 @@ variable {α : Type u} [LE α] [UpwardEnumerable α] [Rxi.IsAlwaysFinite α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
 
 theorem ForIn.toList_rci (r : Rci α) : ForIn.toList r = r.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, forIn, Rci.forIn'_eq_forIn'_toList,
+  simp only [ForIn.toList, ForIn.toArray, forIn, Rci.forIn'_eq_forIn'_toList,
     List.forIn'_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a.val) #[] r.toList.attach).toList = r.toList
   rw [← List.foldl_map (f := Subtype.val) (g := fun acc a => Array.push acc a),
@@ -263,7 +263,7 @@ variable {α : Type u} [LE α] [DecidableLE α] [LT α] [DecidableLT α] [Upward
 
 omit [DecidableLT α] in
 theorem ForIn.toList_roc (r : Roc α) : ForIn.toList r = r.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, forIn, Roc.forIn'_eq_forIn'_toList,
+  simp only [ForIn.toList, ForIn.toArray, forIn, Roc.forIn'_eq_forIn'_toList,
     List.forIn'_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a.val) #[] r.toList.attach).toList = r.toList
   rw [← List.foldl_map (f := Subtype.val) (g := fun acc a => Array.push acc a),
@@ -292,7 +292,7 @@ variable {α : Type u} [LT α] [DecidableLT α] [UpwardEnumerable α] [Rxo.IsAlw
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
 
 theorem ForIn.toList_roo (r : Roo α) : ForIn.toList r = r.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, forIn, Roo.forIn'_eq_forIn'_toList,
+  simp only [ForIn.toList, ForIn.toArray, forIn, Roo.forIn'_eq_forIn'_toList,
     List.forIn'_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a.val) #[] r.toList.attach).toList = r.toList
   rw [← List.foldl_map (f := Subtype.val) (g := fun acc a => Array.push acc a),
@@ -322,7 +322,7 @@ variable {α : Type u} [LT α] [DecidableLT α] [UpwardEnumerable α] [Rxi.IsAlw
 
 omit [DecidableLT α] in
 theorem ForIn.toList_roi (r : Roi α) : ForIn.toList r = r.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, forIn, Roi.forIn'_eq_forIn'_toList,
+  simp only [ForIn.toList, ForIn.toArray, forIn, Roi.forIn'_eq_forIn'_toList,
     List.forIn'_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a.val) #[] r.toList.attach).toList = r.toList
   rw [← List.foldl_map (f := Subtype.val) (g := fun acc a => Array.push acc a),
@@ -351,7 +351,7 @@ variable {α : Type u} [Least? α] [LE α] [DecidableLE α] [UpwardEnumerable α
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLeast? α] [LawfulUpwardEnumerableLE α]
 
 theorem ForIn.toList_ric (r : Ric α) : ForIn.toList r = r.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, forIn, Ric.forIn'_eq_forIn'_toList,
+  simp only [ForIn.toList, ForIn.toArray, forIn, Ric.forIn'_eq_forIn'_toList,
     List.forIn'_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a.val) #[] r.toList.attach).toList = r.toList
   rw [← List.foldl_map (f := Subtype.val) (g := fun acc a => Array.push acc a),
@@ -380,7 +380,7 @@ variable {α : Type u} [Least? α] [LT α] [DecidableLT α] [UpwardEnumerable α
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLeast? α] [LawfulUpwardEnumerableLT α]
 
 theorem ForIn.toList_rio (r : Rio α) : ForIn.toList r = r.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, forIn, Rio.forIn'_eq_forIn'_toList,
+  simp only [ForIn.toList, ForIn.toArray, forIn, Rio.forIn'_eq_forIn'_toList,
     List.forIn'_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a.val) #[] r.toList.attach).toList = r.toList
   rw [← List.foldl_map (f := Subtype.val) (g := fun acc a => Array.push acc a),
@@ -410,7 +410,7 @@ variable {α : Type u} [LT α] [Least? α] [UpwardEnumerable α] [Rxi.IsAlwaysFi
 
 omit [LT α] [LawfulUpwardEnumerableLT α] in
 theorem ForIn.toList_rii (r : Rii α) : ForIn.toList r = r.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, forIn, Rii.forIn'_eq_forIn'_toList,
+  simp only [ForIn.toList, ForIn.toArray, forIn, Rii.forIn'_eq_forIn'_toList,
     List.forIn'_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a.val) #[] r.toList.attach).toList = r.toList
   rw [← List.foldl_map (f := Subtype.val) (g := fun acc a => Array.push acc a),
@@ -444,7 +444,7 @@ open Std.Iterators in
     [ToIterator (Slice γ) Id α γ'] [Iterator α Id γ'] [Finite α Id]
     [IteratorLoop α Id Id] [LawfulIteratorLoop α Id Id] (s : Slice γ) :
     ForIn.toList s = s.toList := by
-  simp only [ForIn.toList, ForIn.toArray, Id.run, ← Slice.forIn_toList,
+  simp only [ForIn.toList, ForIn.toArray, ← Slice.forIn_toList,
     List.forIn_pure_yield_eq_foldl]
   change (List.foldl (fun acc a => acc.push a) #[] s.toList).toList = s.toList
   rw [foldl_push_toList]; simp

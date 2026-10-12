@@ -148,7 +148,7 @@ private def mkRingContext (h : Expr) : ProofM Expr := do
 private abbrev withProofContext (x : ProofM Expr) : LinearM Expr := do
   let ctx := mkFVar (← mkFreshFVarId)
   let ringCtx := mkFVar (← mkFreshFVarId)
-  go { ctx, ringCtx } |>.run' {}
+  go.run { ctx, ringCtx } |>.run' {}
 where
   go : ProofM Expr := do
     let h ← x

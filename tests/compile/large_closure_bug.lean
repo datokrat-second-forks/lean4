@@ -93,7 +93,7 @@ def NonDetT.extract {α : Type} : (s : VeilM σ α) → (ex : ExtractNonDet s) �
   | .pure x, _ => fun s => (Option.some (Except.ok (x, s)))
   | .vis x f, .vis _ _ _ =>
     fun s =>
-      match x s with
+      match (x.run s).run with
       | Option.some (Except.ok (y, s')) =>
         extract (f y) (by rename_i a ; exact a y) s'
       | Option.none => (Option.none)

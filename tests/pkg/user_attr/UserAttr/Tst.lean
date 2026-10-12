@@ -8,8 +8,8 @@ public section
 
 -- Like in extraModUses.lean, but there we do not have registered custom attributes
 meta def resetExtraModUses : Lean.CoreM Unit := do
-  Lean.modifyEnv (Lean.PersistentEnvExtension.setState Lean.extraModUses · ⟨[], ∅⟩)
-  Lean.modifyEnv (Lean.PersistentEnvExtension.setState Lean.isExtraRevModUseExt · ⟨[], ()⟩)
+  Lean.modifyEnv (Lean.PersistentEnvExtension.setState Lean.extraModUses.toPersistentEnvExtension · ⟨[], ∅⟩)
+  Lean.modifyEnv (Lean.PersistentEnvExtension.setState Lean.isExtraRevModUseExt.toPersistentEnvExtension · ⟨[], ()⟩)
 
 attribute [-simp] Nat.add_left_cancel_iff Nat.add_right_cancel_iff
 

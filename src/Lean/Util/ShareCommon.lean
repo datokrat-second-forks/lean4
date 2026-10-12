@@ -46,7 +46,7 @@ instance PShareCommonT.monadShareCommon [Monad m] : MonadShareCommon (PShareComm
 
 @[inline] def ShareCommonT.run [Monad m] : ShareCommonT m α → m α := _root_.ShareCommonT.run
 @[inline] def PShareCommonT.run [Monad m] : PShareCommonT m α → m α := _root_.ShareCommonT.run
-@[inline] def ShareCommonM.run : ShareCommonM α → α := ShareCommonT.run
-@[inline] def PShareCommonM.run : PShareCommonM α → α := PShareCommonT.run
+@[inline] def ShareCommonM.run (x : ShareCommonM α) : α := (ShareCommonT.run x).run
+@[inline] def PShareCommonM.run (x : PShareCommonM α) : α := (PShareCommonT.run x).run
 
 def shareCommon (a : α) : α := (withShareCommon a : ShareCommonM α).run

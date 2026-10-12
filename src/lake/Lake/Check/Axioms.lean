@@ -68,7 +68,7 @@ public def usedAxioms (env : LeanExport.ExportedEnv) : Array (Lean.Name × Lean.
           if let some (.axiomInfo ..) := env.constMap[ref]? then
             modify fun (seen, used) =>
               if seen.contains ref then (seen, used) else (seen.insert ref, used.push (ref, name))
-  (collect.run ({}, #[])).2.2
+  (collect.run ({}, #[])).run.2.2
 
 public def checkAxioms (solution : LeanExport.ExportedEnv) (theoremTargets : Array Lean.Name)
     (definitionTargets : Array Lean.Name) (legalAxioms : Array Lean.Name) : Except String Unit := do

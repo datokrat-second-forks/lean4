@@ -106,7 +106,10 @@ instance : CoeOut (TSyntax ks) Syntax where
   coe stx := stx.raw
 
 instance : Coe SyntaxNodeKind SyntaxNodeKinds where
-  coe k := List.cons k List.nil
+  coe k := .mk (List.cons k List.nil)
+
+instance : Coe (List SyntaxNodeKind) SyntaxNodeKinds where
+  coe ks := .mk ks
 
 end Lean
 

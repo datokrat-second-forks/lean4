@@ -55,7 +55,8 @@ Converts a `PlainDateTime` to a `WallTime`.
 -/
 def toWallTime (dt : PlainDateTime) : WallTime :=
   let days := dt.date.toEpochDay
-  let nanos := days.toSeconds + dt.time.toSeconds |>.mul 1000000000
+  let nanos : Nanosecond.Offset :=
+    .mk ((days.toSeconds + dt.time.toSeconds).toUnitVal.mul 1000000000)
   let nanos := nanos.val + dt.time.nanosecond.val
   WallTime.ofNanoseconds (Nanosecond.Offset.ofInt nanos)
 
@@ -147,8 +148,8 @@ def ofWallTime (stamp : WallTime) : PlainDateTime := Id.run do
   let nano : Bounded.LE 0 999999999 := Bounded.LE.byEmod nanos.val 1000000000 (by decide)
 
   return {
-    date := PlainDate.ofYearMonthDayClip year hmon (Day.Ordinal.ofFin (Fin.succ mday))
-    time := PlainTime.ofHourMinuteSecondsNano (hour.expandTop (by decide)) minute (second.expandTop (by decide)) nano
+    date := PlainDate.ofYearMonthDayClip (.ofInt year) hmon (Day.Ordinal.ofFin (Fin.succ mday))
+    time := PlainTime.ofHourMinuteSecondsNano (.mk (hour.expandTop (by decide))) (.mk minute) (.mk (second.expandTop (by decide))) (.mk nano)
   }
 
 /--
@@ -531,7 +532,7 @@ def dayOfYear (date : PlainDateTime) : Day.Ordinal.OfYear date.year.isLeap :=
 Determines the quarter of the year for the given `PlainDateTime`.
 -/
 @[inline]
-def quarter (date : PlainDateTime) : Bounded.LE 1 4 :=
+def quarter (date : PlainDateTime) : Month.Quarter :=
   date.date.quarter
 
 /--

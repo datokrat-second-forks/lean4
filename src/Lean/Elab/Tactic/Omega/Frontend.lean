@@ -104,13 +104,13 @@ but there was never enough subexpression sharing to make it effective.
 -/
 partial def asLinearCombo (e : Expr) : OmegaM (LinearCombo × OmegaM Expr × List Expr) := do
   let cache ← get
-  match cache.get? e with
+  match cache.map.get? e with
   | some (lc, prf) =>
     trace[omega] "Found in cache: {e}"
     return (lc, prf, ∅)
   | none =>
     let (lc, proof, r) ← asLinearComboImpl e
-    modifyThe Cache fun cache => (cache.insert e (lc, proof.run' cache))
+    modifyThe Cache fun cache => ⟨cache.map.insert e (lc, proof.run' cache)⟩
     pure (lc, proof, r)
 
 /--

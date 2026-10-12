@@ -19,9 +19,10 @@ An exclusion primitive that allows a number of readers or at most one writer.
 
 If you want to guard shared state, use `SharedMutex α` instead.
 -/
-def BaseSharedMutex : Type := SharedMutexImpl.type
+structure BaseSharedMutex : Type where
+  private ref : SharedMutexImpl.type
 
-instance : Nonempty BaseSharedMutex := by exact SharedMutexImpl.property
+instance : Nonempty BaseSharedMutex := ⟨⟨Classical.choice SharedMutexImpl.property⟩⟩
 
 /-- Creates a new `BaseSharedMutex`. -/
 @[extern "lean_io_basesharedmutex_new"]
@@ -112,7 +113,7 @@ def SharedMutex.atomically [Monad m] [MonadLiftT BaseIO m] [MonadFinally m]
     (mutex : SharedMutex α) (k : AtomicT α m β) : m β := do
   try
     mutex.mutex.write
-    k mutex.ref
+    ReaderT.run k mutex.ref
   finally
     mutex.mutex.unlockWrite
 
@@ -128,7 +129,7 @@ def SharedMutex.tryAtomically [Monad m] [MonadLiftT BaseIO m] [MonadFinally m]
     (mutex : SharedMutex α) (k : AtomicT α m β) : m (Option β) := do
   if ← mutex.mutex.tryWrite then
     try
-      some <$> k mutex.ref
+      some <$> ReaderT.run k mutex.ref
     finally
       mutex.mutex.unlockWrite
   else
@@ -146,7 +147,7 @@ def SharedMutex.atomicallyRead [Monad m] [MonadLiftT BaseIO m] [MonadFinally m]
   try
     mutex.mutex.read
     let state ← (mutex.ref.get : BaseIO α)
-    k state
+    k.run state
   finally
     mutex.mutex.unlockRead
 
@@ -163,7 +164,7 @@ def SharedMutex.tryAtomicallyRead [Monad m] [MonadLiftT BaseIO m] [MonadFinally 
   if ← mutex.mutex.tryRead then
     try
       let state ← (mutex.ref.get : BaseIO α)
-      some <$> k state
+      some <$> k.run state
     finally
       mutex.mutex.unlockRead
   else

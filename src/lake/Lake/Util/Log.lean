@@ -254,7 +254,7 @@ public abbrev MonadLogT (m : Type u → Type v) (n : Type v → Type w) :=
 namespace MonadLogT
 
 public instance [Pure n] [Inhabited α] : Inhabited (MonadLogT m n α) :=
-  ⟨fun _ => pure Inhabited.default⟩
+  ⟨.mk fun _ => pure Inhabited.default⟩
 
 public instance [Monad n] [MonadLiftT m n] : MonadLog (MonadLogT m n) where
   logEntry e := do (← read).logEntry e

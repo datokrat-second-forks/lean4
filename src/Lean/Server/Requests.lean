@@ -225,7 +225,7 @@ abbrev RequestT m := ReaderT RequestContext <| ExceptT RequestError m
 abbrev RequestM := ReaderT RequestContext <| EIO RequestError
 
 def RequestM.run (act : RequestM α) (rc : RequestContext) : EIO RequestError α :=
-  act rc
+  ReaderT.run act rc
 
 abbrev RequestTask.pure (a : α) : RequestTask α := ServerTask.pure (.ok a)
 
@@ -265,24 +265,24 @@ def asTask (t : RequestM α) : RequestM (RequestTask α) := do
   ServerTask.EIO.asTask <| t.run rc
 
 def pureTask (t : RequestM α) : RequestM (RequestTask α) := do
-  let r ← t.run
+  let r ← t
   return ServerTask.pure <| .ok r
 
 def mapTaskCheap (t : ServerTask α) (f : α → RequestM β) : RequestM (RequestTask β) := do
   let rc ← readThe RequestContext
-  ServerTask.EIO.mapTaskCheap (f · rc) t
+  ServerTask.EIO.mapTaskCheap (fun a => ReaderT.run (f a) rc) t
 
 def mapTaskCostly (t : ServerTask α) (f : α → RequestM β) : RequestM (RequestTask β) := do
   let rc ← readThe RequestContext
-  ServerTask.EIO.mapTaskCostly (f · rc) t
+  ServerTask.EIO.mapTaskCostly (fun a => ReaderT.run (f a) rc) t
 
 def bindTaskCheap (t : ServerTask α) (f : α → RequestM (RequestTask β)) : RequestM (RequestTask β) := do
   let rc ← readThe RequestContext
-  ServerTask.EIO.bindTaskCheap t (f · rc)
+  ServerTask.EIO.bindTaskCheap t (fun a => ReaderT.run (f a) rc)
 
 def bindTaskCostly (t : ServerTask α) (f : α → RequestM (RequestTask β)) : RequestM (RequestTask β) := do
   let rc ← readThe RequestContext
-  ServerTask.EIO.bindTaskCostly t (f · rc)
+  ServerTask.EIO.bindTaskCostly t (fun a => ReaderT.run (f a) rc)
 
 def mapRequestTaskCheap (t : RequestTask α) (f : α → RequestM β) : RequestM (RequestTask β) := do
   mapTaskCheap (t := t) fun
@@ -371,12 +371,12 @@ open Language.Lean in
 partial def findCmdParsedSnap (doc : EditableDocument) (hoverPos : String.Pos.Raw)
     : ServerTask (Option CommandParsedSnapshot) := Id.run do
   let some headerParsed := doc.initSnap.result?
-    | .pure none
-  headerParsed.processedSnap.task.asServerTask.bindCheap fun headerProcessed => Id.run do
+    | return .pure none
+  return headerParsed.processedSnap.task.asServerTask.bindCheap fun headerProcessed => Id.run do
     let some headerSuccess := headerProcessed.result?
       | return .pure none
     let firstCmdSnapTask : ServerTask CommandParsedSnapshot := headerSuccess.firstCmdSnap.task
-    firstCmdSnapTask.bindCheap go
+    return firstCmdSnapTask.bindCheap go
 where
   go (cmdParsed : CommandParsedSnapshot) : ServerTask (Option CommandParsedSnapshot) := Id.run do
     if containsHoverPos cmdParsed then
@@ -388,8 +388,8 @@ where
       return .pure none
     match cmdParsed.nextCmdSnap? with
     | some next =>
-      next.task.asServerTask.bindCheap go
-    | none => .pure none
+      return next.task.asServerTask.bindCheap go
+    | none => return .pure none
 
   containsHoverPos (cmdParsed : CommandParsedSnapshot) : Bool := Id.run do
     let some range := cmdParsed.stx.getRangeWithTrailing? (canonicalOnly := true)
@@ -438,20 +438,20 @@ partial def findInfoTreeAtPos
 open Elab.Command in
 def runCommandElabM (snap : Snapshot) (c : RequestT CommandElabM α) : RequestM α := do
   let rc ← readThe RequestContext
-  match ← snap.runCommandElabM rc.doc.meta (c.run rc) with
+  match ← snap.runCommandElabM rc.doc.meta (c.run rc).run with
   | .ok v => return v
   | .error e => throw e
 
 def runCoreM (snap : Snapshot) (c : RequestT CoreM α) : RequestM α := do
   let rc ← readThe RequestContext
-  match ← snap.runCoreM rc.doc.meta (c.run rc) with
+  match ← snap.runCoreM rc.doc.meta (c.run rc).run with
   | .ok v => return v
   | .error e => throw e
 
 open Elab.Term in
 def runTermElabM (snap : Snapshot) (c : RequestT TermElabM α) : RequestM α := do
   let rc ← readThe RequestContext
-  match ← snap.runTermElabM rc.doc.meta (c.run rc) with
+  match ← snap.runTermElabM rc.doc.meta (c.run rc).run with
   | .ok v => return v
   | .error e => throw e
 

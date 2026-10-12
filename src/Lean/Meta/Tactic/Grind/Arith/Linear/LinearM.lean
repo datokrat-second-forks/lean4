@@ -33,7 +33,7 @@ instance (m n) [MonadLift m n] [MonadGetStruct m] : MonadGetStruct n where
 abbrev LinearM := ReaderT LinearM.Context GoalM
 
 abbrev LinearM.run (structId : Nat) (x : LinearM α) : GoalM α :=
-  x { structId }
+  ReaderT.run x { structId }
 
 abbrev getStructId : LinearM Nat :=
   return (← read).structId

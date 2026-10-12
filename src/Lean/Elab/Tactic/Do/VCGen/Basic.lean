@@ -120,7 +120,7 @@ def liftSimpM (x : SimpM α) : VCGenM α := do
   let ctx ← read
   let s ← get
   let mref := (Simp.mkDefaultMethodsCore ctx.simprocs).toMethodsRef
-  let (a, simpState) ← x mref ctx.simpCtx |>.run s.simpState
+  let (a, simpState) ← ReaderT.run (ReaderT.run x mref) ctx.simpCtx |>.run s.simpState
   set { s with simpState }
   return a
 

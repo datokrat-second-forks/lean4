@@ -23,9 +23,10 @@ private opaque SocketImpl : NonemptyType.{0}
 /--
 Represents a UDP socket.
 -/
-def Socket : Type := SocketImpl.type
+structure Socket : Type where
+  private ref : SocketImpl.type
 
-instance : Nonempty Socket := by exact SocketImpl.property
+instance : Nonempty Socket := ⟨⟨Classical.choice SocketImpl.property⟩⟩
 
 namespace Socket
 

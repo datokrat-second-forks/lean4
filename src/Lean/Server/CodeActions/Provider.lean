@@ -36,12 +36,12 @@ A code action which calls all `@[hole_code_action]` code actions on each hole
   let startPos := doc.meta.text.lspPosToUtf8Pos params.range.start
   let endPos := doc.meta.text.lspPosToUtf8Pos params.range.end
   have holes := snap.infoTree.foldInfo (init := #[]) fun ctx info result => Id.run do
-    let .ofTermInfo info := info | result
+    let .ofTermInfo info := info | return result
     unless [``elabHole, ``elabSyntheticHole, ``elabSorry].contains info.elaborator do
       return result
-    let (some head, some tail) := (info.stx.getPos? true, info.stx.getTailPos? true) | result
+    let (some head, some tail) := (info.stx.getPos? true, info.stx.getTailPos? true) | return result
     unless head ≤ endPos && startPos ≤ tail do return result
-    result.push (ctx, info)
+    return result.push (ctx, info)
   let #[(ctx, info)] := holes | return #[]
   (holeCodeActionExt.getState snap.env).2.flatMapM (· params snap ctx info)
 
@@ -120,7 +120,7 @@ where
             if let some pos' := stx[2*i].getPos? then
               if range.stop < pos' then
                 return i
-          (stx.getNumArgs + 1) / 2
+          return (stx.getNumArgs + 1) / 2
         .tacticSeq (bracket || preferred pos) i ((stx, 0) :: stack)
       let mut childRes := none
       for i in (*...stx.getNumArgs).iter.stepSize 2 do
@@ -175,10 +175,10 @@ A code action which calls all `@[command_code_action]` code actions on each comm
   let startPos := doc.meta.text.lspPosToUtf8Pos params.range.start
   let endPos := doc.meta.text.lspPosToUtf8Pos params.range.end
   have cmds := snap.infoTree.foldInfoTree (init := #[]) fun ctx node result => Id.run do
-    let .node (.ofCommandInfo info) _ := node | result
-    let (some head, some tail) := (info.stx.getPos? true, info.stx.getTailPos? true) | result
+    let .node (.ofCommandInfo info) _ := node | return result
+    let (some head, some tail) := (info.stx.getPos? true, info.stx.getTailPos? true) | return result
     unless head ≤ endPos && startPos ≤ tail do return result
-    result.push (ctx, node)
+    return result.push (ctx, node)
   let actions := (cmdCodeActionExt.getState snap.env).2
   let mut out := #[]
   for (ctx, node) in cmds do

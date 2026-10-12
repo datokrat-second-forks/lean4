@@ -47,7 +47,7 @@ Parse `expr` as a `Nat` or `BitVec` constant depending on `ty`.
 public def getNatOrBvValue? (ty : Expr) (expr : Expr) : M (Option Nat) := do
   match_expr ty with
   | Nat =>
-    Sym.getNatValue? expr |>.run
+    return Sym.getNatValue? expr
   | BitVec _ =>
     let some ⟨_, distance⟩ := Sym.getBitVecValue? expr | return none
     return some distance.toNat

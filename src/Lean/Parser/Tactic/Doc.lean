@@ -179,7 +179,7 @@ builtin_initialize tacticTagExt
       for (decl, dTags) in tags do
         for t in dTags do
           exported := exported.push (decl, t)
-      exported
+      return exported
   }
 
 builtin_initialize
@@ -260,8 +260,8 @@ def getTacticExtensions (env : Environment) (tactic : Name) : Array String := Id
 /-- Gets the rendered extensions for the given canonical tactic name -/
 def getTacticExtensionString (env : Environment) (tactic : Name) : String := Id.run do
   let exts := getTacticExtensions env tactic
-  if exts.size == 0 then ""
-  else "\n\nExtensions:\n\n" ++ String.join (exts.toList.map bullet) |>.trimAsciiEnd |>.copy
+  if exts.size == 0 then return ""
+  else return "\n\nExtensions:\n\n" ++ String.join (exts.toList.map bullet) |>.trimAsciiEnd |>.copy
 where
   indentLine (str : String.Slice) : String :=
     (if str.all Char.isWhitespace then str.copy else "   " ++ str) ++ "\n"

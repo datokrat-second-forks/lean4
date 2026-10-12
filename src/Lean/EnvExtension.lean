@@ -15,7 +15,7 @@ public section
 namespace Lean
 
 /-- Simple `PersistentEnvExtension` that implements `exportEntriesFn` using a list of entries. -/
-@[expose] def SimplePersistentEnvExtension (α σ : Type) := PersistentEnvExtension α α (List α × σ)
+structure SimplePersistentEnvExtension (α σ : Type) extends PersistentEnvExtension α α (List α × σ)
 
 @[specialize] def mkStateFromImportedEntries {α σ : Type} (addEntryFn : σ → α → σ) (initState : σ) (as : Array (Array α)) : σ :=
   as.foldl (fun r es => es.foldl (fun r e => addEntryFn r e) r) initState
@@ -42,7 +42,7 @@ def SimplePersistentEnvExtension.replayOfFilter (p : σ → α → Bool)
     (newEntries, newEntries.foldl (init := s) addEntryFn)
 
 def registerSimplePersistentEnvExtension {α σ : Type} [Inhabited σ] (descr : SimplePersistentEnvExtensionDescr α σ) : IO (SimplePersistentEnvExtension α σ) :=
-  registerPersistentEnvExtension {
+  .mk <$> registerPersistentEnvExtension {
     name            := descr.name,
     mkInitial       := pure ([], descr.addImportedFn #[]),
     addImportedFn   := fun as => pure ([], descr.addImportedFn as),
@@ -62,36 +62,36 @@ def registerSimplePersistentEnvExtension {α σ : Type} [Inhabited σ] (descr : 
 namespace SimplePersistentEnvExtension
 
 instance {α σ : Type} [Inhabited σ] : Inhabited (SimplePersistentEnvExtension α σ) :=
-  inferInstanceAs (Inhabited (PersistentEnvExtension α α (List α × σ)))
+  ⟨⟨default⟩⟩
 
 /-- Get the list of values used to update the state of the given
 `SimplePersistentEnvExtension` in the current file. -/
 def getEntries {α σ : Type} [Inhabited σ] (ext : SimplePersistentEnvExtension α σ)
     (env : Environment) (asyncMode := ext.toEnvExtension.asyncMode) : List α :=
-  (PersistentEnvExtension.getState (asyncMode := asyncMode) ext env).1
+  (ext.toPersistentEnvExtension.getState (asyncMode := asyncMode) env).1
 
 /-- Get the current state of the given `SimplePersistentEnvExtension`. -/
 def getState {α σ : Type} [Inhabited σ] (ext : SimplePersistentEnvExtension α σ) (env : Environment)
     (asyncMode := ext.toEnvExtension.asyncMode) (asyncDecl : Name := .anonymous) : σ :=
-  (PersistentEnvExtension.getState (asyncMode := asyncMode) (asyncDecl := asyncDecl) ext env).2
+  (ext.toPersistentEnvExtension.getState (asyncMode := asyncMode) (asyncDecl := asyncDecl) env).2
 
 /-- Set the current state of the given `SimplePersistentEnvExtension`. This change is *not* persisted across files. -/
 def setState {α σ : Type} (ext : SimplePersistentEnvExtension α σ) (env : Environment) (s : σ) : Environment :=
-  PersistentEnvExtension.modifyState ext env (fun ⟨entries, _⟩ => (entries, s))
+  ext.toPersistentEnvExtension.modifyState env (fun ⟨entries, _⟩ => (entries, s))
 
 /-- Modify the state of the given extension in the given environment by applying the given function. This change is *not* persisted across files. -/
 def modifyState {α σ : Type} (ext : SimplePersistentEnvExtension α σ) (env : Environment) (f : σ → σ) : Environment :=
-  PersistentEnvExtension.modifyState ext env (fun ⟨entries, s⟩ => (entries, f s))
+  ext.toPersistentEnvExtension.modifyState env (fun ⟨entries, s⟩ => (entries, f s))
 
 end SimplePersistentEnvExtension
 
 /-- Environment extension for tagging declarations.
     Declarations must only be tagged in the module where they were declared. -/
-@[expose] def TagDeclarationExtension := SimplePersistentEnvExtension Name NameSet
+structure TagDeclarationExtension extends SimplePersistentEnvExtension Name NameSet
 
 def mkTagDeclarationExtension (name : Name := by exact decl_name%)
   (asyncMode : EnvExtension.AsyncMode := .mainOnly) : IO TagDeclarationExtension :=
-  registerSimplePersistentEnvExtension {
+  .mk <$> registerSimplePersistentEnvExtension {
     name          := name,
     addImportedFn := fun _ => {},
     addEntryFn    := fun s n => s.insert n,
@@ -104,7 +104,7 @@ def mkTagDeclarationExtension (name : Name := by exact decl_name%)
 namespace TagDeclarationExtension
 
 instance : Inhabited TagDeclarationExtension :=
-  inferInstanceAs (Inhabited (SimplePersistentEnvExtension Name NameSet))
+  ⟨⟨default⟩⟩
 
 def tag (ext : TagDeclarationExtension) (env : Environment) (declName : Name) : Environment :=
   if declName.isAnonymous then

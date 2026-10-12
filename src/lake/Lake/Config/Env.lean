@@ -132,7 +132,7 @@ public def computeToolchain : BaseIO String := do
   return (← IO.getEnv "ELAN_TOOLCHAIN").getD Lean.toolchain
 
 @[inline] def computeEnvCache? : BaseIO (Option Cache) := OptionT.run do
-  let cacheDir ← IO.getEnv "LAKE_CACHE_DIR"
+  let cacheDir ← OptionT.mk (IO.getEnv "LAKE_CACHE_DIR")
   guard cacheDir.isEmpty
   return ⟨cacheDir⟩
 

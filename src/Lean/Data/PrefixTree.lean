@@ -85,8 +85,9 @@ inductive WellFormed (cmp : α → α → Ordering) : PrefixTreeNode α β cmp �
 
 end PrefixTreeNode
 
-@[expose] def PrefixTree (α : Type u) (β : Type v) (cmp : α → α → Ordering) : Type (max u v) :=
-  { t : PrefixTreeNode α β cmp // t.WellFormed cmp }
+structure PrefixTree (α : Type u) (β : Type v) (cmp : α → α → Ordering) : Type (max u v) where
+  val : PrefixTreeNode α β cmp
+  property : val.WellFormed cmp
 
 open PrefixTreeNode
 

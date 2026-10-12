@@ -182,7 +182,7 @@ def isHBinOp (e : Expr) : Bool := Id.run do
     `HAppend.hAppend, `HOrElse.hOrElse, `HAndThen.hAndThen,
     `HAdd.hAdd, `HSub.hSub, `HMul.hMul, `HDiv.hDiv, `HMod.hMod,
     `HShiftLeft.hShiftLeft, `HShiftRight]
-  ops.any fun op => op == f.constName!
+  return ops.any fun op => op == f.constName!
 
 def replaceLPsWithVars (e : Expr) : MetaM Expr := do
   if !e.hasLevelParam then return e
@@ -247,7 +247,7 @@ instance (priority := low) : MonadReaderOf SubExpr AnalyzeM where
   read := Context.subExpr <$> read
 
 instance (priority := low) : MonadWithReaderOf SubExpr AnalyzeM where
-  withReader f x := fun ctx => x { ctx with subExpr := f ctx.subExpr }
+  withReader f x := .mk fun ctx => x.run { ctx with subExpr := f ctx.subExpr }
 
 def tryUnify (e₁ e₂ : Expr) : AnalyzeM Unit := do
   try
@@ -407,7 +407,7 @@ mutual
         (getPPAnalyzeTrustSubst (← getOptions) && isSubstLike (← getExpr))
         || (getPPAnalyzeTrustSubtypeMk (← getOptions) && (← getExpr).isAppOfArity ``Subtype.mk 4)
 
-      analyzeAppStagedCore { f, fType, args, mvars, bInfos, forceRegularApp } |>.run' {
+      ReaderT.run analyzeAppStagedCore { f, fType, args, mvars, bInfos, forceRegularApp } |>.run' {
         bottomUps    := .replicate args.size false,
         higherOrders := .replicate args.size false,
         provideds    := .replicate args.size false,
@@ -617,7 +617,7 @@ def topDownAnalyze (e : Expr) : MetaM OptionsPerPos := do
       let ϕ : AnalyzeM OptionsPerPos := do withNewMCtxDepth analyze; pure (← get).annotations
       try
         let knowsType := getPPAnalyzeKnowsType (← getOptions)
-        ϕ { knowsType := knowsType, knowsLevel := knowsType, subExpr := mkRoot e }
+        ReaderT.run ϕ { knowsType := knowsType, knowsLevel := knowsType, subExpr := mkRoot e }
           |>.run' { : TopDownAnalyze.State }
       catch e =>
         trace[pp.analyze.error] "failed {e.toMessageData}"

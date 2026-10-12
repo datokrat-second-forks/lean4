@@ -258,7 +258,7 @@ theorem LawfulMonad.mk' (m : Type u → Type v) [Monad m]
 
 namespace Id
 
-@[ext] theorem ext {x y : Id α} (h : x.run = y.run) : x = y := h
+@[ext] theorem ext {x y : Id α} (h : x.run = y.run) : x = y := congrArg Id.mk h
 
 instance : LawfulMonad Id := by
   refine LawfulMonad.mk' _ ?_ ?_ ?_ <;> intros <;> rfl
@@ -267,6 +267,7 @@ instance : LawfulMonad Id := by
 @[simp, grind =] theorem run_bind (x : Id α) (f : α → Id β) : (x >>= f).run = (f x.run).run := rfl
 @[simp, grind =] theorem run_pure (a : α) : (pure a : Id α).run = a := rfl
 @[simp, grind =] theorem pure_run (a : Id α) : pure a.run = a := rfl
+@[simp] theorem mk_eq_pure (a : α) : Id.mk a = pure a := rfl
 @[simp] theorem run_seqRight (x : Id α) (y : Id β) : (x *> y).run = y.run := rfl
 @[simp] theorem run_seqLeft (x : Id α) (y : Id β) : (x <* y).run = x.run := rfl
 @[simp] theorem run_seq (f : Id (α → β)) (x : Id α) : (f <*> x).run = f.run x.run := rfl
