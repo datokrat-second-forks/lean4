@@ -205,8 +205,8 @@ disabled to help with porting:
   always wrapped)
 
 If the source type is not definitionally equal to the target type even at `semireducible`
-transparency, as for a `newtype`, the instance is instead transported along the equivalences and
-congruences registered with `@[transport]`, exactly as by the `transport` tactic.
+transparency, as for a `+defeq` structure, the instance is instead transported along the
+equivalences and congruences registered with `@[transport]`, exactly as by the `transport` tactic.
 
 If you just need to synthesize an instance without transporting between types, use `inferInstance`
 instead, potentially with a type annotation for the expected type.
@@ -743,7 +743,8 @@ Declarations concluding in an equivalence can be tagged with `@[transport]`. Con
 `(e : Lean.CanonicalEquivalence α β) → Lean.CanonicalEquivalence (LE α) (LE β)`
 let `transport`, `inferInstanceAs`, and `deriving` move instances between equivalent types
 without unfolding either type. Like a simp lemma or an `eq_def` theorem, a registered equivalence
-unfolds its left-hand side: every `newtype N := ty` registers `N.equivDef : Lean.CanonicalEquivalence N ty`.
+unfolds its left-hand side: every `structure +defeq N where proj : ty` registers
+`N.equivDef : Lean.CanonicalEquivalence N ty`.
 -/
 structure Lean.CanonicalEquivalence (α : Sort u) (β : Sort v) where
   /-- The forward map. -/

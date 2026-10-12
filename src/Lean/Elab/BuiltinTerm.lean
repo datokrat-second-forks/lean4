@@ -367,7 +367,7 @@ private def resynthInstImplicitArgs (type : Expr) : TermElabM Expr := do
     discard <| isDefEq type expectedType
     return type
   -- Checked with unexposed bodies visible. Where even that fails, an irreducible definition such as
-  -- a `newtype` seals the type: wrapping below would unfold it, so move the instance along
+  -- a `+defeq` structure seals the type: wrapping below would unfold it, so move the instance along
   -- `@[transport]` equivalences instead.
   unless ← withoutExporting <| isDefEqGuarded type expectedType do
     let inst ← try Meta.transportInstance type expectedType catch ex =>
@@ -377,7 +377,7 @@ private def resynthInstImplicitArgs (type : Expr) : TermElabM Expr := do
         transported to it:{indentD ex.toMessageData}" ++
         if sealed then .hint' m!"The types are only equal by unfolding irreducible definitions, \
           which seal them. Instances cross such a seal only along `@[transport]` declarations, \
-          which `newtype` provides for its underlying type." else .nil
+          which `structure +defeq` provides for its field type." else .nil
     return ← ensureHasType expectedType? inst
   -- Re-infer instance-implicit args, so that synthesis is not influenced by the expected type's
   -- instance choices.

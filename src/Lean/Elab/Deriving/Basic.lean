@@ -218,8 +218,9 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
           -- We don't reduce because of abbreviations such as `DecidableEq`
           forallTelescope classExpr fun _ classExpr => do
             -- Delta deriving is only justified where `decl` actually unfolds to `value`; for an
-            -- irreducible definition such as a `newtype` the wrapping below would rest on the
-            -- kernel alone, so the instance is transported along `@[transport]` equivalences instead.
+            -- irreducible definition such as a `+defeq` structure the wrapping below would rest on
+            -- the kernel alone, so the instance is transported along `@[transport]` equivalences
+            -- instead.
             let transport := !(← withDefault <| isDefEqGuarded decl value)
             let result ← mkInst classExpr declName decl value transport
             -- Save the pre-wrapping value for the noncomputable check below,
@@ -237,8 +238,8 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
                 if ex matches .internal .. || ((← getEnv).getVirtualStructureInfo? declName).isSome then
                   throw ex
                 throwError ex.toMessageData ++ .hint' m!"`{.ofConstName declName}` is an \
-                  irreducible definition, which seals it. Declare it with `newtype` instead, \
-                  which registers an equivalence with its underlying type."
+                  irreducible definition, which seals it. Declare it with `structure +defeq` \
+                  instead, which registers an equivalence with its field type."
             else if backward.inferInstanceAs.wrap.get (← getOptions) then
               withDeclNameForAuxNaming instName <| withNewMCtxDepth <|
                 wrapInstance result.instVal result.instType

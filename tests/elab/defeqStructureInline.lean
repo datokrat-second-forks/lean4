@@ -41,7 +41,7 @@ run_meta do
   unless k matches .macroInline do
     throwError "`Wrapper.equivDef` is not `macro_inline`"
 
-/-! An instance transported through a chain of `newtype`s compiles to the underlying code. -/
+/-! An instance transported through a chain of `+defeq` structures compiles to the underlying code. -/
 
 class Step (α : Type) where
   step : α → α
@@ -57,9 +57,9 @@ class Step (α : Type) where
 
 instance : Step Nat := ⟨(· + 1)⟩
 
-newtype W1 where
+structure +defeq W1 where
   toNat : Nat
-newtype W2 where
+structure +defeq W2 where
   toW1 : W1
 
 instance : Step W2 := inferInstanceAs (Step Nat)

@@ -2,11 +2,11 @@ import Lean
 
 /-!
 Tests `@[transport]` and the `transport` tactic, and that `inferInstanceAs` and `deriving` fall
-back to transport where their definitional unfolding does not apply, i.e. on `newtype`s, whose
-equivalence with the underlying type is registered automatically.
+back to transport where their definitional unfolding does not apply, i.e. on `+defeq` structures,
+whose equivalence with the field type is registered automatically.
 -/
 
-newtype Foo where
+structure +defeq Foo where
   toInt : Int
 
 /-- info: Foo.equivDef : Lean.CanonicalEquivalence Foo Int -/
@@ -92,9 +92,9 @@ example : Foo.mk 1 ≤ Foo.mk 2 := by decide
 example : ¬ Foo.mk 2 ≤ Foo.mk 1 := by decide
 example (x : Foo) : x ≤ x := LawfulLE.le_refl x
 
-/-! Chaining: through nested `newtype`s with `Lean.CanonicalEquivalence.trans`, and through type constructors. -/
+/-! Chaining: through nested `+defeq` structures with `Lean.CanonicalEquivalence.trans`, and through type constructors. -/
 
-newtype Foo2 where
+structure +defeq Foo2 where
   toFoo : Foo
 
 instance : LE Foo2 := by transport (LE Int)
@@ -108,7 +108,7 @@ example : (default : Option Foo) = none := rfl
 
 /-! `inferInstanceAs` falls back to transport, also resolving placeholders through it. -/
 
-newtype Wrap (n : Nat) where
+structure +defeq Wrap (n : Nat) where
   toFin : Fin n
 
 instance : Inhabited (Wrap 3) := inferInstanceAs (Inhabited (Fin _))
@@ -122,7 +122,7 @@ instance : LE Alias := inferInstanceAs (LE Int)
 
 /-! `deriving` falls back to transport, both as a clause and as a command. -/
 
-newtype Baz where
+structure +defeq Baz where
   toInt : Int
   deriving LE, Inhabited
 
@@ -148,20 +148,20 @@ class Pointed (m : Type → Type) where
 
 instance : Pointed Option := ⟨fun _ => some⟩
 
-newtype Opt (α : Type) where
+structure +defeq Opt (α : Type) where
   toOption : Option α
 
 instance : Pointed Opt := inferInstanceAs (Pointed Option)
 
 example : Pointed.point (m := Opt) Nat 1 = Opt.mk (some 1) := rfl
 
--- The family is `fun α => Opt.equivDef`, the equivalence of the parametrized `newtype`.
+-- The family is `fun α => Opt.equivDef`, the equivalence of the parametrized `+defeq` structure.
 example : (inferInstance : Pointed Opt) =
     (Pointed.canonicalCongr fun α => Opt.equivDef (α := α)).invFun inferInstance :=
   rfl
 
 -- Chaining under the binder: `Opt2 α` unfolds to `Opt α`, which unfolds to `Option α`.
-newtype Opt2 (α : Type) where
+structure +defeq Opt2 (α : Type) where
   toOpt : Opt α
 
 instance : Pointed Opt2 := by transport (Pointed Option)
@@ -192,7 +192,7 @@ example : Decidable (Foo.mk 3 = Foo.mk 4) := by transport Decidable ((3 : Int) =
 
 /-! Failures. -/
 
-newtype Bar where
+structure +defeq Bar where
   toInt : Int
 
 -- Not the transported order, so the law does not carry over.
@@ -270,7 +270,7 @@ infixl:25 " ≃ " => Equiv
 def Foo.equiv : Int ≃ Foo := ⟨Foo.mk, Foo.toInt⟩
 def LE.congr : Nat := 7
 
-newtype Independent where
+structure +defeq Independent where
   toInt : Int
 deriving LE, Inhabited
 
@@ -281,7 +281,7 @@ example (x : Int) : Foo.equiv.toFun x = Foo.equivDef.invFun x := rfl
 example : LE.congr = 7 := rfl
 
 /-!
-An irreducible definition seals its type like a `newtype`, but registers no equivalence, so neither
+An irreducible definition seals its type like a `+defeq` structure, but registers no equivalence, so neither
 `inferInstanceAs` nor `deriving` can cross it.
 -/
 
@@ -305,7 +305,7 @@ and cannot be transported to it:
   
   Note: no `@[transport]` declaration applies
 
-Hint: The types are only equal by unfolding irreducible definitions, which seal them. Instances cross such a seal only along `@[transport]` declarations, which `newtype` provides for its underlying type.
+Hint: The types are only equal by unfolding irreducible definitions, which seal them. Instances cross such a seal only along `@[transport]` declarations, which `structure +defeq` provides for its field type.
 -/
 #guard_msgs in
 instance : LE Sealed := inferInstanceAs (LE Int)
@@ -323,16 +323,16 @@ to
 
 Note: no `@[transport]` declaration applies
 
-Hint: `Sealed` is an irreducible definition, which seals it. Declare it with `newtype` instead, which registers an equivalence with its underlying type.
+Hint: `Sealed` is an irreducible definition, which seals it. Declare it with `structure +defeq` instead, which registers an equivalence with its field type.
 -/
 #guard_msgs in
 deriving instance LE for Sealed
 
 /-! Equivalences are only used in their stated direction, so there is none between siblings. -/
 
-newtype SibA where
+structure +defeq SibA where
   toInt : Int
-newtype SibB where
+structure +defeq SibB where
   toInt : Int
 
 instance : LE SibA := by transport (LE Int)
@@ -430,7 +430,7 @@ def backward (e : Lean.CanonicalEquivalence α β) (b : β) : α := e.invFun b
 
 instance : Point Nat := ⟨0⟩
 
-newtype Pt where
+structure +defeq Pt where
   toNat : Nat
 
 /--

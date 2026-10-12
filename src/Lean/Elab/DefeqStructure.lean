@@ -81,7 +81,7 @@ private def addDefeqStructureCtorProj (declName ctorName projName equivName fiel
       let value ← mkLambdaFVars params value
       let decl := .defnDecl (← mkDefinitionValInferringUnsafe equivName info.levelParams type value .abbrev)
       addDecl decl (forceExpose := exposed)
-      -- Reducible so that `N.equivDef.toFun`/`.invFun` are seen as the projector/constructor.
+      -- Reducible so that `N.equivDef.toFun`/`.invFun` are seen as the projection/constructor.
       setReducibilityStatus equivName .reducible
       -- `macro_inline` substitutes the structure literal before compilation, so that code using
       -- `N.equivDef.toFun`/`.invFun` directly (e.g. `Iter.map`'s instance) folds them to the
@@ -184,7 +184,7 @@ def elabDefeqStructure (modifiers : Modifiers) (stx : Syntax) : CommandElabM Uni
     liftCoreM <| enableRealizationsForConst n
   addDeclarationRangesFromSyntax equivName declId
   liftCoreM <| enableRealizationsForConst equivName
-  -- As `MutualDef.processDeriving` for `def`; for a `newtype` this always means transport.
+  -- As `MutualDef.processDeriving` for `def`; for a `+defeq` structure this always means transport.
   let classes ← liftCoreM <| getOptDerivingClasses optDeriving
   unless classes.isEmpty do
     liftTermElabM <| withLCtx {} {} do

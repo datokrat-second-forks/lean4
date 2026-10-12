@@ -21,7 +21,8 @@ public section
 
 `@[transport]` collects declarations that conclude in `Lean.CanonicalEquivalence α β`. Like a simp
 lemma or an `eq_def` theorem, such a declaration unfolds its left-hand side `α` towards `β`:
-a `newtype` registers `Foo.equivDef : Lean.CanonicalEquivalence Foo Int` automatically.
+`structure +defeq Foo where toInt : Int` registers
+`Foo.equivDef : Lean.CanonicalEquivalence Foo Int` automatically.
 Congruences such as `LE.canonicalCongr` accept canonical equivalences as explicit arguments.
 Congruences for type constructors can also accept families
 `∀ α, Lean.CanonicalEquivalence (m α) (n α)`.
@@ -30,18 +31,18 @@ Congruences for type constructors can also accept families
 It unifies conclusions with the goal, solves equivalence arguments recursively (families under
 their binders), synthesizes instance arguments, and chains through intermediate types with
 `Lean.CanonicalEquivalence.trans`. An instance of `rhs` is moved to `lhs` along `invFun`. Unless it
-is a proof, the equivalence is then unfolded, leaving the instance conjugated by the `newtype`
-constructors and projectors, which compiles like the instance of `rhs`.
+is a proof, the equivalence is then unfolded, leaving the instance conjugated by the constructors
+and projections of `+defeq` structures, which compiles like the instance of `rhs`.
 
 Types are identified by `isDefEq` at implicit transparency, which never unfolds the irreducible
-definition a `newtype` is; unlike `inferInstanceAs`'s instance wrapping this never depends on the
-kernel unfolding what the elaborator may not. A congruence for a lawful class such as `TransOrd`
+definition a `+defeq` structure is; unlike `inferInstanceAs`'s instance wrapping this never
+depends on the kernel unfolding what the elaborator may not. A congruence for a lawful class such as `TransOrd`
 takes the instance of its parent class as an implicit argument, with an equation stating that it
 is the transported instance; it therefore applies to any instance definitionally equal to it.
 
 Equivalences are only used in their stated direction, like unfolding: `Foo.equivDef` unfolds `Foo`
-to `Int` and so moves instances from `Int` to `Foo`, but not back, and not between two `newtype`s
-of `Int`.
+to `Int` and so moves instances from `Int` to `Foo`, but not back, and not between two `+defeq`
+structures over `Int`.
 -/
 
 namespace Lean.Meta
@@ -253,7 +254,7 @@ private partial def whnfGlue (e : Expr) : CoreM Expr := do
       | some v => return ← whnfGlue (mkAppN v args[info.numParams + 1:])
       | none => return mkAppN f (args.set! info.numParams s)
     unless isGlue env c do return e
-    -- not visible, e.g. the unexposed body of a `newtype` of another module
+    -- not visible, e.g. the unexposed body of a `+defeq` structure of another module
     let some (.defnInfo d) := env.find? c | return e
     whnfGlue <| (d.value.instantiateLevelParams d.levelParams us).beta args
   | _ => return e
@@ -285,7 +286,7 @@ private def hasEquivInData (e : Expr) : MetaM Bool := do
 
 /--
 Returns `equiv.invFun e`. For data, the equivalence is unfolded, so that the result is `e`
-conjugated by the `newtype` constructors and projectors themselves and compiles like `e`.
+conjugated by the constructors and projections of `+defeq` structures and compiles like `e`.
 If the unfolding does not eliminate the equivalence from the data, for instance because a
 congruence casts its data or builds it with a non-reducible definition, the result stays
 `equiv.invFun e` and `linter.transport.unfold` warns.
