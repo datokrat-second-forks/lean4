@@ -519,6 +519,40 @@ structure ReduceConfig where
   /-- Ignore stuck typeclass synthesis while elaborating the term. Default: `false`. -/
   ignoreStuckTC : Bool := false
 
+/-- Configuration for the `structure` command, as in `structure +defeq N where ...`. -/
+structure StructureConfig where
+  /--
+  `structure +defeq N ps where ctor :: proj : ty` declares a type `N` definitionally equal to
+  `ty`, together with a constructor `N.ctor` and a projection `N.proj`, and marks all three
+  `@[irreducible]`. For example,
+  ```
+  structure +defeq OrderDual (α : Type u) where
+    toDual ::
+    ofDual : α
+  ```
+  produces
+  ```
+  @[irreducible] def OrderDual (α : Type u) := α
+  @[irreducible] def OrderDual.toDual {α : Type u} (ofDual : α) : OrderDual α := ofDual
+  @[irreducible] def OrderDual.ofDual {α : Type u} (self : OrderDual α) : α := self
+  ```
+  Modifiers, parameters, universe parameters, section variables and auto-bound implicits are
+  handled exactly as for `def`. The structure has a single field, without binders or default
+  value, and does not extend other structures. As for any structure, the constructor is `mk`
+  unless named, the constructor and the field can carry doc comments, explicit parameters become
+  implicit in both, and binders after the constructor's name update the binder kinds of the
+  parameters in the constructor, as in `toLp (p) ::`.
+
+  This is the "irreducible type alias" pattern used to avoid defeq abuse while keeping a
+  zero-overhead representation identical to `ty` (e.g. to cast `List ty` to `List N`). Unlike a
+  hand-written version of this pattern, `N.ctor`/`N.proj` are also registered as a virtual
+  constructor/projection pair, so that `N.proj (N.ctor a)` reduces to `a` and `N.ctor (N.proj x)`
+  is definitionally `x` (see `Lean.Meta.reduceVirtualProj?`), even though `N`, `N.ctor` and
+  `N.proj` stay irreducible otherwise. Use `unsealing_structure N => ...` to locally lift the
+  irreducibility.
+  -/
+  defeq : Bool := false
+
 end Command
 
 end Lean.Meta

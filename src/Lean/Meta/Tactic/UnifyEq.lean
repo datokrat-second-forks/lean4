@@ -36,8 +36,8 @@ private def toOffset? (e : Expr) : MetaM (Option (Expr × Nat)) := do
 
 /--
 Replaces the equation `eqDecl : b x = t` or `t = b x`, where `b` is a chain of one-field-structure
-or `newtype` constructors and projections and `x` is a free variable not occurring in `t`, by
-`x = b⁻¹ t`. The next `unifyEq?` call substitutes `x` by `b⁻¹ t`.
+or `+defeq`-structure constructors and projections and `x` is a free variable not occurring in
+`t`, by `x = b⁻¹ t`. The next `unifyEq?` call substitutes `x` by `b⁻¹ t`.
 -/
 private def unifyEqInvertingBijections? (mvarId : MVarId) (eqDecl : LocalDecl) (subst : FVarSubst)
     (α a b : Expr) : MetaM (Option UnifyEqResult) := do
@@ -66,7 +66,7 @@ private def unifyEqInvertingBijections? (mvarId : MVarId) (eqDecl : LocalDecl) (
      - If `a` (`b`) is a free variable not occurring in `b` (`a`), replace it everywhere.
      - If `a` and `b` are distinct constructors, return `none` to indicate that the goal has been closed.
      - If `a` and `b` are the same constructor, apply `injection`, the result contains the number of new equalities introduced in the goal.
-     - If `a` (`b`) is a chain of constructors and projections of one-field structures or newtypes
+     - If `a` (`b`) is a chain of constructors and projections of one-field structures or `+defeq` structures
        applied to a free variable not occurring in `b` (`a`), replace the equation by one that
        substitutes the variable. See also `unifyEqInvertingBijections?`.
      - It also tries to apply the given `acyclic` method to try to close the goal.

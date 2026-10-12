@@ -9,6 +9,7 @@ prelude
 public import Lean.Elab.MutualDef
 public import Lean.Elab.MutualInductive
 import Lean.Compiler.ExternAttr
+import Lean.Elab.DefeqStructure
 
 public section
 namespace Lean.Elab.Command
@@ -176,6 +177,8 @@ def elabDeclaration : CommandElab := fun stx => do
     withExporting (isExporting := modifiers.isInferredPublic (← getEnv)) do
       if declKind == ``Lean.Parser.Command.«axiom» then
         elabAxiom modifiers decl
+      else if ← liftCoreM <| isDefeqStructure decl then
+        elabDefeqStructure modifiers decl
       else if declKind == ``Lean.Parser.Command.«inductive»
           || declKind == ``Lean.Parser.Command.«coinductive»
           || declKind == ``Lean.Parser.Command.classInductive

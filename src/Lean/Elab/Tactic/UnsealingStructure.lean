@@ -17,9 +17,9 @@ open Meta
 
 /--
 Runs `t` with the declarations `names` treated as having reducibility status `status`. The
-combinator underlying the `unsealing_newtype` tactic; see its docstring.
+combinator underlying the `unsealing_structure` tactic; see its docstring.
 -/
-def unsealingNewtype [Monad m] [MonadEnv m] [MonadFinally m] (names : Array Name)
+def unsealingStructure [Monad m] [MonadEnv m] [MonadFinally m] (names : Array Name)
     (status : ReducibilityStatus := .semireducible) (t : m α) : m α := do
   modifyEnv reducibilityExtraExt.pushScope
   for n in names do
@@ -29,24 +29,25 @@ def unsealingNewtype [Monad m] [MonadEnv m] [MonadFinally m] (names : Array Name
   finally
     modifyEnv reducibilityExtraExt.popScope
 
-declare_config_elab elabUnsealingNewtypeConfig Parser.Tactic.UnsealingNewtypeConfig
+declare_config_elab elabUnsealingStructureConfig Parser.Tactic.UnsealingStructureConfig
 
-def _root_.Lean.Parser.Tactic.UnsealingNewtypeReducibility.toReducibilityStatus :
-    Parser.Tactic.UnsealingNewtypeReducibility → ReducibilityStatus
+def _root_.Lean.Parser.Tactic.UnsealingStructureReducibility.toReducibilityStatus :
+    Parser.Tactic.UnsealingStructureReducibility → ReducibilityStatus
   | .reducible => .reducible
   | .instanceReducible => .instanceReducible
   | .implicitReducible => .implicitReducible
   | .semireducible => .semireducible
 
-@[builtin_tactic Lean.Parser.Tactic.unsealingNewtype] def evalUnsealingNewtype : Tactic :=
+@[builtin_tactic Lean.Parser.Tactic.unsealingStructure] def evalUnsealingStructure : Tactic :=
   fun stx => do
-    let cfg ← elabUnsealingNewtypeConfig stx[1]
+    let cfg ← elabUnsealingStructureConfig stx[1]
     let typeStx := stx[2]
     let typeName ← resolveGlobalConstNoOverload typeStx
     let some info ← getVirtualStructureInfo? typeName
-      | throwErrorAt typeStx "'{typeName}' is not a `newtype`-declared type"
+      | throwErrorAt typeStx "Cannot unseal structure `{.ofConstName typeName}` because it was \
+          defined without the `+defeq` option"
     addConstInfo typeStx typeName
-    unsealingNewtype #[info.typeName, info.ctorName, info.projName]
+    unsealingStructure #[info.typeName, info.ctorName, info.projName]
       cfg.reducibility.toReducibilityStatus (evalTactic stx[4])
 
 end Lean.Elab.Tactic

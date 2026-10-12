@@ -205,8 +205,8 @@ where
         return false
 
 /--
-`isDefEqEtaStruct` for `newtype`s: reduces `a =?= N.mk params arg` to `N.proj params a =?= arg`,
-unless `a` is an `N.mk` application as well, which `isDefEqArgs` handles.
+`isDefEqEtaStruct` for `+defeq` structures: reduces `a =?= N.mk params arg` to
+`N.proj params a =?= arg`, unless `a` is an `N.mk` application as well, which `isDefEqArgs` handles.
 -/
 private def isDefEqVirtualEtaStruct (a b : Expr) : MetaM Bool := do
   let .const ctorName us := b.getAppFn | return false
@@ -1561,8 +1561,9 @@ private def isDeltaCandidate? (t : Expr) : MetaM (Option ConstantInfo) := do
   match t.getAppFn with
   | .const c _ =>
     if let some info ← getUnfoldableConst? c then return some info
-    -- A `newtype` projector is `@[irreducible]`, but `unfoldDefinition?` still reduces it on a
-    -- constructor application, just as it unfolds a real structure's projection function.
+    -- A `+defeq` structure's projection is `@[irreducible]`, but `unfoldDefinition?` still
+    -- reduces it on a constructor application, just as it unfolds a real structure's projection
+    -- function.
     if (← getVirtualProjInfo? c).isSome then return (← getEnv).find? c
     return none
   | _ => pure none
@@ -2429,7 +2430,7 @@ private def isDefEqAppFallback (t : Expr) (s : Expr) : MetaM Bool := do
     return false
 
 /--
-Virtual analog of `isDefEqProj.isDefEqSingleton` for `newtype`-generated projectors: solves
+Virtual analog of `isDefEqProj.isDefEqSingleton` for the projections of `+defeq` structures: solves
 `projName params (?m ...) =?= v` as `?m ... =?= ctorName params v`.
 
 Like the other eta rules, this is a last resort: the assignment it manufactures is definitionally
@@ -2437,7 +2438,7 @@ equal to any competing one but syntactically larger, so whenever the other side 
 the form `projName params w` we prefer `?m ... =?= w`. A real structure's projection only reaches
 `isDefEqProj.isDefEqSingleton` as a `.proj` node, i.e. after `whnfCore`, lazy delta reduction and
 `isDefEqApp` have had their turn; hence the call site below and the check declining an application
-of the same projector, which `isDefEqApp` solves first-order.
+of the same projection, which `isDefEqApp` solves first-order.
 -/
 private def isDefEqVirtualProj (t v : Expr) : MetaM Bool := do
   let .const projName us := t.getAppFn | return false

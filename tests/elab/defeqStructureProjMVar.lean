@@ -1,12 +1,12 @@
 import Lean
 
 /-!
-Tests that a metavariable of a `newtype`-declared type can be assigned from a constraint on its
-projection, as for real single-field structures (`isDefEqProj.isDefEqSingleton`): `N.val ?m =?= v`
-is solved by `?m := N.mk v`.
+Tests that a metavariable whose type is a `+defeq` structure can be assigned from a constraint on
+its projection, as for real single-field structures (`isDefEqProj.isDefEqSingleton`):
+`N.val ?m =?= v` is solved by `?m := N.mk v`.
 -/
 
-newtype N (α : Type) where
+structure +defeq N (α : Type) where
   val : α
 
 example (x : α) : ∃ y : N α, y.val = x := ⟨_, rfl⟩
@@ -19,7 +19,7 @@ example [OfNat α 1] {a : N α} : a.val = 1 ↔ a = 1 := val_inj (b := 1)
 end N
 
 -- Without parameters.
-newtype M where
+structure +defeq M where
   toNat : Nat
 
 example : ∃ y : M, y.toNat = 5 := ⟨_, rfl⟩

@@ -1,11 +1,11 @@
 /-!
-Tests that `induction` accepts indices built from variables by the constructor and the projector
-of a `newtype`, as it does for one-field structures (see `inductionStructIndex.lean`): an index
-`Wrap.mk x` becomes a fresh variable `y` by substituting `y.inner` for `x`, and an index `x.inner`
-by substituting `Wrap.mk y` for `x`.
+Tests that `induction` accepts indices built from variables by the constructor and the projection
+of a `+defeq` structure, as it does for one-field structures (see `inductionStructIndex.lean`): an
+index `Wrap.mk x` becomes a fresh variable `y` by substituting `y.inner` for `x`, and an index
+`x.inner` by substituting `Wrap.mk y` for `x`.
 -/
 
-newtype Wrap where
+structure +defeq Wrap where
   inner : Nat
 
 /--
@@ -57,11 +57,11 @@ example {a b} (h : Relation.TransGen (fun a b : Wrap => a = b) (.mk a) (.mk b)) 
   | single hr => subst hr; exact hb
   | tail h hr ih => subst hr; exact ih hb
 
--- Chains through a `newtype` and a one-field structure in both orders.
+-- Chains through a `+defeq` structure and a one-field structure in both orders.
 structure Box where
   w : Wrap
 
-newtype Wrap2 where
+structure +defeq Wrap2 where
   box : Box
 
 example {a b} (h : Relation.TransGen (fun a b : Box => a = b) ⟨.mk a⟩ ⟨.mk b⟩) : a = b := by

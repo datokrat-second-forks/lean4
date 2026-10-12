@@ -296,8 +296,9 @@ def structFields         := leading_parser
       structInstBinder <|> structSimpleBinder)
 def structCtor           := leading_parser
   atomic (ppIndent (declModifiers true >> ident >> many (ppSpace >> Term.bracketedBinder) >> " :: "))
+-- The options are those of `Lean.Meta.Command.StructureConfig`, as in `structure +defeq`.
 def structureTk          := leading_parser
-  "structure "
+  "structure " >> Term.optConfig
 def classTk              := leading_parser
   "class "
 def structParent        := leading_parser
@@ -316,42 +317,6 @@ def «structure»          := leading_parser
   declModifiers false >>
   («abbrev» <|> definition <|> «theorem» <|> «opaque» <|> «instance» <|> «axiom» <|> «example» <|>
    «inductive» <|> «coinductive» <|> classInductive <|> «structure»)
-
-/-- The projector of a `newtype` and the type it seals, as in `ofDual : α`. -/
-def newtypeField := leading_parser
-  ppIndent (ppLine >> atomic (declModifiers true >> ident) >> " : " >> termParser)
-
-/--
-`newtype N params where ctor :: proj : ty` declares a type `N` definitionally equal to `ty`,
-together with a constructor `N.ctor` and a projector `N.proj`, and marks all three
-`@[irreducible]`. For example,
-```
-newtype OrderDual (α : Type u) where
-  toDual ::
-  ofDual : α
-```
-produces
-```
-@[irreducible] def OrderDual (α : Type u) := α
-@[irreducible] def OrderDual.toDual {α : Type u} (ofDual : α) : OrderDual α := ofDual
-@[irreducible] def OrderDual.ofDual {α : Type u} (self : OrderDual α) : α := self
-```
-Modifiers, parameters, universe parameters, section variables and auto-bound implicits are handled
-exactly as for `def`. The constructor and projector are written as for a `structure` with a single
-field: the constructor is `mk` unless named, both can carry doc comments, explicit parameters
-become implicit in both, and binders after the constructor's name update the binder kinds of the
-parameters in the constructor, as in `toLp (p) ::`.
-
-This is the "irreducible type alias" pattern used to avoid defeq abuse while keeping a
-zero-overhead representation identical to `ty` (e.g. to cast `List ty` to `List N`). Unlike a
-hand-written version of this pattern, `newtype` also registers `N.ctor`/`N.proj` as a virtual
-constructor/projector pair, so that `N.proj (N.ctor a)` reduces to `a` and `N.ctor (N.proj x)` is
-definitionally `x` (see `Lean.Meta.reduceVirtualProj?`), even though `N`, `N.ctor` and `N.proj` stay
-irreducible otherwise. Use `unsealing_newtype N => ...` to locally lift the irreducibility.
--/
-@[builtin_command_parser] def newtypeCmd := leading_parser
-  declModifiers false >> "newtype " >> declId >> many (ppSpace >> Term.bracketedBinder) >>
-  " where " >> optional structCtor >> newtypeField
 
 /--
 `recall` restates a previous declaration for illustrative purposes and checks that its type and

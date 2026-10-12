@@ -167,7 +167,7 @@ public meta def expandConfigDecl : Macro := fun stx => do
   let views ← ps.getElems.foldlM (init := views) (·.push <$> mkParentFieldView ·)
   let fields := views.filterMap (·.decl?)
   let struct ← `(
-    $mods:declModifiers structure $declId $bs* $[$ty?]?
+    $mods:declModifiers structure $declId:declId $bs* $[$ty?]?
     extends $ps,* $(xty?.join)? where $(ctor?.join)? $fields* $drv:optDeriving
   )
   let vis? := mods.raw[2].getOptional?.map (⟨·⟩)

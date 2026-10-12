@@ -7,10 +7,10 @@ congruence step over `N.run` grows its goal by an `mk`/`run` layer instead of st
 projection, and `congr` then descends without bound.
 
 Eta-expanding is still the right answer when the other side is not the same projection applied;
-that case is `newtypeProjMVar.lean`.
+that case is `defeqStructureProjMVar.lean`.
 -/
 
-newtype N (type : Type) where
+structure +defeq N (type : Type) where
   run : type
 
 structure Box (α : Type) where mk :: run : α
@@ -54,8 +54,8 @@ example (a : N Nat) (h : N.mk a.run = N.mk 3) : a = N.mk 3 := by
   guard_hyp h :ₛ a = N.mk 3
   exact h
 
--- The consequence, at a `newtype` monad: `congr` reaches the two loop bodies instead of adding a
--- layer per level and running until it exhausts the heartbeat budget.
+-- The consequence, at a monad that is a `+defeq` structure: `congr` reaches the two loop bodies
+-- instead of adding a layer per level and running until it exhausts the heartbeat budget.
 instance : Monad N where
   pure a := .mk a
   bind x f := f x.run

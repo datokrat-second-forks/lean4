@@ -10,6 +10,7 @@ public import Lean.Elab.Command
 public import Lean.Elab.DeclModifiers
 public import Lean.Elab.DeclarationRange
 public import Lean.Meta.VirtualStructure
+import Lean.Elab.ConfigEval
 import Lean.Meta.Injective
 import Lean.Elab.MutualInductive
 import Lean.DocString.Add
@@ -19,19 +20,27 @@ public section
 namespace Lean.Elab.Command
 open Meta
 
+declare_core_config_elab elabStructureConfig Meta.Command.StructureConfig
+
+/-- Returns whether the declaration `stx` is a `structure +defeq`. -/
+def isDefeqStructure (stx : Syntax) : CoreM Bool := do
+  -- Only `structureTk` takes options.
+  unless stx[0].isOfKind ``Parser.Command.structureTk do return false
+  return (← elabStructureConfig stx[0][1]).defeq
+
 /--
-Adds the constructor `ctorName` and projector `projName` of the already elaborated `newtype`
-`declName`, whose underlying type is the body of its definition. Reading the parameters off the
-elaborated `declName` (instead of re-elaborating its binders) is what makes section variables,
+Adds the constructor `ctorName` and projection `projName` of the already elaborated `+defeq`
+structure `declName`, whose field type is the body of its definition. Reading the parameters off
+the elaborated `declName` (instead of re-elaborating its binders) is what makes section variables,
 auto-bound implicits and universe parameters behave exactly as for `def`.
 -/
-private def addNewtypeCtorProj (declName ctorName projName fieldName : Name)
+private def addDefeqStructureCtorProj (declName ctorName projName fieldName : Name)
     (ctorBinders : Array Syntax) : TermElabM Nat := do
   let info ← withoutExporting <| getConstInfoDefn declName
   let us := info.levelParams.map mkLevelParam
   forallTelescope info.type fun params resultType => do
     unless (← whnf resultType).isSort do
-      throwError "invalid `newtype`, the underlying type must be a type, but has type{indentExpr resultType}"
+      throwError "Invalid resulting type: Expected a sort"
     let underlying := info.value.beta params
     let self := mkAppN (mkConst declName us) params
     let implicitParams ← params.filterMapM fun p => do
@@ -49,8 +58,8 @@ private def addNewtypeCtorProj (declName ctorName projName fieldName : Name)
         let hints := .regular (getMaxHeight (← getEnv) value + 1)
         let decl := .defnDecl (← mkDefinitionValInferringUnsafe name info.levelParams type value hints)
         addDecl decl (forceExpose := exposed)
-        -- Both are identity functions, so inlining them is what keeps a `newtype`'s calling
-        -- convention the same as its underlying type's. `always_inline` rather than `inline`
+        -- Both are identity functions, so inlining them is what keeps a `+defeq` structure's
+        -- calling convention the same as its field type's. `always_inline` rather than `inline`
         -- because the latter is only consulted after the inliner's own heuristics decline.
         setInlineAttribute name .alwaysInline
         compileDecl decl
@@ -61,39 +70,52 @@ private def addNewtypeCtorProj (declName ctorName projName fieldName : Name)
     return params.size
 
 /--
-The doc comment of a `newtype`'s constructor or projector, whose `declModifiers` may consist of
-nothing else.
+The doc comment of a `+defeq` structure's constructor or field, whose `declModifiers` may consist
+of nothing else.
 -/
 private def memberDocComment? (mods : Syntax) (what : String) :
     CommandElabM (Option (TSyntax ``Parser.Command.docComment)) := do
   for i in [1:mods.getNumArgs] do
     unless mods[i].isNone do
-      throwErrorAt mods[i] "invalid `newtype` {what}, only a doc comment may precede it"
+      throwErrorAt mods[i] "Invalid modifier: The {what} of a `+defeq` structure can only be \
+        preceded by a doc comment"
   return if mods[0].isNone then none else some ⟨mods[0][0]⟩
 
-@[builtin_command_elab Lean.Parser.Command.newtypeCmd]
-def elabNewtype : CommandElab := fun stx => do
+/--
+Elaborates the `structure` declaration `stx`, with elaborated modifiers `modifiers`, as a `+defeq`
+structure; see `Lean.Meta.Command.StructureConfig.defeq`.
+-/
+def elabDefeqStructure (modifiers : Modifiers) (stx : Syntax) : CommandElabM Unit := do
   -- Accessed by index rather than matched by quotation so that the pattern does not depend on the
   -- parser the elaborator itself was compiled with.
-  let mods : TSyntax ``Parser.Command.declModifiers := ⟨stx[0]⟩
-  let declId : TSyntax ``Parser.Command.declId := ⟨stx[2]⟩
-  let params : TSyntaxArray ``Parser.Term.bracketedBinder := .mk stx[3].getArgs
-  -- `structCtor`: `declModifiers true >> ident >> many bracketedBinder >> " :: "`
-  let ctor? := if stx[5].isNone then none else some stx[5][0]
-  -- `newtypeField`: `declModifiers true >> ident >> " : " >> termParser`
-  let field := stx[6]
+  let declId : TSyntax ``Parser.Command.declId := ⟨stx[1]⟩
+  -- As for a structure's fields, the field type is elaborated against a sort.
+  let declSig : TSyntax ``Parser.Command.optDeclSig ← if stx[2][1].isNone then
+      pure ⟨stx[2].setArg 1 (mkNullNode #[← `(Parser.Term.typeSpec| : Sort _)])⟩
+    else pure ⟨stx[2]⟩
+  unless stx[3].isNone do
+    throwErrorAt stx[3] "A `+defeq` structure cannot extend other structures"
+  unless stx[5][0].isNone do
+    throwErrorAt stx[5] "A `+defeq` structure does not support `deriving` clauses"
+  -- `optional structCtor`, then `structFields`
+  let (ctor?, fields) := if stx[4].isNone then (none, #[]) else
+    (if stx[4][1].isNone then none else some stx[4][1][0], stx[4][2][0].getArgs)
+  let #[field] := fields
+    | throwErrorAt (if fields.isEmpty then declId.raw else fields[1]!)
+        "A `+defeq` structure must have exactly one field"
+  -- `structSimpleBinder`: `declModifiers true >> ident >> optDeclSig >> optional default`
+  unless field.isOfKind ``Parser.Command.structSimpleBinder && field[2][0].getNumArgs == 0 &&
+      !field[2][1].isNone && field[3].isNone do
+    throwErrorAt field "Invalid field: The field of a `+defeq` structure must be of the form \
+      `name : type`, without binders or default value"
   let projId : Ident := ⟨field[1]⟩
-  let ty : Term := ⟨field[3]⟩
+  -- `typeSpec`: `" : " >> termParser`
+  let ty : Term := ⟨field[2][1][0][1]⟩
   let ctorDoc? ← match ctor? with
     | some ctor => memberDocComment? ctor[0] "constructor"
     | none => pure none
-  let projDoc? ← memberDocComment? field[0] "projector"
-  -- as in `elabDeclaration`: the name and the generated declarations follow the visibility the
-  -- `def` will get, which in a `public section` is not visible in `mods`
-  withExporting (isExporting := (← getScope).isPublic) do
-  let modifiers ← elabModifiers mods
+  let projDoc? ← memberDocComment? field[0] "field"
   let isPublic := modifiers.isInferredPublic (← getEnv)
-  withExporting (isExporting := isPublic) do
   let { declName, .. } ← liftTermElabM <|
     Term.expandDeclId (← getCurrNamespace) (← getLevelNames) declId modifiers
   let ctorRef := match ctor? with
@@ -104,23 +126,25 @@ def elabNewtype : CommandElab := fun stx => do
     | none => `mk)
   let projName := declName ++ projId.getId
   if projName == ctorName then
-    throwErrorAt projId "invalid `newtype`, the projector and the constructor cannot have the same name"
+    throwErrorAt projId "Invalid field name `{projId.getId}`: This is the name of the structure \
+      constructor"
   for n in [ctorName, projName] do
     withRef (if n == projName then projId else ctorRef) <| checkNotAlreadyDeclared n
   for attr in modifiers.attrs do
     if attr.name matches `reducible | `semireducible | `implicit_reducible | `instance_reducible |
         `irreducible then
-      throwError "invalid `newtype`, a `newtype` is always irreducible, `@[{attr.name}]` is not allowed"
-  -- Like a structure's field types, a public `newtype`'s underlying type is always visible.
+      throwError "Invalid attribute: A `+defeq` structure is always irreducible, \
+        `@[{attr.name}]` is not allowed"
+  -- Like a structure's field types, a public `+defeq` structure's field type is always visible.
   withScope (fun sc => if isPublic then
       { sc with attrs := Unhygienic.run `(Parser.Term.attrInstance| expose) :: sc.attrs }
     else sc) do
-    elabCommand <| ← `($mods:declModifiers def $declId $params* := $ty)
+    elabCommand <| ← `($(modifiers.stx):declModifiers def $declId $declSig:optDeclSig := $ty)
   let ctorBinders := match ctor? with
     | some ctor => ctor[2].getArgs
     | none => #[]
   let numParams ← liftTermElabM <| withRef ctorRef <|
-    addNewtypeCtorProj declName ctorName projName projId.getId ctorBinders
+    addDefeqStructureCtorProj declName ctorName projName projId.getId ctorBinders
   addDeclarationRangesFromSyntax ctorName ctorRef
   addDeclarationRangesFromSyntax projName projId
   liftTermElabM do

@@ -1811,10 +1811,10 @@ syntax (name := applyRules) "apply_rules" optConfig (&" only")? (args)? (using_)
 end SolveByElim
 
 /--
-The reducibility status that `unsealing_newtype` temporarily assigns to a `newtype`-declared
-type, its constructor and its projector. Mirrors `Lean.ReducibilityStatus` without `irreducible`.
+The reducibility status that `unsealing_structure` temporarily assigns to a `+defeq` structure,
+its constructor and its projection. Mirrors `Lean.ReducibilityStatus` without `irreducible`.
 -/
-inductive UnsealingNewtypeReducibility where
+inductive UnsealingStructureReducibility where
   /-- Unfolded at reducible transparency and above. -/
   | reducible
   /-- Unfolded at instances transparency and above. -/
@@ -1825,23 +1825,23 @@ inductive UnsealingNewtypeReducibility where
   | semireducible
 
 /--
-Configuration for the `unsealing_newtype` tactic.
+Configuration for the `unsealing_structure` tactic.
 -/
-structure UnsealingNewtypeConfig where
+structure UnsealingStructureConfig where
   /-- The reducibility status to use within the tactic block (default: `.semireducible`). -/
-  reducibility : UnsealingNewtypeReducibility := .semireducible
+  reducibility : UnsealingStructureReducibility := .semireducible
 
 /--
-`unsealing_newtype N => tacs` runs `tacs` with the `newtype`-declared type `N` -- together with
-its auto-generated constructor and projector -- treated as `[semireducible]` instead of
-`[irreducible]`. This is the escape hatch for a `newtype`: within the block, `N`, `N.mk` and its
-projector unfold like ordinary definitions, e.g. `N = Nat` can be proved by `rfl`.
+`unsealing_structure N => tacs` runs `tacs` with the `+defeq` structure `N` -- together with its
+auto-generated constructor and projection -- treated as `[semireducible]` instead of
+`[irreducible]`. This is the escape hatch for a `+defeq` structure: within the block, `N`, `N.mk`
+and its projection unfold like ordinary definitions, e.g. `N = Nat` can be proved by `rfl`.
 
-`unsealing_newtype (reducibility := .instanceReducible) N => tacs` uses the given reducibility
-status instead; see `UnsealingNewtypeReducibility`.
+`unsealing_structure (reducibility := .instanceReducible) N => tacs` uses the given reducibility
+status instead; see `UnsealingStructureReducibility`.
 -/
-syntax (name := unsealingNewtype)
-  "unsealing_newtype " optConfig ident " => " tacticSeq : tactic
+syntax (name := unsealingStructure)
+  "unsealing_structure " optConfig ident " => " tacticSeq : tactic
 
 /--
 Configuration for the `exact?` and `apply?` tactics.

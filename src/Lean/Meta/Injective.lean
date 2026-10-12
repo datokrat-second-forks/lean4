@@ -203,8 +203,9 @@ def mkInjectiveTheorems (declName : Name) : MetaM Unit := do
             mkInjectiveEqTheorem ctorVal
 
 /--
-Generates `ctorName.inj` and `ctorName.injEq` for the constructor `ctorName` of a `newtype`, as
-`mkInjectiveTheorems` does for a one-field structure. The proofs apply the projector `projName`.
+Generates `ctorName.inj` and `ctorName.injEq` for the constructor `ctorName` of a `+defeq`
+structure, as `mkInjectiveTheorems` does for a one-field structure. The proofs apply the projection
+`projName`.
 -/
 def mkVirtualInjectiveTheorems (ctorName projName : Name) (numParams : Nat) : MetaM Unit := do
   unless (← getEnv).contains ``Eq.propIntro && genInjectivity.get (← getOptions) do return

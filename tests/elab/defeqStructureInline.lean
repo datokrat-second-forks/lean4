@@ -1,15 +1,15 @@
 import Lean
 
 /-!
-Tests that `newtype` marks its generated constructor and projector `[always_inline]`.
+Tests that `structure +defeq` marks its generated constructor and projection `[always_inline]`.
 
-They are identity functions, so inlining them is what keeps a `newtype`'s calling convention the
-same as its underlying type's; leaving them as ordinary calls would be a silent cost rather than an
-error. `always_inline` rather than `inline` because the latter is only consulted after the inliner's
-own heuristics decline.
+They are identity functions, so inlining them is what keeps a `+defeq` structure's calling
+convention the same as its field type's; leaving them as ordinary calls would be a silent cost
+rather than an error. `always_inline` rather than `inline` because the latter is only consulted
+after the inliner's own heuristics decline.
 -/
 
-newtype Wrapper (α : Type) where
+structure +defeq Wrapper (α : Type) where
   toList : List α
 
 structure Control (α : Type) where mk :: toList : List α

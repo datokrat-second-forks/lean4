@@ -9,6 +9,7 @@ prelude
 public import Lean.Meta.Structure
 public import Lean.Elab.MutualInductive
 import Init.Omega
+import Lean.Elab.DefeqStructure
 
 public section
 
@@ -412,6 +413,9 @@ def structFields         := leading_parser many (structExplicitBinder <|> struct
 def structCtor           := leading_parser try (declModifiers >> ident >> " :: ")
 -/
 def structureSyntaxToView (modifiers : Modifiers) (stx : Syntax) : TermElabM StructView := do
+  -- Outside of `mutual` blocks, `elabDeclaration` elaborates `+defeq` structures itself.
+  if ← isDefeqStructure stx then
+    throwErrorAt stx[0] "A `+defeq` structure cannot be declared in a `mutual` block"
   checkValidInductiveModifier modifiers
   let isClass   := stx[0].getKind == ``Parser.Command.classTk
   -- **Note**: We use `addFirstAttr` to make sure the `[class]` attribute is processed **before** `[univ_out_params]`

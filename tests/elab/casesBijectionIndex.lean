@@ -1,13 +1,14 @@
 /-!
 Tests that dependent elimination in `cases` solves an index equation `b x = t`, where `b` is a
-chain of constructors and projections of one-field structures or `newtype`s applied to a variable
-`x`, by the definitional change of variables `x := b⁻¹ t`, in the same way it solves `x = t`.
+chain of constructors and projections of one-field structures or `+defeq` structures applied to a
+variable `x`, by the definitional change of variables `x := b⁻¹ t`, in the same way it solves
+`x = t`.
 -/
 
 structure Box (α : Type) where
   val : α
 
-newtype Sealed where
+structure +defeq Sealed where
   toNat : Nat
 
 inductive IsZero : Nat → Prop
@@ -29,12 +30,12 @@ example (n : Nat) (h : OfFun ⟨n⟩) : ∃ f : Unit → Box Nat, n = (f ()).val
   cases h with
   | mk f => exact ⟨f, rfl⟩
 
--- Projector of a `newtype`: `s := Sealed.mk 0`.
+-- Projection of a `+defeq` structure: `s := Sealed.mk 0`.
 example (s : Sealed) (h : IsZero s.toNat) : s = Sealed.mk 0 := by
   cases h
   rfl
 
--- Constructor of a `newtype`: `n := (f ()).toNat`.
+-- Constructor of a `+defeq` structure: `n := (f ()).toNat`.
 example (n : Nat) (h : OfFunSealed (Sealed.mk n)) : ∃ f : Unit → Sealed, n = (f ()).toNat := by
   cases h with
   | mk f => exact ⟨f, rfl⟩
@@ -45,15 +46,15 @@ example (b : Box Sealed) (h : IsZero b.val.toNat) : b = ⟨Sealed.mk 0⟩ := by
   rfl
 
 /-!
-The shape that arises for an iterator whose state is a `newtype` around another iterator's state:
-the index is the constructor of a structure applied to the constructor of a `newtype` applied to a
-projection chain of the variable.
+The shape that arises for an iterator whose state is a `+defeq` structure around another iterator's
+state: the index is the constructor of a structure applied to the constructor of a `+defeq`
+structure applied to a projection chain of the variable.
 -/
 
 structure Inner where
   n : Nat
 
-newtype Mid where
+structure +defeq Mid where
   toInner : Inner
 
 structure Outer where

@@ -3,19 +3,19 @@ module
 public meta import Lean
 
 /-!
-Tests `newtype` under the module system: like a structure's field types, the underlying type of a
-public `newtype` is always visible, so the type, its constructor and its projector are exposed
-without `@[expose]`. Importers can only reduce `N.proj (N.mk a)` in the kernel if all three bodies
-are visible.
+Tests `structure +defeq` under the module system: like a structure's field types, the field type
+of a public `+defeq` structure is always visible, so the type, its constructor and its projection
+are exposed without `@[expose]`. Importers can only reduce `N.proj (N.mk a)` in the kernel if all
+three bodies are visible.
 -/
 
-public newtype Pub where
+public structure +defeq Pub where
   toNat : Nat
 /-- warning: `@[expose]` has no effect; this declaration would be exposed by default -/
 #guard_msgs in
-@[expose] public newtype Exposed where
+@[expose] public structure +defeq Exposed where
   toNat : Nat
-newtype Priv where
+structure +defeq Priv where
   toNat : Nat
 
 open Lean in
@@ -35,7 +35,7 @@ public section
 
 -- The visibility of a `public section` is not visible in the declaration's modifiers, so the
 -- elaborator has to consult the environment for it, as `def` does.
-newtype InPublicSection where
+structure +defeq InPublicSection where
   toNat : Nat
 
 open Lean in

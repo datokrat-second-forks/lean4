@@ -49,7 +49,7 @@ def baseTypeIdent := mkIdent (Name.mkSimple "Base")
 def init (type val : TSyntax `ident) (width : Nat) : MacroM (TSyntax `command) := do
   let fieldsStx ← mkFieldsStx type "base_" width
   let vals := Array.replicate width val
-  `(structure $baseTypeIdent where
+  `(structure $baseTypeIdent:ident where
     $fieldsStx:structFields
     def $baseIdent : $baseTypeIdent := ⟨$vals,*⟩)
 
@@ -68,7 +68,7 @@ where go (val : TSyntax `ident) (width depth : Nat) (cmds : Array <| TSyntax `co
     let newTerm' (s : String) := if len = 1 then baseIdent else mkIdent' s (m+1)
     let fieldsStx ← mkFieldsStx type (s!"x{m}_") width
     let nextStruct ←
-      `(structure $(mkIdent' "A" m) extends $(newTerm "A"):term where
+      `(structure $(mkIdent' "A" m):ident extends $(newTerm "A"):term where
         $fieldsStx:structFields)
     let structVals ← (List.range width).mapM fun j =>
       `(Term.structInstField| $(mkIdent' s!"x{m}_" j):ident := $val)

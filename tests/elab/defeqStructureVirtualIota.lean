@@ -1,20 +1,20 @@
 /-!
-Tests the `newtype` command. It generates an irreducible type alias together with a
-constructor/projector pair (`N`, `N.mk`, `N.toNat`), and registers the pair as a "virtual
+Tests `structure +defeq`. It generates an irreducible type alias together with a
+constructor/projection pair (`N`, `N.mk`, `N.toNat`), and registers the pair as a "virtual
 structure" so that `whnf`/`isDefEq` reduce `N.toNat (N.mk n)` to `n` (virtual iota), even though
 `N`, `N.mk` and `N.toNat` are otherwise irreducible (so `N` does not unify with `Nat` in general).
 -/
 
-newtype N where
+structure +defeq N where
   toNat : Nat
 
--- Virtual iota: projector-of-constructor reduces by `rfl`, without unfolding `N`/`N.mk`/`N.toNat`.
+-- Virtual iota: projection-of-constructor reduces by `rfl`, without unfolding `N`/`N.mk`/`N.toNat`.
 example (n : Nat) : N.toNat (N.mk n) = n := rfl
 
--- Over-applied projector, when the wrapped value is a function.
-newtype F where
+-- Over-applied projection, when the wrapped value is a function.
+structure +defeq F where
   get : Nat → Nat
-newtype G (α : Type) where
+structure +defeq G (α : Type) where
   get : α → α → α
 
 example (f : Nat → Nat) (x : Nat) : (F.mk f).get x = f x := rfl

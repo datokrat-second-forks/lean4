@@ -1,9 +1,10 @@
 /-!
-Tests the injectivity theorems `N.mk.inj` and `N.mk.injEq` generated for a `newtype`, as for a
-one-field structure, and the checks `newtype` performs before adding any declaration.
+Tests the injectivity theorems `N.mk.inj` and `N.mk.injEq` generated for a `+defeq` structure, as
+for a one-field structure, and the checks `structure +defeq` performs before adding any
+declaration.
 -/
 
-newtype N (α : Type u) where
+structure +defeq N (α : Type u) where
   toList : List α
 
 /-- info: N.mk.inj.{u} {α : Type u} {toList toList✝ : List α} : N.mk toList = N.mk toList✝ → toList = toList✝ -/
@@ -17,7 +18,7 @@ example (a b : List Nat) (h : N.mk a = N.mk b) : a = b := by simpa using h
 example (a b : List Nat) (h : N.mk a = N.mk b) : a = b := by grind [N.mk.inj]
 
 -- No injectivity theorems for a proposition.
-newtype P where
+structure +defeq P where
   proof : True
 /-- error: Unknown constant `P.mk.inj` -/
 #guard_msgs in #check P.mk.inj
@@ -26,16 +27,18 @@ newtype P where
 def Clash.toNat : Nat := 0
 
 /-- error: `Clash.toNat` has already been declared -/
-#guard_msgs in newtype Clash where toNat : Nat
+#guard_msgs in structure +defeq Clash where toNat : Nat
 
 /-- error: Unknown identifier `Clash` -/
 #guard_msgs in #check Clash
 
-/-- error: invalid `newtype`, the projector and the constructor cannot have the same name -/
-#guard_msgs in newtype M where mk : Nat
+/-- error: Invalid field name `mk`: This is the name of the structure constructor -/
+#guard_msgs in structure +defeq M where mk : Nat
 
-/-- error: invalid `newtype`, the projector and the constructor cannot have the same name -/
-#guard_msgs in newtype M where val :: val : Nat
+/-- error: Invalid field name `val`: This is the name of the structure constructor -/
+#guard_msgs in structure +defeq M where val :: val : Nat
 
-/-- error: invalid `newtype`, a `newtype` is always irreducible, `@[reducible]` is not allowed -/
-#guard_msgs in @[reducible] newtype R where toNat : Nat
+/--
+error: Invalid attribute: A `+defeq` structure is always irreducible, `@[reducible]` is not allowed
+-/
+#guard_msgs in @[reducible] structure +defeq R where toNat : Nat

@@ -21,7 +21,7 @@ inductive OneFieldStructureInfo where
   | virtualStructure : VirtualStructureInfo → OneFieldStructureInfo
 
 /--
-A one-field-structure or newtype constructor or projection, together with
+A one-field-structure or `+defeq`-structure constructor or projection, together with
 a choice of parameters and universe levels for the underlying structure.
 -/
 structure Bijection where

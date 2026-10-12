@@ -371,7 +371,8 @@ mutual
               if let some mvarId ← getStuckMVar? (← whnf major) then
                 return mvarId
             return none
-          -- `newtype` projectors behave like `.proj` nodes, which are stuck iff their major is.
+          -- `+defeq` structure projections behave like `.proj` nodes, which are stuck iff their
+          -- major is.
           else if let some projInfo ← getVirtualProjInfo? fName then
             if let some major := args[projInfo.numParams]? then
               getStuckMVar? (← whnf major)
@@ -561,8 +562,8 @@ def reduceProj? (e : Expr) : MetaM (Option Expr) := do
   | _           => return none
 
 /--
-Reduces `N.proj (N.mk a)` to `a` for a `newtype` `N`, like `reduceProj?` for a structure and
-regardless of the irreducibility of `N.mk` and `N.proj`. `whnfMajor` puts the major premise in
+Reduces `N.proj (N.mk a)` to `a` for a `+defeq` structure `N`, like `reduceProj?` for a structure
+and regardless of the irreducibility of `N.mk` and `N.proj`. `whnfMajor` puts the major premise in
 normal form; callers honoring `Meta.Config.proj` pass the reducer that `.proj` mode selects.
 -/
 def reduceVirtualProjCore? (e : Expr) (whnfMajor : Expr → MetaM Expr) : MetaM (Option Expr) := do
@@ -574,7 +575,7 @@ def reduceVirtualProjCore? (e : Expr) (whnfMajor : Expr → MetaM Expr) : MetaM 
   let .const ctorName _ := major.getAppFn | return none
   unless ctorName == projInfo.ctorName && major.getAppNumArgs == projInfo.numParams + 1 do
     return none
-  -- The projector may be over-applied if the wrapped value is a function.
+  -- The projection may be over-applied if the wrapped value is a function.
   return some (mkAppN major.appArg! (args.extract (projInfo.numParams + 1)))
 
 /-- `reduceVirtualProjCore?` with the major premise reduced by `whnf`, mirroring `project?`. -/
@@ -872,7 +873,8 @@ private def unfoldDefault (fInfo : ConstantInfo) (us : List Level) (e : Expr) : 
 /--
 Delta-level counterpart of the `whnfCore` virtual projection step: a real projection *function* is
 an ordinary definition, so `whnf` unfolds it and then reduces the resulting `.proj` node according
-to `Meta.Config.proj`. A `newtype` projector is `@[irreducible]` and has no `.proj` node, so both
+to `Meta.Config.proj`. A `+defeq` structure's projection is `@[irreducible]` and has no `.proj`
+node, so both
 steps happen here at once, with the major premise reduced the way `Meta.Config.proj` prescribes.
 -/
 def reduceVirtualProjWithDelta? (e : Expr) : MetaM (Option Expr) := do
@@ -890,7 +892,7 @@ mutual
   partial def unfoldDefinition? (e : Expr) (ignoreTransparency := false) : MetaM (Option Expr) :=
     match e with
     | .app f _ =>
-      -- `newtype` projectors are `@[irreducible]`, so they always take this branch
+      -- `+defeq` structure projections are `@[irreducible]`, so they always take this branch
       let onFailure (_ : Unit) : MetaM (Option Expr) := do
         if let some e' ← reduceVirtualProjWithDelta? e then return some e'
         unfoldProjInstWhenInstances? e

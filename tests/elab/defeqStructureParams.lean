@@ -1,15 +1,16 @@
 import Lean
 
 /-!
-Tests that `newtype` handles parameters exactly like `def`: explicit binders, universe parameters,
-section variables and auto-bound implicits. As for `structure`, explicit parameters become implicit
-in the generated constructor and projector, and virtual iota/eta as well as `unsealing_newtype`
+Tests that `structure +defeq` handles parameters exactly like `def`: explicit binders, universe
+parameters, section variables and auto-bound implicits. As for any structure, explicit parameters
+become implicit in the generated constructor and projection, and virtual iota/eta as well as
+`unsealing_structure`
 work in the presence of parameters.
 -/
 
 universe u
 
-newtype OrderDual (α : Type u) where
+structure +defeq OrderDual (α : Type u) where
   ofDual : α
 
 /-- info: OrderDual.{u} (α : Type u) : Type u -/
@@ -22,12 +23,12 @@ newtype OrderDual (α : Type u) where
 example (a : α) : OrderDual.ofDual (OrderDual.mk a) = a := rfl
 example (x : OrderDual α) : OrderDual.mk (OrderDual.ofDual x) = x := rfl
 example (a : α) : (OrderDual.mk a).ofDual = a := by simp only
-example : OrderDual α = α := by unsealing_newtype OrderDual => rfl
+example : OrderDual α = α := by unsealing_structure OrderDual => rfl
 
 section
 variable (β : Type) [Inhabited β]
 
-newtype Wrap where
+structure +defeq Wrap where
   toList : List β
 
 /-- info: Wrap (β : Type) : Type -/
@@ -40,7 +41,7 @@ example (l : List β) : (Wrap.mk l).toList = l := rfl
 end
 
 -- Auto-bound universe levels in the binders, as for `def`.
-newtype Wrap' (γ : Type _) where
+structure +defeq Wrap' (γ : Type _) where
   get : Option γ
 
 /-- info: Wrap'.{u_1} (γ : Type u_1) : Type u_1 -/
@@ -51,11 +52,16 @@ newtype Wrap' (γ : Type _) where
 example (o : Option γ) : (Wrap'.mk o).get = o := rfl
 
 /-- doc -/
-private newtype Priv (n : Nat) where
+private structure +defeq Priv (n : Nat) where
   val : Fin n
 
 example (i : Fin 3) : (Priv.mk i).val = i := rfl
 
-/-- error: invalid `newtype`, the underlying type must be a type, but has type
-  Nat -/
-#guard_msgs in newtype Bad where val : 5
+/-! As for a structure, the field type is elaborated against a sort unless a resulting type is
+given. -/
+
+structure +defeq Big where val : Type
+example : Type 1 := Big
+
+/-- error: Invalid resulting type: Expected a sort -/
+#guard_msgs in structure +defeq Bad : Nat where val : 5
