@@ -1,7 +1,7 @@
 import Lean
 
 /-!
-Tests that the lawful lifts through the sealed Lean monads are available: each `newtype`-sealed monad
+Tests that the lawful lifts through the sealed Lean monads are available: each sealed monad
 provides `LawfulMonadLift` for its outer layer, as its unfolding `ReaderT` did before the seal.
 -/
 

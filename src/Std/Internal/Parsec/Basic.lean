@@ -57,7 +57,7 @@ end Parsec
 A `Parsec ι α` represents a parser that consumes input of type `ι` and, produces a
 `ParseResult` containing a value of type `α` (the result of parsing) and the remaining input.
 -/
-newtype Parsec (ι : Type) (α : Type) where
+structure +defeq Parsec (ι : Type) (α : Type) where
   run : ι → Parsec.ParseResult α ι
 
 /-- A parser can be applied to its input directly, unwrapping it with `Parsec.run`. -/

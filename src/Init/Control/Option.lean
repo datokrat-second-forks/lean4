@@ -21,19 +21,17 @@ instance : ToBool (Option α) := ⟨Option.isSome⟩
 Adds the ability to fail to a monad. Unlike ordinary exceptions, there is no way to signal why a
 failure occurred.
 -/
-newtype OptionT (m : Type u → Type v) (α : Type u) where
+structure +defeq OptionT (m : Type u → Type v) (α : Type u) where
+  /--
+  Converts an action that returns an `Option` into one that might fail, with `none` indicating
+  failure.
+  -/
+  mk ::
+  /--
+  Executes an action that might fail in the underlying monad `m`, returning `none` in case of
+  failure.
+  -/
   run : m (Option α)
-
-/--
-Executes an action that might fail in the underlying monad `m`, returning `none` in case of failure.
--/
-add_decl_doc OptionT.run
-
-/--
-Converts an action that returns an `Option` into one that might fail, with `none` indicating
-failure.
--/
-add_decl_doc OptionT.mk
 
 namespace OptionT
 variable {m : Type u → Type v} [Monad m] {α β : Type u}

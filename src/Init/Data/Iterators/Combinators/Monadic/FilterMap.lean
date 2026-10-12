@@ -50,8 +50,8 @@ structure FilterMap (α : Type w) {β γ : Type w}
 /--
 Internal state of the `map` combinator. Do not depend on its internals.
 -/
-newtype Map (α : Type w) {β γ : Type w} (m : Type w → Type w') (n : Type w → Type w'')
-    (lift : ⦃α : Type w⦄ → m α → n α) [Functor n]
+structure +defeq Map (α : Type w) {β γ : Type w} (m : Type w → Type w')
+    (n : Type w → Type w'') (lift : ⦃α : Type w⦄ → m α → n α) [Functor n]
     (f : β → PostconditionT n γ) where
   toFilterMap : FilterMap α m n lift (fun b => PostconditionT.map some (f b))
 

@@ -60,8 +60,8 @@ instance {α β : Type} {m : Type → Type} [BEq α] [Hashable α] [Monad m] [Mo
 
 end MonadHashMapCacheAdapter
 
-newtype MonadCacheT {ω} (α β : Type) (m : Type → Type) [STWorld ω m] [BEq α] [Hashable α]
-    (σ : Type) where
+structure +defeq MonadCacheT {ω} (α β : Type) (m : Type → Type) [STWorld ω m] [BEq α]
+    [Hashable α] (σ : Type) where
   toStateRefT : StateRefT (Std.HashMap α β) m σ
 
 namespace MonadCacheT
@@ -86,7 +86,8 @@ instance [Alternative m] : Alternative (MonadCacheT α β m) := inferInstanceAs 
 end MonadCacheT
 
 /-- Similar to `MonadCacheT`, but using `StateT` instead of `StateRefT` -/
-newtype MonadStateCacheT (α β : Type) (m : Type → Type) [BEq α] [Hashable α] (σ : Type) where
+structure +defeq MonadStateCacheT (α β : Type) (m : Type → Type) [BEq α] [Hashable α]
+    (σ : Type) where
   toStateT : StateT (Std.HashMap α β) m σ
 
 namespace MonadStateCacheT

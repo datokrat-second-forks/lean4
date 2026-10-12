@@ -23,19 +23,16 @@ Actions in the resulting monad are functions that take an initial state and retu
 of a value and a state.
 -/
 -- the binder name `s` is part of `StateT.run`'s type, so that `StateT.run (s := ...)` works
-newtype StateT (σ : Type u) (m : Type u → Type v) (α : Type u) where
+structure +defeq StateT (σ : Type u) (m : Type u → Type v) (α : Type u) where
+  /--
+  Interpret `σ → m (α × σ)` as an element of `StateT σ m α`.
+  -/
+  mk ::
+  /--
+  Executes an action from a monad with added state in the underlying monad `m`. Given an initial
+  state, it returns a value paired with the final state.
+  -/
   run : (s : σ) → m (α × σ)
-
-/--
-Interpret `σ → m (α × σ)` as an element of `StateT σ m α`.
--/
-add_decl_doc StateT.mk
-
-/--
-Executes an action from a monad with added state in the underlying monad `m`. Given an initial
-state, it returns a value paired with the final state.
--/
-add_decl_doc StateT.run
 
 instance {σ : Type u} {m : Type u → Type v} {α : Type u} [Inhabited (m (α × σ))] :
     Inhabited (StateT σ m α) where

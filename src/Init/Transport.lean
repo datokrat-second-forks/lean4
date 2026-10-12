@@ -19,8 +19,8 @@ public section
 Each `C.canonicalCongr` lifts an equivalence of types to an equivalence of `C` instances and is
 registered with `@[transport]`, so that `transport`, `inferInstanceAs` and `deriving` can move `C`
 instances between equivalent types (see `Lean.Meta.transport`). An instance transported along
-`e : Lean.CanonicalEquivalence α β` operates on `α` through `e.toFun`, so on a `newtype` it
-computes on the projected value. A congruence for a lawful class concludes at the transported
+`e : Lean.CanonicalEquivalence α β` operates on `α` through `e.toFun`, so on a `+defeq` structure
+it computes on the projected value. A congruence for a lawful class concludes at the transported
 instance of its parent class and hence applies to that instance only.
 -/
 

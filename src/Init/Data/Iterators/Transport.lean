@@ -18,7 +18,7 @@ public section
 
 If `Lean.CanonicalEquivalence α' α`, then an `Iterator α m β` instance yields an `Iterator α' m β` instance whose steps
 are those of the original iterator with the states converted. `Finite` and `Productive` are carried
-along. This is how a `newtype` wrapping an iterator state type obtains its instances.
+along. This is how a `+defeq` structure wrapping an iterator state type obtains its instances.
 -/
 
 namespace Std

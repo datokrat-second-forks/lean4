@@ -128,23 +128,21 @@ end Except
 /--
 Adds exceptions of type `ε` to a monad `m`.
 -/
-newtype ExceptT (ε : Type u) (m : Type u → Type v) (α : Type u) where
+structure +defeq ExceptT (ε : Type u) (m : Type u → Type v) (α : Type u) where
+  /--
+  Use a monadic action that may return an exception's value as an action in the transformed monad
+  that may throw the corresponding exception.
+
+  This is the inverse of `ExceptT.run`.
+  -/
+  mk ::
+  /--
+  Use a monadic action that may throw an exception as an action that may return an exception's
+  value.
+
+  This is the inverse of `ExceptT.mk`.
+  -/
   run : m (Except ε α)
-
-/--
-Use a monadic action that may return an exception's value as an action in the transformed monad that
-may throw the corresponding exception.
-
-This is the inverse of `ExceptT.run`.
--/
-add_decl_doc ExceptT.mk
-
-/--
-Use a monadic action that may throw an exception as an action that may return an exception's value.
-
-This is the inverse of `ExceptT.mk`.
--/
-add_decl_doc ExceptT.run
 
 /--
 Use a monadic action that may throw an exception by providing explicit success and failure

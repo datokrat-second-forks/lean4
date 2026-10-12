@@ -15,7 +15,7 @@ A monad transformer that equips a monad with a value.
 This is a generalization of `ReaderT` where the value is not
 necessarily directly readable through the monad.
 -/
-public newtype EquipT (ρ : Type u) (m : Type v → Type w) (α : Type v) where
+public structure +defeq EquipT (ρ : Type u) (m : Type v → Type w) (α : Type v) where
   run : ρ → m α
 
 namespace EquipT

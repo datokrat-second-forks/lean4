@@ -28,7 +28,7 @@ structure State where
   importAll     : Bool := false
   deriving Inhabited
 
-newtype Parser where
+structure +defeq Parser where
   run : String → State → State
 
 @[inline] def skip : Parser := .mk fun _ s => s

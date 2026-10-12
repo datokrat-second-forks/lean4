@@ -593,7 +593,7 @@ run_meta
   | none => IO.println "no limit found"
 ```
 -/
-newtype MetaM (α : Type) where
+structure +defeq MetaM (α : Type) where
   toReaderT : ReaderT Context (StateRefT State CoreM) α
 
 -- Make the compiler generate specialized `pure`/`bind` so we do not have to optimize through the

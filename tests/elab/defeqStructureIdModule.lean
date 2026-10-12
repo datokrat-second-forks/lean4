@@ -1,8 +1,8 @@
 module
 
 /-!
-Tests the `newtype` `Id` from an importing module: virtual iota and eta hold by `rfl`, `simp` rewrites
-through them inside terms, and `cases` inverts an `Id.mk` index.
+Tests the `+defeq` structure `Id` from an importing module: virtual iota and eta hold by `rfl`,
+`simp` rewrites through them inside terms, and `cases` inverts an `Id.mk` index.
 -/
 
 example (x : Nat) : Id.run (Id.mk x) = x := rfl

@@ -384,18 +384,15 @@ end MaybeTask
 /--
 An asynchronous computation that never fails.
 -/
-newtype BaseAsync (α : Type) where
+structure +defeq BaseAsync (α : Type) where
+  /--
+  Converts a `BaseIO` into a `BaseAsync`
+  -/
+  mk ::
+  /--
+  Converts a `BaseAsync` into a `BaseIO`
+  -/
   toRawBaseIO : BaseIO (MaybeTask α)
-
-/--
-Converts a `BaseIO` into a `BaseAsync`
--/
-add_decl_doc BaseAsync.mk
-
-/--
-Converts a `BaseAsync` into a `BaseIO`
--/
-add_decl_doc BaseAsync.toRawBaseIO
 
 namespace BaseAsync
 
@@ -562,18 +559,15 @@ end BaseAsync
 /--
 An asynchronous computation that may produce an error of type `ε`.
 -/
-newtype EAsync (ε : Type) (α : Type) where
+structure +defeq EAsync (ε : Type) (α : Type) where
+  /--
+  Converts a `BaseAsync` returning an `Except` into an `EAsync`.
+  -/
+  mk ::
+  /--
+  Converts an `EAsync` into a `BaseAsync` returning an `Except`.
+  -/
   toBaseAsync : BaseAsync (Except ε α)
-
-/--
-Converts a `BaseAsync` returning an `Except` into an `EAsync`.
--/
-add_decl_doc EAsync.mk
-
-/--
-Converts an `EAsync` into a `BaseAsync` returning an `Except`.
--/
-add_decl_doc EAsync.toBaseAsync
 
 namespace EAsync
 

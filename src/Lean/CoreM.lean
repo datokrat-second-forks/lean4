@@ -267,7 +267,7 @@ The main features it provides are:
 - Lean options context
 - the current open namespace
 -/
-newtype CoreM (α : Type) where
+structure +defeq CoreM (α : Type) where
   toReaderT : ReaderT Context (StateRefT State (EIO Exception)) α
 
 -- Make the compiler generate specialized `pure`/`bind` so we do not have to optimize through the

@@ -2,13 +2,14 @@ import Std.Time
 
 /-!
 Rehearses sealing one of the `Std.Time` unit types, which are aliases of `Std.Time.Internal.Bounded.LE`
-today, as a `newtype`: the instances the alias obtained by `deriving` and `inferInstanceAs` are
-transported instead, and the lawful `Ord` classes carry over to the transported `Ord` instance.
+today, as a `+defeq` structure: the instances the alias obtained by `deriving` and
+`inferInstanceAs` are transported instead, and the lawful `Ord` classes carry over to the
+transported `Ord` instance.
 -/
 
 open Std Std.Time Std.Time.Internal
 
-newtype DayOrd where
+structure +defeq DayOrd where
   toBounded : Bounded.LE 1 31
 deriving Repr, DecidableEq, LE, LT, Ord, TransOrd, LawfulEqOrd
 

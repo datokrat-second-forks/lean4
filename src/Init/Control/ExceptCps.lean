@@ -21,14 +21,11 @@ Adds exceptions of type `ε` to a monad `m`.
 Instead of using `Except ε` to model exceptions, this implementation uses continuation passing
 style. This has different performance characteristics from `ExceptT ε`.
 -/
-newtype ExceptCpsT (ε : Type u) (m : Type u → Type v) (α : Type u) where
+structure +defeq ExceptCpsT (ε : Type u) (m : Type u → Type v) (α : Type u) where
+  /-- Interpret a CPS exception function as an element of `ExceptCpsT ε m α`. -/
+  mk ::
+  /-- The CPS exception function underlying an `ExceptCpsT` action. -/
   toFn : (β : Type u) → (α → m β) → (ε → m β) → m β
-
-/-- Interpret a CPS exception function as an element of `ExceptCpsT ε m α`. -/
-add_decl_doc ExceptCpsT.mk
-
-/-- The CPS exception function underlying an `ExceptCpsT` action. -/
-add_decl_doc ExceptCpsT.toFn
 
 namespace ExceptCpsT
 

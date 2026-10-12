@@ -4317,18 +4317,15 @@ Actions in the resulting monad are functions that take the local value as a para
 ordinary actions in `m`.
 -/
 -- the binder name `r` is part of `ReaderT.run`'s type, so that `ReaderT.run (r := ...)` works
-newtype ReaderT (ρ : Type u) (m : Type u → Type v) (α : Type u) where
+structure +defeq ReaderT (ρ : Type u) (m : Type u → Type v) (α : Type u) where
+  /--
+  Interpret `ρ → m α` as an element of `ReaderT ρ m α`.
+  -/
+  mk ::
+  /--
+  Executes an action from a monad with a read-only value in the underlying monad `m`.
+  -/
   run : (r : @&ρ) → m α
-
-/--
-Interpret `ρ → m α` as an element of `ReaderT ρ m α`.
--/
-add_decl_doc ReaderT.mk
-
-/--
-Executes an action from a monad with a read-only value in the underlying monad `m`.
--/
-add_decl_doc ReaderT.run
 
 instance (ρ : Type u) (m : Type u → Type v) (α : Type u) [Inhabited (m α)] : Inhabited (ReaderT ρ m α) where
   default := ReaderT.mk fun _ => default
@@ -4676,19 +4673,16 @@ Instances of `EStateM.Backtrackable` provide a way to roll back some part of the
 `EStateM ε σ` is equivalent to `ExceptT ε (StateM σ)`, but it is more efficient.
 -/
 -- the binder name `s` is part of `EStateM.run`'s type, so that `EStateM.run (s := ...)` works
-newtype EStateM (ε σ α : Type u) where
+structure +defeq EStateM (ε σ α : Type u) where
+  /--
+  Interpret `σ → EStateM.Result ε σ α` as an element of `EStateM ε σ α`.
+  -/
+  mk ::
+  /--
+  Executes an `EStateM` action with the initial state `s`. The returned value includes the final
+  state and indicates whether an exception was thrown or a value was returned.
+  -/
   run : (s : σ) → Result ε σ α
-
-/--
-Interpret `σ → EStateM.Result ε σ α` as an element of `EStateM ε σ α`.
--/
-add_decl_doc EStateM.mk
-
-/--
-Executes an `EStateM` action with the initial state `s`. The returned value includes the final state
-and indicates whether an exception was thrown or a value was returned.
--/
-add_decl_doc EStateM.run
 
 namespace EStateM
 
@@ -5244,7 +5238,8 @@ def Syntax.node8 (info : SourceInfo) (kind : SyntaxNodeKind) (a₁ a₂ a₃ a�
 Singleton `SyntaxNodeKinds` are extremely common. They are written as name literals, rather than as
 lists; list syntax is required only for empty or non-singleton sets of kinds.
 -/
-newtype SyntaxNodeKinds where
+structure +defeq SyntaxNodeKinds where
+  /-- The kinds in the set, as a list. -/
   toList : List SyntaxNodeKind
 
 /--

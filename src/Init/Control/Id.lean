@@ -36,21 +36,18 @@ def containsFive (xs : List Nat) : Bool := Id.run do
 true
 ```
 -/
-newtype Id (α : Type u) where
+structure +defeq Id (α : Type u) where
+  /--
+  Interpret a value as a computation in the identity monad.
+  -/
+  mk ::
+  /--
+  Runs a computation in the identity monad.
+
+  This function is the identity function. Because its parameter has type `Id α`, it causes
+  `do`-notation in its arguments to use the `Monad Id` instance.
+  -/
   run : α
-
-/--
-Interpret a value as a computation in the identity monad.
--/
-add_decl_doc Id.mk
-
-/--
-Runs a computation in the identity monad.
-
-This function is the identity function. Because its parameter has type `Id α`, it causes
-`do`-notation in its arguments to use the `Monad Id` instance.
--/
-add_decl_doc Id.run
 
 namespace Id
 

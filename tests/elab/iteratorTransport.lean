@@ -1,15 +1,16 @@
 import Std.Data.Iterators
 
 /-!
-Rehearses sealing the state type of an iterator as a `newtype`, the way `Std.Iterators.Types.Map`
-is sealed: the `Iterator`, `Finite` and `Productive` instances are transported along the generated
-equivalence with `Iterator.ofEquiv`, `Finite.ofEquiv` and `Productive.ofEquiv`, and the consumers of
-the transported iterator agree with those of the underlying one.
+Rehearses sealing the state type of an iterator as a `+defeq` structure, the way
+`Std.Iterators.Types.Map` is sealed: the `Iterator`, `Finite` and `Productive` instances are
+transported along the generated equivalence with `Iterator.ofEquiv`, `Finite.ofEquiv` and
+`Productive.ofEquiv`, and the consumers of the transported iterator agree with those of the
+underlying one.
 -/
 
 open Std Std.Iterators
 
-newtype Wrapped (α : Type) where
+structure +defeq Wrapped (α : Type) where
   toListIterator : Types.ListIterator α
 
 instance : Iterator (Wrapped α) Id α := Iterator.ofEquiv Wrapped.equivDef inferInstance

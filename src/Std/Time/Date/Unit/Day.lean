@@ -21,7 +21,8 @@ set_option linter.all true
 /--
 `Ordinal` represents a bounded value for days, which ranges between 1 and 31.
 -/
-newtype Ordinal where
+structure +defeq Ordinal where
+  /-- The underlying bounded integer of the ordinal. -/
   toBounded : Bounded.LE 1 31
 deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
@@ -47,7 +48,8 @@ instance : Inhabited Ordinal where default := 1
 `Offset` represents an offset in days. It is defined as an `Int` with a base unit of 86400
 (the number of seconds in a day).
 -/
-newtype Offset where
+structure +defeq Offset where
+  /-- The underlying `UnitVal` of the offset. -/
   toUnitVal : UnitVal 86400
 deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
     Ord, TransOrd, LawfulEqOrd
@@ -75,7 +77,8 @@ def ofInt (data : Int) (h : 1 ≤ data ∧ data ≤ 31) : Ordinal :=
 `OfYear` represents the day ordinal within a year, which can be bounded between 1 and 365 or 366,
 depending on whether it's a leap year.
 -/
-newtype OfYear (leap : Bool) where
+structure +defeq OfYear (leap : Bool) where
+  /-- The underlying bounded integer of the ordinal. -/
   toBounded : Bounded.LE 1 (.ofNat (if leap then 366 else 365))
 deriving Repr, ToString, DecidableEq, Ord, TransOrd, LawfulEqOrd
 

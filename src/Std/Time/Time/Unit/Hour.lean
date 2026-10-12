@@ -21,7 +21,8 @@ set_option linter.all true
 /--
 `Ordinal` represents a bounded value for hours, ranging from 0 to 23.
 -/
-newtype Ordinal where
+structure +defeq Ordinal where
+  /-- The underlying bounded integer of the ordinal. -/
   toBounded : Bounded.LE 0 23
 deriving Repr, DecidableEq, LE, LT, DecidableLE, DecidableLT, Ord, TransOrd, LawfulEqOrd
 
@@ -52,7 +53,8 @@ instance : Inhabited Ordinal where
 `Offset` represents an offset in hours, defined as an `Int`. This can be used to express durations
 or differences in hours.
 -/
-newtype Offset where
+structure +defeq Offset where
+  /-- The underlying `UnitVal` of the offset. -/
   toUnitVal : UnitVal 3600
 deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
     Ord, TransOrd, LawfulEqOrd

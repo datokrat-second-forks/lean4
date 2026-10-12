@@ -70,7 +70,7 @@ structure Context where
   -/
   suppressElabErrors : Bool := false
 
-newtype CommandElabM (α : Type) where
+structure +defeq CommandElabM (α : Type) where
   toReaderT : ReaderT Context (StateRefT State (EIO Exception)) α
 
 instance : MonadReaderOf Context CommandElabM := inferInstanceAs (MonadReaderOf _ (ReaderT Context _))

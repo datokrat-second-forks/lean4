@@ -37,15 +37,13 @@ instance : ToString Era where
 /--
 `Offset` represents a year offset, defined as an `Int`.
 -/
-newtype Offset where
+structure +defeq Offset where
+  /--
+  Converts the `Year` offset to an `Int`.
+  -/
   toInt : Int
 deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString, DecidableLE, DecidableLT,
     Ord, TransOrd, LawfulEqOrd
-
-/--
-Converts the `Year` offset to an `Int`.
--/
-add_decl_doc Offset.toInt
 
 instance : OfNat Offset n := inferInstanceAs (OfNat Int n)
 

@@ -103,7 +103,7 @@ example : Baz.mk 1 ≤ Baz.mk 2 := by decide
 
 /-! Arithmetic: a transported operation rewraps the underlying result, so it reduces. -/
 
-newtype Num where
+structure +defeq Num where
   toInt : Int
 deriving Add, Sub, Mul, Div, Neg
 
@@ -125,7 +125,7 @@ example : (3 : Int) • Num.mk 2 = Num.mk 6 := rfl
 
 /-! One congruence covers both arguments of `SMul`: the scalar, the acted-on type, or both. -/
 
-newtype Scalar where
+structure +defeq Scalar where
   toInt : Int
 
 instance : SMul Scalar Int := inferInstanceAs (SMul Int Int)
@@ -184,7 +184,7 @@ Decidability classes are Π-types of `Decidable`s: they transport through `Pi.ca
 `Eq.canonicalCongr` relates by `rfl` side conditions.
 -/
 
-newtype Qux where
+structure +defeq Qux where
   toInt : Int
 
 -- Written by hand, but pointwise definitionally equal to the transported order.
@@ -469,9 +469,9 @@ instance : LawfulPointed Option := ⟨fun _ _ _ h => Option.some.inj h⟩
 instance : LawfulPointed Opt := inferInstanceAs (LawfulPointed Option)
 instance : LawfulPointed Opt2 := by transport (LawfulPointed Option)
 
-/-! Deriving the core order classes on a `newtype`. -/
+/-! Deriving the core order classes on a `+defeq` structure. -/
 
-newtype Ordered where
+structure +defeq Ordered where
   toInt : Int
 deriving DecidableEq, Ord, Std.TransOrd, Std.LawfulEqOrd
 
@@ -483,7 +483,7 @@ example (a b : Ordered) (h : compare a b = .eq) : a = b := Std.LawfulEqOrd.eq_of
 
 /-! The core congruences for `Alternative`, `MonadRef` and `MonadControl`. -/
 
-newtype OptM (α : Type) where
+structure +defeq OptM (α : Type) where
   toStateT : StateT Nat (OptionT (ReaderT Lean.Syntax Id)) α
 
 instance : Lean.MonadRef (ReaderT Lean.Syntax Id) where
@@ -510,7 +510,7 @@ def OptM.run (x : OptM α) : Option (α × Nat) := x.toStateT.run 0 |>.run |>.ru
 
 /-! The core congruences for `MonadFunctor` and the `MonadAttach` laws. -/
 
-newtype RM (α : Type) where
+structure +defeq RM (α : Type) where
   toReaderT : ReaderT Nat Id α
 
 instance : Monad RM := inferInstanceAs (Monad (ReaderT Nat Id))
@@ -524,7 +524,7 @@ example : (monadMap (m := Id) (fun x => x) (pure 1 : RM Nat)).toReaderT.run 0 = 
 
 /-! `MonadLift` and `LawfulMonadLift` along equivalences of both monads. -/
 
-newtype IdN (α : Type) where
+structure +defeq IdN (α : Type) where
   toId : Id α
 
 instance : Monad IdN := inferInstanceAs (Monad Id)
@@ -554,7 +554,7 @@ example : (monadMap (m := IdN) (fun x => x) (pure 1 : RM Nat)).toReaderT.run 0 =
 /-- info: 3 -/
 #guard_msgs in #eval ((controlAt IdN fun run => run (pure 3) : RM Nat).toReaderT.run 0).run
 
-newtype Err where
+structure +defeq Err where
   msg : String
 
 instance : MonadExceptOf Err (Except String) :=
@@ -564,7 +564,7 @@ example : (throw (Err.mk "e") : Except String Nat) = .error "e" := rfl
 example : (tryCatch (throw (Err.mk "e")) fun e => pure e.msg : Except String String) = .ok "e" :=
   rfl
 
-newtype Ctx where
+structure +defeq Ctx where
   toNat : Nat
 
 instance : MonadWithReaderOf Ctx (ReaderT Nat Id) :=

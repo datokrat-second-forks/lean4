@@ -379,7 +379,7 @@ structure Context where
   -/
   fixedTermElabs : Array FixedTermElabRef := #[]
 
-newtype TermElabM (α : Type) where
+structure +defeq TermElabM (α : Type) where
   toReaderT : ReaderT Context (StateRefT State MetaM) α
 
 /-
