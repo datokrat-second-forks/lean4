@@ -113,7 +113,7 @@ def reportJob (job : OpaqueJob) : MonitorM PUnit := do
   let {jobNo, totalJobs, ..} ← get
   let {failLv, outLv, showOptional, out, useAnsi, showProgress, minAction, showTime, ..} ← read
   let {task, caption, optional, ..} := job
-  let {log, action, wantsRebuild, canceled, buildTime, ..} := task.get.state
+  let {log, action, wantsRebuild, canceled, buildTime, ..} := task.toTask.get.state
   let maxLv := log.maxLv
   let failed := strictAnd log.hasEntries (maxLv ≥ failLv)
   let canceled := canceled && !failed
@@ -150,13 +150,13 @@ where
     else s!"{ms}ms"
 
 def drainQueue : MonitorM (Array OpaqueJob) := do
-  let newJobs ← (← read).jobs.modifyGet ((·, #[]))
+  let newJobs ← (← read).jobs.toRef.modifyGet ((·, #[]))
   modify fun s => {s with totalJobs := s.totalJobs + newJobs.size}
   return newJobs
 
 def scanJobs (new unfinished : Array OpaqueJob) : MonitorM (Array OpaqueJob × Array OpaqueJob) := do
   let pollJobs := fun (running, unfinished) job => do
-    match (← IO.getTaskState job.task) with
+    match (← IO.getTaskState job.task.toTask) with
     | .finished =>
       reportJob job
       modify fun s => {s with jobNo := s.jobNo + 1}
@@ -269,7 +269,7 @@ public def monitorJobs
   (updateFrequency := 100)
 : BaseIO MonitorResult := do
   let ctx := {
-    jobs, out, failLv, outLv, minAction, showOptional
+    jobs := .mk jobs, out, failLv, outLv, minAction, showOptional
     useAnsi, showProgress, showTime, updateFrequency
   }
   monitorJobs' ctx initJobs initFailures resetCtrl
@@ -294,7 +294,7 @@ def BuildContext.saveOutputs
       the artifact cache is not enabled for this package, so the artifacts described \
       by the mappings produced by `-o` will not necessarily be available in the cache."
   let isVerbose := bctx.verbosity matches .verbose
-  match (← (← ref.get).writeFile outputsFile pkg.isPlatformIndependent ∅) with
+  match (← ((← ref.get).writeFile outputsFile pkg.isPlatformIndependent).run ∅) with
   | .ok _ log =>
     if !log.isEmpty && isVerbose then
       print! out "There were issues saving input-to-output mappings from the build:\n"

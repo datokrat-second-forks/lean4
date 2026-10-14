@@ -110,7 +110,7 @@ def Needs.get (needs : Needs) (k : NeedsKind) : Bitset :=
   | .metaPub => needs.metaPub
   | .metaPriv => needs.metaPriv
 
-def Needs.has (needs : Needs) (k : NeedsKind) (i : ModuleIdx) : Bool :=
+def Needs.has (needs : Needs) (k : NeedsKind) (i : Nat) : Bool :=
   needs.get k |>.has i
 
 def Needs.set (needs : Needs) (k : NeedsKind) (s : Bitset) : Needs :=
@@ -146,7 +146,7 @@ abbrev Edits := Std.HashMap Name (Array Import × Array Import)
 /-- Reasons for why a module dependency was added that are not captured by
 constant references (which `getExplanations` already tracks). Keyed by the
 `(j, k)` entry written into `deps`. -/
-abbrev Reasons := Std.HashMap (ModuleIdx × NeedsKind) String
+abbrev Reasons := Std.HashMap (Nat × NeedsKind) String
 
 /-- The main state of the checker, containing information on all loaded modules. -/
 structure State where
@@ -264,7 +264,7 @@ def calcNeeds (s : State) (i : ModuleIdx) : Needs := Id.run do
       needs := visitExpr k e needs
 
   for use in getExtraModUses env i do
-    let j : Nat := env.getModuleIdx? use.module |>.get!
+    let j := env.getModuleIdx? use.module |>.get! |>.toNat
     needs := needs.union { use with } {j}
 
   return needs
@@ -275,13 +275,13 @@ where
     Lean.Expr.foldConsts e deps fun c deps => Id.run do
       let mut deps := deps
       if let some c := getDepConstName? s c then
-        if let some (j : Nat) := env.getModuleIdxFor? c then
+        if let some j := env.getModuleIdxFor? c |>.map (·.toNat) then
           let k := { k with isMeta := k.isMeta && !isDeclMeta' env c }
-          if j != i then
+          if j != i.toNat then
             deps := deps.union k {j}
-            for (indMod : Nat) in s.indirectModUses[c]?.getD #[] do
-              if s.transDeps[i]!.has k indMod then
-                deps := deps.union k {indMod}
+            for indMod in s.indirectModUses[c]?.getD #[] do
+              if s.transDeps[i]!.has k indMod.toNat then
+                deps := deps.union k {indMod.toNat}
       return deps
 
 abbrev Explanations := Std.HashMap (ModuleIdx × NeedsKind) (Option (Name × Name))
@@ -320,7 +320,7 @@ where
           let k := { k with isMeta := k.isMeta && !isDeclMeta' env c }
           deps := addExplanation j k name c deps
         for indMod in s.indirectModUses[c]?.getD #[] do
-          if s.transDeps[i]!.has k indMod then
+          if s.transDeps[i]!.has k indMod.toNat then
             deps := addExplanation indMod k name (`_indirect ++ c) deps
       return deps
   addExplanation (j : ModuleIdx) (k : NeedsKind) (use def_ : Name) (deps : Explanations) : Explanations :=
@@ -341,7 +341,7 @@ partial def initStateFromEnv (env : Environment) : State := Id.run do
     for imp in mod.imports do
       let j := env.getModuleIdx? imp.module |>.get!
       imps := imps.push j
-      transImps := addTransitiveImps transImps imp j s.transDeps[j]!
+      transImps := addTransitiveImps transImps imp j.toNat s.transDeps[j]!
     s := { s with transDeps := s.transDeps.push transImps }
   s := { s with transDepsOrig := s.transDeps }
   return s
@@ -413,7 +413,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
     (i : Nat) (needs : Needs) (headerStx : TSyntax ``Parser.Module.header) (args : Args)
     (addOnly := false) : StateT State IO Unit := do
   let modName := (← get).modNames[i]!
-  if isExtraRevModUse (← get).env i then
+  if isExtraRevModUse (← get).env (.ofNat i) then
     modify fun s => { s with preserve := s.preserve.union (if args.addPublic then .pub else .priv) {i} }
     if args.trace then
       IO.eprintln s!"Preserving `{modName}` because of recorded extra rev use"
@@ -438,7 +438,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   -- Add additional preserved imports
   for impStx in imports do
     let imp := decodeImport impStx
-    let j : Nat := s.env.getModuleIdx? imp.module |>.get!
+    let j := s.env.getModuleIdx? imp.module |>.get! |>.toNat
     let k := NeedsKind.ofImport imp
     let reason? :=
       if impStx.raw.getTrailing?.any (·.toString.contains "shake: keep") then
@@ -476,7 +476,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
             deps := deps.sub k' (transDeps.sub k' {j} |>.get k')
 
   if prelude?.isNone then
-    let j : Nat := s.env.getModuleIdx? `Init |>.get!
+    let j := s.env.getModuleIdx? `Init |>.get! |>.toNat
     deps := deps.union .pub {j}
     deps := deps.union .metaPub {j}
 
@@ -484,7 +484,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   let mut transDeps := Needs.empty
   let mut alwaysAdd : Array Import := #[]  -- to be added even if implied by other imports
   for imp in s.mods[i]!.imports do
-    let j : Nat := s.env.getModuleIdx? imp.module |>.get!
+    let j := s.env.getModuleIdx? imp.module |>.get! |>.toNat
     let k := NeedsKind.ofImport imp
     if deps.has k j || imp.importAll then
       let wasInDeps := deps.has k j
@@ -528,9 +528,9 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
             IO.eprintln s!"* upgrading to `{imp}` because of `--add-public`"
           reasons := reasons.insert (j, k) "`--add-public`"
         if args.keepPrefix then
-          let rec tryPrefix : Name → Option ModuleIdx
+          let rec tryPrefix : Name → Option Nat
             | .str p _ => tryPrefix p <|> (do
-              let j' ← s.env.getModuleIdx? p
+              let j' ← s.env.getModuleIdx? p |>.map (·.toNat)
               -- `j'` must be reachable from `i` (allow downgrading from `meta`)
               guard <| s.transDepsOrig[i]!.has k j' || s.transDepsOrig[i]!.has { k with isMeta := true } j'
               let j'transDeps := addTransitiveImps .empty p j' s.transDeps[j']!
@@ -573,7 +573,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   -- Any import which is still not in `deps` was unused
   let mut toRemove : Array Import := #[]
   for imp in s.mods[i]!.imports do
-    let j := s.env.getModuleIdx? imp.module |>.get!
+    let j := s.env.getModuleIdx? imp.module |>.get! |>.toNat
     let k := NeedsKind.ofImport imp
     if args.keepImplied && newTransDeps.has k j then
       if args.trace && !deps.has k j then
@@ -630,16 +630,16 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   let mut newTransDepsI := Needs.empty
   for imp in s.mods[i]!.imports do
     if !toRemove.contains imp then
-      let j := s.env.getModuleIdx? imp.module |>.get!
+      let j := s.env.getModuleIdx? imp.module |>.get! |>.toNat
       newTransDepsI := addTransitiveImps newTransDepsI imp j s.transDeps[j]!
   for imp in toAdd do
-    let j := s.env.getModuleIdx? imp.module |>.get!
+    let j := s.env.getModuleIdx? imp.module |>.get! |>.toNat
     newTransDepsI := addTransitiveImps newTransDepsI imp j s.transDeps[j]!
 
   modify fun s => { s with transDeps := s.transDeps.set! i newTransDepsI }
 
   if args.explain then
-    let explanation := getExplanations s i
+    let explanation := getExplanations s (.ofNat i)
     let sanitize n := if n.hasMacroScopes then (sanitizeName n).run' { options := {} } else n
     let run (imp : Import) := do
       let j := s.env.getModuleIdx? imp.module |>.get!
@@ -651,7 +651,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
       | some none =>
         println! "    because of additional compile-time dependencies"
       | none =>
-        if let some msg := reasons[(j, k)]? then
+        if let some msg := reasons[(j.toNat, k)]? then
           println! "    because of {msg}"
         else
           println! "    (no traced reason)"
@@ -685,16 +685,17 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
   if env.header.moduleData.any (!·.isModule) then
     throw <| .userError "`lake shake` only works with `module`s currently"
   -- the one env ext we want to initialize
-  let is := indirectModUseExt.toEnvExtension.getState env
-  let newState ← indirectModUseExt.addImportedFn is.importedEntries { env := env, opts := {} }
-  env := indirectModUseExt.toEnvExtension.setState (asyncMode := .sync) env { is with state := newState }
+  let ext := indirectModUseExt.toPersistentEnvExtension
+  let is := ext.toEnvExtension.getState env
+  let newState ← ext.addImportedFn is.importedEntries { env := env, opts := {} }
+  env := ext.toEnvExtension.setState (asyncMode := .sync) env { is with state := newState }
 
   StateT.run' (s := initStateFromEnv env) do
 
   let s ← get
   -- Run the calculation of the `needs` array in parallel
   let needs := s.mods.mapIdx fun i _ =>
-    Task.spawn fun _ => calcNeeds s i
+    Task.spawn fun _ => calcNeeds s (.ofNat i)
 
   -- Parse headers in parallel
   let headers ← s.mods.mapIdxM fun i _ =>

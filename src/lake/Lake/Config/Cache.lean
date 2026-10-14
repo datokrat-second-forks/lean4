@@ -885,9 +885,9 @@ def transferArtifacts
     cmd := ← Internal.getCurl, args
     stdout := .piped, stderr := .piped
   }
-  let s ← monitorTransfer cfg child.stderr child.stdout {}
+  let s ← monitorTransfer cfg child.stderr.toHandle child.stdout.toHandle {}
   let rc ← child.wait
-  let stdout ← child.stdout.readToEnd
+  let stdout ← child.stdout.toHandle.readToEnd
   let mut didError := s.didError
   if s.numSuccesses < cfg.infos.size then
     let action := match cfg.kind with | .get => "download" | .put => "upload"

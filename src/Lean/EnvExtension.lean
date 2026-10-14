@@ -64,6 +64,10 @@ def registerSimplePersistentEnvExtension {α σ : Type} [Inhabited σ] (descr : 
 
 namespace SimplePersistentEnvExtension
 
+@[inline] def toPersistentEnvExtension {α σ : Type} (ext : SimplePersistentEnvExtension α σ) :
+    PersistentEnvExtension α α (List α × σ) :=
+  smartCast
+
 instance {α σ : Type} [Inhabited σ] : Inhabited (SimplePersistentEnvExtension α σ) :=
   inferInstanceAs (Inhabited (PersistentEnvExtension α α (List α × σ)))
 

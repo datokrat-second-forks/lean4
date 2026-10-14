@@ -154,16 +154,16 @@ public protected def cast (self : Job α) (h : ¬ self.kind.isAnonymous) : Job (
   {task, caption}
 
 @[inline] public protected def error [OptDataKind α] (log : Log := {}) (caption := "") : Job α :=
-  .ofTask (Task.pure (.error 0 {log})) caption
+  .ofTask (.mk <| Task.pure (.error 0 {log})) caption
 
 @[inline] public protected def pure [kind : OptDataKind α] (a : α) (log : Log := {}) (caption := "") : Job α :=
-  .ofTask (Task.pure (.ok a {log})) caption
+  .ofTask (.mk <| Task.pure (.ok a {log})) caption
 
 public instance : Pure Job := ⟨Job.pure⟩
 
 /-- **For internal use.** -/
 @[inline] public def traceRoot (a : α) (caption := "<root>")  : Job α :=
-  .ofTask <| .pure <| .ok a {trace := .nil caption}
+  .ofTask <| .mk <| .pure <| .ok a {trace := .nil caption}
 
 @[inline] public def nop (log : Log := {}) (caption := "") : Job Unit :=
   .pure () log caption
@@ -176,7 +176,7 @@ Waits for the job and returns it trace.
 Useful if the job is already known to be completed.
 -/
 @[inline] public def getTrace (job : Job α) : BuildTrace :=
-  job.task.get.state.trace
+  job.task.toTask.get.state.trace
 
 /-- Sets the job's caption. -/
 @[inline] public def setCaption (caption : String) (job : Job α) : Job α :=
@@ -189,7 +189,7 @@ Useful if the job is already known to be completed.
 @[inline] public def mapResult
   [OptDataKind β] (f : JobResult α → JobResult β) (self : Job α)
   (prio := Task.Priority.default) (sync := false)
-: Job β := {self with task := self.task.map f prio sync, kind := inferInstance}
+: Job β := {self with task := .mk (self.task.toTask.map f prio sync), kind := inferInstance}
 
 @[inline] public def mapOk
   [OptDataKind β] (f : α → JobState → JobResult β) (self : Job α)
@@ -219,7 +219,7 @@ public abbrev OpaqueJobTask := JobTask Opaque
 /-- Forget the value of a job task. Implemented as a no-op cast. -/
 @[implemented_by toOpaqueImpl]
 public def JobTask.toOpaque (self : JobTask α) : OpaqueJobTask :=
-  self.map (·.map Opaque.mk)
+  .mk (self.toTask.map (·.map Opaque.mk))
 
 public instance : CoeOut (JobTask α) OpaqueJobTask := ⟨.toOpaque⟩
 

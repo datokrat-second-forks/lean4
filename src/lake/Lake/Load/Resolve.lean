@@ -104,7 +104,7 @@ def Workspace.setDepIdxs
 def Workspace.updateDepPkgs (self : Workspace) : Workspace :=
   let s : {pkgs : Vector Package self.packages.size //
     ∀ i, (h : i < pkgs.size) → pkgs[i].wsIdx = i ∧ ∀ j ∈ pkgs[i].depIdxs, j < pkgs.size} :=
-    ⟨self.packages.toVector, fun i i_lt => ⟨self.packages_wsIdx i_lt,
+    ⟨self.packages.toVector, fun i i_lt => by with_semireducible exact ⟨self.packages_wsIdx i_lt,
       self.depIdxs_packages self.packages[i] (Array.getElem_mem ..)⟩⟩
   -- Set `depPkgs` in reverse order (starting from a leaf package).
   -- Since the workspace's packages are topologically sorted, no recursion is necessary.
@@ -125,7 +125,7 @@ def Workspace.updateDepPkgs (self : Workspace) : Workspace :=
     packages := pkgs.toArray
     packageMap := pkgs.foldl (fun map pkg => map.insert pkg.keyName pkg) {}
     size_packages_pos := by simp [self.size_packages_pos]
-    packages_wsIdx {i} i_lt := h i (pkgs.size_toArray.subst i_lt) |>.1
+    packages_wsIdx {i} i_lt := by with_semireducible exact h i (pkgs.size_toArray.subst i_lt) |>.1
     depIdxs_packages p p_mem := by
       have ⟨i, i_lt, p_eq⟩ := Array.mem_iff_getElem.mp p_mem
       simpa [← p_eq] using h i (pkgs.size_toArray.subst i_lt) |>.2
@@ -254,7 +254,7 @@ def reuseManifest
 : UpdateT LoggerIO PUnit := do
   let rootName := ws.root.prettyName
   let validateNames (entries : Array PackageEntry) : UpdateT LoggerIO PUnit := do
-    unless toUpdate.isEmpty do
+    unless toUpdate.toTreeSet.isEmpty do
       let mut known : NameSet :=
         ws.root.depConfigs.foldl (fun s d => s.insert d.name) {}
       for entry in entries do
@@ -266,7 +266,7 @@ def reuseManifest
   | .ok manifest =>
     validateNames manifest.packages
     -- Reuse manifest versions
-    unless toUpdate.isEmpty do
+    unless toUpdate.toTreeSet.isEmpty do
       manifest.packages.forM fun entry => do
         unless entry.inherited || toUpdate.contains entry.name do
           store entry.name entry
@@ -285,7 +285,7 @@ def reuseManifest
     validateNames #[]
     logInfo s!"{rootName}: no previous manifest, creating one from scratch"
   | .error e =>
-    unless toUpdate.isEmpty do
+    unless toUpdate.toTreeSet.isEmpty do
       liftM (m := IO) <| throw e -- only ignore manifest on a bare `lake update`
     logWarning s!"{rootName}: ignoring previous manifest because it failed to load: {e}"
 
@@ -605,7 +605,7 @@ public def Workspace.materializeDeps
     map.insert entry.name entry
   pkgEntries := overrides.foldl (init := pkgEntries) fun map entry =>
     map.insert entry.name entry
-  if pkgEntries.isEmpty && !ws.root.depConfigs.isEmpty then
+  if pkgEntries.toTreeMap.isEmpty && !ws.root.depConfigs.isEmpty then
     error "missing manifest; use `lake update` to generate one"
   -- Materialize all dependencies
   let materialize pkg dep ws := do

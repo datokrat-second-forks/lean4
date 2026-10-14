@@ -78,9 +78,13 @@ public def BuildConfig.showProgress (cfg : BuildConfig) : Bool :=
 @[expose] -- for codegen
 public def JobQueue := IO.Ref (Array OpaqueJob)
 
+@[inline] public def JobQueue.mk (r : IO.Ref (Array OpaqueJob)) : JobQueue := smartCast
+
+@[inline] public def JobQueue.toRef (q : JobQueue) : IO.Ref (Array OpaqueJob) := smartCast
+
 /-- Returns a new empty job queue. -/
 @[inline] public def mkJobQueue : BaseIO JobQueue :=
-  IO.mkRef #[]
+  .mk <$> IO.mkRef #[]
 
 /-- A Lake context with a build configuration and additional build data. -/
 public structure BuildContext extends BuildConfig, Context where

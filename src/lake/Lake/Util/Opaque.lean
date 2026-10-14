@@ -22,7 +22,7 @@ public abbrev Opaque : Type := POpaque
 namespace POpaque
 
 public instance instNonempty : Nonempty POpaque := by
-  exact POpaque.nonemptyType.property
+  with_semireducible exact POpaque.nonemptyType.property
 
 /-- Cast away a value's type and universe. -/
 public opaque mk.{v,u} {α : Type u} (a : α) : POpaque.{v} :=

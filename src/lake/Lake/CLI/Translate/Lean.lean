@@ -221,9 +221,9 @@ protected def PathPatDescr.toLean? (p : PathPatDescr) : Option Term :=
 instance : ToLean? PathPatDescr := ⟨PathPatDescr.toLean?⟩
 
 @[inline] protected def PartialBuildKey.toLean (k : PartialBuildKey) : Term :=
-  go k []
+  go k.toBuildKey []
 where
-  go k (fs : List Name) := Unhygienic.run do
+  go (k : BuildKey) (fs : List Name) := Unhygienic.run do
     match k with
     | .module n =>
       `(`+$(mkIdent n)$(mkSuffixes fs)*)
@@ -275,8 +275,8 @@ def Dependency.mkRequire (cfg : Dependency) : RequireDecl := Unhygienic.run do
       | _ => some <$> `(verSpec|git $(toLean rev))
     | .ver ver => some <$> `(verSpec|$(toLean ver.toString):term)
   let scope? := if cfg.scope.isEmpty then none else some (toLean cfg.scope)
-  let opts? := if cfg.opts.isEmpty then none else some <| Unhygienic.run do
-    cfg.opts.foldlM (init := mkCIdent ``NameMap.empty) fun stx opt val =>
+  let opts? := if cfg.opts.toTreeMap.isEmpty then none else some <| Unhygienic.run do
+    cfg.opts.toTreeMap.foldlM (init := mkCIdent ``NameMap.empty) fun stx opt val =>
       `($stx |>.insert $(toLean opt) $(toLean val))
   `(requireDecl|require $[$scope? /]? $(mkIdent cfg.name):ident $[@ $ver?]?
     $[from $src?]? $[with $opts?]?)

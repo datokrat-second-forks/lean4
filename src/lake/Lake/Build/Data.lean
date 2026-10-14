@@ -66,7 +66,7 @@ public theorem isAnonymous_iff_name_isAnonymous : isAnonymous k ↔ k.name.isAno
 
 public theorem eq_data_type
   {self : OptDataKind α} (h : ¬ self.isAnonymous) : α = DataType self.name
-:= self.wf h
+:= by with_semireducible exact self.wf h
 
 public instance [DataKind α] : OptDataKind α where
   name := DataKind.name α

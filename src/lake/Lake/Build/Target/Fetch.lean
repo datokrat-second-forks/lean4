@@ -17,7 +17,7 @@ namespace Lake
 
 variable (defaultPkg : Package) (root : PartialBuildKey) in
 def PartialBuildKey.fetchInCoreAux
-  (self : PartialBuildKey) (facetless : Bool := false)
+  (self : BuildKey) (facetless : Bool := false)
 : FetchM ((key : BuildKey) × Job (BuildData key)) := do
   match self with
   | .module modName =>
@@ -82,7 +82,7 @@ where
 @[inline] public def PartialBuildKey.fetchInCore
   (defaultPkg : Package) (self : PartialBuildKey)
 : FetchM ((key : BuildKey) × Job (BuildData key)) :=
-  fetchInCoreAux defaultPkg self self true
+  fetchInCoreAux defaultPkg self self.toBuildKey true
 
 /--
 Fetches the target specified by this key, resolving gaps as needed.

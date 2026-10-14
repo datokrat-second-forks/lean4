@@ -88,6 +88,8 @@ instance : Inhabited EnvExtensionState := EnvExtensionStateSpec.snd
 
 abbrev ModuleIdx.toNat (midx : ModuleIdx) : Nat := midx
 
+@[inline] def ModuleIdx.ofNat (n : Nat) : ModuleIdx := smartCast
+
 instance : Inhabited ModuleIdx where default := (0 : Nat)
 
 instance : GetElem (Array α) ModuleIdx α (fun a i => i.toNat < a.size) where

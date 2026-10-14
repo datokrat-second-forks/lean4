@@ -910,7 +910,7 @@ protected def list : CliM PUnit := do
   noArgsRem do
     let ws ← loadWorkspace config
     ws.packages.forM fun pkg => do
-      pkg.scripts.forM fun _ script =>
+      pkg.scripts.toTreeMap.forM fun _ script =>
         IO.println script.name
 
 protected nonrec def run : CliM PUnit := do
@@ -1120,7 +1120,7 @@ private def runBuiltinLint
   let specs ← parseTargetSpecs ws (buildMods.map (s!"+{·}") |>.toList)
   let lintOpts := BuiltinLint.leanOptOverrides args
   let overrides : Lean.NameMap Lean.LeanOptions :=
-    if lintOpts.values.isEmpty then
+    if lintOpts.values.toTreeMap.isEmpty then
       {}
     else
       mods.foldl (init := ({} : Lean.NameMap Lean.LeanOptions))

@@ -94,9 +94,9 @@ structure ModuleImportData where
   let imps ← imports.mapM fun imp => do
     let (includeSelf, transImports) ← f imp
     return {module := imp, transImports, includeSelf : ModuleImportData}
-  let task : JobTask OrdModuleSet := imps.foldl (init := .pure (.ok .empty {})) fun r imp =>
+  let task : Task (JobResult OrdModuleSet) := imps.foldl (init := .pure (.ok .empty {})) fun r imp =>
     r.bind (sync := true) fun r =>
-    imp.transImports.task.map (sync := true) fun
+    imp.transImports.task.toTask.map (sync := true) fun
     | .ok transImps _ =>
       match r with
       | .ok impSet s =>
@@ -109,7 +109,7 @@ structure ModuleImportData where
       match r with
       | .ok _ s => .error 0 (s.logEntry entry)
       | .error e s => .error e (s.logEntry entry)
-  return Job.ofTask <| task.map (sync := true) fun
+  return Job.ofTask <| .mk <| task.map (sync := true) fun
     | .ok impSet s => .ok impSet.toArray s
     | .error e s => .error e s
 
@@ -693,7 +693,7 @@ def Module.recFetchPreSetup (mod : Module) : FetchM (Job ModulePreSetup) := ensu
     }
 where
   traceOptions (opts : LeanOptions) (caption := "opts") : BuildTrace :=
-    opts.values.foldl (init := .nil caption) fun t n v =>
+    opts.values.toTreeMap.foldl (init := .nil caption) fun t n v =>
       let opt := s!"-D{n}={v.asCliFlagValue}"
       t.mix <| .ofHash (pureHash opt) opt
 

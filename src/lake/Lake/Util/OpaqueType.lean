@@ -34,7 +34,7 @@ macro (name := nonemptyTypeCmd)
   private opaque $nonemptyType $[$bs]* : NonemptyType.{0}
   $[$doc?:docComment]? $[$vis?:visibility]? def $id $[$bs]* : Type := $nonemptyTypeApp |>.type
   $[$vis?:visibility]? instance $nonemptyInst:ident : Nonempty $(Syntax.mkApp id args) := by
-    exact $nonemptyTypeApp |>.property
+    with_semireducible exact $nonemptyTypeApp |>.property
   )
 
 macro (name := hydrateOpaqueTypeCmd)

@@ -269,7 +269,11 @@ open IO.FS (SystemTime)
 
 namespace MTime
 
-public instance : OfNat MTime (nat_lit 0) := ⟨⟨0,0⟩⟩
+@[inline] public def ofSystemTime (t : SystemTime) : MTime := smartCast
+
+@[inline] public def toSystemTime (t : MTime) : SystemTime := smartCast
+
+public instance : OfNat MTime (nat_lit 0) := ⟨.ofSystemTime ⟨0,0⟩⟩
 
 public instance : BEq MTime := inferInstanceAs (BEq SystemTime)
 public instance : Repr MTime := inferInstanceAs (Repr SystemTime)
@@ -294,7 +298,7 @@ instance [GetMTime α] : ComputeTrace α IO MTime := ⟨getMTime⟩
 
 /-- Return the modification time of a file recorded by the OS. -/
 @[inline] public def getFileMTime (file : FilePath) : IO MTime :=
-  return (← file.metadata).modified
+  return .ofSystemTime (← file.metadata).modified
 
 public instance : GetMTime FilePath := ⟨getFileMTime⟩
 public instance : GetMTime TextFilePath := ⟨(getFileMTime ·.path)⟩

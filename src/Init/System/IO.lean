@@ -1414,6 +1414,9 @@ communication is possible.
   | Stdio.inherit => Unit
   | Stdio.null    => Unit
 
+/-- The handle of a piped stream. -/
+@[inline] def Stdio.toHandleType.toHandle (h : Stdio.piped.toHandleType) : FS.Handle := smartCast
+
 /--
 Configuration for the standard input, output, and error handles of a child process.
 -/

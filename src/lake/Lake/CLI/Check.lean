@@ -230,7 +230,7 @@ where
     let child ← spawn { args with stdout := .piped, stderr := .piped, stdin := .null }
     let stdout ← IO.asTask (prio := .dedicated) do
       let rec loop : IO Unit := do
-        let buf ← child.stdout.read 4096
+        let buf ← child.stdout.toHandle.read 4096
         if buf.isEmpty then
           handle.flush
           return ()
@@ -238,7 +238,7 @@ where
           handle.write buf
           loop
       loop
-    let stderr ← child.stderr.readToEnd
+    let stderr ← child.stderr.toHandle.readToEnd
     let exitCode ← child.wait
     discard <| IO.ofExcept stdout.get
     return (stderr, exitCode)

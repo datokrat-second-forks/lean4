@@ -636,7 +636,11 @@ set_option linter.unusedVariables false in
 /-- An artifact equipped with information about whether it is executable. -/
 def XArtifact (exe : Bool) := Artifact
 
-instance : ResolveOutputs (XArtifact exe) := ⟨(resolveArtifactOutput (exe := exe))⟩
+@[inline] def XArtifact.mk (art : Artifact) : XArtifact exe := smartCast
+
+@[inline] def XArtifact.toArtifact (art : XArtifact exe) : Artifact := smartCast
+
+instance : ResolveOutputs (XArtifact exe) := ⟨(XArtifact.mk <$> resolveArtifactOutput · exe)⟩
 
 /--
 Construct an artifact from a path outside the Lake artifact cache.
@@ -712,6 +716,7 @@ public def buildArtifactUnlessUpToDate
     let fetchArt? restore := do
       let some (art : XArtifact exe) ← getArtifacts? inputHash savedTrace pkg
         | return none
+      let art := art.toArtifact
       unless (← savedTrace.replayCachedIfUpToDate inputHash) do
         removeFileIfExists file
         writeFetchTrace traceFile inputHash (toJson art.descr)

@@ -463,6 +463,12 @@ end ParserState
 
 @[expose] def ParserFn := ParserContext → ParserState → ParserState
 
+@[always_inline, inline] def ParserFn.mk (p : ParserContext → ParserState → ParserState) : ParserFn :=
+  smartCast
+
+@[always_inline, inline] def ParserFn.toFun (p : ParserFn) : ParserContext → ParserState → ParserState :=
+  smartCast
+
 instance : Inhabited ParserFn where
   default := fun _ s => s
 

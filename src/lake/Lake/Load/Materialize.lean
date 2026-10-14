@@ -275,7 +275,7 @@ public def PackageEntry.materialize
   | .git (url := url) (rev := rev) (subDir? := subDir?) .. =>
     let relGitDir := relPkgsDir / manifestEntry.dirName
     let repo := GitRepo.mk (wsDir / relGitDir)
-    let url := lakeEnv.pkgUrlMap.getD manifestEntry.name url
+    let url := lakeEnv.pkgUrlMap.toTreeMap.getD manifestEntry.name url
     materializeGitRepo manifestEntry.prettyName repo url rev
     let relPkgDir := match subDir? with | .some subDir => relGitDir / subDir | .none => relGitDir
     mkDep relPkgDir (Git.filterUrl? url |>.getD "")

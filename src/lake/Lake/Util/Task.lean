@@ -20,6 +20,11 @@ public abbrev ETask ε := ExceptT ε Task
 public abbrev OptionTask := OptionT Task
 
 @[expose] public def BaseIOTask := Task
+
+@[inline] public def BaseIOTask.mk (t : Task α) : BaseIOTask α := smartCast
+
+@[inline] public def BaseIOTask.toTask (t : BaseIOTask α) : Task α := smartCast
+
 public instance : Monad BaseIOTask := inferInstanceAs (Monad Task)
 public instance [Inhabited α] : Inhabited (BaseIOTask α) := inferInstance
 

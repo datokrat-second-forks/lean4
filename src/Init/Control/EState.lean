@@ -16,6 +16,11 @@ namespace EStateM
 
 variable {ε σ α : Type u}
 
+/-- Constructs an `EStateM` from its functional representation. -/
+@[always_inline, inline]
+def mk (x : σ → Result ε σ α) : EStateM ε σ α :=
+  smartCast
+
 instance [ToString ε] [ToString α] : ToString (Result ε σ α) where
   toString
     | Result.ok a _    => String.Internal.append "ok: " (toString a)

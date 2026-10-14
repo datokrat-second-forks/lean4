@@ -91,7 +91,7 @@ variable [Monad m] [MonadStateOf ArgList m]
   decreasing_by
     simp [String.Pos.Raw.atEnd] at h
     apply Nat.sub_lt_sub_left h
-    exact String.Pos.Raw.byteIdx_lt_byteIdx_next opt p
+    with_semireducible exact String.Pos.Raw.byteIdx_lt_byteIdx_next opt p
   loop ⟨1⟩
 
 /-- Splits a long option of the form `"--long foo bar"` into `--long` and `"foo bar"`. -/

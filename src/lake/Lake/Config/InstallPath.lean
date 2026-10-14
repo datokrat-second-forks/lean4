@@ -109,7 +109,7 @@ theorem size_leanSharedDynlibs_pos : 0 < (leanSharedDynlibs sysroot).size := by
 
 /-- The primary core shared library (i.e., `libleanshared`) in a Lean installation. -/
 public def leanSharedDynlib (sysroot : FilePath) : Dynlib :=
-  (leanSharedDynlibs sysroot)[(0 : USize)]'size_leanSharedDynlibs_pos
+  (leanSharedDynlibs sysroot)[(0 : USize)]'(by with_semireducible exact size_leanSharedDynlibs_pos)
 
 /-- `libleanshared` file name. -/
 public def leanSharedLib : FilePath :=

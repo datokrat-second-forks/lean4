@@ -162,19 +162,19 @@ namespace Job
 @[nospecialize] public protected def sync
   [OptDataKind α] (act : JobM α) (caption := "")
 : SpawnM (Job α) := .ofFn fun fetch pkg? stack store ctx _ =>
-  .ofTask (caption := caption) <$> Task.pure <$>
+  .ofTask (caption := caption) <$> BaseIOTask.mk <$> Task.pure <$>
     (withLoggedIO act).toFn fetch pkg? stack store ctx {}
 
 /-- Spawn a job that asynchronously performs `act`. -/
 @[nospecialize] public protected def async
   [OptDataKind α] (act : JobM α) (prio := Task.Priority.default) (caption := "")
 : SpawnM (Job α) := .ofFn fun fetch pkg? stack store ctx _ =>
-  .ofTask (caption := caption) <$> BaseIO.asTask (prio := prio) do
+  .ofTask (caption := caption) <$> BaseIOTask.mk <$> BaseIO.asTask (prio := prio) do
     (withLoggedIO act).toFn fetch pkg? stack store ctx {}
 
 /-- Wait for a job to complete and return the result. -/
 @[inline] public protected def wait (self : Job α) : BaseIO (JobResult α) := do
-  IO.wait self.task
+  IO.wait self.task.toTask
 
 /--
 Wait for a job to complete and return the produced value.
@@ -223,8 +223,8 @@ If the build's cancellation token is set, errors without running `f`.
   [kind : OptDataKind β] (self : Job α) (f : α → JobM β)
   (prio := Task.Priority.default) (sync := false)
 : SpawnM (Job β) := .ofFn fun fetch pkg? stack store ctx trace => do
-  self.bindTask fun task => do
-  BaseIO.mapTask (t := task) (prio := prio) (sync := sync) fun
+  self.bindTask fun task => BaseIOTask.mk <$> do
+  BaseIO.mapTask (t := task.toTask) (prio := prio) (sync := sync) fun
     | .ok a s => do
       if let some tk := ctx.cancelTk? then
         if ← tk.isSet then return canceledResult s
@@ -241,15 +241,15 @@ If the build's cancellation token is set, errors without running `f`.
   [kind : OptDataKind β] (self : Job α) (f : α → JobM (Job β))
   (prio := Task.Priority.default) (sync := false)
 : SpawnM (Job β) := .ofFn fun fetch pkg? stack store ctx trace => do
-  self.bindTask fun task => do
-  BaseIO.bindTask task (prio := prio) (sync := sync) fun
+  self.bindTask fun task => BaseIOTask.mk <$> do
+  BaseIO.bindTask task.toTask (prio := prio) (sync := sync) fun
     | .ok a sa => do
       if let some tk := ctx.cancelTk? then
         if ← tk.isSet then return Task.pure (canceledResult sa)
       let trace := mixTrace trace sa.trace
       match (← withLoggedIO (f a) |>.toFn fetch pkg? stack store ctx {sa with trace}) with
       | .ok job sa =>
-        return job.task.map (prio := prio) (sync := true) fun
+        return job.task.toTask.map (prio := prio) (sync := true) fun
         | .ok b sb => .ok b {sa.merge sb with trace := sb.trace}
         | .error e sb => .error ⟨sa.log.size + e.val⟩ {sa.merge sb with trace := sb.trace}
       | .error e sa => return Task.pure (.error e sa)
@@ -262,9 +262,9 @@ results of `a` and `b`. The job `c` errors if either `a` or `b` error.
 @[inline] public def zipResultWith
   [OptDataKind γ] (f : JobResult α → JobResult β → JobResult γ) (self : Job α) (other : Job β)
   (prio := Task.Priority.default) (sync := false)
-: Job γ := Job.ofTask $
-  self.task.bind (prio := prio) (sync := true) fun rx =>
-  other.task.map (prio := prio) (sync := sync) fun ry =>
+: Job γ := Job.ofTask $ .mk $
+  self.task.toTask.bind (prio := prio) (sync := true) fun rx =>
+  other.task.toTask.map (prio := prio) (sync := sync) fun ry =>
   f rx ry
 
 /--

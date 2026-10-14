@@ -56,7 +56,7 @@ for the rebuild of the package, in order to turn on the appropriate linters.
 public def leanOptOverrides (args : Args) : LeanOptions :=
   let merged : NameMap Bool := args.linterOverrides.foldl (init := {}) fun m (n, b) => m.insert n b
   let base : Array LeanOption :=
-    merged.toArray.map fun (n, b) => ⟨`weak ++ n, .ofBool b⟩
+    merged.toTreeMap.toArray.map fun (n, b) => ⟨`weak ++ n, .ofBool b⟩
   let base :=
     if args.mode == .recordExceptions then
       base.push ⟨`internal.cmdlineSnapshots, .ofBool false⟩
@@ -332,7 +332,7 @@ private def runTextLinters (args : Args) (linterOpts : Linter.LinterOptions)
       let mut codeQualityEntries : Array CodeQuality.Entry := #[]
       for (m, entries) in textGroups do
         let counts : NameMap Nat := entries.foldl (init := {}) fun counts e =>
-          counts.insert e.linter (counts.getD e.linter 0 + 1)
+          counts.insert e.linter (counts.toTreeMap.getD e.linter 0 + 1)
         for (linter, count) in counts do
           codeQualityEntries := codeQualityEntries.push { name := linter.toString
                                                           source := .module m

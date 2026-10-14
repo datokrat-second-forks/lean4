@@ -22,6 +22,10 @@ namespace Lean
 namespace NameMap
 variable {α : Type}
 
+@[inline] def ofTreeMap (m : Std.TreeMap Name α Name.quickCmp) : NameMap α := smartCast
+
+@[inline] def toTreeMap (m : NameMap α) : Std.TreeMap Name α Name.quickCmp := smartCast
+
 instance [Repr α] : Repr (NameMap α) := inferInstanceAs (Repr (Std.TreeMap _ _ _))
 
 instance (α : Type) : EmptyCollection (NameMap α) := ⟨mkNameMap α⟩
@@ -29,7 +33,7 @@ instance (α : Type) : EmptyCollection (NameMap α) := ⟨mkNameMap α⟩
 instance (α : Type) : Inhabited (NameMap α) where
   default := {}
 
-def insert (m : NameMap α) (n : Name) (a : α) := Std.TreeMap.insert m n a
+def insert (m : NameMap α) (n : Name) (a : α) : NameMap α := Std.TreeMap.insert m n a
 
 def contains (m : NameMap α) (n : Name) : Bool := Std.TreeMap.contains m n
 
@@ -50,6 +54,11 @@ end NameMap
 @[expose] def NameSet := Std.TreeSet Name Name.quickCmp
 
 namespace NameSet
+
+@[inline] def ofTreeSet (s : Std.TreeSet Name Name.quickCmp) : NameSet := smartCast
+
+@[inline] def toTreeSet (s : NameSet) : Std.TreeSet Name Name.quickCmp := smartCast
+
 def empty : NameSet := Std.TreeSet.empty
 instance : EmptyCollection NameSet := ⟨empty⟩
 instance : Inhabited NameSet := ⟨empty⟩

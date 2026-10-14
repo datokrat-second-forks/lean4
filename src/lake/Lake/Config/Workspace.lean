@@ -107,7 +107,7 @@ namespace Workspace
 /-- **For internal use only.** -/
 public theorem wsIdx_root_lt {ws : Workspace} :
   ws.root.wsIdx < ws.packages.size
-:= ws.packages_wsIdx _ ▸ ws.size_packages_pos
+:= by with_semireducible exact ws.packages_wsIdx _ ▸ ws.size_packages_pos
 
 /-- **For internal use.** Whether this workspace is Lean itself.  -/
 @[inline] def bootstrap (self : Workspace) : Bool :=
@@ -234,7 +234,7 @@ This is configured through {lit}`cache.service` entries in the system Lake confi
 /-- **For internal use only.** -/
 public theorem packages_addPackage' :
   (addPackage' pkg ws h h').packages = ws.packages.push pkg
-:= by rfl
+:= by with_semireducible rfl
 
 /-- Add a package to the workspace. -/
 @[inline] public def addPackage (pkg : Package) (self : Workspace) : Workspace :=
@@ -318,7 +318,7 @@ public def findTargetDecl? (name : Name) (self : Workspace) : Option ((pkg : Pac
 /-- **For internal use only.** -/
 public theorem packages_addFacetConfig :
   (addFacetConfig cfg ws).packages = ws.packages
-:= by rfl
+:= by with_semireducible rfl
 
 /-- Try to find a facet configuration in the workspace with the given name. -/
 @[inline] public def findFacetConfig? (name : Name) (self : Workspace) : Option (FacetConfig name) :=

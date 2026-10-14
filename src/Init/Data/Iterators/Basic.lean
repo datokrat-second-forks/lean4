@@ -819,8 +819,6 @@ theorem IterM.TerminationMeasures.Finite.rel_trans
 
 macro_rules | `(tactic| decreasing_trivial) => `(tactic|
   first
-  | exact IterM.TerminationMeasures.Finite.rel_of_yield ‹_›
-  | exact IterM.TerminationMeasures.Finite.rel_of_skip ‹_›
   | with_semireducible exact IterM.TerminationMeasures.Finite.rel_of_yield ‹_›
   | with_semireducible exact IterM.TerminationMeasures.Finite.rel_of_skip ‹_›
   | fail)
@@ -854,8 +852,6 @@ theorem Iter.TerminationMeasures.Finite.rel_of_skip
 
 macro_rules | `(tactic| decreasing_trivial) => `(tactic|
   first
-  | exact Iter.TerminationMeasures.Finite.rel_of_yield ‹_›
-  | exact Iter.TerminationMeasures.Finite.rel_of_skip ‹_›
   | with_semireducible exact Iter.TerminationMeasures.Finite.rel_of_yield ‹_›
   | with_semireducible exact Iter.TerminationMeasures.Finite.rel_of_skip ‹_›
   | fail)
@@ -965,7 +961,6 @@ theorem IterM.TerminationMeasures.Productive.rel_of_skip
 
 macro_rules | `(tactic| decreasing_trivial) => `(tactic|
   first
-    | exact IterM.TerminationMeasures.Productive.rel_of_skip ‹_›
     | with_semireducible exact IterM.TerminationMeasures.Productive.rel_of_skip ‹_›
     | fail)
 
@@ -991,7 +986,6 @@ theorem Iter.TerminationMeasures.Productive.rel_of_skip
 
 macro_rules | `(tactic| decreasing_trivial) => `(tactic|
   first
-    | exact Iter.TerminationMeasures.Productive.rel_of_skip ‹_›
     | with_semireducible exact Iter.TerminationMeasures.Productive.rel_of_skip ‹_›
     | fail)
 

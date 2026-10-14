@@ -91,6 +91,9 @@ srcDir = "lake"
 # Build Lake and all its submodules (which may not be imported elsewhere)
 globs = ["Lake.*"]
 defaultFacets = ["static", "static.export"]
+# Lake, `LakeMain` and `LeanChecker` are closed under importers, so they can use the option without
+# affecting the rest of the library.
+leanOptions.elaborator.implicitTransparency = true
 # Load the previous stage's lake native code into lake's build process in order to prevent ABI
 # breakages from affecting bootstrapping.
 weakLeanArgs = ["--plugin", "${PREV_STAGE}/${CMAKE_RELATIVE_LIBRARY_OUTPUT_DIRECTORY}/libLake_shared${CMAKE_SHARED_LIBRARY_SUFFIX}=initialize_Lake_All"]
@@ -99,6 +102,7 @@ weakLeanArgs = ["--plugin", "${PREV_STAGE}/${CMAKE_RELATIVE_LIBRARY_OUTPUT_DIREC
 name = "LakeMain"
 srcDir = "lake"
 defaultFacets = ["static.export"]
+leanOptions.elaborator.implicitTransparency = true
 
 [[lean_lib]]
 name = "LeanIR"
@@ -113,3 +117,4 @@ defaultFacets = ["static"]
 [[lean_lib]]
 name = "LeanChecker"
 defaultFacets = ["static"]
+leanOptions.elaborator.implicitTransparency = true

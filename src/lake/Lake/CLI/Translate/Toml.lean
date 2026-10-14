@@ -155,7 +155,7 @@ public protected def Dependency.toToml (dep : Dependency) (t : Table  := {}) : T
         |>.smartInsert `subDir subDir?
     else
       t
-  t.smartInsert `options <| dep.opts.foldl (·.insert · ·) Table.empty
+  t.smartInsert `options <| dep.opts.toTreeMap.foldl (·.insert · ·) Table.empty
 
 public instance : ToToml Dependency := ⟨(toToml ·.toToml)⟩
 
