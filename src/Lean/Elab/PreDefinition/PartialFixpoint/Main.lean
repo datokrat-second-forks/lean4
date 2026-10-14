@@ -21,13 +21,29 @@ open Monotonicity
 
 open Lean.Order
 
-private def replaceRecApps (recFnNames : Array Name) (fixedParamPerms : FixedParamPerms) (f : Expr) (e : Expr) : MetaM Expr := do
+/--
+Replaces the recursive calls in `e` by projections of `f`. If `toProps[i]` is set, function `i` is a
+(co)inductive predicate, and the projection, in the order of the fixpoint, is cast back to `Prop`.
+-/
+private def replaceRecApps (recFnNames : Array Name) (fixedParamPerms : FixedParamPerms)
+    (toProps : Array (Option Name)) (f : Expr) (e : Expr) : MetaM Expr := do
   assert! recFnNames.size = fixedParamPerms.perms.size
   let t ← inferType f
   Meta.transform e fun e => e.withApp fun fn args => do
     let some idx := fn.constName?.bind (recFnNames.idxOf? ·) | return .continue
     let varying := fixedParamPerms.perms[idx]!.pickVarying args
-    return .continue (mkAppN (PProdN.proj recFnNames.size idx t f) varying)
+    let call := mkAppN (PProdN.proj recFnNames.size idx t f) varying
+    let some toProp := toProps[idx]! | return .continue call
+    return .continue (← mkPredCast toProp (← inferType e) call)
+
+/-- Removes the casts of `propOrderCasts`. -/
+private partial def erasePropOrderCasts (e : Expr) : Expr :=
+  e.replace fun e =>
+    if isCast e then some (erasePropOrderCasts e.appArg!) else none
+where
+  isCast (e : Expr) : Bool :=
+    [``ImplicationOrder.ofProp, ``ImplicationOrder.toProp, ``ReverseImplicationOrder.ofProp,
+      ``ReverseImplicationOrder.toProp].any (e.isAppOfArity · 1)
 
 /--
 For pretty error messages:
@@ -56,7 +72,7 @@ private def unReplaceRecApps {α} (preDefs : Array PreDefinition) (fixedParamPer
       -- introduced above)
       let e ← PProdN.reduceProjs e
       let e ← Core.betaReduce e
-      pure e
+      pure (erasePropOrderCasts e)
     k e
 
 /--
@@ -136,6 +152,21 @@ def partialFixpoint (docCtx : LocalContext × LocalInstances) (preDefs : Array P
     -- Order ((∀ x y, r₁ x y) ×' (∀ x y, r₂ x y))
     let packedPartialOrderInst ← toPartialOrder packedInst
 
+    -- The fixpoints of (co)inductive predicates are taken in `∀ x y, ImplicationOrder`
+    -- (`ReverseImplicationOrder`), with casts `ofProp`/`toProp` from and to `Prop`
+    let casts := hints.map fun hint =>
+      if isLatticeTheoretic hint.fixpointType then
+        some (propOrderCasts (isCoinductiveFixpoint hint.fixpointType))
+      else
+        none
+    let toProps := casts.map (·.map (·.2))
+    let carriers ← types.mapIdxM fun i type => do
+      if casts[i]!.isSome then
+        mkPropOrderCarrier (isCoinductiveFixpoint hints[i]!.fixpointType) type
+      else
+        return type
+    let packedCarrier ← PProdN.pack 0 carriers
+
     -- Error reporting hook, presenting monotonicity errors in terms of recursive functions
     let failK {α} f (monoThms : Array Name) : MetaM α := do
       unReplaceRecApps preDefs fixedParamPerms fixedArgs f fun t => do
@@ -154,29 +185,35 @@ def partialFixpoint (docCtx : LocalContext × LocalInstances) (preDefs : Array P
     -- (packed) parameter
     let Fs ← withoutExporting do preDefs.mapIdxM fun funIdx preDef => do
       let body ← fixedParamPerms.perms[funIdx]!.instantiateLambda preDef.value fixedArgs
-      withLocalDeclD (← mkFreshUserName `f) packedType fun f => do
+      -- Values coming from `elabCoinductive` are a redex over the `.existential` lambda;
+      -- beta-reduce so monotonicity goals and errors are stated in terms of its body.
+      let body := body.headBeta
+      withLocalDeclD (← mkFreshUserName `f) packedCarrier fun f => do
         let body' ← withoutModifyingEnv do
           -- replaceRecApps needs the constants in the env to typecheck things
           preDefs.forM (addAsAxiom ·)
-          replaceRecApps declNames fixedParamPerms f body
-        -- Values coming from `elabCoinductive` are a redex over the `.existential` lambda;
-        -- beta-reduce so monotonicity goals and errors are stated in terms of its body.
-        mkLambdaFVars #[f] body'.headBeta
+          replaceRecApps declNames fixedParamPerms toProps f body
+        let body' ← if let some (ofProp, _) := casts[funIdx]! then
+          mkPredCast ofProp types[funIdx]! body'
+        else
+          pure body'
+        mkLambdaFVars #[f] body'
 
     -- Construct and solve monotonicity goals for each function separately
     -- This way we preserve the user's parameter names as much as possible
     -- and can (later) use the user-specified per-function tactic
     let hmonos ← withoutExporting do preDefs.mapIdxM fun i preDef => do
-      let type := types[i]!
+      let type := carriers[i]!
       let F := Fs[i]!
       let inst ← toPartialOrder insts'[i]! type
-      let goal ← mkAppOptM ``monotone #[packedType, packedPartialOrderInst, type, inst, F]
+      let goal ← mkAppOptM ``monotone #[packedCarrier, packedPartialOrderInst, type, inst, F]
       if let some term := hints[i]!.term? then
         let hmono ← Term.withSynthesize <| Term.elabTermEnsuringType term goal
         let hmono ← instantiateMVars hmono
         let mvars ← getMVars hmono
         if mvars.isEmpty then
-          pure (goal, hmono)
+          -- The type of an `intro`-style proof is the unfolded goal
+          pure (goal, ← mkExpectedTypeHint hmono goal)
         else
           discard <| Term.logUnassignedUsingErrorInfos mvars
           pure (goal, ← mkSorry goal (synthetic := true))
@@ -189,31 +226,36 @@ def partialFixpoint (docCtx : LocalContext × LocalInstances) (preDefs : Array P
     let (_, hmono) ← PProdN.genMk mkMonoPProd hmonos
 
     -- The `RecAppSyntax` markers are only needed for the monotonicity error messages above
-    let packedValue ← eraseRecAppSyntaxExpr (← mkFixOfMonFun packedType packedInst hmono)
+    let packedValue ← eraseRecAppSyntaxExpr (← mkFixOfMonFun packedCarrier packedInst hmono)
 
     trace[Elab.definition.partialFixpoint] "packedValue: {packedValue}"
 
-    let declName :=
-      if preDefs.size = 1 && fixedParamPerms.fixedArePrefix then
-        preDefs[0]!.declName
+    let isUnary := preDefs.size = 1 && fixedParamPerms.fixedArePrefix
+    let declName := if isUnary then preDefs[0]!.declName else preDefs[0]!.declName ++ `mutual
+    -- The unary definition is the function itself, so it is cast to `Prop` here
+    let (packedType', packedValue') ← if let (true, some toProp) := (isUnary, toProps[0]!) then
+        pure (← mkForallFVars fixedArgs packedType,
+          ← mkLambdaFVars fixedArgs (← mkPredCast toProp types[0]! packedValue))
       else
-        preDefs[0]!.declName ++ `mutual
-    let packedType' ← mkForallFVars fixedArgs packedType
-    let packedValue' ← mkLambdaFVars fixedArgs packedValue
+        pure (← mkForallFVars fixedArgs packedCarrier, ← mkLambdaFVars fixedArgs packedValue)
     let preDefNonRec := { preDefs[0]! with
       declName := declName
       type := packedType'
       value := packedValue'}
 
     let preDefsNonrec ← preDefs.mapIdxM fun fidx preDef => do
-      forallBoundedTelescope preDef.type fixedParamPerms.perms[fidx]!.size fun params _ => do
+      forallBoundedTelescope preDef.type fixedParamPerms.perms[fidx]!.size fun params type => do
         let fixed := fixedParamPerms.perms[fidx]!.pickFixed params
         let varying := fixedParamPerms.perms[fidx]!.pickVarying params
         let us := preDefNonRec.levelParams.map mkLevelParam
         let value := mkConst preDefNonRec.declName us
         let value := mkAppN value fixed
-        let value := PProdN.proj preDefs.size fidx packedType value
+        let value := PProdN.proj preDefs.size fidx packedCarrier value
         let value := mkAppN value varying
+        let value ← if let some toProp := toProps[fidx]! then
+          mkPredCast toProp type value
+        else
+          pure value
         let value ← mkLambdaFVars (etaReduce := true) params value
         pure { preDef with value }
 

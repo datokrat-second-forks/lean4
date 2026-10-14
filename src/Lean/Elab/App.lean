@@ -1687,7 +1687,9 @@ private partial def resolveLValLoop (lval : LVal) (e eType : Expr) (hasArgs : Bo
     return (e, lvalRes)
   catch
     | ex@(Exception.error _ _) =>
-      let eType? ← unfoldDefinition? eType
+      let eType? ← match (← reduceSmartCast? eType) with
+        | some eType => pure (some eType)
+        | none => unfoldDefinition? eType
       match eType? with
       | some eType => resolveLValLoop lval e eType hasArgs
       | none       => throw ex

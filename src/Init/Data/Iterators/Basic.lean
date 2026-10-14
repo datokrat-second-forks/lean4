@@ -821,6 +821,8 @@ macro_rules | `(tactic| decreasing_trivial) => `(tactic|
   first
   | exact IterM.TerminationMeasures.Finite.rel_of_yield ‹_›
   | exact IterM.TerminationMeasures.Finite.rel_of_skip ‹_›
+  | with_semireducible exact IterM.TerminationMeasures.Finite.rel_of_yield ‹_›
+  | with_semireducible exact IterM.TerminationMeasures.Finite.rel_of_skip ‹_›
   | fail)
 
 @[inherit_doc IterM.finitelyManySteps, expose]
@@ -854,6 +856,8 @@ macro_rules | `(tactic| decreasing_trivial) => `(tactic|
   first
   | exact Iter.TerminationMeasures.Finite.rel_of_yield ‹_›
   | exact Iter.TerminationMeasures.Finite.rel_of_skip ‹_›
+  | with_semireducible exact Iter.TerminationMeasures.Finite.rel_of_yield ‹_›
+  | with_semireducible exact Iter.TerminationMeasures.Finite.rel_of_skip ‹_›
   | fail)
 
 theorem IterM.isPlausibleSuccessorOf_of_yield
@@ -962,6 +966,7 @@ theorem IterM.TerminationMeasures.Productive.rel_of_skip
 macro_rules | `(tactic| decreasing_trivial) => `(tactic|
   first
     | exact IterM.TerminationMeasures.Productive.rel_of_skip ‹_›
+    | with_semireducible exact IterM.TerminationMeasures.Productive.rel_of_skip ‹_›
     | fail)
 
 @[inherit_doc IterM.finitelyManySkips, expose]
@@ -987,6 +992,7 @@ theorem Iter.TerminationMeasures.Productive.rel_of_skip
 macro_rules | `(tactic| decreasing_trivial) => `(tactic|
   first
     | exact Iter.TerminationMeasures.Productive.rel_of_skip ‹_›
+    | with_semireducible exact Iter.TerminationMeasures.Productive.rel_of_skip ‹_›
     | fail)
 
 instance Iterators.instProductiveOfFinte [Iterator α m β] [Iterators.Finite α m] :

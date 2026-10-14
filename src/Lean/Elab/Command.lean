@@ -1009,6 +1009,8 @@ def liftTermElabM (x : TermElabM α) : CommandElabM α := do
   -- We execute `x` with an empty message log. Thus, `x` cannot modify/view messages produced by previous commands.
   -- This is useful for implementing `runTermElabM` where we use `Term.resetMessageLog`
   let x : TermElabM _  := withSaveInfoContext x
+  let x : TermElabM _  :=
+    if Term.elaborator.implicitTransparency.get scope.opts then Meta.withTransparency .implicit x else x
   -- make sure `observing` below also catches runtime exceptions (like we do by default in
   -- `CommandElabM`)
   let _ := MonadAlwaysExcept.except (m := TermElabM)

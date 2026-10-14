@@ -376,6 +376,8 @@ via the `SymM.run` configuration because `cbv` may run inside an enclosing `SymM
 session (e.g., inside a `sym` block).
 -/
 def cbvCore (e : Expr) (config : Sym.Simp.Config := {}) : Sym.SymM Result := do
+  -- Like `decide`, evaluates at least at `default` transparency.
+  withAtLeastTransparency .default do
   Sym.withoutShareCommonChecks do
     let simprocs ← getCbvSimprocs
     let methods := mkCbvMethods simprocs
@@ -393,7 +395,7 @@ public def cbvEntry (e : Expr) : MetaM Result := do
   let config : Sym.Simp.Config := { maxSteps := cbv.maxSteps.get (← getOptions) }
   let methods := mkCbvMethods simprocs
   let e ← Sym.unfoldReducible e
-  Sym.SymM.run do
+  withAtLeastTransparency .default <| Sym.SymM.run do
     -- See `cbvCore` for why the `shareCommon` invariant checks are disabled.
     Sym.withoutShareCommonChecks do
       let e ← Sym.shareCommon e

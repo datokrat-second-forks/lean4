@@ -614,6 +614,177 @@ partial def consumeUnusedLet (e : Expr) (consumeNondep : Bool := false) : Expr :
   | .letE _ _ _ b nondep => if b.hasLooseBVars || (nondep && !consumeNondep) then e else consumeUnusedLet b consumeNondep
   | _ => e
 
+/-!
+# Smart casts
+
+Below `default` transparency, `smartCast α β h a` is not unfolded. Instead:
+* it reduces to `a` if `α` and `β` agree at `implicit` transparency (regularity); in a chain of
+  casts, the innermost source is compared with the outermost target;
+* it is pushed into a constructor application `a` if the constructor's leading binders are exactly
+  the arguments of its result type;
+* a projection of a cast is the cast of the projection;
+* an application of a cast is the cast of the application, if the domains agree at `implicit`.
+
+The rules do not look at `h`: they rely on `α` and `β` being definitionally equal wherever the cast
+is visible, which `addDecl` checks for every cast in a declaration, in the public scope if the cast
+is exported (`checkSmartCastTypes`). The checks never assign metavariables.
+-/
+
+/-- Returns `(α, β, a)` if `e` is `smartCast α β h a`. -/
+def smartCastArgs? (e : Expr) : Option (Expr × Expr × Expr) :=
+  if e.isAppOfArity ``smartCast 4 then
+    some (e.getArg! 0, e.getArg! 1, e.appArg!)
+  else
+    none
+
+/--
+`smartCast α β (@id (α = β) rfl) a`. The type hint makes `α = β` the inferred type of the proof, so
+that an auxiliary theorem abstracting it states `α = β`.
+-/
+def mkSmartCast (α β a : Expr) : MetaM Expr := do
+  let .sort u ← whnfD (← inferType α) | throwError "type expected{indentExpr α}"
+  let eq := mkApp3 (mkConst ``Eq [mkLevelSucc u]) (mkSort u) α β
+  let h := mkApp2 (mkConst ``id [.zero]) eq (mkApp2 (mkConst ``rfl [mkLevelSucc u]) (mkSort u) α)
+  return mkApp4 (mkConst ``smartCast [u]) α β h a
+
+def smartCastRulesEnabled : MetaM Bool :=
+  return !(← getTransparency) matches .default | .all
+
+/-- Whether a value of type `α` can be used at type `β` without a cast. -/
+def smartCastTypesAgree (α β : Expr) : MetaM Bool :=
+  withNewMCtxDepth <| withTransparency .implicit <| isDefEq α β
+
+private def mkSmartCastIfNeeded (α β a : Expr) : MetaM Expr := do
+  if (← smartCastTypesAgree α β) then return a else mkSmartCast α β a
+
+/-- Like `mkSmartCastIfNeeded`, but first checks the cast with `checkSmartCastTypes`. -/
+def mkCheckedSmartCastIfNeeded (α β a : Expr) : MetaM Expr := do
+  checkSmartCastTypes α β
+  mkSmartCastIfNeeded α β a
+
+/-- Whether the leading `k` binders of the constructor are exactly the arguments of its result type. -/
+private def ctorResultArgsAreLeadingBinders (ctorVal : ConstructorVal) (k : Nat) : Bool :=
+  let n := ctorVal.numParams + ctorVal.numFields
+  match peel n ctorVal.type with
+  | some res =>
+    let args := res.getAppArgs
+    k ≤ n && args.size == k && (List.range k).all fun i => args[i]! == mkBVar (n - 1 - i)
+  | none => false
+where
+  peel : Nat → Expr → Option Expr
+    | 0, e => some e
+    | m + 1, .forallE _ _ b _ => peel m b
+    | _, _ => none
+
+/-- Pushes a cast to `β` into the constructor application `a`. -/
+private def pushSmartCastIntoCtor? (β a : Expr) : MetaM (Option Expr) := do
+  let .const ctorName aLvls := a.getAppFn | return none
+  let some (.ctorInfo ctorVal) := (← getEnv).find? ctorName | return none
+  let β ← whnf β
+  let .const indName lvls := β.getAppFn | return none
+  unless indName == ctorVal.induct do return none
+  let indVal ← getConstInfoInduct indName
+  let k := indVal.numParams + indVal.numIndices
+  unless β.getAppNumArgs == k && a.getAppNumArgs == ctorVal.numParams + ctorVal.numFields do
+    return none
+  unless ctorResultArgsAreLeadingBinders ctorVal k do return none
+  let oldArgs := a.getAppArgs
+  let mut newArgs := β.getAppArgs
+  let mut srcType ← instantiateForall ((ConstantInfo.ctorInfo ctorVal).instantiateTypeLevelParams aLvls) (oldArgs.extract 0 k)
+  let mut tgtType ← instantiateForall ((ConstantInfo.ctorInfo ctorVal).instantiateTypeLevelParams lvls) newArgs
+  for h : i in k...oldArgs.size do
+    let .forallE _ srcDom srcBody _ := srcType | return none
+    let .forallE _ tgtDom tgtBody bi := tgtType | return none
+    let field := oldArgs[i]
+    let newField ←
+      if (← smartCastTypesAgree srcDom tgtDom) then
+        pure field
+      else if bi.isInstImplicit then
+        return none
+      else
+        mkSmartCast srcDom tgtDom field
+    newArgs := newArgs.push newField
+    srcType := srcBody.instantiate1 field
+    tgtType := tgtBody.instantiate1 newField
+  return some <| mkAppN (mkConst ctorName lvls) newArgs
+
+/-- Regularity (also along a chain of casts), then pushing into a constructor. -/
+private partial def reduceSmartCastCore? (α β a : Expr) : MetaM (Option Expr) := do
+  if (← smartCastTypesAgree α β) then return some a
+  go a
+where
+  go (a : Expr) : MetaM (Option Expr) := do
+    let a ← whnf a
+    match smartCastArgs? a with
+    | some (α₀, _, a₀) =>
+      if (← smartCastTypesAgree α₀ β) then return some a₀
+      go a₀
+    | none => pushSmartCastIntoCtor? β a
+
+/--
+Reduces `e` if it is a cast, possibly applied to arguments. Does nothing at `default`
+transparency or above, where `smartCast` is unfolded instead.
+-/
+def reduceSmartCast? (e : Expr) : MetaM (Option Expr) := do
+  unless e.isAppOf ``smartCast do return none
+  unless (← smartCastRulesEnabled) do return none
+  let numArgs := e.getAppNumArgs
+  if numArgs < 4 then return none
+  let args := e.getAppArgs
+  let some (α, β, f) := smartCastArgs? (mkAppN e.getAppFn (args.extract 0 4)) | return none
+  if let some r ← reduceSmartCastCore? α β f then
+    return some (mkAppN r (args.extract 4 numArgs))
+  if numArgs == 4 then return none
+  let .forallE _ dom body _ ← whnf α | return none
+  let .forallE _ dom' body' _ ← whnf β | return none
+  unless (← smartCastTypesAgree dom dom') do return none
+  let x := args[4]!
+  let r ← mkSmartCastIfNeeded (body.instantiate1 x) (body'.instantiate1 x) (mkApp f x).headBeta
+  return some (mkAppN r (args.extract 5 numArgs))
+
+/--
+If `e` is a chain of casts `smartCast αₙ β _ (… (smartCast α₁ _ _ a))`, returns `(a, α₁)`: the
+innermost term and its type, the source of the chain.
+-/
+partial def smartCastChainSource? (e : Expr) : MetaM (Option (Expr × Expr)) := do
+  let some (α, _, a) := smartCastArgs? e | return none
+  go α a
+where
+  go (α a : Expr) : MetaM (Option (Expr × Expr)) := do
+    match smartCastArgs? (← whnf a) with
+    | some (α₀, _, a₀) => go α₀ a₀
+    | none => return some (a, α)
+
+private def isInstImplicitField (ctorVal : ConstructorVal) (i : Nat) : Bool :=
+  go (ctorVal.numParams + i) ctorVal.type
+where
+  go : Nat → Expr → Bool
+    | 0, .forallE _ _ _ bi => bi.isInstImplicit
+    | m + 1, .forallE _ _ b _ => go m b
+    | _, _ => false
+
+/--
+Reduces `c.i` (`structName` projection `i`), where `c` is in weak head normal form, if `c` is a
+(chain of) cast(s) whose source is a `structName` structure.
+-/
+partial def reduceSmartCastProj? (structName : Name) (i : Nat) (c : Expr) : MetaM (Option Expr) := do
+  unless c.isAppOf ``smartCast do return none
+  unless (← smartCastRulesEnabled) do return none
+  let some (α, _, s) := smartCastArgs? c | return none
+  let some s ← findSource? α s | return none
+  let src := Expr.proj structName i s
+  let srcType ← inferType src
+  let tgtType ← inferType (.proj structName i c)
+  if (← smartCastTypesAgree srcType tgtType) then return some src
+  let some ctorName ← getFirstCtor structName | return none
+  if isInstImplicitField (← getConstInfoCtor ctorName) i then return none
+  return some (← mkSmartCast srcType tgtType src)
+where
+  findSource? (α s : Expr) : MetaM (Option Expr) := do
+    if (← whnf α).isAppOf structName then return some s
+    let some (α₀, _, s₀) := smartCastArgs? (← whnf s) | return none
+    findSource? α₀ s₀
+
 /--
 Apply beta-reduction, zeta-reduction (i.e., unfold let local-decls), iota-reduction,
 expand let-expressions, expand assigned meta-variables, unfold aux declarations.
@@ -674,11 +845,14 @@ where
                 return e
             | .axiomInfo val => recordUnfoldAxiom val.name; return e
             | _ => return e
-      | .proj _ i c =>
+      | .proj structName i c =>
         let k (c : Expr) := do
           match (← projectCore? c i) with
           | some e => go e
-          | none => return e
+          | none =>
+            match (← reduceSmartCastProj? structName i c) with
+            | some e => go e
+            | none => return e
         match (← getConfig).proj with
         | .no => return e
         | .yes => k (← go c)
@@ -936,6 +1110,8 @@ def unfoldDefinition (e : Expr) : MetaM Expr := do
   whnfEasyCases e fun e => do
     let e ← whnfCore e
     if (← pred e) then
+        if let some e ← reduceSmartCast? e then
+          return (← whnfHeadPred e pred)
         match (← unfoldDefinition? e) with
         | some e => whnfHeadPred e pred
         | none   => return e
@@ -1066,6 +1242,8 @@ partial def whnfImp (e : Expr) : MetaM Expr :=
       withTraceNode `Meta.whnf (fun _ => return m!"Non-easy whnf: {e}") do
         checkSystem "whnf"
         let e' ← whnfCore e
+        if let some e'' ← reduceSmartCast? e' then
+          return (← cache useCache e (← whnfImp e''))
         match (← reduceNat? e') with
         | some v => cache useCache e v
         | none   =>

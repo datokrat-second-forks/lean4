@@ -512,6 +512,36 @@ private def useProofAsSorry (k : DefKind) : CoreM Bool := do
         return true
   return false
 
+/--
+Under `elaborator.implicitTransparency`, a definition that unfolds at `implicit` transparency must
+typecheck at `implicit` transparency, so that unfolding it preserves types up to `implicit`.
+-/
+private def checkImplicitTyping (preDefs : Array PreDefinition) : TermElabM Unit := do
+  unless elaborator.implicitTransparency.get (← getOptions) do return
+  for preDef in preDefs do
+    unless (← getReducibilityStatus preDef.declName) matches
+        .reducible | .instanceReducible | .implicitReducible do
+      continue
+    let some info := (← getEnv).find? preDef.declName | continue
+    let some value := info.value? | continue
+    withRef preDef.ref do
+    try
+      withTransparency .implicit do
+        Meta.check value (transparency := .implicit)
+        unless (← isDefEq (← inferType value) info.type) do
+          throwError "its value has type{indentExpr (← inferType value)}"
+    catch ex =>
+      throwError "`{preDef.declName}` unfolds at `implicit` transparency, but does not \
+        typecheck at `implicit` transparency:{indentD ex.toMessageData}"
+
+/-- Elaborates the body `:= smartCast` of a declared cast, which casts the last parameter. -/
+private def elabDeclaredSmartCast (xs : Array Expr) (type : Expr) : TermElabM Expr := do
+  let some x := xs.back? | throwError "a declared cast needs a parameter to cast"
+  let src ← instantiateMVars (← inferType x)
+  let type ← instantiateMVars type
+  checkSmartCastTypes src type
+  mkSmartCast src type x
+
 private def elabFunValues (headers : Array DefViewElabHeader) (vars : Array Expr) (sc : Command.Scope) : TermElabM (Array Expr) :=
   headers.mapM fun header => do
     let mut reusableResult? := none
@@ -548,8 +578,11 @@ private def elabFunValues (headers : Array DefViewElabHeader) (vars : Array Expr
             (mkInfo := (pure <| .inl <| mkBodyInfo valStx ·))
             (mkInfoOnError := (pure <| mkBodyInfo valStx none))
             do
-              -- synthesize mvars here to force the top-level tactic block (if any) to run
-              let val ← elabTermEnsuringType valStx type <* synthesizeSyntheticMVarsNoPostponing
+              let val ← if Command.isSmartCastDeclVal header.value then
+                  elabDeclaredSmartCast xs type
+                else
+                  -- synthesize mvars here to force the top-level tactic block (if any) to run
+                  elabTermEnsuringType valStx type <* synthesizeSyntheticMVarsNoPostponing
               -- NOTE: without this `instantiatedMVars`, `mkLambdaFVars` may leave around a redex that
               -- leads to more section variables being included than necessary
               instantiateMVarsProfiling val
@@ -1439,6 +1472,7 @@ this warning can be disabled with `set_option warn.classDefReducibility false`."
       for preDef in preDefs do
         trace[Elab.definition] "after eraseAuxDiscr, {preDef.declName} : {preDef.type} :=\n{preDef.value}"
       addPreDefinitions docCtx preDefs
+      checkImplicitTyping preDefs
     for view in views, funFVar in funFVars do
       addLocalVarInfo view.declId funFVar
 

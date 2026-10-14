@@ -484,7 +484,9 @@ private def applyRefMap (e : Expr) (map : ExprMap Expr) : Expr :=
   Without this trick, the `PatternWithRef` is lost for the `y` at the pattern `y+1`.
 -/
 private def whnfPreservingPatternRef (e : Expr) : MetaM Expr := do
-  let eNew ← whnf e
+  -- Patterns are read as constructor applications by computation (`rfl`, `n + 1`), also under
+  -- `elaborator.implicitTransparency`.
+  let eNew ← whnfD e
   if (← isConstructorApp eNew) then
     return eNew
   else

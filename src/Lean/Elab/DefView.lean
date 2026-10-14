@@ -145,9 +145,16 @@ def mkDefViewOfAbbrev (modifiers : Modifiers) (stx : Syntax) : DefView :=
   { ref := stx, headerRef := mkNullNode stx.getArgs[*...3], kind := DefKind.abbrev, modifiers,
     declId := stx[1], binders, type? := type, value := stx[3], docString? := modifiers.docString? }
 
+/-- Whether `declVal` is `:= smartCast`, the body of a declared cast. -/
+def isSmartCastDeclVal (declVal : Syntax) : Bool :=
+  declVal.isOfKind ``Parser.Command.declValSimple && declVal[1].isIdent &&
+    declVal[1].getId == `smartCast && declVal[3].isNone
+
 def mkDefViewOfDef (modifiers : Modifiers) (stx : Syntax) : DefView :=
   -- leading_parser "def " >> declId >> optDeclSig >> declVal >> optDefDeriving
   let (binders, type) := expandOptDeclSig stx[2]
+  let modifiers :=
+    if isSmartCastDeclVal stx[3] then modifiers.addAttr { name := `implicit_reducible } else modifiers
   let deriving? := if stx[4].isNone then none else some stx[4][1].getSepArgs
   { ref := stx, headerRef := mkNullNode stx.getArgs[*...3], kind := DefKind.def, modifiers,
     declId := stx[1], binders, type? := type, value := stx[3], deriving?,

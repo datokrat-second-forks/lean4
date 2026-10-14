@@ -414,6 +414,12 @@ In this setting only definitions tagged as `[reducible]`, `[instance_reducible]`
 syntax (name := withImplicit) "with_implicit " tacticSeq : tactic
 
 /--
+`with_semireducible tacs` executes `tacs` using the `.default` transparency setting.
+In this setting all definitions that are not `[irreducible]` are unfolded.
+-/
+syntax (name := withSemireducible) "with_semireducible " tacticSeq : tactic
+
+/--
 `with_unfolding_all tacs` executes `tacs` using the `.all` transparency setting.
 In this setting all definitions that are not opaque are unfolded.
 -/

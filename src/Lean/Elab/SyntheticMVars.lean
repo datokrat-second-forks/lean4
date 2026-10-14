@@ -543,7 +543,7 @@ mutual
     match mvarSyntheticDecl.kind with
     | .typeClass extraErrorMsg? => synthesizePendingInstMVar mvarId extraErrorMsg?
     | .coe _header? expectedType e _f? _ => mvarId.withContext do
-      if (← withDefault do isDefEq (← inferType e) expectedType) then
+      if (← withElabTransparency do isDefEq (← inferType e) expectedType) then
         -- Types may be defeq now due to mvar assignments, type class
         -- defaulting, etc.
         if (← occursCheck mvarId e) then

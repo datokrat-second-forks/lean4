@@ -15,9 +15,6 @@ def f' (x : Nat) : Prop :=
 error: Could not prove 'f''' to be monotone in its recursive calls:
   Cannot eliminate recursive call `f'' (x + 1)` enclosed in
     f'' (x + 1) ∨ f'' (x + 2)
-  Tried to apply 'Lean.Order.implication_order_monotone_or' and 'Lean.Order.coind_monotone_or', but failed.
-  Possible cause: A missing `Lean.Order.MonoBind` instance.
-  Use `set_option trace.Elab.Tactic.monotonicity true` to debug.
 -/
 #guard_msgs in
 def f'' (x : Nat) : Prop :=

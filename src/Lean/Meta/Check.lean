@@ -280,7 +280,13 @@ def checkApp (f a : Expr) : MetaM Unit := do
   match fType with
   | Expr.forallE _ d _ _ =>
     let aType ← inferType a
-    unless (← isDefEq d aType) do
+    let ok ← if f.isAppOfArity ``smartCast 2 then do
+      checkSmartCastTypes f.appFn!.appArg! f.appArg!
+      -- The proof may be `rfl`, which has type `α = β` only at `default` transparency.
+      withAtLeastTransparency .default <| isDefEq d aType
+    else
+      isDefEq d aType
+    unless ok do
       throwAppTypeMismatch f a
   | _ => throwFunctionExpected (mkApp f a)
 
@@ -300,7 +306,11 @@ where
       | .lam ..          => checkLambdaLet e
       | .letE ..         => checkLambdaLet e
       | .const c lvls    => checkConstant c lvls
-      | .app f a         => check f; check a; checkApp f a
+      | .app f a         =>
+        check f
+        -- The proof of a cast typechecks at `default`, where its types are compared (`checkApp`).
+        if f.isAppOfArity ``smartCast 2 then withAtLeastTransparency .default (check a) else check a
+        checkApp f a
       | .mdata _ e       => check e
       | .proj s i e      => check e; checkProj s i e
       | _                => return ()

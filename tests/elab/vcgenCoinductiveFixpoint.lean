@@ -6,15 +6,13 @@ import Std.WP
 `Prop` is an assertion lattice, so `Std.WP` carries a `PartialOrder Prop` instance,
 re-scoped from `Std.Internal.Order`.
 
-The monotonicity solver of `partial_fixpoint` tries `ind_impl` before `coind_impl`. On a mutual
-block that mixes the two directions it must reject `ind_impl`, and it does so only because
-`PartialOrder (Prop ×' Prop → Prop)` fails to synthesize. Any `PartialOrder Prop` supplies that
-instance through the pointwise lift, so `ind_impl` applies and wins on order.
+The monotonicity lemmas of `inductive_fixpoint` and `coinductive_fixpoint` state their conclusion
+with the cast `ImplicationOrder.ofProp` or `ReverseImplicationOrder.ofProp`, so the solver only
+tries the lemmas of the right direction, and a `PartialOrder Prop` in scope does not change that.
 
-This test pins how far that reaches. A single coinductive definition and a `vcgen` proof coexist.
-A mutual block that mixes `inductive_fixpoint` and `coinductive_fixpoint` over an implication does
-not. See the `mixed3` and `mixed4` cases of `coinductive_predicates.lean`, which elaborate when
-`Std.WP` is not open.
+This test pins that a coinductive definition, a `vcgen` proof, and mutual blocks that mix
+`inductive_fixpoint` and `coinductive_fixpoint` coexist (compare the `mixed3` and `mixed4` cases of
+`coinductive_predicates.lean`).
 -/
 
 open Std.WP Lean.Order
@@ -52,9 +50,7 @@ theorem mySum_correct (l : List Nat) : mySum l = l.sum := by
   · fun _pref suff acc => ⌜acc + suff.sum = l.sum⌝
   with finish
 
-/-! ## What does not work: a mixed mutual block over an implication
-
-Negation is not affected, because `ind_not` names its order in the conclusion. -/
+/-! ## Mixed mutual blocks over a negation and an implication -/
 
 namespace mixed2
   mutual
@@ -67,11 +63,6 @@ namespace mixed2
 end mixed2
 
 namespace mixed3
-/--
-error: Could not prove 'mixed3.tick' to be monotone in its recursive calls:
-  Cannot eliminate recursive call in
-    ?f₁ ⟨tick, tock⟩
--/
 #guard_msgs in
 mutual
   def tick : Prop := tock → tick
@@ -83,11 +74,6 @@ end
 end mixed3
 
 namespace mixed4
-/--
-error: Could not prove 'mixed4.tock' to be monotone in its recursive calls:
-  Cannot eliminate recursive call in
-    ?f₁ ⟨tick, tock⟩
--/
 #guard_msgs in
 mutual
   def tick : Prop := tock → tick

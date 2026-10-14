@@ -95,6 +95,43 @@ def warnIfUsesSorry (decl : Declaration) : CoreM Unit := do
         -- This case should not happen, but it ensures a warning will get logged no matter what.
         logWarning <| .tagged `hasSorry m!"declaration uses `sorry`"
 
+private partial def checkSmartCastsIn (e : Expr) : MetaM Unit := do
+  unless (e.find? (·.isConstOf ``smartCast)).isSome do return
+  Meta.forEachExpr' e fun e => do
+    unless e.isAppOf ``smartCast do return true
+    let args := e.getAppArgs
+    unless args.size ≥ 2 do
+      throwError "`smartCast` must be applied to the types it casts between"
+    Meta.checkSmartCastTypes args[0]! args[1]!
+    args.forM checkSmartCastsIn
+    return false
+
+/--
+Checks every smart cast in the types and definition values of `decl` with
+`Meta.checkSmartCastTypes`; the cast rules rely on it. Casts that are exported, i.e. in the type of
+a public declaration or in an exposed body, are checked in the public scope. Theorems are not
+checked: a statement may quantify over casts, such as `smartCast.eq_1`, and its instances are
+checked where they are used.
+-/
+def checkSmartCasts (decl : Declaration) (forceExpose : Bool) : CoreM Unit := do
+  let env ← getEnv
+  let exported := env.header.isModule && !decl.getTopLevelNames.all isPrivateName
+  let (types, values) : Array Expr × Array Expr := match decl with
+    | .axiomDecl v => (#[v.type], #[])
+    | .thmDecl _ => (#[], #[])
+    | .opaqueDecl v => (#[v.type], #[])
+    | .defnDecl v => (#[v.type], #[v.value])
+    | .mutualDefnDecl vs =>
+      (vs.toArray.map (fun (v : DefinitionVal) => v.type),
+        vs.toArray.map (fun (v : DefinitionVal) => v.value))
+    | .inductDecl _ _ types _ =>
+      (types.toArray.flatMap fun (t : InductiveType) => #[t.type] ++ t.ctors.toArray.map (·.type), #[])
+    | .quotDecl => (#[], #[])
+  withExporting (isExporting := exported) do
+    (types.forM checkSmartCastsIn).run'
+  withExporting (isExporting := exported && (forceExpose || env.isExporting)) do
+    (values.forM checkSmartCastsIn).run'
+
 builtin_initialize
   registerTraceClass `addDecl
 
@@ -185,6 +222,7 @@ where
       withTraceNode `Kernel (fun _ => return m!"typechecking declarations {decl.getTopLevelNames}") do
         warnIfUsesSorry decl
         try
+          checkSmartCasts decl forceExpose
           let env ← (← getEnv).addDeclAux (← getOptions) decl (← read).cancelTk?
             |> ofExceptKernelException
           setEnv env

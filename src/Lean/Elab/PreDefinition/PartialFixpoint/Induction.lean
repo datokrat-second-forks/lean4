@@ -10,6 +10,7 @@ prelude
 import Lean.Meta.Injective -- for elimOptParam
 import Lean.Elab.PreDefinition.PartialFixpoint.Eqns
 import Init.Internal.Order.Basic
+import Lean.Meta.Order
 import Lean.Meta.PProdN
 
 namespace Lean.Elab.PartialFixpoint
@@ -47,15 +48,16 @@ def CCPOProdProjs (n : Nat) (inst : Expr) : Array Expr := Id.run do
 /--
 Unfolds an appropriate `PartialOrder` instance on predicates to quantifications and implications.
 I.e. `ImplicationOrder.instPartialOrder.rel P Q` becomes
-`∀ x y, P x y → Q x y`.
+`∀ x y, (P x y).toProp → (Q x y).toProp`.
 In the premise of the Park induction principle (`lfp_le_of_le_monotone`) we use a monotone map defining the predicate in the eta expanded form. In such a case, besides desugaring the predicate, we need to perform a weak head reduction.
 The optional parameter `reducePremise` (false by default) indicates whether we need to perform this reduction.
 -/
 def unfoldPredRel (predType : Expr) (lhs rhs : Expr) (fixpointType : PartialFixpointType) (reducePremise : Bool := false) : MetaM Expr := do
   guard <| isLatticeTheoretic fixpointType
+  let toProp := mkConst (propOrderCasts (isCoinductiveFixpoint fixpointType)).2
   forallTelescopeReducing predType fun ts _ => do
-    let mut lhs : Expr := mkAppN lhs ts
-    let rhs : Expr := mkAppN rhs ts
+    let mut lhs : Expr := mkApp toProp (mkAppN lhs ts)
+    let rhs : Expr := mkApp toProp (mkAppN rhs ts)
     if reducePremise then
         lhs ← whnf lhs
     match fixpointType with
@@ -89,6 +91,20 @@ def unfoldPredRelMutual (eqnInfo : EqnInfo) (body : Expr) (reduceConclusion : Bo
     let lhs ← PProdN.reduceProjs (←PProdN.projM infos.size i lhs)
     unfoldPredRel predTypes[i]! lhs (← PProdN.projM infos.size i rhs) eqnInfo.fixpointType[i]! reduceConclusion
 
+/-- Reduces projections and beta-redexes in `e`, and cancels `toProp (ofProp p)` to `p`. -/
+private def cleanupCasts (e : Expr) : MetaM Expr := do
+  return cancelPropOrderCasts (← Core.betaReduce (← PProdN.reduceProjs e))
+
+/-- `fun xs => toProp (e xs)` to `fun xs => e xs`, for the casts of `propOrderCasts`. -/
+private def stripPredToProp : Expr → Expr
+  | .lam n t b bi => .lam n t (stripPredToProp b) bi
+  | e =>
+    if e.isAppOfArity ``ImplicationOrder.toProp 1 ||
+        e.isAppOfArity ``ReverseImplicationOrder.toProp 1 then
+      e.appArg!
+    else
+      e
+
 /-- `maskArray mask xs` keeps those `x` where the corresponding entry in `mask` is `true` -/
 -- Worth having in the standard library?
 private def maskArray {α} (mask : Array Bool) (xs : Array α) : Array α := Id.run do
@@ -121,12 +137,12 @@ def getInductionPrinciplePostfix (name : Name) (isMutual : Bool) (strong : Bool 
 Constructs a proof of `is_meet x y w` in the packed lattice of a (co)inductive fixpoint, where
 `x = ⟨pred₁, …⟩` is the tuple of candidate predicates, `y = ⟨f₁, …⟩` the tuple of the defined
 predicates, and `w = ⟨w₁, …⟩` the tuple of pointwise meets
-`wᵢ = fun xs => predᵢ xs ∨ fᵢ xs` (resp. `∧` for inductive components).
+`wᵢ = fun xs => predᵢ xs ∨ fᵢ xs` (resp. `∧` for inductive components), each cast with `ofProp`.
 
 The proof is composed from `is_meet_pprod` along the tuple, `is_meet_pi` along the parameters of
 each predicate, and the meet characterizations of `ImplicationOrder`/`ReverseImplicationOrder`.
 -/
-def mkIsMeetProof (predTypes predVars wComponents fInsts : Array Expr)
+def mkIsMeetProof (predTypes predVars fInsts : Array Expr)
     (fixpointTypes : Array PartialFixpointType) : MetaM Expr := do
   let componentProofs ← predTypes.mapIdxM fun i predType =>
     forallTelescopeReducing predType fun ts _ => do
@@ -146,14 +162,14 @@ def mkIsMeetProof (predTypes predVars wComponents fInsts : Array Expr)
   let mut proof := componentProofs.back!
   for j in (Array.range (predTypes.size - 1)).reverse do
     let ty₂ ← inferType proof
-    let_expr is_meet σ₂ inst₂ _ _ _ := ty₂
+    let_expr is_meet σ₂ inst₂ x₂ y₂ w₂ := ty₂
       | throwError "mkIsMeetProof: unexpected proof type{indentExpr ty₂}"
     let ty₁ ← inferType componentProofs[j]!
-    let_expr is_meet σ₁ inst₁ _ _ _ := ty₁
+    let_expr is_meet σ₁ inst₁ x₁ y₁ w₁ := ty₁
       | throwError "mkIsMeetProof: unexpected proof type{indentExpr ty₁}"
-    let subX ← PProdN.mk 0 predVars[j:].toArray
-    let subY ← PProdN.mk 0 fInsts[j:].toArray
-    let subW ← PProdN.mk 0 wComponents[j:].toArray
+    let subX ← PProdN.mk 0 #[x₁, x₂]
+    let subY ← PProdN.mk 0 #[y₁, y₂]
+    let subW ← PProdN.mk 0 #[w₁, w₂]
     proof ← mkAppOptM ``is_meet_pprod
       #[σ₁, σ₂, inst₁, inst₂, subX, subY, subW, componentProofs[j]!, proof]
   return proof
@@ -175,7 +191,7 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
       let body ← eqnInfo.fixedParamPerms.perms[0]!.instantiateLambda infos[0]!.value xs
       -- The body should now be of the form of the form (fix … ).2.2.1
       -- We strip the projections (if present)
-      let body' := PProdN.stripProjs body.eta -- TODO: Eta more carefully?
+      let body' := PProdN.stripProjs (stripPredToProp body).eta -- TODO: Eta more carefully?
       if eqnInfo.fixpointType.all isLatticeTheoretic then
         -- We strip it until we reach an application of `lfp_montotone`
         let some fixApp ← whnfUntil body' ``lfp_monotone
@@ -189,24 +205,26 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
             mkLambdaFVars ys (mkAppN f ys)
           let fInst ← eqnInfo.fixedParamPerms.perms[i]!.instantiateLambda fEtaExpanded xs
           return fInst.eta
-        -- All definitions from `mutual` block as PProdN
-        let packedConclusion ← PProdN.mk 1 fInsts
         -- For each predicate in the mutual group we generate an appropriate candidate predicate
-        let predTypes ← PProdN.unpack α infos.size
+        let predTypes ← infos.mapIdxM fun i info =>
+          eqnInfo.fixedParamPerms.perms[i]!.instantiateForall info.type xs
+        -- Predicates as elements of the lattice
+        let ofProp (i : Nat) (e : Expr) : MetaM Expr := do
+          let (ofProp, _) := propOrderCasts (isCoinductiveFixpoint eqnInfo.fixpointType[i]!)
+          mkPredCast ofProp predTypes[i]! e
+        -- All definitions from `mutual` block as PProdN
+        let packedConclusion ← PProdN.mk 1 (← fInsts.mapIdxM ofProp)
         let predicates := (numberNames infos.size "pred").zip predTypes
         withLocalDeclsDND predicates fun predVars => do
           -- A joint approximation to the fixpoint
-          let predVar ← PProdN.mk 0 predVars
+          let predVar ← PProdN.mk 0 (← predVars.mapIdxM ofProp)
           if strong then
               -- The pointwise meet of the candidate predicates and the defined predicates:
               -- disjunction for coinductive components, conjunction for inductive ones
-              let wComponents ← predTypes.mapIdxM fun i predType =>
-                forallTelescopeReducing predType fun ts _ => do
-                  let conn := if isCoinductiveFixpoint eqnInfo.fixpointType[i]! then ``Or else ``And
-                  mkLambdaFVars ts <|
-                    mkApp2 (mkConst conn) (mkAppN predVars[i]! ts) (fInsts[i]!.beta ts)
-              let wPacked ← PProdN.mk 0 wComponents
-              let hw ← mkIsMeetProof predTypes predVars wComponents fInsts eqnInfo.fixpointType
+              let hw ← mkIsMeetProof predTypes predVars fInsts eqnInfo.fixpointType
+              let hwType ← inferType hw
+              let_expr is_meet _ _ _ _ wPacked := hwType
+                | throwError "Unexpected type of meet proof{indentExpr hwType}"
               -- The type of `hw` mentions the folded predicates where the expected argument type
               -- mentions the `lfp_monotone` application; these are definitionally equal, but only
               -- the kernel can see this (`lfp_monotone` is not exposed), so we apply `hw` without
@@ -219,7 +237,7 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
               let .forallE _ premiseType _ _ ← inferType e'
                 | throwError "Unexpected type of strong induction principle"
               let premises ← unfoldPredRelMutual eqnInfo premiseType (reduceConclusion := true)
-              let premises ← premises.mapM fun p => do Core.betaReduce (← PProdN.reduceProjs p)
+              let premises ← premises.mapM cleanupCasts
               -- Then, we introduce hypotheses
               withLocalDeclsDND ((numberNames infos.size "hyp").zip premises) fun motiveVars => do
                 let packedHyp ← PProdN.mk 0 motiveVars
@@ -231,10 +249,7 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
                   | throwError "Unexpected conclusion {conclType}, not an application of PartialOrder.rel"
                 let newConcl ← mkAppOptM ``PartialOrder.rel #[cType, pord, packedConclusion, cPred]
                 let unfolded ← unfoldPredRelMutual eqnInfo newConcl
-                -- Definitions with a fixed parameter after a varying one do not eta-reduce to a
-                -- partial application in `fInsts`, leaving beta redexes in the conclusion
-                let unfolded ← unfolded.mapM (Core.betaReduce ·)
-                let conclType ← PProdN.reduceProjs (← PProdN.pack 0 unfolded)
+                let conclType ← cleanupCasts (← PProdN.pack 0 unfolded)
                 let e' ← mkExpectedTypeHint e' conclType
                 -- For the `strong_mutual_induct` variant, we are done.
                 -- Else, project out the appropriate element
@@ -259,25 +274,21 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
                 | throwError "Unexpected function type {body}, not an application of PartialOrder.rel"
               let newBody ← mkAppOptM ``PartialOrder.rel #[α, pord, packedConclusion, pred]
               let unfolded ← unfoldPredRelMutual eqnInfo newBody
-              -- Definitions with a fixed parameter after a varying one do not eta-reduce to a
-              -- partial application in `packedConclusion`, leaving beta redexes in the conclusion
-              let unfolded ← unfolded.mapM (Core.betaReduce ·)
-              let newBody ← PProdN.pack 0 unfolded
+              let newBody ← cleanupCasts (← PProdN.pack 0 unfolded)
               mkForallFVars args newBody
             let e' ← mkExpectedTypeHint e' eTyp
-            -- We obtain the premises of (co)induction proof principle
-            let motives ← forallTelescope eTyp fun args _ => do
-              let motives ← unfoldPredRelMutual eqnInfo (←inferType args[1]!) (reduceConclusion := true)
-              motives.mapM (fun x => mkForallFVars #[args[0]!] x)
-            -- All motives get instantiated with the newly created variables
-            let newMotives ← motives.mapM (instantiateForall · #[predVar])
-            let newMotives ← newMotives.mapM (PProdN.reduceProjs ·)
+            -- We obtain the premises of (co)induction proof principle, instantiated with the newly
+            -- created variables
+            let .forallE _ premiseType _ _ ← instantiateForall eTyp #[predVar]
+              | throwError "Unexpected type of induction principle {eTyp}"
+            let newMotives ← unfoldPredRelMutual eqnInfo premiseType (reduceConclusion := true)
+            let newMotives ← newMotives.mapM cleanupCasts
             -- Then, we introduce hypotheses
             withLocalDeclsDND ((numberNames infos.size "hyp").zip newMotives) fun motiveVars => do
               let e' := mkApp e' predVar
               let eTyp ← inferType e'
               -- Conclusion gets cleaned up from `PProd` projections
-              let e' ← mkExpectedTypeHint e' (← PProdN.reduceProjs eTyp)
+              let e' ← mkExpectedTypeHint e' (← cleanupCasts eTyp)
               -- We apply all the premises
               let packedPremise ← PProdN.mk 0 motiveVars
               let e' := mkApp e' packedPremise

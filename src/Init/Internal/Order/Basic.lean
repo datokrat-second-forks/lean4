@@ -1172,8 +1172,16 @@ section implication_order
 -- Partial order on `Prop` given by implication
 @[expose] def ImplicationOrder := Prop
 
+/-- A proposition as an element of `ImplicationOrder`. -/
+@[expose, implicit_reducible] def ImplicationOrder.ofProp (p : Prop) : ImplicationOrder :=
+  smartCast Prop ImplicationOrder rfl p
+
+/-- An element of `ImplicationOrder` as a proposition. -/
+@[expose, implicit_reducible] def ImplicationOrder.toProp (x : ImplicationOrder) : Prop :=
+  smartCast ImplicationOrder Prop rfl x
+
 instance ImplicationOrder.instOrder : PartialOrder ImplicationOrder where
-  rel x y := x → y
+  rel x y := x.toProp → y.toProp
   rel_refl := fun x => x
   rel_trans h₁ h₂ := fun x => h₂ (h₁  x)
   rel_antisymm h₁ h₂ := propext ⟨h₁, h₂⟩
@@ -1198,37 +1206,47 @@ instance ImplicationOrder.instCompleteLattice : CompleteLattice ImplicationOrder
       exact h a caa.1 caa.2
 
 -- Monotonicity lemmas for inductive predicates
+@[partial_fixpoint_monotone] theorem implication_order_monotone_toProp
+    {α} [PartialOrder α] (f : α → ImplicationOrder)
+    (h : @monotone _ _ _ ImplicationOrder.instOrder f) :
+    @monotone _ _ _ ImplicationOrder.instOrder (fun x => ImplicationOrder.ofProp (f x).toProp) :=
+  h
+
 @[partial_fixpoint_monotone] theorem implication_order_monotone_exists
-    {α} [PartialOrder α] {β} (f : α → β → ImplicationOrder)
-    (h : monotone f) :
-    @monotone _ _ _ ImplicationOrder.instOrder (fun x => (Exists (f x))) :=
-  fun x y hxy ⟨w, hw⟩ => ⟨w, monotone_apply w f h x y hxy hw⟩
+    {α} [PartialOrder α] {β} (f : α → β → Prop)
+    (h : monotone fun x y => ImplicationOrder.ofProp (f x y)) :
+    @monotone _ _ _ ImplicationOrder.instOrder (fun x => ImplicationOrder.ofProp (Exists (f x))) :=
+  fun x y hxy ⟨w, hw⟩ => ⟨w, monotone_apply w _ h x y hxy hw⟩
 
 @[partial_fixpoint_monotone] theorem implication_order_monotone_forall
-    {α} [PartialOrder α] {β} (f : α → β → ImplicationOrder)
-    (h : monotone f) :
-    @monotone _ _ _ ImplicationOrder.instOrder (fun x => ∀ y, f x y) :=
-  fun x y hxy h₂ y₁ => monotone_apply y₁ f h x y hxy (h₂ y₁)
+    {α} [PartialOrder α] {β} (f : α → β → Prop)
+    (h : monotone fun x y => ImplicationOrder.ofProp (f x y)) :
+    @monotone _ _ _ ImplicationOrder.instOrder (fun x => ImplicationOrder.ofProp (∀ y, f x y)) :=
+  fun x y hxy h₂ y₁ => monotone_apply y₁ _ h x y hxy (h₂ y₁)
 
 @[partial_fixpoint_monotone] theorem implication_order_monotone_and
-    {α} [PartialOrder α] (f₁ : α → ImplicationOrder) (f₂ : α → ImplicationOrder)
-    (h₁ : @monotone _ _ _ ImplicationOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ImplicationOrder.instOrder f₂) :
-    @monotone _ _ _ ImplicationOrder.instOrder (fun x => f₁ x ∧ f₂ x) :=
+    {α} [PartialOrder α] (f₁ : α → Prop) (f₂ : α → Prop)
+    (h₁ : @monotone _ _ _ ImplicationOrder.instOrder fun x => ImplicationOrder.ofProp (f₁ x))
+    (h₂ : @monotone _ _ _ ImplicationOrder.instOrder fun x => ImplicationOrder.ofProp (f₂ x)) :
+    @monotone _ _ _ ImplicationOrder.instOrder
+      (fun x => ImplicationOrder.ofProp (f₁ x ∧ f₂ x)) :=
   fun x y hxy ⟨hfx₁, hfx₂⟩ => ⟨h₁ x y hxy hfx₁, h₂ x y hxy hfx₂⟩
 
 @[partial_fixpoint_monotone] theorem implication_order_monotone_or
-    {α} [PartialOrder α] (f₁ : α → ImplicationOrder) (f₂ : α → ImplicationOrder)
-    (h₁ : @monotone _ _ _ ImplicationOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ImplicationOrder.instOrder f₂) :
-    @monotone _ _ _ ImplicationOrder.instOrder (fun x => f₁ x ∨ f₂ x) :=
+    {α} [PartialOrder α] (f₁ : α → Prop) (f₂ : α → Prop)
+    (h₁ : @monotone _ _ _ ImplicationOrder.instOrder fun x => ImplicationOrder.ofProp (f₁ x))
+    (h₂ : @monotone _ _ _ ImplicationOrder.instOrder fun x => ImplicationOrder.ofProp (f₂ x)) :
+    @monotone _ _ _ ImplicationOrder.instOrder
+      (fun x => ImplicationOrder.ofProp (f₁ x ∨ f₂ x)) :=
   fun x y hxy h =>
     match h with
     | Or.inl hfx₁ => Or.inl (h₁ x y hxy hfx₁)
     | Or.inr hfx₂ => Or.inr (h₂ x y hxy hfx₂)
 
 /-- In the implication order the meet of two propositions is their conjunction. -/
-theorem ImplicationOrder.is_meet_and (x y : ImplicationOrder) : is_meet x y (x ∧ y : Prop) :=
+theorem ImplicationOrder.is_meet_and (x y : Prop) :
+    is_meet (ImplicationOrder.ofProp x) (ImplicationOrder.ofProp y)
+      (ImplicationOrder.ofProp (x ∧ y)) :=
   ⟨And.left, And.right, fun _ hzx hzy hz => ⟨hzx hz, hzy hz⟩⟩
 
 end implication_order
@@ -1237,9 +1255,19 @@ section reverse_implication_order
 
 @[expose] def ReverseImplicationOrder := Prop
 
+/-- A proposition as an element of `ReverseImplicationOrder`. -/
+@[expose, implicit_reducible]
+def ReverseImplicationOrder.ofProp (p : Prop) : ReverseImplicationOrder :=
+  smartCast Prop ReverseImplicationOrder rfl p
+
+/-- An element of `ReverseImplicationOrder` as a proposition. -/
+@[expose, implicit_reducible]
+def ReverseImplicationOrder.toProp (x : ReverseImplicationOrder) : Prop :=
+  smartCast ReverseImplicationOrder Prop rfl x
+
 -- Partial order on `Prop` given by reverse implication
 instance ReverseImplicationOrder.instOrder : PartialOrder ReverseImplicationOrder where
-  rel x y := y → x
+  rel x y := y.toProp → x.toProp
   rel_refl := fun x => x
   rel_trans := fun h₁ h₂ => fun x => h₁ (h₂ x)
   rel_antisymm h₁ h₂ := propext ⟨h₂, h₁⟩
@@ -1262,38 +1290,54 @@ instance ReverseImplicationOrder.instCompleteLattice : CompleteLattice ReverseIm
       exact y
 
 -- Monotonicity lemmas for coinductive predicates
+@[partial_fixpoint_monotone] theorem coind_monotone_toProp
+    {α} [PartialOrder α] (f : α → ReverseImplicationOrder)
+    (h : @monotone _ _ _ ReverseImplicationOrder.instOrder f) :
+    @monotone _ _ _ ReverseImplicationOrder.instOrder
+      (fun x => ReverseImplicationOrder.ofProp (f x).toProp) :=
+  h
+
 @[partial_fixpoint_monotone] theorem coind_monotone_exists
-    {α} [PartialOrder α] {β} (f : α → β → ReverseImplicationOrder)
-    (h : monotone f) :
-    @monotone _ _ _ ReverseImplicationOrder.instOrder (fun x => Exists (f x)) :=
-  fun x y hxy ⟨w, hw⟩ => ⟨w, monotone_apply w f h x y hxy hw⟩
+    {α} [PartialOrder α] {β} (f : α → β → Prop)
+    (h : monotone fun x y => ReverseImplicationOrder.ofProp (f x y)) :
+    @monotone _ _ _ ReverseImplicationOrder.instOrder
+      (fun x => ReverseImplicationOrder.ofProp (Exists (f x))) :=
+  fun x y hxy ⟨w, hw⟩ => ⟨w, monotone_apply w _ h x y hxy hw⟩
 
 @[partial_fixpoint_monotone] theorem coind_monotone_forall
-    {α} [PartialOrder α] {β} (f : α → β → ReverseImplicationOrder)
-    (h : monotone f) :
-    @monotone _ _ _ ReverseImplicationOrder.instOrder (fun x => ∀ y, f x y) :=
-  fun x y hxy h₂ y₁ => monotone_apply y₁ f h x y hxy (h₂ y₁)
+    {α} [PartialOrder α] {β} (f : α → β → Prop)
+    (h : monotone fun x y => ReverseImplicationOrder.ofProp (f x y)) :
+    @monotone _ _ _ ReverseImplicationOrder.instOrder
+      (fun x => ReverseImplicationOrder.ofProp (∀ y, f x y)) :=
+  fun x y hxy h₂ y₁ => monotone_apply y₁ _ h x y hxy (h₂ y₁)
 
 @[partial_fixpoint_monotone] theorem coind_monotone_and
     {α} [PartialOrder α] (f₁ : α → Prop) (f₂ : α → Prop)
-    (h₁ : @monotone _ _ _ ReverseImplicationOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ReverseImplicationOrder.instOrder f₂) :
-    @monotone _ _ _ ReverseImplicationOrder.instOrder (fun x => f₁ x ∧ f₂ x) :=
+    (h₁ : @monotone _ _ _ ReverseImplicationOrder.instOrder
+      fun x => ReverseImplicationOrder.ofProp (f₁ x))
+    (h₂ : @monotone _ _ _ ReverseImplicationOrder.instOrder
+      fun x => ReverseImplicationOrder.ofProp (f₂ x)) :
+    @monotone _ _ _ ReverseImplicationOrder.instOrder
+      (fun x => ReverseImplicationOrder.ofProp (f₁ x ∧ f₂ x)) :=
   fun x y hxy ⟨hfx₁, hfx₂⟩ => ⟨h₁ x y hxy hfx₁, h₂ x y hxy hfx₂⟩
 
 @[partial_fixpoint_monotone] theorem coind_monotone_or
     {α} [PartialOrder α] (f₁ : α → Prop) (f₂ : α → Prop)
-    (h₁ : @monotone _ _ _ ReverseImplicationOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ReverseImplicationOrder.instOrder f₂) :
-    @monotone _ _ _ ReverseImplicationOrder.instOrder (fun x => f₁ x ∨ f₂ x) :=
+    (h₁ : @monotone _ _ _ ReverseImplicationOrder.instOrder
+      fun x => ReverseImplicationOrder.ofProp (f₁ x))
+    (h₂ : @monotone _ _ _ ReverseImplicationOrder.instOrder
+      fun x => ReverseImplicationOrder.ofProp (f₂ x)) :
+    @monotone _ _ _ ReverseImplicationOrder.instOrder
+      (fun x => ReverseImplicationOrder.ofProp (f₁ x ∨ f₂ x)) :=
   fun x y hxy h =>
     match h with
     | Or.inl hfx₁ => Or.inl (h₁ x y hxy hfx₁)
     | Or.inr hfx₂ => Or.inr (h₂ x y hxy hfx₂)
 
 /-- In the reverse implication order the meet of two propositions is their disjunction. -/
-theorem ReverseImplicationOrder.is_meet_or (x y : ReverseImplicationOrder) :
-    is_meet x y (x ∨ y : Prop) :=
+theorem ReverseImplicationOrder.is_meet_or (x y : Prop) :
+    is_meet (ReverseImplicationOrder.ofProp x) (ReverseImplicationOrder.ofProp y)
+      (ReverseImplicationOrder.ofProp (x ∨ y)) :=
   ⟨Or.inl, Or.inr, fun _ hzx hzy hw => hw.elim hzx hzy⟩
 
 end reverse_implication_order
@@ -1301,23 +1345,27 @@ end reverse_implication_order
 section antitone
 @[partial_fixpoint_monotone] theorem coind_not
     {α} [PartialOrder α] (f₁ : α → Prop)
-    (h₁ : @monotone _ _ _ ReverseImplicationOrder.instOrder f₁) :
-    @monotone _ _ _ ImplicationOrder.instOrder (fun x => ¬f₁ x) := by
+    (h₁ : @monotone _ _ _ ReverseImplicationOrder.instOrder
+      fun x => ReverseImplicationOrder.ofProp (f₁ x)) :
+    @monotone _ _ _ ImplicationOrder.instOrder (fun x => ImplicationOrder.ofProp (¬f₁ x)) := by
   intro x y hxy hfx h
   exact hfx (h₁ x y hxy h)
 
 @[partial_fixpoint_monotone] theorem ind_not
     {α} [PartialOrder α] (f₁ : α → Prop)
-    (h₁ : @monotone _ _ _ ImplicationOrder.instOrder f₁) :
-    @monotone _ _ _ ReverseImplicationOrder.instOrder (fun x => ¬f₁ x) := by
+    (h₁ : @monotone _ _ _ ImplicationOrder.instOrder fun x => ImplicationOrder.ofProp (f₁ x)) :
+    @monotone _ _ _ ReverseImplicationOrder.instOrder
+      (fun x => ReverseImplicationOrder.ofProp (¬f₁ x)) := by
   intro x y hxy hfx h
   exact hfx (h₁ x y hxy h)
 
 @[partial_fixpoint_monotone] theorem ind_impl
     {α} [PartialOrder α] (f₁ : α → Prop) (f₂ : α → Prop)
-    (h₁ : @monotone _ _ _ ReverseImplicationOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ImplicationOrder.instOrder f₂):
-    @monotone _ _ _ ImplicationOrder.instOrder (fun x => f₁ x → f₂ x) := by
+    (h₁ : @monotone _ _ _ ReverseImplicationOrder.instOrder
+      fun x => ReverseImplicationOrder.ofProp (f₁ x))
+    (h₂ : @monotone _ _ _ ImplicationOrder.instOrder fun x => ImplicationOrder.ofProp (f₂ x)):
+    @monotone _ _ _ ImplicationOrder.instOrder
+      (fun x => ImplicationOrder.ofProp (f₁ x → f₂ x)) := by
   intro x y hxy himp hf1
   specialize h₁ x y hxy hf1
   specialize h₂ x y hxy
@@ -1327,9 +1375,11 @@ section antitone
 
 @[partial_fixpoint_monotone] theorem coind_impl
     {α} [PartialOrder α] (f₁ : α → Prop) (f₂ : α → Prop)
-    (h₁ : @monotone _ _ _ ImplicationOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ReverseImplicationOrder.instOrder f₂):
-    @monotone _ _ _ ReverseImplicationOrder.instOrder (fun x => f₁ x → f₂ x) := by
+    (h₁ : @monotone _ _ _ ImplicationOrder.instOrder fun x => ImplicationOrder.ofProp (f₁ x))
+    (h₂ : @monotone _ _ _ ReverseImplicationOrder.instOrder
+      fun x => ReverseImplicationOrder.ofProp (f₂ x)):
+    @monotone _ _ _ ReverseImplicationOrder.instOrder
+      (fun x => ReverseImplicationOrder.ofProp (f₁ x → f₂ x)) := by
   intro x y hxy himp hf1
   specialize h₁ x y hxy hf1
   specialize h₂ x y hxy

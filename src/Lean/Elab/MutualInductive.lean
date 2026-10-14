@@ -1575,6 +1575,9 @@ private def elabInductiveViews (vars : Array Expr) (elabs : Array InductiveElabS
     Lean.compileDecls (elabs.map (·.view.declName))
     -- This might be too coarse, consider reconsidering on construction-by-construction basis
     withoutExporting (when := view0.ctors.any (isPrivateName ·.declName)) do
+    -- Generated declarations are checked by computation, independently of
+    -- `elaborator.implicitTransparency`.
+    withoutImplicitElab do
       mkAuxConstructions (elabs.map (·.view.declName))
       unless view0.isClass do
         mkSizeOfInstances view0.declName
@@ -1716,6 +1719,9 @@ def elabInductives (inductives : Array (Modifiers × Syntax)) : CommandElabM Uni
     runTermElabM fun vars => do
       let flatElabs := elabs.map fun e => {e with view := updateViewWithFunctorName e.view}
       elabFlatInductiveViews vars flatElabs
+      -- The predicates are generated from the flat inductives, independently of
+      -- `elaborator.implicitTransparency`.
+      withoutImplicitElab do
       discard <| flatElabs.mapM fun e => MetaM.run' do mkSumOfProducts e.view.declName
       elabCoinductive (flatElabs.map InductiveViewToCoinductiveElab)
   else

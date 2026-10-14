@@ -1491,6 +1491,14 @@ private def Context.setTransparency (ctx : Context) (transparency : Transparency
 @[inline] def withDefault (x : n α) : n α :=
   withTransparency TransparencyMode.default x
 
+/--
+Executes `x` at `default` transparency and without `elaborator.implicitTransparency`. For internal
+constructions whose terms are type-correct by construction and checked by computation, such as
+matchers and equation lemmas.
+-/
+@[inline] def withoutImplicitElab [MonadWithOptions n] (x : n α) : n α :=
+  withOptions (·.setBool `elaborator.implicitTransparency false) <| withDefault x
+
 /-- `withReducible x` executes `x` using the reducible transparency setting. In this setting only definitions tagged as `[reducible]` are unfolded. -/
 @[inline] def withReducible (x : n α) : n α :=
   withTransparency TransparencyMode.reducible x
@@ -2741,6 +2749,19 @@ def isDefEqD (t s : Expr) : MetaM Bool :=
 def isDefEqI (t s : Expr) : MetaM Bool :=
   withReducibleAndInstances <| isDefEq t s
 
+/--
+Checks that `smartCast α β` is justified: `α` and `β` are definitionally equal at `default`
+transparency in the current scope, which is the public scope if the cast is exported.
+-/
+def checkSmartCastTypes (α β : Expr) : MetaM Unit := do
+  if (← isDefEqD α β) then return
+  if (← getEnv).isExporting && (← withoutExporting <| isDefEqD α β) then
+    throwError "cannot cast{indentExpr α}\nto{indentExpr β}\nin the public scope because the types \
+      are definitionally equal at `default` transparency only in the private scope{.hint' "Mark \
+      the declaration `@[no_expose]`, or expose the definitions that need to be unfolded."}"
+  throwError "cannot cast{indentExpr α}\nto{indentExpr β}\nbecause the types are not \
+    definitionally equal at `default` transparency"
+
 set_option compiler.ignoreBorrowAnnotation true in
 /--
 Returns `true` if `mvarId := val` was successfully assigned.
@@ -2952,6 +2973,8 @@ def realizeConst (forConst : Name) (constName : Name) (realize : MetaM Unit) :
 where
   -- similar to `wrapAsyncAsSnapshot` but not sufficiently so to share code
   realizeAndReport (coreCtx : Core.Context) env opts := do
+    -- Realized constants are internal constructions, see `withoutImplicitElab`.
+    let opts := opts.setBool `elaborator.implicitTransparency false
     let coreCtx := { coreCtx with
       options := opts
       optionFlags := .ofOptions opts, optionFlags_eq := rfl

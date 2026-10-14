@@ -861,6 +861,18 @@ theorem Eq.substr {α : Sort u} {p : α → Prop} {a b : α} (h₁ : b = a) (h�
   rfl
 
 /--
+Cast between types that are definitionally equal, but possibly only at `default` transparency.
+That the types are definitionally equal at `default` transparency is checked when a declaration
+containing the cast is added, in the public scope if the cast is exported; `h` can be any proof.
+
+Below `default` transparency, `smartCast` is not unfolded. Instead, the cast disappears when `α`
+and `β` agree at `implicit` transparency, and it is pushed into constructors, projections and
+applications.
+-/
+@[macro_inline] def smartCast (α β : Sort u) (h : α = β) (a : α) : β :=
+  cast h a
+
+/--
 `a ≠ b`, or `Ne a b` is defined as `¬ (a = b)` or `a = b → False`,
 and asserts that `a` and `b` are not equal.
 -/

@@ -1455,6 +1455,22 @@ private def postponeElabTermCore (stx : Syntax) (expectedType? : Option Expr) : 
 def getSyntheticMVarDecl? (mvarId : MVarId) : TermElabM (Option SyntheticMVarDecl) :=
   return (← get).syntheticMVars.get? mvarId
 
+register_builtin_option elaborator.implicitTransparency : Bool := {
+  defValue := false
+  descr    := "elaborate terms at `implicit` transparency instead of `default`; \
+    `with_semireducible` and declared casts (`:= smartCast`) opt into `default` transparency"
+}
+
+/--
+Runs `x` at the transparency at which terms are elaborated: at least `.implicit` under
+`elaborator.implicitTransparency`, `.default` otherwise.
+-/
+def withElabTransparency (x : TermElabM α) : TermElabM α := do
+  if elaborator.implicitTransparency.get (← getOptions) then
+    withAtLeastTransparency .implicit x
+  else
+    withDefault x
+
 register_builtin_option debug.byAsSorry : Bool := {
   defValue := false
   descr    := "replace `by ..` blocks with `sorry` IF the expected type is a proposition"

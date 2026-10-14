@@ -352,7 +352,8 @@ private def resynthInstImplicitArgs (type : Expr) : TermElabM Expr := do
 @[builtin_term_elab Lean.Parser.Term.inferInstanceAs] def elabInferInstanceAs : TermElab := fun stx expectedType? => do
   -- The type argument is the last child (works for both `inferInstanceAs T` and `inferInstanceAs <| T`)
   let typeStx := stx[stx.getNumArgs - 1]!
-  if !backward.inferInstanceAs.wrap.get (← getOptions) then
+  let implicitElab := elaborator.implicitTransparency.get (← getOptions)
+  if !implicitElab && !backward.inferInstanceAs.wrap.get (← getOptions) then
     return (← elabTerm (← `(_root_.inferInstanceAs $(⟨typeStx⟩))) expectedType?)
 
   let some expectedType ← tryPostponeIfHasMVars? expectedType? |
@@ -370,7 +371,10 @@ private def resynthInstImplicitArgs (type : Expr) : TermElabM Expr := do
   let type ← withSynthesize <| resynthInstImplicitArgs type
   let type ← instantiateMVars type
   let inst ← synthInstance type
-  let inst ← if backward.inferInstanceAs.wrap.get (← getOptions) then
+  let inst ← if implicitElab then
+    -- No rewrapping: projections out of the cast reduce by the cast rules.
+    mkCheckedSmartCastIfNeeded type expectedType inst
+  else if backward.inferInstanceAs.wrap.get (← getOptions) then
     -- Wrap instance so its type matches the expected type exactly.
     let logCompileErrors := !(← read).isNoncomputableSection && !(← read).declName?.any (Lean.isNoncomputable (← getEnv))
     let isMeta := (← read).declName?.any (isMarkedMeta (← getEnv))

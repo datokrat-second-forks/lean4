@@ -1176,7 +1176,9 @@ The generated matcher has the structure described at `MatcherInfo`. The motive a
 `(motive : (a_1 : A_1) -> (a_2 : A_2[a_1]) -> ... -> (a_n : A_n[a_1, a_2, ... a_{n-1}]) -> Sort v)`
 where `v` is a universe parameter or 0 if `B[a_1, ..., a_n]` is a proposition.
 -/
-def mkMatcher (input : MkMatcherInput) : MetaM MatcherResult := withCleanLCtxFor input do
+-- Matcher construction unifies constructor equations by computation, independently of
+-- `elaborator.implicitTransparency`.
+def mkMatcher (input : MkMatcherInput) : MetaM MatcherResult := withoutImplicitElab <| withCleanLCtxFor input do
   let {matcherName, matchType, discrInfos, lhss, isSplitter} := input
   let numDiscrs := discrInfos.size
   checkNumPatterns numDiscrs lhss

@@ -53,7 +53,7 @@ info: infSeq'.step (α : Type) (r : α → α → Prop) {a b : α} : r a b → i
 /--
 trace: α✝ α : Type
 r : α → α → Prop
-⊢ monotone fun f a => ∃ b, r a b ∧ f b
+⊢ monotone fun f a => ReverseImplicationOrder.ofProp (∃ b, r a b ∧ (f b).toProp)
 ---
 warning: declaration uses `sorry`
 ---
@@ -76,7 +76,7 @@ error: Type mismatch
 has type
   Unit
 of sort `Type` but is expected to have type
-  monotone fun f => ¬f
+  monotone fun f => ReverseImplicationOrder.ofProp ¬f.toProp
 of sort `Prop`
 ---
 warning: declaration uses `sorry`

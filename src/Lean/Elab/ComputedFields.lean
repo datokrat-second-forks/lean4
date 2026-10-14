@@ -90,7 +90,8 @@ def getComputedFieldValue (computedField : Name) (ctorTerm : Expr) : MetaM Expr 
     if let some wfEqn := WF.eqnInfoExt.find? (← getEnv) computedField then
       pure <| mkAppN (wfEqn.value.instantiateLevelParams wfEqn.levelParams val.getAppFn.constLevels!) val.getAppArgs
     else
-      unfoldDefinition val
+      -- Independent of `elaborator.implicitTransparency`.
+      withDefault <| unfoldDefinition val
   let val ← whnfHeadPred val (return ctorTerm.occurs ·)
   if !ctorTerm.occurs val then return val
   throwError "computed field {computedField} does not reduce for constructor {ctorName}"

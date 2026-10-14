@@ -147,7 +147,8 @@ private partial def mkInst (classExpr : Expr) (declName : Name) (declVal val : E
       let instType := mkAppN cls xs'
       return { instType, instVal }
     try
-      if let some val' ← unfoldDefinition? val then
+      -- Like the initial unfolding of `declName`, independent of `elaborator.implicitTransparency`.
+      if let some val' ← withDefault <| unfoldDefinition? val then
         return ← withTraceNode `Elab.Deriving (fun _ => return m!"Unfolded value to {val'}") <| go val'
     catch ex =>
       if !messages.hasErrors then
@@ -221,7 +222,13 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
             if isPrivateName declName then
               instName := mkPrivateName env instName
             let isMeta := (← read).isMetaSection || isMarkedMeta (← getEnv) declName
-            let inst ← if backward.inferInstanceAs.wrap.get (← getOptions) then
+            let inst ← if elaborator.implicitTransparency.get (← getOptions) then
+              -- No rewrapping: projections out of the cast reduce by the cast rules.
+              let inst ← mkCheckedSmartCastIfNeeded (← instantiateMVars (← inferType result.instVal))
+                result.instType result.instVal
+              -- As for elaborated definitions, so that the exported body only refers to `α = β`.
+              withDeclNameForAuxNaming instName <| abstractNestedProofs inst
+            else if backward.inferInstanceAs.wrap.get (← getOptions) then
               withDeclNameForAuxNaming instName <| withNewMCtxDepth <|
                 wrapInstance result.instVal result.instType
                   (logCompileErrors := false)  -- covered by noncomputable check below

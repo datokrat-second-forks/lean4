@@ -409,6 +409,16 @@ private def isDefEqArgsFirstPass
   return .ok postponedImplicit postponedHO
 
 /--
+Like `withImplicitConfig`, but under `elaborator.implicitTransparency` the transparency is exactly
+`.implicit`, also when the ambient transparency is `.default`.
+-/
+@[inline] def withAssignmentTypesConfig (x : MetaM α) : MetaM α := do
+  if (← getOptionFlags).implicitElab then
+    withTransparency .implicit <| withImplicitConfig x
+  else
+    withImplicitConfig x
+
+/--
 Like `withImplicitConfig`, but sets transparency to exactly `.instances`: instance-typed
 metavariable assignments must preserve the type at `.instances` even when the ambient
 transparency is higher.
@@ -664,7 +674,7 @@ private def checkTypesAndAssign (mvar : Expr) (v : Expr) : MetaM Bool :=
       let mvarType ← inferType mvar
       let vType ← inferType v
       if (← respectTransparencyAtTypes) then
-        withImplicitConfig do
+        withAssignmentTypesConfig do
           if (← Meta.isExprDefEqAux mvarType vType) then
             mvar.mvarId!.assign v
             return true
@@ -1860,6 +1870,25 @@ private def isDefEqDelta (t s : Expr) : MetaM LBool := do
     else
       unfoldNonProjFnDefEq tInfo sInfo t s
 
+/--
+Reduces a cast on either side below `default` transparency (see `reduceSmartCast?`). Two stuck
+chains of casts are compared as single casts: their innermost terms are compared if their sources
+and targets agree at `implicit` transparency.
+-/
+private def isDefEqSmartCast (t s : Expr) : MetaM LBool := do
+  if let some t' ← reduceSmartCast? t then
+    toLBoolM <| Meta.isExprDefEqAux t' s
+  else if let some s' ← reduceSmartCast? s then
+    toLBoolM <| Meta.isExprDefEqAux t s'
+  else if t.isAppOfArity ``smartCast 4 && s.isAppOfArity ``smartCast 4 && (← smartCastRulesEnabled) then
+    let some (x, α) ← smartCastChainSource? t | return .undef
+    let some (y, α') ← smartCastChainSource? s | return .undef
+    unless (← smartCastTypesAgree α α' <&&> smartCastTypesAgree (t.getArg! 1) (s.getArg! 1)) do
+      return .undef
+    if (← checkpointDefEq <| Meta.isExprDefEqAux x y) then return .true else return .undef
+  else
+    return .undef
+
 private def isAssigned : Expr → MetaM Bool
   | .mvar mvarId => mvarId.isAssigned
   | _            => pure false
@@ -2419,6 +2448,7 @@ private def isExprDefEqExpensive (t : Expr) (s : Expr) : MetaM Bool := do
   else
     whenUndefDo (isDefEqNat t s) do
     whenUndefDo (isDefEqOffset t s) do
+    whenUndefDo (isDefEqSmartCast t s) do
     whenUndefDo (isDefEqDelta t s) do
     -- We try structure eta *after* lazy delta reduction;
     -- otherwise we would end up applying it at every step of a reduction chain

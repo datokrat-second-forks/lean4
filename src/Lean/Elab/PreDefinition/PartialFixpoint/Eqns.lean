@@ -97,6 +97,13 @@ partial def rwFixUnder (lhs : Expr) : MetaM Expr := do
     return mkAppN (mkConst ``Order.fix_eq lhs.getAppFn.constLevels!) lhs.getAppArgs
   else if lhs.isAppOfArity ``Order.lfp_monotone 4 then
     return mkAppN (mkConst ``Order.lfp_monotone_fix lhs.getAppFn.constLevels!) lhs.getAppArgs
+  else if lhs.isAppOfArity ``Order.ImplicationOrder.toProp 1 ||
+      lhs.isAppOfArity ``Order.ReverseImplicationOrder.toProp 1 then
+    mkCongrArg lhs.appFn! (← rwFixUnder lhs.appArg!)
+  else if let .lam n t b bi := lhs then
+    -- `fun xs => toProp (fix xs)`, the value of a (co)inductive predicate
+    withLocalDecl n bi t fun x => do
+      mkFunExt (← mkLambdaFVars #[x] (← rwFixUnder (b.instantiate1 x)))
   else if lhs.isApp then
     let h ← rwFixUnder lhs.appFn!
     mkAppM ``congrFun #[h, lhs.appArg!]

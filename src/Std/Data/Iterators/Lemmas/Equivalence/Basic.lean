@@ -54,6 +54,12 @@ private theorem quotMk_eq_quotOfQuot_comp {R S : α → α → Prop} (h : ∀ a 
     Quot.mk S = (quotOfQuot h) ∘ Quot.mk R :=
   rfl
 
+private theorem map_mapIterator_quotMk_eq [Monad m] [LawfulMonad m] {R S : α → α → Prop}
+    (hRS : ∀ a b, R a b → S a b) {x y : HetT m (IterStep α β)}
+    (h : x.map (IterStep.mapIterator (Quot.mk R)) = y.map (IterStep.mapIterator (Quot.mk R))) :
+    x.map (IterStep.mapIterator (Quot.mk S)) = y.map (IterStep.mapIterator (Quot.mk S)) := by
+  simp only [quotMk_eq_quotOfQuot_comp hRS, IterStep.mapIterator_comp, HetT.comp_map, h]
+
 private theorem quotMk_quot_eq_quot_eq_quotOfQuot_comp (R : α → α → Prop) :
     Quot.mk (Quot.mk R · = Quot.mk R ·) =
     (quotOfQuot fun _ _ => Quot.sound) ∘ Quot.mk R := by
@@ -92,8 +98,9 @@ def BundledIterM.Equiv (m : Type w → Type w') (β : Type w) [Monad m] [LawfulM
   (BundledIterM.step itb).map (IterStep.mapIterator (Quot.mk (BundledIterM.Equiv m β)))
 coinductive_fixpoint monotonicity by
   intro R S hRS ita itb h
-  simp only [BundledIterM.step] at ⊢ h
-  simp only [quotMk_eq_quotOfQuot_comp hRS, IterStep.mapIterator_comp, HetT.comp_map, h]
+  change _ = _ at h ⊢
+  refine map_mapIterator_quotMk_eq ?_ h
+  exact hRS
 
 end Definition
 

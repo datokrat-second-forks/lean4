@@ -85,6 +85,8 @@ def wfRecursion (docCtx : LocalContext × LocalInstances) (preDefs : Array PreDe
   let preDefs ← preDefs.mapM (Mutual.cleanPreDef (cacheProofs := false) ·)
   registerEqnsInfo preDefs preDefNonRec.declName fixedParamPerms argsPacker
   markAsRecursive unaryPreDef.declName
+  -- Deriving the unfolding equations is an internal construction.
+  withoutImplicitElab do
   unless (← isProp unaryPreDef.type) do
     WF.mkUnfoldEq unaryPreDef preDefNonRec.declName wfPreprocessProof
   for preDef in preDefs do

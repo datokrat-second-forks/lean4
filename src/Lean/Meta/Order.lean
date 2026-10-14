@@ -72,6 +72,55 @@ def toPartialOrder (packedInst : Expr) (type : Option Expr := .none) := do
     throwError "getUnderlyingOrder: unexpected type of {packedInst}"
 
 /--
+The casts `ofProp` and `toProp` of `ImplicationOrder`, or of `ReverseImplicationOrder` if
+`isCoinductive`: the orders in which `inductive_fixpoint` and `coinductive_fixpoint` predicates are
+defined.
+-/
+def propOrderCasts (isCoinductive : Bool) : Name × Name :=
+  if isCoinductive then
+    (``ReverseImplicationOrder.ofProp, ``ReverseImplicationOrder.toProp)
+  else
+    (``ImplicationOrder.ofProp, ``ImplicationOrder.toProp)
+
+/-- `∀ xs, ImplicationOrder` (resp. `ReverseImplicationOrder`) for the predicate type `∀ xs, Prop`.
+-/
+def mkPropOrderCarrier (isCoinductive : Bool) (predType : Expr) : MetaM Expr :=
+  forallTelescopeReducing predType fun xs _ =>
+    mkForallFVars xs <|
+      mkConst (if isCoinductive then ``ReverseImplicationOrder else ``ImplicationOrder)
+
+/-- `fun xs => c (e xs)`, where `xs` are the parameters of the predicate type `predType`. -/
+def mkPredCast (c : Name) (predType e : Expr) : MetaM Expr :=
+  forallTelescopeReducing predType fun xs _ =>
+    mkLambdaFVars xs (mkApp (mkConst c) (e.beta xs))
+
+/--
+Replaces `toProp (ofProp p)` by `p`, for the casts of `propOrderCasts`, and eta-reduces
+`fun xs => toProp (ofProp (p xs))` to `p`.
+-/
+partial def cancelPropOrderCasts (e : Expr) : Expr :=
+  e.replace fun e =>
+    if isCancellable e then
+      some (cancelPropOrderCasts e.appArg!.appArg!)
+    else if e.isLambda && isCancellable (lambdaBody e) then
+      some (cancelPropOrderCasts (mapLambdaBody e (·.appArg!.appArg!))).eta
+    else
+      none
+where
+  lambdaBody : Expr → Expr
+    | .lam _ _ b _ => lambdaBody b
+    | e => e
+  mapLambdaBody (e : Expr) (f : Expr → Expr) : Expr :=
+    match e with
+    | .lam n t b bi => .lam n t (mapLambdaBody b f) bi
+    | e => f e
+  isCancellable (e : Expr) : Bool :=
+    e.isAppOfArity ``ImplicationOrder.toProp 1 &&
+      e.appArg!.isAppOfArity ``ImplicationOrder.ofProp 1 ||
+    e.isAppOfArity ``ReverseImplicationOrder.toProp 1 &&
+      e.appArg!.isAppOfArity ``ReverseImplicationOrder.ofProp 1
+
+/--
 Given CCPO instances `inst₁ : CCPO α₁` and `inst₂ : CCPO α₂`,
 constructs an instance of the type `CCPO (α₁ × α₂)`.
 -/
