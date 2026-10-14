@@ -82,8 +82,8 @@ instance : AIG.LawfulVecOperator α AIG.RefVec blastClz where
     apply blastClz.go_le_size
   decl_eq := by
     intros
-    unfold blastClz
-    dsimp only
+    unfold blastClz at *
+    dsimp only at *
     apply blastClz.go_decl_eq
 
 end bitblast

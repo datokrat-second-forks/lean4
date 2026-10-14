@@ -14,6 +14,8 @@ import Init.Data.List.ToArray
 import Init.Data.Option.Lemmas
 import Init.Omega
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std

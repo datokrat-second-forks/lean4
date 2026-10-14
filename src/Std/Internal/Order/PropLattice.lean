@@ -35,6 +35,7 @@ scoped instance instPartialOrderProp : PartialOrder Prop where
 def propSup (c : Prop → Prop) : Prop := ∃ p, c p ∧ p
 
 theorem propSup_is_sup (c : Prop → Prop) : is_sup c (propSup c) := by
+  with_semireducible
   intro y
   constructor
   · intro hsup z hcz hz

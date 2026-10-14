@@ -74,9 +74,11 @@ def toListModel : Impl α β → List ((a : α) × β a)
   | .leaf => []
   | .inner _ k v l r => l.toListModel ++ ⟨k, v⟩ :: r.toListModel
 
-@[simp] theorem toListModel_leaf : (.leaf : Impl α β).toListModel = [] := rfl
-@[simp] theorem toListModel_inner {sz k v l r} :
-  (.inner sz k v l r : Impl α β).toListModel = l.toListModel ++ ⟨k, v⟩ :: r.toListModel := rfl
+@[defeq, simp] theorem toListModel_leaf : (.leaf : Impl α β).toListModel = [] := by
+  with_semireducible rfl
+@[defeq, simp] theorem toListModel_inner {sz k v l r} :
+  (.inner sz k v l r : Impl α β).toListModel = l.toListModel ++ ⟨k, v⟩ :: r.toListModel := by
+  with_semireducible rfl
 
 /--
   Computes the size of the tree. Used for verification of iterators.

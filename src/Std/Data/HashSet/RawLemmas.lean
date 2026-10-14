@@ -9,6 +9,8 @@ prelude
 public import Std.Data.HashMap.RawLemmas
 public import Std.Data.HashSet.Raw
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

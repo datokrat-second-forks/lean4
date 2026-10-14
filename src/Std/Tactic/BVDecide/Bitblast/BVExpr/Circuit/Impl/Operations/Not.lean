@@ -34,7 +34,7 @@ instance : AIG.LawfulVecOperator α AIG.RefVec blastNot where
     apply AIG.LawfulVecOperator.le_size (f := AIG.RefVec.map)
   decl_eq := by
     intros
-    unfold blastNot
+    unfold blastNot at *
     apply AIG.LawfulVecOperator.decl_eq (f := AIG.RefVec.map)
 
 end bitblast

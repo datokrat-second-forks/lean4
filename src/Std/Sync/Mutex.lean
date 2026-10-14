@@ -22,7 +22,7 @@ If you want to guard shared state, use `Mutex α` instead.
 -/
 def BaseMutex : Type := BaseMutexImpl.type
 
-instance : Nonempty BaseMutex := by exact BaseMutexImpl.property
+instance : Nonempty BaseMutex := by with_semireducible exact BaseMutexImpl.property
 
 /-- Creates a new `BaseMutex`. -/
 @[extern "lean_io_basemutex_new"]
@@ -86,7 +86,7 @@ to wait until a condition is true. If working with a `BaseMutex` it must:
 -/
 def Condvar : Type := CondvarImpl.type
 
-instance : Nonempty Condvar := by exact CondvarImpl.property
+instance : Nonempty Condvar := by with_semireducible exact CondvarImpl.property
 
 /-- Creates a new condition variable. -/
 @[extern "lean_io_condvar_new"]

@@ -214,6 +214,7 @@ def go (aig : AIG α) (curr : Nat) (n d : AIG.RefVec aig w)
     let q := res.q
     let r := res.r
     have := by
+      with_semireducible
       refine Nat.le_trans ?_ res.hle
       apply AIG.LawfulVecOperator.le_size_of_le_aig_size (f := AIG.RefVec.ite)
       apply AIG.LawfulVecOperator.le_size_of_le_aig_size (f := AIG.RefVec.ite)

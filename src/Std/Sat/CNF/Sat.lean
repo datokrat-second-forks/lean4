@@ -55,8 +55,8 @@ theorem eval_congr (a1 a2 : α → Bool) (c : Clause α) (hw : ∀ i, VarMem i c
 def Sat (a : α → Bool) (c : Clause α) : Prop := eval a c = true
 def Unsat (c : Clause α) : Prop := ∀ a, eval a c = false
 
-theorem sat_def (a : α → Bool) (c : Clause α) : Sat a c ↔ (eval a c = true) := by rfl
-theorem unsat_def (c : Clause α) : Unsat c ↔ (∀ a, eval a c = false) := by rfl
+theorem sat_def (a : α → Bool) (c : Clause α) : Sat a c ↔ (eval a c = true) := by with_semireducible rfl
+theorem unsat_def (c : Clause α) : Unsat c ↔ (∀ a, eval a c = false) := by with_semireducible rfl
 
 @[simp] theorem unsat_empty : Unsat (.empty : Clause α) := by
   simp [unsat_def]
@@ -171,8 +171,8 @@ theorem eval_congr (a1 a2 : α → Bool) (f : CNF α) (hw : ∀ v, VarMem v f �
 @[expose] def Sat (a : α → Bool) (f : CNF α) : Prop := eval a f = true
 @[expose] def Unsat (f : CNF α) : Prop := ∀ a, eval a f = false
 
-theorem sat_def (a : α → Bool) (f : CNF α) : Sat a f ↔ (eval a f = true) := by rfl
-theorem unsat_def (f : CNF α) : Unsat f ↔ (∀ a, eval a f = false) := by rfl
+theorem sat_def (a : α → Bool) (f : CNF α) : Sat a f ↔ (eval a f = true) := by with_semireducible rfl
+theorem unsat_def (f : CNF α) : Unsat f ↔ (∀ a, eval a f = false) := by with_semireducible rfl
 
 @[simp] theorem not_unsat_empty : ¬Unsat (.empty : CNF α) :=
   fun h => by simp [unsat_def] at h

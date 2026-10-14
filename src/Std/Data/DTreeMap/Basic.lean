@@ -220,7 +220,7 @@ Uses the `LawfulEqCmp` instance to cast the retrieved value to the correct type.
 -/
 @[inline]
 def get [LawfulEqCmp cmp] (t : DTreeMap α β cmp) (a : α) (h : a ∈ t) : β a :=
-  letI : Ord α := ⟨cmp⟩; t.inner.get a h
+  letI : Ord α := ⟨cmp⟩; t.inner.get a (by with_semireducible exact h)
 
 /--
 Tries to retrieve the mapping for the given key, panicking if no such mapping is present.
@@ -254,7 +254,7 @@ requiring a proof of `a ∈ m`. The result is guaranteed to be pointer equal to 
 -/
 @[inline]
 def getKey (t : DTreeMap α β cmp) (a : α) (h : a ∈ t) : α :=
-  letI : Ord α := ⟨cmp⟩; t.inner.getKey a h
+  letI : Ord α := ⟨cmp⟩; t.inner.getKey a (by with_semireducible exact h)
 
 /--
 Checks if a mapping for the given key exists and returns the key if it does, otherwise panics.
@@ -286,7 +286,7 @@ Retrieves the key-value pair, whose key matches `a`. Ensures that such a mapping
 -/
 @[inline]
 def getEntry (t : DTreeMap α β cmp) (a : α) (h : a ∈ t) : (a : α) × β a :=
-  letI : Ord α := ⟨cmp⟩; t.inner.getEntry a h
+  letI : Ord α := ⟨cmp⟩; t.inner.getEntry a (by with_semireducible exact h)
 
 /--
 Checks if a mapping for the given key exists and returns the key-value pair if it does, otherwise `fallback`.
@@ -317,7 +317,7 @@ Given a proof that the tree map is not empty, retrieves the key-value pair with 
 -/
 @[inline]
 def minEntry (t : DTreeMap α β cmp) (h : t.isEmpty = false) : (a : α) × β a :=
-  letI : Ord α := ⟨cmp⟩; t.inner.minEntry h
+  letI : Ord α := ⟨cmp⟩; t.inner.minEntry (by with_semireducible exact h)
 
 /--
 Tries to retrieve the key-value pair with the smallest key in the tree map, panicking if the map is
@@ -348,7 +348,7 @@ Given a proof that the tree map is not empty, retrieves the key-value pair with 
 -/
 @[inline]
 def maxEntry (t : DTreeMap α β cmp) (h : t.isEmpty = false) : (a : α) × β a :=
-  letI : Ord α := ⟨cmp⟩; t.inner.maxEntry h
+  letI : Ord α := ⟨cmp⟩; t.inner.maxEntry (by with_semireducible exact h)
 
 /--
 Tries to retrieve the key-value pair with the largest key in the tree map, panicking if the map is
@@ -378,7 +378,7 @@ Given a proof that the tree map is not empty, retrieves the smallest key.
 -/
 @[inline]
 def minKey (t : DTreeMap α β cmp) (h : t.isEmpty = false) : α :=
-  letI : Ord α := ⟨cmp⟩; t.inner.minKey h
+  letI : Ord α := ⟨cmp⟩; t.inner.minKey (by with_semireducible exact h)
 
 /--
 Tries to retrieve the smallest key in the tree map, panicking if the map is empty.
@@ -406,7 +406,7 @@ Given a proof that the tree map is not empty, retrieves the largest key.
 -/
 @[inline]
 def maxKey (t : DTreeMap α β cmp) (h : t.isEmpty = false) : α :=
-  letI : Ord α := ⟨cmp⟩; t.inner.maxKey h
+  letI : Ord α := ⟨cmp⟩; t.inner.maxKey (by with_semireducible exact h)
 
 /--
 Tries to retrieve the largest key in the tree map, panicking if the map is empty.
@@ -430,7 +430,7 @@ def entryAtIdx? (t : DTreeMap α β cmp) (n : Nat) : Option ((a : α) × β a) :
 /-- Returns the key-value pair with the `n`-th smallest key. -/
 @[inline]
 def entryAtIdx (t : DTreeMap α β cmp) (n : Nat) (h : n < t.size) : (a : α) × β a :=
-  letI : Ord α := ⟨cmp⟩; Impl.entryAtIdx t.inner t.wf.balanced n h
+  letI : Ord α := ⟨cmp⟩; Impl.entryAtIdx t.inner t.wf.balanced n (by with_semireducible exact h)
 
 /-- Returns the key-value pair with the `n`-th smallest key, or panics if `n` is at least `t.size`. -/
 @[inline]
@@ -451,7 +451,7 @@ def keyAtIdx? (t : DTreeMap α β cmp) (n : Nat) : Option α :=
 /-- Returns the `n`-th smallest key. -/
 @[inline]
 def keyAtIdx (t : DTreeMap α β cmp) (n : Nat) (h : n < t.size) : α :=
-  letI : Ord α := ⟨cmp⟩; Impl.keyAtIdx t.inner t.wf.balanced n h
+  letI : Ord α := ⟨cmp⟩; Impl.keyAtIdx t.inner t.wf.balanced n (by with_semireducible exact h)
 
 /-- Returns the `n`-th smallest key, or panics if `n` is at least `t.size`. -/
 @[inline]
@@ -682,7 +682,7 @@ def get? (t : DTreeMap α β cmp) (a : α) : Option β :=
 
 @[inline, inherit_doc DTreeMap.get]
 def get (t : DTreeMap α β cmp) (a : α) (h : a ∈ t) : β :=
-  letI : Ord α := ⟨cmp⟩; Impl.Const.get t.inner a h
+  letI : Ord α := ⟨cmp⟩; Impl.Const.get t.inner a (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.get!]
 def get! [Inhabited β] (t : DTreeMap α β cmp) (a : α) : β :=
@@ -698,7 +698,7 @@ def minEntry? (t : DTreeMap α β cmp) : Option (α × β) :=
 
 @[inline, inherit_doc DTreeMap.minEntry]
 def minEntry (t : DTreeMap α β cmp) (h : t.isEmpty = false) : α × β :=
-  letI : Ord α := ⟨cmp⟩; Impl.Const.minEntry t.inner h
+  letI : Ord α := ⟨cmp⟩; Impl.Const.minEntry t.inner (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.minEntry!]
 def minEntry! [Inhabited (α × β)] (t : DTreeMap α β cmp) : α × β :=
@@ -714,7 +714,7 @@ def maxEntry? (t : DTreeMap α β cmp) : Option (α × β) :=
 
 @[inline, inherit_doc DTreeMap.maxEntry]
 def maxEntry (t : DTreeMap α β cmp) (h : t.isEmpty = false) : α × β :=
-  letI : Ord α := ⟨cmp⟩; Impl.Const.maxEntry t.inner h
+  letI : Ord α := ⟨cmp⟩; Impl.Const.maxEntry t.inner (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.maxEntry!]
 def maxEntry! [Inhabited (α × β)] (t : DTreeMap α β cmp) : α × β :=
@@ -730,7 +730,7 @@ def entryAtIdx? (t : DTreeMap α β cmp) (n : Nat) : Option (α × β) :=
 
 @[inline, inherit_doc DTreeMap.entryAtIdx]
 def entryAtIdx (t : DTreeMap α β cmp) (n : Nat) (h : n < t.size) : α × β :=
-  letI : Ord α := ⟨cmp⟩; Impl.Const.entryAtIdx t.inner t.wf.balanced n h
+  letI : Ord α := ⟨cmp⟩; Impl.Const.entryAtIdx t.inner t.wf.balanced n (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.entryAtIdx!]
 def entryAtIdx! [Inhabited (α × β)] (t : DTreeMap α β cmp) (n : Nat) : α × β :=
@@ -905,7 +905,7 @@ def toList (t : DTreeMap α β cmp) : List ((a : α) × β a) :=
 @[inline]
 def ofList (l : List ((a : α) × β a)) (cmp : α → α → Ordering := by exact compare) :
     DTreeMap α β cmp :=
-  letI : Ord α := ⟨cmp⟩; ⟨Impl.ofList l, Impl.WF.empty.insertMany⟩
+  letI : Ord α := ⟨cmp⟩; ⟨Impl.ofList l, (by with_semireducible exact Impl.WF.empty.insertMany)⟩
 
 /-- Transforms the tree map into a list of mappings in ascending order. -/
 @[inline]
@@ -916,7 +916,7 @@ def toArray (t : DTreeMap α β cmp) : Array ((a : α) × β a) :=
 @[inline]
 def ofArray (a : Array ((a : α) × β a)) (cmp : α → α → Ordering := by exact compare) :
     DTreeMap α β cmp :=
-  letI : Ord α := ⟨cmp⟩; ⟨Impl.ofArray a, Impl.WF.empty.insertMany⟩
+  letI : Ord α := ⟨cmp⟩; ⟨Impl.ofArray a, (by with_semireducible exact Impl.WF.empty.insertMany)⟩
 
 /--
 Modifies in place the value associated with a given key.
@@ -969,7 +969,7 @@ def toList (t : DTreeMap α β cmp) : List (α × β) :=
 @[inline, inherit_doc DTreeMap.ofList]
 def ofList (l : List (α × β)) (cmp : α → α → Ordering := by exact compare) : DTreeMap α β cmp :=
   letI : Ord α := ⟨cmp⟩
-  ⟨Impl.Const.ofList l, Impl.WF.empty.constInsertMany⟩
+  ⟨Impl.Const.ofList l, (by with_semireducible exact Impl.WF.empty.constInsertMany)⟩
 
 @[inline, inherit_doc DTreeMap.toArray]
 def toArray (t : DTreeMap α β cmp) : Array (α × β) :=
@@ -978,19 +978,19 @@ def toArray (t : DTreeMap α β cmp) : Array (α × β) :=
 @[inline, inherit_doc DTreeMap.ofList]
 def ofArray (a : Array (α × β)) (cmp : α → α → Ordering := by exact compare) : DTreeMap α β cmp :=
   letI : Ord α := ⟨cmp⟩
-  ⟨Impl.Const.ofArray a, Impl.WF.empty.constInsertMany⟩
+  ⟨Impl.Const.ofArray a, (by with_semireducible exact Impl.WF.empty.constInsertMany)⟩
 
 /-- Transforms a list of keys into a tree map. -/
 @[inline]
 def unitOfList (l : List α) (cmp : α → α → Ordering := by exact compare) : DTreeMap α Unit cmp :=
   letI : Ord α := ⟨cmp⟩
-  ⟨Impl.Const.unitOfList l, Impl.WF.empty.constInsertManyIfNewUnit⟩
+  ⟨Impl.Const.unitOfList l, (by with_semireducible exact Impl.WF.empty.constInsertManyIfNewUnit)⟩
 
 /-- Transforms an array of keys into a tree map. -/
 @[inline]
 def unitOfArray (a : Array α) (cmp : α → α → Ordering := by exact compare) : DTreeMap α Unit cmp :=
   letI : Ord α := ⟨cmp⟩
-  ⟨Impl.Const.unitOfArray a, Impl.WF.empty.constInsertManyIfNewUnit⟩
+  ⟨Impl.Const.unitOfArray a, (by with_semireducible exact Impl.WF.empty.constInsertManyIfNewUnit)⟩
 
 @[inline, inherit_doc DTreeMap.modify]
 def modify (t : DTreeMap α β cmp) (a : α) (f : β → β) : DTreeMap α β cmp :=

@@ -32,6 +32,7 @@ def emptyWithCapacity (c : Nat) : RefVec aig 0 where
 
 @[simp]
 theorem emptyWithCapacity_eq : emptyWithCapacity (aig := aig) c = empty := by
+  with_semireducible
   rfl
 
 @[inline, implicit_reducible]

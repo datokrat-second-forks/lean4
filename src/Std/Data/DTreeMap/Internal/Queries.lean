@@ -605,7 +605,7 @@ def getEntryLTD [Ord α] (k : α) (t : Impl α β) (fallback : (a : α) × β a)
 /-- Implementation detail of the tree map -/
 def getEntryGE [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, (compare a k).isGE) → (a : α) × β a
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => match hkky : compare k ky with
     | .lt => getEntryGED k l ⟨ky, y⟩
     | .eq => ⟨ky, y⟩
@@ -618,7 +618,7 @@ def getEntryGE [Ord α] [TransOrd α] (k : α) :
 /-- Implementation detail of the tree map -/
 def getEntryGT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .gt) → (a : α) × β a
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => if hkky : compare k ky = .lt then
         getEntryGTD k l ⟨ky, y⟩
       else
@@ -632,7 +632,7 @@ def getEntryGT [Ord α] [TransOrd α] (k : α) :
 /-- Implementation detail of the tree map -/
 def getEntryLE [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, (compare a k).isLE) → (a : α) × β a
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => match hkky : compare k ky with
     | .gt => getEntryLED k r ⟨ky, y⟩
     | .eq => ⟨ky, y⟩
@@ -645,7 +645,7 @@ def getEntryLE [Ord α] [TransOrd α] (k : α) :
 /-- Implementation detail of the tree map -/
 def getEntryLT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .lt) → (a : α) × β a
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => if hkky : compare k ky = .gt then
         getEntryLTD k r ⟨ky, y⟩
       else
@@ -745,7 +745,7 @@ def getKeyLTD [Ord α] (k : α) (t : Impl α β) (fallback : α) : α :=
 /-- Implementation detail of the tree map -/
 def getKeyGE [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, (compare a k).isGE) → α
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => match hkky : compare k ky with
     | .lt => getKeyGED k l ky
     | .eq => ky
@@ -758,7 +758,7 @@ def getKeyGE [Ord α] [TransOrd α] (k : α) :
 /-- Implementation detail of the tree map -/
 def getKeyGT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .gt) → α
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => if hkky : compare k ky = .lt then
         getKeyGTD k l ky
       else
@@ -772,7 +772,7 @@ def getKeyGT [Ord α] [TransOrd α] (k : α) :
 /-- Implementation detail of the tree map -/
 def getKeyLE [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, (compare a k).isLE) → α
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => match hkky : compare k ky with
     | .gt => getKeyLED k r ky
     | .eq => ky
@@ -785,7 +785,7 @@ def getKeyLE [Ord α] [TransOrd α] (k : α) :
 /-- Implementation detail of the tree map -/
 def getKeyLT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .lt) → α
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => if hkky : compare k ky = .gt then
         getKeyLTD k r ky
       else
@@ -972,7 +972,7 @@ def getEntryLTD [Ord α] (k : α) (t : Impl α β) (fallback : α × β) : α ×
 /-- Implementation detail of the tree map -/
 def getEntryGE [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, (compare a k).isGE) → α × β
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => match hkky : compare k ky with
     | .lt => getEntryGED k l ⟨ky, y⟩
     | .eq => ⟨ky, y⟩
@@ -985,7 +985,7 @@ def getEntryGE [Ord α] [TransOrd α] (k : α) :
 /-- Implementation detail of the tree map -/
 def getEntryGT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .gt) → α × β
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => if hkky : compare k ky = .lt then
         getEntryGTD k l ⟨ky, y⟩
       else
@@ -999,7 +999,7 @@ def getEntryGT [Ord α] [TransOrd α] (k : α) :
 /-- Implementation detail of the tree map -/
 def getEntryLE [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, (compare a k).isLE) → α × β
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => match hkky : compare k ky with
     | .gt => getEntryLED k r ⟨ky, y⟩
     | .eq => ⟨ky, y⟩
@@ -1012,7 +1012,7 @@ def getEntryLE [Ord α] [TransOrd α] (k : α) :
 /-- Implementation detail of the tree map -/
 def getEntryLT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .lt) → α × β
-  | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
+  | .leaf, _, he => False.elim <| by with_semireducible obtain ⟨_, ha, _⟩ := he; cases ha
   | .inner _ ky y l r, ho, he => if hkky : compare k ky = .gt then
         getEntryLTD k r ⟨ky, y⟩
       else

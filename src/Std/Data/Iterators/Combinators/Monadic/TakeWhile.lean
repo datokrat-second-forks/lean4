@@ -196,6 +196,7 @@ private def TakeWhile.instFinitenessRelation [Monad m] [Iterator α m β]
     apply InvImage.wf
     exact WellFoundedRelation.wf
   subrelation {it it'} h := by
+    with_semireducible
     obtain ⟨step, h, h'⟩ := h
     cases h'
     case yield it' out k h' h'' =>
@@ -221,6 +222,7 @@ private def TakeWhile.instProductivenessRelation [Monad m] [Iterator α m β]
     apply InvImage.wf
     exact WellFoundedRelation.wf
   subrelation {it it'} h := by
+    with_semireducible
     cases h
     exact IterM.TerminationMeasures.Productive.rel_of_skip ‹_›
 

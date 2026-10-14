@@ -410,7 +410,7 @@ end bitblast
 theorem bitblast_decl_eq (aig : AIG BVBit) (input : WithCache (BVExpr w) aig) :
     ∀ (idx : Nat) (h1) (h2), (bitblast aig input).result.val.aig.decls[idx]'h2 = aig.decls[idx]'h1 := by
   intros
-  unfold bitblast
+  unfold bitblast at *
   apply bitblast.goCache_decl_eq
 
 theorem bitblast_le_size (aig : AIG BVBit) (input : WithCache (BVExpr w) aig) :

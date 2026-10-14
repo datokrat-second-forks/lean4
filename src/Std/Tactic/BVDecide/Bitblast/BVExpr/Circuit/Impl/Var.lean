@@ -81,7 +81,7 @@ instance : AIG.LawfulVecOperator BVBit (fun _ w => BVVar w) blastVar where
     apply blastVar.go_le_size
   decl_eq := by
     intros
-    unfold blastVar
+    unfold blastVar at *
     apply blastVar.go_decl_eq
 
 end bitblast

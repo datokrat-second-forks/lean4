@@ -86,13 +86,13 @@ theorem buckets_size_withComputedSize {self : Array (AssocList α β)} :
     (withComputedSize self).2.size = self.size := by
   simp [withComputedSize]
 
-@[simp]
+@[defeq, simp]
 theorem size_withComputedSize {self : Array (AssocList α β)} :
-    (withComputedSize self).size = computeSize self := rfl
+    (withComputedSize self).size = computeSize self := by with_semireducible rfl
 
-@[simp]
+@[defeq, simp]
 theorem buckets_withComputedSize {self : Array (AssocList α β)} :
-    (withComputedSize self).buckets = self := rfl
+    (withComputedSize self).buckets = self := by with_semireducible rfl
 
 @[simp]
 theorem bucket_updateBucket [Hashable α] (self : Array (AssocList α β)) (h : 0 < self.size) (k : α)
@@ -139,7 +139,7 @@ theorem exists_bucket_of_update [BEq α] [Hashable α] (m : Array (AssocList α 
       (∀ [LawfulHashable α], IsHashSelf m → ∀ k', hash k = hash k' → containsKey k' l = false) := by
   let idx := mkIdx m.size h (hash k)
   obtain ⟨l, h₁, h₂, h₃⟩ := exists_bucket_of_uset m idx.1 idx.2 (f m[idx.1])
-  exact ⟨l, h₁, h₂, fun h k' hk' => h₃ h _ (hk' ▸ rfl)⟩
+  with_semireducible exact ⟨l, h₁, h₂, fun h k' hk' => h₃ h _ (hk' ▸ rfl)⟩
 
 theorem exists_bucket' [BEq α] [Hashable α]
     (self : Array (AssocList α β)) (i : USize) (hi : i.toNat < self.size) :
@@ -147,7 +147,7 @@ theorem exists_bucket' [BEq α] [Hashable α]
         (∀ [LawfulHashable α], IsHashSelf self → ∀ k,
           (mkIdx self.size (by omega) (hash k)).1.toNat = i.toNat → containsKey k l = false) := by
   obtain ⟨l, h₁, -, h₂⟩ := exists_bucket_of_uset self i hi .nil
-  exact ⟨l, h₁, h₂⟩
+  with_semireducible exact ⟨l, h₁, h₂⟩
 
 theorem exists_bucket [BEq α] [Hashable α]
     (m : Array (AssocList α β)) (h : 0 < m.size) (k : α) :
@@ -483,25 +483,25 @@ end
 
 theorem reinsertAux_eq [Hashable α] (data : { d : Array (AssocList α β) // 0 < d.size }) (a : α)
     (b : β a) :
-    (reinsertAux hash data a b).1 = updateBucket data.1 data.2 a (fun l => l.cons a b) := (rfl)
+    (reinsertAux hash data a b).1 = updateBucket data.1 data.2 a (fun l => l.cons a b) := by with_semireducible rfl
 
 theorem get?_eq_get?ₘ [BEq α] [LawfulBEq α] [Hashable α] (m : Raw₀ α β) (a : α) :
-    get? m a = get?ₘ m a := (rfl)
+    get? m a = get?ₘ m a := by with_semireducible rfl
 
 theorem get_eq_getₘ [BEq α] [LawfulBEq α] [Hashable α] (m : Raw₀ α β) (a : α) (h : m.contains a) :
-    get m a h = getₘ m a (by exact h) := (rfl)
+    get m a h = getₘ m a (by exact h) := by with_semireducible rfl
 
 theorem getEntry_eq_getEntryₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (h : m.contains a) :
-    getEntry m a h = getEntryₘ m a (by exact h) := (rfl)
+    getEntry m a h = getEntryₘ m a (by exact h) := by with_semireducible rfl
 
 theorem getEntry?_eq_getEntry?ₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) :
-    getEntry? m a = getEntry?ₘ m a := (rfl)
+    getEntry? m a = getEntry?ₘ m a := by with_semireducible rfl
 
 theorem getEntryD_eq_getEntryDₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (fallback : (a : α) × β a) :
-    getEntryD m a fallback = getEntryDₘ m a fallback := (rfl)
+    getEntryD m a fallback = getEntryDₘ m a fallback := by with_semireducible rfl
 
 theorem getEntry!_eq_getEntry!ₘ [BEq α] [Hashable α] [Inhabited ((a : α) × β a)] (m : Raw₀ α β) (a : α) :
-    getEntry! m a = getEntry!ₘ m a := (rfl)
+    getEntry! m a = getEntry!ₘ m a := by with_semireducible rfl
 
 theorem getD_eq_getDₘ [BEq α] [LawfulBEq α] [Hashable α] (m : Raw₀ α β) (a : α) (fallback : β a) :
     getD m a fallback = getDₘ m a fallback := by
@@ -512,10 +512,10 @@ theorem get!_eq_get!ₘ [BEq α] [LawfulBEq α] [Hashable α] (m : Raw₀ α β)
   simp [get!, get!ₘ, get?ₘ, List.getValueCast!_eq_getValueCast?, bucket]
 
 theorem getKey?_eq_getKey?ₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) :
-    getKey? m a = getKey?ₘ m a := (rfl)
+    getKey? m a = getKey?ₘ m a := by with_semireducible rfl
 
 theorem getKey_eq_getKeyₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (h : m.contains a) :
-    getKey m a h = getKeyₘ m a (by exact h) := (rfl)
+    getKey m a h = getKeyₘ m a (by exact h) := by with_semireducible rfl
 
 theorem getKeyD_eq_getKeyDₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a fallback : α) :
     getKeyD m a fallback = getKeyDₘ m a fallback := by
@@ -538,8 +538,8 @@ theorem alter_eq_alterₘ [BEq α] [Hashable α] [LawfulBEq α] (m : Raw₀ α �
   simp only [AssocList.contains_eq, Array.uset_eq_set, Array.set_set, buckets_withComputedSize,
     bucket_updateBucket]
   split
-  · rfl
-  · rfl
+  · with_semireducible rfl
+  · with_semireducible rfl
 
 theorem modify_eq_alter [BEq α] [Hashable α] [LawfulBEq α] (m : Raw₀ α β) (a : α)
     (f : β a → β a) : m.modify a f = m.alter a (·.map f) := by
@@ -569,7 +569,7 @@ theorem alter_eq_alterₘ [BEq α] [Hashable α] [EquivBEq α] (m : Raw₀ α (f
     · congr 2
       · simp only [withComputedSize, bucket_updateBucket, AssocList.contains_eq]
       · simp only [Array.uset, bucket, Array.ugetElem_eq_getElem, Array.set_set, updateBucket]
-    · rfl
+    · with_semireducible rfl
 
 theorem modify_eq_alter [BEq α] [Hashable α] [EquivBEq α] (m : Raw₀ α (fun _ => β)) (a : α)
     (f : β → β) : Const.modify m a f = Const.alter m a (·.map f) := by
@@ -598,7 +598,7 @@ theorem containsThenInsert_eq_insertₘ [BEq α] [Hashable α] (m : Raw₀ α β
   · simp only [replaceₘ, Subtype.mk.injEq, Raw.mk.injEq, true_and]
     rw [Array.set_set, updateBucket]
     simp only [Array.uset, Array.ugetElem_eq_getElem]
-  · rfl
+  · with_semireducible rfl
 
 theorem containsThenInsert_eq_containsₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) :
     (m.containsThenInsert a b).1 = m.containsₘ a := by
@@ -612,7 +612,7 @@ theorem containsThenInsertIfNew_eq_insertIfNewₘ [BEq α] [Hashable α] (m : Ra
   dsimp only [Array.ugetElem_eq_getElem, Array.uset]
   split
   · simp only
-  · rfl
+  · with_semireducible rfl
 
 theorem containsThenInsertIfNew_eq_containsₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) :
     (m.containsThenInsertIfNew a b).1 = m.containsₘ a := by
@@ -621,7 +621,7 @@ theorem containsThenInsertIfNew_eq_containsₘ [BEq α] [Hashable α] (m : Raw�
   split <;> simp_all
 
 theorem insertIfNew_eq_insertIfNewₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) :
-    m.insertIfNew a b = m.insertIfNewₘ a b := (rfl)
+    m.insertIfNew a b = m.insertIfNewₘ a b := by with_semireducible rfl
 
 theorem getThenInsertIfNew?_eq_insertIfNewₘ [BEq α] [Hashable α] [LawfulBEq α] (m : Raw₀ α β)
     (a : α) (b : β a) : (m.getThenInsertIfNew? a b).2 = m.insertIfNewₘ a b := by
@@ -646,13 +646,13 @@ theorem erase_eq_eraseₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) :
   · rfl
 
 theorem filterMap_eq_filterMapₘ (m : Raw₀ α β) (f : (a : α) → β a → Option (δ a)) :
-    m.filterMap f = m.filterMapₘ f := (rfl)
+    m.filterMap f = m.filterMapₘ f := by with_semireducible rfl
 
 theorem map_eq_mapₘ (m : Raw₀ α β) (f : (a : α) → β a → δ a) :
-    m.map f = m.mapₘ f := (rfl)
+    m.map f = m.mapₘ f := by with_semireducible rfl
 
 theorem filter_eq_filterₘ (m : Raw₀ α β) (f : (a : α) → β a → Bool) :
-    m.filter f = m.filterₘ f := (rfl)
+    m.filter f = m.filterₘ f := by with_semireducible rfl
 
 theorem insertMany_eq_insertListₘ [BEq α] [Hashable α] (m : Raw₀ α β) (l : List ((a : α) × β a)) : insertMany m l = insertListₘ m l := by
   simp only [insertMany, Id.run_pure, pure_bind, List.forIn_pure_yield_eq_foldl]
@@ -679,7 +679,7 @@ theorem eraseManyEntries_eq_eraseListₘ [BEq α] [Hashable α] (m : Raw₀ α �
   | nil => simp [eraseListₘ]
   | cons hd tl ih =>
     simp only [List.foldl_cons]
-    apply ih
+    with_semireducible apply ih
 
 theorem insertManyIfNew_eq_insertListIfNewₘ [BEq α] [Hashable α] (m : Raw₀ α β) (l : List ((a : α) × β a)) :
     insertManyIfNew m l = insertListIfNewₘ m l := by
@@ -699,6 +699,7 @@ theorem interSmallerFn_eq_interSmallerFnₘ [BEq α] [Hashable α] (m sofar : Ra
     interSmallerFn m sofar k = interSmallerFnₘ m sofar k := by
   rw [interSmallerFn, interSmallerFnₘ]
   rw [getEntry?_eq_getEntry?ₘ]
+  with_semireducible
   congr
   ext
   rw [insert_eq_insertₘ]
@@ -708,10 +709,10 @@ section
 variable {β : Type v}
 
 theorem Const.get?_eq_get?ₘ [BEq α] [Hashable α] (m : Raw₀ α (fun _ => β)) (a : α) :
-    Const.get? m a = Const.get?ₘ m a := (rfl)
+    Const.get? m a = Const.get?ₘ m a := by with_semireducible rfl
 
 theorem Const.get_eq_getₘ [BEq α] [Hashable α] (m : Raw₀ α (fun _ => β)) (a : α)
-    (h : m.contains a) : Const.get m a h = Const.getₘ m a (by exact h) := (rfl)
+    (h : m.contains a) : Const.get m a h = Const.getₘ m a (by exact h) := by with_semireducible rfl
 
 theorem Const.getD_eq_getDₘ [BEq α] [Hashable α] (m : Raw₀ α (fun _ => β)) (a : α) (fallback : β) :
     Const.getD m a fallback = Const.getDₘ m a fallback := by

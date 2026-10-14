@@ -76,7 +76,8 @@ instance : Inhabited (Raw α β) where
 @[never_extract, inline, inherit_doc DHashMap.Raw.markLinear] def markLinear (m : Raw α β) : Raw α β :=
   ⟨m.inner.markLinear⟩
 
-@[simp, grind =] theorem markLinear_eq {m : Raw α β} : m.markLinear = m := rfl
+@[defeq, simp, grind =] theorem markLinear_eq {m : Raw α β} : m.markLinear = m := by
+  with_semireducible rfl
 
 @[inherit_doc DHashMap.Raw.Equiv]
 structure Equiv (m₁ m₂ : Raw α β) where
@@ -317,70 +318,70 @@ structure WF [BEq α] [Hashable α] (m : Raw α β) : Prop where
   /-- Internal implementation detail of the hash map -/
   out : m.inner.WF
 
-theorem WF.emptyWithCapacity [BEq α] [Hashable α] {c} : (emptyWithCapacity c : Raw α β).WF :=
-  ⟨DHashMap.Raw.WF.emptyWithCapacity⟩
+theorem WF.emptyWithCapacity [BEq α] [Hashable α] {c} : (emptyWithCapacity c : Raw α β).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.emptyWithCapacity⟩
 
 theorem WF.empty [BEq α] [Hashable α] : (∅ : Raw α β).WF :=
   WF.emptyWithCapacity
 
-theorem WF.markLinear [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) : m.markLinear.WF :=
-  ⟨DHashMap.Raw.WF.markLinear h.out⟩
+theorem WF.markLinear [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) : m.markLinear.WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.markLinear h.out⟩
 
 theorem WF.insert [BEq α] [Hashable α] {m : Raw α β} {a : α} {b : β} (h : m.WF) :
-    (m.insert a b).WF :=
-  ⟨DHashMap.Raw.WF.insert h.out⟩
+    (m.insert a b).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.insert h.out⟩
 
 theorem WF.insertIfNew [BEq α] [Hashable α] {m : Raw α β} {a : α} {b : β} (h : m.WF) :
-    (m.insertIfNew a b).WF :=
-  ⟨DHashMap.Raw.WF.insertIfNew h.out⟩
+    (m.insertIfNew a b).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.insertIfNew h.out⟩
 
 theorem WF.containsThenInsert [BEq α] [Hashable α] {m : Raw α β} {a : α} {b : β} (h : m.WF) :
-    (m.containsThenInsert a b).2.WF :=
-  ⟨DHashMap.Raw.WF.containsThenInsert h.out⟩
+    (m.containsThenInsert a b).2.WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.containsThenInsert h.out⟩
 
 theorem WF.containsThenInsertIfNew [BEq α] [Hashable α] {m : Raw α β} {a : α} {b : β} (h : m.WF) :
-    (m.containsThenInsertIfNew a b).2.WF :=
-  ⟨DHashMap.Raw.WF.containsThenInsertIfNew h.out⟩
+    (m.containsThenInsertIfNew a b).2.WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.containsThenInsertIfNew h.out⟩
 
 theorem WF.getThenInsertIfNew? [BEq α] [Hashable α] {m : Raw α β} {a : α} {b : β} (h : m.WF) :
-    (m.getThenInsertIfNew? a b).2.WF :=
-  ⟨DHashMap.Raw.WF.Const.getThenInsertIfNew? h.out⟩
+    (m.getThenInsertIfNew? a b).2.WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.Const.getThenInsertIfNew? h.out⟩
 
-theorem WF.erase [BEq α] [Hashable α] {m : Raw α β} {a : α} (h : m.WF) : (m.erase a).WF :=
-  ⟨DHashMap.Raw.WF.erase h.out⟩
+theorem WF.erase [BEq α] [Hashable α] {m : Raw α β} {a : α} (h : m.WF) : (m.erase a).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.erase h.out⟩
 
 theorem WF.filter [BEq α] [Hashable α] {m : Raw α β} {f : α → β → Bool} (h : m.WF) :
-    (m.filter f).WF :=
-  ⟨DHashMap.Raw.WF.filter h.out⟩
+    (m.filter f).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.filter h.out⟩
 
 theorem WF.insertMany [BEq α] [Hashable α] {ρ : Type w} [ForIn Id ρ (α × β)] {m : Raw α β} {l : ρ}
-    (h : m.WF) : (m.insertMany l).WF :=
-  ⟨DHashMap.Raw.WF.Const.insertMany h.out⟩
+    (h : m.WF) : (m.insertMany l).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.Const.insertMany h.out⟩
 
 theorem WF.insertManyIfNewUnit [BEq α] [Hashable α] {ρ : Type w} [ForIn Id ρ α] {m : Raw α Unit}
-    {l : ρ} (h : m.WF) : (m.insertManyIfNewUnit l).WF :=
-  ⟨DHashMap.Raw.WF.Const.insertManyIfNewUnit h.out⟩
+    {l : ρ} (h : m.WF) : (m.insertManyIfNewUnit l).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.Const.insertManyIfNewUnit h.out⟩
 
-theorem WF.ofList [BEq α] [Hashable α] {l : List (α × β)} : (ofList l).WF :=
-  ⟨DHashMap.Raw.WF.Const.ofList⟩
+theorem WF.ofList [BEq α] [Hashable α] {l : List (α × β)} : (ofList l).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.Const.ofList⟩
 
-theorem WF.ofArray [BEq α] [Hashable α] {a : Array (α × β)} : (ofArray a).WF :=
-  ⟨DHashMap.Raw.WF.Const.ofArray⟩
+theorem WF.ofArray [BEq α] [Hashable α] {a : Array (α × β)} : (ofArray a).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.Const.ofArray⟩
 
-theorem WF.unitOfList [BEq α] [Hashable α] {l : List α} : (unitOfList l).WF :=
-  ⟨DHashMap.Raw.WF.Const.unitOfList⟩
+theorem WF.unitOfList [BEq α] [Hashable α] {l : List α} : (unitOfList l).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.Const.unitOfList⟩
 
-theorem WF.unitOfArray [BEq α] [Hashable α] {a : Array α} : (unitOfArray a).WF :=
-  ⟨DHashMap.Raw.WF.Const.unitOfArray⟩
+theorem WF.unitOfArray [BEq α] [Hashable α] {a : Array α} : (unitOfArray a).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.Const.unitOfArray⟩
 
-theorem WF.union [BEq α] [Hashable α] {m₁ m₂ : Raw α β} (h₁ : m₁.WF) (h₂ : m₂.WF) : (m₁ ∪ m₂).WF :=
-  ⟨DHashMap.Raw.WF.union h₁.out h₂.out⟩
+theorem WF.union [BEq α] [Hashable α] {m₁ m₂ : Raw α β} (h₁ : m₁.WF) (h₂ : m₂.WF) : (m₁ ∪ m₂).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.union h₁.out h₂.out⟩
 
-theorem WF.inter [BEq α] [Hashable α] {m₁ m₂ : Raw α β} (h₁ : m₁.WF) (h₂ : m₂.WF) : (m₁ ∩ m₂).WF :=
-  ⟨DHashMap.Raw.WF.inter h₁.out h₂.out⟩
+theorem WF.inter [BEq α] [Hashable α] {m₁ m₂ : Raw α β} (h₁ : m₁.WF) (h₂ : m₂.WF) : (m₁ ∩ m₂).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.inter h₁.out h₂.out⟩
 
-theorem WF.diff [BEq α] [Hashable α] {m₁ m₂ : Raw α β} (h₁ : m₁.WF) (h₂ : m₂.WF) : (m₁ \ m₂).WF :=
-  ⟨DHashMap.Raw.WF.diff h₁.out h₂.out⟩
+theorem WF.diff [BEq α] [Hashable α] {m₁ m₂ : Raw α β} (h₁ : m₁.WF) (h₂ : m₂.WF) : (m₁ \ m₂).WF := by
+  with_semireducible exact ⟨DHashMap.Raw.WF.diff h₁.out h₂.out⟩
 
 end Raw
 

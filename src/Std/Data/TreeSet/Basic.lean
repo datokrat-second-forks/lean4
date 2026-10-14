@@ -176,7 +176,7 @@ of `a ∈ m`. The result is guaranteed to be pointer equal to the key in the set
 -/
 @[inline]
 def get (t : TreeSet α cmp) (a : α) (h : a ∈ t) : α :=
-  t.inner.getKey a h
+  t.inner.getKey a (by with_semireducible exact h)
 
 /--
 Checks if given key is contained and returns the key if it is, otherwise panics.
@@ -206,7 +206,7 @@ Given a proof that the tree set is not empty, retrieves the smallest element.
 -/
 @[inline]
 def min (t : TreeSet α cmp) (h : t.isEmpty = false) : α :=
-  TreeMap.minKey t.inner h
+  TreeMap.minKey t.inner (by with_semireducible exact h)
 
 /--
 Tries to retrieve the smallest element of the tree set, panicking if the set is empty.
@@ -234,7 +234,7 @@ Given a proof that the tree set is not empty, retrieves the largest element.
 -/
 @[inline]
 def max (t : TreeSet α cmp) (h : t.isEmpty = false) : α :=
-  TreeMap.maxKey t.inner h
+  TreeMap.maxKey t.inner (by with_semireducible exact h)
 
 /--
 Tries to retrieve the largest element of the tree set, panicking if the set is empty.
@@ -258,7 +258,7 @@ def atIdx? (t : TreeSet α cmp) (n : Nat) : Option α :=
 /-- Returns the `n`-th smallest element. -/
 @[inline]
 def atIdx (t : TreeSet α cmp) (n : Nat) (h : n < t.size) : α :=
-  TreeMap.keyAtIdx t.inner n h
+  TreeMap.keyAtIdx t.inner n (by with_semireducible exact h)
 
 /-- Returns the `n`-th smallest element, or panics if `n` is at least `t.size`. -/
 @[inline]

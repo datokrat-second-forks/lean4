@@ -433,8 +433,9 @@ in Haskell.
 def bin (k : α) (v : β k) (l r : Impl α β) : Impl α β :=
   .inner (l.size + 1 + r.size) k v l r
 
-theorem size_bin (k : α) (v : β k) (l r : Impl α β) : (bin k v l r).size = l.size + 1 + r.size :=
-  rfl
+@[defeq] theorem size_bin (k : α) (v : β k) (l r : Impl α β) :
+    (bin k v l r).size = l.size + 1 + r.size := by
+  with_semireducible rfl
 
 /-- A single left rotation. -/
 @[Std.Internal.tree_tac]
@@ -539,7 +540,7 @@ theorem balance!_eq_balanceₘ {k v} {l r : Impl α β} (hlb : l.Balanced) (hrb 
     balance! k v l r = balanceₘ k v l r := by
   fun_cases balance!
   all_goals dsimp only [balanceₘ]
-  · rfl
+  · with_semireducible rfl
   · split <;> simp_all [Std.Internal.tree_tac]
   · split <;> simp_all only [Std.Internal.tree_tac]
     · omega
@@ -727,6 +728,7 @@ theorem balance_eq_balance! {k : α} {v : β k} {l r : Impl α β} {hlb hrb hlr}
 theorem balance_eq_inner [Ord α] {sz k v} {l r : Impl α β}
     (hl : (inner sz k v l r).Balanced) {h} :
     balance k v l r hl.left hl.right h = inner sz k v l r := by
+  with_semireducible
   rw [balance_eq_balance!, balance!_eq_balanceₘ hl.left hl.right h, balanceₘ]
   have hl' := balanced_inner_iff.mp hl
   rw [hl'.2.2.2]
@@ -740,7 +742,7 @@ theorem balance!_desc {k : α} {v : β k} {l r : Impl α β} (hlb : l.Balanced) 
   rw [balance!_eq_balanceₘ hlb hrb hlr, balanceₘ]
   fun_cases balanceₘ k v l r
   · rw [ite_eq_left ‹_›, bin, balanced_inner_iff]
-    exact ⟨rfl, hlb, hrb, Or.inl ‹_›, rfl⟩
+    with_semireducible exact ⟨rfl, hlb, hrb, Or.inl ‹_›, rfl⟩
   · rw [ite_eq_right ‹_›, dite_eq_left ‹_›]
     simp only [size_rotateL (.left ‹_›), size_bin, size_inner]
     rw [← Balanced.eq ‹_›]
@@ -752,7 +754,7 @@ theorem balance!_desc {k : α} {v : β k} {l r : Impl α β} (hlb : l.Balanced) 
     refine ⟨rfl, ?_⟩
     apply balanced_rotateR <;> assumption
   · rw [ite_eq_right ‹_›, dite_eq_right ‹_›, dite_eq_right ‹_›]
-    exact ⟨rfl, ✓⟩
+    with_semireducible exact ⟨rfl, ✓⟩
 
 @[Std.Internal.tree_tac]
 theorem size_balance! {k : α} {v : β k} {l r : Impl α β} (hlb : l.Balanced) (hrb : r.Balanced)

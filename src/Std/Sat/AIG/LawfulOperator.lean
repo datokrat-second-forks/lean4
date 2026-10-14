@@ -56,6 +56,7 @@ theorem denote.go_eq_of_isPrefix (decls1 decls2 : Array (Decl α)) (start : Nat)
     denote.go start decls2 assign hbounds2 hdag2
       =
     denote.go start decls1 assign hbounds1 hdag1 := by
+  with_semireducible
   unfold denote.go
   have hidx1 := hprefix.idx_eq start hbounds1
   split

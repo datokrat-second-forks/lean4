@@ -329,7 +329,7 @@ theorem BitVec.lt_irrefl (a : BitVec n) : (BitVec.ult a a) = false := by
   exact _root_.BitVec.lt_irrefl _
 
 @[bv_normalize]
-theorem BitVec.not_lt_zero (a : BitVec n) : (BitVec.ult a 0#n) = false := by rfl
+theorem BitVec.not_lt_zero (a : BitVec n) : (BitVec.ult a 0#n) = false := by with_semireducible rfl
 
 @[bv_normalize]
 theorem BitVec.lt_one_iff (a : BitVec n) (h : 0 < n) : (BitVec.ult a 1#n) = (a == 0#n) := by

@@ -37,7 +37,7 @@ greater than or equal to the given element.
 -/
 @[inline]
 def getGE [TransCmp cmp] (t : TreeSet α cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) : α :=
-  TreeMap.getKeyGE t.inner k h
+  TreeMap.getKeyGE t.inner k (by with_semireducible exact h)
 
 /--
 Given a proof that such an element exists, retrieves the smallest element that is
@@ -45,7 +45,7 @@ greater than the given element.
 -/
 @[inline]
 def getGT [TransCmp cmp] (t : TreeSet α cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) : α :=
-  TreeMap.getKeyGT t.inner k h
+  TreeMap.getKeyGT t.inner k (by with_semireducible exact h)
 
 /--
 Given a proof that such an element exists, retrieves the largest element that is
@@ -53,7 +53,7 @@ less than or equal to the given element.
 -/
 @[inline]
 def getLE [TransCmp cmp] (t : TreeSet α cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) : α :=
-  TreeMap.getKeyLE t.inner k h
+  TreeMap.getKeyLE t.inner k (by with_semireducible exact h)
 
 /--
 Given a proof that such an element exists, retrieves the smallest element that is
@@ -61,6 +61,6 @@ less than the given element.
 -/
 @[inline]
 def getLT [TransCmp cmp] (t : TreeSet α cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) : α :=
-  TreeMap.getKeyLT t.inner k h
+  TreeMap.getKeyLT t.inner k (by with_semireducible exact h)
 
 end Std.TreeSet

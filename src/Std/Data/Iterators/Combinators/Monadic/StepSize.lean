@@ -85,6 +85,7 @@ def StepSizeIterator.instFinitenessRelation [Iterator α m β] [IteratorAccess �
     apply InvImage.wf
     apply WellFoundedRelation.wf
   subrelation {it it'} h := by
+    with_semireducible
     obtain ⟨step, hs, h⟩ := h
     simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, instIterator] at h -- TODO
     simp only [InvImage]

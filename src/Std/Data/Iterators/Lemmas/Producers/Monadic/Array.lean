@@ -14,6 +14,8 @@ import Init.Data.List.Nat.TakeDrop
 import Init.Data.List.TakeDrop
 import Init.Omega
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

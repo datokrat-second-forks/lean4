@@ -49,7 +49,7 @@ greater than or equal to the given key.
 @[inline]
 def getEntryGE [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) :
     (a : α) × β a :=
-  letI : Ord α := ⟨cmp⟩; Impl.getEntryGE k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.getEntryGE k t.inner t.wf.ordered (by with_semireducible exact h)
 
 /--
 Given a proof that such a mapping exists, retrieves the key-value pair with the smallest key that is
@@ -58,7 +58,7 @@ greater than the given key.
 @[inline]
 def getEntryGT [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) :
     (a : α) × β a :=
-  letI : Ord α := ⟨cmp⟩; Impl.getEntryGT k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.getEntryGT k t.inner t.wf.ordered (by with_semireducible exact h)
 
 /--
 Given a proof that such a mapping exists, retrieves the key-value pair with the largest key that is
@@ -67,7 +67,7 @@ less than or equal to the given key.
 @[inline]
 def getEntryLE [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) :
     (a : α) × β a :=
-  letI : Ord α := ⟨cmp⟩; Impl.getEntryLE k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.getEntryLE k t.inner t.wf.ordered (by with_semireducible exact h)
 
 /--
 Given a proof that such a mapping exists, retrieves the key-value pair with the largest key that is
@@ -76,7 +76,7 @@ less than the given key.
 @[inline]
 def getEntryLT [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) :
     (a : α) × β a :=
-  letI : Ord α := ⟨cmp⟩; Impl.getEntryLT k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.getEntryLT k t.inner t.wf.ordered (by with_semireducible exact h)
 
 /--
 Given a proof that such a mapping exists, retrieves the smallest key that is
@@ -84,7 +84,7 @@ greater than or equal to the given key.
 -/
 @[inline]
 def getKeyGE [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) : α :=
-  letI : Ord α := ⟨cmp⟩; Impl.getKeyGE k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.getKeyGE k t.inner t.wf.ordered (by with_semireducible exact h)
 
 /--
 Given a proof that such a mapping exists, retrieves the smallest key that is
@@ -92,7 +92,7 @@ greater than the given key.
 -/
 @[inline]
 def getKeyGT [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) : α :=
-  letI : Ord α := ⟨cmp⟩; Impl.getKeyGT k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.getKeyGT k t.inner t.wf.ordered (by with_semireducible exact h)
 
 /--
 Given a proof that such a mapping exists, retrieves the largest key that is
@@ -100,7 +100,7 @@ less than or equal to the given key.
 -/
 @[inline]
 def getKeyLE [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) : α :=
-  letI : Ord α := ⟨cmp⟩; Impl.getKeyLE k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.getKeyLE k t.inner t.wf.ordered (by with_semireducible exact h)
 
 /--
 Given a proof that such a mapping exists, retrieves the largest key that is
@@ -108,7 +108,7 @@ less than the given key.
 -/
 @[inline]
 def getKeyLT [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) : α :=
-  letI : Ord α := ⟨cmp⟩; Impl.getKeyLT k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.getKeyLT k t.inner t.wf.ordered (by with_semireducible exact h)
 
 namespace Const
 
@@ -121,7 +121,7 @@ greater than or equal to the given key.
 @[inline]
 def getEntryGE [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) :
     α × β :=
-  letI : Ord α := ⟨cmp⟩; Impl.Const.getEntryGE k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.Const.getEntryGE k t.inner t.wf.ordered (by with_semireducible exact h)
 
 /--
 Given a proof that such a mapping exists, retrieves the key-value pair with the smallest key that is
@@ -130,7 +130,7 @@ greater than the given key.
 @[inline]
 def getEntryGT [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) :
     α × β :=
-  letI : Ord α := ⟨cmp⟩; Impl.Const.getEntryGT k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.Const.getEntryGT k t.inner t.wf.ordered (by with_semireducible exact h)
 
 /--
 Given a proof that such a mapping exists, retrieves the key-value pair with the largest key that is
@@ -139,7 +139,7 @@ less than or equal to the given key.
 @[inline]
 def getEntryLE [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) :
     α × β :=
-  letI : Ord α := ⟨cmp⟩; Impl.Const.getEntryLE k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.Const.getEntryLE k t.inner t.wf.ordered (by with_semireducible exact h)
 
 /--
 Given a proof that such a mapping exists, retrieves the key-value pair with the largest key that is
@@ -148,7 +148,7 @@ less than the given key.
 @[inline]
 def getEntryLT [TransCmp cmp] (t : DTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) :
     α × β :=
-  letI : Ord α := ⟨cmp⟩; Impl.Const.getEntryLT k t.inner t.wf.ordered h
+  letI : Ord α := ⟨cmp⟩; Impl.Const.getEntryLT k t.inner t.wf.ordered (by with_semireducible exact h)
 
 end Const
 

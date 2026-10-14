@@ -89,12 +89,12 @@ def stop (xs : @& ByteSlice) : Nat :=
   xs.internalRepresentation.stop
 
 @[inherit_doc Internal.ByteSliceData.start_le_stop]
-theorem start_le_stop (xs : ByteSlice) : xs.start ≤ xs.stop :=
-  xs.internalRepresentation.start_le_stop
+theorem start_le_stop (xs : ByteSlice) : xs.start ≤ xs.stop := by
+  with_semireducible exact xs.internalRepresentation.start_le_stop
 
 @[inherit_doc Internal.ByteSliceData.stop_le_size_byteArray]
-theorem stop_le_size_byteArray (xs : ByteSlice) : xs.stop ≤ xs.byteArray.size :=
-  xs.internalRepresentation.stop_le_size_byteArray
+theorem stop_le_size_byteArray (xs : ByteSlice) : xs.stop ≤ xs.byteArray.size := by
+  with_semireducible exact xs.internalRepresentation.stop_le_size_byteArray
 
 /--
 Computes the size of the byte slice.
@@ -105,6 +105,7 @@ def size (s : ByteSlice) : Nat :=
 theorem size_le_size_byteArray {s : ByteSlice} : s.size ≤ s.byteArray.size := by
   let ⟨{byteArray, start, stop, start_le_stop, stop_le_size_byteArray}⟩ := s
   simp only [size, ge_iff_le]
+  with_semireducible
   apply Nat.le_trans (Nat.sub_le stop start)
   assumption
 

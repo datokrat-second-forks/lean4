@@ -8,6 +8,9 @@ module
 prelude
 public import Std.WP.Frame
 public import Std.WP.Monad.Basic
+
+set_option elaborator.implicitTransparency false
+
 universe u v w z t
 @[expose] public section
 

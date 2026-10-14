@@ -11,6 +11,8 @@ public import Std.Do.SPred.Laws
 import Init.Classical
 import Init.TacticsExtra
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 set_option linter.missingDocs true

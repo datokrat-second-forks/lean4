@@ -9,6 +9,8 @@ prelude
 public import Init.Control.Lawful
 public import Std.Do.PostCond
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 set_option linter.missingDocs true

@@ -28,9 +28,9 @@ def relabel (r : α → β) (c : Clause α) : Clause β where
   size_polarities := by rw [c.size_polarities, Array.size_map]
   isBool_polarities := c.isBool_polarities
 
-@[simp]
+@[defeq, simp]
 theorem polarity_relabel {r : α → β} {c : Clause α} {i : Nat} :
-    (c.relabel r).polarity i = c.polarity i := rfl
+    (c.relabel r).polarity i = c.polarity i := by with_semireducible rfl
 
 @[simp]
 theorem literals_relabel {r : α → β} {c : Clause α} :

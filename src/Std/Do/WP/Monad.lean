@@ -9,6 +9,8 @@ prelude
 public import Std.Do.WP.Basic
 import all Std.Do.WP.Basic
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 set_option linter.missingDocs true

@@ -45,8 +45,8 @@ instance : LawfulEqOrd PlainDateTime where
   eq_of_compare {a b} h := by
     simp only [PlainDateTime.compare_def, compareLex_eq_eq] at h
     apply PlainDateTime.ext
-    · exact LawfulEqOrd.eq_of_compare h.1
-    · exact LawfulEqOrd.eq_of_compare h.2
+    · with_semireducible exact LawfulEqOrd.eq_of_compare h.1
+    · with_semireducible exact LawfulEqOrd.eq_of_compare h.2
 
 namespace PlainDateTime
 
@@ -55,8 +55,8 @@ Converts a `PlainDateTime` to a `WallTime`.
 -/
 def toWallTime (dt : PlainDateTime) : WallTime :=
   let days := dt.date.toEpochDay
-  let nanos := days.toSeconds + dt.time.toSeconds |>.mul 1000000000
-  let nanos := nanos.val + dt.time.nanosecond.val
+  let nanos := days.toSeconds + dt.time.toSeconds |>.toUnitVal.mul 1000000000
+  let nanos := nanos.val + dt.time.nanosecond.toBounded.toSubtype.val
   WallTime.ofNanoseconds (Nanosecond.Offset.ofInt nanos)
 
 /--
@@ -71,10 +71,10 @@ def ofWallTime (stamp : WallTime) : PlainDateTime := Id.run do
   let nanos := stamp.toNanoseconds
 
   let secs : Second.Offset := nanos.toSeconds
-  let remNano := Bounded.LE.byMod nanos.val 1000000000 (by decide)
+  let remNano := Bounded.LE.byMod nanos.toUnitVal.val 1000000000 (by decide)
 
   let (remNano, secs) :=
-    if h : remNano.val < 0 then
+    if h : remNano.toSubtype.val < 0 then
       (remNano.truncateTop (Int.le_sub_one_of_lt h) |>.add 1000000000 |>.expandBottom (by decide), secs - 1)
     else
       (remNano.truncateBottom (Int.not_lt.mp h), secs)
@@ -83,20 +83,20 @@ def ofWallTime (stamp : WallTime) : PlainDateTime := Id.run do
   let boundedDaysSinceEpoch := daysSinceEpoch
 
   let mut rawDays := boundedDaysSinceEpoch - leapYearEpoch
-  let mut rem := Bounded.LE.byMod secs.val 86400 (by decide)
+  let mut rem := Bounded.LE.byMod secs.toUnitVal.val 86400 (by decide)
 
   let ⟨remSecs, days⟩ :=
-    if h : rem.val ≤ -1 then
+    if h : rem.toSubtype.val ≤ -1 then
       let remSecs := rem.truncateTop h
       let remSecs : Bounded.LE 1 86399 := remSecs.add 86400
       let rawDays := rawDays - 1
       (remSecs.expandBottom (by decide), rawDays)
     else
-      let h := rem.truncateBottom (Int.not_le.mp h)
+      let h := rem.truncateBottom (Int.add_one_le_of_lt (Int.not_le.mp h))
       (h, rawDays)
 
-  let mut quadracentennialCycles := days.val / daysPer400Y;
-  let mut remDays := days.val % daysPer400Y;
+  let mut quadracentennialCycles := days.toUnitVal.val / daysPer400Y;
+  let mut remDays := days.toUnitVal.val % daysPer400Y;
 
   if remDays < 0 then
     remDays := remDays + daysPer400Y
@@ -144,11 +144,12 @@ def ofWallTime (stamp : WallTime) : PlainDateTime := Id.run do
   let second : Bounded.LE 0 59 := remSecs.emod 60 (by decide)
   let minute : Bounded.LE 0 59 := (remSecs.ediv 60 (by decide)).emod 60 (by decide)
   let hour : Bounded.LE 0 23 := remSecs.ediv 3600 (by decide)
-  let nano : Bounded.LE 0 999999999 := Bounded.LE.byEmod nanos.val 1000000000 (by decide)
+  let nano : Bounded.LE 0 999999999 := Bounded.LE.byEmod nanos.toUnitVal.val 1000000000 (by decide)
 
   return {
     date := PlainDate.ofYearMonthDayClip year hmon (Day.Ordinal.ofFin (Fin.succ mday))
-    time := PlainTime.ofHourMinuteSecondsNano (hour.expandTop (by decide)) minute (second.expandTop (by decide)) nano
+    time := PlainTime.ofHourMinuteSecondsNano (.ofBounded (hour.expandTop (by decide))) (.ofBounded minute)
+      (.ofBounded (second.expandTop (by decide))) (.ofBounded nano)
   }
 
 /--
@@ -525,7 +526,7 @@ Transforms a tuple of a `PlainDateTime` into a `Day.Ordinal.OfYear`.
 -/
 @[inline]
 def dayOfYear (date : PlainDateTime) : Day.Ordinal.OfYear date.year.isLeap :=
-  ValidDate.dayOfYear ⟨(date.month, date.day), date.date.valid⟩
+  ValidDate.dayOfYear (.ofSubtype ⟨(date.month, date.day), by with_semireducible exact date.date.valid⟩)
 
 /--
 Determines the quarter of the year for the given `PlainDateTime`.

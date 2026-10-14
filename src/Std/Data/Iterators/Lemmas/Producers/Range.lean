@@ -11,6 +11,8 @@ import Init.Data.Range.Polymorphic.Lemmas
 public import Init.Data.Iterators.Consumers.Loop
 import Init.Data.Iterators.Lemmas.Consumers.Loop
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std

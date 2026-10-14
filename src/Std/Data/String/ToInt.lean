@@ -95,16 +95,16 @@ public theorem isInt_congr {s t : String.Slice} (h : s.copy = t.copy) : s.isInt 
 end Slice
 
 @[simp]
-public theorem isInt_toSlice {s : String} : s.toSlice.isInt = s.isInt :=
-  (rfl)
+public theorem isInt_toSlice {s : String} : s.toSlice.isInt = s.isInt := by
+  with_semireducible rfl
 
 @[simp]
 public theorem isInt_comp_toSlice : String.Slice.isInt ∘ String.toSlice = String.isInt := by
   ext; simp
 
 @[simp]
-public theorem toInt?_toSlice {s : String} : s.toSlice.toInt? = s.toInt? :=
-  (rfl)
+public theorem toInt?_toSlice {s : String} : s.toSlice.toInt? = s.toInt? := by
+  with_semireducible rfl
 
 @[simp]
 public theorem toInt?_comp_toSlice : String.Slice.toInt? ∘ String.toSlice = String.toInt? := by
@@ -120,7 +120,7 @@ public theorem Slice.isInt_comp_copy : String.isInt ∘ String.Slice.copy = Stri
 
 @[simp]
 public theorem Slice.toInt?_copy {s : Slice} : s.copy.toInt? = s.toInt? := by
-  simpa [← isInt_toSlice] using! Slice.toInt?_congr (by simp)
+  with_semireducible simpa [← isInt_toSlice] using! Slice.toInt?_congr (by simp)
 
 @[simp]
 public theorem Slice.toInt?_comp_copy : String.toInt? ∘ String.Slice.copy = String.Slice.toInt? := by

@@ -11,6 +11,8 @@ public import Std.Data.HashMap.Raw
 import all Std.Data.DHashMap.Raw
 import Init.Data.List.Pairwise
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

@@ -51,21 +51,21 @@ Returns the `Day.Offset` (days since epoch) for a `TransitionSpec.mwd` in the gi
 Finds the `w`-th occurrence of weekday `d` in month `m`; if `w = 5`, returns the last occurrence.
 -/
 def toEpochDayMWD (year : Year.Offset) (month : Month.Ordinal) (week : Week.Aligned.Ordinal) (day : Weekday.Ordinal) : Day.Offset :=
-  if week.val == 5 then
+  if week.toBounded.toSubtype.val == 5 then
     -- "week 5" means the last occurrence of `day` in `month`.
     -- Start from the last day of the month and walk backwards to the desired weekday.
     let lastDay := month.days year.isLeap
     let lastOfMonth := PlainDate.ofYearMonthDayClip year month lastDay
     let lastWday := lastOfMonth.weekday.toOrdinal -- 1 = Monday … 7 = Sunday
-    let diff : Bounded.LE 0 6 := (lastWday.subBounds day).emod 7 (by decide)
-    lastOfMonth.toEpochDay - Day.Offset.ofInt diff.val
+    let diff : Bounded.LE 0 6 := (lastWday.toBounded.subBounds day.toBounded).emod 7 (by decide)
+    lastOfMonth.toEpochDay - Day.Offset.ofInt diff.toSubtype.val
   else
     let firstOfMonth := PlainDate.ofYearMonthDayClip year month 1 -- First day of the month
     let firstWday := firstOfMonth.weekday.toOrdinal -- Weekday of the first day (1 = Monday … 7 = Sunday)
-    let diff : Bounded.LE 0 6 := (day.subBounds firstWday).emod 7 (by decide)
-    let firstOccurrence := firstOfMonth.toEpochDay + Day.Offset.ofInt diff.val
-    let extra : Bounded.LE 0 28 := ((week.sub 1).mul_pos 7 (by decide))
-    let extra := Day.Offset.ofInt extra.val
+    let diff : Bounded.LE 0 6 := (day.toBounded.subBounds firstWday.toBounded).emod 7 (by decide)
+    let firstOccurrence := firstOfMonth.toEpochDay + Day.Offset.ofInt diff.toSubtype.val
+    let extra : Bounded.LE 0 28 := ((week.toBounded.sub 1).mul_pos 7 (by decide))
+    let extra := Day.Offset.ofInt extra.toSubtype.val
     firstOccurrence + extra
 
 /--
@@ -75,8 +75,8 @@ Returns the `Day.Offset` (days since epoch) for a `TransitionSpec.julian` in the
 -/
 def toEpochDayJulian (year : Year.Offset) (day : Bounded.LE 1 365) : Day.Offset :=
   let jan1 := PlainDate.ofYearMonthDayClip year 1 1
-  let extra : Int := if year.isLeap && day.val >= 60 then 1 else 0
-  jan1.toEpochDay + Day.Offset.ofInt (day.val - 1 + extra)
+  let extra : Int := if year.isLeap && day.toSubtype.val >= 60 then 1 else 0
+  jan1.toEpochDay + Day.Offset.ofInt (day.toSubtype.val - 1 + extra)
 
 /--
 Returns the `Day.Offset` (days since epoch) for a `TransitionSpec.julian0` in the given year.
@@ -85,7 +85,7 @@ Returns the `Day.Offset` (days since epoch) for a `TransitionSpec.julian0` in th
 -/
 def toEpochDayJulian0 (year : Year.Offset) (day : Bounded.LE 0 365) : Day.Offset :=
   let jan1 := PlainDate.ofYearMonthDayClip year 1 1
-  jan1.toEpochDay + Day.Offset.ofInt day.val
+  jan1.toEpochDay + Day.Offset.ofInt day.toSubtype.val
 
 /--
 Returns the `Day.Offset` (days since epoch) for this `TransitionSpec` in the given year.

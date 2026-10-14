@@ -240,7 +240,7 @@ Reference: https://www.rfc-editor.org/rfc/rfc9110#name-methods
 
 @[inline]
 private def isValidRequestTargetForMethod (message : Message.Head .receiving) : Bool :=
-  match message.method, message.uri with
+  match message.toRequestHead.method, message.toRequestHead.uri with
 
   -- Reference: https://www.rfc-editor.org/rfc/rfc9110#section-9.3.6
   | .connect, .authorityForm _ => true
@@ -287,7 +287,7 @@ private def hasSingleAcceptedHostHeader (message : Message.Head .receiving) : Bo
   match message.headers.getAll? Header.Name.host with
   | some #[hostValue] =>
     let parsed := Header.Host.parse hostValue
-    match message.uri with
+    match message.toRequestHead.uri with
     | .asteriskForm =>
       hostValue.value.isEmpty ∨ parsed.isSome
     | .authorityForm authority =>
@@ -344,7 +344,7 @@ private def checkSendingMessageHead (message : Message.Head .sending) : Except H
 
   let parsedSize := message.getSize false
 
-  if responseMustNotHaveBody message.status then
+  if responseMustNotHaveBody message.toResponseHead.status then
     match parsedSize with
     | some _ => pure (.fixed 0)
     | none => if framingInHeaders then throw .badMessage else pure (.fixed 0)
@@ -404,7 +404,7 @@ Returns `true` when body chunks should be drained internally rather than surface
 private def drainBodyInternally (machine : Machine dir) : Bool :=
   match dir with
   | .receiving => machine.writer.sentMessage
-  | .sending => machine.reader.messageHead.status.isInformational
+  | .sending => machine.reader.messageHead.toResponseHead.status.isInformational
 
 /--
 Builds the externally exposed `PulledChunk` value from parsed body bytes.
@@ -557,7 +557,7 @@ private def parseWith (machine : Machine dir) (parser : Parser α) (limit : Opti
     Machine dir × Option α :=
   let remaining := machine.reader.input.remainingBytes
 
-  match parser machine.reader.input with
+  match parser.toFun machine.reader.input with
   | .success buffer result =>
     let usedBytes := remaining - buffer.remainingBytes
 
@@ -677,7 +677,7 @@ framing mode to `.fixed 0` so the reader doesn't block waiting for body bytes.
 private def suppressIncomingBodyIfHead (machine : Machine dir) (mode : BodyMode) : BodyMode :=
   match dir with
   | .sending =>
-    if machine.writer.messageHead.method == .head then .fixed 0 else mode
+    if machine.writer.messageHead.toRequestHead.method == .head then .fixed 0 else mode
   | .receiving => mode
 
 /--
@@ -756,7 +756,8 @@ private def writeHead (messageHead : Message.Head dir.swap) (machine : Machine d
   let headers :=
     match dir, messageHead with
     | .receiving, messageHead =>
-      if responseForbidsFramingHeaders messageHead.status ∨ messageHead.status == .notModified then
+      if responseForbidsFramingHeaders messageHead.toResponseHead.status ∨
+          messageHead.toResponseHead.status == .notModified then
         headers
           |>.erase Header.Name.contentLength
           |>.erase Header.Name.transferEncoding
@@ -785,8 +786,8 @@ private def writeHead (messageHead : Message.Head dir.swap) (machine : Machine d
 
     outputData :=
       match dir, messageHead with
-      | .receiving, messageHead => Encode.encode (v := .v11) writer.outputData { messageHead with headers, version := machine.reader.messageHead.version }
-      | .sending, messageHead => Encode.encode (v := .v11) writer.outputData { messageHead with headers },
+      | .receiving, messageHead => Encode.encode (v := .v11) writer.outputData { messageHead.toResponseHead with headers, version := machine.reader.messageHead.version }
+      | .sending, messageHead => Encode.encode (v := .v11) writer.outputData { messageHead.toRequestHead with headers },
 
     state
   })
@@ -890,9 +891,9 @@ header-only responses.
 private def maybeSuppressOutgoingBody (machine : Machine dir) (message : Message.Head dir.swap) : Machine dir :=
   match dir with
   | .receiving =>
-    let suppressByStatus := responseMustNotHaveBody message.status
-    let suppressByMethod := machine.reader.messageHead.method == .head
-    let forceZero := responseForbidsFramingHeaders message.status
+    let suppressByStatus := responseMustNotHaveBody message.toResponseHead.status
+    let suppressByMethod := machine.reader.messageHead.toRequestHead.method == .head
+    let forceZero := responseForbidsFramingHeaders message.toResponseHead.status
     if suppressByStatus ∨ suppressByMethod then
       machine.suppressOutgoingBody (forceZero := forceZero)
     else
@@ -926,7 +927,7 @@ def send (machine : Machine dir) (message : Message.Head dir.swap) : Machine dir
     -- 1xx responses (e.g. 103 Early Hints) at any point before the final response.
     let isInterim : Bool :=
       match dir with
-      | .receiving => message.status.isInformational
+      | .receiving => message.toResponseHead.status.isInformational
       | .sending => false
     if isInterim then
       -- RFC 9110 §15.2: 1xx responses MUST NOT carry a body, so framing headers
@@ -972,7 +973,7 @@ def canContinue (machine : Machine dir) (status : Status) : Machine dir :=
       })
       machine.setReaderState nextState
     else
-      machine.send { status }
+      machine.send (.ofResponseHead { status })
       |>.setKnownSize (.fixed 0)
       |>.userClosedBody
       |>.disableKeepAlive
@@ -990,7 +991,7 @@ stops accepting further input.
 -/
 def closeWithError (machine : Machine .receiving) (status : Status) : Machine .receiving :=
   if machine.isWaitingMessage then
-    machine.send { status, headers := .empty |>.insert .connection (.mk "close") }
+    machine.send (.ofResponseHead { status, headers := .empty |>.insert .connection (.mk "close") })
       |>.userClosedBody
       |>.closeReader
       |>.noMoreInput
@@ -1265,7 +1266,7 @@ private def handleReaderFailed (machine : Machine dir) (error : H1.Error) : Mach
         machine
        |>.setWriterState .waitingHeaders
        |>.disableKeepAlive
-       |>.send { status := errorResponseStatus error }
+       |>.send (.ofResponseHead { status := errorResponseStatus error })
        |>.userClosedBody
       else
         machine
@@ -1448,7 +1449,7 @@ private partial def processReceivingStartLine (machine : Machine .receiving) : M
     match version with
     | some (v@Version.v11) | some (v@Version.v10) =>
       machine
-      |>.modifyReader (.setMessageHead { method, version := v, uri, headers := .empty })
+      |>.modifyReader (.setMessageHead (.ofRequestHead { method, version := v, uri, headers := .empty }))
       |>.setReaderState (.needHeader 0)
       |> processRead
     | _ => machine.setFailure .unsupportedVersion
@@ -1469,14 +1470,14 @@ private partial def processSendingStartLine (machine : Machine .sending) : Machi
   | some (status, version) =>
     if version == some .v11 then
       machine
-      |>.modifyReader (.setMessageHead { status, version := .v11, headers := .empty })
+      |>.modifyReader (.setMessageHead (.ofResponseHead { status, version := .v11, headers := .empty }))
       |>.setReaderState (.needHeader 0)
       |> processRead
     else if version == some .v10 then
       -- HTTP/1.0 response: accept and disable keep-alive (shouldKeepAlive returns false
       -- for version ≠ .v11).
       machine
-      |>.modifyReader (.setMessageHead { status, version := .v10, headers := .empty })
+      |>.modifyReader (.setMessageHead (.ofResponseHead { status, version := .v10, headers := .empty }))
       |>.setReaderState (.needHeader 0)
       |> processRead
     else
@@ -1579,7 +1580,7 @@ private partial def processReaderCompleteState (machine : Machine dir) : Machine
 
     -- RFC 9110 §15.2: 1xx responses are not final; they must not count against the
     -- maxMessages quota (messageCount is not incremented here).
-    if machine.reader.messageHead.status.isInformational then
+    if machine.reader.messageHead.toResponseHead.status.isInformational then
       { machine with reader := {
         state := .needStartLine,
         input := reader.input,

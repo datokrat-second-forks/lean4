@@ -33,6 +33,8 @@ import Init.Data.String.Termination
 import Init.Data.String.Lemmas.Iterate
 public import Std.Internal.ForIn
 
+set_option elaborator.implicitTransparency false
+
 set_option linter.missingDocs true
 
 @[expose] public section

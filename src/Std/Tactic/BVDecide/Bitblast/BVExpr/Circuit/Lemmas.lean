@@ -31,6 +31,7 @@ mutual
 theorem go_Inv_of_Inv (expr : BVLogicalExpr) (aig : AIG BVBit) (assign : BVExpr.Assignment)
     (cache : BVExpr.Cache aig) (hinv : BVExpr.Cache.Inv assign aig cache) :
     BVExpr.Cache.Inv assign (go aig expr cache).result.val.aig (go aig expr cache).cache := by
+  with_semireducible
   induction expr generalizing aig with
   | const =>
     simp only [go]
@@ -121,6 +122,7 @@ theorem denote_bitblast (expr : BVLogicalExpr) (assign : BVExpr.Assignment) :
   apply BVExpr.Cache.Inv_empty
 
 theorem unsat_of_bitblast (expr : BVLogicalExpr) : expr.bitblast.Unsat → expr.Unsat :=  by
+  with_semireducible
   intro h assign
   rw [← denote_bitblast]
   apply h

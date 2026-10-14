@@ -8,6 +8,8 @@ module
 prelude
 public import Std.Do.PredTrans
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 set_option linter.missingDocs true

@@ -129,16 +129,16 @@ private meta def syntaxVal (n : Int) : MacroM (TSyntax `term) := do
  `(Std.Time.Internal.UnitVal.ofInt $(← syntaxInt n))
 
 private meta def convertOffset (offset : Std.Time.TimeZone.Offset) : MacroM (TSyntax `term) := do
- `(Std.Time.TimeZone.Offset.ofSeconds $(← syntaxVal offset.second.val))
+ `(Std.Time.TimeZone.Offset.ofSeconds $(← syntaxVal offset.second.toUnitVal.val))
 
 private meta def convertTimezone (tz : Std.Time.TimeZone) : MacroM (TSyntax `term) := do
  `(Std.Time.TimeZone.mk $(← convertOffset tz.offset) $(Syntax.mkStrLit tz.name) $(Syntax.mkStrLit tz.abbreviation) false)
 
 private meta def convertPlainDate (d : Std.Time.PlainDate) : MacroM (TSyntax `term) := do
- `(Std.Time.PlainDate.ofYearMonthDayClip $(← syntaxInt d.year) $(← syntaxBounded d.month.val) $(← syntaxBounded d.day.val))
+ `(Std.Time.PlainDate.ofYearMonthDayClip $(← syntaxInt d.year) $(← syntaxBounded d.month.toBounded.toSubtype.val) $(← syntaxBounded d.day.toBounded.toSubtype.val))
 
 private meta def convertPlainTime (d : Std.Time.PlainTime) : MacroM (TSyntax `term) := do
- `(Std.Time.PlainTime.mk $(← syntaxBounded d.hour.val) $(← syntaxBounded d.minute.val) $(← syntaxBounded d.second.val) $(← syntaxBounded d.nanosecond.val))
+ `(Std.Time.PlainTime.mk $(← syntaxBounded d.hour.toBounded.toSubtype.val) $(← syntaxBounded d.minute.toBounded.toSubtype.val) $(← syntaxBounded d.second.toBounded.toSubtype.val) $(← syntaxBounded d.nanosecond.toBounded.toSubtype.val))
 
 private meta def convertPlainDateTime (d : Std.Time.PlainDateTime) : MacroM (TSyntax `term) := do
  `(Std.Time.PlainDateTime.mk $(← convertPlainDate d.date) $(← convertPlainTime d.time))

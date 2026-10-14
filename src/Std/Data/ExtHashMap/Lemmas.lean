@@ -10,6 +10,8 @@ public import Std.Data.ExtHashMap.Basic
 import all Std.Data.ExtDHashMap.Basic
 public import Std.Data.ExtDHashMap.Lemmas
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

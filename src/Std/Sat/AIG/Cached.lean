@@ -38,6 +38,7 @@ def mkAtomCached (aig : AIG α) (n : α) : Entrypoint α :=
     let cache := cache.insert decls decl (Cache.get?_eq_none_iff.mp hcache)
     let decls := decls.push decl
     have hdag := by
+      with_semireducible
       intro i lhs rhs h1 h2
       simp only [decls, Array.getElem_push] at h2
       split at h2
@@ -114,6 +115,7 @@ where
           let cache := cache.insert decls decl (Cache.get?_eq_none_iff.mp hcache)
           let decls := decls.push decl
           have hdag := by
+            with_semireducible
             intro i lhs rhs h1 h2
             simp only [decls, Array.getElem_push] at h2
             simp_all

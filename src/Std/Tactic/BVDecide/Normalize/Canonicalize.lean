@@ -107,8 +107,8 @@ attribute [bv_normalize] BitVec.umod_eq
 @[bv_normalize]
 theorem BitVec.shiftLeft_eq' {x : BitVec w₁} {y : BitVec w₂} :  x <<< y.toNat = x <<< y := rfl
 
-@[bv_normalize]
-theorem BitVec.sshiftRight_eq' (x : BitVec w) : x.sshiftRight y.toNat = x.sshiftRight' y  := rfl
+@[defeq, bv_normalize]
+theorem BitVec.sshiftRight_eq' (x : BitVec w) : x.sshiftRight y.toNat = x.sshiftRight' y  := by with_semireducible rfl
 
 @[bv_normalize]
 theorem BitVec.ushiftRight_eq' (x : BitVec w₁) (y : BitVec w₂) : x >>> y.toNat = x >>> y := rfl

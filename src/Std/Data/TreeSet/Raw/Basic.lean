@@ -150,7 +150,7 @@ def get? (t : Raw α cmp) (a : α) : Option α :=
 
 @[inline, inherit_doc TreeSet.get]
 def get (t : Raw α cmp) (a : α) (h : a ∈ t) : α :=
-  t.inner.getKey a h
+  t.inner.getKey a (by with_semireducible exact h)
 
 @[inline, inherit_doc TreeSet.get!]
 def get! [Inhabited α] (t : Raw α cmp) (a : α) : α :=

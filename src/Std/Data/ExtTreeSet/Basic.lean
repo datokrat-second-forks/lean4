@@ -172,7 +172,7 @@ of `a ∈ m`. The result is guaranteed to be pointer equal to the key in the set
 -/
 @[inline]
 def get [TransCmp cmp] (t : ExtTreeSet α cmp) (a : α) (h : a ∈ t) : α :=
-  t.inner.getKey a h
+  t.inner.getKey a (by with_semireducible exact h)
 
 /--
 Checks if given key is contained and returns the key if it is, otherwise panics.
@@ -254,7 +254,7 @@ def atIdx? [TransCmp cmp] (t : ExtTreeSet α cmp) (n : Nat) : Option α :=
 /-- Returns the `n`-th smallest element. -/
 @[inline]
 def atIdx [TransCmp cmp] (t : ExtTreeSet α cmp) (n : Nat) (h : n < t.size) : α :=
-  ExtTreeMap.keyAtIdx t.inner n h
+  ExtTreeMap.keyAtIdx t.inner n (by with_semireducible exact h)
 
 /-- Returns the `n`-th smallest element, or panics if `n` is at least `t.size`. -/
 @[inline]
@@ -304,7 +304,7 @@ greater than or equal to the given element.
 -/
 @[inline]
 def getGE [TransCmp cmp] (t : ExtTreeSet α cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) : α :=
-  ExtTreeMap.getKeyGE t.inner k h
+  ExtTreeMap.getKeyGE t.inner k (by with_semireducible exact h)
 
 /--
 Given a proof that such an element exists, retrieves the smallest element that is
@@ -312,7 +312,7 @@ greater than the given element.
 -/
 @[inline]
 def getGT [TransCmp cmp] (t : ExtTreeSet α cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) : α :=
-  ExtTreeMap.getKeyGT t.inner k h
+  ExtTreeMap.getKeyGT t.inner k (by with_semireducible exact h)
 
 /--
 Given a proof that such an element exists, retrieves the largest element that is
@@ -320,7 +320,7 @@ less than or equal to the given element.
 -/
 @[inline]
 def getLE [TransCmp cmp] (t : ExtTreeSet α cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) : α :=
-  ExtTreeMap.getKeyLE t.inner k h
+  ExtTreeMap.getKeyLE t.inner k (by with_semireducible exact h)
 
 /--
 Given a proof that such an element exists, retrieves the smallest element that is
@@ -328,7 +328,7 @@ less than the given element.
 -/
 @[inline]
 def getLT [TransCmp cmp] (t : ExtTreeSet α cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) : α :=
-  ExtTreeMap.getKeyLT t.inner k h
+  ExtTreeMap.getKeyLT t.inner k (by with_semireducible exact h)
 
 /--
 Tries to retrieve the smallest element that is greater than or equal to the

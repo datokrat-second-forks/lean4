@@ -15,6 +15,8 @@ import Init.Data.Iterators.Lemmas.Consumers.Collect
 import Init.Data.List.ToArray
 import Init.Data.List.Zip
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std

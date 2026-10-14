@@ -73,12 +73,12 @@ public theorem toList_iter {cmp : α → α → Ordering} (m : TreeMap α β cmp
 
 @[simp]
 public theorem keysIter_toList {α β} {cmp : α → α → Ordering} (m : TreeMap α β cmp) :
-    m.keysIter.toList = m.keys :=
-  m.inner.keysIter_toList
+    m.keysIter.toList = m.keys := by
+  with_semireducible exact m.inner.keysIter_toList
 
 @[simp]
 public theorem valuesIter_toList {α β} {cmp : α → α → Ordering} (m : TreeMap α β cmp) :
-    m.valuesIter.toList = m.values :=
-  m.inner.valuesIter_toList
+    m.valuesIter.toList = m.values := by
+  with_semireducible exact m.inner.valuesIter_toList
 
 end Std.TreeMap

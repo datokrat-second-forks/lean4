@@ -44,13 +44,14 @@ def Empty.PlausibleStep (_ : IterM (α := Empty m β) m β)
 
 instance Empty.instIterator [Monad m] : Iterator (Empty m β) m β where
   IsPlausibleStep := Empty.PlausibleStep
-  step _ := return .deflate (.done rfl)
+  step _ := return .deflate (.done (by with_semireducible exact rfl))
 
 private def Empty.instFinitenessRelation [Monad m] :
     FinitenessRelation (Empty m β) m where
   Rel := emptyRelation
   wf := emptyWf.wf
   subrelation {it it'} h := by
+    with_semireducible
     obtain ⟨step, h, h'⟩ := h
     cases h'
     cases h

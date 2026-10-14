@@ -14,6 +14,8 @@ public import Init.Data.Array.Perm
 public import Init.Data.Order.ClassesExtra
 public import Init.Data.Order.Classes
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

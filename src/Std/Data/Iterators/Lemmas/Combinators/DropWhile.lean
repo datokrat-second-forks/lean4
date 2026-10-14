@@ -13,6 +13,8 @@ import Init.Data.Bool
 import Init.Data.Iterators.Lemmas.Basic
 import Init.Data.List.TakeDrop
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std

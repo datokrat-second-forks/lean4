@@ -183,7 +183,7 @@ instance [EquivBEq α] [LawfulHashable α] {m : ExtDHashMap α β} {a : α} : De
 @[inline, inherit_doc DHashMap.get]
 def get [LawfulBEq α] (m : ExtDHashMap α β) (a : α)
     (h : a ∈ m) : β a :=
-  m.pliftOn (fun m h' => m.get a (h' ▸ h :))
+  m.pliftOn (fun m h' => m.get a (by with_semireducible exact (h' ▸ h :)))
     (fun m m' _ _ (h : m ~m m') => h.get_eq _)
 
 @[inline, inherit_doc DHashMap.get!]
@@ -215,7 +215,7 @@ def get? [EquivBEq α] [LawfulHashable α]
 @[inline, inherit_doc DHashMap.Const.get]
 def get [EquivBEq α] [LawfulHashable α]
     (m : ExtDHashMap α (fun _ => β)) (a : α) (h : a ∈ m) : β :=
-  m.pliftOn (fun m h' => DHashMap.Const.get m a (h' ▸ h :))
+  m.pliftOn (fun m h' => DHashMap.Const.get m a (by with_semireducible exact (h' ▸ h :)))
     (fun m m' _ _ (h : m ~m m') => h.constGet_eq _)
 
 @[inline, inherit_doc DHashMap.Const.getD]
@@ -253,7 +253,7 @@ def getKey? [EquivBEq α] [LawfulHashable α] (m : ExtDHashMap α β) (a : α) :
 
 @[inline, inherit_doc DHashMap.getKey]
 def getKey [EquivBEq α] [LawfulHashable α] (m : ExtDHashMap α β) (a : α) (h : a ∈ m) : α :=
-  m.pliftOn (fun m h' => m.getKey a (h' ▸ h :))
+  m.pliftOn (fun m h' => m.getKey a (by with_semireducible exact (h' ▸ h :)))
     (fun m m' _ _ (h : m ~m m') => h.getKey_eq _)
 
 @[inline, inherit_doc DHashMap.getKey!]
@@ -366,10 +366,11 @@ instance [LawfulBEq α] [∀ k, BEq (β k)] : BEq (ExtDHashMap α β) where
   beq m₁ m₂ := lift₂ (fun x y : DHashMap α β => x.beq y) (fun _ _ _ _ => DHashMap.Equiv.beq_congr) m₁ m₂
 
 instance [LawfulBEq α] [∀ k, BEq (β k)] [∀ k, ReflBEq (β k)] : ReflBEq (ExtDHashMap α β) where
-  rfl {a} := a.inductionOn fun x => DHashMap.Equiv.beq <| DHashMap.Equiv.refl x
+  rfl {a} := a.inductionOn fun x => by
+    with_semireducible exact DHashMap.Equiv.beq <| DHashMap.Equiv.refl x
 
 instance [LawfulBEq α] [∀ k, BEq (β k)] [∀ k, LawfulBEq (β k)] : LawfulBEq (ExtDHashMap α β) where
-  eq_of_beq {m₁} {m₂} := m₁.inductionOn₂ m₂ fun _ _ hyp => sound <| DHashMap.equiv_of_beq hyp
+  eq_of_beq {m₁} {m₂} := m₁.inductionOn₂ m₂ fun _ _ hyp => sound <| DHashMap.equiv_of_beq (by with_semireducible exact hyp)
 
 instance {α : Type u} {β : α → Type v} [BEq α] [LawfulBEq α] [Hashable α] [∀ k, BEq (β k)] [∀ k, LawfulBEq (β k)] : DecidableEq (ExtDHashMap α β) :=
   fun _ _ => decidable_of_iff _ beq_iff_eq
@@ -383,10 +384,10 @@ def beq [EquivBEq α] [LawfulHashable α] [BEq β] (m₁ m₂ : ExtDHashMap α f
   lift₂ (fun x y : DHashMap α fun _ => β => DHashMap.Const.beq x y) (fun _ _ _ _ => DHashMap.Const.Equiv.beq_congr) m₁ m₂
 
 theorem beq_of_eq [EquivBEq α] [LawfulHashable α] [BEq β] [ReflBEq β] (m₁ m₂ : ExtDHashMap α fun _ => β) : m₁ = m₂ → Const.beq m₁ m₂ :=
-  m₁.inductionOn₂ m₂ fun _ _ h => DHashMap.Const.Equiv.beq <| exact h
+  m₁.inductionOn₂ m₂ fun _ _ h => by with_semireducible exact DHashMap.Const.Equiv.beq <| exact h
 
 theorem eq_of_beq [LawfulBEq α] [BEq β] [LawfulBEq β] (m₁ m₂ : ExtDHashMap α fun _ => β) : Const.beq m₁ m₂ → m₁ = m₂ :=
-  m₁.inductionOn₂ m₂ fun _ _ h => sound <| DHashMap.Const.equiv_of_beq h
+  m₁.inductionOn₂ m₂ fun _ _ h => sound <| DHashMap.Const.equiv_of_beq (by with_semireducible exact h)
 
 end Const
 

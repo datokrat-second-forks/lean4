@@ -30,7 +30,7 @@ structure Server where
 The keep-alive delay in seconds, which has to fit in a `UInt32`.
 -/
 private def keepAliveDelay (delay : Std.Time.Second.Offset) : IO UInt32 := do
-  let seconds := delay.val.toNat
+  let seconds := delay.toUnitVal.val.toNat
   if seconds < UInt32.size then
     return seconds.toUInt32
   throw <| IO.userError s!"keep-alive delay of {seconds} s is too large"
@@ -129,7 +129,7 @@ def noDelay (s : Server) : IO Unit :=
 Enables TCP keep-alive for all client sockets accepted by this server socket.
 -/
 @[inline]
-def keepAlive (s : Server) (enable : Bool) (delay : Std.Time.Second.Offset) (_ : delay.val ≥ 1 := by decide) : IO Unit := do
+def keepAlive (s : Server) (enable : Bool) (delay : Std.Time.Second.Offset) (_ : delay.toUnitVal.val ≥ 1 := by decide) : IO Unit := do
   s.native.keepAlive enable.toInt8 (← keepAliveDelay delay)
 
 end Server
@@ -253,7 +253,7 @@ def noDelay (s : Client) : IO Unit :=
 Enables TCP keep-alive with a specified delay for the client socket.
 -/
 @[inline]
-def keepAlive (s : Client) (enable : Bool) (delay : Std.Time.Second.Offset) (_ : delay.val ≥ 0 := by decide) : IO Unit := do
+def keepAlive (s : Client) (enable : Bool) (delay : Std.Time.Second.Offset) (_ : delay.toUnitVal.val ≥ 0 := by decide) : IO Unit := do
   s.native.keepAlive enable.toInt8 (← keepAliveDelay delay)
 
 end Client

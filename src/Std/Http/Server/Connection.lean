@@ -198,7 +198,7 @@ private def applyResponse
       else machine
 
   let responseHead ← prepareResponseHead config res.line
-  let machineWithHead := machineSized.send responseHead
+  let machineWithHead := machineSized.send (.ofResponseHead responseHead)
   if machineWithHead.writer.omitBody then
     if ¬(← Body.isClosed res.body) then
       Body.close res.body
@@ -251,7 +251,7 @@ private def processH1Events
         currentTimeout := config.lingeringTimeout
         keepAliveTimeout := none
         headerTimeout := none
-        pendingHead := some head
+        pendingHead := some head.toRequestHead
       }
 
       if let some length := head.getSize true then

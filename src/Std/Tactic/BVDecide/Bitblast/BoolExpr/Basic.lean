@@ -67,11 +67,11 @@ def eval (a : α → Bool) : BoolExpr α → Bool
   | .gate g x y => g.eval (eval a x) (eval a y)
   | .ite d l r => bif d.eval a then l.eval a else r.eval a
 
-@[simp] theorem eval_literal : eval a (.literal l) = a l := rfl
-@[simp] theorem eval_const : eval a (.const b) = b := rfl
-@[simp] theorem eval_not : eval a (.not x) = !eval a x := rfl
-@[simp] theorem eval_gate : eval a (.gate g x y) = g.eval (eval a x) (eval a y) := rfl
-@[simp] theorem eval_ite : eval a (.ite d l r) = bif d.eval a then l.eval a else r.eval a := rfl
+@[defeq, simp] theorem eval_literal : eval a (.literal l) = a l := by with_semireducible rfl
+@[defeq, simp] theorem eval_const : eval a (.const b) = b := by with_semireducible rfl
+@[defeq, simp] theorem eval_not : eval a (.not x) = !eval a x := by with_semireducible rfl
+@[defeq, simp] theorem eval_gate : eval a (.gate g x y) = g.eval (eval a x) (eval a y) := by with_semireducible rfl
+@[defeq, simp] theorem eval_ite : eval a (.ite d l r) = bif d.eval a then l.eval a else r.eval a := by with_semireducible rfl
 
 def Sat (a : α → Bool) (x : BoolExpr α) : Prop := eval a x = true
 def Unsat (x : BoolExpr α) : Prop := ∀ f, eval f x = false
@@ -81,7 +81,7 @@ theorem sat_and {x y : BoolExpr α} {a : α → Bool} (hx : Sat a x) (hy : Sat a
   simp only [Sat] at *
   simp [hx, hy, Gate.eval]
 
-theorem sat_true {a : α → Bool} : Sat a (BoolExpr.const true : BoolExpr α) := rfl
+@[defeq] theorem sat_true {a : α → Bool} : Sat a (BoolExpr.const true : BoolExpr α) := by with_semireducible rfl
 
 end BoolExpr
 

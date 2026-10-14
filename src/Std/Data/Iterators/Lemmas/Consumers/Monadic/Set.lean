@@ -13,6 +13,8 @@ import Init.Data.Iterators.Lemmas.Consumers.Monadic.Loop
 import Std.Data.ExtHashSet.Lemmas
 import Std.Data.ExtTreeSet.Lemmas
 
+set_option elaborator.implicitTransparency false
+
 public section
 
 namespace Std

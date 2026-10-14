@@ -13,6 +13,8 @@ import Init.Data.Nat.Internal.Linear
 import Init.Data.Option.List
 import Init.Data.Subtype.Basic
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

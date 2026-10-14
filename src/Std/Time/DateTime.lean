@@ -184,7 +184,8 @@ Transforms a tuple of a `DateTime` into a `Day.Ordinal.OfYear`.
 -/
 @[inline]
 def dayOfYear (date : DateTime) : Day.Ordinal.OfYear date.date.get.date.year.isLeap :=
-  ValidDate.dayOfYear ⟨(date.date.get.date.month, date.date.get.date.day), date.date.get.date.valid⟩
+  ValidDate.dayOfYear (.ofSubtype ⟨(date.date.get.date.month, date.date.get.date.day),
+    by with_semireducible exact date.date.get.date.valid⟩)
 
 /--
 Determines the week of the year for the given `DateTime`, using `firstDay` as the start of the week

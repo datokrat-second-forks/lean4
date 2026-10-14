@@ -393,14 +393,14 @@ Converts a `BaseIO` into a `BaseAsync`
 -/
 @[inline]
 def mk (x : BaseIO (MaybeTask α)) : BaseAsync α :=
-  x
+  smartCast
 
 /--
 Converts a `BaseAsync` into a `BaseIO`
 -/
 @[inline]
 def toRawBaseIO (x : BaseAsync α) : BaseIO (MaybeTask α) :=
-  x
+  smartCast
 
 /--
 Converts a `BaseAsync` to a `BaseIO Task`.
@@ -507,7 +507,7 @@ Converts `Except` to `BaseAsync`.
 -/
 @[inline]
 protected def ofExcept (except : Except Empty α) : BaseAsync α :=
-  pure (f := BaseIO) <| MaybeTask.pure <| match except with | .ok res => res
+  .mk <| pure <| MaybeTask.pure <| match except with | .ok res => res
 
 /--
 Runs two computations concurrently and returns both results as a pair.
@@ -570,25 +570,39 @@ An asynchronous computation that may produce an error of type `ε`.
 namespace EAsync
 
 /--
+Converts a `BaseAsync` that returns an `Except` into an `EAsync`.
+-/
+@[inline]
+def mk (x : BaseAsync (Except ε α)) : EAsync ε α :=
+  smartCast
+
+/--
+Converts an `EAsync` into a `BaseAsync` that returns an `Except`.
+-/
+@[inline]
+def toBaseAsync (x : EAsync ε α) : BaseAsync (Except ε α) :=
+  smartCast
+
+/--
 Converts a `EAsync` to a `ETask`.
 -/
 @[inline]
 protected def toBaseIO (x : EAsync ε α) : BaseIO (ETask ε α) :=
-  MaybeTask.toTask <$> x.toRawBaseIO
+  MaybeTask.toTask <$> x.toBaseAsync.toRawBaseIO
 
 /--
 Creates a new `EAsync` out of a `RTask`.
 -/
 @[inline]
 protected def ofTask (x : ETask ε α) : EAsync ε α :=
-  .mk <| pure <| MaybeTask.ofTask x
+  .mk <| .mk <| pure <| MaybeTask.ofTask x
 
 /--
 Converts a `BaseAsync` to a `EIO ETask`.
 -/
 @[inline]
 protected def toEIO (x : EAsync ε α) : EIO ε (ETask ε α) :=
-  MaybeTask.toTask <$> x.toRawBaseIO
+  MaybeTask.toTask <$> x.toBaseAsync.toRawBaseIO
 
 /--
 Creates a new `EAsync` out of a `ETask`.
@@ -609,15 +623,15 @@ Maps the result of an `EAsync` computation with a pure function.
 -/
 @[inline]
 protected def map (f : α → β) (self : EAsync ε α) : EAsync ε β :=
-  .mk <| BaseAsync.map (.map f) self
+  .mk <| BaseAsync.map (.map f) self.toBaseAsync
 
 /--
 Sequences two computations, allowing the second to depend on the value computed by the first.
 -/
 @[inline]
 protected def bind (self : EAsync ε α) (f : α → EAsync ε β) : EAsync ε β :=
-  .mk <| BaseAsync.bind self fun
-    | .ok a => f a
+  .mk <| BaseAsync.bind self.toBaseAsync fun
+    | .ok a => (f a).toBaseAsync
     | .error e => BaseAsync.pure (.error e)
 
 /--
@@ -632,7 +646,7 @@ Waits for the result of the `EAsync` computation, blocking if necessary.
 -/
 @[inline]
 protected def wait (self : EAsync ε α) : EIO ε α := do
-  let result ← self |> BaseAsync.wait
+  let result ← self.toBaseAsync |> BaseAsync.wait
   match result with
   | .ok a => return a
   | .error e => throw e
@@ -642,7 +656,7 @@ Lifts an `EAsync` computation into an `ETask` that can be awaited and joined.
 -/
 @[inline]
 protected def asTask (x : EAsync ε α) (prio := Task.Priority.default) : EIO ε (ETask ε α) :=
-  x |> BaseAsync.asTask (prio := prio)
+  x.toBaseAsync |> BaseAsync.asTask (prio := prio)
 
 /--
 Block until the `EAsync` finishes and returns its value. Propagates any error encountered during execution.
@@ -663,9 +677,9 @@ Handles errors in an `EAsync` computation by running a handler if one occurs.
 -/
 @[inline]
 protected def tryCatch (x : EAsync ε α) (f : ε → EAsync ε α) (prio := Task.Priority.default) (sync := false) : EAsync ε α :=
-  .mk <| BaseAsync.bind (sync := sync) (prio := prio) x fun
+  .mk <| BaseAsync.bind (sync := sync) (prio := prio) x.toBaseAsync fun
     | .ok a => BaseAsync.pure (.ok a)
-    | .error e => (f e)
+    | .error e => (f e).toBaseAsync
 
 /--
 Runs an action, ensuring that some other action always happens afterward.
@@ -674,13 +688,13 @@ protected def tryFinally'
     (x : EAsync ε α) (f : Option α → EAsync ε β)
     (prio := Task.Priority.default) (sync := false) :
     EAsync ε (α × β) :=
-  .mk <| BaseAsync.bind x (prio := prio) (sync := sync) fun
+  .mk <| BaseAsync.bind x.toBaseAsync (prio := prio) (sync := sync) fun
     | .ok a => do
-      match ← (f (some a)) with
+      match ← (f (some a)).toBaseAsync with
       | .ok b => BaseAsync.pure (.ok (a, b))
       | .error e => BaseAsync.pure (.error e)
     | .error e => do
-      match ← (f none) with
+      match ← (f none).toBaseAsync with
       | .ok _ => BaseAsync.pure (.error e)
       | .error e' => BaseAsync.pure (.error e')
 
@@ -744,10 +758,10 @@ instance : MonadAsync AsyncTask (EAsync IO.Error) where
   async t prio := EAsync.lift <| t.asTask (prio := prio)
 
 instance : MonadLift BaseIO (EAsync ε) where
-  monadLift x := .mk <| (pure ∘ .ok) <$> x
+  monadLift x := .mk <| .mk <| (pure ∘ .ok) <$> x
 
 instance : MonadLift (EIO ε) (EAsync ε) where
-  monadLift x := .mk <| pure <$> x.toBaseIO
+  monadLift x := .mk <| .mk <| pure <$> x.toBaseIO
 
 instance : MonadLift BaseAsync (EAsync ε) where
   monadLift x := .mk <| x.map (.ok)
@@ -763,7 +777,7 @@ protected partial def forIn
   let promise ← IO.Promise.new
 
   let rec @[specialize] loop (b : β) : BaseIO Unit := do
-    match ← f () b with
+    match ← (f () b).toBaseAsync.toRawBaseIO with
     | MaybeTask.pure result =>
       match result with
       | .error e => promise.resolve (.error e)
@@ -775,7 +789,7 @@ protected partial def forIn
       | .ok (.yield b) => loop b
 
   loop init
-  .mk <| EAsync.ofETask promise.result!
+  EAsync.ofETask promise.result!
 
 instance : ForIn (EAsync ε) Lean.Loop Unit where
   forIn _ := EAsync.forIn
@@ -785,7 +799,7 @@ Converts `Except` to `EAsync`.
 -/
 @[inline]
 protected def ofExcept (except : Except ε α) : EAsync ε α :=
-  pure (f := BaseIO) (MaybeTask.pure except)
+  .mk <| .mk <| pure (MaybeTask.pure except)
 
 /--
 Runs two computations concurrently and returns both results as a pair.
@@ -856,7 +870,7 @@ Converts a `Async` to a `AsyncTask`.
 -/
 @[inline]
 protected def toIO (x : Async α) : IO (AsyncTask α) :=
-  MaybeTask.toTask <$> x.toRawBaseIO
+  MaybeTask.toTask <$> x.toBaseAsync.toRawBaseIO
 
 /--
 Block until the `Async` finishes and returns its value. Propagates any error encountered during execution.
@@ -871,17 +885,17 @@ Converts `Promise` into `Async`.
 @[inline]
 protected def ofPromise (task : IO (IO.Promise (Except IO.Error α))) (error : String := "the promise linked to the Async was dropped") : Async α := do
   match ← task.toBaseIO with
-  | .ok data => pure (f := BaseIO) <| MaybeTask.ofTask <| data.result?.map fun
+  | .ok data => .mk <| .mk <| pure <| MaybeTask.ofTask <| data.result?.map fun
     | none => .error error
     | some res => res
-  | .error err => pure (f := BaseIO) (MaybeTask.pure (.error err))
+  | .error err => .mk <| .mk <| pure (MaybeTask.pure (.error err))
 
 /--
 Converts `AsyncTask` into `Async`.
 -/
 @[inline]
 protected def ofAsyncTask (task : AsyncTask α) : Async α := do
-  pure (f := BaseIO) (MaybeTask.ofTask task)
+  .mk <| .mk <| pure (MaybeTask.ofTask task)
 
 /--
 Converts `IO (Task α)` into `Async`.
@@ -890,14 +904,14 @@ Converts `IO (Task α)` into `Async`.
 protected def ofIOTask (task : IO (Task α)) : Async α := do
   match ← task.toBaseIO with
   | .ok data => .ofAsyncTask (data.map Except.ok)
-  | .error err => pure (f := BaseIO) (MaybeTask.pure (.error err))
+  | .error err => .mk <| .mk <| pure (MaybeTask.pure (.error err))
 
 /--
 Converts `Except` to `Async`.
 -/
 @[inline]
 protected def ofExcept (except : Except IO.Error α) : Async α :=
-  pure (f := BaseIO) (MaybeTask.pure except)
+  .mk <| .mk <| pure (MaybeTask.pure except)
 
 /--
 Converts `Task` to `Async`.
@@ -910,7 +924,7 @@ protected def ofTask (task : Task α) : Async α := do
 Converts `IO (IO.Promise α)` to `Async`.
 -/
 @[inline]
-protected def ofPurePromise (task : IO (IO.Promise α)) (error : String := "the promise linked to the Async was dropped") : Async α := show BaseIO _ from do
+protected def ofPurePromise (task : IO (IO.Promise α)) (error : String := "the promise linked to the Async was dropped") : Async α := .mk <| .mk do
   match ← task.toBaseIO with
   | .ok data => pure <| MaybeTask.ofTask <| data.result?.map fun
     | none => .error error

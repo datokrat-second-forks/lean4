@@ -520,7 +520,7 @@ theorem get_eq_get? [Ord α] [OrientedOrd α] [LawfulEqOrd α] (k : α) (l : Imp
   induction l
   · simp only [get, get?]
     split <;> simp_all
-  · contradiction
+  · with_semireducible contradiction
 
 theorem get_eq_getₘ [Ord α] [OrientedOrd α] [LawfulEqOrd α] (k : α) (l : Impl α β) {h} (h') :
     l.get k h = l.getₘ k h' := by
@@ -533,7 +533,7 @@ theorem get!_eq_get!ₘ [Ord α] [OrientedOrd α] [LawfulEqOrd α] (k : α) [Inh
   induction l
   · simp only [applyCell, get!]
     split <;> simp_all [Cell.get?, Cell.ofEq]
-  · simp only [get!, applyCell, Cell.get?_empty, Option.get!_none]; rfl
+  · simp only [get!, applyCell, Cell.get?_empty, Option.get!_none]; with_semireducible rfl
 
 theorem getD_eq_getDₘ [Ord α] [OrientedOrd α] [LawfulEqOrd α] (k : α) (l : Impl α β)
     (fallback : β k) : l.getD k fallback = l.getDₘ k fallback := by
@@ -557,14 +557,14 @@ theorem getEntry?_eq_getEntry?ₘ [Ord α] (k : α) (l : Impl α β) :
   induction l
   · simp only [applyCell, getEntry?]
     split <;> simp_all [Cell.getEntry?, Cell.ofEq]
-  · simp only [getEntry?, applyCell]; rfl
+  · simp only [getEntry?, applyCell]; with_semireducible rfl
 
 theorem getEntry_eq_getEntry? [Ord α] (k : α) (l : Impl α β) {h} :
     some (l.getEntry k h) = l.getEntry? k := by
   induction l
   · simp only [getEntry, getEntry?]
     split <;> simp_all
-  · contradiction
+  · with_semireducible contradiction
 
 theorem getEntry_eq_getEntryₘ [Ord α] (k : α) (l : Impl α β) {h} (h') :
     l.getEntry k h = l.getEntryₘ k h' := by
@@ -577,7 +577,7 @@ theorem getEntry!_eq_getEntry!ₘ [Ord α] [Inhabited ((a : α) × (β a))] (k :
   induction l
   · simp only [applyCell, getEntry!]
     split <;> simp_all [Cell.getEntry?, Cell.ofEq]
-  · simp only [getEntry!, applyCell]; rfl
+  · simp only [getEntry!, applyCell]; with_semireducible rfl
 
 theorem getEntryD_eq_getEntryDₘ [Ord α] (k : α) (l : Impl α β)
     (fallback : (a : α) × β a) : l.getEntryD k fallback = l.getEntryDₘ k fallback := by
@@ -585,14 +585,14 @@ theorem getEntryD_eq_getEntryDₘ [Ord α] (k : α) (l : Impl α β)
   induction l
   · simp only [applyCell, getEntryD]
     split <;> simp_all [Cell.getEntry?, Cell.ofEq]
-  · simp only [getEntryD, applyCell]; rfl
+  · simp only [getEntryD, applyCell]; with_semireducible rfl
 
 theorem getKey_eq_getKey? [Ord α] (k : α) (l : Impl α β) {h} :
     some (l.getKey k h) = l.getKey? k := by
   induction l
   · simp only [getKey, getKey?]
     split <;> simp_all
-  · contradiction
+  · with_semireducible contradiction
 
 theorem getKey_eq_getKeyₘ [Ord α] (k : α) (l : Impl α β) {h} (h') :
     l.getKey k h = l.getKeyₘ k h' := by
@@ -605,7 +605,7 @@ theorem getKey!_eq_getKey!ₘ [Ord α] (k : α) [Inhabited α] (l : Impl α β) 
   induction l
   · simp only [applyCell, getKey!]
     split <;> simp_all [Cell.getKey?, Cell.ofEq]
-  · simp only [getKey!, applyCell, Cell.getKey?_empty, Option.get!_none]; rfl
+  · simp only [getKey!, applyCell, Cell.getKey?_empty, Option.get!_none]; with_semireducible rfl
 
 theorem getKeyD_eq_getKeyDₘ [Ord α] (k : α) (l : Impl α β)
     (fallback : α) : l.getKeyD k fallback = l.getKeyDₘ k fallback := by
@@ -627,7 +627,7 @@ theorem minEntry?_eq_minEntry?ₘ [Ord α] {l : Impl α β} : l.minEntry? = l.mi
 
 theorem minEntry!_eq_get!_minEntry? [Inhabited ((a : α) × β a)] {l : Impl α β} :
     l.minEntry! = l.minEntry?.get! := by
-  induction l using minEntry?.induct_unfolding <;> simp only [minEntry!] <;> trivial
+  induction l using minEntry?.induct_unfolding <;> simp only [minEntry!] <;> with_semireducible trivial
 
 theorem minEntryD_eq_getD_minEntry? {l : Impl α β} {fallback : (a : α) × β a} :
     l.minEntryD fallback = l.minEntry?.getD fallback := by
@@ -642,11 +642,11 @@ theorem minEntry_eq_get_minEntry? {l : Impl α β} {he} :
   simp [← some_minEntry_eq_minEntry? (he := he)]
 
 theorem maxEntry?_eq_minEntry?_reverse {l : Impl α β} : l.maxEntry? = l.reverse.minEntry? := by
-  induction l using maxEntry?.induct_unfolding <;> simp only [minEntry?, reverse] ; assumption
+  induction l using maxEntry?.induct_unfolding <;> simp only [minEntry?, reverse] ; with_semireducible assumption
 
 theorem maxEntry!_eq_get!_maxEntry? [Inhabited ((a : α) × β a)] {l : Impl α β} :
     l.maxEntry! = l.maxEntry?.get! := by
-  induction l using maxEntry?.induct_unfolding <;> simp only [maxEntry!] <;> trivial
+  induction l using maxEntry?.induct_unfolding <;> simp only [maxEntry!] <;> with_semireducible trivial
 
 theorem maxEntryD_eq_getD_maxEntry? {l : Impl α β} {fallback : (a : α) × β a} :
     l.maxEntryD fallback = l.maxEntry?.getD fallback := by
@@ -663,14 +663,14 @@ theorem minKey_eq_minEntry_fst {l : Impl α β} {he} : l.minKey he = (l.minEntry
 
 theorem minKey!_eq_getElem!_minKey? [Inhabited α] {l : Impl α β} :
     l.minKey! = l.minKey?.get! := by
-  induction l using minKey!.induct_unfolding <;> simp only [minKey?] <;> trivial
+  induction l using minKey!.induct_unfolding <;> simp only [minKey?] <;> with_semireducible trivial
 
 theorem minKeyD_eq_getD_minKey? {l : Impl α β} {fallback} :
     l.minKeyD fallback = l.minKey?.getD fallback := by
   induction l, fallback using minKeyD.induct_unfolding <;> simp only [minKey?] <;> trivial
 
 theorem maxKey?_eq_minKey?_reverse {l : Impl α β} : l.maxKey? = l.reverse.minKey? := by
-  induction l using maxKey?.induct_unfolding <;> simp only [minKey?, reverse] ; assumption
+  induction l using maxKey?.induct_unfolding <;> simp only [minKey?, reverse] ; with_semireducible assumption
 
 theorem some_maxKey_eq_maxKey? {l : Impl α β} {he} : some (l.maxKey he) = l.maxKey? := by
   induction l, he using maxKey.induct_unfolding <;> simp only [maxKey?] ; assumption
@@ -681,7 +681,7 @@ theorem maxKey_eq_get_maxKey? {l : Impl α β} {he} :
 
 theorem maxKey!_eq_get!_maxKey? [Inhabited α] {l : Impl α β} :
     l.maxKey! = l.maxKey?.get! := by
-  induction l using maxKey!.induct_unfolding <;> simp only [maxKey?] <;> trivial
+  induction l using maxKey!.induct_unfolding <;> simp only [maxKey?] <;> with_semireducible trivial
 
 theorem maxKeyD_eq_getD_maxKey? {l : Impl α β} {fallback} :
     l.maxKeyD fallback = l.maxKey?.getD fallback := by
@@ -697,7 +697,7 @@ theorem minEntry?_eq_minEntry? [Ord α] {l : Impl α fun _ => β} :
 
 theorem minEntry!_eq_get!_minEntry? [Ord α] {l : Impl α fun _ => β} [Inhabited (α × β)] :
     minEntry! l = (minEntry? l).get! := by
-  induction l using minEntry?.induct_unfolding <;> simp only [minEntry!] <;> trivial
+  induction l using minEntry?.induct_unfolding <;> simp only [minEntry!] <;> with_semireducible trivial
 
 theorem minEntryD_eq_getD_minEntry? [Ord α] {l : Impl α fun _ => β} {fallback : α × β} :
     minEntryD l fallback = (minEntry? l).getD fallback := by
@@ -713,7 +713,7 @@ theorem maxEntry?_eq_maxEntry? [Ord α] {l : Impl α fun _ => β} :
 
 theorem maxEntry!_eq_get!_maxEntry? [Ord α] {l : Impl α fun _ => β} [Inhabited (α × β)] :
     maxEntry! l = (maxEntry? l).get! := by
-  induction l using maxEntry?.induct_unfolding <;> simp only [maxEntry!] <;> trivial
+  induction l using maxEntry?.induct_unfolding <;> simp only [maxEntry!] <;> with_semireducible trivial
 
 theorem maxEntryD_eq_getD_maxEntry? [Ord α] {l : Impl α fun _ => β} {fallback : α × β} :
     maxEntryD l fallback = (maxEntry? l).getD fallback := by
@@ -889,13 +889,13 @@ theorem containsThenInsertIfNew!_snd_eq_insertIfNew! [Ord α] (t : Impl α β) (
 theorem insertMin_eq_insertMin! [Ord α] {a b} {t : Impl α β} (htb) :
     (t.insertMin a b htb).impl = t.insertMin! a b := by
   fun_cases insertMin!
-  · rfl
+  · with_semireducible rfl
   · simp only [insertMin, balanceL_eq_balanceL!, insertMin_eq_insertMin! htb.left]
 
 theorem insertMax_eq_insertMax! [Ord α] {a b} {t : Impl α β} (htb) :
     (t.insertMax a b htb).impl = t.insertMax! a b := by
   fun_cases insertMax!
-  · rfl
+  · with_semireducible rfl
   · simp only [insertMax, balanceR_eq_balanceR!, insertMax_eq_insertMax! htb.right]
 
 theorem link_eq_link! [Ord α] {k v} {l r : Impl α β} (hlb hrb) :
@@ -920,7 +920,7 @@ theorem get?_eq_get?ₘ [Ord α] (k : α) (l : Impl α (fun _ => β)) :
 
 theorem get_eq_get? [Ord α] (k : α) (l : Impl α (fun _ => β)) {h} :
     some (get l k h) = get? l k := by
-  induction l using tree_split_ind_no_gen (compare k) <;> simp only [*, get, get?] ; contradiction
+  induction l using tree_split_ind_no_gen (compare k) <;> simp only [*, get, get?] ; with_semireducible contradiction
 
 theorem get_eq_getₘ [Ord α] (k : α) (l : Impl α (fun _ => β)) {h} (h') :
     get l k h = getₘ l k h' := by
@@ -932,14 +932,14 @@ theorem get!_eq_get!ₘ [Ord α] (k : α) [Inhabited β] (l : Impl α (fun _ => 
   rw [get!ₘ, get?ₘ]
   induction l using tree_split_ind_no_gen (compare k) <;>
     simp only [*, get!, applyCell, Cell.Const.get?, Cell.ofEq, Option.get!_some]
-  · rfl
+  · with_semireducible rfl
 
 theorem getD_eq_getDₘ [Ord α] (k : α) (l : Impl α (fun _ => β))
     (fallback : β) : getD l k fallback = getDₘ l k fallback := by
   rw [getDₘ, get?ₘ]
   induction l using tree_split_ind_no_gen (compare k) <;>
     simp only [*, getD, applyCell, Cell.Const.get?, Cell.ofEq, Option.getD_some]
-  · rfl
+  · with_semireducible rfl
 
 end Const
 
@@ -949,7 +949,7 @@ theorem entryAtIdx?_eq_some_entryAtIdx {t : Impl α β} (htb : t.Balanced) {i : 
 
 theorem entryAtIdx!_eq_get!_entryAtIdx? {t : Impl α β} {i : Nat} [Inhabited ((a : α) × β a)] :
     t.entryAtIdx! i = (t.entryAtIdx? i).get! := by
-  induction t, i using entryAtIdx?.induct_unfolding <;> simp only [entryAtIdx!, *] <;> trivial
+  induction t, i using entryAtIdx?.induct_unfolding <;> simp only [entryAtIdx!, *] <;> with_semireducible trivial
 
 theorem entryAtIdxD_eq_getD_entryAtIdx? {t : Impl α β} {i : Nat} {fallback : (a : α) × β a} :
     t.entryAtIdxD i fallback = (t.entryAtIdx? i).getD fallback := by
@@ -965,7 +965,7 @@ theorem keyAtIdx_eq_entryAtIdx_fst {t : Impl α β} (htb : t.Balanced) {i : Nat}
 
 theorem keyAtIdx!_eq_get!_keyAtIdx? [Inhabited α] {t : Impl α β} {i : Nat} :
     t.keyAtIdx! i = (t.keyAtIdx? i).get! := by
-  induction t, i using keyAtIdx?.induct_unfolding <;> simp only [keyAtIdx!, *] <;> trivial
+  induction t, i using keyAtIdx?.induct_unfolding <;> simp only [keyAtIdx!, *] <;> with_semireducible trivial
 
 theorem keyAtIdxD_eq_getD_keyAtIdx? {t : Impl α β} {i : Nat} {fallback : α} :
     t.keyAtIdxD i fallback = (t.keyAtIdx? i).getD fallback := by
@@ -1025,29 +1025,29 @@ theorem getEntryLE?_eq_getEntryGE?_reverse [o : Ord α] [TransOrd α] {t : Impl 
     simp only [*, getEntryLE?.go, reverse, getEntryGE?.go, OrientedCmp.eq_swap (b := k),
       Ordering.swap]
 
-theorem getEntryGE!_eq_get!_getEntryGE? [Ord α] {t : Impl α β} {k : α} [Inhabited ((a : α) × β a)] :
-    t.getEntryGE! k = (t.getEntryGE? k).get! := rfl
+@[defeq] theorem getEntryGE!_eq_get!_getEntryGE? [Ord α] {t : Impl α β} {k : α} [Inhabited ((a : α) × β a)] :
+    t.getEntryGE! k = (t.getEntryGE? k).get! := by with_semireducible rfl
 
-theorem getEntryGT!_eq_get!_getEntryGT? [Ord α] {t : Impl α β} {k : α} [Inhabited ((a : α) × β a)] :
-    t.getEntryGT! k = (t.getEntryGT? k).get! := rfl
+@[defeq] theorem getEntryGT!_eq_get!_getEntryGT? [Ord α] {t : Impl α β} {k : α} [Inhabited ((a : α) × β a)] :
+    t.getEntryGT! k = (t.getEntryGT? k).get! := by with_semireducible rfl
 
-theorem getEntryLE!_eq_get!_getEntryLE? [Ord α] {t : Impl α β} {k : α} [Inhabited ((a : α) × β a)] :
-    t.getEntryLE! k = (t.getEntryLE? k).get! := rfl
+@[defeq] theorem getEntryLE!_eq_get!_getEntryLE? [Ord α] {t : Impl α β} {k : α} [Inhabited ((a : α) × β a)] :
+    t.getEntryLE! k = (t.getEntryLE? k).get! := by with_semireducible rfl
 
-theorem getEntryLT!_eq_get!_getEntryLT? [Ord α] {t : Impl α β} {k : α} [Inhabited ((a : α) × β a)] :
-    t.getEntryLT! k = (t.getEntryLT? k).get! := rfl
+@[defeq] theorem getEntryLT!_eq_get!_getEntryLT? [Ord α] {t : Impl α β} {k : α} [Inhabited ((a : α) × β a)] :
+    t.getEntryLT! k = (t.getEntryLT? k).get! := by with_semireducible rfl
 
-theorem getEntryGED_eq_getD_getEntryGE? [Ord α] {t : Impl α β} {k : α} {fallback : (a : α) × β a} :
-    t.getEntryGED k fallback = (t.getEntryGE? k).getD fallback := rfl
+@[defeq] theorem getEntryGED_eq_getD_getEntryGE? [Ord α] {t : Impl α β} {k : α} {fallback : (a : α) × β a} :
+    t.getEntryGED k fallback = (t.getEntryGE? k).getD fallback := by with_semireducible rfl
 
-theorem getEntryGTD_eq_getD_getEntryGT? [Ord α] {t : Impl α β} {k : α} {fallback : (a : α) × β a} :
-    t.getEntryGTD k fallback = (t.getEntryGT? k).getD fallback := rfl
+@[defeq] theorem getEntryGTD_eq_getD_getEntryGT? [Ord α] {t : Impl α β} {k : α} {fallback : (a : α) × β a} :
+    t.getEntryGTD k fallback = (t.getEntryGT? k).getD fallback := by with_semireducible rfl
 
-theorem getEntryLED_eq_getD_getEntryLE? [Ord α] {t : Impl α β} {k : α} {fallback : (a : α) × β a} :
-    t.getEntryLED k fallback = (t.getEntryLE? k).getD fallback := rfl
+@[defeq] theorem getEntryLED_eq_getD_getEntryLE? [Ord α] {t : Impl α β} {k : α} {fallback : (a : α) × β a} :
+    t.getEntryLED k fallback = (t.getEntryLE? k).getD fallback := by with_semireducible rfl
 
-theorem getEntryLTD_eq_getD_getEntryLT? [Ord α] {t : Impl α β} {k : α} {fallback : (a : α) × β a} :
-    t.getEntryLTD k fallback = (t.getEntryLT? k).getD fallback := rfl
+@[defeq] theorem getEntryLTD_eq_getD_getEntryLT? [Ord α] {t : Impl α β} {k : α} {fallback : (a : α) × β a} :
+    t.getEntryLTD k fallback = (t.getEntryLT? k).getD fallback := by with_semireducible rfl
 
 theorem getEntryGE?.eq_go [Ord α] (k : α) (x) (t : Impl α β) :
     (getEntryGE? k t).or x = getEntryGE?.go k x t := by
@@ -1129,29 +1129,29 @@ theorem getKeyLT?_eq_getEntryLT? [Ord α] {t : Impl α β} {k : α} :
   change _ = getKeyLT?.go k (Option.map (·.1) (none : Option ((a : α) × β a))) _
   induction t, none using tree_split_ind (compare k) <;> simp [getKeyLT?.go, getEntryLT?.go, *]
 
-theorem getKeyGE!_eq_get!_getKeyGE? [Ord α] {t : Impl α β} {k : α} [Inhabited α] :
-    t.getKeyGE! k = (t.getKeyGE? k).get! := rfl
+@[defeq] theorem getKeyGE!_eq_get!_getKeyGE? [Ord α] {t : Impl α β} {k : α} [Inhabited α] :
+    t.getKeyGE! k = (t.getKeyGE? k).get! := by with_semireducible rfl
 
-theorem getKeyGT!_eq_get!_getKeyGT? [Ord α] {t : Impl α β} {k : α} [Inhabited α] :
-    t.getKeyGT! k = (t.getKeyGT? k).get! := rfl
+@[defeq] theorem getKeyGT!_eq_get!_getKeyGT? [Ord α] {t : Impl α β} {k : α} [Inhabited α] :
+    t.getKeyGT! k = (t.getKeyGT? k).get! := by with_semireducible rfl
 
-theorem getKeyLE!_eq_get!_getKeyLE? [Ord α] {t : Impl α β} {k : α} [Inhabited α] :
-    t.getKeyLE! k = (t.getKeyLE? k).get! := rfl
+@[defeq] theorem getKeyLE!_eq_get!_getKeyLE? [Ord α] {t : Impl α β} {k : α} [Inhabited α] :
+    t.getKeyLE! k = (t.getKeyLE? k).get! := by with_semireducible rfl
 
-theorem getKeyLT!_eq_get!_getKeyLT? [Ord α] {t : Impl α β} {k : α} [Inhabited α] :
-    t.getKeyLT! k = (t.getKeyLT? k).get! := rfl
+@[defeq] theorem getKeyLT!_eq_get!_getKeyLT? [Ord α] {t : Impl α β} {k : α} [Inhabited α] :
+    t.getKeyLT! k = (t.getKeyLT? k).get! := by with_semireducible rfl
 
-theorem getKeyGED_eq_getD_getKeyGE? [Ord α] {t : Impl α β} {k fallback : α} :
-    t.getKeyGED k fallback = (t.getKeyGE? k).getD fallback := rfl
+@[defeq] theorem getKeyGED_eq_getD_getKeyGE? [Ord α] {t : Impl α β} {k fallback : α} :
+    t.getKeyGED k fallback = (t.getKeyGE? k).getD fallback := by with_semireducible rfl
 
-theorem getKeyGTD_eq_getD_getKeyGT? [Ord α] {t : Impl α β} {k fallback : α} :
-    t.getKeyGTD k fallback = (t.getKeyGT? k).getD fallback := rfl
+@[defeq] theorem getKeyGTD_eq_getD_getKeyGT? [Ord α] {t : Impl α β} {k fallback : α} :
+    t.getKeyGTD k fallback = (t.getKeyGT? k).getD fallback := by with_semireducible rfl
 
-theorem getKeyLED_eq_getD_getKeyLE? [Ord α] {t : Impl α β} {k fallback : α} :
-    t.getKeyLED k fallback = (t.getKeyLE? k).getD fallback := rfl
+@[defeq] theorem getKeyLED_eq_getD_getKeyLE? [Ord α] {t : Impl α β} {k fallback : α} :
+    t.getKeyLED k fallback = (t.getKeyLE? k).getD fallback := by with_semireducible rfl
 
-theorem getKeyLTD_eq_getD_getKeyLT? [Ord α] {t : Impl α β} {k fallback : α} :
-    t.getKeyLTD k fallback = (t.getKeyLT? k).getD fallback := rfl
+@[defeq] theorem getKeyLTD_eq_getD_getKeyLT? [Ord α] {t : Impl α β} {k fallback : α} :
+    t.getKeyLTD k fallback = (t.getKeyLT? k).getD fallback := by with_semireducible rfl
 
 theorem getKeyGE_eq_getEntryGE [Ord α] [TransOrd α] {t : Impl α β} {k : α} {hto he} :
     getKeyGE k t hto he = (getEntryGE k t hto he).1 := by
@@ -1197,7 +1197,7 @@ theorem entryAtIdx_eq {t : Impl α fun _ => β} (htb : t.Balanced) {i : Nat} {h}
 
 theorem entryAtIdx!_eq_get!_entryAtIdx? {t : Impl α fun _ => β} {i : Nat} [Inhabited (α × β)] :
     entryAtIdx! t i = (entryAtIdx? t i).get! := by
-  induction t, i using entryAtIdx?.induct_unfolding <;> simp only [entryAtIdx!, *] <;> rfl
+  induction t, i using entryAtIdx?.induct_unfolding <;> simp only [entryAtIdx!, *] <;> with_semireducible rfl
 
 theorem entryAtIdxD_eq_getD_entryAtIdx? {t : Impl α fun _ => β} {i : Nat} {fallback : α × β} :
     entryAtIdxD t i fallback = (entryAtIdx? t i).getD fallback := by
@@ -1227,29 +1227,29 @@ theorem getEntryLT?_eq_map [Ord α] {t : Impl α fun _ => β} {k : α} :
   change _ = getEntryLT?.go k (Option.map (fun x => (x.1, x.2)) (none : Option ((_ : α) × β))) _
   induction t, none using tree_split_ind (compare k) <;> simp [getEntryLT?.go, Impl.getEntryLT?.go, *]
 
-theorem getEntryGE!_eq_get!_getEntryGE? [Ord α] {t : Impl α fun _ => β} {k : α} [Inhabited (α × β)] :
-    getEntryGE! k t = (getEntryGE? k t).get! := rfl
+@[defeq] theorem getEntryGE!_eq_get!_getEntryGE? [Ord α] {t : Impl α fun _ => β} {k : α} [Inhabited (α × β)] :
+    getEntryGE! k t = (getEntryGE? k t).get! := by with_semireducible rfl
 
-theorem getEntryGT!_eq_get!_getEntryGT? [Ord α] {t : Impl α fun _ => β} {k : α} [Inhabited (α × β)] :
-    getEntryGT! k t = (getEntryGT? k t).get! := rfl
+@[defeq] theorem getEntryGT!_eq_get!_getEntryGT? [Ord α] {t : Impl α fun _ => β} {k : α} [Inhabited (α × β)] :
+    getEntryGT! k t = (getEntryGT? k t).get! := by with_semireducible rfl
 
-theorem getEntryLE!_eq_get!_getEntryLE? [Ord α] {t : Impl α fun _ => β} {k : α} [Inhabited (α × β)] :
-    getEntryLE! k t = (getEntryLE? k t).get! := rfl
+@[defeq] theorem getEntryLE!_eq_get!_getEntryLE? [Ord α] {t : Impl α fun _ => β} {k : α} [Inhabited (α × β)] :
+    getEntryLE! k t = (getEntryLE? k t).get! := by with_semireducible rfl
 
-theorem getEntryLT!_eq_get!_getEntryLT? [Ord α] {t : Impl α fun _ => β} {k : α} [Inhabited (α × β)] :
-    getEntryLT! k t = (getEntryLT? k t).get! := rfl
+@[defeq] theorem getEntryLT!_eq_get!_getEntryLT? [Ord α] {t : Impl α fun _ => β} {k : α} [Inhabited (α × β)] :
+    getEntryLT! k t = (getEntryLT? k t).get! := by with_semireducible rfl
 
-theorem getEntryGED_eq_getD_getEntryGE? [Ord α] {t : Impl α fun _ => β} {k : α} {fallback : α × β} :
-    getEntryGED k t fallback = (getEntryGE? k t).getD fallback := rfl
+@[defeq] theorem getEntryGED_eq_getD_getEntryGE? [Ord α] {t : Impl α fun _ => β} {k : α} {fallback : α × β} :
+    getEntryGED k t fallback = (getEntryGE? k t).getD fallback := by with_semireducible rfl
 
-theorem getEntryGTD_eq_getD_getEntryGT? [Ord α] {t : Impl α fun _ => β} {k : α} {fallback : α × β} :
-    getEntryGTD k t fallback = (getEntryGT? k t).getD fallback := rfl
+@[defeq] theorem getEntryGTD_eq_getD_getEntryGT? [Ord α] {t : Impl α fun _ => β} {k : α} {fallback : α × β} :
+    getEntryGTD k t fallback = (getEntryGT? k t).getD fallback := by with_semireducible rfl
 
-theorem getEntryLED_eq_getD_getEntryLE? [Ord α] {t : Impl α fun _ => β} {k : α} {fallback : α × β} :
-    getEntryLED k t fallback = (getEntryLE? k t).getD fallback := rfl
+@[defeq] theorem getEntryLED_eq_getD_getEntryLE? [Ord α] {t : Impl α fun _ => β} {k : α} {fallback : α × β} :
+    getEntryLED k t fallback = (getEntryLE? k t).getD fallback := by with_semireducible rfl
 
-theorem getEntryLTD_eq_getD_getEntryLT? [Ord α] {t : Impl α fun _ => β} {k : α} {fallback : α × β} :
-    getEntryLTD k t fallback = (getEntryLT? k t).getD fallback := rfl
+@[defeq] theorem getEntryLTD_eq_getD_getEntryLT? [Ord α] {t : Impl α fun _ => β} {k : α} {fallback : α × β} :
+    getEntryLTD k t fallback = (getEntryLT? k t).getD fallback := by with_semireducible rfl
 
 theorem getEntryGE_eq [Ord α] [TransOrd α] {t : Impl α fun _ => β} (hto : t.Ordered) {k : α} (he) :
     getEntryGE k t hto he = (letI e := Impl.getEntryGE k t hto he; (e.1, e.2)) := by

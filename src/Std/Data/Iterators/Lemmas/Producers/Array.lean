@@ -13,6 +13,8 @@ public import Std.Data.Iterators.Producers.Array
 public import Init.Data.Iterators.Producers.List
 public import Std.Data.Iterators.Lemmas.Producers.Monadic.Array
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

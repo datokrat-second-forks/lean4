@@ -10,6 +10,8 @@ public import Init.Ext
 public import Std.Do.SPred.SVal
 public import Init.NotationExtra
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 set_option linter.missingDocs true

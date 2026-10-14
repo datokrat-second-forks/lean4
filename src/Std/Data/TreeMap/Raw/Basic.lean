@@ -164,7 +164,7 @@ def get? (t : Raw α β cmp) (a : α) : Option β :=
 
 @[inline, inherit_doc DTreeMap.Raw.Const.get]
 def get (t : Raw α β cmp) (a : α) (h : a ∈ t) : β :=
-  DTreeMap.Raw.Const.get t.inner a h
+  DTreeMap.Raw.Const.get t.inner a (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Raw.Const.get!]
 def get! [Inhabited β] (t : Raw α β cmp) (a : α) : β :=
@@ -185,7 +185,7 @@ def getKey? (t : Raw α β cmp) (a : α) : Option α :=
 
 @[inline, inherit_doc DTreeMap.Raw.getKey]
 def getKey (t : Raw α β cmp) (a : α) (h : a ∈ t) : α :=
-  t.inner.getKey a h
+  t.inner.getKey a (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Raw.getKey!]
 def getKey! [Inhabited α] (t : Raw α β cmp) (a : α) : α :=

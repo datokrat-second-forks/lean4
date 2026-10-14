@@ -31,9 +31,11 @@ namespace Raw
 
 -- TODO: the next two lemmas need to be renamed, but there is a bootstrapping obstacle.
 
-theorem empty_eq {c : Nat} : (Raw.emptyWithCapacity c : Raw α β) = (Raw₀.emptyWithCapacity c).1 := (rfl)
+theorem empty_eq {c : Nat} : (Raw.emptyWithCapacity c : Raw α β) = (Raw₀.emptyWithCapacity c).1 := by
+  with_semireducible rfl
 
-theorem emptyc_eq : (∅ : Raw α β) = Raw₀.emptyWithCapacity.1 := (rfl)
+theorem emptyc_eq : (∅ : Raw α β) = Raw₀.emptyWithCapacity.1 := by
+  with_semireducible rfl
 
 theorem insert_eq [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) {a : α} {b : β a} :
     m.insert a b = (Raw₀.insert ⟨m, h.size_buckets_pos⟩ a b).1 := by
@@ -80,8 +82,9 @@ theorem contains_eq [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) {a : α} :
   simp [Raw.contains, h.size_buckets_pos]
 
 theorem get_eq [BEq α] [Hashable α] [LawfulBEq α] {m : Raw α β} {a : α} {h : a ∈ m} :
-    m.get a h = Raw₀.get ⟨m, by change dite .. = true at h; split at h <;> simp_all⟩ a
-      (by change dite .. = true at h; split at h <;> simp_all) := (rfl)
+    m.get a h = Raw₀.get ⟨m, by with_semireducible change dite .. = true at h; split at h <;> simp_all⟩ a
+      (by with_semireducible change dite .. = true at h; split at h <;> simp_all) := by
+  with_semireducible rfl
 
 theorem getD_eq [BEq α] [Hashable α] [LawfulBEq α] {m : Raw α β} (h : m.WF) {a : α}
     {fallback : β a} : m.getD a fallback = Raw₀.getD ⟨m, h.size_buckets_pos⟩ a fallback := by
@@ -96,8 +99,9 @@ theorem getKey?_eq [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) {a : α} :
   simp [Raw.getKey?, h.size_buckets_pos]
 
 theorem getKey_eq [BEq α] [Hashable α] {m : Raw α β} {a : α} {h : a ∈ m} :
-    m.getKey a h = Raw₀.getKey ⟨m, by change dite .. = true at h; split at h <;> simp_all⟩ a
-      (by change dite .. = true at h; split at h <;> simp_all) := (rfl)
+    m.getKey a h = Raw₀.getKey ⟨m, by with_semireducible change dite .. = true at h; split at h <;> simp_all⟩ a
+      (by with_semireducible change dite .. = true at h; split at h <;> simp_all) := by
+  with_semireducible rfl
 
 theorem getKeyD_eq [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) {a fallback : α} :
     m.getKeyD a fallback = Raw₀.getKeyD ⟨m, h.size_buckets_pos⟩ a fallback := by
@@ -131,12 +135,12 @@ theorem insertMany_eq [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) {ρ : Ty
 theorem ofList_eq [BEq α] [Hashable α] {l : List ((a : α) × β a)} :
     Raw.ofList l = Raw₀.insertMany Raw₀.emptyWithCapacity l := by
   simp only [Raw.ofList, Raw.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceDIte]
-  congr
+  with_semireducible congr
 
 theorem ofArray_eq [BEq α] [Hashable α] {a : Array ((a : α) × β a)} :
     Raw.ofArray a = Raw₀.insertMany Raw₀.emptyWithCapacity a := by
   simp only [Raw.ofArray, Raw.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceDIte]
-  congr
+  with_semireducible congr
 
 theorem alter_eq [BEq α] [LawfulBEq α] [Hashable α] {m : Raw α β} (h : m.WF) {k : α} {f : Option (β k) → Option (β k)} :
     m.alter k f = Raw₀.alter ⟨m, h.size_buckets_pos⟩ k f := by
@@ -177,12 +181,12 @@ theorem Const.insertMany_eq [BEq α] [Hashable α] {m : Raw α (fun _ => β)} (h
 theorem Const.ofList_eq [BEq α] [Hashable α] {l : List (α × β)} :
     Raw.Const.ofList l = Raw₀.Const.insertMany Raw₀.emptyWithCapacity l := by
   simp only [Raw.Const.ofList, Raw.Const.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceDIte]
-  congr
+  with_semireducible congr
 
 theorem Const.ofArray_eq [BEq α] [Hashable α] {a : Array (α × β)} :
     Raw.Const.ofArray a = Raw₀.Const.insertMany Raw₀.emptyWithCapacity a := by
   simp only [Raw.Const.ofArray, Raw.Const.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceDIte]
-  congr
+  with_semireducible congr
 
 theorem Const.insertManyIfNewUnit_eq {ρ : Type w} [ForIn Id ρ α] [BEq α] [Hashable α]
     {m : Raw α (fun _ => Unit)} {l : ρ} (h : m.WF):
@@ -193,13 +197,13 @@ theorem Const.unitOfList_eq [BEq α] [Hashable α] {l : List α} :
     Raw.Const.unitOfList l = Raw₀.Const.insertManyIfNewUnit Raw₀.emptyWithCapacity l := by
   simp only [Raw.Const.unitOfList, Raw.Const.insertManyIfNewUnit, (Raw.WF.empty).size_buckets_pos ∅,
     ↓reduceDIte]
-  congr
+  with_semireducible congr
 
 theorem Const.unitOfArray_eq [BEq α] [Hashable α] {a : Array α} :
     Raw.Const.unitOfArray a = Raw₀.Const.insertManyIfNewUnit Raw₀.emptyWithCapacity a := by
   simp only [Raw.Const.unitOfArray, Raw.Const.insertManyIfNewUnit, (Raw.WF.empty).size_buckets_pos ∅,
     ↓reduceDIte]
-  congr
+  with_semireducible congr
 
 theorem Const.get?_eq [BEq α] [Hashable α] {m : Raw α (fun _ => β)} (h : m.WF) {a : α} :
     Raw.Const.get? m a = Raw₀.Const.get? ⟨m, h.size_buckets_pos⟩ a := by
@@ -207,9 +211,9 @@ theorem Const.get?_eq [BEq α] [Hashable α] {m : Raw α (fun _ => β)} (h : m.W
 
 theorem Const.get_eq [BEq α] [Hashable α] {m : Raw α (fun _ => β)} {a : α} {h : a ∈ m} :
     Raw.Const.get m a h = Raw₀.Const.get
-      ⟨m, by change dite .. = true at h; split at h <;> simp_all⟩ a
-      (by change dite .. = true at h; split at h <;> simp_all) :=
-  (rfl)
+      ⟨m, by with_semireducible change dite .. = true at h; split at h <;> simp_all⟩ a
+      (by with_semireducible change dite .. = true at h; split at h <;> simp_all) := by
+  with_semireducible rfl
 
 theorem Const.getD_eq [BEq α] [Hashable α] {m : Raw α (fun _ => β)} (h : m.WF) {a : α}
     {fallback : β} : Raw.Const.getD m a fallback =

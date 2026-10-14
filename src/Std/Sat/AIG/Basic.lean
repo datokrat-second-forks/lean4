@@ -177,6 +177,18 @@ A cache for reusing elements from `decls` if they are available.
 def Cache (α : Type) [DecidableEq α] [Hashable α] (decls : Array (Decl α)) :=
   { map : HashMap (Decl α) Nat // Cache.WF decls map }
 
+/-- Creates a `Cache` from a map that is valid with respect to `decls`. -/
+@[inline]
+def Cache.ofSubtype {decls : Array (Decl α)} (c : { map : HashMap (Decl α) Nat // Cache.WF decls map }) :
+    Cache α decls :=
+  smartCast
+
+/-- The map of a `Cache` together with its validity with respect to `decls`. -/
+@[inline]
+def Cache.toSubtype {decls : Array (Decl α)} (c : Cache α decls) :
+    { map : HashMap (Decl α) Nat // Cache.WF decls map } :=
+  smartCast
+
 /--
 Create an empty `Cache`, valid with respect to any `Array Decl` without atoms.
 -/
@@ -184,7 +196,7 @@ Create an empty `Cache`, valid with respect to any `Array Decl` without atoms.
 def Cache.empty {decls : Array (Decl α)}
     (hatoms : ∀ (i : Nat) (h : i < decls.size) (a : α), decls[i] ≠ .atom a := by simp) :
     Cache α decls :=
-  ⟨{}, WF.empty hatoms⟩
+  .ofSubtype ⟨{}, WF.empty hatoms⟩
 
 /-
 We require the `decls` as an explicit argument because we use `decls.size` so accidentally mutating
@@ -192,8 +204,8 @@ We require the `decls` as an explicit argument because we use `decls.size` so ac
 -/
 @[inherit_doc Cache.WF.push_cache, irreducible, inline]
 def Cache.insert (decls : Array (Decl α)) (cache : Cache α decls) (decl : Decl α)
-    (hmiss : cache.val[decl]? = none) : Cache α (decls.push decl) :=
-  ⟨cache.val.insert decl decls.size, Cache.WF.push_cache cache.property hmiss⟩
+    (hmiss : cache.toSubtype.val[decl]? = none) : Cache α (decls.push decl) :=
+  .ofSubtype ⟨cache.toSubtype.val.insert decl decls.size, Cache.WF.push_cache cache.toSubtype.property hmiss⟩
 
 /--
 Contains the index of `decl` in `decls` along with a proof that the index is indeed correct.
@@ -207,36 +219,38 @@ structure CacheHit (decls : Array (Decl α)) (decl : Decl α) where
 For a `c : Cache α decls`, any index `idx` that is a cache hit for some `decl` is within bounds of `decls` (i.e. `idx < decls.size`).
 -/
 theorem Cache.get?_bounds {decls : Array (Decl α)} {idx : Nat} (c : Cache α decls) (decl : Decl α)
-    (hfound : c.val[decl]? = some idx) :
+    (hfound : c.toSubtype.val[decl]? = some idx) :
     idx < decls.size :=
-  (c.property.sound decl idx hfound).1
+  (c.toSubtype.property.sound decl idx hfound).1
 
 /--
 If `Cache.get? decl` returns `some i` then `decls[i] = decl` holds.
 -/
 theorem Cache.get?_property {decls : Array (Decl α)} {idx : Nat} (c : Cache α decls) (decl : Decl α)
-    (hfound : c.val[decl]? = some idx) :
+    (hfound : c.toSubtype.val[decl]? = some idx) :
     decls[idx]'(Cache.get?_bounds c decl hfound) = decl :=
-  (c.property.sound decl idx hfound).2
+  (c.toSubtype.property.sound decl idx hfound).2
 
 /--
 Lookup a `Decl` in a `Cache`.
 -/
 @[inline]
 def Cache.get? (cache : Cache α decls) (decl : Decl α) : Option (CacheHit decls decl) :=
-  match hfound : cache.val[decl]? with
+  match hfound : cache.toSubtype.val[decl]? with
   | some hit =>
     some ⟨hit, Cache.get?_bounds _ _ hfound, Cache.get?_property _ _ hfound⟩
   | none => none
 
 theorem Cache.get?_eq_none_iff {decls : Array (Decl α)} {cache : Cache α decls} {decl : Decl α} :
-    cache.get? decl = none ↔ cache.val[decl]? = none := by
+    cache.get? decl = none ↔ cache.toSubtype.val[decl]? = none := by
+  with_semireducible
   simp only [Cache.get?]
   split <;> simp_all
 
 theorem Cache.get?_eq_some_iff {decls : Array (Decl α)} {cache : Cache α decls} {decl : Decl α}
     {hit : CacheHit decls decl} :
-    cache.get? decl = some hit ↔ cache.val[decl]? = some hit.idx := by
+    cache.get? decl = some hit ↔ cache.toSubtype.val[decl]? = some hit.idx := by
+  with_semireducible
   simp only [Cache.get?]
   split
   next idx hfound =>
@@ -253,7 +267,7 @@ theorem Cache.get?_eq_some_iff {decls : Array (Decl α)} {cache : Cache α decls
 theorem Cache.get?_atom {decls : Array (Decl α)} (cache : Cache α decls) {i : Nat}
     {hi : i < decls.size} {a : α} (h : decls[i] = .atom a) :
     cache.get? (.atom a) = some ⟨i, hi, h⟩ :=
-  Cache.get?_eq_some_iff.mpr (cache.property.atoms i hi a h)
+  Cache.get?_eq_some_iff.mpr (cache.toSubtype.property.atoms i hi a h)
 
 theorem Cache.ofAtoms.complete_succ {decls : Array (Decl α)} {map : HashMap (Decl α) Nat} {idx : Nat}
     (hcomp : ∀ (i : Nat) (h : i < decls.size), i < idx → ∀ (a : α),
@@ -318,7 +332,7 @@ where
       | .false => go (idx + 1) map hsound (ofAtoms.complete_succ hcomp (by simp [hdecl]))
       | .gate _ _ => go (idx + 1) map hsound (ofAtoms.complete_succ hcomp (by simp [hdecl]))
     else
-      ⟨map, ⟨hsound, fun i h a hatom => hcomp i h (by omega) a hatom⟩⟩
+      .ofSubtype ⟨map, ⟨hsound, fun i h a hatom => hcomp i h (by omega) a hatom⟩⟩
   termination_by decls.size - idx
 
 /--
@@ -332,6 +346,7 @@ def IsDAG (α : Type) (decls : Array (Decl α)) : Prop :=
 The empty AIG is a DAG.
 -/
 theorem IsDAG.empty {α : Type} : IsDAG α #[.false] := by
+  with_semireducible
   intro i lhs rhs h
   simp only [List.size_toArray, List.length_cons, List.length_nil, Nat.zero_add,
     Nat.lt_one_iff] at h
@@ -509,7 +524,7 @@ where
       let ridx := rhs.gate
       let rinv := rhs.invert
       let curr := s!"{idx} -> {lidx}{invEdgeStyle linv}; {idx} -> {ridx}{invEdgeStyle rinv};"
-      let hlr := hinv hidx elem
+      have hlr : lidx < idx ∧ ridx < idx := by with_semireducible exact hinv hidx elem
       let laig ← go (acc ++ curr) decls hinv lidx (by omega)
       go laig decls hinv ridx (by omega)
   invEdgeStyle (isInv : Bool) : String :=
@@ -570,7 +585,7 @@ where
     | .false => false
     | .atom v => assign v
     | .gate lhs rhs =>
-      have := h2 h1 h3
+      have : lhs.gate < x ∧ rhs.gate < x := by with_semireducible exact h2 h1 h3
       let lval := go lhs.gate decls assign (by omega) h2
       let rval := go rhs.gate decls assign (by omega) h2
       xor lval lhs.invert && xor rval rhs.invert

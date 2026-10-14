@@ -9,6 +9,9 @@ prelude
 public import Std.WP.Monad.Instances
 public import Init.Control.Lawful.MonadAttach.Instances
 public import Init.Data.Option.Attach
+
+set_option elaborator.implicitTransparency false
+
 universe u v w z
 @[expose] public section
 

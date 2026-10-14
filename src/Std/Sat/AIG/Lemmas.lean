@@ -33,15 +33,15 @@ theorem Ref.cast_eq {aig1 aig2 : AIG α} (ref : Ref aig1)
     (h : aig1.decls.size ≤ aig2.decls.size) :
     (ref.cast h) = ⟨ref.gate, ref.invert, by have := ref.hgate; omega⟩ := rfl
 
-@[simp]
+@[defeq, simp]
 theorem BinaryInput.lhs_cast {aig1 aig2 : AIG α} (input : BinaryInput aig1)
     (h : aig1.decls.size ≤ aig2.decls.size) :
-    (input.cast h).lhs = input.lhs.cast h := rfl
+    (input.cast h).lhs = input.lhs.cast h := by with_semireducible rfl
 
-@[simp]
+@[defeq, simp]
 theorem BinaryInput.rhs_cast {aig1 aig2 : AIG α} (input : BinaryInput aig1)
     (h : aig1.decls.size ≤ aig2.decls.size) :
-    (input.cast h).rhs = input.rhs.cast h := rfl
+    (input.cast h).rhs = input.rhs.cast h := by with_semireducible rfl
 
 @[simp]
 theorem BinaryInput.each_cast {aig1 aig2 : AIG α} (lhs rhs : Ref aig1)
@@ -115,9 +115,9 @@ theorem denote_idx_gate {aig : AIG α} {hstart} (h : aig.decls[start] = .gate lh
     ⟦aig, ⟨start, invert, hstart⟩, assign⟧
       =
     ((
-      (⟦aig, ⟨lhs.gate, lhs.invert, by have := aig.hdag hstart h; omega⟩, assign⟧)
+      (⟦aig, ⟨lhs.gate, lhs.invert, by with_semireducible have := aig.hdag hstart h; omega⟩, assign⟧)
         &&
-      (⟦aig, ⟨rhs.gate, rhs.invert, by have := aig.hdag hstart h; omega⟩, assign⟧)
+      (⟦aig, ⟨rhs.gate, rhs.invert, by with_semireducible have := aig.hdag hstart h; omega⟩, assign⟧)
     ) ^^ invert) := by
   unfold denote
   conv =>
@@ -161,6 +161,7 @@ theorem mem_def {aig : AIG α} {a : α} : (a ∈ aig) ↔ ((.atom a) ∈ aig.dec
 theorem denote_congr (assign1 assign2 : α → Bool) (aig : AIG α) (idx : Nat) (invert : Bool)
     (hidx : idx < aig.decls.size) (h : ∀ a, a ∈ aig → assign1 a = assign2 a) :
     ⟦aig, ⟨idx, invert, hidx⟩, assign1⟧ = ⟦aig, ⟨idx, invert, hidx⟩, assign2⟧ := by
+  with_semireducible
   apply denote_idx_trichotomy
   · intro heq
     simp [denote_idx_false heq]

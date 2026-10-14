@@ -97,9 +97,9 @@ Converts a `WallTime` to a `Nanosecond.Offset`. The epoch is 1970-01-01 00:00:00
 -/
 @[inline]
 def toNanoseconds (wt : WallTime) : Nanosecond.Offset :=
-  let nanos := wt.toSeconds.mul 1000000000
-  let nanos := nanos + (.ofInt wt.val.nano.val)
-  nanos
+  let nanos := wt.toSeconds.toUnitVal.mul 1000000000
+  let nanos := nanos + (.ofInt wt.val.nano.toBounded.toSubtype.val)
+  .ofUnitVal nanos
 
 /--
 Converts a `WallTime` to a `Minute.Offset`. The epoch is 1970-01-01 00:00:00 in local

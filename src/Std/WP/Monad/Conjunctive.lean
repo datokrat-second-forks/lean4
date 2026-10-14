@@ -8,6 +8,9 @@ module
 prelude
 public import Std.WP.Conjunctive
 public import Std.WP.Monad.Instances
+
+set_option elaborator.implicitTransparency false
+
 universe u v w z
 @[expose] public section
 

@@ -24,7 +24,7 @@ public instance {α : Type u}
 @[simp] public theorem toList_rii {α : Type u}
     (cmp : α → α → Ordering := by exact compare) {t : TreeSet α cmp} :
     t[*...*].toList = t.toList := by
-  apply DTreeMap.Internal.Unit.toList_rii
+  with_semireducible apply DTreeMap.Internal.Unit.toList_rii
 
 public instance {α : Type u}
     (cmp : α → α → Ordering := by exact compare) :
@@ -34,8 +34,8 @@ public instance {α : Type u}
 @[simp] public theorem toList_ric {α : Type u}
     (cmp : α → α → Ordering := by exact compare) [TransCmp cmp]
     {t : TreeSet α cmp} {bound : α} : t[*...=bound].toList =
-      t.toList.filter (fun e => (cmp e bound).isLE) :=
-  @DTreeMap.Internal.Unit.toList_ric α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) bound
+      t.toList.filter (fun e => (cmp e bound).isLE) := by
+  with_semireducible exact @DTreeMap.Internal.Unit.toList_ric α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) bound
 
 public instance {α : Type u} (cmp : α → α → Ordering := by exact compare) :
     Rio.Sliceable (TreeSet α cmp) α (@DTreeMap.Internal.Unit.RioSlice α ⟨cmp⟩) :=
@@ -44,8 +44,8 @@ public instance {α : Type u} (cmp : α → α → Ordering := by exact compare)
 @[simp] public theorem toList_rio {α : Type u}
     (cmp : α → α → Ordering := by exact compare) [TransCmp cmp]
     {t : TreeSet α cmp} {bound : α} : t[*...<bound].toList =
-      t.toList.filter (fun e => (cmp e bound).isLT) :=
-  @DTreeMap.Internal.Unit.toList_rio α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) bound
+      t.toList.filter (fun e => (cmp e bound).isLT) := by
+  with_semireducible exact @DTreeMap.Internal.Unit.toList_rio α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) bound
 
 public instance {α : Type u} (cmp : α → α → Ordering := by exact compare) :
     Rci.Sliceable (TreeSet α cmp) α (@DTreeMap.Internal.Unit.RciSlice α ⟨cmp⟩) :=
@@ -53,8 +53,8 @@ public instance {α : Type u} (cmp : α → α → Ordering := by exact compare)
 
 @[simp] public theorem toList_rci {α : Type u} (cmp : α → α → Ordering := by exact compare)
     [TransCmp cmp] {t : TreeSet α cmp} {bound : α} : t[bound...*].toList =
-      t.toList.filter (fun e => (cmp e bound).isGE) :=
-  @DTreeMap.Internal.Unit.toList_rci α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) bound
+      t.toList.filter (fun e => (cmp e bound).isGE) := by
+  with_semireducible exact @DTreeMap.Internal.Unit.toList_rci α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) bound
 
 public instance {α : Type u} (cmp : α → α → Ordering := by exact compare) :
     Rco.Sliceable (TreeSet α cmp) α (@DTreeMap.Internal.Unit.RcoSlice α ⟨cmp⟩) :=
@@ -63,8 +63,8 @@ public instance {α : Type u} (cmp : α → α → Ordering := by exact compare)
 @[simp] public theorem toList_rco {α : Type u} (cmp : α → α → Ordering := by exact compare) [TransCmp cmp]
   {t : TreeSet α cmp} {lowerBound upperBound : α} :
   t[lowerBound...<upperBound].toList =
-    t.toList.filter (fun e => (cmp e lowerBound).isGE ∧ (cmp e upperBound).isLT) :=
-  @DTreeMap.Internal.Unit.toList_rco α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) lowerBound upperBound
+    t.toList.filter (fun e => (cmp e lowerBound).isGE ∧ (cmp e upperBound).isLT) := by
+  with_semireducible exact @DTreeMap.Internal.Unit.toList_rco α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) lowerBound upperBound
 
 public instance {α : Type u} (cmp : α → α → Ordering := by exact compare) :
     Rcc.Sliceable (TreeSet α cmp) α (@DTreeMap.Internal.Unit.RccSlice α ⟨cmp⟩) :=
@@ -73,8 +73,8 @@ public instance {α : Type u} (cmp : α → α → Ordering := by exact compare)
 @[simp] public theorem toList_rcc {α : Type u}
     (cmp : α → α → Ordering := by exact compare)  [TransCmp cmp]
     {t : TreeSet α cmp} {lowerBound upperBound : α} : t[lowerBound...=upperBound].toList =
-    t.toList.filter (fun e => (cmp e lowerBound).isGE ∧ (cmp e upperBound).isLE) :=
-  @DTreeMap.Internal.Unit.toList_rcc α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) lowerBound upperBound
+    t.toList.filter (fun e => (cmp e lowerBound).isGE ∧ (cmp e upperBound).isLE) := by
+  with_semireducible exact @DTreeMap.Internal.Unit.toList_rcc α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) lowerBound upperBound
 
 public instance {α : Type u} (cmp : α → α → Ordering := by exact compare) :
     Roi.Sliceable (TreeSet α cmp) α (@DTreeMap.Internal.Unit.RoiSlice α ⟨cmp⟩) :=
@@ -83,8 +83,8 @@ public instance {α : Type u} (cmp : α → α → Ordering := by exact compare)
 @[simp] public theorem toList_roi {α : Type u}
     (cmp : α → α → Ordering := by exact compare) [TransCmp cmp]
     {t : TreeSet α cmp} {bound : α} : t[bound<...*].toList =
-      t.toList.filter (fun e => (cmp e bound).isGT) :=
-  @DTreeMap.Internal.Unit.toList_roi α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) bound
+      t.toList.filter (fun e => (cmp e bound).isGT) := by
+  with_semireducible exact @DTreeMap.Internal.Unit.toList_roi α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) bound
 
 public instance {α : Type u} (cmp : α → α → Ordering := by exact compare) :
     Roc.Sliceable (TreeSet α cmp) α (@DTreeMap.Internal.Unit.RocSlice α ⟨cmp⟩) :=
@@ -94,8 +94,8 @@ public instance {α : Type u} (cmp : α → α → Ordering := by exact compare)
     (cmp : α → α → Ordering := by exact compare) [TransCmp cmp]
     {t : TreeSet α cmp} {lowerBound upperBound : α} :
     t[lowerBound<...=upperBound].toList =
-      t.toList.filter (fun e => (cmp e lowerBound).isGT ∧ (cmp e upperBound).isLE) :=
-  @DTreeMap.Internal.Unit.toList_roc α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) lowerBound upperBound
+      t.toList.filter (fun e => (cmp e lowerBound).isGT ∧ (cmp e upperBound).isLE) := by
+  with_semireducible exact @DTreeMap.Internal.Unit.toList_roc α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) lowerBound upperBound
 
 public instance {α : Type u} (cmp : α → α → Ordering := by exact compare) :
     Roo.Sliceable (TreeSet α cmp) α (@DTreeMap.Internal.Unit.RooSlice α ⟨cmp⟩) :=
@@ -104,7 +104,7 @@ public instance {α : Type u} (cmp : α → α → Ordering := by exact compare)
 @[simp] public theorem toList_roo {α : Type u}
     (cmp : α → α → Ordering := by exact compare) [TransCmp cmp]
     {t : TreeSet α cmp} {lowerBound upperBound : α} : t[lowerBound<...upperBound].toList =
-      t.toList.filter (fun e => (cmp e lowerBound).isGT ∧ (cmp e upperBound).isLT) :=
-  @DTreeMap.Internal.Unit.toList_roo α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) lowerBound upperBound
+      t.toList.filter (fun e => (cmp e lowerBound).isGT ∧ (cmp e upperBound).isLT) := by
+  with_semireducible exact @DTreeMap.Internal.Unit.toList_roo α ⟨cmp⟩ _ t.inner.inner.inner (@t.inner.inner.wf.ordered α (fun _ => Unit) ⟨cmp⟩ _) lowerBound upperBound
 
 end Std.TreeSet

@@ -93,6 +93,7 @@ end blastConst
 theorem denote_blastConst (aig : AIG α) (c : BitVec w) (assign : α → Bool) :
     ∀ (idx : Nat) (hidx : idx < w),
         ⟦aig, (blastConst aig c).get idx hidx, assign⟧ = c.getLsbD idx := by
+  with_semireducible
   intros
   apply blastConst.go_denote_eq
   omega

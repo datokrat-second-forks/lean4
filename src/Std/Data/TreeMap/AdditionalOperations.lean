@@ -39,37 +39,37 @@ def map (f : α → β → γ) (t : TreeMap α β cmp) : TreeMap α γ cmp :=
 @[inline, inherit_doc DTreeMap.Const.getEntryGE]
 def getEntryGE [TransCmp cmp] (t : TreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) :
     α × β :=
-  DTreeMap.Const.getEntryGE t.inner k h
+  DTreeMap.Const.getEntryGE t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.getEntryGT]
 def getEntryGT [TransCmp cmp] (t : TreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) :
     α × β :=
-  DTreeMap.Const.getEntryGT t.inner k h
+  DTreeMap.Const.getEntryGT t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.getEntryLE]
 def getEntryLE [TransCmp cmp] (t : TreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) :
     α × β :=
-  DTreeMap.Const.getEntryLE t.inner k h
+  DTreeMap.Const.getEntryLE t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.getEntryLT]
 def getEntryLT [TransCmp cmp] (t : TreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) :
     α × β :=
-  DTreeMap.Const.getEntryLT t.inner k h
+  DTreeMap.Const.getEntryLT t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.getKeyGE]
 def getKeyGE [TransCmp cmp] (t : TreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) : α :=
-  DTreeMap.getKeyGE t.inner k h
+  DTreeMap.getKeyGE t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.getKeyGT]
 def getKeyGT [TransCmp cmp] (t : TreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) : α :=
-  DTreeMap.getKeyGT t.inner k h
+  DTreeMap.getKeyGT t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.getKeyLE]
 def getKeyLE [TransCmp cmp] (t : TreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) : α :=
-  DTreeMap.getKeyLE t.inner k h
+  DTreeMap.getKeyLE t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.getKeyLT]
 def getKeyLT [TransCmp cmp] (t : TreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) : α :=
-  DTreeMap.getKeyLT t.inner k h
+  DTreeMap.getKeyLT t.inner k (by with_semireducible exact h)
 
 end Std.TreeMap

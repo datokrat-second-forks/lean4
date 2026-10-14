@@ -47,6 +47,7 @@ theorem bitblast_denote_mem_prefix (aig : AIG BVBit) (input : BVExpr.WithCache B
 theorem bitblast_Inv_of_Inv (input : BVExpr.WithCache BVPred aig)
     (hinv : BVExpr.Cache.Inv assign aig input.cache) :
     BVExpr.Cache.Inv assign (bitblast aig input).result.val.aig (bitblast aig input).cache := by
+  with_semireducible
   unfold bitblast
   dsimp only
   split

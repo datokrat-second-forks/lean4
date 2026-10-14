@@ -129,7 +129,7 @@ theorem not_quotedStringChar_of_not_qdtext_not_dquote_backslash :
   intro c hlt hq
   simpa [Char.ofNat_toNat] using
     (not_quotedStringChar_ofNat_aux
-      c.toNat hlt (by simpa [Char.ofNat_toNat] using hq))
+      c.toNat (by with_semireducible exact hlt) (by simpa [Char.ofNat_toNat] using hq))
 
 /--
 field-vchar = VCHAR

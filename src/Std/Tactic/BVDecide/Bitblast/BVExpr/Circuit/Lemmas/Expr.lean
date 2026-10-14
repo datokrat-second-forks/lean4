@@ -64,6 +64,7 @@ theorem Inv_insert (cache : Cache aig) (expr : BVExpr w) (refs : AIG.RefVec aig 
     (hinv : Inv assign aig cache)
     (hrefs : ∀ (idx : Nat) (hidx : idx < w), ⟦aig, refs.get idx hidx, assign.toAIGAssignment⟧ = (expr.eval assign).getLsbD idx) :
     Inv assign aig (cache.insert expr refs) := by
+  with_semireducible
   intro k hk i hi
   by_cases heq : ⟨w, expr⟩ = k
   · rcases k with ⟨kw, kexpr⟩
@@ -107,6 +108,7 @@ theorem denote_eq_eval_of_get?_eq_some_of_Inv (cache : Cache aig) (expr : BVExpr
     (refs : AIG.RefVec aig w) (hsome : cache.get? expr = some refs) (hinv : Inv assign aig cache) :
     ∀ (i : Nat) (h : i < w),
       ⟦aig,  refs.get i h, assign.toAIGAssignment⟧ = (expr.eval assign).getLsbD i := by
+  with_semireducible
   intro i h
   rcases refs with ⟨refs, _⟩
   rw [get?_eq_some_iff] at hsome
@@ -128,6 +130,7 @@ namespace bitblast
 
 theorem goCache_val_eq_bitblast (aig : AIG BVBit) (expr : BVExpr w) (cache : Cache aig) :
     goCache aig expr cache = bitblast aig ⟨expr, cache⟩ := by
+  with_semireducible
   rfl
 
 theorem go_denote_mem_prefix (aig : AIG BVBit) (expr : BVExpr w) (assign : Assignment)
@@ -189,6 +192,7 @@ termination_by expr => (sizeOf expr, 1, sizeOf aig)
 theorem go_Inv_of_Inv (cache : Cache aig) (hinv : Cache.Inv assign aig cache) :
     ∀ (expr : BVExpr w),
         Cache.Inv assign (go aig expr cache).result.val.aig (go aig expr cache).cache := by
+  with_semireducible
   intro expr
   generalize hres : go aig expr cache = res
   unfold go at hres

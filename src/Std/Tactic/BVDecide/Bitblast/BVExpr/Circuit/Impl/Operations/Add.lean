@@ -223,6 +223,7 @@ theorem go_decl_eq (aig : AIG α) (curr : Nat) (hcurr : curr ≤ w) (cin : AIG.R
       apply AIG.LawfulOperator.lt_size_of_lt_aig_size
       exact h1
     have h4 : idx < (mkFullAdder aig { lhs := lhs.get curr h, rhs := rhs.get curr h, cin := cin }).aig.decls.size := by
+      with_semireducible
       apply AIG.LawfulOperator.lt_size_of_lt_aig_size
       exact h3
     rw [go_decl_eq (w := w) (curr := curr + 1) (h1 := h4)]

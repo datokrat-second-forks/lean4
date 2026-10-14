@@ -23,29 +23,43 @@ for potential leap second.
 -/
 def Ordinal (leap : Bool) := Bounded.LE 0 (.ofNat (if leap then 60 else 59))
 
+/--
+Views an `Ordinal` as the `Bounded.LE` it is defined as.
+-/
+@[inline]
+def Ordinal.toBounded {leap : Bool} (x : Ordinal leap) :
+    Bounded.LE 0 (.ofNat (if leap then 60 else 59)) := smartCast
+
+/--
+Creates an `Ordinal` from the `Bounded.LE` it is defined as.
+-/
+@[inline]
+def Ordinal.ofBounded {leap : Bool} (x : Bounded.LE 0 (.ofNat (if leap then 60 else 59))) :
+    Ordinal leap := smartCast
+
 instance : LE (Ordinal leap) where
-  le x y := LE.le x.val y.val
+  le x y := LE.le x.toBounded.toSubtype.val y.toBounded.toSubtype.val
 
 instance : LT (Ordinal leap) where
-  lt x y := LT.lt x.val y.val
+  lt x y := LT.lt x.toBounded.toSubtype.val y.toBounded.toSubtype.val
 
 instance : Repr (Ordinal leap) where
-  reprPrec r := reprPrec r.val
+  reprPrec r := reprPrec r.toBounded.toSubtype.val
 
 instance : ToString (Ordinal leap) where
-  toString r := toString r.val
+  toString r := toString r.toBounded.toSubtype.val
 
 instance : OfNat (Ordinal leap) n := by
   have inst : OfNat (Bounded.LE 0 (0 + (59 : Nat))) n := inferInstance
   cases leap
-  · exact inst
-  · exact ⟨inst.ofNat.expandTop (by decide)⟩
+  · exact ⟨.ofBounded inst.ofNat⟩
+  · exact ⟨.ofBounded (inst.ofNat.expandTop (by decide))⟩
 
 instance {x y : Ordinal leap} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+  inferInstanceAs (Decidable (x.toBounded.toSubtype.val ≤ y.toBounded.toSubtype.val))
 
 instance {x y : Ordinal leap} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+  inferInstanceAs (Decidable (x.toBounded.toSubtype.val < y.toBounded.toSubtype.val))
 
 instance : DecidableEq (Ordinal leap) := inferInstanceAs <| DecidableEq (Bounded.LE 0 _)
 
@@ -61,14 +75,26 @@ instance : LawfulEqOrd (Ordinal leap) := inferInstanceAs <| LawfulEqOrd (Bounded
 def Offset : Type := UnitVal 1
 deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString
 
+/--
+Views an `Offset` as the `UnitVal` it is defined as.
+-/
+@[inline]
+def Offset.toUnitVal (x : Offset) : UnitVal 1 := smartCast
+
+/--
+Creates an `Offset` from the `UnitVal` it is defined as.
+-/
+@[inline]
+def Offset.ofUnitVal (x : UnitVal 1) : Offset := smartCast
+
 instance {x y : Offset} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+  inferInstanceAs (Decidable (x.toUnitVal.val ≤ y.toUnitVal.val))
 
 instance {x y : Offset} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+  inferInstanceAs (Decidable (x.toUnitVal.val < y.toUnitVal.val))
 
 instance : OfNat Offset n :=
-  ⟨UnitVal.ofNat n⟩
+  ⟨.ofUnitVal (UnitVal.ofNat n)⟩
 
 instance : Ord Offset := inferInstanceAs <| Ord (UnitVal _)
 
@@ -83,14 +109,14 @@ Creates an `Second.Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Second.Offset :=
-  UnitVal.ofInt data
+  .ofUnitVal (UnitVal.ofInt data)
 
 /--
 Creates an `Second.Offset` from an integer.
 -/
 @[inline]
 def ofInt (data : Int) : Second.Offset :=
-  UnitVal.ofInt data
+  .ofUnitVal (UnitVal.ofInt data)
 
 end Offset
 
@@ -101,14 +127,14 @@ Creates an `Ordinal` from an integer, ensuring the value is within bounds.
 -/
 @[inline]
 def ofInt (data : Int) (h : 0 ≤ data ∧ data ≤ Int.ofNat (if leap then 60 else 59)) : Ordinal leap :=
-  Bounded.LE.mk data h
+  .ofBounded (Bounded.LE.mk data h)
 
 /--
 Creates an `Ordinal` from a natural number, ensuring the value is within bounds.
 -/
 @[inline]
 def ofNat (data : Nat) (h : data ≤ (if leap then 60 else 59)) : Ordinal leap :=
-  Bounded.LE.ofNat data h
+  .ofBounded (Bounded.LE.ofNat data h)
 
 /--
 Creates an `Ordinal` from a `Fin`, ensuring the value is within bounds.
@@ -116,15 +142,15 @@ Creates an `Ordinal` from a `Fin`, ensuring the value is within bounds.
 @[inline]
 def ofFin (data : Fin (if leap then 61 else 60)) : Ordinal leap :=
   match leap with
-  | true => Bounded.LE.ofFin data
-  | false => Bounded.LE.ofFin data
+  | true => .ofBounded (Bounded.LE.ofFin data)
+  | false => .ofBounded (Bounded.LE.ofFin data)
 
 /--
 Converts an `Ordinal` to an `Second.Offset`.
 -/
 @[inline]
 def toOffset (ordinal : Ordinal leap) : Second.Offset :=
-  UnitVal.ofInt ordinal.val
+  .ofUnitVal (UnitVal.ofInt ordinal.toBounded.toSubtype.val)
 
 end Ordinal
 end Second

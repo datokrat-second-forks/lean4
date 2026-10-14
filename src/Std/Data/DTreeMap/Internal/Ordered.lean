@@ -39,16 +39,16 @@ def Ordered [Ord α] (t : Impl α β) : Prop :=
 -/
 
 theorem Ordered.left [Ord α] {sz k v l r} (h : (.inner sz k v l r : Impl α β).Ordered) :
-    l.Ordered :=
-  h.sublist (by simp)
+    l.Ordered := by
+  with_semireducible exact h.sublist (by simp)
 
 theorem Ordered.right [Ord α] {sz k v l r} (h : (.inner sz k v l r : Impl α β).Ordered) :
-    r.Ordered :=
-  h.sublist (by simp)
+    r.Ordered := by
+  with_semireducible exact h.sublist (by simp)
 
 theorem Ordered.compare_left [Ord α] {sz k v l r} (h : (.inner sz k v l r : Impl α β).Ordered)
-    {k'} (hk' : k' ∈ l.toListModel) : compare k'.1 k = .lt :=
-  h.rel_of_mem_append hk' List.mem_cons_self
+    {k'} (hk' : k' ∈ l.toListModel) : compare k'.1 k = .lt := by
+  with_semireducible exact h.rel_of_mem_append hk' List.mem_cons_self
 
 theorem Ordered.compare_left_beq_gt [Ord α] [TransOrd α] {k : α → Ordering} [IsStrictCut compare k]
     {sz k' v' l r} (ho : (.inner sz k' v' l r : Impl α β).Ordered) (hcmp : (k k').isGE)
@@ -65,7 +65,7 @@ theorem Ordered.compare_left_not_beq_eq [Ord α] [TransOrd α] {k : α → Order
 theorem Ordered.compare_right [Ord α] {sz k v l r}
     (h : (.inner sz k v l r : Impl α β).Ordered) {k'} (hk' : k' ∈ r.toListModel) :
     compare k k'.1 = .lt := by
-  exact List.rel_of_pairwise_cons (h.sublist (List.sublist_append_right _ _)) hk'
+  with_semireducible exact List.rel_of_pairwise_cons (h.sublist (List.sublist_append_right _ _)) hk'
 
 theorem Ordered.compare_right_not_beq_gt [Ord α] [TransOrd α] {k : α → Ordering}
     [IsStrictCut compare k] {sz k' v' l r}

@@ -9,6 +9,8 @@ prelude
 public import Std.Sat.CNF.Basic
 public import Std.Do.Triple.SpecLemmas
 
+set_option elaborator.implicitTransparency false
+
 public section
 
 /-!

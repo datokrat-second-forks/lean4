@@ -23,6 +23,18 @@ set_option linter.all true
 @[expose] def Ordinal := Bounded.LE 0 59
 deriving Repr, DecidableEq, LE, LT
 
+/--
+Views an `Ordinal` as the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def Ordinal.toBounded (x : Ordinal) : Bounded.LE 0 59 := smartCast
+
+/--
+Creates an `Ordinal` from the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def Ordinal.ofBounded (x : Bounded.LE 0 59) : Ordinal := smartCast
+
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 0 (0 + (59 : Nat))) n)
 
@@ -30,10 +42,10 @@ instance : Inhabited Ordinal where
   default := 0
 
 instance {x y : Ordinal} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+  inferInstanceAs (Decidable (x.toBounded.toSubtype.val ≤ y.toBounded.toSubtype.val))
 
 instance {x y : Ordinal} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+  inferInstanceAs (Decidable (x.toBounded.toSubtype.val < y.toBounded.toSubtype.val))
 
 instance : Ord Ordinal := inferInstanceAs <| Ord (Bounded.LE 0 _)
 
@@ -47,14 +59,26 @@ instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 0 _
 @[expose] def Offset : Type := UnitVal 60
 deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, ToString, LT, LE
 
+/--
+Views an `Offset` as the `UnitVal` it is defined as.
+-/
+@[expose, inline]
+def Offset.toUnitVal (x : Offset) : UnitVal 60 := smartCast
+
+/--
+Creates an `Offset` from the `UnitVal` it is defined as.
+-/
+@[expose, inline]
+def Offset.ofUnitVal (x : UnitVal 60) : Offset := smartCast
+
 instance {x y : Offset} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+  inferInstanceAs (Decidable (x.toUnitVal.val ≤ y.toUnitVal.val))
 
 instance {x y : Offset} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+  inferInstanceAs (Decidable (x.toUnitVal.val < y.toUnitVal.val))
 
 instance : OfNat Offset n :=
-  ⟨UnitVal.ofInt <| Int.ofNat n⟩
+  ⟨.ofUnitVal (UnitVal.ofInt <| Int.ofNat n)⟩
 
 instance : Ord Offset := inferInstanceAs <| Ord (UnitVal _)
 
@@ -69,28 +93,28 @@ Creates an `Ordinal` from an integer, ensuring the value is within bounds.
 -/
 @[inline]
 def ofInt (data : Int) (h : 0 ≤ data ∧ data ≤ 59) : Ordinal :=
-  Bounded.LE.mk data h
+  .ofBounded (Bounded.LE.mk data h)
 
 /--
 Creates an `Ordinal` from a natural number, ensuring the value is within bounds.
 -/
 @[inline]
 def ofNat (data : Nat) (h : data ≤ 59) : Ordinal :=
-  Bounded.LE.ofNat data h
+  .ofBounded (Bounded.LE.ofNat data h)
 
 /--
 Creates an `Ordinal` from a `Fin`, ensuring the value is within bounds.
 -/
 @[inline]
 def ofFin (data : Fin 60) : Ordinal :=
-  Bounded.LE.ofFin data
+  .ofBounded (Bounded.LE.ofFin data)
 
 /--
 Converts an `Ordinal` to an `Offset`.
 -/
 @[inline]
 def toOffset (ordinal : Ordinal) : Offset :=
-  UnitVal.ofInt ordinal.val
+  .ofUnitVal (UnitVal.ofInt ordinal.toBounded.toSubtype.val)
 
 end Ordinal
 namespace Offset
@@ -100,14 +124,14 @@ Creates an `Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Offset :=
-  UnitVal.ofInt data
+  .ofUnitVal (UnitVal.ofInt data)
 
 /--
 Creates an `Offset` from an integer.
 -/
 @[inline]
 def ofInt (data : Int) : Offset :=
-  UnitVal.ofInt data
+  .ofUnitVal (UnitVal.ofInt data)
 
 end Offset
 end Minute

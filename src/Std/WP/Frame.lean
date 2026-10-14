@@ -9,6 +9,9 @@ prelude
 public import Std.WP.Basic
 public import Std.WP.Conjunctive
 public import Std.Internal.Order.FrameClosure
+
+set_option elaborator.implicitTransparency false
+
 universe u v w z t
 @[expose] public section
 

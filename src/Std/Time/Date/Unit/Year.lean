@@ -85,7 +85,7 @@ Converts the `Year` offset to a `Month` offset.
 -/
 @[inline]
 def toMonths (val : Offset) : Month.Offset :=
-  val.mul 12
+  .ofInt (val.mul 12)
 
 /--
 Determines if a year is a leap year in the proleptic Gregorian calendar.
@@ -117,7 +117,7 @@ def weeks (year : Offset) : Bounded.LE 52 53 :=
   let p (year : Offset) := Bounded.LE.byEmod (year.toInt + year.toInt/4 - year.toInt/100 + year.toInt/400) 7 (by decide)
 
   let add : Bounded.LE 0 1 :=
-    if (p year).val = 4 ∨ (p (year - 1)).val = 3
+    if (p year).toSubtype.val = 4 ∨ (p (year - 1)).toSubtype.val = 3
       then Bounded.LE.ofNat 1 (by decide)
       else Bounded.LE.ofNat 0 (by decide)
 

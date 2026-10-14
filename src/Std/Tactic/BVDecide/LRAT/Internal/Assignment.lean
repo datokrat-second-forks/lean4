@@ -44,6 +44,7 @@ def toOption : AssignValue → Option Bool
 
 @[simp]
 theorem toOption_ofBool : (ofBool b).toOption = some b := by
+  with_semireducible
   cases b <;> rfl
 
 end AssignValue
@@ -65,6 +66,7 @@ def get? (a : Assignment) (atom : Nat) : Option Bool :=
 
 private theorem get?_eq_bind {a : Assignment} :
     a.get? atom = a.assign[atom]?.bind AssignValue.toOption := by
+  with_semireducible
   rw [get?, get, Std.HashMap.getD_eq_getD_getElem?]
   cases a.assign[atom]? <;> rfl
 

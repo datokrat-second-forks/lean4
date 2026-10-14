@@ -74,7 +74,8 @@ To debug where the non-linearity is coming from you can set a breakpoint on `lea
   let ⟨size, buckets⟩ := m
   ⟨size, buckets.markLinear⟩
 
-@[simp, grind =] theorem markLinear_eq {m : Raw α β} : m.markLinear = m := rfl
+@[defeq, simp, grind =] theorem markLinear_eq {m : Raw α β} : m.markLinear = m := by
+  with_semireducible rfl
 
 /--
 Two hash maps are equivalent in the sense of `Equiv` iff
@@ -197,8 +198,8 @@ of `a ∈ m`.
 Uses the `LawfulBEq` instance to cast the retrieved value to the correct type.
 -/
 @[inline] def get [BEq α] [Hashable α] [LawfulBEq α] (m : Raw α β) (a : α) (h : a ∈ m) : β a :=
-  Raw₀.get ⟨m, by change dite .. = true at h; split at h <;> simp_all⟩ a
-    (by change dite .. = true at h; split at h <;> simp_all)
+  Raw₀.get ⟨m, by with_semireducible change dite .. = true at h; split at h <;> simp_all⟩ a
+    (by with_semireducible change dite .. = true at h; split at h <;> simp_all)
 
 /--
 Tries to retrieve the mapping for the given key, returning `fallback` if no such mapping is present.
@@ -245,8 +246,8 @@ Retrieves the mapping for the given key. Ensures that such a mapping exists by r
 `a ∈ m`.
 -/
 @[inline] def Const.get [BEq α] [Hashable α] (m : Raw α (fun _ => β)) (a : α) (h : a ∈ m) : β :=
-  Raw₀.Const.get ⟨m, by change dite .. = true at h; split at h <;> simp_all⟩ a
-    (by change dite .. = true at h; split at h <;> simp_all)
+  Raw₀.Const.get ⟨m, by with_semireducible change dite .. = true at h; split at h <;> simp_all⟩ a
+    (by with_semireducible change dite .. = true at h; split at h <;> simp_all)
 
 /--
 Tries to retrieve the mapping for the given key, returning `fallback` if no such mapping is present.
@@ -294,8 +295,8 @@ Retrieves the key from the mapping that matches `a`. Ensures that such a mapping
 requiring a proof of `a ∈ m`. The result is guaranteed to be pointer equal to the key in the map.
 -/
 @[inline] def getKey [BEq α] [Hashable α] (m : Raw α β) (a : α) (h : a ∈ m) : α :=
-  Raw₀.getKey ⟨m, by change dite .. = true at h; split at h <;> simp_all⟩ a
-    (by change dite .. = true at h; split at h <;> simp_all)
+  Raw₀.getKey ⟨m, by with_semireducible change dite .. = true at h; split at h <;> simp_all⟩ a
+    (by with_semireducible change dite .. = true at h; split at h <;> simp_all)
 
 /--
 Checks if a mapping for the given key exists and returns the key if it does, otherwise `fallback`.
@@ -329,8 +330,8 @@ Retrieves the key-value pair, whose key matches `a`. Ensures that such a mapping
 requiring a proof of `a ∈ m`. The key in the returned pair will be `BEq` to the input `a`.
 -/
 @[inline] def getEntry [BEq α] [Hashable α] (m : Raw α β) (a : α) (h : a ∈ m) : (a : α) × β a :=
-  Raw₀.getEntry ⟨m, by change dite .. = true at h; split at h <;> simp_all⟩ a
-    (by change dite .. = true at h; split at h <;> simp_all)
+  Raw₀.getEntry ⟨m, by with_semireducible change dite .. = true at h; split at h <;> simp_all⟩ a
+    (by with_semireducible change dite .. = true at h; split at h <;> simp_all)
 
 /--
 Checks if a mapping for the given key exists and returns the key-value pair if it does, otherwise `fallback`.
@@ -756,13 +757,14 @@ theorem WF.size_buckets_pos [BEq α] [Hashable α] (m : Raw α β) : WF m → 0 
   | constAlter₀ _ => (Raw₀.Const.alter _ _ _).2
   | inter₀ _ _ => (Raw₀.inter _ _).2
 
-@[simp] theorem WF.emptyWithCapacity [BEq α] [Hashable α] {c : Nat} : (Raw.emptyWithCapacity c : Raw α β).WF :=
-  .emptyWithCapacity₀
+@[simp] theorem WF.emptyWithCapacity [BEq α] [Hashable α] {c : Nat} : (Raw.emptyWithCapacity c : Raw α β).WF := by
+  with_semireducible exact .emptyWithCapacity₀
 
 @[simp] theorem WF.empty [BEq α] [Hashable α] : (∅ : Raw α β).WF :=
   .emptyWithCapacity
 
-theorem WF.markLinear [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) : m.markLinear.WF := h
+theorem WF.markLinear [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) : m.markLinear.WF := by
+  with_semireducible exact h
 
 theorem WF.insert [BEq α] [Hashable α] {m : Raw α β} {a : α} {b : β a} (h : m.WF) :
     (m.insert a b).WF := by
@@ -811,28 +813,28 @@ theorem WF.Const.insertManyIfNewUnit [BEq α] [Hashable α] {ρ : Type w} [ForIn
     (Raw₀.Const.insertManyIfNewUnit ⟨m, h.size_buckets_pos⟩ l).2 _ WF.insertIfNew₀ h
 
 theorem WF.ofList [BEq α] [Hashable α] {l : List ((a : α) × β a)} :
-    (ofList l : Raw α β).WF :=
-  .insertMany WF.empty
+    (ofList l : Raw α β).WF := by
+  with_semireducible exact .insertMany WF.empty
 
 theorem WF.Const.ofList {β : Type v} [BEq α] [Hashable α] {l : List (α × β)} :
-    (Const.ofList l : Raw α (fun _ => β)).WF :=
-  Const.insertMany WF.empty
+    (Const.ofList l : Raw α (fun _ => β)).WF := by
+  with_semireducible exact Const.insertMany WF.empty
 
 theorem WF.Const.unitOfList [BEq α] [Hashable α] {l : List α} :
-    (Const.unitOfList l : Raw α (fun _ => Unit)).WF :=
-  Const.insertManyIfNewUnit WF.empty
+    (Const.unitOfList l : Raw α (fun _ => Unit)).WF := by
+  with_semireducible exact Const.insertManyIfNewUnit WF.empty
 
 theorem WF.ofArray [BEq α] [Hashable α] {a : Array ((a : α) × β a)} :
-    (ofArray a : Raw α β).WF :=
-  .insertMany WF.empty
+    (ofArray a : Raw α β).WF := by
+  with_semireducible exact .insertMany WF.empty
 
 theorem WF.Const.ofArray {β : Type v} [BEq α] [Hashable α] {a : Array (α × β)} :
-    (Const.ofArray a : Raw α (fun _ => β)).WF :=
-  Const.insertMany WF.empty
+    (Const.ofArray a : Raw α (fun _ => β)).WF := by
+  with_semireducible exact Const.insertMany WF.empty
 
 theorem WF.Const.unitOfArray [BEq α] [Hashable α] {a : Array α} :
-    (Const.unitOfArray a : Raw α (fun _ => Unit)).WF :=
-  Const.insertManyIfNewUnit WF.empty
+    (Const.unitOfArray a : Raw α (fun _ => Unit)).WF := by
+  with_semireducible exact Const.insertManyIfNewUnit WF.empty
 
 theorem WF.union₀ [BEq α] [Hashable α] {m₁ m₂ : Raw α β} (h₁ : m₁.WF) (h₂ : m₂.WF) : (Raw₀.union ⟨m₁, h₁.size_buckets_pos⟩ ⟨m₂, h₂.size_buckets_pos⟩).val.WF := by
   simp only [Raw₀.union]

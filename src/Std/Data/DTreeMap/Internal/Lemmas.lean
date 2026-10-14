@@ -15,6 +15,8 @@ import Init.Data.List.Pairwise
 import Init.Data.Prod
 import Init.Omega
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

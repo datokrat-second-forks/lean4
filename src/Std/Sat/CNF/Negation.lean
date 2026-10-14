@@ -87,6 +87,7 @@ theorem isNegationOf_negate (c : Clause α) : IsNegationOf c.negate c := by
 
 theorem Clause.sat_negate_iff_sat_of_isNegationOf (f : CNF α) (h : IsNegationOf f c) :
     ∀ a, CNF.Sat a c.negate ↔ CNF.Sat a f := by
+  with_semireducible
   intro a
   have := isNegationOf_negate c
   rw [isNegationOf_def] at this

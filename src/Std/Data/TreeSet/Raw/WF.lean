@@ -9,6 +9,8 @@ prelude
 public import Std.Data.TreeMap.Raw.WF
 public import Std.Data.TreeSet.AdditionalOperations
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

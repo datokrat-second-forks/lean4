@@ -146,6 +146,7 @@ The `Cache` invariant always holds for an empty CNF when all nodes are unmarked.
 -/
 theorem Cache.Inv_init : Inv aig .empty (.replicate aig.decls.size false)
     (by simp) := by
+  with_semireducible
   intro assign _ idx hbound hmark
   simp at hmark
 
@@ -252,6 +253,7 @@ def Cache.cast {aig1 aig2 : AIG α} (cache : Cache aig1 cnf)
     marks := cache.marks ++ Array.replicate (aig2.decls.size - cache.marks.size) false
     hmarks := by simp; omega
     inv := by
+      with_semireducible
       intro assign heval idx hbound hmarked
       have hidx : idx < aig1.decls.size := by
         apply Classical.byContradiction
@@ -287,6 +289,7 @@ def Cache.addFalse (cache : Cache aig cnf) (idx : Nat) (h : idx < aig.decls.size
       marks := cache.marks.set idx true
       hmarks := by simp [cache.hmarks]
       inv := by
+        with_semireducible
         intro assign heval idx hbound hmarked
         rw [Array.getElem_set] at hmarked
         split at hmarked
@@ -312,6 +315,7 @@ def Cache.addAtom (cache : Cache aig cnf) (idx : Nat) (h : idx < aig.decls.size)
       marks := cache.marks.set idx true
       hmarks := by simp [cache.hmarks]
       inv := by
+        with_semireducible
         intro assign heval idx hbound hmarked
         rw [Array.getElem_set] at hmarked
         split at hmarked
@@ -334,13 +338,14 @@ def Cache.addGate (cache : Cache aig cnf) {hlb} {hrb} (idx : Nat) (h : idx < aig
         //
       Cache.IsExtensionBy cache out idx h
     } :=
-  have := aig.hdag h htip
+  have : lhs.gate < idx ∧ rhs.gate < idx := by with_semireducible exact aig.hdag h htip
   have hmarkbound : idx < cache.marks.size := by have := cache.hmarks; omega
   let out :=
     { cache with
       marks := cache.marks.set idx true
       hmarks := by simp [cache.hmarks]
       inv := by
+        with_semireducible
         intro assign heval idx hbound hmarked
         rw [Array.getElem_set] at hmarked
         split at hmarked
@@ -385,6 +390,7 @@ def Cache.addIte (cache : Cache aig cnf) {cond ifTrue ifFalse : Fanin} (idx : Na
       marks := cache.marks.set idx true
       hmarks := by simp [cache.hmarks]
       inv := by
+        with_semireducible
         intro assign heval idx hbound hmarked
         rw [Array.getElem_set] at hmarked
         split at hmarked
@@ -428,6 +434,7 @@ Combining two CNFs for which `State.Inv` holds preserves `State.Inv`.
 -/
 theorem State.Inv_append (h1 : State.Inv aig cnf1) (h2 : State.Inv aig cnf2) :
     State.Inv aig (cnf1 ++ cnf2) := by
+  with_semireducible
   intro assign1 assign hagree
   specialize h1 assign1 assign hagree
   specialize h2 assign1 assign hagree
@@ -440,6 +447,7 @@ theorem State.Inv_append (h1 : State.Inv aig cnf1) (h2 : State.Inv aig cnf2) :
 theorem State.Inv_falseToCNF {upper : Nat} {h : upper < aig.decls.size}
     (heq : aig.decls[upper] = .false) :
     State.Inv aig (Decl.falseToCNF upper) := by
+  with_semireducible
   intro assign1 assign hagree
   simp [CNF.sat_def, hagree upper h, denote_idx_false heq]
 
@@ -449,6 +457,7 @@ theorem State.Inv_falseToCNF {upper : Nat} {h : upper < aig.decls.size}
 theorem State.Inv_gateToCNF {aig : AIG α} {h}
     (heq : aig.decls[upper]'h = .gate lhs rhs) :
     State.Inv aig (Decl.gateToCNF upper lhs.gate rhs.gate lhs.invert rhs.invert) := by
+  with_semireducible
   intro assign1 assign hagree
   have hlhs : lhs.gate < aig.decls.size := Nat.lt_trans (aig.hdag h heq).left h
   have hrhs : rhs.gate < aig.decls.size := Nat.lt_trans (aig.hdag h heq).right h
@@ -471,6 +480,7 @@ theorem State.Inv_iteToCNF {aig : AIG α} {cond ifTrue ifFalse : Fanin} {idx : N
         ⟦aig, ⟨ifTrue.gate, ifTrue.invert, by omega⟩, assign⟧
         ⟦aig, ⟨ifFalse.gate, ifFalse.invert, by omega⟩, assign⟧) :
     State.Inv aig (Decl.iteToCNF idx cond.gate ifTrue.gate ifFalse.gate cond.invert ifTrue.invert ifFalse.invert) := by
+  with_semireducible
   intro assign1 assign hagree
   rw [CNF.sat_def, Decl.iteToCNF_eval, hagree idx h, hdenote, hagree cond.gate (by omega),
     hagree ifTrue.gate (by omega), hagree ifFalse.gate (by omega)]
@@ -514,6 +524,7 @@ public def State.cast {aig1 aig2 : AIG α} (state : State aig1) (hprefix : IsPre
   cnf := state.cnf
   cache := state.cache.cast hprefix
   inv := by
+    with_semireducible
     intro assign1 assign hagree
     apply state.inv assign1 assign
     intro idx h
@@ -578,7 +589,7 @@ def State.addGate (state : State aig) {hlb} {hrb} (idx : Nat) (h : idx < aig.dec
     (htip : aig.decls[idx]'h = .gate lhs rhs) (hl : state.cache.marks[lhs.gate]'hlb = true)
     (hr : state.cache.marks[rhs.gate]'hrb = true) :
     { out : State aig // State.IsExtensionBy state out idx h } :=
-  have := aig.hdag h htip
+  have : lhs.gate < idx ∧ rhs.gate < idx := by with_semireducible exact aig.hdag h htip
   let ⟨cnf, cache, inv⟩ := state
   let newCnf := Decl.gateToCNF idx lhs.gate rhs.gate lhs.invert rhs.invert
   have hinv := toCNF.State.Inv_gateToCNF htip
@@ -629,10 +640,10 @@ theorem State.eval_eq {state : State aig} : State.eval assign state = state.cnf.
   simp [State.eval]
 
 @[simp]
-theorem State.sat_iff {state : State aig} : State.Sat assign state ↔ state.cnf.Sat assign := by rfl
+theorem State.sat_iff {state : State aig} : State.Sat assign state ↔ state.cnf.Sat assign := by with_semireducible rfl
 
 @[simp]
-theorem State.unsat_iff {state : State aig} : State.Unsat state ↔ state.cnf.Unsat := by rfl
+theorem State.unsat_iff {state : State aig} : State.Unsat state ↔ state.cnf.Unsat := by with_semireducible rfl
 
 /--
 Detect if-then-else and XOR/XNOR gates of the form `(c → t) ∧ (¬c → f) = ¬(c ∧ ¬t) ∧ ¬(¬c ∧ ¬f)`.
@@ -646,7 +657,7 @@ def detectIte {aig : AIG α} (root : Nat) (h : root < aig.decls.size) : Option (
       none
     else
       -- Match l = (l0 ∧ l1) and r = (r0 ∧ r1)
-      have := aig.hdag h hroot
+      have : l.gate < root ∧ r.gate < root := by with_semireducible exact aig.hdag h hroot
       match hl : aig.decls[l.gate], hr : aig.decls[r.gate] with
       | .gate l0 l1, .gate r0 r1 => go l r l0 l1 r0 r1
       | _, _ => none
@@ -691,6 +702,7 @@ theorem detectIte.gate_ifFalse_go {l r l0 l1 r0 r1 c t f}
 theorem detectIte_cond_lt {aig : AIG α} {root c t f} {h : root < aig.decls.size}
     (heq : detectIte root h = some ⟨c, t, f⟩) :
     c.gate < root := by
+  with_semireducible
   revert heq
   fun_cases detectIte
   case case2 hl hr =>
@@ -703,6 +715,7 @@ theorem detectIte_cond_lt {aig : AIG α} {root c t f} {h : root < aig.decls.size
 theorem detectIte_ifTrue_lt {aig : AIG α} {root c t f} {h : root < aig.decls.size}
     (heq : detectIte root h = some ⟨c, t, f⟩) :
     t.gate < root := by
+  with_semireducible
   revert heq
   fun_cases detectIte
   case case2 hl hr =>
@@ -715,6 +728,7 @@ theorem detectIte_ifTrue_lt {aig : AIG α} {root c t f} {h : root < aig.decls.si
 theorem detectIte_ifFalse_lt {aig : AIG α} {root c t f} {h : root < aig.decls.size}
     (heq : detectIte root h = some ⟨c, t, f⟩) :
     f.gate < root := by
+  with_semireducible
   revert heq
   fun_cases detectIte
   case case2 hl hr =>
@@ -730,12 +744,12 @@ theorem detectIte.denote_go {aig : AIG α} {root : Nat} {l r l0 l1 r0 r1 c t f :
     (heql : aig.decls[l.gate]'hl = .gate l0 l1) (heqr : aig.decls[r.gate]'hr = .gate r0 r1)
     (hinvl : l.invert) (hinvr : r.invert) :
     ⟦aig, ⟨root, false, hroot⟩, assign⟧ =
-      have := aig.hdag (by omega) heql
-      have := aig.hdag (by omega) heqr
+      have : l0.gate < l.gate ∧ l1.gate < l.gate := by with_semireducible exact aig.hdag (by omega) heql
+      have : r0.gate < r.gate ∧ r1.gate < r.gate := by with_semireducible exact aig.hdag (by omega) heqr
       ite
         ⟦aig, ⟨c.gate, c.invert, by have := gate_cond_go heq; omega⟩, assign⟧
         ⟦aig, ⟨t.gate, t.invert, by have := gate_ifTrue_go heq; omega⟩, assign⟧
-        ⟦aig, ⟨f.gate, f.invert, by have := gate_ifFalse_go heq; omega⟩, assign⟧ := by
+        ⟦aig, ⟨f.gate, f.invert, by with_semireducible have := gate_ifFalse_go heq; omega⟩, assign⟧ := by
   simp only [denote_idx_gate heqroot, Bool.bne_false]
 
   replace heq := heq.symm
@@ -815,7 +829,7 @@ where
             (by simp [toCNF.denote_detectIte hite])
           ⟨ret, toCNF.State.IsExtensionBy_trans_right (h12 := hcstate') (h23 := hretstate)⟩
         | none =>
-          have := aig.hdag h heq
+          have : lhs.gate < upper ∧ rhs.gate < upper := by with_semireducible exact aig.hdag h heq
           let ⟨lstate, hlstate⟩ := go aig lhs.gate (by omega) state
           let ⟨rstate, hrstate⟩ := go aig rhs.gate (by omega) lstate
 
@@ -859,6 +873,7 @@ The CNF returned by `go` will always be SAT at `cnfSatAssignment`.
 theorem toCNF'.go_sat (aig : AIG α) (start : Nat) (h1 : start < aig.decls.size) (assign1 : α → Bool)
     (state : toCNF.State aig) :
     (go aig start h1 state).val.Sat (cnfSatAssignment aig assign1)  := by
+  with_semireducible
   have := (go aig start h1 state).val.inv assign1 (cnfSatAssignment aig assign1)
     (fun _ h => satAssignment_lt h)
   rw [State.sat_iff]
@@ -890,6 +905,7 @@ theorem toCNF'.denote_as_go {assign : Nat → Bool} :
     (⟦aig, ⟨start, inv, h1⟩, projectLeftAssign aig assign⟧ = false)
       →
     CNF.eval assign ((go aig start h1 (.empty aig)).val.cnf.add (CNF.Clause.empty.add start !inv)) = false := by
+  with_semireducible
   intro h
   match heval1:(go aig start h1 (State.empty aig)).val.cnf.eval assign with
   | true =>
@@ -903,6 +919,7 @@ theorem toCNF'.denote_as_go {assign : Nat → Bool} :
 An AIG is unsat iff its CNF is unsat.
 -/
 public theorem toCNF_equisat (entry : Entrypoint α) : (toCNF entry).Unsat ↔ entry.Unsat := by
+  with_semireducible
   simp only [toCNF, toCNF']
   constructor
   · intro h assign1

@@ -10,6 +10,8 @@ public import Init.Internal.Order
 public import Init.Data.Iterators.Basic
 public import Std.Data.Iterators.Lemmas.Equivalence.HetT
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std

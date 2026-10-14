@@ -11,6 +11,8 @@ import all Std.Data.Iterators.Producers.Slice
 public import Init.Data.Slice.Lemmas
 import Init.Data.Slice.InternalLemmas
 
+set_option elaborator.implicitTransparency false
+
 public section
 
 namespace Std.Slice

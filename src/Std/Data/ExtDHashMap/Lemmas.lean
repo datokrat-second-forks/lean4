@@ -12,6 +12,8 @@ import all Std.Data.DHashMap.Basic
 import all Std.Data.DHashMap.Raw
 import all Std.Data.DHashMap.Internal.Defs
 
+set_option elaborator.implicitTransparency false
+
 public section
 
 /-!

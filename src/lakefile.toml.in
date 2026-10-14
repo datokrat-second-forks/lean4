@@ -66,6 +66,7 @@ defaultFacets = ["static", "static.export"]
 [[lean_lib]]
 name = "Std"
 defaultFacets = ["static", "static.export"]
+leanOptions.elaborator.implicitTransparency = true
 
 [[lean_lib]]
 name = "Lean"

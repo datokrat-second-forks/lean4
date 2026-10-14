@@ -64,6 +64,18 @@ def Parsec (ι : Type) (α : Type) : Type :=
 namespace Parsec
 
 /--
+Builds a parser from a function that parses from the given input.
+-/
+@[always_inline, inline]
+def mk {ι α : Type} (f : ι → ParseResult α ι) : Parsec ι α := smartCast
+
+/--
+Runs a parser on the given input.
+-/
+@[always_inline, inline]
+def toFun {ι α : Type} (p : Parsec ι α) : ι → ParseResult α ι := smartCast
+
+/--
 Interface for an input iterator with position tracking and lookahead support.
 -/
 class Input (ι : Type) (elem : outParam Type) (idx : outParam Type) [DecidableEq idx] [DecidableEq elem] where
@@ -78,23 +90,23 @@ variable {α : Type} {ι : Type} {elem : Type} {idx : Type}
 variable [DecidableEq idx] [DecidableEq elem] [Input ι elem idx]
 
 instance : Inhabited (Parsec ι α) where
-  default := fun it => ParseResult.error it (.other "")
+  default := .mk fun it => ParseResult.error it (.other "")
 
 @[always_inline, inline]
-protected def pure (a : α) : Parsec ι α := fun it =>
+protected def pure (a : α) : Parsec ι α := .mk fun it =>
   .success it a
 
 @[always_inline, inline]
-protected def bind {α β : Type} (f : Parsec ι α) (g : α → Parsec ι β) : Parsec ι β := fun it =>
-  match f it with
-  | .success rem a => g a rem
+protected def bind {α β : Type} (f : Parsec ι α) (g : α → Parsec ι β) : Parsec ι β := .mk fun it =>
+  match f.toFun it with
+  | .success rem a => (g a).toFun rem
   | .error pos msg => .error pos msg
 
 /--
 Parser that always fails with the given error message.
 -/
 @[always_inline, inline]
-def fail (msg : String) : Parsec ι α := fun it =>
+def fail (msg : String) : Parsec ι α := .mk fun it =>
   .error it (.other msg)
 
 /--
@@ -102,12 +114,12 @@ Try `p`, then decide what to do based on success or failure without consuming in
 -/
 @[inline]
 def tryCatch (p : Parsec ι α) (csuccess : α → Parsec ι β) (cerror : Unit → Parsec ι β)
-    : Parsec ι β := fun it =>
-  match p it with
-  | .success rem a => csuccess a rem
+    : Parsec ι β := .mk fun it =>
+  match p.toFun it with
+  | .success rem a => (csuccess a).toFun rem
   | .error rem err =>
     -- We assume that it.s never changes as the `Parsec` monad only modifies `it.pos`.
-    if Input.pos it = Input.pos rem then cerror () rem else .error rem err
+    if Input.pos it = Input.pos rem then (cerror ()).toFun rem else .error rem err
 
 @[always_inline]
 instance : Monad (Parsec ι) where
@@ -125,8 +137,8 @@ def orElse (p : Parsec ι α) (q : Unit → Parsec ι α) : Parsec ι α :=
 Attempt to parse with `p`, but don't consume input on failure.
 -/
 @[always_inline, inline]
-def attempt (p : Parsec ι α) : Parsec ι α := fun it =>
-  match p it with
+def attempt (p : Parsec ι α) : Parsec ι α := .mk fun it =>
+  match p.toFun it with
   | .success rem res => .success rem res
   | .error _ err => .error it err
 
@@ -139,14 +151,14 @@ instance : Alternative (Parsec ι) where
 Succeeds only if input is at end-of-file.
 -/
 @[inline]
-def eof : Parsec ι Unit := fun it =>
+def eof : Parsec ι Unit := .mk fun it =>
   if Input.hasNext it then
     .error it (.other "expected end of input")
   else
     .success it ()
 
 @[inline]
-def isEof : Parsec ι Bool := fun it =>
+def isEof : Parsec ι Bool := .mk fun it =>
   .success it (!Input.hasNext it)
 
 @[specialize]
@@ -163,7 +175,7 @@ def many1 (p : Parsec ι α) : Parsec ι <| Array α := do manyCore p #[← p]
 Gets the next input element.
 -/
 @[inline]
-def any : Parsec ι elem := fun it =>
+def any : Parsec ι elem := .mk fun it =>
   if h : Input.hasNext it then
     let c := Input.curr' it h
     let it' := Input.next' it h
@@ -183,8 +195,8 @@ def satisfy (p : elem → Bool) : Parsec ι elem := attempt do
 Fails if `p` succeeds, otherwise succeeds without consuming input.
 -/
 @[inline]
-def notFollowedBy (p : Parsec ι α) : Parsec ι Unit := fun it =>
-  match p it with
+def notFollowedBy (p : Parsec ι α) : Parsec ι Unit := .mk fun it =>
+  match p.toFun it with
   | .success _ _ => .error it (.other "")
   | .error _ _ => .success it ()
 
@@ -192,7 +204,7 @@ def notFollowedBy (p : Parsec ι α) : Parsec ι Unit := fun it =>
 Peeks at the next element, returns `some` if exists else `none`, does not consume input.
 -/
 @[inline]
-def peek? : Parsec ι (Option elem) := fun it =>
+def peek? : Parsec ι (Option elem) := .mk fun it =>
   if h : Input.hasNext it then
     .success it (some <| Input.curr' it h)
   else
@@ -215,7 +227,7 @@ def peekWhen? (p : elem → Bool) : Parsec ι (Option elem) := do
 Peeks at the next element, errors on EOF, does not consume input.
 -/
 @[inline]
-def peek! : Parsec ι elem := fun it =>
+def peek! : Parsec ι elem := .mk fun it =>
   if h : Input.hasNext it then
     .success it (Input.curr' it h)
   else
@@ -225,7 +237,7 @@ def peek! : Parsec ι elem := fun it =>
 Peeks at the next element or returns a default if at EOF, does not consume input.
 -/
 @[inline]
-def peekD (default : elem) : Parsec ι elem := fun it =>
+def peekD (default : elem) : Parsec ι elem := .mk fun it =>
   if h : Input.hasNext it then
     .success it (Input.curr' it h)
   else
@@ -235,7 +247,7 @@ def peekD (default : elem) : Parsec ι elem := fun it =>
 Consumes one element if available, otherwise errors on EOF.
 -/
 @[inline]
-def skip : Parsec ι Unit := fun it =>
+def skip : Parsec ι Unit := .mk fun it =>
   if h : Input.hasNext it then
     .success (Input.next' it h) ()
   else

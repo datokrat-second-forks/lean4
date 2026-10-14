@@ -22,6 +22,8 @@ for a `repeat` loop, one per set of annotations the loop states. Each restates `
 leaving what the loop does not state to `vcgen` to infer.
 -/
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std.WP

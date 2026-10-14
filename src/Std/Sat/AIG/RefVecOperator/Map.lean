@@ -124,8 +124,8 @@ theorem map_decl_eq {aig : AIG α} (target : MapTarget aig len) :
       (map aig target).1.decls[idx]'h2
         =
       aig.decls[idx]'h1 := by
-  intros
-  unfold map
+  intro idx h1 h2
+  unfold map at h2 ⊢
   apply map.go_decl_eq
 
 instance : LawfulVecOperator α MapTarget map where

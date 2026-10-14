@@ -61,7 +61,7 @@ instance : LawfulEqOrd Timestamp where
   eq_of_compare {a b} h := by
     simp only [Timestamp.compare_def] at h
     apply Timestamp.ext
-    exact LawfulEqOrd.eq_of_compare h
+    with_semireducible exact LawfulEqOrd.eq_of_compare h
 
 namespace Timestamp
 
@@ -125,9 +125,9 @@ Converts a `Timestamp` to nanoseconds as `Nanosecond.Offset`.
 -/
 @[inline]
 def toNanosecondsSinceUnixEpoch (tm : Timestamp) : Nanosecond.Offset :=
-  let nanos := tm.toSecondsSinceUnixEpoch.mul 1000000000
-  let nanos := nanos + (.ofInt tm.val.nano.val)
-  nanos
+  let nanos := tm.toSecondsSinceUnixEpoch.toUnitVal.mul 1000000000
+  let nanos := nanos + (.ofInt tm.val.nano.toBounded.toSubtype.val)
+  .ofUnitVal nanos
 
 /--
 Converts a `Timestamp` to nanoseconds as `Millisecond.Offset`.

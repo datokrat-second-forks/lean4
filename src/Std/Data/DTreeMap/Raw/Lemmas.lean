@@ -13,6 +13,8 @@ import Init.Data.List.Find
 import Init.Data.List.Pairwise
 import Init.Data.Prod
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

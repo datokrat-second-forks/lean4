@@ -19,6 +19,8 @@ set_option doc.verso true
 
 open Std Std.Iterators
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

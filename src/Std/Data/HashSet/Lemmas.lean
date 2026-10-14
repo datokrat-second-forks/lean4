@@ -10,6 +10,8 @@ public import Std.Data.HashMap.Lemmas
 public import Std.Data.HashSet.Basic
 public import Std.Internal.ForIn.Basic
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

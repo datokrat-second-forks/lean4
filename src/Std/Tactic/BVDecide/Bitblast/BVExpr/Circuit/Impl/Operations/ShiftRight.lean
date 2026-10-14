@@ -86,7 +86,7 @@ instance : AIG.LawfulVecOperator α AIG.ShiftTarget blastShiftRightConst where
     apply blastShiftRightConst.go_le_size
   decl_eq := by
     intros
-    unfold blastShiftRightConst
+    unfold blastShiftRightConst at *
     apply blastShiftRightConst.go_decl_eq
 
 def blastArithShiftRightConst (aig : AIG α) (target : AIG.ShiftTarget aig w) :

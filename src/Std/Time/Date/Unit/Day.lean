@@ -23,14 +23,26 @@ set_option linter.all true
 @[expose] def Ordinal := Bounded.LE 1 31
 deriving Repr, DecidableEq, LE, LT
 
+/--
+Views an `Ordinal` as the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def Ordinal.toBounded (x : Ordinal) : Bounded.LE 1 31 := smartCast
+
+/--
+Creates an `Ordinal` from the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def Ordinal.ofBounded (x : Bounded.LE 1 31) : Ordinal := smartCast
+
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 1 (1 + (30 : Nat))) n)
 
 instance {x y : Ordinal} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+  inferInstanceAs (Decidable (x.toBounded.toSubtype.val ≤ y.toBounded.toSubtype.val))
 
 instance {x y : Ordinal} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+  inferInstanceAs (Decidable (x.toBounded.toSubtype.val < y.toBounded.toSubtype.val))
 
 instance : Inhabited Ordinal where default := 1
 
@@ -47,13 +59,25 @@ instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 1 _
 @[expose] def Offset : Type := UnitVal 86400
 deriving Repr, DecidableEq, Inhabited, Add, Sub, Neg, LE, LT, ToString
 
-instance : OfNat Offset n := ⟨UnitVal.ofNat n⟩
+/--
+Views an `Offset` as the `UnitVal` it is defined as.
+-/
+@[expose, inline]
+def Offset.toUnitVal (x : Offset) : UnitVal 86400 := smartCast
+
+/--
+Creates an `Offset` from the `UnitVal` it is defined as.
+-/
+@[expose, inline]
+def Offset.ofUnitVal (x : UnitVal 86400) : Offset := smartCast
+
+instance : OfNat Offset n := ⟨.ofUnitVal (UnitVal.ofNat n)⟩
 
 instance {x y : Offset} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+  inferInstanceAs (Decidable (x.toUnitVal.val ≤ y.toUnitVal.val))
 
 instance {x y : Offset} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+  inferInstanceAs (Decidable (x.toUnitVal.val < y.toUnitVal.val))
 
 instance : Ord Offset := inferInstanceAs <| Ord (UnitVal _)
 
@@ -68,7 +92,7 @@ Creates an `Ordinal` from an integer, ensuring the value is within bounds.
 -/
 @[inline]
 def ofInt (data : Int) (h : 1 ≤ data ∧ data ≤ 31) : Ordinal :=
-  Bounded.LE.mk data h
+  .ofBounded (Bounded.LE.mk data h)
 
 /--
 `OfYear` represents the day ordinal within a year, which can be bounded between 1 and 365 or 366,
@@ -76,11 +100,25 @@ depending on whether it's a leap year.
 -/
 @[expose] def OfYear (leap : Bool) := Bounded.LE 1 (.ofNat (if leap then 366 else 365))
 
+/--
+Views an `OfYear` as the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def OfYear.toBounded {leap : Bool} (x : OfYear leap) :
+    Bounded.LE 1 (.ofNat (if leap then 366 else 365)) := smartCast
+
+/--
+Creates an `OfYear` from the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def OfYear.ofBounded {leap : Bool} (x : Bounded.LE 1 (.ofNat (if leap then 366 else 365))) :
+    OfYear leap := smartCast
+
 instance : Repr (OfYear leap) where
-  reprPrec r p := reprPrec r.val p
+  reprPrec r p := reprPrec r.toBounded.toSubtype.val p
 
 instance : ToString (OfYear leap) where
-  toString r := toString r.val
+  toString r := toString r.toBounded.toSubtype.val
 
 instance : DecidableEq (OfYear leap) := inferInstanceAs <| DecidableEq (Bounded.LE 1 _)
 
@@ -98,7 +136,7 @@ is within the valid range for the year, which can be 1 to 365 or 366 for leap ye
 -/
 @[inline]
 def ofNat (data : Nat) (h : data ≥ 1 ∧ data ≤ (if leap then 366 else 365) := by decide) : OfYear leap :=
-  Bounded.LE.ofNat' data h
+  .ofBounded (Bounded.LE.ofNat' data h)
 
 end OfYear
 
@@ -109,7 +147,7 @@ instance : OfNat (Ordinal.OfYear leap) n :=
 
 instance : Inhabited (Ordinal.OfYear leap) where
   default := by
-    refine ⟨1, And.intro (by decide) ?_⟩
+    refine (.ofBounded (.mk 1 (And.intro (by decide) ?_)))
     split <;> simp
 
 /--
@@ -118,7 +156,7 @@ for days of a month (1 to 31).
 -/
 @[inline]
 def ofNat (data : Nat) (h : data ≥ 1 ∧ data ≤ 31 := by decide) : Ordinal :=
-  Bounded.LE.ofNat' data h
+  .ofBounded (Bounded.LE.ofNat' data h)
 
 /--
 Creates an ordinal from a `Fin` value, ensuring it is within the valid range for days of the month (1 to 31).
@@ -126,14 +164,14 @@ If the `Fin` value is 0, it is converted to 1.
 -/
 @[inline]
 def ofFin (data : Fin 32) : Ordinal :=
-  Bounded.LE.ofFin' data (by decide)
+  .ofBounded (Bounded.LE.ofFin' data (by decide))
 
 /--
 Converts an `Ordinal` to an `Offset`.
 -/
 @[inline]
 def toOffset (ordinal : Ordinal) : Offset :=
-  UnitVal.ofInt ordinal.val
+  .ofUnitVal (UnitVal.ofInt ordinal.toBounded.toSubtype.val)
 
 namespace OfYear
 
@@ -141,7 +179,7 @@ namespace OfYear
 Converts an `OfYear` ordinal to a `Offset`.
 -/
 def toOffset (ofYear : OfYear leap) : Offset :=
-  UnitVal.ofInt ofYear.val
+  .ofUnitVal (UnitVal.ofInt ofYear.toBounded.toSubtype.val)
 
 end OfYear
 end Ordinal
@@ -152,92 +190,92 @@ namespace Offset
 Converts an `Offset` to an `Ordinal`.
 -/
 @[inline]
-def toOrdinal (off : Day.Offset) (h : off.val ≥ 1 ∧ off.val ≤ 31) : Ordinal :=
-  Bounded.LE.mk off.val h
+def toOrdinal (off : Day.Offset) (h : off.toUnitVal.val ≥ 1 ∧ off.toUnitVal.val ≤ 31) : Ordinal :=
+  .ofBounded (Bounded.LE.mk off.toUnitVal.val h)
 
 /--
 Creates an `Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Day.Offset :=
-  UnitVal.ofInt data
+  .ofUnitVal (UnitVal.ofInt data)
 
 /--
 Creates an `Offset` from an integer.
 -/
 @[inline]
 def ofInt (data : Int) : Day.Offset :=
-  UnitVal.ofInt data
+  .ofUnitVal (UnitVal.ofInt data)
 
 /--
 Convert `Day.Offset` into `Nanosecond.Offset`.
 -/
 @[inline]
 def toNanoseconds (days : Day.Offset) : Nanosecond.Offset :=
-  days.mul 86400000000000 |>.cast (by decide +kernel)
+  .ofUnitVal (days.toUnitVal.mul 86400000000000 |>.cast (by decide +kernel))
 
 /--
 Convert `Nanosecond.Offset` into `Day.Offset`.
 -/
 @[inline]
 def ofNanoseconds (ns : Nanosecond.Offset) : Day.Offset :=
-  ns.ediv 86400000000000 |>.cast (by decide +kernel)
+  .ofUnitVal (ns.toUnitVal.ediv 86400000000000 |>.cast (by decide +kernel))
 
 /--
 Convert `Day.Offset` into `Millisecond.Offset`.
 -/
 @[inline]
 def toMilliseconds (days : Day.Offset) : Millisecond.Offset :=
-  days.mul 86400000 |>.cast (by decide +kernel)
+  .ofUnitVal (days.toUnitVal.mul 86400000 |>.cast (by decide +kernel))
 
 /--
 Convert `Millisecond.Offset` into `Day.Offset`.
 -/
 @[inline]
 def ofMilliseconds (ms : Millisecond.Offset) : Day.Offset :=
-  ms.ediv 86400000 |>.cast (by decide +kernel)
+  .ofUnitVal (ms.toUnitVal.ediv 86400000 |>.cast (by decide +kernel))
 
 /--
 Convert `Day.Offset` into `Second.Offset`.
 -/
 @[inline]
 def toSeconds (days : Day.Offset) : Second.Offset :=
-  days.mul 86400 |>.cast (by decide +kernel)
+  .ofUnitVal (days.toUnitVal.mul 86400 |>.cast (by decide +kernel))
 
 /--
 Convert `Second.Offset` into `Day.Offset`.
 -/
 @[inline]
 def ofSeconds (secs : Second.Offset) : Day.Offset :=
-  secs.ediv 86400 |>.cast (by decide +kernel)
+  .ofUnitVal (secs.toUnitVal.ediv 86400 |>.cast (by decide +kernel))
 
 /--
 Convert `Day.Offset` into `Minute.Offset`.
 -/
 @[inline]
 def toMinutes (days : Day.Offset) : Minute.Offset :=
-  days.mul 1440 |>.cast (by decide +kernel)
+  .ofUnitVal (days.toUnitVal.mul 1440 |>.cast (by decide +kernel))
 
 /--
 Convert `Minute.Offset` into `Day.Offset`.
 -/
 @[inline]
 def ofMinutes (minutes : Minute.Offset) : Day.Offset :=
-  minutes.ediv 1440 |>.cast (by decide +kernel)
+  .ofUnitVal (minutes.toUnitVal.ediv 1440 |>.cast (by decide +kernel))
 
 /--
 Convert `Day.Offset` into `Hour.Offset`.
 -/
 @[inline]
 def toHours (days : Day.Offset) : Hour.Offset :=
-  days.mul 24 |>.cast (by decide +kernel)
+  .ofUnitVal (days.toUnitVal.mul 24 |>.cast (by decide +kernel))
 
 /--
 Convert `Hour.Offset` into `Day.Offset`.
 -/
 @[inline]
 def ofHours (hours : Hour.Offset) : Day.Offset :=
-  hours.ediv 24 |>.cast (by decide +kernel)
+  .ofUnitVal (hours.toUnitVal.ediv 24 |>.cast (by decide +kernel))
 
 end Offset
 end Day

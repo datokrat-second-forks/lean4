@@ -72,12 +72,12 @@ public theorem toList_iter {α : Type u} {β : Type v} {cmp : α → α → Orde
 
 @[simp]
 public theorem keysIter_toList {α β} {cmp : α → α → Ordering} (m : Raw α β cmp) :
-    m.keysIter.toList = m.keys :=
-  DTreeMap.Raw.keysIter_toList m.inner
+    m.keysIter.toList = m.keys := by
+  with_semireducible exact DTreeMap.Raw.keysIter_toList m.inner
 
 @[simp]
 public theorem valuesIter_toList {α β} {cmp : α → α → Ordering} (m : Raw α β cmp) :
-    m.valuesIter.toList = m.values :=
-  DTreeMap.Raw.valuesIter_toList m.inner
+    m.valuesIter.toList = m.values := by
+  with_semireducible exact DTreeMap.Raw.valuesIter_toList m.inner
 
 end Std.TreeMap.Raw

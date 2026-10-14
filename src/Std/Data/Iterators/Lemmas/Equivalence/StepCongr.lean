@@ -8,6 +8,8 @@ module
 prelude
 public import Std.Data.Iterators.Lemmas.Equivalence.Basic
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

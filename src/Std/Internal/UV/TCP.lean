@@ -26,7 +26,7 @@ Represents a TCP socket.
 -/
 def Socket : Type := SocketImpl.type
 
-instance : Nonempty Socket := by exact SocketImpl.property
+instance : Nonempty Socket := by with_semireducible exact SocketImpl.property
 
 namespace Socket
 

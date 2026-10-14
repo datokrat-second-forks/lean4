@@ -29,6 +29,7 @@ def Clause.maxLiteral (c : Clause Nat) : Option Nat := c.atoms.max?
 
 private theorem Clause.maxLiteral_eq {c : Clause Nat} :
     c.maxLiteral = (c.literals.map (·.1)).max? := by
+  with_semireducible
   show c.atoms.max? = _
   rw [← Array.max?_toList, ← Clause.Internal.map_fst_literals]
 

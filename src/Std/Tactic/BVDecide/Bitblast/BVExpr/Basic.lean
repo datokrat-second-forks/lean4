@@ -107,13 +107,13 @@ def eval : BVBinOp → (BitVec w → BitVec w → BitVec w)
   | udiv => (· / ·)
   | umod => (· % · )
 
-@[simp] theorem eval_and : eval .and = ((· &&& ·) : BitVec w → BitVec w → BitVec w) := by rfl
-@[simp] theorem eval_or : eval .or = ((· ||| ·) : BitVec w → BitVec w → BitVec w) := by rfl
-@[simp] theorem eval_xor : eval .xor = ((· ^^^ ·) : BitVec w → BitVec w → BitVec w) := by rfl
-@[simp] theorem eval_add : eval .add = ((· + ·) : BitVec w → BitVec w → BitVec w) := by rfl
-@[simp] theorem eval_mul : eval .mul = ((· * ·) : BitVec w → BitVec w → BitVec w) := by rfl
-@[simp] theorem eval_udiv : eval .udiv = ((· / ·) : BitVec w → BitVec w → BitVec w) := by rfl
-@[simp] theorem eval_umod : eval .umod = ((· % ·) : BitVec w → BitVec w → BitVec w) := by rfl
+@[simp] theorem eval_and : eval .and = ((· &&& ·) : BitVec w → BitVec w → BitVec w) := by with_semireducible rfl
+@[simp] theorem eval_or : eval .or = ((· ||| ·) : BitVec w → BitVec w → BitVec w) := by with_semireducible rfl
+@[simp] theorem eval_xor : eval .xor = ((· ^^^ ·) : BitVec w → BitVec w → BitVec w) := by with_semireducible rfl
+@[simp] theorem eval_add : eval .add = ((· + ·) : BitVec w → BitVec w → BitVec w) := by with_semireducible rfl
+@[simp] theorem eval_mul : eval .mul = ((· * ·) : BitVec w → BitVec w → BitVec w) := by with_semireducible rfl
+@[simp] theorem eval_udiv : eval .udiv = ((· / ·) : BitVec w → BitVec w → BitVec w) := by with_semireducible rfl
+@[simp] theorem eval_umod : eval .umod = ((· % ·) : BitVec w → BitVec w → BitVec w) := by with_semireducible rfl
 
 end BVBinOp
 
@@ -180,25 +180,28 @@ def eval : BVUnOp → (BitVec w → BitVec w)
   | clz => BitVec.clz
   | cpop => BitVec.cpop
 
-@[simp] theorem eval_not : eval .not = ((~~~ ·) : BitVec w → BitVec w) := by rfl
+@[simp] theorem eval_not : eval .not = ((~~~ ·) : BitVec w → BitVec w) := by with_semireducible rfl
 
 @[simp]
 theorem eval_rotateLeft : eval (rotateLeft n) = ((BitVec.rotateLeft · n) : BitVec w → BitVec w) := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem eval_rotateRight : eval (rotateRight n) = ((BitVec.rotateRight · n) : BitVec w → BitVec w) := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem eval_arithShiftRightConst : eval (arithShiftRightConst n) = (BitVec.sshiftRight · n : BitVec w → BitVec w) := by
+  with_semireducible
   rfl
 
-@[simp] theorem eval_reverse : eval .reverse = (BitVec.reverse : BitVec w → BitVec w) := by rfl
+@[simp] theorem eval_reverse : eval .reverse = (BitVec.reverse : BitVec w → BitVec w) := by with_semireducible rfl
 
-@[simp] theorem eval_clz : eval .clz = (BitVec.clz : BitVec w → BitVec w) := by rfl
+@[simp] theorem eval_clz : eval .clz = (BitVec.clz : BitVec w → BitVec w) := by with_semireducible rfl
 
-@[simp] theorem eval_cpop : eval .cpop = (BitVec.cpop : BitVec w → BitVec w) := by rfl
+@[simp] theorem eval_cpop : eval .cpop = (BitVec.cpop : BitVec w → BitVec w) := by with_semireducible rfl
 
 end BVUnOp
 
@@ -286,7 +289,7 @@ private def withPtrEq (a b : BVExpr w) (k : Unit → Bool) (_h : a = b → k () 
 
 @[no_expose]
 instance decEq : DecidableEq (BVExpr w) := fun l r =>
-  withPtrEqDecEq withPtrEq (fun _ _ _ _ => rfl) l r fun _ =>
+  withPtrEqDecEq withPtrEq (fun _ _ _ _ => (by with_semireducible exact rfl)) l r fun _ =>
     if h : hash l ≠ hash r then
       .isFalse (ne_of_apply_ne hash h)
     else
@@ -466,39 +469,47 @@ theorem eval_var : eval assign ((.var idx) : BVExpr w) = (assign.get idx).bv.tru
   · rfl
 
 @[simp]
-theorem eval_const : eval assign (.const val) = val := by rfl
+theorem eval_const : eval assign (.const val) = val := by with_semireducible rfl
 
 @[simp]
 theorem eval_extract : eval assign (.extract start len expr) = BitVec.extractLsb' start len (eval assign expr) := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem eval_bin : eval assign (.bin lhs op rhs) = op.eval (lhs.eval assign) (rhs.eval assign) := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem eval_un : eval assign (.un op operand) = op.eval (operand.eval assign) := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem eval_append : eval assign (.append lhs rhs h) = (lhs.eval assign) ++ (rhs.eval assign) := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem eval_replicate : eval assign (.replicate n expr h) = BitVec.replicate n (expr.eval assign) := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem eval_shiftLeft : eval assign (.shiftLeft lhs rhs) = (eval assign lhs) <<< (eval assign rhs) := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem eval_shiftRight : eval assign (.shiftRight lhs rhs) = (eval assign lhs) >>> (eval assign rhs) := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem eval_arithShiftRight :
     eval assign (.arithShiftRight lhs rhs) = BitVec.sshiftRight' (eval assign lhs) (eval assign rhs) := by
+  with_semireducible
   rfl
 
 end BVExpr
@@ -532,8 +543,8 @@ def eval : BVBinPred → (BitVec w → BitVec w → Bool)
   | .eq => (· == ·)
   | .ult => BitVec.ult
 
-@[simp] theorem eval_eq : eval .eq = ((· == ·) : BitVec w → BitVec w → Bool) := by rfl
-@[simp] theorem eval_ult : eval .ult = (BitVec.ult : BitVec w → BitVec w → Bool) := by rfl
+@[simp] theorem eval_eq : eval .eq = ((· == ·) : BitVec w → BitVec w → Bool) := by with_semireducible rfl
+@[simp] theorem eval_ult : eval .ult = (BitVec.ult : BitVec w → BitVec w → Bool) := by with_semireducible rfl
 
 end BVBinPred
 
@@ -576,10 +587,12 @@ def eval (assign : BVExpr.Assignment) : BVPred → Bool
 
 @[simp]
 theorem eval_bin : eval assign (.bin lhs op rhs) = op.eval (lhs.eval assign) (rhs.eval assign) := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem eval_getLsbD : eval assign (.getLsbD expr idx) = (expr.eval assign).getLsbD idx := by
+  with_semireducible
   rfl
 
 end BVPred
@@ -597,12 +610,12 @@ The semantics of boolean problems involving BitVec predicates as atoms.
 def eval (assign : BVExpr.Assignment) (expr : BVLogicalExpr) : Bool :=
   BoolExpr.eval (·.eval assign) expr
 
-@[simp] theorem eval_literal : eval assign (.literal pred) = pred.eval assign := rfl
-@[simp] theorem eval_const : eval assign (.const b) = b := rfl
-@[simp] theorem eval_not : eval assign (.not x) = !eval assign x := rfl
-@[simp] theorem eval_gate : eval assign (.gate g x y) = g.eval (eval assign x) (eval assign y) := rfl
-@[simp] theorem eval_ite :
-  eval assign (.ite d l r) = bif (eval assign d) then (eval assign l) else (eval assign r) := rfl
+@[defeq, simp] theorem eval_literal : eval assign (.literal pred) = pred.eval assign := by with_semireducible rfl
+@[defeq, simp] theorem eval_const : eval assign (.const b) = b := by with_semireducible rfl
+@[defeq, simp] theorem eval_not : eval assign (.not x) = !eval assign x := by with_semireducible rfl
+@[defeq, simp] theorem eval_gate : eval assign (.gate g x y) = g.eval (eval assign x) (eval assign y) := by with_semireducible rfl
+@[defeq, simp] theorem eval_ite :
+  eval assign (.ite d l r) = bif (eval assign d) then (eval assign l) else (eval assign r) := by with_semireducible rfl
 
 def Sat (x : BVLogicalExpr) (assign : BVExpr.Assignment) : Prop := eval assign x = true
 
@@ -613,7 +626,7 @@ theorem sat_and {x y : BVLogicalExpr} {assign} (hx : Sat x assign) (hy : Sat y a
   simp only [Sat] at *
   simp [hx, hy, Gate.eval]
 
-theorem sat_true : Sat (.const true) assign := rfl
+@[defeq] theorem sat_true : Sat (.const true) assign := by with_semireducible rfl
 
 end BVLogicalExpr
 

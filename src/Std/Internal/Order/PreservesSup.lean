@@ -67,6 +67,7 @@ instance (a : Prop) : PreservesSup (meet a) where
   map_sup s := by
     show a ⊓ CompleteLattice.sup s = CompleteLattice.sup (fun y => ∃ x, s x ∧ y = a ⊓ x)
     have sup_eq_propSup (c : Prop → Prop) : CompleteLattice.sup c = propSup c := by
+      with_semireducible
       apply propext
       constructor
       · exact sup_le c (fun y hy hyTrue => ⟨y, hy, hyTrue⟩)
@@ -179,8 +180,9 @@ private theorem prod_meet_toPProd (p q : α × β) :
 `α ×' β`. -/
 private theorem prod_sup_toPProd (c : α × β → Prop) :
     (⟨(CompleteLattice.sup c).fst, (CompleteLattice.sup c).snd⟩ : α ×' β)
-      = CompleteLattice.sup fun x => c (x.fst, x.snd) :=
-  is_sup_unique
+      = CompleteLattice.sup fun x => c (x.fst, x.snd) := by
+  with_semireducible
+  exact is_sup_unique
     (fun x => Iff.trans (CompleteLattice.sup_spec c (x.fst, x.snd))
       ⟨fun h y hy => h (y.fst, y.snd) hy, fun h y hy => h ⟨y.fst, y.snd⟩ hy⟩)
     (CompleteLattice.sup_spec _)
@@ -325,13 +327,13 @@ implication `a ⇨ ·`. -/
 noncomputable def upperAdjoint (f : α → α) (b : α) : α := CompleteLattice.sup (fun x => f x ⊑ b)
 
 /-- `upperAdjoint f b` is the least upper bound of `{x | f x ⊑ b}` by definition. -/
-theorem upperAdjoint_spec (f : α → α) (b : α) : is_sup (fun x : α => f x ⊑ b) (upperAdjoint f b) :=
-  CompleteLattice.sup_spec (fun x : α => f x ⊑ b)
+theorem upperAdjoint_spec (f : α → α) (b : α) : is_sup (fun x : α => f x ⊑ b) (upperAdjoint f b) := by
+  with_semireducible exact CompleteLattice.sup_spec (fun x : α => f x ⊑ b)
 
 /-- Unit, free from the definition of `upperAdjoint`: `f x ⊑ b → x ⊑ upperAdjoint f b`. Needs only
 `CompleteLattice`. -/
-theorem le_upperAdjoint (f : α → α) {b x : α} (h : f x ⊑ b) : x ⊑ upperAdjoint f b :=
-  le_sup (c := fun x : α => f x ⊑ b) h
+theorem le_upperAdjoint (f : α → α) {b x : α} (h : f x ⊑ b) : x ⊑ upperAdjoint f b := by
+  with_semireducible exact le_sup (c := fun x : α => f x ⊑ b) h
 
 /-- Counit (modus ponens), from supremum preservation: `f (upperAdjoint f b) ⊑ b`. -/
 theorem upperAdjoint_le (f : α → α) [PreservesSup f] (b : α) : f (upperAdjoint f b) ⊑ b := by
@@ -343,6 +345,7 @@ theorem upperAdjoint_le (f : α → α) [PreservesSup f] (b : α) : f (upperAdjo
 
 /-- Monotonicity of a supremum-preserving `f`, derived from supremum preservation. -/
 theorem map_mono (f : α → α) [PreservesSup f] {b b' : α} (h : b ⊑ b') : f b ⊑ f b' := by
+  with_semireducible
   have hsup : (CompleteLattice.sup (fun y => y ⊑ b')) = b' :=
     is_sup_unique (CompleteLattice.sup_spec _)
       (fun x => ⟨fun hb' y hy => PartialOrder.rel_trans hy hb',
@@ -364,6 +367,7 @@ theorem upperAdjoint_id (b : α) : upperAdjoint (id : α → α) b = b := by
 
 theorem upperAdjoint_comp_apply {ε : Type v} (f : α → α) [PreservesSup f] (X : ε → α) (e : ε) :
     upperAdjoint (Function.comp f) X e = upperAdjoint f (X e) := by
+  with_semireducible
   apply PartialOrder.rel_antisymm
   · show upperAdjoint (Function.comp f) X e ⊑ _
     unfold upperAdjoint
@@ -378,6 +382,7 @@ theorem upperAdjoint_comp_apply {ε : Type v} (f : α → α) [PreservesSup f] (
 theorem upperAdjoint_prodMap_fst {β : Type v} [CompleteLattice β]
     (f : α → α) (g : β → β) [PreservesSup f] [PreservesSup g] (E : α × β) :
     (upperAdjoint (Prod.map f g) E).fst = upperAdjoint f E.fst := by
+  with_semireducible
   apply PartialOrder.rel_antisymm
   · show (upperAdjoint (Prod.map f g) E).fst ⊑ _
     unfold upperAdjoint
@@ -394,6 +399,7 @@ theorem upperAdjoint_prodMap_fst {β : Type v} [CompleteLattice β]
 theorem upperAdjoint_prodMap_snd {β : Type v} [CompleteLattice β]
     (f : α → α) (g : β → β) [PreservesSup f] [PreservesSup g] (E : α × β) :
     (upperAdjoint (Prod.map f g) E).snd = upperAdjoint g E.snd := by
+  with_semireducible
   apply PartialOrder.rel_antisymm
   · show (upperAdjoint (Prod.map f g) E).snd ⊑ _
     unfold upperAdjoint

@@ -66,7 +66,7 @@ variable {Pred : Type u} [CompleteLattice Pred] {R : Type x} {op : R → Pred �
 
 instance (opE : R → EPosts → EPosts) [∀ r, PreservesSup (opE r)] (r : R) {ε : Type w} :
     PreservesSup (FrameOp.pointwise (ε := ε) opE r) :=
-  inferInstanceAs (PreservesSup (Function.comp (opE r)))
+  inferInstanceAs (PreservesSup (Function.comp (α := ε) (opE r)))
 
 instance {B : Type v'} [CompleteLattice B] (opA : R → EPosts → EPosts) (opB : R → B → B)
     [∀ r, PreservesSup (opA r)] [∀ r, PreservesSup (opB r)] (r : R) :
@@ -104,16 +104,16 @@ namespace FrameOp
 
 variable {A : Type u} {B : Type v} {R : Type x} {ε : Type w}
 
-theorem pointwise_apply (opE : R → A → A) (r : R) (E : ε → A) (e : ε) :
-    pointwise opE r E e = opE r (E e) := rfl
+@[defeq] theorem pointwise_apply (opE : R → A → A) (r : R) (E : ε → A) (e : ε) :
+    pointwise opE r E e = opE r (E e) := by with_semireducible rfl
 
-theorem prod_fst (opA : R → A → A) (opB : R → B → B) (r : R) (p : A × B) :
-    (prod opA opB r p).fst = opA r p.fst := rfl
+@[defeq] theorem prod_fst (opA : R → A → A) (opB : R → B → B) (r : R) (p : A × B) :
+    (prod opA opB r p).fst = opA r p.fst := by with_semireducible rfl
 
-theorem prod_snd (opA : R → A → A) (opB : R → B → B) (r : R) (p : A × B) :
-    (prod opA opB r p).snd = opB r p.snd := rfl
+@[defeq] theorem prod_snd (opA : R → A → A) (opB : R → B → B) (r : R) (p : A × B) :
+    (prod opA opB r p).snd = opB r p.snd := by with_semireducible rfl
 
-theorem ignore_apply (r : R) (a : A) : ignore r a = a := rfl
+@[defeq] theorem ignore_apply (r : R) (a : A) : ignore r a = a := by with_semireducible rfl
 
 section
 
@@ -121,24 +121,24 @@ variable [CompleteLattice A] [CompleteLattice B]
 
 theorem upperAdjoint_pointwise_apply (opE : R → A → A) [∀ r, PreservesSup (opE r)] (r : R) (X : ε → A)
     (e : ε) :
-    PreservesSup.upperAdjoint (pointwise opE r) X e = PreservesSup.upperAdjoint (opE r) (X e) :=
-  PreservesSup.upperAdjoint_comp_apply (opE r) X e
+    PreservesSup.upperAdjoint (pointwise opE r) X e = PreservesSup.upperAdjoint (opE r) (X e) := by
+  with_semireducible exact PreservesSup.upperAdjoint_comp_apply (opE r) X e
 
 theorem upperAdjoint_prod_fst (opA : R → A → A) (opB : R → B → B)
     [∀ r, PreservesSup (opA r)] [∀ r, PreservesSup (opB r)] (r : R) (E : A × B) :
     (PreservesSup.upperAdjoint (prod opA opB r) E).fst =
-      PreservesSup.upperAdjoint (opA r) E.fst :=
-  PreservesSup.upperAdjoint_prodMap_fst (opA r) (opB r) E
+      PreservesSup.upperAdjoint (opA r) E.fst := by
+  with_semireducible exact PreservesSup.upperAdjoint_prodMap_fst (opA r) (opB r) E
 
 theorem upperAdjoint_prod_snd (opA : R → A → A) (opB : R → B → B)
     [∀ r, PreservesSup (opA r)] [∀ r, PreservesSup (opB r)] (r : R) (E : A × B) :
     (PreservesSup.upperAdjoint (prod opA opB r) E).snd =
-      PreservesSup.upperAdjoint (opB r) E.snd :=
-  PreservesSup.upperAdjoint_prodMap_snd (opA r) (opB r) E
+      PreservesSup.upperAdjoint (opB r) E.snd := by
+  with_semireducible exact PreservesSup.upperAdjoint_prodMap_snd (opA r) (opB r) E
 
 theorem upperAdjoint_ignore (r : R) (X : A) :
-    PreservesSup.upperAdjoint (ignore (R := R) r) X = X :=
-  PreservesSup.upperAdjoint_id X
+    PreservesSup.upperAdjoint (ignore (R := R) r) X = X := by
+  with_semireducible exact PreservesSup.upperAdjoint_id X
 
 end
 
@@ -158,15 +158,16 @@ noncomputable def PredTrans.frameClosure (op : R → Pred → Pred) [FrameOp op 
   ⟨fun Q E => ⨅ r, PreservesSup.upperAdjoint (op r) (t.apply (fun a => op r (Q a)) (opE r E))⟩
 
 /-- Unfolding `frameClosure` through `apply`. -/
-theorem PredTrans.apply_frameClosure (op : R → Pred → Pred) [FrameOp op EPosts opE]
+@[defeq] theorem PredTrans.apply_frameClosure (op : R → Pred → Pred) [FrameOp op EPosts opE]
     (t : PredTrans Pred EPosts β) (Q : β → Pred) (E : EPosts) :
     (t.frameClosure op).apply Q E =
-      ⨅ r, PreservesSup.upperAdjoint (op r) (t.apply (fun a => op r (Q a)) (opE r E)) := rfl
+      ⨅ r, PreservesSup.upperAdjoint (op r) (t.apply (fun a => op r (Q a)) (opE r E)) := by with_semireducible rfl
 
 /-- The frame closure carries monotonicity: if `t` is monotone, so is `t.frameClosure op`. -/
 theorem PredTrans.monotone_frameClosure (op : R → Pred → Pred) [FrameOp op EPosts opE]
     {t : PredTrans Pred EPosts β} (h : t.Monotone) :
     (t.frameClosure op).Monotone := by
+  with_semireducible
   haveI := FrameOp.preservesSup (op := op) (EPosts := EPosts) (opE := opE)
   haveI := FrameOp.preservesSupE (op := op) (EPosts := EPosts) (opE := opE)
   intro post post' eposts eposts' hE hP
@@ -185,6 +186,7 @@ theorem PredTrans.frameClosure_frames (op : R → Pred → Pred) [FrameOp op EPo
     (t : PredTrans Pred EPosts β) (Q : β → Pred) (E : EPosts) (F : R) :
     op F ((t.frameClosure op).apply Q E) ⊑
       (t.frameClosure op).apply (fun a => op F (Q a)) (opE F E) := by
+  with_semireducible
   haveI := FrameOp.preservesSup (op := op) (EPosts := EPosts) (opE := opE)
   apply le_iInf
   intro F'
@@ -206,6 +208,7 @@ theorem PredTrans.le_frameClosure_iff (op : R → Pred → Pred) [FrameOp op EPo
     (t : PredTrans Pred EPosts β) {Q : β → Pred} {E : EPosts} {pre : Pred} :
     pre ⊑ (t.frameClosure op).apply Q E ↔
       ∀ r, op r pre ⊑ t.apply (fun a => op r (Q a)) (opE r E) := by
+  with_semireducible
   haveI := FrameOp.preservesSup (op := op) (EPosts := EPosts) (opE := opE)
   constructor
   · intro h r
@@ -236,6 +239,7 @@ theorem PredTrans.frameClosure_le (op : R → Pred → Pred) [FrameOp op EPosts 
     (e : R) (hunit : ∀ a, op e a = a) (hunitE : ∀ E, opE e E = E)
     (t : PredTrans Pred EPosts β) (Q : β → Pred) (E : EPosts) :
     (t.frameClosure op).apply Q E ⊑ t.apply Q E := by
+  with_semireducible
   haveI := FrameOp.preservesSup (op := op) (EPosts := EPosts) (opE := opE)
   refine PartialOrder.rel_trans (iInf_le _ e) ?_
   rw [show (fun a => op e (Q a)) = Q from funext fun a => hunit (Q a), hunitE E]

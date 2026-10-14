@@ -30,6 +30,7 @@ def toCNF (s : State) : CNF Nat :=
 
 @[simp]
 theorem ofCNF_toCNF_eq {cnf : CNF Nat} : (ofCNF cnf).toCNF = cnf := by
+  with_semireducible
   rw [CNF.Internal.ext_iff]
   show Array.filterMap id (cnf.clauses.map (fun clause => some clause)) = cnf.clauses
   rw [Array.filterMap_map]

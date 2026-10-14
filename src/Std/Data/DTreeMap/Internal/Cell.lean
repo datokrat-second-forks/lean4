@@ -46,12 +46,13 @@ def ofEq [Ord α] {k : α → Ordering} (k' : α) (v' : β k') (hcmp : ∀ [Orie
 def of [Ord α] (k : α) (v : β k) : Cell α β (compare k) :=
   .ofEq k v compare_self
 
-@[simp]
+@[defeq, simp]
 theorem ofEq_inner [Ord α] {k : α → Ordering} {k' : α} {v' : β k'} {h} :
-  (Cell.ofEq k' v' h : Cell α β k).inner = some ⟨k', v'⟩ := rfl
+  (Cell.ofEq k' v' h : Cell α β k).inner = some ⟨k', v'⟩ := by with_semireducible rfl
 
-@[simp]
-theorem of_inner [Ord α] {k : α} {v : β k} : (Cell.of k v).inner = some ⟨k, v⟩ := rfl
+@[defeq, simp]
+theorem of_inner [Ord α] {k : α} {v : β k} : (Cell.of k v).inner = some ⟨k, v⟩ := by
+  with_semireducible rfl
 
 /-- Create an empty cell. Internal implementation detail of the tree map -/
 def empty [Ord α] {k : α → Ordering} : Cell α β k :=
@@ -63,22 +64,25 @@ def ofOption [Ord α] (k : α) (v? : Option (β k)) : Cell α β (compare k) :=
   | none => .empty
   | some v => .of k v
 
-@[simp]
-theorem empty_inner [Ord α] {k : α → Ordering} : (Cell.empty : Cell α β k).inner = none := rfl
+@[defeq, simp]
+theorem empty_inner [Ord α] {k : α → Ordering} : (Cell.empty : Cell α β k).inner = none := by
+  with_semireducible rfl
 
 /-- Internal implementation detail of the tree map -/
 def contains [Ord α] {k : α → Ordering} (c : Cell α β k) : Bool :=
   c.inner.isSome
 
-@[simp]
-theorem contains_of [Ord α] {k : α} {v : β k} : (Cell.of k v).contains = true := rfl
+@[defeq, simp]
+theorem contains_of [Ord α] {k : α} {v : β k} : (Cell.of k v).contains = true := by
+  with_semireducible rfl
 
-@[simp]
+@[defeq, simp]
 theorem contains_ofEq [Ord α] {k : α → Ordering} {k' : α} {v' : β k'} {h} :
-    (Cell.ofEq k' v' h : Cell α β k).contains = true := rfl
+    (Cell.ofEq k' v' h : Cell α β k).contains = true := by with_semireducible rfl
 
-@[simp]
-theorem contains_empty [Ord α] {k : α → Ordering} : (Cell.empty : Cell α β k).contains = false := rfl
+@[defeq, simp]
+theorem contains_empty [Ord α] {k : α → Ordering} : (Cell.empty : Cell α β k).contains = false := by
+  with_semireducible rfl
 
 theorem containsKey_inner_toList [Ord α] [OrientedOrd α] [BEq α] [LawfulBEqOrd α] {k : α}
     {c : Cell α β (compare k)} :
@@ -101,10 +105,10 @@ def getEntry? [Ord α] {k : α} (c : Cell α β (compare k)) : Option ((a : α) 
   | none => none
   | some p => some ⟨p.1, p.2⟩
 
-@[simp]
+@[defeq, simp]
 theorem get?_empty [Ord α] [OrientedOrd α] [LawfulEqOrd α] {k : α} :
-    (Cell.empty : Cell α β (compare k)).get? = none :=
-  rfl
+    (Cell.empty : Cell α β (compare k)).get? = none := by
+  with_semireducible rfl
 
 /-- Internal implementation detail of the tree map -/
 def getKey? [Ord α] {k : α} (c : Cell α β (compare k)) : Option α :=
@@ -112,14 +116,14 @@ def getKey? [Ord α] {k : α} (c : Cell α β (compare k)) : Option α :=
   | none => none
   | some p => some p.1
 
-@[simp]
+@[defeq, simp]
 theorem getEntry?_empty [Ord α] [OrientedOrd α] [LawfulEqOrd α] {k : α} :
-    (Cell.empty : Cell α β (compare k)).getEntry? = none :=
-  rfl
+    (Cell.empty : Cell α β (compare k)).getEntry? = none := by
+  with_semireducible rfl
 
-@[simp]
-theorem getKey?_empty [Ord α] {k : α} : (Cell.empty : Cell α β (compare k)).getKey? = none :=
-  rfl
+@[defeq, simp]
+theorem getKey?_empty [Ord α] {k : α} : (Cell.empty : Cell α β (compare k)).getKey? = none := by
+  with_semireducible rfl
 
 /-- Internal implementation detail of the tree map -/
 def alter [Ord α] [OrientedOrd α] [LawfulEqOrd α] {k : α}
@@ -144,10 +148,10 @@ def get? [Ord α] {k : α} (c : Cell α (fun _ => β) (compare k)) : Option β :
   | none => none
   | some p => some p.2
 
-@[simp]
+@[defeq, simp]
 theorem get?_empty [Ord α] {k : α} :
-    get? (Cell.empty : Cell α (fun _ => β) (compare k)) = none :=
-  rfl
+    get? (Cell.empty : Cell α (fun _ => β) (compare k)) = none := by
+  with_semireducible rfl
 
 /-- Internal implementation detail of the tree map -/
 def alter [Ord α] [OrientedOrd α] {k : α}
@@ -167,10 +171,11 @@ def List.findCell [Ord α] (l : List ((a : α) × β a)) (k : α → Ordering) :
   inner := l.find? (k ·.1 == .eq)
   property p hp := by simpa using (List.find?_eq_some_iff_append.1 hp).1
 
-theorem List.findCell_inner [Ord α] (l : List ((a : α) × β a)) (k : α → Ordering) :
-    (findCell l k).inner = l.find? (k ·.1 == .eq) := rfl
+@[defeq] theorem List.findCell_inner [Ord α] (l : List ((a : α) × β a)) (k : α → Ordering) :
+    (findCell l k).inner = l.find? (k ·.1 == .eq) := by with_semireducible rfl
 
-@[simp]
-theorem List.findCell_nil [Ord α] (k : α → Ordering) : (findCell [] k : Cell α β k) = .empty := rfl
+@[defeq, simp]
+theorem List.findCell_nil [Ord α] (k : α → Ordering) : (findCell [] k : Cell α β k) = .empty := by
+  with_semireducible rfl
 
 end Std.DTreeMap.Internal

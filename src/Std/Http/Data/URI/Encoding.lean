@@ -134,10 +134,11 @@ private theorem isEncodedQueryChar_isAscii (c : UInt8) (h : isEncodedQueryChar r
   unfold isEncodedQueryChar isAsciiByte at *
   simp at h
   rcases h
-  next h => exact isEncodedChar_isAscii c h
+  next h => with_semireducible exact isEncodedChar_isAscii c h
   next h => subst_vars; decide
 
 private theorem hexDigit_isHexDigit (h₀ : x < 16) : isHexDigitByte (hexDigit x) := by
+  with_semireducible
   unfold hexDigit isHexDigitByte
   have h₁ : x.toNat < 16 := h₀
   split <;> simp
@@ -191,7 +192,7 @@ private theorem autf8EncodeChar_flatMap_ascii {a : List UInt8}
     (is_ascii_list : ∀ (x : UInt8), x ∈ a → x < 128) :
     List.flatMap (fun a => String.utf8EncodeChar (Char.ofUInt8 a)) a = a := by
   have h_encode {i : UInt8} (h : i < 128) : String.utf8EncodeChar (Char.ofUInt8 i) = [i] := by
-    simp [Char.ofUInt8, String.utf8EncodeChar, show ¬127 < i.toNat from Nat.not_lt_of_le (Nat.le_pred_of_lt h)]
+    with_semireducible simp [Char.ofUInt8, String.utf8EncodeChar, show ¬127 < i.toNat from Nat.not_lt_of_le (Nat.le_pred_of_lt h)]
   induction a with
   | nil => simp
   | cons head tail ih =>
@@ -281,7 +282,7 @@ private def byteToHex (b : UInt8) (s : EncodedString r) : EncodedString r :=
       by simp [isEncodedChar]; decide
 
     have h2 : isEncodedChar r (hexDigit (b >>> 4)) :=
-      let h₀ := hexDigit_isHexDigit (BitVec.toNat_ushiftRight_lt b.toBitVec 4 (by decide))
+      let h₀ := hexDigit_isHexDigit (by with_semireducible exact (BitVec.toNat_ushiftRight_lt b.toBitVec 4 (by decide)))
       isHexDigit_isEncodedChar h₀
 
     have h3 : isEncodedChar r (hexDigit (b &&& 0xF)) :=
@@ -469,7 +470,7 @@ private def byteToHex (b : UInt8) (s : EncodedQueryString r) : EncodedQueryStrin
     have h1 : isEncodedQueryChar r '%'.toUInt8 := by
       simp [isEncodedQueryChar, isEncodedChar]; decide
     have h2 : isEncodedQueryChar r (hexDigit (b >>> 4)) :=
-      isHexDigit_isEncodedQueryChar (hexDigit_isHexDigit (BitVec.toNat_ushiftRight_lt b.toBitVec 4 (by decide)))
+      isHexDigit_isEncodedQueryChar (hexDigit_isHexDigit (by with_semireducible exact (BitVec.toNat_ushiftRight_lt b.toBitVec 4 (by decide))))
     have h3 : isEncodedQueryChar r (hexDigit (b &&& 0xF)) :=
       isHexDigit_isEncodedQueryChar (hexDigit_isHexDigit (@UInt8.and_lt_add_one b 0xF (by decide)))
     exact IsAllowedEncodedQueryChars.push (IsAllowedEncodedQueryChars.push (IsAllowedEncodedQueryChars.push s.valid h1) h2) h3

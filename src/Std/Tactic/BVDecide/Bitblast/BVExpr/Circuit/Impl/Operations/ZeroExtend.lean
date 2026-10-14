@@ -87,7 +87,7 @@ instance : AIG.LawfulVecOperator α AIG.ExtendTarget blastZeroExtend where
     apply blastZeroExtend.go_le_size
   decl_eq := by
     intros
-    unfold blastZeroExtend
+    unfold blastZeroExtend at *
     apply blastZeroExtend.go_decl_eq
 
 end bitblast

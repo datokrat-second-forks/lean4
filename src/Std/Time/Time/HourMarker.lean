@@ -41,7 +41,7 @@ instance : Ord HourMarker where
     | .pm, .pm => .eq
 
 instance : OrientedOrd HourMarker where
-  eq_swap {a b} := by cases a <;> cases b <;> rfl
+  eq_swap {a b} := by cases a <;> cases b <;> with_semireducible rfl
 
 instance : TransOrd HourMarker where
   isLE_trans {a b c} hab hbc := by cases a <;> cases b <;> cases c <;> simp_all
@@ -55,7 +55,7 @@ namespace HourMarker
 `ofOrdinal` converts an `Hour.Ordinal` value to an `HourMarker`, indicating whether it is AM or PM.
 -/
 def ofOrdinal (time : Hour.Ordinal) : HourMarker :=
-  if time.val ≥ 12 then
+  if time.toBounded.toSubtype.val ≥ 12 then
     .pm
   else
     .am
@@ -65,26 +65,26 @@ Converts a 12-hour clock time to a 24-hour clock time based on the `HourMarker`.
 -/
 def toAbsolute (marker : HourMarker) (time : Bounded.LE 1 12) : Hour.Ordinal :=
   match marker with
-  | .am => if time.val = 12 then 0 else time.expand (by decide) (by decide)
-  | .pm => if time.val = 12 then 12 else time.add 12 |>.emod 24 (by decide)
+  | .am => if time.toSubtype.val = 12 then 0 else (.ofBounded (time.expand (by decide) (by decide)))
+  | .pm => if time.toSubtype.val = 12 then 12 else (.ofBounded (time.add 12 |>.emod 24 (by decide)))
 
 /--
 Converts a 24-hour clock time to a 12-hour clock time with a `HourMarker`.
 -/
 def toRelative (hour : Hour.Ordinal) : Bounded.LE 1 12 × HourMarker :=
-  if h₀ : hour.val = 0 then
-    (⟨12, by decide⟩, .am)
-  else if h₁ : hour.val ≤ 12 then
-     if hour.val = 12 then
-      (⟨12, by decide⟩, .pm)
+  if h₀ : hour.toBounded.toSubtype.val = 0 then
+    (.mk 12 (by decide), .am)
+  else if h₁ : hour.toBounded.toSubtype.val ≤ 12 then
+     if hour.toBounded.toSubtype.val = 12 then
+      (.mk 12 (by decide), .pm)
     else
       Int.ne_iff_lt_or_gt.mp h₀ |>.by_cases
-        (nomatch Int.not_le.mpr · <| hour.property.left)
-        (⟨hour.val, And.intro · h₁⟩, .am)
+        (nomatch Int.not_le.mpr · <| hour.toBounded.toSubtype.property.left)
+        (fun h => (.mk hour.toBounded.toSubtype.val (And.intro (by with_semireducible exact h) h₁), .am))
   else
     let h := Int.not_le.mp h₁
-    let t := hour |>.truncateBottom h |>.sub 12
-    (t.expandTop (by decide), .pm)
+    let t := hour |>.toBounded.truncateBottom (by with_semireducible exact h) |>.sub 12
+    (by with_semireducible exact t.expandTop (by decide), .pm)
 
 end HourMarker
 end Time

@@ -318,8 +318,8 @@ def empty : Impl α β :=
   .leaf
 
 @[Std.Internal.tree_tac]
-theorem balanced_empty : (empty : Impl α β).Balanced :=
-  .leaf
+theorem balanced_empty : (empty : Impl α β).Balanced := by
+  with_semireducible exact .leaf
 
 attribute [Std.Internal.tree_tac] or_true true_or
 
@@ -914,7 +914,7 @@ theorem aux_size_modify [Ord α] [LawfulEqOrd α] {k f} {t : Impl α β} :
 theorem balanced_modify [Ord α] [LawfulEqOrd α] {k f} {t : Impl α β} (ht : t.Balanced) :
     (t.modify k f).Balanced := by
   induction t with
-  | leaf => exact balanced_empty
+  | leaf => with_semireducible exact balanced_empty
   | inner sz k v l r ihl ihr =>
     dsimp only  [modify]
     have ihl := ihl ht.left
@@ -1035,7 +1035,7 @@ theorem aux_size_modify [Ord α] {k f} {t : Impl α β} :
 theorem balanced_modify [Ord α] {k f} {t : Impl α β} (ht : t.Balanced) :
     (modify k f t).Balanced := by
   induction t with
-  | leaf => exact balanced_empty
+  | leaf => with_semireducible exact balanced_empty
   | inner sz k v l r ihl ihr =>
     dsimp only  [modify]
     have ihl := ihl ht.left

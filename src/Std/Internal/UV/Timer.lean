@@ -29,7 +29,7 @@ of all functions on `Timer`s.
 -/
 def Timer : Type := TimerImpl.type
 
-instance : Nonempty Timer := by exact TimerImpl.property
+instance : Nonempty Timer := by with_semireducible exact TimerImpl.property
 
 namespace Timer
 

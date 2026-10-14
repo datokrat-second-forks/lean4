@@ -8,6 +8,8 @@ module
 prelude
 public import Std.Data.DTreeMap.Raw.AdditionalOperations
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

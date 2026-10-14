@@ -45,7 +45,7 @@ private theorem String.toLower_eq_self_iff {s : String} : s.toLower = s ↔ s.to
 
 instance : Decidable (IsLowerCase s) :=
   decidable_of_decidable_of_iff (p := s.toList.any Char.isUpper = false)
-    (by exact String.toLower_eq_self_iff.symm)
+    (by with_semireducible exact String.toLower_eq_self_iff.symm)
 
 namespace IsLowerCase
 

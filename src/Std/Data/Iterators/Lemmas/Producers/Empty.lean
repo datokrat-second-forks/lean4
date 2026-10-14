@@ -10,6 +10,8 @@ public import Std.Data.Iterators.Lemmas.Producers.Monadic.Empty
 public import Init.Data.Iterators.Lemmas.Consumers
 public import Std.Data.Iterators.Producers.Empty
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std

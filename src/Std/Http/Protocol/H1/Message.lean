@@ -57,28 +57,52 @@ def Message.Head : Direction → Type
   | .sending => Response.Head
 
 /--
+Views a request head as the message head of the receiving direction.
+-/
+@[inline]
+def Message.Head.ofRequestHead (head : Request.Head) : Message.Head .receiving := smartCast
+
+/--
+Views the message head of the receiving direction as a request head.
+-/
+@[inline]
+def Message.Head.toRequestHead (m : Message.Head .receiving) : Request.Head := smartCast
+
+/--
+Views a response head as the message head of the sending direction.
+-/
+@[inline]
+def Message.Head.ofResponseHead (head : Response.Head) : Message.Head .sending := smartCast
+
+/--
+Views the message head of the sending direction as a response head.
+-/
+@[inline]
+def Message.Head.toResponseHead (m : Message.Head .sending) : Response.Head := smartCast
+
+/--
 Gets the headers of a `Message`.
 -/
 def Message.Head.headers (m : Message.Head dir) : Headers :=
   match dir with
-  | .receiving => Request.Head.headers m
-  | .sending => Response.Head.headers m
+  | .receiving => Request.Head.headers m.toRequestHead
+  | .sending => Response.Head.headers m.toResponseHead
 
 /--
 Returns a copy of the message head with the headers replaced.
 -/
 def Message.Head.setHeaders (m : Message.Head dir) (headers : Headers) : Message.Head dir :=
   match dir with
-  | .receiving => { (m : Request.Head)  with headers }
-  | .sending   => { (m : Response.Head) with headers }
+  | .receiving => .ofRequestHead { m.toRequestHead with headers }
+  | .sending   => .ofResponseHead { m.toResponseHead with headers }
 
 /--
 Gets the version of a `Message`.
 -/
 def Message.Head.version (m : Message.Head dir) : Version :=
   match dir with
-  | .receiving => Request.Head.version m
-  | .sending => Response.Head.version m
+  | .receiving => Request.Head.version m.toRequestHead
+  | .sending => Response.Head.version m.toResponseHead
 
 /--
 Determines the message body size based on the `Content-Length` header and the `Transfer-Encoding` (chunked) flag.
@@ -142,5 +166,5 @@ instance : Internal.Encode .v11 (Message.Head dir) :=
 instance : EmptyCollection (Message.Head dir) where
   emptyCollection :=
     match dir with
-    | .receiving => { method := .get, version := .v11 }
-    | .sending => {}
+    | .receiving => .ofRequestHead { method := .get, version := .v11 }
+    | .sending => .ofResponseHead {}

@@ -45,7 +45,7 @@ private def RepeatIterator.instProductivenessRelation :
     ProductivenessRelation (RepeatIterator α f) Id where
   Rel := emptyWf.rel
   wf := emptyWf.wf
-  subrelation {it it'} h := by cases h
+  subrelation {it it'} h := by with_semireducible cases h
 
 instance RepeatIterator.instProductive :
     Productive (RepeatIterator α f) Id := by

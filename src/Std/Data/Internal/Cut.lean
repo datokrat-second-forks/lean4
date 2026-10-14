@@ -29,14 +29,14 @@ variable {α : Type u} {cmp : α → α → Ordering} {cut : α → Ordering}
 theorem IsStrictCut.gt_of_isGE_of_gt [IsStrictCut cmp cut] {k k' : α} :
     (cut k').isGE → cmp k' k = .gt → cut k = .gt := by
   cases h₁ : cut k' with
-  | lt => rintro ⟨⟩
+  | lt => with_semireducible rintro ⟨⟩
   | gt => exact fun _ => IsCut.gt h₁
   | eq => exact fun h₂ h₃ => by rw [← h₃, IsStrictCut.eq (cmp := cmp) k h₁]
 
 theorem IsStrictCut.lt_of_isLE_of_lt [IsStrictCut cmp cut] {k k' : α} :
     (cut k').isLE → cmp k' k = .lt → cut k = .lt := by
   cases h₁ : cut k' with
-  | gt => rintro ⟨⟩
+  | gt => with_semireducible rintro ⟨⟩
   | lt => exact fun _ => IsCut.lt h₁
   | eq => exact fun h₂ h₃ => by rw [← h₃, IsStrictCut.eq (cmp := cmp) k h₁]
 

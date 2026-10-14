@@ -64,6 +64,7 @@ theorem entails_of_all_mem (f1 f2 : CNF α) (h : ∀ c ∈ f1, c ∈ f2) : Entai
 
 theorem entails_iff_all_mem_entails_clause {f g : CNF α} :
     Entails f g ↔ ∀ c ∈ g, EntailsClause f c := by
+  with_semireducible
   rw [entails_def]
   constructor
   · intro h c hc a ha

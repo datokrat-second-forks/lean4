@@ -94,6 +94,7 @@ theorem add_ne_empty (c : Clause α) (atom : α) (pol : Bool) : c.add atom pol �
 
 @[simp]
 theorem Internal.atoms_add {c : Clause α} : (c.add atom pol).atoms = c.atoms.push atom := by
+  with_semireducible
   rfl
 
 @[simp]
@@ -147,6 +148,7 @@ def literals (c : Clause α) : List (Literal α) :=
 
 @[simp]
 theorem literals_empty : (empty : Clause α).literals = [] := by
+  with_semireducible
   rfl
 
 @[simp]
@@ -220,6 +222,7 @@ theorem ofLiterals_literals {c : Clause α} : ofLiterals c.literals = c :=
 
 @[simp]
 theorem literals_eq_nil_iff {c : Clause α} : c.literals = [] ↔ c = empty := by
+  with_semireducible
   constructor
   · intro h
     exact Clause.ext (h.trans literals_empty.symm)
@@ -402,7 +405,7 @@ where
   go (i : Nat) (acc : Clause α) : Clause α :=
     if h : i < c.size then
       let atom := c.atoms[i]'(by rw [← Internal.size_eq_size_atoms]; exact h)
-      let pol := (c.polarities[i]'(by rw [c.size_polarities]; exact h)) == 1
+      let pol := (c.polarities[i]'(by with_semireducible rw [c.size_polarities]; exact h)) == 1
       if atom == lit.fst && pol == lit.snd then
         go (i + 1) acc
       else
@@ -418,7 +421,7 @@ private theorem literals_erase_go [BEq α] [LawfulBEq α] {c : Clause α} {lit :
   | case1 i acc h atom pol heq ih =>
     have hlt : i < c.literals.length := by rw [length_literals]; exact h
     have hlit : c.literals[i] = lit := by
-      rw [Internal.getElem_literals hlt, Internal.polarity_eq_getElem (by rw [c.size_polarities]; exact h)]
+      rw [Internal.getElem_literals hlt, Internal.polarity_eq_getElem (by with_semireducible rw [c.size_polarities]; exact h)]
       simp only [atom, pol, Bool.and_eq_true, beq_iff_eq] at heq
       simp [heq.1, heq.2]
     rw [List.drop_eq_getElem_cons hlt, List.filter_cons, hlit]
@@ -426,7 +429,7 @@ private theorem literals_erase_go [BEq α] [LawfulBEq α] {c : Clause α} {lit :
   | case2 i acc h atom pol heq ih =>
     have hlt : i < c.literals.length := by rw [length_literals]; exact h
     have hlit : c.literals[i] = (atom, pol) := by
-      rw [Internal.getElem_literals hlt, Internal.polarity_eq_getElem (by rw [c.size_polarities]; exact h)]
+      rw [Internal.getElem_literals hlt, Internal.polarity_eq_getElem (by with_semireducible rw [c.size_polarities]; exact h)]
     have hne : ((atom, pol) : Literal α) != lit := by
       simp only [atom, pol, Bool.and_eq_true, beq_iff_eq, not_and] at heq
       simp only [bne_iff_ne, ne_eq, Prod.ext_iff, not_and]
@@ -472,11 +475,13 @@ instance : Append (Clause α) where
 
 @[simp]
 theorem Internal.atoms_append {c1 c2 : Clause α} : (c1 ++ c2).atoms = c1.atoms ++ c2.atoms := by
+  with_semireducible
   rfl
 
 @[simp]
 theorem Internal.polarities_append {c1 c2 : Clause α} :
     (c1 ++ c2).polarities = c1.polarities ++ c2.polarities := by
+  with_semireducible
   rfl
 
 theorem polarity_append {c1 c2 : Clause α} {i : Nat} :
@@ -560,6 +565,7 @@ namespace Clause
 /--
 Variable `v` occurs in `Clause` `c`.
 -/
+@[expose]
 def VarMem (v : α) (c : Clause α) : Prop := v ∈ c.atoms
 
 instance {v : α} {c : Clause α} [DecidableEq α] : Decidable (VarMem v c) :=
@@ -596,8 +602,10 @@ theorem VarMem_add_ne_self {c : Clause α} {atom1 atom2 : α} (h : atom1 ≠ ato
 theorem inductionOn {motive : Clause α → Prop} (empty : motive .empty)
     (add : (c : Clause α) → (atom : α) → (pol : Bool) → motive c → motive (c.add atom pol))
     (c : Clause α) : motive c := by
+  with_semireducible
   have key : ∀ (l : List (Literal α)) (init : Clause α), motive init →
       motive (l.foldl (fun c (atom, pol) => c.add atom pol) init) := by
+    with_semireducible
     intro l
     induction l with
     | nil => intro init h; simpa using h
@@ -610,6 +618,7 @@ end Clause
 /--
 `Clause` `c` occurs in `CNF` formula `f`.
 -/
+@[expose]
 def Mem (f : CNF α) (c : Clause α) : Prop := c ∈ f.clauses
 
 instance : Membership (Clause α) (CNF α) where
@@ -619,9 +628,11 @@ instance {c : Clause α} {f : CNF α} [DecidableEq α] : Decidable (c ∈ f) :=
     inferInstanceAs <| Decidable (c ∈ f.clauses)
 
 theorem Internal.mem_iff {f : CNF α} : c ∈ f ↔ c ∈ f.clauses := by
+  with_semireducible
   rfl
 
 theorem Internal.clauses_append {f1 f2 : CNF α} : (f1 ++ f2).clauses = f1.clauses ++ f2.clauses := by
+  with_semireducible
   rfl
 
 @[simp]
@@ -690,6 +701,7 @@ theorem not_VarMem_empty {v : α} : ¬VarMem v (.empty : CNF α) := by simp [Var
       simp [hc1, hc2]
 
 theorem VarMem_of (h : c ∈ f) (w : Clause.VarMem v c) : VarMem v f := by
+  with_semireducible
   apply Exists.intro c
   constructor <;> assumption
 

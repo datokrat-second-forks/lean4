@@ -12,6 +12,8 @@ public import Std.Internal.ForIn.Basic
 import all Std.Data.DHashMap.Basic
 import Init.Data.List.Pairwise
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

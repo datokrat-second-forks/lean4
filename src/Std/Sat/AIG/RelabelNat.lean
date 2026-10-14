@@ -337,6 +337,7 @@ def relabelNat (aig : AIG α) : AIG Nat :=
 
 @[simp]
 theorem relabelNat'_fst_eq_relabelNat {aig : AIG α} : aig.relabelNat'.fst = aig.relabelNat := by
+  with_semireducible
   rfl
 
 @[simp]

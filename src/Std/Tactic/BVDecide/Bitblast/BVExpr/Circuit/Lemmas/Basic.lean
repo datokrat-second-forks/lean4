@@ -27,6 +27,7 @@ def Assignment.toAIGAssignment (assign : Assignment) : BVBit → Bool :=
 @[simp]
 theorem Assignment.toAIGAssignment_apply (assign : Assignment) (bit : BVBit) :
     assign.toAIGAssignment bit = (assign.get bit.var).bv.getLsbD bit.idx := by
+  with_semireducible
   rfl
 
 end BVExpr

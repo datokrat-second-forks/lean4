@@ -149,7 +149,7 @@ def get? [TransCmp cmp] (t : ExtTreeMap α β cmp) (a : α) : Option β :=
 
 @[inline, inherit_doc ExtDTreeMap.Const.get]
 def get [TransCmp cmp] (t : ExtTreeMap α β cmp) (a : α) (h : a ∈ t) : β :=
-  ExtDTreeMap.Const.get t.inner a h
+  ExtDTreeMap.Const.get t.inner a (by with_semireducible exact h)
 
 @[inline, inherit_doc ExtDTreeMap.Const.get!]
 def get! [TransCmp cmp] [Inhabited β] (t : ExtTreeMap α β cmp) (a : α) : β :=
@@ -170,7 +170,7 @@ def getKey? [TransCmp cmp] (t : ExtTreeMap α β cmp) (a : α) : Option α :=
 
 @[inline, inherit_doc ExtDTreeMap.getKey]
 def getKey [TransCmp cmp] (t : ExtTreeMap α β cmp) (a : α) (h : a ∈ t) : α :=
-  t.inner.getKey a h
+  t.inner.getKey a (by with_semireducible exact h)
 
 @[inline, inherit_doc ExtDTreeMap.getKey!]
 def getKey! [TransCmp cmp] [Inhabited α] (t : ExtTreeMap α β cmp) (a : α) : α :=
@@ -250,7 +250,7 @@ def entryAtIdx? [TransCmp cmp] (t : ExtTreeMap α β cmp) (n : Nat) : Option (α
 
 @[inline, inherit_doc ExtDTreeMap.Const.entryAtIdx]
 def entryAtIdx [TransCmp cmp] (t : ExtTreeMap α β cmp) (n : Nat) (h : n < t.size) : α × β :=
-  ExtDTreeMap.Const.entryAtIdx t.inner n h
+  ExtDTreeMap.Const.entryAtIdx t.inner n (by with_semireducible exact h)
 
 @[inline, inherit_doc ExtDTreeMap.Const.entryAtIdx!]
 def entryAtIdx! [TransCmp cmp] [Inhabited (α × β)] (t : ExtTreeMap α β cmp) (n : Nat) : α × β :=
@@ -266,7 +266,7 @@ def keyAtIdx? [TransCmp cmp] (t : ExtTreeMap α β cmp) (n : Nat) : Option α :=
 
 @[inline, inherit_doc ExtDTreeMap.keyAtIdx]
 def keyAtIdx [TransCmp cmp] (t : ExtTreeMap α β cmp) (n : Nat) (h : n < t.size) : α :=
-  ExtDTreeMap.keyAtIdx t.inner n h
+  ExtDTreeMap.keyAtIdx t.inner n (by with_semireducible exact h)
 
 @[inline, inherit_doc ExtDTreeMap.keyAtIdx!]
 def keyAtIdx! [TransCmp cmp] [Inhabited α] (t : ExtTreeMap α β cmp) (n : Nat) : α :=
@@ -295,22 +295,22 @@ def getEntryLT? [TransCmp cmp] (t : ExtTreeMap α β cmp) (k : α) : Option (α 
 @[inline, inherit_doc ExtDTreeMap.Const.getEntryGE]
 def getEntryGE [TransCmp cmp] (t : ExtTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) :
     α × β :=
-  ExtDTreeMap.Const.getEntryGE t.inner k h
+  ExtDTreeMap.Const.getEntryGE t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.getEntryGT]
 def getEntryGT [TransCmp cmp] (t : ExtTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) :
     α × β :=
-  ExtDTreeMap.Const.getEntryGT t.inner k h
+  ExtDTreeMap.Const.getEntryGT t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.getEntryLE]
 def getEntryLE [TransCmp cmp] (t : ExtTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) :
     α × β :=
-  ExtDTreeMap.Const.getEntryLE t.inner k h
+  ExtDTreeMap.Const.getEntryLE t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.getEntryLT]
 def getEntryLT [TransCmp cmp] (t : ExtTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) :
     α × β :=
-  ExtDTreeMap.Const.getEntryLT t.inner k h
+  ExtDTreeMap.Const.getEntryLT t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc ExtDTreeMap.Const.getEntryGE!]
 def getEntryGE! [TransCmp cmp] [Inhabited (α × β)] (t : ExtTreeMap α β cmp) (k : α) : (α × β) :=
@@ -362,19 +362,19 @@ def getKeyLT? [TransCmp cmp] (t : ExtTreeMap α β cmp) (k : α) : Option α :=
 
 @[inline, inherit_doc ExtDTreeMap.getKeyGE]
 def getKeyGE [TransCmp cmp] (t : ExtTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) : α :=
-  ExtDTreeMap.getKeyGE t.inner k h
+  ExtDTreeMap.getKeyGE t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc ExtDTreeMap.getKeyGT]
 def getKeyGT [TransCmp cmp] (t : ExtTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) : α :=
-  ExtDTreeMap.getKeyGT t.inner k h
+  ExtDTreeMap.getKeyGT t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc ExtDTreeMap.getKeyLE]
 def getKeyLE [TransCmp cmp] (t : ExtTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) : α :=
-  ExtDTreeMap.getKeyLE t.inner k h
+  ExtDTreeMap.getKeyLE t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc ExtDTreeMap.getKeyLT]
 def getKeyLT [TransCmp cmp] (t : ExtTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) : α :=
-  ExtDTreeMap.getKeyLT t.inner k h
+  ExtDTreeMap.getKeyLT t.inner k (by with_semireducible exact h)
 
 @[inline, inherit_doc ExtDTreeMap.getKeyGE!]
 def getKeyGE! [TransCmp cmp] [Inhabited α] (t : ExtTreeMap α β cmp) (k : α) : α :=

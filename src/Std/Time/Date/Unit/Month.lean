@@ -24,6 +24,18 @@ set_option linter.all true
 @[expose] def Ordinal := Bounded.LE 1 12
 deriving Repr, DecidableEq, LE, LT
 
+/--
+Views an `Ordinal` as the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def Ordinal.toBounded (x : Ordinal) : Bounded.LE 1 12 := smartCast
+
+/--
+Creates an `Ordinal` from the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def Ordinal.ofBounded (x : Bounded.LE 1 12) : Ordinal := smartCast
+
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 1 (1 + (11 : Nat))) n)
 
@@ -31,10 +43,10 @@ instance : Inhabited Ordinal where
   default := 1
 
 instance {x y : Ordinal} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+  inferInstanceAs (Decidable (x.toBounded.toSubtype.val ≤ y.toBounded.toSubtype.val))
 
 instance {x y : Ordinal} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+  inferInstanceAs (Decidable (x.toBounded.toSubtype.val < y.toBounded.toSubtype.val))
 
 instance : Ord Ordinal := inferInstanceAs <| Ord (Bounded.LE 1 _)
 
@@ -48,14 +60,26 @@ instance : LawfulEqOrd Ordinal := inferInstanceAs <| LawfulEqOrd (Bounded.LE 1 _
 @[expose] def Offset : Type := Int
 deriving Repr, DecidableEq, Inhabited, Add, Sub, Mul, Div, Neg, ToString, LT, LE
 
+/--
+Views an `Offset` as the `Int` it is defined as.
+-/
+@[expose, inline]
+def Offset.toInt (x : Offset) : Int := smartCast
+
+/--
+Creates an `Offset` from an integer.
+-/
+@[expose, inline]
+def Offset.ofInt (data : Int) : Offset := smartCast
+
 instance {x y : Offset} : Decidable (x ≤ y) :=
-  Int.decLe x y
+  inferInstanceAs (Decidable (x.toInt ≤ y.toInt))
 
 instance {x y : Offset} : Decidable (x < y) :=
-  Int.decLt x y
+  inferInstanceAs (Decidable (x.toInt < y.toInt))
 
 instance : OfNat Offset n :=
-  ⟨Int.ofNat n⟩
+  ⟨.ofInt (Int.ofNat n)⟩
 
 instance : Ord Offset := inferInstanceAs <| Ord Int
 
@@ -68,6 +92,18 @@ instance : LawfulEqOrd Offset := inferInstanceAs <| LawfulEqOrd Int
 -/
 @[expose] def Quarter := Bounded.LE 1 4
 deriving Repr, DecidableEq, LT, LE
+
+/--
+Views a `Quarter` as the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def Quarter.toBounded (x : Quarter) : Bounded.LE 1 4 := smartCast
+
+/--
+Creates a `Quarter` from the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def Quarter.ofBounded (x : Bounded.LE 1 4) : Quarter := smartCast
 
 instance : OfNat Quarter n := inferInstanceAs <| OfNat (Bounded.LE 1 (1 + (3 : Nat))) n
 
@@ -86,10 +122,10 @@ namespace Quarter
 Determine the `Quarter` by the month.
 -/
 def ofMonth (month : Month.Ordinal) : Quarter :=
-  month
-  |>.sub 1
-  |>.ediv 3 (by decide)
-  |>.add 1
+  .ofBounded (month.toBounded
+    |>.sub 1
+    |>.ediv 3 (by decide)
+    |>.add 1)
 
 end Quarter
 
@@ -100,14 +136,7 @@ Creates an `Offset` from a natural number.
 -/
 @[inline]
 def ofNat (data : Nat) : Offset :=
-  Int.ofNat data
-
-/--
-Creates an `Offset` from an integer.
--/
-@[inline]
-def ofInt (data : Int) : Offset :=
-  data
+  .ofInt (Int.ofNat data)
 
 end Offset
 
@@ -178,28 +207,28 @@ Converts a `Ordinal` into a `Offset`.
 -/
 @[inline]
 def toOffset (month : Ordinal) : Offset :=
-  month.val
+  .ofInt month.toBounded.toSubtype.val
 
 /--
 Creates an `Ordinal` from an integer, ensuring the value is within bounds.
 -/
 @[inline]
 def ofInt (data : Int) (h : 1 ≤ data ∧ data ≤ 12) : Ordinal :=
-  Bounded.LE.mk data h
+  .ofBounded (Bounded.LE.mk data h)
 
 /--
 Creates an `Ordinal` from a `Nat`, ensuring the value is within bounds.
 -/
 @[inline]
 def ofNat (data : Nat) (h : data ≥ 1 ∧ data ≤ 12 := by decide) : Ordinal :=
-  Bounded.LE.ofNat' data h
+  .ofBounded (Bounded.LE.ofNat' data h)
 
 /--
 Converts a `Ordinal` into a `Nat`.
 -/
 @[inline]
 def toNat (month : Ordinal) : Nat := by
-  match month with
+  match month.toBounded.toSubtype with
   | ⟨.ofNat s, _⟩ => exact s
   | ⟨.negSucc s, h⟩ => nomatch h.left
 
@@ -209,7 +238,7 @@ to 1.
 -/
 @[inline]
 def ofFin (data : Fin 13) : Ordinal :=
-  Bounded.LE.ofFin' data (by decide)
+  .ofBounded (Bounded.LE.ofFin' data (by decide))
 
 /--
 Transforms `Month.Ordinal` into `Second.Offset`.
@@ -241,7 +270,7 @@ Transforms `Month.Ordinal` into `Day.Offset`.
 -/
 @[inline]
 def toDays (leap : Bool) (month : Ordinal) : Day.Offset :=
-  toSeconds leap month |>.convert
+  .ofUnitVal (toSeconds leap month |>.toUnitVal.convert)
 
 /--
 Size in days of each month if the year is not a leap year.
@@ -261,22 +290,23 @@ private def cumulativeSizes : { val : Array Day.Offset // val.size = 12 } :=
 Gets the number of days in a month.
 -/
 def days (leap : Bool) (month : Ordinal) : Day.Ordinal :=
-  if month.val = 2 then
+  if month.toBounded.toSubtype.val = 2 then
     if leap then 29 else 28
   else
     let ⟨months, p⟩ := monthSizesNonLeap
-    let index : Fin 12 := (month.sub 1).toFin (by decide)
+    let index : Fin 12 := (month.toBounded.sub 1).toFin (by decide)
     let idx : Fin months.size := index.cast (by rw [p])
     months[idx]
 
 theorem days_gt_27 (leap : Bool) (i : Month.Ordinal) : days leap i > 27 := by
+  with_semireducible
   match i with
   | ⟨2, _⟩ =>
-    simp [days]
+    simp [days, Ordinal.toBounded, Bounded.toSubtype]
     split <;> decide
   | ⟨1, _⟩ | ⟨3, _⟩ | ⟨4, _⟩ | ⟨5, _⟩ | ⟨6, _⟩ | ⟨7, _⟩
   | ⟨8, _⟩ | ⟨9, _⟩ | ⟨10, _⟩ | ⟨11, _⟩ | ⟨12, _⟩ =>
-    simp [days, monthSizesNonLeap]
+    simp [days, monthSizesNonLeap, Ordinal.toBounded, Bounded.toSubtype]
     decide +revert
 
 /--
@@ -284,24 +314,27 @@ Returns the number of days until the `month`.
 -/
 def cumulativeDays (leap : Bool) (month : Ordinal) : Day.Offset := by
   let ⟨months, p⟩ := cumulativeSizes
-  let index : Fin 12 := (month.sub 1).toFin (by decide)
+  let index : Fin 12 := (month.toBounded.sub 1).toFin (by decide)
   rw [← p] at index
   let res := months[index]
-  exact res + (if leap ∧ month.val > 2 then 1 else 0)
+  exact res + (if leap ∧ month.toBounded.toSubtype.val > 2 then 1 else 0)
 
 theorem cumulativeDays_le (leap : Bool) (month : Month.Ordinal) : cumulativeDays leap month ≥ 0 ∧ cumulativeDays leap month ≤ 334 + (if leap then 1 else 0) := by
+  with_semireducible
   match month with
   | ⟨1, _⟩ | ⟨2, _⟩ | ⟨3, _⟩  | ⟨4, _⟩  | ⟨5, _⟩  | ⟨6, _⟩  | ⟨7, _⟩  | ⟨8, _⟩  | ⟨9, _⟩  | ⟨10, _⟩  | ⟨11, _⟩ | ⟨12, _⟩ =>
-    simp [cumulativeSizes, Bounded.LE.sub, Bounded.LE.add, Bounded.LE.toFin, cumulativeDays]
+    simp [cumulativeSizes, Bounded.LE.sub, Bounded.LE.add, Bounded.LE.toFin, cumulativeDays, Ordinal.toBounded, Bounded.toSubtype]
     try split
     all_goals decide +revert
 
-theorem difference_eq (p : month.val ≤ 11) :
-  let next := month.truncateTop p |>.addTop 1 (by decide)
-  (cumulativeDays leap next).val = (cumulativeDays leap month).val + (days leap month).val := by
+theorem difference_eq (p : month.toBounded.toSubtype.val ≤ 11) :
+  let next := .ofBounded (month.toBounded.truncateTop p |>.addTop 1 (by decide))
+  (cumulativeDays leap next).toUnitVal.val = (cumulativeDays leap month).toUnitVal.val + (days leap month).toBounded.toSubtype.val := by
+  with_semireducible
   match month with
   | ⟨1, _⟩ | ⟨2, _⟩ | ⟨3, _⟩  | ⟨4, _⟩  | ⟨5, _⟩  | ⟨6, _⟩  | ⟨7, _⟩  | ⟨8, _⟩  | ⟨9, _⟩  | ⟨10, _⟩  | ⟨11, _⟩ =>
-    simp [cumulativeDays, Bounded.LE.addTop, days, monthSizesNonLeap];
+    simp [cumulativeDays, Bounded.LE.addTop, days, monthSizesNonLeap, Ordinal.toBounded, Ordinal.ofBounded,
+      Bounded.toSubtype, Bounded.ofSubtype, Bounded.mk, Bounded.LE.mk, Day.Offset.toUnitVal, Day.Ordinal.toBounded];
     try split <;> rfl
     try rfl
   | ⟨12, _⟩ => contradiction
@@ -311,7 +344,7 @@ Checks if a given day is valid for the specified month and year. For example, `2
 if the year is a leap year.
 -/
 abbrev Valid (leap : Bool) (month : Month.Ordinal) (day : Day.Ordinal) : Prop :=
-  day.val ≤ (days leap month).val
+  day.toBounded.toSubtype.val ≤ (days leap month).toBounded.toSubtype.val
 
 /--
 Clips the day to be within the valid range.
@@ -319,7 +352,7 @@ Clips the day to be within the valid range.
 @[inline]
 def clipDay (leap : Bool) (month : Month.Ordinal) (day : Day.Ordinal) : Day.Ordinal :=
   let max : Day.Ordinal := month.days leap
-  if day.val > max.val
+  if day.toBounded.toSubtype.val > max.toBounded.toSubtype.val
     then max
     else day
 
@@ -329,7 +362,7 @@ Proves that every value provided by a clipDay is a valid day in a year.
 theorem valid_clipDay : Valid leap month (clipDay leap month day) := by
   simp [Valid, clipDay]
   split
-  exact Int.le_refl (days leap month).val
+  exact Int.le_refl (days leap month).toBounded.toSubtype.val
   next h => exact Int.not_lt.mp h
 
 end Ordinal

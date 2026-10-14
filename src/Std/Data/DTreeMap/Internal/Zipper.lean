@@ -221,7 +221,7 @@ theorem Zipper.prependMap_pruneLE_eq_prependMapGE [Ord α] (t : Impl α β) (ord
     cases x
     case lt =>
       simp only
-      apply l_ih
+      with_semireducible apply l_ih
       exact Impl.Ordered.left ord_t
     case eq =>
       simp only [Zipper.prependMap]
@@ -236,7 +236,7 @@ theorem Zipper.prependMap_eq_prependMapGT_self [Ord α] [TransOrd α] (r : Impl 
     Zipper.prependMap r z = Zipper.prependMapGT r lowerBound z := by
   induction r generalizing z
   case leaf =>
-    trivial
+    with_semireducible trivial
   case inner _ k v l r l_ih r_ih =>
     simp only [Zipper.prependMap, Zipper.prependMapGT]
     have hyp' := hyp ⟨k,v⟩ (by simp only [Impl.toList_eq_toListModel,
@@ -302,7 +302,7 @@ theorem Zipper.ordered_prependMap [Ord α] [TransOrd α] {t : Impl α β}
     (hyp : ∀ k ∈ z.toList, ∀ k' ∈ t.toListModel, compare k'.1 k.1 = .lt) :
     (Zipper.prependMap t z).Ordered := by
   rw [Ordered, toList_prependMap_eq_append, List.pairwise_append]
-  refine ⟨by rwa [Impl.toList_eq_toListModel], ord_z, ?_⟩
+  with_semireducible refine ⟨by rwa [Impl.toList_eq_toListModel], ord_z, ?_⟩
   exact fun a ha b hb => hyp _ hb _ (Impl.toList_eq_toListModel ▸ ha)
 
 theorem Zipper.ordered_prependMap_done [Ord α] [TransOrd α] {t : Impl α β}
@@ -343,6 +343,7 @@ def Zipper.FinitenessRelation : FinitenessRelation (Zipper α β) Id where
     apply InvImage.wf
     exact Nat.lt_wfRel.wf
   subrelation {it it'} h := by
+    with_semireducible
     obtain ⟨w, h, h'⟩ := h
     simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, instIteratorZipperIdSigma] at h' -- TODO
     cases w
@@ -381,28 +382,28 @@ public def Zipper.instToIterator :=
   ToIterator.of (γ := Zipper α β) _ (fun z => z.iter)
 attribute [instance] Zipper.instToIterator
 
-@[simp]
-theorem Zipper.toList_done : (done : Zipper α β).toList = [] := rfl
+@[defeq, simp]
+theorem Zipper.toList_done : (done : Zipper α β).toList = [] := by with_semireducible rfl
 
-@[simp]
-theorem Zipper.toList_cons : (cons k v tree next).toList = ⟨k, v⟩ :: tree.toList ++ next.toList := rfl
+@[defeq, simp]
+theorem Zipper.toList_cons : (cons k v tree next).toList = ⟨k, v⟩ :: tree.toList ++ next.toList := by with_semireducible rfl
 
-@[simp]
-theorem Zipper.step_done : (done : Zipper α β).step = .done := rfl
+@[defeq, simp]
+theorem Zipper.step_done : (done : Zipper α β).step = .done := by with_semireducible rfl
 
-@[simp]
-theorem Zipper.step_cons : (cons k v t it : Zipper α β).step = .yield ⟨it.prependMap t⟩ ⟨k, v⟩ := rfl
+@[defeq, simp]
+theorem Zipper.step_cons : (cons k v t it : Zipper α β).step = .yield ⟨it.prependMap t⟩ ⟨k, v⟩ := by with_semireducible rfl
 
 @[simp] theorem Zipper.val_run_step_toIterM_iter {z : Zipper α β} : z.iter.toIterM.step.run.inflate.val = z.step := by
   rw [IterM.step]
   simp only [Iterator.step, Id.run_pure, Shrink.inflate_deflate]
-  rfl
+  with_semireducible rfl
 
-theorem Zipper.eq_toIterM_iter (it : IterM (α := Zipper α β) Id ((a : α) × β a)) :
-    it = it.internalState.iter.toIterM := rfl
+@[defeq] theorem Zipper.eq_toIterM_iter (it : IterM (α := Zipper α β) Id ((a : α) × β a)) :
+    it = it.internalState.iter.toIterM := by with_semireducible rfl
 
-@[simp]
-theorem Zipper.size_cons : (cons k v t it : Zipper α β).size = 1 + t.treeSize + it.size := rfl
+@[defeq, simp]
+theorem Zipper.size_cons : (cons k v t it : Zipper α β).size = 1 + t.treeSize + it.size := by with_semireducible rfl
 
 theorem Zipper.toList_iter {α β} {z : Zipper α β} : z.iter.toList = z.toList := by
   rw [Iter.toList_eq_toList_toIterM, IterM.toList_eq_match_step]
@@ -453,6 +454,7 @@ def RxcIterator.FinitenessRelation [Ord α] : FinitenessRelation (RxcIterator α
     apply InvImage.wf
     exact Nat.lt_wfRel.wf
   subrelation {it it'} h := by
+    with_semireducible
     obtain ⟨w, h, h'⟩ := h
     simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, instIteratorRxcIteratorIdSigma] at h' -- TODO
     cases w
@@ -488,8 +490,8 @@ public instance RxcIterator.instIteratorLoop [Ord α]
     IteratorLoop (RxcIterator α β) Id m :=
   .defaultImplementation
 
-@[simp]
-theorem RxcIterator.step_done [Ord α] {upper : α} : ({ iter := .done, upper := upper } : RxcIterator α β).step = .done := rfl
+@[defeq, simp]
+theorem RxcIterator.step_done [Ord α] {upper : α} : ({ iter := .done, upper := upper } : RxcIterator α β).step = .done := by with_semireducible rfl
 
 @[simp]
 theorem RxcIterator.step_cons_of_LE [Ord α] {upper : α} {h : (compare k upper).isLE} : ({ iter := (.cons k v t it), upper := upper } : RxcIterator α β).step = .yield ⟨it.prependMap t, upper⟩ ⟨k,v⟩ := by
@@ -540,7 +542,7 @@ theorem List.takeWhile_eq_filter_of_pairwise {α : Type u} {p : α → Bool} {l 
   | cons a l ih =>
     rw [List.takeWhile_cons, List.filter_cons]
     split <;> rename_i ha
-    · rw [ih h.tail]
+    · with_semireducible rw [ih h.tail]
     · rw [eq_comm, List.filter_eq_nil_iff]
       exact fun b hb => by simpa using List.rel_of_pairwise_cons h hb (Bool.not_eq_true _ ▸ ha)
 
@@ -586,6 +588,7 @@ def RxoIterator.instFinitenessRelation [Ord α] : FinitenessRelation (RxoIterato
     apply InvImage.wf
     exact Nat.lt_wfRel.wf
   subrelation {it it'} h := by
+    with_semireducible
     obtain ⟨w, h, h'⟩ := h
     simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, instIteratorRxoIteratorIdSigma] at h' -- TODO
     cases w
@@ -621,8 +624,8 @@ public instance RxoIterator.instIteratorLoop [Ord α]
     IteratorLoop (RxoIterator α β) Id m :=
   .defaultImplementation
 
-@[simp]
-theorem RxoIterator.step_done [Ord α] {upper : α} : ({ iter := .done, upper := upper } : RxoIterator α β).step = .done := rfl
+@[defeq, simp]
+theorem RxoIterator.step_done [Ord α] {upper : α} : ({ iter := .done, upper := upper } : RxoIterator α β).step = .done := by with_semireducible rfl
 
 @[simp]
 theorem RxoIterator.step_cons_of_isLT [Ord α] {upper : α} {h : (compare k upper).isLT} : ({ iter := (.cons k v t it), upper := upper } : RxoIterator α β).step = .yield ⟨it.prependMap t, upper⟩ ⟨k,v⟩ := by
@@ -709,7 +712,7 @@ public theorem toList_ric {α : Type u} {β : α → Type v} [Ord α] [TransOrd 
   rw [RxcIterator.toList_rxcIter, RxcIterator.takeWhile_eq_filter]
   · rw [Zipper.toList_prependMap_eq_append]
     simp [Zipper.toList]
-  · apply Zipper.ordered_prependMap_done
+  · with_semireducible apply Zipper.ordered_prependMap_done
     · exact ordered
 
 end Ric
@@ -743,7 +746,7 @@ public theorem toList_ric {α : Type u} [Ord α] [TransOrd α] (t : Impl α (fun
   rw [RxcIterator.toList_rxcIter, RxcIterator.takeWhile_eq_filter]
   · congr
     simp [Zipper.toList_prependMap_eq_append, Zipper.toList, Impl.toList_eq_toListModel]
-  · apply Zipper.ordered_prependMap_done
+  · with_semireducible apply Zipper.ordered_prependMap_done
     · exact ordered
 
 end Unit
@@ -777,7 +780,7 @@ public theorem toList_ric {α : Type u} {β : Type v} [Ord α] [TransOrd α] (t 
   rw [RxcIterator.toList_rxcIter, RxcIterator.takeWhile_eq_filter]
   · congr
     simp [Zipper.toList_prependMap_eq_append, Zipper.toList, Impl.toList_eq_toListModel]
-  · apply Zipper.ordered_prependMap_done
+  · with_semireducible apply Zipper.ordered_prependMap_done
     · exact ordered
 
 end Const
@@ -807,7 +810,7 @@ public theorem toList_rio {α : Type u} {β : α → Type v} [Ord α] [TransOrd 
   rw [RxoIterator.toList_rxoIter, RxoIterator.takeWhile_eq_filter]
   · rw [Zipper.toList_prependMap_eq_append]
     simp [Zipper.toList]
-  · apply Zipper.ordered_prependMap_done
+  · with_semireducible apply Zipper.ordered_prependMap_done
     · exact ordered
 
 end Rio
@@ -841,7 +844,7 @@ public theorem toList_rio {α : Type u} [Ord α] [TransOrd α] (t : Impl α (fun
   rw [RxoIterator.toList_rxoIter, RxoIterator.takeWhile_eq_filter]
   · congr
     simp [Zipper.toList_prependMap_eq_append, Zipper.toList, Impl.toList_eq_toListModel]
-  · apply Zipper.ordered_prependMap_done
+  · with_semireducible apply Zipper.ordered_prependMap_done
     · exact ordered
 
 end Unit
@@ -875,7 +878,7 @@ public theorem toList_rio {α : Type u} {β : Type v} [Ord α] [TransOrd α] (t 
   rw [RxoIterator.toList_rxoIter, RxoIterator.takeWhile_eq_filter]
   · congr
     simp [Zipper.toList_prependMap_eq_append, Zipper.toList, Impl.toList_eq_toListModel]
-  · apply Zipper.ordered_prependMap_done
+  · with_semireducible apply Zipper.ordered_prependMap_done
     · exact ordered
 
 end Const

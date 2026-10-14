@@ -68,16 +68,16 @@ def getEntry! [BEq α] (a : α) [Inhabited ((a : α) × β a)] : List ((a : α) 
   | ⟨k, v⟩ :: l => if k == a then ⟨k, v⟩ else getEntry! a l
 
 @[simp] theorem getEntry?_nil [BEq α] {a : α} :
-    getEntry? a ([] : List ((a : α) × β a)) = none := (rfl)
+    getEntry? a ([] : List ((a : α) × β a)) = none := by with_semireducible rfl
 
 @[simp] theorem getEntryD_nil [BEq α] {a : α} (fallback : (a : α) × β a) :
-    getEntryD a fallback ([] : List ((a : α) × β a)) = fallback := (rfl)
+    getEntryD a fallback ([] : List ((a : α) × β a)) = fallback := by with_semireducible rfl
 
 @[simp] theorem getEntry!_nil [BEq α] {a : α} [Inhabited ((a : α) × β a)] :
-    getEntry! a ([] : List ((a : α) × β a)) = default := (rfl)
+    getEntry! a ([] : List ((a : α) × β a)) = default := by with_semireducible rfl
 
 theorem getEntry?_cons [BEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} :
-    getEntry? a (⟨k, v⟩ :: l) = if k == a then some ⟨k, v⟩ else getEntry? a l := (rfl)
+    getEntry? a (⟨k, v⟩ :: l) = if k == a then some ⟨k, v⟩ else getEntry? a l := by with_semireducible rfl
 
 theorem getEntry?_eq_find [BEq α] {k : α} {l : List ((a : α) × β a)} :
     getEntry? k l = l.find? (·.1 == k) := by
@@ -99,7 +99,7 @@ theorem getEntry?_cons_self [BEq α] [ReflBEq α] {l : List ((a : α) × β a)} 
   getEntry?_cons_of_true BEq.rfl
 
 theorem getEntryD_cons [BEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} {fallback : (a : α) × β a} :
-    getEntryD a fallback (⟨k, v⟩ :: l) = if k == a then ⟨k, v⟩ else getEntryD a fallback l := (rfl)
+    getEntryD a fallback (⟨k, v⟩ :: l) = if k == a then ⟨k, v⟩ else getEntryD a fallback l := by with_semireducible rfl
 
 theorem getEntryD_cons_of_true [BEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} {fallback : (a : α) × β a}
     (h : k == a) : getEntryD a fallback (⟨k, v⟩ :: l) = ⟨k, v⟩ := by
@@ -115,7 +115,7 @@ theorem getEntryD_cons_self [BEq α] [ReflBEq α] {l : List ((a : α) × β a)} 
   getEntryD_cons_of_true BEq.rfl
 
 theorem getEntry!_cons [BEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} [Inhabited ((a : α) × β a)] :
-    getEntry! a (⟨k, v⟩ :: l) = if k == a then ⟨k, v⟩ else getEntry! a l := (rfl)
+    getEntry! a (⟨k, v⟩ :: l) = if k == a then ⟨k, v⟩ else getEntry! a l := by with_semireducible rfl
 
 theorem getEntry!_cons_of_true [BEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} [Inhabited ((a : α) × β a)]
     (h : k == a) : getEntry! a (⟨k, v⟩ :: l) = ⟨k, v⟩ := by
@@ -161,19 +161,19 @@ theorem getEntryD_eq_getEntry? [BEq α] {l : List ((a : α) × β a)} {a : α} {
 theorem getEntry!_eq_getEntry? [BEq α] {l : List ((a : α) × β a)} {a : α} [Inhabited ((a : α) × β a)] :
     getEntry! a l = (getEntry? a l).get! := by
   induction l using assoc_induction with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons k v t ih => cases h : k == a <;> simp_all [getEntry!, getEntry?]
 
 theorem keys_eq_map {l : List ((a : α) × β a)} :
     keys l = l.map (·.1) := by
   induction l with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons => simp [keys, *]
 
 theorem values_eq_map {β : Type v} {l : List ((_ : α) × β)} :
     values l = l.map (·.2) := by
   induction l with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons => simp [values, *]
 
 theorem getEntry?_eq_some_iff [BEq α] [EquivBEq α] {l : List ((a : α) × β a)} {e} {k}
@@ -187,7 +187,7 @@ theorem getEntry?_eq_some_iff [BEq α] [EquivBEq α] {l : List ((a : α) × β a
     split
     · rename_i hlkk
       simp only [Option.some.injEq]
-      replace hd := pairwise_cons.mp hd
+      with_semireducible replace hd := pairwise_cons.mp hd
       refine ⟨fun heq => ⟨(congrArg (Sigma.fst) heq.symm) ▸ BEq.symm hlkk, Or.inl heq.symm⟩, ?_⟩
       rintro ⟨hbeq, ⟨rfl|h⟩⟩
       · rfl
@@ -197,7 +197,7 @@ theorem getEntry?_eq_some_iff [BEq α] [EquivBEq α] {l : List ((a : α) × β a
         simp_all [BEq.trans hlkk hbeq]
     · rename_i h
       replace h := h.imp BEq.symm
-      simp only [ih hd.tail, Sigma.ext_iff, and_congr_right_iff, iff_or_self, and_imp]
+      with_semireducible simp only [ih hd.tail, Sigma.ext_iff, and_congr_right_iff, iff_or_self, and_imp]
       intros; simp_all
 
 theorem mem_iff_getEntry?_eq_some [BEq α] [EquivBEq α] {l : List ((a : α) × β a)}
@@ -223,9 +223,9 @@ variable {β : Type v}
   | [] => none
   | ⟨k, v⟩ :: l => if k == a then some v else getValue? a l
 
-@[simp] theorem getValue?_nil [BEq α] {a : α} : getValue? a ([] : List ((_ : α) × β)) = none := rfl
-theorem getValue?_cons [BEq α] {l : List ((_ : α) × β)} {k a : α} {v : β} :
-    getValue? a (⟨k, v⟩ :: l) = if k == a then some v else getValue? a l := rfl
+@[defeq, simp] theorem getValue?_nil [BEq α] {a : α} : getValue? a ([] : List ((_ : α) × β)) = none := by with_semireducible rfl
+@[defeq] theorem getValue?_cons [BEq α] {l : List ((_ : α) × β)} {k a : α} {v : β} :
+    getValue? a (⟨k, v⟩ :: l) = if k == a then some v else getValue? a l := by with_semireducible rfl
 
 theorem getValue?_cons_of_true [BEq α] {l : List ((_ : α) × β)} {k a : α} {v : β} (h : k == a) :
     getValue? a (⟨k, v⟩ :: l) = some v := by
@@ -269,11 +269,11 @@ end
 def beqModel [BEq α] [LawfulBEq α] [∀ k, BEq (β k)] (l₁ l₂ : List ((a : α) × β a)) :=
   if l₁.length ≠ l₂.length then false else (l₁.all fun x => getValueCast? x.fst l₂ == some x.snd)
 
-@[simp] theorem getValueCast?_nil [BEq α] [LawfulBEq α] {a : α} :
-    getValueCast? a ([] : List ((a : α) × β a)) = none := rfl
-theorem getValueCast?_cons [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} :
+@[defeq, simp] theorem getValueCast?_nil [BEq α] [LawfulBEq α] {a : α} :
+    getValueCast? a ([] : List ((a : α) × β a)) = none := by with_semireducible rfl
+@[defeq] theorem getValueCast?_cons [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} :
     getValueCast? a (⟨k, v⟩ :: l) = if h : k == a then some (cast (congrArg β (eq_of_beq h)) v)
-      else getValueCast? a l := rfl
+      else getValueCast? a l := by with_semireducible rfl
 
 theorem getValueCast?_cons_of_true [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)} {k a : α}
     {v : β k} (h : k == a) :
@@ -308,11 +308,11 @@ private def Option.dmap : (o : Option α) → (f : (a : α) → (o = some a) →
   | none, _ => none
   | some a, f => some (f a rfl)
 
-@[simp] private theorem Option.dmap_none (f : (a : α) → (none = some a) → β) :
-    Option.dmap none f = none := rfl
+@[defeq, simp] private theorem Option.dmap_none (f : (a : α) → (none = some a) → β) :
+    Option.dmap none f = none := by with_semireducible rfl
 
-@[simp] private theorem Option.dmap_some (a : α) (f : (a' : α) → (some a = some a') → β) :
-    Option.dmap (some a) f = some (f a rfl) := rfl
+@[defeq, simp] private theorem Option.dmap_some (a : α) (f : (a' : α) → (some a = some a') → β) :
+    Option.dmap (some a) f = some (f a rfl) := by with_semireducible rfl
 
 @[congr] private theorem Option.dmap_congr {o o' : Option α} (ho : o = o')
     {f : (a : α) → o = some a → β} {f' : (a : α) → o' = some a → β}
@@ -324,7 +324,7 @@ private def Option.dmap : (o : Option α) → (f : (a : α) → (o = some a) →
 @[simp]
 private theorem Option.isSome_dmap {o : Option α} {f : (a : α) → (o = some a) → β} :
     (Option.dmap o f).isSome = o.isSome := by
-  cases o <;> rfl
+  cases o <;> with_semireducible rfl
 
 private theorem Option.dmap_eq_some {o : Option α} {f : (a : α) → (o = some a) → β} (b : β) :
     (Option.dmap o f) = some b ↔ ∃ (a : α) (h : o = some a), f a h = b := by
@@ -360,9 +360,9 @@ def containsKey [BEq α] (a : α) : List ((a : α) × β a) → Bool
   | ⟨k, _⟩ :: l => k == a || containsKey a l
 
 @[simp] theorem containsKey_nil [BEq α] {a : α} :
-    containsKey a ([] : List ((a : α) × β a)) = false := (rfl)
+    containsKey a ([] : List ((a : α) × β a)) = false := by with_semireducible rfl
 @[simp] theorem containsKey_cons [BEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} :
-    containsKey a (⟨k, v⟩ :: l) = (k == a || containsKey a l) := (rfl)
+    containsKey a (⟨k, v⟩ :: l) = (k == a || containsKey a l) := by with_semireducible rfl
 
 theorem containsKey_cons_eq_false [BEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} :
     (containsKey a (⟨k, v⟩ :: l) = false) ↔ ((k == a) = false) ∧ (containsKey a l = false) := by
@@ -414,10 +414,10 @@ theorem containsKey_eq_contains_map_fst [BEq α] [PartialEquivBEq α] {l : List 
     simp only [List.map_cons, List.contains_cons]
     rw [BEq.comm]
 
-@[simp] theorem keys_nil : keys ([] : List ((a : α) × β a)) = [] := (rfl)
-@[simp] theorem values_nil {β : Type v} : values ([] : List ((_ : α) × β )) = [] := (rfl)
+@[simp] theorem keys_nil : keys ([] : List ((a : α) × β a)) = [] := by with_semireducible rfl
+@[simp] theorem values_nil {β : Type v} : values ([] : List ((_ : α) × β )) = [] := by with_semireducible rfl
 @[simp] theorem keys_cons {l : List ((a : α) × β a)} {k : α} {v : β k} :
-    keys (⟨k, v⟩ :: l) = k :: keys l := (rfl)
+    keys (⟨k, v⟩ :: l) = k :: keys l := by with_semireducible rfl
 
 theorem length_keys_eq_length (l : List ((a : α) × β a)) : (keys l).length = l.length := by
   induction l using assoc_induction <;> simp_all
@@ -428,7 +428,7 @@ theorem isEmpty_keys_eq_isEmpty (l : List ((a : α) × β a)) : (keys l).isEmpty
 theorem containsKey_eq_keys_contains [BEq α] [PartialEquivBEq α] {l : List ((a : α) × β a)}
     {a : α} : containsKey a l = (keys l).contains a := by
   induction l using assoc_induction
-  · rfl
+  · with_semireducible rfl
   next k _ l ih => simp [ih, BEq.comm]
 
 theorem containsKey_of_mem_keys [BEq α] [EquivBEq α] {l : List ((a : α) × β a)}
@@ -608,7 +608,7 @@ theorem getEntry_mem [BEq α] {l : List ((a : α) × β a)} {k : α} {h} :
   change (getEntry? k l).get h' ∈ l
   clear h
   induction l using assoc_induction with
-  | nil => contradiction
+  | nil => with_semireducible contradiction
   | cons k v l ih =>
     simp only [getEntry?_cons]
     split
@@ -733,7 +733,7 @@ theorem getValueCast_mem [BEq α] [LawfulBEq α]
     · rw [containsKey_cons] at h
       simp only [hd_a, Bool.false_or] at h
       simp only [getValueCast, getValueCast?, hd_a, Bool.false_eq_true, ↓reduceDIte, List.mem_cons]
-      exact Or.inr (ih h)
+      with_semireducible exact Or.inr (ih h)
 
 theorem getValueCast_of_mem [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)} {x : (a : α) × β a}
     (h : x ∈ l) (distinct : DistinctKeys l) :
@@ -741,6 +741,7 @@ theorem getValueCast_of_mem [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)
   induction h with
   | head => simp [getValueCast, getValueCast?]
   | @tail y l hmem ih =>
+    with_semireducible
     obtain (h|h) := containsKey_cons_eq_true.1
       (@containsKey_of_mem α β _ _ (y :: l) x (List.mem_of_mem_tail hmem))
     · have := containsKey_of_mem hmem ▸ containsKey_congr h ▸ distinct.containsKey_eq_false
@@ -764,10 +765,10 @@ theorem getValue_eq_getValueCast {β : Type v} [BEq α] [LawfulBEq α] {l : List
 
 @[simp]
 theorem getValueCastD_nil [BEq α] [LawfulBEq α] {a : α} {fallback : β a} :
-  getValueCastD a ([] : List ((a : α) × β a)) fallback = fallback := (rfl)
+  getValueCastD a ([] : List ((a : α) × β a)) fallback = fallback := by with_semireducible rfl
 
 theorem getValueCastD_eq_getValueCast? [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)} {a : α}
-    {fallback : β a} : getValueCastD a l fallback = (getValueCast? a l).getD fallback := (rfl)
+    {fallback : β a} : getValueCastD a l fallback = (getValueCast? a l).getD fallback := by with_semireducible rfl
 
 theorem getValueCastD_eq_fallback [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)} {a : α}
     {fallback : β a} (h : containsKey a l = false) : getValueCastD a l fallback = fallback := by
@@ -792,10 +793,10 @@ theorem getValueCast?_eq_some_getValueCastD [BEq α] [LawfulBEq α] {l : List ((
 
 @[simp]
 theorem getValueCast!_nil [BEq α] [LawfulBEq α] {a : α} [Inhabited (β a)] :
-    getValueCast! a ([] : List ((a : α) × β a)) = default := (rfl)
+    getValueCast! a ([] : List ((a : α) × β a)) = default := by with_semireducible rfl
 
 theorem getValueCast!_eq_getValueCast? [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)} {a : α}
-    [Inhabited (β a)] : getValueCast! a l = (getValueCast? a l).get! := (rfl)
+    [Inhabited (β a)] : getValueCast! a l = (getValueCast? a l).get! := by with_semireducible rfl
 
 theorem getValueCast!_eq_default [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)} {a : α}
     [Inhabited (β a)] (h : containsKey a l = false) : getValueCast! a l = default := by
@@ -813,7 +814,7 @@ theorem getValueCast?_eq_some_getValueCast! [BEq α] [LawfulBEq α] {l : List ((
   rw [getValueCast?_eq_some_getValueCast h, getValueCast_eq_getValueCast!]
 
 theorem getValueCast!_eq_getValueCastD_default [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)}
-    {a : α} [Inhabited (β a)] : getValueCast! a l = getValueCastD a l default := (rfl)
+    {a : α} [Inhabited (β a)] : getValueCast! a l = getValueCastD a l default := by with_semireducible rfl
 
 section
 
@@ -825,10 +826,10 @@ variable {β : Type v}
 
 @[simp]
 theorem getValueD_nil [BEq α] {a : α} {fallback : β} :
-    getValueD a ([] : List ((_ : α) × β)) fallback = fallback := (rfl)
+    getValueD a ([] : List ((_ : α) × β)) fallback = fallback := by with_semireducible rfl
 
 theorem getValueD_eq_getValue? [BEq α] {l : List ((_ : α) × β)} {a : α} {fallback : β} :
-    getValueD a l fallback = (getValue? a l).getD fallback := (rfl)
+    getValueD a l fallback = (getValue? a l).getD fallback := by with_semireducible rfl
 
 theorem getValueD_eq_fallback [BEq α] {l : List ((_ : α) × β)} {a : α} {fallback : β}
     (h : containsKey a l = false) : getValueD a l fallback = fallback := by
@@ -857,10 +858,10 @@ theorem getValueD_congr [BEq α] [PartialEquivBEq α] {l : List ((_ : α) × β)
 
 @[simp]
 theorem getValue!_nil [BEq α] [Inhabited β] {a : α} :
-    getValue! a ([] : List ((_ : α) × β)) = default := (rfl)
+    getValue! a ([] : List ((_ : α) × β)) = default := by with_semireducible rfl
 
 theorem getValue!_eq_getValue? [BEq α] [Inhabited β] {l : List ((_ : α) × β)} {a : α} :
-    getValue! a l = (getValue? a l).get! := (rfl)
+    getValue! a l = (getValue? a l).get! := by with_semireducible rfl
 
 theorem getValue!_eq_default [BEq α] [Inhabited β] {l : List ((_ : α) × β)} {a : α}
     (h : containsKey a l = false) : getValue! a l = default := by
@@ -884,7 +885,7 @@ theorem getValue!_congr [BEq α] [PartialEquivBEq α] [Inhabited β] {l : List (
   simp only [getValue!_eq_getValue?, getValue?_congr hab]
 
 theorem getValue!_eq_getValueD_default [BEq α] [Inhabited β] {l : List ((_ : α) × β)} {a : α} :
-    getValue! a l = getValueD a l default := (rfl)
+    getValue! a l = getValueD a l default := by with_semireducible rfl
 
 end
 
@@ -894,10 +895,10 @@ def getKey? [BEq α] (a : α) : List ((a : α) × β a) → Option α
   | ⟨k, _⟩ :: l => if k == a then some k else getKey? a l
 
 @[simp] theorem getKey?_nil [BEq α] {a : α} :
-    getKey? a ([] : List ((a : α) × β a)) = none := (rfl)
+    getKey? a ([] : List ((a : α) × β a)) = none := by with_semireducible rfl
 
 @[simp] theorem getKey?_cons [BEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} :
-    getKey? a (⟨k, v⟩ :: l) = if k == a then some k else getKey? a l := (rfl)
+    getKey? a (⟨k, v⟩ :: l) = if k == a then some k else getKey? a l := by with_semireducible rfl
 
 theorem getKey?_cons_of_true [BEq α] {l : List ((a : α) × β a)} {k a : α} {v : β k} (h : k == a) :
     getKey? a (⟨k, v⟩ :: l) = some k := by
@@ -935,7 +936,7 @@ theorem getKey?_eq_some_iff [BEq α] [EquivBEq α] {l : List ((a : α) × β a)}
 theorem getKey?_beq [BEq α] {l : List ((a : α) × β a)} {a : α} :
     (getKey? a l).all (· == a) := by
   induction l using assoc_induction with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons k v l ih =>
     rw [getKey?_cons]
     split <;> assumption
@@ -943,7 +944,7 @@ theorem getKey?_beq [BEq α] {l : List ((a : α) × β a)} {a : α} :
 theorem getKey?_congr [BEq α] [EquivBEq α] {l : List ((a : α) × β a)}
     {k k' : α} (h : k == k') : getKey? k l = getKey? k' l := by
   induction l with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons x l ih =>
     rw [getKey?_cons, getKey?_cons, BEq.congr_right h, ih]
 
@@ -1092,10 +1093,10 @@ theorem forall_mem_keys_iff_forall_containsKey_getKey [BEq α] [EquivBEq α] {l 
 
 @[simp]
 theorem getKeyD_nil [BEq α] {a fallback : α} :
-  getKeyD a ([] : List ((a : α) × β a)) fallback = fallback := (rfl)
+  getKeyD a ([] : List ((a : α) × β a)) fallback = fallback := by with_semireducible rfl
 
 theorem getKeyD_eq_getKey? [BEq α] {l : List ((a : α) × β a)} {a fallback : α} :
-  getKeyD a l fallback = (getKey? a l).getD fallback := (rfl)
+  getKeyD a l fallback = (getKey? a l).getD fallback := by with_semireducible rfl
 
 theorem getKeyD_eq_fallback [BEq α] [EquivBEq α] {l : List ((a : α) × β a)} {a fallback : α}
     (h : containsKey a l = false) : getKeyD a l fallback = fallback := by
@@ -1128,10 +1129,10 @@ theorem getKey?_eq_some_getKeyD [BEq α] [EquivBEq α] {l : List ((a : α) × β
 
 @[simp]
 theorem getKey!_nil [BEq α] [Inhabited α] {a : α} :
-    getKey! a ([] : List ((a : α) × β a)) = default := (rfl)
+    getKey! a ([] : List ((a : α) × β a)) = default := by with_semireducible rfl
 
 theorem getKey!_eq_getKey? [BEq α] [Inhabited α] {l : List ((a : α) × β a)} {a : α} :
-    getKey! a l = (getKey? a l).get! := (rfl)
+    getKey! a l = (getKey? a l).get! := by with_semireducible rfl
 
 theorem getKey!_eq_default [BEq α] [Inhabited α] {l : List ((a : α) × β a)} {a : α}
     (h : containsKey a l = false) : getKey! a l = default := by
@@ -1158,12 +1159,12 @@ theorem getKey?_eq_some_getKey! [BEq α] [Inhabited α] {l : List ((a : α) × �
   rw [getKey?_eq_some_getKey h, getKey_eq_getKey!]
 
 theorem getKey!_eq_getKeyD_default [BEq α] [EquivBEq α] [Inhabited α] {l : List ((a : α) × β a)}
-    {a : α} : getKey! a l = getKeyD a l default := (rfl)
+    {a : α} : getKey! a l = getKeyD a l default := by with_semireducible rfl
 
 theorem getEntry?_eq_getValueCast? [BEq α] [LawfulBEq α] {l : List ((a : α) × β a)}
     {a : α} : getEntry? a l = (getValueCast? a l).map (fun v => ⟨a, v⟩) := by
   induction l using assoc_induction with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons k v l ih =>
     simp only [getEntry?_cons, getValueCast?_cons]
     split
@@ -1176,7 +1177,7 @@ theorem getEntry?_eq_getValueCast? [BEq α] [LawfulBEq α] {l : List ((a : α) �
 theorem getEntry_eq_getKey_getValue [BEq α] {β : Type v} {l : List ((_ : α) × β)}
     {a : α} (h : containsKey a l) : getEntry a l h = ⟨getKey a l h, getValue a l h⟩ := by
   induction l using assoc_induction with
-  | nil => contradiction
+  | nil => with_semireducible contradiction
   | cons k v l ih =>
     match h' : k == a with
     | true =>
@@ -1191,10 +1192,10 @@ def replaceEntry [BEq α] (k : α) (v : β k) : List ((a : α) × β a) → List
   | [] => []
   | ⟨k', v'⟩ :: l => if k' == k then ⟨k, v⟩ :: l else ⟨k', v'⟩ :: replaceEntry k v l
 
-@[simp] theorem replaceEntry_nil [BEq α] {k : α} {v : β k} : replaceEntry k v [] = [] := (rfl)
+@[simp] theorem replaceEntry_nil [BEq α] {k : α} {v : β k} : replaceEntry k v [] = [] := by with_semireducible rfl
 theorem replaceEntry_cons [BEq α] {l : List ((a : α) × β a)} {k k' : α} {v : β k} {v' : β k'} :
     replaceEntry k v (⟨k', v'⟩ :: l) =
-      if k' == k then ⟨k, v⟩ :: l else ⟨k', v'⟩ :: replaceEntry k v l := (rfl)
+      if k' == k then ⟨k, v⟩ :: l else ⟨k', v'⟩ :: replaceEntry k v l := by with_semireducible rfl
 
 theorem replaceEntry_cons_of_true [BEq α] {l : List ((a : α) × β a)} {k k' : α} {v : β k}
     {v' : β k'} (h : k' == k) : replaceEntry k v (⟨k', v'⟩ :: l) = ⟨k, v⟩ :: l := by
@@ -1375,10 +1376,10 @@ def eraseKey [BEq α] (k : α) : List ((a : α) × β a) → List ((a : α) × �
   | [] => []
   | ⟨k', v'⟩ :: l => if k' == k then l else ⟨k', v'⟩ :: eraseKey k l
 
-@[simp] theorem eraseKey_nil [BEq α] {k : α} : eraseKey k ([] : List ((a : α) × β a)) = [] := (rfl)
+@[simp] theorem eraseKey_nil [BEq α] {k : α} : eraseKey k ([] : List ((a : α) × β a)) = [] := by with_semireducible rfl
 
 theorem eraseKey_cons [BEq α] {l : List ((a : α) × β a)} {k k' : α} {v' : β k'} :
-    eraseKey k (⟨k', v'⟩ :: l) = if k' == k then l else ⟨k', v'⟩ :: eraseKey k l := (rfl)
+    eraseKey k (⟨k', v'⟩ :: l) = if k' == k then l else ⟨k', v'⟩ :: eraseKey k l := by with_semireducible rfl
 
 theorem eraseKey_cons_of_beq [BEq α] {l : List ((a : α) × β a)} {k k' : α} {v' : β k'}
     (h : k' == k) : eraseKey k (⟨k', v'⟩ :: l) = l :=
@@ -1926,7 +1927,7 @@ theorem length_insertEntryIfNew_le [BEq α] {l : List ((a : α) × β a)} {k : �
 theorem keys_eraseKey [BEq α] [PartialEquivBEq α] {l : List ((a : α) × β a)} {k : α} :
     keys (eraseKey k l) = (keys l).erase k := by
   induction l using assoc_induction
-  · rfl
+  · with_semireducible rfl
   next k' v' l ih =>
     simp only [eraseKey_cons, keys_cons, List.erase_cons]
     rw [BEq.comm]
@@ -2827,7 +2828,7 @@ theorem DistinctKeys.insertList [BEq α] [PartialEquivBEq α] {l₁ l₂ : List 
     (h : DistinctKeys l₁) :
     DistinctKeys (insertList l₁ l₂) := by
   induction l₂ using assoc_induction generalizing l₁
-  · simpa [insertList]
+  · with_semireducible simpa [insertList]
   · rename_i k v t ih
     rw [insertList.eq_def]
     exact ih h.insertEntry
@@ -2848,6 +2849,7 @@ theorem insertList_cons_perm [BEq α] [EquivBEq α] {l₁ l₂ : List ((a : α) 
   · simp [insertList]
   · rename_i h t ih
     rw [insertList]
+    with_semireducible
     refine (ih hl₁.insertEntry hl₂.tail).trans
       ((insertEntry_of_perm hl₁.insertList
         (ih hl₁ (distinctKeys_of_sublist (by simp) hl₂))).trans
@@ -2874,7 +2876,7 @@ theorem getEntry?_insertList [BEq α] [EquivBEq α]
       getEntry?_insertEntry]
     cases hk : h.1 == k
     · simp only [Bool.false_eq_true, ↓reduceIte]
-      rw [ih distinct_l distinct_toInsert.tail, getEntry?_cons_of_false hk]
+      with_semireducible rw [ih distinct_l distinct_toInsert.tail, getEntry?_cons_of_false hk]
     · simp only [↓reduceIte]
       rw [getEntry?_cons_of_true hk, Option.some_or]
 
@@ -3101,8 +3103,8 @@ theorem length_le_length_insertList [BEq α]
     {l toInsert : List ((a : α) × β a)} :
     l.length ≤ (insertList l toInsert).length := by
   induction toInsert generalizing l with
-  | nil => apply Nat.le_refl
-  | cons hd tl ih => exact Nat.le_trans length_le_length_insertEntry ih
+  | nil => with_semireducible apply Nat.le_refl
+  | cons hd tl ih => with_semireducible exact Nat.le_trans length_le_length_insertEntry ih
 
 theorem length_insertList_le [BEq α]
     {l toInsert : List ((a : α) × β a)} :
@@ -3135,7 +3137,7 @@ theorem DistinctKeys.insertListIfNew [BEq α] [PartialEquivBEq α] {l₁ l₂ : 
     (h : DistinctKeys l₁) :
     DistinctKeys (insertListIfNew l₁ l₂) := by
   induction l₂ using assoc_induction generalizing l₁
-  · simpa [insertListIfNew]
+  · with_semireducible simpa [insertListIfNew]
   · rename_i k v t ih
     rw [insertListIfNew.eq_def]
     exact ih h.insertEntryIfNew
@@ -3542,8 +3544,8 @@ theorem length_left_le_length_insertListIfNew [BEq α] [EquivBEq α]
    {l toInsert : List ((a : α) × β a)} :
     l.length ≤ (insertListIfNew l toInsert).length := by
   induction toInsert generalizing l with
-  | nil => apply Nat.le_refl
-  | cons hd tl ih => exact Nat.le_trans length_le_length_insertEntryIfNew ih
+  | nil => with_semireducible apply Nat.le_refl
+  | cons hd tl ih => with_semireducible exact Nat.le_trans length_le_length_insertEntryIfNew ih
 
 theorem length_right_le_length_insertList [BEq α] [EquivBEq α]
     {l toInsert : List ((a : α) × β a)}
@@ -3689,7 +3691,7 @@ theorem getKey?_insertListConst_of_mem [BEq α] [EquivBEq α]
     getKey? k' (insertListConst l toInsert) = some k := by
   unfold insertListConst
   apply getKey?_insertList_of_mem distinct_l k_beq
-  · simpa [List.pairwise_map]
+  · with_semireducible simpa [List.pairwise_map]
   · simp only [List.map_map, Prod.fst_comp_toSigma]
     exact mem
 
@@ -3756,15 +3758,15 @@ theorem length_insertListConst [BEq α] [EquivBEq α]
   unfold insertListConst
   rw [length_insertList distinct_l]
   · simp
-  · simpa [List.pairwise_map]
+  · with_semireducible simpa [List.pairwise_map]
   · simpa using distinct_both
 
 theorem length_le_length_insertListConst [BEq α]
     {l : List ((_ : α) × β)} {toInsert : List (α × β)} :
     l.length ≤ (insertListConst l toInsert).length := by
   induction toInsert generalizing l with
-  | nil => apply Nat.le_refl
-  | cons hd tl ih => exact Nat.le_trans length_le_length_insertEntry ih
+  | nil => with_semireducible apply Nat.le_refl
+  | cons hd tl ih => with_semireducible exact Nat.le_trans length_le_length_insertEntry ih
 
 theorem length_insertListConst_le [BEq α]
     {l : List ((_ : α) × β)} {toInsert : List (α × β)} :
@@ -3892,7 +3894,7 @@ theorem getValue?_insertListConst_of_mem [BEq α] [EquivBEq α]
   rw [getValue?_eq_getEntry?]
   have : getEntry? k' (insertList l (toInsert.map Prod.toSigma)) =
       getEntry? k' (toInsert.map Prod.toSigma) := by
-    apply getEntry?_insertList_of_contains_eq_true distinct_l (by simpa [List.pairwise_map])
+    apply getEntry?_insertList_of_contains_eq_true distinct_l (by with_semireducible simpa [List.pairwise_map])
     apply containsKey_of_beq _ k_beq
     rw [containsKey_eq_contains_map_fst, List.map_map, Prod.fst_comp_toSigma,
       List.contains_iff_exists_mem_beq]
@@ -3904,8 +3906,9 @@ theorem getValue?_insertListConst_of_mem [BEq α] [EquivBEq α]
   rw [this]
   rw [getEntry?_of_mem _ k_beq _]
   . rfl
-  · simpa [DistinctKeys.def, List.pairwise_map]
-  . simp only [List.mem_map]
+  · with_semireducible simpa [DistinctKeys.def, List.pairwise_map]
+  . with_semireducible
+    simp only [List.mem_map]
     exists (k, v)
 
 theorem getValue_insertListConst_of_contains_eq_false [BEq α] [PartialEquivBEq α]
@@ -4208,8 +4211,8 @@ theorem length_le_length_insertListIfNewUnit [BEq α] [EquivBEq α]
     {l : List ((_ : α) × Unit)} {toInsert : List α} :
     l.length ≤ (insertListIfNewUnit l toInsert).length := by
   induction toInsert generalizing l with
-  | nil => apply Nat.le_refl
-  | cons hd tl ih => exact Nat.le_trans length_le_length_insertEntryIfNew ih
+  | nil => with_semireducible apply Nat.le_refl
+  | cons hd tl ih => with_semireducible exact Nat.le_trans length_le_length_insertEntryIfNew ih
 
 theorem length_insertListIfNewUnit_le [BEq α] [EquivBEq α]
     {l : List ((_ : α) × Unit)} {toInsert : List α} :
@@ -4306,7 +4309,7 @@ theorem alterKey_cons_perm {k : α} {f : Option (β k) → Option (β k)} {k' : 
   · simp only [hk', ↓reduceDIte]
     rw [getValueCast?_cons_of_true hk', eraseKey_cons_of_beq hk']
     simp only [insertEntry_cons_of_beq hk']
-    rfl
+    with_semireducible rfl
   · simp only [hk', Bool.false_eq_true, ↓reduceDIte]
     rw [Bool.not_eq_true] at hk'
     rw [getValueCast?_cons_of_false hk', eraseKey_cons_of_false hk', alterKey]
@@ -4344,7 +4347,7 @@ theorem alterKey_append_of_containsKey_right_eq_false {a : α} {f : Option (β a
 theorem alterKey_nil {a : α} {f : Option (β a) → Option (β a)} :
     alterKey a f [] = match f none with
 | none => []
-| some b => [⟨a, b⟩] := (rfl)
+| some b => [⟨a, b⟩] := by with_semireducible rfl
 
 theorem containsKey_alterKey_self {a : α} {f : Option (β a) → Option (β a)}
     {l : List ((a : α) × β a)} (hl : DistinctKeys l) :
@@ -4485,7 +4488,7 @@ theorem getKey!_alterKey [Inhabited α] {k k' : α} {f : Option (β k) → Optio
   simp only [getKey!_eq_getKey?, hl, getKey?_alterKey, beq_iff_eq]
   split
   next heq =>
-    split <;> rfl
+    split <;> with_semireducible rfl
   next heq =>
     rfl
 
@@ -4592,7 +4595,7 @@ theorem alterKey_cons_perm {k : α} {f : Option β → Option β} {k' : α} {v' 
   · simp only [hk']
     rw [getValue?_cons_of_true hk', eraseKey_cons_of_beq hk']
     simp only [insertEntry_cons_of_beq hk']
-    rfl
+    with_semireducible rfl
   · simp only [hk', Bool.false_eq_true]
     rw [Bool.not_eq_true] at hk'
     rw [getValue?_cons_of_false hk', eraseKey_cons_of_false hk', alterKey]
@@ -4630,7 +4633,7 @@ theorem alterKey_append_of_containsKey_right_eq_false {a : α} {f : Option β �
 theorem alterKey_nil {a : α} {f : Option β → Option β} :
     alterKey a f [] = match f none with
 | none => []
-| some b => [⟨a, b⟩] := (rfl)
+| some b => [⟨a, b⟩] := by with_semireducible rfl
 
 theorem containsKey_alterKey_self [EquivBEq α] {a : α} {f : Option β → Option β}
     {l : List ((_ : α) × β)} (hl : DistinctKeys l) :
@@ -4831,7 +4834,7 @@ theorem isEmpty_modifyKey [BEq α] [LawfulBEq α] (k : α) (f : β k → β k) (
 theorem length_modifyKey [BEq α] [LawfulBEq α] (k : α) (f : β k → β k) (l : List ((a : α) × β a)) :
     (modifyKey k f l).length = l.length := by
   induction l
-  · rfl
+  · with_semireducible rfl
   next ih =>
     simp only [modifyKey]
     split <;> next h => simp only [length_replaceEntry, List.length_cons]
@@ -5020,7 +5023,7 @@ theorem modifyKey_of_perm [EquivBEq α] {l l' : List ((_ : α) × β)} {k : α} 
 theorem length_modifyKey (k : α) (f : β → β) (l : List ((_ : α) × β)) :
     (modifyKey k f l).length = l.length := by
   induction l
-  · rfl
+  · with_semireducible rfl
   next ih =>
     simp only [modifyKey]
     split <;> next h => simp only [length_replaceEntry, List.length_cons]
@@ -5178,25 +5181,25 @@ private theorem Option.dmap_bind {α β γ : Type _} (x : Option α) (f : α →
     (g : (a : β) → x.bind f = some a → γ) :
     Option.dmap (x.bind f) g =
       x.pbind (fun a h => Option.dmap (f a) (fun b h' => g b (h ▸ h'.symm ▸ rfl))) := by
-  cases x <;> rfl
+  cases x <;> with_semireducible rfl
 
 private theorem Option.bind_dmap_left {α β γ : Type _} (x : Option α)
     (f : (a : α) → x = some a → β) (g : β → Option γ) :
     (Option.dmap x f).bind g = x.pbind (fun a h => g (f a h)) := by
-  cases x <;> rfl
+  cases x <;> with_semireducible rfl
 
 private theorem Option.dmap_map {α β γ : Type _} (x : Option α) (f : α → β)
     (g : (a : β) → x.map f = some a → γ) :
     Option.dmap (x.map f) g = Option.dmap x (fun a h => g (f a) (h ▸ rfl)) := by
-  cases x <;> rfl
+  cases x <;> with_semireducible rfl
 
 private theorem Option.map_dmap {α β γ : Type _} (x : Option α)
     (f : (a : α) → x = some a → β) (g : β → γ) :
     (x.dmap f).map g = Option.dmap x (fun a h => g (f a h)) := by
-  cases x <;> rfl
+  cases x <;> with_semireducible rfl
 
 private theorem Option.dmap_id {α : Type _} (x : Option α) : Option.dmap x (fun a _ => a) = x := by
-  cases x <;> rfl
+  cases x <;> with_semireducible rfl
 
 private theorem Option.dmap_ite {α β : Type _} (p : Prop) [Decidable p] (t e : Option α)
     (f : (a : α) → (if p then t else e) = some a → β) :
@@ -5212,7 +5215,7 @@ private theorem Option.dmap_ite {α β : Type _} (p : Prop) [Decidable p] (t e :
 private theorem Option.get_dmap {α β : Type _} {x : Option α} {f : (a : α) → x = some a → β} (h) :
     (Option.dmap x f).get h =
       f (x.get (isSome_dmap.symm.trans h)) (Option.eq_some_of_isSome _) := by
-  cases x <;> trivial
+  cases x <;> with_semireducible trivial
 
 theorem guard_eq_map (p : (a : α) × β a → Prop) [DecidablePred p] :
     Option.guard p = fun x => Option.map (fun y => ⟨x.1, y⟩) (if p x then some x.2 else none) := by
@@ -5226,16 +5229,16 @@ theorem Sigma.snd_congr {x x' : (a : α) × β a} (h : x = x') :
 private theorem Option.pmap_eq_dmap {α β : Type _} {p : α → Prop} {x : Option α}
     {f : (a : α) → p a → β} (h : ∀ a ∈ x, p a) :
     x.pmap f h = Option.dmap x (fun a h' => f a (h a h')) := by
-  cases x <;> rfl
+  cases x <;> with_semireducible rfl
 
 private theorem Option.dmap_eq_map {α β : Type _} {x : Option α} {f : α → β} :
     Option.dmap x (fun a _ => f a) = x.map f := by
-  cases x <;> rfl
+  cases x <;> with_semireducible rfl
 
 private theorem Option.any_dmap {α β : Type _} {x : Option α}
     {f : (a : α) → x = some a → β} {p : β → Bool} :
     (x.dmap f).any p = x.attach.any (fun ⟨a, h⟩ => p (f a h)) := by
-  cases x <;> rfl
+  cases x <;> with_semireducible rfl
 
 theorem getEntry?_filterMap' [BEq α] [EquivBEq α]
     {f : ((a : α) × β a) → Option (((a : α) × γ a))}
@@ -5243,7 +5246,7 @@ theorem getEntry?_filterMap' [BEq α] [EquivBEq α]
     {l : List ((a : α) × β a)} {k : α} (hl : DistinctKeys l) :
     getEntry? k (l.filterMap f) = (getEntry? k l).bind f := by
   induction l using assoc_induction with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons k' v l ih =>
     simp only [getEntry?]
     simp only [distinctKeys_cons_iff] at hl
@@ -6815,7 +6818,7 @@ theorem containsKey_map [BEq α] {f : (a : α) → β a → γ a}
     {l : List ((a : α) × β a)} {k : α} :
     containsKey k (l.map fun p => ⟨p.1, f p.1 p.2⟩) = containsKey k l := by
   induction l with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons hd tl ih => simp only [List.map_cons, containsKey, ih]
 
 theorem apply_eq_true_of_containsKey_filter [BEq α] [LawfulBEq α]
@@ -7126,7 +7129,7 @@ theorem getKey?_filter_key [BEq α] [EquivBEq α]
     {f : α → Bool} {l : List ((a : α) × β a)} {k : α} (hl : DistinctKeys l) :
     getKey? k (l.filter fun p => f p.1) = (getKey? k l).filter f := by
   induction l using assoc_induction with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons k' v t ih =>
     specialize ih hl.tail
     simp only [getKey?_cons, List.filter_cons]
@@ -7270,7 +7273,7 @@ theorem length_filter_key_eq_length_iff [BEq α] [EquivBEq α] {f : α → Bool}
   · intro h a ha
     specialize h (getEntry a l ha) getEntry_mem
     simp only [getKey, getKey?_eq_getEntry?, Option.get_map]
-    exact h
+    with_semireducible exact h
   · intro h ⟨k, v⟩ he
     have := getEntry?_of_mem hl BEq.rfl he
     specialize h k (containsKey_eq_isSome_getEntry?.trans (Option.isSome_of_eq_some this))
@@ -7705,7 +7708,7 @@ theorem isEmpty_filter_key_iff [BEq α] [EquivBEq α] {f : α → Bool}
   · intro h a ha
     specialize h (getEntry a l ha) getEntry_mem
     simp only [getKey, getKey?_eq_getEntry?, Option.get_map]
-    exact h
+    with_semireducible exact h
   · intro h ⟨k, v⟩ he
     have := getEntry?_of_mem hl BEq.rfl he
     specialize h k (containsKey_eq_isSome_getEntry?.trans (Option.isSome_of_eq_some this))
@@ -8175,9 +8178,9 @@ theorem DistinctKeys.eq_of_mem_of_beq [BEq α] [EquivBEq α] {a b : (a : α) × 
   induction hma
   · cases hmb
     · rfl
-    · simp [pairwise_cons.mp hd |>.1 b.1 <| fst_mem_keys_of_mem ‹_›] at he
+    · with_semireducible simp [pairwise_cons.mp hd |>.1 b.1 <| fst_mem_keys_of_mem ‹_›] at he
   · rename_i _ ih
-    have hd := pairwise_cons.mp hd
+    with_semireducible have hd := pairwise_cons.mp hd
     cases hmb
     · simp [BEq.symm_false <| hd.1 a.1 <| fst_mem_keys_of_mem ‹_›] at he
     · exact ih ‹_› hd.2
@@ -8338,7 +8341,7 @@ theorem minEntry?_map [Ord α] (l : List ((a : α) × β a)) (f : (a : α) × β
   simp only [List.map_cons, Option.map_some, Option.some.injEq]
   rw [← List.foldr_reverse, ← List.foldr_reverse, ← List.map_reverse]
   induction es.reverse with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons _ _ ih =>
     simp [ih, min_apply (hf ..)]
 
@@ -8346,7 +8349,7 @@ theorem replaceEntry_eq_map [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {k
     {l : List ((a : α) × β a)} (hl : DistinctKeys l) :
     replaceEntry k v l = l.map fun e => if e.1 == k then ⟨k, v⟩ else e := by
   induction l with
-  | nil => rfl
+  | nil => with_semireducible rfl
   | cons e es ih =>
     simp only [replaceEntry, List.map_cons]
     split
@@ -8380,7 +8383,7 @@ theorem isSome_minEntry?_of_contains [Ord α] [BEq α] {l : List ((a : α) × β
     (minEntry? l).isSome := by
   apply isSome_minEntry?_of_isEmpty_eq_false
   match l with
-  | [] => contradiction
+  | [] => with_semireducible contradiction
   | x :: xs => simp
 
 theorem minEntry?_insertEntry [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {k : α} {v : β k}
@@ -8393,7 +8396,7 @@ theorem minEntry?_insertEntry [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] 
   cases h : containsKey k l
   · simp only [Bool.false_eq_true, ↓reduceIte]
     simp only [minEntry?_cons, Option.some.injEq]
-    rfl
+    with_semireducible rfl
   · simp only [↓reduceIte]
     rw [minEntry?_replaceEntry hl, Option.map_eq_some_iff]
     have := isSome_minEntry?_of_contains ‹_›
@@ -8730,7 +8733,7 @@ theorem minKey?_modifyKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {k f
     · simp_all [containsKey_congr (BEq.symm h), containsKey_eq_isSome_getKey?,
         getKey?_modifyKey]
       intro k' hk'
-      cases hcmp : compare k k' <;> try rfl
+      cases hcmp : compare k k' <;> try with_semireducible rfl
       replace hkm := hkm.2 k'
       simp only [← compare_eq_iff_beq] at *
       simp only [hcmp, reduceCtorEq, ↓reduceIte] at hk'
@@ -8802,8 +8805,8 @@ theorem minKey_of_perm [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {l l' :
 
 theorem minKey_eq_get_minKey? [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     {l : List ((a : α) × β a)} {he} :
-    minKey l he = (minKey? l |>.get (by simp [isSome_minKey?_eq_not_isEmpty, he])) :=
-  (rfl)
+    minKey l he = (minKey? l |>.get (by simp [isSome_minKey?_eq_not_isEmpty, he])) := by
+  with_semireducible rfl
 
 theorem minKey?_eq_some_minKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     {l : List ((a : α) × β a)} {he} :
@@ -8957,7 +8960,7 @@ theorem minKey_modifyKey_eq_minKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd
 theorem minKey_modifyKey_beq [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     {l : List ((_ : α) × β)} (hd : DistinctKeys l) {k f he} :
     (modifyKey k f l |> minKey <| he) == (minKey l <| isEmpty_modifyKey k f l ▸ he) :=
-  minKey?_modifyKey_beq hd minKey?_eq_some_minKey rfl
+  minKey?_modifyKey_beq hd minKey?_eq_some_minKey (by with_semireducible rfl)
 
 theorem minKey_alterKey_eq_self [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     {l : List ((_ : α) × β)} (hd : DistinctKeys l) {k f he} :
@@ -8976,10 +8979,10 @@ theorem minKey!_of_perm [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhab
     minKey! l = minKey! l' := by
   simp [minKey!, minKey?_of_perm hd hp]
 
-theorem minKey!_eq_get!_minKey? [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
+@[defeq] theorem minKey!_eq_get!_minKey? [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} :
-    minKey! l = (minKey? l).get! :=
-  rfl
+    minKey! l = (minKey? l).get! := by
+  with_semireducible rfl
 
 theorem minKey_eq_minKey! [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} {he} :
@@ -9100,9 +9103,9 @@ theorem minKey!_eq_head!_keys [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] 
     {l : List ((a : α) × β a)} (ho : l.Pairwise fun a b => compare a.1 b.1 = .lt) :
     minKey! l = (keys l).head! := by
   cases l
-  · rfl
+  · with_semireducible rfl
   · simp only [minKey!_eq_get!_minKey?, minKey?_eq_head?_keys ho]
-    rfl
+    with_semireducible rfl
 
 theorem minKey!_modifyKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [LawfulEqOrd α]
     [Inhabited α] {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k f} :
@@ -9166,8 +9169,8 @@ theorem minKeyD_of_perm [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
 
 theorem minKeyD_eq_getD_minKey? [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     {l : List ((a : α) × β a)} {fallback} :
-    minKeyD l fallback = (minKey? l).getD fallback :=
-  (rfl)
+    minKeyD l fallback = (minKey? l).getD fallback := by
+  with_semireducible rfl
 
 theorem minKey_insertEntry_of_isEmpty [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {k : α} {v : β k}
     {l : List ((a : α) × β a)} (hl : DistinctKeys l) (he : l.isEmpty) :
@@ -9680,8 +9683,8 @@ theorem maxKey_of_perm [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {l l' :
 
 theorem maxKey_eq_get_maxKey? [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     {l : List ((a : α) × β a)} {he} :
-    maxKey l he = (maxKey? l |>.get (by simp [isSome_maxKey?_eq_not_isEmpty, he])) :=
-  (rfl)
+    maxKey l he = (maxKey? l |>.get (by simp [isSome_maxKey?_eq_not_isEmpty, he])) := by
+  with_semireducible rfl
 
 theorem maxKey?_eq_some_maxKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     {l : List ((a : α) × β a)} {he} :
@@ -9867,152 +9870,152 @@ def maxKey! [Ord α] [Inhabited α] (xs : List ((a : α) × β a)) : α :=
 
 theorem maxKey!_of_perm [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l l' : List ((a : α) × β a)} (hd : DistinctKeys l) (hp : l.Perm l') :
-    maxKey! l = maxKey! l' :=
+    maxKey! l = maxKey! l' := by
   letI : Ord α := .opposite inferInstance
-  minKey!_of_perm hd hp
+  with_semireducible exact minKey!_of_perm hd hp
 
 theorem maxKey!_eq_get!_maxKey? [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} :
-    maxKey! l = (maxKey? l).get! :=
+    maxKey! l = (maxKey? l).get! := by
   letI : Ord α := .opposite inferInstance
-  minKey!_eq_get!_minKey?
+  with_semireducible exact minKey!_eq_get!_minKey?
 
 theorem maxKey_eq_maxKey! [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} {he} :
-    maxKey l he = maxKey! l :=
+    maxKey l he = maxKey! l := by
   letI : Ord α := .opposite inferInstance
-  minKey_eq_minKey!
+  with_semireducible exact minKey_eq_minKey!
 
 theorem maxKey?_eq_some_maxKey! [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (he : l.isEmpty = false) :
-    maxKey? l = some (maxKey! l) :=
+    maxKey? l = some (maxKey! l) := by
   letI : Ord α := .opposite inferInstance
-  minKey?_eq_some_minKey! he
+  with_semireducible exact minKey?_eq_some_minKey! he
 
 theorem maxKey!_eq_default [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (h : l.isEmpty) :
-    maxKey! l = default :=
+    maxKey! l = default := by
   letI : Ord α := .opposite inferInstance
-  minKey!_eq_default h
+  with_semireducible exact minKey!_eq_default h
 
 theorem maxKey!_eq_iff_getKey?_eq_self_and_forall [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     [Inhabited α] {l : List ((a : α) × β a)} (hd : DistinctKeys l) (he : l.isEmpty = false) {km} :
-    maxKey! l = km ↔ getKey? km l = some km ∧ ∀ k, containsKey k l → (compare k km).isLE :=
+    maxKey! l = km ↔ getKey? km l = some km ∧ ∀ k, containsKey k l → (compare k km).isLE := by
   letI : Ord α := .opposite inferInstance
-  minKey!_eq_iff_getKey?_eq_self_and_forall hd he
+  with_semireducible exact minKey!_eq_iff_getKey?_eq_self_and_forall hd he
 
 theorem maxKey!_eq_iff_mem_and_forall [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     [LawfulEqOrd α] [Inhabited α] {l : List ((a : α) × β a)} (hd : DistinctKeys l)
     (he : l.isEmpty = false) {km} :
-    maxKey! l = km ↔ containsKey km l ∧ ∀ k, containsKey k l → (compare k km).isLE :=
+    maxKey! l = km ↔ containsKey km l ∧ ∀ k, containsKey k l → (compare k km).isLE := by
   letI : Ord α := .opposite inferInstance
-  minKey!_eq_iff_mem_and_forall hd he
+  with_semireducible exact minKey!_eq_iff_mem_and_forall hd he
 
 theorem maxKey!_insertEntry [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k v} :
     (insertEntry k v l |> maxKey!) =
-      ((maxKey? l).elim k fun k' => if compare k' k |>.isLE then k else k') :=
+      ((maxKey? l).elim k fun k' => if compare k' k |>.isLE then k else k') := by
   letI : Ord α := .opposite inferInstance
-  minKey!_insertEntry hd
+  with_semireducible exact minKey!_insertEntry hd
 
 theorem maxKey!_le_maxKey!_insertEntry [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) (he : l.isEmpty = false) {k v} :
-    compare (maxKey! l) (insertEntry k v l |> maxKey!) |>.isLE :=
+    compare (maxKey! l) (insertEntry k v l |> maxKey!) |>.isLE := by
   letI : Ord α := .opposite inferInstance
-  minKey!_insertEntry_le_minKey! hd he
+  with_semireducible exact minKey!_insertEntry_le_minKey! hd he
 
 theorem self_le_maxKey!_insertEntry [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k v} :
-    compare k (insertEntry k v l |> maxKey!) |>.isLE :=
+    compare k (insertEntry k v l |> maxKey!) |>.isLE := by
   letI : Ord α := .opposite inferInstance
-  minKey!_insertEntry_le_self hd
+  with_semireducible exact minKey!_insertEntry_le_self hd
 
 theorem containsKey_maxKey! [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) (he : l.isEmpty = false) :
-    containsKey (maxKey! l) l :=
+    containsKey (maxKey! l) l := by
   letI : Ord α := .opposite inferInstance
-  containsKey_minKey! hd he
+  with_semireducible exact containsKey_minKey! hd he
 
 theorem le_maxKey!_of_containsKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k} (hc : containsKey k l) :
-    compare k (maxKey! l) |>.isLE :=
+    compare k (maxKey! l) |>.isLE := by
   letI : Ord α := .opposite inferInstance
-  minKey!_le_of_containsKey hd hc
+  with_semireducible exact minKey!_le_of_containsKey hd hc
 
 theorem maxKey!_le [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) (he : l.isEmpty = false) {k} :
-    (compare (maxKey! l) k).isLE ↔ (∀ k', containsKey k' l → (compare k' k).isLE) :=
+    (compare (maxKey! l) k).isLE ↔ (∀ k', containsKey k' l → (compare k' k).isLE) := by
   letI : Ord α := .opposite inferInstance
-  le_minKey! hd he
+  with_semireducible exact le_minKey! hd he
 
 theorem getKey?_maxKey! [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) (he : l.isEmpty = false) :
-    getKey? (maxKey! l) l = some (maxKey! l) :=
+    getKey? (maxKey! l) l = some (maxKey! l) := by
   letI : Ord α := .opposite inferInstance
-  getKey?_minKey! hd he
+  with_semireducible exact getKey?_minKey! hd he
 
 theorem getKey_maxKey! [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) {he} :
-    getKey (maxKey! l) l he = maxKey! l :=
+    getKey (maxKey! l) l he = maxKey! l := by
   letI : Ord α := .opposite inferInstance
-  getKey_minKey! hd
+  with_semireducible exact getKey_minKey! hd (he := he)
 
 theorem getKey_maxKey!_eq_maxKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) {he} :
-    getKey (maxKey! l) l he = maxKey l (isEmpty_eq_false_of_containsKey he) :=
+    getKey (maxKey! l) l he = maxKey l (isEmpty_eq_false_of_containsKey he) := by
   letI : Ord α := .opposite inferInstance
-  getKey_minKey!_eq_minKey hd
+  with_semireducible exact getKey_minKey!_eq_minKey hd (he := he)
 
 theorem getKey!_maxKey! [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) (he : l.isEmpty = false) :
-    getKey! (maxKey! l) l = maxKey! l :=
+    getKey! (maxKey! l) l = maxKey! l := by
   letI : Ord α := .opposite inferInstance
-  getKey!_minKey! hd he
+  with_semireducible exact getKey!_minKey! hd he
 
 theorem getKeyD_maxKey! [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) (he : l.isEmpty = false) {fallback} :
-    getKeyD (maxKey! l) l fallback = maxKey! l :=
+    getKeyD (maxKey! l) l fallback = maxKey! l := by
   letI : Ord α := .opposite inferInstance
-  getKeyD_minKey! hd he
+  with_semireducible exact getKeyD_minKey! hd he
 
 theorem maxKey!_eraseKey_eq_iff_beq_maxKey!_eq_false [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     [Inhabited α] {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k}
     (he : (eraseKey k l).isEmpty = false) :
-    (eraseKey k l |> maxKey!) = maxKey! l ↔ (k == (maxKey! l)) = false :=
+    (eraseKey k l |> maxKey!) = maxKey! l ↔ (k == (maxKey! l)) = false := by
   letI : Ord α := .opposite inferInstance
-  minKey!_eraseKey_eq_iff_beq_minKey!_eq_false hd he
+  with_semireducible exact minKey!_eraseKey_eq_iff_beq_minKey!_eq_false hd he
 
 theorem maxKey!_eraseKey_eq_of_beq_maxKey!_eq_false [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     [Inhabited α] {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k}
     (he : (eraseKey k l).isEmpty = false) : (heq : (k == maxKey! l) = false) →
-    (eraseKey k l |> maxKey!) = maxKey! l :=
+    (eraseKey k l |> maxKey!) = maxKey! l := by
   letI : Ord α := .opposite inferInstance
-  minKey!_eraseKey_eq_of_beq_minKey!_eq_false hd he
+  with_semireducible exact minKey!_eraseKey_eq_of_beq_minKey!_eq_false hd he
 
 theorem maxKey!_erase_le_maxKey! [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k} (he : (eraseKey k l).isEmpty = false) :
-    compare (eraseKey k l |> maxKey!) (maxKey! l) |>.isLE :=
+    compare (eraseKey k l |> maxKey!) (maxKey! l) |>.isLE := by
   letI : Ord α := .opposite inferInstance
-  minKey!_le_minKey!_erase hd he
+  with_semireducible exact minKey!_le_minKey!_erase hd he
 
 theorem maxKey!_insertEntryIfNew [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k v} :
     (insertEntryIfNew k v l |> maxKey!) =
-      (maxKey? l).elim k fun k' => if compare k' k = .lt then k else k' :=
+      (maxKey? l).elim k fun k' => if compare k' k = .lt then k else k' := by
   letI : Ord α := .opposite inferInstance
-  minKey!_insertEntryIfNew hd
+  with_semireducible exact minKey!_insertEntryIfNew hd
 
 theorem maxKey!_le_maxKey!_insertEntryIfNew [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     [Inhabited α] {l : List ((a : α) × β a)} (hd : DistinctKeys l) (he : l.isEmpty = false) {k v} :
-    compare (maxKey! l) (insertEntryIfNew k v l |> maxKey!) |>.isLE :=
+    compare (maxKey! l) (insertEntryIfNew k v l |> maxKey!) |>.isLE := by
   letI : Ord α := .opposite inferInstance
-  minKey!_insertEntryIfNew_le_minKey! hd he
+  with_semireducible exact minKey!_insertEntryIfNew_le_minKey! hd he
 
 theorem self_le_maxKey!_insertEntryIfNew [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k v} :
-    compare k (insertEntryIfNew k v l |> maxKey!) |>.isLE :=
+    compare k (insertEntryIfNew k v l |> maxKey!) |>.isLE := by
   letI : Ord α := .opposite inferInstance
-  minKey!_insertEntryIfNew_le_self hd
+  with_semireducible exact minKey!_insertEntryIfNew_le_self hd
 
 theorem maxKey!_eq_getLast!_keys [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} (hd : DistinctKeys l)
@@ -10023,17 +10026,17 @@ theorem maxKey!_eq_getLast!_keys [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd �
 
 theorem maxKey!_modifyKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [LawfulEqOrd α]
     [Inhabited α] {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k f} :
-    (modifyKey k f l |> maxKey!) = maxKey! l :=
+    (modifyKey k f l |> maxKey!) = maxKey! l := by
   letI : Ord α := .opposite inferInstance
-  minKey!_modifyKey hd
+  with_semireducible exact minKey!_modifyKey hd
 
 theorem maxKey!_alterKey_eq_self [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [LawfulEqOrd α]
     [Inhabited α] {l : List ((a : α) × β a)} (hd : DistinctKeys l) {k f}
     (he : (alterKey k f l).isEmpty = false) :
     (alterKey k f l |> maxKey!) = k ↔
-      (f (getValueCast? k l)).isSome ∧ ∀ k', containsKey k' l → (compare k' k).isLE :=
+      (f (getValueCast? k l)).isSome ∧ ∀ k', containsKey k' l → (compare k' k).isLE := by
   letI : Ord α := .opposite inferInstance
-  minKey!_alterKey_eq_self hd he
+  with_semireducible exact minKey!_alterKey_eq_self hd he
 
 namespace Const
 
@@ -10041,28 +10044,28 @@ variable {β : Type v}
 
 theorem maxKey!_modifyKey [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((_ : α) × β)} (hd : DistinctKeys l) {k f} (he : (modifyKey k f l).isEmpty = false) :
-    (modifyKey k f l |> maxKey!) = if (maxKey! l) == k then k else (maxKey! l) :=
+    (modifyKey k f l |> maxKey!) = if (maxKey! l) == k then k else (maxKey! l) := by
   letI : Ord α := .opposite inferInstance
-  minKey!_modifyKey hd he
+  with_semireducible exact minKey!_modifyKey hd he
 
 theorem maxKey!_modifyKey_eq_maxKey! [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [LawfulEqOrd α]
     [Inhabited α] {l : List ((_ : α) × β)} (hd : DistinctKeys l) {k f} :
-    (modifyKey k f l |> maxKey!) = maxKey! l :=
+    (modifyKey k f l |> maxKey!) = maxKey! l := by
   letI : Ord α := .opposite inferInstance
-  minKey!_modifyKey_eq_minKey! hd
+  with_semireducible exact minKey!_modifyKey_eq_minKey! hd
 
 theorem maxKey!_modifyKey_beq [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((_ : α) × β)} (hd : DistinctKeys l) {k f} :
-    (modifyKey k f l |> maxKey!) == (maxKey! l) :=
+    (modifyKey k f l |> maxKey!) == (maxKey! l) := by
   letI : Ord α := .opposite inferInstance
-  minKey!_modifyKey_beq hd
+  with_semireducible exact minKey!_modifyKey_beq hd
 
 theorem maxKey!_alterKey_eq_self [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((_ : α) × β)} (hd : DistinctKeys l) {k f} (he : (alterKey k f l).isEmpty = false) :
     (alterKey k f l |> maxKey!) = k ↔
-      (f (getValue? k l)).isSome ∧ ∀ k', containsKey k' l → (compare k' k).isLE :=
+      (f (getValue? k l)).isSome ∧ ∀ k', containsKey k' l → (compare k' k).isLE := by
   letI : Ord α := .opposite inferInstance
-  minKey!_alterKey_eq_self hd he
+  with_semireducible exact minKey!_alterKey_eq_self hd he
 
 end Const
 
@@ -10096,9 +10099,9 @@ theorem maxKey?_eq_some_maxKeyD [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α
 
 theorem maxKey!_eq_maxKeyD_default [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] [Inhabited α]
     {l : List ((a : α) × β a)} :
-    maxKey! l = maxKeyD l default :=
+    maxKey! l = maxKeyD l default := by
   letI : Ord α := .opposite inferInstance
-  minKey!_eq_minKeyD_default
+  with_semireducible exact minKey!_eq_minKeyD_default
 
 theorem maxKeyD_eq_fallback [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α]
     {l : List ((a : α) × β a)} {fallback} (h : l.isEmpty) :

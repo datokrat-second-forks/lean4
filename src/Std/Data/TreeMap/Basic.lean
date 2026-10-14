@@ -152,7 +152,7 @@ def get? (t : TreeMap α β cmp) (a : α) : Option β :=
 
 @[inline, inherit_doc DTreeMap.Const.get]
 def get (t : TreeMap α β cmp) (a : α) (h : a ∈ t) : β :=
-  DTreeMap.Const.get t.inner a h
+  DTreeMap.Const.get t.inner a (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.get!]
 def get! [Inhabited β] (t : TreeMap α β cmp) (a : α) : β :=
@@ -173,7 +173,7 @@ def getKey? (t : TreeMap α β cmp) (a : α) : Option α :=
 
 @[inline, inherit_doc DTreeMap.getKey]
 def getKey (t : TreeMap α β cmp) (a : α) (h : a ∈ t) : α :=
-  t.inner.getKey a h
+  t.inner.getKey a (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.getKey!]
 def getKey! [Inhabited α] (t : TreeMap α β cmp) (a : α) : α :=
@@ -189,7 +189,7 @@ def minEntry? (t : TreeMap α β cmp) : Option (α × β) :=
 
 @[inline, inherit_doc DTreeMap.Const.minEntry]
 def minEntry (t : TreeMap α β cmp) (h : t.isEmpty = false) : α × β :=
-  DTreeMap.Const.minEntry t.inner h
+  DTreeMap.Const.minEntry t.inner (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.minEntry!]
 def minEntry! [Inhabited (α × β)] (t : TreeMap α β cmp) : α × β :=
@@ -205,7 +205,7 @@ def maxEntry? (t : TreeMap α β cmp) : Option (α × β) :=
 
 @[inline, inherit_doc DTreeMap.Const.maxEntry]
 def maxEntry (t : TreeMap α β cmp) (h : t.isEmpty = false) : α × β :=
-  DTreeMap.Const.maxEntry t.inner h
+  DTreeMap.Const.maxEntry t.inner (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.maxEntry!]
 def maxEntry! [Inhabited (α × β)] (t : TreeMap α β cmp) : α × β :=
@@ -221,7 +221,7 @@ def minKey? (t : TreeMap α β cmp) : Option α :=
 
 @[inline, inherit_doc DTreeMap.minKey]
 def minKey (t : TreeMap α β cmp) (h : t.isEmpty = false) : α :=
-  DTreeMap.minKey t.inner h
+  DTreeMap.minKey t.inner (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.minKey!]
 def minKey! [Inhabited α] (t : TreeMap α β cmp) : α :=
@@ -237,7 +237,7 @@ def maxKey? (t : TreeMap α β cmp) : Option α :=
 
 @[inline, inherit_doc DTreeMap.maxKey]
 def maxKey (t : TreeMap α β cmp) (h : t.isEmpty = false) : α :=
-  DTreeMap.maxKey t.inner h
+  DTreeMap.maxKey t.inner (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.maxKey!]
 def maxKey! [Inhabited α] (t : TreeMap α β cmp) : α :=
@@ -253,7 +253,7 @@ def entryAtIdx? (t : TreeMap α β cmp) (n : Nat) : Option (α × β) :=
 
 @[inline, inherit_doc DTreeMap.Const.entryAtIdx]
 def entryAtIdx (t : TreeMap α β cmp) (n : Nat) (h : n < t.size) : α × β :=
-  DTreeMap.Const.entryAtIdx t.inner n h
+  DTreeMap.Const.entryAtIdx t.inner n (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.entryAtIdx!]
 def entryAtIdx! [Inhabited (α × β)] (t : TreeMap α β cmp) (n : Nat) : α × β :=
@@ -269,7 +269,7 @@ def keyAtIdx? (t : TreeMap α β cmp) (n : Nat) : Option α :=
 
 @[inline, inherit_doc DTreeMap.keyAtIdx]
 def keyAtIdx (t : TreeMap α β cmp) (n : Nat) (h : n < t.size) : α :=
-  DTreeMap.keyAtIdx t.inner n h
+  DTreeMap.keyAtIdx t.inner n (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.keyAtIdx!]
 def keyAtIdx! [Inhabited α] (t : TreeMap α β cmp) (n : Nat) : α :=

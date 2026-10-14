@@ -58,8 +58,10 @@ instance [PartialOrder Pred] : PartialOrder (PredTrans Pred EPosts α) where
 /-- Chain-complete partial order on predicate transformers, for fixed-point reasoning. -/
 instance [CCPO Pred] : CCPO (PredTrans Pred EPosts α) where
   has_csup {c} hc := by
+    with_semireducible
     let c' : ((α → Pred) → EPosts → Pred) → Prop := fun f => ∃ pt, c pt ∧ pt.apply = f
     have hc' : chain c' := by
+      with_semireducible
       intro _ _ ⟨pf, hpf, hpf_eq⟩ ⟨pg, hpg, hpg_eq⟩
       subst hpf_eq; subst hpg_eq
       exact hc pf pg hpf hpg
@@ -100,15 +102,15 @@ instance instMonad : Monad (PredTrans Pred EPosts) where
   bind := bind
 
 instance instLawfulMonad : LawfulMonad (PredTrans Pred EPosts) where
-  map_const := funext fun _ => funext fun _ => ext fun _ _ => rfl
-  id_map _ := ext fun _ _ => rfl
-  seqLeft_eq _ _ := ext fun _ _ => rfl
-  seqRight_eq _ _ := ext fun _ _ => rfl
-  pure_seq _ _ := ext fun _ _ => rfl
-  bind_pure_comp _ _ := ext fun _ _ => rfl
-  bind_map _ _ := ext fun _ _ => rfl
-  pure_bind _ _ := ext fun _ _ => rfl
-  bind_assoc _ _ _ := ext fun _ _ => rfl
+  map_const := funext fun _ => funext fun _ => ext fun _ _ => by with_semireducible rfl
+  id_map _ := ext fun _ _ => by with_semireducible rfl
+  seqLeft_eq _ _ := ext fun _ _ => by with_semireducible rfl
+  seqRight_eq _ _ := ext fun _ _ => by with_semireducible rfl
+  pure_seq _ _ := ext fun _ _ => by with_semireducible rfl
+  bind_pure_comp _ _ := ext fun _ _ => by with_semireducible rfl
+  bind_map _ _ := ext fun _ _ => by with_semireducible rfl
+  pure_bind _ _ := ext fun _ _ => by with_semireducible rfl
+  bind_assoc _ _ _ := ext fun _ _ => by with_semireducible rfl
 
 /-!
 ## `apply_*` computation rules
@@ -117,33 +119,33 @@ Equations that reduce `(expr).apply post eposts` for each monadic combinator.
 -/
 
 /-- Unfolding `PredTrans.pure` through `apply`. -/
-theorem apply_pure (a : α) (post : α → Pred) (eposts : EPosts) :
-    (PredTrans.pure a : PredTrans Pred EPosts α).apply post eposts = post a := rfl
+@[defeq] theorem apply_pure (a : α) (post : α → Pred) (eposts : EPosts) :
+    (PredTrans.pure a : PredTrans Pred EPosts α).apply post eposts = post a := by with_semireducible rfl
 
 /-- Unfolding `pure` through `apply`. -/
-theorem apply_Pure_pure (a : α) (post : α → Pred) (eposts : EPosts) :
-    (Pure.pure a : PredTrans Pred EPosts α).apply post eposts = post a := rfl
+@[defeq] theorem apply_Pure_pure (a : α) (post : α → Pred) (eposts : EPosts) :
+    (Pure.pure a : PredTrans Pred EPosts α).apply post eposts = post a := by with_semireducible rfl
 
 /-- Unfolding `PredTrans.bind` through `apply`. -/
-theorem apply_bind (x : PredTrans Pred EPosts α) (f : α → PredTrans Pred EPosts β)
+@[defeq] theorem apply_bind (x : PredTrans Pred EPosts α) (f : α → PredTrans Pred EPosts β)
     (post : β → Pred) (eposts : EPosts) :
-    (x.bind f).apply post eposts = x.apply (fun a => (f a).apply post eposts) eposts := rfl
+    (x.bind f).apply post eposts = x.apply (fun a => (f a).apply post eposts) eposts := by with_semireducible rfl
 
 /-- Unfolding `>>=` through `apply`. -/
-theorem apply_Bind_bind (x : PredTrans Pred EPosts α) (f : α → PredTrans Pred EPosts β)
+@[defeq] theorem apply_Bind_bind (x : PredTrans Pred EPosts α) (f : α → PredTrans Pred EPosts β)
     (post : β → Pred) (eposts : EPosts) :
-    (x >>= f).apply post eposts = x.apply (fun a => (f a).apply post eposts) eposts := rfl
+    (x >>= f).apply post eposts = x.apply (fun a => (f a).apply post eposts) eposts := by with_semireducible rfl
 
 /-- Unfolding `<$>` through `apply`. -/
-theorem apply_Functor_map (f : α → β) (x : PredTrans Pred EPosts α)
+@[defeq] theorem apply_Functor_map (f : α → β) (x : PredTrans Pred EPosts α)
     (post : β → Pred) (eposts : EPosts) :
-    (f <$> x).apply post eposts = x.apply (post ∘ f) eposts := rfl
+    (f <$> x).apply post eposts = x.apply (post ∘ f) eposts := by with_semireducible rfl
 
 /-- Unfolding `<*>` through `apply`. -/
-theorem apply_Seq_seq (f : PredTrans Pred EPosts (α → β)) (x : PredTrans Pred EPosts α)
+@[defeq] theorem apply_Seq_seq (f : PredTrans Pred EPosts (α → β)) (x : PredTrans Pred EPosts α)
     (post : β → Pred) (eposts : EPosts) :
     (f <*> x).apply post eposts =
-      f.apply (fun g => x.apply (fun a => post (g a)) eposts) eposts := rfl
+      f.apply (fun g => x.apply (fun a => post (g a)) eposts) eposts := by with_semireducible rfl
 
 /-- Unfolding `dite` through `apply`. -/
 theorem apply_dite (c : Prop) [Decidable c]
@@ -176,9 +178,9 @@ def pushArg {σ : Type z} (x : σ → PredTrans Pred EPosts (α × σ)) :
   ⟨fun post eposts s => (x s).apply (fun (a, s) => post a s) eposts⟩
 
 /-- Unfolding lemma for `pushArg`: applies the state-threaded transformer at state `s`. -/
-theorem apply_pushArg {σ : Type z} (x : σ → PredTrans Pred EPosts (α × σ))
+@[defeq] theorem apply_pushArg {σ : Type z} (x : σ → PredTrans Pred EPosts (α × σ))
     (post : α → σ → Pred) (eposts : EPosts) (s : σ) :
-    (pushArg x).apply post eposts s = (x s).apply (fun (a, s) => post a s) eposts := rfl
+    (pushArg x).apply post eposts s = (x s).apply (fun (a, s) => post a s) eposts := by with_semireducible rfl
 
 /-- Removes the state argument of a predicate transformer by applying it at state `s`.
 The transformed result carries the final state. -/
@@ -187,28 +189,28 @@ def popArg {σ : Type z} (x : PredTrans (σ → Pred) EPosts α) (s : σ) :
   ⟨fun post eposts => x.apply (fun a s => post (a, s)) eposts s⟩
 
 /-- Unfolding `popArg` through `apply`. -/
-theorem apply_popArg {σ : Type z} (x : PredTrans (σ → Pred) EPosts α) (s : σ)
+@[defeq] theorem apply_popArg {σ : Type z} (x : PredTrans (σ → Pred) EPosts α) (s : σ)
     (post : α × σ → Pred) (eposts : EPosts) :
-    (x.popArg s).apply post eposts = x.apply (fun a s => post (a, s)) eposts s := rfl
+    (x.popArg s).apply post eposts = x.apply (fun a s => post (a, s)) eposts s := by with_semireducible rfl
 
 /-- Adds a state argument that the predicate transformer ignores. -/
 def liftArg {σ : Type z} (x : PredTrans Pred EPosts α) : PredTrans (σ → Pred) EPosts α :=
   ⟨fun post eposts s => x.apply (fun a => post a s) eposts⟩
 
 /-- Unfolding `liftArg` through `apply`. -/
-theorem apply_liftArg {σ : Type z} (x : PredTrans Pred EPosts α)
+@[defeq] theorem apply_liftArg {σ : Type z} (x : PredTrans Pred EPosts α)
     (post : α → σ → Pred) (eposts : EPosts) (s : σ) :
     (liftArg x : PredTrans (σ → Pred) EPosts α).apply post eposts s
-      = x.apply (fun a => post a s) eposts := rfl
+      = x.apply (fun a => post a s) eposts := by with_semireducible rfl
 
 instance {σ : Type z} : MonadLift (PredTrans Pred EPosts) (PredTrans (σ → Pred) EPosts) where
   monadLift := liftArg
 
 /-- Unfolding `monadLift` through `apply`. -/
-theorem apply_monadLift {σ : Type z} (x : PredTrans Pred EPosts α)
+@[defeq] theorem apply_monadLift {σ : Type z} (x : PredTrans Pred EPosts α)
     (post : α → σ → Pred) (eposts : EPosts) (s : σ) :
     (MonadLift.monadLift x : PredTrans (σ → Pred) EPosts α).apply post eposts s
-      = x.apply (fun a => post a s) eposts := rfl
+      = x.apply (fun a => post a s) eposts := by with_semireducible rfl
 
 end PredTrans
 
@@ -226,14 +228,14 @@ def pushExcept {α : Type u} {ε : Type v} {Pred : Type w}
   | .error e => eposts e
 
 /-- A normal result uses the normal postcondition. -/
-theorem pushExcept_ok {α : Type u} {ε : Type v} {Pred : Type w}
+@[defeq] theorem pushExcept_ok {α : Type u} {ε : Type v} {Pred : Type w}
     (post : α → Pred) (eposts : ε → Pred) (a : α) :
-    pushExcept post eposts (.ok a) = post a := rfl
+    pushExcept post eposts (.ok a) = post a := by with_semireducible rfl
 
 /-- An exceptional result uses the exception postcondition. -/
-theorem pushExcept_error {α : Type u} {ε : Type v} {Pred : Type w}
+@[defeq] theorem pushExcept_error {α : Type u} {ε : Type v} {Pred : Type w}
     (post : α → Pred) (eposts : ε → Pred) (e : ε) :
-    pushExcept post eposts (.error e) = eposts e := rfl
+    pushExcept post eposts (.error e) = eposts e := by with_semireducible rfl
 
 /-- The postcondition for an `Option α` result: `some a` uses `post a`, and `none` uses
 `eposts ()`. -/
@@ -243,14 +245,14 @@ def pushOption {α : Type u} {Pred : Type w}
   | .none => eposts ()
 
 /-- A present result uses the normal postcondition. -/
-theorem pushOption_some {α : Type u} {Pred : Type w}
+@[defeq] theorem pushOption_some {α : Type u} {Pred : Type w}
     (post : α → Pred) (eposts : Unit → Pred) (a : α) :
-    pushOption post eposts (.some a) = post a := rfl
+    pushOption post eposts (.some a) = post a := by with_semireducible rfl
 
 /-- An absent result uses the absent postcondition. -/
-theorem pushOption_none {α : Type u} {Pred : Type w}
+@[defeq] theorem pushOption_none {α : Type u} {Pred : Type w}
     (post : α → Pred) (eposts : Unit → Pred) :
-    pushOption post eposts .none = eposts () := rfl
+    pushOption post eposts .none = eposts () := by with_semireducible rfl
 
 namespace PredTrans
 
@@ -265,11 +267,11 @@ def pushExceptT {ε : Type z} (x : PredTrans Pred EPosts (Except ε α)) :
   ⟨fun post eposts => x.apply (pushExcept post eposts.fst) eposts.snd⟩
 
 /-- Unfolding lemma for `pushExceptT`. -/
-theorem apply_pushExceptT {ε : Type z}
+@[defeq] theorem apply_pushExceptT {ε : Type z}
     (x : PredTrans Pred EPosts (Except ε α)) (post : α → Pred)
     (eposts : (ε → Pred) × EPosts) :
     (pushExceptT x).apply post eposts
-      = x.apply (pushExcept post eposts.fst) eposts.snd := rfl
+      = x.apply (pushExcept post eposts.fst) eposts.snd := by with_semireducible rfl
 
 /-- Adds an early-termination layer to a predicate transformer, mirroring `OptionT`.
 
@@ -280,10 +282,10 @@ def pushOptionT (x : PredTrans Pred EPosts (Option α)) :
   ⟨fun post eposts => x.apply (pushOption post eposts.fst) eposts.snd⟩
 
 /-- Unfolding lemma for `pushOptionT`. -/
-theorem apply_pushOptionT (x : PredTrans Pred EPosts (Option α)) (post : α → Pred)
+@[defeq] theorem apply_pushOptionT (x : PredTrans Pred EPosts (Option α)) (post : α → Pred)
     (eposts : (Unit → Pred) × EPosts) :
     (pushOptionT x).apply post eposts
-      = x.apply (pushOption post eposts.fst) eposts.snd := rfl
+      = x.apply (pushOption post eposts.fst) eposts.snd := by with_semireducible rfl
 
 /-!
 ## Exception Instances
@@ -308,41 +310,41 @@ instance {ε : Type z} : MonadExceptOf ε (PredTrans Pred ((ε → Pred) × EPos
   tryCatch := tryCatch
 
 /-- Unfolding `throw` through `apply`: the first exception postcondition at the thrown value. -/
-theorem apply_throw {ε : Type u} {α : Type u} {Pred : Type u}
+@[defeq] theorem apply_throw {ε : Type u} {α : Type u} {Pred : Type u}
     {EPosts : Type w} (e : ε) (post : α → Pred) (eposts : (ε → Pred) × EPosts) :
     (MonadExceptOf.throw e : PredTrans Pred ((ε → Pred) × EPosts) α).apply post eposts
-      = eposts.fst e := rfl
+      = eposts.fst e := by with_semireducible rfl
 
 /-- Unfolding `tryCatch` through `apply`: the handler replaces the first exception
 postcondition. -/
-theorem apply_tryCatch {ε : Type u} {α : Type u} {Pred : Type u}
+@[defeq] theorem apply_tryCatch {ε : Type u} {α : Type u} {Pred : Type u}
     {EPosts : Type w} (x : PredTrans Pred ((ε → Pred) × EPosts) α)
     (handle : ε → PredTrans Pred ((ε → Pred) × EPosts) α)
     (post : α → Pred) (eposts : (ε → Pred) × EPosts) :
     (MonadExceptOf.tryCatch x handle).apply post eposts
-      = x.apply post ((fun e => (handle e).apply post eposts), eposts.snd) := rfl
+      = x.apply post ((fun e => (handle e).apply post eposts), eposts.snd) := by with_semireducible rfl
 
-theorem apply_MonadExcept_throw {ε : Type u} {α : Type u} {Pred : Type u}
+@[defeq] theorem apply_MonadExcept_throw {ε : Type u} {α : Type u} {Pred : Type u}
     {EPosts : Type w} (e : ε) (post : α → Pred) (eposts : (ε → Pred) × EPosts) :
     (MonadExcept.throw e : PredTrans Pred ((ε → Pred) × EPosts) α).apply post eposts
-      = eposts.fst e := rfl
+      = eposts.fst e := by with_semireducible rfl
 
-theorem apply_MonadExcept_tryCatch {ε : Type u} {α : Type u} {Pred : Type u}
+@[defeq] theorem apply_MonadExcept_tryCatch {ε : Type u} {α : Type u} {Pred : Type u}
     {EPosts : Type w} (x : PredTrans Pred ((ε → Pred) × EPosts) α)
     (handle : ε → PredTrans Pred ((ε → Pred) × EPosts) α)
     (post : α → Pred) (eposts : (ε → Pred) × EPosts) :
     (MonadExcept.tryCatch x handle).apply post eposts
-      = x.apply post ((fun e => (handle e).apply post eposts), eposts.snd) := rfl
+      = x.apply post ((fun e => (handle e).apply post eposts), eposts.snd) := by with_semireducible rfl
 
 /-- Adds a first exception postcondition that the predicate transformer ignores. -/
 def liftExcept {eh : Type z} (x : PredTrans Pred EPosts α) : PredTrans Pred (eh × EPosts) α :=
   ⟨fun post eposts => x.apply post eposts.snd⟩
 
 /-- Unfolding `liftExcept` through `apply`. -/
-theorem apply_liftExcept {eh : Type z} (x : PredTrans Pred EPosts α) (post : α → Pred)
+@[defeq] theorem apply_liftExcept {eh : Type z} (x : PredTrans Pred EPosts α) (post : α → Pred)
     (eposts : eh × EPosts) :
     (liftExcept x : PredTrans Pred (eh × EPosts) α).apply post eposts
-      = x.apply post eposts.snd := rfl
+      = x.apply post eposts.snd := by with_semireducible rfl
 
 /-- Removes the first exception postcondition of a predicate transformer by fixing it to `h`. -/
 def popExcept {eh : Type z} (x : PredTrans Pred (eh × EPosts) α) (h : eh) :
@@ -350,9 +352,9 @@ def popExcept {eh : Type z} (x : PredTrans Pred (eh × EPosts) α) (h : eh) :
   ⟨fun post eposts => x.apply post (h, eposts)⟩
 
 /-- Unfolding `popExcept` through `apply`. -/
-theorem apply_popExcept {eh : Type z} (x : PredTrans Pred (eh × EPosts) α) (h : eh)
+@[defeq] theorem apply_popExcept {eh : Type z} (x : PredTrans Pred (eh × EPosts) α) (h : eh)
     (post : α → Pred) (eposts : EPosts) :
-    (x.popExcept h).apply post eposts = x.apply post (h, eposts) := rfl
+    (x.popExcept h).apply post eposts = x.apply post (h, eposts) := by with_semireducible rfl
 
 instance {ε : Type u} {Pred : Type v} {EPosts : Type w} {ε' : Type u}
     [MonadExceptOf ε (PredTrans Pred EPosts)] :
@@ -390,46 +392,46 @@ instance {σ : Type z} : MonadReaderOf σ (PredTrans (σ → Pred) EPosts) where
   read := get
 
 /-- Unfolding `get` through `apply`. -/
-theorem apply_get {σ : Type z}
+@[defeq] theorem apply_get {σ : Type z}
     (post : σ → σ → Pred) (eposts : EPosts) (s : σ) :
-    (MonadStateOf.get : PredTrans (σ → Pred) EPosts σ).apply post eposts s = post s s := rfl
+    (MonadStateOf.get : PredTrans (σ → Pred) EPosts σ).apply post eposts s = post s s := by with_semireducible rfl
 
 /-- Unfolding `set` through `apply`. -/
-theorem apply_set {σ : Type z}
+@[defeq] theorem apply_set {σ : Type z}
     (s' : σ) (post : PUnit → σ → Pred) (eposts : EPosts) (s : σ) :
-    (MonadStateOf.set s' : PredTrans (σ → Pred) EPosts PUnit).apply post eposts s = post ⟨⟩ s' := rfl
+    (MonadStateOf.set s' : PredTrans (σ → Pred) EPosts PUnit).apply post eposts s = post ⟨⟩ s' := by with_semireducible rfl
 
 /-- Unfolding `modifyGet` through `apply`. -/
-theorem apply_modifyGet {σ α : Type z}
+@[defeq] theorem apply_modifyGet {σ α : Type z}
     (f : σ → α × σ) (post : α → σ → Pred) (eposts : EPosts) (s : σ) :
     (MonadStateOf.modifyGet f : PredTrans (σ → Pred) EPosts α).apply post eposts s
-      = post (f s).1 (f s).2 := rfl
+      = post (f s).1 (f s).2 := by with_semireducible rfl
 
 /-- Unfolding `read` through `apply`. -/
-theorem apply_read {σ : Type z}
+@[defeq] theorem apply_read {σ : Type z}
     (post : σ → σ → Pred) (eposts : EPosts) (s : σ) :
-    (MonadReaderOf.read : PredTrans (σ → Pred) EPosts σ).apply post eposts s = post s s := rfl
+    (MonadReaderOf.read : PredTrans (σ → Pred) EPosts σ).apply post eposts s = post s s := by with_semireducible rfl
 
-theorem apply_MonadState_get {σ : Type z}
+@[defeq] theorem apply_MonadState_get {σ : Type z}
     (post : σ → σ → Pred) (eposts : EPosts) (s : σ) :
-    (MonadState.get : PredTrans (σ → Pred) EPosts σ).apply post eposts s = post s s := rfl
+    (MonadState.get : PredTrans (σ → Pred) EPosts σ).apply post eposts s = post s s := by with_semireducible rfl
 
-theorem apply_MonadState_modifyGet {σ α : Type z}
+@[defeq] theorem apply_MonadState_modifyGet {σ α : Type z}
     (f : σ → α × σ) (post : α → σ → Pred) (eposts : EPosts) (s : σ) :
     (MonadState.modifyGet f : PredTrans (σ → Pred) EPosts α).apply post eposts s
-      = post (f s).1 (f s).2 := rfl
+      = post (f s).1 (f s).2 := by with_semireducible rfl
 
-theorem apply_modify {σ : Type z}
+@[defeq] theorem apply_modify {σ : Type z}
     (f : σ → σ) (post : PUnit → σ → Pred) (eposts : EPosts) (s : σ) :
-    (modify f : PredTrans (σ → Pred) EPosts PUnit).apply post eposts s = post ⟨⟩ (f s) := rfl
+    (modify f : PredTrans (σ → Pred) EPosts PUnit).apply post eposts s = post ⟨⟩ (f s) := by with_semireducible rfl
 
-theorem apply_modifyThe {σ : Type z}
+@[defeq] theorem apply_modifyThe {σ : Type z}
     (f : σ → σ) (post : PUnit → σ → Pred) (eposts : EPosts) (s : σ) :
-    (modifyThe σ f : PredTrans (σ → Pred) EPosts PUnit).apply post eposts s = post ⟨⟩ (f s) := rfl
+    (modifyThe σ f : PredTrans (σ → Pred) EPosts PUnit).apply post eposts s = post ⟨⟩ (f s) := by with_semireducible rfl
 
-theorem apply_MonadReader_read {σ : Type z}
+@[defeq] theorem apply_MonadReader_read {σ : Type z}
     (post : σ → σ → Pred) (eposts : EPosts) (s : σ) :
-    (MonadReader.read : PredTrans (σ → Pred) EPosts σ).apply post eposts s = post s s := rfl
+    (MonadReader.read : PredTrans (σ → Pred) EPosts σ).apply post eposts s = post s s := by with_semireducible rfl
 
 instance {ε : Type u'} {σ : Type z} [MonadExceptOf ε (PredTrans Pred EPosts)] :
     MonadExceptOf ε (PredTrans (σ → Pred) EPosts) where

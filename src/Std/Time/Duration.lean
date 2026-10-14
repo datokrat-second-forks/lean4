@@ -37,16 +37,16 @@ structure Duration where
   /--
   Proof that the duration is valid, ensuring that the `second` and `nano` values are correctly related.
   -/
-  proof : (second.val ≥ 0 ∧ nano.val ≥ 0) ∨ (second.val ≤ 0 ∧ nano.val ≤ 0)
+  proof : (second.toUnitVal.val ≥ 0 ∧ nano.toBounded.toSubtype.val ≥ 0) ∨ (second.toUnitVal.val ≤ 0 ∧ nano.toBounded.toSubtype.val ≤ 0)
 deriving Repr, DecidableEq
 
 instance : ToString Duration where
   toString s :=
     let (sign, secs, nanos) :=
-      if s.second.val > 0 then ("" ,s.second, s.nano.val)
-      else if s.second.val < 0 then ("-", -s.second, -s.nano.val)
-      else if s.nano.val < 0 then ("-", -s.second, -s.nano.val) else ("", s.second, s.nano.val)
-    sign ++ toString secs ++ (if s.nano.val == 0 then "" else "." ++ (leftPad 9 <| toString nanos)) ++ "s"
+      if s.second.toUnitVal.val > 0 then ("" ,s.second, s.nano.toBounded.toSubtype.val)
+      else if s.second.toUnitVal.val < 0 then ("-", -s.second, -s.nano.toBounded.toSubtype.val)
+      else if s.nano.toBounded.toSubtype.val < 0 then ("-", -s.second, -s.nano.toBounded.toSubtype.val) else ("", s.second, s.nano.toBounded.toSubtype.val)
+    sign ++ toString secs ++ (if s.nano.toBounded.toSubtype.val == 0 then "" else "." ++ (leftPad 9 <| toString nanos)) ++ "s"
   where
     leftPad n s := "".pushn '0' (n - s.length) ++ s
 
@@ -54,12 +54,13 @@ instance : Repr Duration where
   reprPrec s := reprPrec (toString s)
 
 instance : Inhabited Duration where
-  default := ⟨0, Bounded.LE.mk 0 (by decide), by decide⟩
+  default := ⟨0, .ofBounded (Bounded.LE.mk 0 (by decide)), by decide⟩
 
 instance : OfNat Duration n where
   ofNat := by
-    refine ⟨.ofInt n, ⟨0, by decide⟩, ?_⟩
-    simp ; exact Int.le_total n 0 |>.symm
+    refine ⟨.ofInt n, .ofBounded (.mk 0 (by decide)), ?_⟩
+    simp [Second.Offset.ofInt, Second.Offset.toUnitVal, Second.Offset.ofUnitVal, Nanosecond.Span.ofBounded,
+      Nanosecond.Span.toBounded, Bounded.toSubtype, Bounded.LE.mk, Bounded.mk, Bounded.ofSubtype]
 
 instance : Ord Duration where
   compare := compareLex (compareOn (·.second)) (compareOn (·.nano))
@@ -73,8 +74,8 @@ instance : LawfulEqOrd Duration where
   eq_of_compare {a b} h := by
     simp only [Duration.compare_def, compareLex_eq_eq] at h
     ext
-    · exact LawfulEqOrd.eq_of_compare h.1
-    · exact LawfulEqOrd.eq_of_compare h.2
+    · with_semireducible exact LawfulEqOrd.eq_of_compare h.1
+    · with_semireducible exact LawfulEqOrd.eq_of_compare h.2
 
 namespace Duration
 
@@ -83,29 +84,31 @@ Negates a `Duration`, flipping its second and nanosecond values.
 -/
 @[inline]
 protected def neg (duration : Duration) : Duration := by
-  refine ⟨-duration.second, duration.nano.neg, ?_⟩
+  refine ⟨-duration.second, .ofBounded duration.nano.toBounded.neg, ?_⟩
   cases duration.proof with
-  | inl n => exact Or.inr (n.imp Int.neg_le_neg Int.neg_le_neg)
-  | inr n => exact Or.inl (n.imp Int.neg_le_neg Int.neg_le_neg)
+  | inl n => with_semireducible exact Or.inr (n.imp Int.neg_le_neg Int.neg_le_neg)
+  | inr n => with_semireducible exact Or.inl (n.imp Int.neg_le_neg Int.neg_le_neg)
 
 /--
 Creates a new `Duration` out of `Second.Offset`.
 -/
 @[inline]
 def ofSeconds (s : Second.Offset) : Duration := by
-  refine ⟨s, ⟨0, by decide⟩, ?_⟩
-  simp ; exact Int.le_total s.val 0 |>.symm
+  refine ⟨s, .ofBounded (.mk 0 (by decide)), ?_⟩
+  simp [Nanosecond.Span.ofBounded, Nanosecond.Span.toBounded, Bounded.toSubtype, Bounded.LE.mk, Bounded.mk,
+    Bounded.ofSubtype]
+  exact Int.le_total s.toUnitVal.val 0 |>.symm
 
 /--
 Creates a new `Duration` out of `Nanosecond.Offset`.
 -/
 def ofNanoseconds (s : Nanosecond.Offset) : Duration := by
   -- TODO: we should be using `s.toSeconds` here, but the proof below depends on this form.
-  refine ⟨s.tdiv 1000000000 |>.cast (by decide +kernel), Bounded.LE.byMod s.val 1000000000 (by decide), ?_⟩
+  refine ⟨.ofUnitVal (s.toUnitVal.tdiv 1000000000 |>.cast (by decide +kernel)), .ofBounded (Bounded.LE.byMod s.toUnitVal.val 1000000000 (by decide)), ?_⟩
 
-  cases Int.le_total s.val 0
-  next n => exact Or.inr (And.intro (tdiv_neg n (by decide)) (mod_nonpos 1000000000 n (by decide)))
-  next n => exact Or.inl (And.intro (Int.tdiv_nonneg n (by decide)) (Int.tmod_nonneg 1000000000 n))
+  cases Int.le_total s.toUnitVal.val 0
+  next n => with_semireducible exact Or.inr (And.intro (tdiv_neg n (by decide)) (mod_nonpos 1000000000 n (by decide)))
+  next n => with_semireducible exact Or.inl (And.intro (Int.tdiv_nonneg n (by decide)) (Int.tmod_nonneg 1000000000 n))
   where
     mod_nonpos : ∀ {a : Int} (b : Int), (a ≤ 0) → (b ≥ 0) → 0 ≥ a.tmod b
     | .negSucc m, .ofNat n, _, _ => Int.neg_le_neg (Int.tmod_nonneg (↑n) (Int.ofNat_le.mpr (Nat.zero_le (m + 1))))
@@ -128,7 +131,7 @@ Checks if the duration is zero seconds and zero nanoseconds.
 -/
 @[inline]
 def isZero (d : Duration) : Bool :=
-  d.second.val = 0 ∧ d.nano.val = 0
+  d.second.toUnitVal.val = 0 ∧ d.nano.toBounded.toSubtype.val = 0
 
 /--
 Converts a `Duration` to a `Second.Offset`
@@ -142,19 +145,19 @@ Converts a `Duration` to a `Millisecond.Offset`
 -/
 @[inline]
 def toMilliseconds (duration : Duration) : Millisecond.Offset :=
-  let secMillis := duration.second.mul 1000
-  let nanosMillis := duration.nano.ediv 1000000 (by decide)
-  let millis := secMillis + (.ofInt nanosMillis.val)
-  millis
+  let secMillis := duration.second.toUnitVal.mul 1000
+  let nanosMillis := duration.nano.toBounded.ediv 1000000 (by decide)
+  let millis := secMillis + (.ofInt nanosMillis.toSubtype.val)
+  .ofUnitVal millis
 
 /--
 Converts a `Duration` to a `Nanosecond.Offset`
 -/
 @[inline]
 def toNanoseconds (duration : Duration) : Nanosecond.Offset :=
-  let nanos := duration.second.mul 1000000000
-  let nanos := nanos + (.ofInt duration.nano.val)
-  nanos
+  let nanos := duration.second.toUnitVal.mul 1000000000
+  let nanos := nanos + (.ofInt duration.nano.toBounded.toSubtype.val)
+  .ofUnitVal nanos
 
 instance : LE Duration where
   le d1 d2 := d1.toNanoseconds ≤ d2.toNanoseconds
@@ -376,10 +379,10 @@ instance : Coe Day.Offset Duration where
   coe := ofSeconds ∘ Day.Offset.toSeconds
 
 instance : HMul Int Duration Duration where
-  hMul i d := Duration.ofNanoseconds <| Nanosecond.Offset.ofInt (d.toNanoseconds.val * i)
+  hMul i d := Duration.ofNanoseconds <| Nanosecond.Offset.ofInt (d.toNanoseconds.toUnitVal.val * i)
 
 instance : HMul Duration Int Duration where
-  hMul d i := Duration.ofNanoseconds <| Nanosecond.Offset.ofInt (d.toNanoseconds.val * i)
+  hMul d i := Duration.ofNanoseconds <| Nanosecond.Offset.ofInt (d.toNanoseconds.toUnitVal.val * i)
 
 instance : HAdd PlainTime Duration PlainTime where
    hAdd pt d := PlainTime.ofNanoseconds (d.toNanoseconds + pt.toNanoseconds)

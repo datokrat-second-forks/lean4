@@ -23,134 +23,134 @@ set_option linter.all true
 The ISO 8601 format, used for representing date and time in a standardized
 format. The format follows the pattern `uuuu-MM-dd'T'HH:mm:ssXXX`.
 -/
-def iso8601 : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ssXXX")
+@[implicit_reducible] def iso8601 : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ssXXX")
 
 
 /--
 The americanDate format, which follows the pattern `MM-dd-uuuu`.
 -/
-def americanDate : GenericFormat .any := datespec("MM-dd-uuuu")
+@[implicit_reducible] def americanDate : GenericFormat .any := datespec("MM-dd-uuuu")
 
 /--
 The europeanDate format, which follows the pattern `dd-MM-uuuu`.
 -/
-def europeanDate : GenericFormat .any := datespec("dd-MM-uuuu")
+@[implicit_reducible] def europeanDate : GenericFormat .any := datespec("dd-MM-uuuu")
 
 /--
 The time12Hour format, which follows the pattern `hh:mm:ss aa` for representing time
 in a 12-hour clock format with an upper case AM/PM marker.
 -/
-def time12Hour : GenericFormat .any := datespec("hh:mm:ss aa")
+@[implicit_reducible] def time12Hour : GenericFormat .any := datespec("hh:mm:ss aa")
 
 /--
 The Time24Hour format, which follows the pattern `HH:mm:ss` for representing time
 in a 24-hour clock format.
 -/
-def time24Hour : GenericFormat .any := datespec("HH:mm:ss")
+@[implicit_reducible] def time24Hour : GenericFormat .any := datespec("HH:mm:ss")
 
 /--
 The DateTimeZone24Hour format, which follows the pattern `uuuu-MM-dd:HH:mm:ss.SSSSSSSSS` for
 representing date, time, and time zone.
 -/
-def dateTime24Hour : GenericFormat (.only .GMT) := datespec("uuuu-MM-dd:HH:mm:ss.SSSSSSSSS")
+@[implicit_reducible] def dateTime24Hour : GenericFormat (.only .GMT) := datespec("uuuu-MM-dd:HH:mm:ss.SSSSSSSSS")
 
 /--
 The DateTimeWithZone format, which follows the pattern `uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSSZZZ`
 for representing date, time, and time zone.
 -/
-def dateTimeWithZone : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSSZZZ")
+@[implicit_reducible] def dateTimeWithZone : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSSZZZ")
 
 /--
 The leanTime24Hour format, which follows the pattern `HH:mm:ss.SSSSSSSSS` for representing time
 in a 24-hour clock format. It uses the default value that can be parsed with the
 notation of dates.
 -/
-def leanTime24Hour : GenericFormat .any := datespec("HH:mm:ss.SSSSSSSSS")
+@[implicit_reducible] def leanTime24Hour : GenericFormat .any := datespec("HH:mm:ss.SSSSSSSSS")
 
 /--
 The leanTime24HourNoNanos format, which follows the pattern `HH:mm:ss` for representing time
 in a 24-hour clock format. It uses the default value that can be parsed with the
 notation of dates.
 -/
-def leanTime24HourNoNanos : GenericFormat .any := datespec("HH:mm:ss")
+@[implicit_reducible] def leanTime24HourNoNanos : GenericFormat .any := datespec("HH:mm:ss")
 
 /--
 The leanDateTime24Hour format, which follows the pattern `uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSS` for
 representing date, time, and time zone. It uses the default value that can be parsed with the
 notation of dates.
 -/
-def leanDateTime24Hour : GenericFormat (.only .GMT) := datespec("uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSS")
+@[implicit_reducible] def leanDateTime24Hour : GenericFormat (.only .GMT) := datespec("uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSS")
 
 /--
 The leanDateTime24HourNoNanos format, which follows the pattern `uuuu-MM-dd'T'HH:mm:ss` for
 representing date, time, and time zone. It uses the default value that can be parsed with the
 notation of dates.
 -/
-def leanDateTime24HourNoNanos : GenericFormat (.only .GMT) := datespec("uuuu-MM-dd'T'HH:mm:ss")
+@[implicit_reducible] def leanDateTime24HourNoNanos : GenericFormat (.only .GMT) := datespec("uuuu-MM-dd'T'HH:mm:ss")
 
 /--
 The leanDateTimeWithZone format, which follows the pattern `uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSSZZZZZ`
 for representing date, time, and time zone. It uses the default value that can be parsed with the
 notation of dates.
 -/
-def leanDateTimeWithZone : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSSZZZZZ")
+@[implicit_reducible] def leanDateTimeWithZone : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSSZZZZZ")
 
 /--
 The leanDateTimeWithZoneNoNanos format, which follows the pattern `uuuu-MM-dd'T'HH:mm:ssZZZZZ`
 for representing date, time, and time zone. It uses the default value that can be parsed with the
 notation of dates.
 -/
-def leanDateTimeWithZoneNoNanos : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ssZZZZZ")
+@[implicit_reducible] def leanDateTimeWithZoneNoNanos : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ssZZZZZ")
 
 /--
 The leanDateTimeWithIdentifier format, which follows the pattern `uuuu-MM-dd'T'HH:mm:ss[z]`
 for representing date, time, and time zone. It uses the default value that can be parsed with the
 notation of dates.
 -/
-def leanDateTimeWithIdentifier : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ss'['zzzz']'")
+@[implicit_reducible] def leanDateTimeWithIdentifier : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ss'['zzzz']'")
 
 /--
 The leanDateTimeWithIdentifierAndNanos format, which follows the pattern `uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSS'[z]'`
 for representing date, time, and time zone. It uses the default value that can be parsed with the
 notation of dates.
 -/
-def leanDateTimeWithIdentifierAndNanos : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSS'['zzzz']'")
+@[implicit_reducible] def leanDateTimeWithIdentifierAndNanos : GenericFormat .any := datespec("uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSS'['zzzz']'")
 
 /--
 The Lean Date format, which follows the pattern `uuuu-MM-dd`. It uses the default value that can be parsed with the
 notation of dates.
 -/
-def leanDate : GenericFormat .any := datespec("uuuu-MM-dd")
+@[implicit_reducible] def leanDate : GenericFormat .any := datespec("uuuu-MM-dd")
 
 /--
 The SQLDate format, which follows the pattern `uuuu-MM-dd` and is commonly used
 in SQL databases to represent dates.
 -/
-def sqlDate : GenericFormat .any := datespec("uuuu-MM-dd")
+@[implicit_reducible] def sqlDate : GenericFormat .any := datespec("uuuu-MM-dd")
 
 /--
 The LongDateFormat, which follows the pattern `EEEE, MMMM d, uuuu HH:mm:ss` for
 representing a full date and time with the day of the week and month name.
 -/
-def longDateFormat : GenericFormat (.only .GMT) := datespec("EEEE, MMMM d, uuuu HH:mm:ss")
+@[implicit_reducible] def longDateFormat : GenericFormat (.only .GMT) := datespec("EEEE, MMMM d, uuuu HH:mm:ss")
 
 /--
 The AscTime format, which follows the pattern `EEE MMM d HH:mm:ss uuuu`. This format
 is often used in older systems for logging and time-stamping events.
 -/
-def ascTime : GenericFormat (.only .GMT) := datespec("EEE MMM d HH:mm:ss uuuu")
+@[implicit_reducible] def ascTime : GenericFormat (.only .GMT) := datespec("EEE MMM d HH:mm:ss uuuu")
 
 /--
 The RFC822 format, which follows the pattern `eee, dd MMM uuuu HH:mm:ss ZZZ`.
 This format is used in email headers and HTTP headers.
 -/
-def rfc822 : GenericFormat .any := datespec("eee, dd MMM uuuu HH:mm:ss ZZZ")
+@[implicit_reducible] def rfc822 : GenericFormat .any := datespec("eee, dd MMM uuuu HH:mm:ss ZZZ")
 
 /--
 The RFC850 format, which follows the pattern `eee, dd-MMM-YY HH:mm:ss ZZZ`.
 This format is an older standard for representing date and time in headers.
 -/
-def rfc850 : GenericFormat .any := datespec("eee, dd-MM-uuuu HH:mm:ss ZZZ")
+@[implicit_reducible] def rfc850 : GenericFormat .any := datespec("eee, dd-MM-uuuu HH:mm:ss ZZZ")
 
 end Formats
 
@@ -191,7 +191,7 @@ def format (date : PlainDate) (format : String) (locale : DateFormat := .enUS) :
       | .u _ => some date.year
       | .Y _ => some (date.weekYear locale.firstDayOfWeek locale.minimalDaysInFirstWeek)
       | .D _ => some (Sigma.mk date.year.isLeap date.dayOfYear)
-      | .Q _ | .q _ => some date.quarter
+      | .Q _ | .q _ => some (Month.Quarter.ofBounded date.quarter)
       | .w _ => some (date.weekOfYear locale.firstDayOfWeek locale.minimalDaysInFirstWeek)
       | .W _ => some (date.weekOfMonth locale.firstDayOfWeek)
       | .M _ | .L _ => some date.month
@@ -274,7 +274,7 @@ def format (time : PlainTime) (format : String) : String :=
       | .b _ => some (classifyDayPeriod time.hour time.minute time.second)
       | .B _ => some (classifyExtendedDayPeriod time.hour time.minute time.second)
       | .h _ => some time.hour.toRelative
-      | .K _ => some (time.hour.emod 12 (by decide))
+      | .K _ => some (time.hour.toBounded.emod 12 (by decide))
       | .S _ => some time.nanosecond
       | .A _ => some time.toMilliseconds
       | .N _ => some time.toNanoseconds
@@ -313,7 +313,7 @@ Parses a time string in the 12-hour format (`hh:mm:ss aa`) and returns a `PlainT
 -/
 def fromTime12Hour (input : String) : Except String PlainTime := do
   let builder h m s a : Option PlainTime := do
-    let value ← Internal.Bounded.ofInt? h.val
+    let value ← Internal.Bounded.ofInt? h.toSubtype.val
     some <| PlainTime.ofHourMinuteSeconds (HourMarker.toAbsolute a value) m s
 
   Formats.time12Hour.parseBuilder builder input
@@ -322,7 +322,7 @@ def fromTime12Hour (input : String) : Except String PlainTime := do
 Formats a `PlainTime` value into a 12-hour format string (`hh:mm:ss aa`).
 -/
 def toTime12Hour (input : PlainTime) : String :=
-  Formats.time12Hour.formatBuilder (input.hour.emod 12 (by decide) |>.add 1) input.minute input.second (if input.hour.val ≥ 12 then HourMarker.pm else HourMarker.am)
+  Formats.time12Hour.formatBuilder (input.hour.toBounded.emod 12 (by decide) |>.add 1) input.minute input.second (if input.hour.toBounded.toSubtype.val ≥ 12 then HourMarker.pm else HourMarker.am)
 
 /--
 Parses a `String` in the `Time12Hour` or `Time24Hour` format and returns a `PlainTime`.
@@ -457,7 +457,7 @@ def format (date : PlainDateTime) (format : String) (locale : DateFormat := .enU
       | .u _ => some date.year
       | .Y _ => some (date.weekYear locale.firstDayOfWeek locale.minimalDaysInFirstWeek)
       | .D _ => some (Sigma.mk date.year.isLeap date.dayOfYear)
-      | .Q _ | .q _ => some date.quarter
+      | .Q _ | .q _ => some (Month.Quarter.ofBounded date.quarter)
       | .w _ => some (date.weekOfYear locale.firstDayOfWeek locale.minimalDaysInFirstWeek)
       | .W _ => some (date.weekOfMonth locale.firstDayOfWeek)
       | .M _ | .L _ => some date.month
@@ -473,7 +473,7 @@ def format (date : PlainDateTime) (format : String) (locale : DateFormat := .enU
       | .b _ => some (classifyDayPeriod date.hour date.minute date.time.second)
       | .B _ => some (classifyExtendedDayPeriod date.hour date.minute date.time.second)
       | .h _ => some date.hour.toRelative
-      | .K _ => some (date.hour.emod 12 (by decide))
+      | .K _ => some (date.hour.toBounded.emod 12 (by decide))
       | .S _ => some date.nanosecond
       | .A _ => some date.time.toMilliseconds
       | .N _ => some date.time.toNanoseconds

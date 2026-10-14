@@ -82,6 +82,7 @@ theorem denote_append_blastExtractAndExtendBit (assign : α → Bool) (aig : AIG
         (blastExtractAndExtendBit aig ⟨currIdx, xc⟩).vec).get idx hidx,
       assign
     ⟧ = (BitVec.extractAndExtend w x).getLsbD idx := by
+  with_semireducible
   rw [RefVec.get_append]
   split
   · rw [blastExtractAndExtendBit_denote_mem_prefix (xc := xc)]
@@ -108,6 +109,7 @@ theorem denote_blastExtractAndExtend.go (assign : α → Bool) (aig : AIG α) (c
         (blastExtractAndExtend.go (outWidth := w * w) currIdx xc acc (by omega) (by rfl)).vec.get idx hidx,
         assign
       ⟧ = (BitVec.extractAndExtend w x).getLsbD idx := by
+  with_semireducible
   intros idx hidx
   generalize hgen : blastExtractAndExtend.go (outWidth := w * w) currIdx xc acc (by omega) (by rfl) = gen
   unfold blastExtractAndExtend.go at hgen
@@ -154,6 +156,7 @@ theorem denote_blastCpopLayer.go (aig : AIG α) (iterNum : Nat)
         (blastCpopLayer.go iterNum oldLayer newLayer hold' (by rfl)).vec.get idx hidx,
         assign
       ⟧ = (BitVec.cpopLayer oldLayerBv 0#(0 * w) (by omega)).getLsbD idx := by
+  with_semireducible
   intros idx hidx
   generalize hgen : blastCpopLayer.go (outWidth := (len + 1) / 2 * w) iterNum oldLayer newLayer
     hold' (by rfl) = res

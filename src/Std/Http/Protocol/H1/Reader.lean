@@ -198,8 +198,7 @@ Adds a header to the current message head.
 -/
 @[inline]
 def addHeader (name : Header.Name) (value : Header.Value) (reader : Reader dir) : Reader dir :=
-  match dir with
-  | .sending | .receiving => { reader with messageHead := { reader.messageHead with headers := reader.messageHead.headers.insert name value } }
+  { reader with messageHead := reader.messageHead.setHeaders (reader.messageHead.headers.insert name value) }
 
 /--
 Closes the reader, transitioning to the closed state.

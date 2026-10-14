@@ -337,6 +337,7 @@ theorem denote_go_eq_divRec_q (aig : AIG α) (assign : α → Bool) (curr : Nat)
       ⟧
         =
       (BitVec.divRec curr { n := lhs, d := rhs} { wn, wr, q := qbv, r := rbv }).q.getLsbD idx := by
+  with_semireducible
   induction curr generalizing aig wn wr q r qbv rbv with
   | zero =>
     intro idx hidx

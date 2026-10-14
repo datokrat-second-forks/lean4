@@ -75,7 +75,7 @@ structure DHashMap (α : Type u) (β : α → Type v) [BEq α] [Hashable α] whe
 namespace DHashMap
 
 @[cbv_opaque, inline, inherit_doc Raw.emptyWithCapacity] def emptyWithCapacity [BEq α] [Hashable α] (capacity := 8) : DHashMap α β :=
-  ⟨Raw.emptyWithCapacity capacity, .emptyWithCapacity₀⟩
+  ⟨Raw.emptyWithCapacity capacity, by with_semireducible exact .emptyWithCapacity₀⟩
 
 instance [BEq α] [Hashable α] : EmptyCollection (DHashMap α β) where
   emptyCollection := emptyWithCapacity
@@ -87,7 +87,8 @@ instance [BEq α] [Hashable α] : Inhabited (DHashMap α β) where
     DHashMap α β :=
   ⟨m.1.markLinear, m.2.markLinear⟩
 
-@[simp, grind =] theorem markLinear_eq {m : DHashMap α β} : m.markLinear = m := rfl
+@[defeq, simp, grind =] theorem markLinear_eq {m : DHashMap α β} : m.markLinear = m := by
+  with_semireducible rfl
 
 @[inherit_doc Raw.Equiv]
 structure Equiv (m₁ m₂ : DHashMap α β) where
@@ -142,7 +143,7 @@ instance [BEq α] [Hashable α] {m : DHashMap α β} {a : α} : Decidable (a ∈
 
 @[inline, inherit_doc Raw.get] def get [LawfulBEq α] (m : DHashMap α β) (a : α)
     (h : a ∈ m) : β a :=
-  Raw₀.get ⟨m.1, m.2.size_buckets_pos⟩ a h
+  Raw₀.get ⟨m.1, m.2.size_buckets_pos⟩ a (by with_semireducible exact h)
 
 @[inline, inherit_doc Raw.get!] def get! [LawfulBEq α] (m : DHashMap α β)
     (a : α) [Inhabited (β a)] : β a :=
@@ -166,7 +167,7 @@ variable {β : Type v}
 
 @[inline, inherit_doc Raw.Const.get] def Const.get
     (m : DHashMap α (fun _ => β)) (a : α) (h : a ∈ m) : β :=
-  Raw₀.Const.get ⟨m.1, m.2.size_buckets_pos⟩ a h
+  Raw₀.Const.get ⟨m.1, m.2.size_buckets_pos⟩ a (by with_semireducible exact h)
 
 @[inline, inherit_doc Raw.Const.getD] def Const.getD
     (m : DHashMap α (fun _ => β)) (a : α) (fallback : β) : β :=
@@ -188,7 +189,7 @@ end
   Raw₀.getKey? ⟨m.1, m.2.size_buckets_pos⟩ a
 
 @[inline, inherit_doc Raw.getKey] def getKey (m : DHashMap α β) (a : α) (h : a ∈ m) : α :=
-  Raw₀.getKey ⟨m.1, m.2.size_buckets_pos⟩ a h
+  Raw₀.getKey ⟨m.1, m.2.size_buckets_pos⟩ a (by with_semireducible exact h)
 
 @[inline, inherit_doc Raw.getKey!] def getKey! [Inhabited α] (m : DHashMap α β) (a : α) : α :=
   Raw₀.getKey! ⟨m.1, m.2.size_buckets_pos⟩ a
@@ -200,7 +201,7 @@ end
   Raw₀.getEntry? ⟨m.1, m.2.size_buckets_pos⟩ a
 
 @[inline, inherit_doc Raw.getEntry] def getEntry (m : DHashMap α β) (a : α) (h : a ∈ m) : (a : α) × β a :=
-  Raw₀.getEntry ⟨m.1, m.2.size_buckets_pos⟩ a h
+  Raw₀.getEntry ⟨m.1, m.2.size_buckets_pos⟩ a (by with_semireducible exact h)
 
 @[inline, inherit_doc Raw.getEntry!] def getEntry! [Inhabited ((a : α) × β a)] (m : DHashMap α β) (a : α) : (a : α) × β a :=
   Raw₀.getEntry! ⟨m.1, m.2.size_buckets_pos⟩ a

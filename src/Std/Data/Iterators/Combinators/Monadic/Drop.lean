@@ -91,9 +91,11 @@ private def Drop.instFinitenessRelation [Iterator α m β] [Monad m]
     FinitenessRelation (Drop α m β) m where
   Rel := Drop.FiniteRel m
   wf := by
+    with_semireducible
     apply InvImage.wf
     exact WellFoundedRelation.wf
   subrelation {it it'} h := by
+    with_semireducible
     obtain ⟨step, h, h'⟩ := h
     cases h'
     case drop it' h' _ =>
@@ -122,23 +124,25 @@ private def Drop.ProductiveRel (m : Type w → Type w') [Iterator α m β] [Prod
 
 private theorem Drop.productiveRel_of_remaining [Monad m] [Iterator α m β] [Productive α m]
     {it it' : IterM (α := Drop α m β) m β}
-    (h : it'.internalState.remaining < it.internalState.remaining) : Drop.ProductiveRel m it' it :=
-  Prod.Lex.left _ _ h
+    (h : it'.internalState.remaining < it.internalState.remaining) : Drop.ProductiveRel m it' it := by
+  with_semireducible exact Prod.Lex.left _ _ h
 
 private theorem Drop.productiveRel_of_inner [Monad m] [Iterator α m β] [Productive α m] {remaining : Nat}
     {it it' : IterM (α := α) m β}
     (h : it'.finitelyManySkips.Rel it.finitelyManySkips) :
-    Drop.ProductiveRel m (it'.drop remaining) (it.drop remaining) :=
-  Prod.Lex.right _ h
+    Drop.ProductiveRel m (it'.drop remaining) (it.drop remaining) := by
+  with_semireducible exact Prod.Lex.right _ h
 
 private def Drop.instProductivenessRelation [Iterator α m β] [Monad m]
     [Productive α m] :
     ProductivenessRelation (Drop α m β) m where
   Rel := Drop.ProductiveRel m
   wf := by
+    with_semireducible
     apply InvImage.wf
     exact WellFoundedRelation.wf
   subrelation {it it'} h := by
+    with_semireducible
     rw [IterM.IsPlausibleSkipSuccessorOf] at h
     cases h
     case drop it' out k h h' =>

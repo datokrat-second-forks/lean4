@@ -32,18 +32,22 @@ universe uₗ vₗ wₗ
 variable {α : Type uₗ} [CompleteLattice α]
 
 theorem le_top (x : α) : x ⊑ ⊤ := by
+  with_semireducible
   apply le_sup
   trivial
 
 theorem meet_le_left (x y : α) : x ⊓ y ⊑ x := by
+  with_semireducible
   apply inf_le
   left; rfl
 
 theorem meet_le_right (x y : α) : x ⊓ y ⊑ y := by
+  with_semireducible
   apply inf_le
   right; rfl
 
 theorem le_meet (x y z : α) : x ⊑ y → x ⊑ z → x ⊑ y ⊓ z := by
+  with_semireducible
   intro hxy hxz
   apply le_inf
   intro w hw
@@ -52,14 +56,17 @@ theorem le_meet (x y z : α) : x ⊑ y → x ⊑ z → x ⊑ y ⊓ z := by
   | inr h => rw [h]; exact hxz
 
 theorem left_le_join (x y : α) : x ⊑ x ⊔ y := by
+  with_semireducible
   apply le_sup
   left; rfl
 
 theorem right_le_join (x y : α) : y ⊑ x ⊔ y := by
+  with_semireducible
   apply le_sup
   right; rfl
 
 theorem join_le (x y z : α) : x ⊑ z → y ⊑ z → x ⊔ y ⊑ z := by
+  with_semireducible
   intro hxz hyz
   apply sup_le
   intro w hw
@@ -68,10 +75,12 @@ theorem join_le (x y z : α) : x ⊑ z → y ⊑ z → x ⊔ y ⊑ z := by
   | inr h => rw [h]; exact hyz
 
 theorem iInf_le {ι : Type vₗ} (f : ι → α) (i : ι) : iInf f ⊑ f i := by
+  with_semireducible
   apply inf_le
   exact ⟨i, rfl⟩
 
 theorem le_iInf {ι : Type vₗ} (f : ι → α) (x : α) : (∀ i, x ⊑ f i) → x ⊑ iInf f := by
+  with_semireducible
   intro h
   apply le_inf
   intro y ⟨i, hi⟩
@@ -97,10 +106,12 @@ theorem iInf_apply
     simpa [g] using hg s
 
 theorem le_iSup {ι : Type vₗ} (f : ι → α) (i : ι) : f i ⊑ iSup f := by
+  with_semireducible
   apply le_sup
   exact ⟨i, rfl⟩
 
 theorem iSup_le {ι : Type vₗ} (f : ι → α) (x : α) : (∀ i, f i ⊑ x) → iSup f ⊑ x := by
+  with_semireducible
   intro h
   apply sup_le
   intro y ⟨i, hi⟩

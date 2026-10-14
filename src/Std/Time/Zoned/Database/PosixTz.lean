@@ -46,9 +46,11 @@ private def posixParseHMS (maxHour : Nat := 24) : Parser Second.Offset := do
     | some b => pure b
     | none   => fail s!"hour {rawH} out of range 0-{167}"
 
-  let m : Minute.Ordinal ← attempt (pchar ':' *> parseBoundedNat "minute") <|> pure (Bounded.LE.mk 0 (by decide))
-  let s : Second.Ordinal false ← attempt (pchar ':' *> parseBoundedNat "second") <|> pure (Bounded.LE.mk 0 (by decide))
-  return (Hour.Offset.ofInt h.val).toSeconds + m.toOffset.toSeconds + s.toOffset
+  let m : Minute.Ordinal ← Minute.Ordinal.ofBounded <$>
+    (attempt (pchar ':' *> parseBoundedNat "minute") <|> pure (Bounded.LE.mk 0 (by decide)))
+  let s : Second.Ordinal false ← Second.Ordinal.ofBounded <$>
+    (attempt (pchar ':' *> parseBoundedNat "second") <|> pure (Bounded.LE.mk 0 (by decide)))
+  return (Hour.Offset.ofInt h.toSubtype.val).toSeconds + m.toOffset.toSeconds + s.toOffset
 
 -- <offset> ::= [ "+" | "-" ] <time>
 private def posixParseOffset : Parser TimeZone.Offset := do
@@ -56,7 +58,7 @@ private def posixParseOffset : Parser TimeZone.Offset := do
   let secs ← posixParseHMS
 
   -- POSIX offsets are west-positive, so we negate
-  return ⟨Second.Offset.ofInt (-sign * secs.val)⟩
+  return ⟨Second.Offset.ofInt (-sign * secs.toUnitVal.val)⟩
 
 -- <quoted-name> ::= "<" <quoted-char> { <quoted-char> } ">"
 private def quotedName : Parser String :=
@@ -80,10 +82,10 @@ private def posixParseMwdSpec : Parser TransitionSpec := do
   if d > 6 then fail s!"day {d} out of range 0-6"
 
   let day ← match (Bounded.LE.ofInt (if d == 0 then 7 else Int.ofNat d)) with
-    | some wd => pure wd
+    | some wd => pure (.ofBounded wd)
     | none => fail s!"day {d} out of range 0-6"
 
-  return .mwd month week day
+  return .mwd (.ofBounded month) (.ofBounded week) day
 
 -- "J" <n> where n is 1–365; Feb 29 is never counted.
 private def posixParseJulianSpec : Parser TransitionSpec := do
@@ -101,8 +103,8 @@ private def posixParseDstOffset (stdOffset : TimeZone.Offset) : Parser TimeZone.
   let c ← peek?
   if let some ch := c then
     if ch.isDigit || ch == '+' || ch == '-' then posixParseOffset
-    else pure ⟨Second.Offset.ofInt (stdOffset.second.val + 3600)⟩
-  else pure ⟨Second.Offset.ofInt (stdOffset.second.val + 3600)⟩
+    else pure ⟨Second.Offset.ofInt (stdOffset.second.toUnitVal.val + 3600)⟩
+  else pure ⟨Second.Offset.ofInt (stdOffset.second.toUnitVal.val + 3600)⟩
 
 -- <rule-spec> ::= "M" <month> "." <week> "." <weekday> | "J" <n> | <n>
 private def posixParseSpec : Parser TransitionSpec :=
@@ -121,7 +123,7 @@ private def posixParseRule (extended : Bool := false) : Parser TransitionRule :=
     skipChar '/'
     let sign ← posixParseSign
     let t ← posixParseHMS (maxHour := if extended then 167 else 24)
-    return Second.Offset.ofInt (sign * t.val)
+    return Second.Offset.ofInt (sign * t.toUnitVal.val)
 
   let time ← parseTime <|> pure defaultTime.toSeconds
 

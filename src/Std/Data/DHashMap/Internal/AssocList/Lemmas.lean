@@ -12,6 +12,8 @@ public import Std.Data.Internal.List.Associative
 import Init.ByCases
 import Init.Data.Array.Bootstrap
 
+set_option elaborator.implicitTransparency false
+
 public section
 
 /-!

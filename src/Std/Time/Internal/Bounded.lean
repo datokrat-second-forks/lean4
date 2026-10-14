@@ -28,37 +28,52 @@ def Bounded (rel : Int → Int → Prop) (lo : Int) (hi : Int) := { val : Int //
 
 namespace Bounded
 
+/--
+Views a `Bounded` as the subtype it is defined as.
+-/
+@[inline]
+def toSubtype {rel : Int → Int → Prop} {lo hi : Int} (b : Bounded rel lo hi) :
+    { val : Int // rel lo val ∧ rel val hi } := smartCast
+
+/--
+Creates a `Bounded` from the subtype it is defined as.
+-/
+@[inline]
+def ofSubtype {rel : Int → Int → Prop} {lo hi : Int} (s : { val : Int // rel lo val ∧ rel val hi }) :
+    Bounded rel lo hi := smartCast
+
 @[always_inline]
 instance : LE (Bounded rel n m) where
-  le l r := l.val ≤ r.val
+  le l r := l.toSubtype.val ≤ r.toSubtype.val
 
 @[always_inline]
 instance : LT (Bounded rel n m) where
-  lt l r := l.val < r.val
+  lt l r := l.toSubtype.val < r.toSubtype.val
 
 @[always_inline]
 instance : Ord (Bounded rel n m) where
-  compare := compareOn (·.val)
+  compare := compareOn (·.toSubtype.val)
 
 @[always_inline]
 instance : Repr (Bounded rel m n) where
-  reprPrec n := reprPrec n.val
+  reprPrec n := reprPrec n.toSubtype.val
 
 @[always_inline]
-instance : DecidableEq (Bounded rel n m) := Subtype.instDecidableEq
+instance : DecidableEq (Bounded rel n m) :=
+  inferInstanceAs (DecidableEq { val : Int // rel n val ∧ rel val m })
 
 @[always_inline]
 instance {x y : Bounded rel a b} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+  inferInstanceAs (Decidable (x.toSubtype.val ≤ y.toSubtype.val))
 
 instance : OrientedOrd (Bounded rel n m) where
-  eq_swap := OrientedOrd.eq_swap (α := Int)
+  eq_swap := by with_semireducible exact OrientedOrd.eq_swap (α := Int)
 
 instance : TransOrd (Bounded rel n m) where
-  isLE_trans := TransOrd.isLE_trans (α := Int)
+  isLE_trans := by with_semireducible exact TransOrd.isLE_trans (α := Int)
 
 instance : LawfulEqOrd (Bounded rel n m) where
-  eq_of_compare := Subtype.ext ∘ LawfulEqOrd.eq_of_compare (α := Int)
+  eq_of_compare := by with_semireducible exact Subtype.ext ∘ LawfulEqOrd.eq_of_compare (α := Int)
 
 variable {rel a b}
 
@@ -73,7 +88,7 @@ Casts the boundaries of the `Bounded` using equivalences.
 -/
 @[inline]
 def cast {rel : Int → Int → Prop} {lo₁ lo₂ hi₁ hi₂ : Int} (h₁ : lo₁ = lo₂) (h₂ : hi₁ = hi₂) (b : Bounded rel lo₁ hi₁) : Bounded rel lo₂ hi₂ :=
-  .mk b.val ⟨h₁ ▸ b.property.1, h₂ ▸ b.property.2⟩
+  .ofSubtype (.mk b.toSubtype.val ⟨h₁ ▸ b.toSubtype.property.1, h₂ ▸ b.toSubtype.property.2⟩)
 
 /--
 A `Bounded` integer where the relation used is the less-than relation, so it includes all
@@ -86,7 +101,7 @@ Creates a new `Bounded` Integer.
 -/
 @[inline]
 def mk {rel : Int → Int → Prop} (val : Int) (proof : rel lo val ∧ rel val hi) : @Bounded rel lo hi :=
-  ⟨val, proof⟩
+  .ofSubtype ⟨val, proof⟩
 
 /--
 Convert a `Int` to a `Bounded` if it checks.
@@ -94,7 +109,7 @@ Convert a `Int` to a `Bounded` if it checks.
 @[inline]
 def ofInt? [DecidableRel rel] (val : Int) : Option (Bounded rel lo hi) :=
   if h : rel lo ↑val ∧ rel ↑val hi then
-    some ⟨val, h⟩
+    some (.mk val h)
   else
     none
 
@@ -111,7 +126,7 @@ def ofNatWrapping { lo hi : Int } (val : Int) (h : lo ≤ hi) : Bounded.LE lo hi
   have mod_nonneg : 0 ≤ (val - lo) % range := Int.emod_nonneg (val - lo) not_zero.symm
   have add_nonneg : lo ≤ lo + (val - lo) % range := Int.le_add_of_nonneg_right mod_nonneg
   have mod_range : (val - lo) % (hi - lo + 1) < range := Int.emod_lt_of_pos (a := val - lo) range_pos
-  refine ⟨((val - lo) % range + range) % range + lo, And.intro ?_ ?_⟩
+  refine .mk (((val - lo) % range + range) % range + lo) (And.intro ?_ ?_)
   · simp_all [range]
     rw [Int.add_comm] at add_nonneg
     exact add_nonneg
@@ -134,14 +149,14 @@ Creates a new `Bounded` integer that the relation is less-equal.
 -/
 @[inline]
 def mk (val : Int) (proof : lo ≤ val ∧ val ≤ hi) : Bounded.LE lo hi :=
-  ⟨val, proof⟩
+  Bounded.mk val proof
 
 /--
 Creates a new `Bounded` integer that the relation is less-equal.
 -/
 @[inline]
 def exact (val : Nat) : Bounded.LE val val :=
-  ⟨val, by simp⟩
+  .mk val (by simp)
 
 /--
 Creates a new `Bounded` integer.
@@ -149,7 +164,7 @@ Creates a new `Bounded` integer.
 @[inline]
 def ofInt { lo hi : Int } (val : Int) : Option (Bounded.LE lo hi) :=
   if h : lo ≤ val ∧ val ≤ hi
-    then some ⟨val, h⟩
+    then some (.mk val h)
     else none
 
 /--
@@ -183,42 +198,42 @@ Convert a `Nat` to a `Bounded.LE` using the lower boundary too.
 def clip (val : Int) (h : lo ≤ hi) : Bounded.LE lo hi :=
   if h₀ : lo ≤ val then
     if h₁ : val ≤ hi
-      then ⟨val, And.intro h₀ h₁⟩
-      else ⟨hi, And.intro h (Int.le_refl hi)⟩
-  else ⟨lo, And.intro (Int.le_refl lo) h⟩
+      then .mk val (And.intro h₀ h₁)
+      else .mk hi (And.intro h (Int.le_refl hi))
+  else .mk lo (And.intro (Int.le_refl lo) h)
 
 /--
 Convert a `Bounded.LE` to a Nat.
 -/
 @[inline]
 def toNat (n : Bounded.LE lo hi) : Nat :=
-  n.val.toNat
+  n.toSubtype.val.toNat
 
 /--
 Convert a `Bounded.LE` to a Nat.
 -/
 @[inline]
 def toNat' (n : Bounded.LE lo hi) (h : lo ≥ 0) : Nat :=
-  let h₁ := (Int.le_trans h n.property.left)
-  match n.val, h₁ with
+  let h₁ := (Int.le_trans h n.toSubtype.property.left)
+  match n.toSubtype.val, h₁ with
   | .ofNat n, _ => n
-  | .negSucc _, h => by contradiction
+  | .negSucc _, h => by with_semireducible contradiction
 
 /--
 Convert a `Bounded.LE` to an Int.
 -/
 @[inline]
 def toInt (n : Bounded.LE lo hi) : Int :=
-  n.val
+  n.toSubtype.val
 
 /--
 Convert a `Bounded.LE` to a `Fin`.
 -/
 @[inline, simp]
 def toFin (n : Bounded.LE lo hi) (h₀ : 0 ≤ lo) : Fin (hi + 1).toNat := by
-  let h := n.property.right
-  let h₁ := Int.le_trans h₀ n.property.left
-  refine ⟨n.val.toNat, (Int.toNat_lt h₁).mpr ?_⟩
+  let h := n.toSubtype.property.right
+  let h₁ := Int.le_trans h₀ n.toSubtype.property.left
+  refine ⟨n.toSubtype.val.toNat, (Int.toNat_lt h₁).mpr ?_⟩
   rw [Int.toNat_of_nonneg (by omega)]
   exact Int.lt_add_one_of_le h
 
@@ -243,7 +258,7 @@ Creates a new `Bounded.LE` using the modulus of a number.
 -/
 @[inline]
 def byEmod (b : Int) (i : Int) (hi : i > 0) : Bounded.LE 0 (i - 1) := by
-  refine ⟨b % i, And.intro ?_ ?_⟩
+  refine .mk (b % i) (And.intro ?_ ?_)
   · apply Int.emod_nonneg b
     intro a
     simp_all [Int.lt_irrefl]
@@ -256,15 +271,15 @@ Creates a new `Bounded.LE` using the Truncating modulus of a number.
 -/
 @[inline]
 def byMod (b : Int) (i : Int) (hi : 0 < i) : Bounded.LE (- (i - 1)) (i - 1) := by
-  refine ⟨b.tmod i, And.intro ?_ ?_⟩
+  refine .mk (b.tmod i) (And.intro ?_ ?_)
   · simp [Int.tmod]
-    split <;> try contradiction
+    split <;> try with_semireducible contradiction
     next m n =>
       let h := Int.emod_nonneg (a := m) (b := n) (Int.ne_of_gt hi)
       apply (Int.le_trans · h)
       apply Int.le_of_neg_le_neg
       simp_all
-      exact hi
+      with_semireducible exact hi
     next m n =>
       apply Int.neg_le_neg
       have h := Int.tmod_lt_of_pos (m + 1) hi
@@ -276,8 +291,8 @@ Adjust the bounds of a `Bounded` by setting the lower bound to zero and the maxi
 -/
 @[inline]
 def truncate (bounded : Bounded.LE n m) : Bounded.LE 0 (m - n) := by
-  let ⟨left, right⟩ := bounded.property
-  refine ⟨bounded.val - n, And.intro ?_ ?_⟩
+  let ⟨left, right⟩ := bounded.toSubtype.property
+  refine .mk (bounded.toSubtype.val - n) (And.intro ?_ ?_)
   all_goals omega
 
 /--
@@ -285,9 +300,9 @@ Adjust the bounds of a `Bounded` by changing the higher bound if another value `
 constraint.
 -/
 @[inline, simp]
-def truncateTop (bounded : Bounded.LE n m) (h : bounded.val ≤ j) : Bounded.LE n j := by
-  refine ⟨bounded.val, And.intro ?_ ?_⟩
-  · exact bounded.property.left
+def truncateTop (bounded : Bounded.LE n m) (h : bounded.toSubtype.val ≤ j) : Bounded.LE n j := by
+  refine .mk bounded.toSubtype.val (And.intro ?_ ?_)
+  · exact bounded.toSubtype.property.left
   · exact h
 
 /--
@@ -295,37 +310,37 @@ Adjust the bounds of a `Bounded` by changing the lower bound if another value `j
 constraint.
 -/
 @[inline]
-def truncateBottom (bounded : Bounded.LE n m) (h : bounded.val ≥ j) : Bounded.LE j m := by
-  refine ⟨bounded.val, And.intro ?_ ?_⟩
+def truncateBottom (bounded : Bounded.LE n m) (h : bounded.toSubtype.val ≥ j) : Bounded.LE j m := by
+  refine .mk bounded.toSubtype.val (And.intro ?_ ?_)
   · exact h
-  · exact bounded.property.right
+  · exact bounded.toSubtype.property.right
 
 /--
 Adjust the bounds of a `Bounded` by adding a constant value to both the lower and upper bounds.
 -/
 @[inline]
 def neg (bounded : Bounded.LE n m) : Bounded.LE (-m) (-n) := by
-  refine ⟨-bounded.val, And.intro ?_ ?_⟩
-  · exact Int.neg_le_neg bounded.property.right
-  · exact Int.neg_le_neg bounded.property.left
+  refine .mk (-bounded.toSubtype.val) (And.intro ?_ ?_)
+  · exact Int.neg_le_neg bounded.toSubtype.property.right
+  · exact Int.neg_le_neg bounded.toSubtype.property.left
 
 /--
 Adjust the bounds of a `Bounded` by adding a constant value to both the lower and upper bounds.
 -/
 @[inline, simp]
 def add (bounded : Bounded.LE n m) (num : Int) : Bounded.LE (n + num) (m + num) := by
-  refine ⟨bounded.val + num, And.intro ?_ ?_⟩
+  refine .mk (bounded.toSubtype.val + num) (And.intro ?_ ?_)
   all_goals apply (Int.add_le_add · (Int.le_refl num))
-  · exact bounded.property.left
-  · exact bounded.property.right
+  · exact bounded.toSubtype.property.left
+  · exact bounded.toSubtype.property.right
 
 /--
 Adjust the bounds of a `Bounded` by adding a constant value to both the lower and upper bounds.
 -/
 @[inline]
-def addProven (bounded : Bounded.LE n m) (h₀ : bounded.val + num ≤ m) (h₁ : num ≥ 0) : Bounded.LE n m := by
-  refine ⟨bounded.val + num, And.intro ?_ ?_⟩
-  · exact Int.le_trans bounded.property.left (Int.le_add_of_nonneg_right h₁)
+def addProven (bounded : Bounded.LE n m) (h₀ : bounded.toSubtype.val + num ≤ m) (h₁ : num ≥ 0) : Bounded.LE n m := by
+  refine .mk (bounded.toSubtype.val + num) (And.intro ?_ ?_)
+  · exact Int.le_trans bounded.toSubtype.property.left (Int.le_add_of_nonneg_right h₁)
   · exact h₀
 
 /--
@@ -333,20 +348,20 @@ Adjust the bounds of a `Bounded` by adding a constant value to the upper bounds.
 -/
 @[inline]
 def addTop (bounded : Bounded.LE n m) (num : Int) (h : num ≥ 0) : Bounded.LE n (m + num) := by
-  refine ⟨bounded.val + num, And.intro ?_ ?_⟩
-  · let h := Int.add_le_add bounded.property.left h
+  refine .mk (bounded.toSubtype.val + num) (And.intro ?_ ?_)
+  · let h := Int.add_le_add bounded.toSubtype.property.left h
     simp at h
     exact h
-  · exact Int.add_le_add bounded.property.right (Int.le_refl num)
+  · exact Int.add_le_add bounded.toSubtype.property.right (Int.le_refl num)
 
 /--
 Adjust the bounds of a `Bounded` by adding a constant value to the lower bounds.
 -/
 @[inline]
 def subBottom (bounded : Bounded.LE n m) (num : Int) (h : num ≥ 0) : Bounded.LE (n - num) m := by
-  refine ⟨bounded.val - num, And.intro ?_ ?_⟩
-  · exact Int.add_le_add bounded.property.left (Int.le_refl (-num))
-  · let h := Int.sub_le_sub bounded.property.right h
+  refine .mk (bounded.toSubtype.val - num) (And.intro ?_ ?_)
+  · exact Int.add_le_add bounded.toSubtype.property.left (Int.le_refl (-num))
+  · let h := Int.sub_le_sub bounded.toSubtype.property.right h
     simp at h
     exact h
 
@@ -355,9 +370,9 @@ Adds two `Bounded` and adjust the boundaries.
 -/
 @[inline]
 def addBounds (bounded : Bounded.LE n m) (bounded₂ : Bounded.LE i j) : Bounded.LE (n + i) (m + j) := by
-  refine ⟨bounded.val + bounded₂.val, And.intro ?_ ?_⟩
-  · exact Int.add_le_add bounded.property.left bounded₂.property.left
-  · exact Int.add_le_add bounded.property.right bounded₂.property.right
+  refine .mk (bounded.toSubtype.val + bounded₂.toSubtype.val) (And.intro ?_ ?_)
+  · exact Int.add_le_add bounded.toSubtype.property.left bounded₂.toSubtype.property.left
+  · exact Int.add_le_add bounded.toSubtype.property.right bounded₂.toSubtype.property.right
 
 /--
 Adjust the bounds of a `Bounded` by subtracting a constant value to both the lower and upper bounds.
@@ -379,40 +394,40 @@ the upper bound to the value.
 -/
 @[inline]
 def emod (bounded : Bounded.LE n num) (num : Int) (hi : 0 < num) : Bounded.LE 0 (num - 1) :=
-  byEmod bounded.val num hi
+  byEmod bounded.toSubtype.val num hi
 
 /--
 Adjust the bounds of a `Bounded` by applying the mod operation.
 -/
 @[inline]
 def mod (bounded : Bounded.LE n num) (num : Int) (hi : 0 < num) : Bounded.LE (- (num - 1)) (num - 1) :=
-  byMod bounded.val num hi
+  byMod bounded.toSubtype.val num hi
 
 /--
 Adjust the bounds of a `Bounded` by applying the multiplication operation with a positive number.
 -/
 @[inline]
 def mul_pos (bounded : Bounded.LE n m) (num : Int) (h : num ≥ 0) : Bounded.LE (n * num) (m * num) := by
-  refine ⟨bounded.val * num, And.intro ?_ ?_⟩
-  · exact Int.mul_le_mul_of_nonneg_right bounded.property.left h
-  · exact Int.mul_le_mul_of_nonneg_right bounded.property.right h
+  refine .mk (bounded.toSubtype.val * num) (And.intro ?_ ?_)
+  · exact Int.mul_le_mul_of_nonneg_right bounded.toSubtype.property.left h
+  · exact Int.mul_le_mul_of_nonneg_right bounded.toSubtype.property.right h
 
 /--
 Adjust the bounds of a `Bounded` by applying the multiplication operation with a positive number.
 -/
 @[inline]
 def mul_neg (bounded : Bounded.LE n m) (num : Int) (h : num ≤ 0) : Bounded.LE (m * num) (n * num) := by
-  refine ⟨bounded.val * num, And.intro ?_ ?_⟩
-  · exact Int.mul_le_mul_of_nonpos_right bounded.property.right h
-  · exact Int.mul_le_mul_of_nonpos_right bounded.property.left h
+  refine .mk (bounded.toSubtype.val * num) (And.intro ?_ ?_)
+  · exact Int.mul_le_mul_of_nonpos_right bounded.toSubtype.property.right h
+  · exact Int.mul_le_mul_of_nonpos_right bounded.toSubtype.property.left h
 
 /--
 Adjust the bounds of a `Bounded` by applying the div operation.
 -/
 @[inline]
 def ediv (bounded : Bounded.LE n m) (num : Int) (h : num > 0) : Bounded.LE (n / num) (m / num) := by
-  let ⟨left, right⟩ := bounded.property
-  refine ⟨bounded.val.ediv num, And.intro ?_ ?_⟩
+  let ⟨left, right⟩ := bounded.toSubtype.property
+  refine .mk (bounded.toSubtype.val.ediv num) (And.intro ?_ ?_)
   apply Int.ediv_le_ediv
   · exact h
   · exact left
@@ -422,14 +437,14 @@ def ediv (bounded : Bounded.LE n m) (num : Int) (h : num > 0) : Bounded.LE (n / 
 
 @[inline]
 def eq {n : Int} : Bounded.LE n n :=
-  ⟨n, And.intro (Int.le_refl n) (Int.le_refl n)⟩
+  .mk n (And.intro (Int.le_refl n) (Int.le_refl n))
 
 /--
 Expand the range of a bounded value.
 -/
 @[inline]
 def expand (bounded : Bounded.LE lo hi) (h : hi ≤ nhi) (h₁ : nlo ≤ lo) : Bounded.LE nlo nhi :=
-  ⟨bounded.val, And.intro (Int.le_trans h₁ bounded.property.left) (Int.le_trans bounded.property.right h)⟩
+  .mk bounded.toSubtype.val (And.intro (Int.le_trans h₁ bounded.toSubtype.property.left) (Int.le_trans bounded.toSubtype.property.right h))
 
 /--
 Expand the bottom of the bounded to a number `nhi` is `hi` is less or equal to the previous higher bound.
@@ -449,9 +464,9 @@ def expandBottom (bounded : Bounded.LE lo hi) (h : nlo ≤ lo) : Bounded.LE nlo 
 Adds one to the value of the bounded if the value is less than the higher bound of the bounded number.
 -/
 @[inline]
-def succ (bounded : Bounded.LE lo hi) (h : bounded.val < hi) : Bounded.LE lo hi :=
-  let left := bounded.property.left
-  ⟨bounded.val + 1, And.intro (by omega) (by omega)⟩
+def succ (bounded : Bounded.LE lo hi) (h : bounded.toSubtype.val < hi) : Bounded.LE lo hi :=
+  let left := bounded.toSubtype.property.left
+  .mk (bounded.toSubtype.val + 1) (And.intro (by omega) (by omega))
 
 /--
 Returns the absolute value of the bounded number `bo` with bounds `-(i - 1)` to `i - 1`. The result
@@ -459,7 +474,7 @@ will be a new bounded number with bounds `0` to `i - 1`.
 -/
 @[inline]
 def abs (bo :  Bounded.LE (-i) i) : Bounded.LE 0 i :=
-  if h : bo.val ≥ 0 then
+  if h : bo.toSubtype.val ≥ 0 then
     bo.truncateBottom h
   else by
     let r := bo.truncateTop (Int.le_of_lt (Int.not_le.mp h)) |>.neg
@@ -470,8 +485,8 @@ def abs (bo :  Bounded.LE (-i) i) : Bounded.LE 0 i :=
 Returns the maximum between a number and the bounded.
 -/
 def max (bounded : Bounded.LE n m) (val : Int) : Bounded.LE (Max.max n val) (Max.max m val) := by
-  let ⟨left, right⟩ := bounded.property
-  refine ⟨Max.max bounded.val val, And.intro ?_ ?_⟩
+  let ⟨left, right⟩ := bounded.toSubtype.property
+  refine .mk (Max.max bounded.toSubtype.val val) (And.intro ?_ ?_)
 
   all_goals
     simp [Int.max_def]

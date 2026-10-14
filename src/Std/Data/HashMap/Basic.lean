@@ -80,7 +80,8 @@ instance [BEq α] [Hashable α] : Inhabited (HashMap α β) where
 @[never_extract, inline, inherit_doc DHashMap.markLinear] def markLinear (m : HashMap α β) : HashMap α β :=
   ⟨m.inner.markLinear⟩
 
-@[simp, grind =] theorem markLinear_eq {m : HashMap α β} : m.markLinear = m := rfl
+@[defeq, simp, grind =] theorem markLinear_eq {m : HashMap α β} : m.markLinear = m := by
+  with_semireducible rfl
 
 @[inherit_doc DHashMap.Equiv]
 structure Equiv (m₁ m₂ : HashMap α β) where

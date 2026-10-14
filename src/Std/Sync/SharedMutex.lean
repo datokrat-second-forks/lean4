@@ -21,7 +21,7 @@ If you want to guard shared state, use `SharedMutex α` instead.
 -/
 def BaseSharedMutex : Type := SharedMutexImpl.type
 
-instance : Nonempty BaseSharedMutex := by exact SharedMutexImpl.property
+instance : Nonempty BaseSharedMutex := by with_semireducible exact SharedMutexImpl.property
 
 /-- Creates a new `BaseSharedMutex`. -/
 @[extern "lean_io_basesharedmutex_new"]

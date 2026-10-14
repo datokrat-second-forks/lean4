@@ -8,6 +8,9 @@ module
 prelude
 public import Std.WP.Assertion
 public import Std.Internal.Order.PredTrans
+
+set_option elaborator.implicitTransparency false
+
 universe u v w z
 @[expose] public section
 

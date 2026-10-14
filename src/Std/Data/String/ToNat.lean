@@ -102,6 +102,7 @@ theorem isNat_iff' {s : String.Slice} :
         s.copy.toList ≠ [] ∧
         (∀ c ∈ s.copy.toList, c.isDigit ∨ c = '_') ∧
         NoRepetition '_' ('_' :: s.copy.toList ++ ['_']) := by
+  with_semireducible
   generalize h : s.isNat = res
   apply Id.of_wp_run_eq h
   simp only [↓Char.isValue, Bool.not_eq_eq_eq_not, Bool.not_true, forIn_eq_forIn_toList, ne_eq,
@@ -218,16 +219,16 @@ end String.Slice
 namespace String
 
 @[simp]
-public theorem isNat_toSlice {s : String} : s.toSlice.isNat = s.isNat :=
-  (rfl)
+public theorem isNat_toSlice {s : String} : s.toSlice.isNat = s.isNat := by
+  with_semireducible rfl
 
 @[simp]
 public theorem isNat_comp_toSlice : String.Slice.isNat ∘ String.toSlice = String.isNat := by
   ext; simp
 
 @[simp]
-public theorem toNat?_toSlice {s : String} : s.toSlice.toNat? = s.toNat? :=
-  (rfl)
+public theorem toNat?_toSlice {s : String} : s.toSlice.toNat? = s.toNat? := by
+  with_semireducible rfl
 
 @[simp]
 public theorem toNat?_comp_toSlice : String.Slice.toNat? ∘ String.toSlice = String.toNat? := by
@@ -243,7 +244,7 @@ public theorem Slice.isNat_comp_copy : String.isNat ∘ String.Slice.copy = Stri
 
 @[simp]
 public theorem Slice.toNat?_copy {s : Slice} : s.copy.toNat? = s.toNat? := by
-  simpa [← isNat_toSlice] using! Slice.toNat?_congr (by simp)
+  with_semireducible simpa [← isNat_toSlice] using! Slice.toNat?_congr (by simp)
 
 @[simp]
 public theorem Slice.toNat?_comp_copy : String.toNat? ∘ String.Slice.copy = String.Slice.toNat? := by
@@ -260,7 +261,7 @@ public theorem isNat_iff {s : String} :
 
 public theorem isNat_of_isDigit {s : String} (hne : s ≠ "")
     (hdigit : ∀ c ∈ s.toList, c.isDigit) : s.isNat = true := by
-  apply Slice.isNat_of_isDigit <;> simpa
+  with_semireducible apply Slice.isNat_of_isDigit <;> simpa
 
 @[simp]
 public theorem isSome_toNat? {s : String} : s.toNat?.isSome = s.isNat := by

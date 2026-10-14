@@ -97,6 +97,7 @@ private def ArrayIterator.instFinitenessRelation [Pure m] :
       (fun it => it.internalState.array.size - it.internalState.pos)
   wf := InvImage.wf _ WellFoundedRelation.wf
   subrelation {it it'} h := by
+    with_semireducible
     simp_wf
     obtain ⟨step, h, h'⟩ := h
     cases step

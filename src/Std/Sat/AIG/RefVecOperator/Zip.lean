@@ -149,8 +149,8 @@ theorem zip_decl_eq {aig : AIG α} (input : BinaryRefVec aig len)
     [LawfulOperator α BinaryInput func] [LawfulZipOperator α func] :
     ∀ idx (h1 : idx < aig.decls.size) (h2),
       (zip aig input func).1.decls[idx]'h2 = aig.decls[idx]'h1 := by
-  intros
-  unfold zip
+  intro idx h1 h2
+  unfold zip at h2 ⊢
   apply zip.go_decl_eq
 
 theorem zip_lt_size_of_lt_aig_size (aig : AIG α) (input : BinaryRefVec aig len)
@@ -174,7 +174,6 @@ theorem IsPrefix_zip {aig : AIG α} (input : BinaryRefVec aig len)
     [LawfulOperator α BinaryInput func] [LawfulZipOperator α func] :
     AIG.IsPrefix aig.decls (zip aig input func).aig.decls := by
   intros
-  unfold zip
   apply IsPrefix.of
   · intros
     apply zip_decl_eq
@@ -286,6 +285,7 @@ theorem denote_zip {aig : AIG α} (input : BinaryRefVec aig len)
       ⟦(zip aig input func).aig, (zip aig input func).vec.get idx hidx, assign⟧
         =
       ⟦func aig ⟨input.lhs.get idx hidx, input.rhs.get idx hidx⟩, assign⟧ := by
+  with_semireducible
   intros
   apply zip.denote_go
   omega

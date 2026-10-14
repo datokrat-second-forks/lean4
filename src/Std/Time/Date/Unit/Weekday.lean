@@ -50,11 +50,23 @@ namespace Weekday
 @[expose] def Ordinal := Bounded.LE 1 7
 deriving Repr, DecidableEq, LT, LE
 
+/--
+Views an `Ordinal` as the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def Ordinal.toBounded (x : Ordinal) : Bounded.LE 1 7 := smartCast
+
+/--
+Creates an `Ordinal` from the `Bounded.LE` it is defined as.
+-/
+@[expose, inline]
+def Ordinal.ofBounded (x : Bounded.LE 1 7) : Ordinal := smartCast
+
 instance {x y : Ordinal} : Decidable (x ≤ y) :=
-  inferInstanceAs (Decidable (x.val ≤ y.val))
+  inferInstanceAs (Decidable (x.toBounded.toSubtype.val ≤ y.toBounded.toSubtype.val))
 
 instance {x y : Ordinal} : Decidable (x < y) :=
-  inferInstanceAs (Decidable (x.val < y.val))
+  inferInstanceAs (Decidable (x.toBounded.toSubtype.val < y.toBounded.toSubtype.val))
 
 instance : OfNat Ordinal n :=
   inferInstanceAs (OfNat (Bounded.LE 1 (1 + (6 : Nat))) n)
@@ -102,7 +114,7 @@ theorem toOrdinal.inj {a b : Weekday} (h : toOrdinal a = toOrdinal b) : a = b :=
   cases a <;> cases b <;> rw [toOrdinal] at * <;> contradiction
 
 instance : LawfulEqOrd Weekday where
-  eq_of_compare := toOrdinal.inj ∘ LawfulEqOrd.eq_of_compare (α := Ordinal)
+  eq_of_compare := by with_semireducible exact toOrdinal.inj ∘ LawfulEqOrd.eq_of_compare (α := Ordinal)
 
 /--
 Converts a `Weekday` to a `Nat`.

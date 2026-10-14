@@ -82,7 +82,8 @@ inductive Zip.PlausibleStep (it : IterM (α := Zip α₁ m α₂ β₂) m (β₁
     IterStep (IterM (α := Zip α₁ m α₂ β₂) m (β₁ × β₂)) (β₁ × β₂) → Prop where
   | yieldLeft (hm : it.internalState.memoizedLeft = none) {it' out}
       (hp : it.internalState.left.IsPlausibleStep (.yield it' out)) :
-      PlausibleStep it (.skip ⟨⟨it', (some ⟨out, _, _, hp⟩), it.internalState.right⟩⟩)
+      PlausibleStep it (.skip ⟨⟨it', (some ⟨out, it.internalState.left,
+        by with_semireducible exact ⟨_, hp⟩⟩), it.internalState.right⟩⟩)
   | skipLeft (hm : it.internalState.memoizedLeft = none) {it'}
       (hp : it.internalState.left.IsPlausibleStep (.skip it')) :
       PlausibleStep it (.skip ⟨⟨it', none, it.internalState.right⟩⟩)
@@ -107,7 +108,8 @@ instance Zip.instIterator [Monad m] :
     | none => do
       match (← it.internalState.left.step).inflate with
       | .yield it₁' out hp =>
-          pure <| .deflate <| .skip ⟨⟨it₁', (some ⟨out, _, _, hp⟩), it.internalState.right⟩⟩ (.yieldLeft hm hp)
+          pure <| .deflate <| .skip ⟨⟨it₁', (some ⟨out, it.internalState.left,
+            by with_semireducible exact ⟨_, hp⟩⟩), it.internalState.right⟩⟩ (.yieldLeft hm hp)
       | .skip it₁' hp =>
           pure <| .deflate <| .skip ⟨⟨it₁', none, it.internalState.right⟩⟩ (.skipLeft hm hp)
       | .done hp =>
@@ -131,14 +133,14 @@ def Zip.Rel₁ [Finite α₁ m] [Productive α₂ m] :
 
 theorem Zip.rel₁_of_left [Finite α₁ m] [Productive α₂ m] {it' it : IterM (α := Zip α₁ m α₂ β₂) m (β₁ × β₂)}
     (h : it'.internalState.left.finitelyManySteps.Rel it.internalState.left.finitelyManySteps) :
-    Zip.Rel₁ m it' it :=
-  Prod.Lex.left _ _ h
+    Zip.Rel₁ m it' it := by
+  with_semireducible exact Prod.Lex.left _ _ h
 
 theorem Zip.rel₁_of_memoizedLeft [Finite α₁ m] [Productive α₂ m]
     {left : IterM (α := α₁) m β₁} {b' b} {right' right : IterM (α := α₂) m β₂}
     (h : Option.lt emptyRelation b' b) :
-    Zip.Rel₁ m ⟨left, b', right'⟩ ⟨left, b, right⟩ :=
-  Prod.Lex.right _ <| Prod.Lex.left _ _ h
+    Zip.Rel₁ m ⟨left, b', right'⟩ ⟨left, b, right⟩ := by
+  with_semireducible exact Prod.Lex.right _ <| Prod.Lex.left _ _ h
 
 theorem Zip.rel₁_of_right [Finite α₁ m] [Productive α₂ m]
     {left : IterM (α := α₁) m β₁} {b b' : _} {it' it : IterM (α := α₂) m β₂}
@@ -146,12 +148,13 @@ theorem Zip.rel₁_of_right [Finite α₁ m] [Productive α₂ m]
     (h' : it'.finitelyManySkips.Rel it.finitelyManySkips) :
     Zip.Rel₁ m ⟨left, b', it'⟩ ⟨left, b, it⟩ := by
   cases h
-  exact Prod.Lex.right _ <| Prod.Lex.right _ h'
+  with_semireducible exact Prod.Lex.right _ <| Prod.Lex.right _ h'
 
 def Zip.instFinitenessRelation₁ [Monad m] [Finite α₁ m] [Productive α₂ m] :
     FinitenessRelation (Zip α₁ m α₂ β₂) m where
   Rel := Zip.Rel₁ m
   wf := by
+    with_semireducible
     apply InvImage.wf
     refine ⟨fun (a, b) => Prod.lexAccessible (WellFounded.apply ?_ a) (WellFounded.apply ?_) b⟩
     · exact WellFoundedRelation.wf
@@ -160,6 +163,7 @@ def Zip.instFinitenessRelation₁ [Monad m] [Finite α₁ m] [Productive α₂ m
         exact emptyWf.wf
       · exact WellFoundedRelation.wf
   subrelation {it it'} h := by
+    with_semireducible
     obtain ⟨step, h, h'⟩ := h
     cases h'
     case yieldLeft hm it' out hp =>
@@ -197,14 +201,14 @@ def Zip.Rel₂ [Productive α₁ m] [Finite α₂ m] :
     (fun it => (it.internalState.right.finitelyManySteps, (it.internalState.memoizedLeft, it.internalState.left.finitelyManySkips)))
 
 theorem Zip.rel₂_of_right [Productive α₁ m] [Finite α₂ m] {it' it : IterM (α := Zip α₁ m α₂ β₂) m (β₁ × β₂)}
-    (h : it'.internalState.right.finitelyManySteps.Rel it.internalState.right.finitelyManySteps) : Zip.Rel₂ m it' it :=
-  Prod.Lex.left _ _ h
+    (h : it'.internalState.right.finitelyManySteps.Rel it.internalState.right.finitelyManySteps) : Zip.Rel₂ m it' it := by
+  with_semireducible exact Prod.Lex.left _ _ h
 
 theorem Zip.rel₂_of_memoizedLeft [Productive α₁ m] [Finite α₂ m]
     {right : IterM (α := α₂) m β₂} {b' b} {left' left : IterM (α := α₁) m β₁}
     (h : Option.SomeLtNone.lt emptyRelation b' b) :
-    Zip.Rel₂ m ⟨left, b', right⟩ ⟨left', b, right⟩ :=
-  Prod.Lex.right _ <| Prod.Lex.left _ _ h
+    Zip.Rel₂ m ⟨left, b', right⟩ ⟨left', b, right⟩ := by
+  with_semireducible exact Prod.Lex.right _ <| Prod.Lex.left _ _ h
 
 theorem Zip.rel₂_of_left [Productive α₁ m] [Finite α₂ m]
     {right : IterM (α := α₂) m β₂} {b b' : _} {it' it : IterM (α := α₁) m β₁}
@@ -212,12 +216,13 @@ theorem Zip.rel₂_of_left [Productive α₁ m] [Finite α₂ m]
     (h' : it'.finitelyManySkips.Rel it.finitelyManySkips) :
     Zip.Rel₂ m ⟨it', b', right⟩ ⟨it, b, right⟩ := by
   cases h
-  exact Prod.Lex.right _ <| Prod.Lex.right _ h'
+  with_semireducible exact Prod.Lex.right _ <| Prod.Lex.right _ h'
 
 def Zip.instFinitenessRelation₂ [Monad m] [Productive α₁ m] [Finite α₂ m] :
     FinitenessRelation (Zip α₁ m α₂ β₂) m where
   Rel := Zip.Rel₂ m
   wf := by
+    with_semireducible
     apply InvImage.wf
     refine ⟨fun (a, b) => Prod.lexAccessible (WellFounded.apply ?_ a) (WellFounded.apply ?_) b⟩
     · exact WellFoundedRelation.wf
@@ -226,6 +231,7 @@ def Zip.instFinitenessRelation₂ [Monad m] [Productive α₁ m] [Finite α₂ m
         exact emptyWf.wf
       · exact WellFoundedRelation.wf
   subrelation {it it'} h := by
+    with_semireducible
     obtain ⟨step, h, h'⟩ := h
     cases h'
     case yieldLeft hm it' out hp =>
@@ -264,14 +270,14 @@ def Zip.Rel₃ [Productive α₁ m] [Productive α₂ m] :
 
 theorem Zip.rel₃_of_memoizedLeft [Productive α₁ m] [Productive α₂ m] {it' it : IterM (α := Zip α₁ m α₂ β₂) m (β₁ × β₂)}
     (h : Option.SomeLtNone.lt emptyRelation it'.internalState.memoizedLeft it.internalState.memoizedLeft) :
-    Zip.Rel₃ m it' it :=
-  Prod.Lex.left _ _ h
+    Zip.Rel₃ m it' it := by
+  with_semireducible exact Prod.Lex.left _ _ h
 
 theorem Zip.rel₃_of_left [Productive α₁ m] [Productive α₂ m]
     {left' left : IterM (α := α₁) m β₁} {b} {right' right : IterM (α := α₂) m β₂}
     (h : left'.finitelyManySkips.Rel left.finitelyManySkips) :
-    Zip.Rel₃ m ⟨left', b, right'⟩ ⟨left, b, right⟩ :=
-  Prod.Lex.right _ <| Prod.Lex.left _ _ h
+    Zip.Rel₃ m ⟨left', b, right'⟩ ⟨left, b, right⟩ := by
+  with_semireducible exact Prod.Lex.right _ <| Prod.Lex.left _ _ h
 
 theorem Zip.rel₃_of_right [Productive α₁ m] [Productive α₂ m]
     {left : IterM (α := α₁) m β₁} {b b' : _} {it' it : IterM (α := α₂) m β₂}
@@ -279,12 +285,13 @@ theorem Zip.rel₃_of_right [Productive α₁ m] [Productive α₂ m]
     (h' : it'.finitelyManySkips.Rel it.finitelyManySkips) :
     Zip.Rel₃ m ⟨left, b', it'⟩ ⟨left, b, it⟩ := by
   cases h
-  exact Prod.Lex.right _ <| Prod.Lex.right _ h'
+  with_semireducible exact Prod.Lex.right _ <| Prod.Lex.right _ h'
 
 def Zip.instProductivenessRelation [Monad m] [Productive α₁ m] [Productive α₂ m] :
     ProductivenessRelation (Zip α₁ m α₂ β₂) m where
   Rel := Zip.Rel₃ m
   wf := by
+    with_semireducible
     apply InvImage.wf
     refine ⟨fun (a, b) => Prod.lexAccessible (WellFounded.apply ?_ a) (WellFounded.apply ?_) b⟩
     · apply Option.SomeLtNone.wellFounded_lt
@@ -293,6 +300,7 @@ def Zip.instProductivenessRelation [Monad m] [Productive α₁ m] [Productive α
       · exact WellFoundedRelation.wf
       · exact WellFoundedRelation.wf
   subrelation {it it'} h := by
+    with_semireducible
     cases h
     case yieldLeft hm it' out hp =>
       apply Zip.rel₃_of_memoizedLeft

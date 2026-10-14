@@ -125,6 +125,7 @@ theorem denote_blastVar (aig : AIG BVBit) (var : BVVar w) (assign : Assignment) 
         ⟦(blastVar aig var).aig, (blastVar aig var).vec.get idx hidx, assign.toAIGAssignment⟧
           =
         ((BVExpr.var (w := w) var.ident).eval assign).getLsbD idx := by
+  with_semireducible
   intros
   apply blastVar.go_denote_eq
   omega

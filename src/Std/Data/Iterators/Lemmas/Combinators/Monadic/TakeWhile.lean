@@ -9,6 +9,8 @@ prelude
 public import Std.Data.Iterators.Combinators.Monadic.TakeWhile
 public import Std.Data.Iterators.Lemmas.Consumers.Monadic
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std

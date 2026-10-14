@@ -11,6 +11,8 @@ public import Std.Data.ExtTreeMap.Basic
 public import Std.Internal.ForIn.Basic
 import Init.Data.List.Pairwise
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 /-!

@@ -602,33 +602,47 @@ It's the sync version of `Broadcast.Receiver`.
 -/
 @[expose] def Sync.Receiver (α : Type) : Type := Broadcast.Receiver α
 
+/--
+This function is a no-op and just a convenient way to expose the synchronous API of the broadcast.
+-/
+@[inline]
+def sync (ch : Broadcast α) : Sync α := smartCast
+
 namespace Sync
+
+/-- The asynchronous API of the broadcast. -/
+@[inline]
+def toBroadcast (ch : Sync α) : Broadcast α := smartCast
 
 @[inherit_doc Broadcast.new, inline]
 def new (capacity : Nat := 16) (h : capacity > 0 := by decide) : BaseIO (Sync α) :=
-  Broadcast.new capacity h
+  Broadcast.sync <$> Broadcast.new capacity h
 
 @[inherit_doc Broadcast.trySend, inline]
 def trySend (ch : Sync α) (v : α) : BaseIO (Option Nat) :=
-  Broadcast.trySend ch v
+  Broadcast.trySend ch.toBroadcast v
 
 /--
 Send a value through the channel, blocking until the transmission could be completed.
 -/
 @[inline]
 def send (ch : Sync α) (v : α) : IO Nat := do
-  IO.ofExcept =<< IO.wait (← Broadcast.send ch v)
+  IO.ofExcept =<< IO.wait (← Broadcast.send ch.toBroadcast v)
 
 namespace Receiver
 
+/-- The asynchronous API of the receiver. -/
+@[inline]
+def toReceiver (ch : Sync.Receiver α) : Broadcast.Receiver α := smartCast
+
 @[inherit_doc Broadcast.Receiver.tryRecv, inline]
-def tryRecv (ch : Sync.Receiver α) : BaseIO (Option α) := Broadcast.Receiver.tryRecv ch
+def tryRecv (ch : Sync.Receiver α) : BaseIO (Option α) := Broadcast.Receiver.tryRecv ch.toReceiver
 
 /--
 Receive a value from the channel, blocking until the transmission could be completed.
 -/
 def recv [Inhabited α] (ch : Sync.Receiver α) : BaseIO (Option α) := do
-  IO.wait (← Broadcast.Receiver.recv ch)
+  IO.wait (← Broadcast.Receiver.recv ch.toReceiver)
 
 partial def forIn [Inhabited α] [Monad m] [MonadLiftT BaseIO m]
     (ch : Sync.Receiver α) (f : α → β → m (ForInStep β)) : β → m β := fun b => do

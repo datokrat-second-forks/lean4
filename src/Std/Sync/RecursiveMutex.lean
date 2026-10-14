@@ -21,7 +21,7 @@ If you want to guard shared state, use `RecursiveMutex α` instead.
 -/
 def BaseRecursiveMutex : Type := RecursiveMutexImpl.type
 
-instance : Nonempty BaseRecursiveMutex := by exact RecursiveMutexImpl.property
+instance : Nonempty BaseRecursiveMutex := by with_semireducible exact RecursiveMutexImpl.property
 
 /-- Creates a new `BaseRecursiveMutex`. -/
 @[extern "lean_io_baserecmutex_new"]

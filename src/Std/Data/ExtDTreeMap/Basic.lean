@@ -202,6 +202,7 @@ def isEmpty (t : ExtDTreeMap α β cmp) : Bool :=
 
 @[simp, grind =]
 theorem isEmpty_iff {t : ExtDTreeMap α β cmp} [TransCmp cmp] : t.isEmpty ↔ t = ∅ := by
+  with_semireducible
   rcases t with ⟨⟨t⟩⟩
   refine t.equiv_empty_iff_isEmpty.symm.trans ?_
   exact ⟨fun h => sound h, exact⟩
@@ -221,7 +222,7 @@ def get? [TransCmp cmp] [LawfulEqCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) :
 
 @[inline, inherit_doc DTreeMap.get]
 def get [TransCmp cmp] [LawfulEqCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) (h : a ∈ t) : β a :=
-  t.pliftOn (fun m h' => m.get a (h' ▸ h :))
+  t.pliftOn (fun m h' => m.get a (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.get_eq)
 
 @[inline, inherit_doc DTreeMap.get!]
@@ -238,7 +239,7 @@ def getKey? [TransCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) : Option α :=
 
 @[inline, inherit_doc DTreeMap.getKey]
 def getKey [TransCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) (h : a ∈ t) : α :=
-  t.pliftOn (fun m h' => m.getKey a (h' ▸ h :))
+  t.pliftOn (fun m h' => m.getKey a (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.getKey_eq)
 
 @[inline, inherit_doc DTreeMap.getKey!]
@@ -255,7 +256,7 @@ def minEntry? [TransCmp cmp] (t : ExtDTreeMap α β cmp) : Option ((a : α) × �
 
 @[inline, inherit_doc DTreeMap.minEntry]
 def minEntry [TransCmp cmp] (t : ExtDTreeMap α β cmp) (h : t ≠ ∅) : (a : α) × β a :=
-  t.pliftOn (fun m h' => m.minEntry (h' ▸ isEmpty_eq_false_iff.mpr h :))
+  t.pliftOn (fun m h' => m.minEntry (by with_semireducible exact (h' ▸ isEmpty_eq_false_iff.mpr h :)))
     (fun _ _ _ _ h => h.minEntry_eq)
 
 @[inline, inherit_doc DTreeMap.minEntry!]
@@ -272,7 +273,7 @@ def maxEntry? [TransCmp cmp] (t : ExtDTreeMap α β cmp) : Option ((a : α) × �
 
 @[inline, inherit_doc DTreeMap.maxEntry]
 def maxEntry [TransCmp cmp] (t : ExtDTreeMap α β cmp) (h : t ≠ ∅) : (a : α) × β a :=
-  t.pliftOn (fun m h' => m.maxEntry (h' ▸ isEmpty_eq_false_iff.mpr h :))
+  t.pliftOn (fun m h' => m.maxEntry (by with_semireducible exact (h' ▸ isEmpty_eq_false_iff.mpr h :)))
     (fun _ _ _ _ h => h.maxEntry_eq)
 
 @[inline, inherit_doc DTreeMap.maxEntry!]
@@ -289,7 +290,7 @@ def minKey? [TransCmp cmp] (t : ExtDTreeMap α β cmp) : Option α :=
 
 @[inline, inherit_doc DTreeMap.minKey]
 def minKey [TransCmp cmp] (t : ExtDTreeMap α β cmp) (h : t ≠ ∅) : α :=
-  t.pliftOn (fun m h' => m.minKey (h' ▸ isEmpty_eq_false_iff.mpr h :))
+  t.pliftOn (fun m h' => m.minKey (by with_semireducible exact (h' ▸ isEmpty_eq_false_iff.mpr h :)))
     (fun _ _ _ _ h => h.minKey_eq)
 
 @[inline, inherit_doc DTreeMap.minKey!]
@@ -306,7 +307,7 @@ def maxKey? [TransCmp cmp] (t : ExtDTreeMap α β cmp) : Option α :=
 
 @[inline, inherit_doc DTreeMap.maxKey]
 def maxKey [TransCmp cmp] (t : ExtDTreeMap α β cmp) (h : t ≠ ∅) : α :=
-  t.pliftOn (fun m h' => m.maxKey (h' ▸ isEmpty_eq_false_iff.mpr h :))
+  t.pliftOn (fun m h' => m.maxKey (by with_semireducible exact (h' ▸ isEmpty_eq_false_iff.mpr h :)))
     (fun _ _ _ _ h => h.maxKey_eq)
 
 @[inline, inherit_doc DTreeMap.maxKey!]
@@ -323,7 +324,7 @@ def entryAtIdx? [TransCmp cmp] (t : ExtDTreeMap α β cmp) (n : Nat) : Option ((
 
 @[inline, inherit_doc DTreeMap.entryAtIdx]
 def entryAtIdx [TransCmp cmp] (t : ExtDTreeMap α β cmp) (n : Nat) (h : n < t.size) : (a : α) × β a :=
-  t.pliftOn (fun m h' => m.entryAtIdx n (h' ▸ h :))
+  t.pliftOn (fun m h' => m.entryAtIdx n (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.entryAtIdx_eq)
 
 @[inline, inherit_doc DTreeMap.entryAtIdx!]
@@ -341,7 +342,7 @@ def keyAtIdx? [TransCmp cmp] (t : ExtDTreeMap α β cmp) (n : Nat) : Option α :
 
 @[inline, inherit_doc DTreeMap.keyAtIdx]
 def keyAtIdx [TransCmp cmp] (t : ExtDTreeMap α β cmp) (n : Nat) (h : n < t.size) : α :=
-  t.pliftOn (fun m h' => m.keyAtIdx n (h' ▸ h :))
+  t.pliftOn (fun m h' => m.keyAtIdx n (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.keyAtIdx_eq)
 
 @[inline, inherit_doc DTreeMap.keyAtIdx!]
@@ -371,25 +372,25 @@ def getEntryLT? [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) : Option ((a
 @[inline, inherit_doc DTreeMap.getEntryGE]
 def getEntryGE [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) :
     (a : α) × β a :=
-  t.pliftOn (fun m h' => m.getEntryGE k (h' ▸ h :))
+  t.pliftOn (fun m h' => m.getEntryGE k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.getEntryGE_eq)
 
 @[inline, inherit_doc DTreeMap.getEntryGT]
 def getEntryGT [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) :
     (a : α) × β a :=
-  t.pliftOn (fun m h' => m.getEntryGT k (h' ▸ h :))
+  t.pliftOn (fun m h' => m.getEntryGT k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.getEntryGT_eq)
 
 @[inline, inherit_doc DTreeMap.getEntryLE]
 def getEntryLE [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) :
     (a : α) × β a :=
-  t.pliftOn (fun m h' => m.getEntryLE k (h' ▸ h :))
+  t.pliftOn (fun m h' => m.getEntryLE k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.getEntryLE_eq)
 
 @[inline, inherit_doc DTreeMap.getEntryLT]
 def getEntryLT [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) :
     (a : α) × β a :=
-  t.pliftOn (fun m h' => m.getEntryLT k (h' ▸ h :))
+  t.pliftOn (fun m h' => m.getEntryLT k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.getEntryLT_eq)
 
 @[inline, inherit_doc DTreeMap.getEntryGE!]
@@ -442,22 +443,22 @@ def getKeyLT? [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) : Option α :=
 
 @[inline, inherit_doc DTreeMap.getKeyGE]
 def getKeyGE [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) : α :=
-  t.pliftOn (fun m h' => m.getKeyGE k (h' ▸ h :))
+  t.pliftOn (fun m h' => m.getKeyGE k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.getKeyGE_eq)
 
 @[inline, inherit_doc DTreeMap.getKeyGT]
 def getKeyGT [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) : α :=
-  t.pliftOn (fun m h' => m.getKeyGT k (h' ▸ h :))
+  t.pliftOn (fun m h' => m.getKeyGT k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.getKeyGT_eq)
 
 @[inline, inherit_doc DTreeMap.getKeyLE]
 def getKeyLE [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) : α :=
-  t.pliftOn (fun m h' => m.getKeyLE k (h' ▸ h :))
+  t.pliftOn (fun m h' => m.getKeyLE k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.getKeyLE_eq)
 
 @[inline, inherit_doc DTreeMap.getKeyLT]
 def getKeyLT [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) : α :=
-  t.pliftOn (fun m h' => m.getKeyLT k (h' ▸ h :))
+  t.pliftOn (fun m h' => m.getKeyLT k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.getKeyLT_eq)
 
 @[inline, inherit_doc DTreeMap.getKeyGE!]
@@ -517,7 +518,7 @@ def get? [TransCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) : Option β :=
 
 @[inline, inherit_doc ExtDTreeMap.get]
 def get [TransCmp cmp] (t : ExtDTreeMap α β cmp) (a : α) (h : a ∈ t) : β :=
-  t.pliftOn (fun m h' => DTreeMap.Const.get m a (h' ▸ h :))
+  t.pliftOn (fun m h' => DTreeMap.Const.get m a (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.constGet_eq)
 
 @[inline, inherit_doc ExtDTreeMap.get!]
@@ -537,7 +538,7 @@ def minEntry? [TransCmp cmp] (t : ExtDTreeMap α β cmp) : Option (α × β) :=
 
 @[inline, inherit_doc ExtDTreeMap.minEntry]
 def minEntry [TransCmp cmp] (t : ExtDTreeMap α β cmp) (h : t ≠ ∅) : α × β :=
-  t.pliftOn (fun m h' => DTreeMap.Const.minEntry m (h' ▸ isEmpty_eq_false_iff.mpr h :))
+  t.pliftOn (fun m h' => DTreeMap.Const.minEntry m (by with_semireducible exact (h' ▸ isEmpty_eq_false_iff.mpr h :)))
     (fun _ _ _ _ h => h.constMinEntry_eq)
 
 @[inline, inherit_doc ExtDTreeMap.minEntry!]
@@ -557,7 +558,7 @@ def maxEntry? [TransCmp cmp] (t : ExtDTreeMap α β cmp) : Option (α × β) :=
 
 @[inline, inherit_doc ExtDTreeMap.maxEntry]
 def maxEntry [TransCmp cmp] (t : ExtDTreeMap α β cmp) (h : t ≠ ∅) : α × β :=
-  t.pliftOn (fun m h' => DTreeMap.Const.maxEntry m (h' ▸ isEmpty_eq_false_iff.mpr h :))
+  t.pliftOn (fun m h' => DTreeMap.Const.maxEntry m (by with_semireducible exact (h' ▸ isEmpty_eq_false_iff.mpr h :)))
     (fun _ _ _ _ h => h.constMaxEntry_eq)
 
 @[inline, inherit_doc ExtDTreeMap.maxEntry!]
@@ -577,7 +578,7 @@ def entryAtIdx? [TransCmp cmp] (t : ExtDTreeMap α β cmp) (n : Nat) : Option (�
 
 @[inline, inherit_doc ExtDTreeMap.entryAtIdx]
 def entryAtIdx [TransCmp cmp] (t : ExtDTreeMap α β cmp) (n : Nat) (h : n < t.size) : α × β :=
-  t.pliftOn (fun m h' => DTreeMap.Const.entryAtIdx m n (h' ▸ h :))
+  t.pliftOn (fun m h' => DTreeMap.Const.entryAtIdx m n (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.constEntryAtIdx_eq)
 
 @[inline, inherit_doc ExtDTreeMap.entryAtIdx!]
@@ -614,25 +615,25 @@ def getEntryLT? [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) : Option (α
 @[inline, inherit_doc ExtDTreeMap.getEntryGE]
 def getEntryGE [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isGE) :
     α × β :=
-  t.pliftOn (fun m h' => DTreeMap.Const.getEntryGE m k (h' ▸ h :))
+  t.pliftOn (fun m h' => DTreeMap.Const.getEntryGE m k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.constGetEntryGE_eq)
 
 @[inline, inherit_doc ExtDTreeMap.getEntryGT]
 def getEntryGT [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .gt) :
     α × β :=
-  t.pliftOn (fun m h' => DTreeMap.Const.getEntryGT m k (h' ▸ h :))
+  t.pliftOn (fun m h' => DTreeMap.Const.getEntryGT m k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.constGetEntryGT_eq)
 
 @[inline, inherit_doc ExtDTreeMap.getEntryLE]
 def getEntryLE [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, (cmp a k).isLE) :
     α × β :=
-  t.pliftOn (fun m h' => DTreeMap.Const.getEntryLE m k (h' ▸ h :))
+  t.pliftOn (fun m h' => DTreeMap.Const.getEntryLE m k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.constGetEntryLE_eq)
 
 @[inline, inherit_doc ExtDTreeMap.getEntryLT]
 def getEntryLT [TransCmp cmp] (t : ExtDTreeMap α β cmp) (k : α) (h : ∃ a ∈ t, cmp a k = .lt) :
     α × β :=
-  t.pliftOn (fun m h' => DTreeMap.Const.getEntryLT m k (h' ▸ h :))
+  t.pliftOn (fun m h' => DTreeMap.Const.getEntryLT m k (by with_semireducible exact (h' ▸ h :)))
     (fun _ _ _ _ h => h.constGetEntryLT_eq)
 
 @[inline, inherit_doc ExtDTreeMap.getEntryGE!]
@@ -928,10 +929,11 @@ instance [LawfulEqCmp cmp] [TransCmp cmp] [∀ k, BEq (β k)] : BEq (ExtDTreeMap
   beq := lift₂ (fun x y : DTreeMap α β cmp => x.beq y) fun _ _ _ _ => DTreeMap.Equiv.beq_congr
 
 instance [LawfulEqCmp cmp] [TransCmp cmp] [∀ k, BEq (β k)] [∀ k, ReflBEq (β k)] : ReflBEq (ExtDTreeMap α β cmp) where
-  rfl {a} := a.inductionOn fun _ => DTreeMap.Equiv.beq <| DTreeMap.Equiv.rfl
+  rfl {a} := a.inductionOn fun _ => by
+    with_semireducible exact DTreeMap.Equiv.beq <| DTreeMap.Equiv.rfl
 
 instance [LawfulEqCmp cmp] [TransCmp cmp] [∀ k, BEq (β k)] [∀ k, LawfulBEq (β k)] : LawfulBEq (ExtDTreeMap α β cmp) where
-  eq_of_beq {a} {b} := a.inductionOn₂ b fun _ _ h => sound <| DTreeMap.equiv_of_beq h
+  eq_of_beq {a} {b} := a.inductionOn₂ b fun _ _ h => sound <| DTreeMap.equiv_of_beq (by with_semireducible exact h)
 
 instance {α : Type u} {β : α → Type v} {cmp : α → α → Ordering} [TransCmp cmp] [LawfulEqCmp cmp] [∀ k, BEq (β k)] [∀ k, LawfulBEq (β k)] : DecidableEq (ExtDTreeMap α β cmp) :=
   fun _ _ => decidable_of_iff _ beq_iff_eq
@@ -945,10 +947,10 @@ def beq [TransCmp cmp] [BEq β] (m₁ m₂ : ExtDTreeMap α (fun _ => β) cmp) :
   (fun _ _ _ _ => DTreeMap.Const.Equiv.beq_congr) m₁ m₂
 
 theorem beq_of_eq [TransCmp cmp] [BEq β] [ReflBEq β] (m₁ m₂ : ExtDTreeMap α (fun _ => β) cmp) : m₁ = m₂ → Const.beq m₁ m₂ :=
-  m₁.inductionOn₂ m₂ fun _ _ h => DTreeMap.Const.Equiv.beq <| exact h
+  m₁.inductionOn₂ m₂ fun _ _ h => by with_semireducible exact DTreeMap.Const.Equiv.beq <| exact h
 
 theorem eq_of_beq [TransCmp cmp] [LawfulEqCmp cmp] [BEq β] [LawfulBEq β] (m₁ m₂ : ExtDTreeMap α (fun _ => β) cmp) : Const.beq m₁ m₂ → m₁ = m₂ :=
-  m₁.inductionOn₂ m₂ fun _ _ h => sound <| DTreeMap.Const.equiv_of_beq h
+  m₁.inductionOn₂ m₂ fun _ _ h => sound <| DTreeMap.Const.equiv_of_beq (by with_semireducible exact h)
 
 end Const
 @[inline, inherit_doc DTreeMap.diff]

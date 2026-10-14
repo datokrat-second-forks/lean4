@@ -9,6 +9,8 @@ prelude
 public import Init.Data.Iterators.Lemmas.Combinators.Monadic.FilterMap
 public import Std.Data.Iterators.Lemmas.Equivalence.StepCongr
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std

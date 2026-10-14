@@ -157,7 +157,7 @@ or `none` if the timestamp precedes all transitions.
 -/
 def findTransitionIndexForTimestamp (transitions : Array Transition) (timestamp : Timestamp) : Option Nat :=
   let value := timestamp.toSecondsSinceUnixEpoch
-  match transitions.findIdx? (fun t => t.time.val > value.val) with
+  match transitions.findIdx? (fun t => t.time.toUnitVal.val > value.toUnitVal.val) with
   | some 0 => none
   | some i => some (i - 1)
   | none => if transitions.isEmpty then none else some (transitions.size - 1)

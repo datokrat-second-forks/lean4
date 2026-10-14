@@ -16,6 +16,8 @@ import Init.Data.Iterators.Lemmas.Consumers.Collect
 import Init.Data.List.Nat.TakeDrop
 import Init.Data.Option.Lemmas
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std

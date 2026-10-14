@@ -86,7 +86,7 @@ instance : AIG.LawfulVecOperator α AIG.ShiftTarget blastShiftLeftConst where
     apply blastShiftLeftConst.go_le_size
   decl_eq := by
     intros
-    unfold blastShiftLeftConst
+    unfold blastShiftLeftConst at *
     apply blastShiftLeftConst.go_decl_eq
 
 namespace blastShiftLeft

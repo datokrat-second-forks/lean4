@@ -10,6 +10,8 @@ public import Std.Do.WP.Monad
 public import Std.Do.Internal.Ensures
 public import Init.Control.Lawful.MonadAttach.Instances
 
+set_option elaborator.implicitTransparency false
+
 set_option linter.missingDocs true
 
 /-!

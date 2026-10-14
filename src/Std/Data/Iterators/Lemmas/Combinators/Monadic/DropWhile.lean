@@ -10,6 +10,8 @@ public import Std.Data.Iterators.Combinators.Monadic.DropWhile
 public import Init.Data.Iterators.Lemmas.Consumers.Monadic
 import Init.Data.Bool
 
+set_option elaborator.implicitTransparency false
+
 @[expose] public section
 
 namespace Std

@@ -39,6 +39,7 @@ def AssocListIterator.finitenessRelation :
   Rel := InvImage WellFoundedRelation.rel (AssocListIterator.l ∘ IterM.internalState)
   wf := InvImage.wf _ WellFoundedRelation.wf
   subrelation {it it'} h := by
+    with_semireducible
     simp_wf
     obtain ⟨step, h, h'⟩ := h
     cases step <;> simp_all [IterStep.successor, IterM.IsPlausibleStep, Iterator.IsPlausibleStep, instIteratorAssocListIteratorIdSigma] -- TODO

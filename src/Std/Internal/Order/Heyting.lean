@@ -51,6 +51,7 @@ theorem meet_himp_le {a b : α} [PreservesSup (meet a)] : a ⊓ (a ⇨ b) ⊑ b 
   unfold himp; exact PreservesSup.upperAdjoint_le (meet a) b
 
 theorem himp_prop_eq_imp (a b : Prop) : ((a ⇨ b : Prop) = (a → b)) := by
+  with_semireducible
   apply propext
   constructor
   · intro hab

@@ -8,6 +8,8 @@ module
 prelude
 public import Std.Do.WP
 
+set_option elaborator.implicitTransparency false
+
 set_option linter.missingDocs true
 
 @[expose] public section

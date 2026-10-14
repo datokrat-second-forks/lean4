@@ -31,6 +31,7 @@ theorem relabel_id_map (decl : Decl α) : relabel id decl = decl := by
 
 theorem relabel_comp (decl : Decl α) (g : α → β) (h : β → γ) :
     relabel (h ∘ g) decl = relabel h (relabel g decl) := by
+  with_semireducible
   cases decl <;> rfl
 
 theorem relabel_false {decls : Array (Decl α)} {r : α → β} {hidx : idx < decls.size}
@@ -84,6 +85,7 @@ def relabel (r : α → β) (aig : AIG α) (hinj : ∀ x y, x ∈ aig → y ∈ 
     decls,
     cache := Cache.ofAtoms decls huniq,
     hdag := by
+      with_semireducible
       intro idx lhs rhs hbound hgate
       simp +zetaDelta at hgate
       have := Decl.relabel_gate hgate
@@ -96,23 +98,24 @@ def relabel (r : α → β) (aig : AIG α) (hinj : ∀ x y, x ∈ aig → y ∈ 
 @[simp]
 theorem relabel_size_eq_size {aig : AIG α} {r : α → β} {hinj} :
     (aig.relabel r hinj).decls.size = aig.decls.size := by
+  with_semireducible
   simp [relabel]
 
 theorem relabel_false {aig : AIG α} {r : α → β} {hinj} {hidx : idx < (relabel r aig hinj).decls.size}
     (h : (relabel r aig hinj).decls[idx]'hidx = .false) :
-    aig.decls[idx]'(by rw [← relabel_size_eq_size (r := r) (hinj := hinj)]; omega) = .false := by
+    aig.decls[idx]'(by with_semireducible rw [← relabel_size_eq_size (r := r) (hinj := hinj)]; omega) = .false := by
   apply Decl.relabel_false
   simpa [relabel] using h
 
 theorem relabel_atom {aig : AIG α} {r : α → β} {hinj} {hidx : idx < (relabel r aig hinj).decls.size}
     (h : (relabel r aig hinj).decls[idx]'hidx = .atom a) :
-    ∃ x, aig.decls[idx]'(by rw [← relabel_size_eq_size (r := r) (hinj := hinj)]; omega) = .atom x ∧ a = r x := by
+    ∃ x, aig.decls[idx]'(by with_semireducible rw [← relabel_size_eq_size (r := r) (hinj := hinj)]; omega) = .atom x ∧ a = r x := by
   apply Decl.relabel_atom
   simpa [relabel] using h
 
 theorem relabel_gate {aig : AIG α} {r : α → β} {hinj} {hidx : idx < (relabel r aig hinj).decls.size}
     (h : (relabel r aig hinj).decls[idx]'hidx = .gate lhs rhs) :
-    aig.decls[idx]'(by rw [← relabel_size_eq_size (r := r) (hinj := hinj)]; omega) = .gate lhs rhs := by
+    aig.decls[idx]'(by with_semireducible rw [← relabel_size_eq_size (r := r) (hinj := hinj)]; omega) = .gate lhs rhs := by
   apply Decl.relabel_gate
   simpa [relabel] using h
 
@@ -121,7 +124,8 @@ theorem denote_relabel (aig : AIG α) (r : α → β) {hinj} (start : Nat) {hidx
     (assign : β → Bool) :
     ⟦aig.relabel r hinj, ⟨start, invert, hidx⟩, assign⟧
       =
-    ⟦aig, ⟨start, invert, by rw [← relabel_size_eq_size (r := r) (hinj := hinj)]; omega⟩, (assign ∘ r)⟧ := by
+    ⟦aig, ⟨start, invert, by with_semireducible rw [← relabel_size_eq_size (r := r) (hinj := hinj)]; omega⟩, (assign ∘ r)⟧ := by
+  with_semireducible
   apply denote_idx_trichotomy
   · intro heq1
     have heq2 := relabel_false heq1
@@ -143,6 +147,7 @@ theorem denote_relabel (aig : AIG α) (r : α → β) {hinj} (start : Nat) {hidx
 
 theorem unsat_relabel {aig : AIG α} (r : α → β) {hinj} {hidx} :
     aig.UnsatAt idx invert hidx → (aig.relabel r hinj).UnsatAt idx invert (by simp [hidx]) := by
+  with_semireducible
   intro h assign
   specialize h (assign ∘ r)
   simp [h]
@@ -151,6 +156,7 @@ theorem relabel_unsat_iff_of_not_Nonempty {aig : AIG α}
     {r : α → β} {hinj} {hidx1} {hidx2}
     (hNonempty : ¬ Nonempty α) :
     (aig.relabel r hinj).UnsatAt idx invert hidx1 ↔ aig.UnsatAt idx invert hidx2 := by
+  with_semireducible
   constructor
   · intro hα assignα
     let assignβ : β → Bool := fun b => false
@@ -164,6 +170,7 @@ theorem relabel_unsat_iff_of_not_Nonempty {aig : AIG α}
 theorem relabel_unsat_iff_of_Nonempty [Nonempty α] {aig : AIG α} {r : α → β} {hinj} {hidx1}
     {hidx2} :
     (aig.relabel r hinj).UnsatAt idx invert hidx1 ↔ aig.UnsatAt idx invert hidx2 := by
+  with_semireducible
   constructor
   · intro h assign
     let g : β → α := fun b =>
@@ -191,6 +198,7 @@ theorem relabel_unsat_iff_of_Nonempty [Nonempty α] {aig : AIG α} {r : α → �
 -/
 theorem relabel_unsat_iff {aig : AIG α} {r : α → β} {hinj} {hidx1} {hidx2} :
     (aig.relabel r hinj).UnsatAt idx invert hidx1 ↔ aig.UnsatAt idx invert hidx2 := by
+  with_semireducible
   by_cases hαNonempty : Nonempty α
   · apply relabel_unsat_iff_of_Nonempty
   · apply relabel_unsat_iff_of_not_Nonempty hαNonempty
@@ -207,10 +215,12 @@ def relabel (r : α → β) (entry : Entrypoint α)
 @[simp]
 theorem relabel_size_eq {entry : Entrypoint α} {r : α → β} {hinj} :
     (entry.relabel r hinj).aig.decls.size = entry.aig.decls.size := by
+  with_semireducible
   simp [relabel]
 
 theorem relabel_unsat_iff {entry : Entrypoint α} {r : α → β} {hinj} :
     (entry.relabel r hinj).Unsat ↔ entry.Unsat := by
+  with_semireducible
   simp [relabel, Unsat]
   rw [AIG.relabel_unsat_iff]
 

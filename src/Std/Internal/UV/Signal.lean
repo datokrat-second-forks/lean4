@@ -31,7 +31,7 @@ of all functions on `Signal`s.
 -/
 def Signal : Type := SignalImpl.type
 
-instance : Nonempty Signal := by exact SignalImpl.property
+instance : Nonempty Signal := by with_semireducible exact SignalImpl.property
 
 namespace Signal
 

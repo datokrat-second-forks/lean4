@@ -16,6 +16,8 @@ import all Std.Data.DHashMap.Internal.Defs
 import Std.Data.DHashMap.RawLemmas
 import Std.Data.DHashMap.Lemmas
 
+set_option elaborator.implicitTransparency false
+
 namespace Std.DHashMap.Internal.AssocList
 open Std.Iterators
 

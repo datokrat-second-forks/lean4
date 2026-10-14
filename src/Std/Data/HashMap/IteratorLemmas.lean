@@ -15,6 +15,8 @@ import Std.Data.HashMap.RawLemmas
 import Std.Data.HashMap.Lemmas
 import all Std.Data.DHashMap.Basic
 
+set_option elaborator.implicitTransparency false
+
 namespace Std.HashMap.Raw
 open Std.Iterators
 

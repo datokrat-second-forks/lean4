@@ -172,7 +172,7 @@ def get? [LawfulEqCmp cmp] (t : Raw α β cmp) (a : α) : Option (β a) :=
 
 @[inline, inherit_doc DTreeMap.get]
 def get [LawfulEqCmp cmp] (t : Raw α β cmp) (a : α) (h : a ∈ t) : β a :=
-  letI : Ord α := ⟨cmp⟩; t.inner.get a h
+  letI : Ord α := ⟨cmp⟩; t.inner.get a (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.get!]
 def get! [LawfulEqCmp cmp] (t : Raw α β cmp) (a : α) [Inhabited (β a)]  : β a :=
@@ -188,7 +188,7 @@ def getEntry? (t : Raw α β cmp) (a : α) : Option ((a : α) × β a) :=
 
 @[inline, inherit_doc DTreeMap.getEntry]
 def getEntry [LawfulEqCmp cmp] (t : Raw α β cmp) (a : α) (h : a ∈ t) : (a : α) × β a :=
-  letI : Ord α := ⟨cmp⟩; t.inner.getEntry a h
+  letI : Ord α := ⟨cmp⟩; t.inner.getEntry a (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.getEntry!]
 def getEntry! [Inhabited ((a : α) × β a)](t : Raw α β cmp) (a : α) : (a : α) × β a :=
@@ -204,7 +204,7 @@ def getKey? (t : Raw α β cmp) (a : α) : Option α :=
 
 @[inline, inherit_doc DTreeMap.getKey]
 def getKey (t : Raw α β cmp) (a : α) (h : a ∈ t) : α :=
-  letI : Ord α := ⟨cmp⟩; t.inner.getKey a h
+  letI : Ord α := ⟨cmp⟩; t.inner.getKey a (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.getKey!]
 def getKey! [Inhabited α] (t : Raw α β cmp) (a : α) : α :=
@@ -430,7 +430,7 @@ def get? (t : Raw α β cmp) (a : α) : Option β :=
 
 @[inline, inherit_doc DTreeMap.Const.get]
 def get (t : Raw α β cmp) (a : α) (h : a ∈ t) : β :=
-  letI : Ord α := ⟨cmp⟩; Impl.Const.get t.inner a h
+  letI : Ord α := ⟨cmp⟩; Impl.Const.get t.inner a (by with_semireducible exact h)
 
 @[inline, inherit_doc DTreeMap.Const.get!]
 def get! [Inhabited β] (t : Raw α β cmp) (a : α) : β :=

@@ -16,6 +16,8 @@ import Init.Data.Array.Bootstrap
 import Init.Data.List.Nat.TakeDrop
 import Init.Data.List.TakeDrop
 
+set_option elaborator.implicitTransparency false
+
 public section
 
 /-!
