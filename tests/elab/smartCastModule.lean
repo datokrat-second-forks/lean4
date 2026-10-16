@@ -19,7 +19,7 @@ to
   Decidable (Mem xs x)
 in the public scope because the types are definitionally equal at `default` transparency only in the private scope
 
-Hint: Mark the declaration `@[no_expose]`, or expose the definitions that need to be unfolded.
+Hint: Expose the definitions that need to be unfolded, or make the declaration `private` if it is only used in this module.
 -/
 #guard_msgs in
 instance instDecidableMemExposed {xs : List Nat} {x : Nat} : Decidable (Mem xs x) :=
@@ -53,7 +53,7 @@ to
   Decidable (Mem xs x)
 in the public scope because the types are definitionally equal at `default` transparency only in the private scope
 
-Hint: Mark the declaration `@[no_expose]`, or expose the definitions that need to be unfolded.
+Hint: Expose the definitions that need to be unfolded, or make the declaration `private` if it is only used in this module.
 -/
 #guard_msgs in
 @[expose] def decMemExposed (xs : List Nat) (x : Nat) : Decidable (Mem xs x) :=
@@ -73,7 +73,7 @@ to
   NatList
 in the public scope because the types are definitionally equal at `default` transparency only in the private scope
 
-Hint: Mark the declaration `@[no_expose]`, or expose the definitions that need to be unfolded.
+Hint: Expose the definitions that need to be unfolded, or make the declaration `private` if it is only used in this module.
 -/
 #guard_msgs in
 @[expose] noncomputable def NatList.ofListExposed (xs : List Nat) : NatList := smartCast

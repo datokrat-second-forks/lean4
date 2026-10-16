@@ -2757,8 +2757,9 @@ def checkSmartCastTypes (α β : Expr) : MetaM Unit := do
   if (← isDefEqD α β) then return
   if (← getEnv).isExporting && (← withoutExporting <| isDefEqD α β) then
     throwError "cannot cast{indentExpr α}\nto{indentExpr β}\nin the public scope because the types \
-      are definitionally equal at `default` transparency only in the private scope{.hint' "Mark \
-      the declaration `@[no_expose]`, or expose the definitions that need to be unfolded."}"
+      are definitionally equal at `default` transparency only in the private scope{.hint' "Expose \
+      the definitions that need to be unfolded, or make the declaration `private` if it is only \
+      used in this module."}"
   throwError "cannot cast{indentExpr α}\nto{indentExpr β}\nbecause the types are not \
     definitionally equal at `default` transparency"
 
