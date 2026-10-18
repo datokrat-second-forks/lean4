@@ -866,8 +866,8 @@ That the types are definitionally equal at `default` transparency is checked whe
 containing the cast is added, in the public scope if the cast is exported; `h` can be any proof.
 
 Below `default` transparency, `smartCast` is not unfolded. Instead, the cast disappears when `α`
-and `β` agree at `implicit` transparency, and it is pushed into constructors, projections and
-applications.
+and `β` agree at `implicit` transparency, and it is pushed into constructors, `fun`s, projections
+and applications.
 -/
 @[macro_inline] def smartCast (α β : Sort u) (h : α = β) (a : α) : β :=
   cast h a

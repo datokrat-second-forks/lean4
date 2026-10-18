@@ -125,26 +125,16 @@ example (p : Nat × Nat) : (toMyNats p).1 = .ofNat p.1 := rfl
 example (p : Nat × Nat) : (toMyNats p).2 = .ofNat p.2 := rfl
 example (p : Nat × Nat) : toMyNats p = (.ofNat p.1, .ofNat p.2) := rfl
 
-/-! Functions: an applied cast is the cast of the application if the domains agree. -/
+/-!
+Functions: an applied cast is the cast of the application to the argument cast back to the source
+domain (more in `smartCastEta.lean`).
+-/
 
 def liftCod (h : Nat → Nat) : Nat → MyNat := smartCast
 def liftDom (h : Nat → Nat) : MyNat → Nat := smartCast
 
 example (h : Nat → Nat) (n : Nat) : liftCod h n = .ofNat (h n) := rfl
-
--- The domains do not agree, so the application stays stuck.
-/--
-error: Type mismatch
-  rfl
-has type
-  ?m.3 = ?m.3
-but is expected to have type
-  liftDom h (MyNat.ofNat n) = h n
--/
-#guard_msgs in
 example (h : Nat → Nat) (n : Nat) : liftDom h (.ofNat n) = h n := rfl
-
-example (h : Nat → Nat) (n : Nat) : liftDom h (.ofNat n) = h n := by with_semireducible rfl
 
 /-! Computation with semireducible definitions is opt-in. -/
 

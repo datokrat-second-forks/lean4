@@ -622,8 +622,10 @@ Below `default` transparency, `smartCast α β h a` is not unfolded. Instead:
   casts, the innermost source is compared with the outermost target;
 * it is pushed into a constructor application `a` if the constructor's leading binders are exactly
   the arguments of its result type;
+* it is pushed into a `fun` `a`, casting the bound variable back to the domain of `a`;
 * a projection of a cast is the cast of the projection;
-* an application of a cast is the cast of the application, if the domains agree at `implicit`.
+* an application of a cast is the cast of the application to the argument cast back to the source
+  domain.
 
 The rules do not look at `h`: they rely on `α` and `β` being definitionally equal wherever the cast
 is visible, which `addDecl` checks for every cast in a declaration, in the public scope if the cast
@@ -708,7 +710,15 @@ private def pushSmartCastIntoCtor? (β a : Expr) : MetaM (Option Expr) := do
     tgtType := tgtBody.instantiate1 newField
   return some <| mkAppN (mkConst ctorName lvls) newArgs
 
-/-- Regularity (also along a chain of casts), then pushing into a constructor. -/
+/-- Pushes a cast to `β` into the `fun` `a`, casting the bound variable back to the domain of `a`. -/
+private def pushSmartCastIntoLambda? (β a : Expr) : MetaM (Option Expr) := do
+  let .lam _ dom b _ := a | return none
+  let .forallE n dom' body' bi ← whnf β | return none
+  withLocalDecl n bi dom' fun x => do
+    let b := b.instantiate1 (← mkSmartCastIfNeeded dom' dom x)
+    mkLambdaFVars #[x] (← mkSmartCastIfNeeded (← inferType b) (body'.instantiate1 x) b)
+
+/-- Regularity (also along a chain of casts), then pushing into a constructor or a `fun`. -/
 private partial def reduceSmartCastCore? (α β a : Expr) : MetaM (Option Expr) := do
   if (← smartCastTypesAgree α β) then return some a
   go a
@@ -719,7 +729,7 @@ where
     | some (α₀, _, a₀) =>
       if (← smartCastTypesAgree α₀ β) then return some a₀
       go a₀
-    | none => pushSmartCastIntoCtor? β a
+    | none => if a.isLambda then pushSmartCastIntoLambda? β a else pushSmartCastIntoCtor? β a
 
 /--
 Reduces `e` if it is a cast, possibly applied to arguments. Does nothing at `default`
@@ -737,9 +747,9 @@ def reduceSmartCast? (e : Expr) : MetaM (Option Expr) := do
   if numArgs == 4 then return none
   let .forallE _ dom body _ ← whnf α | return none
   let .forallE _ dom' body' _ ← whnf β | return none
-  unless (← smartCastTypesAgree dom dom') do return none
   let x := args[4]!
-  let r ← mkSmartCastIfNeeded (body.instantiate1 x) (body'.instantiate1 x) (mkApp f x).headBeta
+  let x₀ ← mkSmartCastIfNeeded dom' dom x
+  let r ← mkSmartCastIfNeeded (body.instantiate1 x₀) (body'.instantiate1 x) (mkApp f x₀).headBeta
   return some (mkAppN r (args.extract 5 numArgs))
 
 /--
