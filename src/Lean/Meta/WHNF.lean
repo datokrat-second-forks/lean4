@@ -141,8 +141,6 @@ private def toCtorWhenK (recVal : RecursorVal) (major : Expr) : MetaM Expr := do
   let majorTypeI := majorType.getAppFn
   if !majorTypeI.isConstOf recVal.getMajorInduct then
     return major
-  else if majorType.hasExprMVar && majorType.getAppArgs[recVal.numParams...*].any Expr.hasExprMVar then
-    return major
   else do
     let (some newCtorApp) ← mkNullaryCtor majorType recVal.numParams | pure major
     let newType ← inferType newCtorApp
@@ -152,8 +150,11 @@ private def toCtorWhenK (recVal : RecursorVal) (major : Expr) : MetaM Expr := do
 
        We use `withNewMCtxDepth` to make sure metavariables at `majorType` are not assigned.
        For example, given `major : Eq ?x y`, we don't want to apply K by assigning `?x := y`.
+       A comparison stuck on such a metavariable leaves the recursor stuck instead of throwing
+       `isDefEqStuck`, which would abort, e.g., type class resolution.
     -/
-    if (← withAtLeastTransparency TransparencyMode.default <| withNewMCtxDepth <| isDefEq majorType newType) then
+    if (← withAtLeastTransparency TransparencyMode.default <| withNewMCtxDepth <|
+        withConfig ({ · with isDefEqStuckEx := false }) <| isDefEq majorType newType) then
       return newCtorApp
     else
       return major
