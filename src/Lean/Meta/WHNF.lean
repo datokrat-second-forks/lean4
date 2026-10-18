@@ -696,15 +696,9 @@ private def pushSmartCastIntoCtor? (β a : Expr) : MetaM (Option Expr) := do
   let mut tgtType ← instantiateForall ((ConstantInfo.ctorInfo ctorVal).instantiateTypeLevelParams lvls) newArgs
   for h : i in k...oldArgs.size do
     let .forallE _ srcDom srcBody _ := srcType | return none
-    let .forallE _ tgtDom tgtBody bi := tgtType | return none
+    let .forallE _ tgtDom tgtBody _ := tgtType | return none
     let field := oldArgs[i]
-    let newField ←
-      if (← smartCastTypesAgree srcDom tgtDom) then
-        pure field
-      else if bi.isInstImplicit then
-        return none
-      else
-        mkSmartCast srcDom tgtDom field
+    let newField ← mkSmartCastIfNeeded srcDom tgtDom field
     newArgs := newArgs.push newField
     srcType := srcBody.instantiate1 field
     tgtType := tgtBody.instantiate1 newField
@@ -765,14 +759,6 @@ where
     | some (α₀, _, a₀) => go α₀ a₀
     | none => return some (a, α)
 
-private def isInstImplicitField (ctorVal : ConstructorVal) (i : Nat) : Bool :=
-  go (ctorVal.numParams + i) ctorVal.type
-where
-  go : Nat → Expr → Bool
-    | 0, .forallE _ _ _ bi => bi.isInstImplicit
-    | m + 1, .forallE _ _ b _ => go m b
-    | _, _ => false
-
 /--
 Reduces `c.i` (`structName` projection `i`), where `c` is in weak head normal form, if `c` is a
 (chain of) cast(s) whose source is a `structName` structure.
@@ -785,10 +771,7 @@ partial def reduceSmartCastProj? (structName : Name) (i : Nat) (c : Expr) : Meta
   let src := Expr.proj structName i s
   let srcType ← inferType src
   let tgtType ← inferType (.proj structName i c)
-  if (← smartCastTypesAgree srcType tgtType) then return some src
-  let some ctorName ← getFirstCtor structName | return none
-  if isInstImplicitField (← getConstInfoCtor ctorName) i then return none
-  return some (← mkSmartCast srcType tgtType src)
+  return some (← mkSmartCastIfNeeded srcType tgtType src)
 where
   findSource? (α s : Expr) : MetaM (Option Expr) := do
     if (← whnf α).isAppOf structName then return some s
