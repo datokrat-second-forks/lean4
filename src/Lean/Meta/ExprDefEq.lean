@@ -1565,6 +1565,8 @@ private def isDeltaCandidate? (t : Expr) : MetaM (Option ConstantInfo) := do
     -- reduces it on a constructor application, just as it unfolds a real structure's projection
     -- function.
     if (← getVirtualProjInfo? c).isSome then return (← getEnv).find? c
+    -- Likewise for registered maps, which `unfoldDefinition?` reduces along cast functions.
+    if (← getCongrMapType? c).isSome then return (← getEnv).find? c
     return none
   | _ => pure none
 
@@ -2456,6 +2458,17 @@ private def isDefEqVirtualProj (t v : Expr) : MetaM Bool := do
   else
     return false
 
+/--
+Compares two stuck chains of maps along cast functions by their innermost arguments: the kernel
+reduces both chains to them.
+-/
+private def isDefEqCongrMap (t s : Expr) : MetaM Bool := do
+  let some x ← congrMapChainSource? t | return false
+  let some y ← congrMapChainSource? s | return false
+  checkpointDefEq do
+    Meta.isExprDefEqAux (← inferType x) (← inferType y) <&&>
+      Meta.isExprDefEqAux (← inferType t) (← inferType s) <&&> Meta.isExprDefEqAux x y
+
 private def isExprDefEqExpensive (t : Expr) (s : Expr) : MetaM Bool := do
   whenUndefDo (isDefEqEta t s) do
   whenUndefDo (isDefEqEta s t) do
@@ -2477,6 +2490,7 @@ private def isExprDefEqExpensive (t : Expr) (s : Expr) : MetaM Bool := do
     if (← (isDefEqVirtualEtaStruct t s <||> isDefEqVirtualEtaStruct s t)) then
       return true
     if (← (isDefEqVirtualProj t s <||> isDefEqVirtualProj s t)) then return true
+    if (← isDefEqCongrMap t s) then return true
     if t.isConst && s.isConst then
       if t.constName! == s.constName! then isListLevelDefEqAux t.constLevels! s.constLevels! else return false
     else if (← pure t.isApp <&&> pure s.isApp) then

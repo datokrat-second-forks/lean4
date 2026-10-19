@@ -8,6 +8,7 @@ module
 prelude
 public import Lean.Structure
 public import Lean.Meta.VirtualStructure
+public import Lean.Meta.CongrMap
 public import Lean.Util.Recognizers
 public import Lean.Util.SafeExponentiation
 public import Lean.Meta.GetUnfoldableConst
@@ -708,11 +709,14 @@ where
                 return e
             | .axiomInfo val => recordUnfoldAxiom val.name; return e
             | _ => return e
-      | .proj _ i c =>
+      | .proj structName i c =>
         let k (c : Expr) := do
           match (← projectCore? c i) with
           | some e => go e
-          | none => return e
+          | none =>
+            match (← reduceCongrMapProj? structName i c) with
+            | some e => go e
+            | none => return e
         match (← getConfig).proj with
         | .no => return e
         | .yes => k (← go c)
@@ -895,6 +899,7 @@ mutual
       -- `+defeq` structure projections are `@[irreducible]`, so they always take this branch
       let onFailure (_ : Unit) : MetaM (Option Expr) := do
         if let some e' ← reduceVirtualProjWithDelta? e then return some e'
+        if let some e' ← reduceCongrMap? e then return some e'
         unfoldProjInstWhenInstances? e
       matchConstAux (ignoreTransparency := ignoreTransparency) f.getAppFn onFailure fun fInfo fLvls => do
         if fInfo.levelParams.length != fLvls.length then
