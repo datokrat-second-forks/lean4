@@ -143,6 +143,12 @@ theorem List.castCongr_cons (c : Cast α β) (a : α) (l : List α) :
   subst h
   rfl
 
+def N := Nat
+
+example (a : N) (h : ∀ a : N, N.castUnfold.app a :: [] = []) :
+    (List.castCongr N.castUnfold).app (a :: []) = [] := by
+  exact h _
+
 /-! Generation fails for definitions that are not semireducible types, and for inductive types with
 indices, dependent parameters, or fields whose casts cannot be composed. -/
 
