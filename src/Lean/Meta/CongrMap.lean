@@ -101,20 +101,34 @@ def congrMapApp? (e : Expr) : MetaM (Option (Name × List Level × Array Expr)) 
   return some (T, us, e.getAppArgs)
 
 /--
-Whether `f` is definitionally the identity, recognized syntactically: the constructor or projection
-of a `+defeq` structure, `id`, compositions of cast functions, and registered maps of cast
-functions.
+Whether `f` is definitionally the identity: the constructor or projection of a `+defeq` structure,
+`id`, compositions of cast functions, registered maps of cast functions, and functions such as
+`⇑OrderDual.toDual` whose applications reduce to cast functions at `.implicit` transparency.
 -/
 partial def isCastFn (f : Expr) : MetaM Bool := do
   let f := (← instantiateMVars f).cleanupAnnotations.eta
-  let .const n _ := f.getAppFn | return false
-  let args := f.getAppArgs
-  if let some info ← getVirtualCtorInfo? n then return args.size == info.numParams
-  if let some info ← getVirtualProjInfo? n then return args.size == info.numParams
-  if n == ``id then return args.size == 1
-  if n == ``Function.comp then return args.size == 5 && (← isCastFn args[3]! <&&> isCastFn args[4]!)
-  if (← getCongrMapType? n).isSome then return args.size == 4 && (← isCastFn args[2]!)
-  return false
+  if (← isCastFnHead f) then return true
+  let .forallE n d b _ ← whnf (← inferType f) | return false
+  if b.hasLooseBVars then return false
+  withLocalDeclD n d fun a => appliesCastFns a (mkApp f a)
+where
+  isCastFnHead (f : Expr) : MetaM Bool := do
+    let .const n _ := f.getAppFn | return false
+    let args := f.getAppArgs
+    if let some info ← getVirtualCtorInfo? n then return args.size == info.numParams
+    if let some info ← getVirtualProjInfo? n then return args.size == info.numParams
+    if n == ``id then return args.size == 1
+    if n == ``Function.comp then
+      return args.size == 5 && (← isCastFn args[3]! <&&> isCastFn args[4]!)
+    if (← getCongrMapType? n).isSome then return args.size == 4 && (← isCastFn args[2]!)
+    return false
+  /-- Whether `e` reduces to cast functions applied to `a`. -/
+  appliesCastFns (a e : Expr) : MetaM Bool := do
+    let e := (← withTransparency .implicit <| whnf e).cleanupAnnotations
+    if e == a then return true
+    let .app g x := e | return false
+    if g.containsFVar a.fvarId! then return false
+    isCastFnHead g.eta <&&> appliesCastFns a x
 
 /-- `@cast τ τ' (@id (τ = τ') rfl) p`, for a proof `p : τ` and `τ'` equal to `τ` in the kernel. -/
 private def mkProofCast (τ τ' p : Expr) : Expr :=

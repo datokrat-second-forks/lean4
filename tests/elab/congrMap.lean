@@ -142,6 +142,28 @@ example (s : UBag Nat) : (UBag.congrMap wrap s).val = Bag.congrMap wrap s.val :=
 
 example (s : UBag Nat) : UBag.congrMap unwrap (UBag.congrMap wrap s) = s := rfl
 
+/-!
+Functions whose applications reduce to cast functions at `.implicit` transparency are cast functions,
+and pushed maps keep them.
+-/
+
+structure Iso (α β : Type u) where
+  toFun : α → β
+  invFun : β → α
+
+@[implicit_reducible]
+def wrapIso : Iso α (Wrap α) := ⟨wrap, unwrap⟩
+
+instance : IsCast (@wrapIso α).toFun :=
+  ⟨by with_unfolding_all rfl, fun _ => by with_unfolding_all rfl⟩
+instance : IsCast (@wrapIso α).invFun :=
+  ⟨by with_unfolding_all rfl, fun _ => by with_unfolding_all rfl⟩
+
+example (l : List Nat) : List.congrMap wrapIso.invFun (List.congrMap wrapIso.toFun l) = l := rfl
+
+example (a : Nat) (l : List Nat) :
+    List.congrMap wrapIso.toFun (a :: l) = wrapIso.toFun a :: List.congrMap wrapIso.toFun l := rfl
+
 /-! A map between types that agree reduces to its argument, whatever the function. -/
 
 def myId (n : Nat) : Nat := n
