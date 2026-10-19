@@ -873,6 +873,33 @@ and applications.
   cast h a
 
 /--
+A cast from `α` to `β`, applied with `Cast.app`. Casts are built from the casts Lean generates for
+a definition `D` whose value is a type (`D.castFold`, `D.castUnfold`) and the congruences it
+generates for an inductive type `T` (`T.castCongr`).
+-/
+structure Cast (α β : Sort u) : Type where
+  /-- The types are equal. -/
+  eq : α = β
+
+/--
+Applies a cast. Below `default` transparency, `Cast.app` is not unfolded. Instead, it disappears
+when the endpoints of the cast agree at `implicit` transparency, and a cast built from generated
+casts is pushed into constructors and projections.
+-/
+@[macro_inline] def Cast.app {α β : Sort u} (c : Cast α β) (a : α) : β :=
+  cast c.eq a
+
+/-- The identity cast. -/
+@[implicit_reducible] def Cast.refl (α : Sort u) : Cast α α := ⟨rfl⟩
+
+/-- The inverse cast. -/
+@[implicit_reducible] def Cast.symm {α β : Sort u} (c : Cast α β) : Cast β α := ⟨c.eq.symm⟩
+
+/-- Casts along `c`, then along `d`. -/
+@[implicit_reducible] def Cast.trans {α β γ : Sort u} (c : Cast α β) (d : Cast β γ) : Cast α γ :=
+  ⟨c.eq.trans d.eq⟩
+
+/--
 `a ≠ b`, or `Ne a b` is defined as `¬ (a = b)` or `a = b → False`,
 and asserts that `a` and `b` are not equal.
 -/

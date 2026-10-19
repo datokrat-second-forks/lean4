@@ -779,6 +779,228 @@ where
     let some (α₀, _, s₀) := smartCastArgs? (← whnf s) | return none
     findSource? α₀ s₀
 
+/-!
+# Generated casts
+
+Lean generates casts `D.castFold : Cast body (D xs)` and `D.castUnfold : Cast (D xs) body` for a
+semireducible definition `D` whose value is a type, and a congruence
+`T.castCongr : Cast α α' → … → Cast (T … α …) (T … α' …)` for an inductive type `T`, taking a cast
+for each type parameter (`Lean.Meta.Constructions.CastConstants`).
+
+Below `default` transparency, `Cast.app c a` is not unfolded. Instead:
+* it reduces to `a` if the endpoints of `c` agree at `implicit` transparency;
+* if `c` is built from generated casts (`isGeneratedCast`), then in a chain of such casts, the
+  innermost source is compared with the outermost target, a congruence is pushed into a
+  constructor application `a`, and a projection of a congruence is the cast of the projection.
+
+The endpoints of a cast built from generated casts are definitionally equal at `default`
+transparency, so the kernel confirms these reductions. For an arbitrary cast, such as a variable,
+it could not.
+-/
+
+/-- The kinds of generated casts. -/
+inductive CastConstKind where
+  | fold | unfold
+  /-- `numCasts` is the number of cast arguments, which come last. -/
+  | congr (numCasts : Nat)
+  deriving Inhabited
+
+builtin_initialize castConstsExt : MapDeclarationExtension CastConstKind ← mkMapDeclarationExtension
+
+def castCongrSuffix := "castCongr"
+def castFoldSuffix := "castFold"
+def castUnfoldSuffix := "castUnfold"
+
+/-- Returns `(α, β, c, a)` if `e` is `@Cast.app α β c a`. -/
+def castAppArgs? (e : Expr) : Option (Expr × Expr × Expr × Expr) :=
+  if e.isAppOfArity ``Cast.app 4 then
+    some (e.getArg! 0, e.getArg! 1, e.getArg! 2, e.getArg! 3)
+  else
+    none
+
+/-- Whether `c` is built from generated casts and `Cast.refl`, `Cast.symm` and `Cast.trans`. -/
+partial def isGeneratedCast (c : Expr) : MetaM Bool := do
+  let c ← instantiateMVars c.cleanupAnnotations
+  let .const n _ := c.getAppFn | return false
+  let args := c.getAppArgs
+  match n with
+  | ``Cast.refl => return args.size == 1
+  | ``Cast.symm => return args.size == 3 && (← isGeneratedCast args[2]!)
+  | ``Cast.trans => return args.size == 5 && (← isGeneratedCast args[3]!) && (← isGeneratedCast args[4]!)
+  | _ =>
+    match castConstsExt.find? (← getEnv) n with
+    | some .fold | some .unfold => return true
+    | some (.congr k) => return args.size ≥ k && (← (args.extract (args.size - k)).allM isGeneratedCast)
+    | none => return false
+
+/-- For each parameter of the inductive type `T`, whether it is a type parameter, which gets a cast. -/
+def castCongrTypeParams (T : Name) : MetaM (Array Bool) := do
+  let info ← getConstInfoInduct T
+  forallBoundedTelescope info.type info.numParams fun ps _ =>
+    ps.mapM fun p => return (← inferType p).isSort && !(← inferType p).isProp
+
+/--
+Substitution for composing casts of field types. `params` are free variables standing for the
+parameters of an inductive type and for fields, `src` and `tgt` what they are on each side, and
+`casts` the casts of the type parameters among them. `blocked` free variables are fields whose
+cast is not the identity.
+-/
+structure CastSubst where
+  params : Array Expr := #[]
+  src : Array Expr := #[]
+  tgt : Array Expr := #[]
+  casts : FVarIdMap Expr := {}
+  blocked : FVarIdSet := {}
+
+def CastSubst.push (s : CastSubst) (p src tgt : Expr) (cast? : Option Expr := none) : CastSubst :=
+  { s with
+    params := s.params.push p, src := s.src.push src, tgt := s.tgt.push tgt
+    casts := if let some c := cast? then s.casts.insert p.fvarId! c else s.casts }
+
+/--
+Composes a cast `Cast τ[src] τ[tgt]` for values of type `τ`, or returns `none` for the identity.
+`congrAvailable S` says whether `S.castCongr` can be used. Throws if no cast can be composed.
+-/
+partial def composeCast (s : CastSubst) (congrAvailable : Name → MetaM Bool) (τ : Expr) :
+    MetaM (Option Expr) := do
+  let τ ← instantiateMVars τ
+  if !τ.hasAnyFVar (fun f => s.casts.contains f || s.blocked.contains f) then
+    return none
+  if let .fvar f := τ then
+    if let some c := s.casts.get? f then return some c
+  let fail {α} : MetaM α := throwError "cannot compose a cast for values of type{indentExpr τ}"
+  let .const S lvls := τ.getAppFn | fail
+  let some (.inductInfo info) := (← getEnv).find? S | fail
+  unless info.numIndices == 0 && τ.getAppNumArgs == info.numParams && (← congrAvailable S) do fail
+  let kinds ← castCongrTypeParams S
+  let mut implicitArgs := #[]
+  let mut casts := #[]
+  for arg in τ.getAppArgs, isType in kinds do
+    let argSrc := arg.replaceFVars s.params s.src
+    if isType then
+      let argTgt := arg.replaceFVars s.params s.tgt
+      implicitArgs := implicitArgs.push argSrc |>.push argTgt
+      match (← composeCast s congrAvailable arg) with
+      | some c => casts := casts.push c
+      | none => casts := casts.push (mkApp (mkConst ``Cast.refl [← getLevel argSrc]) argSrc)
+    else
+      if arg.hasAnyFVar (fun f => s.casts.contains f || s.blocked.contains f) then fail
+      implicitArgs := implicitArgs.push argSrc
+  return some <| mkAppN (mkConst (.str S castCongrSuffix) lvls) (implicitArgs ++ casts)
+
+/--
+If `c` is `T.castCongr …`, returns the substitution of `T`'s parameters by its arguments: the
+parameters on each side, and the casts of the type parameters.
+-/
+private def castCongrSubst? (T : Name) (params : Array Expr) (c : Expr) : MetaM (Option CastSubst) := do
+  let kinds ← castCongrTypeParams T
+  let args := c.getAppArgs
+  let numTypeParams := kinds.filter id |>.size
+  unless args.size == kinds.size + 2 * numTypeParams do return none
+  let mut s : CastSubst := {}
+  let mut i := 0
+  let mut j := args.size - numTypeParams
+  for p in params, isType in kinds do
+    if isType then
+      s := s.push p args[i]! args[i+1]! args[j]!
+      i := i + 2
+      j := j + 1
+    else
+      s := s.push p args[i]! args[i]!
+      i := i + 1
+  return s
+
+/-- `@cast τ τ' (@id (τ = τ') rfl) p`, for a proof `p : τ` and `τ'` equal to `τ` at `default`. -/
+private def mkProofCast (τ τ' p : Expr) : Expr :=
+  let eq := mkApp3 (mkConst ``Eq [Level.one]) (mkSort Level.zero) τ τ'
+  let h := mkApp2 (mkConst ``id [Level.zero]) eq (mkApp2 (mkConst ``rfl [Level.one]) (mkSort Level.zero) τ)
+  mkApp4 (mkConst ``cast [Level.zero]) τ τ' h p
+
+/--
+Casts the first `numFields` fields of a constructor of `T` along the congruence `c`, where
+`field i` is the `i`-th field. Returns the target parameters and the cast fields.
+-/
+private def castCtorFields? (T : Name) (ctorVal : ConstructorVal) (lvls : List Level) (c : Expr)
+    (numFields : Nat) (field : Nat → Expr) : MetaM (Option (Array Expr × Array Expr)) := do
+  let ctorType := (ConstantInfo.ctorInfo ctorVal).instantiateTypeLevelParams lvls
+  forallBoundedTelescope ctorType (ctorVal.numParams + ctorVal.numFields) fun xs _ => do
+    let some s ← castCongrSubst? T (xs.extract 0 ctorVal.numParams) c | return none
+    let mut s := s
+    let mut newFields := #[]
+    for i in *...numFields do
+      let some f := xs[ctorVal.numParams + i]? | return none
+      let τ ← inferType f
+      let x := field i
+      let τSrc := τ.replaceFVars s.params s.src
+      let τTgt := τ.replaceFVars s.params s.tgt
+      let mut x' := x
+      if (← isProp τSrc) then
+        x' := mkProofCast τSrc τTgt x
+      else
+        let congrAvailable (S : Name) : MetaM Bool := do
+          return (← getEnv).contains (.str S castCongrSuffix)
+        let some c? ← tryCatch (some <$> composeCast s congrAvailable τ) (fun _ => pure none)
+          | return none
+        if let some c := c? then
+          x' := mkApp4 (mkConst ``Cast.app [← getLevel τSrc]) τSrc τTgt c x
+      newFields := newFields.push x'
+      s := s.push f x x'
+      if x' != x then s := { s with blocked := s.blocked.insert f.fvarId! }
+    return some (s.tgt.extract 0 ctorVal.numParams, newFields)
+
+/-- Pushes the congruence `c` (an application of `T.castCongr`) into the constructor application `a`. -/
+private def pushCastCongrIntoCtor? (T : Name) (c a : Expr) : MetaM (Option Expr) := do
+  let a ← whnf a
+  let .const ctorName lvls := a.getAppFn | return none
+  let some (.ctorInfo ctorVal) := (← getEnv).find? ctorName | return none
+  unless ctorVal.induct == T && a.getAppNumArgs == ctorVal.numParams + ctorVal.numFields do
+    return none
+  let args := a.getAppArgs
+  let some (tgtParams, fields) ←
+      castCtorFields? T ctorVal lvls c ctorVal.numFields (args[ctorVal.numParams + ·]!)
+    | return none
+  return mkAppN (mkConst ctorName lvls) (tgtParams ++ fields)
+
+/-- If `e` is `Cast.app c a`, reduces it below `default` transparency (see above). -/
+partial def reduceCastApp? (e : Expr) : MetaM (Option Expr) := do
+  let some (α, β, c, a) := castAppArgs? e | return none
+  unless (← smartCastRulesEnabled) do return none
+  if (← smartCastTypesAgree α β) then return some a
+  unless (← isGeneratedCast c) do return none
+  if let some r ← chain β a then return some r
+  let c ← instantiateMVars c.cleanupAnnotations
+  let .const (.str T s) _ := c.getAppFn | return none
+  unless s == castCongrSuffix && (castConstsExt.find? (← getEnv) (.str T s)).isSome do return none
+  pushCastCongrIntoCtor? T c a
+where
+  chain (β a : Expr) : MetaM (Option Expr) := do
+    let some (α₀, _, c₀, a₀) := castAppArgs? (← whnf a) | return none
+    unless (← isGeneratedCast c₀) do return none
+    if (← smartCastTypesAgree α₀ β) then return some a₀
+    chain β a₀
+
+/--
+Reduces `c.i` (`structName` projection `i`), where `c` is in weak head normal form, if `c` is
+`Cast.app (structName.castCongr …) s`.
+-/
+def reduceCastAppProj? (structName : Name) (i : Nat) (c : Expr) : MetaM (Option Expr) := do
+  let some (_, _, cast, s) := castAppArgs? c | return none
+  unless (← smartCastRulesEnabled) do return none
+  unless (← isGeneratedCast cast) do return none
+  let cast ← instantiateMVars cast.cleanupAnnotations
+  unless cast.isAppOf (.str structName castCongrSuffix) do return none
+  let .const _ lvls := cast.getAppFn | return none
+  let [ctorName] := (← getConstInfoInduct structName).ctors | return none
+  let ctorVal ← getConstInfoCtor ctorName
+  let some (_, fields) ← castCtorFields? structName ctorVal lvls cast (i + 1) (.proj structName · s)
+    | return none
+  return fields[i]?
+
+/-- Reduces `e` if it is a cast (`smartCast` or `Cast.app`) below `default` transparency. -/
+def reduceCast? (e : Expr) : MetaM (Option Expr) := do
+  if let some r ← reduceSmartCast? e then return some r
+  reduceCastApp? e
+
 /--
 Apply beta-reduction, zeta-reduction (i.e., unfold let local-decls), iota-reduction,
 expand let-expressions, expand assigned meta-variables, unfold aux declarations.
@@ -846,7 +1068,10 @@ where
           | none =>
             match (← reduceSmartCastProj? structName i c) with
             | some e => go e
-            | none => return e
+            | none =>
+              match (← reduceCastAppProj? structName i c) with
+              | some e => go e
+              | none => return e
         match (← getConfig).proj with
         | .no => return e
         | .yes => k (← go c)
@@ -1104,7 +1329,7 @@ def unfoldDefinition (e : Expr) : MetaM Expr := do
   whnfEasyCases e fun e => do
     let e ← whnfCore e
     if (← pred e) then
-        if let some e ← reduceSmartCast? e then
+        if let some e ← reduceCast? e then
           return (← whnfHeadPred e pred)
         match (← unfoldDefinition? e) with
         | some e => whnfHeadPred e pred
@@ -1236,7 +1461,7 @@ partial def whnfImp (e : Expr) : MetaM Expr :=
       withTraceNode `Meta.whnf (fun _ => return m!"Non-easy whnf: {e}") do
         checkSystem "whnf"
         let e' ← whnfCore e
-        if let some e'' ← reduceSmartCast? e' then
+        if let some e'' ← reduceCast? e' then
           return (← cache useCache e (← whnfImp e''))
         match (← reduceNat? e') with
         | some v => cache useCache e v

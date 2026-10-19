@@ -1871,14 +1871,14 @@ private def isDefEqDelta (t s : Expr) : MetaM LBool := do
       unfoldNonProjFnDefEq tInfo sInfo t s
 
 /--
-Reduces a cast on either side below `default` transparency (see `reduceSmartCast?`). Two stuck
+Reduces a cast on either side below `default` transparency (see `reduceCast?`). Two stuck
 chains of casts are compared as single casts: their innermost terms are compared if their sources
 and targets agree at `implicit` transparency.
 -/
 private def isDefEqSmartCast (t s : Expr) : MetaM LBool := do
-  if let some t' ← reduceSmartCast? t then
+  if let some t' ← reduceCast? t then
     toLBoolM <| Meta.isExprDefEqAux t' s
-  else if let some s' ← reduceSmartCast? s then
+  else if let some s' ← reduceCast? s then
     toLBoolM <| Meta.isExprDefEqAux t s'
   else if t.isAppOfArity ``smartCast 4 && s.isAppOfArity ``smartCast 4 && (← smartCastRulesEnabled) then
     let some (x, α) ← smartCastChainSource? t | return .undef
