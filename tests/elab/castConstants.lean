@@ -116,6 +116,56 @@ example : (Elems.elems : List (Dual Nat)) = [(toD).app 0, (toD).app 1] := rfl
 #guard_msgs in #eval (Elems.elems : List (Dual Nat)).map (ofD).app
 
 /-!
+A function field is cast with `Cast.arrowCongr`: an application of the cast function is the cast of
+the application to the argument cast back with `Cast.symm`, and the cast of a `fun` casts its bound
+variable back. `Cast.symm` is distributed over congruences.
+-/
+
+structure Fn (α : Type u) where
+  f : α → α
+
+/-- info: Fn.castCongr.{u} {α α' : Type u} (cα : Cast α α') : Cast (Fn α) (Fn α') -/
+#guard_msgs in #check Fn.castCongr
+
+example (p : Fn Nat) (n : Nat) : ((Fn.castCongr toD).app p).f ((toD).app n) = (toD).app (p.f n) :=
+  rfl
+
+/-- info: fun n => Dual.castFold.app (Dual.castFold.symm.app n + 1) -/
+#guard_msgs in
+#whnf_implicit ((Fn.castCongr toD).app ⟨fun n => n + 1⟩).f
+
+example (a : Nat) : (Cast.symm (List.castCongr toD)).app [(toD).app a] = [a] := rfl
+
+structure Fix (α : Type u) where
+  fix : (α → α) → α
+
+example (p : Fix Nat) (g : Nat → Nat) :
+    ((Fix.castCongr toD).app p).fix (fun d => (toD).app (g ((ofD).app d))) = (toD).app (p.fix g) :=
+  rfl
+
+instance : Add (Dual Nat) := (Add.castCongr toD).app inferInstance
+
+instance : LE (Dual Nat) := (LE.castCongr toD).app inferInstance
+
+instance : Repr (Dual Nat) := (Repr.castCongr toD).app inferInstance
+
+example (a b : Nat) : (toD).app a + (toD).app b = (toD).app (a + b) := rfl
+
+example (a b : Nat) : ((toD).app a ≤ (toD).app b) = (a ≤ b) := rfl
+
+/-- info: 5 -/
+#guard_msgs in #eval (toD).app 2 + (toD).app 3
+
+class Head (α : Type u) where
+  head : List α → α
+
+instance : Head Nat := ⟨fun l => l.headD 0⟩
+
+instance : Head (Dual Nat) := (Head.castCongr toD).app inferInstance
+
+example (a : Nat) : Head.head [(toD).app a] = (toD).app (Head.head [a]) := rfl
+
+/-!
 A cast whose argument is not built from generated casts, such as a variable, is not reduced: its
 endpoints may not be definitionally equal, so the kernel could not confirm the result. Lemmas about
 such casts are proved by taking the cast apart.
@@ -149,8 +199,11 @@ example (a : N) (h : ∀ a : N, N.castUnfold.app a :: [] = []) :
     (List.castCongr N.castUnfold).app (a :: []) = [] := by
   exact h _
 
-/-! Generation fails for definitions that are not semireducible types, and for inductive types with
-indices, dependent parameters, or fields whose casts cannot be composed. -/
+/-!
+Generation fails for definitions that are not semireducible types, and for inductive types with
+indices, dependent parameters, or fields whose casts cannot be composed, such as dependent
+functions.
+-/
 
 @[irreducible] def Hidden := Nat
 
@@ -160,8 +213,8 @@ inductive Vec (α : Type u) : Nat → Type u where
   | nil : Vec α 0
   | cons : α → Vec α n → Vec α (n + 1)
 
-structure Fn (α : Type u) where
-  f : α → α
+structure DFn (α : Type u) where
+  f : (n : Nat) → Fin n → α
 
 def Fam (_ : α) : Type := Nat
 
@@ -210,13 +263,13 @@ error: Unknown constant `Subtype.castCongr`
 #guard_msgs in #print Subtype.castCongr
 
 /--
-error: Failed to realize constant Fn.castCongr:
-  cannot generate the congruence of `Fn`: cannot compose a cast for field `f` of type
-    α → α
+error: Failed to realize constant DFn.castCongr:
+  cannot generate the congruence of `DFn`: cannot compose a cast for field `f` of type
+    (n : Nat) → Fin n → α
 ---
-error: Unknown constant `Fn.castCongr`
+error: Unknown constant `DFn.castCongr`
 -/
-#guard_msgs in #print Fn.castCongr
+#guard_msgs in #print DFn.castCongr
 
 /--
 error: Failed to realize constant Dep.castCongr:

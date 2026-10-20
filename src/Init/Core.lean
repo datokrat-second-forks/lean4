@@ -900,6 +900,14 @@ casts is pushed into constructors and projections.
   ⟨c.eq.trans d.eq⟩
 
 /--
+Casts functions along casts of their domain and codomain. Below `default` transparency, the cast of
+a function applied to `a` is the cast of the function's value at `a` cast back with `Cast.symm`.
+-/
+@[implicit_reducible] def Cast.arrowCongr {α α' : Sort u} {β β' : Sort v} (cα : Cast α α')
+    (cβ : Cast β β') : Cast (α → β) (α' → β') :=
+  ⟨congr (congrArg (fun (a : Sort u) (b : Sort v) => a → b) cα.eq) cβ.eq⟩
+
+/--
 `a ≠ b`, or `Ne a b` is defined as `¬ (a = b)` or `a = b → False`,
 and asserts that `a` and `b` are not equal.
 -/
