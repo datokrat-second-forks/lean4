@@ -63,6 +63,20 @@ example (n : Nat) : g n ≤ n := by
   unfold g
   split <;> omega
 
+/-! `split` splits an `if` nested in the condition of another one first. -/
+
+example (a : Bool) (n : Nat) : (uif (uif a then n else 0) ≤ n then 1 else 2) = 1 := by
+  split <;> simp
+
+set_option backward.split false in
+example (a : Bool) (n : Nat) : (uif (uif a then n else 0) ≤ n then 1 else 2) = 1 := by
+  split <;> simp
+
+set_option backward.split false in
+example (a : Bool) (n : Nat) :
+    (uif h : (uif a then n else 0) ≤ n then 1 else 2) = 1 := by
+  split <;> simp
+
 /-! Well-founded recursion that uses the hypothesis of `uif h : c`. -/
 
 def sumTo (n : Nat) : Nat := uif h : n = 0 then 0 else n + sumTo (n - 1)

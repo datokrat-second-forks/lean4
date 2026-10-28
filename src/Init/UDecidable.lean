@@ -177,6 +177,17 @@ theorem dite_eq_right_of_eq_false {α : Sort u} {c : Prop} {_ : UDecidable c} {t
     {e : ¬c → α} (h : c = False) : dite c t e = e (of_eq_false h) :=
   dite_eq_right (of_eq_false h)
 
+theorem ite_cond_congr {α : Sort u} {b c : Prop} {_ : UDecidable b} [UDecidable c] {x y : α}
+    (h : b = c) : (uif b then x else y) = (uif c then x else y) := by
+  subst h
+  rfl
+
+theorem dite_cond_congr {α : Sort u} {b c : Prop} {_ : UDecidable b} [UDecidable c] {x : b → α}
+    {y : ¬b → α} (h : b = c) :
+    dite b x y = dite c (fun hc => x (h.mpr_prop hc)) (fun hc => y (h.mpr_not hc)) := by
+  subst h
+  rfl
+
 @[congr]
 theorem ite_congr {b c : Prop} {_ : UDecidable b} [UDecidable c] {α : Sort u} {x y u v : α}
     (h₁ : b = c) (h₂ : c → x = u) (h₃ : ¬c → y = v) :

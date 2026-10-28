@@ -303,7 +303,23 @@ private def reduceUIte' (numIndices : Nat) (useDecideBool : Bool) : Simp.Simproc
       else (eb, ``UDecidable.ite_eq_right)
     return .done { expr := e', proof? := some (mkApp6 (mkConst thm us) c i h α tb eb) }
   else
-    return .done { expr := e }
+    -- `split` may have selected an `if-then-else` nested in `c`.
+    let r ← Simp.simp c
+    if r.expr == c then
+      return .done { expr := e }
+    let c' := r.expr
+    let h ← r.getProof
+    let .some i' ← trySynthInstance (mkApp (mkConst ``UDecidable) c') | return .done { expr := e }
+    if dep then
+      let tb' := mkApp tb (mkApp4 (mkConst ``Eq.mpr_prop) c c' h (mkBVar 0)) |>.headBeta
+      let tb' := mkLambda (← getBinderName tb) .default c' tb'
+      let eb' := mkApp eb (mkApp4 (mkConst ``Eq.mpr_not) c c' h (mkBVar 0)) |>.headBeta
+      let eb' := mkLambda (← getBinderName eb) .default (mkNot c') eb'
+      let pr := mkApp8 (mkConst ``UDecidable.dite_cond_congr us) α c c' i i' tb eb h
+      return .done { expr := mkApp5 f α c' i' tb' eb', proof? := some pr }
+    else
+      let pr := mkApp8 (mkConst ``UDecidable.ite_cond_congr us) α c c' i i' tb eb h
+      return .done { expr := mkApp5 f α c' i' tb eb, proof? := some pr }
 
 private def getSimprocs (numIndices : Nat) (useDecide : Bool) : MetaM (Array Simprocs) := do
   let s : Simprocs := {}
