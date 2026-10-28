@@ -1,63 +1,9 @@
 /-!
-Prototype of a data-free `Decidable`, `UDecidable`. Logically it carries no data and `decide` is
-defined classically, but the compiler represents an instance by the `Bool` passed to
-`UDecidable.mk`, so `UDecidable.decide` compiles to the identity. This test checks that compiled and
-interpreted code compute with that `Bool`.
+`UDecidable` carries no data in the logic and `UDecidable.decide` is defined classically, but the
+compiler represents an instance by the `Bool` passed to `UDecidable.mk`, so `UDecidable.decide`
+compiles to the identity. This test checks that compiled and interpreted code compute with that
+`Bool`.
 -/
-
--- The compiler represents `UDecidable p` by a `Bool`, which `intro` does not carry and `casesOn`
--- cannot match on.
-noncomputable class UDecidable (p : Prop) : Type where
-  private intro ::
-  exists_reflects : ∃ b : Bool, b = true ↔ p
-
-namespace UDecidable
-
-unsafe def decideImpl (p : Prop) [i : UDecidable p] : Bool := unsafeCast i
-
-@[irreducible, implemented_by decideImpl] def decide (p : Prop) [i : UDecidable p] : Bool :=
-  (Classical.choice (i.exists_reflects.elim fun b h => ⟨⟨b, h⟩⟩) :
-    {b : Bool // b = true ↔ p}).val
-
-theorem decide_spec (p : Prop) [UDecidable p] : decide p = true ↔ p := by
-  unfold decide
-  exact (Classical.choice _ : {b : Bool // b = true ↔ p}).property
-
-@[instance_reducible] unsafe def mkImpl (b : Bool) (_ : b = true ↔ p) : UDecidable p := unsafeCast b
-
-@[irreducible, implemented_by mkImpl] def mk (b : Bool) (h : b = true ↔ p) : UDecidable p := ⟨b, h⟩
-
-@[macro_inline] def ite {α : Sort u} (c : Prop) [UDecidable c] (t e : α) : α :=
-  cond (decide c) t e
-
-@[macro_inline] def dite {α : Sort u} (c : Prop) [UDecidable c] (t : c → α) (e : ¬c → α) : α :=
-  Bool.dcond (decide c) (fun h => t ((decide_spec c).mp h))
-    (fun h => e fun hc => nomatch h.symm.trans ((decide_spec c).mpr hc))
-
-theorem reflects_decide (p : Prop) [UDecidable p] : (decide p).Reflects p := by
-  cases h : decide p
-  · exact fun hp => nomatch h.symm.trans ((decide_spec p).mpr hp)
-  · exact (decide_spec p).mp h
-
-instance (priority := low) ofDecidable (p : Prop) [Decidable p] : UDecidable p :=
-  mk (Decidable.decide p) decide_eq_true_iff
-
-def toDecidable (p : Prop) [UDecidable p] : Decidable p :=
-  ⟨decide p, reflects_decide p⟩
-
-instance instNatLe (n m : Nat) : UDecidable (n ≤ m) :=
-  mk (Nat.ble n m) ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
-
-instance instAnd (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∧ q) :=
-  mk (decide p && decide q) (by simp [decide_spec])
-
-instance instNot (p : Prop) [UDecidable p] : UDecidable (¬p) :=
-  mk (!decide p) (by
-    have := decide_spec p
-    revert this
-    cases decide p <;> simp)
-
-end UDecidable
 
 @[noinline] def classify (n m : Nat) : String :=
   UDecidable.ite (n ≤ m) "le" "gt"
