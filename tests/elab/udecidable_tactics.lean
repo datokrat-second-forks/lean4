@@ -88,8 +88,27 @@ example (n : Nat) : sumTo (n + 1) = n + 1 + sumTo n := by
   rw [sumTo]
   simp
 
+/-! A non-dependent `uif` also provides its condition to termination proofs. -/
+
+def double (n power : Nat) (h : power > 0) : Nat :=
+  uif power < n then double n (power * 2) (Nat.mul_pos h (by decide)) else power
+termination_by n - power
+decreasing_by omega
+
+/-! Functional induction splits on `uif`. -/
+
+example (n p h) : double n p h ≥ p := by
+  fun_induction double with
+  | case1 => omega
+  | case2 => omega
+
+example (n : Nat) : sumTo n ≥ n := by
+  fun_induction sumTo with
+  | case1 => omega
+  | case2 => omega
+
 /-! Compiled code -/
 
-/-- info: [0, 5, 0, 4, 10] -/
+/-- info: [0, 5, 0, 4, 10, 8] -/
 #guard_msgs in
-#eval [f 2, f 5, g 0, g 5, sumTo 4]
+#eval [f 2, f 5, g 0, g 5, sumTo 4, double 5 1 (by decide)]

@@ -17,6 +17,7 @@ import Lean.Elab.PreDefinition.Structural.Eqns
 import Lean.Elab.PreDefinition.Structural.FindRecArg
 import Lean.Meta.Tactic.FunIndInfo
 import Lean.Data.Array
+import Init.UDecidable
 import Lean.Meta.Tactic.Replace
 import Init.Omega
 
@@ -657,6 +658,34 @@ partial def buildInductionBody (toErase toClear : Array FVarId) (goal : Expr)
       mkLambdaFVars #[h] f'
     let u ← getLevel goal
     return mkApp5 (mkConst ``dite [u]) goal c' h' t' f'
+  | UDecidable.ite _α c h t f =>
+    let c' ← foldAndCollect oldIH newIH isRecCall c
+    let h' ← foldAndCollect oldIH newIH isRecCall h
+    let t' ← withLocalDecl `h .default c' fun h => M2.branch do
+      let t' ← withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
+        buildInductionBody toErase toClear goal' oldIH newIH isRecCall t
+      mkLambdaFVars #[h] t'
+    let f' ← withLocalDecl `h .default (mkNot c') fun h => M2.branch do
+      let f' ← withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
+        buildInductionBody toErase toClear goal' oldIH newIH isRecCall f
+      mkLambdaFVars #[h] f'
+    let u ← getLevel goal
+    return mkApp5 (mkConst ``UDecidable.dite [u]) goal c' h' t' f'
+  | UDecidable.dite _α c h t f =>
+    let c' ← foldAndCollect oldIH newIH isRecCall c
+    let h' ← foldAndCollect oldIH newIH isRecCall h
+    let t' ← withLocalDecl `h .default c' fun h => M2.branch do
+      let t ← instantiateLambda t #[h]
+      let t' ← withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
+        buildInductionBody toErase toClear goal' oldIH newIH isRecCall t
+      mkLambdaFVars #[h] t'
+    let f' ← withLocalDecl `h .default (mkNot c') fun h => M2.branch do
+      let f ← instantiateLambda f #[h]
+      let f' ← withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
+        buildInductionBody toErase toClear goal' oldIH newIH isRecCall f
+      mkLambdaFVars #[h] f'
+    let u ← getLevel goal
+    return mkApp5 (mkConst ``UDecidable.dite [u]) goal c' h' t' f'
   | cond _α c t f =>
     let c' ← foldAndCollect oldIH newIH isRecCall c
     let t' ← withLocalDecl `h .default (← mkEq c' (mkConst ``Bool.true)) fun h => M2.branch do
@@ -1384,7 +1413,8 @@ where
                 modify (·.set! i true)
             for alt in args[matchInfo.getFirstAltPos...matchInfo.arity] do
               go xs alt
-        if f.isConstOf ``ite || f.isConstOf ``dite then
+        if f.isConstOf ``ite || f.isConstOf ``dite || f.isConstOf ``UDecidable.ite
+            || f.isConstOf ``UDecidable.dite then
           for arg in args[3...5] do
             go xs arg
         if f.isConstOf ``cond then
