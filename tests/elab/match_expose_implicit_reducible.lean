@@ -42,8 +42,9 @@ fun motive x h_1 h_2 h_3 h_4 =>
 info: @[instance_reducible, expose] def boo.match_1.{u_1} : (motive : Nat → Sort u_1) →
   (x : Nat) → (Unit → motive 0) → (Unit → motive 1) → (Unit → motive 2) → ((x : Nat) → motive x) → motive x :=
 fun motive x h_1 h_2 h_3 h_4 =>
-  dite (x = 0) (Eq.ndrec_symm (h_1 ())) fun h_1 =>
-    dite (x = 1) (Eq.ndrec_symm (h_2 ())) fun h_2 => dite (x = 2) (Eq.ndrec_symm (h_3 ())) fun h_3 => h_4 x
+  Bool.Internal.matchValue (x.beq 0) (x = 0) ⋯ (Eq.ndrec_symm (h_1 ())) fun h_1 =>
+    Bool.Internal.matchValue (x.beq 1) (x = 1) ⋯ (Eq.ndrec_symm (h_2 ())) fun h_2 =>
+      Bool.Internal.matchValue (x.beq 2) (x = 2) ⋯ (Eq.ndrec_symm (h_3 ())) fun h_3 => h_4 x
 -/
 #guard_msgs in
 #print boo.match_1

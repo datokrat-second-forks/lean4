@@ -22,7 +22,7 @@ trace: [Compiler.explicitRc] size: 27
           dec x;
           return _x.2;
       let _x.6 := 0;
-      let _x.7 := Nat.decEq x _x.6;
+      let _x.7 := Nat.beq x _x.6;
       cases _x.7 : UInt8
       | Bool.false =>
         dec y;

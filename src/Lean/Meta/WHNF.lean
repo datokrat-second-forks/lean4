@@ -493,18 +493,20 @@ This solution is also not perfect because the match-expression above will not re
 -/
 
 /--
-Eagerly unfold `dite` constants in `e`. This is an auxiliary function used to reduce match expressions.
+Eagerly unfold `dite` and `Bool.Internal.matchValue` constants in `e`. This is an auxiliary function
+used to reduce match expressions.
 See comment above.
 -/
 private def unfoldNestedDIte (e : Expr) : CoreM Expr := do
-  if e.find? (fun e => e.isAppOf ``dite) matches some _ then
+  let isBranch (declName : Name) := declName == ``dite || declName == ``Bool.Internal.matchValue
+  if e.find? (fun e => e.getAppFn.constName?.any isBranch) matches some _ then
     Core.transform e fun e => do
-      if let .const ``dite us := e then
-        let constInfo ← getConstInfo ``dite
-        let e ← instantiateValueLevelParams constInfo us
-        return .done e
-      else
-        return .continue
+      if let .const declName us := e then
+        if isBranch declName then
+          let constInfo ← getConstInfo declName
+          let e ← instantiateValueLevelParams constInfo us
+          return .done e
+      return .continue
   else
     return e
 

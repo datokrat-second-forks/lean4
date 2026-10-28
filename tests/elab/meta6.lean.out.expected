@@ -30,24 +30,30 @@
     h_2 : Not (@Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
     h_3 : Not (@Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 5) (instOfNatNat (nat_lit 5))))
     ⊢ Vec.{0} Nat x
-[Meta.debug] @dite.{1} (Vec.{0} Nat x) (@Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
-      (instDecidableEqNat x (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
+[Meta.debug] @Bool.Internal.matchValue.{1} (Vec.{0} Nat x)
+      (Nat.beq x (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
+      (@Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
+      (Nat.reflects_beq x (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
       (fun (h_1 : @Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2)))) =>
         @Eq.ndrec.{1, 1} Nat (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2)))
           (fun (x : Nat) => (v : Vec.{0} Nat x) → Vec.{0} Nat x)
           (fun (v : Vec.{0} Nat (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2)))) => v) x
           (@Eq.symm.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))) h_1) v)
       fun (h_1 : Not (@Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))) =>
-      @dite.{1} (Vec.{0} Nat x) (@Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
-        (instDecidableEqNat x (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+      @Bool.Internal.matchValue.{1} (Vec.{0} Nat x)
+        (Nat.beq x (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+        (@Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+        (Nat.reflects_beq x (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
         (fun (h_2 : @Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) =>
           @Eq.ndrec.{1, 1} Nat (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))
             (fun (x : Nat) => (v : Vec.{0} Nat x) → Vec.{0} Nat x)
             (fun (v : Vec.{0} Nat (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) => v) x
             (@Eq.symm.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))) h_2) v)
         fun (h_2 : Not (@Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))) =>
-        @dite.{1} (Vec.{0} Nat x) (@Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 5) (instOfNatNat (nat_lit 5))))
-          (instDecidableEqNat x (@OfNat.ofNat.{0} Nat (nat_lit 5) (instOfNatNat (nat_lit 5))))
+        @Bool.Internal.matchValue.{1} (Vec.{0} Nat x)
+          (Nat.beq x (@OfNat.ofNat.{0} Nat (nat_lit 5) (instOfNatNat (nat_lit 5))))
+          (@Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 5) (instOfNatNat (nat_lit 5))))
+          (Nat.reflects_beq x (@OfNat.ofNat.{0} Nat (nat_lit 5) (instOfNatNat (nat_lit 5))))
           (fun (h_3 : @Eq.{1} Nat x (@OfNat.ofNat.{0} Nat (nat_lit 5) (instOfNatNat (nat_lit 5)))) =>
             @Eq.ndrec.{1, 1} Nat (@OfNat.ofNat.{0} Nat (nat_lit 5) (instOfNatNat (nat_lit 5)))
               (fun (x : Nat) => (v : Vec.{0} Nat x) → Vec.{0} Nat x)

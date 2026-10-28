@@ -1136,6 +1136,28 @@ abbrev Bool.Reflects : Bool → Prop → Prop
   | true, p => p
 
 /--
+Branches on `b`, given a proof that `b` reflects `p`. The `match` compiler tests value patterns with
+this function and a `Bool`-valued test that reduces by itself, rather than with `dite` and a
+`Decidable` instance.
+-/
+@[macro_inline, implicit_reducible]
+def Bool.Internal.matchValue {α : Sort u} (b : Bool) (p : Prop) (h : b.Reflects p) (t : p → α)
+    (e : Not p → α) : α :=
+  b.casesOn (motive := fun b => b.Reflects p → α) e t h
+
+theorem Bool.Internal.matchValue_pos {α : Sort u} {b : Bool} {p : Prop} {h : b.Reflects p}
+    {t : p → α} {e : Not p → α} (hp : p) : Eq (matchValue b p h t e) (t hp) :=
+  match b, h with
+  | true, _ => rfl
+  | false, h => absurd hp h
+
+theorem Bool.Internal.matchValue_neg {α : Sort u} {b : Bool} {p : Prop} {h : b.Reflects p}
+    {t : p → α} {e : Not p → α} (hnp : Not p) : Eq (matchValue b p h t e) (e hnp) :=
+  match b, h with
+  | true, h => absurd h hnp
+  | false, _ => rfl
+
+/--
 A `Bool` (that is, `decide p`) paired with a proof of `p` if `decide p` is `true` or a proof of `¬p`
 if `decide p` is `false`. The easiest way to extract these proofs is to use `of_decide_eq_true` or
 `of_decide_eq_false`.
@@ -1980,6 +2002,12 @@ theorem Nat.ne_of_beq_eq_false : {n m : Nat} → Eq (beq n m) false → Not (Eq 
     have : Eq (beq n m) false := h₁
     Nat.noConfusion h₂ (fun h₂ => absurd h₂ (ne_of_beq_eq_false this))
 
+/-- Used by the `match` compiler to test `Nat` value patterns. -/
+theorem Nat.reflects_beq (n m : Nat) : (beq n m).Reflects (Eq n m) :=
+  match h : beq n m with
+  | true  => eq_of_beq_eq_true h
+  | false => ne_of_beq_eq_false h
+
 
 private theorem noConfusion_of_Nat.aux : (a : Nat) → (Nat.beq a a).rec False True
   | Nat.zero   => True.intro
@@ -2498,6 +2526,12 @@ instance (n : Nat) : DecidableEq (Fin n) := fun i j => {
     | isFalse h => fun h' => absurd (Fin.val_eq_of_eq h') h
 }
 
+/-- Used by the `match` compiler to test `Fin` value patterns. -/
+theorem Fin.reflects_beq_val {n} (i j : Fin n) : (Nat.beq i.val j.val).Reflects (Eq i j) :=
+  match h : Nat.beq i.val j.val with
+  | true  => Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)
+  | false => fun h' => Nat.ne_of_beq_eq_false h (Fin.val_eq_of_eq h')
+
 instance {n} : LT (Fin n) where
   lt a b := LT.lt a.val b.val
 
@@ -2546,6 +2580,13 @@ def BitVec.decEq (x y : BitVec w) : Decidable (Eq x y) where
     | isFalse h => fun h' => BitVec.noConfusion rfl (heq_of_eq h') (fun h' => absurd (eq_of_heq h') h)
 
 instance : DecidableEq (BitVec w) := BitVec.decEq
+
+/-- Used by the `match` compiler to test `BitVec` value patterns. -/
+theorem BitVec.reflects_beq_val (x y : BitVec w) :
+    (Nat.beq x.toFin.val y.toFin.val).Reflects (Eq x y) :=
+  match h : Nat.beq x.toFin.val y.toFin.val with
+  | true  => congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h))
+  | false => fun h' => Nat.ne_of_beq_eq_false h (congrArg (fun (x : BitVec w) => x.toFin.val) h')
 
 /-- The `BitVec` with value `i`, given a proof that `i < 2^w`. -/
 @[match_pattern, implicit_reducible]
@@ -2643,6 +2684,24 @@ def UInt8.decEq (a b : UInt8) : Decidable (Eq a b) where
     | isFalse h => fun h' => UInt8.noConfusion h' h
 
 instance : DecidableEq UInt8 := UInt8.decEq
+
+/--
+Boolean equality of `UInt8`s that reduces by itself. The `match` compiler uses it to test `UInt8`
+value patterns.
+-/
+@[reducible, extern "lean_uint8_dec_eq"]
+def UInt8.Internal.beq (a b : UInt8) : Bool :=
+  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- Used by the `match` compiler to test `UInt8` value patterns. -/
+theorem UInt8.Internal.reflects_beq (a b : UInt8) :
+    (UInt8.Internal.beq a b).Reflects (Eq a b) :=
+  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
+  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
+  | true  =>
+    congrArg UInt8.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
+  | false => fun h' =>
+    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt8) => a.toBitVec.toFin.val) h')
 
 instance : Inhabited UInt8 where
   default := UInt8.ofNatLT 0 (of_decide_eq_true rfl)
@@ -2748,6 +2807,24 @@ def UInt16.decEq (a b : UInt16) : Decidable (Eq a b) where
 
 instance : DecidableEq UInt16 := UInt16.decEq
 
+/--
+Boolean equality of `UInt16`s that reduces by itself. The `match` compiler uses it to test `UInt16`
+value patterns.
+-/
+@[reducible, extern "lean_uint16_dec_eq"]
+def UInt16.Internal.beq (a b : UInt16) : Bool :=
+  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- Used by the `match` compiler to test `UInt16` value patterns. -/
+theorem UInt16.Internal.reflects_beq (a b : UInt16) :
+    (UInt16.Internal.beq a b).Reflects (Eq a b) :=
+  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
+  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
+  | true  =>
+    congrArg UInt16.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
+  | false => fun h' =>
+    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt16) => a.toBitVec.toFin.val) h')
+
 instance : Inhabited UInt16 where
   default := UInt16.ofNatLT 0 (of_decide_eq_true rfl)
 
@@ -2812,6 +2889,24 @@ def UInt32.decEq (a b : UInt32) : Decidable (Eq a b) where
     | isFalse h => fun h' => UInt32.noConfusion h' h
 
 instance : DecidableEq UInt32 := UInt32.decEq
+
+/--
+Boolean equality of `UInt32`s that reduces by itself. The `match` compiler uses it to test `UInt32`
+value patterns.
+-/
+@[reducible, extern "lean_uint32_dec_eq"]
+def UInt32.Internal.beq (a b : UInt32) : Bool :=
+  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- Used by the `match` compiler to test `UInt32` value patterns. -/
+theorem UInt32.Internal.reflects_beq (a b : UInt32) :
+    (UInt32.Internal.beq a b).Reflects (Eq a b) :=
+  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
+  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
+  | true  =>
+    congrArg UInt32.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
+  | false => fun h' =>
+    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt32) => a.toBitVec.toFin.val) h')
 
 instance : Inhabited UInt32 where
   default := UInt32.ofNatLT 0 (of_decide_eq_true rfl)
@@ -2912,6 +3007,24 @@ def UInt64.decEq (a b : UInt64) : Decidable (Eq a b) where
     | isFalse h => fun h' => UInt64.noConfusion h' h
 
 instance : DecidableEq UInt64 := UInt64.decEq
+
+/--
+Boolean equality of `UInt64`s that reduces by itself. The `match` compiler uses it to test `UInt64`
+value patterns.
+-/
+@[reducible, extern "lean_uint64_dec_eq"]
+def UInt64.Internal.beq (a b : UInt64) : Bool :=
+  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- Used by the `match` compiler to test `UInt64` value patterns. -/
+theorem UInt64.Internal.reflects_beq (a b : UInt64) :
+    (UInt64.Internal.beq a b).Reflects (Eq a b) :=
+  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
+  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
+  | true  =>
+    congrArg UInt64.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
+  | false => fun h' =>
+    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt64) => a.toBitVec.toFin.val) h')
 
 instance : Inhabited UInt64 where
   default := UInt64.ofNatLT 0 (of_decide_eq_true rfl)
@@ -3057,6 +3170,23 @@ instance : DecidableEq Char := fun c d => {
     | isTrue  h => Char.ext h
     | isFalse h => Char.ne_of_val_ne h
 }
+
+/--
+Boolean equality of `Char`s that reduces by itself. The `match` compiler uses it to test `Char`
+value patterns.
+-/
+@[reducible, extern "lean_uint32_dec_eq"]
+def Char.Internal.beq (c d : Char) : Bool :=
+  Nat.beq c.val.toBitVec.toFin.val d.val.toBitVec.toFin.val
+
+/-- Used by the `match` compiler to test `Char` value patterns. -/
+theorem Char.Internal.reflects_beq (c d : Char) : (Char.Internal.beq c d).Reflects (Eq c d) :=
+  show (Nat.beq c.val.toBitVec.toFin.val d.val.toBitVec.toFin.val).Reflects _ from
+  match h : Nat.beq c.val.toBitVec.toFin.val d.val.toBitVec.toFin.val with
+  | true  => Char.ext
+    (congrArg UInt32.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h))))
+  | false => fun h' =>
+    Nat.ne_of_beq_eq_false h (congrArg (fun (c : Char) => c.val.toBitVec.toFin.val) h')
 
 /-- Returns the number of bytes required to encode this `Char` in UTF-8. -/
 @[implicit_reducible, inline]

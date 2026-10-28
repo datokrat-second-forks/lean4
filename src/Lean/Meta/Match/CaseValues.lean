@@ -13,6 +13,32 @@ import Lean.Meta.Tactic.Subst
 namespace Lean.Meta
 
 /--
+For each type of value patterns, a theorem `thm x v : (b x v).Reflects (x = v)` whose `Bool` test
+`b x v` reduces by itself. `Decidable` instances are not used for this because their `Bool`s are
+built from those of other instances.
+-/
+def valueTestTheorems : List (Name × Name) := [
+  (``Nat, ``Nat.reflects_beq),
+  (``Int, ``Int.Internal.reflects_beq),
+  (``Fin, ``Fin.reflects_beq_val),
+  (``BitVec, ``BitVec.reflects_beq_val),
+  (``UInt8, ``UInt8.Internal.reflects_beq),
+  (``UInt16, ``UInt16.Internal.reflects_beq),
+  (``UInt32, ``UInt32.Internal.reflects_beq),
+  (``UInt64, ``UInt64.Internal.reflects_beq),
+  (``Char, ``Char.Internal.reflects_beq)]
+
+/-- Returns the `Bool` test of `x = value` and the proof that it reflects `x = value`, if any. -/
+def mkValueTest? (x value : Expr) : MetaM (Option (Expr × Expr)) := do
+  let .const typeName _ := (← whnfR (← inferType x)).getAppFn | return none
+  let some thm := valueTestTheorems.lookup typeName | return none
+  -- Missing while compiling the prelude up to these declarations.
+  unless (← getEnv).contains thm && (← getEnv).contains ``Bool.Internal.matchValue do return none
+  let some h ← observing? (mkAppM thm #[x, value]) | return none
+  let_expr Bool.Reflects b _ ← (← inferType h) | return none
+  return some (b, h)
+
+/--
   Split goal `... |- C x`,, where `fvarId` is `x`s id, into two subgoals
   `..., |- (h : x = value)  → C x`
   `..., |- (h : x != value) → C x`
@@ -24,13 +50,18 @@ def caseValue (mvarId : MVarId) (fvarId : FVarId) (value : Expr) (hName : Name :
     let tag ← mvarId.getTag
     mvarId.checkNotAssigned `caseValue
     let target ← mvarId.getType
-    let xEqValue ← mkEq (mkFVar fvarId) (← normLitValue value)
+    let value ← normLitValue value
+    let xEqValue ← mkEq (mkFVar fvarId) value
     let xNeqValue := mkApp (mkConst `Not) xEqValue
     let thenTarget := Lean.mkForall hName BinderInfo.default xEqValue  target
     let elseTarget := Lean.mkForall hName BinderInfo.default xNeqValue target
     let thenMVar ← mkFreshExprSyntheticOpaqueMVar thenTarget tag
     let elseMVar ← mkFreshExprSyntheticOpaqueMVar elseTarget tag
-    let val ← mkAppOptM `dite #[none, xEqValue, none, thenMVar, elseMVar]
+    let val ←
+      if let some (b, h) ← mkValueTest? (mkFVar fvarId) value then
+        mkAppOptM ``Bool.Internal.matchValue #[none, b, xEqValue, h, thenMVar, elseMVar]
+      else
+        mkAppOptM `dite #[none, xEqValue, none, thenMVar, elseMVar]
     mvarId.assign val
     return (thenMVar.mvarId!, elseMVar.mvarId!)
 

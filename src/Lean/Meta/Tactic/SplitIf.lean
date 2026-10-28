@@ -44,6 +44,10 @@ private def isCandidate? (env : Environment) (ctx : Context) (e : Expr) : Option
       let numArgs := e.getAppNumArgs
       if numArgs >= 5 && !(e.getArg! 1 5).hasLooseBVars then
         return ret (e.getBoundedAppFn (numArgs - 5))
+    if e.isAppOf ``Bool.Internal.matchValue then
+      let numArgs := e.getAppNumArgs
+      if numArgs >= 6 && !(e.getArg! 1 6).hasLooseBVars && !(e.getArg! 2 6).hasLooseBVars then
+        return ret (e.getBoundedAppFn (numArgs - 6))
   if ctx.kind.considerMatch then
     if let some info := isMatcherAppCore? env e then
       let args := e.getAppArgs
@@ -122,6 +126,9 @@ where
 /-- Return the condition and decidable instance of an `if` expression to case split. -/
 private partial def findIfToSplit? (e : Expr) : MetaM (Option (Expr × Expr)) := do
   if let some iteApp ← findSplit? e .ite then
+    if iteApp.isAppOf ``Bool.Internal.matchValue then
+      let_expr Bool.Internal.matchValue _ b p h _ _ := iteApp | return none
+      return (p, mkApp3 (mkConst ``Decidable.intro) p b h)
     let cond := iteApp.getArg! 1 5
     let dec := iteApp.getArg! 2 5
     return (cond, dec)
@@ -249,10 +256,27 @@ private def reduceDIte' (numIndices : Nat) (useDecideBool : Bool) : Simp.Simproc
       let h := mkApp8 (mkConst ``dite_cond_congr us) α c c' i i' tb eb h
       return .done { expr := e', proof? := some h }
 
+/-- Reduces the value tests that the `match` compiler emits, like `reduceDIte'`. -/
+private def reduceMatchValue' (numIndices : Nat) (useDecideBool : Bool) :
+    Simp.Simproc := fun e => do
+  let_expr f@Bool.Internal.matchValue α b p h tb eb ← e | return .continue
+  let us := f.constLevels!
+  if let some hp ← discharge? numIndices useDecideBool p then
+    let e' := mkApp tb hp |>.headBeta
+    let h := mkApp7 (mkConst ``Bool.Internal.matchValue_pos us) α b p h tb eb hp
+    return .done { expr := e', proof? := some h }
+  else if let some hnp ← discharge? numIndices useDecideBool (mkNot p) then
+    let e' := mkApp eb hnp |>.headBeta
+    let h := mkApp7 (mkConst ``Bool.Internal.matchValue_neg us) α b p h tb eb hnp
+    return .done { expr := e', proof? := some h }
+  else
+    return .done { expr := e }
+
 private def getSimprocs (numIndices : Nat) (useDecide : Bool) : MetaM (Array Simprocs) := do
   let s : Simprocs := {}
   let s := s.addCore #[.const ``ite 5, .star, .star, .star, .star, .star] ``reduceIte' (post := false) (.inl <| reduceIte' numIndices useDecide)
   let s := s.addCore #[.const ``dite 5, .star, .star, .star, .star, .star] ``reduceDIte' (post := false) (.inl <| reduceDIte' numIndices useDecide)
+  let s := s.addCore #[.const ``Bool.Internal.matchValue 6, .star, .star, .star, .star, .star, .star] ``reduceMatchValue' (post := false) (.inl <| reduceMatchValue' numIndices useDecide)
   return #[s]
 
 def mkDischarge? (useDecide := false) : MetaM Simp.Discharge :=

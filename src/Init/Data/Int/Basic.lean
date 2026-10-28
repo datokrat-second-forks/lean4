@@ -268,6 +268,31 @@ protected def decEq (a b : @& Int) : Decidable (a = b) :=
 instance : DecidableEq Int := Int.decEq
 
 set_option bootstrap.genMatcherCode false in
+/--
+Boolean equality of integers that reduces by itself. The `match` compiler uses it to test `Int`
+value patterns.
+-/
+@[reducible, extern "lean_int_dec_eq"]
+protected def Internal.beq : (@& Int) → (@& Int) → Bool
+  | ofNat a, ofNat b => Nat.beq a b
+  | ofNat _, -[_ +1] => false
+  | -[_ +1], ofNat _ => false
+  | -[a +1], -[b +1] => Nat.beq a b
+
+/-- Used by the `match` compiler to test `Int` value patterns. -/
+theorem Internal.reflects_beq : (a b : Int) → (Int.Internal.beq a b).Reflects (a = b)
+  | ofNat a, ofNat b => show (Nat.beq a b).Reflects _ from
+    match h : Nat.beq a b with
+    | true  => congrArg ofNat (Nat.eq_of_beq_eq_true h)
+    | false => fun h' => Nat.ne_of_beq_eq_false h (Int.ofNat.inj h')
+  | ofNat _, -[_ +1] => show Not _ from fun h => Int.noConfusion h
+  | -[_ +1], ofNat _ => show Not _ from fun h => Int.noConfusion h
+  | -[a +1], -[b +1] => show (Nat.beq a b).Reflects _ from
+    match h : Nat.beq a b with
+    | true  => congrArg negSucc (Nat.eq_of_beq_eq_true h)
+    | false => fun h' => Nat.ne_of_beq_eq_false h (Int.negSucc.inj h')
+
+set_option bootstrap.genMatcherCode false in
 /-- Decides whether an integer is negative.
 
   ```
