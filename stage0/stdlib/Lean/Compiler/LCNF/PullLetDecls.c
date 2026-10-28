@@ -1538,9 +1538,9 @@ return v___y_403_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_PullLetDecls_pullDecls___lam__0___boxed(lean_object* v___x_519_, lean_object* v_decl_520_, lean_object* v_type_521_, lean_object* v_params_522_, lean_object* v_k_523_, lean_object* v_code_524_, lean_object* v_value_525_, lean_object* v___y_526_, lean_object* v___y_527_, lean_object* v___y_528_, lean_object* v___y_529_, lean_object* v___y_530_, lean_object* v___y_531_, lean_object* v___y_532_){
 _start:
 {
-uint8_t v___x_4033__boxed_533_; lean_object* v_res_534_; 
-v___x_4033__boxed_533_ = lean_unbox(v___x_519_);
-v_res_534_ = l_Lean_Compiler_LCNF_PullLetDecls_pullDecls___lam__0(v___x_4033__boxed_533_, v_decl_520_, v_type_521_, v_params_522_, v_k_523_, v_code_524_, v_value_525_, v___y_526_, v___y_527_, v___y_528_, v___y_529_, v___y_530_, v___y_531_);
+uint8_t v___x_3971__boxed_533_; lean_object* v_res_534_; 
+v___x_3971__boxed_533_ = lean_unbox(v___x_519_);
+v_res_534_ = l_Lean_Compiler_LCNF_PullLetDecls_pullDecls___lam__0(v___x_3971__boxed_533_, v_decl_520_, v_type_521_, v_params_522_, v_k_523_, v_code_524_, v_value_525_, v___y_526_, v___y_527_, v___y_528_, v___y_529_, v___y_530_, v___y_531_);
 lean_dec(v___y_531_);
 lean_dec_ref(v___y_530_);
 lean_dec(v___y_529_);

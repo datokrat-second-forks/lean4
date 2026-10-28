@@ -1068,12 +1068,12 @@ return v___x_400_;
 LEAN_EXPORT lean_object* l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Linter_recordLints_spec__0_spec__0___boxed(lean_object* v___y_401_, lean_object* v_x_402_, lean_object* v_x_403_, lean_object* v_x_404_, lean_object* v_x_405_, lean_object* v___y_406_){
 _start:
 {
-size_t v_x_2063__boxed_407_; size_t v_x_2064__boxed_408_; lean_object* v_res_409_; 
-v_x_2063__boxed_407_ = lean_unbox_usize(v_x_403_);
+size_t v_x_2040__boxed_407_; size_t v_x_2041__boxed_408_; lean_object* v_res_409_; 
+v_x_2040__boxed_407_ = lean_unbox_usize(v_x_403_);
 lean_dec(v_x_403_);
-v_x_2064__boxed_408_ = lean_unbox_usize(v_x_404_);
+v_x_2041__boxed_408_ = lean_unbox_usize(v_x_404_);
 lean_dec(v_x_404_);
-v_res_409_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Linter_recordLints_spec__0_spec__0(v___y_401_, v_x_402_, v_x_2063__boxed_407_, v_x_2064__boxed_408_, v_x_405_);
+v_res_409_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Linter_recordLints_spec__0_spec__0(v___y_401_, v_x_402_, v_x_2040__boxed_407_, v_x_2041__boxed_408_, v_x_405_);
 lean_dec_ref(v_x_402_);
 return v_res_409_;
 }

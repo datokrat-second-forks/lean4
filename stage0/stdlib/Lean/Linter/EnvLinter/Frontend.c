@@ -6345,9 +6345,9 @@ return v___x_2122_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_QSort_Basic_0__Array_qsort_sort___at___00Lean_Linter_EnvLinter_groupedByFilename_spec__1___redArg___lam__0___boxed(lean_object* v___x_2123_, lean_object* v_x_2124_, lean_object* v_x_2125_){
 _start:
 {
-uint8_t v___x_5184__boxed_2126_; uint8_t v_res_2127_; lean_object* v_r_2128_; 
-v___x_5184__boxed_2126_ = lean_unbox(v___x_2123_);
-v_res_2127_ = l___private_Init_Data_Array_QSort_Basic_0__Array_qsort_sort___at___00Lean_Linter_EnvLinter_groupedByFilename_spec__1___redArg___lam__0(v___x_5184__boxed_2126_, v_x_2124_, v_x_2125_);
+uint8_t v___x_5169__boxed_2126_; uint8_t v_res_2127_; lean_object* v_r_2128_; 
+v___x_5169__boxed_2126_ = lean_unbox(v___x_2123_);
+v_res_2127_ = l___private_Init_Data_Array_QSort_Basic_0__Array_qsort_sort___at___00Lean_Linter_EnvLinter_groupedByFilename_spec__1___redArg___lam__0(v___x_5169__boxed_2126_, v_x_2124_, v_x_2125_);
 v_r_2128_ = lean_box(v_res_2127_);
 return v_r_2128_;
 }
@@ -8327,9 +8327,9 @@ return v___x_2920_;
 LEAN_EXPORT lean_object* l_Lean_Linter_EnvLinter_getDeclsInPackage___redArg___lam__0___boxed(lean_object* v___x_2921_, lean_object* v___x_2922_, lean_object* v_decls_2923_, lean_object* v_declName_2924_, lean_object* v_x_2925_){
 _start:
 {
-uint8_t v___x_1274__boxed_2926_; lean_object* v_res_2927_; 
-v___x_1274__boxed_2926_ = lean_unbox(v___x_2921_);
-v_res_2927_ = l_Lean_Linter_EnvLinter_getDeclsInPackage___redArg___lam__0(v___x_1274__boxed_2926_, v___x_2922_, v_decls_2923_, v_declName_2924_, v_x_2925_);
+uint8_t v___x_1260__boxed_2926_; lean_object* v_res_2927_; 
+v___x_1260__boxed_2926_ = lean_unbox(v___x_2921_);
+v_res_2927_ = l_Lean_Linter_EnvLinter_getDeclsInPackage___redArg___lam__0(v___x_1260__boxed_2926_, v___x_2922_, v_decls_2923_, v_declName_2924_, v_x_2925_);
 lean_dec_ref(v_x_2925_);
 lean_dec_ref(v___x_2922_);
 return v_res_2927_;

@@ -8210,12 +8210,12 @@ return v___x_2596_;
 LEAN_EXPORT lean_object* l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00__private_Lean_Meta_Tactic_Grind_PP_0__Lean_Meta_Grind_ppThresholds_spec__0_spec__0___boxed(lean_object* v_a_2597_, lean_object* v_x_2598_, lean_object* v_x_2599_, lean_object* v_x_2600_, lean_object* v_x_2601_){
 _start:
 {
-size_t v_x_7552__boxed_2602_; size_t v_x_7553__boxed_2603_; lean_object* v_res_2604_; 
-v_x_7552__boxed_2602_ = lean_unbox_usize(v_x_2599_);
+size_t v_x_7538__boxed_2602_; size_t v_x_7539__boxed_2603_; lean_object* v_res_2604_; 
+v_x_7538__boxed_2602_ = lean_unbox_usize(v_x_2599_);
 lean_dec(v_x_2599_);
-v_x_7553__boxed_2603_ = lean_unbox_usize(v_x_2600_);
+v_x_7539__boxed_2603_ = lean_unbox_usize(v_x_2600_);
 lean_dec(v_x_2600_);
-v_res_2604_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00__private_Lean_Meta_Tactic_Grind_PP_0__Lean_Meta_Grind_ppThresholds_spec__0_spec__0(v_a_2597_, v_x_2598_, v_x_7552__boxed_2602_, v_x_7553__boxed_2603_, v_x_2601_);
+v_res_2604_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00__private_Lean_Meta_Tactic_Grind_PP_0__Lean_Meta_Grind_ppThresholds_spec__0_spec__0(v_a_2597_, v_x_2598_, v_x_7538__boxed_2602_, v_x_7539__boxed_2603_, v_x_2601_);
 lean_dec_ref(v_x_2598_);
 lean_dec_ref(v_a_2597_);
 return v_res_2604_;

@@ -11674,18 +11674,18 @@ goto v_reusejp_2349_;
 }
 v_reusejp_2349_:
 {
-lean_object* v___x_2351_; lean_object* v___x_2352_; lean_object* v___x_2353_; lean_object* v___x_1176__overap_2354_; lean_object* v___x_2355_; 
+lean_object* v___x_2351_; lean_object* v___x_2352_; lean_object* v___x_2353_; lean_object* v___x_1104__overap_2354_; lean_object* v___x_2355_; 
 v___x_2351_ = l_StateRefT_x27_instMonad___redArg(v___x_2350_);
 v___x_2352_ = lean_box(0);
 v___x_2353_ = l_instInhabitedOfMonad___redArg(v___x_2351_, v___x_2352_);
-v___x_1176__overap_2354_ = lean_panic_fn_borrowed(v___x_2353_, v_msg_2295_);
+v___x_1104__overap_2354_ = lean_panic_fn_borrowed(v___x_2353_, v_msg_2295_);
 lean_dec(v___x_2353_);
 lean_inc(v___y_2300_);
 lean_inc_ref(v___y_2299_);
 lean_inc(v___y_2298_);
 lean_inc_ref(v___y_2297_);
 lean_inc(v___y_2296_);
-v___x_2355_ = lean_apply_6(v___x_1176__overap_2354_, v___y_2296_, v___y_2297_, v___y_2298_, v___y_2299_, v___y_2300_, lean_box(0));
+v___x_2355_ = lean_apply_6(v___x_1104__overap_2354_, v___y_2296_, v___y_2297_, v___y_2298_, v___y_2299_, v___y_2300_, lean_box(0));
 return v___x_2355_;
 }
 }
@@ -30624,9 +30624,9 @@ return v___x_8273_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__10___boxed(lean_object* v___x_8274_, lean_object* v___x_8275_, lean_object* v___y_8276_, lean_object* v___y_8277_, lean_object* v___y_8278_, lean_object* v___y_8279_, lean_object* v___y_8280_, lean_object* v___y_8281_, lean_object* v___y_8282_){
 _start:
 {
-uint16_t v___x_22024__boxed_8283_; lean_object* v_res_8284_; 
-v___x_22024__boxed_8283_ = lean_unbox(v___x_8274_);
-v_res_8284_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__10(v___x_22024__boxed_8283_, v___x_8275_, v___y_8276_, v___y_8277_, v___y_8278_, v___y_8279_, v___y_8280_, v___y_8281_);
+uint16_t v___x_21252__boxed_8283_; lean_object* v_res_8284_; 
+v___x_21252__boxed_8283_ = lean_unbox(v___x_8274_);
+v_res_8284_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__10(v___x_21252__boxed_8283_, v___x_8275_, v___y_8276_, v___y_8277_, v___y_8278_, v___y_8279_, v___y_8280_, v___y_8281_);
 lean_dec(v___y_8281_);
 lean_dec_ref(v___y_8280_);
 lean_dec(v___y_8279_);
@@ -30647,9 +30647,9 @@ return v___x_8293_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__15___boxed(lean_object* v___x_8294_, lean_object* v___y_8295_, lean_object* v___y_8296_, lean_object* v___y_8297_, lean_object* v___y_8298_, lean_object* v___y_8299_, lean_object* v___y_8300_, lean_object* v___y_8301_){
 _start:
 {
-uint16_t v___x_22053__boxed_8302_; lean_object* v_res_8303_; 
-v___x_22053__boxed_8302_ = lean_unbox(v___x_8294_);
-v_res_8303_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__15(v___x_22053__boxed_8302_, v___y_8295_, v___y_8296_, v___y_8297_, v___y_8298_, v___y_8299_, v___y_8300_);
+uint16_t v___x_21281__boxed_8302_; lean_object* v_res_8303_; 
+v___x_21281__boxed_8302_ = lean_unbox(v___x_8294_);
+v_res_8303_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__15(v___x_21281__boxed_8302_, v___y_8295_, v___y_8296_, v___y_8297_, v___y_8298_, v___y_8299_, v___y_8300_);
 lean_dec(v___y_8300_);
 lean_dec_ref(v___y_8299_);
 lean_dec(v___y_8298_);
@@ -30670,9 +30670,9 @@ return v___x_8312_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__16___boxed(lean_object* v___x_8313_, lean_object* v___y_8314_, lean_object* v___y_8315_, lean_object* v___y_8316_, lean_object* v___y_8317_, lean_object* v___y_8318_, lean_object* v___y_8319_, lean_object* v___y_8320_){
 _start:
 {
-uint16_t v___x_22079__boxed_8321_; lean_object* v_res_8322_; 
-v___x_22079__boxed_8321_ = lean_unbox(v___x_8313_);
-v_res_8322_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__16(v___x_22079__boxed_8321_, v___y_8314_, v___y_8315_, v___y_8316_, v___y_8317_, v___y_8318_, v___y_8319_);
+uint16_t v___x_21307__boxed_8321_; lean_object* v_res_8322_; 
+v___x_21307__boxed_8321_ = lean_unbox(v___x_8313_);
+v_res_8322_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__16(v___x_21307__boxed_8321_, v___y_8314_, v___y_8315_, v___y_8316_, v___y_8317_, v___y_8318_, v___y_8319_);
 lean_dec(v___y_8319_);
 lean_dec_ref(v___y_8318_);
 lean_dec(v___y_8317_);
@@ -30693,9 +30693,9 @@ return v___x_8331_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__17___boxed(lean_object* v___x_8332_, lean_object* v___y_8333_, lean_object* v___y_8334_, lean_object* v___y_8335_, lean_object* v___y_8336_, lean_object* v___y_8337_, lean_object* v___y_8338_, lean_object* v___y_8339_){
 _start:
 {
-uint16_t v___x_22105__boxed_8340_; lean_object* v_res_8341_; 
-v___x_22105__boxed_8340_ = lean_unbox(v___x_8332_);
-v_res_8341_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__17(v___x_22105__boxed_8340_, v___y_8333_, v___y_8334_, v___y_8335_, v___y_8336_, v___y_8337_, v___y_8338_);
+uint16_t v___x_21333__boxed_8340_; lean_object* v_res_8341_; 
+v___x_21333__boxed_8340_ = lean_unbox(v___x_8332_);
+v_res_8341_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__17(v___x_21333__boxed_8340_, v___y_8333_, v___y_8334_, v___y_8335_, v___y_8336_, v___y_8337_, v___y_8338_);
 lean_dec(v___y_8338_);
 lean_dec_ref(v___y_8337_);
 lean_dec(v___y_8336_);
@@ -30803,9 +30803,9 @@ return v___x_8429_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__20___boxed(lean_object* v___x_8430_, lean_object* v___f_8431_, lean_object* v___y_8432_, lean_object* v___y_8433_, lean_object* v___y_8434_, lean_object* v___y_8435_, lean_object* v___y_8436_, lean_object* v___y_8437_, lean_object* v___y_8438_){
 _start:
 {
-uint16_t v___x_22205__boxed_8439_; lean_object* v_res_8440_; 
-v___x_22205__boxed_8439_ = lean_unbox(v___x_8430_);
-v_res_8440_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__20(v___x_22205__boxed_8439_, v___f_8431_, v___y_8432_, v___y_8433_, v___y_8434_, v___y_8435_, v___y_8436_, v___y_8437_);
+uint16_t v___x_21433__boxed_8439_; lean_object* v_res_8440_; 
+v___x_21433__boxed_8439_ = lean_unbox(v___x_8430_);
+v_res_8440_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__20(v___x_21433__boxed_8439_, v___f_8431_, v___y_8432_, v___y_8433_, v___y_8434_, v___y_8435_, v___y_8436_, v___y_8437_);
 lean_dec(v___y_8437_);
 lean_dec_ref(v___y_8436_);
 lean_dec(v___y_8435_);
@@ -30826,9 +30826,9 @@ return v___x_8450_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__21___boxed(lean_object* v___x_8451_, lean_object* v___f_8452_, lean_object* v___y_8453_, lean_object* v___y_8454_, lean_object* v___y_8455_, lean_object* v___y_8456_, lean_object* v___y_8457_, lean_object* v___y_8458_, lean_object* v___y_8459_){
 _start:
 {
-uint16_t v___x_22234__boxed_8460_; lean_object* v_res_8461_; 
-v___x_22234__boxed_8460_ = lean_unbox(v___x_8451_);
-v_res_8461_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__21(v___x_22234__boxed_8460_, v___f_8452_, v___y_8453_, v___y_8454_, v___y_8455_, v___y_8456_, v___y_8457_, v___y_8458_);
+uint16_t v___x_21462__boxed_8460_; lean_object* v_res_8461_; 
+v___x_21462__boxed_8460_ = lean_unbox(v___x_8451_);
+v_res_8461_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__21(v___x_21462__boxed_8460_, v___f_8452_, v___y_8453_, v___y_8454_, v___y_8455_, v___y_8456_, v___y_8457_, v___y_8458_);
 lean_dec(v___y_8458_);
 lean_dec_ref(v___y_8457_);
 lean_dec(v___y_8456_);
@@ -31176,10 +31176,10 @@ return v___x_8608_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__19___boxed(lean_object* v___x_8609_, lean_object* v___x_8610_, lean_object* v___y_8611_, lean_object* v___y_8612_, lean_object* v___y_8613_, lean_object* v___y_8614_, lean_object* v___y_8615_, lean_object* v___y_8616_, lean_object* v___y_8617_){
 _start:
 {
-uint32_t v___x_22449__boxed_8618_; lean_object* v_res_8619_; 
-v___x_22449__boxed_8618_ = lean_unbox_uint32(v___x_8609_);
+uint32_t v___x_21677__boxed_8618_; lean_object* v_res_8619_; 
+v___x_21677__boxed_8618_ = lean_unbox_uint32(v___x_8609_);
 lean_dec(v___x_8609_);
-v_res_8619_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__19(v___x_22449__boxed_8618_, v___x_8610_, v___y_8611_, v___y_8612_, v___y_8613_, v___y_8614_, v___y_8615_, v___y_8616_);
+v_res_8619_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__19(v___x_21677__boxed_8618_, v___x_8610_, v___y_8611_, v___y_8612_, v___y_8613_, v___y_8614_, v___y_8615_, v___y_8616_);
 lean_dec(v___y_8616_);
 lean_dec_ref(v___y_8615_);
 lean_dec(v___y_8614_);
@@ -31200,10 +31200,10 @@ return v___x_8628_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__22___boxed(lean_object* v___x_8629_, lean_object* v___y_8630_, lean_object* v___y_8631_, lean_object* v___y_8632_, lean_object* v___y_8633_, lean_object* v___y_8634_, lean_object* v___y_8635_, lean_object* v___y_8636_){
 _start:
 {
-uint32_t v___x_22478__boxed_8637_; lean_object* v_res_8638_; 
-v___x_22478__boxed_8637_ = lean_unbox_uint32(v___x_8629_);
+uint32_t v___x_21706__boxed_8637_; lean_object* v_res_8638_; 
+v___x_21706__boxed_8637_ = lean_unbox_uint32(v___x_8629_);
 lean_dec(v___x_8629_);
-v_res_8638_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__22(v___x_22478__boxed_8637_, v___y_8630_, v___y_8631_, v___y_8632_, v___y_8633_, v___y_8634_, v___y_8635_);
+v_res_8638_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__22(v___x_21706__boxed_8637_, v___y_8630_, v___y_8631_, v___y_8632_, v___y_8633_, v___y_8634_, v___y_8635_);
 lean_dec(v___y_8635_);
 lean_dec_ref(v___y_8634_);
 lean_dec(v___y_8633_);
@@ -31224,10 +31224,10 @@ return v___x_8647_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__23___boxed(lean_object* v___x_8648_, lean_object* v___y_8649_, lean_object* v___y_8650_, lean_object* v___y_8651_, lean_object* v___y_8652_, lean_object* v___y_8653_, lean_object* v___y_8654_, lean_object* v___y_8655_){
 _start:
 {
-uint32_t v___x_22504__boxed_8656_; lean_object* v_res_8657_; 
-v___x_22504__boxed_8656_ = lean_unbox_uint32(v___x_8648_);
+uint32_t v___x_21732__boxed_8656_; lean_object* v_res_8657_; 
+v___x_21732__boxed_8656_ = lean_unbox_uint32(v___x_8648_);
 lean_dec(v___x_8648_);
-v_res_8657_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__23(v___x_22504__boxed_8656_, v___y_8649_, v___y_8650_, v___y_8651_, v___y_8652_, v___y_8653_, v___y_8654_);
+v_res_8657_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__23(v___x_21732__boxed_8656_, v___y_8649_, v___y_8650_, v___y_8651_, v___y_8652_, v___y_8653_, v___y_8654_);
 lean_dec(v___y_8654_);
 lean_dec_ref(v___y_8653_);
 lean_dec(v___y_8652_);
@@ -31248,10 +31248,10 @@ return v___x_8666_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__24___boxed(lean_object* v___x_8667_, lean_object* v___y_8668_, lean_object* v___y_8669_, lean_object* v___y_8670_, lean_object* v___y_8671_, lean_object* v___y_8672_, lean_object* v___y_8673_, lean_object* v___y_8674_){
 _start:
 {
-uint32_t v___x_22530__boxed_8675_; lean_object* v_res_8676_; 
-v___x_22530__boxed_8675_ = lean_unbox_uint32(v___x_8667_);
+uint32_t v___x_21758__boxed_8675_; lean_object* v_res_8676_; 
+v___x_21758__boxed_8675_ = lean_unbox_uint32(v___x_8667_);
 lean_dec(v___x_8667_);
-v_res_8676_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__24(v___x_22530__boxed_8675_, v___y_8668_, v___y_8669_, v___y_8670_, v___y_8671_, v___y_8672_, v___y_8673_);
+v_res_8676_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__24(v___x_21758__boxed_8675_, v___y_8668_, v___y_8669_, v___y_8670_, v___y_8671_, v___y_8672_, v___y_8673_);
 lean_dec(v___y_8673_);
 lean_dec_ref(v___y_8672_);
 lean_dec(v___y_8671_);
@@ -31365,10 +31365,10 @@ return v___x_8764_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__27___boxed(lean_object* v___x_8765_, lean_object* v___f_8766_, lean_object* v___y_8767_, lean_object* v___y_8768_, lean_object* v___y_8769_, lean_object* v___y_8770_, lean_object* v___y_8771_, lean_object* v___y_8772_, lean_object* v___y_8773_){
 _start:
 {
-uint32_t v___x_22630__boxed_8774_; lean_object* v_res_8775_; 
-v___x_22630__boxed_8774_ = lean_unbox_uint32(v___x_8765_);
+uint32_t v___x_21858__boxed_8774_; lean_object* v_res_8775_; 
+v___x_21858__boxed_8774_ = lean_unbox_uint32(v___x_8765_);
 lean_dec(v___x_8765_);
-v_res_8775_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__27(v___x_22630__boxed_8774_, v___f_8766_, v___y_8767_, v___y_8768_, v___y_8769_, v___y_8770_, v___y_8771_, v___y_8772_);
+v_res_8775_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__27(v___x_21858__boxed_8774_, v___f_8766_, v___y_8767_, v___y_8768_, v___y_8769_, v___y_8770_, v___y_8771_, v___y_8772_);
 lean_dec(v___y_8772_);
 lean_dec_ref(v___y_8771_);
 lean_dec(v___y_8770_);
@@ -31389,10 +31389,10 @@ return v___x_8785_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__28___boxed(lean_object* v___x_8786_, lean_object* v___f_8787_, lean_object* v___y_8788_, lean_object* v___y_8789_, lean_object* v___y_8790_, lean_object* v___y_8791_, lean_object* v___y_8792_, lean_object* v___y_8793_, lean_object* v___y_8794_){
 _start:
 {
-uint32_t v___x_22659__boxed_8795_; lean_object* v_res_8796_; 
-v___x_22659__boxed_8795_ = lean_unbox_uint32(v___x_8786_);
+uint32_t v___x_21887__boxed_8795_; lean_object* v_res_8796_; 
+v___x_21887__boxed_8795_ = lean_unbox_uint32(v___x_8786_);
 lean_dec(v___x_8786_);
-v_res_8796_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__28(v___x_22659__boxed_8795_, v___f_8787_, v___y_8788_, v___y_8789_, v___y_8790_, v___y_8791_, v___y_8792_, v___y_8793_);
+v_res_8796_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__28(v___x_21887__boxed_8795_, v___f_8787_, v___y_8788_, v___y_8789_, v___y_8790_, v___y_8791_, v___y_8792_, v___y_8793_);
 lean_dec(v___y_8793_);
 lean_dec_ref(v___y_8792_);
 lean_dec(v___y_8791_);
@@ -31740,10 +31740,10 @@ return v___x_8943_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__26___boxed(lean_object* v___x_8944_, lean_object* v___x_8945_, lean_object* v___y_8946_, lean_object* v___y_8947_, lean_object* v___y_8948_, lean_object* v___y_8949_, lean_object* v___y_8950_, lean_object* v___y_8951_, lean_object* v___y_8952_){
 _start:
 {
-uint64_t v___x_22874__boxed_8953_; lean_object* v_res_8954_; 
-v___x_22874__boxed_8953_ = lean_unbox_uint64(v___x_8944_);
+uint64_t v___x_22102__boxed_8953_; lean_object* v_res_8954_; 
+v___x_22102__boxed_8953_ = lean_unbox_uint64(v___x_8944_);
 lean_dec_ref(v___x_8944_);
-v_res_8954_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__26(v___x_22874__boxed_8953_, v___x_8945_, v___y_8946_, v___y_8947_, v___y_8948_, v___y_8949_, v___y_8950_, v___y_8951_);
+v_res_8954_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__26(v___x_22102__boxed_8953_, v___x_8945_, v___y_8946_, v___y_8947_, v___y_8948_, v___y_8949_, v___y_8950_, v___y_8951_);
 lean_dec(v___y_8951_);
 lean_dec_ref(v___y_8950_);
 lean_dec(v___y_8949_);
@@ -31764,10 +31764,10 @@ return v___x_8963_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__29___boxed(lean_object* v___x_8964_, lean_object* v___y_8965_, lean_object* v___y_8966_, lean_object* v___y_8967_, lean_object* v___y_8968_, lean_object* v___y_8969_, lean_object* v___y_8970_, lean_object* v___y_8971_){
 _start:
 {
-uint64_t v___x_22903__boxed_8972_; lean_object* v_res_8973_; 
-v___x_22903__boxed_8972_ = lean_unbox_uint64(v___x_8964_);
+uint64_t v___x_22131__boxed_8972_; lean_object* v_res_8973_; 
+v___x_22131__boxed_8972_ = lean_unbox_uint64(v___x_8964_);
 lean_dec_ref(v___x_8964_);
-v_res_8973_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__29(v___x_22903__boxed_8972_, v___y_8965_, v___y_8966_, v___y_8967_, v___y_8968_, v___y_8969_, v___y_8970_);
+v_res_8973_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__29(v___x_22131__boxed_8972_, v___y_8965_, v___y_8966_, v___y_8967_, v___y_8968_, v___y_8969_, v___y_8970_);
 lean_dec(v___y_8970_);
 lean_dec_ref(v___y_8969_);
 lean_dec(v___y_8968_);
@@ -31788,10 +31788,10 @@ return v___x_8982_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__30___boxed(lean_object* v___x_8983_, lean_object* v___y_8984_, lean_object* v___y_8985_, lean_object* v___y_8986_, lean_object* v___y_8987_, lean_object* v___y_8988_, lean_object* v___y_8989_, lean_object* v___y_8990_){
 _start:
 {
-uint64_t v___x_22929__boxed_8991_; lean_object* v_res_8992_; 
-v___x_22929__boxed_8991_ = lean_unbox_uint64(v___x_8983_);
+uint64_t v___x_22157__boxed_8991_; lean_object* v_res_8992_; 
+v___x_22157__boxed_8991_ = lean_unbox_uint64(v___x_8983_);
 lean_dec_ref(v___x_8983_);
-v_res_8992_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__30(v___x_22929__boxed_8991_, v___y_8984_, v___y_8985_, v___y_8986_, v___y_8987_, v___y_8988_, v___y_8989_);
+v_res_8992_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__30(v___x_22157__boxed_8991_, v___y_8984_, v___y_8985_, v___y_8986_, v___y_8987_, v___y_8988_, v___y_8989_);
 lean_dec(v___y_8989_);
 lean_dec_ref(v___y_8988_);
 lean_dec(v___y_8987_);
@@ -31812,10 +31812,10 @@ return v___x_9001_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__31___boxed(lean_object* v___x_9002_, lean_object* v___y_9003_, lean_object* v___y_9004_, lean_object* v___y_9005_, lean_object* v___y_9006_, lean_object* v___y_9007_, lean_object* v___y_9008_, lean_object* v___y_9009_){
 _start:
 {
-uint64_t v___x_22955__boxed_9010_; lean_object* v_res_9011_; 
-v___x_22955__boxed_9010_ = lean_unbox_uint64(v___x_9002_);
+uint64_t v___x_22183__boxed_9010_; lean_object* v_res_9011_; 
+v___x_22183__boxed_9010_ = lean_unbox_uint64(v___x_9002_);
 lean_dec_ref(v___x_9002_);
-v_res_9011_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__31(v___x_22955__boxed_9010_, v___y_9003_, v___y_9004_, v___y_9005_, v___y_9006_, v___y_9007_, v___y_9008_);
+v_res_9011_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__31(v___x_22183__boxed_9010_, v___y_9003_, v___y_9004_, v___y_9005_, v___y_9006_, v___y_9007_, v___y_9008_);
 lean_dec(v___y_9008_);
 lean_dec_ref(v___y_9007_);
 lean_dec(v___y_9006_);
@@ -31929,10 +31929,10 @@ return v___x_9099_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__34___boxed(lean_object* v___x_9100_, lean_object* v___f_9101_, lean_object* v___y_9102_, lean_object* v___y_9103_, lean_object* v___y_9104_, lean_object* v___y_9105_, lean_object* v___y_9106_, lean_object* v___y_9107_, lean_object* v___y_9108_){
 _start:
 {
-uint64_t v___x_23055__boxed_9109_; lean_object* v_res_9110_; 
-v___x_23055__boxed_9109_ = lean_unbox_uint64(v___x_9100_);
+uint64_t v___x_22283__boxed_9109_; lean_object* v_res_9110_; 
+v___x_22283__boxed_9109_ = lean_unbox_uint64(v___x_9100_);
 lean_dec_ref(v___x_9100_);
-v_res_9110_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__34(v___x_23055__boxed_9109_, v___f_9101_, v___y_9102_, v___y_9103_, v___y_9104_, v___y_9105_, v___y_9106_, v___y_9107_);
+v_res_9110_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__34(v___x_22283__boxed_9109_, v___f_9101_, v___y_9102_, v___y_9103_, v___y_9104_, v___y_9105_, v___y_9106_, v___y_9107_);
 lean_dec(v___y_9107_);
 lean_dec_ref(v___y_9106_);
 lean_dec(v___y_9105_);
@@ -31953,10 +31953,10 @@ return v___x_9120_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__35___boxed(lean_object* v___x_9121_, lean_object* v___f_9122_, lean_object* v___y_9123_, lean_object* v___y_9124_, lean_object* v___y_9125_, lean_object* v___y_9126_, lean_object* v___y_9127_, lean_object* v___y_9128_, lean_object* v___y_9129_){
 _start:
 {
-uint64_t v___x_23084__boxed_9130_; lean_object* v_res_9131_; 
-v___x_23084__boxed_9130_ = lean_unbox_uint64(v___x_9121_);
+uint64_t v___x_22312__boxed_9130_; lean_object* v_res_9131_; 
+v___x_22312__boxed_9130_ = lean_unbox_uint64(v___x_9121_);
 lean_dec_ref(v___x_9121_);
-v_res_9131_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__35(v___x_23084__boxed_9130_, v___f_9122_, v___y_9123_, v___y_9124_, v___y_9125_, v___y_9126_, v___y_9127_, v___y_9128_);
+v_res_9131_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__35(v___x_22312__boxed_9130_, v___f_9122_, v___y_9123_, v___y_9124_, v___y_9125_, v___y_9126_, v___y_9127_, v___y_9128_);
 lean_dec(v___y_9128_);
 lean_dec_ref(v___y_9127_);
 lean_dec(v___y_9126_);
@@ -31977,12 +31977,12 @@ return v___x_9141_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__39___boxed(lean_object* v___x_9142_, lean_object* v___x_9143_, lean_object* v___y_9144_, lean_object* v___y_9145_, lean_object* v___y_9146_, lean_object* v___y_9147_, lean_object* v___y_9148_, lean_object* v___y_9149_, lean_object* v___y_9150_){
 _start:
 {
-uint64_t v___x_23113__boxed_9151_; uint64_t v___x_23114__boxed_9152_; lean_object* v_res_9153_; 
-v___x_23113__boxed_9151_ = lean_unbox_uint64(v___x_9142_);
+uint64_t v___x_22341__boxed_9151_; uint64_t v___x_22342__boxed_9152_; lean_object* v_res_9153_; 
+v___x_22341__boxed_9151_ = lean_unbox_uint64(v___x_9142_);
 lean_dec_ref(v___x_9142_);
-v___x_23114__boxed_9152_ = lean_unbox_uint64(v___x_9143_);
+v___x_22342__boxed_9152_ = lean_unbox_uint64(v___x_9143_);
 lean_dec_ref(v___x_9143_);
-v_res_9153_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__39(v___x_23113__boxed_9151_, v___x_23114__boxed_9152_, v___y_9144_, v___y_9145_, v___y_9146_, v___y_9147_, v___y_9148_, v___y_9149_);
+v_res_9153_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__39(v___x_22341__boxed_9151_, v___x_22342__boxed_9152_, v___y_9144_, v___y_9145_, v___y_9146_, v___y_9147_, v___y_9148_, v___y_9149_);
 lean_dec(v___y_9149_);
 lean_dec_ref(v___y_9148_);
 lean_dec(v___y_9147_);
@@ -32003,12 +32003,12 @@ return v___x_9156_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__32___boxed(lean_object* v___x_9157_, lean_object* v_x_9158_){
 _start:
 {
-uint64_t v___x_23142__boxed_9159_; uint64_t v_x_23143__boxed_9160_; uint64_t v_res_9161_; lean_object* v_r_9162_; 
-v___x_23142__boxed_9159_ = lean_unbox_uint64(v___x_9157_);
+uint64_t v___x_22370__boxed_9159_; uint64_t v_x_22371__boxed_9160_; uint64_t v_res_9161_; lean_object* v_r_9162_; 
+v___x_22370__boxed_9159_ = lean_unbox_uint64(v___x_9157_);
 lean_dec_ref(v___x_9157_);
-v_x_23143__boxed_9160_ = lean_unbox_uint64(v_x_9158_);
+v_x_22371__boxed_9160_ = lean_unbox_uint64(v_x_9158_);
 lean_dec_ref(v_x_9158_);
-v_res_9161_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__32(v___x_23142__boxed_9159_, v_x_23143__boxed_9160_);
+v_res_9161_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__32(v___x_22370__boxed_9159_, v_x_22371__boxed_9160_);
 v_r_9162_ = lean_box_uint64(v_res_9161_);
 return v_r_9162_;
 }
@@ -32024,10 +32024,10 @@ return v___x_9172_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__33___boxed(lean_object* v___x_9173_, lean_object* v___x_9174_, lean_object* v___y_9175_, lean_object* v___y_9176_, lean_object* v___y_9177_, lean_object* v___y_9178_, lean_object* v___y_9179_, lean_object* v___y_9180_, lean_object* v___y_9181_){
 _start:
 {
-uint64_t v___x_23150__boxed_9182_; lean_object* v_res_9183_; 
-v___x_23150__boxed_9182_ = lean_unbox_uint64(v___x_9173_);
+uint64_t v___x_22378__boxed_9182_; lean_object* v_res_9183_; 
+v___x_22378__boxed_9182_ = lean_unbox_uint64(v___x_9173_);
 lean_dec_ref(v___x_9173_);
-v_res_9183_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__33(v___x_23150__boxed_9182_, v___x_9174_, v___y_9175_, v___y_9176_, v___y_9177_, v___y_9178_, v___y_9179_, v___y_9180_);
+v_res_9183_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__33(v___x_22378__boxed_9182_, v___x_9174_, v___y_9175_, v___y_9176_, v___y_9177_, v___y_9178_, v___y_9179_, v___y_9180_);
 lean_dec(v___y_9180_);
 lean_dec_ref(v___y_9179_);
 lean_dec(v___y_9178_);
@@ -32048,12 +32048,12 @@ return v___x_9186_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__38___boxed(lean_object* v___x_9187_, lean_object* v_x_9188_){
 _start:
 {
-uint32_t v___x_23179__boxed_9189_; uint32_t v_x_23180__boxed_9190_; uint32_t v_res_9191_; lean_object* v_r_9192_; 
-v___x_23179__boxed_9189_ = lean_unbox_uint32(v___x_9187_);
+uint32_t v___x_22407__boxed_9189_; uint32_t v_x_22408__boxed_9190_; uint32_t v_res_9191_; lean_object* v_r_9192_; 
+v___x_22407__boxed_9189_ = lean_unbox_uint32(v___x_9187_);
 lean_dec(v___x_9187_);
-v_x_23180__boxed_9190_ = lean_unbox_uint32(v_x_9188_);
+v_x_22408__boxed_9190_ = lean_unbox_uint32(v_x_9188_);
 lean_dec(v_x_9188_);
-v_res_9191_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__38(v___x_23179__boxed_9189_, v_x_23180__boxed_9190_);
+v_res_9191_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__38(v___x_22407__boxed_9189_, v_x_22408__boxed_9190_);
 v_r_9192_ = lean_box_uint32(v_res_9191_);
 return v_r_9192_;
 }
@@ -32069,12 +32069,12 @@ return v___x_9202_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__36___boxed(lean_object* v___x_9203_, lean_object* v___x_9204_, lean_object* v___y_9205_, lean_object* v___y_9206_, lean_object* v___y_9207_, lean_object* v___y_9208_, lean_object* v___y_9209_, lean_object* v___y_9210_, lean_object* v___y_9211_){
 _start:
 {
-uint32_t v___x_23187__boxed_9212_; uint32_t v___x_23188__boxed_9213_; lean_object* v_res_9214_; 
-v___x_23187__boxed_9212_ = lean_unbox_uint32(v___x_9203_);
+uint32_t v___x_22415__boxed_9212_; uint32_t v___x_22416__boxed_9213_; lean_object* v_res_9214_; 
+v___x_22415__boxed_9212_ = lean_unbox_uint32(v___x_9203_);
 lean_dec(v___x_9203_);
-v___x_23188__boxed_9213_ = lean_unbox_uint32(v___x_9204_);
+v___x_22416__boxed_9213_ = lean_unbox_uint32(v___x_9204_);
 lean_dec(v___x_9204_);
-v_res_9214_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__36(v___x_23187__boxed_9212_, v___x_23188__boxed_9213_, v___y_9205_, v___y_9206_, v___y_9207_, v___y_9208_, v___y_9209_, v___y_9210_);
+v_res_9214_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__36(v___x_22415__boxed_9212_, v___x_22416__boxed_9213_, v___y_9205_, v___y_9206_, v___y_9207_, v___y_9208_, v___y_9209_, v___y_9210_);
 lean_dec(v___y_9210_);
 lean_dec_ref(v___y_9209_);
 lean_dec(v___y_9208_);
@@ -32095,10 +32095,10 @@ return v___x_9224_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__41___boxed(lean_object* v___x_9225_, lean_object* v___x_9226_, lean_object* v___y_9227_, lean_object* v___y_9228_, lean_object* v___y_9229_, lean_object* v___y_9230_, lean_object* v___y_9231_, lean_object* v___y_9232_, lean_object* v___y_9233_){
 _start:
 {
-uint32_t v___x_23216__boxed_9234_; lean_object* v_res_9235_; 
-v___x_23216__boxed_9234_ = lean_unbox_uint32(v___x_9225_);
+uint32_t v___x_22444__boxed_9234_; lean_object* v_res_9235_; 
+v___x_22444__boxed_9234_ = lean_unbox_uint32(v___x_9225_);
 lean_dec(v___x_9225_);
-v_res_9235_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__41(v___x_23216__boxed_9234_, v___x_9226_, v___y_9227_, v___y_9228_, v___y_9229_, v___y_9230_, v___y_9231_, v___y_9232_);
+v_res_9235_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__41(v___x_22444__boxed_9234_, v___x_9226_, v___y_9227_, v___y_9228_, v___y_9229_, v___y_9230_, v___y_9231_, v___y_9232_);
 lean_dec(v___y_9232_);
 lean_dec_ref(v___y_9231_);
 lean_dec(v___y_9230_);
@@ -32486,9 +32486,9 @@ return v___x_9420_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__42___boxed(lean_object* v___x_9421_, lean_object* v___x_9422_, lean_object* v___y_9423_, lean_object* v___y_9424_, lean_object* v___y_9425_, lean_object* v___y_9426_, lean_object* v___y_9427_, lean_object* v___y_9428_, lean_object* v___y_9429_){
 _start:
 {
-uint8_t v___x_23486__boxed_9430_; lean_object* v_res_9431_; 
-v___x_23486__boxed_9430_ = lean_unbox(v___x_9421_);
-v_res_9431_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__42(v___x_23486__boxed_9430_, v___x_9422_, v___y_9423_, v___y_9424_, v___y_9425_, v___y_9426_, v___y_9427_, v___y_9428_);
+uint8_t v___x_22714__boxed_9430_; lean_object* v_res_9431_; 
+v___x_22714__boxed_9430_ = lean_unbox(v___x_9421_);
+v_res_9431_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__42(v___x_22714__boxed_9430_, v___x_9422_, v___y_9423_, v___y_9424_, v___y_9425_, v___y_9426_, v___y_9427_, v___y_9428_);
 lean_dec(v___y_9428_);
 lean_dec_ref(v___y_9427_);
 lean_dec(v___y_9426_);
@@ -32509,9 +32509,9 @@ return v___x_9440_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__44___boxed(lean_object* v___x_9441_, lean_object* v___y_9442_, lean_object* v___y_9443_, lean_object* v___y_9444_, lean_object* v___y_9445_, lean_object* v___y_9446_, lean_object* v___y_9447_, lean_object* v___y_9448_){
 _start:
 {
-uint8_t v___x_23515__boxed_9449_; lean_object* v_res_9450_; 
-v___x_23515__boxed_9449_ = lean_unbox(v___x_9441_);
-v_res_9450_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__44(v___x_23515__boxed_9449_, v___y_9442_, v___y_9443_, v___y_9444_, v___y_9445_, v___y_9446_, v___y_9447_);
+uint8_t v___x_22743__boxed_9449_; lean_object* v_res_9450_; 
+v___x_22743__boxed_9449_ = lean_unbox(v___x_9441_);
+v_res_9450_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__44(v___x_22743__boxed_9449_, v___y_9442_, v___y_9443_, v___y_9444_, v___y_9445_, v___y_9446_, v___y_9447_);
 lean_dec(v___y_9447_);
 lean_dec_ref(v___y_9446_);
 lean_dec(v___y_9445_);
@@ -32532,9 +32532,9 @@ return v___x_9459_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__45___boxed(lean_object* v___x_9460_, lean_object* v___y_9461_, lean_object* v___y_9462_, lean_object* v___y_9463_, lean_object* v___y_9464_, lean_object* v___y_9465_, lean_object* v___y_9466_, lean_object* v___y_9467_){
 _start:
 {
-uint8_t v___x_23541__boxed_9468_; lean_object* v_res_9469_; 
-v___x_23541__boxed_9468_ = lean_unbox(v___x_9460_);
-v_res_9469_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__45(v___x_23541__boxed_9468_, v___y_9461_, v___y_9462_, v___y_9463_, v___y_9464_, v___y_9465_, v___y_9466_);
+uint8_t v___x_22769__boxed_9468_; lean_object* v_res_9469_; 
+v___x_22769__boxed_9468_ = lean_unbox(v___x_9460_);
+v_res_9469_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__45(v___x_22769__boxed_9468_, v___y_9461_, v___y_9462_, v___y_9463_, v___y_9464_, v___y_9465_, v___y_9466_);
 lean_dec(v___y_9466_);
 lean_dec_ref(v___y_9465_);
 lean_dec(v___y_9464_);
@@ -32555,9 +32555,9 @@ return v___x_9478_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__46___boxed(lean_object* v___x_9479_, lean_object* v___y_9480_, lean_object* v___y_9481_, lean_object* v___y_9482_, lean_object* v___y_9483_, lean_object* v___y_9484_, lean_object* v___y_9485_, lean_object* v___y_9486_){
 _start:
 {
-uint8_t v___x_23567__boxed_9487_; lean_object* v_res_9488_; 
-v___x_23567__boxed_9487_ = lean_unbox(v___x_9479_);
-v_res_9488_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__46(v___x_23567__boxed_9487_, v___y_9480_, v___y_9481_, v___y_9482_, v___y_9483_, v___y_9484_, v___y_9485_);
+uint8_t v___x_22795__boxed_9487_; lean_object* v_res_9488_; 
+v___x_22795__boxed_9487_ = lean_unbox(v___x_9479_);
+v_res_9488_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__46(v___x_22795__boxed_9487_, v___y_9480_, v___y_9481_, v___y_9482_, v___y_9483_, v___y_9484_, v___y_9485_);
 lean_dec(v___y_9485_);
 lean_dec_ref(v___y_9484_);
 lean_dec(v___y_9483_);
@@ -32665,9 +32665,9 @@ return v___x_9576_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__49___boxed(lean_object* v___x_9577_, lean_object* v___f_9578_, lean_object* v___y_9579_, lean_object* v___y_9580_, lean_object* v___y_9581_, lean_object* v___y_9582_, lean_object* v___y_9583_, lean_object* v___y_9584_, lean_object* v___y_9585_){
 _start:
 {
-uint8_t v___x_23667__boxed_9586_; lean_object* v_res_9587_; 
-v___x_23667__boxed_9586_ = lean_unbox(v___x_9577_);
-v_res_9587_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__49(v___x_23667__boxed_9586_, v___f_9578_, v___y_9579_, v___y_9580_, v___y_9581_, v___y_9582_, v___y_9583_, v___y_9584_);
+uint8_t v___x_22895__boxed_9586_; lean_object* v_res_9587_; 
+v___x_22895__boxed_9586_ = lean_unbox(v___x_9577_);
+v_res_9587_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__49(v___x_22895__boxed_9586_, v___f_9578_, v___y_9579_, v___y_9580_, v___y_9581_, v___y_9582_, v___y_9583_, v___y_9584_);
 lean_dec(v___y_9584_);
 lean_dec_ref(v___y_9583_);
 lean_dec(v___y_9582_);
@@ -32688,9 +32688,9 @@ return v___x_9597_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__50___boxed(lean_object* v___x_9598_, lean_object* v___f_9599_, lean_object* v___y_9600_, lean_object* v___y_9601_, lean_object* v___y_9602_, lean_object* v___y_9603_, lean_object* v___y_9604_, lean_object* v___y_9605_, lean_object* v___y_9606_){
 _start:
 {
-uint8_t v___x_23696__boxed_9607_; lean_object* v_res_9608_; 
-v___x_23696__boxed_9607_ = lean_unbox(v___x_9598_);
-v_res_9608_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__50(v___x_23696__boxed_9607_, v___f_9599_, v___y_9600_, v___y_9601_, v___y_9602_, v___y_9603_, v___y_9604_, v___y_9605_);
+uint8_t v___x_22924__boxed_9607_; lean_object* v_res_9608_; 
+v___x_22924__boxed_9607_ = lean_unbox(v___x_9598_);
+v_res_9608_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__50(v___x_22924__boxed_9607_, v___f_9599_, v___y_9600_, v___y_9601_, v___y_9602_, v___y_9603_, v___y_9604_, v___y_9605_);
 lean_dec(v___y_9605_);
 lean_dec_ref(v___y_9604_);
 lean_dec(v___y_9603_);
@@ -32711,10 +32711,10 @@ return v___x_9618_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__61___boxed(lean_object* v___x_9619_, lean_object* v___x_9620_, lean_object* v___y_9621_, lean_object* v___y_9622_, lean_object* v___y_9623_, lean_object* v___y_9624_, lean_object* v___y_9625_, lean_object* v___y_9626_, lean_object* v___y_9627_){
 _start:
 {
-uint8_t v___x_23725__boxed_9628_; uint8_t v___x_23726__boxed_9629_; lean_object* v_res_9630_; 
-v___x_23725__boxed_9628_ = lean_unbox(v___x_9619_);
-v___x_23726__boxed_9629_ = lean_unbox(v___x_9620_);
-v_res_9630_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__61(v___x_23725__boxed_9628_, v___x_23726__boxed_9629_, v___y_9621_, v___y_9622_, v___y_9623_, v___y_9624_, v___y_9625_, v___y_9626_);
+uint8_t v___x_22953__boxed_9628_; uint8_t v___x_22954__boxed_9629_; lean_object* v_res_9630_; 
+v___x_22953__boxed_9628_ = lean_unbox(v___x_9619_);
+v___x_22954__boxed_9629_ = lean_unbox(v___x_9620_);
+v_res_9630_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__61(v___x_22953__boxed_9628_, v___x_22954__boxed_9629_, v___y_9621_, v___y_9622_, v___y_9623_, v___y_9624_, v___y_9625_, v___y_9626_);
 lean_dec(v___y_9626_);
 lean_dec_ref(v___y_9625_);
 lean_dec(v___y_9624_);
@@ -32735,10 +32735,10 @@ return v___x_9633_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__47___boxed(lean_object* v___x_9634_, lean_object* v_x_9635_){
 _start:
 {
-uint8_t v___x_23754__boxed_9636_; uint8_t v_x_23755__boxed_9637_; uint8_t v_res_9638_; lean_object* v_r_9639_; 
-v___x_23754__boxed_9636_ = lean_unbox(v___x_9634_);
-v_x_23755__boxed_9637_ = lean_unbox(v_x_9635_);
-v_res_9638_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__47(v___x_23754__boxed_9636_, v_x_23755__boxed_9637_);
+uint8_t v___x_22982__boxed_9636_; uint8_t v_x_22983__boxed_9637_; uint8_t v_res_9638_; lean_object* v_r_9639_; 
+v___x_22982__boxed_9636_ = lean_unbox(v___x_9634_);
+v_x_22983__boxed_9637_ = lean_unbox(v_x_9635_);
+v_res_9638_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__47(v___x_22982__boxed_9636_, v_x_22983__boxed_9637_);
 v_r_9639_ = lean_box(v_res_9638_);
 return v_r_9639_;
 }
@@ -32754,9 +32754,9 @@ return v___x_9649_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__48___boxed(lean_object* v___x_9650_, lean_object* v___x_9651_, lean_object* v___y_9652_, lean_object* v___y_9653_, lean_object* v___y_9654_, lean_object* v___y_9655_, lean_object* v___y_9656_, lean_object* v___y_9657_, lean_object* v___y_9658_){
 _start:
 {
-uint8_t v___x_23762__boxed_9659_; lean_object* v_res_9660_; 
-v___x_23762__boxed_9659_ = lean_unbox(v___x_9650_);
-v_res_9660_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__48(v___x_23762__boxed_9659_, v___x_9651_, v___y_9652_, v___y_9653_, v___y_9654_, v___y_9655_, v___y_9656_, v___y_9657_);
+uint8_t v___x_22990__boxed_9659_; lean_object* v_res_9660_; 
+v___x_22990__boxed_9659_ = lean_unbox(v___x_9650_);
+v_res_9660_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__48(v___x_22990__boxed_9659_, v___x_9651_, v___y_9652_, v___y_9653_, v___y_9654_, v___y_9655_, v___y_9656_, v___y_9657_);
 lean_dec(v___y_9657_);
 lean_dec_ref(v___y_9656_);
 lean_dec(v___y_9655_);
@@ -32777,10 +32777,10 @@ return v___x_9663_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__53___boxed(lean_object* v___x_9664_, lean_object* v_x_9665_){
 _start:
 {
-uint16_t v___x_23791__boxed_9666_; uint16_t v_x_23792__boxed_9667_; uint16_t v_res_9668_; lean_object* v_r_9669_; 
-v___x_23791__boxed_9666_ = lean_unbox(v___x_9664_);
-v_x_23792__boxed_9667_ = lean_unbox(v_x_9665_);
-v_res_9668_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__53(v___x_23791__boxed_9666_, v_x_23792__boxed_9667_);
+uint16_t v___x_23019__boxed_9666_; uint16_t v_x_23020__boxed_9667_; uint16_t v_res_9668_; lean_object* v_r_9669_; 
+v___x_23019__boxed_9666_ = lean_unbox(v___x_9664_);
+v_x_23020__boxed_9667_ = lean_unbox(v_x_9665_);
+v_res_9668_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__53(v___x_23019__boxed_9666_, v_x_23020__boxed_9667_);
 v_r_9669_ = lean_box(v_res_9668_);
 return v_r_9669_;
 }
@@ -32796,10 +32796,10 @@ return v___x_9679_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__51___boxed(lean_object* v___x_9680_, lean_object* v___x_9681_, lean_object* v___y_9682_, lean_object* v___y_9683_, lean_object* v___y_9684_, lean_object* v___y_9685_, lean_object* v___y_9686_, lean_object* v___y_9687_, lean_object* v___y_9688_){
 _start:
 {
-uint16_t v___x_23799__boxed_9689_; uint16_t v___x_23800__boxed_9690_; lean_object* v_res_9691_; 
-v___x_23799__boxed_9689_ = lean_unbox(v___x_9680_);
-v___x_23800__boxed_9690_ = lean_unbox(v___x_9681_);
-v_res_9691_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__51(v___x_23799__boxed_9689_, v___x_23800__boxed_9690_, v___y_9682_, v___y_9683_, v___y_9684_, v___y_9685_, v___y_9686_, v___y_9687_);
+uint16_t v___x_23027__boxed_9689_; uint16_t v___x_23028__boxed_9690_; lean_object* v_res_9691_; 
+v___x_23027__boxed_9689_ = lean_unbox(v___x_9680_);
+v___x_23028__boxed_9690_ = lean_unbox(v___x_9681_);
+v_res_9691_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__51(v___x_23027__boxed_9689_, v___x_23028__boxed_9690_, v___y_9682_, v___y_9683_, v___y_9684_, v___y_9685_, v___y_9686_, v___y_9687_);
 lean_dec(v___y_9687_);
 lean_dec_ref(v___y_9686_);
 lean_dec(v___y_9685_);
@@ -32820,9 +32820,9 @@ return v___x_9701_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__55___boxed(lean_object* v___x_9702_, lean_object* v___x_9703_, lean_object* v___y_9704_, lean_object* v___y_9705_, lean_object* v___y_9706_, lean_object* v___y_9707_, lean_object* v___y_9708_, lean_object* v___y_9709_, lean_object* v___y_9710_){
 _start:
 {
-uint16_t v___x_23828__boxed_9711_; lean_object* v_res_9712_; 
-v___x_23828__boxed_9711_ = lean_unbox(v___x_9702_);
-v_res_9712_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__55(v___x_23828__boxed_9711_, v___x_9703_, v___y_9704_, v___y_9705_, v___y_9706_, v___y_9707_, v___y_9708_, v___y_9709_);
+uint16_t v___x_23056__boxed_9711_; lean_object* v_res_9712_; 
+v___x_23056__boxed_9711_ = lean_unbox(v___x_9702_);
+v_res_9712_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_arithmeticFolders___lam__55(v___x_23056__boxed_9711_, v___x_9703_, v___y_9704_, v___y_9705_, v___y_9706_, v___y_9707_, v___y_9708_, v___y_9709_);
 lean_dec(v___y_9709_);
 lean_dec_ref(v___y_9708_);
 lean_dec(v___y_9707_);
@@ -60872,10 +60872,10 @@ return v___y_19664_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_conversionFolders___lam__0___boxed(lean_object* v___y_19665_){
 _start:
 {
-uint64_t v___y_9673__boxed_19666_; uint64_t v_res_19667_; lean_object* v_r_19668_; 
-v___y_9673__boxed_19666_ = lean_unbox_uint64(v___y_19665_);
+uint64_t v___y_9527__boxed_19666_; uint64_t v_res_19667_; lean_object* v_r_19668_; 
+v___y_9527__boxed_19666_ = lean_unbox_uint64(v___y_19665_);
 lean_dec_ref(v___y_19665_);
-v_res_19667_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_conversionFolders___lam__0(v___y_9673__boxed_19666_);
+v_res_19667_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_conversionFolders___lam__0(v___y_9527__boxed_19666_);
 v_r_19668_ = lean_box_uint64(v_res_19667_);
 return v_r_19668_;
 }
@@ -60889,10 +60889,10 @@ return v___y_19669_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_Simp_ConstantFold_conversionFolders___lam__1___boxed(lean_object* v___y_19670_){
 _start:
 {
-uint32_t v___y_9676__boxed_19671_; uint32_t v_res_19672_; lean_object* v_r_19673_; 
-v___y_9676__boxed_19671_ = lean_unbox_uint32(v___y_19670_);
+uint32_t v___y_9530__boxed_19671_; uint32_t v_res_19672_; lean_object* v_r_19673_; 
+v___y_9530__boxed_19671_ = lean_unbox_uint32(v___y_19670_);
 lean_dec(v___y_19670_);
-v_res_19672_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_conversionFolders___lam__1(v___y_9676__boxed_19671_);
+v_res_19672_ = l_Lean_Compiler_LCNF_Simp_ConstantFold_conversionFolders___lam__1(v___y_9530__boxed_19671_);
 v_r_19673_ = lean_box_uint32(v_res_19672_);
 return v_r_19673_;
 }
@@ -63898,8 +63898,8 @@ goto v___jp_21609_;
 }
 else
 {
-lean_dec_ref_known(v_val_21624_, 3);
 lean_dec(v_declName_21628_);
+lean_dec_ref_known(v_val_21624_, 3);
 lean_del_object(v___x_21626_);
 lean_del_object(v___x_21622_);
 goto v___jp_21609_;

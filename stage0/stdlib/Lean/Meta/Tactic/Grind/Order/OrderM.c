@@ -1602,10 +1602,10 @@ return v___x_642_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Grind_Order_getNodeId_spec__0_spec__0___redArg___boxed(lean_object* v_x_643_, lean_object* v_x_644_, lean_object* v_x_645_){
 _start:
 {
-size_t v_x_1282__boxed_646_; lean_object* v_res_647_; 
-v_x_1282__boxed_646_ = lean_unbox_usize(v_x_644_);
+size_t v_x_1268__boxed_646_; lean_object* v_res_647_; 
+v_x_1268__boxed_646_ = lean_unbox_usize(v_x_644_);
 lean_dec(v_x_644_);
-v_res_647_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Grind_Order_getNodeId_spec__0_spec__0___redArg(v_x_643_, v_x_1282__boxed_646_, v_x_645_);
+v_res_647_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Grind_Order_getNodeId_spec__0_spec__0___redArg(v_x_643_, v_x_1268__boxed_646_, v_x_645_);
 lean_dec_ref(v_x_645_);
 lean_dec_ref(v_x_643_);
 return v_res_647_;
@@ -1830,10 +1830,10 @@ return v___x_743_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Grind_Order_getNodeId_spec__0_spec__0___boxed(lean_object* v_00_u03b2_744_, lean_object* v_x_745_, lean_object* v_x_746_, lean_object* v_x_747_){
 _start:
 {
-size_t v_x_1422__boxed_748_; lean_object* v_res_749_; 
-v_x_1422__boxed_748_ = lean_unbox_usize(v_x_746_);
+size_t v_x_1408__boxed_748_; lean_object* v_res_749_; 
+v_x_1408__boxed_748_ = lean_unbox_usize(v_x_746_);
 lean_dec(v_x_746_);
-v_res_749_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Grind_Order_getNodeId_spec__0_spec__0(v_00_u03b2_744_, v_x_745_, v_x_1422__boxed_748_, v_x_747_);
+v_res_749_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Grind_Order_getNodeId_spec__0_spec__0(v_00_u03b2_744_, v_x_745_, v_x_1408__boxed_748_, v_x_747_);
 lean_dec_ref(v_x_747_);
 lean_dec_ref(v_x_745_);
 return v_res_749_;

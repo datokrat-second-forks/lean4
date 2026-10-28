@@ -912,12 +912,12 @@ uint8_t v___x_115_;
 v___x_115_ = lean_usize_dec_eq(v_i_113_, v_stop_114_);
 if (v___x_115_ == 0)
 {
-lean_object* v___x_154__overap_116_; lean_object* v___x_117_; uint8_t v___x_118_; 
-v___x_154__overap_116_ = lean_array_uget_borrowed(v_as_112_, v_i_113_);
-lean_inc(v___x_154__overap_116_);
+lean_object* v___x_153__overap_116_; lean_object* v___x_117_; uint8_t v___x_118_; 
+v___x_153__overap_116_ = lean_array_uget_borrowed(v_as_112_, v_i_113_);
+lean_inc(v___x_153__overap_116_);
 lean_inc(v_name_111_);
 lean_inc_ref(v_env_110_);
-v___x_117_ = lean_apply_2(v___x_154__overap_116_, v_env_110_, v_name_111_);
+v___x_117_ = lean_apply_2(v___x_153__overap_116_, v_env_110_, v_name_111_);
 v___x_118_ = lean_unbox(v___x_117_);
 if (v___x_118_ == 0)
 {

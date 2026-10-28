@@ -4686,13 +4686,13 @@ goto v___jp_1705_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Linter_Extra_UnusedDecidableInType_0__Lean_Linter_Extra_UnusedDecidableInType_onUnusedInstancesWhere_spec__1___redArg___boxed(lean_object* v___x_1734_, lean_object* v___x_1735_, lean_object* v___x_1736_, lean_object* v___x_1737_, lean_object* v_fvars_1738_, lean_object* v_sz_1739_, lean_object* v_i_1740_, lean_object* v_bs_1741_, lean_object* v___y_1742_, lean_object* v___y_1743_, lean_object* v___y_1744_, lean_object* v___y_1745_, lean_object* v___y_1746_){
 _start:
 {
-uint8_t v___x_3282__boxed_1747_; size_t v_sz_boxed_1748_; size_t v_i_boxed_1749_; lean_object* v_res_1750_; 
-v___x_3282__boxed_1747_ = lean_unbox(v___x_1737_);
+uint8_t v___x_3275__boxed_1747_; size_t v_sz_boxed_1748_; size_t v_i_boxed_1749_; lean_object* v_res_1750_; 
+v___x_3275__boxed_1747_ = lean_unbox(v___x_1737_);
 v_sz_boxed_1748_ = lean_unbox_usize(v_sz_1739_);
 lean_dec(v_sz_1739_);
 v_i_boxed_1749_ = lean_unbox_usize(v_i_1740_);
 lean_dec(v_i_1740_);
-v_res_1750_ = l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Linter_Extra_UnusedDecidableInType_0__Lean_Linter_Extra_UnusedDecidableInType_onUnusedInstancesWhere_spec__1___redArg(v___x_1734_, v___x_1735_, v___x_1736_, v___x_3282__boxed_1747_, v_fvars_1738_, v_sz_boxed_1748_, v_i_boxed_1749_, v_bs_1741_, v___y_1742_, v___y_1743_, v___y_1744_, v___y_1745_);
+v_res_1750_ = l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Linter_Extra_UnusedDecidableInType_0__Lean_Linter_Extra_UnusedDecidableInType_onUnusedInstancesWhere_spec__1___redArg(v___x_1734_, v___x_1735_, v___x_1736_, v___x_3275__boxed_1747_, v_fvars_1738_, v_sz_boxed_1748_, v_i_boxed_1749_, v_bs_1741_, v___y_1742_, v___y_1743_, v___y_1744_, v___y_1745_);
 lean_dec(v___y_1745_);
 lean_dec_ref(v___y_1744_);
 lean_dec(v___y_1743_);
@@ -4775,9 +4775,9 @@ return v___x_1778_;
 LEAN_EXPORT lean_object* l___private_Lean_Linter_Extra_UnusedDecidableInType_0__Lean_Linter_Extra_UnusedDecidableInType_onUnusedInstancesWhere___lam__0___boxed(lean_object* v_p_1781_, lean_object* v_type_1782_, lean_object* v_a_1783_, lean_object* v___x_1784_, lean_object* v___x_1785_, lean_object* v___x_1786_, lean_object* v_logOnUnused_1787_, lean_object* v_fvars_1788_, lean_object* v_x_1789_, lean_object* v___y_1790_, lean_object* v___y_1791_, lean_object* v___y_1792_, lean_object* v___y_1793_, lean_object* v___y_1794_, lean_object* v___y_1795_, lean_object* v___y_1796_){
 _start:
 {
-uint8_t v___x_3375__boxed_1797_; lean_object* v_res_1798_; 
-v___x_3375__boxed_1797_ = lean_unbox(v___x_1786_);
-v_res_1798_ = l___private_Lean_Linter_Extra_UnusedDecidableInType_0__Lean_Linter_Extra_UnusedDecidableInType_onUnusedInstancesWhere___lam__0(v_p_1781_, v_type_1782_, v_a_1783_, v___x_1784_, v___x_1785_, v___x_3375__boxed_1797_, v_logOnUnused_1787_, v_fvars_1788_, v_x_1789_, v___y_1790_, v___y_1791_, v___y_1792_, v___y_1793_, v___y_1794_, v___y_1795_);
+uint8_t v___x_3368__boxed_1797_; lean_object* v_res_1798_; 
+v___x_3368__boxed_1797_ = lean_unbox(v___x_1786_);
+v_res_1798_ = l___private_Lean_Linter_Extra_UnusedDecidableInType_0__Lean_Linter_Extra_UnusedDecidableInType_onUnusedInstancesWhere___lam__0(v_p_1781_, v_type_1782_, v_a_1783_, v___x_1784_, v___x_1785_, v___x_3368__boxed_1797_, v_logOnUnused_1787_, v_fvars_1788_, v_x_1789_, v___y_1790_, v___y_1791_, v___y_1792_, v___y_1793_, v___y_1794_, v___y_1795_);
 lean_dec(v___y_1795_);
 lean_dec_ref(v___y_1794_);
 lean_dec(v___y_1793_);
@@ -4986,13 +4986,13 @@ return v___x_1869_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Linter_Extra_UnusedDecidableInType_0__Lean_Linter_Extra_UnusedDecidableInType_onUnusedInstancesWhere_spec__1___boxed(lean_object* v___x_1870_, lean_object* v___x_1871_, lean_object* v___x_1872_, lean_object* v___x_1873_, lean_object* v_fvars_1874_, lean_object* v_sz_1875_, lean_object* v_i_1876_, lean_object* v_bs_1877_, lean_object* v___y_1878_, lean_object* v___y_1879_, lean_object* v___y_1880_, lean_object* v___y_1881_, lean_object* v___y_1882_, lean_object* v___y_1883_, lean_object* v___y_1884_){
 _start:
 {
-uint8_t v___x_3506__boxed_1885_; size_t v_sz_boxed_1886_; size_t v_i_boxed_1887_; lean_object* v_res_1888_; 
-v___x_3506__boxed_1885_ = lean_unbox(v___x_1873_);
+uint8_t v___x_3499__boxed_1885_; size_t v_sz_boxed_1886_; size_t v_i_boxed_1887_; lean_object* v_res_1888_; 
+v___x_3499__boxed_1885_ = lean_unbox(v___x_1873_);
 v_sz_boxed_1886_ = lean_unbox_usize(v_sz_1875_);
 lean_dec(v_sz_1875_);
 v_i_boxed_1887_ = lean_unbox_usize(v_i_1876_);
 lean_dec(v_i_1876_);
-v_res_1888_ = l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Linter_Extra_UnusedDecidableInType_0__Lean_Linter_Extra_UnusedDecidableInType_onUnusedInstancesWhere_spec__1(v___x_1870_, v___x_1871_, v___x_1872_, v___x_3506__boxed_1885_, v_fvars_1874_, v_sz_boxed_1886_, v_i_boxed_1887_, v_bs_1877_, v___y_1878_, v___y_1879_, v___y_1880_, v___y_1881_, v___y_1882_, v___y_1883_);
+v_res_1888_ = l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Linter_Extra_UnusedDecidableInType_0__Lean_Linter_Extra_UnusedDecidableInType_onUnusedInstancesWhere_spec__1(v___x_1870_, v___x_1871_, v___x_1872_, v___x_3499__boxed_1885_, v_fvars_1874_, v_sz_boxed_1886_, v_i_boxed_1887_, v_bs_1877_, v___y_1878_, v___y_1879_, v___y_1880_, v___y_1881_, v___y_1882_, v___y_1883_);
 lean_dec(v___y_1883_);
 lean_dec_ref(v___y_1882_);
 lean_dec(v___y_1881_);

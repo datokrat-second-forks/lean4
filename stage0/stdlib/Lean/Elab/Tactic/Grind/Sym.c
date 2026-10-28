@@ -9732,14 +9732,14 @@ goto _start;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00__private_Lean_Elab_Tactic_Grind_Sym_0__Lean_Elab_Tactic_Grind_evalSymSimp_spec__4___boxed(lean_object* v___x_3362_, lean_object* v___x_3363_, lean_object* v_as_3364_, lean_object* v_i_3365_, lean_object* v_stop_3366_, lean_object* v_b_3367_){
 _start:
 {
-uint8_t v___x_7542__boxed_3368_; uint8_t v___x_7543__boxed_3369_; size_t v_i_boxed_3370_; size_t v_stop_boxed_3371_; lean_object* v_res_3372_; 
-v___x_7542__boxed_3368_ = lean_unbox(v___x_3362_);
-v___x_7543__boxed_3369_ = lean_unbox(v___x_3363_);
+uint8_t v___x_7535__boxed_3368_; uint8_t v___x_7536__boxed_3369_; size_t v_i_boxed_3370_; size_t v_stop_boxed_3371_; lean_object* v_res_3372_; 
+v___x_7535__boxed_3368_ = lean_unbox(v___x_3362_);
+v___x_7536__boxed_3369_ = lean_unbox(v___x_3363_);
 v_i_boxed_3370_ = lean_unbox_usize(v_i_3365_);
 lean_dec(v_i_3365_);
 v_stop_boxed_3371_ = lean_unbox_usize(v_stop_3366_);
 lean_dec(v_stop_3366_);
-v_res_3372_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00__private_Lean_Elab_Tactic_Grind_Sym_0__Lean_Elab_Tactic_Grind_evalSymSimp_spec__4(v___x_7542__boxed_3368_, v___x_7543__boxed_3369_, v_as_3364_, v_i_boxed_3370_, v_stop_boxed_3371_, v_b_3367_);
+v_res_3372_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00__private_Lean_Elab_Tactic_Grind_Sym_0__Lean_Elab_Tactic_Grind_evalSymSimp_spec__4(v___x_7535__boxed_3368_, v___x_7536__boxed_3369_, v_as_3364_, v_i_boxed_3370_, v_stop_boxed_3371_, v_b_3367_);
 lean_dec_ref(v_as_3364_);
 return v_res_3372_;
 }

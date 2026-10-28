@@ -18192,8 +18192,8 @@ return v___x_5354_;
 else
 {
 lean_object* v___x_5355_; 
-lean_dec(v_kind_5321_);
 lean_dec_ref_known(v___x_5320_, 3);
+lean_dec(v_kind_5321_);
 v___x_5355_ = ((lean_object*)(l_Lean_versionString___closed__0));
 return v___x_5355_;
 }

@@ -451,13 +451,13 @@ goto _start;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Elab_Term_shouldExpandMatchAlt_spec__1___boxed(lean_object* v___x_118_, lean_object* v_as_119_, lean_object* v_i_120_, lean_object* v_stop_121_, lean_object* v_b_122_){
 _start:
 {
-uint8_t v___x_404__boxed_123_; size_t v_i_boxed_124_; size_t v_stop_boxed_125_; lean_object* v_res_126_; 
-v___x_404__boxed_123_ = lean_unbox(v___x_118_);
+uint8_t v___x_397__boxed_123_; size_t v_i_boxed_124_; size_t v_stop_boxed_125_; lean_object* v_res_126_; 
+v___x_397__boxed_123_ = lean_unbox(v___x_118_);
 v_i_boxed_124_ = lean_unbox_usize(v_i_120_);
 lean_dec(v_i_120_);
 v_stop_boxed_125_ = lean_unbox_usize(v_stop_121_);
 lean_dec(v_stop_121_);
-v_res_126_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Elab_Term_shouldExpandMatchAlt_spec__1(v___x_404__boxed_123_, v_as_119_, v_i_boxed_124_, v_stop_boxed_125_, v_b_122_);
+v_res_126_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Elab_Term_shouldExpandMatchAlt_spec__1(v___x_397__boxed_123_, v_as_119_, v_i_boxed_124_, v_stop_boxed_125_, v_b_122_);
 lean_dec_ref(v_as_119_);
 return v_res_126_;
 }

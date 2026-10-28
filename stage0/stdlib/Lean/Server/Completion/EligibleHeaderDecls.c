@@ -2414,9 +2414,9 @@ return v___x_795_;
 LEAN_EXPORT lean_object* l_Lean_Server_Completion_getEligibleHeaderDecls___lam__0___boxed(lean_object* v_a_796_, lean_object* v___y_797_, lean_object* v___y_798_, lean_object* v___y_799_, lean_object* v___y_800_, lean_object* v___y_801_){
 _start:
 {
-uint8_t v_a_8924__boxed_802_; lean_object* v_res_803_; 
-v_a_8924__boxed_802_ = lean_unbox(v_a_796_);
-v_res_803_ = l_Lean_Server_Completion_getEligibleHeaderDecls___lam__0(v_a_8924__boxed_802_, v___y_797_, v___y_798_, v___y_799_, v___y_800_);
+uint8_t v_a_8906__boxed_802_; lean_object* v_res_803_; 
+v_a_8906__boxed_802_ = lean_unbox(v_a_796_);
+v_res_803_ = l_Lean_Server_Completion_getEligibleHeaderDecls___lam__0(v_a_8906__boxed_802_, v___y_797_, v___y_798_, v___y_799_, v___y_800_);
 lean_dec(v___y_800_);
 lean_dec_ref(v___y_799_);
 lean_dec(v___y_798_);

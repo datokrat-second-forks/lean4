@@ -1089,9 +1089,9 @@ return v___x_198_;
 LEAN_EXPORT lean_object* l_Std_DHashMap_Internal_AssocList_Const_alter___at___00Std_DHashMap_Internal_Raw_u2080_Const_alter___at___00Lean_Elab_Tactic_Do_FVarUses_add_spec__0_spec__2___lam__0___boxed(lean_object* v_x3_201_, lean_object* v_x_202_){
 _start:
 {
-uint8_t v_x3_855__boxed_203_; lean_object* v_res_204_; 
-v_x3_855__boxed_203_ = lean_unbox(v_x3_201_);
-v_res_204_ = l_Std_DHashMap_Internal_AssocList_Const_alter___at___00Std_DHashMap_Internal_Raw_u2080_Const_alter___at___00Lean_Elab_Tactic_Do_FVarUses_add_spec__0_spec__2___lam__0(v_x3_855__boxed_203_, v_x_202_);
+uint8_t v_x3_848__boxed_203_; lean_object* v_res_204_; 
+v_x3_848__boxed_203_ = lean_unbox(v_x3_201_);
+v_res_204_ = l_Std_DHashMap_Internal_AssocList_Const_alter___at___00Std_DHashMap_Internal_Raw_u2080_Const_alter___at___00Lean_Elab_Tactic_Do_FVarUses_add_spec__0_spec__2___lam__0(v_x3_848__boxed_203_, v_x_202_);
 return v_res_204_;
 }
 }
@@ -1203,9 +1203,9 @@ return v___x_227_;
 LEAN_EXPORT lean_object* l_Std_DHashMap_Internal_AssocList_Const_alter___at___00Std_DHashMap_Internal_Raw_u2080_Const_alter___at___00Lean_Elab_Tactic_Do_FVarUses_add_spec__0_spec__2___boxed(lean_object* v_x3_230_, lean_object* v_a_231_, lean_object* v_x_232_){
 _start:
 {
-uint8_t v_x3_887__boxed_233_; lean_object* v_res_234_; 
-v_x3_887__boxed_233_ = lean_unbox(v_x3_230_);
-v_res_234_ = l_Std_DHashMap_Internal_AssocList_Const_alter___at___00Std_DHashMap_Internal_Raw_u2080_Const_alter___at___00Lean_Elab_Tactic_Do_FVarUses_add_spec__0_spec__2(v_x3_887__boxed_233_, v_a_231_, v_x_232_);
+uint8_t v_x3_880__boxed_233_; lean_object* v_res_234_; 
+v_x3_880__boxed_233_ = lean_unbox(v_x3_230_);
+v_res_234_ = l_Std_DHashMap_Internal_AssocList_Const_alter___at___00Std_DHashMap_Internal_Raw_u2080_Const_alter___at___00Lean_Elab_Tactic_Do_FVarUses_add_spec__0_spec__2(v_x3_880__boxed_233_, v_a_231_, v_x_232_);
 return v_res_234_;
 }
 }
@@ -1376,9 +1376,9 @@ return v___x_283_;
 LEAN_EXPORT lean_object* l_Std_DHashMap_Internal_Raw_u2080_Const_alter___at___00Lean_Elab_Tactic_Do_FVarUses_add_spec__0___boxed(lean_object* v_x3_289_, lean_object* v_m_290_, lean_object* v_a_291_){
 _start:
 {
-uint8_t v_x3_935__boxed_292_; lean_object* v_res_293_; 
-v_x3_935__boxed_292_ = lean_unbox(v_x3_289_);
-v_res_293_ = l_Std_DHashMap_Internal_Raw_u2080_Const_alter___at___00Lean_Elab_Tactic_Do_FVarUses_add_spec__0(v_x3_935__boxed_292_, v_m_290_, v_a_291_);
+uint8_t v_x3_928__boxed_292_; lean_object* v_res_293_; 
+v_x3_928__boxed_292_ = lean_unbox(v_x3_289_);
+v_res_293_ = l_Std_DHashMap_Internal_Raw_u2080_Const_alter___at___00Lean_Elab_Tactic_Do_FVarUses_add_spec__0(v_x3_928__boxed_292_, v_m_290_, v_a_291_);
 return v_res_293_;
 }
 }

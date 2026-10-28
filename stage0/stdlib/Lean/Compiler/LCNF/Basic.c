@@ -6058,10 +6058,10 @@ goto _start;
 LEAN_EXPORT lean_object* l_List_foldl___at___00Lean_Compiler_LCNF_instHashableLetValue_hash_spec__0___boxed(lean_object* v_x_1815_, lean_object* v_x_1816_){
 _start:
 {
-uint64_t v_x_1190__boxed_1817_; uint64_t v_res_1818_; lean_object* v_r_1819_; 
-v_x_1190__boxed_1817_ = lean_unbox_uint64(v_x_1815_);
+uint64_t v_x_1183__boxed_1817_; uint64_t v_res_1818_; lean_object* v_r_1819_; 
+v_x_1183__boxed_1817_ = lean_unbox_uint64(v_x_1815_);
 lean_dec_ref(v_x_1815_);
-v_res_1818_ = l_List_foldl___at___00Lean_Compiler_LCNF_instHashableLetValue_hash_spec__0(v_x_1190__boxed_1817_, v_x_1816_);
+v_res_1818_ = l_List_foldl___at___00Lean_Compiler_LCNF_instHashableLetValue_hash_spec__0(v_x_1183__boxed_1817_, v_x_1816_);
 lean_dec(v_x_1816_);
 v_r_1819_ = lean_box_uint64(v_res_1818_);
 return v_r_1819_;
@@ -6550,9 +6550,9 @@ return v___x_1865_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_instHashableLetValue_hash___boxed(lean_object* v_pu_2046_, lean_object* v_x_2047_){
 _start:
 {
-uint8_t v_pu_1220__boxed_2048_; uint64_t v_res_2049_; lean_object* v_r_2050_; 
-v_pu_1220__boxed_2048_ = lean_unbox(v_pu_2046_);
-v_res_2049_ = l_Lean_Compiler_LCNF_instHashableLetValue_hash(v_pu_1220__boxed_2048_, v_x_2047_);
+uint8_t v_pu_1213__boxed_2048_; uint64_t v_res_2049_; lean_object* v_r_2050_; 
+v_pu_1213__boxed_2048_ = lean_unbox(v_pu_2046_);
+v_res_2049_ = l_Lean_Compiler_LCNF_instHashableLetValue_hash(v_pu_1213__boxed_2048_, v_x_2047_);
 lean_dec(v_x_2047_);
 v_r_2050_ = lean_box_uint64(v_res_2049_);
 return v_r_2050_;
@@ -6569,15 +6569,15 @@ return v___x_2056_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Compiler_LCNF_instHashableLetValue_hash_spec__1___boxed(lean_object* v_pu_2057_, lean_object* v_as_2058_, lean_object* v_i_2059_, lean_object* v_stop_2060_, lean_object* v_b_2061_){
 _start:
 {
-uint8_t v_pu_1626__boxed_2062_; size_t v_i_boxed_2063_; size_t v_stop_boxed_2064_; uint64_t v_b_boxed_2065_; uint64_t v_res_2066_; lean_object* v_r_2067_; 
-v_pu_1626__boxed_2062_ = lean_unbox(v_pu_2057_);
+uint8_t v_pu_1619__boxed_2062_; size_t v_i_boxed_2063_; size_t v_stop_boxed_2064_; uint64_t v_b_boxed_2065_; uint64_t v_res_2066_; lean_object* v_r_2067_; 
+v_pu_1619__boxed_2062_ = lean_unbox(v_pu_2057_);
 v_i_boxed_2063_ = lean_unbox_usize(v_i_2059_);
 lean_dec(v_i_2059_);
 v_stop_boxed_2064_ = lean_unbox_usize(v_stop_2060_);
 lean_dec(v_stop_2060_);
 v_b_boxed_2065_ = lean_unbox_uint64(v_b_2061_);
 lean_dec_ref(v_b_2061_);
-v_res_2066_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Compiler_LCNF_instHashableLetValue_hash_spec__1(v_pu_1626__boxed_2062_, v_as_2058_, v_i_boxed_2063_, v_stop_boxed_2064_, v_b_boxed_2065_);
+v_res_2066_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Compiler_LCNF_instHashableLetValue_hash_spec__1(v_pu_1619__boxed_2062_, v_as_2058_, v_i_boxed_2063_, v_stop_boxed_2064_, v_b_boxed_2065_);
 lean_dec_ref(v_as_2058_);
 v_r_2067_ = lean_box_uint64(v_res_2066_);
 return v_r_2067_;

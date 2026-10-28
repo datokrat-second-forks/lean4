@@ -10427,9 +10427,9 @@ return v___x_4113_;
 LEAN_EXPORT lean_object* l___private_Lean_Elab_Deriving_ToExpr_0__Lean_Elab_Deriving_ToExpr_mkToExprInstanceHandler___lam__0___boxed(lean_object* v_____do__lift_4114_, lean_object* v___y_4115_, lean_object* v___y_4116_, lean_object* v___y_4117_){
 _start:
 {
-uint8_t v_____do__lift_1533__boxed_4118_; lean_object* v_res_4119_; 
-v_____do__lift_1533__boxed_4118_ = lean_unbox(v_____do__lift_4114_);
-v_res_4119_ = l___private_Lean_Elab_Deriving_ToExpr_0__Lean_Elab_Deriving_ToExpr_mkToExprInstanceHandler___lam__0(v_____do__lift_1533__boxed_4118_, v___y_4115_, v___y_4116_);
+uint8_t v_____do__lift_1522__boxed_4118_; lean_object* v_res_4119_; 
+v_____do__lift_1522__boxed_4118_ = lean_unbox(v_____do__lift_4114_);
+v_res_4119_ = l___private_Lean_Elab_Deriving_ToExpr_0__Lean_Elab_Deriving_ToExpr_mkToExprInstanceHandler___lam__0(v_____do__lift_1522__boxed_4118_, v___y_4115_, v___y_4116_);
 lean_dec(v___y_4116_);
 lean_dec_ref(v___y_4115_);
 return v_res_4119_;
@@ -10627,9 +10627,9 @@ return v___x_4175_;
 LEAN_EXPORT lean_object* l___private_Lean_Elab_Deriving_ToExpr_0__Lean_Elab_Deriving_ToExpr_mkToExprInstanceHandler___lam__1___boxed(lean_object* v_a_4178_, lean_object* v_scope_4179_){
 _start:
 {
-uint8_t v_a_1591__boxed_4180_; lean_object* v_res_4181_; 
-v_a_1591__boxed_4180_ = lean_unbox(v_a_4178_);
-v_res_4181_ = l___private_Lean_Elab_Deriving_ToExpr_0__Lean_Elab_Deriving_ToExpr_mkToExprInstanceHandler___lam__1(v_a_1591__boxed_4180_, v_scope_4179_);
+uint8_t v_a_1580__boxed_4180_; lean_object* v_res_4181_; 
+v_a_1580__boxed_4180_ = lean_unbox(v_a_4178_);
+v_res_4181_ = l___private_Lean_Elab_Deriving_ToExpr_0__Lean_Elab_Deriving_ToExpr_mkToExprInstanceHandler___lam__1(v_a_1580__boxed_4180_, v_scope_4179_);
 return v_res_4181_;
 }
 }

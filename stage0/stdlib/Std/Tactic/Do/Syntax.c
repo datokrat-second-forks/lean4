@@ -5011,14 +5011,14 @@ goto _start;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Parser_Tactic_MCasesPat_parse_go_spec__2___boxed(lean_object* v___x_2044_, lean_object* v___x_2045_, lean_object* v_as_2046_, lean_object* v_i_2047_, lean_object* v_stop_2048_, lean_object* v_b_2049_){
 _start:
 {
-uint8_t v___x_947__boxed_2050_; uint8_t v___x_948__boxed_2051_; size_t v_i_boxed_2052_; size_t v_stop_boxed_2053_; lean_object* v_res_2054_; 
-v___x_947__boxed_2050_ = lean_unbox(v___x_2044_);
-v___x_948__boxed_2051_ = lean_unbox(v___x_2045_);
+uint8_t v___x_940__boxed_2050_; uint8_t v___x_941__boxed_2051_; size_t v_i_boxed_2052_; size_t v_stop_boxed_2053_; lean_object* v_res_2054_; 
+v___x_940__boxed_2050_ = lean_unbox(v___x_2044_);
+v___x_941__boxed_2051_ = lean_unbox(v___x_2045_);
 v_i_boxed_2052_ = lean_unbox_usize(v_i_2047_);
 lean_dec(v_i_2047_);
 v_stop_boxed_2053_ = lean_unbox_usize(v_stop_2048_);
 lean_dec(v_stop_2048_);
-v_res_2054_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Parser_Tactic_MCasesPat_parse_go_spec__2(v___x_947__boxed_2050_, v___x_948__boxed_2051_, v_as_2046_, v_i_boxed_2052_, v_stop_boxed_2053_, v_b_2049_);
+v_res_2054_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Parser_Tactic_MCasesPat_parse_go_spec__2(v___x_940__boxed_2050_, v___x_941__boxed_2051_, v_as_2046_, v_i_boxed_2052_, v_stop_boxed_2053_, v_b_2049_);
 lean_dec_ref(v_as_2046_);
 return v_res_2054_;
 }

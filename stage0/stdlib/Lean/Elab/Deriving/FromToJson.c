@@ -12858,9 +12858,9 @@ return v___x_5576_;
 LEAN_EXPORT lean_object* l_Lean_Elab_Deriving_FromToJson_mkToJsonInstanceHandler___lam__0___boxed(lean_object* v_____do__lift_5577_, lean_object* v___y_5578_, lean_object* v___y_5579_, lean_object* v___y_5580_){
 _start:
 {
-uint8_t v_____do__lift_2478__boxed_5581_; lean_object* v_res_5582_; 
-v_____do__lift_2478__boxed_5581_ = lean_unbox(v_____do__lift_5577_);
-v_res_5582_ = l_Lean_Elab_Deriving_FromToJson_mkToJsonInstanceHandler___lam__0(v_____do__lift_2478__boxed_5581_, v___y_5578_, v___y_5579_);
+uint8_t v_____do__lift_2459__boxed_5581_; lean_object* v_res_5582_; 
+v_____do__lift_2459__boxed_5581_ = lean_unbox(v_____do__lift_5577_);
+v_res_5582_ = l_Lean_Elab_Deriving_FromToJson_mkToJsonInstanceHandler___lam__0(v_____do__lift_2459__boxed_5581_, v___y_5578_, v___y_5579_);
 lean_dec(v___y_5579_);
 lean_dec_ref(v___y_5578_);
 return v_res_5582_;

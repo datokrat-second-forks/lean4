@@ -769,8 +769,8 @@ goto v___jp_16_;
 else
 {
 lean_object* v___x_74_; 
-lean_dec_ref_known(v_pre_50_, 2);
 lean_dec(v_pre_51_);
+lean_dec_ref_known(v_pre_50_, 2);
 lean_dec_ref_known(v_pre_49_, 2);
 lean_dec_ref_known(v___x_48_, 2);
 lean_dec(v___x_47_);
@@ -837,8 +837,8 @@ goto v___jp_16_;
 else
 {
 lean_object* v___x_79_; 
-lean_dec(v_pre_28_);
 lean_dec_ref_known(v_pre_27_, 2);
+lean_dec(v_pre_28_);
 lean_dec_ref_known(v_pre_26_, 2);
 lean_dec_ref_known(v___x_25_, 2);
 lean_dec(v___x_24_);
@@ -864,8 +864,8 @@ goto v___jp_16_;
 else
 {
 lean_object* v___x_81_; 
-lean_dec(v_pre_26_);
 lean_dec_ref_known(v___x_25_, 2);
+lean_dec(v_pre_26_);
 lean_dec(v___x_24_);
 lean_inc(v___x_23_);
 v___x_81_ = lean_array_push(v_b_15_, v___x_23_);

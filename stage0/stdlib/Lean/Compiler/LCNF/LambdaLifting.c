@@ -3055,9 +3055,9 @@ return v_a_882_;
 LEAN_EXPORT lean_object* l_Lean_Compiler_LCNF_LambdaLifting_visitCode___lam__1___boxed(lean_object* v_a_884_, lean_object* v_x_885_){
 _start:
 {
-uint8_t v_a_12981__boxed_886_; uint8_t v_res_887_; lean_object* v_r_888_; 
-v_a_12981__boxed_886_ = lean_unbox(v_a_884_);
-v_res_887_ = l_Lean_Compiler_LCNF_LambdaLifting_visitCode___lam__1(v_a_12981__boxed_886_, v_x_885_);
+uint8_t v_a_12910__boxed_886_; uint8_t v_res_887_; lean_object* v_r_888_; 
+v_a_12910__boxed_886_ = lean_unbox(v_a_884_);
+v_res_887_ = l_Lean_Compiler_LCNF_LambdaLifting_visitCode___lam__1(v_a_12910__boxed_886_, v_x_885_);
 lean_dec(v_x_885_);
 v_r_888_ = lean_box(v_res_887_);
 return v_r_888_;

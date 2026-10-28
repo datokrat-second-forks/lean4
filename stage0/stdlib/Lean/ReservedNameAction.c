@@ -1658,14 +1658,14 @@ uint8_t v___x_406_;
 v___x_406_ = lean_usize_dec_eq(v_i_401_, v_stop_402_);
 if (v___x_406_ == 0)
 {
-uint8_t v___x_407_; lean_object* v___x_5263__overap_408_; lean_object* v___x_409_; 
+uint8_t v___x_407_; lean_object* v___x_5261__overap_408_; lean_object* v___x_409_; 
 v___x_407_ = 1;
-v___x_5263__overap_408_ = lean_array_uget_borrowed(v_as_400_, v_i_401_);
-lean_inc(v___x_5263__overap_408_);
+v___x_5261__overap_408_ = lean_array_uget_borrowed(v_as_400_, v_i_401_);
+lean_inc(v___x_5261__overap_408_);
 lean_inc(v___y_404_);
 lean_inc_ref(v___y_403_);
 lean_inc(v_name_399_);
-v___x_409_ = lean_apply_4(v___x_5263__overap_408_, v_name_399_, v___y_403_, v___y_404_, lean_box(0));
+v___x_409_ = lean_apply_4(v___x_5261__overap_408_, v_name_399_, v___y_403_, v___y_404_, lean_box(0));
 if (lean_obj_tag(v___x_409_) == 0)
 {
 lean_object* v_a_410_; lean_object* v___x_412_; uint8_t v_isShared_413_; uint8_t v_isSharedCheck_422_; 

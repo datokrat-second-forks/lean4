@@ -4781,9 +4781,9 @@ return v___x_1915_;
 LEAN_EXPORT lean_object* l_Lean_Meta_ArgsPacker_Mutual_uncurryType___lam__0___boxed(lean_object* v_a_1922_, lean_object* v___x_1923_, lean_object* v___x_1924_, lean_object* v_x_1925_, lean_object* v___y_1926_, lean_object* v___y_1927_, lean_object* v___y_1928_, lean_object* v___y_1929_, lean_object* v___y_1930_){
 _start:
 {
-uint8_t v___x_1823__boxed_1931_; lean_object* v_res_1932_; 
-v___x_1823__boxed_1931_ = lean_unbox(v___x_1924_);
-v_res_1932_ = l_Lean_Meta_ArgsPacker_Mutual_uncurryType___lam__0(v_a_1922_, v___x_1923_, v___x_1823__boxed_1931_, v_x_1925_, v___y_1926_, v___y_1927_, v___y_1928_, v___y_1929_);
+uint8_t v___x_1814__boxed_1931_; lean_object* v_res_1932_; 
+v___x_1814__boxed_1931_ = lean_unbox(v___x_1924_);
+v_res_1932_ = l_Lean_Meta_ArgsPacker_Mutual_uncurryType___lam__0(v_a_1922_, v___x_1923_, v___x_1814__boxed_1931_, v_x_1925_, v___y_1926_, v___y_1927_, v___y_1928_, v___y_1929_);
 lean_dec(v___y_1929_);
 lean_dec_ref(v___y_1928_);
 lean_dec(v___y_1927_);

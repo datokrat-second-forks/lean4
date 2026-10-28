@@ -8852,7 +8852,7 @@ v___jp_2843_:
 {
 lean_object* v___x_2847_; double v___x_2848_; double v___x_2849_; double v___x_2850_; double v___x_2851_; double v___x_2852_; lean_object* v___x_2853_; lean_object* v___x_2854_; lean_object* v___x_2855_; lean_object* v___x_2856_; lean_object* v___x_2857_; 
 v___x_2847_ = lean_io_mono_nanos_now();
-v___x_2848_ = lean_float_of_nat(v___y_2844_);
+v___x_2848_ = lean_float_of_nat(v___y_2845_);
 v___x_2849_ = lean_float_once(&l___private_Lean_Meta_Tactic_LibrarySearch_0__Lean_Meta_LibrarySearch_librarySearchLemma___closed__3, &l___private_Lean_Meta_Tactic_LibrarySearch_0__Lean_Meta_LibrarySearch_librarySearchLemma___closed__3_once, _init_l___private_Lean_Meta_Tactic_LibrarySearch_0__Lean_Meta_LibrarySearch_librarySearchLemma___closed__3);
 v___x_2850_ = lean_float_div(v___x_2848_, v___x_2849_);
 v___x_2851_ = lean_float_of_nat(v___x_2847_);
@@ -8865,7 +8865,7 @@ lean_ctor_set(v___x_2855_, 1, v___x_2854_);
 v___x_2856_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_2856_, 0, v_a_2846_);
 lean_ctor_set(v___x_2856_, 1, v___x_2855_);
-v___x_2857_ = l___private_Lean_Util_Trace_0__Lean_withTraceNode_postCallback___at___00__private_Lean_Meta_Tactic_LibrarySearch_0__Lean_Meta_LibrarySearch_librarySearch_x27_spec__4(v___x_2839_, v_hasTrace_2829_, v___x_2840_, v_options_2827_, v___x_2842_, v___y_2845_, v___f_2838_, v___x_2856_, v_a_2821_, v_a_2822_, v_a_2823_, v_a_2824_);
+v___x_2857_ = l___private_Lean_Util_Trace_0__Lean_withTraceNode_postCallback___at___00__private_Lean_Meta_Tactic_LibrarySearch_0__Lean_Meta_LibrarySearch_librarySearch_x27_spec__4(v___x_2839_, v_hasTrace_2829_, v___x_2840_, v_options_2827_, v___x_2842_, v___y_2844_, v___f_2838_, v___x_2856_, v_a_2821_, v_a_2822_, v_a_2823_, v_a_2824_);
 return v___x_2857_;
 }
 v___jp_2858_:
@@ -8956,8 +8956,8 @@ goto v_reusejp_2888_;
 }
 v_reusejp_2888_:
 {
-v___y_2844_ = v___x_2875_;
-v___y_2845_ = v_a_2872_;
+v___y_2844_ = v_a_2872_;
+v___y_2845_ = v___x_2875_;
 v_a_2846_ = v___x_2889_;
 goto v___jp_2843_;
 }
@@ -9001,8 +9001,8 @@ goto v_reusejp_2896_;
 }
 v_reusejp_2896_:
 {
-v___y_2844_ = v___x_2875_;
-v___y_2845_ = v_a_2872_;
+v___y_2844_ = v_a_2872_;
+v___y_2845_ = v___x_2875_;
 v_a_2846_ = v___x_2897_;
 goto v___jp_2843_;
 }

@@ -3254,14 +3254,14 @@ return v___x_849_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00Lean_Meta_Grind_checkAnchorRefsEMatchTheoremProof_spec__0___boxed(lean_object* v_a_850_, lean_object* v_as_851_, lean_object* v_i_852_, lean_object* v_stop_853_){
 _start:
 {
-uint64_t v_a_3837__boxed_854_; size_t v_i_boxed_855_; size_t v_stop_boxed_856_; uint8_t v_res_857_; lean_object* v_r_858_; 
-v_a_3837__boxed_854_ = lean_unbox_uint64(v_a_850_);
+uint64_t v_a_3830__boxed_854_; size_t v_i_boxed_855_; size_t v_stop_boxed_856_; uint8_t v_res_857_; lean_object* v_r_858_; 
+v_a_3830__boxed_854_ = lean_unbox_uint64(v_a_850_);
 lean_dec_ref(v_a_850_);
 v_i_boxed_855_ = lean_unbox_usize(v_i_852_);
 lean_dec(v_i_852_);
 v_stop_boxed_856_ = lean_unbox_usize(v_stop_853_);
 lean_dec(v_stop_853_);
-v_res_857_ = l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00Lean_Meta_Grind_checkAnchorRefsEMatchTheoremProof_spec__0(v_a_3837__boxed_854_, v_as_851_, v_i_boxed_855_, v_stop_boxed_856_);
+v_res_857_ = l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00Lean_Meta_Grind_checkAnchorRefsEMatchTheoremProof_spec__0(v_a_3830__boxed_854_, v_as_851_, v_i_boxed_855_, v_stop_boxed_856_);
 lean_dec_ref(v_as_851_);
 v_r_858_ = lean_box(v_res_857_);
 return v_r_858_;

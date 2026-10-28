@@ -4594,9 +4594,9 @@ return v___x_1581_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_PersistentArray_forIn___at___00Lean_MVarId_getNondepPropHyps_spec__3_spec__8___lam__2___boxed(lean_object* v___f_1584_, lean_object* v___f_1585_, lean_object* v___x_1586_, lean_object* v_e_1587_, lean_object* v_candidates_1588_, lean_object* v___y_1589_, lean_object* v___y_1590_, lean_object* v___y_1591_, lean_object* v___y_1592_, lean_object* v___y_1593_){
 _start:
 {
-uint8_t v___x_16881__boxed_1594_; lean_object* v_res_1595_; 
-v___x_16881__boxed_1594_ = lean_unbox(v___x_1586_);
-v_res_1595_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_PersistentArray_forIn___at___00Lean_MVarId_getNondepPropHyps_spec__3_spec__8___lam__2(v___f_1584_, v___f_1585_, v___x_16881__boxed_1594_, v_e_1587_, v_candidates_1588_, v___y_1589_, v___y_1590_, v___y_1591_, v___y_1592_);
+uint8_t v___x_16873__boxed_1594_; lean_object* v_res_1595_; 
+v___x_16873__boxed_1594_ = lean_unbox(v___x_1586_);
+v_res_1595_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00Lean_PersistentArray_forIn___at___00Lean_MVarId_getNondepPropHyps_spec__3_spec__8___lam__2(v___f_1584_, v___f_1585_, v___x_16873__boxed_1594_, v_e_1587_, v_candidates_1588_, v___y_1589_, v___y_1590_, v___y_1591_, v___y_1592_);
 lean_dec(v___y_1592_);
 lean_dec_ref(v___y_1591_);
 lean_dec(v___y_1590_);

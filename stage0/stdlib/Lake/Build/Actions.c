@@ -524,7 +524,7 @@ return v_r_102_;
 LEAN_EXPORT lean_object* l_Lake_compileLeanModule___lam__0(uint32_t v_exitCode_105_, lean_object* v___x_106_, lean_object* v_stderr_107_, lean_object* v_____r_108_, lean_object* v___y_109_){
 _start:
 {
-uint32_t v___y_112_; lean_object* v___y_113_; uint32_t v___y_124_; uint8_t v___y_125_; lean_object* v___y_126_; lean_object* v___y_132_; uint8_t v___y_133_; lean_object* v___y_139_; lean_object* v___x_148_; lean_object* v___x_149_; uint8_t v___x_150_; 
+uint32_t v___y_112_; lean_object* v___y_113_; uint8_t v___y_124_; uint32_t v___y_125_; lean_object* v___y_126_; lean_object* v___y_132_; uint8_t v___y_133_; lean_object* v___y_139_; lean_object* v___x_148_; lean_object* v___x_149_; uint8_t v___x_150_; 
 v___x_148_ = lean_string_utf8_byte_size(v_stderr_107_);
 v___x_149_ = lean_unsigned_to_nat(0u);
 v___x_150_ = lean_nat_dec_eq(v___x_148_, v___x_149_);
@@ -578,16 +578,16 @@ v___jp_123_:
 {
 uint32_t v___x_127_; uint8_t v___x_128_; 
 v___x_127_ = 0;
-v___x_128_ = lean_uint32_dec_eq(v___y_124_, v___x_127_);
+v___x_128_ = lean_uint32_dec_eq(v___y_125_, v___x_127_);
 if (v___x_128_ == 0)
 {
-v___y_112_ = v___y_124_;
+v___y_112_ = v___y_125_;
 v___y_113_ = v___y_126_;
 goto v___jp_111_;
 }
 else
 {
-if (v___y_125_ == 0)
+if (v___y_124_ == 0)
 {
 lean_object* v___x_129_; lean_object* v___x_130_; 
 v___x_129_ = lean_box(0);
@@ -598,7 +598,7 @@ return v___x_130_;
 }
 else
 {
-v___y_112_ = v___y_124_;
+v___y_112_ = v___y_125_;
 v___y_113_ = v___y_126_;
 goto v___jp_111_;
 }
@@ -611,8 +611,8 @@ v___x_134_ = 1;
 v___x_135_ = lean_uint32_dec_eq(v_exitCode_105_, v___x_134_);
 if (v___x_135_ == 0)
 {
-v___y_124_ = v_exitCode_105_;
-v___y_125_ = v___y_133_;
+v___y_124_ = v___y_133_;
+v___y_125_ = v_exitCode_105_;
 v___y_126_ = v___y_132_;
 goto v___jp_123_;
 }
@@ -620,8 +620,8 @@ else
 {
 if (v___y_133_ == 0)
 {
-v___y_124_ = v_exitCode_105_;
-v___y_125_ = v___y_133_;
+v___y_124_ = v___y_133_;
+v___y_125_ = v_exitCode_105_;
 v___y_126_ = v___y_132_;
 goto v___jp_123_;
 }

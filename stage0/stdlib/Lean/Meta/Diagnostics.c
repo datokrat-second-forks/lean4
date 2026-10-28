@@ -3297,9 +3297,9 @@ return v___x_1236_;
 LEAN_EXPORT lean_object* l_Lean_Meta_mkDiagSynthPendingFailure___lam__0___boxed(lean_object* v___x_1237_, lean_object* v___x_1238_, lean_object* v_data_1239_, lean_object* v_x_1240_, lean_object* v_____s_1241_, lean_object* v___y_1242_, lean_object* v___y_1243_, lean_object* v___y_1244_, lean_object* v___y_1245_, lean_object* v___y_1246_){
 _start:
 {
-uint8_t v___x_2373__boxed_1247_; lean_object* v_res_1248_; 
-v___x_2373__boxed_1247_ = lean_unbox(v___x_1238_);
-v_res_1248_ = l_Lean_Meta_mkDiagSynthPendingFailure___lam__0(v___x_1237_, v___x_2373__boxed_1247_, v_data_1239_, v_x_1240_, v_____s_1241_, v___y_1242_, v___y_1243_, v___y_1244_, v___y_1245_);
+uint8_t v___x_2362__boxed_1247_; lean_object* v_res_1248_; 
+v___x_2362__boxed_1247_ = lean_unbox(v___x_1238_);
+v_res_1248_ = l_Lean_Meta_mkDiagSynthPendingFailure___lam__0(v___x_1237_, v___x_2362__boxed_1247_, v_data_1239_, v_x_1240_, v_____s_1241_, v___y_1242_, v___y_1243_, v___y_1244_, v___y_1245_);
 lean_dec(v___y_1245_);
 lean_dec_ref(v___y_1244_);
 lean_dec(v___y_1243_);
