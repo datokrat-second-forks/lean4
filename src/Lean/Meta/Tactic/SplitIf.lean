@@ -162,10 +162,12 @@ def getSimpContext : MetaM Simp.Context := do
   s ← s.addConst ``ite_eq_right
   s ← s.addConst ``dite_eq_left
   s ← s.addConst ``dite_eq_right
-  s ← s.addConst ``UDecidable.ite_eq_left
-  s ← s.addConst ``UDecidable.ite_eq_right
-  s ← s.addConst ``UDecidable.dite_eq_left
-  s ← s.addConst ``UDecidable.dite_eq_right
+  -- Missing in files that do not import `Init.UDecidable`.
+  if (← getEnv).contains ``UDecidable.ite_eq_left then
+    s ← s.addConst ``UDecidable.ite_eq_left
+    s ← s.addConst ``UDecidable.ite_eq_right
+    s ← s.addConst ``UDecidable.dite_eq_left
+    s ← s.addConst ``UDecidable.dite_eq_right
   Simp.mkContext
    (simpTheorems  := #[s])
     (congrTheorems := (← getSimpCongrTheorems))
