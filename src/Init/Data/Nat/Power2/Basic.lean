@@ -10,6 +10,7 @@ public import Init.Grind.Tactics
 import Init.Data.Nat.Internal.Linear
 import Init.NotationExtra
 import Init.WFTactics
+import Init.UDecidable
 
 public section
 
@@ -34,7 +35,7 @@ def nextPowerOfTwo (n : Nat) : Nat :=
   go 1 (by decide)
 where
   go (power : Nat) (h : power > 0) : Nat :=
-    if power < n then
+    uif power < n then
       go (power * 2) (Nat.mul_pos h (by decide))
     else
       power

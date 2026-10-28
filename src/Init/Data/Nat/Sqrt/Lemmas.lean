@@ -36,7 +36,7 @@ private theorem sqrt.iter_sq_le (n guess : Nat) : sqrt.iter n guess * sqrt.iter 
   unfold sqrt.iter
   let next := (guess + n / guess) / 2
   if h : next < guess then
-    simpa only [next, dite_eq_left h] using sqrt.iter_sq_le n next
+    simpa only [next, UDecidable.dite_eq_left h] using sqrt.iter_sq_le n next
   else
     apply Nat.mul_le_of_le_div
     simp only
@@ -50,7 +50,7 @@ private theorem sqrt.lt_iter_succ_sq (n guess : Nat) (hn : n < (guess + 1) * (gu
   dsimp
   split <;> rename_i h
   · suffices n < (m + 1) * (m + 1) by
-      simpa only [dite_eq_left h] using sqrt.lt_iter_succ_sq n m this
+      simpa only [UDecidable.dite_eq_left h] using sqrt.lt_iter_succ_sq n m this
     refine Nat.lt_of_mul_lt_mul_left ?_ (a := 4 * (guess * guess))
     apply Nat.lt_of_le_of_lt AM_GM
     rw [show (4 : Nat) = 2 * 2 from rfl]
@@ -82,7 +82,7 @@ private theorem sqrt_isSqrt (n : Nat) : IsSqrt n (sqrt n) := by
   | 1 => simp [IsSqrt, sqrt]
   | n + 2 =>
     have h : ¬ (n + 2) ≤ 1 := by simp
-    simp only [IsSqrt, sqrt, h, ite_false]
+    simp only [IsSqrt, sqrt, h, UDecidable.ite_false]
     refine ⟨sqrt.iter_sq_le _ _, sqrt.lt_iter_succ_sq _ _ ?_⟩
     simp only [Nat.mul_add, Nat.add_mul, Nat.one_mul, Nat.mul_one, ← Nat.add_assoc]
     rw [Nat.lt_add_one_iff, Nat.add_assoc, ← Nat.mul_two]
