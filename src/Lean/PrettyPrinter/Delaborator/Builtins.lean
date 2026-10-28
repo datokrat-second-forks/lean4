@@ -14,6 +14,7 @@ public import Lean.PrettyPrinter.Formatter
 public import Lean.PrettyPrinter.Parenthesizer
 meta import Lean.Parser.Command
 meta import Lean.PrettyPrinter.Delaborator.DeclWithSig
+import Init.UDecidable
 
 public section
 
@@ -1275,6 +1276,20 @@ where
     | some h => return (← withBindingBody h delab, h)
     | none   => withBindingBodyUnusedName fun h => do
       return (← delab, h.getId)
+
+@[builtin_delab app.UDecidable.ite]
+def delabUIte : Delab := whenNotPPOption getPPExplicit <| whenPPOption getPPNotation <| withOverApp 5 do
+  let c ← withAppFn $ withAppFn $ withAppFn $ withAppArg delab
+  let t ← withAppFn $ withAppArg delab
+  let e ← withAppArg delab
+  `(uif $c then $t else $e)
+
+@[builtin_delab app.UDecidable.dite]
+def delabUDIte : Delab := whenNotPPOption getPPExplicit <| whenPPOption getPPNotation <| withOverApp 5 do
+  let c ← withAppFn $ withAppFn $ withAppFn $ withAppArg delab
+  let (t, h) ← withAppFn $ withAppArg $ delabDIte.delabBranch none
+  let (e, _) ← withAppArg $ delabDIte.delabBranch h
+  `(uif $(mkIdent h):ident : $c then $t else $e)
 
 @[builtin_delab app.cond]
 def delabCond : Delab := whenNotPPOption getPPExplicit <| whenPPOption getPPNotation <| withOverApp 4 do

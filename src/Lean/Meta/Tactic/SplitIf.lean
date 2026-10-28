@@ -8,8 +8,15 @@ prelude
 public import Lean.Meta.Tactic.Cases
 public import Lean.Meta.Tactic.Simp.Rewrite
 import Lean.Meta.Tactic.Simp.Main
+import Init.UDecidable
 public section
 namespace Lean.Meta
+
+/--
+Returns `true` if `e` is an application of `ite`, `dite`, `UDecidable.ite` or `UDecidable.dite`.
+-/
+def isIteLike (e : Expr) : Bool :=
+  e.isIte || e.isDIte || e.isAppOfArity ``UDecidable.ite 5 || e.isAppOfArity ``UDecidable.dite 5
 
 inductive SplitKind where
   | ite | match | both
@@ -40,7 +47,8 @@ private def isCandidate? (env : Environment) (ctx : Context) (e : Expr) : Option
   let ret (e : Expr) : Option Expr :=
     if ctx.exceptionSet.contains e then none else some e
   if ctx.kind.considerIte then
-    if e.isAppOf ``ite || e.isAppOf ``dite then
+    if e.isAppOf ``ite || e.isAppOf ``dite || e.isAppOf ``UDecidable.ite
+        || e.isAppOf ``UDecidable.dite then
       let numArgs := e.getAppNumArgs
       if numArgs >= 5 && !(e.getArg! 1 5).hasLooseBVars then
         return ret (e.getBoundedAppFn (numArgs - 5))
@@ -108,7 +116,7 @@ partial def findSplit? (e : Expr) (kind : SplitKind := .both) (exceptionSet : Ex
 where
   go (e : Expr) : MetaM (Option Expr) := do
     if let some target ← find? e then
-      if target.isIte || target.isDIte then
+      if isIteLike target then
         let cond := target.getArg! 1 5
         -- Try to find a nested `if` in `cond`
         return (← go cond).getD target
@@ -131,6 +139,8 @@ private partial def findIfToSplit? (e : Expr) : MetaM (Option (Expr × Expr)) :=
       return (p, mkApp3 (mkConst ``Decidable.intro) p b h)
     let cond := iteApp.getArg! 1 5
     let dec := iteApp.getArg! 2 5
+    if iteApp.isAppOf ``UDecidable.ite || iteApp.isAppOf ``UDecidable.dite then
+      return (cond, mkApp2 (mkConst ``UDecidable.toDecidable) cond dec)
     return (cond, dec)
   else
     return none
@@ -152,6 +162,10 @@ def getSimpContext : MetaM Simp.Context := do
   s ← s.addConst ``ite_eq_right
   s ← s.addConst ``dite_eq_left
   s ← s.addConst ``dite_eq_right
+  s ← s.addConst ``UDecidable.ite_eq_left
+  s ← s.addConst ``UDecidable.ite_eq_right
+  s ← s.addConst ``UDecidable.dite_eq_left
+  s ← s.addConst ``UDecidable.dite_eq_right
   Simp.mkContext
    (simpTheorems  := #[s])
     (congrTheorems := (← getSimpCongrTheorems))
@@ -272,10 +286,31 @@ private def reduceMatchValue' (numIndices : Nat) (useDecideBool : Bool) :
   else
     return .done { expr := e }
 
+/-- Reduces `UDecidable.ite` and `UDecidable.dite`, like `reduceIte'` and `reduceDIte'`. -/
+private def reduceUIte' (numIndices : Nat) (useDecideBool : Bool) : Simp.Simproc := fun e => do
+  let some (dep, f, α, c, i, tb, eb) := match_expr e with
+    | f@UDecidable.ite α c i tb eb => some (false, f, α, c, i, tb, eb)
+    | f@UDecidable.dite α c i tb eb => some (true, f, α, c, i, tb, eb)
+    | _ => none
+    | return .continue
+  let us := f.constLevels!
+  if let some h ← discharge? numIndices useDecideBool c then
+    let (e', thm) := if dep then (mkApp tb h |>.headBeta, ``UDecidable.dite_eq_left)
+      else (tb, ``UDecidable.ite_eq_left)
+    return .done { expr := e', proof? := some (mkApp6 (mkConst thm us) c i h α tb eb) }
+  else if let some h ← discharge? numIndices useDecideBool (mkNot c) then
+    let (e', thm) := if dep then (mkApp eb h |>.headBeta, ``UDecidable.dite_eq_right)
+      else (eb, ``UDecidable.ite_eq_right)
+    return .done { expr := e', proof? := some (mkApp6 (mkConst thm us) c i h α tb eb) }
+  else
+    return .done { expr := e }
+
 private def getSimprocs (numIndices : Nat) (useDecide : Bool) : MetaM (Array Simprocs) := do
   let s : Simprocs := {}
   let s := s.addCore #[.const ``ite 5, .star, .star, .star, .star, .star] ``reduceIte' (post := false) (.inl <| reduceIte' numIndices useDecide)
   let s := s.addCore #[.const ``dite 5, .star, .star, .star, .star, .star] ``reduceDIte' (post := false) (.inl <| reduceDIte' numIndices useDecide)
+  let s := s.addCore #[.const ``UDecidable.ite 5, .star, .star, .star, .star, .star] ``reduceUIte' (post := false) (.inl <| reduceUIte' numIndices useDecide)
+  let s := s.addCore #[.const ``UDecidable.dite 5, .star, .star, .star, .star, .star] ``reduceUIte' (post := false) (.inl <| reduceUIte' numIndices useDecide)
   let s := s.addCore #[.const ``Bool.Internal.matchValue 6, .star, .star, .star, .star, .star, .star] ``reduceMatchValue' (post := false) (.inl <| reduceMatchValue' numIndices useDecide)
   return #[s]
 
