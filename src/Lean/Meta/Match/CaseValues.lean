@@ -26,7 +26,8 @@ def valueTestTheorems : List (Name × Name) := [
   (``UInt16, ``UInt16.Internal.reflects_beq),
   (``UInt32, ``UInt32.Internal.reflects_beq),
   (``UInt64, ``UInt64.Internal.reflects_beq),
-  (``Char, ``Char.Internal.reflects_beq)]
+  (``Char, ``Char.Internal.reflects_beq),
+  (``String, ``String.Internal.reflects_beq)]
 
 /-- Returns the `Bool` test of `x = value` and the proof that it reflects `x = value`, if any. -/
 def mkValueTest? (x value : Expr) : MetaM (Option (Expr × Expr)) := do

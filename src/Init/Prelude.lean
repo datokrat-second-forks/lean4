@@ -2663,7 +2663,24 @@ Examples:
 @[extern "lean_uint8_of_nat", implicit_reducible]
 def UInt8.ofNat (n : @& Nat) : UInt8 := ⟨BitVec.ofNat 8 n⟩
 
-set_option bootstrap.genMatcherCode false in
+/--
+Boolean equality of `UInt8`s that reduces by itself. It implements `BEq UInt8` and
+`DecidableEq UInt8`, and the `match` compiler uses it to test `UInt8` value patterns.
+-/
+@[implicit_reducible]
+def UInt8.Internal.beq (a b : UInt8) : Bool :=
+  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- `UInt8.Internal.beq a b` is `true` exactly when `a = b`. -/
+theorem UInt8.Internal.reflects_beq (a b : UInt8) :
+    (UInt8.Internal.beq a b).Reflects (Eq a b) :=
+  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
+  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
+  | true  =>
+    congrArg UInt8.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
+  | false => fun h' =>
+    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt8) => a.toBitVec.toFin.val) h')
+
 /--
 Decides whether two 8-bit unsigned integers are equal. Usually accessed via the `DecidableEq UInt8`
 instance.
@@ -2676,32 +2693,19 @@ Examples:
  * `show (7 : UInt8) = 7 by decide`
 -/
 @[extern "lean_uint8_dec_eq", implicit_reducible]
-def UInt8.decEq (a b : UInt8) : Decidable (Eq a b) where
-  decide := decide (Eq a.toBitVec b.toBitVec)
-  reflects_decide :=
-    match instDecidableEqBitVec a.toBitVec b.toBitVec with
-    | isTrue  h => congrArg UInt8.ofBitVec h
-    | isFalse h => fun h' => UInt8.noConfusion h' h
+def UInt8.decEq (a b : UInt8) : Decidable (Eq a b) :=
+  ⟨UInt8.Internal.beq a b, UInt8.Internal.reflects_beq a b⟩
 
 instance : DecidableEq UInt8 := UInt8.decEq
 
-/--
-Boolean equality of `UInt8`s that reduces by itself. The `match` compiler uses it to test `UInt8`
-value patterns.
--/
-@[reducible, extern "lean_uint8_dec_eq"]
-def UInt8.Internal.beq (a b : UInt8) : Bool :=
-  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+-- TODO: drop this and mark `UInt8.Internal.beq` as `@[extern "lean_uint8_dec_eq"]`
+-- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
+/-- Runtime implementation of `UInt8.Internal.beq`. -/
+@[inline] def UInt8.Internal.beqImpl (a b : UInt8) : Bool := @decide (Eq a b) (UInt8.decEq a b)
 
-/-- Used by the `match` compiler to test `UInt8` value patterns. -/
-theorem UInt8.Internal.reflects_beq (a b : UInt8) :
-    (UInt8.Internal.beq a b).Reflects (Eq a b) :=
-  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
-  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
-  | true  =>
-    congrArg UInt8.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
-  | false => fun h' =>
-    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt8) => a.toBitVec.toFin.val) h')
+attribute [implemented_by UInt8.Internal.beqImpl] UInt8.Internal.beq
+
+instance : BEq UInt8 := ⟨UInt8.Internal.beq⟩
 
 instance : Inhabited UInt8 where
   default := UInt8.ofNatLT 0 (of_decide_eq_true rfl)
@@ -2784,7 +2788,23 @@ This function is overridden at runtime with an efficient implementation.
 def UInt16.ofNatLT (n : @& Nat) (h : LT.lt n UInt16.size) : UInt16 where
   toBitVec := BitVec.ofNatLT n h
 
-set_option bootstrap.genMatcherCode false in
+/--
+Boolean equality of `UInt16`s that reduces by itself. It implements `BEq UInt16` and
+`DecidableEq UInt16`, and the `match` compiler uses it to test `UInt16` value patterns.
+-/
+@[implicit_reducible]
+def UInt16.Internal.beq (a b : UInt16) : Bool :=
+  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- `UInt16.Internal.beq a b` is `true` exactly when `a = b`. -/
+theorem UInt16.Internal.reflects_beq (a b : UInt16) :
+    (UInt16.Internal.beq a b).Reflects (Eq a b) :=
+  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
+  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
+  | true  =>
+    congrArg UInt16.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
+  | false => fun h' =>
+    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt16) => a.toBitVec.toFin.val) h')
 
 /--
 Decides whether two 16-bit unsigned integers are equal. Usually accessed via the
@@ -2798,32 +2818,19 @@ Examples:
  * `show (7 : UInt16) = 7 by decide`
 -/
 @[extern "lean_uint16_dec_eq", implicit_reducible]
-def UInt16.decEq (a b : UInt16) : Decidable (Eq a b) where
-  decide := decide (Eq a.toBitVec b.toBitVec)
-  reflects_decide :=
-    match instDecidableEqBitVec a.toBitVec b.toBitVec with
-    | isTrue  h => congrArg UInt16.ofBitVec h
-    | isFalse h => fun h' => UInt16.noConfusion h' h
+def UInt16.decEq (a b : UInt16) : Decidable (Eq a b) :=
+  ⟨UInt16.Internal.beq a b, UInt16.Internal.reflects_beq a b⟩
 
 instance : DecidableEq UInt16 := UInt16.decEq
 
-/--
-Boolean equality of `UInt16`s that reduces by itself. The `match` compiler uses it to test `UInt16`
-value patterns.
--/
-@[reducible, extern "lean_uint16_dec_eq"]
-def UInt16.Internal.beq (a b : UInt16) : Bool :=
-  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+-- TODO: drop this and mark `UInt16.Internal.beq` as `@[extern "lean_uint16_dec_eq"]`
+-- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
+/-- Runtime implementation of `UInt16.Internal.beq`. -/
+@[inline] def UInt16.Internal.beqImpl (a b : UInt16) : Bool := @decide (Eq a b) (UInt16.decEq a b)
 
-/-- Used by the `match` compiler to test `UInt16` value patterns. -/
-theorem UInt16.Internal.reflects_beq (a b : UInt16) :
-    (UInt16.Internal.beq a b).Reflects (Eq a b) :=
-  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
-  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
-  | true  =>
-    congrArg UInt16.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
-  | false => fun h' =>
-    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt16) => a.toBitVec.toFin.val) h')
+attribute [implemented_by UInt16.Internal.beqImpl] UInt16.Internal.beq
+
+instance : BEq UInt16 := ⟨UInt16.Internal.beq⟩
 
 instance : Inhabited UInt16 where
   default := UInt16.ofNatLT 0 (of_decide_eq_true rfl)
@@ -2868,7 +2875,24 @@ This function is overridden at runtime with an efficient implementation.
 @[extern "lean_uint32_to_nat", implicit_reducible]
 def UInt32.toNat (n : UInt32) : Nat := n.toBitVec.toNat
 
-set_option bootstrap.genMatcherCode false in
+/--
+Boolean equality of `UInt32`s that reduces by itself. It implements `BEq UInt32` and
+`DecidableEq UInt32`, and the `match` compiler uses it to test `UInt32` value patterns.
+-/
+@[implicit_reducible]
+def UInt32.Internal.beq (a b : UInt32) : Bool :=
+  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- `UInt32.Internal.beq a b` is `true` exactly when `a = b`. -/
+theorem UInt32.Internal.reflects_beq (a b : UInt32) :
+    (UInt32.Internal.beq a b).Reflects (Eq a b) :=
+  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
+  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
+  | true  =>
+    congrArg UInt32.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
+  | false => fun h' =>
+    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt32) => a.toBitVec.toFin.val) h')
+
 /--
 Decides whether two 32-bit unsigned integers are equal. Usually accessed via the
 `DecidableEq UInt32` instance.
@@ -2881,32 +2905,19 @@ Examples:
  * `show (7 : UInt32) = 7 by decide`
 -/
 @[extern "lean_uint32_dec_eq", implicit_reducible]
-def UInt32.decEq (a b : UInt32) : Decidable (Eq a b) where
-  decide := decide (Eq a.toBitVec b.toBitVec)
-  reflects_decide :=
-    match instDecidableEqBitVec a.toBitVec b.toBitVec with
-    | isTrue  h => congrArg UInt32.ofBitVec h
-    | isFalse h => fun h' => UInt32.noConfusion h' h
+def UInt32.decEq (a b : UInt32) : Decidable (Eq a b) :=
+  ⟨UInt32.Internal.beq a b, UInt32.Internal.reflects_beq a b⟩
 
 instance : DecidableEq UInt32 := UInt32.decEq
 
-/--
-Boolean equality of `UInt32`s that reduces by itself. The `match` compiler uses it to test `UInt32`
-value patterns.
--/
-@[reducible, extern "lean_uint32_dec_eq"]
-def UInt32.Internal.beq (a b : UInt32) : Bool :=
-  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+-- TODO: drop this and mark `UInt32.Internal.beq` as `@[extern "lean_uint32_dec_eq"]`
+-- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
+/-- Runtime implementation of `UInt32.Internal.beq`. -/
+@[inline] def UInt32.Internal.beqImpl (a b : UInt32) : Bool := @decide (Eq a b) (UInt32.decEq a b)
 
-/-- Used by the `match` compiler to test `UInt32` value patterns. -/
-theorem UInt32.Internal.reflects_beq (a b : UInt32) :
-    (UInt32.Internal.beq a b).Reflects (Eq a b) :=
-  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
-  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
-  | true  =>
-    congrArg UInt32.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
-  | false => fun h' =>
-    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt32) => a.toBitVec.toFin.val) h')
+attribute [implemented_by UInt32.Internal.beqImpl] UInt32.Internal.beq
+
+instance : BEq UInt32 := ⟨UInt32.Internal.beq⟩
 
 instance : Inhabited UInt32 where
   default := UInt32.ofNatLT 0 (of_decide_eq_true rfl)
@@ -2985,7 +2996,23 @@ This function is overridden at runtime with an efficient implementation.
 def UInt64.ofNatLT (n : @& Nat) (h : LT.lt n UInt64.size) : UInt64 where
   toBitVec := BitVec.ofNatLT n h
 
-set_option bootstrap.genMatcherCode false in
+/--
+Boolean equality of `UInt64`s that reduces by itself. It implements `BEq UInt64` and
+`DecidableEq UInt64`, and the `match` compiler uses it to test `UInt64` value patterns.
+-/
+@[implicit_reducible]
+def UInt64.Internal.beq (a b : UInt64) : Bool :=
+  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- `UInt64.Internal.beq a b` is `true` exactly when `a = b`. -/
+theorem UInt64.Internal.reflects_beq (a b : UInt64) :
+    (UInt64.Internal.beq a b).Reflects (Eq a b) :=
+  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
+  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
+  | true  =>
+    congrArg UInt64.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
+  | false => fun h' =>
+    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt64) => a.toBitVec.toFin.val) h')
 
 /--
 Decides whether two 64-bit unsigned integers are equal. Usually accessed via the
@@ -2999,32 +3026,19 @@ Examples:
  * `show (7 : UInt64) = 7 by decide`
 -/
 @[extern "lean_uint64_dec_eq", implicit_reducible]
-def UInt64.decEq (a b : UInt64) : Decidable (Eq a b) where
-  decide := decide (Eq a.toBitVec b.toBitVec)
-  reflects_decide :=
-    match instDecidableEqBitVec a.toBitVec b.toBitVec with
-    | isTrue  h => congrArg UInt64.ofBitVec h
-    | isFalse h => fun h' => UInt64.noConfusion h' h
+def UInt64.decEq (a b : UInt64) : Decidable (Eq a b) :=
+  ⟨UInt64.Internal.beq a b, UInt64.Internal.reflects_beq a b⟩
 
 instance : DecidableEq UInt64 := UInt64.decEq
 
-/--
-Boolean equality of `UInt64`s that reduces by itself. The `match` compiler uses it to test `UInt64`
-value patterns.
--/
-@[reducible, extern "lean_uint64_dec_eq"]
-def UInt64.Internal.beq (a b : UInt64) : Bool :=
-  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+-- TODO: drop this and mark `UInt64.Internal.beq` as `@[extern "lean_uint64_dec_eq"]`
+-- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
+/-- Runtime implementation of `UInt64.Internal.beq`. -/
+@[inline] def UInt64.Internal.beqImpl (a b : UInt64) : Bool := @decide (Eq a b) (UInt64.decEq a b)
 
-/-- Used by the `match` compiler to test `UInt64` value patterns. -/
-theorem UInt64.Internal.reflects_beq (a b : UInt64) :
-    (UInt64.Internal.beq a b).Reflects (Eq a b) :=
-  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
-  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
-  | true  =>
-    congrArg UInt64.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
-  | false => fun h' =>
-    Nat.ne_of_beq_eq_false h (congrArg (fun (a : UInt64) => a.toBitVec.toFin.val) h')
+attribute [implemented_by UInt64.Internal.beqImpl] UInt64.Internal.beq
+
+instance : BEq UInt64 := ⟨UInt64.Internal.beq⟩
 
 instance : Inhabited UInt64 where
   default := UInt64.ofNatLT 0 (of_decide_eq_true rfl)
@@ -3074,7 +3088,24 @@ This function is overridden at runtime with an efficient implementation.
 def USize.ofNatLT (n : @& Nat) (h : LT.lt n USize.size) : USize where
   toBitVec := BitVec.ofNatLT n h
 
-set_option bootstrap.genMatcherCode false in
+/--
+Boolean equality of `USize`s that reduces by itself. It implements `BEq USize` and
+`DecidableEq USize`.
+-/
+@[implicit_reducible]
+def USize.Internal.beq (a b : USize) : Bool :=
+  Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- `USize.Internal.beq a b` is `true` exactly when `a = b`. -/
+theorem USize.Internal.reflects_beq (a b : USize) :
+    (USize.Internal.beq a b).Reflects (Eq a b) :=
+  show (Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val).Reflects _ from
+  match h : Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val with
+  | true  =>
+    congrArg USize.ofBitVec (congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h)))
+  | false => fun h' =>
+    Nat.ne_of_beq_eq_false h (congrArg (fun (a : USize) => a.toBitVec.toFin.val) h')
+
 /--
 Decides whether two word-sized unsigned integers are equal. Usually accessed via the
 `DecidableEq USize` instance.
@@ -3087,14 +3118,19 @@ Examples:
  * `show (7 : USize) = 7 by decide`
 -/
 @[extern "lean_usize_dec_eq"]
-def USize.decEq (a b : USize) : Decidable (Eq a b) where
-  decide := decide (Eq a.toBitVec b.toBitVec)
-  reflects_decide :=
-    match instDecidableEqBitVec a.toBitVec b.toBitVec with
-    | isTrue  h => congrArg USize.ofBitVec h
-    | isFalse h => fun h' => USize.noConfusion h' h
+def USize.decEq (a b : USize) : Decidable (Eq a b) :=
+  ⟨USize.Internal.beq a b, USize.Internal.reflects_beq a b⟩
 
 instance : DecidableEq USize := USize.decEq
+
+-- TODO: drop this and mark `USize.Internal.beq` as `@[extern "lean_usize_dec_eq"]`
+-- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
+/-- Runtime implementation of `USize.Internal.beq`. -/
+@[inline] def USize.Internal.beqImpl (a b : USize) : Bool := @decide (Eq a b) (USize.decEq a b)
+
+attribute [implemented_by USize.Internal.beqImpl] USize.Internal.beq
+
+instance : BEq USize := ⟨USize.Internal.beq⟩
 
 instance : Inhabited USize where
   default := USize.ofNatLT 0 USize.size_pos
@@ -3175,7 +3211,7 @@ instance : DecidableEq Char := fun c d => {
 Boolean equality of `Char`s that reduces by itself. The `match` compiler uses it to test `Char`
 value patterns.
 -/
-@[reducible, extern "lean_uint32_dec_eq"]
+@[implicit_reducible, extern "lean_uint32_dec_eq"]
 def Char.Internal.beq (c d : Char) : Bool :=
   Nat.beq c.val.toBitVec.toFin.val d.val.toBitVec.toFin.val
 
@@ -3280,21 +3316,23 @@ protected def List.beq {α : Type u} [BEq α] : (a b : List α) → Bool
   | nil,       cons _ _  => false
   | cons a as, cons b bs => and (beq a b) (List.beq as bs)
 
+/-- `List.beq` decides equality of lists if `beq` decides equality of their elements. -/
+theorem List.reflects_beq {α : Type u} [BEq α] (hα : (a b : α) → (beq a b).Reflects (Eq a b)) :
+    (as bs : List α) → (as.beq bs).Reflects (Eq as bs)
+  | nil, nil => rfl
+  | cons _ _, nil => fun h => List.noConfusion rfl (heq_of_eq h)
+  | nil, cons _ _ => fun h => List.noConfusion rfl (heq_of_eq h)
+  | cons a as, cons b bs => show (and (beq a b) (List.beq as bs)).Reflects _ from
+    match beq a b, hα a b, List.beq as bs, reflects_beq hα as bs with
+    | false, h, _,     _  => fun h' => List.noConfusion rfl (heq_of_eq h') (fun hab _ => absurd (eq_of_heq hab) h)
+    | true,  _, false, h  => fun h' => List.noConfusion rfl (heq_of_eq h') (fun _ habs => absurd (eq_of_heq habs) h)
+    | true,  h, true,  h' => h' ▸ h ▸ rfl
+
 /-- Implements decidable equality for `List α`, assuming `α` has decidable equality. -/
 @[instance_reducible]
 protected def List.hasDecEq {α : Type u} [d : DecidableEq α] (a b : List α) : Decidable (Eq a b) where
   decide := a.beq b
-  reflects_decide := go a b
-where
-  go : (a b : List α) → (a.beq b).Reflects (Eq a b)
-  | nil, nil => rfl
-  | cons _ _, nil => fun h => List.noConfusion rfl (heq_of_eq h)
-  | nil, cons _ _ => fun h => List.noConfusion rfl (heq_of_eq h)
-  | cons a as, cons b bs => show (and (decide (Eq a b)) (List.beq as bs)).Reflects _ from
-    match d a b, List.beq as bs, go as bs with
-    | isFalse h, _,     _  => fun h' => List.noConfusion rfl (heq_of_eq h') (fun hab _ => absurd (eq_of_heq hab) h)
-    | isTrue  _, false, h  => fun h' => List.noConfusion rfl (heq_of_eq h') (fun _ habs => absurd (eq_of_heq habs) h)
-    | isTrue  h, true,  h' => h' ▸ h ▸ rfl
+  reflects_decide := List.reflects_beq (fun a b => (d a b).reflects_decide) a b
 
 instance {α : Type u} [DecidableEq α] : DecidableEq (List α) := fun xs ys =>
   /-
@@ -3854,6 +3892,25 @@ def String.ofList (data : List Char) : String :=
   ⟨List.utf8Encode data, .intro data rfl⟩
 
 /--
+Boolean equality of `String`s that reduces by itself, by comparing the UTF-8 encodings. It
+implements `DecidableEq String`, and the `match` compiler uses it to test `String` value patterns.
+-/
+@[implicit_reducible]
+def String.Internal.beq (s₁ s₂ : @& String) : Bool :=
+  List.beq s₁.toByteArray.data.toList s₂.toByteArray.data.toList
+
+/-- `String.Internal.beq s₁ s₂` is `true` exactly when `s₁ = s₂`. -/
+theorem String.Internal.reflects_beq (s₁ s₂ : String) :
+    (String.Internal.beq s₁ s₂).Reflects (Eq s₁ s₂) :=
+  match s₁, s₂ with
+  | ⟨⟨⟨s₁⟩⟩, _⟩, ⟨⟨⟨s₂⟩⟩, _⟩ =>
+    show (List.beq s₁ s₂).Reflects _ from
+    match List.beq s₁ s₂, List.reflects_beq UInt8.Internal.reflects_beq s₁ s₂ with
+    | true,  h => match s₁, s₂, h with | _, _, Eq.refl _ => rfl
+    | false, h => fun h' =>
+      h (congrArg (fun s => Array.toList (ByteArray.data (String.toByteArray s))) h')
+
+/--
 Decides whether two strings are equal. Normally used via the `DecidableEq String` instance and the
 `=` operator.
 
@@ -3861,13 +3918,16 @@ At runtime, this function is overridden with an efficient native implementation.
 -/
 @[extern "lean_string_dec_eq", instance_reducible]
 def String.decEq (s₁ s₂ : @& String) : Decidable (Eq s₁ s₂) :=
-  match s₁, s₂ with
-  | ⟨⟨⟨s₁⟩⟩, _⟩, ⟨⟨⟨s₂⟩⟩, _⟩ =>
-    dite (Eq s₁ s₂) (fun h => match s₁, s₂, h with | _, _, Eq.refl _ => isTrue rfl)
-      (fun h => isFalse
-        (fun h' => h (congrArg (fun s => Array.toList (ByteArray.data (String.toByteArray s))) h')))
+  ⟨String.Internal.beq s₁ s₂, String.Internal.reflects_beq s₁ s₂⟩
 
 instance : DecidableEq String := String.decEq
+
+-- TODO: drop this and mark `String.Internal.beq` as `@[extern "lean_string_dec_eq"]`
+-- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
+/-- Runtime implementation of `String.Internal.beq`. -/
+@[inline] def String.Internal.beqImpl (s₁ s₂ : @& String) : Bool := @decide (Eq s₁ s₂) (String.decEq s₁ s₂)
+
+attribute [implemented_by String.Internal.beqImpl] String.Internal.beq
 
 /--
 A byte position in a `String`, according to its UTF-8 encoding.

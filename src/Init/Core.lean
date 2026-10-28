@@ -807,6 +807,27 @@ instance [DecidableEq α] : LawfulBEq α where
   eq_of_beq := of_decide_eq_true
   rfl := of_decide_eq_self_eq_true _
 
+-- The `BEq` instances of these types are not built from `DecidableEq`, but agree with it by `rfl`.
+instance : LawfulBEq UInt8 where
+  eq_of_beq {a b} := @of_decide_eq_true (a = b) _
+  rfl {a} := of_decide_eq_self_eq_true a
+
+instance : LawfulBEq UInt16 where
+  eq_of_beq {a b} := @of_decide_eq_true (a = b) _
+  rfl {a} := of_decide_eq_self_eq_true a
+
+instance : LawfulBEq UInt32 where
+  eq_of_beq {a b} := @of_decide_eq_true (a = b) _
+  rfl {a} := of_decide_eq_self_eq_true a
+
+instance : LawfulBEq UInt64 where
+  eq_of_beq {a b} := @of_decide_eq_true (a = b) _
+  rfl {a} := of_decide_eq_self_eq_true a
+
+instance : LawfulBEq USize where
+  eq_of_beq {a b} := @of_decide_eq_true (a = b) _
+  rfl {a} := of_decide_eq_self_eq_true a
+
 /--
 Non-instance for `DecidableEq` from `LawfulBEq`.
 To use this, add `attribute [local instance 5] instDecidableEqOfLawfulBEq` at the top of a file.

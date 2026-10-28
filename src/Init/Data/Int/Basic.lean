@@ -272,7 +272,7 @@ set_option bootstrap.genMatcherCode false in
 Boolean equality of integers that reduces by itself. The `match` compiler uses it to test `Int`
 value patterns.
 -/
-@[reducible, extern "lean_int_dec_eq"]
+@[implicit_reducible, extern "lean_int_dec_eq"]
 protected def Internal.beq : (@& Int) → (@& Int) → Bool
   | ofNat a, ofNat b => Nat.beq a b
   | ofNat _, -[_ +1] => false

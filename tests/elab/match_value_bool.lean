@@ -1,9 +1,9 @@
 import Lean
 
 /-!
-The `match` compiler tests value patterns (`Nat`, `Int`, `Fin`, `BitVec`, `UIntN` and `Char`
-literals, and array sizes) with `Bool`-valued functions that reduce by themselves, instead of
-branching on a `DecidableEq` instance with `dite`. The matchers keep reducing by `rfl`, `decide`
+The `match` compiler tests value patterns (`Nat`, `Int`, `Fin`, `BitVec`, `UIntN`, `Char` and
+`String` literals, and array sizes) with `Bool`-valued functions that reduce by themselves, instead
+of branching on a `DecidableEq` instance with `dite`. The matchers keep reducing by `rfl`, `decide`
 and `simp only`, and their equation lemmas are still generated.
 -/
 
@@ -155,14 +155,17 @@ run_meta checkBoolTests ``fArray.match_1
 example : fArray #[3, 4] = 7 := rfl
 example : fArray #[1, 2, 3] = 42 := by decide
 
-/-! Values of other types still use `dite`. -/
-
 def fString : String → Nat
   | "a" => 1
-  | _ => 2
+  | "bc" => 2
+  | _ => 3
 
-example : fString "a" = 1 := by simp [fString]
-example : fString "b" = 2 := by simp [fString]
+run_meta checkBoolTests ``fString.match_1
+example : fString "a" = 1 := rfl
+example : fString "bc" = 2 := by decide
+example : fString "b" = 3 := by simp [fString]
+example (x : String) (h₁ : x ≠ "a") (h₂ : x ≠ "bc") : fString x = 3 := by simp [fString, h₁, h₂]
+example : (match "bc" with | "a" => 1 | "bc" => 2 | _ => 3 : Nat) = 2 := by simp only
 
 /-! Compiled code compares the native values directly. -/
 
@@ -170,7 +173,7 @@ example : fString "b" = 2 := by simp [fString]
 trace: [Compiler.IR] [result]
     def gUInt8 (x_1 : u8) : tobj :=
       let x_2 : u8 := 2;
-      let x_3 : u8 := UInt8.Internal.beq x_1 x_2;
+      let x_3 : u8 := UInt8.decEq x_1 x_2;
       case x_3 : u8 of
       Bool.false →
         let x_4 : tagged := 3;
@@ -213,8 +216,32 @@ def gChar : Char → Nat
   | 'a' => 1
   | _ => 3
 
+/--
+trace: [Compiler.IR] [result]
+    def gString (x_1 : @& obj) : tobj :=
+      let x_2 : obj := fString._closed_0;
+      let x_3 : u8 := String.decEq x_1 x_2;
+      case x_3 : u8 of
+      Bool.false →
+        let x_4 : tagged := 3;
+        ret x_4
+      Bool.true →
+        let x_5 : tagged := 1;
+        ret x_5
+    def gString._boxed (x_1 : obj) : tobj :=
+      let x_2 : tobj := gString x_1;
+      dec x_1;
+      ret x_2
+-/
+#guard_msgs in
+set_option trace.compiler.ir.result true in
+def gString : String → Nat
+  | "a" => 1
+  | _ => 3
 
-/-- info: [1, 2, 3, 1, 2, 3, 1, 2, 3, 0, 1, 3, 42] -/
+
+/-- info: [1, 2, 3, 1, 2, 3, 1, 2, 3, 0, 1, 3, 42, 1, 2, 3] -/
 #guard_msgs in
 #eval [fNat 5, fNat 7, fNat 8, fInt (-3), fInt 4, fInt 0, fChar 'a', fChar 'z', fChar 'x',
-  fArray #[], fArray #[1], fArray #[1, 2], fArray #[1, 2, 3]]
+  fArray #[], fArray #[1], fArray #[1, 2], fArray #[1, 2, 3], fString "a", fString "bc",
+  fString "b"]
