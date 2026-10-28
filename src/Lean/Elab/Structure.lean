@@ -412,7 +412,7 @@ def structFields         := leading_parser many (structExplicitBinder <|> struct
 def structCtor           := leading_parser try (declModifiers >> ident >> " :: ")
 -/
 def structureSyntaxToView (modifiers : Modifiers) (stx : Syntax) : TermElabM StructView := do
-  checkValidInductiveModifier modifiers
+  checkValidInductiveModifier modifiers (allowNoncomputable := true)
   let isClass   := stx[0].getKind == ``Parser.Command.classTk
   -- **Note**: We use `addFirstAttr` to make sure the `[class]` attribute is processed **before** `[univ_out_params]`
   let modifiers := if isClass then modifiers.addFirstAttr { name := `class } else modifiers
@@ -464,6 +464,7 @@ def structureSyntaxToView (modifiers : Modifiers) (stx : Syntax) : TermElabM Str
       type?
       allowIndices := false
       allowSortPolymorphism := false
+      allowNoncomputable := true
       ctors := #[ctor]
       parents
       fields
@@ -1284,6 +1285,9 @@ private def addProjections (params : Array Expr) (r : ElabHeaderResult) (fieldIn
       let paramInfoOverrides := params |>.map (fun param => info.paramInfoOverrides[param]?.map Prod.snd) |>.toList
       return { ref := info.ref, projName := info.declName, paramInfoOverrides })
   mkProjections r.view.declName projDecls r.view.isClass
+  if r.view.modifiers.isNoncomputable then
+    for projDecl in projDecls do
+      modifyEnv (addNoncomputable · projDecl.projName)
   for fieldInfo in fieldInfos do
     if fieldInfo.kind.isSubobject then
       addDeclarationRangesFromSyntax fieldInfo.declName r.view.ref fieldInfo.ref
@@ -1427,11 +1431,16 @@ private partial def mkCoercionToCopiedParent (levelParams : List Name) (params :
       else
         Declaration.thmDecl { cval with value := declVal }
   else
-    addAndCompile <| Declaration.defnDecl { cval with
+    let decl := Declaration.defnDecl { cval with
       value       := declVal
       hints       := ReducibilityHints.abbrev
       safety      := if view.modifiers.isUnsafe then DefinitionSafety.unsafe else DefinitionSafety.safe
     }
+    if view.modifiers.isNoncomputable then
+      addDecl decl
+      modifyEnv (addNoncomputable · declName)
+    else
+      addAndCompile decl
   -- Logic from `mk_projections`: non-instance-implicits that aren't props become reducible.
   -- (Instances will get instance reducibility in `Lean.Elab.Command.addParentInstances`.)
   if !binfo.isInstImplicit && !(← Meta.isProp parentType) then

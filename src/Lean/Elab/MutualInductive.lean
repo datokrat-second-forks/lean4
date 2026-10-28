@@ -96,6 +96,8 @@ structure InductiveView where
   /-- Whether the command supports creating inductive types that can be polymorphic across both `Prop` and `Type _`.
   If false, then either the universe must be `Prop` or it must be of the form `Type _`. -/
   allowSortPolymorphism : Bool
+  /-- Whether the command accepts the `noncomputable` modifier (like `structure`) or not (like `inductive`). -/
+  allowNoncomputable : Bool := false
   shortDeclName   : Name
   declName        : Name
   levelNames      : List Name
@@ -217,8 +219,9 @@ def mkInductiveView (modifiers : Modifiers) (stx : Syntax) : TermElabM Inductive
       handler for `{.ofConstName stx.getKind}` syntax"
   handlers[0]!.mkInductiveView modifiers stx
 
-def checkValidInductiveModifier [Monad m] [MonadError m] (modifiers : Modifiers) : m Unit := do
-  if modifiers.isNoncomputable then
+def checkValidInductiveModifier [Monad m] [MonadError m] (modifiers : Modifiers)
+    (allowNoncomputable := false) : m Unit := do
+  if modifiers.isNoncomputable && !allowNoncomputable then
     throwError "Invalid modifier: Inductive declarations cannot be marked as `noncomputable`"
   if modifiers.isPartial then
     throwError "Invalid modifier: Inductive declarations cannot be marked as `partial`"
@@ -1576,6 +1579,13 @@ private def elabInductiveViews (vars : Array Expr) (elabs : Array InductiveElabS
     -- This might be too coarse, consider reconsidering on construction-by-construction basis
     withoutExporting (when := view0.ctors.any (isPrivateName ·.declName)) do
       mkAuxConstructions (elabs.map (·.view.declName))
+      -- Values of a `noncomputable` type can only be constructed and inspected through
+      -- `implemented_by` functions, which choose their own representation.
+      for e in elabs do
+        if e.view.modifiers.isNoncomputable then
+          for ctor in e.view.ctors do
+            modifyEnv (addNoncomputable · ctor.declName)
+          modifyEnv (addNoncomputable · (mkCasesOnName e.view.declName))
       unless view0.isClass do
         mkSizeOfInstances view0.declName
         IndPredBelow.mkBelow view0.declName
@@ -1709,7 +1719,7 @@ def elabInductives (inductives : Array (Modifiers × Syntax)) : CommandElabM Uni
   let elabs ← runTermElabM fun _ => inductives.mapM fun (modifiers, stx) => mkInductiveView modifiers stx
   let isCoinductive := elabs.any (·.view.isCoinductive)
   checkNoInductiveNameConflicts elabs (isCoinductive := isCoinductive)
-  elabs.forM fun e => checkValidInductiveModifier e.view.modifiers
+  elabs.forM fun e => checkValidInductiveModifier e.view.modifiers e.view.allowNoncomputable
   liftTermElabM <| elabs.forM fun e => withRef e.view.ref do
     Term.applyAttributesAt e.view.declName e.view.modifiers.attrs .beforeElaboration
   if isCoinductive then
