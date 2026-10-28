@@ -1,0 +1,11 @@
+1 2: le false le true
+2 2: le true le true
+3 2: gt false gt false
+between 1 0 10: false
+between 1 1 10: true
+between 1 5 10: true
+between 1 9 10: true
+between 1 10 10: false
+8 0
+mk: [true]
+decide: [true] [false]
