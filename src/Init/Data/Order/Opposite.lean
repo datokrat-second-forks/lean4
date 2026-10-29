@@ -10,6 +10,7 @@ public import Init.Data.Order.ClassesExtra
 public import Init.Data.Order.Classes
 import Init.Data.Order.FactoriesExtra
 import Init.Data.Order.Lemmas
+public import Init.UDecidable
 
 public section
 
@@ -188,6 +189,18 @@ scoped instance (priority := low) instDecidableLEOpposite {i : LE α} [id : Deci
 scoped instance (priority := low) instDecidableLTOpposite {i : LT α} [id : DecidableLT α] :
     haveI := i.opposite
     DecidableLT α :=
+  fun a b => id b a
+
+@[no_expose]
+scoped instance (priority := low) instUDecidableLEOpposite {i : LE α} [id : UDecidableLE α] :
+    haveI := i.opposite
+    UDecidableLE α :=
+  fun a b => id b a
+
+@[no_expose]
+scoped instance (priority := low) instUDecidableLTOpposite {i : LT α} [id : UDecidableLT α] :
+    haveI := i.opposite
+    UDecidableLT α :=
   fun a b => id b a
 
 scoped instance (priority := low) instLEReflOpposite {i : LE α} [Refl (α := α) (· ≤ ·)] :

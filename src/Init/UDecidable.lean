@@ -47,6 +47,12 @@ abbrev UDecidableRel {α : Sort u} {β : Sort v} (r : α → β → Prop) :=
 /-- A type `α` has `UDecidableEq` if equality of its elements is `UDecidable`. -/
 abbrev UDecidableEq (α : Sort u) := (a b : α) → UDecidable (a = b)
 
+/-- Abbreviation for `UDecidableRel (· ≤ · : α → α → Prop)`. -/
+abbrev UDecidableLE (α : Type u) [LE α] := UDecidableRel (LE.le : α → α → Prop)
+
+/-- Abbreviation for `UDecidableRel (· < · : α → α → Prop)`. -/
+abbrev UDecidableLT (α : Type u) [LT α] := UDecidableRel (LT.lt : α → α → Prop)
+
 /-! Boolean comparisons that implement the `UDecidable` instances below in compiled code. -/
 
 namespace Int.Internal
@@ -254,6 +260,20 @@ theorem dite_congr {b c : Prop} {_ : UDecidable b} [UDecidable c] {α : Sort u}
   | inl hc => rw [dite_eq_left hc, dite_eq_left hc, h₂ hc]
   | inr hc => rw [dite_eq_right hc, dite_eq_right hc, h₃ hc]
 
+/-- `uif` agrees with `if` for any pair of instances. -/
+theorem ite_eq_ite {α : Sort u} {c : Prop} [UDecidable c] [Decidable c] {t e : α} :
+    (uif c then t else e) = (if c then t else e) := by
+  cases em c with
+  | inl hc => rw [ite_eq_left hc, _root_.ite_eq_left hc]
+  | inr hc => rw [ite_eq_right hc, _root_.ite_eq_right hc]
+
+/-- `uif h :` agrees with `if h :` for any pair of instances. -/
+theorem dite_eq_dite {α : Sort u} {c : Prop} [UDecidable c] [Decidable c] {t : c → α}
+    {e : ¬c → α} : dite c t e = _root_.dite c t e := by
+  cases em c with
+  | inl hc => rw [dite_eq_left hc, _root_.dite_eq_left hc]
+  | inr hc => rw [dite_eq_right hc, _root_.dite_eq_right hc]
+
 /-- Decides `p` by deciding the equivalent proposition `q`. -/
 @[inline, instance_reducible] def ofIff {p : Prop} (q : Prop) [UDecidable q] (h : q ↔ p) :
     UDecidable p :=
@@ -401,6 +421,16 @@ instance instSumEq [UDecidableEq α] [UDecidableEq β] : UDecidableEq (α ⊕ β
 
 instance instSubtypeEq {p : α → Prop} [UDecidableEq α] : UDecidableEq (Subtype p) :=
   fun a b => ofIff (a.val = b.val) ⟨Subtype.ext, congrArg Subtype.val⟩
+
+instance instListEqNil (l : List α) : UDecidable (l = []) :=
+  match l with
+  | [] => isTrue rfl
+  | _ :: _ => isFalse nofun
+
+instance instListNilEq (l : List α) : UDecidable ([] = l) :=
+  match l with
+  | [] => isTrue rfl
+  | _ :: _ => isFalse nofun
 
 instance instListEq [UDecidableEq α] : UDecidableEq (List α)
   | [], [] => isTrue rfl
