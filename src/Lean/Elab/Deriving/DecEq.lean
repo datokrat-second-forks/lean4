@@ -15,6 +15,7 @@ import Lean.Meta.Constructions.CtorIdx
 import Lean.Meta.Constructions.CasesOnSameCtor
 import Lean.Meta.SameCtorUtils
 import Init.Data.Array.OfFn
+import Init.UDecidable
 
 namespace Lean.Elab.Deriving.DecEq
 open Lean.Parser.Term
@@ -28,25 +29,45 @@ register_builtin_option deriving.decEq.linear_construction_threshold : Nat := {
     The alternative construction compiles to less efficient code in some cases, so by default \
     it is only used for inductive types with 10 or more constructors." }
 
-def mkDecEqHeader (indVal : InductiveVal) : TermElabM Header := do
-  mkHeader `DecidableEq 2 indVal
+/--
+Whether to derive `UDecidableEq` instead of `DecidableEq`. The two only differ in the names of the
+class, of `isTrue`/`isFalse` and of the dependent `if`.
+-/
+abbrev Flavor := Bool
 
-def mkMatchOld (ctx : Context) (header : Header) (indVal : InductiveVal) : TermElabM Term := do
+def Flavor.className (u : Flavor) : Name :=
+  if u then ``UDecidableEq else ``DecidableEq
+
+def mkIsTrue (u : Flavor) (h : Term) : TermElabM Term :=
+  if u then ``(UDecidable.isTrue $h) else `(isTrue $h)
+
+def mkIsFalse (u : Flavor) (h : Term) : TermElabM Term :=
+  if u then ``(UDecidable.isFalse $h) else `(isFalse $h)
+
+/-- `if h : c then t else e`, where `h` is bound in both branches. -/
+def mkDIte (u : Flavor) (h : Ident) (c t e : Term) : TermElabM Term :=
+  if u then ``(UDecidable.dite $c (fun $h:ident => $t) (fun $h:ident => $e))
+  else `(if $h:ident : $c then $t else $e)
+
+def mkDecEqHeader (u : Flavor) (indVal : InductiveVal) : TermElabM Header := do
+  mkHeader u.className 2 indVal
+
+def mkMatchOld (u : Flavor) (ctx : Context) (header : Header) (indVal : InductiveVal) :
+    TermElabM Term := do
   let discrs ← mkDiscrs header indVal
   let alts ← mkAlts
   `(match $[$discrs],* with $alts:matchAlt*)
 where
   mkSameCtorRhs : List (Ident × Ident × Option Name × Bool) → TermElabM Term
-    | [] => ``(isTrue rfl)
+    | [] => do mkIsTrue u (← `(rfl))
     | (a, b, recField, isProof) :: todo => withFreshMacroScope do
       let rhs ← if isProof then
         `(have h : @$a = @$b := rfl; by subst h; exact $(← mkSameCtorRhs todo):term)
       else
         let sameCtor ← mkSameCtorRhs todo
-        `(if h : @$a = @$b then
-           by subst h; exact $sameCtor:term
-          else
-           isFalse (by intro n; injection n; apply h _; assumption))
+        let h : Ident ← `(h)
+        mkDIte u h (← `(@$a = @$b)) (← `(by subst $h:ident; exact $sameCtor:term))
+          (← mkIsFalse u (← `(by intro n; injection n; apply $h:ident _; assumption)))
       if let some auxFunName := recField then
         -- add local instance for `a = b` using the function being defined `auxFunName`
         `(let inst := $(mkIdent auxFunName) @$a @$b; $rhs)
@@ -101,11 +122,12 @@ where
           alts := alts.push alt
         else if (← compatibleCtors ctorName₁ ctorName₂) then
           patterns := patterns ++ #[(← `($(mkIdent ctorName₁) ..)), (← `($(mkIdent ctorName₂) ..))]
-          let rhs ← `(isFalse (by intro h; injection h))
+          let rhs ← mkIsFalse u (← `(by intro h; injection h))
           alts := alts.push (← `(matchAltExpr| | $[$patterns:term],* => $rhs:term))
     return alts
 
-def mkMatchNew (ctx : Context) (header : Header) (indVal : InductiveVal) : TermElabM Term := do
+def mkMatchNew (u : Flavor) (ctx : Context) (header : Header) (indVal : InductiveVal) :
+    TermElabM Term := do
   assert! header.targetNames.size == 2
 
   let x1 := mkIdent header.targetNames[0]!
@@ -148,22 +170,26 @@ def mkMatchNew (ctx : Context) (header : Header) (indVal : InductiveVal) : TermE
       `(@fun $ctorArgs1:term* $ctorArgs2:term* =>$rhs:term)
   if indVal.numCtors == 1 then
     `( $(mkCIdent casesOnSameCtorName) $x1:term $x2:term rfl $alts:term* )
+  else if u then
+    let h : Ident ← `(h)
+    mkDIte u h (← `($(mkCIdent ctorIdxName) $x1:ident = $(mkCIdent ctorIdxName) $x2:ident))
+      (← `($(mkCIdent casesOnSameCtorName) $x1:term $x2:term $h:ident $alts:term*))
+      (← mkIsFalse u (← `(fun h' => $h:ident (congrArg $(mkCIdent ctorIdxName) h'))))
   else
     `( match decEq ($(mkCIdent ctorIdxName) $x1:ident) ($(mkCIdent ctorIdxName) $x2:ident) with
       | .isTrue h => $(mkCIdent casesOnSameCtorName) $x1:term $x2:term h $alts:term*
       | .isFalse h => isFalse (fun h' => h (congrArg $(mkCIdent ctorIdxName) h')))
 where
   mkSameCtorRhs : List (Ident × Ident × Option Name × Bool) → TermElabM Term
-    | [] => ``(isTrue rfl)
+    | [] => do mkIsTrue u (← `(rfl))
     | (a, b, recField, isProof) :: todo => withFreshMacroScope do
       let rhs ← if isProof then
         `(have h : @$a = @$b := rfl; by subst h; exact $(← mkSameCtorRhs todo):term)
       else
         let sameCtor ← mkSameCtorRhs todo
-        `(if h : @$a = @$b then
-           by subst h; exact $sameCtor:term
-          else
-           isFalse (by intro n; injection n; apply h _; assumption))
+        let h : Ident ← `(h)
+        mkDIte u h (← `(@$a = @$b)) (← `(by subst $h:ident; exact $sameCtor:term))
+          (← mkIsFalse u (← `(by intro n; injection n; apply $h:ident _; assumption)))
       if let some auxFunName := recField then
         -- add local instance for `a = b` using the function being defined `auxFunName`
         `(let inst := $(mkIdent auxFunName) @$a @$b; $rhs)
@@ -171,47 +197,56 @@ where
         return rhs
 
 
-def mkMatch (ctx : Context) (header : Header) (indVal : InductiveVal) : TermElabM Term := do
+def mkMatch (u : Flavor) (ctx : Context) (header : Header) (indVal : InductiveVal) :
+    TermElabM Term := do
   if indVal.numCtors ≥ deriving.decEq.linear_construction_threshold.get (← getOptions) then
-    mkMatchNew ctx header indVal
+    mkMatchNew u ctx header indVal
   else
-    mkMatchOld ctx header indVal
+    mkMatchOld u ctx header indVal
 
-def mkAuxFunction (ctx : Context) (auxFunName : Name) (indVal : InductiveVal): TermElabM (TSyntax `command) := do
-  let header  ← mkDecEqHeader indVal
-  let body    ← mkMatch ctx header indVal
+def mkAuxFunction (u : Flavor) (ctx : Context) (auxFunName : Name) (indVal : InductiveVal) :
+    TermElabM (TSyntax `command) := do
+  let header  ← mkDecEqHeader u indVal
+  let body    ← mkMatch u ctx header indVal
   let binders := header.binders
   let target₁ := mkIdent header.targetNames[0]!
   let target₂ := mkIdent header.targetNames[1]!
   let termSuffix ← if indVal.isRec
     then `(Parser.Termination.suffix|termination_by structural $target₁)
     else `(Parser.Termination.suffix|)
-  let type    ← `(Decidable ($target₁ = $target₂))
-  `(def $(mkIdent auxFunName):ident $binders:bracketedBinder* : $type:term := $body:term
-    $termSuffix:suffix)
+  let type    ← if u then ``(UDecidable ($target₁ = $target₂))
+    else `(Decidable ($target₁ = $target₂))
+  if u then
+    `(@[instance_reducible] def $(mkIdent auxFunName):ident $binders:bracketedBinder* :
+        $type:term := $body:term
+      $termSuffix:suffix)
+  else
+    `(def $(mkIdent auxFunName):ident $binders:bracketedBinder* : $type:term := $body:term
+      $termSuffix:suffix)
 
-def mkAuxFunctions (ctx : Context) : TermElabM (TSyntax `command) := do
+def mkAuxFunctions (u : Flavor) (ctx : Context) : TermElabM (TSyntax `command) := do
   let mut res : Array (TSyntax `command) := #[]
   for i in *...ctx.auxFunNames.size do
     let auxFunName := ctx.auxFunNames[i]!
     let indVal     := ctx.typeInfos[i]!
-    res := res.push (← mkAuxFunction ctx auxFunName indVal)
+    res := res.push (← mkAuxFunction u ctx auxFunName indVal)
   `(command| mutual $[$res:command]* end)
 
-def mkDecEqCmds (indVal : InductiveVal) : TermElabM (Array Syntax) := do
-  let ctx ← mkContext ``DecidableEq "decEq" indVal.name
-  let cmds := #[← mkAuxFunctions ctx] ++ (← mkInstanceCmds ctx `DecidableEq #[indVal.name] (useAnonCtor := false))
+def mkDecEqCmds (u : Flavor) (indVal : InductiveVal) : TermElabM (Array Syntax) := do
+  let ctx ← mkContext u.className (if u then "udecEq" else "decEq") indVal.name
+  let cmds := #[← mkAuxFunctions u ctx] ++
+    (← mkInstanceCmds ctx u.className #[indVal.name] (useAnonCtor := false))
   trace[Elab.Deriving.decEq] "\n{cmds}"
   return cmds
 
 open Command
 
-def mkDecEq (declName : Name) : CommandElabM Bool := do
+def mkDecEq (u : Flavor) (declName : Name) : CommandElabM Bool := do
   let indVal ← getConstInfoInduct declName
   if indVal.isNested then
     return false -- nested inductive types are not supported yet
   else
-    let cmds ← liftTermElabM <| mkDecEqCmds indVal
+    let cmds ← liftTermElabM <| mkDecEqCmds u indVal
     -- `cmds` can have a number of syntax nodes quadratic in the number of constructors
     -- and thus create as many info tree nodes, which we never make use of but which can
     -- significantly slow down e.g. the unused variables linter; avoid creating them
@@ -261,35 +296,42 @@ def mkEnumOfNatThm (declName : Name) : MetaM Unit := do
       value, type
     }
 
-def mkDecEqEnum (declName : Name) : CommandElabM Unit := do
+def mkDecEqEnum (u : Flavor) (declName : Name) : CommandElabM Unit := do
   let cmd ← liftTermElabM do
-    mkEnumOfNat declName
-    mkEnumOfNatThm declName
+    unless (← getEnv).contains (Name.mkStr declName "ofNat") do
+      mkEnumOfNat declName
+      mkEnumOfNatThm declName
     let ofNatIdent  := mkIdent (Name.mkStr declName "ofNat")
     let auxThmIdent := mkIdent (Name.mkStr declName "ofNat_ctorIdx")
-    `(instance : DecidableEq $(mkCIdent declName) :=
-        fun x y =>
-          if h : x.ctorIdx = y.ctorIdx then
-            -- We use `rfl` in the following proof because the first script fails for unit-like datatypes due to etaStruct.
-            isTrue (by first | have aux := congrArg $ofNatIdent h; rw [$auxThmIdent:ident, $auxThmIdent:ident] at aux; assumption | rfl)
-          else
-            isFalse fun h => by subst h; contradiction)
+    let h : Ident ← `(h)
+    -- We use `rfl` in the following proof because the first script fails for unit-like datatypes
+    -- due to etaStruct.
+    let eqProof ← `(by
+      first
+      | have aux := congrArg $ofNatIdent $h:ident
+        rw [$auxThmIdent:ident, $auxThmIdent:ident] at aux
+        assumption
+      | rfl)
+    let body ← mkDIte u h (← `(x.ctorIdx = y.ctorIdx)) (← mkIsTrue u eqProof)
+      (← mkIsFalse u (← `(fun h => by subst h; contradiction)))
+    `(instance : $(mkCIdent u.className) $(mkCIdent declName) := fun x y => $body)
   trace[Elab.Deriving.decEq] "\n{cmd}"
   elabCommand cmd
 
-def mkDecEqInstance (declName : Name) : CommandElabM Bool := do
+def mkDecEqInstance (u : Flavor) (declName : Name) : CommandElabM Bool := do
   withoutExposeFromCtors declName do
   if (← isEnumType declName) then
-    mkDecEqEnum declName
+    mkDecEqEnum u declName
     return true
   else
-    mkDecEq declName
+    mkDecEq u declName
 
-def mkDecEqInstanceHandler (declNames : Array Name) : CommandElabM Bool := do
-  declNames.foldlM (fun b n => andM (pure b) (mkDecEqInstance n)) true
+def mkDecEqInstanceHandler (u : Flavor) (declNames : Array Name) : CommandElabM Bool := do
+  declNames.foldlM (fun b n => andM (pure b) (mkDecEqInstance u n)) true
 
 builtin_initialize
-  registerDerivingHandler `DecidableEq mkDecEqInstanceHandler
+  registerDerivingHandler `DecidableEq (mkDecEqInstanceHandler false)
+  registerDerivingHandler `UDecidableEq (mkDecEqInstanceHandler true)
   registerTraceClass `Elab.Deriving.decEq
 
 end Lean.Elab.Deriving.DecEq
