@@ -75,9 +75,9 @@ where
       | p₁, [] => p₁
       | [], p₂ => p₂
       | (k₁, m₁) :: p₁, (k₂, m₂) :: p₂ =>
-        bif m₁ < m₂ then
+        bif m₁.lex m₂ Nat.blt then
           (k₁, m₁) :: go fuel p₁ ((k₂, m₂) :: p₂)
-        else bif m₂ < m₁ then
+        else bif m₁ != m₂ then
           (k₂, m₂) :: go fuel ((k₁, m₁) :: p₁) p₂
         else bif k₁ + k₂ == 0 then
           go fuel p₁ p₂
@@ -87,7 +87,7 @@ where
 def Poly.insertSorted (k : Nat) (m : Mon) (p : Poly) : Poly :=
   match p with
   | [] => [(k, m)]
-  | (k', m') :: p => bif m < m' then (k, m) :: (k', m') :: p else (k', m') :: insertSorted k m p
+  | (k', m') :: p => bif m.lex m' Nat.blt then (k, m) :: (k', m') :: p else (k', m') :: insertSorted k m p
 
 def Poly.mulMon (p : Poly) (k : Nat) (m : Mon) : Poly :=
   go p []
@@ -144,9 +144,9 @@ where
       simp!
       split <;> simp!
       next k₁ m₁ p₁ k₂ m₂ p₂ =>
-        by_cases hlt : m₁ < m₂ <;> simp! [hlt, Nat.add_assoc, ih]
-        by_cases hgt : m₂ < m₁ <;> simp! [hgt, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm, ih]
-        have : m₁ = m₂ := List.le_antisymm hgt hlt
+        by_cases hlt : m₁.lex m₂ Nat.blt <;> simp! [hlt, Nat.add_assoc, ih]
+        by_cases hgt : (m₁ != m₂) = true <;> simp! [hgt, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm, ih]
+        have : m₁ = m₂ := Decidable.of_not_not (by simpa using hgt)
         subst m₂
         by_cases heq : k₁ + k₂ == 0 <;> simp! [heq, ih]
         · simp [← Nat.add_assoc, ← Nat.right_distrib, eq_of_beq heq]
@@ -156,7 +156,7 @@ theorem Poly.denote_insertSorted (ctx : Context) (k : Nat) (m : Mon) (p : Poly) 
   match p with
   | [] => simp!
   | (k', m') :: p =>
-    by_cases h : m < m' <;> simp! [h, denote_insertSorted ctx k m p, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+    by_cases h : m.lex m' Nat.blt <;> simp! [h, denote_insertSorted ctx k m p, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
 
 theorem Poly.mulMon_denote (ctx : Context) (p : Poly) (k : Nat) (m : Mon) : (p.mulMon k m).denote ctx = p.denote ctx * k * m.denote ctx := by
   simp [mulMon, go]; simp!

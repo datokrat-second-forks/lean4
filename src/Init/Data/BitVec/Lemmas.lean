@@ -43,8 +43,8 @@ namespace BitVec
     (BitVec.ofFin x)[i] = x.val.testBit i := rfl
 
 @[simp, grind =] theorem getMsbD_of_ge (x : BitVec w) (i : Nat) (ge : w ≤ i) : getMsbD x i = false := by
-  rw [getMsbD]
-  simp only [Bool.and_eq_false_imp, decide_eq_true_eq]
+  rw [getMsbD, Nat.blt_eq_udecide]
+  simp only [Bool.and_eq_false_imp, UDecidable.decide_eq_true_eq]
   omega
 
 theorem lt_of_getLsbD {x : BitVec w} {i : Nat} : getLsbD x i = true → i < w := by
@@ -158,8 +158,8 @@ theorem two_pow_le_toNat_of_getElem_eq_true {i : Nat} {x : BitVec w}
   simp only [getMsb?, getLsb?_eq_getElem?]
   split <;> simp [getMsb_eq_getLsb]
 
-theorem getMsbD_eq_getLsbD (x : BitVec w) (i : Nat) : x.getMsbD i = (decide (i < w) && x.getLsbD (w - 1 - i)) := by
-  rw [getMsbD, getLsbD]
+theorem getMsbD_eq_getLsbD (x : BitVec w) (i : Nat) : x.getMsbD i = (UDecidable.decide (i < w) && x.getLsbD (w - 1 - i)) := by
+  rw [getMsbD, getLsbD, Nat.blt_eq_udecide]
 
 grind_pattern getMsbD_eq_getLsbD => x.getMsbD i, x.getLsbD _
 
@@ -168,10 +168,10 @@ theorem getMsbD_eq_getElem (x : BitVec w) (i : Nat) (h : i < w) : x.getMsbD i = 
   rw [← getLsbD_eq_getElem]
   simp [getMsbD_eq_getLsbD, h]
 
-theorem getLsbD_eq_getMsbD (x : BitVec w) (i : Nat) : x.getLsbD i = (decide (i < w) && x.getMsbD (w - 1 - i)) := by
-  rw [getMsbD]
+theorem getLsbD_eq_getMsbD (x : BitVec w) (i : Nat) : x.getLsbD i = (UDecidable.decide (i < w) && x.getMsbD (w - 1 - i)) := by
+  rw [getMsbD, Nat.blt_eq_udecide]
   by_cases h₁ : i < w <;> by_cases h₂ : w - 1 - i < w <;>
-    simp only [h₁, h₂] <;> simp only [decide_true, decide_false, Bool.false_and, Bool.and_false, Bool.true_and]
+    simp only [h₁, h₂] <;> simp only [UDecidable.decide_true, UDecidable.decide_false, Bool.false_and, Bool.and_false, Bool.true_and]
   · congr
     omega
   all_goals
@@ -214,7 +214,7 @@ theorem getMsbD_eq_getMsb?_getD (x : BitVec w) (i : Nat) :
   · simp [getMsb?, h]
   · rw [getLsbD_eq_getElem?_getD, getMsb?_eq_getLsb?]
     split <;>
-    · simp only [getLsb?_eq_getElem?, Bool.and_eq_right_iff_imp, decide_eq_true_eq,
+    · simp only [getLsb?_eq_getElem?, Bool.and_eq_right_iff_imp, UDecidable.decide_eq_true_eq,
         Option.getD_none, Bool.and_eq_false_imp]
       intros
       omega
@@ -232,7 +232,7 @@ theorem eq_of_getLsbD_eq_iff {w : Nat} {x y : BitVec w} :
 
 theorem eq_of_getMsbD_eq {x y : BitVec w}
     (pred : ∀ i, i < w → x.getMsbD i = y.getMsbD i) : x = y := by
-  simp only [getMsbD] at pred
+  simp only [getMsbD, Nat.blt_eq_udecide] at pred
   apply eq_of_getLsbD_eq
   intro i i_lt
   if w_zero : w = 0 then
@@ -340,8 +340,8 @@ attribute [grind =] BitVec.toNat_ofNatLT
   simp [getLsbD, BitVec.ofNatLT]
 
 @[simp, grind =] theorem getMsbD_ofNatLT {n x i : Nat} (h : x < 2^n) :
-    getMsbD (x#'h) i = (decide (i < n) && x.testBit (n - 1 - i)) := by
-  simp [getMsbD, getLsbD]
+    getMsbD (x#'h) i = (UDecidable.decide (i < n) && x.testBit (n - 1 - i)) := by
+  simp [getMsbD, Nat.blt_eq_udecide, getLsbD]
 
 @[simp, grind =] theorem toFin_ofNat (x : Nat) : toFin (BitVec.ofNat w x) = Fin.ofNat (2^w) x := rfl
 
@@ -369,19 +369,19 @@ theorem getLsbD_ofNat (n : Nat) (x : Nat) (i : Nat) :
 
 @[simp, grind =] theorem getElem_zero (h : i < w) : (0#w)[i] = false := by simp [getElem_eq_testBit_toNat]
 
-@[simp, grind =] theorem getMsbD_zero : (0#w).getMsbD i = false := by simp [getMsbD]
+@[simp, grind =] theorem getMsbD_zero : (0#w).getMsbD i = false := by simp [getMsbD, Nat.blt_eq_udecide]
 
-@[simp, grind =] theorem getLsbD_one : (1#w).getLsbD i = (decide (0 < w) && decide (i = 0)) := by
+@[simp, grind =] theorem getLsbD_one : (1#w).getLsbD i = (UDecidable.decide (0 < w) && UDecidable.decide (i = 0)) := by
   simp only [getLsbD, toNat_ofNat, Nat.testBit_mod_two_pow]
   by_cases h : i = 0
     <;> simp [h, Nat.testBit_eq_decide_div_mod_eq, Nat.div_eq_of_lt]
 
-@[simp, grind =] theorem getElem_one (h : i < w) : (1#w)[i] = decide (i = 0) := by
+@[simp, grind =] theorem getElem_one (h : i < w) : (1#w)[i] = UDecidable.decide (i = 0) := by
   simp [← getLsbD_eq_getElem, getLsbD_one, show 0 < w by omega]
 
 /-- The msb at index `w-1` is the least significant bit, and is true when the width is nonzero. -/
-@[simp] theorem getMsbD_one : (1#w).getMsbD i = (decide (i = w - 1) && decide (0 < w)) := by
-  simp only [getMsbD]
+@[simp] theorem getMsbD_one : (1#w).getMsbD i = (UDecidable.decide (i = w - 1) && UDecidable.decide (0 < w)) := by
+  simp only [getMsbD, Nat.blt_eq_udecide]
   by_cases h : 0 < w <;> by_cases h' : i = w - 1 <;> simp [h, h'] <;> omega
 
 @[simp] theorem toNat_mod_cancel (x : BitVec n) : x.toNat % (2^n) = x.toNat :=
@@ -464,8 +464,8 @@ theorem getElem_ofBool {b : Bool} {h : i < 1}: (ofBool b)[i] = b := by
   simp [← getLsbD_eq_getElem]
   omega
 
-@[simp] theorem getMsbD_ofBool (b : Bool) : (ofBool b).getMsbD i = (decide (i = 0) && b) := by
-  cases b <;> simp [getMsbD]
+@[simp] theorem getMsbD_ofBool (b : Bool) : (ofBool b).getMsbD i = (UDecidable.decide (i = 0) && b) := by
+  cases b <;> simp [getMsbD, Nat.blt_eq_udecide]
 
 @[simp] theorem msb_ofBool (b : Bool) : (ofBool b).msb = b := by
   cases b <;> simp [BitVec.msb]
@@ -498,21 +498,21 @@ theorem zero_iff_eq_false {x: BitVec w} :
 
 /-! ### msb -/
 
-@[simp] theorem msb_zero : (0#w).msb = false := by simp [BitVec.msb, getMsbD]
+@[simp] theorem msb_zero : (0#w).msb = false := by simp [BitVec.msb, getMsbD, Nat.blt_eq_udecide]
 
-@[simp] theorem msb_one : (1#w).msb = decide (w = 1) := by
-  simp [BitVec.msb, getMsbD_one, ← Bool.decide_and]
+@[simp] theorem msb_one : (1#w).msb = UDecidable.decide (w = 1) := by
+  simp [BitVec.msb, getMsbD_one, ← UDecidable.decide_and]
   omega
 
 theorem msb_eq_getLsbD_last (x : BitVec w) :
     x.msb = x.getLsbD (w - 1) := by
-  simp only [BitVec.msb, getMsbD]
+  simp only [BitVec.msb, getMsbD, Nat.blt_eq_udecide]
   rcases w  with rfl | w
   · simp [BitVec.eq_nil x]
   · simp
 
 @[bitvec_to_nat, grind =] theorem getLsbD_last (x : BitVec w) :
-    x.getLsbD (w-1) = decide (2 ^ (w-1) ≤ x.toNat) := by
+    x.getLsbD (w-1) = UDecidable.decide (2 ^ (w-1) ≤ x.toNat) := by
   rcases w with rfl | w
   · simp [toNat_of_zero_length]
   · simp only [getLsbD, Nat.testBit_eq_decide_div_mod_eq, Nat.succ_sub_succ_eq_sub, Nat.sub_zero]
@@ -524,21 +524,21 @@ theorem msb_eq_getLsbD_last (x : BitVec w) :
       · omega
 
 @[bitvec_to_nat] theorem getLsbD_succ_last (x : BitVec (w + 1)) :
-    x.getLsbD w = decide (2 ^ w ≤ x.toNat) := getLsbD_last x
+    x.getLsbD w = UDecidable.decide (2 ^ w ≤ x.toNat) := getLsbD_last x
 
-@[bitvec_to_nat] theorem msb_eq_decide (x : BitVec w) : BitVec.msb x = decide (2 ^ (w-1) ≤ x.toNat) := by
+@[bitvec_to_nat] theorem msb_eq_decide (x : BitVec w) : BitVec.msb x = UDecidable.decide (2 ^ (w-1) ≤ x.toNat) := by
   simp [msb_eq_getLsbD_last, getLsbD_last]
 
 @[grind =]
-theorem getMsbD_last (x : BitVec w) : x.getMsbD 0 = decide (2 ^ (w-1) ≤ x.toNat) := by
+theorem getMsbD_last (x : BitVec w) : x.getMsbD 0 = UDecidable.decide (2 ^ (w-1) ≤ x.toNat) := by
   rw [← BitVec.msb, msb_eq_decide]
 
 theorem toNat_ge_of_msb_true {x : BitVec n} (p : BitVec.msb x = true) : x.toNat ≥ 2^(n-1) := by
   match n with
   | 0 =>
-    simp [BitVec.msb, BitVec.getMsbD] at p
+    simp [BitVec.msb, BitVec.getMsbD, Nat.blt_eq_udecide] at p
   | n + 1 =>
-    simp only [msb_eq_decide, Nat.add_one_sub_one, decide_eq_true_eq] at p
+    simp only [msb_eq_decide, Nat.add_one_sub_one, UDecidable.decide_eq_true_eq] at p
     simp only [Nat.add_sub_cancel]
     exact p
 
@@ -635,7 +635,7 @@ theorem toInt_nonneg_of_msb_false {x : BitVec w} (h : x.msb = false) : 0 ≤ x.t
 
 @[simp] theorem toInt_one_of_lt {w : Nat} (h : 1 < w) : (1#w).toInt = 1 := by
   rw [toInt_eq_msb_cond]
-  simp only [msb_one, show w ≠ 1 by omega, decide_false, Bool.false_eq_true, ↓reduceIte,
+  simp only [msb_one, show w ≠ 1 by omega, UDecidable.decide_false, Bool.false_eq_true, ↓reduceIte,
     toNat_ofNat, Int.natCast_emod]
   norm_cast
   apply Nat.mod_eq_of_lt
@@ -731,18 +731,18 @@ theorem toInt_one (h : 1 < w) : (1#w : BitVec w).toInt = 1 := by
 
 @[simp] theorem sub_toNat_mod_cancel_of_msb_true {x : BitVec w} (h : x.msb = true) :
     (2 ^ w - x.toNat) % 2 ^ w = 2 ^ w - x.toNat := by
-  simp only [msb_eq_decide, decide_eq_true_eq] at h
+  simp only [msb_eq_decide, UDecidable.decide_eq_true_eq] at h
   have := Nat.two_pow_pos (w-1)
   exact sub_toNat_mod_cancel_of_toNat (by omega)
 
 theorem toNat_lt_of_msb_false {w : Nat} {x : BitVec w} (h : x.msb = false) : x.toNat < 2 ^ (w - 1) := by
   have rt := @msb_eq_decide w x
-  simp only [false_eq_decide_iff, Nat.not_le, h] at rt
+  simp only [UDecidable.false_eq_decide_iff, Nat.not_le, h] at rt
   omega
 
 theorem le_toNat_of_msb_true {w : Nat} {x : BitVec w} (h : x.msb = true) : 2 ^ (w - 1) ≤ x.toNat := by
   have rt := @msb_eq_decide w x
-  simp only [h, true_eq_decide_iff] at rt
+  simp only [h, UDecidable.true_eq_decide_iff] at rt
   omega
 
 /--
@@ -825,49 +825,55 @@ theorem slt_zero_iff_msb_cond {x : BitVec w} : x.slt 0#w ↔ x.msb = true := by
     intro hmsb
     simp only [Bool.not_eq_true] at hmsb
     simp only [hmsb, Bool.false_eq_true, ↓reduceIte] at this
-    simp only [BitVec.slt, toInt_zero, decide_eq_true_eq] at h
+    simp only [BitVec.slt, toInt_zero, Int.Internal.blt_eq_true_iff] at h
     omega /- Can't have `x.toInt` which is equal to `x.toNat` be strictly less than zero -/
   · intro h
     simp only [h, ↓reduceIte] at this
-    simp only [BitVec.slt, this, toInt_zero, decide_eq_true_eq]
+    simp only [BitVec.slt, this, toInt_zero, Int.Internal.blt_eq_true_iff]
     omega
 
 theorem slt_zero_eq_msb {w : Nat} {x : BitVec  w} : x.slt 0#w = x.msb := by
   rw [Bool.eq_iff_iff, BitVec.slt_zero_iff_msb_cond]
 
-theorem sle_eq_decide {x y : BitVec w} : x.sle y = decide (x.toInt ≤ y.toInt) := rfl
+theorem sle_eq_decide {x y : BitVec w} : x.sle y = UDecidable.decide (x.toInt ≤ y.toInt) := by
+  rw [Bool.eq_iff_iff]; simp [BitVec.sle]
 
-theorem slt_eq_decide {x y : BitVec w} : x.slt y = decide (x.toInt < y.toInt) := rfl
+theorem slt_eq_decide {x y : BitVec w} : x.slt y = UDecidable.decide (x.toInt < y.toInt) := by
+  rw [Bool.eq_iff_iff]; simp [BitVec.slt]
 
-theorem ule_eq_decide {x y : BitVec w} : x.ule y = decide (x.toNat ≤ y.toNat) := rfl
+theorem ule_eq_decide {x y : BitVec w} : x.ule y = UDecidable.decide (x.toNat ≤ y.toNat) := by
+  rw [Bool.eq_iff_iff]; simp [BitVec.ule]
 
-theorem ult_eq_decide {x y : BitVec w} : x.ult y = decide (x.toNat < y.toNat) := rfl
+theorem ult_eq_decide {x y : BitVec w} : x.ult y = UDecidable.decide (x.toNat < y.toNat) := by
+  rw [Bool.eq_iff_iff]; simp [BitVec.ult]
 
-theorem ule_eq_decide_le {x y : BitVec w} : x.ule y = decide (x ≤ y) := rfl
+theorem ule_eq_decide_le {x y : BitVec w} : x.ule y = UDecidable.decide (x ≤ y) := by
+  rw [Bool.eq_iff_iff]; simp only [BitVec.ule, Nat.ble_eq, UDecidable.decide_eq_true_eq]; exact Iff.rfl
 
-theorem ult_eq_decide_lt {x y : BitVec w} : x.ult y = decide (x < y) := rfl
+theorem ult_eq_decide_lt {x y : BitVec w} : x.ult y = UDecidable.decide (x < y) := by
+  rw [Bool.eq_iff_iff]; simp only [BitVec.ult, Nat.blt_eq, UDecidable.decide_eq_true_eq]; exact Iff.rfl
 
 theorem ule_iff_le {x y : BitVec w} : x.ule y ↔ x ≤ y :=
-  decide_eq_true_iff
+  ule_eq_decide_le ▸ UDecidable.decide_eq_true_iff
 
 theorem ult_iff_lt {x y : BitVec w} : x.ult y ↔ x < y :=
-  decide_eq_true_iff
+  ult_eq_decide_lt ▸ UDecidable.decide_eq_true_iff
 
 theorem sle_iff_toInt_le {w : Nat} {x y : BitVec w} : x.sle y ↔ x.toInt ≤ y.toInt :=
-  decide_eq_true_iff
+  sle_eq_decide ▸ UDecidable.decide_eq_true_iff
 
 theorem slt_iff_toInt_lt {w : Nat} {x y : BitVec w} : x.slt y ↔ x.toInt < y.toInt :=
-  decide_eq_true_iff
+  slt_eq_decide ▸ UDecidable.decide_eq_true_iff
 
 theorem ule_iff_toNat_le {x y : BitVec w} : x.ule y ↔ x.toNat ≤ y.toNat :=
-  decide_eq_true_iff
+  ule_eq_decide ▸ UDecidable.decide_eq_true_iff
 
 theorem ult_iff_toNat_lt {x y : BitVec w} : x.ult y ↔ x.toNat < y.toNat :=
-  decide_eq_true_iff
+  ult_eq_decide ▸ UDecidable.decide_eq_true_iff
 
 theorem sle_eq_slt_or_eq {x y : BitVec w} : x.sle y = (x.slt y || x == y) := by
   apply Bool.eq_iff_iff.2
-  simp only [BitVec.sle, decide_eq_true_eq, BitVec.slt, Bool.or_eq_true, beq_iff_eq, ← toInt_inj]
+  simp only [sle_eq_decide, UDecidable.decide_eq_true_eq, slt_eq_decide, Bool.or_eq_true, beq_iff_eq, ← toInt_inj]
   omega
 
 theorem slt_eq_sle_and_ne {x y : BitVec w} : x.slt y = (x.sle y && x != y) := by
@@ -884,31 +890,31 @@ theorem slt_trichotomy (x y : BitVec w) : x.slt y ∨ x = y ∨ y.slt x := by
 or is equal to `y`, or is unsigned greater than `y`. -/
 theorem lt_trichotomy (x y : BitVec w) :
     x < y ∨ x = y ∨ y < x := by
-  simpa [← ult_iff_lt, ult_eq_decide, decide_eq_true_eq, ← toNat_inj]
+  simpa [← ult_iff_lt, ult_eq_decide, UDecidable.decide_eq_true_eq, ← toNat_inj]
     using Nat.lt_trichotomy x.toNat y.toNat
 
 /-! ### setWidth, zeroExtend and truncate -/
 
 theorem getLsbD_eq_decide_getElem (x : BitVec w) (i : Nat) :
-    BitVec.getLsbD x i = decide (∃ h : i < w, x[i]'h = true) := by
+    BitVec.getLsbD x i = UDecidable.decide (∃ h : i < w, x[i]'h = true) := by
   by_cases h : i < w
   · simp [h]
   · rw [Bool.eq_iff_iff]
     constructor
     · simp_all
     · intro h2
-      rw [decide_eq_true_eq] at h2
+      rw [UDecidable.decide_eq_true_eq] at h2
       rcases h2 with ⟨h3, h4⟩
       contradiction
 
 @[grind =]
 theorem getElem_setWidth'_eq_decide_getElem (x : BitVec w) (i : Nat) (h : w ≤ v) (hi : i < v) :
-    (setWidth' h x)[i] = decide (∃ h : i < w, x[i]) := by
+    (setWidth' h x)[i] = UDecidable.decide (∃ h : i < w, x[i]) := by
   simp [getLsbD_eq_decide_getElem, getElem_setWidth']
 
 @[grind =]
 theorem getElem_setWidth_eq_decide_getElem (m : Nat) (x : BitVec n) (i : Nat) (h : i < m) :
-    (setWidth m x)[i] = decide (∃ h : i < n, x[i]'h) := by
+    (setWidth m x)[i] = UDecidable.decide (∃ h : i < n, x[i]'h) := by
   simp [getLsbD_eq_decide_getElem]
 
 @[simp]
@@ -964,29 +970,29 @@ theorem getElem?_setWidth (m : Nat) (x : BitVec n) (i : Nat) :
   simp [getLsbD, toNat_setWidth']
 
 @[simp, grind =] theorem getMsbD_setWidth' (ge : m ≥ n) (x : BitVec n) (i : Nat) :
-    getMsbD (setWidth' ge x) i = (decide (m - n ≤ i) && getMsbD x (i + n - m)) := by
-  simp only [getMsbD, getLsbD_setWidth']
-  by_cases h₁ : decide (i < m) <;> by_cases h₂ : decide (m - n ≤ i) <;> by_cases h₃ : decide (i + n - m < n) <;>
+    getMsbD (setWidth' ge x) i = (UDecidable.decide (m - n ≤ i) && getMsbD x (i + n - m)) := by
+  simp only [getMsbD, Nat.blt_eq_udecide, getLsbD_setWidth']
+  by_cases h₁ : UDecidable.decide (i < m) <;> by_cases h₂ : UDecidable.decide (m - n ≤ i) <;> by_cases h₃ : UDecidable.decide (i + n - m < n) <;>
     by_cases h₄ : n - 1 - (i + n - m) = m - 1 - i
   all_goals
     simp only [h₁, h₂, h₃, h₄]
-    simp_all only [ge_iff_le, decide_eq_true_eq, Nat.not_le, Nat.not_lt, Bool.true_and,
+    simp_all only [ge_iff_le, UDecidable.decide_eq_true_eq, Nat.not_le, Nat.not_lt, Bool.true_and,
       Bool.false_and, Bool.and_self] <;>
     (try apply getLsbD_of_ge) <;>
     (try apply (getLsbD_of_ge _ _ _).symm) <;>
     omega
 
 @[simp] theorem getLsbD_setWidth (m : Nat) (x : BitVec n) (i : Nat) :
-    getLsbD (setWidth m x) i = (decide (i < m) && getLsbD x i) := by
+    getLsbD (setWidth m x) i = (UDecidable.decide (i < m) && getLsbD x i) := by
   simp [getLsbD, toNat_setWidth, Nat.testBit_mod_two_pow]
 
 @[simp, grind =] theorem getMsbD_setWidth {m : Nat} {x : BitVec n} {i : Nat} :
-    getMsbD (setWidth m x) i = (decide (m - n ≤ i) && getMsbD x (i + n - m)) := by
+    getMsbD (setWidth m x) i = (UDecidable.decide (m - n ≤ i) && getMsbD x (i + n - m)) := by
   unfold setWidth
   by_cases h : n ≤ m <;> simp only [h]
   · by_cases h' : m - n ≤ i
     <;> simp [h']
-  · simp only [show m - n = 0 by omega, getMsbD]
+  · simp only [show m - n = 0 by omega, getMsbD, Nat.blt_eq_udecide]
     by_cases h' : i < m
     · simp [show m - 1 - i < m by omega, show i + n - m < n by omega,
         show n - 1 - (i + n - m) = m - 1 - i by omega]
@@ -1007,7 +1013,7 @@ theorem setWidth'_eq {x : BitVec w} (h : w ≤ v) : x.setWidth' h = x.setWidth v
     (x.setWidth (w + k)).getMsbD i = x.getMsbD (i - k) := by
   by_cases h : w = 0
   · subst h; simp [of_length_zero]
-  simp only [getMsbD, getLsbD_setWidth]
+  simp only [getMsbD, Nat.blt_eq_udecide, getLsbD_setWidth]
   by_cases h₁ : i < w + k <;> by_cases h₂ : i - k < w <;> by_cases h₃ : w + k - 1 - i < w + k
     <;> simp [h₁, h₂, h₃]
   · congr 1
@@ -1032,16 +1038,16 @@ theorem setWidth'_eq {x : BitVec w} (h : w ≤ v) : x.setWidth' h = x.setWidth v
   simp
 
 @[grind =]
-theorem msb_setWidth (x : BitVec w) : (x.setWidth v).msb = (decide (0 < v) && x.getLsbD (v - 1)) := by
+theorem msb_setWidth (x : BitVec w) : (x.setWidth v).msb = (UDecidable.decide (0 < v) && x.getLsbD (v - 1)) := by
   rw [msb_eq_getLsbD_last]
   simp only [getLsbD_setWidth]
   cases getLsbD x (v - 1) <;> simp; omega
 
-theorem msb_setWidth' (x : BitVec w) (h : w ≤ v) : (x.setWidth' h).msb = (decide (0 < v) && x.getLsbD (v - 1)) := by
+theorem msb_setWidth' (x : BitVec w) (h : w ≤ v) : (x.setWidth' h).msb = (UDecidable.decide (0 < v) && x.getLsbD (v - 1)) := by
   rw [setWidth'_eq, msb_setWidth]
 
 theorem msb_setWidth'' (x : BitVec w) : (x.setWidth (k + 1)).msb = x.getLsbD k := by
-  simp [BitVec.msb, getMsbD]
+  simp [BitVec.msb, getMsbD, Nat.blt_eq_udecide]
 
 /-- Truncating to width 1 produces a bitvector equal to the least significant bit. -/
 theorem setWidth_one {x : BitVec w} :
@@ -1226,8 +1232,8 @@ let x' = x.extractLsb' 7 5  =   _ _ 9 8 7
 -/
 @[simp, grind =] theorem getMsbD_extractLsb' {start len : Nat} {x : BitVec w} {i : Nat} :
     (extractLsb' start len x).getMsbD i =
-      (decide (i < len) &&
-      (decide (start + len - i ≤ w) &&
+      (UDecidable.decide (i < len) &&
+      (UDecidable.decide (start + len - i ≤ w) &&
       x.getMsbD (w - (start + len - i)))) := by
   rw [getMsbD_eq_getLsbD, getLsbD_extractLsb', getLsbD_eq_getMsbD]
   simp only [bool_to_prop]
@@ -1241,8 +1247,8 @@ let x' = x.extractLsb' 7 5  =   _ _ 9 8 7
 
 @[simp, grind =] theorem msb_extractLsb' {start len : Nat} {x : BitVec w} :
     (extractLsb' start len x).msb =
-      (decide (0 < len) &&
-      (decide (start + len ≤ w) &&
+      (UDecidable.decide (0 < len) &&
+      (UDecidable.decide (start + len ≤ w) &&
       x.getMsbD (w - (start + len)))) := by
   simp [BitVec.msb, getMsbD_extractLsb']
 
@@ -1252,7 +1258,7 @@ let x' = x.extractLsb' 7 5  =   _ _ 9 8 7
 
 @[grind =] theorem getElem_extract_eq_decide_getElem {hi lo : Nat} {x : BitVec n} {i : Nat}
     (h : i < hi - lo + 1) :
-    (extractLsb hi lo x)[i] = decide (∃ h : lo+i < n, x[lo+i]'h) := by
+    (extractLsb hi lo x)[i] = UDecidable.decide (∃ h : lo+i < n, x[lo+i]'h) := by
   simp [getLsbD_eq_decide_getElem]
 
 @[simp] theorem getLsbD_extract (hi lo : Nat) (x : BitVec n) (i : Nat) :
@@ -1260,13 +1266,13 @@ let x' = x.extractLsb' 7 5  =   _ _ 9 8 7
   simp [getLsbD, Nat.lt_succ_iff]
 
 @[simp] theorem getLsbD_extractLsb {hi lo : Nat} {x : BitVec n} {i : Nat} :
-    (extractLsb hi lo x).getLsbD i = (decide (i < hi - lo + 1) && x.getLsbD (lo + i)) := by
+    (extractLsb hi lo x).getLsbD i = (UDecidable.decide (i < hi - lo + 1) && x.getLsbD (lo + i)) := by
   rw [extractLsb, getLsbD_extractLsb']
 
 @[simp, grind =] theorem getMsbD_extractLsb {hi lo : Nat} {x : BitVec w} {i : Nat} :
     (extractLsb hi lo x).getMsbD i =
-      (decide (i < hi - lo + 1) &&
-      (decide (max hi lo - i < w) &&
+      (UDecidable.decide (i < hi - lo + 1) &&
+      (UDecidable.decide (max hi lo - i < w) &&
       x.getMsbD (w - 1 - (max hi lo - i)))) := by
   rw [getMsbD_eq_getLsbD, getLsbD_extractLsb, getLsbD_eq_getMsbD]
   simp only [bool_to_prop]
@@ -1284,7 +1290,7 @@ let x' = x.extractLsb' 7 5  =   _ _ 9 8 7
     omega
 
 @[simp, grind =] theorem msb_extractLsb {hi lo : Nat} {x : BitVec w} :
-    (extractLsb hi lo x).msb = (decide (max hi lo < w) && x.getMsbD (w - 1 - max hi lo)) := by
+    (extractLsb hi lo x).msb = (UDecidable.decide (max hi lo < w) && x.getMsbD (w - 1 - max hi lo)) := by
   simp [BitVec.msb]
 
 theorem extractLsb'_eq_extractLsb {w : Nat} (x : BitVec w) (start len : Nat) (h : len > 0) :
@@ -1371,10 +1377,10 @@ theorem extractLsb'_extractLsb'_of_le {x : BitVec w} (hlt : start + len ≤ len'
   ext
   simp
 
-@[simp, grind =] theorem getLsbD_allOnes : (allOnes v).getLsbD i = decide (i < v) := by
+@[simp, grind =] theorem getLsbD_allOnes : (allOnes v).getLsbD i = UDecidable.decide (i < v) := by
   simp [allOnes]
 
-@[simp] theorem getMsbD_allOnes : (allOnes v).getMsbD i = decide (i < v) := by
+@[simp] theorem getMsbD_allOnes : (allOnes v).getMsbD i = UDecidable.decide (i < v) := by
   simp [allOnes]
   omega
 
@@ -1417,7 +1423,7 @@ theorem msb_allOnes (hw : 0 < w) : (allOnes w).msb = true := by
   simp
 
 @[simp] theorem getMsbD_or {x y : BitVec w} : (x ||| y).getMsbD i = (x.getMsbD i || y.getMsbD i) := by
-  simp only [getMsbD]
+  simp only [getMsbD, Nat.blt_eq_udecide]
   by_cases h : i < w <;> simp [h]
 
 @[simp, grind =] theorem getElem_or {x y : BitVec w} {i : Nat} (h : i < w) : (x ||| y)[i] = (x[i] || y[i]) := by
@@ -1516,7 +1522,7 @@ theorem extractLsb_or {x : BitVec w} {hi lo : Nat} :
   simp
 
 @[simp] theorem getMsbD_and {x y : BitVec w} : (x &&& y).getMsbD i = (x.getMsbD i && y.getMsbD i) := by
-  simp only [getMsbD]
+  simp only [getMsbD, Nat.blt_eq_udecide]
   by_cases h : i < w <;> simp [h]
 
 @[simp, grind =] theorem getElem_and {x y : BitVec w} {i : Nat} (h : i < w) : (x &&& y)[i] = (x[i] && y[i]) := by
@@ -1624,7 +1630,7 @@ theorem and_or_distrib_right {x y z : BitVec w} : (x ||| y) &&& z = (x &&& z) ||
 
 @[simp] theorem getMsbD_xor {x y : BitVec w} :
     (x ^^^ y).getMsbD i = (x.getMsbD i ^^ y.getMsbD i) := by
-  simp only [getMsbD]
+  simp only [getMsbD, Nat.blt_eq_udecide]
   by_cases h : i < w <;> simp [h]
 
 @[simp, grind =] theorem getElem_xor {x y : BitVec w} {i : Nat} (h : i < w) : (x ^^^ y)[i] = (x[i] ^^ y[i]) := by
@@ -1719,8 +1725,8 @@ theorem not_def {x : BitVec v} : ~~~x = allOnes v ^^^ x := rfl
     rw [Nat.succ_eq_add_one] at h
     rw [← h]
     rw [Nat.testBit_two_pow_sub_succ (isLt _)]
-    · cases w : decide (i < v)
-      · simp only [decide_eq_false_iff_not, Nat.not_lt] at w
+    · cases w : UDecidable.decide (i < v)
+      · simp only [UDecidable.decide_eq_false_iff_not, Nat.not_lt] at w
         simp only [Bool.false_bne, Bool.false_and]
         rw [Nat.testBit_lt_two_pow]
         calc BitVec.toNat x < 2 ^ v := isLt _
@@ -1756,11 +1762,11 @@ theorem not_def {x : BitVec v} : ~~~x = allOnes v ^^^ x := rfl
   simp only [val_toFin, toNat_not, Fin.val_rev]
   omega
 
-@[simp, grind =] theorem getLsbD_not {x : BitVec v} : (~~~x).getLsbD i = (decide (i < v) && ! x.getLsbD i) := by
+@[simp, grind =] theorem getLsbD_not {x : BitVec v} : (~~~x).getLsbD i = (UDecidable.decide (i < v) && ! x.getLsbD i) := by
   by_cases h' : i < v <;> simp_all [not_def]
 
 @[simp] theorem getMsbD_not {x : BitVec v} :
-    (~~~x).getMsbD i = (decide (i < v) && ! x.getMsbD i) := by
+    (~~~x).getMsbD i = (UDecidable.decide (i < v) && ! x.getMsbD i) := by
   by_cases h' : i < v <;> simp_all [not_def]
 
 @[simp, grind =] theorem getElem_not {x : BitVec w} {i : Nat} (h : i < w) : (~~~x)[i] = !x[i] := by
@@ -1823,7 +1829,7 @@ theorem not_eq_comm {x y : BitVec w} : ~~~ x = y ↔ x = ~~~ y := by
     rw [h]
     simp
 
-@[simp] theorem msb_not {x : BitVec w} : (~~~x).msb = (decide (0 < w) && !x.msb) := by
+@[simp] theorem msb_not {x : BitVec w} : (~~~x).msb = (UDecidable.decide (0 < w) && !x.msb) := by
   simp [BitVec.msb]
 
 /--
@@ -1925,19 +1931,19 @@ theorem zero_shiftLeft (n : Nat) : 0#w <<< n = 0#w := by
   simp [bitvec_to_nat]
 
 @[simp, grind =] theorem getLsbD_shiftLeft (x : BitVec m) (n) :
-    getLsbD (x <<< n) i = (decide (i < m) && !decide (i < n) && getLsbD x (i - n)) := by
+    getLsbD (x <<< n) i = (UDecidable.decide (i < m) && !UDecidable.decide (i < n) && getLsbD x (i - n)) := by
   rw [← testBit_toNat, getLsbD]
   simp only [toNat_shiftLeft, Nat.testBit_mod_two_pow, Nat.testBit_shiftLeft, ge_iff_le]
   -- This step could be a case bashing tactic.
-  cases h₁ : decide (i < m) <;> cases h₂ : decide (n ≤ i) <;> cases h₃ : decide (i < n)
+  cases h₁ : UDecidable.decide (i < m) <;> cases h₂ : UDecidable.decide (n ≤ i) <;> cases h₃ : UDecidable.decide (i < n)
   all_goals { simp_all <;> omega }
 
 @[simp, grind =] theorem getElem_shiftLeft {x : BitVec m} {n : Nat} (h : i < m) :
-    (x <<< n)[i] = (!decide (i < n) && x[i - n]) := by
+    (x <<< n)[i] = (!UDecidable.decide (i < n) && x[i - n]) := by
   rw [getElem_eq_testBit_toNat, getElem_eq_testBit_toNat]
   simp only [toNat_shiftLeft, Nat.testBit_mod_two_pow, Nat.testBit_shiftLeft, ge_iff_le]
   -- This step could be a case bashing tactic.
-  cases h₁ : decide (i < m) <;> cases h₂ : decide (n ≤ i) <;> cases h₃ : decide (i < n)
+  cases h₁ : UDecidable.decide (i < m) <;> cases h₂ : UDecidable.decide (n ≤ i) <;> cases h₃ : UDecidable.decide (i < n)
   all_goals { simp_all <;> omega }
 
 theorem shiftLeft_xor_distrib (x y : BitVec w) (n : Nat) :
@@ -1960,14 +1966,14 @@ theorem shiftLeft_or_distrib (x y : BitVec w) (n : Nat) :
 
 @[simp] theorem getMsbD_shiftLeft (x : BitVec w) (i) :
     (x <<< i).getMsbD k = x.getMsbD (k + i) := by
-  simp only [getMsbD, getLsbD_shiftLeft]
+  simp only [getMsbD, Nat.blt_eq_udecide, getLsbD_shiftLeft]
   by_cases h : w = 0
   · subst h; simp
   have t : w - 1 - k < w := by omega
   simp only [t]
-  simp only [decide_true, Nat.sub_sub, Bool.true_and, Nat.add_assoc]
+  simp only [UDecidable.decide_true, Nat.sub_sub, Bool.true_and, Nat.add_assoc]
   by_cases h₁ : k < w <;> by_cases h₂ : w - (1 + k) < i <;> by_cases h₃ : k + i < w
-    <;> simp only [h₁, h₃, decide_false, h₂, decide_true, Bool.not_true, Bool.false_and, Bool.and_self,
+    <;> simp only [h₁, h₃, UDecidable.decide_false, h₂, UDecidable.decide_true, Bool.not_true, Bool.false_and, Bool.and_self,
       Bool.true_and, Bool.false_eq, Bool.false_and, Bool.not_false]
     <;> (first | apply getLsbD_of_ge | apply Eq.symm; apply getLsbD_of_ge)
     <;> omega
@@ -2046,15 +2052,15 @@ theorem toFin_shiftLeftZeroExtend {x : BitVec w} :
     (shiftLeftZeroExtend x n)[i] = if h' : i < n then false else x[i - n] := by
   rw [shiftLeftZeroExtend_eq]
   simp only [getElem_eq_testBit_toNat]
-  cases h₁ : decide (i < n) <;> cases h₂ : decide (i - n < m + n)
+  cases h₁ : UDecidable.decide (i < n) <;> cases h₂ : UDecidable.decide (i - n < m + n)
     <;> simp_all
     <;> omega
 
 @[simp] theorem getLsbD_shiftLeftZeroExtend (x : BitVec m) (n : Nat) :
-    getLsbD (shiftLeftZeroExtend x n) i = ((! decide (i < n)) && getLsbD x (i - n)) := by
+    getLsbD (shiftLeftZeroExtend x n) i = ((! UDecidable.decide (i < n)) && getLsbD x (i - n)) := by
   rw [shiftLeftZeroExtend_eq]
   simp only [getLsbD_shiftLeft, getLsbD_setWidth]
-  cases h₁ : decide (i < n) <;> cases h₂ : decide (i - n < m + n) <;> cases h₃ : decide (i < m + n)
+  cases h₁ : UDecidable.decide (i < n) <;> cases h₂ : UDecidable.decide (i - n < m + n) <;> cases h₃ : UDecidable.decide (i < m + n)
     <;> simp_all
     <;> (rw [getLsbD_of_ge]; omega)
 
@@ -2075,10 +2081,10 @@ theorem shiftLeft_add {w : Nat} (x : BitVec w) (n m : Nat) :
   ext i
   simp only [getElem_shiftLeft]
   rw [show x[i - (n + m)] = x[i - m - n] by congr 1; omega]
-  cases h₂ : decide (i < m) <;>
-  cases h₃ : decide (i - m < w) <;>
-  cases h₄ : decide (i - m < n) <;>
-  cases h₅ : decide (i < n + m) <;>
+  cases h₂ : UDecidable.decide (i < m) <;>
+  cases h₃ : UDecidable.decide (i - m < w) <;>
+  cases h₄ : UDecidable.decide (i - m < n) <;>
+  cases h₅ : UDecidable.decide (i < n + m) <;>
     simp at * <;> omega
 
 @[simp]
@@ -2107,11 +2113,11 @@ theorem shiftLeft_shiftLeft' {x : BitVec w₁} {y : BitVec w₂} {z : BitVec w�
   simp [shiftLeft_add]
 
 theorem getLsbD_shiftLeft' {x : BitVec w₁} {y : BitVec w₂} {i : Nat} :
-    (x <<< y).getLsbD i = (decide (i < w₁) && !decide (i < y.toNat) && x.getLsbD (i - y.toNat)) := by
+    (x <<< y).getLsbD i = (UDecidable.decide (i < w₁) && !UDecidable.decide (i < y.toNat) && x.getLsbD (i - y.toNat)) := by
   simp [shiftLeft_eq', getLsbD_shiftLeft]
 
 theorem getElem_shiftLeft' {x : BitVec w₁} {y : BitVec w₂} {i : Nat} (h : i < w₁) :
-    (x <<< y)[i] = (!decide (i < y.toNat) && x[i - y.toNat]) := by
+    (x <<< y)[i] = (!UDecidable.decide (i < y.toNat) && x[i - y.toNat]) := by
   simp
 
 @[simp] theorem shiftLeft_eq_zero {x : BitVec w} {n : Nat} (hn : w ≤ n) : x <<< n = 0#w := by
@@ -2135,7 +2141,7 @@ theorem shiftLeft_ofNat_eq {x : BitVec w} {v k : Nat} : x <<< (BitVec.ofNat v k)
   simp [getElem_eq_testBit_toNat, toNat_ushiftRight, Nat.testBit_shiftRight, getLsbD]
 
 @[grind =] theorem getElem_ushiftRight_eq_decide_getElem (x : BitVec w) (i n : Nat) (h : i < w) :
-    (x >>> n)[i] = decide (∃ h : n + i < w, x[n + i]) := by
+    (x >>> n)[i] = UDecidable.decide (∃ h : n + i < w, x[n + i]) := by
   simp [getLsbD_eq_decide_getElem]
 
 theorem ushiftRight_xor_distrib (x y : BitVec w) (n : Nat) :
@@ -2227,13 +2233,13 @@ theorem toFin_ushiftRight {x : BitVec w} {n : Nat} :
 
 @[simp, grind =]
 theorem getMsbD_ushiftRight {x : BitVec w} {i n : Nat} :
-    (x >>> n).getMsbD i = (decide (i < w) && (!decide (i < n) && x.getMsbD (i - n))) := by
-  simp only [getMsbD, getLsbD_ushiftRight]
+    (x >>> n).getMsbD i = (UDecidable.decide (i < w) && (!UDecidable.decide (i < n) && x.getMsbD (i - n))) := by
+  simp only [getMsbD, Nat.blt_eq_udecide, getLsbD_ushiftRight]
   by_cases h : i < n
   · simp [getLsbD_of_ge, show w ≤ (n + (w - 1 - i)) by omega]
     omega
   · by_cases h₁ : i < w
-    · simp only [h, decide_false, Bool.not_false, show i - n < w by omega, decide_true,
+    · simp only [h, UDecidable.decide_false, Bool.not_false, show i - n < w by omega, UDecidable.decide_true,
         Bool.true_and]
       congr
       omega
@@ -2241,7 +2247,7 @@ theorem getMsbD_ushiftRight {x : BitVec w} {i n : Nat} :
 
 @[simp]
 theorem msb_ushiftRight {x : BitVec w} {n : Nat} :
-    (x >>> n).msb = (!decide (0 < n) && x.msb) := by
+    (x >>> n).msb = (!UDecidable.decide (0 < n) && x.msb) := by
   induction n
   case zero =>
     simp
@@ -2252,7 +2258,7 @@ theorem msb_ushiftRight {x : BitVec w} {n : Nat} :
     (x >>> y).setWidth i = x.setWidth i >>> y := by
   refine eq_of_getElem_eq (fun j hj => ?_)
   simp only [getElem_setWidth, getLsbD_ushiftRight, getElem_ushiftRight, getLsbD_setWidth,
-    Bool.eq_and_self, decide_eq_true_eq]
+    Bool.eq_and_self, UDecidable.decide_eq_true_eq]
   intro ha
   have := lt_of_getLsbD ha
   omega
@@ -2320,30 +2326,30 @@ theorem sshiftRight_eq_of_msb_true {x : BitVec w} {s : Nat} (h : x.msb = true) :
 @[grind =]
 theorem getLsbD_sshiftRight (x : BitVec w) (s i : Nat) :
     getLsbD (x.sshiftRight s) i =
-      (!decide (w ≤ i) && if s + i < w then x.getLsbD (s + i) else x.msb) := by
+      (!UDecidable.decide (w ≤ i) && if s + i < w then x.getLsbD (s + i) else x.msb) := by
   rcases hmsb : x.msb with rfl | rfl
   · simp only [sshiftRight_eq_of_msb_false hmsb, getLsbD_ushiftRight, Bool.ite_false_right]
     by_cases hi : i ≥ w
-    · simp only [hi, decide_true, Bool.not_true, Bool.false_and]
+    · simp only [hi, UDecidable.decide_true, Bool.not_true, Bool.false_and]
       apply getLsbD_of_ge
       omega
-    · simp only [hi, decide_false, Bool.not_false, Bool.true_and, Bool.eq_and_self,
-        decide_eq_true_eq]
+    · simp only [hi, UDecidable.decide_false, Bool.not_false, Bool.true_and, Bool.eq_and_self,
+        UDecidable.decide_eq_true_eq]
       intro hlsb
       apply BitVec.lt_of_getLsbD hlsb
   · by_cases hi : i ≥ w
     · simp [hi]
     · simp only [sshiftRight_eq_of_msb_true hmsb, getLsbD_not, getLsbD_ushiftRight, Bool.not_and,
-        Bool.not_not, hi, decide_false, Bool.not_false, Bool.ite_true_right, Bool.true_and,
-        Bool.and_eq_right_iff_imp, Bool.or_eq_true, Bool.not_eq_true', decide_eq_false_iff_not,
-        Nat.not_lt, decide_eq_true_eq]
+        Bool.not_not, hi, UDecidable.decide_false, Bool.not_false, Bool.ite_true_right, Bool.true_and,
+        Bool.and_eq_right_iff_imp, Bool.or_eq_true, Bool.not_eq_true', UDecidable.decide_eq_false_iff_not,
+        Nat.not_lt, UDecidable.decide_eq_true_eq]
       omega
 
 @[grind =]
 theorem getElem_sshiftRight {x : BitVec w} {s i : Nat} (h : i < w) :
     (x.sshiftRight s)[i] = (if h : s + i < w then x[s + i] else x.msb) := by
   rw [← getLsbD_eq_getElem, getLsbD_sshiftRight]
-  simp only [show ¬(w ≤ i) by omega, decide_false, Bool.not_false, Bool.true_and]
+  simp only [show ¬(w ≤ i) by omega, UDecidable.decide_false, Bool.not_false, Bool.true_and]
   by_cases h' : s + i < w <;> simp [h']
 
 theorem sshiftRight_xor_distrib (x y : BitVec w) (n : Nat) :
@@ -2381,7 +2387,7 @@ theorem msb_sshiftRight {n : Nat} {x : BitVec w} :
   rw [msb_eq_getLsbD_last, getLsbD_sshiftRight, msb_eq_getLsbD_last]
   by_cases hw₀ : w = 0
   · simp [hw₀]
-  · simp only [show ¬(w ≤ w - 1) by omega, decide_false, Bool.not_false, Bool.true_and,
+  · simp only [show ¬(w ≤ w - 1) by omega, UDecidable.decide_false, Bool.not_false, Bool.true_and,
       ite_eq_right_iff]
     intro h
     simp [show n = 0 by omega]
@@ -2424,18 +2430,18 @@ theorem not_sshiftRight_not {x : BitVec w} {n : Nat} :
 
 @[simp, grind =]
 theorem getMsbD_sshiftRight {x : BitVec w} {i n : Nat} :
-    getMsbD (x.sshiftRight n) i = (decide (i < w) && if i < n then x.msb else getMsbD x (i - n)) := by
-  simp only [getMsbD, BitVec.getLsbD_sshiftRight]
+    getMsbD (x.sshiftRight n) i = (UDecidable.decide (i < w) && if i < n then x.msb else getMsbD x (i - n)) := by
+  simp only [getMsbD, Nat.blt_eq_udecide, BitVec.getLsbD_sshiftRight]
   by_cases h : i < w
-  · simp only [h, decide_true, Bool.true_and]
+  · simp only [h, UDecidable.decide_true, Bool.true_and]
     by_cases h₁ : w ≤ w - 1 - i
     · simp [h₁]
       omega
-    · simp only [h₁, decide_false, Bool.not_false, Bool.true_and]
+    · simp only [h₁, UDecidable.decide_false, Bool.not_false, Bool.true_and]
       by_cases h₂ : i < n
       · simp only [h₂, ↓reduceIte, ite_eq_right_iff]
         omega
-      · simp only [show i - n < w by omega, h₂, ↓reduceIte, decide_true, Bool.true_and]
+      · simp only [show i - n < w by omega, h₂, ↓reduceIte, UDecidable.decide_true, Bool.true_and]
         by_cases h₄ : n + (w - 1 - i) < w <;> (simp only [h₄, ↓reduceIte]; congr; omega)
   · simp [h]
 
@@ -2564,7 +2570,7 @@ theorem toInt_sshiftRight' {x y : BitVec w} :
 -- This should not be a `@[simp]` lemma as the left hand side is not in simp normal form.
 theorem getLsbD_sshiftRight' {x y : BitVec w} {i : Nat} :
     getLsbD (x.sshiftRight' y) i =
-      (!decide (w ≤ i) && if y.toNat + i < w then x.getLsbD (y.toNat + i) else x.msb) := by
+      (!UDecidable.decide (w ≤ i) && if y.toNat + i < w then x.getLsbD (y.toNat + i) else x.msb) := by
   simp only [BitVec.sshiftRight', BitVec.getLsbD_sshiftRight]
 
 -- This should not be a `@[simp]` lemma as the left hand side is not in simp normal form.
@@ -2574,7 +2580,7 @@ theorem getElem_sshiftRight' {x y : BitVec w} {i : Nat} (h : i < w) :
 
 theorem getMsbD_sshiftRight' {x y: BitVec w} {i : Nat} :
     (x.sshiftRight y.toNat).getMsbD i =
-      (decide (i < w) && if i < y.toNat then x.msb else x.getMsbD (i - y.toNat)) := by
+      (UDecidable.decide (i < w) && if i < y.toNat then x.msb else x.getMsbD (i - y.toNat)) := by
   simp
 
 theorem msb_sshiftRight' {x y: BitVec w} :
@@ -2706,7 +2712,7 @@ theorem signExtend_eq_not_setWidth_not_of_msb_true {x : BitVec w} {v : Nat} (hms
 
 @[grind =]
 theorem getLsbD_signExtend (x  : BitVec w) {v i : Nat} :
-    (x.signExtend v).getLsbD i = (decide (i < v) && if i < w then x.getLsbD i else x.msb) := by
+    (x.signExtend v).getLsbD i = (UDecidable.decide (i < v) && if i < w then x.getLsbD i else x.msb) := by
   rcases hmsb : x.msb with rfl | rfl
   · rw [signExtend_eq_setWidth_of_msb_false hmsb]
     by_cases (i < v) <;> by_cases (i < w) <;> simp_all <;> omega
@@ -2716,10 +2722,10 @@ theorem getLsbD_signExtend (x  : BitVec w) {v i : Nat} :
 @[grind =]
 theorem getMsbD_signExtend {x : BitVec w} {v i : Nat} :
     (x.signExtend v).getMsbD i =
-      (decide (i < v) && if v - w ≤ i then x.getMsbD (i + w - v) else x.msb) := by
+      (UDecidable.decide (i < v) && if v - w ≤ i then x.getMsbD (i + w - v) else x.msb) := by
   rcases hmsb : x.msb with rfl | rfl
   · simp only [signExtend_eq_setWidth_of_msb_false hmsb, getMsbD_setWidth]
-    by_cases h : v - w ≤ i <;> simp [h, getMsbD] <;> omega
+    by_cases h : v - w ≤ i <;> simp [h, getMsbD, Nat.blt_eq_udecide] <;> omega
   · simp only [signExtend_eq_not_setWidth_not_of_msb_true hmsb, getMsbD_not, getMsbD_setWidth]
     by_cases h : i < v <;> by_cases h' : v - w ≤ i <;> simp [h, h'] <;> omega
 
@@ -2730,7 +2736,7 @@ theorem getElem_signExtend {x  : BitVec w} {v i : Nat} (h : i < v) :
 
 @[grind =]
 theorem msb_signExtend {x : BitVec w} :
-    (x.signExtend v).msb = (decide (0 < v) && if w ≥ v then x.getMsbD (w - v) else x.msb) := by
+    (x.signExtend v).msb = (UDecidable.decide (0 < v) && if w ≥ v then x.getMsbD (w - v) else x.msb) := by
   by_cases h : w ≥ v
   · simp [h, BitVec.msb, getMsbD_signExtend, show v - w = 0 by omega]
   · simp [h, BitVec.msb, getMsbD_signExtend, show ¬ (v - w = 0) by omega]
@@ -2743,7 +2749,7 @@ theorem signExtend_extractLsb_setWidth {x : BitVec w} {n : Nat} :
     ((x.signExtend (w + n)).extractLsb (w - 1 + n) n).setWidth w = x.sshiftRight n := by
   ext i hi
   simp only [getElem_sshiftRight, getElem_setWidth, getLsbD_extract,
-    Nat.add_sub_cancel, show i ≤ w - 1 by omega, decide_true, getLsbD_signExtend,
+    Nat.add_sub_cancel, show i ≤ w - 1 by omega, UDecidable.decide_true, getLsbD_signExtend,
     Bool.true_and]
   by_cases hni : n + i < w
   <;> (simp [hni]; omega)
@@ -2930,10 +2936,10 @@ theorem msb_append {x : BitVec w} {y : BitVec v} :
   simp only [msb_or, msb_shiftLeftZeroExtend, msb_setWidth']
   by_cases h : w = 0
   · subst h
-    simp [BitVec.msb, getMsbD]
+    simp [BitVec.msb, getMsbD, Nat.blt_eq_udecide]
   · have q : 0 < w + v := by omega
     have t : y.getLsbD (w + v - 1) = false := getLsbD_of_ge _ _ (by omega)
-    simp [h, q, t, BitVec.msb, getMsbD]
+    simp [h, q, t, BitVec.msb, getMsbD, Nat.blt_eq_udecide]
 
 @[simp] theorem append_zero_width (x : BitVec w) (y : BitVec 0) : x ++ y = x := by
   ext i ih
@@ -3102,17 +3108,17 @@ theorem setWidth_append {x : BitVec w} {y : BitVec v} :
 
 @[simp] theorem getLsbD_flattenList {w : Nat} (vs : List (BitVec w)) (i) :
     (BitVec.flattenList vs).getLsbD i =
-      (decide (i < w * vs.length) && (vs[vs.length - 1 - i / w]?.getD 0#w).getLsbD (i % w)) := by
+      (UDecidable.decide (i < w * vs.length) && (vs[vs.length - 1 - i / w]?.getD 0#w).getLsbD (i % w)) := by
   by_cases p : 0 < w
   · rw [getLsbD_eq_getMsbD, getMsbD_flattenList, getLsbD_eq_getMsbD]
     have h₁ : i % w < w := Nat.mod_lt i p
-    simp only [h₁, decide_true, Bool.true_and]
+    simp only [h₁, UDecidable.decide_true, Bool.true_and]
     by_cases h₂ : i < w * vs.length
-    · simp only [h₂, decide_true, Bool.true_and]
+    · simp only [h₂, UDecidable.decide_true, Bool.true_and]
       congr
       · rw [Nat.sub_sub, Nat.add_comm, Nat.mul_sub_div _ _ _ h₂, Nat.sub_sub, Nat.add_comm]
       · rw [Nat.sub_sub, Nat.add_comm, Nat.mul_sub_mod h₂, Nat.sub_sub, Nat.add_comm]
-    · simp only [h₂, decide_false, Bool.false_and]
+    · simp only [h₂, UDecidable.decide_false, Bool.false_and]
   · simp_all
 
 @[simp] theorem flattenList_zero_length (vs : List (BitVec 0)) : BitVec.flattenList vs = 0 := by
@@ -3197,7 +3203,7 @@ theorem extractLsb_flattenList (hi lo : Nat) {w  : Nat} (vs : List (BitVec w))
       · simp only [Nat.mul_add]; omega
     have h₂ : (lo + i) % w = lo % w + i := by simp [Nat.mod_eq_sub_mul_div, h₁]; omega
     simp only [getLsbD_extractLsb, getLsbD_flattenList, q, q', q'', h₁, h₂, h, getLsbD_cast,
-      decide_true, Bool.true_and]
+      UDecidable.decide_true, Bool.true_and]
   · simp at p
     subst p
     omega
@@ -3322,7 +3328,7 @@ theorem append_extractLsb'_of_lt {x : BitVec (x_len * w)} :
 theorem extractLsb'_append_of_lt {x : BitVec (k * w)} {y : BitVec w} (hlt : i < k) :
     extractLsb' (i * w) w (y ++ x) = extractLsb' (i * w) w x := by
   ext j hj
-  simp only [← getLsbD_eq_getElem, getLsbD_extractLsb', hj, decide_true, getLsbD_append,
+  simp only [← getLsbD_eq_getElem, getLsbD_extractLsb', hj, UDecidable.decide_true, getLsbD_append,
     Bool.true_and, ite_eq_left_iff, Nat.not_lt]
   intros h
   by_cases hw0 : w = 0
@@ -3360,7 +3366,7 @@ theorem signExtend_eq_append_extractLsb' {w v : Nat} {x : BitVec w} :
   cases hx : x.msb
   · simp only [hx, signExtend_eq_setWidth_of_msb_false, getElem_setWidth, Bool.false_eq_true,
       ↓reduceIte, getElem_append, getElem_extractLsb', Nat.zero_add, getElem_zero, dite_eq_ite,
-      Bool.ite_false_right, Bool.eq_and_self, decide_eq_true_eq]
+      Bool.ite_false_right, Bool.eq_and_self, UDecidable.decide_eq_true_eq]
     intro hi
     have hw : i < w := lt_of_getLsbD hi
     omega
@@ -3495,14 +3501,14 @@ theorem and_setWidth_allOnes (w' w : Nat) (b : BitVec (w' + w)) :
 @[grind =]
 theorem getLsbD_rev (x : BitVec w) (i : Fin w) :
     x.getLsbD i.rev = x.getMsbD i := by
-  simp only [getLsbD, Fin.val_rev, getMsbD, Fin.is_lt, decide_true, Bool.true_and]
+  simp only [getLsbD, Fin.val_rev, getMsbD, Nat.blt_eq_udecide, Fin.is_lt, UDecidable.decide_true, Bool.true_and]
   congr 1
   omega
 
 @[grind =]
 theorem getElem_rev {x : BitVec w} {i : Fin w}:
     x[i.rev] = x.getMsbD i := by
-  simp only [Fin.getElem_fin, Fin.val_rev, getMsbD, Fin.is_lt, decide_true, Bool.true_and]
+  simp only [Fin.getElem_fin, Fin.val_rev, getMsbD, Nat.blt_eq_udecide, Fin.is_lt, UDecidable.decide_true, Bool.true_and]
   congr 1
   omega
 
@@ -3529,9 +3535,9 @@ theorem getLsbD_cons (b : Bool) {n} (x : BitVec n) (i : Nat) :
   · have p1 : ¬(n ≤ i) := by omega
     have p2 : i ≠ n := by omega
     simp [p1, p2]
-  · simp only [i_eq_n, Nat.le_refl, decide_true, Nat.sub_self, Nat.testBit_zero,
+  · simp only [i_eq_n, Nat.le_refl, UDecidable.decide_true, Nat.sub_self, Nat.testBit_zero,
     Bool.true_and, testBit_toNat, getLsbD_of_ge, Bool.or_false, ↓reduceIte]
-    cases b <;> trivial
+    cases b <;> simp
   · have p1 : i ≠ n := by omega
     have p2 : i - n ≠ 0 := by omega
     simp [p1, p2, Nat.testBit_bool_toNat]
@@ -3647,21 +3653,21 @@ theorem getLsbD_concat_zero : (concat x b).getLsbD 0 = b := by
 
 @[simp]
 theorem getMsbD_concat {i w : Nat} {b : Bool} {x : BitVec w} :
-    (x.concat b).getMsbD i = if i < w then x.getMsbD i else decide (i = w) && b := by
+    (x.concat b).getMsbD i = if i < w then x.getMsbD i else UDecidable.decide (i = w) && b := by
   simp only [getMsbD_eq_getLsbD, Nat.add_sub_cancel, getLsbD_concat]
   by_cases h₀ : i = w
   · simp [h₀]
   · by_cases h₁ : i < w
     · simp [h₁, show ¬ w - i = 0 by omega, show i < w + 1 by omega, Nat.sub_sub, Nat.add_comm]
-    · simp only [show w - i = 0 by omega, ↓reduceIte, h₁, h₀, decide_false, Bool.false_and,
-        Bool.and_eq_false_imp, decide_eq_true_eq]
+    · simp only [show w - i = 0 by omega, ↓reduceIte, h₁, h₀, UDecidable.decide_false, Bool.false_and,
+        Bool.and_eq_false_imp, UDecidable.decide_eq_true_eq]
       intro
       omega
 
 @[simp]
 theorem msb_concat {w : Nat} {b : Bool} {x : BitVec w} :
     (x.concat b).msb = if 0 < w then x.msb else b := by
-  simp only [BitVec.msb, getMsbD_eq_getLsbD, Nat.zero_lt_succ, decide_true, Nat.add_one_sub_one,
+  simp only [BitVec.msb, getMsbD_eq_getLsbD, Nat.zero_lt_succ, UDecidable.decide_true, Nat.add_one_sub_one,
     Nat.sub_zero, Bool.true_and]
   by_cases h₀ : 0 < w
   · simp [getElem_concat, h₀, show ¬ w = 0 by omega, show w - 1 < w by omega]
@@ -3704,7 +3710,7 @@ theorem msb_concat {w : Nat} {b : Bool} {x : BitVec w} :
 theorem extractLsb'_concat {x : BitVec (w + 1)} {y : Bool} :
     (x.concat y).extractLsb' 0 (t + 1) = (x.extractLsb' 0 t).concat y := by
   ext i hi
-  simp only [← getLsbD_eq_getElem, getLsbD_extractLsb', hi, decide_true, Nat.zero_add,
+  simp only [← getLsbD_eq_getElem, getLsbD_extractLsb', hi, UDecidable.decide_true, Nat.zero_add,
     getLsbD_concat, Bool.true_and]
   split
   · simp
@@ -3735,13 +3741,13 @@ theorem concat_induction {motive : (w : Nat) → BitVec w → Prop} (nil : motiv
 @[grind =]
 theorem getLsbD_shiftConcat (x : BitVec w) (b : Bool) (i : Nat) :
     (shiftConcat x b).getLsbD i
-    = (decide (i < w) && (if (i = 0) then b else x.getLsbD (i - 1))) := by
+    = (UDecidable.decide (i < w) && (if (i = 0) then b else x.getLsbD (i - 1))) := by
   simp only [shiftConcat, getLsbD_setWidth, getLsbD_concat]
 
 @[grind =]
 theorem getElem_shiftConcat {x : BitVec w} {b : Bool} (h : i < w) :
     (x.shiftConcat b)[i] = if i = 0 then b else x[i-1] := by
-  rw [← getLsbD_eq_getElem, getLsbD_shiftConcat, getLsbD_eq_getElem, decide_eq_true h, Bool.true_and]
+  rw [← getLsbD_eq_getElem, getLsbD_shiftConcat, getLsbD_eq_getElem, UDecidable.decide_eq_true h, Bool.true_and]
 
 @[simp]
 theorem getElem_shiftConcat_zero {x : BitVec w} (b : Bool) (h : 0 < w) :
@@ -3755,7 +3761,7 @@ theorem getElem_shiftConcat_succ {x : BitVec w} {b : Bool} (h : i + 1 < w) :
 
 theorem getLsbD_shiftConcat_eq_decide (x : BitVec w) (b : Bool) (i : Nat) :
     (shiftConcat x b).getLsbD i
-    = (decide (i < w) && ((decide (i = 0) && b) || (decide (0 < i) && x.getLsbD (i - 1)))) := by
+    = (UDecidable.decide (i < w) && ((UDecidable.decide (i = 0) && b) || (UDecidable.decide (0 < i) && x.getLsbD (i - 1)))) := by
   simp only [getLsbD_shiftConcat]
   split <;> simp [*, show ((0 < i) ↔ ¬(i = 0)) by omega]
 
@@ -3816,7 +3822,7 @@ theorem toNat_add_of_not_uaddOverflow {x y : BitVec w} (h : ¬ uaddOverflow x y)
     (x + y).toNat = x.toNat + y.toNat := by
   rcases w with _|w
   · simp [of_length_zero]
-  · simp only [uaddOverflow, ge_iff_le, decide_eq_true_eq, Nat.not_le] at h
+  · simp only [uaddOverflow, ge_iff_le, UDecidable.decide_eq_true_eq, Nat.not_le] at h
     rw [toNat_add, Nat.mod_eq_of_lt h]
 
 /--
@@ -3825,8 +3831,8 @@ If `(x + y)` and `(y + z)` do not overflow, then `(x + y) + z` overflows iff `x 
 -/
 theorem uaddOverflow_assoc {x y z : BitVec w} (h : ¬ x.uaddOverflow y) (h' : ¬ y.uaddOverflow z) :
     (x + y).uaddOverflow z = x.uaddOverflow (y + z) := by
-  simp only [uaddOverflow, ge_iff_le, decide_eq_true_eq, Nat.not_le] at h h'
-  simp only [uaddOverflow, toNat_add, ge_iff_le, decide_eq_decide]
+  simp only [uaddOverflow, ge_iff_le, UDecidable.decide_eq_true_eq, Nat.not_le] at h h'
+  simp only [uaddOverflow, toNat_add, ge_iff_le, UDecidable.decide_eq_decide]
   repeat rw [Nat.mod_eq_of_lt (by omega)]
   omega
 
@@ -3865,7 +3871,7 @@ theorem toInt_add_of_not_saddOverflow {x y : BitVec w} (h : ¬ saddOverflow x y)
     (x + y).toInt = x.toInt + y.toInt := by
   rcases w with _|w
   · simp [of_length_zero]
-  · simp only [saddOverflow, Nat.add_one_sub_one, ge_iff_le, Bool.or_eq_true, decide_eq_true_eq,
+  · simp only [saddOverflow, Nat.add_one_sub_one, ge_iff_le, Bool.or_eq_true, UDecidable.decide_eq_true_eq,
       _root_.not_or, Int.not_le, Int.not_lt] at h
     rw [toInt_add, Int.bmod_eq_of_le (by push_cast; omega) (by push_cast; omega)]
 
@@ -3877,7 +3883,7 @@ theorem saddOverflow_assoc {x y z : BitVec w} (h : ¬ x.saddOverflow y) (h' : ¬
     (x + y).saddOverflow z = x.saddOverflow (y + z) := by
   rcases w with _|w
   · simp [of_length_zero]
-  · simp only [saddOverflow, Nat.add_one_sub_one, ge_iff_le, Bool.or_eq_true, decide_eq_true_eq,
+  · simp only [saddOverflow, Nat.add_one_sub_one, ge_iff_le, Bool.or_eq_true, UDecidable.decide_eq_true_eq,
       _root_.not_or, Int.not_le, Int.not_lt] at h h'
     simp only [bool_to_prop, saddOverflow, toInt_add, ge_iff_le, Nat.add_one_sub_one]
     repeat rw [Int.bmod_eq_of_le (by push_cast; omega) (by push_cast; omega)]
@@ -3913,7 +3919,7 @@ theorem toNat_sub_of_not_usubOverflow {x y : BitVec w} (h : ¬ usubOverflow x y)
     (x - y).toNat = x.toNat - y.toNat := by
   rcases w with _|w
   · simp [of_length_zero]
-  · simp only [usubOverflow, decide_eq_true_eq, Nat.not_lt] at h
+  · simp only [usubOverflow, UDecidable.decide_eq_true_eq, Nat.not_lt] at h
     rw [toNat_sub, ← Nat.sub_add_comm (by omega), Nat.add_sub_assoc h, Nat.add_mod_left,
       Nat.mod_eq_of_lt (by omega)]
 
@@ -3922,7 +3928,7 @@ theorem toInt_sub_of_not_ssubOverflow {x y : BitVec w} (h : ¬ ssubOverflow x y)
     (x - y).toInt = x.toInt - y.toInt := by
   rcases w with _|w
   · simp [of_length_zero]
-  · simp only [ssubOverflow, Nat.add_one_sub_one, ge_iff_le, Bool.or_eq_true, decide_eq_true_eq,
+  · simp only [ssubOverflow, Nat.add_one_sub_one, ge_iff_le, Bool.or_eq_true, UDecidable.decide_eq_true_eq,
       _root_.not_or, Int.not_le, Int.not_lt] at h
     rw [toInt_sub, Int.bmod_eq_of_le (by push_cast; omega) (by push_cast; omega)]
 
@@ -4212,13 +4218,13 @@ protected theorem self_eq_add_left {x y : BitVec w} : x = y + x ↔ y = 0#w := b
 
 @[simp, grind =]
 theorem getLsbD_fill {w i : Nat} {v : Bool} :
-    (fill w v).getLsbD i = (v && decide (i < w)) := by
+    (fill w v).getLsbD i = (v && UDecidable.decide (i < w)) := by
   by_cases h : v
   <;> simp [h, BitVec.fill, BitVec.neg_one_eq_allOnes]
 
 @[simp]
 theorem getMsbD_fill {w i : Nat} {v : Bool} :
-    (fill w v).getMsbD i = (v && decide (i < w)) := by
+    (fill w v).getMsbD i = (v && UDecidable.decide (i < w)) := by
   by_cases h : v
   <;> simp [h, BitVec.fill, BitVec.neg_one_eq_allOnes]
 
@@ -4230,7 +4236,7 @@ theorem getElem_fill {w i : Nat} {v : Bool} (h : i < w) :
 
 @[simp]
 theorem msb_fill {w : Nat} {v : Bool} :
-    (fill w v).msb = (v && decide (0 < w)) := by
+    (fill w v).msb = (v && UDecidable.decide (0 < w)) := by
   simp [BitVec.msb]
 
 theorem fill_eq {w : Nat} {v : Bool} : fill w v = if v = true then allOnes w else 0#w := by
@@ -4328,7 +4334,7 @@ theorem toNat_mul_of_not_umulOverflow {x y : BitVec w} (h : ¬ umulOverflow x y)
     (x * y).toNat = x.toNat * y.toNat := by
   rcases w with _|w
   · simp [of_length_zero]
-  · simp only [umulOverflow, ge_iff_le, decide_eq_true_eq, Nat.not_le] at h
+  · simp only [umulOverflow, ge_iff_le, UDecidable.decide_eq_true_eq, Nat.not_le] at h
     rw [toNat_mul, Nat.mod_eq_of_lt h]
 
 /--
@@ -4338,8 +4344,8 @@ If `(x * y)` and `(y * z)` do not overflow, then `(x * y) * z` overflows iff `x 
 theorem umulOverflow_assoc {x y z : BitVec w} (h : ¬ x.umulOverflow y) (h' : ¬ y.umulOverflow z) :
 
     (x * y).umulOverflow z = x.umulOverflow (y * z) := by
-  simp only [umulOverflow, ge_iff_le, decide_eq_true_eq, Nat.not_le] at h h'
-  simp only [umulOverflow, toNat_mul, ge_iff_le, decide_eq_decide]
+  simp only [umulOverflow, ge_iff_le, UDecidable.decide_eq_true_eq, Nat.not_le] at h h'
+  simp only [umulOverflow, toNat_mul, ge_iff_le, UDecidable.decide_eq_decide]
   repeat rw [Nat.mod_eq_of_lt (by omega)]
   rw [Nat.mul_assoc]
 
@@ -4348,7 +4354,7 @@ theorem toInt_mul_of_not_smulOverflow {x y : BitVec w} (h : ¬ smulOverflow x y)
     (x * y).toInt = x.toInt * y.toInt := by
   rcases w with _|w
   · simp [of_length_zero]
-  · simp only [smulOverflow, Nat.add_one_sub_one, ge_iff_le, Bool.or_eq_true, decide_eq_true_eq,
+  · simp only [smulOverflow, Nat.add_one_sub_one, ge_iff_le, Bool.or_eq_true, UDecidable.decide_eq_true_eq,
       _root_.not_or, Int.not_le, Int.not_lt] at h
     rw [toInt_mul, Int.bmod_eq_of_le (by push_cast; omega) (by push_cast; omega)]
 
@@ -4360,7 +4366,7 @@ theorem smulOverflow_assoc {x y z : BitVec w} (h : ¬ x.smulOverflow y) (h' : ¬
     (x * y).smulOverflow z = x.smulOverflow (y * z) := by
   rcases w with _|w
   · simp [of_length_zero]
-  · simp only [smulOverflow, Nat.add_one_sub_one, ge_iff_le, Bool.or_eq_true, decide_eq_true_eq,
+  · simp only [smulOverflow, Nat.add_one_sub_one, ge_iff_le, Bool.or_eq_true, UDecidable.decide_eq_true_eq,
       _root_.not_or, Int.not_le, Int.not_lt] at h h'
     simp only [smulOverflow, toInt_mul, Nat.add_one_sub_one, ge_iff_le, bool_to_prop]
     repeat rw [Int.bmod_eq_of_le (by push_cast; omega) (by push_cast; omega)]
@@ -4701,9 +4707,9 @@ theorem msb_udiv (x y : BitVec w) :
       x.toNat / y.toNat ≤ x.toNat     := by apply Nat.div_le_self
                       _ < 2 ^ (w - 1) := by simpa [msb_eq_decide] using msb_x
   . rcases w with _|w
-    · contradiction
-    · have : (y == 1#_) = decide (y.toNat = 1) := by
-        simp [(· == ·), toNat_eq]
+    · simp [BitVec.msb, BitVec.getMsbD, Nat.blt_eq_udecide] at msb_x
+    · have : (y == 1#_) = UDecidable.decide (y.toNat = 1) := by
+        rw [Bool.eq_iff_iff]; simp [(· == ·)]
       simp only [this, Bool.true_and]
       match hy : y.toNat with
       | 0 =>
@@ -4815,7 +4821,7 @@ theorem msb_umod {x y : BitVec w} :
         · have : x.toNat % y.toNat < y.toNat := Nat.mod_lt _ (by omega)
           omega
         · rcases w with _|w
-          · contradiction
+          · simp [BitVec.msb, BitVec.getMsbD, Nat.blt_eq_udecide] at msb_x
           simp only [Nat.add_one_sub_one]
           replace msb_y : 2 ^ w ≤ y.toNat := by
             simpa using msb_y
@@ -5139,13 +5145,13 @@ theorem zero_smod {x : BitVec w} : (0#w).smod x = 0#w := by
   induction bs generalizing i <;> cases i <;> simp_all [ofBoolListBE]
 
 @[simp, grind =] theorem getLsbD_ofBoolListBE :
-    (ofBoolListBE bs).getLsbD i = (decide (i < bs.length) && bs.getD (bs.length - 1 - i) false) := by
+    (ofBoolListBE bs).getLsbD i = (UDecidable.decide (i < bs.length) && bs.getD (bs.length - 1 - i) false) := by
   simp [getLsbD_eq_getMsbD]
 
 @[simp, grind =] theorem getElem_ofBoolListBE (h : i < bs.length) :
     (ofBoolListBE bs)[i] = bs[bs.length - 1 - i] := by
   rw [← getLsbD_eq_getElem, getLsbD_ofBoolListBE]
-  simp only [h, decide_true, List.getD_eq_getElem?_getD, Bool.true_and]
+  simp only [h, UDecidable.decide_true, List.getD_eq_getElem?_getD, Bool.true_and]
   rw [List.getElem?_eq_getElem (by omega)]
   simp
 
@@ -5153,7 +5159,7 @@ theorem zero_smod {x : BitVec w} : (0#w).smod x = 0#w := by
   induction bs generalizing i <;> cases i <;> simp_all [ofBoolListLE]
 
 @[simp, grind =] theorem getMsbD_ofBoolListLE :
-    (ofBoolListLE bs).getMsbD i = (decide (i < bs.length) && bs.getD (bs.length - 1 - i) false) := by
+    (ofBoolListLE bs).getMsbD i = (UDecidable.decide (i < bs.length) && bs.getD (bs.length - 1 - i) false) := by
   simp [getMsbD_eq_getLsbD]
 
 /-! # Rotate Left -/
@@ -5212,10 +5218,10 @@ Intuitively, grab the full width (7), then move the marker `|` by `r` to the rig
 Then, access the bit at `i` from the right `(+i)`.
  -/
 theorem getLsbD_rotateLeftAux_of_ge {x : BitVec w} {r : Nat} {i : Nat} (hi : i ≥ r) :
-    (x.rotateLeftAux r).getLsbD i = (decide (i < w) && x.getLsbD (i - r)) := by
+    (x.rotateLeftAux r).getLsbD i = (UDecidable.decide (i < w) && x.getLsbD (i - r)) := by
   rw [rotateLeftAux, getLsbD_or]
   suffices (x >>> (w - r)).getLsbD i = false by
-    have hiltr : decide (i < r) = false := by
+    have hiltr : UDecidable.decide (i < r) = false := by
       simp [hi]
     simp [getLsbD_shiftLeft, Bool.or_false, hiltr, this]
   simp only [getLsbD_ushiftRight]
@@ -5227,7 +5233,7 @@ theorem getLsbD_rotateLeft_of_le {x : BitVec w} {r i : Nat} (hr: r < w) :
     (x.rotateLeft r).getLsbD i =
       if i < r then
       (x.getLsbD (w - r + i)) else
-      (decide (i < w) && x.getLsbD (i - r)) := by
+      (UDecidable.decide (i < w) && x.getLsbD (i - r)) := by
   · rw [rotateLeft_eq_rotateLeftAux_of_lt hr]
     by_cases h : i < r
     · simp [h, getLsbD_rotateLeftAux_of_lt h]
@@ -5238,7 +5244,7 @@ theorem getLsbD_rotateLeft {x : BitVec w} {r i : Nat}  :
     (x.rotateLeft r).getLsbD i =
       if i < r % w then
       (x.getLsbD (w - (r % w) + i)) else
-      (decide (i < w) && x.getLsbD (i - (r % w))) := by
+      (UDecidable.decide (i < w) && x.getLsbD (i - (r % w))) := by
   rcases w with ⟨rfl, w⟩
   · simp
   · rw [← rotateLeft_mod_eq_rotateLeft, getLsbD_rotateLeft_of_le (Nat.mod_lt _ (by omega))]
@@ -5255,7 +5261,7 @@ theorem getMsbD_rotateLeftAux_of_lt {x : BitVec w} {r : Nat} {i : Nat} (hi : i <
   simp [show i < w - r by omega, Nat.add_comm]
 
 theorem getMsbD_rotateLeftAux_of_ge {x : BitVec w} {r : Nat} {i : Nat} (hi : i ≥ w - r) :
-    (x.rotateLeftAux r).getMsbD i = (decide (i < w) && x.getMsbD (i - (w - r))) := by
+    (x.rotateLeftAux r).getMsbD i = (UDecidable.decide (i < w) && x.getMsbD (i - (w - r))) := by
   simp [rotateLeftAux, getMsbD_or, show i + r ≥ w by omega, show ¬i < w - r by omega]
 
 /--
@@ -5274,7 +5280,7 @@ private theorem Nat.sub_mul_eq_mod_of_lt_of_le (hlo : w * n ≤ i) (hhi : i < w 
 
 /-- When `r < w`, we give a formula for `(x.rotateLeft r).getMsbD i`. -/
 theorem getMsbD_rotateLeft_of_lt {n w : Nat} {x : BitVec w} (hi : r < w):
-    (x.rotateLeft r).getMsbD n = (decide (n < w) && x.getMsbD ((r + n) % w)) := by
+    (x.rotateLeft r).getMsbD n = (UDecidable.decide (n < w) && x.getMsbD ((r + n) % w)) := by
   rcases w with rfl | w
   · simp
   · rw [BitVec.rotateLeft_eq_rotateLeftAux_of_lt (by omega)]
@@ -5282,7 +5288,7 @@ theorem getMsbD_rotateLeft_of_lt {n w : Nat} {x : BitVec w} (hi : r < w):
     · simp [getMsbD_rotateLeftAux_of_lt h, Nat.mod_eq_of_lt, show r + n < (w + 1) by omega, show n < w + 1 by omega]
     · simp [getMsbD_rotateLeftAux_of_ge <| Nat.ge_of_not_lt h]
       by_cases h₁ : n < w + 1
-      · simp only [h₁, decide_true, Bool.true_and]
+      · simp only [h₁, UDecidable.decide_true, Bool.true_and]
         have h₂ : (r + n) < 2 * (w + 1) := by omega
         congr 1
         rw [← Nat.sub_mul_eq_mod_of_lt_of_le (n := 1) (by omega) (by omega)]
@@ -5291,7 +5297,7 @@ theorem getMsbD_rotateLeft_of_lt {n w : Nat} {x : BitVec w} (hi : r < w):
 
 @[grind =]
 theorem getMsbD_rotateLeft {r n w : Nat} {x : BitVec w} :
-    (x.rotateLeft r).getMsbD n = (decide (n < w) && x.getMsbD ((r + n) % w)) := by
+    (x.rotateLeft r).getMsbD n = (UDecidable.decide (n < w) && x.getMsbD ((r + n) % w)) := by
   rcases w with rfl | w
   · simp
   · by_cases h : r < w
@@ -5350,8 +5356,8 @@ theorem getLsbD_rotateRightAux_of_lt {x : BitVec w} {r : Nat} {i : Nat} (hi : i 
   rw [rotateRightAux, getLsbD_or, getLsbD_ushiftRight]
   suffices (x <<< (w - r)).getLsbD i = false by
     simp only [this, Bool.or_false]
-  simp only [getLsbD_shiftLeft, Bool.and_eq_false_imp, Bool.and_eq_true, decide_eq_true_eq,
-    Bool.not_eq_true', decide_eq_false_iff_not, Nat.not_lt, and_imp]
+  simp only [getLsbD_shiftLeft, Bool.and_eq_false_imp, Bool.and_eq_true, UDecidable.decide_eq_true_eq,
+    Bool.not_eq_true', UDecidable.decide_eq_false_iff_not, Nat.not_lt, and_imp]
   omega
 
 /--
@@ -5368,7 +5374,7 @@ x.rotateRight 2 = (<6 5 4 3 2 | 1 0>).rotateRight 2 = <1 0 | 6 5 4 3 2>
 = <6 5 4 3 2 | 1 0> (i - len<6 4 4 3 2>)
  -/
 theorem getLsbD_rotateRightAux_of_ge {x : BitVec w} {r : Nat} {i : Nat} (hi : i ≥ w - r) :
-    (x.rotateRightAux r).getLsbD i = (decide (i < w) && x.getLsbD (i - (w - r))) := by
+    (x.rotateRightAux r).getLsbD i = (UDecidable.decide (i < w) && x.getLsbD (i - (w - r))) := by
   rw [rotateRightAux, getLsbD_or]
   suffices (x >>> r).getLsbD i = false by
     simp only [this, getLsbD_shiftLeft, Bool.false_or]
@@ -5395,7 +5401,7 @@ theorem getLsbD_rotateRight_of_lt {x : BitVec w} {r i : Nat} (hr: r < w) :
     (x.rotateRight r).getLsbD i =
       if i < w - r then
       (x.getLsbD (r + i)) else
-      (decide (i < w) && x.getLsbD (i - (w - r))) := by
+      (UDecidable.decide (i < w) && x.getLsbD (i - (w - r))) := by
   · rw [rotateRight_eq_rotateRightAux_of_lt hr]
     by_cases h : i < w - r
     · simp [h, getLsbD_rotateRightAux_of_lt h]
@@ -5406,7 +5412,7 @@ theorem getLsbD_rotateRight {x : BitVec w} {r i : Nat} :
     (x.rotateRight r).getLsbD i =
       if i < w - (r % w) then
       (x.getLsbD ((r % w) + i)) else
-      (decide (i < w) && x.getLsbD (i - (w - (r % w)))) := by
+      (UDecidable.decide (i < w) && x.getLsbD (i - (w - (r % w)))) := by
   rcases w with ⟨rfl, w⟩
   · simp
   · rw [← rotateRight_mod_eq_rotateRight, getLsbD_rotateRight_of_lt (Nat.mod_lt _ (by omega))]
@@ -5422,31 +5428,31 @@ theorem getMsbD_rotateRightAux_of_lt {x : BitVec w} {r : Nat} {i : Nat} (hi : i 
   simp [show i < r by omega]
 
 theorem getMsbD_rotateRightAux_of_ge {x : BitVec w} {r : Nat} {i : Nat} (hi : i ≥ r) :
-    (x.rotateRightAux r).getMsbD i = (decide (i < w) && x.getMsbD (i - r)) := by
+    (x.rotateRightAux r).getMsbD i = (UDecidable.decide (i < w) && x.getMsbD (i - r)) := by
   simp [rotateRightAux, show ¬ i < r by omega, show i + (w - r) ≥ w by omega]
 
 /-- When `m < w`, we give a formula for `(x.rotateLeft m).getMsbD i`. -/
 -- This should not be a simp lemma as `getMsbD_rotateRight` will apply first.
 theorem getMsbD_rotateRight_of_lt {w n m : Nat} {x : BitVec w} (hr : m < w) :
-    (x.rotateRight m).getMsbD n = (decide (n < w) && (if (n < m % w)
+    (x.rotateRight m).getMsbD n = (UDecidable.decide (n < w) && (if (n < m % w)
     then x.getMsbD ((w + n - m % w) % w) else x.getMsbD (n - m % w))) := by
   rcases w with rfl | w
   · simp
   · rw [rotateRight_eq_rotateRightAux_of_lt (by omega)]
     by_cases h : n < m
-    · simp only [getMsbD_rotateRightAux_of_lt h, show n < w + 1 by omega, decide_true,
+    · simp only [getMsbD_rotateRightAux_of_lt h, show n < w + 1 by omega, UDecidable.decide_true,
         show m % (w + 1) = m by rw [Nat.mod_eq_of_lt hr], h, ↓reduceIte,
         show (w + 1 + n - m) < (w + 1) by omega, Nat.mod_eq_of_lt, Bool.true_and]
       congr 1
       omega
     · simp [getMsbD_rotateRightAux_of_ge <| Nat.ge_of_not_lt h]
       by_cases h₁ : n < w + 1
-      · simp [h, h₁, decide_true, Bool.true_and, Nat.mod_eq_of_lt hr]
+      · simp [h, h₁, UDecidable.decide_true, Bool.true_and, Nat.mod_eq_of_lt hr]
       · simp [h₁]
 
 @[simp, grind =]
 theorem getMsbD_rotateRight {w n m : Nat} {x : BitVec w} :
-    (x.rotateRight m).getMsbD n = (decide (n < w) && (if (n < m % w)
+    (x.rotateRight m).getMsbD n = (UDecidable.decide (n < w) && (if (n < m % w)
     then x.getMsbD ((w + n - m % w) % w) else x.getMsbD (n - m % w))):= by
   rcases w with rfl | w
   · simp
@@ -5460,7 +5466,7 @@ theorem msb_rotateRight {r w : Nat} {x : BitVec w} :
     (x.rotateRight r).msb = x.getMsbD ((w - r % w) % w) := by
   simp only [BitVec.msb, getMsbD_rotateRight]
   by_cases h₀ : 0 < w
-  · simp only [h₀, decide_true, Nat.add_zero, Nat.zero_le, Nat.sub_eq_zero_of_le, Bool.true_and,
+  · simp only [h₀, UDecidable.decide_true, Nat.add_zero, Nat.zero_le, Nat.sub_eq_zero_of_le, Bool.true_and,
     ite_eq_left_iff, Nat.not_lt, Nat.le_zero_eq]
     intro h₁
     simp [h₁]
@@ -5566,8 +5572,8 @@ theorem getLsbD_twoPow (i j : Nat) : (twoPow w i).getLsbD j = ((i < w) && (i = j
   · simp
   · simp only [twoPow, getLsbD_shiftLeft, getLsbD_ofNat]
     by_cases hj : j < i
-    · simp only [hj, decide_true, Bool.not_true, Bool.and_false, Bool.false_and, Bool.false_eq,
-      Bool.and_eq_false_imp, decide_eq_true_eq, decide_eq_false_iff_not]
+    · simp only [hj, UDecidable.decide_true, Bool.not_true, Bool.and_false, Bool.false_and, Bool.false_eq,
+      Bool.and_eq_false_imp, UDecidable.decide_eq_true_eq, UDecidable.decide_eq_false_iff_not]
       omega
     · by_cases hi : Nat.testBit 1 (j - i)
       · obtain hi' := Nat.testBit_one_eq_true_iff_self_eq_zero.mp hi
@@ -5580,9 +5586,9 @@ theorem getLsbD_twoPow (i j : Nat) : (twoPow w i).getLsbD j = ((i < w) && (i = j
 
 @[simp]
 theorem msb_twoPow {i w: Nat} :
-    (twoPow w i).msb = (decide (i < w) && decide (i = w - 1)) := by
+    (twoPow w i).msb = (UDecidable.decide (i < w) && UDecidable.decide (i = w - 1)) := by
   simp only [BitVec.msb, getMsbD_eq_getLsbD, Nat.sub_zero, getLsbD_twoPow,
-    Bool.and_eq_right_iff_imp, Bool.and_eq_true, decide_eq_true_eq, and_imp]
+    Bool.and_eq_right_iff_imp, Bool.and_eq_true, UDecidable.decide_eq_true_eq, and_imp]
   intros
   omega
 
@@ -5608,14 +5614,14 @@ theorem toFin_twoPow {w i : Nat} :
   · simp [BitVec.twoPow, toFin_shiftLeft, Nat.shiftLeft_eq]
 
 @[simp, grind =]
-theorem getElem_twoPow {i j : Nat} (h : j < w) : (twoPow w i)[j] = decide (j = i) := by
+theorem getElem_twoPow {i j : Nat} (h : j < w) : (twoPow w i)[j] = UDecidable.decide (j = i) := by
   rw [←getLsbD_eq_getElem, getLsbD_twoPow]
   simp [eq_comm]
   omega
 
 @[simp]
 theorem getMsbD_twoPow {i j w: Nat} :
-    (twoPow w i).getMsbD j = (decide (i < w) && decide (j = w - i - 1)) := by
+    (twoPow w i).getMsbD j = (UDecidable.decide (i < w) && UDecidable.decide (j = w - i - 1)) := by
   simp only [getMsbD_eq_getLsbD, getLsbD_twoPow]
   by_cases h₀ : i < w <;> by_cases h₁ : j < w <;>
   simp [h₀, h₁] <;> omega
@@ -5764,20 +5770,20 @@ theorem replicate_succ {x : BitVec w} :
 @[simp, grind =]
 theorem getLsbD_replicate {n w : Nat} {x : BitVec w} :
     (x.replicate n).getLsbD i =
-    (decide (i < w * n) && x.getLsbD (i % w)) := by
+    (UDecidable.decide (i < w * n) && x.getLsbD (i % w)) := by
   induction n generalizing x
   case zero => simp
   case succ n ih =>
     simp only [replicate_succ, getLsbD_cast, getLsbD_append]
     by_cases hi : i < w * (n + 1)
-    · simp only [hi, decide_true, Bool.true_and]
+    · simp only [hi, UDecidable.decide_true, Bool.true_and]
       by_cases hi' : i < w * n
       · rw [ih]
         simp_all
       · simp only [hi', ↓reduceIte]
         rw [Nat.sub_mul_eq_mod_of_lt_of_le (by omega) (by omega)]
     · rw [Nat.mul_succ] at hi ⊢
-      simp only [show ¬i < w * n by omega, decide_false, hi, Bool.false_and]
+      simp only [show ¬i < w * n by omega, UDecidable.decide_false, hi, Bool.false_and]
       apply BitVec.getLsbD_of_ge (x := x) (i := i - w * n) (ge := by omega)
 
 @[simp, grind =]
@@ -5838,14 +5844,14 @@ theorem setWidth_setWidth_eq_self {a : BitVec w} {w' : Nat} (h : a < BitVec.twoP
 /-! ### intMin -/
 
 @[grind =]
-theorem getLsbD_intMin (w : Nat) : (intMin w).getLsbD i = decide (i + 1 = w) := by
+theorem getLsbD_intMin (w : Nat) : (intMin w).getLsbD i = UDecidable.decide (i + 1 = w) := by
   simp only [intMin, getLsbD_twoPow, bool_to_prop]
   omega
 
 @[grind =]
 theorem getMsbD_intMin {w i : Nat} :
-    (intMin w).getMsbD i = (decide (0 < w) && decide (i = 0)) := by
-  simp only [getMsbD, getLsbD_intMin]
+    (intMin w).getMsbD i = (UDecidable.decide (0 < w) && UDecidable.decide (i = 0)) := by
+  simp only [getMsbD, Nat.blt_eq_udecide, getLsbD_intMin]
   match w, i with
   | 0,   _    => simp
   | w+1, 0    => simp
@@ -5906,7 +5912,7 @@ theorem toInt_intMin_le (x : BitVec w) :
 
 @[grind =]
 theorem intMin_sle (x : BitVec w) : (intMin w).sle x := by
-  simp only [BitVec.sle, toInt_intMin_le x, decide_true]
+  simp only [sle_eq_decide, toInt_intMin_le x, UDecidable.decide_true]
 
 @[simp, grind =]
 theorem neg_intMin {w : Nat} : -intMin w = intMin w := by
@@ -5949,14 +5955,14 @@ theorem toInt_neg_eq_ite {x : BitVec w} :
     simp [hx, neg_intMin, toInt_neg_of_ne_intMin]
 
 @[grind =]
-theorem msb_intMin {w : Nat} : (intMin w).msb = decide (0 < w) := by
-  simp only [msb_eq_decide, toNat_intMin, decide_eq_decide]
+theorem msb_intMin {w : Nat} : (intMin w).msb = UDecidable.decide (0 < w) := by
+  simp only [msb_eq_decide, toNat_intMin, UDecidable.decide_eq_decide]
   by_cases h : 0 < w <;> simp_all
 
 theorem ne_intMin_of_msb_eq_false (h : 0 < w) {n : BitVec w} (hn : n.msb = false) :
     n ≠ intMin w := by
   rintro rfl
-  simp only [msb_intMin, decide_eq_false_iff_not, Nat.not_lt, Nat.le_zero_eq] at hn
+  simp only [msb_intMin, UDecidable.decide_eq_false_iff_not, Nat.not_lt, Nat.le_zero_eq] at hn
   omega
 
 theorem toInt_neg_eq_of_msb {x : BitVec w} (h : x.msb = false) : (-x).toInt = -x.toInt := by
@@ -6007,8 +6013,8 @@ theorem toNat_intMax : (intMax w).toNat = 2 ^ (w - 1) - 1 := by
     omega
 
 @[simp, grind =]
-theorem getLsbD_intMax (w : Nat) : (intMax w).getLsbD i = decide (i + 1 < w) := by
-  rw [← testBit_toNat, toNat_intMax, Nat.testBit_two_pow_sub_one, decide_eq_decide]
+theorem getLsbD_intMax (w : Nat) : (intMax w).getLsbD i = UDecidable.decide (i + 1 < w) := by
+  rw [← testBit_toNat, toNat_intMax, Nat.testBit_two_pow_sub_one, UDecidable.decide_eq_decide]
   omega
 
 @[simp] theorem intMax_add_one {w : Nat} : intMax w + 1#w = intMin w := by
@@ -6115,8 +6121,8 @@ theorem two_pow_le_toInt_mul_toInt_iff {x y : BitVec w} :
   · have := Int.pow_lt_pow_of_lt (a := 2) (b := (w + 1) * 2 - 2) (c := (w + 1) * 2 - 1) (by omega)
     have := @BitVec.le_toInt_mul_toInt (w + 1) x y
     have := @BitVec.toInt_mul_toInt_le (w + 1) x y
-    simp only [Nat.add_one_sub_one, BitVec.slt, intMax, ofNat_eq_ofNat, toInt_mul,
-      decide_eq_true_eq]
+    simp only [Nat.add_one_sub_one, slt_eq_decide, intMax, ofNat_eq_ofNat, toInt_mul,
+      UDecidable.decide_eq_true_eq]
     repeat rw [BitVec.toInt_signExtend_of_le (by omega)]
     simp only [show BitVec.twoPow (w + 1) w - 1#(w + 1) = BitVec.intMax (w + 1) by simp [intMax],
       toInt_intMax, Nat.add_one_sub_one]
@@ -6134,7 +6140,7 @@ theorem toInt_mul_toInt_lt_neg_two_pow_iff {x y : BitVec w} :
   · have := Int.pow_lt_pow_of_lt (a := 2) (b := (w + 1) * 2 - 2) (c := (w + 1) * 2 - 1) (by omega)
     have := @BitVec.le_toInt_mul_toInt (w + 1) x y
     have := @BitVec.toInt_mul_toInt_le (w + 1) x y
-    simp only [BitVec.slt, toInt_mul, intMin, Nat.add_one_sub_one, decide_eq_true_eq]
+    simp only [slt_eq_decide, toInt_mul, intMin, Nat.add_one_sub_one, UDecidable.decide_eq_true_eq]
     repeat rw [BitVec.toInt_signExtend_of_le (by omega)]
     simp only [toInt_twoPow, show ¬w + 1 ≤ w by omega, ↓reduceIte]
     push_cast
@@ -6145,11 +6151,11 @@ theorem toInt_mul_toInt_lt_neg_two_pow_iff {x y : BitVec w} :
 /-! ### neg -/
 
 theorem msb_eq_toInt {x : BitVec w}:
-    x.msb = decide (x.toInt < 0) := by
+    x.msb = UDecidable.decide (x.toInt < 0) := by
   by_cases h : x.msb <;> simp [h, toInt_eq_msb_cond, -Int.natCast_pow] <;> omega
 
 theorem msb_eq_toNat {x : BitVec w}:
-    x.msb = decide (x.toNat ≥ 2 ^ (w - 1)) := by
+    x.msb = UDecidable.decide (x.toNat ≥ 2 ^ (w - 1)) := by
   simp only [msb_eq_decide, ge_iff_le]
 
 /-- Negating a bitvector created from a natural number equals
@@ -6292,7 +6298,7 @@ theorem getLsbD_reverse {i : Nat} {x : BitVec w} :
     · rfl
     · simp only [Nat.add_one_ne_zero, ↓reduceIte, Nat.add_one_sub_one, ih]
       rw [getMsbD_setWidth]
-      simp only [show n - (n + 1) = 0 by omega, Nat.zero_le, decide_true, Bool.true_and]
+      simp only [show n - (n + 1) = 0 by omega, Nat.zero_le, UDecidable.decide_true, Bool.true_and]
       congr; omega
 
 @[grind =]
@@ -6304,7 +6310,7 @@ theorem getMsbD_reverse {i : Nat} {x : BitVec w} :
     (x.reverse).getMsbD i = x.getLsbD i := by
   simp only [getMsbD_eq_getLsbD, getLsbD_reverse]
   by_cases hi : i < w
-  · simp only [hi, decide_true, show w - 1 - i < w by omega, Bool.true_and]
+  · simp only [hi, UDecidable.decide_true, show w - 1 - i < w by omega, Bool.true_and]
     congr; omega
   · simp [hi, show i ≥ w by omega]
 
@@ -6340,12 +6346,12 @@ theorem reverse_replicate {n : Nat} {x : BitVec w} :
 
 @[simp, grind =]
 theorem getMsbD_replicate {n w : Nat} {x : BitVec w} :
-    (x.replicate n).getMsbD i = (decide (i < w * n) && x.getMsbD (i % w)) := by
+    (x.replicate n).getMsbD i = (UDecidable.decide (i < w * n) && x.getMsbD (i % w)) := by
   rw [← getLsbD_reverse, reverse_replicate, getLsbD_replicate, getLsbD_reverse]
 
 @[simp, grind =]
 theorem msb_replicate {n w : Nat} {x : BitVec w} :
-    (x.replicate n).msb = (decide (0 < n) && x.msb) := by
+    (x.replicate n).msb = (UDecidable.decide (0 < n) && x.msb) := by
   simp only [BitVec.msb, getMsbD_replicate, Nat.zero_mod]
   cases n <;> cases w <;> simp
 
@@ -6373,7 +6379,7 @@ theorem concat_reverse_setWidth_msb_eq_reverse {x : BitVec (w + 1)} :
     concat ((x.setWidth w).reverse) x.msb = x.reverse := by
   ext i hi
   simp only [getElem_reverse, BitVec.msb, getElem_concat, getMsbD_setWidth, Nat.le_add_right,
-    Nat.sub_eq_zero_of_le, Nat.zero_le, decide_true, Bool.true_and, dite_eq_ite]
+    Nat.sub_eq_zero_of_le, Nat.zero_le, UDecidable.decide_true, Bool.true_and, dite_eq_ite]
   by_cases hzero : i = 0
   · simp [hzero]
   · simp [hzero, show i - 1 + (w + 1) - w = i by omega]
@@ -6381,18 +6387,18 @@ theorem concat_reverse_setWidth_msb_eq_reverse {x : BitVec (w + 1)} :
 /-! ### Inequalities (le / lt) -/
 
 theorem ule_eq_not_ult (x y : BitVec w) : x.ule y = !y.ult x := by
-  simp [BitVec.ule, BitVec.ult, ← decide_not]
+  simp [ule_eq_decide, ult_eq_decide, ← UDecidable.decide_not]
 
 /-- If two bitvectors have the same `msb`, then signed and unsigned comparisons coincide -/
 theorem slt_eq_ult_of_msb_eq {x y : BitVec w} (h : x.msb = y.msb) :
     x.slt y = x.ult y := by
-  simp only [BitVec.slt, toInt_eq_msb_cond, BitVec.ult, decide_eq_decide, h]
+  simp only [slt_eq_decide, toInt_eq_msb_cond, ult_eq_decide, UDecidable.decide_eq_decide, h]
   cases y.msb <;> simp
 
 /-- If two bitvectors have different `msb`s, then unsigned comparison is determined by this bit -/
 theorem ult_eq_msb_of_msb_neq {x y : BitVec w} (h : x.msb ≠ y.msb) :
     x.ult y = y.msb := by
-  simp only [BitVec.ult, msb_eq_decide, ne_eq, decide_eq_decide] at *
+  simp only [ult_eq_decide, msb_eq_decide, ne_eq, UDecidable.decide_eq_decide] at *
   omega
 
 /-- If two bitvectors have different `msb`s, then signed and unsigned comparisons are opposites -/
@@ -6409,7 +6415,7 @@ theorem slt_eq_ult {x y : BitVec w} :
     simp [slt_eq_not_ult_of_msb_neq h, h']
 
 theorem sle_eq_not_slt {x y : BitVec w} : x.sle y = !y.slt x := by
-  simp only [BitVec.sle, BitVec.slt, ← decide_not, decide_eq_decide]; omega
+  simp only [sle_eq_decide, slt_eq_decide, ← UDecidable.decide_not, UDecidable.decide_eq_decide]; omega
 
 theorem zero_sle_eq_not_msb {w : Nat} {x : BitVec w} : BitVec.sle 0#w x = !x.msb := by
   rw [sle_eq_not_slt, BitVec.slt_zero_eq_msb]
@@ -6816,7 +6822,7 @@ theorem getLsbD_false_of_lt_ctz {x : BitVec w} (hi : i < x.ctz.toNat) :
       iff_true] at hiff
     simp only [ctz] at hi
     have hi' : i < w := by simp [BitVec.lt_def] at hiff; omega
-    simp only [hi', decide_true, Bool.true_and]
+    simp only [hi', UDecidable.decide_true, Bool.true_and]
     have : (x.reverse.clzAuxRec (w - 1)).toNat ≤ w := by
       rw [show ((x.reverse.clzAuxRec (w - 1)).toNat ≤ w) =
             ((x.reverse.clzAuxRec (w - 1)).toNat ≤ (BitVec.ofNat w w).toNat) by simp, ← le_def]
@@ -6841,7 +6847,7 @@ theorem getLsbD_true_ctz_of_ne_zero {x : BitVec w} (hx : x ≠ 0#w) :
   have := ctz_lt_iff_ne_zero (x := x)
   simp only [ctz_eq_reverse_clz, clz, natCast_eq_ofNat, lt_def, toNat_ofNat, Nat.mod_two_pow_self,
     ne_eq] at this
-  simp only [this, hx, not_false_eq_true, decide_true, Bool.true_and]
+  simp only [this, hx, not_false_eq_true, UDecidable.decide_true, Bool.true_and]
   have hnotrev : ¬x.reverse = 0#w := by simp [reverse_eq_zero_iff, hx]
   apply getLsbD_true_of_eq_clzAuxRec_of_ne_zero (x := x.reverse) (n := w - 1) hnotrev
   intro i hi

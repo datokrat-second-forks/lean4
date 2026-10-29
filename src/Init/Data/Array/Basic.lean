@@ -313,7 +313,7 @@ Examples:
 -/
 @[expose, inline]
 def isEmpty (xs : Array α) : Bool :=
-  xs.size = 0
+  xs.size == 0
 
 @[specialize, expose]
 def isEqvAux (xs ys : Array α) (hsz : xs.size = ys.size) (p : α → α → Bool) :

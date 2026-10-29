@@ -333,11 +333,11 @@ theorem erase!_empty {k : α} :
   rfl
 
 theorem isEmpty_erase [TransOrd α] (h : t.WF) {k : α} :
-    (t.erase k h.balanced).impl.isEmpty = (t.isEmpty || (t.size = 1 && t.contains k)) := by
+    (t.erase k h.balanced).impl.isEmpty = (t.isEmpty || (t.size == 1 && t.contains k)) := by
   simp_to_model [erase, isEmpty, size, contains] using List.isEmpty_eraseKey
 
 theorem isEmpty_erase! [TransOrd α] (h : t.WF) {k : α} :
-    (t.erase! k).isEmpty = (t.isEmpty || (t.size = 1 && t.contains k)) := by
+    (t.erase! k).isEmpty = (t.isEmpty || (t.size == 1 && t.contains k)) := by
   simpa only [erase_eq_erase!] using isEmpty_erase h
 
 theorem isEmpty_eq_isEmpty_erase_and_not_contains [TransOrd α] (h : t.WF) (k : α) :
@@ -1196,7 +1196,7 @@ theorem getKey?_erase!_self [TransOrd α] (h : t.WF) {k : α} :
 
 theorem compare_getKey?_self [TransOrd α] (h : t.WF) {k : α} :
     (t.getKey? k).all (compare · k = .eq) := by
-  simp only [compare_eq_iff_beq, Bool.decide_eq_true]
+  simp only [compare_eq_iff_beq, UDecidable.decide_bool_eq_true]
   simp_to_model [getKey?] using List.getKey?_beq
 
 theorem getKey?_congr [TransOrd α] (h : t.WF) {k k' : α} (h' : compare k k' = .eq) :
@@ -3766,7 +3766,7 @@ theorem get?_union_of_contains_eq_false_right [TransOrd α] [LawfulEqOrd α] (h�
   revert contains_eq_false
   simp_to_model [contains]
   simp only [containsKey_eq_contains_map_fst, List.contains_eq_mem, List.mem_map,
-    decide_eq_false_iff_not, not_exists, not_and, imp_self]
+    UDecidable.decide_eq_false_iff_not, not_exists, not_and, imp_self]
 
 theorem get?_union!_of_contains_eq_false_right [TransOrd α] [LawfulEqOrd α] (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} (contains_eq_false : m₂.contains k = false) :

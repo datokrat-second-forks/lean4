@@ -24,7 +24,7 @@ namespace String
     let r := (b.extract s i)::r
     r.reverse
   else
-    have := Nat.sub_lt_sub_left (Nat.gt_of_not_le (mt decide_eq_true h)) (Pos.Raw.lt_next s _)
+    have := Nat.sub_lt_sub_left (Nat.gt_of_not_le (mt UDecidable.decide_eq_true h)) (Pos.Raw.lt_next s _)
     if p (i.get s) then
       let i' := i.next s
       splitAux s p i' i' (b.extract s i :: r)
@@ -77,7 +77,7 @@ decreasing_by
   focus
     rename_i h _ _
     left; exact Nat.sub_lt_sub_left
-      (Nat.lt_of_le_of_lt (Nat.sub_le ..) (Nat.gt_of_not_le (mt decide_eq_true h)))
+      (Nat.lt_of_le_of_lt (Nat.sub_le ..) (Nat.gt_of_not_le (mt UDecidable.decide_eq_true h)))
       (Nat.lt_of_le_of_lt (Nat.sub_le ..) (Pos.Raw.lt_next s _))
   focus
     rename_i i₀ j₀ _ eq h'
@@ -85,12 +85,12 @@ decreasing_by
       change (_ + Char.utf8Size _) - (_ + Char.utf8Size _) = _
       rw [(beq_iff_eq ..).1 eq, Nat.add_sub_add_right]; rfl]
     right; exact Nat.sub_lt_sub_left
-      (Nat.lt_of_le_of_lt (Nat.le_add_right ..) (Nat.gt_of_not_le (mt decide_eq_true h')))
+      (Nat.lt_of_le_of_lt (Nat.le_add_right ..) (Nat.gt_of_not_le (mt UDecidable.decide_eq_true h')))
       (Pos.Raw.lt_next sep _)
   focus
     rename_i h _
     left; exact Nat.sub_lt_sub_left
-      (Nat.lt_of_le_of_lt (Nat.sub_le ..) (Nat.gt_of_not_le (mt decide_eq_true h)))
+      (Nat.lt_of_le_of_lt (Nat.sub_le ..) (Nat.gt_of_not_le (mt UDecidable.decide_eq_true h)))
       (Pos.Raw.lt_next s _)
 
 /--

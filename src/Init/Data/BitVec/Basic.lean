@@ -106,7 +106,7 @@ Returns the `i`th most significant bit.
 
 /-- Returns the `i`th most significant bit, or `false` if `i ≥ w`. -/
 @[inline, implicit_reducible] def getMsbD (x : BitVec w) (i : Nat) : Bool :=
-  i < w && x.getLsbD (w-1-i)
+  Nat.blt i w && x.getLsbD (w-1-i)
 
 /-- Returns the most significant bit in a bitvector. -/
 @[inline, implicit_reducible] protected def msb (x : BitVec n) : Bool := getMsbD x 0
@@ -382,7 +382,7 @@ Unsigned less-than for bitvectors.
 SMT-LIB name: `bvult`.
 -/
 @[implicit_reducible]
-protected def ult (x y : BitVec n) : Bool := x.toNat < y.toNat
+protected def ult (x y : BitVec n) : Bool := Nat.blt x.toNat y.toNat
 
 /--
 Unsigned less-than-or-equal-to for bitvectors.
@@ -390,7 +390,7 @@ Unsigned less-than-or-equal-to for bitvectors.
 SMT-LIB name: `bvule`.
 -/
 @[implicit_reducible]
-protected def ule (x y : BitVec n) : Bool := x.toNat ≤ y.toNat
+protected def ule (x y : BitVec n) : Bool := Nat.ble x.toNat y.toNat
 
 /--
 Signed less-than for bitvectors.
@@ -402,7 +402,7 @@ Examples:
  * `BitVec.slt 7#4 8 = false`
 -/
 @[implicit_reducible]
-protected def slt (x y : BitVec n) : Bool := x.toInt < y.toInt
+protected def slt (x y : BitVec n) : Bool := Int.Internal.blt x.toInt y.toInt
 
 /--
 Signed less-than-or-equal-to for bitvectors.
@@ -410,7 +410,7 @@ Signed less-than-or-equal-to for bitvectors.
 SMT-LIB name: `bvsle`.
 -/
 @[implicit_reducible]
-protected def sle (x y : BitVec n) : Bool := x.toInt ≤ y.toInt
+protected def sle (x y : BitVec n) : Bool := Int.Internal.ble x.toInt y.toInt
 
 end relations
 

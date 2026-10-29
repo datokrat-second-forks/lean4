@@ -64,7 +64,7 @@ deriving Repr, DecidableEq
 namespace Name
 
 instance : BEq Name where
-  beq a b := a.value = b.value
+  beq a b := a.value == b.value
 
 instance : Hashable Name where
   hash x := Hashable.hash x.value

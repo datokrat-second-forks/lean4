@@ -1812,8 +1812,8 @@ theorem containsKey_insertEntryIfNew [BEq α] [PartialEquivBEq α] {l : List ((a
   simp only [containsKey_eq_isSome_getEntry?, getEntry?_insertEntryIfNew, apply_ite Option.isSome,
     Option.isSome_some]
   simp only [Bool.and_eq_true, Option.not_isSome, Option.isNone_iff_eq_none,
-    getEntry?_eq_none, Bool.ite_true_left, Bool.decide_and, Bool.decide_eq_true,
-    Bool.decide_eq_false]
+    getEntry?_eq_none, Bool.ite_true_left, UDecidable.decide_and, UDecidable.decide_bool_eq_true,
+    UDecidable.decide_bool_eq_false]
   cases h : k == a
   · simp
   · rw [containsKey_eq_isSome_getEntry?, getEntry?_congr h]
@@ -5336,7 +5336,7 @@ theorem getValueCast?_filter_not_contains [BEq α] [LawfulBEq α]
       case isTrue => rfl
       case isFalse h₁ =>
         rw [List.contains_eq_mem] at h
-        rw [← decide_eq_false_iff_not] at h₁
+        rw [← UDecidable.decide_eq_false_iff_not] at h₁
         rw [h₁] at h
         contradiction
     case h_2 => rfl
@@ -5350,7 +5350,7 @@ theorem getValueCast?_filter_not_contains [BEq α] [LawfulBEq α]
         case h_1 _ val heq =>
           rw [@List.contains_congr _ _ _ l₂ _ _ (PartialEquivBEq.symm <| @beq_of_getEntry?_eq_some α β _ l₁ k val heq)] at h
           rw [List.contains_eq_mem] at h
-          rw [decide_eq_true_eq] at h
+          rw [UDecidable.decide_eq_true_eq] at h
           rw [heq]
           split
           case isTrue => contradiction
@@ -6976,8 +6976,8 @@ theorem insertEntry_perm_filter [BEq α] [EquivBEq α]
   rw [insertEntry]
   by_cases eq : containsKey k l
   case neg =>
-    simp only [eq, Bool.false_eq_true, ↓reduceIte, Bool.not_eq_true, Bool.decide_eq_false,
-      List.perm_cons]
+    simp only [eq, Bool.false_eq_true, ↓reduceIte, Bool.not_eq_true,
+      UDecidable.decide_bool_eq_false, List.perm_cons]
     suffices (List.filter (fun x => !k == x.fst) l) = l by rw [this]
     simp only [List.filter_eq_self, Bool.not_eq_eq_eq_not, Bool.not_true]
     intro ⟨e₁,e₂⟩ mem
@@ -6989,7 +6989,7 @@ theorem insertEntry_perm_filter [BEq α] [EquivBEq α]
       contradiction
     case neg => simp [h]
   case pos =>
-    simp only [eq, Bool.not_eq_true, Bool.decide_eq_false]
+    simp only [eq, Bool.not_eq_true, UDecidable.decide_bool_eq_false]
     induction l
     case nil => simp at eq
     case cons h t ih =>
@@ -7023,7 +7023,7 @@ theorem Const.map_insertEntry_perm_filter_map {β : Type v} [BEq α] [EquivBEq �
     (List.map (fun x => (x.fst, x.snd)) (insertEntry k v l)).Perm <|
       (k, v) :: List.filter (fun x => !k == x.fst) (List.map (fun x => (x.fst, x.snd)) l) := by
   apply Perm.trans <| Perm.map _ (insertEntry_perm_filter _ _ hl)
-  simp only [Bool.not_eq_true, Bool.decide_eq_false, List.map_cons, List.perm_cons]
+  simp only [Bool.not_eq_true, UDecidable.decide_bool_eq_false, List.map_cons, List.perm_cons]
   induction l with
   | nil => simp
   | cons h t ih =>
@@ -7742,7 +7742,7 @@ theorem Const.beqModel_eq_true_of_perm {β : Type v} [BEq α] [EquivBEq α] [BEq
   · exact hc
 
 theorem perm_of_beqModel [BEq α] [LawfulBEq α] [∀ k, BEq (β k)] [∀ k, LawfulBEq (β k)] {l₁ l₂ : List ((a : α) × β a)} (hl₁ : DistinctKeys l₁) (hl₂ : DistinctKeys l₂) : beqModel l₁ l₂ → l₁.Perm l₂ := by
-  simp only [beqModel, ne_eq, ite_not, Bool.ite_false_right, Bool.and_eq_true, decide_eq_true_eq,
+  simp only [beqModel, ne_eq, ite_not, Bool.ite_false_right, Bool.and_eq_true, UDecidable.decide_eq_true_eq,
     List.all_eq_true, beq_iff_eq, and_imp]
   intro he hyp
   apply getValueCast?_ext hl₁ hl₂

@@ -358,7 +358,7 @@ theorem Mon.revlex_k_eq_revlexWF (m₁ m₂ : Mon) : m₁.revlex_k m₂ = m₁.r
 theorem Mon.revlexFuel_eq_revlexWF (fuel : Nat) (m₁ m₂ : Mon) : revlexFuel fuel m₁ m₂ = revlexWF m₁ m₂ := by
   fun_induction revlexFuel
   case case1 => rfl
-  all_goals simp_all [revlexWF]
+  all_goals (simp_all [revlexWF]; try omega)
 
 @[simp] theorem Mon.revlex_k_eq_revlex (m₁ m₂ : Mon) : m₁.revlex_k m₂ = m₁.revlex m₂ := by
   rw [revlex_k_eq_revlexWF, revlex, revlexFuel_eq_revlexWF]
@@ -753,7 +753,7 @@ def Poly.cancelVar' (c : Int) (x : Var) (p : Poly) (acc : Poly) : Poly :=
   | .num k => acc.addConst k
   | .add k m p =>
     let n := m.degreeOf x
-    bif n > 0 && c^n ∣ k then
+    bif Nat.blt 0 n && k % c^n == 0 then
       cancelVar' c x p (acc.insert (k / (c^n)) (m.cancelVar x))
     else
       cancelVar' c x p (acc.insert k m)
@@ -1817,7 +1817,7 @@ theorem Poly.denote_cancelVar' {α} [CommRing α] (ctx : Context α) (p : Poly) 
     congr 1
     rw [Semiring.add_comm, Ring.zsmul_eq_intCast_mul,]
     congr 1
-    simp +zetaDelta [Int.dvd_def] at h
+    simp +zetaDelta [← Int.dvd_iff_emod_eq_zero, Int.dvd_def] at h
     have ⟨d, h⟩ := h.2
     simp +zetaDelta [h]
     rw [Int.mul_ediv_cancel_left _ (Int.pow_ne_zero h₁)]
@@ -1885,14 +1885,6 @@ theorem Poly.cancelVar_k_eq (c : Int) (x : Var) (p : Poly) : p.cancelVar_k c x =
     rw [Mon.degreeOf_k_eq_degreeOf, Mon.cancelVar_k_eq_cancelVar, Int.pow_k_eq, Int.emod_k_eq, Int.ediv_k_eq,
       Int.beqZero_k_eq]
     simp only [Poly.cancelVar', cond_eq_ite]
-    have hd : (Nat.blt 0 (m.degreeOf x) && (k % c ^ m.degreeOf x == 0)) =
-        (decide (m.degreeOf x > 0) && decide (c ^ m.degreeOf x ∣ k)) := by
-      cases h₁ : Nat.blt 0 (m.degreeOf x)
-      · have : ¬ 0 < m.degreeOf x := by rw [← Nat.blt_eq, h₁]; simp
-        simp [this]
-      · have : 0 < m.degreeOf x := by rw [← Nat.blt_eq, h₁]
-        simp [this, Int.dvd_iff_emod_eq_zero, Bool.beq_eq_decide_eq]
-    rw [← hd]
     cases (Nat.blt 0 (m.degreeOf x) && (k % c ^ m.degreeOf x == 0))
     · show Poly.rec (motive := fun _ => Poly → Poly) _ _ p _ = _
       rw [ih, Poly.insert_k_eq_insert]; rfl
@@ -3061,7 +3053,7 @@ theorem le_int_module {α} [CommRing α] [LE α] (ctx : Context α) (p : Poly)
   simp [Poly.denoteAsIntModule_eq_denote]
 
 noncomputable def mul_ineq_cert (p₁ : Poly) (k : Int) (p : Poly) : Bool :=
-  k > 0 && (p₁.mulConst_k k |>.beq' p)
+  Int.Internal.blt 0 k && (p₁.mulConst_k k |>.beq' p)
 
 theorem le_mul {α} [CommRing α] [LE α] [LT α] [IsPreorder α] [OrderedRing α] (ctx : Context α) (p₁ : Poly) (k : Int) (p : Poly)
     : mul_ineq_cert p₁ k p → p₁.denote ctx ≤ 0 → p.denote ctx ≤ 0 := by

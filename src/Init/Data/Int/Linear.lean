@@ -803,13 +803,13 @@ theorem eq_eq_true (ctx : Context) (lhs rhs : Expr) : (lhs.sub rhs).norm.isValid
 @[expose]
 def Poly.isUnsatLe (p : Poly) : Bool :=
   match p with
-  | .num k => k > 0
+  | .num k => Int.Internal.blt 0 k
   | _ => false
 
 @[expose]
 def Poly.isValidLe (p : Poly) : Bool :=
   match p with
-  | .num k => k ≤ 0
+  | .num k => Int.Internal.ble k 0
   | _ => false
 
 attribute [-simp] Int.not_le in
@@ -2342,19 +2342,24 @@ theorem Poly.isValidEq_k_eq (p : Poly) : p.isValidEq_k = p.isValidEq := by
 theorem Poly.isValidLe_k_eq (p : Poly) : p.isValidLe_k = p.isValidLe := by
   cases p with
   | num k =>
-    show Bool.rec (motive := fun _ => Bool) true false (Int.blt' 0 k) = decide (k ≤ 0)
+    show Bool.rec (motive := fun _ => Bool) true false (Int.blt' 0 k) = Int.Internal.ble k 0
     cases h : Int.blt' 0 k
-    · have := (Int.blt'_eq_false 0 k).mp h; simp; omega
-    · have := (Int.blt'_eq_true 0 k).mp h; simp; omega
+    · have := (Int.blt'_eq_false 0 k).mp h
+      exact ((Int.Internal.ble_eq_true_iff k 0).mpr (by omega)).symm
+    · have := (Int.blt'_eq_true 0 k).mp h
+      exact (Bool.eq_false_iff.mpr fun h' =>
+        absurd ((Int.Internal.ble_eq_true_iff k 0).mp h') (by omega)).symm
   | add => rfl
 
 theorem Poly.isUnsatLe_k_eq (p : Poly) : p.isUnsatLe_k = p.isUnsatLe := by
   cases p with
   | num k =>
-    show Int.blt' 0 k = decide (k > 0)
+    show Int.blt' 0 k = Int.Internal.blt 0 k
     cases h : Int.blt' 0 k
-    · have := (Int.blt'_eq_false 0 k).mp h; simp; omega
-    · have := (Int.blt'_eq_true 0 k).mp h; simp; omega
+    · have := (Int.blt'_eq_false 0 k).mp h
+      exact (Bool.eq_false_iff.mpr fun h' => absurd ((Int.Internal.blt_eq_true_iff 0 k).mp h') this).symm
+    · have := (Int.blt'_eq_true 0 k).mp h
+      exact ((Int.Internal.blt_eq_true_iff 0 k).mpr this).symm
   | add => rfl
 
 /-!

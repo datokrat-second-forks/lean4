@@ -207,7 +207,7 @@ theorem denote_blastCpopLayer.go (aig : AIG α) (iterNum : Nat)
             · simp [hold, hidx'']
             · apply Ref.hgate
           · case _ hnot =>
-            simp only [hidx'', decide_true, Bool.true_and, Bool.false_eq]
+            simp only [hidx'', UDecidable.decide_true, Bool.true_and, Bool.false_eq]
             simp only [Nat.not_lt] at hnot
             apply BitVec.getLsbD_of_ge oldLayerBv (ge := hnot)
   · have h : iterNum = (len + 1) / 2 := by omega

@@ -109,7 +109,7 @@ end Nat.ToInt
 
 namespace Int.Nonneg
 
-@[expose] def num_cert (a : Int) : Bool := a ≥ 0
+@[expose] def num_cert (a : Int) : Bool := Int.Internal.ble 0 a
 theorem num (a : Int) : num_cert a → a ≥ 0 := by simp [num_cert]
 theorem add (a b : Int) (h₁ : a ≥ 0) (h₂ : b ≥ 0) : a + b ≥ 0 := by exact Int.add_nonneg h₁ h₂
 theorem mul (a b : Int) (h₁ : a ≥ 0) (h₂ : b ≥ 0) : a * b ≥ 0 := by exact Int.mul_nonneg h₁ h₂

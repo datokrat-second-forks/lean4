@@ -596,19 +596,19 @@ Examples:
 @[extern "lean_string_is_valid_pos", expose]
 def Pos.Raw.isValid (s : @&String) (p : @& Pos.Raw) : Bool :=
   if h : p < s.rawEndPos then
-    (s.getUTF8Byte p h).IsUTF8FirstByte
+    (s.getUTF8Byte p h).isUTF8FirstByte
   else
-    p = s.rawEndPos
+    p.byteIdx == s.rawEndPos.byteIdx
 
 @[simp]
 theorem Pos.Raw.isValid_eq_true_iff {s : String} {p : Pos.Raw} : p.isValid s = true ↔ p.IsValid s := by
   rw [isValid_iff_isUTF8FirstByte]
   fun_cases isValid s p with
   | case1 h =>
-    simp_all only [decide_eq_true_eq, exists_true_left, iff_or_self]
+    simp_all only [UInt8.isUTF8FirstByte_eq_true_iff, exists_true_left, iff_or_self]
     rintro rfl
     simp [lt_iff] at h
-  | case2 => simp_all
+  | case2 => simp_all [Pos.Raw.ext_iff]
 
 @[simp]
 theorem Pos.Raw.isValid_eq_false_iff {s : String} {p : Pos.Raw} : p.isValid s = false ↔ ¬ p.IsValid s := by
@@ -810,9 +810,9 @@ theorem Pos.Raw.isValidForSlice_iff_exists_append {s : Slice} {p : Pos.Raw} :
 @[expose]
 def Pos.Raw.isValidForSlice (s : Slice) (p : Pos.Raw) : Bool :=
   if h : p < s.rawEndPos then
-    (s.getUTF8Byte p h).IsUTF8FirstByte
+    (s.getUTF8Byte p h).isUTF8FirstByte
   else
-    p = s.rawEndPos
+    p.byteIdx == s.rawEndPos.byteIdx
 
 @[simp]
 theorem Pos.Raw.isValidForSlice_eq_true_iff {s : Slice} {p : Pos.Raw} :
@@ -820,10 +820,10 @@ theorem Pos.Raw.isValidForSlice_eq_true_iff {s : Slice} {p : Pos.Raw} :
   rw [isValidForSlice_iff_isUTF8FirstByte]
   fun_cases isValidForSlice with
   | case1 h =>
-    simp_all only [decide_eq_true_eq, exists_true_left, iff_or_self]
+    simp_all only [UInt8.isUTF8FirstByte_eq_true_iff, exists_true_left, iff_or_self]
     rintro rfl
     simp [lt_iff] at h
-  | case2 => simp_all
+  | case2 => simp_all [Pos.Raw.ext_iff]
 
 @[simp]
 theorem Pos.Raw.isValidForSlice_eq_false_iff {s : Slice} {p : Pos.Raw} :
@@ -2951,7 +2951,7 @@ def Pos.Raw.offsetOfPosAux (s : String) (pos : Pos.Raw) (i : Pos.Raw) (offset : 
   else if h : i.atEnd s then
     offset
   else
-    have := Nat.sub_lt_sub_left (Nat.gt_of_not_le (mt decide_eq_true h)) (Pos.Raw.lt_next s _)
+    have := Nat.sub_lt_sub_left (Nat.gt_of_not_le (mt UDecidable.decide_eq_true h)) (Pos.Raw.lt_next s _)
     offsetOfPosAux s pos (i.next s) (offset+1)
 termination_by s.rawEndPos.1 - i.1
 

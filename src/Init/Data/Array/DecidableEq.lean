@@ -78,7 +78,7 @@ theorem isEqv_eq_decide (xs ys : Array α) (r) :
 @[simp, grind =] theorem isEqv_toList [BEq α] (xs ys : Array α) : (xs.toList.isEqv ys.toList r) = (xs.isEqv ys r) := by
   simp [isEqv_eq_decide, List.isEqv_eq_decide, Array.size]
 
-theorem eq_of_isEqv [DecidableEq α] (xs ys : Array α) (h : Array.isEqv xs ys (fun x y => x = y)) : xs = ys := by
+theorem eq_of_isEqv [DecidableEq α] (xs ys : Array α) (h : Array.isEqv xs ys (fun x y => decide (x = y))) : xs = ys := by
   have ⟨h, h'⟩ := rel_of_isEqv h
   exact ext h (fun i lt _ => by simpa using h' i lt)
 
@@ -93,13 +93,13 @@ private theorem isEqvAux_self (r : α → α → Bool) (hr : ∀ a, r a a) (xs :
 theorem isEqv_self_beq [BEq α] [ReflBEq α] (xs : Array α) : Array.isEqv xs xs (· == ·) = true := by
   simp [isEqv, isEqvAux_self]
 
-theorem isEqv_self [DecidableEq α] (xs : Array α) : Array.isEqv xs xs (· = ·) = true := by
+theorem isEqv_self [DecidableEq α] (xs : Array α) : Array.isEqv xs xs (fun x y => decide (x = y)) = true := by
   simp [isEqv, isEqvAux_self]
 
 -- Exposed so that `Array` equality reduces across module boundaries.
 @[expose]
 def instDecidableEqImpl [DecidableEq α] : DecidableEq (Array α) := fun xs ys =>
-  match h:isEqv xs ys (fun a b => a = b) with
+  match h:isEqv xs ys (fun a b => decide (a = b)) with
   | true  => isTrue (eq_of_isEqv xs ys h)
   | false => isFalse (by subst ·; rw [isEqv_self] at h; contradiction)
 

@@ -540,7 +540,8 @@ theorem elem_eq_mem [BEq α] [LawfulBEq α] (a : α) (as : List α) :
     elem a as = decide (a ∈ as) := by rw [Bool.eq_iff_iff, elem_iff, decide_eq_true_iff]
 
 @[simp, grind =] theorem contains_eq_mem [BEq α] [LawfulBEq α] (a : α) (as : List α) :
-    as.contains a = decide (a ∈ as) := by rw [Bool.eq_iff_iff, elem_iff, decide_eq_true_iff]
+    as.contains a = UDecidable.decide (a ∈ as) := by
+  rw [Bool.eq_iff_iff, elem_iff, UDecidable.decide_eq_true_iff]
 
 @[simp, grind =] theorem contains_cons [BEq α] {a : α} {b : α} {l : List α} :
     (a :: l).contains b = (b == a || l.contains b) := by
@@ -1367,6 +1368,7 @@ theorem foldl_ite_right {P : α → Prop} [DecidablePred P] {l : List α} {f : �
       (l.filter (fun a => ¬ P a)).foldl (init := init) f := by
   simp +singlePass only [← ite_not]
   rw [foldl_ite_left]
+  simp only [UDecidable.decide_eq_decidable_decide]
 
 theorem foldr_filter {p : α → Bool} {f : α → β → β} {l : List α} {init : β} :
     (l.filter p).foldr f init = l.foldr (fun x y => if p x then f x y else y) init := by
@@ -2018,8 +2020,8 @@ theorem flatten_filter_not_isEmpty  :
 
 theorem flatten_filter_ne_nil [DecidablePred fun l : List α => l ≠ []] {L : List (List α)} :
     flatten (L.filter fun l => l ≠ []) = L.flatten := by
-  simp only [ne_eq, ← isEmpty_iff, Bool.not_eq_true, Bool.decide_eq_false,
-    flatten_filter_not_isEmpty]
+  simp only [ne_eq, ← isEmpty_iff, Bool.not_eq_true, UDecidable.decide_eq_decidable_decide,
+    Bool.decide_eq_false, flatten_filter_not_isEmpty]
 
 @[simp, grind _=_] theorem flatten_append {L₁ L₂ : List (List α)} : flatten (L₁ ++ L₂) = flatten L₁ ++ flatten L₂ := by
   induction L₁ <;> simp_all
@@ -3718,12 +3720,12 @@ theorem eraseDupsBy_cons :
     (a :: as).eraseDupsBy r = a :: (as.filter fun b => r b a = false).eraseDupsBy r := by
   simp only [eraseDupsBy, eraseDupsBy.loop, any_nil]
   rw [eraseDupsBy_loop_cons]
-  simp
+  simp [UDecidable.decide_eq_decidable_decide]
 
 @[simp, grind =] theorem eraseDups_nil [BEq α] : ([] : List α).eraseDups = [] := rfl
 @[grind =] theorem eraseDups_cons [BEq α] {a : α} {as : List α} :
     (a :: as).eraseDups = a :: (as.filter fun b => !b == a).eraseDups := by
-  simp [eraseDups, eraseDupsBy_cons]
+  simp [eraseDups, eraseDupsBy_cons, UDecidable.decide_eq_decidable_decide]
 
 @[grind =]
 theorem eraseDups_append [BEq α] [LawfulBEq α] {as bs : List α} :

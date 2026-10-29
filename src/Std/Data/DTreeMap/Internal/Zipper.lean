@@ -890,7 +890,7 @@ theorem toList_rccIter {α β} [Ord α] [TransOrd α]
     {t : Impl α β} {t_ord : t.Ordered} {lowerBound upperBound : α} :
     (rccIterator t lowerBound upperBound : Iter (Sigma β)).toList =
       t.toList.filter (fun e => (compare e.fst lowerBound).isGE ∧ (compare e.fst upperBound).isLE) := by
-  simp only [rccIterator, Bool.decide_and, Bool.decide_eq_true]
+  simp only [rccIterator, UDecidable.decide_and, UDecidable.decide_bool_eq_true]
   rw [RxcIterator.toList_rxcIter, RxcIterator.takeWhile_eq_filter]
   · conv =>
       rhs
@@ -966,8 +966,8 @@ public theorem toList_rcc {α : Type u} [Ord α] [TransOrd α] (t : Impl α (fun
   have := @toList_rccIter α (fun _ => Unit) _ _ t ordered lowerBound upperBound
   rw [rccIterator] at this
   rw [this]
-  have eq : (fun (e : (_ : α) × Unit) => decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLE = true)) =
-    (fun (e : α) => decide ((compare e lowerBound).isGE = true ∧ (compare e upperBound).isLE = true)) ∘ (fun e => e.fst) := by congr
+  have eq : (fun (e : (_ : α) × Unit) => UDecidable.decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLE = true)) =
+    (fun (e : α) => UDecidable.decide ((compare e lowerBound).isGE = true ∧ (compare e upperBound).isLE = true)) ∘ (fun e => e.fst) := by congr
   conv =>
     lhs
     rhs
@@ -1002,8 +1002,8 @@ public theorem toList_rcc {α : Type u} {β : Type v} [Ord α] [TransOrd α] (t 
   have := @toList_rccIter α (fun _ => β) _ _ t ordered lowerBound upperBound
   rw [rccIterator] at this
   rw [this]
-  have eq : (fun (e : (_ : α) × β) => decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLE = true)) =
-    (fun (e : α × β) => decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLE = true)) ∘ (fun e => (e.1, e.2)) := by congr
+  have eq : (fun (e : (_ : α) × β) => UDecidable.decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLE = true)) =
+    (fun (e : α × β) => UDecidable.decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLE = true)) ∘ (fun e => (e.1, e.2)) := by congr
   conv =>
     lhs
     rhs
@@ -1024,7 +1024,7 @@ theorem toList_rcoIter {α β} [Ord α] [TransOrd α]
     {t : Impl α β} {t_ord : t.Ordered} {lowerBound upperBound : α} :
     (rcoIterator t lowerBound upperBound : Iter (Sigma β)).toList =
       t.toList.filter (fun e => (compare e.fst lowerBound).isGE ∧ (compare e.fst upperBound).isLT) := by
-  simp only [rcoIterator, Bool.decide_and, Bool.decide_eq_true]
+  simp only [rcoIterator, UDecidable.decide_and, UDecidable.decide_bool_eq_true]
   rw [RxoIterator.toList_rxoIter, RxoIterator.takeWhile_eq_filter]
   · conv =>
       rhs
@@ -1100,8 +1100,8 @@ public theorem toList_rco {α : Type u} [Ord α] [TransOrd α] (t : Impl α (fun
   have := @toList_rcoIter α (fun _ => Unit) _ _ t ordered lowerBound upperBound
   rw [rcoIterator] at this
   rw [this]
-  have eq : (fun (e : (_ : α) × Unit) => decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLT = true)) =
-    (fun (e : α) => decide ((compare e lowerBound).isGE = true ∧ (compare e upperBound).isLT = true)) ∘ (fun e => e.fst) := by congr
+  have eq : (fun (e : (_ : α) × Unit) => UDecidable.decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLT = true)) =
+    (fun (e : α) => UDecidable.decide ((compare e lowerBound).isGE = true ∧ (compare e upperBound).isLT = true)) ∘ (fun e => e.fst) := by congr
   conv =>
     lhs
     rhs
@@ -1136,7 +1136,7 @@ public theorem toList_rco {α : Type u} {β : Type v} [Ord α] [TransOrd α] (t 
   have := @toList_rcoIter α (fun _ => β) _ _ t ordered lowerBound upperBound
   rw [rcoIterator] at this
   rw [this]
-  have eq : (fun (e : (_ : α) × β) => decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLT = true)) = (fun (e : α × β) => decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLT = true)) ∘ (fun e => (e.1, e.2)) := by congr
+  have eq : (fun (e : (_ : α) × β) => UDecidable.decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLT = true)) = (fun (e : α × β) => UDecidable.decide ((compare e.fst lowerBound).isGE = true ∧ (compare e.fst upperBound).isLT = true)) ∘ (fun e => (e.1, e.2)) := by congr
   conv =>
     lhs
     rhs
@@ -1157,7 +1157,7 @@ theorem toList_rooIter {α β} [Ord α] [TransOrd α]
     {t : Impl α β} {t_ord : t.Ordered} {lowerBound upperBound : α} :
     (rooIterator t lowerBound upperBound : Iter (Sigma β)).toList =
       t.toList.filter (fun e => (compare e.fst lowerBound).isGT ∧ (compare e.fst upperBound).isLT) := by
-  simp only [rooIterator, Bool.decide_and, Bool.decide_eq_true]
+  simp only [rooIterator, UDecidable.decide_and, UDecidable.decide_bool_eq_true]
   rw [RxoIterator.toList_rxoIter, RxoIterator.takeWhile_eq_filter]
   · conv =>
       rhs
@@ -1233,8 +1233,8 @@ public theorem toList_roo {α : Type u} [Ord α] [TransOrd α] (t : Impl α (fun
   have := @toList_rooIter α (fun _ => Unit) _ _ t ordered lowerBound upperBound
   rw [rooIterator] at this
   rw [this]
-  have eq : (fun (e : (_ : α) × Unit) => decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLT = true)) =
-    (fun (e : α) => decide ((compare e lowerBound).isGT = true ∧ (compare e upperBound).isLT = true)) ∘ (fun e => e.fst) := by congr
+  have eq : (fun (e : (_ : α) × Unit) => UDecidable.decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLT = true)) =
+    (fun (e : α) => UDecidable.decide ((compare e lowerBound).isGT = true ∧ (compare e upperBound).isLT = true)) ∘ (fun e => e.fst) := by congr
   conv =>
     lhs
     rhs
@@ -1269,8 +1269,8 @@ public theorem toList_roo {α : Type u} {β : Type v} [Ord α] [TransOrd α] (t 
   have := @toList_rooIter α (fun _ => β) _ _ t ordered lowerBound upperBound
   rw [rooIterator] at this
   rw [this]
-  have eq : (fun (e : (_ : α) × β) => decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLT = true)) =
-    (fun (e : α × β) => decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLT = true)) ∘ (fun e => (e.1, e.2)) := by congr
+  have eq : (fun (e : (_ : α) × β) => UDecidable.decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLT = true)) =
+    (fun (e : α × β) => UDecidable.decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLT = true)) ∘ (fun e => (e.1, e.2)) := by congr
   conv =>
     lhs
     rhs
@@ -1291,7 +1291,7 @@ theorem toList_rocIter {α β} [Ord α] [TransOrd α]
     {t : Impl α β} {t_ord : t.Ordered} {lowerBound upperBound : α} :
     (rocIterator t lowerBound upperBound : Iter (Sigma β)).toList =
       t.toList.filter (fun e => (compare e.fst lowerBound).isGT ∧ (compare e.fst upperBound).isLE) := by
-  simp only [rocIterator, Bool.decide_and, Bool.decide_eq_true]
+  simp only [rocIterator, UDecidable.decide_and, UDecidable.decide_bool_eq_true]
   rw [RxcIterator.toList_rxcIter, RxcIterator.takeWhile_eq_filter]
   · conv =>
       rhs
@@ -1367,8 +1367,8 @@ public theorem toList_roc {α : Type u} [Ord α] [TransOrd α] (t : Impl α (fun
   have := @toList_rocIter α (fun _ => Unit) _ _ t ordered lowerBound upperBound
   rw [rocIterator] at this
   rw [this]
-  have eq : (fun (e : (_ : α) × Unit) => decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLE = true)) =
-    (fun (e : α) => decide ((compare e lowerBound).isGT = true ∧ (compare e upperBound).isLE = true)) ∘ (fun e => e.fst) := by congr
+  have eq : (fun (e : (_ : α) × Unit) => UDecidable.decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLE = true)) =
+    (fun (e : α) => UDecidable.decide ((compare e lowerBound).isGT = true ∧ (compare e upperBound).isLE = true)) ∘ (fun e => e.fst) := by congr
   conv =>
     lhs
     rhs
@@ -1403,8 +1403,8 @@ public theorem toList_roc {α : Type u} {β : Type v} [Ord α] [TransOrd α] (t 
   have := @toList_rocIter α (fun _ => β) _ _ t ordered lowerBound upperBound
   rw [rocIterator] at this
   rw [this]
-  have eq : (fun (e : (_ : α) × β) => decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLE = true)) =
-    (fun (e : α × β) => decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLE = true)) ∘ (fun e => (e.1, e.2)) := by congr
+  have eq : (fun (e : (_ : α) × β) => UDecidable.decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLE = true)) =
+    (fun (e : α × β) => UDecidable.decide ((compare e.fst lowerBound).isGT = true ∧ (compare e.fst upperBound).isLE = true)) ∘ (fun e => (e.1, e.2)) := by congr
   conv =>
     lhs
     rhs

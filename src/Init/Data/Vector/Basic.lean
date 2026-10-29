@@ -599,7 +599,7 @@ Lexicographic comparator for vectors.
 - `v` is pairwise equivalent via `==` to `w`, or
 - there is an index `i` such that `lt v[i] w[i]`, and for all `j < i`, `v[j] == w[j]`.
 -/
-def lex [BEq α] (xs ys : Vector α n) (lt : α → α → Bool := by exact (· < ·)) : Bool :=
+def lex [BEq α] (xs ys : Vector α n) (lt : α → α → Bool := by exact decideLT) : Bool :=
   go 0
 where @[specialize, semireducible] go (i : Nat) : Bool :=
   if h : n ≤ i then

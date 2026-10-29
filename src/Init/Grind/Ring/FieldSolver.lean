@@ -105,7 +105,7 @@ theorem Mon.denote_cancelInv [CommSemiring α] (ctx : Context α) (m : Mon) (x y
     have hm : m.denote ctx = x.denote ctx ^ m.degreeOf x * (y.denote ctx ^ m.degreeOf y * ((m.cancelVar x).cancelVar y).denote ctx) := by
       rw [Mon.denote_cancelVar ctx m x, Mon.denote_cancelVar ctx (m.cancelVar x) y, Mon.degreeOf_cancelVar m x y hxy]
     rw [hm, ← Semiring.mul_assoc]
-    simp only [decide_eq_true_eq]
+    simp only [UDecidable.decide_eq_true_eq]
     split
     next hlt =>
       rw [Mon.denote_mulPow, Power.denote_eq, pow_mul_pow_of_le h (Nat.le_of_lt hlt)]
@@ -205,7 +205,7 @@ noncomputable def Poly.cancelInvs_k (p : Poly) (invs : InvAtoms) : Poly :=
 
 @[simp] theorem Mon.cancelInv_k_eq_cancelInv (x y : Var) (m : Mon) : Mon.cancelInv_k x y m = m.cancelInv x y := by
   simp only [Mon.cancelInv_k, Mon.degreeOf_k_eq_degreeOf, Mon.cancelVar_k_eq_cancelVar, Mon.mulPow_k_eq_mulPow, Bool.rec_eq,
-    Mon.cancelInv, cond_eq_ite, Bool.or_eq_true, Nat.beq_eq_true_eq, Nat.beq_eq, Nat.blt_eq, decide_eq_true_eq]
+    Mon.cancelInv, cond_eq_ite, Bool.or_eq_true, Nat.beq_eq_true_eq, Nat.beq_eq, Nat.blt_eq, UDecidable.decide_eq_true_eq]
   split <;> simp_all
   split <;> simp_all
 
@@ -252,7 +252,7 @@ checked by multiplying back, so the correctness proof needs no divisibility reas
 -/
 def PolyQ.reduce (q : PolyQ) : PolyQ :=
   let g := Nat.gcd q.num.gcdCoeffs q.den
-  bif g ≤ 1 then q else
+  bif Nat.ble g 1 then q else
   let num := q.num.divConst g
   let den := q.den / g
   bif num.mulConst g == q.num && den * g == q.den then ⟨num, den⟩ else q
@@ -364,18 +364,12 @@ theorem PolyQ.reduce_k_eq (q : PolyQ) : q.reduce_k = q.reduce := by
   rw [Poly.gcdCoeffs_k_eq, Poly.divConst_k_eq, Poly.mulConst_k_eq_mulConst]
   generalize Nat.gcd q.num.gcdCoeffs q.den = g
   dsimp only
-  have e₁ : Nat.ble g 1 = decide (g ≤ 1) := by
-    cases h : Nat.ble g 1
-    · have : ¬ g ≤ 1 := by rw [← Nat.ble_eq, h]; simp
-      simp [this]
-    · have : g ≤ 1 := by rw [← Nat.ble_eq, h]
-      simp [this]
   have e₂ : ((q.num.divConst (Int.ofNat g)).mulConst (Int.ofNat g)).beq' q.num =
       ((q.num.divConst (Int.ofNat g)).mulConst (Int.ofNat g) == q.num) := by
     apply Bool.eq_iff_iff.mpr; rw [Poly.beq'_eq, beq_iff_eq]
   have e₃ : Nat.beq (Nat.mul (Nat.div q.den g) g) q.den = (q.den / g * g == q.den) := rfl
-  rw [e₁, e₂, e₃]
-  cases decide (g ≤ 1) <;> cases ((q.num.divConst (Int.ofNat g)).mulConst (Int.ofNat g) == q.num && q.den / g * g == q.den) <;> rfl
+  rw [e₂, e₃]
+  cases Nat.ble g 1 <;> cases ((q.num.divConst (Int.ofNat g)).mulConst (Int.ofNat g) == q.num && q.den / g * g == q.den) <;> rfl
 
 noncomputable def Poly.toPolyQ_k (p : Poly) (invs : InvVars) (ainvs : InvAtoms) : PolyQ :=
   (invs.foldl (fun (q : PolyQ) xc => q.substInv_k xc.1 xc.2) ⟨p.cancelInvs_k ainvs, 1⟩).reduce_k
@@ -430,7 +424,7 @@ theorem PolyQ.denote_reduce [Field α] [IsCharP α 0] (ctx : Context α) (q : Po
     split
     next h =>
       simp only [Bool.and_eq_true, beq_iff_eq] at h
-      simp only [decide_eq_true_eq, Nat.not_le] at hg
+      simp only [Nat.ble_eq, Nat.not_le] at hg
       obtain ⟨h₁, h₂⟩ := h
       generalize Nat.gcd q.num.gcdCoeffs q.den = g at *
       generalize q.num.divConst g = num at *

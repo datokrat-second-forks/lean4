@@ -362,7 +362,7 @@ def Char.quoteCore (c : Char) (inString : Bool := false) : String :=
   else if  c = '\t' then "\\t"
   else if  c = '\\' then "\\\\"
   else if  c = '\"' then "\\\""
-  else if !inString && c = '\'' then "\\\'"
+  else if !inString && c == '\'' then "\\\'"
   else if  c.toNat <= 31 ∨ c = '\x7f' then String.Internal.append "\\x" (smallCharToHex c)
   else String.singleton c
 where

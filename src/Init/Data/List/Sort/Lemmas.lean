@@ -429,7 +429,7 @@ theorem mergeSort_cons {le : α → α → Bool}
       simp only [zipIdxLE]
       simp only [Bool.ite_false_right, Bool.and_eq_true, Prod.mk.injEq, and_imp]
       intro ab h ba h'
-      simp only [Bool.decide_eq_true] at ba
+      simp only [UDecidable.decide_bool_eq_true] at ba
       replace h : i ≤ j := by simpa [ab, ba] using h
       replace h' : j ≤ i := by simpa [ab, ba] using h'
       cases Nat.le_antisymm h h'

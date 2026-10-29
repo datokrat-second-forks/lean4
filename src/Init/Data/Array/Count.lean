@@ -292,7 +292,7 @@ theorem filter_beq {xs : Array α} (a : α) : xs.filter (· == a) = replicate (c
   simp [List.filter_beq]
 
 theorem filter_eq {α} [BEq α] [LawfulBEq α] [DecidableEq α] {xs : Array α} (a : α) : xs.filter (· = a) = replicate (count a xs) a :=
-  funext (Bool.beq_eq_decide_eq · a) ▸ filter_beq a
+  funext (Bool.beq_eq_udecide_eq · a) ▸ filter_beq a
 
 theorem replicate_count_eq_of_count_eq_size {xs : Array α} (h : count a xs = xs.size) :
     replicate (count a xs) a = xs := by

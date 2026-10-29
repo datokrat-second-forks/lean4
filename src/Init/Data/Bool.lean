@@ -32,14 +32,14 @@ abbrev xor : Bool → Bool → Bool := bne
 recommended_spelling "xor" for "^^" in [xor, «term_^^_»]
 
 instance (p : Bool → Prop) [inst : DecidablePred p] : Decidable (∀ x, p x) :=
-  Decidable.intro (p true && p false)
+  Decidable.intro (decide (p true) && decide (p false))
     (match inst true, inst false with
     | isFalse ht, _ => fun h => absurd (h _) ht
     | isTrue _, isFalse hf => fun h => absurd (h _) hf
     | isTrue ht, isTrue hf => fun | true => ht | false => hf)
 
 instance (p : Bool → Prop) [inst : DecidablePred p] : Decidable (∃ x, p x) :=
-  Decidable.intro (p true || p false)
+  Decidable.intro (decide (p true) || decide (p false))
     (match inst true, inst false with
     | isTrue ht, _ => ⟨_, ht⟩
     | isFalse _, isTrue hf => ⟨_, hf⟩
@@ -270,6 +270,10 @@ theorem beq_eq_decide_eq [BEq α] [LawfulBEq α] [DecidableEq α] (a b : α) :
   · simp [ne_of_beq_false h]
   · simp [eq_of_beq h]
 
+theorem beq_eq_udecide_eq [BEq α] [LawfulBEq α] (a b : α) {_ : UDecidable (a = b)} :
+    (a == b) = UDecidable.decide (a = b) :=
+  Bool.eq_iff_iff.mpr (by simp)
+
 theorem eq_not : ∀ {a b : Bool}, (a = (!b)) ↔ (a ≠ b) := by decide
 theorem not_eq : ∀ {a b : Bool}, ((!a) = b) ↔ (a ≠ b) := by decide
 
@@ -419,28 +423,28 @@ Converts `true` to `1` and `false` to `0`.
 /-! ### ite -/
 
 @[simp] theorem ite_true_left  (p : Prop) [h : Decidable p] (f : Bool) :
-    (ite p true f) = (p || f) := by cases h with | _ p => simp [p]
+    (ite p true f) = (UDecidable.decide p || f) := by cases h with | _ p => simp [p]
 
 @[deprecated Bool.ite_true_left (since := "2026-07-21")]
-theorem if_true_left (p : Prop) [h : Decidable p] (f : Bool) : (if p then Bool.true else f) = (Decidable.decide p || f) := Bool.ite_true_left p f
+theorem if_true_left (p : Prop) [h : Decidable p] (f : Bool) : (if p then Bool.true else f) = (UDecidable.decide p || f) := Bool.ite_true_left p f
 
 @[simp] theorem ite_false_left  (p : Prop) [h : Decidable p] (f : Bool) :
-    (ite p false f) = (!p && f) := by cases h with | _ p => simp [p]
+    (ite p false f) = (!UDecidable.decide p && f) := by cases h with | _ p => simp [p]
 
 @[deprecated Bool.ite_false_left (since := "2026-07-21")]
-theorem if_false_left (p : Prop) [h : Decidable p] (f : Bool) : (if p then Bool.false else f) = (!Decidable.decide p && f) := Bool.ite_false_left p f
+theorem if_false_left (p : Prop) [h : Decidable p] (f : Bool) : (if p then Bool.false else f) = (!UDecidable.decide p && f) := Bool.ite_false_left p f
 
 @[simp] theorem ite_true_right  (p : Prop) [h : Decidable p] (t : Bool) :
-    (ite p t true) = (!(p : Bool) || t) := by cases h with | _ p => simp [p]
+    (ite p t true) = (!UDecidable.decide p || t) := by cases h with | _ p => simp [p]
 
 @[deprecated Bool.ite_true_right (since := "2026-07-21")]
-theorem if_true_right (p : Prop) [h : Decidable p] (t : Bool) : (if p then t else Bool.true) = (!Decidable.decide p || t) := Bool.ite_true_right p t
+theorem if_true_right (p : Prop) [h : Decidable p] (t : Bool) : (if p then t else Bool.true) = (!UDecidable.decide p || t) := Bool.ite_true_right p t
 
 @[simp] theorem ite_false_right  (p : Prop) [h : Decidable p] (t : Bool) :
-    (ite p t false) = (p && t) := by cases h with | _ p => simp [p]
+    (ite p t false) = (UDecidable.decide p && t) := by cases h with | _ p => simp [p]
 
 @[deprecated Bool.ite_false_right (since := "2026-07-21")]
-theorem if_false_right (p : Prop) [h : Decidable p] (t : Bool) : (if p then t else Bool.false) = (Decidable.decide p && t) := Bool.ite_false_right p t
+theorem if_false_right (p : Prop) [h : Decidable p] (t : Bool) : (if p then t else Bool.false) = (UDecidable.decide p && t) := Bool.ite_false_right p t
 
 @[simp] theorem ite_eq_true_distrib (p : Prop) [h : Decidable p] (t f : Bool) :
     (ite p t f = true) = ite p (t = true) (f = true) := by
@@ -626,11 +630,11 @@ theorem apply_cond (f : α → β) {b : Bool} {a a' : α} :
 protected theorem decide_coe (b : Bool) [Decidable (b = true)] : decide (b = true) = b := decide_eq_true
 
 @[simp] theorem decide_and (p q : Prop) [dpq : Decidable (p ∧ q)] [dp : Decidable p] [dq : Decidable q] :
-    decide (p ∧ q) = (p && q) := by
+    decide (p ∧ q) = (decide p && decide q) := by
   cases dp with | _ p => simp [p]
 
 @[simp] theorem decide_or (p q : Prop) [dpq : Decidable (p ∨ q)] [dp : Decidable p] [dq : Decidable q] :
-    decide (p ∨ q) = (p || q) := by
+    decide (p ∨ q) = (decide p || decide q) := by
   cases dp with | _ p => simp [p]
 
 @[simp] theorem decide_iff_dist (p q : Prop) [dpq : Decidable (p ↔ q)] [dp : Decidable p] [dq : Decidable q] :
@@ -638,10 +642,12 @@ protected theorem decide_coe (b : Bool) [Decidable (b = true)] : decide (b = tru
   cases dp with | _ p => simp [p]
 
 @[bool_to_prop]
-theorem and_eq_decide (p q : Bool) : (p && q) = decide (p ∧ q) := rfl
+theorem and_eq_decide (p q : Bool) : (p && q) = UDecidable.decide (p ∧ q) := by
+  cases p <;> cases q <;> simp
 
 @[bool_to_prop]
-theorem or_eq_decide (p q : Bool) : (p || q) = decide (p ∨ q) := rfl
+theorem or_eq_decide (p q : Bool) : (p || q) = UDecidable.decide (p ∨ q) := by
+  cases p <;> cases q <;> simp
 
 @[bool_to_prop]
 theorem decide_beq_decide (p q : Prop) [dp : Decidable p] [dq : Decidable q] :

@@ -704,7 +704,7 @@ protected theorem lt_iff (a b : Rat) : a < b ↔ a.num * b.den < b.num * a.den :
       change Rat.blt _ _ = true ↔ _
       suffices
         (na < 0 ∧ 0 ≤ nb ∨ if na = 0 then 0 < nb else (na ≤ 0 ∨ 0 < nb) ∧ na * ↑db < nb * da) ↔
-        na * db < nb * da by simpa [Rat.blt]
+        na * db < nb * da by simpa [Rat.blt, Decidable.imp_iff_not_or, Int.not_lt]
       split
       · simp_all
       · constructor

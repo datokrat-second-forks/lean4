@@ -27,32 +27,45 @@ namespace Std.Http.Internal.Char
 set_option linter.all true
 
 /--
+Checks if `c` lies between `lo` and `hi`. Unlike the coerced proposition `lo ≤ c ∧ c ≤ hi`, it
+reduces in the kernel, so `decide` can evaluate the character classes below.
+-/
+@[inline]
+def inRange (c lo hi : Char) : Bool :=
+  UInt32.Internal.ble lo.val c.val && UInt32.Internal.ble c.val hi.val
+
+@[simp]
+theorem inRange_eq_true_iff {c lo hi : Char} : inRange c lo hi = true ↔ lo ≤ c ∧ c ≤ hi := by
+  simp [inRange, Char.le_def]
+
+/--
 Checks if a character is ASCII (Unicode code point < 128).
 -/
 @[inline]
 def isAscii (c : Char) : Bool :=
-  c.toNat < 128
+  Nat.blt c.toNat 128
 
 /--
 Checks if a byte represents an ASCII character (value < 128).
 -/
 @[inline]
 def isAsciiByte (c : UInt8) : Bool :=
-  c < 128
+  UInt8.Internal.blt c 128
 
 /--
 Checks if a byte is a decimal digit (0-9).
 -/
 @[inline]
 def isDigitByte (c : UInt8) : Bool :=
-  c >= '0'.toUInt8 && c <= '9'.toUInt8
+  UInt8.Internal.ble '0'.toUInt8 c && UInt8.Internal.ble c '9'.toUInt8
 
 /--
 Checks if a byte is an alphabetic character (a-z or A-Z).
 -/
 @[inline]
 def isAlphaByte (c : UInt8) : Bool :=
-  (c >= 'A'.toUInt8 && c <= 'Z'.toUInt8) || (c >= 'a'.toUInt8 && c <= 'z'.toUInt8)
+  (UInt8.Internal.ble 'A'.toUInt8 c && UInt8.Internal.ble c 'Z'.toUInt8) ||
+  (UInt8.Internal.ble 'a'.toUInt8 c && UInt8.Internal.ble c 'z'.toUInt8)
 
 /--
 tchar = "!" / "#" / "$" / "%" / "&" / "'" / "*"
@@ -72,7 +85,7 @@ vchar = %x21-7E
 -/
 @[inline]
 def vchar (c : Char) : Bool :=
-  c ≥ '!' ∧ c ≤ '~'
+  inRange c '!' '~'
 
 /--
 qdtext = HTAB / SP / %x21 / %x23-5B / %x5D-7E
@@ -81,8 +94,8 @@ qdtext = HTAB / SP / %x21 / %x23-5B / %x5D-7E
 @[inline]
 def qdtext (c : Char) : Bool :=
   (c matches '\t' | ' ' | '!') ||
-  ('#' ≤ c ∧ c ≤ '[') ||
-  (']' ≤ c ∧ c ≤ '~')
+  inRange c '#' '[' ||
+  inRange c ']' '~'
 
 /--
 quoted-pair = "\\" ( HTAB / SP / VCHAR )
@@ -110,7 +123,7 @@ theorem quotedStringChar_lt_0x80 : quotedStringChar c → c < '\x80' := by
     · exact Char.le_trans h (by decide)
     · exact h
     · nomatch h
-    · simp only [vchar, ge_iff_le, Bool.decide_and, Bool.and_eq_true, decide_eq_true_eq] at h
+    · simp only [vchar, inRange_eq_true_iff] at h
       exact h.2
   have h80 : ('~' : Char) < '\x80' := by decide
   rw [Char.lt_def, UInt32.lt_iff_toNat_lt]
@@ -193,7 +206,7 @@ obs-text = %x80-FF (and higher Unicode scalar values in this library's `Char` mo
 -/
 @[inline]
 def obsText (c : Char) : Bool :=
-  0x80 ≤ c.toNat
+  Nat.ble 0x80 c.toNat
 
 /--
 reason-phrase character class:
@@ -219,9 +232,9 @@ Checks if a byte is a hexadecimal digit (0-9, a-f, or A-F).
 -/
 @[inline]
 def isHexDigitByte (c : UInt8) : Bool :=
-  (c ≥ '0'.toUInt8 && c ≤ '9'.toUInt8) ||
-  (c ≥ 'a'.toUInt8 && c ≤ 'f'.toUInt8) ||
-  (c ≥ 'A'.toUInt8 && c ≤ 'F'.toUInt8)
+  (UInt8.Internal.ble '0'.toUInt8 c && UInt8.Internal.ble c '9'.toUInt8) ||
+  (UInt8.Internal.ble 'a'.toUInt8 c && UInt8.Internal.ble c 'f'.toUInt8) ||
+  (UInt8.Internal.ble 'A'.toUInt8 c && UInt8.Internal.ble c 'F'.toUInt8)
 
 /--
 Checks if a byte is an alphanumeric digit (0-9, a-z, or A-Z).

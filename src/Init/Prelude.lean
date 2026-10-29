@@ -1461,6 +1461,13 @@ abbrev DecidableLT (α : Type u) [LT α] := DecidableRel (LT.lt : α → α → 
 abbrev DecidableLE (α : Type u) [LE α] := DecidableRel (LE.le : α → α → Prop)
 
 /--
+Decides `a < b` using a `DecidableLT α` instance. It is the default comparator of `List.lex`,
+`Array.lex` and `Vector.lex`, so that these functions reduce in the kernel.
+-/
+def decideLT {α : Type u} [LT α] [DecidableLT α] (a b : α) : Bool :=
+  decide (LT.lt a b)
+
+/--
 An overloaded operation to find the greater of two values of type `α`.
 -/
 class Max (α : Type u) where
@@ -2588,6 +2595,10 @@ theorem BitVec.reflects_beq_val (x y : BitVec w) :
   | true  => congrArg BitVec.ofFin (Fin.eq_of_val_eq (Nat.eq_of_beq_eq_true h))
   | false => fun h' => Nat.ne_of_beq_eq_false h (congrArg (fun (x : BitVec w) => x.toFin.val) h')
 
+/-- Boolean equality of bitvectors, comparing their values. -/
+instance BitVec.instBEq : BEq (BitVec w) where
+  beq x y := Nat.beq x.toFin.val y.toFin.val
+
 /-- The `BitVec` with value `i`, given a proof that `i < 2^w`. -/
 @[match_pattern, implicit_reducible]
 protected def BitVec.ofNatLT {w : Nat} (i : Nat) (p : LT.lt i (hPow 2 w)) : BitVec w where
@@ -2662,6 +2673,14 @@ Examples:
 -/
 @[extern "lean_uint8_of_nat", implicit_reducible]
 def UInt8.ofNat (n : @& Nat) : UInt8 := ⟨BitVec.ofNat 8 n⟩
+
+/-- Boolean `≤` on `UInt8`. -/
+@[extern "lean_uint8_dec_le"] def UInt8.Internal.ble (a b : UInt8) : Bool :=
+  Nat.ble a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- Boolean `<` on `UInt8`. -/
+@[extern "lean_uint8_dec_lt"] def UInt8.Internal.blt (a b : UInt8) : Bool :=
+  Nat.ble (Nat.succ a.toBitVec.toFin.val) b.toBitVec.toFin.val
 
 /--
 Boolean equality of `UInt8`s that reduces by itself. It implements `BEq UInt8` and
@@ -2781,6 +2800,14 @@ This function is overridden at runtime with an efficient implementation.
 def UInt16.ofNatLT (n : @& Nat) (h : LT.lt n UInt16.size) : UInt16 where
   toBitVec := BitVec.ofNatLT n h
 
+/-- Boolean `≤` on `UInt16`. -/
+@[extern "lean_uint16_dec_le"] def UInt16.Internal.ble (a b : UInt16) : Bool :=
+  Nat.ble a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- Boolean `<` on `UInt16`. -/
+@[extern "lean_uint16_dec_lt"] def UInt16.Internal.blt (a b : UInt16) : Bool :=
+  Nat.ble (Nat.succ a.toBitVec.toFin.val) b.toBitVec.toFin.val
+
 /--
 Boolean equality of `UInt16`s that reduces by itself. It implements `BEq UInt16` and
 `DecidableEq UInt16`, and the `match` compiler uses it to test `UInt16` value patterns.
@@ -2860,6 +2887,14 @@ This function is overridden at runtime with an efficient implementation.
 -/
 @[extern "lean_uint32_to_nat", implicit_reducible]
 def UInt32.toNat (n : UInt32) : Nat := n.toBitVec.toNat
+
+/-- Boolean `≤` on `UInt32`. -/
+@[extern "lean_uint32_dec_le"] def UInt32.Internal.ble (a b : UInt32) : Bool :=
+  Nat.ble a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- Boolean `<` on `UInt32`. -/
+@[extern "lean_uint32_dec_lt"] def UInt32.Internal.blt (a b : UInt32) : Bool :=
+  Nat.ble (Nat.succ a.toBitVec.toFin.val) b.toBitVec.toFin.val
 
 /--
 Boolean equality of `UInt32`s that reduces by itself. It implements `BEq UInt32` and
@@ -2975,6 +3010,14 @@ This function is overridden at runtime with an efficient implementation.
 def UInt64.ofNatLT (n : @& Nat) (h : LT.lt n UInt64.size) : UInt64 where
   toBitVec := BitVec.ofNatLT n h
 
+/-- Boolean `≤` on `UInt64`. -/
+@[extern "lean_uint64_dec_le"] def UInt64.Internal.ble (a b : UInt64) : Bool :=
+  Nat.ble a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- Boolean `<` on `UInt64`. -/
+@[extern "lean_uint64_dec_lt"] def UInt64.Internal.blt (a b : UInt64) : Bool :=
+  Nat.ble (Nat.succ a.toBitVec.toFin.val) b.toBitVec.toFin.val
+
 /--
 Boolean equality of `UInt64`s that reduces by itself. It implements `BEq UInt64` and
 `DecidableEq UInt64`, and the `match` compiler uses it to test `UInt64` value patterns.
@@ -3059,6 +3102,14 @@ This function is overridden at runtime with an efficient implementation.
 @[extern "lean_usize_of_nat"]
 def USize.ofNatLT (n : @& Nat) (h : LT.lt n USize.size) : USize where
   toBitVec := BitVec.ofNatLT n h
+
+/-- Boolean `≤` on `USize`. -/
+@[extern "lean_usize_dec_le"] def USize.Internal.ble (a b : USize) : Bool :=
+  Nat.ble a.toBitVec.toFin.val b.toBitVec.toFin.val
+
+/-- Boolean `<` on `USize`. -/
+@[extern "lean_usize_dec_lt"] def USize.Internal.blt (a b : USize) : Bool :=
+  Nat.ble (Nat.succ a.toBitVec.toFin.val) b.toBitVec.toFin.val
 
 /--
 Boolean equality of `USize`s that reduces by itself. It implements `BEq USize` and

@@ -486,3 +486,69 @@ instance [IntCast R] : CoeTail Int R where coe := Int.cast
 
 -- see the notes about coercions into arbitrary types in the module doc-string
 instance [IntCast R] : CoeHTCT Int R where coe := Int.cast
+
+/-! ### `UDecidable` instances -/
+
+namespace Int.Internal
+
+/-- Whether an integer is nonnegative. -/
+def isNonneg : Int → Bool
+  | ofNat _ => true
+  | -[_ +1] => false
+
+theorem reflects_isNonneg : (m : Int) → (isNonneg m).Reflects (NonNeg m)
+  | ofNat m => NonNeg.mk m
+  | -[_ +1] => fun h => nomatch h
+
+/-- Boolean `≤` on integers. -/
+@[extern "lean_int_dec_le"] def ble (a b : @& Int) : Bool := isNonneg (b - a)
+
+/-- Boolean `<` on integers. -/
+@[extern "lean_int_dec_lt"] def blt (a b : @& Int) : Bool := isNonneg (b - (a + 1))
+
+theorem reflects_ble (a b : Int) : (ble a b).Reflects (a ≤ b) := reflects_isNonneg (b - a)
+
+theorem reflects_blt (a b : Int) : (blt a b).Reflects (a < b) := reflects_isNonneg (b - (a + 1))
+
+@[simp] theorem ble_eq_true_iff (a b : Int) : ble a b = true ↔ a ≤ b := by
+  have := reflects_ble a b
+  revert this
+  cases ble a b with
+  | true => exact fun h => ⟨fun _ => h, fun _ => rfl⟩
+  | false => exact fun h => ⟨Bool.noConfusion, fun h' => absurd h' h⟩
+
+@[simp] theorem blt_eq_true_iff (a b : Int) : blt a b = true ↔ a < b := by
+  have := reflects_blt a b
+  revert this
+  cases blt a b with
+  | true => exact fun h => ⟨fun _ => h, fun _ => rfl⟩
+  | false => exact fun h => ⟨Bool.noConfusion, fun h' => absurd h' h⟩
+
+@[simp] theorem ble_eq_false_iff (a b : Int) : ble a b = false ↔ ¬a ≤ b := by
+  have := ble_eq_true_iff a b
+  revert this
+  cases ble a b with
+  | true => exact fun this => ⟨Bool.noConfusion, fun h => absurd (this.mp rfl) h⟩
+  | false => exact fun this => ⟨fun _ h => Bool.noConfusion (this.mpr h), fun _ => rfl⟩
+
+@[simp] theorem blt_eq_false_iff (a b : Int) : blt a b = false ↔ ¬a < b := by
+  have := blt_eq_true_iff a b
+  revert this
+  cases blt a b with
+  | true => exact fun this => ⟨Bool.noConfusion, fun h => absurd (this.mp rfl) h⟩
+  | false => exact fun this => ⟨fun _ h => Bool.noConfusion (this.mpr h), fun _ => rfl⟩
+
+end Int.Internal
+
+namespace UDecidable
+
+instance instIntEq (a b : Int) : UDecidable (a = b) :=
+  UDecidable.ofReflects (Int.Internal.beq a b) (Int.Internal.reflects_beq a b)
+
+instance instIntLe (a b : Int) : UDecidable (a ≤ b) :=
+  UDecidable.ofReflects (Int.Internal.ble a b) (Int.Internal.reflects_ble a b)
+
+instance instIntLt (a b : Int) : UDecidable (a < b) :=
+  UDecidable.ofReflects (Int.Internal.blt a b) (Int.Internal.reflects_blt a b)
+
+end UDecidable

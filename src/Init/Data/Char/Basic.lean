@@ -95,7 +95,7 @@ Returns `true` if the character is a space `(' ', U+0020)`, a tab `('\t', U+0009
 return `('\r', U+000D)`, or a newline `('\n', U+000A)`.
 -/
 @[inline, implicit_reducible] def isWhitespace (c : Char) : Bool :=
-  c = ' ' || c = '\t' || c = '\r' || c = '\n'
+  c == ' ' || c == '\t' || c == '\r' || c == '\n'
 
 /--
 Returns `true` if the character is a uppercase ASCII letter.
@@ -103,7 +103,7 @@ Returns `true` if the character is a uppercase ASCII letter.
 The uppercase ASCII letters are the following: `ABCDEFGHIJKLMNOPQRSTUVWXYZ`.
 -/
 @[inline, implicit_reducible] def isUpper (c : Char) : Bool :=
-  c.val ≥ 'A'.val ∧ c.val ≤ 'Z'.val
+  UInt32.Internal.ble 'A'.val c.val && UInt32.Internal.ble c.val 'Z'.val
 
 /--
 Returns `true` if the character is a lowercase ASCII letter.
@@ -111,7 +111,7 @@ Returns `true` if the character is a lowercase ASCII letter.
 The lowercase ASCII letters are the following: `abcdefghijklmnopqrstuvwxyz`.
 -/
 @[inline, implicit_reducible] def isLower (c : Char) : Bool :=
-  c.val ≥ 'a'.val && c.val ≤ 'z'.val
+  UInt32.Internal.ble 'a'.val c.val && UInt32.Internal.ble c.val 'z'.val
 
 /--
 Returns `true` if the character is an ASCII letter.
@@ -127,7 +127,7 @@ Returns `true` if the character is an ASCII digit.
 The ASCII digits are the following: `0123456789`.
 -/
 @[inline, implicit_reducible] def isDigit (c : Char) : Bool :=
-  c.val ≥ '0'.val && c.val ≤ '9'.val
+  UInt32.Internal.ble '0'.val c.val && UInt32.Internal.ble c.val '9'.val
 
 /--
 Returns `true` if the character is an ASCII hexadecimal digit.
@@ -135,7 +135,8 @@ Returns `true` if the character is an ASCII hexadecimal digit.
 The ASCII hexadecimal digits are the following: `0123456789abcdefABCDEF`.
 -/
 @[inline] def isHexDigit (c : Char) : Bool :=
-  c.isDigit || (c.val ≥ 'a'.val && c.val ≤ 'f'.val) || (c.val ≥ 'A'.val && c.val ≤ 'F'.val)
+  c.isDigit || (UInt32.Internal.ble 'a'.val c.val && UInt32.Internal.ble c.val 'f'.val) ||
+    (UInt32.Internal.ble 'A'.val c.val && UInt32.Internal.ble c.val 'F'.val)
 
 /--
 Returns `true` if the character is an ASCII letter or digit.
@@ -189,3 +190,11 @@ where finally
     (Nat.mod_eq_of_lt (Nat.lt_trans h₂ (by decide)))) h₂
 
 end Char
+
+namespace UDecidable
+
+instance instCharLe (c d : Char) : UDecidable (c ≤ d) := instUInt32Le c.val d.val
+
+instance instCharLt (c d : Char) : UDecidable (c < d) := instUInt32Lt c.val d.val
+
+end UDecidable

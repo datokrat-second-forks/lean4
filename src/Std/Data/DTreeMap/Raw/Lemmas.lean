@@ -1330,13 +1330,13 @@ theorem get?_eq_some_iff_exists_compare_eq_eq_and_mem_toArray [TransCmp cmp] (h 
 
 theorem find?_toList_eq_some_iff_getKey?_eq_some_and_get?_eq_some [TransCmp cmp] (h : t.WF)
     {k k' : α} {v : β} :
-    (toList t).find? (fun a => cmp a.1 k = .eq) = some ⟨k', v⟩ ↔
+    (toList t).find? (fun a => cmp a.1 k == .eq) = some ⟨k', v⟩ ↔
       t.getKey? k = some k' ∧ get? t k = some v :=
   Impl.Const.find?_toList_eq_some_iff_getKey?_eq_some_and_get?_eq_some h.out
 
 theorem find?_toArray_eq_some_iff_getKey?_eq_some_and_get?_eq_some [TransCmp cmp] (h : t.WF)
     {k k' : α} {v : β} :
-    (toArray t).find? (fun a => cmp a.1 k = .eq) = some ⟨k', v⟩ ↔
+    (toArray t).find? (fun a => cmp a.1 k == .eq) = some ⟨k', v⟩ ↔
       t.getKey? k = some k' ∧ get? t k = some v :=
   Impl.Const.find?_toArray_eq_some_iff_getKey?_eq_some_and_get?_eq_some h.out
 

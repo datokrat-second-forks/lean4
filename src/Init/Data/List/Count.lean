@@ -373,7 +373,7 @@ theorem filter_beq {l : List α} (a : α) : l.filter (· == a) = replicate (coun
   exact ⟨trivial, fun _ h => h.2⟩
 
 theorem filter_eq [DecidableEq α] {l : List α} (a : α) : l.filter (· = a) = replicate (count a l) a :=
-  funext (Bool.beq_eq_decide_eq · a) ▸ filter_beq a
+  funext (Bool.beq_eq_udecide_eq · a) ▸ filter_beq a
 
 @[grind =] theorem replicate_sublist_iff {l : List α} : replicate n a <+ l ↔ n ≤ count a l := by
   refine ⟨fun h => ?_, fun h => ?_⟩

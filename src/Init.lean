@@ -26,6 +26,7 @@ public import Init.Meta
 public import Init.NotationExtra
 public import Init.SimpLemmas
 public import Init.PropLemmas
+public import Init.UDecidable.Basic
 public import Init.UDecidable
 public import Init.UDecidable.Instances
 public import Init.UDecidable.List

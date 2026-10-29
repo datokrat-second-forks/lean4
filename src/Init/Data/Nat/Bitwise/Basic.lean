@@ -32,8 +32,8 @@ def bitwise (f : Bool → Bool → Bool) (n m : Nat) : Nat :=
   else
     let n' := n / 2
     let m' := m / 2
-    let b₁ := n % 2 = 1
-    let b₂ := m % 2 = 1
+    let b₁ := n % 2 == 1
+    let b₂ := m % 2 == 1
     let r  := bitwise f n' m'
     if f b₁ b₂ then
       r+r+1

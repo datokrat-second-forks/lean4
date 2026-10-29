@@ -59,7 +59,7 @@ theorem denote_blastShiftConcat_eq_shiftConcat (aig : AIG α) (target : ShiftCon
         =
       (BitVec.shiftConcat x b).getLsbD idx := by
   intro idx hidx
-  simp only [denote_blastShiftConcat, hb, hx, BitVec.getLsbD_shiftConcat, hidx, decide_true,
+  simp only [denote_blastShiftConcat, hb, hx, BitVec.getLsbD_shiftConcat, hidx, UDecidable.decide_true,
     Bool.true_and]
 
 

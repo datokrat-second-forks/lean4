@@ -1004,3 +1004,87 @@ def Bool.toUSize (b : Bool) : USize := if b then 1 else 0
 
 instance : Max USize := maxOfLe
 instance : Min USize := minOfLe
+
+/-! ### `UDecidable` instances -/
+
+@[simp] theorem UInt16.Internal.ble_iff (a b : UInt16) : UInt16.Internal.ble a b = true ↔ a ≤ b :=
+  ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
+
+@[simp] theorem UInt16.Internal.ble_eq_false_iff (a b : UInt16) : UInt16.Internal.ble a b = false ↔ ¬a ≤ b := by
+  have := UInt16.Internal.ble_iff a b
+  revert this
+  cases UInt16.Internal.ble a b with
+  | true => exact fun this => ⟨Bool.noConfusion, fun h => absurd (this.mp rfl) h⟩
+  | false => exact fun this => ⟨fun _ h => Bool.noConfusion (this.mpr h), fun _ => rfl⟩
+
+@[simp] theorem UInt16.Internal.blt_iff (a b : UInt16) : UInt16.Internal.blt a b = true ↔ a < b :=
+  ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
+
+@[simp] theorem UInt16.Internal.blt_eq_false_iff (a b : UInt16) : UInt16.Internal.blt a b = false ↔ ¬a < b := by
+  have := UInt16.Internal.blt_iff a b
+  revert this
+  cases UInt16.Internal.blt a b with
+  | true => exact fun this => ⟨Bool.noConfusion, fun h => absurd (this.mp rfl) h⟩
+  | false => exact fun this => ⟨fun _ h => Bool.noConfusion (this.mpr h), fun _ => rfl⟩
+
+@[simp] theorem UInt64.Internal.ble_iff (a b : UInt64) : UInt64.Internal.ble a b = true ↔ a ≤ b :=
+  ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
+
+@[simp] theorem UInt64.Internal.ble_eq_false_iff (a b : UInt64) : UInt64.Internal.ble a b = false ↔ ¬a ≤ b := by
+  have := UInt64.Internal.ble_iff a b
+  revert this
+  cases UInt64.Internal.ble a b with
+  | true => exact fun this => ⟨Bool.noConfusion, fun h => absurd (this.mp rfl) h⟩
+  | false => exact fun this => ⟨fun _ h => Bool.noConfusion (this.mpr h), fun _ => rfl⟩
+
+@[simp] theorem UInt64.Internal.blt_iff (a b : UInt64) : UInt64.Internal.blt a b = true ↔ a < b :=
+  ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
+
+@[simp] theorem UInt64.Internal.blt_eq_false_iff (a b : UInt64) : UInt64.Internal.blt a b = false ↔ ¬a < b := by
+  have := UInt64.Internal.blt_iff a b
+  revert this
+  cases UInt64.Internal.blt a b with
+  | true => exact fun this => ⟨Bool.noConfusion, fun h => absurd (this.mp rfl) h⟩
+  | false => exact fun this => ⟨fun _ h => Bool.noConfusion (this.mpr h), fun _ => rfl⟩
+
+@[simp] theorem USize.Internal.ble_iff (a b : USize) : USize.Internal.ble a b = true ↔ a ≤ b :=
+  ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
+
+@[simp] theorem USize.Internal.ble_eq_false_iff (a b : USize) : USize.Internal.ble a b = false ↔ ¬a ≤ b := by
+  have := USize.Internal.ble_iff a b
+  revert this
+  cases USize.Internal.ble a b with
+  | true => exact fun this => ⟨Bool.noConfusion, fun h => absurd (this.mp rfl) h⟩
+  | false => exact fun this => ⟨fun _ h => Bool.noConfusion (this.mpr h), fun _ => rfl⟩
+
+@[simp] theorem USize.Internal.blt_iff (a b : USize) : USize.Internal.blt a b = true ↔ a < b :=
+  ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
+
+@[simp] theorem USize.Internal.blt_eq_false_iff (a b : USize) : USize.Internal.blt a b = false ↔ ¬a < b := by
+  have := USize.Internal.blt_iff a b
+  revert this
+  cases USize.Internal.blt a b with
+  | true => exact fun this => ⟨Bool.noConfusion, fun h => absurd (this.mp rfl) h⟩
+  | false => exact fun this => ⟨fun _ h => Bool.noConfusion (this.mpr h), fun _ => rfl⟩
+
+namespace UDecidable
+
+instance instUInt16Le (a b : UInt16) : UDecidable (a ≤ b) :=
+  UDecidable.mk (UInt16.Internal.ble a b) (UInt16.Internal.ble_iff a b)
+
+instance instUInt16Lt (a b : UInt16) : UDecidable (a < b) :=
+  UDecidable.mk (UInt16.Internal.blt a b) (UInt16.Internal.blt_iff a b)
+
+instance instUInt64Le (a b : UInt64) : UDecidable (a ≤ b) :=
+  UDecidable.mk (UInt64.Internal.ble a b) (UInt64.Internal.ble_iff a b)
+
+instance instUInt64Lt (a b : UInt64) : UDecidable (a < b) :=
+  UDecidable.mk (UInt64.Internal.blt a b) (UInt64.Internal.blt_iff a b)
+
+instance instUSizeLe (a b : USize) : UDecidable (a ≤ b) :=
+  UDecidable.mk (USize.Internal.ble a b) (USize.Internal.ble_iff a b)
+
+instance instUSizeLt (a b : USize) : UDecidable (a < b) :=
+  UDecidable.mk (USize.Internal.blt a b) (USize.Internal.blt_iff a b)
+
+end UDecidable

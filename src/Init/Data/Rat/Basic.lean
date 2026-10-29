@@ -140,15 +140,15 @@ instance : OfScientific Rat where
 
 /-- Rational number strictly less than relation, as a `Bool`. -/
 protected def blt (a b : Rat) : Bool :=
-  if a.num < 0 && 0 ≤ b.num then
+  bif Int.Internal.blt a.num 0 && Int.Internal.ble 0 b.num then
     true
-  else if a.num = 0 then
-    0 < b.num
-  else if 0 < a.num && b.num ≤ 0 then
+  else bif a.num == 0 then
+    Int.Internal.blt 0 b.num
+  else bif Int.Internal.blt 0 a.num && Int.Internal.ble b.num 0 then
     false
   else
     -- `a` and `b` must have the same sign
-   a.num * b.den < b.num * a.den
+    Int.Internal.blt (a.num * b.den) (b.num * a.den)
 
 instance : LT Rat := ⟨(·.blt ·)⟩
 

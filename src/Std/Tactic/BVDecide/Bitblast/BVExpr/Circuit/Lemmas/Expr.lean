@@ -426,7 +426,7 @@ theorem go_denote_eq (aig : AIG BVBit) (expr : BVExpr w) (assign : Assignment)
         · exact hinv
     · rw [← hres]
       simp only [denote_blastReverse, eval_un, BVUnOp.eval_reverse, hidx, BitVec.getLsbD_eq_getElem,
-        BitVec.getElem_reverse, BitVec.getMsbD_eq_getLsbD, decide_true, Bool.true_and]
+        BitVec.getElem_reverse, BitVec.getMsbD_eq_getLsbD, UDecidable.decide_true, Bool.true_and]
       rw [goCache_denote_eq]
       exact hinv
     · rw [← hres]

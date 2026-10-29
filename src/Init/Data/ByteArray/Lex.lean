@@ -44,6 +44,12 @@ public instance : DecidableLT ByteArray :=
 public instance : DecidableLE ByteArray :=
   fun a b => inferInstanceAs (Decidable (¬ b < a))
 
+public instance : UDecidableLT ByteArray :=
+  fun a b => UDecidable.ofDecidable (a < b)
+
+public instance : UDecidableLE ByteArray :=
+  fun a b => UDecidable.ofDecidable (a ≤ b)
+
 @[extern "lean_byte_array_compare", expose]
 public protected def compare (a b : @& ByteArray) : Ordering :=
   compare a.data b.data

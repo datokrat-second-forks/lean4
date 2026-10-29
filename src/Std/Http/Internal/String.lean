@@ -120,6 +120,6 @@ Checks whether a string is a valid non-empty HTTP token.
 @[expose]
 def isToken (s : String) : Bool :=
   let s := s.toList
-  ¬s.isEmpty ∧ s.all Char.tchar
+  !s.isEmpty && s.all Char.tchar
 
 end Std.Http.Internal

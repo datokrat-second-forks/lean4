@@ -33,6 +33,10 @@ theorem testBit_toNat (x : BitVec w) : x.toNat.testBit i = x.getLsbD i := rfl
 theorem eq_of_toNat_eq {n} : ∀ {x y : BitVec n}, x.toNat = y.toNat → x = y
   | ⟨_, _⟩, ⟨_, _⟩, rfl => rfl
 
+instance : LawfulBEq (BitVec w) where
+  eq_of_beq h := eq_of_toNat_eq (Nat.eq_of_beq_eq_true h)
+  rfl := Nat.beq_refl _
+
 theorem eq_of_getLsbD_eq {x y : BitVec w}
     (pred : ∀ i, i < w → x.getLsbD i = y.getLsbD i) : x = y := by
   apply eq_of_toNat_eq
@@ -90,9 +94,9 @@ theorem getElem_cons {b : Bool} {n} {x : BitVec n} {i : Nat} (h : i < n + 1) :
   · have p1 : ¬(n ≤ i) := by omega
     have p2 : i ≠ n := by omega
     simp [p1, p2]
-  · simp only [i_eq_n, ge_iff_le, Nat.le_refl, decide_true, Nat.sub_self, Nat.testBit_zero,
+  · simp only [i_eq_n, ge_iff_le, Nat.le_refl, UDecidable.decide_true, Nat.sub_self, Nat.testBit_zero,
     Bool.true_and, testBit_toNat, getLsbD_of_ge, Bool.or_false]
-    cases b <;> trivial
+    cases b <;> simp
   · have p1 : i ≠ n := by omega
     have p2 : i - n ≠ 0 := by omega
     simp [p1, p2, Nat.testBit_bool_toNat]
@@ -132,7 +136,7 @@ theorem getElem_setWidth (m : Nat) (x : BitVec n) (i : Nat) (h : i < m) :
   split
   · rw [getElem_setWidth']
   · simp only [ofNat_toNat, getElem_eq_testBit_toNat, toNat_setWidth, Nat.testBit_mod_two_pow,
-      getLsbD, Bool.and_eq_right_iff_imp, decide_eq_true_eq]
+      getLsbD, Bool.and_eq_right_iff_imp, UDecidable.decide_eq_true_eq]
     omega
 
 -- Later this is provable by `grind`, so doesn't need an annotation.

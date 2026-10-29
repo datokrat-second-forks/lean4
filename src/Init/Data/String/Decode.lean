@@ -1477,6 +1477,15 @@ scalar value.
 public def IsUTF8FirstByte (c : UInt8) : Prop :=
   c &&& 0x80 = 0 ∨ c &&& 0xe0 = 0xc0 ∨ c &&& 0xf0 = 0xe0 ∨ c &&& 0xf8 = 0xf0
 
+/-- Boolean version of `IsUTF8FirstByte`. -/
+@[expose]
+public def isUTF8FirstByte (c : UInt8) : Bool :=
+  c &&& 0x80 == 0 || c &&& 0xe0 == 0xc0 || c &&& 0xf0 == 0xe0 || c &&& 0xf8 == 0xf0
+
+@[simp]
+public theorem isUTF8FirstByte_eq_true_iff {c : UInt8} : c.isUTF8FirstByte = true ↔ c.IsUTF8FirstByte := by
+  simp [isUTF8FirstByte, IsUTF8FirstByte, or_assoc]
+
 @[inline]
 public instance {c : UInt8} : Decidable c.IsUTF8FirstByte :=
   inferInstanceAs <| Decidable (c &&& 0x80 = 0 ∨ c &&& 0xe0 = 0xc0 ∨ c &&& 0xf0 = 0xe0 ∨ c &&& 0xf8 = 0xf0)

@@ -337,12 +337,12 @@ theorem lex_eq_decide_lex [BEq α] [LawfulBEq α] [DecidableEq α] (lt : α → 
 
 @[simp] theorem lex_eq_true_iff_lt [BEq α] [LawfulBEq α] [LT α] [DecidableLT α]
     {l₁ l₂ : List α} : lex l₁ l₂ = true ↔ l₁ < l₂ := by
-  simp only [lex_eq_true_iff_lex, decide_eq_true_eq]
+  simp only [lex_eq_true_iff_lex, decideLT_eq_true_eq]
   exact Iff.rfl
 
 @[simp] theorem lex_eq_false_iff_ge [BEq α] [LawfulBEq α] [LT α] [DecidableLT α]
     {l₁ l₂ : List α} : lex l₁ l₂ = false ↔ l₂ ≤ l₁ := by
-  simp only [lex_eq_false_iff_not_lex, decide_eq_true_eq]
+  simp only [lex_eq_false_iff_not_lex, decideLT_eq_true_eq]
   exact Iff.rfl
 
 attribute [local simp] Nat.add_one_lt_add_one_iff in
@@ -491,7 +491,7 @@ protected theorem le_iff_exists [LT α]
             l₁[j]'(Nat.lt_trans hj h₁) = l₂[j]'(Nat.lt_trans hj h₂)) ∧ l₁[i] < l₂[i]) := by
   open Classical in
   rw [← lex_eq_false_iff_ge, lex_eq_false_iff_exists]
-  · simp only [isEqv_eq, beq_iff_eq, decide_eq_true_eq]
+  · simp only [isEqv_eq, beq_iff_eq, decideLT_eq_true_eq]
     simp only [eq_comm]
     conv => lhs; simp +singlePass [exists_comm]
   · simpa using Std.Irrefl.irrefl

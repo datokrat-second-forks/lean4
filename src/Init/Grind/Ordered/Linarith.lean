@@ -471,7 +471,7 @@ theorem le_le_combine {α} [IntModule α] [LE α] [IsPreorder α] [OrderedAdd α
 noncomputable def le_lt_combine_cert (p₁ p₂ p₃ : Poly) : Bool :=
   let a₁ := p₁.leadCoeff.natAbs
   let a₂ := p₂.leadCoeff.natAbs
-  a₁ > (0 : Int) && p₃.beq' (p₁.mul_k a₂ |>.combine_k (p₂.mul_k a₁))
+  Int.Internal.blt 0 a₁ && p₃.beq' (p₁.mul_k a₂ |>.combine_k (p₂.mul_k a₁))
 
 theorem le_lt_combine {α} [IntModule α] [LE α] [LT α] [LawfulOrderLT α] [IsPreorder α] [OrderedAdd α] (ctx : Context α) (p₁ p₂ p₃ : Poly)
     : le_lt_combine_cert p₁ p₂ p₃ → p₁.denote' ctx ≤ 0 → p₂.denote' ctx < 0 → p₃.denote' ctx < 0 := by
@@ -483,7 +483,7 @@ theorem le_lt_combine {α} [IntModule α] [LE α] [LT α] [LawfulOrderLT α] [Is
 noncomputable def lt_lt_combine_cert (p₁ p₂ p₃ : Poly) : Bool :=
   let a₁ := p₁.leadCoeff.natAbs
   let a₂ := p₂.leadCoeff.natAbs
-  a₂ > (0 : Int) && a₁ > (0 : Int) && p₃.beq' (p₁.mul_k a₂ |>.combine_k (p₂.mul_k a₁))
+  Int.Internal.blt 0 a₂ && Int.Internal.blt 0 a₁ && p₃.beq' (p₁.mul_k a₂ |>.combine_k (p₂.mul_k a₁))
 
 theorem lt_lt_combine {α} [IntModule α] [LE α] [LT α] [LawfulOrderLT α] [IsPreorder α] [OrderedAdd α] (ctx : Context α) (p₁ p₂ p₃ : Poly)
     : lt_lt_combine_cert p₁ p₂ p₃ → p₁.denote' ctx < 0 → p₂.denote' ctx < 0 → p₃.denote' ctx < 0 := by
@@ -613,7 +613,7 @@ Substitution
 -/
 
 noncomputable def eq_diseq_subst_cert (k₁ k₂ : Int) (p₁ p₂ p₃ : Poly) : Bool :=
-  k₁.natAbs ≠ 0 && p₃.beq' (p₁.mul_k k₂ |>.combine_k (p₂.mul_k k₁))
+  k₁.natAbs != 0 && p₃.beq' (p₁.mul_k k₂ |>.combine_k (p₂.mul_k k₁))
 
 theorem eq_diseq_subst {α} [IntModule α] [NoNatZeroDivisors α] (ctx : Context α) (k₁ k₂ : Int) (p₁ p₂ p₃ : Poly)
     : eq_diseq_subst_cert k₁ k₂ p₁ p₂ p₃ → p₁.denote' ctx = 0 → p₂.denote' ctx ≠ 0 → p₃.denote' ctx ≠ 0 := by

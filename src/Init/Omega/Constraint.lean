@@ -11,6 +11,7 @@ import Init.Data.Int.Lemmas
 import Init.Data.Int.Order
 import Init.Data.ToString.Macro
 import Init.Omega.Int
+import Init.Data.Bool
 import Init.PropLemmas
 import Init.RCases
 
@@ -32,9 +33,9 @@ abbrev LowerBound : Type := Option Int
 abbrev UpperBound : Type := Option Int
 
 /-- A lower bound at `x` is satisfied at `t` if `x ≤ t`. -/
-abbrev LowerBound.sat (b : LowerBound) (t : Int) := b.all fun x => x ≤ t
+abbrev LowerBound.sat (b : LowerBound) (t : Int) := b.all fun x => Int.Internal.ble x t
 /-- A upper bound at `y` is satisfied at `t` if `t ≤ y`. -/
-abbrev UpperBound.sat (b : UpperBound) (t : Int) := b.all fun y => t ≤ y
+abbrev UpperBound.sat (b : UpperBound) (t : Int) := b.all fun y => Int.Internal.ble t y
 
 private local instance : Append String where
   append := String.Internal.append
@@ -69,7 +70,7 @@ instance : ToString Constraint where
     if y < x then "∅" else if x = y then s!"\{{x}}" else s!"[{x}, {y}]"
 
 /-- A constraint is satisfied at `t` is both the lower bound and upper bound are satisfied. -/
-def sat (c : Constraint) (t : Int) : Bool := c.lowerBound.sat t ∧ c.upperBound.sat t
+def sat (c : Constraint) (t : Int) : Bool := c.lowerBound.sat t && c.upperBound.sat t
 
 /-- Apply a function to both the lower bound and upper bound. -/
 def map (c : Constraint) (f : Int → Int) : Constraint where
@@ -108,18 +109,20 @@ def exact (r : Int) : Constraint := ⟨some r, some r⟩
 @[simp] theorem trivial_say : trivial.sat t := by
   simp [sat, trivial]
 
-@[simp] theorem exact_sat (r : Int) (t : Int) : (exact r).sat t = decide (r = t) := by
-  simp only [sat, exact, Option.all_some, decide_eq_true_eq, decide_eq_decide]
+@[simp] theorem exact_sat (r : Int) (t : Int) : (exact r).sat t = UDecidable.decide (r = t) := by
+  simp only [sat, exact, Option.all_some]
+  rw [Bool.eq_iff_iff]
+  simp only [Bool.and_eq_true, Int.Internal.ble_eq_true_iff, UDecidable.decide_eq_true_eq]
   exact Int.eq_iff_le_and_ge.symm
 
 /-- Check if a constraint is unsatisfiable. -/
 def isImpossible : Constraint → Bool
-  | ⟨some x, some y⟩ => y < x
+  | ⟨some x, some y⟩ => Int.Internal.blt y x
   | _ => false
 
 /-- Check if a constraint requires an exact value. -/
 def isExact : Constraint → Bool
-  | ⟨some x, some y⟩ => x = y
+  | ⟨some x, some y⟩ => x == y
   | _ => false
 
 theorem not_sat_of_isImpossible (h : isImpossible c) {t} : ¬ c.sat t := by
@@ -394,7 +397,7 @@ theorem bmod_sat (m : Nat) (r : Int) (i : Nat) (x v : Coeffs)
     (w : (Constraint.exact r).sat' x v) :
     (Constraint.exact (Int.bmod r m)).sat' (bmod_coeffs m i x) v := by
   simp at w
-  simp only [p, bmod_coeffs, Constraint.exact_sat, Coeffs.dot_set_left, decide_eq_true_eq]
+  simp only [p, bmod_coeffs, Constraint.exact_sat, Coeffs.dot_set_left, UDecidable.decide_eq_true_eq]
   replace h := Nat.le_trans (Coeffs.bmod_length x m) h
   rw [Coeffs.get_of_length_le h, Int.sub_zero,
     Int.mul_ediv_cancel' (Coeffs.dvd_bmod_dot_sub_dot_bmod _ _ _), w,

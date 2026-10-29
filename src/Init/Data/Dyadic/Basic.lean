@@ -627,30 +627,30 @@ theorem neg_mul (x y : Dyadic) : -x * y = -(x * y) := by
 def blt (x y : Dyadic) : Bool :=
   match x, y with
   | .zero, .zero => false
-  | .zero, .ofOdd n₂ _ _ => 0 < n₂
-  | .ofOdd n₁ _ _, .zero => n₁ < 0
+  | .zero, .ofOdd n₂ _ _ => Int.Internal.blt 0 n₂
+  | .ofOdd n₁ _ _, .zero => Int.Internal.blt n₁ 0
   | .ofOdd n₁ k₁ _, .ofOdd n₂ k₂ _ =>
     match k₂ - k₁ with
-    | (l : Nat) => (n₁ <<< l) < n₂
-    | -((l+1 : Nat)) => n₁ < (n₂ <<< (l + 1))
+    | (l : Nat) => Int.Internal.blt (n₁ <<< l) n₂
+    | -((l+1 : Nat)) => Int.Internal.blt n₁ (n₂ <<< (l + 1))
 
 /-- Determine if a dyadic rational is less than or equal to another. -/
 def ble (x y : Dyadic) : Bool :=
   match x, y with
   | .zero, .zero => true
-  | .zero, .ofOdd n₂ _ _ => 0 ≤ n₂
-  | .ofOdd n₁ _ _, .zero => n₁ ≤ 0
+  | .zero, .ofOdd n₂ _ _ => Int.Internal.ble 0 n₂
+  | .ofOdd n₁ _ _, .zero => Int.Internal.ble n₁ 0
   | .ofOdd n₁ k₁ _, .ofOdd n₂ k₂ _ =>
     match k₂ - k₁ with
-    | (l : Nat) => (n₁ <<< l) ≤ n₂
-    | -((l+1 : Nat)) => n₁ ≤ (n₂ <<< (l + 1))
+    | (l : Nat) => Int.Internal.ble (n₁ <<< l) n₂
+    | -((l+1 : Nat)) => Int.Internal.ble n₁ (n₂ <<< (l + 1))
 
 theorem blt_iff_toRat {x y : Dyadic} : blt x y ↔ x.toRat < y.toRat := by
   rcases x with _ | ⟨n₁, k₁, hn₁⟩ <;> rcases y with _ | ⟨n₂, k₂, hn₂⟩
   · decide
-  · simp only [blt, decide_eq_true_eq, Dyadic.zero_eq, toRat_zero, toRat_ofOdd_eq_mul_two_pow,
+  · simp only [blt, Int.Internal.blt_eq_true_iff, Dyadic.zero_eq, toRat_zero, toRat_ofOdd_eq_mul_two_pow,
       Rat.mul_pos_iff_of_pos_right (Rat.zpow_pos (by decide : (0 : Rat) < 2)), Rat.intCast_pos]
-  · simp only [blt, decide_eq_true_eq, Dyadic.zero_eq, toRat_zero, toRat_ofOdd_eq_mul_two_pow,
+  · simp only [blt, Int.Internal.blt_eq_true_iff, Dyadic.zero_eq, toRat_zero, toRat_ofOdd_eq_mul_two_pow,
       Rat.mul_neg_iff_of_pos_right (Rat.zpow_pos (by decide : (0 : Rat) < 2)), Rat.intCast_neg_iff]
   · simp only [blt, toRat_ofOdd_eq_mul_two_pow,
       ← Rat.div_lt_iff (Rat.zpow_pos (by decide : (0 : Rat) < 2)), Rat.div_def, ← Rat.zpow_neg,
@@ -658,8 +658,8 @@ theorem blt_iff_toRat {x y : Dyadic} : blt x y ↔ x.toRat < y.toRat := by
       ← Rat.zpow_add, Int.shiftLeft_eq]
     rw [Int.add_comm, Int.add_neg_eq_sub]
     split
-    · simp [decide_eq_true_eq, ← Rat.intCast_lt_intCast, Rat.zpow_natCast, *]
-    · simp only [decide_eq_true_eq, Int.negSucc_eq, *]
+    · simp [Int.Internal.blt_eq_true_iff, ← Rat.intCast_lt_intCast, Rat.zpow_natCast, *]
+    · simp only [Int.Internal.blt_eq_true_iff, Int.negSucc_eq, *]
       rw [Rat.zpow_neg, ← Rat.div_def, Rat.div_lt_iff (Rat.zpow_pos (by decide))]
       simp [← Rat.intCast_lt_intCast, ← Rat.zpow_natCast, *]
 
@@ -674,8 +674,8 @@ theorem blt_eq_false_iff : blt x y = false ↔ ble y x = true := by
     rcases k₁ - k₂ with (_ | _) | _
     · simp
     · simp [← Int.negSucc_eq]
-    · simp only [Int.neg_negSucc, decide_eq_false_iff_not, Int.not_lt,
-        decide_eq_true_eq]
+    · simp only [Int.neg_negSucc, Int.Internal.blt_eq_false_iff, Int.not_lt,
+        Int.Internal.ble_eq_true_iff]
 
 theorem ble_iff_toRat : ble x y ↔ x.toRat ≤ y.toRat := by
   rw [← blt_eq_false_iff, Bool.eq_false_iff]

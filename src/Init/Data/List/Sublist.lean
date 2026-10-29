@@ -61,7 +61,7 @@ variable [BEq α]
   simp [isSuffixOf]
 
 @[simp, grind =] theorem isSuffixOf_replicate {a : α} :
-    isSuffixOf l (replicate n a) = (decide (l.length ≤ n) && l.all (· == a)) := by
+    isSuffixOf l (replicate n a) = (UDecidable.decide (l.length ≤ n) && l.all (· == a)) := by
   simp [isSuffixOf, all_eq]
 
 end isSuffixOf

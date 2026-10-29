@@ -89,7 +89,7 @@ noncomputable def div2Induction {motive : Nat → Sort u}
 @[simp, grind =] theorem zero_testBit (i : Nat) : testBit 0 i = false := by
   simp only [testBit, zero_shiftRight, and_zero, bne_self_eq_false]
 
-@[simp, grind =] theorem testBit_zero (x : Nat) : testBit x 0 = decide (x % 2 = 1) := by
+@[simp, grind =] theorem testBit_zero (x : Nat) : testBit x 0 = UDecidable.decide (x % 2 = 1) := by
   cases mod_two_eq_zero_or_one x with | _ p => simp [testBit, p]
 
 theorem mod_two_eq_one_iff_testBit_zero : (x % 2 = 1) ↔ x.testBit 0 = true := by
@@ -129,7 +129,7 @@ theorem testBit_div_two_pow (x i : Nat) : testBit (x / 2 ^ n) i = testBit x (i +
   testBit_add .. |>.symm
 
 @[grind =]
-theorem testBit_eq_decide_div_mod_eq {x : Nat} : testBit x i = decide (x / 2^i % 2 = 1) := by
+theorem testBit_eq_decide_div_mod_eq {x : Nat} : testBit x i = UDecidable.decide (x / 2^i % 2 = 1) := by
   induction i generalizing x with
   | zero =>
     unfold testBit
@@ -299,7 +299,7 @@ theorem testBit_two_pow_add_gt {i j : Nat} (j_lt_i : j < i) (x : Nat) :
     simp [Nat.pow_succ, Nat.mul_comm _ 2]
 
 @[simp, grind =] theorem testBit_mod_two_pow (x j i : Nat) :
-    testBit (x % 2^j) i = (decide (i < j) && testBit x i) := by
+    testBit (x % 2^j) i = (UDecidable.decide (i < j) && testBit x i) := by
   induction x using Nat.strongRecOn generalizing j i with
   | ind x hyp =>
     rw [mod_eq_ite]
@@ -327,12 +327,12 @@ theorem testBit_two_pow_add_gt {i j : Nat} (j_lt_i : j < i) (x : Nat) :
 theorem testBit_one_zero : testBit 1 0 = true := by trivial
 
 theorem not_decide_mod_two_eq_one (x : Nat)
-    : (!decide (x % 2 = 1)) = decide (x % 2 = 0) := by
+    : (!UDecidable.decide (x % 2 = 1)) = UDecidable.decide (x % 2 = 0) := by
   cases Nat.mod_two_eq_zero_or_one x <;> (rename_i p; simp [p])
 
 @[grind =]
 theorem testBit_two_pow_sub_succ (h₂ : x < 2 ^ n) (i : Nat) :
-    testBit (2^n - (x + 1)) i = (decide (i < n) && ! testBit x i) := by
+    testBit (2^n - (x + 1)) i = (UDecidable.decide (i < n) && ! testBit x i) := by
   induction i generalizing n x with
   | zero =>
     match n with
@@ -344,20 +344,20 @@ theorem testBit_two_pow_sub_succ (h₂ : x < 2 ^ n) (i : Nat) :
     simp only [testBit_succ]
     match n with
     | 0 =>
-      simp [decide_eq_false]
+      simp [UDecidable.decide_eq_false]
     | n+1 =>
       rw [Nat.two_pow_succ_sub_succ_div_two, ih]
       · simp [Nat.succ_lt_succ_iff]
       · omega
 
-@[simp] theorem testBit_two_pow_sub_one (n i : Nat) : testBit (2^n-1) i = decide (i < n) := by
+@[simp] theorem testBit_two_pow_sub_one (n i : Nat) : testBit (2^n-1) i = UDecidable.decide (i < n) := by
   rw [testBit_two_pow_sub_succ]
   · simp
   · exact Nat.two_pow_pos _
 
 @[grind =]
 theorem testBit_bool_toNat (b : Bool) (i : Nat) :
-    testBit (Bool.toNat b) i = (decide (i = 0) && b) := by
+    testBit (Bool.toNat b) i = (UDecidable.decide (i = 0) && b) := by
   cases b <;> cases i <;>
   simp [testBit_eq_decide_div_mod_eq,
         Nat.mod_eq_of_lt]
@@ -368,7 +368,7 @@ theorem testBit_one_eq_true_iff_self_eq_zero {i : Nat} :
   cases i <;> simp
 
 @[grind =]
-theorem testBit_two_pow {n m : Nat} : testBit (2 ^ n) m = decide (n = m) := by
+theorem testBit_two_pow {n m : Nat} : testBit (2 ^ n) m = UDecidable.decide (n = m) := by
   rw [testBit, shiftRight_eq_div_pow]
   by_cases h : n = m
   · simp [h, Nat.div_self (Nat.pow_pos Nat.zero_lt_two)]
@@ -395,7 +395,7 @@ theorem testBit_two_pow_of_ne {n m : Nat} (hm : n ≠ m) : testBit (2 ^ n) m = f
   | zero => simp
   | succ n =>
     rw [mod_eq_of_lt (a := 1) (Nat.one_lt_two_pow (by omega)), mod_two_eq_one_iff_testBit_zero, testBit_two_pow_sub_one ]
-    simp only [zero_lt_succ, decide_true]
+    simp only [zero_lt_succ, UDecidable.decide_true]
 
 @[simp] theorem mod_two_pos_mod_two_eq_one : x % 2 ^ j % 2 = 1 ↔ (0 < j) ∧ x % 2 = 1 := by
   rw [mod_two_eq_one_iff_testBit_zero, testBit_mod_two_pow]
@@ -421,11 +421,11 @@ theorem testBit_bitwise (of_false_false : f false false = false) (x y i : Nat) :
       simp only [x_zero, y_zero, ←Nat.two_mul]
       cases i with
       | zero =>
-        cases p : f (decide (x % 2 = 1)) (decide (y % 2 = 1)) <;>
-          simp [p]
+        cases p : f (UDecidable.decide (x % 2 = 1)) (UDecidable.decide (y % 2 = 1)) <;>
+          simp [p, Bool.beq_eq_udecide_eq]
       | succ i =>
         have hyp_i := hyp i (Nat.le_refl (i+1))
-        cases p : f (decide (x % 2 = 1)) (decide (y % 2 = 1)) <;>
+        cases p : f (x % 2 == 1) (y % 2 == 1) <;>
           simp [hyp_i, Nat.mul_add_div]
 
 /-! ### bitwise -/
@@ -469,7 +469,7 @@ theorem bitwise_lt_two_pow (left : x < 2^n) (right : y < 2^n) : (Nat.bitwise f x
     else
       simp only [x_zero, y_zero]
       have hyp1 := hyp (div_two_le_of_lt_two left) (div_two_le_of_lt_two right)
-      by_cases p : f (decide (x % 2 = 1)) (decide (y % 2 = 1)) = true <;>
+      by_cases p : f (x % 2 == 1) (y % 2 == 1) = true <;>
         simp [p, Nat.pow_succ, mul_succ, Nat.add_assoc]
       case pos =>
         apply lt_of_succ_le
@@ -488,7 +488,7 @@ theorem bitwise_mod_two_pow (of_false_false : f false false = false := by rfl) :
   apply Nat.eq_of_testBit_eq
   simp only [testBit_mod_two_pow, testBit_bitwise of_false_false]
   intro i
-  by_cases h : i < n <;> simp only [h, decide_true, decide_false, Bool.true_and, Bool.false_and,
+  by_cases h : i < n <;> simp only [h, UDecidable.decide_true, UDecidable.decide_false, Bool.true_and, Bool.false_and,
     of_false_false]
 
 /-! ### and -/
@@ -748,7 +748,7 @@ theorem testBit_two_pow_mul_add (a : Nat) {b i : Nat} (b_lt : b < 2^i) (j : Nat)
 
 @[grind =]
 theorem testBit_two_pow_mul :
-    testBit (2 ^ i * a) j = (decide (j ≥ i) && testBit a (j-i)) := by
+    testBit (2 ^ i * a) j = (UDecidable.decide (j ≥ i) && testBit a (j-i)) := by
   have gen := testBit_two_pow_mul_add a (Nat.two_pow_pos i) j
   simp at gen
   rw [gen]
@@ -757,7 +757,7 @@ theorem testBit_two_pow_mul :
 
 @[grind =] -- Ideally `grind` could do this just with `testBit_two_pow_mul`.
 theorem testBit_mul_two_pow (x j i : Nat) :
-    (x * 2 ^ i).testBit j = (decide (i ≤ j) && x.testBit (j - i)) := by
+    (x * 2 ^ i).testBit j = (UDecidable.decide (i ≤ j) && x.testBit (j - i)) := by
   rw [Nat.mul_comm, testBit_two_pow_mul]
 
 theorem two_pow_add_eq_or_of_lt {b : Nat} (b_lt : b < 2^i) (a : Nat) :
@@ -783,7 +783,7 @@ theorem or_two_pow_eq_add_of_lt {a n : Nat} (h : a < 2 ^ n) : a ||| 2 ^ n = a + 
 /-! ### shiftLeft and shiftRight -/
 
 @[simp, grind =] theorem testBit_shiftLeft (x : Nat) : testBit (x <<< i) j =
-    (decide (j ≥ i) && testBit x (j-i)) := by
+    (UDecidable.decide (j ≥ i) && testBit x (j-i)) := by
   simp [shiftLeft_eq, Nat.mul_comm _ (2^_), testBit_two_pow_mul]
 
 @[simp, grind =] theorem testBit_shiftRight (x : Nat) : testBit (x >>> i) j = testBit x (i+j) := by
@@ -817,9 +817,9 @@ theorem shiftLeft_xor_distrib {a b : Nat} : (a ^^^ b) <<< i = a <<< i ^^^ b <<< 
   shiftLeft_bitwise_distrib
 
 @[simp] theorem decide_shiftRight_mod_two_eq_one :
-    decide (x >>> i % 2 = 1) = x.testBit i := by
+    UDecidable.decide (x >>> i % 2 = 1) = x.testBit i := by
   simp only [testBit, one_and_eq_mod_two, mod_two_bne_zero]
-  exact (Bool.beq_eq_decide_eq _ _).symm
+  exact (Bool.beq_eq_udecide_eq _ _).symm
 
 theorem shiftRight_bitwise_distrib {a b : Nat} (of_false_false : f false false = false := by rfl) :
     (bitwise f a b) >>> i = bitwise f (a >>> i) (b >>> i) := by

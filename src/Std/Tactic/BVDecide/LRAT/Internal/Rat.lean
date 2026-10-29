@@ -54,12 +54,9 @@ theorem checkRatHintsExhaustive_spec {s : State} {ratHints : Array (Nat × Array
   intro c hc hmem
   simp only [checkRatHintsExhaustive, HashSet.ofArray_eq_ofList, Array.toList_map,
     HashSet.contains_ofList, List.contains_eq_mem, List.mem_map, Array.mem_toList_iff, Prod.exists,
-    exists_and_right, exists_eq_right, decide_eq_true_eq, Bool.decide_or, decide_not,
-    Bool.decide_eq_true] at h
+    exists_and_right, exists_eq_right, UDecidable.decide_eq_true_eq] at h
   rcases forall_of_all_eq_true h c hc with ⟨idx, hidx1, hidx2⟩
-  simp only [List.mem_map, Array.mem_toList_iff, Prod.exists, exists_and_right, exists_eq_right,
-    Bool.or_eq_true, Bool.not_eq_eq_eq_not, Bool.not_true, decide_eq_false_iff_not,
-    decide_eq_true_eq] at hidx2
+  simp only [UDecidable.decide_eq_true_eq] at hidx2
   rcases hidx2 with hidx2 | hidx2
   · contradiction
   · rcases hidx2 with ⟨hints, hmem⟩

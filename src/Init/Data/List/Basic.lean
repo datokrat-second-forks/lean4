@@ -176,6 +176,33 @@ Examples:
 theorem isEqv_cons₂ : isEqv (a::as) (b::bs) eqv = (eqv a b && isEqv as bs eqv) := isEqv_cons_cons
 
 
+end List
+
+namespace UDecidable
+
+instance instListEqNil (l : List α) : UDecidable (l = []) :=
+  match l with
+  | [] => UDecidable.isTrue rfl
+  | _ :: _ => UDecidable.isFalse nofun
+
+instance instListNilEq (l : List α) : UDecidable ([] = l) :=
+  match l with
+  | [] => UDecidable.isTrue rfl
+  | _ :: _ => UDecidable.isFalse nofun
+
+instance instListEq [UDecidableEq α] : UDecidableEq (List α)
+  | [], [] => UDecidable.isTrue rfl
+  | [], _ :: _ => UDecidable.isFalse nofun
+  | _ :: _, [] => UDecidable.isFalse nofun
+  | a :: as, b :: bs =>
+    have := instListEq as bs
+    UDecidable.ofIff (a = b ∧ as = bs)
+      ⟨fun ⟨h₁, h₂⟩ => h₁ ▸ h₂ ▸ rfl, List.cons.inj⟩
+
+end UDecidable
+
+namespace List
+
 /-! ## Lexicographic ordering -/
 
 /--
@@ -274,7 +301,7 @@ The lexicographic order with respect to `lt` is:
 * `(a :: as).lex (b :: bs)` is true if `lt a b` or `a == b` and `lex lt as bs` is true.
 -/
 @[specialize]
-def lex [BEq α] (l₁ l₂ : List α) (lt : α → α → Bool := by exact (· < ·)) : Bool :=
+def lex [BEq α] (l₁ l₂ : List α) (lt : α → α → Bool := by exact decideLT) : Bool :=
   match l₁, l₂ with
   | [],      _ :: _  => true
   | _,      []       => false

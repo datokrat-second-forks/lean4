@@ -153,7 +153,7 @@ function is faster that `String.Iterator.curr` due to avoiding a run-time bounds
 -/
 @[inline] def curr' (it : Iterator) (h : it.hasNext) : Char :=
   match it with
-  | ⟨s, i⟩ => i.get' s (by simpa only [hasNext, rawEndPos, decide_eq_true_eq, Pos.Raw.atEnd, ge_iff_le, Nat.not_le] using h)
+  | ⟨s, i⟩ => i.get' s (by simpa only [hasNext, rawEndPos, UDecidable.decide_eq_true_eq, Pos.Raw.atEnd, ge_iff_le, Nat.not_le] using h)
 
 /--
 Moves the iterator's position forward by one character, unconditionally.
@@ -163,7 +163,7 @@ This function is faster that `String.Iterator.next` due to avoiding a run-time b
 -/
 @[inline] def next' (it : Iterator) (h : it.hasNext) : Iterator :=
   match it with
-  | ⟨s, i⟩ => ⟨s, i.next' s (by simpa only [hasNext, rawEndPos, decide_eq_true_eq, Pos.Raw.atEnd, ge_iff_le, Nat.not_le] using h)⟩
+  | ⟨s, i⟩ => ⟨s, i.next' s (by simpa only [hasNext, rawEndPos, UDecidable.decide_eq_true_eq, Pos.Raw.atEnd, ge_iff_le, Nat.not_le] using h)⟩
 
 /--
 Moves the iterator's position to the end of the string, just past the last character.
@@ -221,7 +221,7 @@ macro_rules
   `(tactic| with_reducible apply String.Legacy.Iterator.sizeOf_next_lt_of_hasNext; assumption)
 
 theorem sizeOf_next_lt_of_atEnd (i : String.Legacy.Iterator) (h : ¬ i.atEnd = true) : sizeOf i.next < sizeOf i :=
-  have h : i.hasNext := decide_eq_true <| Nat.gt_of_not_le <| mt decide_eq_true h
+  have h : i.hasNext := UDecidable.decide_eq_true <| Nat.gt_of_not_le <| mt UDecidable.decide_eq_true h
   sizeOf_next_lt_of_hasNext i h
 
 macro_rules

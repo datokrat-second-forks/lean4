@@ -2197,7 +2197,7 @@ theorem flatten_filter_not_isEmpty {xss : Array (Array α)} :
 
 theorem flatten_filter_ne_empty [DecidablePred fun xs : Array α => xs ≠ #[]] {xss : Array (Array α)} :
     flatten (xss.filter fun xs => xs ≠ #[]) = xss.flatten := by
-  simp only [ne_eq, ← isEmpty_iff, Bool.not_eq_true, Bool.decide_eq_false,
+  simp only [ne_eq, ← isEmpty_iff, Bool.not_eq_true, UDecidable.decide_eq_decidable_decide, Bool.decide_eq_false,
     flatten_filter_not_isEmpty]
 
 @[simp, grind _=_] theorem flatten_append {xss₁ xss₂ : Array (Array α)} :

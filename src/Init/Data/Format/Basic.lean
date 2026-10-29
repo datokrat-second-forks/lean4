@@ -153,7 +153,7 @@ private structure SpaceResult where
   deriving Inhabited
 
 @[inline] private def merge (w : Nat) (r₁ : SpaceResult) (r₂ : Nat → SpaceResult) : SpaceResult :=
-  if r₁.space > w || r₁.foundLine then
+  if Nat.blt w r₁.space || r₁.foundLine then
     r₁
   else
     let r₂ := r₂ (w - r₁.space);
@@ -247,7 +247,7 @@ private def pushGroup (flb : FlattenBehavior) (items : List WorkItem) (gs : List
   let r  := spaceUptoLine' [g] k (w-k)
   let r' := merge (w-k) r (spaceUptoLine' gs k)
   -- Prevent flattening if any item contains a hard line break, except within `fill` if it is ungrouped (=> unflattened)
-  return { g with fla := .allow (!r.foundFlattenedHardLine && r'.space <= w-k) }::gs
+  return { g with fla := .allow (!r.foundFlattenedHardLine && Nat.ble r'.space (w-k)) }::gs
 
 private partial def be (w : Nat) [Monad m] [MonadPrettyFormat m] : List WorkGroup → m Unit
   | []                           => pure ()

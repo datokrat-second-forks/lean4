@@ -175,7 +175,7 @@ theorem denote_blast (aig : AIG α) (lhs rhs : BitVec w) (assign : α → Bool)
       simp only [Nat.succ_eq_add_one, RefVec.denote_ite,
         denote_blastConst,
         BitVec.ofNat_eq_ofNat, BitVec.getLsbD_zero, Bool.ite_false_right,
-        Bool.decide_eq_true]
+        UDecidable.decide_bool_eq_true]
       split
       next heq =>
         rw [← hright] at heq

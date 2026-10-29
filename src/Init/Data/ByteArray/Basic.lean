@@ -453,7 +453,7 @@ def curr' (it : Iterator) (h : it.hasNext) : UInt8 :=
   match it with
   | ⟨arr, i⟩ =>
     have : i < arr.size := by
-      simp only [hasNext, decide_eq_true_eq] at h
+      simp only [hasNext, UDecidable.decide_eq_true_eq] at h
       assumption
     arr[i]
 

@@ -33,6 +33,12 @@ public instance : LE String :=
 public instance decLE (s₁ s₂ : String) : Decidable (s₁ ≤ s₂) :=
   inferInstanceAs (Decidable (Not _))
 
+public instance : UDecidableLT String :=
+  fun a b => UDecidable.ofDecidable (a < b)
+
+public instance : UDecidableLE String :=
+  fun a b => UDecidable.ofDecidable (a ≤ b)
+
 @[simp]
 public theorem toByteArray_lt_toByteArray_iff {s t : String} :
   s.toByteArray < t.toByteArray ↔ s < t := Iff.rfl

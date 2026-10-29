@@ -2752,7 +2752,7 @@ theorem get?_union_of_contains_eq_false_right [LawfulBEq α] (h₁ : m₁.val.WF
   revert contains_eq_false
   simp_to_model [contains]
   simp only [containsKey_eq_contains_map_fst, List.contains_eq_mem, List.mem_map,
-    decide_eq_false_iff_not, not_exists, not_and, imp_self]
+    UDecidable.decide_eq_false_iff_not, not_exists, not_and, imp_self]
 
 /- get -/
 theorem get_union_of_contains_right [LawfulBEq α] (h₁ : m₁.val.WF) (h₂ : m₂.val.WF)
