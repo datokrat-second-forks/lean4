@@ -55,13 +55,13 @@ This function is prefixed with {lit}`Monadic` in order to disambiguate it from t
 iterators of type {name}`Iter`.
 -/
 @[inline]
-def Iterator.Monadic.step [UpwardEnumerable α] [LE α] [DecidableLE α]
+def Iterator.Monadic.step [UpwardEnumerable α] [LE α] [UDecidableLE α]
     (it : IterM (α := Rxc.Iterator α) Id α) :
     IterStep (IterM (α := Rxc.Iterator α) Id α) α :=
   match it.internalState.next with
   | none => .done
   | some next =>
-    if next ≤ it.internalState.upperBound then
+    uif next ≤ it.internalState.upperBound then
       .yield ⟨⟨UpwardEnumerable.succ? next, it.internalState.upperBound⟩⟩ next
     else
       .done
@@ -70,17 +70,17 @@ def Iterator.Monadic.step [UpwardEnumerable α] [LE α] [DecidableLE α]
 The pure function mapping a range iterator of type {name}`Iter` to the next step of the iterator.
 -/
 @[always_inline, inline]
-def Iterator.step [UpwardEnumerable α] [LE α] [DecidableLE α]
+def Iterator.step [UpwardEnumerable α] [LE α] [UDecidableLE α]
     (it : Iter (α := Rxc.Iterator α) α) :
     IterStep (Iter (α := Rxc.Iterator α) α) α :=
   match it.internalState.next with
   | none => .done
-  | some next => if next ≤ it.internalState.upperBound then
+  | some next => uif next ≤ it.internalState.upperBound then
       .yield ⟨⟨UpwardEnumerable.succ? next, it.internalState.upperBound⟩⟩ next
     else
       .done
 
-theorem Iterator.step_eq_monadicStep [UpwardEnumerable α] [LE α] [DecidableLE α]
+theorem Iterator.step_eq_monadicStep [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it : Iter (α := Rxc.Iterator α) α} :
     Iterator.step it = (Iterator.Monadic.step it.toIterM).mapIterator IterM.toIter := by
   simp only [step, Monadic.step, Iter.toIterM]
@@ -89,22 +89,22 @@ theorem Iterator.step_eq_monadicStep [UpwardEnumerable α] [LE α] [DecidableLE 
   · split <;> rfl
 
 @[always_inline, inline]
-instance [UpwardEnumerable α] [LE α] [DecidableLE α] :
+instance [UpwardEnumerable α] [LE α] [UDecidableLE α] :
     Iterator (Rxc.Iterator α) Id α where
   IsPlausibleStep it step := step = Iterator.Monadic.step it
   step it := pure <| .deflate <| ⟨Iterator.Monadic.step it, rfl⟩
 
-theorem Iterator.Monadic.isPlausibleStep_iff [UpwardEnumerable α] [LE α] [DecidableLE α]
+theorem Iterator.Monadic.isPlausibleStep_iff [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it : IterM (α := Rxc.Iterator α) Id α} {step} :
     it.IsPlausibleStep step ↔ step = Iterator.Monadic.step it := by
   exact Iff.rfl
 
-theorem Iterator.Monadic.step_eq_step [UpwardEnumerable α] [LE α] [DecidableLE α]
+theorem Iterator.Monadic.step_eq_step [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it : IterM (α := Rxc.Iterator α) Id α} :
     Std.Iterator.step it = pure (.deflate ⟨Iterator.Monadic.step it, isPlausibleStep_iff.mpr rfl⟩) := by
   simp [Std.Iterator.step]
 
-theorem Iterator.isPlausibleStep_iff [UpwardEnumerable α] [LE α] [DecidableLE α]
+theorem Iterator.isPlausibleStep_iff [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it : Iter (α := Rxc.Iterator α) α} {step} :
     it.IsPlausibleStep step ↔ step = Iterator.step it := by
   simp only [Iter.IsPlausibleStep, Monadic.isPlausibleStep_iff, step_eq_monadicStep]
@@ -117,20 +117,20 @@ theorem Iterator.isPlausibleStep_iff [UpwardEnumerable α] [LE α] [DecidableLE 
   · rintro rfl
     simp only [IterStep.mapIterator_mapIterator, Iter.toIterM_comp_toIter, IterStep.mapIterator_id]
 
-theorem Iterator.step_eq_step [UpwardEnumerable α] [LE α] [DecidableLE α]
+theorem Iterator.step_eq_step [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it : Iter (α := Rxc.Iterator α) α} :
     it.step = ⟨Iterator.step it, isPlausibleStep_iff.mpr rfl⟩ := by
   simp [step_eq_monadicStep, IterM.Step.toPure, Iter.step_eq]
 
 theorem Iterator.Monadic.isPlausibleOutput_next {a}
-    [UpwardEnumerable α] [LE α] [DecidableLE α]
+    [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it : IterM (α := Rxc.Iterator α) Id α} (h : it.internalState.next = some a)
     (hP : a ≤ it.internalState.upperBound) :
     it.IsPlausibleOutput a := by
   simp [IterM.IsPlausibleOutput, Monadic.isPlausibleStep_iff, Monadic.step, h, hP]
 
 theorem Iterator.Monadic.isPlausibleOutput_iff
-    [UpwardEnumerable α] [LE α] [DecidableLE α]
+    [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it : IterM (α := Rxc.Iterator α) Id α} :
     it.IsPlausibleOutput a ↔
       it.internalState.next = some a ∧
@@ -147,14 +147,14 @@ theorem Iterator.Monadic.isPlausibleOutput_iff
       simp_all
 
 theorem Iterator.isPlausibleOutput_next
-    [UpwardEnumerable α] [LE α] [DecidableLE α]
+    [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it : Iter (α := Rxc.Iterator α) α} (h : it.internalState.next = some a)
     (hP : a ≤ it.internalState.upperBound) :
     it.IsPlausibleOutput a := by
   simp [Iter.IsPlausibleOutput, Monadic.isPlausibleOutput_iff, Iter.toIterM, h, hP]
 
 theorem Iterator.isPlausibleOutput_iff
-    [UpwardEnumerable α] [LE α] [DecidableLE α]
+    [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it : Iter (α := Rxc.Iterator α) α} :
     it.IsPlausibleOutput a ↔
       it.internalState.next = some a ∧
@@ -162,7 +162,7 @@ theorem Iterator.isPlausibleOutput_iff
   simp [Iter.IsPlausibleOutput, Monadic.isPlausibleOutput_iff, Iter.toIterM]
 
 theorem Iterator.Monadic.isPlausibleSuccessorOf_iff
-    [UpwardEnumerable α] [LE α] [DecidableLE α]
+    [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it' it : IterM (α := Rxc.Iterator α) Id α} :
     it'.IsPlausibleSuccessorOf it ↔
       ∃ a, it.internalState.next = some a ∧
@@ -183,12 +183,12 @@ theorem Iterator.Monadic.isPlausibleSuccessorOf_iff
       · cases h
   · rintro ⟨a, h, hP, h'⟩
     refine ⟨.yield it' a, rfl, ?_⟩
-    simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, step, h, hP, ↓reduceIte,
-      IterStep.yield.injEq, and_true, instIteratorIteratorIdOfUpwardEnumerableOfDecidableLE] -- TODO
+    simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, step, h, hP, ↓reduceUIte,
+      IterStep.yield.injEq, and_true, instIteratorIteratorIdOfUpwardEnumerableOfUDecidableLE] -- TODO
     simp [h'.1, ← h'.2]
 
 theorem Iterator.isPlausibleSuccessorOf_iff
-    [UpwardEnumerable α] [LE α] [DecidableLE α]
+    [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it' it : Iter (α := Rxc.Iterator α) α} :
     it'.IsPlausibleSuccessorOf it ↔
       ∃ a, it.internalState.next = some a ∧
@@ -198,7 +198,7 @@ theorem Iterator.isPlausibleSuccessorOf_iff
   simp [Iter.IsPlausibleSuccessorOf, Monadic.isPlausibleSuccessorOf_iff, Iter.toIterM]
 
 theorem Iterator.isSome_next_of_isPlausibleIndirectOutput
-    [UpwardEnumerable α] [LE α] [DecidableLE α]
+    [UpwardEnumerable α] [LE α] [UDecidableLE α]
     {it : Iter (α := Rxc.Iterator α) α} {out : α} (h : it.IsPlausibleIndirectOutput out) :
     it.internalState.next.isSome := by
   cases h
@@ -233,7 +233,7 @@ private theorem List.length_filter_strict_mono {l : List α} {P Q : α → Bool}
     rw [← heq, List.mem_filter] at this
     exact this.2
 
-private def Iterator.instFinitenessRelation [UpwardEnumerable α] [LE α] [DecidableLE α]
+private def Iterator.instFinitenessRelation [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] [Rxc.IsAlwaysFinite α] :
     FinitenessRelation (Rxc.Iterator α) Id where
   Rel it' it := it'.IsPlausibleSuccessorOf it
@@ -245,10 +245,10 @@ private def Iterator.instFinitenessRelation [UpwardEnumerable α] [LE α] [Decid
       intro bound
       constructor
       intro it' ⟨step, hs₁, hs₂⟩
-      simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, Monadic.step, instIteratorIteratorIdOfUpwardEnumerableOfDecidableLE] at hs₂ -- TODO
+      simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, Monadic.step, instIteratorIteratorIdOfUpwardEnumerableOfUDecidableLE] at hs₂ -- TODO
       simp [hs₂, IterStep.successor] at hs₁
     simp only [IterM.IsPlausibleSuccessorOf, IterM.IsPlausibleStep, Iterator.IsPlausibleStep,
-      Monadic.step, exists_eq_right, instIteratorIteratorIdOfUpwardEnumerableOfDecidableLE] at hnone ⊢ -- TODO
+      Monadic.step, exists_eq_right, instIteratorIteratorIdOfUpwardEnumerableOfUDecidableLE] at hnone ⊢ -- TODO
     match it with
     | ⟨⟨none, _⟩⟩ => apply hnone
     | ⟨⟨some init, bound⟩⟩ =>
@@ -280,12 +280,12 @@ private def Iterator.instFinitenessRelation [UpwardEnumerable α] [LE α] [Decid
           · cases h
   subrelation := id
 
-instance Iterator.instFinite [UpwardEnumerable α] [LE α] [DecidableLE α]
+instance Iterator.instFinite [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] [Rxc.IsAlwaysFinite α] :
     Finite (Rxc.Iterator α) Id :=
   .of_finitenessRelation instFinitenessRelation
 
-private def Iterator.instProductivenessRelation [UpwardEnumerable α] [LE α] [DecidableLE α]
+private def Iterator.instProductivenessRelation [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] :
     ProductivenessRelation (Rxc.Iterator α) Id where
   Rel := emptyWf.rel
@@ -293,24 +293,24 @@ private def Iterator.instProductivenessRelation [UpwardEnumerable α] [LE α] [D
   subrelation {it it'} h := by
     exfalso
     simp only [IterM.IsPlausibleSkipSuccessorOf, IterM.IsPlausibleStep,
-      Iterator.IsPlausibleStep, Monadic.step, instIteratorIteratorIdOfUpwardEnumerableOfDecidableLE] at h
+      Iterator.IsPlausibleStep, Monadic.step, instIteratorIteratorIdOfUpwardEnumerableOfUDecidableLE] at h
     split at h
     · cases h
     · split at h
       · cases h
       · cases h
 
-instance Iterator.instProductive [UpwardEnumerable α] [LE α] [DecidableLE α]
+instance Iterator.instProductive [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] :
     Productive (Rxc.Iterator α) Id :=
   .of_productivenessRelation instProductivenessRelation
 
-instance Iterator.instIteratorAccess [UpwardEnumerable α] [LE α] [DecidableLE α]
+instance Iterator.instIteratorAccess [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] :
     IteratorAccess (Rxc.Iterator α) Id where
   nextAtIdx? it n := ⟨match it.internalState.next.bind (UpwardEnumerable.succMany? n) with
     | none => .done
-    | some next => if next ≤ it.internalState.upperBound then
+    | some next => uif next ≤ it.internalState.upperBound then
         .yield ⟨⟨UpwardEnumerable.succ? next, it.internalState.upperBound⟩⟩ next
       else
         .done, (by
@@ -345,7 +345,7 @@ instance Iterator.instIteratorAccess [UpwardEnumerable α] [LE α] [DecidableLE 
             simp only [heq] at ih
             by_cases heq'' : out ≤ it.internalState.upperBound
             · apply IterM.IsPlausibleNthOutputStep.yield
-              · simp only [Monadic.isPlausibleStep_iff, Monadic.step, heq', heq'', ↓reduceIte,
+              · simp only [Monadic.isPlausibleStep_iff, Monadic.step, heq', heq'', ↓reduceUIte,
                 IterStep.yield.injEq]
                 exact ⟨rfl, rfl⟩
               · exact ih
@@ -361,7 +361,7 @@ instance Iterator.instIteratorAccess [UpwardEnumerable α] [LE α] [DecidableLE 
           simp only [heq] at ih
           by_cases hout : out ≤ it.internalState.upperBound
           · apply IterM.IsPlausibleNthOutputStep.yield
-            · simp only [Monadic.isPlausibleStep_iff, Monadic.step, heq', hout, ↓reduceIte,
+            · simp only [Monadic.isPlausibleStep_iff, Monadic.step, heq', hout, ↓reduceUIte,
               IterStep.yield.injEq]
               exact ⟨rfl, rfl⟩
             · apply ih
@@ -370,17 +370,17 @@ instance Iterator.instIteratorAccess [UpwardEnumerable α] [LE α] [DecidableLE 
             have := hout.imp (fun h : next ≤ it.internalState.upperBound => by
               rw [← UpwardEnumerable.le_iff] at hle
               exact Trans.trans hle h)
-            simp only [this, ↓reduceIte]
-            simp only [this, ↓reduceIte] at ih
+            simp only [this, ↓reduceUIte]
+            simp only [this, ↓reduceUIte] at ih
             apply IterM.IsPlausibleNthOutputStep.done
             simp [Monadic.isPlausibleStep_iff, Monadic.step, heq', hout])⟩
 
-instance Iterator.instLawfulDeterministicIterator [UpwardEnumerable α] [LE α] [DecidableLE α] :
+instance Iterator.instLawfulDeterministicIterator [UpwardEnumerable α] [LE α] [UDecidableLE α] :
     LawfulDeterministicIterator (Rxc.Iterator α) Id where
   isPlausibleStep_eq_eq it := ⟨Monadic.step it, rfl⟩
 
 theorem Iterator.Monadic.isPlausibleIndirectOutput_iff
-    [UpwardEnumerable α] [LE α] [DecidableLE α] [LawfulUpwardEnumerableLE α]
+    [UpwardEnumerable α] [LE α] [UDecidableLE α] [LawfulUpwardEnumerableLE α]
     [LawfulUpwardEnumerable α]
     {it : IterM (α := Rxc.Iterator α) Id α} {out : α} :
     it.IsPlausibleIndirectOutput out ↔
@@ -423,7 +423,7 @@ theorem Iterator.Monadic.isPlausibleIndirectOutput_iff
       exact Trans.trans (α := α) (r := (· ≤ ·)) (UpwardEnumerable.le_iff.mpr hle) hu
 
 theorem Iterator.isPlausibleIndirectOutput_iff
-    [UpwardEnumerable α] [LE α] [DecidableLE α]
+    [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
     {it : Iter (α := Rxc.Iterator α) α} {out : α} :
     it.IsPlausibleIndirectOutput out ↔
@@ -440,7 +440,7 @@ As long as the compiler cannot optimize away the {name}`Option` in the internal 
 loop implementation.
 -/
 @[always_inline, inline]
-instance Iterator.instIteratorLoop [UpwardEnumerable α] [LE α] [DecidableLE α]
+instance Iterator.instIteratorLoop [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
     {n : Type u → Type w} [Monad n] :
     IteratorLoop (Rxc.Iterator α) Id n where
@@ -457,14 +457,14 @@ instance Iterator.instIteratorLoop [UpwardEnumerable α] [LE α] [DecidableLE α
       haveI : Nonempty γ := ⟨acc⟩
       WellFounded.extrinsicFix₃ (C₃ := fun _ _ _ => n γ) (InvImage (IteratorLoop.rel _ Id Pl) (fun x => (⟨Rxc.Iterator.mk (some x.1) upperBound⟩, x.2.1)))
         (fun next acc (h : LargeEnough next) G => do
-          if hu : next ≤ upperBound then
+          uif hu : next ≤ upperBound then do
             match ← f next h hu acc with
             | ⟨.yield acc', h'⟩ =>
               match hs : UpwardEnumerable.succ? next with
               | some next' => G next' acc' (hl _ _ ?hle' h) ?decreasing
               | none => return acc'
             | ⟨.done acc', _⟩ => return acc'
-          else
+          else do
             return acc) next acc h
   finally
     case hf =>
@@ -485,7 +485,7 @@ instance Iterator.instIteratorLoop [UpwardEnumerable α] [LE α] [DecidableLE α
       simp_wf
       simp [IteratorLoop.rel, Monadic.isPlausibleStep_iff, Monadic.step, *]
 
-private noncomputable def Iterator.instIteratorLoop.loop.wf [UpwardEnumerable α] [LE α] [DecidableLE α]
+private noncomputable def Iterator.instIteratorLoop.loop.wf [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
     {n : Type u → Type w} [Monad n] (γ : Type u)
     (Pl : α → γ → ForInStep γ → Prop)
@@ -494,7 +494,7 @@ private noncomputable def Iterator.instIteratorLoop.loop.wf [UpwardEnumerable α
     (upperBound : α) (acc : γ) (next : α) (h : LargeEnough next)
     (f : (out : α) → LargeEnough out → out ≤ upperBound → (c : γ) → n (Subtype (fun s : ForInStep γ => Pl out c s))) :
     n γ := do
-  if hu : next ≤ upperBound then
+  uif hu : next ≤ upperBound then do
     match ← f next h hu acc with
     | ⟨.yield acc', _⟩ =>
       match hs : UpwardEnumerable.succ? next with
@@ -502,7 +502,7 @@ private noncomputable def Iterator.instIteratorLoop.loop.wf [UpwardEnumerable α
         loop.wf γ Pl wf LargeEnough hl upperBound acc' next' (hl _ _ ?hle h) f
       | none => return acc'
     | ⟨.done acc', _⟩ => return acc'
-  else
+  else do
     return acc
 termination_by IteratorLoop.WithWF.mk ⟨⟨some next, upperBound⟩⟩ acc (hwf := wf)
 decreasing_by
@@ -513,7 +513,7 @@ where finally
     refine ⟨1, ?_⟩
     simpa [succMany?_one] using hs
 
-private theorem Iterator.instIteratorLoop.loop_eq_wf [UpwardEnumerable α] [LE α] [DecidableLE α]
+private theorem Iterator.instIteratorLoop.loop_eq_wf [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α] [Monad n] [LawfulMonad n]
     {γ LargeEnough hl upperBound} {next hn} {acc} (Pl wf f) :
     loop γ Pl LargeEnough hl upperBound acc next hn f =
@@ -523,7 +523,7 @@ private theorem Iterator.instIteratorLoop.loop_eq_wf [UpwardEnumerable α] [LE �
   · exact InvImage.wf _ wf
   · fun_induction loop.wf γ Pl wf LargeEnough hl upperBound acc  next hn f
     · rw [WellFounded.fix_eq]
-      simp only [↓reduceDIte, *]
+      simp only [↓reduceUDIte, *]
       apply bind_congr; intro forInStep
       split
       · simp only
@@ -534,7 +534,7 @@ private theorem Iterator.instIteratorLoop.loop_eq_wf [UpwardEnumerable α] [LE �
     · rw [WellFounded.fix_eq]
       simp_all
 
-private theorem Iterator.instIteratorLoop.loopWf_eq [UpwardEnumerable α] [LE α] [DecidableLE α]
+private theorem Iterator.instIteratorLoop.loopWf_eq [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
     {n : Type u → Type w} [Monad n] [LawfulMonad n] (γ : Type u)
     {lift} [instLawfulMonadLiftFunction : Std.Internal.LawfulMonadLiftBindFunction (m := Id) (n := n) lift]
@@ -544,7 +544,7 @@ private theorem Iterator.instIteratorLoop.loopWf_eq [UpwardEnumerable α] [LE α
     (upperBound : α) (acc : γ) (next : α) (h : LargeEnough next)
     (f : (out : α) → LargeEnough out → out ≤ upperBound → (c : γ) → n (Subtype (fun s : ForInStep γ => Pl out c s))) :
     loop.wf γ Pl wf LargeEnough hl upperBound acc next h f = (do
-      if hu : next ≤ upperBound then
+      uif hu : next ≤ upperBound then do
         match ← f next h hu acc with
         | ⟨.yield acc', _⟩ =>
           letI it' : IterM (α := Rxc.Iterator α) Id α := ⟨⟨succ? next, upperBound⟩⟩
@@ -561,7 +561,7 @@ private theorem Iterator.instIteratorLoop.loopWf_eq [UpwardEnumerable α] [LE α
                 exact h.choose_spec.2)
               acc'
         | ⟨.done acc', _⟩ => return acc'
-      else return acc) := by
+      else do return acc) := by
   haveI : Nonempty γ := ⟨acc⟩
   rw [loop.wf]
   congr 1; ext hu
@@ -590,7 +590,7 @@ termination_by IteratorLoop.WithWF.mk ⟨⟨some next, upperBound⟩⟩ acc (hwf
 decreasing_by
   simp [IteratorLoop.rel, Monadic.isPlausibleStep_iff, Monadic.step, *]
 
-instance Iterator.instLawfulIteratorLoop [UpwardEnumerable α] [LE α] [DecidableLE α]
+instance Iterator.instLawfulIteratorLoop [UpwardEnumerable α] [LE α] [UDecidableLE α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
     {n : Type u → Type w} [Monad n] [LawfulMonad n] :
     LawfulIteratorLoop (Rxc.Iterator α) Id n where
@@ -636,13 +636,13 @@ This function is prefixed with {lit}`Monadic` in order to disambiguate it from t
 of type {name}`Iter`.
 -/
 @[inline, implicit_reducible]
-def Iterator.Monadic.step [UpwardEnumerable α] [LT α] [DecidableLT α]
+def Iterator.Monadic.step [UpwardEnumerable α] [LT α] [UDecidableLT α]
     (it : IterM (α := Rxo.Iterator α) Id α) :
     IterStep (IterM (α := Rxo.Iterator α) Id α) α :=
   match it.internalState.next with
   | none => .done
   | some next =>
-    if next < it.internalState.upperBound then
+    uif next < it.internalState.upperBound then
       .yield ⟨⟨UpwardEnumerable.succ? next, it.internalState.upperBound⟩⟩ next
     else
       .done
@@ -651,17 +651,17 @@ def Iterator.Monadic.step [UpwardEnumerable α] [LT α] [DecidableLT α]
 The pure function mapping a range iterator of type {name}`Iter` to the next step of the iterator.
 -/
 @[always_inline, inline]
-def Iterator.step [UpwardEnumerable α] [LT α] [DecidableLT α]
+def Iterator.step [UpwardEnumerable α] [LT α] [UDecidableLT α]
     (it : Iter (α := Rxo.Iterator α) α) :
     IterStep (Iter (α := Rxo.Iterator α) α) α :=
   match it.internalState.next with
   | none => .done
-  | some next => if next < it.internalState.upperBound then
+  | some next => uif next < it.internalState.upperBound then
       .yield ⟨⟨UpwardEnumerable.succ? next, it.internalState.upperBound⟩⟩ next
     else
       .done
 
-theorem Iterator.step_eq_monadicStep [UpwardEnumerable α] [LT α] [DecidableLT α]
+theorem Iterator.step_eq_monadicStep [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it : Iter (α := Rxo.Iterator α) α} :
     Iterator.step it = (Iterator.Monadic.step it.toIterM).mapIterator IterM.toIter := by
   simp only [step, Monadic.step, Iter.toIterM]
@@ -670,22 +670,22 @@ theorem Iterator.step_eq_monadicStep [UpwardEnumerable α] [LT α] [DecidableLT 
   · split <;> rfl
 
 @[always_inline, inline]
-instance [UpwardEnumerable α] [LT α] [DecidableLT α] :
+instance [UpwardEnumerable α] [LT α] [UDecidableLT α] :
     Iterator (Rxo.Iterator α) Id α where
   IsPlausibleStep it step := step = Iterator.Monadic.step it
   step it := pure (.deflate ⟨Iterator.Monadic.step it, rfl⟩)
 
-theorem Iterator.Monadic.isPlausibleStep_iff [UpwardEnumerable α] [LT α] [DecidableLT α]
+theorem Iterator.Monadic.isPlausibleStep_iff [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it : IterM (α := Rxo.Iterator α) Id α} {step} :
     it.IsPlausibleStep step ↔ step = Iterator.Monadic.step it := by
   exact Iff.rfl
 
-theorem Iterator.Monadic.step_eq_step [UpwardEnumerable α] [LT α] [DecidableLT α]
+theorem Iterator.Monadic.step_eq_step [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it : IterM (α := Rxo.Iterator α) Id α} :
     Std.Iterator.step it = pure (.deflate ⟨Iterator.Monadic.step it, isPlausibleStep_iff.mpr rfl⟩) := by
   simp [Std.Iterator.step]
 
-theorem Iterator.isPlausibleStep_iff [UpwardEnumerable α] [LT α] [DecidableLT α]
+theorem Iterator.isPlausibleStep_iff [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it : Iter (α := Rxo.Iterator α) α} {step} :
     it.IsPlausibleStep step ↔ step = Iterator.step it := by
   simp only [Iter.IsPlausibleStep, Monadic.isPlausibleStep_iff, step_eq_monadicStep]
@@ -698,20 +698,20 @@ theorem Iterator.isPlausibleStep_iff [UpwardEnumerable α] [LT α] [DecidableLT 
   · rintro rfl
     simp only [IterStep.mapIterator_mapIterator, Iter.toIterM_comp_toIter, IterStep.mapIterator_id]
 
-theorem Iterator.step_eq_step [UpwardEnumerable α] [LT α] [DecidableLT α]
+theorem Iterator.step_eq_step [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it : Iter (α := Rxo.Iterator α) α} :
     it.step = ⟨Iterator.step it, isPlausibleStep_iff.mpr rfl⟩ := by
   simp [Iter.step_eq, step_eq_monadicStep, IterM.Step.toPure]
 
 theorem Iterator.Monadic.isPlausibleOutput_next {a}
-    [UpwardEnumerable α] [LT α] [DecidableLT α]
+    [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it : IterM (α := Rxo.Iterator α) Id α} (h : it.internalState.next = some a)
     (hP : a < it.internalState.upperBound) :
     it.IsPlausibleOutput a := by
   simp [IterM.IsPlausibleOutput, Monadic.isPlausibleStep_iff, Monadic.step, h, hP]
 
 theorem Iterator.Monadic.isPlausibleOutput_iff
-    [UpwardEnumerable α] [LT α] [DecidableLT α]
+    [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it : IterM (α := Rxo.Iterator α) Id α} :
     it.IsPlausibleOutput a ↔
       it.internalState.next = some a ∧
@@ -728,14 +728,14 @@ theorem Iterator.Monadic.isPlausibleOutput_iff
       simp_all
 
 theorem Iterator.isPlausibleOutput_next
-    [UpwardEnumerable α] [LT α] [DecidableLT α]
+    [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it : Iter (α := Rxo.Iterator α) α} (h : it.internalState.next = some a)
     (hP : a < it.internalState.upperBound) :
     it.IsPlausibleOutput a := by
   simp [Iter.IsPlausibleOutput, Monadic.isPlausibleOutput_iff, Iter.toIterM, h, hP]
 
 theorem Iterator.isPlausibleOutput_iff
-    [UpwardEnumerable α] [LT α] [DecidableLT α]
+    [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it : Iter (α := Rxo.Iterator α) α} :
     it.IsPlausibleOutput a ↔
       it.internalState.next = some a ∧
@@ -743,7 +743,7 @@ theorem Iterator.isPlausibleOutput_iff
   simp [Iter.IsPlausibleOutput, Monadic.isPlausibleOutput_iff, Iter.toIterM]
 
 theorem Iterator.Monadic.isPlausibleSuccessorOf_iff
-    [UpwardEnumerable α] [LT α] [DecidableLT α]
+    [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it' it : IterM (α := Rxo.Iterator α) Id α} :
     it'.IsPlausibleSuccessorOf it ↔
       ∃ a, it.internalState.next = some a ∧
@@ -764,12 +764,12 @@ theorem Iterator.Monadic.isPlausibleSuccessorOf_iff
       · cases h
   · rintro ⟨a, h, hP, h'⟩
     refine ⟨.yield it' a, rfl, ?_⟩
-    simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, step, h, hP, ↓reduceIte,
-      IterStep.yield.injEq, and_true, instIteratorIteratorIdOfUpwardEnumerableOfDecidableLT] -- TODO
+    simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, step, h, hP, ↓reduceUIte,
+      IterStep.yield.injEq, and_true, instIteratorIteratorIdOfUpwardEnumerableOfUDecidableLT] -- TODO
     simp [h'.1, ← h'.2]
 
 theorem Iterator.isPlausibleSuccessorOf_iff
-    [UpwardEnumerable α] [LT α] [DecidableLT α]
+    [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it' it : Iter (α := Rxo.Iterator α) α} :
     it'.IsPlausibleSuccessorOf it ↔
       ∃ a, it.internalState.next = some a ∧
@@ -779,7 +779,7 @@ theorem Iterator.isPlausibleSuccessorOf_iff
   simp [Iter.IsPlausibleSuccessorOf, Monadic.isPlausibleSuccessorOf_iff, Iter.toIterM]
 
 theorem Iterator.isSome_next_of_isPlausibleIndirectOutput
-    [UpwardEnumerable α] [LT α] [DecidableLT α]
+    [UpwardEnumerable α] [LT α] [UDecidableLT α]
     {it : Iter (α := Rxo.Iterator α) α} {out : α} (h : it.IsPlausibleIndirectOutput out) :
     it.internalState.next.isSome := by
   cases h
@@ -813,7 +813,7 @@ private theorem List.length_filter_strict_mono {l : List α} {P Q : α → Bool}
     rw [← heq, List.mem_filter] at this
     exact this.2
 
-private def Iterator.instFinitenessRelation [UpwardEnumerable α] [LT α] [DecidableLT α]
+private def Iterator.instFinitenessRelation [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] [Rxo.IsAlwaysFinite α] :
     FinitenessRelation (Rxo.Iterator α) Id where
   Rel it' it := it'.IsPlausibleSuccessorOf it
@@ -825,10 +825,10 @@ private def Iterator.instFinitenessRelation [UpwardEnumerable α] [LT α] [Decid
       intro bound
       constructor
       intro it' ⟨step, hs₁, hs₂⟩
-      simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, Monadic.step, instIteratorIteratorIdOfUpwardEnumerableOfDecidableLT] at hs₂ -- TODO
+      simp only [IterM.IsPlausibleStep, Iterator.IsPlausibleStep, Monadic.step, instIteratorIteratorIdOfUpwardEnumerableOfUDecidableLT] at hs₂ -- TODO
       simp [hs₂, IterStep.successor] at hs₁
     simp only [IterM.IsPlausibleSuccessorOf, IterM.IsPlausibleStep, Iterator.IsPlausibleStep,
-      Monadic.step, exists_eq_right, instIteratorIteratorIdOfUpwardEnumerableOfDecidableLT] at hnone ⊢ -- TODO
+      Monadic.step, exists_eq_right, instIteratorIteratorIdOfUpwardEnumerableOfUDecidableLT] at hnone ⊢ -- TODO
     match it with
     | ⟨⟨none, _⟩⟩ => apply hnone
     | ⟨⟨some init, bound⟩⟩ =>
@@ -860,12 +860,12 @@ private def Iterator.instFinitenessRelation [UpwardEnumerable α] [LT α] [Decid
           · cases h
   subrelation := id
 
-instance Iterator.instFinite [UpwardEnumerable α] [LT α] [DecidableLT α]
+instance Iterator.instFinite [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] [Rxo.IsAlwaysFinite α] :
     Finite (Rxo.Iterator α) Id :=
   .of_finitenessRelation instFinitenessRelation
 
-private def Iterator.instProductivenessRelation [UpwardEnumerable α] [LT α] [DecidableLT α]
+private def Iterator.instProductivenessRelation [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] :
     ProductivenessRelation (Rxo.Iterator α) Id where
   Rel := emptyWf.rel
@@ -873,24 +873,24 @@ private def Iterator.instProductivenessRelation [UpwardEnumerable α] [LT α] [D
   subrelation {it it'} h := by
     exfalso
     simp only [IterM.IsPlausibleSkipSuccessorOf, IterM.IsPlausibleStep,
-      Iterator.IsPlausibleStep, Monadic.step, instIteratorIteratorIdOfUpwardEnumerableOfDecidableLT] at h -- TODO
+      Iterator.IsPlausibleStep, Monadic.step, instIteratorIteratorIdOfUpwardEnumerableOfUDecidableLT] at h -- TODO
     split at h
     · cases h
     · split at h
       · cases h
       · cases h
 
-instance Iterator.instProductive [UpwardEnumerable α] [LT α] [DecidableLT α]
+instance Iterator.instProductive [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] :
     Productive (Rxo.Iterator α) Id :=
   .of_productivenessRelation instProductivenessRelation
 
-instance Iterator.instIteratorAccess [UpwardEnumerable α] [LT α] [DecidableLT α]
+instance Iterator.instIteratorAccess [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] :
     IteratorAccess (Rxo.Iterator α) Id where
   nextAtIdx? it n := ⟨match it.internalState.next.bind (UpwardEnumerable.succMany? n) with
     | none => .done
-    | some next => if next < it.internalState.upperBound then
+    | some next => uif next < it.internalState.upperBound then
         .yield ⟨⟨UpwardEnumerable.succ? next, it.internalState.upperBound⟩⟩ next
       else
         .done, (by
@@ -925,7 +925,7 @@ instance Iterator.instIteratorAccess [UpwardEnumerable α] [LT α] [DecidableLT 
             simp only [heq] at ih
             by_cases heq'' : out < it.internalState.upperBound
             · apply IterM.IsPlausibleNthOutputStep.yield
-              · simp only [Monadic.isPlausibleStep_iff, Monadic.step, heq', heq'', ↓reduceIte,
+              · simp only [Monadic.isPlausibleStep_iff, Monadic.step, heq', heq'', ↓reduceUIte,
                 IterStep.yield.injEq]
                 exact ⟨rfl, rfl⟩
               · exact ih
@@ -941,7 +941,7 @@ instance Iterator.instIteratorAccess [UpwardEnumerable α] [LT α] [DecidableLT 
           simp only [heq] at ih
           by_cases hout : out < it.internalState.upperBound
           · apply IterM.IsPlausibleNthOutputStep.yield
-            · simp only [Monadic.isPlausibleStep_iff, Monadic.step, heq', hout, ↓reduceIte,
+            · simp only [Monadic.isPlausibleStep_iff, Monadic.step, heq', hout, ↓reduceUIte,
               IterStep.yield.injEq]
               exact ⟨rfl, rfl⟩
             · apply ih
@@ -950,17 +950,17 @@ instance Iterator.instIteratorAccess [UpwardEnumerable α] [LT α] [DecidableLT 
             have := hout.imp (fun h : next < it.internalState.upperBound => by
               rw [← UpwardEnumerable.lt_iff] at hlt
               exact Trans.trans hlt h)
-            simp only [this, ↓reduceIte]
-            simp only [this, ↓reduceIte] at ih
+            simp only [this, ↓reduceUIte]
+            simp only [this, ↓reduceUIte] at ih
             apply IterM.IsPlausibleNthOutputStep.done
             simp [Monadic.isPlausibleStep_iff, Monadic.step, heq', hout])⟩
 
-instance Iterator.instLawfulDeterministicIterator [UpwardEnumerable α] [LT α] [DecidableLT α] :
+instance Iterator.instLawfulDeterministicIterator [UpwardEnumerable α] [LT α] [UDecidableLT α] :
     LawfulDeterministicIterator (Rxo.Iterator α) Id where
   isPlausibleStep_eq_eq it := ⟨Monadic.step it, rfl⟩
 
 theorem Iterator.Monadic.isPlausibleIndirectOutput_iff
-    [UpwardEnumerable α] [LT α] [DecidableLT α] [LawfulUpwardEnumerableLT α]
+    [UpwardEnumerable α] [LT α] [UDecidableLT α] [LawfulUpwardEnumerableLT α]
     [LawfulUpwardEnumerable α]
     {it : IterM (α := Rxo.Iterator α) Id α} {out : α} :
     it.IsPlausibleIndirectOutput out ↔
@@ -1003,7 +1003,7 @@ theorem Iterator.Monadic.isPlausibleIndirectOutput_iff
       exact Trans.trans (α := α) (UpwardEnumerable.lt_iff.mpr hlt) hu
 
 theorem Iterator.isPlausibleIndirectOutput_iff
-    [UpwardEnumerable α] [LT α] [DecidableLT α]
+    [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
     {it : Iter (α := Rxo.Iterator α) α} {out : α} :
     it.IsPlausibleIndirectOutput out ↔
@@ -1020,7 +1020,7 @@ As long as the compiler cannot optimize away the {name}`Option` in the internal 
 loop implementation.
 -/
 @[always_inline, inline]
-instance Iterator.instIteratorLoop [UpwardEnumerable α] [LT α] [DecidableLT α]
+instance Iterator.instIteratorLoop [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
     {n : Type u → Type w} [Monad n] :
     IteratorLoop (Rxo.Iterator α) Id n where
@@ -1038,14 +1038,14 @@ instance Iterator.instIteratorLoop [UpwardEnumerable α] [LT α] [DecidableLT α
       haveI : Nonempty γ := ⟨acc⟩
       WellFounded.extrinsicFix₃ (C₃ := fun _ _ _ => n γ) (InvImage (IteratorLoop.rel _ Id Pl) (fun x => (⟨Rxo.Iterator.mk (some x.1) upperBound⟩, x.2.1)))
         (fun next acc (h : LargeEnough next) G => do
-          if hu : next < upperBound then
+          uif hu : next < upperBound then do
             match ← f next h hu acc with
             | ⟨.yield acc', h'⟩ =>
               match hs : UpwardEnumerable.succ? next with
               | some next' => G next' acc' (hl _ _ ?hle' h) ?decreasing
               | none => return acc'
             | ⟨.done acc', _⟩ => return acc'
-          else
+          else do
             return acc) next acc h
   finally
     case hf =>
@@ -1062,7 +1062,7 @@ instance Iterator.instIteratorLoop [UpwardEnumerable α] [LT α] [DecidableLT α
     case decreasing =>
       simp_wf; simp [IteratorLoop.rel, Monadic.isPlausibleStep_iff, Monadic.step, *]
 
-private noncomputable def Iterator.instIteratorLoop.loop.wf [UpwardEnumerable α] [LT α] [DecidableLT α]
+private noncomputable def Iterator.instIteratorLoop.loop.wf [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
     {n : Type u → Type w} [Monad n] (γ : Type u)
     (Pl : α → γ → ForInStep γ → Prop)
@@ -1071,7 +1071,7 @@ private noncomputable def Iterator.instIteratorLoop.loop.wf [UpwardEnumerable α
     (upperBound : α) (acc : γ) (next : α) (h : LargeEnough next)
     (f : (out : α) → LargeEnough out → out < upperBound → (c : γ) → n (Subtype (fun s : ForInStep γ => Pl out c s))) :
     n γ := do
-  if hu : next < upperBound then
+  uif hu : next < upperBound then do
     match ← f next h hu acc with
     | ⟨.yield acc', _⟩ =>
       match hs : UpwardEnumerable.succ? next with
@@ -1079,7 +1079,7 @@ private noncomputable def Iterator.instIteratorLoop.loop.wf [UpwardEnumerable α
         loop.wf γ Pl wf LargeEnough hl upperBound acc' next' (hl _ _ ?hle h) f
       | none => return acc'
     | ⟨.done acc', _⟩ => return acc'
-  else
+  else do
     return acc
 termination_by IteratorLoop.WithWF.mk ⟨⟨some next, upperBound⟩⟩ acc (hwf := wf)
 decreasing_by
@@ -1089,7 +1089,7 @@ where finally
     refine ⟨1, ?_⟩
     simpa [succMany?_one] using hs
 
-private theorem Iterator.instIteratorLoop.loop_eq_wf [UpwardEnumerable α] [LT α] [DecidableLT α]
+private theorem Iterator.instIteratorLoop.loop_eq_wf [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α] [Monad n] [LawfulMonad n]
     {γ LargeEnough hl upperBound} {next hn} {acc} (Pl wf f) :
     loop γ Pl LargeEnough hl upperBound acc next hn f =
@@ -1099,7 +1099,7 @@ private theorem Iterator.instIteratorLoop.loop_eq_wf [UpwardEnumerable α] [LT �
   · exact InvImage.wf _ wf
   · fun_induction loop.wf γ Pl wf LargeEnough hl upperBound acc  next hn f
     · rw [WellFounded.fix_eq]
-      simp only [↓reduceDIte, *]
+      simp only [↓reduceUDIte, *]
       apply bind_congr; intro forInStep
       split
       · simp only
@@ -1110,7 +1110,7 @@ private theorem Iterator.instIteratorLoop.loop_eq_wf [UpwardEnumerable α] [LT �
     · rw [WellFounded.fix_eq]
       simp_all
 
-private theorem Iterator.instIteratorLoop.loopWf_eq [UpwardEnumerable α] [LT α] [DecidableLT α]
+private theorem Iterator.instIteratorLoop.loopWf_eq [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
     {n : Type u → Type w} [Monad n] [LawfulMonad n] (γ : Type u)
     {lift} [instLawfulMonadLiftFunction : Std.Internal.LawfulMonadLiftBindFunction (m := Id) (n := n) lift]
@@ -1120,7 +1120,7 @@ private theorem Iterator.instIteratorLoop.loopWf_eq [UpwardEnumerable α] [LT α
     (upperBound : α) (acc : γ) (next : α) (h : LargeEnough next)
     (f : (out : α) → LargeEnough out → out < upperBound → (c : γ) → n (Subtype (fun s : ForInStep γ => Pl out c s))) :
     loop.wf γ Pl wf LargeEnough hl upperBound acc next h f = (do
-      if hu : next < upperBound then
+      uif hu : next < upperBound then do
         match ← f next h hu acc with
         | ⟨.yield acc', _⟩ =>
           letI it' : IterM (α := Rxo.Iterator α) Id α := ⟨⟨succ? next, upperBound⟩⟩
@@ -1137,7 +1137,7 @@ private theorem Iterator.instIteratorLoop.loopWf_eq [UpwardEnumerable α] [LT α
                 exact h.choose_spec.2)
               acc'
         | ⟨.done acc', _⟩ => return acc'
-      else return acc) := by
+      else do return acc) := by
   haveI : Nonempty γ := ⟨acc⟩
   rw [loop.wf]
   congr 1; ext hu
@@ -1161,7 +1161,7 @@ termination_by IteratorLoop.WithWF.mk ⟨⟨some next, upperBound⟩⟩ acc (hwf
 decreasing_by
   simp [IteratorLoop.rel, Monadic.isPlausibleStep_iff, Monadic.step, *]
 
-instance Iterator.instLawfulIteratorLoop [UpwardEnumerable α] [LT α] [DecidableLT α]
+instance Iterator.instLawfulIteratorLoop [UpwardEnumerable α] [LT α] [UDecidableLT α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLT α]
     {n : Type u → Type w} [Monad n] [LawfulMonad n] :
     LawfulIteratorLoop (Rxo.Iterator α) Id n where

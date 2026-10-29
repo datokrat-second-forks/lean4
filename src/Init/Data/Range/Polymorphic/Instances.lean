@@ -96,8 +96,8 @@ abbrev HasSize.ofClosed [Rxc.HasSize α] : HasSize α where
   size lo hi := Rxc.HasSize.size lo hi - 1
 
 attribute [local instance] HasSize.ofClosed in
-instance LawfulHasSize.of_closed [UpwardEnumerable α] [LE α] [DecidableLE α]
-    [LT α] [DecidableLT α] [LawfulOrderLT α] [IsPartialOrder α]
+instance LawfulHasSize.of_closed [UpwardEnumerable α] [LE α] [UDecidableLE α]
+    [LT α] [UDecidableLT α] [LawfulOrderLT α] [IsPartialOrder α]
     [LawfulUpwardEnumerable α] [LawfulUpwardEnumerableLE α]
     [Rxc.HasSize α] [Rxc.LawfulHasSize α] :
     LawfulHasSize α where

@@ -152,7 +152,7 @@ theorem toArray_toList_rco {m n : Nat} :
 theorem toList_rco_eq_ite {m n : Nat} :
     (m...n).toList = if m < n then m :: ((m + 1)...n).toList else [] := by
   rw [Rco.toList_eq_ite_roo]
-  simp [Roo.toList_eq_match_rco]
+  simp [Roo.toList_eq_match_rco, UDecidable.ite_eq_ite]
 
 @[deprecated Nat.toList_rco_eq_ite (since := "2026-07-21")]
 theorem toList_rco_eq_if {m : Nat} {n : Nat} : (m...n).toList = if m < n then m :: ((m + 1)...n).toList else [] := Nat.toList_rco_eq_ite
@@ -171,7 +171,7 @@ def _root_.Std.PRange.Nat.toList_rco_succ_succ := @_root_.Nat.toList_rco_succ_su
 
 theorem toList_rco_succ_right_eq_cons_map {m n : Nat} (h : m ≤ n) :
     (m...(n + 1)).toList = m :: (m...n).toList.map (· + 1) := by
-  rw [Rco.toList_eq_ite_roo, ite_eq_left (Nat.lt_succ_iff.mpr h), Roo.toList_eq_match_rco]
+  rw [Rco.toList_eq_ite_roo, UDecidable.ite_eq_left (Nat.lt_succ_iff.mpr h), Roo.toList_eq_match_rco]
   simp [toList_rco_succ_succ]
 
 @[simp]
@@ -358,7 +358,7 @@ theorem getD_toList_rco_eq_fallback {m n i fallback : Nat} (h : n ≤ i + m) :
 theorem toArray_rco_eq_ite {m n : Nat} :
     (m...n).toArray = if m < n then #[m] ++ ((m + 1)...n).toArray else #[] := by
   rw [Rco.toArray_eq_ite_roo]
-  simp [Roo.toArray_eq_match_rco]
+  simp [Roo.toArray_eq_match_rco, UDecidable.ite_eq_ite]
 
 @[deprecated Nat.toArray_rco_eq_ite (since := "2026-07-21")]
 theorem toArray_rco_eq_if {m : Nat} {n : Nat} : (m...n).toArray = if m < n then #[m] ++ ((m + 1)...n).toArray else #[] := Nat.toArray_rco_eq_ite
@@ -369,7 +369,7 @@ theorem toArray_rco_succ_succ {m n : Nat} :
 
 theorem toArray_rco_succ_right_eq_append_map {m n : Nat} (h : m ≤ n) :
     (m...(n + 1)).toArray = #[m] ++ (m...n).toArray.map (· + 1) := by
-  rw [Rco.toArray_eq_ite_roo, ite_eq_left (Nat.lt_succ_iff.mpr h), Roo.toArray_eq_match_rco]
+  rw [Rco.toArray_eq_ite_roo, UDecidable.ite_eq_left (Nat.lt_succ_iff.mpr h), Roo.toArray_eq_match_rco]
   simp [toArray_rco_succ_succ]
 
 @[simp]
@@ -1021,7 +1021,7 @@ theorem induct_rcc_right (motive : Nat → Nat → Prop)
 
 theorem toList_roo_eq_toList_rco {m n : Nat} :
     (m<...n).toList = ((m + 1)...n).toList := by
-  simp [Roo.toList_eq_match_rco]
+  simp [Roo.toList_eq_match_rco, UDecidable.ite_eq_ite]
 
 @[simp]
 theorem toList_toArray_roo {m n : Nat} :
@@ -1194,7 +1194,7 @@ theorem getD_toList_roo_eq_fallback {m n i fallback : Nat} (h : n ≤ i + (m + 1
 
 theorem toArray_roo_eq_toArray_rco {m n : Nat} :
     (m<...n).toArray = ((m + 1)...n).toArray := by
-  simp [Roo.toArray_eq_match_rco]
+  simp [Roo.toArray_eq_match_rco, UDecidable.ite_eq_ite]
 
 theorem toArray_roo_eq_ite {m n : Nat} :
     (m<...n).toArray = if m + 1 < n then #[m + 1] ++ ((m + 1)<...n).toArray else #[] := by

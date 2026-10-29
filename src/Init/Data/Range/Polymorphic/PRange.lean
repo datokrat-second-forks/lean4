@@ -7,6 +7,7 @@ module
 
 prelude
 public import Init.Data.Range.Polymorphic.UpwardEnumerable
+public import Init.UDecidable
 
 set_option doc.verso true
 set_option linter.missingDocs true
@@ -255,6 +256,8 @@ instance [LE α] : Membership α (Rcc α) where
 
 instance [LE α] [DecidableLE α] : Decidable (a ∈ r) := inferInstanceAs (Decidable (_ ∧ _))
 
+instance [LE α] [UDecidableLE α] : UDecidable (a ∈ r) := inferInstanceAs (UDecidable (_ ∧ _))
+
 end Rcc
 
 namespace Rco
@@ -266,6 +269,9 @@ instance [LE α] [LT α] : Membership α (Rco α) where
 
 instance [LE α] [DecidableLE α] [LT α] [DecidableLT α] :
     Decidable (a ∈ r) := inferInstanceAs (Decidable (_ ∧ _))
+
+instance [LE α] [UDecidableLE α] [LT α] [UDecidableLT α] :
+    UDecidable (a ∈ r) := inferInstanceAs (UDecidable (_ ∧ _))
 
 end Rco
 
@@ -279,6 +285,9 @@ instance [LE α] : Membership α (Rci α) where
 instance [LE α] [DecidableLE α] :
     Decidable (a ∈ r) := inferInstanceAs (Decidable (_ ≤ _))
 
+instance [LE α] [UDecidableLE α] :
+    UDecidable (a ∈ r) := inferInstanceAs (UDecidable (_ ≤ _))
+
 end Rci
 
 namespace Roc
@@ -291,6 +300,9 @@ instance [LE α] [LT α] : Membership α (Roc α) where
 instance [LE α] [DecidableLE α] [LT α] [DecidableLT α] : Decidable (a ∈ r) :=
   inferInstanceAs (Decidable (_ ∧ _))
 
+instance [LE α] [UDecidableLE α] [LT α] [UDecidableLT α] : UDecidable (a ∈ r) :=
+  inferInstanceAs (UDecidable (_ ∧ _))
+
 end Roc
 
 namespace Roo
@@ -301,6 +313,8 @@ instance [LT α] : Membership α (Roo α) where
   mem r a := r.lower < a ∧ a < r.upper
 
 instance [LT α] [DecidableLT α] : Decidable (a ∈ r) := inferInstanceAs (Decidable (_ ∧ _))
+
+instance [LT α] [UDecidableLT α] : UDecidable (a ∈ r) := inferInstanceAs (UDecidable (_ ∧ _))
 
 end Roo
 
@@ -313,6 +327,8 @@ instance [LT α] : Membership α (Roi α) where
 
 instance [LT α] [DecidableLT α] : Decidable (a ∈ r) := inferInstanceAs (Decidable (_ < _))
 
+instance [LT α] [UDecidableLT α] : UDecidable (a ∈ r) := inferInstanceAs (UDecidable (_ < _))
+
 end Roi
 
 namespace Ric
@@ -323,6 +339,8 @@ instance [LE α] : Membership α (Ric α) where
   mem r a := a ≤ r.upper
 
 instance [LE α] [DecidableLE α] : Decidable (a ∈ r) := inferInstanceAs (Decidable (_ ≤ _))
+
+instance [LE α] [UDecidableLE α] : UDecidable (a ∈ r) := inferInstanceAs (UDecidable (_ ≤ _))
 
 end Ric
 
@@ -335,6 +353,8 @@ instance [LT α] : Membership α (Rio α) where
 
 instance [LT α] [DecidableLT α] : Decidable (a ∈ r) := inferInstanceAs (Decidable (_ < _))
 
+instance [LT α] [UDecidableLT α] : UDecidable (a ∈ r) := inferInstanceAs (UDecidable (_ < _))
+
 end Rio
 
 namespace Rii
@@ -345,6 +365,8 @@ instance : Membership α (Rii α) where
   mem _ _ := True
 
 instance : Decidable (a ∈ r) := inferInstanceAs (Decidable True)
+
+instance : UDecidable (a ∈ r) := inferInstanceAs (UDecidable True)
 
 end Rii
 

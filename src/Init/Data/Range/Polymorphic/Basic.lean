@@ -8,6 +8,7 @@ module
 prelude
 public import Init.Data.Range.Polymorphic.PRange
 public import Init.Data.Option.Instances
+public import Init.UDecidable
 
 set_option doc.verso true
 
@@ -226,9 +227,9 @@ This function returns a meaningful value given {name}`LawfulUpwardEnumerable` an
 {name}`LawfulUpwardEnumerableLE` instances.
 -/
 @[inline]
-def isEmpty [LE α] [DecidableLE α] [UpwardEnumerable α]
+def isEmpty [LE α] [UDecidableLE α] [UpwardEnumerable α]
     (r : Rcc α) : Bool :=
-  ¬ r.lower ≤ r.upper
+  UDecidable.decide (¬ r.lower ≤ r.upper)
 
 theorem mem_iff [LE α] {r : Rcc α} {a : α} :
     a ∈ r ↔ r.lower ≤ a ∧ a ≤ r.upper :=
@@ -253,8 +254,8 @@ This function returns a meaningful value given {name}`LawfulUpwardEnumerable` an
 {name}`LawfulUpwardEnumerableLT` instances.
 -/
 @[inline]
-def isEmpty [LT α] [DecidableLT α] [UpwardEnumerable α] (r : Rco α) : Bool :=
-  ¬ r.lower < r.upper
+def isEmpty [LT α] [UDecidableLT α] [UpwardEnumerable α] (r : Rco α) : Bool :=
+  UDecidable.decide (¬ r.lower < r.upper)
 
 theorem mem_iff [LE α] [LT α] :
     a ∈ r ↔ r.lower ≤ a ∧ a < r.upper :=
@@ -306,9 +307,9 @@ This function returns a meaningful value given {name}`LawfulUpwardEnumerable` an
 {name}`LawfulUpwardEnumerableLT` instances.
 -/
 @[inline]
-def isEmpty [LT α] [DecidableLT α] [UpwardEnumerable α]
+def isEmpty [LT α] [UDecidableLT α] [UpwardEnumerable α]
     (r : Roc α) : Bool :=
-  ¬ r.lower < r.upper
+  UDecidable.decide (¬ r.lower < r.upper)
 
 theorem mem_iff [LE α] [LT α] {r : Roc α} {a : α} :
     a ∈ r ↔ r.lower < a ∧ a ≤ r.upper :=
@@ -333,8 +334,8 @@ This function returns a meaningful value given {name}`LawfulUpwardEnumerable` an
 {name}`LawfulUpwardEnumerableLT` instances.
 -/
 @[inline]
-def isEmpty [LT α] [DecidableLT α] [UpwardEnumerable α] (r : Roo α) : Bool :=
-  ∀ a, UpwardEnumerable.succ? r.lower = some a → ¬ a < r.upper
+def isEmpty [LT α] [UDecidableLT α] [UpwardEnumerable α] (r : Roo α) : Bool :=
+  UDecidable.decide (∀ a, UpwardEnumerable.succ? r.lower = some a → ¬ a < r.upper)
 
 theorem mem_iff [LT α] :
     a ∈ r ↔ r.lower < a ∧ a < r.upper :=
@@ -407,8 +408,8 @@ This function returns a meaningful value given {name}`LawfulUpwardEnumerable`,
 {name}`LawfulUpwardEnumerableLT` and {name}`LawfulUpwardEnumerableLeast?` instances.
 -/
 @[inline]
-def isEmpty [LT α] [DecidableLT α] [UpwardEnumerable α] [Least? α] (r : Rio α) : Bool :=
-  ∀ a, Least?.least? (α := α) = some a → ¬ a < r.upper
+def isEmpty [LT α] [UDecidableLT α] [UpwardEnumerable α] [Least? α] (r : Rio α) : Bool :=
+  UDecidable.decide (∀ a, Least?.least? (α := α) = some a → ¬ a < r.upper)
 
 theorem mem_iff [LT α] : a ∈ r ↔ a < r.upper :=
   Iff.rfl
