@@ -11,6 +11,7 @@ public import Init.Data.Order.Ord
 public import Init.Data.Int.Repr
 public import Init.Omega
 import Init.Ext
+public import Init.UDecidable
 
 @[expose] public section
 
@@ -92,8 +93,8 @@ def mk {rel : Int → Int → Prop} (val : Int) (proof : rel lo val ∧ rel val 
 Convert a `Int` to a `Bounded` if it checks.
 -/
 @[inline]
-def ofInt? [DecidableRel rel] (val : Int) : Option (Bounded rel lo hi) :=
-  if h : rel lo ↑val ∧ rel ↑val hi then
+def ofInt? [UDecidableRel rel] (val : Int) : Option (Bounded rel lo hi) :=
+  uif h : rel lo ↑val ∧ rel ↑val hi then
     some ⟨val, h⟩
   else
     none
@@ -148,7 +149,7 @@ Creates a new `Bounded` integer.
 -/
 @[inline]
 def ofInt { lo hi : Int } (val : Int) : Option (Bounded.LE lo hi) :=
-  if h : lo ≤ val ∧ val ≤ hi
+  uif h : lo ≤ val ∧ val ≤ hi
     then some ⟨val, h⟩
     else none
 
@@ -164,7 +165,7 @@ Convert a `Nat` to a `Bounded.LE` if it checks.
 -/
 @[inline]
 def ofNat? { hi : Nat } (val : Nat) : Option (Bounded.LE 0 hi) :=
-  if h : val ≤ hi then
+  uif h : val ≤ hi then
     some <| ofNat val h
   else
     none
@@ -181,8 +182,8 @@ Convert a `Nat` to a `Bounded.LE` using the lower boundary too.
 -/
 @[inline]
 def clip (val : Int) (h : lo ≤ hi) : Bounded.LE lo hi :=
-  if h₀ : lo ≤ val then
-    if h₁ : val ≤ hi
+  uif h₀ : lo ≤ val then
+    uif h₁ : val ≤ hi
       then ⟨val, And.intro h₀ h₁⟩
       else ⟨hi, And.intro h (Int.le_refl hi)⟩
   else ⟨lo, And.intro (Int.le_refl lo) h⟩
@@ -234,7 +235,7 @@ Convert a `Fin` to a `Bounded.LE`.
 -/
 @[inline]
 def ofFin' {lo : Nat} (fin : Fin (Nat.succ hi)) (h : lo ≤ hi) : Bounded.LE lo hi :=
-  if h₁ : fin.val ≥ lo
+  uif h₁ : fin.val ≥ lo
     then ofNat' fin.val (And.intro h₁ ((Nat.le_of_lt_succ fin.isLt)))
     else ofNat' lo (And.intro (Nat.le_refl lo) h)
 
@@ -459,7 +460,7 @@ will be a new bounded number with bounds `0` to `i - 1`.
 -/
 @[inline]
 def abs (bo :  Bounded.LE (-i) i) : Bounded.LE 0 i :=
-  if h : bo.val ≥ 0 then
+  uif h : bo.val ≥ 0 then
     bo.truncateBottom h
   else by
     let r := bo.truncateTop (Int.le_of_lt (Int.not_le.mp h)) |>.neg

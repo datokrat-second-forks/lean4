@@ -1,7 +1,9 @@
 import Lean
+import Std.Time
 
 /-!
-`Nat.sqrt` and `Nat.nextPowerOfTwo` branch with `uif`, i.e. on `UDecidable` instances. Compiled
+`Nat.sqrt`, `Nat.nextPowerOfTwo` and the `Std.Time.Internal.Bounded` constructors branch with
+`uif`, i.e. on `UDecidable` instances. Compiled
 code still computes them, and their lemmas still apply. They no longer reduce in the kernel.
 -/
 
@@ -16,6 +18,8 @@ def checkUDecidable (declName : Name) : MetaM Unit := do
     throwError "{declName} does not use `UDecidable`"
 
 run_meta checkUDecidable ``Nat.sqrt
+run_meta checkUDecidable ``Std.Time.Internal.Bounded.ofInt?
+run_meta checkUDecidable ``Std.Time.Internal.Bounded.LE.clip
 
 /-- info: [0, 1, 1, 2, 3, 4, 100] -/
 #guard_msgs in
@@ -24,6 +28,20 @@ run_meta checkUDecidable ``Nat.sqrt
 /-- info: [1, 1, 2, 4, 8, 1024] -/
 #guard_msgs in
 #eval [0, 1, 2, 3, 5, 1000].map Nat.nextPowerOfTwo
+
+open Std.Time.Internal in
+/-- info: [none, some 0, some 5, none] -/
+#guard_msgs in
+#eval [-1, 0, 5, 6].map fun i => (Bounded.ofInt? (rel := (· ≤ ·)) (lo := 0) (hi := 5) i).map (·.val)
+
+open Std.Time.Internal in
+/-- info: [0, 0, 3, 5] -/
+#guard_msgs in
+#eval [-1, 0, 3, 6].map fun i => (Bounded.LE.clip (lo := 0) (hi := 5) i (by decide)).val
+
+/-- info: [some (date("2024-02-29")), none] -/
+#guard_msgs in
+#eval [2024, 2023].map (Std.Time.PlainDate.ofYearMonthDay? · 2 29)
 
 example (n : Nat) : Nat.sqrt n * Nat.sqrt n ≤ n := Nat.sqrt_le n
 example (n : Nat) : n ≤ n.nextPowerOfTwo := Nat.le_nextPowerOfTwo n

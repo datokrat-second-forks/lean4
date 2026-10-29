@@ -37,6 +37,16 @@ noncomputable class UDecidable (p : Prop) : Type where
   /-- There is a `Bool` that is `true` exactly if `p` holds. -/
   exists_reflects : ∃ b : Bool, b = true ↔ p
 
+/-- A predicate `p` is `UDecidablePred` if `p a` is `UDecidable` for every `a`. -/
+abbrev UDecidablePred {α : Sort u} (p : α → Prop) := (a : α) → UDecidable (p a)
+
+/-- A relation `r` is `UDecidableRel` if `r a b` is `UDecidable` for all `a` and `b`. -/
+abbrev UDecidableRel {α : Sort u} {β : Sort v} (r : α → β → Prop) :=
+  (a : α) → (b : β) → UDecidable (r a b)
+
+/-- A type `α` has `UDecidableEq` if equality of its elements is `UDecidable`. -/
+abbrev UDecidableEq (α : Sort u) := (a b : α) → UDecidable (a = b)
+
 namespace UDecidable
 
 private unsafe def decideImpl (p : Prop) [i : UDecidable p] : Bool := unsafeCast i
