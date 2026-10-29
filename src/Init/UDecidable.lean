@@ -47,6 +47,31 @@ abbrev UDecidableRel {α : Sort u} {β : Sort v} (r : α → β → Prop) :=
 /-- A type `α` has `UDecidableEq` if equality of its elements is `UDecidable`. -/
 abbrev UDecidableEq (α : Sort u) := (a b : α) → UDecidable (a = b)
 
+/-! Boolean comparisons that implement the `UDecidable` instances below in compiled code. -/
+
+namespace Int.Internal
+
+/-- Whether an integer is nonnegative. -/
+def isNonneg : Int → Bool
+  | ofNat _ => true
+  | -[_ +1] => false
+
+theorem reflects_isNonneg : (m : Int) → (isNonneg m).Reflects (NonNeg m)
+  | ofNat m => NonNeg.mk m
+  | -[_ +1] => fun h => nomatch h
+
+/-- Boolean `≤` on integers. -/
+@[extern "lean_int_dec_le"] def ble (a b : @& Int) : Bool := isNonneg (b - a)
+
+/-- Boolean `<` on integers. -/
+@[extern "lean_int_dec_lt"] def blt (a b : @& Int) : Bool := isNonneg (b - (a + 1))
+
+theorem reflects_ble (a b : Int) : (ble a b).Reflects (a ≤ b) := reflects_isNonneg (b - a)
+
+theorem reflects_blt (a b : Int) : (blt a b).Reflects (a < b) := reflects_isNonneg (b - (a + 1))
+
+end Int.Internal
+
 namespace UDecidable
 
 private unsafe def decideImpl (p : Prop) [i : UDecidable p] : Bool := unsafeCast i
@@ -229,6 +254,26 @@ theorem dite_congr {b c : Prop} {_ : UDecidable b} [UDecidable c] {α : Sort u}
   | inl hc => rw [dite_eq_left hc, dite_eq_left hc, h₂ hc]
   | inr hc => rw [dite_eq_right hc, dite_eq_right hc, h₃ hc]
 
+/-- Decides `p` by deciding the equivalent proposition `q`. -/
+@[inline, instance_reducible] def ofIff {p : Prop} (q : Prop) [UDecidable q] (h : q ↔ p) :
+    UDecidable p :=
+  mk (decide q) ((decide_spec q).trans h)
+
+/-- Decides `p` by a `Bool` that reflects it. -/
+@[inline, instance_reducible] def ofReflects {p : Prop} (b : Bool) (h : b.Reflects p) :
+    UDecidable p :=
+  mk b (match b, h with
+    | true, h => ⟨fun _ => h, fun _ => rfl⟩
+    | false, h => ⟨fun h' => Bool.noConfusion h', fun hp => absurd hp h⟩)
+
+/-- Decides a proposition that holds. -/
+@[inline, instance_reducible] def isTrue {p : Prop} (h : p) : UDecidable p :=
+  ofReflects true h
+
+/-- Decides a proposition that does not hold. -/
+@[inline, instance_reducible] def isFalse {p : Prop} (h : ¬p) : UDecidable p :=
+  ofReflects false h
+
 /-- Every `Decidable` proposition is `UDecidable`. Compiled code represents both by the same `Bool`. -/
 instance (priority := low) ofDecidable (p : Prop) [Decidable p] : UDecidable p :=
   mk (Decidable.decide p) decide_eq_true_iff
@@ -257,5 +302,113 @@ instance instNatLe (n m : Nat) : UDecidable (n ≤ m) :=
 
 instance instNatLt (n m : Nat) : UDecidable (n < m) :=
   instNatLe (n + 1) m
+
+instance instTrue : UDecidable True := isTrue trivial
+
+instance instFalse : UDecidable False := isFalse id
+
+instance instImp (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p → q) :=
+  mk (!decide p || decide q) (by
+    cases em p with
+    | inl hp =>
+      rw [decide_eq_true hp]
+      exact ⟨fun h _ => (decide_spec q).mp h, fun h => (decide_spec q).mpr (h hp)⟩
+    | inr hp =>
+      rw [decide_eq_false hp]
+      exact ⟨fun _ h => absurd h hp, fun _ => rfl⟩)
+
+instance instIff (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ↔ q) :=
+  mk (cond (decide p) (decide q) (!decide q)) (by
+    cases em p with
+    | inl hp =>
+      cases em q with
+      | inl hq =>
+        rw [decide_eq_true hp, decide_eq_true hq]
+        exact ⟨fun _ => ⟨fun _ => hq, fun _ => hp⟩, fun _ => rfl⟩
+      | inr hq =>
+        rw [decide_eq_true hp, decide_eq_false hq]
+        exact ⟨Bool.noConfusion, fun h => absurd (h.mp hp) hq⟩
+    | inr hp =>
+      cases em q with
+      | inl hq =>
+        rw [decide_eq_false hp, decide_eq_true hq]
+        exact ⟨Bool.noConfusion, fun h => absurd (h.mpr hq) hp⟩
+      | inr hq =>
+        rw [decide_eq_false hp, decide_eq_false hq]
+        exact ⟨fun _ => ⟨fun h => absurd h hp, fun h => absurd h hq⟩, fun _ => rfl⟩)
+
+instance instBoolEq : UDecidableEq Bool
+  | true, true => isTrue rfl
+  | false, false => isTrue rfl
+  | true, false => isFalse Bool.noConfusion
+  | false, true => isFalse Bool.noConfusion
+
+instance instPUnitEq : UDecidableEq PUnit.{u} := fun _ _ => isTrue rfl
+
+instance instIntEq (a b : Int) : UDecidable (a = b) :=
+  ofReflects (Int.Internal.beq a b) (Int.Internal.reflects_beq a b)
+
+instance instIntLe (a b : Int) : UDecidable (a ≤ b) :=
+  ofReflects (Int.Internal.ble a b) (Int.Internal.reflects_ble a b)
+
+instance instIntLt (a b : Int) : UDecidable (a < b) :=
+  ofReflects (Int.Internal.blt a b) (Int.Internal.reflects_blt a b)
+
+instance instFinEq (i j : Fin n) : UDecidable (i = j) :=
+  ofReflects (Nat.beq i.val j.val) (Fin.reflects_beq_val i j)
+
+instance instFinLe (i j : Fin n) : UDecidable (i ≤ j) := instNatLe i.val j.val
+
+instance instFinLt (i j : Fin n) : UDecidable (i < j) := instNatLt i.val j.val
+
+instance instUInt8Eq (a b : UInt8) : UDecidable (a = b) :=
+  ofReflects (UInt8.Internal.beq a b) (UInt8.Internal.reflects_beq a b)
+
+instance instUInt16Eq (a b : UInt16) : UDecidable (a = b) :=
+  ofReflects (UInt16.Internal.beq a b) (UInt16.Internal.reflects_beq a b)
+
+instance instUInt32Eq (a b : UInt32) : UDecidable (a = b) :=
+  ofReflects (UInt32.Internal.beq a b) (UInt32.Internal.reflects_beq a b)
+
+instance instUInt64Eq (a b : UInt64) : UDecidable (a = b) :=
+  ofReflects (UInt64.Internal.beq a b) (UInt64.Internal.reflects_beq a b)
+
+instance instUSizeEq (a b : USize) : UDecidable (a = b) :=
+  ofReflects (USize.Internal.beq a b) (USize.Internal.reflects_beq a b)
+
+instance instCharEq (c d : Char) : UDecidable (c = d) :=
+  ofReflects (Char.Internal.beq c d) (Char.Internal.reflects_beq c d)
+
+instance instStringEq (s₁ s₂ : String) : UDecidable (s₁ = s₂) :=
+  ofReflects (String.Internal.beq s₁ s₂) (String.Internal.reflects_beq s₁ s₂)
+
+instance instOptionEq [UDecidableEq α] : UDecidableEq (Option α)
+  | none, none => isTrue rfl
+  | none, some _ => isFalse nofun
+  | some _, none => isFalse nofun
+  | some a, some b => ofIff (a = b) ⟨congrArg some, Option.some.inj⟩
+
+instance instProdEq [UDecidableEq α] [UDecidableEq β] : UDecidableEq (α × β)
+  | (a₁, a₂), (b₁, b₂) =>
+    ofIff (a₁ = b₁ ∧ a₂ = b₂)
+      ⟨fun ⟨h₁, h₂⟩ => h₁ ▸ h₂ ▸ rfl, fun h => ⟨congrArg Prod.fst h, congrArg Prod.snd h⟩⟩
+
+instance instSumEq [UDecidableEq α] [UDecidableEq β] : UDecidableEq (α ⊕ β)
+  | .inl a, .inl b => ofIff (a = b) ⟨congrArg Sum.inl, Sum.inl.inj⟩
+  | .inr a, .inr b => ofIff (a = b) ⟨congrArg Sum.inr, Sum.inr.inj⟩
+  | .inl _, .inr _ => isFalse nofun
+  | .inr _, .inl _ => isFalse nofun
+
+instance instSubtypeEq {p : α → Prop} [UDecidableEq α] : UDecidableEq (Subtype p) :=
+  fun a b => ofIff (a.val = b.val) ⟨Subtype.ext, congrArg Subtype.val⟩
+
+instance instListEq [UDecidableEq α] : UDecidableEq (List α)
+  | [], [] => isTrue rfl
+  | [], _ :: _ => isFalse nofun
+  | _ :: _, [] => isFalse nofun
+  | a :: as, b :: bs =>
+    have := instListEq as bs
+    ofIff (a = b ∧ as = bs)
+      ⟨fun ⟨h₁, h₂⟩ => h₁ ▸ h₂ ▸ rfl, List.cons.inj⟩
 
 end UDecidable
