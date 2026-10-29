@@ -9,6 +9,7 @@ prelude
 public import Init.Data.Nat.Basic
 public import Init.PropLemmas
 import Init.Data.Bool
+import Init.Classical
 public import Init.BinderNameHint
 
 set_option linter.missingDocs true
@@ -124,6 +125,16 @@ theorem reflects_decide (p : Prop) [UDecidable p] : (decide p).Reflects p := by
     (fun h => e fun hc => nomatch h.symm.trans ((decide_spec c).mpr hc))
 
 instance (p : Prop) : Subsingleton (UDecidable p) := ⟨fun _ _ => rfl⟩
+
+/--
+The noncomputable instance of `UDecidable p` from the law of the excluded middle.
+
+`simp` and `split` use it for conditions that they rewrite. Since it depends only on `p`, it never
+embeds proofs about the old condition, unlike a cast of the old instance.
+-/
+@[instance_reducible] noncomputable def classical (p : Prop) : UDecidable p :=
+  ⟨(Classical.em p).elim (fun h => ⟨true, iff_of_true rfl h⟩)
+    (fun h => ⟨false, iff_of_false Bool.false_ne_true h⟩)⟩
 
 theorem em (p : Prop) [UDecidable p] : p ∨ ¬p := by
   have h := reflects_decide p
@@ -241,20 +252,25 @@ inside `uif c then t else e` with the condition.
   | inl hc => rw [ite_eq_left hc, dite_eq_left hc]; rfl
   | inr hc => rw [ite_eq_right hc, dite_eq_right hc]; rfl
 
+/-
+The congruence lemmas use `UDecidable.classical` for the new condition instead of synthesizing an
+instance, which is possible because all instances are definitionally equal.
+-/
+
 @[congr]
-theorem ite_congr {b c : Prop} {_ : UDecidable b} [UDecidable c] {α : Sort u} {x y u v : α}
+theorem ite_congr {b c : Prop} {inst : UDecidable b} {α : Sort u} {x y u v : α}
     (h₁ : b = c) (h₂ : c → x = u) (h₃ : ¬c → y = v) :
-    (uif b then x else y) = (uif c then u else v) := by
+    @ite α b inst x y = @ite α c (classical c) u v := by
   subst h₁
   cases em b with
   | inl hc => rw [ite_eq_left hc, ite_eq_left hc, h₂ hc]
   | inr hc => rw [ite_eq_right hc, ite_eq_right hc, h₃ hc]
 
 @[congr]
-theorem dite_congr {b c : Prop} {_ : UDecidable b} [UDecidable c] {α : Sort u}
+theorem dite_congr {b c : Prop} {inst : UDecidable b} {α : Sort u}
     {x : b → α} {u : c → α} {y : ¬b → α} {v : ¬c → α} (h₁ : b = c)
     (h₂ : (h : c) → x (h₁.mpr_prop h) = u h) (h₃ : (h : ¬c) → y (h₁.mpr_not h) = v h) :
-    dite b x y = dite c u v := by
+    @dite α b inst x y = @dite α c (classical c) u v := by
   subst h₁
   cases em b with
   | inl hc => rw [dite_eq_left hc, dite_eq_left hc, h₂ hc]

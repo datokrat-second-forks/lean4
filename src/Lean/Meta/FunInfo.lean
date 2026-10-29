@@ -8,6 +8,7 @@ module
 prelude
 public import Lean.Meta.InferType
 import Init.Data.Range.Polymorphic.Iterators
+import Init.UDecidable
 
 public section
 
@@ -115,6 +116,8 @@ private def getFunInfoAux (fn : Expr) (maxArgs? : Option Nat) : MetaM FunInfo :=
             binderInfo := decl.binderInfo
             isProp     := (← isProp decl.type)
             isDecInst  := (← forallTelescopeReducing decl.type fun _ type => return type.isAppOf ``Decidable)
+            isUDecInst := (← forallTelescopeReducing decl.type fun _ type =>
+              return type.isAppOf ``UDecidable)
           }
           if isInstance then
             /- Collect higher order output parameters of this class IF `isInstance` is `true` -/

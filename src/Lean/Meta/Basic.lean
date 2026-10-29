@@ -275,6 +275,12 @@ structure ParamInfo where
     This information affects the generation of congruence theorems.
   -/
   isDecInst      : Bool       := false
+  /--
+    `isUDecInst` is true if the parameter's type is of the form `UDecidable ...`. Since such instances
+    are definitionally equal, congruence theorems replace them by `UDecidable.classical` instead
+    of re-synthesizing them.
+  -/
+  isUDecInst     : Bool       := false
   /-- `isInstance` is true if the parameter type is a class instance. -/
   isInstance     : Bool       := false
   /--

@@ -153,6 +153,15 @@ private def shouldUseSubsingletonInst (info : FunInfo) (kinds : Array CongrArgKi
   return false
 
 /--
+Tests whether a `UDecidable` instance depends on `eq`. Such an instance becomes a `cast` argument,
+which `mkCongrSimpCore?` replaces by `UDecidable.classical` instead of casting it. Before
+`UDecidable.classical` is declared, early in `Init`, the instance is fixed instead.
+-/
+private def shouldReplaceUDecInst (info : FunInfo) (kinds : Array CongrArgKind) (i : Nat) : Bool :=
+  info.paramInfo[i]!.isUDecInst &&
+    info.paramInfo[i]!.backDeps.any fun j => kinds[j]! matches .eq
+
+/--
 If `f` is a class constructor, return a bitmask `m` s.t. `m[i]` is true if the `i`-th parameter
 corresponds to a subobject field.
 
@@ -190,6 +199,7 @@ def getCongrSimpKinds (f : Expr) (info : FunInfo) : MetaM (Array CongrArgKind) :
   For this kind of function, we treat subobject fields as regular parameters instead of instance implicit ones.
   We added this feature because of issue #1808
   -/
+  let hasClassical := (← getEnv).contains ``UDecidable.classical
   let mut result := #[]
   let mask? ← getClassSubobjectMask? f
   for h : i in *...info.paramInfo.size do
@@ -206,6 +216,8 @@ def getCongrSimpKinds (f : Expr) (info : FunInfo) : MetaM (Array CongrArgKind) :
             continue
       if shouldUseSubsingletonInst info result i then
         result := result.push .subsingletonInst
+      else if hasClassical && shouldReplaceUDecInst info result i then
+        result := result.push .cast
       else
         result := result.push .fixed
     else
@@ -218,6 +230,7 @@ If it is possible to rewrite, the 0th `CongrArgKind` is `.eq`,
 and otherwise it is `.fixed`. This is used for the `arg` conv tactic.
 -/
 def getCongrSimpKindsForArgZero (info : FunInfo) : MetaM (Array CongrArgKind) := do
+  let hasClassical := (← getEnv).contains ``UDecidable.classical
   let mut result := #[]
   for h : i in *...info.paramInfo.size do
     if info.resultDeps.contains i then
@@ -229,6 +242,8 @@ def getCongrSimpKindsForArgZero (info : FunInfo) : MetaM (Array CongrArgKind) :=
     else if info.paramInfo[i].isInstance then
       if shouldUseSubsingletonInst info result i then
         result := result.push .subsingletonInst
+      else if hasClassical && shouldReplaceUDecInst info result i then
+        result := result.push .cast
       else
         result := result.push .fixed
     else
@@ -334,7 +349,12 @@ where
             | .fixed => go (i+1) (rhss.push lhss[i]!) (eqs.push none) hyps
             | .cast =>
               let rhsType := (← inferType lhss[i]!).replaceFVars (lhss[*...rhss.size]) rhss
-              let rhs ← mkCast lhss[i]!.fvarId! rhsType info.paramInfo[i]!.backDeps eqs
+              let rhs ← if info.paramInfo[i]!.isUDecInst then
+                -- Casting would embed the equations into the instance and break later `rw`s.
+                forallTelescopeReducing rhsType fun xs type =>
+                  mkLambdaFVars xs (mkApp (mkConst ``UDecidable.classical) type.appArg!)
+              else
+                mkCast lhss[i]!.fvarId! rhsType info.paramInfo[i]!.backDeps eqs
               go (i+1) (rhss.push rhs) (eqs.push none) hyps
             | .subsingletonInst =>
               -- The `lhs` does not need to instance implicit since it can be inferred from the LHS
