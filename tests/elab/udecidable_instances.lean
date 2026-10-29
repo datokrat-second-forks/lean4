@@ -56,6 +56,27 @@ variable (n : Nat) (i j : Int) (f g : Fin 5) (c d : Char) (s t : String) (b : Bo
 
 #check_native "a" < "b"
 
+/-! Lists -/
+
+variable (l l' : List Nat)
+
+#check_native n ∈ l
+#check_native l < l'
+#check_native l ≤ l'
+#check_native ∃ x, x ∈ l ∧ x = 3
+#check_native ∀ x, x ∈ l → x < 3
+#check_native l ⊆ l'
+#check_native l.Pairwise (· < ·)
+#check_native l.Nodup
+
+/-- info: [true, false, true, true, false, true, false, true, false] -/
+#guard_msgs in
+#eval [UDecidable.decide (2 ∈ [1, 2, 3]), UDecidable.decide (4 ∈ [1, 2, 3]),
+  UDecidable.decide ([1, 2] < [1, 3]), UDecidable.decide ([] < [1]),
+  UDecidable.decide ([1, 2] ≤ [1]), UDecidable.decide ([1, 2] ⊆ [2, 3, 1]),
+  UDecidable.decide ([1, 3, 2].Pairwise (· < ·)), UDecidable.decide [1, 2, 3].Nodup,
+  UDecidable.decide [1, 2, 1].Nodup]
+
 /-- info: [true, false, true, false, true, true, false] -/
 #guard_msgs in
 #eval [UDecidable.decide ((-3 : Int) ≤ -3), UDecidable.decide ((-3 : Int) < -3),
