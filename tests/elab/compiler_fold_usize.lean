@@ -32,7 +32,7 @@ trace: [Compiler.saveMono] size: 3
     def testDecEqNoAction : Bool :=
       let x1 := 0;
       let x2 := 4294967296;
-      let _x.1 := USize.decEq x1 x2;
+      let _x.1 := USize.Internal.beq x1 x2;
       return _x.1
 -/
 #guard_msgs in

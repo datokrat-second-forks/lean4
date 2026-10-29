@@ -280,6 +280,15 @@ def Folder.mkBinaryUSize (f64 : UInt64 → UInt64 → UInt64) (f32 : UInt32 → 
   unless res64.toUInt32 == res32 do return none
   mkUSizeLit res64
 
+def Folder.mkBinaryUSizePredicate (f64 : UInt64 → UInt64 → Bool) (f32 : UInt32 → UInt32 → Bool) :
+    Folder := fun args => do
+  let #[.fvar fvarId₁, .fvar fvarId₂] := args | return none
+  let some arg₁ ← getUSizeLit fvarId₁ | return none
+  let some arg₂ ← getUSizeLit fvarId₂ | return none
+  let res64 := f64 arg₁ arg₂
+  unless res64 == f32 arg₁.toUInt32 arg₂.toUInt32 do return none
+  mkLit res64
+
 def Folder.mkUnaryUSize (f64 : UInt64 → UInt64) (f32 : UInt32 → UInt32) : Folder := fun args => do
   let #[.fvar fvarId] := args | return none
   let some arg ← getUSizeLit fvarId | return none
@@ -675,22 +684,28 @@ def relationFolders : List (Name × Folder) := [
   (``Nat.blt, Folder.first #[Folder.mkBinary Nat.blt, Folder.rightAnnihilator 0 false Nat.blt (by simp [Bool.eq_false_iff, Nat.blt_eq, Nat.not_lt_zero])]),
   (``Nat.testBit, Folder.first #[Folder.mkBinary Nat.testBit, Folder.leftAnnihilator 0 false Nat.testBit Nat.zero_testBit]),
   (``UInt8.decEq, Folder.mkBinaryDecisionProcedure UInt8.decEq),
+  (``UInt8.Internal.beq, Folder.mkBinary UInt8.Internal.beq),
   (``UInt8.decLt, Folder.mkBinaryDecisionProcedure UInt8.decLt),
   (``UInt8.decLe, Folder.mkBinaryDecisionProcedure UInt8.decLe),
   (``UInt16.decEq, Folder.mkBinaryDecisionProcedure UInt16.decEq),
+  (``UInt16.Internal.beq, Folder.mkBinary UInt16.Internal.beq),
   (``UInt16.decLt, Folder.mkBinaryDecisionProcedure UInt16.decLt),
   (``UInt16.decLe, Folder.mkBinaryDecisionProcedure UInt16.decLe),
   (``UInt32.decEq, Folder.mkBinaryDecisionProcedure UInt32.decEq),
+  (``UInt32.Internal.beq, Folder.mkBinary UInt32.Internal.beq),
   (``UInt32.decLt, Folder.mkBinaryDecisionProcedure UInt32.decLt),
   (``UInt32.decLe, Folder.mkBinaryDecisionProcedure UInt32.decLe),
   (``UInt64.decEq, Folder.mkBinaryDecisionProcedure UInt64.decEq),
+  (``UInt64.Internal.beq, Folder.mkBinary UInt64.Internal.beq),
   (``UInt64.decLt, Folder.mkBinaryDecisionProcedure UInt64.decLt),
   (``UInt64.decLe, Folder.mkBinaryDecisionProcedure UInt64.decLe),
   (``USize.decEq, Folder.mkBinaryUSizeDecisionProcedure UInt64.decEq UInt32.decEq),
+  (``USize.Internal.beq, Folder.mkBinaryUSizePredicate UInt64.Internal.beq UInt32.Internal.beq),
   (``USize.decLt, Folder.mkBinaryUSizeDecisionProcedure UInt64.decLt UInt32.decLt),
   (``USize.decLe, Folder.mkBinaryUSizeDecisionProcedure UInt64.decLe UInt32.decLe),
   (``Bool.decEq, Folder.mkBinaryDecisionProcedure Bool.decEq),
-  (``String.decEq, Folder.mkBinaryDecisionProcedure String.decEq)
+  (``String.decEq, Folder.mkBinaryDecisionProcedure String.decEq),
+  (``String.Internal.beq, Folder.mkBinary String.Internal.beq)
 ]
 
 def conversionFolders : List (Name × Folder) := [

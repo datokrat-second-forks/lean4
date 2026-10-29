@@ -23,7 +23,7 @@
 /--
 trace: [Compiler.saveMono] size: 13
     def _private.Init.Data.Array.Basic.0.Array.anyMUnsafe.any._at_.Array.contains._at_.deletions.spec_0.spec_0 a as i stop : Bool :=
-      let _x.1 := USize.decEq i stop;
+      let _x.1 := USize.Internal.beq i stop;
       cases _x.1 : Bool
       | Bool.false =>
         let _x.2 := Array.uget ◾ as i ◾;

@@ -27,7 +27,7 @@ example : ("abc" == "abd") = false := by decide
 /--
 trace: [Compiler.IR] [result]
     def beqUInt8 (x_1 : u8) (x_2 : u8) : u8 :=
-      let x_3 : u8 := UInt8.decEq x_1 x_2;
+      let x_3 : u8 := UInt8.Internal.beq x_1 x_2;
       ret x_3
     def beqUInt8._boxed (x_1 : tagged) (x_2 : tagged) : tagged :=
       let x_3 : u8 := unbox x_1;

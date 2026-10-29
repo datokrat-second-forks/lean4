@@ -2667,7 +2667,7 @@ def UInt8.ofNat (n : @& Nat) : UInt8 := ⟨BitVec.ofNat 8 n⟩
 Boolean equality of `UInt8`s that reduces by itself. It implements `BEq UInt8` and
 `DecidableEq UInt8`, and the `match` compiler uses it to test `UInt8` value patterns.
 -/
-@[implicit_reducible]
+@[implicit_reducible, extern "lean_uint8_dec_eq"]
 def UInt8.Internal.beq (a b : UInt8) : Bool :=
   Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
 
@@ -2697,13 +2697,6 @@ def UInt8.decEq (a b : UInt8) : Decidable (Eq a b) :=
   ⟨UInt8.Internal.beq a b, UInt8.Internal.reflects_beq a b⟩
 
 instance : DecidableEq UInt8 := UInt8.decEq
-
--- TODO: drop this and mark `UInt8.Internal.beq` as `@[extern "lean_uint8_dec_eq"]`
--- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
-/-- Runtime implementation of `UInt8.Internal.beq`. -/
-@[inline] def UInt8.Internal.beqImpl (a b : UInt8) : Bool := @decide (Eq a b) (UInt8.decEq a b)
-
-attribute [implemented_by UInt8.Internal.beqImpl] UInt8.Internal.beq
 
 instance : BEq UInt8 := ⟨UInt8.Internal.beq⟩
 
@@ -2792,7 +2785,7 @@ def UInt16.ofNatLT (n : @& Nat) (h : LT.lt n UInt16.size) : UInt16 where
 Boolean equality of `UInt16`s that reduces by itself. It implements `BEq UInt16` and
 `DecidableEq UInt16`, and the `match` compiler uses it to test `UInt16` value patterns.
 -/
-@[implicit_reducible]
+@[implicit_reducible, extern "lean_uint16_dec_eq"]
 def UInt16.Internal.beq (a b : UInt16) : Bool :=
   Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
 
@@ -2822,13 +2815,6 @@ def UInt16.decEq (a b : UInt16) : Decidable (Eq a b) :=
   ⟨UInt16.Internal.beq a b, UInt16.Internal.reflects_beq a b⟩
 
 instance : DecidableEq UInt16 := UInt16.decEq
-
--- TODO: drop this and mark `UInt16.Internal.beq` as `@[extern "lean_uint16_dec_eq"]`
--- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
-/-- Runtime implementation of `UInt16.Internal.beq`. -/
-@[inline] def UInt16.Internal.beqImpl (a b : UInt16) : Bool := @decide (Eq a b) (UInt16.decEq a b)
-
-attribute [implemented_by UInt16.Internal.beqImpl] UInt16.Internal.beq
 
 instance : BEq UInt16 := ⟨UInt16.Internal.beq⟩
 
@@ -2879,7 +2865,7 @@ def UInt32.toNat (n : UInt32) : Nat := n.toBitVec.toNat
 Boolean equality of `UInt32`s that reduces by itself. It implements `BEq UInt32` and
 `DecidableEq UInt32`, and the `match` compiler uses it to test `UInt32` value patterns.
 -/
-@[implicit_reducible]
+@[implicit_reducible, extern "lean_uint32_dec_eq"]
 def UInt32.Internal.beq (a b : UInt32) : Bool :=
   Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
 
@@ -2909,13 +2895,6 @@ def UInt32.decEq (a b : UInt32) : Decidable (Eq a b) :=
   ⟨UInt32.Internal.beq a b, UInt32.Internal.reflects_beq a b⟩
 
 instance : DecidableEq UInt32 := UInt32.decEq
-
--- TODO: drop this and mark `UInt32.Internal.beq` as `@[extern "lean_uint32_dec_eq"]`
--- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
-/-- Runtime implementation of `UInt32.Internal.beq`. -/
-@[inline] def UInt32.Internal.beqImpl (a b : UInt32) : Bool := @decide (Eq a b) (UInt32.decEq a b)
-
-attribute [implemented_by UInt32.Internal.beqImpl] UInt32.Internal.beq
 
 instance : BEq UInt32 := ⟨UInt32.Internal.beq⟩
 
@@ -3000,7 +2979,7 @@ def UInt64.ofNatLT (n : @& Nat) (h : LT.lt n UInt64.size) : UInt64 where
 Boolean equality of `UInt64`s that reduces by itself. It implements `BEq UInt64` and
 `DecidableEq UInt64`, and the `match` compiler uses it to test `UInt64` value patterns.
 -/
-@[implicit_reducible]
+@[implicit_reducible, extern "lean_uint64_dec_eq"]
 def UInt64.Internal.beq (a b : UInt64) : Bool :=
   Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
 
@@ -3030,13 +3009,6 @@ def UInt64.decEq (a b : UInt64) : Decidable (Eq a b) :=
   ⟨UInt64.Internal.beq a b, UInt64.Internal.reflects_beq a b⟩
 
 instance : DecidableEq UInt64 := UInt64.decEq
-
--- TODO: drop this and mark `UInt64.Internal.beq` as `@[extern "lean_uint64_dec_eq"]`
--- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
-/-- Runtime implementation of `UInt64.Internal.beq`. -/
-@[inline] def UInt64.Internal.beqImpl (a b : UInt64) : Bool := @decide (Eq a b) (UInt64.decEq a b)
-
-attribute [implemented_by UInt64.Internal.beqImpl] UInt64.Internal.beq
 
 instance : BEq UInt64 := ⟨UInt64.Internal.beq⟩
 
@@ -3092,7 +3064,7 @@ def USize.ofNatLT (n : @& Nat) (h : LT.lt n USize.size) : USize where
 Boolean equality of `USize`s that reduces by itself. It implements `BEq USize` and
 `DecidableEq USize`.
 -/
-@[implicit_reducible]
+@[implicit_reducible, extern "lean_usize_dec_eq"]
 def USize.Internal.beq (a b : USize) : Bool :=
   Nat.beq a.toBitVec.toFin.val b.toBitVec.toFin.val
 
@@ -3122,13 +3094,6 @@ def USize.decEq (a b : USize) : Decidable (Eq a b) :=
   ⟨USize.Internal.beq a b, USize.Internal.reflects_beq a b⟩
 
 instance : DecidableEq USize := USize.decEq
-
--- TODO: drop this and mark `USize.Internal.beq` as `@[extern "lean_usize_dec_eq"]`
--- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
-/-- Runtime implementation of `USize.Internal.beq`. -/
-@[inline] def USize.Internal.beqImpl (a b : USize) : Bool := @decide (Eq a b) (USize.decEq a b)
-
-attribute [implemented_by USize.Internal.beqImpl] USize.Internal.beq
 
 instance : BEq USize := ⟨USize.Internal.beq⟩
 
@@ -3895,7 +3860,7 @@ def String.ofList (data : List Char) : String :=
 Boolean equality of `String`s that reduces by itself, by comparing the UTF-8 encodings. It
 implements `DecidableEq String`, and the `match` compiler uses it to test `String` value patterns.
 -/
-@[implicit_reducible]
+@[implicit_reducible, extern "lean_string_dec_eq"]
 def String.Internal.beq (s₁ s₂ : @& String) : Bool :=
   List.beq s₁.toByteArray.data.toList s₂.toByteArray.data.toList
 
@@ -3921,13 +3886,6 @@ def String.decEq (s₁ s₂ : @& String) : Decidable (Eq s₁ s₂) :=
   ⟨String.Internal.beq s₁ s₂, String.Internal.reflects_beq s₁ s₂⟩
 
 instance : DecidableEq String := String.decEq
-
--- TODO: drop this and mark `String.Internal.beq` as `@[extern "lean_string_dec_eq"]`
--- after a stage0 update. Until then, the stage0 interpreter has no native code for it.
-/-- Runtime implementation of `String.Internal.beq`. -/
-@[inline] def String.Internal.beqImpl (s₁ s₂ : @& String) : Bool := @decide (Eq s₁ s₂) (String.decEq s₁ s₂)
-
-attribute [implemented_by String.Internal.beqImpl] String.Internal.beq
 
 /--
 A byte position in a `String`, according to its UTF-8 encoding.

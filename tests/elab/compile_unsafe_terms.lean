@@ -8,7 +8,7 @@ trace: [Compiler.result] size: 3
     def test @&xs @&ys : UInt8 :=
       let _x.1 := ptrAddrUnsafe ◾ xs;
       let _x.2 := ptrAddrUnsafe ◾ ys;
-      let _x.3 := USize.decEq _x.1 _x.2;
+      let _x.3 := USize.Internal.beq _x.1 _x.2;
       return _x.3
 [Compiler.result] size: 4
     def test._boxed xs ys : tagged :=

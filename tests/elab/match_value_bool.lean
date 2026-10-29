@@ -173,7 +173,7 @@ example : (match "bc" with | "a" => 1 | "bc" => 2 | _ => 3 : Nat) = 2 := by simp
 trace: [Compiler.IR] [result]
     def gUInt8 (x_1 : u8) : tobj :=
       let x_2 : u8 := 2;
-      let x_3 : u8 := UInt8.decEq x_1 x_2;
+      let x_3 : u8 := UInt8.Internal.beq x_1 x_2;
       case x_3 : u8 of
       Bool.false →
         let x_4 : tagged := 3;
@@ -220,7 +220,7 @@ def gChar : Char → Nat
 trace: [Compiler.IR] [result]
     def gString (x_1 : @& obj) : tobj :=
       let x_2 : obj := fString._closed_0;
-      let x_3 : u8 := String.decEq x_1 x_2;
+      let x_3 : u8 := String.Internal.beq x_1 x_2;
       case x_3 : u8 of
       Bool.false →
         let x_4 : tagged := 3;
