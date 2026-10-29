@@ -15,6 +15,7 @@ public import Init.BinderPredicates
 import Init.Grind.Annotated
 public import Init.Data.BEq
 public import Init.Data.Option.Instances
+public import Init.UDecidable
 import Init.Data.Bool
 import Init.Data.Option.Lemmas
 import Init.TacticsExtra
@@ -410,6 +411,14 @@ theorem eq_nil_iff_forall_not_mem {l : List α} : l = [] ↔ ∀ a, a ∉ l := b
 
 @[simp] theorem mem_ite_nil_right {x : α} [Decidable p] {l : List α} :
     (x ∈ if p then l else []) ↔ p ∧ x ∈ l := by
+  split <;> simp_all
+
+@[simp] theorem mem_uite_nil_left {x : α} {_ : UDecidable p} {l : List α} :
+    (x ∈ uif p then [] else l) ↔ ¬ p ∧ x ∈ l := by
+  split <;> simp_all
+
+@[simp] theorem mem_uite_nil_right {x : α} {_ : UDecidable p} {l : List α} :
+    (x ∈ uif p then l else []) ↔ p ∧ x ∈ l := by
   split <;> simp_all
 
 theorem eq_of_mem_singleton : a ∈ [b] → a = b

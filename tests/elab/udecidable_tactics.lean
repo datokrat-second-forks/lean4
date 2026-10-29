@@ -152,3 +152,14 @@ def minBy (r : α → α → Prop) [UDecidableRel r] (x y : α) : α :=
 example {r s : α → α → Prop} [UDecidableRel r] [UDecidableRel s] (h : r = s) (x y : α) :
     minBy r x y = minBy s x y := by
   simp only [h]
+
+/-! `cbv` evaluates only the branch that the condition selects. -/
+
+def countdown (n : Nat) : List Nat :=
+  uif h : 0 < n then n :: countdown (n - 1) else []
+termination_by n
+decreasing_by omega
+
+example : countdown 2 = [2, 1] := by cbv
+
+example : (uif 2 ≤ 1 then 0 else 1) = 1 := by cbv

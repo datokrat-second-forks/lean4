@@ -97,6 +97,23 @@ theorem decide_spec (p : Prop) [UDecidable p] : decide p = true ↔ p := by
   unfold decide
   exact (Classical.choice _ : {b : Bool // b = true ↔ p}).property
 
+@[simp] theorem decide_eq_true_eq {p : Prop} [UDecidable p] : (decide p = true) = p :=
+  propext (decide_spec p)
+
+/-! `cbv` evaluates `decide` through these rules once it has evaluated the condition. -/
+
+@[simp, cbv_eval] theorem decide_true {_ : UDecidable True} : decide True = true :=
+  (decide_spec True).mpr trivial
+
+@[simp, cbv_eval] theorem decide_false {_ : UDecidable False} : decide False = false := by
+  cases h : decide False
+  · rfl
+  · exact ((decide_spec False).mp h).elim
+
+/-- Coerces `p` to `decide p`. It applies only when `p` has no `Decidable` instance. -/
+instance (priority := low) instCoeDepBool (p : Prop) [UDecidable p] : CoeDep Prop p Bool where
+  coe := decide p
+
 @[instance_reducible] private unsafe def mkImpl (b : Bool) (_ : b = true ↔ p) : UDecidable p :=
   unsafeCast b
 
@@ -319,10 +336,10 @@ instance (priority := low) ofDecidable (p : Prop) [Decidable p] : UDecidable p :
   ⟨decide p, reflects_decide p⟩
 
 instance instAnd (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∧ q) :=
-  mk (decide p && decide q) (by simp [decide_spec])
+  mk (decide p && decide q) (by simp)
 
 instance instOr (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∨ q) :=
-  mk (decide p || decide q) (by simp [decide_spec])
+  mk (decide p || decide q) (by simp)
 
 instance instNot (p : Prop) [UDecidable p] : UDecidable (¬p) :=
   mk (!decide p) ⟨fun h hp => by simp [(decide_spec p).mpr hp] at h, fun hnp => by
@@ -423,6 +440,12 @@ instance instOptionEq [UDecidableEq α] : UDecidableEq (Option α)
   | none, some _ => isFalse nofun
   | some _, none => isFalse nofun
   | some a, some b => ofIff (a = b) ⟨congrArg some, Option.some.inj⟩
+
+instance instForallOptionEqSome {o : Option α} {p : α → Prop} [UDecidablePred p] :
+    UDecidable (∀ a, o = some a → p a) :=
+  match o with
+  | none => isTrue nofun
+  | some b => ofIff (p b) ⟨fun h _ e => Option.some.inj e ▸ h, fun h => h b rfl⟩
 
 instance instProdEq [UDecidableEq α] [UDecidableEq β] : UDecidableEq (α × β)
   | (a₁, a₂), (b₁, b₂) =>

@@ -22,6 +22,7 @@ import Lean.Meta.Tactic.Cbv.Opaque
 import Lean.Meta.Tactic.Cbv.CbvEvalExt
 import Lean.Compiler.NoncomputableAttr
 import Init.CbvSimproc
+import Init.UDecidable
 import Lean.Meta.Tactic.Cbv.CbvSimproc
 
 /-!
@@ -422,6 +423,52 @@ builtin_cbv_simproc ↓ simpDecideCbv (@Decidable.decide _ _) := fun e => do
             let res ← shareCommon res
             let res ← mkAppS₂ res p' inst'
             return .step res (mkApp5 (mkConst ``Decidable.decide.congr_simp) p p' hp inst inst') (done := true) (contextDependent := cd)
+
+/--
+Simplifies the condition `c` of a `UDecidable.ite` or `UDecidable.dite` and returns the result as
+`c = c'` together with `c'`.
+-/
+def simpUDecidableCond (c : Expr) : SimpM (Expr × Expr × Bool) := do
+  match (← simp c) with
+  | .rfl _ cd => return (c, mkApp2 (mkConst ``Eq.refl [1]) (mkSort 0) c, cd)
+  | .step c' h _ cd => return (c', h, cd)
+
+/--
+Takes the branch of `uif c then a else b` once `c` evaluates to `True` or `False`. Unlike for
+`ite`, the instance carries no data in the logic, so it cannot be evaluated instead.
+-/
+builtin_cbv_simproc ↓ simpUIteCbv (@UDecidable.ite _ _ _ _ _) := fun e => do
+  let numArgs := e.getAppNumArgs
+  if numArgs < 5 then return .rfl (done := true)
+  propagateOverApplied e (numArgs - 5) fun e => do
+    let_expr f@UDecidable.ite α c inst a b := e | return .rfl
+    let (c', h, cd) ← simpUDecidableCond c
+    if (← isTrueExpr c') then
+      return .step a (mkApp6 (mkConst ``UDecidable.ite_eq_left_of_eq_true f.constLevels!) α c inst a b h)
+        (contextDependent := cd)
+    else if (← isFalseExpr c') then
+      return .step b (mkApp6 (mkConst ``UDecidable.ite_eq_right_of_eq_false f.constLevels!) α c inst a b h)
+        (contextDependent := cd)
+    else
+      return mkRflResult (done := true) (contextDependent := cd)
+
+/-- Like `simpUIteCbv`, but for `uif h : c then a h else b h`. -/
+builtin_cbv_simproc ↓ simpUDIteCbv (@UDecidable.dite _ _ _ _ _) := fun e => do
+  let numArgs := e.getAppNumArgs
+  if numArgs < 5 then return .rfl (done := true)
+  propagateOverApplied e (numArgs - 5) fun e => do
+    let_expr f@UDecidable.dite α c inst a b := e | return .rfl
+    let (c', h, cd) ← simpUDecidableCond c
+    if (← isTrueExpr c') then
+      let a' ← share <| a.betaRev #[mkApp2 (mkConst ``of_eq_true) c h]
+      return .step a' (mkApp6 (mkConst ``UDecidable.dite_eq_left_of_eq_true f.constLevels!) α c inst a b h)
+        (contextDependent := cd)
+    else if (← isFalseExpr c') then
+      let b' ← share <| b.betaRev #[mkApp2 (mkConst ``of_eq_false) c h]
+      return .step b' (mkApp6 (mkConst ``UDecidable.dite_eq_right_of_eq_false f.constLevels!) α c inst a b h)
+        (contextDependent := cd)
+    else
+      return mkRflResult (done := true) (contextDependent := cd)
 
 end Lean.Meta.Sym.Simp
 
