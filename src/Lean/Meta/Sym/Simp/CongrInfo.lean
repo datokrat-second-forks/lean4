@@ -31,11 +31,11 @@ where
     else
       none
 
-def mkCongrInfo (f : Expr) : SymM CongrInfo := do
+def mkCongrInfo (f : Expr) (replaceUDecInsts : Bool) : SymM CongrInfo := do
   if (← isProof f) then
     return .none
   let info ← getFunInfo f
-  let argKinds ← getCongrSimpKinds f info
+  let argKinds ← getCongrSimpKinds f info replaceUDecInsts
   if argKinds.all fun k => match k with | .fixed | .eq => true | _ => false then
     if argKinds.all (· == .fixed) then
       return .none
@@ -50,11 +50,16 @@ def mkCongrInfo (f : Expr) : SymM CongrInfo := do
   let some thm ← mkCongrSimpCore? f info argKinds | return .none
   return .congrTheorem thm
 
-public def getCongrInfo (f : Expr) : SymM CongrInfo := do
-  if let some info := (← get).congrInfo.find? { expr := f } then
+public def getCongrInfo (f : Expr) (replaceUDecInsts := true) : SymM CongrInfo := do
+  let s ← get
+  let cache := if replaceUDecInsts then s.congrInfo else s.congrInfoFixedUDec
+  if let some info := cache.find? { expr := f } then
     return info
-  let info ← mkCongrInfo f
-  modify fun s => { s with congrInfo := s.congrInfo.insert { expr := f } info }
+  let info ← mkCongrInfo f replaceUDecInsts
+  if replaceUDecInsts then
+    modify fun s => { s with congrInfo := s.congrInfo.insert { expr := f } info }
+  else
+    modify fun s => { s with congrInfoFixedUDec := s.congrInfoFixedUDec.insert { expr := f } info }
   return info
 
 protected def CongrInfo.toMessageData : CongrInfo → MessageData

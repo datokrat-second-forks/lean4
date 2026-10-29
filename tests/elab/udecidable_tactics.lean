@@ -163,3 +163,20 @@ decreasing_by omega
 example : countdown 2 = [2, 1] := by cbv
 
 example : (uif 2 ≤ 1 then 0 else 1) = 1 := by cbv
+
+/-!
+When the condition does not simplify to `True` or `False`, `cbv` evaluates the instance instead.
+-/
+
+def Even' (n : Nat) : Prop := ∃ k, n = 2 * k
+
+instance (n : Nat) : UDecidable (Even' n) :=
+  UDecidable.mk (n % 2 == 0) (by
+    simp only [Even', beq_iff_eq]
+    exact ⟨fun h => ⟨n / 2, by omega⟩, fun ⟨k, hk⟩ => by omega⟩)
+
+example : (uif Even' 4 then 1 else 0) = 1 := by cbv
+example : (uif _ : Even' 3 then 1 else 0) = 0 := by cbv
+example : UDecidable.decide (Even' 3) = false := by cbv
+example : UDecidable.decide (2 ∈ [1, 2, 3]) = true := by cbv
+example : UDecidable.decide ([1, 2] < [1, 3]) = true := by cbv

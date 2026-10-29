@@ -106,6 +106,12 @@ structure Config where
   Prevents infinite loops when conditional rewrite rules trigger recursive discharge attempts.
   -/
   maxDischargeDepth : Nat := 2
+  /--
+  When `true`, `UDecidable` instances are kept when an argument they depend on could be
+  rewritten, so that argument is not rewritten either. Otherwise, rewriting replaces the instance
+  by `UDecidable.classical`. `cbv` sets this because it evaluates the instances.
+  -/
+  fixUDecidableInsts : Bool := false
   deriving Inhabited
 
 /--

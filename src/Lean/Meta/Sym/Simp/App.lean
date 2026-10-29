@@ -479,7 +479,7 @@ Dispatches to the appropriate strategy based on the function's `CongrInfo`.
 -/
 public def simpAppArgs (e : Expr) : SimpM Result := do
   let f := e.getAppFn
-  match (← getCongrInfo f) with
+  match (← getCongrInfo f (replaceUDecInsts := !(← getConfig).fixUDecidableInsts)) with
   | .none => return .rfl
   | .fixedPrefix prefixSize suffixSize => simpFixedPrefix e prefixSize suffixSize
   | .interlaced rewritable => simpInterlaced e rewritable

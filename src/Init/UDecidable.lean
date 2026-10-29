@@ -59,7 +59,7 @@ abbrev UDecidableLT (α : Type u) [LT α] := UDecidableRel (LT.lt : α → α �
 namespace Int.Internal
 
 /-- Whether an integer is nonnegative. -/
-def isNonneg : Int → Bool
+@[expose] def isNonneg : Int → Bool
   | ofNat _ => true
   | -[_ +1] => false
 
@@ -68,10 +68,10 @@ theorem reflects_isNonneg : (m : Int) → (isNonneg m).Reflects (NonNeg m)
   | -[_ +1] => fun h => nomatch h
 
 /-- Boolean `≤` on integers. -/
-@[extern "lean_int_dec_le"] def ble (a b : @& Int) : Bool := isNonneg (b - a)
+@[expose, extern "lean_int_dec_le"] def ble (a b : @& Int) : Bool := isNonneg (b - a)
 
 /-- Boolean `<` on integers. -/
-@[extern "lean_int_dec_lt"] def blt (a b : @& Int) : Bool := isNonneg (b - (a + 1))
+@[expose, extern "lean_int_dec_lt"] def blt (a b : @& Int) : Bool := isNonneg (b - (a + 1))
 
 theorem reflects_ble (a b : Int) : (ble a b).Reflects (a ≤ b) := reflects_isNonneg (b - a)
 
@@ -89,7 +89,7 @@ The `Bool` that is `true` exactly if `p` holds.
 This function is defined classically and does not reduce. Compiled code returns the `Bool` that was
 passed to `UDecidable.mk` when creating the instance.
 -/
-@[irreducible, implemented_by decideImpl] def decide (p : Prop) [i : UDecidable p] : Bool :=
+@[irreducible, cbv_opaque, implemented_by decideImpl] def decide (p : Prop) [i : UDecidable p] : Bool :=
   (Classical.choice (i.exists_reflects.elim fun b h => ⟨⟨b, h⟩⟩) :
     {b : Bool // b = true ↔ p}).val
 
@@ -100,12 +100,10 @@ theorem decide_spec (p : Prop) [UDecidable p] : decide p = true ↔ p := by
 @[simp] theorem decide_eq_true_eq {p : Prop} [UDecidable p] : (decide p = true) = p :=
   propext (decide_spec p)
 
-/-! `cbv` evaluates `decide` through these rules once it has evaluated the condition. -/
-
-@[simp, cbv_eval] theorem decide_true {_ : UDecidable True} : decide True = true :=
+@[simp] theorem decide_true {_ : UDecidable True} : decide True = true :=
   (decide_spec True).mpr trivial
 
-@[simp, cbv_eval] theorem decide_false {_ : UDecidable False} : decide False = false := by
+@[simp] theorem decide_false {_ : UDecidable False} : decide False = false := by
   cases h : decide False
   · rfl
   · exact ((decide_spec False).mp h).elim
@@ -118,7 +116,7 @@ instance (priority := low) instCoeDepBool (p : Prop) [UDecidable p] : CoeDep Pro
   unsafeCast b
 
 /-- Proves that `p` is decidable by providing a `Bool` that is `true` exactly if `p` holds. -/
-@[irreducible, implemented_by mkImpl] def mk (b : Bool) (h : b = true ↔ p) : UDecidable p :=
+@[irreducible, cbv_opaque, implemented_by mkImpl] def mk (b : Bool) (h : b = true ↔ p) : UDecidable p :=
   ⟨b, h⟩
 
 theorem decide_mk (b : Bool) (h : b = true ↔ p) : @decide p (mk b h) = b :=
@@ -167,6 +165,12 @@ theorem decide_eq_false {p : Prop} [UDecidable p] (hnp : ¬p) : decide p = false
   cases h : decide p
   · rfl
   · exact absurd ((decide_spec p).mp h) hnp
+
+theorem of_decide_eq_true {p : Prop} [UDecidable p] (h : decide p = true) : p :=
+  (decide_spec p).mp h
+
+theorem of_decide_eq_false {p : Prop} [UDecidable p] (h : decide p = false) : ¬p :=
+  fun hp => Bool.false_ne_true (h.symm.trans (decide_eq_true hp))
 
 /-! `uif c then t else e` and `uif h : c then t else e` are the notations for `ite` and `dite`. -/
 
@@ -238,6 +242,22 @@ theorem ite_eq_left_of_eq_true {α : Sort u} {c : Prop} {_ : UDecidable c} (t e 
 theorem ite_eq_right_of_eq_false {α : Sort u} {c : Prop} {_ : UDecidable c} (t e : α)
     (h : c = False) : (uif c then t else e) = e :=
   ite_eq_right (of_eq_false h)
+
+theorem ite_eq_left_of_decide_eq_true {α : Sort u} {c : Prop} {_ : UDecidable c} (t e : α)
+    (h : decide c = true) : (uif c then t else e) = t :=
+  ite_eq_left (of_decide_eq_true h)
+
+theorem ite_eq_right_of_decide_eq_false {α : Sort u} {c : Prop} {_ : UDecidable c} (t e : α)
+    (h : decide c = false) : (uif c then t else e) = e :=
+  ite_eq_right (of_decide_eq_false h)
+
+theorem dite_eq_left_of_decide_eq_true {α : Sort u} {c : Prop} {_ : UDecidable c} {t : c → α}
+    {e : ¬c → α} (h : decide c = true) : dite c t e = t (of_decide_eq_true h) :=
+  dite_eq_left (of_decide_eq_true h)
+
+theorem dite_eq_right_of_decide_eq_false {α : Sort u} {c : Prop} {_ : UDecidable c} {t : c → α}
+    {e : ¬c → α} (h : decide c = false) : dite c t e = e (of_decide_eq_false h) :=
+  dite_eq_right (of_decide_eq_false h)
 
 theorem dite_eq_left_of_eq_true {α : Sort u} {c : Prop} {_ : UDecidable c} {t : c → α}
     {e : ¬c → α} (h : c = True) : dite c t e = t (of_eq_true h) :=

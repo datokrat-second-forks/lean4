@@ -183,8 +183,15 @@ private def getClassSubobjectMask? (f : Expr) : MetaM (Option (Array Bool)) := d
         mask := mask.push (isSubobjectField? env val.induct localDecl.userName).isSome
     return some mask
 
-/-- Computes `CongrArgKind`s for a simp congruence theorem. -/
-def getCongrSimpKinds (f : Expr) (info : FunInfo) : MetaM (Array CongrArgKind) := do
+/--
+Computes `CongrArgKind`s for a simp congruence theorem.
+
+If `replaceUDecInsts := false`, `UDecidable` instances that depend on rewritten arguments are
+fixed instead of being replaced by `UDecidable.classical`, which also fixes the arguments they
+depend on.
+-/
+def getCongrSimpKinds (f : Expr) (info : FunInfo) (replaceUDecInsts := true) :
+    MetaM (Array CongrArgKind) := do
   /-
   The default `CongrArgKind` is `eq`, which allows `simp` to rewrite this
   argument. However, if there are references from `i` to `j`, we cannot
@@ -216,7 +223,7 @@ def getCongrSimpKinds (f : Expr) (info : FunInfo) : MetaM (Array CongrArgKind) :
             continue
       if shouldUseSubsingletonInst info result i then
         result := result.push .subsingletonInst
-      else if hasClassical && shouldReplaceUDecInst info result i then
+      else if replaceUDecInsts && hasClassical && shouldReplaceUDecInst info result i then
         result := result.push .cast
       else
         result := result.push .fixed

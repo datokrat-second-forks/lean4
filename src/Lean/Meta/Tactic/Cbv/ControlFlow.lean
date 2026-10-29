@@ -425,32 +425,57 @@ builtin_cbv_simproc ↓ simpDecideCbv (@Decidable.decide _ _) := fun e => do
             return .step res (mkApp5 (mkConst ``Decidable.decide.congr_simp) p p' hp inst inst') (done := true) (contextDependent := cd)
 
 /--
-Simplifies the condition `c` of a `UDecidable.ite` or `UDecidable.dite` and returns the result as
-`c = c'` together with `c'`.
+Evaluates `UDecidable.decide c` by evaluating the instance until it is `UDecidable.mk b _` and
+rewriting with `UDecidable.decide_mk`. The condition `c` is left alone.
 -/
-def simpUDecidableCond (c : Expr) : SimpM (Expr × Expr × Bool) := do
-  match (← simp c) with
-  | .rfl _ cd => return (c, mkApp2 (mkConst ``Eq.refl [1]) (mkSort 0) c, cd)
-  | .step c' h _ cd => return (c', h, cd)
+builtin_cbv_simproc ↓ simpUDecideCbv (@UDecidable.decide _ _) := fun e => do
+  let numArgs := e.getAppNumArgs
+  if numArgs < 2 then return .rfl (done := true)
+  propagateOverApplied e (numArgs - 2) fun e => do
+    let_expr UDecidable.decide c inst := e | return .rfl
+    let decideFn := mkApp (mkConst ``UDecidable.decide) c
+    match (← simp inst) with
+    | .rfl _ cd =>
+      let_expr UDecidable.mk _ b h := inst | return mkRflResult (done := true) (contextDependent := cd)
+      return .step b (mkApp3 (mkConst ``UDecidable.decide_mk) c b h) (contextDependent := cd)
+    | .step inst' hinst _ cd =>
+      let hcongr := mkApp6 (mkConst ``congrArg [1, 1]) (mkApp (mkConst ``UDecidable) c)
+        (mkConst ``Bool) inst inst' decideFn hinst
+      let_expr UDecidable.mk _ b h := inst' |
+        return .step (← share <| mkApp decideFn inst') hcongr (done := true) (contextDependent := cd)
+      let hmk := mkApp3 (mkConst ``UDecidable.decide_mk) c b h
+      let htrans := mkApp6 (mkConst ``Eq.trans [1]) (mkConst ``Bool) e (mkApp decideFn inst') b
+        hcongr hmk
+      return .step b htrans (contextDependent := cd)
 
 /--
-Takes the branch of `uif c then a else b` once `c` evaluates to `True` or `False`. Unlike for
-`ite`, the instance carries no data in the logic, so it cannot be evaluated instead.
+Evaluates `UDecidable.decide c` with the instance `inst`. Returns `true` or `false` with a proof of
+`decide c = true` or `decide c = false`, if the instance evaluates to one of them.
 -/
+def evalUDecide (c inst : Expr) : SimpM (Option (Bool × Expr) × Bool) := do
+  let d ← share <| mkApp2 (mkConst ``UDecidable.decide) c inst
+  match (← simp d) with
+  | .rfl _ cd => return (none, cd)
+  | .step b hb _ cd =>
+    match_expr b with
+    | Bool.true => return (some (true, hb), cd)
+    | Bool.false => return (some (false, hb), cd)
+    | _ => return (none, cd)
+
+/-- Takes the branch of `uif c then a else b` that the instance evaluates to. -/
 builtin_cbv_simproc ↓ simpUIteCbv (@UDecidable.ite _ _ _ _ _) := fun e => do
   let numArgs := e.getAppNumArgs
   if numArgs < 5 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 5) fun e => do
     let_expr f@UDecidable.ite α c inst a b := e | return .rfl
-    let (c', h, cd) ← simpUDecidableCond c
-    if (← isTrueExpr c') then
-      return .step a (mkApp6 (mkConst ``UDecidable.ite_eq_left_of_eq_true f.constLevels!) α c inst a b h)
+    match (← evalUDecide c inst) with
+    | (some (true, hb), cd) =>
+      return .step a (mkApp6 (mkConst ``UDecidable.ite_eq_left_of_decide_eq_true f.constLevels!) α c inst a b hb)
         (contextDependent := cd)
-    else if (← isFalseExpr c') then
-      return .step b (mkApp6 (mkConst ``UDecidable.ite_eq_right_of_eq_false f.constLevels!) α c inst a b h)
+    | (some (false, hb), cd) =>
+      return .step b (mkApp6 (mkConst ``UDecidable.ite_eq_right_of_decide_eq_false f.constLevels!) α c inst a b hb)
         (contextDependent := cd)
-    else
-      return mkRflResult (done := true) (contextDependent := cd)
+    | (none, cd) => return mkRflResult (done := true) (contextDependent := cd)
 
 /-- Like `simpUIteCbv`, but for `uif h : c then a h else b h`. -/
 builtin_cbv_simproc ↓ simpUDIteCbv (@UDecidable.dite _ _ _ _ _) := fun e => do
@@ -458,17 +483,16 @@ builtin_cbv_simproc ↓ simpUDIteCbv (@UDecidable.dite _ _ _ _ _) := fun e => do
   if numArgs < 5 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 5) fun e => do
     let_expr f@UDecidable.dite α c inst a b := e | return .rfl
-    let (c', h, cd) ← simpUDecidableCond c
-    if (← isTrueExpr c') then
-      let a' ← share <| a.betaRev #[mkApp2 (mkConst ``of_eq_true) c h]
-      return .step a' (mkApp6 (mkConst ``UDecidable.dite_eq_left_of_eq_true f.constLevels!) α c inst a b h)
+    match (← evalUDecide c inst) with
+    | (some (true, hb), cd) =>
+      let a' ← share <| a.betaRev #[mkApp3 (mkConst ``UDecidable.of_decide_eq_true) c inst hb]
+      return .step a' (mkApp6 (mkConst ``UDecidable.dite_eq_left_of_decide_eq_true f.constLevels!) α c inst a b hb)
         (contextDependent := cd)
-    else if (← isFalseExpr c') then
-      let b' ← share <| b.betaRev #[mkApp2 (mkConst ``of_eq_false) c h]
-      return .step b' (mkApp6 (mkConst ``UDecidable.dite_eq_right_of_eq_false f.constLevels!) α c inst a b h)
+    | (some (false, hb), cd) =>
+      let b' ← share <| b.betaRev #[mkApp3 (mkConst ``UDecidable.of_decide_eq_false) c inst hb]
+      return .step b' (mkApp6 (mkConst ``UDecidable.dite_eq_right_of_decide_eq_false f.constLevels!) α c inst a b hb)
         (contextDependent := cd)
-    else
-      return mkRflResult (done := true) (contextDependent := cd)
+    | (none, cd) => return mkRflResult (done := true) (contextDependent := cd)
 
 end Lean.Meta.Sym.Simp
 

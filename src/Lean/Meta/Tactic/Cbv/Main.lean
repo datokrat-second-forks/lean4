@@ -375,7 +375,8 @@ full-term repair pass. The checks are disabled here (and in `cbvGoalCore`) rathe
 via the `SymM.run` configuration because `cbv` may run inside an enclosing `SymM`
 session (e.g., inside a `sym` block).
 -/
-def cbvCore (e : Expr) (config : Sym.Simp.Config := {}) : Sym.SymM Result := do
+def cbvCore (e : Expr) (config : Sym.Simp.Config := { fixUDecidableInsts := true }) :
+    Sym.SymM Result := do
   Sym.withoutShareCommonChecks do
     let simprocs ← getCbvSimprocs
     let methods := mkCbvMethods simprocs
@@ -390,7 +391,7 @@ public def cbvEntry (e : Expr) : MetaM Result := do
       | .ok (Result.rfl ..)     => return m!"cbv: no change{indentExpr e}"
       | .error err              => return m!"cbv: {err.toMessageData}") do
   let simprocs ← getCbvSimprocs
-  let config : Sym.Simp.Config := { maxSteps := cbv.maxSteps.get (← getOptions) }
+  let config : Sym.Simp.Config := { maxSteps := cbv.maxSteps.get (← getOptions), fixUDecidableInsts := true }
   let methods := mkCbvMethods simprocs
   let e ← Sym.unfoldReducible e
   Sym.SymM.run do
@@ -406,7 +407,7 @@ call-by-value evaluation, within the caller's `SymM` context.
 public def cbvGoalCore (mvarId : MVarId) : Sym.SymM (Option MVarId) := do
   -- See `cbvCore` for why the `shareCommon` invariant checks are disabled.
   Sym.withoutShareCommonChecks do
-  let config : Sym.Simp.Config := { maxSteps := cbv.maxSteps.get (← getOptions) }
+  let config : Sym.Simp.Config := { maxSteps := cbv.maxSteps.get (← getOptions), fixUDecidableInsts := true }
   mvarId.withContext do
     let mut mvarIdNew := mvarId
     let target ← mvarIdNew.getType
@@ -437,7 +438,7 @@ public def cbvHyp (mvarId : MVarId) (fvarId : FVarId) : MetaM (Option MVarId) :=
   mvarId.withContext do
     let localDecl ← fvarId.getDecl
     let type ← instantiateMVars localDecl.type
-    let config : Sym.Simp.Config := { maxSteps := cbv.maxSteps.get (← getOptions) }
+    let config : Sym.Simp.Config := { maxSteps := cbv.maxSteps.get (← getOptions), fixUDecidableInsts := true }
     let result ← withTraceNode `Meta.Tactic.cbv (fun
         | .ok (Result.step type' ..) => return m!"hypothesis `{localDecl.userName}`:{indentExpr type}\n==>{indentExpr type'}"
         | .ok (Result.rfl ..)        => return m!"hypothesis `{localDecl.userName}`: no change"
@@ -480,7 +481,7 @@ public def cbvDecideGoal (m : MVarId) : MetaM Unit := do
   withTraceNode `Meta.Tactic.cbv (fun
       | .ok ()   => return m!"decide_cbv: closed goal"
       | .error err => return m!"decide_cbv: {err.toMessageData}") do
-  let config : Sym.Simp.Config := { maxSteps := cbv.maxSteps.get (← getOptions) }
+  let config : Sym.Simp.Config := { maxSteps := cbv.maxSteps.get (← getOptions), fixUDecidableInsts := true }
   Sym.SymM.run do
     let m ← Sym.preprocessMVar m
     let mType ← m.getType

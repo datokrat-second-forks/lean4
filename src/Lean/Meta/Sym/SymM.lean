@@ -207,6 +207,8 @@ structure State where
   -/
   getLevel : PHashMap ExprPtr Level := {}
   congrInfo : PHashMap ExprPtr CongrInfo := {}
+  /-- Like `congrInfo`, but for `Simp.Config.fixUDecidableInsts := true`. -/
+  congrInfoFixedUDec : PHashMap ExprPtr CongrInfo := {}
   /-- Cache for `isDefEqI` results -/
   defEqI : PHashMap (ExprPtr × ExprPtr) Bool := {}
   /-- State for registered `SymExtension`s, indexed by extension id. -/

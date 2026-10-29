@@ -23,11 +23,11 @@ set_option linter.missingDocs true
 public section
 
 /-- Boolean `≤` on `UInt8`. -/
-@[extern "lean_uint8_dec_le"] def UInt8.Internal.ble (a b : UInt8) : Bool :=
+@[expose, extern "lean_uint8_dec_le"] def UInt8.Internal.ble (a b : UInt8) : Bool :=
   Nat.ble a.toBitVec.toFin.val b.toBitVec.toFin.val
 
 /-- Boolean `<` on `UInt8`. -/
-@[extern "lean_uint8_dec_lt"] def UInt8.Internal.blt (a b : UInt8) : Bool :=
+@[expose, extern "lean_uint8_dec_lt"] def UInt8.Internal.blt (a b : UInt8) : Bool :=
   Nat.blt a.toBitVec.toFin.val b.toBitVec.toFin.val
 
 theorem UInt8.Internal.ble_iff (a b : UInt8) : UInt8.Internal.ble a b = true ↔ a ≤ b :=
@@ -37,11 +37,11 @@ theorem UInt8.Internal.blt_iff (a b : UInt8) : UInt8.Internal.blt a b = true ↔
   ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
 
 /-- Boolean `≤` on `UInt16`. -/
-@[extern "lean_uint16_dec_le"] def UInt16.Internal.ble (a b : UInt16) : Bool :=
+@[expose, extern "lean_uint16_dec_le"] def UInt16.Internal.ble (a b : UInt16) : Bool :=
   Nat.ble a.toBitVec.toFin.val b.toBitVec.toFin.val
 
 /-- Boolean `<` on `UInt16`. -/
-@[extern "lean_uint16_dec_lt"] def UInt16.Internal.blt (a b : UInt16) : Bool :=
+@[expose, extern "lean_uint16_dec_lt"] def UInt16.Internal.blt (a b : UInt16) : Bool :=
   Nat.blt a.toBitVec.toFin.val b.toBitVec.toFin.val
 
 theorem UInt16.Internal.ble_iff (a b : UInt16) : UInt16.Internal.ble a b = true ↔ a ≤ b :=
@@ -51,11 +51,11 @@ theorem UInt16.Internal.blt_iff (a b : UInt16) : UInt16.Internal.blt a b = true 
   ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
 
 /-- Boolean `≤` on `UInt32`. -/
-@[extern "lean_uint32_dec_le"] def UInt32.Internal.ble (a b : UInt32) : Bool :=
+@[expose, extern "lean_uint32_dec_le"] def UInt32.Internal.ble (a b : UInt32) : Bool :=
   Nat.ble a.toBitVec.toFin.val b.toBitVec.toFin.val
 
 /-- Boolean `<` on `UInt32`. -/
-@[extern "lean_uint32_dec_lt"] def UInt32.Internal.blt (a b : UInt32) : Bool :=
+@[expose, extern "lean_uint32_dec_lt"] def UInt32.Internal.blt (a b : UInt32) : Bool :=
   Nat.blt a.toBitVec.toFin.val b.toBitVec.toFin.val
 
 theorem UInt32.Internal.ble_iff (a b : UInt32) : UInt32.Internal.ble a b = true ↔ a ≤ b :=
@@ -65,11 +65,11 @@ theorem UInt32.Internal.blt_iff (a b : UInt32) : UInt32.Internal.blt a b = true 
   ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
 
 /-- Boolean `≤` on `UInt64`. -/
-@[extern "lean_uint64_dec_le"] def UInt64.Internal.ble (a b : UInt64) : Bool :=
+@[expose, extern "lean_uint64_dec_le"] def UInt64.Internal.ble (a b : UInt64) : Bool :=
   Nat.ble a.toBitVec.toFin.val b.toBitVec.toFin.val
 
 /-- Boolean `<` on `UInt64`. -/
-@[extern "lean_uint64_dec_lt"] def UInt64.Internal.blt (a b : UInt64) : Bool :=
+@[expose, extern "lean_uint64_dec_lt"] def UInt64.Internal.blt (a b : UInt64) : Bool :=
   Nat.blt a.toBitVec.toFin.val b.toBitVec.toFin.val
 
 theorem UInt64.Internal.ble_iff (a b : UInt64) : UInt64.Internal.ble a b = true ↔ a ≤ b :=
@@ -79,11 +79,11 @@ theorem UInt64.Internal.blt_iff (a b : UInt64) : UInt64.Internal.blt a b = true 
   ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
 
 /-- Boolean `≤` on `USize`. -/
-@[extern "lean_usize_dec_le"] def USize.Internal.ble (a b : USize) : Bool :=
+@[expose, extern "lean_usize_dec_le"] def USize.Internal.ble (a b : USize) : Bool :=
   Nat.ble a.toBitVec.toFin.val b.toBitVec.toFin.val
 
 /-- Boolean `<` on `USize`. -/
-@[extern "lean_usize_dec_lt"] def USize.Internal.blt (a b : USize) : Bool :=
+@[expose, extern "lean_usize_dec_lt"] def USize.Internal.blt (a b : USize) : Bool :=
   Nat.blt a.toBitVec.toFin.val b.toBitVec.toFin.val
 
 theorem USize.Internal.ble_iff (a b : USize) : USize.Internal.ble a b = true ↔ a ≤ b :=
