@@ -289,6 +289,12 @@ theorem dite_eq_right {c : Prop} [UDecidable c] (hnc : ¬c) {α : Sort u} {t : c
   | inl hp => rw [ite_eq_right (not_not_intro hp), @ite_eq_left p (classical p) hp]
   | inr hp => rw [ite_eq_left hp, @ite_eq_right p (classical p) hp]
 
+theorem apply_ite {α : Sort u} {β : Sort v} (f : α → β) {c : Prop} {_ : UDecidable c} {a b : α} :
+    f (uif c then a else b) = uif c then f a else f b := by
+  cases em c with
+  | inl hc => rw [ite_eq_left hc, ite_eq_left hc]
+  | inr hc => rw [ite_eq_right hc, ite_eq_right hc]
+
 theorem ite_eq_left_of_eq_true {α : Sort u} {c : Prop} {_ : UDecidable c} (t e : α)
     (h : c = True) : (uif c then t else e) = t :=
   ite_eq_left (of_eq_true h)

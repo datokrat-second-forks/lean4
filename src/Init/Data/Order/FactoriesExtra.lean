@@ -9,6 +9,7 @@ prelude
 public import Init.Data.Order.ClassesExtra
 public import Init.Data.Order.Ord
 public import Init.Data.Order.Classes
+public import Init.UDecidable
 import Init.Data.Bool
 
 namespace Std
@@ -24,14 +25,12 @@ public def _root_.LE.ofOrd (α : Type u) [Ord α] : LE α where
   le a b := (compare a b).isLE
 
 /--
-Creates an `DecidableLE α` instance using a well-behaved `Ord α` instance.
+Creates a `UDecidableLE α` instance using a well-behaved `Ord α` instance.
 -/
 @[inline, expose, instance_reducible]
-public def _root_.DecidableLE.ofOrd (α : Type u) [LE α] [Ord α] [LawfulOrderOrd α] :
-    DecidableLE α :=
-  fun a b => match h : (compare a b).isLE with
-    | true => isTrue (by simpa only [LawfulOrderOrd.isLE_compare] using h)
-    | false => isFalse (by simpa only [LawfulOrderOrd.isLE_compare_eq_false] using h)
+public def _root_.UDecidableLE.ofOrd (α : Type u) [LE α] [Ord α] [LawfulOrderOrd α] :
+    UDecidableLE α :=
+  fun a b => UDecidable.mk (compare a b).isLE (LawfulOrderOrd.isLE_compare a b)
 
 /--
 Creates an `LT α` instance from an `Ord α` instance.
@@ -53,7 +52,7 @@ public theorem isGE_compare {α : Type u} [Ord α] [LE α] [LawfulOrderOrd α]
   simp [← LawfulOrderOrd.isGE_compare]
 
 -- We need to define `compare_eq_lt` and `compare_eq_gt` here instead of in `LemmasExtra.lean`
--- because they are needed for `DecidableLT.ofOrd`.
+-- because they are needed for `UDecidableLT.ofOrd`.
 public theorem compare_eq_lt {α : Type u} [Ord α] [LT α] [LE α] [LawfulOrderOrd α] [LawfulOrderLT α]
     {a b : α} : compare a b = .lt ↔ a < b := by
   rw [LawfulOrderLT.lt_iff, ← LawfulOrderOrd.isLE_compare, ← LawfulOrderOrd.isGE_compare]
@@ -91,16 +90,13 @@ grind_pattern compare_ne_eq => compare a b, Ordering.eq where
   guard compare a b ≠ .eq
 
 /--
-Creates a `DecidableLT α` instance using a well-behaved `Ord α` instance.
+Creates a `UDecidableLT α` instance using a well-behaved `Ord α` instance.
 -/
 @[inline, expose, instance_reducible]
-public def _root_.DecidableLT.ofOrd (α : Type u) [LE α] [LT α] [Ord α] [LawfulOrderOrd α]
+public def _root_.UDecidableLT.ofOrd (α : Type u) [LE α] [LT α] [Ord α] [LawfulOrderOrd α]
     [LawfulOrderLT α] :
-    DecidableLT α :=
-  fun a b => if h : compare a b = .lt then
-      isTrue (by simpa only [compare_eq_lt] using h)
-    else
-      isFalse (by simpa only [compare_eq_lt] using h)
+    UDecidableLT α :=
+  fun a b => UDecidable.mk (compare a b == .lt) (by simp [compare_eq_lt])
 
 /--
 Creates a `BEq α` instance from an `Ord α` instance. -/

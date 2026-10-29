@@ -404,12 +404,26 @@ public theorem min_eq_ite {α : Type u} [LE α] [DecidableLE α] {_ : Min α}
   · simp [LawfulOrderLeftLeaningMin.min_eq_left _ _ h]
   · simp [LawfulOrderLeftLeaningMin.min_eq_right _ _ h]
 
+public theorem min_eq_uite {α : Type u} [LE α] [UDecidableLE α] {_ : Min α}
+    [LawfulOrderLeftLeaningMin α] {a b : α} :
+    min a b = uif a ≤ b then a else b := by
+  split <;> rename_i h
+  · simp [LawfulOrderLeftLeaningMin.min_eq_left _ _ h]
+  · simp [LawfulOrderLeftLeaningMin.min_eq_right _ _ h]
+
 @[deprecated Std.min_eq_ite (since := "2026-07-21")]
 public theorem min_eq_if {α : Type u} [LE α] [DecidableLE α] {_ : Min α} [Std.LawfulOrderLeftLeaningMin α] {a : α} {b : α} : Min.min a b = if a ≤ b then a else b := Std.min_eq_ite
 
 public theorem max_eq_ite {α : Type u} [LE α] [DecidableLE α] {_ : Max α}
     [LawfulOrderLeftLeaningMax α] {a b : α} :
     max a b = if b ≤ a then a else b := by
+  split <;> rename_i h
+  · simp [LawfulOrderLeftLeaningMax.max_eq_left _ _ h]
+  · simp [LawfulOrderLeftLeaningMax.max_eq_right _ _ h]
+
+public theorem max_eq_uite {α : Type u} [LE α] [UDecidableLE α] {_ : Max α}
+    [LawfulOrderLeftLeaningMax α] {a b : α} :
+    max a b = uif b ≤ a then a else b := by
   split <;> rename_i h
   · simp [LawfulOrderLeftLeaningMax.max_eq_left _ _ h]
   · simp [LawfulOrderLeftLeaningMax.max_eq_right _ _ h]
@@ -433,9 +447,14 @@ public theorem LawfulOrderLeftLeaningMin.of_eq {α : Type u} [LE α] [Min α] [D
   min_eq_left a b := by simp +contextual [min_eq]
   min_eq_right a b := by simp +contextual [min_eq]
 
+public theorem LawfulOrderLeftLeaningMin.of_eq_uite {α : Type u} [LE α] [Min α] [UDecidableLE α]
+    (min_eq : ∀ a b : α, min a b = uif a ≤ b then a else b) : LawfulOrderLeftLeaningMin α where
+  min_eq_left a b := by simp +contextual [min_eq]
+  min_eq_right a b := by simp +contextual [min_eq]
+
 attribute [local instance] Min.leftLeaningOfLE
-public instance [LE α] [DecidableLE α] : LawfulOrderLeftLeaningMin α :=
-  .of_eq (fun a b => by simp [min])
+public instance [LE α] [UDecidableLE α] : LawfulOrderLeftLeaningMin α :=
+  .of_eq_uite (fun a b => by simp [min])
 
 public instance {α : Type u} [LE α] [Min α] [LawfulOrderLeftLeaningMin α] :
     MinEqOr α where
@@ -595,9 +614,14 @@ public theorem LawfulOrderLeftLeaningMax.of_eq {α : Type u} [LE α] [Max α] [D
   max_eq_left a b := by simp +contextual [min_eq]
   max_eq_right a b := by simp +contextual [min_eq]
 
+public theorem LawfulOrderLeftLeaningMax.of_eq_uite {α : Type u} [LE α] [Max α] [UDecidableLE α]
+    (max_eq : ∀ a b : α, max a b = uif b ≤ a then a else b) : LawfulOrderLeftLeaningMax α where
+  max_eq_left a b := by simp +contextual [max_eq]
+  max_eq_right a b := by simp +contextual [max_eq]
+
 attribute [local instance] Max.leftLeaningOfLE
-public instance [LE α] [DecidableLE α] : LawfulOrderLeftLeaningMax α :=
-  .of_eq (fun a b => by simp [max])
+public instance [LE α] [UDecidableLE α] : LawfulOrderLeftLeaningMax α :=
+  .of_eq_uite (fun a b => by simp [max])
 
 public instance {α : Type u} [LE α] [Max α] [LawfulOrderLeftLeaningMax α] :
     MaxEqOr α where

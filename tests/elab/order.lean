@@ -63,7 +63,7 @@ section
 
 @[instance_reducible] def packageWithoutSynthesizableInstances : Std.LinearOrderPackage X := .ofLE X {
   le := X.instLE
-  decidableLE := X.instDecidableLE }
+  decidableLE := fun a b => @UDecidable.ofDecidable _ (X.instDecidableLE a b) }
 
 end
 
@@ -73,7 +73,7 @@ attribute [local instance] X.LinearOrderPackage.packageOfLE
 
 @[instance_reducible] def packageWithoutSynthesizableInstances' : Std.LinearOrderPackage X := .ofLE X {
   le := X.instLE
-  decidableLE := X.instDecidableLE
+  decidableLE := fun a b => @UDecidable.ofDecidable _ (X.instDecidableLE a b)
 }
 
 end

@@ -7,6 +7,7 @@ module
 
 prelude
 public import Init.Data.Order.Classes
+public import Init.UDecidable
 import Init.Classical
 
 namespace Std
@@ -18,24 +19,24 @@ This module provides utilities for the creation of order-related typeclass insta
 section OfLE
 
 /--
-Creates a `Min α` instance from `LE α` and `DecidableLE α` so that `min a b` is either `a` or `b`,
+Creates a `Min α` instance from `LE α` and `UDecidableLE α` so that `min a b` is either `a` or `b`,
 preferring `a` over `b` when in doubt.
 
 Has a `LawfulOrderLeftLeaningMin α` instance.
 -/
 @[inline, instance_reducible]
-public def _root_.Min.leftLeaningOfLE (α : Type u) [LE α] [DecidableLE α] : Min α where
-  min a b := if a ≤ b then a else b
+public def _root_.Min.leftLeaningOfLE (α : Type u) [LE α] [UDecidableLE α] : Min α where
+  min a b := uif a ≤ b then a else b
 
 /--
-Creates a `Max α` instance from `LE α` and `DecidableLE α` so that `max a b` is either `a` or `b`,
+Creates a `Max α` instance from `LE α` and `UDecidableLE α` so that `max a b` is either `a` or `b`,
 preferring `a` over `b` when in doubt.
 
 Has a `LawfulOrderLeftLeaningMax α` instance.
 -/
 @[inline, instance_reducible]
-public def _root_.Max.leftLeaningOfLE (α : Type u) [LE α] [DecidableLE α] : Max α where
-  max a b := if b ≤ a then a else b
+public def _root_.Max.leftLeaningOfLE (α : Type u) [LE α] [UDecidableLE α] : Max α where
+  max a b := uif b ≤ a then a else b
 
 /--
 This instance is only publicly defined in `Init.Data.Order.Lemmas`.

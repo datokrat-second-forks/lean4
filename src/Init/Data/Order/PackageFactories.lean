@@ -30,29 +30,28 @@ represent the same preorder structure on `α`.
 -/
 public class PreorderPackage (α : Type u) extends
     LE α, LT α, BEq α, LawfulOrderLT α, LawfulOrderBEq α, IsPreorder α where
-  decidableLE : DecidableLE α
-  decidableLT : DecidableLT α
+  decidableLE : UDecidableLE α
+  decidableLT : UDecidableLT α
 
-public instance [PreorderPackage α] : DecidableLE α := PreorderPackage.decidableLE
-public instance [PreorderPackage α] : DecidableLT α := PreorderPackage.decidableLT
+public instance [PreorderPackage α] : UDecidableLE α := PreorderPackage.decidableLE
+public instance [PreorderPackage α] : UDecidableLT α := PreorderPackage.decidableLT
 
 namespace FactoryInstances
 
-public scoped instance beqOfDecidableLE {α : Type u} [LE α] [DecidableLE α] :
+public scoped instance beqOfDecidableLE {α : Type u} [LE α] [UDecidableLE α] :
     BEq α where
-  beq a b := a ≤ b ∧ b ≤ a
+  beq a b := UDecidable.decide (a ≤ b ∧ b ≤ a)
 
-public instance instLawfulOrderBEqOfDecidableLE {α : Type u} [LE α] [DecidableLE α] :
+public instance instLawfulOrderBEqOfDecidableLE {α : Type u} [LE α] [UDecidableLE α] :
     LawfulOrderBEq α where
   beq_iff_le_and_ge := by simp [BEq.beq]
 
 /-- If `LT` can be characterized in terms of a decidable `LE`, then `LT` is decidable either. -/
 @[inline, expose, instance_reducible]
-public def decidableLTOfLE {α : Type u} [LE α] {_ : LT α} [DecidableLE α] [LawfulOrderLT α] :
-    DecidableLT α :=
+public def decidableLTOfLE {α : Type u} [LE α] {_ : LT α} [UDecidableLE α] [LawfulOrderLT α] :
+    UDecidableLT α :=
   fun a b =>
-    haveI := iff_iff_eq.mp <| LawfulOrderLT.lt_iff a b
-    if h : a ≤ b ∧ ¬ b ≤ a then .isTrue (this ▸ h) else .isFalse (this ▸ h)
+    UDecidable.ofIff (a ≤ b ∧ ¬ b ≤ a) (LawfulOrderLT.lt_iff a b).symm
 
 end FactoryInstances
 
@@ -63,7 +62,7 @@ are automatically provided if possible. For the detailed rules how the fields ar
 -/
 public structure Packages.PreorderOfLEArgs (α : Type u) where
   le : LE α := by infer_instance
-  decidableLE : DecidableLE α := by infer_instance
+  decidableLE : UDecidableLE α := by infer_instance
   lt :
       let := le
       LT α := by
@@ -90,7 +89,7 @@ public structure Packages.PreorderOfLEArgs (α : Type u) where
   decidableLT :
       let := le; let := decidableLE; let := lt; haveI := lt_iff
       have := lt_iff
-      DecidableLT α := by
+      UDecidableLT α := by
     extract_lets
     first
     | infer_instance
@@ -98,7 +97,7 @@ public structure Packages.PreorderOfLEArgs (α : Type u) where
     | exact _root_.Std.FactoryInstances.decidableLTOfLE
     | (haveI := @_root_.Std.LawfulOrderLT.mk (lt_iff := by assumption) ..; exact _root_.Std.FactoryInstances.decidableLTOfLE)
     | fail "Failed to automatically derive that `LT` is decidable. \
-            Please ensure that a `DecidableLT` instance can be synthesized or \
+            Please ensure that a `UDecidableLT` instance can be synthesized or \
             manually provide the field `decidableLT`."
   beq_iff_le_and_ge :
       let := le; let := decidableLE; let := beq
@@ -136,7 +135,7 @@ Creates a `PreorderPackage α` instance. Such an instance entails `LE α`, `LT �
 `BEq α` instances as well as an `IsPreorder α` instance and `LawfulOrder*` instances proving the
 compatibility of the operations with the preorder.
 
-In the presence of `LE α`, `DecidableLE α`, `Refl (· ≤ ·)` and `Trans (· ≤ ·) (· ≤ ·) (· ≤ ·)`
+In the presence of `LE α`, `UDecidableLE α`, `Refl (· ≤ ·)` and `Trans (· ≤ ·) (· ≤ ·) (· ≤ ·)`
 instances, no arguments are required and the factory can be used as in this example:
 
 ```lean
@@ -219,7 +218,7 @@ Creates a `PartialOrderPackage α` instance. Such an instance entails `LE α`, `
 `BEq α` instances as well as an `IsPartialOrder α` instance and `LawfulOrder*` instances proving the
 compatibility of the operations with the preorder.
 
-In the presence of `LE α`, `DecidableLE α`, `Refl (· ≤ ·)`, `Trans (· ≤ ·) (· ≤ ·) (· ≤ ·)`
+In the presence of `LE α`, `UDecidableLE α`, `Refl (· ≤ ·)`, `Trans (· ≤ ·) (· ≤ ·) (· ≤ ·)`
 and `Antisymm (· ≤ ·)` instances, no arguments are required and the factory can be used as in this
 example:
 
@@ -266,18 +265,18 @@ end PartialOrder
 
 namespace FactoryInstances
 
-public scoped instance instOrdOfDecidableLE {α : Type u} [LE α] [DecidableLE α] :
+public scoped instance instOrdOfDecidableLE {α : Type u} [LE α] [UDecidableLE α] :
     Ord α where
-  compare a b := if a ≤ b then if b ≤ a then .eq else .lt else .gt
+  compare a b := uif a ≤ b then uif b ≤ a then .eq else .lt else .gt
 
-theorem isLE_compare {α : Type u} [LE α] [DecidableLE α] {a b : α} :
+theorem isLE_compare {α : Type u} [LE α] [UDecidableLE α] {a b : α} :
     (compare a b).isLE ↔ a ≤ b := by
   simp only [compare]
   split
   · split <;> simp_all
   · simp_all
 
-theorem isGE_compare {α : Type u} [LE α] [DecidableLE α]
+theorem isGE_compare {α : Type u} [LE α] [UDecidableLE α]
     (le_total : ∀ a b : α, a ≤ b ∨ b ≤ a) {a b : α} :
     (compare a b).isGE ↔ b ≤ a := by
   simp only [compare]
@@ -286,7 +285,7 @@ theorem isGE_compare {α : Type u} [LE α] [DecidableLE α]
   · specialize le_total a b
     simp_all
 
-public instance instLawfulOrderOrdOfDecidableLE {α : Type u} [LE α] [DecidableLE α]
+public instance instLawfulOrderOrdOfDecidableLE {α : Type u} [LE α] [UDecidableLE α]
     [Total (α := α) (· ≤ ·)] :
     LawfulOrderOrd α where
   isLE_compare _ _ := by exact isLE_compare
@@ -350,7 +349,7 @@ Creates a `LinearPreorderPackage α` instance. Such an instance entails `LE α`,
 `Ord α` instances as well as an `IsLinearPreorder α` instance and `LawfulOrder*` instances proving
 the compatibility of the operations with the linear preorder.
 
-In the presence of `LE α`, `DecidableLE α`, `Total (· ≤ ·)` and `Trans (· ≤ ·) (· ≤ ·) (· ≤ ·)`
+In the presence of `LE α`, `UDecidableLE α`, `Total (· ≤ ·)` and `Trans (· ≤ ·) (· ≤ ·) (· ≤ ·)`
 instances, no arguments are required and the factory can be used as in this example:
 
 ```lean
@@ -425,19 +424,19 @@ public structure Packages.LinearOrderOfLEArgs (α : Type u) extends
     | exact _root_.Max.leftLeaningOfLE _
   min_eq :
       let := le; let := decidableLE; let := min
-      ∀ a b : α, Min.min a b = if a ≤ b then a else b := by
+      ∀ a b : α, Min.min a b = uif a ≤ b then a else b := by
     extract_lets
     first
-    | exact fun a b => _root_.Std.min_eq_ite (a := a) (b := b)
+    | exact fun a b => _root_.Std.min_eq_uite (a := a) (b := b)
     | fail "Failed to automatically prove that `min` is left-leaning. \
             Please ensure that a `LawfulOrderLeftLeaningMin` instance can be synthesized or \
             manually provide the field `min_eq`."
   max_eq :
       let := le; let := decidableLE; let := max
-      ∀ a b : α, Max.max a b = if b ≤ a then a else b := by
+      ∀ a b : α, Max.max a b = uif b ≤ a then a else b := by
     extract_lets
     first
-    | exact fun a b => _root_.Std.max_eq_ite (a := a) (b := b)
+    | exact fun a b => _root_.Std.max_eq_uite (a := a) (b := b)
     | fail "Failed to automatically prove that `max` is left-leaning. \
             Please ensure that a `LawfulOrderLeftLeaningMax` instance can be synthesized or \
             manually provide the field `max_eq`."
@@ -450,7 +449,7 @@ Creates a `LinearOrderPackage α` instance. Such an instance entails `LE α`, `L
 `Ord α`, `Min α` and `Max α` instances as well as an `IsLinearOrder α` instance and `LawfulOrder*`
 instances proving the compatibility of the operations with the linear order.
 
-In the presence of `LE α`, `DecidableLE α`, `Total (· ≤ ·)`, `Trans (· ≤ ·) (· ≤ ·) (· ≤ ·)` and
+In the presence of `LE α`, `UDecidableLE α`, `Total (· ≤ ·)`, `Trans (· ≤ ·) (· ≤ ·) (· ≤ ·)` and
 `Antisymm (· ≤ ·)` instances, no arguments are required and the factory can be used as in this
 example:
 
@@ -497,12 +496,12 @@ public def LinearOrderPackage.ofLE (α : Type u)
   toLawfulOrderMin := by
     letI := LinearPreorderPackage.ofLE α args.toLinearPreorderOfLEArgs
     letI := args.decidableLE; letI := args.min
-    haveI : LawfulOrderLeftLeaningMin α := .of_eq args.min_eq
+    haveI : LawfulOrderLeftLeaningMin α := .of_eq_uite args.min_eq
     infer_instance
   toLawfulOrderMax := by
     letI := LinearPreorderPackage.ofLE α args.toLinearPreorderOfLEArgs
     letI := args.decidableLE; letI := args.max
-    haveI : LawfulOrderLeftLeaningMax α := .of_eq args.max_eq
+    haveI : LawfulOrderLeftLeaningMax α := .of_eq_uite args.max_eq
     infer_instance
 
 section LinearPreorder
@@ -554,13 +553,13 @@ public structure Packages.LinearPreorderOfOrdArgs (α : Type u) where
             manually provide the field `lawfulOrderOrd`."
   decidableLE :
       let := ord; let := le; have := lawfulOrderOrd
-      DecidableLE α := by
+      UDecidableLE α := by
     extract_lets
     first
     | infer_instance
     | exact _root_.DecidableLE.ofOrd _
     | fail "Failed to automatically derive that `LE` is decidable.\
-            Please ensure that a `DecidableLE` instance can be synthesized or \
+            Please ensure that a `UDecidableLE` instance can be synthesized or \
             manually provide the field `decidableLE`."
   lt :
       let := ord
@@ -580,13 +579,13 @@ public structure Packages.LinearPreorderOfOrdArgs (α : Type u) where
             manually provide the field `lt_iff`."
   decidableLT :
       let := ord; let := lt; let := le; have := lawfulOrderOrd; have := lt_iff
-      DecidableLT α := by
+      UDecidableLT α := by
     extract_lets
     first
     | infer_instance
-    | exact _root_DecidableLT.ofOrd _
+    | exact _root_.DecidableLT.ofOrd _
     | fail "Failed to automatically derive that `LT` is decidable. \
-            Please ensure that a `DecidableLT` instance can be synthesized or \
+            Please ensure that a `UDecidableLT` instance can be synthesized or \
             manually provide the field `decidableLT`."
   beq :
       let := ord; BEq α := by
@@ -804,10 +803,14 @@ public def LinearOrderPackage.ofOrd (α : Type u)
     toMax := args.max,
     le_antisymm := Antisymm.antisymm
     toLawfulOrderMin := by
-      haveI : LawfulOrderLeftLeaningMin α := .of_eq (by simpa [isLE_compare] using args.min_eq)
+      haveI : LawfulOrderLeftLeaningMin α :=
+        ⟨fun a b h => by simp [args.min_eq, isLE_compare.mpr h],
+          fun a b h => by simp [args.min_eq, Bool.eq_false_iff.mpr (h ∘ isLE_compare.mp)]⟩
       infer_instance
     toLawfulOrderMax := by
-      haveI : LawfulOrderLeftLeaningMax α := .of_eq (by simpa [isGE_compare] using args.max_eq)
+      haveI : LawfulOrderLeftLeaningMax α :=
+        ⟨fun a b h => by simp [args.max_eq, isGE_compare.mpr h],
+          fun a b h => by simp [args.max_eq, Bool.eq_false_iff.mpr (h ∘ isGE_compare.mp)]⟩
       infer_instance }
 
 end LinearOrder

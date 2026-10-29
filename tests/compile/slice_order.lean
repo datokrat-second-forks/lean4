@@ -27,12 +27,12 @@ deriving BEq, Repr
   beq := s == t
 
 /-- Goes through instance dictionaries, which exercises the boxed entry points. -/
-@[noinline, nospecialize] def viaInstances {α : Type} [LT α] [DecidableLT α] [LE α] [DecidableLE α]
+@[noinline, nospecialize] def viaInstances {α : Type} [LT α] [UDecidableLT α] [LE α] [UDecidableLE α]
     [Ord α] [BEq α] (a b : α) : Results where
-  lt := decide (a < b)
-  le := decide (a ≤ b)
-  gt := decide (a > b)
-  ge := decide (a ≥ b)
+  lt := UDecidable.decide (a < b)
+  le := UDecidable.decide (a ≤ b)
+  gt := UDecidable.decide (a > b)
+  ge := UDecidable.decide (a ≥ b)
   cmp := compare a b
   beq := a == b
 

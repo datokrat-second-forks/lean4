@@ -52,10 +52,8 @@ variable (n : Nat) (i j : Int) (f g : Fin 5) (c d : Char) (s t : String) (b : Bo
 #check_native ∀ b : Bool, b = true
 #check_native ∃ b : Bool, b = true
 
-/-! `String.lt` has no native instance yet, so the checker rejects it. -/
+/-! The order on `String` comes from an order package, which provides native instances. -/
 
-/-- error: instance for "a" < "b" uses `UDecidable.ofDecidable`: UDecidable.ofDecidable ("a" < "b") -/
-#guard_msgs in
 #check_native "a" < "b"
 
 /-- info: [true, false, true, false, true, true, false] -/

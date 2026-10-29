@@ -39,12 +39,12 @@ example (a b : Char) : min a b = if a ≤ b then a else b := Std.min_eq_ite
 example (a b : Char) : max a b = if b ≤ a then a else b := Std.max_eq_ite
 example (a b : Char) : min a b ≤ max a b := Std.le_trans Std.min_le_left Std.left_le_max
 
-/-! `min` and `max` evaluate both in the kernel and at runtime. -/
+/-! `min` and `max` evaluate both with `cbv` and at runtime. -/
 
-example : min 'a' 'b' = 'a' := by decide
-example : max 'a' 'b' = 'b' := by decide
-example : min 'β' 'α' = 'α' := by decide
-example : max 'β' 'α' = 'β' := by decide
+example : min 'a' 'b' = 'a' := by cbv
+example : max 'a' 'b' = 'b' := by cbv
+example : min 'β' 'α' = 'α' := by cbv
+example : max 'β' 'α' = 'β' := by cbv
 
 #guard min 'a' 'b' = 'a'
 #guard max 'a' 'b' = 'b'
