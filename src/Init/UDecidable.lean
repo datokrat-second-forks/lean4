@@ -235,6 +235,60 @@ theorem dite_eq_right {c : Prop} [UDecidable c] (hnc : ¬c) {α : Sort u} {t : c
     dite False t e = e id :=
   dite_eq_right id
 
+@[simp] theorem ite_self {α : Sort u} {c : Prop} {_ : UDecidable c} (a : α) :
+    (uif c then a else a) = a := by
+  cases em c with
+  | inl hc => exact ite_eq_left hc
+  | inr hc => exact ite_eq_right hc
+
+@[simp] theorem dite_eq_ite {α : Sort u} {c : Prop} {_ : UDecidable c} {t e : α} :
+    (dite c (fun _ => t) (fun _ => e)) = uif c then t else e := by
+  cases em c with
+  | inl hc => rw [dite_eq_left hc, ite_eq_left hc]
+  | inr hc => rw [dite_eq_right hc, ite_eq_right hc]
+
+@[simp] theorem ite_eq_left_iff {α : Sort u} {p : Prop} {_ : UDecidable p} {x y : α} :
+    (uif p then x else y) = x ↔ ¬p → y = x := by
+  cases em p with
+  | inl hp => rw [ite_eq_left hp]; exact ⟨fun _ h => absurd hp h, fun _ => rfl⟩
+  | inr hp => rw [ite_eq_right hp]; exact ⟨fun e _ => e, fun f => f hp⟩
+
+@[simp] theorem ite_eq_right_iff {α : Sort u} {p : Prop} {_ : UDecidable p} {x y : α} :
+    (uif p then x else y) = y ↔ p → x = y := by
+  cases em p with
+  | inl hp => rw [ite_eq_left hp]; exact ⟨fun e _ => e, fun f => f hp⟩
+  | inr hp => rw [ite_eq_right hp]; exact ⟨fun _ h => absurd h hp, fun _ => rfl⟩
+
+@[simp] theorem left_eq_ite_iff {α : Sort u} {p : Prop} {_ : UDecidable p} {x y : α} :
+    x = (uif p then x else y) ↔ ¬p → x = y := by
+  cases em p with
+  | inl hp => rw [ite_eq_left hp]; exact ⟨fun _ h => absurd hp h, fun _ => rfl⟩
+  | inr hp => rw [ite_eq_right hp]; exact ⟨fun e _ => e, fun f => f hp⟩
+
+@[simp] theorem right_eq_ite_iff {α : Sort u} {p : Prop} {_ : UDecidable p} {x y : α} :
+    y = (uif p then x else y) ↔ p → y = x := by
+  cases em p with
+  | inl hp => rw [ite_eq_left hp]; exact ⟨fun e _ => e, fun f => f hp⟩
+  | inr hp => rw [ite_eq_right hp]; exact ⟨fun _ h => absurd h hp, fun _ => rfl⟩
+
+@[simp] theorem dite_eq_left_iff {α : Sort u} {p : Prop} {_ : UDecidable p} {x : α}
+    {y : ¬p → α} : (uif h : p then x else y h) = x ↔ ∀ h : ¬p, y h = x := by
+  cases em p with
+  | inl hp => rw [dite_eq_left hp]; exact ⟨fun _ h => absurd hp h, fun _ => rfl⟩
+  | inr hp => rw [dite_eq_right hp]; exact ⟨fun e _ => e, fun f => f hp⟩
+
+@[simp] theorem dite_eq_right_iff {α : Sort u} {p : Prop} {_ : UDecidable p} {x : p → α}
+    {y : α} : (uif h : p then x h else y) = y ↔ ∀ h : p, x h = y := by
+  cases em p with
+  | inl hp => rw [dite_eq_left hp]; exact ⟨fun e _ => e, fun f => f hp⟩
+  | inr hp => rw [dite_eq_right hp]; exact ⟨fun _ h => absurd h hp, fun _ => rfl⟩
+
+@[simp] theorem ite_not {α : Sort u} {p : Prop} {_ : UDecidable (¬p)} {x y : α} :
+    (uif ¬p then x else y) = @ite α p (classical p) y x := by
+  cases Classical.em p with
+  | inl hp => rw [ite_eq_right (not_not_intro hp), @ite_eq_left p (classical p) hp]
+  | inr hp => rw [ite_eq_left hp, @ite_eq_right p (classical p) hp]
+
 theorem ite_eq_left_of_eq_true {α : Sort u} {c : Prop} {_ : UDecidable c} (t e : α)
     (h : c = True) : (uif c then t else e) = t :=
   ite_eq_left (of_eq_true h)
