@@ -1069,22 +1069,64 @@ instance : Min USize := minOfLe
 
 namespace UDecidable
 
-instance instUInt16Le (a b : UInt16) : UDecidable (a ≤ b) :=
+/-- The implementation of `instUInt16Le` in compiled code and `cbv`. -/
+@[instance_reducible] def instUInt16LeImpl (a b : UInt16) : UDecidable (a ≤ b) :=
   UDecidable.mk (UInt16.Internal.ble a b) (UInt16.Internal.ble_iff a b)
 
-instance instUInt16Lt (a b : UInt16) : UDecidable (a < b) :=
+noncomputable instance instUInt16Le (a b : UInt16) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt16Le_csimp : @instUInt16Le = @instUInt16LeImpl := rfl
+
+/-- The implementation of `instUInt16Lt` in compiled code and `cbv`. -/
+@[instance_reducible] def instUInt16LtImpl (a b : UInt16) : UDecidable (a < b) :=
   UDecidable.mk (UInt16.Internal.blt a b) (UInt16.Internal.blt_iff a b)
 
-instance instUInt64Le (a b : UInt64) : UDecidable (a ≤ b) :=
+noncomputable instance instUInt16Lt (a b : UInt16) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt16Lt_csimp : @instUInt16Lt = @instUInt16LtImpl := rfl
+
+/-- The implementation of `instUInt64Le` in compiled code and `cbv`. -/
+@[instance_reducible] def instUInt64LeImpl (a b : UInt64) : UDecidable (a ≤ b) :=
   UDecidable.mk (UInt64.Internal.ble a b) (UInt64.Internal.ble_iff a b)
 
-instance instUInt64Lt (a b : UInt64) : UDecidable (a < b) :=
+noncomputable instance instUInt64Le (a b : UInt64) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt64Le_csimp : @instUInt64Le = @instUInt64LeImpl := rfl
+
+/-- The implementation of `instUInt64Lt` in compiled code and `cbv`. -/
+@[instance_reducible] def instUInt64LtImpl (a b : UInt64) : UDecidable (a < b) :=
   UDecidable.mk (UInt64.Internal.blt a b) (UInt64.Internal.blt_iff a b)
 
-instance instUSizeLe (a b : USize) : UDecidable (a ≤ b) :=
+noncomputable instance instUInt64Lt (a b : UInt64) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt64Lt_csimp : @instUInt64Lt = @instUInt64LtImpl := rfl
+
+/-- The implementation of `instUSizeLe` in compiled code and `cbv`. -/
+@[instance_reducible] def instUSizeLeImpl (a b : USize) : UDecidable (a ≤ b) :=
   UDecidable.mk (USize.Internal.ble a b) (USize.Internal.ble_iff a b)
 
-instance instUSizeLt (a b : USize) : UDecidable (a < b) :=
+noncomputable instance instUSizeLe (a b : USize) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUSizeLe_csimp : @instUSizeLe = @instUSizeLeImpl := rfl
+
+/-- The implementation of `instUSizeLt` in compiled code and `cbv`. -/
+@[instance_reducible] def instUSizeLtImpl (a b : USize) : UDecidable (a < b) :=
   UDecidable.mk (USize.Internal.blt a b) (USize.Internal.blt_iff a b)
+
+noncomputable instance instUSizeLt (a b : USize) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUSizeLt_csimp : @instUSizeLt = @instUSizeLtImpl := rfl
 
 end UDecidable

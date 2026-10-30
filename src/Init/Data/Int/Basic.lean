@@ -542,13 +542,34 @@ end Int.Internal
 
 namespace UDecidable
 
-instance instIntEq (a b : Int) : UDecidable (a = b) :=
+/-- The implementation of `instIntEq` in compiled code and `cbv`. -/
+@[instance_reducible] def instIntEqImpl (a b : Int) : UDecidable (a = b) :=
   UDecidable.ofReflects (Int.Internal.beq a b) (Int.Internal.reflects_beq a b)
 
-instance instIntLe (a b : Int) : UDecidable (a ≤ b) :=
+noncomputable instance instIntEq (a b : Int) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instIntEq_csimp : @instIntEq = @instIntEqImpl := rfl
+
+/-- The implementation of `instIntLe` in compiled code and `cbv`. -/
+@[instance_reducible] def instIntLeImpl (a b : Int) : UDecidable (a ≤ b) :=
   UDecidable.ofReflects (Int.Internal.ble a b) (Int.Internal.reflects_ble a b)
 
-instance instIntLt (a b : Int) : UDecidable (a < b) :=
+noncomputable instance instIntLe (a b : Int) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instIntLe_csimp : @instIntLe = @instIntLeImpl := rfl
+
+/-- The implementation of `instIntLt` in compiled code and `cbv`. -/
+@[instance_reducible] def instIntLtImpl (a b : Int) : UDecidable (a < b) :=
   UDecidable.ofReflects (Int.Internal.blt a b) (Int.Internal.reflects_blt a b)
+
+noncomputable instance instIntLt (a b : Int) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instIntLt_csimp : @instIntLt = @instIntLtImpl := rfl
 
 end UDecidable

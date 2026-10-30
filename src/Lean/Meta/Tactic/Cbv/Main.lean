@@ -17,6 +17,7 @@ import Lean.Meta.Tactic.Cbv.Util
 import Lean.Meta.Tactic.Cbv.TheoremsLookup
 import Lean.Meta.Tactic.Cbv.CbvEvalExt
 import Lean.Meta.Tactic.Cbv.CbvSimproc
+import Lean.Compiler.CSimpAttr
 import Lean.Meta.Sym
 import Lean.Meta.Tactic.Refl
 import Lean.Meta.Tactic.Replace
@@ -151,6 +152,29 @@ def tryCbvTheorems : Simproc := fun e => do
     trace[Meta.Tactic.cbv.rewrite] "@[cbv_eval] `{fnName}`:{indentExpr e}\n==>{indentExpr e'}"
   return result
 
+/--
+Rewrites an application of a `UDecidable`-valued constant along its `@[csimp]` equation. Instances
+that are `UDecidable.classical` in the logic evaluate through the implementation that the compiler
+uses.
+-/
+def tryCSimpUDecidable : Simproc := fun e => do
+  let .const declName us := e.getAppFn | return .rfl
+  let some entry := (Compiler.CSimp.ext.getState (← getEnv)).map.find? declName | return .rfl
+  unless (← whnfR (← Sym.inferType e)).isAppOf ``UDecidable do return .rfl
+  let thmInfo ← getConstVal entry.thmName
+  let some (_, .const _ thmUs, _) := thmInfo.type.eq? | return .rfl
+  -- `thmUs` lists the theorem's level parameters in the order of `declName`'s.
+  let thmLevels := thmInfo.levelParams.map fun n =>
+    match thmUs.findIdx? (· == .param n) with
+    | some i => us[i]!
+    | none => Level.zero
+  let mut h := mkConst entry.thmName thmLevels
+  for arg in e.getAppArgs do
+    h ← mkCongrFun h arg
+  let e' ← Sym.share <| mkAppN (mkConst entry.toDeclName us) e.getAppArgs
+  trace[Meta.Tactic.cbv.rewrite] "@[csimp] `{declName}`:{indentExpr e}\n==>{indentExpr e'}"
+  return .step e' h
+
 /-- Try equation theorems, then unfold equations. -/
 def handleConstApp : Simproc := fun e => do
   tryEquations <|> tryUnfold <| e
@@ -178,7 +202,7 @@ def handleApp : Simproc := fun e => do
     if (← isPartialApp e) then
       return markAsDoneIfFailed <| ← tryCbvTheorems e
     let info ← getConstInfo constName
-    tryCbvTheorems <|> (guardSimproc (fun _ => info.hasValue) handleConstApp) <|> reduceRecMatcher <| e
+    tryCSimpUDecidable <|> tryCbvTheorems <|> (guardSimproc (fun _ => info.hasValue) handleConstApp) <|> reduceRecMatcher <| e
   | .lam .. => betaReduce e
   | _ => return .rfl
 

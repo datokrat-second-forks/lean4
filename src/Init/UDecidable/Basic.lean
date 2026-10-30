@@ -194,7 +194,7 @@ The noncomputable instance of `UDecidable p` from the law of the excluded middle
 `simp` and `split` use it for conditions that they rewrite. Since it depends only on `p`, it never
 embeds proofs about the old condition, unlike a cast of the old instance.
 -/
-@[instance_reducible] noncomputable def classical (p : Prop) : UDecidable p :=
+@[instance_reducible, cbv_opaque] noncomputable def classical (p : Prop) : UDecidable p :=
   ⟨(Classical.em p).elim (fun h => ⟨true, iff_of_true rfl h⟩)
     (fun h => ⟨false, iff_of_false Bool.noConfusion h⟩)⟩
 
@@ -381,11 +381,18 @@ instance instTrue : UDecidable True := isTrue trivial
 
 instance instFalse : UDecidable False := isFalse id
 
-instance instNot (p : Prop) [UDecidable p] : UDecidable (¬p) :=
+/-- The implementation of `instNot` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instNotImpl (p : Prop) [UDecidable p] : UDecidable (¬p) :=
   mk (!decide p) (by
     cases em p with
     | inl hp => rw [decide_eq_true hp]; exact ⟨Bool.noConfusion, fun h => absurd hp h⟩
     | inr hp => rw [decide_eq_false hp]; exact ⟨fun _ => hp, fun _ => rfl⟩)
+
+noncomputable instance instNot (p : Prop) [UDecidable p] : UDecidable (¬p) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instNot_csimp : @instNot = @instNotImpl := rfl
 
 @[simp] theorem decide_not (p : Prop) [UDecidable p] [UDecidable (¬p)] :
     decide (¬p) = !decide p := by
@@ -397,7 +404,8 @@ theorem not_decide_eq_true {p : Prop} [UDecidable p] : ((!decide p) = true) = ¬
   propext ⟨fun h hp => by rw [decide_eq_true hp] at h; exact Bool.noConfusion h,
     fun hnp => by rw [decide_eq_false hnp]; rfl⟩
 
-instance instAnd (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∧ q) :=
+/-- The implementation of `instAnd` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instAndImpl (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∧ q) :=
   mk (decide p && decide q) (by
     cases em p with
     | inl hp =>
@@ -407,7 +415,14 @@ instance instAnd (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∧ 
       rw [decide_eq_false hp]
       exact ⟨Bool.noConfusion, fun h => absurd h.1 hp⟩)
 
-instance instOr (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∨ q) :=
+noncomputable instance instAnd (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∧ q) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instAnd_csimp : @instAnd = @instAndImpl := rfl
+
+/-- The implementation of `instOr` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instOrImpl (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∨ q) :=
   mk (decide p || decide q) (by
     cases em p with
     | inl hp =>
@@ -417,6 +432,12 @@ instance instOr (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∨ q
       rw [decide_eq_false hp]
       exact ⟨fun h => Or.inr ((decide_spec q).mp h),
         fun h => (decide_spec q).mpr (h.elim (fun h' => absurd h' hp) id)⟩)
+
+noncomputable instance instOr (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∨ q) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instOr_csimp : @instOr = @instOrImpl := rfl
 
 @[simp] theorem decide_and (p q : Prop) [UDecidable p] [UDecidable q] {_ : UDecidable (p ∧ q)} :
     decide (p ∧ q) = (decide p && decide q) := by
@@ -457,7 +478,8 @@ instance instOr (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∨ q
     {_ : UDecidable (p ↔ q)} : decide (p ↔ q) = (decide p == decide q) :=
   (decide_beq_decide p q).symm
 
-instance instImp (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p → q) :=
+/-- The implementation of `instImp` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instImpImpl (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p → q) :=
   mk (!decide p || decide q) (by
     cases em p with
     | inl hp =>
@@ -467,7 +489,14 @@ instance instImp (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p → 
       rw [decide_eq_false hp]
       exact ⟨fun _ h => absurd h hp, fun _ => rfl⟩)
 
-instance instIff (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ↔ q) :=
+noncomputable instance instImp (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p → q) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instImp_csimp : @instImp = @instImpImpl := rfl
+
+/-- The implementation of `instIff` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instIffImpl (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ↔ q) :=
   mk (cond (decide p) (decide q) (!decide q)) (by
     cases em p with
     | inl hp =>
@@ -487,106 +516,258 @@ instance instIff (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ↔ 
         rw [decide_eq_false hp, decide_eq_false hq]
         exact ⟨fun _ => ⟨fun h => absurd h hp, fun h => absurd h hq⟩, fun _ => rfl⟩)
 
+noncomputable instance instIff (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ↔ q) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instIff_csimp : @instIff = @instIffImpl := rfl
+
 /-! Instances for the types of the prelude -/
 
-instance instNatEq (n m : Nat) : UDecidable (n = m) :=
+/-- The implementation of `instNatEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instNatEqImpl (n m : Nat) : UDecidable (n = m) :=
   ofReflects (Nat.beq n m) (match h : Nat.beq n m with
     | true => Nat.eq_of_beq_eq_true h
     | false => Nat.ne_of_beq_eq_false h)
 
-instance instNatLe (n m : Nat) : UDecidable (n ≤ m) :=
+noncomputable instance instNatEq (n m : Nat) : UDecidable (n = m) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instNatEq_csimp : @instNatEq = @instNatEqImpl := rfl
+
+/-- The implementation of `instNatLe` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instNatLeImpl (n m : Nat) : UDecidable (n ≤ m) :=
   mk (Nat.ble n m) ⟨Nat.le_of_ble_eq_true, Nat.ble_eq_true_of_le⟩
+
+noncomputable instance instNatLe (n m : Nat) : UDecidable (n ≤ m) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instNatLe_csimp : @instNatLe = @instNatLeImpl := rfl
 
 instance instNatLt (n m : Nat) : UDecidable (n < m) :=
   instNatLe (n + 1) m
 
-instance instBoolEq : UDecidableEq Bool
+/-- The implementation of `instBoolEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instBoolEqImpl : UDecidableEq Bool
   | true, true => isTrue rfl
   | false, false => isTrue rfl
   | true, false => isFalse Bool.noConfusion
   | false, true => isFalse Bool.noConfusion
 
+noncomputable instance instBoolEq : UDecidableEq Bool := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instBoolEq_csimp : @instBoolEq = @instBoolEqImpl := rfl
+
 instance instPUnitEq : UDecidableEq PUnit.{u} := fun _ _ => isTrue rfl
 
-@[simp] theorem decide_bool_eq_true (b : Bool) {_ : UDecidable (b = true)} :
-    decide (b = true) = b := by
+@[simp] theorem decide_bool_eq_true (b : Bool) : decide (b = true) = b := by
   cases b with
   | false => exact decide_eq_false Bool.noConfusion
   | true => exact decide_eq_true rfl
 
-@[simp] theorem decide_bool_eq_false (b : Bool) {_ : UDecidable (b = false)} :
-    decide (b = false) = !b := by
+@[simp] theorem decide_bool_eq_false (b : Bool) : decide (b = false) = !b := by
   cases b with
   | false => exact decide_eq_true rfl
   | true => exact decide_eq_false Bool.noConfusion
 
-instance instFinEq (i j : Fin n) : UDecidable (i = j) :=
+/-- The implementation of `instFinEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instFinEqImpl (i j : Fin n) : UDecidable (i = j) :=
   ofReflects (Nat.beq i.val j.val) (Fin.reflects_beq_val i j)
+
+noncomputable instance instFinEq (i j : Fin n) : UDecidable (i = j) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instFinEq_csimp : @instFinEq = @instFinEqImpl := rfl
 
 instance instFinLe (i j : Fin n) : UDecidable (i ≤ j) := instNatLe i.val j.val
 
 instance instFinLt (i j : Fin n) : UDecidable (i < j) := instNatLt i.val j.val
 
-instance instBitVecEq (x y : BitVec w) : UDecidable (x = y) :=
+/-- The implementation of `instBitVecEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instBitVecEqImpl (x y : BitVec w) : UDecidable (x = y) :=
   ofReflects (x == y) (BitVec.reflects_beq_val x y)
 
-instance instUInt8Eq (a b : UInt8) : UDecidable (a = b) :=
+noncomputable instance instBitVecEq (x y : BitVec w) : UDecidable (x = y) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instBitVecEq_csimp : @instBitVecEq = @instBitVecEqImpl := rfl
+
+/-- The implementation of `instUInt8Eq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instUInt8EqImpl (a b : UInt8) : UDecidable (a = b) :=
   ofReflects (UInt8.Internal.beq a b) (UInt8.Internal.reflects_beq a b)
 
-instance instUInt16Eq (a b : UInt16) : UDecidable (a = b) :=
+noncomputable instance instUInt8Eq (a b : UInt8) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt8Eq_csimp : @instUInt8Eq = @instUInt8EqImpl := rfl
+
+/-- The implementation of `instUInt16Eq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instUInt16EqImpl (a b : UInt16) : UDecidable (a = b) :=
   ofReflects (UInt16.Internal.beq a b) (UInt16.Internal.reflects_beq a b)
 
-instance instUInt32Eq (a b : UInt32) : UDecidable (a = b) :=
+noncomputable instance instUInt16Eq (a b : UInt16) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt16Eq_csimp : @instUInt16Eq = @instUInt16EqImpl := rfl
+
+/-- The implementation of `instUInt32Eq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instUInt32EqImpl (a b : UInt32) : UDecidable (a = b) :=
   ofReflects (UInt32.Internal.beq a b) (UInt32.Internal.reflects_beq a b)
 
-instance instUInt64Eq (a b : UInt64) : UDecidable (a = b) :=
+noncomputable instance instUInt32Eq (a b : UInt32) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt32Eq_csimp : @instUInt32Eq = @instUInt32EqImpl := rfl
+
+/-- The implementation of `instUInt64Eq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instUInt64EqImpl (a b : UInt64) : UDecidable (a = b) :=
   ofReflects (UInt64.Internal.beq a b) (UInt64.Internal.reflects_beq a b)
 
-instance instUSizeEq (a b : USize) : UDecidable (a = b) :=
+noncomputable instance instUInt64Eq (a b : UInt64) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt64Eq_csimp : @instUInt64Eq = @instUInt64EqImpl := rfl
+
+/-- The implementation of `instUSizeEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instUSizeEqImpl (a b : USize) : UDecidable (a = b) :=
   ofReflects (USize.Internal.beq a b) (USize.Internal.reflects_beq a b)
 
-instance instCharEq (c d : Char) : UDecidable (c = d) :=
+noncomputable instance instUSizeEq (a b : USize) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUSizeEq_csimp : @instUSizeEq = @instUSizeEqImpl := rfl
+
+/-- The implementation of `instCharEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instCharEqImpl (c d : Char) : UDecidable (c = d) :=
   ofReflects (Char.Internal.beq c d) (Char.Internal.reflects_beq c d)
 
-instance instUInt8Le (a b : UInt8) : UDecidable (a ≤ b) :=
+noncomputable instance instCharEq (c d : Char) : UDecidable (c = d) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instCharEq_csimp : @instCharEq = @instCharEqImpl := rfl
+
+/-- The implementation of `instUInt8Le` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instUInt8LeImpl (a b : UInt8) : UDecidable (a ≤ b) :=
   mk (UInt8.Internal.ble a b) (UInt8.Internal.ble_iff a b)
 
-instance instUInt8Lt (a b : UInt8) : UDecidable (a < b) :=
+noncomputable instance instUInt8Le (a b : UInt8) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt8Le_csimp : @instUInt8Le = @instUInt8LeImpl := rfl
+
+/-- The implementation of `instUInt8Lt` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instUInt8LtImpl (a b : UInt8) : UDecidable (a < b) :=
   mk (UInt8.Internal.blt a b) (UInt8.Internal.blt_iff a b)
 
-instance instUInt32Le (a b : UInt32) : UDecidable (a ≤ b) :=
+noncomputable instance instUInt8Lt (a b : UInt8) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt8Lt_csimp : @instUInt8Lt = @instUInt8LtImpl := rfl
+
+/-- The implementation of `instUInt32Le` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instUInt32LeImpl (a b : UInt32) : UDecidable (a ≤ b) :=
   mk (UInt32.Internal.ble a b) (UInt32.Internal.ble_iff a b)
 
-instance instUInt32Lt (a b : UInt32) : UDecidable (a < b) :=
+noncomputable instance instUInt32Le (a b : UInt32) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt32Le_csimp : @instUInt32Le = @instUInt32LeImpl := rfl
+
+/-- The implementation of `instUInt32Lt` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instUInt32LtImpl (a b : UInt32) : UDecidable (a < b) :=
   mk (UInt32.Internal.blt a b) (UInt32.Internal.blt_iff a b)
 
-instance instStringEq (s₁ s₂ : String) : UDecidable (s₁ = s₂) :=
+noncomputable instance instUInt32Lt (a b : UInt32) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUInt32Lt_csimp : @instUInt32Lt = @instUInt32LtImpl := rfl
+
+/-- The implementation of `instStringEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instStringEqImpl (s₁ s₂ : String) : UDecidable (s₁ = s₂) :=
   ofReflects (String.Internal.beq s₁ s₂) (String.Internal.reflects_beq s₁ s₂)
 
-instance instOptionEq [UDecidableEq α] : UDecidableEq (Option α)
+noncomputable instance instStringEq (s₁ s₂ : String) : UDecidable (s₁ = s₂) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instStringEq_csimp : @instStringEq = @instStringEqImpl := rfl
+
+/-- The implementation of `instOptionEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instOptionEqImpl [UDecidableEq α] : UDecidableEq (Option α)
   | none, none => isTrue rfl
   | none, some _ => isFalse nofun
   | some _, none => isFalse nofun
   | some a, some b => ofIff (a = b) ⟨congrArg some, Option.some.inj⟩
 
-instance instForallOptionEqSome {o : Option α} {p : α → Prop} [UDecidablePred p] :
+noncomputable instance instOptionEq [UDecidableEq α] : UDecidableEq (Option α) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instOptionEq_csimp : @instOptionEq = @instOptionEqImpl := rfl
+
+/-- The implementation of `instForallOptionEqSome` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instForallOptionEqSomeImpl {o : Option α} {p : α → Prop} [UDecidablePred p] :
     UDecidable (∀ a, o = some a → p a) :=
   match o with
   | none => isTrue nofun
   | some b => ofIff (p b) ⟨fun h _ e => Option.some.inj e ▸ h, fun h => h b rfl⟩
 
-instance instProdEq [UDecidableEq α] [UDecidableEq β] : UDecidableEq (α × β)
+noncomputable instance instForallOptionEqSome {o : Option α} {p : α → Prop} [UDecidablePred p] :
+    UDecidable (∀ a, o = some a → p a) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instForallOptionEqSome_csimp : @instForallOptionEqSome = @instForallOptionEqSomeImpl := rfl
+
+/-- The implementation of `instProdEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instProdEqImpl [UDecidableEq α] [UDecidableEq β] : UDecidableEq (α × β)
   | (a₁, a₂), (b₁, b₂) =>
     ofIff (a₁ = b₁ ∧ a₂ = b₂)
       ⟨fun ⟨h₁, h₂⟩ => h₁ ▸ h₂ ▸ rfl, fun h => ⟨congrArg Prod.fst h, congrArg Prod.snd h⟩⟩
 
-instance instSumEq [UDecidableEq α] [UDecidableEq β] : UDecidableEq (Sum α β)
+noncomputable instance instProdEq [UDecidableEq α] [UDecidableEq β] : UDecidableEq (α × β) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instProdEq_csimp : @instProdEq = @instProdEqImpl := rfl
+
+/-- The implementation of `instSumEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instSumEqImpl [UDecidableEq α] [UDecidableEq β] : UDecidableEq (Sum α β)
   | .inl a, .inl b => ofIff (a = b) ⟨congrArg Sum.inl, Sum.inl.inj⟩
   | .inr a, .inr b => ofIff (a = b) ⟨congrArg Sum.inr, Sum.inr.inj⟩
   | .inl _, .inr _ => isFalse nofun
   | .inr _, .inl _ => isFalse nofun
 
-instance instSubtypeEq {p : α → Prop} [UDecidableEq α] : UDecidableEq (Subtype p) :=
+noncomputable instance instSumEq [UDecidableEq α] [UDecidableEq β] : UDecidableEq (Sum α β) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instSumEq_csimp : @instSumEq = @instSumEqImpl := rfl
+
+/-- The implementation of `instSubtypeEq` in compiled code and `cbv`. -/
+@[expose, instance_reducible] def instSubtypeEqImpl {p : α → Prop} [UDecidableEq α] : UDecidableEq (Subtype p) :=
   fun a b => ofIff (a.val = b.val) ⟨Subtype.ext, congrArg Subtype.val⟩
+
+noncomputable instance instSubtypeEq {p : α → Prop} [UDecidableEq α] : UDecidableEq (Subtype p) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instSubtypeEq_csimp : @instSubtypeEq = @instSubtypeEqImpl := rfl
 
 end UDecidable

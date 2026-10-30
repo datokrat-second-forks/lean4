@@ -180,24 +180,45 @@ end List
 
 namespace UDecidable
 
-instance instListEqNil (l : List α) : UDecidable (l = []) :=
+/-- The implementation of `instListEqNil` in compiled code and `cbv`. -/
+@[instance_reducible] def instListEqNilImpl (l : List α) : UDecidable (l = []) :=
   match l with
   | [] => UDecidable.isTrue rfl
   | _ :: _ => UDecidable.isFalse nofun
 
-instance instListNilEq (l : List α) : UDecidable ([] = l) :=
+noncomputable instance instListEqNil (l : List α) : UDecidable (l = []) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instListEqNil_csimp : @instListEqNil = @instListEqNilImpl := rfl
+
+/-- The implementation of `instListNilEq` in compiled code and `cbv`. -/
+@[instance_reducible] def instListNilEqImpl (l : List α) : UDecidable ([] = l) :=
   match l with
   | [] => UDecidable.isTrue rfl
   | _ :: _ => UDecidable.isFalse nofun
 
-instance instListEq [UDecidableEq α] : UDecidableEq (List α)
+noncomputable instance instListNilEq (l : List α) : UDecidable ([] = l) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instListNilEq_csimp : @instListNilEq = @instListNilEqImpl := rfl
+
+/-- The implementation of `instListEq` in compiled code and `cbv`. -/
+@[instance_reducible] def instListEqImpl [UDecidableEq α] : UDecidableEq (List α)
   | [], [] => UDecidable.isTrue rfl
   | [], _ :: _ => UDecidable.isFalse nofun
   | _ :: _, [] => UDecidable.isFalse nofun
   | a :: as, b :: bs =>
-    have := instListEq as bs
+    have := instListEqImpl as bs
     UDecidable.ofIff (a = b ∧ as = bs)
       ⟨fun ⟨h₁, h₂⟩ => h₁ ▸ h₂ ▸ rfl, List.cons.inj⟩
+
+noncomputable instance instListEq [UDecidableEq α] : UDecidableEq (List α) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instListEq_csimp : @instListEq = @instListEqImpl := rfl
 
 end UDecidable
 
