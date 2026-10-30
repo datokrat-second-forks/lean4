@@ -454,6 +454,42 @@ theorem if_false_right (p : Prop) [h : Decidable p] (t : Bool) : (if p then t el
     (ite p t f = false) = ite p (t = false) (f = false) := by
   cases h with | _ p => simp [p]
 
+@[simp] theorem uite_true_left (p : Prop) {_ : UDecidable p} (f : Bool) :
+    (uif p then true else f) = (UDecidable.decide p || f) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem uite_false_left (p : Prop) {_ : UDecidable p} (f : Bool) :
+    (uif p then false else f) = (!UDecidable.decide p && f) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem uite_true_right (p : Prop) {_ : UDecidable p} (t : Bool) :
+    (uif p then t else true) = (!UDecidable.decide p || t) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem uite_false_right (p : Prop) {_ : UDecidable p} (t : Bool) :
+    (uif p then t else false) = (UDecidable.decide p && t) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem uite_eq_true_distrib (p : Prop) {_ : UDecidable p} (t f : Bool) :
+    ((uif p then t else f) = true) = uif p then t = true else f = true := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem uite_eq_false_distrib (p : Prop) {_ : UDecidable p} (t f : Bool) :
+    ((uif p then t else f) = false) = uif p then t = false else f = false := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
 @[simp] theorem ite_eq_false : (if b = false then p else q) ↔ if b then q else p := by
   cases b <;> simp
 
@@ -536,11 +572,11 @@ theorem cond_true  {α : Sort u} {a b : α} : cond true  a b = a := rfl
 theorem cond_false {α : Sort u} {a b : α} : cond false a b = b := rfl
 
 @[simp]
-theorem cond_eq_ite {α} (b : Bool) (t e : α) : cond b t e = if b then t else e := by
+theorem cond_eq_ite {α} (b : Bool) (t e : α) : cond b t e = uif b then t else e := by
   cases b <;> simp [Bool.cond_true, Bool.cond_false]
 
 @[deprecated cond_eq_ite +typeChanged (since := "2025-10-29")]
-theorem cond_eq_if : (bif b then x else y) = (if b then x else y) := cond_eq_ite b x y
+theorem cond_eq_if : (bif b then x else y) = (uif b then x else y) := cond_eq_ite b x y
 
 theorem cond_not (b : Bool) (t e : α) : cond (!b) t e = cond b e t := by
   cases b <;> rfl
@@ -549,7 +585,7 @@ theorem cond_self (c : Bool) (t : α) : cond c t t = t := by simp
 
 theorem cond_prop {b : Bool} {p q : Prop} :
     (bif b then p else q) ↔ if b then p else q := by
-  simp
+  cases b <;> simp
 
 /-
 This is a simp rule in Mathlib, but results in non-confluence that is difficult
@@ -566,15 +602,25 @@ operations like `cond` to a mix of `Prop` and `Bool`.
 -/
 theorem cond_decide {α} (p : Prop) [Decidable p] (t e : α) :
     cond (decide p) t e = if p then t else e := by
-  simp
+  cases ‹Decidable p› <;> simp [*]
+
+/--
+A `cond` on a coerced proposition becomes `uif`. This is a pre-rule, so that it applies before
+`decide` distributes over the proposition.
+-/
+@[simp ↓] theorem cond_udecide {α} (p : Prop) [UDecidable p] (t e : α) :
+    cond (UDecidable.decide p) t e = uif p then t else e := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
 
 theorem cond_eq_ite_iff {a : Bool} {p : Prop} [h : Decidable p] {x y u v : α} :
     (cond a x y = ite p u v) ↔ ite a x y = ite p u v := by
-  simp
+  cases a <;> simp
 
 theorem ite_eq_cond_iff {p : Prop} {a : Bool} [h : Decidable p] {x y u v : α} :
     (ite p x y = cond a u v) ↔ ite p x y = ite a u v := by
-  simp
+  cases a <;> simp
 
 theorem cond_eq_true_distrib : ∀(c t f : Bool),
     (cond c t f = true) = ite (c = true) (t = true) (f = true) := by
@@ -716,7 +762,7 @@ abbrev Bool.not' (a : Bool) : Bool :=
 
 section
 
-theorem Bool.rec_eq {α : Sort _} (b : Bool) {x y : α} : Bool.rec y x b = if b then x else y := by
+theorem Bool.rec_eq {α : Sort _} (b : Bool) {x y : α} : Bool.rec y x b = uif b then x else y := by
   cases b <;> simp
 
 /-! ### Deprecations -/

@@ -10157,7 +10157,7 @@ theorem filterMap_equiv_filter {f : (a : α) → β a → Bool} (h : t.WF) :
     (t.filterMap (fun k => Option.guard (fun v => f k v)) h.balanced).1 ~m
       (t.filter f h.balanced).1 := by
   simp_to_model [filter, filterMap, Equiv]
-  simp only [Option.guard_def, ← List.filterMap_eq_filter, Option.map_ite, List.Perm.rfl]
+  simp only [Option.guard_def, ← List.filterMap_eq_filter, Option.map_uite, List.Perm.rfl]
 
 theorem filterMap!_equiv_filter! {f : (a : α) → β a → Bool} (h : t.WF) :
     (t.filterMap! (fun k => Option.guard (fun v => f k v))) ~m

@@ -922,7 +922,8 @@ theorem Iter.find?_toList {α β : Type w}
     [Finite α Id] [LawfulIteratorLoop α Id Id]
     {it : Iter (α := α) β} {f : β → Bool} :
     it.toList.find? f = it.find? f := by
-  simp [find?_eq_findSome?, List.find?_eq_findSome?_guard, findSome?_toList, Option.guard_def]
+  simp [find?_eq_findSome?, List.find?_eq_findSome?_guard, findSome?_toList, Option.guard_def,
+    UDecidable.ite_eq_ite]
 
 theorem Iter.findM?_pure {α β : Type w} {m : Type w → Type w'} [Monad m]
     [Iterator α Id β] [IteratorLoop α Id m] [IteratorLoop α Id Id]

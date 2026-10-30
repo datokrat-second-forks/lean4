@@ -549,6 +549,6 @@ returned value.
 @[inline, expose]
 def IterM.filter {α β : Type w} {m : Type w → Type w'} [Iterator α m β] [Monad m]
     (f : β → Bool) (it : IterM (α := α) m β) :=
-  (it.filterMap (fun b => if f b then some b else none) : IterM m β)
+  (it.filterMap (fun b => bif f b then some b else none) : IterM m β)
 
 end Std

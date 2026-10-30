@@ -183,7 +183,7 @@ theorem eraseP_filter {f : α → Bool} {l : List α} :
   rw [← filterMap_eq_filter, eraseP_filterMap]
   congr
   ext x
-  simp only [Option.guard]
+  simp only [Option.guard, Bool.cond_eq_ite]
   split <;> split at * <;> simp_all
 
 theorem eraseP_append_left {a : α} (pa : p a) :

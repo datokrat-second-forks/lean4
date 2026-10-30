@@ -378,13 +378,14 @@ theorem map_dif {α : Type u_1} {β : Type u_2} {c : Prop} {f : α → β} {_ : 
 
 @[simp, grind =] theorem filter_none (p : α → Bool) : none.filter p = none := rfl
 
-@[grind =] theorem filter_some : Option.filter p (some a) = if p a then some a else none := rfl
+@[grind =] theorem filter_some : Option.filter p (some a) = uif p a then some a else none :=
+  Bool.cond_eq_ite ..
 
 theorem filter_some_pos (h : p a) : Option.filter p (some a) = some a := by
-  rw [filter_some, ite_eq_left h]
+  rw [filter_some, UDecidable.ite_eq_left h]
 
 theorem filter_some_neg (h : p a = false) : Option.filter p (some a) = none := by
-  rw [filter_some, ite_eq_right] <;> simpa
+  rw [filter_some, UDecidable.ite_eq_right] <;> simpa
 
 theorem isSome_of_isSome_filter (p : α → Bool) (o : Option α) (h : (o.filter p).isSome) :
     o.isSome := by
@@ -480,11 +481,11 @@ theorem eq_some_of_filter_eq_some {o : Option α} {a : α} (h : o.filter p = som
 
 @[simp] theorem all_guard (a : α) :
     Option.all q (guard p a) = (!p a || q a) := by
-  simp only [guard]
+  simp only [guard, Bool.cond_eq_ite]
   split <;> simp_all
 
 @[simp] theorem any_guard (a : α) : Option.any q (guard p a) = (p a && q a) := by
-  simp only [guard]
+  simp only [guard, Bool.cond_eq_ite]
   split <;> simp_all
 
 theorem all_eq_true (p : α → Bool) (x : Option α) :
@@ -629,20 +630,23 @@ theorem get_none_eq_iff_true {h} : (none : Option α).get h = a ↔ True := by
   simp at h
 
 @[simp, grind =] theorem get_guard : (guard p a).get h = a := by
-  simp only [guard]
+  simp only [guard, Bool.cond_eq_ite]
   split <;> simp
 
 @[grind =] theorem getD_guard : (guard p a).getD b = if p a then a else b := by
-  simp only [guard]
+  simp only [guard, Bool.cond_eq_ite]
   split <;> simp
 
 theorem guard_def (p : α → Bool) :
-    Option.guard p = fun x => if p x then some x else none := rfl
+    Option.guard p = fun x => uif p x then some x else none :=
+  funext fun _ => Bool.cond_eq_ite ..
 
-@[grind =] theorem guard_apply : Option.guard p x = if p x then some x else none := rfl
+@[grind =] theorem guard_apply : Option.guard p x = uif p x then some x else none :=
+  Bool.cond_eq_ite ..
 
 theorem guard_eq_ite {p : α → Bool} {x : α} :
-    Option.guard p x = if p x then some x else none := rfl
+    Option.guard p x = uif p x then some x else none :=
+  Bool.cond_eq_ite ..
 
 theorem guard_eq_filter {p : α → Bool} {x : α} :
     Option.guard p x = Option.filter p (some x) := rfl
@@ -653,7 +657,7 @@ theorem guard_eq_filter {p : α → Bool} {x : α} :
   split <;> simp_all [filter_some, guard_eq_ite]
 
 theorem map_guard {p : α → Bool} {f : α → β} {x : α} :
-    (Option.guard p x).map f = if p x then some (f x) else none := by
+    (Option.guard p x).map f = uif p x then some (f x) else none := by
   simp [guard_eq_ite]
 
 @[grind =] theorem join_filter {p : Option α → Bool} : {o : Option (Option α)} →
@@ -913,7 +917,7 @@ theorem get!_or {o o' : Option α} [Inhabited α] : (o.or o').get! = o.getD o'.g
   cases o <;> cases o' <;> simp
 
 theorem guard_or_guard : (guard p a).or (guard q a) = guard (fun x => p x || q x) a := by
-  simp only [guard]
+  simp only [guard, Bool.cond_eq_ite]
   split <;> simp_all
 
 theorem any_or_of_any_left {o₁ o₂ : Option α} {f : α → Bool} (h : o₁.any f) :
@@ -1208,7 +1212,7 @@ end uite
   cases x
   · contradiction
   · unfold Option.filter
-    simp only [Option.get_ite, Option.get_some]
+    simp only [Bool.cond_eq_ite, Option.get_uite, Option.get_some]
 
 /-! ### pbind -/
 
@@ -1408,7 +1412,7 @@ theorem pelim_congr {o o' : Option α} {b b' : β}
 
 theorem pelim_guard {a : α} {f : (a' : α) → guard p a = some a' → β} :
     (guard p a).pelim b f = if h : p a then f a (by simpa) else b := by
-  simp only [guard]
+  simp only [guard, Bool.cond_eq_ite]
   split <;> simp
 
 /-! ### pfilter -/
@@ -1427,7 +1431,7 @@ theorem pfilter_congr {α : Type u} {o o' : Option α} (ho : o = o')
   rfl
 
 @[simp, grind =] theorem pfilter_some {α : Type _} {x : α} {p : (a : α) → some x = some a → Bool} :
-    (some x).pfilter p = if p x rfl then some x else none := by
+    (some x).pfilter p = uif p x rfl then some x else none := by
   simp only [pfilter, cond_eq_ite]
 
 theorem isSome_pfilter_iff {α : Type _} {o : Option α} {p : (a : α) → o = some a → Bool} :
@@ -1447,8 +1451,8 @@ theorem isNone_pfilter_iff {o : Option α} {p : (a : α) → o = some a → Bool
   cases o with
   | none => simp
   | some a =>
-    simp only [pfilter_some, isNone_iff_eq_none, ite_eq_right_iff, reduceCtorEq, imp_false,
-      Bool.not_eq_true, some.injEq]
+    simp only [pfilter_some, isNone_iff_eq_none, UDecidable.ite_eq_right_iff, reduceCtorEq,
+      imp_false, Bool.not_eq_true, some.injEq]
     exact ⟨fun h _ h' => h' ▸ h, fun h => h _ rfl⟩
 
 @[simp, grind =] theorem get_pfilter {α : Type _} {o : Option α} {p : (a : α) → o = some a → Bool}
@@ -1490,7 +1494,7 @@ theorem eq_some_of_pfilter_eq_some {o : Option α} {p : (a : α) → o = some a 
   cases o with
   | none => rfl
   | some a =>
-    simp only [pfilter, Option.filter, Bool.cond_eq_ite_iff]
+    simp only [pfilter, Option.filter]
 
 @[simp] theorem pfilter_filter {o : Option α} {p : α → Bool} {q : (a : α) → o.filter p = some a → Bool} :
     (o.filter p).pfilter q = o.pfilter (fun a h => if h' : p a then q a (Option.filter_eq_some_iff.2 ⟨h, h'⟩) else false) := by
@@ -1519,7 +1523,7 @@ theorem eq_some_of_pfilter_eq_some {o : Option α} {p : (a : α) → o = some a 
 
 theorem pfilter_eq_pbind_ite {α : Type _} {o : Option α}
     {p : (a : α) → o = some a → Bool} :
-    o.pfilter p = o.pbind (fun a h => if p a h then some a else none) := by
+    o.pfilter p = o.pbind (fun a h => uif p a h then some a else none) := by
   cases o
   · rfl
   · simp only [Option.pfilter, Bool.cond_eq_ite, Option.pbind_some]
@@ -1567,8 +1571,8 @@ theorem pfilter_eq_pbind_ite {α : Type _} {o : Option α}
     split <;> simp
 
 theorem pfilter_guard {a : α} {p : α → Bool} {q : (a' : α) → guard p a = some a' → Bool} :
-    (guard p a).pfilter q = if ∃ (h : p a), q a (by simp [h]) then some a else none := by
-  simp only [guard]
+    (guard p a).pfilter q = uif ∃ (h : p a), q a (by simp [h]) then some a else none := by
+  simp only [guard, Bool.cond_eq_ite]
   split <;> simp_all
 
 /-! ### LT and LE -/

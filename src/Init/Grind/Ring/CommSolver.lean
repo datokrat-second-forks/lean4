@@ -233,9 +233,9 @@ theorem Mon.mul_k_eq_mul_go (fuel : Nat) (m₁ m₂ : Mon) (h : m₁.length + m�
         simp only [Mon.mul.go, Power.varLt, cond_eq_ite]
         cases h₁ : Nat.blt pw₁.x pw₂.x
         · cases h₂ : Nat.blt pw₂.x pw₁.x
-          · simp only [Bool.false_eq_true, ↓reduceIte]; congr 1; exact ih _ _ (by omega)
-          · simp only [Bool.false_eq_true, ↓reduceIte]; congr 1; exact ih (.mult pw₁ m₁) m₂ (by simp [Mon.length]; omega)
-        · simp only [↓reduceIte]; congr 1; exact ih m₁ (.mult pw₂ m₂) (by simp [Mon.length]; omega)
+          · simp only [Bool.false_eq_true, ↓reduceUIte]; congr 1; exact ih _ _ (by omega)
+          · simp only [Bool.false_eq_true, ↓reduceUIte]; congr 1; exact ih (.mult pw₁ m₁) m₂ (by simp [Mon.length]; omega)
+        · simp only [↓reduceUIte]; congr 1; exact ih m₁ (.mult pw₂ m₂) (by simp [Mon.length]; omega)
 
 @[simp] theorem Mon.mul_k_eq_mul (m₁ m₂ : Mon) : Mon.mul_k m₁ m₂ = Mon.mul m₁ m₂ :=
   Mon.mul_k_eq_mul_go _ _ _ (Nat.lt_succ_self _)
@@ -454,9 +454,9 @@ noncomputable def Poly.addConst_k (p : Poly) (k : Int) : Poly :=
     (Int.beqZero_k k)
 
 @[simp] theorem Poly.addConst_k_eq_addConst (p : Poly) (k : Int) : addConst_k p k = addConst p k := by
-  unfold addConst_k addConst; rw [Int.beqZero_k_eq, cond_eq_ite]
+  unfold addConst_k addConst; rw [Int.beqZero_k_eq]
   cases h : k == 0
-  · simp only [Bool.false_eq_true, ↓reduceIte]
+  · simp only [Bool.cond_false]
     induction p with
     | num k' => show Poly.num (Int.add_k k' k) = _; simp [addConst.go]
     | add k' m p ih => simp only [addConst.go, ← ih]
@@ -509,10 +509,10 @@ noncomputable def Poly.mulConst_k (k : Int) (p : Poly) : Poly :=
     (Int.beqZero_k k)
 
 @[simp] theorem Poly.mulConst_k_eq_mulConst (k : Int) (p : Poly) : p.mulConst_k k = p.mulConst k := by
-  unfold mulConst_k mulConst; rw [Int.beqZero_k_eq, Int.beq'_eq_beq, cond_eq_ite, cond_eq_ite]
+  unfold mulConst_k mulConst; rw [Int.beqZero_k_eq, Int.beq'_eq_beq]
   cases h₀ : k == 0
   · cases h₁ : k == 1
-    · simp only [Bool.false_eq_true, ↓reduceIte]
+    · simp only [Bool.cond_false]
       induction p with
       | num k' => show Poly.num (Int.mul_k k k') = _; simp [mulConst.go]
       | add k' m p ih => show Poly.add (Int.mul_k k k') m _ = _; simp only [mulConst.go, ← ih, Int.mul_k_eq]; rfl
@@ -548,17 +548,17 @@ noncomputable def Poly.mulMon_k (k : Int) (m : Mon) (p : Poly) : Poly :=
     (Int.beqZero_k k)
 
 @[simp] theorem Poly.mulMon_k_eq_mulMon (k : Int) (m : Mon) (p : Poly) : p.mulMon_k k m = p.mulMon k m := by
-  unfold mulMon_k mulMon; rw [Int.beqZero_k_eq, cond_eq_ite, cond_eq_ite]
+  unfold mulMon_k mulMon; rw [Int.beqZero_k_eq]
   cases h₀ : k == 0
   · cases m with
     | unit => simp [mulConst_k_eq_mulConst]
     | mult pw m =>
       have : (Mon.mult pw m == .unit) = false := rfl
-      simp only [Bool.false_eq_true, ↓reduceIte, this]
+      simp only [Bool.cond_false, this]
       induction p with
       | num k' =>
         show Bool.rec (motive := fun _ => Poly) _ _ (Int.beqZero_k k') = _
-        rw [Int.beqZero_k_eq]; simp only [mulMon.go, cond_eq_ite, Int.mul_k_eq]
+        rw [Int.beqZero_k_eq]; simp only [mulMon.go, Int.mul_k_eq]
         cases k' == 0 <;> rfl
       | add k' m' p ih =>
         show Poly.add (Int.mul_k k k') ((Mon.mult pw m).mul_k m') _ = _
@@ -639,9 +639,9 @@ theorem Poly.combine_k_eq_combine_go (fuel : Nat) (p₁ p₂ : Poly) (h : p₁.l
         | lt => dsimp only; congr 1; exact ih (.add k₁ m₁ p₁) p₂ (by simp [Poly.length]; omega)
         | gt => dsimp only; congr 1; exact ih p₁ (.add k₂ m₂ p₂) (by simp [Poly.length]; omega)
         | eq =>
-          dsimp only; rw [Int.beqZero_k_eq, Int.add_k_eq, cond_eq_ite]
+          dsimp only; rw [Int.beqZero_k_eq, Int.add_k_eq]
           cases (Int.add k₁ k₂ == 0)
-          · simp only [Bool.false_eq_true, ↓reduceIte]; congr 1; exact ih p₁ p₂ (by omega)
+          · simp only [Bool.cond_false]; congr 1; exact ih p₁ p₂ (by omega)
           · exact ih p₁ p₂ (by omega)
 
 @[simp] theorem Poly.combine_k_eq_combine (p₁ p₂ : Poly) : p₁.combine_k p₂ = p₁.combine p₂ :=
@@ -1045,12 +1045,12 @@ noncomputable def Poly.insertC_k (k : Int) (m : Mon) (p : Poly) (c : Nat) : Poly
       cases m.grevlex m' with
       | lt => exact congrArg _ ih
       | eq =>
-        dsimp only; rw [Int.beqZero_k_eq, Int.emod_k_eq, Int.add_k_eq, cond_eq_ite]
+        dsimp only; rw [Int.beqZero_k_eq, Int.emod_k_eq, Int.add_k_eq]
         cases ((Int.add k k') % (Int.ofNat c) == 0) <;> rfl
       | gt => rfl
-  unfold insertC_k insertC; rw [Int.beqZero_k_eq, Int.emod_k_eq, cond_eq_ite]
+  unfold insertC_k insertC; rw [Int.beqZero_k_eq, Int.emod_k_eq]; dsimp only
   cases h : (k % Int.ofNat c == 0)
-  · simp only [Bool.false_eq_true, ↓reduceIte]; exact hgo _ _
+  · simp only [Bool.cond_false]; exact hgo _ _
   · rfl
 
 noncomputable def Poly.mulConstC_k.go (k : Int) (c : Nat) (p : Poly) : Poly :=
@@ -1072,12 +1072,12 @@ noncomputable def Poly.mulConstC_k (k : Int) (p : Poly) (c : Nat) : Poly :=
     | num k' => show Poly.num (Int.emod_k (Int.mul_k k k') (Int.ofNat c)) = _; simp [mulConstC.go]
     | add k' m p ih =>
       change Bool.rec (motive := fun _ => Poly) _ _ (Int.beqZero_k (Int.emod_k (Int.mul_k k k') (Int.ofNat c))) = _
-      rw [Int.beqZero_k_eq, Int.emod_k_eq, Int.mul_k_eq]; simp only [mulConstC.go, cond_eq_ite]
-      cases (Int.mul k k' % Int.ofNat c == 0) <;> simp only [Bool.false_eq_true, ↓reduceIte] <;> first | rfl | exact congrArg _ ih | exact ih
-  unfold mulConstC_k mulConstC; rw [Int.beqZero_k_eq, Int.beq'_eq_beq, Int.emod_k_eq, cond_eq_ite, cond_eq_ite]
+      rw [Int.beqZero_k_eq, Int.emod_k_eq, Int.mul_k_eq]; simp only [mulConstC.go]
+      cases (Int.mul k k' % Int.ofNat c == 0) <;> simp only [Bool.cond_false, Bool.cond_true] <;> first | rfl | exact congrArg _ ih | exact ih
+  unfold mulConstC_k mulConstC; rw [Int.beqZero_k_eq, Int.beq'_eq_beq, Int.emod_k_eq]; dsimp only
   cases (k % Int.ofNat c == 0)
   · cases (k % Int.ofNat c == 1)
-    · simp only [Bool.false_eq_true, ↓reduceIte]; exact hgo _ _
+    · simp only [Bool.cond_false]; exact hgo _ _
     · rfl
   · rfl
 
@@ -1101,19 +1101,19 @@ noncomputable def Poly.mulMonC_k (k : Int) (m : Mon) (p : Poly) (c : Nat) : Poly
     induction p with
     | num k' =>
       change Bool.rec (motive := fun _ => Poly) _ _ (Int.beqZero_k (Int.emod_k (Int.mul_k k k') (Int.ofNat c))) = _
-      rw [Int.beqZero_k_eq, Int.emod_k_eq, Int.mul_k_eq]; simp only [mulMonC.go, cond_eq_ite]
+      rw [Int.beqZero_k_eq, Int.emod_k_eq, Int.mul_k_eq]; simp only [mulMonC.go]
       cases (Int.mul k k' % Int.ofNat c == 0) <;> rfl
     | add k' m' p ih =>
       change Bool.rec (motive := fun _ => Poly) _ _ (Int.beqZero_k (Int.emod_k (Int.mul_k k k') (Int.ofNat c))) = _
-      rw [Int.beqZero_k_eq, Int.emod_k_eq, Int.mul_k_eq]; simp only [mulMonC.go, cond_eq_ite]
-      cases (Int.mul k k' % Int.ofNat c == 0) <;> simp only [Bool.false_eq_true, ↓reduceIte] <;> first | exact ih | (rw [Mon.mul_k_eq_mul]; exact congrArg _ ih)
-  unfold mulMonC_k mulMonC; rw [Int.beqZero_k_eq, Int.emod_k_eq, cond_eq_ite, cond_eq_ite]
+      rw [Int.beqZero_k_eq, Int.emod_k_eq, Int.mul_k_eq]; simp only [mulMonC.go]
+      cases (Int.mul k k' % Int.ofNat c == 0) <;> simp only [Bool.cond_false, Bool.cond_true] <;> first | exact ih | (rw [Mon.mul_k_eq_mul]; exact congrArg _ ih)
+  unfold mulMonC_k mulMonC; rw [Int.beqZero_k_eq, Int.emod_k_eq]; dsimp only
   cases (k % Int.ofNat c == 0)
   · cases m with
     | unit => simp [mulConstC_k_eq_mulConstC]
     | mult pw m =>
       have : (Mon.mult pw m == .unit) = false := rfl
-      simp only [Bool.false_eq_true, ↓reduceIte, this]; exact hgo _ _
+      simp only [Bool.cond_false, this]; exact hgo _ _
   · rfl
 
 noncomputable def Poly.combineC_k (p₁ : Poly) (c : Nat) : Poly → Poly :=
@@ -1265,16 +1265,16 @@ noncomputable def Poly.insert_k (k : Int) (m : Mon) (p : Poly) : Poly :=
       cases m.grevlex m' with
       | lt => exact congrArg _ ih
       | eq =>
-        dsimp only; rw [Int.beqZero_k_eq, Int.add_k_eq, cond_eq_ite]
+        dsimp only; rw [Int.beqZero_k_eq, Int.add_k_eq]
         cases (Int.add k k' == 0) <;> rfl
       | gt => rfl
-  unfold insert_k insert; rw [Int.beqZero_k_eq, cond_eq_ite, cond_eq_ite]
+  unfold insert_k insert; rw [Int.beqZero_k_eq]
   cases (k == 0)
   · cases m with
     | unit => simp [addConst_k_eq_addConst]
     | mult pw m =>
       have : (Mon.mult pw m == .unit) = false := rfl
-      simp only [Bool.false_eq_true, ↓reduceIte, this]; exact hgo _
+      simp only [Bool.cond_false, this]; exact hgo _
   · rfl
 
 noncomputable def Mon.mulPow_nc_k (pw : Power) (m : Mon) : Mon :=
@@ -1327,13 +1327,13 @@ noncomputable def Poly.mulMon_nc_k (k : Int) (m : Mon) (p : Poly) : Poly :=
       intro acc
       show mulMon_nc_k.go k m p (acc.insert_k (Int.mul_k k k') (m.mul_nc_k m')) = _
       rw [ih]; simp [mulMon_nc.go]
-  unfold mulMon_nc_k mulMon_nc; rw [Int.beqZero_k_eq, cond_eq_ite, cond_eq_ite]
+  unfold mulMon_nc_k mulMon_nc; rw [Int.beqZero_k_eq]
   cases (k == 0)
   · cases m with
     | unit => simp [mulConst_k_eq_mulConst]
     | mult pw m =>
       have : (Mon.mult pw m == .unit) = false := rfl
-      simp only [Bool.false_eq_true, ↓reduceIte, this]; exact hgo _ _
+      simp only [Bool.cond_false, this]; exact hgo _ _
   · rfl
 
 noncomputable def Poly.mul_nc_k (p₁ p₂ : Poly) : Poly :=
@@ -1428,13 +1428,13 @@ noncomputable def Poly.mulMonC_nc_k (k : Int) (m : Mon) (p : Poly) (c : Nat) : P
       intro acc
       show mulMonC_nc_k.go k m c p (acc.insert_k (Int.emod_k (Int.mul_k k k') (Int.ofNat c)) (m.mul_nc_k m')) = _
       rw [ih]; simp [mulMonC_nc.go]
-  unfold mulMonC_nc_k mulMonC_nc; rw [Int.beqZero_k_eq, Int.emod_k_eq, cond_eq_ite, cond_eq_ite]
+  unfold mulMonC_nc_k mulMonC_nc; rw [Int.beqZero_k_eq, Int.emod_k_eq]; dsimp only
   cases (k % Int.ofNat c == 0)
   · cases m with
     | unit => simp [mulConstC_k_eq_mulConstC]
     | mult pw m =>
       have : (Mon.mult pw m == .unit) = false := rfl
-      simp only [Bool.false_eq_true, ↓reduceIte, this]; exact hgo _ _
+      simp only [Bool.cond_false, this]; exact hgo _ _
   · rfl
 
 noncomputable def Poly.mulC_nc_k (p₁ p₂ : Poly) (c : Nat) : Poly :=
@@ -1655,12 +1655,12 @@ theorem Poly.denote_insert {α} [Ring α] (ctx : Context α) (k : Int) (m : Mon)
   next =>
     split
     next h =>
-      simp at h <;> simp [*, Mon.denote, denote_addConst, mul_one, add_comm]
+      simp [*, Mon.denote, denote_addConst, mul_one, add_comm]
     next =>
       fun_induction insert.go <;> simp_all +zetaDelta [denote, zsmul_eq_intCast_mul]
-      next h₁ h₂ =>
+      next h₁ _ h₂ =>
         rw [← add_assoc, Mon.eq_of_grevlex h₁, ← right_distrib, ← intCast_add, h₂, intCast_zero, zero_mul, zero_add]
-      next h₁ _ =>
+      next h₁ _ _ =>
         rw [intCast_add, right_distrib, add_assoc, Mon.eq_of_grevlex h₁]
       next =>
         rw [add_left_comm]
@@ -1688,7 +1688,7 @@ theorem Poly.denote_mulMon {α} [CommRing α] (ctx : Context α) (k : Int) (m : 
   next =>
     split
     next h =>
-      simp at h; simp [*, Mon.denote, mul_one, denote_mulConst]
+      simp [*, Mon.denote, mul_one, denote_mulConst]
     next =>
       fun_induction mulMon.go <;> simp [denote, zsmul_eq_intCast_mul, *]
       next h => simp +zetaDelta at h; simp [*, intCast_zero, mul_zero]
@@ -1712,7 +1712,7 @@ theorem Poly.denote_mulMon_nc {α} [Ring α] (ctx : Context α) (k : Int) (m : M
   next =>
     split
     next h =>
-      simp at h; simp [*, Mon.denote, mul_one, denote_mulConst]
+      simp [*, Mon.denote, mul_one, denote_mulConst]
     next =>
       rw [denote_mulMon_nc_go]; simp [denote, Ring.intCast_zero, add_zero]
 
@@ -1884,7 +1884,7 @@ theorem Poly.cancelVar_k_eq (c : Int) (x : Var) (p : Poly) : p.cancelVar_k c x =
     show Bool.rec (motive := fun _ => Poly) _ _ _ = _
     rw [Mon.degreeOf_k_eq_degreeOf, Mon.cancelVar_k_eq_cancelVar, Int.pow_k_eq, Int.emod_k_eq, Int.ediv_k_eq,
       Int.beqZero_k_eq]
-    simp only [Poly.cancelVar', cond_eq_ite]
+    simp only [Poly.cancelVar']
     cases (Nat.blt 0 (m.degreeOf x) && (k % c ^ m.degreeOf x == 0))
     · show Poly.rec (motive := fun _ => Poly → Poly) _ _ p _ = _
       rw [ih, Poly.insert_k_eq_insert]; rfl
@@ -1954,7 +1954,7 @@ theorem Poly.denote_mulMonC {α c} [CommRing α] [IsCharP α c] (ctx : Context �
   next =>
     split
     next h =>
-      simp at h; simp [*, Mon.denote, mul_one, denote_mulConstC, IsCharP.intCast_emod]
+      simp [*, Mon.denote, mul_one, denote_mulConstC, IsCharP.intCast_emod]
     next =>
       fun_induction mulMonC.go <;> simp [denote]
       next h =>
@@ -1992,7 +1992,7 @@ theorem Poly.denote_mulMonC_nc {α c} [Ring α] [IsCharP α c] (ctx : Context α
     simp [denote, *, intCast_zero, zero_mul]
   next =>
     split
-    next h => simp at h; simp [*, Mon.denote, mul_one, denote_mulConstC, IsCharP.intCast_emod]
+    next h => simp [*, Mon.denote, mul_one, denote_mulConstC, IsCharP.intCast_emod]
     next => rw [Poly.denote_mulMonC_nc_go, denote, Ring.intCast_zero, add_zero]
 
 theorem Poly.denote_combineC {α c} [Ring α] [IsCharP α c] (ctx : Context α) (p₁ p₂ : Poly)

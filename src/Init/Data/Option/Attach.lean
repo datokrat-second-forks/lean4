@@ -219,15 +219,9 @@ theorem attach_filter {o : Option α} {p : α → Bool} :
   cases o with
   | none => simp
   | some a =>
-    simp only [Option.filter, attach_some]
-    ext
-    simp only [attach_eq_some_iff, ite_none_right_eq_some, some.injEq, bind_some,
-      dite_none_right_eq_some]
-    constructor
-    · rintro ⟨h, w⟩
-      refine ⟨h, by ext; simpa using w⟩
-    · rintro ⟨h, rfl⟩
-      simp [h]
+    cases h : p a
+    · rw [attach_congr (filter_some_neg h)]; simp [h]
+    · rw [attach_congr (filter_some_pos h)]; simp [h]
 
 theorem filter_attachWith {P : α → Prop} {o : Option α} {h : ∀ x, o = some x → P x} {q : α → Bool} :
     (o.attachWith P h).filter q =
@@ -235,7 +229,7 @@ theorem filter_attachWith {P : α → Prop} {o : Option α} {h : ∀ x, o = some
   cases o <;> simp [filter_some] <;> split <;> simp
 
 theorem filter_attach {o : Option α} {p : {x // o = some x} → Bool} :
-    o.attach.filter p = o.pbind fun a h => if p ⟨a, h⟩ then some ⟨a, h⟩ else none := by
+    o.attach.filter p = o.pbind fun a h => uif p ⟨a, h⟩ then some ⟨a, h⟩ else none := by
   cases o <;> simp [filter_some]
 
 theorem toList_pbind {o : Option α} {f : (a : α) → o = some a → Option β} :
@@ -291,7 +285,7 @@ theorem attach_pfilter {o : Option α} {p : (a : α) → o = some a → Bool} :
 
 theorem attach_guard {p : α → Bool} {x : α} :
     (guard p x).attach = if h : p x then some ⟨x, by simp_all⟩ else none := by
-  simp only [guard_eq_ite]
+  rw [attach_congr guard_eq_ite]
   split <;> simp [*]
 
 theorem attachWith_guard {q : α → Bool} {x : α} {P : α → Prop}
@@ -395,7 +389,7 @@ and simplifies these to the function directly taking the value.
 @[simp] theorem unattach_guard {p : α → Prop} {q : { x // p x } → Bool} {r : α → Bool}
     (hq : ∀ x h, q ⟨x, h⟩ = r x) {x : { x // p x }} :
     (guard q x).unattach = guard r x.1 := by
-  simp only [guard]
+  simp only [guard, Bool.cond_eq_ite]
   split <;> simp_all
 
 @[simp] theorem unattach_pfilter {p : α → Prop} {o : Option { x // p x }}

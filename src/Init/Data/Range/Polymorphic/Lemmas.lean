@@ -3070,7 +3070,7 @@ theorem getElem?_toList_eq [LE α] [UDecidableLE α] [UpwardEnumerable α] [Lawf
       cases hs : UpwardEnumerable.succMany? (n + 1) r.lower
       · simp
       · rename_i hl a
-        simp only [Option.filter_some, UDecidable.decide_eq_true_eq, right_eq_ite_iff,
+        simp only [Option.filter_some, UDecidable.decide_eq_true_eq, UDecidable.right_eq_ite_iff,
           UpwardEnumerable.le_iff] at hl ⊢
         intro ha
         exact hl.elim <| UpwardEnumerable.le_trans ⟨n + 1, hs⟩ ha
@@ -3462,7 +3462,7 @@ theorem getElem?_toList_eq [LT α] [UDecidableLT α] [UpwardEnumerable α]
       cases hs : UpwardEnumerable.succMany? (n + 1) r.lower
       · simp
       · rename_i hl a
-        simp only [Option.filter_some, UDecidable.decide_eq_true_eq, right_eq_ite_iff,
+        simp only [Option.filter_some, UDecidable.decide_eq_true_eq, UDecidable.right_eq_ite_iff,
           UpwardEnumerable.lt_iff] at hl ⊢
         intro ha
         exact hl.elim <| UpwardEnumerable.lt_trans ⟨n, hs⟩ ha

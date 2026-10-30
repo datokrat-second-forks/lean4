@@ -191,6 +191,34 @@ theorem ite_true_right [h : Decidable p] :
 @[deprecated ite_true_right (since := "2026-07-21")]
 theorem if_true_right {p : Prop} {q : Prop} [h : Decidable p] : (if p then q else True) ↔ p → q := ite_true_right
 
+namespace UDecidable
+
+@[simp]
+theorem ite_false_left {_ : UDecidable p} : (uif p then False else q) ↔ ¬p ∧ q := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp]
+theorem ite_false_right {_ : UDecidable p} : (uif p then q else False) ↔ p ∧ q := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp low]
+theorem ite_true_left {_ : UDecidable p} : (uif p then True else q) ↔ ¬p → q := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp low]
+theorem ite_true_right {_ : UDecidable p} : (uif p then q else True) ↔ p → q := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+end UDecidable
+
 /-- Negation of the condition `P : Prop` in a `dite` is the same as swapping the branches. -/
 @[simp] theorem dite_not [hn : Decidable (¬p)] [h : Decidable p]  (x : ¬p → α) (y : ¬¬p → α) :
     dite (¬p) x y = dite p (fun h => y (not_not_intro h)) x := by

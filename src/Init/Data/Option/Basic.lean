@@ -193,7 +193,7 @@ Examples:
  * `none.filter (fun x : Nat => true) = none`
 -/
 @[always_inline, inline, implicit_reducible] protected def filter (p : α → Bool) : Option α → Option α
-  | some a => if p a then some a else none
+  | some a => bif p a then some a else none
   | none   => none
 
 /--
@@ -398,7 +398,7 @@ Examples:
  * `Option.guard (· > 2) 5 = some 5`
 -/
 @[inline, implicit_reducible] def guard (p : α → Bool) (a : α) : Option α :=
-  if p a then some a else none
+  bif p a then some a else none
 
 /--
 Converts an optional value to a list with zero or one element.

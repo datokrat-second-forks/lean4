@@ -41,7 +41,7 @@ theorem Bool.eq_false_of_not_eq_true {b : Bool} (h : (!b) = true) : b = false :=
 
 @[bv_normalize]
 theorem ite_eq_cond {b : Bool} {x y : α} : (if b = true then x else y) = (bif b then x else y) := by
-  rw [cond_eq_ite]
+  rw [cond_eq_ite, UDecidable.ite_eq_ite]
 
 @[deprecated Std.Tactic.BVDecide.Normalize.ite_eq_cond (since := "2026-07-21")]
 theorem if_eq_cond {α : Sort u_1} {b : Bool} {x : α} {y : α} : (if b = Bool.true then x else y) = bif b then x else y := Std.Tactic.BVDecide.Normalize.ite_eq_cond

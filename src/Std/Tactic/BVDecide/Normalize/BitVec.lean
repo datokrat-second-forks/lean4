@@ -109,7 +109,7 @@ theorem BitVec.smod_umod (x y : BitVec w) :
         else
           x.umod y := by
   rw [BitVec.smod_eq, ← BitVec.msb_eq_getLsbD_last, ← BitVec.msb_eq_getLsbD_last]
-  cases x.msb <;> cases y.msb <;> simp
+  cases x.msb <;> cases y.msb <;> simp [UDecidable.ite_eq_ite]
 
 attribute [bv_normalize] BitVec.smtUDiv_eq
 
@@ -147,7 +147,7 @@ theorem BitVec.srem_umod (x y : BitVec w) :
 
 @[bv_normalize]
 theorem BitVec.abs_eq (x : BitVec w) : x.abs = bif x.getLsbD (w - 1) then -x else x := by
-  simp [_root_.BitVec.abs_eq, BitVec.msb_eq_getLsbD_last]
+  simp [_root_.BitVec.abs_eq, BitVec.msb_eq_getLsbD_last, UDecidable.ite_eq_ite]
 
 attribute [bv_normalize] BitVec.twoPow_eq
 
@@ -478,7 +478,7 @@ theorem BitVec.append_const_right {a : BitVec w1} :
 theorem BitVec.signExtend_elim {v : Nat} {x : BitVec v} {w : Nat} (h : v ≤ w) :
     BitVec.signExtend w x = ((bif x.msb then -1#(w - v) else 0#(w - v)) ++ x).cast (by omega) := by
   rw [BitVec.signExtend_eq_append_of_le]
-  simp [BitVec.neg_one_eq_allOnes, cond_eq_ite]
+  simp [BitVec.neg_one_eq_allOnes, UDecidable.ite_eq_ite]
   assumption
 
 theorem BitVec.signExtend_elim' {v : Nat} {x : BitVec v} {w : Nat} (h : w ≤ v) :

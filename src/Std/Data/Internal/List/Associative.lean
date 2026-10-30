@@ -5198,11 +5198,11 @@ private theorem Option.map_dmap {α β γ : Type _} (x : Option α)
 private theorem Option.dmap_id {α : Type _} (x : Option α) : Option.dmap x (fun a _ => a) = x := by
   cases x <;> rfl
 
-private theorem Option.dmap_ite {α β : Type _} (p : Prop) [Decidable p] (t e : Option α)
-    (f : (a : α) → (if p then t else e) = some a → β) :
-    Option.dmap (if p then t else e) f =
-      if h : p then Option.dmap t (fun a h' => f a (ite_eq_left h ▸ h'))
-      else Option.dmap e (fun a h' => f a (ite_eq_right h ▸ h')) := by
+private theorem Option.dmap_uite {α β : Type _} (p : Prop) {_ : UDecidable p} (t e : Option α)
+    (f : (a : α) → (uif p then t else e) = some a → β) :
+    Option.dmap (uif p then t else e) f =
+      uif h : p then Option.dmap t (fun a h' => f a (UDecidable.ite_eq_left h ▸ h'))
+      else Option.dmap e (fun a h' => f a (UDecidable.ite_eq_right h ▸ h')) := by
   split
   · rename_i h
     simp only
@@ -5215,7 +5215,7 @@ private theorem Option.get_dmap {α β : Type _} {x : Option α} {f : (a : α) �
   cases x <;> trivial
 
 theorem guard_eq_map (p : (a : α) × β a → Prop) [DecidablePred p] :
-    Option.guard p = fun x => Option.map (fun y => ⟨x.1, y⟩) (if p x then some x.2 else none) := by
+    Option.guard p = fun x => Option.map (fun y => ⟨x.1, y⟩) (uif p x then some x.2 else none) := by
   funext x
   simp [Option.guard]
 
@@ -5526,7 +5526,7 @@ theorem eraseList_perm_filter_not_contains [BEq α] [EquivBEq α] (l toErase : L
           cases x
           · simp
           · rename_i val
-            simp only [Option.filter, Bool.not_eq_eq_eq_not, Bool.not_true]
+            simp only [Option.filter]
             rw [List.contains_cons]
             rw [getEntry?_eq_some_iff] at heq2
             · suffices (val.fst == kv.fst) = false by simp [this]
@@ -6280,11 +6280,11 @@ theorem getValue?_filter_not_contains {β : Type v} [BEq α] [EquivBEq α]
   case isFalse h =>
     congr 1
     rw [getEntry?_filter]
-    · simp only [Option.filter]
+    · simp only [Option.filter, Bool.cond_eq_ite]
       split
       case h_1 _ val heq =>
-        simp only [Bool.not_eq_eq_eq_not, Bool.not_true, heq, ite_eq_left_iff, Bool.not_eq_false,
-          reduceCtorEq, imp_false, Bool.not_eq_true]
+        simp only [Bool.not_eq_eq_eq_not, Bool.not_true, heq, UDecidable.ite_eq_left_iff,
+          Bool.not_eq_false, reduceCtorEq, imp_false, Bool.not_eq_true]
         have := @beq_of_getEntry?_eq_some α (fun _ => β) _ l₁ k val heq
         rw [Bool.not_eq_true] at h
         rw [List.contains_congr this, h]
@@ -6486,7 +6486,7 @@ theorem List.getValue?_filter_containsKey {β : Type v} [BEq α] [EquivBEq α]
   case isTrue h =>
     congr 1
     rw [getEntry?_filter]
-    . simp only [Option.filter]
+    . simp only [Option.filter, Bool.cond_eq_ite]
       split
       case h_1 _ val heq =>
         simp [heq]
@@ -6865,8 +6865,8 @@ theorem getValueCast?_filter [BEq α] [LawfulBEq α]
   simp only [Option.dmap_bind, Option.bind_dmap_left]
   congr; funext a h
   cases eq_of_beq (beq_of_getEntry?_eq_some h)
-  simp only [cast_eq, Option.guard, Option.dmap_ite,
-    Option.dmap_some, Option.dmap_none, dite_eq_ite]
+  simp only [cast_eq, Option.guard, Bool.cond_eq_ite, Option.dmap_uite,
+    Option.dmap_some, Option.dmap_none, UDecidable.dite_eq_ite]
 
 theorem getValueCast!_filter [BEq α] [LawfulBEq α]
     {f : (a : α) → β a → Bool}
@@ -7076,7 +7076,7 @@ theorem getKey?_filterMap [BEq α] [LawfulBEq α]
   congr; funext a h
   cases eq_of_beq (beq_of_getEntry?_eq_some h)
   simp only [show _ = _ from h, Option.dmap_some, Option.get_some, cast_eq]
-  cases f a.1 a.2 <;> rfl
+  cases f a.1 a.2 <;> simp
 
 theorem getKey!_filterMap [BEq α] [LawfulBEq α] [Inhabited α]
     {f : (a : α) → β a → Option (γ a)}
@@ -7132,13 +7132,13 @@ theorem getKey?_filter_key [BEq α] [EquivBEq α]
     simp only [getKey?_cons, List.filter_cons]
     split
     · simp only [getKey?_cons, ih, apply_ite (Option.filter f), Option.filter_some,
-        ‹f k'›, ↓reduceIte]
+        ‹f k'›, ↓reduceUIte]
     · replace hl := hl.containsKey_eq_false
       simp only [ih]
       split
       · rw [containsKey_congr ‹_›] at hl
         simp only [getKey?_eq_none hl, Option.filter_none, Option.filter_some, eq_false ‹_›,
-          ↓reduceIte]
+          ↓reduceUIte]
       · rfl
 
 theorem getKey!_filter [BEq α] [LawfulBEq α] [Inhabited α]
@@ -7889,7 +7889,7 @@ theorem getValue?_filter {β : Type v} [BEq α] [EquivBEq α]
         f (getKey k l (containsKey_eq_isSome_getValue?.trans (Option.isSome_of_eq_some h))) v) := by
   simp only [getValue?_eq_getEntry?, distinct, getEntry?_filter,
     Option.pfilter_eq_pbind_ite, ← Option.bind_guard, Option.guard_def,
-    Option.pbind_map, Option.map_bind, Function.comp_def, apply_ite,
+    Option.pbind_map, Option.map_bind, Function.comp_def, UDecidable.apply_ite,
     Option.map_some, Option.map_none]
   simp only [getKey, getKey?_eq_getEntry?, ← Option.pbind_eq_bind]
   congr; funext a h
@@ -7990,7 +7990,7 @@ theorem getKey?_filterMap [BEq α] [EquivBEq α] {β : Type v} {γ : Type w}
   congr; funext a h
   simp only [getEntry?_congr (beq_of_getEntry?_eq_some h)]
   simp only [show _ = _ from h, Option.map_some, Option.get_some]
-  cases f a.1 a.2 <;> rfl
+  cases f a.1 a.2 <;> simp
 
 theorem getKey!_filterMap [BEq α] [EquivBEq α] [Inhabited α] {β : Type v} {γ : Type w}
     {f : (_ : α) → β → Option γ}
