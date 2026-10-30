@@ -44,6 +44,7 @@ uint8_t l_Substring_Raw_beq(lean_object*, lean_object*);
 lean_object* lean_array_get_size(lean_object*);
 lean_object* lean_nat_sub(lean_object*, lean_object*);
 lean_object* lean_array_fget_borrowed(lean_object*, lean_object*);
+uint8_t lean_string_dec_eq(lean_object*, lean_object*);
 uint64_t l_String_instHashableRaw_hash(lean_object*);
 uint64_t lean_uint64_mix_hash(uint64_t, uint64_t);
 uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
@@ -8068,13 +8069,13 @@ return v___x_2389_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00Lean_Syntax_isAntiquots_spec__0___boxed(lean_object* v___x_2390_, lean_object* v___x_2391_, lean_object* v_as_2392_, lean_object* v_i_2393_, lean_object* v_stop_2394_){
 _start:
 {
-uint8_t v___x_334__boxed_2395_; size_t v_i_boxed_2396_; size_t v_stop_boxed_2397_; uint8_t v_res_2398_; lean_object* v_r_2399_; 
-v___x_334__boxed_2395_ = lean_unbox(v___x_2391_);
+uint8_t v___x_332__boxed_2395_; size_t v_i_boxed_2396_; size_t v_stop_boxed_2397_; uint8_t v_res_2398_; lean_object* v_r_2399_; 
+v___x_332__boxed_2395_ = lean_unbox(v___x_2391_);
 v_i_boxed_2396_ = lean_unbox_usize(v_i_2393_);
 lean_dec(v_i_2393_);
 v_stop_boxed_2397_ = lean_unbox_usize(v_stop_2394_);
 lean_dec(v_stop_2394_);
-v_res_2398_ = l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00Lean_Syntax_isAntiquots_spec__0(v___x_2390_, v___x_334__boxed_2395_, v_as_2392_, v_i_boxed_2396_, v_stop_boxed_2397_);
+v_res_2398_ = l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00Lean_Syntax_isAntiquots_spec__0(v___x_2390_, v___x_332__boxed_2395_, v_as_2392_, v_i_boxed_2396_, v_stop_boxed_2397_);
 lean_dec_ref(v_as_2392_);
 lean_dec(v___x_2390_);
 v_r_2399_ = lean_box(v_res_2398_);

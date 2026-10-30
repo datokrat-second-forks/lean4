@@ -77,6 +77,7 @@ lean_object* l_Id_instMonad___lam__0(lean_object*, lean_object*, lean_object*, l
 lean_object* l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, size_t, size_t, lean_object*);
 lean_object* l_Std_Http_URI_EncodedFragment_encode(lean_object*);
 size_t lean_usize_of_nat(lean_object*);
+uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
 lean_object* lean_string_utf8_next_fast(lean_object*, lean_object*);
 lean_object* lean_string_utf8_extract_fast(lean_object*, lean_object*, lean_object*);
 lean_object* l_List_getLast_x3f___redArg(lean_object*);
@@ -95,6 +96,7 @@ lean_object* l_instReprTupleOfRepr___redArg___lam__0(lean_object*, lean_object*,
 lean_object* l_Prod_repr___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* l_Array_repr___redArg(lean_object*, lean_object*);
 lean_object* l_Array_append___redArg(lean_object*, lean_object*);
+uint8_t lean_uint16_dec_eq(uint16_t, uint16_t);
 lean_object* l_Std_Http_URI_EncodedUserInfo_decode(lean_object*);
 lean_object* l_Std_Http_URI_EncodedQueryParam_decode(lean_object*);
 lean_object* l_Std_Http_URI_EncodedUserInfo_encode(lean_object*);

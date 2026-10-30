@@ -99,6 +99,7 @@ lean_object* l_Std_Format_fill(lean_object*);
 lean_object* l_Lean_TSyntax_getString(lean_object*);
 uint8_t lean_string_utf8_at_end(lean_object*, lean_object*);
 lean_object* lean_string_utf8_next_fast(lean_object*, lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* lean_array_fget(lean_object*, lean_object*);
 lean_object* l_Lean_replaceRef(lean_object*, lean_object*);
 lean_object* lean_string_utf8_next(lean_object*, lean_object*);
@@ -124,6 +125,7 @@ lean_object* l_Id_instMonad___lam__1___boxed(lean_object*, lean_object*, lean_ob
 lean_object* l_Id_instMonad___lam__0(lean_object*, lean_object*, lean_object*, lean_object*);
 size_t lean_array_size(lean_object*);
 lean_object* l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, size_t, size_t, lean_object*);
+uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
 lean_object* l_Lean_Parser_takeWhile1Fn(lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_Parser_mkAntiquot(lean_object*, lean_object*, uint8_t, uint8_t);
 lean_object* l_Lean_Parser_ParserState_mkError(lean_object*, lean_object*);
@@ -1733,8 +1735,8 @@ return v___x_179_;
 }
 else
 {
-lean_dec_ref_known(v___x_167_, 2);
 lean_dec(v_info_168_);
+lean_dec_ref_known(v___x_167_, 2);
 lean_inc_ref(v_s_159_);
 return v_s_159_;
 }
@@ -2189,7 +2191,7 @@ v___x_345_ = lean_obj_once(&l_Lean_Html_Syntax_decodeCharacterReferenceAt___clos
 v___x_346_ = lean_alloc_ctor(7, 2, 0);
 lean_ctor_set(v___x_346_, 0, v___x_344_);
 lean_ctor_set(v___x_346_, 1, v___x_345_);
-v___x_347_ = l_Lean_throwErrorAt___at___00Lean_Html_Syntax_decodeCharacterReferenceAt_spec__0___redArg(v___x_336_, v___x_346_, v___y_332_, v___y_334_);
+v___x_347_ = l_Lean_throwErrorAt___at___00Lean_Html_Syntax_decodeCharacterReferenceAt_spec__0___redArg(v___x_336_, v___x_346_, v___y_334_, v___y_332_);
 lean_dec(v___x_336_);
 return v___x_347_;
 }
@@ -2207,9 +2209,9 @@ if (v___x_351_ == 0)
 {
 lean_object* v___x_359_; 
 v___x_359_ = ((lean_object*)(l_Lean_Html_Syntax_decodeCharacterReferenceAt___closed__6));
-v___y_332_ = v___y_354_;
+v___y_332_ = v___y_355_;
 v___y_333_ = v_refEnd_356_;
-v___y_334_ = v___y_355_;
+v___y_334_ = v___y_354_;
 v___y_335_ = v___x_359_;
 goto v___jp_331_;
 }
@@ -2217,9 +2219,9 @@ else
 {
 lean_object* v___x_360_; 
 v___x_360_ = ((lean_object*)(l_Lean_Html_Syntax_decodeCharacterReferenceAt___closed__7));
-v___y_332_ = v___y_354_;
+v___y_332_ = v___y_355_;
 v___y_333_ = v_refEnd_356_;
-v___y_334_ = v___y_355_;
+v___y_334_ = v___y_354_;
 v___y_335_ = v___x_360_;
 goto v___jp_331_;
 }

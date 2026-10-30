@@ -25,6 +25,7 @@ lean_object* lean_nat_to_int(lean_object*);
 lean_object* lean_string_append(lean_object*, lean_object*);
 lean_object* l_Int_repr(lean_object*);
 uint8_t lean_int_dec_le(lean_object*, lean_object*);
+uint8_t lean_int_dec_le(lean_object*, lean_object*);
 uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
 lean_object* l_Nat_reprFast(lean_object*);
 uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
@@ -657,9 +658,9 @@ return v___x_141_;
 LEAN_EXPORT lean_object* l___private_Std_Time_Zoned_Database_PosixTz_0__Std_Time_TimeZone_posixParseHMS___lam__0___boxed(lean_object* v___x_143_, lean_object* v_x_144_){
 _start:
 {
-uint8_t v___x_4037__boxed_145_; uint8_t v_res_146_; lean_object* v_r_147_; 
-v___x_4037__boxed_145_ = lean_unbox(v___x_143_);
-v_res_146_ = l___private_Std_Time_Zoned_Database_PosixTz_0__Std_Time_TimeZone_posixParseHMS___lam__0(v___x_4037__boxed_145_, v_x_144_);
+uint8_t v___x_4033__boxed_145_; uint8_t v_res_146_; lean_object* v_r_147_; 
+v___x_4033__boxed_145_ = lean_unbox(v___x_143_);
+v_res_146_ = l___private_Std_Time_Zoned_Database_PosixTz_0__Std_Time_TimeZone_posixParseHMS___lam__0(v___x_4033__boxed_145_, v_x_144_);
 lean_dec(v_x_144_);
 v_r_147_ = lean_box(v_res_146_);
 return v_r_147_;

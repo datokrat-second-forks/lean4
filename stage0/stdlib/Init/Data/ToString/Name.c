@@ -38,6 +38,7 @@ lean_object* l_String_Slice_Pos_get_x3f(lean_object*, lean_object*);
 uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 uint8_t lean_string_get_byte_fast(lean_object*, lean_object*);
 uint8_t lean_uint8_dec_eq(uint8_t, uint8_t);
+uint8_t lean_uint8_dec_eq(uint8_t, uint8_t);
 uint8_t lean_uint8_dec_le(uint8_t, uint8_t);
 lean_object* l_String_Slice_Pattern_CharPred_instForwardPatternForallCharBool(lean_object*);
 lean_object* l_String_Slice_Pos_skipWhile___redArg(lean_object*, lean_object*, lean_object*);

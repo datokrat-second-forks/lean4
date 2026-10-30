@@ -88,6 +88,7 @@ lean_object* l___private_Lean_Meta_Basic_0__Lean_Meta_forallTelescopeReducingAux
 lean_object* l_Lean_Meta_mkAppM(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 size_t lean_usize_of_nat(lean_object*);
 uint8_t lean_usize_dec_eq(size_t, size_t);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Meta_instantiateMVarsIfMVarApp___redArg(lean_object*, lean_object*);
 lean_object* l_Lean_mkApp6(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* l_List_lengthTR___redArg(lean_object*);
@@ -2557,10 +2558,10 @@ return v___x_945_;
 LEAN_EXPORT lean_object* l_Lean_Meta_ArgsPacker_Unary_uncurry___lam__0___boxed(lean_object* v___x_948_, lean_object* v___x_949_, lean_object* v_varNames_950_, lean_object* v_e_951_, lean_object* v___x_952_, lean_object* v___x_953_, lean_object* v_xs_954_, lean_object* v_codomain_955_, lean_object* v___y_956_, lean_object* v___y_957_, lean_object* v___y_958_, lean_object* v___y_959_, lean_object* v___y_960_){
 _start:
 {
-uint8_t v___x_799__boxed_961_; uint8_t v___x_800__boxed_962_; lean_object* v_res_963_; 
-v___x_799__boxed_961_ = lean_unbox(v___x_952_);
-v___x_800__boxed_962_ = lean_unbox(v___x_953_);
-v_res_963_ = l_Lean_Meta_ArgsPacker_Unary_uncurry___lam__0(v___x_948_, v___x_949_, v_varNames_950_, v_e_951_, v___x_799__boxed_961_, v___x_800__boxed_962_, v_xs_954_, v_codomain_955_, v___y_956_, v___y_957_, v___y_958_, v___y_959_);
+uint8_t v___x_783__boxed_961_; uint8_t v___x_784__boxed_962_; lean_object* v_res_963_; 
+v___x_783__boxed_961_ = lean_unbox(v___x_952_);
+v___x_784__boxed_962_ = lean_unbox(v___x_953_);
+v_res_963_ = l_Lean_Meta_ArgsPacker_Unary_uncurry___lam__0(v___x_948_, v___x_949_, v_varNames_950_, v_e_951_, v___x_783__boxed_961_, v___x_784__boxed_962_, v_xs_954_, v_codomain_955_, v___y_956_, v___y_957_, v___y_958_, v___y_959_);
 lean_dec(v___y_959_);
 lean_dec_ref(v___y_958_);
 lean_dec(v___y_957_);
@@ -4781,9 +4782,9 @@ return v___x_1915_;
 LEAN_EXPORT lean_object* l_Lean_Meta_ArgsPacker_Mutual_uncurryType___lam__0___boxed(lean_object* v_a_1922_, lean_object* v___x_1923_, lean_object* v___x_1924_, lean_object* v_x_1925_, lean_object* v___y_1926_, lean_object* v___y_1927_, lean_object* v___y_1928_, lean_object* v___y_1929_, lean_object* v___y_1930_){
 _start:
 {
-uint8_t v___x_1814__boxed_1931_; lean_object* v_res_1932_; 
-v___x_1814__boxed_1931_ = lean_unbox(v___x_1924_);
-v_res_1932_ = l_Lean_Meta_ArgsPacker_Mutual_uncurryType___lam__0(v_a_1922_, v___x_1923_, v___x_1814__boxed_1931_, v_x_1925_, v___y_1926_, v___y_1927_, v___y_1928_, v___y_1929_);
+uint8_t v___x_1812__boxed_1931_; lean_object* v_res_1932_; 
+v___x_1812__boxed_1931_ = lean_unbox(v___x_1924_);
+v_res_1932_ = l_Lean_Meta_ArgsPacker_Mutual_uncurryType___lam__0(v_a_1922_, v___x_1923_, v___x_1812__boxed_1931_, v_x_1925_, v___y_1926_, v___y_1927_, v___y_1928_, v___y_1929_);
 lean_dec(v___y_1929_);
 lean_dec_ref(v___y_1928_);
 lean_dec(v___y_1927_);
@@ -8173,11 +8174,11 @@ v___jp_3200_:
 {
 lean_object* v___x_3207_; lean_object* v___x_3208_; lean_object* v___x_3209_; 
 lean_inc(v_i_3187_);
-v___x_3207_ = l_List_get_x21Internal___redArg(v___x_3193_, v___y_3201_, v_i_3187_);
-lean_dec(v___y_3201_);
+v___x_3207_ = l_List_get_x21Internal___redArg(v___x_3193_, v___y_3202_, v_i_3187_);
+lean_dec(v___y_3202_);
 v___x_3208_ = l_Lean_Expr_bindingName_x21(v_a_3199_);
 lean_dec(v_a_3199_);
-v___x_3209_ = l_Lean_Meta_withLocalDeclD___at___00Lean_Meta_ArgsPacker_Unary_uncurryType_spec__1___redArg(v___x_3208_, v___x_3207_, v___y_3202_, v___y_3203_, v___y_3204_, v___y_3205_, v___y_3206_);
+v___x_3209_ = l_Lean_Meta_withLocalDeclD___at___00Lean_Meta_ArgsPacker_Unary_uncurryType_spec__1___redArg(v___x_3208_, v___x_3207_, v___y_3201_, v___y_3203_, v___y_3204_, v___y_3205_, v___y_3206_);
 if (lean_obj_tag(v___x_3209_) == 0)
 {
 lean_object* v_a_3210_; lean_object* v___x_3211_; lean_object* v___x_3212_; 
@@ -8266,8 +8267,8 @@ return v___x_3231_;
 }
 else
 {
-v___y_3201_ = v_a_3220_;
-v___y_3202_ = v___f_3221_;
+v___y_3201_ = v___f_3221_;
+v___y_3202_ = v_a_3220_;
 v___y_3203_ = v___y_3214_;
 v___y_3204_ = v___y_3215_;
 v___y_3205_ = v___y_3216_;

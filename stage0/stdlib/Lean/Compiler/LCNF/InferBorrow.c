@@ -1297,18 +1297,18 @@ goto v_reusejp_244_;
 }
 v_reusejp_244_:
 {
-lean_object* v___x_246_; lean_object* v___x_247_; lean_object* v___x_248_; lean_object* v___x_2502__overap_249_; lean_object* v___x_250_; 
+lean_object* v___x_246_; lean_object* v___x_247_; lean_object* v___x_248_; lean_object* v___x_2498__overap_249_; lean_object* v___x_250_; 
 v___x_246_ = l_StateRefT_x27_instMonad___redArg(v___x_245_);
 v___x_247_ = lean_box(0);
 v___x_248_ = l_instInhabitedOfMonad___redArg(v___x_246_, v___x_247_);
-v___x_2502__overap_249_ = lean_panic_fn_borrowed(v___x_248_, v_msg_190_);
+v___x_2498__overap_249_ = lean_panic_fn_borrowed(v___x_248_, v_msg_190_);
 lean_dec(v___x_248_);
 lean_inc(v___y_195_);
 lean_inc_ref(v___y_194_);
 lean_inc(v___y_193_);
 lean_inc_ref(v___y_192_);
 lean_inc(v___y_191_);
-v___x_250_ = lean_apply_6(v___x_2502__overap_249_, v___y_191_, v___y_192_, v___y_193_, v___y_194_, v___y_195_, lean_box(0));
+v___x_250_ = lean_apply_6(v___x_2498__overap_249_, v___y_191_, v___y_192_, v___y_193_, v___y_194_, v___y_195_, lean_box(0));
 return v___x_250_;
 }
 }
@@ -3804,19 +3804,19 @@ goto v_reusejp_1111_;
 }
 v_reusejp_1111_:
 {
-lean_object* v___x_1113_; lean_object* v___x_1114_; lean_object* v___x_1115_; lean_object* v___f_1116_; lean_object* v___x_2983__overap_1117_; lean_object* v___x_1118_; 
+lean_object* v___x_1113_; lean_object* v___x_1114_; lean_object* v___x_1115_; lean_object* v___f_1116_; lean_object* v___x_2944__overap_1117_; lean_object* v___x_1118_; 
 v___x_1113_ = l_StateRefT_x27_instMonad___redArg(v___x_1112_);
 v___x_1114_ = lean_obj_once(&l_panic___at___00__private_Lean_Compiler_LCNF_InferBorrow_0__Lean_Compiler_LCNF_apply_go_spec__3___closed__0, &l_panic___at___00__private_Lean_Compiler_LCNF_InferBorrow_0__Lean_Compiler_LCNF_apply_go_spec__3___closed__0_once, _init_l_panic___at___00__private_Lean_Compiler_LCNF_InferBorrow_0__Lean_Compiler_LCNF_apply_go_spec__3___closed__0);
 v___x_1115_ = l_instInhabitedOfMonad___redArg(v___x_1113_, v___x_1114_);
 v___f_1116_ = lean_alloc_closure((void*)(l_instInhabitedForall___redArg___lam__0___boxed), 2, 1);
 lean_closure_set(v___f_1116_, 0, v___x_1115_);
-v___x_2983__overap_1117_ = lean_panic_fn_borrowed(v___f_1116_, v_msg_1082_);
+v___x_2944__overap_1117_ = lean_panic_fn_borrowed(v___f_1116_, v_msg_1082_);
 lean_dec_ref(v___f_1116_);
 lean_inc(v___y_1086_);
 lean_inc_ref(v___y_1085_);
 lean_inc(v___y_1084_);
 lean_inc_ref(v___y_1083_);
-v___x_1118_ = lean_apply_5(v___x_2983__overap_1117_, v___y_1083_, v___y_1084_, v___y_1085_, v___y_1086_, lean_box(0));
+v___x_1118_ = lean_apply_5(v___x_2944__overap_1117_, v___y_1083_, v___y_1084_, v___y_1085_, v___y_1086_, lean_box(0));
 return v___x_1118_;
 }
 }
@@ -12703,13 +12703,13 @@ goto v_reusejp_3976_;
 }
 v_reusejp_3976_:
 {
-lean_object* v___x_3978_; lean_object* v___x_3979_; lean_object* v___x_3980_; lean_object* v___f_3981_; lean_object* v___x_3970__overap_3982_; lean_object* v___x_3983_; 
+lean_object* v___x_3978_; lean_object* v___x_3979_; lean_object* v___x_3980_; lean_object* v___f_3981_; lean_object* v___x_3966__overap_3982_; lean_object* v___x_3983_; 
 v___x_3978_ = l_StateRefT_x27_instMonad___redArg(v___x_3977_);
 v___x_3979_ = lean_box(0);
 v___x_3980_ = l_instInhabitedOfMonad___redArg(v___x_3978_, v___x_3979_);
 v___f_3981_ = lean_alloc_closure((void*)(l_instInhabitedForall___redArg___lam__0___boxed), 2, 1);
 lean_closure_set(v___f_3981_, 0, v___x_3980_);
-v___x_3970__overap_3982_ = lean_panic_fn_borrowed(v___f_3981_, v_msg_3921_);
+v___x_3966__overap_3982_ = lean_panic_fn_borrowed(v___f_3981_, v_msg_3921_);
 lean_dec_ref(v___f_3981_);
 lean_inc(v___y_3927_);
 lean_inc_ref(v___y_3926_);
@@ -12717,7 +12717,7 @@ lean_inc(v___y_3925_);
 lean_inc_ref(v___y_3924_);
 lean_inc(v___y_3923_);
 lean_inc_ref(v___y_3922_);
-v___x_3983_ = lean_apply_7(v___x_3970__overap_3982_, v___y_3922_, v___y_3923_, v___y_3924_, v___y_3925_, v___y_3926_, v___y_3927_, lean_box(0));
+v___x_3983_ = lean_apply_7(v___x_3966__overap_3982_, v___y_3922_, v___y_3923_, v___y_3924_, v___y_3925_, v___y_3926_, v___y_3927_, lean_box(0));
 return v___x_3983_;
 }
 }

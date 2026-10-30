@@ -59,6 +59,7 @@ lean_object* lean_panic_fn_borrowed(lean_object*, lean_object*);
 uint8_t lean_byte_array_get(lean_object*, lean_object*);
 uint32_t lean_uint32_shift_left(uint32_t, uint32_t);
 uint32_t lean_uint32_lor(uint32_t, uint32_t);
+uint8_t lean_uint8_dec_eq(uint8_t, uint8_t);
 lean_object* l_Lean_replaceRef(lean_object*, lean_object*);
 lean_object* l_Lean_Syntax_node1(lean_object*, lean_object*, lean_object*);
 lean_object* lean_string_to_utf8(lean_object*);

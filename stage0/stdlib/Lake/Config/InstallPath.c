@@ -56,6 +56,7 @@ uint8_t lean_uint32_dec_le(uint32_t, uint32_t);
 uint32_t lean_string_utf8_get_fast(lean_object*, lean_object*);
 uint32_t lean_uint32_add(uint32_t, uint32_t);
 uint8_t lean_string_dec_eq(lean_object*, lean_object*);
+uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
 extern lean_object* l_Lake_defaultBinDir;
 lean_object* l_Lake_nameToSharedLib(lean_object*, uint8_t);
 lean_object* lean_array_get_size(lean_object*);

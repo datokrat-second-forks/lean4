@@ -2164,12 +2164,12 @@ return v___x_671_;
 LEAN_EXPORT lean_object* l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_LocalContext_foldlM___at___00Lean_MVarId_revertAfter_spec__0_spec__0_spec__1___boxed(lean_object* v_x_672_, lean_object* v_x_673_, lean_object* v_x_674_, lean_object* v_x_675_){
 _start:
 {
-size_t v_x_1358__boxed_676_; size_t v_x_1359__boxed_677_; lean_object* v_res_678_; 
-v_x_1358__boxed_676_ = lean_unbox_usize(v_x_673_);
+size_t v_x_1354__boxed_676_; size_t v_x_1355__boxed_677_; lean_object* v_res_678_; 
+v_x_1354__boxed_676_ = lean_unbox_usize(v_x_673_);
 lean_dec(v_x_673_);
-v_x_1359__boxed_677_ = lean_unbox_usize(v_x_674_);
+v_x_1355__boxed_677_ = lean_unbox_usize(v_x_674_);
 lean_dec(v_x_674_);
-v_res_678_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_LocalContext_foldlM___at___00Lean_MVarId_revertAfter_spec__0_spec__0_spec__1(v_x_672_, v_x_1358__boxed_676_, v_x_1359__boxed_677_, v_x_675_);
+v_res_678_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_LocalContext_foldlM___at___00Lean_MVarId_revertAfter_spec__0_spec__0_spec__1(v_x_672_, v_x_1354__boxed_676_, v_x_1355__boxed_677_, v_x_675_);
 lean_dec_ref(v_x_672_);
 return v_res_678_;
 }

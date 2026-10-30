@@ -19,6 +19,7 @@ uint32_t lean_uint32_shift_left(uint32_t, uint32_t);
 uint32_t lean_uint32_lor(uint32_t, uint32_t);
 uint8_t lean_uint8_dec_eq(uint8_t, uint8_t);
 uint8_t lean_uint32_dec_le(uint32_t, uint32_t);
+uint8_t lean_uint8_dec_eq(uint8_t, uint8_t);
 uint32_t lean_uint32_shift_right(uint32_t, uint32_t);
 uint8_t lean_uint32_to_uint8(uint32_t);
 uint8_t lean_uint8_lor(uint8_t, uint8_t);

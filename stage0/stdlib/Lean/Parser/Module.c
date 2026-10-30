@@ -2939,9 +2939,9 @@ return v___x_868_;
 LEAN_EXPORT lean_object* l___private_Lean_Parser_Module_0__Lean_Parser_testParseModuleAux_parse___lam__0___boxed(lean_object* v___x_869_, lean_object* v_msg_870_, lean_object* v___y_871_){
 _start:
 {
-uint8_t v___x_1221__boxed_872_; lean_object* v_res_873_; 
-v___x_1221__boxed_872_ = lean_unbox(v___x_869_);
-v_res_873_ = l___private_Lean_Parser_Module_0__Lean_Parser_testParseModuleAux_parse___lam__0(v___x_1221__boxed_872_, v_msg_870_);
+uint8_t v___x_1217__boxed_872_; lean_object* v_res_873_; 
+v___x_1217__boxed_872_ = lean_unbox(v___x_869_);
+v_res_873_ = l___private_Lean_Parser_Module_0__Lean_Parser_testParseModuleAux_parse___lam__0(v___x_1217__boxed_872_, v_msg_870_);
 return v_res_873_;
 }
 }
@@ -3454,12 +3454,12 @@ return v___x_1029_;
 LEAN_EXPORT lean_object* l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_forFromMAux___at___00Lean_PersistentArray_forM___at___00Lean_MessageLog_forM___at___00__private_Lean_Parser_Module_0__Lean_Parser_testParseModuleAux_parse_spec__1_spec__2_spec__3___boxed(lean_object* v_f_1031_, lean_object* v_x_1032_, lean_object* v_x_1033_, lean_object* v_x_1034_, lean_object* v___y_1035_){
 _start:
 {
-size_t v_x_1377__boxed_1036_; size_t v_x_1378__boxed_1037_; lean_object* v_res_1038_; 
-v_x_1377__boxed_1036_ = lean_unbox_usize(v_x_1033_);
+size_t v_x_1373__boxed_1036_; size_t v_x_1374__boxed_1037_; lean_object* v_res_1038_; 
+v_x_1373__boxed_1036_ = lean_unbox_usize(v_x_1033_);
 lean_dec(v_x_1033_);
-v_x_1378__boxed_1037_ = lean_unbox_usize(v_x_1034_);
+v_x_1374__boxed_1037_ = lean_unbox_usize(v_x_1034_);
 lean_dec(v_x_1034_);
-v_res_1038_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_forFromMAux___at___00Lean_PersistentArray_forM___at___00Lean_MessageLog_forM___at___00__private_Lean_Parser_Module_0__Lean_Parser_testParseModuleAux_parse_spec__1_spec__2_spec__3(v_f_1031_, v_x_1032_, v_x_1377__boxed_1036_, v_x_1378__boxed_1037_);
+v_res_1038_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_forFromMAux___at___00Lean_PersistentArray_forM___at___00Lean_MessageLog_forM___at___00__private_Lean_Parser_Module_0__Lean_Parser_testParseModuleAux_parse_spec__1_spec__2_spec__3(v_f_1031_, v_x_1032_, v_x_1373__boxed_1036_, v_x_1374__boxed_1037_);
 return v_res_1038_;
 }
 }

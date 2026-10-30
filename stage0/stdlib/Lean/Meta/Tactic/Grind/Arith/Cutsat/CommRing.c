@@ -47,6 +47,7 @@ lean_object* l_Lean_Meta_Grind_Arith_CommRing_RingM_getCommRingState___redArg(le
 uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 lean_object* l_outOfBounds___redArg(lean_object*);
 lean_object* l_Lean_PersistentArray_get_x21___redArg(lean_object*, lean_object*, lean_object*);
+uint8_t lean_int_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Meta_Grind_getGeneration___redArg(lean_object*, lean_object*);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 lean_object* l_Lean_Meta_Sym_getIntExpr___redArg(lean_object*);
@@ -916,9 +917,9 @@ return v___x_265_;
 LEAN_EXPORT lean_object* l_Int_Internal_Linear_Poly_normCommRing_x3f___lam__0___boxed(lean_object* v_a_268_, lean_object* v_s_269_){
 _start:
 {
-uint8_t v_a_125066__boxed_270_; lean_object* v_res_271_; 
-v_a_125066__boxed_270_ = lean_unbox(v_a_268_);
-v_res_271_ = l_Int_Internal_Linear_Poly_normCommRing_x3f___lam__0(v_a_125066__boxed_270_, v_s_269_);
+uint8_t v_a_125056__boxed_270_; lean_object* v_res_271_; 
+v_a_125056__boxed_270_ = lean_unbox(v_a_268_);
+v_res_271_ = l_Int_Internal_Linear_Poly_normCommRing_x3f___lam__0(v_a_125056__boxed_270_, v_s_269_);
 return v_res_271_;
 }
 }

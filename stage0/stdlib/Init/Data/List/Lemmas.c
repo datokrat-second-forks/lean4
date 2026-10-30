@@ -1,6 +1,6 @@
 // Lean compiler output
 // Module: Init.Data.List.Lemmas
-// Imports: public import Init.Data.List.BasicAux import all Init.Data.List.BasicAux public import Init.Data.List.Control import all Init.Data.List.Control public import Init.BinderPredicates import Init.Grind.Annotated public import Init.Data.BEq public import Init.Data.Option.Instances import Init.Data.Bool import Init.Data.Option.Lemmas import Init.TacticsExtra
+// Imports: public import Init.Data.List.BasicAux import all Init.Data.List.BasicAux public import Init.Data.List.Control import all Init.Data.List.Control public import Init.BinderPredicates import Init.Grind.Annotated public import Init.Data.BEq public import Init.Data.Option.Instances public import Init.UDecidable import Init.Data.Bool import Init.Data.Option.Lemmas import Init.TacticsExtra
 #include <lean/lean.h>
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -743,6 +743,7 @@ lean_object* runtime_initialize_Init_BinderPredicates(uint8_t builtin);
 lean_object* runtime_initialize_Init_Grind_Annotated(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_BEq(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_Option_Instances(uint8_t builtin);
+lean_object* runtime_initialize_Init_UDecidable(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_Bool(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_Option_Lemmas(uint8_t builtin);
 lean_object* runtime_initialize_Init_TacticsExtra(uint8_t builtin);
@@ -777,6 +778,9 @@ lean_dec_ref(res);
 res = runtime_initialize_Init_Data_Option_Instances(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
+res = runtime_initialize_Init_UDecidable(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
 res = runtime_initialize_Init_Data_Bool(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
@@ -803,6 +807,7 @@ lean_object* initialize_Init_BinderPredicates(uint8_t builtin);
 lean_object* initialize_Init_Grind_Annotated(uint8_t builtin);
 lean_object* initialize_Init_Data_BEq(uint8_t builtin);
 lean_object* initialize_Init_Data_Option_Instances(uint8_t builtin);
+lean_object* initialize_Init_UDecidable(uint8_t builtin);
 lean_object* initialize_Init_Data_Bool(uint8_t builtin);
 lean_object* initialize_Init_Data_Option_Lemmas(uint8_t builtin);
 lean_object* initialize_Init_TacticsExtra(uint8_t builtin);
@@ -833,6 +838,9 @@ res = initialize_Init_Data_BEq(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = initialize_Init_Data_Option_Instances(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
+res = initialize_Init_UDecidable(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = initialize_Init_Data_Bool(builtin);

@@ -59,6 +59,7 @@ uint64_t lean_string_hash(lean_object*);
 lean_object* l_Lean_Name_mkStr2(lean_object*, lean_object*);
 lean_object* l_Lean_registerParametricAttribute___redArg(lean_object*);
 lean_object* l_Lean_ParametricAttribute_getParam_x3f___redArg(lean_object*, lean_object*, lean_object*, lean_object*);
+uint8_t lean_string_dec_eq(lean_object*, lean_object*);
 lean_object* lean_obj_tag_nat(lean_object*);
 LEAN_EXPORT lean_object* l_Lean_ExternEntry_ctorIdx___impl(lean_object*);
 LEAN_EXPORT lean_object* l_Lean_ExternEntry_ctorIdx___impl___boxed(lean_object*);

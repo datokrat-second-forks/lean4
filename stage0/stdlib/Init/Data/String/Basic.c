@@ -31,6 +31,7 @@ uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
 uint8_t lean_byte_array_fget(lean_object*, lean_object*);
 lean_object* lean_byte_array_size(lean_object*);
+uint8_t lean_uint8_dec_eq(uint8_t, uint8_t);
 uint32_t lean_uint8_to_uint32(uint8_t);
 uint32_t lean_uint32_shift_left(uint32_t, uint32_t);
 uint32_t lean_uint32_lor(uint32_t, uint32_t);

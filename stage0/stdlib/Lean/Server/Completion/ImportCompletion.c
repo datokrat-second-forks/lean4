@@ -1158,13 +1158,13 @@ goto _start;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Lsp_ImportCompletion_computePartialImportCompletions_spec__5___boxed(lean_object* v___x_306_, lean_object* v_snd_307_, lean_object* v_as_308_, lean_object* v_i_309_, lean_object* v_stop_310_, lean_object* v_b_311_){
 _start:
 {
-uint8_t v___x_3398__boxed_312_; size_t v_i_boxed_313_; size_t v_stop_boxed_314_; lean_object* v_res_315_; 
-v___x_3398__boxed_312_ = lean_unbox(v___x_306_);
+uint8_t v___x_3394__boxed_312_; size_t v_i_boxed_313_; size_t v_stop_boxed_314_; lean_object* v_res_315_; 
+v___x_3394__boxed_312_ = lean_unbox(v___x_306_);
 v_i_boxed_313_ = lean_unbox_usize(v_i_309_);
 lean_dec(v_i_309_);
 v_stop_boxed_314_ = lean_unbox_usize(v_stop_310_);
 lean_dec(v_stop_310_);
-v_res_315_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Lsp_ImportCompletion_computePartialImportCompletions_spec__5(v___x_3398__boxed_312_, v_snd_307_, v_as_308_, v_i_boxed_313_, v_stop_boxed_314_, v_b_311_);
+v_res_315_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lean_Lsp_ImportCompletion_computePartialImportCompletions_spec__5(v___x_3394__boxed_312_, v_snd_307_, v_as_308_, v_i_boxed_313_, v_stop_boxed_314_, v_b_311_);
 lean_dec_ref(v_as_308_);
 lean_dec_ref(v_snd_307_);
 return v_res_315_;

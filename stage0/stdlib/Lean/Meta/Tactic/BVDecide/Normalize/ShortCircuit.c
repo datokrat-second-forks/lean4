@@ -16,15 +16,15 @@ extern "C" {
 lean_object* l_Lean_Name_mkStr6(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_mkConst(lean_object*, lean_object*);
 lean_object* l___private_Lean_Meta_Basic_0__Lean_Meta_withMVarContextImp(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-lean_object* l_Lean_Name_mkStr2(lean_object*, lean_object*);
-lean_object* l_Lean_Name_mkStr1(lean_object*);
-lean_object* l_Lean_Level_ofNat(lean_object*);
 lean_object* l_Lean_Expr_cleanupAnnotations(lean_object*);
 uint8_t l_Lean_Expr_isApp(lean_object*);
 lean_object* l_Lean_Expr_appFnCleanup___redArg(lean_object*);
+lean_object* l_Lean_Name_mkStr2(lean_object*, lean_object*);
 uint8_t l_Lean_Expr_isConstOf(lean_object*, lean_object*);
+lean_object* l_Lean_Name_mkStr1(lean_object*);
 size_t lean_ptr_addr(lean_object*);
 uint8_t lean_usize_dec_eq(size_t, size_t);
+lean_object* l_Lean_Level_ofNat(lean_object*);
 lean_object* l_Lean_mkApp4(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_Expr_app___override(lean_object*, lean_object*);
 lean_object* l_Lean_mkAppB(lean_object*, lean_object*, lean_object*);
@@ -114,21 +114,23 @@ LEAN_EXPORT lean_object* l_Lean_MVarId_withContext___at___00Lean_Meta_Tactic_BVD
 LEAN_EXPORT lean_object* l_Lean_MVarId_withContext___at___00Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass_spec__0___redArg___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lean_MVarId_withContext___at___00Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass_spec__0(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lean_MVarId_withContext___at___00Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass_spec__0___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-static const lean_closure_object l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0___boxed, .m_arity = 11, .m_num_fixed = 0, .m_objs = {} };
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0(uint8_t, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+static const lean_closure_object l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*1, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0___boxed, .m_arity = 12, .m_num_fixed = 1, .m_objs = {((lean_object*)(((size_t)(0) << 1) | 1))} };
+static const lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___closed__0 = (const lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___closed__0_value;
+static lean_once_cell_t l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___closed__1_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___closed__1;
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+static const lean_closure_object l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___boxed, .m_arity = 12, .m_num_fixed = 0, .m_objs = {} };
 static const lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__0 = (const lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__0_value;
-static const lean_closure_object l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*1, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___boxed, .m_arity = 13, .m_num_fixed = 1, .m_objs = {((lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__0_value)} };
+static const lean_string_object l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 17, .m_capacity = 17, .m_length = 16, .m_data = "shortCircuitPass"};
 static const lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__1 = (const lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__1_value;
-static const lean_string_object l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__2_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 17, .m_capacity = 17, .m_length = 16, .m_data = "shortCircuitPass"};
+static const lean_ctor_object l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__2_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__1_value),LEAN_SCALAR_PTR_LITERAL(45, 197, 199, 240, 107, 41, 97, 28)}};
 static const lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__2 = (const lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__2_value;
-static const lean_ctor_object l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__2_value),LEAN_SCALAR_PTR_LITERAL(45, 197, 199, 240, 107, 41, 97, 28)}};
+static const lean_ctor_object l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 0, .m_other = 2, .m_tag = 0}, .m_objs = {((lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__2_value),((lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__0_value)}};
 static const lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__3 = (const lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__3_value;
-static const lean_ctor_object l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__4_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 0, .m_other = 2, .m_tag = 0}, .m_objs = {((lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__3_value),((lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__1_value)}};
-static const lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__4 = (const lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__4_value;
-LEAN_EXPORT const lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass = (const lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__4_value;
+LEAN_EXPORT const lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass = (const lean_object*)&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___closed__3_value;
 LEAN_EXPORT lean_object* l___private_Lean_Meta_Tactic_BVDecide_Normalize_ShortCircuit_0__Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitProc___lam__0(lean_object* v_x_3_, lean_object* v___y_4_, lean_object* v___y_5_, lean_object* v___y_6_, lean_object* v___y_7_, lean_object* v___y_8_, lean_object* v___y_9_, lean_object* v___y_10_, lean_object* v___y_11_, lean_object* v___y_12_){
 _start:
 {
@@ -1098,21 +1100,26 @@ lean_dec_ref(v___y_361_);
 return v_res_373_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0(lean_object* v_x_374_, lean_object* v___y_375_, lean_object* v___y_376_, lean_object* v___y_377_, lean_object* v___y_378_, lean_object* v___y_379_, lean_object* v___y_380_, lean_object* v___y_381_, lean_object* v___y_382_, lean_object* v___y_383_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0(uint8_t v___x_374_, lean_object* v_x_375_, lean_object* v___y_376_, lean_object* v___y_377_, lean_object* v___y_378_, lean_object* v___y_379_, lean_object* v___y_380_, lean_object* v___y_381_, lean_object* v___y_382_, lean_object* v___y_383_, lean_object* v___y_384_){
 _start:
 {
-lean_object* v___x_385_; lean_object* v___x_386_; 
-v___x_385_ = ((lean_object*)(l___private_Lean_Meta_Tactic_BVDecide_Normalize_ShortCircuit_0__Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitProc___lam__0___closed__0));
-v___x_386_ = lean_alloc_ctor(0, 1, 0);
-lean_ctor_set(v___x_386_, 0, v___x_385_);
-return v___x_386_;
+lean_object* v___x_386_; lean_object* v___x_387_; 
+v___x_386_ = lean_alloc_ctor(0, 0, 2);
+lean_ctor_set_uint8(v___x_386_, 0, v___x_374_);
+lean_ctor_set_uint8(v___x_386_, 1, v___x_374_);
+v___x_387_ = lean_alloc_ctor(0, 1, 0);
+lean_ctor_set(v___x_387_, 0, v___x_386_);
+return v___x_387_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0___boxed(lean_object* v_x_387_, lean_object* v___y_388_, lean_object* v___y_389_, lean_object* v___y_390_, lean_object* v___y_391_, lean_object* v___y_392_, lean_object* v___y_393_, lean_object* v___y_394_, lean_object* v___y_395_, lean_object* v___y_396_, lean_object* v___y_397_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0___boxed(lean_object* v___x_388_, lean_object* v_x_389_, lean_object* v___y_390_, lean_object* v___y_391_, lean_object* v___y_392_, lean_object* v___y_393_, lean_object* v___y_394_, lean_object* v___y_395_, lean_object* v___y_396_, lean_object* v___y_397_, lean_object* v___y_398_, lean_object* v___y_399_){
 _start:
 {
-lean_object* v_res_398_; 
-v_res_398_ = l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0(v_x_387_, v___y_388_, v___y_389_, v___y_390_, v___y_391_, v___y_392_, v___y_393_, v___y_394_, v___y_395_, v___y_396_);
+uint8_t v___x_4302__boxed_400_; lean_object* v_res_401_; 
+v___x_4302__boxed_400_ = lean_unbox(v___x_388_);
+v_res_401_ = l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__0(v___x_4302__boxed_400_, v_x_389_, v___y_390_, v___y_391_, v___y_392_, v___y_393_, v___y_394_, v___y_395_, v___y_396_, v___y_397_, v___y_398_);
+lean_dec(v___y_398_);
+lean_dec_ref(v___y_397_);
 lean_dec(v___y_396_);
 lean_dec_ref(v___y_395_);
 lean_dec(v___y_394_);
@@ -1120,57 +1127,66 @@ lean_dec_ref(v___y_393_);
 lean_dec(v___y_392_);
 lean_dec_ref(v___y_391_);
 lean_dec(v___y_390_);
-lean_dec_ref(v___y_389_);
-lean_dec(v___y_388_);
-lean_dec_ref(v_x_387_);
-return v_res_398_;
+lean_dec_ref(v_x_389_);
+return v_res_401_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1(lean_object* v___f_399_, lean_object* v___y_400_, lean_object* v___y_401_, lean_object* v___y_402_, lean_object* v___y_403_, lean_object* v___y_404_, lean_object* v___y_405_, lean_object* v___y_406_, lean_object* v___y_407_, lean_object* v___y_408_, lean_object* v___y_409_, lean_object* v___y_410_){
+static lean_object* _init_l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___closed__1(void){
 _start:
 {
-lean_object* v_config_412_; lean_object* v_maxSteps_413_; lean_object* v___x_414_; lean_object* v_config_415_; lean_object* v___x_416_; lean_object* v_methods_417_; lean_object* v___x_418_; lean_object* v_target_419_; lean_object* v___x_420_; lean_object* v___x_421_; lean_object* v___x_422_; 
-v_config_412_ = lean_ctor_get(v___y_400_, 0);
-v_maxSteps_413_ = lean_ctor_get(v_config_412_, 1);
-v___x_414_ = lean_unsigned_to_nat(2u);
-lean_inc(v_maxSteps_413_);
-v_config_415_ = lean_alloc_ctor(0, 2, 0);
-lean_ctor_set(v_config_415_, 0, v_maxSteps_413_);
-lean_ctor_set(v_config_415_, 1, v___x_414_);
-v___x_416_ = lean_alloc_closure((void*)(l___private_Lean_Meta_Tactic_BVDecide_Normalize_ShortCircuit_0__Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitProc___boxed), 11, 0);
-v_methods_417_ = lean_alloc_ctor(0, 2, 0);
-lean_ctor_set(v_methods_417_, 0, v___f_399_);
-lean_ctor_set(v_methods_417_, 1, v___x_416_);
-v___x_418_ = lean_st_ref_get(v___y_401_);
-v_target_419_ = lean_ctor_get(v___x_418_, 2);
-lean_inc_ref(v_target_419_);
-lean_dec(v___x_418_);
-v___x_420_ = l_Lean_Meta_Tactic_BVDecide_Normalize_Target_mvarId(v_target_419_);
-lean_dec_ref(v_target_419_);
-v___x_421_ = lean_alloc_closure((void*)(l_Lean_Meta_Tactic_BVDecide_Normalize_PreProcessM_mapSimpHyps___boxed), 14, 2);
-lean_closure_set(v___x_421_, 0, v_methods_417_);
-lean_closure_set(v___x_421_, 1, v_config_415_);
-v___x_422_ = l_Lean_MVarId_withContext___at___00Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass_spec__0___redArg(v___x_420_, v___x_421_, v___y_400_, v___y_401_, v___y_402_, v___y_403_, v___y_404_, v___y_405_, v___y_406_, v___y_407_, v___y_408_, v___y_409_, v___y_410_);
-return v___x_422_;
+lean_object* v___x_405_; lean_object* v___f_406_; lean_object* v_methods_407_; 
+v___x_405_ = lean_alloc_closure((void*)(l___private_Lean_Meta_Tactic_BVDecide_Normalize_ShortCircuit_0__Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitProc___boxed), 11, 0);
+v___f_406_ = ((lean_object*)(l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___closed__0));
+v_methods_407_ = lean_alloc_ctor(0, 2, 0);
+lean_ctor_set(v_methods_407_, 0, v___f_406_);
+lean_ctor_set(v_methods_407_, 1, v___x_405_);
+return v_methods_407_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___boxed(lean_object* v___f_423_, lean_object* v___y_424_, lean_object* v___y_425_, lean_object* v___y_426_, lean_object* v___y_427_, lean_object* v___y_428_, lean_object* v___y_429_, lean_object* v___y_430_, lean_object* v___y_431_, lean_object* v___y_432_, lean_object* v___y_433_, lean_object* v___y_434_, lean_object* v___y_435_){
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1(lean_object* v___y_408_, lean_object* v___y_409_, lean_object* v___y_410_, lean_object* v___y_411_, lean_object* v___y_412_, lean_object* v___y_413_, lean_object* v___y_414_, lean_object* v___y_415_, lean_object* v___y_416_, lean_object* v___y_417_, lean_object* v___y_418_){
 _start:
 {
-lean_object* v_res_436_; 
-v_res_436_ = l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1(v___f_423_, v___y_424_, v___y_425_, v___y_426_, v___y_427_, v___y_428_, v___y_429_, v___y_430_, v___y_431_, v___y_432_, v___y_433_, v___y_434_);
-lean_dec(v___y_434_);
-lean_dec_ref(v___y_433_);
+lean_object* v_config_420_; lean_object* v_maxSteps_421_; lean_object* v___x_422_; uint8_t v___x_423_; lean_object* v_config_424_; lean_object* v_methods_425_; lean_object* v___x_426_; lean_object* v_target_427_; lean_object* v___x_428_; lean_object* v___x_429_; lean_object* v___x_430_; 
+v_config_420_ = lean_ctor_get(v___y_408_, 0);
+v_maxSteps_421_ = lean_ctor_get(v_config_420_, 1);
+v___x_422_ = lean_unsigned_to_nat(2u);
+v___x_423_ = 0;
+lean_inc(v_maxSteps_421_);
+v_config_424_ = lean_alloc_ctor(0, 2, 1);
+lean_ctor_set(v_config_424_, 0, v_maxSteps_421_);
+lean_ctor_set(v_config_424_, 1, v___x_422_);
+lean_ctor_set_uint8(v_config_424_, sizeof(void*)*2, v___x_423_);
+v_methods_425_ = lean_obj_once(&l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___closed__1, &l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___closed__1_once, _init_l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___closed__1);
+v___x_426_ = lean_st_ref_get(v___y_409_);
+v_target_427_ = lean_ctor_get(v___x_426_, 2);
+lean_inc_ref(v_target_427_);
+lean_dec(v___x_426_);
+v___x_428_ = l_Lean_Meta_Tactic_BVDecide_Normalize_Target_mvarId(v_target_427_);
+lean_dec_ref(v_target_427_);
+v___x_429_ = lean_alloc_closure((void*)(l_Lean_Meta_Tactic_BVDecide_Normalize_PreProcessM_mapSimpHyps___boxed), 14, 2);
+lean_closure_set(v___x_429_, 0, v_methods_425_);
+lean_closure_set(v___x_429_, 1, v_config_424_);
+v___x_430_ = l_Lean_MVarId_withContext___at___00Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass_spec__0___redArg(v___x_428_, v___x_429_, v___y_408_, v___y_409_, v___y_410_, v___y_411_, v___y_412_, v___y_413_, v___y_414_, v___y_415_, v___y_416_, v___y_417_, v___y_418_);
+return v___x_430_;
+}
+}
+LEAN_EXPORT lean_object* l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1___boxed(lean_object* v___y_431_, lean_object* v___y_432_, lean_object* v___y_433_, lean_object* v___y_434_, lean_object* v___y_435_, lean_object* v___y_436_, lean_object* v___y_437_, lean_object* v___y_438_, lean_object* v___y_439_, lean_object* v___y_440_, lean_object* v___y_441_, lean_object* v___y_442_){
+_start:
+{
+lean_object* v_res_443_; 
+v_res_443_ = l_Lean_Meta_Tactic_BVDecide_Normalize_shortCircuitPass___lam__1(v___y_431_, v___y_432_, v___y_433_, v___y_434_, v___y_435_, v___y_436_, v___y_437_, v___y_438_, v___y_439_, v___y_440_, v___y_441_);
+lean_dec(v___y_441_);
+lean_dec_ref(v___y_440_);
+lean_dec(v___y_439_);
+lean_dec_ref(v___y_438_);
+lean_dec(v___y_437_);
+lean_dec_ref(v___y_436_);
+lean_dec(v___y_435_);
+lean_dec_ref(v___y_434_);
+lean_dec(v___y_433_);
 lean_dec(v___y_432_);
 lean_dec_ref(v___y_431_);
-lean_dec(v___y_430_);
-lean_dec_ref(v___y_429_);
-lean_dec(v___y_428_);
-lean_dec_ref(v___y_427_);
-lean_dec(v___y_426_);
-lean_dec(v___y_425_);
-lean_dec_ref(v___y_424_);
-return v_res_436_;
+return v_res_443_;
 }
 }
 lean_object* runtime_initialize_Lean_Meta_Tactic_BVDecide_Normalize_Basic(uint8_t builtin);

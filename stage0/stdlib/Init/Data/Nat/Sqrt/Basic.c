@@ -1,6 +1,6 @@
 // Lean compiler output
 // Module: Init.Data.Nat.Sqrt.Basic
-// Imports: public import Init.Prelude public import Init.Data.Nat.Log2 public import Init.Data.Nat.Bitwise.Basic public import Init.WFTactics
+// Imports: public import Init.Prelude public import Init.Data.Nat.Log2 public import Init.Data.Nat.Bitwise.Basic public import Init.WFTactics public import Init.UDecidable
 #include <lean/lean.h>
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -16,7 +16,7 @@ extern "C" {
 lean_object* lean_nat_div(lean_object*, lean_object*);
 lean_object* lean_nat_add(lean_object*, lean_object*);
 lean_object* lean_nat_shiftr(lean_object*, lean_object*);
-uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
+uint8_t l_UDecidable_instNatLt(lean_object*, lean_object*);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 lean_object* lean_nat_log2(lean_object*);
 lean_object* lean_nat_shiftl(lean_object*, lean_object*);
@@ -34,7 +34,7 @@ lean_dec(v___x_3_);
 v___x_5_ = lean_unsigned_to_nat(1u);
 v_next_6_ = lean_nat_shiftr(v___x_4_, v___x_5_);
 lean_dec(v___x_4_);
-v___x_7_ = lean_nat_dec_lt(v_next_6_, v_guess_2_);
+v___x_7_ = l_UDecidable_instNatLt(v_next_6_, v_guess_2_);
 if (v___x_7_ == 0)
 {
 lean_dec(v_next_6_);
@@ -96,6 +96,7 @@ lean_object* runtime_initialize_Init_Prelude(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_Nat_Log2(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_Nat_Bitwise_Basic(uint8_t builtin);
 lean_object* runtime_initialize_Init_WFTactics(uint8_t builtin);
+lean_object* runtime_initialize_Init_UDecidable(uint8_t builtin);
 void lean_initialize_runtime_module();
 static bool _G_runtime_initialized = false;
 LEAN_EXPORT lean_object* runtime_initialize_Init_Data_Nat_Sqrt_Basic(uint8_t builtin) {
@@ -115,6 +116,9 @@ lean_dec_ref(res);
 res = runtime_initialize_Init_WFTactics(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
+res = runtime_initialize_Init_UDecidable(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;
@@ -128,6 +132,7 @@ lean_object* initialize_Init_Prelude(uint8_t builtin);
 lean_object* initialize_Init_Data_Nat_Log2(uint8_t builtin);
 lean_object* initialize_Init_Data_Nat_Bitwise_Basic(uint8_t builtin);
 lean_object* initialize_Init_WFTactics(uint8_t builtin);
+lean_object* initialize_Init_UDecidable(uint8_t builtin);
 static bool _G_initialized = false;
 LEAN_EXPORT lean_object* initialize_Init_Data_Nat_Sqrt_Basic(uint8_t builtin) {
 lean_object * res;
@@ -143,6 +148,9 @@ res = initialize_Init_Data_Nat_Bitwise_Basic(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = initialize_Init_WFTactics(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
+res = initialize_Init_UDecidable(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = runtime_initialize_Init_Data_Nat_Sqrt_Basic(builtin);

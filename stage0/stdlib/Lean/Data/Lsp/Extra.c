@@ -56,6 +56,7 @@ lean_object* l_Lean_Lsp_instToJsonRpcWireFormat_toJson(uint8_t);
 lean_object* l_Lean_Lsp_instFromJsonTextDocumentItem_fromJson(lean_object*);
 lean_object* l_Lean_Lsp_instToJsonTextDocumentItem_toJson(lean_object*);
 lean_object* l_Lean_Name_fromJson_x3f(lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Lean_Lsp_DependencyBuildMode_ctorIdx___impl(uint8_t);
 LEAN_EXPORT lean_object* l_Lean_Lsp_DependencyBuildMode_ctorIdx___impl___boxed(lean_object*);
 LEAN_EXPORT lean_object* l_Lean_Lsp_DependencyBuildMode_ctorElim___redArg(lean_object*);

@@ -17546,10 +17546,10 @@ return v___x_5378_;
 LEAN_EXPORT lean_object* l___private_Lean_Server_FileWorker_WidgetRequests_0__Lean_Widget_highlightMatchesAux___lam__1___boxed(lean_object* v_children_5379_, lean_object* v_indent_5380_, lean_object* v_cls_5381_, lean_object* v_fst_5382_, lean_object* v_collapsed_5383_, lean_object* v_a_5384_, lean_object* v_snd_5385_, lean_object* v_x_5386_){
 _start:
 {
-uint8_t v_collapsed_2340__boxed_5387_; uint8_t v_snd_2341__boxed_5388_; lean_object* v_res_5389_; 
-v_collapsed_2340__boxed_5387_ = lean_unbox(v_collapsed_5383_);
-v_snd_2341__boxed_5388_ = lean_unbox(v_snd_5385_);
-v_res_5389_ = l___private_Lean_Server_FileWorker_WidgetRequests_0__Lean_Widget_highlightMatchesAux___lam__1(v_children_5379_, v_indent_5380_, v_cls_5381_, v_fst_5382_, v_collapsed_2340__boxed_5387_, v_a_5384_, v_snd_2341__boxed_5388_, v_x_5386_);
+uint8_t v_collapsed_2336__boxed_5387_; uint8_t v_snd_2337__boxed_5388_; lean_object* v_res_5389_; 
+v_collapsed_2336__boxed_5387_ = lean_unbox(v_collapsed_5383_);
+v_snd_2337__boxed_5388_ = lean_unbox(v_snd_5385_);
+v_res_5389_ = l___private_Lean_Server_FileWorker_WidgetRequests_0__Lean_Widget_highlightMatchesAux___lam__1(v_children_5379_, v_indent_5380_, v_cls_5381_, v_fst_5382_, v_collapsed_2336__boxed_5387_, v_a_5384_, v_snd_2337__boxed_5388_, v_x_5386_);
 return v_res_5389_;
 }
 }
@@ -17681,13 +17681,13 @@ return v___x_5429_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Server_FileWorker_WidgetRequests_0__Lean_Widget_highlightMatchesAux_spec__4___boxed(lean_object* v___y_5432_, lean_object* v_indent_5433_, lean_object* v_sz_5434_, lean_object* v_i_5435_, lean_object* v_bs_5436_, lean_object* v___y_5437_){
 _start:
 {
-uint8_t v___y_2375__boxed_5438_; size_t v_sz_boxed_5439_; size_t v_i_boxed_5440_; lean_object* v_res_5441_; 
-v___y_2375__boxed_5438_ = lean_unbox(v___y_5432_);
+uint8_t v___y_2371__boxed_5438_; size_t v_sz_boxed_5439_; size_t v_i_boxed_5440_; lean_object* v_res_5441_; 
+v___y_2371__boxed_5438_ = lean_unbox(v___y_5432_);
 v_sz_boxed_5439_ = lean_unbox_usize(v_sz_5434_);
 lean_dec(v_sz_5434_);
 v_i_boxed_5440_ = lean_unbox_usize(v_i_5435_);
 lean_dec(v_i_5435_);
-v_res_5441_ = l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Server_FileWorker_WidgetRequests_0__Lean_Widget_highlightMatchesAux_spec__4(v___y_2375__boxed_5438_, v_indent_5433_, v_sz_boxed_5439_, v_i_boxed_5440_, v_bs_5436_);
+v_res_5441_ = l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___00__private_Lean_Server_FileWorker_WidgetRequests_0__Lean_Widget_highlightMatchesAux_spec__4(v___y_2371__boxed_5438_, v_indent_5433_, v_sz_boxed_5439_, v_i_boxed_5440_, v_bs_5436_);
 return v_res_5441_;
 }
 }

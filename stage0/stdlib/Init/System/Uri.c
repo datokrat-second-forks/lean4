@@ -40,6 +40,7 @@ lean_object* l_String_Slice_Pos_nextn(lean_object*, lean_object*, lean_object*);
 uint32_t lean_string_utf8_get(lean_object*, lean_object*);
 lean_object* lean_string_utf8_set(lean_object*, lean_object*, uint32_t);
 lean_object* lean_array_to_list(lean_object*);
+uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
 lean_object* lean_string_to_utf8(lean_object*);
 lean_object* lean_byte_array_size(lean_object*);
 extern lean_object* l_ByteArray_empty;

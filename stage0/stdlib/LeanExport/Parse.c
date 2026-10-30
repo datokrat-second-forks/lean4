@@ -28,6 +28,7 @@ size_t lean_usize_of_nat(lean_object*);
 size_t lean_usize_sub(size_t, size_t);
 size_t lean_usize_land(size_t, size_t);
 lean_object* lean_array_uget_borrowed(lean_object*, size_t);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* l_Nat_reprFast(lean_object*);
 lean_object* lean_string_append(lean_object*, lean_object*);
 lean_object* l_UInt64_ofNat___boxed(lean_object*);
@@ -9013,8 +9014,8 @@ goto v___jp_2080_;
 }
 else
 {
-lean_dec(v_head_2086_);
 lean_dec_ref_known(v_x_2076_, 2);
+lean_dec(v_head_2086_);
 lean_dec_ref(v___y_2078_);
 lean_dec(v_x_2077_);
 goto v___jp_2080_;

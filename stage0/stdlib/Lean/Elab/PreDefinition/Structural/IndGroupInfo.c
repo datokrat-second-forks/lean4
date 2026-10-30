@@ -1524,10 +1524,10 @@ return v___x_466_;
 LEAN_EXPORT lean_object* l_Lean_Elab_Structural_IndGroupInst_isDefEq___lam__0___boxed(lean_object* v___x_467_, lean_object* v_____do__lift_468_, lean_object* v___y_469_, lean_object* v___y_470_, lean_object* v___y_471_, lean_object* v___y_472_, lean_object* v___y_473_){
 _start:
 {
-uint8_t v___x_1781__boxed_474_; uint8_t v_____do__lift_1782__boxed_475_; lean_object* v_res_476_; 
-v___x_1781__boxed_474_ = lean_unbox(v___x_467_);
-v_____do__lift_1782__boxed_475_ = lean_unbox(v_____do__lift_468_);
-v_res_476_ = l_Lean_Elab_Structural_IndGroupInst_isDefEq___lam__0(v___x_1781__boxed_474_, v_____do__lift_1782__boxed_475_, v___y_469_, v___y_470_, v___y_471_, v___y_472_);
+uint8_t v___x_1779__boxed_474_; uint8_t v_____do__lift_1780__boxed_475_; lean_object* v_res_476_; 
+v___x_1779__boxed_474_ = lean_unbox(v___x_467_);
+v_____do__lift_1780__boxed_475_ = lean_unbox(v_____do__lift_468_);
+v_res_476_ = l_Lean_Elab_Structural_IndGroupInst_isDefEq___lam__0(v___x_1779__boxed_474_, v_____do__lift_1780__boxed_475_, v___y_469_, v___y_470_, v___y_471_, v___y_472_);
 lean_dec(v___y_472_);
 lean_dec_ref(v___y_471_);
 lean_dec(v___y_470_);

@@ -21,6 +21,7 @@ lean_object* lean_uint32_to_nat(uint32_t);
 uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 uint8_t lean_uint8_dec_lt(uint8_t, uint8_t);
+uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
 LEAN_EXPORT uint8_t l_Std_Http_Internal_Char_isAscii(uint32_t);
 LEAN_EXPORT lean_object* l_Std_Http_Internal_Char_isAscii___boxed(lean_object*);
 LEAN_EXPORT uint8_t l_Std_Http_Internal_Char_isAsciiByte(uint8_t);
@@ -794,10 +795,10 @@ return v___x_177_;
 LEAN_EXPORT lean_object* l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_qdtext_match__1_splitter___redArg___boxed(lean_object* v_c_178_, lean_object* v_h__1_179_, lean_object* v_h__2_180_, lean_object* v_h__3_181_, lean_object* v_h__4_182_){
 _start:
 {
-uint32_t v_c_73__boxed_183_; lean_object* v_res_184_; 
-v_c_73__boxed_183_ = lean_unbox_uint32(v_c_178_);
+uint32_t v_c_43__boxed_183_; lean_object* v_res_184_; 
+v_c_43__boxed_183_ = lean_unbox_uint32(v_c_178_);
 lean_dec(v_c_178_);
-v_res_184_ = l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_qdtext_match__1_splitter___redArg(v_c_73__boxed_183_, v_h__1_179_, v_h__2_180_, v_h__3_181_, v_h__4_182_);
+v_res_184_ = l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_qdtext_match__1_splitter___redArg(v_c_43__boxed_183_, v_h__1_179_, v_h__2_180_, v_h__3_181_, v_h__4_182_);
 return v_res_184_;
 }
 }
@@ -861,10 +862,10 @@ return v___x_204_;
 LEAN_EXPORT lean_object* l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_qdtext_match__1_splitter___boxed(lean_object* v_motive_205_, lean_object* v_c_206_, lean_object* v_h__1_207_, lean_object* v_h__2_208_, lean_object* v_h__3_209_, lean_object* v_h__4_210_){
 _start:
 {
-uint32_t v_c_104__boxed_211_; lean_object* v_res_212_; 
-v_c_104__boxed_211_ = lean_unbox_uint32(v_c_206_);
+uint32_t v_c_74__boxed_211_; lean_object* v_res_212_; 
+v_c_74__boxed_211_ = lean_unbox_uint32(v_c_206_);
 lean_dec(v_c_206_);
-v_res_212_ = l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_qdtext_match__1_splitter(v_motive_205_, v_c_104__boxed_211_, v_h__1_207_, v_h__2_208_, v_h__3_209_, v_h__4_210_);
+v_res_212_ = l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_qdtext_match__1_splitter(v_motive_205_, v_c_74__boxed_211_, v_h__1_207_, v_h__2_208_, v_h__3_209_, v_h__4_210_);
 return v_res_212_;
 }
 }
@@ -911,10 +912,10 @@ return v___x_226_;
 LEAN_EXPORT lean_object* l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_quotedPairChar_match__1_splitter___redArg___boxed(lean_object* v_c_227_, lean_object* v_h__1_228_, lean_object* v_h__2_229_, lean_object* v_h__3_230_){
 _start:
 {
-uint32_t v_c_51__boxed_231_; lean_object* v_res_232_; 
-v_c_51__boxed_231_ = lean_unbox_uint32(v_c_227_);
+uint32_t v_c_31__boxed_231_; lean_object* v_res_232_; 
+v_c_31__boxed_231_ = lean_unbox_uint32(v_c_227_);
 lean_dec(v_c_227_);
-v_res_232_ = l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_quotedPairChar_match__1_splitter___redArg(v_c_51__boxed_231_, v_h__1_228_, v_h__2_229_, v_h__3_230_);
+v_res_232_ = l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_quotedPairChar_match__1_splitter___redArg(v_c_31__boxed_231_, v_h__1_228_, v_h__2_229_, v_h__3_230_);
 return v_res_232_;
 }
 }
@@ -961,10 +962,10 @@ return v___x_247_;
 LEAN_EXPORT lean_object* l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_quotedPairChar_match__1_splitter___boxed(lean_object* v_motive_248_, lean_object* v_c_249_, lean_object* v_h__1_250_, lean_object* v_h__2_251_, lean_object* v_h__3_252_){
 _start:
 {
-uint32_t v_c_74__boxed_253_; lean_object* v_res_254_; 
-v_c_74__boxed_253_ = lean_unbox_uint32(v_c_249_);
+uint32_t v_c_54__boxed_253_; lean_object* v_res_254_; 
+v_c_54__boxed_253_ = lean_unbox_uint32(v_c_249_);
 lean_dec(v_c_249_);
-v_res_254_ = l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_quotedPairChar_match__1_splitter(v_motive_248_, v_c_74__boxed_253_, v_h__1_250_, v_h__2_251_, v_h__3_252_);
+v_res_254_ = l___private_Std_Http_Internal_Char_0__Std_Http_Internal_Char_quotedPairChar_match__1_splitter(v_motive_248_, v_c_54__boxed_253_, v_h__1_250_, v_h__2_251_, v_h__3_252_);
 return v_res_254_;
 }
 }

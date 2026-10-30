@@ -3366,14 +3366,14 @@ return v_b_991_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lake_MainM_liftLogIO_spec__0___boxed(lean_object* v_val_999_, lean_object* v___y_1000_, lean_object* v_val_1001_, lean_object* v_as_1002_, lean_object* v_i_1003_, lean_object* v_stop_1004_, lean_object* v_b_1005_, lean_object* v___y_1006_){
 _start:
 {
-uint8_t v___y_244__boxed_1007_; uint8_t v_val_245__boxed_1008_; size_t v_i_boxed_1009_; size_t v_stop_boxed_1010_; lean_object* v_res_1011_; 
-v___y_244__boxed_1007_ = lean_unbox(v___y_1000_);
-v_val_245__boxed_1008_ = lean_unbox(v_val_1001_);
+uint8_t v___y_242__boxed_1007_; uint8_t v_val_243__boxed_1008_; size_t v_i_boxed_1009_; size_t v_stop_boxed_1010_; lean_object* v_res_1011_; 
+v___y_242__boxed_1007_ = lean_unbox(v___y_1000_);
+v_val_243__boxed_1008_ = lean_unbox(v_val_1001_);
 v_i_boxed_1009_ = lean_unbox_usize(v_i_1003_);
 lean_dec(v_i_1003_);
 v_stop_boxed_1010_ = lean_unbox_usize(v_stop_1004_);
 lean_dec(v_stop_1004_);
-v_res_1011_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lake_MainM_liftLogIO_spec__0(v_val_999_, v___y_244__boxed_1007_, v_val_245__boxed_1008_, v_as_1002_, v_i_boxed_1009_, v_stop_boxed_1010_, v_b_1005_);
+v_res_1011_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00Lake_MainM_liftLogIO_spec__0(v_val_999_, v___y_242__boxed_1007_, v_val_243__boxed_1008_, v_as_1002_, v_i_boxed_1009_, v_stop_boxed_1010_, v_b_1005_);
 lean_dec_ref(v_as_1002_);
 return v_res_1011_;
 }

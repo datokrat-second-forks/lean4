@@ -26,6 +26,7 @@ lean_object* lean_array_uget_borrowed(lean_object*, size_t);
 lean_object* l_Lean_Lsp_instFromJsonRange_fromJson(lean_object*);
 lean_object* l_Lean_Json_pretty(lean_object*, lean_object*);
 lean_object* l_Lean_Json_getNat_x3f(lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Json_getBool_x3f(lean_object*);
 lean_object* l_Lean_Json_getStr_x3f(lean_object*);
 lean_object* lean_array_uset(lean_object*, size_t, lean_object*);

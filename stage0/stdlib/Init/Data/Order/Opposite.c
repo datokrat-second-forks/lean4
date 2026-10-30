@@ -1,6 +1,6 @@
 // Lean compiler output
 // Module: Init.Data.Order.Opposite
-// Imports: public import Init.Data.Order.ClassesExtra public import Init.Data.Order.Classes import Init.Data.Order.FactoriesExtra import Init.Data.Order.Lemmas
+// Imports: public import Init.Data.Order.ClassesExtra public import Init.Data.Order.Classes import Init.Data.Order.FactoriesExtra import Init.Data.Order.Lemmas public import Init.UDecidable
 #include <lean/lean.h>
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -33,6 +33,14 @@ LEAN_EXPORT uint8_t l_Std_OppositeOrderInstances_instDecidableLTOpposite___redAr
 LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instDecidableLTOpposite___redArg___boxed(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT uint8_t l_Std_OppositeOrderInstances_instDecidableLTOpposite(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instDecidableLTOpposite___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_Std_OppositeOrderInstances_instUDecidableLEOpposite___redArg(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instUDecidableLEOpposite___redArg___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_Std_OppositeOrderInstances_instUDecidableLEOpposite(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instUDecidableLEOpposite___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_Std_OppositeOrderInstances_instUDecidableLTOpposite___redArg(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instUDecidableLTOpposite___redArg___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_Std_OppositeOrderInstances_instUDecidableLTOpposite(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instUDecidableLTOpposite___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instLETransOpposite___redArg();
 LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instLETransOpposite___redArg___boxed(lean_object*);
 LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instLETransOpposite(lean_object*, lean_object*, lean_object*);
@@ -208,34 +216,107 @@ v_r_80_ = lean_box(v_res_79_);
 return v_r_80_;
 }
 }
+LEAN_EXPORT uint8_t l_Std_OppositeOrderInstances_instUDecidableLEOpposite___redArg(lean_object* v_id_81_, lean_object* v_a_82_, lean_object* v_b_83_){
+_start:
+{
+lean_object* v___x_84_; uint8_t v___x_85_; 
+v___x_84_ = lean_apply_2(v_id_81_, v_b_83_, v_a_82_);
+v___x_85_ = lean_unbox(v___x_84_);
+return v___x_85_;
+}
+}
+LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instUDecidableLEOpposite___redArg___boxed(lean_object* v_id_86_, lean_object* v_a_87_, lean_object* v_b_88_){
+_start:
+{
+uint8_t v_res_89_; lean_object* v_r_90_; 
+v_res_89_ = l_Std_OppositeOrderInstances_instUDecidableLEOpposite___redArg(v_id_86_, v_a_87_, v_b_88_);
+v_r_90_ = lean_box(v_res_89_);
+return v_r_90_;
+}
+}
+LEAN_EXPORT uint8_t l_Std_OppositeOrderInstances_instUDecidableLEOpposite(lean_object* v_00_u03b1_91_, lean_object* v_i_92_, lean_object* v_id_93_, lean_object* v_a_94_, lean_object* v_b_95_){
+_start:
+{
+lean_object* v___x_96_; uint8_t v___x_97_; 
+v___x_96_ = lean_apply_2(v_id_93_, v_b_95_, v_a_94_);
+v___x_97_ = lean_unbox(v___x_96_);
+return v___x_97_;
+}
+}
+LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instUDecidableLEOpposite___boxed(lean_object* v_00_u03b1_98_, lean_object* v_i_99_, lean_object* v_id_100_, lean_object* v_a_101_, lean_object* v_b_102_){
+_start:
+{
+uint8_t v_res_103_; lean_object* v_r_104_; 
+v_res_103_ = l_Std_OppositeOrderInstances_instUDecidableLEOpposite(v_00_u03b1_98_, v_i_99_, v_id_100_, v_a_101_, v_b_102_);
+v_r_104_ = lean_box(v_res_103_);
+return v_r_104_;
+}
+}
+LEAN_EXPORT uint8_t l_Std_OppositeOrderInstances_instUDecidableLTOpposite___redArg(lean_object* v_id_105_, lean_object* v_a_106_, lean_object* v_b_107_){
+_start:
+{
+lean_object* v___x_108_; uint8_t v___x_109_; 
+v___x_108_ = lean_apply_2(v_id_105_, v_b_107_, v_a_106_);
+v___x_109_ = lean_unbox(v___x_108_);
+return v___x_109_;
+}
+}
+LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instUDecidableLTOpposite___redArg___boxed(lean_object* v_id_110_, lean_object* v_a_111_, lean_object* v_b_112_){
+_start:
+{
+uint8_t v_res_113_; lean_object* v_r_114_; 
+v_res_113_ = l_Std_OppositeOrderInstances_instUDecidableLTOpposite___redArg(v_id_110_, v_a_111_, v_b_112_);
+v_r_114_ = lean_box(v_res_113_);
+return v_r_114_;
+}
+}
+LEAN_EXPORT uint8_t l_Std_OppositeOrderInstances_instUDecidableLTOpposite(lean_object* v_00_u03b1_115_, lean_object* v_i_116_, lean_object* v_id_117_, lean_object* v_a_118_, lean_object* v_b_119_){
+_start:
+{
+lean_object* v___x_120_; uint8_t v___x_121_; 
+v___x_120_ = lean_apply_2(v_id_117_, v_b_119_, v_a_118_);
+v___x_121_ = lean_unbox(v___x_120_);
+return v___x_121_;
+}
+}
+LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instUDecidableLTOpposite___boxed(lean_object* v_00_u03b1_122_, lean_object* v_i_123_, lean_object* v_id_124_, lean_object* v_a_125_, lean_object* v_b_126_){
+_start:
+{
+uint8_t v_res_127_; lean_object* v_r_128_; 
+v_res_127_ = l_Std_OppositeOrderInstances_instUDecidableLTOpposite(v_00_u03b1_122_, v_i_123_, v_id_124_, v_a_125_, v_b_126_);
+v_r_128_ = lean_box(v_res_127_);
+return v_r_128_;
+}
+}
 LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instLETransOpposite___redArg(){
 _start:
 {
-lean_object* v___x_82_; 
-v___x_82_ = lean_box(0);
-return v___x_82_;
+lean_object* v___x_130_; 
+v___x_130_ = lean_box(0);
+return v___x_130_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instLETransOpposite___redArg___boxed(lean_object* v___dummy_83_){
+LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instLETransOpposite___redArg___boxed(lean_object* v___dummy_131_){
 _start:
 {
-lean_object* v_res_84_; 
-v_res_84_ = l_Std_OppositeOrderInstances_instLETransOpposite___redArg();
-return v_res_84_;
+lean_object* v_res_132_; 
+v_res_132_ = l_Std_OppositeOrderInstances_instLETransOpposite___redArg();
+return v_res_132_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instLETransOpposite(lean_object* v_00_u03b1_85_, lean_object* v_i_86_, lean_object* v_inst_87_){
+LEAN_EXPORT lean_object* l_Std_OppositeOrderInstances_instLETransOpposite(lean_object* v_00_u03b1_133_, lean_object* v_i_134_, lean_object* v_inst_135_){
 _start:
 {
-lean_object* v___x_88_; 
-v___x_88_ = lean_box(0);
-return v___x_88_;
+lean_object* v___x_136_; 
+v___x_136_ = lean_box(0);
+return v___x_136_;
 }
 }
 lean_object* runtime_initialize_Init_Data_Order_ClassesExtra(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_Order_Classes(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_Order_FactoriesExtra(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_Order_Lemmas(uint8_t builtin);
+lean_object* runtime_initialize_Init_UDecidable(uint8_t builtin);
 void lean_initialize_runtime_module();
 static bool _G_runtime_initialized = false;
 LEAN_EXPORT lean_object* runtime_initialize_Init_Data_Order_Opposite(uint8_t builtin) {
@@ -255,6 +336,9 @@ lean_dec_ref(res);
 res = runtime_initialize_Init_Data_Order_Lemmas(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
+res = runtime_initialize_Init_UDecidable(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
 return lean_io_result_mk_ok(lean_box(0));
 }
 static bool _G_meta_initialized = false;
@@ -268,6 +352,7 @@ lean_object* initialize_Init_Data_Order_ClassesExtra(uint8_t builtin);
 lean_object* initialize_Init_Data_Order_Classes(uint8_t builtin);
 lean_object* initialize_Init_Data_Order_FactoriesExtra(uint8_t builtin);
 lean_object* initialize_Init_Data_Order_Lemmas(uint8_t builtin);
+lean_object* initialize_Init_UDecidable(uint8_t builtin);
 static bool _G_initialized = false;
 LEAN_EXPORT lean_object* initialize_Init_Data_Order_Opposite(uint8_t builtin) {
 lean_object * res;
@@ -283,6 +368,9 @@ res = initialize_Init_Data_Order_FactoriesExtra(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = initialize_Init_Data_Order_Lemmas(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
+res = initialize_Init_UDecidable(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = runtime_initialize_Init_Data_Order_Opposite(builtin);

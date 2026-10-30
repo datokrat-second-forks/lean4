@@ -77,6 +77,7 @@ uint8_t lean_usize_dec_lt(size_t, size_t);
 size_t lean_usize_add(size_t, size_t);
 lean_object* lean_array_fswap(lean_object*, lean_object*, lean_object*);
 lean_object* lean_nat_shiftr(lean_object*, lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* lean_nat_sub(lean_object*, lean_object*);
 lean_object* lean_mk_empty_array_with_capacity(lean_object*);
 uint8_t lean_usize_dec_eq(size_t, size_t);
@@ -1833,8 +1834,8 @@ return v___x_648_;
 else
 {
 lean_object* v___x_649_; 
-lean_dec_ref_known(v_fst_629_, 2);
 lean_dec(v_pre_630_);
+lean_dec_ref_known(v_fst_629_, 2);
 lean_dec_ref(v___x_628_);
 v___x_649_ = l_Lean_Expr_nat_x3f(v_n_627_);
 lean_dec_ref(v_n_627_);
@@ -2370,8 +2371,8 @@ return v___x_798_;
 else
 {
 lean_object* v___x_799_; 
-lean_dec(v_pre_705_);
 lean_dec_ref_known(v_fst_704_, 2);
+lean_dec(v_pre_705_);
 lean_dec_ref(v___x_703_);
 v___x_799_ = l_Lean_Expr_nat_x3f(v_e_702_);
 lean_dec_ref(v_e_702_);
@@ -5574,8 +5575,8 @@ return v___x_1728_;
 else
 {
 lean_object* v___x_1729_; 
-lean_dec(v_pre_1691_);
 lean_dec_ref_known(v_fst_1690_, 2);
+lean_dec(v_pre_1691_);
 lean_dec_ref(v___x_1689_);
 lean_del_object(v___x_1236_);
 v___x_1729_ = lean_alloc_ctor(0, 1, 0);

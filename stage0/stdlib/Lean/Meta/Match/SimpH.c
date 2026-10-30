@@ -3640,9 +3640,9 @@ return v___x_1087_;
 LEAN_EXPORT lean_object* l_Lean_Meta_Match_simpH___lam__1___boxed(lean_object* v_snd_1104_, lean_object* v___x_1105_, lean_object* v___x_1106_, lean_object* v___x_1107_, lean_object* v_a_1108_, lean_object* v___x_1109_, lean_object* v___y_1110_, lean_object* v___y_1111_, lean_object* v___y_1112_, lean_object* v___y_1113_, lean_object* v___y_1114_){
 _start:
 {
-uint8_t v___x_6298__boxed_1115_; lean_object* v_res_1116_; 
-v___x_6298__boxed_1115_ = lean_unbox(v___x_1105_);
-v_res_1116_ = l_Lean_Meta_Match_simpH___lam__1(v_snd_1104_, v___x_6298__boxed_1115_, v___x_1106_, v___x_1107_, v_a_1108_, v___x_1109_, v___y_1110_, v___y_1111_, v___y_1112_, v___y_1113_);
+uint8_t v___x_6296__boxed_1115_; lean_object* v_res_1116_; 
+v___x_6296__boxed_1115_ = lean_unbox(v___x_1105_);
+v_res_1116_ = l_Lean_Meta_Match_simpH___lam__1(v_snd_1104_, v___x_6296__boxed_1115_, v___x_1106_, v___x_1107_, v_a_1108_, v___x_1109_, v___y_1110_, v___y_1111_, v___y_1112_, v___y_1113_);
 lean_dec(v___y_1113_);
 lean_dec_ref(v___y_1112_);
 lean_dec(v___y_1111_);
@@ -3781,9 +3781,9 @@ return v___x_1151_;
 LEAN_EXPORT lean_object* l_Lean_Meta_Match_simpH___lam__2___boxed(lean_object* v_mvarId_1154_, lean_object* v___x_1155_, lean_object* v___x_1156_, lean_object* v_xs_1157_, lean_object* v___y_1158_, lean_object* v___y_1159_, lean_object* v___y_1160_, lean_object* v___y_1161_, lean_object* v___y_1162_){
 _start:
 {
-uint8_t v___x_6397__boxed_1163_; lean_object* v_res_1164_; 
-v___x_6397__boxed_1163_ = lean_unbox(v___x_1156_);
-v_res_1164_ = l_Lean_Meta_Match_simpH___lam__2(v_mvarId_1154_, v___x_1155_, v___x_6397__boxed_1163_, v_xs_1157_, v___y_1158_, v___y_1159_, v___y_1160_, v___y_1161_);
+uint8_t v___x_6395__boxed_1163_; lean_object* v_res_1164_; 
+v___x_6395__boxed_1163_ = lean_unbox(v___x_1156_);
+v_res_1164_ = l_Lean_Meta_Match_simpH___lam__2(v_mvarId_1154_, v___x_1155_, v___x_6395__boxed_1163_, v_xs_1157_, v___y_1158_, v___y_1159_, v___y_1160_, v___y_1161_);
 lean_dec(v___y_1161_);
 lean_dec_ref(v___y_1160_);
 lean_dec(v___y_1159_);

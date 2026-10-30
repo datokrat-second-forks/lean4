@@ -38,9 +38,11 @@ lean_object* lean_string_utf8_byte_size(lean_object*);
 uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 lean_object* lean_string_append(lean_object*, lean_object*);
 uint8_t lean_string_any(lean_object*, lean_object*);
+uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
 lean_object* lean_substring_drop(lean_object*, lean_object*);
 uint8_t lean_substring_all(lean_object*, lean_object*);
 uint8_t lean_string_get_byte_fast(lean_object*, lean_object*);
+uint8_t lean_uint8_dec_eq(uint8_t, uint8_t);
 uint8_t lean_uint8_dec_eq(uint8_t, uint8_t);
 uint8_t lean_uint8_dec_le(uint8_t, uint8_t);
 lean_object* l_Nat_reprFast(lean_object*);
@@ -50,6 +52,7 @@ uint8_t l_Lean_Name_hasMacroScopes(lean_object*);
 uint8_t lean_string_isprefixof(lean_object*, lean_object*);
 lean_object* lean_mk_empty_array_with_capacity(lean_object*);
 lean_object* lean_array_push(lean_object*, lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Name_mkStr4(lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* lean_nat_mod(lean_object*, lean_object*);
 lean_object* l_Lean_Name_mkStr3(lean_object*, lean_object*, lean_object*);
@@ -91,6 +94,7 @@ lean_object* l_panic___at___00__private_Init_Prelude_0__Lean_assembleParts_spec_
 lean_object* lean_string_drop(lean_object*, lean_object*);
 lean_object* lean_string_dropright(lean_object*, lean_object*);
 lean_object* l_Lean_Syntax_getArg(lean_object*, lean_object*);
+uint8_t lean_string_dec_eq(lean_object*, lean_object*);
 lean_object* lean_array_fget(lean_object*, lean_object*);
 uint8_t lean_substring_beq(lean_object*, lean_object*);
 lean_object* l_Id_instMonad___lam__6(lean_object*, lean_object*, lean_object*, lean_object*);
@@ -18192,8 +18196,8 @@ return v___x_5354_;
 else
 {
 lean_object* v___x_5355_; 
-lean_dec_ref_known(v___x_5320_, 3);
 lean_dec(v_kind_5321_);
+lean_dec_ref_known(v___x_5320_, 3);
 v___x_5355_ = ((lean_object*)(l_Lean_versionString___closed__0));
 return v___x_5355_;
 }

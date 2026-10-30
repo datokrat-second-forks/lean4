@@ -447,7 +447,7 @@ else
 {
 lean_object* v_info_29_; uint8_t v_isInstance_30_; uint8_t v___y_32_; 
 v_info_29_ = lean_array_fget_borrowed(v_infos_20_, v_i_19_);
-v_isInstance_30_ = lean_ctor_get_uint8(v_info_29_, sizeof(void*)*1 + 4);
+v_isInstance_30_ = lean_ctor_get_uint8(v_info_29_, sizeof(void*)*1 + 5);
 if (v_isInstance_30_ == 0)
 {
 uint8_t v___x_48_; 
@@ -8687,9 +8687,9 @@ return v___x_2851_;
 LEAN_EXPORT lean_object* l_Lean_Meta_DiscrTree_getUnify___redArg___lam__1___boxed(lean_object* v_e_2854_, lean_object* v___x_2855_, lean_object* v___f_2856_, lean_object* v_d_2857_, lean_object* v___y_2858_, lean_object* v___y_2859_, lean_object* v___y_2860_, lean_object* v___y_2861_, lean_object* v___y_2862_){
 _start:
 {
-uint8_t v___x_1515__boxed_2863_; lean_object* v_res_2864_; 
-v___x_1515__boxed_2863_ = lean_unbox(v___x_2855_);
-v_res_2864_ = l_Lean_Meta_DiscrTree_getUnify___redArg___lam__1(v_e_2854_, v___x_1515__boxed_2863_, v___f_2856_, v_d_2857_, v___y_2858_, v___y_2859_, v___y_2860_, v___y_2861_);
+uint8_t v___x_1513__boxed_2863_; lean_object* v_res_2864_; 
+v___x_1513__boxed_2863_ = lean_unbox(v___x_2855_);
+v_res_2864_ = l_Lean_Meta_DiscrTree_getUnify___redArg___lam__1(v_e_2854_, v___x_1513__boxed_2863_, v___f_2856_, v_d_2857_, v___y_2858_, v___y_2859_, v___y_2860_, v___y_2861_);
 lean_dec(v___y_2861_);
 lean_dec_ref(v___y_2860_);
 lean_dec(v___y_2859_);

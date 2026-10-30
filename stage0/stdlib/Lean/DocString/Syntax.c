@@ -37,6 +37,7 @@ lean_object* l_Lean_Parser_atomic(lean_object*);
 lean_object* l_Lean_Parser_many(lean_object*);
 lean_object* l_Lean_Parser_SyntaxStack_back(lean_object*);
 lean_object* lean_array_get_size(lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* lean_array_fget_borrowed(lean_object*, lean_object*);
 lean_object* lean_string_length(lean_object*);
 lean_object* lean_nat_sub(lean_object*, lean_object*);

@@ -154,6 +154,7 @@ lean_object* l_Lean_Compiler_LCNF_getBinderName(lean_object*, lean_object*, lean
 lean_object* l_Lean_Name_getPrefix(lean_object*);
 lean_object* l_Lean_Compiler_LCNF_findFunDecl_x3f___redArg(uint8_t, lean_object*, lean_object*);
 lean_object* l_Lean_Compiler_LCNF_findLetValue_x3f___redArg(uint8_t, lean_object*, lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Compiler_LCNF_eraseLetDecl___redArg(uint8_t, lean_object*, lean_object*);
 lean_object* l_Lean_Compiler_LCNF_replaceExprFVars___redArg(uint8_t, lean_object*, lean_object*, uint8_t);
 lean_object* l_Lean_Compiler_LCNF_mkAuxParam(uint8_t, lean_object*, uint8_t, lean_object*, lean_object*, lean_object*, lean_object*);
@@ -3446,9 +3447,9 @@ goto v___jp_594_;
 v___jp_573_:
 {
 lean_object* v___x_577_; lean_object* v___x_579_; 
-v___x_577_ = lean_nat_add(v___y_575_, v___y_576_);
+v___x_577_ = lean_nat_add(v___y_574_, v___y_576_);
 lean_dec(v___y_576_);
-lean_dec(v___y_575_);
+lean_dec(v___y_574_);
 lean_inc_ref(v_tree_544_);
 if (v_isShared_570_ == 0)
 {
@@ -3506,7 +3507,7 @@ lean_object* v___x_584_;
 if (v_isShared_582_ == 0)
 {
 lean_ctor_set(v___x_581_, 4, v___x_579_);
-lean_ctor_set(v___x_581_, 3, v___y_574_);
+lean_ctor_set(v___x_581_, 3, v___y_575_);
 lean_ctor_set(v___x_581_, 2, v_v_562_);
 lean_ctor_set(v___x_581_, 1, v_k_561_);
 lean_ctor_set(v___x_581_, 0, v___x_572_);
@@ -3520,7 +3521,7 @@ v_reuseFailAlloc_585_ = lean_alloc_ctor(0, 5, 0);
 lean_ctor_set(v_reuseFailAlloc_585_, 0, v___x_572_);
 lean_ctor_set(v_reuseFailAlloc_585_, 1, v_k_561_);
 lean_ctor_set(v_reuseFailAlloc_585_, 2, v_v_562_);
-lean_ctor_set(v_reuseFailAlloc_585_, 3, v___y_574_);
+lean_ctor_set(v_reuseFailAlloc_585_, 3, v___y_575_);
 lean_ctor_set(v_reuseFailAlloc_585_, 4, v___x_579_);
 v___x_584_ = v_reuseFailAlloc_585_;
 goto v_reusejp_583_;
@@ -3569,8 +3570,8 @@ if (lean_obj_tag(v_r_564_) == 0)
 lean_object* v_size_600_; 
 v_size_600_ = lean_ctor_get(v_r_564_, 0);
 lean_inc(v_size_600_);
-v___y_574_ = v___x_598_;
-v___y_575_ = v___x_599_;
+v___y_574_ = v___x_599_;
+v___y_575_ = v___x_598_;
 v___y_576_ = v_size_600_;
 goto v___jp_573_;
 }
@@ -3578,8 +3579,8 @@ else
 {
 lean_object* v___x_601_; 
 v___x_601_ = lean_unsigned_to_nat(0u);
-v___y_574_ = v___x_598_;
-v___y_575_ = v___x_599_;
+v___y_574_ = v___x_599_;
+v___y_575_ = v___x_598_;
 v___y_576_ = v___x_601_;
 goto v___jp_573_;
 }
@@ -4167,9 +4168,9 @@ goto v___jp_743_;
 v___jp_731_:
 {
 lean_object* v___x_735_; lean_object* v___x_737_; 
-v___x_735_ = lean_nat_add(v___y_732_, v___y_734_);
+v___x_735_ = lean_nat_add(v___y_733_, v___y_734_);
 lean_dec(v___y_734_);
-lean_dec(v___y_732_);
+lean_dec(v___y_733_);
 if (v_isShared_728_ == 0)
 {
 lean_ctor_set(v___x_727_, 4, v_impl_698_);
@@ -4198,7 +4199,7 @@ lean_object* v___x_739_;
 if (v_isShared_716_ == 0)
 {
 lean_ctor_set(v___x_715_, 4, v___x_737_);
-lean_ctor_set(v___x_715_, 3, v___y_733_);
+lean_ctor_set(v___x_715_, 3, v___y_732_);
 lean_ctor_set(v___x_715_, 2, v_v_720_);
 lean_ctor_set(v___x_715_, 1, v_k_719_);
 lean_ctor_set(v___x_715_, 0, v___x_730_);
@@ -4212,7 +4213,7 @@ v_reuseFailAlloc_740_ = lean_alloc_ctor(0, 5, 0);
 lean_ctor_set(v_reuseFailAlloc_740_, 0, v___x_730_);
 lean_ctor_set(v_reuseFailAlloc_740_, 1, v_k_719_);
 lean_ctor_set(v_reuseFailAlloc_740_, 2, v_v_720_);
-lean_ctor_set(v_reuseFailAlloc_740_, 3, v___y_733_);
+lean_ctor_set(v_reuseFailAlloc_740_, 3, v___y_732_);
 lean_ctor_set(v_reuseFailAlloc_740_, 4, v___x_737_);
 v___x_739_ = v_reuseFailAlloc_740_;
 goto v_reusejp_738_;
@@ -4260,8 +4261,8 @@ if (lean_obj_tag(v_r_722_) == 0)
 lean_object* v_size_749_; 
 v_size_749_ = lean_ctor_get(v_r_722_, 0);
 lean_inc(v_size_749_);
-v___y_732_ = v___x_748_;
-v___y_733_ = v___x_747_;
+v___y_732_ = v___x_747_;
+v___y_733_ = v___x_748_;
 v___y_734_ = v_size_749_;
 goto v___jp_731_;
 }
@@ -4269,8 +4270,8 @@ else
 {
 lean_object* v___x_750_; 
 v___x_750_ = lean_unsigned_to_nat(0u);
-v___y_732_ = v___x_748_;
-v___y_733_ = v___x_747_;
+v___y_732_ = v___x_747_;
+v___y_733_ = v___x_748_;
 v___y_734_ = v___x_750_;
 goto v___jp_731_;
 }

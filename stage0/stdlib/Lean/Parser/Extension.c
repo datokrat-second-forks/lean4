@@ -34,6 +34,7 @@ lean_object* l_Lean_Environment_find_x3f(lean_object*, lean_object*, uint8_t);
 lean_object* l_Lean_ConstantInfo_type(lean_object*);
 uint8_t lean_string_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Name_eraseMacroScopes(lean_object*);
+uint8_t lean_string_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Data_Trie_find_x3f___redArg(lean_object*, lean_object*);
 lean_object* l_Lean_Data_Trie_insert___redArg(lean_object*, lean_object*, lean_object*);
 lean_object* l_mkPanicMessageWithDecl(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
@@ -117,6 +118,7 @@ lean_object* l_Lean_MessageData_ofName(lean_object*);
 lean_object* l_Lean_registerBuiltinAttribute(lean_object*);
 lean_object* l_Lean_registerAttributeImplBuilder(lean_object*, lean_object*);
 lean_object* l_Lean_Syntax_getNumArgs(lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Syntax_getArg(lean_object*, lean_object*);
 lean_object* l_Lean_Syntax_isNatLit_x3f(lean_object*);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
@@ -6653,8 +6655,8 @@ goto v___jp_1623_;
 }
 else
 {
-lean_dec_ref_known(v_declName_1646_, 2);
 lean_dec(v_pre_1647_);
+lean_dec_ref_known(v_declName_1646_, 2);
 lean_dec_ref(v_compileParserDescr_1620_);
 goto v___jp_1623_;
 }
@@ -12203,8 +12205,8 @@ goto v___jp_3889_;
 }
 else
 {
-lean_dec_ref_known(v_declName_3911_, 2);
 lean_dec(v_pre_3912_);
+lean_dec_ref_known(v_declName_3911_, 2);
 lean_dec(v_a_3904_);
 lean_dec(v_catName_3876_);
 v___y_3890_ = v_a_3909_;
@@ -13992,8 +13994,8 @@ return v___x_4662_;
 }
 else
 {
-lean_dec(v_tail_4654_);
 lean_dec_ref_known(v_head_4653_, 1);
+lean_dec(v_tail_4654_);
 lean_dec_ref_known(v_head_4651_, 1);
 lean_dec(v_ref_4647_);
 goto v___jp_4649_;

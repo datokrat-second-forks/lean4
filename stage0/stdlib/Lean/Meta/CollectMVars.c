@@ -887,10 +887,10 @@ return v___x_261_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_MVarId_isDelayedAssigned___at___00Lean_Meta_getMVarsNoDelayed_spec__0_spec__0_spec__1___redArg___boxed(lean_object* v_x_262_, lean_object* v_x_263_, lean_object* v_x_264_){
 _start:
 {
-size_t v_x_1266__boxed_265_; uint8_t v_res_266_; lean_object* v_r_267_; 
-v_x_1266__boxed_265_ = lean_unbox_usize(v_x_263_);
+size_t v_x_1264__boxed_265_; uint8_t v_res_266_; lean_object* v_r_267_; 
+v_x_1264__boxed_265_ = lean_unbox_usize(v_x_263_);
 lean_dec(v_x_263_);
-v_res_266_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_MVarId_isDelayedAssigned___at___00Lean_Meta_getMVarsNoDelayed_spec__0_spec__0_spec__1___redArg(v_x_262_, v_x_1266__boxed_265_, v_x_264_);
+v_res_266_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_MVarId_isDelayedAssigned___at___00Lean_Meta_getMVarsNoDelayed_spec__0_spec__0_spec__1___redArg(v_x_262_, v_x_1264__boxed_265_, v_x_264_);
 lean_dec(v_x_264_);
 lean_dec_ref(v_x_262_);
 v_r_267_ = lean_box(v_res_266_);
@@ -1192,10 +1192,10 @@ return v___x_389_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_MVarId_isDelayedAssigned___at___00Lean_Meta_getMVarsNoDelayed_spec__0_spec__0_spec__1___boxed(lean_object* v_00_u03b2_390_, lean_object* v_x_391_, lean_object* v_x_392_, lean_object* v_x_393_){
 _start:
 {
-size_t v_x_1455__boxed_394_; uint8_t v_res_395_; lean_object* v_r_396_; 
-v_x_1455__boxed_394_ = lean_unbox_usize(v_x_392_);
+size_t v_x_1453__boxed_394_; uint8_t v_res_395_; lean_object* v_r_396_; 
+v_x_1453__boxed_394_ = lean_unbox_usize(v_x_392_);
 lean_dec(v_x_392_);
-v_res_395_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_MVarId_isDelayedAssigned___at___00Lean_Meta_getMVarsNoDelayed_spec__0_spec__0_spec__1(v_00_u03b2_390_, v_x_391_, v_x_1455__boxed_394_, v_x_393_);
+v_res_395_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_MVarId_isDelayedAssigned___at___00Lean_Meta_getMVarsNoDelayed_spec__0_spec__0_spec__1(v_00_u03b2_390_, v_x_391_, v_x_1453__boxed_394_, v_x_393_);
 lean_dec(v_x_393_);
 lean_dec_ref(v_x_391_);
 v_r_396_ = lean_box(v_res_395_);

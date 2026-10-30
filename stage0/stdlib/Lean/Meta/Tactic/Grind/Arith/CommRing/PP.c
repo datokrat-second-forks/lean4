@@ -43,6 +43,7 @@ extern lean_object* l_Lean_instInhabitedExpr;
 uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 lean_object* l_outOfBounds___redArg(lean_object*);
 lean_object* l_Lean_PersistentArray_get_x21___redArg(lean_object*, lean_object*, lean_object*);
+uint8_t lean_int_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Level_succ___override(lean_object*);
 lean_object* l_Lean_mkNot(lean_object*);
 lean_object* l_Lean_Name_str___override(lean_object*, lean_object*);

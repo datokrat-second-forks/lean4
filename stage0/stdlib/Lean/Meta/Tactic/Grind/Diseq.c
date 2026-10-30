@@ -839,9 +839,9 @@ return v___x_282_;
 LEAN_EXPORT lean_object* l_panic___at___00Lean_Meta_Grind_mkDiseqProofUsing_spec__0(lean_object* v_msg_283_, lean_object* v___y_284_, lean_object* v___y_285_, lean_object* v___y_286_, lean_object* v___y_287_, lean_object* v___y_288_, lean_object* v___y_289_, lean_object* v___y_290_, lean_object* v___y_291_, lean_object* v___y_292_, lean_object* v___y_293_){
 _start:
 {
-lean_object* v___x_295_; lean_object* v___x_11417__overap_296_; lean_object* v___x_297_; 
+lean_object* v___x_295_; lean_object* v___x_11299__overap_296_; lean_object* v___x_297_; 
 v___x_295_ = lean_obj_once(&l_panic___at___00Lean_Meta_Grind_mkDiseqProofUsing_spec__0___closed__0, &l_panic___at___00Lean_Meta_Grind_mkDiseqProofUsing_spec__0___closed__0_once, _init_l_panic___at___00Lean_Meta_Grind_mkDiseqProofUsing_spec__0___closed__0);
-v___x_11417__overap_296_ = lean_panic_fn_borrowed(v___x_295_, v_msg_283_);
+v___x_11299__overap_296_ = lean_panic_fn_borrowed(v___x_295_, v_msg_283_);
 lean_inc(v___y_293_);
 lean_inc_ref(v___y_292_);
 lean_inc(v___y_291_);
@@ -852,7 +852,7 @@ lean_inc(v___y_287_);
 lean_inc_ref(v___y_286_);
 lean_inc(v___y_285_);
 lean_inc(v___y_284_);
-v___x_297_ = lean_apply_11(v___x_11417__overap_296_, v___y_284_, v___y_285_, v___y_286_, v___y_287_, v___y_288_, v___y_289_, v___y_290_, v___y_291_, v___y_292_, v___y_293_, lean_box(0));
+v___x_297_ = lean_apply_11(v___x_11299__overap_296_, v___y_284_, v___y_285_, v___y_286_, v___y_287_, v___y_288_, v___y_289_, v___y_290_, v___y_291_, v___y_292_, v___y_293_, lean_box(0));
 return v___x_297_;
 }
 }

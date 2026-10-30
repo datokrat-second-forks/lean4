@@ -3830,13 +3830,13 @@ goto _start;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00__private_Lean_Server_Completion_SyntheticCompletion_0__Lean_Server_Completion_isSyntheticStructFieldCompletion_spec__0___boxed(lean_object* v___y_1097_, lean_object* v_hoverPos_1098_, lean_object* v_as_1099_, lean_object* v_i_1100_, lean_object* v_stop_1101_){
 _start:
 {
-uint8_t v___y_1672__boxed_1102_; size_t v_i_boxed_1103_; size_t v_stop_boxed_1104_; uint8_t v_res_1105_; lean_object* v_r_1106_; 
-v___y_1672__boxed_1102_ = lean_unbox(v___y_1097_);
+uint8_t v___y_1670__boxed_1102_; size_t v_i_boxed_1103_; size_t v_stop_boxed_1104_; uint8_t v_res_1105_; lean_object* v_r_1106_; 
+v___y_1670__boxed_1102_ = lean_unbox(v___y_1097_);
 v_i_boxed_1103_ = lean_unbox_usize(v_i_1100_);
 lean_dec(v_i_1100_);
 v_stop_boxed_1104_ = lean_unbox_usize(v_stop_1101_);
 lean_dec(v_stop_1101_);
-v_res_1105_ = l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00__private_Lean_Server_Completion_SyntheticCompletion_0__Lean_Server_Completion_isSyntheticStructFieldCompletion_spec__0(v___y_1672__boxed_1102_, v_hoverPos_1098_, v_as_1099_, v_i_boxed_1103_, v_stop_boxed_1104_);
+v_res_1105_ = l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00__private_Lean_Server_Completion_SyntheticCompletion_0__Lean_Server_Completion_isSyntheticStructFieldCompletion_spec__0(v___y_1670__boxed_1102_, v_hoverPos_1098_, v_as_1099_, v_i_boxed_1103_, v_stop_boxed_1104_);
 lean_dec_ref(v_as_1099_);
 lean_dec(v_hoverPos_1098_);
 v_r_1106_ = lean_box(v_res_1105_);
@@ -4042,11 +4042,11 @@ return v___y_1122_;
 LEAN_EXPORT lean_object* l___private_Lean_Server_Completion_SyntheticCompletion_0__Lean_Server_Completion_isSyntheticStructFieldCompletion___lam__0___boxed(lean_object* v___x_1156_, lean_object* v_isCursorOnWhitespace_1157_, lean_object* v_isCursorInProperWhitespace_1158_, lean_object* v_fileMap_1159_, lean_object* v_hoverFilePos_1160_, lean_object* v_hoverPos_1161_, lean_object* v_leadingToken_x3f_1162_, lean_object* v_stx_1163_){
 _start:
 {
-uint8_t v___x_1736__boxed_1164_; uint8_t v_isCursorOnWhitespace_boxed_1165_; uint8_t v_isCursorInProperWhitespace_boxed_1166_; uint8_t v_res_1167_; lean_object* v_r_1168_; 
-v___x_1736__boxed_1164_ = lean_unbox(v___x_1156_);
+uint8_t v___x_1734__boxed_1164_; uint8_t v_isCursorOnWhitespace_boxed_1165_; uint8_t v_isCursorInProperWhitespace_boxed_1166_; uint8_t v_res_1167_; lean_object* v_r_1168_; 
+v___x_1734__boxed_1164_ = lean_unbox(v___x_1156_);
 v_isCursorOnWhitespace_boxed_1165_ = lean_unbox(v_isCursorOnWhitespace_1157_);
 v_isCursorInProperWhitespace_boxed_1166_ = lean_unbox(v_isCursorInProperWhitespace_1158_);
-v_res_1167_ = l___private_Lean_Server_Completion_SyntheticCompletion_0__Lean_Server_Completion_isSyntheticStructFieldCompletion___lam__0(v___x_1736__boxed_1164_, v_isCursorOnWhitespace_boxed_1165_, v_isCursorInProperWhitespace_boxed_1166_, v_fileMap_1159_, v_hoverFilePos_1160_, v_hoverPos_1161_, v_leadingToken_x3f_1162_, v_stx_1163_);
+v_res_1167_ = l___private_Lean_Server_Completion_SyntheticCompletion_0__Lean_Server_Completion_isSyntheticStructFieldCompletion___lam__0(v___x_1734__boxed_1164_, v_isCursorOnWhitespace_boxed_1165_, v_isCursorInProperWhitespace_boxed_1166_, v_fileMap_1159_, v_hoverFilePos_1160_, v_hoverPos_1161_, v_leadingToken_x3f_1162_, v_stx_1163_);
 lean_dec(v_leadingToken_x3f_1162_);
 lean_dec(v_hoverPos_1161_);
 lean_dec_ref(v_hoverFilePos_1160_);

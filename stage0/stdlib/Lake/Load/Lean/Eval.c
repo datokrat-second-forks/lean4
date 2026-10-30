@@ -879,9 +879,9 @@ return v___x_310_;
 LEAN_EXPORT lean_object* l_Lake_LakefileConfig_loadFromEnv___lam__1___boxed(lean_object* v___x_311_, lean_object* v___x_312_, lean_object* v_env_313_, lean_object* v_opts_314_, lean_object* v___x_315_, lean_object* v_scriptName_316_, lean_object* v___y_317_, lean_object* v___y_318_){
 _start:
 {
-uint8_t v___x_49074__boxed_319_; lean_object* v_res_320_; 
-v___x_49074__boxed_319_ = lean_unbox(v___x_312_);
-v_res_320_ = l_Lake_LakefileConfig_loadFromEnv___lam__1(v___x_311_, v___x_49074__boxed_319_, v_env_313_, v_opts_314_, v___x_315_, v_scriptName_316_, v___y_317_);
+uint8_t v___x_49066__boxed_319_; lean_object* v_res_320_; 
+v___x_49066__boxed_319_ = lean_unbox(v___x_312_);
+v_res_320_ = l_Lake_LakefileConfig_loadFromEnv___lam__1(v___x_311_, v___x_49066__boxed_319_, v_env_313_, v_opts_314_, v___x_315_, v_scriptName_316_, v___y_317_);
 lean_dec_ref(v_opts_314_);
 return v_res_320_;
 }

@@ -22,6 +22,7 @@ lean_object* l_Nat_reprFast(lean_object*);
 uint8_t lean_int_dec_lt(lean_object*, lean_object*);
 lean_object* l_Int_repr(lean_object*);
 lean_object* lean_obj_tag_nat(lean_object*);
+uint8_t lean_int_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Grind_IntModule_toNatModule___redArg(lean_object*);
 lean_object* l_Lean_RArray_getImpl___redArg(lean_object*, lean_object*);
 lean_object* lean_int_mul(lean_object*, lean_object*);

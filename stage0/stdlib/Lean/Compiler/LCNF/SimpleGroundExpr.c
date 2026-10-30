@@ -58,6 +58,7 @@ lean_object* lean_st_mk_ref(lean_object*);
 size_t lean_array_size(lean_object*);
 uint8_t lean_usize_dec_lt(size_t, size_t);
 uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* lean_array_uget(lean_object*, size_t);
 lean_object* lean_array_uset(lean_object*, size_t, lean_object*);
 uint8_t lean_string_dec_eq(lean_object*, lean_object*);
@@ -9383,8 +9384,8 @@ goto v___jp_2640_;
 }
 else
 {
-lean_dec_ref_known(v_type_2644_, 2);
 lean_dec(v_declName_2753_);
+lean_dec_ref_known(v_type_2644_, 2);
 lean_dec_ref_known(v_value_2749_, 1);
 lean_del_object(v___x_2751_);
 lean_dec(v_fvarId_2643_);

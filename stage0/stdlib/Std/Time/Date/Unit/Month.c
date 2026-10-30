@@ -46,6 +46,7 @@ lean_object* l_Rat_instNatCast___lam__0(lean_object*);
 lean_object* l_Rat_div(lean_object*, lean_object*);
 lean_object* lean_int_ediv(lean_object*, lean_object*);
 lean_object* l_Int_neg___boxed(lean_object*);
+uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 lean_object* l_Int_sub___boxed(lean_object*, lean_object*);
 static lean_once_cell_t l_Std_Time_Month_instReprOrdinal___aux__1___closed__0_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l_Std_Time_Month_instReprOrdinal___aux__1___closed__0;

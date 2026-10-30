@@ -234,7 +234,7 @@ _start:
 {
 lean_object* v___y_11_; lean_object* v___x_14_; uint8_t v_debug_15_; 
 v___x_14_ = lean_st_ref_get(v___y_4_);
-v_debug_15_ = lean_ctor_get_uint8(v___x_14_, sizeof(void*)*12);
+v_debug_15_ = lean_ctor_get_uint8(v___x_14_, sizeof(void*)*13);
 lean_dec(v___x_14_);
 if (v_debug_15_ == 0)
 {
@@ -4055,9 +4055,9 @@ return v___x_924_;
 LEAN_EXPORT lean_object* l_Lean_Meta_Sym_Simp_simpCond___lam__0___boxed(lean_object* v___x_1079_, lean_object* v_e_1080_, lean_object* v___y_1081_, lean_object* v___y_1082_, lean_object* v___y_1083_, lean_object* v___y_1084_, lean_object* v___y_1085_, lean_object* v___y_1086_, lean_object* v___y_1087_, lean_object* v___y_1088_, lean_object* v___y_1089_, lean_object* v___y_1090_){
 _start:
 {
-uint8_t v___x_11205__boxed_1091_; lean_object* v_res_1092_; 
-v___x_11205__boxed_1091_ = lean_unbox(v___x_1079_);
-v_res_1092_ = l_Lean_Meta_Sym_Simp_simpCond___lam__0(v___x_11205__boxed_1091_, v_e_1080_, v___y_1081_, v___y_1082_, v___y_1083_, v___y_1084_, v___y_1085_, v___y_1086_, v___y_1087_, v___y_1088_, v___y_1089_);
+uint8_t v___x_10977__boxed_1091_; lean_object* v_res_1092_; 
+v___x_10977__boxed_1091_ = lean_unbox(v___x_1079_);
+v_res_1092_ = l_Lean_Meta_Sym_Simp_simpCond___lam__0(v___x_10977__boxed_1091_, v_e_1080_, v___y_1081_, v___y_1082_, v___y_1083_, v___y_1084_, v___y_1085_, v___y_1086_, v___y_1087_, v___y_1088_, v___y_1089_);
 lean_dec(v___y_1089_);
 lean_dec_ref(v___y_1088_);
 lean_dec(v___y_1087_);

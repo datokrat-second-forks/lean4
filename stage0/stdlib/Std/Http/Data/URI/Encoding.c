@@ -26,6 +26,7 @@ uint8_t lean_uint8_sub(uint8_t, uint8_t);
 uint8_t lean_uint8_add(uint8_t, uint8_t);
 uint8_t lean_uint8_shift_left(uint8_t, uint8_t);
 uint8_t lean_string_validate_utf8(lean_object*);
+uint8_t lean_uint8_dec_eq(uint8_t, uint8_t);
 uint8_t lean_uint8_shift_right(uint8_t, uint8_t);
 uint8_t lean_uint8_dec_lt(uint8_t, uint8_t);
 uint8_t lean_uint8_land(uint8_t, uint8_t);

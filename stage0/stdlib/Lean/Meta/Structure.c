@@ -8700,7 +8700,7 @@ else
 {
 lean_object* v___x_3090_; uint8_t v_isInstance_3091_; 
 v___x_3090_ = lean_array_fget_borrowed(v___x_3043_, v_a_3049_);
-v_isInstance_3091_ = lean_ctor_get_uint8(v___x_3090_, sizeof(void*)*1 + 4);
+v_isInstance_3091_ = lean_ctor_get_uint8(v___x_3090_, sizeof(void*)*1 + 5);
 if (v_isInstance_3091_ == 0)
 {
 lean_object* v___x_3092_; lean_object* v___x_3093_; lean_object* v___x_3094_; lean_object* v___f_3095_; 

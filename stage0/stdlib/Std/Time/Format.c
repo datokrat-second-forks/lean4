@@ -48,6 +48,7 @@ lean_object* l_Std_Time_Hour_Ordinal_toRelative(lean_object*);
 lean_object* lean_int_emod(lean_object*, lean_object*);
 lean_object* l_Std_Time_PlainTime_toMilliseconds(lean_object*);
 lean_object* l_Std_Time_PlainTime_toNanoseconds(lean_object*);
+uint8_t lean_int_dec_le(lean_object*, lean_object*);
 lean_object* l_Std_Time_HourMarker_toAbsolute(uint8_t, lean_object*);
 lean_object* l_Std_Time_ValidDate_dayOfYear(uint8_t, lean_object*);
 lean_object* l_Std_Time_PlainDateTime_alignedWeekOfMonth(lean_object*);
