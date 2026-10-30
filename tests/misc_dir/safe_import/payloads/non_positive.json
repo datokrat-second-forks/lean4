@@ -1,0 +1,1 @@
+{"version":1,"imports":[],"names":[null,[0,"Bad"],[1,"mk"],[0,"Nat"]],"levels":[null,["succ",0]],"exprs":[["sort",1],["const",1,[]],["const",3,[]],["pi",0,1,2,"default"],["pi",0,3,1,"default"]],"decls":[{"kind":"induct","lparams":[],"nparams":0,"types":[{"name":1,"type":0,"ctors":[{"name":2,"type":4}]}]}]}

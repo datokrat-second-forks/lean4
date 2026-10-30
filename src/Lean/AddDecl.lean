@@ -51,7 +51,8 @@ private def isNamespaceName : Name → Bool
   | .str p _          => isNamespaceName p
   | _                 => false
 
-private def registerNamePrefixes (env : Environment) (name : Name) : Environment :=
+/-- Registers the namespaces that `name` is contained in, as done by `addDecl`. -/
+def registerNamePrefixes (env : Environment) (name : Name) : Environment :=
   -- namespaces are based on the un-encoded name (`isNamespaceName` is false for any private name)
   let name := privateToUserName name
   match name with

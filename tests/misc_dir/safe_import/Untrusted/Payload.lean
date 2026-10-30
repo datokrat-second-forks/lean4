@@ -1,0 +1,1 @@
+-- Never elaborated; the tests use a fake sandbox that prints a crafted export instead.

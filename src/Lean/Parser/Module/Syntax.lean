@@ -23,9 +23,16 @@ def «import»   := leading_parser
   atomic (optional «public» >> optional «meta» >> "import ") >>
   optional all >>
   identWithPartialTrailingDot
+/--
+`safe import M` elaborates `M` in a sandbox and imports only its kernel declarations, which are
+re-checked by the kernel. See `Lean.Elab.SafeImport`.
+-/
+def safeImport := leading_parser
+  atomic ("safe " >> "import ") >>
+  identWithPartialTrailingDot
 def header     := leading_parser optional (moduleTk >> ppLine >> ppLine) >>
   optional («prelude» >> ppLine) >>
-  many («import» >> ppLine) >>
+  many ((safeImport <|> «import») >> ppLine) >>
   ppLine
 
 /--

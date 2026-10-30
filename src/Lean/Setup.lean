@@ -30,8 +30,26 @@ structure Import where
   isExported : Bool := true
   /-- Whether to import IR for all definitions (transitively) reachable. -/
   isMeta     : Bool := false
-  deriving Repr, Inhabited, ToJson, FromJson,
+  /--
+  `safe import`; whether the module is untrusted. Such a module is never loaded from an
+  {lit}`.olean` but elaborated in a sandbox, and only its kernel declarations are imported.
+  -/
+  isSafe     : Bool := false
+  deriving Repr, Inhabited, ToJson,
     BEq, Hashable -- needed by Lake (in `Lake.Load.Elab.Lean`)
+
+instance : FromJson Import where
+  fromJson? j := do
+    return {
+      module := ← j.getObjValAs? Name "module"
+      importAll := ← j.getObjValAs? Bool "importAll"
+      isExported := ← j.getObjValAs? Bool "isExported"
+      isMeta := ← j.getObjValAs? Bool "isMeta"
+      -- optional for compatibility with existing setup files
+      isSafe := ← match j.getObjVal? "isSafe" with
+        | .ok v => fromJson? v
+        | .error _ => pure false
+    }
 
 -- TODO: move further up into `Init` by using simpler representation for `imports`
 @[extern "lean_idbg_client_loop"]
@@ -41,6 +59,7 @@ opaque Idbg.idbgClientLoop {α : Type} [Nonempty α]
 instance : Coe Name Import := ⟨({module := ·})⟩
 
 instance : ToString Import := ⟨fun imp =>
+  if imp.isSafe then s!"safe import {imp.module}" else
   s!"{if imp.isExported then "public " else ""}{if imp.isMeta then "meta " else ""}import \
     {if imp.importAll then "all " else ""}{imp.module}"⟩
 

@@ -1,0 +1,14 @@
+'uses_double' does not depend on any axioms
+@Tree.rec : {motive_1 : Tree → Sort u_1} →
+  {motive_2 : List Tree → Sort u_1} →
+    motive_1 Tree.leaf →
+      ((children : List Tree) → motive_2 children → motive_1 (Tree.node children)) →
+        motive_2 [] →
+          ((head : Tree) → (tail : List Tree) → motive_1 head → motive_2 tail → motive_2 (head :: tail)) →
+            (t : Tree) → motive_1 t
+@Point.casesOn : {motive : Point → Sort u_1} → (t : Point) → ((x y : Nat) → motive (Point.mk x y)) → motive t
+@Even.rec : ∀ {motive_1 : (a : Nat) → Even a → Prop} {motive_2 : (a : Nat) → Odd a → Prop},
+  motive_1 0 Even.zero →
+    (∀ {n : Nat} (a : Odd n), motive_2 n a → motive_1 (n + 1) ⋯) →
+      (∀ {n : Nat} (a : Even n), motive_1 n a → motive_2 (n + 1) ⋯) → ∀ {a : Nat} (t : Even a), motive_1 a t
+loop : Nat → Nat

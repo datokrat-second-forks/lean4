@@ -347,7 +347,9 @@ def elabIdbgCore (e : Syntax) (body : TSyntax `term) (ref : Syntax) (expectedTyp
     let importAllExpr := toExpr imp.importAll
     let isExportedExpr := toExpr imp.isExported
     let isMetaExpr := toExpr imp.isMeta
-    return mkAppN (.const ``Import.mk []) #[nameExpr, importAllExpr, isExportedExpr, isMetaExpr]
+    let isSafeExpr := toExpr imp.isSafe
+    return mkAppN (.const ``Import.mk []) #[nameExpr, importAllExpr, isExportedExpr, isMetaExpr,
+      isSafeExpr]
   let importsExpr := mkApp2 (.const ``List.toArray [.zero])
     (.const ``Import [])
     (importExprs.toList.foldr (fun e acc => mkApp3 (.const ``List.cons [.zero]) (.const ``Import []) e acc)

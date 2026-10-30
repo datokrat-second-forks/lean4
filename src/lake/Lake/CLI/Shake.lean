@@ -410,7 +410,9 @@ def parseHeader (srcSearchPath : SearchPath) (mod : Name) :
 
 def decodeHeader : TSyntax ``Parser.Module.header → Option (TSyntax `module) × Option (TSyntax `prelude) × TSyntaxArray ``Parser.Module.import
   | `(Parser.Module.header| $[module%$moduleTk?]? $[prelude%$preludeTk?]? $imports*) =>
-    (moduleTk?.map .mk, preludeTk?.map .mk, imports)
+    -- `safe import`s do not load any data from `.olean` files, so there is nothing to shake
+    (moduleTk?.map .mk, preludeTk?.map .mk,
+      imports.filterMap fun i => if i.raw.isOfKind ``Parser.Module.import then some ⟨i.raw⟩ else none)
   | stx => panic! s!"unexpected header syntax {stx}"
 
 def decodeImport : TSyntax ``Parser.Module.import → Import

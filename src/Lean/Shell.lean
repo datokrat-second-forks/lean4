@@ -15,6 +15,7 @@ import Init.System.Platform
 import Init.Data.String.Lossy
 import Lean.Compiler.Options
 import Std.Async.Process
+import Lean.Elab.SafeImport
 
 /-  Lean companion to  `shell.cpp` -/
 
@@ -168,6 +169,8 @@ def displayHelp (useStderr : Bool) : IO Unit := do
   out.putStrLn    "      --print-libdir     print the installation directory for Lean's built-in libraries and exit"
   out.putStrLn    "      --profile          display elaboration/type checking time for each definition/theorem"
   out.putStrLn    "      --stats            display environment statistics"
+  out.putStrLn    "      --safe-export      print the kernel declarations of the module for `safe import`"
+  out.putStrLn    "                         to stdout; messages are printed to stderr instead"
   out.putStrLn    "      --incr-save=file   EXPERIMENTAL: save a full incremental snapshot of post-elaboration state at end of run"
   out.putStrLn    "      --incr-load=file   EXPERIMENTAL: reuse a snapshot saved by `--incr-(header-)save` at start of run"
   out.putStrLn    "      --incr-header-save=file"
@@ -239,6 +242,7 @@ structure ShellOptions where
   incrSaveFileName? : Option System.FilePath := none
   incrLoadFileName? : Option System.FilePath := none
   incrHeaderSaveFileName? : Option System.FilePath := none
+  safeExport : Bool := false
 
 @[export lean_shell_options_mk]
 def mkShellOptions (_ : Unit) : ShellOptions := {}
@@ -431,6 +435,8 @@ def ShellOptions.process (opts : ShellOptions)
     return {opts with incrLoadFileName? := ← checkOptArg "Z" optArg?}
   | 'H' => -- `--incr-header-save=file`
     return {opts with incrHeaderSaveFileName? := ← checkOptArg "H" optArg?}
+  | 'X' => -- `--safe-export`
+    return {opts with safeExport := true}
   | _ =>
     pure ()
   eprint "Unknown command line option\n"
@@ -540,6 +546,10 @@ def shellMain (args : List String) (opts : ShellOptions) : IO UInt32 := do
           throw e
     else
       pure `_stdin
+  let stdout ← IO.getStdout
+  if opts.safeExport then
+    -- reserve stdout for the export
+    discard <| IO.setStdout (← IO.getStderr)
   let env? ← Elab.runFrontend contents opts.leanOpts fileName mainModuleName
     opts.trustLevel opts.oleanFileName? opts.ileanFileName? opts.jsonOutput opts.errorOnKinds
     #[] opts.printStats setup?
@@ -547,6 +557,12 @@ def shellMain (args : List String) (opts : ShellOptions) : IO UInt32 := do
     (incrLoadFileName? := opts.incrLoadFileName?)
     (incrHeaderSaveFileName? := opts.incrHeaderSaveFileName?)
   if let some env := env? then
+    if opts.safeExport then
+      match Elab.SafeImport.exportModule env with
+      | .ok out => stdout.putStr out; stdout.flush
+      | .error e =>
+        IO.eprintln s!"failed to export module: {e}"
+        return 1
     if opts.run then
       return ← runMain env opts.leanOpts args
     if let some c := opts.cFileName? then

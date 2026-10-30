@@ -1,0 +1,1 @@
+{"version":1,"imports":[],"names":[null,[0,"x"],[0,"Nat"]],"levels":[null],"exprs":[["const",2,[]],["bvar",99999999]],"decls":[{"kind":"defn","name":1,"lparams":[],"type":0,"value":1,"hints":"abbrev"}]}

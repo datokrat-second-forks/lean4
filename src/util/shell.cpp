@@ -193,6 +193,7 @@ static struct option g_long_options[] = {
     {"incr-save",    required_argument, 0, 'Y'},
     {"incr-load",    required_argument, 0, 'Z'},
     {"incr-header-save", required_argument, 0, 'H'},
+    {"safe-export",  no_argument,       0, 'X'},
 #ifdef LEAN_DEBUG
     {"debug",        required_argument, 0, 'B'},
 #endif

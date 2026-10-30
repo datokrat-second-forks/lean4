@@ -9,6 +9,7 @@ prelude
 public import Lean.Parser.Module
 meta import Lean.Parser.Module
 import Lean.Compiler.ModPkgExt
+import Lean.Elab.SafeImport
 public import Lean.DeprecatedModule
 import Init.Data.String.Modify
 
@@ -32,7 +33,10 @@ def HeaderSyntax.imports (stx : HeaderSyntax) (includeInit : Bool := true) : Arr
     let imports := if preludeTk.isNone && includeInit then
         #[{ module := `Init : Import }, { module := `Init, isMeta := true : Import }]
       else #[]
-    imports ++ importsStx.map fun
+    imports ++ importsStx.map fun stx =>
+      if stx.raw.isOfKind ``Parser.Module.safeImport then
+        { module := stx.raw[2].getId, isSafe := true }
+      else match stx with
       | `(Parser.Module.import| $[public%$publicTk]? $[meta%$metaTk]? import $[all%$allTk]? $n) =>
         { module := n.getId, importAll := allTk.isSome
           isExported := publicTk.isSome || moduleTk.isNone
@@ -147,6 +151,8 @@ def processHeaderCore
     (headerStx? : Option HeaderSyntax := none)
     (origHeaderStx? : Option HeaderSyntax := none)
     : IO (Environment × MessageLog) := do
+  let safeImports := imports.filter (·.isSafe)
+  let imports := imports.filter (!·.isSafe)
   let level := if isModule then
     if Elab.inServer.get opts then
       .server
@@ -164,6 +170,14 @@ def processHeaderCore
     let pos := inputCtx.fileMap.toPosition startPos
     pure (env, messages.add { fileName := inputCtx.fileName, data := toString e, pos := pos })
   let env := env.setMainModule mainModule |>.setModulePackage package?
+  -- safe imports are added as declarations of the main module, so this must come after
+  -- `setMainModule`
+  let (env, messages) ← safeImports.foldlM (init := (env, messages)) fun (env, messages) imp => do
+    try
+      return (← SafeImport.importSafeModule env imp.module opts, messages)
+    catch e =>
+      let pos := inputCtx.fileMap.toPosition startPos
+      return (env, messages.add { fileName := inputCtx.fileName, data := toString e, pos })
   let messages := checkDeprecatedImports env imports opts inputCtx startPos messages headerStx? origHeaderStx?
   let messages := checkModuleNamePortability mainModule inputCtx startPos messages
   return (env, messages)
@@ -192,7 +206,8 @@ def parseImports (input : String) (fileName : Option String := none) : IO (Array
 
 def printImports (input : String) (fileName : Option String) : IO Unit := do
   let (deps, _, _) ← parseImports input fileName
-  for dep in deps do
+  -- safe imports have no `.olean` files to depend on
+  for dep in deps.filter (!·.isSafe) do
     let fname ← findOLean dep.module
     IO.println fname
 

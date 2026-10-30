@@ -1,0 +1,4 @@
+Noncomputable.lean:3:4: error(lean.dependsOnNoncomputable): failed to compile definition, consider marking it as 'noncomputable' because it depends on 'double', which is 'noncomputable'
+Noncomputable.lean:5:0: error(lean.dependsOnNoncomputable): failed to compile definition, consider marking it as 'noncomputable' because it depends on 'double', which is 'noncomputable'
+Noncomputable.lean:8:17: error(lean.unknownIdentifier): Unknown identifier `untrusted_macro`
+Noncomputable.lean:11:8: error(lean.unknownIdentifier): Unknown identifier `unsafeId`

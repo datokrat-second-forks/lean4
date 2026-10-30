@@ -1,0 +1,2 @@
+uses_double : double 2 = 4
+double_eq (n : Nat) : double n = 2 * n

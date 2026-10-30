@@ -2577,6 +2577,9 @@ the module map.
 where
   go (imports : Array Import) (importAll isExported needsData needsIRTrans : Bool) := do
     for i in imports do
+      if i.isSafe then
+        throw <| IO.userError s!"'{i}' cannot be loaded from an .olean file; safe imports must \
+          be processed by `Lean.Elab.processHeaderCore`"
       -- `B > none`?
       let needsData := needsData && (i.isExported || importAll)
       -- `B ≥ privateAll`?
