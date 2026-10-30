@@ -393,6 +393,10 @@ instance instNot (p : Prop) [UDecidable p] : UDecidable (¬p) :=
   | inl hp => rw [decide_eq_false (not_not_intro hp), decide_eq_true hp]; rfl
   | inr hp => rw [decide_eq_true hp, decide_eq_false hp]; rfl
 
+theorem not_decide_eq_true {p : Prop} [UDecidable p] : ((!decide p) = true) = ¬p :=
+  propext ⟨fun h hp => by rw [decide_eq_true hp] at h; exact Bool.noConfusion h,
+    fun hnp => by rw [decide_eq_false hnp]; rfl⟩
+
 instance instAnd (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∧ q) :=
   mk (decide p && decide q) (by
     cases em p with

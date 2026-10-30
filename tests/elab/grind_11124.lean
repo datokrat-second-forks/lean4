@@ -128,7 +128,7 @@ left_2 : ¬dlookup x (s₁.entries.kunion s₂.entries) = none
 right_2 : x ∈ (s₁.entries.kunion s₂.entries).keys
 w : β x
 h_5 : ⟨x, w⟩ ∈ s₁.entries.kunion s₂.entries
-left_3 : ¬find? (fun s => decide (x = s.fst)) (s₁.entries.kunion s₂.entries) = none
+left_3 : ¬find? (fun s => UDecidable.decide (x = s.fst)) (s₁.entries.kunion s₂.entries) = none
 w_1 : Sigma β
 left_4 : w_1 ∈ s₁.entries.kunion s₂.entries
 right_4 : x = w_1.fst
@@ -144,12 +144,12 @@ right_7 : w_2.fst = w_4.fst
 w_5 : Sigma β
 left_8 : w_5 ∈ s₁.entries.kunion s₂.entries
 right_8 : w_4.fst = w_5.fst
-h_16 : (fun s => decide (w_2.fst = s.fst)) = fun s => decide (x = s.fst)
-h_17 : (fun s => decide (w_1.fst = s.fst)) = fun s => decide (w_2.fst = s.fst)
-h_18 : (fun s => decide (w_4.fst = s.fst)) = fun s => decide (w_2.fst = s.fst)
+h_16 : (fun s => UDecidable.decide (w_2.fst = s.fst)) = fun s => UDecidable.decide (x = s.fst)
+h_17 : (fun s => UDecidable.decide (w_1.fst = s.fst)) = fun s => UDecidable.decide (w_2.fst = s.fst)
+h_18 : (fun s => UDecidable.decide (w_4.fst = s.fst)) = fun s => UDecidable.decide (w_2.fst = s.fst)
 left_9 : ⟨x, w⟩ ∈ w_2 :: s₂.entries.kunion s₁.entries
 right_9 : ⟨x, w⟩ = w_2 ∨ ⟨x, w⟩ ∈ s₂.entries.kunion s₁.entries
-h_20 : (fun s => decide (w_3.fst = s.fst)) = fun s => decide (x = s.fst)
+h_20 : (fun s => UDecidable.decide (w_3.fst = s.fst)) = fun s => UDecidable.decide (x = s.fst)
 left_10 : ⟨x, cast ⋯ w_2.snd⟩ ∈ w_1 :: s₂.entries.kunion s₁.entries
 right_10 : ⟨x, cast ⋯ w_2.snd⟩ = w_1 ∨ ⟨x, cast ⋯ w_2.snd⟩ ∈ s₂.entries.kunion s₁.entries
 ⊢ False

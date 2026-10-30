@@ -397,6 +397,22 @@ builtin_grind_propagator propagateDecideUp ↑decide := fun e => do
   else if (← isEqFalse p) then
     pushEq e (← getBoolFalseExpr) <| mkApp3 (mkConst ``Grind.decide_eq_false) p h (← mkEqFalseProof p)
 
+builtin_grind_propagator propagateUDecideDown ↓UDecidable.decide := fun e => do
+  let root ← getRootENode e
+  unless root.ctor do return ()
+  let_expr UDecidable.decide p h := e | return ()
+  if root.self.isConstOf ``true then
+    pushEqTrue p <| mkApp3 (mkConst ``Grind.of_udecide_eq_true) p h (← mkEqProof e root.self)
+  else if root.self.isConstOf ``false then
+    pushEqFalse p <| mkApp3 (mkConst ``Grind.of_udecide_eq_false) p h (← mkEqProof e root.self)
+
+builtin_grind_propagator propagateUDecideUp ↑UDecidable.decide := fun e => do
+  let_expr UDecidable.decide p h := e | return ()
+  if (← isEqTrue p) then
+    pushEq e (← getBoolTrueExpr) <| mkApp3 (mkConst ``Grind.udecide_eq_true) p h (← mkEqTrueProof p)
+  else if (← isEqFalse p) then
+    pushEq e (← getBoolFalseExpr) <| mkApp3 (mkConst ``Grind.udecide_eq_false) p h (← mkEqFalseProof p)
+
 /-- `Bool` version of `propagateAndUp` -/
 builtin_grind_propagator propagateBoolAndUp ↑Bool.and := fun e => do
   let_expr Bool.and a b := e | return ()

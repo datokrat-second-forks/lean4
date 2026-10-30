@@ -187,6 +187,7 @@ init_grind_norm
   bne_iff_ne bne_eq_decide_not_eq
   -- decide
   decide_eq_true_eq decide_not not_decide_eq_true
+  UDecidable.decide_eq_true_eq UDecidable.decide_not UDecidable.not_decide_eq_true
   -- Nat
   Nat.le_zero_eq Nat.lt_eq Nat.succ_eq_add_one
   Nat.add_eq Nat.sub_eq Nat.mul_eq Nat.zero_eq Nat.le_eq

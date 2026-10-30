@@ -47,7 +47,8 @@ private def isBoolEqTarget (declName : Name) : Bool :=
   declName == ``Bool.or  ||
   declName == ``Bool.not ||
   declName == ``BEq.beq  ||
-  declName == ``decide
+  declName == ``decide   ||
+  declName == ``UDecidable.decide
 
 builtin_simproc_decl simpEq (@Eq _ _ _) := fun e => do
   let_expr f@Eq α lhs rhs ← e | return .continue

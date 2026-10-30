@@ -167,7 +167,7 @@ a.toBitVec.toInt < b.toBitVec.toInt
 #guard_msgs in
 run_meta applyHomo ``i64Lt
 
-/-! Signed bitvector comparisons are `Bool`-valued; they are translated into `decide` of
+/-! Signed bitvector comparisons are `Bool`-valued; they are translated into `UDecidable.decide` of
 the `Int` comparison, which `grind` connects to the proposition itself. -/
 
 def bvSle (x y : BitVec 8) : Prop := x.sle y
@@ -176,7 +176,7 @@ def bvSlt (x y : BitVec 8) : Prop := x.slt y
 /--
 info: x.sle y = true
 ==>
-decide (x.toInt ≤ y.toInt) = true
+UDecidable.decide (x.toInt ≤ y.toInt) = true
 -/
 #guard_msgs in
 run_meta applyHomo ``bvSle
@@ -184,7 +184,7 @@ run_meta applyHomo ``bvSle
 /--
 info: x.slt y = true
 ==>
-decide (x.toInt < y.toInt) = true
+UDecidable.decide (x.toInt < y.toInt) = true
 -/
 #guard_msgs in
 run_meta applyHomo ``bvSlt

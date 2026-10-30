@@ -178,6 +178,11 @@ theorem of_decide_eq_false {p : Prop} {_ : Decidable p} : decide p = false → p
 theorem decide_eq_true {p : Prop} {_ : Decidable p} : p = True → decide p = true := by simp
 theorem decide_eq_false {p : Prop} {_ : Decidable p} : p = False → decide p = false := by simp
 
+theorem of_udecide_eq_true {p : Prop} {_ : UDecidable p} : UDecidable.decide p = true → p = True := by simp
+theorem of_udecide_eq_false {p : Prop} {_ : UDecidable p} : UDecidable.decide p = false → p = False := by simp
+theorem udecide_eq_true {p : Prop} {_ : UDecidable p} : p = True → UDecidable.decide p = true := by simp
+theorem udecide_eq_false {p : Prop} {_ : UDecidable p} : p = False → UDecidable.decide p = false := by simp
+
 /-! Lookahead -/
 
 theorem of_lookahead (p : Prop) (h : (¬ p) → False) : p = True := by

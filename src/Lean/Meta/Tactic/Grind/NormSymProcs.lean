@@ -110,7 +110,8 @@ private def isBoolEqTarget (declName : Name) : Bool :=
   declName == ``Bool.or  ||
   declName == ``Bool.not ||
   declName == ``BEq.beq  ||
-  declName == ``decide
+  declName == ``decide   ||
+  declName == ``UDecidable.decide
 
 /--
 Normalizes equalities:

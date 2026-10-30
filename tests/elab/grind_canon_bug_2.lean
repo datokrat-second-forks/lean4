@@ -5,7 +5,7 @@ set_option warn.sorry false
 -- Without `proofCanon`, two `m[k]` appear because they carry different proofs.
 /--
 trace: [grind.lia.model] k := 101
-[grind.lia.model] (ExtHashMap.filter (fun k x => decide (101 ≤ k)) (m.insert 1 3))[k] := 4
+[grind.lia.model] (ExtHashMap.filter (fun k x => UDecidable.decide (101 ≤ k)) (m.insert 1 3))[k] := 4
 [grind.lia.model] (m.insert 1 2)[k] := 4
 [grind.lia.model] (m.insert 1 3)[k] := 4
 [grind.lia.model] m[k] := 4
