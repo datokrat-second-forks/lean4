@@ -89,7 +89,7 @@ Returns the `i`th least significant bit.
 
 /-- Returns the `i`th least significant bit, or `none` if `i ≥ w`. -/
 @[inline] def getLsb? (x : BitVec w) (i : Nat) : Option Bool :=
-  if h : i < w then some (getLsb x ⟨i, h⟩) else none
+  uif h : i < w then some (getLsb x ⟨i, h⟩) else none
 
 /--
 Returns the `i`th most significant bit.

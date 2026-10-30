@@ -230,6 +230,34 @@ theorem dite_congr {_ : Decidable b} [Decidable c]
   | inl h => rw [dite_eq_left h]; subst b; rw [dite_eq_left h]; exact h₂ h
   | inr h => rw [dite_eq_right h]; subst b; rw [dite_eq_right h]; exact h₃ h
 
+namespace UDecidable
+
+/-
+The congruence lemmas use `UDecidable.classical` for the new condition instead of synthesizing an
+instance, which is possible because all instances are definitionally equal.
+-/
+
+@[congr]
+theorem ite_congr {b c : Prop} {inst : UDecidable b} {α : Sort u} {x y u v : α}
+    (h₁ : b = c) (h₂ : c → x = u) (h₃ : ¬c → y = v) :
+    @ite α b inst x y = @ite α c (classical c) u v := by
+  subst h₁
+  cases em b with
+  | inl hc => rw [ite_eq_left hc, ite_eq_left hc, h₂ hc]
+  | inr hc => rw [ite_eq_right hc, ite_eq_right hc, h₃ hc]
+
+@[congr]
+theorem dite_congr {b c : Prop} {inst : UDecidable b} {α : Sort u}
+    {x : b → α} {u : c → α} {y : ¬b → α} {v : ¬c → α} (h₁ : b = c)
+    (h₂ : (h : c) → x (h₁.mpr_prop h) = u h) (h₃ : (h : ¬c) → y (h₁.mpr_not h) = v h) :
+    @dite α b inst x y = @dite α c (classical c) u v := by
+  subst h₁
+  cases em b with
+  | inl hc => rw [dite_eq_left hc, dite_eq_left hc, h₂ hc]
+  | inr hc => rw [dite_eq_right hc, dite_eq_right hc, h₃ hc]
+
+end UDecidable
+
 theorem dite_cond_congr {α} {b c : Prop} {s : Decidable b} [Decidable c]
     {x : b → α} {y : ¬ b → α} (h₁ : b = c) :
     dite b x y = dite c (fun h => x (h₁.mpr_prop h)) (fun h => y (h₁.mpr_not h)) := by

@@ -365,6 +365,14 @@ theorem map_if {α : Type u_1} {β : Type u_2} {c : Prop} {a : α} {f : α → �
      (if h : c then some (a h) else none).map f = if h : c then some (f (a h)) else none := by
   split <;> rfl
 
+@[simp] theorem map_uite {f : α → β} {_ : UDecidable c} :
+     (uif c then some a else none).map f = uif c then some (f a) else none := by
+  split <;> rfl
+
+@[simp] theorem map_udite {f : α → β} {_ : UDecidable c} {a : c → α} :
+     (uif h : c then some (a h) else none).map f = uif h : c then some (f (a h)) else none := by
+  split <;> rfl
+
 @[deprecated Option.map_dite (since := "2026-07-21")]
 theorem map_dif {α : Type u_1} {β : Type u_2} {c : Prop} {f : α → β} {_ : Decidable c} {a : c → α} : Option.map f (if h : c then Option.some (a h) else Option.none) = if h : c then Option.some (f (a h)) else Option.none := Option.map_dite
 
@@ -1097,6 +1105,103 @@ theorem mem_ite_none_right {x : α} {_ : Decidable p} {l : Option α} :
   simpa using! get_dite' (p := p) (fun _ => b) (by simpa using h)
 
 end ite
+
+/-! ### uite -/
+section uite
+
+@[simp] theorem udite_none_left_eq_some {p : Prop} {_ : UDecidable p} {b : ¬p → Option β} :
+    (uif h : p then none else b h) = some a ↔ ∃ h, b h = some a := by
+  split <;> simp_all
+
+@[simp] theorem udite_none_right_eq_some {p : Prop} {_ : UDecidable p} {b : p → Option α} :
+    (uif h : p then b h else none) = some a ↔ ∃ h, b h = some a := by
+  split <;> simp_all
+
+@[simp] theorem some_eq_udite_none_left {p : Prop} {_ : UDecidable p} {b : ¬p → Option β} :
+    some a = (uif h : p then none else b h) ↔ ∃ h, some a = b h := by
+  split <;> simp_all
+
+@[simp] theorem some_eq_udite_none_right {p : Prop} {_ : UDecidable p} {b : p → Option α} :
+    some a = (uif h : p then b h else none) ↔ ∃ h, some a = b h := by
+  split <;> simp_all
+
+@[simp] theorem uite_none_left_eq_some {p : Prop} {_ : UDecidable p} {b : Option β} :
+    (uif p then none else b) = some a ↔ ¬ p ∧ b = some a := by
+  split <;> simp_all
+
+@[simp] theorem uite_none_right_eq_some {p : Prop} {_ : UDecidable p} {b : Option α} :
+    (uif p then b else none) = some a ↔ p ∧ b = some a := by
+  split <;> simp_all
+
+@[simp] theorem some_eq_uite_none_left {p : Prop} {_ : UDecidable p} {b : Option β} :
+    some a = (uif p then none else b) ↔ ¬ p ∧ some a = b := by
+  split <;> simp_all
+
+@[simp] theorem some_eq_uite_none_right {p : Prop} {_ : UDecidable p} {b : Option α} :
+    some a = (uif p then b else none) ↔ p ∧ some a = b := by
+  split <;> simp_all
+
+theorem uite_some_none_eq_some {p : Prop} {_ : UDecidable p} {a b : α} :
+    (uif p then some a else none) = some b ↔ p ∧ a = b := by simp
+
+theorem mem_udite_none_left {x : α} {_ : UDecidable p} {l : ¬ p → Option α} :
+    (x ∈ uif h : p then none else l h) ↔ ∃ h : ¬ p, x ∈ l h := by
+  simp
+
+theorem mem_udite_none_right {x : α} {_ : UDecidable p} {l : p → Option α} :
+    (x ∈ uif h : p then l h else none) ↔ ∃ h : p, x ∈ l h := by
+  simp
+
+theorem mem_uite_none_left {x : α} {_ : UDecidable p} {l : Option α} :
+    (x ∈ uif p then none else l) ↔ ¬ p ∧ x ∈ l := by
+  simp
+
+theorem mem_uite_none_right {x : α} {_ : UDecidable p} {l : Option α} :
+    (x ∈ uif p then l else none) ↔ p ∧ x ∈ l := by
+  simp
+
+@[simp] theorem isSome_udite {p : Prop} {_ : UDecidable p} {b : p → β} :
+    (uif h : p then some (b h) else none).isSome = true ↔ p := by
+  split <;> simpa
+
+@[simp] theorem isSome_uite {p : Prop} {_ : UDecidable p} :
+    (uif p then some b else none).isSome = true ↔ p := by
+  split <;> simpa
+
+@[simp] theorem isSome_udite' {p : Prop} {_ : UDecidable p} {b : ¬ p → β} :
+    (uif h : p then none else some (b h)).isSome = true ↔ ¬ p := by
+  split <;> simpa
+
+@[simp] theorem isSome_uite' {p : Prop} {_ : UDecidable p} :
+    (uif p then none else some b).isSome = true ↔ ¬ p := by
+  split <;> simpa
+
+@[simp] theorem get_udite {p : Prop} {_ : UDecidable p} (b : p → β) (w) :
+    (uif h : p then some (b h) else none).get w = b (by simpa using w) := by
+  split
+  · simp
+  · exfalso
+    simp at w
+    contradiction
+
+@[simp] theorem get_uite {p : Prop} {_ : UDecidable p} (h) :
+    (uif p then some b else none).get h = b := by
+  simpa using! get_udite (p := p) (fun _ => b) (by simpa using h)
+
+@[simp] theorem get_udite' {p : Prop} {_ : UDecidable p} (b : ¬ p → β) (w) :
+    (uif h : p then none else some (b h)).get w = b (by simpa using w) := by
+  split
+  · exfalso
+    simp at w
+    contradiction
+  · simp
+
+@[simp] theorem get_uite' {p : Prop} {_ : UDecidable p} (h) :
+    (uif p then none else some b).get h = b := by
+  simpa using! get_udite' (p := p) (fun _ => b) (by simpa using h)
+
+end uite
+
 
 @[simp, grind =] theorem get_filter {α : Type _} {x : Option α} {f : α → Bool} (h : (x.filter f).isSome) :
     (x.filter f).get h = x.get (isSome_of_isSome_filter f x h) := by

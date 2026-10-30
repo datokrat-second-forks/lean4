@@ -38,9 +38,9 @@ theorem getElem?_eq_some_getElemV [GetElem? cont idx elem dom] [LawfulGetElem co
     [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom]
     (c : cont) (i : idx) (h : dom c i) :
     c[i]? = some c｢i｣ := by
-  have : Decidable (dom c i) := .isTrue h
+  have : UDecidable (dom c i) := .isTrue h
   simp only [getElem?_def, getElem_eq_getElemV]
-  exact dite_eq_left h
+  exact UDecidable.dite_eq_left h
 
 theorem getElemV_pos [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     [GetElemV cont idx elem] [LawfulGetElemV cont idx elem dom]

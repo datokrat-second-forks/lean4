@@ -55,6 +55,16 @@ theorem ite_true_false {_ : Decidable p} : (ite p True False) = p := by
 theorem ite_false_true {_ : Decidable p} : (ite p False True) = ¬p := by
   by_cases p <;> simp
 
+/-! `grind` handles `uif` by turning it into `if`, whose instance it never inspects. -/
+
+theorem uite_eq_ite {α : Sort u} {c : Prop} {_ : UDecidable c} {t e : α} :
+    (uif c then t else e) = @ite α c (UDecidable.toDecidable c) t e :=
+  @UDecidable.ite_eq_ite α c _ (UDecidable.toDecidable c) t e
+
+theorem udite_eq_dite {α : Sort u} {c : Prop} {_ : UDecidable c} {t : c → α} {e : ¬c → α} :
+    UDecidable.dite c t e = @dite α c (UDecidable.toDecidable c) t e :=
+  @UDecidable.dite_eq_dite α c _ (UDecidable.toDecidable c) t e
+
 theorem cond_eq_ite (c : Bool) (a b : α) : cond c a b = ite c a b := by
   cases c <;> simp [*]
 
@@ -172,7 +182,7 @@ init_grind_norm
   -- a subtype are stated over the underlying type and the property.
   Subtype.forall Subtype.exists
   -- ite
-  ite_true_false ite_false_true
+  ite_true_false ite_false_true uite_eq_ite udite_eq_dite
   -- Bool cond
   cond_eq_ite
   -- Bool or

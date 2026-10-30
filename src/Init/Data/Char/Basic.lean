@@ -193,8 +193,8 @@ end Char
 
 namespace UDecidable
 
-instance instCharLe (c d : Char) : UDecidable (c ≤ d) := instUInt32Le c.val d.val
+@[inline] instance instCharLe (c d : Char) : UDecidable (c ≤ d) := instUInt32Le c.val d.val
 
-instance instCharLt (c d : Char) : UDecidable (c < d) := instUInt32Lt c.val d.val
+@[inline] instance instCharLt (c d : Char) : UDecidable (c < d) := instUInt32Lt c.val d.val
 
 end UDecidable

@@ -231,12 +231,12 @@ theorem getElem?_insertIdx {l : List α} {x : α} {i j : Nat} :
   · rw [getElem_insertIdx h]
     simp only [length_insertIdx] at h
     split <;> rename_i h₁
-    · rw [getElem?_def, dite_eq_left]
+    · rw [getElem?_def, UDecidable.dite_eq_left]
     · split <;> rename_i h₂
       · rw [ite_eq_left]
         split at h <;> omega
       · rw [getElem?_def]
-        simp only [Option.some_eq_dite_none_right, exists_prop, and_true]
+        simp only [Option.some_eq_udite_none_right, exists_prop, and_true]
         split at h <;> omega
   · simp only [length_insertIdx] at h
     split <;> rename_i h₁

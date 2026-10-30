@@ -25,7 +25,7 @@ public section
 namespace UDecidable
 
 /-- The implementation of `instBoolForall` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instBoolForallImpl (p : Bool → Prop) [UDecidablePred p] : UDecidable (∀ b, p b) :=
+@[expose, inline, instance_reducible] def instBoolForallImpl (p : Bool → Prop) [UDecidablePred p] : UDecidable (∀ b, p b) :=
   ofIff (p true ∧ p false) ⟨fun ⟨ht, hf⟩ b => match b with | true => ht | false => hf,
     fun h => ⟨h true, h false⟩⟩
 
@@ -36,7 +36,7 @@ noncomputable instance instBoolForall (p : Bool → Prop) [UDecidablePred p] : U
 @[csimp] theorem instBoolForall_csimp : @instBoolForall = @instBoolForallImpl := rfl
 
 /-- The implementation of `instBoolExists` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instBoolExistsImpl (p : Bool → Prop) [UDecidablePred p] : UDecidable (∃ b, p b) :=
+@[expose, inline, instance_reducible] def instBoolExistsImpl (p : Bool → Prop) [UDecidablePred p] : UDecidable (∃ b, p b) :=
   ofIff (p true ∨ p false)
     ⟨fun h => h.elim (⟨true, ·⟩) (⟨false, ·⟩), fun ⟨b, h⟩ => match b, h with
       | true, h => .inl h
@@ -49,7 +49,7 @@ noncomputable instance instBoolExists (p : Bool → Prop) [UDecidablePred p] : U
 @[csimp] theorem instBoolExists_csimp : @instBoolExists = @instBoolExistsImpl := rfl
 
 /-- The implementation of `instArrayEq` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instArrayEqImpl [UDecidableEq α] : UDecidableEq (Array α) := fun xs ys =>
+@[expose, inline, instance_reducible] def instArrayEqImpl [UDecidableEq α] : UDecidableEq (Array α) := fun xs ys =>
   mk (xs.isEqv ys (fun a b => decide (a = b)))
     ⟨fun h =>
       let ⟨hs, w⟩ := Array.isEqv_iff_rel.mp h

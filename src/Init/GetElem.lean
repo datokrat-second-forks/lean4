@@ -86,9 +86,9 @@ syntax term noWs "[" withoutPosition(term) "]'" term:max : term
 macro_rules | `($x[$i]'$h) => `(getElem $x $i $h)
 
 /-- Helper function for implementation of `GetElem?.getElem?`. -/
-abbrev decidableGetElem? [GetElem coll idx elem valid] (xs : coll) (i : idx) [Decidable (valid xs i)] :
+abbrev decidableGetElem? [GetElem coll idx elem valid] (xs : coll) (i : idx) [UDecidable (valid xs i)] :
     Option elem :=
-  if h : valid xs i then some xs[i] else none
+  uif h : valid xs i then some xs[i] else none
 
 @[inherit_doc GetElem]
 class GetElem? (coll : Type u) (idx : Type v) (elem : outParam (Type w))
@@ -126,7 +126,7 @@ recommended_spelling "getElem" for "xs[i]'h" in [GetElem.getElem, «term__[_]'_�
 recommended_spelling "getElem?" for "xs[i]?" in [GetElem?.getElem?, «term__[_]_?»]
 recommended_spelling "getElem!" for "xs[i]!" in [GetElem?.getElem!, «term__[_]_!»]
 
-instance (priority := low) [GetElem coll idx elem valid] [∀ xs i, Decidable (valid xs i)] :
+instance (priority := low) [GetElem coll idx elem valid] [∀ xs i, UDecidable (valid xs i)] :
     GetElem? coll idx elem valid where
   getElem? xs i := decidableGetElem? xs i
 
@@ -151,8 +151,8 @@ class LawfulGetElem (cont : Type u) (idx : Type v) (elem : outParam (Type w))
    (dom : outParam (cont → idx → Prop)) [ge : GetElem? cont idx elem dom] : Prop where
 
   /-- `GetElem?.getElem?` succeeds when the validity predicate is satisfied and fails otherwise. -/
-  getElem?_def (c : cont) (i : idx) [Decidable (dom c i)] :
-      c[i]? = if h : dom c i then some (c[i]'h) else none := by
+  getElem?_def (c : cont) (i : idx) [UDecidable (dom c i)] :
+      c[i]? = uif h : dom c i then some (c[i]'h) else none := by
     intros
     try simp only [getElem?] <;> congr
 
@@ -164,50 +164,50 @@ class LawfulGetElem (cont : Type u) (idx : Type v) (elem : outParam (Type w))
 
 export LawfulGetElem (getElem?_def getElem!_def)
 
-instance (priority := low) [GetElem coll idx elem valid] [∀ xs i, Decidable (valid xs i)] :
+instance (priority := low) [GetElem coll idx elem valid] [∀ xs i, UDecidable (valid xs i)] :
     LawfulGetElem coll idx elem valid where
 
 @[simp, grind =] theorem getElem?_pos [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     (c : cont) (i : idx) (h : dom c i) : c[i]? = some (c[i]'h) := by
-  have : Decidable (dom c i) := .isTrue h
+  have : UDecidable (dom c i) := .isTrue h
   rw [getElem?_def]
-  exact dite_eq_left h
+  exact UDecidable.dite_eq_left h
 
 @[simp, grind =] theorem getElem?_neg [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     (c : cont) (i : idx) (h : ¬dom c i) : c[i]? = none := by
-  have : Decidable (dom c i) := .isFalse h
+  have : UDecidable (dom c i) := .isFalse h
   rw [getElem?_def]
-  exact dite_eq_right h
+  exact UDecidable.dite_eq_right h
 
 @[simp, grind =] theorem getElem!_pos [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     [Inhabited elem] (c : cont) (i : idx) (h : dom c i) :
     c[i]! = c[i]'h := by
-  have : Decidable (dom c i) := .isTrue h
+  have : UDecidable (dom c i) := .isTrue h
   simp [getElem!_def, h]
 
 @[simp, grind =] theorem getElem!_neg [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     [Inhabited elem] (c : cont) (i : idx) (h : ¬dom c i) : c[i]! = default := by
-  have : Decidable (dom c i) := .isFalse h
+  have : UDecidable (dom c i) := .isFalse h
   simp [getElem!_def, h]
 
 @[simp, grind =] theorem get_getElem? [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    (c : cont) (i : idx) [Decidable (dom c i)] (h) :
+    (c : cont) (i : idx) [UDecidable (dom c i)] (h) :
     c[i]?.get h = c[i]'(by simp only [getElem?_def] at h; split at h <;> simp_all) := by
   simp only [getElem?_def] at h ⊢
   split <;> simp_all
 
 @[simp] theorem getElem?_eq_none_iff [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    (c : cont) (i : idx) [Decidable (dom c i)] : c[i]? = none ↔ ¬dom c i := by
+    (c : cont) (i : idx) [UDecidable (dom c i)] : c[i]? = none ↔ ¬dom c i := by
   simp only [getElem?_def]
   split <;> simp_all
 
 @[simp] theorem none_eq_getElem?_iff [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    (c : cont) (i : idx) [Decidable (dom c i)] : none = c[i]? ↔ ¬dom c i := by
+    (c : cont) (i : idx) [UDecidable (dom c i)] : none = c[i]? ↔ ¬dom c i := by
   simp only [getElem?_def]
   split <;> simp_all
 
 theorem of_getElem?_eq_some [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    {c : cont} {i : idx} [Decidable (dom c i)] (h : c[i]? = some e) : dom c i := by
+    {c : cont} {i : idx} [UDecidable (dom c i)] (h : c[i]? = some e) : dom c i := by
   simp only [getElem?_def] at h
   split at h <;> rename_i h'
   case isTrue =>
@@ -216,7 +216,7 @@ theorem of_getElem?_eq_some [GetElem? cont idx elem dom] [LawfulGetElem cont idx
     simp at h
 
 theorem getElem?_eq_some_iff [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    {c : cont} {i : idx} [Decidable (dom c i)] : c[i]? = some e ↔ Exists fun h : dom c i => c[i] = e := by
+    {c : cont} {i : idx} [UDecidable (dom c i)] : c[i]? = some e ↔ Exists fun h : dom c i => c[i] = e := by
   simp only [getElem?_def]
   split <;> rename_i h
   case isTrue =>
@@ -234,28 +234,28 @@ theorem getElem?_eq_some_iff [GetElem? cont idx elem dom] [LawfulGetElem cont id
     exact h w
 
 theorem some_eq_getElem?_iff [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    {c : cont} {i : idx} [Decidable (dom c i)] : some e = c[i]? ↔ Exists fun h : dom c i => c[i] = e := by
+    {c : cont} {i : idx} [UDecidable (dom c i)] : some e = c[i]? ↔ Exists fun h : dom c i => c[i] = e := by
   rw [eq_comm, getElem?_eq_some_iff]
 
 theorem getElem_of_getElem? [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    {c : cont} {i : idx} [Decidable (dom c i)] (h : c[i]? = some e) : Exists fun h : dom c i => c[i] = e :=
+    {c : cont} {i : idx} [UDecidable (dom c i)] (h : c[i]? = some e) : Exists fun h : dom c i => c[i] = e :=
   getElem?_eq_some_iff.mp h
 
 theorem of_getElem_eq [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    {c : cont} {i : idx} [Decidable (dom c i)] {h} (_ : c[i] = e) : dom c i := h
+    {c : cont} {i : idx} [UDecidable (dom c i)] {h} (_ : c[i] = e) : dom c i := h
 
 @[simp] theorem some_getElem_eq_getElem?_iff [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    {c : cont} {i : idx} [Decidable (dom c i)] (h : dom c i):
+    {c : cont} {i : idx} [UDecidable (dom c i)] (h : dom c i):
     (some c[i] = c[i]?) ↔ True := by
   simp [h]
 
 @[simp] theorem getElem?_eq_some_getElem_iff [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    {c : cont} {i : idx} [Decidable (dom c i)] (h : dom c i):
+    {c : cont} {i : idx} [UDecidable (dom c i)] (h : dom c i):
     (c[i]? = some c[i]) ↔ True := by
   simp [h]
 
 @[simp, grind =] theorem isSome_getElem? [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
-    (c : cont) (i : idx) [Decidable (dom c i)] : c[i]?.isSome = dom c i := by
+    (c : cont) (i : idx) [UDecidable (dom c i)] : c[i]?.isSome = dom c i := by
   simp only [getElem?_def]
   split <;> simp_all
 
@@ -400,7 +400,6 @@ instance : GetElem? (Array α) Nat α fun xs i => i < xs.size where
 instance : LawfulGetElem (Array α) Nat α fun xs i => i < xs.size where
   getElem?_def xs i h := by
     simp only [getElem?, decidableGetElem?]
-    split <;> rfl
   getElem!_def xs i := by
     simp only [getElem!, getElem?, decidableGetElem?, get!Internal, getD, getElem]
     split <;> rfl

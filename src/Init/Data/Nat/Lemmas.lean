@@ -1985,7 +1985,7 @@ end Nat
 namespace UDecidable
 
 /-- The implementation of `instForallNatLt` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instForallNatLtImpl (n : Nat) (p : ∀ k, k < n → Prop) [∀ k h, UDecidable (p k h)] :
+@[expose, inline, instance_reducible] def instForallNatLtImpl (n : Nat) (p : ∀ k, k < n → Prop) [∀ k h, UDecidable (p k h)] :
     UDecidable (∀ k h, p k h) :=
   mk (Nat.allLTTR n (fun k h => decide (p k h))) (by
     rw [Nat.allLTTR_eq_true]
@@ -1999,7 +1999,7 @@ noncomputable instance instForallNatLt (n : Nat) (p : ∀ k, k < n → Prop) [�
 @[csimp] theorem instForallNatLt_csimp : @instForallNatLt = @instForallNatLtImpl := rfl
 
 /-- The implementation of `instForallNatLe` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instForallNatLeImpl (n : Nat) (p : ∀ k, k ≤ n → Prop) [∀ k h, UDecidable (p k h)] :
+@[expose, inline, instance_reducible] def instForallNatLeImpl (n : Nat) (p : ∀ k, k ≤ n → Prop) [∀ k h, UDecidable (p k h)] :
     UDecidable (∀ k h, p k h) :=
   ofIff (∀ (k) (h : k < n + 1), p k (Nat.le_of_lt_succ h))
     ⟨fun w k h => w k (Nat.lt_succ_of_le h), fun w k _ => w k _⟩
@@ -2012,7 +2012,7 @@ noncomputable instance instForallNatLe (n : Nat) (p : ∀ k, k ≤ n → Prop) [
 @[csimp] theorem instForallNatLe_csimp : @instForallNatLe = @instForallNatLeImpl := rfl
 
 /-- The implementation of `instForallFin` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instForallFinImpl (p : Fin n → Prop) [UDecidablePred p] : UDecidable (∀ i, p i) :=
+@[expose, inline, instance_reducible] def instForallFinImpl (p : Fin n → Prop) [UDecidablePred p] : UDecidable (∀ i, p i) :=
   ofIff (∀ k h, p ⟨k, h⟩) ⟨fun w ⟨k, h⟩ => w k h, fun w k h => w ⟨k, h⟩⟩
 
 noncomputable instance instForallFin (p : Fin n → Prop) [UDecidablePred p] : UDecidable (∀ i, p i) := by
@@ -2022,7 +2022,7 @@ noncomputable instance instForallFin (p : Fin n → Prop) [UDecidablePred p] : U
 @[csimp] theorem instForallFin_csimp : @instForallFin = @instForallFinImpl := rfl
 
 /-- The implementation of `instExistsNatLt'` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instExistsNatLt'Impl {p : (k : Nat) → k < n → Prop} [∀ k h, UDecidable (p k h)] :
+@[expose, inline, instance_reducible] def instExistsNatLt'Impl {p : (k : Nat) → k < n → Prop} [∀ k h, UDecidable (p k h)] :
     UDecidable (∃ k, ∃ h : k < n, p k h) :=
   mk (Nat.anyLTTR n (fun k h => decide (p k h))) (by
     rw [Nat.anyLTTR_eq_true]
@@ -2037,7 +2037,7 @@ noncomputable instance instExistsNatLt' {p : (k : Nat) → k < n → Prop} [∀ 
 @[csimp] theorem instExistsNatLt'_csimp : @instExistsNatLt' = @instExistsNatLt'Impl := rfl
 
 /-- The implementation of `instExistsNatLe'` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instExistsNatLe'Impl {p : (k : Nat) → k ≤ n → Prop} [∀ k h, UDecidable (p k h)] :
+@[expose, inline, instance_reducible] def instExistsNatLe'Impl {p : (k : Nat) → k ≤ n → Prop} [∀ k h, UDecidable (p k h)] :
     UDecidable (∃ k, ∃ h : k ≤ n, p k h) :=
   ofIff (∃ k, ∃ h : k < n + 1, p k (Nat.le_of_lt_succ h))
     ⟨fun ⟨k, h, w⟩ => ⟨k, Nat.le_of_lt_succ h, w⟩, fun ⟨k, h, w⟩ => ⟨k, Nat.lt_succ_of_le h, w⟩⟩
@@ -2050,7 +2050,7 @@ noncomputable instance instExistsNatLe' {p : (k : Nat) → k ≤ n → Prop} [�
 @[csimp] theorem instExistsNatLe'_csimp : @instExistsNatLe' = @instExistsNatLe'Impl := rfl
 
 /-- The implementation of `instExistsNatLt` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instExistsNatLtImpl {p : Nat → Prop} [UDecidablePred p] :
+@[expose, inline, instance_reducible] def instExistsNatLtImpl {p : Nat → Prop} [UDecidablePred p] :
     UDecidablePred fun n => ∃ k, k < n ∧ p k :=
   fun _ => ofIff (∃ k, ∃ _ : k < _, p k)
     ⟨fun ⟨k, h, w⟩ => ⟨k, h, w⟩, fun ⟨k, h, w⟩ => ⟨k, h, w⟩⟩
@@ -2063,7 +2063,7 @@ noncomputable instance instExistsNatLt {p : Nat → Prop} [UDecidablePred p] :
 @[csimp] theorem instExistsNatLt_csimp : @instExistsNatLt = @instExistsNatLtImpl := rfl
 
 /-- The implementation of `instExistsNatLe` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instExistsNatLeImpl {p : Nat → Prop} [UDecidablePred p] :
+@[expose, inline, instance_reducible] def instExistsNatLeImpl {p : Nat → Prop} [UDecidablePred p] :
     UDecidablePred fun n => ∃ k, k ≤ n ∧ p k :=
   fun _ => ofIff (∃ k, ∃ _ : k ≤ _, p k)
     ⟨fun ⟨k, h, w⟩ => ⟨k, h, w⟩, fun ⟨k, h, w⟩ => ⟨k, h, w⟩⟩
@@ -2076,7 +2076,7 @@ noncomputable instance instExistsNatLe {p : Nat → Prop} [UDecidablePred p] :
 @[csimp] theorem instExistsNatLe_csimp : @instExistsNatLe = @instExistsNatLeImpl := rfl
 
 /-- The implementation of `instExistsFin` in compiled code and `cbv`. -/
-@[expose, instance_reducible] def instExistsFinImpl (p : Fin n → Prop) [UDecidablePred p] : UDecidable (∃ i, p i) :=
+@[expose, inline, instance_reducible] def instExistsFinImpl (p : Fin n → Prop) [UDecidablePred p] : UDecidable (∃ i, p i) :=
   ofIff (∃ k, ∃ h : k < n, p ⟨k, h⟩) ⟨fun ⟨k, h, w⟩ => ⟨⟨k, h⟩, w⟩, fun ⟨⟨k, h⟩, w⟩ => ⟨k, h, w⟩⟩
 
 noncomputable instance instExistsFin (p : Fin n → Prop) [UDecidablePred p] : UDecidable (∃ i, p i) := by

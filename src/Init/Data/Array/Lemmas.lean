@@ -181,7 +181,8 @@ theorem getD_getElem? {xs : Array α} {i : Nat} {d : α} :
     have p : i ≥ xs.size := Nat.le_of_not_gt h
     simp [h]
 
-@[simp] theorem getElem?_empty {i : Nat} : (#[] : Array α)[i]? = none := rfl
+@[simp] theorem getElem?_empty {i : Nat} : (#[] : Array α)[i]? = none := by
+  simp
 
 set_option backward.isDefEq.respectTransparency false in
 theorem getElem_push_lt {xs : Array α} {x : α} {i : Nat} (h : i < xs.size) :
@@ -355,7 +356,7 @@ theorem replicate_succ : replicate (n + 1) a = (replicate n a).push a := by
     (replicate n v)[i] = v := by simp [← getElem_toList]
 
 @[grind =] theorem getElem?_replicate {n : Nat} {v : α} {i : Nat} :
-    (replicate n v)[i]? = if i < n then some v else none := by
+    (replicate n v)[i]? = uif i < n then some v else none := by
   simp [getElem?_def]
 
 /-! ### mem -/
@@ -4020,7 +4021,7 @@ theorem getElem_modify_of_ne {xs : Array α} {i : Nat} (h : i ≠ j)
 
 @[grind =] theorem getElem?_modify {xs : Array α} {i : Nat} {f : α → α} {j : Nat} :
     (xs.modify i f)[j]? = if i = j then xs[j]?.map f else xs[j]? := by
-  simp only [getElem?_def, size_modify, getElem_modify, Option.map_dite]
+  simp only [getElem?_def, size_modify, getElem_modify, Option.map_udite]
   split <;> split <;> rfl
 
 /-! ### swap -/
@@ -4295,7 +4296,7 @@ set_option backward.isDefEq.respectTransparency false in
   rw [getElem_ofFn_go] <;> simp_all
 
 theorem getElem?_ofFn {f : Fin n → α} {i : Nat} :
-    (ofFn f)[i]? = if h : i < n then some (f ⟨i, h⟩) else none := by
+    (ofFn f)[i]? = uif h : i < n then some (f ⟨i, h⟩) else none := by
   simp [getElem?_def]
 
 /-! ### Preliminaries about `range` and `range'` -/
@@ -4315,7 +4316,7 @@ theorem getElem_range' {start size step : Nat} {i : Nat}
 
 @[grind =]
 theorem getElem?_range' {start size step : Nat} {i : Nat} :
-    (Array.range' start size step)[i]? = if i < size then some (start + step * i) else none := by
+    (Array.range' start size step)[i]? = uif i < size then some (start + step * i) else none := by
   simp [getElem?_def, getElem_range']
 
 @[simp, grind =] theorem _root_.List.toArray_range' {start size step : Nat} :
@@ -4334,7 +4335,7 @@ theorem getElem_range {n : Nat} {i : Nat} (h : i < (Array.range n).size) : (Arra
   simp [← getElem_toList]
 
 @[grind =]
-theorem getElem?_range {n : Nat} {i : Nat} : (Array.range n)[i]? = if i < n then some i else none := by
+theorem getElem?_range {n : Nat} {i : Nat} : (Array.range n)[i]? = uif i < n then some i else none := by
   simp [getElem?_def, getElem_range]
 
 @[simp, grind =] theorem _root_.List.toArray_range {n : Nat} : (List.range n).toArray = Array.range n := by
@@ -4501,7 +4502,7 @@ theorem getElem?_push_eq {xs : Array α} {x : α} : (xs.push x)[xs.size]? = some
   rw [getElem?_pos (xs.push x) xs.size (size_push _ ▸ Nat.lt_succ_self xs.size), getElem_push_eq]
 
 @[simp] theorem getElem?_size {xs : Array α} : xs[xs.size]? = none := by
-  simp only [getElem?_def, Nat.lt_irrefl, dite_false]
+  simp only [getElem?_def, Nat.lt_irrefl, UDecidable.dite_false]
 
 /-! ### forIn -/
 

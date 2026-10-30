@@ -16,7 +16,7 @@ example (n m : Nat) : UDecidable.instNatLe n m = UDecidable.ofDecidable (n ≤ m
 /--
 trace: [Compiler.IR] [result]
     def natLeDecide (x_1 : @& tobj) (x_2 : @& tobj) : u8 :=
-      let x_3 : u8 := Nat.ble x_1 x_2;
+      let x_3 : u8 := Nat.decLe x_1 x_2;
       ret x_3
     def natLeDecide._boxed (x_1 : tobj) (x_2 : tobj) : tagged :=
       let x_3 : u8 := natLeDecide x_1 x_2;

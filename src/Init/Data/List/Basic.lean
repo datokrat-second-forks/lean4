@@ -181,7 +181,7 @@ end List
 namespace UDecidable
 
 /-- The implementation of `instListEqNil` in compiled code and `cbv`. -/
-@[instance_reducible] def instListEqNilImpl (l : List α) : UDecidable (l = []) :=
+@[inline, instance_reducible] def instListEqNilImpl (l : List α) : UDecidable (l = []) :=
   match l with
   | [] => UDecidable.isTrue rfl
   | _ :: _ => UDecidable.isFalse nofun
@@ -193,7 +193,7 @@ noncomputable instance instListEqNil (l : List α) : UDecidable (l = []) := by
 @[csimp] theorem instListEqNil_csimp : @instListEqNil = @instListEqNilImpl := rfl
 
 /-- The implementation of `instListNilEq` in compiled code and `cbv`. -/
-@[instance_reducible] def instListNilEqImpl (l : List α) : UDecidable ([] = l) :=
+@[inline, instance_reducible] def instListNilEqImpl (l : List α) : UDecidable ([] = l) :=
   match l with
   | [] => UDecidable.isTrue rfl
   | _ :: _ => UDecidable.isFalse nofun

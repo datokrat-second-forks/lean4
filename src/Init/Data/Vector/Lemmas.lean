@@ -902,7 +902,8 @@ theorem getD_getElem? {xs : Vector α n} {i : Nat} {d : α} :
     have p : i ≥ n := Nat.le_of_not_gt h
     simp [h]
 
-@[simp] theorem getElem?_empty {i : Nat} : (#v[] : Vector α 0)[i]? = none := rfl
+@[simp] theorem getElem?_empty {i : Nat} : (#v[] : Vector α 0)[i]? = none := by
+  simp
 
 @[simp] theorem getElem_push_lt {xs : Vector α n} {x : α} {i : Nat} (h : i < n) :
     (xs.push x)[i] = xs[i] := by
@@ -1944,7 +1945,7 @@ set_option linter.listVariables false in
 
 theorem getElem?_flatten {xss : Vector (Vector β m) n} {i : Nat} :
     xss.flatten[i]? =
-      if hi : i < n * m then
+      uif hi : i < n * m then
         haveI : i / m < n := by rwa [Nat.div_lt_iff_lt_mul (Nat.pos_of_lt_mul_left hi)]
         haveI : i % m < m := Nat.mod_lt _ (Nat.pos_of_lt_mul_left hi)
         some xss[i / m][i % m]
@@ -2056,7 +2057,7 @@ theorem flatMap_def {xs : Vector α n} {f : α → Vector β m} : xs.flatMap f =
 
 theorem getElem?_flatMap {xs : Vector α n} {f : α → Vector β m} {i : Nat} :
     (xs.flatMap f)[i]? =
-      if hi : i < n * m then
+      uif hi : i < n * m then
         haveI : i / m < n := by rwa [Nat.div_lt_iff_lt_mul (Nat.pos_of_lt_mul_left hi)]
         haveI : i % m < m := Nat.mod_lt _ (Nat.pos_of_lt_mul_left hi)
         some ((f (xs[i / m]))[i % m])
@@ -2140,7 +2141,7 @@ theorem forall_mem_replicate {p : α → Prop} {a : α} {n} :
   rw [replicate_eq_mk_replicate, getElem_mk]
   simp
 
-@[grind =] theorem getElem?_replicate {a : α} {n i : Nat} : (replicate n a)[i]? = if i < n then some a else none := by
+@[grind =] theorem getElem?_replicate {a : α} {n i : Nat} : (replicate n a)[i]? = uif i < n then some a else none := by
   simp [getElem?_def]
 
 @[simp] theorem getElem?_replicate_of_lt {n : Nat} {i : Nat} (h : i < n) : (replicate n a)[i]? = some a := by

@@ -47,7 +47,7 @@ theorem range'_eq_mk_range' {start size step} :
   simp [range']
 
 @[simp, grind =] theorem getElem?_range' {start size step i} :
-   (range' start size step)[i]? = if i < size then some (start + step * i) else none := by
+   (range' start size step)[i]? = uif i < size then some (start + step * i) else none := by
   simp [getElem?_def, range']
 
 theorem range'_succ {s n step} :

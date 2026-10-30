@@ -60,7 +60,7 @@ theorem lt_of_getMsbD {x : BitVec w} {i : Nat} : getMsbD x i = true → i < w :=
     simp [Nat.ge_of_not_lt h]
 
 @[simp] theorem getElem?_eq_getElem {l : BitVec w} {n} (h : n < w) : l[n]? = some l[n] := by
-  simp only [getElem?_def, h, ↓reduceDIte]
+  simp only [getElem?_def, h, ↓reduceUDIte]
 
 theorem getElem?_eq_some_iff {l : BitVec w} : l[n]? = some a ↔ ∃ h : n < w, l[n] = a :=
   _root_.getElem?_eq_some_iff

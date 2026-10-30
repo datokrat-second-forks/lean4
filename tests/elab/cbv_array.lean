@@ -24,7 +24,10 @@ theorem test3 : #[1, 2, 3][1]? = some 2 := by cbv
 
 /--
 info: theorem test3 : #[1, 2, 3][1]? = some 2 :=
-of_eq_true (Eq.trans (congrFun' (congrArg Eq (Eq.refl (some 2))) (some 2)) (eq_self (some 2)))
+of_eq_true
+  (Eq.trans
+    (congrFun' (congrArg Eq (getElem?_pos { toList := [1, 2, 3] } 1 (Nat.le_of_ble_eq_true (Eq.refl true)))) (some 2))
+    (eq_self (some 2)))
 -/
 #guard_msgs in
 #print test3
@@ -34,7 +37,12 @@ theorem test4 : #[1, 2, 3][5]? = none := by cbv
 
 /--
 info: theorem test4 : #[1, 2, 3][5]? = none :=
-of_eq_true (Eq.trans (congrFun' (congrArg Eq (Eq.refl none)) none) (eq_self none))
+of_eq_true
+  (Eq.trans
+    (congrFun'
+      (congrArg Eq (getElem?_neg { toList := [1, 2, 3] } 5 (Nat.not_lt_of_le (Nat.le_of_ble_eq_true (Eq.refl true)))))
+      none)
+    (eq_self none))
 -/
 #guard_msgs in
 #print test4

@@ -2493,9 +2493,9 @@ theorem List.range'_eq_toList_rco {m n : Nat} :
 theorem Array.range_eq_toArray_rco {n : Nat} :
     Array.range n = (0...n).toArray := by
   apply Array.ext_getElem?; intro n
-  simp [Std.Rco.getElem?_toArray_eq, Array.getElem?_range, Option.filter]
+  simp [Std.Rco.getElem?_toArray_eq, Array.getElem?_range, Option.filter, UDecidable.ite_eq_ite]
 
 theorem Array.range'_eq_toArray_rco {m n : Nat} :
     Array.range' m n = (m...(m + n)).toArray := by
   apply Array.ext_getElem?; intro n
-  simp [Std.Rco.getElem?_toArray_eq, Array.getElem?_range', Option.filter]
+  simp [Std.Rco.getElem?_toArray_eq, Array.getElem?_range', Option.filter, UDecidable.ite_eq_ite]

@@ -29,7 +29,7 @@ namespace Vector
   simp [ofFn]
 
 @[simp, grind =] theorem getElem?_ofFn {α n} {f : Fin n → α} :
-    (ofFn f)[i]? = if h : i < n then some (f ⟨i, h⟩) else none := by
+    (ofFn f)[i]? = uif h : i < n then some (f ⟨i, h⟩) else none := by
   simp [getElem?_def]
 
 @[simp 500, grind =]
