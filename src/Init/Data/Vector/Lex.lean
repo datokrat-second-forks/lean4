@@ -171,23 +171,39 @@ protected theorem le_iff_lt_or_eq [LT α]
     {xs ys : Vector α n} : xs ≤ ys ↔ xs < ys ∨ xs = ys := by
   simpa using Array.le_iff_lt_or_eq (xs := xs.toArray) (ys := ys.toArray)
 
-@[simp] theorem lex_eq_true_iff_lt [BEq α] [LawfulBEq α] [LT α] [DecidableLT α]
+/-- Variant of `lex_eq_true_iff_lt` for any comparator that decides `<`. -/
+theorem lex_eq_true_iff_lt_of_iff [BEq α] [LawfulBEq α] [LT α] {lt : α → α → Bool}
+    (h : ∀ a b, lt a b = true ↔ a < b) {xs ys : Vector α n} : lex xs ys lt = true ↔ xs < ys := by
+  cases xs
+  cases ys
+  simp [Array.lex_eq_true_iff_lt_of_iff h]
+
+/-- Variant of `lex_eq_false_iff_ge` for any comparator that decides `<`. -/
+theorem lex_eq_false_iff_ge_of_iff [BEq α] [LawfulBEq α] [LT α] {lt : α → α → Bool}
+    (h : ∀ a b, lt a b = true ↔ a < b) {xs ys : Vector α n} : lex xs ys lt = false ↔ ys ≤ xs := by
+  cases xs
+  cases ys
+  simp [Array.lex_eq_false_iff_ge_of_iff h]
+
+@[simp] theorem lex_eq_true_iff_lt [BEq α] [LawfulBEq α] [LT α] [UDecidableLT α]
     {xs ys : Vector α n} : lex xs ys = true ↔ xs < ys := by
   cases xs
   cases ys
   simp
 
-@[simp] theorem lex_eq_false_iff_ge [BEq α] [LawfulBEq α] [LT α] [DecidableLT α]
+@[simp] theorem lex_eq_false_iff_ge [BEq α] [LawfulBEq α] [LT α] [UDecidableLT α]
     {xs ys : Vector α n} : lex xs ys = false ↔ ys ≤ xs := by
   cases xs
   cases ys
   simp
 
 instance [DecidableEq α] [LT α] [DecidableLT α] : DecidableLT (Vector α n) :=
-  fun xs ys => decidable_of_iff (lex xs ys = true) lex_eq_true_iff_lt
+  fun xs ys => decidable_of_iff (lex xs ys (fun a b => decide (a < b)) = true)
+    (lex_eq_true_iff_lt_of_iff fun _ _ => decide_eq_true_iff)
 
 instance [DecidableEq α] [LT α] [DecidableLT α] : DecidableLE (Vector α n) :=
-  fun xs ys => decidable_of_iff (lex ys xs = false) lex_eq_false_iff_ge
+  fun xs ys => decidable_of_iff (lex ys xs (fun a b => decide (a < b)) = false)
+    (lex_eq_false_iff_ge_of_iff fun _ _ => decide_eq_true_iff)
 
 /--
 `xs` is lexicographically less than `ys` if

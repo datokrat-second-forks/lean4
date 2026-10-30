@@ -26,7 +26,7 @@ Specifically, `Array.lex as bs lt` is true if
 * there is an index `i` such that `lt as[i] bs[i]`, and for all `j < i`, `as[j] == bs[j]`.
 -/
 @[inline, expose]
-def lex [BEq α] (as bs : Array α) (lt : α → α → Bool := by exact decideLT) : Bool :=
+def lex [BEq α] (as bs : Array α) (lt : α → α → Bool := by exact (· < ·)) : Bool :=
   go 0
 where @[specialize, semireducible] go (i : Nat) : Bool :=
   if h₁ : as.size ≤ i then

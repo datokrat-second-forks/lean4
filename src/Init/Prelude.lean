@@ -1461,13 +1461,6 @@ abbrev DecidableLT (α : Type u) [LT α] := DecidableRel (LT.lt : α → α → 
 abbrev DecidableLE (α : Type u) [LE α] := DecidableRel (LE.le : α → α → Prop)
 
 /--
-Decides `a < b` using a `DecidableLT α` instance. It is the default comparator of `List.lex`,
-`Array.lex` and `Vector.lex`, so that these functions reduce in the kernel.
--/
-def decideLT {α : Type u} [LT α] [DecidableLT α] (a b : α) : Bool :=
-  decide (LT.lt a b)
-
-/--
 An overloaded operation to find the greater of two values of type `α`.
 -/
 class Max (α : Type u) where

@@ -170,23 +170,39 @@ instance [LT α] [Std.Asymm (· < · : α → α → Prop)] :
     Std.Total (· ≤ · : Array α → Array α → Prop) where
   total := Array.le_total
 
-@[simp] theorem lex_eq_true_iff_lt [BEq α] [LawfulBEq α] [LT α] [DecidableLT α]
+/-- Variant of `lex_eq_true_iff_lt` for any comparator that decides `<`. -/
+theorem lex_eq_true_iff_lt_of_iff [BEq α] [LawfulBEq α] [LT α] {lt : α → α → Bool}
+    (h : ∀ a b, lt a b = true ↔ a < b) {xs ys : Array α} : lex xs ys lt = true ↔ xs < ys := by
+  cases xs
+  cases ys
+  simp [List.lex_eq_true_iff_lt_of_iff h]
+
+/-- Variant of `lex_eq_false_iff_ge` for any comparator that decides `<`. -/
+theorem lex_eq_false_iff_ge_of_iff [BEq α] [LawfulBEq α] [LT α] {lt : α → α → Bool}
+    (h : ∀ a b, lt a b = true ↔ a < b) {xs ys : Array α} : lex xs ys lt = false ↔ ys ≤ xs := by
+  cases xs
+  cases ys
+  simp [List.lex_eq_false_iff_ge_of_iff h]
+
+@[simp] theorem lex_eq_true_iff_lt [BEq α] [LawfulBEq α] [LT α] [UDecidableLT α]
     {xs ys : Array α} : lex xs ys = true ↔ xs < ys := by
   cases xs
   cases ys
   simp
 
-@[simp] theorem lex_eq_false_iff_ge [BEq α] [LawfulBEq α] [LT α] [DecidableLT α]
+@[simp] theorem lex_eq_false_iff_ge [BEq α] [LawfulBEq α] [LT α] [UDecidableLT α]
     {xs ys : Array α} : lex xs ys = false ↔ ys ≤ xs := by
   cases xs
   cases ys
   simp
 
 instance [DecidableEq α] [LT α] [DecidableLT α] : DecidableLT (Array α) :=
-  fun xs ys => decidable_of_iff (lex xs ys = true) lex_eq_true_iff_lt
+  fun xs ys => decidable_of_iff (lex xs ys (fun a b => decide (a < b)) = true)
+    (lex_eq_true_iff_lt_of_iff fun _ _ => decide_eq_true_iff)
 
 instance [DecidableEq α] [LT α] [DecidableLT α] : DecidableLE (Array α) :=
-  fun xs ys => decidable_of_iff (lex ys xs = false) lex_eq_false_iff_ge
+  fun xs ys => decidable_of_iff (lex ys xs (fun a b => decide (a < b)) = false)
+    (lex_eq_false_iff_ge_of_iff fun _ _ => decide_eq_true_iff)
 
 /--
 `l₁` is lexicographically less than `l₂` if either

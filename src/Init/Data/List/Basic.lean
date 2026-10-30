@@ -322,7 +322,7 @@ The lexicographic order with respect to `lt` is:
 * `(a :: as).lex (b :: bs)` is true if `lt a b` or `a == b` and `lex lt as bs` is true.
 -/
 @[specialize]
-def lex [BEq α] (l₁ l₂ : List α) (lt : α → α → Bool := by exact decideLT) : Bool :=
+def lex [BEq α] (l₁ l₂ : List α) (lt : α → α → Bool := by exact (· < ·)) : Bool :=
   match l₁, l₂ with
   | [],      _ :: _  => true
   | _,      []       => false

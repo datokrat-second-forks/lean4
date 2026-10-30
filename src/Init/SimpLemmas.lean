@@ -443,13 +443,6 @@ theorem Bool.not_eq_false' (b : Bool) : ((!b) = false) = (b = true) := by simp
 @[simp] theorem decide_eq_false_iff_not {_ : Decidable p} : (decide p = false) ↔ ¬p :=
   ⟨of_decide_eq_false, decide_eq_false⟩
 
-@[simp] theorem decideLT_eq_true_eq [LT α] [DecidableLT α] {a b : α} :
-    (decideLT a b = true) = (a < b) :=
-  decide_eq_true_eq
-@[simp] theorem decideLT_eq_false_iff_not [LT α] [DecidableLT α] {a b : α} :
-    (decideLT a b = false) ↔ ¬a < b :=
-  decide_eq_false_iff_not
-
 @[simp] theorem decide_not [g : Decidable p] [h : Decidable (Not p)] : decide (Not p) = !(decide p) := by
   cases g <;> (rename_i gp; simp [gp])
 theorem not_decide_eq_true [h : Decidable p] : ((!decide p) = true) = ¬ p := by simp

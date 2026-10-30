@@ -335,15 +335,25 @@ theorem lex_eq_decide_lex [BEq α] [LawfulBEq α] [DecidableEq α] (lt : α → 
     lex l₁ l₂ lt = false ↔ ¬ Lex (fun x y => lt x y) l₁ l₂ := by
   simp [Bool.eq_false_iff, lex_eq_true_iff_lex]
 
-@[simp] theorem lex_eq_true_iff_lt [BEq α] [LawfulBEq α] [LT α] [DecidableLT α]
-    {l₁ l₂ : List α} : lex l₁ l₂ = true ↔ l₁ < l₂ := by
-  simp only [lex_eq_true_iff_lex, decideLT_eq_true_eq]
+/-- Variant of `lex_eq_true_iff_lt` for any comparator that decides `<`. -/
+theorem lex_eq_true_iff_lt_of_iff [BEq α] [LawfulBEq α] [LT α] {lt : α → α → Bool}
+    (h : ∀ a b, lt a b = true ↔ a < b) {l₁ l₂ : List α} : lex l₁ l₂ lt = true ↔ l₁ < l₂ := by
+  simp only [lex_eq_true_iff_lex, h]
   exact Iff.rfl
 
-@[simp] theorem lex_eq_false_iff_ge [BEq α] [LawfulBEq α] [LT α] [DecidableLT α]
-    {l₁ l₂ : List α} : lex l₁ l₂ = false ↔ l₂ ≤ l₁ := by
-  simp only [lex_eq_false_iff_not_lex, decideLT_eq_true_eq]
+/-- Variant of `lex_eq_false_iff_ge` for any comparator that decides `<`. -/
+theorem lex_eq_false_iff_ge_of_iff [BEq α] [LawfulBEq α] [LT α] {lt : α → α → Bool}
+    (h : ∀ a b, lt a b = true ↔ a < b) {l₁ l₂ : List α} : lex l₁ l₂ lt = false ↔ l₂ ≤ l₁ := by
+  simp only [lex_eq_false_iff_not_lex, h]
   exact Iff.rfl
+
+@[simp] theorem lex_eq_true_iff_lt [BEq α] [LawfulBEq α] [LT α] [UDecidableLT α]
+    {l₁ l₂ : List α} : lex l₁ l₂ = true ↔ l₁ < l₂ :=
+  lex_eq_true_iff_lt_of_iff fun _ _ => UDecidable.decide_eq_true_iff
+
+@[simp] theorem lex_eq_false_iff_ge [BEq α] [LawfulBEq α] [LT α] [UDecidableLT α]
+    {l₁ l₂ : List α} : lex l₁ l₂ = false ↔ l₂ ≤ l₁ :=
+  lex_eq_false_iff_ge_of_iff fun _ _ => UDecidable.decide_eq_true_iff
 
 attribute [local simp] Nat.add_one_lt_add_one_iff in
 /--
@@ -491,7 +501,7 @@ protected theorem le_iff_exists [LT α]
             l₁[j]'(Nat.lt_trans hj h₁) = l₂[j]'(Nat.lt_trans hj h₂)) ∧ l₁[i] < l₂[i]) := by
   open Classical in
   rw [← lex_eq_false_iff_ge, lex_eq_false_iff_exists]
-  · simp only [isEqv_eq, beq_iff_eq, decideLT_eq_true_eq]
+  · simp only [isEqv_eq, beq_iff_eq, UDecidable.decide_eq_true_eq]
     simp only [eq_comm]
     conv => lhs; simp +singlePass [exists_comm]
   · simpa using Std.Irrefl.irrefl
