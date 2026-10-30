@@ -74,6 +74,8 @@ theorem Bool.eq_false (a : Bool) : ((a = true) = False) = ((!a) = true) := by
 theorem Bool.decide_eq_true (a : Bool) : (decide (a = true)) = a := by
   simp
 
+attribute [bv_normalize] UDecidable.decide_bool_eq_true
+
 attribute [bv_normalize] BitVec.getLsbD_cast
 attribute [bv_normalize] BitVec.testBit_toNat
 

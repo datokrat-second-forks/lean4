@@ -187,6 +187,9 @@ attribute [bv_normalize] BitVec.not_not
 attribute [bv_normalize] decide_true
 attribute [bv_normalize] decide_false
 attribute [bv_normalize] decide_not
+attribute [bv_normalize] UDecidable.decide_true
+attribute [bv_normalize] UDecidable.decide_false
+attribute [bv_normalize] UDecidable.decide_not
 
 end Constant
 

@@ -196,12 +196,9 @@ def mkSetWidth (oldWidthExpr newWidthExpr target : Expr) : Sym.SymM Expr :=
   Sym.share <| mkApp3 (mkConst ``BitVec.setWidth) oldWidthExpr newWidthExpr target
 
 def mkBEq (lhs rhs : Expr) (wExpr : Expr) : SimprocM Expr :=
-  withCachedBinOp wExpr ``BitVec.instLinearOrderPackage lhs rhs fun wExpr => do
+  withCachedBinOp wExpr ``BitVec.instBEq lhs rhs fun wExpr => do
     let ty := mkBitVecTy wExpr
-    let inst := mkApp (mkConst ``BitVec.instLinearOrderPackage) wExpr
-    let inst := mkApp2 (mkConst ``Std.LinearOrderPackage.toLinearPreorderPackage [0]) ty inst
-    let inst := mkApp2 (mkConst ``Std.LinearPreorderPackage.toPreorderPackage [0]) ty inst
-    let inst := mkApp2 (mkConst ``Std.PreorderPackage.toBEq [0]) ty inst
+    let inst := mkApp (mkConst ``BitVec.instBEq) wExpr
     Sym.share <| mkApp2 (mkConst ``BEq.beq [0]) ty inst
 
 def mkExtractLsb' (wExpr startExpr lenExpr target : Expr) : SimprocM Expr :=
