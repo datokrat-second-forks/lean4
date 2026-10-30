@@ -23,7 +23,7 @@ theorem isEqv_iff_rel {xs ys : Vector α n} {r} :
   simp [Array.isEqv_iff_rel, h]
 
 theorem isEqv_eq_decide (xs ys : Vector α n) (r) :
-    Vector.isEqv xs ys r = decide (∀ (i : Nat) (h' : i < n), r xs[i] ys[i]) := by
+    Vector.isEqv xs ys r = UDecidable.decide (∀ (i : Nat) (h' : i < n), r xs[i] ys[i]) := by
   rcases xs with ⟨xs, rfl⟩
   rcases ys with ⟨ys, h⟩
   simp -implicitDefEqProofs [Array.isEqv_eq_decide, h]
@@ -47,7 +47,7 @@ theorem isEqv_self [DecidableEq α] (xs : Vector α n) : Vector.isEqv xs xs (fun
   simp [Array.isEqv_self]
 
 theorem beq_eq_decide [BEq α] (xs ys : Vector α n) :
-    (xs == ys) = decide (∀ (i : Nat) (h' : i < n), xs[i] == ys[i]) := by
+    (xs == ys) = UDecidable.decide (∀ (i : Nat) (h' : i < n), xs[i] == ys[i]) := by
   simp [BEq.beq, isEqv_eq_decide]
 
 instance [BEq α] [ReflBEq α] : ReflBEq (Vector α n) where

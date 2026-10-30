@@ -558,7 +558,7 @@ theorem prefix_iff_getElemV [Nonempty α] {l₁ l₂ : List α} :
 
 theorem isEqv_eq_decide_getElemV {_ : Nonempty α} {as bs : List α} {r : α → α → Bool} :
     isEqv as bs r = if as.length = bs.length then
-      decide (∀ (i : Nat), i < as.length → r as｢i｣ bs｢i｣) else false := by
+      UDecidable.decide (∀ (i : Nat), i < as.length → r as｢i｣ bs｢i｣) else false := by
   -- Have to disable `Bool.ite_false_right` because of spurious dependency.
   -- The `dite` in `isEqv_eq_decide`'s conclusion does not reduce to `ite` at
   -- reducible transparency (`dite_eq_ite` requires the `fun _ => …` form

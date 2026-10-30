@@ -63,7 +63,7 @@ theorem isEqv_iff_rel {xs ys : Array α} {r} :
 
 theorem isEqv_eq_decide (xs ys : Array α) (r) :
     Array.isEqv xs ys r =
-      if h : xs.size = ys.size then decide (∀ (i : Nat) (h' : i < xs.size), r (xs[i]) (ys[i]'(h ▸ h'))) else false := by
+      if h : xs.size = ys.size then UDecidable.decide (∀ (i : Nat) (h' : i < xs.size), r (xs[i]) (ys[i]'(h ▸ h'))) else false := by
   by_cases h : Array.isEqv xs ys r
   · simp only [h, Bool.true_eq]
     simp only [isEqv_iff_rel] at h
@@ -71,7 +71,7 @@ theorem isEqv_eq_decide (xs ys : Array α) (r) :
     simp [h, w]
   · let h' := h
     simp only [Bool.not_eq_true] at h
-    simp only [h, Bool.false_eq, dite_eq_right_iff, decide_eq_false_iff_not, Classical.not_forall,
+    simp only [h, Bool.false_eq, dite_eq_right_iff, UDecidable.decide_eq_false_iff_not, Classical.not_forall,
       Bool.not_eq_true]
     simpa [isEqv_iff_rel] using h'
 
@@ -152,7 +152,7 @@ theorem instDecidableEmpEq_csimp : @instDecidableEmpEq = @instDecidableEmpEqImpl
 
 theorem beq_eq_decide [BEq α] (xs ys : Array α) :
     (xs == ys) = if h : xs.size = ys.size then
-      decide (∀ (i : Nat) (h' : i < xs.size), xs[i] == ys[i]'(h ▸ h')) else false := by
+      UDecidable.decide (∀ (i : Nat) (h' : i < xs.size), xs[i] == ys[i]'(h ▸ h')) else false := by
   simp [BEq.beq, isEqv_eq_decide]
 
 @[simp, grind =] theorem beq_toList [BEq α] (xs ys : Array α) : (xs.toList == ys.toList) = (xs == ys) := by

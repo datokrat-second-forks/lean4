@@ -21,7 +21,7 @@ namespace List
 
 theorem isEqv_eq_decide {as bs : List α} {r : α → α → Bool} :
     isEqv as bs r = if h : as.length = bs.length then
-      decide (∀ (i : Nat) (h' : i < as.length), r (as[i]'(h ▸ h')) (bs[i]'(h ▸ h'))) else false := by
+      UDecidable.decide (∀ (i : Nat) (h' : i < as.length), r (as[i]'(h ▸ h')) (bs[i]'(h ▸ h'))) else false := by
   induction as generalizing bs with
   | nil =>
     cases bs <;> simp
@@ -43,13 +43,13 @@ theorem beq_eq_isEqv [BEq α] {as bs : List α} : as.beq bs = isEqv as bs (· ==
     | nil => simp
     | cons b bs =>
       simp only [beq_cons_cons, ih, isEqv_eq_decide, length_cons, Nat.add_right_cancel_iff,
-        Nat.forall_lt_succ_left', getElem_cons_zero, getElem_cons_succ, Bool.decide_and,
-        Bool.decide_eq_true]
+        Nat.forall_lt_succ_left', getElem_cons_zero, getElem_cons_succ, UDecidable.decide_and,
+        UDecidable.decide_bool_eq_true]
       split <;> simp
 
 theorem beq_eq_decide [BEq α] {as bs : List α} :
     (as == bs) = if h : as.length = bs.length then
-      decide (∀ (i : Nat) (h' : i < as.length), as[i] == bs[i]'(h ▸ h')) else false := by
+      UDecidable.decide (∀ (i : Nat) (h' : i < as.length), as[i] == bs[i]'(h ▸ h')) else false := by
   simp [BEq.beq, beq_eq_isEqv, isEqv_eq_decide]
 
 end List
