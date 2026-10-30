@@ -508,12 +508,14 @@ instance instBoolEq : UDecidableEq Bool
 
 instance instPUnitEq : UDecidableEq PUnit.{u} := fun _ _ => isTrue rfl
 
-@[simp] theorem decide_bool_eq_true (b : Bool) : decide (b = true) = b := by
+@[simp] theorem decide_bool_eq_true (b : Bool) {_ : UDecidable (b = true)} :
+    decide (b = true) = b := by
   cases b with
   | false => exact decide_eq_false Bool.noConfusion
   | true => exact decide_eq_true rfl
 
-@[simp] theorem decide_bool_eq_false (b : Bool) : decide (b = false) = !b := by
+@[simp] theorem decide_bool_eq_false (b : Bool) {_ : UDecidable (b = false)} :
+    decide (b = false) = !b := by
   cases b with
   | false => exact decide_eq_true rfl
   | true => exact decide_eq_false Bool.noConfusion
