@@ -414,7 +414,7 @@ def IterM.anyM {α β : Type w} {m : Type w → Type w'} [Monad m]
     [Iterator α m β] [IteratorLoop α m m]
     (p : β → m (ULift Bool)) (it : IterM (α := α) m β) : m (ULift Bool) :=
   ForIn.forIn it (ULift.up false) (fun x _ => do
-    if (← p x).down then
+    bif (← p x).down then
       return .done (.up true)
     else
       return .yield (.up false))
@@ -510,7 +510,7 @@ examined in order of iteration.
 def IterM.allM {α β : Type w} {m : Type w → Type w'} [Monad m] [Iterator α m β] [IteratorLoop α m m]
     (p : β → m (ULift Bool)) (it : IterM (α := α) m β) : m (ULift Bool) := do
   ForIn.forIn it (ULift.up true) (fun x _ => do
-    if (← p x).down then
+    bif (← p x).down then
       return .yield (.up true)
     else
       return .done (.up false))

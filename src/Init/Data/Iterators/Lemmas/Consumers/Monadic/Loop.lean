@@ -575,7 +575,7 @@ theorem IterM.anyM_eq_forIn {α β : Type w} {m : Type w → Type w'} [Iterator 
     [Finite α m] [Monad m] [LawfulMonad m] [IteratorLoop α m m] [LawfulIteratorLoop α m m]
     {it : IterM (α := α) m β} {p : β → m (ULift Bool)} :
     it.anyM p = (ForIn.forIn it (.up false) (fun x _ => do
-        if (← p x).down then
+        bif (← p x).down then
           return .done (.up true)
         else
           return .yield (.up false))) := by
@@ -599,8 +599,8 @@ theorem IterM.anyM_eq_match_step {α β : Type w} {m : Type w → Type w'} [Iter
   cases step.inflate using PlausibleIterStep.casesOn
   · apply bind_congr; intro px
     split
-    · simp
-    · simp [anyM_eq_forIn]
+    · simp [*]
+    · simp [*, anyM_eq_forIn]
   · simp [anyM_eq_forIn]
   · simp
 
@@ -639,7 +639,7 @@ theorem IterM.any_eq_forIn {α β : Type w} {m : Type w → Type w'} [Iterator �
     [Finite α m] [Monad m] [LawfulMonad m] [IteratorLoop α m m] [LawfulIteratorLoop α m m]
     {it : IterM (α := α) m β} {p : β → Bool} :
     it.any p = (ForIn.forIn it (.up false) (fun x _ => do
-        if p x then
+        uif p x then
           return .done (.up true)
         else
           return .yield (.up false))) := by
@@ -649,7 +649,7 @@ theorem IterM.allM_eq_forIn {α β : Type w} {m : Type w → Type w'} [Iterator 
     [Finite α m] [Monad m] [LawfulMonad m] [IteratorLoop α m m] [LawfulIteratorLoop α m m]
     {it : IterM (α := α) m β} {p : β → m (ULift Bool)} :
     it.allM p = (ForIn.forIn it (.up true) (fun x _ => do
-        if (← p x).down then
+        bif (← p x).down then
           return .yield (.up true)
         else
           return .done (.up false))) := by
@@ -673,8 +673,8 @@ theorem IterM.allM_eq_match_step {α β : Type w} {m : Type w → Type w'} [Iter
   cases step.inflate using PlausibleIterStep.casesOn
   · apply bind_congr; intro px
     split
-    · simp [allM_eq_forIn]
-    · simp
+    · simp [*, allM_eq_forIn]
+    · simp [*]
   · simp [allM_eq_forIn]
   · simp
 
@@ -713,7 +713,7 @@ theorem IterM.all_eq_forIn {α β : Type w} {m : Type w → Type w'} [Iterator �
     [Finite α m] [Monad m] [LawfulMonad m] [IteratorLoop α m m] [LawfulIteratorLoop α m m]
     {it : IterM (α := α) m β} {p : β → Bool} :
     it.all p = (ForIn.forIn it (.up true) (fun x _ => do
-        if p x then
+        uif p x then
           return .yield (.up true)
         else
           return .done (.up false))) := by

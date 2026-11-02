@@ -744,7 +744,7 @@ example [Monad m] (f : α → β → m β) :
 @[implemented_by foldrMUnsafe, expose]
 def foldrM {α : Type u} {β : Type v} {m : Type v → Type w} [Monad m] (f : α → β → m β) (init : β) (as : Array α) (start := as.size) (stop := 0) : m β :=
   let rec fold (i : Nat) (h : i ≤ as.size) (b : β) : m β := do
-    if i == stop then
+    bif i == stop then
       pure b
     else match i, h with
       | 0, _   => pure b
@@ -920,7 +920,7 @@ some 1
 @[inline]
 def findM? {α : Type} [Monad m] (p : α → m Bool) (as : Array α) : m (Option α) := do
   for a in as do
-    if (← p a) then
+    bif (← p a) then
       return some a
   return none
 
@@ -933,7 +933,7 @@ satisfies `p` is found. If no such element exists in the array, then `none` is r
 def findIdxM? [Monad m] (p : α → m Bool) (as : Array α) : m (Option Nat) := do
   let mut i := 0
   for a in as do
-    if (← p a) then
+    bif (← p a) then
       return some i
     i := i + 1
   return none
@@ -973,7 +973,7 @@ def anyM {α : Type u} {m : Type → Type w} [Monad m] (p : α → m Bool) (as :
     let rec loop (j : Nat) : m Bool := do
       if hlt : j < stop then
         have : j < as.size := Nat.lt_of_lt_of_le hlt h
-        if (← p as[j]) then
+        bif (← p as[j]) then
           pure true
         else
           loop (j+1)
@@ -1239,7 +1239,7 @@ Examples:
 def find? {α : Type u} (p : α → Bool) (as : Array α) : Option α :=
   Id.run do
     for a in as do
-      if p a then
+      bif p a then
         return some a
     return none
 
@@ -1645,7 +1645,7 @@ Checking 7
 @[inline]
 def filterM {α : Type} [Monad m] (p : α → m Bool) (as : Array α) (start := 0) (stop := as.size) : m (Array α) :=
   as.foldlM (init := #[]) (start := start) (stop := stop) fun acc a => do
-    if (← p a) then return acc.push a else return acc
+    bif (← p a) then return acc.push a else return acc
 
 /--
 Applies the monadic predicate `p` on every element in the array in reverse order, from right to
@@ -1677,7 +1677,7 @@ Checking 1
 @[inline]
 def filterRevM {α : Type} [Monad m] (p : α → m Bool) (as : Array α) (start := as.size) (stop := 0) : m (Array α) :=
   reverse <$> as.foldrM (init := #[]) (start := start) (stop := stop) fun a acc => do
-    if (← p a) then return acc.push a else return acc
+    bif (← p a) then return acc.push a else return acc
 
 /--
 Applies a monadic function that returns an `Option` to each element of an array, collecting the
@@ -1765,7 +1765,7 @@ def partition (p : α → Bool) (as : Array α) : Array α × Array α := Id.run
   let mut bs := #[]
   let mut cs := #[]
   for a in as do
-    if p a then
+    bif p a then
       bs := bs.push a
     else
       cs := cs.push a

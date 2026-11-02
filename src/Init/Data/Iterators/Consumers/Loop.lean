@@ -167,7 +167,7 @@ def Iter.anyM {α β : Type w} {m : Type → Type w'} [Monad m]
     [Iterator α Id β] [IteratorLoop α Id m]
     (p : β → m Bool) (it : Iter (α := α) β) : m Bool :=
   ForIn.forIn it false (fun x _ => do
-    if ← p x then
+    bif ← p x then
       return .done true
     else
       return .yield false)
@@ -233,7 +233,7 @@ def Iter.allM {α β : Type w} {m : Type → Type w'} [Monad m]
     [Iterator α Id β] [IteratorLoop α Id m]
     (p : β → m Bool) (it : Iter (α := α) β) : m Bool :=
   ForIn.forIn it true (fun x _ => do
-    if ← p x then
+    bif ← p x then
       return .yield true
     else
       return .done false)

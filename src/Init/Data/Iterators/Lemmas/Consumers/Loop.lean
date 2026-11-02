@@ -550,7 +550,7 @@ theorem Iter.anyM_eq_forIn {α β : Type w} {m : Type → Type w'} [Iterator α 
     [Finite α Id] [Monad m] [LawfulMonad m] [IteratorLoop α Id m] [LawfulIteratorLoop α Id m]
     {it : Iter (α := α) β} {p : β → m Bool} :
     it.anyM p = (ForIn.forIn it false (fun x _ => do
-        if ← p x then
+        bif ← p x then
           return .done true
         else
           return .yield false)) := by
@@ -573,8 +573,8 @@ theorem Iter.anyM_eq_match_step {α β : Type w} {m : Type → Type w'} [Iterato
   cases it.step using PlausibleIterStep.casesOn
   · apply bind_congr; intro px
     split
-    · simp
-    · simp [anyM_eq_forIn]
+    · simp [*]
+    · simp [*, anyM_eq_forIn]
   · simp [anyM_eq_forIn]
   · simp
 
@@ -629,7 +629,7 @@ theorem Iter.any_eq_forIn {α β : Type w} [Iterator α Id β]
     [Finite α Id] [IteratorLoop α Id Id] [LawfulIteratorLoop α Id Id]
     {it : Iter (α := α) β} {p : β → Bool} :
     it.any p = (ForIn.forIn (m := Id) it false (fun x _ => do
-        if p x then
+        uif p x then
           return .done true
         else
           return .yield false)).run := by
@@ -658,7 +658,7 @@ theorem Iter.allM_eq_forIn {α β : Type w} {m : Type → Type w'} [Iterator α 
     [Finite α Id] [Monad m] [LawfulMonad m] [IteratorLoop α Id m] [LawfulIteratorLoop α Id m]
     {it : Iter (α := α) β} {p : β → m Bool} :
     it.allM p = (ForIn.forIn it true (fun x _ => do
-        if ← p x then
+        bif ← p x then
           return .yield true
         else
           return .done false)) := by
@@ -681,8 +681,8 @@ theorem Iter.allM_eq_match_step {α β : Type w} {m : Type → Type w'} [Iterato
   cases it.step using PlausibleIterStep.casesOn
   · apply bind_congr; intro px
     split
-    · simp [allM_eq_forIn]
-    · simp
+    · simp [*, allM_eq_forIn]
+    · simp [*]
   · simp [allM_eq_forIn]
   · simp
 
@@ -720,7 +720,7 @@ theorem Iter.all_eq_forIn {α β : Type w} [Iterator α Id β]
     [Finite α Id] [IteratorLoop α Id Id] [LawfulIteratorLoop α Id Id]
     {it : Iter (α := α) β} {p : β → Bool} :
     it.all p = (ForIn.forIn (m := Id) it true (fun x _ => do
-        if p x then
+        uif p x then
           return .yield true
         else
           return .done false)).run := by

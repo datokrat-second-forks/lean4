@@ -277,16 +277,17 @@ namespace List
 
 @[grind =] theorem filterM_toArray [Monad m] [LawfulMonad m] {l : List α} {p : α → m Bool} :
     l.toArray.filterM p = toArray <$> l.filterM p := by
-  simp only [Array.filterM, filterM, foldlM_toArray, bind_pure_comp, Functor.map_map]
+  simp only [Array.filterM, filterM, foldlM_toArray, bind_pure_comp, Functor.map_map,
+    Bool.cond_eq_ite]
   conv => lhs; rw [← reverse_nil]
   generalize [] = acc
   induction l generalizing acc with simp
   | cons x xs ih =>
     congr; funext b
     cases b
-    · simp only [Bool.false_eq_true, ↓reduceIte, ↓reduceUIte, pure_bind]
+    · simp only [Bool.false_eq_true, ↓reduceUIte, pure_bind]
       exact ih acc
-    · simp only [↓reduceIte, ↓reduceUIte, ← reverse_cons, pure_bind]
+    · simp only [↓reduceUIte, ← reverse_cons, pure_bind]
       exact ih (x :: acc)
 
 /-- Variant of `filterM_toArray` with a side condition for the stop position. -/
@@ -297,7 +298,7 @@ namespace List
 
 @[grind =] theorem filterRevM_toArray [Monad m] [LawfulMonad m] {l : List α} {p : α → m Bool} :
     l.toArray.filterRevM p = toArray <$> l.filterRevM p := by
-  simp [Array.filterRevM, filterRevM]
+  simp [Array.filterRevM, filterRevM, -Bool.cond_eq_ite]
   rw [← foldlM_reverse, ← foldlM_toArray, ← Array.filterM, filterM_toArray]
   simp only [filterM, bind_pure_comp, Functor.map_map, reverse_toArray, reverse_reverse]
 

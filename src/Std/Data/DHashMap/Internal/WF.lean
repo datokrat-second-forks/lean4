@@ -280,7 +280,7 @@ theorem forIn_eq_forIn_toListModel {δ : Type w} {l : Raw α β} {m : Type w →
 
 theorem all_eq_all_toListModel {p : (a: α) → β a → Bool} {m : Raw α β} :
     m.all p = (toListModel m.buckets).all (fun x => p x.1 x.2) := by
-  simp only [Raw.all, ForIn.forIn, Bool.not_eq_true, Id.run_bind]
+  simp only [Raw.all, ForIn.forIn, Bool.cond_eq_ite, Bool.not_eq_true', Id.run_bind]
   rw [forIn_eq_forIn_toListModel, ← toList_eq_toListModel, forIn_eq_forIn']
   induction m.toList with
   | nil => simp only [all_nil, forIn'_nil, Id.run_pure]

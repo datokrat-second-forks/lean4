@@ -139,7 +139,7 @@ where
   @[specialize] go : List α → Array α → Array α → m (List α × List α)
   | [], acc₁, acc₂ => pure (acc₁.toList, acc₂.toList)
   | x :: xs, acc₁, acc₂ => do
-    if ← p x then
+    bif ← p x then
       go xs (acc₁.push x) acc₂
     else
       go xs acc₁ (acc₂.push x)

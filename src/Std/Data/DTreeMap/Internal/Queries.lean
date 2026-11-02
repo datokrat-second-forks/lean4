@@ -303,14 +303,14 @@ instance [Monad m] : ForIn m (Impl α β) ((a : α) × β a) where
 @[inline]
 def any (t : Impl α β) (p : (a : α) → β a → Bool) : Bool := Id.run $ do
   for ⟨a, b⟩ in t do
-    if p a b then return true
+    bif p a b then return true
   return false
 
 /-- Implementation detail. -/
 @[inline]
 def all (t : Impl α β) (p : (a : α) → β a → Bool) : Bool := Id.run $ do
   for ⟨a, b⟩ in t do
-    if p a b = false then return false
+    bif !p a b then return false
   return true
 
 /-- Returns a `List` of the keys in order. -/

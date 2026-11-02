@@ -261,7 +261,7 @@ theorem findRevM?_toArray [Monad m] [LawfulMonad m] (f : α → m Bool) (l : Lis
 @[simp, grind =] theorem findM?_toArray [Monad m] [LawfulMonad m] (f : α → m Bool) (l : List α) :
     l.toArray.findM? f = l.findM? f := by
   rw [Array.findM?]
-  simp only [forIn_toArray]
+  simp only [forIn_toArray, Bool.cond_eq_ite]
   induction l with
   | nil => simp
   | cons a l ih =>

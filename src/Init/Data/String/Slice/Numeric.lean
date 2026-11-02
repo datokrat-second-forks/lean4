@@ -46,11 +46,11 @@ def isNat (s : Slice) : Bool := Id.run do
   let mut lastWasDigit := false
 
   for c in s do
-    if c = '_' then
-      if !lastWasDigit then
+    bif c =ᵇ '_' then
+      bif !lastWasDigit then
         return false
       lastWasDigit := false
-    else if c.isDigit then
+    else bif c.isDigit then
       lastWasDigit := true
     else
       return false

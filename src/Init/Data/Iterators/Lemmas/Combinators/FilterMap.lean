@@ -771,6 +771,7 @@ theorem Iter.anyM_eq_anyM_mapM_pure {α β : Type} {m : Type → Type w'} [Itera
     {it : Iter (α := α) β} {p : β → m Bool} :
     it.anyM p = ULift.down <$> (it.mapM (α := α) (pure (f := m))).anyM (fun x => ULift.up <$> p x) := by
   rw [anyM_eq_forIn, IterM.anyM_eq_forIn, map_eq_pure_bind]
+  simp only [Bool.cond_eq_ite]
   induction it using Iter.inductSteps with | step it ihy ihs =>
   rw [forIn_eq_match_step, IterM.forIn_eq_match_step, bind_assoc, step_mapM]
   cases it.step using PlausibleIterStep.casesOn

@@ -599,9 +599,10 @@ theorem anyM_loop_cons [Monad m] {p : α → m Bool} {a : α} {as : List α} {st
     rw [anyM.loop, dite_eq_left (by omega)]
     congr 1
     funext b
+    simp only [Bool.cond_eq_ite]
     split
     · simp
-    · simp only [Bool.false_eq_true, ↓reduceIte]
+    · simp only [Bool.false_eq_true]
       rw [anyM_loop_cons]
       simpa [anyM] using! anyM_toList
 
@@ -612,6 +613,7 @@ theorem anyM_loop_iff_exists {p : α → Bool} {as : Array α} {start stop} (h :
   unfold anyM.loop
   split <;> rename_i h₁
   · dsimp
+    simp only [Bool.cond_eq_ite]
     split <;> rename_i h₂
     · simp only [true_iff, Id.run_pure]
       refine ⟨start, by omega, by omega, by omega, h₂⟩
@@ -3008,8 +3010,8 @@ theorem foldrM_start_stop {m} [Monad m] {xs : Array α} {f : α → β → m β}
     simp
   | succ i ih =>
     unfold foldrM.fold
-    simp only [beq_iff_eq, Nat.add_eq_left, Nat.add_one_ne_zero, ↓reduceIte, Nat.add_eq,
-      getElem_extract]
+    simp only [Bool.cond_eq_ite, beq_iff_eq, Nat.add_eq_left, Nat.add_one_ne_zero, ↓reduceUIte,
+      Nat.add_eq, getElem_extract]
     congr
     funext b
     simp [ih b (by omega)]
@@ -3071,6 +3073,7 @@ theorem foldlM_append [Monad m] [LawfulMonad m] {f : β → α → m β} {b} {xs
 @[simp] theorem foldrM_fold_empty [Monad m] {f : α → β → m β} {init : β} {i j : Nat} (h) :
     foldrM.fold f #[] i j h init = pure init := by
   unfold foldrM.fold
+  simp only [Bool.cond_eq_ite]
   split <;> rename_i h₁
   · rfl
   · split <;> rename_i h₂

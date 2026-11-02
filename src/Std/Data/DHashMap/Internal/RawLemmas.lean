@@ -1567,7 +1567,7 @@ theorem any_eq_false' [LawfulBEq α] {p : (_ : α) → β → Bool} (h : m.1.WF)
 omit [BEq α] [Hashable α] in
 theorem all_toList {p : (_ : α) → β → Bool} :
     (Raw.Const.toList m.1).all (fun x => p x.1 x.2) = m.1.all p := by
-  simp only [Raw.all, ForIn.forIn, Bool.not_eq_true, Id.run_bind]
+  simp only [Raw.all, ForIn.forIn, Id.run_bind]
   rw [forIn_eq_forIn_toList, forIn_eq_forIn']
   induction Raw.Const.toList m.1 with
   | nil => simp
