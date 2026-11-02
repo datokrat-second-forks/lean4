@@ -2565,22 +2565,22 @@ evaluate the `Decidable` instance, so they reduce in the kernel. `simp` rewrites
 -/
 
 /-- `a <ᵇ b` decides `a < b` with the `DecidableLT` instance. -/
-@[inline] def decLT [LT α] [DecidableLT α] (a b : α) : Bool :=
+@[inline] def decideLT [LT α] [DecidableLT α] (a b : α) : Bool :=
   decide (a < b)
 
 /-- `a ≤ᵇ b` decides `a ≤ b` with the `DecidableLE` instance. -/
-@[inline] def decLE [LE α] [DecidableLE α] (a b : α) : Bool :=
+@[inline] def decideLE [LE α] [DecidableLE α] (a b : α) : Bool :=
   decide (a ≤ b)
 
 /-- `a =ᵇ b` decides `a = b` with the `DecidableEq` instance. -/
-@[inline] def decEqB [DecidableEq α] (a b : α) : Bool :=
+@[inline] def decideEq [DecidableEq α] (a b : α) : Bool :=
   decide (a = b)
 
 /-- `a ≠ᵇ b` decides `a ≠ b` with the `DecidableEq` instance. -/
-@[inline] def decNe [DecidableEq α] (a b : α) : Bool :=
+@[inline] def decideNe [DecidableEq α] (a b : α) : Bool :=
   decide (a ≠ b)
 
-@[inherit_doc] infix:50 " <ᵇ " => decLT
-@[inherit_doc] infix:50 " ≤ᵇ " => decLE
-@[inherit_doc] infix:50 " =ᵇ " => decEqB
-@[inherit_doc] infix:50 " ≠ᵇ " => decNe
+@[inherit_doc] infix:50 " <ᵇ " => decideLT
+@[inherit_doc] infix:50 " ≤ᵇ " => decideLE
+@[inherit_doc] infix:50 " =ᵇ " => decideEq
+@[inherit_doc] infix:50 " ≠ᵇ " => decideNe

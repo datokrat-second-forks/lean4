@@ -264,19 +264,19 @@ private theorem decide_eq_udecide (p : Prop) [Decidable p] [UDecidable p] :
   | inl h => rw [UDecidable.decide_eq_true h]; exact decide_eq_true h
   | inr h => rw [UDecidable.decide_eq_false h]; exact decide_eq_false h
 
-@[simp] theorem decLT_eq_udecide [LT α] [DecidableLT α] {a b : α} [UDecidable (a < b)] :
+@[simp] theorem decideLT_eq_udecide [LT α] [DecidableLT α] {a b : α} [UDecidable (a < b)] :
     (a <ᵇ b) = UDecidable.decide (a < b) :=
   decide_eq_udecide _
 
-@[simp] theorem decLE_eq_udecide [LE α] [DecidableLE α] {a b : α} [UDecidable (a ≤ b)] :
+@[simp] theorem decideLE_eq_udecide [LE α] [DecidableLE α] {a b : α} [UDecidable (a ≤ b)] :
     (a ≤ᵇ b) = UDecidable.decide (a ≤ b) :=
   decide_eq_udecide _
 
-@[simp] theorem decEqB_eq_udecide [DecidableEq α] {a b : α} [UDecidable (a = b)] :
+@[simp] theorem decideEq_eq_udecide [DecidableEq α] {a b : α} [UDecidable (a = b)] :
     (a =ᵇ b) = UDecidable.decide (a = b) :=
   decide_eq_udecide _
 
-@[simp] theorem decNe_eq_udecide [DecidableEq α] {a b : α} [UDecidable (a ≠ b)] :
+@[simp] theorem decideNe_eq_udecide [DecidableEq α] {a b : α} [UDecidable (a ≠ b)] :
     (a ≠ᵇ b) = UDecidable.decide (a ≠ b) :=
   decide_eq_udecide _
 
