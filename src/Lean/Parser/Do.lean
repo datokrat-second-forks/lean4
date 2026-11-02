@@ -62,7 +62,7 @@ def notFollowedByRedefinedTermToken :=
   -- but we include them in the following list to fix the ambiguity where
   -- an "open" command follows the `do`-block.
   -- If we don't add `do`, then users would have to indent `do` blocks or use `{ ... }`.
-  notFollowedBy ("set_option" <|> "open" <|> "if" <|> "match" <|> "match_expr" <|> "let" <|> "let_expr" <|> "have" <|>
+  notFollowedBy ("set_option" <|> "open" <|> "if" <|> "uif" <|> "bif" <|> "match" <|> "match_expr" <|> "let" <|> "let_expr" <|> "have" <|>
       "do" <|> "dbg_trace" <|> "idbg" <|> "assert!" <|> "debug_assert!" <|> "for" <|> "unless" <|> "return" <|> symbol "try")
     "token at 'do' element"
 
@@ -177,6 +177,28 @@ def doIfCond    :=
   ppRealFill (ppIndent ("if " >> doIfCond >> " then") >> ppSpace >> doSeq) >>
   many (checkColGe "'else if' in 'do' must be indented" >>
     group (ppDedent ppSpace >> ppRealFill (elseIf >> doIfCond >> " then " >> doSeq))) >>
+  optional (checkColGe "'else' in 'do' must be indented" >>
+    ppDedent ppSpace >> ppRealFill ("else " >> doSeq))
+def elseUIf := atomic (group (withPosition ("else " >> checkLineEq >> " uif ")))
+def elseBIf := atomic (group (withPosition ("else " >> checkLineEq >> " bif ")))
+/--
+`uif c then ... else ...` in `do` blocks. Like `if`, the branches are `do` sequences, so they can
+`return`, `break` or reassign mutable variables, but the condition is decided with `UDecidable`.
+-/
+@[builtin_doElem_parser] def doUIf := leading_parser withResetCache <| withPositionAfterLinebreak <| ppRealGroup <|
+  ppRealFill (ppIndent ("uif " >> doIfProp >> " then") >> ppSpace >> doSeq) >>
+  many (checkColGe "'else uif' in 'do' must be indented" >>
+    group (ppDedent ppSpace >> ppRealFill (elseUIf >> doIfProp >> " then " >> doSeq))) >>
+  optional (checkColGe "'else' in 'do' must be indented" >>
+    ppDedent ppSpace >> ppRealFill ("else " >> doSeq))
+/--
+`bif c then ... else ...` in `do` blocks, where `c : Bool`. Like `if`, the branches are `do`
+sequences, but the result is a `cond`, so it reduces when `c` does.
+-/
+@[builtin_doElem_parser] def doBIf := leading_parser withResetCache <| withPositionAfterLinebreak <| ppRealGroup <|
+  ppRealFill (ppIndent ("bif " >> termParser >> " then") >> ppSpace >> doSeq) >>
+  many (checkColGe "'else bif' in 'do' must be indented" >>
+    group (ppDedent ppSpace >> ppRealFill (elseBIf >> termParser >> " then " >> doSeq))) >>
   optional (checkColGe "'else' in 'do' must be indented" >>
     ppDedent ppSpace >> ppRealFill ("else " >> doSeq))
 @[builtin_doElem_parser] def doUnless := leading_parser

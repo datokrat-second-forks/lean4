@@ -67,3 +67,73 @@ where
     | `(_%$tk) => Term.elabTermEnsuringType (← `(if _%$tk : $cond then $then_ else $else_)) mγ
     | `($h:ident) => Term.elabTermEnsuringType (← `(if $h:ident : $cond then $then_ else $else_)) mγ
     | _ => throwUnsupportedSyntax
+
+/-!
+`uif` and `bif` in `do` blocks. Their syntax is taken apart by position: the layout is
+`[kw, cond, "then", thenSeq, elseIfs, else?]`, as for `doIf`, where each `elseIfs` entry is
+`[elseKw, cond, "then", seq]` and `else?` is `["else", seq]` if present. For `doUIf`, `cond` is a
+`doIfProp` (`[optional [h, ":"], c]`); for `doBIf`, it is a term.
+-/
+
+private def mkDoSeqOfElem (elem : Syntax) : MacroM Syntax :=
+  `(doSeq| $(⟨elem⟩):doElem)
+
+open InternalSyntax in
+/-- Rewrites `else uif`/`else bif` chains and a missing `else` into nested `uif`/`bif`s with `else`. -/
+private def expandDoCondChain : Macro := fun stx => do
+  let elseIfs := stx[4].getArgs
+  if elseIfs.isEmpty && !stx[5].isNone then Macro.throwUnsupported
+  let mut e : Syntax ← if stx[5].isNone then `(doSeq| skip%$(stx[0])) else pure stx[5][1]
+  let branches := #[(stx[1], stx[3])] ++ elseIfs.map fun g => (g[1], g[3])
+  let mut first := true
+  for (cond, thenSeq) in branches.reverse do
+    unless first do e ← mkDoSeqOfElem e
+    first := false
+    e := Syntax.node stx.getHeadInfo stx.getKind
+      #[stx[0], cond, stx[2], thenSeq, mkNullNode, mkNullNode #[mkAtom "else", e]]
+  return e
+
+@[builtin_macro Lean.Parser.Term.doUIf] def expandDoUIf : Macro := expandDoCondChain
+@[builtin_macro Lean.Parser.Term.doBIf] def expandDoBIf : Macro := expandDoCondChain
+
+private def controlInfoDoCond : ControlInfoHandler := fun stx => do
+  if !stx.raw[4].getArgs.isEmpty || stx.raw[5].isNone then throwUnsupportedSyntax
+  return (← inferControlInfoSeq ⟨stx.raw[3]⟩).alternative (← inferControlInfoSeq ⟨stx.raw[5][1]⟩)
+
+@[builtin_doElem_control_info Lean.Parser.Term.doUIf]
+def controlInfoDoUIf : ControlInfoHandler := controlInfoDoCond
+
+@[builtin_doElem_control_info Lean.Parser.Term.doBIf]
+def controlInfoDoBIf : ControlInfoHandler := controlInfoDoCond
+
+/--
+Elaborates a canonical `uif`/`bif` (no `else uif` chain, with `else`). `mkTerm` receives the
+elaborated branches and builds the term.
+-/
+private def elabDoCond (stx : Syntax) (dec : DoElemCont)
+    (mkTerm : Term → Term → TermElabM Term) : DoElabM Expr := do
+  if !stx[4].getArgs.isEmpty || stx[5].isNone then throwUnsupportedSyntax
+  let thenSeq : DoSeq := ⟨stx[3]⟩
+  let elseSeq : DoSeq := ⟨stx[5][1]⟩
+  let cond := stx[1]
+  let info := (← inferControlInfoSeq thenSeq).alternative (← inferControlInfoSeq elseSeq)
+  dec.withDuplicableCont info fun dec => do
+  doElabToSyntax m!"then branch of {stx[0]} with condition {cond}" (elabDoSeq thenSeq dec) fun then_ => do
+  doElabToSyntax m!"else branch of {stx[0]} with condition {cond}" (elabDoSeq elseSeq dec) fun else_ => do
+  let mγ ← mkMonadApp (← read).doBlockResultType
+  Term.elabTermEnsuringType (← mkTerm then_ else_) mγ
+
+@[builtin_doElem_elab Lean.Parser.Term.doUIf] def elabDoUIf : DoElab := fun stx dec => do
+  let prop := stx.raw[1]
+  let c : Term := ⟨prop[1]⟩
+  elabDoCond stx dec fun then_ else_ =>
+    if prop[0].isNone then
+      `(UDecidable.ite $c $then_ $else_)
+    else
+      let h := prop[0][0]
+      let h : Term := ⟨if h.isOfKind ``Lean.binderIdent then h[0] else h⟩
+      `(UDecidable.dite $c (fun $h => $then_) (fun $h => $else_))
+
+@[builtin_doElem_elab Lean.Parser.Term.doBIf] def elabDoBIf : DoElab := fun stx dec => do
+  let c : Term := ⟨stx.raw[1]⟩
+  elabDoCond stx dec fun then_ else_ => `(cond $c $then_ $else_)

@@ -258,6 +258,28 @@ theorem dite_congr {b c : Prop} {inst : UDecidable b} {α : Sort u}
 
 end UDecidable
 
+private theorem decide_eq_udecide (p : Prop) [Decidable p] [UDecidable p] :
+    decide p = UDecidable.decide p := by
+  cases UDecidable.em p with
+  | inl h => rw [UDecidable.decide_eq_true h]; exact decide_eq_true h
+  | inr h => rw [UDecidable.decide_eq_false h]; exact decide_eq_false h
+
+@[simp] theorem decLT_eq_udecide [LT α] [DecidableLT α] {a b : α} [UDecidable (a < b)] :
+    (a <ᵇ b) = UDecidable.decide (a < b) :=
+  decide_eq_udecide _
+
+@[simp] theorem decLE_eq_udecide [LE α] [DecidableLE α] {a b : α} [UDecidable (a ≤ b)] :
+    (a ≤ᵇ b) = UDecidable.decide (a ≤ b) :=
+  decide_eq_udecide _
+
+@[simp] theorem decEqB_eq_udecide [DecidableEq α] {a b : α} [UDecidable (a = b)] :
+    (a =ᵇ b) = UDecidable.decide (a = b) :=
+  decide_eq_udecide _
+
+@[simp] theorem decNe_eq_udecide [DecidableEq α] {a b : α} [UDecidable (a ≠ b)] :
+    (a ≠ᵇ b) = UDecidable.decide (a ≠ b) :=
+  decide_eq_udecide _
+
 theorem dite_cond_congr {α} {b c : Prop} {s : Decidable b} [Decidable c]
     {x : b → α} {y : ¬ b → α} (h₁ : b = c) :
     dite b x y = dite c (fun h => x (h₁.mpr_prop h)) (fun h => y (h₁.mpr_not h)) := by
