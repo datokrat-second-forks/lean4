@@ -22,6 +22,7 @@ uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* lean_string_push(lean_object*, uint32_t);
 lean_object* lean_string_append(lean_object*, lean_object*);
 uint8_t lean_string_get_byte_fast(lean_object*, lean_object*);
+uint8_t lean_uint8_dec_le(uint8_t, uint8_t);
 lean_object* lean_mk_empty_byte_array(lean_object*);
 lean_object* lean_string_from_utf8_unchecked(lean_object*);
 uint64_t lean_uint64_shift_right(uint64_t, uint64_t);

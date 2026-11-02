@@ -15,8 +15,8 @@ extern "C" {
 #endif
 uint8_t lean_uint32_dec_le(uint32_t, uint32_t);
 lean_object* l_instOrdChar___lam__0___boxed(lean_object*, lean_object*);
-lean_object* l_Char_instDecidableLt___boxed(lean_object*, lean_object*);
-lean_object* l_Char_instDecidableLe___boxed(lean_object*, lean_object*);
+lean_object* l_UDecidable_instCharLt___boxed(lean_object*, lean_object*);
+lean_object* l_UDecidable_instCharLe___boxed(lean_object*, lean_object*);
 lean_object* l_instDecidableEqChar___boxed(lean_object*, lean_object*);
 lean_object* l_instBEqOfDecidableEq___redArg___lam__0___boxed(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT uint32_t l_Char_instLinearOrderPackage___lam__0(uint32_t, uint32_t);
@@ -29,11 +29,11 @@ static const lean_closure_object l_Char_instLinearOrderPackage___closed__1_value
 static const lean_object* l_Char_instLinearOrderPackage___closed__1 = (const lean_object*)&l_Char_instLinearOrderPackage___closed__1_value;
 static const lean_closure_object l_Char_instLinearOrderPackage___closed__2_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_instOrdChar___lam__0___boxed, .m_arity = 2, .m_num_fixed = 0, .m_objs = {} };
 static const lean_object* l_Char_instLinearOrderPackage___closed__2 = (const lean_object*)&l_Char_instLinearOrderPackage___closed__2_value;
-static const lean_closure_object l_Char_instLinearOrderPackage___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_Char_instDecidableLe___boxed, .m_arity = 2, .m_num_fixed = 0, .m_objs = {} };
+static const lean_closure_object l_Char_instLinearOrderPackage___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_UDecidable_instCharLe___boxed, .m_arity = 2, .m_num_fixed = 0, .m_objs = {} };
 static const lean_object* l_Char_instLinearOrderPackage___closed__3 = (const lean_object*)&l_Char_instLinearOrderPackage___closed__3_value;
 static lean_once_cell_t l_Char_instLinearOrderPackage___closed__4_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l_Char_instLinearOrderPackage___closed__4;
-static const lean_closure_object l_Char_instLinearOrderPackage___closed__5_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_Char_instDecidableLt___boxed, .m_arity = 2, .m_num_fixed = 0, .m_objs = {} };
+static const lean_closure_object l_Char_instLinearOrderPackage___closed__5_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_UDecidable_instCharLt___boxed, .m_arity = 2, .m_num_fixed = 0, .m_objs = {} };
 static const lean_object* l_Char_instLinearOrderPackage___closed__5 = (const lean_object*)&l_Char_instLinearOrderPackage___closed__5_value;
 static lean_once_cell_t l_Char_instLinearOrderPackage___closed__6_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l_Char_instLinearOrderPackage___closed__6;

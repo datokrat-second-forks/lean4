@@ -14,10 +14,10 @@
 extern "C" {
 #endif
 lean_object* l_Fin_instMin___redArg___lam__0___boxed(lean_object*, lean_object*);
-lean_object* l_Fin_decLe___boxed(lean_object*, lean_object*, lean_object*);
+lean_object* l_UDecidable_instFinLe___boxed(lean_object*, lean_object*, lean_object*);
 lean_object* l_instDecidableEqFin___boxed(lean_object*, lean_object*, lean_object*);
 lean_object* l_instBEqOfDecidableEq___redArg___lam__0___boxed(lean_object*, lean_object*, lean_object*);
-lean_object* l_Fin_decLt___boxed(lean_object*, lean_object*, lean_object*);
+lean_object* l_UDecidable_instFinLt___boxed(lean_object*, lean_object*, lean_object*);
 lean_object* l_instOrdNat___lam__0___boxed(lean_object*, lean_object*);
 lean_object* l_Fin_instMax___redArg___lam__0___boxed(lean_object*, lean_object*);
 static const lean_closure_object l_Fin_instLinearOrderPackage___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_instOrdNat___lam__0___boxed, .m_arity = 2, .m_num_fixed = 0, .m_objs = {} };
@@ -33,14 +33,14 @@ _start:
 lean_object* v_this_5_; lean_object* v_this_6_; lean_object* v_this_7_; lean_object* v___x_8_; lean_object* v___f_9_; lean_object* v___x_10_; lean_object* v___f_11_; lean_object* v___f_12_; lean_object* v___f_13_; lean_object* v___x_14_; lean_object* v___x_15_; lean_object* v___x_16_; 
 v_this_5_ = lean_box(0);
 lean_inc_n(v_n_4_, 2);
-v_this_6_ = lean_alloc_closure((void*)(l_Fin_decLe___boxed), 3, 1);
+v_this_6_ = lean_alloc_closure((void*)(l_UDecidable_instFinLe___boxed), 3, 1);
 lean_closure_set(v_this_6_, 0, v_n_4_);
 v_this_7_ = lean_box(0);
 v___x_8_ = lean_alloc_closure((void*)(l_instDecidableEqFin___boxed), 3, 1);
 lean_closure_set(v___x_8_, 0, v_n_4_);
 v___f_9_ = lean_alloc_closure((void*)(l_instBEqOfDecidableEq___redArg___lam__0___boxed), 3, 1);
 lean_closure_set(v___f_9_, 0, v___x_8_);
-v___x_10_ = lean_alloc_closure((void*)(l_Fin_decLt___boxed), 3, 1);
+v___x_10_ = lean_alloc_closure((void*)(l_UDecidable_instFinLt___boxed), 3, 1);
 lean_closure_set(v___x_10_, 0, v_n_4_);
 v___f_11_ = ((lean_object*)(l_Fin_instLinearOrderPackage___closed__0));
 v___f_12_ = ((lean_object*)(l_Fin_instLinearOrderPackage___closed__1));

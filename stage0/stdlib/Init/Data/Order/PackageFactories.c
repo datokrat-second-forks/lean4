@@ -20,14 +20,14 @@ lean_object* l_Lean_Name_mkStr1(lean_object*);
 lean_object* l_Lean_Name_mkStr4(lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_Name_mkStr3(lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_Name_mkStr2(lean_object*, lean_object*);
-LEAN_EXPORT uint8_t l_Std_instDecidableLE___redArg(lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Std_instDecidableLE___redArg___boxed(lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT uint8_t l_Std_instDecidableLE(lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Std_instDecidableLE___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT uint8_t l_Std_instDecidableLT___redArg(lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Std_instDecidableLT___redArg___boxed(lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT uint8_t l_Std_instDecidableLT(lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l_Std_instDecidableLT___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_Std_instUDecidableLE___redArg(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Std_instUDecidableLE___redArg___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_Std_instUDecidableLE(lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Std_instUDecidableLE___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_Std_instUDecidableLT___redArg(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Std_instUDecidableLT___redArg___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_Std_instUDecidableLT(lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Std_instUDecidableLT___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT uint8_t l_Std_FactoryInstances_beqOfDecidableLE___redArg___lam__0(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Std_FactoryInstances_beqOfDecidableLE___redArg___lam__0___boxed(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Std_FactoryInstances_beqOfDecidableLE___redArg(lean_object*);
@@ -740,7 +740,7 @@ static lean_once_cell_t l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam_
 static lean_object* l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__152;
 static lean_once_cell_t l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__153_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__153;
-static const lean_string_object l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__154_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 193, .m_capacity = 193, .m_length = 192, .m_data = "\"Failed to automatically derive that `LT` is decidable. \\\n            Please ensure that a `DecidableLT` instance can be synthesized or \\\n            manually provide the field `decidableLT`.\""};
+static const lean_string_object l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__154_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 194, .m_capacity = 194, .m_length = 193, .m_data = "\"Failed to automatically derive that `LT` is decidable. \\\n            Please ensure that a `UDecidableLT` instance can be synthesized or \\\n            manually provide the field `decidableLT`.\""};
 static const lean_object* l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__154 = (const lean_object*)&l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__154_value;
 static lean_once_cell_t l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__155_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__155;
@@ -1938,15 +1938,15 @@ static lean_once_cell_t l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam__
 static lean_object* l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__12;
 static lean_once_cell_t l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13;
-static const lean_string_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__14_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 22, .m_capacity = 22, .m_length = 21, .m_data = "_root_.Std.min_eq_ite"};
+static const lean_string_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__14_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 23, .m_capacity = 23, .m_length = 22, .m_data = "_root_.Std.min_eq_uite"};
 static const lean_object* l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__14 = (const lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__14_value;
-static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__15_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*3 + 0, .m_other = 3, .m_tag = 0}, .m_objs = {((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__14_value),((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)(((size_t)(21) << 1) | 1))}};
+static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__15_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*3 + 0, .m_other = 3, .m_tag = 0}, .m_objs = {((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__14_value),((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)(((size_t)(22) << 1) | 1))}};
 static const lean_object* l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__15 = (const lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__15_value;
-static const lean_string_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__16_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 11, .m_capacity = 11, .m_length = 10, .m_data = "min_eq_ite"};
+static const lean_string_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__16_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 12, .m_capacity = 12, .m_length = 11, .m_data = "min_eq_uite"};
 static const lean_object* l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__16 = (const lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__16_value;
 static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__17_value_aux_0 = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__34_value),LEAN_SCALAR_PTR_LITERAL(184, 175, 53, 50, 212, 152, 178, 8)}};
 static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__17_value_aux_1 = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__17_value_aux_0),((lean_object*)&l_Std_Packages_PreorderOfLEArgs_beq___autoParam___closed__2_value),LEAN_SCALAR_PTR_LITERAL(239, 63, 99, 250, 117, 187, 118, 169)}};
-static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__17_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__17_value_aux_1),((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__16_value),LEAN_SCALAR_PTR_LITERAL(187, 181, 112, 158, 19, 203, 210, 75)}};
+static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__17_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__17_value_aux_1),((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__16_value),LEAN_SCALAR_PTR_LITERAL(68, 138, 52, 116, 8, 123, 178, 55)}};
 static const lean_object* l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__17 = (const lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__17_value;
 static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__18_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*4 + 0, .m_other = 4, .m_tag = 3}, .m_objs = {((lean_object*)(((size_t)(2) << 1) | 1)),((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__15_value),((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__17_value),((lean_object*)(((size_t)(0) << 1) | 1))}};
 static const lean_object* l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__18 = (const lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__18_value;
@@ -2065,15 +2065,15 @@ static lean_object* l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___clo
 static lean_once_cell_t l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__75_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__75;
 LEAN_EXPORT lean_object* l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam;
-static const lean_string_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 22, .m_capacity = 22, .m_length = 21, .m_data = "_root_.Std.max_eq_ite"};
+static const lean_string_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 23, .m_capacity = 23, .m_length = 22, .m_data = "_root_.Std.max_eq_uite"};
 static const lean_object* l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__0 = (const lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__0_value;
-static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*3 + 0, .m_other = 3, .m_tag = 0}, .m_objs = {((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__0_value),((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)(((size_t)(21) << 1) | 1))}};
+static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*3 + 0, .m_other = 3, .m_tag = 0}, .m_objs = {((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__0_value),((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)(((size_t)(22) << 1) | 1))}};
 static const lean_object* l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__1 = (const lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__1_value;
-static const lean_string_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__2_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 11, .m_capacity = 11, .m_length = 10, .m_data = "max_eq_ite"};
+static const lean_string_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__2_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 12, .m_capacity = 12, .m_length = 11, .m_data = "max_eq_uite"};
 static const lean_object* l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__2 = (const lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__2_value;
 static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__3_value_aux_0 = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__34_value),LEAN_SCALAR_PTR_LITERAL(184, 175, 53, 50, 212, 152, 178, 8)}};
 static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__3_value_aux_1 = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__3_value_aux_0),((lean_object*)&l_Std_Packages_PreorderOfLEArgs_beq___autoParam___closed__2_value),LEAN_SCALAR_PTR_LITERAL(239, 63, 99, 250, 117, 187, 118, 169)}};
-static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__3_value_aux_1),((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__2_value),LEAN_SCALAR_PTR_LITERAL(155, 125, 95, 219, 151, 115, 215, 103)}};
+static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__3_value_aux_1),((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__2_value),LEAN_SCALAR_PTR_LITERAL(254, 17, 57, 60, 165, 140, 215, 196)}};
 static const lean_object* l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__3 = (const lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__3_value;
 static const lean_ctor_object l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__4_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*4 + 0, .m_other = 4, .m_tag = 3}, .m_objs = {((lean_object*)(((size_t)(2) << 1) | 1)),((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__1_value),((lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__3_value),((lean_object*)(((size_t)(0) << 1) | 1))}};
 static const lean_object* l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__4 = (const lean_object*)&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__4_value;
@@ -2329,7 +2329,7 @@ static lean_once_cell_t l_Std_Packages_LinearPreorderOfOrdArgs_decidableLE___aut
 static lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_decidableLE___autoParam___closed__17;
 static lean_once_cell_t l_Std_Packages_LinearPreorderOfOrdArgs_decidableLE___autoParam___closed__18_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_decidableLE___autoParam___closed__18;
-static const lean_string_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLE___autoParam___closed__19_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 192, .m_capacity = 192, .m_length = 191, .m_data = "\"Failed to automatically derive that `LE` is decidable.\\\n            Please ensure that a `DecidableLE` instance can be synthesized or \\\n            manually provide the field `decidableLE`.\""};
+static const lean_string_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLE___autoParam___closed__19_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 193, .m_capacity = 193, .m_length = 192, .m_data = "\"Failed to automatically derive that `LE` is decidable.\\\n            Please ensure that a `UDecidableLE` instance can be synthesized or \\\n            manually provide the field `decidableLE`.\""};
 static const lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_decidableLE___autoParam___closed__19 = (const lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLE___autoParam___closed__19_value;
 static lean_once_cell_t l_Std_Packages_LinearPreorderOfOrdArgs_decidableLE___autoParam___closed__20_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_decidableLE___autoParam___closed__20;
@@ -2546,14 +2546,15 @@ static lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam__
 static lean_once_cell_t l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__50_once = LEAN_ONCE_CELL_INITIALIZER;
 static lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__50;
 LEAN_EXPORT lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam;
-static const lean_string_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 24, .m_capacity = 24, .m_length = 23, .m_data = "_root_DecidableLT.ofOrd"};
+static const lean_string_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 25, .m_capacity = 25, .m_length = 24, .m_data = "_root_.DecidableLT.ofOrd"};
 static const lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__0 = (const lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__0_value;
-static const lean_ctor_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*3 + 0, .m_other = 3, .m_tag = 0}, .m_objs = {((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__0_value),((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)(((size_t)(23) << 1) | 1))}};
+static const lean_ctor_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*3 + 0, .m_other = 3, .m_tag = 0}, .m_objs = {((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__0_value),((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)(((size_t)(24) << 1) | 1))}};
 static const lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__1 = (const lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__1_value;
-static const lean_string_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__2_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 18, .m_capacity = 18, .m_length = 17, .m_data = "_root_DecidableLT"};
+static const lean_string_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__2_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 12, .m_capacity = 12, .m_length = 11, .m_data = "DecidableLT"};
 static const lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__2 = (const lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__2_value;
-static const lean_ctor_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3_value_aux_0 = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__2_value),LEAN_SCALAR_PTR_LITERAL(43, 64, 82, 82, 146, 13, 218, 204)}};
-static const lean_ctor_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3_value_aux_0),((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_le___autoParam___closed__3_value),LEAN_SCALAR_PTR_LITERAL(181, 42, 76, 55, 60, 198, 152, 25)}};
+static const lean_ctor_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3_value_aux_0 = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)(((size_t)(0) << 1) | 1)),((lean_object*)&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__34_value),LEAN_SCALAR_PTR_LITERAL(184, 175, 53, 50, 212, 152, 178, 8)}};
+static const lean_ctor_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3_value_aux_1 = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3_value_aux_0),((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__2_value),LEAN_SCALAR_PTR_LITERAL(6, 73, 164, 254, 38, 145, 247, 116)}};
+static const lean_ctor_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*2 + 8, .m_other = 2, .m_tag = 1}, .m_objs = {((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3_value_aux_1),((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_le___autoParam___closed__3_value),LEAN_SCALAR_PTR_LITERAL(124, 62, 28, 15, 17, 140, 162, 217)}};
 static const lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3 = (const lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3_value;
 static const lean_ctor_object l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__4_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*4 + 0, .m_other = 4, .m_tag = 3}, .m_objs = {((lean_object*)(((size_t)(2) << 1) | 1)),((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__1_value),((lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__3_value),((lean_object*)(((size_t)(0) << 1) | 1))}};
 static const lean_object* l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__4 = (const lean_object*)&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__4_value;
@@ -3118,7 +3119,7 @@ LEAN_EXPORT lean_object* l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam
 LEAN_EXPORT lean_object* l_Std_LinearOrderPackage_ofOrd___auto__1;
 LEAN_EXPORT lean_object* l_Std_LinearOrderPackage_ofOrd___redArg(lean_object*);
 LEAN_EXPORT lean_object* l_Std_LinearOrderPackage_ofOrd(lean_object*, lean_object*);
-LEAN_EXPORT uint8_t l_Std_instDecidableLE___redArg(lean_object* v_inst_1_, lean_object* v_a_2_, lean_object* v_b_3_){
+LEAN_EXPORT uint8_t l_Std_instUDecidableLE___redArg(lean_object* v_inst_1_, lean_object* v_a_2_, lean_object* v_b_3_){
 _start:
 {
 lean_object* v_decidableLE_4_; lean_object* v___x_5_; uint8_t v___x_6_; 
@@ -3130,33 +3131,33 @@ v___x_6_ = lean_unbox(v___x_5_);
 return v___x_6_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_instDecidableLE___redArg___boxed(lean_object* v_inst_7_, lean_object* v_a_8_, lean_object* v_b_9_){
+LEAN_EXPORT lean_object* l_Std_instUDecidableLE___redArg___boxed(lean_object* v_inst_7_, lean_object* v_a_8_, lean_object* v_b_9_){
 _start:
 {
 uint8_t v_res_10_; lean_object* v_r_11_; 
-v_res_10_ = l_Std_instDecidableLE___redArg(v_inst_7_, v_a_8_, v_b_9_);
+v_res_10_ = l_Std_instUDecidableLE___redArg(v_inst_7_, v_a_8_, v_b_9_);
 v_r_11_ = lean_box(v_res_10_);
 return v_r_11_;
 }
 }
-LEAN_EXPORT uint8_t l_Std_instDecidableLE(lean_object* v_00_u03b1_12_, lean_object* v_inst_13_, lean_object* v_a_14_, lean_object* v_b_15_){
+LEAN_EXPORT uint8_t l_Std_instUDecidableLE(lean_object* v_00_u03b1_12_, lean_object* v_inst_13_, lean_object* v_a_14_, lean_object* v_b_15_){
 _start:
 {
 uint8_t v___x_16_; 
-v___x_16_ = l_Std_instDecidableLE___redArg(v_inst_13_, v_a_14_, v_b_15_);
+v___x_16_ = l_Std_instUDecidableLE___redArg(v_inst_13_, v_a_14_, v_b_15_);
 return v___x_16_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_instDecidableLE___boxed(lean_object* v_00_u03b1_17_, lean_object* v_inst_18_, lean_object* v_a_19_, lean_object* v_b_20_){
+LEAN_EXPORT lean_object* l_Std_instUDecidableLE___boxed(lean_object* v_00_u03b1_17_, lean_object* v_inst_18_, lean_object* v_a_19_, lean_object* v_b_20_){
 _start:
 {
 uint8_t v_res_21_; lean_object* v_r_22_; 
-v_res_21_ = l_Std_instDecidableLE(v_00_u03b1_17_, v_inst_18_, v_a_19_, v_b_20_);
+v_res_21_ = l_Std_instUDecidableLE(v_00_u03b1_17_, v_inst_18_, v_a_19_, v_b_20_);
 v_r_22_ = lean_box(v_res_21_);
 return v_r_22_;
 }
 }
-LEAN_EXPORT uint8_t l_Std_instDecidableLT___redArg(lean_object* v_inst_23_, lean_object* v_a_24_, lean_object* v_b_25_){
+LEAN_EXPORT uint8_t l_Std_instUDecidableLT___redArg(lean_object* v_inst_23_, lean_object* v_a_24_, lean_object* v_b_25_){
 _start:
 {
 lean_object* v_decidableLT_26_; lean_object* v___x_27_; uint8_t v___x_28_; 
@@ -3168,28 +3169,28 @@ v___x_28_ = lean_unbox(v___x_27_);
 return v___x_28_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_instDecidableLT___redArg___boxed(lean_object* v_inst_29_, lean_object* v_a_30_, lean_object* v_b_31_){
+LEAN_EXPORT lean_object* l_Std_instUDecidableLT___redArg___boxed(lean_object* v_inst_29_, lean_object* v_a_30_, lean_object* v_b_31_){
 _start:
 {
 uint8_t v_res_32_; lean_object* v_r_33_; 
-v_res_32_ = l_Std_instDecidableLT___redArg(v_inst_29_, v_a_30_, v_b_31_);
+v_res_32_ = l_Std_instUDecidableLT___redArg(v_inst_29_, v_a_30_, v_b_31_);
 v_r_33_ = lean_box(v_res_32_);
 return v_r_33_;
 }
 }
-LEAN_EXPORT uint8_t l_Std_instDecidableLT(lean_object* v_00_u03b1_34_, lean_object* v_inst_35_, lean_object* v_a_36_, lean_object* v_b_37_){
+LEAN_EXPORT uint8_t l_Std_instUDecidableLT(lean_object* v_00_u03b1_34_, lean_object* v_inst_35_, lean_object* v_a_36_, lean_object* v_b_37_){
 _start:
 {
 uint8_t v___x_38_; 
-v___x_38_ = l_Std_instDecidableLT___redArg(v_inst_35_, v_a_36_, v_b_37_);
+v___x_38_ = l_Std_instUDecidableLT___redArg(v_inst_35_, v_a_36_, v_b_37_);
 return v___x_38_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_instDecidableLT___boxed(lean_object* v_00_u03b1_39_, lean_object* v_inst_40_, lean_object* v_a_41_, lean_object* v_b_42_){
+LEAN_EXPORT lean_object* l_Std_instUDecidableLT___boxed(lean_object* v_00_u03b1_39_, lean_object* v_inst_40_, lean_object* v_a_41_, lean_object* v_b_42_){
 _start:
 {
 uint8_t v_res_43_; lean_object* v_r_44_; 
-v_res_43_ = l_Std_instDecidableLT(v_00_u03b1_39_, v_inst_40_, v_a_41_, v_b_42_);
+v_res_43_ = l_Std_instUDecidableLT(v_00_u03b1_39_, v_inst_40_, v_a_41_, v_b_42_);
 v_r_44_ = lean_box(v_res_43_);
 return v_r_44_;
 }
@@ -3251,26 +3252,23 @@ return v___f_63_;
 LEAN_EXPORT uint8_t l_Std_FactoryInstances_decidableLTOfLE___redArg(lean_object* v_inst_64_, lean_object* v_a_65_, lean_object* v_b_66_){
 _start:
 {
-lean_object* v___x_67_; uint8_t v___x_68_; 
+lean_object* v___x_67_; lean_object* v___x_68_; uint8_t v___x_69_; 
 lean_inc_ref(v_inst_64_);
 lean_inc(v_b_66_);
 lean_inc(v_a_65_);
 v___x_67_ = lean_apply_2(v_inst_64_, v_a_65_, v_b_66_);
-v___x_68_ = lean_unbox(v___x_67_);
-if (v___x_68_ == 0)
+v___x_68_ = lean_apply_2(v_inst_64_, v_b_66_, v_a_65_);
+v___x_69_ = lean_unbox(v___x_68_);
+if (v___x_69_ == 0)
 {
-uint8_t v___x_69_; 
-lean_dec(v_b_66_);
-lean_dec(v_a_65_);
-lean_dec_ref(v_inst_64_);
-v___x_69_ = lean_unbox(v___x_67_);
-return v___x_69_;
+uint8_t v___x_70_; 
+v___x_70_ = lean_unbox(v___x_67_);
+return v___x_70_;
 }
 else
 {
-lean_object* v___x_70_; uint8_t v___x_71_; 
-v___x_70_ = lean_apply_2(v_inst_64_, v_b_66_, v_a_65_);
-v___x_71_ = lean_unbox(v___x_70_);
+uint8_t v___x_71_; 
+v___x_71_ = lean_unbox(v___x_67_);
 if (v___x_71_ == 0)
 {
 uint8_t v___x_72_; 
@@ -3298,26 +3296,23 @@ return v_r_78_;
 LEAN_EXPORT uint8_t l_Std_FactoryInstances_decidableLTOfLE(lean_object* v_00_u03b1_79_, lean_object* v_inst_80_, lean_object* v_x_81_, lean_object* v_inst_82_, lean_object* v_inst_83_, lean_object* v_a_84_, lean_object* v_b_85_){
 _start:
 {
-lean_object* v___x_86_; uint8_t v___x_87_; 
+lean_object* v___x_86_; lean_object* v___x_87_; uint8_t v___x_88_; 
 lean_inc_ref(v_inst_82_);
 lean_inc(v_b_85_);
 lean_inc(v_a_84_);
 v___x_86_ = lean_apply_2(v_inst_82_, v_a_84_, v_b_85_);
-v___x_87_ = lean_unbox(v___x_86_);
-if (v___x_87_ == 0)
+v___x_87_ = lean_apply_2(v_inst_82_, v_b_85_, v_a_84_);
+v___x_88_ = lean_unbox(v___x_87_);
+if (v___x_88_ == 0)
 {
-uint8_t v___x_88_; 
-lean_dec(v_b_85_);
-lean_dec(v_a_84_);
-lean_dec_ref(v_inst_82_);
-v___x_88_ = lean_unbox(v___x_86_);
-return v___x_88_;
+uint8_t v___x_89_; 
+v___x_89_ = lean_unbox(v___x_86_);
+return v___x_89_;
 }
 else
 {
-lean_object* v___x_89_; uint8_t v___x_90_; 
-v___x_89_ = lean_apply_2(v_inst_82_, v_b_85_, v_a_84_);
-v___x_90_ = lean_unbox(v___x_89_);
+uint8_t v___x_90_; 
+v___x_90_ = lean_unbox(v___x_86_);
 if (v___x_90_ == 0)
 {
 uint8_t v___x_91_; 
@@ -14926,3025 +14921,3025 @@ return v___x_4066_;
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__5(void){
 _start:
 {
-lean_object* v___x_4081_; lean_object* v___x_4082_; lean_object* v___x_4083_; 
-v___x_4081_ = ((lean_object*)(l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__4));
-v___x_4082_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4083_ = lean_array_push(v___x_4082_, v___x_4081_);
-return v___x_4083_;
+lean_object* v___x_4082_; lean_object* v___x_4083_; lean_object* v___x_4084_; 
+v___x_4082_ = ((lean_object*)(l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__4));
+v___x_4083_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4084_ = lean_array_push(v___x_4083_, v___x_4082_);
+return v___x_4084_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__6(void){
 _start:
 {
-lean_object* v___x_4084_; lean_object* v___x_4085_; lean_object* v___x_4086_; 
-v___x_4084_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7, &l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7);
-v___x_4085_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__5, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__5_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__5);
-v___x_4086_ = lean_array_push(v___x_4085_, v___x_4084_);
-return v___x_4086_;
+lean_object* v___x_4085_; lean_object* v___x_4086_; lean_object* v___x_4087_; 
+v___x_4085_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7, &l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7);
+v___x_4086_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__5, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__5_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__5);
+v___x_4087_ = lean_array_push(v___x_4086_, v___x_4085_);
+return v___x_4087_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__7(void){
 _start:
 {
-lean_object* v___x_4087_; lean_object* v___x_4088_; lean_object* v___x_4089_; lean_object* v___x_4090_; 
-v___x_4087_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__6, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__6_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__6);
-v___x_4088_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__37));
-v___x_4089_ = lean_box(2);
-v___x_4090_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4090_, 0, v___x_4089_);
-lean_ctor_set(v___x_4090_, 1, v___x_4088_);
-lean_ctor_set(v___x_4090_, 2, v___x_4087_);
-return v___x_4090_;
+lean_object* v___x_4088_; lean_object* v___x_4089_; lean_object* v___x_4090_; lean_object* v___x_4091_; 
+v___x_4088_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__6, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__6_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__6);
+v___x_4089_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__37));
+v___x_4090_ = lean_box(2);
+v___x_4091_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4091_, 0, v___x_4090_);
+lean_ctor_set(v___x_4091_, 1, v___x_4089_);
+lean_ctor_set(v___x_4091_, 2, v___x_4088_);
+return v___x_4091_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__8(void){
 _start:
 {
-lean_object* v___x_4091_; lean_object* v___x_4092_; lean_object* v___x_4093_; 
-v___x_4091_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__7, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__7_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__7);
-v___x_4092_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
-v___x_4093_ = lean_array_push(v___x_4092_, v___x_4091_);
-return v___x_4093_;
+lean_object* v___x_4092_; lean_object* v___x_4093_; lean_object* v___x_4094_; 
+v___x_4092_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__7, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__7_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__7);
+v___x_4093_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
+v___x_4094_ = lean_array_push(v___x_4093_, v___x_4092_);
+return v___x_4094_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__9(void){
 _start:
 {
-lean_object* v___x_4094_; lean_object* v___x_4095_; lean_object* v___x_4096_; lean_object* v___x_4097_; 
-v___x_4094_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__8, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__8_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__8);
-v___x_4095_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
-v___x_4096_ = lean_box(2);
-v___x_4097_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4097_, 0, v___x_4096_);
-lean_ctor_set(v___x_4097_, 1, v___x_4095_);
-lean_ctor_set(v___x_4097_, 2, v___x_4094_);
-return v___x_4097_;
+lean_object* v___x_4095_; lean_object* v___x_4096_; lean_object* v___x_4097_; lean_object* v___x_4098_; 
+v___x_4095_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__8, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__8_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__8);
+v___x_4096_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
+v___x_4097_ = lean_box(2);
+v___x_4098_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4098_, 0, v___x_4097_);
+lean_ctor_set(v___x_4098_, 1, v___x_4096_);
+lean_ctor_set(v___x_4098_, 2, v___x_4095_);
+return v___x_4098_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__10(void){
 _start:
 {
-lean_object* v___x_4098_; lean_object* v___x_4099_; lean_object* v___x_4100_; 
-v___x_4098_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__9, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__9_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__9);
-v___x_4099_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4100_ = lean_array_push(v___x_4099_, v___x_4098_);
-return v___x_4100_;
+lean_object* v___x_4099_; lean_object* v___x_4100_; lean_object* v___x_4101_; 
+v___x_4099_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__9, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__9_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__9);
+v___x_4100_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4101_ = lean_array_push(v___x_4100_, v___x_4099_);
+return v___x_4101_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__11(void){
 _start:
 {
-lean_object* v___x_4101_; lean_object* v___x_4102_; lean_object* v___x_4103_; lean_object* v___x_4104_; 
-v___x_4101_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__10, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__10_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__10);
-v___x_4102_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4103_ = lean_box(2);
-v___x_4104_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4104_, 0, v___x_4103_);
-lean_ctor_set(v___x_4104_, 1, v___x_4102_);
-lean_ctor_set(v___x_4104_, 2, v___x_4101_);
-return v___x_4104_;
+lean_object* v___x_4102_; lean_object* v___x_4103_; lean_object* v___x_4104_; lean_object* v___x_4105_; 
+v___x_4102_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__10, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__10_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__10);
+v___x_4103_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4104_ = lean_box(2);
+v___x_4105_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4105_, 0, v___x_4104_);
+lean_ctor_set(v___x_4105_, 1, v___x_4103_);
+lean_ctor_set(v___x_4105_, 2, v___x_4102_);
+return v___x_4105_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__12(void){
 _start:
 {
-lean_object* v___x_4105_; lean_object* v___x_4106_; lean_object* v___x_4107_; 
-v___x_4105_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__11, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__11_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__11);
-v___x_4106_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4107_ = lean_array_push(v___x_4106_, v___x_4105_);
-return v___x_4107_;
+lean_object* v___x_4106_; lean_object* v___x_4107_; lean_object* v___x_4108_; 
+v___x_4106_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__11, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__11_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__11);
+v___x_4107_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4108_ = lean_array_push(v___x_4107_, v___x_4106_);
+return v___x_4108_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__13(void){
 _start:
 {
-lean_object* v___x_4108_; lean_object* v___x_4109_; lean_object* v___x_4110_; lean_object* v___x_4111_; 
-v___x_4108_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__12, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__12_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__12);
-v___x_4109_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4110_ = lean_box(2);
-v___x_4111_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4111_, 0, v___x_4110_);
-lean_ctor_set(v___x_4111_, 1, v___x_4109_);
-lean_ctor_set(v___x_4111_, 2, v___x_4108_);
-return v___x_4111_;
+lean_object* v___x_4109_; lean_object* v___x_4110_; lean_object* v___x_4111_; lean_object* v___x_4112_; 
+v___x_4109_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__12, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__12_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__12);
+v___x_4110_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4111_ = lean_box(2);
+v___x_4112_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4112_, 0, v___x_4111_);
+lean_ctor_set(v___x_4112_, 1, v___x_4110_);
+lean_ctor_set(v___x_4112_, 2, v___x_4109_);
+return v___x_4112_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__14(void){
 _start:
 {
-lean_object* v___x_4112_; lean_object* v___x_4113_; lean_object* v___x_4114_; 
-v___x_4112_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__13, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__13_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__13);
-v___x_4113_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4114_ = lean_array_push(v___x_4113_, v___x_4112_);
-return v___x_4114_;
+lean_object* v___x_4113_; lean_object* v___x_4114_; lean_object* v___x_4115_; 
+v___x_4113_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__13, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__13_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__13);
+v___x_4114_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4115_ = lean_array_push(v___x_4114_, v___x_4113_);
+return v___x_4115_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__15(void){
 _start:
 {
-lean_object* v___x_4115_; lean_object* v___x_4116_; lean_object* v___x_4117_; lean_object* v___x_4118_; 
-v___x_4115_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__14, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__14_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__14);
-v___x_4116_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4117_ = lean_box(2);
-v___x_4118_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4118_, 0, v___x_4117_);
-lean_ctor_set(v___x_4118_, 1, v___x_4116_);
-lean_ctor_set(v___x_4118_, 2, v___x_4115_);
-return v___x_4118_;
+lean_object* v___x_4116_; lean_object* v___x_4117_; lean_object* v___x_4118_; lean_object* v___x_4119_; 
+v___x_4116_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__14, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__14_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__14);
+v___x_4117_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4118_ = lean_box(2);
+v___x_4119_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4119_, 0, v___x_4118_);
+lean_ctor_set(v___x_4119_, 1, v___x_4117_);
+lean_ctor_set(v___x_4119_, 2, v___x_4116_);
+return v___x_4119_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__16(void){
 _start:
 {
-lean_object* v___x_4119_; lean_object* v___x_4120_; lean_object* v___x_4121_; 
-v___x_4119_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__15, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__15_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__15);
-v___x_4120_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
-v___x_4121_ = lean_array_push(v___x_4120_, v___x_4119_);
-return v___x_4121_;
+lean_object* v___x_4120_; lean_object* v___x_4121_; lean_object* v___x_4122_; 
+v___x_4120_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__15, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__15_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__15);
+v___x_4121_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
+v___x_4122_ = lean_array_push(v___x_4121_, v___x_4120_);
+return v___x_4122_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__17(void){
 _start:
 {
-lean_object* v___x_4122_; lean_object* v___x_4123_; lean_object* v___x_4124_; lean_object* v___x_4125_; 
-v___x_4122_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__16, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__16_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__16);
-v___x_4123_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
-v___x_4124_ = lean_box(2);
-v___x_4125_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4125_, 0, v___x_4124_);
-lean_ctor_set(v___x_4125_, 1, v___x_4123_);
-lean_ctor_set(v___x_4125_, 2, v___x_4122_);
-return v___x_4125_;
+lean_object* v___x_4123_; lean_object* v___x_4124_; lean_object* v___x_4125_; lean_object* v___x_4126_; 
+v___x_4123_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__16, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__16_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__16);
+v___x_4124_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
+v___x_4125_ = lean_box(2);
+v___x_4126_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4126_, 0, v___x_4125_);
+lean_ctor_set(v___x_4126_, 1, v___x_4124_);
+lean_ctor_set(v___x_4126_, 2, v___x_4123_);
+return v___x_4126_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__18(void){
 _start:
 {
-lean_object* v___x_4126_; lean_object* v___x_4127_; lean_object* v___x_4128_; 
-v___x_4126_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__17, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__17_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__17);
-v___x_4127_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27);
-v___x_4128_ = lean_array_push(v___x_4127_, v___x_4126_);
-return v___x_4128_;
+lean_object* v___x_4127_; lean_object* v___x_4128_; lean_object* v___x_4129_; 
+v___x_4127_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__17, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__17_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__17);
+v___x_4128_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27);
+v___x_4129_ = lean_array_push(v___x_4128_, v___x_4127_);
+return v___x_4129_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__19(void){
 _start:
 {
-lean_object* v___x_4129_; lean_object* v___x_4130_; lean_object* v___x_4131_; 
-v___x_4129_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__169, &l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__169_once, _init_l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__169);
-v___x_4130_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__18, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__18_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__18);
-v___x_4131_ = lean_array_push(v___x_4130_, v___x_4129_);
-return v___x_4131_;
+lean_object* v___x_4130_; lean_object* v___x_4131_; lean_object* v___x_4132_; 
+v___x_4130_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__169, &l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__169_once, _init_l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__169);
+v___x_4131_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__18, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__18_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__18);
+v___x_4132_ = lean_array_push(v___x_4131_, v___x_4130_);
+return v___x_4132_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__20(void){
 _start:
 {
-lean_object* v___x_4132_; lean_object* v___x_4133_; lean_object* v___x_4134_; lean_object* v___x_4135_; 
-v___x_4132_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__19, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__19_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__19);
-v___x_4133_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4134_ = lean_box(2);
-v___x_4135_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4135_, 0, v___x_4134_);
-lean_ctor_set(v___x_4135_, 1, v___x_4133_);
-lean_ctor_set(v___x_4135_, 2, v___x_4132_);
-return v___x_4135_;
+lean_object* v___x_4133_; lean_object* v___x_4134_; lean_object* v___x_4135_; lean_object* v___x_4136_; 
+v___x_4133_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__19, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__19_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__19);
+v___x_4134_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4135_ = lean_box(2);
+v___x_4136_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4136_, 0, v___x_4135_);
+lean_ctor_set(v___x_4136_, 1, v___x_4134_);
+lean_ctor_set(v___x_4136_, 2, v___x_4133_);
+return v___x_4136_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__21(void){
 _start:
 {
-lean_object* v___x_4136_; lean_object* v___x_4137_; lean_object* v___x_4138_; 
-v___x_4136_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__20, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__20_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__20);
-v___x_4137_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
-v___x_4138_ = lean_array_push(v___x_4137_, v___x_4136_);
-return v___x_4138_;
+lean_object* v___x_4137_; lean_object* v___x_4138_; lean_object* v___x_4139_; 
+v___x_4137_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__20, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__20_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__20);
+v___x_4138_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
+v___x_4139_ = lean_array_push(v___x_4138_, v___x_4137_);
+return v___x_4139_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__22(void){
 _start:
 {
-lean_object* v___x_4139_; lean_object* v___x_4140_; lean_object* v___x_4141_; lean_object* v___x_4142_; 
-v___x_4139_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__21, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__21_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__21);
-v___x_4140_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
-v___x_4141_ = lean_box(2);
-v___x_4142_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4142_, 0, v___x_4141_);
-lean_ctor_set(v___x_4142_, 1, v___x_4140_);
-lean_ctor_set(v___x_4142_, 2, v___x_4139_);
-return v___x_4142_;
+lean_object* v___x_4140_; lean_object* v___x_4141_; lean_object* v___x_4142_; lean_object* v___x_4143_; 
+v___x_4140_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__21, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__21_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__21);
+v___x_4141_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
+v___x_4142_ = lean_box(2);
+v___x_4143_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4143_, 0, v___x_4142_);
+lean_ctor_set(v___x_4143_, 1, v___x_4141_);
+lean_ctor_set(v___x_4143_, 2, v___x_4140_);
+return v___x_4143_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__23(void){
 _start:
 {
-lean_object* v___x_4143_; lean_object* v___x_4144_; lean_object* v___x_4145_; 
-v___x_4143_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__22, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__22_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__22);
-v___x_4144_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
-v___x_4145_ = lean_array_push(v___x_4144_, v___x_4143_);
-return v___x_4145_;
+lean_object* v___x_4144_; lean_object* v___x_4145_; lean_object* v___x_4146_; 
+v___x_4144_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__22, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__22_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__22);
+v___x_4145_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
+v___x_4146_ = lean_array_push(v___x_4145_, v___x_4144_);
+return v___x_4146_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__24(void){
 _start:
 {
-lean_object* v___x_4146_; lean_object* v___x_4147_; lean_object* v___x_4148_; lean_object* v___x_4149_; 
-v___x_4146_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__23, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__23_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__23);
-v___x_4147_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4148_ = lean_box(2);
-v___x_4149_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4149_, 0, v___x_4148_);
-lean_ctor_set(v___x_4149_, 1, v___x_4147_);
-lean_ctor_set(v___x_4149_, 2, v___x_4146_);
-return v___x_4149_;
+lean_object* v___x_4147_; lean_object* v___x_4148_; lean_object* v___x_4149_; lean_object* v___x_4150_; 
+v___x_4147_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__23, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__23_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__23);
+v___x_4148_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4149_ = lean_box(2);
+v___x_4150_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4150_, 0, v___x_4149_);
+lean_ctor_set(v___x_4150_, 1, v___x_4148_);
+lean_ctor_set(v___x_4150_, 2, v___x_4147_);
+return v___x_4150_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__25(void){
 _start:
 {
-lean_object* v___x_4150_; lean_object* v___x_4151_; lean_object* v___x_4152_; 
-v___x_4150_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__24, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__24_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__24);
-v___x_4151_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4152_ = lean_array_push(v___x_4151_, v___x_4150_);
-return v___x_4152_;
+lean_object* v___x_4151_; lean_object* v___x_4152_; lean_object* v___x_4153_; 
+v___x_4151_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__24, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__24_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__24);
+v___x_4152_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4153_ = lean_array_push(v___x_4152_, v___x_4151_);
+return v___x_4153_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__26(void){
 _start:
 {
-lean_object* v___x_4153_; lean_object* v___x_4154_; lean_object* v___x_4155_; lean_object* v___x_4156_; 
-v___x_4153_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__25, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__25_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__25);
-v___x_4154_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4155_ = lean_box(2);
-v___x_4156_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4156_, 0, v___x_4155_);
-lean_ctor_set(v___x_4156_, 1, v___x_4154_);
-lean_ctor_set(v___x_4156_, 2, v___x_4153_);
-return v___x_4156_;
+lean_object* v___x_4154_; lean_object* v___x_4155_; lean_object* v___x_4156_; lean_object* v___x_4157_; 
+v___x_4154_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__25, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__25_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__25);
+v___x_4155_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4156_ = lean_box(2);
+v___x_4157_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4157_, 0, v___x_4156_);
+lean_ctor_set(v___x_4157_, 1, v___x_4155_);
+lean_ctor_set(v___x_4157_, 2, v___x_4154_);
+return v___x_4157_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__27(void){
 _start:
 {
-lean_object* v___x_4157_; lean_object* v___x_4158_; lean_object* v___x_4159_; 
-v___x_4157_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__26, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__26_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__26);
-v___x_4158_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4159_ = lean_array_push(v___x_4158_, v___x_4157_);
-return v___x_4159_;
+lean_object* v___x_4158_; lean_object* v___x_4159_; lean_object* v___x_4160_; 
+v___x_4158_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__26, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__26_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__26);
+v___x_4159_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4160_ = lean_array_push(v___x_4159_, v___x_4158_);
+return v___x_4160_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__28(void){
 _start:
 {
-lean_object* v___x_4160_; lean_object* v___x_4161_; lean_object* v___x_4162_; lean_object* v___x_4163_; 
-v___x_4160_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__27, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__27_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__27);
-v___x_4161_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4162_ = lean_box(2);
-v___x_4163_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4163_, 0, v___x_4162_);
-lean_ctor_set(v___x_4163_, 1, v___x_4161_);
-lean_ctor_set(v___x_4163_, 2, v___x_4160_);
-return v___x_4163_;
+lean_object* v___x_4161_; lean_object* v___x_4162_; lean_object* v___x_4163_; lean_object* v___x_4164_; 
+v___x_4161_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__27, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__27_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__27);
+v___x_4162_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4163_ = lean_box(2);
+v___x_4164_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4164_, 0, v___x_4163_);
+lean_ctor_set(v___x_4164_, 1, v___x_4162_);
+lean_ctor_set(v___x_4164_, 2, v___x_4161_);
+return v___x_4164_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam(void){
 _start:
 {
-lean_object* v___x_4164_; 
-v___x_4164_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__28, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__28_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__28);
-return v___x_4164_;
+lean_object* v___x_4165_; 
+v___x_4165_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__28, &l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__28_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_decidableLT___autoParam___closed__28);
+return v___x_4165_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__5(void){
 _start:
 {
-lean_object* v___x_4180_; lean_object* v___x_4181_; lean_object* v___x_4182_; 
-v___x_4180_ = ((lean_object*)(l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__4));
-v___x_4181_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4182_ = lean_array_push(v___x_4181_, v___x_4180_);
-return v___x_4182_;
+lean_object* v___x_4181_; lean_object* v___x_4182_; lean_object* v___x_4183_; 
+v___x_4181_ = ((lean_object*)(l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__4));
+v___x_4182_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4183_ = lean_array_push(v___x_4182_, v___x_4181_);
+return v___x_4183_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__6(void){
 _start:
 {
-lean_object* v___x_4183_; lean_object* v___x_4184_; lean_object* v___x_4185_; 
-v___x_4183_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7, &l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7);
-v___x_4184_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__5, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__5_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__5);
-v___x_4185_ = lean_array_push(v___x_4184_, v___x_4183_);
-return v___x_4185_;
+lean_object* v___x_4184_; lean_object* v___x_4185_; lean_object* v___x_4186_; 
+v___x_4184_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7, &l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min___autoParam___closed__7);
+v___x_4185_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__5, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__5_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__5);
+v___x_4186_ = lean_array_push(v___x_4185_, v___x_4184_);
+return v___x_4186_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__7(void){
 _start:
 {
-lean_object* v___x_4186_; lean_object* v___x_4187_; lean_object* v___x_4188_; lean_object* v___x_4189_; 
-v___x_4186_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__6, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__6_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__6);
-v___x_4187_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__37));
-v___x_4188_ = lean_box(2);
-v___x_4189_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4189_, 0, v___x_4188_);
-lean_ctor_set(v___x_4189_, 1, v___x_4187_);
-lean_ctor_set(v___x_4189_, 2, v___x_4186_);
-return v___x_4189_;
+lean_object* v___x_4187_; lean_object* v___x_4188_; lean_object* v___x_4189_; lean_object* v___x_4190_; 
+v___x_4187_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__6, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__6_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__6);
+v___x_4188_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__37));
+v___x_4189_ = lean_box(2);
+v___x_4190_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4190_, 0, v___x_4189_);
+lean_ctor_set(v___x_4190_, 1, v___x_4188_);
+lean_ctor_set(v___x_4190_, 2, v___x_4187_);
+return v___x_4190_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__8(void){
 _start:
 {
-lean_object* v___x_4190_; lean_object* v___x_4191_; lean_object* v___x_4192_; 
-v___x_4190_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__7, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__7_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__7);
-v___x_4191_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
-v___x_4192_ = lean_array_push(v___x_4191_, v___x_4190_);
-return v___x_4192_;
+lean_object* v___x_4191_; lean_object* v___x_4192_; lean_object* v___x_4193_; 
+v___x_4191_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__7, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__7_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__7);
+v___x_4192_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
+v___x_4193_ = lean_array_push(v___x_4192_, v___x_4191_);
+return v___x_4193_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__9(void){
 _start:
 {
-lean_object* v___x_4193_; lean_object* v___x_4194_; lean_object* v___x_4195_; lean_object* v___x_4196_; 
-v___x_4193_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__8, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__8_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__8);
-v___x_4194_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
-v___x_4195_ = lean_box(2);
-v___x_4196_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4196_, 0, v___x_4195_);
-lean_ctor_set(v___x_4196_, 1, v___x_4194_);
-lean_ctor_set(v___x_4196_, 2, v___x_4193_);
-return v___x_4196_;
+lean_object* v___x_4194_; lean_object* v___x_4195_; lean_object* v___x_4196_; lean_object* v___x_4197_; 
+v___x_4194_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__8, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__8_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__8);
+v___x_4195_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
+v___x_4196_ = lean_box(2);
+v___x_4197_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4197_, 0, v___x_4196_);
+lean_ctor_set(v___x_4197_, 1, v___x_4195_);
+lean_ctor_set(v___x_4197_, 2, v___x_4194_);
+return v___x_4197_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__10(void){
 _start:
 {
-lean_object* v___x_4197_; lean_object* v___x_4198_; lean_object* v___x_4199_; 
-v___x_4197_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__9, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__9_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__9);
-v___x_4198_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4199_ = lean_array_push(v___x_4198_, v___x_4197_);
-return v___x_4199_;
+lean_object* v___x_4198_; lean_object* v___x_4199_; lean_object* v___x_4200_; 
+v___x_4198_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__9, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__9_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__9);
+v___x_4199_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4200_ = lean_array_push(v___x_4199_, v___x_4198_);
+return v___x_4200_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__11(void){
 _start:
 {
-lean_object* v___x_4200_; lean_object* v___x_4201_; lean_object* v___x_4202_; lean_object* v___x_4203_; 
-v___x_4200_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__10, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__10_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__10);
-v___x_4201_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4202_ = lean_box(2);
-v___x_4203_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4203_, 0, v___x_4202_);
-lean_ctor_set(v___x_4203_, 1, v___x_4201_);
-lean_ctor_set(v___x_4203_, 2, v___x_4200_);
-return v___x_4203_;
+lean_object* v___x_4201_; lean_object* v___x_4202_; lean_object* v___x_4203_; lean_object* v___x_4204_; 
+v___x_4201_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__10, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__10_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__10);
+v___x_4202_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4203_ = lean_box(2);
+v___x_4204_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4204_, 0, v___x_4203_);
+lean_ctor_set(v___x_4204_, 1, v___x_4202_);
+lean_ctor_set(v___x_4204_, 2, v___x_4201_);
+return v___x_4204_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__12(void){
 _start:
 {
-lean_object* v___x_4204_; lean_object* v___x_4205_; lean_object* v___x_4206_; 
-v___x_4204_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__11, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__11_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__11);
-v___x_4205_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4206_ = lean_array_push(v___x_4205_, v___x_4204_);
-return v___x_4206_;
+lean_object* v___x_4205_; lean_object* v___x_4206_; lean_object* v___x_4207_; 
+v___x_4205_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__11, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__11_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__11);
+v___x_4206_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4207_ = lean_array_push(v___x_4206_, v___x_4205_);
+return v___x_4207_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__13(void){
 _start:
 {
-lean_object* v___x_4207_; lean_object* v___x_4208_; lean_object* v___x_4209_; lean_object* v___x_4210_; 
-v___x_4207_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__12, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__12_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__12);
-v___x_4208_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4209_ = lean_box(2);
-v___x_4210_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4210_, 0, v___x_4209_);
-lean_ctor_set(v___x_4210_, 1, v___x_4208_);
-lean_ctor_set(v___x_4210_, 2, v___x_4207_);
-return v___x_4210_;
+lean_object* v___x_4208_; lean_object* v___x_4209_; lean_object* v___x_4210_; lean_object* v___x_4211_; 
+v___x_4208_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__12, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__12_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__12);
+v___x_4209_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4210_ = lean_box(2);
+v___x_4211_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4211_, 0, v___x_4210_);
+lean_ctor_set(v___x_4211_, 1, v___x_4209_);
+lean_ctor_set(v___x_4211_, 2, v___x_4208_);
+return v___x_4211_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__14(void){
 _start:
 {
-lean_object* v___x_4211_; lean_object* v___x_4212_; lean_object* v___x_4213_; 
-v___x_4211_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__13, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__13_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__13);
-v___x_4212_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4213_ = lean_array_push(v___x_4212_, v___x_4211_);
-return v___x_4213_;
+lean_object* v___x_4212_; lean_object* v___x_4213_; lean_object* v___x_4214_; 
+v___x_4212_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__13, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__13_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__13);
+v___x_4213_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4214_ = lean_array_push(v___x_4213_, v___x_4212_);
+return v___x_4214_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__15(void){
 _start:
 {
-lean_object* v___x_4214_; lean_object* v___x_4215_; lean_object* v___x_4216_; lean_object* v___x_4217_; 
-v___x_4214_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__14, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__14_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__14);
-v___x_4215_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4216_ = lean_box(2);
-v___x_4217_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4217_, 0, v___x_4216_);
-lean_ctor_set(v___x_4217_, 1, v___x_4215_);
-lean_ctor_set(v___x_4217_, 2, v___x_4214_);
-return v___x_4217_;
+lean_object* v___x_4215_; lean_object* v___x_4216_; lean_object* v___x_4217_; lean_object* v___x_4218_; 
+v___x_4215_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__14, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__14_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__14);
+v___x_4216_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4217_ = lean_box(2);
+v___x_4218_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4218_, 0, v___x_4217_);
+lean_ctor_set(v___x_4218_, 1, v___x_4216_);
+lean_ctor_set(v___x_4218_, 2, v___x_4215_);
+return v___x_4218_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__16(void){
 _start:
 {
-lean_object* v___x_4218_; lean_object* v___x_4219_; lean_object* v___x_4220_; 
-v___x_4218_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__15, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__15_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__15);
-v___x_4219_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
-v___x_4220_ = lean_array_push(v___x_4219_, v___x_4218_);
-return v___x_4220_;
+lean_object* v___x_4219_; lean_object* v___x_4220_; lean_object* v___x_4221_; 
+v___x_4219_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__15, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__15_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__15);
+v___x_4220_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
+v___x_4221_ = lean_array_push(v___x_4220_, v___x_4219_);
+return v___x_4221_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__17(void){
 _start:
 {
-lean_object* v___x_4221_; lean_object* v___x_4222_; lean_object* v___x_4223_; lean_object* v___x_4224_; 
-v___x_4221_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__16, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__16_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__16);
-v___x_4222_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
-v___x_4223_ = lean_box(2);
-v___x_4224_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4224_, 0, v___x_4223_);
-lean_ctor_set(v___x_4224_, 1, v___x_4222_);
-lean_ctor_set(v___x_4224_, 2, v___x_4221_);
-return v___x_4224_;
+lean_object* v___x_4222_; lean_object* v___x_4223_; lean_object* v___x_4224_; lean_object* v___x_4225_; 
+v___x_4222_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__16, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__16_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__16);
+v___x_4223_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
+v___x_4224_ = lean_box(2);
+v___x_4225_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4225_, 0, v___x_4224_);
+lean_ctor_set(v___x_4225_, 1, v___x_4223_);
+lean_ctor_set(v___x_4225_, 2, v___x_4222_);
+return v___x_4225_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__18(void){
 _start:
 {
-lean_object* v___x_4225_; lean_object* v___x_4226_; lean_object* v___x_4227_; 
-v___x_4225_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__17, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__17_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__17);
-v___x_4226_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27);
-v___x_4227_ = lean_array_push(v___x_4226_, v___x_4225_);
-return v___x_4227_;
+lean_object* v___x_4226_; lean_object* v___x_4227_; lean_object* v___x_4228_; 
+v___x_4226_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__17, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__17_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__17);
+v___x_4227_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27);
+v___x_4228_ = lean_array_push(v___x_4227_, v___x_4226_);
+return v___x_4228_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__19(void){
 _start:
 {
-lean_object* v___x_4228_; lean_object* v___x_4229_; lean_object* v___x_4230_; lean_object* v___x_4231_; 
-v___x_4228_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__18, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__18_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__18);
-v___x_4229_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4230_ = lean_box(2);
-v___x_4231_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4231_, 0, v___x_4230_);
-lean_ctor_set(v___x_4231_, 1, v___x_4229_);
-lean_ctor_set(v___x_4231_, 2, v___x_4228_);
-return v___x_4231_;
+lean_object* v___x_4229_; lean_object* v___x_4230_; lean_object* v___x_4231_; lean_object* v___x_4232_; 
+v___x_4229_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__18, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__18_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__18);
+v___x_4230_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4231_ = lean_box(2);
+v___x_4232_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4232_, 0, v___x_4231_);
+lean_ctor_set(v___x_4232_, 1, v___x_4230_);
+lean_ctor_set(v___x_4232_, 2, v___x_4229_);
+return v___x_4232_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__20(void){
 _start:
 {
-lean_object* v___x_4232_; lean_object* v___x_4233_; lean_object* v___x_4234_; 
-v___x_4232_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__19, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__19_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__19);
-v___x_4233_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
-v___x_4234_ = lean_array_push(v___x_4233_, v___x_4232_);
-return v___x_4234_;
+lean_object* v___x_4233_; lean_object* v___x_4234_; lean_object* v___x_4235_; 
+v___x_4233_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__19, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__19_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__19);
+v___x_4234_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
+v___x_4235_ = lean_array_push(v___x_4234_, v___x_4233_);
+return v___x_4235_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__21(void){
 _start:
 {
-lean_object* v___x_4235_; lean_object* v___x_4236_; lean_object* v___x_4237_; lean_object* v___x_4238_; 
-v___x_4235_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__20, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__20_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__20);
-v___x_4236_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
-v___x_4237_ = lean_box(2);
-v___x_4238_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4238_, 0, v___x_4237_);
-lean_ctor_set(v___x_4238_, 1, v___x_4236_);
-lean_ctor_set(v___x_4238_, 2, v___x_4235_);
-return v___x_4238_;
+lean_object* v___x_4236_; lean_object* v___x_4237_; lean_object* v___x_4238_; lean_object* v___x_4239_; 
+v___x_4236_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__20, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__20_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__20);
+v___x_4237_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
+v___x_4238_ = lean_box(2);
+v___x_4239_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4239_, 0, v___x_4238_);
+lean_ctor_set(v___x_4239_, 1, v___x_4237_);
+lean_ctor_set(v___x_4239_, 2, v___x_4236_);
+return v___x_4239_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__22(void){
 _start:
 {
-lean_object* v___x_4239_; lean_object* v___x_4240_; lean_object* v___x_4241_; 
-v___x_4239_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__21, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__21_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__21);
-v___x_4240_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
-v___x_4241_ = lean_array_push(v___x_4240_, v___x_4239_);
-return v___x_4241_;
+lean_object* v___x_4240_; lean_object* v___x_4241_; lean_object* v___x_4242_; 
+v___x_4240_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__21, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__21_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__21);
+v___x_4241_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
+v___x_4242_ = lean_array_push(v___x_4241_, v___x_4240_);
+return v___x_4242_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__23(void){
 _start:
 {
-lean_object* v___x_4242_; lean_object* v___x_4243_; lean_object* v___x_4244_; lean_object* v___x_4245_; 
-v___x_4242_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__22, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__22_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__22);
-v___x_4243_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4244_ = lean_box(2);
-v___x_4245_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4245_, 0, v___x_4244_);
-lean_ctor_set(v___x_4245_, 1, v___x_4243_);
-lean_ctor_set(v___x_4245_, 2, v___x_4242_);
-return v___x_4245_;
+lean_object* v___x_4243_; lean_object* v___x_4244_; lean_object* v___x_4245_; lean_object* v___x_4246_; 
+v___x_4243_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__22, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__22_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__22);
+v___x_4244_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4245_ = lean_box(2);
+v___x_4246_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4246_, 0, v___x_4245_);
+lean_ctor_set(v___x_4246_, 1, v___x_4244_);
+lean_ctor_set(v___x_4246_, 2, v___x_4243_);
+return v___x_4246_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__24(void){
 _start:
 {
-lean_object* v___x_4246_; lean_object* v___x_4247_; lean_object* v___x_4248_; 
-v___x_4246_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__23, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__23_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__23);
-v___x_4247_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4248_ = lean_array_push(v___x_4247_, v___x_4246_);
-return v___x_4248_;
+lean_object* v___x_4247_; lean_object* v___x_4248_; lean_object* v___x_4249_; 
+v___x_4247_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__23, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__23_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__23);
+v___x_4248_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4249_ = lean_array_push(v___x_4248_, v___x_4247_);
+return v___x_4249_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__25(void){
 _start:
 {
-lean_object* v___x_4249_; lean_object* v___x_4250_; lean_object* v___x_4251_; lean_object* v___x_4252_; 
-v___x_4249_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__24, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__24_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__24);
-v___x_4250_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4251_ = lean_box(2);
-v___x_4252_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4252_, 0, v___x_4251_);
-lean_ctor_set(v___x_4252_, 1, v___x_4250_);
-lean_ctor_set(v___x_4252_, 2, v___x_4249_);
-return v___x_4252_;
+lean_object* v___x_4250_; lean_object* v___x_4251_; lean_object* v___x_4252_; lean_object* v___x_4253_; 
+v___x_4250_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__24, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__24_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__24);
+v___x_4251_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4252_ = lean_box(2);
+v___x_4253_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4253_, 0, v___x_4252_);
+lean_ctor_set(v___x_4253_, 1, v___x_4251_);
+lean_ctor_set(v___x_4253_, 2, v___x_4250_);
+return v___x_4253_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__26(void){
 _start:
 {
-lean_object* v___x_4253_; lean_object* v___x_4254_; lean_object* v___x_4255_; 
-v___x_4253_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__25, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__25_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__25);
-v___x_4254_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4255_ = lean_array_push(v___x_4254_, v___x_4253_);
-return v___x_4255_;
+lean_object* v___x_4254_; lean_object* v___x_4255_; lean_object* v___x_4256_; 
+v___x_4254_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__25, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__25_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__25);
+v___x_4255_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4256_ = lean_array_push(v___x_4255_, v___x_4254_);
+return v___x_4256_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__27(void){
 _start:
 {
-lean_object* v___x_4256_; lean_object* v___x_4257_; lean_object* v___x_4258_; lean_object* v___x_4259_; 
-v___x_4256_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__26, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__26_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__26);
-v___x_4257_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4258_ = lean_box(2);
-v___x_4259_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4259_, 0, v___x_4258_);
-lean_ctor_set(v___x_4259_, 1, v___x_4257_);
-lean_ctor_set(v___x_4259_, 2, v___x_4256_);
-return v___x_4259_;
+lean_object* v___x_4257_; lean_object* v___x_4258_; lean_object* v___x_4259_; lean_object* v___x_4260_; 
+v___x_4257_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__26, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__26_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__26);
+v___x_4258_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4259_ = lean_box(2);
+v___x_4260_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4260_, 0, v___x_4259_);
+lean_ctor_set(v___x_4260_, 1, v___x_4258_);
+lean_ctor_set(v___x_4260_, 2, v___x_4257_);
+return v___x_4260_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam(void){
 _start:
 {
-lean_object* v___x_4260_; 
-v___x_4260_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__27, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__27_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__27);
-return v___x_4260_;
+lean_object* v___x_4261_; 
+v___x_4261_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__27, &l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__27_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq___autoParam___closed__27);
+return v___x_4261_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__5(void){
 _start:
 {
-lean_object* v___x_4276_; lean_object* v___x_4277_; lean_object* v___x_4278_; 
-v___x_4276_ = ((lean_object*)(l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__4));
-v___x_4277_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3, &l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3);
-v___x_4278_ = lean_array_push(v___x_4277_, v___x_4276_);
-return v___x_4278_;
+lean_object* v___x_4277_; lean_object* v___x_4278_; lean_object* v___x_4279_; 
+v___x_4277_ = ((lean_object*)(l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__4));
+v___x_4278_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3, &l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3);
+v___x_4279_ = lean_array_push(v___x_4278_, v___x_4277_);
+return v___x_4279_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__6(void){
 _start:
 {
-lean_object* v___x_4279_; lean_object* v___x_4280_; lean_object* v___x_4281_; lean_object* v___x_4282_; 
-v___x_4279_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__5, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__5_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__5);
-v___x_4280_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__5));
-v___x_4281_ = lean_box(2);
-v___x_4282_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4282_, 0, v___x_4281_);
-lean_ctor_set(v___x_4282_, 1, v___x_4280_);
-lean_ctor_set(v___x_4282_, 2, v___x_4279_);
-return v___x_4282_;
+lean_object* v___x_4280_; lean_object* v___x_4281_; lean_object* v___x_4282_; lean_object* v___x_4283_; 
+v___x_4280_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__5, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__5_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__5);
+v___x_4281_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__5));
+v___x_4282_ = lean_box(2);
+v___x_4283_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4283_, 0, v___x_4282_);
+lean_ctor_set(v___x_4283_, 1, v___x_4281_);
+lean_ctor_set(v___x_4283_, 2, v___x_4280_);
+return v___x_4283_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__7(void){
 _start:
 {
-lean_object* v___x_4283_; lean_object* v___x_4284_; lean_object* v___x_4285_; 
-v___x_4283_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__6, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__6_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__6);
-v___x_4284_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3, &l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3_once, _init_l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3);
-v___x_4285_ = lean_array_push(v___x_4284_, v___x_4283_);
-return v___x_4285_;
+lean_object* v___x_4284_; lean_object* v___x_4285_; lean_object* v___x_4286_; 
+v___x_4284_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__6, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__6_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__6);
+v___x_4285_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3, &l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3_once, _init_l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3);
+v___x_4286_ = lean_array_push(v___x_4285_, v___x_4284_);
+return v___x_4286_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__8(void){
 _start:
 {
-lean_object* v___x_4286_; lean_object* v___x_4287_; lean_object* v___x_4288_; lean_object* v___x_4289_; 
-v___x_4286_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__7, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__7_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__7);
-v___x_4287_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__1));
-v___x_4288_ = lean_box(2);
-v___x_4289_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4289_, 0, v___x_4288_);
-lean_ctor_set(v___x_4289_, 1, v___x_4287_);
-lean_ctor_set(v___x_4289_, 2, v___x_4286_);
-return v___x_4289_;
+lean_object* v___x_4287_; lean_object* v___x_4288_; lean_object* v___x_4289_; lean_object* v___x_4290_; 
+v___x_4287_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__7, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__7_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__7);
+v___x_4288_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__1));
+v___x_4289_ = lean_box(2);
+v___x_4290_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4290_, 0, v___x_4289_);
+lean_ctor_set(v___x_4290_, 1, v___x_4288_);
+lean_ctor_set(v___x_4290_, 2, v___x_4287_);
+return v___x_4290_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__9(void){
 _start:
 {
-lean_object* v___x_4290_; lean_object* v___x_4291_; lean_object* v___x_4292_; 
-v___x_4290_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__8, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__8_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__8);
-v___x_4291_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
-v___x_4292_ = lean_array_push(v___x_4291_, v___x_4290_);
-return v___x_4292_;
+lean_object* v___x_4291_; lean_object* v___x_4292_; lean_object* v___x_4293_; 
+v___x_4291_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__8, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__8_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__8);
+v___x_4292_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
+v___x_4293_ = lean_array_push(v___x_4292_, v___x_4291_);
+return v___x_4293_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__10(void){
 _start:
 {
-lean_object* v___x_4293_; lean_object* v___x_4294_; lean_object* v___x_4295_; lean_object* v___x_4296_; 
-v___x_4293_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__9, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__9_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__9);
-v___x_4294_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
-v___x_4295_ = lean_box(2);
-v___x_4296_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4296_, 0, v___x_4295_);
-lean_ctor_set(v___x_4296_, 1, v___x_4294_);
-lean_ctor_set(v___x_4296_, 2, v___x_4293_);
-return v___x_4296_;
+lean_object* v___x_4294_; lean_object* v___x_4295_; lean_object* v___x_4296_; lean_object* v___x_4297_; 
+v___x_4294_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__9, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__9_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__9);
+v___x_4295_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
+v___x_4296_ = lean_box(2);
+v___x_4297_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4297_, 0, v___x_4296_);
+lean_ctor_set(v___x_4297_, 1, v___x_4295_);
+lean_ctor_set(v___x_4297_, 2, v___x_4294_);
+return v___x_4297_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__11(void){
 _start:
 {
-lean_object* v___x_4297_; lean_object* v___x_4298_; lean_object* v___x_4299_; 
-v___x_4297_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__10, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__10_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__10);
-v___x_4298_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4299_ = lean_array_push(v___x_4298_, v___x_4297_);
-return v___x_4299_;
+lean_object* v___x_4298_; lean_object* v___x_4299_; lean_object* v___x_4300_; 
+v___x_4298_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__10, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__10_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__10);
+v___x_4299_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4300_ = lean_array_push(v___x_4299_, v___x_4298_);
+return v___x_4300_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__12(void){
 _start:
 {
-lean_object* v___x_4300_; lean_object* v___x_4301_; lean_object* v___x_4302_; lean_object* v___x_4303_; 
-v___x_4300_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__11, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__11_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__11);
-v___x_4301_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4302_ = lean_box(2);
-v___x_4303_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4303_, 0, v___x_4302_);
-lean_ctor_set(v___x_4303_, 1, v___x_4301_);
-lean_ctor_set(v___x_4303_, 2, v___x_4300_);
-return v___x_4303_;
+lean_object* v___x_4301_; lean_object* v___x_4302_; lean_object* v___x_4303_; lean_object* v___x_4304_; 
+v___x_4301_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__11, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__11_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__11);
+v___x_4302_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4303_ = lean_box(2);
+v___x_4304_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4304_, 0, v___x_4303_);
+lean_ctor_set(v___x_4304_, 1, v___x_4302_);
+lean_ctor_set(v___x_4304_, 2, v___x_4301_);
+return v___x_4304_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__13(void){
 _start:
 {
-lean_object* v___x_4304_; lean_object* v___x_4305_; lean_object* v___x_4306_; 
-v___x_4304_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__12, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__12_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__12);
-v___x_4305_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4306_ = lean_array_push(v___x_4305_, v___x_4304_);
-return v___x_4306_;
+lean_object* v___x_4305_; lean_object* v___x_4306_; lean_object* v___x_4307_; 
+v___x_4305_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__12, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__12_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__12);
+v___x_4306_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4307_ = lean_array_push(v___x_4306_, v___x_4305_);
+return v___x_4307_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__14(void){
 _start:
 {
-lean_object* v___x_4307_; lean_object* v___x_4308_; lean_object* v___x_4309_; lean_object* v___x_4310_; 
-v___x_4307_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__13, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__13_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__13);
-v___x_4308_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4309_ = lean_box(2);
-v___x_4310_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4310_, 0, v___x_4309_);
-lean_ctor_set(v___x_4310_, 1, v___x_4308_);
-lean_ctor_set(v___x_4310_, 2, v___x_4307_);
-return v___x_4310_;
+lean_object* v___x_4308_; lean_object* v___x_4309_; lean_object* v___x_4310_; lean_object* v___x_4311_; 
+v___x_4308_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__13, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__13_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__13);
+v___x_4309_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4310_ = lean_box(2);
+v___x_4311_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4311_, 0, v___x_4310_);
+lean_ctor_set(v___x_4311_, 1, v___x_4309_);
+lean_ctor_set(v___x_4311_, 2, v___x_4308_);
+return v___x_4311_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__15(void){
 _start:
 {
-lean_object* v___x_4311_; lean_object* v___x_4312_; lean_object* v___x_4313_; 
-v___x_4311_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__14, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__14_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__14);
-v___x_4312_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4313_ = lean_array_push(v___x_4312_, v___x_4311_);
-return v___x_4313_;
+lean_object* v___x_4312_; lean_object* v___x_4313_; lean_object* v___x_4314_; 
+v___x_4312_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__14, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__14_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__14);
+v___x_4313_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4314_ = lean_array_push(v___x_4313_, v___x_4312_);
+return v___x_4314_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__16(void){
 _start:
 {
-lean_object* v___x_4314_; lean_object* v___x_4315_; lean_object* v___x_4316_; lean_object* v___x_4317_; 
-v___x_4314_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__15, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__15_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__15);
-v___x_4315_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4316_ = lean_box(2);
-v___x_4317_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4317_, 0, v___x_4316_);
-lean_ctor_set(v___x_4317_, 1, v___x_4315_);
-lean_ctor_set(v___x_4317_, 2, v___x_4314_);
-return v___x_4317_;
+lean_object* v___x_4315_; lean_object* v___x_4316_; lean_object* v___x_4317_; lean_object* v___x_4318_; 
+v___x_4315_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__15, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__15_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__15);
+v___x_4316_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4317_ = lean_box(2);
+v___x_4318_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4318_, 0, v___x_4317_);
+lean_ctor_set(v___x_4318_, 1, v___x_4316_);
+lean_ctor_set(v___x_4318_, 2, v___x_4315_);
+return v___x_4318_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__17(void){
 _start:
 {
-lean_object* v___x_4318_; lean_object* v___x_4319_; lean_object* v___x_4320_; 
-v___x_4318_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__16, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__16_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__16);
-v___x_4319_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
-v___x_4320_ = lean_array_push(v___x_4319_, v___x_4318_);
-return v___x_4320_;
+lean_object* v___x_4319_; lean_object* v___x_4320_; lean_object* v___x_4321_; 
+v___x_4319_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__16, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__16_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__16);
+v___x_4320_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
+v___x_4321_ = lean_array_push(v___x_4320_, v___x_4319_);
+return v___x_4321_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__18(void){
 _start:
 {
-lean_object* v___x_4321_; lean_object* v___x_4322_; lean_object* v___x_4323_; lean_object* v___x_4324_; 
-v___x_4321_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__17, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__17_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__17);
-v___x_4322_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
-v___x_4323_ = lean_box(2);
-v___x_4324_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4324_, 0, v___x_4323_);
-lean_ctor_set(v___x_4324_, 1, v___x_4322_);
-lean_ctor_set(v___x_4324_, 2, v___x_4321_);
-return v___x_4324_;
+lean_object* v___x_4322_; lean_object* v___x_4323_; lean_object* v___x_4324_; lean_object* v___x_4325_; 
+v___x_4322_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__17, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__17_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__17);
+v___x_4323_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
+v___x_4324_ = lean_box(2);
+v___x_4325_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4325_, 0, v___x_4324_);
+lean_ctor_set(v___x_4325_, 1, v___x_4323_);
+lean_ctor_set(v___x_4325_, 2, v___x_4322_);
+return v___x_4325_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__19(void){
 _start:
 {
-lean_object* v___x_4325_; lean_object* v___x_4326_; lean_object* v___x_4327_; 
-v___x_4325_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__18, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__18_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__18);
-v___x_4326_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4327_ = lean_array_push(v___x_4326_, v___x_4325_);
-return v___x_4327_;
+lean_object* v___x_4326_; lean_object* v___x_4327_; lean_object* v___x_4328_; 
+v___x_4326_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__18, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__18_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__18);
+v___x_4327_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4328_ = lean_array_push(v___x_4327_, v___x_4326_);
+return v___x_4328_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__21(void){
 _start:
 {
-lean_object* v___x_4329_; lean_object* v___x_4330_; 
-v___x_4329_ = ((lean_object*)(l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__20));
-v___x_4330_ = l_Lean_mkAtom(v___x_4329_);
-return v___x_4330_;
+lean_object* v___x_4330_; lean_object* v___x_4331_; 
+v___x_4330_ = ((lean_object*)(l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__20));
+v___x_4331_ = l_Lean_mkAtom(v___x_4330_);
+return v___x_4331_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__22(void){
 _start:
 {
-lean_object* v___x_4331_; lean_object* v___x_4332_; lean_object* v___x_4333_; 
-v___x_4331_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__21, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__21_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__21);
-v___x_4332_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4333_ = lean_array_push(v___x_4332_, v___x_4331_);
-return v___x_4333_;
+lean_object* v___x_4332_; lean_object* v___x_4333_; lean_object* v___x_4334_; 
+v___x_4332_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__21, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__21_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__21);
+v___x_4333_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4334_ = lean_array_push(v___x_4333_, v___x_4332_);
+return v___x_4334_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__23(void){
 _start:
 {
-lean_object* v___x_4334_; lean_object* v___x_4335_; lean_object* v___x_4336_; lean_object* v___x_4337_; 
-v___x_4334_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__22, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__22_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__22);
-v___x_4335_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__22));
-v___x_4336_ = lean_box(2);
-v___x_4337_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4337_, 0, v___x_4336_);
-lean_ctor_set(v___x_4337_, 1, v___x_4335_);
-lean_ctor_set(v___x_4337_, 2, v___x_4334_);
-return v___x_4337_;
+lean_object* v___x_4335_; lean_object* v___x_4336_; lean_object* v___x_4337_; lean_object* v___x_4338_; 
+v___x_4335_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__22, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__22_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__22);
+v___x_4336_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__22));
+v___x_4337_ = lean_box(2);
+v___x_4338_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4338_, 0, v___x_4337_);
+lean_ctor_set(v___x_4338_, 1, v___x_4336_);
+lean_ctor_set(v___x_4338_, 2, v___x_4335_);
+return v___x_4338_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__24(void){
 _start:
 {
-lean_object* v___x_4338_; lean_object* v___x_4339_; lean_object* v___x_4340_; 
-v___x_4338_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__23, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__23_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__23);
-v___x_4339_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4340_ = lean_array_push(v___x_4339_, v___x_4338_);
-return v___x_4340_;
+lean_object* v___x_4339_; lean_object* v___x_4340_; lean_object* v___x_4341_; 
+v___x_4339_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__23, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__23_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__23);
+v___x_4340_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4341_ = lean_array_push(v___x_4340_, v___x_4339_);
+return v___x_4341_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__25(void){
 _start:
 {
-lean_object* v___x_4341_; lean_object* v___x_4342_; lean_object* v___x_4343_; lean_object* v___x_4344_; 
-v___x_4341_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__24, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__24_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__24);
-v___x_4342_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4343_ = lean_box(2);
-v___x_4344_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4344_, 0, v___x_4343_);
-lean_ctor_set(v___x_4344_, 1, v___x_4342_);
-lean_ctor_set(v___x_4344_, 2, v___x_4341_);
-return v___x_4344_;
+lean_object* v___x_4342_; lean_object* v___x_4343_; lean_object* v___x_4344_; lean_object* v___x_4345_; 
+v___x_4342_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__24, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__24_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__24);
+v___x_4343_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4344_ = lean_box(2);
+v___x_4345_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4345_, 0, v___x_4344_);
+lean_ctor_set(v___x_4345_, 1, v___x_4343_);
+lean_ctor_set(v___x_4345_, 2, v___x_4342_);
+return v___x_4345_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__26(void){
 _start:
 {
-lean_object* v___x_4345_; lean_object* v___x_4346_; lean_object* v___x_4347_; 
-v___x_4345_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__25, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__25_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__25);
-v___x_4346_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20, &l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20_once, _init_l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20);
-v___x_4347_ = lean_array_push(v___x_4346_, v___x_4345_);
-return v___x_4347_;
+lean_object* v___x_4346_; lean_object* v___x_4347_; lean_object* v___x_4348_; 
+v___x_4346_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__25, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__25_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__25);
+v___x_4347_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20, &l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20_once, _init_l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20);
+v___x_4348_ = lean_array_push(v___x_4347_, v___x_4346_);
+return v___x_4348_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__27(void){
 _start:
 {
-lean_object* v___x_4348_; lean_object* v___x_4349_; lean_object* v___x_4350_; lean_object* v___x_4351_; 
-v___x_4348_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__26, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__26_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__26);
-v___x_4349_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__18));
-v___x_4350_ = lean_box(2);
-v___x_4351_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4351_, 0, v___x_4350_);
-lean_ctor_set(v___x_4351_, 1, v___x_4349_);
-lean_ctor_set(v___x_4351_, 2, v___x_4348_);
-return v___x_4351_;
+lean_object* v___x_4349_; lean_object* v___x_4350_; lean_object* v___x_4351_; lean_object* v___x_4352_; 
+v___x_4349_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__26, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__26_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__26);
+v___x_4350_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__18));
+v___x_4351_ = lean_box(2);
+v___x_4352_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4352_, 0, v___x_4351_);
+lean_ctor_set(v___x_4352_, 1, v___x_4350_);
+lean_ctor_set(v___x_4352_, 2, v___x_4349_);
+return v___x_4352_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__28(void){
 _start:
 {
-lean_object* v___x_4352_; lean_object* v___x_4353_; lean_object* v___x_4354_; 
-v___x_4352_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__27, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__27_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__27);
-v___x_4353_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4354_ = lean_array_push(v___x_4353_, v___x_4352_);
-return v___x_4354_;
+lean_object* v___x_4353_; lean_object* v___x_4354_; lean_object* v___x_4355_; 
+v___x_4353_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__27, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__27_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__27);
+v___x_4354_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4355_ = lean_array_push(v___x_4354_, v___x_4353_);
+return v___x_4355_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__29(void){
 _start:
 {
-lean_object* v___x_4355_; lean_object* v___x_4356_; lean_object* v___x_4357_; lean_object* v___x_4358_; 
-v___x_4355_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__28, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__28_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__28);
-v___x_4356_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4357_ = lean_box(2);
-v___x_4358_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4358_, 0, v___x_4357_);
-lean_ctor_set(v___x_4358_, 1, v___x_4356_);
-lean_ctor_set(v___x_4358_, 2, v___x_4355_);
-return v___x_4358_;
+lean_object* v___x_4356_; lean_object* v___x_4357_; lean_object* v___x_4358_; lean_object* v___x_4359_; 
+v___x_4356_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__28, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__28_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__28);
+v___x_4357_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4358_ = lean_box(2);
+v___x_4359_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4359_, 0, v___x_4358_);
+lean_ctor_set(v___x_4359_, 1, v___x_4357_);
+lean_ctor_set(v___x_4359_, 2, v___x_4356_);
+return v___x_4359_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__30(void){
 _start:
 {
-lean_object* v___x_4359_; lean_object* v___x_4360_; lean_object* v___x_4361_; 
-v___x_4359_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__29, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__29_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__29);
-v___x_4360_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4361_ = lean_array_push(v___x_4360_, v___x_4359_);
-return v___x_4361_;
+lean_object* v___x_4360_; lean_object* v___x_4361_; lean_object* v___x_4362_; 
+v___x_4360_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__29, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__29_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__29);
+v___x_4361_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4362_ = lean_array_push(v___x_4361_, v___x_4360_);
+return v___x_4362_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__31(void){
 _start:
 {
-lean_object* v___x_4362_; lean_object* v___x_4363_; lean_object* v___x_4364_; lean_object* v___x_4365_; 
-v___x_4362_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__30, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__30_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__30);
-v___x_4363_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4364_ = lean_box(2);
-v___x_4365_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4365_, 0, v___x_4364_);
-lean_ctor_set(v___x_4365_, 1, v___x_4363_);
-lean_ctor_set(v___x_4365_, 2, v___x_4362_);
-return v___x_4365_;
+lean_object* v___x_4363_; lean_object* v___x_4364_; lean_object* v___x_4365_; lean_object* v___x_4366_; 
+v___x_4363_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__30, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__30_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__30);
+v___x_4364_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4365_ = lean_box(2);
+v___x_4366_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4366_, 0, v___x_4365_);
+lean_ctor_set(v___x_4366_, 1, v___x_4364_);
+lean_ctor_set(v___x_4366_, 2, v___x_4363_);
+return v___x_4366_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__32(void){
 _start:
 {
-lean_object* v___x_4366_; lean_object* v___x_4367_; lean_object* v___x_4368_; 
-v___x_4366_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__31, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__31_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__31);
-v___x_4367_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4368_ = lean_array_push(v___x_4367_, v___x_4366_);
-return v___x_4368_;
+lean_object* v___x_4367_; lean_object* v___x_4368_; lean_object* v___x_4369_; 
+v___x_4367_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__31, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__31_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__31);
+v___x_4368_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4369_ = lean_array_push(v___x_4368_, v___x_4367_);
+return v___x_4369_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__33(void){
 _start:
 {
-lean_object* v___x_4369_; lean_object* v___x_4370_; lean_object* v___x_4371_; lean_object* v___x_4372_; 
-v___x_4369_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__32, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__32_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__32);
-v___x_4370_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4371_ = lean_box(2);
-v___x_4372_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4372_, 0, v___x_4371_);
-lean_ctor_set(v___x_4372_, 1, v___x_4370_);
-lean_ctor_set(v___x_4372_, 2, v___x_4369_);
-return v___x_4372_;
+lean_object* v___x_4370_; lean_object* v___x_4371_; lean_object* v___x_4372_; lean_object* v___x_4373_; 
+v___x_4370_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__32, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__32_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__32);
+v___x_4371_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4372_ = lean_box(2);
+v___x_4373_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4373_, 0, v___x_4372_);
+lean_ctor_set(v___x_4373_, 1, v___x_4371_);
+lean_ctor_set(v___x_4373_, 2, v___x_4370_);
+return v___x_4373_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__34(void){
 _start:
 {
-lean_object* v___x_4373_; lean_object* v___x_4374_; lean_object* v___x_4375_; 
-v___x_4373_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__33, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__33_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__33);
-v___x_4374_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
-v___x_4375_ = lean_array_push(v___x_4374_, v___x_4373_);
-return v___x_4375_;
+lean_object* v___x_4374_; lean_object* v___x_4375_; lean_object* v___x_4376_; 
+v___x_4374_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__33, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__33_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__33);
+v___x_4375_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
+v___x_4376_ = lean_array_push(v___x_4375_, v___x_4374_);
+return v___x_4376_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__35(void){
 _start:
 {
-lean_object* v___x_4376_; lean_object* v___x_4377_; lean_object* v___x_4378_; lean_object* v___x_4379_; 
-v___x_4376_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__34, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__34_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__34);
-v___x_4377_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
-v___x_4378_ = lean_box(2);
-v___x_4379_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4379_, 0, v___x_4378_);
-lean_ctor_set(v___x_4379_, 1, v___x_4377_);
-lean_ctor_set(v___x_4379_, 2, v___x_4376_);
-return v___x_4379_;
+lean_object* v___x_4377_; lean_object* v___x_4378_; lean_object* v___x_4379_; lean_object* v___x_4380_; 
+v___x_4377_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__34, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__34_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__34);
+v___x_4378_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
+v___x_4379_ = lean_box(2);
+v___x_4380_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4380_, 0, v___x_4379_);
+lean_ctor_set(v___x_4380_, 1, v___x_4378_);
+lean_ctor_set(v___x_4380_, 2, v___x_4377_);
+return v___x_4380_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__36(void){
 _start:
 {
-lean_object* v___x_4380_; lean_object* v___x_4381_; lean_object* v___x_4382_; 
-v___x_4380_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__35, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__35_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__35);
-v___x_4381_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__19, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__19_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__19);
-v___x_4382_ = lean_array_push(v___x_4381_, v___x_4380_);
-return v___x_4382_;
+lean_object* v___x_4381_; lean_object* v___x_4382_; lean_object* v___x_4383_; 
+v___x_4381_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__35, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__35_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__35);
+v___x_4382_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__19, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__19_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__19);
+v___x_4383_ = lean_array_push(v___x_4382_, v___x_4381_);
+return v___x_4383_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__37(void){
 _start:
 {
-lean_object* v___x_4383_; lean_object* v___x_4384_; lean_object* v___x_4385_; lean_object* v___x_4386_; 
-v___x_4383_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__36, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__36_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__36);
-v___x_4384_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4385_ = lean_box(2);
-v___x_4386_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4386_, 0, v___x_4385_);
-lean_ctor_set(v___x_4386_, 1, v___x_4384_);
-lean_ctor_set(v___x_4386_, 2, v___x_4383_);
-return v___x_4386_;
+lean_object* v___x_4384_; lean_object* v___x_4385_; lean_object* v___x_4386_; lean_object* v___x_4387_; 
+v___x_4384_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__36, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__36_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__36);
+v___x_4385_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4386_ = lean_box(2);
+v___x_4387_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4387_, 0, v___x_4386_);
+lean_ctor_set(v___x_4387_, 1, v___x_4385_);
+lean_ctor_set(v___x_4387_, 2, v___x_4384_);
+return v___x_4387_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__38(void){
 _start:
 {
-lean_object* v___x_4387_; lean_object* v___x_4388_; lean_object* v___x_4389_; 
-v___x_4387_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__37, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__37_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__37);
-v___x_4388_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
-v___x_4389_ = lean_array_push(v___x_4388_, v___x_4387_);
-return v___x_4389_;
+lean_object* v___x_4388_; lean_object* v___x_4389_; lean_object* v___x_4390_; 
+v___x_4388_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__37, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__37_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__37);
+v___x_4389_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
+v___x_4390_ = lean_array_push(v___x_4389_, v___x_4388_);
+return v___x_4390_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__39(void){
 _start:
 {
-lean_object* v___x_4390_; lean_object* v___x_4391_; lean_object* v___x_4392_; lean_object* v___x_4393_; 
-v___x_4390_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__38, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__38_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__38);
-v___x_4391_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
-v___x_4392_ = lean_box(2);
-v___x_4393_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4393_, 0, v___x_4392_);
-lean_ctor_set(v___x_4393_, 1, v___x_4391_);
-lean_ctor_set(v___x_4393_, 2, v___x_4390_);
-return v___x_4393_;
+lean_object* v___x_4391_; lean_object* v___x_4392_; lean_object* v___x_4393_; lean_object* v___x_4394_; 
+v___x_4391_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__38, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__38_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__38);
+v___x_4392_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
+v___x_4393_ = lean_box(2);
+v___x_4394_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4394_, 0, v___x_4393_);
+lean_ctor_set(v___x_4394_, 1, v___x_4392_);
+lean_ctor_set(v___x_4394_, 2, v___x_4391_);
+return v___x_4394_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__40(void){
 _start:
 {
-lean_object* v___x_4394_; lean_object* v___x_4395_; lean_object* v___x_4396_; 
-v___x_4394_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__39, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__39_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__39);
-v___x_4395_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
-v___x_4396_ = lean_array_push(v___x_4395_, v___x_4394_);
-return v___x_4396_;
+lean_object* v___x_4395_; lean_object* v___x_4396_; lean_object* v___x_4397_; 
+v___x_4395_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__39, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__39_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__39);
+v___x_4396_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
+v___x_4397_ = lean_array_push(v___x_4396_, v___x_4395_);
+return v___x_4397_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__41(void){
 _start:
 {
-lean_object* v___x_4397_; lean_object* v___x_4398_; lean_object* v___x_4399_; lean_object* v___x_4400_; 
-v___x_4397_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__40, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__40_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__40);
-v___x_4398_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4399_ = lean_box(2);
-v___x_4400_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4400_, 0, v___x_4399_);
-lean_ctor_set(v___x_4400_, 1, v___x_4398_);
-lean_ctor_set(v___x_4400_, 2, v___x_4397_);
-return v___x_4400_;
+lean_object* v___x_4398_; lean_object* v___x_4399_; lean_object* v___x_4400_; lean_object* v___x_4401_; 
+v___x_4398_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__40, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__40_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__40);
+v___x_4399_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4400_ = lean_box(2);
+v___x_4401_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4401_, 0, v___x_4400_);
+lean_ctor_set(v___x_4401_, 1, v___x_4399_);
+lean_ctor_set(v___x_4401_, 2, v___x_4398_);
+return v___x_4401_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__42(void){
 _start:
 {
-lean_object* v___x_4401_; lean_object* v___x_4402_; lean_object* v___x_4403_; 
-v___x_4401_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__41, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__41_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__41);
-v___x_4402_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4403_ = lean_array_push(v___x_4402_, v___x_4401_);
-return v___x_4403_;
+lean_object* v___x_4402_; lean_object* v___x_4403_; lean_object* v___x_4404_; 
+v___x_4402_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__41, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__41_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__41);
+v___x_4403_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4404_ = lean_array_push(v___x_4403_, v___x_4402_);
+return v___x_4404_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__43(void){
 _start:
 {
-lean_object* v___x_4404_; lean_object* v___x_4405_; lean_object* v___x_4406_; lean_object* v___x_4407_; 
-v___x_4404_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__42, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__42_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__42);
-v___x_4405_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4406_ = lean_box(2);
-v___x_4407_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4407_, 0, v___x_4406_);
-lean_ctor_set(v___x_4407_, 1, v___x_4405_);
-lean_ctor_set(v___x_4407_, 2, v___x_4404_);
-return v___x_4407_;
+lean_object* v___x_4405_; lean_object* v___x_4406_; lean_object* v___x_4407_; lean_object* v___x_4408_; 
+v___x_4405_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__42, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__42_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__42);
+v___x_4406_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4407_ = lean_box(2);
+v___x_4408_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4408_, 0, v___x_4407_);
+lean_ctor_set(v___x_4408_, 1, v___x_4406_);
+lean_ctor_set(v___x_4408_, 2, v___x_4405_);
+return v___x_4408_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__44(void){
 _start:
 {
-lean_object* v___x_4408_; lean_object* v___x_4409_; lean_object* v___x_4410_; 
-v___x_4408_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__43, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__43_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__43);
-v___x_4409_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4410_ = lean_array_push(v___x_4409_, v___x_4408_);
-return v___x_4410_;
+lean_object* v___x_4409_; lean_object* v___x_4410_; lean_object* v___x_4411_; 
+v___x_4409_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__43, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__43_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__43);
+v___x_4410_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4411_ = lean_array_push(v___x_4410_, v___x_4409_);
+return v___x_4411_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__45(void){
 _start:
 {
-lean_object* v___x_4411_; lean_object* v___x_4412_; lean_object* v___x_4413_; lean_object* v___x_4414_; 
-v___x_4411_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__44, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__44_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__44);
-v___x_4412_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4413_ = lean_box(2);
-v___x_4414_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4414_, 0, v___x_4413_);
-lean_ctor_set(v___x_4414_, 1, v___x_4412_);
-lean_ctor_set(v___x_4414_, 2, v___x_4411_);
-return v___x_4414_;
+lean_object* v___x_4412_; lean_object* v___x_4413_; lean_object* v___x_4414_; lean_object* v___x_4415_; 
+v___x_4412_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__44, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__44_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__44);
+v___x_4413_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4414_ = lean_box(2);
+v___x_4415_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4415_, 0, v___x_4414_);
+lean_ctor_set(v___x_4415_, 1, v___x_4413_);
+lean_ctor_set(v___x_4415_, 2, v___x_4412_);
+return v___x_4415_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam(void){
 _start:
 {
-lean_object* v___x_4415_; 
-v___x_4415_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__45, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__45_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__45);
-return v___x_4415_;
+lean_object* v___x_4416_; 
+v___x_4416_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__45, &l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__45_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_beq__iff___autoParam___closed__45);
+return v___x_4416_;
 }
 }
 static lean_object* _init_l_Std_LinearPreorderPackage_ofOrd___auto__1(void){
 _start:
 {
-lean_object* v___x_4416_; 
-v___x_4416_ = lean_obj_once(&l_Std_PreorderPackage_ofLE___auto__1___closed__35, &l_Std_PreorderPackage_ofLE___auto__1___closed__35_once, _init_l_Std_PreorderPackage_ofLE___auto__1___closed__35);
-return v___x_4416_;
+lean_object* v___x_4417_; 
+v___x_4417_ = lean_obj_once(&l_Std_PreorderPackage_ofLE___auto__1___closed__35, &l_Std_PreorderPackage_ofLE___auto__1___closed__35_once, _init_l_Std_PreorderPackage_ofLE___auto__1___closed__35);
+return v___x_4417_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_LinearPreorderPackage_ofOrd___redArg(lean_object* v_args_4417_){
+LEAN_EXPORT lean_object* l_Std_LinearPreorderPackage_ofOrd___redArg(lean_object* v_args_4418_){
 _start:
 {
-lean_object* v_ord_4418_; lean_object* v_le_4419_; lean_object* v_decidableLE_4420_; lean_object* v_lt_4421_; lean_object* v_decidableLT_4422_; lean_object* v_beq_4423_; lean_object* v___x_4424_; lean_object* v___x_4425_; 
-v_ord_4418_ = lean_ctor_get(v_args_4417_, 0);
-v_le_4419_ = lean_ctor_get(v_args_4417_, 1);
-lean_inc(v_le_4419_);
-v_decidableLE_4420_ = lean_ctor_get(v_args_4417_, 2);
-v_lt_4421_ = lean_ctor_get(v_args_4417_, 3);
-lean_inc(v_lt_4421_);
-v_decidableLT_4422_ = lean_ctor_get(v_args_4417_, 4);
-v_beq_4423_ = lean_ctor_get(v_args_4417_, 5);
-lean_inc_ref(v_decidableLT_4422_);
-lean_inc_ref(v_decidableLE_4420_);
-lean_inc_ref(v_beq_4423_);
-v___x_4424_ = lean_alloc_ctor(0, 5, 0);
-lean_ctor_set(v___x_4424_, 0, v_le_4419_);
-lean_ctor_set(v___x_4424_, 1, v_lt_4421_);
-lean_ctor_set(v___x_4424_, 2, v_beq_4423_);
-lean_ctor_set(v___x_4424_, 3, v_decidableLE_4420_);
-lean_ctor_set(v___x_4424_, 4, v_decidableLT_4422_);
-lean_inc_ref(v_ord_4418_);
-v___x_4425_ = lean_alloc_ctor(0, 2, 0);
-lean_ctor_set(v___x_4425_, 0, v___x_4424_);
-lean_ctor_set(v___x_4425_, 1, v_ord_4418_);
-return v___x_4425_;
+lean_object* v_ord_4419_; lean_object* v_le_4420_; lean_object* v_decidableLE_4421_; lean_object* v_lt_4422_; lean_object* v_decidableLT_4423_; lean_object* v_beq_4424_; lean_object* v___x_4425_; lean_object* v___x_4426_; 
+v_ord_4419_ = lean_ctor_get(v_args_4418_, 0);
+v_le_4420_ = lean_ctor_get(v_args_4418_, 1);
+lean_inc(v_le_4420_);
+v_decidableLE_4421_ = lean_ctor_get(v_args_4418_, 2);
+v_lt_4422_ = lean_ctor_get(v_args_4418_, 3);
+lean_inc(v_lt_4422_);
+v_decidableLT_4423_ = lean_ctor_get(v_args_4418_, 4);
+v_beq_4424_ = lean_ctor_get(v_args_4418_, 5);
+lean_inc_ref(v_decidableLT_4423_);
+lean_inc_ref(v_decidableLE_4421_);
+lean_inc_ref(v_beq_4424_);
+v___x_4425_ = lean_alloc_ctor(0, 5, 0);
+lean_ctor_set(v___x_4425_, 0, v_le_4420_);
+lean_ctor_set(v___x_4425_, 1, v_lt_4422_);
+lean_ctor_set(v___x_4425_, 2, v_beq_4424_);
+lean_ctor_set(v___x_4425_, 3, v_decidableLE_4421_);
+lean_ctor_set(v___x_4425_, 4, v_decidableLT_4423_);
+lean_inc_ref(v_ord_4419_);
+v___x_4426_ = lean_alloc_ctor(0, 2, 0);
+lean_ctor_set(v___x_4426_, 0, v___x_4425_);
+lean_ctor_set(v___x_4426_, 1, v_ord_4419_);
+return v___x_4426_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_LinearPreorderPackage_ofOrd___redArg___boxed(lean_object* v_args_4426_){
+LEAN_EXPORT lean_object* l_Std_LinearPreorderPackage_ofOrd___redArg___boxed(lean_object* v_args_4427_){
 _start:
 {
-lean_object* v_res_4427_; 
-v_res_4427_ = l_Std_LinearPreorderPackage_ofOrd___redArg(v_args_4426_);
-lean_dec_ref(v_args_4426_);
-return v_res_4427_;
+lean_object* v_res_4428_; 
+v_res_4428_ = l_Std_LinearPreorderPackage_ofOrd___redArg(v_args_4427_);
+lean_dec_ref(v_args_4427_);
+return v_res_4428_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_LinearPreorderPackage_ofOrd(lean_object* v_00_u03b1_4428_, lean_object* v_args_4429_){
+LEAN_EXPORT lean_object* l_Std_LinearPreorderPackage_ofOrd(lean_object* v_00_u03b1_4429_, lean_object* v_args_4430_){
 _start:
 {
-lean_object* v_ord_4430_; lean_object* v_le_4431_; lean_object* v_decidableLE_4432_; lean_object* v_lt_4433_; lean_object* v_decidableLT_4434_; lean_object* v_beq_4435_; lean_object* v___x_4436_; lean_object* v___x_4437_; 
-v_ord_4430_ = lean_ctor_get(v_args_4429_, 0);
-v_le_4431_ = lean_ctor_get(v_args_4429_, 1);
-lean_inc(v_le_4431_);
-v_decidableLE_4432_ = lean_ctor_get(v_args_4429_, 2);
-v_lt_4433_ = lean_ctor_get(v_args_4429_, 3);
-lean_inc(v_lt_4433_);
-v_decidableLT_4434_ = lean_ctor_get(v_args_4429_, 4);
-v_beq_4435_ = lean_ctor_get(v_args_4429_, 5);
-lean_inc_ref(v_decidableLT_4434_);
-lean_inc_ref(v_decidableLE_4432_);
-lean_inc_ref(v_beq_4435_);
-v___x_4436_ = lean_alloc_ctor(0, 5, 0);
-lean_ctor_set(v___x_4436_, 0, v_le_4431_);
-lean_ctor_set(v___x_4436_, 1, v_lt_4433_);
-lean_ctor_set(v___x_4436_, 2, v_beq_4435_);
-lean_ctor_set(v___x_4436_, 3, v_decidableLE_4432_);
-lean_ctor_set(v___x_4436_, 4, v_decidableLT_4434_);
-lean_inc_ref(v_ord_4430_);
-v___x_4437_ = lean_alloc_ctor(0, 2, 0);
-lean_ctor_set(v___x_4437_, 0, v___x_4436_);
-lean_ctor_set(v___x_4437_, 1, v_ord_4430_);
-return v___x_4437_;
+lean_object* v_ord_4431_; lean_object* v_le_4432_; lean_object* v_decidableLE_4433_; lean_object* v_lt_4434_; lean_object* v_decidableLT_4435_; lean_object* v_beq_4436_; lean_object* v___x_4437_; lean_object* v___x_4438_; 
+v_ord_4431_ = lean_ctor_get(v_args_4430_, 0);
+v_le_4432_ = lean_ctor_get(v_args_4430_, 1);
+lean_inc(v_le_4432_);
+v_decidableLE_4433_ = lean_ctor_get(v_args_4430_, 2);
+v_lt_4434_ = lean_ctor_get(v_args_4430_, 3);
+lean_inc(v_lt_4434_);
+v_decidableLT_4435_ = lean_ctor_get(v_args_4430_, 4);
+v_beq_4436_ = lean_ctor_get(v_args_4430_, 5);
+lean_inc_ref(v_decidableLT_4435_);
+lean_inc_ref(v_decidableLE_4433_);
+lean_inc_ref(v_beq_4436_);
+v___x_4437_ = lean_alloc_ctor(0, 5, 0);
+lean_ctor_set(v___x_4437_, 0, v_le_4432_);
+lean_ctor_set(v___x_4437_, 1, v_lt_4434_);
+lean_ctor_set(v___x_4437_, 2, v_beq_4436_);
+lean_ctor_set(v___x_4437_, 3, v_decidableLE_4433_);
+lean_ctor_set(v___x_4437_, 4, v_decidableLT_4435_);
+lean_inc_ref(v_ord_4431_);
+v___x_4438_ = lean_alloc_ctor(0, 2, 0);
+lean_ctor_set(v___x_4438_, 0, v___x_4437_);
+lean_ctor_set(v___x_4438_, 1, v_ord_4431_);
+return v___x_4438_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_LinearPreorderPackage_ofOrd___boxed(lean_object* v_00_u03b1_4438_, lean_object* v_args_4439_){
+LEAN_EXPORT lean_object* l_Std_LinearPreorderPackage_ofOrd___boxed(lean_object* v_00_u03b1_4439_, lean_object* v_args_4440_){
 _start:
 {
-lean_object* v_res_4440_; 
-v_res_4440_ = l_Std_LinearPreorderPackage_ofOrd(v_00_u03b1_4438_, v_args_4439_);
-lean_dec_ref(v_args_4439_);
-return v_res_4440_;
+lean_object* v_res_4441_; 
+v_res_4441_ = l_Std_LinearPreorderPackage_ofOrd(v_00_u03b1_4439_, v_args_4440_);
+lean_dec_ref(v_args_4440_);
+return v_res_4441_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMinOfOrd___redArg___lam__0(lean_object* v_inst_4441_, lean_object* v_a_4442_, lean_object* v_b_4443_){
+LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMinOfOrd___redArg___lam__0(lean_object* v_inst_4442_, lean_object* v_a_4443_, lean_object* v_b_4444_){
 _start:
 {
-lean_object* v___x_4444_; uint8_t v___x_4445_; 
-lean_inc(v_b_4443_);
-lean_inc(v_a_4442_);
-v___x_4444_ = lean_apply_2(v_inst_4441_, v_a_4442_, v_b_4443_);
-v___x_4445_ = lean_unbox(v___x_4444_);
-if (v___x_4445_ == 2)
+lean_object* v___x_4445_; uint8_t v___x_4446_; 
+lean_inc(v_b_4444_);
+lean_inc(v_a_4443_);
+v___x_4445_ = lean_apply_2(v_inst_4442_, v_a_4443_, v_b_4444_);
+v___x_4446_ = lean_unbox(v___x_4445_);
+if (v___x_4446_ == 2)
 {
-lean_dec(v_a_4442_);
-return v_b_4443_;
+lean_dec(v_a_4443_);
+return v_b_4444_;
 }
 else
 {
-lean_dec(v_b_4443_);
-return v_a_4442_;
+lean_dec(v_b_4444_);
+return v_a_4443_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMinOfOrd___redArg(lean_object* v_inst_4446_){
+LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMinOfOrd___redArg(lean_object* v_inst_4447_){
 _start:
 {
-lean_object* v___f_4447_; 
-v___f_4447_ = lean_alloc_closure((void*)(l_Std_FactoryInstances_instMinOfOrd___redArg___lam__0), 3, 1);
-lean_closure_set(v___f_4447_, 0, v_inst_4446_);
-return v___f_4447_;
+lean_object* v___f_4448_; 
+v___f_4448_ = lean_alloc_closure((void*)(l_Std_FactoryInstances_instMinOfOrd___redArg___lam__0), 3, 1);
+lean_closure_set(v___f_4448_, 0, v_inst_4447_);
+return v___f_4448_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMinOfOrd(lean_object* v_00_u03b1_4448_, lean_object* v_inst_4449_){
+LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMinOfOrd(lean_object* v_00_u03b1_4449_, lean_object* v_inst_4450_){
 _start:
 {
-lean_object* v___f_4450_; 
-v___f_4450_ = lean_alloc_closure((void*)(l_Std_FactoryInstances_instMinOfOrd___redArg___lam__0), 3, 1);
-lean_closure_set(v___f_4450_, 0, v_inst_4449_);
-return v___f_4450_;
+lean_object* v___f_4451_; 
+v___f_4451_ = lean_alloc_closure((void*)(l_Std_FactoryInstances_instMinOfOrd___redArg___lam__0), 3, 1);
+lean_closure_set(v___f_4451_, 0, v_inst_4450_);
+return v___f_4451_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMaxOfOrd___redArg___lam__0(lean_object* v_inst_4451_, lean_object* v_a_4452_, lean_object* v_b_4453_){
+LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMaxOfOrd___redArg___lam__0(lean_object* v_inst_4452_, lean_object* v_a_4453_, lean_object* v_b_4454_){
 _start:
 {
-lean_object* v___x_4454_; uint8_t v___x_4455_; 
-lean_inc(v_a_4452_);
-lean_inc(v_b_4453_);
-v___x_4454_ = lean_apply_2(v_inst_4451_, v_b_4453_, v_a_4452_);
-v___x_4455_ = lean_unbox(v___x_4454_);
-if (v___x_4455_ == 2)
+lean_object* v___x_4455_; uint8_t v___x_4456_; 
+lean_inc(v_a_4453_);
+lean_inc(v_b_4454_);
+v___x_4455_ = lean_apply_2(v_inst_4452_, v_b_4454_, v_a_4453_);
+v___x_4456_ = lean_unbox(v___x_4455_);
+if (v___x_4456_ == 2)
 {
-lean_dec(v_a_4452_);
-return v_b_4453_;
+lean_dec(v_a_4453_);
+return v_b_4454_;
 }
 else
 {
-lean_dec(v_b_4453_);
-return v_a_4452_;
+lean_dec(v_b_4454_);
+return v_a_4453_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMaxOfOrd___redArg(lean_object* v_inst_4456_){
+LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMaxOfOrd___redArg(lean_object* v_inst_4457_){
 _start:
 {
-lean_object* v___f_4457_; 
-v___f_4457_ = lean_alloc_closure((void*)(l_Std_FactoryInstances_instMaxOfOrd___redArg___lam__0), 3, 1);
-lean_closure_set(v___f_4457_, 0, v_inst_4456_);
-return v___f_4457_;
+lean_object* v___f_4458_; 
+v___f_4458_ = lean_alloc_closure((void*)(l_Std_FactoryInstances_instMaxOfOrd___redArg___lam__0), 3, 1);
+lean_closure_set(v___f_4458_, 0, v_inst_4457_);
+return v___f_4458_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMaxOfOrd(lean_object* v_00_u03b1_4458_, lean_object* v_inst_4459_){
+LEAN_EXPORT lean_object* l_Std_FactoryInstances_instMaxOfOrd(lean_object* v_00_u03b1_4459_, lean_object* v_inst_4460_){
 _start:
 {
-lean_object* v___f_4460_; 
-v___f_4460_ = lean_alloc_closure((void*)(l_Std_FactoryInstances_instMaxOfOrd___redArg___lam__0), 3, 1);
-lean_closure_set(v___f_4460_, 0, v_inst_4459_);
-return v___f_4460_;
+lean_object* v___f_4461_; 
+v___f_4461_ = lean_alloc_closure((void*)(l_Std_FactoryInstances_instMaxOfOrd___redArg___lam__0), 3, 1);
+lean_closure_set(v___f_4461_, 0, v_inst_4460_);
+return v___f_4461_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__6(void){
 _start:
 {
-lean_object* v___x_4478_; lean_object* v___x_4479_; lean_object* v___x_4480_; 
-v___x_4478_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__5));
-v___x_4479_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3, &l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3);
-v___x_4480_ = lean_array_push(v___x_4479_, v___x_4478_);
-return v___x_4480_;
+lean_object* v___x_4479_; lean_object* v___x_4480_; lean_object* v___x_4481_; 
+v___x_4479_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__5));
+v___x_4480_ = lean_obj_once(&l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3, &l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3_once, _init_l_Std_Packages_LinearPreorderOfOrdArgs_lt__iff___autoParam___closed__3);
+v___x_4481_ = lean_array_push(v___x_4480_, v___x_4479_);
+return v___x_4481_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__7(void){
 _start:
 {
-lean_object* v___x_4481_; lean_object* v___x_4482_; lean_object* v___x_4483_; lean_object* v___x_4484_; 
-v___x_4481_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__6, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__6_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__6);
-v___x_4482_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__5));
-v___x_4483_ = lean_box(2);
-v___x_4484_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4484_, 0, v___x_4483_);
-lean_ctor_set(v___x_4484_, 1, v___x_4482_);
-lean_ctor_set(v___x_4484_, 2, v___x_4481_);
-return v___x_4484_;
+lean_object* v___x_4482_; lean_object* v___x_4483_; lean_object* v___x_4484_; lean_object* v___x_4485_; 
+v___x_4482_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__6, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__6_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__6);
+v___x_4483_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__5));
+v___x_4484_ = lean_box(2);
+v___x_4485_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4485_, 0, v___x_4484_);
+lean_ctor_set(v___x_4485_, 1, v___x_4483_);
+lean_ctor_set(v___x_4485_, 2, v___x_4482_);
+return v___x_4485_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__8(void){
 _start:
 {
-lean_object* v___x_4485_; lean_object* v___x_4486_; lean_object* v___x_4487_; 
-v___x_4485_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__7, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__7);
-v___x_4486_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3, &l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3_once, _init_l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3);
-v___x_4487_ = lean_array_push(v___x_4486_, v___x_4485_);
-return v___x_4487_;
+lean_object* v___x_4486_; lean_object* v___x_4487_; lean_object* v___x_4488_; 
+v___x_4486_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__7, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__7);
+v___x_4487_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3, &l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3_once, _init_l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3);
+v___x_4488_ = lean_array_push(v___x_4487_, v___x_4486_);
+return v___x_4488_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__9(void){
 _start:
 {
-lean_object* v___x_4488_; lean_object* v___x_4489_; lean_object* v___x_4490_; lean_object* v___x_4491_; 
-v___x_4488_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__8, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__8_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__8);
-v___x_4489_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__1));
-v___x_4490_ = lean_box(2);
-v___x_4491_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4491_, 0, v___x_4490_);
-lean_ctor_set(v___x_4491_, 1, v___x_4489_);
-lean_ctor_set(v___x_4491_, 2, v___x_4488_);
-return v___x_4491_;
+lean_object* v___x_4489_; lean_object* v___x_4490_; lean_object* v___x_4491_; lean_object* v___x_4492_; 
+v___x_4489_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__8, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__8_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__8);
+v___x_4490_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__1));
+v___x_4491_ = lean_box(2);
+v___x_4492_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4492_, 0, v___x_4491_);
+lean_ctor_set(v___x_4492_, 1, v___x_4490_);
+lean_ctor_set(v___x_4492_, 2, v___x_4489_);
+return v___x_4492_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__10(void){
 _start:
 {
-lean_object* v___x_4492_; lean_object* v___x_4493_; lean_object* v___x_4494_; 
-v___x_4492_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__9, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__9_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__9);
-v___x_4493_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
-v___x_4494_ = lean_array_push(v___x_4493_, v___x_4492_);
-return v___x_4494_;
+lean_object* v___x_4493_; lean_object* v___x_4494_; lean_object* v___x_4495_; 
+v___x_4493_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__9, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__9_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__9);
+v___x_4494_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
+v___x_4495_ = lean_array_push(v___x_4494_, v___x_4493_);
+return v___x_4495_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__11(void){
 _start:
 {
-lean_object* v___x_4495_; lean_object* v___x_4496_; lean_object* v___x_4497_; lean_object* v___x_4498_; 
-v___x_4495_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__10, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__10_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__10);
-v___x_4496_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
-v___x_4497_ = lean_box(2);
-v___x_4498_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4498_, 0, v___x_4497_);
-lean_ctor_set(v___x_4498_, 1, v___x_4496_);
-lean_ctor_set(v___x_4498_, 2, v___x_4495_);
-return v___x_4498_;
+lean_object* v___x_4496_; lean_object* v___x_4497_; lean_object* v___x_4498_; lean_object* v___x_4499_; 
+v___x_4496_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__10, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__10_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__10);
+v___x_4497_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
+v___x_4498_ = lean_box(2);
+v___x_4499_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4499_, 0, v___x_4498_);
+lean_ctor_set(v___x_4499_, 1, v___x_4497_);
+lean_ctor_set(v___x_4499_, 2, v___x_4496_);
+return v___x_4499_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__12(void){
 _start:
 {
-lean_object* v___x_4499_; lean_object* v___x_4500_; lean_object* v___x_4501_; 
-v___x_4499_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__11, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__11_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__11);
-v___x_4500_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4501_ = lean_array_push(v___x_4500_, v___x_4499_);
-return v___x_4501_;
+lean_object* v___x_4500_; lean_object* v___x_4501_; lean_object* v___x_4502_; 
+v___x_4500_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__11, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__11_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__11);
+v___x_4501_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4502_ = lean_array_push(v___x_4501_, v___x_4500_);
+return v___x_4502_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__13(void){
 _start:
 {
-lean_object* v___x_4502_; lean_object* v___x_4503_; lean_object* v___x_4504_; lean_object* v___x_4505_; 
-v___x_4502_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__12, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__12_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__12);
-v___x_4503_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4504_ = lean_box(2);
-v___x_4505_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4505_, 0, v___x_4504_);
-lean_ctor_set(v___x_4505_, 1, v___x_4503_);
-lean_ctor_set(v___x_4505_, 2, v___x_4502_);
-return v___x_4505_;
+lean_object* v___x_4503_; lean_object* v___x_4504_; lean_object* v___x_4505_; lean_object* v___x_4506_; 
+v___x_4503_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__12, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__12_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__12);
+v___x_4504_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4505_ = lean_box(2);
+v___x_4506_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4506_, 0, v___x_4505_);
+lean_ctor_set(v___x_4506_, 1, v___x_4504_);
+lean_ctor_set(v___x_4506_, 2, v___x_4503_);
+return v___x_4506_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__14(void){
 _start:
 {
-lean_object* v___x_4506_; lean_object* v___x_4507_; lean_object* v___x_4508_; 
-v___x_4506_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__13, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__13);
-v___x_4507_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4508_ = lean_array_push(v___x_4507_, v___x_4506_);
-return v___x_4508_;
+lean_object* v___x_4507_; lean_object* v___x_4508_; lean_object* v___x_4509_; 
+v___x_4507_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__13, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__13);
+v___x_4508_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4509_ = lean_array_push(v___x_4508_, v___x_4507_);
+return v___x_4509_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__15(void){
 _start:
 {
-lean_object* v___x_4509_; lean_object* v___x_4510_; lean_object* v___x_4511_; lean_object* v___x_4512_; 
-v___x_4509_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__14, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__14_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__14);
-v___x_4510_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4511_ = lean_box(2);
-v___x_4512_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4512_, 0, v___x_4511_);
-lean_ctor_set(v___x_4512_, 1, v___x_4510_);
-lean_ctor_set(v___x_4512_, 2, v___x_4509_);
-return v___x_4512_;
+lean_object* v___x_4510_; lean_object* v___x_4511_; lean_object* v___x_4512_; lean_object* v___x_4513_; 
+v___x_4510_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__14, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__14_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__14);
+v___x_4511_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4512_ = lean_box(2);
+v___x_4513_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4513_, 0, v___x_4512_);
+lean_ctor_set(v___x_4513_, 1, v___x_4511_);
+lean_ctor_set(v___x_4513_, 2, v___x_4510_);
+return v___x_4513_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__16(void){
 _start:
 {
-lean_object* v___x_4513_; lean_object* v___x_4514_; lean_object* v___x_4515_; 
-v___x_4513_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__15, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__15_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__15);
-v___x_4514_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4515_ = lean_array_push(v___x_4514_, v___x_4513_);
-return v___x_4515_;
+lean_object* v___x_4514_; lean_object* v___x_4515_; lean_object* v___x_4516_; 
+v___x_4514_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__15, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__15_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__15);
+v___x_4515_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4516_ = lean_array_push(v___x_4515_, v___x_4514_);
+return v___x_4516_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__17(void){
 _start:
 {
-lean_object* v___x_4516_; lean_object* v___x_4517_; lean_object* v___x_4518_; lean_object* v___x_4519_; 
-v___x_4516_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__16, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__16_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__16);
-v___x_4517_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4518_ = lean_box(2);
-v___x_4519_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4519_, 0, v___x_4518_);
-lean_ctor_set(v___x_4519_, 1, v___x_4517_);
-lean_ctor_set(v___x_4519_, 2, v___x_4516_);
-return v___x_4519_;
+lean_object* v___x_4517_; lean_object* v___x_4518_; lean_object* v___x_4519_; lean_object* v___x_4520_; 
+v___x_4517_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__16, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__16_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__16);
+v___x_4518_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4519_ = lean_box(2);
+v___x_4520_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4520_, 0, v___x_4519_);
+lean_ctor_set(v___x_4520_, 1, v___x_4518_);
+lean_ctor_set(v___x_4520_, 2, v___x_4517_);
+return v___x_4520_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__18(void){
 _start:
 {
-lean_object* v___x_4520_; lean_object* v___x_4521_; lean_object* v___x_4522_; 
-v___x_4520_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__17, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__17_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__17);
-v___x_4521_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
-v___x_4522_ = lean_array_push(v___x_4521_, v___x_4520_);
-return v___x_4522_;
+lean_object* v___x_4521_; lean_object* v___x_4522_; lean_object* v___x_4523_; 
+v___x_4521_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__17, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__17_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__17);
+v___x_4522_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
+v___x_4523_ = lean_array_push(v___x_4522_, v___x_4521_);
+return v___x_4523_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__19(void){
 _start:
 {
-lean_object* v___x_4523_; lean_object* v___x_4524_; lean_object* v___x_4525_; lean_object* v___x_4526_; 
-v___x_4523_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__18, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__18_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__18);
-v___x_4524_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
-v___x_4525_ = lean_box(2);
-v___x_4526_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4526_, 0, v___x_4525_);
-lean_ctor_set(v___x_4526_, 1, v___x_4524_);
-lean_ctor_set(v___x_4526_, 2, v___x_4523_);
-return v___x_4526_;
+lean_object* v___x_4524_; lean_object* v___x_4525_; lean_object* v___x_4526_; lean_object* v___x_4527_; 
+v___x_4524_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__18, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__18_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__18);
+v___x_4525_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
+v___x_4526_ = lean_box(2);
+v___x_4527_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4527_, 0, v___x_4526_);
+lean_ctor_set(v___x_4527_, 1, v___x_4525_);
+lean_ctor_set(v___x_4527_, 2, v___x_4524_);
+return v___x_4527_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__20(void){
 _start:
 {
-lean_object* v___x_4527_; lean_object* v___x_4528_; lean_object* v___x_4529_; 
-v___x_4527_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__19, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__19_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__19);
-v___x_4528_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4529_ = lean_array_push(v___x_4528_, v___x_4527_);
-return v___x_4529_;
+lean_object* v___x_4528_; lean_object* v___x_4529_; lean_object* v___x_4530_; 
+v___x_4528_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__19, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__19_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__19);
+v___x_4529_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4530_ = lean_array_push(v___x_4529_, v___x_4528_);
+return v___x_4530_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__22(void){
 _start:
 {
-lean_object* v___x_4531_; lean_object* v___x_4532_; 
-v___x_4531_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__21));
-v___x_4532_ = l_Lean_mkAtom(v___x_4531_);
-return v___x_4532_;
+lean_object* v___x_4532_; lean_object* v___x_4533_; 
+v___x_4532_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__21));
+v___x_4533_ = l_Lean_mkAtom(v___x_4532_);
+return v___x_4533_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__23(void){
 _start:
 {
-lean_object* v___x_4533_; lean_object* v___x_4534_; lean_object* v___x_4535_; 
-v___x_4533_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__22, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__22_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__22);
-v___x_4534_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4535_ = lean_array_push(v___x_4534_, v___x_4533_);
-return v___x_4535_;
+lean_object* v___x_4534_; lean_object* v___x_4535_; lean_object* v___x_4536_; 
+v___x_4534_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__22, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__22_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__22);
+v___x_4535_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4536_ = lean_array_push(v___x_4535_, v___x_4534_);
+return v___x_4536_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__24(void){
 _start:
 {
-lean_object* v___x_4536_; lean_object* v___x_4537_; lean_object* v___x_4538_; lean_object* v___x_4539_; 
-v___x_4536_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__23, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__23_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__23);
-v___x_4537_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__22));
-v___x_4538_ = lean_box(2);
-v___x_4539_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4539_, 0, v___x_4538_);
-lean_ctor_set(v___x_4539_, 1, v___x_4537_);
-lean_ctor_set(v___x_4539_, 2, v___x_4536_);
-return v___x_4539_;
+lean_object* v___x_4537_; lean_object* v___x_4538_; lean_object* v___x_4539_; lean_object* v___x_4540_; 
+v___x_4537_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__23, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__23_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__23);
+v___x_4538_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__22));
+v___x_4539_ = lean_box(2);
+v___x_4540_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4540_, 0, v___x_4539_);
+lean_ctor_set(v___x_4540_, 1, v___x_4538_);
+lean_ctor_set(v___x_4540_, 2, v___x_4537_);
+return v___x_4540_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__25(void){
 _start:
 {
-lean_object* v___x_4540_; lean_object* v___x_4541_; lean_object* v___x_4542_; 
-v___x_4540_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__24, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__24_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__24);
-v___x_4541_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4542_ = lean_array_push(v___x_4541_, v___x_4540_);
-return v___x_4542_;
+lean_object* v___x_4541_; lean_object* v___x_4542_; lean_object* v___x_4543_; 
+v___x_4541_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__24, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__24_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__24);
+v___x_4542_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4543_ = lean_array_push(v___x_4542_, v___x_4541_);
+return v___x_4543_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__26(void){
 _start:
 {
-lean_object* v___x_4543_; lean_object* v___x_4544_; lean_object* v___x_4545_; lean_object* v___x_4546_; 
-v___x_4543_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__25, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__25_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__25);
-v___x_4544_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4545_ = lean_box(2);
-v___x_4546_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4546_, 0, v___x_4545_);
-lean_ctor_set(v___x_4546_, 1, v___x_4544_);
-lean_ctor_set(v___x_4546_, 2, v___x_4543_);
-return v___x_4546_;
+lean_object* v___x_4544_; lean_object* v___x_4545_; lean_object* v___x_4546_; lean_object* v___x_4547_; 
+v___x_4544_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__25, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__25_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__25);
+v___x_4545_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4546_ = lean_box(2);
+v___x_4547_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4547_, 0, v___x_4546_);
+lean_ctor_set(v___x_4547_, 1, v___x_4545_);
+lean_ctor_set(v___x_4547_, 2, v___x_4544_);
+return v___x_4547_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__27(void){
 _start:
 {
-lean_object* v___x_4547_; lean_object* v___x_4548_; lean_object* v___x_4549_; 
-v___x_4547_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__26, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__26_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__26);
-v___x_4548_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20, &l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20_once, _init_l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20);
-v___x_4549_ = lean_array_push(v___x_4548_, v___x_4547_);
-return v___x_4549_;
+lean_object* v___x_4548_; lean_object* v___x_4549_; lean_object* v___x_4550_; 
+v___x_4548_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__26, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__26_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__26);
+v___x_4549_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20, &l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20_once, _init_l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__20);
+v___x_4550_ = lean_array_push(v___x_4549_, v___x_4548_);
+return v___x_4550_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__28(void){
 _start:
 {
-lean_object* v___x_4550_; lean_object* v___x_4551_; lean_object* v___x_4552_; lean_object* v___x_4553_; 
-v___x_4550_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__27, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__27_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__27);
-v___x_4551_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__18));
-v___x_4552_ = lean_box(2);
-v___x_4553_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4553_, 0, v___x_4552_);
-lean_ctor_set(v___x_4553_, 1, v___x_4551_);
-lean_ctor_set(v___x_4553_, 2, v___x_4550_);
-return v___x_4553_;
+lean_object* v___x_4551_; lean_object* v___x_4552_; lean_object* v___x_4553_; lean_object* v___x_4554_; 
+v___x_4551_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__27, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__27_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__27);
+v___x_4552_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt__iff___autoParam___closed__18));
+v___x_4553_ = lean_box(2);
+v___x_4554_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4554_, 0, v___x_4553_);
+lean_ctor_set(v___x_4554_, 1, v___x_4552_);
+lean_ctor_set(v___x_4554_, 2, v___x_4551_);
+return v___x_4554_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__29(void){
 _start:
 {
-lean_object* v___x_4554_; lean_object* v___x_4555_; lean_object* v___x_4556_; 
-v___x_4554_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__28, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__28_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__28);
-v___x_4555_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4556_ = lean_array_push(v___x_4555_, v___x_4554_);
-return v___x_4556_;
+lean_object* v___x_4555_; lean_object* v___x_4556_; lean_object* v___x_4557_; 
+v___x_4555_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__28, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__28_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__28);
+v___x_4556_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4557_ = lean_array_push(v___x_4556_, v___x_4555_);
+return v___x_4557_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__30(void){
 _start:
 {
-lean_object* v___x_4557_; lean_object* v___x_4558_; lean_object* v___x_4559_; lean_object* v___x_4560_; 
-v___x_4557_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__29, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__29_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__29);
-v___x_4558_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4559_ = lean_box(2);
-v___x_4560_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4560_, 0, v___x_4559_);
-lean_ctor_set(v___x_4560_, 1, v___x_4558_);
-lean_ctor_set(v___x_4560_, 2, v___x_4557_);
-return v___x_4560_;
+lean_object* v___x_4558_; lean_object* v___x_4559_; lean_object* v___x_4560_; lean_object* v___x_4561_; 
+v___x_4558_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__29, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__29_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__29);
+v___x_4559_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4560_ = lean_box(2);
+v___x_4561_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4561_, 0, v___x_4560_);
+lean_ctor_set(v___x_4561_, 1, v___x_4559_);
+lean_ctor_set(v___x_4561_, 2, v___x_4558_);
+return v___x_4561_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__31(void){
 _start:
 {
-lean_object* v___x_4561_; lean_object* v___x_4562_; lean_object* v___x_4563_; 
-v___x_4561_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__30, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__30_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__30);
-v___x_4562_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4563_ = lean_array_push(v___x_4562_, v___x_4561_);
-return v___x_4563_;
+lean_object* v___x_4562_; lean_object* v___x_4563_; lean_object* v___x_4564_; 
+v___x_4562_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__30, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__30_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__30);
+v___x_4563_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4564_ = lean_array_push(v___x_4563_, v___x_4562_);
+return v___x_4564_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__32(void){
 _start:
 {
-lean_object* v___x_4564_; lean_object* v___x_4565_; lean_object* v___x_4566_; lean_object* v___x_4567_; 
-v___x_4564_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__31, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__31_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__31);
-v___x_4565_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4566_ = lean_box(2);
-v___x_4567_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4567_, 0, v___x_4566_);
-lean_ctor_set(v___x_4567_, 1, v___x_4565_);
-lean_ctor_set(v___x_4567_, 2, v___x_4564_);
-return v___x_4567_;
+lean_object* v___x_4565_; lean_object* v___x_4566_; lean_object* v___x_4567_; lean_object* v___x_4568_; 
+v___x_4565_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__31, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__31_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__31);
+v___x_4566_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4567_ = lean_box(2);
+v___x_4568_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4568_, 0, v___x_4567_);
+lean_ctor_set(v___x_4568_, 1, v___x_4566_);
+lean_ctor_set(v___x_4568_, 2, v___x_4565_);
+return v___x_4568_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__33(void){
 _start:
 {
-lean_object* v___x_4568_; lean_object* v___x_4569_; lean_object* v___x_4570_; 
-v___x_4568_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__32, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__32_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__32);
-v___x_4569_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4570_ = lean_array_push(v___x_4569_, v___x_4568_);
-return v___x_4570_;
+lean_object* v___x_4569_; lean_object* v___x_4570_; lean_object* v___x_4571_; 
+v___x_4569_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__32, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__32_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__32);
+v___x_4570_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4571_ = lean_array_push(v___x_4570_, v___x_4569_);
+return v___x_4571_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__34(void){
 _start:
 {
-lean_object* v___x_4571_; lean_object* v___x_4572_; lean_object* v___x_4573_; lean_object* v___x_4574_; 
-v___x_4571_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__33, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__33_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__33);
-v___x_4572_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4573_ = lean_box(2);
-v___x_4574_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4574_, 0, v___x_4573_);
-lean_ctor_set(v___x_4574_, 1, v___x_4572_);
-lean_ctor_set(v___x_4574_, 2, v___x_4571_);
-return v___x_4574_;
+lean_object* v___x_4572_; lean_object* v___x_4573_; lean_object* v___x_4574_; lean_object* v___x_4575_; 
+v___x_4572_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__33, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__33_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__33);
+v___x_4573_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4574_ = lean_box(2);
+v___x_4575_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4575_, 0, v___x_4574_);
+lean_ctor_set(v___x_4575_, 1, v___x_4573_);
+lean_ctor_set(v___x_4575_, 2, v___x_4572_);
+return v___x_4575_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__35(void){
 _start:
 {
-lean_object* v___x_4575_; lean_object* v___x_4576_; lean_object* v___x_4577_; 
-v___x_4575_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__34, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__34_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__34);
-v___x_4576_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
-v___x_4577_ = lean_array_push(v___x_4576_, v___x_4575_);
-return v___x_4577_;
+lean_object* v___x_4576_; lean_object* v___x_4577_; lean_object* v___x_4578_; 
+v___x_4576_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__34, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__34_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__34);
+v___x_4577_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
+v___x_4578_ = lean_array_push(v___x_4577_, v___x_4576_);
+return v___x_4578_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__36(void){
 _start:
 {
-lean_object* v___x_4578_; lean_object* v___x_4579_; lean_object* v___x_4580_; lean_object* v___x_4581_; 
-v___x_4578_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__35, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__35_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__35);
-v___x_4579_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
-v___x_4580_ = lean_box(2);
-v___x_4581_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4581_, 0, v___x_4580_);
-lean_ctor_set(v___x_4581_, 1, v___x_4579_);
-lean_ctor_set(v___x_4581_, 2, v___x_4578_);
-return v___x_4581_;
+lean_object* v___x_4579_; lean_object* v___x_4580_; lean_object* v___x_4581_; lean_object* v___x_4582_; 
+v___x_4579_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__35, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__35_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__35);
+v___x_4580_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
+v___x_4581_ = lean_box(2);
+v___x_4582_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4582_, 0, v___x_4581_);
+lean_ctor_set(v___x_4582_, 1, v___x_4580_);
+lean_ctor_set(v___x_4582_, 2, v___x_4579_);
+return v___x_4582_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__37(void){
 _start:
 {
-lean_object* v___x_4582_; lean_object* v___x_4583_; lean_object* v___x_4584_; 
-v___x_4582_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__36, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__36_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__36);
-v___x_4583_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__20, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__20_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__20);
-v___x_4584_ = lean_array_push(v___x_4583_, v___x_4582_);
-return v___x_4584_;
+lean_object* v___x_4583_; lean_object* v___x_4584_; lean_object* v___x_4585_; 
+v___x_4583_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__36, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__36_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__36);
+v___x_4584_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__20, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__20_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__20);
+v___x_4585_ = lean_array_push(v___x_4584_, v___x_4583_);
+return v___x_4585_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__38(void){
 _start:
 {
-lean_object* v___x_4585_; lean_object* v___x_4586_; lean_object* v___x_4587_; lean_object* v___x_4588_; 
-v___x_4585_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__37, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__37_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__37);
-v___x_4586_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4587_ = lean_box(2);
-v___x_4588_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4588_, 0, v___x_4587_);
-lean_ctor_set(v___x_4588_, 1, v___x_4586_);
-lean_ctor_set(v___x_4588_, 2, v___x_4585_);
-return v___x_4588_;
+lean_object* v___x_4586_; lean_object* v___x_4587_; lean_object* v___x_4588_; lean_object* v___x_4589_; 
+v___x_4586_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__37, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__37_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__37);
+v___x_4587_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4588_ = lean_box(2);
+v___x_4589_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4589_, 0, v___x_4588_);
+lean_ctor_set(v___x_4589_, 1, v___x_4587_);
+lean_ctor_set(v___x_4589_, 2, v___x_4586_);
+return v___x_4589_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__39(void){
 _start:
 {
-lean_object* v___x_4589_; lean_object* v___x_4590_; lean_object* v___x_4591_; 
-v___x_4589_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__38, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__38_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__38);
-v___x_4590_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
-v___x_4591_ = lean_array_push(v___x_4590_, v___x_4589_);
-return v___x_4591_;
+lean_object* v___x_4590_; lean_object* v___x_4591_; lean_object* v___x_4592_; 
+v___x_4590_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__38, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__38_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__38);
+v___x_4591_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
+v___x_4592_ = lean_array_push(v___x_4591_, v___x_4590_);
+return v___x_4592_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__40(void){
 _start:
 {
-lean_object* v___x_4592_; lean_object* v___x_4593_; lean_object* v___x_4594_; lean_object* v___x_4595_; 
-v___x_4592_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__39, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__39_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__39);
-v___x_4593_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
-v___x_4594_ = lean_box(2);
-v___x_4595_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4595_, 0, v___x_4594_);
-lean_ctor_set(v___x_4595_, 1, v___x_4593_);
-lean_ctor_set(v___x_4595_, 2, v___x_4592_);
-return v___x_4595_;
+lean_object* v___x_4593_; lean_object* v___x_4594_; lean_object* v___x_4595_; lean_object* v___x_4596_; 
+v___x_4593_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__39, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__39_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__39);
+v___x_4594_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
+v___x_4595_ = lean_box(2);
+v___x_4596_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4596_, 0, v___x_4595_);
+lean_ctor_set(v___x_4596_, 1, v___x_4594_);
+lean_ctor_set(v___x_4596_, 2, v___x_4593_);
+return v___x_4596_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__41(void){
 _start:
 {
-lean_object* v___x_4596_; lean_object* v___x_4597_; lean_object* v___x_4598_; 
-v___x_4596_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__40, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__40_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__40);
-v___x_4597_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
-v___x_4598_ = lean_array_push(v___x_4597_, v___x_4596_);
-return v___x_4598_;
+lean_object* v___x_4597_; lean_object* v___x_4598_; lean_object* v___x_4599_; 
+v___x_4597_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__40, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__40_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__40);
+v___x_4598_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
+v___x_4599_ = lean_array_push(v___x_4598_, v___x_4597_);
+return v___x_4599_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__42(void){
 _start:
 {
-lean_object* v___x_4599_; lean_object* v___x_4600_; lean_object* v___x_4601_; lean_object* v___x_4602_; 
-v___x_4599_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__41, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__41_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__41);
-v___x_4600_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4601_ = lean_box(2);
-v___x_4602_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4602_, 0, v___x_4601_);
-lean_ctor_set(v___x_4602_, 1, v___x_4600_);
-lean_ctor_set(v___x_4602_, 2, v___x_4599_);
-return v___x_4602_;
+lean_object* v___x_4600_; lean_object* v___x_4601_; lean_object* v___x_4602_; lean_object* v___x_4603_; 
+v___x_4600_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__41, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__41_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__41);
+v___x_4601_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4602_ = lean_box(2);
+v___x_4603_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4603_, 0, v___x_4602_);
+lean_ctor_set(v___x_4603_, 1, v___x_4601_);
+lean_ctor_set(v___x_4603_, 2, v___x_4600_);
+return v___x_4603_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__43(void){
 _start:
 {
-lean_object* v___x_4603_; lean_object* v___x_4604_; lean_object* v___x_4605_; 
-v___x_4603_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__42, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__42_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__42);
-v___x_4604_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4605_ = lean_array_push(v___x_4604_, v___x_4603_);
-return v___x_4605_;
+lean_object* v___x_4604_; lean_object* v___x_4605_; lean_object* v___x_4606_; 
+v___x_4604_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__42, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__42_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__42);
+v___x_4605_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4606_ = lean_array_push(v___x_4605_, v___x_4604_);
+return v___x_4606_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__44(void){
 _start:
 {
-lean_object* v___x_4606_; lean_object* v___x_4607_; lean_object* v___x_4608_; lean_object* v___x_4609_; 
-v___x_4606_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__43, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__43_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__43);
-v___x_4607_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4608_ = lean_box(2);
-v___x_4609_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4609_, 0, v___x_4608_);
-lean_ctor_set(v___x_4609_, 1, v___x_4607_);
-lean_ctor_set(v___x_4609_, 2, v___x_4606_);
-return v___x_4609_;
+lean_object* v___x_4607_; lean_object* v___x_4608_; lean_object* v___x_4609_; lean_object* v___x_4610_; 
+v___x_4607_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__43, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__43_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__43);
+v___x_4608_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4609_ = lean_box(2);
+v___x_4610_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4610_, 0, v___x_4609_);
+lean_ctor_set(v___x_4610_, 1, v___x_4608_);
+lean_ctor_set(v___x_4610_, 2, v___x_4607_);
+return v___x_4610_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__45(void){
 _start:
 {
-lean_object* v___x_4610_; lean_object* v___x_4611_; lean_object* v___x_4612_; 
-v___x_4610_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__44, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__44_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__44);
-v___x_4611_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4612_ = lean_array_push(v___x_4611_, v___x_4610_);
-return v___x_4612_;
+lean_object* v___x_4611_; lean_object* v___x_4612_; lean_object* v___x_4613_; 
+v___x_4611_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__44, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__44_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__44);
+v___x_4612_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4613_ = lean_array_push(v___x_4612_, v___x_4611_);
+return v___x_4613_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__46(void){
 _start:
 {
-lean_object* v___x_4613_; lean_object* v___x_4614_; lean_object* v___x_4615_; lean_object* v___x_4616_; 
-v___x_4613_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__45, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__45_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__45);
-v___x_4614_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4615_ = lean_box(2);
-v___x_4616_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4616_, 0, v___x_4615_);
-lean_ctor_set(v___x_4616_, 1, v___x_4614_);
-lean_ctor_set(v___x_4616_, 2, v___x_4613_);
-return v___x_4616_;
+lean_object* v___x_4614_; lean_object* v___x_4615_; lean_object* v___x_4616_; lean_object* v___x_4617_; 
+v___x_4614_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__45, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__45_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__45);
+v___x_4615_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4616_ = lean_box(2);
+v___x_4617_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4617_, 0, v___x_4616_);
+lean_ctor_set(v___x_4617_, 1, v___x_4615_);
+lean_ctor_set(v___x_4617_, 2, v___x_4614_);
+return v___x_4617_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam(void){
 _start:
 {
-lean_object* v___x_4617_; 
-v___x_4617_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__46, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__46_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__46);
-return v___x_4617_;
+lean_object* v___x_4618_; 
+v___x_4618_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__46, &l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__46_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_eq__of__compare___autoParam___closed__46);
+return v___x_4618_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__5(void){
 _start:
 {
-lean_object* v___x_4634_; lean_object* v___x_4635_; lean_object* v___x_4636_; 
-v___x_4634_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__4));
-v___x_4635_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
-v___x_4636_ = lean_array_push(v___x_4635_, v___x_4634_);
-return v___x_4636_;
+lean_object* v___x_4635_; lean_object* v___x_4636_; lean_object* v___x_4637_; 
+v___x_4635_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__4));
+v___x_4636_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
+v___x_4637_ = lean_array_push(v___x_4636_, v___x_4635_);
+return v___x_4637_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__6(void){
 _start:
 {
-lean_object* v___x_4637_; lean_object* v___x_4638_; lean_object* v___x_4639_; lean_object* v___x_4640_; 
-v___x_4637_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__5, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__5_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__5);
-v___x_4638_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
-v___x_4639_ = lean_box(2);
-v___x_4640_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4640_, 0, v___x_4639_);
-lean_ctor_set(v___x_4640_, 1, v___x_4638_);
-lean_ctor_set(v___x_4640_, 2, v___x_4637_);
-return v___x_4640_;
+lean_object* v___x_4638_; lean_object* v___x_4639_; lean_object* v___x_4640_; lean_object* v___x_4641_; 
+v___x_4638_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__5, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__5_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__5);
+v___x_4639_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
+v___x_4640_ = lean_box(2);
+v___x_4641_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4641_, 0, v___x_4640_);
+lean_ctor_set(v___x_4641_, 1, v___x_4639_);
+lean_ctor_set(v___x_4641_, 2, v___x_4638_);
+return v___x_4641_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__7(void){
 _start:
 {
-lean_object* v___x_4641_; lean_object* v___x_4642_; lean_object* v___x_4643_; 
-v___x_4641_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__6, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__6_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__6);
-v___x_4642_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4643_ = lean_array_push(v___x_4642_, v___x_4641_);
-return v___x_4643_;
+lean_object* v___x_4642_; lean_object* v___x_4643_; lean_object* v___x_4644_; 
+v___x_4642_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__6, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__6_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__6);
+v___x_4643_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4644_ = lean_array_push(v___x_4643_, v___x_4642_);
+return v___x_4644_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__8(void){
 _start:
 {
-lean_object* v___x_4644_; lean_object* v___x_4645_; lean_object* v___x_4646_; lean_object* v___x_4647_; 
-v___x_4644_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__7, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__7);
-v___x_4645_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4646_ = lean_box(2);
-v___x_4647_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4647_, 0, v___x_4646_);
-lean_ctor_set(v___x_4647_, 1, v___x_4645_);
-lean_ctor_set(v___x_4647_, 2, v___x_4644_);
-return v___x_4647_;
+lean_object* v___x_4645_; lean_object* v___x_4646_; lean_object* v___x_4647_; lean_object* v___x_4648_; 
+v___x_4645_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__7, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__7);
+v___x_4646_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4647_ = lean_box(2);
+v___x_4648_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4648_, 0, v___x_4647_);
+lean_ctor_set(v___x_4648_, 1, v___x_4646_);
+lean_ctor_set(v___x_4648_, 2, v___x_4645_);
+return v___x_4648_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__9(void){
 _start:
 {
-lean_object* v___x_4648_; lean_object* v___x_4649_; lean_object* v___x_4650_; 
-v___x_4648_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__8, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__8_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__8);
-v___x_4649_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4650_ = lean_array_push(v___x_4649_, v___x_4648_);
-return v___x_4650_;
+lean_object* v___x_4649_; lean_object* v___x_4650_; lean_object* v___x_4651_; 
+v___x_4649_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__8, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__8_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__8);
+v___x_4650_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4651_ = lean_array_push(v___x_4650_, v___x_4649_);
+return v___x_4651_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__10(void){
 _start:
 {
-lean_object* v___x_4651_; lean_object* v___x_4652_; lean_object* v___x_4653_; lean_object* v___x_4654_; 
-v___x_4651_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__9, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__9_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__9);
-v___x_4652_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4653_ = lean_box(2);
-v___x_4654_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4654_, 0, v___x_4653_);
-lean_ctor_set(v___x_4654_, 1, v___x_4652_);
-lean_ctor_set(v___x_4654_, 2, v___x_4651_);
-return v___x_4654_;
+lean_object* v___x_4652_; lean_object* v___x_4653_; lean_object* v___x_4654_; lean_object* v___x_4655_; 
+v___x_4652_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__9, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__9_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__9);
+v___x_4653_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4654_ = lean_box(2);
+v___x_4655_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4655_, 0, v___x_4654_);
+lean_ctor_set(v___x_4655_, 1, v___x_4653_);
+lean_ctor_set(v___x_4655_, 2, v___x_4652_);
+return v___x_4655_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__11(void){
 _start:
 {
-lean_object* v___x_4655_; lean_object* v___x_4656_; lean_object* v___x_4657_; 
-v___x_4655_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__10, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__10_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__10);
-v___x_4656_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4657_ = lean_array_push(v___x_4656_, v___x_4655_);
-return v___x_4657_;
+lean_object* v___x_4656_; lean_object* v___x_4657_; lean_object* v___x_4658_; 
+v___x_4656_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__10, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__10_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__10);
+v___x_4657_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4658_ = lean_array_push(v___x_4657_, v___x_4656_);
+return v___x_4658_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__12(void){
 _start:
 {
-lean_object* v___x_4658_; lean_object* v___x_4659_; lean_object* v___x_4660_; lean_object* v___x_4661_; 
-v___x_4658_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__11, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__11_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__11);
-v___x_4659_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4660_ = lean_box(2);
-v___x_4661_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4661_, 0, v___x_4660_);
-lean_ctor_set(v___x_4661_, 1, v___x_4659_);
-lean_ctor_set(v___x_4661_, 2, v___x_4658_);
-return v___x_4661_;
+lean_object* v___x_4659_; lean_object* v___x_4660_; lean_object* v___x_4661_; lean_object* v___x_4662_; 
+v___x_4659_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__11, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__11_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__11);
+v___x_4660_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4661_ = lean_box(2);
+v___x_4662_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4662_, 0, v___x_4661_);
+lean_ctor_set(v___x_4662_, 1, v___x_4660_);
+lean_ctor_set(v___x_4662_, 2, v___x_4659_);
+return v___x_4662_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__13(void){
 _start:
 {
-lean_object* v___x_4662_; lean_object* v___x_4663_; lean_object* v___x_4664_; 
-v___x_4662_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__12, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__12_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__12);
-v___x_4663_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
-v___x_4664_ = lean_array_push(v___x_4663_, v___x_4662_);
-return v___x_4664_;
+lean_object* v___x_4663_; lean_object* v___x_4664_; lean_object* v___x_4665_; 
+v___x_4663_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__12, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__12_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__12);
+v___x_4664_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
+v___x_4665_ = lean_array_push(v___x_4664_, v___x_4663_);
+return v___x_4665_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__14(void){
 _start:
 {
-lean_object* v___x_4665_; lean_object* v___x_4666_; lean_object* v___x_4667_; lean_object* v___x_4668_; 
-v___x_4665_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__13, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__13);
-v___x_4666_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
-v___x_4667_ = lean_box(2);
-v___x_4668_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4668_, 0, v___x_4667_);
-lean_ctor_set(v___x_4668_, 1, v___x_4666_);
-lean_ctor_set(v___x_4668_, 2, v___x_4665_);
-return v___x_4668_;
+lean_object* v___x_4666_; lean_object* v___x_4667_; lean_object* v___x_4668_; lean_object* v___x_4669_; 
+v___x_4666_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__13, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__13);
+v___x_4667_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
+v___x_4668_ = lean_box(2);
+v___x_4669_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4669_, 0, v___x_4668_);
+lean_ctor_set(v___x_4669_, 1, v___x_4667_);
+lean_ctor_set(v___x_4669_, 2, v___x_4666_);
+return v___x_4669_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__15(void){
 _start:
 {
-lean_object* v___x_4669_; lean_object* v___x_4670_; lean_object* v___x_4671_; 
-v___x_4669_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__14, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__14_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__14);
-v___x_4670_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27);
-v___x_4671_ = lean_array_push(v___x_4670_, v___x_4669_);
-return v___x_4671_;
+lean_object* v___x_4670_; lean_object* v___x_4671_; lean_object* v___x_4672_; 
+v___x_4670_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__14, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__14_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__14);
+v___x_4671_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27);
+v___x_4672_ = lean_array_push(v___x_4671_, v___x_4670_);
+return v___x_4672_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__16(void){
 _start:
 {
-lean_object* v___x_4672_; lean_object* v___x_4673_; lean_object* v___x_4674_; lean_object* v___x_4675_; 
-v___x_4672_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__15, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__15_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__15);
-v___x_4673_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4674_ = lean_box(2);
-v___x_4675_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4675_, 0, v___x_4674_);
-lean_ctor_set(v___x_4675_, 1, v___x_4673_);
-lean_ctor_set(v___x_4675_, 2, v___x_4672_);
-return v___x_4675_;
+lean_object* v___x_4673_; lean_object* v___x_4674_; lean_object* v___x_4675_; lean_object* v___x_4676_; 
+v___x_4673_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__15, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__15_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__15);
+v___x_4674_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4675_ = lean_box(2);
+v___x_4676_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4676_, 0, v___x_4675_);
+lean_ctor_set(v___x_4676_, 1, v___x_4674_);
+lean_ctor_set(v___x_4676_, 2, v___x_4673_);
+return v___x_4676_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__17(void){
 _start:
 {
-lean_object* v___x_4676_; lean_object* v___x_4677_; lean_object* v___x_4678_; 
-v___x_4676_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__16, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__16_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__16);
-v___x_4677_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
-v___x_4678_ = lean_array_push(v___x_4677_, v___x_4676_);
-return v___x_4678_;
+lean_object* v___x_4677_; lean_object* v___x_4678_; lean_object* v___x_4679_; 
+v___x_4677_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__16, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__16_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__16);
+v___x_4678_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
+v___x_4679_ = lean_array_push(v___x_4678_, v___x_4677_);
+return v___x_4679_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__18(void){
 _start:
 {
-lean_object* v___x_4679_; lean_object* v___x_4680_; lean_object* v___x_4681_; lean_object* v___x_4682_; 
-v___x_4679_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__17, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__17_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__17);
-v___x_4680_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
-v___x_4681_ = lean_box(2);
-v___x_4682_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4682_, 0, v___x_4681_);
-lean_ctor_set(v___x_4682_, 1, v___x_4680_);
-lean_ctor_set(v___x_4682_, 2, v___x_4679_);
-return v___x_4682_;
+lean_object* v___x_4680_; lean_object* v___x_4681_; lean_object* v___x_4682_; lean_object* v___x_4683_; 
+v___x_4680_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__17, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__17_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__17);
+v___x_4681_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
+v___x_4682_ = lean_box(2);
+v___x_4683_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4683_, 0, v___x_4682_);
+lean_ctor_set(v___x_4683_, 1, v___x_4681_);
+lean_ctor_set(v___x_4683_, 2, v___x_4680_);
+return v___x_4683_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__19(void){
 _start:
 {
-lean_object* v___x_4683_; lean_object* v___x_4684_; lean_object* v___x_4685_; 
-v___x_4683_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__18, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__18_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__18);
-v___x_4684_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
-v___x_4685_ = lean_array_push(v___x_4684_, v___x_4683_);
-return v___x_4685_;
+lean_object* v___x_4684_; lean_object* v___x_4685_; lean_object* v___x_4686_; 
+v___x_4684_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__18, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__18_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__18);
+v___x_4685_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
+v___x_4686_ = lean_array_push(v___x_4685_, v___x_4684_);
+return v___x_4686_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__20(void){
 _start:
 {
-lean_object* v___x_4686_; lean_object* v___x_4687_; lean_object* v___x_4688_; lean_object* v___x_4689_; 
-v___x_4686_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__19, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__19_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__19);
-v___x_4687_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4688_ = lean_box(2);
-v___x_4689_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4689_, 0, v___x_4688_);
-lean_ctor_set(v___x_4689_, 1, v___x_4687_);
-lean_ctor_set(v___x_4689_, 2, v___x_4686_);
-return v___x_4689_;
+lean_object* v___x_4687_; lean_object* v___x_4688_; lean_object* v___x_4689_; lean_object* v___x_4690_; 
+v___x_4687_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__19, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__19_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__19);
+v___x_4688_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4689_ = lean_box(2);
+v___x_4690_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4690_, 0, v___x_4689_);
+lean_ctor_set(v___x_4690_, 1, v___x_4688_);
+lean_ctor_set(v___x_4690_, 2, v___x_4687_);
+return v___x_4690_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__21(void){
 _start:
 {
-lean_object* v___x_4690_; lean_object* v___x_4691_; lean_object* v___x_4692_; 
-v___x_4690_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__20, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__20_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__20);
-v___x_4691_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4692_ = lean_array_push(v___x_4691_, v___x_4690_);
-return v___x_4692_;
+lean_object* v___x_4691_; lean_object* v___x_4692_; lean_object* v___x_4693_; 
+v___x_4691_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__20, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__20_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__20);
+v___x_4692_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4693_ = lean_array_push(v___x_4692_, v___x_4691_);
+return v___x_4693_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__22(void){
 _start:
 {
-lean_object* v___x_4693_; lean_object* v___x_4694_; lean_object* v___x_4695_; lean_object* v___x_4696_; 
-v___x_4693_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__21, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__21_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__21);
-v___x_4694_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4695_ = lean_box(2);
-v___x_4696_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4696_, 0, v___x_4695_);
-lean_ctor_set(v___x_4696_, 1, v___x_4694_);
-lean_ctor_set(v___x_4696_, 2, v___x_4693_);
-return v___x_4696_;
+lean_object* v___x_4694_; lean_object* v___x_4695_; lean_object* v___x_4696_; lean_object* v___x_4697_; 
+v___x_4694_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__21, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__21_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__21);
+v___x_4695_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4696_ = lean_box(2);
+v___x_4697_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4697_, 0, v___x_4696_);
+lean_ctor_set(v___x_4697_, 1, v___x_4695_);
+lean_ctor_set(v___x_4697_, 2, v___x_4694_);
+return v___x_4697_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__23(void){
 _start:
 {
-lean_object* v___x_4697_; lean_object* v___x_4698_; lean_object* v___x_4699_; 
-v___x_4697_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__22, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__22_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__22);
-v___x_4698_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4699_ = lean_array_push(v___x_4698_, v___x_4697_);
-return v___x_4699_;
+lean_object* v___x_4698_; lean_object* v___x_4699_; lean_object* v___x_4700_; 
+v___x_4698_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__22, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__22_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__22);
+v___x_4699_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4700_ = lean_array_push(v___x_4699_, v___x_4698_);
+return v___x_4700_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__24(void){
 _start:
 {
-lean_object* v___x_4700_; lean_object* v___x_4701_; lean_object* v___x_4702_; lean_object* v___x_4703_; 
-v___x_4700_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__23, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__23_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__23);
-v___x_4701_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4702_ = lean_box(2);
-v___x_4703_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4703_, 0, v___x_4702_);
-lean_ctor_set(v___x_4703_, 1, v___x_4701_);
-lean_ctor_set(v___x_4703_, 2, v___x_4700_);
-return v___x_4703_;
+lean_object* v___x_4701_; lean_object* v___x_4702_; lean_object* v___x_4703_; lean_object* v___x_4704_; 
+v___x_4701_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__23, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__23_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__23);
+v___x_4702_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4703_ = lean_box(2);
+v___x_4704_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4704_, 0, v___x_4703_);
+lean_ctor_set(v___x_4704_, 1, v___x_4702_);
+lean_ctor_set(v___x_4704_, 2, v___x_4701_);
+return v___x_4704_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam(void){
 _start:
 {
-lean_object* v___x_4704_; 
-v___x_4704_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__24, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__24_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__24);
-return v___x_4704_;
+lean_object* v___x_4705_; 
+v___x_4705_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__24, &l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__24_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min___autoParam___closed__24);
+return v___x_4705_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__5(void){
 _start:
 {
-lean_object* v___x_4721_; lean_object* v___x_4722_; lean_object* v___x_4723_; 
-v___x_4721_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__4));
-v___x_4722_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
-v___x_4723_ = lean_array_push(v___x_4722_, v___x_4721_);
-return v___x_4723_;
+lean_object* v___x_4722_; lean_object* v___x_4723_; lean_object* v___x_4724_; 
+v___x_4722_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__4));
+v___x_4723_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
+v___x_4724_ = lean_array_push(v___x_4723_, v___x_4722_);
+return v___x_4724_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__6(void){
 _start:
 {
-lean_object* v___x_4724_; lean_object* v___x_4725_; lean_object* v___x_4726_; lean_object* v___x_4727_; 
-v___x_4724_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__5, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__5_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__5);
-v___x_4725_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
-v___x_4726_ = lean_box(2);
-v___x_4727_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4727_, 0, v___x_4726_);
-lean_ctor_set(v___x_4727_, 1, v___x_4725_);
-lean_ctor_set(v___x_4727_, 2, v___x_4724_);
-return v___x_4727_;
+lean_object* v___x_4725_; lean_object* v___x_4726_; lean_object* v___x_4727_; lean_object* v___x_4728_; 
+v___x_4725_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__5, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__5_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__5);
+v___x_4726_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
+v___x_4727_ = lean_box(2);
+v___x_4728_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4728_, 0, v___x_4727_);
+lean_ctor_set(v___x_4728_, 1, v___x_4726_);
+lean_ctor_set(v___x_4728_, 2, v___x_4725_);
+return v___x_4728_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__7(void){
 _start:
 {
-lean_object* v___x_4728_; lean_object* v___x_4729_; lean_object* v___x_4730_; 
-v___x_4728_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__6, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__6_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__6);
-v___x_4729_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4730_ = lean_array_push(v___x_4729_, v___x_4728_);
-return v___x_4730_;
+lean_object* v___x_4729_; lean_object* v___x_4730_; lean_object* v___x_4731_; 
+v___x_4729_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__6, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__6_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__6);
+v___x_4730_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4731_ = lean_array_push(v___x_4730_, v___x_4729_);
+return v___x_4731_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__8(void){
 _start:
 {
-lean_object* v___x_4731_; lean_object* v___x_4732_; lean_object* v___x_4733_; lean_object* v___x_4734_; 
-v___x_4731_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__7, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__7);
-v___x_4732_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4733_ = lean_box(2);
-v___x_4734_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4734_, 0, v___x_4733_);
-lean_ctor_set(v___x_4734_, 1, v___x_4732_);
-lean_ctor_set(v___x_4734_, 2, v___x_4731_);
-return v___x_4734_;
+lean_object* v___x_4732_; lean_object* v___x_4733_; lean_object* v___x_4734_; lean_object* v___x_4735_; 
+v___x_4732_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__7, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__7);
+v___x_4733_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4734_ = lean_box(2);
+v___x_4735_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4735_, 0, v___x_4734_);
+lean_ctor_set(v___x_4735_, 1, v___x_4733_);
+lean_ctor_set(v___x_4735_, 2, v___x_4732_);
+return v___x_4735_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__9(void){
 _start:
 {
-lean_object* v___x_4735_; lean_object* v___x_4736_; lean_object* v___x_4737_; 
-v___x_4735_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__8, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__8_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__8);
-v___x_4736_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4737_ = lean_array_push(v___x_4736_, v___x_4735_);
-return v___x_4737_;
+lean_object* v___x_4736_; lean_object* v___x_4737_; lean_object* v___x_4738_; 
+v___x_4736_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__8, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__8_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__8);
+v___x_4737_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4738_ = lean_array_push(v___x_4737_, v___x_4736_);
+return v___x_4738_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__10(void){
 _start:
 {
-lean_object* v___x_4738_; lean_object* v___x_4739_; lean_object* v___x_4740_; lean_object* v___x_4741_; 
-v___x_4738_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__9, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__9_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__9);
-v___x_4739_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4740_ = lean_box(2);
-v___x_4741_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4741_, 0, v___x_4740_);
-lean_ctor_set(v___x_4741_, 1, v___x_4739_);
-lean_ctor_set(v___x_4741_, 2, v___x_4738_);
-return v___x_4741_;
+lean_object* v___x_4739_; lean_object* v___x_4740_; lean_object* v___x_4741_; lean_object* v___x_4742_; 
+v___x_4739_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__9, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__9_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__9);
+v___x_4740_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4741_ = lean_box(2);
+v___x_4742_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4742_, 0, v___x_4741_);
+lean_ctor_set(v___x_4742_, 1, v___x_4740_);
+lean_ctor_set(v___x_4742_, 2, v___x_4739_);
+return v___x_4742_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__11(void){
 _start:
 {
-lean_object* v___x_4742_; lean_object* v___x_4743_; lean_object* v___x_4744_; 
-v___x_4742_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__10, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__10_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__10);
-v___x_4743_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4744_ = lean_array_push(v___x_4743_, v___x_4742_);
-return v___x_4744_;
+lean_object* v___x_4743_; lean_object* v___x_4744_; lean_object* v___x_4745_; 
+v___x_4743_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__10, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__10_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__10);
+v___x_4744_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4745_ = lean_array_push(v___x_4744_, v___x_4743_);
+return v___x_4745_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__12(void){
 _start:
 {
-lean_object* v___x_4745_; lean_object* v___x_4746_; lean_object* v___x_4747_; lean_object* v___x_4748_; 
-v___x_4745_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__11, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__11_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__11);
-v___x_4746_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4747_ = lean_box(2);
-v___x_4748_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4748_, 0, v___x_4747_);
-lean_ctor_set(v___x_4748_, 1, v___x_4746_);
-lean_ctor_set(v___x_4748_, 2, v___x_4745_);
-return v___x_4748_;
+lean_object* v___x_4746_; lean_object* v___x_4747_; lean_object* v___x_4748_; lean_object* v___x_4749_; 
+v___x_4746_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__11, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__11_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__11);
+v___x_4747_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4748_ = lean_box(2);
+v___x_4749_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4749_, 0, v___x_4748_);
+lean_ctor_set(v___x_4749_, 1, v___x_4747_);
+lean_ctor_set(v___x_4749_, 2, v___x_4746_);
+return v___x_4749_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__13(void){
 _start:
 {
-lean_object* v___x_4749_; lean_object* v___x_4750_; lean_object* v___x_4751_; 
-v___x_4749_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__12, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__12_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__12);
-v___x_4750_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
-v___x_4751_ = lean_array_push(v___x_4750_, v___x_4749_);
-return v___x_4751_;
+lean_object* v___x_4750_; lean_object* v___x_4751_; lean_object* v___x_4752_; 
+v___x_4750_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__12, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__12_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__12);
+v___x_4751_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
+v___x_4752_ = lean_array_push(v___x_4751_, v___x_4750_);
+return v___x_4752_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__14(void){
 _start:
 {
-lean_object* v___x_4752_; lean_object* v___x_4753_; lean_object* v___x_4754_; lean_object* v___x_4755_; 
-v___x_4752_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__13, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__13);
-v___x_4753_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
-v___x_4754_ = lean_box(2);
-v___x_4755_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4755_, 0, v___x_4754_);
-lean_ctor_set(v___x_4755_, 1, v___x_4753_);
-lean_ctor_set(v___x_4755_, 2, v___x_4752_);
-return v___x_4755_;
+lean_object* v___x_4753_; lean_object* v___x_4754_; lean_object* v___x_4755_; lean_object* v___x_4756_; 
+v___x_4753_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__13, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__13);
+v___x_4754_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
+v___x_4755_ = lean_box(2);
+v___x_4756_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4756_, 0, v___x_4755_);
+lean_ctor_set(v___x_4756_, 1, v___x_4754_);
+lean_ctor_set(v___x_4756_, 2, v___x_4753_);
+return v___x_4756_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__15(void){
 _start:
 {
-lean_object* v___x_4756_; lean_object* v___x_4757_; lean_object* v___x_4758_; 
-v___x_4756_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__14, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__14_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__14);
-v___x_4757_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27);
-v___x_4758_ = lean_array_push(v___x_4757_, v___x_4756_);
-return v___x_4758_;
+lean_object* v___x_4757_; lean_object* v___x_4758_; lean_object* v___x_4759_; 
+v___x_4757_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__14, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__14_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__14);
+v___x_4758_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__27);
+v___x_4759_ = lean_array_push(v___x_4758_, v___x_4757_);
+return v___x_4759_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__16(void){
 _start:
 {
-lean_object* v___x_4759_; lean_object* v___x_4760_; lean_object* v___x_4761_; lean_object* v___x_4762_; 
-v___x_4759_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__15, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__15_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__15);
-v___x_4760_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4761_ = lean_box(2);
-v___x_4762_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4762_, 0, v___x_4761_);
-lean_ctor_set(v___x_4762_, 1, v___x_4760_);
-lean_ctor_set(v___x_4762_, 2, v___x_4759_);
-return v___x_4762_;
+lean_object* v___x_4760_; lean_object* v___x_4761_; lean_object* v___x_4762_; lean_object* v___x_4763_; 
+v___x_4760_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__15, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__15_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__15);
+v___x_4761_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4762_ = lean_box(2);
+v___x_4763_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4763_, 0, v___x_4762_);
+lean_ctor_set(v___x_4763_, 1, v___x_4761_);
+lean_ctor_set(v___x_4763_, 2, v___x_4760_);
+return v___x_4763_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__17(void){
 _start:
 {
-lean_object* v___x_4763_; lean_object* v___x_4764_; lean_object* v___x_4765_; 
-v___x_4763_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__16, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__16_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__16);
-v___x_4764_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
-v___x_4765_ = lean_array_push(v___x_4764_, v___x_4763_);
-return v___x_4765_;
+lean_object* v___x_4764_; lean_object* v___x_4765_; lean_object* v___x_4766_; 
+v___x_4764_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__16, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__16_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__16);
+v___x_4765_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
+v___x_4766_ = lean_array_push(v___x_4765_, v___x_4764_);
+return v___x_4766_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__18(void){
 _start:
 {
-lean_object* v___x_4766_; lean_object* v___x_4767_; lean_object* v___x_4768_; lean_object* v___x_4769_; 
-v___x_4766_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__17, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__17_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__17);
-v___x_4767_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
-v___x_4768_ = lean_box(2);
-v___x_4769_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4769_, 0, v___x_4768_);
-lean_ctor_set(v___x_4769_, 1, v___x_4767_);
-lean_ctor_set(v___x_4769_, 2, v___x_4766_);
-return v___x_4769_;
+lean_object* v___x_4767_; lean_object* v___x_4768_; lean_object* v___x_4769_; lean_object* v___x_4770_; 
+v___x_4767_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__17, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__17_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__17);
+v___x_4768_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
+v___x_4769_ = lean_box(2);
+v___x_4770_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4770_, 0, v___x_4769_);
+lean_ctor_set(v___x_4770_, 1, v___x_4768_);
+lean_ctor_set(v___x_4770_, 2, v___x_4767_);
+return v___x_4770_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__19(void){
 _start:
 {
-lean_object* v___x_4770_; lean_object* v___x_4771_; lean_object* v___x_4772_; 
-v___x_4770_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__18, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__18_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__18);
-v___x_4771_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
-v___x_4772_ = lean_array_push(v___x_4771_, v___x_4770_);
-return v___x_4772_;
+lean_object* v___x_4771_; lean_object* v___x_4772_; lean_object* v___x_4773_; 
+v___x_4771_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__18, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__18_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__18);
+v___x_4772_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
+v___x_4773_ = lean_array_push(v___x_4772_, v___x_4771_);
+return v___x_4773_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__20(void){
 _start:
 {
-lean_object* v___x_4773_; lean_object* v___x_4774_; lean_object* v___x_4775_; lean_object* v___x_4776_; 
-v___x_4773_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__19, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__19_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__19);
-v___x_4774_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4775_ = lean_box(2);
-v___x_4776_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4776_, 0, v___x_4775_);
-lean_ctor_set(v___x_4776_, 1, v___x_4774_);
-lean_ctor_set(v___x_4776_, 2, v___x_4773_);
-return v___x_4776_;
+lean_object* v___x_4774_; lean_object* v___x_4775_; lean_object* v___x_4776_; lean_object* v___x_4777_; 
+v___x_4774_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__19, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__19_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__19);
+v___x_4775_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4776_ = lean_box(2);
+v___x_4777_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4777_, 0, v___x_4776_);
+lean_ctor_set(v___x_4777_, 1, v___x_4775_);
+lean_ctor_set(v___x_4777_, 2, v___x_4774_);
+return v___x_4777_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__21(void){
 _start:
 {
-lean_object* v___x_4777_; lean_object* v___x_4778_; lean_object* v___x_4779_; 
-v___x_4777_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__20, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__20_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__20);
-v___x_4778_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4779_ = lean_array_push(v___x_4778_, v___x_4777_);
-return v___x_4779_;
+lean_object* v___x_4778_; lean_object* v___x_4779_; lean_object* v___x_4780_; 
+v___x_4778_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__20, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__20_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__20);
+v___x_4779_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4780_ = lean_array_push(v___x_4779_, v___x_4778_);
+return v___x_4780_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__22(void){
 _start:
 {
-lean_object* v___x_4780_; lean_object* v___x_4781_; lean_object* v___x_4782_; lean_object* v___x_4783_; 
-v___x_4780_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__21, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__21_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__21);
-v___x_4781_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4782_ = lean_box(2);
-v___x_4783_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4783_, 0, v___x_4782_);
-lean_ctor_set(v___x_4783_, 1, v___x_4781_);
-lean_ctor_set(v___x_4783_, 2, v___x_4780_);
-return v___x_4783_;
+lean_object* v___x_4781_; lean_object* v___x_4782_; lean_object* v___x_4783_; lean_object* v___x_4784_; 
+v___x_4781_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__21, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__21_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__21);
+v___x_4782_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4783_ = lean_box(2);
+v___x_4784_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4784_, 0, v___x_4783_);
+lean_ctor_set(v___x_4784_, 1, v___x_4782_);
+lean_ctor_set(v___x_4784_, 2, v___x_4781_);
+return v___x_4784_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__23(void){
 _start:
 {
-lean_object* v___x_4784_; lean_object* v___x_4785_; lean_object* v___x_4786_; 
-v___x_4784_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__22, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__22_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__22);
-v___x_4785_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4786_ = lean_array_push(v___x_4785_, v___x_4784_);
-return v___x_4786_;
+lean_object* v___x_4785_; lean_object* v___x_4786_; lean_object* v___x_4787_; 
+v___x_4785_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__22, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__22_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__22);
+v___x_4786_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4787_ = lean_array_push(v___x_4786_, v___x_4785_);
+return v___x_4787_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__24(void){
 _start:
 {
-lean_object* v___x_4787_; lean_object* v___x_4788_; lean_object* v___x_4789_; lean_object* v___x_4790_; 
-v___x_4787_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__23, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__23_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__23);
-v___x_4788_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4789_ = lean_box(2);
-v___x_4790_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4790_, 0, v___x_4789_);
-lean_ctor_set(v___x_4790_, 1, v___x_4788_);
-lean_ctor_set(v___x_4790_, 2, v___x_4787_);
-return v___x_4790_;
+lean_object* v___x_4788_; lean_object* v___x_4789_; lean_object* v___x_4790_; lean_object* v___x_4791_; 
+v___x_4788_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__23, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__23_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__23);
+v___x_4789_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4790_ = lean_box(2);
+v___x_4791_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4791_, 0, v___x_4790_);
+lean_ctor_set(v___x_4791_, 1, v___x_4789_);
+lean_ctor_set(v___x_4791_, 2, v___x_4788_);
+return v___x_4791_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam(void){
 _start:
 {
-lean_object* v___x_4791_; 
-v___x_4791_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__24, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__24_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__24);
-return v___x_4791_;
+lean_object* v___x_4792_; 
+v___x_4792_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__24, &l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__24_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max___autoParam___closed__24);
+return v___x_4792_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__5(void){
 _start:
 {
-lean_object* v___x_4807_; lean_object* v___x_4808_; lean_object* v___x_4809_; 
-v___x_4807_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__4));
-v___x_4808_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4809_ = lean_array_push(v___x_4808_, v___x_4807_);
-return v___x_4809_;
+lean_object* v___x_4808_; lean_object* v___x_4809_; lean_object* v___x_4810_; 
+v___x_4808_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__4));
+v___x_4809_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4810_ = lean_array_push(v___x_4809_, v___x_4808_);
+return v___x_4810_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__6(void){
 _start:
 {
-lean_object* v___x_4810_; lean_object* v___x_4811_; lean_object* v___x_4812_; 
-v___x_4810_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32, &l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32);
-v___x_4811_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__5, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__5_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__5);
-v___x_4812_ = lean_array_push(v___x_4811_, v___x_4810_);
-return v___x_4812_;
+lean_object* v___x_4811_; lean_object* v___x_4812_; lean_object* v___x_4813_; 
+v___x_4811_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32, &l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32);
+v___x_4812_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__5, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__5_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__5);
+v___x_4813_ = lean_array_push(v___x_4812_, v___x_4811_);
+return v___x_4813_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__7(void){
 _start:
 {
-lean_object* v___x_4813_; lean_object* v___x_4814_; lean_object* v___x_4815_; lean_object* v___x_4816_; 
-v___x_4813_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__6, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__6_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__6);
-v___x_4814_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__37));
-v___x_4815_ = lean_box(2);
-v___x_4816_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4816_, 0, v___x_4815_);
-lean_ctor_set(v___x_4816_, 1, v___x_4814_);
-lean_ctor_set(v___x_4816_, 2, v___x_4813_);
-return v___x_4816_;
+lean_object* v___x_4814_; lean_object* v___x_4815_; lean_object* v___x_4816_; lean_object* v___x_4817_; 
+v___x_4814_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__6, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__6_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__6);
+v___x_4815_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__37));
+v___x_4816_ = lean_box(2);
+v___x_4817_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4817_, 0, v___x_4816_);
+lean_ctor_set(v___x_4817_, 1, v___x_4815_);
+lean_ctor_set(v___x_4817_, 2, v___x_4814_);
+return v___x_4817_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__8(void){
 _start:
 {
-lean_object* v___x_4817_; lean_object* v___x_4818_; lean_object* v___x_4819_; 
-v___x_4817_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__7, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__7);
-v___x_4818_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13, &l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13);
-v___x_4819_ = lean_array_push(v___x_4818_, v___x_4817_);
-return v___x_4819_;
+lean_object* v___x_4818_; lean_object* v___x_4819_; lean_object* v___x_4820_; 
+v___x_4818_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__7, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__7);
+v___x_4819_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13, &l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13);
+v___x_4820_ = lean_array_push(v___x_4819_, v___x_4818_);
+return v___x_4820_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__9(void){
 _start:
 {
-lean_object* v___x_4820_; lean_object* v___x_4821_; lean_object* v___x_4822_; lean_object* v___x_4823_; 
-v___x_4820_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__8, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__8_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__8);
-v___x_4821_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__5));
-v___x_4822_ = lean_box(2);
-v___x_4823_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4823_, 0, v___x_4822_);
-lean_ctor_set(v___x_4823_, 1, v___x_4821_);
-lean_ctor_set(v___x_4823_, 2, v___x_4820_);
-return v___x_4823_;
+lean_object* v___x_4821_; lean_object* v___x_4822_; lean_object* v___x_4823_; lean_object* v___x_4824_; 
+v___x_4821_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__8, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__8_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__8);
+v___x_4822_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__5));
+v___x_4823_ = lean_box(2);
+v___x_4824_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4824_, 0, v___x_4823_);
+lean_ctor_set(v___x_4824_, 1, v___x_4822_);
+lean_ctor_set(v___x_4824_, 2, v___x_4821_);
+return v___x_4824_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__10(void){
 _start:
 {
-lean_object* v___x_4824_; lean_object* v___x_4825_; lean_object* v___x_4826_; 
-v___x_4824_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__9, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__9_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__9);
-v___x_4825_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3, &l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3_once, _init_l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3);
-v___x_4826_ = lean_array_push(v___x_4825_, v___x_4824_);
-return v___x_4826_;
+lean_object* v___x_4825_; lean_object* v___x_4826_; lean_object* v___x_4827_; 
+v___x_4825_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__9, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__9_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__9);
+v___x_4826_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3, &l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3_once, _init_l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3);
+v___x_4827_ = lean_array_push(v___x_4826_, v___x_4825_);
+return v___x_4827_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__11(void){
 _start:
 {
-lean_object* v___x_4827_; lean_object* v___x_4828_; lean_object* v___x_4829_; lean_object* v___x_4830_; 
-v___x_4827_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__10, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__10_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__10);
-v___x_4828_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__1));
-v___x_4829_ = lean_box(2);
-v___x_4830_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4830_, 0, v___x_4829_);
-lean_ctor_set(v___x_4830_, 1, v___x_4828_);
-lean_ctor_set(v___x_4830_, 2, v___x_4827_);
-return v___x_4830_;
+lean_object* v___x_4828_; lean_object* v___x_4829_; lean_object* v___x_4830_; lean_object* v___x_4831_; 
+v___x_4828_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__10, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__10_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__10);
+v___x_4829_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__1));
+v___x_4830_ = lean_box(2);
+v___x_4831_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4831_, 0, v___x_4830_);
+lean_ctor_set(v___x_4831_, 1, v___x_4829_);
+lean_ctor_set(v___x_4831_, 2, v___x_4828_);
+return v___x_4831_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__12(void){
 _start:
 {
-lean_object* v___x_4831_; lean_object* v___x_4832_; lean_object* v___x_4833_; 
-v___x_4831_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__11, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__11_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__11);
-v___x_4832_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
-v___x_4833_ = lean_array_push(v___x_4832_, v___x_4831_);
-return v___x_4833_;
+lean_object* v___x_4832_; lean_object* v___x_4833_; lean_object* v___x_4834_; 
+v___x_4832_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__11, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__11_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__11);
+v___x_4833_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
+v___x_4834_ = lean_array_push(v___x_4833_, v___x_4832_);
+return v___x_4834_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__13(void){
 _start:
 {
-lean_object* v___x_4834_; lean_object* v___x_4835_; lean_object* v___x_4836_; lean_object* v___x_4837_; 
-v___x_4834_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__12, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__12_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__12);
-v___x_4835_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
-v___x_4836_ = lean_box(2);
-v___x_4837_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4837_, 0, v___x_4836_);
-lean_ctor_set(v___x_4837_, 1, v___x_4835_);
-lean_ctor_set(v___x_4837_, 2, v___x_4834_);
-return v___x_4837_;
+lean_object* v___x_4835_; lean_object* v___x_4836_; lean_object* v___x_4837_; lean_object* v___x_4838_; 
+v___x_4835_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__12, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__12_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__12);
+v___x_4836_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
+v___x_4837_ = lean_box(2);
+v___x_4838_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4838_, 0, v___x_4837_);
+lean_ctor_set(v___x_4838_, 1, v___x_4836_);
+lean_ctor_set(v___x_4838_, 2, v___x_4835_);
+return v___x_4838_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__14(void){
 _start:
 {
-lean_object* v___x_4838_; lean_object* v___x_4839_; lean_object* v___x_4840_; 
-v___x_4838_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__13, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__13);
-v___x_4839_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4840_ = lean_array_push(v___x_4839_, v___x_4838_);
-return v___x_4840_;
+lean_object* v___x_4839_; lean_object* v___x_4840_; lean_object* v___x_4841_; 
+v___x_4839_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__13, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__13);
+v___x_4840_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4841_ = lean_array_push(v___x_4840_, v___x_4839_);
+return v___x_4841_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__15(void){
 _start:
 {
-lean_object* v___x_4841_; lean_object* v___x_4842_; lean_object* v___x_4843_; lean_object* v___x_4844_; 
-v___x_4841_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__14, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__14_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__14);
-v___x_4842_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4843_ = lean_box(2);
-v___x_4844_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4844_, 0, v___x_4843_);
-lean_ctor_set(v___x_4844_, 1, v___x_4842_);
-lean_ctor_set(v___x_4844_, 2, v___x_4841_);
-return v___x_4844_;
+lean_object* v___x_4842_; lean_object* v___x_4843_; lean_object* v___x_4844_; lean_object* v___x_4845_; 
+v___x_4842_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__14, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__14_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__14);
+v___x_4843_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4844_ = lean_box(2);
+v___x_4845_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4845_, 0, v___x_4844_);
+lean_ctor_set(v___x_4845_, 1, v___x_4843_);
+lean_ctor_set(v___x_4845_, 2, v___x_4842_);
+return v___x_4845_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__16(void){
 _start:
 {
-lean_object* v___x_4845_; lean_object* v___x_4846_; lean_object* v___x_4847_; 
-v___x_4845_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__15, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__15_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__15);
-v___x_4846_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4847_ = lean_array_push(v___x_4846_, v___x_4845_);
-return v___x_4847_;
+lean_object* v___x_4846_; lean_object* v___x_4847_; lean_object* v___x_4848_; 
+v___x_4846_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__15, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__15_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__15);
+v___x_4847_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4848_ = lean_array_push(v___x_4847_, v___x_4846_);
+return v___x_4848_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__17(void){
 _start:
 {
-lean_object* v___x_4848_; lean_object* v___x_4849_; lean_object* v___x_4850_; lean_object* v___x_4851_; 
-v___x_4848_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__16, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__16_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__16);
-v___x_4849_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4850_ = lean_box(2);
-v___x_4851_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4851_, 0, v___x_4850_);
-lean_ctor_set(v___x_4851_, 1, v___x_4849_);
-lean_ctor_set(v___x_4851_, 2, v___x_4848_);
-return v___x_4851_;
+lean_object* v___x_4849_; lean_object* v___x_4850_; lean_object* v___x_4851_; lean_object* v___x_4852_; 
+v___x_4849_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__16, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__16_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__16);
+v___x_4850_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4851_ = lean_box(2);
+v___x_4852_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4852_, 0, v___x_4851_);
+lean_ctor_set(v___x_4852_, 1, v___x_4850_);
+lean_ctor_set(v___x_4852_, 2, v___x_4849_);
+return v___x_4852_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__18(void){
 _start:
 {
-lean_object* v___x_4852_; lean_object* v___x_4853_; lean_object* v___x_4854_; 
-v___x_4852_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__17, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__17_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__17);
-v___x_4853_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4854_ = lean_array_push(v___x_4853_, v___x_4852_);
-return v___x_4854_;
+lean_object* v___x_4853_; lean_object* v___x_4854_; lean_object* v___x_4855_; 
+v___x_4853_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__17, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__17_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__17);
+v___x_4854_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4855_ = lean_array_push(v___x_4854_, v___x_4853_);
+return v___x_4855_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__19(void){
 _start:
 {
-lean_object* v___x_4855_; lean_object* v___x_4856_; lean_object* v___x_4857_; lean_object* v___x_4858_; 
-v___x_4855_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__18, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__18_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__18);
-v___x_4856_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4857_ = lean_box(2);
-v___x_4858_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4858_, 0, v___x_4857_);
-lean_ctor_set(v___x_4858_, 1, v___x_4856_);
-lean_ctor_set(v___x_4858_, 2, v___x_4855_);
-return v___x_4858_;
+lean_object* v___x_4856_; lean_object* v___x_4857_; lean_object* v___x_4858_; lean_object* v___x_4859_; 
+v___x_4856_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__18, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__18_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__18);
+v___x_4857_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4858_ = lean_box(2);
+v___x_4859_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4859_, 0, v___x_4858_);
+lean_ctor_set(v___x_4859_, 1, v___x_4857_);
+lean_ctor_set(v___x_4859_, 2, v___x_4856_);
+return v___x_4859_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__20(void){
 _start:
 {
-lean_object* v___x_4859_; lean_object* v___x_4860_; lean_object* v___x_4861_; 
-v___x_4859_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__19, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__19_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__19);
-v___x_4860_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
-v___x_4861_ = lean_array_push(v___x_4860_, v___x_4859_);
-return v___x_4861_;
+lean_object* v___x_4860_; lean_object* v___x_4861_; lean_object* v___x_4862_; 
+v___x_4860_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__19, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__19_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__19);
+v___x_4861_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
+v___x_4862_ = lean_array_push(v___x_4861_, v___x_4860_);
+return v___x_4862_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__21(void){
 _start:
 {
-lean_object* v___x_4862_; lean_object* v___x_4863_; lean_object* v___x_4864_; lean_object* v___x_4865_; 
-v___x_4862_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__20, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__20_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__20);
-v___x_4863_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
-v___x_4864_ = lean_box(2);
-v___x_4865_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4865_, 0, v___x_4864_);
-lean_ctor_set(v___x_4865_, 1, v___x_4863_);
-lean_ctor_set(v___x_4865_, 2, v___x_4862_);
-return v___x_4865_;
+lean_object* v___x_4863_; lean_object* v___x_4864_; lean_object* v___x_4865_; lean_object* v___x_4866_; 
+v___x_4863_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__20, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__20_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__20);
+v___x_4864_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
+v___x_4865_ = lean_box(2);
+v___x_4866_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4866_, 0, v___x_4865_);
+lean_ctor_set(v___x_4866_, 1, v___x_4864_);
+lean_ctor_set(v___x_4866_, 2, v___x_4863_);
+return v___x_4866_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__22(void){
 _start:
 {
-lean_object* v___x_4866_; lean_object* v___x_4867_; lean_object* v___x_4868_; 
-v___x_4866_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__21, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__21_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__21);
-v___x_4867_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4868_ = lean_array_push(v___x_4867_, v___x_4866_);
-return v___x_4868_;
+lean_object* v___x_4867_; lean_object* v___x_4868_; lean_object* v___x_4869_; 
+v___x_4867_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__21, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__21_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__21);
+v___x_4868_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4869_ = lean_array_push(v___x_4868_, v___x_4867_);
+return v___x_4869_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__23(void){
 _start:
 {
-lean_object* v___x_4869_; lean_object* v___x_4870_; lean_object* v___x_4871_; 
-v___x_4869_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__65, &l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__65_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__65);
-v___x_4870_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__22, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__22_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__22);
-v___x_4871_ = lean_array_push(v___x_4870_, v___x_4869_);
-return v___x_4871_;
+lean_object* v___x_4870_; lean_object* v___x_4871_; lean_object* v___x_4872_; 
+v___x_4870_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__65, &l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__65_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__65);
+v___x_4871_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__22, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__22_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__22);
+v___x_4872_ = lean_array_push(v___x_4871_, v___x_4870_);
+return v___x_4872_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__24(void){
 _start:
 {
-lean_object* v___x_4872_; lean_object* v___x_4873_; lean_object* v___x_4874_; lean_object* v___x_4875_; 
-v___x_4872_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__23, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__23_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__23);
-v___x_4873_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4874_ = lean_box(2);
-v___x_4875_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4875_, 0, v___x_4874_);
-lean_ctor_set(v___x_4875_, 1, v___x_4873_);
-lean_ctor_set(v___x_4875_, 2, v___x_4872_);
-return v___x_4875_;
+lean_object* v___x_4873_; lean_object* v___x_4874_; lean_object* v___x_4875_; lean_object* v___x_4876_; 
+v___x_4873_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__23, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__23_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__23);
+v___x_4874_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4875_ = lean_box(2);
+v___x_4876_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4876_, 0, v___x_4875_);
+lean_ctor_set(v___x_4876_, 1, v___x_4874_);
+lean_ctor_set(v___x_4876_, 2, v___x_4873_);
+return v___x_4876_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__25(void){
 _start:
 {
-lean_object* v___x_4876_; lean_object* v___x_4877_; lean_object* v___x_4878_; 
-v___x_4876_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__24, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__24_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__24);
-v___x_4877_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
-v___x_4878_ = lean_array_push(v___x_4877_, v___x_4876_);
-return v___x_4878_;
+lean_object* v___x_4877_; lean_object* v___x_4878_; lean_object* v___x_4879_; 
+v___x_4877_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__24, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__24_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__24);
+v___x_4878_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
+v___x_4879_ = lean_array_push(v___x_4878_, v___x_4877_);
+return v___x_4879_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__26(void){
 _start:
 {
-lean_object* v___x_4879_; lean_object* v___x_4880_; lean_object* v___x_4881_; lean_object* v___x_4882_; 
-v___x_4879_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__25, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__25_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__25);
-v___x_4880_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
-v___x_4881_ = lean_box(2);
-v___x_4882_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4882_, 0, v___x_4881_);
-lean_ctor_set(v___x_4882_, 1, v___x_4880_);
-lean_ctor_set(v___x_4882_, 2, v___x_4879_);
-return v___x_4882_;
+lean_object* v___x_4880_; lean_object* v___x_4881_; lean_object* v___x_4882_; lean_object* v___x_4883_; 
+v___x_4880_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__25, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__25_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__25);
+v___x_4881_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
+v___x_4882_ = lean_box(2);
+v___x_4883_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4883_, 0, v___x_4882_);
+lean_ctor_set(v___x_4883_, 1, v___x_4881_);
+lean_ctor_set(v___x_4883_, 2, v___x_4880_);
+return v___x_4883_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__27(void){
 _start:
 {
-lean_object* v___x_4883_; lean_object* v___x_4884_; lean_object* v___x_4885_; 
-v___x_4883_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__26, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__26_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__26);
-v___x_4884_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
-v___x_4885_ = lean_array_push(v___x_4884_, v___x_4883_);
-return v___x_4885_;
+lean_object* v___x_4884_; lean_object* v___x_4885_; lean_object* v___x_4886_; 
+v___x_4884_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__26, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__26_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__26);
+v___x_4885_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
+v___x_4886_ = lean_array_push(v___x_4885_, v___x_4884_);
+return v___x_4886_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__28(void){
 _start:
 {
-lean_object* v___x_4886_; lean_object* v___x_4887_; lean_object* v___x_4888_; lean_object* v___x_4889_; 
-v___x_4886_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__27, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__27_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__27);
-v___x_4887_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4888_ = lean_box(2);
-v___x_4889_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4889_, 0, v___x_4888_);
-lean_ctor_set(v___x_4889_, 1, v___x_4887_);
-lean_ctor_set(v___x_4889_, 2, v___x_4886_);
-return v___x_4889_;
+lean_object* v___x_4887_; lean_object* v___x_4888_; lean_object* v___x_4889_; lean_object* v___x_4890_; 
+v___x_4887_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__27, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__27_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__27);
+v___x_4888_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4889_ = lean_box(2);
+v___x_4890_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4890_, 0, v___x_4889_);
+lean_ctor_set(v___x_4890_, 1, v___x_4888_);
+lean_ctor_set(v___x_4890_, 2, v___x_4887_);
+return v___x_4890_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__29(void){
 _start:
 {
-lean_object* v___x_4890_; lean_object* v___x_4891_; lean_object* v___x_4892_; 
-v___x_4890_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__28, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__28_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__28);
-v___x_4891_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4892_ = lean_array_push(v___x_4891_, v___x_4890_);
-return v___x_4892_;
+lean_object* v___x_4891_; lean_object* v___x_4892_; lean_object* v___x_4893_; 
+v___x_4891_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__28, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__28_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__28);
+v___x_4892_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4893_ = lean_array_push(v___x_4892_, v___x_4891_);
+return v___x_4893_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__30(void){
 _start:
 {
-lean_object* v___x_4893_; lean_object* v___x_4894_; lean_object* v___x_4895_; lean_object* v___x_4896_; 
-v___x_4893_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__29, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__29_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__29);
-v___x_4894_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4895_ = lean_box(2);
-v___x_4896_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4896_, 0, v___x_4895_);
-lean_ctor_set(v___x_4896_, 1, v___x_4894_);
-lean_ctor_set(v___x_4896_, 2, v___x_4893_);
-return v___x_4896_;
+lean_object* v___x_4894_; lean_object* v___x_4895_; lean_object* v___x_4896_; lean_object* v___x_4897_; 
+v___x_4894_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__29, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__29_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__29);
+v___x_4895_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4896_ = lean_box(2);
+v___x_4897_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4897_, 0, v___x_4896_);
+lean_ctor_set(v___x_4897_, 1, v___x_4895_);
+lean_ctor_set(v___x_4897_, 2, v___x_4894_);
+return v___x_4897_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__31(void){
 _start:
 {
-lean_object* v___x_4897_; lean_object* v___x_4898_; lean_object* v___x_4899_; 
-v___x_4897_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__30, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__30_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__30);
-v___x_4898_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4899_ = lean_array_push(v___x_4898_, v___x_4897_);
-return v___x_4899_;
+lean_object* v___x_4898_; lean_object* v___x_4899_; lean_object* v___x_4900_; 
+v___x_4898_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__30, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__30_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__30);
+v___x_4899_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4900_ = lean_array_push(v___x_4899_, v___x_4898_);
+return v___x_4900_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__32(void){
 _start:
 {
-lean_object* v___x_4900_; lean_object* v___x_4901_; lean_object* v___x_4902_; lean_object* v___x_4903_; 
-v___x_4900_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__31, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__31_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__31);
-v___x_4901_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4902_ = lean_box(2);
-v___x_4903_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4903_, 0, v___x_4902_);
-lean_ctor_set(v___x_4903_, 1, v___x_4901_);
-lean_ctor_set(v___x_4903_, 2, v___x_4900_);
-return v___x_4903_;
+lean_object* v___x_4901_; lean_object* v___x_4902_; lean_object* v___x_4903_; lean_object* v___x_4904_; 
+v___x_4901_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__31, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__31_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__31);
+v___x_4902_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4903_ = lean_box(2);
+v___x_4904_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4904_, 0, v___x_4903_);
+lean_ctor_set(v___x_4904_, 1, v___x_4902_);
+lean_ctor_set(v___x_4904_, 2, v___x_4901_);
+return v___x_4904_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam(void){
 _start:
 {
-lean_object* v___x_4904_; 
-v___x_4904_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__32, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__32_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__32);
-return v___x_4904_;
+lean_object* v___x_4905_; 
+v___x_4905_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__32, &l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__32_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_min__eq___autoParam___closed__32);
+return v___x_4905_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__5(void){
 _start:
 {
-lean_object* v___x_4920_; lean_object* v___x_4921_; lean_object* v___x_4922_; 
-v___x_4920_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__4));
-v___x_4921_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4922_ = lean_array_push(v___x_4921_, v___x_4920_);
-return v___x_4922_;
+lean_object* v___x_4921_; lean_object* v___x_4922_; lean_object* v___x_4923_; 
+v___x_4921_ = ((lean_object*)(l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__4));
+v___x_4922_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4923_ = lean_array_push(v___x_4922_, v___x_4921_);
+return v___x_4923_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__6(void){
 _start:
 {
-lean_object* v___x_4923_; lean_object* v___x_4924_; lean_object* v___x_4925_; 
-v___x_4923_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32, &l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32);
-v___x_4924_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__5, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__5_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__5);
-v___x_4925_ = lean_array_push(v___x_4924_, v___x_4923_);
-return v___x_4925_;
+lean_object* v___x_4924_; lean_object* v___x_4925_; lean_object* v___x_4926_; 
+v___x_4924_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32, &l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__32);
+v___x_4925_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__5, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__5_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__5);
+v___x_4926_ = lean_array_push(v___x_4925_, v___x_4924_);
+return v___x_4926_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__7(void){
 _start:
 {
-lean_object* v___x_4926_; lean_object* v___x_4927_; lean_object* v___x_4928_; lean_object* v___x_4929_; 
-v___x_4926_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__6, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__6_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__6);
-v___x_4927_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__37));
-v___x_4928_ = lean_box(2);
-v___x_4929_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4929_, 0, v___x_4928_);
-lean_ctor_set(v___x_4929_, 1, v___x_4927_);
-lean_ctor_set(v___x_4929_, 2, v___x_4926_);
-return v___x_4929_;
+lean_object* v___x_4927_; lean_object* v___x_4928_; lean_object* v___x_4929_; lean_object* v___x_4930_; 
+v___x_4927_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__6, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__6_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__6);
+v___x_4928_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_decidableLT___autoParam___closed__37));
+v___x_4929_ = lean_box(2);
+v___x_4930_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4930_, 0, v___x_4929_);
+lean_ctor_set(v___x_4930_, 1, v___x_4928_);
+lean_ctor_set(v___x_4930_, 2, v___x_4927_);
+return v___x_4930_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__8(void){
 _start:
 {
-lean_object* v___x_4930_; lean_object* v___x_4931_; lean_object* v___x_4932_; 
-v___x_4930_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__7, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__7);
-v___x_4931_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13, &l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13);
-v___x_4932_ = lean_array_push(v___x_4931_, v___x_4930_);
-return v___x_4932_;
+lean_object* v___x_4931_; lean_object* v___x_4932_; lean_object* v___x_4933_; 
+v___x_4931_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__7, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__7_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__7);
+v___x_4932_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13, &l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfLEArgs_min__eq___autoParam___closed__13);
+v___x_4933_ = lean_array_push(v___x_4932_, v___x_4931_);
+return v___x_4933_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__9(void){
 _start:
 {
-lean_object* v___x_4933_; lean_object* v___x_4934_; lean_object* v___x_4935_; lean_object* v___x_4936_; 
-v___x_4933_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__8, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__8_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__8);
-v___x_4934_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__5));
-v___x_4935_ = lean_box(2);
-v___x_4936_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4936_, 0, v___x_4935_);
-lean_ctor_set(v___x_4936_, 1, v___x_4934_);
-lean_ctor_set(v___x_4936_, 2, v___x_4933_);
-return v___x_4936_;
+lean_object* v___x_4934_; lean_object* v___x_4935_; lean_object* v___x_4936_; lean_object* v___x_4937_; 
+v___x_4934_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__8, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__8_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__8);
+v___x_4935_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__5));
+v___x_4936_ = lean_box(2);
+v___x_4937_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4937_, 0, v___x_4936_);
+lean_ctor_set(v___x_4937_, 1, v___x_4935_);
+lean_ctor_set(v___x_4937_, 2, v___x_4934_);
+return v___x_4937_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__10(void){
 _start:
 {
-lean_object* v___x_4937_; lean_object* v___x_4938_; lean_object* v___x_4939_; 
-v___x_4937_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__9, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__9_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__9);
-v___x_4938_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3, &l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3_once, _init_l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3);
-v___x_4939_ = lean_array_push(v___x_4938_, v___x_4937_);
-return v___x_4939_;
+lean_object* v___x_4938_; lean_object* v___x_4939_; lean_object* v___x_4940_; 
+v___x_4938_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__9, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__9_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__9);
+v___x_4939_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3, &l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3_once, _init_l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__3);
+v___x_4940_ = lean_array_push(v___x_4939_, v___x_4938_);
+return v___x_4940_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__11(void){
 _start:
 {
-lean_object* v___x_4940_; lean_object* v___x_4941_; lean_object* v___x_4942_; lean_object* v___x_4943_; 
-v___x_4940_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__10, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__10_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__10);
-v___x_4941_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__1));
-v___x_4942_ = lean_box(2);
-v___x_4943_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4943_, 0, v___x_4942_);
-lean_ctor_set(v___x_4943_, 1, v___x_4941_);
-lean_ctor_set(v___x_4943_, 2, v___x_4940_);
-return v___x_4943_;
+lean_object* v___x_4941_; lean_object* v___x_4942_; lean_object* v___x_4943_; lean_object* v___x_4944_; 
+v___x_4941_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__10, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__10_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__10);
+v___x_4942_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le__trans___autoParam___closed__1));
+v___x_4943_ = lean_box(2);
+v___x_4944_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4944_, 0, v___x_4943_);
+lean_ctor_set(v___x_4944_, 1, v___x_4942_);
+lean_ctor_set(v___x_4944_, 2, v___x_4941_);
+return v___x_4944_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__12(void){
 _start:
 {
-lean_object* v___x_4944_; lean_object* v___x_4945_; lean_object* v___x_4946_; 
-v___x_4944_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__11, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__11_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__11);
-v___x_4945_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
-v___x_4946_ = lean_array_push(v___x_4945_, v___x_4944_);
-return v___x_4946_;
+lean_object* v___x_4945_; lean_object* v___x_4946_; lean_object* v___x_4947_; 
+v___x_4945_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__11, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__11_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__11);
+v___x_4946_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__31);
+v___x_4947_ = lean_array_push(v___x_4946_, v___x_4945_);
+return v___x_4947_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__13(void){
 _start:
 {
-lean_object* v___x_4947_; lean_object* v___x_4948_; lean_object* v___x_4949_; lean_object* v___x_4950_; 
-v___x_4947_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__12, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__12_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__12);
-v___x_4948_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
-v___x_4949_ = lean_box(2);
-v___x_4950_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4950_, 0, v___x_4949_);
-lean_ctor_set(v___x_4950_, 1, v___x_4948_);
-lean_ctor_set(v___x_4950_, 2, v___x_4947_);
-return v___x_4950_;
+lean_object* v___x_4948_; lean_object* v___x_4949_; lean_object* v___x_4950_; lean_object* v___x_4951_; 
+v___x_4948_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__12, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__12_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__12);
+v___x_4949_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__29));
+v___x_4950_ = lean_box(2);
+v___x_4951_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4951_, 0, v___x_4950_);
+lean_ctor_set(v___x_4951_, 1, v___x_4949_);
+lean_ctor_set(v___x_4951_, 2, v___x_4948_);
+return v___x_4951_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__14(void){
 _start:
 {
-lean_object* v___x_4951_; lean_object* v___x_4952_; lean_object* v___x_4953_; 
-v___x_4951_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__13, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__13);
-v___x_4952_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4953_ = lean_array_push(v___x_4952_, v___x_4951_);
-return v___x_4953_;
+lean_object* v___x_4952_; lean_object* v___x_4953_; lean_object* v___x_4954_; 
+v___x_4952_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__13, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__13_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__13);
+v___x_4953_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4954_ = lean_array_push(v___x_4953_, v___x_4952_);
+return v___x_4954_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__15(void){
 _start:
 {
-lean_object* v___x_4954_; lean_object* v___x_4955_; lean_object* v___x_4956_; lean_object* v___x_4957_; 
-v___x_4954_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__14, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__14_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__14);
-v___x_4955_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4956_ = lean_box(2);
-v___x_4957_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4957_, 0, v___x_4956_);
-lean_ctor_set(v___x_4957_, 1, v___x_4955_);
-lean_ctor_set(v___x_4957_, 2, v___x_4954_);
-return v___x_4957_;
+lean_object* v___x_4955_; lean_object* v___x_4956_; lean_object* v___x_4957_; lean_object* v___x_4958_; 
+v___x_4955_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__14, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__14_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__14);
+v___x_4956_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4957_ = lean_box(2);
+v___x_4958_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4958_, 0, v___x_4957_);
+lean_ctor_set(v___x_4958_, 1, v___x_4956_);
+lean_ctor_set(v___x_4958_, 2, v___x_4955_);
+return v___x_4958_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__16(void){
 _start:
 {
-lean_object* v___x_4958_; lean_object* v___x_4959_; lean_object* v___x_4960_; 
-v___x_4958_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__15, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__15_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__15);
-v___x_4959_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4960_ = lean_array_push(v___x_4959_, v___x_4958_);
-return v___x_4960_;
+lean_object* v___x_4959_; lean_object* v___x_4960_; lean_object* v___x_4961_; 
+v___x_4959_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__15, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__15_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__15);
+v___x_4960_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4961_ = lean_array_push(v___x_4960_, v___x_4959_);
+return v___x_4961_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__17(void){
 _start:
 {
-lean_object* v___x_4961_; lean_object* v___x_4962_; lean_object* v___x_4963_; lean_object* v___x_4964_; 
-v___x_4961_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__16, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__16_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__16);
-v___x_4962_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_4963_ = lean_box(2);
-v___x_4964_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4964_, 0, v___x_4963_);
-lean_ctor_set(v___x_4964_, 1, v___x_4962_);
-lean_ctor_set(v___x_4964_, 2, v___x_4961_);
-return v___x_4964_;
+lean_object* v___x_4962_; lean_object* v___x_4963_; lean_object* v___x_4964_; lean_object* v___x_4965_; 
+v___x_4962_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__16, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__16_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__16);
+v___x_4963_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_4964_ = lean_box(2);
+v___x_4965_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4965_, 0, v___x_4964_);
+lean_ctor_set(v___x_4965_, 1, v___x_4963_);
+lean_ctor_set(v___x_4965_, 2, v___x_4962_);
+return v___x_4965_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__18(void){
 _start:
 {
-lean_object* v___x_4965_; lean_object* v___x_4966_; lean_object* v___x_4967_; 
-v___x_4965_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__17, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__17_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__17);
-v___x_4966_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4967_ = lean_array_push(v___x_4966_, v___x_4965_);
-return v___x_4967_;
+lean_object* v___x_4966_; lean_object* v___x_4967_; lean_object* v___x_4968_; 
+v___x_4966_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__17, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__17_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__17);
+v___x_4967_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4968_ = lean_array_push(v___x_4967_, v___x_4966_);
+return v___x_4968_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__19(void){
 _start:
 {
-lean_object* v___x_4968_; lean_object* v___x_4969_; lean_object* v___x_4970_; lean_object* v___x_4971_; 
-v___x_4968_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__18, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__18_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__18);
-v___x_4969_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_4970_ = lean_box(2);
-v___x_4971_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4971_, 0, v___x_4970_);
-lean_ctor_set(v___x_4971_, 1, v___x_4969_);
-lean_ctor_set(v___x_4971_, 2, v___x_4968_);
-return v___x_4971_;
+lean_object* v___x_4969_; lean_object* v___x_4970_; lean_object* v___x_4971_; lean_object* v___x_4972_; 
+v___x_4969_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__18, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__18_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__18);
+v___x_4970_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_4971_ = lean_box(2);
+v___x_4972_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4972_, 0, v___x_4971_);
+lean_ctor_set(v___x_4972_, 1, v___x_4970_);
+lean_ctor_set(v___x_4972_, 2, v___x_4969_);
+return v___x_4972_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__20(void){
 _start:
 {
-lean_object* v___x_4972_; lean_object* v___x_4973_; lean_object* v___x_4974_; 
-v___x_4972_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__19, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__19_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__19);
-v___x_4973_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
-v___x_4974_ = lean_array_push(v___x_4973_, v___x_4972_);
-return v___x_4974_;
+lean_object* v___x_4973_; lean_object* v___x_4974_; lean_object* v___x_4975_; 
+v___x_4973_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__19, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__19_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__19);
+v___x_4974_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__24);
+v___x_4975_ = lean_array_push(v___x_4974_, v___x_4973_);
+return v___x_4975_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__21(void){
 _start:
 {
-lean_object* v___x_4975_; lean_object* v___x_4976_; lean_object* v___x_4977_; lean_object* v___x_4978_; 
-v___x_4975_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__20, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__20_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__20);
-v___x_4976_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
-v___x_4977_ = lean_box(2);
-v___x_4978_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4978_, 0, v___x_4977_);
-lean_ctor_set(v___x_4978_, 1, v___x_4976_);
-lean_ctor_set(v___x_4978_, 2, v___x_4975_);
-return v___x_4978_;
+lean_object* v___x_4976_; lean_object* v___x_4977_; lean_object* v___x_4978_; lean_object* v___x_4979_; 
+v___x_4976_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__20, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__20_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__20);
+v___x_4977_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__21));
+v___x_4978_ = lean_box(2);
+v___x_4979_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4979_, 0, v___x_4978_);
+lean_ctor_set(v___x_4979_, 1, v___x_4977_);
+lean_ctor_set(v___x_4979_, 2, v___x_4976_);
+return v___x_4979_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__22(void){
 _start:
 {
-lean_object* v___x_4979_; lean_object* v___x_4980_; lean_object* v___x_4981_; 
-v___x_4979_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__21, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__21_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__21);
-v___x_4980_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_4981_ = lean_array_push(v___x_4980_, v___x_4979_);
-return v___x_4981_;
+lean_object* v___x_4980_; lean_object* v___x_4981_; lean_object* v___x_4982_; 
+v___x_4980_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__21, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__21_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__21);
+v___x_4981_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_4982_ = lean_array_push(v___x_4981_, v___x_4980_);
+return v___x_4982_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__23(void){
 _start:
 {
-lean_object* v___x_4982_; lean_object* v___x_4983_; lean_object* v___x_4984_; 
-v___x_4982_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__38, &l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__38_once, _init_l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__38);
-v___x_4983_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__22, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__22_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__22);
-v___x_4984_ = lean_array_push(v___x_4983_, v___x_4982_);
-return v___x_4984_;
+lean_object* v___x_4983_; lean_object* v___x_4984_; lean_object* v___x_4985_; 
+v___x_4983_ = lean_obj_once(&l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__38, &l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__38_once, _init_l_Std_Packages_LinearOrderOfLEArgs_max__eq___autoParam___closed__38);
+v___x_4984_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__22, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__22_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__22);
+v___x_4985_ = lean_array_push(v___x_4984_, v___x_4983_);
+return v___x_4985_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__24(void){
 _start:
 {
-lean_object* v___x_4985_; lean_object* v___x_4986_; lean_object* v___x_4987_; lean_object* v___x_4988_; 
-v___x_4985_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__23, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__23_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__23);
-v___x_4986_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_4987_ = lean_box(2);
-v___x_4988_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4988_, 0, v___x_4987_);
-lean_ctor_set(v___x_4988_, 1, v___x_4986_);
-lean_ctor_set(v___x_4988_, 2, v___x_4985_);
-return v___x_4988_;
+lean_object* v___x_4986_; lean_object* v___x_4987_; lean_object* v___x_4988_; lean_object* v___x_4989_; 
+v___x_4986_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__23, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__23_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__23);
+v___x_4987_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_4988_ = lean_box(2);
+v___x_4989_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4989_, 0, v___x_4988_);
+lean_ctor_set(v___x_4989_, 1, v___x_4987_);
+lean_ctor_set(v___x_4989_, 2, v___x_4986_);
+return v___x_4989_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__25(void){
 _start:
 {
-lean_object* v___x_4989_; lean_object* v___x_4990_; lean_object* v___x_4991_; 
-v___x_4989_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__24, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__24_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__24);
-v___x_4990_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
-v___x_4991_ = lean_array_push(v___x_4990_, v___x_4989_);
-return v___x_4991_;
+lean_object* v___x_4990_; lean_object* v___x_4991_; lean_object* v___x_4992_; 
+v___x_4990_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__24, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__24_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__24);
+v___x_4991_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__19);
+v___x_4992_ = lean_array_push(v___x_4991_, v___x_4990_);
+return v___x_4992_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__26(void){
 _start:
 {
-lean_object* v___x_4992_; lean_object* v___x_4993_; lean_object* v___x_4994_; lean_object* v___x_4995_; 
-v___x_4992_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__25, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__25_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__25);
-v___x_4993_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
-v___x_4994_ = lean_box(2);
-v___x_4995_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_4995_, 0, v___x_4994_);
-lean_ctor_set(v___x_4995_, 1, v___x_4993_);
-lean_ctor_set(v___x_4995_, 2, v___x_4992_);
-return v___x_4995_;
+lean_object* v___x_4993_; lean_object* v___x_4994_; lean_object* v___x_4995_; lean_object* v___x_4996_; 
+v___x_4993_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__25, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__25_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__25);
+v___x_4994_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__17));
+v___x_4995_ = lean_box(2);
+v___x_4996_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_4996_, 0, v___x_4995_);
+lean_ctor_set(v___x_4996_, 1, v___x_4994_);
+lean_ctor_set(v___x_4996_, 2, v___x_4993_);
+return v___x_4996_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__27(void){
 _start:
 {
-lean_object* v___x_4996_; lean_object* v___x_4997_; lean_object* v___x_4998_; 
-v___x_4996_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__26, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__26_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__26);
-v___x_4997_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
-v___x_4998_ = lean_array_push(v___x_4997_, v___x_4996_);
-return v___x_4998_;
+lean_object* v___x_4997_; lean_object* v___x_4998_; lean_object* v___x_4999_; 
+v___x_4997_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__26, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__26_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__26);
+v___x_4998_ = lean_obj_once(&l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15, &l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15_once, _init_l_Std_Packages_PreorderOfLEArgs_lt___autoParam___closed__15);
+v___x_4999_ = lean_array_push(v___x_4998_, v___x_4997_);
+return v___x_4999_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__28(void){
 _start:
 {
-lean_object* v___x_4999_; lean_object* v___x_5000_; lean_object* v___x_5001_; lean_object* v___x_5002_; 
-v___x_4999_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__27, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__27_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__27);
-v___x_5000_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
-v___x_5001_ = lean_box(2);
-v___x_5002_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_5002_, 0, v___x_5001_);
-lean_ctor_set(v___x_5002_, 1, v___x_5000_);
-lean_ctor_set(v___x_5002_, 2, v___x_4999_);
-return v___x_5002_;
+lean_object* v___x_5000_; lean_object* v___x_5001_; lean_object* v___x_5002_; lean_object* v___x_5003_; 
+v___x_5000_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__27, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__27_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__27);
+v___x_5001_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__9));
+v___x_5002_ = lean_box(2);
+v___x_5003_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_5003_, 0, v___x_5002_);
+lean_ctor_set(v___x_5003_, 1, v___x_5001_);
+lean_ctor_set(v___x_5003_, 2, v___x_5000_);
+return v___x_5003_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__29(void){
 _start:
 {
-lean_object* v___x_5003_; lean_object* v___x_5004_; lean_object* v___x_5005_; 
-v___x_5003_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__28, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__28_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__28);
-v___x_5004_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_5005_ = lean_array_push(v___x_5004_, v___x_5003_);
-return v___x_5005_;
+lean_object* v___x_5004_; lean_object* v___x_5005_; lean_object* v___x_5006_; 
+v___x_5004_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__28, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__28_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__28);
+v___x_5005_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_5006_ = lean_array_push(v___x_5005_, v___x_5004_);
+return v___x_5006_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__30(void){
 _start:
 {
-lean_object* v___x_5006_; lean_object* v___x_5007_; lean_object* v___x_5008_; lean_object* v___x_5009_; 
-v___x_5006_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__29, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__29_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__29);
-v___x_5007_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
-v___x_5008_ = lean_box(2);
-v___x_5009_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_5009_, 0, v___x_5008_);
-lean_ctor_set(v___x_5009_, 1, v___x_5007_);
-lean_ctor_set(v___x_5009_, 2, v___x_5006_);
-return v___x_5009_;
+lean_object* v___x_5007_; lean_object* v___x_5008_; lean_object* v___x_5009_; lean_object* v___x_5010_; 
+v___x_5007_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__29, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__29_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__29);
+v___x_5008_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__7));
+v___x_5009_ = lean_box(2);
+v___x_5010_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_5010_, 0, v___x_5009_);
+lean_ctor_set(v___x_5010_, 1, v___x_5008_);
+lean_ctor_set(v___x_5010_, 2, v___x_5007_);
+return v___x_5010_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__31(void){
 _start:
 {
-lean_object* v___x_5010_; lean_object* v___x_5011_; lean_object* v___x_5012_; 
-v___x_5010_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__30, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__30_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__30);
-v___x_5011_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
-v___x_5012_ = lean_array_push(v___x_5011_, v___x_5010_);
-return v___x_5012_;
+lean_object* v___x_5011_; lean_object* v___x_5012_; lean_object* v___x_5013_; 
+v___x_5011_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__30, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__30_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__30);
+v___x_5012_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__5));
+v___x_5013_ = lean_array_push(v___x_5012_, v___x_5011_);
+return v___x_5013_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__32(void){
 _start:
 {
-lean_object* v___x_5013_; lean_object* v___x_5014_; lean_object* v___x_5015_; lean_object* v___x_5016_; 
-v___x_5013_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__31, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__31_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__31);
-v___x_5014_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
-v___x_5015_ = lean_box(2);
-v___x_5016_ = lean_alloc_ctor(1, 3, 0);
-lean_ctor_set(v___x_5016_, 0, v___x_5015_);
-lean_ctor_set(v___x_5016_, 1, v___x_5014_);
-lean_ctor_set(v___x_5016_, 2, v___x_5013_);
-return v___x_5016_;
+lean_object* v___x_5014_; lean_object* v___x_5015_; lean_object* v___x_5016_; lean_object* v___x_5017_; 
+v___x_5014_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__31, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__31_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__31);
+v___x_5015_ = ((lean_object*)(l_Std_Packages_PreorderOfLEArgs_le___autoParam___closed__4));
+v___x_5016_ = lean_box(2);
+v___x_5017_ = lean_alloc_ctor(1, 3, 0);
+lean_ctor_set(v___x_5017_, 0, v___x_5016_);
+lean_ctor_set(v___x_5017_, 1, v___x_5015_);
+lean_ctor_set(v___x_5017_, 2, v___x_5014_);
+return v___x_5017_;
 }
 }
 static lean_object* _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam(void){
 _start:
 {
-lean_object* v___x_5017_; 
-v___x_5017_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__32, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__32_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__32);
-return v___x_5017_;
+lean_object* v___x_5018_; 
+v___x_5018_ = lean_obj_once(&l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__32, &l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__32_once, _init_l_Std_Packages_LinearOrderOfOrdArgs_max__eq___autoParam___closed__32);
+return v___x_5018_;
 }
 }
 static lean_object* _init_l_Std_LinearOrderPackage_ofOrd___auto__1(void){
 _start:
 {
-lean_object* v___x_5018_; 
-v___x_5018_ = lean_obj_once(&l_Std_PreorderPackage_ofLE___auto__1___closed__35, &l_Std_PreorderPackage_ofLE___auto__1___closed__35_once, _init_l_Std_PreorderPackage_ofLE___auto__1___closed__35);
-return v___x_5018_;
+lean_object* v___x_5019_; 
+v___x_5019_ = lean_obj_once(&l_Std_PreorderPackage_ofLE___auto__1___closed__35, &l_Std_PreorderPackage_ofLE___auto__1___closed__35_once, _init_l_Std_PreorderPackage_ofLE___auto__1___closed__35);
+return v___x_5019_;
 }
 }
-LEAN_EXPORT lean_object* l_Std_LinearOrderPackage_ofOrd___redArg(lean_object* v_args_5019_){
+LEAN_EXPORT lean_object* l_Std_LinearOrderPackage_ofOrd___redArg(lean_object* v_args_5020_){
 _start:
 {
-lean_object* v_toLinearPreorderOfOrdArgs_5020_; lean_object* v_min_5021_; lean_object* v_max_5022_; lean_object* v___x_5024_; uint8_t v_isShared_5025_; uint8_t v_isSharedCheck_5037_; 
-v_toLinearPreorderOfOrdArgs_5020_ = lean_ctor_get(v_args_5019_, 0);
-v_min_5021_ = lean_ctor_get(v_args_5019_, 1);
-v_max_5022_ = lean_ctor_get(v_args_5019_, 2);
-v_isSharedCheck_5037_ = !lean_is_exclusive(v_args_5019_);
-if (v_isSharedCheck_5037_ == 0)
+lean_object* v_toLinearPreorderOfOrdArgs_5021_; lean_object* v_min_5022_; lean_object* v_max_5023_; lean_object* v___x_5025_; uint8_t v_isShared_5026_; uint8_t v_isSharedCheck_5038_; 
+v_toLinearPreorderOfOrdArgs_5021_ = lean_ctor_get(v_args_5020_, 0);
+v_min_5022_ = lean_ctor_get(v_args_5020_, 1);
+v_max_5023_ = lean_ctor_get(v_args_5020_, 2);
+v_isSharedCheck_5038_ = !lean_is_exclusive(v_args_5020_);
+if (v_isSharedCheck_5038_ == 0)
 {
-v___x_5024_ = v_args_5019_;
-v_isShared_5025_ = v_isSharedCheck_5037_;
-goto v_resetjp_5023_;
+v___x_5025_ = v_args_5020_;
+v_isShared_5026_ = v_isSharedCheck_5038_;
+goto v_resetjp_5024_;
 }
 else
 {
-lean_inc(v_max_5022_);
-lean_inc(v_min_5021_);
-lean_inc(v_toLinearPreorderOfOrdArgs_5020_);
-lean_dec(v_args_5019_);
-v___x_5024_ = lean_box(0);
-v_isShared_5025_ = v_isSharedCheck_5037_;
-goto v_resetjp_5023_;
+lean_inc(v_max_5023_);
+lean_inc(v_min_5022_);
+lean_inc(v_toLinearPreorderOfOrdArgs_5021_);
+lean_dec(v_args_5020_);
+v___x_5025_ = lean_box(0);
+v_isShared_5026_ = v_isSharedCheck_5038_;
+goto v_resetjp_5024_;
 }
-v_resetjp_5023_:
+v_resetjp_5024_:
 {
-lean_object* v_ord_5026_; lean_object* v_le_5027_; lean_object* v_decidableLE_5028_; lean_object* v_lt_5029_; lean_object* v_decidableLT_5030_; lean_object* v_beq_5031_; lean_object* v___x_5032_; lean_object* v___x_5033_; lean_object* v___x_5035_; 
-v_ord_5026_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5020_, 0);
-lean_inc_ref(v_ord_5026_);
-v_le_5027_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5020_, 1);
-lean_inc(v_le_5027_);
-v_decidableLE_5028_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5020_, 2);
-lean_inc_ref(v_decidableLE_5028_);
-v_lt_5029_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5020_, 3);
-lean_inc(v_lt_5029_);
-v_decidableLT_5030_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5020_, 4);
-lean_inc_ref(v_decidableLT_5030_);
-v_beq_5031_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5020_, 5);
-lean_inc_ref(v_beq_5031_);
-lean_dec_ref(v_toLinearPreorderOfOrdArgs_5020_);
-v___x_5032_ = lean_alloc_ctor(0, 5, 0);
-lean_ctor_set(v___x_5032_, 0, v_le_5027_);
-lean_ctor_set(v___x_5032_, 1, v_lt_5029_);
-lean_ctor_set(v___x_5032_, 2, v_beq_5031_);
-lean_ctor_set(v___x_5032_, 3, v_decidableLE_5028_);
-lean_ctor_set(v___x_5032_, 4, v_decidableLT_5030_);
-v___x_5033_ = lean_alloc_ctor(0, 2, 0);
-lean_ctor_set(v___x_5033_, 0, v___x_5032_);
-lean_ctor_set(v___x_5033_, 1, v_ord_5026_);
-if (v_isShared_5025_ == 0)
+lean_object* v_ord_5027_; lean_object* v_le_5028_; lean_object* v_decidableLE_5029_; lean_object* v_lt_5030_; lean_object* v_decidableLT_5031_; lean_object* v_beq_5032_; lean_object* v___x_5033_; lean_object* v___x_5034_; lean_object* v___x_5036_; 
+v_ord_5027_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5021_, 0);
+lean_inc_ref(v_ord_5027_);
+v_le_5028_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5021_, 1);
+lean_inc(v_le_5028_);
+v_decidableLE_5029_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5021_, 2);
+lean_inc_ref(v_decidableLE_5029_);
+v_lt_5030_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5021_, 3);
+lean_inc(v_lt_5030_);
+v_decidableLT_5031_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5021_, 4);
+lean_inc_ref(v_decidableLT_5031_);
+v_beq_5032_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5021_, 5);
+lean_inc_ref(v_beq_5032_);
+lean_dec_ref(v_toLinearPreorderOfOrdArgs_5021_);
+v___x_5033_ = lean_alloc_ctor(0, 5, 0);
+lean_ctor_set(v___x_5033_, 0, v_le_5028_);
+lean_ctor_set(v___x_5033_, 1, v_lt_5030_);
+lean_ctor_set(v___x_5033_, 2, v_beq_5032_);
+lean_ctor_set(v___x_5033_, 3, v_decidableLE_5029_);
+lean_ctor_set(v___x_5033_, 4, v_decidableLT_5031_);
+v___x_5034_ = lean_alloc_ctor(0, 2, 0);
+lean_ctor_set(v___x_5034_, 0, v___x_5033_);
+lean_ctor_set(v___x_5034_, 1, v_ord_5027_);
+if (v_isShared_5026_ == 0)
 {
-lean_ctor_set(v___x_5024_, 0, v___x_5033_);
-v___x_5035_ = v___x_5024_;
-goto v_reusejp_5034_;
+lean_ctor_set(v___x_5025_, 0, v___x_5034_);
+v___x_5036_ = v___x_5025_;
+goto v_reusejp_5035_;
 }
 else
 {
-lean_object* v_reuseFailAlloc_5036_; 
-v_reuseFailAlloc_5036_ = lean_alloc_ctor(0, 3, 0);
-lean_ctor_set(v_reuseFailAlloc_5036_, 0, v___x_5033_);
-lean_ctor_set(v_reuseFailAlloc_5036_, 1, v_min_5021_);
-lean_ctor_set(v_reuseFailAlloc_5036_, 2, v_max_5022_);
-v___x_5035_ = v_reuseFailAlloc_5036_;
-goto v_reusejp_5034_;
+lean_object* v_reuseFailAlloc_5037_; 
+v_reuseFailAlloc_5037_ = lean_alloc_ctor(0, 3, 0);
+lean_ctor_set(v_reuseFailAlloc_5037_, 0, v___x_5034_);
+lean_ctor_set(v_reuseFailAlloc_5037_, 1, v_min_5022_);
+lean_ctor_set(v_reuseFailAlloc_5037_, 2, v_max_5023_);
+v___x_5036_ = v_reuseFailAlloc_5037_;
+goto v_reusejp_5035_;
 }
-v_reusejp_5034_:
+v_reusejp_5035_:
 {
-return v___x_5035_;
+return v___x_5036_;
 }
 }
 }
 }
-LEAN_EXPORT lean_object* l_Std_LinearOrderPackage_ofOrd(lean_object* v_00_u03b1_5038_, lean_object* v_args_5039_){
+LEAN_EXPORT lean_object* l_Std_LinearOrderPackage_ofOrd(lean_object* v_00_u03b1_5039_, lean_object* v_args_5040_){
 _start:
 {
-lean_object* v_toLinearPreorderOfOrdArgs_5040_; lean_object* v_min_5041_; lean_object* v_max_5042_; lean_object* v___x_5044_; uint8_t v_isShared_5045_; uint8_t v_isSharedCheck_5057_; 
-v_toLinearPreorderOfOrdArgs_5040_ = lean_ctor_get(v_args_5039_, 0);
-v_min_5041_ = lean_ctor_get(v_args_5039_, 1);
-v_max_5042_ = lean_ctor_get(v_args_5039_, 2);
-v_isSharedCheck_5057_ = !lean_is_exclusive(v_args_5039_);
-if (v_isSharedCheck_5057_ == 0)
+lean_object* v_toLinearPreorderOfOrdArgs_5041_; lean_object* v_min_5042_; lean_object* v_max_5043_; lean_object* v___x_5045_; uint8_t v_isShared_5046_; uint8_t v_isSharedCheck_5058_; 
+v_toLinearPreorderOfOrdArgs_5041_ = lean_ctor_get(v_args_5040_, 0);
+v_min_5042_ = lean_ctor_get(v_args_5040_, 1);
+v_max_5043_ = lean_ctor_get(v_args_5040_, 2);
+v_isSharedCheck_5058_ = !lean_is_exclusive(v_args_5040_);
+if (v_isSharedCheck_5058_ == 0)
 {
-v___x_5044_ = v_args_5039_;
-v_isShared_5045_ = v_isSharedCheck_5057_;
-goto v_resetjp_5043_;
+v___x_5045_ = v_args_5040_;
+v_isShared_5046_ = v_isSharedCheck_5058_;
+goto v_resetjp_5044_;
 }
 else
 {
-lean_inc(v_max_5042_);
-lean_inc(v_min_5041_);
-lean_inc(v_toLinearPreorderOfOrdArgs_5040_);
-lean_dec(v_args_5039_);
-v___x_5044_ = lean_box(0);
-v_isShared_5045_ = v_isSharedCheck_5057_;
-goto v_resetjp_5043_;
+lean_inc(v_max_5043_);
+lean_inc(v_min_5042_);
+lean_inc(v_toLinearPreorderOfOrdArgs_5041_);
+lean_dec(v_args_5040_);
+v___x_5045_ = lean_box(0);
+v_isShared_5046_ = v_isSharedCheck_5058_;
+goto v_resetjp_5044_;
 }
-v_resetjp_5043_:
+v_resetjp_5044_:
 {
-lean_object* v_ord_5046_; lean_object* v_le_5047_; lean_object* v_decidableLE_5048_; lean_object* v_lt_5049_; lean_object* v_decidableLT_5050_; lean_object* v_beq_5051_; lean_object* v___x_5052_; lean_object* v___x_5053_; lean_object* v___x_5055_; 
-v_ord_5046_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5040_, 0);
-lean_inc_ref(v_ord_5046_);
-v_le_5047_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5040_, 1);
-lean_inc(v_le_5047_);
-v_decidableLE_5048_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5040_, 2);
-lean_inc_ref(v_decidableLE_5048_);
-v_lt_5049_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5040_, 3);
-lean_inc(v_lt_5049_);
-v_decidableLT_5050_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5040_, 4);
-lean_inc_ref(v_decidableLT_5050_);
-v_beq_5051_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5040_, 5);
-lean_inc_ref(v_beq_5051_);
-lean_dec_ref(v_toLinearPreorderOfOrdArgs_5040_);
-v___x_5052_ = lean_alloc_ctor(0, 5, 0);
-lean_ctor_set(v___x_5052_, 0, v_le_5047_);
-lean_ctor_set(v___x_5052_, 1, v_lt_5049_);
-lean_ctor_set(v___x_5052_, 2, v_beq_5051_);
-lean_ctor_set(v___x_5052_, 3, v_decidableLE_5048_);
-lean_ctor_set(v___x_5052_, 4, v_decidableLT_5050_);
-v___x_5053_ = lean_alloc_ctor(0, 2, 0);
-lean_ctor_set(v___x_5053_, 0, v___x_5052_);
-lean_ctor_set(v___x_5053_, 1, v_ord_5046_);
-if (v_isShared_5045_ == 0)
+lean_object* v_ord_5047_; lean_object* v_le_5048_; lean_object* v_decidableLE_5049_; lean_object* v_lt_5050_; lean_object* v_decidableLT_5051_; lean_object* v_beq_5052_; lean_object* v___x_5053_; lean_object* v___x_5054_; lean_object* v___x_5056_; 
+v_ord_5047_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5041_, 0);
+lean_inc_ref(v_ord_5047_);
+v_le_5048_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5041_, 1);
+lean_inc(v_le_5048_);
+v_decidableLE_5049_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5041_, 2);
+lean_inc_ref(v_decidableLE_5049_);
+v_lt_5050_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5041_, 3);
+lean_inc(v_lt_5050_);
+v_decidableLT_5051_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5041_, 4);
+lean_inc_ref(v_decidableLT_5051_);
+v_beq_5052_ = lean_ctor_get(v_toLinearPreorderOfOrdArgs_5041_, 5);
+lean_inc_ref(v_beq_5052_);
+lean_dec_ref(v_toLinearPreorderOfOrdArgs_5041_);
+v___x_5053_ = lean_alloc_ctor(0, 5, 0);
+lean_ctor_set(v___x_5053_, 0, v_le_5048_);
+lean_ctor_set(v___x_5053_, 1, v_lt_5050_);
+lean_ctor_set(v___x_5053_, 2, v_beq_5052_);
+lean_ctor_set(v___x_5053_, 3, v_decidableLE_5049_);
+lean_ctor_set(v___x_5053_, 4, v_decidableLT_5051_);
+v___x_5054_ = lean_alloc_ctor(0, 2, 0);
+lean_ctor_set(v___x_5054_, 0, v___x_5053_);
+lean_ctor_set(v___x_5054_, 1, v_ord_5047_);
+if (v_isShared_5046_ == 0)
 {
-lean_ctor_set(v___x_5044_, 0, v___x_5053_);
-v___x_5055_ = v___x_5044_;
-goto v_reusejp_5054_;
+lean_ctor_set(v___x_5045_, 0, v___x_5054_);
+v___x_5056_ = v___x_5045_;
+goto v_reusejp_5055_;
 }
 else
 {
-lean_object* v_reuseFailAlloc_5056_; 
-v_reuseFailAlloc_5056_ = lean_alloc_ctor(0, 3, 0);
-lean_ctor_set(v_reuseFailAlloc_5056_, 0, v___x_5053_);
-lean_ctor_set(v_reuseFailAlloc_5056_, 1, v_min_5041_);
-lean_ctor_set(v_reuseFailAlloc_5056_, 2, v_max_5042_);
-v___x_5055_ = v_reuseFailAlloc_5056_;
-goto v_reusejp_5054_;
+lean_object* v_reuseFailAlloc_5057_; 
+v_reuseFailAlloc_5057_ = lean_alloc_ctor(0, 3, 0);
+lean_ctor_set(v_reuseFailAlloc_5057_, 0, v___x_5054_);
+lean_ctor_set(v_reuseFailAlloc_5057_, 1, v_min_5042_);
+lean_ctor_set(v_reuseFailAlloc_5057_, 2, v_max_5043_);
+v___x_5056_ = v_reuseFailAlloc_5057_;
+goto v_reusejp_5055_;
 }
-v_reusejp_5054_:
+v_reusejp_5055_:
 {
-return v___x_5055_;
+return v___x_5056_;
 }
 }
 }

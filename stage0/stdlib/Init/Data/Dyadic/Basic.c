@@ -31,6 +31,7 @@ lean_object* lean_obj_tag_nat(lean_object*);
 lean_object* lean_int_neg(lean_object*);
 lean_object* l_Int_shiftLeft(lean_object*, lean_object*);
 lean_object* lean_nat_shiftl(lean_object*, lean_object*);
+uint8_t lean_int_dec_lt(lean_object*, lean_object*);
 lean_object* lean_nat_pow(lean_object*, lean_object*);
 lean_object* l_Int_pow(lean_object*, lean_object*);
 uint8_t lean_int_dec_le(lean_object*, lean_object*);

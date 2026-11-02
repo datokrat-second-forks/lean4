@@ -1194,9 +1194,9 @@ lean_ctor_set(v___x_368_, 6, v_recordedDeps_360_);
 lean_ctor_set(v___x_368_, 7, v_messages_361_);
 lean_ctor_set(v___x_368_, 8, v_infoState_362_);
 lean_ctor_set(v___x_368_, 9, v_snapshotTasks_363_);
-v___x_369_ = lean_st_ref_put(v___y_364_, v___x_368_);
+v___x_369_ = lean_st_ref_put(v___y_365_, v___x_368_);
 v___x_370_ = lean_alloc_ctor(0, 1, 0);
-lean_ctor_set(v___x_370_, 0, v___y_365_);
+lean_ctor_set(v___x_370_, 0, v___y_364_);
 return v___x_370_;
 }
 v___jp_372_:
@@ -1251,8 +1251,8 @@ v_recordedDeps_360_ = v_recordedDeps_383_;
 v_messages_361_ = v_messages_384_;
 v_infoState_362_ = v_infoState_385_;
 v_snapshotTasks_363_ = v_snapshotTasks_386_;
-v___y_364_ = v___y_374_;
-v___y_365_ = v___x_389_;
+v___y_364_ = v___x_389_;
+v___y_365_ = v___y_374_;
 v___y_366_ = v___x_392_;
 goto v___jp_355_;
 }
@@ -1272,8 +1272,8 @@ v_recordedDeps_360_ = v_recordedDeps_383_;
 v_messages_361_ = v_messages_384_;
 v_infoState_362_ = v_infoState_385_;
 v_snapshotTasks_363_ = v_snapshotTasks_386_;
-v___y_364_ = v___y_374_;
-v___y_365_ = v___x_389_;
+v___y_364_ = v___x_389_;
+v___y_365_ = v___y_374_;
 v___y_366_ = v___x_394_;
 goto v___jp_355_;
 }

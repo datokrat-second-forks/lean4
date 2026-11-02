@@ -38,7 +38,8 @@ lean_object* l_BitVec_append___redArg(lean_object*, lean_object*, lean_object*);
 lean_object* l_BitVec_replicate(lean_object*, lean_object*, lean_object*);
 lean_object* l_BitVec_shiftLeft(lean_object*, lean_object*, lean_object*);
 lean_object* lean_nat_shiftr(lean_object*, lean_object*);
-uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
+uint8_t l_Nat_blt(lean_object*, lean_object*);
 uint8_t l_Nat_testBit(lean_object*, lean_object*);
 uint8_t l_Std_Tactic_BVDecide_BoolExpr_eval___redArg(lean_object*, lean_object*);
 lean_object* lean_obj_tag_nat(lean_object*);
@@ -5168,7 +5169,7 @@ return v___x_1605_;
 else
 {
 uint8_t v___x_1606_; 
-v___x_1606_ = lean_nat_dec_lt(v_a_1603_, v_a_1604_);
+v___x_1606_ = l_Nat_blt(v_a_1603_, v_a_1604_);
 return v___x_1606_;
 }
 }

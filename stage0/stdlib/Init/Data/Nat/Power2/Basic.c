@@ -13,7 +13,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-uint8_t l_UDecidable_instNatLt(lean_object*, lean_object*);
+uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 lean_object* lean_nat_mul(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l___private_Init_Data_Nat_Power2_Basic_0__Nat_nextPowerOfTwo_go___redArg(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l___private_Init_Data_Nat_Power2_Basic_0__Nat_nextPowerOfTwo_go___redArg___boxed(lean_object*, lean_object*);
@@ -25,7 +25,7 @@ LEAN_EXPORT lean_object* l___private_Init_Data_Nat_Power2_Basic_0__Nat_nextPower
 _start:
 {
 uint8_t v___x_3_; 
-v___x_3_ = l_UDecidable_instNatLt(v_power_2_, v_n_1_);
+v___x_3_ = lean_nat_dec_lt(v_power_2_, v_n_1_);
 if (v___x_3_ == 0)
 {
 return v_power_2_;

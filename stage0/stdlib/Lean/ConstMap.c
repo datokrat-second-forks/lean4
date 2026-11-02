@@ -1470,12 +1470,12 @@ return v_res_428_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_ConstMap_insert_spec__0_spec__0___redArg___boxed(lean_object* v_x_429_, lean_object* v_x_430_, lean_object* v_x_431_, lean_object* v_x_432_, lean_object* v_x_433_){
 _start:
 {
-size_t v_x_359__boxed_434_; size_t v_x_360__boxed_435_; lean_object* v_res_436_; 
-v_x_359__boxed_434_ = lean_unbox_usize(v_x_430_);
+size_t v_x_357__boxed_434_; size_t v_x_358__boxed_435_; lean_object* v_res_436_; 
+v_x_357__boxed_434_ = lean_unbox_usize(v_x_430_);
 lean_dec(v_x_430_);
-v_x_360__boxed_435_ = lean_unbox_usize(v_x_431_);
+v_x_358__boxed_435_ = lean_unbox_usize(v_x_431_);
 lean_dec(v_x_431_);
-v_res_436_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_ConstMap_insert_spec__0_spec__0___redArg(v_x_429_, v_x_359__boxed_434_, v_x_360__boxed_435_, v_x_432_, v_x_433_);
+v_res_436_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_ConstMap_insert_spec__0_spec__0___redArg(v_x_429_, v_x_357__boxed_434_, v_x_358__boxed_435_, v_x_432_, v_x_433_);
 return v_res_436_;
 }
 }
@@ -1574,12 +1574,12 @@ return v___x_471_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_ConstMap_insert_spec__0_spec__0___boxed(lean_object* v_00_u03b2_472_, lean_object* v_x_473_, lean_object* v_x_474_, lean_object* v_x_475_, lean_object* v_x_476_, lean_object* v_x_477_){
 _start:
 {
-size_t v_x_555__boxed_478_; size_t v_x_556__boxed_479_; lean_object* v_res_480_; 
-v_x_555__boxed_478_ = lean_unbox_usize(v_x_474_);
+size_t v_x_553__boxed_478_; size_t v_x_554__boxed_479_; lean_object* v_res_480_; 
+v_x_553__boxed_478_ = lean_unbox_usize(v_x_474_);
 lean_dec(v_x_474_);
-v_x_556__boxed_479_ = lean_unbox_usize(v_x_475_);
+v_x_554__boxed_479_ = lean_unbox_usize(v_x_475_);
 lean_dec(v_x_475_);
-v_res_480_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_ConstMap_insert_spec__0_spec__0(v_00_u03b2_472_, v_x_473_, v_x_555__boxed_478_, v_x_556__boxed_479_, v_x_476_, v_x_477_);
+v_res_480_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_ConstMap_insert_spec__0_spec__0(v_00_u03b2_472_, v_x_473_, v_x_553__boxed_478_, v_x_554__boxed_479_, v_x_476_, v_x_477_);
 return v_res_480_;
 }
 }

@@ -1,6 +1,6 @@
 // Lean compiler output
 // Module: Init.Omega.Constraint
-// Imports: public import Init.Omega.Coeffs import Init.Data.Int.Lemmas import Init.Data.Int.Order import Init.Data.ToString.Macro import Init.Omega.Int import Init.PropLemmas import Init.RCases
+// Imports: public import Init.Omega.Coeffs import Init.Data.Int.Lemmas import Init.Data.Int.Order import Init.Data.ToString.Macro import Init.Omega.Int import Init.Data.Bool import Init.PropLemmas import Init.RCases
 #include <lean/lean.h>
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -23,6 +23,7 @@ lean_object* lean_nat_add(lean_object*, lean_object*);
 uint8_t lean_int_dec_eq(lean_object*, lean_object*);
 uint8_t lean_int_dec_le(lean_object*, lean_object*);
 lean_object* lean_int_mul(lean_object*, lean_object*);
+uint8_t lean_int_dec_lt(lean_object*, lean_object*);
 lean_object* lean_int_add(lean_object*, lean_object*);
 lean_object* l_Lean_Omega_IntList_leading(lean_object*);
 lean_object* l_Int_neg___boxed(lean_object*);
@@ -32,6 +33,7 @@ lean_object* l_Lean_Omega_IntList_gcd(lean_object*);
 uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* lean_int_ediv(lean_object*, lean_object*);
 lean_object* l_Lean_Omega_IntList_sdiv(lean_object*, lean_object*);
+uint8_t lean_int_dec_le(lean_object*, lean_object*);
 lean_object* l_Repr_addAppParen(lean_object*, lean_object*);
 lean_object* lean_string_length(lean_object*);
 lean_object* l_Int_instDecidableEq___boxed(lean_object*, lean_object*);
@@ -2830,6 +2832,7 @@ lean_object* runtime_initialize_Init_Data_Int_Lemmas(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_Int_Order(uint8_t builtin);
 lean_object* runtime_initialize_Init_Data_ToString_Macro(uint8_t builtin);
 lean_object* runtime_initialize_Init_Omega_Int(uint8_t builtin);
+lean_object* runtime_initialize_Init_Data_Bool(uint8_t builtin);
 lean_object* runtime_initialize_Init_PropLemmas(uint8_t builtin);
 lean_object* runtime_initialize_Init_RCases(uint8_t builtin);
 void lean_initialize_runtime_module();
@@ -2854,6 +2857,9 @@ lean_dec_ref(res);
 res = runtime_initialize_Init_Omega_Int(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
+res = runtime_initialize_Init_Data_Bool(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
 res = runtime_initialize_Init_PropLemmas(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
@@ -2876,6 +2882,7 @@ lean_object* initialize_Init_Data_Int_Lemmas(uint8_t builtin);
 lean_object* initialize_Init_Data_Int_Order(uint8_t builtin);
 lean_object* initialize_Init_Data_ToString_Macro(uint8_t builtin);
 lean_object* initialize_Init_Omega_Int(uint8_t builtin);
+lean_object* initialize_Init_Data_Bool(uint8_t builtin);
 lean_object* initialize_Init_PropLemmas(uint8_t builtin);
 lean_object* initialize_Init_RCases(uint8_t builtin);
 static bool _G_initialized = false;
@@ -2896,6 +2903,9 @@ res = initialize_Init_Data_ToString_Macro(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = initialize_Init_Omega_Int(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
+res = initialize_Init_Data_Bool(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = initialize_Init_PropLemmas(builtin);

@@ -1929,9 +1929,9 @@ lean_object* v___x_441_; lean_object* v___x_442_; lean_object* v___x_443_;
 v___x_441_ = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(v___x_441_, 0, v___y_440_);
 lean_ctor_set(v___x_441_, 1, v_foundJPs_438_);
-v___x_442_ = lean_st_ref_put(v___y_439_, v___x_441_);
+v___x_442_ = lean_st_ref_put(v___y_437_, v___x_441_);
 v___x_443_ = lean_alloc_ctor(0, 1, 0);
-lean_ctor_set(v___x_443_, 0, v___y_437_);
+lean_ctor_set(v___x_443_, 0, v___y_439_);
 return v___x_443_;
 }
 v___jp_444_:
@@ -1949,18 +1949,18 @@ if (v___x_450_ == 0)
 {
 lean_object* v___x_451_; 
 v___x_451_ = l_Std_DTreeMap_Internal_Impl_insert___at___00Lean_IR_Checker_markVar_spec__1___redArg(v_x_430_, v___x_449_, v_foundVars_447_);
-v___y_437_ = v___x_449_;
+v___y_437_ = v___y_445_;
 v_foundJPs_438_ = v_foundJPs_448_;
-v___y_439_ = v___y_445_;
+v___y_439_ = v___x_449_;
 v___y_440_ = v___x_451_;
 goto v___jp_436_;
 }
 else
 {
 lean_dec(v_x_430_);
-v___y_437_ = v___x_449_;
+v___y_437_ = v___y_445_;
 v_foundJPs_438_ = v_foundJPs_448_;
-v___y_439_ = v___y_445_;
+v___y_439_ = v___x_449_;
 v___y_440_ = v_foundVars_447_;
 goto v___jp_436_;
 }
@@ -2037,9 +2037,9 @@ v___jp_490_:
 {
 lean_object* v___x_495_; lean_object* v___x_496_; lean_object* v___x_497_; 
 v___x_495_ = lean_alloc_ctor(0, 2, 0);
-lean_ctor_set(v___x_495_, 0, v___y_491_);
+lean_ctor_set(v___x_495_, 0, v___y_493_);
 lean_ctor_set(v___x_495_, 1, v___y_494_);
-v___x_496_ = lean_st_ref_put(v___y_493_, v___x_495_);
+v___x_496_ = lean_st_ref_put(v___y_491_, v___x_495_);
 v___x_497_ = lean_alloc_ctor(0, 1, 0);
 lean_ctor_set(v___x_497_, 0, v___y_492_);
 return v___x_497_;
@@ -2059,18 +2059,18 @@ if (v___x_504_ == 0)
 {
 lean_object* v___x_505_; 
 v___x_505_ = l_Std_DTreeMap_Internal_Impl_insert___at___00Lean_IR_Checker_markVar_spec__1___redArg(v_j_484_, v___x_503_, v_foundJPs_502_);
-v___y_491_ = v_foundVars_501_;
+v___y_491_ = v___y_499_;
 v___y_492_ = v___x_503_;
-v___y_493_ = v___y_499_;
+v___y_493_ = v_foundVars_501_;
 v___y_494_ = v___x_505_;
 goto v___jp_490_;
 }
 else
 {
 lean_dec(v_j_484_);
-v___y_491_ = v_foundVars_501_;
+v___y_491_ = v___y_499_;
 v___y_492_ = v___x_503_;
-v___y_493_ = v___y_499_;
+v___y_493_ = v_foundVars_501_;
 v___y_494_ = v_foundJPs_502_;
 goto v___jp_490_;
 }

@@ -3922,10 +3922,10 @@ return v___x_1340_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_lookupLspRequestHandler_spec__0_spec__0___redArg___boxed(lean_object* v_x_1341_, lean_object* v_x_1342_, lean_object* v_x_1343_){
 _start:
 {
-size_t v_x_319__boxed_1344_; lean_object* v_res_1345_; 
-v_x_319__boxed_1344_ = lean_unbox_usize(v_x_1342_);
+size_t v_x_315__boxed_1344_; lean_object* v_res_1345_; 
+v_x_315__boxed_1344_ = lean_unbox_usize(v_x_1342_);
 lean_dec(v_x_1342_);
-v_res_1345_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_lookupLspRequestHandler_spec__0_spec__0___redArg(v_x_1341_, v_x_319__boxed_1344_, v_x_1343_);
+v_res_1345_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_lookupLspRequestHandler_spec__0_spec__0___redArg(v_x_1341_, v_x_315__boxed_1344_, v_x_1343_);
 lean_dec_ref(v_x_1343_);
 lean_dec_ref(v_x_1341_);
 return v_res_1345_;
@@ -4002,10 +4002,10 @@ return v___x_1375_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_lookupLspRequestHandler_spec__0_spec__0___boxed(lean_object* v_00_u03b2_1376_, lean_object* v_x_1377_, lean_object* v_x_1378_, lean_object* v_x_1379_){
 _start:
 {
-size_t v_x_397__boxed_1380_; lean_object* v_res_1381_; 
-v_x_397__boxed_1380_ = lean_unbox_usize(v_x_1378_);
+size_t v_x_393__boxed_1380_; lean_object* v_res_1381_; 
+v_x_393__boxed_1380_ = lean_unbox_usize(v_x_1378_);
 lean_dec(v_x_1378_);
-v_res_1381_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_lookupLspRequestHandler_spec__0_spec__0(v_00_u03b2_1376_, v_x_1377_, v_x_397__boxed_1380_, v_x_1379_);
+v_res_1381_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_lookupLspRequestHandler_spec__0_spec__0(v_00_u03b2_1376_, v_x_1377_, v_x_393__boxed_1380_, v_x_1379_);
 lean_dec_ref(v_x_1379_);
 lean_dec_ref(v_x_1377_);
 return v_res_1381_;
@@ -6403,10 +6403,10 @@ return v___x_2375_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_isStatefulLspRequestMethod_spec__0_spec__0___redArg___boxed(lean_object* v_x_2376_, lean_object* v_x_2377_, lean_object* v_x_2378_){
 _start:
 {
-size_t v_x_268__boxed_2379_; uint8_t v_res_2380_; lean_object* v_r_2381_; 
-v_x_268__boxed_2379_ = lean_unbox_usize(v_x_2377_);
+size_t v_x_264__boxed_2379_; uint8_t v_res_2380_; lean_object* v_r_2381_; 
+v_x_264__boxed_2379_ = lean_unbox_usize(v_x_2377_);
 lean_dec(v_x_2377_);
-v_res_2380_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_isStatefulLspRequestMethod_spec__0_spec__0___redArg(v_x_2376_, v_x_268__boxed_2379_, v_x_2378_);
+v_res_2380_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_isStatefulLspRequestMethod_spec__0_spec__0___redArg(v_x_2376_, v_x_264__boxed_2379_, v_x_2378_);
 lean_dec_ref(v_x_2378_);
 lean_dec_ref(v_x_2376_);
 v_r_2381_ = lean_box(v_res_2380_);
@@ -6485,10 +6485,10 @@ return v___x_2413_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_isStatefulLspRequestMethod_spec__0_spec__0___boxed(lean_object* v_00_u03b2_2414_, lean_object* v_x_2415_, lean_object* v_x_2416_, lean_object* v_x_2417_){
 _start:
 {
-size_t v_x_338__boxed_2418_; uint8_t v_res_2419_; lean_object* v_r_2420_; 
-v_x_338__boxed_2418_ = lean_unbox_usize(v_x_2416_);
+size_t v_x_334__boxed_2418_; uint8_t v_res_2419_; lean_object* v_r_2420_; 
+v_x_334__boxed_2418_ = lean_unbox_usize(v_x_2416_);
 lean_dec(v_x_2416_);
-v_res_2419_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_isStatefulLspRequestMethod_spec__0_spec__0(v_00_u03b2_2414_, v_x_2415_, v_x_338__boxed_2418_, v_x_2417_);
+v_res_2419_ = l_Lean_PersistentHashMap_containsAux___at___00Lean_PersistentHashMap_contains___at___00Lean_Server_isStatefulLspRequestMethod_spec__0_spec__0(v_00_u03b2_2414_, v_x_2415_, v_x_334__boxed_2418_, v_x_2417_);
 lean_dec_ref(v_x_2417_);
 lean_dec_ref(v_x_2415_);
 v_r_2420_ = lean_box(v_res_2419_);

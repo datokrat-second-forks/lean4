@@ -14,6 +14,7 @@
 extern "C" {
 #endif
 uint32_t lean_uint32_of_nat_mk(lean_object*);
+uint8_t lean_uint64_dec_le(uint64_t, uint64_t);
 lean_object* lean_uint8_to_nat(uint8_t);
 lean_object* lean_nat_mod(lean_object*, lean_object*);
 lean_object* l_BitVec_ofNat(lean_object*, lean_object*);
@@ -25,6 +26,7 @@ lean_object* lean_int_emod(lean_object*, lean_object*);
 lean_object* l_Int_toNat(lean_object*);
 uint64_t lean_uint64_of_nat(lean_object*);
 uint8_t lean_uint8_dec_lt(uint8_t, uint8_t);
+uint8_t lean_uint64_dec_lt(uint64_t, uint64_t);
 extern lean_object* l_System_Platform_numBits;
 size_t lean_usize_of_nat(lean_object*);
 lean_object* lean_usize_to_nat(size_t);
@@ -35,10 +37,14 @@ lean_object* lean_uint32_to_nat(uint32_t);
 lean_object* lean_uint16_to_nat(uint16_t);
 uint16_t lean_uint16_of_nat_mk(lean_object*);
 uint8_t lean_uint8_dec_le(uint8_t, uint8_t);
+uint8_t lean_uint16_dec_le(uint16_t, uint16_t);
 uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* lean_nat_sub(lean_object*, lean_object*);
 uint16_t lean_uint16_of_nat(lean_object*);
+uint8_t lean_uint16_dec_lt(uint16_t, uint16_t);
+uint8_t lean_usize_dec_lt(size_t, size_t);
 uint8_t lean_uint8_of_nat(lean_object*);
+uint8_t lean_usize_dec_le(size_t, size_t);
 uint32_t lean_uint32_of_nat(lean_object*);
 LEAN_EXPORT uint8_t l_UInt8_ofFin(lean_object*);
 LEAN_EXPORT lean_object* l_UInt8_ofFin___boxed(lean_object*);
@@ -504,6 +510,18 @@ LEAN_EXPORT lean_object* l_instMinUSize___lam__0___boxed(lean_object*, lean_obje
 static const lean_closure_object l_instMinUSize___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*0, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_instMinUSize___lam__0___boxed, .m_arity = 2, .m_num_fixed = 0, .m_objs = {} };
 static const lean_object* l_instMinUSize___closed__0 = (const lean_object*)&l_instMinUSize___closed__0_value;
 LEAN_EXPORT const lean_object* l_instMinUSize = (const lean_object*)&l_instMinUSize___closed__0_value;
+LEAN_EXPORT uint8_t l_UDecidable_instUInt16LeImpl(uint16_t, uint16_t);
+LEAN_EXPORT lean_object* l_UDecidable_instUInt16LeImpl___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instUInt16LtImpl(uint16_t, uint16_t);
+LEAN_EXPORT lean_object* l_UDecidable_instUInt16LtImpl___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instUInt64LeImpl(uint64_t, uint64_t);
+LEAN_EXPORT lean_object* l_UDecidable_instUInt64LeImpl___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instUInt64LtImpl(uint64_t, uint64_t);
+LEAN_EXPORT lean_object* l_UDecidable_instUInt64LtImpl___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instUSizeLeImpl(size_t, size_t);
+LEAN_EXPORT lean_object* l_UDecidable_instUSizeLeImpl___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instUSizeLtImpl(size_t, size_t);
+LEAN_EXPORT lean_object* l_UDecidable_instUSizeLtImpl___boxed(lean_object*, lean_object*);
 LEAN_EXPORT uint8_t l_UInt8_ofFin(lean_object* v_a_1_){
 _start:
 {
@@ -2380,6 +2398,128 @@ lean_dec(v_y_1021_);
 v_res_1024_ = l_instMinUSize___lam__0(v_x_boxed_1022_, v_y_boxed_1023_);
 v_r_1025_ = lean_box_usize(v_res_1024_);
 return v_r_1025_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instUInt16LeImpl(uint16_t v_a_1028_, uint16_t v_b_1029_){
+_start:
+{
+uint8_t v___x_1030_; 
+v___x_1030_ = lean_uint16_dec_le(v_a_1028_, v_b_1029_);
+return v___x_1030_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instUInt16LeImpl___boxed(lean_object* v_a_1031_, lean_object* v_b_1032_){
+_start:
+{
+uint16_t v_a_boxed_1033_; uint16_t v_b_boxed_1034_; uint8_t v_res_1035_; lean_object* v_r_1036_; 
+v_a_boxed_1033_ = lean_unbox(v_a_1031_);
+v_b_boxed_1034_ = lean_unbox(v_b_1032_);
+v_res_1035_ = l_UDecidable_instUInt16LeImpl(v_a_boxed_1033_, v_b_boxed_1034_);
+v_r_1036_ = lean_box(v_res_1035_);
+return v_r_1036_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instUInt16LtImpl(uint16_t v_a_1037_, uint16_t v_b_1038_){
+_start:
+{
+uint8_t v___x_1039_; 
+v___x_1039_ = lean_uint16_dec_lt(v_a_1037_, v_b_1038_);
+return v___x_1039_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instUInt16LtImpl___boxed(lean_object* v_a_1040_, lean_object* v_b_1041_){
+_start:
+{
+uint16_t v_a_boxed_1042_; uint16_t v_b_boxed_1043_; uint8_t v_res_1044_; lean_object* v_r_1045_; 
+v_a_boxed_1042_ = lean_unbox(v_a_1040_);
+v_b_boxed_1043_ = lean_unbox(v_b_1041_);
+v_res_1044_ = l_UDecidable_instUInt16LtImpl(v_a_boxed_1042_, v_b_boxed_1043_);
+v_r_1045_ = lean_box(v_res_1044_);
+return v_r_1045_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instUInt64LeImpl(uint64_t v_a_1046_, uint64_t v_b_1047_){
+_start:
+{
+uint8_t v___x_1048_; 
+v___x_1048_ = lean_uint64_dec_le(v_a_1046_, v_b_1047_);
+return v___x_1048_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instUInt64LeImpl___boxed(lean_object* v_a_1049_, lean_object* v_b_1050_){
+_start:
+{
+uint64_t v_a_boxed_1051_; uint64_t v_b_boxed_1052_; uint8_t v_res_1053_; lean_object* v_r_1054_; 
+v_a_boxed_1051_ = lean_unbox_uint64(v_a_1049_);
+lean_dec_ref(v_a_1049_);
+v_b_boxed_1052_ = lean_unbox_uint64(v_b_1050_);
+lean_dec_ref(v_b_1050_);
+v_res_1053_ = l_UDecidable_instUInt64LeImpl(v_a_boxed_1051_, v_b_boxed_1052_);
+v_r_1054_ = lean_box(v_res_1053_);
+return v_r_1054_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instUInt64LtImpl(uint64_t v_a_1055_, uint64_t v_b_1056_){
+_start:
+{
+uint8_t v___x_1057_; 
+v___x_1057_ = lean_uint64_dec_lt(v_a_1055_, v_b_1056_);
+return v___x_1057_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instUInt64LtImpl___boxed(lean_object* v_a_1058_, lean_object* v_b_1059_){
+_start:
+{
+uint64_t v_a_boxed_1060_; uint64_t v_b_boxed_1061_; uint8_t v_res_1062_; lean_object* v_r_1063_; 
+v_a_boxed_1060_ = lean_unbox_uint64(v_a_1058_);
+lean_dec_ref(v_a_1058_);
+v_b_boxed_1061_ = lean_unbox_uint64(v_b_1059_);
+lean_dec_ref(v_b_1059_);
+v_res_1062_ = l_UDecidable_instUInt64LtImpl(v_a_boxed_1060_, v_b_boxed_1061_);
+v_r_1063_ = lean_box(v_res_1062_);
+return v_r_1063_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instUSizeLeImpl(size_t v_a_1064_, size_t v_b_1065_){
+_start:
+{
+uint8_t v___x_1066_; 
+v___x_1066_ = lean_usize_dec_le(v_a_1064_, v_b_1065_);
+return v___x_1066_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instUSizeLeImpl___boxed(lean_object* v_a_1067_, lean_object* v_b_1068_){
+_start:
+{
+size_t v_a_boxed_1069_; size_t v_b_boxed_1070_; uint8_t v_res_1071_; lean_object* v_r_1072_; 
+v_a_boxed_1069_ = lean_unbox_usize(v_a_1067_);
+lean_dec(v_a_1067_);
+v_b_boxed_1070_ = lean_unbox_usize(v_b_1068_);
+lean_dec(v_b_1068_);
+v_res_1071_ = l_UDecidable_instUSizeLeImpl(v_a_boxed_1069_, v_b_boxed_1070_);
+v_r_1072_ = lean_box(v_res_1071_);
+return v_r_1072_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instUSizeLtImpl(size_t v_a_1073_, size_t v_b_1074_){
+_start:
+{
+uint8_t v___x_1075_; 
+v___x_1075_ = lean_usize_dec_lt(v_a_1073_, v_b_1074_);
+return v___x_1075_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instUSizeLtImpl___boxed(lean_object* v_a_1076_, lean_object* v_b_1077_){
+_start:
+{
+size_t v_a_boxed_1078_; size_t v_b_boxed_1079_; uint8_t v_res_1080_; lean_object* v_r_1081_; 
+v_a_boxed_1078_ = lean_unbox_usize(v_a_1076_);
+lean_dec(v_a_1076_);
+v_b_boxed_1079_ = lean_unbox_usize(v_b_1077_);
+lean_dec(v_b_1077_);
+v_res_1080_ = l_UDecidable_instUSizeLtImpl(v_a_boxed_1078_, v_b_boxed_1079_);
+v_r_1081_ = lean_box(v_res_1080_);
+return v_r_1081_;
 }
 }
 lean_object* runtime_initialize_Init_Data_BitVec_Basic(uint8_t builtin);

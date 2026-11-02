@@ -37,6 +37,7 @@ lean_object* l_Bool_toNat(uint8_t);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 lean_object* l_BitVec_shiftLeft(lean_object*, lean_object*, lean_object*);
 lean_object* l_BitVec_iunfoldr___redArg(lean_object*, lean_object*, lean_object*);
+uint8_t l_Nat_blt(lean_object*, lean_object*);
 LEAN_EXPORT uint8_t l_Bool_atLeastTwo(uint8_t, uint8_t, uint8_t);
 LEAN_EXPORT lean_object* l_Bool_atLeastTwo___boxed(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT uint8_t l_BitVec_carry___redArg(lean_object*, lean_object*, lean_object*, uint8_t);
@@ -1160,7 +1161,7 @@ if (v_isZero_394_ == 1)
 {
 uint8_t v___x_395_; 
 lean_dec(v_s_392_);
-v___x_395_ = lean_nat_dec_lt(v_zero_393_, v_w_390_);
+v___x_395_ = l_Nat_blt(v_zero_393_, v_w_390_);
 if (v___x_395_ == 0)
 {
 return v___x_395_;

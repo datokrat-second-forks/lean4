@@ -1359,9 +1359,9 @@ return v___x_378_;
 LEAN_EXPORT lean_object* l___private_Lean_Util_ParamMinimizer_0__Lean_Util_ParamMinimizer_tryCur___redArg___lam__0___boxed(lean_object* v_toPure_385_, lean_object* v___x_386_, lean_object* v_____x_387_){
 _start:
 {
-uint8_t v___x_6887__boxed_388_; lean_object* v_res_389_; 
-v___x_6887__boxed_388_ = lean_unbox(v___x_386_);
-v_res_389_ = l___private_Lean_Util_ParamMinimizer_0__Lean_Util_ParamMinimizer_tryCur___redArg___lam__0(v_toPure_385_, v___x_6887__boxed_388_, v_____x_387_);
+uint8_t v___x_6904__boxed_388_; lean_object* v_res_389_; 
+v___x_6904__boxed_388_ = lean_unbox(v___x_386_);
+v_res_389_ = l___private_Lean_Util_ParamMinimizer_0__Lean_Util_ParamMinimizer_tryCur___redArg___lam__0(v_toPure_385_, v___x_6904__boxed_388_, v_____x_387_);
 return v_res_389_;
 }
 }

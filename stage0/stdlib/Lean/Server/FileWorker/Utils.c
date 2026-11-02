@@ -937,12 +937,12 @@ return v___x_277_;
 LEAN_EXPORT lean_object* l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Server_FileWorker_EditableDocumentCore_appendStickyDiagnostic_spec__0_spec__0___boxed(lean_object* v_diagnostic_278_, lean_object* v_x_279_, lean_object* v_x_280_, lean_object* v_x_281_, lean_object* v_x_282_){
 _start:
 {
-size_t v_x_1594__boxed_283_; size_t v_x_1595__boxed_284_; lean_object* v_res_285_; 
-v_x_1594__boxed_283_ = lean_unbox_usize(v_x_280_);
+size_t v_x_1592__boxed_283_; size_t v_x_1593__boxed_284_; lean_object* v_res_285_; 
+v_x_1592__boxed_283_ = lean_unbox_usize(v_x_280_);
 lean_dec(v_x_280_);
-v_x_1595__boxed_284_ = lean_unbox_usize(v_x_281_);
+v_x_1593__boxed_284_ = lean_unbox_usize(v_x_281_);
 lean_dec(v_x_281_);
-v_res_285_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Server_FileWorker_EditableDocumentCore_appendStickyDiagnostic_spec__0_spec__0(v_diagnostic_278_, v_x_279_, v_x_1594__boxed_283_, v_x_1595__boxed_284_, v_x_282_);
+v_res_285_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00Lean_Server_FileWorker_EditableDocumentCore_appendStickyDiagnostic_spec__0_spec__0(v_diagnostic_278_, v_x_279_, v_x_1592__boxed_283_, v_x_1593__boxed_284_, v_x_282_);
 lean_dec_ref(v_x_279_);
 return v_res_285_;
 }

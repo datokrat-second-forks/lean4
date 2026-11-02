@@ -167,6 +167,7 @@ uint64_t lean_int64_shift_right(uint64_t, uint64_t);
 uint64_t lean_int64_shift_left(uint64_t, uint64_t);
 lean_object* l_BitVec_replicate(lean_object*, lean_object*, lean_object*);
 lean_object* lean_uint16_to_nat(uint16_t);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* l_Lean_Meta_Sym_getBoolValue_x3f(lean_object*);
 uint8_t lean_int_dec_eq(lean_object*, lean_object*);
 uint8_t l_instDecidableEqRat_decEq(lean_object*, lean_object*);
@@ -257,6 +258,7 @@ lean_object* l_BitVec_smod(lean_object*, lean_object*, lean_object*);
 lean_object* l_BitVec_srem(lean_object*, lean_object*, lean_object*);
 lean_object* l_BitVec_smtUDiv(lean_object*, lean_object*, lean_object*);
 lean_object* l_BitVec_smtSDiv(lean_object*, lean_object*, lean_object*);
+uint8_t l_Nat_blt(lean_object*, lean_object*);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 uint8_t l_BitVec_slt(lean_object*, lean_object*, lean_object*);
 uint8_t l_BitVec_sle(lean_object*, lean_object*, lean_object*);
@@ -68888,7 +68890,7 @@ else
 {
 uint8_t v_r_21101_; 
 lean_del_object(v___x_21070_);
-v_r_21101_ = lean_nat_dec_lt(v_val_21073_, v_val_21075_);
+v_r_21101_ = l_Nat_blt(v_val_21073_, v_val_21075_);
 lean_dec(v_val_21075_);
 lean_dec(v_val_21073_);
 if (v_r_21101_ == 0)
@@ -70032,7 +70034,7 @@ lean_inc(v_n_21287_);
 v_val_21288_ = lean_ctor_get(v_val_21281_, 1);
 lean_inc(v_val_21288_);
 lean_dec(v_val_21281_);
-v___x_21289_ = lean_nat_dec_lt(v_val_21286_, v_n_21287_);
+v___x_21289_ = l_Nat_blt(v_val_21286_, v_n_21287_);
 if (v___x_21289_ == 0)
 {
 lean_dec(v_val_21288_);

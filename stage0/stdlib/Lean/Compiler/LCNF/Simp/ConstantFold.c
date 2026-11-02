@@ -4942,8 +4942,8 @@ goto v___jp_267_;
 }
 else
 {
-lean_dec(v_pre_286_);
 lean_dec_ref_known(v_declName_281_, 2);
+lean_dec(v_pre_286_);
 lean_del_object(v___x_278_);
 lean_del_object(v___x_274_);
 goto v___jp_267_;
@@ -5559,8 +5559,8 @@ goto v___jp_388_;
 }
 else
 {
-lean_dec(v_declName_428_);
 lean_dec_ref_known(v_val_402_, 3);
+lean_dec(v_declName_428_);
 goto v___jp_388_;
 }
 }
@@ -6973,8 +6973,8 @@ goto v___jp_823_;
 }
 else
 {
-lean_dec_ref_known(v_val_832_, 3);
 lean_dec(v_declName_836_);
+lean_dec_ref_known(v_val_832_, 3);
 lean_del_object(v___x_834_);
 lean_del_object(v___x_830_);
 lean_dec(v_fvarIds_820_);
@@ -66029,8 +66029,8 @@ goto v___jp_22292_;
 }
 else
 {
-lean_dec(v_pre_22312_);
 lean_dec_ref_known(v_declName_22311_, 2);
+lean_dec(v_pre_22312_);
 lean_dec_ref_known(v_val_22307_, 3);
 lean_del_object(v___x_22309_);
 lean_del_object(v___x_22305_);
@@ -66039,8 +66039,8 @@ goto v___jp_22292_;
 }
 else
 {
-lean_dec(v_declName_22311_);
 lean_dec_ref_known(v_val_22307_, 3);
+lean_dec(v_declName_22311_);
 lean_del_object(v___x_22309_);
 lean_del_object(v___x_22305_);
 goto v___jp_22292_;
@@ -68379,12 +68379,12 @@ return v_res_23137_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_SMap_insert___at___00Lean_Compiler_LCNF_Simp_ConstantFold_builtinFolders_spec__0_spec__0_spec__1___redArg___boxed(lean_object* v_x_23138_, lean_object* v_x_23139_, lean_object* v_x_23140_, lean_object* v_x_23141_, lean_object* v_x_23142_){
 _start:
 {
-size_t v_x_1107__boxed_23143_; size_t v_x_1108__boxed_23144_; lean_object* v_res_23145_; 
-v_x_1107__boxed_23143_ = lean_unbox_usize(v_x_23139_);
+size_t v_x_1105__boxed_23143_; size_t v_x_1106__boxed_23144_; lean_object* v_res_23145_; 
+v_x_1105__boxed_23143_ = lean_unbox_usize(v_x_23139_);
 lean_dec(v_x_23139_);
-v_x_1108__boxed_23144_ = lean_unbox_usize(v_x_23140_);
+v_x_1106__boxed_23144_ = lean_unbox_usize(v_x_23140_);
 lean_dec(v_x_23140_);
-v_res_23145_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_SMap_insert___at___00Lean_Compiler_LCNF_Simp_ConstantFold_builtinFolders_spec__0_spec__0_spec__1___redArg(v_x_23138_, v_x_1107__boxed_23143_, v_x_1108__boxed_23144_, v_x_23141_, v_x_23142_);
+v_res_23145_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_SMap_insert___at___00Lean_Compiler_LCNF_Simp_ConstantFold_builtinFolders_spec__0_spec__0_spec__1___redArg(v_x_23138_, v_x_1105__boxed_23143_, v_x_1106__boxed_23144_, v_x_23141_, v_x_23142_);
 return v_res_23145_;
 }
 }
@@ -68713,12 +68713,12 @@ return v___x_23246_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_SMap_insert___at___00Lean_Compiler_LCNF_Simp_ConstantFold_builtinFolders_spec__0_spec__0_spec__1___boxed(lean_object* v_00_u03b2_23247_, lean_object* v_x_23248_, lean_object* v_x_23249_, lean_object* v_x_23250_, lean_object* v_x_23251_, lean_object* v_x_23252_){
 _start:
 {
-size_t v_x_1472__boxed_23253_; size_t v_x_1473__boxed_23254_; lean_object* v_res_23255_; 
-v_x_1472__boxed_23253_ = lean_unbox_usize(v_x_23249_);
+size_t v_x_1470__boxed_23253_; size_t v_x_1471__boxed_23254_; lean_object* v_res_23255_; 
+v_x_1470__boxed_23253_ = lean_unbox_usize(v_x_23249_);
 lean_dec(v_x_23249_);
-v_x_1473__boxed_23254_ = lean_unbox_usize(v_x_23250_);
+v_x_1471__boxed_23254_ = lean_unbox_usize(v_x_23250_);
 lean_dec(v_x_23250_);
-v_res_23255_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_SMap_insert___at___00Lean_Compiler_LCNF_Simp_ConstantFold_builtinFolders_spec__0_spec__0_spec__1(v_00_u03b2_23247_, v_x_23248_, v_x_1472__boxed_23253_, v_x_1473__boxed_23254_, v_x_23251_, v_x_23252_);
+v_res_23255_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_SMap_insert___at___00Lean_Compiler_LCNF_Simp_ConstantFold_builtinFolders_spec__0_spec__0_spec__1(v_00_u03b2_23247_, v_x_23248_, v_x_1470__boxed_23253_, v_x_1471__boxed_23254_, v_x_23251_, v_x_23252_);
 return v_res_23255_;
 }
 }

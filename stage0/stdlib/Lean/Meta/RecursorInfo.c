@@ -1164,16 +1164,16 @@ goto v_reusejp_274_;
 }
 v_reusejp_274_:
 {
-lean_object* v___x_276_; lean_object* v___x_277_; lean_object* v___x_2866__overap_278_; lean_object* v___x_279_; 
+lean_object* v___x_276_; lean_object* v___x_277_; lean_object* v___x_2858__overap_278_; lean_object* v___x_279_; 
 v___x_276_ = lean_box(0);
 v___x_277_ = l_instInhabitedOfMonad___redArg(v___x_275_, v___x_276_);
-v___x_2866__overap_278_ = lean_panic_fn_borrowed(v___x_277_, v_msg_221_);
+v___x_2858__overap_278_ = lean_panic_fn_borrowed(v___x_277_, v_msg_221_);
 lean_dec(v___x_277_);
 lean_inc(v___y_225_);
 lean_inc_ref(v___y_224_);
 lean_inc(v___y_223_);
 lean_inc_ref(v___y_222_);
-v___x_279_ = lean_apply_5(v___x_2866__overap_278_, v___y_222_, v___y_223_, v___y_224_, v___y_225_, lean_box(0));
+v___x_279_ = lean_apply_5(v___x_2858__overap_278_, v___y_222_, v___y_223_, v___y_224_, v___y_225_, lean_box(0));
 return v___x_279_;
 }
 }
@@ -4166,13 +4166,13 @@ return v___x_1416_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00__private_Lean_Meta_RecursorInfo_0__Lean_Meta_getProduceMotiveAndRecursive_spec__0___boxed(lean_object* v_motive_1417_, lean_object* v___x_1418_, lean_object* v_next_1419_, lean_object* v_upperBound_1420_, lean_object* v_as_1421_, lean_object* v_i_1422_, lean_object* v_stop_1423_, lean_object* v___y_1424_, lean_object* v___y_1425_, lean_object* v___y_1426_, lean_object* v___y_1427_, lean_object* v___y_1428_){
 _start:
 {
-uint8_t v___x_3759__boxed_1429_; size_t v_i_boxed_1430_; size_t v_stop_boxed_1431_; lean_object* v_res_1432_; 
-v___x_3759__boxed_1429_ = lean_unbox(v___x_1418_);
+uint8_t v___x_3776__boxed_1429_; size_t v_i_boxed_1430_; size_t v_stop_boxed_1431_; lean_object* v_res_1432_; 
+v___x_3776__boxed_1429_ = lean_unbox(v___x_1418_);
 v_i_boxed_1430_ = lean_unbox_usize(v_i_1422_);
 lean_dec(v_i_1422_);
 v_stop_boxed_1431_ = lean_unbox_usize(v_stop_1423_);
 lean_dec(v_stop_1423_);
-v_res_1432_ = l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00__private_Lean_Meta_RecursorInfo_0__Lean_Meta_getProduceMotiveAndRecursive_spec__0(v_motive_1417_, v___x_3759__boxed_1429_, v_next_1419_, v_upperBound_1420_, v_as_1421_, v_i_boxed_1430_, v_stop_boxed_1431_, v___y_1424_, v___y_1425_, v___y_1426_, v___y_1427_);
+v_res_1432_ = l___private_Init_Data_Array_Basic_0__Array_anyMUnsafe_any___at___00__private_Lean_Meta_RecursorInfo_0__Lean_Meta_getProduceMotiveAndRecursive_spec__0(v_motive_1417_, v___x_3776__boxed_1429_, v_next_1419_, v_upperBound_1420_, v_as_1421_, v_i_boxed_1430_, v_stop_boxed_1431_, v___y_1424_, v___y_1425_, v___y_1426_, v___y_1427_);
 lean_dec(v___y_1427_);
 lean_dec_ref(v___y_1426_);
 lean_dec(v___y_1425_);
@@ -4317,9 +4317,9 @@ return v___x_1460_;
 LEAN_EXPORT lean_object* l_Lean_Expr_withAppAux___at___00__private_Lean_Meta_RecursorInfo_0__Lean_Meta_getProduceMotiveAndRecursive_spec__1___boxed(lean_object* v_motive_1477_, lean_object* v___x_1478_, lean_object* v___x_1479_, lean_object* v_minorArgs_1480_, lean_object* v_next_1481_, lean_object* v_upperBound_1482_, lean_object* v_x_1483_, lean_object* v_x_1484_, lean_object* v_x_1485_, lean_object* v___y_1486_, lean_object* v___y_1487_, lean_object* v___y_1488_, lean_object* v___y_1489_, lean_object* v___y_1490_){
 _start:
 {
-uint8_t v___x_3834__boxed_1491_; lean_object* v_res_1492_; 
-v___x_3834__boxed_1491_ = lean_unbox(v___x_1479_);
-v_res_1492_ = l_Lean_Expr_withAppAux___at___00__private_Lean_Meta_RecursorInfo_0__Lean_Meta_getProduceMotiveAndRecursive_spec__1(v_motive_1477_, v___x_1478_, v___x_3834__boxed_1491_, v_minorArgs_1480_, v_next_1481_, v_upperBound_1482_, v_x_1483_, v_x_1484_, v_x_1485_, v___y_1486_, v___y_1487_, v___y_1488_, v___y_1489_);
+uint8_t v___x_3851__boxed_1491_; lean_object* v_res_1492_; 
+v___x_3851__boxed_1491_ = lean_unbox(v___x_1479_);
+v_res_1492_ = l_Lean_Expr_withAppAux___at___00__private_Lean_Meta_RecursorInfo_0__Lean_Meta_getProduceMotiveAndRecursive_spec__1(v_motive_1477_, v___x_1478_, v___x_3851__boxed_1491_, v_minorArgs_1480_, v_next_1481_, v_upperBound_1482_, v_x_1483_, v_x_1484_, v_x_1485_, v___y_1486_, v___y_1487_, v___y_1488_, v___y_1489_);
 lean_dec(v___y_1489_);
 lean_dec_ref(v___y_1488_);
 lean_dec(v___y_1487_);

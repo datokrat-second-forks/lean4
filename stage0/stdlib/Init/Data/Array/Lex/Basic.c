@@ -22,7 +22,7 @@ lean_object* lean_array_get_size(lean_object*);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 lean_object* lean_array_fget_borrowed(lean_object*, lean_object*);
 lean_object* lean_nat_add(lean_object*, lean_object*);
-uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
+uint8_t l_Nat_blt(lean_object*, lean_object*);
 static const lean_string_object l_Array_lex___auto__1___closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 5, .m_capacity = 5, .m_length = 4, .m_data = "Lean"};
 static const lean_object* l_Array_lex___auto__1___closed__0 = (const lean_object*)&l_Array_lex___auto__1___closed__0_value;
 static const lean_string_object l_Array_lex___auto__1___closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 7, .m_capacity = 7, .m_length = 6, .m_data = "Parser"};
@@ -581,7 +581,7 @@ lean_object* v___x_181_; uint8_t v___x_182_;
 lean_dec_ref(v_lt_164_);
 lean_dec_ref(v_inst_161_);
 v___x_181_ = lean_array_get_size(v_bs_163_);
-v___x_182_ = lean_nat_dec_lt(v_i_165_, v___x_181_);
+v___x_182_ = l_Nat_blt(v_i_165_, v___x_181_);
 lean_dec(v_i_165_);
 return v___x_182_;
 }

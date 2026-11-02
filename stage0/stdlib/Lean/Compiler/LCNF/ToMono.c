@@ -12676,8 +12676,8 @@ return v___x_3728_;
 else
 {
 lean_object* v_a_3736_; lean_object* v___x_3738_; uint8_t v_isShared_3739_; uint8_t v_isSharedCheck_3743_; 
-lean_dec_ref(v_cases_3596_);
 lean_dec_ref_known(v_code_3288_, 1);
+lean_dec_ref(v_cases_3596_);
 v_a_3736_ = lean_ctor_get(v___x_3629_, 0);
 v_isSharedCheck_3743_ = !lean_is_exclusive(v___x_3629_);
 if (v_isSharedCheck_3743_ == 0)

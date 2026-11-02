@@ -58,38 +58,38 @@ uint8_t v___x_6_;
 v___x_6_ = lean_nat_dec_eq(v_m_3_, v___x_4_);
 if (v___x_6_ == 0)
 {
-lean_object* v___x_7_; lean_object* v_n_x27_8_; lean_object* v_m_x27_9_; lean_object* v_r_10_; lean_object* v___x_11_; lean_object* v___x_12_; uint8_t v___x_13_; lean_object* v___x_14_; uint8_t v___x_15_; lean_object* v___x_16_; lean_object* v___x_17_; lean_object* v___x_18_; uint8_t v___x_19_; 
+lean_object* v___x_7_; lean_object* v_n_x27_8_; lean_object* v_m_x27_9_; lean_object* v___x_10_; lean_object* v___x_11_; uint8_t v_b_u2081_12_; lean_object* v___x_13_; uint8_t v_b_u2082_14_; lean_object* v_r_15_; lean_object* v___x_16_; lean_object* v___x_17_; lean_object* v___x_18_; uint8_t v___x_19_; 
 v___x_7_ = lean_unsigned_to_nat(2u);
 v_n_x27_8_ = lean_nat_div(v_n_2_, v___x_7_);
 v_m_x27_9_ = lean_nat_div(v_m_3_, v___x_7_);
+v___x_10_ = lean_nat_mod(v_n_2_, v___x_7_);
+v___x_11_ = lean_unsigned_to_nat(1u);
+v_b_u2081_12_ = lean_nat_dec_eq(v___x_10_, v___x_11_);
+lean_dec(v___x_10_);
+v___x_13_ = lean_nat_mod(v_m_3_, v___x_7_);
+v_b_u2082_14_ = lean_nat_dec_eq(v___x_13_, v___x_11_);
+lean_dec(v___x_13_);
 lean_inc_ref(v_f_1_);
-v_r_10_ = l_Nat_bitwise(v_f_1_, v_n_x27_8_, v_m_x27_9_);
+v_r_15_ = l_Nat_bitwise(v_f_1_, v_n_x27_8_, v_m_x27_9_);
 lean_dec(v_m_x27_9_);
 lean_dec(v_n_x27_8_);
-v___x_11_ = lean_nat_mod(v_n_2_, v___x_7_);
-v___x_12_ = lean_unsigned_to_nat(1u);
-v___x_13_ = lean_nat_dec_eq(v___x_11_, v___x_12_);
-lean_dec(v___x_11_);
-v___x_14_ = lean_nat_mod(v_m_3_, v___x_7_);
-v___x_15_ = lean_nat_dec_eq(v___x_14_, v___x_12_);
-lean_dec(v___x_14_);
-v___x_16_ = lean_box(v___x_13_);
-v___x_17_ = lean_box(v___x_15_);
+v___x_16_ = lean_box(v_b_u2081_12_);
+v___x_17_ = lean_box(v_b_u2082_14_);
 v___x_18_ = lean_apply_2(v_f_1_, v___x_16_, v___x_17_);
 v___x_19_ = lean_unbox(v___x_18_);
 if (v___x_19_ == 0)
 {
 lean_object* v___x_20_; 
-v___x_20_ = lean_nat_add(v_r_10_, v_r_10_);
-lean_dec(v_r_10_);
+v___x_20_ = lean_nat_add(v_r_15_, v_r_15_);
+lean_dec(v_r_15_);
 return v___x_20_;
 }
 else
 {
 lean_object* v___x_21_; lean_object* v___x_22_; 
-v___x_21_ = lean_nat_add(v_r_10_, v_r_10_);
-lean_dec(v_r_10_);
-v___x_22_ = lean_nat_add(v___x_21_, v___x_12_);
+v___x_21_ = lean_nat_add(v_r_15_, v_r_15_);
+lean_dec(v_r_15_);
+v___x_22_ = lean_nat_add(v___x_21_, v___x_11_);
 lean_dec(v___x_21_);
 return v___x_22_;
 }

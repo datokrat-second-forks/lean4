@@ -3909,7 +3909,7 @@ return v_res_1326_;
 LEAN_EXPORT lean_object* l___private_Lean_Compiler_InitAttr_0__Lean_runInitAttrForMod(lean_object* v_env_1332_, lean_object* v_opts_1333_, lean_object* v_mod_1334_, lean_object* v_modIdx_1335_){
 _start:
 {
-uint8_t v___y_1338_; lean_object* v___y_1339_; uint8_t v___y_1340_; lean_object* v___y_1341_; lean_object* v___x_1358_; uint8_t v___y_1360_; lean_object* v___y_1384_; uint8_t v___y_1385_; uint8_t v_a_1386_; uint8_t v___y_1403_; lean_object* v___x_1445_; uint8_t v___x_1446_; 
+uint8_t v___y_1338_; uint8_t v___y_1339_; lean_object* v___y_1340_; lean_object* v___y_1341_; lean_object* v___x_1358_; uint8_t v___y_1360_; lean_object* v___y_1384_; uint8_t v___y_1385_; uint8_t v_a_1386_; uint8_t v___y_1403_; lean_object* v___x_1445_; uint8_t v___x_1446_; 
 v___x_1358_ = ((lean_object*)(l___private_Lean_Compiler_InitAttr_0__Lean_runInitAttrForMod___closed__0));
 v___x_1445_ = l_Lean_Elab_inServer;
 v___x_1446_ = l_Lean_Option_get___at___00__private_Lean_Compiler_InitAttr_0__Lean_runInitAttrForMod_spec__3(v_opts_1333_, v___x_1445_);
@@ -3940,12 +3940,12 @@ goto v___jp_1402_;
 v___jp_1337_:
 {
 lean_object* v___x_1342_; lean_object* v___x_1343_; size_t v_sz_1344_; size_t v___x_1345_; lean_object* v___x_1346_; 
-v___x_1342_ = l_Array_append___redArg(v___y_1339_, v___y_1341_);
+v___x_1342_ = l_Array_append___redArg(v___y_1340_, v___y_1341_);
 lean_dec_ref(v___y_1341_);
 v___x_1343_ = lean_box(0);
 v_sz_1344_ = lean_array_size(v___x_1342_);
 v___x_1345_ = ((size_t)0ULL);
-v___x_1346_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00__private_Lean_Compiler_InitAttr_0__Lean_runInitAttrForMod_spec__1(v_env_1332_, v_opts_1333_, v___y_1338_, v___y_1340_, v___x_1342_, v_sz_1344_, v___x_1345_, v___x_1343_);
+v___x_1346_ = l___private_Init_Data_Array_Basic_0__Array_forIn_x27Unsafe_loop___at___00__private_Lean_Compiler_InitAttr_0__Lean_runInitAttrForMod_spec__1(v_env_1332_, v_opts_1333_, v___y_1338_, v___y_1339_, v___x_1342_, v_sz_1344_, v___x_1345_, v___x_1343_);
 lean_dec_ref(v___x_1342_);
 if (lean_obj_tag(v___x_1346_) == 0)
 {
@@ -4035,8 +4035,8 @@ if (v___x_1377_ == 0)
 {
 lean_dec_ref(v___x_1373_);
 v___y_1338_ = v___y_1360_;
-v___y_1339_ = v___x_1372_;
-v___y_1340_ = v___x_1365_;
+v___y_1339_ = v___x_1365_;
+v___y_1340_ = v___x_1372_;
 v___y_1341_ = v___x_1376_;
 goto v___jp_1337_;
 }
@@ -4048,8 +4048,8 @@ v___x_1379_ = lean_usize_of_nat(v___x_1375_);
 v___x_1380_ = l___private_Init_Data_Array_Basic_0__Array_foldlMUnsafe_fold___at___00__private_Lean_Compiler_InitAttr_0__Lean_runInitAttrForMod_spec__2(v___x_1372_, v___x_1373_, v___x_1378_, v___x_1379_, v___x_1376_);
 lean_dec_ref(v___x_1373_);
 v___y_1338_ = v___y_1360_;
-v___y_1339_ = v___x_1372_;
-v___y_1340_ = v___x_1365_;
+v___y_1339_ = v___x_1365_;
+v___y_1340_ = v___x_1372_;
 v___y_1341_ = v___x_1380_;
 goto v___jp_1337_;
 }

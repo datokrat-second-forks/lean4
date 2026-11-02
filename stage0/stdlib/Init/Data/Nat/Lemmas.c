@@ -71,6 +71,42 @@ LEAN_EXPORT uint8_t l_Nat_decidableExistsFin___redArg(lean_object*, lean_object*
 LEAN_EXPORT lean_object* l_Nat_decidableExistsFin___redArg___boxed(lean_object*, lean_object*);
 LEAN_EXPORT uint8_t l_Nat_decidableExistsFin(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Nat_decidableExistsFin___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instForallNatLtImpl___redArg___lam__0(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instForallNatLtImpl___redArg___lam__0___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instForallNatLtImpl___redArg(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instForallNatLtImpl___redArg___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instForallNatLtImpl(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instForallNatLtImpl___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instForallNatLeImpl___redArg(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instForallNatLeImpl___redArg___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instForallNatLeImpl(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instForallNatLeImpl___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instForallFinImpl___redArg___lam__0(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instForallFinImpl___redArg___lam__0___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instForallFinImpl___redArg(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instForallFinImpl___redArg___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instForallFinImpl(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instForallFinImpl___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLt_x27Impl___redArg(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLt_x27Impl___redArg___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLt_x27Impl(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLt_x27Impl___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLe_x27Impl___redArg(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLe_x27Impl___redArg___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLe_x27Impl(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLe_x27Impl___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLtImpl___redArg(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLtImpl___redArg___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLtImpl(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLtImpl___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLeImpl___redArg(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLeImpl___redArg___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLeImpl(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLeImpl___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instExistsFinImpl___redArg(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instExistsFinImpl___redArg___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instExistsFinImpl(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instExistsFinImpl___boxed(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT uint8_t l___private_Init_Data_Nat_Lemmas_0__Nat_allLTTR_loop___redArg(lean_object* v_n_1_, lean_object* v_f_2_, lean_object* v_i_3_){
 _start:
 {
@@ -666,6 +702,396 @@ uint8_t v_res_268_; lean_object* v_r_269_;
 v_res_268_ = l_Nat_decidableExistsFin(v_n_265_, v_P_266_, v_inst_267_);
 v_r_269_ = lean_box(v_res_268_);
 return v_r_269_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instForallNatLtImpl___redArg___lam__0(lean_object* v_inst_270_, lean_object* v_k_271_, lean_object* v_h_272_){
+_start:
+{
+lean_object* v___x_273_; uint8_t v___x_274_; 
+v___x_273_ = lean_apply_2(v_inst_270_, v_k_271_, lean_box(0));
+v___x_274_ = lean_unbox(v___x_273_);
+return v___x_274_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instForallNatLtImpl___redArg___lam__0___boxed(lean_object* v_inst_275_, lean_object* v_k_276_, lean_object* v_h_277_){
+_start:
+{
+uint8_t v_res_278_; lean_object* v_r_279_; 
+v_res_278_ = l_UDecidable_instForallNatLtImpl___redArg___lam__0(v_inst_275_, v_k_276_, v_h_277_);
+v_r_279_ = lean_box(v_res_278_);
+return v_r_279_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instForallNatLtImpl___redArg(lean_object* v_n_280_, lean_object* v_inst_281_){
+_start:
+{
+lean_object* v___f_282_; uint8_t v___x_283_; 
+v___f_282_ = lean_alloc_closure((void*)(l_UDecidable_instForallNatLtImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_282_, 0, v_inst_281_);
+lean_inc(v_n_280_);
+v___x_283_ = l___private_Init_Data_Nat_Lemmas_0__Nat_allLTTR_loop___redArg(v_n_280_, v___f_282_, v_n_280_);
+lean_dec(v_n_280_);
+return v___x_283_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instForallNatLtImpl___redArg___boxed(lean_object* v_n_284_, lean_object* v_inst_285_){
+_start:
+{
+uint8_t v_res_286_; lean_object* v_r_287_; 
+v_res_286_ = l_UDecidable_instForallNatLtImpl___redArg(v_n_284_, v_inst_285_);
+v_r_287_ = lean_box(v_res_286_);
+return v_r_287_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instForallNatLtImpl(lean_object* v_n_288_, lean_object* v_p_289_, lean_object* v_inst_290_){
+_start:
+{
+lean_object* v___f_291_; uint8_t v___x_292_; 
+v___f_291_ = lean_alloc_closure((void*)(l_UDecidable_instForallNatLtImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_291_, 0, v_inst_290_);
+lean_inc(v_n_288_);
+v___x_292_ = l___private_Init_Data_Nat_Lemmas_0__Nat_allLTTR_loop___redArg(v_n_288_, v___f_291_, v_n_288_);
+lean_dec(v_n_288_);
+return v___x_292_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instForallNatLtImpl___boxed(lean_object* v_n_293_, lean_object* v_p_294_, lean_object* v_inst_295_){
+_start:
+{
+uint8_t v_res_296_; lean_object* v_r_297_; 
+v_res_296_ = l_UDecidable_instForallNatLtImpl(v_n_293_, v_p_294_, v_inst_295_);
+v_r_297_ = lean_box(v_res_296_);
+return v_r_297_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instForallNatLeImpl___redArg(lean_object* v_n_298_, lean_object* v_inst_299_){
+_start:
+{
+lean_object* v___f_300_; lean_object* v___x_301_; lean_object* v___x_302_; uint8_t v___x_303_; 
+v___f_300_ = lean_alloc_closure((void*)(l_UDecidable_instForallNatLtImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_300_, 0, v_inst_299_);
+v___x_301_ = lean_unsigned_to_nat(1u);
+v___x_302_ = lean_nat_add(v_n_298_, v___x_301_);
+lean_inc(v___x_302_);
+v___x_303_ = l___private_Init_Data_Nat_Lemmas_0__Nat_allLTTR_loop___redArg(v___x_302_, v___f_300_, v___x_302_);
+lean_dec(v___x_302_);
+return v___x_303_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instForallNatLeImpl___redArg___boxed(lean_object* v_n_304_, lean_object* v_inst_305_){
+_start:
+{
+uint8_t v_res_306_; lean_object* v_r_307_; 
+v_res_306_ = l_UDecidable_instForallNatLeImpl___redArg(v_n_304_, v_inst_305_);
+lean_dec(v_n_304_);
+v_r_307_ = lean_box(v_res_306_);
+return v_r_307_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instForallNatLeImpl(lean_object* v_n_308_, lean_object* v_p_309_, lean_object* v_inst_310_){
+_start:
+{
+lean_object* v___f_311_; lean_object* v___x_312_; lean_object* v___x_313_; uint8_t v___x_314_; 
+v___f_311_ = lean_alloc_closure((void*)(l_UDecidable_instForallNatLtImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_311_, 0, v_inst_310_);
+v___x_312_ = lean_unsigned_to_nat(1u);
+v___x_313_ = lean_nat_add(v_n_308_, v___x_312_);
+lean_inc(v___x_313_);
+v___x_314_ = l___private_Init_Data_Nat_Lemmas_0__Nat_allLTTR_loop___redArg(v___x_313_, v___f_311_, v___x_313_);
+lean_dec(v___x_313_);
+return v___x_314_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instForallNatLeImpl___boxed(lean_object* v_n_315_, lean_object* v_p_316_, lean_object* v_inst_317_){
+_start:
+{
+uint8_t v_res_318_; lean_object* v_r_319_; 
+v_res_318_ = l_UDecidable_instForallNatLeImpl(v_n_315_, v_p_316_, v_inst_317_);
+lean_dec(v_n_315_);
+v_r_319_ = lean_box(v_res_318_);
+return v_r_319_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instForallFinImpl___redArg___lam__0(lean_object* v_inst_320_, lean_object* v_k_321_, lean_object* v_h_322_){
+_start:
+{
+lean_object* v___x_323_; uint8_t v___x_324_; 
+v___x_323_ = lean_apply_1(v_inst_320_, v_k_321_);
+v___x_324_ = lean_unbox(v___x_323_);
+return v___x_324_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instForallFinImpl___redArg___lam__0___boxed(lean_object* v_inst_325_, lean_object* v_k_326_, lean_object* v_h_327_){
+_start:
+{
+uint8_t v_res_328_; lean_object* v_r_329_; 
+v_res_328_ = l_UDecidable_instForallFinImpl___redArg___lam__0(v_inst_325_, v_k_326_, v_h_327_);
+v_r_329_ = lean_box(v_res_328_);
+return v_r_329_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instForallFinImpl___redArg(lean_object* v_n_330_, lean_object* v_inst_331_){
+_start:
+{
+lean_object* v___f_332_; uint8_t v___x_333_; 
+v___f_332_ = lean_alloc_closure((void*)(l_UDecidable_instForallFinImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_332_, 0, v_inst_331_);
+lean_inc(v_n_330_);
+v___x_333_ = l___private_Init_Data_Nat_Lemmas_0__Nat_allLTTR_loop___redArg(v_n_330_, v___f_332_, v_n_330_);
+lean_dec(v_n_330_);
+return v___x_333_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instForallFinImpl___redArg___boxed(lean_object* v_n_334_, lean_object* v_inst_335_){
+_start:
+{
+uint8_t v_res_336_; lean_object* v_r_337_; 
+v_res_336_ = l_UDecidable_instForallFinImpl___redArg(v_n_334_, v_inst_335_);
+v_r_337_ = lean_box(v_res_336_);
+return v_r_337_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instForallFinImpl(lean_object* v_n_338_, lean_object* v_p_339_, lean_object* v_inst_340_){
+_start:
+{
+lean_object* v___f_341_; uint8_t v___x_342_; 
+v___f_341_ = lean_alloc_closure((void*)(l_UDecidable_instForallFinImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_341_, 0, v_inst_340_);
+lean_inc(v_n_338_);
+v___x_342_ = l___private_Init_Data_Nat_Lemmas_0__Nat_allLTTR_loop___redArg(v_n_338_, v___f_341_, v_n_338_);
+lean_dec(v_n_338_);
+return v___x_342_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instForallFinImpl___boxed(lean_object* v_n_343_, lean_object* v_p_344_, lean_object* v_inst_345_){
+_start:
+{
+uint8_t v_res_346_; lean_object* v_r_347_; 
+v_res_346_ = l_UDecidable_instForallFinImpl(v_n_343_, v_p_344_, v_inst_345_);
+v_r_347_ = lean_box(v_res_346_);
+return v_r_347_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLt_x27Impl___redArg(lean_object* v_n_348_, lean_object* v_inst_349_){
+_start:
+{
+lean_object* v___f_350_; uint8_t v___x_351_; 
+v___f_350_ = lean_alloc_closure((void*)(l_UDecidable_instForallNatLtImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_350_, 0, v_inst_349_);
+lean_inc(v_n_348_);
+v___x_351_ = l___private_Init_Data_Nat_Lemmas_0__Nat_anyLTTR_loop___redArg(v_n_348_, v___f_350_, v_n_348_);
+lean_dec(v_n_348_);
+return v___x_351_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLt_x27Impl___redArg___boxed(lean_object* v_n_352_, lean_object* v_inst_353_){
+_start:
+{
+uint8_t v_res_354_; lean_object* v_r_355_; 
+v_res_354_ = l_UDecidable_instExistsNatLt_x27Impl___redArg(v_n_352_, v_inst_353_);
+v_r_355_ = lean_box(v_res_354_);
+return v_r_355_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLt_x27Impl(lean_object* v_n_356_, lean_object* v_p_357_, lean_object* v_inst_358_){
+_start:
+{
+lean_object* v___f_359_; uint8_t v___x_360_; 
+v___f_359_ = lean_alloc_closure((void*)(l_UDecidable_instForallNatLtImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_359_, 0, v_inst_358_);
+lean_inc(v_n_356_);
+v___x_360_ = l___private_Init_Data_Nat_Lemmas_0__Nat_anyLTTR_loop___redArg(v_n_356_, v___f_359_, v_n_356_);
+lean_dec(v_n_356_);
+return v___x_360_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLt_x27Impl___boxed(lean_object* v_n_361_, lean_object* v_p_362_, lean_object* v_inst_363_){
+_start:
+{
+uint8_t v_res_364_; lean_object* v_r_365_; 
+v_res_364_ = l_UDecidable_instExistsNatLt_x27Impl(v_n_361_, v_p_362_, v_inst_363_);
+v_r_365_ = lean_box(v_res_364_);
+return v_r_365_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLe_x27Impl___redArg(lean_object* v_n_366_, lean_object* v_inst_367_){
+_start:
+{
+lean_object* v___f_368_; lean_object* v___x_369_; lean_object* v___x_370_; uint8_t v___x_371_; 
+v___f_368_ = lean_alloc_closure((void*)(l_UDecidable_instForallNatLtImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_368_, 0, v_inst_367_);
+v___x_369_ = lean_unsigned_to_nat(1u);
+v___x_370_ = lean_nat_add(v_n_366_, v___x_369_);
+lean_inc(v___x_370_);
+v___x_371_ = l___private_Init_Data_Nat_Lemmas_0__Nat_anyLTTR_loop___redArg(v___x_370_, v___f_368_, v___x_370_);
+lean_dec(v___x_370_);
+return v___x_371_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLe_x27Impl___redArg___boxed(lean_object* v_n_372_, lean_object* v_inst_373_){
+_start:
+{
+uint8_t v_res_374_; lean_object* v_r_375_; 
+v_res_374_ = l_UDecidable_instExistsNatLe_x27Impl___redArg(v_n_372_, v_inst_373_);
+lean_dec(v_n_372_);
+v_r_375_ = lean_box(v_res_374_);
+return v_r_375_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLe_x27Impl(lean_object* v_n_376_, lean_object* v_p_377_, lean_object* v_inst_378_){
+_start:
+{
+lean_object* v___f_379_; lean_object* v___x_380_; lean_object* v___x_381_; uint8_t v___x_382_; 
+v___f_379_ = lean_alloc_closure((void*)(l_UDecidable_instForallNatLtImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_379_, 0, v_inst_378_);
+v___x_380_ = lean_unsigned_to_nat(1u);
+v___x_381_ = lean_nat_add(v_n_376_, v___x_380_);
+lean_inc(v___x_381_);
+v___x_382_ = l___private_Init_Data_Nat_Lemmas_0__Nat_anyLTTR_loop___redArg(v___x_381_, v___f_379_, v___x_381_);
+lean_dec(v___x_381_);
+return v___x_382_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLe_x27Impl___boxed(lean_object* v_n_383_, lean_object* v_p_384_, lean_object* v_inst_385_){
+_start:
+{
+uint8_t v_res_386_; lean_object* v_r_387_; 
+v_res_386_ = l_UDecidable_instExistsNatLe_x27Impl(v_n_383_, v_p_384_, v_inst_385_);
+lean_dec(v_n_383_);
+v_r_387_ = lean_box(v_res_386_);
+return v_r_387_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLtImpl___redArg(lean_object* v_inst_388_, lean_object* v_x_389_){
+_start:
+{
+lean_object* v___f_390_; uint8_t v___x_391_; 
+v___f_390_ = lean_alloc_closure((void*)(l_UDecidable_instForallFinImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_390_, 0, v_inst_388_);
+lean_inc(v_x_389_);
+v___x_391_ = l___private_Init_Data_Nat_Lemmas_0__Nat_anyLTTR_loop___redArg(v_x_389_, v___f_390_, v_x_389_);
+lean_dec(v_x_389_);
+return v___x_391_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLtImpl___redArg___boxed(lean_object* v_inst_392_, lean_object* v_x_393_){
+_start:
+{
+uint8_t v_res_394_; lean_object* v_r_395_; 
+v_res_394_ = l_UDecidable_instExistsNatLtImpl___redArg(v_inst_392_, v_x_393_);
+v_r_395_ = lean_box(v_res_394_);
+return v_r_395_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLtImpl(lean_object* v_p_396_, lean_object* v_inst_397_, lean_object* v_x_398_){
+_start:
+{
+lean_object* v___f_399_; uint8_t v___x_400_; 
+v___f_399_ = lean_alloc_closure((void*)(l_UDecidable_instForallFinImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_399_, 0, v_inst_397_);
+lean_inc(v_x_398_);
+v___x_400_ = l___private_Init_Data_Nat_Lemmas_0__Nat_anyLTTR_loop___redArg(v_x_398_, v___f_399_, v_x_398_);
+lean_dec(v_x_398_);
+return v___x_400_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLtImpl___boxed(lean_object* v_p_401_, lean_object* v_inst_402_, lean_object* v_x_403_){
+_start:
+{
+uint8_t v_res_404_; lean_object* v_r_405_; 
+v_res_404_ = l_UDecidable_instExistsNatLtImpl(v_p_401_, v_inst_402_, v_x_403_);
+v_r_405_ = lean_box(v_res_404_);
+return v_r_405_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLeImpl___redArg(lean_object* v_inst_406_, lean_object* v_x_407_){
+_start:
+{
+lean_object* v___f_408_; lean_object* v___x_409_; lean_object* v___x_410_; uint8_t v___x_411_; 
+v___f_408_ = lean_alloc_closure((void*)(l_UDecidable_instForallFinImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_408_, 0, v_inst_406_);
+v___x_409_ = lean_unsigned_to_nat(1u);
+v___x_410_ = lean_nat_add(v_x_407_, v___x_409_);
+lean_inc(v___x_410_);
+v___x_411_ = l___private_Init_Data_Nat_Lemmas_0__Nat_anyLTTR_loop___redArg(v___x_410_, v___f_408_, v___x_410_);
+lean_dec(v___x_410_);
+return v___x_411_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLeImpl___redArg___boxed(lean_object* v_inst_412_, lean_object* v_x_413_){
+_start:
+{
+uint8_t v_res_414_; lean_object* v_r_415_; 
+v_res_414_ = l_UDecidable_instExistsNatLeImpl___redArg(v_inst_412_, v_x_413_);
+lean_dec(v_x_413_);
+v_r_415_ = lean_box(v_res_414_);
+return v_r_415_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instExistsNatLeImpl(lean_object* v_p_416_, lean_object* v_inst_417_, lean_object* v_x_418_){
+_start:
+{
+lean_object* v___f_419_; lean_object* v___x_420_; lean_object* v___x_421_; uint8_t v___x_422_; 
+v___f_419_ = lean_alloc_closure((void*)(l_UDecidable_instForallFinImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_419_, 0, v_inst_417_);
+v___x_420_ = lean_unsigned_to_nat(1u);
+v___x_421_ = lean_nat_add(v_x_418_, v___x_420_);
+lean_inc(v___x_421_);
+v___x_422_ = l___private_Init_Data_Nat_Lemmas_0__Nat_anyLTTR_loop___redArg(v___x_421_, v___f_419_, v___x_421_);
+lean_dec(v___x_421_);
+return v___x_422_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instExistsNatLeImpl___boxed(lean_object* v_p_423_, lean_object* v_inst_424_, lean_object* v_x_425_){
+_start:
+{
+uint8_t v_res_426_; lean_object* v_r_427_; 
+v_res_426_ = l_UDecidable_instExistsNatLeImpl(v_p_423_, v_inst_424_, v_x_425_);
+lean_dec(v_x_425_);
+v_r_427_ = lean_box(v_res_426_);
+return v_r_427_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instExistsFinImpl___redArg(lean_object* v_n_428_, lean_object* v_inst_429_){
+_start:
+{
+lean_object* v___f_430_; uint8_t v___x_431_; 
+v___f_430_ = lean_alloc_closure((void*)(l_UDecidable_instForallFinImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_430_, 0, v_inst_429_);
+lean_inc(v_n_428_);
+v___x_431_ = l___private_Init_Data_Nat_Lemmas_0__Nat_anyLTTR_loop___redArg(v_n_428_, v___f_430_, v_n_428_);
+lean_dec(v_n_428_);
+return v___x_431_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instExistsFinImpl___redArg___boxed(lean_object* v_n_432_, lean_object* v_inst_433_){
+_start:
+{
+uint8_t v_res_434_; lean_object* v_r_435_; 
+v_res_434_ = l_UDecidable_instExistsFinImpl___redArg(v_n_432_, v_inst_433_);
+v_r_435_ = lean_box(v_res_434_);
+return v_r_435_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instExistsFinImpl(lean_object* v_n_436_, lean_object* v_p_437_, lean_object* v_inst_438_){
+_start:
+{
+lean_object* v___f_439_; uint8_t v___x_440_; 
+v___f_439_ = lean_alloc_closure((void*)(l_UDecidable_instForallFinImpl___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_439_, 0, v_inst_438_);
+lean_inc(v_n_436_);
+v___x_440_ = l___private_Init_Data_Nat_Lemmas_0__Nat_anyLTTR_loop___redArg(v_n_436_, v___f_439_, v_n_436_);
+lean_dec(v_n_436_);
+return v___x_440_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instExistsFinImpl___boxed(lean_object* v_n_441_, lean_object* v_p_442_, lean_object* v_inst_443_){
+_start:
+{
+uint8_t v_res_444_; lean_object* v_r_445_; 
+v_res_444_ = l_UDecidable_instExistsFinImpl(v_n_441_, v_p_442_, v_inst_443_);
+v_r_445_ = lean_box(v_res_444_);
+return v_r_445_;
 }
 }
 lean_object* runtime_initialize_Init_Data_Nat_Bitwise_Basic(uint8_t builtin);

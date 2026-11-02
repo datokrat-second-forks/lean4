@@ -411,6 +411,8 @@ else
 lean_object* v_stxStack_106_; lean_object* v_pos_107_; uint8_t v___x_108_; 
 v_stxStack_106_ = lean_ctor_get(v___x_97_, 0);
 v_pos_107_ = lean_ctor_get(v___x_97_, 2);
+lean_inc(v_pos_107_);
+lean_inc_ref(v_ictx_77_);
 v___x_108_ = l_Lean_Parser_InputContext_atEnd(v_ictx_77_, v_pos_107_);
 if (v___x_108_ == 0)
 {

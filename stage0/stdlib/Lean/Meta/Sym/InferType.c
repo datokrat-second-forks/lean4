@@ -318,10 +318,10 @@ return v___x_98_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Sym_inferType_spec__0_spec__0___redArg___boxed(lean_object* v_x_99_, lean_object* v_x_100_, lean_object* v_x_101_){
 _start:
 {
-size_t v_x_2998__boxed_102_; lean_object* v_res_103_; 
-v_x_2998__boxed_102_ = lean_unbox_usize(v_x_100_);
+size_t v_x_2996__boxed_102_; lean_object* v_res_103_; 
+v_x_2996__boxed_102_ = lean_unbox_usize(v_x_100_);
 lean_dec(v_x_100_);
-v_res_103_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Sym_inferType_spec__0_spec__0___redArg(v_x_99_, v_x_2998__boxed_102_, v_x_101_);
+v_res_103_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Sym_inferType_spec__0_spec__0___redArg(v_x_99_, v_x_2996__boxed_102_, v_x_101_);
 lean_dec_ref(v_x_101_);
 lean_dec_ref(v_x_99_);
 return v_res_103_;
@@ -819,12 +819,12 @@ return v_res_255_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_Meta_Sym_inferType_spec__1_spec__2___redArg___boxed(lean_object* v_x_256_, lean_object* v_x_257_, lean_object* v_x_258_, lean_object* v_x_259_, lean_object* v_x_260_){
 _start:
 {
-size_t v_x_3150__boxed_261_; size_t v_x_3151__boxed_262_; lean_object* v_res_263_; 
-v_x_3150__boxed_261_ = lean_unbox_usize(v_x_257_);
+size_t v_x_3148__boxed_261_; size_t v_x_3149__boxed_262_; lean_object* v_res_263_; 
+v_x_3148__boxed_261_ = lean_unbox_usize(v_x_257_);
 lean_dec(v_x_257_);
-v_x_3151__boxed_262_ = lean_unbox_usize(v_x_258_);
+v_x_3149__boxed_262_ = lean_unbox_usize(v_x_258_);
 lean_dec(v_x_258_);
-v_res_263_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_Meta_Sym_inferType_spec__1_spec__2___redArg(v_x_256_, v_x_3150__boxed_261_, v_x_3151__boxed_262_, v_x_259_, v_x_260_);
+v_res_263_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_Meta_Sym_inferType_spec__1_spec__2___redArg(v_x_256_, v_x_3148__boxed_261_, v_x_3149__boxed_262_, v_x_259_, v_x_260_);
 return v_res_263_;
 }
 }
@@ -1094,10 +1094,10 @@ return v___x_354_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Sym_inferType_spec__0_spec__0___boxed(lean_object* v_00_u03b2_355_, lean_object* v_x_356_, lean_object* v_x_357_, lean_object* v_x_358_){
 _start:
 {
-size_t v_x_3412__boxed_359_; lean_object* v_res_360_; 
-v_x_3412__boxed_359_ = lean_unbox_usize(v_x_357_);
+size_t v_x_3410__boxed_359_; lean_object* v_res_360_; 
+v_x_3410__boxed_359_ = lean_unbox_usize(v_x_357_);
 lean_dec(v_x_357_);
-v_res_360_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Sym_inferType_spec__0_spec__0(v_00_u03b2_355_, v_x_356_, v_x_3412__boxed_359_, v_x_358_);
+v_res_360_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Meta_Sym_inferType_spec__0_spec__0(v_00_u03b2_355_, v_x_356_, v_x_3410__boxed_359_, v_x_358_);
 lean_dec_ref(v_x_358_);
 lean_dec_ref(v_x_356_);
 return v_res_360_;
@@ -1114,12 +1114,12 @@ return v___x_367_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_Meta_Sym_inferType_spec__1_spec__2___boxed(lean_object* v_00_u03b2_368_, lean_object* v_x_369_, lean_object* v_x_370_, lean_object* v_x_371_, lean_object* v_x_372_, lean_object* v_x_373_){
 _start:
 {
-size_t v_x_3423__boxed_374_; size_t v_x_3424__boxed_375_; lean_object* v_res_376_; 
-v_x_3423__boxed_374_ = lean_unbox_usize(v_x_370_);
+size_t v_x_3421__boxed_374_; size_t v_x_3422__boxed_375_; lean_object* v_res_376_; 
+v_x_3421__boxed_374_ = lean_unbox_usize(v_x_370_);
 lean_dec(v_x_370_);
-v_x_3424__boxed_375_ = lean_unbox_usize(v_x_371_);
+v_x_3422__boxed_375_ = lean_unbox_usize(v_x_371_);
 lean_dec(v_x_371_);
-v_res_376_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_Meta_Sym_inferType_spec__1_spec__2(v_00_u03b2_368_, v_x_369_, v_x_3423__boxed_374_, v_x_3424__boxed_375_, v_x_372_, v_x_373_);
+v_res_376_ = l_Lean_PersistentHashMap_insertAux___at___00Lean_PersistentHashMap_insert___at___00Lean_Meta_Sym_inferType_spec__1_spec__2(v_00_u03b2_368_, v_x_369_, v_x_3421__boxed_374_, v_x_3422__boxed_375_, v_x_372_, v_x_373_);
 return v_res_376_;
 }
 }

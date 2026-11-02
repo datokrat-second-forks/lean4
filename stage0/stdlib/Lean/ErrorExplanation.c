@@ -1513,9 +1513,9 @@ return v___x_510_;
 LEAN_EXPORT lean_object* l___private_Init_Data_Array_QSort_Basic_0__Array_qsort_sort___at___00Lean_getErrorExplanationsRaw_spec__1___redArg___lam__0___boxed(lean_object* v___x_511_, lean_object* v_e_512_, lean_object* v_e_x27_513_){
 _start:
 {
-uint8_t v___x_412__boxed_514_; uint8_t v_res_515_; lean_object* v_r_516_; 
-v___x_412__boxed_514_ = lean_unbox(v___x_511_);
-v_res_515_ = l___private_Init_Data_Array_QSort_Basic_0__Array_qsort_sort___at___00Lean_getErrorExplanationsRaw_spec__1___redArg___lam__0(v___x_412__boxed_514_, v_e_512_, v_e_x27_513_);
+uint8_t v___x_411__boxed_514_; uint8_t v_res_515_; lean_object* v_r_516_; 
+v___x_411__boxed_514_ = lean_unbox(v___x_511_);
+v_res_515_ = l___private_Init_Data_Array_QSort_Basic_0__Array_qsort_sort___at___00Lean_getErrorExplanationsRaw_spec__1___redArg___lam__0(v___x_411__boxed_514_, v_e_512_, v_e_x27_513_);
 v_r_516_ = lean_box(v_res_515_);
 return v_r_516_;
 }

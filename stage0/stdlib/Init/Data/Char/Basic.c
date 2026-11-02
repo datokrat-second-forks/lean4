@@ -13,9 +13,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+uint8_t lean_uint32_dec_lt(uint32_t, uint32_t);
 uint8_t lean_uint32_dec_le(uint32_t, uint32_t);
 uint32_t lean_uint32_add(uint32_t, uint32_t);
 uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
+uint8_t lean_uint32_dec_le(uint32_t, uint32_t);
 lean_object* lean_uint32_to_nat(uint32_t);
 uint32_t lean_uint8_to_uint32(uint8_t);
 uint8_t lean_uint32_to_uint8(uint32_t);
@@ -51,6 +53,10 @@ LEAN_EXPORT uint32_t l_Char_toLower(uint32_t);
 LEAN_EXPORT lean_object* l_Char_toLower___boxed(lean_object*);
 LEAN_EXPORT uint32_t l_Char_toUpper(uint32_t);
 LEAN_EXPORT lean_object* l_Char_toUpper___boxed(lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instCharLe(uint32_t, uint32_t);
+LEAN_EXPORT lean_object* l_UDecidable_instCharLe___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instCharLt(uint32_t, uint32_t);
+LEAN_EXPORT lean_object* l_UDecidable_instCharLt___boxed(lean_object*, lean_object*);
 static lean_object* _init_l_Char_instLT(void){
 _start:
 {
@@ -600,6 +606,48 @@ lean_dec(v_c_149_);
 v_res_151_ = l_Char_toUpper(v_c_boxed_150_);
 v_r_152_ = lean_box_uint32(v_res_151_);
 return v_r_152_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instCharLe(uint32_t v_c_153_, uint32_t v_d_154_){
+_start:
+{
+uint8_t v___x_155_; 
+v___x_155_ = lean_uint32_dec_le(v_c_153_, v_d_154_);
+return v___x_155_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instCharLe___boxed(lean_object* v_c_156_, lean_object* v_d_157_){
+_start:
+{
+uint32_t v_c_boxed_158_; uint32_t v_d_boxed_159_; uint8_t v_res_160_; lean_object* v_r_161_; 
+v_c_boxed_158_ = lean_unbox_uint32(v_c_156_);
+lean_dec(v_c_156_);
+v_d_boxed_159_ = lean_unbox_uint32(v_d_157_);
+lean_dec(v_d_157_);
+v_res_160_ = l_UDecidable_instCharLe(v_c_boxed_158_, v_d_boxed_159_);
+v_r_161_ = lean_box(v_res_160_);
+return v_r_161_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instCharLt(uint32_t v_c_162_, uint32_t v_d_163_){
+_start:
+{
+uint8_t v___x_164_; 
+v___x_164_ = lean_uint32_dec_lt(v_c_162_, v_d_163_);
+return v___x_164_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instCharLt___boxed(lean_object* v_c_165_, lean_object* v_d_166_){
+_start:
+{
+uint32_t v_c_boxed_167_; uint32_t v_d_boxed_168_; uint8_t v_res_169_; lean_object* v_r_170_; 
+v_c_boxed_167_ = lean_unbox_uint32(v_c_165_);
+lean_dec(v_c_165_);
+v_d_boxed_168_ = lean_unbox_uint32(v_d_166_);
+lean_dec(v_d_166_);
+v_res_169_ = l_UDecidable_instCharLt(v_c_boxed_167_, v_d_boxed_168_);
+v_r_170_ = lean_box(v_res_169_);
+return v_r_170_;
 }
 }
 lean_object* runtime_initialize_Init_Data_UInt_BasicAux(uint8_t builtin);

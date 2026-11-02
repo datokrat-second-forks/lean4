@@ -4531,9 +4531,9 @@ return v___x_1262_;
 LEAN_EXPORT lean_object* l_instBEqOption_beq___at___00Lean_Lsp_instBEqPublishDiagnosticsParams_beq_spec__1___boxed(lean_object* v___x_1263_, lean_object* v_x_1264_, lean_object* v_x_1265_){
 _start:
 {
-uint8_t v___x_854__boxed_1266_; uint8_t v_res_1267_; lean_object* v_r_1268_; 
-v___x_854__boxed_1266_ = lean_unbox(v___x_1263_);
-v_res_1267_ = l_instBEqOption_beq___at___00Lean_Lsp_instBEqPublishDiagnosticsParams_beq_spec__1(v___x_854__boxed_1266_, v_x_1264_, v_x_1265_);
+uint8_t v___x_848__boxed_1266_; uint8_t v_res_1267_; lean_object* v_r_1268_; 
+v___x_848__boxed_1266_ = lean_unbox(v___x_1263_);
+v_res_1267_ = l_instBEqOption_beq___at___00Lean_Lsp_instBEqPublishDiagnosticsParams_beq_spec__1(v___x_848__boxed_1266_, v_x_1264_, v_x_1265_);
 lean_dec(v_x_1265_);
 lean_dec(v_x_1264_);
 v_r_1268_ = lean_box(v_res_1267_);

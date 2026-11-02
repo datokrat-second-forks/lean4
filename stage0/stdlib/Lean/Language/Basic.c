@@ -3656,14 +3656,14 @@ return v___x_1237_;
 LEAN_EXPORT lean_object* l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00__private_Lean_Language_Basic_0__Lean_Language_reportMessages_spec__4_spec__4___boxed(lean_object* v_opts_1239_, lean_object* v_json_1240_, lean_object* v_includeEndPos_1241_, lean_object* v_severityOverrides_1242_, lean_object* v_x_1243_, lean_object* v_x_1244_, lean_object* v_x_1245_, lean_object* v_x_1246_, lean_object* v___y_1247_){
 _start:
 {
-uint8_t v_json_boxed_1248_; uint8_t v_includeEndPos_boxed_1249_; size_t v_x_2221__boxed_1250_; size_t v_x_2222__boxed_1251_; lean_object* v_res_1252_; 
+uint8_t v_json_boxed_1248_; uint8_t v_includeEndPos_boxed_1249_; size_t v_x_2224__boxed_1250_; size_t v_x_2225__boxed_1251_; lean_object* v_res_1252_; 
 v_json_boxed_1248_ = lean_unbox(v_json_1240_);
 v_includeEndPos_boxed_1249_ = lean_unbox(v_includeEndPos_1241_);
-v_x_2221__boxed_1250_ = lean_unbox_usize(v_x_1244_);
+v_x_2224__boxed_1250_ = lean_unbox_usize(v_x_1244_);
 lean_dec(v_x_1244_);
-v_x_2222__boxed_1251_ = lean_unbox_usize(v_x_1245_);
+v_x_2225__boxed_1251_ = lean_unbox_usize(v_x_1245_);
 lean_dec(v_x_1245_);
-v_res_1252_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00__private_Lean_Language_Basic_0__Lean_Language_reportMessages_spec__4_spec__4(v_opts_1239_, v_json_boxed_1248_, v_includeEndPos_boxed_1249_, v_severityOverrides_1242_, v_x_1243_, v_x_2221__boxed_1250_, v_x_2222__boxed_1251_, v_x_1246_);
+v_res_1252_ = l___private_Lean_Data_PersistentArray_0__Lean_PersistentArray_foldlFromMAux___at___00Lean_PersistentArray_foldlM___at___00__private_Lean_Language_Basic_0__Lean_Language_reportMessages_spec__4_spec__4(v_opts_1239_, v_json_boxed_1248_, v_includeEndPos_boxed_1249_, v_severityOverrides_1242_, v_x_1243_, v_x_2224__boxed_1250_, v_x_2225__boxed_1251_, v_x_1246_);
 lean_dec(v_severityOverrides_1242_);
 lean_dec_ref(v_opts_1239_);
 return v_res_1252_;

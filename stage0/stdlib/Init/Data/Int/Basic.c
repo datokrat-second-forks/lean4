@@ -205,6 +205,18 @@ LEAN_EXPORT lean_object* l_instCoeTailIntOfIntCast___redArg(lean_object*);
 LEAN_EXPORT lean_object* l_instCoeTailIntOfIntCast(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_instCoeHTCTIntOfIntCast___redArg(lean_object*);
 LEAN_EXPORT lean_object* l_instCoeHTCTIntOfIntCast(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_Int_Internal_isNonneg(lean_object*);
+LEAN_EXPORT lean_object* l_Int_Internal_isNonneg___boxed(lean_object*);
+uint8_t lean_int_dec_le(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Int_Internal_ble___boxed(lean_object*, lean_object*);
+uint8_t lean_int_dec_lt(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_Int_Internal_blt___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instIntEqImpl(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instIntEqImpl___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instIntLeImpl(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instIntLeImpl___boxed(lean_object*, lean_object*);
+LEAN_EXPORT uint8_t l_UDecidable_instIntLtImpl(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l_UDecidable_instIntLtImpl___boxed(lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_Int_ofNat___boxed(lean_object* v_a_00___x40___internal___hyg_2_){
 _start:
 {
@@ -1067,6 +1079,115 @@ v___x_383_ = lean_alloc_closure((void*)(l_Int_cast), 3, 2);
 lean_closure_set(v___x_383_, 0, lean_box(0));
 lean_closure_set(v___x_383_, 1, v_inst_382_);
 return v___x_383_;
+}
+}
+LEAN_EXPORT uint8_t l_Int_Internal_isNonneg(lean_object* v_x_384_){
+_start:
+{
+lean_object* v_intZero_385_; uint8_t v_isNeg_386_; 
+v_intZero_385_ = lean_obj_once(&l_Int_instInhabited___closed__0, &l_Int_instInhabited___closed__0_once, _init_l_Int_instInhabited___closed__0);
+v_isNeg_386_ = lean_int_dec_lt(v_x_384_, v_intZero_385_);
+if (v_isNeg_386_ == 0)
+{
+uint8_t v___x_387_; 
+v___x_387_ = 1;
+return v___x_387_;
+}
+else
+{
+uint8_t v___x_388_; 
+v___x_388_ = 0;
+return v___x_388_;
+}
+}
+}
+LEAN_EXPORT lean_object* l_Int_Internal_isNonneg___boxed(lean_object* v_x_389_){
+_start:
+{
+uint8_t v_res_390_; lean_object* v_r_391_; 
+v_res_390_ = l_Int_Internal_isNonneg(v_x_389_);
+lean_dec(v_x_389_);
+v_r_391_ = lean_box(v_res_390_);
+return v_r_391_;
+}
+}
+LEAN_EXPORT lean_object* l_Int_Internal_ble___boxed(lean_object* v_a_394_, lean_object* v_b_395_){
+_start:
+{
+uint8_t v_res_396_; lean_object* v_r_397_; 
+v_res_396_ = lean_int_dec_le(v_a_394_, v_b_395_);
+lean_dec(v_b_395_);
+lean_dec(v_a_394_);
+v_r_397_ = lean_box(v_res_396_);
+return v_r_397_;
+}
+}
+LEAN_EXPORT lean_object* l_Int_Internal_blt___boxed(lean_object* v_a_400_, lean_object* v_b_401_){
+_start:
+{
+uint8_t v_res_402_; lean_object* v_r_403_; 
+v_res_402_ = lean_int_dec_lt(v_a_400_, v_b_401_);
+lean_dec(v_b_401_);
+lean_dec(v_a_400_);
+v_r_403_ = lean_box(v_res_402_);
+return v_r_403_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instIntEqImpl(lean_object* v_a_404_, lean_object* v_b_405_){
+_start:
+{
+uint8_t v___x_406_; 
+v___x_406_ = lean_int_dec_eq(v_a_404_, v_b_405_);
+return v___x_406_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instIntEqImpl___boxed(lean_object* v_a_407_, lean_object* v_b_408_){
+_start:
+{
+uint8_t v_res_409_; lean_object* v_r_410_; 
+v_res_409_ = l_UDecidable_instIntEqImpl(v_a_407_, v_b_408_);
+lean_dec(v_b_408_);
+lean_dec(v_a_407_);
+v_r_410_ = lean_box(v_res_409_);
+return v_r_410_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instIntLeImpl(lean_object* v_a_411_, lean_object* v_b_412_){
+_start:
+{
+uint8_t v___x_413_; 
+v___x_413_ = lean_int_dec_le(v_a_411_, v_b_412_);
+return v___x_413_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instIntLeImpl___boxed(lean_object* v_a_414_, lean_object* v_b_415_){
+_start:
+{
+uint8_t v_res_416_; lean_object* v_r_417_; 
+v_res_416_ = l_UDecidable_instIntLeImpl(v_a_414_, v_b_415_);
+lean_dec(v_b_415_);
+lean_dec(v_a_414_);
+v_r_417_ = lean_box(v_res_416_);
+return v_r_417_;
+}
+}
+LEAN_EXPORT uint8_t l_UDecidable_instIntLtImpl(lean_object* v_a_418_, lean_object* v_b_419_){
+_start:
+{
+uint8_t v___x_420_; 
+v___x_420_ = lean_int_dec_lt(v_a_418_, v_b_419_);
+return v___x_420_;
+}
+}
+LEAN_EXPORT lean_object* l_UDecidable_instIntLtImpl___boxed(lean_object* v_a_421_, lean_object* v_b_422_){
+_start:
+{
+uint8_t v_res_423_; lean_object* v_r_424_; 
+v_res_423_ = l_UDecidable_instIntLtImpl(v_a_421_, v_b_422_);
+lean_dec(v_b_422_);
+lean_dec(v_a_421_);
+v_r_424_ = lean_box(v_res_423_);
+return v_r_424_;
 }
 }
 lean_object* runtime_initialize_Init_Data_Cast(uint8_t builtin);

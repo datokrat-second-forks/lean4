@@ -2803,8 +2803,8 @@ lean_ctor_set(v___x_441_, 1, v___x_440_);
 v___x_442_ = lean_alloc_ctor(7, 2, 0);
 lean_ctor_set(v___x_442_, 0, v___x_441_);
 lean_ctor_set(v___x_442_, 1, v___y_438_);
-v___x_443_ = l_Lean_throwError___at___00Lean_Elab_ConfigEval_evalExprWithElab___at___00Lean_Elab_ConfigEval_evalTermOrExprWithElab___at___00__private_Lean_Elab_Tactic_Grind_Config_0__Lean_Elab_Tactic_elabGrindConfigCore_evalConfigItem_spec__0_spec__0_spec__2___redArg(v___x_442_, v___y_432_, v___y_437_, v___y_434_, v___y_435_, v___y_433_, v___y_436_);
-lean_dec_ref(v___y_433_);
+v___x_443_ = l_Lean_throwError___at___00Lean_Elab_ConfigEval_evalExprWithElab___at___00Lean_Elab_ConfigEval_evalTermOrExprWithElab___at___00__private_Lean_Elab_Tactic_Grind_Config_0__Lean_Elab_Tactic_elabGrindConfigCore_evalConfigItem_spec__0_spec__0_spec__2___redArg(v___x_442_, v___y_433_, v___y_435_, v___y_437_, v___y_434_, v___y_432_, v___y_436_);
+lean_dec_ref(v___y_432_);
 return v___x_443_;
 }
 v___jp_444_:
@@ -2912,12 +2912,12 @@ v___x_466_ = lean_obj_once(&l_Lean_Elab_ConfigEval_evalExprWithElab___at___00Lea
 v___x_467_ = lean_alloc_ctor(7, 2, 0);
 lean_ctor_set(v___x_467_, 0, v___x_465_);
 lean_ctor_set(v___x_467_, 1, v___x_466_);
-v___y_432_ = v___y_445_;
-v___y_433_ = v___y_449_;
-v___y_434_ = v___y_447_;
-v___y_435_ = v___y_448_;
+v___y_432_ = v___y_449_;
+v___y_433_ = v___y_445_;
+v___y_434_ = v___y_448_;
+v___y_435_ = v___y_446_;
 v___y_436_ = v___y_450_;
-v___y_437_ = v___y_446_;
+v___y_437_ = v___y_447_;
 v___y_438_ = v___x_467_;
 goto v___jp_431_;
 }
@@ -2927,12 +2927,12 @@ else
 lean_object* v___x_469_; 
 lean_del_object(v___x_458_);
 v___x_469_ = lean_obj_once(&l_Lean_Elab_ConfigEval_evalExprWithElab___at___00Lean_Elab_ConfigEval_evalTermOrExprWithElab___at___00__private_Lean_Elab_Tactic_Grind_Config_0__Lean_Elab_Tactic_elabGrindConfigCore_evalConfigItem_spec__1_spec__2___closed__2, &l_Lean_Elab_ConfigEval_evalExprWithElab___at___00Lean_Elab_ConfigEval_evalTermOrExprWithElab___at___00__private_Lean_Elab_Tactic_Grind_Config_0__Lean_Elab_Tactic_elabGrindConfigCore_evalConfigItem_spec__1_spec__2___closed__2_once, _init_l_Lean_Elab_ConfigEval_evalExprWithElab___at___00Lean_Elab_ConfigEval_evalTermOrExprWithElab___at___00__private_Lean_Elab_Tactic_Grind_Config_0__Lean_Elab_Tactic_elabGrindConfigCore_evalConfigItem_spec__1_spec__2___closed__2);
-v___y_432_ = v___y_445_;
-v___y_433_ = v___y_449_;
-v___y_434_ = v___y_447_;
-v___y_435_ = v___y_448_;
+v___y_432_ = v___y_449_;
+v___y_433_ = v___y_445_;
+v___y_434_ = v___y_448_;
+v___y_435_ = v___y_446_;
 v___y_436_ = v___y_450_;
-v___y_437_ = v___y_446_;
+v___y_437_ = v___y_447_;
 v___y_438_ = v___x_469_;
 goto v___jp_431_;
 }

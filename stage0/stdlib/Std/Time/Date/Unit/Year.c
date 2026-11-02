@@ -30,6 +30,7 @@ lean_object* lean_int_emod(lean_object*, lean_object*);
 lean_object* l_Int_repr___boxed(lean_object*);
 lean_object* l_Int_sub___boxed(lean_object*, lean_object*);
 lean_object* lean_int_mod(lean_object*, lean_object*);
+uint8_t lean_int_dec_eq(lean_object*, lean_object*);
 lean_object* l_Int_neg___boxed(lean_object*);
 lean_object* lean_obj_tag_nat(lean_object*);
 LEAN_EXPORT lean_object* l_Std_Time_Year_Era_ctorIdx___impl(uint8_t);
@@ -825,24 +826,23 @@ return v___x_223_;
 LEAN_EXPORT uint8_t l_Std_Time_Year_Offset_isLeap(lean_object* v_y_224_){
 _start:
 {
-lean_object* v___x_225_; lean_object* v___x_226_; lean_object* v___x_227_; uint8_t v___x_228_; 
+lean_object* v___x_225_; lean_object* v___x_226_; lean_object* v___x_227_; uint8_t v___x_228_; lean_object* v___x_229_; lean_object* v___x_230_; uint8_t v___x_231_; 
 v___x_225_ = lean_obj_once(&l_Std_Time_Year_Offset_isLeap___closed__0, &l_Std_Time_Year_Offset_isLeap___closed__0_once, _init_l_Std_Time_Year_Offset_isLeap___closed__0);
 v___x_226_ = lean_int_mod(v_y_224_, v___x_225_);
 v___x_227_ = lean_obj_once(&l_Std_Time_Year_instReprOffset___aux__1___closed__0, &l_Std_Time_Year_instReprOffset___aux__1___closed__0_once, _init_l_Std_Time_Year_instReprOffset___aux__1___closed__0);
 v___x_228_ = lean_int_dec_eq(v___x_226_, v___x_227_);
 lean_dec(v___x_226_);
-if (v___x_228_ == 0)
-{
-return v___x_228_;
-}
-else
-{
-lean_object* v___x_229_; lean_object* v___x_230_; uint8_t v___x_231_; 
 v___x_229_ = lean_obj_once(&l_Std_Time_Year_Offset_isLeap___closed__1, &l_Std_Time_Year_Offset_isLeap___closed__1_once, _init_l_Std_Time_Year_Offset_isLeap___closed__1);
 v___x_230_ = lean_int_mod(v_y_224_, v___x_229_);
 v___x_231_ = lean_int_dec_eq(v___x_230_, v___x_227_);
 lean_dec(v___x_230_);
 if (v___x_231_ == 0)
+{
+return v___x_228_;
+}
+else
+{
+if (v___x_228_ == 0)
 {
 return v___x_228_;
 }
@@ -919,26 +919,32 @@ return v___x_249_;
 LEAN_EXPORT lean_object* l_Std_Time_Year_Offset_days(lean_object* v_year_250_){
 _start:
 {
-lean_object* v___x_255_; lean_object* v___x_256_; lean_object* v___x_257_; uint8_t v___x_258_; 
+lean_object* v___x_255_; lean_object* v___x_256_; lean_object* v___x_257_; uint8_t v___x_258_; lean_object* v___x_259_; lean_object* v___x_260_; uint8_t v___x_261_; 
 v___x_255_ = lean_obj_once(&l_Std_Time_Year_Offset_isLeap___closed__0, &l_Std_Time_Year_Offset_isLeap___closed__0_once, _init_l_Std_Time_Year_Offset_isLeap___closed__0);
 v___x_256_ = lean_int_mod(v_year_250_, v___x_255_);
 v___x_257_ = lean_obj_once(&l_Std_Time_Year_instReprOffset___aux__1___closed__0, &l_Std_Time_Year_instReprOffset___aux__1___closed__0_once, _init_l_Std_Time_Year_instReprOffset___aux__1___closed__0);
 v___x_258_ = lean_int_dec_eq(v___x_256_, v___x_257_);
 lean_dec(v___x_256_);
-if (v___x_258_ == 0)
-{
-goto v___jp_251_;
-}
-else
-{
-lean_object* v___x_259_; lean_object* v___x_260_; uint8_t v___x_261_; 
 v___x_259_ = lean_obj_once(&l_Std_Time_Year_Offset_isLeap___closed__1, &l_Std_Time_Year_Offset_isLeap___closed__1_once, _init_l_Std_Time_Year_Offset_isLeap___closed__1);
 v___x_260_ = lean_int_mod(v_year_250_, v___x_259_);
 v___x_261_ = lean_int_dec_eq(v___x_260_, v___x_257_);
 lean_dec(v___x_260_);
 if (v___x_261_ == 0)
 {
+if (v___x_258_ == 0)
+{
+goto v___jp_251_;
+}
+else
+{
 goto v___jp_253_;
+}
+}
+else
+{
+if (v___x_258_ == 0)
+{
+goto v___jp_251_;
 }
 else
 {

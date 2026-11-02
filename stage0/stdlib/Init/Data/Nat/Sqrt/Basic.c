@@ -16,7 +16,7 @@ extern "C" {
 lean_object* lean_nat_div(lean_object*, lean_object*);
 lean_object* lean_nat_add(lean_object*, lean_object*);
 lean_object* lean_nat_shiftr(lean_object*, lean_object*);
-uint8_t l_UDecidable_instNatLt(lean_object*, lean_object*);
+uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 lean_object* lean_nat_log2(lean_object*);
 lean_object* lean_nat_shiftl(lean_object*, lean_object*);
@@ -34,7 +34,7 @@ lean_dec(v___x_3_);
 v___x_5_ = lean_unsigned_to_nat(1u);
 v_next_6_ = lean_nat_shiftr(v___x_4_, v___x_5_);
 lean_dec(v___x_4_);
-v___x_7_ = l_UDecidable_instNatLt(v_next_6_, v_guess_2_);
+v___x_7_ = lean_nat_dec_lt(v_next_6_, v_guess_2_);
 if (v___x_7_ == 0)
 {
 lean_dec(v_next_6_);

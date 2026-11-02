@@ -31,8 +31,8 @@ LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__List_head_match_
 LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__List_head_match__1_splitter(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__List_foldl_match__1_splitter___redArg(lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__List_foldl_match__1_splitter(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__List_getLast_x3f_match__1_splitter___redArg(lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__List_getLast_x3f_match__1_splitter(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__UDecidable_instListEqNilImpl_match__3_splitter___redArg(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__UDecidable_instListEqNilImpl_match__3_splitter(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__List_minOn_x3f_match__1_splitter___redArg(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__List_minOn_x3f_match__1_splitter(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_List_minOn___redArg(lean_object* v_inst_1_, lean_object* v_inst_2_, lean_object* v_f_3_, lean_object* v_l_4_){
@@ -371,10 +371,10 @@ return v___x_143_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__List_getLast_x3f_match__1_splitter___redArg(lean_object* v_x_144_, lean_object* v_h__1_145_, lean_object* v_h__2_146_){
+LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__UDecidable_instListEqNilImpl_match__3_splitter___redArg(lean_object* v_l_144_, lean_object* v_h__1_145_, lean_object* v_h__2_146_){
 _start:
 {
-if (lean_obj_tag(v_x_144_) == 0)
+if (lean_obj_tag(v_l_144_) == 0)
 {
 lean_object* v___x_147_; lean_object* v___x_148_; 
 lean_dec(v_h__2_146_);
@@ -386,20 +386,20 @@ else
 {
 lean_object* v_head_149_; lean_object* v_tail_150_; lean_object* v___x_151_; 
 lean_dec(v_h__1_145_);
-v_head_149_ = lean_ctor_get(v_x_144_, 0);
+v_head_149_ = lean_ctor_get(v_l_144_, 0);
 lean_inc(v_head_149_);
-v_tail_150_ = lean_ctor_get(v_x_144_, 1);
+v_tail_150_ = lean_ctor_get(v_l_144_, 1);
 lean_inc(v_tail_150_);
-lean_dec_ref_known(v_x_144_, 2);
+lean_dec_ref_known(v_l_144_, 2);
 v___x_151_ = lean_apply_2(v_h__2_146_, v_head_149_, v_tail_150_);
 return v___x_151_;
 }
 }
 }
-LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__List_getLast_x3f_match__1_splitter(lean_object* v_00_u03b1_152_, lean_object* v_motive_153_, lean_object* v_x_154_, lean_object* v_h__1_155_, lean_object* v_h__2_156_){
+LEAN_EXPORT lean_object* l___private_Init_Data_List_MinMaxOn_0__UDecidable_instListEqNilImpl_match__3_splitter(lean_object* v_00_u03b1_152_, lean_object* v_motive_153_, lean_object* v_l_154_, lean_object* v_h__1_155_, lean_object* v_h__2_156_){
 _start:
 {
-if (lean_obj_tag(v_x_154_) == 0)
+if (lean_obj_tag(v_l_154_) == 0)
 {
 lean_object* v___x_157_; lean_object* v___x_158_; 
 lean_dec(v_h__2_156_);
@@ -411,11 +411,11 @@ else
 {
 lean_object* v_head_159_; lean_object* v_tail_160_; lean_object* v___x_161_; 
 lean_dec(v_h__1_155_);
-v_head_159_ = lean_ctor_get(v_x_154_, 0);
+v_head_159_ = lean_ctor_get(v_l_154_, 0);
 lean_inc(v_head_159_);
-v_tail_160_ = lean_ctor_get(v_x_154_, 1);
+v_tail_160_ = lean_ctor_get(v_l_154_, 1);
 lean_inc(v_tail_160_);
-lean_dec_ref_known(v_x_154_, 2);
+lean_dec_ref_known(v_l_154_, 2);
 v___x_161_ = lean_apply_2(v_h__2_156_, v_head_159_, v_tail_160_);
 return v___x_161_;
 }
