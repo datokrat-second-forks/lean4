@@ -433,7 +433,7 @@ theorem findSome?_eq_findSomeM? {f : α → Option β} {as : List α} :
   simp
 
 theorem findM?_eq_findSomeM? [Monad m] [LawfulMonad m] {p : α → m Bool} {as : List α} :
-    as.findM? p = as.findSomeM? fun a => return if (← p a) then some a else none := by
+    as.findM? p = as.findSomeM? fun a => return uif (← p a) then some a else none := by
   induction as with
   | nil => rfl
   | cons a as ih =>

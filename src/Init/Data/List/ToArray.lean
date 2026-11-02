@@ -256,7 +256,7 @@ theorem findSomeRevM?_toArray [Monad m] [LawfulMonad m] (f : α → m (Option β
 -- This is not marked as `@[simp]` as later we simplify all occurrences of `findRevM?`.
 theorem findRevM?_toArray [Monad m] [LawfulMonad m] (f : α → m Bool) (l : List α) :
     l.toArray.findRevM? f = l.reverse.findM? f := by
-  rw [Array.findRevM?, findSomeRevM?_toArray, findM?_eq_findSomeM?]
+  simp only [Array.findRevM?, findSomeRevM?_toArray, findM?_eq_findSomeM?, Bool.cond_eq_ite]
 
 @[simp, grind =] theorem findM?_toArray [Monad m] [LawfulMonad m] (f : α → m Bool) (l : List α) :
     l.toArray.findM? f = l.findM? f := by

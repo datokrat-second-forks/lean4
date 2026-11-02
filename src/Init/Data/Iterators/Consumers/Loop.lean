@@ -427,7 +427,7 @@ some 1
 def Iter.findM? {α β : Type w} {m : Type w → Type w'} [Monad m] [Iterator α Id β]
     [IteratorLoop α Id m] (it : Iter (α := α) β) (f : β → m (ULift Bool)) :
     m (Option β) :=
-  it.findSomeM? (fun x => return if (← f x).down then some x else none)
+  it.findSomeM? (fun x => return bif (← f x).down then some x else none)
 
 /--
 Returns the first output of the iterator for which the monadic predicate `p` returns `true`, or

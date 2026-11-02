@@ -238,7 +238,7 @@ instance : Neg (BitVec n) := ⟨.neg⟩
 Returns the absolute value of a signed bitvector.
 -/
 @[implicit_reducible]
-protected def abs (x : BitVec n) : BitVec n := if x.msb then .neg x else x
+protected def abs (x : BitVec n) : BitVec n := bif x.msb then .neg x else x
 
 /--
 Multiplies two bitvectors. This can be interpreted as either signed or unsigned multiplication
@@ -352,10 +352,10 @@ def smod (x y : BitVec m) : BitVec m :=
   | false, false => umod x y
   | false, true =>
     let u := umod x (.neg y)
-    (if u = .zero m then u else .add u y)
+    (bif u == .zero m then u else .add u y)
   | true, false =>
     let u := umod (.neg x) y
-    (if u = .zero m then u else .sub y u)
+    (bif u == .zero m then u else .sub y u)
   | true, true => .neg (umod (.neg x) (.neg y))
 
 end arithmetic

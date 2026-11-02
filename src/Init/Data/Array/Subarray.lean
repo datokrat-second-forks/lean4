@@ -351,7 +351,7 @@ some 5
 -/
 @[inline]
 def findRevM? {α : Type} {m : Type → Type w} [Monad m] (as : Subarray α) (p : α → m Bool) : m (Option α) :=
-  as.findSomeRevM? fun a => return if (← p a) then some a else none
+  as.findSomeRevM? fun a => return bif (← p a) then some a else none
 
 /--
 Tests each element in a subarray with a Boolean predicate in reverse order, stopping at the first

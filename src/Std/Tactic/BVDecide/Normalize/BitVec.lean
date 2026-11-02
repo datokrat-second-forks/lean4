@@ -109,7 +109,7 @@ theorem BitVec.smod_umod (x y : BitVec w) :
         else
           x.umod y := by
   rw [BitVec.smod_eq, ← BitVec.msb_eq_getLsbD_last, ← BitVec.msb_eq_getLsbD_last]
-  cases x.msb <;> cases y.msb <;> simp [UDecidable.ite_eq_ite]
+  cases x.msb <;> cases y.msb <;> simp
 
 attribute [bv_normalize] BitVec.smtUDiv_eq
 
@@ -147,7 +147,7 @@ theorem BitVec.srem_umod (x y : BitVec w) :
 
 @[bv_normalize]
 theorem BitVec.abs_eq (x : BitVec w) : x.abs = bif x.getLsbD (w - 1) then -x else x := by
-  simp [_root_.BitVec.abs_eq, BitVec.msb_eq_getLsbD_last, UDecidable.ite_eq_ite]
+  simp [_root_.BitVec.abs_eq, BitVec.msb_eq_getLsbD_last]
 
 attribute [bv_normalize] BitVec.twoPow_eq
 

@@ -808,7 +808,7 @@ theorem IterM.findSomeM?_pure {α β γ : Type w} {m : Type w → Type w'} [Mona
 theorem IterM.findM?_eq_findSomeM? {α β : Type w} {m : Type w → Type w'} [Monad m]
     [Iterator α m β] [IteratorLoop α m m] [Finite α m]
     {it : IterM (α := α) m β} {f : β → m (ULift Bool)} :
-    it.findM? f = it.findSomeM? (fun x => return if (← f x).down then some x else none) :=
+    it.findM? f = it.findSomeM? (fun x => return bif (← f x).down then some x else none) :=
   (rfl)
 
 theorem IterM.findM?_eq_match_step {α β : Type w} {m : Type w → Type w'} [Monad m]
@@ -817,7 +817,7 @@ theorem IterM.findM?_eq_match_step {α β : Type w} {m : Type w → Type w'} [Mo
     it.findM? f = (do
       match (← it.step).inflate.val with
       | .yield it' out =>
-        if (← f out).down then return (some out) else it'.findM? f
+        uif (← f out).down then return (some out) else it'.findM? f
       | .skip it' => it'.findM? f
       | .done => return none) := by
   rw [findM?_eq_findSomeM?, findSomeM?_eq_match_step]
@@ -825,7 +825,7 @@ theorem IterM.findM?_eq_match_step {α β : Type w} {m : Type w → Type w'} [Mo
   split
   · simp only [bind_assoc]
     apply bind_congr; intro fx
-    split <;> simp [findM?_eq_findSomeM?]
+    split <;> simp [*, findM?_eq_findSomeM?]
   · simp [findM?_eq_findSomeM?]
   · simp
 
@@ -836,7 +836,7 @@ theorem IterM.find?_eq_findM? {α β : Type w} {m : Type w → Type w'} [Monad m
 
 theorem IterM.find?_eq_findSome? {α β : Type w} {m : Type w → Type w'} [Monad m] [Iterator α m β]
     [IteratorLoop α m m] [LawfulMonad m] [Finite α m] {it : IterM (α := α) m β} {f : β → Bool} :
-    it.find? f = it.findSome? (fun x => if f x then some x else none) := by
+    it.find? f = it.findSome? (fun x => uif f x then some x else none) := by
   simp [find?_eq_findM?, findSome?_eq_findSomeM?, findM?_eq_findSomeM?]
 
 theorem IterM.find?_eq_match_step {α β : Type w} {m : Type w → Type w'} [Monad m]

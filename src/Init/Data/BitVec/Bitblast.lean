@@ -1991,7 +1991,7 @@ theorem toInt_smod {x y : BitVec w} :
         by_cases hx_dvd_y : y.toInt ∣ x.toInt
         · simp [show x % -y = 0#(w + 1) by simp_all, hx_dvd_y, Int.fmod_eq_zero_of_dvd]
         · have hynonpos := toInt_neg_of_msb_true hymsb
-          simp only [show ¬x % -y = 0#(w + 1) by simp_all, ↓reduceIte,
+          simp only [show ¬x % -y = 0#(w + 1) by simp_all, ↓reduceIte, ↓reduceUIte,
             toInt_umod_neg_add hymsb hxmsb hx_dvd_y, Int.fmod_eq_emod, show ¬0 ≤ y.toInt by omega,
             hx_dvd_y, _root_.or_self]
       · have hynonneg := toInt_nonneg_of_msb_false hymsb
@@ -2008,8 +2008,8 @@ theorem getElem_smod {x y : BitVec w} (h : i < w) :
     (x.smod y)[i] =
       match x.msb, y.msb with
       | false, false => (x % y)[i]
-      | false, true => (if x % -y = 0#w then (x % -y) else (x % -y + y))[i]
-      | true, false => (if -x % y = 0#w then (-x % y) else (y - -x % y))[i]
+      | false, true => (uif x % -y = 0#w then (x % -y) else (x % -y + y))[i]
+      | true, false => (uif -x % y = 0#w then (-x % y) else (y - -x % y))[i]
       | true, true => (-(-x % -y))[i] := by
   simp only [smod, umod_eq, neg_eq, zero_eq, add_eq, sub_eq]
   by_cases hx : x.msb <;> by_cases hy : y.msb <;> simp [hx, hy]
@@ -2032,8 +2032,8 @@ theorem getMsbD_smod {x y : BitVec w} :
     (x.smod y).getMsbD i  =
       match x.msb, y.msb with
       | false, false => (x % y).getMsbD i
-      | false, true => (if x % -y = 0#w then (x % -y) else (x % -y + y)).getMsbD i
-      | true, false => (if -x % y = 0#w then (-x % y) else (y - -x % y)).getMsbD i
+      | false, true => (uif x % -y = 0#w then (x % -y) else (x % -y + y)).getMsbD i
+      | true, false => (uif -x % y = 0#w then (-x % y) else (y - -x % y)).getMsbD i
       | true, true => (-(-x % -y)).getMsbD i := by
   simp only [smod, umod_eq, neg_eq, zero_eq, add_eq, sub_eq]
   by_cases hx : x.msb <;> by_cases hy : y.msb <;> simp [hx, hy]

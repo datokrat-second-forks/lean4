@@ -791,4 +791,19 @@ noncomputable instance instSubtypeEq {p : α → Prop} [UDecidableEq α] : UDeci
 
 @[csimp] theorem instSubtypeEq_csimp : @instSubtypeEq = @instSubtypeEqImpl := rfl
 
+/-- `simp` normalizes `cond` to `uif`, so that `bif` and `uif` meet. -/
+@[simp] theorem _root_.Bool.cond_eq_ite {α : Sort u} (b : Bool) (t e : α) :
+    cond b t e = uif b then t else e := by
+  cases b with
+  | true => exact (ite_eq_left rfl).symm
+  | false => exact (ite_eq_right Bool.noConfusion).symm
+
+/--
+A `cond` on a coerced proposition becomes `uif`. This is a pre-rule, so that it applies before
+`decide` distributes over the proposition.
+-/
+@[simp ↓] theorem _root_.Bool.cond_udecide {α : Sort u} (p : Prop) [UDecidable p] (t e : α) :
+    cond (decide p) t e = uif p then t else e :=
+  rfl
+
 end UDecidable

@@ -1064,7 +1064,7 @@ some 2
 -/
 @[inline]
 def findRevM? {α : Type} {m : Type → Type w} [Monad m] (p : α → m Bool) (as : Array α) : m (Option α) :=
-  as.findSomeRevM? fun a => return if (← p a) then some a else none
+  as.findSomeRevM? fun a => return bif (← p a) then some a else none
 
 /--
 Applies the monadic action `f` to each element of an array, in order.

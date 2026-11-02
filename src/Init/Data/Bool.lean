@@ -571,10 +571,6 @@ theorem exists_bool {p : Bool → Prop} : (∃ b, p b) ↔ p false ∨ p true :=
 theorem cond_true  {α : Sort u} {a b : α} : cond true  a b = a := rfl
 theorem cond_false {α : Sort u} {a b : α} : cond false a b = b := rfl
 
-@[simp]
-theorem cond_eq_ite {α} (b : Bool) (t e : α) : cond b t e = uif b then t else e := by
-  cases b <;> simp [Bool.cond_true, Bool.cond_false]
-
 @[deprecated cond_eq_ite +typeChanged (since := "2025-10-29")]
 theorem cond_eq_if : (bif b then x else y) = (uif b then x else y) := cond_eq_ite b x y
 
@@ -603,16 +599,6 @@ operations like `cond` to a mix of `Prop` and `Bool`.
 theorem cond_decide {α} (p : Prop) [Decidable p] (t e : α) :
     cond (decide p) t e = if p then t else e := by
   cases ‹Decidable p› <;> simp [*]
-
-/--
-A `cond` on a coerced proposition becomes `uif`. This is a pre-rule, so that it applies before
-`decide` distributes over the proposition.
--/
-@[simp ↓] theorem cond_udecide {α} (p : Prop) [UDecidable p] (t e : α) :
-    cond (UDecidable.decide p) t e = uif p then t else e := by
-  cases UDecidable.em p with
-  | inl hp => simp [hp]
-  | inr hp => simp [hp]
 
 theorem cond_eq_ite_iff {a : Bool} {p : Prop} [h : Decidable p] {x y u v : α} :
     (cond a x y = ite p u v) ↔ ite a x y = ite p u v := by

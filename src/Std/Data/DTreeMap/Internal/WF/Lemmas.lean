@@ -1109,17 +1109,17 @@ theorem ordered_filterMap [Ord α] {t : Impl α β} {h} {f : (a : α) → β a �
 -/
 
 theorem filter_eq_filterMap [Ord α] {t : Impl α β} {h} {f : (a : α) → β a → Bool} :
-    t.filter f h = t.filterMap (fun k v => if f k v then some v else none) h := by
+    t.filter f h = t.filterMap (fun k v => bif f k v then some v else none) h := by
   induction t with
   | leaf => rfl
   | inner sz k v l r ihl ihr =>
-    simp [filter, filterMap]
+    simp [filter, filterMap, -Bool.cond_eq_ite]
     cases hf : f k v <;> rw [ihl, ihr] <;> rfl
 
 theorem toListModel_filter [Ord α] {t : Impl α β} {h} {f : (a : α) → β a → Bool} :
     (t.filter f h).impl.toListModel = t.toListModel.filter (fun e => f e.1 e.2) := by
   rw [filter_eq_filterMap, toListModel_filterMap, ← List.filterMap_eq_filter]
-  congr; simp only [Option.map_ite, Option.guard_def, UDecidable.ite_eq_ite]
+  congr; simp only [Bool.cond_eq_ite, Option.map_uite, Option.guard_def]
 
 theorem ordered_filter [Ord α] {t : Impl α β} {h} {f : (a : α) → β a → Bool} (hto : t.Ordered) :
     (t.filter f h).impl.Ordered := by
@@ -1413,7 +1413,7 @@ theorem toListModel_alterₘ [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {
     cases f none <;> rfl
   · simp only [Cell.Const.alter, Cell.ofOption, Const.alterKey, Option.toList_some]
     have := OrientedCmp.eq_symm <| hl l rfl
-    simp only [getValue?, compare_eq_iff_beq.mp this, reduceIte]
+    simp only [getValue?, compare_eq_iff_beq.mp this, Bool.cond_true]
     cases f _
     · simp [eraseKey, compare_eq_iff_beq.mp this]
     · simp [insertEntry, containsKey, replaceEntry, compare_eq_iff_beq.mp this]

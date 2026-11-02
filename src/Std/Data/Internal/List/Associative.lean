@@ -221,11 +221,11 @@ variable {β : Type v}
 /-- Internal implementation detail of the hash map -/
 @[expose] def getValue? [BEq α] (a : α) : List ((_ : α) × β) → Option β
   | [] => none
-  | ⟨k, v⟩ :: l => if k == a then some v else getValue? a l
+  | ⟨k, v⟩ :: l => bif k == a then some v else getValue? a l
 
 @[simp] theorem getValue?_nil [BEq α] {a : α} : getValue? a ([] : List ((_ : α) × β)) = none := rfl
 theorem getValue?_cons [BEq α] {l : List ((_ : α) × β)} {k a : α} {v : β} :
-    getValue? a (⟨k, v⟩ :: l) = if k == a then some v else getValue? a l := rfl
+    getValue? a (⟨k, v⟩ :: l) = uif k == a then some v else getValue? a l := Bool.cond_eq_ite ..
 
 theorem getValue?_cons_of_true [BEq α] {l : List ((_ : α) × β)} {k a : α} {v : β} (h : k == a) :
     getValue? a (⟨k, v⟩ :: l) = some v := by
@@ -291,7 +291,9 @@ theorem getValueCast?_cons_self [BEq α] [LawfulBEq α] {l : List ((a : α) × �
 
 theorem getValue?_eq_getValueCast? [BEq α] [LawfulBEq α] {β : Type v} {l : List ((_ : α) × β)}
     {a : α} : getValue? a l = getValueCast? a l := by
-  induction l using assoc_induction <;> simp_all [getValueCast?_cons, getValue?_cons]
+  induction l using assoc_induction with
+  | nil => simp
+  | cons k v l ih => by_cases h : k = a <;> simp_all [getValueCast?_cons, getValue?_cons]
 
 section
 
@@ -2646,8 +2648,9 @@ theorem find?_map_toProd_eq_some_iff_getKey?_eq_some_and_getValue?_eq_some [BEq 
       Bool.not_true, getKey?, getValue?]
     by_cases hdfst_k: hd.fst == k
     · simp only [hdfst_k, true_and, Bool.true_eq_false, false_and, or_false, ↓reduceIte,
-      Option.some.injEq]
-    · simp only [hdfst_k, Bool.false_eq_true, false_and, true_and, false_or, ↓reduceIte]
+      Bool.cond_true, Option.some.injEq]
+    · simp only [hdfst_k, Bool.false_eq_true, false_and, true_and, false_or, ↓reduceIte,
+      Bool.cond_false]
       rw [ih]
 
 theorem mem_iff_getKey?_eq_some_and_getValue?_eq_some [BEq α] [EquivBEq α]

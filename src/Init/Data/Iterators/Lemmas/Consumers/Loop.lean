@@ -853,7 +853,7 @@ theorem Iter.findSomeM?_pure {α β : Type w} {γ : Type x} {m : Type x → Type
 theorem Iter.findM?_eq_findSomeM? {α β : Type w} {m : Type w → Type w'} [Monad m]
     [Iterator α Id β] [IteratorLoop α Id m] [Finite α Id]
     {it : Iter (α := α) β} {f : β → m (ULift Bool)} :
-    it.findM? f = it.findSomeM? (fun x => return if (← f x).down then some x else none) :=
+    it.findM? f = it.findSomeM? (fun x => return bif (← f x).down then some x else none) :=
   (rfl)
 
 theorem Iter.findM?_eq_match_step {α β : Type w} {m : Type w → Type w'} [Monad m]
@@ -862,14 +862,14 @@ theorem Iter.findM?_eq_match_step {α β : Type w} {m : Type w → Type w'} [Mon
     it.findM? f = (do
       match it.step.val with
       | .yield it' out =>
-        if (← f out).down then return (some out) else it'.findM? f
+        uif (← f out).down then return (some out) else it'.findM? f
       | .skip it' => it'.findM? f
       | .done => return none) := by
   rw [findM?_eq_findSomeM?, findSomeM?_eq_match_step]
   split
   · simp only [bind_assoc]
     apply bind_congr; intro fx
-    split <;> simp [findM?_eq_findSomeM?]
+    split <;> simp [*, findM?_eq_findSomeM?]
   · simp [findM?_eq_findSomeM?]
   · simp
 
@@ -899,7 +899,7 @@ theorem Iter.find?_eq_find?_toIterM {α β : Type w} [Iterator α Id β]
 
 theorem Iter.find?_eq_findSome? {α β : Type w} [Iterator α Id β]
     [IteratorLoop α Id Id] [Finite α Id] {it : Iter (α := α) β} {f : β → Bool} :
-    it.find? f = it.findSome? (fun x => if f x then some x else none) := by
+    it.find? f = it.findSome? (fun x => uif f x then some x else none) := by
   simp [find?_eq_findM?, findSome?_eq_findSomeM?, findM?_eq_findSomeM?]
 
 theorem Iter.find?_eq_match_step {α β : Type w}
@@ -922,8 +922,7 @@ theorem Iter.find?_toList {α β : Type w}
     [Finite α Id] [LawfulIteratorLoop α Id Id]
     {it : Iter (α := α) β} {f : β → Bool} :
     it.toList.find? f = it.find? f := by
-  simp [find?_eq_findSome?, List.find?_eq_findSome?_guard, findSome?_toList, Option.guard_def,
-    UDecidable.ite_eq_ite]
+  simp [find?_eq_findSome?, List.find?_eq_findSome?_guard, findSome?_toList, Option.guard_def]
 
 theorem Iter.findM?_pure {α β : Type w} {m : Type w → Type w'} [Monad m]
     [Iterator α Id β] [IteratorLoop α Id m] [IteratorLoop α Id Id]
