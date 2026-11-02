@@ -3456,10 +3456,10 @@ theorem smod_eq (x y : BitVec w) : x.smod y =
   | false, false => x.umod y
   | false, true =>
     let u := x.umod (- y)
-    (if u = 0#w then u else u + y)
+    (uif u = 0#w then u else u + y)
   | true, false =>
     let u := umod (- x) y
-    (if u = 0#w then u else y - u)
+    (uif u = 0#w then u else y - u)
   | true, true => - ((- x).umod (- y)) := by
   rw [BitVec.smod]
   rcases x.msb <;> rcases y.msb <;> simp
@@ -4355,13 +4355,13 @@ theorem toNat_neg_lt_of_msb (x : BitVec w) (hmsb : x.msb = true) :
 
 /-! ### abs -/
 
-theorem abs_eq (x : BitVec w) : x.abs = if x.msb then -x else x := rfl
+theorem abs_eq (x : BitVec w) : x.abs = uif x.msb then -x else x := Bool.cond_eq_ite ..
 
 @[simp, bitvec_to_nat]
 theorem toNat_abs {x : BitVec w} : x.abs.toNat = if x.msb then 2^w - x.toNat else x.toNat := by
   simp only [BitVec.abs, neg_eq]
   by_cases h : x.msb = true
-  · simp only [h, ↓reduceIte, toNat_neg]
+  · simp only [h, Bool.cond_true, ↓reduceIte, toNat_neg]
     have : 2 * x.toNat ≥ 2 ^ w := BitVec.msb_eq_true_iff_two_mul_ge.mp h
     rw [Nat.mod_eq_of_lt (by omega)]
   · simp [h]

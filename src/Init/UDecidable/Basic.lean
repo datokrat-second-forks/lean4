@@ -801,9 +801,14 @@ noncomputable instance instSubtypeEq {p : α → Prop} [UDecidableEq α] : UDeci
 /--
 A `cond` on a coerced proposition becomes `uif`. This is a pre-rule, so that it applies before
 `decide` distributes over the proposition.
+
+The proof is deliberately not `rfl`: `dsimp` would otherwise rewrite `cond` inside types, such as
+the iterator type of `Iter.filter`, which then no longer matches the lemmas about it.
 -/
 @[simp ↓] theorem _root_.Bool.cond_udecide {α : Sort u} (p : Prop) [UDecidable p] (t e : α) :
-    cond (decide p) t e = uif p then t else e :=
-  rfl
+    cond (decide p) t e = uif p then t else e := by
+  cases em p with
+  | inl hp => rw [decide_eq_true hp, ite_eq_left hp]; rfl
+  | inr hp => rw [decide_eq_false hp, ite_eq_right hp]; rfl
 
 end UDecidable
