@@ -158,9 +158,9 @@ theorem negOfNat_k_eq (k : Nat) : Int.negOfNat_k k = Int.negOfNat k := by
   simp only [Int.bmod_k, Int.bmod, emod_k_eq, sub_k_eq, hm, ofNat_eq_natCast]
   cases hb : Int.blt' (x % m) ((m + 1) / 2)
   · have hc : ¬ x % m < (m + 1) / 2 := by rw [← blt'_eq_false]; exact hb
-    simp only [hc, ↓reduceIte]
+    simp only [hc, ↓reduceCond]
   · have hc : x % m < (m + 1) / 2 := by rw [← blt'_eq_true]; exact hb
-    simp only [hc, ↓reduceIte]
+    simp only [hc, ↓reduceCond]
 
 @[simp] theorem toNat_k_eq (a : Int) : Int.toNat_k a = a.toNat := by
   cases a <;> rfl
@@ -173,8 +173,8 @@ theorem negOfNat_k_eq (k : Nat) : Int.negOfNat_k k = Int.negOfNat k := by
     unfold Int.pow_k Int.pow
     cases h : Nat.beq (Nat.mod n 2) 0
     · have : ¬ n % 2 = 0 := Nat.ne_of_beq_eq_false h
-      simp only [this, negOfNat_k_eq, ↓reduceIte]; rfl
+      simp only [this, negOfNat_k_eq, ↓reduceCond]; rfl
     · have : n % 2 = 0 := Nat.eq_of_beq_eq_true h
-      simp only [this, ↓reduceIte]; rfl
+      simp only [this, ↓reduceCond]; rfl
 
 end Int

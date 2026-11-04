@@ -3,8 +3,8 @@
 #reduce Char.ofNat (nat_lit 0)
 
 /--
-info: { val := { toBitVec := { toFin := ⟨0, Char.ofNatAux._private_1 0 (Decidable.reflects_decide (Nat.isValidChar 0))⟩ } },
-  valid := Decidable.reflects_decide (Nat.isValidChar 0) }
+info: { val := { toBitVec := { toFin := ⟨0, Char.ofNatAux._private_1 0 (Char.ofNat._proof_1 0 rfl)⟩ } },
+  valid := Char.ofNat._proof_1 0 rfl }
 -/
 #guard_msgs in
 set_option pp.proofs true in

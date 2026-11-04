@@ -55,10 +55,10 @@ public theorem Char.utf8Size_eq_four_iff {c : Char} : c.utf8Size = 4 ↔ 0xffff 
   | case4 v _ _ _ => subst v; simp_all [← UInt32.not_le]
 
 public theorem Char.utf8Size_pos (c : Char) : 0 < c.utf8Size := by
-  repeat first | apply iteInduction (motive := (0 < ·)) <;> intros | decide
+  fun_cases utf8Size <;> decide
 
 public theorem Char.utf8Size_le_four (c : Char) : c.utf8Size ≤ 4 := by
-  repeat first | apply iteInduction (motive := (· ≤ 4)) <;> intros | decide
+  fun_cases utf8Size <;> decide
 
 public theorem Char.utf8Size_eq (c : Char) : c.utf8Size = 1 ∨ c.utf8Size = 2 ∨ c.utf8Size = 3 ∨ c.utf8Size = 4 := by
   match c.utf8Size, c.utf8Size_pos, c.utf8Size_le_four with

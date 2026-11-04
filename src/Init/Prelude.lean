@@ -1032,7 +1032,7 @@ Just like `ite`, `dite`, and `cond`, `dcond` is declared `@[macro_inline]`, whic
 applications of `dcond` to be unfolded. As a result, `x` and `y` are not evaluated at runtime until
 one of them is selected, and only the selected branch is evaluated.
 -/
-@[macro_inline]
+@[macro_inline, implicit_reducible]
 protected def Bool.dcond {α : Sort u} (c : Bool) (x : Eq c true → α) (y : Eq c false → α) : α :=
   match c with
   | true  => x rfl
@@ -2348,13 +2348,14 @@ Examples:
 -/
 @[extern "lean_nat_div", irreducible]
 protected def Nat.div (x y : @& Nat) : Nat :=
-  dite (LT.lt 0 y) (fun hy =>
+  Bool.dcond (decideLT 0 y) (fun hy =>
     let rec
       go (fuel : Nat) (x : Nat) (hfuel : LT.lt x fuel) : Nat :=
       match fuel with
       | succ fuel =>
-        dite (LE.le y x)
-          (fun h => HAdd.hAdd (go fuel (HSub.hSub x y) (div_rec_fuel_lemma hy h hfuel)) 1)
+        Bool.dcond (decideLE y x)
+          (fun h => HAdd.hAdd (go fuel (HSub.hSub x y)
+            (div_rec_fuel_lemma (of_decide_eq_true hy) (of_decide_eq_true h) hfuel)) 1)
           (fun _ => 0)
       termination_by structural fuel
     go (succ x) x (Nat.lt_succ_self _))
@@ -2378,33 +2379,42 @@ logical model.
 -/
 @[extern "lean_nat_mod"]
 protected noncomputable def Nat.modCore (x y : Nat) : Nat :=
-  dite (LT.lt 0 y)
+  Bool.dcond (decideLT 0 y)
     (fun hy =>
       let rec
         go (fuel : Nat) (x : Nat) (hfuel : LT.lt x fuel) : Nat :=
         match fuel with
         | succ fuel =>
-          dite (LE.le y x)
-            (fun h => go fuel (HSub.hSub x y) (div_rec_fuel_lemma hy h hfuel))
+          Bool.dcond (decideLE y x)
+            (fun h => go fuel (HSub.hSub x y)
+              (div_rec_fuel_lemma (of_decide_eq_true hy) (of_decide_eq_true h) hfuel))
             (fun _ => x)
         termination_by structural fuel
       go (succ x) x (Nat.lt_succ_self _))
     (fun _ => x)
 
-theorem Nat.modCoreGo_lt {fuel y : Nat} (hy : LT.lt 0 y) : (x : Nat) → (hfuel : LT.lt x fuel) →
-    LT.lt (Nat.modCore.go y hy fuel x hfuel) y :=
+theorem Bool.dcond_induction {α : Sort u} {P : α → Prop} : (c : Bool) → {x : Eq c true → α} →
+    {y : Eq c false → α} → ((h : Eq c true) → P (x h)) → ((h : Eq c false) → P (y h)) →
+    P (Bool.dcond c x y)
+  | true, _, _, ht, _ => ht rfl
+  | false, _, _, _, hf => hf rfl
+
+theorem Bool.cond_induction {α : Sort u} {P : α → Prop} {x y : α} : (c : Bool) →
+    (Eq c true → P x) → (Eq c false → P y) → P (cond c x y)
+  | true, ht, _ => ht rfl
+  | false, _, hf => hf rfl
+
+theorem Nat.modCoreGo_lt {fuel y : Nat} (hy : Eq (decideLT 0 y) true) : (x : Nat) →
+    (hfuel : LT.lt x fuel) → LT.lt (Nat.modCore.go y hy fuel x hfuel) y :=
   fuel.rec (fun _ h => absurd h (Nat.not_lt_zero _))
     (fun _ ih x _ =>
-      show LT.lt (dite _ _ _) _ from
-        match Nat.decLe y x with
-        | .isTrue _ => ih _ _
-        | .isFalse h => Nat.lt_of_not_le h)
+      Bool.dcond_induction (P := fun r => LT.lt r y) (decideLE y x) (fun _ => ih _ _)
+        (fun h => Nat.lt_of_not_le (of_decide_eq_false h)))
 
 theorem Nat.modCore_lt {x y : Nat} (hy : LT.lt 0 y) : LT.lt (Nat.modCore x y) y :=
-  show LT.lt (dite _ _ _) y from
-    match Nat.decLt 0 y with
-    | .isTrue _ => Nat.modCoreGo_lt hy x (Nat.lt_succ_self _)
-    | .isFalse h => absurd hy h
+  Bool.dcond_induction (P := fun r => LT.lt r y) (decideLT 0 y)
+    (fun h => Nat.modCoreGo_lt h x (Nat.lt_succ_self _))
+    (fun h => absurd hy (of_decide_eq_false h))
 
 attribute [irreducible] Nat.modCore
 
@@ -2446,17 +2456,16 @@ protected def Nat.mod : @& Nat → @& Nat → Nat
   definition.
    -/
   | 0, _ => 0
-  | n@(succ _), m => ite (LE.le m n) (Nat.modCore n m) n
+  | n@(succ _), m => cond (decideLE m n) (Nat.modCore n m) n
 
 instance Nat.instMod : Mod Nat := ⟨Nat.mod⟩
 
 theorem Nat.mod_lt : (x : Nat) →  {y : Nat} → (hy : LT.lt 0 y) → LT.lt (HMod.hMod x y) y
   | 0, succ _, _ => Nat.zero_lt_succ _
   | succ n, m, hm =>
-    show LT.lt (ite (LE.le m (succ n)) (Nat.modCore (succ n) m) (succ n)) _ from
-      match Nat.decLe m (succ n) with
-      | .isTrue _ => Nat.modCore_lt hm
-      | .isFalse h => Nat.lt_of_not_le h
+    show LT.lt (cond (decideLE m (succ n)) (Nat.modCore (succ n) m) (succ n)) _ from
+      Bool.cond_induction (P := fun r => LT.lt r m) (decideLE m (succ n)) (fun _ => Nat.modCore_lt hm)
+        (fun h => Nat.lt_of_not_le (of_decide_eq_false h))
 
 /--
 Gets the word size of the current platform. The word size may be 64 or 32 bits.
@@ -3187,8 +3196,8 @@ returned instead.
 -/
 @[noinline, match_pattern, implicit_reducible]
 def Char.ofNat (n : Nat) : Char :=
-  dite (n.isValidChar)
-    (fun h => Char.ofNatAux n h)
+  Bool.dcond (decide n.isValidChar)
+    (fun h => Char.ofNatAux n (of_decide_eq_true h))
     (fun _ => { val := ⟨BitVec.ofNatLT 0 (of_decide_eq_true rfl)⟩, valid := Or.inl (of_decide_eq_true rfl) })
 
 theorem Char.ext : ∀ {c d : Char}, Eq c.val d.val → Eq c d
@@ -3232,9 +3241,9 @@ theorem Char.Internal.reflects_beq (c d : Char) : (Char.Internal.beq c d).Reflec
 @[implicit_reducible, inline]
 def Char.utf8Size (c : Char) : Nat :=
   let v := c.val
-  ite (LE.le v (UInt32.ofNatLT 0x7F (of_decide_eq_true rfl))) 1
-    (ite (LE.le v (UInt32.ofNatLT 0x7FF (of_decide_eq_true rfl))) 2
-      (ite (LE.le v (UInt32.ofNatLT 0xFFFF (of_decide_eq_true rfl))) 3 4))
+  cond (decideLE v (UInt32.ofNatLT 0x7F (of_decide_eq_true rfl))) 1
+    (cond (decideLE v (UInt32.ofNatLT 0x7FF (of_decide_eq_true rfl))) 2
+      (cond (decideLE v (UInt32.ofNatLT 0xFFFF (of_decide_eq_true rfl))) 3 4))
 
 /--
 Optional values, which are either `some` around a value from the underlying type or `none`.

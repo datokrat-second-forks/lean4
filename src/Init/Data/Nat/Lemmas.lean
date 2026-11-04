@@ -285,9 +285,9 @@ theorem le_or_le_of_add_eq_add_pred (h : a + c = b + d - 1) : b ≤ a ∨ d ≤ 
 
 /-! ## sub -/
 
-protected theorem one_sub : ∀ n, 1 - n = if n = 0 then 1 else 0
-  | 0 => rfl
-  | _+1 => by rw [ite_eq_right (Nat.succ_ne_zero _), Nat.succ_sub_succ, Nat.zero_sub]
+protected theorem one_sub : ∀ n, 1 - n = uif n = 0 then 1 else 0
+  | 0 => (UDecidable.ite_eq_left rfl).symm
+  | _+1 => by rw [UDecidable.ite_eq_right (Nat.succ_ne_zero _), Nat.succ_sub_succ, Nat.zero_sub]
 
 theorem succ_sub_sub_succ (n m k) : succ n - m - succ k = n - m - k := by
   rw [Nat.sub_sub, Nat.sub_sub, add_succ, succ_sub_succ]
@@ -1550,16 +1550,16 @@ theorem dvd_sub_mod (k : Nat) : n ∣ k - k % n :=
   ⟨k / n, Nat.sub_eq_of_eq_add (Nat.div_add_mod k n).symm⟩
 
 theorem add_mod_eq_ite {m n : Nat} :
-    (m + n) % k = if k ≤ m % k + n % k then m % k + n % k - k else m % k + n % k := by
+    (m + n) % k = uif k ≤ m % k + n % k then m % k + n % k - k else m % k + n % k := by
   cases k with
   | zero => simp
   | succ k =>
     rw [Nat.add_mod]
     by_cases h : k + 1 ≤ m % (k + 1) + n % (k + 1)
-    · rw [ite_eq_left h, Nat.mod_eq_sub_mod h, Nat.mod_eq_of_lt]
+    · rw [UDecidable.ite_eq_left h, Nat.mod_eq_sub_mod h, Nat.mod_eq_of_lt]
       exact (Nat.sub_lt_iff_lt_add h).mpr (Nat.add_lt_add (m.mod_lt (zero_lt_succ _))
         (n.mod_lt (zero_lt_succ _)))
-    · rw [ite_eq_right h]
+    · rw [UDecidable.ite_eq_right h]
       exact Nat.mod_eq_of_lt (Nat.lt_of_not_ge h)
 
 -- TODO: Replace `Nat.dvd_add_iff_left`

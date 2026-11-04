@@ -171,7 +171,7 @@ def Poly.insert (k : Int) (v : Var) (p : Poly) : Poly :=
     bif Nat.blt v' v then
       .add k v <| .add k' v' p
     else bif Nat.beq v v' then
-      if Int.add k k' == 0 then
+      bif Int.add k k' == 0 then
         p
       else
         .add (Int.add k k') v' p
@@ -432,7 +432,7 @@ def Poly.mul' (p : Poly) (k : Int) : Poly :=
 
 @[expose]
 def Poly.mul (p : Poly) (k : Int) : Poly :=
-  if k == 0 then
+  bif k == 0 then
     .num 0
   else
     p.mul' k
@@ -448,7 +448,7 @@ def Poly.mul (p : Poly) (k : Int) : Poly :=
 @[simp] theorem Poly.mul_k_eq_mul (k : Int) (p : Poly) : p.mul_k k = p.mul k := by
   simp only [mul_k, mul, Int.beqZero_k_eq]
   cases h : k == 0
-  · simp only [Bool.false_eq_true, ↓reduceIte]
+  · simp only [Bool.cond_false]
     induction p
     next => simp [mul']
     next k m p ih => simp [mul', ← ih]
@@ -1116,7 +1116,7 @@ def Poly.bmodCoeffs (m : Nat) : Poly → Poly
   | .num k => .num (Int.bmod k m)
   | .add k v p =>
     let k := Int.bmod k m
-    if k == 0 then bmodCoeffs m p else .add k v (bmodCoeffs m p)
+    bif k == 0 then bmodCoeffs m p else .add k v (bmodCoeffs m p)
 
 @[expose] noncomputable def Poly.bmodCoeffs_k (m : Nat) (p : Poly) : Poly :=
   Poly.rec (fun k => .num (Int.bmod_k k m))
@@ -1140,7 +1140,6 @@ theorem Poly.dvd_denote_sub_bmodCoeffs (ctx : Context) (m : Nat) (p : Poly)
     simp only [bmodCoeffs]
     split
     next h =>
-      simp only [beq_iff_eq] at h
       have : k * v.denote ctx + p.denote ctx - (p.bmodCoeffs m).denote ctx
            = k * v.denote ctx + (p.denote ctx - (p.bmodCoeffs m).denote ctx) := by omega
       simp only [denote, this]
@@ -2243,11 +2242,11 @@ theorem dvd_norm_poly (ctx : Context) (d : Int) (p p' : Poly) : p.denote' ctx = 
 theorem natCast_sub (x y : Nat)
     : (NatCast.natCast (x - y) : Int)
       =
-      if (NatCast.natCast y : Int) + (-1)*NatCast.natCast x ≤ 0 then
+      uif (NatCast.natCast y : Int) + (-1)*NatCast.natCast x ≤ 0 then
         (NatCast.natCast x : Int) + -1*NatCast.natCast y
       else
         (0 : Int) := by
-  change (↑(x - y) : Int) = if (↑y : Int) + (-1)*↑x ≤ 0 then (↑x : Int) + (-1)*↑y else 0
+  change (↑(x - y) : Int) = uif (↑y : Int) + (-1)*↑x ≤ 0 then (↑x : Int) + (-1)*↑y else 0
   rw [Int.neg_mul, ← Int.sub_eq_add_neg, Int.one_mul]
   rw [Int.neg_mul, ← Int.sub_eq_add_neg, Int.one_mul]
   split

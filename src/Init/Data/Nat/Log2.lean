@@ -7,6 +7,7 @@ module
 
 prelude
 public import Init.Grind.Tactics
+public import Init.UDecidable.Basic
 import Init.Data.Nat.Div.Basic
 import Init.NotationExtra
 import Init.WFTactics
@@ -19,7 +20,7 @@ theorem log2_terminates : ∀ n, n ≥ 2 → n / 2 < n
   | 2, _ => by decide
   | 3, _ => by decide
   | n+4, _ => by
-    rw [div_eq_ite, ite_eq_left]
+    rw [div_eq_ite, UDecidable.ite_eq_left]
     refine succ_lt_succ (Nat.lt_trans ?_ (lt_succ_self _))
     exact log2_terminates (n+2) (by simp)
     simp
@@ -59,10 +60,10 @@ private theorem log2_rec_irrel {n k k' : Nat} (hk : n ≤ k) (hk' : n ≤ k') :
         exact congrArg Nat.succ (ih (Nat.le_of_lt_add_one (Nat.lt_of_lt_of_le hn hk))
           (Nat.le_of_lt_add_one (Nat.lt_of_lt_of_le hn hk')))
 
-theorem log2_def (n : Nat) : n.log2 = if 2 ≤ n then (n / 2).log2 + 1 else 0 := by
+theorem log2_def (n : Nat) : n.log2 = uif 2 ≤ n then (n / 2).log2 + 1 else 0 := by
   rw [Nat.log2, Nat.log2]
   cases n
-  · rfl
+  · exact (UDecidable.ite_eq_right (by decide)).symm
   split
   · rename_i n h
     simp only [ble_eq_true_of_le h]

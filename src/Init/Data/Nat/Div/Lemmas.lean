@@ -28,7 +28,7 @@ theorem mod_add_mod_lt (a b : Nat) {c : Nat} (h : 0 < c) : a % c + b % c < 2 * c
   have := mod_lt b h
   omega
 
-theorem mod_add_mod_eq {a b c : Nat} : a % c + b % c = (a + b) % c + if a % c + b % c < c then 0 else c := by
+theorem mod_add_mod_eq {a b c : Nat} : a % c + b % c = (a + b) % c + uif a % c + b % c < c then 0 else c := by
   if h : 0 < c then
     rw [add_mod]
     split <;> rename_i h'
@@ -44,7 +44,7 @@ theorem mod_add_mod_eq {a b c : Nat} : a % c + b % c = (a + b) % c + if a % c + 
     replace h : c = 0 := by omega
     simp [h]
 
-theorem add_mod_eq_sub : (a + b) % c = a % c + b % c - if a % c + b % c < c then 0 else c := by
+theorem add_mod_eq_sub : (a + b) % c = a % c + b % c - uif a % c + b % c < c then 0 else c := by
   conv => rhs; congr; rw [mod_add_mod_eq]
   omega
 
@@ -124,7 +124,7 @@ theorem succ_div_of_dvd {a b : Nat} (h : b ∣ a + 1) :
   | succ b =>
     by_cases h' : b ≤ a
     · rw [Nat.div_eq_ite]
-      simp only [zero_lt_succ, Nat.add_le_add_iff_right, h', and_self, ↓reduceIte,
+      simp only [zero_lt_succ, Nat.add_le_add_iff_right, h', and_self, ↓reduceUIte,
         Nat.reduceSubDiff, Nat.add_right_cancel_iff]
       obtain ⟨_|k, h⟩ := Nat.dvd_of_mod_eq_zero h
       · simp at h
@@ -160,13 +160,13 @@ theorem succ_div_of_mod_ne_zero {a b : Nat} (h : (a + 1) % b ≠ 0) :
     (a + 1) / b = a / b := by
   rw [succ_div_of_not_dvd (by rwa [dvd_iff_mod_eq_zero])]
 
-protected theorem succ_div {a b : Nat} : (a + 1) / b = a / b + if b ∣ a + 1 then 1 else 0 := by
+protected theorem succ_div {a b : Nat} : (a + 1) / b = a / b + uif b ∣ a + 1 then 1 else 0 := by
   split <;> rename_i h
   · simp [succ_div_of_dvd h]
   · simp [succ_div_of_not_dvd h]
 
 protected theorem add_div {a b c : Nat} (h : 0 < c) :
-    (a + b) / c = a / c + b / c + if c ≤ a % c + b % c then 1 else 0 := by
+    (a + b) / c = a / c + b / c + uif c ≤ a % c + b % c then 1 else 0 := by
   conv => lhs; rw [← Nat.div_add_mod a c]
   rw [Nat.add_assoc, mul_add_div h]
   conv => lhs; rw [← Nat.div_add_mod b c]
@@ -192,7 +192,7 @@ theorem mod_add_mod_lt_of_add_mod_eq_sub_one (w : 0 < c) (h : (a + b) % c = c - 
 theorem add_div_of_dvd_add_add_one (h : c ∣ a + b + 1) : (a + b) / c = a / c + b / c := by
   have w : c ≠ 0 := by rintro rfl; simp at h
   replace w : 0 < c := by omega
-  rw [Nat.add_div w, ite_eq_right, Nat.add_zero]
+  rw [Nat.add_div w, UDecidable.ite_eq_right, Nat.add_zero]
   have := mod_add_mod_lt_of_add_mod_eq_sub_one w ((mod_eq_sub_iff Nat.zero_lt_one w).mpr h)
   omega
 

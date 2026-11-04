@@ -112,7 +112,7 @@ def Poly.isZero (p : Poly) : Bool :=
 def Poly.isNonZero (p : Poly) : Bool :=
   match p with
   | [] => false
-  | (k, v) :: p => bif v == fixedVar then k > 0 else isNonZero p
+  | (k, v) :: p => bif v == fixedVar then k >ᵇ 0 else isNonZero p
 
 abbrev Poly.denote_eq (ctx : Context) (mp : Poly × Poly) : Prop :=
   mp.1.denote ctx = mp.2.denote ctx

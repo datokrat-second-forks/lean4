@@ -349,7 +349,7 @@ theorem gcd_eq_iff {a b : Int} {g : Nat} :
 def dvdProdDvdOfDvdProd {k m n : Int} (h : k ∣ m * n) :
     { d : { m' // m' ∣ m } × { n' // n' ∣ n } // k = d.1.val * d.2.val } :=
   let d₀ := Nat.dvdProdDvdOfDvdProd (natAbs_mul _ _ ▸ natAbs_dvd_natAbs.2 h)
-  if hk : 0 ≤ k then
+  uif hk : 0 ≤ k then
     ⟨⟨⟨d₀.val.1.val, ofNat_dvd_left.2 d₀.val.1.property⟩,
       ⟨d₀.val.2.val, ofNat_dvd_left.2 d₀.val.2.property⟩⟩,
      (eq_natAbs_of_nonneg hk).trans (by simp [d₀.property])⟩

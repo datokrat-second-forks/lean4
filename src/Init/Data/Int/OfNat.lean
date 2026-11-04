@@ -60,7 +60,7 @@ theorem mul_congr {a b : Nat} {a' b' : Int}
   simp_all [Int.natCast_mul]
 
 theorem sub_congr {a b : Nat} {a' b' : Int}
-    (h₁ : NatCast.natCast a = a') (h₂ : NatCast.natCast b = b') : NatCast.natCast (a - b) = if b' + (-1)*a' ≤ 0 then a' - b' else 0 := by
+    (h₁ : NatCast.natCast a = a') (h₂ : NatCast.natCast b = b') : NatCast.natCast (a - b) = uif b' + (-1)*a' ≤ 0 then a' - b' else 0 := by
   rw [Int.neg_mul, ← Int.sub_eq_add_neg, Int.one_mul]
   split
   next h =>

@@ -25,7 +25,7 @@ protected theorem lt_or_eq_of_le {n m : Int} (h : n ≤ m) : n < m ∨ n = m := 
   omega
 
 theorem compare_eq_ite_lt (a b : Int) :
-    compare a b = if a < b then .lt else if b < a then .gt else .eq := by
+    compare a b = uif a < b then .lt else uif b < a then .gt else .eq := by
   simp only [compare, compareOfLessAndEq]
   split
   · rfl
@@ -35,7 +35,7 @@ theorem compare_eq_ite_lt (a b : Int) :
     | .inr rfl => simp
 
 theorem compare_eq_ite_le (a b : Int) :
-    compare a b = if a ≤ b then if b ≤ a then .eq else .lt else .gt := by
+    compare a b = uif a ≤ b then uif b ≤ a then .eq else .lt else .gt := by
   rw [compare_eq_ite_lt]
   split
   next hlt => simp [Int.le_of_lt hlt, Int.not_le.2 hlt]

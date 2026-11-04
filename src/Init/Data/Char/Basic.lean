@@ -155,11 +155,13 @@ The uppercase ASCII letters are the following: `ABCDEFGHIJKLMNOPQRSTUVWXYZ`.
 -/
 @[inline, implicit_reducible]
 def toLower (c : Char) : Char :=
-  if h : c.val ≥ 'A'.val ∧ c.val ≤ 'Z'.val then
+  bif h : c.val ≥ᵇ 'A'.val && c.val ≤ᵇ 'Z'.val then
     ⟨c.val + ('a'.val - 'A'.val), ?_⟩
   else
     c
 where finally
+  have h : c.val ≥ 'A'.val ∧ c.val ≤ 'Z'.val := by
+    simpa only [Bool.and_eq_true, decideLE_eq_true_iff] using h
   have h : c.val.toBitVec.toNat + ('a'.val - 'A'.val).toBitVec.toNat < 0xd800 :=
     Nat.add_lt_add_right (Nat.lt_of_le_of_lt h.2 (by decide)) _
   exact .inl (lt_of_eq_of_lt (Nat.mod_eq_of_lt (Nat.lt_trans h (by decide))) h)
@@ -172,11 +174,13 @@ The lowercase ASCII letters are the following: `abcdefghijklmnopqrstuvwxyz`.
 -/
 @[inline, implicit_reducible]
 def toUpper (c : Char) : Char :=
-  if h : 'a'.val ≤ c.val ∧ c.val ≤ 'z'.val then
+  bif h : 'a'.val ≤ᵇ c.val && c.val ≤ᵇ 'z'.val then
     ⟨c.val + ('A'.val - 'a'.val), ?_⟩
   else
     c
 where finally
+  have h : 'a'.val ≤ c.val ∧ c.val ≤ 'z'.val := by
+    simpa only [Bool.and_eq_true, decideLE_eq_true_iff] using h
   -- This expression is a ground non-value; generalize for better
   -- control on where it is evaluated.
   generalize hx : 'A'.val - 'a'.val = x

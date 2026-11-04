@@ -36,7 +36,7 @@ theorem isDigit_digitChar : n.digitChar.isDigit = decide (n < 10) :=
   match n with
   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 => by simp [digitChar]
   | _ + 10 => by
-    simp only [digitChar, ↓reduceIte, Nat.reduceEqDiff]
+    simp only [digitChar, ↓reduceCond, Nat.reduceEqDiff]
     (repeat' split) <;> simp
 
 private theorem digitChar_iff_aux :
@@ -150,10 +150,12 @@ private theorem toDigitsCore_eq_toDigitsCore_nil_append :
 private theorem toDigitsCore_eq_of_lt_fuel (hb : 1 < b) (h₁ : n < fuel₁) (h₂ : n < fuel₂) :
     toDigitsCore b fuel₁ n cs = toDigitsCore b fuel₂ n cs := by
   cases fuel₁ <;> cases fuel₂ <;> try contradiction
-  simp only [toDigitsCore, Nat.div_eq_zero_iff]
+  simp only [toDigitsCore]
   split
   · simp
-  · have := Nat.div_lt_self (by omega : 0 < n) hb
+  · rename_i h
+    rw [ne_eq, Nat.div_eq_zero_iff] at h
+    have := Nat.div_lt_self (by omega : 0 < n) hb
     exact toDigitsCore_eq_of_lt_fuel hb (by omega) (by omega)
 
 private theorem toDigitsCore_toDigitsCore
@@ -187,13 +189,13 @@ theorem toDigits_of_base_le (hb : 1 < b) (h : b ≤ n) :
   rw [toDigits_of_lt_base (n := n % b) (Nat.mod_lt n (by omega))]
 
 theorem toDigits_eq_ite (hb : 1 < b) :
-    toDigits b n = if n < b then [digitChar n] else toDigits b (n / b) ++ [digitChar (n % b)] := by
+    toDigits b n = uif n < b then [digitChar n] else toDigits b (n / b) ++ [digitChar (n % b)] := by
   split
   · rw [toDigits_of_lt_base ‹_›]
   · rw [toDigits_of_base_le hb (by omega)]
 
 @[deprecated Nat.toDigits_eq_ite (since := "2026-07-21")]
-theorem toDigits_eq_if {b : Nat} {n : Nat} (hb : 1 < b) : b.toDigits n = if n < b then [n.digitChar] else b.toDigits (n / b) ++ [(n % b).digitChar] := Nat.toDigits_eq_ite hb
+theorem toDigits_eq_if {b : Nat} {n : Nat} (hb : 1 < b) : b.toDigits n = uif n < b then [n.digitChar] else b.toDigits (n / b) ++ [(n % b).digitChar] := Nat.toDigits_eq_ite hb
 
 theorem length_toDigits_pos {b n : Nat} :
     0 < (Nat.toDigits b n).length := by

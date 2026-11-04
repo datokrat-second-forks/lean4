@@ -19,6 +19,6 @@ public protected def repr : Int → String
   | negSucc m => "-" ++ Nat.repr (Nat.succ m)
 
 public instance : Repr Int where
-  reprPrec i prec := if i < 0 then Repr.addAppParen i.repr prec else i.repr
+  reprPrec i prec := bif i <ᵇ 0 then Repr.addAppParen i.repr prec else i.repr
 
 end Int

@@ -8,6 +8,7 @@ module
 prelude
 public import Init.Data.NeZero
 public import Init.WF
+public import Init.UDecidable.Basic
 meta import Init.MetaTypes
 import Init.WFTactics
 
@@ -24,7 +25,7 @@ there is some `c` such that `b = a * c`.
 instance : Dvd Nat where
   dvd a b := Exists (fun c => b = a * c)
 
-private theorem div.go.fuel_congr (x y fuel1 fuel2 : Nat) (hy : 0 < y) (h1 : x < fuel1) (h2 : x < fuel2) :
+private theorem div.go.fuel_congr (x y fuel1 fuel2 : Nat) (hy : (0 <ᵇ y) = true) (h1 : x < fuel1) (h2 : x < fuel2) :
     Nat.div.go y hy fuel1 x h1 = Nat.div.go y hy fuel2 x h2 := by
   match fuel1, fuel2 with
   | 0, _ => contradiction
@@ -36,24 +37,24 @@ private theorem div.go.fuel_congr (x y fuel1 fuel2 : Nat) (hy : 0 < y) (h1 : x <
     next => rfl
 termination_by structural fuel1
 
-theorem div_eq_ite (x y : Nat) : x / y = if 0 < y ∧ y ≤ x then (x - y) / y + 1 else 0 := by
-  change Nat.div _ _ = ite _ (Nat.div _ _ + 1) _
+theorem div_eq_ite (x y : Nat) : x / y = uif 0 < y ∧ y ≤ x then (x - y) / y + 1 else 0 := by
+  change Nat.div _ _ = UDecidable.ite _ (Nat.div _ _ + 1) _
   unfold Nat.div
   split
   next =>
     rw [Nat.div.go]
     split
     next =>
-      simp only [and_self, ↓reduceIte, *]
+      simp only [and_self, ↓reduceUIte, *]
       congr 1
       apply div.go.fuel_congr
     next =>
-      simp only [and_false, ↓reduceIte, *]
+      simp only [and_false, ↓reduceUIte, *]
   next =>
-    simp only [false_and, ↓reduceIte, *]
+    simp only [false_and, ↓reduceUIte, *]
 
 @[deprecated div_eq_ite (since := "2026-07-20")]
-theorem div_eq (x y : Nat) : x / y = if 0 < y ∧ y ≤ x then (x - y) / y + 1 else 0 :=
+theorem div_eq (x y : Nat) : x / y = uif 0 < y ∧ y ≤ x then (x - y) / y + 1 else 0 :=
   Nat.div_eq_ite x y
 
 /--
@@ -66,7 +67,7 @@ def div.inductionOn.{u}
       (ind  : ∀ x y, 0 < y ∧ y ≤ x → motive (x - y) y → motive x y)
       (base : ∀ x y, ¬(0 < y ∧ y ≤ x) → motive x y)
       : motive x y :=
-  if h : 0 < y ∧ y ≤ x then
+  uif h : 0 < y ∧ y ≤ x then
     ind x y h (inductionOn (x - y) y ind base)
   else
     base x y h
@@ -117,7 +118,7 @@ protected def divExact (x y : @& Nat) (h : y ∣ x) : Nat :=
 @[simp]
 theorem divExact_eq_div {x y : Nat} (h : y ∣ x) : x.divExact y h = x / y := rfl
 
-private theorem modCore.go.fuel_congr (x y fuel1 fuel2 : Nat) (hy : 0 < y) (h1 : x < fuel1) (h2 : x < fuel2) :
+private theorem modCore.go.fuel_congr (x y fuel1 fuel2 : Nat) (hy : (0 <ᵇ y) = true) (h1 : x < fuel1) (h2 : x < fuel2) :
     Nat.modCore.go y hy fuel1 x h1 = Nat.modCore.go y hy fuel2 x h2 := by
   match fuel1, fuel2 with
   | 0, _ => contradiction
@@ -130,7 +131,7 @@ private theorem modCore.go.fuel_congr (x y fuel1 fuel2 : Nat) (hy : 0 < y) (h1 :
 termination_by structural fuel1
 
 protected theorem modCore_eq (x y : Nat) : Nat.modCore x y =
-  if 0 < y ∧ y ≤ x then
+  uif 0 < y ∧ y ≤ x then
     Nat.modCore (x - y) y
   else
     x := by
@@ -140,30 +141,30 @@ protected theorem modCore_eq (x y : Nat) : Nat.modCore x y =
     rw [Nat.modCore.go]
     split
     next =>
-      simp only [and_self, ↓reduceIte, *]
+      simp only [and_self, ↓reduceUIte, *]
       apply modCore.go.fuel_congr
     next =>
-      simp only [and_false, ↓reduceIte, *]
+      simp only [and_false, ↓reduceUIte, *]
   next =>
-    simp only [false_and, ↓reduceIte, *]
+    simp only [false_and, ↓reduceUIte, *]
 
 protected theorem modCore_eq_mod (n m : Nat) : Nat.modCore n m = n % m := by
   change Nat.modCore n m = Nat.mod n m
   match n, m with
   | 0, _ =>
     rw [Nat.modCore_eq]
-    exact ite_eq_right fun ⟨hlt, hle⟩ => Nat.lt_irrefl _ (Nat.lt_of_lt_of_le hlt hle)
+    exact UDecidable.ite_eq_right fun ⟨hlt, hle⟩ => Nat.lt_irrefl _ (Nat.lt_of_lt_of_le hlt hle)
   | (_ + 1), _ =>
     rw [Nat.mod]; dsimp
-    refine iteInduction (fun _ => rfl) (fun h => ?false) -- cannot use `split` this early yet
+    refine Bool.cond_induction (P := (Nat.modCore _ _ = ·)) _ (fun _ => rfl) (fun h => ?false)
     rw [Nat.modCore_eq]
-    exact ite_eq_right fun ⟨_hlt, hle⟩ => h hle
+    exact UDecidable.ite_eq_right fun ⟨_hlt, hle⟩ => of_decide_eq_false h hle
 
-theorem mod_eq_ite (x y : Nat) : x % y = if 0 < y ∧ y ≤ x then (x - y) % y else x := by
+theorem mod_eq_ite (x y : Nat) : x % y = uif 0 < y ∧ y ≤ x then (x - y) % y else x := by
   rw [←Nat.modCore_eq_mod, ←Nat.modCore_eq_mod, Nat.modCore_eq]
 
 @[deprecated mod_eq_ite (since := "2026-07-20")]
-theorem mod_eq (x y : Nat) : x % y = if 0 < y ∧ y ≤ x then (x - y) % y else x :=
+theorem mod_eq (x y : Nat) : x % y = uif 0 < y ∧ y ≤ x then (x - y) % y else x :=
   Nat.mod_eq_ite x y
 
 /--
@@ -178,15 +179,15 @@ def mod.inductionOn.{u}
   div.inductionOn x y ind base
 
 @[simp] theorem mod_zero (a : Nat) : a % 0 = a :=
-  have : (if 0 < 0 ∧ 0 ≤ a then (a - 0) % 0 else a) = a :=
+  have : (uif 0 < 0 ∧ 0 ≤ a then (a - 0) % 0 else a) = a :=
     have h : ¬ (0 < 0 ∧ 0 ≤ a) := fun ⟨h₁, _⟩ => absurd h₁ (Nat.lt_irrefl _)
-    ite_eq_right h
+    UDecidable.ite_eq_right h
   (mod_eq_ite a 0).symm ▸ this
 
 theorem mod_eq_of_lt {a b : Nat} (h : a < b) : a % b = a :=
-  have : (if 0 < b ∧ b ≤ a then (a - b) % b else a) = a :=
+  have : (uif 0 < b ∧ b ≤ a then (a - b) % b else a) = a :=
     have h' : ¬(0 < b ∧ b ≤ a) := fun ⟨_, h₁⟩ => absurd h₁ (Nat.not_le_of_gt h)
-    ite_eq_right h'
+    UDecidable.ite_eq_right h'
   (mod_eq_ite a b).symm ▸ this
 
 @[simp] theorem one_mod_eq_zero_iff {n : Nat} : 1 % n = 0 ↔ n = 1 := by
@@ -205,7 +206,7 @@ theorem mod_eq_of_lt {a b : Nat} (h : a < b) : a % b = a :=
 theorem mod_eq_sub_mod {a b : Nat} (h : a ≥ b) : a % b = (a - b) % b :=
   match eq_zero_or_pos b with
   | Or.inl h₁ => h₁.symm ▸ (Nat.sub_zero a).symm ▸ rfl
-  | Or.inr h₁ => (mod_eq_ite a b).symm ▸ ite_eq_left ⟨h₁, h⟩
+  | Or.inr h₁ => (mod_eq_ite a b).symm ▸ UDecidable.ite_eq_left ⟨h₁, h⟩
 
 @[simp] protected theorem sub_mod_add_mod_cancel (a b : Nat) [NeZero a] : a - b % a + b % a = a := by
   rw [Nat.sub_add_cancel]
@@ -250,7 +251,7 @@ theorem div_add_mod (m n : Nat) : n * (m / n) + m % n = m := by
 decreasing_by apply div_rec_lemma; assumption
 
 theorem div_eq_sub_div (h₁ : 0 < b) (h₂ : b ≤ a) : a / b = (a - b) / b + 1 := by
- rw [div_eq_ite a, ite_eq_left]; constructor <;> assumption
+ rw [div_eq_ite a, UDecidable.ite_eq_left]; constructor <;> assumption
 
 theorem mod_add_div (m k : Nat) : m % k + k * (m / k) = m := by
   induction m, k using mod.inductionOn with rw [div_eq_ite, mod_eq_ite]
@@ -274,7 +275,7 @@ theorem mod_eq_sub_div_mul {x k : Nat} : x % k = x - (x / k) * k := by
   rw [div_eq_ite]; simp [Nat.lt_irrefl]
 
 @[simp] protected theorem zero_div (b : Nat) : 0 / b = 0 :=
-  (div_eq_ite 0 b).trans <| ite_eq_right <| And.rec Nat.not_le_of_gt
+  (div_eq_ite 0 b).trans <| UDecidable.ite_eq_right <| And.rec Nat.not_le_of_gt
 
 theorem le_div_iff_mul_le (k0 : 0 < k) : x ≤ y / k ↔ x * k ≤ y := by
   induction y, k using mod.inductionOn generalizing x with
@@ -420,7 +421,7 @@ theorem mul_mod_mul_left (z x y : Nat) : (z * x) % (z * y) = z * (x % y) :=
         exact IH _ (sub_lt (Nat.lt_of_lt_of_le y0 yn) y0)
 
 theorem div_eq_of_lt (h₀ : a < b) : a / b = 0 := by
-  rw [div_eq_ite a, ite_eq_right]
+  rw [div_eq_ite a, UDecidable.ite_eq_right]
   intro h₁
   apply Nat.not_le_of_gt h₀ h₁.right
 

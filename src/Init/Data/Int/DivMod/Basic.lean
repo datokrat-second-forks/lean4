@@ -317,7 +317,7 @@ Examples:
 @[implicit_reducible]
 def bmod (x : Int) (m : Nat) : Int :=
   let r := x % m
-  if r < (m + 1) / 2 then
+  bif r <ᵇ (m + 1) / 2 then
     r
   else
     r - m
@@ -341,12 +341,12 @@ Examples:
 -/
 @[implicit_reducible]
 def bdiv (x : Int) (m : Nat) : Int :=
-  if m = 0 then
+  bif m =ᵇ 0 then
     0
   else
     let q := x / m
     let r := x % m
-    if r < (m + 1) / 2 then
+    bif r <ᵇ (m + 1) / 2 then
       q
     else
       q + 1

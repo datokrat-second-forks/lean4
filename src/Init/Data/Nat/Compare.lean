@@ -21,7 +21,7 @@ Import `Std.Classes.Ord` in order to obtain the `TransOrd` and `LawfulEqOrd` ins
 namespace Nat
 
 theorem compare_eq_ite_lt (a b : Nat) :
-    compare a b = if a < b then .lt else if b < a then .gt else .eq := by
+    compare a b = uif a < b then .lt else uif b < a then .gt else .eq := by
   simp only [compare, compareOfLessAndEq]
   split
   · rfl
@@ -31,7 +31,7 @@ theorem compare_eq_ite_lt (a b : Nat) :
     | .inr rfl => simp
 
 theorem compare_eq_ite_le (a b : Nat) :
-    compare a b = if a ≤ b then if b ≤ a then .eq else .lt else .gt := by
+    compare a b = uif a ≤ b then uif b ≤ a then .eq else .lt else .gt := by
   rw [compare_eq_ite_lt]
   split
   next hlt => simp [Nat.le_of_lt hlt, Nat.not_le.2 hlt]

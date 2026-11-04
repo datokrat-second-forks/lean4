@@ -77,7 +77,7 @@ theorem notLTTotal : Std.Total (¬ · < · : Char → Char → Prop) where
   total := fun x y => by simpa using Char.le_total y x
 
 @[simp] theorem ofNat_toNat (c : Char) : Char.ofNat c.toNat = c := by
-  rw [Char.ofNat, dite_eq_left]
+  rw [Char.ofNat, Bool.dcond_pos (decide_eq_true (p := c.toNat.isValidChar) c.valid)]
   rfl
 
 @[simp]

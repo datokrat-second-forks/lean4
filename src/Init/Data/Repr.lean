@@ -88,7 +88,7 @@ Together with `reprArg`, this can be used to correctly parenthesize function app
 syntax.
 -/
 def Repr.addAppParen (f : Format) (prec : Nat) : Format :=
-  if prec >= max_prec then
+  bif prec ≥ᵇ max_prec then
     Format.paren f
   else
     f
@@ -178,22 +178,22 @@ Examples:
  * `Nat.digitChar 85 = '*'`
 -/
 def digitChar (n : Nat) : Char :=
-  if n = 0 then '0' else
-  if n = 1 then '1' else
-  if n = 2 then '2' else
-  if n = 3 then '3' else
-  if n = 4 then '4' else
-  if n = 5 then '5' else
-  if n = 6 then '6' else
-  if n = 7 then '7' else
-  if n = 8 then '8' else
-  if n = 9 then '9' else
-  if n = 0xa then 'a' else
-  if n = 0xb then 'b' else
-  if n = 0xc then 'c' else
-  if n = 0xd then 'd' else
-  if n = 0xe then 'e' else
-  if n = 0xf then 'f' else
+  bif n =ᵇ 0 then '0' else
+  bif n =ᵇ 1 then '1' else
+  bif n =ᵇ 2 then '2' else
+  bif n =ᵇ 3 then '3' else
+  bif n =ᵇ 4 then '4' else
+  bif n =ᵇ 5 then '5' else
+  bif n =ᵇ 6 then '6' else
+  bif n =ᵇ 7 then '7' else
+  bif n =ᵇ 8 then '8' else
+  bif n =ᵇ 9 then '9' else
+  bif n =ᵇ 0xa then 'a' else
+  bif n =ᵇ 0xb then 'b' else
+  bif n =ᵇ 0xc then 'c' else
+  bif n =ᵇ 0xd then 'd' else
+  bif n =ᵇ 0xe then 'e' else
+  bif n =ᵇ 0xf then 'f' else
   '*'
 
 def toDigitsCore (base : Nat) : Nat → Nat → List Char → List Char
@@ -201,7 +201,7 @@ def toDigitsCore (base : Nat) : Nat → Nat → List Char → List Char
   | fuel+1, n, ds =>
     let d  := digitChar <| n % base;
     let n' := n / base;
-    if n' = 0 then d::ds
+    bif n' =ᵇ 0 then d::ds
     else toDigitsCore base fuel n' (d::ds)
 
 /--
@@ -257,23 +257,23 @@ Examples:
 * `Nat.superDigitChar 10 = '*'`
 -/
 def superDigitChar (n : Nat) : Char :=
-  if n = 0 then '⁰' else
-  if n = 1 then '¹' else
-  if n = 2 then '²' else
-  if n = 3 then '³' else
-  if n = 4 then '⁴' else
-  if n = 5 then '⁵' else
-  if n = 6 then '⁶' else
-  if n = 7 then '⁷' else
-  if n = 8 then '⁸' else
-  if n = 9 then '⁹' else
+  bif n =ᵇ 0 then '⁰' else
+  bif n =ᵇ 1 then '¹' else
+  bif n =ᵇ 2 then '²' else
+  bif n =ᵇ 3 then '³' else
+  bif n =ᵇ 4 then '⁴' else
+  bif n =ᵇ 5 then '⁵' else
+  bif n =ᵇ 6 then '⁶' else
+  bif n =ᵇ 7 then '⁷' else
+  bif n =ᵇ 8 then '⁸' else
+  bif n =ᵇ 9 then '⁹' else
   '*'
 
 partial def toSuperDigitsAux : Nat → List Char → List Char
   | n, ds =>
     let d  := superDigitChar <| n % 10;
     let n' := n / 10;
-    if n' = 0 then d::ds
+    bif n' =ᵇ 0 then d::ds
     else toSuperDigitsAux n' (d::ds)
 
 /--
@@ -308,23 +308,23 @@ Examples:
 * `Nat.subDigitChar 10 = '*'`
 -/
 def subDigitChar (n : Nat) : Char :=
-  if n = 0 then '₀' else
-  if n = 1 then '₁' else
-  if n = 2 then '₂' else
-  if n = 3 then '₃' else
-  if n = 4 then '₄' else
-  if n = 5 then '₅' else
-  if n = 6 then '₆' else
-  if n = 7 then '₇' else
-  if n = 8 then '₈' else
-  if n = 9 then '₉' else
+  bif n =ᵇ 0 then '₀' else
+  bif n =ᵇ 1 then '₁' else
+  bif n =ᵇ 2 then '₂' else
+  bif n =ᵇ 3 then '₃' else
+  bif n =ᵇ 4 then '₄' else
+  bif n =ᵇ 5 then '₅' else
+  bif n =ᵇ 6 then '₆' else
+  bif n =ᵇ 7 then '₇' else
+  bif n =ᵇ 8 then '₈' else
+  bif n =ᵇ 9 then '₉' else
   '*'
 
 partial def toSubDigitsAux : Nat → List Char → List Char
   | n, ds =>
     let d  := subDigitChar <| n % 10;
     let n' := n / 10;
-    if n' = 0 then d::ds
+    bif n' =ᵇ 0 then d::ds
     else toSubDigitsAux n' (d::ds)
 
 /--
@@ -358,12 +358,12 @@ def hexDigitRepr (n : Nat) : String :=
   String.singleton <| Nat.digitChar n
 
 def Char.quoteCore (c : Char) (inString : Bool := false) : String :=
-  if       c = '\n' then "\\n"
-  else if  c = '\t' then "\\t"
-  else if  c = '\\' then "\\\\"
-  else if  c = '\"' then "\\\""
-  else if !inString && c == '\'' then "\\\'"
-  else if  c.toNat <= 31 ∨ c = '\x7f' then String.Internal.append "\\x" (smallCharToHex c)
+  bif       c =ᵇ '\n' then "\\n"
+  else bif  c =ᵇ '\t' then "\\t"
+  else bif  c =ᵇ '\\' then "\\\\"
+  else bif  c =ᵇ '\"' then "\\\""
+  else bif !inString && c == '\'' then "\\\'"
+  else bif  c.toNat ≤ᵇ 31 || c =ᵇ '\x7f' then String.Internal.append "\\x" (smallCharToHex c)
   else String.singleton c
 where
   smallCharToHex (c : Char) : String :=
@@ -398,7 +398,7 @@ Examples:
 * `"\"".quote = "\"\\\"\""`
 -/
 def String.quote (s : String) : String :=
-  if String.Internal.isEmpty s then "\"\""
+  bif String.Internal.isEmpty s then "\"\""
   else String.Internal.append (String.Internal.foldl (fun s c => String.Internal.append s (c.quoteCore (inString := true))) "\"" s) "\""
 
 instance : Repr String where

@@ -36,10 +36,10 @@ Examples:
 -/
 @[expose, semireducible, extern "lean_nat_powmod"]
 def powMod (b e m : @& Nat) : Nat :=
-  if e = 0 then 1 % m
+  bif _h : e =ᵇ 0 then 1 % m
   else
     let r := powMod (b * b % m) (e / 2) m
-    if e % 2 = 1 then r * b % m else r
+    bif e % 2 =ᵇ 1 then r * b % m else r
 termination_by e
 decreasing_by omega
 

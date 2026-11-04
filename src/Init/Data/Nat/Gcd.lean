@@ -33,12 +33,12 @@ Examples:
 -/
 @[extern "lean_nat_gcd"]
 def gcd (m n : @& Nat) : Nat :=
-  if m = 0 then
+  bif _h : m =ᵇ 0 then
     n
   else
     gcd (n % m) m
   termination_by m
-  decreasing_by simp_wf; apply mod_lt _ (zero_lt_of_ne_zero _); assumption
+  decreasing_by simp_wf; exact mod_lt _ (zero_lt_of_ne_zero (of_decide_eq_false ‹(m =ᵇ 0) = false›))
 
 @[simp] theorem gcd_zero_left (y : Nat) : gcd 0 y = y := by
   rw [gcd]; rfl
@@ -49,7 +49,7 @@ theorem gcd_succ (x y : Nat) : gcd (succ x) y = gcd (y % succ x) (succ x) := by
 theorem gcd_add_one (x y : Nat) : gcd (x + 1) y = gcd (y % (x + 1)) (x + 1) := by
   rw [gcd]; rfl
 
-theorem gcd_def (x y : Nat) : gcd x y = if x = 0 then y else gcd (y % x) x := by
+theorem gcd_def (x y : Nat) : gcd x y = uif x = 0 then y else gcd (y % x) x := by
   cases x <;> simp [Nat.gcd_add_one]
 
 @[simp] theorem gcd_one_left (n : Nat) : gcd 1 n = 1 := by
@@ -371,7 +371,7 @@ theorem gcd_eq_iff {a b : Nat} :
 /-- Represent a divisor of `m * n` as a product of a divisor of `m` and a divisor of `n`. -/
 def dvdProdDvdOfDvdProd {k m n : Nat} (h : k ∣ m * n) :
     {d : {m' // m' ∣ m} × {n' // n' ∣ n} // k = d.1.val * d.2.val} :=
-  if h0 : gcd k m = 0 then
+  uif h0 : gcd k m = 0 then
     ⟨⟨⟨0, eq_zero_of_gcd_eq_zero_right h0 ▸ Nat.dvd_refl 0⟩,
       ⟨n, Nat.dvd_refl n⟩⟩,
       eq_zero_of_gcd_eq_zero_left h0 ▸ (Nat.zero_mul n).symm⟩

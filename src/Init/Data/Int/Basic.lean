@@ -428,7 +428,7 @@ Examples:
 @[implicit_reducible]
 protected def pow : Int → Nat → Int
   | (m : Nat), n => Int.ofNat (m ^ n)
-  | m@-[_+1], n => if n % 2 = 0 then Int.ofNat (m.natAbs ^ n) else - Int.ofNat (m.natAbs ^ n)
+  | m@-[_+1], n => bif n % 2 =ᵇ 0 then Int.ofNat (m.natAbs ^ n) else - Int.ofNat (m.natAbs ^ n)
 
 instance : NatPow Int where
   pow := Int.pow
