@@ -184,6 +184,7 @@ def elseBIf := atomic (group (withPosition ("else " >> checkLineEq >> " bif ")))
 /--
 `uif c then ... else ...` in `do` blocks. Like `if`, the branches are `do` sequences, so they can
 `return`, `break` or reassign mutable variables, but the condition is decided with `UDecidable`.
+`uif h : c then ...` binds `h : c` and `h : ¬c` in the branches.
 -/
 @[builtin_doElem_parser] def doUIf := leading_parser withResetCache <| withPositionAfterLinebreak <| ppRealGroup <|
   ppRealFill (ppIndent ("uif " >> doIfProp >> " then") >> ppSpace >> doSeq) >>
@@ -193,12 +194,13 @@ def elseBIf := atomic (group (withPosition ("else " >> checkLineEq >> " bif ")))
     ppDedent ppSpace >> ppRealFill ("else " >> doSeq))
 /--
 `bif c then ... else ...` in `do` blocks, where `c : Bool`. Like `if`, the branches are `do`
-sequences, but the result is a `cond`, so it reduces when `c` does.
+sequences, but the result is a `cond`, so it reduces when `c` does. With `bif h : c then ...`, the
+branches have `h : c = true` and `h : c = false`, respectively, and the result is a `Bool.dcond`.
 -/
 @[builtin_doElem_parser] def doBIf := leading_parser withResetCache <| withPositionAfterLinebreak <| ppRealGroup <|
-  ppRealFill (ppIndent ("bif " >> termParser >> " then") >> ppSpace >> doSeq) >>
+  ppRealFill (ppIndent ("bif " >> doIfProp >> " then") >> ppSpace >> doSeq) >>
   many (checkColGe "'else bif' in 'do' must be indented" >>
-    group (ppDedent ppSpace >> ppRealFill (elseBIf >> termParser >> " then " >> doSeq))) >>
+    group (ppDedent ppSpace >> ppRealFill (elseBIf >> doIfProp >> " then " >> doSeq))) >>
   optional (checkColGe "'else' in 'do' must be indented" >>
     ppDedent ppSpace >> ppRealFill ("else " >> doSeq))
 @[builtin_doElem_parser] def doUnless := leading_parser

@@ -82,7 +82,10 @@ theorem udite_eq_dite {α : Sort u} {c : Prop} {_ : UDecidable c} {t : c → α}
 theorem cond_eq_ite (c : Bool) (a b : α) : cond c a b = ite c a b := by
   cases c <;> simp [*]
 
-/-! `grind` normalizes `if`, `dite` and `cond` to `uif`, whose instance it never inspects. -/
+/-!
+`grind` normalizes `if`, `dite`, `cond` and `Bool.dcond` to `uif`, whose instance it never
+inspects.
+-/
 
 theorem ite_eq_uite {α : Sort u} {c : Prop} {_ : Decidable c} {t e : α} :
     ite c t e = @UDecidable.ite α c (UDecidable.ofDecidable c) t e :=
@@ -213,7 +216,7 @@ init_grind_norm
   -- ite
   uite_true_false uite_false_true ite_eq_uite dite_eq_udite
   -- Bool cond
-  cond_eq_uite
+  cond_eq_uite Bool.dcond_eq_udite
   -- Bool or
   Bool.or_false Bool.or_true Bool.false_or Bool.true_or Bool.or_eq_true
   -- Bool and
@@ -227,6 +230,7 @@ init_grind_norm
   -- decide
   decide_eq_true_eq decide_not not_decide_eq_true
   UDecidable.decide_eq_true_eq UDecidable.decide_not UDecidable.not_decide_eq_true
+  decideLT_eq_udecide decideLE_eq_udecide decideEq_eq_udecide decideNe_eq_udecide
   -- Nat
   Nat.le_zero_eq Nat.lt_eq Nat.succ_eq_add_one
   Nat.add_eq Nat.sub_eq Nat.mul_eq Nat.zero_eq Nat.le_eq

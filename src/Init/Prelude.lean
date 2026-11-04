@@ -1024,15 +1024,13 @@ only the selected branch is evaluated.
 The dependent conditional function, in which each branch is provided with a local assumption about
 the condition's value. This allows the value to be used in proofs as well as for control flow.
 
-`dcond c (fun h => x) (fun h => y)` is the same as `if h : c then x else y`, but optimized for a
-Boolean condition rather than a decidable proposition. Unlike the non-dependent version `cond`,
-there is no special notation for `dcond`.
+`dcond c (fun h => x) (fun h => y)` is written `bif h : c then x else y`. It is the same as
+`if h : c then x else y`, but optimized for a Boolean condition rather than a decidable
+proposition, and it reduces when `c` does. `simp` rewrites it to `uif h : c = true then x else y`.
 
 Just like `ite`, `dite`, and `cond`, `dcond` is declared `@[macro_inline]`, which causes
 applications of `dcond` to be unfolded. As a result, `x` and `y` are not evaluated at runtime until
-one of them is selected, and only the selected branch is evaluated. `dcond` is intended for
-metaprogramming use, rather than for use in verified programs, so behavioral lemmas are not
-provided.
+one of them is selected, and only the selected branch is evaluated.
 -/
 @[macro_inline]
 protected def Bool.dcond {α : Sort u} (c : Bool) (x : Eq c true → α) (y : Eq c false → α) : α :=

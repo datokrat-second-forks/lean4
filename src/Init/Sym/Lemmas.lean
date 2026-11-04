@@ -101,6 +101,19 @@ theorem cond_cond_eq_false {α : Sort u} (c : Bool) (a b : α) (h : c = false) :
 theorem cond_cond_congr {α : Sort u} (c : Bool) (a b : α) (c' : Bool) (h : c = c') : cond c a b = cond c' a b := by
   simp [*]
 
+theorem dcond_cond_eq_true {α : Sort u} (c : Bool) (a : c = true → α) (b : c = false → α)
+    (h : c = true) : Bool.dcond c a b = a h := by
+  subst h; rfl
+
+theorem dcond_cond_eq_false {α : Sort u} (c : Bool) (a : c = true → α) (b : c = false → α)
+    (h : c = false) : Bool.dcond c a b = b h := by
+  subst h; rfl
+
+theorem dcond_cond_congr {α : Sort u} (c : Bool) (a : c = true → α) (b : c = false → α) (c' : Bool)
+    (h : c = c') :
+    Bool.dcond c a b = Bool.dcond c' (fun h' => a (h.trans h')) (fun h' => b (h.trans h')) := by
+  subst h; rfl
+
 theorem Nat.lt_eq_true (a b : Nat) (h : decide (a < b) = true) : (a < b) = True := by simp_all
 theorem Int.lt_eq_true (a b : Int) (h : decide (a < b) = true) : (a < b) = True := by simp_all
 theorem Rat.lt_eq_true (a b : Rat) (h : decide (a < b) = true) : (a < b) = True := by simp_all

@@ -1299,6 +1299,13 @@ def delabCond : Delab := whenNotPPOption getPPExplicit <| whenPPOption getPPNota
   let e ← withAppArg delab
   `(bif $c then $t else $e)
 
+@[builtin_delab app.Bool.dcond]
+def delabDCond : Delab := whenNotPPOption getPPExplicit <| whenPPOption getPPNotation <| withOverApp 4 do
+  let c ← withAppFn $ withAppFn $ withAppArg delab
+  let (t, h) ← withAppFn $ withAppArg $ delabDIte.delabBranch none
+  let (e, _) ← withAppArg $ delabDIte.delabBranch h
+  `(bif $(mkIdent h):ident : $c then $t else $e)
+
 @[builtin_delab app.namedPattern]
 def delabNamedPattern : Delab := do
   -- Note: we keep this as a delaborator because it accesses the DelabM context

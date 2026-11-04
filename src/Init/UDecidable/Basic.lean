@@ -828,4 +828,33 @@ the iterator type of `Iter.filter`, which then no longer matches the lemmas abou
   | inl hp => rw [decide_eq_true hp, ite_eq_left hp]; rfl
   | inr hp => rw [decide_eq_false hp, ite_eq_right hp]; rfl
 
+@[simp] theorem _root_.Bool.dcond_true {α : Sort u} (t : true = true → α) (e : true = false → α) :
+    Bool.dcond true t e = t rfl :=
+  rfl
+
+@[simp] theorem _root_.Bool.dcond_false {α : Sort u} (t : false = true → α)
+    (e : false = false → α) : Bool.dcond false t e = e rfl :=
+  rfl
+
+/-- `simp` normalizes `Bool.dcond` to `uif`, so that `bif h :` and `uif h :` meet. -/
+@[simp] theorem _root_.Bool.dcond_eq_udite {α : Sort u} (b : Bool) (t : b = true → α)
+    (e : b = false → α) :
+    Bool.dcond b t e = uif h : b = true then t h else e (Bool.of_not_eq_true h) := by
+  cases b with
+  | true => exact (dite_eq_left (t := t) rfl).symm
+  | false =>
+    exact (dite_eq_right (e := fun h => e (Bool.of_not_eq_true h)) fun h : false = true =>
+      Bool.noConfusion h).symm
+
+/--
+A `Bool.dcond` on a coerced proposition becomes `uif`. This is the dependent version of
+`Bool.cond_udecide`, and its proof is not `rfl` for the same reason.
+-/
+@[simp ↓] theorem _root_.Bool.dcond_udecide {α : Sort u} (p : Prop) [UDecidable p]
+    (t : decide p = true → α) (e : decide p = false → α) :
+    Bool.dcond (decide p) t e = uif h : p then t (decide_eq_true h) else e (decide_eq_false h) := by
+  cases em p with
+  | inl hp => rw [dcond_eq_left (decide_eq_true hp), dite_eq_left hp]
+  | inr hp => rw [dcond_eq_right (decide_eq_false hp), dite_eq_right hp]
+
 end UDecidable

@@ -17,7 +17,8 @@ public section
 namespace Lean.Meta
 
 /--
-Tries to rewrite the `ite`, `dite`, `UDecidable.ite`, `UDecidable.dite` or `cond` expression `e`
+Tries to rewrite the `ite`, `dite`, `UDecidable.ite`, `UDecidable.dite`, `cond` or `Bool.dcond`
+expression `e`
 with the hypothesis `hc`.
 If it fails, it returns a rewrite with `proof? := none` and unchanged expression.
 -/
@@ -82,6 +83,18 @@ def rwIfWith (hc : Expr) (e : Expr) : MetaM Simp.Result := do
       return {
         expr := f
         proof? := (mkAppN (mkConst ``Bool.cond_neg us) #[α, c, t, f, hc])
+      }
+  | dcond@Bool.dcond α c t f =>
+    let us := dcond.constLevels!
+    if (← isDefEq (← inferType hc) (← mkEq c (mkConst ``Bool.true))) then
+      return {
+        expr := t.beta #[hc]
+        proof? := mkAppN (mkConst ``Bool.dcond_pos us) #[α, c, t, f, hc]
+      }
+    if (← isDefEq (← inferType hc) (← mkEq c (mkConst ``Bool.false))) then
+      return {
+        expr := f.beta #[hc]
+        proof? := mkAppN (mkConst ``Bool.dcond_neg us) #[α, c, t, f, hc]
       }
   | _ => pure ()
   return { expr := e }

@@ -129,6 +129,7 @@ public def addDefaultTypeAnalysisLemmas (methods : Sym.Simp.Methods) :
   let mut lemmas : Sym.Simp.Theorems := {}
   let relevantNames := #[
     ``dite_eq_ite,
+    ``UDecidable.dite_eq_ite,
     ``Std.Tactic.BVDecide.Normalize.BitVec.getElem_eq_getLsbD,
   ]
   for name in relevantNames do

@@ -71,8 +71,8 @@ where
 /-!
 `uif` and `bif` in `do` blocks. Their syntax is taken apart by position: the layout is
 `[kw, cond, "then", thenSeq, elseIfs, else?]`, as for `doIf`, where each `elseIfs` entry is
-`[elseKw, cond, "then", seq]` and `else?` is `["else", seq]` if present. For `doUIf`, `cond` is a
-`doIfProp` (`[optional [h, ":"], c]`); for `doBIf`, it is a term.
+`[elseKw, cond, "then", seq]` and `else?` is `["else", seq]` if present. `cond` is a `doIfProp`
+(`[optional [h, ":"], c]`).
 -/
 
 private def mkDoSeqOfElem (elem : Syntax) : MacroM Syntax :=
@@ -123,17 +123,25 @@ private def elabDoCond (stx : Syntax) (dec : DoElemCont)
   let mγ ← mkMonadApp (← read).doBlockResultType
   Term.elabTermEnsuringType (← mkTerm then_ else_) mγ
 
+/-- The hypothesis name of a `doIfProp`, if it has one. -/
+private def doIfPropHyp? (prop : Syntax) : Option Term :=
+  if prop[0].isNone then none
+  else
+    let h := prop[0][0]
+    some ⟨if h.isOfKind ``Lean.binderIdent then h[0] else h⟩
+
 @[builtin_doElem_elab Lean.Parser.Term.doUIf] def elabDoUIf : DoElab := fun stx dec => do
   let prop := stx.raw[1]
   let c : Term := ⟨prop[1]⟩
   elabDoCond stx dec fun then_ else_ =>
-    if prop[0].isNone then
-      `(UDecidable.ite $c $then_ $else_)
-    else
-      let h := prop[0][0]
-      let h : Term := ⟨if h.isOfKind ``Lean.binderIdent then h[0] else h⟩
-      `(UDecidable.dite $c (fun $h => $then_) (fun $h => $else_))
+    match doIfPropHyp? prop with
+    | none => `(UDecidable.ite $c $then_ $else_)
+    | some h => `(UDecidable.dite $c (fun $h => $then_) (fun $h => $else_))
 
 @[builtin_doElem_elab Lean.Parser.Term.doBIf] def elabDoBIf : DoElab := fun stx dec => do
-  let c : Term := ⟨stx.raw[1]⟩
-  elabDoCond stx dec fun then_ else_ => `(cond $c $then_ $else_)
+  let prop := stx.raw[1]
+  let c : Term := ⟨prop[1]⟩
+  elabDoCond stx dec fun then_ else_ =>
+    match doIfPropHyp? prop with
+    | none => `(cond $c $then_ $else_)
+    | some h => `(Bool.dcond $c (fun $h => $then_) (fun $h => $else_))

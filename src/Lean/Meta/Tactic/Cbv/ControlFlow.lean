@@ -28,7 +28,7 @@ import Lean.Meta.Tactic.Cbv.CbvSimproc
 /-!
 # Control Flow Handling for Cbv
 
-Cbv-specific simprocs for `ite`, `dite`, `cond`, `match`, `Decidable.rec`, and `Decidable.decide`.
+Cbv-specific simprocs for `ite`, `dite`, `cond`, `Bool.dcond`, `match`, `Decidable.rec`, and `Decidable.decide`.
 
 The standard `Sym.Simp` control flow simprocs (`simpIte`, `simpDIte`) give up
 when the condition does not reduce to `True` or `False` directly. The Cbv variants
@@ -500,6 +500,8 @@ namespace Lean.Meta.Tactic.Cbv
 open Lean.Meta.Sym.Simp
 
 builtin_cbv_simproc ↓ simpCbvCond (@cond _ _ _ _) := simpCond
+
+builtin_cbv_simproc ↓ simpCbvDCond (@Bool.dcond _ _ _ _) := simpDCond
 
 public def reduceRecMatcher : Simproc := fun e => do
   if let some e' ← withCbvOpaqueGuard <| reduceRecMatcher? e then

@@ -698,6 +698,20 @@ partial def buildInductionBody (toErase toClear : Array FVarId) (goal : Expr)
       mkLambdaFVars #[h] t'
     let u ← getLevel goal
     return mkApp4 (mkConst ``Bool.dcond [u]) goal c' t' f'
+  | Bool.dcond _α c t f =>
+    let c' ← foldAndCollect oldIH newIH isRecCall c
+    let t' ← withLocalDecl `h .default (← mkEq c' (mkConst ``Bool.true)) fun h => M2.branch do
+      let t ← instantiateLambda t #[h]
+      let t' ← withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
+        buildInductionBody toErase toClear goal' oldIH newIH isRecCall t
+      mkLambdaFVars #[h] t'
+    let f' ← withLocalDecl `h .default (← mkEq c' (mkConst ``Bool.false)) fun h => M2.branch do
+      let f ← instantiateLambda f #[h]
+      let f' ← withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
+        buildInductionBody toErase toClear goal' oldIH newIH isRecCall f
+      mkLambdaFVars #[h] f'
+    let u ← getLevel goal
+    return mkApp4 (mkConst ``Bool.dcond [u]) goal c' t' f'
   | _ =>
 
   -- Check for unreachable cases. We look for the kind of expressions that `by contradiction`

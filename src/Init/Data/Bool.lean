@@ -653,6 +653,14 @@ theorem cond_pos {b : Bool} {a a' : α} (h : b = true) : (bif b then a else a') 
 theorem cond_neg {b : Bool} {a a' : α} (h : b = false) : (bif b then a else a') = a' := by
   rw [h, cond_false]
 
+theorem dcond_pos {b : Bool} {t : b = true → α} {e : b = false → α} (h : b = true) :
+    Bool.dcond b t e = t h := by
+  subst h; rfl
+
+theorem dcond_neg {b : Bool} {t : b = true → α} {e : b = false → α} (h : b = false) :
+    Bool.dcond b t e = e h := by
+  subst h; rfl
+
 theorem apply_cond (f : α → β) {b : Bool} {a a' : α} :
     f (bif b then a else a') = bif b then f a else f a' := by
   cases b <;> simp

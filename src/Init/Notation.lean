@@ -519,6 +519,16 @@ macro_rules
 macro_rules
   | `(bif $c then $t else $e) => `(cond $c $t $e)
 
+@[inherit_doc Bool.dcond] syntax (name := boolDepIfThenElse)
+  ppRealGroup(ppRealFill(ppIndent("bif " Lean.binderIdent " : " term " then") ppSpace term)
+    ppDedent(ppSpace) ppRealFill("else " term)) : term
+
+macro_rules
+  | `(bif $h:ident : $c then $t else $e) =>
+    `(Bool.dcond $c (fun $h:ident => $t) (fun $h:ident => $e))
+  | `(bif _%$h : $c then $t else $e) =>
+    `(Bool.dcond $c (fun _%$h => $t) (fun _%$h => $e))
+
 /--
 A pipe operator that feeds values from the right into functions on the left.
 

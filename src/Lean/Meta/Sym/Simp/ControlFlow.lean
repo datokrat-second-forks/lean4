@@ -190,6 +190,49 @@ public def simpCond : Simproc := fun e => do
         return .step e' h' (done := true) (contextDependent := cd)
 
 /--
+Simplifies a `Bool.dcond` expression (aka dependent Boolean `if-then-else`).
+-/
+public def simpDCond : Simproc := fun e => do
+  let numArgs := e.getAppNumArgs
+  if numArgs < 4 then return .rfl (done := true)
+  propagateOverApplied e (numArgs - 4) fun e => do
+    let_expr f@Bool.dcond α c a b := e | return .rfl
+    -- See `simpIte` for why `cd` is propagated to all branches.
+    let boolTrue ← getBoolTrueExpr
+    let boolFalse ← getBoolFalseExpr
+    match (← simp c) with
+    | .rfl _ cd =>
+      if isSameExpr c boolTrue then
+        let a' ← share <| a.betaRev #[mkApp2 (mkConst ``rfl [Level.one]) (mkConst ``Bool) c]
+        return .step a' (mkApp3 (mkConst ``Bool.dcond_true f.constLevels!) α a b) (contextDependent := cd)
+      else if isSameExpr c boolFalse then
+        let b' ← share <| b.betaRev #[mkApp2 (mkConst ``rfl [Level.one]) (mkConst ``Bool) c]
+        return .step b' (mkApp3 (mkConst ``Bool.dcond_false f.constLevels!) α a b) (contextDependent := cd)
+      else
+        return mkRflResult (done := true) (contextDependent := cd)
+    | .step c' h _ cd =>
+      if isSameExpr c' boolTrue then
+        let h ← shareCommon h
+        let a ← share <| a.betaRev #[h]
+        return .step a (mkApp (e.replaceFn ``Sym.dcond_cond_eq_true) h) (contextDependent := cd)
+      else if isSameExpr c' boolFalse then
+        let h ← shareCommon h
+        let b ← share <| b.betaRev #[h]
+        return .step b (mkApp (e.replaceFn ``Sym.dcond_cond_eq_false) h) (contextDependent := cd)
+      else
+        let e' := e.getBoundedAppFn 3
+        let h ← shareCommon h
+        let bool := mkConst ``Bool
+        let trans (rhs : Expr) := mkApp6 (mkConst ``Eq.trans [Level.one]) bool c c' rhs h (mkBVar 0)
+        let a ← share <| mkLambda `h .default (mkApp3 (mkConst ``Eq [Level.one]) bool c' boolTrue)
+          (a.betaRev #[trans boolTrue])
+        let b ← share <| mkLambda `h .default (mkApp3 (mkConst ``Eq [Level.one]) bool c' boolFalse)
+          (b.betaRev #[trans boolFalse])
+        let e' ← mkAppS₃ e' c' a b
+        let h' := mkApp2 (e.replaceFn ``Sym.dcond_cond_congr) c' h
+        return .step e' h' (done := true) (contextDependent := cd)
+
+/--
 Simplifies a `match`-expression.
 -/
 def simpMatch (declName : Name) : Simproc := fun e => do
@@ -216,6 +259,8 @@ public def simpControl : Simproc := fun e => do
     simpIte e
   else if declName == ``cond then
     simpCond e
+  else if declName == ``Bool.dcond then
+    simpDCond e
   else if declName == ``dite then
     simpDIte e
   else if declName == ``UDecidable.ite then

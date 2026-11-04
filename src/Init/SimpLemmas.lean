@@ -258,6 +258,16 @@ theorem dite_congr {b c : Prop} {inst : UDecidable b} {α : Sort u}
 
 end UDecidable
 
+@[congr]
+theorem Bool.dcond_congr {α : Sort u} {b c : Bool} {x : b = true → α} {u : c = true → α}
+    {y : b = false → α} {v : c = false → α} (h₁ : b = c)
+    (h₂ : (h : c = true) → x (h₁.trans h) = u h) (h₃ : (h : c = false) → y (h₁.trans h) = v h) :
+    Bool.dcond b x y = Bool.dcond c u v := by
+  subst h₁
+  cases b with
+  | true => exact h₂ rfl
+  | false => exact h₃ rfl
+
 private theorem decide_eq_udecide (p : Prop) [Decidable p] [UDecidable p] :
     decide p = UDecidable.decide p := by
   cases UDecidable.em p with
@@ -279,6 +289,57 @@ private theorem decide_eq_udecide (p : Prop) [Decidable p] [UDecidable p] :
 @[simp] theorem decideNe_eq_udecide [DecidableEq α] {a b : α} [UDecidable (a ≠ b)] :
     (a ≠ᵇ b) = UDecidable.decide (a ≠ b) :=
   decide_eq_udecide _
+
+theorem decideLT_eq_true_iff [LT α] [DecidableLT α] {a b : α} : (a <ᵇ b) = true ↔ a < b :=
+  ⟨of_decide_eq_true, decide_eq_true⟩
+
+theorem decideLT_eq_false_iff [LT α] [DecidableLT α] {a b : α} : (a <ᵇ b) = false ↔ ¬a < b :=
+  ⟨of_decide_eq_false, decide_eq_false⟩
+
+theorem decideLE_eq_true_iff [LE α] [DecidableLE α] {a b : α} : (a ≤ᵇ b) = true ↔ a ≤ b :=
+  ⟨of_decide_eq_true, decide_eq_true⟩
+
+theorem decideLE_eq_false_iff [LE α] [DecidableLE α] {a b : α} : (a ≤ᵇ b) = false ↔ ¬a ≤ b :=
+  ⟨of_decide_eq_false, decide_eq_false⟩
+
+theorem decideEq_eq_true_iff [DecidableEq α] {a b : α} : (a =ᵇ b) = true ↔ a = b :=
+  ⟨of_decide_eq_true, decide_eq_true⟩
+
+theorem decideEq_eq_false_iff [DecidableEq α] {a b : α} : (a =ᵇ b) = false ↔ a ≠ b :=
+  ⟨of_decide_eq_false, decide_eq_false⟩
+
+theorem decideNe_eq_true_iff [DecidableEq α] {a b : α} : (a ≠ᵇ b) = true ↔ a ≠ b :=
+  ⟨of_decide_eq_true, decide_eq_true⟩
+
+theorem decideNe_eq_false_iff [DecidableEq α] {a b : α} : (a ≠ᵇ b) = false ↔ a = b :=
+  ⟨fun h => Decidable.byContradiction (of_decide_eq_false h),
+    fun h => decide_eq_false (not_not_intro h)⟩
+
+theorem lt_of_decideLT_eq_true [LT α] [DecidableLT α] {a b : α} (h : (a <ᵇ b) = true) : a < b :=
+  decideLT_eq_true_iff.mp h
+
+theorem not_lt_of_decideLT_eq_false [LT α] [DecidableLT α] {a b : α} (h : (a <ᵇ b) = false) :
+    ¬a < b :=
+  decideLT_eq_false_iff.mp h
+
+theorem le_of_decideLE_eq_true [LE α] [DecidableLE α] {a b : α} (h : (a ≤ᵇ b) = true) : a ≤ b :=
+  decideLE_eq_true_iff.mp h
+
+theorem not_le_of_decideLE_eq_false [LE α] [DecidableLE α] {a b : α} (h : (a ≤ᵇ b) = false) :
+    ¬a ≤ b :=
+  decideLE_eq_false_iff.mp h
+
+theorem eq_of_decideEq_eq_true [DecidableEq α] {a b : α} (h : (a =ᵇ b) = true) : a = b :=
+  decideEq_eq_true_iff.mp h
+
+theorem ne_of_decideEq_eq_false [DecidableEq α] {a b : α} (h : (a =ᵇ b) = false) : a ≠ b :=
+  decideEq_eq_false_iff.mp h
+
+theorem ne_of_decideNe_eq_true [DecidableEq α] {a b : α} (h : (a ≠ᵇ b) = true) : a ≠ b :=
+  decideNe_eq_true_iff.mp h
+
+theorem eq_of_decideNe_eq_false [DecidableEq α] {a b : α} (h : (a ≠ᵇ b) = false) : a = b :=
+  decideNe_eq_false_iff.mp h
 
 theorem dite_cond_congr {α} {b c : Prop} {s : Decidable b} [Decidable c]
     {x : b → α} {y : ¬ b → α} (h₁ : b = c) :

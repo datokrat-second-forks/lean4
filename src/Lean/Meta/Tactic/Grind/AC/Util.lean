@@ -64,7 +64,7 @@ def getOp : ACM Expr :=
   return (← getStruct).op
 
 private def notAssoc : Std.HashSet Name :=
-  Std.HashSet.ofList [``Eq, ``And, ``Or, ``Iff, ``getElem, ``OfNat.ofNat, ``ite, ``dite, ``UDecidable.ite, ``UDecidable.dite, ``cond, ``LT.lt, ``LE.le]
+  Std.HashSet.ofList [``Eq, ``And, ``Or, ``Iff, ``getElem, ``OfNat.ofNat, ``ite, ``dite, ``UDecidable.ite, ``UDecidable.dite, ``cond, ``Bool.dcond, ``LT.lt, ``LE.le]
 
 /--
 Returns `true` if `op` is an arithmetic operator supported in other modules.
