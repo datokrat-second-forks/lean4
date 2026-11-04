@@ -1460,6 +1460,14 @@ abbrev DecidableLT (α : Type u) [LT α] := DecidableRel (LT.lt : α → α → 
 /-- Abbreviation for `DecidableRel (· ≤ · : α → α → Prop)`. -/
 abbrev DecidableLE (α : Type u) [LE α] := DecidableRel (LE.le : α → α → Prop)
 
+/-- `a <ᵇ b` decides `a < b` with the `DecidableLT` instance. -/
+@[inline] def decideLT {α : Type u} [LT α] [DecidableLT α] (a b : α) : Bool :=
+  decide (LT.lt a b)
+
+/-- `a ≤ᵇ b` decides `a ≤ b` with the `DecidableLE` instance. -/
+@[inline] def decideLE {α : Type u} [LE α] [DecidableLE α] (a b : α) : Bool :=
+  decide (LE.le a b)
+
 /--
 An overloaded operation to find the greater of two values of type `α`.
 -/
@@ -1469,13 +1477,6 @@ class Max (α : Type u) where
 
 export Max (max)
 
-/--
-Constructs a `Max` instance from a decidable `≤` operation.
--/
--- Marked inline so that `min x y + max x y` can be optimized to a single branch.
-@[inline, instance_reducible]
-def maxOfLe [LE α] [DecidableRel (@LE.le α _)] : Max α where
-  max x y := ite (LE.le x y) y x
 
 /--
 An overloaded operation to find the lesser of two values of type `α`.
@@ -1486,13 +1487,6 @@ class Min (α : Type u) where
 
 export Min (min)
 
-/--
-Constructs a `Min` instance from a decidable `≤` operation.
--/
--- Marked inline so that `min x y + max x y` can be optimized to a single branch.
-@[inline, instance_reducible]
-def minOfLe [LE α] [DecidableRel (@LE.le α _)] : Min α where
-  min x y := ite (LE.le x y) x y
 
 /--
 Transitive chaining of proofs, used e.g. by `calc`.
@@ -2275,7 +2269,8 @@ Examples:
 instance Nat.decLt (n m : @& Nat) : Decidable (LT.lt n m) :=
   decLe (succ n) m
 
-instance : Min Nat := minOfLe
+instance : Min Nat where
+  min n m := cond (decideLE n m) n m
 
 set_option bootstrap.genMatcherCode false in
 /--
@@ -2968,8 +2963,10 @@ def UInt32.decLe (a b : UInt32) : Decidable (LE.le a b) :=
 
 attribute [instance] UInt32.decLt UInt32.decLe
 
-instance : Max UInt32 := maxOfLe
-instance : Min UInt32 := minOfLe
+instance : Max UInt32 where
+  max a b := cond (decideLE a b) b a
+instance : Min UInt32 where
+  min a b := cond (decideLE a b) a b
 
 /-- The number of distinct values representable by `UInt64`, that is, `2^64 = 18446744073709551616`. -/
 abbrev UInt64.size : Nat := 18446744073709551616

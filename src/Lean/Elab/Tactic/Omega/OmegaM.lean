@@ -232,6 +232,11 @@ def analyzeAtom (e : Expr) : OmegaM (List Expr) := do
         pure [mkApp5 (.const ``ite_disjunction [0]) α i dec t e]
       else
         pure []
+  | (``UDecidable.ite, #[α, i, dec, t, e]) =>
+      if α == (.const ``Int []) then
+        pure [mkApp5 (.const ``uite_disjunction [0]) α i dec t e]
+      else
+        pure []
   | _ => pure ∅
 
 /--

@@ -229,6 +229,22 @@ macro_rules
 macro_rules
   | `(uif $c then $t else $e) => `(UDecidable.ite $c $t $e)
 
+/--
+Constructs a `Max` instance from a decidable `≤` operation.
+-/
+-- Marked inline so that `min x y + max x y` can be optimized to a single branch.
+@[expose, inline, instance_reducible]
+def _root_.maxOfLe [LE α] [UDecidableLE α] : Max α where
+  max x y := uif x ≤ y then y else x
+
+/--
+Constructs a `Min` instance from a decidable `≤` operation.
+-/
+-- Marked inline so that `min x y + max x y` can be optimized to a single branch.
+@[expose, inline, instance_reducible]
+def _root_.minOfLe [LE α] [UDecidableLE α] : Min α where
+  min x y := uif x ≤ y then x else y
+
 theorem ite_eq_left {c : Prop} [UDecidable c] (hc : c) {α : Sort u} {t e : α} :
     (uif c then t else e) = t :=
   (congrArg (fun b => cond b t e) (decide_eq_true hc)).trans rfl

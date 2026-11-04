@@ -2561,16 +2561,8 @@ end Classical
 
 Unlike a proposition coerced to `Bool`, which goes through `UDecidable` and does not reduce, these
 evaluate the `Decidable` instance, so they reduce in the kernel. `simp` rewrites them to
-`UDecidable.decide`.
+`UDecidable.decide`. `decideLT` and `decideLE` are defined in the prelude.
 -/
-
-/-- `a <ᵇ b` decides `a < b` with the `DecidableLT` instance. -/
-@[inline] def decideLT [LT α] [DecidableLT α] (a b : α) : Bool :=
-  decide (a < b)
-
-/-- `a ≤ᵇ b` decides `a ≤ b` with the `DecidableLE` instance. -/
-@[inline] def decideLE [LE α] [DecidableLE α] (a b : α) : Bool :=
-  decide (a ≤ b)
 
 /-- `a =ᵇ b` decides `a = b` with the `DecidableEq` instance. -/
 @[inline] def decideEq [DecidableEq α] (a b : α) : Bool :=

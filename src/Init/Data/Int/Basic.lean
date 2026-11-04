@@ -433,9 +433,11 @@ protected def pow : Int → Nat → Int
 instance : NatPow Int where
   pow := Int.pow
 
-instance : Min Int := minOfLe
+instance : Min Int where
+  min a b := bif a ≤ᵇ b then a else b
 
-instance : Max Int := maxOfLe
+instance : Max Int where
+  max a b := bif a ≤ᵇ b then b else a
 
 /-- Equality predicate for kernel reduction. -/
 protected noncomputable def beq' (a b : Int) : Bool :=

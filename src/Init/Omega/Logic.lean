@@ -7,6 +7,7 @@ module
 
 prelude
 public import Init.Grind.Tactics
+public import Init.UDecidable.Basic
 import Init.PropLemmas
 
 public section
@@ -51,5 +52,10 @@ theorem ite_disjunction {α : Type u} {P : Prop} [Decidable P] {a b : α} :
     .inl ⟨h, ite_eq_left h⟩
   else
     .inr ⟨h, ite_eq_right h⟩
+
+theorem uite_disjunction {α : Type u} {P : Prop} [UDecidable P] {a b : α} :
+    (P ∧ (uif P then a else b) = a) ∨ (¬ P ∧ (uif P then a else b) = b) :=
+  (Classical.em P).elim (fun h => .inl ⟨h, UDecidable.ite_eq_left h⟩)
+    (fun h => .inr ⟨h, UDecidable.ite_eq_right h⟩)
 
 end Lean.Omega

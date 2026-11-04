@@ -8,7 +8,7 @@ module
 prelude
 public import Init.Data.BitVec.Basic
 public import Init.Data.Order.PackageFactories
-import Init.Data.BitVec.Lemmas
+public import Init.Data.BitVec.Lemmas
 import Init.Data.Nat.Compare
 import Init.Data.Nat.Order
 
@@ -16,7 +16,9 @@ open Std
 
 namespace BitVec
 
-public instance : LinearOrderPackage (BitVec w) := .ofLE _ { }
+public instance : LinearOrderPackage (BitVec w) := .ofLE _ {
+  min_eq _ _ := BitVec.min_def
+  max_eq _ _ := BitVec.max_def.trans uite_le_swap }
 
 @[simp]
 public theorem compare_toNat {w : Nat} {x y : BitVec w} :

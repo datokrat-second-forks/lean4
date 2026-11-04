@@ -909,8 +909,10 @@ def cpopNatRec (x : BitVec w) (pos acc : Nat) : Nat :=
 @[suggest_for BitVec.popcount BitVec.popcnt, implicit_reducible]
 def cpop (x : BitVec w) : BitVec w := BitVec.ofNat w (cpopNatRec x w 0)
 
-instance : Min (BitVec w) := minOfLe
+instance : Min (BitVec w) where
+  min a b := bif a ≤ᵇ b then a else b
 
-instance : Max (BitVec w) := maxOfLe
+instance : Max (BitVec w) where
+  max a b := bif a ≤ᵇ b then b else a
 
 end BitVec

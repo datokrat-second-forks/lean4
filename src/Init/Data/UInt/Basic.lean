@@ -177,8 +177,10 @@ Converts `true` to `1` and `false` to `0`.
 @[extern "lean_bool_to_uint8"]
 def Bool.toUInt8 (b : Bool) : UInt8 := if b then 1 else 0
 
-instance : Max UInt8 := maxOfLe
-instance : Min UInt8 := minOfLe
+instance : Max UInt8 where
+  max a b := bif a ≤ᵇ b then b else a
+instance : Min UInt8 where
+  min a b := bif a ≤ᵇ b then a else b
 
 /--
 If `b` is the ASCII value of an uppercase character return the corresponding
@@ -406,8 +408,10 @@ def UInt16.decLe (a b : UInt16) : Decidable (a ≤ b) :=
 
 attribute [instance] UInt16.decLt UInt16.decLe
 
-instance : Max UInt16 := maxOfLe
-instance : Min UInt16 := minOfLe
+instance : Max UInt16 where
+  max a b := bif a ≤ᵇ b then b else a
+instance : Min UInt16 where
+  min a b := bif a ≤ᵇ b then a else b
 
 /-- Converts a `Fin UInt32.size` into the corresponding `UInt32`. -/
 @[inline] def UInt32.ofFin (a : Fin UInt32.size) : UInt32 := ⟨⟨a⟩⟩
@@ -769,8 +773,10 @@ def UInt64.decLe (a b : UInt64) : Decidable (a ≤ b) :=
 
 attribute [instance] UInt64.decLt UInt64.decLe
 
-instance : Max UInt64 := maxOfLe
-instance : Min UInt64 := minOfLe
+instance : Max UInt64 where
+  max a b := bif a ≤ᵇ b then b else a
+instance : Min UInt64 where
+  min a b := bif a ≤ᵇ b then a else b
 
 /-- Converts a `Fin USize.size` into the corresponding `USize`. -/
 @[inline] def USize.ofFin (a : Fin USize.size) : USize := ⟨⟨a⟩⟩
@@ -1002,8 +1008,10 @@ Converts `true` to `1` and `false` to `0`.
 @[extern "lean_bool_to_usize"]
 def Bool.toUSize (b : Bool) : USize := if b then 1 else 0
 
-instance : Max USize := maxOfLe
-instance : Min USize := minOfLe
+instance : Max USize where
+  max a b := bif a ≤ᵇ b then b else a
+instance : Min USize where
+  min a b := bif a ≤ᵇ b then a else b
 
 /-! ### `UDecidable` instances -/
 

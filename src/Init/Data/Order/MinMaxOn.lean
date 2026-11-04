@@ -35,7 +35,7 @@ public def maxOn [i : LE β] [UDecidableLE β] (f : α → β) (x y : α) :=
 
 public theorem minOn_id [Min α] [LE α] [DecidableLE α] [LawfulOrderLeftLeaningMin α] {x y : α} :
     minOn id x y = min x y := by
-  simp [minOn, min_eq_ite, UDecidable.ite_eq_ite]
+  simp [minOn, min_eq_uite]
 
 public theorem maxOn_id [Max α] [LE α] [DecidableLE α] [LawfulOrderLeftLeaningMax α] {x y : α} :
     maxOn id x y = max x y := by
@@ -135,7 +135,7 @@ public theorem minOn_eq_if {β : Type u_1} {α : Sort u_2} [LE β] [UDecidableLE
 public theorem minOn_eq_min [Min α] [LE α] [DecidableLE α] [LawfulOrderLeftLeaningMin α] [LE β]
     [UDecidableLE β] {f : α → β} {a b : α} (hf : f a ≤ f b ↔ a ≤ b) :
     minOn f a b = min a b := by
-  simp [minOn_eq_ite, min_eq_ite, hf, UDecidable.ite_eq_ite]
+  simp [minOn_eq_ite, min_eq_uite, hf]
 
 public theorem min_apply_eq_min [LE α] [DecidableLE α] [Min α] [LawfulOrderLeftLeaningMin α]
     [Min β] [LE β] [UDecidableLE β] [LawfulOrderLeftLeaningMin β]
@@ -225,7 +225,7 @@ public theorem maxOn_eq_if {β : Type u_1} {α : Sort u_2} [LE β] [UDecidableLE
 public theorem maxOn_eq_max [Max α] [LE α] [DecidableLE α] [LawfulOrderLeftLeaningMax α] [LE β]
     [UDecidableLE β] {f : α → β} {a b : α} (hf : f b ≤ f a ↔ b ≤ a) :
     maxOn f a b = max a b := by
-  simp [maxOn_eq_ite, max_eq_ite, hf, UDecidable.ite_eq_ite]
+  simp [maxOn_eq_ite, max_eq_uite, hf]
 
 public theorem max_apply_eq_max [LE α] [DecidableLE α] [Max α] [LawfulOrderLeftLeaningMax α]
     [Max β] [LE β] [UDecidableLE β] [LawfulOrderLeftLeaningMax β]

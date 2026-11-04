@@ -428,6 +428,15 @@ public theorem max_eq_uite {α : Type u} [LE α] [UDecidableLE α] {_ : Max α}
   · simp [LawfulOrderLeftLeaningMax.max_eq_left _ _ h]
   · simp [LawfulOrderLeftLeaningMax.max_eq_right _ _ h]
 
+public theorem uite_le_swap {α : Type u} [LE α] [UDecidableLE α] [Total (α := α) (· ≤ ·)]
+    [Antisymm (α := α) (· ≤ ·)] {a b : α} :
+    (uif a ≤ b then b else a) = uif b ≤ a then a else b := by
+  cases Classical.em (a ≤ b) <;> cases Classical.em (b ≤ a) <;> rename_i hab hba
+  · simp [Antisymm.antisymm a b hab hba]
+  · simp [hab, hba]
+  · simp [hab, hba]
+  · exact ((Total.total a b).elim hab hba).elim
+
 @[deprecated Std.max_eq_ite (since := "2026-07-21")]
 public theorem max_eq_if {α : Type u} [LE α] [DecidableLE α] {_ : Max α} [Std.LawfulOrderLeftLeaningMax α] {a : α} {b : α} : Max.max a b = if b ≤ a then a else b := Std.max_eq_ite
 
@@ -481,12 +490,12 @@ public instance {α : Type u} [LE α] [Min α] [IsLinearPreorder α] [LawfulOrde
 
 section minOfLe
 
-public theorem min_eq_of_minOfLe {α : Type u} [LE α] [DecidableLE α] {a b : α} :
+public theorem min_eq_of_minOfLe {α : Type u} [LE α] [UDecidableLE α] {a b : α} :
     letI : Min α := minOfLe
-    min a b = if a ≤ b then a else b :=
+    min a b = uif a ≤ b then a else b :=
   rfl
 
-public instance lawfulOrderLeftLeaningMin_minOfLe {α : Type u} [LE α] [DecidableLE α] :
+public instance lawfulOrderLeftLeaningMin_minOfLe {α : Type u} [LE α] [UDecidableLE α] :
     letI : Min α := minOfLe
     Std.LawfulOrderLeftLeaningMin α := by
   let : Min α := minOfLe
@@ -648,12 +657,12 @@ public instance {α : Type u} [LE α] [Max α] [IsLinearPreorder α] [LawfulOrde
 
 section maxOfLe
 
-public theorem max_eq_of_maxOfLe {α : Type u} [LE α] [DecidableLE α] {a b : α} :
+public theorem max_eq_of_maxOfLe {α : Type u} [LE α] [UDecidableLE α] {a b : α} :
     letI : Max α := maxOfLe
-    max a b = if a ≤ b then b else a :=
+    max a b = uif a ≤ b then b else a :=
   rfl
 
-public instance lawfulOrderSup_maxOfLe {α : Type u} [LE α] [DecidableLE α]
+public instance lawfulOrderSup_maxOfLe {α : Type u} [LE α] [UDecidableLE α]
     [Trans (α := α) (· ≤ ·) (· ≤ ·) (· ≤ ·)] [Std.Total (α := α) (· ≤ ·)] :
     letI : Max α := maxOfLe
     Std.LawfulOrderSup α := by

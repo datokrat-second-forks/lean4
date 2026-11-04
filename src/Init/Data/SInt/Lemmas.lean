@@ -57,16 +57,22 @@ macro "declare_int_theorems" typeName:ident _bits:term:arg : command => do
   @[simp] protected theorem toBitVec_div {a b : $typeName} : (a / b).toBitVec = a.toBitVec.sdiv b.toBitVec := (rfl)
   @[simp] protected theorem toBitVec_mod {a b : $typeName} : (a % b).toBitVec = a.toBitVec.srem b.toBitVec := (rfl)
 
-  protected theorem min_def {a b : $typeName} : min a b = if a ≤ b then a else b := by rfl
-  protected theorem max_def {a b : $typeName} : max a b = if a ≤ b then b else a := by rfl
+  protected theorem min_def {a b : $typeName} : min a b = uif a ≤ b then a else b := by
+    show cond (a ≤ᵇ b) a b = _
+    rw [decideLE_eq_udecide]
+    rfl
+  protected theorem max_def {a b : $typeName} : max a b = uif a ≤ b then b else a := by
+    show cond (a ≤ᵇ b) b a = _
+    rw [decideLE_eq_udecide]
+    rfl
 
   open $typeName (min_def le_iff_toBitVec_sle)
-  @[simp] protected theorem toBitVec_min {a b : $typeName} : (min a b).toBitVec = if a.toBitVec.sle b.toBitVec then a.toBitVec else b.toBitVec := by
-    simp [BitVec.min_def, min_def, apply_ite toBitVec, le_iff_toBitVec_sle]
+  @[simp] protected theorem toBitVec_min {a b : $typeName} : (min a b).toBitVec = uif a.toBitVec.sle b.toBitVec then a.toBitVec else b.toBitVec := by
+    simp [BitVec.min_def, min_def, UDecidable.apply_ite toBitVec, le_iff_toBitVec_sle]
 
   open $typeName (max_def le_iff_toBitVec_sle)
-  @[simp] protected theorem toBitVec_max {a b : $typeName} : (max a b).toBitVec = if a.toBitVec.sle b.toBitVec then b.toBitVec else a.toBitVec := by
-    simp [BitVec.max_def, max_def, apply_ite toBitVec, le_iff_toBitVec_sle]
+  @[simp] protected theorem toBitVec_max {a b : $typeName} : (max a b).toBitVec = uif a.toBitVec.sle b.toBitVec then b.toBitVec else a.toBitVec := by
+    simp [BitVec.max_def, max_def, UDecidable.apply_ite toBitVec, le_iff_toBitVec_sle]
 
   )
   unless isISize do

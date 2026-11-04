@@ -436,8 +436,10 @@ def Int8.decLe (a b : Int8) : Decidable (a ≤ b) :=
 
 attribute [instance] Int8.decLt Int8.decLe
 
-instance : Max Int8 := maxOfLe
-instance : Min Int8 := minOfLe
+instance : Max Int8 where
+  max a b := bif a ≤ᵇ b then b else a
+instance : Min Int8 where
+  min a b := bif a ≤ᵇ b then a else b
 
 /-- The number of distinct values representable by `Int16`, that is, `2^16 = 65536`. -/
 abbrev Int16.size : Nat := 65536
@@ -809,8 +811,10 @@ def Int16.decLe (a b : Int16) : Decidable (a ≤ b) :=
 
 attribute [instance] Int16.decLt Int16.decLe
 
-instance : Max Int16 := maxOfLe
-instance : Min Int16 := minOfLe
+instance : Max Int16 where
+  max a b := bif a ≤ᵇ b then b else a
+instance : Min Int16 where
+  min a b := bif a ≤ᵇ b then a else b
 
 /-- The number of distinct values representable by `Int32`, that is, `2^32 = 4294967296`. -/
 abbrev Int32.size : Nat := 4294967296
@@ -1198,8 +1202,10 @@ def Int32.decLe (a b : Int32) : Decidable (a ≤ b) :=
 
 attribute [instance] Int32.decLt Int32.decLe
 
-instance : Max Int32 := maxOfLe
-instance : Min Int32 := minOfLe
+instance : Max Int32 where
+  max a b := bif a ≤ᵇ b then b else a
+instance : Min Int32 where
+  min a b := bif a ≤ᵇ b then a else b
 
 /-- The number of distinct values representable by `Int64`, that is, `2^64 = 18446744073709551616`. -/
 abbrev Int64.size : Nat := 18446744073709551616
@@ -1606,8 +1612,10 @@ def Int64.decLe (a b : Int64) : Decidable (a ≤ b) :=
 
 attribute [instance] Int64.decLt Int64.decLe
 
-instance : Max Int64 := maxOfLe
-instance : Min Int64 := minOfLe
+instance : Max Int64 where
+  max a b := bif a ≤ᵇ b then b else a
+instance : Min Int64 where
+  min a b := bif a ≤ᵇ b then a else b
 
 /-- The number of distinct values representable by `ISize`, that is, `2^System.Platform.numBits`. -/
 abbrev ISize.size : Nat := 2^System.Platform.numBits
@@ -2017,5 +2025,7 @@ def ISize.decLe (a b : ISize) : Decidable (a ≤ b) :=
 
 attribute [instance] ISize.decLt ISize.decLe
 
-instance : Max ISize := maxOfLe
-instance : Min ISize := minOfLe
+instance : Max ISize where
+  max a b := bif a ≤ᵇ b then b else a
+instance : Min ISize where
+  min a b := bif a ≤ᵇ b then a else b

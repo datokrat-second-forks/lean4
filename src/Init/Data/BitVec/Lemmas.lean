@@ -7133,10 +7133,14 @@ theorem toNat_cpop_setWidth_eq_of_le {x : BitVec w} {n : Nat} (h : w ≤ n) :
     (x.setWidth n).cpop.toNat = x.cpop.toNat := by
   simp [BitVec.setWidth_eq_append, h]
 
-protected theorem min_def {x y : BitVec w} : min x y = if x ≤ y then x else y := by
+protected theorem min_def {x y : BitVec w} : min x y = uif x ≤ y then x else y := by
+  show cond (x ≤ᵇ y) x y = _
+  rw [decideLE_eq_udecide]
   rfl
 
-protected theorem max_def {x y : BitVec w} : max x y = if x ≤ y then y else x := by
+protected theorem max_def {x y : BitVec w} : max x y = uif x ≤ y then y else x := by
+  show cond (x ≤ᵇ y) y x = _
+  rw [decideLE_eq_udecide]
   rfl
 
 end BitVec
