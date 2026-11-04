@@ -18,6 +18,7 @@ public import Lean.Elab.PreDefinition.FixedParams
 public import Lean.Elab.PreDefinition.WF.Basic
 public import Lean.Data.Array
 import Lean.Meta.Tactic.Refl
+import Lean.Meta.Tactic.BoolToProp
 import Init.Data.Prod
 
 public section
@@ -383,6 +384,29 @@ partial def isNatCmp (e : Expr) : MetaM (Option (Expr × Expr)) := withReducible
     else
       return none
 
+private partial def conjuncts (p : Expr) (acc : List Expr) : List Expr :=
+  if p.isAppOfArity ``And 2 then
+    conjuncts p.appFn!.appArg! (conjuncts p.appArg! acc)
+  else
+    p :: acc
+
+/--
+The hypotheses types to inspect with `isNatCmp`: `t` itself, or, if `t` is `c = true` or
+`c = false` for a `Bool` condition `c` (e.g. from a dependent `bif`), the conjuncts of its
+propositional view (see `boolCondToProp?`).
+-/
+def natCmpCandidates (t : Expr) : MetaM (List Expr) := do
+  let some (c, value) ← boolEq? t | return [t]
+  let some (p, _) ← boolCondToProp? c value | return [t]
+  return conjuncts p []
+where
+  boolEq? (t : Expr) : MetaM (Option (Expr × Bool)) := do
+    let_expr Eq α c v ← t | return none
+    unless α.isConstOf ``Bool do return none
+    if v.isConstOf ``Bool.true then return some (c, true)
+    if v.isConstOf ``Bool.false then return some (c, false)
+    return none
+
 def complexMeasures (preDefs : Array PreDefinition) (fixedParamPerms : FixedParamPerms)
     (userVarNamess : Array (Array Name)) (recCalls : Array RecCallWithContext) :
     MetaM (Array (Array BasicMeasure)) := do
@@ -401,20 +425,21 @@ def complexMeasures (preDefs : Array PreDefinition) (fixedParamPerms : FixedPara
         trace[Elab.definition.wf] "rc: {rc.caller} ({rc.params}) → {rc.callee} ({rc.args})"
         let mut measures := measures
         for ldecl in ← getLCtx do
-          if let some (e₁, e₂) ← isNatCmp ldecl.type then
-            -- We only want to consider these expressions if they depend only on the function's
-            -- immediate arguments, so check that
-            if e₁.hasAnyFVar (! params.contains ·) then continue
-            if e₂.hasAnyFVar (! params.contains ·) then continue
-            -- If e₁ does not depend on any varying parameters, simply ignore it
-            let e₁_is_const := ! e₁.hasAnyFVar (varyingFVars.contains ·)
-            let body := if e₁_is_const then e₂ else mkNatSub e₂ e₁
-            -- Avoid adding simple measures
-            unless body.isFVar do
-              let fn ← mkLambdaFVars rc.params body
-              -- Avoid duplicates
-              unless ← measures.anyM (isDefEq ·.fn fn) do
-                measures := measures.push { ref := .missing, structural := false,  fn, natFn := fn }
+          for t in ← natCmpCandidates ldecl.type do
+            if let some (e₁, e₂) ← isNatCmp t then
+              -- We only want to consider these expressions if they depend only on the function's
+              -- immediate arguments, so check that
+              if e₁.hasAnyFVar (! params.contains ·) then continue
+              if e₂.hasAnyFVar (! params.contains ·) then continue
+              -- If e₁ does not depend on any varying parameters, simply ignore it
+              let e₁_is_const := ! e₁.hasAnyFVar (varyingFVars.contains ·)
+              let body := if e₁_is_const then e₂ else mkNatSub e₂ e₁
+              -- Avoid adding simple measures
+              unless body.isFVar do
+                let fn ← mkLambdaFVars rc.params body
+                -- Avoid duplicates
+                unless ← measures.anyM (isDefEq ·.fn fn) do
+                  measures := measures.push { ref := .missing, structural := false,  fn, natFn := fn }
         return measures
     return measures
 

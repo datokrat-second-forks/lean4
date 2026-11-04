@@ -74,6 +74,54 @@ builtin_simproc ↓ [simp, seval] reduceUDIte (UDecidable.dite _ _ _) := fun e =
     return .visit { expr := eNew, proof? := prNew }
   return .continue
 
+/--
+Decides a `Bool` condition `c` for `reduceCond`/`reduceDCond`: returns `some (true, h)` with
+`h : c = true` or `some (false, h)` with `h : c = false`. If `simp c` does not produce a literal,
+`c = true` is first turned into a proposition `p` with the `bool_to_prop` lemmas alone (fresh
+cache), and then `p` is simplified in the current context. So propositional facts (hypotheses such
+as `h : i < n`, or lemmas such as `Nat.le_refl`) decide conditions such as `i <ᵇ n` even under
+`simp only`. The two simp sets are kept apart because `bool_to_prop` and the default simp set
+rewrite `&&`/`decide` in opposite directions.
+-/
+private def decideBoolCond? (c : Expr) : SimpM (Option (Bool × Expr)) := do
+  let r ← simp c
+  if r.expr.isConstOf ``Bool.true then
+    return some (true, ← r.getProof)
+  if r.expr.isConstOf ``Bool.false then
+    return some (false, ← r.getProof)
+  let some ext ← getSimpExtension? `bool_to_prop | return none
+  let eqTrue := mkApp3 (mkConst ``Eq [1]) (mkConst ``Bool) c (mkConst ``Bool.true)
+  let rView ← Simp.withFreshCache <| Simp.withSimpTheorems #[← ext.getTheorems] <| simp eqTrue
+  if rView.expr == eqTrue then return none
+  let r ← simp rView.expr
+  unless r.expr.isTrue || r.expr.isFalse do return none
+  -- `eqTrue = rView.expr = True/False`
+  let pr ← mkEqTrans (← rView.getProof) (← r.getProof)
+  if r.expr.isTrue then
+    return some (true, mkApp2 (mkConst ``of_eq_true) eqTrue pr)
+  let hNot := mkApp2 (mkConst ``of_eq_false) eqTrue pr
+  return some (false, mkApp2 (mkConst ``Bool.of_not_eq_true) c hNot)
+
+set_option linter.coreInternal.internalModule false in -- User-facing builtin simprocs are fine
+builtin_simproc ↓ [simp, seval] reduceCond (cond _ _ _) := fun e => do
+  let_expr f@cond α c tb eb ← e | return .continue
+  let some (b, h) ← decideBoolCond? c | return .continue
+  if b then
+    return .visit { expr := tb, proof? := mkApp5 (mkConst ``Bool.cond_pos f.constLevels!) α c tb eb h }
+  else
+    return .visit { expr := eb, proof? := mkApp5 (mkConst ``Bool.cond_neg f.constLevels!) α c tb eb h }
+
+set_option linter.coreInternal.internalModule false in -- User-facing builtin simprocs are fine
+builtin_simproc ↓ [simp, seval] reduceDCond (Bool.dcond _ _ _) := fun e => do
+  let_expr f@Bool.dcond α c tb eb ← e | return .continue
+  let some (b, h) ← decideBoolCond? c | return .continue
+  if b then
+    let prNew := mkApp5 (mkConst ``Bool.dcond_pos f.constLevels!) α c tb eb h
+    return .visit { expr := (mkApp tb h).headBeta, proof? := prNew }
+  else
+    let prNew := mkApp5 (mkConst ``Bool.dcond_neg f.constLevels!) α c tb eb h
+    return .visit { expr := (mkApp eb h).headBeta, proof? := prNew }
+
 set_option linter.coreInternal.internalModule false in -- User-facing builtin simprocs are fine
 builtin_dsimproc ↓ [simp, seval] dreduceIte (ite _ _ _) := fun e => do
   unless (← inDSimp) do
@@ -116,6 +164,35 @@ builtin_dsimproc ↓ [simp, seval] dreduceDIte (dite _ _ _) := fun e => do
     | Bool.false => return .visit (mkApp eb (mkExpectedPropHint (.proj ``Decidable 1 i) (mkNot c))).headBeta
     | _ => return .continue
   return .continue
+
+set_option linter.coreInternal.internalModule false in -- User-facing builtin simprocs are fine
+builtin_dsimproc ↓ [simp, seval] dreduceCond (cond _ _ _) := fun e => do
+  unless (← inDSimp) do
+    return .continue
+  let_expr cond _ c tb eb ← e | return .continue
+  -- See comment at `dreduceIte`: `simp` may use propositional rewrites, so it is only a filter.
+  let r ← simp c
+  unless r.expr.isConstOf ``Bool.true || r.expr.isConstOf ``Bool.false do return .continue
+  match_expr (← whnfD c) with
+  | Bool.true => return .visit tb
+  | Bool.false => return .visit eb
+  | _ => return .continue
+
+set_option linter.coreInternal.internalModule false in -- User-facing builtin simprocs are fine
+builtin_dsimproc ↓ [simp, seval] dreduceDCond (Bool.dcond _ _ _) := fun e => do
+  unless (← inDSimp) do
+    return .continue
+  let_expr Bool.dcond _ c tb eb ← e | return .continue
+  -- See comment at `dreduceIte`: `simp` may use propositional rewrites, so it is only a filter.
+  let r ← simp c
+  unless r.expr.isConstOf ``Bool.true || r.expr.isConstOf ``Bool.false do return .continue
+  let v ← whnfD c
+  let mkHyp := mkExpectedPropHint (mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Bool) v)
+    (mkApp3 (mkConst ``Eq [1]) (mkConst ``Bool) c v)
+  match_expr v with
+  | Bool.true => return .visit (mkApp tb mkHyp).headBeta
+  | Bool.false => return .visit (mkApp eb mkHyp).headBeta
+  | _ => return .continue
 
 set_option linter.coreInternal.internalModule false in -- User-facing builtin simprocs are fine
 builtin_simproc [simp, seval] reduceCtorEq (_ = _) := fun e => withReducibleAndInstances do

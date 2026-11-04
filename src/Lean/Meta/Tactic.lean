@@ -23,6 +23,7 @@ public import Lean.Meta.Tactic.ElimInfo
 public import Lean.Meta.Tactic.Delta
 public import Lean.Meta.Tactic.Constructor
 public import Lean.Meta.Tactic.Simp
+public import Lean.Meta.Tactic.BoolToProp
 public import Lean.Meta.Tactic.AuxLemma
 public import Lean.Meta.Tactic.SplitIf
 public import Lean.Meta.Tactic.Split

@@ -119,12 +119,12 @@ theorem or_exists_add_one : p 0 ∨ (Exists fun n => p (n + 1)) ↔ Exists p :=
   induction a with simp [Nat.beq]
   | succ a ih => simp [ih]
 
-@[simp] theorem beq_eq : (Nat.beq x y = true) = (x = y) := propext <| Iff.intro Nat.eq_of_beq_eq_true (fun h => h ▸ (Nat.beq_refl x))
-@[simp] theorem ble_eq : (Nat.ble x y = true) = (x ≤ y) := propext <| Iff.intro Nat.le_of_ble_eq_true Nat.ble_eq_true_of_le
-@[simp] theorem blt_eq : (Nat.blt x y = true) = (x < y) := propext <| Iff.intro Nat.le_of_ble_eq_true Nat.ble_eq_true_of_le
-@[simp] theorem ble_eq_false_iff : Nat.ble x y = false ↔ ¬x ≤ y := by
+@[simp, bool_to_prop] theorem beq_eq : (Nat.beq x y = true) = (x = y) := propext <| Iff.intro Nat.eq_of_beq_eq_true (fun h => h ▸ (Nat.beq_refl x))
+@[simp, bool_to_prop] theorem ble_eq : (Nat.ble x y = true) = (x ≤ y) := propext <| Iff.intro Nat.le_of_ble_eq_true Nat.ble_eq_true_of_le
+@[simp, bool_to_prop] theorem blt_eq : (Nat.blt x y = true) = (x < y) := propext <| Iff.intro Nat.le_of_ble_eq_true Nat.ble_eq_true_of_le
+@[simp, bool_to_prop] theorem ble_eq_false_iff : Nat.ble x y = false ↔ ¬x ≤ y := by
   rw [← Bool.not_eq_true, ble_eq]
-@[simp] theorem blt_eq_false_iff : Nat.blt x y = false ↔ ¬x < y := by
+@[simp, bool_to_prop] theorem blt_eq_false_iff : Nat.blt x y = false ↔ ¬x < y := by
   rw [← Bool.not_eq_true, blt_eq]
 
 theorem ble_eq_udecide (x y : Nat) : Nat.ble x y = UDecidable.decide (x ≤ y) := by

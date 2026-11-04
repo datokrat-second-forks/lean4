@@ -7,14 +7,4 @@ Authors: Tobias Grosser
 module
 
 prelude
-public import Lean.Meta.Tactic.Simp.Attr
-
-public section
-
-namespace Lean
-
-builtin_initialize bool_to_prop : Lean.Meta.SimpExtension ←
-  Lean.Meta.registerSimpAttr `bool_to_prop
-    "simp lemmas converting boolean expressions in terms of `decide` into propositional statements"
-
-end Lean
+public import Lean.Meta.Tactic.BoolToProp

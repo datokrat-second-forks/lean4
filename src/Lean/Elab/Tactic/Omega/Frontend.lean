@@ -10,6 +10,7 @@ public import Lean.Elab.Tactic.Omega.Core
 public import Lean.Elab.Tactic.FalseOrByContra
 import Lean.Elab.ConfigEval
 public import Lean.Meta.Tactic.Simp.Attr
+import Lean.Meta.Tactic.BoolToProp
 import Lean.Elab.Tactic.BuiltinTactic
 import Init.Data.Int.Pow
 import Init.Data.List.MapIdx
@@ -395,6 +396,10 @@ def pushNot (h P : Expr) : MetaM (Option Expr) := do
       | Nat => return some (mkApp3 (.const ``Nat.lt_or_gt_of_ne []) x y h)
       | Int => return some (mkApp3 (.const ``Int.lt_or_gt_of_ne []) x y h)
       | Fin n => return some (mkApp4 (.const ``Fin.lt_or_gt_of_ne []) n x y h)
+      | Bool => match_expr y with
+        | Bool.true => return some (mkApp2 (.const ``Bool.of_not_eq_true []) x h)
+        | Bool.false => return some (mkApp2 (.const ``Bool.of_not_eq_false []) x h)
+        | _ => return none
       | _ => return none
     | Dvd.dvd α _ k x => match_expr α with
       | Nat => return some (mkApp3 (.const ``Nat.emod_pos_of_not_dvd []) k x h)
@@ -446,6 +451,14 @@ partial def addFact (p : MetaProblem) (h : Expr) : OmegaM (MetaProblem × Nat) :
           | _ => p.addFact (mkApp3 (.const ``Int.sub_eq_zero_of_eq []) x y h)
         | Nat => p.addFact (mkApp3 (.const ``Int.ofNat_congr []) x y h)
         | Fin n => p.addFact (mkApp4 (.const ``Fin.val_congr []) n x y h)
+        | Bool =>
+          let value ← match_expr y with
+            | Bool.true => pure true
+            | Bool.false => pure false
+            | _ => return (p, 0)
+          match ← boolCondToProp? x value with
+          | some (P, pf) => p.addFact (mkApp4 (.const ``Eq.mp [0]) t P pf h)
+          | none => pure (p, 0)
         | _ => pure (p, 0)
       | LE.le α _ x y =>
         match_expr α with

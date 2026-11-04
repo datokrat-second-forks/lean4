@@ -1696,7 +1696,7 @@ theorem Nat.succ.inj {m n : Nat} : m.succ = n.succ → m = n :=
 theorem Nat.succ.injEq (u v : Nat) : (u.succ = v.succ) = (u = v) :=
   Eq.propIntro Nat.succ.inj (congrArg Nat.succ)
 
-@[simp] theorem beq_iff_eq [BEq α] [LawfulBEq α] {a b : α} : a == b ↔ a = b :=
+@[simp, bool_to_prop] theorem beq_iff_eq [BEq α] [LawfulBEq α] {a b : α} : a == b ↔ a = b :=
   ⟨eq_of_beq, beq_of_eq⟩
 
 /-! # Prop lemmas -/

@@ -131,7 +131,7 @@ theorem of_decide_eq_true {p : Prop} [UDecidable p] (h : decide p = true) : p :=
 theorem of_decide_eq_false {p : Prop} [UDecidable p] (h : decide p = false) : ¬p :=
   fun hp => Bool.noConfusion (h.symm.trans (decide_eq_true hp))
 
-@[simp] theorem decide_eq_false_iff_not {p : Prop} [UDecidable p] : decide p = false ↔ ¬p :=
+@[simp, bool_to_prop] theorem decide_eq_false_iff_not {p : Prop} [UDecidable p] : decide p = false ↔ ¬p :=
   ⟨of_decide_eq_false, decide_eq_false⟩
 
 @[bool_to_prop] theorem decide_eq_true_iff {p : Prop} [UDecidable p] : decide p = true ↔ p :=

@@ -290,28 +290,28 @@ private theorem decide_eq_udecide (p : Prop) [Decidable p] [UDecidable p] :
     (a ≠ᵇ b) = UDecidable.decide (a ≠ b) :=
   decide_eq_udecide _
 
-theorem decideLT_eq_true_iff [LT α] [DecidableLT α] {a b : α} : (a <ᵇ b) = true ↔ a < b :=
+@[bool_to_prop] theorem decideLT_eq_true_iff [LT α] [DecidableLT α] {a b : α} : (a <ᵇ b) = true ↔ a < b :=
   ⟨of_decide_eq_true, decide_eq_true⟩
 
-theorem decideLT_eq_false_iff [LT α] [DecidableLT α] {a b : α} : (a <ᵇ b) = false ↔ ¬a < b :=
+@[bool_to_prop] theorem decideLT_eq_false_iff [LT α] [DecidableLT α] {a b : α} : (a <ᵇ b) = false ↔ ¬a < b :=
   ⟨of_decide_eq_false, decide_eq_false⟩
 
-theorem decideLE_eq_true_iff [LE α] [DecidableLE α] {a b : α} : (a ≤ᵇ b) = true ↔ a ≤ b :=
+@[bool_to_prop] theorem decideLE_eq_true_iff [LE α] [DecidableLE α] {a b : α} : (a ≤ᵇ b) = true ↔ a ≤ b :=
   ⟨of_decide_eq_true, decide_eq_true⟩
 
-theorem decideLE_eq_false_iff [LE α] [DecidableLE α] {a b : α} : (a ≤ᵇ b) = false ↔ ¬a ≤ b :=
+@[bool_to_prop] theorem decideLE_eq_false_iff [LE α] [DecidableLE α] {a b : α} : (a ≤ᵇ b) = false ↔ ¬a ≤ b :=
   ⟨of_decide_eq_false, decide_eq_false⟩
 
-theorem decideEq_eq_true_iff [DecidableEq α] {a b : α} : (a =ᵇ b) = true ↔ a = b :=
+@[bool_to_prop] theorem decideEq_eq_true_iff [DecidableEq α] {a b : α} : (a =ᵇ b) = true ↔ a = b :=
   ⟨of_decide_eq_true, decide_eq_true⟩
 
-theorem decideEq_eq_false_iff [DecidableEq α] {a b : α} : (a =ᵇ b) = false ↔ a ≠ b :=
+@[bool_to_prop] theorem decideEq_eq_false_iff [DecidableEq α] {a b : α} : (a =ᵇ b) = false ↔ a ≠ b :=
   ⟨of_decide_eq_false, decide_eq_false⟩
 
-theorem decideNe_eq_true_iff [DecidableEq α] {a b : α} : (a ≠ᵇ b) = true ↔ a ≠ b :=
+@[bool_to_prop] theorem decideNe_eq_true_iff [DecidableEq α] {a b : α} : (a ≠ᵇ b) = true ↔ a ≠ b :=
   ⟨of_decide_eq_true, decide_eq_true⟩
 
-theorem decideNe_eq_false_iff [DecidableEq α] {a b : α} : (a ≠ᵇ b) = false ↔ a = b :=
+@[bool_to_prop] theorem decideNe_eq_false_iff [DecidableEq α] {a b : α} : (a ≠ᵇ b) = false ↔ a = b :=
   ⟨fun h => Decidable.byContradiction (of_decide_eq_false h),
     fun h => decide_eq_false (not_not_intro h)⟩
 
@@ -543,15 +543,15 @@ This helps confluence, and also helps combining pairs of `!`s.
   cases a <;> cases b <;> simp
 theorem Bool.not_not_eq {a b : Bool} : ¬(!a) = b ↔ a = b := by simp
 
-theorem Bool.not_eq_true'  (b : Bool) : ((!b) = true) = (b = false) := by simp
-theorem Bool.not_eq_false' (b : Bool) : ((!b) = false) = (b = true) := by simp
+@[bool_to_prop] theorem Bool.not_eq_true'  (b : Bool) : ((!b) = true) = (b = false) := by simp
+@[bool_to_prop] theorem Bool.not_eq_false' (b : Bool) : ((!b) = false) = (b = true) := by simp
 
 @[simp] theorem Bool.not_eq_true (b : Bool) : (¬(b = true)) = (b = false) := by cases b <;> decide
 @[simp] theorem Bool.not_eq_false (b : Bool) : (¬(b = false)) = (b = true) := by cases b <;> decide
 
 @[simp] theorem decide_eq_true_eq [Decidable p] : (decide p = true) = p :=
   propext <| Iff.intro of_decide_eq_true decide_eq_true
-@[simp] theorem decide_eq_false_iff_not {_ : Decidable p} : (decide p = false) ↔ ¬p :=
+@[simp, bool_to_prop] theorem decide_eq_false_iff_not {_ : Decidable p} : (decide p = false) ↔ ¬p :=
   ⟨of_decide_eq_false, decide_eq_false⟩
 
 @[simp] theorem decide_not [g : Decidable p] [h : Decidable (Not p)] : decide (Not p) = !(decide p) := by
@@ -566,7 +566,7 @@ theorem beq_self_eq_true' [DecidableEq α] (a : α) : (a == a) = true := BEq.rfl
 @[simp] theorem bne_self_eq_false [BEq α] [LawfulBEq α] (a : α) : (a != a) = false := by simp [bne]
 theorem bne_self_eq_false' [DecidableEq α] (a : α) : (a != a) = false := by simp
 
-@[simp] theorem bne_iff_ne [BEq α] [LawfulBEq α] {a b : α} : a != b ↔ a ≠ b := by
+@[simp, bool_to_prop] theorem bne_iff_ne [BEq α] [LawfulBEq α] {a b : α} : a != b ↔ a ≠ b := by
   simp [bne]; rw [← beq_iff_eq (a := a) (b := b)]; simp [-beq_iff_eq]
 
 /-
@@ -577,11 +577,11 @@ Added for critical pair for `¬((a != b) = true)`
 
 These will both normalize to `a = b` with the first via `bne_eq_false_iff_eq`.
 -/
-@[simp] theorem beq_eq_false_iff_ne [BEq α] [LawfulBEq α] {a b : α} : (a == b) = false ↔ a ≠ b := by
+@[simp, bool_to_prop] theorem beq_eq_false_iff_ne [BEq α] [LawfulBEq α] {a b : α} : (a == b) = false ↔ a ≠ b := by
   rw [ne_eq, ← beq_iff_eq (a := a) (b := b)]
   cases a == b <;> decide
 
-@[simp] theorem bne_eq_false_iff_eq [BEq α] [LawfulBEq α] {a b : α} : (a != b) = false ↔ a = b := by
+@[simp, bool_to_prop] theorem bne_eq_false_iff_eq [BEq α] [LawfulBEq α] {a b : α} : (a != b) = false ↔ a = b := by
   rw [bne, ← beq_iff_eq (a := a) (b := b)]
   cases a == b <;> decide
 
