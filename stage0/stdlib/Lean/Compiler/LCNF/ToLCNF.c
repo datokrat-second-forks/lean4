@@ -30263,9 +30263,9 @@ goto v___jp_9530_;
 v___jp_9497_:
 {
 lean_object* v___x_9501_; lean_object* v___x_9502_; 
-v___x_9501_ = lean_st_ref_put(v___y_9498_, v_snd_9500_);
+v___x_9501_ = lean_st_ref_put(v___y_9499_, v_snd_9500_);
 v___x_9502_ = lean_alloc_ctor(0, 1, 0);
-lean_ctor_set(v___x_9502_, 0, v___y_9499_);
+lean_ctor_set(v___x_9502_, 0, v___y_9498_);
 return v___x_9502_;
 }
 v___jp_9503_:
@@ -30276,8 +30276,8 @@ v_shouldCache_9508_ = lean_ctor_get_uint8(v___x_9507_, sizeof(void*)*6);
 if (v_shouldCache_9508_ == 0)
 {
 lean_dec_ref(v___y_9504_);
-v___y_9498_ = v___y_9506_;
-v___y_9499_ = v_r_9505_;
+v___y_9498_ = v_r_9505_;
+v___y_9499_ = v___y_9506_;
 v_snd_9500_ = v___x_9507_;
 goto v___jp_9497_;
 }
@@ -30337,8 +30337,8 @@ goto v_reusejp_9519_;
 }
 v_reusejp_9519_:
 {
-v___y_9498_ = v___y_9506_;
-v___y_9499_ = v_r_9505_;
+v___y_9498_ = v_r_9505_;
+v___y_9499_ = v___y_9506_;
 v_snd_9500_ = v___x_9520_;
 goto v___jp_9497_;
 }

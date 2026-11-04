@@ -1986,57 +1986,57 @@ v___x_564_ = l_Lean_Omega_Constraint_add(v___x_562_, v___x_563_);
 return v___x_564_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Omega_Constraint_combine___lam__0(lean_object* v_x_565_, lean_object* v_y_566_){
+LEAN_EXPORT lean_object* l_Lean_Omega_Constraint_combine___lam__0(lean_object* v_a_565_, lean_object* v_b_566_){
 _start:
 {
 uint8_t v___x_567_; 
-v___x_567_ = lean_int_dec_le(v_x_565_, v_y_566_);
+v___x_567_ = lean_int_dec_le(v_a_565_, v_b_566_);
 if (v___x_567_ == 0)
 {
-lean_inc(v_x_565_);
-return v_x_565_;
+lean_inc(v_a_565_);
+return v_a_565_;
 }
 else
 {
-lean_inc(v_y_566_);
-return v_y_566_;
+lean_inc(v_b_566_);
+return v_b_566_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Omega_Constraint_combine___lam__0___boxed(lean_object* v_x_568_, lean_object* v_y_569_){
+LEAN_EXPORT lean_object* l_Lean_Omega_Constraint_combine___lam__0___boxed(lean_object* v_a_568_, lean_object* v_b_569_){
 _start:
 {
 lean_object* v_res_570_; 
-v_res_570_ = l_Lean_Omega_Constraint_combine___lam__0(v_x_568_, v_y_569_);
-lean_dec(v_y_569_);
-lean_dec(v_x_568_);
+v_res_570_ = l_Lean_Omega_Constraint_combine___lam__0(v_a_568_, v_b_569_);
+lean_dec(v_b_569_);
+lean_dec(v_a_568_);
 return v_res_570_;
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Omega_Constraint_combine___lam__1(lean_object* v_x_571_, lean_object* v_y_572_){
+LEAN_EXPORT lean_object* l_Lean_Omega_Constraint_combine___lam__1(lean_object* v_a_571_, lean_object* v_b_572_){
 _start:
 {
 uint8_t v___x_573_; 
-v___x_573_ = lean_int_dec_le(v_x_571_, v_y_572_);
+v___x_573_ = lean_int_dec_le(v_a_571_, v_b_572_);
 if (v___x_573_ == 0)
 {
-lean_inc(v_y_572_);
-return v_y_572_;
+lean_inc(v_b_572_);
+return v_b_572_;
 }
 else
 {
-lean_inc(v_x_571_);
-return v_x_571_;
+lean_inc(v_a_571_);
+return v_a_571_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Lean_Omega_Constraint_combine___lam__1___boxed(lean_object* v_x_574_, lean_object* v_y_575_){
+LEAN_EXPORT lean_object* l_Lean_Omega_Constraint_combine___lam__1___boxed(lean_object* v_a_574_, lean_object* v_b_575_){
 _start:
 {
 lean_object* v_res_576_; 
-v_res_576_ = l_Lean_Omega_Constraint_combine___lam__1(v_x_574_, v_y_575_);
-lean_dec(v_y_575_);
-lean_dec(v_x_574_);
+v_res_576_ = l_Lean_Omega_Constraint_combine___lam__1(v_a_574_, v_b_575_);
+lean_dec(v_b_575_);
+lean_dec(v_a_574_);
 return v_res_576_;
 }
 }

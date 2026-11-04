@@ -3922,30 +3922,30 @@ lean_dec(v_x_1400_);
 return v_res_1401_;
 }
 }
-LEAN_EXPORT lean_object* l_BitVec_instMin___redArg___lam__0(lean_object* v_x_1402_, lean_object* v_y_1403_){
+LEAN_EXPORT lean_object* l_BitVec_instMin___redArg___lam__0(lean_object* v_a_1402_, lean_object* v_b_1403_){
 _start:
 {
 uint8_t v___x_1404_; 
-v___x_1404_ = lean_nat_dec_le(v_x_1402_, v_y_1403_);
+v___x_1404_ = lean_nat_dec_le(v_a_1402_, v_b_1403_);
 if (v___x_1404_ == 0)
 {
-lean_inc(v_y_1403_);
-return v_y_1403_;
+lean_inc(v_b_1403_);
+return v_b_1403_;
 }
 else
 {
-lean_inc(v_x_1402_);
-return v_x_1402_;
+lean_inc(v_a_1402_);
+return v_a_1402_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_BitVec_instMin___redArg___lam__0___boxed(lean_object* v_x_1405_, lean_object* v_y_1406_){
+LEAN_EXPORT lean_object* l_BitVec_instMin___redArg___lam__0___boxed(lean_object* v_a_1405_, lean_object* v_b_1406_){
 _start:
 {
 lean_object* v_res_1407_; 
-v_res_1407_ = l_BitVec_instMin___redArg___lam__0(v_x_1405_, v_y_1406_);
-lean_dec(v_y_1406_);
-lean_dec(v_x_1405_);
+v_res_1407_ = l_BitVec_instMin___redArg___lam__0(v_a_1405_, v_b_1406_);
+lean_dec(v_b_1406_);
+lean_dec(v_a_1405_);
 return v_res_1407_;
 }
 }
@@ -3982,30 +3982,30 @@ lean_dec(v_w_1415_);
 return v_res_1416_;
 }
 }
-LEAN_EXPORT lean_object* l_BitVec_instMax___redArg___lam__0(lean_object* v_x_1417_, lean_object* v_y_1418_){
+LEAN_EXPORT lean_object* l_BitVec_instMax___redArg___lam__0(lean_object* v_a_1417_, lean_object* v_b_1418_){
 _start:
 {
 uint8_t v___x_1419_; 
-v___x_1419_ = lean_nat_dec_le(v_x_1417_, v_y_1418_);
+v___x_1419_ = lean_nat_dec_le(v_a_1417_, v_b_1418_);
 if (v___x_1419_ == 0)
 {
-lean_inc(v_x_1417_);
-return v_x_1417_;
+lean_inc(v_a_1417_);
+return v_a_1417_;
 }
 else
 {
-lean_inc(v_y_1418_);
-return v_y_1418_;
+lean_inc(v_b_1418_);
+return v_b_1418_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_BitVec_instMax___redArg___lam__0___boxed(lean_object* v_x_1420_, lean_object* v_y_1421_){
+LEAN_EXPORT lean_object* l_BitVec_instMax___redArg___lam__0___boxed(lean_object* v_a_1420_, lean_object* v_b_1421_){
 _start:
 {
 lean_object* v_res_1422_; 
-v_res_1422_ = l_BitVec_instMax___redArg___lam__0(v_x_1420_, v_y_1421_);
-lean_dec(v_y_1421_);
-lean_dec(v_x_1420_);
+v_res_1422_ = l_BitVec_instMax___redArg___lam__0(v_a_1420_, v_b_1421_);
+lean_dec(v_b_1421_);
+lean_dec(v_a_1420_);
 return v_res_1422_;
 }
 }

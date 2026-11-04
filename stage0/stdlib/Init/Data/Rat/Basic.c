@@ -1455,41 +1455,41 @@ v_r_483_ = lean_box(v_res_482_);
 return v_r_483_;
 }
 }
-LEAN_EXPORT lean_object* l_Rat_instMin___lam__0(lean_object* v_x_484_, lean_object* v_y_485_){
+LEAN_EXPORT lean_object* l_Rat_instMin___lam__0(lean_object* v_a_484_, lean_object* v_b_485_){
 _start:
 {
 uint8_t v___x_486_; 
-lean_inc_ref(v_y_485_);
-lean_inc_ref(v_x_484_);
-v___x_486_ = l_Rat_instDecidableLe(v_x_484_, v_y_485_);
+lean_inc_ref(v_b_485_);
+lean_inc_ref(v_a_484_);
+v___x_486_ = l_Rat_instDecidableLe(v_a_484_, v_b_485_);
 if (v___x_486_ == 0)
 {
-lean_dec_ref(v_x_484_);
-return v_y_485_;
+lean_dec_ref(v_a_484_);
+return v_b_485_;
 }
 else
 {
-lean_dec_ref(v_y_485_);
-return v_x_484_;
+lean_dec_ref(v_b_485_);
+return v_a_484_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Rat_instMax___lam__0(lean_object* v_x_489_, lean_object* v_y_490_){
+LEAN_EXPORT lean_object* l_Rat_instMax___lam__0(lean_object* v_a_489_, lean_object* v_b_490_){
 _start:
 {
 uint8_t v___x_491_; 
-lean_inc_ref(v_y_490_);
-lean_inc_ref(v_x_489_);
-v___x_491_ = l_Rat_instDecidableLe(v_x_489_, v_y_490_);
+lean_inc_ref(v_b_490_);
+lean_inc_ref(v_a_489_);
+v___x_491_ = l_Rat_instDecidableLe(v_a_489_, v_b_490_);
 if (v___x_491_ == 0)
 {
-lean_dec_ref(v_y_490_);
-return v_x_489_;
+lean_dec_ref(v_b_490_);
+return v_a_489_;
 }
 else
 {
-lean_dec_ref(v_x_489_);
-return v_y_490_;
+lean_dec_ref(v_a_489_);
+return v_b_490_;
 }
 }
 }

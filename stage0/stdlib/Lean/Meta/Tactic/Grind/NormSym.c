@@ -3740,6 +3740,7 @@ _start:
 {
 lean_object* v___x_839_; lean_object* v___x_840_; 
 v___x_839_ = lean_box(0);
+lean_inc_ref(v___y_828_);
 v___x_840_ = l_Lean_Meta_Grind_NormSym_simpDIte(v___y_828_, v___y_829_, v___y_830_, v___y_831_, v___y_832_, v___y_833_, v___y_834_, v___y_835_, v___y_836_, v___y_837_);
 if (lean_obj_tag(v___x_840_) == 0)
 {

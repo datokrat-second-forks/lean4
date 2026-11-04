@@ -1,6 +1,6 @@
 // Lean compiler output
 // Module: Init.Data.BitVec.Package
-// Imports: public import Init.Data.BitVec.Basic public import Init.Data.Order.PackageFactories import Init.Data.BitVec.Lemmas import Init.Data.Nat.Compare import Init.Data.Nat.Order
+// Imports: public import Init.Data.BitVec.Basic public import Init.Data.Order.PackageFactories public import Init.Data.BitVec.Lemmas import Init.Data.Nat.Compare import Init.Data.Nat.Order
 #include <lean/lean.h>
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"

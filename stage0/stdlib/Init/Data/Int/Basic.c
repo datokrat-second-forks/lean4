@@ -955,57 +955,57 @@ lean_dec(v_x_341_);
 return v_res_343_;
 }
 }
-LEAN_EXPORT lean_object* l_Int_instMin___lam__0(lean_object* v_x_346_, lean_object* v_y_347_){
+LEAN_EXPORT lean_object* l_Int_instMin___lam__0(lean_object* v_a_346_, lean_object* v_b_347_){
 _start:
 {
 uint8_t v___x_348_; 
-v___x_348_ = lean_int_dec_le(v_x_346_, v_y_347_);
+v___x_348_ = lean_int_dec_le(v_a_346_, v_b_347_);
 if (v___x_348_ == 0)
 {
-lean_inc(v_y_347_);
-return v_y_347_;
+lean_inc(v_b_347_);
+return v_b_347_;
 }
 else
 {
-lean_inc(v_x_346_);
-return v_x_346_;
+lean_inc(v_a_346_);
+return v_a_346_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Int_instMin___lam__0___boxed(lean_object* v_x_349_, lean_object* v_y_350_){
+LEAN_EXPORT lean_object* l_Int_instMin___lam__0___boxed(lean_object* v_a_349_, lean_object* v_b_350_){
 _start:
 {
 lean_object* v_res_351_; 
-v_res_351_ = l_Int_instMin___lam__0(v_x_349_, v_y_350_);
-lean_dec(v_y_350_);
-lean_dec(v_x_349_);
+v_res_351_ = l_Int_instMin___lam__0(v_a_349_, v_b_350_);
+lean_dec(v_b_350_);
+lean_dec(v_a_349_);
 return v_res_351_;
 }
 }
-LEAN_EXPORT lean_object* l_Int_instMax___lam__0(lean_object* v_x_354_, lean_object* v_y_355_){
+LEAN_EXPORT lean_object* l_Int_instMax___lam__0(lean_object* v_a_354_, lean_object* v_b_355_){
 _start:
 {
 uint8_t v___x_356_; 
-v___x_356_ = lean_int_dec_le(v_x_354_, v_y_355_);
+v___x_356_ = lean_int_dec_le(v_a_354_, v_b_355_);
 if (v___x_356_ == 0)
 {
-lean_inc(v_x_354_);
-return v_x_354_;
+lean_inc(v_a_354_);
+return v_a_354_;
 }
 else
 {
-lean_inc(v_y_355_);
-return v_y_355_;
+lean_inc(v_b_355_);
+return v_b_355_;
 }
 }
 }
-LEAN_EXPORT lean_object* l_Int_instMax___lam__0___boxed(lean_object* v_x_357_, lean_object* v_y_358_){
+LEAN_EXPORT lean_object* l_Int_instMax___lam__0___boxed(lean_object* v_a_357_, lean_object* v_b_358_){
 _start:
 {
 lean_object* v_res_359_; 
-v_res_359_ = l_Int_instMax___lam__0(v_x_357_, v_y_358_);
-lean_dec(v_y_358_);
-lean_dec(v_x_357_);
+v_res_359_ = l_Int_instMax___lam__0(v_a_357_, v_b_358_);
+lean_dec(v_b_358_);
+lean_dec(v_a_357_);
 return v_res_359_;
 }
 }
