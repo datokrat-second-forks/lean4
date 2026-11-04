@@ -35,11 +35,6 @@ open InternalSyntax in
   let `(doNested| do $doSeq) := stx | throwUnsupportedSyntax
   elabDoSeq ⟨doSeq.raw⟩ dec
 
-open InternalSyntax in
-@[builtin_doElem_elab Lean.Parser.Term.doUnless] def elabDoUnless : DoElab := fun stx dec => do
-  let `(doUnless| unless%$tk $cond do $body) := stx | throwUnsupportedSyntax
-  elabDoElem (← `(doElem| if $cond then skip%$tk else $body)) dec
-
 @[builtin_doElem_elab Lean.Parser.Term.doDbgTrace] def elabDoDbgTrace : DoElab := fun stx dec => do
   let `(doDbgTrace| dbg_trace%$tk $msg:term) := stx | throwUnsupportedSyntax
   let mγ ← mkMonadApp (← read).doBlockResultType

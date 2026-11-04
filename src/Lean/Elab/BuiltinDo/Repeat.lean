@@ -39,8 +39,8 @@ remove the following code without breaking the do block's type.
     withRef expanded <| elabDoElem ⟨expanded⟩ dec
 
 /-!
-`while c do s` and `repeat s until c` decide `c` with `bif` if it is a `Bool` and with `uif`
-otherwise. The macros expand to the internal `if_auto%` element, laid out as
+`while c do s`, `repeat s until c` and `unless c do s` decide `c` with `bif` if it is a `Bool` and
+with `uif` otherwise. The macros expand to the internal `if_auto%` element, laid out as
 `[kw, optional [h, ":"], c, "then", thenSeq, "else", elseSeq]`, whose elaborator picks `bif` or
 `uif` once nested actions in `c` are lifted.
 -/
@@ -66,6 +66,12 @@ open InternalSyntax in
         do $seq:doSeq
         $(⟨ifAuto⟩):doElem)
   | _ => Macro.throwUnsupported
+
+open InternalSyntax in
+@[builtin_doElem_elab Lean.Parser.Term.doUnless] def elabDoUnless : DoElab := fun stx dec => do
+  let `(doUnless| unless%$tk $cond do $body) := stx | throwUnsupportedSyntax
+  let ifAuto := mkDoIfAuto tk mkNullNode cond (← `(doSeq| skip%$tk)) body
+  Term.withMacroExpansion stx ifAuto <| withRef ifAuto <| elabDoElem ⟨ifAuto⟩ dec
 
 /--
 Whether the loop condition `c` is a `Bool`. It is elaborated without expected type and the state is
