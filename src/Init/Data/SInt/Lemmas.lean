@@ -704,15 +704,15 @@ theorem ISize.ofIntLE_int64ToInt (x : Int64) {h₁ h₂} : ISize.ofIntLE x.toInt
     simpa [ISize.toInt_maxValue] using h₂
 
 theorem Int8.ofIntLE_eq_ofIntClamp {x : Int} {h₁ h₂} : (ofIntLE x h₁ h₂) = ofIntClamp x := by
-  rw [ofIntClamp, dite_eq_left h₁, dite_eq_left h₂]
+  rw [ofIntClamp, Bool.dcond_pos (decideLE_eq_true_iff.2 h₁), Bool.dcond_pos (decideLE_eq_true_iff.2 h₂)]
 theorem Int16.ofIntLE_eq_ofIntClamp {x : Int} {h₁ h₂} : (ofIntLE x h₁ h₂) = ofIntClamp x := by
-  rw [ofIntClamp, dite_eq_left h₁, dite_eq_left h₂]
+  rw [ofIntClamp, Bool.dcond_pos (decideLE_eq_true_iff.2 h₁), Bool.dcond_pos (decideLE_eq_true_iff.2 h₂)]
 theorem Int32.ofIntLE_eq_ofIntClamp {x : Int} {h₁ h₂} : (ofIntLE x h₁ h₂) = ofIntClamp x := by
-  rw [ofIntClamp, dite_eq_left h₁, dite_eq_left h₂]
+  rw [ofIntClamp, Bool.dcond_pos (decideLE_eq_true_iff.2 h₁), Bool.dcond_pos (decideLE_eq_true_iff.2 h₂)]
 theorem Int64.ofIntLE_eq_ofIntClamp {x : Int} {h₁ h₂} : (ofIntLE x h₁ h₂) = ofIntClamp x := by
-  rw [ofIntClamp, dite_eq_left h₁, dite_eq_left h₂]
+  rw [ofIntClamp, Bool.dcond_pos (decideLE_eq_true_iff.2 h₁), Bool.dcond_pos (decideLE_eq_true_iff.2 h₂)]
 theorem ISize.ofIntLE_eq_ofIntClamp {x : Int} {h₁ h₂} : (ofIntLE x h₁ h₂) = ofIntClamp x := by
-  rw [ofIntClamp, dite_eq_left h₁, dite_eq_left h₂]
+  rw [ofIntClamp, Bool.dcond_pos (decideLE_eq_true_iff.2 h₁), Bool.dcond_pos (decideLE_eq_true_iff.2 h₂)]
 
 theorem Int8.ofIntLE_eq_ofInt {n : Int} (h₁ h₂) : Int8.ofIntLE n h₁ h₂ = Int8.ofInt n := (rfl)
 theorem Int16.ofIntLE_eq_ofInt {n : Int} (h₁ h₂) : Int16.ofIntLE n h₁ h₂ = Int16.ofInt n := (rfl)
@@ -1084,7 +1084,7 @@ theorem Int8.toNatClampNeg_ofIntClamp_of_lt {n : Int} (h₁ : n < 2 ^ 7) :
     (Int8.ofIntClamp n).toNatClampNeg = n.toNat := by
   rw [ofIntClamp]
   split
-  · rw [dite_eq_left (by rw [toInt_maxValue]; omega), toNatClampNeg_ofIntLE]
+  · rw [Bool.dcond_pos (decideLE_eq_true_iff.2 (by rw [toInt_maxValue]; omega)), toNatClampNeg_ofIntLE]
   next h =>
     rw [toNatClampNeg_minValue, eq_comm, Int.toNat_eq_zero]
     rw [toInt_minValue] at h
@@ -1093,7 +1093,7 @@ theorem Int16.toNatClampNeg_ofIntClamp_of_lt {n : Int} (h₁ : n < 2 ^ 15) :
     (Int16.ofIntClamp n).toNatClampNeg = n.toNat := by
   rw [ofIntClamp]
   split
-  · rw [dite_eq_left (by rw [toInt_maxValue]; omega), toNatClampNeg_ofIntLE]
+  · rw [Bool.dcond_pos (decideLE_eq_true_iff.2 (by rw [toInt_maxValue]; omega)), toNatClampNeg_ofIntLE]
   next h =>
     rw [toNatClampNeg_minValue, eq_comm, Int.toNat_eq_zero]
     rw [toInt_minValue] at h
@@ -1102,7 +1102,7 @@ theorem Int32.toNatClampNeg_ofIntClamp_of_lt {n : Int} (h₁ : n < 2 ^ 31) :
     (Int32.ofIntClamp n).toNatClampNeg = n.toNat := by
   rw [ofIntClamp]
   split
-  · rw [dite_eq_left (by rw [toInt_maxValue]; omega), toNatClampNeg_ofIntLE]
+  · rw [Bool.dcond_pos (decideLE_eq_true_iff.2 (by rw [toInt_maxValue]; omega)), toNatClampNeg_ofIntLE]
   next h =>
     rw [toNatClampNeg_minValue, eq_comm, Int.toNat_eq_zero]
     rw [toInt_minValue] at h
@@ -1111,7 +1111,7 @@ theorem Int64.toNatClampNeg_ofIntClamp_of_lt {n : Int} (h₁ : n < 2 ^ 63) :
     (Int64.ofIntClamp n).toNatClampNeg = n.toNat := by
   rw [ofIntClamp]
   split
-  · rw [dite_eq_left (by rw [toInt_maxValue]; omega), toNatClampNeg_ofIntLE]
+  · rw [Bool.dcond_pos (decideLE_eq_true_iff.2 (by rw [toInt_maxValue]; omega)), toNatClampNeg_ofIntLE]
   next h =>
     rw [toNatClampNeg_minValue, eq_comm, Int.toNat_eq_zero]
     rw [toInt_minValue] at h
@@ -1120,7 +1120,7 @@ theorem ISize.toNatClampNeg_ofIntClamp_of_lt_two_pow_numBits {n : Int} (h₁ : n
     (ISize.ofIntClamp n).toNatClampNeg = n.toNat := by
   rw [ofIntClamp]
   split
-  · rw [dite_eq_left (by rw [toInt_maxValue]; omega), toNatClampNeg_ofIntLE]
+  · rw [Bool.dcond_pos (decideLE_eq_true_iff.2 (by rw [toInt_maxValue]; omega)), toNatClampNeg_ofIntLE]
   next h =>
     rw [toNatClampNeg_minValue, eq_comm, Int.toNat_eq_zero]
     rw [toInt_minValue] at h
@@ -3192,15 +3192,15 @@ protected theorem ISize.le_antisymm {a b : ISize} : a ≤ b → b ≤ a → a = 
 @[simp] protected theorem Int64.div_one {a : Int64} : a / 1 = a := Int64.toBitVec_inj.1 BitVec.sdiv_one
 @[simp] protected theorem ISize.div_one {a : ISize} : a / 1 = a := ISize.toBitVec_inj.1 BitVec.sdiv_one
 
-protected theorem Int8.div_self {a : Int8} : a / a = if a = 0 then 0 else 1 := by
-  simp [← Int8.toBitVec_inj, apply_ite]
-protected theorem Int16.div_self {a : Int16} : a / a = if a = 0 then 0 else 1 := by
-  simp [← Int16.toBitVec_inj, apply_ite]
-protected theorem Int32.div_self {a : Int32} : a / a = if a = 0 then 0 else 1 := by
-  simp [← Int32.toBitVec_inj, apply_ite]
-protected theorem Int64.div_self {a : Int64} : a / a = if a = 0 then 0 else 1 := by
-  simp [← Int64.toBitVec_inj, apply_ite]
-protected theorem ISize.div_self {a : ISize} : a / a = if a = 0 then 0 else 1 := by
+protected theorem Int8.div_self {a : Int8} : a / a = uif a = 0 then 0 else 1 := by
+  by_cases h : a = 0 <;> simp_all [← Int8.toBitVec_inj]
+protected theorem Int16.div_self {a : Int16} : a / a = uif a = 0 then 0 else 1 := by
+  by_cases h : a = 0 <;> simp_all [← Int16.toBitVec_inj]
+protected theorem Int32.div_self {a : Int32} : a / a = uif a = 0 then 0 else 1 := by
+  by_cases h : a = 0 <;> simp_all [← Int32.toBitVec_inj]
+protected theorem Int64.div_self {a : Int64} : a / a = uif a = 0 then 0 else 1 := by
+  by_cases h : a = 0 <;> simp_all [← Int64.toBitVec_inj]
+protected theorem ISize.div_self {a : ISize} : a / a = uif a = 0 then 0 else 1 := by
   simp [← ISize.toInt_inj]
   split
   · simp_all

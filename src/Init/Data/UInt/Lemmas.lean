@@ -3463,15 +3463,15 @@ protected theorem USize.lt_iff_le_and_ne {a b : USize} : a < b ↔ a ≤ b ∧ a
 @[simp] protected theorem UInt64.div_one {a : UInt64} : a / 1 = a := UInt64.toBitVec_inj.1 BitVec.udiv_one
 @[simp] protected theorem USize.div_one {a : USize} : a / 1 = a := USize.toBitVec_inj.1 BitVec.udiv_one
 
-protected theorem UInt8.div_self {a : UInt8} : a / a = if a = 0 then 0 else 1 := by
-  simp [← UInt8.toBitVec_inj, apply_ite]
-protected theorem UInt16.div_self {a : UInt16} : a / a = if a = 0 then 0 else 1 := by
-  simp [← UInt16.toBitVec_inj, apply_ite]
-protected theorem UInt32.div_self {a : UInt32} : a / a = if a = 0 then 0 else 1 := by
-  simp [← UInt32.toBitVec_inj, apply_ite]
-protected theorem UInt64.div_self {a : UInt64} : a / a = if a = 0 then 0 else 1 := by
-  simp [← UInt64.toBitVec_inj, apply_ite]
-protected theorem USize.div_self {a : USize} : a / a = if a = 0 then 0 else 1 := by
+protected theorem UInt8.div_self {a : UInt8} : a / a = uif a = 0 then 0 else 1 := by
+  by_cases h : a = 0 <;> simp_all [← UInt8.toBitVec_inj]
+protected theorem UInt16.div_self {a : UInt16} : a / a = uif a = 0 then 0 else 1 := by
+  by_cases h : a = 0 <;> simp_all [← UInt16.toBitVec_inj]
+protected theorem UInt32.div_self {a : UInt32} : a / a = uif a = 0 then 0 else 1 := by
+  by_cases h : a = 0 <;> simp_all [← UInt32.toBitVec_inj]
+protected theorem UInt64.div_self {a : UInt64} : a / a = uif a = 0 then 0 else 1 := by
+  by_cases h : a = 0 <;> simp_all [← UInt64.toBitVec_inj]
+protected theorem USize.div_self {a : USize} : a / a = uif a = 0 then 0 else 1 := by
   simp [← USize.toNat_inj]
   split
   · simp_all

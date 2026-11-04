@@ -193,9 +193,9 @@ def Int8.ofIntLE (i : Int) (_hl : Int8.minValue.toInt ≤ i) (_hr : i ≤ Int8.m
   Int8.ofInt i
 /-- Constructs an `Int8` from an `Int`, clamping if the value is too small or too large. -/
 def Int8.ofIntClamp (i : Int) : Int8 :=
-  if hl : Int8.minValue.toInt ≤ i then
-    if hr : i ≤ Int8.maxValue.toInt then
-      Int8.ofIntLE i hl hr
+  bif hl : Int8.minValue.toInt ≤ᵇ i then
+    bif hr : i ≤ᵇ Int8.maxValue.toInt then
+      Int8.ofIntLE i (le_of_decideLE_eq_true hl) (le_of_decideLE_eq_true hr)
     else
       Int8.maxValue
   else
@@ -401,7 +401,7 @@ instance : DecidableEq Int8 := Int8.decEq
 Converts `true` to `1` and `false` to `0`.
 -/
 @[extern "lean_bool_to_int8"]
-def Bool.toInt8 (b : Bool) : Int8 := if b then 1 else 0
+def Bool.toInt8 (b : Bool) : Int8 := bif b then 1 else 0
 
 /--
 Decides whether one 8-bit signed integer is strictly less than another. Usually accessed via the
@@ -567,9 +567,9 @@ def Int16.ofIntLE (i : Int) (_hl : Int16.minValue.toInt ≤ i) (_hr : i ≤ Int1
   Int16.ofInt i
 /-- Constructs an `Int16` from an `Int`, clamping if the value is too small or too large. -/
 def Int16.ofIntClamp (i : Int) : Int16 :=
-  if hl : Int16.minValue.toInt ≤ i then
-    if hr : i ≤ Int16.maxValue.toInt then
-      Int16.ofIntLE i hl hr
+  bif hl : Int16.minValue.toInt ≤ᵇ i then
+    bif hr : i ≤ᵇ Int16.maxValue.toInt then
+      Int16.ofIntLE i (le_of_decideLE_eq_true hl) (le_of_decideLE_eq_true hr)
     else
       Int16.maxValue
   else
@@ -776,7 +776,7 @@ instance : DecidableEq Int16 := Int16.decEq
 Converts `true` to `1` and `false` to `0`.
 -/
 @[extern "lean_bool_to_int16"]
-def Bool.toInt16 (b : Bool) : Int16 := if b then 1 else 0
+def Bool.toInt16 (b : Bool) : Int16 := bif b then 1 else 0
 
 /--
 Decides whether one 16-bit signed integer is strictly less than another. Usually accessed via the
@@ -958,9 +958,9 @@ def Int32.ofIntLE (i : Int) (_hl : Int32.minValue.toInt ≤ i) (_hr : i ≤ Int3
   Int32.ofInt i
 /-- Constructs an `Int32` from an `Int`, clamping if the value is too small or too large. -/
 def Int32.ofIntClamp (i : Int) : Int32 :=
-  if hl : Int32.minValue.toInt ≤ i then
-    if hr : i ≤ Int32.maxValue.toInt then
-      Int32.ofIntLE i hl hr
+  bif hl : Int32.minValue.toInt ≤ᵇ i then
+    bif hr : i ≤ᵇ Int32.maxValue.toInt then
+      Int32.ofIntLE i (le_of_decideLE_eq_true hl) (le_of_decideLE_eq_true hr)
     else
       Int32.maxValue
   else
@@ -1167,7 +1167,7 @@ instance : DecidableEq Int32 := Int32.decEq
 Converts `true` to `1` and `false` to `0`.
 -/
 @[extern "lean_bool_to_int32"]
-def Bool.toInt32 (b : Bool) : Int32 := if b then 1 else 0
+def Bool.toInt32 (b : Bool) : Int32 := bif b then 1 else 0
 
 /--
 Decides whether one 32-bit signed integer is strictly less than another. Usually accessed via the
@@ -1369,9 +1369,9 @@ def Int64.ofIntLE (i : Int) (_hl : Int64.minValue.toInt ≤ i) (_hr : i ≤ Int6
   Int64.ofInt i
 /-- Constructs an `Int64` from an `Int`, clamping if the value is too small or too large. -/
 def Int64.ofIntClamp (i : Int) : Int64 :=
-  if hl : Int64.minValue.toInt ≤ i then
-    if hr : i ≤ Int64.maxValue.toInt then
-      Int64.ofIntLE i hl hr
+  bif hl : Int64.minValue.toInt ≤ᵇ i then
+    bif hr : i ≤ᵇ Int64.maxValue.toInt then
+      Int64.ofIntLE i (le_of_decideLE_eq_true hl) (le_of_decideLE_eq_true hr)
     else
       Int64.maxValue
   else
@@ -1578,7 +1578,7 @@ instance : DecidableEq Int64 := Int64.decEq
 Converts `true` to `1` and `false` to `0`.
 -/
 @[extern "lean_bool_to_int64"]
-def Bool.toInt64 (b : Bool) : Int64 := if b then 1 else 0
+def Bool.toInt64 (b : Bool) : Int64 := bif b then 1 else 0
 
 /--
 Decides whether one 8-bit signed integer is strictly less than another. Usually accessed via the
@@ -1779,9 +1779,9 @@ def ISize.ofIntLE (i : Int) (_hl : ISize.minValue.toInt ≤ i) (_hr : i ≤ ISiz
   ISize.ofInt i
 /-- Constructs an `ISize` from an `Int`, clamping if the value is too small or too large. -/
 def ISize.ofIntClamp (i : Int) : ISize :=
-  if hl : ISize.minValue.toInt ≤ i then
-    if hr : i ≤ ISize.maxValue.toInt then
-      ISize.ofIntLE i hl hr
+  bif hl : ISize.minValue.toInt ≤ᵇ i then
+    bif hr : i ≤ᵇ ISize.maxValue.toInt then
+      ISize.ofIntLE i (le_of_decideLE_eq_true hl) (le_of_decideLE_eq_true hr)
     else
       ISize.maxValue
   else
@@ -1990,7 +1990,7 @@ instance : DecidableEq ISize := ISize.decEq
 Converts `true` to `1` and `false` to `0`.
 -/
 @[extern "lean_bool_to_isize"]
-def Bool.toISize (b : Bool) : ISize := if b then 1 else 0
+def Bool.toISize (b : Bool) : ISize := bif b then 1 else 0
 
 /--
 Decides whether one word-sized signed integer is strictly less than another. Usually accessed via the
