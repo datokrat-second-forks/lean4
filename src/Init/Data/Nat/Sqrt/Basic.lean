@@ -21,17 +21,18 @@ Integer square root function. Implemented via Newton's method.
 -/
 @[expose]
 def sqrt (n : Nat) : Nat :=
-  uif n ≤ 1 then n else
+  bif n ≤ᵇ 1 then n else
   iter n (1 <<< ((n.log2 / 2) + 1))
 where
   /-- Auxiliary for `sqrt`. If `guess` is greater than the integer square root of `n`,
   returns the integer square root of `n`. -/
   iter (n guess : Nat) : Nat :=
     let next := (guess + n / guess) / 2
-    uif _h : next < guess then
+    bif next <ᵇ guess then
       iter n next
     else
       guess
   termination_by guess
+  decreasing_by exact lt_of_decideLT_eq_true ‹_›
 
 end Nat

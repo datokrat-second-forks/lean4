@@ -161,13 +161,12 @@ private def recv (ch : Unbounded α) : BaseIO (Task (Option α)) := do
   ch.state.atomically do
     if let some val ← tryRecv' then
       return .pure <| some val
+    else bif (← get).closed then
+      return .pure none
     else
-      bif (← get).closed then
-        return .pure none
-      else
-        let promise ← IO.Promise.new
-        modify fun st => { st with consumers := st.consumers.enqueue (.normal promise) }
-        return promise.result?.map (sync := true) (·.bind id)
+      let promise ← IO.Promise.new
+      modify fun st => { st with consumers := st.consumers.enqueue (.normal promise) }
+      return promise.result?.map (sync := true) (·.bind id)
 
 @[inline]
 private def recvReady' [Monad m] [MonadLiftT (ST IO.RealWorld) m] :
@@ -312,13 +311,12 @@ private def recv (ch : Zero α) : BaseIO (Task (Option α)) := do
     let st ← get
     if let some val ← tryRecv' then
       return .pure <| some val
+    else bif !st.closed then
+      let promise ← IO.Promise.new
+      set { st with consumers := st.consumers.enqueue (.normal promise) }
+      return promise.result?.map (sync := true) (·.bind id)
     else
-      bif !st.closed then
-        let promise ← IO.Promise.new
-        set { st with consumers := st.consumers.enqueue (.normal promise) }
-        return promise.result?.map (sync := true) (·.bind id)
-      else
-        return .pure <| none
+      return .pure <| none
 
 @[inline]
 private def recvReady' [Monad m] [MonadLiftT (ST IO.RealWorld) m] :
@@ -546,17 +544,16 @@ private partial def recv (ch : Bounded α) : BaseIO (Task (Option α)) := do
   ch.state.atomically do
     if let some val ← tryRecv' then
       return .pure <| some val
+    else bif (← get).closed then
+      return .pure none
     else
-      bif (← get).closed then
-        return .pure none
-      else
-        let promise ← IO.Promise.new
-        modify fun st => { st with consumers := st.consumers.enqueue ⟨promise, none⟩ }
-        BaseIO.bindTask promise.result? fun res => do
-          bif res.getD false then
-            Bounded.recv ch
-          else
-            return .pure none
+      let promise ← IO.Promise.new
+      modify fun st => { st with consumers := st.consumers.enqueue ⟨promise, none⟩ }
+      BaseIO.bindTask promise.result? fun res => do
+        bif res.getD false then
+          Bounded.recv ch
+        else
+          return .pure none
 
 @[inline]
 private def recvReady' [Monad m] [MonadLiftT (ST IO.RealWorld) m] :

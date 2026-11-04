@@ -1925,7 +1925,7 @@ Examples:
 -/
 @[inline] def insertIdx (as : Array α) (i : Nat) (a : α) (_ : i ≤ as.size := by get_elem_tactic) : Array α :=
   let rec loop (as : Array α) (j : Fin as.size) :=
-    bif _ : i <ᵇ j.val then
+    bif i <ᵇ j.val then
       let j' : Fin as.size := ⟨j-1, Nat.lt_of_le_of_lt (Nat.pred_le _) j.2⟩
       let as := as.swap j' j
       loop as ⟨j', by rw [size_swap]; exact j'.2⟩
@@ -2058,7 +2058,7 @@ Examples:
 def zipWithAll (f : Option α → Option β → γ) (as : Array α) (bs : Array β) : Array γ :=
   go as bs 0 #[]
 where go (as : Array α) (bs : Array β) (i : Nat) (cs : Array γ) :=
-  bif _ : i <ᵇ max as.size bs.size then
+  bif i <ᵇ max as.size bs.size then
     let a := as[i]?
     let b := bs[i]?
     go as bs (i+1) (cs.push (f a b))

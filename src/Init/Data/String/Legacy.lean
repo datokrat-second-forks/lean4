@@ -59,14 +59,14 @@ It represents the state where we have currently parsed some split parts into `r`
 of `sep` match the bytes `i-j .. i` of `s`.
 -/
 def splitOnAux (s sep : String) (b : Pos.Raw) (i : Pos.Raw) (j : Pos.Raw) (r : List String) : List String :=
-  bif _ : i.atEnd s then
+  bif i.atEnd s then
     let r := (b.extract s i)::r
     r.reverse
   else
-    bif _ : i.get s == j.get sep then
+    bif i.get s == j.get sep then
       let i := i.next s
       let j := j.next sep
-      bif _ : j.atEnd sep then
+      bif j.atEnd sep then
         splitOnAux s sep i i 0 (b.extract s (i.unoffsetBy j)::r)
       else
         splitOnAux s sep b i j r

@@ -558,12 +558,11 @@ private partial def send' (stream : Stream) (chunk : Chunk) : Async Unit := do
       else
         set { st with pendingConsumer := none }
         return .ok (some false)
+    else bif st.pendingProducer.isSome then
+      return .error (IO.Error.userError "only one blocked producer is allowed")
     else
-      bif st.pendingProducer.isSome then
-        return .error (IO.Error.userError "only one blocked producer is allowed")
-      else
-        set { st with pendingProducer := some { chunk, done } }
-        return .ok none
+      set { st with pendingProducer := some { chunk, done } }
+      return .ok none
 
   match result with
   | .error err =>

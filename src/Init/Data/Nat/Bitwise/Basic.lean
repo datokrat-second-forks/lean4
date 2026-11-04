@@ -25,7 +25,7 @@ Each bit of the resulting `Nat` is the result of applying `f` to the correspondi
 `Nat`s, up to the position of the highest set bit in either input.
 -/
 def bitwise (f : Bool → Bool → Bool) (n m : Nat) : Nat :=
-  bif _hn : n =ᵇ 0 then
+  bif n =ᵇ 0 then
     bif f false true then m else 0
   else bif m =ᵇ 0 then
     bif f true false then n else 0

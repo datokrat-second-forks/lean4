@@ -500,7 +500,7 @@ private def handle
     pendingHead := none
   }
 
-  while ¬state.machine.halted do
+  while !state.machine.halted do
 
     -- Phase 1: advance the state machine and flush any output.
     let (newMachine, step) := state.machine.step

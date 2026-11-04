@@ -106,7 +106,7 @@ private def shuffleIt {α : Type u} (xs : Array α) (gen : StdGen) : Array α ×
   go xs gen 0
 where
   go (xs : Array α) (gen : StdGen) (i : Nat) : Array α × StdGen :=
-    bif _ : i <ᵇ xs.size - 1 then
+    bif i <ᵇ xs.size - 1 then
       let (j, gen) := randNat gen i (xs.size - 1)
       let xs := xs.swapIfInBounds i j
       go xs gen (i + 1)

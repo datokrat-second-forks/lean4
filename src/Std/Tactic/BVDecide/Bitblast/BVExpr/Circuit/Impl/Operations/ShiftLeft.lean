@@ -150,7 +150,7 @@ where
   go {n : Nat} (aig : AIG α) (distance : AIG.RefVec aig n) (curr : Nat)
       (acc : AIG.RefVec aig w) :
       AIG.RefVecEntry α w :=
-    bif _ : curr <ᵇ n - 1 then
+    bif curr <ᵇ n - 1 then
       let res := blastShiftLeft.twoPowShift aig ⟨_, acc, distance, curr + 1⟩
       let aig := res.aig
       let acc := res.vec

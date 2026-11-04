@@ -372,7 +372,7 @@ def balance! (k : α) (v : β k) (l r : Impl α β) : Impl α β :=
       | .inner _ _ _ _ _, .inner lrs lrk lrv lrl lrr =>
         .inner (1 + ls) lk lv ll (.inner (1 + lrs) k v (.inner lrs lrk lrv lrl lrr) .leaf)
     | .inner rs rk rv rl rr =>
-      bif _ : delta * ls <ᵇ rs then
+      bif delta * ls <ᵇ rs then
         match rl, rr with
         | .inner rls rlk rlv rll rlr, .inner rrs _ _ _ _ =>
           bif rls <ᵇ ratio * rrs then
@@ -382,7 +382,7 @@ def balance! (k : α) (v : β k) (l r : Impl α β) : Impl α β :=
               (.inner (1 + rrs + rlr.size) rk rv rlr rr)
         | inner _ _ _ _ _, .leaf => panic! "balance! input was not balanced"
         | .leaf, _ => panic! "balance! input was not balanced"
-      else bif _ : delta * rs <ᵇ ls then
+      else bif delta * rs <ᵇ ls then
         match ll, lr with
         | .inner lls _ _ _ _, .inner lrs lrk lrv lrl lrr =>
           bif lrs <ᵇ ratio * lls then

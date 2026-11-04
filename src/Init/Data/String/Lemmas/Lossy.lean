@@ -73,14 +73,14 @@ public theorem fromUTF8Lossy_empty : fromUTF8Lossy ByteArray.empty = "" := by
 
 theorem fromUTF8Lossy.go_of_not_lt {b : ByteArray} {i : Nat} {acc : String}
     (h : ¬ i < b.size) : fromUTF8Lossy.go b i acc = acc := by
-  rw [fromUTF8Lossy.go, Bool.dcond_decideLT_neg h]
+  rw [fromUTF8Lossy.go, Bool.cond_decideLT_neg h]
 
 theorem fromUTF8Lossy.go_of_utf8DecodeChar?_eq_some {b : ByteArray} {i : Nat}
     {acc : String} {c : Char} (h : i < b.size)
     (hc : b.utf8DecodeChar? i = some c) :
     fromUTF8Lossy.go b i acc =
       fromUTF8Lossy.go b (i + c.utf8Size) (acc.push c) := by
-  rw [fromUTF8Lossy.go, Bool.dcond_decideLT_pos h]
+  rw [fromUTF8Lossy.go, Bool.cond_decideLT_pos h]
   split
   · rename_i d hd
     obtain rfl : c = d := by rw [← Option.some_inj, ← hc, hd]
@@ -91,7 +91,7 @@ theorem fromUTF8Lossy.go_of_utf8DecodeChar?_eq_none {b : ByteArray} {i : Nat}
     {acc : String} (h : i < b.size) (hc : b.utf8DecodeChar? i = none) :
     fromUTF8Lossy.go b i acc =
       fromUTF8Lossy.go b (skipContinuationBytes b (i + 1)) (acc.push '\ufffd') := by
-  rw [fromUTF8Lossy.go, Bool.dcond_decideLT_pos h]
+  rw [fromUTF8Lossy.go, Bool.cond_decideLT_pos h]
   split
   · simp_all
   · rfl

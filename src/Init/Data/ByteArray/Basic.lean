@@ -210,12 +210,10 @@ Converts a packed array of bytes to a linked list.
 -/
 def toList (bs : ByteArray) : List UInt8 :=
   let rec loop (i : Nat) (r : List UInt8) :=
-    bif _ : i <ᵇ bs.size then
+    bif i <ᵇ bs.size then
       loop (i+1) (bs.get! i :: r)
     else
       r.reverse
-    termination_by bs.size - i
-    decreasing_by decreasing_trivial_pre_omega
   loop 0 []
 
 /--

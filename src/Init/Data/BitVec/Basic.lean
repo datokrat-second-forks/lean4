@@ -774,7 +774,7 @@ def intMax (w : Nat) := (twoPow w (w - 1)) - 1
 Computes a hash of a bitvector, combining 64-bit words using `mixHash`.
 -/
 def hash (bv : BitVec n) : UInt64 :=
-  bif _ : n ≤ᵇ 64 then
+  bif n ≤ᵇ 64 then
     bv.toFin.val.toUInt64
   else
     mixHash (bv.toFin.val.toUInt64) (hash ((bv >>> 64).setWidth (n - 64)))

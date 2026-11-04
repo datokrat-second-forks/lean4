@@ -351,7 +351,7 @@ def decode (es : EncodedString r) : Option String := Id.run do
   let len := rawBytes.size
   let mut i := 0
   let percent := '%'.toNat.toUInt8
-  while h : i < len do
+  while h : i <ᵇ len do
     let c := rawBytes[i]
     (decoded, i) := bif h₁ : c == percent && i + 1 <ᵇ len then
       let h1 := rawBytes[i + 1]
@@ -482,7 +482,7 @@ def encode (s : String) (r : UInt8 → Bool := isQueryChar) : EncodedQueryString
   s.toUTF8.foldl (init := EncodedQueryString.empty) fun acc c =>
     bif h : isAsciiByte c && r c then
       acc.push c (by have h := (Bool.and_eq_true _ _).mp h; simp [isEncodedQueryChar, isEncodedChar]; exact Or.inl (And.intro h.left (Or.inl h.right)))
-    else bif _ : c == ' '.toUInt8 then
+    else bif c == ' '.toUInt8 then
       acc.push '+'.toUInt8 (by simp [isEncodedQueryChar])
     else
       byteToHex c acc
@@ -506,7 +506,7 @@ def decode (es : EncodedQueryString r) : Option String := Id.run do
   let mut i := 0
   let percent := '%'.toNat.toUInt8
   let plus := '+'.toNat.toUInt8
-  while h : i < len do
+  while h : i <ᵇ len do
     let c := rawBytes[i]
     (decoded, i) := bif c == plus then
       (decoded.push ' '.toNat.toUInt8, i + 1)

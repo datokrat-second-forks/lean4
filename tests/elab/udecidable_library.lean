@@ -2,10 +2,10 @@ import Lean
 import Std.Time
 
 /-!
-`Nat.sqrt`, `Nat.nextPowerOfTwo` and the generic `Std.Time.Internal.Bounded.ofInt?` branch with
-`uif`, i.e. on `UDecidable` instances. Compiled
-code still computes them, and their lemmas still apply. They no longer reduce in the kernel.
-The `Bounded.LE` constructors on concrete bounds (`clip`, `ofInt`, `ofNat?`) use `bif` and reduce.
+The generic `Std.Time.Internal.Bounded.ofInt?` branches with `uif`, i.e. on `UDecidable` instances.
+`Nat.sqrt`, `Nat.nextPowerOfTwo` and the `Bounded.LE` constructors on concrete bounds (`clip`,
+`ofInt`, `ofNat?`) branch with `bif` on Boolean comparisons, so they reduce in the kernel as they did
+with `if`. Compiled code computes all of them, and their lemmas still apply.
 -/
 
 open Lean Meta in
@@ -18,7 +18,16 @@ def checkUDecidable (declName : Name) : MetaM Unit := do
       |>.isSome do
     throwError "{declName} does not use `UDecidable`"
 
-run_meta checkUDecidable ``Nat.sqrt
+open Lean Meta in
+/-- Fails unless the definition of `declName` branches with `cond` and not with `ite`/`dite`. -/
+def checkBif (declName : Name) : MetaM Unit := do
+  let some value := (← getConstInfo declName).value? | throwError "{declName} has no value"
+  if value.find? (fun e => e.isConstOf ``ite || e.isConstOf ``dite) |>.isSome then
+    throwError "{declName} uses `ite` or `dite`"
+  unless value.find? (fun e => e.isConstOf ``cond) |>.isSome do
+    throwError "{declName} does not use `cond`"
+
+run_meta checkBif ``Nat.sqrt
 run_meta checkUDecidable ``Std.Time.Internal.Bounded.ofInt?
 
 /-- info: [0, 1, 1, 2, 3, 4, 100] -/
@@ -50,15 +59,8 @@ example (n : Nat) : n.nextPowerOfTwo.isPowerOfTwo := Nat.isPowerOfTwo_nextPowerO
 open Std.Time.Internal in
 example : (Bounded.LE.clip (lo := 0) (hi := 5) 6 (by decide)).val = 5 := by decide
 
-/-! The kernel cannot evaluate them anymore. -/
+/-! The kernel evaluates them, as it did upstream. -/
 
-/--
-error: Tactic `decide` failed to reduce
-  @decide (Nat.sqrt 16 = 4) (instDecidableEqNat (Nat.sqrt 16) 4)
-to `true` or `false`.
-
-After unfolding the instances `instDecidableEqNat` and `Nat.decEq`, reduction got stuck at
-  (Nat.sqrt 16).beq 4
--/
-#guard_msgs in
-example : Nat.sqrt 16 = 4 := by decide
+example : Nat.sqrt 16 = 4 := by decide +kernel
+example : Nat.sqrt 1000000 = 1000 := by decide +kernel
+example : Nat.nextPowerOfTwo 1000 = 1024 := by decide +kernel

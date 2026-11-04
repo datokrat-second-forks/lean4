@@ -250,18 +250,17 @@ private partial def send (ch : Bounded α) (v : α) : BaseIO (Task (Except Broad
       return .pure <| .error .closed
     else bif (← get).receivers.isEmpty then
       return .pure <| .ok 0
+    else if let some receivers ← trySend' v then
+      return .pure <| .ok receivers
     else
-      if let some receivers ← trySend' v then
-        return .pure <| .ok receivers
-      else
-        let promise ← IO.Promise.new
-        modify fun st => { st with producers := st.producers.enqueue promise }
+      let promise ← IO.Promise.new
+      modify fun st => { st with producers := st.producers.enqueue promise }
 
-        BaseIO.bindTask promise.result? fun res => do
-          bif res.getD false then
-            Bounded.send ch v
-          else
-            return .pure <| .error .closed
+      BaseIO.bindTask promise.result? fun res => do
+        bif res.getD false then
+          Bounded.send ch v
+        else
+          return .pure <| .error .closed
 
 private def close (ch : Bounded α) : EIO Broadcast.Error Unit := do
   ch.state.atomically do
@@ -331,7 +330,7 @@ private def unsubscribe (bd : Bounded.Receiver α) : IO Unit := do
     let mut currentSt := st
     let mut currentNext := next
 
-    while currentNext < currentSt.pos ∧ currentSt.size > 0 do
+    while currentNext <ᵇ currentSt.pos && currentSt.size >ᵇ 0 do
       let some _val ← getValueByPosition currentNext | break
 
       currentSt ← get
@@ -366,20 +365,18 @@ private partial def recv (ch : Bounded.Receiver α) : BaseIO (Task (Option α)) 
   ch.state.atomically do
     bif !(← get).receivers.contains ch.id then
       return .pure none
+    else if let some val ← tryRecv' ch.id then
+      return .pure <| some val
+    else bif (← get).closed then
+      return .pure none
     else
-      if let some val ← tryRecv' ch.id then
-        return .pure <| some val
-      else
-        bif (← get).closed then
-          return .pure none
+      let promise ← IO.Promise.new
+      modify fun st => { st with waiters := st.waiters.enqueue ⟨promise, none⟩ }
+      BaseIO.bindTask promise.result? fun res => do
+        bif res.getD false then
+          Bounded.Receiver.recv ch
         else
-          let promise ← IO.Promise.new
-          modify fun st => { st with waiters := st.waiters.enqueue ⟨promise, none⟩ }
-          BaseIO.bindTask promise.result? fun res => do
-            bif res.getD false then
-              Bounded.Receiver.recv ch
-            else
-              return .pure none
+          return .pure none
 
 private partial def forAsync
     (f : α → BaseIO Unit) (ch : Bounded.Receiver α)

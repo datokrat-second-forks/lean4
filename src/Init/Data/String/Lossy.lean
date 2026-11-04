@@ -46,7 +46,7 @@ public def fromUTF8Lossy (b : ByteArray) : String :=
   go 0 ""
 where
   go (i : Nat) (acc : String) : String :=
-    bif _ : i <ᵇ b.size then
+    bif i <ᵇ b.size then
       match b.utf8DecodeChar? i with
       | some c =>
         have := c.utf8Size_pos

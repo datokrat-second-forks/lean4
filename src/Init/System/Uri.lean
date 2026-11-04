@@ -39,7 +39,7 @@ def decodeUri (uri : String) : String := Id.run do
   let len := rawBytes.size
   let mut i := 0
   let percent := '%'.toNat.toUInt8
-  while h : i < len do
+  while h : i <ᵇ len do
     let c := rawBytes[i]
     (decoded, i) := bif h₁ : c == percent && i + 1 <ᵇ len then
       let h1 := rawBytes[i + 1]

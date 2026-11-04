@@ -644,7 +644,7 @@ private def parseExtendedDayPeriodFrom (arr : Vector String 6) : Parser Extended
 
 private def exactly (parse : Parser α) (size : Nat) : Parser (Array α) :=
   let rec go (acc : Array α) (count : Nat) : Parser (Array α) :=
-    bif _ : count ≥ᵇ size then
+    bif count ≥ᵇ size then
       pure acc
     else do
       let res ← parse
@@ -655,7 +655,7 @@ private def exactly (parse : Parser α) (size : Nat) : Parser (Array α) :=
 
 private def exactlyChars (parse : Parser Char) (size : Nat) : Parser String :=
   let rec go (acc : String) (count : Nat) : Parser String :=
-    bif _ : count ≥ᵇ size then
+    bif count ≥ᵇ size then
       pure acc
     else do
       let res ← parse

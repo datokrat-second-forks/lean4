@@ -54,7 +54,7 @@ instance [Monad m] : ForIn' m Range Nat inferInstance where
 
 @[inline] protected def forM [Monad m] (range : Range) (f : Nat → m PUnit) : m PUnit :=
   let rec @[specialize] loop (i : Nat): m PUnit := do
-    bif _ : i <ᵇ range.stop then
+    bif i <ᵇ range.stop then
       f i
       have := range.step_pos
       loop (i + range.step)

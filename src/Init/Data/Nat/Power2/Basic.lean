@@ -35,12 +35,12 @@ def nextPowerOfTwo (n : Nat) : Nat :=
   go 1 (by decide)
 where
   go (power : Nat) (h : power > 0) : Nat :=
-    uif power < n then
+    bif power <ᵇ n then
       go (power * 2) (Nat.mul_pos h (by decide))
     else
       power
   termination_by n - power
-  decreasing_by simp_wf; apply nextPowerOfTwo_dec <;> assumption
+  decreasing_by simp_wf; apply nextPowerOfTwo_dec <;> first | assumption | exact lt_of_decideLT_eq_true ‹_›
 
 /--
 A natural number `n` is a power of two if there exists some `k : Nat` such that `n = 2 ^ k`.

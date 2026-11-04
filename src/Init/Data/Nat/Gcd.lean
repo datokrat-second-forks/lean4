@@ -33,7 +33,7 @@ Examples:
 -/
 @[extern "lean_nat_gcd"]
 def gcd (m n : @& Nat) : Nat :=
-  bif _h : m =ᵇ 0 then
+  bif m =ᵇ 0 then
     n
   else
     gcd (n % m) m

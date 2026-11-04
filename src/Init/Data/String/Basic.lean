@@ -76,7 +76,7 @@ def ByteArray.utf8Decode? (b : ByteArray) : Option (Array Char) :=
 where
   @[semireducible, implicit_reducible]
   go (i : Nat) (acc : Array Char) (hi : i ≤ b.size) : Option (Array Char) :=
-    bif _ : i <ᵇ b.size then
+    bif i <ᵇ b.size then
       match h : utf8DecodeChar? b i with
       | none => none
       | some c => go (i + c.utf8Size) (acc.push c) (le_size_of_utf8DecodeChar?_eq_some h)
@@ -255,14 +255,14 @@ private theorem ByteArray.utf8Decode?go_eq_utf8Decode?go_extract {b : ByteArray}
     rw [utf8Decode?.go]
     simp only [size_extract, Nat.le_refl, Nat.min_eq_left, Nat.zero_add, List.push_toArray,
       List.nil_append]
-    rw [Bool.dcond_pos (by omega)]
+    rw [Bool.cond_pos (by omega)]
     rw [utf8DecodeChar?_eq_utf8DecodeChar?_extract] at h₂
     split <;> simp_all
   | case2 h₁ c h₂ =>
     conv => rhs; rw [utf8Decode?.go]
     simp only [size_extract, Nat.le_refl, Nat.min_eq_left, Nat.zero_add, List.push_toArray,
       List.nil_append]
-    rw [Bool.dcond_pos (by omega)]
+    rw [Bool.cond_pos (by omega)]
     rw [utf8DecodeChar?_eq_utf8DecodeChar?_extract] at h₂
     split
     · simp_all
@@ -279,14 +279,14 @@ private theorem ByteArray.utf8Decode?go_eq_utf8Decode?go_extract {b : ByteArray}
     rw [utf8Decode?.go]
     simp only [size_extract, Nat.le_refl, Nat.min_eq_left, Nat.zero_add, List.push_toArray,
       List.nil_append]
-    rw [Bool.dcond_neg (by omega)]
+    rw [Bool.cond_neg (by omega)]
     simp
 termination_by b.size - i
 
 theorem ByteArray.utf8Decode?_utf8Encode_singleton_append {l : ByteArray} {c : Char} :
     ([c].utf8Encode ++ l).utf8Decode? = l.utf8Decode?.map (#[c] ++ ·) := by
   rw [utf8Decode?, utf8Decode?.go,
-    Bool.dcond_pos (by simp [List.utf8Encode_singleton]; have := c.utf8Size_pos; omega)]
+    Bool.cond_pos (by simp [List.utf8Encode_singleton]; have := c.utf8Size_pos; omega)]
   split
   · simp_all [List.utf8DecodeChar?_utf8Encode_singleton_append]
   · rename_i d h
@@ -3006,14 +3006,14 @@ def Pos.Raw.substrEq (s1 : String) (pos1 : String.Pos.Raw) (s2 : String) (pos2 :
   pos1.byteIdx + sz ≤ᵇ s1.rawEndPos.byteIdx && pos2.byteIdx + sz ≤ᵇ s2.rawEndPos.byteIdx && loop pos1 pos2 { byteIdx := pos1.byteIdx + sz }
 where
   loop (off1 off2 stop1 : Pos.Raw) :=
-    bif _h : off1.byteIdx <ᵇ stop1.byteIdx then
+    bif off1.byteIdx <ᵇ stop1.byteIdx then
       let c₁ := off1.get s1
       let c₂ := off2.get s2
       c₁ == c₂ && loop (off1 + c₁) (off2 + c₂) stop1
     else true
   termination_by stop1.1 - off1.1
   decreasing_by
-    have := Nat.sub_lt_sub_left (lt_of_decideLT_eq_true _h) (Nat.add_lt_add_left c₁.utf8Size_pos off1.1)
+    have := Nat.sub_lt_sub_left (lt_of_decideLT_eq_true ‹(off1.byteIdx <ᵇ stop1.byteIdx) = true›) (Nat.add_lt_add_left c₁.utf8Size_pos off1.1)
     decreasing_tactic
 
 @[deprecated Pos.Raw.substrEq (since := "2025-10-10")]

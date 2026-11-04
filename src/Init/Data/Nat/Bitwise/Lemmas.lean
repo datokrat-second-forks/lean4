@@ -418,7 +418,7 @@ theorem testBit_bitwise (of_false_false : f false false = false) (x y i : Nat) :
         cases testBit x i <;>
           simp [p, of_false_false]
     else
-      simp only [x_zero, y_zero, ←Nat.two_mul, ↓reduceDCond, ↓reduceCond]
+      simp only [x_zero, y_zero, ←Nat.two_mul, ↓reduceCond]
       cases i with
       | zero =>
         cases p : f (UDecidable.decide (x % 2 = 1)) (UDecidable.decide (y % 2 = 1)) <;>
@@ -461,13 +461,13 @@ theorem bitwise_lt_two_pow (left : x < 2^n) (right : y < 2^n) : (Nat.bitwise f x
   | succ n hyp =>
     unfold bitwise
     if x_zero : x = 0 then
-      simp only [x_zero, ↓reduceDCond]
+      simp only [x_zero]
       by_cases p : f false true = true <;> simp [p, right]
     else if y_zero : y = 0 then
-      simp only [x_zero, y_zero, ↓reduceDCond, ↓reduceCond]
+      simp only [x_zero, y_zero, ↓reduceCond]
       by_cases p : f true false = true <;> simp [p, left]
     else
-      simp only [x_zero, y_zero, ↓reduceDCond, ↓reduceCond]
+      simp only [x_zero, y_zero, ↓reduceCond]
       have hyp1 := hyp (div_two_le_of_lt_two left) (div_two_le_of_lt_two right)
       by_cases p : f (x % 2 == 1) (y % 2 == 1) = true <;>
         simp [p, Nat.pow_succ, mul_succ, Nat.add_assoc]

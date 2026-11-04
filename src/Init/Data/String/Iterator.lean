@@ -246,7 +246,7 @@ character or until the end of the string is reached. Does nothing if the current
 satisfies `p`.
 -/
 @[specialize] def find (it : Iterator) (p : Char → Bool) : Iterator :=
-  bif _ : it.hasNext then
+  bif it.hasNext then
     bif p it.curr then it
     else find it.next p
   else it
@@ -257,7 +257,7 @@ Iterates over a string, updating a state at each character using the provided fu
 returns `none`.
 -/
 @[specialize] def foldUntil (it : Iterator) (init : α) (f : α → Char → Option α) : α × Iterator :=
-  bif _ : it.hasNext then
+  bif it.hasNext then
     if let some a := f init it.curr then
       foldUntil it.next a f
     else

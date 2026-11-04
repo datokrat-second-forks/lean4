@@ -331,7 +331,7 @@ Advances {name}`pos` as long as {name}`pat` matches.
 def Pos.skipWhile {s : Slice} (pos : s.Pos) (pat : ρ) [ForwardPattern pat] : s.Pos :=
   match pos.skip? pat with
   | some nextCurr =>
-    bif _ : pos <ᵇ nextCurr then
+    bif pos <ᵇ nextCurr then
       skipWhile nextCurr pat
     else
       pos
@@ -641,7 +641,7 @@ Rewinds {name}`pos` as long as {name}`pat` matches.
 def Pos.revSkipWhile {s : Slice} (pos : s.Pos) (pat : ρ) [BackwardPattern pat] : s.Pos :=
   match pos.revSkip? pat with
   | some nextCurr =>
-    bif _ : nextCurr <ᵇ pos then
+    bif nextCurr <ᵇ pos then
       revSkipWhile nextCurr pat
     else
       pos
