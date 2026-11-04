@@ -8,6 +8,7 @@ module
 prelude
 public import Init.Data.Zero
 public import Init.Core
+public import Init.UDecidable.Basic
 
 public section
 
@@ -45,6 +46,13 @@ theorem neZero_iff {n : R} : NeZero n ↔ n ≠ 0 :=
 instance {p : Prop} [Decidable p] {n m : Nat} [NeZero n] [NeZero m] :
     NeZero (if p then n else m) := by
   split <;> infer_instance
+
+instance {p : Prop} [UDecidable p] {n m : Nat} [NeZero n] [NeZero m] :
+    NeZero (uif p then n else m) := by
+  split <;> infer_instance
+
+instance {b : Bool} {n m : Nat} [NeZero n] [NeZero m] : NeZero (bif b then n else m) := by
+  cases b <;> assumption
 
 instance {n m : Nat} [h : NeZero n] : NeZero (n + m) where
   out :=
