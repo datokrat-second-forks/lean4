@@ -230,7 +230,7 @@ theorem twoPowShift_eq (aig : AIG α) (target : TwoPowShiftTarget aig w) (lhs : 
       apply BitVec.getLsbD_of_ge
       dsimp only
       omega
-    simp only [this, Bool.false_eq_true, ↓reduceIte]
+    simp only [this, Bool.false_eq_true, ↓reduceUIte]
     rw [← hg]
     rw [hleft]
     simp
@@ -296,7 +296,7 @@ theorem denote_blastShiftLeft (aig : AIG α) (target : ArbitraryShiftTarget aig 
     subst hzero
     rw [← hg]
     simp only [hleft, Nat.zero_sub, BitVec.shiftLeftRec_zero, BitVec.and_twoPow, Nat.le_refl,
-      BitVec.getLsbD_of_ge, Bool.false_eq_true, ↓reduceIte, BitVec.reduceHShiftLeft',
+      BitVec.getLsbD_of_ge, Bool.false_eq_true, ↓reduceUIte, BitVec.reduceHShiftLeft',
       BitVec.getLsbD_shiftLeft, Nat.sub_zero, Bool.eq_and_self, Bool.and_eq_true, UDecidable.decide_eq_true_eq,
       Bool.not_eq_true', UDecidable.decide_eq_false_iff_not, Nat.not_lt, Nat.zero_le, and_true]
     apply BitVec.lt_of_getLsbD

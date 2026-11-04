@@ -34,8 +34,8 @@ if the number is too large.
 Returns `2^w - 1` for natural numbers greater than or equal to `2^w`.
 -/
 def ofNatClamp (w n : Nat) : BitVec w :=
-  if h : n < 2 ^ w then
-    BitVec.ofNatLT n h
+  bif h : n <ᵇ 2 ^ w then
+    BitVec.ofNatLT n (lt_of_decideLT_eq_true h)
   else
     BitVec.ofNatLT (2 ^ w - 1) (Nat.sub_lt (Nat.two_pow_pos w) Nat.one_pos)
 

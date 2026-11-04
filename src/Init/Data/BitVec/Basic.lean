@@ -98,7 +98,7 @@ Returns the `i`th most significant bit.
 
 /-- Returns the `i`th most significant bit or `none` if `i ≥ w`. -/
 @[inline] def getMsb? (x : BitVec w) (i : Nat) : Option Bool :=
-  if h : i < w then some (getMsb x ⟨i, h⟩) else none
+  bif h : i <ᵇ w then some (getMsb x ⟨i, lt_of_decideLT_eq_true h⟩) else none
 
 /-- Returns the `i`th least significant bit or `false` if `i ≥ w`. -/
 @[inline, implicit_reducible] def getLsbD (x : BitVec w) (i : Nat) : Bool :=
@@ -143,7 +143,7 @@ Interprets the bitvector as an integer stored in two's complement form.
 -/
 @[implicit_reducible]
 protected def toInt (x : BitVec n) : Int :=
-  if 2 * x.toNat < 2^n then
+  bif 2 * x.toNat <ᵇ 2^n then
     x.toNat
   else
     (x.toNat : Int) - (2^n : Nat)
@@ -291,7 +291,7 @@ where division by zero returns `BitVector.allOnes n`.
 SMT-LIB name: `bvudiv`.
 -/
 @[implicit_reducible]
-def smtUDiv (x y : BitVec n) : BitVec n := if y = 0 then allOnes n else udiv x y
+def smtUDiv (x y : BitVec n) : BitVec n := bif y == 0 then allOnes n else udiv x y
 
 /--
 Signed T-division (using the truncating rounding convention) for bitvectors. This function obeys the
@@ -492,8 +492,8 @@ SMT-LIB name: `zero_extend`.
 -/
 @[implicit_reducible]
 def setWidth (v : Nat) (x : BitVec w) : BitVec v :=
-  if h : w ≤ v then
-    setWidth' h x
+  bif h : w ≤ᵇ v then
+    setWidth' (le_of_decideLE_eq_true h) x
   else
     .ofNat v x.toNat
 
@@ -768,7 +768,7 @@ def intMax (w : Nat) := (twoPow w (w - 1)) - 1
 Computes a hash of a bitvector, combining 64-bit words using `mixHash`.
 -/
 def hash (bv : BitVec n) : UInt64 :=
-  if n ≤ 64 then
+  bif _ : n ≤ᵇ 64 then
     bv.toFin.val.toUInt64
   else
     mixHash (bv.toFin.val.toUInt64) (hash ((bv >>> 64).setWidth (n - 64)))
@@ -811,7 +811,7 @@ Checks whether addition of `x` and `y` results in *unsigned* overflow.
 
 SMT-LIB name: `bvuaddo`.
 -/
-def uaddOverflow {w : Nat} (x y : BitVec w) : Bool := x.toNat + y.toNat ≥ 2 ^ w
+def uaddOverflow {w : Nat} (x y : BitVec w) : Bool := x.toNat + y.toNat ≥ᵇ 2 ^ w
 
 /--
 Checks whether addition of `x` and `y` results in *signed* overflow, treating `x` and `y` as 2's
@@ -820,14 +820,14 @@ complement signed bitvectors.
 SMT-LIB name: `bvsaddo`.
 -/
 def saddOverflow {w : Nat} (x y : BitVec w) : Bool :=
-  (x.toInt + y.toInt ≥ 2 ^ (w - 1)) || (x.toInt + y.toInt < - 2 ^ (w - 1))
+  (x.toInt + y.toInt ≥ᵇ 2 ^ (w - 1)) || (x.toInt + y.toInt <ᵇ - 2 ^ (w - 1))
 
 /--
 Checks whether subtraction of `x` and `y` results in *unsigned* overflow.
 
 SMT-Lib name: `bvusubo`.
 -/
-def usubOverflow {w : Nat} (x y : BitVec w) : Bool := x.toNat < y.toNat
+def usubOverflow {w : Nat} (x y : BitVec w) : Bool := x.toNat <ᵇ y.toNat
 
 /--
 Checks whether the subtraction of `x` and `y` results in *signed* overflow, treating `x` and `y` as
@@ -836,7 +836,7 @@ Checks whether the subtraction of `x` and `y` results in *signed* overflow, trea
 SMT-Lib name: `bvssubo`.
 -/
 def ssubOverflow {w : Nat} (x y : BitVec w) : Bool :=
-  (x.toInt - y.toInt ≥ 2 ^ (w - 1)) || (x.toInt - y.toInt < - 2 ^ (w - 1))
+  (x.toInt - y.toInt ≥ᵇ 2 ^ (w - 1)) || (x.toInt - y.toInt <ᵇ - 2 ^ (w - 1))
 
 /--
 Checks whether the negation of a bitvector results in overflow.
@@ -855,7 +855,7 @@ For BitVecs `x` and `y` with nonzero width, this only happens if `x = intMin` an
 SMT-LIB name: `bvsdivo`.
 -/
 def sdivOverflow {w : Nat} (x y : BitVec w) : Bool :=
-  (2 ^ (w - 1) ≤ x.toInt / y.toInt) || (x.toInt / y.toInt <  - 2 ^ (w - 1))
+  (2 ^ (w - 1) ≤ᵇ x.toInt / y.toInt) || (x.toInt / y.toInt <ᵇ - 2 ^ (w - 1))
 
 /- ### reverse -/
 
@@ -868,7 +868,7 @@ def reverse : {w : Nat} → BitVec w → BitVec w
 
   SMT-Lib name: `bvumulo`.
 -/
-def umulOverflow {w : Nat} (x y : BitVec w) : Bool := x.toNat * y.toNat ≥ 2 ^ w
+def umulOverflow {w : Nat} (x y : BitVec w) : Bool := x.toNat * y.toNat ≥ᵇ 2 ^ w
 
 /-- `smulOverflow x y` returns `true` if multiplying `x` and `y` results in *signed* overflow,
 treating `x` and `y` as 2's complement signed bitvectors.
@@ -877,7 +877,7 @@ treating `x` and `y` as 2's complement signed bitvectors.
 -/
 
 def smulOverflow {w : Nat} (x y : BitVec w) : Bool :=
-  (x.toInt * y.toInt ≥ 2 ^ (w - 1)) || (x.toInt * y.toInt < - 2 ^ (w - 1))
+  (x.toInt * y.toInt ≥ᵇ 2 ^ (w - 1)) || (x.toInt * y.toInt <ᵇ - 2 ^ (w - 1))
 
 /-- Count the number of leading zeros downward from the `n`-th bit to the `0`-th bit for the bitblaster.
   This builds a tree of `if-then-else` lookups whose length is linear in the bitwidth,
@@ -885,8 +885,8 @@ def smulOverflow {w : Nat} (x y : BitVec w) : Bool :=
 @[implicit_reducible]
 def clzAuxRec {w : Nat} (x : BitVec w) (n : Nat) : BitVec w :=
   match n with
-  | 0 => if x.getLsbD 0 then BitVec.ofNat w (w - 1) else BitVec.ofNat w w
-  | n' + 1 => if x.getLsbD n then BitVec.ofNat w (w - 1 - n) else clzAuxRec x n'
+  | 0 => bif x.getLsbD 0 then BitVec.ofNat w (w - 1) else BitVec.ofNat w w
+  | n' + 1 => bif x.getLsbD n then BitVec.ofNat w (w - 1 - n) else clzAuxRec x n'
 
 /-- Count the number of leading zeros. -/
 @[implicit_reducible]

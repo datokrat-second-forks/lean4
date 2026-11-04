@@ -40,7 +40,7 @@ theorem denote_blastShiftConcat (aig : AIG α) (target : ShiftConcatInput aig w)
   ∀ (idx : Nat) (hidx : idx < w),
       ⟦(blastShiftConcat aig target).aig, (blastShiftConcat aig target).vec.get idx hidx, assign⟧
         =
-      if idx = 0 then
+      uif idx = 0 then
         ⟦aig, target.bit, assign⟧
       else
         ⟦aig, target.lhs.get (idx - 1) (by omega), assign⟧
@@ -102,6 +102,7 @@ theorem denote_blastDivSubtractShift_q (aig : AIG α) (assign : α → Bool) (lh
     rw [AIG.RefVec.denote_ite]
     conv =>
       rhs
+      rw [← Normalize.ite_eq_cond]
       rw [apply_ite (f := BitVec.DivModState.q)]
       rw [apply_ite (f := (BitVec.getLsbD · idx))]
     apply ite_congr
@@ -195,7 +196,7 @@ theorem denote_blastDivSubtractShift_r (aig : AIG α) (assign : α → Bool) (lh
   · split
     next hdiscr =>
       rw [← Normalize.BitVec.lt_ult] at hdiscr
-      simp only [Ref.cast_eq, hdiscr, ↓reduceIte]
+      simp only [Ref.cast_eq, hdiscr, ↓reduceCond]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := AIG.RefVec.ite) (h := ?h)]
       case h =>
         apply AIG.LawfulOperator.lt_size_of_lt_aig_size (f := BVPred.mkUlt)
@@ -227,7 +228,7 @@ theorem denote_blastDivSubtractShift_r (aig : AIG α) (assign : α → Bool) (lh
         · simp
     next hdiscr =>
       rw [← Normalize.BitVec.lt_ult] at hdiscr
-      simp only [Ref.cast_eq, hdiscr, ↓reduceIte]
+      simp only [Ref.cast_eq, hdiscr, ↓reduceCond]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := AIG.RefVec.ite) (h := ?h2)]
       case h2 =>
         apply AIG.LawfulOperator.lt_size_of_lt_aig_size (f := BVPred.mkUlt)

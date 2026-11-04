@@ -100,7 +100,7 @@ theorem go_denote_eq {w : Nat} (aig : AIG α) (curr : Nat) (hcurr : curr + 1 ≤
             all_goals
               repeat apply AIG.LawfulVecOperator.lt_size_of_lt_aig_size
               exact Ref.hgate _
-          simp only [this, ↓reduceIte]
+          simp only [this, ↓reduceUIte]
           rw [denote_blastAdd]
           · intros
             simp only [RefVec.get_cast, Ref.cast_eq]
@@ -122,7 +122,7 @@ theorem go_denote_eq {w : Nat} (aig : AIG α) (curr : Nat) (hcurr : curr + 1 ≤
             all_goals
               repeat apply AIG.LawfulVecOperator.lt_size_of_lt_aig_size
               exact Ref.hgate _
-          simp only [this, Bool.false_eq_true, ↓reduceIte, BitVec.add_zero]
+          simp only [this, Bool.false_eq_true, ↓reduceUIte, BitVec.add_zero]
           rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastAdd)]
           rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastShiftLeftConst)]
           rw [hacc]

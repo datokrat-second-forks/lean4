@@ -71,7 +71,7 @@ theorem go_denote_eq {w : Nat} (aig : AIG α)
           · simp [denote_blastConst, BitVec.clzAuxRec_zero, h, BitVec.ofNat_sub_ofNat_of_le (x := w) (y := 1) (by omega) (by omega)]
           · have := Nat.lt_pow_self (n := curr + 1) (a := 2) (by omega)
             have := Nat.pow_lt_pow_of_lt (a := 2) (n := curr + 1) (m := w) (by omega) (by omega)
-            simp only [denote_blastConst, BitVec.clzAuxRec_succ, h, reduceIte]
+            simp only [denote_blastConst, BitVec.clzAuxRec_succ, h, reduceUIte]
             rw [BitVec.ofNat_sub_ofNat_of_le (x := w) (y := 1) (by omega) (by omega),
                 BitVec.ofNat_sub_ofNat_of_le (x := w - 1) (y := curr + 1) (by omega) (by omega)]
         · split at hacc

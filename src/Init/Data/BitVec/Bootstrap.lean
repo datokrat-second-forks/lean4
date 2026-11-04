@@ -87,7 +87,7 @@ theorem toNat_ofFin (x : Fin (2^n)) : (BitVec.ofFin x).toNat = x.val := rfl
 
 @[grind =]
 theorem getElem_cons {b : Bool} {n} {x : BitVec n} {i : Nat} (h : i < n + 1) :
-    (cons b x)[i] = if h : i = n then b else x[i] := by
+    (cons b x)[i] = uif h : i = n then b else x[i] := by
   simp only [getElem_eq_testBit_toNat, toNat_cons, Nat.testBit_or]
   rw [Nat.testBit_shiftLeft]
   rcases Nat.lt_trichotomy i n with i_lt_n | i_eq_n | n_lt_i

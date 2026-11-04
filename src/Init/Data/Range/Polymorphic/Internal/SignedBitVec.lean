@@ -109,7 +109,7 @@ theorem sle_iff_rotate_le_rotate {x y : BitVec n} :
   match n with
   | 0 => simp [eq_nil x, eq_nil y]
   | n + 1 =>
-    simp only [sle_iff_toInt_le, BitVec.toInt, Nat.pow_add, Nat.pow_one, Nat.mul_comm _ 2,
+    simp only [sle_iff_toInt_le, toInt_eq_toNat_cond, Nat.pow_add, Nat.pow_one, Nat.mul_comm _ 2,
       Nat.zero_lt_succ, Nat.mul_lt_mul_left, Int.natCast_mul, Int.cast_ofNat_Int, Int.natCast_pow,
       rotate, intMinSealed_def, Nat.add_one_sub_one, natCast_eq_ofNat, le_def, toNat_add,
       toNat_ofNat, Nat.add_mod_mod]
@@ -163,7 +163,7 @@ theorem toInt_eq_ofNat_toNat_rotate_sub {x : BitVec n} (h : n > 0) :
   match n with
   | 0 => omega
   | n + 1 =>
-    simp only [BitVec.toInt, Int.natCast_pow, Int.cast_ofNat_Int, rotate, intMinSealed_def,
+    simp only [toInt_eq_toNat_cond, Int.natCast_pow, Int.cast_ofNat_Int, rotate, intMinSealed_def,
       Nat.add_one_sub_one, natCast_eq_ofNat, toNat_add, toNat_ofNat, Nat.add_mod_mod,
       Int.natCast_emod, Int.natCast_add]
     rw [Int.emod_eq_of_lt (a := 2 ^ n)]; rotate_left
