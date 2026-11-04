@@ -58,4 +58,18 @@ theorem uite_disjunction {α : Type u} {P : Prop} [UDecidable P] {a b : α} :
   (Classical.em P).elim (fun h => .inl ⟨h, UDecidable.ite_eq_left h⟩)
     (fun h => .inr ⟨h, UDecidable.ite_eq_right h⟩)
 
+theorem cond_disjunction {α : Type u} {b : Bool} {a a' : α} :
+    (b = true ∧ cond b a a' = a) ∨ (b = false ∧ cond b a a' = a') := by
+  cases b
+  · exact .inr ⟨rfl, rfl⟩
+  · exact .inl ⟨rfl, rfl⟩
+
+/-- The existentials keep the branches applicable to a proof when they depend on the condition. -/
+theorem dcond_disjunction {α : Type u} {b : Bool} {t : b = true → α} {e : b = false → α} :
+    (b = true ∧ ∃ h : b = true, Bool.dcond b t e = t h) ∨
+      (b = false ∧ ∃ h : b = false, Bool.dcond b t e = e h) := by
+  cases b
+  · exact .inr ⟨rfl, rfl, rfl⟩
+  · exact .inl ⟨rfl, rfl, rfl⟩
+
 end Lean.Omega

@@ -32,8 +32,10 @@ The main functions are:
     `b ≤ a ∧ ((a - b : Nat) : Int) = a - b ∨ a < b ∧ ((a - b : Nat) : Int) = 0`
   * for each new atom of the form `min a b`, the facts `min a b ≤ a` and `min a b ≤ b`
     (and similarly for `max`)
-  * for each new atom of the form `if P then a else b`, the disjunction:
-    `(P ∧ (if P then a else b) = a) ∨ (¬ P ∧ (if P then a else b) = b)`
+  * for each new atom of the form `if P then a else b` (or `uif`), the disjunction:
+    `(P ∧ (if P then a else b) = a) ∨ (¬ P ∧ (if P then a else b) = b)`,
+    and similarly for `bif b then a else b'` and `bif h : b then a else b'`
+    (also inside `((· : Nat) : Int)`)
 The `OmegaM` monad also keeps an internal cache of visited expressions
 (not necessarily atoms, but arbitrary subexpressions of one side of a linear relation)
 to reduce duplication.
@@ -160,6 +162,32 @@ def mkEqReflWithExpectedType (a b : Expr) : MetaM Expr := do
   return mkExpectedPropHint (← mkEqRefl a) (← mkEq a b)
 
 /--
+For a conditional `e : α` (`if`, `uif`, `bif` or `bif h :`), the disjunction stating which
+branch it evaluates to under which condition. `α` is `Int` or `Nat`.
+-/
+def conditionalFacts (α e : Expr) : MetaM (List Expr) := do
+  match e.getAppFnArgs with
+  | (``ite, #[β, i, dec, t, f]) =>
+    if β == α then return [mkApp5 (.const ``ite_disjunction [0]) α i dec t f]
+  | (``UDecidable.ite, #[β, i, dec, t, f]) =>
+    if β == α then return [mkApp5 (.const ``uite_disjunction [0]) α i dec t f]
+  | (``cond, #[β, c, t, f]) =>
+    if β == α then return [mkApp4 (.const ``cond_disjunction [0]) α c t f]
+  | (``Bool.dcond, #[β, c, t, f]) =>
+    if β == α then
+      let pf := mkApp4 (.const ``dcond_disjunction [0]) α c t f
+      -- State the branches beta-reduced, so that their values are recognized as atoms.
+      let branch (v k : Expr) : MetaM Expr := do
+        let hTy := mkApp3 (.const ``Eq [1]) (.const ``Bool []) c v
+        let p ← withLocalDeclD `h hTy fun h =>
+          mkLambdaFVars #[h] (mkApp3 (.const ``Eq [1]) α e (k.beta #[h]))
+        return mkAnd hTy (mkApp2 (.const ``Exists [0]) hTy p)
+      let ty := mkOr (← branch (.const ``Bool.true []) t) (← branch (.const ``Bool.false []) f)
+      return [mkExpectedPropHint pf ty]
+  | _ => pure ()
+  return []
+
+/--
 Analyzes a newly recorded atom,
 returning a collection of interesting facts about it that should be added to the context.
 -/
@@ -180,7 +208,7 @@ def analyzeAtom (e : Expr) : OmegaM (List Expr) := do
       | _, (``BitVec.toNat, #[n, x]) =>
         r := r.insert (mkApp2 (.const ``BitVec.isLt []) n x)
       | _, _ => pure ()
-    return r
+    return r ++ (← conditionalFacts (.const ``Nat []) e')
   | (``HDiv.hDiv, #[_, _, _, _, x, k]) => match natCast? k with
     | none
     | some 0 => pure ∅
@@ -227,17 +255,7 @@ def analyzeAtom (e : Expr) : OmegaM (List Expr) := do
     pure [mkApp2 (.const ``Int.min_le_left []) x y, mkApp2 (.const ``Int.min_le_right []) x y]
   | (``Max.max, #[_, _, x, y]) =>
     pure [mkApp2 (.const ``Int.le_max_left []) x y, mkApp2 (.const ``Int.le_max_right []) x y]
-  | (``ite, #[α, i, dec, t, e]) =>
-      if α == (.const ``Int []) then
-        pure [mkApp5 (.const ``ite_disjunction [0]) α i dec t e]
-      else
-        pure []
-  | (``UDecidable.ite, #[α, i, dec, t, e]) =>
-      if α == (.const ``Int []) then
-        pure [mkApp5 (.const ``uite_disjunction [0]) α i dec t e]
-      else
-        pure []
-  | _ => pure ∅
+  | _ => conditionalFacts (.const ``Int []) e
 
 /--
 Look up an expression in the atoms, recording it if it has not previously appeared.
