@@ -22,8 +22,8 @@ public section
 variable {n : Nat}
 
 instance : UpwardEnumerable (BitVec n) where
-  succ? i := if i + 1 = 0 then none else some (i + 1)
-  succMany? m i := if h : i.toNat + m < 2 ^ n then some (.ofNatLT _ h) else none
+  succ? i := bif i + 1 == 0 then none else some (i + 1)
+  succMany? m i := bif h : i.toNat + m <ᵇ 2 ^ n then some (.ofNatLT _ (lt_of_decideLT_eq_true h)) else none
 
 theorem succ?_eq_none {x : BitVec n} :
     UpwardEnumerable.succ? x = none ↔ x.toNat = 2 ^ n - 1 := by
@@ -44,14 +44,15 @@ theorem succ?_eq_some {x y : BitVec n} :
     · rintro rfl
       have : ¬ succ? x = none := fun _ => by simp_all
       simp only [succ?_eq_none] at this
-      simp only [succ?, ofNat_eq_ofNat, Option.ite_none_left_eq_some, Option.some.injEq] at h
+      simp only [succ?, ofNat_eq_ofNat, Bool.cond_eq_ite, beq_iff_eq, Option.uite_none_left_eq_some,
+        Option.some.injEq] at h
       apply And.intro
       · omega
       · simp only [← toNat_inj, toNat_add, toNat_ofNat, Nat.add_mod_mod, Nat.zero_mod] at h
         rw [Nat.mod_eq_of_lt (by omega)] at h
         exact h.2.symm
-    · simp only [succ?, ofNat_eq_ofNat, ← toNat_inj, toNat_add, toNat_ofNat, Nat.add_mod_mod,
-        Nat.zero_mod, Option.ite_none_left_eq_some, Option.some.injEq] at h
+    · simp only [succ?, ofNat_eq_ofNat, Bool.cond_eq_ite, beq_iff_eq, ← toNat_inj, toNat_add, toNat_ofNat, Nat.add_mod_mod,
+        Nat.zero_mod, Option.uite_none_left_eq_some, Option.some.injEq] at h
       intro h'
       rw [Nat.mod_eq_of_lt (by omega)] at h
       simp [← BitVec.toNat_inj, *]

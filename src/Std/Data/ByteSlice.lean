@@ -138,7 +138,7 @@ bounds.
 The index is relative to the start and end of the byte slice, rather than the underlying byte array.
 -/
 @[inline] def getD (s : ByteSlice) (i : Nat) (v₀ : UInt8) : UInt8 :=
-  if h : i < s.size then s[i] else v₀
+  bif h : i <ᵇ s.size then s[i]'(lt_of_decideLT_eq_true h) else v₀
 
 /--
 Extracts a byte from the byte slice, or returns a default value when the index is out of bounds.
@@ -213,7 +213,7 @@ some 6
 @[inline]
 def foldrM {β : Type v} {m : Type v → Type w} [Monad m] (f : UInt8 → β → m β) (init : β) (as : ByteSlice) : m β :=
   let rec loop (i : Nat) (acc : β) : m β :=
-    if h : i < as.size then do
+    bif h : i <ᵇ as.size then do
       let newAcc ← f as[as.size - 1 - i] acc
       loop (i + 1) newAcc
     else
@@ -228,8 +228,8 @@ The bytes are processed starting at the lowest index and moving up.
 @[inline]
 def forM {m : Type v → Type w} [Monad m] (f : UInt8 → m PUnit) (as : ByteSlice) : m PUnit :=
   let rec loop (i : Nat) : m PUnit :=
-    if h : i < as.size then do
-      f as[i]
+    bif h : i <ᵇ as.size then do
+      f (as[i]'(lt_of_decideLT_eq_true h))
       loop (i + 1)
     else
       pure ⟨⟩
@@ -260,19 +260,19 @@ The indices are relative to the current slice, not the underlying byte array.
 def slice (s : ByteSlice) (start : Nat := 0) (stop : Nat := s.size) : ByteSlice :=
   let actualStart := s.start + min start s.size
   let actualStop := s.start + min stop s.size
-  if h₂ : actualStop ≤ s.byteArray.size then
-    if h₁ : actualStart ≤ actualStop then
+  bif h₂ : actualStop ≤ᵇ s.byteArray.size then
+    bif h₁ : actualStart ≤ᵇ actualStop then
       ⟨{ byteArray := s.byteArray,
          start := actualStart,
          stop := actualStop,
-         start_le_stop := h₁,
-         stop_le_size_byteArray := h₂ }⟩
+         start_le_stop := le_of_decideLE_eq_true h₁,
+         stop_le_size_byteArray := le_of_decideLE_eq_true h₂ }⟩
     else
       ⟨{ byteArray := s.byteArray,
          start := actualStop,
          stop := actualStop,
          start_le_stop := Nat.le_refl _,
-         stop_le_size_byteArray := h₂ }⟩
+         stop_le_size_byteArray := le_of_decideLE_eq_true h₂ }⟩
   else
     ⟨{ byteArray := s.byteArray,
        start := s.start,
@@ -287,8 +287,8 @@ Returns `true` if any byte in the slice equals the given value, `false` otherwis
 -/
 def contains (s : ByteSlice) (byte : UInt8) : Bool :=
   let rec loop (i : Nat) : Bool :=
-    if h : i < s.size then
-      if s[i] == byte then true
+    bif h : i <ᵇ s.size then
+      bif s[i]'(lt_of_decideLT_eq_true h) == byte then true
       else loop (i + 1)
     else
       false
@@ -305,19 +305,19 @@ If `start` or `stop` are not valid bounds for a byte slice, then they are clampe
 Additionally, the starting index is clamped to the ending index.
 -/
 def toByteSlice (as : ByteArray) (start : Nat := 0) (stop : Nat := as.size) : ByteSlice :=
-  if h₂ : stop ≤ as.size then
-    if h₁ : start ≤ stop then
+  bif h₂ : stop ≤ᵇ as.size then
+    bif h₁ : start ≤ᵇ stop then
       ⟨{ byteArray := as, start := start, stop := stop,
-         start_le_stop := h₁, stop_le_size_byteArray := h₂ }⟩
+         start_le_stop := le_of_decideLE_eq_true h₁, stop_le_size_byteArray := le_of_decideLE_eq_true h₂ }⟩
     else
       ⟨{ byteArray := as, start := stop, stop := stop,
-         start_le_stop := Nat.le_refl _, stop_le_size_byteArray := h₂ }⟩
+         start_le_stop := Nat.le_refl _, stop_le_size_byteArray := le_of_decideLE_eq_true h₂ }⟩
   else
-    if h₁ : start ≤ as.size then
+    bif h₁ : start ≤ᵇ as.size then
       ⟨{ byteArray := as,
          start := start,
          stop := as.size,
-         start_le_stop := h₁,
+         start_le_stop := le_of_decideLE_eq_true h₁,
          stop_le_size_byteArray := Nat.le_refl _ }⟩
     else
       ⟨{ byteArray := as,

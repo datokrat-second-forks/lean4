@@ -275,7 +275,7 @@ theorem Iter.toList_zip_of_finite_left {α₁ α₂ β₁ β₂} [Iterator α₁
     (it₁.zip it₂).toList = it₁.toList.zip (it₂.take it₁.toList.length).toList := by
   ext
   simp only [List.getElem?_zip_eq_some, getElem?_toList_eq_atIdxSlow?, atIdxSlow?_zip, Option.pure_def, Option.bind_eq_bind,
-    atIdxSlow?_take, Option.ite_none_right_eq_some]
+    atIdxSlow?_take, Option.uite_none_right_eq_some]
   constructor
   · intro h
     simp only [Option.bind_eq_some_iff, Option.some.injEq] at h
@@ -295,7 +295,7 @@ theorem Iter.toList_zip_of_finite_right {α₁ α₂ β₁ β₂} [Iterator α�
     (it₁.zip it₂).toList = (it₁.take it₂.toList.length).toList.zip it₂.toList := by
   ext
   simp only [List.getElem?_zip_eq_some, getElem?_toList_eq_atIdxSlow?, atIdxSlow?_zip, Option.pure_def, Option.bind_eq_bind,
-    atIdxSlow?_take, Option.ite_none_right_eq_some]
+    atIdxSlow?_take, Option.uite_none_right_eq_some]
   constructor
   · intro h
     simp only [Option.bind_eq_some_iff, Option.some.injEq] at h

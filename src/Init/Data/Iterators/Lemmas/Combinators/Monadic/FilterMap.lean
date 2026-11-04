@@ -213,7 +213,7 @@ theorem IterM.step_filter [Monad m] [LawfulMonad m] {f : β → Bool} :
   (it.filter f).step = (do
     match (← it.step).inflate with
     | .yield it' out h =>
-      if h' : f out = true then
+      uif h' : f out = true then
         pure <| .deflate <| .yield (it'.filter f) out (.yieldSome h (by simp [h']))
       else
         pure <| .deflate <| .skip (it'.filter f) (.yieldNone h (by simp [h']))
@@ -1341,7 +1341,7 @@ theorem IterM.forIn_filterWithPostcondition
     {g : β → γ → o (ForInStep γ)} :
     haveI : MonadLift n o := ⟨monadLift⟩
     forIn (it.filterWithPostcondition f) init g =
-      forIn it init (fun out acc => do if (← (f out).run).down then g out acc else return .yield acc) := by
+      forIn it init (fun out acc => do uif (← (f out).run).down then g out acc else return .yield acc) := by
   rw [filterWithPostcondition, forIn_filterMapWithPostcondition]
   congr 1; ext out acc
   simp only [PostconditionT.map_eq_pure_bind, PostconditionT.run_eq_map,
@@ -1358,7 +1358,7 @@ theorem IterM.forIn_filterM
     [IteratorLoop α m o] [LawfulIteratorLoop α m o]
     {it : IterM (α := α) m β} {f : β → n (ULift Bool)} {init : γ} {g : β → γ → o (ForInStep γ)} :
     haveI : MonadLift n o := ⟨monadLift⟩
-    forIn (it.filterM f) init g = forIn it init (fun out acc => do if (← f out).down then g out acc else return .yield acc) := by
+    forIn (it.filterM f) init g = forIn it init (fun out acc => do uif (← f out).down then g out acc else return .yield acc) := by
   rw [filterM, ← filterWithPostcondition, forIn_filterWithPostcondition]
   simp [PostconditionT.run_attachLift]
 
@@ -1367,7 +1367,7 @@ theorem IterM.forIn_filter
     [MonadLiftT m n] [LawfulMonadLiftT m n]
     [Iterator α m β] [Finite α m] [IteratorLoop α m n] [LawfulIteratorLoop α m n]
     {it : IterM (α := α) m β} {f : β → Bool} {init : γ} {g : β → γ → n (ForInStep γ)} :
-    forIn (it.filter f) init g = forIn it init (fun out acc => do if f out then g out acc else return .yield acc) := by
+    forIn (it.filter f) init g = forIn it init (fun out acc => do uif f out then g out acc else return .yield acc) := by
   rw [filter, forIn_filterMap]
   congr 1; ext out acc
   cases f out <;> simp
@@ -1450,7 +1450,7 @@ theorem IterM.foldM_filterWithPostcondition {α β δ : Type w}
     {f : β → PostconditionT n (ULift Bool)} {g : δ → β → o δ} {init : δ} {it : IterM (α := α) m β} :
     haveI : MonadLift n o := ⟨MonadLiftT.monadLift⟩
     (it.filterWithPostcondition f).foldM (init := init) g =
-      it.foldM (init := init) (fun d b => do if (← (f b).run).down then g d b else pure d) := by
+      it.foldM (init := init) (fun d b => do uif (← (f b).run).down then g d b else pure d) := by
   simp only [foldM_eq_forIn, forIn_filterWithPostcondition]
   congr 1; ext out acc
   simp only [map_bind]
@@ -1469,7 +1469,7 @@ theorem IterM.foldM_filterM {α β δ : Type w}
     {f : β → n (ULift Bool)} {g : δ → β → o δ} {init : δ} {it : IterM (α := α) m β} :
     haveI : MonadLift n o := ⟨MonadLiftT.monadLift⟩
     (it.filterM f).foldM (init := init) g =
-      it.foldM (init := init) (fun d b => do if (← f b).down then g d b else pure d) := by
+      it.foldM (init := init) (fun d b => do uif (← f b).down then g d b else pure d) := by
   simp [filterM, foldM_filterMapWithPostcondition, PostconditionT.run_attachLift]
   congr 1; ext out acc
   apply bind_congr; intro fx
@@ -1505,7 +1505,7 @@ theorem IterM.foldM_filter {α β δ : Type w} {m : Type w → Type w'} {n : Typ
     [MonadLiftT m n] [LawfulMonadLiftT m n]
     {f : β → Bool} {g : δ → β → n δ} {init : δ} {it : IterM (α := α) m β} :
     (it.filter f).foldM (init := init) g =
-      it.foldM (init := init) (fun d b => if f b then g d b else pure d) := by
+      it.foldM (init := init) (fun d b => uif f b then g d b else pure d) := by
   simp only [foldM_eq_forIn, forIn_filter]
   congr 1; ext out acc
   split <;> simp [*]
@@ -1568,7 +1568,7 @@ theorem IterM.fold_filterWithPostcondition {α β δ : Type w} {m : Type w → T
     [MonadLiftT m n] [LawfulMonadLiftT m n]
     {f : β → PostconditionT n (ULift Bool)} {g : δ → β → δ} {init : δ} {it : IterM (α := α) m β} :
     (it.filterWithPostcondition f).fold (init := init) g =
-      it.foldM (init := init) (fun d b => return if (← (f b).run).down then g d b else d) := by
+      it.foldM (init := init) (fun d b => return uif (← (f b).run).down then g d b else d) := by
   simp only [fold_eq_foldM, foldM_filterWithPostcondition, monadLift_self]
   congr 1; ext out acc
   apply bind_congr; intro fx
@@ -1582,7 +1582,7 @@ theorem IterM.fold_filterM {α β δ : Type w} {m : Type w → Type w'} {n : Typ
     [MonadLiftT m n] [LawfulMonadLiftT m n]
     {f : β → n (ULift Bool)} {g : δ → β → δ} {init : δ} {it : IterM (α := α) m β} :
     (it.filterM f).fold (init := init) g =
-      it.foldM (init := init) (fun d b => return if (← f b).down then g d b else d) := by
+      it.foldM (init := init) (fun d b => return uif (← f b).down then g d b else d) := by
   simp only [fold_eq_foldM, foldM_filterM]
   congr 1; ext out acc
   apply bind_congr; intro fx
@@ -1614,7 +1614,7 @@ theorem IterM.fold_filter {α β δ : Type w} {m : Type w → Type w'}
     [IteratorLoop α m m] [LawfulIteratorLoop α m m]
     {f : β → Bool} {g : δ → β → δ} {init : δ} {it : IterM (α := α) m β} :
     (it.filter f).fold (init := init) g =
-      it.fold (init := init) (fun d b => if f b then g d b else d) := by
+      it.fold (init := init) (fun d b => uif f b then g d b else d) := by
   simp [fold_eq_foldM, foldM_filter]
   congr; ext
   split <;> simp
@@ -1707,7 +1707,7 @@ theorem IterM.anyM_filterM {α β : Type w} {m : Type w → Type w'} {n : Type w
     [Monad m] [LawfulMonad m] [Monad n] [MonadAttach n] [LawfulMonad n] [WeaklyLawfulMonadAttach n]
     {it : IterM (α := α) m β} {f : β → n (ULift Bool)} {p : β → n (ULift Bool)} :
     (it.filterM f).anyM p = (it.mapM (pure (f := n))).anyM (fun x => do
-        if (← f x).down then
+        uif (← f x).down then
           p x
         else
           return .up false) := by
@@ -1772,7 +1772,7 @@ theorem IterM.anyM_filter {α β : Type w} {m : Type w → Type w'}
     [LawfulMonad m] [LawfulIteratorLoop α m m]
     {it : IterM (α := α) m β} {f : β → Bool} {p : β → m (ULift Bool)} :
     (it.filter f).anyM p = it.anyM (fun x => do
-        if f x then
+        uif f x then
           p x
         else
           return .up false) := by
@@ -1811,7 +1811,7 @@ theorem IterM.any_filterM {α β : Type w} {m : Type w → Type w'} {n : Type w 
     [LawfulMonadLiftT m n] [LawfulIteratorLoop α m m]
     {it : IterM (α := α) m β} {f : β → n (ULift Bool)} {p : β → Bool} :
     (it.filterM f).any p = (it.mapM (pure (f := n))).anyM (fun x => do
-        if (← f x).down then
+        uif (← f x).down then
           return .up (p x)
         else
           return .up false) := by
@@ -1879,7 +1879,7 @@ theorem IterM.allM_filterM {α β : Type w} {m : Type w → Type w'} {n : Type w
     [LawfulMonadLiftT m n]
     {it : IterM (α := α) m β} {f : β → n (ULift Bool)} {p : β → n (ULift Bool)} :
     (it.filterM f).allM p = (it.mapM (pure (f := n))).allM (fun x => do
-        if (← f x).down then
+        uif (← f x).down then
           p x
         else
           return .up true) := by
@@ -1912,7 +1912,7 @@ theorem IterM.allM_filter {α β : Type w} {m : Type w → Type w'}
     [LawfulMonad m] [LawfulIteratorLoop α m m]
     {it : IterM (α := α) m β} {f : β → Bool} {p : β → m (ULift Bool)} :
     (it.filter f).allM p = it.allM (fun x => do
-        if f x then
+        uif f x then
           p x
         else
           return .up true) := by
@@ -1945,7 +1945,7 @@ theorem IterM.all_filterM {α β : Type w} {m : Type w → Type w'} {n : Type w 
     [LawfulMonadLiftT m n] [LawfulIteratorLoop α m m]
     {it : IterM (α := α) m β} {f : β → n (ULift Bool)} {p : β → Bool} :
     (it.filterM f).all p = (it.mapM (pure (f := n))).allM (fun x => do
-        if (← f x).down then
+        uif (← f x).down then
           return .up (p x)
         else
           return .up true) := by

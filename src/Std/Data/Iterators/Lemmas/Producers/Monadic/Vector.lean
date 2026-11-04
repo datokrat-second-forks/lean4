@@ -72,7 +72,7 @@ theorem Vector.iterM_toArray {xs : Vector β n} :
   rfl
 
 theorem Vector.step_iterFromIdxM {xs : Vector β n} {pos : Nat} :
-    (xs.iterFromIdxM m pos).step = (pure <| .deflate <| if h : pos < n then
+    (xs.iterFromIdxM m pos).step = (pure <| .deflate <| uif h : pos < n then
         .yield
           (xs.iterFromIdxM m (pos + 1))
           xs[pos]
@@ -82,7 +82,7 @@ theorem Vector.step_iterFromIdxM {xs : Vector β n} {pos : Nat} :
   simp [← Vector.iterFromIdxM_toArray, Array.step_iterFromIdxM]
 
 theorem Vector.step_iterM {xs : Vector β n} :
-    (xs.iterM m).step = (pure <| .deflate <| if h : 0 < n then
+    (xs.iterM m).step = (pure <| .deflate <| uif h : 0 < n then
         .yield
           (xs.iterFromIdxM m 1)
           xs[0]

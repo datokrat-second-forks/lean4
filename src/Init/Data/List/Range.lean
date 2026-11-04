@@ -91,7 +91,7 @@ theorem getElem?_range' {s step} :
     (range' n m step)[i] = n + step * i :=
   (getElem?_eq_some_iff.1 <| getElem?_range' (by simpa using H)).2
 
-theorem head?_range' : (range' s n).head? = if n = 0 then none else some s := by
+theorem head?_range' : (range' s n).head? = uif n = 0 then none else some s := by
   induction n <;> simp_all [range'_succ]
 
 @[simp, grind =] theorem head_range' (h) : (range' s n).head h = s := by
@@ -186,7 +186,7 @@ theorem range_add {n m : Nat} : range (n + m) = range n ++ (range m).map (n + ·
   rw [← range'_eq_map_range]
   simpa [range_eq_range', Nat.add_comm] using (range'_append_1 (s := 0)).symm
 
-theorem head?_range {n : Nat} : (range n).head? = if n = 0 then none else some 0 := by
+theorem head?_range {n : Nat} : (range n).head? = uif n = 0 then none else some 0 := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -198,7 +198,7 @@ theorem head?_range {n : Nat} : (range n).head? = if n = 0 then none else some 0
   | zero => simp at h
   | succ n => simp [head?_range, head_eq_iff_head?_eq_some]
 
-theorem getLast?_range {n : Nat} : (range n).getLast? = if n = 0 then none else some (n - 1) := by
+theorem getLast?_range {n : Nat} : (range n).getLast? = uif n = 0 then none else some (n - 1) := by
   induction n with
   | zero => simp
   | succ n ih =>

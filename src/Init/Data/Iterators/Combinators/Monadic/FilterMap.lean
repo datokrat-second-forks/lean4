@@ -333,7 +333,7 @@ def IterM.filterWithPostcondition {α β : Type w} {m : Type w → Type w'} {n :
     [Monad n] [MonadLiftT m n] [Iterator α m β] (f : β → PostconditionT n (ULift Bool))
     (it : IterM (α := α) m β) :=
   (it.filterMapWithPostcondition
-    (fun b => (f b).map (fun x => if x.down = true then some b else none)) : IterM n β)
+    (fun b => (f b).map (fun x => bif x.down then some b else none)) : IterM n β)
 
 /--
 If `it` is an iterator, then `it.filterMapM f` is another iterator that applies a monadic
@@ -449,7 +449,7 @@ For each value emitted by the base iterator `it`, this combinator calls `f`.
 def IterM.filterM {α β : Type w} {m : Type w → Type w'} {n : Type w → Type w''} [Iterator α m β]
     [Monad n] [MonadAttach n] [MonadLiftT m n] (f : β → n (ULift Bool)) (it : IterM (α := α) m β) :=
   (it.filterMapWithPostcondition
-    (fun b => (PostconditionT.attachLift (f b)).map (if ·.down = true then some b else none)) : IterM n β)
+    (fun b => (PostconditionT.attachLift (f b)).map (fun x => bif x.down then some b else none)) : IterM n β)
 
 /--
 If `it` is an iterator, then `it.filterMap f` is another iterator that applies a function `f` to all

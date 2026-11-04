@@ -102,7 +102,7 @@ theorem foldrM_filterMap [Monad m] [LawfulMonad m] {f : α → Option β} {g : �
 theorem foldlM_filter [Monad m] [LawfulMonad m] {p : α → Bool} {g : β → α → m β} {xs : Array α}
     {init : β} {w : stop = (xs.filter p).size} :
     (xs.filter p).foldlM g init 0 stop =
-      xs.foldlM (fun x y => if p y then g x y else pure x) init := by
+      xs.foldlM (fun x y => uif p y then g x y else pure x) init := by
   subst w
   cases xs
   simp [List.foldlM_filter]
@@ -110,7 +110,7 @@ theorem foldlM_filter [Monad m] [LawfulMonad m] {p : α → Bool} {g : β → α
 theorem foldrM_filter [Monad m] [LawfulMonad m] {p : α → Bool} {g : α → β → m β} {xs : Array α}
     {init : β} {w : start = (xs.filter p).size} :
     (xs.filter p).foldrM g init start 0 =
-      xs.foldrM (fun x y => if p x then g x y else pure y) init := by
+      xs.foldrM (fun x y => uif p x then g x y else pure y) init := by
   subst w
   cases xs
   simp [List.foldrM_filter]

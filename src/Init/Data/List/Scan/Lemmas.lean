@@ -149,7 +149,7 @@ theorem getElem_scanl {f : α → β → α} (h : i < (scanl f a l).length) :
 
 @[grind =]
 theorem getElem?_scanl {f : α → β → α} :
-    (scanl f a l)[i]? = if i ≤ l.length then some (foldl f a (l.take i)) else none := by
+    (scanl f a l)[i]? = uif i ≤ l.length then some (foldl f a (l.take i)) else none := by
   split
   · rw [getElem?_pos _ _ (by simpa using Nat.lt_add_one_iff.mpr ‹_›), getElem_scanl]
   · rw [getElem?_neg]
@@ -310,7 +310,7 @@ theorem getElem_scanr {f : α → β → β} (h : i < (scanr f b l).length) :
 
 @[grind =]
 theorem getElem?_scanr {f : α → β → β} :
-    (scanr f b l)[i]? = if i < l.length + 1 then some (foldr f b (l.drop i)) else none := by
+    (scanr f b l)[i]? = uif i < l.length + 1 then some (foldr f b (l.drop i)) else none := by
   split
   · rw [getElem?_pos _ _ (by simpa), getElem_scanr]
   · rename_i h

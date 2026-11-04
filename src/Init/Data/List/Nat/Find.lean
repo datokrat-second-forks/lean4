@@ -55,7 +55,7 @@ theorem findIdx?_eq_some_le_of_findIdx?_eq_some {xs : List α} {p q : α → Boo
     (h : xs.findIdx? p = some i) : ∃ j, j ≤ i ∧ xs.findIdx? q = some j := by
   simp only [findIdx?_eq_findSome?_zipIdx] at h
   rw [findSome?_eq_some_iff] at h
-  simp only [Option.ite_none_right_eq_some, Option.some.injEq, ite_eq_right_iff, reduceCtorEq,
+  simp only [Option.uite_none_right_eq_some, Option.some.injEq, UDecidable.ite_eq_right_iff, reduceCtorEq,
     imp_false, Bool.not_eq_true, Prod.forall, exists_and_right, Prod.exists] at h
   obtain ⟨xs, h₁, b, ⟨ys, h₂⟩, ⟨hb, rfl⟩, h₃⟩ := h
   rw [zipIdx_eq_append_iff] at h₂

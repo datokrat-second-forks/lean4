@@ -55,10 +55,10 @@ protected theorem countP_go_eq_add {l} : countP.go p l n = n + countP.go p l 0 :
   simp [countP, countP.go, pa]
 
 @[grind =]
-theorem countP_cons {a : α} {l : List α} : countP p (a :: l) = countP p l + if p a then 1 else 0 := by
+theorem countP_cons {a : α} {l : List α} : countP p (a :: l) = countP p l + uif p a then 1 else 0 := by
   by_cases h : p a <;> simp [h]
 
-@[simp] theorem countP_singleton {a : α} : countP p [a] = if p a then 1 else 0 := by
+@[simp] theorem countP_singleton {a : α} : countP p [a] = uif p a then 1 else 0 := by
   simp [countP_cons]
 
 theorem length_eq_countP_add_countP (p : α → Bool) {l : List α} : length l = countP p l + countP (fun a => ¬p a) l := by
@@ -122,12 +122,12 @@ grind_pattern Std.Internal.List.not_of_countP_eq_zero_of_mem => xs.countP p, x �
   rw [countP_eq_length_filter, length_filter_eq_length_iff]
 
 theorem countP_replicate {p : α → Bool} {a : α} {n : Nat} :
-    countP p (replicate n a) = if p a then n else 0 := by
+    countP p (replicate n a) = uif p a then n else 0 := by
   simp only [countP_eq_length_filter, filter_replicate]
   split <;> simp
 
 theorem boole_getElem_le_countP {p : α → Bool} {l : List α} {i : Nat} (h : i < l.length) :
-    (if p l[i] then 1 else 0) ≤ l.countP p := by
+    (uif p l[i] then 1 else 0) ≤ l.countP p := by
   induction l generalizing i with
   | nil => simp at h
   | cons x l ih =>
@@ -227,10 +227,10 @@ theorem countP_mono_left (h : ∀ x ∈ l, p x → q x) : countP p l ≤ countP 
     have ⟨ha, hl⟩ := h
     simp [countP_cons]
     cases h : p a
-    · simp only [Bool.false_eq_true, ↓reduceIte, Nat.add_zero]
+    · simp only [Bool.false_eq_true, ↓reduceUIte, Nat.add_zero]
       apply Nat.le_trans ?_ (Nat.le_add_right _ _)
       apply ihl hl
-    · simp only [↓reduceIte, ha h, succ_le_succ_iff]
+    · simp only [↓reduceUIte, ha h, succ_le_succ_iff]
       apply ihl hl
 
 theorem countP_congr (h : ∀ x ∈ l, p x ↔ q x) : countP p l = countP q l :=
@@ -249,7 +249,7 @@ variable [BEq α]
 
 @[grind =]
 theorem count_cons {a b : α} {l : List α} :
-    count a (b :: l) = count a l + if b == a then 1 else 0 := by
+    count a (b :: l) = count a l + uif b == a then 1 else 0 := by
   simp [count, countP_cons]
 
 theorem count_eq_countP {a : α} {l : List α} : count a l = countP (· == a) l := rfl
@@ -264,7 +264,7 @@ grind_pattern count_eq_length_filter => count a l, (filter _ l).length
 
 @[grind =]
 theorem count_tail : ∀ {l : List α} {a : α},
-      l.tail.count a = l.count a - if l.head? == some a then 1 else 0
+      l.tail.count a = l.count a - uif l.head? == some a then 1 else 0
   | [], a => by simp
   | _ :: _, a => by
     set_option backward.isDefEq.respectTransparency false in
@@ -304,7 +304,7 @@ theorem count_tail_le {a : α} {l : List α} : count a l.tail ≤ count a l :=
 theorem count_le_count_cons {a b : α} {l : List α} : count a l ≤ count a (b :: l) :=
   (sublist_cons_self _ _).count_le a
 
-theorem count_singleton {a b : α} : count a [b] = if b == a then 1 else 0 := by
+theorem count_singleton {a b : α} : count a [b] = uif b == a then 1 else 0 := by
   simp [count_cons]
 
 @[simp, grind =] theorem count_append {a : α} {l₁ l₂ : List α} : count a (l₁ ++ l₂) = count a l₁ + count a l₂ :=
@@ -318,7 +318,7 @@ theorem count_flatten {a : α} {l : List (List α)} : count a l.flatten = (l.map
   simp only [count_eq_countP, countP_eq_length_filter, filter_reverse, length_reverse]
 
 theorem boole_getElem_le_count {a : α} {l : List α} {i : Nat} (h : i < l.length) :
-    (if l[i] == a then 1 else 0) ≤ l.count a := by
+    (uif l[i] == a then 1 else 0) ≤ l.count a := by
   rw [count_eq_countP]
   apply boole_getElem_le_countP (p := (· == a))
 
@@ -363,8 +363,8 @@ theorem count_eq_length {l : List α} : count a l = l.length ↔ ∀ b ∈ l, a 
 @[simp] theorem count_replicate_self {a : α} {n : Nat} : count a (replicate n a) = n :=
   (count_eq_length.2 <| fun _ h => (eq_of_mem_replicate h).symm).trans (length_replicate ..)
 
-@[grind =] theorem count_replicate {a b : α} {n : Nat} : count a (replicate n b) = if b == a then n else 0 := by
-  split <;> (rename_i h; simp only [beq_iff_eq] at h)
+@[grind =] theorem count_replicate {a b : α} {n : Nat} : count a (replicate n b) = uif b == a then n else 0 := by
+  split <;> rename_i h
   · exact ‹b = a› ▸ count_replicate_self ..
   · exact count_eq_zero.2 <| mt eq_of_mem_replicate (Ne.symm h)
 
@@ -407,26 +407,26 @@ theorem count_flatMap {α} [BEq β] {l : List α} {f : α → List β} {x : β} 
 
 @[grind =]
 theorem count_erase {a b : α} :
-    ∀ {l : List α}, count a (l.erase b) = count a l - if b == a then 1 else 0
+    ∀ {l : List α}, count a (l.erase b) = count a l - uif b == a then 1 else 0
   | [] => by simp
   | c :: l => by
     rw [erase_cons]
     if hc : c = b then
       have hc_beq := beq_iff_eq.mpr hc
-      rw [ite_eq_left hc_beq, hc, count_cons, Nat.add_sub_cancel]
+      rw [UDecidable.ite_eq_left hc_beq, hc, count_cons, Nat.add_sub_cancel]
     else
       have hc_beq := beq_false_of_ne hc
-      simp only [hc_beq, ite_false, count_cons, count_cons, count_erase, reduceCtorEq]
+      simp only [hc_beq, UDecidable.ite_false, count_cons, count_cons, count_erase, reduceCtorEq]
       if ha : b = a then
         rw [ha, eq_comm] at hc
-        rw [ite_eq_left (beq_iff_eq.2 ha), ite_eq_right (by simpa using Ne.symm hc), Nat.add_zero, Nat.add_zero]
+        rw [UDecidable.ite_eq_left (beq_iff_eq.2 ha), UDecidable.ite_eq_right (by simpa using Ne.symm hc), Nat.add_zero, Nat.add_zero]
       else
-        rw [ite_eq_right (by simpa using ha), Nat.sub_zero, Nat.sub_zero]
+        rw [UDecidable.ite_eq_right (by simpa using ha), Nat.sub_zero, Nat.sub_zero]
 
 @[simp] theorem count_erase_self {a : α} {l : List α} :
-    count a (List.erase l a) = count a l - 1 := by rw [count_erase, ite_eq_left (by simp)]
+    count a (List.erase l a) = count a l - 1 := by rw [count_erase, UDecidable.ite_eq_left (by simp)]
 
 @[simp] theorem count_erase_of_ne (ab : a ≠ b) {l : List α} : count a (l.erase b) = count a l := by
-  rw [count_erase, ite_eq_right (by simpa using ab.symm), Nat.sub_zero]
+  rw [count_erase, UDecidable.ite_eq_right (by simpa using ab.symm), Nat.sub_zero]
 
 end count

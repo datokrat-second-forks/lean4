@@ -64,8 +64,8 @@ def get! : (@& FloatArray) → (@& Nat) → Float
   | ⟨ds⟩, i => ds[i]!
 
 def get? (ds : FloatArray) (i : Nat) : Option Float :=
-  if h : i < ds.size then
-    some (ds.get i h)
+  bif h : i <ᵇ ds.size then
+    some (ds.get i (lt_of_decideLT_eq_true h))
   else
     none
 
@@ -122,8 +122,8 @@ def isEmpty (s : FloatArray) : Bool :=
 
 partial def toList (ds : FloatArray) : List Float :=
   let rec loop (i r) :=
-    if h : i < ds.size then
-      loop (i+1) (ds[i] :: r)
+    bif h : i <ᵇ ds.size then
+      loop (i+1) (ds[i]'(lt_of_decideLT_eq_true h) :: r)
     else
       r.reverse
   loop 0 []
@@ -187,16 +187,16 @@ unsafe def foldlMUnsafe {β : Type v} {m : Type v → Type w} [Monad m] (f : β 
 def foldlM {β : Type v} {m : Type v → Type w} [Monad m] (f : β → Float → m β) (init : β) (as : FloatArray) (start := 0) (stop := as.size) : m β :=
   let fold (stop : Nat) (h : stop ≤ as.size) :=
     let rec loop (i : Nat) (j : Nat) (b : β) : m β := do
-      if hlt : j < stop then
+      bif hlt : j <ᵇ stop then
         match i with
         | 0    => pure b
         | i'+1 =>
-          loop i' (j+1) (← f b (as[j]'(Nat.lt_of_lt_of_le hlt h)))
+          loop i' (j+1) (← f b (as[j]'(Nat.lt_of_lt_of_le (lt_of_decideLT_eq_true hlt) h)))
       else
         pure b
     loop (stop - start) start init
-  if h : stop ≤ as.size then
-    fold stop h
+  bif h : stop ≤ᵇ as.size then
+    fold stop (le_of_decideLE_eq_true h)
   else
     fold as.size (Nat.le_refl _)
 

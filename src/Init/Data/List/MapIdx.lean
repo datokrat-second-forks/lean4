@@ -115,7 +115,7 @@ theorem mapFinIdx_nil {f : (i : Nat) → α → (h : i < 0) → β} : mapFinIdx 
 
 theorem getElem_mapFinIdx_go {as : List α} {f : (i : Nat) → α → (h : i < as.length) → β} {i : Nat} {h} {w} :
     (mapFinIdx.go as f bs acc h)[i] =
-      if w' : i < acc.size then
+      uif w' : i < acc.size then
         acc[i]
       else
         f i (bs[i - acc.size]'(by simp at w; omega)) (by simp at w; omega) := by
@@ -123,7 +123,7 @@ theorem getElem_mapFinIdx_go {as : List α} {f : (i : Nat) → α → (h : i < a
   | nil =>
     simp only [length_mapFinIdx_go, length_nil, Nat.zero_add] at w h
     simp only [mapFinIdx.go, Array.getElem_toList]
-    rw [dite_eq_left]
+    rw [UDecidable.dite_eq_left]
   | cons _ _ ih =>
     simp [mapFinIdx.go]
     rw [ih]

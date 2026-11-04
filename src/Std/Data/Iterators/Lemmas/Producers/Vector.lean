@@ -78,7 +78,7 @@ theorem Vector.iter_toArray {xs : Vector β n} :
   rfl
 
 theorem Vector.step_iterFromIdx {xs : Vector β n} {pos : Nat} :
-    (xs.iterFromIdx pos).step = if h : pos < n then
+    (xs.iterFromIdx pos).step = uif h : pos < n then
         .yield
           (xs.iterFromIdx (pos + 1))
           xs[pos]
@@ -88,7 +88,7 @@ theorem Vector.step_iterFromIdx {xs : Vector β n} {pos : Nat} :
   split <;> simp [Vector.iterFromIdx_eq_toIter_iterFromIdxM, Iter.step, Vector.step_iterFromIdxM, *]
 
 theorem Vector.step_iter {xs : Vector β n} :
-    xs.iter.step = if h : 0 < n then
+    xs.iter.step = uif h : 0 < n then
         .yield
           (xs.iterFromIdx 1)
           xs[0]

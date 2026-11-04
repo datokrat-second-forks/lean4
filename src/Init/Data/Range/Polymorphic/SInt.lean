@@ -161,7 +161,7 @@ theorem succ?_eq_of_technicalCondition {α : Type u} [UpwardEnumerable α] [LE �
 theorem succMany?_eq {α : Type u} [UpwardEnumerable α] [LE α] [LT α]
     [m : HasModel α (BitVec n)] {x : α} {k} :
     haveI := HasModel.instUpwardEnumerable (α := α)
-    succMany? k x = if (m.encode x).toInt + ↑k ≤ (BitVec.Signed.intMaxSealed n).toInt then
+    succMany? k x = uif (m.encode x).toInt + ↑k ≤ (BitVec.Signed.intMaxSealed n).toInt then
       some (m.decode (BitVec.ofInt n ((m.encode x).toInt + ↑k)))
     else
       none := by
@@ -221,11 +221,13 @@ theorem toBitVec_maxValueSealed_eq_intMaxSealed : maxValueSealed.toBitVec = BitV
   simp [maxValueSealed_def, BitVec.Signed.intMaxSealed_def]
 
 @[no_expose]
-public instance : UpwardEnumerable Int8 where
-  succ? i := if i + 1 = minValueSealed then none else some (i + 1)
+public instance instUpwardEnumerable : UpwardEnumerable Int8 where
+  succ? i := bif i + 1 == minValueSealed then none else some (i + 1)
   succMany? n i :=
     have := i.minValue_le_toInt
-    if h : i.toInt + n ≤ maxValueSealed.toInt then some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ h)) else none
+    bif h : i.toInt + n ≤ᵇ maxValueSealed.toInt then
+      some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ le_of_decideLE_eq_true h))
+    else none
 
 instance : Least? Int8 where
   least? := some Int8.minValue
@@ -249,13 +251,15 @@ instance : HasModel Int8 (BitVec 8) where
   lt_iff_encode_lt := by simp [LT.lt, Int8.lt]
 
 theorem succ?_eq_minValueSealed {x : Int8} :
-    UpwardEnumerable.succ? x = if x + 1 = minValueSealed then none else some (x + 1) :=
+    UpwardEnumerable.succ? x = bif x + 1 == minValueSealed then none else some (x + 1) :=
   (rfl)
 
 theorem succMany?_eq_maxValueSealed {i : Int8} :
     UpwardEnumerable.succMany? n i =
       have := i.minValue_le_toInt
-      if h : i.toInt + n ≤ maxValueSealed.toInt then some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ h)) else none :=
+      bif h : i.toInt + n ≤ᵇ maxValueSealed.toInt then
+        some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ le_of_decideLE_eq_true h))
+      else none :=
   (rfl)
 
 theorem instUpwardEnumerable_eq :
@@ -326,11 +330,13 @@ theorem toBitVec_maxValueSealed_eq_intMaxSealed : maxValueSealed.toBitVec = BitV
   simp [maxValueSealed_def, BitVec.Signed.intMaxSealed_def]
 
 @[no_expose]
-public instance : UpwardEnumerable Int16 where
-  succ? i := if i + 1 = minValueSealed then none else some (i + 1)
+public instance instUpwardEnumerable : UpwardEnumerable Int16 where
+  succ? i := bif i + 1 == minValueSealed then none else some (i + 1)
   succMany? n i :=
     have := i.minValue_le_toInt
-    if h : i.toInt + n ≤ maxValueSealed.toInt then some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ h)) else none
+    bif h : i.toInt + n ≤ᵇ maxValueSealed.toInt then
+      some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ le_of_decideLE_eq_true h))
+    else none
 
 instance : Least? Int16 where
   least? := some Int16.minValue
@@ -421,11 +427,13 @@ theorem toBitVec_maxValueSealed_eq_intMaxSealed : maxValueSealed.toBitVec = BitV
   simp [maxValueSealed_def, BitVec.Signed.intMaxSealed_def]
 
 @[no_expose]
-public instance : UpwardEnumerable Int32 where
-  succ? i := if i + 1 = minValueSealed then none else some (i + 1)
+public instance instUpwardEnumerable : UpwardEnumerable Int32 where
+  succ? i := bif i + 1 == minValueSealed then none else some (i + 1)
   succMany? n i :=
     have := i.minValue_le_toInt
-    if h : i.toInt + n ≤ maxValueSealed.toInt then some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ h)) else none
+    bif h : i.toInt + n ≤ᵇ maxValueSealed.toInt then
+      some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ le_of_decideLE_eq_true h))
+    else none
 
 instance : Least? Int32 where
   least? := some Int32.minValue
@@ -516,11 +524,13 @@ theorem toBitVec_maxValueSealed_eq_intMaxSealed : maxValueSealed.toBitVec = BitV
   simp [maxValueSealed_def, BitVec.Signed.intMaxSealed_def]
 
 @[no_expose]
-public instance : UpwardEnumerable Int64 where
-  succ? i := if i + 1 = minValueSealed then none else some (i + 1)
+public instance instUpwardEnumerable : UpwardEnumerable Int64 where
+  succ? i := bif i + 1 == minValueSealed then none else some (i + 1)
   succMany? n i :=
     have := i.minValue_le_toInt
-    if h : i.toInt + n ≤ maxValueSealed.toInt then some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ h)) else none
+    bif h : i.toInt + n ≤ᵇ maxValueSealed.toInt then
+      some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ le_of_decideLE_eq_true h))
+    else none
 
 instance : Least? Int64 where
   least? := some Int64.minValue
@@ -617,11 +627,13 @@ theorem toBitVec_maxValueSealed_eq_intMaxSealed :
   rcases this with rfl | rfl <;> rfl
 
 @[no_expose]
-public instance : UpwardEnumerable ISize where
-  succ? i := if i + 1 = minValueSealed then none else some (i + 1)
+public instance instUpwardEnumerable : UpwardEnumerable ISize where
+  succ? i := bif i + 1 == minValueSealed then none else some (i + 1)
   succMany? n i :=
     have := i.minValue_le_toInt
-    if h : i.toInt + n ≤ maxValueSealed.toInt then some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ h)) else none
+    bif h : i.toInt + n ≤ᵇ maxValueSealed.toInt then
+      some (.ofIntLE _ (by omega) (maxValueSealed_def ▸ le_of_decideLE_eq_true h))
+    else none
 
 instance : Least? ISize where
   least? := some ISize.minValue
@@ -631,7 +643,7 @@ instance : LawfulUpwardEnumerableLeast? ISize where
     refine ⟨ISize.minValue, rfl, (x.toInt - ISize.minValue.toInt).toNat, ?_⟩
     simp only [succMany?, Int.ofNat_toNat, ofIntLE_eq_ofInt, maxValueSealed]
     rw [Int.max_eq_left, Int.sub_eq_add_neg, Int.add_comm _ (-minValue.toInt), ← Int.add_assoc,
-      ← Int.sub_eq_add_neg, Int.sub_self, Int.zero_add, dite_eq_left (toInt_le x), ofInt_toInt]
+      ← Int.sub_eq_add_neg, Int.sub_self, Int.zero_add, Bool.dcond_decideLE_pos (toInt_le x), ofInt_toInt]
     have := minValue_le_toInt x
     omega
 

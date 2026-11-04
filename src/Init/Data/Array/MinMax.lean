@@ -217,7 +217,7 @@ public theorem min?_eq_some_iff [Min α] [LE α] {xs : Array α} [Std.IsLinearOr
   simpa using List.min?_eq_some_iff
 
 public theorem min?_replicate [Min α] [Std.IdempotentOp (min : α → α → α)] {n : Nat} {a : α} :
-    (replicate n a).min? = if n = 0 then none else some a := by
+    (replicate n a).min? = uif n = 0 then none else some a := by
   rw [← List.toArray_replicate, List.min?_toArray, List.min?_replicate]
 
 @[simp, grind =]
@@ -289,7 +289,7 @@ public theorem max?_eq_some_iff [Max α] [LE α] {xs : Array α} [Std.IsLinearOr
   simpa using List.max?_eq_some_iff
 
 public theorem max?_replicate [Max α] [Std.IdempotentOp (max : α → α → α)] {n : Nat} {a : α} :
-    (replicate n a).max? = if n = 0 then none else some a := by
+    (replicate n a).max? = uif n = 0 then none else some a := by
   rw [← List.toArray_replicate, List.max?_toArray, List.max?_replicate]
 
 @[simp, grind =]

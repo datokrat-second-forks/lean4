@@ -32,30 +32,32 @@ theorem Array.iterM_eq_iterFromIdxM {array : Array β} :
   rfl
 
 theorem Array.step_iterFromIdxM {array : Array β} {pos : Nat} :
-    (array.iterFromIdxM m pos).step = (pure <| .deflate <| if h : pos < array.size then
+    (array.iterFromIdxM m pos).step = (pure <| .deflate <| uif h : pos < array.size then
         .yield
           (array.iterFromIdxM m (pos + 1))
           array[pos]
           ⟨rfl, rfl, h, rfl⟩
       else
         .done (Nat.not_lt.mp h)) := by
+  simp only [IterM.step, Iterator.step, decideLT_eq_udecide, Bool.dcond_udecide]
   rfl
 
 theorem Array.step_iterM {array : Array β} :
-    (array.iterM m).step = (pure <| .deflate <| if h : 0 < array.size then
+    (array.iterM m).step = (pure <| .deflate <| uif h : 0 < array.size then
         .yield
           (array.iterFromIdxM m 1)
           array[0]
           ⟨rfl, rfl, h, rfl⟩
       else
         .done (Nat.not_lt.mp h)) := by
+  simp only [IterM.step, Iterator.step, decideLT_eq_udecide, Bool.dcond_udecide]
   rfl
 
 section Equivalence
 
 theorem Std.Iterators.Types.ArrayIterator.stepAsHetT_iterFromIdxM [LawfulMonad m] {array : Array β}
     {pos : Nat} :
-    (array.iterFromIdxM m pos).stepAsHetT = (if _ : pos < array.size then
+    (array.iterFromIdxM m pos).stepAsHetT = (uif _ : pos < array.size then
       pure (.yield (array.iterFromIdxM m (pos + 1)) array[pos])
     else
       pure .done) := by
@@ -105,13 +107,13 @@ theorem Array.iterFromIdxM_equiv_iterM_drop_toList {α : Type w} {array : Array 
     split
     · rename_i heq
       rw [List.drop_eq_nil_iff] at heq
-      rw [dite_eq_right (by omega)]
+      rw [UDecidable.dite_eq_right (by omega)]
       simp [Pure.pure, HetT.pure_bind]
     · rename_i x xs heq
       have hlt : pos < l.length := by
         have := heq ▸ List.drop_eq_nil_iff
         simpa using this
-      rw [dite_eq_left hlt]
+      rw [UDecidable.dite_eq_left hlt]
       simp [Pure.pure]
       congr
       · rw [← List.drop_drop (i := 1) (j := pos), heq, List.drop_succ_cons, List.drop_zero]

@@ -43,7 +43,7 @@ Examples:
 * `#["orange", "apple"].setIfInBounds 5 "grape" = #["orange", "apple"]`
 -/
 @[inline, expose] def Array.setIfInBounds (xs : Array α) (i : Nat) (v : α) : Array α :=
-  dite (LT.lt i xs.size) (fun h => xs.set i v h) (fun _ => xs)
+  Bool.dcond (decideLT i xs.size) (fun h => xs.set i v (of_decide_eq_true h)) (fun _ => xs)
 
 /--
 Set an element in an array, or panic if the index is out of bounds.

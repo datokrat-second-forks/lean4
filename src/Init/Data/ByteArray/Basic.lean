@@ -210,7 +210,7 @@ Converts a packed array of bytes to a linked list.
 -/
 def toList (bs : ByteArray) : List UInt8 :=
   let rec loop (i : Nat) (r : List UInt8) :=
-    if i < bs.size then
+    bif _ : i <ᵇ bs.size then
       loop (i+1) (bs.get! i :: r)
     else
       r.reverse
@@ -226,8 +226,8 @@ The index is returned along with a proof that it is a valid index in the array.
 -/
 @[inline] def findFinIdx? (a : ByteArray) (p : UInt8 → Bool) (start := 0) : Option (Fin a.size) :=
   let rec @[specialize] loop (i : Nat) :=
-    if h : i < a.size then
-      if p a[i] then some ⟨i, h⟩ else loop (i+1)
+    bif h : i <ᵇ a.size then
+      bif p (a[i]'(lt_of_decideLT_eq_true h)) then some ⟨i, lt_of_decideLT_eq_true h⟩ else loop (i+1)
     else
       none
     termination_by a.size - i
@@ -242,8 +242,8 @@ The variant {name}`findFinIdx?` additionally returns a proof that the found inde
 -/
 @[inline] def findIdx? (a : ByteArray) (p : UInt8 → Bool) (start := 0) : Option Nat :=
   let rec @[specialize] loop (i : Nat) :=
-    if h : i < a.size then
-      if p a[i] then some i else loop (i+1)
+    bif h : i <ᵇ a.size then
+      bif p (a[i]'(lt_of_decideLT_eq_true h)) then some i else loop (i+1)
     else
       none
     termination_by a.size - i
@@ -329,16 +329,16 @@ been processed.
 def foldlM {β : Type v} {m : Type v → Type w} [Monad m] (f : β → UInt8 → m β) (init : β) (as : ByteArray) (start := 0) (stop := as.size) : m β :=
   let fold (stop : Nat) (h : stop ≤ as.size) :=
     let rec loop (i : Nat) (j : Nat) (b : β) : m β := do
-      if hlt : j < stop then
+      bif hlt : j <ᵇ stop then
         match i with
         | 0    => pure b
         | i'+1 =>
-          loop i' (j+1) (← f b as[j])
+          loop i' (j+1) (← f b (as[j]'(Nat.lt_of_lt_of_le (lt_of_decideLT_eq_true hlt) h)))
       else
         pure b
     loop (stop - start) start init
-  if h : stop ≤ as.size then
-    fold stop h
+  bif h : stop ≤ᵇ as.size then
+    fold stop (le_of_decideLE_eq_true h)
   else
     fold as.size (Nat.le_refl _)
 
@@ -412,7 +412,7 @@ def pos := Iterator.idx
 /-- True if the iterator is past the array's last byte. -/
 @[inline]
 def atEnd : Iterator → Bool
-  | ⟨arr, i⟩ => i ≥ arr.size
+  | ⟨arr, i⟩ => i ≥ᵇ arr.size
 
 /--
 The byte at the current position.
@@ -422,8 +422,8 @@ On an invalid position, returns {lean}`(default : UInt8)`.
 @[inline]
 def curr : Iterator → UInt8
   | ⟨arr, i⟩ =>
-    if h : i < arr.size then
-      arr[i]'h
+    bif h : i <ᵇ arr.size then
+      arr[i]'(lt_of_decideLT_eq_true h)
     else
       default
 
@@ -451,16 +451,14 @@ True if the iterator is valid; that is, it is not past the array's last byte.
 -/
 @[inline]
 def hasNext : Iterator → Bool
-  | ⟨arr, i⟩ => i < arr.size
+  | ⟨arr, i⟩ => i <ᵇ arr.size
 
 /-- The byte at the current position. --/
 @[inline]
 def curr' (it : Iterator) (h : it.hasNext) : UInt8 :=
   match it with
   | ⟨arr, i⟩ =>
-    have : i < arr.size := by
-      simp only [hasNext, UDecidable.decide_eq_true_eq] at h
-      assumption
+    have : i < arr.size := lt_of_decideLT_eq_true h
     arr[i]
 
 /-- Moves the iterator's position forward by one byte. --/
@@ -472,7 +470,7 @@ def next' (it : Iterator) (_h : it.hasNext) : Iterator :=
 /-- True if the position is not zero. -/
 @[inline]
 def hasPrev : Iterator → Bool
-  | ⟨_, i⟩ => i > 0
+  | ⟨_, i⟩ => i >ᵇ 0
 
 /--
 Moves the iterator's position to the end of the array.

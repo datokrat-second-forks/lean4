@@ -562,7 +562,7 @@ theorem Iter.anyM_eq_match_step {α β : Type w} {m : Type → Type w'} [Iterato
     it.anyM p = (do
       match it.step.val with
       | .yield it' x =>
-        if (← p x) then
+        uif (← p x) then
           return true
         else
           it'.anyM p
@@ -612,7 +612,7 @@ theorem Iter.any_eq_match_step {α β : Type w} [Iterator α Id β]
     {it : Iter (α := α) β} {p : β → Bool} :
     it.any p = (match it.step.val with
       | .yield it' x =>
-        if p x then
+        uif p x then
           true
         else
           it'.any p
@@ -620,7 +620,7 @@ theorem Iter.any_eq_match_step {α β : Type w} [Iterator α Id β]
       | .done => false) := by
   rw [any_eq_anyM, anyM_eq_match_step]
   split
-  · simp only [pure_bind, Bool.ite_true_left, UDecidable.decide_bool_eq_true, any_eq_anyM]
+  · simp only [pure_bind, any_eq_anyM]
     split <;> simp [*]
   · simp [any_eq_anyM]
   · simp
@@ -670,7 +670,7 @@ theorem Iter.allM_eq_match_step {α β : Type w} {m : Type → Type w'} [Iterato
     it.allM p = (do
       match it.step.val with
       | .yield it' x =>
-        if (← p x) then
+        uif (← p x) then
           it'.allM p
         else
           return false
@@ -703,7 +703,7 @@ theorem Iter.all_eq_match_step {α β : Type w} [Iterator α Id β]
     {it : Iter (α := α) β} {p : β → Bool} :
     it.all p = (match it.step.val with
       | .yield it' x =>
-        if p x then
+        uif p x then
           it'.all p
         else
           false
@@ -711,7 +711,7 @@ theorem Iter.all_eq_match_step {α β : Type w} [Iterator α Id β]
       | .done => true) := by
   rw [all_eq_allM, allM_eq_match_step]
   split
-  · simp only [pure_bind, all_eq_allM, Bool.ite_false_right, UDecidable.decide_bool_eq_true]
+  · simp only [pure_bind, all_eq_allM]
     split <;> simp [*]
   · simp [all_eq_allM]
   · simp
@@ -907,7 +907,7 @@ theorem Iter.find?_eq_match_step {α β : Type w}
     {it : Iter (α := α) β} {f : β → Bool} :
     it.find? f = (match it.step.val with
       | .yield it' out =>
-        if f out then some out else it'.find? f
+        uif f out then some out else it'.find? f
       | .skip it' => it'.find? f
       | .done => none) := by
   rw [find?_eq_findM?, findM?_eq_match_step]

@@ -35,7 +35,7 @@ theorem ofFn_succ {f : Fin (n+1) → α} :
     ofFn f = (ofFn (fun (i : Fin n) => f i.castSucc)).push (f ⟨n, by omega⟩) := by
   ext i h₁ h₂
   · simp
-  · simp only [getElem_ofFn, getElem_push, size_ofFn, Fin.castSucc_mk, left_eq_dite_iff,
+  · simp only [getElem_ofFn, getElem_push, size_ofFn, Fin.castSucc_mk, UDecidable.left_eq_dite_iff,
       Nat.not_lt]
     simp only [size_ofFn] at h₁
     intro h₃

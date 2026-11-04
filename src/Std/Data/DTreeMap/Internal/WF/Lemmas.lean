@@ -2360,7 +2360,7 @@ theorem entryAtIdx?_eq_getElem? {t : Impl α β} (htb : t.Balanced) {i : Nat} :
     simp only [toListModel_inner, *, htb.right]
     simp_all only [Nat.compare_eq_gt, List.getElem?_append_right, Nat.le_of_lt,
       ← size_eq_length, htb.left, List.getElem?_cons, Nat.sub_eq_zero_iff_le,
-      ← Nat.not_lt, not_true, ↓reduceIte]
+      ← Nat.not_lt, not_true, ↓reduceUIte]
 
 theorem entryAtIdx_eq_getElem {t : Impl α β} (htb : t.Balanced) {i : Nat} {h} :
     t.entryAtIdx htb i h = t.toListModel[i]'(size_eq_length t htb ▸ h) := by

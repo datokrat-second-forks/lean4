@@ -74,7 +74,7 @@ theorem insertIdx_eraseIdx_of_le {as : Array α}
 @[grind =]
 theorem insertIdx_eraseIdx {as : Array α} (h₁ : i < as.size) (h₂ : j ≤ (as.eraseIdx i).size) :
     (as.eraseIdx i).insertIdx j a =
-      if h : i ≤ j then
+      uif h : i ≤ j then
         (as.insertIdx (j + 1) a (by simp_all; omega)).eraseIdx i (by simp_all; omega)
       else
         (as.insertIdx j a).eraseIdx (i + 1) (by simp_all) := by
@@ -101,10 +101,10 @@ theorem insertIdx_size_self {xs : Array α} {x : α} : xs.insertIdx xs.size x = 
 @[grind =]
 theorem getElem_insertIdx {xs : Array α} {x : α} {i k : Nat} (w : i ≤ xs.size) (h : k < (xs.insertIdx i x).size) :
     (xs.insertIdx i x)[k] =
-      if h₁ : k < i then
+      uif h₁ : k < i then
         xs[k]'(by simp [size_insertIdx] at h; omega)
       else
-        if h₂ : k = i then
+        uif h₂ : k = i then
           x
         else
           xs[k-1]'(by simp [size_insertIdx] at h; omega) := by
@@ -122,16 +122,16 @@ theorem getElem_insertIdx_self {xs : Array α} {x : α} {i : Nat} (w : i ≤ xs.
 theorem getElem_insertIdx_of_gt {xs : Array α} {x : α} {i k : Nat} (w : k ≤ xs.size) (h : k > i) :
     (xs.insertIdx i x)[k]'(by simp; omega) = xs[k - 1]'(by omega) := by
   simp [getElem_insertIdx]
-  rw [dite_eq_right (by omega), dite_eq_right (by omega)]
+  rw [UDecidable.dite_eq_right (by omega), UDecidable.dite_eq_right (by omega)]
 
 @[grind =]
 theorem getElem?_insertIdx {xs : Array α} {x : α} {i k : Nat} (h : i ≤ xs.size) :
     (xs.insertIdx i x)[k]? =
-      if k < i then
+      uif k < i then
         xs[k]?
       else
-        if k = i then
-          if k ≤ xs.size then some x else none
+        uif k = i then
+          uif k ≤ xs.size then some x else none
         else
           xs[k-1]? := by
   cases xs
@@ -139,15 +139,15 @@ theorem getElem?_insertIdx {xs : Array α} {x : α} {i k : Nat} (h : i ≤ xs.si
 
 theorem getElem?_insertIdx_of_lt {xs : Array α} {x : α} {i k : Nat} (w : i ≤ xs.size) (h : k < i) :
     (xs.insertIdx i x)[k]? = xs[k]? := by
-  rw [getElem?_insertIdx, ite_eq_left h]
+  rw [getElem?_insertIdx, UDecidable.ite_eq_left h]
 
 theorem getElem?_insertIdx_self {xs : Array α} {x : α} {i : Nat} (w : i ≤ xs.size) :
     (xs.insertIdx i x)[i]? = some x := by
-  rw [getElem?_insertIdx, ite_eq_right (by omega), ite_eq_left rfl, ite_eq_left w]
+  rw [getElem?_insertIdx, UDecidable.ite_eq_right (by omega), UDecidable.ite_eq_left rfl, UDecidable.ite_eq_left w]
 
 theorem getElem?_insertIdx_of_ge {xs : Array α} {x : α} {i k : Nat} (w : i < k) (h : k ≤ xs.size) :
     (xs.insertIdx i x)[k]? = xs[k - 1]? := by
-  rw [getElem?_insertIdx, ite_eq_right (by omega), ite_eq_right (by omega)]
+  rw [getElem?_insertIdx, UDecidable.ite_eq_right (by omega), UDecidable.ite_eq_right (by omega)]
 
 end InsertIdx
 

@@ -28,7 +28,7 @@ open Nat
 set_option backward.isDefEq.respectTransparency false in
 @[grind =]
 theorem countP_set {p : α → Bool} {l : List α} {i : Nat} {a : α} (h : i < l.length) :
-    (l.set i a).countP p = l.countP p - (if p l[i] then 1 else 0) + (if p a then 1 else 0) := by
+    (l.set i a).countP p = l.countP p - (uif p l[i] then 1 else 0) + (uif p a then 1 else 0) := by
   induction l generalizing i with
   | nil => simp at h
   | cons x l ih =>
@@ -37,18 +37,18 @@ theorem countP_set {p : α → Bool} {l : List α} {i : Nat} {a : α} (h : i < l
     | succ i =>
       simp [add_one_lt_add_one_iff] at h
       simp [countP_cons, ih h]
-      have : (if p l[i] = true then 1 else 0) ≤ l.countP p := boole_getElem_le_countP (p := p) h
+      have : (uif p l[i] = true then 1 else 0) ≤ l.countP p := boole_getElem_le_countP (p := p) h
       omega
 
 @[grind =]
 theorem count_set [BEq α] {a b : α} {l : List α} {i : Nat} (h : i < l.length) :
-    (l.set i a).count b = l.count b - (if l[i] == b then 1 else 0) + (if a == b then 1 else 0) := by
+    (l.set i a).count b = l.count b - (uif l[i] == b then 1 else 0) + (uif a == b then 1 else 0) := by
   simp [count_eq_countP, countP_set, h]
 
 @[grind =]
 theorem countP_replace [BEq α] [LawfulBEq α] {a b : α} {l : List α} {p : α → Bool} :
     (l.replace a b).countP p =
-      if l.contains a then l.countP p + (if p b then 1 else 0) - (if p a then 1 else 0) else l.countP p := by
+      uif l.contains a then l.countP p + (uif p b then 1 else 0) - (uif p a then 1 else 0) else l.countP p := by
   induction l with
   | nil => simp
   | cons x l ih =>
@@ -58,7 +58,7 @@ theorem countP_replace [BEq α] [LawfulBEq α] {a b : α} {l : List α} {p : α 
       simp [h, countP_cons]
       omega
     · simp only [beq_eq_false_iff_ne, ne_eq] at h
-      simp only [countP_cons, ih, contains_eq_mem, UDecidable.decide_eq_true_eq, mem_cons, h, false_or]
+      simp only [countP_cons, ih, contains_eq_mem, UDecidable.decide_eq_true_eq, h, false_or]
       split <;> rename_i h'
       · by_cases h'' : p a
         · have : countP p l > 0 := countP_pos_iff.mpr ⟨a, h', h''⟩
@@ -71,16 +71,15 @@ theorem countP_replace [BEq α] [LawfulBEq α] {a b : α} {l : List α} {p : α 
 @[grind =]
 theorem count_replace [BEq α] [LawfulBEq α] {a b c : α} {l : List α} :
     (l.replace a b).count c =
-      if l.contains a then l.count c + (if b == c then 1 else 0) - (if a == c then 1 else 0) else l.count c := by
+      uif l.contains a then l.count c + (uif b == c then 1 else 0) - (uif a == c then 1 else 0) else l.count c := by
   simp [count_eq_countP, countP_replace]
 
 @[grind =] theorem count_insert [BEq α] [LawfulBEq α] {a b : α} {l : List α} :
-    count a (List.insert b l) = max (count a l) (if b == a then 1 else 0) := by
+    count a (List.insert b l) = max (count a l) (uif b == a then 1 else 0) := by
   simp only [List.insert, contains_eq_mem, Bool.cond_udecide, beq_iff_eq]
   split <;> rename_i h
   · split <;> rename_i h'
     · rw [Nat.max_def]
-      simp only [beq_iff_eq] at h'
       split
       · have := List.count_pos_iff.mpr (h' ▸ h)
         omega
@@ -88,8 +87,7 @@ theorem count_replace [BEq α] [LawfulBEq α] {a b c : α} {l : List α} :
     · simp
   · rw [count_cons]
     split <;> rename_i h'
-    · simp only [beq_iff_eq] at h'
-      rw [count_eq_zero.mpr (h' ▸ h)]
+    · rw [count_eq_zero.mpr (h' ▸ h)]
       simp
     · simp
 

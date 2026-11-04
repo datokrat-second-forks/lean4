@@ -671,8 +671,8 @@ private theorem insertIdx_loop_toArray (i : Nat) (l : List α) (j : Nat) (hj : j
       rw [getElem_cons]
       simp
       split <;> rename_i h₄
-      · rw [dite_eq_left (by omega)]
-      · rw [dite_eq_right (by omega)]
+      · rw [UDecidable.dite_eq_left (by omega)]
+      · rw [UDecidable.dite_eq_right (by omega)]
         congr
         omega
 
@@ -699,19 +699,19 @@ theorem replace_toArray [BEq α] [LawfulBEq α] (l : List α) (a b : α) :
     · intro j h₁ h₂
       rw [List.getElem_replace, List.getElem_set]
       by_cases h₃ : j < i
-      · rw [ite_eq_right (by omega), ite_eq_right]
+      · rw [UDecidable.ite_eq_right (by omega), UDecidable.ite_eq_right]
         simp only [length_set] at h₁ h₃
         simpa using h.2 ⟨j, by omega⟩ h₃
       · by_cases h₃ : j = i
-        · rw [ite_eq_left (by omega), ite_eq_left, ite_eq_right]
+        · rw [UDecidable.ite_eq_left (by omega), UDecidable.ite_eq_left, UDecidable.ite_eq_right]
           · simp only [mem_take_iff_getElem, not_exists]
             intro k hk
             simpa using h.2 ⟨k, by omega⟩ (by change k < i.1; omega)
           · subst h₃
             simpa using h.1
-        · rw [ite_eq_right (by omega)]
+        · rw [UDecidable.ite_eq_right (by omega)]
           split
-          · rw [ite_eq_left]
+          · rw [UDecidable.ite_eq_left]
             · simp_all
             · simp only [mem_take_iff_getElem]
               simp only [length_set] at h₁

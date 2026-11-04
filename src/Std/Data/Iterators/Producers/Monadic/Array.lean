@@ -83,13 +83,13 @@ instance ArrayIterator.instIterator {α : Type w} [Pure m] : Iterator (ArrayIter
       it.internalState.array[it.internalState.pos] = out
     | .skip _ => False
     | .done => it.internalState.pos ≥ it.internalState.array.size
-  step it := pure <| .deflate <| if h : it.internalState.pos < it.internalState.array.size then
+  step it := pure <| .deflate <| bif h : it.internalState.pos <ᵇ it.internalState.array.size then
         .yield
           ⟨⟨it.internalState.array, it.internalState.pos + 1⟩⟩
           it.internalState.array[it.internalState.pos]
-          ⟨rfl, rfl, h, rfl⟩
+          ⟨rfl, rfl, lt_of_decideLT_eq_true h, rfl⟩
       else
-        .done (Nat.not_lt.mp h)
+        .done (Nat.not_lt.mp (decideLT_eq_false_iff.1 h))
 
 private def ArrayIterator.instFinitenessRelation [Pure m] :
     FinitenessRelation (ArrayIterator α) m where

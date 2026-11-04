@@ -40,12 +40,12 @@ variable {p q : α → Bool}
   rcases xs with ⟨xs, rfl⟩
   simp_all
 
-theorem countP_push {a : α} {xs : Vector α n} : countP p (xs.push a) = countP p xs + if p a then 1 else 0 := by
+theorem countP_push {a : α} {xs : Vector α n} : countP p (xs.push a) = countP p xs + uif p a then 1 else 0 := by
   rcases xs with ⟨xs, rfl⟩
   simp [Array.countP_push]
 
 @[grind =]
-theorem countP_singleton {a : α} : countP p #v[a] = if p a then 1 else 0 := by
+theorem countP_singleton {a : α} : countP p #v[a] = uif p a then 1 else 0 := by
   simp
 
 theorem size_eq_countP_add_countP {xs : Vector α n} : n = countP p xs + countP (fun a => ¬p a) xs := by
@@ -94,20 +94,20 @@ grind_pattern Std.Internal.Vector.not_of_countP_eq_zero_of_mem => xs.countP p, x
   rcases xs with ⟨xs, rfl⟩
   simp
 
-theorem countP_replicate {a : α} {n : Nat} : countP p (replicate n a) = if p a then n else 0 := by
+theorem countP_replicate {a : α} {n : Nat} : countP p (replicate n a) = uif p a then n else 0 := by
   simp only [replicate_eq_mk_replicate, countP_mk]
   simp [Array.countP_replicate]
 
 set_option backward.isDefEq.respectTransparency false in
 theorem boole_getElem_le_countP {p : α → Bool} {xs : Vector α n} (h : i < n) :
-    (if p xs[i] then 1 else 0) ≤ xs.countP p := by
+    (uif p xs[i] then 1 else 0) ≤ xs.countP p := by
   rcases xs with ⟨xs, rfl⟩
   simp [Array.boole_getElem_le_countP]
 
 set_option backward.isDefEq.respectTransparency false in
 @[grind =]
 theorem countP_set {p : α → Bool} {xs : Vector α n} {a : α} (h : i < n) :
-    (xs.set i a).countP p = xs.countP p - (if p xs[i] then 1 else 0) + (if p a then 1 else 0) := by
+    (xs.set i a).countP p = xs.countP p - (uif p xs[i] then 1 else 0) + (uif p a then 1 else 0) := by
   rcases xs with ⟨xs, rfl⟩
   simp [Array.countP_set]
 
@@ -158,7 +158,7 @@ variable [BEq α]
 @[simp, grind =] theorem count_empty {a : α} : count a #v[] = 0 := rfl
 
 theorem count_push {a b : α} {xs : Vector α n} :
-    count a (xs.push b) = count a xs + if b == a then 1 else 0 := by
+    count a (xs.push b) = count a xs + uif b == a then 1 else 0 := by
   rcases xs with ⟨xs, rfl⟩
   simp [Array.count_push]
 
@@ -176,7 +176,7 @@ theorem count_le_count_push {a b : α} {xs : Vector α n} : count a xs ≤ count
   rcases xs with ⟨xs, rfl⟩
   simp [Array.count_push]
 
-@[simp, grind =] theorem count_singleton {a b : α} : count a #v[b] = if b == a then 1 else 0 := by
+@[simp, grind =] theorem count_singleton {a b : α} : count a #v[b] = uif b == a then 1 else 0 := by
   simp [count_eq_countP]
 
 @[simp, grind =] theorem count_append {a : α} {xs : Vector α n} {ys : Vector α m} :
@@ -194,14 +194,14 @@ theorem count_le_count_push {a b : α} {xs : Vector α n} : count a xs ≤ count
 
 set_option backward.isDefEq.respectTransparency false in
 theorem boole_getElem_le_count {a : α} {xs : Vector α n} (h : i < n) :
-    (if xs[i] == a then 1 else 0) ≤ xs.count a := by
+    (uif xs[i] == a then 1 else 0) ≤ xs.count a := by
   rcases xs with ⟨xs, rfl⟩
   simp [Array.boole_getElem_le_count]
 
 theorem count_set {a b : α} {xs : Vector α n} (h : i < n) :
-    (xs.set i a).count b = xs.count b - (if xs[i] == b then 1 else 0) + (if a == b then 1 else 0) := by
+    (xs.set i a).count b = xs.count b - (uif xs[i] == b then 1 else 0) + (uif a == b then 1 else 0) := by
   rcases xs with ⟨xs, rfl⟩
-  simp [Array.count_set]; rfl
+  simp [Array.count_set]
 
 @[simp] theorem count_cast {xs : Vector α n} : (xs.cast h).count a = xs.count a := by
   rcases xs with ⟨xs, rfl⟩
@@ -246,7 +246,7 @@ theorem count_eq_size {xs : Vector α n} : count a xs = n ↔ ∀ b ∈ xs, a = 
   simp only [replicate_eq_mk_replicate, count_mk]
   simp
 
-theorem count_replicate {a b : α} {n : Nat} : count a (replicate n b) = if b == a then n else 0 := by
+theorem count_replicate {a b : α} {n : Nat} : count a (replicate n b) = uif b == a then n else 0 := by
   simp only [replicate_eq_mk_replicate, count_mk]
   simp [Array.count_replicate]
 
@@ -262,13 +262,13 @@ theorem count_flatMap {α} [BEq β] {xs : Vector α n} {f : α → Vector β m} 
 
 theorem countP_replace {a b : α} {xs : Vector α n} {p : α → Bool} :
     (xs.replace a b).countP p =
-      if xs.contains a then xs.countP p + (if p b then 1 else 0) - (if p a then 1 else 0) else xs.countP p := by
+      uif xs.contains a then xs.countP p + (uif p b then 1 else 0) - (uif p a then 1 else 0) else xs.countP p := by
   rcases xs with ⟨xs, rfl⟩
   simp [Array.countP_replace]
 
 theorem count_replace {a b c : α} {xs : Vector α n} :
     (xs.replace a b).count c =
-      if xs.contains a then xs.count c + (if b == c then 1 else 0) - (if a == c then 1 else 0) else xs.count c := by
+      uif xs.contains a then xs.count c + (uif b == c then 1 else 0) - (uif a == c then 1 else 0) else xs.count c := by
   simp [count_eq_countP, countP_replace]
 
 end count

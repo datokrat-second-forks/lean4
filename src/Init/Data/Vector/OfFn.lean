@@ -53,7 +53,7 @@ theorem map_ofFn {f : Fin n → α} {g : α → β} :
 theorem ofFn_succ {f : Fin (n+1) → α} :
     ofFn f = (ofFn (fun (i : Fin n) => f i.castSucc)).push (f ⟨n, by omega⟩) := by
   ext i h
-  · simp only [getElem_ofFn, getElem_push, Fin.castSucc_mk, left_eq_dite_iff]
+  · simp only [getElem_ofFn, getElem_push, Fin.castSucc_mk, UDecidable.left_eq_dite_iff]
     intro h'
     have : i = n := by omega
     simp_all

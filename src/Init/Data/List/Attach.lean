@@ -473,7 +473,7 @@ theorem attach_filterMap {l : List α} {f : α → Option β} :
 
 theorem attach_filter {l : List α} (p : α → Bool) :
     (l.filter p).attach = l.attach.filterMap
-      fun x => if w : p x.1 then some ⟨x.1, mem_filter.mpr ⟨x.2, w⟩⟩ else none := by
+      fun x => uif w : p x.1 then some ⟨x.1, mem_filter.mpr ⟨x.2, w⟩⟩ else none := by
   rw [attach_congr (congrFun filterMap_eq_filter.symm _), attach_filterMap, map_filterMap]
   simp only [Option.guard, Bool.cond_eq_ite]
   congr

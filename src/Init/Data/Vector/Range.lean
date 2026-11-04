@@ -131,12 +131,12 @@ theorem range'_eq_append_iff : range' s (n + m) = xs ++ ys ↔ xs = range' s n �
 
 @[simp, grind =]
 theorem count_range' {a s n step} (h : 0 < step := by simp) :
-    count a (range' s n step) = if ∃ i, i < n ∧ a = s + step * i then 1 else 0 := by
+    count a (range' s n step) = uif ∃ i, i < n ∧ a = s + step * i then 1 else 0 := by
   rw [range'_eq_mk_range', count_mk, ← Array.count_range' h]
 
 @[simp, grind =]
 theorem count_range_1' {a s n} :
-    count a (range' s n) = if s ≤ a ∧ a < s + n then 1 else 0 := by
+    count a (range' s n) = uif s ≤ a ∧ a < s + n then 1 else 0 := by
   rw [range'_eq_mk_range', count_mk, ← Array.count_range_1']
 
 
@@ -194,7 +194,7 @@ theorem self_mem_range_succ {n : Nat} : n ∈ range (n + 1) := by simp
 
 @[simp, grind =]
 theorem count_range {a n} :
-    count a (range n) = if a < n then 1 else 0 := by
+    count a (range n) = uif a < n then 1 else 0 := by
   rw [range_eq_range', count_range_1']
   simp
 

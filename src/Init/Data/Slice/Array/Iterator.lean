@@ -30,7 +30,7 @@ structure SubarrayIterator (α : Type u) where
 def SubarrayIterator.step :
     IterM (α := SubarrayIterator α) Id α → IterStep (IterM (α := SubarrayIterator α) m α) α
   | ⟨⟨xs⟩⟩ =>
-    if h : xs.start < xs.stop then
+    bif h : xs.start <ᵇ xs.stop then
       have := xs.start_le_stop; have := xs.stop_le_array_size
       .yield ⟨⟨xs.array, xs.start + 1, xs.stop, by omega, xs.stop_le_array_size⟩⟩ xs.array[xs.start]
     else

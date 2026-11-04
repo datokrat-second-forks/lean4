@@ -266,7 +266,7 @@ set_option linter.defProp false in
 def Iter.step_filter {f : β → Bool} :
     (it.filter f).step = match it.step with
       | .yield it' out h =>
-        if h' : f out = true then
+        uif h' : f out = true then
           .yield (it'.filter f) out (.yieldSome (out := out) h (by simp [h']))
         else
           .skip (it'.filter f) (.yieldNone h (by simp [h']))
@@ -287,7 +287,7 @@ set_option linter.defProp false in
 def Iter.val_step_filter {f : β → Bool} :
     (it.filter f).step.val = match it.step.val with
       | .yield it' out =>
-        if f out = true then
+        uif f out = true then
           .yield (it'.filter f) out
         else
           .skip (it'.filter f)
@@ -505,7 +505,7 @@ theorem Iter.forIn_filterWithPostcondition
     {g : β → γ → o (ForInStep γ)} :
     haveI : MonadLift n o := ⟨monadLift⟩
     forIn (it.filterWithPostcondition f) init g =
-      forIn it init (fun out acc => do if (← (f out).run).down then g out acc else return .yield acc) := by
+      forIn it init (fun out acc => do uif (← (f out).run).down then g out acc else return .yield acc) := by
   simp only [filterWithPostcondition, forIn_eq_forIn_toIterM, IterM.forIn_filterWithPostcondition]
   rw [instMonadLiftTOfMonadLift_instMonadLiftTOfPure]
 
@@ -515,7 +515,7 @@ theorem Iter.forIn_filterM
     [MonadLiftT n o] [LawfulMonadLiftT n o] [Finite α Id]
     [IteratorLoop α Id o] [LawfulIteratorLoop α Id o]
     {it : Iter (α := α) β} {f : β → n (ULift Bool)} {init : γ} {g : β → γ → o (ForInStep γ)} :
-    forIn (it.filterM f) init g = forIn it init (fun out acc => do if (← f out).down then g out acc else return .yield acc) := by
+    forIn (it.filterM f) init g = forIn it init (fun out acc => do uif (← f out).down then g out acc else return .yield acc) := by
   simp only [filterM, forIn_eq_forIn_toIterM, IterM.forIn_filterM]
   rw [instMonadLiftTOfMonadLift_instMonadLiftTOfPure]
 
@@ -523,7 +523,7 @@ theorem Iter.forIn_filter
     [Monad n] [LawfulMonad n]
     [Finite α Id] [IteratorLoop α Id n] [LawfulIteratorLoop α Id n]
     {it : Iter (α := α) β} {f : β → Bool} {init : γ} {g : β → γ → n (ForInStep γ)} :
-    forIn (it.filter f) init g = forIn it init (fun out acc => do if f out then g out acc else return .yield acc) := by
+    forIn (it.filter f) init g = forIn it init (fun out acc => do uif f out then g out acc else return .yield acc) := by
   simp [filter, forIn_eq_forIn_toIterM, IterM.forIn_filter]
 
 end ForIn
@@ -599,7 +599,7 @@ theorem Iter.foldM_filterWithPostcondition {α β δ : Type w}
     [MonadLiftT n o] [LawfulMonadLiftT n o]
     {f : β → PostconditionT n (ULift Bool)} {g : δ → β → o δ} {init : δ} {it : Iter (α := α) β} :
     (it.filterWithPostcondition f).foldM (init := init) g =
-      it.foldM (init := init) (fun d b => do if (← (f b).run).down then g d b else pure d) := by
+      it.foldM (init := init) (fun d b => do uif (← (f b).run).down then g d b else pure d) := by
   simp only [filterWithPostcondition, IterM.foldM_filterWithPostcondition, foldM_eq_foldM_toIterM]
   rw [instMonadLiftTOfMonadLift_instMonadLiftTOfPure]
 
@@ -613,7 +613,7 @@ theorem Iter.foldM_filterM {α β δ : Type w}
     [MonadLiftT n o] [LawfulMonadLiftT n o]
     {f : β → n (ULift Bool)} {g : δ → β → o δ} {init : δ} {it : Iter (α := α) β} :
     (it.filterM f).foldM (init := init) g =
-      it.foldM (init := init) (fun d b => do if (← f b).down then g d b else pure d) := by
+      it.foldM (init := init) (fun d b => do uif (← f b).down then g d b else pure d) := by
   simp only [filterM, IterM.foldM_filterM, foldM_eq_foldM_toIterM]
   rw [instMonadLiftTOfMonadLift_instMonadLiftTOfPure]
 
@@ -641,7 +641,7 @@ theorem Iter.foldM_filter {α β δ : Type w} {n : Type w → Type w''}
     [IteratorLoop α Id n] [LawfulIteratorLoop α Id n]
     {f : β → Bool} {g : δ → β → n δ} {init : δ} {it : Iter (α := α) β} :
     (it.filter f).foldM (init := init) g =
-      it.foldM (init := init) (fun d b => if f b then g d b else pure d) := by
+      it.foldM (init := init) (fun d b => uif f b then g d b else pure d) := by
   simp only [foldM_eq_forIn, forIn_filter]
   congr 1; ext out acc
   cases f out <;> simp
@@ -694,7 +694,7 @@ theorem Iter.fold_filterWithPostcondition {α β δ : Type w}
     [IteratorLoop α Id n] [LawfulIteratorLoop α Id n]
     {f : β → PostconditionT n (ULift Bool)} {g : δ → β → δ} {init : δ} {it : Iter (α := α) β} :
     (it.filterWithPostcondition f).fold (init := init) g =
-      it.foldM (init := init) (fun d b => return if (← (f b).run).down then g d b else d) := by
+      it.foldM (init := init) (fun d b => return uif (← (f b).run).down then g d b else d) := by
   simp [filterWithPostcondition, IterM.fold_filterWithPostcondition, foldM_eq_foldM_toIterM]
 
 theorem Iter.fold_filterM {α β δ : Type w} {n : Type w → Type w''}
@@ -703,7 +703,7 @@ theorem Iter.fold_filterM {α β δ : Type w} {n : Type w → Type w''}
     [IteratorLoop α Id n] [LawfulIteratorLoop α Id n]
     {f : β → n (ULift Bool)} {g : δ → β → δ} {init : δ} {it : Iter (α := α) β} :
     (it.filterM f).fold (init := init) g =
-      it.foldM (init := init) (fun d b => return if (← f b).down then g d b else d) := by
+      it.foldM (init := init) (fun d b => return uif (← f b).down then g d b else d) := by
   simp [filterM, IterM.fold_filterM, foldM_eq_foldM_toIterM]
 
 theorem Iter.fold_filterMap {α β γ δ : Type w}
@@ -730,7 +730,7 @@ theorem Iter.fold_filter {α β δ : Type w}
     [IteratorLoop α Id Id] [LawfulIteratorLoop α Id Id]
     {f : β → Bool} {g : δ → β → δ} {init : δ} {it : Iter (α := α) β} :
     (it.filter f).fold (init := init) g =
-      it.fold (init := init) (fun d b => if f b then g d b else d) := by
+      it.fold (init := init) (fun d b => uif f b then g d b else d) := by
   simp [filter, IterM.fold_filter, fold_eq_fold_toIterM]
 
 end Fold
@@ -803,7 +803,7 @@ theorem Iter.anyM_filterM {α β : Type w} {m : Type w → Type w'}
     [Iterator α Id β] [Finite α Id] [Monad m] [MonadAttach m] [LawfulMonad m] [WeaklyLawfulMonadAttach m]
     {it : Iter (α := α) β} {f : β → m (ULift Bool)} {p : β → m (ULift Bool)} :
     (it.filterM f).anyM p = (it.mapM (pure (f := m))).anyM (fun x => do
-        if (← f x).down then
+        uif (← f x).down then
           p x
         else
           return .up false) := by
@@ -846,7 +846,7 @@ theorem Iter.anyM_filter {α β : Type w} {m : Type → Type w'}
     [LawfulMonad m] [LawfulIteratorLoop α Id m]
     {it : Iter (α := α) β} {f : β → Bool} {p : β → m Bool} :
     (it.filter f).anyM p = it.anyM (fun x => do
-        if f x then
+        uif f x then
           p x
         else
           return false) := by
@@ -881,7 +881,7 @@ theorem Iter.any_filterM {α β : Type w} {m : Type w → Type w'}
     [Monad m] [MonadAttach m] [LawfulMonad m] [WeaklyLawfulMonadAttach m] [LawfulIteratorLoop α Id m]
     {it : Iter (α := α) β} {f : β → m (ULift Bool)} {p : β → Bool} :
     (it.filterM f).any p = (it.mapM (pure (f := m))).anyM (fun x => do
-        if (← f x).down then
+        uif (← f x).down then
           return .up (p x)
         else
           return .up false) := by
@@ -949,7 +949,7 @@ theorem Iter.allM_filterM {α β : Type w} {m : Type w → Type w'}
     [Iterator α Id β] [Finite α Id] [Monad m] [MonadAttach m] [LawfulMonad m] [WeaklyLawfulMonadAttach m]
     {it : Iter (α := α) β} {f : β → m (ULift Bool)} {p : β → m (ULift Bool)} :
     (it.filterM f).allM p = (it.mapM (pure (f := m))).allM (fun x => do
-        if (← f x).down then
+        uif (← f x).down then
           p x
         else
           return .up true) := by
@@ -992,7 +992,7 @@ theorem Iter.allM_filter {α β : Type w} {m : Type → Type w'}
     [LawfulMonad m] [LawfulIteratorLoop α Id m]
     {it : Iter (α := α) β} {f : β → Bool} {p : β → m Bool} :
     (it.filter f).allM p = it.allM (fun x => do
-        if f x then
+        uif f x then
           p x
         else
           return true) := by
@@ -1028,7 +1028,7 @@ theorem Iter.all_filterM {α β : Type w} {m : Type w → Type w'}
     [Monad m] [MonadAttach m] [LawfulMonad m] [WeaklyLawfulMonadAttach m] [LawfulIteratorLoop α Id m]
     {it : Iter (α := α) β} {f : β → m (ULift Bool)} {p : β → Bool} :
     (it.filterM f).all p = (it.mapM (pure (f := m))).allM (fun x => do
-        if (← f x).down then
+        uif (← f x).down then
           return .up (p x)
         else
           return .up true) := by

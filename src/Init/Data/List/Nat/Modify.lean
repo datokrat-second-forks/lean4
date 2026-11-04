@@ -41,7 +41,7 @@ theorem modifyHead_eq_set [Inhabited α] (f : α → α) (l : List α) :
 
 @[grind =]
 theorem getElem_modifyHead {l : List α} {f : α → α} {i} (h : i < (l.modifyHead f).length) :
-    (l.modifyHead f)[i] = if h' : i = 0 then f (l[0]'(by simp at h; omega)) else l[i]'(by simpa using h) := by
+    (l.modifyHead f)[i] = uif h' : i = 0 then f (l[0]'(by simp at h; omega)) else l[i]'(by simpa using h) := by
   cases l with
   | nil => simp at h
   | cons hd tl => cases i <;> simp
@@ -54,7 +54,7 @@ theorem getElem_modifyHead {l : List α} {f : α → α} {i} (h : i < (l.modifyH
 
 @[grind =]
 theorem getElem?_modifyHead {l : List α} {f : α → α} {i} :
-    (l.modifyHead f)[i]? = if i = 0 then l[i]?.map f else l[i]? := by
+    (l.modifyHead f)[i]? = uif i = 0 then l[i]?.map f else l[i]? := by
   cases l with
   | nil => simp
   | cons hd tl => cases i <;> simp
@@ -171,7 +171,7 @@ theorem modifyTailIdx_modifyTailIdx_self {f g : List α → List α} (i : Nat) (
 @[grind =]
 theorem modify_cons {f : α → α} {a : α} {l : List α} {i : Nat} :
     (a :: l).modify i f =
-      if i = 0 then f a :: l else a :: l.modify (i - 1) f := by
+      uif i = 0 then f a :: l else a :: l.modify (i - 1) f := by
   split <;> rename_i h
   · subst h
     simp
@@ -184,7 +184,7 @@ theorem modifyHead_eq_modify_zero (f : α → α) (l : List α) :
     l.modify i f = [] ↔ l = [] := by cases l <;> cases i <;> simp
 
 @[grind =] theorem getElem?_modify (f : α → α) :
-    ∀ i (l : List α) j, (l.modify i f)[j]? = (fun a => if i = j then f a else a) <$> l[j]?
+    ∀ i (l : List α) j, (l.modify i f)[j]? = (fun a => uif i = j then f a else a) <$> l[j]?
   | n, l, 0 => by cases l <;> cases n <;> simp
   | n, [], _+1 => by cases n <;> rfl
   | 0, _ :: l, j+1 => by cases h : l[j]? <;> simp [h, modify]
@@ -199,15 +199,15 @@ theorem modifyHead_eq_modify_zero (f : α → α) (l : List α) :
 
 @[simp] theorem getElem?_modify_eq (f : α → α) (i) (l : List α) :
     (l.modify i f)[i]? = f <$> l[i]? := by
-  simp only [getElem?_modify, ite_eq_left]
+  simp only [getElem?_modify, UDecidable.ite_eq_left]
 
 @[simp] theorem getElem?_modify_ne (f : α → α) {i j} (l : List α) (h : i ≠ j) :
     (l.modify i f)[j]? = l[j]? := by
-  simp only [getElem?_modify, ite_eq_right h, id_map']
+  simp only [getElem?_modify, UDecidable.ite_eq_right h, id_map']
 
 @[grind =] theorem getElem_modify (f : α → α) (i) (l : List α) (j) (h : j < (l.modify i f).length) :
     (l.modify i f)[j] =
-      if i = j then f (l[j]'(by simp at h; omega)) else l[j]'(by simp at h; omega) := by
+      uif i = j then f (l[j]'(by simp at h; omega)) else l[j]'(by simp at h; omega) := by
   rw [getElem_eq_iff, getElem?_modify]
   simp at h
   simp [h]
@@ -223,7 +223,7 @@ theorem modify_eq_self {f : α → α} {i} {l : List α} (h : l.length ≤ i) :
   apply ext_getElem
   · simp
   · intro m h₁ h₂
-    simp only [getElem_modify, ite_eq_right_iff]
+    simp only [getElem_modify, UDecidable.ite_eq_right_iff]
     intro h
     omega
 
@@ -294,7 +294,7 @@ theorem drop_modify_of_lt (f : α → α) (i j) (l : List α) (h : i < j) :
   apply ext_getElem
   · simp
   · intro m' h₁ h₂
-    simp only [getElem_drop, getElem_modify, ite_eq_right_iff]
+    simp only [getElem_drop, getElem_modify, UDecidable.ite_eq_right_iff]
     intro h'
     omega
 

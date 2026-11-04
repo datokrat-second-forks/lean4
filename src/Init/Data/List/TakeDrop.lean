@@ -165,7 +165,7 @@ theorem take_set {l : List α} {i j : Nat} {a : α} :
     | cons hd tl => cases j <;> simp_all
 
 theorem drop_set {l : List α} {i j : Nat} {a : α} :
-    (l.set j a).drop i = if j < i then l.drop i else (l.drop i).set (j - i) a := by
+    (l.set j a).drop i = uif j < i then l.drop i else (l.drop i).set (j - i) a := by
   induction i generalizing l j with
   | zero => simp
   | succ _ hi =>
@@ -180,7 +180,7 @@ theorem drop_set {l : List α} {i j : Nat} {a : α} :
 
 theorem set_drop {l : List α} {i j : Nat} {a : α} :
     (l.drop i).set j a = (l.set (i + j) a).drop i := by
-  rw [drop_set, ite_eq_right, add_sub_self_left]
+  rw [drop_set, UDecidable.ite_eq_right, add_sub_self_left]
   exact (Nat.not_lt).2 (le_add_right ..)
 
 theorem take_concat_get {l : List α} {i : Nat} (h : i < l.length) :
@@ -233,7 +233,7 @@ theorem take_add_one {l : List α} {i : Nat} : l.take (i + 1) = l.take i ++ l[i]
     simp only [take_nil, Option.toList, append_nil, getElem?_nil]
   | cons hd tl hl =>
     cases i
-    · simp only [take, Option.toList, nil_append, getElem?_cons, ↓reduceIte]
+    · simp only [take, Option.toList, nil_append, getElem?_cons, ↓reduceUIte]
     · simp only [take, hl, getElem?_cons_succ, cons_append]
 
 @[deprecated take_add_one (since := "2025-10-26")]
@@ -273,7 +273,7 @@ theorem drop_eq_extract {l : List α} {k : Nat} :
 /-! ### takeWhile and dropWhile -/
 
 theorem takeWhile_cons {p : α → Bool} {a : α} {l : List α} :
-    (a :: l).takeWhile p = if p a then a :: l.takeWhile p else [] := by
+    (a :: l).takeWhile p = uif p a then a :: l.takeWhile p else [] := by
   simp only [takeWhile]
   by_cases h: p a <;> simp [h]
 
@@ -286,7 +286,7 @@ theorem takeWhile_cons {p : α → Bool} {a : α} {l : List α} :
   simp [takeWhile_cons, h]
 
 theorem dropWhile_cons :
-    (x :: xs : List α).dropWhile p = if p x then xs.dropWhile p else x :: xs := by
+    (x :: xs : List α).dropWhile p = uif p x then xs.dropWhile p else x :: xs := by
   split <;> simp_all [dropWhile]
 
 @[simp] theorem dropWhile_cons_of_pos {a : α} {l : List α} (h : p a) :
@@ -389,7 +389,7 @@ theorem dropWhile_filter {p q : α → Bool} {l : List α} :
 
 theorem takeWhile_append {xs ys : List α} :
     (xs ++ ys).takeWhile p =
-      if (xs.takeWhile p).length = xs.length then xs ++ ys.takeWhile p else xs.takeWhile p := by
+      uif (xs.takeWhile p).length = xs.length then xs ++ ys.takeWhile p else xs.takeWhile p := by
   induction xs with
   | nil => simp
   | cons x xs ih =>
@@ -407,7 +407,7 @@ theorem takeWhile_append {xs ys : List α} :
 
 theorem dropWhile_append {xs ys : List α} :
     (xs ++ ys).dropWhile p =
-      if (xs.dropWhile p).isEmpty then ys.dropWhile p else xs.dropWhile p ++ ys := by
+      uif (xs.dropWhile p).isEmpty then ys.dropWhile p else xs.dropWhile p ++ ys := by
   induction xs with
   | nil => simp
   | cons _ _ ih =>
@@ -429,7 +429,7 @@ theorem dropWhile_append {xs ys : List α} :
     split <;> simp_all
 
 theorem takeWhile_replicate {p : α → Bool} :
-    (replicate n a).takeWhile p = if p a then replicate n a else [] := by
+    (replicate n a).takeWhile p = uif p a then replicate n a else [] := by
   rw [takeWhile_replicate_eq_filter, filter_replicate]
 
 @[simp] theorem dropWhile_replicate_eq_filter_not {p : α → Bool} :
@@ -441,7 +441,7 @@ theorem takeWhile_replicate {p : α → Bool} :
     split <;> simp_all
 
 theorem dropWhile_replicate {p : α → Bool} :
-    (replicate n a).dropWhile p = if p a then [] else replicate n a := by
+    (replicate n a).dropWhile p = uif p a then [] else replicate n a := by
   simp only [dropWhile_replicate_eq_filter_not, filter_replicate]
   split <;> simp_all
 

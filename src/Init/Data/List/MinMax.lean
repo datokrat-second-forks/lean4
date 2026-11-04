@@ -152,9 +152,9 @@ theorem min?_eq_some_iff_subtype [Min α] [LE α] {xs : List α}
     exact ⟨ha, h⟩
 
 theorem min?_replicate [Min α] [Std.IdempotentOp (min : α → α → α)] {n : Nat} {a : α} :
-    (replicate n a).min? = if n = 0 then none else some a := by
+    (replicate n a).min? = uif n = 0 then none else some a := by
   induction n with
-  | zero => rfl
+  | zero => simp
   | succ n ih => cases n <;> simp_all [replicate_succ, min?_cons', Std.IdempotentOp.idempotent]
 
 @[simp, grind =]
@@ -375,9 +375,9 @@ theorem max?_eq_some_iff_legacy [Max α] [LE α] [anti : Std.Antisymm (· ≤ ·
   apply max?_eq_some_iff
 
 theorem max?_replicate [Max α] [Std.IdempotentOp (max : α → α → α)] {n : Nat} {a : α} :
-    (replicate n a).max? = if n = 0 then none else some a := by
+    (replicate n a).max? = uif n = 0 then none else some a := by
   induction n with
-  | zero => rfl
+  | zero => simp
   | succ n ih => cases n <;> simp_all [replicate_succ, max?_cons', Std.IdempotentOp.idempotent]
 
 @[simp, grind =]

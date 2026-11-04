@@ -435,7 +435,7 @@ example (as bs cs : Array α) (v₁ v₂ : α)
     repeat instantiate only [= Array.getElem_set]
 
 /--
-trace: [grind.ematch.instance] Array.getElem_set: (as.set i₁ v₁ ⋯)[j] = if i₁ = j then v₁ else as[j]
+trace: [grind.ematch.instance] Array.getElem_set: (as.set i₁ v₁ ⋯)[j] = uif i₁ = j then v₁ else as[j]
 -/
 #guard_msgs in
 example (as bs cs : Array α) (v₁ v₂ : α)

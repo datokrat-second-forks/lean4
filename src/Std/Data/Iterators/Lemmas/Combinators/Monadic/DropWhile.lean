@@ -47,7 +47,7 @@ theorem IterM.step_intermediateDropWhileWithPostcondition {α m β} [Monad m] [I
     (IterM.Intermediate.dropWhileWithPostcondition P dropping it).step = (do
     match (← it.step).inflate with
     | .yield it' out h =>
-      if h' : dropping = true then
+      uif h' : dropping = true then
         match ← (P out).operation with
         | ⟨.up true, h''⟩ =>
           return .deflate <| .skip (IterM.Intermediate.dropWhileWithPostcondition P true it') (.dropped h h' h'')
@@ -87,7 +87,7 @@ theorem IterM.step_intermediateDropWhileM {α m β} [Monad m] [MonadAttach m] [L
     (IterM.Intermediate.dropWhileM P dropping it).step = (do
     match (← it.step).inflate with
     | .yield it' out h =>
-      if h' : dropping = true then
+      uif h' : dropping = true then
         match ← MonadAttach.attach (P out) with
         | ⟨.up true, hP⟩ =>
           return .deflate <| .skip (IterM.Intermediate.dropWhileM P true it') (.dropped h h' hP)
@@ -135,7 +135,7 @@ theorem IterM.step_intermediateDropWhile {α m β} [Monad m] [LawfulMonad m] [It
     (IterM.Intermediate.dropWhile P dropping it).step = (do
     match (← it.step).inflate with
     | .yield it' out h =>
-      if h' : dropping = true then
+      uif h' : dropping = true then
         match hP : P out with
         | true =>
           return .deflate <| .skip (IterM.Intermediate.dropWhile P true it') (.dropped h h' (by simpa))

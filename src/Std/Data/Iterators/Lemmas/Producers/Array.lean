@@ -39,7 +39,7 @@ theorem Array.iterFromIdx_eq_toIter_iterFromIdxM {array : Array β} {pos : Nat} 
   rfl
 
 theorem Array.step_iterFromIdx {array : Array β} {pos : Nat} :
-    (array.iterFromIdx pos).step = if h : pos < array.size then
+    (array.iterFromIdx pos).step = uif h : pos < array.size then
         .yield
           (array.iterFromIdx (pos + 1))
           array[pos]
@@ -51,7 +51,7 @@ theorem Array.step_iterFromIdx {array : Array β} {pos : Nat} :
   split <;> rfl
 
 theorem Array.step_iter {array : Array β} :
-    array.iter.step = if h : 0 < array.size then
+    array.iter.step = uif h : 0 < array.size then
         .yield
           (array.iterFromIdx 1)
           array[0]

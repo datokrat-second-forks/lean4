@@ -59,9 +59,9 @@ theorem size_extract_of_le {as : Array α} {i j : Nat} (h : j ≤ as.size) :
 @[grind =]
 theorem extract_push {as : Array α} {b : α} {start stop : Nat} :
     (as.push b).extract start stop =
-      if stop ≤ as.size then
+      uif stop ≤ as.size then
         as.extract start stop
-      else if start ≤ as.size then
+      else uif start ≤ as.size then
         (as.extract start as.size).push b
       else #[] := by
   split
@@ -70,7 +70,7 @@ theorem extract_push {as : Array α} {b : α} {start stop : Nat} :
       omega
     · simp only [size_extract, size_push] at h₁ h₂
       simp only [getElem_extract, getElem_push]
-      rw [dite_eq_left (by omega)]
+      rw [UDecidable.dite_eq_left (by omega)]
   · split
     · ext i h₁ h₂
       · simp
@@ -94,7 +94,7 @@ theorem extract_push {as : Array α} {b : α} {start stop : Nat} :
 @[simp]
 theorem extract_push_of_le {as : Array α} {b : α} {start stop : Nat} (h : stop ≤ as.size) :
     (as.push b).extract start stop = as.extract start stop := by
-  rw [extract_push, ite_eq_left h]
+  rw [extract_push, UDecidable.ite_eq_left h]
 
 @[simp, grind =]
 theorem extract_eq_pop {as : Array α} {stop : Nat} (h : stop = as.size - 1) :
@@ -231,9 +231,9 @@ theorem ne_empty_of_extract_ne_empty {as : Array α} {i j : Nat} (h : as.extract
 @[grind =]
 theorem extract_set {as : Array α} {i j k : Nat} (h : k < as.size) {a : α} :
     (as.set k a).extract i j =
-      if _ : k < i then
+      uif _ : k < i then
         as.extract i j
-      else if _ : k < min j as.size then
+      else uif _ : k < min j as.size then
         (as.extract i j).set (k - i) a (by simp; omega)
       else as.extract i j := by
   split
@@ -247,8 +247,8 @@ theorem extract_set {as : Array α} {i j k : Nat} (h : k < as.size) {a : α} :
       · simp
       · simp only [getElem_extract, getElem_set]
         split
-        · rw [ite_eq_left]; omega
-        · rw [ite_eq_right]; omega
+        · rw [UDecidable.ite_eq_left]; omega
+        · rw [UDecidable.ite_eq_right]; omega
     · ext l h₁ h₂
       · simp
       · simp at h₁ h₂
@@ -398,7 +398,7 @@ theorem popWhile_filter {p q : α → Bool} {as : Array α} :
 
 theorem takeWhile_append {xs ys : Array α} :
     (xs ++ ys).takeWhile p =
-      if (xs.takeWhile p).size = xs.size then xs ++ ys.takeWhile p else xs.takeWhile p := by
+      uif (xs.takeWhile p).size = xs.size then xs ++ ys.takeWhile p else xs.takeWhile p := by
   rcases xs with ⟨xs⟩
   rcases ys with ⟨ys⟩
   simp only [List.append_toArray, List.takeWhile_toArray, List.takeWhile_append, List.size_toArray]
@@ -413,7 +413,7 @@ theorem takeWhile_append {xs ys : Array α} :
 
 theorem popWhile_append {xs ys : Array α} :
     (xs ++ ys).popWhile p =
-      if (ys.popWhile p).isEmpty then xs.popWhile p else xs ++ ys.popWhile p := by
+      uif (ys.popWhile p).isEmpty then xs.popWhile p else xs ++ ys.popWhile p := by
   rcases xs with ⟨xs⟩
   rcases ys with ⟨ys⟩
   simp only [List.append_toArray, List.popWhile_toArray, List.reverse_append, List.dropWhile_append,
@@ -437,7 +437,7 @@ theorem popWhile_append {xs ys : Array α} :
   simp [← List.toArray_replicate]
 
 theorem takeWhile_replicate {p : α → Bool} :
-    (replicate n a).takeWhile p = if p a then replicate n a else #[] := by
+    (replicate n a).takeWhile p = uif p a then replicate n a else #[] := by
   simp [takeWhile_replicate_eq_filter, filter_replicate]
 
 @[simp] theorem popWhile_replicate_eq_filter_not {p : α → Bool} :
@@ -445,7 +445,7 @@ theorem takeWhile_replicate {p : α → Bool} :
   simp [← List.toArray_replicate, ← List.filter_reverse]
 
 theorem popWhile_replicate {p : α → Bool} :
-    (replicate n a).popWhile p = if p a then #[] else replicate n a := by
+    (replicate n a).popWhile p = uif p a then #[] else replicate n a := by
   simp only [popWhile_replicate_eq_filter_not, size_replicate, filter_replicate, Bool.not_eq_eq_eq_not,
     Bool.not_true]
   split <;> simp_all

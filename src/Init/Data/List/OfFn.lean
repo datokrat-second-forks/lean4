@@ -63,13 +63,13 @@ protected theorem getElem_ofFn {f : Fin n → α} (h : i < (ofFn f).length) :
 
 @[simp, grind =]
 protected theorem getElem?_ofFn {f : Fin n → α} :
-    (ofFn f)[i]? = if h : i < n then some (f ⟨i, h⟩) else none :=
+    (ofFn f)[i]? = uif h : i < n then some (f ⟨i, h⟩) else none :=
   if h : i < (ofFn f).length
   then by
     rw [getElem?_eq_getElem h, List.getElem_ofFn]
     · simp only [length_ofFn] at h; simp [h]
   else by
-    rw [dite_eq_right] <;>
+    rw [UDecidable.dite_eq_right] <;>
     simpa using h
 
 /-- `ofFn` on an empty domain is the empty list. -/

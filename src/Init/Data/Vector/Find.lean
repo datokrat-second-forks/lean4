@@ -137,7 +137,7 @@ theorem getElem_zero_flatten {xss : Vector (Vector α m) n} (h : 0 < n * m) :
   simp [← t]
 
 @[grind =]
-theorem findSome?_replicate : findSome? f (replicate n a) = if n = 0 then none else f a := by
+theorem findSome?_replicate : findSome? f (replicate n a) = uif n = 0 then none else f a := by
   rw [replicate_eq_mk_replicate, findSome?_mk, Array.findSome?_replicate]
 
 @[simp] theorem findSome?_replicate_of_pos (h : 0 < n) : findSome? f (replicate n a) = f a := by
@@ -145,7 +145,7 @@ theorem findSome?_replicate : findSome? f (replicate n a) = if n = 0 then none e
 
 -- Argument is unused, but used to decide whether `simp` should unfold.
 @[simp] theorem findSome?_replicate_of_isSome (_ : (f a).isSome) :
-   findSome? f (replicate n a) = if n = 0 then none else f a := by
+   findSome? f (replicate n a) = uif n = 0 then none else f a := by
   simp [findSome?_replicate]
 
 @[simp] theorem findSome?_replicate_of_isNone (h : (f a).isNone) :
@@ -259,15 +259,15 @@ theorem find?_flatMap_eq_none_iff {xs : Vector α n} {f : α → Vector β m} {p
 
 @[grind =]
 theorem find?_replicate :
-    find? p (replicate n a) = if n = 0 then none else if p a then some a else none := by
+    find? p (replicate n a) = uif n = 0 then none else uif p a then some a else none := by
   rw [replicate_eq_mk_replicate, find?_mk, Array.find?_replicate]
 
 @[simp] theorem find?_replicate_of_size_pos (h : 0 < n) :
-    find? p (replicate n a) = if p a then some a else none := by
+    find? p (replicate n a) = uif p a then some a else none := by
   simp [find?_replicate, Nat.ne_of_gt h]
 
 @[simp] theorem find?_replicate_of_pos (h : p a) :
-    find? p (replicate n a) = if n = 0 then none else some a := by
+    find? p (replicate n a) = uif n = 0 then none else some a := by
   simp [find?_replicate, h]
 
 @[simp] theorem find?_replicate_of_neg (h : ¬ p a) : find? p (replicate n a) = none := by
@@ -307,7 +307,7 @@ theorem findFinIdx?_empty {p : α → Bool} : findFinIdx? p (#v[] : Vector α 0)
 
 @[grind =]
 theorem findFinIdx?_singleton {a : α} {p : α → Bool} :
-    #[a].findFinIdx? p = if p a then some ⟨0, by simp⟩ else none := by
+    #[a].findFinIdx? p = uif p a then some ⟨0, by simp⟩ else none := by
   simp
 
 @[congr] theorem findFinIdx?_congr {p : α → Bool} {xs : Vector α n} {ys : Vector α n} (w : xs = ys) :
@@ -323,7 +323,7 @@ theorem findFinIdx?_singleton {a : α} {p : α → Bool} :
 @[grind =]
 theorem findFinIdx?_push {xs : Vector α n} {a : α} {p : α → Bool} :
     (xs.push a).findFinIdx? p =
-      ((xs.findFinIdx? p).map Fin.castSucc).or (if p a then some ⟨n, by simp⟩ else none) := by
+      ((xs.findFinIdx? p).map Fin.castSucc).or (uif p a then some ⟨n, by simp⟩ else none) := by
   rcases xs with ⟨xs, rfl⟩
   simp [Array.findFinIdx?_push, Option.map_or, Function.comp_def]
   congr

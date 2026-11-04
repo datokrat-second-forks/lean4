@@ -37,7 +37,7 @@ grind_pattern eraseIdx_eq_take_drop_succ => xs.eraseIdx i h, xs.drop i
 
 @[grind =]
 theorem getElem?_eraseIdx {xs : Vector α n} {i : Nat} (h : i < n) {j : Nat} :
-    (xs.eraseIdx i)[j]? = if j < i then xs[j]? else xs[j + 1]? := by
+    (xs.eraseIdx i)[j]? = uif j < i then xs[j]? else xs[j + 1]? := by
   rcases xs with ⟨xs, rfl⟩
   simp [Array.getElem?_eraseIdx]
 
@@ -49,13 +49,13 @@ theorem getElem?_eraseIdx_of_lt {xs : Vector α n} {i : Nat} (h : i < n) {j : Na
 theorem getElem?_eraseIdx_of_ge {xs : Vector α n} {i : Nat} (h : i < n) {j : Nat} (h' : i ≤ j) :
     (xs.eraseIdx i)[j]? = xs[j + 1]? := by
   rw [getElem?_eraseIdx]
-  simp only [ite_eq_right_iff]
+  simp only [UDecidable.ite_eq_right_iff]
   intro h'
   omega
 
 @[grind =]
 theorem getElem_eraseIdx {xs : Vector α n} {i : Nat} (h : i < n) {j : Nat} (h' : j < n - 1) :
-    (xs.eraseIdx i)[j] = if h'' : j < i then xs[j] else xs[j + 1] := by
+    (xs.eraseIdx i)[j] = uif h'' : j < i then xs[j] else xs[j + 1] := by
   apply Option.some.inj
   rw [← getElem?_eq_getElem, getElem?_eraseIdx]
   split <;> simp
@@ -82,7 +82,7 @@ theorem eraseIdx_append_of_length_le {xs : Vector α n} {k : Nat} (hk : n ≤ k)
 
 @[grind =]
 theorem eraseIdx_append {xs : Vector α n} {ys : Vector α m} {k : Nat} (h : k < n + m) :
-    eraseIdx (xs ++ ys) k = if h' : k < n then (eraseIdx xs k ++ ys).cast (by omega) else (xs ++ eraseIdx ys (k - n) (by omega)).cast (by omega) := by
+    eraseIdx (xs ++ ys) k = uif h' : k < n then (eraseIdx xs k ++ ys).cast (by omega) else (xs ++ eraseIdx ys (k - n) (by omega)).cast (by omega) := by
   rcases xs with ⟨xs, rfl⟩
   rcases ys with ⟨ys, rfl⟩
   simp only [mk_append_mk, eraseIdx_mk, Array.eraseIdx_append]
@@ -136,9 +136,9 @@ theorem eraseIdx_set_gt {xs : Vector α n} {i : Nat} {j : Nat} {a : α} (h : i <
 @[grind =]
 theorem eraseIdx_set {xs : Vector α n} {i : Nat} {a : α} {hi : i < n} {j : Nat} {hj : j < n} :
     (xs.set i a).eraseIdx j =
-      if h' : j < i then
+      uif h' : j < i then
         (xs.eraseIdx j).set (i - 1) a
-      else if h'' : j = i then
+      else uif h'' : j = i then
         xs.eraseIdx i
       else
         (xs.eraseIdx j).set i a := by
@@ -162,7 +162,7 @@ theorem set_eraseIdx_gt {xs : Vector α n} {i : Nat} {w : i < n} {j : Nat} {a : 
 @[grind =]
 theorem set_eraseIdx {xs : Vector α n} {i : Nat} {w : i < n} {j : Nat} {a : α} (hj : j < n - 1) :
     (xs.eraseIdx i).set j a =
-      if h' : i ≤ j then
+      uif h' : i ≤ j then
         (xs.set (j + 1) a).eraseIdx i
       else
         (xs.set j a).eraseIdx i := by

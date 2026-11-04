@@ -17,7 +17,7 @@ theorem countP_cons_of_pos {l} (pa : p a) : countP p (a :: l) = countP p l + 1 :
 theorem countP_cons_of_neg {l} (pa : ¬p a) : countP p (a :: l) = countP p l := by
   grind
 
-theorem countP_cons {a : α} {l : List α} : countP p (a :: l) = countP p l + if p a then 1 else 0 := List.countP_cons -- This is already a grind lemma
+theorem countP_cons {a : α} {l : List α} : countP p (a :: l) = countP p l + uif p a then 1 else 0 := List.countP_cons -- This is already a grind lemma
 
 theorem countP_singleton {a : α} : countP p [a] = if p a then 1 else 0 := by grind
 

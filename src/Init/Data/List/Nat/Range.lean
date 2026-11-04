@@ -43,15 +43,15 @@ open Nat
     fun ⟨h₁, h₂⟩ => ⟨m - s, Nat.sub_lt_left_of_lt_add h₁ h₂, (Nat.add_sub_cancel' h₁).symm⟩⟩
 
 @[grind =]
-theorem getLast?_range' {n : Nat} : (range' s n).getLast? = if n = 0 then none else some (s + n - 1) := by
+theorem getLast?_range' {n : Nat} : (range' s n).getLast? = uif n = 0 then none else some (s + n - 1) := by
   induction n generalizing s with
   | zero => simp
   | succ n ih =>
     rw [range'_succ, getLast?_cons, ih]
     by_cases h : n = 0
-    · rw [ite_eq_left h]
+    · rw [UDecidable.ite_eq_left h]
       simp [h]
-    · rw [ite_eq_right h]
+    · rw [UDecidable.ite_eq_right h]
       simp
 
 @[simp, grind =] theorem getLast_range' {n : Nat} (h) : (range' s n).getLast h = s + n - 1 := by
@@ -167,19 +167,19 @@ theorem erase_range' :
 
 @[simp, grind =]
 theorem count_range' {a s n step} (h : 0 < step := by simp) :
-    count a (range' s n step) = if ∃ i, i < n ∧ a = s + step * i then 1 else 0 := by
+    count a (range' s n step) = uif ∃ i, i < n ∧ a = s + step * i then 1 else 0 := by
   rw [(nodup_range' step h).count]
   simp only [mem_range']
 
 @[simp, grind =]
 theorem count_range_1' {a s n} :
-    count a (range' s n) = if s ≤ a ∧ a < s + n then 1 else 0 := by
+    count a (range' s n) = uif s ≤ a ∧ a < s + n then 1 else 0 := by
   rw [count_range' (by simp)]
   split <;> rename_i h
   · obtain ⟨i, h, rfl⟩ := h
     simp [h]
   · simp at h
-    rw [ite_eq_right]
+    rw [UDecidable.ite_eq_right]
     simp only [not_and, Nat.not_lt]
     intro w
     specialize h (a - s)
@@ -275,7 +275,7 @@ theorem erase_range : (range n).erase i = range (min n i) ++ range' (i + 1) (n -
 
 @[simp, grind =]
 theorem count_range {a n} :
-    count a (range n) = if a < n then 1 else 0 := by
+    count a (range n) = uif a < n then 1 else 0 := by
   rw [range_eq_range', count_range_1']
   simp
 

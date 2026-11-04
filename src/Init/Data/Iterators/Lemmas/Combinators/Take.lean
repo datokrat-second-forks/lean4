@@ -52,7 +52,7 @@ theorem Iter.step_take {α β} [Iterator α Id β] {n : Nat}
 theorem Iter.atIdxSlow?_take {α β}
     [Iterator α Id β] [Productive α Id] {k l : Nat}
     {it : Iter (α := α) β} :
-    (it.take k).atIdxSlow? l = if l < k then it.atIdxSlow? l else none := by
+    (it.take k).atIdxSlow? l = uif l < k then it.atIdxSlow? l else none := by
   induction l, it using Iter.atIdxSlow?.induct_unfolding generalizing k
   case yield_zero it it' out h h' =>
     simp only [atIdxSlow?_eq_match (it := it.take k), step_take, h']

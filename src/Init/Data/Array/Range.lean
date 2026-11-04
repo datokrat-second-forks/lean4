@@ -83,8 +83,8 @@ theorem range'_append {s m n step : Nat} :
   ext i h₁ h₂
   · simp
   · simp only [size_append, size_range'] at h₁ h₂
-    simp only [getElem_append, size_range', getElem_range', Nat.mul_sub_left_distrib, dite_eq_ite,
-      ite_eq_left_iff, Nat.not_lt]
+    simp only [getElem_append, size_range', getElem_range', Nat.mul_sub_left_distrib, UDecidable.dite_eq_ite,
+      UDecidable.ite_eq_left_iff, Nat.not_lt]
     intro h
     have : step * m ≤ step * i := by exact mul_le_mul_left step h
     omega
@@ -138,12 +138,12 @@ theorem erase_range' :
 
 @[simp, grind =]
 theorem count_range' {a s n step} (h : 0 < step := by simp) :
-    count a (range' s n step) = if ∃ i, i < n ∧ a = s + step * i then 1 else 0 := by
+    count a (range' s n step) = uif ∃ i, i < n ∧ a = s + step * i then 1 else 0 := by
   rw [← List.toArray_range', List.count_toArray, ← List.count_range' h]
 
 @[simp, grind =]
 theorem count_range_1' {a s n} :
-    count a (range' s n) = if s ≤ a ∧ a < s + n then 1 else 0 := by
+    count a (range' s n) = uif s ≤ a ∧ a < s + n then 1 else 0 := by
   rw [← List.toArray_range', List.count_toArray, ← List.count_range_1']
 
 /-! ### range -/
@@ -159,7 +159,7 @@ theorem range_succ_eq_map {n : Nat} : range (n + 1) = #[0] ++ map succ (range n)
     omega
   · simp only [getElem_range, getElem_append, List.size_toArray, List.length_cons, List.length_nil,
       Nat.zero_add, lt_one_iff, List.getElem_toArray, List.getElem_singleton, getElem_map,
-      succ_eq_add_one, dite_eq_ite]
+      succ_eq_add_one]
     split <;> omega
 
 theorem range'_eq_map_range {s n : Nat} : range' s n = map (s + ·) (range n) := by
@@ -176,8 +176,7 @@ theorem range_succ {n : Nat} : range (succ n) = range n ++ #[n] := by
   ext i h₁ h₂
   · simp
   · simp only [succ_eq_add_one, size_range] at h₁
-    simp only [succ_eq_add_one, getElem_range, append_singleton, getElem_push, size_range,
-      dite_eq_ite]
+    simp only [succ_eq_add_one, getElem_range, append_singleton, getElem_push, size_range]
     split <;> omega
 
 theorem range_add {n m : Nat} : range (n + m) = range n ++ (range m).map (n + ·) := by
@@ -212,7 +211,7 @@ theorem erase_range : (range n).erase i = range (min n i) ++ range' (i + 1) (n -
 
 @[simp, grind =]
 theorem count_range {a n} :
-    count a (range n) = if a < n then 1 else 0 := by
+    count a (range n) = uif a < n then 1 else 0 := by
   rw [← List.toArray_range, List.count_toArray, ← List.count_range]
 
 /-! ### zipIdx -/

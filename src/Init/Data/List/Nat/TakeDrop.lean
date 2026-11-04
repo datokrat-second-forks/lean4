@@ -66,35 +66,35 @@ theorem getElem?_take_eq_none {l : List α} {i j : Nat} (h : i ≤ j) :
   getElem?_eq_none <| Nat.le_trans (length_take_le _ _) h
 
 @[grind =] theorem getElem?_take {l : List α} {i j : Nat} :
-    (l.take i)[j]? = if j < i then l[j]? else none := by
+    (l.take i)[j]? = uif j < i then l[j]? else none := by
   split
   next h => exact getElem?_take_of_lt h
   next h => exact getElem?_take_eq_none (Nat.le_of_not_lt h)
 
 theorem head?_take {l : List α} {i : Nat} :
-    (l.take i).head? = if i = 0 then none else l.head? := by
+    (l.take i).head? = uif i = 0 then none else l.head? := by
   simp [head?_eq_getElem?, getElem?_take]
   split
-  · rw [ite_eq_right (by omega)]
-  · rw [ite_eq_left (by omega)]
+  · rw [UDecidable.ite_eq_right (by omega)]
+  · rw [UDecidable.ite_eq_left (by omega)]
 
 theorem head_take {l : List α} {i : Nat} (h : l.take i ≠ []) :
     (l.take i).head h = l.head (by simp_all) := by
   apply Option.some_inj.1
-  rw [← head?_eq_some_head, ← head?_eq_some_head, head?_take, ite_eq_right]
+  rw [← head?_eq_some_head, ← head?_eq_some_head, head?_take, UDecidable.ite_eq_right]
   simp_all
 
-theorem getLast?_take {l : List α} : (l.take i).getLast? = if i = 0 then none else l[i - 1]?.or l.getLast? := by
+theorem getLast?_take {l : List α} : (l.take i).getLast? = uif i = 0 then none else l[i - 1]?.or l.getLast? := by
   rw [getLast?_eq_getElem?, getElem?_take, length_take]
   split
-  · rw [ite_eq_right (by omega)]
+  · rw [UDecidable.ite_eq_right (by omega)]
     rw [Nat.min_def]
     split
     · rw [getElem?_eq_getElem (by omega)]
       simp
     · rw [← getLast?_eq_getElem?, getElem?_eq_none (by omega)]
       simp
-  · rw [ite_eq_left]
+  · rw [UDecidable.ite_eq_left]
     omega
 
 theorem getLast_take {l : List α} (h : l.take i ≠ []) :
@@ -289,7 +289,7 @@ theorem mem_drop_iff_getElem {l : List α} {a : α} :
   have w : i < l.length := length_lt_of_drop_ne_nil h
   simp [w, head_eq_iff_head?_eq_some]
 
-theorem getLast?_drop {l : List α} : (l.drop i).getLast? = if l.length ≤ i then none else l.getLast? := by
+theorem getLast?_drop {l : List α} : (l.drop i).getLast? = uif l.length ≤ i then none else l.getLast? := by
   rw [getLast?_eq_getElem?, getElem?_drop]
   rw [length_drop]
   split
@@ -302,7 +302,7 @@ theorem getLast?_drop {l : List α} : (l.drop i).getLast? = if l.length ≤ i th
     (l.drop i).getLast h = l.getLast (ne_nil_of_length_pos (by simp at h; omega)) := by
   simp only [ne_eq, drop_eq_nil_iff] at h
   apply Option.some_inj.1
-  simp only [← getLast?_eq_some_getLast, getLast?_drop, ite_eq_right_iff]
+  simp only [← getLast?_eq_some_getLast, getLast?_drop, UDecidable.ite_eq_right_iff]
   omega
 
 theorem drop_length_cons {l : List α} (h : l ≠ []) (a : α) :
@@ -346,7 +346,7 @@ theorem drop_length_add_append {l₁ l₂ : List α} (i : Nat) : drop (l₁.leng
     simp [Nat.add_sub_cancel_left, Nat.le_add_right]
 
 theorem set_eq_take_append_cons_drop {l : List α} {i : Nat} {a : α} :
-    l.set i a = if i < l.length then l.take i ++ a :: l.drop (i + 1) else l := by
+    l.set i a = uif i < l.length then l.take i ++ a :: l.drop (i + 1) else l := by
   split <;> rename_i h
   · ext1 j
     by_cases h' : j < i

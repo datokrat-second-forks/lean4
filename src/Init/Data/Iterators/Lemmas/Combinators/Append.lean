@@ -119,7 +119,7 @@ theorem Iter.atIdxSlow?_append {α₁ α₂ β : Type w}
     [Iterator α₁ Id β] [Iterator α₂ Id β] [Finite α₁ Id] [Productive α₂ Id]
     {it₁ : Iter (α := α₁) β} {it₂ : Iter (α := α₂) β} {n : Nat} :
     (it₁.append it₂).atIdxSlow? n =
-      if n < it₁.toList.length then it₁.atIdxSlow? n
+      uif n < it₁.toList.length then it₁.atIdxSlow? n
       else it₂.atIdxSlow? (n - it₁.toList.length) := by
   induction n, it₁ using Iter.atIdxSlow?.induct_unfolding generalizing it₂ with
   | yield_zero it it' out h h' =>

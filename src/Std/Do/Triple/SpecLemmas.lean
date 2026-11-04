@@ -1422,7 +1422,7 @@ theorem Spec.IterM.forIn_filterWithPostcondition {m β ps}
     {g : β → γ → o (ForInStep γ)} {P Q}
     (h :
         haveI : MonadLift n o := ⟨monadLift⟩
-        Triple (forIn (m := o) it init (fun out acc => do if (← (f out).run).down then g out acc else return .yield acc)) P Q) :
+        Triple (forIn (m := o) it init (fun out acc => do uif (← (f out).run).down then g out acc else return .yield acc)) P Q) :
     Triple (forIn (it.filterWithPostcondition f) init g) P Q := by
   rwa [Std.IterM.forIn_filterWithPostcondition]
 
@@ -1436,7 +1436,7 @@ theorem Spec.IterM.forIn_filterM {m β ps}
     {it : IterM (α := α) m β} {f : β → n (ULift Bool)} {init : γ} {g : β → γ → o (ForInStep γ)} {P Q}
     (h :
         haveI : MonadLift n o := ⟨monadLift⟩
-        Triple (forIn (m := o) it init (fun out acc => do if (← f out).down then g out acc else return .yield acc)) P Q):
+        Triple (forIn (m := o) it init (fun out acc => do uif (← f out).down then g out acc else return .yield acc)) P Q):
     Triple (forIn (it.filterM f) init g) P Q := by
   rwa [Std.IterM.forIn_filterM]
 
@@ -1446,7 +1446,7 @@ theorem Spec.IterM.forIn_filter {m β ps}
     [MonadLiftT m n] [LawfulMonadLiftT m n]
     [Iterator α m β] [Finite α m] [IteratorLoop α m n] [LawfulIteratorLoop α m n]
     {it : IterM (α := α) m β} {f : β → Bool} {init : γ} {g : β → γ → n (ForInStep γ)} {P Q}
-    (h : Triple (forIn (m := n) it init (fun out acc => do if f out then g out acc else return .yield acc)) P Q) :
+    (h : Triple (forIn (m := n) it init (fun out acc => do uif f out then g out acc else return .yield acc)) P Q) :
     Triple (forIn (it.filter f) init g) P Q := by
   rwa [Std.IterM.forIn_filter]
 
@@ -1529,7 +1529,7 @@ theorem Spec.IterM.foldM_filterWithPostcondition {α β δ : Type w} {ps}
     {f : β → PostconditionT n (ULift Bool)} {g : δ → β → o δ} {init : δ} {it : IterM (α := α) m β} {P Q}
     (h :
         haveI : MonadLift n o := ⟨MonadLiftT.monadLift⟩
-        Triple (it.foldM (n := o) (init := init) (fun d b => do if (← (f b).run).down then g d b else Pure.pure d)) P Q):
+        Triple (it.foldM (n := o) (init := init) (fun d b => do uif (← (f b).run).down then g d b else Pure.pure d)) P Q):
     Triple ((it.filterWithPostcondition f).foldM (init := init) g) P Q := by
   rwa [Std.IterM.foldM_filterWithPostcondition]
 
@@ -1546,7 +1546,7 @@ theorem Spec.IterM.foldM_filterM {α β δ : Type w} {ps}
     {f : β → n (ULift Bool)} {g : δ → β → o δ} {init : δ} {it : IterM (α := α) m β} {P Q}
     (h :
         haveI : MonadLift n o := ⟨MonadLiftT.monadLift⟩
-        Triple (it.foldM (n := o) (init := init) (fun d b => do if (← f b).down then g d b else Pure.pure d)) P Q) :
+        Triple (it.foldM (n := o) (init := init) (fun d b => do uif (← f b).down then g d b else Pure.pure d)) P Q) :
     Triple ((it.filterM f).foldM (init := init) g) P Q := by
   rwa [Std.IterM.foldM_filterM]
 
@@ -1580,7 +1580,7 @@ theorem Spec.IterM.foldM_filter {α β δ : Type w} {m : Type w → Type w'} {n 
     [LawfulIteratorLoop α m n]
     [MonadLiftT m n] [LawfulMonadLiftT m n]
     {f : β → Bool} {g : δ → β → n δ} {init : δ} {it : IterM (α := α) m β} {P Q}
-    (h : Triple (it.foldM (init := init) (fun d b => if f b then g d b else Pure.pure d)) P Q) :
+    (h : Triple (it.foldM (init := init) (fun d b => uif f b then g d b else Pure.pure d)) P Q) :
     Triple ((it.filter f).foldM (init := init) g) P Q := by
   rwa [Std.IterM.foldM_filter]
 
@@ -1647,7 +1647,7 @@ theorem Spec.IterM.fold_filterWithPostcondition {α β δ : Type w} {m : Type w 
     [IteratorLoop α m n] [LawfulIteratorLoop α m n]
     [MonadLiftT m n] [LawfulMonadLiftT m n]
     {f : β → PostconditionT n (ULift Bool)} {g : δ → β → δ} {init : δ} {it : IterM (α := α) m β} {P Q}
-    (h : Triple (it.foldM (init := init) (fun d b => return if (← (f b).run).down then g d b else d)) P Q) :
+    (h : Triple (it.foldM (init := init) (fun d b => return uif (← (f b).run).down then g d b else d)) P Q) :
     Triple ((it.filterWithPostcondition f).fold (init := init) g) P Q := by
   rwa [Std.IterM.fold_filterWithPostcondition]
 
@@ -1659,7 +1659,7 @@ theorem Spec.IterM.fold_filterM {α β δ : Type w} {m : Type w → Type w'} {n 
     [IteratorLoop α m n] [LawfulIteratorLoop α m n]
     [MonadLiftT m n] [LawfulMonadLiftT m n]
     {f : β → n (ULift Bool)} {g : δ → β → δ} {init : δ} {it : IterM (α := α) m β} {P Q}
-    (h : Triple (it.foldM (init := init) (fun d b => return if (← f b).down then g d b else d)) P Q) :
+    (h : Triple (it.foldM (init := init) (fun d b => return uif (← f b).down then g d b else d)) P Q) :
     Triple ((it.filterM f).fold (init := init) g) P Q := by
   rwa [Std.IterM.fold_filterM]
 
@@ -1689,7 +1689,7 @@ theorem Spec.IterM.fold_filter {α β δ : Type w} {m : Type w → Type w'} {ps}
     [Iterator α m β] [Finite α m] [Monad m] [LawfulMonad m] [WPMonad m ps]
     [IteratorLoop α m m] [LawfulIteratorLoop α m m]
     {f : β → Bool} {g : δ → β → δ} {init : δ} {it : IterM (α := α) m β} {P Q}
-    (h : Triple (it.fold (init := init) (fun d b => if f b then g d b else d)) P Q) :
+    (h : Triple (it.fold (init := init) (fun d b => uif f b then g d b else d)) P Q) :
     Triple ((it.filter f).fold (init := init) g) P Q := by
   rwa [Std.IterM.fold_filter]
 
@@ -1774,7 +1774,7 @@ theorem Spec.Iter.forIn_filterWithPostcondition
     [Finite α Id] [IteratorLoop α Id o] [LawfulIteratorLoop α Id o]
     {it : Iter (α := α) β} {f : β → PostconditionT n (ULift Bool)} {init : γ}
     {g : β → γ → o (ForInStep γ)} {P Q}
-    (h : Triple (forIn (m := o) it init (fun out acc => do if (← (f out).run).down then g out acc else return .yield acc)) P Q) :
+    (h : Triple (forIn (m := o) it init (fun out acc => do uif (← (f out).run).down then g out acc else return .yield acc)) P Q) :
     Triple (forIn (it.filterWithPostcondition f) init g) P Q := by
   rwa [Std.Iter.forIn_filterWithPostcondition]
 
@@ -1785,7 +1785,7 @@ theorem Spec.Iter.forIn_filterM
     [MonadLiftT n o] [LawfulMonadLiftT n o] [Finite α Id]
     [IteratorLoop α Id o] [LawfulIteratorLoop α Id o]
     {it : Iter (α := α) β} {f : β → n (ULift Bool)} {init : γ} {g : β → γ → o (ForInStep γ)} {P Q}
-    (h : Triple (forIn (m := o) it init (fun out acc => do if (← f out).down then g out acc else return .yield acc)) P Q):
+    (h : Triple (forIn (m := o) it init (fun out acc => do uif (← f out).down then g out acc else return .yield acc)) P Q):
     Triple (forIn (it.filterM f) init g) P Q := by
   rwa [Std.Iter.forIn_filterM]
 
@@ -1794,7 +1794,7 @@ theorem Spec.Iter.forIn_filter
     [Monad n] [LawfulMonad n] [WPMonad n ps]
     [Finite α Id] [IteratorLoop α Id n] [LawfulIteratorLoop α Id n]
     {it : Iter (α := α) β} {f : β → Bool} {init : γ} {g : β → γ → n (ForInStep γ)} {P Q}
-    (h : Triple (forIn it init (fun out acc => do if f out then g out acc else return .yield acc)) P Q) :
+    (h : Triple (forIn it init (fun out acc => do uif f out then g out acc else return .yield acc)) P Q) :
     Triple (forIn (it.filter f) init g) P Q := by
   rwa [Std.Iter.forIn_filter]
 
@@ -1865,7 +1865,7 @@ theorem Iter.foldM_filterWithPostcondition {α β δ : Type w}
     [LawfulIteratorLoop α Id n] [LawfulIteratorLoop α Id o]
     [MonadLiftT n o] [LawfulMonadLiftT n o]
     {f : β → PostconditionT n (ULift Bool)} {g : δ → β → o δ} {init : δ} {it : Iter (α := α) β} {P Q}
-    (h : Triple (it.foldM (m := o) (init := init) (fun d b => do if (← (f b).run).down then g d b else pure d)) P Q) :
+    (h : Triple (it.foldM (m := o) (init := init) (fun d b => do uif (← (f b).run).down then g d b else pure d)) P Q) :
     Triple ((it.filterWithPostcondition f).foldM (init := init) g) P Q := by
   rwa [Std.Iter.foldM_filterWithPostcondition]
 
@@ -1879,7 +1879,7 @@ theorem Iter.foldM_filterM {α β δ : Type w}
     [LawfulIteratorLoop α Id n] [LawfulIteratorLoop α Id o]
     [MonadLiftT n o] [LawfulMonadLiftT n o]
     {f : β → n (ULift Bool)} {g : δ → β → o δ} {init : δ} {it : Iter (α := α) β} {P Q}
-    (h : Triple (it.foldM (m := o) (init := init) (fun d b => do if (← f b).down then g d b else pure d)) P Q) :
+    (h : Triple (it.foldM (m := o) (init := init) (fun d b => do uif (← f b).down then g d b else pure d)) P Q) :
     Triple ((it.filterM f).foldM (init := init) g) P Q := by
   rwa [Std.Iter.foldM_filterM]
 
@@ -1909,7 +1909,7 @@ theorem Iter.foldM_filter {α β δ : Type w} {n : Type w → Type w''}
     [Iterator α Id β] [Finite α Id] [Monad n] [LawfulMonad n] [WPMonad n ps]
     [IteratorLoop α Id n] [LawfulIteratorLoop α Id n]
     {f : β → Bool} {g : δ → β → n δ} {init : δ} {it : Iter (α := α) β} {P Q}
-    (h : Triple (it.foldM (init := init) (fun d b => if f b then g d b else pure d)) P Q) :
+    (h : Triple (it.foldM (init := init) (fun d b => uif f b then g d b else pure d)) P Q) :
     Triple ((it.filter f).foldM (init := init) g) P Q := by
   rwa [Std.Iter.foldM_filter]
 
@@ -1964,7 +1964,7 @@ theorem Iter.fold_filterWithPostcondition {α β δ : Type w}
     [Monad n] [LawfulMonad n] [WPMonad n ps]
     [IteratorLoop α Id n] [LawfulIteratorLoop α Id n]
     {f : β → PostconditionT n (ULift Bool)} {g : δ → β → δ} {init : δ} {it : Iter (α := α) β} {P Q}
-    (h : Triple (it.foldM (init := init) (fun d b => return if (← (f b).run).down then g d b else d)) P Q) :
+    (h : Triple (it.foldM (init := init) (fun d b => return uif (← (f b).run).down then g d b else d)) P Q) :
     Triple ((it.filterWithPostcondition f).fold (init := init) g) P Q := by
   rwa [Std.Iter.fold_filterWithPostcondition]
 
@@ -1974,7 +1974,7 @@ theorem Iter.fold_filterM {α β δ : Type w} {n : Type w → Type w''}
     [Monad n] [MonadAttach n] [LawfulMonad n] [WeaklyLawfulMonadAttach n] [WPMonad n ps]
     [IteratorLoop α Id n] [LawfulIteratorLoop α Id n]
     {f : β → n (ULift Bool)} {g : δ → β → δ} {init : δ} {it : Iter (α := α) β} {P Q}
-    (h : Triple (it.foldM (init := init) (fun d b => return if (← f b).down then g d b else d)) P Q) :
+    (h : Triple (it.foldM (init := init) (fun d b => return uif (← f b).down then g d b else d)) P Q) :
     Triple ((it.filterM f).fold (init := init) g) P Q := by
   rwa [Std.Iter.fold_filterM]
 

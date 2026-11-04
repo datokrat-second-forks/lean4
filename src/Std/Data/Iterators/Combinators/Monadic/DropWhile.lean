@@ -225,7 +225,7 @@ instance DropWhile.instIterator [Monad m] [Iterator α m β] {P} :
   step it := do
     match (← it.internalState.inner.step).inflate with
     | .yield it' out h =>
-      if h' : it.internalState.dropping = true then
+      bif h' : it.internalState.dropping then
         match ← (P out).operation with
         | ⟨.up true, h''⟩ =>
           return .deflate <| .skip (IterM.Intermediate.dropWhileWithPostcondition P true it') (.dropped h h' h'')
@@ -233,7 +233,7 @@ instance DropWhile.instIterator [Monad m] [Iterator α m β] {P} :
           return .deflate <| .yield (IterM.Intermediate.dropWhileWithPostcondition P false it') out (.start h h' h'')
       else
         return .deflate <| .yield (IterM.Intermediate.dropWhileWithPostcondition P false it') out
-            (.yield h (Bool.not_eq_true _ ▸ h'))
+            (.yield h h')
     | .skip it' h =>
       return .deflate <| .skip (IterM.Intermediate.dropWhileWithPostcondition P it.internalState.dropping it') (.skip h)
     | .done h =>

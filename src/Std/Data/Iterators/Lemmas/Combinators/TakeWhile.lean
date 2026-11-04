@@ -60,7 +60,7 @@ theorem Iter.val_step_takeWhile {α β} [Iterator α Id β] {P}
 theorem Iter.atIdxSlow?_takeWhile {α β}
     [Iterator α Id β] [Productive α Id] {l : Nat}
     {it : Iter (α := α) β} {P} :
-    (it.takeWhile P).atIdxSlow? l = if ∀ k, k ≤ l → (it.atIdxSlow? k).any P then it.atIdxSlow? l else none := by
+    (it.takeWhile P).atIdxSlow? l = uif ∀ k, k ≤ l → (it.atIdxSlow? k).any P then it.atIdxSlow? l else none := by
   induction l, it using atIdxSlow?.induct_unfolding
   case yield_zero it it' out h h' =>
     rw [atIdxSlow?_eq_match]
@@ -88,14 +88,14 @@ theorem Iter.atIdxSlow?_takeWhile {α β}
     · simp [ih]
       split
       · rename_i h
-        rw [ite_eq_left]
+        rw [UDecidable.ite_eq_left]
         intro k hk
         split
         · exact hP
         · simp at hk
           exact h _ hk
       · rename_i hl
-        rw [ite_eq_right]
+        rw [UDecidable.ite_eq_right]
         intro hl'
         apply hl
         intro k hk
@@ -109,7 +109,7 @@ theorem Iter.atIdxSlow?_takeWhile {α β}
     split <;> rfl
 
 private theorem List.getElem?_takeWhile {l : List α} {P : α → Bool} {k} :
-    (l.takeWhile P)[k]? = if ∀ k' : Nat, k' ≤ k → l[k']?.any P then l[k]? else none := by
+    (l.takeWhile P)[k]? = uif ∀ k' : Nat, k' ≤ k → l[k']?.any P then l[k]? else none := by
   induction l generalizing k
   · simp
   · rename_i x xs ih
@@ -119,13 +119,13 @@ private theorem List.getElem?_takeWhile {l : List α} {P : α → Bool} {k} :
       · simp [*]
       · simp [ih]
         split
-        · rw [ite_eq_left]
+        · rw [UDecidable.ite_eq_left]
           intro k' hk'
           cases k'
           · simp [*]
           · simp_all
         · rename_i hP
-          rw [ite_eq_right]
+          rw [UDecidable.ite_eq_right]
           intro hP'
           apply hP
           intro k' hk'

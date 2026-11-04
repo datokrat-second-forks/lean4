@@ -37,9 +37,9 @@ set_option linter.indexVariables false
 @[grind =]
 theorem extract_push {α} {xs : Vector α n} {b : α} {start stop : Nat} :
     (xs.push b).extract start stop =
-      if h₁ : stop ≤ n then
+      uif h₁ : stop ≤ n then
         (xs.extract start stop).cast (by omega)
-      else if h₂ : start ≤ n then
+      else uif h₂ : start ≤ n then
         ((xs.extract start n).push b).cast (by omega)
       else #v[].cast (by omega) := by
   rcases xs with ⟨xs, rfl⟩
@@ -94,9 +94,9 @@ theorem getElem?_extract_of_succ {xs : Vector α n} {j : Nat} :
   simp only [Nat.sub_zero]
   erw [getElem?_extract] -- Why does this not fire by `simp` or `rw`?
   by_cases h : j < n
-  · rw [ite_eq_left (by omega)]
+  · rw [UDecidable.ite_eq_left (by omega)]
     simp
-  · rw [ite_eq_right (by omega)]
+  · rw [UDecidable.ite_eq_right (by omega)]
     simp_all
 
 @[simp, grind =] theorem extract_extract {xs : Vector α n} {i j k l : Nat} :
@@ -107,9 +107,9 @@ theorem getElem?_extract_of_succ {xs : Vector α n} {j : Nat} :
 @[grind =]
 theorem extract_set {xs : Vector α n} {i j k : Nat} (h : k < n) {a : α} :
     (xs.set k a).extract i j =
-      if _ : k < i then
+      uif _ : k < i then
         xs.extract i j
-      else if _ : k < min j n then
+      else uif _ : k < min j n then
         (xs.extract i j).set (k - i) a (by omega)
       else xs.extract i j := by
   rcases xs with ⟨xs, rfl⟩

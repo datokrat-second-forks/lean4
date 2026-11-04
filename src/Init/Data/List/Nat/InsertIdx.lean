@@ -51,7 +51,7 @@ theorem insertIdx_succ_cons {xs : List α} {hd x : α} {i : Nat} :
   rfl
 
 @[grind =]
-theorem length_insertIdx : ∀ {i} {as : List α}, (as.insertIdx i a).length = if i ≤ as.length then as.length + 1 else as.length
+theorem length_insertIdx : ∀ {i} {as : List α}, (as.insertIdx i a).length = uif i ≤ as.length then as.length + 1 else as.length
   | 0, _ => by simp
   | n + 1, [] => by simp
   | n + 1, a :: as => by
@@ -85,7 +85,7 @@ theorem insertIdx_eraseIdx_of_le :
 @[grind =]
 theorem insertIdx_eraseIdx (h : i < length as) :
     (as.eraseIdx i).insertIdx j a =
-      if i ≤ j then (as.insertIdx (j + 1) a).eraseIdx i else (as.insertIdx j a).eraseIdx (i + 1) := by
+      uif i ≤ j then (as.insertIdx (j + 1) a).eraseIdx i else (as.insertIdx j a).eraseIdx (i + 1) := by
   split <;> rename_i h'
   · rw [insertIdx_eraseIdx_of_ge h h']
   · rw [insertIdx_eraseIdx_of_le h (by omega)]
@@ -202,10 +202,10 @@ theorem getElem_insertIdx_of_gt {l : List α} {x : α} {i j : Nat} (hn : i < j)
 @[grind =]
 theorem getElem_insertIdx {l : List α} {x : α} {i j : Nat} (h : j < (l.insertIdx i x).length) :
     (l.insertIdx i x)[j] =
-      if h₁ : j < i then
+      uif h₁ : j < i then
         l[j]'(by simp [length_insertIdx] at h; split at h <;> omega)
       else
-        if h₂ : j = i then
+        uif h₂ : j = i then
           x
         else
           l[j-1]'(by simp [length_insertIdx] at h; split at h <;> omega) := by
@@ -219,11 +219,11 @@ theorem getElem_insertIdx {l : List α} {x : α} {i j : Nat} (h : j < (l.insertI
 @[grind =]
 theorem getElem?_insertIdx {l : List α} {x : α} {i j : Nat} :
     (l.insertIdx i x)[j]? =
-      if j < i then
+      uif j < i then
         l[j]?
       else
-        if j = i then
-          if j ≤ l.length then some x else none
+        uif j = i then
+          uif j ≤ l.length then some x else none
         else
           l[j-1]? := by
   rw [getElem?_def]
@@ -233,7 +233,7 @@ theorem getElem?_insertIdx {l : List α} {x : α} {i j : Nat} :
     split <;> rename_i h₁
     · rw [getElem?_def, UDecidable.dite_eq_left]
     · split <;> rename_i h₂
-      · rw [ite_eq_left]
+      · rw [UDecidable.ite_eq_left]
         split at h <;> omega
       · rw [getElem?_def]
         simp only [Option.some_eq_udite_none_right, exists_prop, and_true]
@@ -243,23 +243,23 @@ theorem getElem?_insertIdx {l : List α} {x : α} {i j : Nat} :
     · rw [getElem?_eq_none]
       split at h <;> omega
     · split <;> rename_i h₂
-      · rw [ite_eq_right]
+      · rw [UDecidable.ite_eq_right]
         split at h <;> omega
       · rw [getElem?_eq_none]
         split at h <;> omega
 
 theorem getElem?_insertIdx_of_lt {l : List α} {x : α} {i j : Nat} (h : j < i) :
     (l.insertIdx i x)[j]? = l[j]? := by
-  rw [getElem?_insertIdx, ite_eq_left h]
+  rw [getElem?_insertIdx, UDecidable.ite_eq_left h]
 
 theorem getElem?_insertIdx_self {l : List α} {x : α} {i : Nat} :
-    (l.insertIdx i x)[i]? = if i ≤ l.length then some x else none := by
-  rw [getElem?_insertIdx, ite_eq_right (by omega)]
+    (l.insertIdx i x)[i]? = uif i ≤ l.length then some x else none := by
+  rw [getElem?_insertIdx, UDecidable.ite_eq_right (by omega)]
   simp
 
 theorem getElem?_insertIdx_of_gt {l : List α} {x : α} {i j : Nat} (h : i < j) :
     (l.insertIdx i x)[j]? = l[j - 1]? := by
-  rw [getElem?_insertIdx, ite_eq_right (by omega), ite_eq_right (by omega)]
+  rw [getElem?_insertIdx, UDecidable.ite_eq_right (by omega), UDecidable.ite_eq_right (by omega)]
 
 end InsertIdx
 

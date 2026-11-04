@@ -140,10 +140,10 @@ theorem getElem?_intersperse_two_mul_add_one (h : i + 1 < l.length) :
 @[grind =]
 theorem getElem?_intersperse :
     (l.intersperse sep)[i]? =
-      if i % 2 = 0 then
+      uif i % 2 = 0 then
         l[i / 2]?
       else
-        if i < 2 * l.length - 1 then some sep else none := by
+        uif i < 2 * l.length - 1 then some sep else none := by
   split
   · have p : i = 2 * (i / 2) := by omega
     conv => lhs; rw [p]
@@ -171,7 +171,7 @@ theorem getElem?_intersperse :
 @[grind =]
 theorem getElem_intersperse (h) :
     (l.intersperse sep)[i] =
-      if i % 2 = 0 then l[i / 2]'(by simp at h; omega) else sep := by
+      uif i % 2 = 0 then l[i / 2]'(by simp at h; omega) else sep := by
   split
   · have p : i = 2 * (i / 2) := by omega
     conv => lhs; simp +singlePass only [p]

@@ -141,7 +141,7 @@ theorem getElem_zero_flatten {xss : Array (Array α)} (h) :
   simp [← getElem?_zero_flatten xss]
 
 @[grind =]
-theorem findSome?_replicate : findSome? f (replicate n a) = if n = 0 then none else f a := by
+theorem findSome?_replicate : findSome? f (replicate n a) = uif n = 0 then none else f a := by
   simp [← List.toArray_replicate, List.findSome?_replicate]
 
 @[simp] theorem findSome?_replicate_of_pos (h : 0 < n) : findSome? f (replicate n a) = f a := by
@@ -149,7 +149,7 @@ theorem findSome?_replicate : findSome? f (replicate n a) = if n = 0 then none e
 
 -- Argument is unused, but used to decide whether `simp` should unfold.
 @[simp] theorem findSome?_replicate_of_isSome (_ : (f a).isSome) :
-   findSome? f (replicate n a) = if n = 0 then none else f a := by
+   findSome? f (replicate n a) = uif n = 0 then none else f a := by
   simp [findSome?_replicate]
 
 @[simp] theorem findSome?_replicate_of_isNone (h : (f a).isNone) :
@@ -312,15 +312,15 @@ theorem find?_flatMap_eq_none_iff {xs : Array α} {f : α → Array β} {p : β 
 
 @[grind =]
 theorem find?_replicate :
-    find? p (replicate n a) = if n = 0 then none else if p a then some a else none := by
+    find? p (replicate n a) = uif n = 0 then none else uif p a then some a else none := by
   simp [← List.toArray_replicate, List.find?_replicate]
 
 @[simp] theorem find?_replicate_of_size_pos (h : 0 < n) :
-    find? p (replicate n a) = if p a then some a else none := by
+    find? p (replicate n a) = uif p a then some a else none := by
   simp [find?_replicate, Nat.ne_of_gt h]
 
 @[simp] theorem find?_replicate_of_pos (h : p a) :
-    find? p (replicate n a) = if n = 0 then none else some a := by
+    find? p (replicate n a) = uif n = 0 then none else some a := by
   simp [find?_replicate, h]
 
 @[simp] theorem find?_replicate_of_neg (h : ¬ p a) : find? p (replicate n a) = none := by
@@ -446,14 +446,14 @@ theorem findIdx_eq {p : α → Bool} {xs : Array α} {i : Nat} (h : i < xs.size)
 @[grind =]
 theorem findIdx_append {p : α → Bool} {xs ys : Array α} :
     (xs ++ ys).findIdx p =
-      if xs.findIdx p < xs.size then xs.findIdx p else ys.findIdx p + xs.size := by
+      uif xs.findIdx p < xs.size then xs.findIdx p else ys.findIdx p + xs.size := by
   rcases xs with ⟨xs⟩
   rcases ys with ⟨ys⟩
   simp [List.findIdx_append]
 
 @[grind =]
 theorem findIdx_push {xs : Array α} {a : α} {p : α → Bool} :
-    (xs.push a).findIdx p = if xs.findIdx p < xs.size then xs.findIdx p else xs.size + uif p a then 0 else 1 := by
+    (xs.push a).findIdx p = uif xs.findIdx p < xs.size then xs.findIdx p else xs.size + uif p a then 0 else 1 := by
   simp only [push_eq_append, findIdx_append]
   split <;> rename_i h
   · rfl
@@ -574,13 +574,13 @@ theorem findIdx?_flatten {xss : Array (Array α)} {p : α → Bool} :
   simp [List.findIdx?_flatten, Function.comp_def]
 
 @[simp, grind =] theorem findIdx?_replicate :
-    (replicate n a).findIdx? p = if 0 < n ∧ p a then some 0 else none := by
+    (replicate n a).findIdx? p = uif 0 < n ∧ p a then some 0 else none := by
   rw [← List.toArray_replicate]
   simp only [List.findIdx?_toArray]
   simp
 
 theorem findIdx?_eq_findSome?_zipIdx {xs : Array α} {p : α → Bool} :
-    xs.findIdx? p = xs.zipIdx.findSome? fun ⟨a, i⟩ => if p a then some i else none := by
+    xs.findIdx? p = xs.zipIdx.findSome? fun ⟨a, i⟩ => uif p a then some i else none := by
   rcases xs with ⟨xs⟩
   simp [List.findIdx?_eq_findSome?_zipIdx]
 
@@ -625,7 +625,7 @@ theorem findFinIdx?_empty {p : α → Bool} : findFinIdx? p #[] = none := by sim
 
 @[grind =]
 theorem findFinIdx?_singleton {a : α} {p : α → Bool} :
-    #[a].findFinIdx? p = if p a then some ⟨0, by simp⟩ else none := by
+    #[a].findFinIdx? p = uif p a then some ⟨0, by simp⟩ else none := by
   simp
 
 -- We can't mark this as a `@[congr]` lemma since the head of the RHS is not `findFinIdx?`.
@@ -660,7 +660,7 @@ theorem findFinIdx?_eq_some_iff {xs : Array α} {p : α → Bool} {i : Fin xs.si
 @[grind =]
 theorem findFinIdx?_push {xs : Array α} {a : α} {p : α → Bool} :
     (xs.push a).findFinIdx? p =
-      ((xs.findFinIdx? p).map (Fin.castLE (by simp))).or (if p a then some ⟨xs.size, by simp⟩ else none) := by
+      ((xs.findFinIdx? p).map (Fin.castLE (by simp))).or (uif p a then some ⟨xs.size, by simp⟩ else none) := by
   simp only [findFinIdx?_eq_pmap_findIdx?, findIdx?_push, Option.pmap_or]
   split <;> rename_i h _ <;> split <;> simp [h]
 
@@ -736,12 +736,12 @@ The lemmas below should be made consistent with those for `findIdx` (and proved 
 
 @[grind =]
 theorem idxOf_append [BEq α] [LawfulBEq α] {xs ys : Array α} {a : α} :
-    (xs ++ ys).idxOf a = if a ∈ xs then xs.idxOf a else ys.idxOf a + xs.size := by
+    (xs ++ ys).idxOf a = uif a ∈ xs then xs.idxOf a else ys.idxOf a + xs.size := by
   rw [idxOf, findIdx_append]
   split <;> rename_i h
-  · rw [ite_eq_left]
+  · rw [UDecidable.ite_eq_left]
     simpa using h
-  · rw [ite_eq_right]
+  · rw [UDecidable.ite_eq_right]
     simpa using h
 
 theorem idxOf_eq_size [BEq α] [LawfulBEq α] {xs : Array α} (h : a ∉ xs) : xs.idxOf a = xs.size := by

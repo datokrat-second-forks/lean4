@@ -318,7 +318,7 @@ theorem getElem?_toList_rco_eq_none {m n i : Nat} (h : n ≤ i + m) :
   simp [h]
 
 theorem getElem!_toList_rco {m n i : Nat} :
-    (m...n).toList[i]! = if i < n - m then (m + i) else 0 := by
+    (m...n).toList[i]! = uif i < n - m then (m + i) else 0 := by
   simp only [List.getElem!_eq_getElem?_getD, getElem?_toList_rco, Nat.default_eq_zero]
   split <;> simp
 
@@ -343,7 +343,7 @@ theorem zero_lt_getElem!_toList_rco_iff {m n i : Nat} :
   split <;> (simp; omega)
 
 theorem getD_toList_rco {m n i fallback : Nat} :
-    (m...n).toList.getD i fallback = if i < n - m then (m + i) else fallback := by
+    (m...n).toList.getD i fallback = uif i < n - m then (m + i) else fallback := by
   by_cases h : i < n - m <;> simp [h]
 
 @[simp]
@@ -505,7 +505,7 @@ theorem getElem?_toArray_rco_eq_none {m n i : Nat} (h : n ≤ i + m) :
   simp [h]
 
 theorem getElem!_toArray_rco {m n i : Nat} :
-    (m...n).toArray[i]! = if i < n - m then (m + i) else 0 := by
+    (m...n).toArray[i]! = uif i < n - m then (m + i) else 0 := by
   simp only [← toArray_toList_rco, List.getElem!_toArray, getElem!_toList_rco]
 
 @[simp 1001]
@@ -527,7 +527,7 @@ theorem zero_lt_getElem!_toArray_rco_iff {m n i : Nat} :
   simp only [← toArray_toList_rco, List.getElem!_toArray, zero_lt_getElem!_toList_rco_iff]
 
 theorem getD_toArray_rco {m n i fallback : Nat} :
-    (m...n).toArray.getD i fallback = if i < n - m then (m + i) else fallback := by
+    (m...n).toArray.getD i fallback = uif i < n - m then (m + i) else fallback := by
   by_cases h : i < n - m <;> simp [h]
 
 @[simp]
@@ -746,7 +746,7 @@ theorem getElem?_toList_rcc_eq_none {m n i : Nat} (h : n + 1 ≤ i + m) :
   simp [h]
 
 theorem getElem!_toList_rcc {m n i : Nat} :
-    (m...=n).toList[i]! = if i < n + 1 - m then (m + i) else 0 := by
+    (m...=n).toList[i]! = uif i < n + 1 - m then (m + i) else 0 := by
   simp only [toList_rcc_eq_toList_rco, getElem!_toList_rco]
 
 @[simp]
@@ -768,7 +768,7 @@ theorem zero_lt_getElem!_toList_rcc_iff {m n i : Nat} :
   simp only [toList_rcc_eq_toList_rco, zero_lt_getElem!_toList_rco_iff]
 
 theorem getD_toList_rcc {m n i fallback : Nat} :
-    (m...=n).toList.getD i fallback = if i < n + 1 - m then (m + i) else fallback := by
+    (m...=n).toList.getD i fallback = uif i < n + 1 - m then (m + i) else fallback := by
   by_cases h : i < n + 1 - m <;> simp [h]
 
 @[simp]
@@ -910,7 +910,7 @@ theorem getElem?_toArray_rcc_eq_none {m n i : Nat} (h : n + 1 ≤ i + m) :
   simp [h]
 
 theorem getElem!_toArray_rcc {m n i : Nat} :
-    (m...=n).toArray[i]! = if i < n + 1 - m then (m + i) else 0 := by
+    (m...=n).toArray[i]! = uif i < n + 1 - m then (m + i) else 0 := by
   simp only [toArray_rcc_eq_toArray_rco, getElem!_toArray_rco]
 
 @[simp]
@@ -932,7 +932,7 @@ theorem zero_lt_getElem!_toArray_rcc_iff {m n i : Nat} :
   simp only [toArray_rcc_eq_toArray_rco, zero_lt_getElem!_toArray_rco_iff]
 
 theorem getD_toArray_rcc {m n i fallback : Nat} :
-    (m...=n).toArray.getD i fallback = if i < n + 1 - m then (m + i) else fallback := by
+    (m...=n).toArray.getD i fallback = uif i < n + 1 - m then (m + i) else fallback := by
   by_cases h : i < n + 1 - m <;> simp [h]
 
 @[simp]
@@ -1155,7 +1155,7 @@ theorem getElem?_toList_roo_eq_none {m n i : Nat} (h : n ≤ i + (m + 1)) :
   simp [h, toList_roo_eq_toList_rco]
 
 theorem getElem!_toList_roo {m n i : Nat} :
-    (m<...n).toList[i]! = if i < n - (m + 1) then (m + 1 + i) else 0 := by
+    (m<...n).toList[i]! = uif i < n - (m + 1) then (m + 1 + i) else 0 := by
   simp only [List.getElem!_eq_getElem?_getD, getElem?_toList_roo, Nat.default_eq_zero]
   split <;> simp
 
@@ -1180,7 +1180,7 @@ theorem zero_lt_getElem!_toList_roo_iff {m n i : Nat} :
   omega
 
 theorem getD_toList_roo {m n i fallback : Nat} :
-    (m<...n).toList.getD i fallback = if i < n - (m + 1) then (m + 1 + i) else fallback := by
+    (m<...n).toList.getD i fallback = uif i < n - (m + 1) then (m + 1 + i) else fallback := by
   by_cases h : i < n - (m + 1) <;> simp [h, toList_roo_eq_toList_rco]
 
 @[simp]
@@ -1318,7 +1318,7 @@ theorem getElem?_toArray_roo_eq_none {m n i : Nat} (h : n ≤ i + (m + 1)) :
   simp [h, toArray_roo_eq_toArray_rco]
 
 theorem getElem!_toArray_roo {m n i : Nat} :
-    (m<...n).toArray[i]! = if i < n - (m + 1) then (m + 1 + i) else 0 := by
+    (m<...n).toArray[i]! = uif i < n - (m + 1) then (m + 1 + i) else 0 := by
   simp only [Array.getElem!_eq_getD, Array.getD_eq_getD_getElem?, getElem?_toArray_roo,
     Nat.default_eq_zero]
   split <;> simp
@@ -1344,7 +1344,7 @@ theorem zero_lt_getElem!_toArray_roo_iff {m n i : Nat} :
   omega
 
 theorem getD_toArray_roo {m n i fallback : Nat} :
-    (m<...n).toArray.getD i fallback = if i < n - (m + 1) then (m + 1 + i) else fallback := by
+    (m<...n).toArray.getD i fallback = uif i < n - (m + 1) then (m + 1 + i) else fallback := by
   by_cases h : i < n - (m + 1) <;> simp [h, toArray_roo_eq_toArray_rco]
 
 @[simp]
@@ -1577,7 +1577,7 @@ theorem getElem?_toList_roc_eq_none {m n i : Nat} (h : n ≤ i + m) :
   simp [h]
 
 theorem getElem!_toList_roc {m n i : Nat} :
-    (m<...=n).toList[i]! = if i < n - m then (m + 1 + i) else 0 := by
+    (m<...=n).toList[i]! = uif i < n - m then (m + 1 + i) else 0 := by
   rw [toList_roc_eq_toList_rco, getElem!_toList_rco]
   simp
 
@@ -1602,7 +1602,7 @@ theorem zero_lt_getElem!_toList_roc_iff {m n i : Nat} :
   omega
 
 theorem getD_toList_roc {m n i fallback : Nat} :
-    (m<...=n).toList.getD i fallback = if i < n - m then (m + 1 + i) else fallback := by
+    (m<...=n).toList.getD i fallback = uif i < n - m then (m + 1 + i) else fallback := by
   by_cases h : i < n - m <;> simp [h]
 
 @[simp]
@@ -1755,7 +1755,7 @@ theorem getElem?_toArray_roc_eq_none {m n i : Nat} (h : n ≤ i + m) :
   simp [h]
 
 theorem getElem!_toArray_roc {m n i : Nat} :
-    (m<...=n).toArray[i]! = if i < n - m then (m + 1 + i) else 0 := by
+    (m<...=n).toArray[i]! = uif i < n - m then (m + 1 + i) else 0 := by
   rw [toArray_roc_eq_toArray_rco, getElem!_toArray_rco]
   simp
 
@@ -1780,7 +1780,7 @@ theorem zero_lt_getElem!_toArray_roc_iff {m n i : Nat} :
   omega
 
 theorem getD_toArray_roc {m n i fallback : Nat} :
-    (m<...=n).toArray.getD i fallback = if i < n - m then (m + 1 + i) else fallback := by
+    (m<...=n).toArray.getD i fallback = uif i < n - m then (m + 1 + i) else fallback := by
   by_cases h : i < n - m <;> simp [h]
 
 @[simp]
@@ -1979,7 +1979,7 @@ theorem getElem?_toList_rio_eq_none {n i : Nat} (h : n ≤ i) :
   simp [h]
 
 theorem getElem!_toList_rio {n i : Nat} :
-    (*...n).toList[i]! = if i < n then i else 0 := by
+    (*...n).toList[i]! = uif i < n then i else 0 := by
   simp only [toList_rio_eq_toList_rco, getElem!_toList_rco, Nat.sub_zero, Nat.zero_add]
 
 @[simp]
@@ -2001,7 +2001,7 @@ theorem zero_lt_getElem!_toList_rio_iff {n i : Nat} :
   simp only [toList_rio_eq_toList_rco, zero_lt_getElem!_toList_rco_iff, Nat.sub_zero, Nat.add_zero]
 
 theorem getD_toList_rio {n i fallback : Nat} :
-    (*...n).toList.getD i fallback = if i < n then i else fallback := by
+    (*...n).toList.getD i fallback = uif i < n then i else fallback := by
   simp only [toList_rio_eq_toList_rco, getD_toList_rco]
   simp
 
@@ -2134,7 +2134,7 @@ theorem getElem?_toArray_rio_eq_none {n i : Nat} (h : n ≤ i) :
   simp [h]
 
 theorem getElem!_toArray_rio {n i : Nat} :
-    (*...n).toArray[i]! = if i < n then i else 0 := by
+    (*...n).toArray[i]! = uif i < n then i else 0 := by
   simp only [toArray_rio_eq_toArray_rco, getElem!_toArray_rco, Nat.sub_zero, Nat.zero_add]
 
 @[simp]
@@ -2156,7 +2156,7 @@ theorem zero_lt_getElem!_toArray_rio_iff {n i : Nat} :
   simp only [toArray_rio_eq_toArray_rco, zero_lt_getElem!_toArray_rco_iff, Nat.sub_zero, Nat.add_zero]
 
 theorem getD_toArray_rio {n i fallback : Nat} :
-    (*...n).toArray.getD i fallback = if i < n then i else fallback := by
+    (*...n).toArray.getD i fallback = uif i < n then i else fallback := by
   simp only [toArray_rio_eq_toArray_rco, getD_toArray_rco]
   simp
 
@@ -2290,7 +2290,7 @@ theorem getElem?_toList_ric_eq_none {n i : Nat} (h : n < i) :
   simp [Nat.succ_le_iff, h]
 
 theorem getElem!_toList_ric {n i : Nat} :
-    (*...=n).toList[i]! = if i ≤ n then i else 0 := by
+    (*...=n).toList[i]! = uif i ≤ n then i else 0 := by
   simp only [toList_ric_eq_toList_rco, getElem!_toList_rco, Nat.sub_zero, Nat.zero_add,
     Nat.lt_succ_iff]
 
@@ -2317,7 +2317,7 @@ theorem zero_lt_getElem!_toList_ric_iff {n i : Nat} :
     Nat.lt_succ_iff]
 
 theorem getD_toList_ric {n i fallback : Nat} :
-    (*...=n).toList.getD i fallback = if i ≤ n then i else fallback := by
+    (*...=n).toList.getD i fallback = uif i ≤ n then i else fallback := by
   simp only [toList_ric_eq_toList_rco, getD_toList_rco]
   simp [Nat.lt_succ_iff]
 
@@ -2440,7 +2440,7 @@ theorem getElem?_toArray_ric_eq_none {n i : Nat} (h : n < i) :
   simp [Nat.succ_le_iff, h]
 
 theorem getElem!_toArray_ric {n i : Nat} :
-    (*...=n).toArray[i]! = if i ≤ n then i else 0 := by
+    (*...=n).toArray[i]! = uif i ≤ n then i else 0 := by
   simp only [toArray_ric_eq_toArray_rco, getElem!_toArray_rco, Nat.sub_zero, Nat.zero_add,
     Nat.lt_succ_iff]
 
@@ -2467,7 +2467,7 @@ theorem zero_lt_getElem!_toArray_ric_iff {n i : Nat} :
     Nat.lt_succ_iff]
 
 theorem getD_toArray_ric {n i fallback : Nat} :
-    (*...=n).toArray.getD i fallback = if i ≤ n then i else fallback := by
+    (*...=n).toArray.getD i fallback = uif i ≤ n then i else fallback := by
   simp only [toArray_ric_eq_toArray_rco, getD_toArray_rco]
   simp [Nat.lt_succ_iff]
 

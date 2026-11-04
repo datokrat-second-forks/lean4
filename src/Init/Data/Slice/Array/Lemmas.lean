@@ -29,7 +29,7 @@ open Std Std.Iterators Std.PRange Std.Slice
 namespace SubarrayIterator
 
 theorem step_eq {it : Iter (α := SubarrayIterator α) α} :
-    it.step = if h : it.1.xs.start < it.1.xs.stop then
+    it.step = uif h : it.1.xs.start < it.1.xs.stop then
         haveI := it.1.xs.start_le_stop
         haveI := it.1.xs.stop_le_array_size
         ⟨.yield ⟨⟨it.1.xs.array, it.1.xs.start + 1, it.1.xs.stop, by omega, by assumption⟩⟩
@@ -44,11 +44,11 @@ theorem step_eq {it : Iter (α := SubarrayIterator α) α} :
   simp only [Iter.step, IterM.Step.toPure, Iter.toIter_toIterM, IterStep.mapIterator, IterM.step,
     Iterator.step, SubarrayIterator.step, Id.run_pure, Shrink.inflate_deflate]
   by_cases h : it.internalState.xs.start < it.internalState.xs.stop
-  · simp [h, ↓reduceDIte]
-  · simp [h, ↓reduceDIte]
+  · simp [h]
+  · simp [h]
 
 theorem val_step_eq {it : Iter (α := SubarrayIterator α) α} :
-    it.step.val = if h : it.1.xs.start < it.1.xs.stop then
+    it.step.val = uif h : it.1.xs.start < it.1.xs.stop then
         haveI := it.1.xs.start_le_stop
         haveI := it.1.xs.stop_le_array_size
         .yield ⟨⟨it.1.xs.array, it.1.xs.start + 1, it.1.xs.stop, by omega, by assumption⟩⟩
@@ -76,9 +76,8 @@ theorem toList_eq {α : Type u} {it : Iter (α := SubarrayIterator α) α} :
       · simp [Subarray.array, Subarray.stop]
     · simp only [Iter.IsPlausibleStep, IterM.IsPlausibleStep, Iterator.IsPlausibleStep, instIteratorSubarrayIteratorId, -- TODO
       IterStep.mapIterator_yield, SubarrayIterator.step]
-      rw [dite_eq_left]; rotate_left; exact h
-      rfl
-  · rw [dite_eq_right]; rotate_left; exact h
+      simp [h, Iter.toIterM]
+  · rw [UDecidable.dite_eq_right]; rotate_left; exact h
     simp_all [it.internalState.xs.stop_le_array_size]
 
 theorem length_eq {α : Type u} {it : Iter (α := SubarrayIterator α) α} :

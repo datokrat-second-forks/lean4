@@ -73,7 +73,7 @@ theorem exists_or_eq_self_of_eraseP (p) (xs : Array α) :
   rw [e₂]; simp [size_append, e₁]
 
 @[grind =]
-theorem size_eraseP {xs : Array α} : (xs.eraseP p).size = if xs.any p then xs.size - 1 else xs.size := by
+theorem size_eraseP {xs : Array α} : (xs.eraseP p).size = uif xs.any p then xs.size - 1 else xs.size := by
   split <;> rename_i h
   · simp only [any_eq_true] at h
     obtain ⟨i, h, w⟩ := h
@@ -134,7 +134,7 @@ theorem eraseP_append_right {xs : Array α} ys (h : ∀ b ∈ xs, ¬p b) :
 
 @[grind =]
 theorem eraseP_append {xs : Array α} {ys : Array α} :
-    (xs ++ ys).eraseP p = if xs.any p then xs.eraseP p ++ ys else xs ++ ys.eraseP p := by
+    (xs ++ ys).eraseP p = uif xs.any p then xs.eraseP p ++ ys else xs ++ ys.eraseP p := by
   rcases xs with ⟨xs⟩
   rcases ys with ⟨ys⟩
   simp only [List.append_toArray, List.eraseP_toArray, List.eraseP_append, List.any_toArray]
@@ -142,7 +142,7 @@ theorem eraseP_append {xs : Array α} {ys : Array α} :
 
 @[grind =]
 theorem eraseP_replicate {n : Nat} {a : α} {p : α → Bool} :
-    (replicate n a).eraseP p = if p a then replicate (n - 1) a else replicate n a := by
+    (replicate n a).eraseP p = uif p a then replicate (n - 1) a else replicate n a := by
   simp only [← List.toArray_replicate, List.eraseP_toArray, List.eraseP_replicate]
   split <;> simp
 
@@ -217,7 +217,7 @@ theorem exists_erase_eq [LawfulBEq α] {a : α} {xs : Array α} (h : a ∈ xs) :
 
 @[grind =]
 theorem size_erase [LawfulBEq α] {a : α} {xs : Array α} :
-    (xs.erase a).size = if a ∈ xs then xs.size - 1 else xs.size := by
+    (xs.erase a).size = uif a ∈ xs then xs.size - 1 else xs.size := by
   rw [erase_eq_eraseP, size_eraseP]
   congr
   simp [mem_iff_getElem, eq_comm (a := a)]
@@ -263,7 +263,7 @@ theorem erase_append_right [LawfulBEq α] {a : α} {xs : Array α} (ys : Array �
 
 @[grind =]
 theorem erase_append [LawfulBEq α] {a : α} {xs ys : Array α} :
-    (xs ++ ys).erase a = if a ∈ xs then xs.erase a ++ ys else xs ++ ys.erase a := by
+    (xs ++ ys).erase a = uif a ∈ xs then xs.erase a ++ ys else xs ++ ys.erase a := by
   rcases xs with ⟨xs⟩
   rcases ys with ⟨ys⟩
   simp only [List.append_toArray, List.erase_toArray, List.erase_append, List.mem_toArray]
@@ -271,7 +271,7 @@ theorem erase_append [LawfulBEq α] {a : α} {xs ys : Array α} :
 
 @[grind =]
 theorem erase_replicate [LawfulBEq α] {n : Nat} {a b : α} :
-    (replicate n a).erase b = if b == a then replicate (n - 1) a else replicate n a := by
+    (replicate n a).erase b = uif b == a then replicate (n - 1) a else replicate n a := by
   simp only [← List.toArray_replicate, List.erase_toArray]
   simp only [List.erase_replicate, beq_iff_eq, List.toArray_replicate]
   split <;> simp
@@ -338,7 +338,7 @@ grind_pattern eraseIdx_eq_take_drop_succ => xs.eraseIdx i h, xs.drop i
 
 @[grind =]
 theorem getElem?_eraseIdx {xs : Array α} {i : Nat} (h : i < xs.size) {j : Nat} :
-    (xs.eraseIdx i)[j]? = if j < i then xs[j]? else xs[j + 1]? := by
+    (xs.eraseIdx i)[j]? = uif j < i then xs[j]? else xs[j + 1]? := by
   rcases xs with ⟨xs⟩
   simp [List.getElem?_eraseIdx]
 
@@ -350,13 +350,13 @@ theorem getElem?_eraseIdx_of_lt {xs : Array α} {i : Nat} (h : i < xs.size) {j :
 theorem getElem?_eraseIdx_of_ge {xs : Array α} {i : Nat} (h : i < xs.size) {j : Nat} (h' : i ≤ j) :
     (xs.eraseIdx i)[j]? = xs[j + 1]? := by
   rw [getElem?_eraseIdx]
-  simp only [ite_eq_right_iff]
+  simp only [UDecidable.ite_eq_right_iff]
   intro h'
   omega
 
 @[grind =]
 theorem getElem_eraseIdx {xs : Array α} {i : Nat} (h : i < xs.size) {j : Nat} (h' : j < (xs.eraseIdx i).size) :
-    (xs.eraseIdx i)[j] = if h'' : j < i then
+    (xs.eraseIdx i)[j] = uif h'' : j < i then
         xs[j]
       else
         xs[j + 1]'(by rw [size_eraseIdx] at h'; omega) := by
@@ -401,7 +401,7 @@ theorem eraseIdx_append_of_size_le {xs : Array α} {k : Nat} (hk : xs.size ≤ k
 @[grind =]
 theorem eraseIdx_append {xs ys : Array α} (h : k < (xs ++ ys).size) :
     eraseIdx (xs ++ ys) k =
-      if h' : k < xs.size then
+      uif h' : k < xs.size then
         eraseIdx xs k ++ ys
       else
         xs ++ eraseIdx ys (k - xs.size) (by simp at h; omega) := by
@@ -459,9 +459,9 @@ theorem eraseIdx_set_gt {xs : Array α} {i : Nat} {j : Nat} {a : α} (h : i < j)
 @[grind =]
 theorem eraseIdx_set {xs : Array α} {i : Nat} {a : α} {hi : i < xs.size} {j : Nat} {hj : j < (xs.set i a).size} :
     (xs.set i a).eraseIdx j =
-      if h' : j < i then
+      uif h' : j < i then
         (xs.eraseIdx j).set (i - 1) a (by simp; omega)
-      else if h'' : j = i then
+      else uif h'' : j = i then
         xs.eraseIdx i
       else
         (xs.eraseIdx j (by simp at hj; omega)).set i a (by simp at hj ⊢; omega) := by
@@ -488,7 +488,7 @@ theorem set_eraseIdx_gt {xs : Array α} {i : Nat} {w : i < xs.size} {j : Nat} {a
 @[grind =]
 theorem set_eraseIdx {xs : Array α} {i : Nat} {w : i < xs.size} {j : Nat} {a : α} (hj : j < (xs.eraseIdx i).size) :
     (xs.eraseIdx i).set j a =
-      if h' : i ≤ j then
+      uif h' : i ≤ j then
         (xs.set (j + 1) a (by simp at hj; omega)).eraseIdx i (by simp at ⊢; omega)
       else
         (xs.set j a).eraseIdx i (by simp at ⊢; omega) := by

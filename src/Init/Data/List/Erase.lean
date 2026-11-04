@@ -98,7 +98,7 @@ theorem exists_or_eq_self_of_eraseP (p) (l : List α) :
   let ⟨_, l₁, l₂, _, _, e₁, e₂⟩ := exists_of_eraseP al pa
   rw [e₂]; simp [length_append, e₁]
 
-@[grind =] theorem length_eraseP {l : List α} : (l.eraseP p).length = if l.any p then l.length - 1 else l.length := by
+@[grind =] theorem length_eraseP {l : List α} : (l.eraseP p).length = uif l.any p then l.length - 1 else l.length := by
   split <;> rename_i h
   · simp only [any_eq_true] at h
     obtain ⟨x, m, h⟩ := h
@@ -201,7 +201,7 @@ theorem eraseP_append_right :
 
 @[grind =]
 theorem eraseP_append {l₁ l₂ : List α} :
-    (l₁ ++ l₂).eraseP p = if l₁.any p then l₁.eraseP p ++ l₂ else l₁ ++ l₂.eraseP p := by
+    (l₁ ++ l₂).eraseP p = uif l₁.any p then l₁.eraseP p ++ l₂ else l₁ ++ l₂.eraseP p := by
   split <;> rename_i h
   · simp only [any_eq_true] at h
     obtain ⟨x, m, h⟩ := h
@@ -212,7 +212,7 @@ theorem eraseP_append {l₁ l₂ : List α} :
 
 @[grind =]
 theorem eraseP_replicate {n : Nat} {a : α} {p : α → Bool} :
-    (replicate n a).eraseP p = if p a then replicate (n - 1) a else replicate n a := by
+    (replicate n a).eraseP p = uif p a then replicate (n - 1) a else replicate n a := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -334,13 +334,13 @@ variable [BEq α]
   simp [erase_cons]
 
 @[simp] theorem erase_cons_tail {a b : α} {l : List α} (h : ¬(b == a)) :
-    (b :: l).erase a = b :: l.erase a := by simp only [erase_cons, ite_eq_right h]
+    (b :: l).erase a = b :: l.erase a := by simp only [erase_cons, UDecidable.ite_eq_right h]
 
 theorem erase_of_not_mem [LawfulBEq α] {a : α} : ∀ {l : List α}, a ∉ l → l.erase a = l
   | [], _ => rfl
   | b :: l, h => by
     rw [mem_cons, not_or] at h
-    simp only [erase_cons, ite_eq_right, erase_of_not_mem h.2, beq_iff_eq, Ne.symm h.1, not_false_eq_true]
+    simp only [erase_cons, UDecidable.ite_eq_right, erase_of_not_mem h.2, beq_iff_eq, Ne.symm h.1, not_false_eq_true]
 
 -- The arguments are intentionally explicit.
 theorem erase_eq_eraseP' (a : α) (l : List α) : l.erase a = l.eraseP (· == a) := by
@@ -348,7 +348,7 @@ theorem erase_eq_eraseP' (a : α) (l : List α) : l.erase a = l.eraseP (· == a)
   · simp
   next b t ih =>
     rw [erase_cons, eraseP_cons, ih]
-    cases b == a <;> rfl
+    cases b == a <;> simp
 
 -- The arguments are intentionally explicit.
 theorem erase_eq_eraseP [LawfulBEq α] (a : α) : ∀ (l : List α), l.erase a = l.eraseP (a == ·)
@@ -377,7 +377,7 @@ theorem exists_erase_eq [LawfulBEq α] {a : α} {l : List α} (h : a ∈ l) :
 
 @[grind =]
 theorem length_erase [LawfulBEq α] {a : α} {l : List α} :
-    length (l.erase a) = if a ∈ l then length l - 1 else length l := by
+    length (l.erase a) = uif a ∈ l then length l - 1 else length l := by
   rw [erase_eq_eraseP, length_eraseP]
   split <;> split <;> simp_all
 
@@ -424,7 +424,7 @@ theorem erase_filter [LawfulBEq α] {f : α → Bool} {l : List α} :
   | cons x xs ih =>
     by_cases h : a = x
     · rw [erase_cons]
-      simp only [h, beq_self_eq_true, ↓reduceIte]
+      simp only [h, beq_self_eq_true, ↓reduceUIte]
       rw [filter_cons]
       split
       · rw [erase_cons_head]
@@ -446,12 +446,12 @@ theorem erase_append_right [LawfulBEq α] {a : α} {l₁ : List α} (l₂ : List
 
 @[grind =]
 theorem erase_append [LawfulBEq α] {a : α} {l₁ l₂ : List α} :
-    (l₁ ++ l₂).erase a = if a ∈ l₁ then l₁.erase a ++ l₂ else l₁ ++ l₂.erase a := by
+    (l₁ ++ l₂).erase a = uif a ∈ l₁ then l₁.erase a ++ l₂ else l₁ ++ l₂.erase a := by
   simp [erase_eq_eraseP, eraseP_append]
 
 @[grind =]
 theorem erase_replicate [LawfulBEq α] {n : Nat} {a b : α} :
-    (replicate n a).erase b = if b == a then replicate (n - 1) a else replicate n a := by
+    (replicate n a).erase b = uif b == a then replicate (n - 1) a else replicate n a := by
   rw [erase_eq_eraseP]
   simp [eraseP_replicate]
 
@@ -554,7 +554,7 @@ end erase
 
 @[grind =]
 theorem length_eraseIdx {l : List α} {i : Nat} :
-    (l.eraseIdx i).length = if i < l.length then l.length - 1 else l.length := by
+    (l.eraseIdx i).length = uif i < l.length then l.length - 1 else l.length := by
   induction l generalizing i with
   | nil => simp
   | cons x l ih =>
@@ -650,7 +650,7 @@ theorem eraseIdx_append_of_length_le {l : List α} {k : Nat} (hk : length l ≤ 
 
 @[grind =]
 theorem eraseIdx_append :
-    eraseIdx (l ++ l') k = if k < length l then eraseIdx l k ++ l' else l ++ eraseIdx l' (k - length l) := by
+    eraseIdx (l ++ l') k = uif k < length l then eraseIdx l k ++ l' else l ++ eraseIdx l' (k - length l) := by
   split <;> rename_i h
   · simp [eraseIdx_append_of_lt_length h]
   · rw [eraseIdx_append_of_length_le]
@@ -658,7 +658,7 @@ theorem eraseIdx_append :
 
 @[grind =]
 theorem eraseIdx_replicate {n : Nat} {a : α} {k : Nat} :
-    (replicate n a).eraseIdx k = if k < n then replicate (n - 1) a else replicate n a := by
+    (replicate n a).eraseIdx k = uif k < n then replicate (n - 1) a else replicate n a := by
   split <;> rename_i h
   · rw [eq_replicate_iff, length_eraseIdx_of_lt (by simpa using h)]
     simp only [length_replicate, true_and]
@@ -705,7 +705,7 @@ theorem erase_eq_eraseIdx_of_idxOf [BEq α] [LawfulBEq α]
   · right
     obtain ⟨as, bs, rfl, h'⟩ := eq_append_cons_of_mem h
     refine ⟨as, bs, h', by simp, ?_⟩
-    rw [idxOf_append, ite_eq_right h', idxOf_cons_self, eraseIdx_append_of_length_le] <;>
+    rw [idxOf_append, UDecidable.ite_eq_right h', idxOf_cons_self, eraseIdx_append_of_length_le] <;>
       simp
   · left
     refine ⟨h, ?_⟩

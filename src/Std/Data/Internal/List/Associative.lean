@@ -6184,12 +6184,10 @@ theorem size_filter_not_contains_add_size_inter_eq_size_left [BEq α] [EquivBEq 
     simp only [List.filter_cons]
     split
     case isTrue hc =>
-      simp only [Bool.not_eq_eq_eq_not, Bool.not_true] at hc
-      simp only [List.length_cons, hc, Bool.false_eq_true, ↓reduceIte]
+      simp only [List.length_cons, hc, Bool.false_eq_true, ↓reduceUIte]
       omega
     case isFalse hc =>
-      simp only [Bool.not_eq_eq_eq_not, Bool.not_true, Bool.not_eq_false] at hc
-      simp only [hc, ↓reduceIte, List.length_cons]
+      simp only [List.length_cons]
       omega
 
 theorem size_filter_not_contains_map_fst_add_size_inter_eq_size_left [BEq α] [EquivBEq α]
@@ -6244,10 +6242,8 @@ theorem isEmpty_filter_not_contains_iff [BEq α] [EquivBEq α]
       case cons.isTrue _ =>
         simp at hyp
       case cons.isFalse heq =>
-        simp only [Bool.not_eq_eq_eq_not, Bool.not_true] at heq
         cases mem
         case inl heq2 =>
-          rw [Bool.not_eq_false] at heq
           rwa [List.contains_congr heq2] at heq
         case inr heq2 =>
           apply ih
@@ -6999,7 +6995,7 @@ theorem insertEntry_perm_filter [BEq α] [EquivBEq α]
       rw [distinctKeys_cons_iff] at hl
       by_cases heq : (h.fst == k)
       case pos =>
-        simp only [heq, BEq.symm heq, Bool.true_eq_false, ↓reduceIte, Bool.cond_true, List.perm_cons]
+        simp only [heq, BEq.symm heq, Bool.true_eq_false, ↓reduceUIte, Bool.cond_true, List.perm_cons]
         suffices (List.filter (fun x => !k == x.fst) t) = t by rw [this]
         simp only [List.filter_eq_self, Bool.not_eq_eq_eq_not, Bool.not_true]
         intro ⟨e₁, e₂⟩ mem
@@ -7033,7 +7029,7 @@ theorem Const.map_insertEntry_perm_filter_map {β : Type v} [BEq α] [EquivBEq �
     rw [distinctKeys_cons_iff] at hl
     by_cases heq : (k == h.fst)
     case pos =>
-      simp only [heq, Bool.true_eq_false, ↓reduceIte]
+      simp only [heq, Bool.true_eq_false, ↓reduceUIte]
       apply ih hl.1
     case neg =>
       simp [heq]
@@ -7346,7 +7342,7 @@ theorem length_filter_containsKey_of_length_right [BEq α] [EquivBEq α]
               exact heq
       rw [len_eq]
       rw [List.countP_cons]
-      simp only [heq, ↓reduceIte, Nat.add_right_cancel_iff]
+      simp only [heq, ↓reduceUIte, Nat.add_right_cancel_iff]
       suffices List.countP (fun p => containsKey p.fst l₂) t = List.countP (fun p =>  containsKey p.fst (eraseKey h.fst l₂)) t by
         rw [this]
         apply ih
@@ -7386,7 +7382,7 @@ theorem length_filter_containsKey_of_length_right [BEq α] [EquivBEq α]
         case isFalse heq2 =>
           simp only [Bool.not_eq_true] at heq2
           rw [containsKey_eraseKey]
-          simp only [Nat.add_zero, heq2, Bool.and_false, Bool.false_eq_true, ↓reduceIte]
+          simp only [Nat.add_zero, heq2, Bool.and_false, Bool.false_eq_true, ↓reduceUIte]
           apply ih'
           . rw [List.distinctKeys_cons_iff, List.distinctKeys_cons_iff, containsKey_cons] at hl₁
             simp only [Bool.or_eq_false_iff] at hl₁
@@ -7519,7 +7515,7 @@ theorem length_filter_containsKey_le [BEq α] [EquivBEq α]
             split
             case isTrue contains =>
               rw [containsKey_eraseKey]
-              simp only [heq2, Bool.not_false, contains, Bool.and_self, ↓reduceIte, 
+              simp only [heq2, Bool.not_false, contains, Bool.and_self, ↓reduceUIte,
                 Nat.add_le_add_iff_right]
               apply ih'
               . rw [List.distinctKeys_cons_iff, List.distinctKeys_cons_iff, containsKey_cons] at dl₂
@@ -7530,7 +7526,7 @@ theorem length_filter_containsKey_le [BEq α] [EquivBEq α]
             case isFalse contains =>
               rw [containsKey_eraseKey]
               simp only [Nat.add_zero, heq2, Bool.not_false, contains, Bool.and_false,
-                Bool.false_eq_true, ↓reduceIte]
+                Bool.false_eq_true, ↓reduceUIte]
               apply ih'
               . rw [List.distinctKeys_cons_iff, List.distinctKeys_cons_iff, containsKey_cons] at dl₂
                 simp only [Bool.or_eq_false_iff] at dl₂
@@ -7538,7 +7534,7 @@ theorem length_filter_containsKey_le [BEq α] [EquivBEq α]
                 all_goals simp only [dl₂]
               . exact dl₁
     case neg =>
-      simp only [List.filter_cons, heq, Bool.false_eq_true, ↓reduceIte]
+      simp only [List.filter_cons, heq, Bool.false_eq_true, ↓reduceUIte]
       apply ih dl₁
       rw [List.distinctKeys_cons_iff] at dl₂
       exact dl₂.1

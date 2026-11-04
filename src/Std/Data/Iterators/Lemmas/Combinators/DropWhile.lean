@@ -38,7 +38,7 @@ theorem Iter.step_intermediateDropWhile {α β} [Iterator α Id β]
     {it : Iter (α := α) β} {P} {dropping} :
     (Iter.Intermediate.dropWhile P dropping it).step = (match it.step with
       | .yield it' out h =>
-        if h' : dropping = true then
+        uif h' : dropping = true then
           match hP : P out with
           | true =>
             .skip (Intermediate.dropWhile P true it') (.dropped h h' (by simpa))
@@ -70,7 +70,7 @@ theorem Iter.val_step_intermediateDropWhile {α β} [Iterator α Id β]
     {it : Iter (α := α) β} {P} {dropping} :
     (Iter.Intermediate.dropWhile P dropping it).step.val = (match it.step.val with
       | .yield it' out =>
-        if dropping = true then
+        uif dropping = true then
           match P out with
           | true => .skip (Intermediate.dropWhile P true it')
           | false => .yield (Intermediate.dropWhile P false it') out
@@ -82,7 +82,7 @@ theorem Iter.val_step_intermediateDropWhile {α β} [Iterator α Id β]
   cases it.step using PlausibleIterStep.casesOn
   · cases dropping
     · simp
-    · simp only [↓reduceDIte, ↓reduceIte]
+    · simp only [↓reduceUDIte, ↓reduceUIte]
       split <;> simp_all
   · simp
   · simp
@@ -123,7 +123,7 @@ theorem Iter.val_step_dropWhile {α β} [Iterator α Id β] {P}
 theorem Iter.toList_intermediateDropWhile_of_finite {α β} [Iterator α Id β] {P dropping}
     [Finite α Id] {it : Iter (α := α) β} :
     (Intermediate.dropWhile P dropping it).toList =
-      if dropping = true then it.toList.dropWhile P else it.toList := by
+      uif dropping = true then it.toList.dropWhile P else it.toList := by
   induction it using Iter.inductSteps generalizing dropping with | step it ihy ihs
   rw [toList_eq_match_step, toList_eq_match_step, val_step_intermediateDropWhile]
   cases it.step using PlausibleIterStep.casesOn

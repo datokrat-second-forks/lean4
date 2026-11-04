@@ -224,7 +224,7 @@ theorem foldrM_filterMap [Monad m] [LawfulMonad m] {f : α → Option β} {g : �
 
 theorem foldlM_filter [Monad m] [LawfulMonad m] {p : α → Bool} {g : β → α → m β} {l : List α} {init : β} :
     (l.filter p).foldlM g init =
-      l.foldlM (fun x y => if p y then g x y else pure x) init := by
+      l.foldlM (fun x y => uif p y then g x y else pure x) init := by
   induction l generalizing init with
   | nil => rfl
   | cons a l ih =>
@@ -233,7 +233,7 @@ theorem foldlM_filter [Monad m] [LawfulMonad m] {p : α → Bool} {g : β → α
 
 theorem foldrM_filter [Monad m] [LawfulMonad m] {p : α → Bool} {g : α → β → m β} {l : List α} {init : β} :
     (l.filter p).foldrM g init =
-      l.foldrM (fun x y => if p x then g x y else pure y) init := by
+      l.foldrM (fun x y => uif p x then g x y else pure y) init := by
   induction l generalizing init with
   | nil => rfl
   | cons a l ih =>
@@ -467,7 +467,7 @@ theorem allM_eq_not_anyM_not [Monad m] [LawfulMonad m] {p : α → m Bool} {as :
 
 @[simp] theorem anyM_cons [Monad m] {p : α → m Bool} {x : α} {xs : List α} :
     (x :: xs).anyM p = (do
-      if (← p x) then
+      uif (← p x) then
         return true
       else
         xs.anyM p) := by
@@ -485,7 +485,7 @@ theorem allM_eq_not_anyM_not [Monad m] [LawfulMonad m] {p : α → m Bool} {as :
 
 @[simp] theorem allM_cons [Monad m] {p : α → m Bool} {x : α} {xs : List α} :
     (x :: xs).allM p = (do
-      if (← p x) then
+      uif (← p x) then
         xs.allM p
       else
         return false) := by

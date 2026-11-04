@@ -587,7 +587,7 @@ theorem IterM.anyM_eq_match_step {α β : Type w} {m : Type w → Type w'} [Iter
     it.anyM p = (do
       match (← it.step).inflate.val with
       | .yield it' x =>
-        if (← p x).down then
+        uif (← p x).down then
           return .up true
         else
           it'.anyM p
@@ -622,7 +622,7 @@ theorem IterM.any_eq_match_step {α β : Type w} {m : Type w → Type w'} [Itera
     it.any p = (do
       match (← it.step).inflate.val with
       | .yield it' x =>
-        if p x then
+        uif p x then
           return .up true
         else
           it'.any p
@@ -661,7 +661,7 @@ theorem IterM.allM_eq_match_step {α β : Type w} {m : Type w → Type w'} [Iter
     it.allM p = (do
       match (← it.step).inflate.val with
       | .yield it' x =>
-        if (← p x).down then
+        uif (← p x).down then
           it'.allM p
         else
           return .up false
@@ -696,7 +696,7 @@ theorem IterM.all_eq_match_step {α β : Type w} {m : Type w → Type w'} [Itera
     it.all p = (do
       match (← it.step).inflate.val with
       | .yield it' x =>
-        if p x then
+        uif p x then
           it'.all p
         else
           return .up false
@@ -845,7 +845,7 @@ theorem IterM.find?_eq_match_step {α β : Type w} {m : Type w → Type w'} [Mon
     it.find? f = (do
       match (← it.step).inflate.val with
       | .yield it' out =>
-        if f out then return (some out) else it'.find? f
+        uif f out then return (some out) else it'.find? f
       | .skip it' => it'.find? f
       | .done => return none) := by
   rw [find?_eq_findM?, findM?_eq_match_step]

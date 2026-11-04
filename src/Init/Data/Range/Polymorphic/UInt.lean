@@ -19,8 +19,8 @@ open Std Std.PRange
 namespace UInt8
 
 instance : UpwardEnumerable UInt8 where
-  succ? i := if i + 1 = 0 then none else some (i + 1)
-  succMany? n i := if h : i.toNat + n < UInt8.size then some (.ofNatLT _ h) else none
+  succ? i := bif i + 1 == 0 then none else some (i + 1)
+  succMany? n i := bif h : i.toNat + n <ᵇ UInt8.size then some (.ofNatLT _ (lt_of_decideLT_eq_true h)) else none
 
 instance : Least? UInt8 where
   least? := some 0
@@ -30,7 +30,8 @@ instance : LawfulUpwardEnumerableLeast? UInt8 where
 
 theorem succ?_ofBitVec {x : BitVec 8} :
     UpwardEnumerable.succ? (UInt8.ofBitVec x) = UInt8.ofBitVec <$> UpwardEnumerable.succ? x := by
-  simp only [succ?, BitVec.ofNat_eq_ofNat, Option.map_eq_map, ← UInt8.toBitVec_inj]
+  simp only [succ?, BitVec.ofNat_eq_ofNat, Option.map_eq_map, Bool.cond_eq_ite, beq_iff_eq,
+    ← UInt8.toBitVec_inj]
   split <;> simp_all
 
 theorem succMany?_ofBitVec {k : Nat} {x : BitVec 8} :
@@ -114,8 +115,8 @@ end UInt8
 namespace UInt16
 
 instance : UpwardEnumerable UInt16 where
-  succ? i := if i + 1 = 0 then none else some (i + 1)
-  succMany? n i := if h : i.toNat + n < UInt16.size then some (.ofNatLT _ h) else none
+  succ? i := bif i + 1 == 0 then none else some (i + 1)
+  succMany? n i := bif h : i.toNat + n <ᵇ UInt16.size then some (.ofNatLT _ (lt_of_decideLT_eq_true h)) else none
 
 instance : Least? UInt16 where
   least? := some 0
@@ -125,7 +126,8 @@ instance : LawfulUpwardEnumerableLeast? UInt16 where
 
 theorem succ?_ofBitVec {x : BitVec 16} :
     UpwardEnumerable.succ? (UInt16.ofBitVec x) = UInt16.ofBitVec <$> UpwardEnumerable.succ? x := by
-  simp only [succ?, BitVec.ofNat_eq_ofNat, Option.map_eq_map, ← UInt16.toBitVec_inj]
+  simp only [succ?, BitVec.ofNat_eq_ofNat, Option.map_eq_map, Bool.cond_eq_ite, beq_iff_eq,
+    ← UInt16.toBitVec_inj]
   split <;> simp_all
 
 theorem succMany?_ofBitVec {k : Nat} {x : BitVec 16} :
@@ -209,8 +211,8 @@ end UInt16
 namespace UInt32
 
 instance : UpwardEnumerable UInt32 where
-  succ? i := if i + 1 = 0 then none else some (i + 1)
-  succMany? n i := if h : i.toNat + n < UInt32.size then some (.ofNatLT _ h) else none
+  succ? i := bif i + 1 == 0 then none else some (i + 1)
+  succMany? n i := bif h : i.toNat + n <ᵇ UInt32.size then some (.ofNatLT _ (lt_of_decideLT_eq_true h)) else none
 
 instance : Least? UInt32 where
   least? := some 0
@@ -220,7 +222,8 @@ instance : LawfulUpwardEnumerableLeast? UInt32 where
 
 theorem succ?_ofBitVec {x : BitVec 32} :
     UpwardEnumerable.succ? (UInt32.ofBitVec x) = UInt32.ofBitVec <$> UpwardEnumerable.succ? x := by
-  simp only [succ?, BitVec.ofNat_eq_ofNat, Option.map_eq_map, ← UInt32.toBitVec_inj]
+  simp only [succ?, BitVec.ofNat_eq_ofNat, Option.map_eq_map, Bool.cond_eq_ite, beq_iff_eq,
+    ← UInt32.toBitVec_inj]
   split <;> simp_all
 
 theorem succMany?_ofBitVec {k : Nat} {x : BitVec 32} :
@@ -304,8 +307,8 @@ end UInt32
 namespace UInt64
 
 instance : UpwardEnumerable UInt64 where
-  succ? i := if i + 1 = 0 then none else some (i + 1)
-  succMany? n i := if h : i.toNat + n < UInt64.size then some (.ofNatLT _ h) else none
+  succ? i := bif i + 1 == 0 then none else some (i + 1)
+  succMany? n i := bif h : i.toNat + n <ᵇ UInt64.size then some (.ofNatLT _ (lt_of_decideLT_eq_true h)) else none
 
 instance : Least? UInt64 where
   least? := some 0
@@ -315,7 +318,8 @@ instance : LawfulUpwardEnumerableLeast? UInt64 where
 
 theorem succ?_ofBitVec {x : BitVec 64} :
     UpwardEnumerable.succ? (UInt64.ofBitVec x) = UInt64.ofBitVec <$> UpwardEnumerable.succ? x := by
-  simp only [succ?, BitVec.ofNat_eq_ofNat, Option.map_eq_map, ← UInt64.toBitVec_inj]
+  simp only [succ?, BitVec.ofNat_eq_ofNat, Option.map_eq_map, Bool.cond_eq_ite, beq_iff_eq,
+    ← UInt64.toBitVec_inj]
   split <;> simp_all
 
 theorem succMany?_ofBitVec {k : Nat} {x : BitVec 64} :
@@ -399,8 +403,8 @@ end UInt64
 namespace USize
 
 instance : UpwardEnumerable USize where
-  succ? i := if i + 1 = 0 then none else some (i + 1)
-  succMany? n i := if h : i.toNat + n < USize.size then some (.ofNatLT _ h) else none
+  succ? i := bif i + 1 == 0 then none else some (i + 1)
+  succMany? n i := bif h : i.toNat + n <ᵇ USize.size then some (.ofNatLT _ (lt_of_decideLT_eq_true h)) else none
 
 instance : Least? USize where
   least? := some 0
@@ -410,7 +414,8 @@ instance : LawfulUpwardEnumerableLeast? USize where
 
 theorem succ?_ofBitVec {x : BitVec System.Platform.numBits} :
     UpwardEnumerable.succ? (USize.ofBitVec x) = USize.ofBitVec <$> UpwardEnumerable.succ? x := by
-  simp only [succ?, BitVec.ofNat_eq_ofNat, Option.map_eq_map, ← USize.toBitVec_inj]
+  simp only [succ?, BitVec.ofNat_eq_ofNat, Option.map_eq_map, Bool.cond_eq_ite, beq_iff_eq,
+    ← USize.toBitVec_inj]
   split <;> simp_all
 
 theorem succMany?_ofBitVec {k : Nat} {x : BitVec System.Platform.numBits} :

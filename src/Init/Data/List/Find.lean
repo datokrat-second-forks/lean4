@@ -161,7 +161,7 @@ theorem getLast_flatten {L : List (List α)} (h : ∃ l, l ∈ L ∧ l ≠ []) :
   simp [getLast_eq_iff_getLast?_eq_some, getLast?_flatten]
 
 @[grind =]
-theorem findSome?_replicate : findSome? f (replicate n a) = if n = 0 then none else f a := by
+theorem findSome?_replicate : findSome? f (replicate n a) = uif n = 0 then none else f a := by
   cases n with
   | zero => simp
   | succ n =>
@@ -172,7 +172,7 @@ theorem findSome?_replicate : findSome? f (replicate n a) = if n = 0 then none e
   simp [findSome?_replicate, Nat.ne_of_gt h]
 
 -- Argument is unused, but used to decide whether `simp` should unfold.
-@[simp] theorem findSome?_replicate_of_isSome (_ : (f a).isSome) : findSome? f (replicate n a) = if n = 0 then none else f a := by
+@[simp] theorem findSome?_replicate_of_isSome (_ : (f a).isSome) : findSome? f (replicate n a) = uif n = 0 then none else f a := by
   simp [findSome?_replicate]
 
 @[simp] theorem findSome?_replicate_of_isNone (h : (f a).isNone) : findSome? f (replicate n a) = none := by
@@ -423,15 +423,15 @@ theorem find?_flatMap_eq_none_iff {xs : List α} {f : α → List β} {p : β �
   simp
 
 @[grind =]
-theorem find?_replicate : find? p (replicate n a) = if n = 0 then none else if p a then some a else none := by
+theorem find?_replicate : find? p (replicate n a) = uif n = 0 then none else uif p a then some a else none := by
   cases n
   · simp
   · by_cases p a <;> simp_all [replicate_succ]
 
-@[simp] theorem find?_replicate_of_length_pos (h : 0 < n) : find? p (replicate n a) = if p a then some a else none := by
+@[simp] theorem find?_replicate_of_length_pos (h : 0 < n) : find? p (replicate n a) = uif p a then some a else none := by
   simp [find?_replicate, Nat.ne_of_gt h]
 
-@[simp] theorem find?_replicate_of_pos (h : p a) : find? p (replicate n a) = if n = 0 then none else some a := by
+@[simp] theorem find?_replicate_of_pos (h : p a) : find? p (replicate n a) = uif n = 0 then none else some a := by
   simp [find?_replicate, h]
 
 @[simp] theorem find?_replicate_of_neg (h : ¬ p a) : find? p (replicate n a) = none := by
@@ -691,7 +691,7 @@ theorem findIdx_map (xs : List α) (f : α → β) (p : β → Bool) :
 @[grind =]
 theorem findIdx_append {p : α → Bool} {l₁ l₂ : List α} :
     (l₁ ++ l₂).findIdx p =
-      if l₁.findIdx p < l₁.length then l₁.findIdx p else l₂.findIdx p + l₁.length := by
+      uif l₁.findIdx p < l₁.length then l₁.findIdx p else l₂.findIdx p + l₁.length := by
   induction l₁ with
   | nil => simp
   | cons x xs ih =>
@@ -895,7 +895,7 @@ theorem findIdx?_flatten {l : List (List α)} {p : α → Bool} :
       simp [Function.comp_def, Nat.add_comm, Nat.add_assoc]
 
 @[simp, grind =] theorem findIdx?_replicate :
-    (replicate n a).findIdx? p = if 0 < n ∧ p a then some 0 else none := by
+    (replicate n a).findIdx? p = uif 0 < n ∧ p a then some 0 else none := by
   cases n with
   | zero => simp
   | succ n =>
@@ -903,16 +903,16 @@ theorem findIdx?_flatten {l : List (List α)} {p : α → Bool} :
     split <;> simp_all
 
 theorem findIdx?_eq_findSome?_zipIdx {xs : List α} {p : α → Bool} :
-    xs.findIdx? p = xs.zipIdx.findSome? fun ⟨a, i⟩ => if p a then some i else none := by
+    xs.findIdx? p = xs.zipIdx.findSome? fun ⟨a, i⟩ => uif p a then some i else none := by
   induction xs with
   | nil => simp
   | cons x xs ih =>
     simp only [findIdx?_cons, Nat.zero_add, zipIdx]
     split
     · simp_all
-    · simp_all only [ite_false, Option.isNone_none, findSome?_cons_of_isNone, reduceCtorEq]
+    · simp_all only [UDecidable.ite_false, Option.isNone_none, findSome?_cons_of_isNone, reduceCtorEq]
       rw [← map_snd_add_zipIdx_eq_zipIdx (n := 1) (k := 0)]
-      simp [Function.comp_def, findSome?_map]
+      simp [findSome?_map, Function.comp_def]
 
 theorem findIdx?_eq_fst_find?_zipIdx {xs : List α} {p : α → Bool} :
     xs.findIdx? p = (xs.zipIdx.find? fun ⟨x, _⟩ => p x).map (·.2) := by
@@ -1029,7 +1029,7 @@ theorem findFinIdx?_eq_pmap_findIdx? {xs : List α} {p : α → Bool} :
 
 @[grind =]
 theorem findFinIdx?_cons {p : α → Bool} {x : α} {xs : List α} :
-    findFinIdx? p (x :: xs) = if p x then some 0 else (findFinIdx? p xs).map Fin.succ := by
+    findFinIdx? p (x :: xs) = uif p x then some 0 else (findFinIdx? p xs).map Fin.succ := by
   rw [← Option.map_inj_right (f := Fin.val) (fun a b => Fin.eq_of_val_eq)]
   rw [← findIdx?_eq_map_findFinIdx?_val]
   rw [findIdx?_cons]
@@ -1049,7 +1049,7 @@ theorem findFinIdx?_append {xs ys : List α} {p : α → Bool} :
   · simp [h]
 
 @[simp, grind =] theorem findFinIdx?_singleton {a : α} {p : α → Bool} :
-    [a].findFinIdx? p = if p a then some ⟨0, by simp⟩ else none := by
+    [a].findFinIdx? p = uif p a then some ⟨0, by simp⟩ else none := by
   simp [findFinIdx?_cons, findFinIdx?_nil]
 
 @[simp, grind =] theorem findFinIdx?_eq_none_iff {l : List α} {p : α → Bool} :
@@ -1160,12 +1160,12 @@ theorem getElem_idxOf [BEq α] [LawfulBEq α] {x : α} {xs : List α}
 
 @[grind =]
 theorem idxOf_append [BEq α] [LawfulBEq α] {l₁ l₂ : List α} {a : α} :
-    (l₁ ++ l₂).idxOf a = if a ∈ l₁ then l₁.idxOf a else l₂.idxOf a + l₁.length := by
+    (l₁ ++ l₂).idxOf a = uif a ∈ l₁ then l₁.idxOf a else l₂.idxOf a + l₁.length := by
   rw [idxOf, findIdx_append]
   split <;> rename_i h
-  · rw [ite_eq_left]
+  · rw [UDecidable.ite_eq_left]
     simpa using h
-  · rw [ite_eq_right]
+  · rw [UDecidable.ite_eq_right]
     simpa using h
 
 theorem idxOf_eq_length [BEq α] [LawfulBEq α] {l : List α} (h : a ∉ l) : l.idxOf a = l.length := by
@@ -1218,7 +1218,7 @@ theorem idxOf?_eq_map_finIdxOf?_val [BEq α] {xs : List α} {a : α} :
 
 @[grind =] theorem finIdxOf?_cons [BEq α] {a : α} {xs : List α} :
     (a :: xs).finIdxOf? b =
-      if a == b then some ⟨0, by simp⟩ else (xs.finIdxOf? b).map (·.succ) := by
+      uif a == b then some ⟨0, by simp⟩ else (xs.finIdxOf? b).map (·.succ) := by
   simp [finIdxOf?, findFinIdx?_cons]
 
 @[simp, grind =] theorem finIdxOf?_eq_none_iff [BEq α] [LawfulBEq α] {l : List α} {a : α} :
@@ -1349,12 +1349,12 @@ variable [BEq α]
 @[simp] theorem lookup_cons_self [ReflBEq α] {k : α} : ((k,b) :: es).lookup k = some b := by
   simp [lookup_cons]
 
-@[simp] theorem lookup_singleton {a b : α} : [(a,b)].lookup c = if c == a then some b else none := by
+@[simp] theorem lookup_singleton {a b : α} : [(a,b)].lookup c = uif c == a then some b else none := by
   simp [lookup_cons, lookup_nil]
   split <;> simp_all
 
 theorem lookup_eq_findSome? {l : List (α × β)} {k : α} :
-    l.lookup k = l.findSome? fun p => if k == p.1 then some p.2 else none := by
+    l.lookup k = l.findSome? fun p => uif k == p.1 then some p.2 else none := by
   induction l with
   | nil => rfl
   | cons p l ih =>
@@ -1376,7 +1376,7 @@ theorem lookup_eq_some_iff [LawfulBEq α] {l : List (α × β)} {k : α} {b : β
   simp only [lookup_eq_findSome?, findSome?_eq_some_iff]
   constructor
   · rintro ⟨l₁, a, l₂, rfl, h₁, h₂⟩
-    simp only [beq_iff_eq, Option.ite_none_right_eq_some, Option.some.injEq] at h₁
+    simp only [beq_iff_eq, Option.uite_none_right_eq_some, Option.some.injEq] at h₁
     obtain ⟨rfl, rfl⟩ := h₁
     simp at h₂
     exact ⟨l₁, l₂, rfl, by simpa using h₂⟩
@@ -1390,7 +1390,7 @@ theorem lookup_append {l₁ l₂ : List (α × β)} {k : α} :
 
 @[grind =]
 theorem lookup_replicate {k : α} :
-    (replicate n (a,b)).lookup k = if n = 0 then none else if k == a then some b else none := by
+    (replicate n (a,b)).lookup k = uif n = 0 then none else uif k == a then some b else none := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -1398,11 +1398,11 @@ theorem lookup_replicate {k : α} :
     split <;> simp_all
 
 theorem lookup_replicate_of_pos {k : α} (h : 0 < n) :
-    (replicate n (a, b)).lookup k = if k == a then some b else none := by
+    (replicate n (a, b)).lookup k = uif k == a then some b else none := by
   simp [lookup_replicate, Nat.ne_of_gt h]
 
 theorem lookup_replicate_self [ReflBEq α] {a : α} :
-    (replicate n (a, b)).lookup a = if n = 0 then none else some b := by
+    (replicate n (a, b)).lookup a = uif n = 0 then none else some b := by
   simp [lookup_replicate]
 
 @[simp] theorem lookup_replicate_self_of_pos [ReflBEq α] {a : α} (h : 0 < n) :

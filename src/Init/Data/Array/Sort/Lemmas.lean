@@ -104,7 +104,7 @@ private theorem Array.MergeSort.merge_eq_listMerge {xs ys : Array α} {le} :
 
 private theorem List.mergeSort_eq_merge_mkSlice {xs : List α} :
     xs.mergeSort le =
-      if 1 < xs.length then
+      uif 1 < xs.length then
         merge (xs[*...((xs.length + 1) / 2)].toList.mergeSort le) (xs[((xs.length + 1) / 2)...*].toList.mergeSort le) le
       else
         xs := by

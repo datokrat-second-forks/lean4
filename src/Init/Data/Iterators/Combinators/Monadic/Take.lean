@@ -117,19 +117,19 @@ inductive Take.PlausibleStep [Iterator α m β] (it : IterM (α := Take α m) m 
 instance Take.instIterator [Monad m] [Iterator α m β] : Iterator (Take α m) m β where
   IsPlausibleStep := Take.PlausibleStep
   step it :=
-    if h : it.internalState.countdown = 1 then
-      pure <| .deflate <| .done (.depleted h)
+    bif h : it.internalState.countdown =ᵇ 1 then
+      pure <| .deflate <| .done (.depleted (decideEq_eq_true_iff.1 h))
     else do
       match (← it.internalState.inner.step).inflate with
       | .yield it' out h' =>
-        pure <| .deflate <| .yield ⟨it.internalState.countdown - 1, it', (it.internalState.finite.imp_left (by omega))⟩ out (.yield h' h)
-      | .skip it' h' => pure <| .deflate <| .skip ⟨it.internalState.countdown, it', it.internalState.finite⟩ (.skip h' h)
+        pure <| .deflate <| .yield ⟨it.internalState.countdown - 1, it', (it.internalState.finite.imp_left (by omega))⟩ out (.yield h' (decideEq_eq_false_iff.1 h))
+      | .skip it' h' => pure <| .deflate <| .skip ⟨it.internalState.countdown, it', it.internalState.finite⟩ (.skip h' (decideEq_eq_false_iff.1 h))
       | .done h' => pure <| .deflate <| .done (.done h')
 
 def Take.Rel (m : Type w → Type w') [Monad m] [Iterator α m β] [Productive α m] :
     IterM (α := Take α m) m β → IterM (α := Take α m) m β → Prop :=
   open scoped Classical in
-  if _ : Finite α m then
+  uif _ : Finite α m then
     InvImage (Prod.Lex Nat.lt_wfRel.rel IterM.TerminationMeasures.Finite.Rel)
       (fun it => (it.internalState.countdown, it.internalState.inner.finitelyManySteps))
   else
@@ -158,7 +158,7 @@ theorem Take.rel_of_zero_of_inner [Monad m] [Iterator α m β]
     haveI := it.internalState.finite.resolve_left (by omega)
     Take.Rel m it' it := by
   haveI := it.internalState.finite.resolve_left (by omega)
-  simp only [Rel, this, ↓reduceDIte, InvImage, h, h']
+  simp only [Rel, this, ↓reduceUDIte, InvImage, h, h']
   exact Prod.Lex.right _ h''
 
 private def Take.instFinitenessRelation [Monad m] [Iterator α m β]

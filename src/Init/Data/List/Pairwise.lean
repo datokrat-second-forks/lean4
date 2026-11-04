@@ -385,15 +385,15 @@ theorem nodup_iff_count_of_mem [BEq α] [LawfulBEq α] {l : List α} :
   exact fun hb => forall₂_congr fun a ha => count_cons_of_ne (hb <| · ▸ ha : b ≠ a) ▸ Iff.rfl
 
 theorem nodup_iff_count_eq_ite [BEq α] [LawfulBEq α] {l : List α} :
-    l.Nodup ↔ ∀ a, count a l = if a ∈ l then 1 else 0 :=
+    l.Nodup ↔ ∀ a, count a l = uif a ∈ l then 1 else 0 :=
   nodup_iff_count_of_mem.trans <| forall_congr' fun a => by
   by_cases ha : a ∈ l <;> simp [ha, count_eq_zero]
 
 theorem Nodup.count [BEq α] [LawfulBEq α] {a : α} {l : List α} (h : Nodup l) :
-    l.count a = if a ∈ l then 1 else 0 := nodup_iff_count_eq_ite.mp h _
+    l.count a = uif a ∈ l then 1 else 0 := nodup_iff_count_eq_ite.mp h _
 
 theorem Nodup.count_of_mem [BEq α] [LawfulBEq α] {a : α} {l : List α} (h : Nodup l) (ha : a ∈ l) :
-    l.count a = 1 := h.count ▸ ite_eq_left ha
+    l.count a = 1 := h.count ▸ UDecidable.ite_eq_left ha
 
 grind_pattern Nodup.count => count a l, Nodup l
 

@@ -403,7 +403,7 @@ theorem attach_filterMap {xs : Array α} {f : α → Option β} :
 @[grind =]
 theorem attach_filter {xs : Array α} (p : α → Bool) :
     (xs.filter p).attach = xs.attach.filterMap
-      fun x => if w : p x.1 then some ⟨x.1, mem_filter.mpr ⟨x.2, w⟩⟩ else none := by
+      fun x => uif w : p x.1 then some ⟨x.1, mem_filter.mpr ⟨x.2, w⟩⟩ else none := by
   cases xs
   rw [attach_congr List.filter_toArray]
   simp [List.attach_filter, List.map_filterMap, Function.comp_def]

@@ -21,7 +21,7 @@ namespace List
 
 @[grind =]
 theorem getElem?_eraseIdx {l : List α} {i : Nat} {j : Nat} :
-    (l.eraseIdx i)[j]? = if j < i then l[j]? else l[j + 1]? := by
+    (l.eraseIdx i)[j]? = uif j < i then l[j]? else l[j + 1]? := by
   rw [eraseIdx_eq_take_drop_succ, getElem?_append]
   split <;> rename_i h
   · rw [getElem?_take]
@@ -51,13 +51,13 @@ theorem getElem?_eraseIdx_of_lt {l : List α} {i : Nat} {j : Nat} (h : j < i) :
 theorem getElem?_eraseIdx_of_ge {l : List α} {i : Nat} {j : Nat} (h : i ≤ j) :
     (l.eraseIdx i)[j]? = l[j + 1]? := by
   rw [getElem?_eraseIdx]
-  simp only [ite_eq_right_iff]
+  simp only [UDecidable.ite_eq_right_iff]
   intro h'
   omega
 
 @[grind =]
 theorem getElem_eraseIdx {l : List α} {i : Nat} {j : Nat} (h : j < (l.eraseIdx i).length) :
-    (l.eraseIdx i)[j] = if h' : j < i then
+    (l.eraseIdx i)[j] = uif h' : j < i then
         l[j]'(by have := length_eraseIdx_le l i; omega)
       else
         l[j + 1]'(by rw [length_eraseIdx] at h; split at h <;> omega) := by
@@ -68,13 +68,13 @@ theorem getElem_eraseIdx {l : List α} {i : Nat} {j : Nat} (h : j < (l.eraseIdx 
 theorem getElem_eraseIdx_of_lt {l : List α} {i : Nat} {j : Nat} (h : j < (l.eraseIdx i).length) (h' : j < i) :
     (l.eraseIdx i)[j] = l[j]'(by have := length_eraseIdx_le l i; omega) := by
   rw [getElem_eraseIdx]
-  simp only [dite_eq_left_iff, Nat.not_lt]
+  simp only [UDecidable.dite_eq_left_iff, Nat.not_lt]
   intro h'
   omega
 
 theorem getElem_eraseIdx_of_ge {l : List α} {i : Nat} {j : Nat} (h : j < (l.eraseIdx i).length) (h' : i ≤ j) :
     (l.eraseIdx i)[j] = l[j + 1]'(by rw [length_eraseIdx] at h; split at h <;> omega) := by
-  rw [getElem_eraseIdx, dite_eq_right]
+  rw [getElem_eraseIdx, UDecidable.dite_eq_right]
   omega
 
 theorem eraseIdx_eq_dropLast {l : List α} {i : Nat} (h : i + 1 = l.length) :
@@ -133,9 +133,9 @@ theorem eraseIdx_set_gt {l : List α} {i : Nat} {j : Nat} {a : α} (h : i < j) :
 @[grind =]
 theorem eraseIdx_set {xs : List α} {i : Nat} {a : α} {j : Nat} :
     (xs.set i a).eraseIdx j =
-      if j < i then
+      uif j < i then
         (xs.eraseIdx j).set (i - 1) a
-      else if j = i then
+      else uif j = i then
         xs.eraseIdx i
       else
         (xs.eraseIdx j).set i a := by
@@ -162,7 +162,7 @@ theorem set_eraseIdx_gt {xs : List α} {i : Nat} {j : Nat} {a : α} (h : j < i) 
 @[grind =]
 theorem set_eraseIdx {xs : List α} {i : Nat} {j : Nat} {a : α} :
     (xs.eraseIdx i).set j a =
-      if i ≤ j then
+      uif i ≤ j then
         (xs.set (j + 1) a).eraseIdx i
       else
         (xs.set j a).eraseIdx i := by
@@ -176,8 +176,8 @@ theorem set_eraseIdx {xs : List α} {i : Nat} {j : Nat} {a : α} :
     {l : List α} {i : Nat} (h : i + 1 < l.length) :
     (l.eraseIdx (i + 1)).set i l[i + 1] = l.eraseIdx i := by
   apply ext_getElem
-  · simp only [length_set, length_eraseIdx, h, ↓reduceIte]
-    rw [ite_eq_left]
+  · simp only [length_set, length_eraseIdx, h, ↓reduceUIte]
+    rw [UDecidable.ite_eq_left]
     omega
   · intro n h₁ h₂
     simp [getElem_set, getElem_eraseIdx]
