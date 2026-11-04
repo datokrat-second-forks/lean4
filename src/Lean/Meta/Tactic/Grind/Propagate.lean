@@ -337,8 +337,11 @@ where
         registerParent e rhs
       pushEq e rhs h
 
-/-- Propagates `ite` upwards -/
-builtin_grind_propagator propagateIte ↑ite := fun e => do
+/--
+Propagates `ite`-like applications upwards. `eqLeft`/`eqRight` are the counterparts of
+`ite_eq_left_of_eq_true`/`ite_eq_right_of_eq_false`.
+-/
+private def propagateIteCore (eqLeft eqRight : Name) (e : Expr) : GoalM Unit := do
   let numArgs := e.getAppNumArgs
   if numArgs < 5 then return ()
   let c := e.getArg! 1 numArgs
@@ -346,17 +349,28 @@ builtin_grind_propagator propagateIte ↑ite := fun e => do
     let f := e.getAppFn
     let args := e.getAppArgs
     let rhs := args[3]!
-    let h := mkApp (mkAppRange (mkConst ``ite_eq_left_of_eq_true f.constLevels!) 0 5 args) (← mkEqTrueProof c)
+    let h := mkApp (mkAppRange (mkConst eqLeft f.constLevels!) 0 5 args) (← mkEqTrueProof c)
     applyCongrFun e rhs h 5 args (ite := true)
   else if (← isEqFalse c) then
     let f := e.getAppFn
     let args := e.getAppArgs
     let rhs := args[4]!
-    let h := mkApp (mkAppRange (mkConst ``ite_eq_right_of_eq_false f.constLevels!) 0 5 args) (← mkEqFalseProof c)
+    let h := mkApp (mkAppRange (mkConst eqRight f.constLevels!) 0 5 args) (← mkEqFalseProof c)
     applyCongrFun e rhs h 5 args (ite := true)
 
-/-- Propagates `dite` upwards -/
-builtin_grind_propagator propagateDIte ↑dite := fun e => do
+/-- Propagates `ite` upwards -/
+builtin_grind_propagator propagateIte ↑ite :=
+  propagateIteCore ``ite_eq_left_of_eq_true ``ite_eq_right_of_eq_false
+
+/-- Propagates `UDecidable.ite` upwards -/
+builtin_grind_propagator propagateUIte ↑UDecidable.ite :=
+  propagateIteCore ``UDecidable.ite_eq_left_of_eq_true ``UDecidable.ite_eq_right_of_eq_false
+
+/--
+Propagates `dite`-like applications upwards. `eqLeft`/`eqRight` are the counterparts of
+`Grind.dite_cond_eq_true'`/`Grind.dite_cond_eq_false'`.
+-/
+private def propagateDIteCore (eqLeft eqRight : Name) (e : Expr) : GoalM Unit := do
   let numArgs := e.getAppNumArgs
   if numArgs < 5 then return ()
   let c := e.getArg! 1 numArgs
@@ -368,7 +382,7 @@ builtin_grind_propagator propagateDIte ↑dite := fun e => do
     let p ← preprocess ah₁
     let r := p.expr
     let h₂ ← p.getProof
-    let h := mkApp3 (mkAppRange (mkConst ``Grind.dite_cond_eq_true' f.constLevels!) 0 5 args) r h₁ h₂
+    let h := mkApp3 (mkAppRange (mkConst eqLeft f.constLevels!) 0 5 args) r h₁ h₂
     applyCongrFun e r h 5 args (ite := false)
   else if (← isEqFalse c) then
     let f := e.getAppFn
@@ -378,8 +392,16 @@ builtin_grind_propagator propagateDIte ↑dite := fun e => do
     let p ← preprocess bh₁
     let r := p.expr
     let h₂ ← p.getProof
-    let h := mkApp3 (mkAppRange (mkConst ``Grind.dite_cond_eq_false' f.constLevels!) 0 5 args) r h₁ h₂
+    let h := mkApp3 (mkAppRange (mkConst eqRight f.constLevels!) 0 5 args) r h₁ h₂
     applyCongrFun e r h 5 args (ite := false)
+
+/-- Propagates `dite` upwards -/
+builtin_grind_propagator propagateDIte ↑dite :=
+  propagateDIteCore ``Grind.dite_cond_eq_true' ``Grind.dite_cond_eq_false'
+
+/-- Propagates `UDecidable.dite` upwards -/
+builtin_grind_propagator propagateUDIte ↑UDecidable.dite :=
+  propagateDIteCore ``Grind.udite_cond_eq_true' ``Grind.udite_cond_eq_false'
 
 builtin_grind_propagator propagateDecideDown ↓decide := fun e => do
   let root ← getRootENode e

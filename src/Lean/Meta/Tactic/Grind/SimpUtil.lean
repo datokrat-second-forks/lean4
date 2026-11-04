@@ -87,6 +87,16 @@ builtin_simproc_decl simpDIte (@dite _ _ _ _ _) := fun e => do
  let expr := mkApp5 (mkConst ``ite us) α c inst aBody bBody
  return .visit { expr, proof? := some (mkApp5 (mkConst ``dite_eq_ite us) c α aBody bBody inst) }
 
+builtin_simproc_decl simpUDIte (@UDecidable.dite _ _ _ _ _) := fun e => do
+ let_expr f@UDecidable.dite α c inst a b ← e | return .continue
+ let .lam _ _ aBody _ := a | return .continue
+ if aBody.hasLooseBVars then return .continue
+ let .lam _ _ bBody _ := b | return .continue
+ if bBody.hasLooseBVars then return .continue
+ let us := f.constLevels!
+ let expr := mkApp5 (mkConst ``UDecidable.ite us) α c inst aBody bBody
+ return .visit { expr, proof? := some (mkApp5 (mkConst ``UDecidable.dite_eq_ite us) α c inst aBody bBody) }
+
 builtin_simproc_decl pushNot (Not _) := fun e => do
  let_expr Not p ← e | return .continue
  match_expr p with
@@ -103,6 +113,7 @@ builtin_simproc_decl pushNot (Not _) := fun e => do
      | Bool.false => return .visit { expr := mkApp3 f α a (mkConst ``Bool.true), proof? := some <| mkApp (mkConst ``Bool.not_eq_false) a }
      | _ => return .continue
  | f@ite α c inst a b => return .visit { expr := mkApp5 f α c inst (mkNot a) (mkNot b), proof? := some <| mkApp4 (mkConst ``Grind.not_ite) c inst a b }
+ | f@UDecidable.ite α c inst a b => return .visit { expr := mkApp5 f α c inst (mkNot a) (mkNot b), proof? := some <| mkApp4 (mkConst ``Grind.not_uite) c inst a b }
  | Exists α p =>
    let expr := mkForall `a .default α (mkNot (mkApp p (mkBVar 0)))
    let u ← getLevel α
@@ -179,6 +190,7 @@ protected def getSimprocs : MetaM (Array Simprocs) := do
   let s ← s.add ``simpEq (post := true)
   let s ← s.add ``simpOr (post := true)
   let s ← s.add ``simpDIte (post := true)
+  let s ← s.add ``simpUDIte (post := true)
   let s ← s.add ``pushNot (post := false)
   let s ← s.add ``unfoldReducibleSimproc (post := false)
   return #[s]

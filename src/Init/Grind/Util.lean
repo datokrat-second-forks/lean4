@@ -7,6 +7,7 @@ module
 prelude
 public import Init.Data.Cast
 public import Init.Grind.Tactics
+public import Init.UDecidable.Basic
 public meta import Init.Grind.Tactics
 import Init.Classical
 public section
@@ -21,6 +22,9 @@ theorem nestedProof (p : Prop) {h : p} : p := h
 -- **Note**: We mark it as an abbreviation to ensure the kernel will not get confused when checking
 -- that `t =?= Grind.nestedDecidable t`
 abbrev nestedDecidable {p : Prop} (h : Decidable p) : Decidable p := h
+
+/-- A helper gadget for annotating nested `UDecidable` instances in goals. -/
+abbrev nestedUDecidable {p : Prop} (h : UDecidable p) : UDecidable p := h
 
 /--
 Gadget for marking `match`-expressions that should not be reduced by the `grind` simplifier, but the discriminants should be normalized.
@@ -74,6 +78,9 @@ theorem nestedDecidable_congr (p q : Prop) (h : p = q) (hp : Decidable p) (hq : 
   subst h; cases hp <;> cases hq <;> unfold nestedDecidable <;> try simp
   next h1 h2 => exact False.elim (h1 h2)
   next h1 h2 => exact False.elim (h2 h1)
+
+theorem nestedUDecidable_congr (p q : Prop) (h : p = q) (hp : UDecidable p) (hq : UDecidable q) : @nestedUDecidable p hp ≍ @nestedUDecidable q hq := by
+  subst h; exact HEq.rfl
 
 @[app_unexpander nestedProof]
 meta def nestedProofUnexpander : PrettyPrinter.Unexpander := fun stx => do

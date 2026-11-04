@@ -41,6 +41,10 @@ theorem not_not (p : Prop) : (¬¬p) = p := by by_cases p <;> simp [*]
 theorem not_and (p q : Prop) : (¬(p ∧ q)) = (¬p ∨ ¬q) := by by_cases p <;> by_cases q <;> simp [*]
 theorem not_or (p q : Prop) : (¬(p ∨ q)) = (¬p ∧ ¬q) := by by_cases p <;> by_cases q <;> simp [*]
 theorem not_ite {_ : Decidable p} (q r : Prop) : (¬ite p q r) = ite p (¬q) (¬r) := by by_cases p <;> simp [*]
+theorem not_uite {_ : UDecidable p} (q r : Prop) : (¬UDecidable.ite p q r) = UDecidable.ite p (¬q) (¬r) := by
+  cases UDecidable.em p with
+  | inl h => rw [UDecidable.ite_eq_left h, UDecidable.ite_eq_left h]
+  | inr h => rw [UDecidable.ite_eq_right h, UDecidable.ite_eq_right h]
 theorem not_forall (p : α → Prop) : (¬∀ x, p x) = ∃ x, ¬p x := by simp
 theorem not_exists (p : α → Prop) : (¬∃ x, p x) = ∀ x, ¬p x := by simp
 theorem not_implies (p q : Prop) : (¬(p → q)) = (p ∧ ¬q) := by simp
@@ -67,6 +71,21 @@ theorem udite_eq_dite {α : Sort u} {c : Prop} {_ : UDecidable c} {t : c → α}
 
 theorem cond_eq_ite (c : Bool) (a b : α) : cond c a b = ite c a b := by
   cases c <;> simp [*]
+
+/-! Not `[grind norm]` yet: they are meant to replace `uite_eq_ite`, `udite_eq_dite` and `cond_eq_ite`. -/
+
+theorem ite_eq_uite {α : Sort u} {c : Prop} {_ : Decidable c} {t e : α} :
+    ite c t e = @UDecidable.ite α c (UDecidable.ofDecidable c) t e :=
+  (@UDecidable.ite_eq_ite α c (UDecidable.ofDecidable c) _ t e).symm
+
+theorem dite_eq_udite {α : Sort u} {c : Prop} {_ : Decidable c} {t : c → α} {e : ¬c → α} :
+    dite c t e = @UDecidable.dite α c (UDecidable.ofDecidable c) t e :=
+  (@UDecidable.dite_eq_dite α c (UDecidable.ofDecidable c) _ t e).symm
+
+theorem cond_eq_uite (c : Bool) (a b : α) : cond c a b = uif c = true then a else b := by
+  cases c with
+  | true => exact (UDecidable.ite_eq_left rfl).symm
+  | false => exact (UDecidable.ite_eq_right Bool.noConfusion).symm
 
 theorem Nat.lt_eq (a b : Nat) : (a < b) = (a + 1 ≤ b) := by
   simp [Nat.lt, LT.lt]

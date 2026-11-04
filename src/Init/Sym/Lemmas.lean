@@ -74,6 +74,24 @@ theorem dite_cond_congr {α : Sort u} (c : Prop) {inst : Decidable c} (a : c →
     : @dite α c inst a b = @dite α c' inst' (fun h' => a (h.mpr_prop h')) (fun h' => b (h.mpr_not h')) := by
   simp [*]
 
+theorem uite_cond_congr {α : Sort u} (c : Prop) {inst : UDecidable c} (a b : α) (c' : Prop) (h : c = c') :
+    @UDecidable.ite α c inst a b = @UDecidable.ite α c' (UDecidable.classical c') a b := by
+  subst h; rfl
+
+theorem udite_cond_congr {α : Sort u} (c : Prop) {inst : UDecidable c} (a : c → α) (b : ¬ c → α)
+    (c' : Prop) (h : c = c') :
+    @UDecidable.dite α c inst a b = @UDecidable.dite α c' (UDecidable.classical c')
+      (fun h' => a (h.mpr_prop h')) (fun h' => b (h.mpr_not h')) := by
+  subst h; rfl
+
+theorem udite_eq_left_of_eq_true {α : Sort u} {c : Prop} {_ : UDecidable c} {a : c → α} {b : ¬ c → α}
+    (h : c = True) : UDecidable.dite c a b = a (of_eq_true h) :=
+  UDecidable.dite_eq_left (of_eq_true h)
+
+theorem udite_eq_right_of_eq_false {α : Sort u} {c : Prop} {_ : UDecidable c} {a : c → α} {b : ¬ c → α}
+    (h : c = False) : UDecidable.dite c a b = b (of_eq_false h) :=
+  UDecidable.dite_eq_right (of_eq_false h)
+
 theorem cond_cond_eq_true {α : Sort u} (c : Bool) (a b : α) (h : c = true) : cond c a b = a := by
   simp [*]
 

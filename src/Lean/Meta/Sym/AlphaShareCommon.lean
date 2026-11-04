@@ -61,6 +61,7 @@ propagators consume them.
 -/
 def isGrindGadget (declName : Name) : Bool :=
   declName == ``Grind.EqMatch || declName == ``Grind.MatchCond || declName == ``Grind.nestedDecidable
+    || declName == ``Grind.nestedUDecidable
 
 /--
 Returns `true` if `declName` is a reducible constant that the `unfoldReducible`

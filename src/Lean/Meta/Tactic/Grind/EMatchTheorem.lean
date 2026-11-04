@@ -439,6 +439,7 @@ def isOpaqueForIndexing (declName : Name) : Bool :=
   declName == ``OfNat.ofNat || declName == ``Grind.nestedProof
     || declName == ``Grind.eqBwdPattern
     || declName == ``Grind.nestedDecidable || declName == ``ite
+    || declName == ``Grind.nestedUDecidable || declName == ``UDecidable.ite
 
 namespace NormalizePattern
 

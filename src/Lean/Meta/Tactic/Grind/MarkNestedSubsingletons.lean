@@ -17,6 +17,7 @@ private abbrev M := StateRefT (Std.HashMap ExprPtr Expr) GrindM
 def isMarkedSubsingletonConst (e : Expr) : Bool := Id.run do
   let .const declName _ := e | false
   return declName == ``Grind.nestedProof || declName == ``Grind.nestedDecidable
+    || declName == ``Grind.nestedUDecidable
 
 def isMarkedSubsingletonApp (e : Expr) : Bool :=
   /-
@@ -28,10 +29,13 @@ def isMarkedSubsingletonApp (e : Expr) : Bool :=
   -/
   isMarkedSubsingletonConst e.getAppFn && e.getAppNumArgs == 2
 
-/-- Returns `some p` if `e` is of the form `Decidable p` -/
-private def isDecidable (e : Expr) : MetaM (Option Expr) := do
+/--
+Returns `some (p, u)` if `e` is of the form `Decidable p` (`u = false`) or `UDecidable p` (`u = true`).
+-/
+private def isDecidable (e : Expr) : MetaM (Option (Expr × Bool)) := do
   match_expr (← whnfCore e) with
-  | Decidable p => return some p
+  | Decidable p => return some (p, false)
+  | UDecidable p => return some (p, true)
   | _ => return none
 
 /-- Result of `isProofOrDecidableQuick`. -/
@@ -40,7 +44,7 @@ private inductive QuickResult where
 
 /--
 Classifies a term from its (syntactically known) type `rt`:
-- `.decidable` if `rt` is a `Decidable`-application,
+- `.decidable` if `rt` is a `Decidable`- or `UDecidable`-application,
 - `.proof` if `rt` is definitely a proposition,
 - `.no` if `rt` is definitely neither a proposition nor reducible by `whnfCore` to a
   `Decidable`-application: sorts, dependent arrows, and applications headed by an inductive type,
@@ -50,7 +54,7 @@ Classifies a term from its (syntactically known) type `rt`:
 inspect the head symbols, so they are not affected (`isPropQuick` returns `.undef` on them).
 -/
 private def classifyResultType (rt : Expr) : MetaM QuickResult := do
-  if rt.isAppOf ``Decidable then
+  if rt.isAppOf ``Decidable || rt.isAppOf ``UDecidable then
     return .decidable
   match (← isPropQuick rt) with
   | .true  => return .proof
@@ -122,7 +126,7 @@ private partial def isProofOrDecidableQuick (e : Expr) : MetaM QuickResult := do
 private inductive ProofOrDecidableResult where
   | no
   | proof (type : Expr)
-  | decidable (p : Expr)
+  | decidable (p : Expr) (u : Bool)
 
 /--
 Returns whether `e` is a proof (together with its type), a `Decidable` instance (together
@@ -137,13 +141,14 @@ private def isProofOrDecidable (e : Expr) : MetaM ProofOrDecidableResult := do
     let type ← inferType e
     if (← Meta.isProp type) then
       return .proof type
-    else if let some p ← isDecidable type then
-      return .decidable p
+    else if let some (p, u) ← isDecidable type then
+      return .decidable p u
     else
       return .no
 
 /--
-Wrap nested proofs and decidable instances in `e` with `Lean.Grind.nestedProof` and `Lean.Grind.nestedDecidable`-applications.
+Wrap nested proofs and decidable instances in `e` with `Lean.Grind.nestedProof`, `Lean.Grind.nestedDecidable`
+and `Lean.Grind.nestedUDecidable`-applications.
 Recall that the congruence closure module has special support for them.
 -/
 -- TODO: consider other subsingletons in the future? We decided to not support them to avoid the overhead of
@@ -163,8 +168,9 @@ where
       let e' := mkApp2 (mkConst ``Grind.nestedProof) (← preprocess type) e
       modify fun s => s.insert { expr := e } e'
       return e'
-    | .decidable p =>
-      let e' := mkApp2 (mkConst ``Grind.nestedDecidable) (← preprocess p) e
+    | .decidable p u =>
+      let g := if u then ``Grind.nestedUDecidable else ``Grind.nestedDecidable
+      let e' := mkApp2 (mkConst g) (← preprocess p) e
       modify fun s => s.insert { expr := e } e'
       return e'
     | .no => pure ()

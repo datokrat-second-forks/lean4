@@ -153,6 +153,10 @@ theorem of_forall_eq_false (α : Sort u) (p : α → Prop) (h : (∀ x : α, p x
 
 theorem dite_cond_eq_true' {α : Sort u} {c : Prop} {_ : Decidable c} {a : c → α} {b : ¬ c → α} {r : α} (h₁ : c = True) (h₂ : a (of_eq_true h₁) = r) : (dite c a b) = r := by simp [h₁, h₂]
 theorem dite_cond_eq_false' {α : Sort u} {c : Prop} {_ : Decidable c} {a : c → α} {b : ¬ c → α} {r : α} (h₁ : c = False) (h₂ : b (of_eq_false h₁) = r) : (dite c a b) = r := by simp [h₁, h₂]
+theorem udite_cond_eq_true' {α : Sort u} {c : Prop} {_ : UDecidable c} {a : c → α} {b : ¬ c → α} {r : α} (h₁ : c = True) (h₂ : a (of_eq_true h₁) = r) : UDecidable.dite c a b = r :=
+  (UDecidable.dite_eq_left (of_eq_true h₁)).trans h₂
+theorem udite_cond_eq_false' {α : Sort u} {c : Prop} {_ : UDecidable c} {a : c → α} {b : ¬ c → α} {r : α} (h₁ : c = False) (h₂ : b (of_eq_false h₁) = r) : UDecidable.dite c a b = r :=
+  (UDecidable.dite_eq_right (of_eq_false h₁)).trans h₂
 
 /-! Casts -/
 

@@ -142,19 +142,31 @@ def simpEq : Simproc := fun e => do
       return .step (← mkNotS lhs) (mkApp (mkConst ``Grind.eq_false_eq) lhs)
     return .rfl
 
-/-- Converts `dite` with non-dependent branches into `ite`. -/
+/-- Returns the bodies of `a` and `b` if both are lambdas that do not use their argument. -/
+private def nonDepBodies? (a b : Expr) : Option (Expr × Expr) := do
+  let .lam _ _ aBody _ := a | none
+  if aBody.hasLooseBVars then none
+  let .lam _ _ bBody _ := b | none
+  if bBody.hasLooseBVars then none
+  return (aBody, bBody)
+
+/-- Converts `dite` (`UDecidable.dite`) with non-dependent branches into `ite` (`UDecidable.ite`). -/
 def simpDIte : Simproc := fun e => do
-  let_expr f@dite α c inst a b := e | return .rfl
-  let .lam _ _ aBody _ := a | return .rfl
-  if aBody.hasLooseBVars then return .rfl
-  let .lam _ _ bBody _ := b | return .rfl
-  if bBody.hasLooseBVars then return .rfl
-  let us := f.constLevels!
-  let e' ← mkAppS₅ (← mkConstS ``ite us) α c inst aBody bBody
-  return .step e' (mkApp5 (mkConst ``dite_eq_ite us) c α aBody bBody inst)
+  match_expr e with
+  | f@dite α c inst a b =>
+    let some (a, b) := nonDepBodies? a b | return .rfl
+    let us := f.constLevels!
+    let e' ← mkAppS₅ (← mkConstS ``ite us) α c inst a b
+    return .step e' (mkApp5 (mkConst ``dite_eq_ite us) c α a b inst)
+  | f@UDecidable.dite α c inst a b =>
+    let some (a, b) := nonDepBodies? a b | return .rfl
+    let us := f.constLevels!
+    let e' ← mkAppS₅ (← mkConstS ``UDecidable.ite us) α c inst a b
+    return .step e' (mkApp5 (mkConst ``UDecidable.dite_eq_ite us) α c inst a b)
+  | _ => return .rfl
 
 /--
-Pushes negations inwards through the propositional connectives, `ite`, and the quantifiers.
+Pushes negations inwards through the propositional connectives, `ite`, `UDecidable.ite`, and the quantifiers.
 Negated arithmetic comparisons are handled by the rewrite rules `Nat.not_le_eq` and
 `Int.not_le_eq`.
 -/
@@ -175,6 +187,8 @@ def pushNot : Simproc := fun e => do
       | _ => return .rfl
   | f@ite α c inst a b =>
     return .step (← mkAppS₅ f α c inst (← mkNotS a) (← mkNotS b)) (mkApp4 (mkConst ``Grind.not_ite) c inst a b)
+  | f@UDecidable.ite α c inst a b =>
+    return .step (← mkAppS₅ f α c inst (← mkNotS a) (← mkNotS b)) (mkApp4 (mkConst ``Grind.not_uite) c inst a b)
   | Exists α q =>
     let e' ← mkForallS `a .default α (← mkNotS (← Sym.betaS q #[← mkBVarS 0]))
     let u ← Sym.getLevel α

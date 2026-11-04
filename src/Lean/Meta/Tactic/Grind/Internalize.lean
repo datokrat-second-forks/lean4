@@ -410,6 +410,7 @@ private def propagateEtaStruct (a : Expr) (generation : Nat) : GoalM Unit := do
 /-- Returns `true` if we can ignore `ext` for functions occurring as arguments of a `declName`-application. -/
 private def extParentsToIgnore (declName : Name) : Bool :=
   declName == ``Eq || declName == ``HEq || declName == ``dite || declName == ``ite
+  || declName == ``UDecidable.dite || declName == ``UDecidable.ite
   || declName == ``Exists || declName == ``Subtype
 
 /--
@@ -753,13 +754,13 @@ where
       internalizeImpl c generation e
       registerParent e c
       pushEqTrue c <| mkApp2 (mkConst ``eq_true) c args[1]!
-    else if args.size == 2 && f.isConstOf ``Grind.nestedDecidable then
+    else if args.size == 2 && (f.isConstOf ``Grind.nestedDecidable || f.isConstOf ``Grind.nestedUDecidable) then
       -- We only internalize the proposition. We can skip the instance because it is
       -- a subsingleton
       let c := args[0]!
       internalizeImpl c generation e
       registerParent e c
-    else if f.isConstOf ``ite && args.size == 5 then
+    else if (f.isConstOf ``ite || f.isConstOf ``UDecidable.ite) && args.size == 5 then
       -- Only the condition is internalized; the branches are internalized by `propagateIte`
       -- once the condition is decided. The congruence hash of `e` covers every argument,
       -- so `e` is registered as a parent of all of them: if a branch or the instance is

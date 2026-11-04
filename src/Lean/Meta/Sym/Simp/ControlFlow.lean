@@ -92,6 +92,76 @@ def simpDIte : Simproc := fun e => do
         return .step e' h' (done := true) (contextDependent := cd)
 
 /--
+Simplifies a `UDecidable.ite` expression. A rewritten condition `c'` gets the instance
+`UDecidable.classical c'`, unless `fixUDecidableInsts` is set.
+-/
+def simpUIte : Simproc := fun e => do
+  let numArgs := e.getAppNumArgs
+  if numArgs < 5 then return .rfl (done := true)
+  propagateOverApplied e (numArgs - 5) fun e => do
+    let_expr f@UDecidable.ite α c inst a b := e | return .rfl
+    -- See `simpIte` for why `cd` is propagated to all branches.
+    match (← simp c) with
+    | .rfl _ cd =>
+      if (← isTrueExpr c) then
+        return .step a (mkApp4 (mkConst ``UDecidable.ite_true f.constLevels!) inst α a b) (contextDependent := cd)
+      else if (← isFalseExpr c) then
+        return .step b (mkApp4 (mkConst ``UDecidable.ite_false f.constLevels!) inst α a b) (contextDependent := cd)
+      else
+        return mkRflResult (done := true) (contextDependent := cd)
+    | .step c' h _ cd =>
+      if (← isTrueExpr c') then
+        return .step a (mkApp (e.replaceFn ``UDecidable.ite_eq_left_of_eq_true) h) (contextDependent := cd)
+      else if (← isFalseExpr c') then
+        return .step b (mkApp (e.replaceFn ``UDecidable.ite_eq_right_of_eq_false) h) (contextDependent := cd)
+      else
+        if (← getConfig).fixUDecidableInsts then return .rfl
+        let inst' ← shareCommon (mkApp (mkConst ``UDecidable.classical) c')
+        let e' := e.getBoundedAppFn 4
+        let e' ← mkAppS₄ e' c' inst' a b
+        let h' := mkApp2 (e.replaceFn ``Sym.uite_cond_congr) c' h
+        return .step e' h' (done := true) (contextDependent := cd)
+
+/--
+Simplifies a `UDecidable.dite` expression. See `simpUIte` for the instance of a rewritten condition.
+-/
+def simpUDIte : Simproc := fun e => do
+  let numArgs := e.getAppNumArgs
+  if numArgs < 5 then return .rfl (done := true)
+  propagateOverApplied e (numArgs - 5) fun e => do
+    let_expr f@UDecidable.dite α c inst a b := e | return .rfl
+    -- See `simpIte` for why `cd` is propagated to all branches.
+    match (← simp c) with
+    | .rfl _ cd =>
+      if (← isTrueExpr c) then
+        let a' ← share <| a.betaRev #[mkConst ``trivial]
+        return .step a' (mkApp4 (mkConst ``UDecidable.dite_true f.constLevels!) inst α a b) (contextDependent := cd)
+      else if (← isFalseExpr c) then
+        let b' ← share <| b.betaRev #[mkApp (mkConst ``id [.zero]) (mkConst ``False)]
+        return .step b' (mkApp4 (mkConst ``UDecidable.dite_false f.constLevels!) inst α a b) (contextDependent := cd)
+      else
+        return mkRflResult (done := true) (contextDependent := cd)
+    | .step c' h _ cd =>
+      if (← isTrueExpr c') then
+        let h' ← shareCommon <| mkOfEqTrueCore c h
+        let a ← share <| a.betaRev #[h']
+        return .step a (mkApp (e.replaceFn ``Sym.udite_eq_left_of_eq_true) h) (contextDependent := cd)
+      else if (← isFalseExpr c') then
+        let h' ← shareCommon <| mkOfEqFalseCore c h
+        let b ← share <| b.betaRev #[h']
+        return .step b (mkApp (e.replaceFn ``Sym.udite_eq_right_of_eq_false) h) (contextDependent := cd)
+      else
+        if (← getConfig).fixUDecidableInsts then return .rfl
+        let inst' ← shareCommon (mkApp (mkConst ``UDecidable.classical) c')
+        let e' := e.getBoundedAppFn 4
+        let h ← shareCommon h
+        let a ← share <| mkLambda `h .default c' (a.betaRev #[mkApp4 (mkConst ``Eq.mpr_prop) c c' h (mkBVar 0)])
+        let b ← share <| mkLambda `h .default (mkNot c') (b.betaRev #[mkApp4 (mkConst ``Eq.mpr_not) c c' h (mkBVar 0)])
+        let e' ← mkAppS₄ e' c' inst' a b
+        let h' := mkApp2 (e.replaceFn ``Sym.udite_cond_congr) c' h
+        return .step e' h' (done := true) (contextDependent := cd)
+
+/--
 Simplifies a `cond` expression (aka Boolean `if-then-else`).
 -/
 public def simpCond : Simproc := fun e => do
@@ -148,6 +218,10 @@ public def simpControl : Simproc := fun e => do
     simpCond e
   else if declName == ``dite then
     simpDIte e
+  else if declName == ``UDecidable.ite then
+    simpUIte e
+  else if declName == ``UDecidable.dite then
+    simpUDIte e
   else
     simpMatch declName e
 

@@ -57,7 +57,7 @@ leverage the support in `grind` for lambda-expressions.
 
 Instances are re-synthesized via `synthInstance`. The instance type is first normalized
 using the type-level reductions above, so that `OfNat (Fin (2+1)) 0` and `OfNat (Fin 3) 0`
-produce the same canonical instance. Two special cases:
+produce the same canonical instance. Special cases:
 
 - **`Decidable` instances** (`Grind.nestedDecidable`): the proposition is recursively
   canonicalized, then the `Decidable` instance is re-synthesized. If resynthesis fails,
@@ -65,11 +65,14 @@ produce the same canonical instance. Two special cases:
   A `checkDefEqInst` guard is required because structurally different `Decidable` instances
   are not necessarily definitionally equal.
 
+- **`UDecidable` instances** (`Grind.nestedUDecidable`): as for `Decidable`, but without the
+  `checkDefEqInst` guard, since any two `UDecidable p` instances are definitionally equal.
+
 - **Propositional instances** (`Grind.nestedProof`): the proposition is recursively
   canonicalized, then the proof is re-synthesized. If resynthesis fails, the original
   proof is kept. No definitional-equality check is needed thanks to proof irrelevance.
 
-In both cases, resynthesis failure is silent — the original instance or proof is kept.
+In all cases, resynthesis failure is silent — the original instance or proof is kept.
 Ideally we would report an issue when resynthesis fails inside a type (where structural
 agreement matters most), but in practice users provide non-synthesizable instances via `haveI`,
 and these instances propagate into types through forward dependencies. Reporting failures
@@ -465,10 +468,25 @@ where
   canonInstDec (g : Expr) (prop : Expr) (h : Expr) (e : Expr) : CanonM Expr := withCaching e do
     canonInstDec' g prop h e
 
+  /--
+  `canonInstDec'` for `@Grind.nestedUDecidable prop inst`. No definitional equality check is needed
+  because any two `UDecidable prop` instances are definitionally equal.
+  -/
+  canonInstUDec' (g : Expr) (prop : Expr) (inst : Expr) (e : Expr) : CanonM Expr := do
+    let prop' ← canon prop
+    let type := mkApp (mkConst ``UDecidable) prop'
+    let inst' := (← Sym.synthInstance? type).getD inst
+    return if isSameExpr prop prop' && isSameExpr inst inst' then e else mkApp2 g prop' inst'
+
+  /-- `withCaching` + `canonInstUDec'` -/
+  canonInstUDec (g : Expr) (prop : Expr) (h : Expr) (e : Expr) : CanonM Expr := withCaching e do
+    canonInstUDec' g prop h e
+
   /-- `canonInstDec` variant for normalizing `if-then-else` expressions. -/
   canonInstDecCore (e : Expr) : CanonM Expr := do
     match_expr e with
     | g@Grind.nestedDecidable prop inst => canonInstDec g prop inst e
+    | g@Grind.nestedUDecidable prop inst => canonInstUDec g prop inst e
     | _  => canonInst e (report := false)
 
   canonLambda (e : Expr) : CanonM Expr := do
@@ -511,6 +529,8 @@ where
         return e'
       else if f.isConstOf ``Grind.nestedDecidable then
         return (← canonInstDec' f args[0]! args[1]! e)
+      else if f.isConstOf ``Grind.nestedUDecidable then
+        return (← canonInstUDec' f args[0]! args[1]! e)
     let mut modified := false
     let args ← if f.isConstOf ``OfNat.ofNat then
       let some args ← normOfNatArgs? args | pure args
@@ -540,6 +560,7 @@ where
         | .canonInst =>
           match_expr arg with
           | g@Grind.nestedDecidable prop h => canonInstDec g prop h arg
+          | g@Grind.nestedUDecidable prop h => canonInstUDec g prop h arg
           | g@Grind.nestedProof prop h => canonInstProp g prop h arg
           | _ =>
             if i == 2 && f.isConstOf ``OfNat.ofNat then
@@ -604,6 +625,7 @@ where
   canonApp (e : Expr) : CanonM Expr := do
     match_expr e with
     | f@ite α c i a b => canonIte f α c i a b
+    | f@UDecidable.ite α c i a b => canonIte f α c i a b
     | f@cond α c a b => canonCond f α c a b
     -- Remark: We currently don't normalize dependent-if-then-else occurring in types.
     | _ =>

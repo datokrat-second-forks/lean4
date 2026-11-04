@@ -96,10 +96,11 @@ when displaying equivalence classes.
 This is hard-coded for now. We will probably make it extensible in the future.
 -/
 private def isGadget (declName : Name) : Bool :=
-  declName == ``Grind.nestedDecidable || declName == ``Grind.leftInv
+  declName == ``Grind.nestedDecidable || declName == ``Grind.nestedUDecidable || declName == ``Grind.leftInv
 
 private def isBuiltin (declName : Name) : Bool :=
-  declName == ``ite || declName == ``dite || declName == ``cast
+  declName == ``ite || declName == ``dite || declName == ``UDecidable.ite || declName == ``UDecidable.dite
+  || declName == ``cast
 
 /-- Result for helper function `isArithOfCastLike` -/
 private inductive Result where

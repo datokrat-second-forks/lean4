@@ -187,11 +187,13 @@ def replacePreMatchCond (e : Expr) : MetaM Simp.Result := do
     let e' ← Core.transform e (pre := pre)
     return { expr := e', proof? := mkExpectedPropHint (← mkEqRefl e') (← mkEq e e') }
 
+/-- Returns `true` if `e` is an `ite` or `UDecidable.ite` application. Both take the condition as argument `1`. -/
 def isIte (e : Expr) :=
-  e.isAppOf ``ite && e.getAppNumArgs >= 5
+  (e.isAppOf ``ite || e.isAppOf ``UDecidable.ite) && e.getAppNumArgs >= 5
 
+/-- Returns `true` if `e` is a `dite` or `UDecidable.dite` application. Both take the condition as argument `1`. -/
 def isDIte (e : Expr) :=
-  e.isAppOf ``dite && e.getAppNumArgs >= 5
+  (e.isAppOf ``dite || e.isAppOf ``UDecidable.dite) && e.getAppNumArgs >= 5
 
 def getBinOp (e : Expr) : Option Expr :=
   if !e.isApp then none else

@@ -129,14 +129,15 @@ mutual
   /--
   Given `lhs` and `rhs` proof terms of the form `nestedDecidable p hp` and `nestedDecidable q hq`,
   constructs a congruence proof for `nestedDecidable p hp ≍ nestedDecidable q hq`.
-  `p` and `q` are in the same equivalence class.
+  `p` and `q` are in the same equivalence class. With `congrThm := nestedUDecidable_congr`, the same for
+  `nestedUDecidable`.
   -/
-  private partial def mkNestedDecidableCongr (lhs rhs : Expr) (heq : Bool) : GoalM Expr := do
+  private partial def mkNestedDecidableCongr (lhs rhs : Expr) (heq : Bool) (congrThm := ``Lean.Grind.nestedDecidable_congr) : GoalM Expr := do
     let p  := lhs.appFn!.appArg!
     let hp := lhs.appArg!
     let q  := rhs.appFn!.appArg!
     let hq := rhs.appArg!
-    let h  := mkApp5 (mkConst ``Lean.Grind.nestedDecidable_congr) p q (← mkEqProofCore p q false) hp hq
+    let h  := mkApp5 (mkConst congrThm) p q (← mkEqProofCore p q false) hp hq
     mkEqOfHEqIfNeeded h heq
 
   partial def mkEqCongrProof (lhs rhs : Expr) : GoalM Expr := withIncRecDepth do
@@ -262,6 +263,8 @@ mutual
         mkNestedProofCongr lhs rhs heq
       else if numArgs == 2 && f.isConstOf ``Grind.nestedDecidable && g.isConstOf ``Grind.nestedDecidable then
         mkNestedDecidableCongr lhs rhs heq
+      else if numArgs == 2 && f.isConstOf ``Grind.nestedUDecidable && g.isConstOf ``Grind.nestedUDecidable then
+        mkNestedDecidableCongr lhs rhs heq (congrThm := ``Lean.Grind.nestedUDecidable_congr)
       else if numArgs == 3 && f.isConstOf ``Eq && g.isConstOf ``Eq then
         let r ← mkEqCongrProof lhs rhs
         if heq then mkHEqOfEq r else return r

@@ -737,6 +737,7 @@ private def congrHash (enodes : ENodeMap) (e : Expr) : UInt64 :=
   else match_expr e with
   | Grind.nestedProof p _ => hashRoot enodes p
   | Grind.nestedDecidable p _ => mixHash 13 (hashRoot enodes p)
+  | Grind.nestedUDecidable p _ => mixHash 17 (hashRoot enodes p)
   | Eq _ lhs rhs => goEq lhs rhs
   | _ =>
     match e with
@@ -794,6 +795,9 @@ private partial def isCongruent (enodes : ENodeMap) (e₁ e₂ : Expr) : Bool :=
     hasSameRoot enodes p₁ p₂
   | Grind.nestedDecidable p₁ _ =>
     let_expr Grind.nestedDecidable p₂ _ := e₂ | false
+    hasSameRoot enodes p₁ p₂
+  | Grind.nestedUDecidable p₁ _ =>
+    let_expr Grind.nestedUDecidable p₂ _ := e₂ | false
     hasSameRoot enodes p₁ p₂
   | Eq _ lhs₁ rhs₁ =>
     let_expr Eq _ lhs₂ rhs₂ := e₂ | false
