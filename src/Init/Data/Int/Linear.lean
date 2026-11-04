@@ -607,29 +607,23 @@ attribute [local simp] Expr.denote
 theorem Expr.denote_toPoly'_go (ctx : Context) (e : Expr) :
   (toPoly'.go k e p).denote ctx = k * e.denote ctx + p.denote ctx := by
     induction k, e using Expr.toPoly'.go.induct generalizing p with
-  | case1 k k' h =>
-    simp only [toPoly'.go, h, Bool.cond_true]
-    simp [eq_of_beq h]
-  | case2 k k' h =>
-    simp only [toPoly'.go, h, Bool.cond_false]
-    simp
+  | case1 k => simp [toPoly'.go]
+  | case2 k k' h => simp [toPoly'.go, h]
   | case3 k i => simp [toPoly'.go]
   | case4 k a b iha ihb => simp [toPoly'.go, iha, ihb]
   | case5 k a b iha ihb =>
     simp [toPoly'.go, iha, ihb, Int.mul_sub]
     rw [Int.sub_eq_add_neg, ←Int.neg_mul, Int.add_assoc]
-  | case6 k k' a h
-  | case8 k a k' h =>
-    simp only [toPoly'.go, h]
-    simp [eq_of_beq h]
+  | case6 k a
+  | case8 k a => simp [toPoly'.go]
   | case7 k a k' h ih =>
-    simp only [toPoly'.go, h, Bool.cond_false]
-    simpa [denote, ← Int.mul_assoc] using ih
-  | case9 k a h h ih =>
-    simp only [toPoly'.go, h, Bool.cond_false]
+    simp only [toPoly'.go]
+    simpa [denote, ← Int.mul_assoc, h] using ih
+  | case9 k a k' h ih =>
+    simp only [toPoly'.go]
     simp only [mul_def, denote]
     rw [Int.mul_comm (denote _ _) _]
-    simpa [Int.mul_assoc] using ih
+    simpa [Int.mul_assoc, h] using ih
   | case10 k a ih => simp [toPoly'.go, ih, Int.neg_mul, Int.mul_neg]
 
 theorem Expr.denote_norm (ctx : Context) (e : Expr) : e.norm.denote ctx = e.denote ctx := by

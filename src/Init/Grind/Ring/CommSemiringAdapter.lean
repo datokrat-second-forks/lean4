@@ -139,9 +139,9 @@ noncomputable def Expr.toPolyS_k (e : Expr) : CommRing.Poly :=
   | pow a k ih =>
     simp only [toPolyS, cond_eq_ite]
     split
-    next h => rw [Nat.beq_eq_true_eq, ← Nat.beq_eq] at h; show Bool.rec (motive := fun _ => CommRing.Poly) _ _ (k.beq 0) = _; rw [h]
+    next h => rw [← Nat.beq_eq] at h; show Bool.rec (motive := fun _ => CommRing.Poly) _ _ (k.beq 0) = _; rw [h]
     next h =>
-      rw [Nat.beq_eq_true_eq, ← Nat.beq_eq, Bool.not_eq_true] at h
+      rw [Ne, ← Nat.beq_eq, Bool.not_eq_true] at h
       show Bool.rec (motive := fun _ => CommRing.Poly) _ _ (k.beq 0) = _
       rw [h]; dsimp only
       show
@@ -192,9 +192,9 @@ noncomputable def Expr.toPolyS_nc_k (e : Expr) : CommRing.Poly :=
   | pow a k ih =>
     simp only [toPolyS_nc, cond_eq_ite]
     split
-    next h => rw [Nat.beq_eq_true_eq, ← Nat.beq_eq] at h; show Bool.rec (motive := fun _ => CommRing.Poly) _ _ (k.beq 0) = _; rw [h]
+    next h => rw [← Nat.beq_eq] at h; show Bool.rec (motive := fun _ => CommRing.Poly) _ _ (k.beq 0) = _; rw [h]
     next h =>
-      rw [Nat.beq_eq_true_eq, ← Nat.beq_eq, Bool.not_eq_true] at h
+      rw [Ne, ← Nat.beq_eq, Bool.not_eq_true] at h
       show Bool.rec (motive := fun _ => CommRing.Poly) _ _ (k.beq 0) = _
       rw [h]; dsimp only
       show
@@ -356,7 +356,6 @@ theorem Poly.denoteS_mulMon {α} [CommSemiring α] (ctx : Context α) (k : Int) 
       simp [*, Mon.denote, denoteS_mulConst _ _ _ h₁ h₂]
     next =>
       fun_induction mulMon.go <;> simp [denoteS, *]
-      next h => simp +zetaDelta at h; simp [*]
       next =>
         intro h₁ h₂; cases h₂
         rw [Int.toNat_mul]
@@ -663,7 +662,7 @@ theorem Expr.denoteS_toPolyS {α} [CommSemiring α] (ctx : Context α) (e : Expr
   next => simp [Semiring.ofNat_eq_natCast]
   next => simp [Poly.denoteS_combine] <;> simp [*]
   next => simp [Poly.denoteS_mul] <;> simp [*]
-  next => rename_i h; simp at h; simp [h, Semiring.pow_zero]
+  next => simp [Semiring.pow_zero]
   next => rw [Int.toNat_pow_of_nonneg, Semiring.natCast_pow, Int.toNat_natCast, ← Semiring.ofNat_eq_natCast]
           apply Int.natCast_nonneg
   next => simp [Poly.ofMon, Poly.denoteS, denoteSInt_eq, Power.denote_eq, Mon.denote,
@@ -678,7 +677,7 @@ theorem Expr.denoteS_toPolyS_nc {α} [Semiring α] (ctx : Context α) (e : Expr)
   next => simp [Semiring.ofNat_eq_natCast]
   next => simp [Poly.denoteS_combine] <;> simp [*]
   next => simp [Poly.denoteS_mul_nc] <;> simp [*]
-  next => rename_i h; simp at h; simp [h, Semiring.pow_zero]
+  next => simp [Semiring.pow_zero]
   next => rw [Int.toNat_pow_of_nonneg, Semiring.natCast_pow, Int.toNat_natCast, ← Semiring.ofNat_eq_natCast]
           apply Int.natCast_nonneg
   next => simp [Poly.ofMon, Poly.denoteS, denoteSInt_eq, Power.denote_eq, Mon.denote,

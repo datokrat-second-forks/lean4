@@ -110,3 +110,37 @@ example (b : Bool) (t e : Nat) : (bif b then t else e) = (uif b = true then t el
 example : countUp 3 1 = 2 := by simp [countUp]
 example (n : Nat) : countUp n n = 0 := by simp [countUp]
 example (n : Nat) : countUp (n + 1) n = 1 := by simp [countUp]
+
+/-! `↓reduceCond`/`↓reduceDCond` decide a `Bool` condition through its propositional form, so
+propositional hypotheses and lemmas decide `bif` even under `simp only`. -/
+
+example (j stop a b : Nat) (h : j < stop) : (bif j <ᵇ stop then a else b) = a := by
+  simp only [h, ↓reduceCond]
+
+example (j stop a b : Nat) (h : ¬ j < stop) : (bif j <ᵇ stop then a else b) = b := by
+  simp only [h, ↓reduceCond]
+
+example (n a b : Nat) : (bif n ≤ᵇ n then a else b) = a := by
+  simp only [Nat.le_refl, ↓reduceCond]
+
+example (k a b : Nat) (h : k ≠ 0) : (bif k == 0 then a else b) = b := by
+  simp only [h, ↓reduceCond]
+
+example (j stop : Nat) (h : j < stop) (f : (j <ᵇ stop) = true → Nat)
+    (g : (j <ᵇ stop) = false → Nat) :
+    Bool.dcond (j <ᵇ stop) f g = f (decideLT_eq_true_iff.2 h) := by
+  simp only [h, ↓reduceDCond]
+
+/-- An undecided condition leaves `bif` untouched under `simp only`. -/
+example (j stop a b : Nat) :
+    (bif j <ᵇ stop then a else b) = (bif j <ᵇ stop then a + 0 else b) := by
+  simp only [Nat.add_zero]
+
+-- Under full `simp`, conditions with `&&` do not loop.
+/-- warning: declaration uses `sorry` -/
+#guard_msgs in
+example (na nb : Int) (P : Prop) :
+    ((bif Int.Internal.blt na 0 && Int.Internal.ble 0 nb then true
+      else bif na == 0 then Int.Internal.blt 0 nb else false) = true) = P := by
+  simp
+  sorry

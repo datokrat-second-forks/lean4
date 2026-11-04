@@ -108,7 +108,7 @@ variable {le : α → α → Bool}
 
 theorem zipIdxLE_trans (trans : ∀ a b c, le a b → le b c → le a c)
     (a b c : α × Nat) : zipIdxLE le a b → zipIdxLE le b c → zipIdxLE le a c := by
-  simp only [zipIdxLE, Bool.cond_eq_ite]
+  simp only [zipIdxLE]
   split <;> split <;> split <;> rename_i ab₂ ba₂ bc₂
   · simp_all
     intro ab₁
@@ -136,7 +136,7 @@ theorem zipIdxLE_trans (trans : ∀ a b c, le a b → le b c → le a c)
 
 theorem zipIdxLE_total (total : ∀ a b, le a b || le b a)
     (a b : α × Nat) : zipIdxLE le a b || zipIdxLE le b a := by
-  simp only [zipIdxLE, Bool.cond_eq_ite]
+  simp only [zipIdxLE]
   split <;> split
   · simpa using Nat.le_total a.2 b.2
   · simp
@@ -164,7 +164,7 @@ theorem cons_merge_cons (s : α → α → Bool) (a b l r) :
   | [], r => simp
   | l, [] => simp
   | a::l, b::r =>
-    rw [cons_merge_cons, Bool.cond_eq_ite]
+    rw [cons_merge_cons]
     split
     · simp +arith [length_merge s l (b::r)]
     · simp +arith [length_merge s (a::l) r]
@@ -180,7 +180,7 @@ theorem mem_merge {a : α} {xs ys : List α} : a ∈ merge xs ys le ↔ a ∈ xs
     induction ys with
     | nil => simp
     | cons y ys ih =>
-      simp only [merge, Bool.cond_eq_ite]
+      simp only [merge]
       split <;> rename_i h
       · simp_all [or_assoc]
       · simp only [mem_cons, ih, ← or_assoc]
@@ -225,7 +225,7 @@ theorem pairwise_merge
     induction l₂ with
     | nil => simpa only [merge]
     | cons y l₂ ih₂ =>
-      simp only [merge, Bool.cond_eq_ite]
+      simp only [merge]
       split <;> rename_i h
       · apply Pairwise.cons
         · intro z m
@@ -238,7 +238,6 @@ theorem pairwise_merge
       · apply Pairwise.cons
         · intro z m
           rw [mem_merge, mem_cons] at m
-          simp only [Bool.not_eq_true] at h
           rcases m with (⟨rfl|m⟩|m)
           · simpa [h] using total y z
           · exact trans _ _ _ (by simpa [h] using total x y) (rel_of_pairwise_cons h₁ m)
@@ -261,7 +260,7 @@ theorem merge_perm_append : ∀ {xs ys : List α}, merge xs ys le ~ xs ++ ys
   | [], ys => by simp
   | xs, [] => by simp
   | x :: xs, y :: ys => by
-    simp only [merge, Bool.cond_eq_ite]
+    simp only [merge]
     split
     · exact merge_perm_append.cons x
     · exact (merge_perm_append.cons y).trans
@@ -503,7 +502,6 @@ theorem map_merge {f : α → β} {r : α → α → Bool} {s : β → β → Bo
     simp only [forall_and] at hl
     simp only [List.map, List.cons_merge_cons]
     rw [← hl.1.1]
-    simp only [Bool.cond_eq_ite]
     split
     · rw [List.map, map_merge, List.map]
       simp only [List.forall_mem_cons, forall_and]

@@ -523,10 +523,10 @@ private theorem findIdx?_go_eq {p : α → Bool} {xs : List α} {i : Nat} :
   induction xs generalizing i with
   | nil => simp
   | cons _ _ _ =>
-    simp only [findIdx?_go_succ, findIdx?_go_cons, Nat.zero_add, Bool.cond_eq_ite]
+    simp only [findIdx?_go_succ, findIdx?_go_cons, Nat.zero_add]
     split
     · simp_all
-    · simp_all only [findIdx?_go_succ, Bool.not_eq_true, Option.map_map, Nat.zero_add]
+    · simp_all only [findIdx?_go_succ, Option.map_map, Nat.zero_add]
       congr 1
       ext
       simp only [Nat.add_comm i, Function.comp_apply, Nat.add_assoc]
@@ -1010,7 +1010,7 @@ theorem findIdx?_go_eq_map_findFinIdx?_go_val {xs : List α} {p : α → Bool} {
   unfold findFinIdx?.go
   split
   · simp_all
-  · simp only [Bool.cond_eq_ite]
+  · simp only
     split
     · simp
     · rw [findIdx?_go_eq_map_findFinIdx?_go_val]

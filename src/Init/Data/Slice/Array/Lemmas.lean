@@ -157,7 +157,7 @@ end Subarray
 public theorem Array.toSubarray_eq_min {xs : Array α} {lo hi : Nat} :
     xs.toSubarray lo hi = ⟨⟨xs, min lo (min hi xs.size), min hi xs.size, Nat.min_le_right _ _,
       Nat.min_le_right _ _⟩⟩ := by
-  simp only [Array.toSubarray, decideLE_eq_udecide, Bool.dcond_udecide]
+  simp only [Array.toSubarray]
   split <;> split <;> simp [Nat.min_eq_right (Nat.le_of_not_ge _), *]
 
 public theorem Array.toSubarray_eq_toSubarray_of_min_eq_min {xs : Array α}

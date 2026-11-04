@@ -291,12 +291,9 @@ which also receives the index of the element, and the fact that the index is les
 where
   go (k : Nat) (h : k ≤ n) (acc : Vector β k) : m (Vector β n) := do
     bif h' : k <ᵇ n then
-      have h' := lt_of_decideLT_eq_true h'
       go (k+1) (by omega) (acc.push (← f xs[k]))
     else
-      have h' := not_lt_of_decideLT_eq_false h'
       return acc.cast (by omega)
-  termination_by n - k
 
 @[inline, expose] protected def forM [Monad m] (xs : Vector α n) (f : α → m PUnit) : m PUnit :=
   xs.toArray.forM f
@@ -306,12 +303,9 @@ where
 where
   go (i : Nat) (h : i ≤ n) (acc : Vector β (i * k)) : m (Vector β (n * k)) := do
     bif h' : i <ᵇ n then
-      have h' := lt_of_decideLT_eq_true h'
       go (i+1) (by omega) ((acc ++ (← f xs[i])).cast (Nat.succ_mul i k).symm)
     else
-      have h' := not_lt_of_decideLT_eq_false h'
       return acc.cast (by congr; omega)
-  termination_by n - i
 
 /-- Variant of `mapIdxM` which receives the index `i` along with the bound `i < n. -/
 @[inline, expose]
@@ -430,7 +424,7 @@ instance [BEq α] : BEq (Vector α n) where
 /-- Delete an element of a vector using a `Nat` index. Panics if the index is out of bounds. -/
 @[inline, expose] def eraseIdx! (xs : Vector α n) (i : Nat) : Vector α (n-1) :=
   bif h : i <ᵇ n then
-    xs.eraseIdx i (lt_of_decideLT_eq_true h)
+    xs.eraseIdx i
   else
     have : Inhabited (Vector α (n-1)) := ⟨xs.pop⟩
     panic! "index out of bounds"
@@ -443,7 +437,7 @@ instance [BEq α] : BEq (Vector α n) where
 /-- Insert an element into a vector using a `Nat` index. Panics if the index is out of bounds. -/
 @[inline, expose] def insertIdx! (xs : Vector α n) (i : Nat) (x : α) : Vector α (n+1) :=
   bif h : i ≤ᵇ n then
-    xs.insertIdx i x (le_of_decideLE_eq_true h)
+    xs.insertIdx i x
   else
     have : Inhabited (Vector α (n+1)) := ⟨xs.push x⟩
     panic! "index out of bounds"
@@ -611,10 +605,8 @@ where @[specialize, semireducible] go (i : Nat) : Bool :=
   bif h : n ≤ᵇ i then
     false
   else
-    have h := not_le_of_decideLE_eq_false h
     bif lt xs[i] ys[i] then
       true
     else bif xs[i] == ys[i] then
       go (i + 1)
     else false
-  termination_by n - i

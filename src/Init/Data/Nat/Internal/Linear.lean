@@ -423,19 +423,18 @@ attribute [local simp] Poly.denote_le_cancel_eq
 theorem Expr.denote_toPoly_go (ctx : Context) (e : Expr) :
   (toPoly.go k e p).denote ctx = k * e.denote ctx + p.denote ctx := by
   induction k, e using Expr.toPoly.go.induct generalizing p with
-  | case1 k k' h =>
-    simp [toPoly.go, eq_of_beq h]
+  | case1 k => simp [toPoly.go]
   | case2 k k' h =>
     simp [toPoly.go, h, Var.denote]
   | case3 k i => simp [toPoly.go]
   | case4 k a b iha ihb => simp [toPoly.go, iha, ihb]
-  | case5 k k' a h => simp [toPoly.go, eq_of_beq h]
+  | case5 k a => simp [toPoly.go]
   | case6 k a k' h ih =>
     simp only [toPoly.go, denote, mul_eq]
     simp [h, ih, Nat.mul_assoc]
-  | case7 k a k' h =>
+  | case7 k a =>
     simp only [toPoly.go, denote, mul_eq]
-    simp [eq_of_beq h]
+    simp
   | case8 k a k' h ih =>
     simp only [toPoly.go, denote, mul_eq]
     simp [h, ih, Nat.mul_assoc]

@@ -29,7 +29,6 @@ theorem foldlM_toList.aux [Monad m]
     {f : β → α → m β} {xs : Array α} {i j} (H : xs.size ≤ i + j) {b} :
     foldlM.loop f xs xs.size (Nat.le_refl _) i j b = (xs.toList.drop j).foldlM f b := by
   unfold foldlM.loop
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split; split
   · cases Nat.not_le_of_gt ‹_› (Nat.zero_add _ ▸ H)
   · rename_i i; rw [Nat.succ_add] at H

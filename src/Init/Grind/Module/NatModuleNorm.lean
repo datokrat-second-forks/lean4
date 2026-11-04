@@ -60,14 +60,13 @@ theorem Poly.denoteN_insert {α} [NatModule α] (ctx : Context α) (k : Int) (x 
   fun_induction insert
   next => intros; simp [*]
   next => intro h₁ h₂; cases h₂; simp [*]
-  next h₁ h₂ h₃ =>
+  next h₃ _ =>
     intro h₄ h₅; cases h₅; simp [*]
-    simp at h₃; simp at h₂; subst h₂
+    simp at h₃
     rw [← add_assoc, ← add_nsmul, ← Int.toNat_add, h₃, Int.toNat_zero, zero_nsmul, zero_add] <;> assumption
-  next h _ =>
+  next =>
     intro h₁ h₂; cases h₂; rw [denoteN_add] <;> simp <;> try omega
     next h₂ _ =>
-    simp at h; subst h;
     rw [Int.toNat_add h₁ h₂, add_nsmul]; simp [*]; ac_rfl
   next ih =>
     intro h₁ h₂; cases h₂; simp [*]; ac_rfl
@@ -86,7 +85,6 @@ theorem Poly.denoteN_combine {α} [NatModule α] (ctx : Context α) (p₁ p₂ :
     : p₁.NonnegCoeffs → p₂.NonnegCoeffs → (p₁.combine p₂).denoteN ctx = p₁.denoteN ctx + p₂.denoteN ctx := by
   fun_induction p₁.combine p₂ <;> intro h₁ h₂ <;> try simp [*, zero_add, add_zero]
   next hx _ h ih =>
-    simp at hx
     simp +zetaDelta at h
     cases h₁; cases h₂
     next h₁ _ h₂ =>
@@ -94,7 +92,6 @@ theorem Poly.denoteN_combine {α} [NatModule α] (ctx : Context α) (p₁ p₂ :
     rw [add_left_comm, add_assoc, ← add_assoc, ← add_nsmul, ← Int.toNat_add, Int.add_comm, h,
       Int.toNat_zero, zero_nsmul, zero_add] <;> assumption
   next hx _ h ih =>
-    simp at hx
     cases h₁; cases h₂
     next hp₁ h₁ hp₂ h₂ =>
     simp +zetaDelta [*]

@@ -571,11 +571,11 @@ instance {xs : Array α} {p : α → Prop} [DecidablePred p] :
 
 theorem anyM_eq_anyM_loop [Monad m] {p : α → m Bool} {as : Array α} {start stop} :
     anyM p as start stop = anyM.loop p as (min stop as.size) (Nat.min_le_right ..) start := by
-  simp only [anyM, Nat.min_def, decideLE_eq_udecide, Bool.dcond_udecide]; split <;> rfl
+  simp only [anyM, Nat.min_def]; split <;> rfl
 
 theorem anyM_stop_le_start [Monad m] {p : α → m Bool} {as : Array α} {start stop}
     (h : min stop as.size ≤ start) : anyM p as start stop = pure false := by
-  rw [anyM_eq_anyM_loop, anyM.loop, Bool.dcond_neg (decideLT_eq_false_iff.2 (Nat.not_lt.2 h))]
+  rw [anyM_eq_anyM_loop, anyM.loop, Bool.dcond_neg (by omega)]
 
 theorem anyM_loop_cons [Monad m] {p : α → m Bool} {a : α} {as : List α} {stop start : Nat}
     (h : stop + 1 ≤ (a :: as).length) :
@@ -583,22 +583,18 @@ theorem anyM_loop_cons [Monad m] {p : α → m Bool} {a : α} {as : List α} {st
       anyM.loop p ⟨as⟩ stop (by simpa using h) start := by
   rw [anyM.loop]
   conv => rhs; rw [anyM.loop]
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h'
-  · simp only [Nat.add_lt_add_iff_right] at h'
-    rw [UDecidable.dite_eq_left h', anyM_loop_cons]
+  · rw [Bool.dcond_pos (by omega), anyM_loop_cons]
     simp
-  · rw [UDecidable.dite_eq_right]
-    omega
+  · rw [Bool.dcond_neg (by omega)]
 
 @[simp, grind =] theorem anyM_toList [Monad m] {p : α → m Bool} {as : Array α} :
     as.toList.anyM p = as.anyM p :=
   match as with
-  | ⟨[]⟩  => by unfold anyM anyM.loop; simp
+  | ⟨[]⟩  => by simp [anyM, anyM.loop]
   | ⟨a :: as⟩ => by
-    simp only [List.anyM, anyM, List.size_toArray, List.length_cons, Nat.le_refl,
-      decideLE_eq_udecide, Bool.dcond_udecide, ↓reduceUDIte]
-    rw [anyM.loop, Bool.dcond_pos (decideLT_eq_true_iff.2 (by omega))]
+    simp only [List.anyM, anyM, List.size_toArray, List.length_cons]
+    rw [Bool.dcond_pos (by omega), anyM.loop, Bool.dcond_pos (by omega)]
     congr 1
     funext b
     simp only [Bool.cond_eq_ite]
@@ -613,7 +609,6 @@ theorem anyM_loop_iff_exists {p : α → Bool} {as : Array α} {start stop} (h :
     (anyM.loop (m := Id) (pure <| p ·) as stop h start).run = true ↔
       ∃ (i : Nat) (_ : i < as.size), start ≤ i ∧ i < stop ∧ p as[i] = true := by
   unfold anyM.loop
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h₁
   · dsimp
     simp only [Bool.cond_eq_ite]
@@ -636,7 +631,6 @@ termination_by stop - start
 theorem any_iff_exists {p : α → Bool} {as : Array α} {start stop} :
     as.any p start stop ↔ ∃ (i : Nat) (_ : i < as.size), start ≤ i ∧ i < stop ∧ p as[i] := by
   dsimp [any, anyM]
-  simp only [decideLE_eq_udecide, Bool.dcond_udecide]
   split
   · rw [anyM_loop_iff_exists (p := p)]
   · rw [anyM_loop_iff_exists]
@@ -1183,7 +1177,7 @@ theorem mapM_eq_foldlM [Monad m] [LawfulMonad m] {f : α → m β} {xs : Array �
 where
   aux (i bs) :
       mapM.map f xs i bs = (xs.toList.drop i).foldlM (fun bs a => bs.push <$> f a) bs := by
-    unfold mapM.map; simp only [decideLT_eq_udecide, Bool.dcond_udecide]; split
+    unfold mapM.map; split
     · rw [← List.getElem_cons_drop ‹_›]
       simp only [aux (i + 1), map_eq_pure_bind, List.foldlM_cons, bind_assoc,
         pure_bind]
@@ -2568,7 +2562,7 @@ theorem getElem?_swap {xs : Array α} {i j : Nat} (hi hj) {k : Nat} : (xs.swap i
       simp [(go · (i+1) ⟨j-1, ·⟩), h]
     else simp [h]
     termination_by j - i
-  simp only [reverse, decideLE_eq_udecide, Bool.dcond_udecide]; split <;> simp [go]
+  simp only [reverse]; split <;> simp [go]
 
 @[simp, grind =] theorem reverse_empty : reverse (#[] : Array α) = #[] := rfl
 
@@ -2577,7 +2571,7 @@ theorem getElem?_swap {xs : Array α} {i j : Nat} (hi hj) {k : Nat} : (xs.swap i
       (h : i + j + 1 = xs.size) (h₂ : as.size = xs.size)
       (H : ∀ k, as.toList[k]? = if i ≤ k ∧ k ≤ j then xs.toList[k]? else xs.toList.reverse[k]?)
       (k : Nat) : (reverse.loop as i ⟨j, hj⟩).toList[k]? = xs.toList.reverse[k]? := by
-    rw [reverse.loop]; simp only [decideLT_eq_udecide, Bool.dcond_udecide]; split <;> rename_i h₁
+    rw [reverse.loop]; dsimp only; split <;> rename_i h₁
     · match j with | j+1 => ?_
       simp only [Nat.add_sub_cancel]
       rw [(go · (i+1) j)]
@@ -2601,7 +2595,7 @@ theorem getElem?_swap {xs : Array α} {i j : Nat} (hi hj) {k : Nat} : (xs.swap i
         exact (List.getElem?_reverse' h).symm
       · rfl
     termination_by j - i
-  simp only [reverse, decideLE_eq_udecide, Bool.dcond_udecide]
+  simp only [reverse]
   split
   · match xs with | ⟨[]⟩ | ⟨[_]⟩ => rfl
   · have := Nat.sub_add_cancel (Nat.le_of_not_le ‹_›)
@@ -2968,8 +2962,7 @@ theorem foldlM_start_stop {m} [Monad m] {xs : Array α} {f : β → α → m β}
     simp [foldlM.loop]
   | succ i ih =>
     unfold foldlM.loop
-    rw [Bool.dcond_pos (decideLT_eq_true_iff.2 (by omega)),
-      Bool.dcond_pos (decideLT_eq_true_iff.2 (by omega))]
+    rw [Bool.dcond_pos (by omega), Bool.dcond_pos (by omega)]
     split <;> rename_i h
     · rfl
     · simp at h
@@ -3066,7 +3059,7 @@ theorem foldlM_append [Monad m] [LawfulMonad m] {f : β → α → m β} {b} {xs
 
 @[simp] theorem foldlM_loop_empty [Monad m] {f : β → α → m β} {init : β} {i j : Nat} :
     foldlM.loop f #[] s h i j init = pure init := by
-  unfold foldlM.loop; simp only [decideLT_eq_udecide, Bool.dcond_udecide]; split
+  unfold foldlM.loop; split
   · split
     · rfl
     · simp at h
@@ -3203,7 +3196,7 @@ theorem foldl_induction
     motive as.size (as.foldl f init) := by
   let rec go {i j b} (h₁ : j ≤ as.size) (h₂ : as.size ≤ i + j) (H : motive j b) :
     (motive as.size) (foldlM.loop (m := Id) f as as.size (Nat.le_refl _) i j b) := by
-    unfold foldlM.loop; simp only [decideLT_eq_udecide, Bool.dcond_udecide]; split
+    unfold foldlM.loop; split
     next hj =>
       split
       · cases Nat.not_le_of_gt (by simp [hj]) h₂
@@ -4003,13 +3996,11 @@ theorem all_filterMap {xs : Array α} {f : α → Option β} {p : β → Bool} :
 
 @[simp, grind =] theorem size_modify {xs : Array α} {i : Nat} {f : α → α} : (xs.modify i f).size = xs.size := by
   unfold modify modifyM
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> simp
 
 @[grind =] theorem getElem_modify {xs : Array α} {j i} (h : i < (xs.modify j f).size) :
     (xs.modify j f)[i] = if j = i then f (xs[i]'(by simpa using h)) else xs[i]'(by simpa using h) := by
-  unfold modify modifyM
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
+  simp only [modify, modifyM]
   split
   · simp only [getElem_set, Id.run_pure, Id.run_bind]; split <;> simp [*]
   · simp only [Id.run_pure]
@@ -4090,8 +4081,7 @@ theorem swap_comm {xs : Array α} {i j : Nat} (hi hj) : xs.swap i j hi hj = xs.s
 
 @[simp, grind =] theorem size_swapIfInBounds {xs : Array α} {i j : Nat} :
     (xs.swapIfInBounds i j).size = xs.size := by
-  unfold swapIfInBounds; simp only [decideLT_eq_udecide, Bool.dcond_udecide]
-  split <;> (try split) <;> simp [size_swap]
+  unfold swapIfInBounds; split <;> (try split) <;> simp [size_swap]
 
 @[grind =] theorem getElem_swapIfInBounds {xs : Array α} {i j k : Nat}
     (hk : k < (xs.swapIfInBounds i j).size) :
@@ -4100,7 +4090,6 @@ theorem swap_comm {xs : Array α} {i j : Nat} (hi hj) : xs.swap i j hi hj = xs.s
     else xs[k]'(by simp_all) := by
   rw [size_swapIfInBounds] at hk
   unfold swapIfInBounds
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i hi
   · split <;> rename_i hj
     · simp only [hi, hj, and_true]
@@ -4159,7 +4148,7 @@ theorem swapAt!_def {xs : Array α} {i : Nat} {v : α} (h : i < xs.size) :
 
 @[simp] theorem size_swapAt! {xs : Array α} {i : Nat} {v : α} :
     (xs.swapAt! i v).2.size = xs.size := by
-  simp only [swapAt!, decideLT_eq_udecide, Bool.dcond_udecide]
+  simp only [swapAt!]
   split
   · simp
   · rfl
@@ -4758,10 +4747,9 @@ set_option backward.isDefEq.respectTransparency false in
     simpa
   intro i
   induction i with
-  | zero => unfold firstM.go; simp
+  | zero => simp [firstM.go]
   | succ i ih =>
     unfold firstM.go
-    simp only [decideLT_eq_udecide, Bool.dcond_udecide]
     split <;> rename_i h
     · rw [drop_eq_getElem_cons h]
       intro h'

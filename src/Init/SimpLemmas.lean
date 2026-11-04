@@ -329,6 +329,12 @@ theorem not_le_of_decideLE_eq_false [LE α] [DecidableLE α] {a b : α} (h : (a 
     ¬a ≤ b :=
   decideLE_eq_false_iff.mp h
 
+/-- Proves index bounds from `h : (i <ᵇ n) = true` or `h : (i ≤ᵇ n) = true`, as bound by `bif h :`. -/
+@[macro tacticGet_elem_tactic_extensible] meta def getElemTacticDecideLT : Lean.Macro := fun _ =>
+  `(tactic| first
+    | apply lt_of_decideLT_eq_true; assumption
+    | apply le_of_decideLE_eq_true; assumption)
+
 theorem eq_of_decideEq_eq_true [DecidableEq α] {a b : α} (h : (a =ᵇ b) = true) : a = b :=
   decideEq_eq_true_iff.mp h
 

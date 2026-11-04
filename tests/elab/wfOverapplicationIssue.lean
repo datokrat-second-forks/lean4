@@ -3,7 +3,6 @@ theorem Array.sizeOf_lt_of_mem' [DecidableEq α] [SizeOf α] {as : Array α} (h 
   let rec aux (j : Nat) : anyM.loop (m := Id) (fun b => pure <| decide (a = b)) as as.size (Nat.le_refl ..) j = true → sizeOf a < sizeOf as := by
     unfold anyM.loop
     intro h
-    simp only [decideLT_eq_udecide, Bool.dcond_udecide] at h
     split at h
     · simp only [bind, decide_eq_true_eq, pure, Bool.cond_eq_ite] at h; split at h
       next he => subst a; apply sizeOf_get

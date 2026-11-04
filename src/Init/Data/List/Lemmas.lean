@@ -3527,7 +3527,7 @@ variable [BEq α]
 
 @[simp, grind =] theorem contains_insert [PartialEquivBEq α] {l : List α} {a : α} {x : α} :
     (l.insert a).contains x = (x == a || l.contains x) := by
-  simp only [List.insert, Bool.cond_eq_ite]
+  simp only [List.insert]
   split <;> rename_i h
   · simp only [Bool.eq_or_self]
     intro h'

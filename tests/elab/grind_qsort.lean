@@ -103,7 +103,6 @@ private theorem qpartition_perm
     (as : Vector α n) (w : lo ≤ hi) (hlo : lo < n) (hhi : hi < n) :
     (qpartition as lt lo hi).2 ~ as := by
   unfold qpartition
-  simp only [Bool.cond_eq_ite]
   refine Vector.Perm.trans (qpartition_loop_perm ..) ?_
   repeat' first
   | split
@@ -252,13 +251,11 @@ private theorem qsort_sort_spec
     (as' : Vector α n) (w_as : as' = qsort.sort lt as lo hi) :
     ∀ i, (h₁ : lo ≤ i) → (h₂ : i < hi) → ¬ lt (as')[i + 1] as'[i] := by
   unfold qsort.sort at w_as
-  rw [Bool.dcond_eq_udite] at w_as
   split at w_as <;> rename_i w₁
   · -- The interesting case, where `lo < hi`.
     intro i h₁ h₂
     -- Decompose `qpartition as lt lo hi` into `mid` (the pivot) and `as'` (the partitioned array).
     split at w_as <;> rename_i mid hmid as' w₂
-    rw [Bool.dcond_eq_udite] at w_as
     split at w_as <;> rename_i w₃
     · -- If the pivot was at least `hi`, then we get a contradiction from `lo < hi`.
       simp only [Prod.ext_iff, Subtype.ext_iff] at w₂
@@ -324,8 +321,6 @@ private theorem qsort_sort_spec
           apply qsort_sort_spec lt_asymm le_trans _ _ _ (w_as := rfl) <;> grind
   · -- Just an arithmetical contradiction.
     grind
-termination_by hi - lo
-decreasing_by all_goals simp only [decideLE_eq_true_iff] at *; omega
 
 /--
 The slice of `as.qsort lt lo hi` from `lo` to `hi` (inclusive) is sorted.
@@ -338,7 +333,6 @@ theorem qsort_sorted₁' (lt : α → α → Bool) (lt_asymm : ∀ {a b}, lt a b
     (as : Array α) (lo hi : Nat) (i) (h₁ : lo ≤ i) (h₂ : i < hi) (h₃ : i + 1 < as.size) :
       ¬ lt ((as.qsort lt lo hi)[i + 1]'(by grind)) ((as.qsort lt lo hi)[i]'(by grind)) := by
   unfold qsort
-  simp only [decideEq_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i w
   · grind
   · apply qsort_sort_spec lt lt_asymm le_trans (w_as := rfl) <;> grind

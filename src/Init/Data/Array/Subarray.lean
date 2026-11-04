@@ -116,7 +116,7 @@ bounds.
 The index is relative to the start and end of the subarray, rather than the underlying array.
 -/
 @[inline] def getD (s : Subarray α) (i : Nat) (v₀ : α) : α :=
-  bif h : i <ᵇ s.size then s[i]'(lt_of_decideLT_eq_true h) else v₀
+  bif h : i <ᵇ s.size then s[i] else v₀
 
 /--
 Extracts an element from the subarray, or returns a default value when the index is out of bounds.

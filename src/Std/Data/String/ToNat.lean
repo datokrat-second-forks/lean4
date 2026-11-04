@@ -116,8 +116,6 @@ theorem isNat_iff' {s : String.Slice} :
       (fun res lastWasDigit => ⌜res = false ∧
         ((∃ c ∈ s.copy.toList, c.isDigit = false ∧ c ≠ '_') ∨ ¬ NoRepetition '_' ('_' :: s.copy.toList))⌝)
   next pref c suff h b hc h₁ h₂ =>
-    simp only [decideEq_eq_udecide, UDecidable.decide_eq_true_eq, Bool.not_eq_eq_eq_not,
-      Bool.not_true] at hc h₁
     subst hc
     simp only [h₁, ↓Char.isValue, eq_iff_iff, false_iff, Decidable.not_not,
       reduceCtorEq, h, List.mem_append, List.mem_cons, ne_eq, false_and, and_false, exists_const,
@@ -126,8 +124,6 @@ theorem isNat_iff' {s : String.Slice} :
     rw [List.append_cons, ← List.cons_append, ← List.cons_append]
     exact Or.inr (not_noRepetition_append_of_left (not_noRepetition_append_singleton_of_suffix h₂.2.1))
   next pref c suff h b hc h₁ h₂ =>
-    simp only [decideEq_eq_udecide, UDecidable.decide_eq_true_eq, Bool.not_eq_eq_eq_not,
-      Bool.not_false] at hc h₁
     subst hc
     simp only [h₁, ↓Char.isValue, eq_iff_iff, true_iff, reduceCtorEq, h, List.mem_append,
       List.mem_cons, ne_eq, false_and, and_false, exists_const, or_false, Bool.false_eq_true,
@@ -137,7 +133,6 @@ theorem isNat_iff' {s : String.Slice} :
     rw [← List.cons_append]
     exact NoRepetition.append_singleton_of_not_suffix h₂.2.2.2 h₂.2.1
   next pref c suff h b hc hc' h₁ =>
-    simp only [decideEq_eq_udecide, UDecidable.decide_eq_false_iff_not] at hc
     simp only [↓Char.isValue, eq_iff_iff, reduceCtorEq, h, List.mem_append, List.mem_cons, ne_eq,
       false_and, and_false, exists_const, or_false, List.singleton_suffix_cons_append_singleton_iff,
       Ne.symm hc, not_false_eq_true, List.not_mem_nil, forall_or_eq_imp, hc', true_or, and_true,

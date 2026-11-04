@@ -81,15 +81,13 @@ def ofFnM {n} [Monad m] (f : Fin n → m α) : m (Vector α n) :=
   /-- Auxiliary for `ofFn`. `ofFn.go f i acc = acc ++ #v[f i, ..., f(n - 1)]` -/
   go (i : Nat) (h' : i ≤ n) (acc : Array α) (w : acc.size = i) : m (Vector α n) := do
     bif h : i <ᵇ n then
-      go (i+1) (Nat.succ_le_of_lt (lt_of_decideLT_eq_true h))
-        (acc.push (← f ⟨i, lt_of_decideLT_eq_true h⟩)) (by simp [w])
+      go (i+1) (by omega) (acc.push (← f ⟨i, lt_of_decideLT_eq_true h⟩)) (by simp [w])
     else
-      pure ⟨acc, by have := not_lt_of_decideLT_eq_false h; omega⟩
-  termination_by n - i
+      pure ⟨acc, by omega⟩
 
 @[simp, grind =]
 theorem ofFnM_zero [Monad m] {f : Fin 0 → m α} : Vector.ofFnM f = pure #v[] := by
-  unfold ofFnM ofFnM.go; simp
+  simp [ofFnM, ofFnM.go]
 
 private theorem ofFnM_go_succ {n} [Monad m] [LawfulMonad m] {f : Fin (n + 1) → m α}
     (hi : i ≤ n := by omega) {h : xs.size = i} :
@@ -99,10 +97,9 @@ private theorem ofFnM_go_succ {n} [Monad m] [LawfulMonad m] {f : Fin (n + 1) →
       pure (as.push a)) := by
   fun_induction ofFnM.go f i (by omega) xs h
   case case1 acc h' h ih =>
-    have h := lt_of_decideLT_eq_true h
     if h : acc.size = n then
       unfold ofFnM.go
-      rw [Bool.dcond_neg (decideLT_eq_false_iff.2 (by omega))]
+      rw [Bool.dcond_neg (by omega)]
       have h : ¬ acc.size + 1 < n + 1 := by omega
       have : Fin.last n = ⟨acc.size, by omega⟩ := by ext; simp; omega
       simp [*]
@@ -110,10 +107,9 @@ private theorem ofFnM_go_succ {n} [Monad m] [LawfulMonad m] {f : Fin (n + 1) →
       have : acc.size + 1 ≤ n := by omega
       simp only [ih, this]
       conv => rhs; unfold ofFnM.go
-      rw [Bool.dcond_pos (decideLT_eq_true_iff.2 (by omega))]
+      rw [Bool.dcond_pos (by omega)]
       simp
-  case case2 h =>
-    have := not_lt_of_decideLT_eq_false h
+  case case2 =>
     omega
 
 theorem ofFnM_succ {n} [Monad m] [LawfulMonad m] {f : Fin (n + 1) → m α} :

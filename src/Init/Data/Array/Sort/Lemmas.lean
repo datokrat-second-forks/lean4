@@ -53,8 +53,7 @@ private theorem Array.MergeSort.merge.go_eq_listMerge {xs ys : Subarray α} {hxs
       cases h₂
       simp [*]
       have : xs.size = xs'.length + 1 := by simp [← Subarray.length_toList, *]
-      have : xs' = [] := List.eq_nil_of_length_eq_zero
-        (by simp only [decideLT_eq_false_iff] at *; omega)
+      have : xs' = [] := List.eq_nil_of_length_eq_zero (by omega)
       simp only [this]
       rw [← Subarray.foldl_toList]
       simp [*]
@@ -87,8 +86,7 @@ private theorem Array.MergeSort.merge.go_eq_listMerge {xs ys : Subarray α} {hxs
       cases h₂
       simp [*]
       have : ys.size = ys'.length + 1 := by simp [← Subarray.length_toList, *]
-      have : ys' = [] := List.eq_nil_of_length_eq_zero
-        (by simp only [decideLT_eq_false_iff] at *; omega)
+      have : ys' = [] := List.eq_nil_of_length_eq_zero (by omega)
       simp [this]
       rw [← Subarray.foldl_toList]
       simp [*]
@@ -96,7 +94,6 @@ private theorem Array.MergeSort.merge.go_eq_listMerge {xs ys : Subarray α} {hxs
 private theorem Array.MergeSort.merge_eq_listMerge {xs ys : Array α} {le} :
     (Array.MergeSort.Internal.merge xs ys le).toList = List.merge xs.toList ys.toList le := by
   rw [Array.MergeSort.Internal.merge]
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i heq₁
   · split <;> rename_i heq₂
     · simp [Array.MergeSort.merge.go_eq_listMerge]
@@ -119,7 +116,7 @@ private theorem List.mergeSort_eq_merge_mkSlice {xs : List α} :
 
 theorem Subarray.toList_mergeSort {xs : Subarray α} {le : α → α → Bool} :
     (xs.mergeSort le).toList = xs.toList.mergeSort le := by
-  fun_induction xs.mergeSort le <;> simp only [decideLT_eq_true_iff, decideLT_eq_false_iff] at *
+  fun_induction xs.mergeSort le
   · rw [List.mergeSort_eq_merge_mkSlice]
     simp +zetaDelta [Array.MergeSort.merge_eq_listMerge, *]
   · simp [List.mergeSort_eq_merge_mkSlice, *]

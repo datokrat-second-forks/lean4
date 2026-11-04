@@ -209,10 +209,10 @@ theorem Poly.denote_insert {α} [IntModule α] (ctx : Context α) (k : Int) (v :
     (p.insert k v).denote ctx = p.denote ctx + k • v.denote ctx := by
   fun_induction p.insert k v <;> simp [denote]
   next => ac_rfl
-  next h₁ h₂ h₃ =>
-    simp at h₃; simp at h₂; subst h₂
+  next h₃ _ =>
+    simp at h₃
     rw [add_comm, ← add_assoc, ← add_zsmul, h₃, zero_zsmul, zero_add]
-  next h _ => simp at h; subst h; rw [add_zsmul]; ac_rfl
+  next => rw [add_zsmul]; ac_rfl
   next ih => rw [ih]; ac_rfl
 
 attribute [local simp] Poly.denote_insert
@@ -243,9 +243,7 @@ private theorem Expr.denote_toPoly'_go {α} [IntModule α] {k p} (ctx : Context 
   induction k, e using Expr.toPoly'.go.induct generalizing p <;> simp [toPoly'.go, denote, Poly.denote, *, zsmul_add]
   next => ac_rfl
   next => rw [sub_eq_add_neg, neg_zsmul, zsmul_add, zsmul_neg]; ac_rfl
-  next h => simp at h; subst h; simp
   next ih => simp at ih; rw [ih, mul_zsmul, zsmul_natCast_eq_nsmul]
-  next ih => simp at ih; simp [ih]
   next ih => simp at ih; rw [ih, mul_zsmul]
   next => rw [zsmul_neg, neg_zsmul]
 

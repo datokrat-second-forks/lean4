@@ -288,7 +288,6 @@ private theorem findFinIdx?_loop_toArray (w : l' = l.drop j) :
     Array.findFinIdx?.loop p l.toArray j = List.findFinIdx?.go p l l' j h := by
   unfold findFinIdx?.loop
   unfold findFinIdx?.go
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h'
   · cases l' with
     | nil =>
@@ -300,13 +299,12 @@ private theorem findFinIdx?_loop_toArray (w : l' = l.drop j) :
         simp only [cons.injEq] at w
         exact w.1.symm
       simp only [getElem_toArray, this]
-      cases hp : p a
-      · simp only [Bool.cond_false]
-        simp only [length_cons] at h
+      split
+      · rfl
+      · simp only [length_cons] at h
         have : l.length - (j + 1) < l.length - j := by omega
         rw [findFinIdx?_loop_toArray]
         rw [drop_add_one_eq_tail_drop, ← w, tail_cons]
-      · rfl
   · have : l' = [] := by simp_all
     subst this
     simp
@@ -327,7 +325,6 @@ private theorem idxAuxOf_toArray [BEq α] (a : α) (l : List α) (j : Nat) (w : 
     l.toArray.idxOfAux a j = findFinIdx?.go (fun x => x == a) l l' j h := by
   unfold idxOfAux
   unfold findFinIdx?.go
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h'
   · cases l' with
     | nil =>
@@ -340,13 +337,12 @@ private theorem idxAuxOf_toArray [BEq α] (a : α) (l : List α) (j : Nat) (w : 
         simp only [cons.injEq] at w
         exact w.1.symm
       simp only [getElem_toArray, this]
-      cases hp : b == a
-      · simp only [Bool.cond_false]
-        simp only [length_cons] at h
+      split
+      · rfl
+      · simp only [length_cons] at h
         have : l.length - (j + 1) < l.length - j := by omega
         rw [idxAuxOf_toArray]
         rw [drop_add_one_eq_tail_drop, ← w, tail_cons]
-      · rfl
   · have : l' = [] := by simp_all
     subst this
     simp
@@ -376,7 +372,7 @@ theorem isPrefixOfAux_toArray_succ [BEq α] (l₁ l₂ : List α) (hle : l₁.le
       Array.isPrefixOfAux l₁.tail.toArray l₂.tail.toArray (by simp; omega) i := by
   rw [Array.isPrefixOfAux]
   conv => rhs; rw [Array.isPrefixOfAux]
-  simp only [size_toArray, getElem_toArray, length_tail, getElem_tail, decideLT_eq_udecide, Bool.dcond_udecide]
+  simp only [size_toArray, getElem_toArray, Bool.cond_false_right, length_tail, getElem_tail]
   split <;> rename_i h₁ <;> split <;> rename_i h₂
   · rw [isPrefixOfAux_toArray_succ]
   · omega
@@ -405,7 +401,6 @@ theorem isPrefixOfAux_toArray_zero [BEq α] (l₁ l₂ : List α) (hle : l₁.le
 @[simp, grind =] theorem isPrefixOf_toArray [BEq α] (l₁ l₂ : List α) :
     l₁.toArray.isPrefixOf l₂.toArray = l₁.isPrefixOf l₂ := by
   rw [Array.isPrefixOf]
-  simp only [decideLE_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h
   · simp [isPrefixOfAux_toArray_zero]
   · simp only [Bool.false_eq]
@@ -424,14 +419,14 @@ theorem zipWithMAux_toArray_succ {m : Type u → Type v} [Monad m] (as : List α
     zipWithMAux as.toArray bs.toArray f (i + 1) xs = zipWithMAux as.tail.toArray bs.tail.toArray f i xs := by
   rw [zipWithMAux]
   conv => rhs; rw [zipWithMAux]
-  simp only [size_toArray, getElem_toArray, length_tail, getElem_tail, decideLT_eq_udecide, Bool.dcond_udecide]
+  simp only [size_toArray, getElem_toArray, length_tail, getElem_tail]
   split <;> rename_i h₁
   · split <;> rename_i h₂
-    · rw [UDecidable.dite_eq_left (by omega), UDecidable.dite_eq_left (by omega)]
+    · rw [Bool.dcond_pos (by omega), Bool.dcond_pos (by omega)]
       simp only [zipWithMAux_toArray_succ as bs f (i+1)]
-    · rw [UDecidable.dite_eq_left (by omega)]
-      rw [UDecidable.dite_eq_right (by omega)]
-  · rw [UDecidable.dite_eq_right (by omega)]
+    · rw [Bool.dcond_pos (by omega)]
+      rw [Bool.dcond_neg (by omega)]
+  · rw [Bool.dcond_neg (by omega)]
 
 theorem zipWithMAux_toArray_succ' {m : Type u → Type v} [Monad m] (as : List α) (bs : List β) (f : α → β → m γ) (i : Nat) (xs : Array γ) :
     zipWithMAux as.toArray bs.toArray f (i + 1) xs = zipWithMAux (as.drop (i+1)).toArray (bs.drop (i+1)).toArray f 0 xs := by
@@ -462,7 +457,6 @@ theorem zipWithMAux_toArray_zero {m : Type u → Type v} [Monad m] [LawfulMonad 
 private theorem zipWithAll_go_toArray (as : List α) (bs : List β) (f : Option α → Option β → γ) (i : Nat) (xs : Array γ) :
     zipWithAll.go f as.toArray bs.toArray i xs = xs ++ (List.zipWithAll f (as.drop i) (bs.drop i)).toArray := by
   unfold zipWithAll.go
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h
   · rw [zipWithAll_go_toArray]
     simp at h
@@ -524,7 +518,7 @@ private theorem takeWhile_go_succ (p : α → Bool) (a : α) (l : List α) (i : 
 private theorem takeWhile_go_toArray (p : α → Bool) (l : List α) (i : Nat) :
     Array.takeWhile.go p l.toArray i r = r ++ (takeWhile p (l.drop i)).toArray := by
   induction l generalizing i r with
-  | nil => rw [takeWhile.go]; simp
+  | nil => simp [takeWhile.go]
   | cons a l ih =>
     rw [takeWhile.go]
     cases i with
@@ -603,7 +597,6 @@ theorem flatMap_toArray_cons {β} (f : α → Array β) (a : α) (as : List α) 
 @[simp, grind =] theorem eraseIdx_toArray (l : List α) (i : Nat) (h : i < l.toArray.size) :
     l.toArray.eraseIdx i h = (l.eraseIdx i).toArray := by
   rw [Array.eraseIdx]
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h'
   · rw [eraseIdx_toArray]
     simp only [swap_toArray, toList_toArray, mk.injEq]
@@ -622,7 +615,6 @@ decreasing_by
 @[simp, grind =] theorem eraseIdxIfInBounds_toArray (l : List α) (i : Nat) :
     l.toArray.eraseIdxIfInBounds i = (l.eraseIdx i).toArray := by
   rw [Array.eraseIdxIfInBounds]
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split
   · simp
   · simp_all [eraseIdx_eq_self.2]
@@ -641,7 +633,6 @@ decreasing_by
 private theorem insertIdx_loop_toArray (i : Nat) (l : List α) (j : Nat) (hj : j < l.toArray.size) (h : i ≤ j) :
     insertIdx.loop i l.toArray ⟨j, hj⟩ = (l.take i ++ l[j] :: (l.take j).drop i ++ l.drop (j + 1)).toArray := by
   rw [insertIdx.loop]
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   simp only [size_toArray] at hj
   split <;> rename_i h'
   · have w : j - 1 + 1 = j := by omega
@@ -688,7 +679,6 @@ private theorem insertIdx_loop_toArray (i : Nat) (l : List α) (j : Nat) (hj : j
 @[simp, grind =] theorem insertIdxIfInBounds_toArray (l : List α) (i : Nat) (a : α) :
     l.toArray.insertIdxIfInBounds i a = (l.insertIdx i a).toArray := by
   rw [Array.insertIdxIfInBounds]
-  simp only [decideLE_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h'
   · simp
   · simp only [size_toArray, Nat.not_le] at h'

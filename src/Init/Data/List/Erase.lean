@@ -55,7 +55,7 @@ theorem eraseP_of_forall_not {l : List α} (h : ∀ a, a ∈ l → ¬p a) : l.er
   induction xs with
   | nil => simp
   | cons x xs ih =>
-    simp only [eraseP_cons, Bool.cond_eq_ite]
+    simp only [eraseP_cons]
     split <;> rename_i h
     · simp only [reduceCtorEq, cons.injEq, false_or]
       constructor
@@ -319,9 +319,8 @@ theorem eraseP_eq_eraseIdx {xs : List α} {p : α → Bool} :
     rw [eraseP_cons, findIdx?_cons]
     by_cases h : p x
     · simp [h]
-    · simp only [h]
+    · simp only [h, Bool.cond_false]
       rw [ih]
-      simp only [Bool.false_eq_true, ↓reduceUIte]
       split <;> simp [*]
 
 /-! ### erase -/

@@ -61,7 +61,7 @@ protected theorem not_le_iff_gt [LT α] {xs ys : Array α} :
   Classical.not_not
 
 @[simp] theorem lex_empty [BEq α] {lt : α → α → Bool} {xs : Array α} : xs.lex #[] lt = false := by
-  unfold lex lex.go; simp
+  simp [lex, lex.go]
 
 private theorem lex.go_def [BEq α] (lt : α → α → Bool) (i : Nat) (l₁ l₂ r₁ r₂ : List α)
     (h₁ : l₁.length = i) (h₂ : l₂.length = i) :

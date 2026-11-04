@@ -73,7 +73,7 @@ theorem Mon.degreeOf_cancelVar (m : Mon) (x y : Var) (h : x ≠ y) : (m.cancelVa
   | mult pw m ih =>
     simp only [cancelVar, cond_eq_ite]
     split
-    next h' => simp only [beq_iff_eq] at h'; subst h'; simp [degreeOf, h]
+    next h' => subst h'; simp [degreeOf, h]
     next => simp [degreeOf, ih]
 
 /--
@@ -390,7 +390,7 @@ theorem Poly.denote_substInv [Field α] [IsCharP α 0] (ctx : Context α) (p : P
   simp only [substInv, PolyQ.denote, cond_eq_ite]
   split
   next hc =>
-    simp at hc; subst hc
+    subst hc
     simp [Semiring.natCast_one, Field.inv_one, Semiring.mul_one]
   next hc =>
     simp at hc
@@ -423,8 +423,7 @@ theorem PolyQ.denote_reduce [Field α] [IsCharP α 0] (ctx : Context α) (q : Po
   next hg =>
     split
     next h =>
-      simp only [Bool.and_eq_true, beq_iff_eq] at h
-      simp only [Nat.ble_eq, Nat.not_le] at hg
+      simp only [Nat.not_le] at hg
       obtain ⟨h₁, h₂⟩ := h
       generalize Nat.gcd q.num.gcdCoeffs q.den = g at *
       generalize q.num.divConst g = num at *
@@ -461,7 +460,6 @@ theorem PolyQ.reduce_den_ne_zero (q : PolyQ) (h : q.den ≠ 0) : q.reduce.den �
   next =>
     split
     next h' =>
-      simp only [Bool.and_eq_true, beq_iff_eq] at h'
       intro hd
       have h₂ := h'.2
       simp only at hd

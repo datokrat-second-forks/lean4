@@ -49,15 +49,12 @@ def qpartition {n} (as : Vector α n) (lt : α → α → Bool) (lo hi : Nat) (w
   let rec @[specialize] loop (as : Vector α n) (i k : Nat)
       (ilo : lo ≤ i := by omega) (ik : i ≤ k := by omega) (w : k ≤ hi := by omega) :=
     bif h : k <ᵇ hi then
-      have h := lt_of_decideLT_eq_true h
       bif lt as[k] pivot then
         loop (as.swap i k) (i+1) (k+1)
       else
         loop as i (k+1)
     else
-      have h := not_lt_of_decideLT_eq_false h
       (⟨i, ilo, by omega⟩, as.swap i hi)
-  termination_by hi - k
   loop as lo lo
 
 /--
@@ -70,7 +67,6 @@ In-place quicksort.
   let rec @[specialize] sort {n} (as : Vector α n) (lo hi : Nat) (w : lo ≤ hi := by omega)
       (hlo : lo < n := by omega) (hhi : hi < n := by omega) :=
     bif h₁ : lo <ᵇ hi then
-      have h₁ := lt_of_decideLT_eq_true h₁
       let ⟨⟨mid, hmid⟩, as⟩ := qpartition as lt lo hi
       bif h₂ : hi ≤ᵇ mid then
         -- This only occurs when `hi ≤ lo`,
@@ -78,14 +74,11 @@ In-place quicksort.
         as
       else
         -- Otherwise, we recursively sort the two subarrays.
-        have h₂ := not_le_of_decideLE_eq_false h₂
         sort (sort as lo mid) (mid+1) hi
     else as
-  termination_by hi - lo
   bif h : as.size =ᵇ 0 then
     as
   else
-    have h := ne_of_decideEq_eq_false h
     let lo := min lo (as.size - 1)
     let hi := max lo (min hi (as.size - 1))
     sort as.toVector lo hi |>.toArray

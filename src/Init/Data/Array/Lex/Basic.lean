@@ -34,14 +34,11 @@ where @[specialize, semireducible] go (i : Nat) : Bool :=
   else bif h₂ : bs.size ≤ᵇ i then
     false
   else
-    have h₁ := not_le_of_decideLE_eq_false h₁
-    have h₂ := not_le_of_decideLE_eq_false h₂
     bif lt as[i] bs[i] then
       true
     else bif as[i] == bs[i] then
       go (i + 1)
     else
       false
-  termination_by as.size - i
 
 end Array

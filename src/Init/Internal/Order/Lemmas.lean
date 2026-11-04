@@ -339,7 +339,6 @@ namespace Array
 theorem monotone_modifyM (a : Array α) (i : Nat) (f : γ → α → m α) (hmono : monotone f) :
     monotone (fun x => a.modifyM i (f x)) := by
   unfold Array.modifyM
-  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split
   · apply monotone_bind
     · apply monotone_apply
@@ -393,11 +392,11 @@ theorem monotone_foldlM_loop
   induction i, j, b using Array.foldlM.loop.induct (h := h) with
   | case1 =>
     unfold Array.foldlM.loop
-    simp only [Bool.dcond_true, *]
+    simp only [*]
     apply monotone_const
   | case2 _ _ _ _ _ ih =>
     unfold Array.foldlM.loop
-    simp only [Bool.dcond_true, *]
+    simp only [*, ↓reduceDCond]
     apply monotone_bind
     · apply monotone_apply
       apply monotone_apply
@@ -406,7 +405,7 @@ theorem monotone_foldlM_loop
       apply ih
   | case3 =>
     unfold Array.foldlM.loop
-    simp only [Bool.dcond_false, *]
+    simp only [decideLT_eq_false_iff.2 ‹¬_ < stop›, Bool.dcond_false]
     apply monotone_const
 
 @[partial_fixpoint_monotone]
@@ -414,7 +413,6 @@ theorem monotone_foldlM
     (f : γ → β → α → m β) (init : β) (xs : Array α) (start stop : Nat) (hmono : monotone f) :
     monotone (fun x => xs.foldlM (f x) init start stop) := by
   unfold Array.foldlM
-  simp only [decideLE_eq_udecide, Bool.dcond_udecide]
   split <;> apply monotone_foldlM_loop (hmono := hmono)
 
 @[partial_fixpoint_monotone]
@@ -424,7 +422,7 @@ theorem monotone_foldrM_fold
   induction i, h, b using Array.foldrM.fold.induct (stop := stop) with
   | case1 =>
     unfold Array.foldrM.fold
-    simp only [*]
+    simp only [beq_self_eq_true, Bool.cond_true]
     apply monotone_const
   | case2  =>
     unfold Array.foldrM.fold
@@ -432,7 +430,7 @@ theorem monotone_foldrM_fold
     apply monotone_const
   | case3 _ _ _ _ _ ih =>
     unfold Array.foldrM.fold
-    simp only [*]
+    simp only [*, ↓reduceCond]
     apply monotone_bind
     · apply monotone_apply
       apply monotone_apply
@@ -446,7 +444,6 @@ theorem monotone_foldrM
     (f : γ → α → β → m β) (init : β) (xs : Array α) (start stop : Nat) (hmono : monotone f) :
     monotone (fun x => xs.foldrM (f x) init start stop) := by
   unfold Array.foldrM
-  simp only [decideLE_eq_udecide, decideLT_eq_udecide, Bool.dcond_udecide, Bool.cond_udecide]
   split
   · split
     · apply monotone_foldrM_fold (hmono := hmono)
@@ -463,7 +460,7 @@ theorem monotone_mapM (xs : Array α) (f : γ → α → m β) (hmono : monotone
   induction i, r using Array.mapM.map.induct xs
   case case1 ih =>
     unfold Array.mapM.map
-    simp only [*]
+    simp only [*, ↓reduceDCond]
     apply monotone_bind
     · apply monotone_apply
       apply hmono
@@ -472,7 +469,7 @@ theorem monotone_mapM (xs : Array α) (f : γ → α → m β) (hmono : monotone
       apply ih
   case case2 =>
     unfold Array.mapM.map
-    simp only [*]
+    simp only [decideLT_eq_false_iff.2 ‹¬_ < xs.size›, Bool.dcond_false]
     apply monotone_const
 
 @[partial_fixpoint_monotone]
@@ -554,11 +551,11 @@ theorem monotone_anyM_loop
   induction j using Array.anyM.loop.induct (h := h) with
   | case2 =>
     unfold Array.anyM.loop
-    simp only [*]
+    simp only [decideLT_eq_false_iff.2 ‹¬_ < stop›, Bool.dcond_false]
     apply monotone_const
   | case1 _ _ _ ih =>
     unfold Array.anyM.loop
-    simp only [Bool.cond_eq_ite, *]
+    simp only [*, ↓reduceDCond, Bool.cond_eq_ite]
     apply monotone_bind
     · apply monotone_apply
       apply hmono
@@ -574,7 +571,6 @@ theorem monotone_anyM
     (f : γ → α → m Bool) (xs : Array α) (start stop : Nat) (hmono : monotone f) :
     monotone (fun x => xs.anyM (f x) start stop) := by
   unfold Array.anyM
-  simp only [decideLE_eq_udecide, Bool.dcond_udecide]
   split
   · apply monotone_anyM_loop
     apply hmono
