@@ -11,7 +11,7 @@ termination_by state
 decreasing_by sorry
 
 /--
-error: Tactic `split` failed: Could not split an `if` or `match` expression in the goal
+error: Tactic `split` failed: Could not split an `if`, `bif` or `match` expression in the goal
 
 state : Nat
 p :

@@ -19,6 +19,7 @@ import Lean.Meta.Tactic.FunIndInfo
 import Lean.Data.Array
 import Init.UDecidable
 import Lean.Meta.Tactic.Replace
+import Lean.Meta.Tactic.BoolToProp
 import Init.Omega
 
 /-!
@@ -619,6 +620,23 @@ def rwFun (names : Array Name) (e : Expr) : MetaM Simp.Result := do
       return { expr := e }
 
 /--
+Builds a function of type `c = value → goal` for a `Bool.dcond` branch. The case hypothesis is the
+propositional view of `c = value` (see `boolCondToProp?`) if there is one; `k` receives a proof of
+`c = value` in either case.
+-/
+def withBoolCaseHyp (c : Expr) (value : Bool) (k : Expr → M2 Expr) : M2 Expr := do
+  let eq ← mkEq c (toExpr value)
+  match ← boolCondToProp? c value with
+  | none =>
+    withLocalDecl `h .default eq fun h => M2.branch do
+      mkLambdaFVars #[h] (← k h)
+  | some (p, pr) =>
+    let body ← withLocalDecl `h .default p fun hp => M2.branch do
+      mkLambdaFVars #[hp] (← k (← mkEqMPR pr hp))
+    withLocalDecl `h .default eq fun h => do
+      mkLambdaFVars #[h] (body.beta #[← mkEqMP pr h])
+
+/--
 Builds an expression of type `goal` by replicating the expression `e` into its tail-call-positions,
 where it calls `buildInductionCase`. Collects the cases of the final induction hypothesis
 as `MVars` as it goes.
@@ -688,28 +706,24 @@ partial def buildInductionBody (toErase toClear : Array FVarId) (goal : Expr)
     return mkApp5 (mkConst ``UDecidable.dite [u]) goal c' h' t' f'
   | cond _α c t f =>
     let c' ← foldAndCollect oldIH newIH isRecCall c
-    let t' ← withLocalDecl `h .default (← mkEq c' (mkConst ``Bool.true)) fun h => M2.branch do
-      let t' ← withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
+    let t' ← withBoolCaseHyp c' true fun h => do
+      withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
         buildInductionBody toErase toClear goal' oldIH newIH isRecCall t
-      mkLambdaFVars #[h] t'
-    let f' ← withLocalDecl `h .default (← mkEq c' (mkConst ``Bool.false)) fun h => M2.branch do
-      let t' ← withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
+    let f' ← withBoolCaseHyp c' false fun h => do
+      withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
         buildInductionBody toErase toClear goal' oldIH newIH isRecCall f
-      mkLambdaFVars #[h] t'
     let u ← getLevel goal
     return mkApp4 (mkConst ``Bool.dcond [u]) goal c' t' f'
   | Bool.dcond _α c t f =>
     let c' ← foldAndCollect oldIH newIH isRecCall c
-    let t' ← withLocalDecl `h .default (← mkEq c' (mkConst ``Bool.true)) fun h => M2.branch do
+    let t' ← withBoolCaseHyp c' true fun h => do
       let t ← instantiateLambda t #[h]
-      let t' ← withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
+      withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
         buildInductionBody toErase toClear goal' oldIH newIH isRecCall t
-      mkLambdaFVars #[h] t'
-    let f' ← withLocalDecl `h .default (← mkEq c' (mkConst ``Bool.false)) fun h => M2.branch do
+    let f' ← withBoolCaseHyp c' false fun h => do
       let f ← instantiateLambda f #[h]
-      let f' ← withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
+      withRewrittenMotiveArg goal (rwIfWith h) fun goal' =>
         buildInductionBody toErase toClear goal' oldIH newIH isRecCall f
-      mkLambdaFVars #[h] f'
     let u ← getLevel goal
     return mkApp4 (mkConst ``Bool.dcond [u]) goal c' t' f'
   | _ =>

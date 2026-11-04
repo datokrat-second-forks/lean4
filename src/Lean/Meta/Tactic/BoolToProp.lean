@@ -52,6 +52,26 @@ def boolCondToProp? (c : Expr) (value : Bool) : MetaM (Option (Expr × Expr)) :=
   if r.expr == e then return none
   return some (r.expr, ← r.getProof)
 
+/--
+If the target of `mvarId` is `∀ h : c = value, T` for `value` a `Bool` literal and `c = value`
+has the propositional view `p` (see `boolCondToProp?`), replaces it by `∀ h : p, T'`, where `T'`
+transports `h` back to `c = value`. Returns `none` otherwise.
+-/
+def _root_.Lean.MVarId.boolCondBinderToProp? (mvarId : MVarId) (c : Expr) :
+    MetaM (Option MVarId) := mvarId.withContext do
+  let .forallE n d body bi ← instantiateMVars (← mvarId.getType) | return none
+  let_expr Eq α c' v := d | return none
+  unless α.isConstOf ``Bool && c' == c do return none
+  let some value := (if v.isConstOf ``Bool.true then some true
+    else if v.isConstOf ``Bool.false then some false else none) | return none
+  let some (p, pr) ← boolCondToProp? c value | return none
+  let newTarget ← withLocalDecl n bi p fun hp => do
+    mkForallFVars #[hp] (body.instantiate1 (← mkEqMPR pr hp))
+  let newGoal ← mkFreshExprSyntheticOpaqueMVar newTarget (← mvarId.getTag)
+  mvarId.assign (← withLocalDecl n bi d fun h => do
+    mkLambdaFVars #[h] (mkApp newGoal (← mkEqMP pr h)))
+  return some newGoal.mvarId!
+
 end Meta
 
 end Lean

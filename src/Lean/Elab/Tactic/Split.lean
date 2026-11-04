@@ -70,12 +70,12 @@ where
       ++ .hint' m!"Specify a single target to split, or use `split at *` to split the first target that can be automatically split"
 
   throwCouldNotSplitGoal (mvarId : MVarId) := do
-    Meta.throwTacticEx `split mvarId <| m!"Could not split an `if` or `match` expression in the goal"
+    Meta.throwTacticEx `split mvarId <| m!"Could not split an `if`, `bif` or `match` expression in the goal"
       ++ (← mkCasesHint <$> mvarId.getType) ++ traceHint
 
   throwCouldNotSplitHyp (fvarId : FVarId) (mvarId: MVarId) := do
     let fvarType ← fvarId.getType
-    Meta.throwTacticEx `split mvarId <| m!"Could not split an `if` or `match` expression in \
+    Meta.throwTacticEx `split mvarId <| m!"Could not split an `if`, `bif` or `match` expression in \
       the type{inlineExpr fvarType}of `{Expr.fvar fvarId}`" ++ mkCasesHint fvarType ++ traceHint
 
   throwCouldNotSplitWildcard {α} (fvarIds : Array FVarId) (mvarId : MVarId) : MetaM α := do

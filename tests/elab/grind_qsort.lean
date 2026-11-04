@@ -255,7 +255,6 @@ private theorem qsort_sort_spec
   rw [Bool.dcond_eq_udite] at w_as
   split at w_as <;> rename_i w₁
   · -- The interesting case, where `lo < hi`.
-    replace w₁ := lt_of_decideLT_eq_true w₁
     intro i h₁ h₂
     -- Decompose `qpartition as lt lo hi` into `mid` (the pivot) and `as'` (the partitioned array).
     split at w_as <;> rename_i mid hmid as' w₂

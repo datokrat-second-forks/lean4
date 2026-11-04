@@ -5,7 +5,8 @@ import Std.Tactic.Do
 Both `vcgen` (`experimental.vcgen`) and the legacy `mvcgen` split programs headed by
 `UDecidable.ite` (`uif c then …`), `UDecidable.dite` (`uif h : c then …`), `cond` (`bif b then …`)
 and `Bool.dcond` (`bif h : b then …`). The `uif` branches get `h : c` or `h : ¬c`, the `bif`
-branches `h : b = true` or `h : b = false`.
+branches the propositional view of `b = true` or `b = false` (such as `h : i < n` for
+`b := i <ᵇ n`), or the `Bool` equation itself if there is none (such as for an opaque `b`).
 -/
 
 namespace NewVCGen
@@ -42,8 +43,8 @@ theorem dcond_spec (xs : Array Nat) (i : Nat) (hxs : ∀ j (h : j < xs.size), xs
     ⦃ True ⦄ dcond xs i ⦃ fun r => r > 0 ⦄ := by
   vcgen [dcond] with finish
 
-/-! The branches get the propositional hypotheses `i < xs.size` and `¬i < xs.size`, respectively
-`(i <ᵇ xs.size) = true` and `(i <ᵇ xs.size) = false`. -/
+/-! The branches of both `uif h : i < xs.size` and `bif h : i <ᵇ xs.size` get the propositional
+hypotheses `i < xs.size` and `¬i < xs.size`. -/
 
 /--
 trace: case vc1
@@ -72,14 +73,14 @@ trace: case vc1
 xs : Array Nat
 i : Nat
 hxs : ∀ (j : Nat) (h : j < xs.size), 0 < xs[j]
-h✝ : (i <ᵇ xs.size) = true
+h✝ : i < xs.size
 ⊢ 0 < xs[i]
 
 case vc2
 xs : Array Nat
 i : Nat
 hxs : ∀ (j : Nat) (h : j < xs.size), 0 < xs[j]
-h✝ : (i <ᵇ xs.size) = false
+h✝ : ¬i < xs.size
 ⊢ 0 < 1
 -/
 #guard_msgs in
@@ -135,6 +136,57 @@ theorem joins_spec (n : Nat) (xs : Array Nat) :
     ⦃ fun _ => True ⦄ joins n xs ⦃ fun r s => r > 1 ∧ r = s ⦄ := by
   vcgen +jp [joins] with finish
 
+/-! A non-dependent `bif` on a comparison gets the propositional view, an opaque `Bool` keeps the
+`Bool` equation. -/
+
+def bcondLt (i n : Nat) : StateM Nat Unit := do
+  bif i <ᵇ n then modify (· + 1) else set 0
+
+/--
+trace: case vc1
+i n s✝ : Nat
+a✝ : s✝ = 3
+h✝ : i < n
+x✝ : n ≤ i
+⊢ 3 + 1 = 0
+
+case vc2
+i n s✝ : Nat
+a✝ : s✝ = 3
+h✝ : ¬i < n
+x✝ : i < n
+⊢ 0 = 4
+-/
+#guard_msgs in
+example (i n : Nat) : ⦃ fun s => s = 3 ⦄ bcondLt i n ⦃ fun _ s => (i < n → s = 4) ∧ (n ≤ i → s = 0) ⦄ := by
+  vcgen [bcondLt]
+  trace_state
+  all_goals grind
+
+/--
+trace: case vc1
+b : Bool
+s✝ : Nat
+a✝ : s✝ = 3
+h✝ : b = true
+x✝ : b = false
+⊢ 3 + 1 = 0
+
+case vc2
+b : Bool
+s✝ : Nat
+a✝ : s✝ = 3
+h✝ : b = false
+x✝ : b = true
+⊢ 0 = 4
+-/
+#guard_msgs in
+example (b : Bool) :
+    ⦃ fun s => s = 3 ⦄ bcond b ⦃ fun _ s => (b = true → s = 4) ∧ (b = false → s = 0) ⦄ := by
+  vcgen [bcond]
+  trace_state
+  all_goals grind
+
 end NewVCGen
 
 namespace LegacyMVCGen
@@ -171,8 +223,8 @@ theorem dcond_spec (xs : Array Nat) (i : Nat) (hxs : ∀ j (h : j < xs.size), xs
     ⦃⌜True⌝⦄ dcond xs i ⦃⇓ r => ⌜r > 0⌝⦄ := by
   mvcgen [dcond] <;> grind
 
-/-! The branches get the propositional hypothesis `i < xs.size`, respectively
-`(i <ᵇ xs.size) = true`. The other branches are closed by `mvcgen`. -/
+/-! The branches of both `uif h : i < xs.size` and `bif h : i <ᵇ xs.size` get the propositional
+hypothesis `i < xs.size`. The other branches are closed by `mvcgen`. -/
 
 /--
 trace: case vc1.isTrue
@@ -194,7 +246,7 @@ trace: case vc1.isTrue
 xs : Array Nat
 i : Nat
 hxs : ∀ (j : Nat) (h : j < xs.size), xs[j] > 0
-h✝ : (i <ᵇ xs.size) = true
+h✝ : i < xs.size
 ⊢ xs[i] > 0
 -/
 #guard_msgs in
@@ -249,5 +301,57 @@ def joins (n : Nat) (xs : Array Nat) : StateM Nat Nat := do
 theorem joins_spec (n : Nat) (xs : Array Nat) :
     ⦃⌜True⌝⦄ joins n xs ⦃⇓ r s => ⌜r > 1 ∧ r = s⌝⦄ := by
   mvcgen +jp [joins] <;> grind
+
+/-! A non-dependent `bif` on a comparison gets the propositional view, an opaque `Bool` keeps the
+`Bool` equation. -/
+
+def bcondLt (i n : Nat) : StateM Nat Unit := do
+  bif i <ᵇ n then modify (· + 1) else set 0
+
+/--
+trace: case vc1.isTrue
+i n : Nat
+h✝¹ : i < n
+s✝ : Nat
+h✝ : s✝ = 3
+t✝ : Unit × Nat := (PUnit.unit, s✝ + 1)
+⊢ (i < n → t✝.snd = 4) ∧ (n ≤ i → t✝.snd = 0)
+
+case vc2.isFalse
+i n : Nat
+h✝¹ : ¬i < n
+s✝ : Nat
+h✝ : s✝ = 3
+⊢ (i < n → 0 = 4) ∧ (n ≤ i → True)
+-/
+#guard_msgs in
+example (i n : Nat) :
+    ⦃fun s => ⌜s = 3⌝⦄ bcondLt i n ⦃⇓ _ s => ⌜(i < n → s = 4) ∧ (n ≤ i → s = 0)⌝⦄ := by
+  mvcgen [bcondLt]
+  trace_state
+  all_goals grind
+
+/--
+trace: case vc1.isTrue
+b : Bool
+h✝¹ : b = true
+s✝ : Nat
+h✝ : s✝ = 3
+t✝ : Unit × Nat := (PUnit.unit, s✝ + 1)
+⊢ (b = true → t✝.snd = 4) ∧ (b = false → t✝.snd = 0)
+
+case vc2.isFalse
+b : Bool
+h✝¹ : b = false
+s✝ : Nat
+h✝ : s✝ = 3
+⊢ (b = true → 0 = 4) ∧ (b = false → True)
+-/
+#guard_msgs in
+example (b : Bool) :
+    ⦃fun s => ⌜s = 3⌝⦄ bcond b ⦃⇓ _ s => ⌜(b = true → s = 4) ∧ (b = false → s = 0)⌝⦄ := by
+  mvcgen [bcond]
+  trace_state
+  all_goals grind
 
 end LegacyMVCGen

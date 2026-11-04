@@ -5,7 +5,7 @@ set_option pp.proofs true
 -- set_option trace.split.debug true
 
 /--
-error: Tactic `split` failed: Could not split an `if` or `match` expression in the goal
+error: Tactic `split` failed: Could not split an `if`, `bif` or `match` expression in the goal
 
 Hint: Use `set_option trace.split.failure true` to display additional diagnostic information
 

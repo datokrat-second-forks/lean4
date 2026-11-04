@@ -118,12 +118,19 @@ example (xs : Array Nat) (i : Nat) :
     getOr xs i = Bool.dcond (UDecidable.decide (i < xs.size)) (fun h => xs[i]'(UDecidable.of_decide_eq_true h)) (fun _ => 0) := by
   simp only [getOr, decideLT_eq_udecide]
 
-/-- `split` after `simp`. -/
+/-- `split` after `simp` gives the propositional hypotheses. -/
 example (xs : Array Nat) (i : Nat) : getOr xs i = xs[i]?.getD 0 := by
   simp only [getOr, Bool.dcond_eq_udite]
   split
-  next h => simp [lt_of_decideLT_eq_true h]
-  next h => simp [not_lt_of_decideLT_eq_false (Bool.eq_false_iff.mpr h)]
+  next h => simp [h]
+  next h => simp [h]
+
+/-- `split` without `simp`. -/
+example (xs : Array Nat) (i : Nat) : getOr xs i = xs[i]?.getD 0 := by
+  simp only [getOr]
+  split
+  next h => simp [h]
+  next h => simp [h]
 
 example (xs : Array Nat) (i : Nat) : getOr xs i = xs[i]?.getD 0 := by
   simp only [getOr]
@@ -179,13 +186,13 @@ theorem countDown_eq (n : Nat) : countDown n = n := by
     rw [countDown]
     simp only [Bool.dcond_eq_udite]
     split
-    next h => have := le_of_decideLE_eq_true h; omega
+    next h => omega
     next => simp [ih]
 
 /-- Functional induction splits on the dependent `bif`. -/
 theorem countDown_eq' (n : Nat) : countDown n = n := by
   fun_induction countDown with
-  | case1 n h => have := le_of_decideLE_eq_true h; omega
+  | case1 n h => omega
   | case2 n _ _ ih => omega
 
 /-! ## `grind` -/

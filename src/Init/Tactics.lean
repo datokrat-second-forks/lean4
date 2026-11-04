@@ -1244,6 +1244,11 @@ one goal with hypothesis `n = 0` and target `Q`, and a second goal with hypothes
 `¬n = 0` and target `R`.  Note that the introduced hypothesis is unnamed, and is commonly
 renamed using the `case` or `next` tactics.
 
+For a target `bif b then Q else R` (also `bif h : b then Q else R`), `split` case splits on the
+value of `b`. The hypothesis is the propositional form of `b = true` resp. `b = false` given by the
+`bool_to_prop` simp set, such as `i < n` and `¬i < n` for `b := i <ᵇ n`, or the `Bool` equation if
+there is none.
+
 - `split` will split the goal (target).
 - `split at h` will split the hypothesis `h`.
 -/

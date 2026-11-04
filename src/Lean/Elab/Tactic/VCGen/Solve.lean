@@ -16,6 +16,7 @@ public import Lean.Meta.Sym.Simp.App
 import Lean.Meta.Sym.InferType
 import Lean.Meta.Sym.InstantiateMVarsS
 import Init.Data.Prod
+import Lean.Meta.Tactic.BoolToProp
 
 open Lean Meta Elab Tactic Sym Sym.Internal
 open Lean.Elab.Tactic.VCGen.SpecAttr
@@ -350,6 +351,9 @@ def wpMatch? (goal : MVarId) (info : WPApp) :
     | throwError "Failed to apply split rule for {indentExpr info.prog}"
   let mut simpGoals := #[]
   for g in goals do
+    let g ← match splitInfo with
+      | .cond e | .dcond e => pure ((← liftMetaM <| g.boolCondBinderToProp? (e.getArg! 1)).getD g)
+      | _ => pure g
     match ← simpGoalTelescope g with
     | .goal g' => simpGoals := simpGoals.push g'
     | .noProgress => simpGoals := simpGoals.push g

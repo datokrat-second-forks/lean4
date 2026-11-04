@@ -12,6 +12,7 @@ public import Lean.Data.Array
 import Lean.Meta.Match.Rewrite
 import Lean.Meta.Tactic.Simp.Rewrite
 import Lean.Meta.Tactic.Assumption
+public import Lean.Meta.Tactic.BoolToProp
 
 public section
 
@@ -181,6 +182,23 @@ def withAbstract {n} {α} [MonadLiftT MetaM n] [MonadControlT MetaM n] [Monad n]
     }
     k (.matcher abstractMatcherApp) (discrs ++ alts)
 
+/--
+Builds a function of type `c = value → resTy` for a `Bool.dcond` branch, passing the case
+hypothesis `h : c = value` to `k`. If `c = value` has a propositional view `p` (see
+`boolCondToProp?`), `h` is an implementation detail and the branch also gets `h : p`, so that the
+verification conditions mention `p`.
+-/
+def withBoolCaseHyp {n} [MonadLiftT MetaM n] [MonadControlT MetaM n] [Monad n]
+    (name : Name) (c : Expr) (value : Bool) (k : Expr → n Expr) : n Expr := do
+  let eq ← liftMetaM <| mkEq c (toExpr value)
+  match ← liftMetaM <| boolCondToProp? c value with
+  | none =>
+    withLocalDecl name .default eq fun h => do mkLambdaFVars #[h] (← k h)
+  | some (p, pr) =>
+    withLocalDecl name .default eq (kind := .implDetail) fun h => do
+      let body ← withLocalDecl name .default p fun hp => do mkLambdaFVars #[hp] (← k h)
+      mkLambdaFVars #[h] (mkApp body (← liftMetaM <| mkEqMP pr h))
+
 def splitWith
   {n} [MonadLiftT MetaM n] [MonadControlT MetaM n] [Monad n] [MonadError n] [MonadEnv n] [MonadLog n]
   [AddMessageContext n] [MonadOptions n]
@@ -211,10 +229,8 @@ def splitWith
     let c := e.getArg! 1
     if useSplitter then -- Bool.dcond is the "splitter" for cond
       let n ← liftMetaM <| mkFreshUserName `h
-      let hTrue ← liftMetaM <| mkEq c (mkConst ``Bool.true)
-      let hFalse ← liftMetaM <| mkEq c (mkConst ``Bool.false)
-      let t ← withLocalDecl n .default hTrue fun h => do mkLambdaFVars #[h] (← onAlt `isTrue resTy 0 { fields := #[h] })
-      let e ← withLocalDecl n .default hFalse fun h => do mkLambdaFVars #[h] (← onAlt `isFalse resTy 1 { fields := #[h] })
+      let t ← withBoolCaseHyp n c true fun h => onAlt `isTrue resTy 0 { fields := #[h] }
+      let e ← withBoolCaseHyp n c false fun h => onAlt `isFalse resTy 1 { fields := #[h] }
       return mkApp4 (mkConst ``Bool.dcond [u]) resTy c t e
     else
       let t ← onAlt `isTrue resTy 0 { fields := #[] }
@@ -245,10 +261,8 @@ def splitWith
     let u ← getLevel resTy
     let c := e.getArg! 1
     let n ← liftMetaM <| mkFreshUserName `h
-    let hTrue ← liftMetaM <| mkEq c (mkConst ``Bool.true)
-    let hFalse ← liftMetaM <| mkEq c (mkConst ``Bool.false)
-    let t ← withLocalDecl n .default hTrue fun h => do mkLambdaFVars #[h] (← onAlt `isTrue resTy 0 { args := #[h], fields := #[h] })
-    let e ← withLocalDecl n .default hFalse fun h => do mkLambdaFVars #[h] (← onAlt `isFalse resTy 1 { args := #[h], fields := #[h] })
+    let t ← withBoolCaseHyp n c true fun h => onAlt `isTrue resTy 0 { args := #[h], fields := #[h] }
+    let e ← withBoolCaseHyp n c false fun h => onAlt `isFalse resTy 1 { args := #[h], fields := #[h] }
     return mkApp4 (mkConst ``Bool.dcond [u]) resTy c t e
   | matcher matcherApp => do
     -- Do not abstract `match h :` discriminants: the alternatives' equality binders
@@ -300,8 +314,12 @@ def rwIfOrMatcher (idx : Nat) (e : Expr) : MetaM Simp.Result := do
   else if e.isAppOf ``cond || e.isAppOf ``Bool.dcond then
     let c := e.getArg! 1
     let h ← mkEq c (mkConst (if idx = 0 then ``Bool.true else ``Bool.false))
-    let .some fv ← findLocalDeclWithType? h
-      | throwError "Failed to find proof for cond condition {h}"
-    rwIfWith (mkFVar fv) e
+    if let .some fv ← findLocalDeclWithType? h then
+      return ← rwIfWith (mkFVar fv) e
+    -- `withBoolCaseHyp` may have introduced the propositional view instead.
+    if let some (p, pr) ← boolCondToProp? c (idx = 0) then
+      if let .some fv ← findLocalDeclWithType? p then
+        return ← rwIfWith (← mkEqMPR pr (mkFVar fv)) e
+    throwError "Failed to find proof for cond condition {h}"
   else
     rwMatcher idx e

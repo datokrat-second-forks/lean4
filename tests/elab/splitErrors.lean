@@ -20,7 +20,7 @@ example (x y : Bool) : (if x && y then 1 else 2) > (if x || y then 0 else 1) := 
   split x && y
 
 /--
-error: Tactic `split` failed: Could not split an `if` or `match` expression in the goal
+error: Tactic `split` failed: Could not split an `if`, `bif` or `match` expression in the goal
 
 Hint: Use `set_option trace.split.failure true` to display additional diagnostic information
 
@@ -46,7 +46,7 @@ example : False := by
   split at *
 
 /--
-error: Tactic `split` failed: Could not split an `if` or `match` expression in the type `p ∧ q` of `h`
+error: Tactic `split` failed: Could not split an `if`, `bif` or `match` expression in the type `p ∧ q` of `h`
 
 Hint: If you meant to destruct this conjunction, use the `cases` tactic instead
 
@@ -61,7 +61,7 @@ example {p q : Prop} (h : p ∧ q) : p := by
   split at h
 
 /--
-error: Tactic `split` failed: Could not split an `if` or `match` expression in the type `Equivalence R` of `h`
+error: Tactic `split` failed: Could not split an `if`, `bif` or `match` expression in the type `Equivalence R` of `h`
 
 Hint: If you meant to destruct this structure, use the `cases` tactic instead
 
@@ -95,7 +95,7 @@ example : False := by
   split at *
 
 /--
-error: Tactic `split` failed: Could not split an `if` or `match` expression in the type `Nat` of `x`
+error: Tactic `split` failed: Could not split an `if`, `bif` or `match` expression in the type `Nat` of `x`
 
 x : Nat := if true = true then 3 else 4
 ⊢ False
@@ -107,7 +107,7 @@ example : False := by
   split at x
 
 /--
-error: Tactic `split` failed: Could not split an `if` or `match` expression in the type `True` of `h`
+error: Tactic `split` failed: Could not split an `if`, `bif` or `match` expression in the type `True` of `h`
 
 Hint: Use `set_option trace.split.failure true` to display additional diagnostic information
 
