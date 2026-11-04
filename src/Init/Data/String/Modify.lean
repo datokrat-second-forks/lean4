@@ -33,7 +33,8 @@ Examples:
 -/
 @[extern "lean_string_utf8_set", expose]
 def Pos.set {s : String} (p : s.Pos) (c : Char) (hp : p ≠ s.endPos) : String :=
-  if hc : c.utf8Size = 1 ∧ (p.byte hp).utf8ByteSize isUTF8FirstByte_byte = 1 then
+  bif hc : c.utf8Size =ᵇ 1 && (p.byte hp).utf8ByteSize isUTF8FirstByte_byte =ᵇ 1 then
+    have hc : c.utf8Size = 1 ∧ (p.byte hp).utf8ByteSize isUTF8FirstByte_byte = 1 := by simpa using hc
     .ofByteArray (s.toByteArray.set p.offset.byteIdx c.toUInt8 (p.byteIdx_lt_utf8ByteSize hp)) (by
       rw [ByteArray.set_eq_push_extract_append_extract, ← hc.2, utf8ByteSize_byte,
         ← Pos.byteIdx_offset_next]
@@ -188,10 +189,10 @@ def modify (s : String) (i : Pos.Raw) (f : Char → Char) : String :=
   i.set s (f (i.get s))
 
 @[specialize] def mapAux (f : Char → Char) (s : String) (p : s.Pos) : String :=
-  if h : p = s.endPos then
+  bif h : p =ᵇ s.endPos then
     s
   else
-    mapAux f (p.modify f h) (p.pastModify f h)
+    mapAux f (p.modify f (ne_of_decideEq_eq_false h)) (p.pastModify f (ne_of_decideEq_eq_false h))
 termination_by p.remainingBytes
 decreasing_by
   simp [remainingBytes_pastModify, ← Pos.lt_iff_remainingBytes_lt]

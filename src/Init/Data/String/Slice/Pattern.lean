@@ -190,7 +190,7 @@ instance : Std.Iterator (SplitInclusiveIterator pat s) Id Slice where
         pure (.deflate ⟨.skip ⟨.operating currPos searcher'⟩,
           by simp [hps.isPlausibleSuccessor_of_skip]⟩)
       | ⟨.done, _⟩ =>
-        if currPos != s.endPos then
+        bif currPos != s.endPos then
           let slice := s.sliceFrom currPos
           pure (.deflate ⟨.yield ⟨.atEnd⟩ slice, by simp⟩)
         else
@@ -331,12 +331,13 @@ Advances {name}`pos` as long as {name}`pat` matches.
 def Pos.skipWhile {s : Slice} (pos : s.Pos) (pat : ρ) [ForwardPattern pat] : s.Pos :=
   match pos.skip? pat with
   | some nextCurr =>
-    if pos < nextCurr then
+    bif _ : pos <ᵇ nextCurr then
       skipWhile nextCurr pat
     else
       pos
   | none => pos
 termination_by pos
+decreasing_by exact lt_of_decideLT_eq_true ‹_›
 
 /--
 Returns the position after the longest prefix of {name}`s` for which {name}`pat` matches
@@ -520,7 +521,7 @@ instance [Pure m] : Std.Iterator (RevSplitIterator ρ s) m Slice where
         pure (.deflate ⟨.skip ⟨.operating currPos searcher'⟩,
           by simp [hps.isPlausibleSuccessor_of_skip]⟩)
       | ⟨.done, _⟩ =>
-        if currPos ≠ s.startPos then
+        bif currPos ≠ᵇ s.startPos then
           let slice := s.sliceTo currPos
           pure (.deflate ⟨.yield ⟨.atEnd⟩ slice, by simp⟩)
         else
@@ -640,12 +641,13 @@ Rewinds {name}`pos` as long as {name}`pat` matches.
 def Pos.revSkipWhile {s : Slice} (pos : s.Pos) (pat : ρ) [BackwardPattern pat] : s.Pos :=
   match pos.revSkip? pat with
   | some nextCurr =>
-    if nextCurr < pos then
+    bif _ : nextCurr <ᵇ pos then
       revSkipWhile nextCurr pat
     else
       pos
   | none => pos
 termination_by pos.down
+decreasing_by simpa [Pos.inner_down] using lt_of_decideLT_eq_true ‹_›
 
 /--
 Returns the position at the start of the longest suffix of {name}`s` for which {name}`pat` matches

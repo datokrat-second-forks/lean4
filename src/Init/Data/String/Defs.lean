@@ -563,8 +563,8 @@ is out-of-bounds.
 -/
 @[expose]
 def Slice.getUTF8Byte! (s : Slice) (p : String.Pos.Raw) : UInt8 :=
-  if h : p < s.rawEndPos then
-    s.getUTF8Byte p h
+  bif h : p <ᵇ s.rawEndPos then
+    s.getUTF8Byte p (lt_of_decideLT_eq_true h)
   else
     panic! "String slice access is out of bounds."
 

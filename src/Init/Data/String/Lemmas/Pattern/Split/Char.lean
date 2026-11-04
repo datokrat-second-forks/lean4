@@ -39,11 +39,11 @@ theorem Pattern.Model.split_char_eq_split_beq {c : Char} {s : Slice}
   | case1 fr h => simp
   | case2 fr curr hle h pos h₁ h₂ ih =>
     conv => rhs; rw [Model.split]
-    simp only [h, ↓reduceDIte]
+    simp only [h, ↓reduceUDIte]
     split <;> simp_all [matchAt?_eq_matchAt?_beq]
   | case3 fr curr hle h pos ih =>
     conv => rhs; rw [Model.split]
-    simp only [h, ↓reduceDIte]
+    simp only [h, ↓reduceUDIte]
     split <;> simp_all [matchAt?_eq_matchAt?_beq]
 
 theorem toList_splitToSubslice_char {s : Slice} {c : Char} :
@@ -65,7 +65,7 @@ theorem toList_split_char {s : String} {c : Char} :
 
 theorem Slice.toList_split_intercalate {c : Char} {l : List Slice} (hl : ∀ s ∈ l, c ∉ s.copy.toList) :
     ((Slice.intercalate (String.singleton c) l).split c).toList.map Slice.copy =
-      if l = [] then [""] else l.map Slice.copy := by
+      uif l = [] then [""] else l.map Slice.copy := by
   simp [String.toList_split_char]
   split
   · simp_all
@@ -73,12 +73,12 @@ theorem Slice.toList_split_intercalate {c : Char} {l : List Slice} (hl : ∀ s �
 
 theorem Slice.toList_split_intercalate_beq {c : Char} {l : List Slice} (hl : ∀ s ∈ l, c ∉ s.copy.toList) :
     ((Slice.intercalate (String.singleton c) l).split c).toList ==
-      if l = [] then ["".toSlice] else l := by
+      uif l = [] then ["".toSlice] else l := by
   split <;> simp_all [toList_split_intercalate hl, beq_list_iff]
 
 theorem toList_split_intercalate {c : Char} {l : List String} (hl : ∀ s ∈ l, c ∉ s.toList) :
     ((String.intercalate (String.singleton c) l).split c).toList.map (·.copy) =
-      if l = [] then [""] else l := by
+      uif l = [] then [""] else l := by
   simp only [toList_split_char, toList_intercalate, toList_singleton]
   split
   · simp_all
@@ -86,7 +86,7 @@ theorem toList_split_intercalate {c : Char} {l : List String} (hl : ∀ s ∈ l,
 
 theorem toList_split_intercalate_beq {c : Char} {l : List String} (hl : ∀ s ∈ l, c ∉ s.toList) :
     ((String.intercalate (String.singleton c) l).split c).toList ==
-      if l = [] then ["".toSlice] else l.map String.toSlice := by
+      uif l = [] then ["".toSlice] else l.map String.toSlice := by
   split <;> simp_all [toList_split_intercalate hl, Slice.beq_list_iff]
 
 end String

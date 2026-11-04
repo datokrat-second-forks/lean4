@@ -31,29 +31,31 @@ namespace CharPred
 @[default_instance]
 instance {p : Char → Bool} : ForwardPattern p where
   skipPrefixOfNonempty? s h :=
-    if p (s.startPos.get (Slice.startPos_ne_endPos h)) then
+    bif p (s.startPos.get (Slice.startPos_ne_endPos h)) then
       some (s.startPos.next (Slice.startPos_ne_endPos h))
     else
       none
   skipPrefix? s :=
-    if h : s.startPos = s.endPos then
+    bif h : s.startPos =ᵇ s.endPos then
       none
-    else if p (s.startPos.get h) then
-      some (s.startPos.next h)
     else
-      none
+      have h := ne_of_decideEq_eq_false h
+      bif p (s.startPos.get h) then
+        some (s.startPos.next h)
+      else
+        none
   startsWith s :=
-    if h : s.startPos = s.endPos then
+    bif h : s.startPos =ᵇ s.endPos then
       false
     else
-      p (s.startPos.get h)
+      p (s.startPos.get (ne_of_decideEq_eq_false h))
 
 instance {p : Char → Bool} : StrictForwardPattern p where
   ne_startPos {s h q} := by
-    simp only [ForwardPattern.skipPrefixOfNonempty?, Option.ite_none_right_eq_some,
-      Option.some.injEq, ne_eq, and_imp]
-    rintro _ rfl
-    simp
+    simp only [ForwardPattern.skipPrefixOfNonempty?]
+    split
+    · intro hq; cases hq; simp
+    · simp
 
 instance {p : Char → Bool} : LawfulForwardPattern p where
   skipPrefixOfNonempty?_eq {s} h := by
@@ -89,29 +91,31 @@ end Decidable
 @[default_instance]
 instance {p : Char → Bool} : BackwardPattern p where
   skipSuffixOfNonempty? s h :=
-    if p ((s.endPos.prev (Ne.symm (by exact Slice.startPos_ne_endPos h))).get (by simp)) then
+    bif p ((s.endPos.prev (Ne.symm (by exact Slice.startPos_ne_endPos h))).get (by simp)) then
       some (s.endPos.prev (Ne.symm (by exact Slice.startPos_ne_endPos h)))
     else
       none
   skipSuffix? s :=
-    if h : s.endPos = s.startPos then
+    bif h : s.endPos =ᵇ s.startPos then
       none
-    else if p ((s.endPos.prev h).get (by simp)) then
-      some (s.endPos.prev h)
     else
-      none
+      have h := ne_of_decideEq_eq_false h
+      bif p ((s.endPos.prev h).get (by simp)) then
+        some (s.endPos.prev h)
+      else
+        none
   endsWith s :=
-    if h : s.endPos = s.startPos then
+    bif h : s.endPos =ᵇ s.startPos then
       false
     else
-      p ((s.endPos.prev h).get (by simp))
+      p ((s.endPos.prev (ne_of_decideEq_eq_false h)).get (by simp))
 
 instance {p : Char → Bool} : StrictBackwardPattern p where
   ne_endPos {s h q} := by
-    simp only [BackwardPattern.skipSuffixOfNonempty?, Option.ite_none_right_eq_some,
-      Option.some.injEq, ne_eq, and_imp]
-    rintro _ rfl
-    simp
+    simp only [BackwardPattern.skipSuffixOfNonempty?]
+    split
+    · intro hq; cases hq; simp
+    · simp
 
 instance {p : Char → Bool} : LawfulBackwardPattern p where
   skipSuffixOfNonempty?_eq {s h} := by

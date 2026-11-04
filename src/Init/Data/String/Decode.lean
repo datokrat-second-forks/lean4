@@ -102,12 +102,12 @@ Returns the sequence of bytes in a character's UTF-8 encoding.
 @[expose]
 public def String.utf8EncodeCharFast (c : Char) : List UInt8 :=
   let v := c.val
-  if v ≤ 0x7f then
+  bif v ≤ᵇ 0x7f then
     [v.toUInt8]
-  else if v ≤ 0x7ff then
+  else bif v ≤ᵇ 0x7ff then
     [(v >>>  6).toUInt8 &&& 0x1f ||| 0xc0,
               v.toUInt8 &&& 0x3f ||| 0x80]
-  else if v ≤ 0xffff then
+  else bif v ≤ᵇ 0xffff then
     [(v >>> 12).toUInt8 &&& 0x0f ||| 0xe0,
      (v >>>  6).toUInt8 &&& 0x3f ||| 0x80,
               v.toUInt8 &&& 0x3f ||| 0x80]
@@ -125,7 +125,8 @@ theorem Nat.add_two_pow_eq_or_of_lt {b : Nat} (i : Nat) (b_lt : b < 2 ^ i) (a : 
 public theorem String.utf8EncodeChar_eq_utf8EncodeCharFast : @utf8EncodeChar = @utf8EncodeCharFast := by
   funext c
   simp only [utf8EncodeChar, utf8EncodeCharFast, UInt8.ofNat_uInt32ToNat, UInt8.ofNat_add,
-    UInt8.reduceOfNat, UInt32.le_iff_toNat_le, UInt32.reduceToNat]
+    UInt8.reduceOfNat, decideLE_eq_udecide, Bool.cond_udecide, UInt32.le_iff_toNat_le,
+    UInt32.reduceToNat]
   split
   · rfl
   · split
@@ -317,13 +318,13 @@ public inductive FirstByte where
 
 @[inline, expose, implicit_reducible]
 public def parseFirstByte (b : UInt8) : FirstByte :=
-  if b &&& 0x80 == 0 then
+  bif b &&& 0x80 == 0 then
     .done
-  else if b &&& 0xe0 == 0xc0 then
+  else bif b &&& 0xe0 == 0xc0 then
     .oneMore
-  else if b &&& 0xf0 == 0xe0 then
+  else bif b &&& 0xf0 == 0xe0 then
     .twoMore
-  else if b &&& 0xf8 == 0xf0 then
+  else bif b &&& 0xf8 == 0xf0 then
     .threeMore
   else .invalid
 
@@ -600,11 +601,11 @@ public def assemble₂Unchecked (w x : UInt8) : UInt32 :=
 
 @[inline, expose]
 public def assemble₂ (w x : UInt8) : Option Char :=
-  if !x.isUTF8ContinuationByte then
+  bif !x.isUTF8ContinuationByte then
     none
   else
     let r := assemble₂Unchecked w x
-    if r < 0x80 then
+    bif r <ᵇ 0x80 then
       none -- overlong encoding
     else
       some ⟨r, ?onemore⟩
@@ -624,11 +625,11 @@ where finally
 
 @[inline, expose]
 public def verify₂ (w x : UInt8) : Bool :=
-  if !x.isUTF8ContinuationByte then
+  bif !x.isUTF8ContinuationByte then
     false
   else
     let r := assemble₂Unchecked w x
-    0x80 ≤ r
+    0x80 ≤ᵇ r
 
 theorem helper₃ {x : UInt8} (n : Nat) (hn : n < 8) :
     (x &&& UInt8.ofNat (2 ^ n - 1)).toUInt32.toBitVec = (x.toBitVec.setWidth n).setWidth 32 := by
@@ -744,13 +745,13 @@ public def assemble₃Unchecked (w x y : UInt8) : UInt32 :=
 
 @[inline, expose]
 public def assemble₃ (w x y : UInt8) : Option Char :=
-  if !x.isUTF8ContinuationByte || !y.isUTF8ContinuationByte then
+  bif !x.isUTF8ContinuationByte || !y.isUTF8ContinuationByte then
     none
   else
     let r := assemble₃Unchecked w x y
-    if r < 0x800 then
+    bif r <ᵇ 0x800 then
       none -- overlong encoding
-    else if hr : 0xd800 ≤ r ∧ r ≤ 0xdfff then
+    else bif hr : 0xd800 ≤ᵇ r && r ≤ᵇ 0xdfff then
       none -- surrogate code point
     else
       some ⟨r, ?twomore⟩
@@ -764,7 +765,7 @@ where finally
     have hb₂ : b₂ < 0x40 := UInt8.and_lt_add_one (by decide)
     have hr' : r = (b₀.toUInt32 <<< 12) ||| (b₁.toUInt32 <<< 6) ||| b₂.toUInt32 := rfl
     simp only [UInt8.lt_iff_toNat_lt, UInt8.reduceToNat] at hb₀ hb₁ hb₂
-    simp only [Decidable.not_and_iff_not_or_not, UInt32.not_le] at hr
+    simp only [Bool.and_eq_false_iff, decideLE_eq_false_iff, UInt32.not_le] at hr
     rcases hr with (hr|hr)
     · exact Or.inl hr
     · refine Or.inr ⟨hr, ?_⟩
@@ -778,11 +779,11 @@ where finally
 
 @[inline, expose]
 public def verify₃ (w x y : UInt8) : Bool :=
-  if !x.isUTF8ContinuationByte || !y.isUTF8ContinuationByte then
+  bif !x.isUTF8ContinuationByte || !y.isUTF8ContinuationByte then
     false
   else
     let r := assemble₃Unchecked w x y
-    0x800 ≤ r ∧ (r < 0xd800 ∨ 0xdfff < r)
+    0x800 ≤ᵇ r && (r <ᵇ 0xd800 || 0xdfff <ᵇ r)
 
 theorem toBitVec_assemble₃Unchecked {w x y : UInt8} : (assemble₃Unchecked w x y).toBitVec =
     (w.toBitVec.setWidth 4 ++ x.toBitVec.setWidth 6 ++ y.toBitVec.setWidth 6).setWidth 32 := by
@@ -909,28 +910,28 @@ public def assemble₄Unchecked (w x y z : UInt8) : UInt32 :=
 
 @[inline, expose]
 public def assemble₄ (w x y z : UInt8) : Option Char :=
-  if !x.isUTF8ContinuationByte || !y.isUTF8ContinuationByte || !z.isUTF8ContinuationByte then
+  bif !x.isUTF8ContinuationByte || !y.isUTF8ContinuationByte || !z.isUTF8ContinuationByte then
     none
   else
     let r := assemble₄Unchecked w x y z
-    if h₁ : r < 0x10000 then
+    bif h₁ : r <ᵇ 0x10000 then
       none -- overlong encoding
-    else if h₂ : 0x10ffff < r then
+    else bif h₂ : 0x10ffff <ᵇ r then
       none -- out-of-range code point
     else
       some ⟨r, ?threemore⟩
 where finally
   case threemore =>
-    simp only [UInt32.not_lt, UInt32.le_iff_toNat_le, UInt32.reduceToNat] at h₁ h₂
+    simp only [decideLT_eq_false_iff, UInt32.not_lt, UInt32.le_iff_toNat_le, UInt32.reduceToNat] at h₁ h₂
     exact Or.inr ⟨by omega, by omega⟩
 
 @[inline, expose]
 public def verify₄ (w x y z : UInt8) : Bool :=
-  if !x.isUTF8ContinuationByte || !y.isUTF8ContinuationByte || !z.isUTF8ContinuationByte then
+  bif !x.isUTF8ContinuationByte || !y.isUTF8ContinuationByte || !z.isUTF8ContinuationByte then
     false
   else
     let r := assemble₄Unchecked w x y z
-    0x10000 ≤ r ∧ r ≤ 0x10ffff
+    0x10000 ≤ᵇ r && r ≤ᵇ 0x10ffff
 
 theorem toBitVec_assemble₄Unchecked {w x y z : UInt8} : (assemble₄Unchecked w x y z).toBitVec =
     (w.toBitVec.setWidth 3 ++ x.toBitVec.setWidth 6 ++ y.toBitVec.setWidth 6 ++ z.toBitVec.setWidth 6).setWidth 32 := by
@@ -1074,42 +1075,42 @@ Returns `none` if `i` is not the start of a valid UTF-8 encoding of a character.
 -/
 @[inline, expose, implicit_reducible]
 public def ByteArray.utf8DecodeChar? (bytes : ByteArray) (i : Nat) : Option Char :=
-  if h₀ : i < bytes.size then
+  bif h₀ : i <ᵇ bytes.size then
     match h : parseFirstByte bytes[i] with
     | .invalid => none -- invalid first byte
     | .done => assemble₁ bytes[i] h
     | .oneMore =>
-      if h₁ : i + 1 < bytes.size then
+      bif h₁ : i + 1 <ᵇ bytes.size then
         assemble₂ bytes[i] bytes[i + 1]
       else
         none
     | .twoMore =>
-      if h₁ : i + 2 < bytes.size then
+      bif h₁ : i + 2 <ᵇ bytes.size then
         assemble₃ bytes[i] bytes[i + 1] bytes[i + 2]
       else none
     | .threeMore =>
-      if h₁ : i + 3 < bytes.size then
+      bif h₁ : i + 3 <ᵇ bytes.size then
         assemble₄ bytes[i] bytes[i + 1] bytes[i + 2] bytes[i + 3]
       else none
   else none
 
 @[inline, expose]
 public def ByteArray.validateUTF8At (bytes : ByteArray) (i : Nat) : Bool :=
-  if h₀ : i < bytes.size then
+  bif h₀ : i <ᵇ bytes.size then
     match h : parseFirstByte bytes[i] with
     | .invalid => false
     | .done => verify₁ bytes[i] h
     | .oneMore =>
-      if h₁ : i + 1 < bytes.size then
+      bif h₁ : i + 1 <ᵇ bytes.size then
         verify₂ bytes[i] bytes[i + 1]
       else
         false
     | .twoMore =>
-      if h₁ : i + 2 < bytes.size then
+      bif h₁ : i + 2 <ᵇ bytes.size then
         verify₃ bytes[i] bytes[i + 1] bytes[i + 2]
       else false
     | .threeMore =>
-      if h₁ : i + 3 < bytes.size then
+      bif h₁ : i + 3 <ᵇ bytes.size then
         verify₄ bytes[i] bytes[i + 1] bytes[i + 2] bytes[i + 3]
       else false
   else false
@@ -1482,9 +1483,14 @@ public def IsUTF8FirstByte (c : UInt8) : Prop :=
 public def isUTF8FirstByte (c : UInt8) : Bool :=
   c &&& 0x80 == 0 || c &&& 0xe0 == 0xc0 || c &&& 0xf0 == 0xe0 || c &&& 0xf8 == 0xf0
 
-@[simp]
+@[simp, bool_to_prop]
 public theorem isUTF8FirstByte_eq_true_iff {c : UInt8} : c.isUTF8FirstByte = true ↔ c.IsUTF8FirstByte := by
   simp [isUTF8FirstByte, IsUTF8FirstByte, or_assoc]
+
+@[bool_to_prop]
+public theorem isUTF8FirstByte_eq_false_iff {c : UInt8} :
+    c.isUTF8FirstByte = false ↔ ¬c.IsUTF8FirstByte := by
+  simp [← Bool.not_eq_true]
 
 @[inline]
 public instance {c : UInt8} : Decidable c.IsUTF8FirstByte :=
@@ -1523,11 +1529,11 @@ public theorem isUTF8FirstByte_getElem_zero_utf8EncodeChar {c : Char} :
 
 @[expose, inline]
 public def utf8ByteSize (c : UInt8) (_h : c.IsUTF8FirstByte) : Nat :=
-  if c &&& 0x80 = 0 then
+  bif c &&& 0x80 == 0 then
     1
-  else if c &&& 0xe0 = 0xc0 then
+  else bif c &&& 0xe0 == 0xc0 then
     2
-  else if c &&& 0xf0 = 0xe0 then
+  else bif c &&& 0xf0 == 0xe0 then
     3
   else
     4
@@ -1544,7 +1550,7 @@ def _root_.ByteArray.utf8DecodeChar?.FirstByte.utf8ByteSize : FirstByte → Nat
 
 theorem utf8ByteSize_eq_utf8ByteSize_parseFirstByte {c : UInt8} {h : c.IsUTF8FirstByte} :
     c.utf8ByteSize h = (parseFirstByte c).utf8ByteSize := by
-  simp only [utf8ByteSize, FirstByte.utf8ByteSize, parseFirstByte, beq_iff_eq]
+  simp only [utf8ByteSize, FirstByte.utf8ByteSize, parseFirstByte]
   split
   · simp
   · split

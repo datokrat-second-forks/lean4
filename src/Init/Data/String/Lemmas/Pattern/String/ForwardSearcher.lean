@@ -146,7 +146,7 @@ runs in linear time, also computes this table.
 def prefixFunction (pat : ByteArray) (stackPos : Nat) (hst : stackPos < pat.size) : Nat :=
   go stackPos
 where go (k : Nat) : Nat :=
-  if h : PartialMatch pat pat k (stackPos + 1) then
+  uif h : PartialMatch pat pat k (stackPos + 1) then
     k
   else
     have : k ≠ 0 := by rintro rfl; simp [partialMatch_zero (Nat.lt_iff_add_one_le.1 hst)] at h
@@ -227,9 +227,9 @@ the `buildTable` function.
 -/
 def prefixFunctionRecurrence (pat : ByteArray) (stackPos : Nat) (hst : stackPos < pat.size)
     (guess : Nat) (hg : guess < stackPos) : Nat :=
-  if pat[guess] = pat[stackPos] then
+  uif pat[guess] = pat[stackPos] then
     guess + 1
-  else if h : guess = 0 then
+  else uif h : guess = 0 then
     0
   else
     have : (prefixFunction pat (guess - 1) (by omega)) < guess := by
@@ -308,14 +308,14 @@ theorem computeDistance_eq_prefixFunctionRecurrence {s : Slice} (i : Nat)
   cases hpat
   fun_induction prefixFunctionRecurrence with
   | case1 =>
-    rw [buildTable.computeDistance, ite_eq_left]
+    rw [buildTable.computeDistance, UDecidable.ite_eq_left]
     simp [getUTF8Byte_eq_getUTF8Byte_copy, String.getUTF8Byte, *]
   | case2 =>
-    rw [buildTable.computeDistance, ite_eq_right, dite_eq_left]
+    rw [buildTable.computeDistance, UDecidable.ite_eq_right, UDecidable.dite_eq_left]
     · rfl
     · simp [getUTF8Byte_eq_getUTF8Byte_copy, String.getUTF8Byte, *]
   | case3 g hg h₁ h₂ h₃ ih =>
-    rw [buildTable.computeDistance, ite_eq_right, dite_eq_right h₂]
+    rw [buildTable.computeDistance, UDecidable.ite_eq_right, UDecidable.dite_eq_right h₂]
     · simp only [ht'.eq_prefixFunction, ih]
     · simp [getUTF8Byte_eq_getUTF8Byte_copy, String.getUTF8Byte, *]
 
@@ -562,7 +562,7 @@ public theorem lawfulToForwardSearcherModel {pat : Slice} (hpat : pat.isEmpty = 
     LawfulToForwardSearcherModel pat where
   isValidSearchFrom_toList s := by
     simp only [ToForwardSearcher.toSearcher]
-    rw [iter, dite_eq_right (by simpa [isEmpty_eq] using hpat)]
+    rw [iter, UDecidable.dite_eq_right (by simpa [isEmpty_eq] using hpat)]
     rw (occs := [1]) [← Invariants.base_start hpat]
     apply Invariants.isValidSearchFrom_toList _ _ rfl rfl
 
@@ -582,7 +582,7 @@ public theorem toList_emptyAt_eq (s : Slice) (pos : s.Pos) (h : pos ≠ s.endPos
 
 public theorem toList_emptyBefore_eq (s : Slice) (pos : s.Pos) :
     (Std.Iter.mk (.emptyBefore pos : ForwardSliceSearcher s)).toList =
-      if h : pos = s.endPos then
+      uif h : pos = s.endPos then
         [.matched pos pos]
       else
         .matched pos pos ::
@@ -590,14 +590,14 @@ public theorem toList_emptyBefore_eq (s : Slice) (pos : s.Pos) :
   rw [Std.Iter.toList_eq_match_step, Std.Iter.step_eq]
   by_cases h : pos = s.endPos
   · simp [h]
-  · rw [dite_eq_right h, Std.Iter.toList_eq_match_step]
+  · rw [UDecidable.dite_eq_right h, Std.Iter.toList_eq_match_step]
     simp [Std.Iter.step_eq, h]
 
 public theorem toSearcher_of_isEmpty {pat : Slice} (hpat : pat.isEmpty = true) (s : Slice) :
     ToForwardSearcher.toSearcher pat s =
       Std.Iter.mk (.emptyBefore s.startPos : ForwardSliceSearcher s) := by
   simp only [ToForwardSearcher.toSearcher, iter,
-    dite_eq_left (show pat.utf8ByteSize = 0 from by simpa [isEmpty_eq] using hpat)]
+    UDecidable.dite_eq_left (show pat.utf8ByteSize = 0 from by simpa [isEmpty_eq] using hpat)]
 
 end ForwardSliceSearcher
 
@@ -612,7 +612,7 @@ public theorem lawfulToForwardSearcherModel {pat : String} (hpat : pat ≠ "") :
 public theorem toSearcher_empty (s : Slice) : ToForwardSearcher.toSearcher "" s =
       Std.Iter.mk (.emptyBefore s.startPos : ForwardSliceSearcher s) := by
   simp only [ToForwardSearcher.toSearcher, ForwardSliceSearcher.iter,
-    dite_eq_left (show "".toSlice.utf8ByteSize = 0 from by decide)]
+    UDecidable.dite_eq_left (show "".toSlice.utf8ByteSize = 0 from by decide)]
 
 end ForwardStringSearcher
 

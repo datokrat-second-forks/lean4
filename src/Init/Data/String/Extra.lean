@@ -36,15 +36,19 @@ private def findLeadingSpacesSize (s : String) : Nat :=
   | none => 0
 where
   consumeSpaces {s : String} (it : s.Pos) (curr min : Nat) : Nat :=
-    if h : it.IsAtEnd then min
-    else if it.get h == ' ' || it.get h == '\t' then consumeSpaces (it.next h) (curr + 1) min
-    else if it.get h == '\n' then findNextLine (it.next h) min
-    else findNextLine (it.next h) (Nat.min curr min)
+    bif h : it =ᵇ s.endPos then min
+    else
+      have h := ne_of_decideEq_eq_false h
+      bif it.get h == ' ' || it.get h == '\t' then consumeSpaces (it.next h) (curr + 1) min
+      else bif it.get h == '\n' then findNextLine (it.next h) min
+      else findNextLine (it.next h) (Nat.min curr min)
   termination_by it
   findNextLine {s : String} (it : s.Pos) (min : Nat) : Nat :=
-    if h : it.IsAtEnd then min
-    else if it.get h == '\n' then consumeSpaces (it.next h) 0 min
-    else findNextLine (it.next h) min
+    bif h : it =ᵇ s.endPos then min
+    else
+      have h := ne_of_decideEq_eq_false h
+      bif it.get h == '\n' then consumeSpaces (it.next h) 0 min
+      else findNextLine (it.next h) min
   termination_by it
 
 private def removeNumLeadingSpaces (n : Nat) (s : String) : String :=
@@ -54,14 +58,18 @@ where
      match n with
      | 0 => saveLine it r
      | n+1 =>
-       if h : it.IsAtEnd then r
-       else if it.get h == ' ' || it.get h == '\t' then consumeSpaces n (it.next h) r
-       else saveLine it r
+       bif h : it =ᵇ s.endPos then r
+       else
+         have h := ne_of_decideEq_eq_false h
+         bif it.get h == ' ' || it.get h == '\t' then consumeSpaces n (it.next h) r
+         else saveLine it r
   termination_by (it, 1)
   saveLine {s : String} (it : s.Pos) (r : String) : String :=
-    if h : it.IsAtEnd then r
-    else if it.get h  == '\n' then consumeSpaces n (it.next h) (r.push '\n')
-    else saveLine (it.next h) (r.push (it.get h))
+    bif h : it =ᵇ s.endPos then r
+    else
+      have h := ne_of_decideEq_eq_false h
+      bif it.get h  == '\n' then consumeSpaces n (it.next h) (r.push '\n')
+      else saveLine (it.next h) (r.push (it.get h))
   termination_by (it, 0)
 
 /--
@@ -84,7 +92,7 @@ Examples:
 -/
 def removeLeadingSpaces (s : String) : String :=
   let n := findLeadingSpacesSize s
-  if n == 0 then s else removeNumLeadingSpaces n s
+  bif n == 0 then s else removeNumLeadingSpaces n s
 
 /--
 Replaces each `\r\n` with `\n` to normalize line endings, but does not validate that there are no
@@ -96,26 +104,26 @@ def crlfToLf (text : String) : String :=
   go "" 0 0
 where
   go (acc : String) (accStop pos : String.Pos.Raw) : String :=
-    if h : pos.atEnd text then
+    bif h : pos.atEnd text then
       -- note: if accStop = 0 then acc is empty
-      if accStop = 0 then text else acc ++ accStop.extract text pos
+      bif accStop =ᵇ 0 then text else acc ++ accStop.extract text pos
     else
-      let c := pos.get' text h
-      let pos' := pos.next' text h
-      if h' : ¬ pos'.atEnd text ∧ c == '\r' ∧ pos'.get text == '\n' then
+      let c := pos.get' text (Bool.ne_true_of_eq_false h)
+      let pos' := pos.next' text (Bool.ne_true_of_eq_false h)
+      bif h' : !pos'.atEnd text && c == '\r' && pos'.get text == '\n' then
         let acc := acc ++ accStop.extract text pos
-        go acc pos' (pos'.next' text h'.1)
+        go acc pos' (pos'.next' text (by simp_all))
       else
         go acc accStop pos'
   termination_by text.utf8ByteSize - pos.byteIdx
   decreasing_by
     decreasing_with
       change text.utf8ByteSize - ((pos.next text).next text).byteIdx < text.utf8ByteSize - pos.byteIdx
-      have k := Nat.gt_of_not_le <| mt UDecidable.decide_eq_true h
+      have k := Nat.gt_of_not_le <| not_le_of_decideLE_eq_false h
       exact Nat.sub_lt_sub_left k (Nat.lt_trans (String.Pos.Raw.lt_next text pos) (String.Pos.Raw.lt_next _ _))
     decreasing_with
       change text.utf8ByteSize - (pos.next text).byteIdx < text.utf8ByteSize - pos.byteIdx
-      have k := Nat.gt_of_not_le <| mt UDecidable.decide_eq_true h
+      have k := Nat.gt_of_not_le <| not_le_of_decideLE_eq_false h
       exact Nat.sub_lt_sub_left k (String.Pos.Raw.lt_next _ _)
 
 end String

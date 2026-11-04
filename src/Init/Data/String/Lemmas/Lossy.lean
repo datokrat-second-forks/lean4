@@ -22,17 +22,18 @@ theorem skipContinuationBytes_le_size {b : ByteArray} {i : Nat} (hi : i ≤ b.si
 
 theorem skipContinuationBytes_of_not_lt {b : ByteArray} {i : Nat} (h : ¬ i < b.size) :
     skipContinuationBytes b i = i := by
-  rw [skipContinuationBytes, dite_eq_right h]
+  rw [skipContinuationBytes, Bool.dcond_neg (decideLT_eq_false_iff.2 h)]
 
 theorem skipContinuationBytes_of_isUTF8ContinuationByte {b : ByteArray} {i : Nat}
     (h : i < b.size) (hc : b[i].isUTF8ContinuationByte) :
     skipContinuationBytes b i = skipContinuationBytes b (i + 1) := by
-  rw [skipContinuationBytes, dite_eq_left h, ite_eq_left hc]
+  rw [skipContinuationBytes, Bool.dcond_pos (decideLT_eq_true_iff.2 h), Bool.cond_pos hc]
 
 theorem skipContinuationBytes_of_not_isUTF8ContinuationByte {b : ByteArray} {i : Nat}
     (h : i < b.size) (hc : ¬ b[i].isUTF8ContinuationByte) :
     skipContinuationBytes b i = i := by
-  rw [skipContinuationBytes, dite_eq_left h, ite_eq_right hc]
+  rw [skipContinuationBytes, Bool.dcond_pos (decideLT_eq_true_iff.2 h),
+    Bool.cond_neg (Bool.eq_false_of_ne_true hc)]
 
 theorem skipContinuationBytes_eq_of_forall_isUTF8ContinuationByte {b : ByteArray}
     {i j : Nat} (hij : i ≤ j) (hj : j ≤ b.size)
@@ -46,7 +47,7 @@ theorem skipContinuationBytes_eq_of_forall_isUTF8ContinuationByte {b : ByteArray
     · simp_all
   | case2 i h₁ h₂ =>
     suffices ¬ i < j by omega
-    exact fun hlt => h₂ (hcont i h₁ (by omega) hlt)
+    exact fun hlt => by simp [hcont i h₁ (by omega) hlt] at h₂
   | case3 => omega
 
 theorem skipContinuationBytes_extract {b : ByteArray} {i j : Nat} :
@@ -72,14 +73,14 @@ public theorem fromUTF8Lossy_empty : fromUTF8Lossy ByteArray.empty = "" := by
 
 theorem fromUTF8Lossy.go_of_not_lt {b : ByteArray} {i : Nat} {acc : String}
     (h : ¬ i < b.size) : fromUTF8Lossy.go b i acc = acc := by
-  rw [fromUTF8Lossy.go, ite_eq_right h]
+  rw [fromUTF8Lossy.go, Bool.dcond_neg (decideLT_eq_false_iff.2 h)]
 
 theorem fromUTF8Lossy.go_of_utf8DecodeChar?_eq_some {b : ByteArray} {i : Nat}
     {acc : String} {c : Char} (h : i < b.size)
     (hc : b.utf8DecodeChar? i = some c) :
     fromUTF8Lossy.go b i acc =
       fromUTF8Lossy.go b (i + c.utf8Size) (acc.push c) := by
-  rw [fromUTF8Lossy.go, ite_eq_left h]
+  rw [fromUTF8Lossy.go, Bool.dcond_pos (decideLT_eq_true_iff.2 h)]
   split
   · rename_i d hd
     obtain rfl : c = d := by rw [← Option.some_inj, ← hc, hd]
@@ -90,7 +91,7 @@ theorem fromUTF8Lossy.go_of_utf8DecodeChar?_eq_none {b : ByteArray} {i : Nat}
     {acc : String} (h : i < b.size) (hc : b.utf8DecodeChar? i = none) :
     fromUTF8Lossy.go b i acc =
       fromUTF8Lossy.go b (skipContinuationBytes b (i + 1)) (acc.push '\ufffd') := by
-  rw [fromUTF8Lossy.go, ite_eq_left h]
+  rw [fromUTF8Lossy.go, Bool.dcond_pos (decideLT_eq_true_iff.2 h)]
   split
   · simp_all
   · rfl

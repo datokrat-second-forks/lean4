@@ -32,9 +32,9 @@ different base strings or different slices within the same string.
 The implementation is an efficient equivalent of {lean}`s1.copy == s2.copy`
 -/
 def beq (s1 s2 : Slice) : Bool :=
-  if h : s1.utf8ByteSize = s2.utf8ByteSize then
+  bif h : s1.utf8ByteSize =ᵇ s2.utf8ByteSize then
     have h1 := by simp [String.Pos.Raw.le_iff]
-    have h2 := by simp [h, String.Pos.Raw.le_iff]
+    have h2 := by simp [eq_of_decideEq_eq_true h, String.Pos.Raw.le_iff]
     Pattern.Internal.memcmpSlice s1 s2 s1.startPos.offset s2.startPos.offset s1.utf8ByteSize h1 h2
   else
     false
@@ -68,12 +68,14 @@ Checks whether {name}`s` is lexicographically smaller than {name}`t`.
 The implementation is an efficient equivalent of {lean}`decide (s.copy < t.copy)`.
 -/
 def blt (s t : Slice) : Bool :=
-  if h : s.utf8ByteSize < t.utf8ByteSize then
+  bif h : s.utf8ByteSize <ᵇ t.utf8ByteSize then
     -- `s` is shorter, so it is smaller unless the first `s.utf8ByteSize` bytes of `t` are smaller.
+    have h := lt_of_decideLT_eq_true h
     have h1 := by simp [Pos.Raw.le_iff]; omega
     have h2 := by simp [Pos.Raw.le_iff]
     !Pattern.Internal.memcmpSliceLt t s t.startPos.offset s.startPos.offset s.utf8ByteSize h1 h2
   else
+    have h := not_lt_of_decideLT_eq_false h
     have h1 := by simp [Pos.Raw.le_iff]; omega
     have h2 := by simp [Pos.Raw.le_iff]
     Pattern.Internal.memcmpSliceLt s t s.startPos.offset t.startPos.offset t.utf8ByteSize h1 h2
@@ -172,10 +174,10 @@ def eqIgnoreAsciiCase (s1 s2 : Slice) : Bool :=
   s1.utf8ByteSize == s2.utf8ByteSize && go s1 s1.startPos.offset s2 s2.startPos.offset
 where
   go (s1 : Slice) (s1Curr : String.Pos.Raw) (s2 : Slice) (s2Curr : String.Pos.Raw) : Bool :=
-    if h : s1Curr < s1.rawEndPos ∧ s2Curr < s2.rawEndPos then
-      let c1 := (s1.getUTF8Byte s1Curr h.left).toAsciiLower
-      let c2 := (s2.getUTF8Byte s2Curr h.right).toAsciiLower
-      if c1 == c2 then
+    bif h : s1Curr <ᵇ s1.rawEndPos && s2Curr <ᵇ s2.rawEndPos then
+      let c1 := (s1.getUTF8Byte s1Curr (lt_of_decideLT_eq_true (Bool.and_eq_true_iff.1 h).1)).toAsciiLower
+      let c2 := (s2.getUTF8Byte s2Curr (lt_of_decideLT_eq_true (Bool.and_eq_true_iff.1 h).2)).toAsciiLower
+      bif c1 == c2 then
         go s1 s1Curr.inc s2 s2Curr.inc
       else
         false

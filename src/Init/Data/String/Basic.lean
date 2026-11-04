@@ -76,7 +76,7 @@ def ByteArray.utf8Decode? (b : ByteArray) : Option (Array Char) :=
 where
   @[semireducible, implicit_reducible]
   go (i : Nat) (acc : Array Char) (hi : i ≤ b.size) : Option (Array Char) :=
-    if i < b.size then
+    bif _ : i <ᵇ b.size then
       match h : utf8DecodeChar? b i with
       | none => none
       | some c => go (i + c.utf8Size) (acc.push c) (le_size_of_utf8DecodeChar?_eq_some h)
@@ -91,7 +91,7 @@ def ByteArray.validateUTF8 (b : @& ByteArray) : Bool :=
 where
   @[semireducible]
   go (i : Nat) (hi : i ≤ b.size) : Bool :=
-    if hi : i < b.size then
+    bif hi : i <ᵇ b.size then
       match h : validateUTF8At b i with
       | false => false
       | true => go (i + b[i].utf8ByteSize (isUTF8FirstByte_of_validateUTF8At h)) ?_
@@ -111,14 +111,14 @@ theorem ByteArray.isSome_utf8Decode?Go_eq_validateUTF8Go {b : ByteArray}
   fun_induction utf8Decode?.go with
   | case1 i acc hi h₁ h₂ =>
     unfold validateUTF8.go
-    simp only [Option.isSome_none, ↓reduceDIte, Bool.false_eq, h₁]
+    simp only [Option.isSome_none, ↓reduceDCond, Bool.false_eq, h₁]
     split
     · rfl
     · rename_i heq
       simp [validateUTF8At_eq_isSome_utf8DecodeChar?, h₂] at heq
   | case2 i acc hi h₁ c h₂ ih =>
     unfold validateUTF8.go
-    simp only [↓reduceDIte, ih, h₁]
+    simp only [↓reduceDCond, ih, h₁]
     split
     · rename_i heq
       simp [validateUTF8At_eq_isSome_utf8DecodeChar?, h₂] at heq
@@ -165,12 +165,12 @@ theorem ByteArray.isSome_utf8Decode?_iff {b : ByteArray} :
     b.utf8Decode?.isSome ↔ IsValidUTF8 b := by
   rw [utf8Decode?, isSome_utf8Decode?go_iff, extract_zero_size]
 
-@[simp]
+@[simp, bool_to_prop]
 theorem ByteArray.validateUTF8_eq_true_iff {b : ByteArray} :
     b.validateUTF8 = true ↔ IsValidUTF8 b := by
   rw [← isSome_utf8Decode?_eq_validateUTF8, isSome_utf8Decode?_iff]
 
-@[simp]
+@[simp, bool_to_prop]
 theorem ByteArray.validateUTF8_eq_false_iff {b : ByteArray} :
     b.validateUTF8 = false ↔ ¬ IsValidUTF8 b := by
   simp [← Bool.not_eq_true]
@@ -183,14 +183,15 @@ Decodes an array of bytes that encode a string as [UTF-8](https://en.wikipedia.o
 the corresponding string, or returns `none` if the array is not a valid UTF-8 encoding of a string.
 -/
 @[inline, expose] def String.fromUTF8? (a : ByteArray) : Option String :=
-  if h : a.IsValidUTF8 then some (fromUTF8 a h) else none
+  bif h : a.validateUTF8 then some (fromUTF8 a (ByteArray.validateUTF8_eq_true_iff.1 h)) else none
 
 /--
 Decodes an array of bytes that encode a string as [UTF-8](https://en.wikipedia.org/wiki/UTF-8) into
 the corresponding string, or panics if the array is not a valid UTF-8 encoding of a string.
 -/
 @[inline, expose] def String.fromUTF8! (a : ByteArray) : String :=
-  if h : a.IsValidUTF8 then fromUTF8 a h else panic! "invalid UTF-8 string"
+  bif h : a.validateUTF8 then fromUTF8 a (ByteArray.validateUTF8_eq_true_iff.1 h)
+  else panic! "invalid UTF-8 string"
 
 @[simp]
 theorem String.empty_append {s : String} : "" ++ s = s := by
@@ -254,14 +255,14 @@ private theorem ByteArray.utf8Decode?go_eq_utf8Decode?go_extract {b : ByteArray}
     rw [utf8Decode?.go]
     simp only [size_extract, Nat.le_refl, Nat.min_eq_left, Nat.zero_add, List.push_toArray,
       List.nil_append]
-    rw [ite_eq_left (by omega)]
+    rw [Bool.dcond_pos (by omega)]
     rw [utf8DecodeChar?_eq_utf8DecodeChar?_extract] at h₂
     split <;> simp_all
   | case2 h₁ c h₂ =>
     conv => rhs; rw [utf8Decode?.go]
     simp only [size_extract, Nat.le_refl, Nat.min_eq_left, Nat.zero_add, List.push_toArray,
       List.nil_append]
-    rw [ite_eq_left (by omega)]
+    rw [Bool.dcond_pos (by omega)]
     rw [utf8DecodeChar?_eq_utf8DecodeChar?_extract] at h₂
     split
     · simp_all
@@ -278,14 +279,14 @@ private theorem ByteArray.utf8Decode?go_eq_utf8Decode?go_extract {b : ByteArray}
     rw [utf8Decode?.go]
     simp only [size_extract, Nat.le_refl, Nat.min_eq_left, Nat.zero_add, List.push_toArray,
       List.nil_append]
-    rw [ite_eq_right (by omega)]
+    rw [Bool.dcond_neg (by omega)]
     simp
 termination_by b.size - i
 
 theorem ByteArray.utf8Decode?_utf8Encode_singleton_append {l : ByteArray} {c : Char} :
     ([c].utf8Encode ++ l).utf8Decode? = l.utf8Decode?.map (#[c] ++ ·) := by
   rw [utf8Decode?, utf8Decode?.go,
-    ite_eq_left (by simp [List.utf8Encode_singleton]; have := c.utf8Size_pos; omega)]
+    Bool.dcond_pos (by simp [List.utf8Encode_singleton]; have := c.utf8Size_pos; omega)]
   split
   · simp_all [List.utf8DecodeChar?_utf8Encode_singleton_append]
   · rename_i d h
@@ -595,12 +596,12 @@ Examples:
 -/
 @[extern "lean_string_is_valid_pos", expose]
 def Pos.Raw.isValid (s : @&String) (p : @& Pos.Raw) : Bool :=
-  if h : p < s.rawEndPos then
-    (s.getUTF8Byte p h).isUTF8FirstByte
+  bif h : p <ᵇ s.rawEndPos then
+    (s.getUTF8Byte p (lt_of_decideLT_eq_true h)).isUTF8FirstByte
   else
     p.byteIdx == s.rawEndPos.byteIdx
 
-@[simp]
+@[simp, bool_to_prop]
 theorem Pos.Raw.isValid_eq_true_iff {s : String} {p : Pos.Raw} : p.isValid s = true ↔ p.IsValid s := by
   rw [isValid_iff_isUTF8FirstByte]
   fun_cases isValid s p with
@@ -610,7 +611,7 @@ theorem Pos.Raw.isValid_eq_true_iff {s : String} {p : Pos.Raw} : p.isValid s = t
     simp [lt_iff] at h
   | case2 => simp_all [Pos.Raw.ext_iff]
 
-@[simp]
+@[simp, bool_to_prop]
 theorem Pos.Raw.isValid_eq_false_iff {s : String} {p : Pos.Raw} : p.isValid s = false ↔ ¬ p.IsValid s := by
   rw [← Bool.not_eq_true, Pos.Raw.isValid_eq_true_iff]
 
@@ -809,12 +810,12 @@ theorem Pos.Raw.isValidForSlice_iff_exists_append {s : Slice} {p : Pos.Raw} :
 /-- Efficiently checks whether a position is at a UTF-8 character boundary of the slice `s`. -/
 @[expose]
 def Pos.Raw.isValidForSlice (s : Slice) (p : Pos.Raw) : Bool :=
-  if h : p < s.rawEndPos then
-    (s.getUTF8Byte p h).isUTF8FirstByte
+  bif h : p <ᵇ s.rawEndPos then
+    (s.getUTF8Byte p (lt_of_decideLT_eq_true h)).isUTF8FirstByte
   else
     p.byteIdx == s.rawEndPos.byteIdx
 
-@[simp]
+@[simp, bool_to_prop]
 theorem Pos.Raw.isValidForSlice_eq_true_iff {s : Slice} {p : Pos.Raw} :
     p.isValidForSlice s = true ↔ p.IsValidForSlice s := by
   rw [isValidForSlice_iff_isUTF8FirstByte]
@@ -825,7 +826,7 @@ theorem Pos.Raw.isValidForSlice_eq_true_iff {s : Slice} {p : Pos.Raw} :
     simp [lt_iff] at h
   | case2 => simp_all [Pos.Raw.ext_iff]
 
-@[simp]
+@[simp, bool_to_prop]
 theorem Pos.Raw.isValidForSlice_eq_false_iff {s : Slice} {p : Pos.Raw} :
     p.isValidForSlice s = false ↔ ¬ p.IsValidForSlice s := by
   rw [← Bool.not_eq_true, isValidForSlice_eq_true_iff]
@@ -1012,16 +1013,16 @@ theorem Slice.endExclusive_slice {s : Slice} {newStart newEnd : s.Pos} {h} :
 /-- Given a slice and two valid positions within the slice, obtain a new slice on the same underlying
 string formed by the new bounds, or `none` if the given end is strictly less than the given start. -/
 def Slice.slice? (s : Slice) (newStart newEnd : s.Pos) : Option Slice :=
-  if h : newStart.offset ≤ newEnd.offset then
-    some (s.slice newStart newEnd h)
+  bif h : newStart.offset ≤ᵇ newEnd.offset then
+    some (s.slice newStart newEnd (le_of_decideLE_eq_true h))
   else
     none
 
 /-- Given a slice and two valid positions within the slice, obtain a new slice on the same underlying
 string formed by the new bounds, or panic if the given end is strictly less than the given start. -/
 def Slice.slice! (s : Slice) (newStart newEnd : s.Pos) : Slice :=
-  if h : newStart ≤ newEnd then
-    s.slice newStart newEnd h
+  bif h : newStart ≤ᵇ newEnd then
+    s.slice newStart newEnd (le_of_decideLE_eq_true h)
   else
     panic! "Starting position must be less than or equal to end position."
 
@@ -1102,13 +1103,14 @@ theorem Slice.Pos.utf8Encode_get_eq_extract {s : Slice} (pos : s.Pos) (h : pos �
 position. -/
 @[expose]
 def Slice.Pos.get? {s : Slice} (pos : s.Pos) : Option Char :=
-  if h : pos = s.endPos then none else some (pos.get h)
+  bif h : pos =ᵇ s.endPos then none else some (pos.get (ne_of_decideEq_eq_false h))
 
 /-- Returns the byte at the given position in the string, or panics if the position is the end
 position. -/
 @[expose]
 def Slice.Pos.get! {s : Slice} (pos : s.Pos) : Char :=
-  if h : pos = s.endPos then panic! "Cannot retrieve character at end position" else pos.get h
+  bif h : pos =ᵇ s.endPos then panic! "Cannot retrieve character at end position"
+  else pos.get (ne_of_decideEq_eq_false h)
 
 @[simp]
 theorem Pos.Raw.isValidForSlice_toSlice_iff {s : String} {p : Pos.Raw} :
@@ -1489,13 +1491,14 @@ def Slice.Pos.next {s : Slice} (pos : s.Pos) (h : pos ≠ s.endPos) : s.Pos wher
 given position is the past-the-end position. -/
 @[expose]
 def Slice.Pos.next? {s : Slice} (pos : s.Pos) : Option s.Pos :=
-  if h : pos = s.endPos then none else some (pos.next h)
+  bif h : pos =ᵇ s.endPos then none else some (pos.next (ne_of_decideEq_eq_false h))
 
 /-- Advances a valid position on a slice to the next valid position, or panics if the given
 position is the past-the-end position. -/
 @[expose]
 def Slice.Pos.next! {s : Slice} (pos : s.Pos) : s.Pos :=
-  if h : pos = s.endPos then panic! "Cannot advance the end position" else pos.next h
+  bif h : pos =ᵇ s.endPos then panic! "Cannot advance the end position"
+  else pos.next (ne_of_decideEq_eq_false h)
 
 @[simp]
 theorem Slice.Pos.offset_next {s : Slice} {pos : s.Pos} {h : pos ≠ s.endPos} :
@@ -1528,13 +1531,13 @@ def Slice.Pos.prevAux {s : Slice} (pos : s.Pos) (h : pos ≠ s.startPos) : Strin
     omega)
 where
   go (off : Nat) (h₁ : off < s.utf8ByteSize) : String.Pos.Raw :=
-    if hbyte : (s.getUTF8Byte ⟨off⟩ h₁).IsUTF8FirstByte then
+    bif hbyte : (s.getUTF8Byte ⟨off⟩ h₁).isUTF8FirstByte then
       ⟨off⟩
     else
       have : 0 ≠ off := by
         intro h
         obtain hoff : (⟨off⟩ : String.Pos.Raw) = 0 := by simpa [String.Pos.Raw.ext_iff] using h.symm
-        simp [hoff, s.isUTF8FirstByte_utf8ByteAt_zero] at hbyte
+        simp [hoff, UInt8.isUTF8FirstByte_eq_false_iff, s.isUTF8FirstByte_utf8ByteAt_zero] at hbyte
       match off with
       | 0 => False.elim (by contradiction)
       | off + 1 => go off (by omega)
@@ -1572,7 +1575,7 @@ theorem Slice.offset_pos {s : Slice} {off h} : (s.pos off h).offset = off := rfl
 /-- Constructs a valid position on `s` from a position, returning `none` if the position is not valid. -/
 @[expose]
 def Slice.pos? (s : Slice) (off : String.Pos.Raw) : Option s.Pos :=
-  if h : off.isValidForSlice s then
+  bif h : off.isValidForSlice s then
     some (s.pos off (Pos.Raw.isValidForSlice_eq_true_iff.1 h))
   else
     none
@@ -1580,7 +1583,7 @@ def Slice.pos? (s : Slice) (off : String.Pos.Raw) : Option s.Pos :=
 /-- Constructs a valid position `s` from a position, panicking if the position is not valid. -/
 @[expose]
 def Slice.pos! (s : Slice) (off : String.Pos.Raw) : s.Pos :=
-  if h : off.isValidForSlice s then
+  bif h : off.isValidForSlice s then
     s.pos off (Pos.Raw.isValidForSlice_eq_true_iff.1 h)
   else
     panic! "Offset is not at a valid UTF-8 character boundary"
@@ -1793,7 +1796,7 @@ theorem Slice.Pos.prevAux_lt_rawEndPos {s : Slice} {p : s.Pos} {h} : p.prevAux h
 @[expose]
 def Pos.Raw.utf8GetAux : List Char → Pos.Raw → Pos.Raw → Char
   | [],    _, _ => default
-  | c::cs, i, p => if i = p then c else utf8GetAux cs (i + c) p
+  | c::cs, i, p => bif i =ᵇ p then c else utf8GetAux cs (i + c) p
 
 @[deprecated Pos.Raw.utf8GetAux (since := "2025-10-09")]
 abbrev utf8GetAux : List Char → Pos.Raw → Pos.Raw → Char :=
@@ -1825,7 +1828,7 @@ def get (s : @& String) (p : @& Pos.Raw) : Char :=
 @[expose]
 def Pos.Raw.utf8GetAux? : List Char → Pos.Raw → Pos.Raw → Option Char
   | [],    _, _ => none
-  | c::cs, i, p => if i = p then some c else utf8GetAux? cs (i + c) p
+  | c::cs, i, p => bif i =ᵇ p then some c else utf8GetAux? cs (i + c) p
 
 @[deprecated Pos.Raw.utf8GetAux +typeChanged (since := "2025-10-09")]
 abbrev utf8GetAux? : List Char → Pos.Raw → Pos.Raw → Option Char :=
@@ -1882,7 +1885,7 @@ def get! (s : @& String) (p : @& Pos.Raw) : Char :=
 def Pos.Raw.utf8SetAux (c' : Char) : List Char → Pos.Raw → Pos.Raw → List Char
   | [],    _, _ => []
   | c::cs, i, p =>
-    if i = p then (c'::cs) else c::(utf8SetAux c' cs (i + c) p)
+    bif i =ᵇ p then (c'::cs) else c::(utf8SetAux c' cs (i + c) p)
 
 @[deprecated Pos.Raw.utf8SetAux (since := "2025-10-09")]
 abbrev utf8SetAux (c' : Char) : List Char → Pos.Raw → Pos.Raw → List Char :=
@@ -2177,8 +2180,8 @@ theorem slice_toSlice {s : String} {p₁ p₂ : s.Pos} {h} :
 /-- Given a string and two valid positions within the string, obtain a slice on the string formed
 by the new bounds, or return `none` if the given end is strictly less then the given start. -/
 def slice? (s : String) (startInclusive endExclusive : s.Pos) :=
-  if h : startInclusive ≤ endExclusive then
-    some (s.slice startInclusive endExclusive h)
+  bif h : startInclusive ≤ᵇ endExclusive then
+    some (s.slice startInclusive endExclusive (le_of_decideLE_eq_true h))
   else
     none
 
@@ -2595,8 +2598,9 @@ is not between `p₀` and `p₁`.
 @[inline]
 def Slice.Pos.sliceOrPanic {s : Slice} (pos : s.Pos) (p₀ p₁ : s.Pos) {h} :
     (s.slice p₀ p₁ h).Pos :=
-  if h : p₀ ≤ pos ∧ pos ≤ p₁ then
-    pos.slice p₀ p₁ h.1 h.2
+  bif h : p₀ ≤ᵇ pos && pos ≤ᵇ p₁ then
+    pos.slice p₀ p₁ (le_of_decideLE_eq_true (Bool.and_eq_true_iff.1 h).1)
+      (le_of_decideLE_eq_true (Bool.and_eq_true_iff.1 h).2)
   else
     panic! "Position is outside of the bounds of the slice."
 
@@ -2619,8 +2623,8 @@ theorem slice_eq_slice! {s : String} {p₀ p₁ h} : s.slice p₀ p₁ h = s.sli
 taking `s.slice! p₀ p₁` already panicked. -/
 @[inline]
 def Slice.Pos.ofSlice! {s : Slice} {p₀ p₁ : s.Pos} (pos : (s.slice! p₀ p₁).Pos) : s.Pos :=
-  if h : p₀ ≤ p₁ then
-    ofSlice (h := h) (pos.cast (congrArg Slice.copy slice_eq_slice!.symm))
+  bif h : p₀ ≤ᵇ p₁ then
+    ofSlice (h := le_of_decideLE_eq_true h) (pos.cast (congrArg Slice.copy slice_eq_slice!.symm))
   else
     panic! "Starting position must be less than or equal to end position."
 
@@ -2637,8 +2641,9 @@ taking `s.slice! p₀ p₁` already panicked or if the position is not between `
 @[inline]
 def Slice.Pos.slice! {s : Slice} (pos : s.Pos) (p₀ p₁ : s.Pos) :
     (s.slice! p₀ p₁).Pos :=
-  if h : p₀ ≤ pos ∧ pos ≤ p₁ then
-    (pos.slice _ _ h.1 h.2).cast (congrArg Slice.copy slice_eq_slice!)
+  bif h : p₀ ≤ᵇ pos && pos ≤ᵇ p₁ then
+    (pos.slice _ _ (le_of_decideLE_eq_true (Bool.and_eq_true_iff.1 h).1)
+      (le_of_decideLE_eq_true (Bool.and_eq_true_iff.1 h).2)).cast (congrArg Slice.copy slice_eq_slice!)
   else
     panic! "Starting position must be less than or equal to end position and position must be between starting position and end position."
 
@@ -2689,10 +2694,10 @@ def Slice.Pos.nextn {s : Slice} (p : s.Pos) (n : Nat) : s.Pos :=
   match n with
   | 0 => p
   | n + 1 =>
-    if h : p ≠ s.endPos then
-      nextn (p.next h) n
-    else
+    bif h : p =ᵇ s.endPos then
       p
+    else
+      nextn (p.next (ne_of_decideEq_eq_false h)) n
 
 /--
 Advances the position `p` `n` times.
@@ -2707,10 +2712,10 @@ def Pos.nextn {s : String} (p : s.Pos) (n : Nat) : s.Pos :=
 theorem Slice.Pos.le_nextn {s : Slice} {p : s.Pos} {n : Nat} : p ≤ p.nextn n := by
   fun_induction nextn with
   | case1 => simp
-  | case2 p n h ih =>
+  | case2 => simp
+  | case3 p n h ih =>
     simp only [Pos.le_iff] at *
     exact Pos.Raw.le_of_lt (Pos.Raw.lt_of_lt_of_le lt_next ih)
-  | case3 => simp
 
 theorem Pos.le_nextn {s : String} {p : s.Pos} {n : Nat} :
     p ≤ p.nextn n := by
@@ -2750,7 +2755,7 @@ def Pos.Raw.utf8PrevAux : List Char → Pos.Raw → Pos.Raw → Pos.Raw
   | [],    _, p => ⟨p.byteIdx - 1⟩
   | c::cs, i, p =>
     let i' := i + c
-    if p ≤ i' then i else utf8PrevAux cs i' p
+    bif p ≤ᵇ i' then i else utf8PrevAux cs i' p
 
 @[deprecated Pos.Raw.utf8PrevAux (since := "2025-10-10")]
 abbrev utf8PrevAux : List Char → Pos.Raw → Pos.Raw → Pos.Raw :=
@@ -2795,11 +2800,11 @@ Examples:
 -/
 @[extern "lean_string_utf8_at_end", expose]
 def Pos.Raw.atEnd : (@& String) → (@& Pos.Raw) → Bool
-  | s, p => p.byteIdx ≥ utf8ByteSize s
+  | s, p => p.byteIdx ≥ᵇ utf8ByteSize s
 
 @[extern "lean_string_utf8_at_end", expose, deprecated Pos.Raw.atEnd (since := "2025-10-14")]
 def atEnd : (@& String) → (@& Pos.Raw) → Bool
-  | s, p => p.byteIdx ≥ utf8ByteSize s
+  | s, p => p.byteIdx ≥ᵇ utf8ByteSize s
 
 /--
 Returns the character at position `p` of a string. Returns `(default : Char)`, which is `'A'`, if
@@ -2878,10 +2883,10 @@ theorem Pos.Raw.utf8PrevAux_lt_of_pos : ∀ (cs : List Char) (i p : Pos.Raw), i 
     (Pos.Raw.utf8PrevAux cs i p).1 < p.1
   | [], _, _, _, h => Nat.sub_one_lt (mt (congrArg Pos.Raw.mk) h)
   | c::cs, i, p, h, h' => by
-    simp [utf8PrevAux]
-    apply iteInduction (motive := (Pos.Raw.byteIdx · < _)) <;> intro h''
+    simp only [utf8PrevAux]
+    split
     next => exact h
-    next => exact utf8PrevAux_lt_of_pos _ _ _ (Nat.lt_of_not_le h'') h'
+    next h'' => exact utf8PrevAux_lt_of_pos _ _ _ (Nat.lt_of_not_le h'') h'
 
 theorem Pos.Raw.prev_lt_of_pos (s : String) (i : Pos.Raw) (h : i ≠ 0) : (i.prev s).1 < i.1 :=
   utf8PrevAux_lt_of_pos _ _ _ (Nat.zero_lt_of_ne_zero (mt (congrArg Pos.Raw.mk) h)) h
@@ -2906,10 +2911,10 @@ Examples:
 def firstDiffPos (a b : String) : Pos.Raw :=
   let stopPos := a.rawEndPos.min b.rawEndPos
   let rec loop (i : Pos.Raw) : Pos.Raw :=
-    if h : i < stopPos then
-      if i.get a != i.get b then i
+    bif h : i <ᵇ stopPos then
+      bif i.get a != i.get b then i
       else
-        have := Nat.sub_lt_sub_left h (Pos.Raw.lt_next a i)
+        have := Nat.sub_lt_sub_left (lt_of_decideLT_eq_true h) (Pos.Raw.lt_next a i)
         loop (i.next a)
     else i
     termination_by stopPos.1 - i.1
@@ -2936,22 +2941,22 @@ Examples:
 -/
 @[extern "lean_string_utf8_extract", expose]
 def Pos.Raw.extract : (@& String) → (@& Pos.Raw) → (@& Pos.Raw) → String
-  | s, b, e => if b.byteIdx ≥ e.byteIdx then "" else ofList (go₁ s.toList 0 b e)
+  | s, b, e => bif b.byteIdx ≥ᵇ e.byteIdx then "" else ofList (go₁ s.toList 0 b e)
 where
   go₁ : List Char → Pos.Raw → Pos.Raw → Pos.Raw → List Char
     | [],        _, _, _ => []
-    | s@(c::cs), i, b, e => if i = b then go₂ s i e else go₁ cs (i + c) b e
+    | s@(c::cs), i, b, e => bif i =ᵇ b then go₂ s i e else go₁ cs (i + c) b e
 
   go₂ : List Char → Pos.Raw → Pos.Raw → List Char
     | [],    _, _ => []
-    | c::cs, i, e => if i = e then [] else c :: go₂ cs (i + c) e
+    | c::cs, i, e => bif i =ᵇ e then [] else c :: go₂ cs (i + c) e
 
 def Pos.Raw.offsetOfPosAux (s : String) (pos : Pos.Raw) (i : Pos.Raw) (offset : Nat) : Nat :=
-  if i >= pos then offset
-  else if h : i.atEnd s then
+  bif i ≥ᵇ pos then offset
+  else bif h : i.atEnd s then
     offset
   else
-    have := Nat.sub_lt_sub_left (Nat.gt_of_not_le (mt UDecidable.decide_eq_true h)) (Pos.Raw.lt_next s _)
+    have := Nat.sub_lt_sub_left (Nat.gt_of_not_le (not_le_of_decideLE_eq_false h)) (Pos.Raw.lt_next s _)
     offsetOfPosAux s pos (i.next s) (offset+1)
 termination_by s.rawEndPos.1 - i.1
 
@@ -2985,7 +2990,8 @@ def Internal.offsetOfPosImpl (s : String) (pos : Pos.Raw) : Nat :=
 theorem Pos.Raw.utf8SetAux_of_gt (c' : Char) : ∀ (cs : List Char) {i p : Pos.Raw}, i > p → utf8SetAux c' cs i p = cs
   | [],    _, _, _ => rfl
   | c::cs, i, p, h => by
-    rw [utf8SetAux, ite_eq_right (mt (congrArg (·.1)) (Ne.symm <| Nat.ne_of_lt h)), utf8SetAux_of_gt c' cs]
+    rw [utf8SetAux, Bool.cond_neg (decideEq_eq_false_iff.2 (mt (congrArg (·.1)) (Ne.symm <| Nat.ne_of_lt h))),
+      utf8SetAux_of_gt c' cs]
     exact Nat.lt_of_lt_of_le h (Nat.le_add_right ..)
 
 /--
@@ -2997,17 +3003,17 @@ This is a legacy function. The recommended alternative is to construct slices re
 strings to be compared and use the `BEq` instance of `String.Slice`.
 -/
 def Pos.Raw.substrEq (s1 : String) (pos1 : String.Pos.Raw) (s2 : String) (pos2 : String.Pos.Raw) (sz : Nat) : Bool :=
-  pos1.byteIdx + sz ≤ s1.rawEndPos.byteIdx && pos2.byteIdx + sz ≤ s2.rawEndPos.byteIdx && loop pos1 pos2 { byteIdx := pos1.byteIdx + sz }
+  pos1.byteIdx + sz ≤ᵇ s1.rawEndPos.byteIdx && pos2.byteIdx + sz ≤ᵇ s2.rawEndPos.byteIdx && loop pos1 pos2 { byteIdx := pos1.byteIdx + sz }
 where
   loop (off1 off2 stop1 : Pos.Raw) :=
-    if _h : off1.byteIdx < stop1.byteIdx then
+    bif _h : off1.byteIdx <ᵇ stop1.byteIdx then
       let c₁ := off1.get s1
       let c₂ := off2.get s2
       c₁ == c₂ && loop (off1 + c₁) (off2 + c₂) stop1
     else true
   termination_by stop1.1 - off1.1
   decreasing_by
-    have := Nat.sub_lt_sub_left _h (Nat.add_lt_add_left c₁.utf8Size_pos off1.1)
+    have := Nat.sub_lt_sub_left (lt_of_decideLT_eq_true _h) (Nat.add_lt_add_left c₁.utf8Size_pos off1.1)
     decreasing_tactic
 
 @[deprecated Pos.Raw.substrEq (since := "2025-10-10")]

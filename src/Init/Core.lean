@@ -2590,3 +2590,9 @@ evaluate the `Decidable` instance, so they reduce in the kernel. `simp` rewrites
 @[inherit_doc] infix:50 " ≤ᵇ " => decideLE
 @[inherit_doc] infix:50 " =ᵇ " => decideEq
 @[inherit_doc] infix:50 " ≠ᵇ " => decideNe
+
+/-- `a ≥ᵇ b` decides `a ≥ b` with the `DecidableLE` instance. It stands for `b ≤ᵇ a`. -/
+macro:50 a:term:51 " ≥ᵇ " b:term:51 : term => `($b ≤ᵇ $a)
+
+/-- `a >ᵇ b` decides `a > b` with the `DecidableLT` instance. It stands for `b <ᵇ a`. -/
+macro:50 a:term:51 " >ᵇ " b:term:51 : term => `($b <ᵇ $a)

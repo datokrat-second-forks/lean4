@@ -203,9 +203,17 @@ public theorem toNat?_eq_none {s : String.Slice} (h : s.isNat = false) : s.toNat
 
 public theorem toNat?_eq_some_ofDigitChars {s : String.Slice} (h : s.isNat = true) :
     s.toNat? = some (Nat.ofDigitChars 10 (s.copy.toList.filter (· != '_')) 0) := by
-  rw [toNat?, ite_eq_left h, Option.some.injEq]
-  simp [Nat.ofDigitChars_eq_foldl, ↓Char.isValue, Char.reduceToNat, foldl_eq_foldl_toList, List.foldl_ite_right,
-    bne_eq, Bool.beq_eq_udecide_eq, Nat.mul_comm 10]
+  rw [toNat?, Bool.cond_pos h, Option.some.injEq]
+  have key : ∀ (l : List Char) (init : Nat),
+      l.foldl (fun n c => uif c = '_' then n else n * 10 + (c.toNat - 48)) init =
+        (l.filter (fun x => !UDecidable.decide (x = '_'))).foldl
+          (fun sofar c => sofar * 10 + (c.toNat - 48)) init := by
+    intro l
+    induction l with
+    | nil => simp
+    | cons a l ih => intro init; by_cases ha : a = '_' <;> simp [ha, ih]
+  simp [Nat.ofDigitChars_eq_foldl, ↓Char.isValue, Char.reduceToNat, foldl_eq_foldl_toList,
+    bne_eq, Bool.beq_eq_udecide_eq, Nat.mul_comm 10, key]
 
 public theorem isNat_congr {s t : String.Slice} (h : s.copy = t.copy) : s.isNat = t.isNat := by
   rw [Bool.eq_iff_iff, isNat_iff, isNat_iff, ← isEmpty_copy]

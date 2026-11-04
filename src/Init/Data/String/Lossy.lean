@@ -14,8 +14,8 @@ import Init.Omega
 namespace String
 
 def skipContinuationBytes (b : ByteArray) (i : Nat) : Nat :=
-  if h : i < b.size then
-    if b[i].isUTF8ContinuationByte then
+  bif h : i <ᵇ b.size then
+    bif b[i].isUTF8ContinuationByte then
       skipContinuationBytes b (i + 1)
     else i
   else i
@@ -46,7 +46,7 @@ public def fromUTF8Lossy (b : ByteArray) : String :=
   go 0 ""
 where
   go (i : Nat) (acc : String) : String :=
-    if i < b.size then
+    bif _ : i <ᵇ b.size then
       match b.utf8DecodeChar? i with
       | some c =>
         have := c.utf8Size_pos

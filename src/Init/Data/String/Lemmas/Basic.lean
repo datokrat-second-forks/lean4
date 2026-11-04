@@ -317,7 +317,7 @@ theorem nextn_zero {s : Slice} {p : s.Pos} : p.nextn 0 = p := by
   simp [nextn]
 
 theorem nextn_add_one {s : Slice} {p : s.Pos} :
-    p.nextn (n + 1) = if h : p = s.endPos then p else (p.next h).nextn n := by
+    p.nextn (n + 1) = uif h : p = s.endPos then p else (p.next h).nextn n := by
   simp [nextn]
 
 @[simp]
@@ -336,12 +336,12 @@ theorem nextn_zero {s : String} {p : s.Pos} : p.nextn 0 = p := by
   simp [nextn_eq_nextn_toSlice]
 
 theorem nextn_add_one {s : String} {p : s.Pos} :
-    p.nextn (n + 1) = if h : p = s.endPos then p else (p.next h).nextn n := by
+    p.nextn (n + 1) = uif h : p = s.endPos then p else (p.next h).nextn n := by
   simp only [nextn_eq_nextn_toSlice, Slice.Pos.nextn_add_one, endPos_toSlice, toSlice_inj]
   split <;> simp [Pos.next_toSlice]
 
 theorem nextn_toSlice {s : String} {p : s.Pos} : p.toSlice.nextn n = (p.nextn n).toSlice := by
-  induction n generalizing p with simp_all [nextn_add_one, Slice.Pos.nextn_add_one, apply_dite Pos.toSlice, next_toSlice]
+  induction n generalizing p with simp_all [nextn_add_one, Slice.Pos.nextn_add_one, UDecidable.apply_dite Pos.toSlice, next_toSlice]
 
 theorem toSlice_nextn {s : String} {p : s.Pos} : (p.nextn n).toSlice = p.toSlice.nextn n :=
   nextn_toSlice.symm

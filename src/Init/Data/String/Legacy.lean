@@ -20,12 +20,12 @@ public section
 namespace String
 
 @[specialize] def splitAux (s : String) (p : Char → Bool) (b : Pos.Raw) (i : Pos.Raw) (r : List String) : List String :=
-  if h : i.atEnd s then
+  bif h : i.atEnd s then
     let r := (b.extract s i)::r
     r.reverse
   else
-    have := Nat.sub_lt_sub_left (Nat.gt_of_not_le (mt UDecidable.decide_eq_true h)) (Pos.Raw.lt_next s _)
-    if p (i.get s) then
+    have := Nat.sub_lt_sub_left (Nat.gt_of_not_le (not_le_of_decideLE_eq_false h)) (Pos.Raw.lt_next s _)
+    bif p (i.get s) then
       let i' := i.next s
       splitAux s p i' i' (b.extract s i :: r)
     else
@@ -59,14 +59,14 @@ It represents the state where we have currently parsed some split parts into `r`
 of `sep` match the bytes `i-j .. i` of `s`.
 -/
 def splitOnAux (s sep : String) (b : Pos.Raw) (i : Pos.Raw) (j : Pos.Raw) (r : List String) : List String :=
-  if i.atEnd s then
+  bif _ : i.atEnd s then
     let r := (b.extract s i)::r
     r.reverse
   else
-    if i.get s == j.get sep then
+    bif _ : i.get s == j.get sep then
       let i := i.next s
       let j := j.next sep
-      if j.atEnd sep then
+      bif _ : j.atEnd sep then
         splitOnAux s sep i i 0 (b.extract s (i.unoffsetBy j)::r)
       else
         splitOnAux s sep b i j r
@@ -77,7 +77,7 @@ decreasing_by
   focus
     rename_i h _ _
     left; exact Nat.sub_lt_sub_left
-      (Nat.lt_of_le_of_lt (Nat.sub_le ..) (Nat.gt_of_not_le (mt UDecidable.decide_eq_true h)))
+      (Nat.lt_of_le_of_lt (Nat.sub_le ..) (Nat.gt_of_not_le (not_le_of_decideLE_eq_false h)))
       (Nat.lt_of_le_of_lt (Nat.sub_le ..) (Pos.Raw.lt_next s _))
   focus
     rename_i i₀ j₀ _ eq h'
@@ -85,12 +85,12 @@ decreasing_by
       change (_ + Char.utf8Size _) - (_ + Char.utf8Size _) = _
       rw [(beq_iff_eq ..).1 eq, Nat.add_sub_add_right]; rfl]
     right; exact Nat.sub_lt_sub_left
-      (Nat.lt_of_le_of_lt (Nat.le_add_right ..) (Nat.gt_of_not_le (mt UDecidable.decide_eq_true h')))
+      (Nat.lt_of_le_of_lt (Nat.le_add_right ..) (Nat.gt_of_not_le (not_le_of_decideLE_eq_false h')))
       (Pos.Raw.lt_next sep _)
   focus
     rename_i h _
     left; exact Nat.sub_lt_sub_left
-      (Nat.lt_of_le_of_lt (Nat.sub_le ..) (Nat.gt_of_not_le (mt UDecidable.decide_eq_true h)))
+      (Nat.lt_of_le_of_lt (Nat.sub_le ..) (Nat.gt_of_not_le (not_le_of_decideLE_eq_false h)))
       (Pos.Raw.lt_next s _)
 
 /--
@@ -110,6 +110,6 @@ Examples:
 * `"ababacabac".splitOn "aba" = ["", "bac", "c"]`
 -/
 @[inline] def splitOn (s : String) (sep : String := " ") : List String :=
-  if sep == "" then [s] else splitOnAux s sep 0 0 0 []
+  bif sep == "" then [s] else splitOnAux s sep 0 0 0 []
 
 end String

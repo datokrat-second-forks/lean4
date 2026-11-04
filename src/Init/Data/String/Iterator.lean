@@ -131,19 +131,19 @@ The position is not changed if the iterator is at the beginning of the string.
 Checks whether the iterator is past its string's last character.
 -/
 @[inline] def atEnd : Iterator → Bool
-  | ⟨s, i⟩ => i.byteIdx ≥ s.rawEndPos.byteIdx
+  | ⟨s, i⟩ => i.byteIdx ≥ᵇ s.rawEndPos.byteIdx
 
 /--
 Checks whether the iterator is at or before the string's last character.
 -/
 @[inline] def hasNext : Iterator → Bool
-  | ⟨s, i⟩ => i.byteIdx < s.rawEndPos.byteIdx
+  | ⟨s, i⟩ => i.byteIdx <ᵇ s.rawEndPos.byteIdx
 
 /--
 Checks whether the iterator is after the beginning of the string.
 -/
 @[inline] def hasPrev : Iterator → Bool
-  | ⟨_, i⟩ => i.byteIdx > 0
+  | ⟨_, i⟩ => i.byteIdx >ᵇ 0
 
 /--
 Gets the character at the iterator's current position.
@@ -153,7 +153,7 @@ function is faster that `String.Iterator.curr` due to avoiding a run-time bounds
 -/
 @[inline] def curr' (it : Iterator) (h : it.hasNext) : Char :=
   match it with
-  | ⟨s, i⟩ => i.get' s (by simpa only [hasNext, rawEndPos, UDecidable.decide_eq_true_eq, Pos.Raw.atEnd, ge_iff_le, Nat.not_le] using h)
+  | ⟨s, i⟩ => i.get' s (by simpa only [hasNext, rawEndPos, decideLT_eq_true_iff, Pos.Raw.atEnd, decideLE_eq_true_iff, Nat.not_le] using h)
 
 /--
 Moves the iterator's position forward by one character, unconditionally.
@@ -163,7 +163,7 @@ This function is faster that `String.Iterator.next` due to avoiding a run-time b
 -/
 @[inline] def next' (it : Iterator) (h : it.hasNext) : Iterator :=
   match it with
-  | ⟨s, i⟩ => ⟨s, i.next' s (by simpa only [hasNext, rawEndPos, UDecidable.decide_eq_true_eq, Pos.Raw.atEnd, ge_iff_le, Nat.not_le] using h)⟩
+  | ⟨s, i⟩ => ⟨s, i.next' s (by simpa only [hasNext, rawEndPos, decideLT_eq_true_iff, Pos.Raw.atEnd, decideLE_eq_true_iff, Nat.not_le] using h)⟩
 
 /--
 Moves the iterator's position to the end of the string, just past the last character.
@@ -180,7 +180,7 @@ iterator is past the position of the second iterator.
 -/
 @[inline] def extract : Iterator → Iterator → String
   | ⟨s₁, b⟩, ⟨s₂, e⟩ =>
-    if s₁ ≠ s₂ || b > e then ""
+    bif s₁ ≠ᵇ s₂ || b >ᵇ e then ""
     else b.extract s₁ e
 
 /--
@@ -221,8 +221,10 @@ macro_rules
   `(tactic| with_reducible apply String.Legacy.Iterator.sizeOf_next_lt_of_hasNext; assumption)
 
 theorem sizeOf_next_lt_of_atEnd (i : String.Legacy.Iterator) (h : ¬ i.atEnd = true) : sizeOf i.next < sizeOf i :=
-  have h : i.hasNext := UDecidable.decide_eq_true <| Nat.gt_of_not_le <| mt UDecidable.decide_eq_true h
-  sizeOf_next_lt_of_hasNext i h
+  sizeOf_next_lt_of_hasNext i (by
+    cases i
+    simp only [atEnd, hasNext, decideLT_eq_true_iff, decideLE_eq_true_iff] at h ⊢
+    exact Nat.gt_of_not_le h)
 
 macro_rules
 | `(tactic| decreasing_trivial) =>
@@ -244,9 +246,10 @@ character or until the end of the string is reached. Does nothing if the current
 satisfies `p`.
 -/
 @[specialize] def find (it : Iterator) (p : Char → Bool) : Iterator :=
-  if it.atEnd then it
-  else if p it.curr then it
-  else find it.next p
+  bif _ : it.hasNext then
+    bif p it.curr then it
+    else find it.next p
+  else it
 
 /--
 Iterates over a string, updating a state at each character using the provided function `f`, until
@@ -254,10 +257,11 @@ Iterates over a string, updating a state at each character using the provided fu
 returns `none`.
 -/
 @[specialize] def foldUntil (it : Iterator) (init : α) (f : α → Char → Option α) : α × Iterator :=
-  if it.atEnd then
-    (init, it)
-  else if let some a := f init it.curr then
-    foldUntil it.next a f
+  bif _ : it.hasNext then
+    if let some a := f init it.curr then
+      foldUntil it.next a f
+    else
+      (init, it)
   else
     (init, it)
 

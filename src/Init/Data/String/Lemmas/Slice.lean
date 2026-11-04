@@ -58,11 +58,11 @@ end BEq
 
 namespace Pos
 
-theorem get?_eq_dite {s : Slice} {p : s.Pos} : p.get? = if h : p = s.endPos then none else some (p.get h) :=
-  (rfl)
+theorem get?_eq_dite {s : Slice} {p : s.Pos} : p.get? = uif h : p = s.endPos then none else some (p.get h) := by
+  simp [get?]
 
 @[deprecated String.Slice.Pos.get?_eq_dite (since := "2026-07-21")]
-theorem get?_eq_dif {s : String.Slice} {p : s.Pos} : p.get? = if h : p = s.endPos then Option.none else Option.some (p.get h) := String.Slice.Pos.get?_eq_dite
+theorem get?_eq_dif {s : String.Slice} {p : s.Pos} : p.get? = uif h : p = s.endPos then Option.none else Option.some (p.get h) := String.Slice.Pos.get?_eq_dite
 
 theorem get?_eq_some_get {s : Slice} {p : s.Pos} (h : p ≠ s.endPos) : p.get? = some (p.get h) := by
   simp [Pos.get?, h]
@@ -87,11 +87,11 @@ namespace Pos
 theorem get?_toSlice {s : String} {p : s.Pos} : p.toSlice.get? = p.get? :=
   (rfl)
 
-theorem get?_eq_dite {s : String} {p : s.Pos} : p.get? = if h : p = s.endPos then none else some (p.get h) := by
+theorem get?_eq_dite {s : String} {p : s.Pos} : p.get? = uif h : p = s.endPos then none else some (p.get h) := by
   simp [← get?_toSlice, Slice.Pos.get?_eq_dite]
 
 @[deprecated String.Pos.get?_eq_dite (since := "2026-07-21")]
-theorem get?_eq_dif {s : String} {p : s.Pos} : p.get? = if h : p = s.endPos then Option.none else Option.some (p.get h) := String.Pos.get?_eq_dite
+theorem get?_eq_dif {s : String} {p : s.Pos} : p.get? = uif h : p = s.endPos then Option.none else Option.some (p.get h) := String.Pos.get?_eq_dite
 
 theorem get?_eq_some_get {s : String} {p : s.Pos} (h : p ≠ s.endPos) : p.get? = some (p.get h) := by
   simpa [← get?_toSlice] using! Slice.Pos.get?_eq_some_get (by simpa)

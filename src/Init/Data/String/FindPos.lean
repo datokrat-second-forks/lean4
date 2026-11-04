@@ -25,10 +25,10 @@ namespace String
 Obtains the smallest valid position that is greater than or equal to the given byte position.
 -/
 def Slice.posGE (s : Slice) (offset : String.Pos.Raw) (h : offset ≤ s.rawEndPos) : s.Pos :=
-  if h' : offset.IsValidForSlice s then
-    s.pos offset h'
+  bif h' : offset.isValidForSlice s then
+    s.pos offset (Pos.Raw.isValidForSlice_eq_true_iff.1 h')
   else
-    have : offset < s.rawEndPos := Std.not_le.1 (fun h₁ => h' (Std.le_antisymm h h₁ ▸ Pos.Raw.isValidForSlice_rawEndPos))
+    have : offset < s.rawEndPos := Std.not_le.1 (fun h₁ => Pos.Raw.isValidForSlice_eq_false_iff.1 h' (Std.le_antisymm h h₁ ▸ Pos.Raw.isValidForSlice_rawEndPos))
     s.posGE offset.inc (by simpa)
 termination_by s.utf8ByteSize - offset.byteIdx
 decreasing_by
@@ -65,8 +65,8 @@ Obtains the largest valid position that is less than or equal to the given byte 
 -/
 @[expose]
 def Slice.posLE (s : Slice) (offset : String.Pos.Raw) : s.Pos :=
-  if h' : offset.IsValidForSlice s then
-    s.pos offset h'
+  bif h' : offset.isValidForSlice s then
+    s.pos offset (Pos.Raw.isValidForSlice_eq_true_iff.1 h')
   else
     have : offset ≠ 0 := by rintro rfl; simp at h'
     s.posLE offset.dec
@@ -106,13 +106,14 @@ def Slice.Pos.prev {s : Slice} (pos : s.Pos) (h : pos ≠ s.startPos) : s.Pos :=
 the start position. -/
 @[expose]
 def Slice.Pos.prev? {s : Slice} (pos : s.Pos) : Option s.Pos :=
-  if h : pos = s.startPos then none else some (pos.prev h)
+  bif h : pos =ᵇ s.startPos then none else some (pos.prev (ne_of_decideEq_eq_false h))
 
 /-- Returns the previous valid position before the given position, or panics if the position is
 the start position. -/
 @[expose]
 def Slice.Pos.prev! {s : Slice} (pos : s.Pos) : s.Pos :=
-  if h : pos = s.startPos then panic! "The start position has no previous position" else pos.prev h
+  bif h : pos =ᵇ s.startPos then panic! "The start position has no previous position"
+  else pos.prev (ne_of_decideEq_eq_false h)
 
 /-- Returns the previous valid position before the given position, given a proof that the position
 is not the start position, which guarantees that such a position exists. -/
@@ -141,10 +142,10 @@ def Slice.Pos.prevn {s : Slice} (p : s.Pos) (n : Nat) : s.Pos :=
   match n with
   | 0 => p
   | n + 1 =>
-    if h : p ≠ s.startPos then
-      prevn (p.prev h) n
-    else
+    bif h : p =ᵇ s.startPos then
       p
+    else
+      prevn (p.prev (ne_of_decideEq_eq_false h)) n
 
 /--
 Iterates {lean}`p.prev` {name}`n` times.

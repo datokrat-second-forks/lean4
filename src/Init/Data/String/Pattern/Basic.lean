@@ -240,9 +240,10 @@ instance (s : Slice) [ForwardPattern pat] :
     | .done => it.internalState.currPos = s.endPos
     | .skip _ => False
   step it :=
-    if h : it.internalState.currPos = s.endPos then
-      pure (.deflate ⟨.done, by simp [h]⟩)
+    bif h : it.internalState.currPos =ᵇ s.endPos then
+      pure (.deflate ⟨.done, by simp [eq_of_decideEq_eq_true h]⟩)
     else
+      have h := ne_of_decideEq_eq_false h
       match h' : ForwardPattern.skipPrefixOfNonempty? pat (s.sliceFrom it.internalState.currPos) (by simpa) with
       | some pos =>
         pure (.deflate ⟨.yield ⟨⟨Slice.Pos.ofSliceFrom pos⟩⟩
@@ -394,9 +395,10 @@ instance (s : Slice) [BackwardPattern pat] :
     | .done => it.internalState.currPos = s.startPos
     | .skip _ => False
   step it :=
-    if h : it.internalState.currPos = s.startPos then
-      pure (.deflate ⟨.done, by simp [h]⟩)
+    bif h : it.internalState.currPos =ᵇ s.startPos then
+      pure (.deflate ⟨.done, by simp [eq_of_decideEq_eq_true h]⟩)
     else
+      have h := ne_of_decideEq_eq_false h
       match h' : BackwardPattern.skipSuffixOfNonempty? pat (s.sliceTo it.internalState.currPos) (by simpa) with
       | some pos =>
         pure (.deflate ⟨.yield ⟨⟨Slice.Pos.ofSliceTo pos⟩⟩

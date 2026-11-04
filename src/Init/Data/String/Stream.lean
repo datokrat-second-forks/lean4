@@ -11,7 +11,7 @@ public import Init.Data.Stream
 
 public instance : Std.Stream Substring.Raw Char where
   next? s :=
-    if s.startPos < s.stopPos then
+    bif s.startPos <ᵇ s.stopPos then
       some (s.startPos.get s.str, { s with startPos := s.startPos.next s.str })
     else
       none

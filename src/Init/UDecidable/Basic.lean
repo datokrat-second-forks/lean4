@@ -365,6 +365,13 @@ theorem apply_ite {α : Sort u} {β : Sort v} (f : α → β) {c : Prop} {_ : UD
   | inl hc => rw [ite_eq_left hc, ite_eq_left hc]
   | inr hc => rw [ite_eq_right hc, ite_eq_right hc]
 
+theorem apply_dite {α : Sort u} {β : Sort v} (f : α → β) {c : Prop} {_ : UDecidable c}
+    {a : c → α} {b : ¬c → α} :
+    f (uif h : c then a h else b h) = uif h : c then f (a h) else f (b h) := by
+  cases em c with
+  | inl hc => rw [dite_eq_left hc, dite_eq_left hc]
+  | inr hc => rw [dite_eq_right hc, dite_eq_right hc]
+
 theorem ite_eq_left_of_decide_eq_true {α : Sort u} {c : Prop} {_ : UDecidable c} (t e : α)
     (h : decide c = true) : (uif c then t else e) = t :=
   ite_eq_left (of_decide_eq_true h)

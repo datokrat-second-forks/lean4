@@ -31,7 +31,7 @@ namespace String.Slice.Pattern
 namespace ForwardSliceSearcher
 
 def buildTable (pat : Slice) : Vector Nat pat.utf8ByteSize :=
-  if h : pat.utf8ByteSize = 0 then
+  uif h : pat.utf8ByteSize = 0 then
     #v[].cast h.symm
   else
     let arr := Array.emptyWithCapacity pat.utf8ByteSize
@@ -40,7 +40,7 @@ def buildTable (pat : Slice) : Vector Nat pat.utf8ByteSize :=
 where
   go (table : Array Nat) (ht₀ : 0 < table.size) (ht : table.size ≤ pat.utf8ByteSize) (h : ∀ (i : Nat) hi, table[i]'hi ≤ i) :
       Vector Nat pat.utf8ByteSize :=
-    if hs : table.size < pat.utf8ByteSize then
+    uif hs : table.size < pat.utf8ByteSize then
       let patByte := pat.getUTF8Byte ⟨table.size⟩ hs
       let dist := computeDistance patByte table ht h (table[table.size - 1])
         (by have := h (table.size - 1) (by omega); omega)
@@ -60,9 +60,9 @@ where
       (ht : table.size ≤ pat.utf8ByteSize)
       (h : ∀ (i : Nat) hi, table[i]'hi ≤ i) (guess : Nat) (hg : guess < table.size) :
       { n : Nat // n ≤ table.size } :=
-    if pat.getUTF8Byte ⟨guess⟩ (by simp [Pos.Raw.lt_iff]; omega) = patByte then
+    uif pat.getUTF8Byte ⟨guess⟩ (by simp [Pos.Raw.lt_iff]; omega) = patByte then
       ⟨guess + 1, by omega⟩
-    else if h₀ : guess = 0 then
+    else uif h₀ : guess = 0 then
       ⟨0, by simp⟩
     else
       have : table[guess - 1] < guess := by have := h (guess - 1) (by omega); omega
@@ -89,7 +89,7 @@ deriving Inhabited
 
 @[inline]
 def iter (pat : Slice) (s : Slice) : Std.Iter (α := ForwardSliceSearcher s) (SearchStep s) :=
-  if h : pat.utf8ByteSize = 0 then
+  uif h : pat.utf8ByteSize = 0 then
     { internalState := .emptyBefore s.startPos }
   else
     { internalState := .proper pat (buildTable pat) rfl s.startPos.offset pat.startPos.offset
@@ -113,7 +113,7 @@ instance (s : Slice) : Std.Iterator (ForwardSliceSearcher s) Id (SearchStep s) w
     match iter with
     | .emptyBefore pos =>
       let res := .matched pos pos
-      if h : pos ≠ s.endPos then
+      uif h : pos ≠ s.endPos then
         pure (.deflate ⟨.yield ⟨.emptyAt pos h⟩ res, by simp [h]⟩)
       else
         pure (.deflate ⟨.yield ⟨.atEnd⟩ res, by simp⟩)
@@ -131,14 +131,14 @@ instance (s : Slice) : Std.Iterator (ForwardSliceSearcher s) Id (SearchStep s) w
       -- **Invariant 2:** `stackPos - needlePos` is a valid position
       -- **Invariant 3:** the range from `stackPos - needlePos` to `stackPos` (exclusive) is a
       -- prefix of the pattern.
-      if h₁' : (stackPos.unoffsetBy needlePos).increaseBy needle.utf8ByteSize ≤ s.rawEndPos then
+      uif h₁' : (stackPos.unoffsetBy needlePos).increaseBy needle.utf8ByteSize ≤ s.rawEndPos then
         have h₁ : stackPos < s.rawEndPos := by simp [Pos.Raw.lt_iff, Pos.Raw.le_iff] at ⊢ hn h₁'; omega
         let stackByte := s.getUTF8Byte stackPos h₁
         let patByte := needle.getUTF8Byte needlePos hn
-        if stackByte = patByte then
+        uif stackByte = patByte then
           let nextStackPos := stackPos.inc
           let nextNeedlePos := needlePos.inc
-          if h : nextNeedlePos = needle.rawEndPos then
+          uif h : nextNeedlePos = needle.rawEndPos then
             -- Safety: the section from `nextStackPos.decreaseBy needle.utf8ByteSize` to `nextStackPos`
             -- (exclusive) is exactly the needle, so it must represent a valid range.
             let res := .matched (s.pos! (nextStackPos.unoffsetBy nextNeedlePos)) (s.pos! nextStackPos)
@@ -154,7 +154,7 @@ instance (s : Slice) : Std.Iterator (ForwardSliceSearcher s) Id (SearchStep s) w
                by simpa using ⟨_, _, ⟨rfl, rfl⟩, by simp [nextNeedlePos, Pos.Raw.lt_iff, Pos.Raw.ext_iff] at h hn ⊢; omega,
                 Or.inl (by simp [nextStackPos, Pos.Raw.lt_iff] at h₁ ⊢; omega)⟩⟩)
         else
-          if hnp : needlePos = 0 then
+          uif hnp : needlePos = 0 then
             -- Safety: by invariant 2
             let basePos := s.pos! stackPos
             -- Since we report (mis)matches by code point and not by byte, missing in the first byte
@@ -171,7 +171,7 @@ instance (s : Slice) : Std.Iterator (ForwardSliceSearcher s) Id (SearchStep s) w
                   simp [nextStackPos, Pos.Raw.lt_iff] at this ⊢; omega)⟩⟩)
           else
             let newNeedlePos := table[needlePos.byteIdx - 1]'(by simp [Pos.Raw.lt_iff] at hn; omega)
-            if newNeedlePos = 0 then
+            uif newNeedlePos = 0 then
               -- Safety: by invariant 2
               let basePos := s.pos! (stackPos.unoffsetBy needlePos)
               -- Since we report (mis)matches by code point and not by byte, missing in the first byte
@@ -209,7 +209,7 @@ instance (s : Slice) : Std.Iterator (ForwardSliceSearcher s) Id (SearchStep s) w
                     simp [newNeedlePos, Pos.Raw.lt_iff] at hn hnp ⊢
                     omega⟩)
       else
-        if stackPos.unoffsetBy needlePos < s.rawEndPos then
+        uif stackPos.unoffsetBy needlePos < s.rawEndPos then
           let basePos := stackPos.unoffsetBy needlePos
           -- Safety: by invariant 2
           let res := .rejected (s.pos! basePos) s.endPos
@@ -270,7 +270,8 @@ instance {pat : Slice} : ToForwardSearcher pat ForwardSliceSearcher where
 
 @[inline]
 def startsWith (pat : Slice) (s : Slice) : Bool :=
-  if h : pat.utf8ByteSize ≤ s.utf8ByteSize then
+  bif h : pat.utf8ByteSize ≤ᵇ s.utf8ByteSize then
+    have h := le_of_decideLE_eq_true h
     have hs := by
       simp [Pos.Raw.le_iff] at h ⊢
       omega
@@ -281,7 +282,7 @@ def startsWith (pat : Slice) (s : Slice) : Bool :=
 
 @[inline]
 def skipPrefix? (pat : Slice) (s : Slice) : Option s.Pos :=
-  if startsWith pat s then
+  bif startsWith pat s then
     some <| s.pos! <| pat.rawEndPos.offsetBy s.startPos.offset
   else
     none
@@ -303,7 +304,8 @@ namespace BackwardSliceSearcher
 
 @[inline]
 def endsWith (pat : Slice) (s : Slice) : Bool :=
-  if h : pat.utf8ByteSize ≤ s.utf8ByteSize then
+  bif h : pat.utf8ByteSize ≤ᵇ s.utf8ByteSize then
+    have h := le_of_decideLE_eq_true h
     let sStart := s.endPos.offset.unoffsetBy pat.rawEndPos
     let patStart := pat.startPos.offset
     have hs := by
@@ -316,7 +318,7 @@ def endsWith (pat : Slice) (s : Slice) : Bool :=
 
 @[inline]
 def skipSuffix? (pat : Slice) (s : Slice) : Option s.Pos :=
-  if endsWith pat s then
+  bif endsWith pat s then
     some <| s.pos! <| s.endPos.offset.unoffsetBy pat.rawEndPos
   else
     none

@@ -81,8 +81,8 @@ Examples:
  * {lean}`"0xff".toSlice.toNat? = none`
 -/
 def toNat? (s : Slice) : Option Nat :=
-  if s.isNat then
-    some <| s.foldl (fun n c => if c = '_' then n else n * 10 + (c.toNat - '0'.toNat)) 0
+  bif s.isNat then
+    some <| s.foldl (fun n c => bif c =ᵇ '_' then n else n * 10 + (c.toNat - '0'.toNat)) 0
   else
     none
 
@@ -103,8 +103,8 @@ Examples:
  * {lean}`"1_000".toSlice.toNat! = 1000`
 -/
 def toNat! (s : Slice) : Nat :=
-  if s.isNat then
-    s.foldl (fun n c => if c = '_' then n else n * 10 + (c.toNat - '0'.toNat)) 0
+  bif s.isNat then
+    s.foldl (fun n c => bif c =ᵇ '_' then n else n * 10 + (c.toNat - '0'.toNat)) 0
   else
     panic! "Nat expected"
 

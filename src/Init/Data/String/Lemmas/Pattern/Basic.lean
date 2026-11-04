@@ -716,7 +716,7 @@ position, or {lean}`none` if there is no match.
 -/
 noncomputable def matchAt? {ρ : Type} (pat : ρ) [PatternModel pat]
     {s : Slice} (startPos : s.Pos) : Option s.Pos :=
-  if h : ∃ endPos, IsLongestMatchAt pat startPos endPos then some h.choose else none
+  uif h : ∃ endPos, IsLongestMatchAt pat startPos endPos then some h.choose else none
 
 @[simp]
 theorem matchAt?_eq_some_iff {ρ : Type} {pat : ρ} [PatternModel pat]
@@ -756,7 +756,7 @@ position, or {lean}`none` if there is no match.
 -/
 noncomputable def revMatchAt? {ρ : Type} (pat : ρ) [PatternModel pat]
     {s : Slice} (endPos : s.Pos) : Option s.Pos :=
-  if h : ∃ startPos, IsLongestRevMatchAt pat startPos endPos then some h.choose else none
+  uif h : ∃ startPos, IsLongestRevMatchAt pat startPos endPos then some h.choose else none
 
 @[simp]
 theorem revMatchAt?_eq_some_iff {ρ : Type} {pat : ρ} [PatternModel pat]
@@ -928,7 +928,7 @@ theorem LawfulToForwardSearcherModel.defaultImplementation {pat : ρ} [ForwardPa
   simp only [Std.Iter.toIterM_mk, Std.IterM.internalState_mk, ne_eq]
   by_cases h : pos = s.endPos
   · simpa [h] using IsValidSearchFrom.endPos
-  · simp only [h, ↓reduceDIte]
+  · simp only [h, ↓reduceDCond]
     split <;> rename_i heq
     · split at heq <;> rename_i pos' heq'
       · simp only [Id.run_pure, Std.Shrink.inflate_deflate, Std.IterM.Step.toPure_yield,
@@ -1039,7 +1039,7 @@ theorem LawfulToBackwardSearcherModel.defaultImplementation {pat : ρ} [Backward
   simp only [Std.Iter.toIterM_mk, Std.IterM.internalState_mk, ne_eq]
   by_cases h : pos = s.startPos
   · simpa [h] using IsValidRevSearchFrom.startPos
-  · simp only [h, ↓reduceDIte]
+  · simp only [h, ↓reduceDCond]
     split <;> rename_i heq
     · split at heq <;> rename_i pos' heq'
       · simp only [Id.run_pure, Std.Shrink.inflate_deflate, Std.IterM.Step.toPure_yield,

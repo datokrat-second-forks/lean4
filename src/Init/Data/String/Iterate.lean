@@ -59,9 +59,10 @@ instance [Pure m] :
     | .skip _ => False
     | .done => it.internalState.currPos = s.endPos
   step := fun ⟨⟨currPos⟩⟩ =>
-    if h : currPos = s.endPos then
-      pure (.deflate ⟨.done, by simp [h]⟩)
+    bif h : currPos =ᵇ s.endPos then
+      pure (.deflate ⟨.done, by simp [eq_of_decideEq_eq_true h]⟩)
     else
+      have h := ne_of_decideEq_eq_false h
       pure (.deflate ⟨.yield ⟨⟨currPos.next h⟩⟩ ⟨currPos, h⟩, by simp [h]⟩)
 
 private def finitenessRelation [Pure m] :
@@ -146,9 +147,10 @@ instance [Pure m] :
     | .skip _ => False
     | .done => it.internalState.currPos = s.startPos
   step := fun ⟨⟨currPos⟩⟩ =>
-    if h : currPos = s.startPos then
-      pure (.deflate ⟨.done, by simp [h]⟩)
+    bif h : currPos =ᵇ s.startPos then
+      pure (.deflate ⟨.done, by simp [eq_of_decideEq_eq_true h]⟩)
     else
+      have h := ne_of_decideEq_eq_false h
       let prevPos := currPos.prev h
       pure (.deflate ⟨.yield ⟨⟨prevPos⟩⟩ ⟨prevPos, by exact Pos.prev_ne_endPos⟩, by simp [h, prevPos]⟩)
 
@@ -221,10 +223,11 @@ instance [Pure m] : Std.Iterator ByteIterator m UInt8 where
     | .skip _ => False
     | .done => ¬ it.internalState.offset < it.internalState.s.rawEndPos
   step := fun ⟨s, offset⟩ =>
-    if h : offset < s.rawEndPos then
+    bif h : offset <ᵇ s.rawEndPos then
+      have h := lt_of_decideLT_eq_true h
       pure (.deflate ⟨.yield ⟨s, offset.inc⟩ (s.getUTF8Byte offset h), by simp [h]⟩)
     else
-      pure (.deflate ⟨.done, by simp [h]⟩)
+      pure (.deflate ⟨.done, by simp [not_lt_of_decideLT_eq_false h]⟩)
 
 private def finitenessRelation [Pure m] :
     Std.Iterators.FinitenessRelation (ByteIterator) m where
@@ -292,7 +295,8 @@ instance [Pure m] : Std.Iterator RevByteIterator m UInt8 where
     | .skip _ => False
     | .done => it.internalState.offset = 0
   step := fun ⟨s, offset, hinv⟩ =>
-    if h : offset ≠ 0 then
+    bif h : offset ≠ᵇ 0 then
+      have h := ne_of_decideNe_eq_true h
       let nextOffset := offset.dec
       have hbound := by
         simp [String.Pos.Raw.le_iff, nextOffset, String.Pos.Raw.lt_iff] at h hinv ⊢

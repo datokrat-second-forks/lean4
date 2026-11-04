@@ -35,7 +35,9 @@ Converts a `Substring.Raw` into a `String.Slice`, returning `none` if the substr
 -/
 @[inline]
 def toSlice? (s : Substring.Raw) : Option String.Slice :=
-  if h : s.startPos.IsValid s.str ∧ s.stopPos.IsValid s.str ∧ s.startPos ≤ s.stopPos then
+  bif h : s.startPos.isValid s.str && s.stopPos.isValid s.str && s.startPos ≤ᵇ s.stopPos then
+    have h : s.startPos.IsValid s.str ∧ s.stopPos.IsValid s.str ∧ s.startPos ≤ s.stopPos := by
+      simpa [and_assoc] using h
     some (String.Slice.mk s.str (s.str.pos s.startPos h.1) (s.str.pos s.stopPos h.2.1)
       (by simp [String.Pos.le_iff, h.2.2]))
   else
@@ -88,11 +90,11 @@ position, not the underlying string.
 @[inline] def next : Substring.Raw → String.Pos.Raw → String.Pos.Raw
   | ⟨s, b, e⟩, p =>
     let absP := p.offsetBy b
-    if absP = e then p else { byteIdx := (absP.next s).byteIdx - b.byteIdx }
+    bif absP =ᵇ e then p else { byteIdx := (absP.next s).byteIdx - b.byteIdx }
 
 theorem lt_next (s : Substring.Raw) (i : String.Pos.Raw) (h : i.1 < s.bsize) :
     i.1 < (s.next i).1 := by
-  simp [next]; rw [ite_eq_right ?a]
+  simp only [next]; rw [Bool.cond_neg (decideEq_eq_false_iff.2 ?a)]
   case a =>
     refine mt (congrArg String.Pos.Raw.byteIdx) (Nat.ne_of_lt ?_)
     exact (Nat.add_comm .. ▸ Nat.add_lt_of_lt_sub h :)
@@ -109,7 +111,7 @@ position, not the underlying string.
 @[inline] def prev : Substring.Raw → String.Pos.Raw → String.Pos.Raw
   | ⟨s, b, _⟩, p =>
     let absP := p.offsetBy b
-    if absP = b then p else { byteIdx := (absP.prev s).byteIdx - b.byteIdx }
+    bif absP =ᵇ b then p else { byteIdx := (absP.prev s).byteIdx - b.byteIdx }
 
 @[export lean_substring_prev]
 def Internal.prevImpl : Substring.Raw → String.Pos.Raw → String.Pos.Raw :=
@@ -218,7 +220,7 @@ If the resulting substring is empty, then the resulting substring is a substring
 positions adjusted.
 -/
 @[inline] def extract : Substring.Raw → String.Pos.Raw → String.Pos.Raw → Substring.Raw
-  | ⟨s, b, e⟩, b', e' => if b' ≥ e' then ⟨"", 0, 0⟩ else ⟨s, e.min (b'.offsetBy b), e.min (e'.offsetBy b)⟩
+  | ⟨s, b, e⟩, b', e' => bif b' ≥ᵇ e' then ⟨"", 0, 0⟩ else ⟨s, e.min (b'.offsetBy b), e.min (e'.offsetBy b)⟩
 
 @[export lean_substring_extract]
 def Internal.extractImpl : Substring.Raw → String.Pos.Raw → String.Pos.Raw → Substring.Raw :=
@@ -233,23 +235,24 @@ non-overlapping matches of `sep` in the string. The separators are not included 
 substrings, which are all substrings of `s`'s string.
 -/
 def splitOn (s : Substring.Raw) (sep : String := " ") : List Substring.Raw :=
-  if sep == "" then
+  bif sep == "" then
     [s]
   else
     let rec loop (b i j : String.Pos.Raw) (r : List Substring.Raw) : List Substring.Raw :=
-      if h : i.byteIdx < s.bsize then
+      bif h : i.byteIdx <ᵇ s.bsize then
+        have h := lt_of_decideLT_eq_true h
         have := Nat.sub_lt_sub_left h (lt_next s i h)
-        if s.get i == j.get sep then
+        bif s.get i == j.get sep then
           let i := s.next i
           let j := j.next sep
-          if j.atEnd sep then
+          bif j.atEnd sep then
             loop i i 0 (s.extract b (i.unoffsetBy j) :: r)
           else
             loop b i j r
         else
           loop b (s.next i) 0 r
       else
-        let r := if j.atEnd sep then
+        let r := bif j.atEnd sep then
           "".toRawSubstring :: s.extract b (i.unoffsetBy j) :: r
         else
           s.extract b i :: r
@@ -298,9 +301,9 @@ Checks whether a substring contains the specified character.
   s.any (fun a => a == c)
 
 @[specialize] def takeWhileAux (s : String) (stopPos : String.Pos.Raw) (p : Char → Bool) (i : String.Pos.Raw) : String.Pos.Raw :=
-  if h : i < stopPos then
-    if p (i.get s) then
-      have := Nat.sub_lt_sub_left h (String.Pos.Raw.lt_next s i)
+  bif h : i <ᵇ stopPos then
+    bif p (i.get s) then
+      have := Nat.sub_lt_sub_left (lt_of_decideLT_eq_true h) (String.Pos.Raw.lt_next s i)
       takeWhileAux s stopPos p (i.next s)
     else i
   else i
@@ -331,12 +334,12 @@ the predicate always returns `true`.
     ⟨s, b, e⟩
 
 @[specialize] def takeRightWhileAux (s : String) (begPos : String.Pos.Raw) (p : Char → Bool) (i : String.Pos.Raw) : String.Pos.Raw :=
-  if h : begPos < i then
+  bif h : begPos <ᵇ i then
     have := String.Pos.Raw.prev_lt_of_pos s i <| mt (congrArg String.Pos.Raw.byteIdx) <|
-      Ne.symm <| Nat.ne_of_lt <| Nat.lt_of_le_of_lt (Nat.zero_le _) h
+      Ne.symm <| Nat.ne_of_lt <| Nat.lt_of_le_of_lt (Nat.zero_le _) (lt_of_decideLT_eq_true h)
     let i' := i.prev s
     let c  := i'.get s
-    if !p c then i
+    bif !p c then i
     else takeRightWhileAux s begPos p i'
   else i
 termination_by i.1
@@ -411,13 +414,13 @@ at the start, at the end, or consecutively.
 Use `Substring.toNat?` to convert such a substring to a natural number.
 -/
 @[inline] def isNat (s : Substring.Raw) : Bool :=
-  if s.isEmpty then
+  bif s.isEmpty then
     false
   else
     -- Track: isFirst, lastWasUnderscore, lastCharWasDigit, valid
     let result := s.foldl (fun (isFirst, lastWasUnderscore, _lastCharWasDigit, valid) c =>
       let isDigit := c.isDigit
-      let isUnderscore := c = '_'
+      let isUnderscore := c =ᵇ '_'
       let newValid := valid && (isDigit || isUnderscore) &&
                       !(isFirst && isUnderscore) &&  -- Cannot start with underscore
                       !(lastWasUnderscore && isUnderscore)  -- No consecutive underscores
@@ -436,8 +439,8 @@ in it are digits. Underscores ({lit}`_`) are allowed as digit separators and are
 Use `Substring.isNat` to check whether the substring is such a substring.
 -/
 def toNat? (s : Substring.Raw) : Option Nat :=
-  if s.isNat then
-    some <| s.foldl (fun n c => if c = '_' then n else n*10 + (c.toNat - '0'.toNat)) 0
+  bif s.isNat then
+    some <| s.foldl (fun n c => bif c =ᵇ '_' then n else n*10 + (c.toNat - '0'.toNat)) 0
   else
     none
 
@@ -447,7 +450,7 @@ and represents the same substring according to `Substring.toString`.
 (Note, the substring may still be inverted, i.e. beginning greater than end.)
 -/
 def repair : Substring.Raw → Substring.Raw
-  | ⟨s, b, e⟩ => ⟨s, if b.isValid s then b else s.rawEndPos, if e.isValid s then e else s.rawEndPos⟩
+  | ⟨s, b, e⟩ => ⟨s, bif b.isValid s then b else s.rawEndPos, bif e.isValid s then e else s.rawEndPos⟩
 
 /--
 Checks whether two substrings represent equal strings. Usually accessed via the `==` operator.
@@ -484,9 +487,10 @@ def commonPrefix (s t : Substring.Raw) : Substring.Raw :=
 where
   /-- Returns the ending position of the common prefix, working up from `spos, tpos`. -/
   loop spos tpos :=
-    if h : spos < s.stopPos ∧ tpos < t.stopPos then
-      if spos.get s.str == tpos.get t.str then
-        have := Nat.sub_lt_sub_left h.1 (String.Pos.Raw.lt_next s.str spos)
+    bif h : spos <ᵇ s.stopPos && tpos <ᵇ t.stopPos then
+      bif spos.get s.str == tpos.get t.str then
+        have := Nat.sub_lt_sub_left (lt_of_decideLT_eq_true (Bool.and_eq_true_iff.1 h).1)
+          (String.Pos.Raw.lt_next s.str spos)
         loop (spos.next s.str) (tpos.next t.str)
       else
         spos
@@ -504,11 +508,12 @@ def commonSuffix (s t : Substring.Raw) : Substring.Raw :=
 where
   /-- Returns the starting position of the common prefix, working down from `spos, tpos`. -/
   loop spos tpos :=
-    if h : s.startPos < spos ∧ t.startPos < tpos then
+    bif h : s.startPos <ᵇ spos && t.startPos <ᵇ tpos then
       let spos' := spos.prev s.str
       let tpos' := tpos.prev t.str
-      if spos'.get s.str == tpos'.get t.str then
-        have : spos' < spos := String.Pos.Raw.prev_lt_of_pos s.str spos (String.Pos.Raw.ne_zero_of_lt h.1)
+      bif spos'.get s.str == tpos'.get t.str then
+        have : spos' < spos := String.Pos.Raw.prev_lt_of_pos s.str spos
+          (String.Pos.Raw.ne_zero_of_lt (lt_of_decideLT_eq_true (Bool.and_eq_true_iff.1 h).1))
         loop spos' tpos'
       else
         spos
@@ -525,7 +530,7 @@ prefix.
 -/
 def dropPrefix? (s : Substring.Raw) (pre : Substring.Raw) : Option Substring.Raw :=
   let t := s.commonPrefix pre
-  if t.bsize = pre.bsize then
+  bif t.bsize == pre.bsize then
     some { s with startPos := t.stopPos }
   else
     none
@@ -539,7 +544,7 @@ suffix.
 -/
 def dropSuffix? (s : Substring.Raw) (suff : Substring.Raw) : Option Substring.Raw :=
   let t := s.commonSuffix suff
-  if t.bsize = suff.bsize then
+  bif t.bsize == suff.bsize then
     some { s with stopPos := t.startPos }
   else
     none

@@ -986,3 +986,101 @@ theorem Bool.dite_else_true {p : Prop} [Decidable p] {x : p → Bool} : (if h : 
 
 @[deprecated Bool.dite_false_right_eq_false (since := "2026-07-21")]
 theorem Bool.dite_else_false_eq_false {p : Prop} [Decidable p] {x : p → Bool} : (if h : p then x h else Bool.false) = Bool.false ↔ ∀ (h : p), x h = Bool.false := Bool.dite_false_right_eq_false
+
+/-! `UDecidable` mirrors of the `Bool`-valued `ite`/`dite` lemmas above. -/
+
+@[simp] theorem UDecidable.Bool.ite_false_left_eq_true {p : Prop} {_ : UDecidable p} {x : Bool} :
+    (uif p then false else x) = true ↔ ¬ p ∧ x := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.ite_true_left_eq_false {p : Prop} {_ : UDecidable p} {x : Bool} :
+    (uif p then true else x) = false ↔ ¬ p ∧ x = false := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.ite_false_right_eq_true {p : Prop} {_ : UDecidable p} {x : Bool} :
+    (uif p then x else false) = true ↔ p ∧ x := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.ite_true_right_eq_false {p : Prop} {_ : UDecidable p} {x : Bool} :
+    (uif p then x else true) = false ↔ p ∧ x = false := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.ite_true_left_eq_true {p : Prop} {_ : UDecidable p} {x : Bool} :
+    (uif p then true else x) = true ↔ p ∨ x := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.ite_false_left_eq_false {p : Prop} {_ : UDecidable p} {x : Bool} :
+    (uif p then false else x) = false ↔ p ∨ x = false := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.ite_true_right_eq_true {p : Prop} {_ : UDecidable p} {x : Bool} :
+    (uif p then x else true) = true ↔ ¬ p ∨ x := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.ite_false_right_eq_false {p : Prop} {_ : UDecidable p} {x : Bool} :
+    (uif p then x else false) = false ↔ ¬ p ∨ x = false := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.dite_false_left_eq_true {p : Prop} {_ : UDecidable p} {x : ¬ p → Bool} :
+    (uif h : p then false else x h) = true ↔ ∃ h : ¬ p, x h := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.dite_true_left_eq_false {p : Prop} {_ : UDecidable p} {x : ¬ p → Bool} :
+    (uif h : p then true else x h) = false ↔ ∃ h : ¬ p, x h = false := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.dite_false_right_eq_true {p : Prop} {_ : UDecidable p} {x : p → Bool} :
+    (uif h : p then x h else false) = true ↔ ∃ h : p, x h := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.dite_true_right_eq_false {p : Prop} {_ : UDecidable p} {x : p → Bool} :
+    (uif h : p then x h else true) = false ↔ ∃ h : p, x h = false := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.dite_true_left_eq_true {p : Prop} {_ : UDecidable p} {x : ¬ p → Bool} :
+    (uif h : p then true else x h) = true ↔ ∀ h : ¬ p, x h := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.dite_false_left_eq_false {p : Prop} {_ : UDecidable p} {x : ¬ p → Bool} :
+    (uif h : p then false else x h) = false ↔ ∀ h : ¬ p, x h = false := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.dite_true_right_eq_true {p : Prop} {_ : UDecidable p} {x : p → Bool} :
+    (uif h : p then x h else true) = true ↔ ∀ h : p, x h := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]
+
+@[simp] theorem UDecidable.Bool.dite_false_right_eq_false {p : Prop} {_ : UDecidable p} {x : p → Bool} :
+    (uif h : p then x h else false) = false ↔ ∀ h : p, x h = false := by
+  cases UDecidable.em p with
+  | inl h => simp [h]
+  | inr h => simp [h]

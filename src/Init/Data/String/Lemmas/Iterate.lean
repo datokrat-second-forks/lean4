@@ -35,7 +35,7 @@ This function is not meant to be used in actual programs. Actual programs should
 {name}`Slice.positionsFrom` or {name}`Slice.positions`.
 -/
 protected def Model.positionsFrom {s : Slice} (p : s.Pos) : List { p : s.Pos // p ≠ s.endPos } :=
-  if h : p.IsAtEnd then
+  uif h : p.IsAtEnd then
     []
   else
     ⟨p, h⟩ :: Model.positionsFrom (p.next h)
@@ -134,7 +134,7 @@ This function is not meant to be used in actual programs. Actual programs should
 {name}`Slice.revPositionsFrom` and {name}`Slice.revPositions`.
 -/
 protected def Model.revPositionsFrom {s : Slice} (p : s.Pos) : List { p : s.Pos // p ≠ s.endPos } :=
-  if h : p = s.startPos then
+  uif h : p = s.startPos then
     []
   else
     ⟨p.prev h, by simp⟩ :: Model.revPositionsFrom (p.prev h)
@@ -210,7 +210,7 @@ This function is not meant to be used in actual programs. Actual programs should
 {name}`Slice.positionsFrom` or {name}`Slice.positions`.
 -/
 protected def Model.positionsFrom {s : String} (p : s.Pos) : List { p : s.Pos // p ≠ s.endPos } :=
-  if h : p.IsAtEnd then
+  uif h : p.IsAtEnd then
     []
   else
     ⟨p, h⟩ :: Model.positionsFrom (p.next h)
@@ -309,7 +309,7 @@ This function is not meant to be used in actual programs. Actual programs should
 {name}`Slice.revPositionsFrom` and {name}`Slice.revPositions`.
 -/
 protected def Model.revPositionsFrom {s : String} (p : s.Pos) : List { p : s.Pos // p ≠ s.endPos } :=
-  if h : p = s.startPos then
+  uif h : p = s.startPos then
     []
   else
     ⟨p.prev h, by simp⟩ :: Model.revPositionsFrom (p.prev h)

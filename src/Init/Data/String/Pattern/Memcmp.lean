@@ -25,7 +25,7 @@ def memcmpStrCompare (lhs rhs : @& String) (lstart : @& String.Pos.Raw) (rstart 
   go 0
 where
   go (curr : Nat) : Ordering :=
-    if h : curr < len then
+    bif h : curr <ᵇ len then
       have hl := by
         simp [Pos.Raw.le_iff, Pos.Raw.lt_iff] at h1 ⊢
         omega

@@ -30,7 +30,7 @@ public theorem intercalateString_eq {α β : Type} [Std.Iterator α Id β] [Std.
   simp only [intercalateString, String.appendSlice_eq, ← foldl_toList, toList_map]
   generalize s.copy = s
   suffices ∀ (l m : List String),
-      (l.foldl (init := if m = [] then none else some (s.intercalate m))
+      (l.foldl (init := uif m = [] then none else some (s.intercalate m))
         (fun | none, sl => some sl | some str, sl => some (str ++ s ++ sl))).getD ""
         = s.intercalate (m ++ l) by
     simpa [-foldl_toList] using! this (it.toList.map toString) []
@@ -40,11 +40,11 @@ public theorem intercalateString_eq {α β : Type} [Std.Iterator α Id β] [Std.
   | cons hd tl ih =>
     rw [List.append_cons, ← ih, List.foldl_cons]
     congr
-    simp only [List.append_eq_nil_iff, List.cons_ne_self, and_false, ↓reduceIte]
+    simp only [List.append_eq_nil_iff, List.cons_ne_self, and_false, ↓reduceUIte]
     match m with
     | [] => simp
     | x::xs =>
-      simp only [List.cons_append, Option.some.injEq, reduceCtorEq, ↓reduceIte]
+      simp only [List.cons_append, Option.some.injEq, reduceCtorEq, ↓reduceUIte]
       rw [← List.cons_append, String.intercalate_append_of_ne_nil (by simp) (by simp),
         String.intercalate_singleton]
 

@@ -122,8 +122,8 @@ Constructs a subslice of {name}`s` given the bounds of the subslice. If the subs
 degenerate, this function panics.
 -/
 def subslice! (s : Slice) (newStart newEnd : s.Pos) : s.Subslice :=
-  if h : newStart ≤ newEnd then
-    s.subslice _ _ h
+  bif h : newStart ≤ᵇ newEnd then
+    s.subslice _ _ (le_of_decideLE_eq_true h)
   else
     panic! "Trying to construct a degenerate subslice"
 
