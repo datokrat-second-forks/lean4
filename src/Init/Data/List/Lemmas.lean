@@ -3527,7 +3527,7 @@ variable [BEq α]
 
 @[simp, grind =] theorem contains_insert [PartialEquivBEq α] {l : List α} {a : α} {x : α} :
     (l.insert a).contains x = (x == a || l.contains x) := by
-  simp only [List.insert]
+  simp only [List.insert, Bool.cond_eq_ite]
   split <;> rename_i h
   · simp only [Bool.eq_or_self]
     intro h'
@@ -3588,7 +3588,7 @@ theorem length_insert_pos {l : List α} {a : α} : 0 < (l.insert a).length := by
 
 grind_pattern length_insert_pos => (l.insert a).length
 
-theorem insert_eq {l : List α} {a : α} : l.insert a = if a ∈ l then l else a :: l := by
+theorem insert_eq {l : List α} {a : α} : l.insert a = uif a ∈ l then l else a :: l := by
   simp [List.insert]
 
 theorem getElem?_insert_zero {l : List α} {a : α} :

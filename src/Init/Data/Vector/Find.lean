@@ -158,7 +158,7 @@ theorem findSome?_replicate : findSome? f (replicate n a) = if n = 0 then none e
 @[simp, grind =] theorem find?_empty : find? p #v[] = none := rfl
 
 @[grind =]theorem find?_singleton {a : α} {p : α → Bool} :
-    #v[a].find? p = if p a then some a else none := by
+    #v[a].find? p = uif p a then some a else none := by
   simp
 
 @[simp] theorem findRev?_push_of_pos {xs : Vector α n} (h : p a) :
@@ -198,7 +198,7 @@ theorem isSome_find? {xs : Vector α n} {f : α → Bool} :
     (xs.find? f).isSome = xs.any (f ·) := by
   simp [← find?_toList, List.isSome_find?]
 
-theorem find?_push {xs : Vector α n} : (xs.push a).find? p = (xs.find? p).or (if p a then some a else none) := by
+theorem find?_push {xs : Vector α n} : (xs.push a).find? p = (xs.find? p).or (uif p a then some a else none) := by
   rcases xs with ⟨xs, rfl⟩
   simp [Array.find?_push]
 

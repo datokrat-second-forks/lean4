@@ -108,7 +108,7 @@ variable {le : α → α → Bool}
 
 theorem zipIdxLE_trans (trans : ∀ a b c, le a b → le b c → le a c)
     (a b c : α × Nat) : zipIdxLE le a b → zipIdxLE le b c → zipIdxLE le a c := by
-  simp only [zipIdxLE]
+  simp only [zipIdxLE, Bool.cond_eq_ite]
   split <;> split <;> split <;> rename_i ab₂ ba₂ bc₂
   · simp_all
     intro ab₁
@@ -136,7 +136,7 @@ theorem zipIdxLE_trans (trans : ∀ a b c, le a b → le b c → le a c)
 
 theorem zipIdxLE_total (total : ∀ a b, le a b || le b a)
     (a b : α × Nat) : zipIdxLE le a b || zipIdxLE le b a := by
-  simp only [zipIdxLE]
+  simp only [zipIdxLE, Bool.cond_eq_ite]
   split <;> split
   · simpa using Nat.le_total a.2 b.2
   · simp
@@ -147,16 +147,16 @@ theorem zipIdxLE_total (total : ∀ a b, le a b || le b a)
 /-! ### merge -/
 
 theorem cons_merge_cons (s : α → α → Bool) (a b l r) :
-    merge (a::l) (b::r) s = if s a b then a :: merge l (b::r) s else b :: merge (a::l) r s := by
+    merge (a::l) (b::r) s = bif s a b then a :: merge l (b::r) s else b :: merge (a::l) r s := by
   simp only [merge]
 
 @[simp] theorem cons_merge_cons_pos (s : α → α → Bool) (l r) (h : s a b) :
     merge (a::l) (b::r) s = a :: merge l (b::r) s := by
-  rw [cons_merge_cons, ite_eq_left h]
+  rw [cons_merge_cons, Bool.cond_pos h]
 
 @[simp] theorem cons_merge_cons_neg (s : α → α → Bool) (l r) (h : ¬ s a b) :
     merge (a::l) (b::r) s = b :: merge (a::l) r s := by
-  rw [cons_merge_cons, ite_eq_right h]
+  rw [cons_merge_cons, Bool.cond_neg (by simpa using h)]
 
 @[simp] theorem length_merge (s : α → α → Bool) (l r) :
     (merge l r s).length = l.length + r.length := by
@@ -164,7 +164,7 @@ theorem cons_merge_cons (s : α → α → Bool) (a b l r) :
   | [], r => simp
   | l, [] => simp
   | a::l, b::r =>
-    rw [cons_merge_cons]
+    rw [cons_merge_cons, Bool.cond_eq_ite]
     split
     · simp +arith [length_merge s l (b::r)]
     · simp +arith [length_merge s (a::l) r]
@@ -180,7 +180,7 @@ theorem mem_merge {a : α} {xs ys : List α} : a ∈ merge xs ys le ↔ a ∈ xs
     induction ys with
     | nil => simp
     | cons y ys ih =>
-      simp only [merge]
+      simp only [merge, Bool.cond_eq_ite]
       split <;> rename_i h
       · simp_all [or_assoc]
       · simp only [mem_cons, ih, ← or_assoc]
@@ -198,13 +198,13 @@ theorem merge_stable : ∀ (xs ys) (_ : ∀ x y, x ∈ xs → y ∈ ys → x.2 �
   | [], ys, _ => by simp
   | xs, [], _ => by simp
   | (i, x) :: xs, (j, y) :: ys, h => by
-    simp only [merge, zipIdxLE, map_cons]
+    simp only [merge, zipIdxLE, map_cons, Bool.cond_eq_ite]
     split <;> rename_i w
-    · rw [ite_eq_left (by simp [h _ _ (mem_cons_self ..) (mem_cons_self ..)])]
+    · rw [UDecidable.ite_eq_left (by simp [h _ _ (mem_cons_self ..) (mem_cons_self ..)])]
       simp only [map_cons, cons.injEq, true_and]
       rw [merge_stable, map_cons]
       exact fun x' y' mx my => h x' y' (mem_cons_of_mem (i, x) mx) my
-    · simp only [↓reduceIte, map_cons, cons.injEq, true_and, reduceCtorEq]
+    · simp only [↓reduceUIte, map_cons, cons.injEq, true_and, reduceCtorEq]
       rw [merge_stable, map_cons]
       exact fun x' y' mx my => h x' y' mx (mem_cons_of_mem (j, y) my)
 
@@ -225,7 +225,7 @@ theorem pairwise_merge
     induction l₂ with
     | nil => simpa only [merge]
     | cons y l₂ ih₂ =>
-      simp only [merge]
+      simp only [merge, Bool.cond_eq_ite]
       split <;> rename_i h
       · apply Pairwise.cons
         · intro z m
@@ -251,7 +251,7 @@ theorem merge_of_le : ∀ {xs ys : List α} (_ : ∀ a b, a ∈ xs → b ∈ ys 
   | xs, [], _ => by simp
   | x :: xs, y :: ys, h => by
     simp only [merge, cons_append]
-    rw [ite_eq_left, merge_of_le]
+    rw [Bool.cond_pos, merge_of_le]
     · intro a b ma mb
       exact h a b (mem_cons_of_mem _ ma) mb
     · exact h x y mem_cons_self mem_cons_self
@@ -261,7 +261,7 @@ theorem merge_perm_append : ∀ {xs ys : List α}, merge xs ys le ~ xs ++ ys
   | [], ys => by simp
   | xs, [] => by simp
   | x :: xs, y :: ys => by
-    simp only [merge]
+    simp only [merge, Bool.cond_eq_ite]
     split
     · exact merge_perm_append.cons x
     · exact (merge_perm_append.cons y).trans
@@ -304,10 +304,10 @@ theorem mergeSort_append (l₁ l₂ : List α)
     congr 2 <;> simp
 
 @[simp] theorem mergeSort_pair (a b : α) :
-    [a, b].mergeSort le = if le a b then [a, b] else [b, a] := by
+    [a, b].mergeSort le = uif le a b then [a, b] else [b, a] := by
   rw [show [a, b] = [a] ++ [b] from rfl, mergeSort_append _ _ (by simp) (by simp)]
   simp only [mergeSort_singleton]
-  rw [List.merge]
+  rw [List.merge, Bool.cond_eq_ite]
   split <;> simp
 
 theorem mergeSort_perm : ∀ (l : List α) (le), mergeSort l le ~ l
@@ -427,9 +427,8 @@ theorem mergeSort_cons {le : α → α → Bool}
       simp only [mem_mergeSort] at ha
       simp only [← q.mem_iff, mem_mergeSort] at hb
       simp only [zipIdxLE]
-      simp only [Bool.ite_false_right, Bool.and_eq_true, Prod.mk.injEq, and_imp]
+      simp only [Bool.cond_false_right, Bool.and_eq_true, Prod.mk.injEq, and_imp]
       intro ab h ba h'
-      simp only [UDecidable.decide_bool_eq_true] at ba
       replace h : i ≤ j := by simpa [ab, ba] using h
       replace h' : j ≤ i := by simpa [ab, ba] using h'
       cases Nat.le_antisymm h h'
@@ -504,6 +503,7 @@ theorem map_merge {f : α → β} {r : α → α → Bool} {s : β → β → Bo
     simp only [forall_and] at hl
     simp only [List.map, List.cons_merge_cons]
     rw [← hl.1.1]
+    simp only [Bool.cond_eq_ite]
     split
     · rw [List.map, map_merge, List.map]
       simp only [List.forall_mem_cons, forall_and]

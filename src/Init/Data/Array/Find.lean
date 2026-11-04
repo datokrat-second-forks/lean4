@@ -163,7 +163,7 @@ theorem findSome?_replicate : findSome? f (replicate n a) = if n = 0 then none e
 
 @[grind =]
 theorem find?_singleton {a : α} {p : α → Bool} :
-    #[a].find? p = if p a then some a else none := by
+    #[a].find? p = uif p a then some a else none := by
   simp
 
 @[simp] theorem findRev?_push_of_pos {xs : Array α} (h : p a) :
@@ -203,7 +203,7 @@ theorem isSome_find? {xs : Array α} {f : α → Bool} :
     (xs.find? f).isSome = xs.any (f ·) := by
   simp [← find?_toList, List.isSome_find?]
 
-theorem find?_push {xs : Array α} : (xs.push a).find? p = (xs.find? p).or (if p a then some a else none) := by
+theorem find?_push {xs : Array α} : (xs.push a).find? p = (xs.find? p).or (uif p a then some a else none) := by
   cases xs; simp
 
 @[simp]
@@ -358,7 +358,7 @@ theorem findIdx_empty : findIdx p #[] = 0 := by simp
 
 @[grind =]
 theorem findIdx_singleton {a : α} {p : α → Bool} :
-    #[a].findIdx p = if p a then 0 else 1 := by
+    #[a].findIdx p = uif p a then 0 else 1 := by
   simp
 
 theorem findIdx_of_getElem?_eq_some {xs : Array α} (w : xs[xs.findIdx p]? = some y) : p y := by
@@ -453,7 +453,7 @@ theorem findIdx_append {p : α → Bool} {xs ys : Array α} :
 
 @[grind =]
 theorem findIdx_push {xs : Array α} {a : α} {p : α → Bool} :
-    (xs.push a).findIdx p = if xs.findIdx p < xs.size then xs.findIdx p else xs.size + if p a then 0 else 1 := by
+    (xs.push a).findIdx p = if xs.findIdx p < xs.size then xs.findIdx p else xs.size + uif p a then 0 else 1 := by
   simp only [push_eq_append, findIdx_append]
   split <;> rename_i h
   · rfl
@@ -488,7 +488,7 @@ theorem false_of_mem_extract_findIdx {xs : Array α} {p : α → Bool} (h : x �
 
 @[simp, grind =] theorem findIdx?_empty : (#[] : Array α).findIdx? p = none := by simp
 @[grind =] theorem findIdx?_singleton {a : α} {p : α → Bool} :
-    #[a].findIdx? p = if p a then some 0 else none := by
+    #[a].findIdx? p = uif p a then some 0 else none := by
   simp
 
 @[simp, grind =]
@@ -559,11 +559,11 @@ theorem of_findIdx?_eq_none {xs : Array α} {p : α → Bool} (w : xs.findIdx? p
 
 @[grind =]
 theorem findIdx?_push {xs : Array α} {a : α} {p : α → Bool} :
-    (xs.push a).findIdx? p = (xs.findIdx? p).or (if p a then some xs.size else none) := by
+    (xs.push a).findIdx? p = (xs.findIdx? p).or (uif p a then some xs.size else none) := by
   simp only [push_eq_append, findIdx?_append]
   split <;> rename_i h
-  · simp only [findIdx?_singleton, ite_eq_left h, Option.map_some, Nat.zero_add]
-  · simp only [findIdx?_singleton, ite_eq_right h, Option.map_none]
+  · simp only [findIdx?_singleton, UDecidable.ite_eq_left h, Option.map_some, Nat.zero_add]
+  · simp only [findIdx?_singleton, UDecidable.ite_eq_right h, Option.map_none]
 
 theorem findIdx?_flatten {xss : Array (Array α)} {p : α → Bool} :
     xss.flatten.findIdx? p =

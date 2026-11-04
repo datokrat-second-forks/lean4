@@ -299,9 +299,10 @@ private theorem findFinIdx?_loop_toArray (w : l' = l.drop j) :
         simp only [cons.injEq] at w
         exact w.1.symm
       simp only [getElem_toArray, this]
-      split
-      · rfl
-      · simp only [length_cons] at h
+      split <;> rename_i hp
+      · rw [Bool.cond_pos hp]
+      · rw [Bool.cond_neg (by simpa using hp)]
+        simp only [length_cons] at h
         have : l.length - (j + 1) < l.length - j := by omega
         rw [findFinIdx?_loop_toArray]
         rw [drop_add_one_eq_tail_drop, ← w, tail_cons]
@@ -337,9 +338,10 @@ private theorem idxAuxOf_toArray [BEq α] (a : α) (l : List α) (j : Nat) (w : 
         simp only [cons.injEq] at w
         exact w.1.symm
       simp only [getElem_toArray, this]
-      split
-      · rfl
-      · simp only [length_cons] at h
+      split <;> rename_i hp
+      · rw [Bool.cond_pos hp]
+      · rw [Bool.cond_neg (by simpa using hp)]
+        simp only [length_cons] at h
         have : l.length - (j + 1) < l.length - j := by omega
         rw [idxAuxOf_toArray]
         rw [drop_add_one_eq_tail_drop, ← w, tail_cons]

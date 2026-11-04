@@ -273,7 +273,7 @@ Examples:
 /-- Tail recursive implementation of `findRev?`. This is only used at runtime. -/
 def findRev?TR (p : α → Bool) (l : List α) : Option α := l.reverse.find? p
 
-@[simp, grind =] theorem find?_singleton {a : α} : [a].find? p = if p a then some a else none := by
+@[simp, grind =] theorem find?_singleton {a : α} : [a].find? p = uif p a then some a else none := by
   simp only [find?]
   split <;> simp_all
 

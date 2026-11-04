@@ -25,7 +25,7 @@ first element of the result.
 -/
 noncomputable def splitOnPPrepend (p : α → Bool) : (l : List α) → (acc : List α) → List (List α)
 | [], acc => [acc.reverse]
-| a :: t, acc => if p a then acc.reverse :: splitOnPPrepend p t [] else splitOnPPrepend p t (a::acc)
+| a :: t, acc => bif p a then acc.reverse :: splitOnPPrepend p t [] else splitOnPPrepend p t (a::acc)
 
 /--
 Split a list at every element satisfying a predicate. The separators are not in the result.
@@ -45,7 +45,7 @@ noncomputable def splitOnP.go (p : α → Bool) (l acc : List α) : List (List �
 def splitOnPTR (p : α → Bool) (l : List α) : List (List α) := go l #[] #[] where
   @[specialize] go : List α → Array α → Array (List α) → List (List α)
   | [], acc, r => r.toListAppend [acc.toList]
-  | a :: t, acc, r => if p a then go t #[] (r.push acc.toList) else go t (acc.push a) r
+  | a :: t, acc, r => bif p a then go t #[] (r.push acc.toList) else go t (acc.push a) r
 
 @[csimp] theorem splitOnP_eq_splitOnPTR : @splitOnP = @splitOnPTR := by
   funext α P l

@@ -511,7 +511,7 @@ theorem find?_pmap {P : α → Prop} {f : (a : α) → P a → β} {xs : List α
     findIdx?.go p [] i = none := rfl
 
 @[local simp] private theorem findIdx?_go_cons :
-    findIdx?.go p (x :: xs) i = if p x then some i else findIdx?.go p xs (i + 1) := rfl
+    findIdx?.go p (x :: xs) i = bif p x then some i else findIdx?.go p xs (i + 1) := rfl
 
 private theorem findIdx?_go_succ {p : α → Bool} {xs : List α} {i : Nat} :
     findIdx?.go p xs (i+1) = (findIdx?.go p xs i).map fun i => i + 1 := by
@@ -523,7 +523,7 @@ private theorem findIdx?_go_eq {p : α → Bool} {xs : List α} {i : Nat} :
   induction xs generalizing i with
   | nil => simp
   | cons _ _ _ =>
-    simp only [findIdx?_go_succ, findIdx?_go_cons, Nat.zero_add]
+    simp only [findIdx?_go_succ, findIdx?_go_cons, Nat.zero_add, Bool.cond_eq_ite]
     split
     · simp_all
     · simp_all only [findIdx?_go_succ, Bool.not_eq_true, Option.map_map, Nat.zero_add]
@@ -534,17 +534,17 @@ private theorem findIdx?_go_eq {p : α → Bool} {xs : List α} {i : Nat} :
 @[simp, grind =] theorem findIdx?_nil : ([] : List α).findIdx? p = none := rfl
 
 @[grind =] theorem findIdx?_cons :
-    (x :: xs).findIdx? p = if p x then some 0 else (xs.findIdx? p).map fun i => i + 1 := by
+    (x :: xs).findIdx? p = uif p x then some 0 else (xs.findIdx? p).map fun i => i + 1 := by
   simp [findIdx?, findIdx?_go_eq]
 
-@[simp] theorem findIdx?_singleton {a : α} {p : α → Bool} : [a].findIdx? p = if p a then some 0 else none := by
+@[simp] theorem findIdx?_singleton {a : α} {p : α → Bool} : [a].findIdx? p = uif p a then some 0 else none := by
   simp [findIdx?_cons, findIdx?_nil]
 
 /-! ### findIdx -/
 
 @[grind =]
 theorem findIdx_cons {p : α → Bool} {b : α} {l : List α} :
-    (b :: l).findIdx p = if p b then 0 else (l.findIdx p) + 1 := by
+    (b :: l).findIdx p = uif p b then 0 else (l.findIdx p) + 1 := by
   cases H : p b with
   | true => simp [H, findIdx, findIdx.go]
   | false => simp [H, findIdx, findIdx.go, findIdx_go_succ]
@@ -555,10 +555,10 @@ where
     | nil => unfold findIdx.go; exact Nat.succ_eq_add_one n
     | cons hd tl =>
       unfold findIdx.go
-      cases p hd <;> simp only [Bool.false_eq_true, ↓reduceIte]
+      cases p hd <;> simp only [Bool.cond_true, Bool.cond_false]
       exact findIdx_go_succ p tl (n + 1)
 
-@[simp] theorem findIdx_singleton {a : α} {p : α → Bool} : [a].findIdx p = if p a then 0 else 1 := by
+@[simp] theorem findIdx_singleton {a : α} {p : α → Bool} : [a].findIdx p = uif p a then 0 else 1 := by
   simp [findIdx_cons, findIdx_nil]
 
 theorem findIdx_of_getElem?_eq_some {xs : List α} (w : xs[xs.findIdx p]? = some y) : p y := by
@@ -579,7 +579,7 @@ theorem findIdx_lt_length_of_exists {xs : List α} (h : ∃ x ∈ xs, p x) :
   | cons x xs ih =>
     by_cases p x
     · simp_all only [forall_exists_index, and_imp, mem_cons, exists_eq_or_imp, true_or,
-        findIdx_cons, length_cons]
+        findIdx_cons, length_cons, ↓reduceUIte]
       apply Nat.succ_pos
     · simp_all [findIdx_cons, Nat.succ_lt_succ_iff]
       obtain ⟨x', m', h'⟩ := h
@@ -698,7 +698,7 @@ theorem findIdx_append {p : α → Bool} {l₁ l₂ : List α} :
     simp only [findIdx_cons, length_cons, cons_append]
     by_cases h : p x
     · simp [h]
-    · simp only [h, ih, Bool.false_eq_true, ↓reduceIte, add_one_lt_add_one_iff]
+    · simp only [h, ih, Bool.false_eq_true, ↓reduceUIte, add_one_lt_add_one_iff]
       split <;> simp [Nat.add_assoc]
 
 theorem IsPrefix.findIdx_le {l₁ l₂ : List α} {p : α → Bool} (h : l₁ <+: l₂) :
@@ -1010,7 +1010,7 @@ theorem findIdx?_go_eq_map_findFinIdx?_go_val {xs : List α} {p : α → Bool} {
   unfold findFinIdx?.go
   split
   · simp_all
-  · simp only
+  · simp only [Bool.cond_eq_ite]
     split
     · simp
     · rw [findIdx?_go_eq_map_findFinIdx?_go_val]
@@ -1136,7 +1136,7 @@ The lemmas below should be made consistent with those for `findIdx` (and proved 
 
 @[grind =]
 theorem idxOf_cons [BEq α] :
-    (x :: xs : List α).idxOf y = if x == y then 0 else xs.idxOf y + 1 := by
+    (x :: xs : List α).idxOf y = uif x == y then 0 else xs.idxOf y + 1 := by
   dsimp [idxOf]
   simp [findIdx_cons]
 
@@ -1152,10 +1152,10 @@ theorem getElem_idxOf [BEq α] [LawfulBEq α] {x : α} {xs : List α}
   | nil => simp at h
   | cons a l ih =>
     cases hax : a == x with
-    | true => simp only [idxOf_cons, hax]; exact eq_of_beq hax
+    | true => simp only [idxOf_cons, hax, ↓reduceUIte]; exact eq_of_beq hax
     | false =>
-      simp only [idxOf_cons, hax]
-      rw [idxOf_cons, hax, ite_eq_right (by simp), length_cons] at h
+      simp only [idxOf_cons, hax, Bool.false_eq_true, ↓reduceUIte]
+      simp only [idxOf_cons, hax, Bool.false_eq_true, ↓reduceUIte, length_cons] at h
       exact ih (by omega)
 
 @[grind =]
@@ -1257,10 +1257,10 @@ The lemmas below should be made consistent with those for `findIdx?` (and proved
 @[simp, grind =] theorem idxOf?_nil [BEq α] : ([] : List α).idxOf? a = none := rfl
 
 @[grind =] theorem idxOf?_cons [BEq α] {a : α} {xs : List α} {b : α} :
-    (a :: xs).idxOf? b = if a == b then some 0 else (xs.idxOf? b).map (· + 1) := by
+    (a :: xs).idxOf? b = uif a == b then some 0 else (xs.idxOf? b).map (· + 1) := by
   simp [idxOf?, findIdx?_cons]
 
-@[simp] theorem idxOf?_singleton [BEq α] {a b : α} : [a].idxOf? b = if a == b then some 0 else none := by
+@[simp] theorem idxOf?_singleton [BEq α] {a b : α} : [a].idxOf? b = uif a == b then some 0 else none := by
   simp [idxOf?_cons, idxOf?_nil]
 
 @[simp, grind =] theorem idxOf?_eq_none_iff [BEq α] [LawfulBEq α] {l : List α} {a : α} :

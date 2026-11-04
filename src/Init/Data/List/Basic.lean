@@ -1163,7 +1163,7 @@ def isSublist [BEq α] : List α → List α → Bool
   | [], _ => true
   | _, [] => false
   | l₁@(hd₁::tl₁), hd₂::tl₂ =>
-    if hd₁ == hd₂
+    bif hd₁ == hd₂
     then tl₁.isSublist tl₂
     else l₁.isSublist tl₂
 
@@ -1225,7 +1225,7 @@ def isPrefixOf? [BEq α] : (l₁ : List α) → (l₂ : List α) → Option (Lis
   | [], l₂ => some l₂
   | _, [] => none
   | (x₁ :: l₁), (x₂ :: l₂) =>
-    if x₁ == x₂ then isPrefixOf? l₁ l₂ else none
+    bif x₁ == x₂ then isPrefixOf? l₁ l₂ else none
 
 /-! ### IsSuffix / isSuffixOf / isSuffixOf? -/
 
@@ -1564,7 +1564,7 @@ Examples:
  * `[1, 2, 3].insert 2 = [1, 2, 3]`
 -/
 @[inline] protected def insert [BEq α] (a : α) (l : List α) : List α :=
-  if l.contains a then l else a :: l
+  bif l.contains a then l else a :: l
 
 /--
 Inserts an element into a list at the specified index. If the index is greater than the length of
@@ -1615,7 +1615,7 @@ Examples:
 -/
 def eraseP (p : α → Bool) : List α → List α
   | [] => []
-  | a :: l => if p a then l else a :: eraseP p l
+  | a :: l => bif p a then l else a :: eraseP p l
 
 /-! ### eraseIdx -/
 
@@ -1705,7 +1705,7 @@ def findRev? (p : α → Bool) : List α → Option α
   | []    => none
   | a::as => match findRev? p as with
     | some b => some b
-    | none   => if p a then some a else none
+    | none   => bif p a then some a else none
 
 /-! ### findSomeRev? -/
 
@@ -1740,7 +1740,7 @@ Examples:
   /-- Auxiliary for `findIdx`: `findIdx.go p l n = findIdx p l + n` -/
   @[specialize] go : List α → Nat → Nat
   | [], n => n
-  | a :: l, n => if p a then n else go l (n + 1)
+  | a :: l, n => bif p a then n else go l (n + 1)
 
 @[simp, grind =] theorem findIdx_nil {p : α → Bool} : [].findIdx p = 0 := rfl
 
@@ -1777,7 +1777,7 @@ where
   @[specialize]
   go : List α → Nat → Option Nat
   | [], _ => none
-  | a :: l, i => if p a then some i else go l (i + 1)
+  | a :: l, i => bif p a then some i else go l (i + 1)
 
 /-! ### idxOf? -/
 
@@ -1809,7 +1809,7 @@ where
   go : (l' : List α) → (i : Nat) → (h : l'.length + i = l.length) → Option (Fin l.length)
   | [], _, _ => none
   | a :: l, i, h =>
-    if p a then
+    bif p a then
       some ⟨i, by
         simp only [Nat.add_comm _ i] at h
         exact Nat.lt_of_add_right_lt (Nat.lt_of_succ_le (Nat.le_of_eq h))⟩
@@ -1845,7 +1845,7 @@ Examples:
   /-- Auxiliary for `countP`: `countP.go p l acc = countP p l + acc`. -/
   @[specialize] go : List α → Nat → Nat
   | [], acc => acc
-  | x :: xs, acc => if p x then go xs (acc + 1) else go xs acc
+  | x :: xs, acc => bif p x then go xs (acc + 1) else go xs acc
 
 /-! ### count -/
 

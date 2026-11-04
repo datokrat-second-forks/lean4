@@ -54,7 +54,7 @@ where go : List α → List α → List α → List α
   | [], l₂, acc => reverseAux acc l₂
   | l₁, [], acc => reverseAux acc l₁
   | x :: xs, y :: ys, acc =>
-    if le x y then
+    bif le x y then
       go xs (y :: ys) (x :: acc)
     else
       go (x :: xs) ys (y :: acc)

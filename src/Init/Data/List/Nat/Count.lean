@@ -76,7 +76,7 @@ theorem count_replace [BEq α] [LawfulBEq α] {a b c : α} {l : List α} :
 
 @[grind =] theorem count_insert [BEq α] [LawfulBEq α] {a b : α} {l : List α} :
     count a (List.insert b l) = max (count a l) (if b == a then 1 else 0) := by
-  simp only [List.insert, contains_eq_mem, UDecidable.decide_eq_true_eq, beq_iff_eq]
+  simp only [List.insert, contains_eq_mem, Bool.cond_udecide, beq_iff_eq]
   split <;> rename_i h
   · split <;> rename_i h'
     · rw [Nat.max_def]

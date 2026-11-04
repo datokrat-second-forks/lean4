@@ -1207,6 +1207,20 @@ theorem ite_eq_right {c : Prop} {h : Decidable c} (hnc : ¬c) {α : Sort u} {t e
 @[deprecated ite_eq_right (since := "2026-07-21")]
 theorem if_neg {c : Prop} {h : Decidable c} (hnc : ¬c) {α : Sort u} {t : α} {e : α} : (if c then t else e) = e := ite_eq_right hnc
 
+theorem Bool.cond_pos {α : Sort u} {b : Bool} {a a' : α} (h : b = true) : cond b a a' = a := by
+  subst h; rfl
+
+theorem Bool.cond_neg {α : Sort u} {b : Bool} {a a' : α} (h : b = false) : cond b a a' = a' := by
+  subst h; rfl
+
+theorem Bool.dcond_pos {α : Sort u} {b : Bool} {t : b = true → α} {e : b = false → α} (h : b = true) :
+    Bool.dcond b t e = t h := by
+  subst h; rfl
+
+theorem Bool.dcond_neg {α : Sort u} {b : Bool} {t : b = true → α} {e : b = false → α} (h : b = false) :
+    Bool.dcond b t e = e h := by
+  subst h; rfl
+
 /-- Split an if-then-else into cases. The `split` tactic is generally easier to use than this theorem. -/
 def iteInduction {c} [inst : Decidable c] {motive : α → Sort _} {t e : α}
     (hpos : c → motive t) (hneg : ¬c → motive e) : motive (ite c t e) :=

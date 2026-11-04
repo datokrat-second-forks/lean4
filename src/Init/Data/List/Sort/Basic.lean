@@ -41,7 +41,7 @@ def merge (xs ys : List α) (le : α → α → Bool := by exact fun a b => a �
   | [], ys => ys
   | xs, [] => xs
   | x :: xs, y :: ys =>
-    if le x y then
+    bif le x y then
       x :: merge xs (y :: ys) le
     else
       y :: merge (x :: xs) ys le
@@ -96,6 +96,6 @@ then compares the second components using `≤`.
 This function is only used in stating the stability properties of `mergeSort`.
 -/
 def zipIdxLE (le : α → α → Bool) (a b : α × Nat) : Bool :=
-  if le a.1 b.1 then if le b.1 a.1 then a.2 ≤ b.2 else true else false
+  bif le a.1 b.1 then bif le b.1 a.1 then a.2 ≤ b.2 else true else false
 
 end List
