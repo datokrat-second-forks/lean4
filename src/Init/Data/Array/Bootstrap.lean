@@ -29,6 +29,7 @@ theorem foldlM_toList.aux [Monad m]
     {f : β → α → m β} {xs : Array α} {i j} (H : xs.size ≤ i + j) {b} :
     foldlM.loop f xs xs.size (Nat.le_refl _) i j b = (xs.toList.drop j).foldlM f b := by
   unfold foldlM.loop
+  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split; split
   · cases Nat.not_le_of_gt ‹_› (Nat.zero_add _ ▸ H)
   · rename_i i; rw [Nat.succ_add] at H
@@ -61,7 +62,9 @@ theorem foldrM_eq_reverse_foldlM_toList [Monad m] {f : α → β → m β} {init
   have : xs = #[] ∨ 0 < xs.size :=
     match xs with | ⟨[]⟩ => .inl rfl | ⟨a::l⟩ => .inr (Nat.zero_lt_succ _)
   match xs, this with | _, .inl rfl => simp [foldrM] | xs, .inr h => ?_
-  simp only [foldrM, h, ← foldrM_eq_reverse_foldlM_toList.aux]
+  simp only [foldrM, decideLE_eq_udecide, decideLT_eq_udecide, Bool.dcond_udecide,
+    Bool.cond_udecide, Nat.le_refl, h, ↓reduceUDIte, ↓reduceUIte,
+    ← foldrM_eq_reverse_foldlM_toList.aux]
   simp [Array.size]
 
 @[simp, grind =] theorem foldrM_toList [Monad m]

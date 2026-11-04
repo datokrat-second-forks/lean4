@@ -42,10 +42,10 @@ Examples:
 * `#[1, 4, 2, 10, 6].min? = some 1`
 -/
 public protected def min? [Min α] (arr : Array α) : Option α :=
-  if h : arr ≠ #[] then
-    some (arr.min h)
-  else
+  bif h : arr.isEmpty then
     none
+  else
+    some (arr.min (Array.isEmpty_eq_false_iff.mp h))
 
 /-! ### max -/
 
@@ -71,10 +71,10 @@ Examples:
 * `#[1, 4, 2, 10, 6].max? = some 10`
 -/
 public protected def max? [Max α] (arr : Array α) : Option α :=
-  if h : arr ≠ #[] then
-    some (arr.max h)
-  else
+  bif h : arr.isEmpty then
     none
+  else
+    some (arr.max (Array.isEmpty_eq_false_iff.mp h))
 
 /-! ### Compatibility with `List` -/
 
@@ -109,9 +109,9 @@ public theorem min_eq_min_toList [Min α] {xs : Array α} {h} :
 public theorem _root_.List.min?_toArray [Min α] {l : List α} :
     l.toArray.min? = l.min? := by
   rw [Array.min?]
-  split
+  cases l
+  · rfl
   · simp [List.min_toArray, List.min_eq_get_min?, - List.get_min?]
-  · simp_all
 
 @[simp, grind =, cbv_eval ←]
 public theorem min?_toList [Min α] {xs : Array α} :
@@ -149,9 +149,9 @@ public theorem max_eq_max_toList [Max α] {xs : Array α} {h} :
 public theorem _root_.List.max?_toArray [Max α] {l : List α} :
     l.toArray.max? = l.max? := by
   rw [Array.max?]
-  split
+  cases l
+  · rfl
   · simp [List.max_toArray, List.max_eq_get_max?, - List.get_max?]
-  · simp_all
 
 @[simp, grind =, cbv_eval ←]
 public theorem max?_toList [Max α] {xs : Array α} :

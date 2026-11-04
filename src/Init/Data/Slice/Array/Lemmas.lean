@@ -153,45 +153,17 @@ public theorem foldl_toList {α : Type u} {s : Subarray α} {f} :
 
 end Subarray
 
-public theorem Array.toSubarray_eq_toSubarray_of_min_eq_min {xs : Array α}
-    {start stop stop' : Nat} (h : min stop xs.size = min stop' xs.size) :
-    xs.toSubarray start stop = xs.toSubarray start stop' := by
-  simp only [Array.toSubarray]
-  split
-  · split
-    · have h₁ : start ≤ xs.size := by omega
-      have h₂ : start ≤ stop' := by omega
-      simp only [dite_eq_left h₁, dite_eq_left h₂]
-      split
-      · simp_all
-      · simp_all [Nat.min_eq_right (Nat.le_of_lt _)]
-    · simp only [Nat.min_eq_left, *] at h
-      split
-      · simp only [Nat.min_eq_left, *] at h
-        simp only [h, right_eq_dite_iff, Slice.mk.injEq, Internal.SubarrayData.mk.injEq, and_true,
-          true_and]
-        omega
-      · simp only [ge_iff_le, not_false_eq_true, Nat.min_eq_right (Nat.le_of_not_ge _), *] at h
-        simp [h]
-        omega
-  · split
-    · split
-      · simp only [not_false_eq_true, Nat.min_eq_right (Nat.le_of_not_ge _),
-        Nat.min_eq_left, Nat.not_le, *] at *
-        simp [*]; omega
-      · simp
-    · simp [Nat.min_eq_right (Nat.le_of_not_ge _), *] at h
-      split
-      · simp only [Nat.min_eq_left, *] at h
-        simp [*]; omega
-      · simp
-
 @[cbv_eval]
 public theorem Array.toSubarray_eq_min {xs : Array α} {lo hi : Nat} :
     xs.toSubarray lo hi = ⟨⟨xs, min lo (min hi xs.size), min hi xs.size, Nat.min_le_right _ _,
       Nat.min_le_right _ _⟩⟩ := by
-  simp only [Array.toSubarray]
+  simp only [Array.toSubarray, decideLE_eq_udecide, Bool.dcond_udecide]
   split <;> split <;> simp [Nat.min_eq_right (Nat.le_of_not_ge _), *]
+
+public theorem Array.toSubarray_eq_toSubarray_of_min_eq_min {xs : Array α}
+    {start stop stop' : Nat} (h : min stop xs.size = min stop' xs.size) :
+    xs.toSubarray start stop = xs.toSubarray start stop' := by
+  simp only [Array.toSubarray_eq_min, h]
 
 @[simp, grind =]
 public theorem Array.array_toSubarray {xs : Array α} {lo hi : Nat} :
@@ -307,7 +279,7 @@ namespace Array
 @[simp, grind =]
 public theorem array_mkSlice_rco {xs : Array α} {lo hi : Nat} :
     xs[lo...hi].array = xs := by
-  simp [Std.Rco.Sliceable.mkSlice, Array.toSubarray, apply_dite, Subarray.array]
+  simp [Std.Rco.Sliceable.mkSlice]
 
 @[simp, grind =]
 public theorem start_mkSlice_rco {xs : Array α} {lo hi : Nat} :
@@ -360,7 +332,7 @@ public theorem mkSlice_rcc_eq_mkSlice_rco_min {xs : Array α} {lo hi : Nat} :
 @[simp, grind =]
 public theorem array_mkSlice_rcc {xs : Array α} {lo hi : Nat} :
     xs[lo...=hi].array = xs := by
-  simp [Std.Rcc.Sliceable.mkSlice, Array.toSubarray, apply_dite, Subarray.array]
+  simp [Std.Rcc.Sliceable.mkSlice]
 
 @[simp, grind =]
 public theorem start_mkSlice_rcc {xs : Array α} {lo hi : Nat} :
@@ -390,7 +362,7 @@ public theorem size_mkSlice_rcc {xs : Array α} {lo hi : Nat} :
 @[simp, grind =]
 public theorem array_mkSlice_rci {xs : Array α} {lo : Nat} :
     xs[lo...*].array = xs := by
-  simp [Std.Rci.Sliceable.mkSlice, Array.toSubarray, apply_dite, Subarray.array]
+  simp [Std.Rci.Sliceable.mkSlice]
 
 @[simp, grind =]
 public theorem start_mkSlice_rci {xs : Array α} {lo : Nat} :
@@ -428,7 +400,7 @@ public theorem size_mkSlice_rci {xs : Array α} {lo : Nat} :
 @[simp, grind =]
 public theorem array_mkSlice_roo {xs : Array α} {lo hi : Nat} :
     xs[lo<...hi].array = xs := by
-  simp [Std.Roo.Sliceable.mkSlice, Array.toSubarray, apply_dite, Subarray.array]
+  simp [Std.Roo.Sliceable.mkSlice]
 
 @[simp, grind =]
 public theorem start_mkSlice_roo {xs : Array α} {lo hi : Nat} :
@@ -466,7 +438,7 @@ public theorem size_mkSlice_roo {xs : Array α} {lo hi : Nat} :
 @[simp, grind =]
 public theorem array_mkSlice_roc {xs : Array α} {lo hi : Nat} :
     xs[lo<...=hi].array = xs := by
-  simp [Std.Roc.Sliceable.mkSlice, Array.toSubarray, apply_dite, Subarray.array]
+  simp [Std.Roc.Sliceable.mkSlice]
 
 @[simp, grind =]
 public theorem start_mkSlice_roc {xs : Array α} {lo hi : Nat} :
@@ -508,7 +480,7 @@ public theorem size_mkSlice_roc {xs : Array α} {lo hi : Nat} :
 @[simp, grind =]
 public theorem array_mkSlice_roi {xs : Array α} {lo : Nat} :
     xs[lo<...*].array = xs := by
-  simp [Std.Roi.Sliceable.mkSlice, Array.toSubarray, apply_dite, Subarray.array]
+  simp [Std.Roi.Sliceable.mkSlice]
 
 @[simp, grind =]
 public theorem start_mkSlice_roi {xs : Array α} {lo : Nat} :
@@ -556,7 +528,7 @@ public theorem size_mkSlice_roi {xs : Array α} {lo : Nat} :
 @[simp, grind =]
 public theorem array_mkSlice_rio {xs : Array α} {hi : Nat} :
     xs[*...hi].array = xs := by
-  simp [Std.Rio.Sliceable.mkSlice, Array.toSubarray, apply_dite, Subarray.array]
+  simp [Std.Rio.Sliceable.mkSlice]
 
 @[simp, grind =]
 public theorem start_mkSlice_rio {xs : Array α} {hi : Nat} :
@@ -594,7 +566,7 @@ public theorem size_mkSlice_rio {xs : Array α} {hi : Nat} :
 @[simp, grind =]
 public theorem array_mkSlice_ric {xs : Array α} {hi : Nat} :
     xs[*...=hi].array = xs := by
-  simp [Std.Ric.Sliceable.mkSlice, Array.toSubarray, apply_dite, Subarray.array]
+  simp [Std.Ric.Sliceable.mkSlice]
 
 @[simp, grind =]
 public theorem start_mkSlice_ric {xs : Array α} {hi : Nat} :

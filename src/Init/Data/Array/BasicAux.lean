@@ -52,10 +52,10 @@ def Array.mapM' [Monad m] (f : α → m β) (as : Array α) : m { bs : Array β 
   go 0 ⟨mkEmpty as.size, rfl⟩ (by simp)
 where
   go (i : Nat) (acc : { bs : Array β // bs.size = i }) (hle : i ≤ as.size) : m { bs : Array β // bs.size = as.size } := do
-    if h : i = as.size then
-      return h ▸ acc
+    bif h : i =ᵇ as.size then
+      return eq_of_decideEq_eq_true h ▸ acc
     else
-      have hlt : i < as.size := Nat.lt_of_le_of_ne hle h
+      have hlt : i < as.size := Nat.lt_of_le_of_ne hle (ne_of_decideEq_eq_false h)
       let b ← f as[i]
       go (i+1) ⟨acc.val.push b, by simp [acc.property]⟩ hlt
   termination_by as.size - i

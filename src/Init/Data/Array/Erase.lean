@@ -314,7 +314,7 @@ end erase
 
 @[grind =]
 theorem eraseIdxIfInBounds_eq {xs : Array α} {i : Nat} :
-    xs.eraseIdxIfInBounds i = if h : i < xs.size then xs.eraseIdx i else xs := by
+    xs.eraseIdxIfInBounds i = uif h : i < xs.size then xs.eraseIdx i else xs := by
   simp [eraseIdxIfInBounds]
 
 /-! ### eraseIdx -/

@@ -26,8 +26,8 @@ where
     match fuel with
     | 0      => xs
     | fuel+1 =>
-      if h : i < xs.size then
-        traverse (swapLoop xs i h) (i+1) fuel
+      bif h : i <ᵇ xs.size then
+        traverse (swapLoop xs i (lt_of_decideLT_eq_true h)) (i+1) fuel
       else
         xs
   @[specialize] swapLoop (xs : Array α) (j : Nat) (h : j < xs.size) : Array α :=
@@ -35,7 +35,7 @@ where
     | 0    => xs
     | j'+1 =>
       have h' : j' < xs.size := by subst j; exact Nat.lt_trans (Nat.lt_succ_self _) h
-      if lt xs[j] xs[j'] then
+      bif lt xs[j] xs[j'] then
         swapLoop (xs.swap j j') j' (by rw [size_swap]; assumption; done)
       else
         xs

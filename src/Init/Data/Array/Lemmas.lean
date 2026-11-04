@@ -571,11 +571,11 @@ instance {xs : Array α} {p : α → Prop} [DecidablePred p] :
 
 theorem anyM_eq_anyM_loop [Monad m] {p : α → m Bool} {as : Array α} {start stop} :
     anyM p as start stop = anyM.loop p as (min stop as.size) (Nat.min_le_right ..) start := by
-  simp only [anyM, Nat.min_def]; split <;> rfl
+  simp only [anyM, Nat.min_def, decideLE_eq_udecide, Bool.dcond_udecide]; split <;> rfl
 
 theorem anyM_stop_le_start [Monad m] {p : α → m Bool} {as : Array α} {start stop}
     (h : min stop as.size ≤ start) : anyM p as start stop = pure false := by
-  rw [anyM_eq_anyM_loop, anyM.loop, dite_eq_right (Nat.not_lt.2 h)]
+  rw [anyM_eq_anyM_loop, anyM.loop, Bool.dcond_neg (decideLT_eq_false_iff.2 (Nat.not_lt.2 h))]
 
 theorem anyM_loop_cons [Monad m] {p : α → m Bool} {a : α} {as : List α} {stop start : Nat}
     (h : stop + 1 ≤ (a :: as).length) :
@@ -583,20 +583,22 @@ theorem anyM_loop_cons [Monad m] {p : α → m Bool} {a : α} {as : List α} {st
       anyM.loop p ⟨as⟩ stop (by simpa using h) start := by
   rw [anyM.loop]
   conv => rhs; rw [anyM.loop]
+  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h'
   · simp only [Nat.add_lt_add_iff_right] at h'
-    rw [dite_eq_left h', anyM_loop_cons]
+    rw [UDecidable.dite_eq_left h', anyM_loop_cons]
     simp
-  · rw [dite_eq_right]
+  · rw [UDecidable.dite_eq_right]
     omega
 
 @[simp, grind =] theorem anyM_toList [Monad m] {p : α → m Bool} {as : Array α} :
     as.toList.anyM p = as.anyM p :=
   match as with
-  | ⟨[]⟩  => by simp [anyM, anyM.loop]
+  | ⟨[]⟩  => by unfold anyM anyM.loop; simp
   | ⟨a :: as⟩ => by
-    simp only [List.anyM, anyM, List.size_toArray, List.length_cons, Nat.le_refl, ↓reduceDIte]
-    rw [anyM.loop, dite_eq_left (by omega)]
+    simp only [List.anyM, anyM, List.size_toArray, List.length_cons, Nat.le_refl,
+      decideLE_eq_udecide, Bool.dcond_udecide, ↓reduceUDIte]
+    rw [anyM.loop, Bool.dcond_pos (decideLT_eq_true_iff.2 (by omega))]
     congr 1
     funext b
     simp only [Bool.cond_eq_ite]
@@ -611,6 +613,7 @@ theorem anyM_loop_iff_exists {p : α → Bool} {as : Array α} {start stop} (h :
     (anyM.loop (m := Id) (pure <| p ·) as stop h start).run = true ↔
       ∃ (i : Nat) (_ : i < as.size), start ≤ i ∧ i < stop ∧ p as[i] = true := by
   unfold anyM.loop
+  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h₁
   · dsimp
     simp only [Bool.cond_eq_ite]
@@ -633,6 +636,7 @@ termination_by stop - start
 theorem any_iff_exists {p : α → Bool} {as : Array α} {start stop} :
     as.any p start stop ↔ ∃ (i : Nat) (_ : i < as.size), start ≤ i ∧ i < stop ∧ p as[i] := by
   dsimp [any, anyM]
+  simp only [decideLE_eq_udecide, Bool.dcond_udecide]
   split
   · rw [anyM_loop_iff_exists (p := p)]
   · rw [anyM_loop_iff_exists]
@@ -1179,7 +1183,7 @@ theorem mapM_eq_foldlM [Monad m] [LawfulMonad m] {f : α → m β} {xs : Array �
 where
   aux (i bs) :
       mapM.map f xs i bs = (xs.toList.drop i).foldlM (fun bs a => bs.push <$> f a) bs := by
-    unfold mapM.map; split
+    unfold mapM.map; simp only [decideLT_eq_udecide, Bool.dcond_udecide]; split
     · rw [← List.getElem_cons_drop ‹_›]
       simp only [aux (i + 1), map_eq_pure_bind, List.foldlM_cons, bind_assoc,
         pure_bind]
@@ -1398,7 +1402,7 @@ theorem filter_congr {xs ys : Array α} (h : xs = ys)
   dsimp only [filter]
   rw [← foldl_toList]
   generalize xs.toList = xs
-  suffices ∀ as, (List.foldl (fun acc a => if p a = true then push acc a else acc) as xs).toList =
+  suffices ∀ as, (List.foldl (fun acc a => uif p a then push acc a else acc) as xs).toList =
       as.toList ++ List.filter p xs by
     simpa using this #[]
   induction xs with simp
@@ -2564,7 +2568,7 @@ theorem getElem?_swap {xs : Array α} {i j : Nat} (hi hj) {k : Nat} : (xs.swap i
       simp [(go · (i+1) ⟨j-1, ·⟩), h]
     else simp [h]
     termination_by j - i
-  simp only [reverse]; split <;> simp [go]
+  simp only [reverse, decideLE_eq_udecide, Bool.dcond_udecide]; split <;> simp [go]
 
 @[simp, grind =] theorem reverse_empty : reverse (#[] : Array α) = #[] := rfl
 
@@ -2573,7 +2577,7 @@ theorem getElem?_swap {xs : Array α} {i j : Nat} (hi hj) {k : Nat} : (xs.swap i
       (h : i + j + 1 = xs.size) (h₂ : as.size = xs.size)
       (H : ∀ k, as.toList[k]? = if i ≤ k ∧ k ≤ j then xs.toList[k]? else xs.toList.reverse[k]?)
       (k : Nat) : (reverse.loop as i ⟨j, hj⟩).toList[k]? = xs.toList.reverse[k]? := by
-    rw [reverse.loop]; dsimp only; split <;> rename_i h₁
+    rw [reverse.loop]; simp only [decideLT_eq_udecide, Bool.dcond_udecide]; split <;> rename_i h₁
     · match j with | j+1 => ?_
       simp only [Nat.add_sub_cancel]
       rw [(go · (i+1) j)]
@@ -2597,7 +2601,7 @@ theorem getElem?_swap {xs : Array α} {i j : Nat} (hi hj) {k : Nat} : (xs.swap i
         exact (List.getElem?_reverse' h).symm
       · rfl
     termination_by j - i
-  simp only [reverse]
+  simp only [reverse, decideLE_eq_udecide, Bool.dcond_udecide]
   split
   · match xs with | ⟨[]⟩ | ⟨[_]⟩ => rfl
   · have := Nat.sub_add_cancel (Nat.le_of_not_le ‹_›)
@@ -2941,7 +2945,8 @@ theorem toList_shrink {xs : Array α} {i : Nat} : (xs.shrink i).toList = xs.toLi
 theorem foldlM_start_stop {m} [Monad m] {xs : Array α} {f : β → α → m β} {b} {start stop : Nat} :
     xs.foldlM f b start stop = (xs.extract start stop).foldlM f b := by
   unfold foldlM
-  simp only [Nat.sub_zero, size_extract, Nat.le_refl, ↓reduceDIte]
+  simp only [Nat.sub_zero, size_extract, Nat.le_refl, decideLE_eq_udecide, Bool.dcond_udecide,
+    ↓reduceUDIte]
   suffices foldlM.loop f xs (min stop xs.size) (by omega) (min stop xs.size - start) start b =
       foldlM.loop f (xs.extract start stop) (min stop xs.size - start) (by simp) (min stop xs.size - start) 0 b by
     split
@@ -2963,7 +2968,8 @@ theorem foldlM_start_stop {m} [Monad m] {xs : Array α} {f : β → α → m β}
     simp [foldlM.loop]
   | succ i ih =>
     unfold foldlM.loop
-    rw [dite_eq_left (by omega), dite_eq_left (by omega)]
+    rw [Bool.dcond_pos (decideLT_eq_true_iff.2 (by omega)),
+      Bool.dcond_pos (decideLT_eq_true_iff.2 (by omega))]
     split <;> rename_i h
     · rfl
     · simp at h
@@ -2978,23 +2984,24 @@ theorem foldlM_start_stop {m} [Monad m] {xs : Array α} {f : β → α → m β}
 theorem foldrM_start_stop {m} [Monad m] {xs : Array α} {f : α → β → m β} {b} {start stop : Nat} :
     xs.foldrM f b start stop = (xs.extract stop start).foldrM f b := by
   unfold foldrM
-  simp only [size_extract, Nat.le_refl, ↓reduceDIte]
+  simp only [size_extract, Nat.le_refl, decideLE_eq_udecide, decideLT_eq_udecide,
+    Bool.dcond_udecide, Bool.cond_udecide, ↓reduceUDIte]
   suffices stop ≤ min start xs.size →
       foldrM.fold f xs stop (min start xs.size) (by omega) b =
         foldrM.fold f (xs.extract stop start) 0 (min start xs.size - stop) (by simp) b by
     split
     · split
-      · rw [ite_eq_left (by omega)]
+      · rw [UDecidable.ite_eq_left (by omega)]
         have h : min start xs.size = start := by omega
         specialize this (by omega)
         simp_all
-      · rw [ite_eq_right (by omega)]
+      · rw [UDecidable.ite_eq_right (by omega)]
     · split
-      · rw [ite_eq_left (by omega)]
+      · rw [UDecidable.ite_eq_left (by omega)]
         have h : min start xs.size = xs.size := by omega
         specialize this (by omega)
         simp_all
-      · rw [ite_eq_right (by omega)]
+      · rw [UDecidable.ite_eq_right (by omega)]
   revert b
   suffices ∀ (b : β) (i) (w : stop + i ≤ min start xs.size),
       foldrM.fold f xs stop (stop + i) (by omega) b =
@@ -3059,7 +3066,7 @@ theorem foldlM_append [Monad m] [LawfulMonad m] {f : β → α → m β} {b} {xs
 
 @[simp] theorem foldlM_loop_empty [Monad m] {f : β → α → m β} {init : β} {i j : Nat} :
     foldlM.loop f #[] s h i j init = pure init := by
-  unfold foldlM.loop; split
+  unfold foldlM.loop; simp only [decideLT_eq_udecide, Bool.dcond_udecide]; split
   · split
     · rfl
     · simp at h
@@ -3196,7 +3203,7 @@ theorem foldl_induction
     motive as.size (as.foldl f init) := by
   let rec go {i j b} (h₁ : j ≤ as.size) (h₂ : as.size ≤ i + j) (H : motive j b) :
     (motive as.size) (foldlM.loop (m := Id) f as as.size (Nat.le_refl _) i j b) := by
-    unfold foldlM.loop; split
+    unfold foldlM.loop; simp only [decideLT_eq_udecide, Bool.dcond_udecide]; split
     next hj =>
       split
       · cases Nat.not_le_of_gt (by simp [hj]) h₂
@@ -3996,11 +4003,13 @@ theorem all_filterMap {xs : Array α} {f : α → Option β} {p : β → Bool} :
 
 @[simp, grind =] theorem size_modify {xs : Array α} {i : Nat} {f : α → α} : (xs.modify i f).size = xs.size := by
   unfold modify modifyM
+  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> simp
 
 @[grind =] theorem getElem_modify {xs : Array α} {j i} (h : i < (xs.modify j f).size) :
     (xs.modify j f)[i] = if j = i then f (xs[i]'(by simpa using h)) else xs[i]'(by simpa using h) := by
-  simp only [modify, modifyM]
+  unfold modify modifyM
+  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split
   · simp only [getElem_set, Id.run_pure, Id.run_bind]; split <;> simp [*]
   · simp only [Id.run_pure]
@@ -4075,12 +4084,14 @@ theorem swap_comm {xs : Array α} {i j : Nat} (hi hj) : xs.swap i j hi hj = xs.s
 /-! ### swapIfInBounds -/
 
 @[grind =] theorem swapIfInBounds_def {xs : Array α} {i j : Nat} :
-    xs.swapIfInBounds i j = if h₁ : i < xs.size then
-  if h₂ : j < xs.size then swap xs i j else xs else xs := rfl
+    xs.swapIfInBounds i j = uif h₁ : i < xs.size then
+  uif h₂ : j < xs.size then swap xs i j else xs else xs := by
+  simp only [swapIfInBounds, decideLT_eq_udecide, Bool.dcond_udecide]
 
 @[simp, grind =] theorem size_swapIfInBounds {xs : Array α} {i j : Nat} :
     (xs.swapIfInBounds i j).size = xs.size := by
-  unfold swapIfInBounds; split <;> (try split) <;> simp [size_swap]
+  unfold swapIfInBounds; simp only [decideLT_eq_udecide, Bool.dcond_udecide]
+  split <;> (try split) <;> simp [size_swap]
 
 @[grind =] theorem getElem_swapIfInBounds {xs : Array α} {i j k : Nat}
     (hk : k < (xs.swapIfInBounds i j).size) :
@@ -4089,6 +4100,7 @@ theorem swap_comm {xs : Array α} {i j : Nat} (hi hj) : xs.swap i j hi hj = xs.s
     else xs[k]'(by simp_all) := by
   rw [size_swapIfInBounds] at hk
   unfold swapIfInBounds
+  simp only [decideLT_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i hi
   · split <;> rename_i hj
     · simp only [hi, hj, and_true]
@@ -4147,7 +4159,7 @@ theorem swapAt!_def {xs : Array α} {i : Nat} {v : α} (h : i < xs.size) :
 
 @[simp] theorem size_swapAt! {xs : Array α} {i : Nat} {v : α} :
     (xs.swapAt! i v).2.size = xs.size := by
-  simp only [swapAt!]
+  simp only [swapAt!, decideLT_eq_udecide, Bool.dcond_udecide]
   split
   · simp
   · rfl
@@ -4746,9 +4758,10 @@ set_option backward.isDefEq.respectTransparency false in
     simpa
   intro i
   induction i with
-  | zero => simp [firstM.go]
+  | zero => unfold firstM.go; simp
   | succ i ih =>
     unfold firstM.go
+    simp only [decideLT_eq_udecide, Bool.dcond_udecide]
     split <;> rename_i h
     · rw [drop_eq_getElem_cons h]
       intro h'

@@ -1352,7 +1352,7 @@ Examples:
 -/
 def rotateLeft (xs : List α) (i : Nat := 1) : List α :=
   let len := xs.length
-  if len ≤ 1 then
+  bif len ≤ᵇ 1 then
     xs
   else
     let i := i % len
@@ -1376,7 +1376,7 @@ Examples:
 -/
 def rotateRight (xs : List α) (i : Nat := 1) : List α :=
   let len := xs.length
-  if len ≤ 1 then
+  bif len ≤ᵇ 1 then
     xs
   else
     let i := len - i % len

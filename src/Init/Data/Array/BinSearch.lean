@@ -24,13 +24,18 @@ namespace Array
   | lo, hi, h =>
     let m := (lo.1 + hi.1)/2
     let a := as[m]
-    if lt a k then
-      if h' : m + 1 ≤ hi.1 then
+    bif lt a k then
+      bif h' : m + 1 ≤ᵇ hi.1 then
+        have h' := le_of_decideLE_eq_true h'
         binSearchAux lt found as k ⟨m+1, by omega⟩ hi h'
       else found none
-    else if lt k a then
-      if h' : m = 0 ∨ m - 1 < lo.1 then found none
-      else binSearchAux lt found as k lo ⟨m-1, by omega⟩ (by simp; omega)
+    else bif lt k a then
+      bif h₀ : m =ᵇ 0 then found none
+      else bif h' : m - 1 <ᵇ lo.1 then found none
+      else
+        have h₀ := ne_of_decideEq_eq_false h₀
+        have h' := not_lt_of_decideLT_eq_false h'
+        binSearchAux lt found as k lo ⟨m-1, by omega⟩ (by simp; omega)
     else found (some a)
 termination_by lo hi => hi.1 - lo.1
 
@@ -45,10 +50,12 @@ The optional parameters `lo` and `hi` determine the region of the array indices 
 are inclusive, and default to searching the entire array.
 -/
 @[inline] def binSearch {α : Type} (as : Array α) (k : α) (lt : α → α → Bool) (lo := 0) (hi := as.size - 1) : Option α :=
-  if h : lo < as.size then
-    let hi := if hi < as.size then hi else as.size - 1
-    if w : lo ≤ hi then
-      binSearchAux lt id as k ⟨lo, by omega⟩ ⟨hi, by simp [hi]; split <;> omega⟩ (by simp [hi]; omega)
+  bif h : lo <ᵇ as.size then
+    have h := lt_of_decideLT_eq_true h
+    let hi := bif hi <ᵇ as.size then hi else as.size - 1
+    bif w : lo ≤ᵇ hi then
+      have w := le_of_decideLE_eq_true w
+      binSearchAux lt id as k ⟨lo, by omega⟩ ⟨hi, by simp [hi]; split <;> omega⟩ w
     else
       none
   else
@@ -65,10 +72,12 @@ The optional parameters `lo` and `hi` determine the region of the array indices 
 are inclusive, and default to searching the entire array.
 -/
 @[inline] def binSearchContains {α : Type} (as : Array α) (k : α) (lt : α → α → Bool) (lo := 0) (hi := as.size - 1) : Bool :=
-  if h : lo < as.size then
-    let hi := if hi < as.size then hi else as.size - 1
-    if w : lo ≤ hi then
-      binSearchAux lt Option.isSome as k ⟨lo, by omega⟩ ⟨hi, by simp [hi]; split <;> omega⟩ (by simp [hi]; omega)
+  bif h : lo <ᵇ as.size then
+    have h := lt_of_decideLT_eq_true h
+    let hi := bif hi <ᵇ as.size then hi else as.size - 1
+    bif w : lo ≤ᵇ hi then
+      have w := le_of_decideLE_eq_true w
+      binSearchAux lt Option.isSome as k ⟨lo, by omega⟩ ⟨hi, by simp [hi]; split <;> omega⟩ w
     else
       false
   else
@@ -83,10 +92,12 @@ are inclusive, and default to searching the entire array.
   | lo, hi, h, w =>
     let mid    := (lo.1 + hi.1)/2
     let midVal := as[mid]
-    if w₁ : lt midVal k then
-      if h' : mid = lo then do let v ← add (); pure <| as.insertIdx (lo+1) v
-      else binInsertAux lt merge add as k ⟨mid, by omega⟩ hi (by simp; omega) w₁
-    else if w₂ : lt k midVal then
+    bif w₁ : lt midVal k then
+      bif h' : mid =ᵇ lo.1 then do let v ← add (); pure <| as.insertIdx (lo+1) v
+      else
+        have h' := ne_of_decideEq_eq_false h'
+        binInsertAux lt merge add as k ⟨mid, by omega⟩ hi (by simp; omega) w₁
+    else bif lt k midVal then
       have : mid ≠ lo := fun z => by simp [midVal, z] at w₁; simp_all
       binInsertAux lt merge add as k lo ⟨mid, by omega⟩ (by simp; omega) w
     else do
@@ -109,12 +120,14 @@ to `k` is present, then `add` is used to determine the value to be inserted.
     (add : Unit → m α)
     (as : Array α)
     (k : α) : m (Array α) :=
-  if h : as.size = 0 then do let v ← add (); pure <| as.push v
-  else if lt k as[0] then do let v ← add (); pure <| as.insertIdx 0 v
-  else if h' : !lt as[0] k then as.modifyM 0 <| merge
-  else if lt as[as.size - 1] k then do let v ← add (); pure <| as.push v
-  else if !lt k as[as.size - 1] then as.modifyM (as.size - 1) <| merge
-  else binInsertAux lt merge add as k ⟨0, by omega⟩ ⟨as.size - 1, by omega⟩ (by simp) (by simpa using h')
+  bif h : as.size =ᵇ 0 then do let v ← add (); pure <| as.push v
+  else
+    have h := ne_of_decideEq_eq_false h
+    bif lt k as[0] then do let v ← add (); pure <| as.insertIdx 0 v
+    else bif h' : !lt as[0] k then as.modifyM 0 <| merge
+    else bif lt as[as.size - 1] k then do let v ← add (); pure <| as.push v
+    else bif !lt k as[as.size - 1] then as.modifyM (as.size - 1) <| merge
+    else binInsertAux lt merge add as k ⟨0, by omega⟩ ⟨as.size - 1, by omega⟩ (by simp) (by simpa using h')
 
 /--
 Inserts an element into a sorted array such that the resulting array is sorted. If the element is

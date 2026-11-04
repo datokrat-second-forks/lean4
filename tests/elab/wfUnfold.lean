@@ -39,7 +39,7 @@ error: Failed: `fail` tactic was invoked
 as : Array α
 i : Nat
 j : Fin as.size
-⊢ (if i < ↑j then
+⊢ (bif x : i <ᵇ ↑j then
         let j' := ⟨↑j - 1, ⋯⟩;
         let as_1 := as.swap ↑j' ↑j ⋯ ⋯;
         insertIdx.loop i as_1 ⟨↑j', ⋯⟩

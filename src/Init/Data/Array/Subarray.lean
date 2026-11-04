@@ -116,7 +116,7 @@ bounds.
 The index is relative to the start and end of the subarray, rather than the underlying array.
 -/
 @[inline] def getD (s : Subarray α) (i : Nat) (v₀ : α) : α :=
-  if h : i < s.size then s[i] else v₀
+  bif h : i <ᵇ s.size then s[i]'(lt_of_decideLT_eq_true h) else v₀
 
 /--
 Extracts an element from the subarray, or returns a default value when the index is out of bounds.
@@ -137,10 +137,10 @@ Examples:
  * `#[1,2,3].toSubarray.popFront.popFront.popFront.popFront.toArray = #[]`
 -/
 def popFront (s : Subarray α) : Subarray α :=
-  if h : s.start < s.stop then
+  bif h : s.start <ᵇ s.stop then
     ⟨{ s.internalRepresentation with
         start := s.start + 1,
-        start_le_stop := Nat.le_of_lt_succ (Nat.add_lt_add_right h 1) }⟩
+        start_le_stop := Nat.le_of_lt_succ (Nat.add_lt_add_right (lt_of_decideLT_eq_true h) 1) }⟩
   else
     s
 
@@ -379,19 +379,19 @@ If `start` or `stop` are not valid bounds for a subarray, then they are clamped 
 Additionally, the starting index is clamped to the ending index.
 -/
 def toSubarray (as : Array α) (start : Nat := 0) (stop : Nat := as.size) : Subarray α :=
-  if h₂ : stop ≤ as.size then
-    if h₁ : start ≤ stop then
+  bif h₂ : stop ≤ᵇ as.size then
+    bif h₁ : start ≤ᵇ stop then
       ⟨{ array := as, start := start, stop := stop,
-         start_le_stop := h₁, stop_le_array_size := h₂ }⟩
+         start_le_stop := le_of_decideLE_eq_true h₁, stop_le_array_size := le_of_decideLE_eq_true h₂ }⟩
     else
       ⟨{ array := as, start := stop, stop := stop,
-         start_le_stop := Nat.le_refl _, stop_le_array_size := h₂ }⟩
+         start_le_stop := Nat.le_refl _, stop_le_array_size := le_of_decideLE_eq_true h₂ }⟩
   else
-    if h₁ : start ≤ as.size then
+    bif h₁ : start ≤ᵇ as.size then
       ⟨{ array := as,
          start := start,
          stop := as.size,
-         start_le_stop := h₁,
+         start_le_stop := le_of_decideLE_eq_true h₁,
          stop_le_array_size := Nat.le_refl _ }⟩
     else
       ⟨{ array := as,

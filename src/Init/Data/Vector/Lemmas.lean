@@ -352,7 +352,7 @@ private theorem toArray_mapM_go [Monad m] [LawfulMonad m] {f : α → m β} {xs 
     toArray <$> mapM.go f xs i h acc = Array.mapM.map f xs.toArray i acc.toArray := by
   unfold mapM.go
   unfold Array.mapM.map
-  simp only [xs.size_toArray, getElem_toArray]
+  simp only [xs.size_toArray, getElem_toArray, decideLT_eq_udecide, Bool.dcond_udecide]
   split
   · simp only [map_bind]
     congr

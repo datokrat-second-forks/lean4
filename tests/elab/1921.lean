@@ -5,4 +5,7 @@ def f := #[true].any id 0 USize.size
 -- `native_decide` used to prove `false` here, due to a bug in `Array.anyMUnsafe`.
 example : f = true := by native_decide
 
-example : f = true := by simp (config := { decide := true }) [f, Array.any, Array.anyM, Array.anyM.loop]
+example : f = true := by
+  simp (config := { decide := true }) [f, Array.any, Array.anyM]
+  unfold Array.anyM.loop
+  simp

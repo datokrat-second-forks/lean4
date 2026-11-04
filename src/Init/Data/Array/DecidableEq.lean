@@ -50,7 +50,7 @@ private theorem isEqvAux_of_rel {r : α → α → Bool} {xs ys : Array α} (hsz
 -- This is private as the forward direction of `isEqv_iff_rel` may be used.
 private theorem rel_of_isEqv {r : α → α → Bool} {xs ys : Array α} :
     Array.isEqv xs ys r → ∃ h : xs.size = ys.size, ∀ (i : Nat) (h' : i < xs.size), r (xs[i]) (ys[i]'(h ▸ h')) := by
-  simp only [isEqv]
+  simp only [isEqv, decideEq_eq_udecide, Bool.dcond_udecide]
   split <;> rename_i h
   · exact fun h' => ⟨h, fun i => rel_of_isEqvAux h (Nat.le_refl ..) h'⟩
   · intro; contradiction
@@ -58,7 +58,7 @@ private theorem rel_of_isEqv {r : α → α → Bool} {xs ys : Array α} :
 theorem isEqv_iff_rel {xs ys : Array α} {r} :
     Array.isEqv xs ys r ↔ ∃ h : xs.size = ys.size, ∀ (i : Nat) (h' : i < xs.size), r (xs[i]) (ys[i]'(h ▸ h')) :=
   ⟨rel_of_isEqv, fun ⟨h, w⟩ => by
-    simp only [isEqv, ← h, ↓reduceDIte]
+    simp only [isEqv, decideEq_eq_udecide, Bool.dcond_udecide, ← h, ↓reduceUDIte]
     exact isEqvAux_of_rel h (by simp [h]) w⟩
 
 theorem isEqv_eq_decide (xs ys : Array α) (r) :

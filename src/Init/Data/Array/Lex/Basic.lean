@@ -29,15 +29,19 @@ Specifically, `Array.lex as bs lt` is true if
 def lex [BEq α] (as bs : Array α) (lt : α → α → Bool := by exact (· < ·)) : Bool :=
   go 0
 where @[specialize, semireducible] go (i : Nat) : Bool :=
-  if h₁ : as.size ≤ i then
+  bif h₁ : as.size ≤ᵇ i then
     Nat.blt i bs.size
-  else if h₂ : bs.size ≤ i then
+  else bif h₂ : bs.size ≤ᵇ i then
     false
-  else if lt as[i] bs[i] then
-    true
-  else if as[i] == bs[i] then
-    go (i + 1)
   else
-    false
+    have h₁ := not_le_of_decideLE_eq_false h₁
+    have h₂ := not_le_of_decideLE_eq_false h₂
+    bif lt as[i] bs[i] then
+      true
+    else bif as[i] == bs[i] then
+      go (i + 1)
+    else
+      false
+  termination_by as.size - i
 
 end Array

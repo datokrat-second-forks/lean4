@@ -64,7 +64,8 @@ protected theorem not_le_iff_gt [LT α] {xs ys : Vector α n} :
   rw [Vector.lex, Array.lex, eq_comm]
   suffices ∀ i, Array.lex.go xs ys lt i = Vector.lex.go (Vector.mk xs n₁) (Vector.mk ys n₂) lt i from this 0
   intro i
-  fun_induction Vector.lex.go with (rw [Array.lex.go]; simp_all)
+  fun_induction Vector.lex.go <;> rw [Array.lex.go.eq_1] <;>
+    simp only [n₁, n₂, decideLE_eq_udecide, Bool.dcond_udecide, Bool.cond_eq_ite] <;> simp_all
 
 @[simp, grind =] theorem lex_toArray [BEq α] {lt : α → α → Bool} {xs ys : Vector α n} :
     xs.toArray.lex ys.toArray lt = xs.lex ys lt := by

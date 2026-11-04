@@ -285,8 +285,8 @@ Examples:
 -/
 @[extern "lean_array_swap", expose]
 def swapIfInBounds (xs : Array α) (i j : @& Nat) : Array α :=
-  if h₁ : i < xs.size then
-  if h₂ : j < xs.size then swap xs i j
+  bif h₁ : i <ᵇ xs.size then
+  bif h₂ : j <ᵇ xs.size then swap xs i j (lt_of_decideLT_eq_true h₁) (lt_of_decideLT_eq_true h₂)
   else xs
   else xs
 
@@ -333,8 +333,8 @@ Examples:
 * `#[1, 2, 3].isEqv #[2, 3] (· < ·) = false`
 -/
 @[inline, expose] def isEqv (xs ys : Array α) (p : α → α → Bool) : Bool :=
-  if h : xs.size = ys.size then
-    isEqvAux xs ys h p xs.size (Nat.le_refl xs.size)
+  bif h : xs.size =ᵇ ys.size then
+    isEqvAux xs ys (eq_of_decideEq_eq_true h) p xs.size (Nat.le_refl xs.size)
   else
     false
 
@@ -456,8 +456,8 @@ Examples:
 -/
 @[inline, expose]
 def swapAt! (xs : Array α) (i : Nat) (v : α) : α × Array α :=
-  if h : i < xs.size then
-    swapAt xs i v
+  bif h : i <ᵇ xs.size then
+    swapAt xs i v (lt_of_decideLT_eq_true h)
   else
     have : Inhabited (α × Array α) := ⟨(v, xs)⟩
     panic! String.Internal.append (String.Internal.append "index " (toString i)) " out of bounds"
@@ -556,10 +556,10 @@ It was 3
 -/
 @[implemented_by modifyMUnsafe, expose]
 def modifyM [Monad m] (xs : Array α) (i : Nat) (f : α → m α) : m (Array α) := do
-  if h : i < xs.size then
-    let v   := xs[i]
+  bif h : i <ᵇ xs.size then
+    let v   := xs[i]'(lt_of_decideLT_eq_true h)
     let v ← f v
-    pure <| xs.set i v
+    pure <| xs.set i v (lt_of_decideLT_eq_true h)
   else
     pure xs
 
@@ -680,17 +680,17 @@ example [Monad m] (f : α → β → m α) :
 def foldlM {α : Type u} {β : Type v} {m : Type v → Type w} [Monad m] (f : β → α → m β) (init : β) (as : Array α) (start := 0) (stop := as.size) : m β :=
   let fold (stop : Nat) (h : stop ≤ as.size) :=
     let rec loop (i : Nat) (j : Nat) (b : β) : m β := do
-      if hlt : j < stop then
+      bif hlt : j <ᵇ stop then
         match i with
         | 0    => pure b
         | i'+1 =>
-          have : j < as.size := Nat.lt_of_lt_of_le hlt h
+          have : j < as.size := Nat.lt_of_lt_of_le (lt_of_decideLT_eq_true hlt) h
           loop i' (j+1) (← f b as[j])
       else
         pure b
     loop (stop - start) start init
-  if h : stop ≤ as.size then
-    fold stop h
+  bif h : stop ≤ᵇ as.size then
+    fold stop (le_of_decideLE_eq_true h)
   else
     fold as.size (Nat.le_refl _)
 
@@ -751,12 +751,12 @@ def foldrM {α : Type u} {β : Type v} {m : Type v → Type w} [Monad m] (f : α
       | i+1, h =>
         have : i < as.size := Nat.lt_of_lt_of_le (Nat.lt_succ_self _) h
         fold i (Nat.le_of_lt this) (← f as[i] b)
-  if h : start ≤ as.size then
-    if stop < start then
-      fold start h init
+  bif h : start ≤ᵇ as.size then
+    bif stop <ᵇ start then
+      fold start (le_of_decideLE_eq_true h) init
     else
       pure init
-  else if stop < as.size then
+  else bif stop <ᵇ as.size then
     fold as.size (Nat.le_refl _) init
   else
     pure init
@@ -788,10 +788,11 @@ def mapM {α : Type u} {β : Type v} {m : Type v → Type w} [Monad m] (f : α �
   -- Note: we cannot use `foldlM` here for the reference implementation because this calls
   -- `bind` and `pure` too many times. (We are not assuming `m` is a `LawfulMonad`)
   let rec map (i : Nat) (bs : Array β) : m (Array β) := do
-      if hlt : i < as.size then
-        map (i+1) (bs.push (← f as[i]))
+      bif hlt : i <ᵇ as.size then
+        map (i+1) (bs.push (← f (as[i]'(lt_of_decideLT_eq_true hlt))))
       else
         pure bs
+  termination_by as.size - i
   decreasing_by simp_wf; decreasing_trivial_pre_omega
   map 0 (emptyWithCapacity as.size)
 
@@ -858,12 +859,12 @@ def firstM {α : Type u} {m : Type v → Type w} [Alternative m] (f : α → m �
 where
   @[specialize]
   go (i : Nat) : m β :=
-    if hlt : i < as.size then
-      f as[i] <|> go (i+1)
+    bif hlt : i <ᵇ as.size then
+      f (as[i]'(lt_of_decideLT_eq_true hlt)) <|> go (i+1)
     else
       failure
   termination_by as.size - i
-  decreasing_by exact Nat.sub_succ_lt_self as.size i hlt
+  decreasing_by exact Nat.sub_succ_lt_self as.size i (lt_of_decideLT_eq_true hlt)
 
 /--
 Returns the first non-`none` result of applying the monadic function `f` to each element of the
@@ -971,18 +972,19 @@ entire array is checked.
 def anyM {α : Type u} {m : Type → Type w} [Monad m] (p : α → m Bool) (as : Array α) (start := 0) (stop := as.size) : m Bool :=
   let any (stop : Nat) (h : stop ≤ as.size) :=
     let rec loop (j : Nat) : m Bool := do
-      if hlt : j < stop then
-        have : j < as.size := Nat.lt_of_lt_of_le hlt h
+      bif hlt : j <ᵇ stop then
+        have : j < as.size := Nat.lt_of_lt_of_le (lt_of_decideLT_eq_true hlt) h
         bif (← p as[j]) then
           pure true
         else
           loop (j+1)
       else
         pure false
+      termination_by stop - j
       decreasing_by simp_wf; decreasing_trivial_pre_omega
     loop start
-  if h : stop ≤ as.size then
-    any stop h
+  bif h : stop ≤ᵇ as.size then
+    any stop (le_of_decideLE_eq_true h)
   else
     any as.size (Nat.le_refl _)
 
@@ -1320,9 +1322,10 @@ Examples:
 @[inline, expose]
 def findIdx? {α : Type u} (p : α → Bool) (as : Array α) : Option Nat :=
   let rec @[specialize] loop (j : Nat) :=
-    if h : j < as.size then
-      if p as[j] then some j else loop (j + 1)
+    bif h : j <ᵇ as.size then
+      bif p (as[j]'(lt_of_decideLT_eq_true h)) then some j else loop (j + 1)
     else none
+    termination_by as.size - j
     decreasing_by simp_wf; decreasing_trivial_pre_omega
   loop 0
 
@@ -1337,9 +1340,10 @@ Examples:
 @[inline]
 def findFinIdx? {α : Type u} (p : α → Bool) (as : Array α) : Option (Fin as.size) :=
   let rec loop (j : Nat) :=
-    if h : j < as.size then
-      if p as[j] then some ⟨j, h⟩ else loop (j + 1)
+    bif h : j <ᵇ as.size then
+      bif p (as[j]'(lt_of_decideLT_eq_true h)) then some ⟨j, lt_of_decideLT_eq_true h⟩ else loop (j + 1)
     else none
+    termination_by as.size - j
     decreasing_by simp_wf; decreasing_trivial_pre_omega
   loop 0
 
@@ -1347,12 +1351,14 @@ private theorem findIdx?_loop_eq_map_findFinIdx?_loop_val {xs : Array α} {p : �
     findIdx?.loop p xs j = (findFinIdx?.loop p xs j).map (·.val) := by
   unfold findIdx?.loop
   unfold findFinIdx?.loop
+  simp only [Bool.dcond_eq_udite, Bool.cond_eq_ite]
   split <;> rename_i h
   case isTrue =>
     split
     case isTrue => simp
     case isFalse =>
-      have : xs.size - (j + 1) < xs.size - j := Nat.sub_succ_lt_self xs.size j h
+      have : xs.size - (j + 1) < xs.size - j :=
+        Nat.sub_succ_lt_self xs.size j (lt_of_decideLT_eq_true h)
       rw [findIdx?_loop_eq_map_findFinIdx?_loop_val (j := j + 1)]
   case isFalse => simp
 termination_by xs.size - j
@@ -1373,10 +1379,11 @@ Examples:
 def findIdx (p : α → Bool) (as : Array α) : Nat := (as.findIdx? p).getD as.size
 
 def idxOfAux [BEq α] (xs : Array α) (v : α) (i : Nat) : Option (Fin xs.size) :=
-  if h : i < xs.size then
-    if xs[i] == v then some ⟨i, h⟩
+  bif h : i <ᵇ xs.size then
+    bif xs[i]'(lt_of_decideLT_eq_true h) == v then some ⟨i, lt_of_decideLT_eq_true h⟩
     else idxOfAux xs v (i+1)
   else none
+termination_by xs.size - i
 decreasing_by simp_wf; decreasing_trivial_pre_omega
 
 
@@ -1581,22 +1588,24 @@ Examples:
 -/
 @[expose]
 def reverse (as : Array α) : Array α :=
-  if h : as.size ≤ 1 then
+  bif h : as.size ≤ᵇ 1 then
     as
   else
-    loop as 0 ⟨as.size - 1, Nat.pred_lt (mt (fun h : as.size = 0 => h ▸ by decide) h)⟩
+    loop as 0 ⟨as.size - 1, Nat.pred_lt (mt (fun h : as.size = 0 => h ▸ by decide)
+      (not_le_of_decideLE_eq_false h))⟩
 where
   termination {i j : Nat} (h : i < j) : j - 1 - (i + 1) < j - i := by
     rw [Nat.sub_sub, Nat.add_comm]
     exact Nat.lt_of_le_of_lt (Nat.pred_le _) (Nat.sub_succ_lt_self _ _ h)
   loop (as : Array α) (i : Nat) (j : Fin as.size) :=
-    if h : i < j then
-      have := termination h
-      let as := as.swap i j (Nat.lt_trans h j.2)
+    bif h : i <ᵇ j.val then
+      have := termination (lt_of_decideLT_eq_true h)
+      let as := as.swap i j (Nat.lt_trans (lt_of_decideLT_eq_true h) j.2)
       have : j-1 < as.size := by rw [size_swap]; exact Nat.lt_of_le_of_lt (Nat.pred_le _) j.2
       loop as (i+1) ⟨j-1, this⟩
     else
       as
+  termination_by j.val - i
 
 /--
 Returns the array of elements in `as` for which `p` returns `true`.
@@ -1615,7 +1624,7 @@ Examples:
 @[inline, expose]
 def filter (p : α → Bool) (as : Array α) (start := 0) (stop := as.size) : Array α :=
   as.foldl (init := #[]) (start := start) (stop := stop) fun acc a =>
-    if p a then acc.push a else acc
+    bif p a then acc.push a else acc
 
 /--
 Applies the monadic predicate `p` to every element in the array, in order from left to right, and
@@ -1740,10 +1749,10 @@ Examples:
 -/
 @[specialize]
 def getMax? (as : Array α) (lt : α → α → Bool) : Option α :=
-  if h : 0 < as.size then
-    let a0 := as[0]
+  bif h : 0 <ᵇ as.size then
+    let a0 := as[0]'(by exact lt_of_decideLT_eq_true h)
     some <| as.foldl (init := a0) (start := 1) fun best a =>
-      if lt best a then a else best
+      bif lt best a then a else best
   else
     none
 
@@ -1782,18 +1791,19 @@ Examples:
  * `(#[] : Array Nat).popWhile (· > 2) = #[]`
 -/
 def popWhile (p : α → Bool) (as : Array α) : Array α :=
-  if h : as.size > 0 then
-    if p (as[as.size - 1]'(Nat.sub_lt h (by decide))) then
+  bif h : 0 <ᵇ as.size then
+    bif p (as[as.size - 1]'(Nat.sub_lt (lt_of_decideLT_eq_true h) (by decide))) then
       popWhile p as.pop
     else
       as
   else
     as
+termination_by as.size
 decreasing_by simp_wf; decreasing_trivial_pre_omega
 
 @[simp, grind =] theorem popWhile_empty {p : α → Bool} :
     popWhile p #[] = #[] := by
-  simp [popWhile]
+  unfold popWhile; rfl
 
 /--
 Returns a new array that contains the longest prefix of elements that satisfy the predicate `p` from
@@ -1806,14 +1816,15 @@ Examples:
 -/
 def takeWhile (p : α → Bool) (as : Array α) : Array α :=
   let rec go (i : Nat) (acc : Array α) : Array α :=
-    if h : i < as.size then
-      let a := as[i]
-      if p a then
+    bif h : i <ᵇ as.size then
+      let a := as[i]'(lt_of_decideLT_eq_true h)
+      bif p a then
         go (i+1) (acc.push a)
       else
         acc
     else
       acc
+    termination_by as.size - i
     decreasing_by simp_wf; decreasing_trivial_pre_omega
   go 0 #[]
 
@@ -1829,9 +1840,9 @@ Examples:
 * `#["apple", "pear", "orange"].eraseIdx 2 = #["apple", "pear"]`
 -/
 def eraseIdx (xs : Array α) (i : Nat) (h : i < xs.size := by get_elem_tactic) : Array α :=
-  if h' : i + 1 < xs.size then
-    let xs' := xs.swap (i + 1) i
-    xs'.eraseIdx (i + 1) (by simp [xs', h'])
+  bif h' : i + 1 <ᵇ xs.size then
+    let xs' := xs.swap (i + 1) i (lt_of_decideLT_eq_true h')
+    xs'.eraseIdx (i + 1) (by simp [xs', lt_of_decideLT_eq_true h'])
   else
     xs.pop
 termination_by xs.size - i
@@ -1843,10 +1854,10 @@ theorem size_eraseIdx {xs : Array α} (i : Nat) (h) : (xs.eraseIdx i h).size = x
   induction xs, i, h using Array.eraseIdx.induct with
   | @case1 xs i h h' xs' ih =>
     unfold eraseIdx
-    simp +zetaDelta [h', ih]
+    simp +zetaDelta [lt_of_decideLT_eq_true h', ih]
   | case2 xs i h h' =>
     unfold eraseIdx
-    simp [h']
+    simp [not_lt_of_decideLT_eq_false h']
 
 /--
 Removes the element at a given index from an array. Does nothing if the index is out of bounds.
@@ -1862,7 +1873,7 @@ Examples:
 * `#["apple", "pear", "orange"].eraseIdxIfInBounds 5 = #["apple", "pear", "orange"]`
 -/
 def eraseIdxIfInBounds (xs : Array α) (i : Nat) : Array α :=
-  if h : i < xs.size then xs.eraseIdx i h else xs
+  bif h : i <ᵇ xs.size then xs.eraseIdx i (lt_of_decideLT_eq_true h) else xs
 
 /--
 Removes the element at a given index from an array. Panics if the index is out of bounds.
@@ -1871,7 +1882,7 @@ This function takes worst-case `O(n)` time because it back-shifts all elements a
 greater than `i`.
 -/
 def eraseIdx! (xs : Array α) (i : Nat) : Array α :=
-  if h : i < xs.size then xs.eraseIdx i h else panic! "invalid index"
+  bif h : i <ᵇ xs.size then xs.eraseIdx i (lt_of_decideLT_eq_true h) else panic! "invalid index"
 
 /--
 Removes the first occurrence of a specified element from an array, or does nothing if it is not
@@ -1924,12 +1935,13 @@ Examples:
 -/
 @[inline] def insertIdx (as : Array α) (i : Nat) (a : α) (_ : i ≤ as.size := by get_elem_tactic) : Array α :=
   let rec loop (as : Array α) (j : Fin as.size) :=
-    if i < j then
+    bif _ : i <ᵇ j.val then
       let j' : Fin as.size := ⟨j-1, Nat.lt_of_le_of_lt (Nat.pred_le _) j.2⟩
       let as := as.swap j' j
       loop as ⟨j', by rw [size_swap]; exact j'.2⟩
     else
       as
+    termination_by j.val
     decreasing_by simp_wf; decreasing_trivial_pre_omega
   let j := as.size
   let as := as.push a
@@ -1951,8 +1963,8 @@ Examples:
  * `#["tues", "thur", "sat"].insertIdx! 3 "wed" = #["tues", "thur", "sat", "wed"]`
 -/
 def insertIdx! (as : Array α) (i : Nat) (a : α) : Array α :=
-  if h : i ≤ as.size then
-    insertIdx as i a
+  bif h : i ≤ᵇ as.size then
+    insertIdx as i a (le_of_decideLE_eq_true h)
   else panic! "invalid index"
 
 /--
@@ -1972,22 +1984,23 @@ Examples:
 -/
 @[grind]
 def insertIdxIfInBounds (as : Array α) (i : Nat) (a : α) : Array α :=
-  if h : i ≤ as.size then
-    insertIdx as i a
+  bif h : i ≤ᵇ as.size then
+    insertIdx as i a (le_of_decideLE_eq_true h)
   else
     as
 
 def isPrefixOfAux [BEq α] (as bs : Array α) (hle : as.size ≤ bs.size) (i : Nat) : Bool :=
-  if h : i < as.size then
-    let a := as[i]
-    have : i < bs.size := Nat.lt_of_lt_of_le h hle
+  bif h : i <ᵇ as.size then
+    let a := as[i]'(lt_of_decideLT_eq_true h)
+    have : i < bs.size := Nat.lt_of_lt_of_le (lt_of_decideLT_eq_true h) hle
     let b := bs[i]
-    if a == b then
+    bif a == b then
       isPrefixOfAux as bs hle (i+1)
     else
       false
   else
     true
+termination_by as.size - i
 decreasing_by simp_wf; decreasing_trivial_pre_omega
 
 /--
@@ -2000,22 +2013,23 @@ Examples:
  * `#[].isPrefixOf #[0, 1] = true`
 -/
 def isPrefixOf [BEq α] (as bs : Array α) : Bool :=
-  if h : as.size ≤ bs.size then
-    isPrefixOfAux as bs h 0
+  bif h : as.size ≤ᵇ bs.size then
+    isPrefixOfAux as bs (le_of_decideLE_eq_true h) 0
   else
     false
 
 @[specialize, expose]
 def zipWithMAux {m : Type v → Type w} [Monad m] (as : Array α) (bs : Array β) (f : α → β → m γ) (i : Nat) (cs : Array γ) : m (Array γ) := do
-  if h : i < as.size then
-    let a := as[i]
-    if h : i < bs.size then
-      let b := bs[i]
+  bif h : i <ᵇ as.size then
+    let a := as[i]'(lt_of_decideLT_eq_true h)
+    bif h : i <ᵇ bs.size then
+      let b := bs[i]'(lt_of_decideLT_eq_true h)
       zipWithMAux as bs f (i+1) <| cs.push (← f a b)
     else
       return cs
   else
     return cs
+termination_by as.size - i
 decreasing_by simp_wf; decreasing_trivial_pre_omega
 
 /--
@@ -2057,7 +2071,7 @@ Examples:
 def zipWithAll (f : Option α → Option β → γ) (as : Array α) (bs : Array β) : Array γ :=
   go as bs 0 #[]
 where go (as : Array α) (bs : Array β) (i : Nat) (cs : Array γ) :=
-  if i < max as.size bs.size then
+  bif _ : i <ᵇ max as.size bs.size then
     let a := as[i]?
     let b := bs[i]?
     go as bs (i+1) (cs.push (f a b))
@@ -2153,9 +2167,9 @@ Example:
 * `#[1, 3, 2, 2, 2, 3, 3, 5].eraseReps = #[1, 3, 2, 3, 5]`
 -/
 def eraseReps {α} [BEq α] (as : Array α) : Array α :=
-  if h : 0 < as.size then
-    let ⟨last, acc⟩ := as.foldl (init := (as[0], #[])) fun ⟨last, acc⟩ a =>
-      if a == last then ⟨last, acc⟩ else ⟨a, acc.push last⟩
+  bif h : 0 <ᵇ as.size then
+    let ⟨last, acc⟩ := as.foldl (init := (as[0]'(by exact lt_of_decideLT_eq_true h), #[])) fun ⟨last, acc⟩ a =>
+      bif a == last then ⟨last, acc⟩ else ⟨a, acc.push last⟩
     acc.push last
   else
     #[]
@@ -2169,10 +2183,11 @@ private def allDiffAuxAux [BEq α] (as : Array α) (a : α) : forall (i : Nat), 
     a != as[i] && allDiffAuxAux as a i this
 
 private def allDiffAux [BEq α] (as : Array α) (i : Nat) : Bool :=
-  if h : i < as.size then
-    allDiffAuxAux as as[i] i h && allDiffAux as (i+1)
+  bif h : i <ᵇ as.size then
+    allDiffAuxAux as (as[i]'(lt_of_decideLT_eq_true h)) i (lt_of_decideLT_eq_true h) && allDiffAux as (i+1)
   else
     true
+termination_by as.size - i
 decreasing_by simp_wf; decreasing_trivial_pre_omega
 
 /--
@@ -2200,7 +2215,7 @@ Examples:
 -/
 @[inline] def getEvenElems (as : Array α) : Array α :=
   (·.2) <| as.foldl (init := (true, Array.empty)) fun (even, acc) a =>
-    if even then
+    bif even then
       (false, acc.push a)
     else
       (true, acc)
@@ -2209,7 +2224,7 @@ Examples:
 
 protected def repr {α : Type u} [Repr α] (xs : Array α) : Std.Format :=
   let _ : Std.ToFormat α := ⟨repr⟩
-  if xs.size == 0 then
+  bif xs.size == 0 then
     "#[]"
   else
     Std.Format.bracketFill "#[" (Std.Format.joinSep (toList xs) ("," ++ Std.Format.line)) "]"

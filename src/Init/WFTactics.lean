@@ -40,6 +40,13 @@ macro_rules | `(tactic| decreasing_trivial) => `(tactic| linarith)
 syntax "decreasing_trivial" : tactic
 
 macro_rules | `(tactic| decreasing_trivial) => `(tactic| (simp +arith -failIfUnchanged) <;> done)
+/-
+For `h : (i <ᵇ n) = true` from `bif h :`. This comes after the `simp +arith` rule, whose failure
+aborts the remaining rules, and it is not a `macro_rules`, so that the generated names of the
+following rules, which name native code in stage0, do not change.
+-/
+@[macro tacticDecreasing_trivial] meta def decreasingTrivialSubDecideLT : Lean.Macro := fun _ =>
+  `(tactic| apply Nat.sub_succ_lt_self; apply lt_of_decideLT_eq_true; assumption)
 macro_rules | `(tactic| decreasing_trivial) => `(tactic| omega)
 macro_rules | `(tactic| decreasing_trivial) => `(tactic| assumption)
 
@@ -51,6 +58,8 @@ syntax "decreasing_trivial_pre_omega" : tactic
 macro_rules | `(tactic| decreasing_trivial_pre_omega) => `(tactic| apply Nat.sub_succ_lt_self; assumption) -- a - (i+1) < a - i if i < a
 macro_rules | `(tactic| decreasing_trivial_pre_omega) => `(tactic| apply Nat.pred_lt_of_lt; assumption) -- i-1 < i if j < i
 macro_rules | `(tactic| decreasing_trivial_pre_omega) => `(tactic| apply Nat.pred_lt; assumption)  -- i-1 < i if i ≠ 0
+macro_rules | `(tactic| decreasing_trivial_pre_omega) => `(tactic| apply Nat.sub_succ_lt_self; apply lt_of_decideLT_eq_true; assumption)
+macro_rules | `(tactic| decreasing_trivial_pre_omega) => `(tactic| apply Nat.pred_lt_of_lt; apply lt_of_decideLT_eq_true; assumption)
 
 
 /-- Constructs a proof of decreasing along a well founded relation, by simplifying, then applying

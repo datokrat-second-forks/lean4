@@ -64,7 +64,7 @@ recommended_spelling "singleton" for "#v[x]" in [Vector.mk, «term#v[_,]»]
 
 protected def Vector.repr {α : Type u} [Repr α] {n : Nat} (xs : Vector α n) : Std.Format :=
   let _ : Std.ToFormat α := ⟨repr⟩
-  if xs.size == 0 then
+  bif xs.size == 0 then
     "#v[]"
   else
     Std.Format.bracketFill "#v[" (Std.Format.joinSep (xs.toArray.toList) ("," ++ Std.Format.line)) "]"
@@ -290,10 +290,13 @@ which also receives the index of the element, and the fact that the index is les
   go 0 (Nat.zero_le n) #v[]
 where
   go (k : Nat) (h : k ≤ n) (acc : Vector β k) : m (Vector β n) := do
-    if h' : k < n then
+    bif h' : k <ᵇ n then
+      have h' := lt_of_decideLT_eq_true h'
       go (k+1) (by omega) (acc.push (← f xs[k]))
     else
+      have h' := not_lt_of_decideLT_eq_false h'
       return acc.cast (by omega)
+  termination_by n - k
 
 @[inline, expose] protected def forM [Monad m] (xs : Vector α n) (f : α → m PUnit) : m PUnit :=
   xs.toArray.forM f
@@ -302,10 +305,13 @@ where
   go 0 (Nat.zero_le n) (#v[].cast (by omega))
 where
   go (i : Nat) (h : i ≤ n) (acc : Vector β (i * k)) : m (Vector β (n * k)) := do
-    if h' : i < n then
+    bif h' : i <ᵇ n then
+      have h' := lt_of_decideLT_eq_true h'
       go (i+1) (by omega) ((acc ++ (← f xs[i])).cast (Nat.succ_mul i k).symm)
     else
+      have h' := not_lt_of_decideLT_eq_false h'
       return acc.cast (by congr; omega)
+  termination_by n - i
 
 /-- Variant of `mapIdxM` which receives the index `i` along with the bound `i < n. -/
 @[inline, expose]
@@ -423,8 +429,8 @@ instance [BEq α] : BEq (Vector α n) where
 
 /-- Delete an element of a vector using a `Nat` index. Panics if the index is out of bounds. -/
 @[inline, expose] def eraseIdx! (xs : Vector α n) (i : Nat) : Vector α (n-1) :=
-  if _ : i < n then
-    xs.eraseIdx i
+  bif h : i <ᵇ n then
+    xs.eraseIdx i (lt_of_decideLT_eq_true h)
   else
     have : Inhabited (Vector α (n-1)) := ⟨xs.pop⟩
     panic! "index out of bounds"
@@ -436,8 +442,8 @@ instance [BEq α] : BEq (Vector α n) where
 
 /-- Insert an element into a vector using a `Nat` index. Panics if the index is out of bounds. -/
 @[inline, expose] def insertIdx! (xs : Vector α n) (i : Nat) (x : α) : Vector α (n+1) :=
-  if _ : i ≤ n then
-    xs.insertIdx i x
+  bif h : i ≤ᵇ n then
+    xs.insertIdx i x (le_of_decideLE_eq_true h)
   else
     have : Inhabited (Vector α (n+1)) := ⟨xs.push x⟩
     panic! "index out of bounds"
@@ -602,10 +608,13 @@ Lexicographic comparator for vectors.
 def lex [BEq α] (xs ys : Vector α n) (lt : α → α → Bool := by exact (· < ·)) : Bool :=
   go 0
 where @[specialize, semireducible] go (i : Nat) : Bool :=
-  if h : n ≤ i then
+  bif h : n ≤ᵇ i then
     false
-  else if lt xs[i] ys[i] then
-    true
-  else if xs[i] == ys[i] then
-    go (i + 1)
-  else false
+  else
+    have h := not_le_of_decideLE_eq_false h
+    bif lt xs[i] ys[i] then
+      true
+    else bif xs[i] == ys[i] then
+      go (i + 1)
+    else false
+  termination_by n - i
