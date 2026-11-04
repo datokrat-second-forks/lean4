@@ -799,8 +799,9 @@ noncomputable instance instSubtypeEq {p : α → Prop} [UDecidableEq α] : UDeci
   | false => exact (ite_eq_right Bool.noConfusion).symm
 
 /--
-A `cond` on a coerced proposition becomes `uif`. This is a pre-rule, so that it applies before
-`decide` distributes over the proposition.
+A `cond` on a coerced proposition becomes `uif`. This is a shortcut: without it, `decide`
+distributes over the proposition, `Bool.cond_eq_ite` produces `uif (…) = true`, and the `Bool`
+lemmas reassemble the same proposition. As a pre-rule it applies before that detour starts.
 
 The proof is deliberately not `rfl`: `dsimp` would otherwise rewrite `cond` inside types, such as
 the iterator type of `Iter.filter`, which then no longer matches the lemmas about it.
