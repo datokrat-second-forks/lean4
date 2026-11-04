@@ -53,6 +53,21 @@ Note: This linter can be disabled with `set_option linter.deprecatedCoercions fa
 #guard_msgs(positions := true) in
 example := fun (n m l : X) => (n + (m +' l) : Int)
 
+/-! Deprecated `CoeDep` coercions are reported too. -/
+
+structure Z
+
+@[deprecated "" (since := "")]
+instance mycoeDep (x : X) : CoeDep X x Z where coe := ⟨⟩
+
+/--
+warning: This term uses the deprecated coercion `mycoeDep`.
+
+Note: This linter can be disabled with `set_option linter.deprecatedCoercions false`
+-/
+#guard_msgs in
+def hDep (foo : X) : Z := foo
+
 set_option linter.deprecatedCoercions false
 
 #guard_msgs in

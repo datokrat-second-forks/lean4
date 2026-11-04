@@ -57,11 +57,14 @@ partial def expandCoe (e : Expr) : MetaM (Expr × List Name) := StateT.run (s :=
           recordExtraModUseFromDecl (isMeta := false) (← recProjTarget e)
           if let some e' ← unfoldDefinition? e then
             /-
-            If the unfolded coercion is an application of `Coe.coe` and its third argument is
-            an application of a constant, record this constant's name.
+            If the unfolded coercion is an application of `Coe.coe` (instance in the third
+            argument) or `CoeDep.coe` (instance in the fourth argument) and that argument is an
+            application of a constant, record this constant's name.
             -/
-            if declName = ``Coe.coe then
-              if let some inst := e.getAppArgs[2]? then
+            let instIdx? := if declName = ``Coe.coe then some 2
+              else if declName = ``CoeDep.coe then some 3 else none
+            if let some instIdx := instIdx? then
+              if let some inst := e.getAppArgs[instIdx]? then
                 let g := inst.getAppFn
                 if g.isConst then
                   let instName := g.constName!
