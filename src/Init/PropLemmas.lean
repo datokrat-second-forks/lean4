@@ -252,6 +252,34 @@ theorem ite_then_not_self {p : Prop} [Decidable p] {q : Prop} : (if p then ¬p e
 @[deprecated ite_not_self_right (since := "2026-07-21")]
 theorem ite_else_not_self {p : Prop} [Decidable p] {q : Prop} : (if p then q else ¬p) ↔ p → q := ite_not_self_right
 
+namespace UDecidable
+
+@[simp] theorem ite_self_left {p q : Prop} {_ : UDecidable p} :
+    (uif p then p else q) ↔ (¬p → q) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem ite_self_right {p q : Prop} {_ : UDecidable p} :
+    (uif p then q else p) ↔ (p ∧ q) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem ite_not_self_left {p q : Prop} {_ : UDecidable p} :
+    (uif p then ¬p else q) ↔ ¬p ∧ q := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem ite_not_self_right {p q : Prop} {_ : UDecidable p} :
+    (uif p then q else ¬p) ↔ p → q := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+end UDecidable
+
 /-- If two if-then-else statements only differ by the `Decidable` instances, they are equal. -/
 -- This is useful for ensuring confluence, but rarely otherwise.
 @[simp] theorem ite_eq_ite (p : Prop) {h h' : Decidable p} (x y : α) :
@@ -817,6 +845,49 @@ theorem ite_then_decide_not_self (p : Prop) [h : Decidable p] {w : Decidable p} 
 theorem ite_else_decide_not_self (p : Prop) [h : Decidable p] {w : Decidable p} (q : Bool) :
     (@ite _ p h q (!@decide p w)) = (!@decide p w || q) := @ite_decide_not_self_right p h w q
 
+namespace UDecidable
+
+@[simp]
+theorem decide_implies (u v : Prop) [UDecidable u] [UDecidable v] {_ : UDecidable (u → v)} :
+    decide (u → v) = uif u then decide v else true := by
+  cases UDecidable.em u with
+  | inl hu => simp [hu]
+  | inr hu => simp [hu]
+
+@[simp]
+theorem decide_ite (u : Prop) {_ : UDecidable u} (p q : Prop) {_ : UDecidable (uif u then p else q)}
+    [UDecidable p] [UDecidable q] :
+    decide (uif u then p else q) = uif u then decide p else decide q := by
+  cases UDecidable.em u with
+  | inl hu => simp [hu]
+  | inr hu => simp [hu]
+
+@[simp] theorem ite_decide_self_left (p : Prop) {_ : UDecidable p} (q : Bool) :
+    (uif p then decide p else q) = (decide p || q) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem ite_decide_self_right (p : Prop) {_ : UDecidable p} (q : Bool) :
+    (uif p then q else decide p) = (decide p && q) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem ite_decide_not_self_left (p : Prop) {_ : UDecidable p} (q : Bool) :
+    (uif p then !decide p else q) = (!decide p && q) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem ite_decide_not_self_right (p : Prop) {_ : UDecidable p} (q : Bool) :
+    (uif p then q else !decide p) = (!decide p || q) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+end UDecidable
+
 attribute [local simp] Decidable.imp_iff_left_iff
 
 @[simp] theorem dite_eq_left_iff {p : Prop} [Decidable p] {x : α} {y : ¬ p → α} : (if h : p then x else y h) = x ↔ ∀ h : ¬ p, y h = x := by
@@ -890,6 +961,94 @@ theorem dite_then_true {p : Prop} [Decidable p] {x : ¬p → Prop} : (if h : p t
 
 @[deprecated dite_true_right (since := "2026-07-21")]
 theorem dite_else_true {p : Prop} [Decidable p] {x : p → Prop} : (if h : p then x h else True) ↔ ∀ (h : p), x h := dite_true_right
+
+namespace UDecidable
+
+@[simp] theorem left_eq_dite_iff {p : Prop} {_ : UDecidable p} {α : Sort u} {x : α} {y : ¬p → α} :
+    x = (uif h : p then x else y h) ↔ ∀ h : ¬p, x = y h := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem right_eq_dite_iff {p : Prop} {_ : UDecidable p} {α : Sort u} {x : p → α} {y : α} :
+    y = (uif h : p then x h else y) ↔ ∀ h : p, y = x h := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem dite_iff_left_iff {p : Prop} {_ : UDecidable p} {x : Prop} {y : ¬p → Prop} :
+    ((uif h : p then x else y h) ↔ x) ↔ ∀ h : ¬p, y h ↔ x := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem dite_iff_right_iff {p : Prop} {_ : UDecidable p} {x : p → Prop} {y : Prop} :
+    ((uif h : p then x h else y) ↔ y) ↔ ∀ h : p, x h ↔ y := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem left_iff_dite_iff {p : Prop} {_ : UDecidable p} {x : Prop} {y : ¬p → Prop} :
+    (x ↔ (uif h : p then x else y h)) ↔ ∀ h : ¬p, x ↔ y h := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem right_iff_dite_iff {p : Prop} {_ : UDecidable p} {x : p → Prop} {y : Prop} :
+    (y ↔ (uif h : p then x h else y)) ↔ ∀ h : p, y ↔ x h := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem ite_iff_left_iff {p : Prop} {_ : UDecidable p} {x y : Prop} :
+    ((uif p then x else y) ↔ x) ↔ ¬p → y = x := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem ite_iff_right_iff {p : Prop} {_ : UDecidable p} {x y : Prop} :
+    ((uif p then x else y) ↔ y) ↔ p → x = y := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem left_iff_ite_iff {p : Prop} {_ : UDecidable p} {x y : Prop} :
+    (x ↔ (uif p then x else y)) ↔ ¬p → x = y := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem right_iff_ite_iff {p : Prop} {_ : UDecidable p} {x y : Prop} :
+    (y ↔ (uif p then x else y)) ↔ p → y = x := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem dite_false_left {p : Prop} {_ : UDecidable p} {x : ¬p → Prop} :
+    (uif h : p then False else x h) ↔ ∃ h : ¬p, x h := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem dite_false_right {p : Prop} {_ : UDecidable p} {x : p → Prop} :
+    (uif h : p then x h else False) ↔ ∃ h : p, x h := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem dite_true_left {p : Prop} {_ : UDecidable p} {x : ¬p → Prop} :
+    (uif h : p then True else x h) ↔ ∀ h : ¬p, x h := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp] theorem dite_true_right {p : Prop} {_ : UDecidable p} {x : p → Prop} :
+    (uif h : p then x h else True) ↔ ∀ h : p, x h := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+end UDecidable
 
 @[simp] theorem Bool.ite_false_left_eq_true {p : Prop} [Decidable p] {x : Bool} : (if p then false else x) = true ↔ ¬ p ∧ x := by
   split <;> simp_all

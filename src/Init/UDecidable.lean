@@ -32,6 +32,14 @@ namespace UDecidable
   | inl hp => rw [ite_eq_right (not_not_intro hp), @ite_eq_left p (classical p) hp]
   | inr hp => rw [ite_eq_left hp, @ite_eq_right p (classical p) hp]
 
+@[simp] theorem dite_not {α : Sort u} {p : Prop} {_ : UDecidable (¬p)} {x : ¬p → α}
+    {y : ¬¬p → α} :
+    (uif h : ¬p then x h else y h) =
+      @dite α p (classical p) (fun h => y (not_not_intro h)) x := by
+  cases Classical.em p with
+  | inl hp => rw [dite_eq_right (not_not_intro hp), @dite_eq_left p (classical p) hp]
+  | inr hp => rw [dite_eq_left hp, @dite_eq_right p (classical p) hp]
+
 theorem ite_cond_congr {α : Sort u} {b c : Prop} {_ : UDecidable b} [UDecidable c] {x y : α}
     (h : b = c) : (uif b then x else y) = (uif c then x else y) := by
   subst h

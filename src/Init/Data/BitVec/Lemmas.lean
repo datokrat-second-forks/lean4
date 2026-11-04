@@ -2590,24 +2590,24 @@ theorem msb_sshiftRight' {x y: BitVec w} :
 
 theorem ofNatClamp_eq_ofNat {w n : Nat} (hn : n < 2 ^ w) :
     BitVec.ofNatClamp w n = BitVec.ofNat w n := by
-  rw [ofNatClamp, Bool.dcond_pos (decideLT_eq_true_iff.2 hn), ofNatLT_eq_ofNat]
+  rw [ofNatClamp, Bool.dcond_decideLT_pos hn, ofNatLT_eq_ofNat]
 
 theorem ofNatClamp_eq_ofNat_of_le {w n : Nat} (hn : 2 ^ w ≤ n) :
     BitVec.ofNatClamp w n = BitVec.ofNat w (2 ^ w - 1) := by
-  rw [ofNatClamp, Bool.dcond_neg (decideLT_eq_false_iff.2 (by omega)), ofNatLT_eq_ofNat]
+  rw [ofNatClamp, Bool.dcond_decideLT_neg (by omega), ofNatLT_eq_ofNat]
 
 theorem ofNatClamp_eq_allOnes_of_le {w n : Nat} (hn : 2 ^ w ≤ n) :
     BitVec.ofNatClamp w n = BitVec.allOnes w := by
-  rw [ofNatClamp, Bool.dcond_neg (decideLT_eq_false_iff.2 (by omega))]
+  rw [ofNatClamp, Bool.dcond_decideLT_neg (by omega)]
   rfl
 
 theorem toNat_ofNatClamp_of_lt {w n : Nat} (hn : n < 2 ^ w) :
     (BitVec.ofNatClamp w n).toNat = n := by
-  rw [ofNatClamp, Bool.dcond_pos (decideLT_eq_true_iff.2 hn), toNat_ofNatLT]
+  rw [ofNatClamp, Bool.dcond_decideLT_pos hn, toNat_ofNatLT]
 
 theorem toNat_ofNatClamp_of_le {w n : Nat} (hn : 2 ^ w ≤ n) :
     (BitVec.ofNatClamp w n).toNat = 2 ^ w - 1 := by
-  rw [ofNatClamp, Bool.dcond_neg (decideLT_eq_false_iff.2 (by omega)), toNat_ofNatLT]
+  rw [ofNatClamp, Bool.dcond_decideLT_neg (by omega), toNat_ofNatLT]
 
 theorem toNat_ofNatClamp {w n : Nat} :
     (BitVec.ofNatClamp w n).toNat = min n (2 ^ w - 1) := by
@@ -2625,18 +2625,18 @@ theorem toNat_ofNatClamp_le (w n : Nat) : (BitVec.ofNatClamp w n).toNat ≤ n :=
 
 theorem toFin_ofNatClamp_of_lt {w n : Nat} (hn : n < 2 ^ w) :
     (BitVec.ofNatClamp w n).toFin = ⟨n, hn⟩ := by
-  rw [ofNatClamp, Bool.dcond_pos (decideLT_eq_true_iff.2 hn)]
+  rw [ofNatClamp, Bool.dcond_decideLT_pos hn]
   rfl
 
 theorem toFin_ofNatClamp_of_le {w n : Nat} (hn : 2 ^ w ≤ n) :
     (BitVec.ofNatClamp w n).toFin =
       ⟨2 ^ w - 1, Nat.sub_lt (Nat.two_pow_pos w) Nat.one_pos⟩ := by
-  rw [ofNatClamp, Bool.dcond_neg (decideLT_eq_false_iff.2 (by omega))]
+  rw [ofNatClamp, Bool.dcond_decideLT_neg (by omega)]
   rfl
 
 @[simp] theorem ofNatClamp_finVal (n : Fin (2 ^ w)) :
     BitVec.ofNatClamp w n.val = BitVec.ofFin n := by
-  rw [ofNatClamp, Bool.dcond_pos (decideLT_eq_true_iff.2 n.isLt)]
+  rw [ofNatClamp, Bool.dcond_decideLT_pos n.isLt]
   rfl
 
 theorem getLsbD_ofNatClamp {w n i : Nat} :

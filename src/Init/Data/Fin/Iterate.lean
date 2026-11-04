@@ -69,12 +69,12 @@ private theorem hIterateFrom_elim {P : Nat → Sort _}(Q : ∀(i : Nat), P i →
     have g : ¬ (i < n) := by simp at p; simp [p]
     have r : Q n (_root_.cast (congrArg P p) s) :=
       @Eq.rec Nat i (fun k eq => Q k (_root_.cast (congrArg P eq) s)) init n p
-    rw [Bool.dcond_neg (decideLT_eq_false_iff.2 g)]; exact r
+    rw [Bool.dcond_decideLT_neg g]; exact r
   | succ j inv =>
     unfold hIterateFrom
     have d : Nat.succ i + j = n := by simp [Nat.succ_add]; exact p
     have g : i < n := Nat.le.intro d
-    rw [Bool.dcond_pos (decideLT_eq_true_iff.2 g)]
+    rw [Bool.dcond_decideLT_pos g]
     exact inv _ _ (step ⟨i,g⟩ s init) d
 
 /--

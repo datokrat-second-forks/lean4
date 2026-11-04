@@ -500,6 +500,13 @@ theorem if_false_right (p : Prop) [h : Decidable p] (t : Bool) : (if p then t el
 @[deprecated Bool.ite_eq_false_right (since := "2026-07-21")]
 theorem ite_eq_true_else_eq_false {b : Bool} {q : Prop} : (if b = Bool.true then q else b = Bool.false) ↔ b = Bool.true → q := Bool.ite_eq_false_right
 
+@[simp] theorem uite_eq_false : (uif b = false then p else q) ↔ uif b = true then q else p := by
+  cases b <;> simp
+
+@[simp] theorem uite_eq_false_right {q : Prop} :
+    (uif b = true then q else b = false) ↔ (b = true → q) := by
+  cases b <;> simp
+
 /-
 `not_ite_eq_true_eq_true` and related theorems below are added for
 non-confluence.  A motivating example is
@@ -532,6 +539,34 @@ theorem not_ite_eq_true_eq_false {p : Prop} [h : Decidable p] {b c : Bool} :
 theorem not_ite_eq_false_eq_true {p : Prop} [h : Decidable p] {b c : Bool} :
   ¬(ite p (b = false) (c = true)) ↔ (ite p (b = true) (c = false)) := by
   cases h with | _ p => simp [p]
+
+@[simp]
+theorem not_uite_eq_true_eq_true {p : Prop} {_ : UDecidable p} {b c : Bool} :
+    ¬(uif p then b = true else c = true) ↔ (uif p then b = false else c = false) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp]
+theorem not_uite_eq_false_eq_false {p : Prop} {_ : UDecidable p} {b c : Bool} :
+    ¬(uif p then b = false else c = false) ↔ (uif p then b = true else c = true) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp]
+theorem not_uite_eq_true_eq_false {p : Prop} {_ : UDecidable p} {b c : Bool} :
+    ¬(uif p then b = true else c = false) ↔ (uif p then b = false else c = true) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
+
+@[simp]
+theorem not_uite_eq_false_eq_true {p : Prop} {_ : UDecidable p} {b c : Bool} :
+    ¬(uif p then b = false else c = true) ↔ (uif p then b = true else c = false) := by
+  cases UDecidable.em p with
+  | inl hp => simp [hp]
+  | inr hp => simp [hp]
 
 /-
 It would be nice to have this for confluence between `ite_true_left` and `ite_false_same` on

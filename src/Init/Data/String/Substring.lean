@@ -94,7 +94,7 @@ position, not the underlying string.
 
 theorem lt_next (s : Substring.Raw) (i : String.Pos.Raw) (h : i.1 < s.bsize) :
     i.1 < (s.next i).1 := by
-  simp only [next]; rw [Bool.cond_neg (decideEq_eq_false_iff.2 ?a)]
+  simp only [next]; rw [Bool.cond_decideEq_neg ?a]
   case a =>
     refine mt (congrArg String.Pos.Raw.byteIdx) (Nat.ne_of_lt ?_)
     exact (Nat.add_comm .. ▸ Nat.add_lt_of_lt_sub h :)

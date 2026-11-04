@@ -2990,7 +2990,7 @@ def Internal.offsetOfPosImpl (s : String) (pos : Pos.Raw) : Nat :=
 theorem Pos.Raw.utf8SetAux_of_gt (c' : Char) : ∀ (cs : List Char) {i p : Pos.Raw}, i > p → utf8SetAux c' cs i p = cs
   | [],    _, _, _ => rfl
   | c::cs, i, p, h => by
-    rw [utf8SetAux, Bool.cond_neg (decideEq_eq_false_iff.2 (mt (congrArg (·.1)) (Ne.symm <| Nat.ne_of_lt h))),
+    rw [utf8SetAux, Bool.cond_decideEq_neg (mt (congrArg (·.1)) (Ne.symm <| Nat.ne_of_lt h)),
       utf8SetAux_of_gt c' cs]
     exact Nat.lt_of_lt_of_le h (Nat.le_add_right ..)
 

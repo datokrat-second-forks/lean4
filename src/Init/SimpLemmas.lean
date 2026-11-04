@@ -315,6 +315,80 @@ private theorem decide_eq_udecide (p : Prop) [Decidable p] [UDecidable p] :
   ⟨fun h => Decidable.byContradiction (of_decide_eq_false h),
     fun h => decide_eq_false (not_not_intro h)⟩
 
+/-! `rw`-friendly forms of `Bool.cond_pos`/`dcond_pos`/… that take the proposition behind the
+`Bool` comparison. -/
+theorem Bool.cond_decideLT_pos [LT α] [DecidableLT α] {a b : α} {β : Sort v} {t e : β}
+    (h : a < b) : cond (a <ᵇ b) t e = t :=
+  Bool.cond_pos (decideLT_eq_true_iff.2 h)
+
+theorem Bool.cond_decideLT_neg [LT α] [DecidableLT α] {a b : α} {β : Sort v} {t e : β}
+    (h : ¬a < b) : cond (a <ᵇ b) t e = e :=
+  Bool.cond_neg (decideLT_eq_false_iff.2 h)
+
+theorem Bool.dcond_decideLT_pos [LT α] [DecidableLT α] {a b : α} {β : Sort v}
+    {t : (a <ᵇ b) = true → β} {e : (a <ᵇ b) = false → β} (h : a < b) :
+    Bool.dcond (a <ᵇ b) t e = t (decideLT_eq_true_iff.2 h) :=
+  Bool.dcond_pos _
+
+theorem Bool.dcond_decideLT_neg [LT α] [DecidableLT α] {a b : α} {β : Sort v}
+    {t : (a <ᵇ b) = true → β} {e : (a <ᵇ b) = false → β} (h : ¬a < b) :
+    Bool.dcond (a <ᵇ b) t e = e (decideLT_eq_false_iff.2 h) :=
+  Bool.dcond_neg _
+
+theorem Bool.cond_decideLE_pos [LE α] [DecidableLE α] {a b : α} {β : Sort v} {t e : β}
+    (h : a ≤ b) : cond (a ≤ᵇ b) t e = t :=
+  Bool.cond_pos (decideLE_eq_true_iff.2 h)
+
+theorem Bool.cond_decideLE_neg [LE α] [DecidableLE α] {a b : α} {β : Sort v} {t e : β}
+    (h : ¬a ≤ b) : cond (a ≤ᵇ b) t e = e :=
+  Bool.cond_neg (decideLE_eq_false_iff.2 h)
+
+theorem Bool.dcond_decideLE_pos [LE α] [DecidableLE α] {a b : α} {β : Sort v}
+    {t : (a ≤ᵇ b) = true → β} {e : (a ≤ᵇ b) = false → β} (h : a ≤ b) :
+    Bool.dcond (a ≤ᵇ b) t e = t (decideLE_eq_true_iff.2 h) :=
+  Bool.dcond_pos _
+
+theorem Bool.dcond_decideLE_neg [LE α] [DecidableLE α] {a b : α} {β : Sort v}
+    {t : (a ≤ᵇ b) = true → β} {e : (a ≤ᵇ b) = false → β} (h : ¬a ≤ b) :
+    Bool.dcond (a ≤ᵇ b) t e = e (decideLE_eq_false_iff.2 h) :=
+  Bool.dcond_neg _
+
+theorem Bool.cond_decideEq_pos [DecidableEq α] {a b : α} {β : Sort v} {t e : β}
+    (h : a = b) : cond (a =ᵇ b) t e = t :=
+  Bool.cond_pos (decideEq_eq_true_iff.2 h)
+
+theorem Bool.cond_decideEq_neg [DecidableEq α] {a b : α} {β : Sort v} {t e : β}
+    (h : a ≠ b) : cond (a =ᵇ b) t e = e :=
+  Bool.cond_neg (decideEq_eq_false_iff.2 h)
+
+theorem Bool.dcond_decideEq_pos [DecidableEq α] {a b : α} {β : Sort v}
+    {t : (a =ᵇ b) = true → β} {e : (a =ᵇ b) = false → β} (h : a = b) :
+    Bool.dcond (a =ᵇ b) t e = t (decideEq_eq_true_iff.2 h) :=
+  Bool.dcond_pos _
+
+theorem Bool.dcond_decideEq_neg [DecidableEq α] {a b : α} {β : Sort v}
+    {t : (a =ᵇ b) = true → β} {e : (a =ᵇ b) = false → β} (h : a ≠ b) :
+    Bool.dcond (a =ᵇ b) t e = e (decideEq_eq_false_iff.2 h) :=
+  Bool.dcond_neg _
+
+theorem Bool.cond_decideNe_pos [DecidableEq α] {a b : α} {β : Sort v} {t e : β}
+    (h : a ≠ b) : cond (a ≠ᵇ b) t e = t :=
+  Bool.cond_pos (decideNe_eq_true_iff.2 h)
+
+theorem Bool.cond_decideNe_neg [DecidableEq α] {a b : α} {β : Sort v} {t e : β}
+    (h : a = b) : cond (a ≠ᵇ b) t e = e :=
+  Bool.cond_neg (decideNe_eq_false_iff.2 h)
+
+theorem Bool.dcond_decideNe_pos [DecidableEq α] {a b : α} {β : Sort v}
+    {t : (a ≠ᵇ b) = true → β} {e : (a ≠ᵇ b) = false → β} (h : a ≠ b) :
+    Bool.dcond (a ≠ᵇ b) t e = t (decideNe_eq_true_iff.2 h) :=
+  Bool.dcond_pos _
+
+theorem Bool.dcond_decideNe_neg [DecidableEq α] {a b : α} {β : Sort v}
+    {t : (a ≠ᵇ b) = true → β} {e : (a ≠ᵇ b) = false → β} (h : a = b) :
+    Bool.dcond (a ≠ᵇ b) t e = e (decideNe_eq_false_iff.2 h) :=
+  Bool.dcond_neg _
+
 theorem lt_of_decideLT_eq_true [LT α] [DecidableLT α] {a b : α} (h : (a <ᵇ b) = true) : a < b :=
   decideLT_eq_true_iff.mp h
 
