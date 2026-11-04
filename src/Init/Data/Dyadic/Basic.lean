@@ -34,12 +34,12 @@ namespace Int
 
 /-- The number of trailing zeros in the binary representation of `i`. -/
 def trailingZeros (i : Int) : Nat :=
-  if h : i = 0 then 0 else aux i.natAbs i h (Nat.le_refl _) 0
+  bif h : i =ᵇ 0 then 0 else aux i.natAbs i (ne_of_decideEq_eq_false h) (Nat.le_refl _) 0
 where
   aux (k : Nat) (i : Int) (hi : i ≠ 0) (hk : i.natAbs ≤ k) (acc : Nat) : Nat :=
     match k, (by omega : k ≠ 0) with
     | k + 1, _ =>
-      if h : i % 2 = 0 then aux k (i / 2) (by omega) (by omega) (acc + 1)
+      bif h : i % 2 =ᵇ 0 then aux k (i / 2) (by omega) (by omega) (acc + 1)
       else acc
 
 -- TODO: check performance of `trailingZeros` in the kernel and VM.
@@ -63,22 +63,22 @@ theorem trailingZeros_zero : trailingZeros 0 = 0 := rfl
 theorem trailingZeros_two_mul_add_one (i : Int) :
     Int.trailingZeros (2 * i + 1) = 0 := by
   unfold trailingZeros trailingZeros.aux
-  rw [dite_eq_right (by omega)]
+  rw [Bool.dcond_decideEq_neg (by omega)]
   split <;> simp_all
 
 theorem trailingZeros_eq_zero_of_mod_eq {i : Int} (h : i % 2 = 1) :
     Int.trailingZeros i = 0 := by
   unfold trailingZeros trailingZeros.aux
-  rw [dite_eq_right (by omega)]
+  rw [Bool.dcond_decideEq_neg (by omega)]
   split <;> simp_all
 
 theorem trailingZeros_two_mul {i : Int} (h : i ≠ 0) :
     Int.trailingZeros (2 * i) = Int.trailingZeros i + 1 := by
-  rw [Int.trailingZeros, dite_eq_right (Int.mul_ne_zero (by decide) h), Int.trailingZeros.aux.eq_def]
-  simp only [ne_eq, mul_emod_right, ↓reduceDIte, Int.reduceEq, not_false_eq_true,
+  rw [Int.trailingZeros, Bool.dcond_decideEq_neg (Int.mul_ne_zero (by decide) h), Int.trailingZeros.aux.eq_def]
+  simp only [ne_eq, mul_emod_right, ↓reduceDCond, Int.reduceEq, not_false_eq_true,
     mul_ediv_cancel_left, Nat.zero_add]
   split
-  rw [trailingZeros, trailingZeros_aux_succ, dite_eq_right h]
+  rw [trailingZeros, trailingZeros_aux_succ, Bool.dcond_decideEq_neg h]
   apply congrArg Nat.succ (trailingZeros_aux_irrel ..) <;> omega
 
 theorem shiftRight_trailingZeros_mod_two {i : Int} (h : i ≠ 0) :
@@ -138,8 +138,8 @@ namespace Dyadic
 
 /-- Returns the dyadic number representation of `i * 2 ^ (-exp)`. -/
 def ofIntWithPrec (i : Int) (prec : Int) : Dyadic :=
-  if h : i = 0 then .zero
-  else .ofOdd (i >>> i.trailingZeros) (prec - i.trailingZeros) (Int.shiftRight_trailingZeros_mod_two h)
+  bif h : i =ᵇ 0 then .zero
+  else .ofOdd (i >>> i.trailingZeros) (prec - i.trailingZeros) (Int.shiftRight_trailingZeros_mod_two (ne_of_decideEq_eq_false h))
 
 /-- Convert an integer to a dyadic number (which will necessarily have non-positive precision). -/
 def ofInt (i : Int) : Dyadic :=
@@ -179,7 +179,7 @@ instance : Mul Dyadic := ⟨Dyadic.mul⟩
 /-- Multiply two dyadic numbers. -/
 protected def pow (x : Dyadic) (i : Nat) : Dyadic :=
   match x with
-  | .zero => if i = 0 then 1 else 0
+  | .zero => bif i =ᵇ 0 then 1 else 0
   | .ofOdd n k hn =>
     .ofOdd (n ^ i) (k * i) (by induction i <;> simp [Int.pow_succ, Int.mul_emod, *])
 
@@ -373,7 +373,8 @@ theorem toRat_eq_zero_iff {x : Dyadic} : x.toRat = 0 ↔ x = 0 := by
 
 theorem ofOdd_eq_ofIntWithPrec : ofOdd n k hn = ofIntWithPrec n k := by
   simp only [ofIntWithPrec, Dyadic.zero_eq, Int.trailingZeros_eq_zero_of_mod_eq hn,
-    Int.shiftRight_zero, Int.cast_ofNat_Int, Int.sub_zero, right_eq_dite_iff, of_ne_zero, imp_false]
+    Int.shiftRight_zero, Int.cast_ofNat_Int, Int.sub_zero, decideEq_eq_udecide, Bool.dcond_udecide,
+    UDecidable.right_eq_dite_iff, of_ne_zero, imp_false]
   intro rfl; contradiction
 
 theorem toRat_ofOdd_eq_mul_two_pow : toRat (.ofOdd n k hn) = n * 2 ^ (-k) := by
@@ -388,7 +389,8 @@ theorem neg_ofOdd : -ofOdd n k hn = ofOdd (-n) k (by simpa using hn) := rfl
 @[simp]
 theorem neg_ofIntWithPrec {i prec : Int} : -ofIntWithPrec i prec = ofIntWithPrec (-i) prec := by
   rw [ofIntWithPrec, ofIntWithPrec]
-  simp only [Dyadic.zero_eq, Int.neg_eq_zero, Int.trailingZeros_neg]
+  simp only [Dyadic.zero_eq, decideEq_eq_udecide, Bool.dcond_udecide, Int.neg_eq_zero,
+    Int.trailingZeros_neg]
   split
   · rfl
   · obtain ⟨a, h⟩ := Int.two_pow_trailingZeros_dvd ‹_›
@@ -400,7 +402,7 @@ theorem neg_ofIntWithPrec {i prec : Int} : -ofIntWithPrec i prec = ofIntWithPrec
 theorem ofIntWithPrec_shiftLeft_add {n : Nat} :
     ofIntWithPrec ((x : Int) <<< n) (i + n) = ofIntWithPrec x i := by
   rw [ofIntWithPrec, ofIntWithPrec]
-  simp only [Int.shiftLeft_eq_zero_iff]
+  simp only [decideEq_eq_udecide, Bool.dcond_udecide, Int.shiftLeft_eq_zero_iff]
   split
   · rfl
   · simp [Int.trailingZeros_shiftLeft, *, Int.shiftLeft_shiftRight_eq_shiftRight_of_le,
@@ -494,7 +496,7 @@ theorem toRat_toDyadic (x : Rat) (prec : Int) :
     simp only [natCast_pow, natCast_ofNat, den_inv, num_pow, num_ofNat, Int.natAbs_pow,
       Int.reduceAbs, num_inv, den_pow, den_ofNat, Nat.one_pow, Int.cast_ofNat_Int, Int.mul_one]
     have : ¬ (2 ^ (prec + 1) : Int) = 0 := NeZero.out
-    simp only [ite_eq_right this]
+    simp only [UDecidable.ite_eq_right this]
     have : (2 ^ (prec + 1) : Int).sign = 1 := by simpa using Int.pow_pos (by decide)
     simp only [this]
     have : x.den * 2 ^ (prec + 1) = 0 ↔ x.den = 0 := by

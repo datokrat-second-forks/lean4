@@ -118,9 +118,9 @@ def Seq.erase0 (s : Seq) : Seq :=
   | .var x => .var x
   | .cons x s =>
     let s' := erase0 s
-    if x == 0 then
+    bif x == 0 then
       s'
-    else if s' == .var 0 then
+    else bif s' == .var 0 then
       .var x
     else
       .cons x s'
@@ -141,7 +141,7 @@ attribute [local simp] Seq.erase0_k_var Seq.erase0_k_cons
 
 theorem Seq.erase0_k_eq_erase0 (s : Seq) : s.erase0_k = s.erase0 := by
   fun_induction erase0 s <;> simp
-  next h ih => simp at h; simp +zetaDelta; simp [← ih, h]
+  next h ih => simp +zetaDelta; simp [← ih]
   next x _ _ h₁ h₂ ih =>
     replace h₁ : Nat.beq x 0 = false := by rw [← Bool.not_eq_true, Nat.beq_eq]; simp at h₁; assumption
     simp +zetaDelta [← Seq.beq'_eq, ← ih] at h₂
@@ -163,8 +163,8 @@ attribute [local simp] Seq.denote_erase0
 
 def Seq.insert (x : Var) (s : Seq) : Seq :=
   match s with
-  | .var y => if Nat.blt x y then .cons x (.var y) else .cons y (.var x)
-  | .cons y s => if Nat.blt x y then .cons x (.cons y s) else .cons y (insert x s)
+  | .var y => bif Nat.blt x y then .cons x (.var y) else .cons y (.var x)
+  | .cons y s => bif Nat.blt x y then .cons x (.cons y s) else .cons y (insert x s)
 
 -- Kernel version for `insert`
 noncomputable def Seq.insert_k (x : Var) (s : Seq) : Seq :=
@@ -174,8 +174,8 @@ noncomputable def Seq.insert_k (x : Var) (s : Seq) : Seq :=
     s
 
 theorem Seq.insert_k_eq_insert (x : Var) (s : Seq) : insert_k x s = insert x s := by
-  fun_induction insert x s <;> simp [insert_k, *]
-  next ih => simp [← ih]; rfl
+  fun_induction insert x s <;> (try simp only [← Nat.blt_eq, Bool.not_eq_true] at *) <;> simp [insert_k, *]
+  next ih _ => simp [← ih]; rfl
 
 attribute [local simp] Seq.insert_k_eq_insert
 
@@ -240,8 +240,8 @@ def Seq.eraseDup (s : Seq) : Seq :=
   | .cons x s =>
     let s' := s.eraseDup
     match s' with
-    | .var y => if Nat.beq x y then .var x else .cons x (.var y)
-    | .cons y s' => if Nat.beq x y then .cons y s' else .cons x (.cons y s')
+    | .var y => bif Nat.beq x y then .var x else .cons x (.var y)
+    | .cons y s' => bif Nat.beq x y then .cons y s' else .cons x (.cons y s')
 
 -- Kernel version for `eraseDup`
 noncomputable def Seq.eraseDup_k (s : Seq) : Seq :=
@@ -395,11 +395,11 @@ def Seq.unionFuel (fuel : Nat) (s₁ s₂ : Seq) : Seq :=
   | 0 => s₁.concat s₂
   | fuel + 1 =>
     match s₁, s₂ with
-    | .var x₁, .var x₂  => if Nat.blt x₁ x₂ then .cons x₁ (.var x₂) else .cons x₂ (.var x₁)
+    | .var x₁, .var x₂  => bif Nat.blt x₁ x₂ then .cons x₁ (.var x₂) else .cons x₂ (.var x₁)
     | .var x₁, .cons .. => s₂.insert x₁
     | .cons .., .var x₂ => s₁.insert x₂
     | .cons x₁ s₁, .cons x₂ s₂ =>
-      if Nat.blt x₁ x₂ then
+      bif Nat.blt x₁ x₂ then
         .cons x₁ (unionFuel fuel s₁ (.cons x₂ s₂))
       else
         .cons x₂ (unionFuel fuel (.cons x₁ s₁) s₂)
@@ -414,10 +414,10 @@ noncomputable def Seq.unionFuel_k (fuel : Nat) : Seq → Seq → Seq :=
       s₁) fuel
 
 theorem Seq.unionFuel_k_eq_unionFuel (fuel : Nat) (s₁ s₂ : Seq) : unionFuel_k fuel s₁ s₂ = unionFuel fuel s₁ s₂ := by
-  fun_induction unionFuel <;> simp [unionFuel_k, *]
+  fun_induction unionFuel <;> (try simp only [← Nat.blt_eq, Bool.not_eq_true] at *) <;> simp [unionFuel_k, *]
   next => rfl
-  next ih => rw [← ih]; rfl
-  next ih => rw [← ih]; rfl
+  next ih _ => rw [← ih]; rfl
+  next ih _ => rw [← ih]; rfl
 
 attribute [local simp] Seq.unionFuel_k_eq_unionFuel
 

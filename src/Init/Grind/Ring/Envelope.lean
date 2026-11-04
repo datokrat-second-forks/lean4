@@ -111,7 +111,7 @@ theorem Q.ind {β : Q α → Prop} (mk : ∀ (a : α × α), β (Q.mk a)) (q : Q
   Q.mk (n, 0)
 
 @[local simp] def intCast (n : Int) : Q α :=
-  if n < 0 then Q.mk (0, n.natAbs) else Q.mk (n.natAbs, 0)
+  bif n <ᵇ 0 then Q.mk (0, n.natAbs) else Q.mk (n.natAbs, 0)
 
 @[local simp] def sub (q₁ q₂ : Q α) : Q α :=
   Q.liftOn₂ q₁ q₂ (fun (a, b) (c, d) => Q.mk (a + d, c + b))

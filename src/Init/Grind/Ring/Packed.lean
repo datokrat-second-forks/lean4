@@ -183,15 +183,15 @@ noncomputable def Expr.degB_k (e : Expr) : Nat :=
 
 /-- The sum of the digits of `v` in base `B`. -/
 def PPoly.dsum (B : Nat) (v : Nat) : Nat :=
-  if _h : 1 < B ∧ 0 < v then v % B + dsum B (v / B) else 0
+  bif _h : 1 <ᵇ B && 0 <ᵇ v then v % B + dsum B (v / B) else 0
 termination_by v
-decreasing_by exact Nat.div_lt_self _h.2 _h.1
+decreasing_by simp only [Bool.and_eq_true, decideLT_eq_true_iff] at _h; exact Nat.div_lt_self _h.2 _h.1
 
 /-- The monomial whose exponent of the variable `i + j` is the `j`-th digit of `v` in base `B`. -/
 noncomputable def PPoly.monDenote {α} [Semiring α] (ctx : Nat → α) (B : Nat) (i v : Nat) : α :=
-  if _h : 1 < B ∧ 0 < v then (ctx i) ^ (v % B) * monDenote ctx B (i + 1) (v / B) else 1
+  bif _h : 1 <ᵇ B && 0 <ᵇ v then (ctx i) ^ (v % B) * monDenote ctx B (i + 1) (v / B) else 1
 termination_by v
-decreasing_by exact Nat.div_lt_self _h.2 _h.1
+decreasing_by simp only [Bool.and_eq_true, decideLT_eq_true_iff] at _h; exact Nat.div_lt_self _h.2 _h.1
 
 theorem PPoly.dsum_zero (B : Nat) : dsum B 0 = 0 := by
   rw [dsum]; simp

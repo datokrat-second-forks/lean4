@@ -103,7 +103,7 @@ Creates a `BEq α` instance from an `Ord α` instance. -/
 @[inline, expose, instance_reducible]
 public def _root_.BEq.ofOrd (α : Type u) [Ord α] :
     BEq α where
-  beq a b := compare a b = .eq
+  beq a b := (compare a b).isEq
 
 /--
 The `LE α` instance obtained from an `Ord α` instance is compatible with said `Ord α`

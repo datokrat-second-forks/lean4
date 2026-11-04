@@ -679,23 +679,23 @@ namespace FactoryInstances
 
 public scoped instance instMinOfOrd {α : Type u} [Ord α] :
     Min α where
-  min a b := if (compare a b).isLE then a else b
+  min a b := bif (compare a b).isLE then a else b
 
 public scoped instance instMaxOfOrd {α : Type u} [Ord α] :
     Max α where
-  max a b := if (compare b a).isLE then a else b
+  max a b := bif (compare b a).isLE then a else b
 
 public instance instLawfulOrderLeftLeaningMinOfOrd {α : Type u} [Ord α] [LE α] [LawfulOrderOrd α] :
     LawfulOrderLeftLeaningMin α where
-  min_eq_left a b := by simp +contextual only [← Std.isLE_compare, min, ↑reduceIte, implies_true]
+  min_eq_left a b := by simp +contextual only [← Std.isLE_compare, min, ↑reduceCond, implies_true]
   min_eq_right a b := by
-    simp +contextual only [← Std.isLE_compare, min, Bool.false_eq_true, ↑reduceIte, implies_true]
+    simp +contextual only [← Std.isLE_compare, min, ↑reduceCond, implies_true]
 
 public instance instLawfulOrderLeftLeaningMaxOfOrd {α : Type u} [Ord α] [LE α] [LawfulOrderOrd α] :
     LawfulOrderLeftLeaningMax α where
-  max_eq_left a b := by simp +contextual only [← Std.isLE_compare, max, ↑reduceIte, implies_true]
+  max_eq_left a b := by simp +contextual only [← Std.isLE_compare, max, ↑reduceCond, implies_true]
   max_eq_right a b := by
-    simp +contextual only [← Std.isLE_compare, max, Bool.false_eq_true, ↑reduceIte, implies_true]
+    simp +contextual only [← Std.isLE_compare, max, ↑reduceCond, implies_true]
 
 end FactoryInstances
 
@@ -731,7 +731,7 @@ public structure Packages.LinearOrderOfOrdArgs (α : Type u) extends
     | exact _root_.Std.FactoryInstances.instMaxOfOrd
   min_eq :
       let := ord; let := le; let := min; have := lawfulOrderOrd
-      ∀ a b : α, Min.min a b = if (compare a b).isLE then a else b := by
+      ∀ a b : α, Min.min a b = uif (compare a b).isLE then a else b := by
     extract_lets
     first
     | exact fun a b => _root_.Std.min_eq_ite_isLE_compare (a := a) (b := b)
@@ -740,7 +740,7 @@ public structure Packages.LinearOrderOfOrdArgs (α : Type u) extends
             manually provide the field `min_eq`."
   max_eq :
       let := ord; let := le; let := max; have := lawfulOrderOrd
-      ∀ a b : α, Max.max a b = if (compare a b).isGE then a else b := by
+      ∀ a b : α, Max.max a b = uif (compare a b).isGE then a else b := by
     extract_lets
     first
     | exact fun a b => _root_.Std.max_eq_ite_isGE_compare (a := a) (b := b)

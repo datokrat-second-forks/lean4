@@ -46,7 +46,7 @@ private local instance : ToString Int where
     | Int.negSucc m => "-" ++ toString (m + 1)
 
 private local instance : Repr Int where
-  reprPrec i prec := if i < 0 then Repr.addAppParen (toString i) prec else toString i
+  reprPrec i prec := bif i <ᵇ 0 then Repr.addAppParen (toString i) prec else toString i
 
 /--
 A `Constraint` consists of an optional lower and upper bound (inclusive),
@@ -67,7 +67,7 @@ instance : ToString Constraint where
   | ⟨none, some y⟩ => s!"(-∞, {y}]"
   | ⟨some x, none⟩ => s!"[{x}, ∞)"
   | ⟨some x, some y⟩ =>
-    if y < x then "∅" else if x = y then s!"\{{x}}" else s!"[{x}, {y}]"
+    bif y <ᵇ x then "∅" else bif x =ᵇ y then s!"\{{x}}" else s!"[{x}, {y}]"
 
 /-- A constraint is satisfied at `t` is both the lower bound and upper bound are satisfied. -/
 def sat (c : Constraint) (t : Int) : Bool := c.lowerBound.sat t && c.upperBound.sat t
@@ -137,9 +137,9 @@ Scale a constraint by multiplying by an integer.
 * If `k` is negative this takes `[x, y]` to `[k * y, k * x]`.
 -/
 def scale (k : Int) (c : Constraint) : Constraint :=
-  if k = 0 then
-    if c.isImpossible then c else ⟨some 0, some 0⟩
-  else if 0 < k then
+  bif k =ᵇ 0 then
+    bif c.isImpossible then c else ⟨some 0, some 0⟩
+  else bif 0 <ᵇ k then
     c.map (k * ·)
   else
     c.flip.map (k * ·)
@@ -276,12 +276,12 @@ Return `none` if there is nothing to do, to avoid adding unnecessary steps to th
 def normalize? : Constraint × Coeffs → Option (Constraint × Coeffs)
   | ⟨s, x⟩ =>
     let gcd := Coeffs.gcd x -- TODO should we be caching this?
-    if gcd = 0 then
-      if s.sat 0 then
+    bif gcd =ᵇ 0 then
+      bif s.sat 0 then
         some (.trivial, x)
       else
         some (.impossible, x)
-    else if gcd = 1 then
+    else bif gcd =ᵇ 1 then
       none
     else
       some (s.div gcd, Coeffs.sdiv x gcd)
@@ -319,7 +319,7 @@ theorem normalize_sat {s x v} (w : s.sat' x v) :
 /-- Multiply by `-1` if the leading coefficient is negative, otherwise return `none`. -/
 def positivize? : Constraint × Coeffs → Option (Constraint × Coeffs)
   | ⟨s, x⟩ =>
-    if 0 ≤ x.leading then
+    bif 0 ≤ᵇ x.leading then
       none
     else
       some (s.neg, Coeffs.smul x (-1))

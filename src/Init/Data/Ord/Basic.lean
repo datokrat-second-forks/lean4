@@ -360,8 +360,8 @@ In particular, if `x < y` then the result is `Ordering.lt`. If `x = y` then the 
 `compareOfLessAndBEq` uses `BEq` instead of `DecidableEq`.
 -/
 @[inline, expose] def compareOfLessAndEq {α} (x y : α) [LT α] [Decidable (x < y)] [DecidableEq α] : Ordering :=
-  if x < y then Ordering.lt
-  else if x = y then Ordering.eq
+  bif decide (x < y) then Ordering.lt
+  else bif x =ᵇ y then Ordering.eq
   else Ordering.gt
 
 /--
@@ -373,8 +373,8 @@ In particular, if `x < y` then the result is `Ordering.lt`. If `x == y` then the
 `compareOfLessAndEq` uses `DecidableEq` instead of `BEq`.
 -/
 @[inline] def compareOfLessAndBEq {α} (x y : α) [LT α] [Decidable (x < y)] [BEq α] : Ordering :=
-  if x < y then .lt
-  else if x == y then .eq
+  bif decide (x < y) then .lt
+  else bif x == y then .eq
   else .gt
 
 /--
@@ -402,14 +402,14 @@ theorem compareOfLessAndEq_eq_swap_of_lt_iff_not_gt_and_ne {α : Type u} [LT α]
   split
   · rename_i h'
     rw [h] at h'
-    simp only [h'.1, h'.2.symm, ↓reduceIte, Ordering.swap_gt]
+    simp only [h'.1, h'.2.symm, ↓reduceCond, Ordering.swap_gt]
   · split
     · rename_i h'
       have : ¬ y < y := Not.imp (·.2 rfl) <| (h y y).mp
-      simp only [h', this, ↓reduceIte, Ordering.swap_eq]
+      simp only [h', this, ↓reduceCond, Ordering.swap_eq]
     · rename_i h' h''
       replace h' := (h y x).mpr ⟨h', Ne.symm h''⟩
-      simp only [h', ↓reduceIte, Ordering.swap_lt]
+      simp only [h', ↓reduceCond, Ordering.swap_lt]
 
 theorem lt_iff_not_gt_and_ne_of_antisymm_of_total_of_not_le
     {α : Type u} [LT α] [LE α] [DecidableLT α] [DecidableEq α]

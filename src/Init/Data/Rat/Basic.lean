@@ -47,10 +47,10 @@ structure Rat where
 instance : Inhabited Rat := ⟨{ num := 0 }⟩
 
 instance : ToString Rat where
-  toString a := if a.den = 1 then toString a.num else s!"{a.num}/{a.den}"
+  toString a := bif a.den =ᵇ 1 then toString a.num else s!"{a.num}/{a.den}"
 
 instance : Repr Rat where
-  reprPrec a _ := if a.den = 1 then repr a.num else s!"({a.num} : Rat)/{a.den}"
+  reprPrec a _ := bif a.den =ᵇ 1 then repr a.num else s!"({a.num} : Rat)/{a.den}"
 
 theorem Rat.den_pos (self : Rat) : 0 < self.den := Nat.pos_of_ne_zero self.den_nz
 
@@ -61,10 +61,10 @@ dividing both `num` and `den` by `g` (which is the gcd of the two) if it is not 
 @[inline] def Rat.maybeNormalize (num : Int) (den g : Nat)
     (dvd_num : ↑g ∣ num) (dvd_den : g ∣ den) (den_nz : den / g ≠ 0)
     (reduced : (num / g).natAbs.Coprime (den / g)) : Rat :=
-  if hg : g = 1 then
+  bif hg : g =ᵇ 1 then
     { num, den
-      den_nz := by simp [hg] at den_nz; exact den_nz
-      reduced := by simp [hg] at reduced; exact reduced }
+      den_nz := by simp [eq_of_decideEq_eq_true hg] at den_nz; exact den_nz
+      reduced := by simp [eq_of_decideEq_eq_true hg] at reduced; exact reduced }
   else { num := num.divExact g dvd_num, den := den.divExact g dvd_den, den_nz, reduced }
 
 theorem Rat.normalize.dvd_num {num : Int} {den g : Nat}
@@ -103,7 +103,7 @@ the gcd to ensure that the resulting rational number is normalized, and returns
 zero if `den` is zero.
 -/
 def mkRat (num : Int) (den : Nat) : Rat :=
-  if den_nz : den = 0 then { num := 0 } else Rat.normalize num den den_nz
+  bif den_nz : den =ᵇ 0 then { num := 0 } else Rat.normalize num den (ne_of_decideEq_eq_false den_nz)
 
 namespace Rat
 
@@ -130,7 +130,7 @@ def divInt : Int → Int → Rat
 `@[irreducible]` because you don't want to unfold it. Use `Rat.ofScientific_def`,
 `Rat.ofScientific_true_def`, or `Rat.ofScientific_false_def` instead.) -/
 @[irreducible] protected def ofScientific (m : Nat) (s : Bool) (e : Nat) : Rat :=
-  if s then
+  bif s then
     Rat.normalize m (10 ^ e) <| Nat.ne_of_gt <| Nat.pow_pos (by decide)
   else
     (m * 10 ^ e : Nat)
@@ -191,13 +191,13 @@ The inverse of a rational number. Note: `inv 0 = 0`. (This definition is `@[irre
 because you don't want to unfold it. Use `Rat.inv_def` instead.)
 -/
 @[irreducible] protected def inv (a : Rat) : Rat :=
-  if h : a.num < 0 then
+  bif h : a.num <ᵇ 0 then
     { num := -a.den, den := a.num.natAbs
-      den_nz := by exact Nat.ne_of_gt (Int.natAbs_pos.2 (Int.ne_of_lt h))
+      den_nz := by exact Nat.ne_of_gt (Int.natAbs_pos.2 (Int.ne_of_lt (lt_of_decideLT_eq_true h)))
       reduced := by exact Int.natAbs_neg a.den ▸ a.reduced.symm }
-  else if h : a.num > 0 then
+  else bif h : a.num >ᵇ 0 then
     { num := a.den, den := a.num.natAbs
-      den_nz := by exact Nat.ne_of_gt (Int.natAbs_pos.2 (Int.ne_of_gt h))
+      den_nz := by exact Nat.ne_of_gt (Int.natAbs_pos.2 (Int.ne_of_gt (lt_of_decideLT_eq_true h)))
       reduced := by exact a.reduced.symm }
   else
     a
@@ -260,9 +260,9 @@ unfold it. Use `Rat.add_def` instead.)
 -/
 @[irreducible] protected def add (a b : Rat) : Rat :=
   let g := a.den.gcd b.den
-  if hg : g = 1 then
+  bif hg : g =ᵇ 1 then
     have den_nz := Nat.ne_of_gt <| Nat.mul_pos a.den_pos b.den_pos
-    have reduced := add.aux a b hg.symm (Nat.div_one _).symm (Nat.div_one _).symm
+    have reduced := add.aux a b (eq_of_decideEq_eq_true hg).symm (Nat.div_one _).symm (Nat.div_one _).symm
       |>.symm.trans (Nat.gcd_one_right _)
     { num := a.num * b.den + b.num * a.den, den := a.den * b.den, den_nz, reduced }
   else
@@ -296,9 +296,9 @@ unfold it. Use `Rat.sub_def` instead.)
 -/
 @[irreducible] protected def sub (a b : Rat) : Rat :=
   let g := a.den.gcd b.den
-  if hg : g = 1 then
+  bif hg : g =ᵇ 1 then
     have den_nz := Nat.ne_of_gt <| Nat.mul_pos a.den_pos b.den_pos
-    have reduced := sub.aux a b hg.symm (Nat.div_one _).symm (Nat.div_one _).symm
+    have reduced := sub.aux a b (eq_of_decideEq_eq_true hg).symm (Nat.div_one _).symm (Nat.div_one _).symm
       |>.symm.trans (Nat.gcd_one_right _)
     { num := a.num * b.den - b.num * a.den, den := a.den * b.den, den_nz, reduced }
   else
@@ -314,20 +314,20 @@ instance : Sub Rat := ⟨Rat.sub⟩
 
 /-- The floor of a rational number `a` is the largest integer less than or equal to `a`. -/
 protected def floor (a : Rat) : Int :=
-  if a.den = 1 then
+  bif a.den =ᵇ 1 then
     a.num
   else
     a.num / a.den
 
 /-- The ceiling of a rational number `a` is the smallest integer greater than or equal to `a`. -/
 protected def ceil (a : Rat) : Int :=
-  if a.den = 1 then
+  bif a.den =ᵇ 1 then
     a.num
   else
     a.num / a.den + 1
 
 /-- The absolute value of a rational number `a` is `a` if `a ≥ 0` and `-a` if `a ≤ 0`. -/
 protected def abs (a : Rat) : Rat :=
-  if 0 ≤ a then a else -a
+  bif 0 ≤ᵇ a then a else -a
 
 end Rat

@@ -85,8 +85,8 @@ def Mon.cancelInv (x y : Var) (m : Mon) : Mon :=
   let b := m.degreeOf y
   bif x == y || a == 0 || b == 0 then m else
   let m' := (m.cancelVar x).cancelVar y
-  bif a < b then m'.mulPow { x := y, k := b - a }
-  else bif b < a then m'.mulPow { x, k := a - b }
+  bif a <ᵇ b then m'.mulPow { x := y, k := b - a }
+  else bif b <ᵇ a then m'.mulPow { x, k := a - b }
   else m'
 
 private theorem pow_mul_pow_of_le [CommSemiring α] {u v : α} (h : u * v = 1) {a b : Nat} (hab : a ≤ b) :
@@ -105,7 +105,6 @@ theorem Mon.denote_cancelInv [CommSemiring α] (ctx : Context α) (m : Mon) (x y
     have hm : m.denote ctx = x.denote ctx ^ m.degreeOf x * (y.denote ctx ^ m.degreeOf y * ((m.cancelVar x).cancelVar y).denote ctx) := by
       rw [Mon.denote_cancelVar ctx m x, Mon.denote_cancelVar ctx (m.cancelVar x) y, Mon.degreeOf_cancelVar m x y hxy]
     rw [hm, ← Semiring.mul_assoc]
-    simp only [UDecidable.decide_eq_true_eq]
     split
     next hlt =>
       rw [Mon.denote_mulPow, Power.denote_eq, pow_mul_pow_of_le h (Nat.le_of_lt hlt)]
@@ -205,7 +204,7 @@ noncomputable def Poly.cancelInvs_k (p : Poly) (invs : InvAtoms) : Poly :=
 
 @[simp] theorem Mon.cancelInv_k_eq_cancelInv (x y : Var) (m : Mon) : Mon.cancelInv_k x y m = m.cancelInv x y := by
   simp only [Mon.cancelInv_k, Mon.degreeOf_k_eq_degreeOf, Mon.cancelVar_k_eq_cancelVar, Mon.mulPow_k_eq_mulPow, Bool.rec_eq,
-    Mon.cancelInv, cond_eq_ite, Bool.or_eq_true, Nat.beq_eq_true_eq, Nat.beq_eq, Nat.blt_eq, UDecidable.decide_eq_true_eq]
+    Mon.cancelInv, cond_eq_ite, Bool.or_eq_true, Nat.beq_eq_true_eq, Nat.beq_eq, Nat.blt_eq]
   split <;> simp_all
   split <;> simp_all
 
@@ -315,7 +314,7 @@ theorem Poly.gcdCoeffs_k_eq (p : Poly) : p.gcdCoeffs_k = p.gcdCoeffs := by
       unfold Poly.gcdCoeffs.go
       cases h : Nat.beq acc 1
       · have : (acc == 1) = false := h
-        simp only [this, Bool.false_eq_true, ↓reduceIte]
+        simp only [this, Bool.cond_false]
         show Poly.gcdCoeffs_k.go p _ = _
         rw [ih]; simp
       · have : (acc == 1) = true := h

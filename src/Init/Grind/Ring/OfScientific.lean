@@ -24,6 +24,6 @@ class LawfulOfScientific (α : Type u) [Field α] [OfScientific α] : Prop where
   `OfScientific.ofScientific` is properly defined with respect to the field structure.
   -/
   ofScientific_def :
-    OfScientific.ofScientific m s e = if s then (Nat.cast m : α) / 10^e else (Nat.cast m : α) * 10^e
+    OfScientific.ofScientific m s e = uif s then (Nat.cast m : α) / 10^e else (Nat.cast m : α) * 10^e
 
 end Lean.Grind

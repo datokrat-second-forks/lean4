@@ -20,10 +20,10 @@ namespace Array
 protected def compareLex {α} (cmp : α → α → Ordering) (a₁ a₂ : Array α) : Ordering :=
   go 0
 where @[specialize, semireducible] go i :=
-  if h₁ : a₁.size <= i then
-    if a₂.size <= i then .eq else .lt
+  bif h₁ : a₁.size ≤ᵇ i then
+    bif a₂.size ≤ᵇ i then .eq else .lt
   else
-    if h₂ : a₂.size <= i then
+    bif h₂ : a₂.size ≤ᵇ i then
       .gt
     else match cmp a₁[i] a₂[i] with
       | .lt => .lt
@@ -59,7 +59,7 @@ protected theorem _root_.List.compareLex_eq_compareLex_toArray {α} {cmp} {l₁ 
     · simp [Array.compareLex.go, List.compareLex_cons_nil]
     · rw [Array.compareLex.go, List.compareLex_cons_cons]
       simp only [List.size_toArray, List.length_cons, Nat.le_zero_eq, Nat.add_one_ne_zero,
-        ↓reduceDIte, List.getElem_toArray, List.getElem_cons_zero, Nat.zero_add]
+        ↓reduceDCond, List.getElem_toArray, List.getElem_cons_zero, Nat.zero_add]
       split <;> simp_all [compareLex.go_succ]
 
 protected theorem _root_.List.compare_eq_compare_toArray {α} [Ord α] {l₁ l₂ : List α} :

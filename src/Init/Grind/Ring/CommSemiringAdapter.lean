@@ -224,7 +224,7 @@ inductive Poly.NonnegCoeffs : Poly → Prop
   | add (a : Int) (m : Mon) (p : Poly) : a ≥ 0 → NonnegCoeffs p → NonnegCoeffs (.add a m p)
 
 def denoteSInt {α} [Semiring α] (k : Int) : α :=
-  bif k < 0 then
+  bif k <ᵇ 0 then
     0
   else
     OfNat.ofNat (α := α) k.natAbs
@@ -719,7 +719,7 @@ theorem Expr.denoteS_num_of_nonneg {α} [Semiring α] (ctx : Context α) (k : In
 theorem Power.denoteS_toExpr {α} [Semiring α] (ctx : Context α) (pw : Power) :
     pw.toExpr.denoteS ctx = pw.denote ctx := by
   rw [Power.denote_eq]; unfold Power.toExpr; split
-  · next h => simp at h; simp [Expr.denoteS, h, pow_one]
+  · next h => simp [Expr.denoteS, h, pow_one]
   · simp [Expr.denoteS]
 
 theorem Mon.denoteS_toExpr_go {α} [Semiring α] (ctx : Context α) (m : Mon) (acc : Expr) :
@@ -740,7 +740,7 @@ theorem Poly.denoteS_toExpr_goTerm {α} [Semiring α] (ctx : Context α) (k : In
     (Poly.toExpr.goTerm k m).denoteS ctx = denoteSInt k * m.denote ctx := by
   unfold toExpr.goTerm; split
   · next h' =>
-    simp at h'; subst h'
+    subst h'
     rw [Mon.denoteS_toExpr, denoteSInt_eq]; simp [natCast_one, one_mul]
   · show (Expr.num k).denoteS ctx * m.toExpr.denoteS ctx = _
     rw [Expr.denoteS_num_of_nonneg ctx k h, Mon.denoteS_toExpr]

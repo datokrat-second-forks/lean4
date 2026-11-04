@@ -370,7 +370,7 @@ theorem Mon.revlexFuel_eq_revlexWF (fuel : Nat) (m₁ m₂ : Mon) : revlexFuel f
   simp only [compare, compareOfLessAndEq]
   cases h : Nat.beq m₁.degree m₂.degree
   · have h' : m₁.degree ≠ m₂.degree := Nat.ne_of_beq_eq_false h
-    simp only [h']
+    simp only [Bool.cond_decideEq_neg h']
     cases h'' : Nat.blt m₁.degree m₂.degree
     · have : ¬ m₁.degree < m₂.degree := fun h => by simp [Nat.blt_eq.mpr h] at h''
       simp [this]
@@ -767,7 +767,7 @@ def Poly.gcdCoeffs : Poly → Nat
   | .add k _ p => go p k.natAbs
 where
   go (p : Poly) (acc : Nat) : Nat :=
-    if acc == 1 then
+    bif acc == 1 then
       acc
     else match p with
       | .num k => Nat.gcd acc k.natAbs
@@ -2088,7 +2088,7 @@ theorem Expr.eq_of_toPolyC_nc_eq {α c} [Ring α] [IsCharP α c] (ctx : Context 
 /-! `Expr` spelling of a polynomial: the left-associated sum of its terms, as in `Poly.denote'`. -/
 
 def Power.toExpr (pw : Power) : Expr :=
-  if pw.k == 1 then
+  bif pw.k == 1 then
     .var pw.x
   else
     .pow (.var pw.x) pw.k
@@ -2109,7 +2109,7 @@ def Poly.toExpr (p : Poly) : Expr :=
   | .add k m p => go p (goTerm k m)
 where
   goTerm (k : Int) (m : Mon) : Expr :=
-    if k == 1 then
+    bif k == 1 then
       m.toExpr
     else
       .mul (.num k) m.toExpr
@@ -2177,7 +2177,7 @@ theorem Poly.toExpr_k_go_eq (p : Poly) (acc : Expr) : Poly.toExpr_k.go p acc = P
 
 theorem Power.denote_toExpr {α} [Ring α] (ctx : Context α) (pw : Power) : pw.toExpr.denote ctx = pw.denote ctx := by
   unfold toExpr; split
-  · next h => simp at h; cases pw; simp at h; subst h; rfl
+  · next h => cases pw; simp at h; subst h; rfl
   · next h => cases pw with
     | mk x k => show (x.denote ctx) ^ k = _; simp [Power.denote_eq]
 
@@ -2198,7 +2198,7 @@ theorem Mon.denote_toExpr {α} [Ring α] (ctx : Context α) (m : Mon) : m.toExpr
 theorem Poly.denote_toExpr_goTerm {α} [Ring α] (ctx : Context α) (k : Int) (m : Mon) :
     (Poly.toExpr.goTerm k m).denote ctx = k • m.denote ctx := by
   unfold toExpr.goTerm; split
-  · next h => simp at h; subst h; rw [Mon.denote_toExpr, zsmul_eq_intCast_mul, Ring.intCast_one, Semiring.one_mul]
+  · next h => subst h; rw [Mon.denote_toExpr, zsmul_eq_intCast_mul, Ring.intCast_one, Semiring.one_mul]
   · show denoteInt k * m.toExpr.denote ctx = _
     rw [Mon.denote_toExpr, denoteInt_eq, zsmul_eq_intCast_mul]
 
@@ -3125,7 +3125,7 @@ theorem inv_zero_eqC {α c} [Field α] [IsCharP α c] (b : Int) : b % c == 0 →
   simp [this, Field.inv_zero]
 
 open Classical in
-theorem inv_split {α} [Field α] (a : α) : if a = 0 then a⁻¹ = 0 else a * a⁻¹ = 1 := by
+theorem inv_split {α} [Field α] (a : α) : uif a = 0 then a⁻¹ = 0 else a * a⁻¹ = 1 := by
   split
   next h => simp [h, Field.inv_zero]
   next h => rw [Field.mul_inv_cancel h]

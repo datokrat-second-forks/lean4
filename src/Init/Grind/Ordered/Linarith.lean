@@ -131,7 +131,7 @@ def Poly.insert (k : Int) (v : Var) (p : Poly) : Poly :=
     bif Nat.blt v' v then
       .add k v <| .add k' v' p
     else bif Nat.beq v v' then
-      if Int.add k k' == 0 then
+      bif Int.add k k' == 0 then
         p
       else
         .add (Int.add k k') v' p
@@ -192,7 +192,7 @@ def Poly.mul' (p : Poly) (k : Int) : Poly :=
   | .add k' v p => .add (k*k') v (mul' p k)
 
 def Poly.mul (p : Poly) (k : Int) : Poly :=
-  if k == 0 then
+  bif k == 0 then
     .nil
   else
     p.mul' k
@@ -283,7 +283,7 @@ noncomputable def Poly.mul_k (p : Poly) (k : Int) : Poly :=
   by_cases h : k = 0
   · subst h; rfl
   · have : (k == 0) = false := by simpa using h
-    rw [this]; simp only [Bool.false_eq_true, ite_false]
+    rw [this]; simp only [Bool.cond_false]
     induction p with
     | nil => rfl
     | add k' v p ih => show Poly.add (Int.mul_k k k') v _ = _; rw [ih, Int.mul_k_eq]; rfl
@@ -367,7 +367,7 @@ noncomputable def Poly.insert_k (k : Int) (v : Var) (p : Poly) : Poly :=
       (Nat.blt v' v) = _
     have hz : (Int.add k k' == 0) = Int.beqZero_k (Int.add_k k k') := by rw [Int.beqZero_k_eq, Int.add_k_eq]
     show _ = (bif Nat.blt v' v then .add k v (.add k' v' p) else bif Nat.beq v v' then
-      (if (Int.add k k' == 0) = true then p else .add (Int.add k k') v' p) else .add k' v' (p.insert k v))
+      (bif Int.add k k' == 0 then p else .add (Int.add k k') v' p) else .add k' v' (p.insert k v))
     rw [ih, hz, show Int.add k k' = Int.add_k k k' by rw [Int.add_k_eq]]
     cases Nat.blt v' v <;> cases Nat.beq v v' <;> cases Int.beqZero_k (Int.add_k k k') <;> rfl
 

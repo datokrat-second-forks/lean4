@@ -123,11 +123,11 @@ theorem ofNat_max (a b : Nat) : ((max a b : Nat) : Int) = max (a : Int) (b : Int
   simp only [Nat.max_def, Int.max_def, Int.ofNat_le]
   split <;> rfl
 
-theorem ofNat_natAbs (a : Int) : (a.natAbs : Int) = if 0 ≤ a then a else -a := by
+theorem ofNat_natAbs (a : Int) : (a.natAbs : Int) = uif 0 ≤ a then a else -a := by
   rw [Int.natAbs.eq_def]
   split <;> rename_i n
   · simp only [Int.ofNat_eq_natCast]
-    rw [ite_eq_left (Int.natCast_nonneg n)]
+    rw [UDecidable.ite_eq_left (Int.natCast_nonneg n)]
   · simp
 
 theorem natAbs_dichotomy {a : Int} : 0 ≤ a ∧ a.natAbs = a ∨ a < 0 ∧ a.natAbs = -a := by

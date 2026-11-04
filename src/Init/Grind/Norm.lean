@@ -196,7 +196,7 @@ theorem smul_int_eq_mul {α} [Ring α] (i : Int) (a : α) : i • a = Int.cast i
 theorem Int.subNatNat_eq (a b : Nat) : Int.subNatNat a b = NatCast.natCast a - NatCast.natCast b := by
   apply Int.subNatNat_eq_coe
 
-theorem Int.sign_eq (x : Int) : x.sign = if x > 0 then 1 else if x < 0 then -1 else 0 := by
+theorem Int.sign_eq (x : Int) : x.sign = uif x > 0 then 1 else uif x < 0 then -1 else 0 := by
   split; simp [*]
   split; simp [*]
   have : x = 0 := by omega

@@ -80,7 +80,7 @@ theorem Q.ind {β : Q α → Prop} (mk : ∀ (a : α × α), β (Q.mk a)) (q : Q
         simpa [NatModule.nsmul_add] using h)
 
 @[local simp] def zsmul (n : Int) (q : Q α) : (Q α) :=
-  q.liftOn (fun (a, b) => if n < 0 then Q.mk (n.natAbs • b, n.natAbs • a) else Q.mk (n.natAbs • a, n.natAbs • b))
+  q.liftOn (fun (a, b) => bif n <ᵇ 0 then Q.mk (n.natAbs • b, n.natAbs • a) else Q.mk (n.natAbs • a, n.natAbs • b))
     (by intro (a₁, b₁) (a₂, b₂)
         simp; intro k h;
         split
@@ -161,10 +161,10 @@ theorem add_zsmul (a b : Int) (c : Q α) : zsmul (a + b) c = add (zsmul a c) (zs
   induction c using Q.ind with | _ c
   rcases c with ⟨c₁, c₂⟩; simp
   by_cases hb : b < 0
-  · simp only [ite_eq_left hb]
+  · simp only [UDecidable.ite_eq_left hb]
     by_cases ha : a < 0
-    · simp only [ite_eq_left ha]
-      rw [ite_eq_left (by omega)]
+    · simp only [UDecidable.ite_eq_left ha]
+      rw [UDecidable.ite_eq_left (by omega)]
       apply Quot.sound
       refine ⟨0, ?_⟩
       rw [Int.natAbs_add_of_nonpos (by omega) (by omega), NatModule.add_nsmul, NatModule.add_nsmul]
@@ -180,7 +180,7 @@ theorem add_zsmul (a b : Int) (c : Q α) : zsmul (a + b) c = add (zsmul a c) (zs
         have : (a + b).natAbs + b.natAbs = a.natAbs := by omega
         simp [← this]
         ac_rfl
-  · simp only [ite_eq_right hb]
+  · simp only [UDecidable.ite_eq_right hb]
     by_cases ha : a < 0
     · split
       · apply Quot.sound
@@ -193,8 +193,8 @@ theorem add_zsmul (a b : Int) (c : Q α) : zsmul (a + b) c = add (zsmul a c) (zs
         have : (a + b).natAbs + a.natAbs = b.natAbs := by omega
         simp [← this]
         ac_rfl
-    · simp only [ite_eq_right ha]
-      rw [ite_eq_right (by omega)]
+    · simp only [UDecidable.ite_eq_right ha]
+      rw [UDecidable.ite_eq_right (by omega)]
       apply Quot.sound
       refine ⟨0, ?_⟩
       rw [Int.natAbs_add_of_nonneg (by omega) (by omega), NatModule.add_nsmul, NatModule.add_nsmul]

@@ -29,7 +29,7 @@ def Poly.denoteN {α} [NatModule α] (ctx : Context α) (p : Poly) : α :=
   match p with
   | .nil => 0
   | .add k v p =>
-    bif k < 0 then
+    bif k <ᵇ 0 then
       0
     else
       k.natAbs • v.denote ctx + denoteN ctx p

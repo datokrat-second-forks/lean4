@@ -34,7 +34,7 @@ private local instance : ToString Int where
     | Int.negSucc m => "-" ++ toString (m + 1)
 
 private local instance : Repr Int where
-  reprPrec i prec := if i < 0 then Repr.addAppParen (toString i) prec else toString i
+  reprPrec i prec := bif i <ᵇ 0 then Repr.addAppParen (toString i) prec else toString i
 
 /-- Internal representation of a linear combination of atoms, and a constant term. -/
 structure LinearCombo where

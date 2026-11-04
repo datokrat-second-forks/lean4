@@ -493,9 +493,14 @@ theorem Std.TransOrd.compareOfLessAndEq_of_lt_trans_of_lt_iff
     TransCmp (fun x y : α => compareOfLessAndEq x y) where
   eq_swap := compareOfLessAndEq_eq_swap_of_lt_iff_not_gt_and_ne h
   isLE_trans {x y z} h₁ h₂ := by
-    simp only [compareOfLessAndEq, apply_ite Ordering.isLE,
-      Ordering.isLE_lt, Ordering.isLE_eq, Ordering.isLE_gt] at h₁ h₂ ⊢
-    simp only [Bool.ite_true_left, Bool.or_false, Bool.or_eq_true, UDecidable.decide_eq_true_eq] at h₁ h₂ ⊢
+    have isLE_iff (a b : α) : (compareOfLessAndEq a b).isLE ↔ a < b ∨ a = b := by
+      simp only [compareOfLessAndEq]
+      split <;> rename_i hlt
+      · simp [hlt]
+      · split <;> rename_i heq
+        · simp [heq]
+        · simp [hlt, heq]
+    rw [isLE_iff] at h₁ h₂ ⊢
     rcases h₁ with (h₁ | rfl)
     · rcases h₂ with (h₂ | rfl)
       · exact .inl (lt_trans h₁ h₂)
