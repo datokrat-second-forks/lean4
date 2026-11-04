@@ -1,5 +1,6 @@
 module
 public meta import Lean.Elab.Command
+public meta import Lean.Meta.Tactic.Grind.Attr
 /-!
 Paul Reichert's examples: `grind` + kernel interaction through `Grind.nestedDecidable`.
 
@@ -28,11 +29,26 @@ it would still be worthwhile to investigate two things.
     `Decidable` instances?
 (b) Why is WHNF'ing `UInt32` arithmetic so terribly inefficient? Can we at least stop it from
     exploding?
+
+`grind` normalizes `if` to `uif` (`UDecidable.ite`), whose instance it wraps in
+`Grind.nestedUDecidable`. Section `Test` disables this normalization (locally) so that the
+`Grind.nestedDecidable` path is still covered. Section `UTest` checks the default `uif` path:
+there, the kernel check is cheap even with a `regular` wrapper, since `UDecidable` instances carry no
+data.
 -/
+
+open Lean Meta Grind Elab Command in
+/-- Erases `ite_eq_uite` and `dite_eq_udite` from the `grind` normalizer in the current scope. -/
+elab "erase_uite_norm" : command => do
+  let erased := [``Lean.Grind.ite_eq_uite, ``Lean.Grind.dite_eq_udite]
+  modifyEnv fun env => normExt.modifyState env fun s =>
+    erased.foldl (init := s) fun s n => s.eraseCore (.decl n)
 
 section Test
 
 set_option maxHeartbeats 1000 -- for the health of the machine
+
+erase_uite_norm
 
 structure MyChar where
   val : UInt32
@@ -65,17 +81,25 @@ lacking the `abbrev` kernel hint that it has on the current toolchain.
 @[reducible]
 def regularNestedDecidable {p : Prop} (h : Decidable p) : Decidable p := h
 
+/-- `Grind.nestedUDecidable` with a `regular` reducibility hint. -/
+@[reducible]
+def regularNestedUDecidable {p : Prop} (h : UDecidable p) : UDecidable p := h
+
 open Lean Elab Command in
 /--
-Re-checks the proofs of `thm` and its auxiliary lemmas that mention `Grind.nestedDecidable`, with
-that constant replaced by `regularNestedDecidable`.
+Re-checks the proofs of `thm` and its auxiliary lemmas that mention `Grind.nestedDecidable` or
+`Grind.nestedUDecidable`, with these constants replaced by `regularNestedDecidable` and
+`regularNestedUDecidable`.
 -/
 elab "#recheck_with_regular_wrapper " thm:ident : command => liftCoreM do
   let thm ← realizeGlobalConstNoOverload thm
   let some v := (← getConstInfo thm).value? (allowOpaque := true) | throwError "no value"
-  let mentionsWrapper (e : Expr) := (e.find? (·.isConstOf ``Grind.nestedDecidable)).isSome
+  let mentionsWrapper (e : Expr) := (e.find? fun e =>
+    e.isConstOf ``Grind.nestedDecidable || e.isConstOf ``Grind.nestedUDecidable).isSome
   let replace (e : Expr) := e.replace fun e =>
-    if e.isConstOf ``Grind.nestedDecidable then some (mkConst ``regularNestedDecidable) else none
+    if e.isConstOf ``Grind.nestedDecidable then some (mkConst ``regularNestedDecidable)
+    else if e.isConstOf ``Grind.nestedUDecidable then some (mkConst ``regularNestedUDecidable)
+    else none
   let mut found := false
   for n in #[thm] ++ v.getUsedConstants.filter (thm.isPrefixOf ·) do
     let ci ← getConstInfo n
@@ -83,7 +107,7 @@ elab "#recheck_with_regular_wrapper " thm:ident : command => liftCoreM do
     unless mentionsWrapper v do continue
     found := true
     addDecl <| .thmDecl { name := n ++ `regular, levelParams := ci.levelParams, type := replace ci.type, value := replace v }
-  unless found do throwError "neither `{thm}` nor its auxiliary lemmas mention `Grind.nestedDecidable`"
+  unless found do throwError "neither `{thm}` nor its auxiliary lemmas mention `Grind.nestedDecidable` or `Grind.nestedUDecidable`"
 
 set_option maxHeartbeats 1000
 
@@ -92,3 +116,15 @@ set_option maxHeartbeats 1000
 #recheck_with_regular_wrapper MyChar.isLower_toUpper
 
 end Control
+
+section UTest
+
+set_option maxHeartbeats 1000
+
+theorem MyChar.isLower_toUpper' (c : MyChar) : c.toUpper.isLower = false := by
+  unfold MyChar.isLower MyChar.toUpper
+  split <;> grind only
+
+#recheck_with_regular_wrapper MyChar.isLower_toUpper'
+
+end UTest

@@ -122,9 +122,9 @@ example {α : Type} [CommRing α] (a b c d e : α) :
 
 /--
 info: Try this:
-  [apply] ⏎
+  [apply] 
     instantiate only [= Nat.min_def]
-    cases #d485
+    cases #cb05
     · sorry
     · lia
 -/

@@ -8,19 +8,19 @@ opaque R : Nat → Prop
 
 /--
 trace: [grind] working on goal `grind`
-[grind.eqc] (if p then a else b) = c
+[grind.eqc] (uif p then a else b) = c
 [grind.eqc] R a = True
 [grind.eqc] R b = True
 [grind.eqc] R c = False
-[grind.split] if p then a else b, generation: 0
+[grind.split] uif p then a else b, generation: 0
 [grind] working on goal `grind.1`
 [grind.eqc] p = True
-[grind.eqc] (if p then a else b) = a
+[grind.eqc] (uif p then a else b) = a
 [grind.eqc] R a = R c
 [grind] closed `grind.1`
 [grind] working on goal `grind.2`
 [grind.eqc] p = False
-[grind.eqc] (if p then a else b) = b
+[grind.eqc] (uif p then a else b) = b
 [grind.eqc] R b = R c
 [grind] closed `grind.2`
 -/

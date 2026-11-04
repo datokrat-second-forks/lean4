@@ -20,8 +20,8 @@ public section
 
 namespace Nat.ToInt
 
-theorem ofNat_toNat (a : Int) : (NatCast.natCast a.toNat : Int) = if a ≤ 0 then 0 else a := by
-  simp [Int.max_def, UDecidable.ite_eq_ite]
+theorem ofNat_toNat (a : Int) : (NatCast.natCast a.toNat : Int) = uif a ≤ 0 then 0 else a := by
+  simp [Int.max_def]
 
 theorem toNat_nonneg (x : Nat) : (-1:Int) * (NatCast.natCast x) ≤ 0 := by simp
 

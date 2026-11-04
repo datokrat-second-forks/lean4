@@ -59,7 +59,17 @@ theorem ite_true_false {_ : Decidable p} : (ite p True False) = p := by
 theorem ite_false_true {_ : Decidable p} : (ite p False True) = ¬p := by
   by_cases p <;> simp
 
-/-! `grind` handles `uif` by turning it into `if`, whose instance it never inspects. -/
+theorem uite_true_false {_ : UDecidable p} : (uif p then True else False) = p := by
+  cases UDecidable.em p with
+  | inl h => rw [UDecidable.ite_eq_left h]; exact (eq_true h).symm
+  | inr h => rw [UDecidable.ite_eq_right h]; exact (eq_false h).symm
+
+theorem uite_false_true {_ : UDecidable p} : (uif p then False else True) = ¬p := by
+  cases UDecidable.em p with
+  | inl h => rw [UDecidable.ite_eq_left h]; exact (eq_false (not_not_intro h)).symm
+  | inr h => rw [UDecidable.ite_eq_right h]; exact (eq_true h).symm
+
+/-! Formerly used to turn `uif` into `if`; `grind` now normalizes in the other direction. -/
 
 theorem uite_eq_ite {α : Sort u} {c : Prop} {_ : UDecidable c} {t e : α} :
     (uif c then t else e) = @ite α c (UDecidable.toDecidable c) t e :=
@@ -72,7 +82,7 @@ theorem udite_eq_dite {α : Sort u} {c : Prop} {_ : UDecidable c} {t : c → α}
 theorem cond_eq_ite (c : Bool) (a b : α) : cond c a b = ite c a b := by
   cases c <;> simp [*]
 
-/-! Not `[grind norm]` yet: they are meant to replace `uite_eq_ite`, `udite_eq_dite` and `cond_eq_ite`. -/
+/-! `grind` normalizes `if`, `dite` and `cond` to `uif`, whose instance it never inspects. -/
 
 theorem ite_eq_uite {α : Sort u} {c : Prop} {_ : Decidable c} {t e : α} :
     ite c t e = @UDecidable.ite α c (UDecidable.ofDecidable c) t e :=
@@ -201,9 +211,9 @@ init_grind_norm
   -- a subtype are stated over the underlying type and the property.
   Subtype.forall Subtype.exists
   -- ite
-  ite_true_false ite_false_true uite_eq_ite udite_eq_dite
+  uite_true_false uite_false_true ite_eq_uite dite_eq_udite
   -- Bool cond
-  cond_eq_ite
+  cond_eq_uite
   -- Bool or
   Bool.or_false Bool.or_true Bool.false_or Bool.true_or Bool.or_eq_true
   -- Bool and

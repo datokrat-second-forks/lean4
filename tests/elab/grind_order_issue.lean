@@ -101,7 +101,7 @@ example (m : IndexMap α β) (a a' : α) (b : β) (h : a' ∈ m.insert a b) :
     (m.insert a b)[a'] = if h' : a' == a then b else m[a'] := by
   grind -ring -linarith -lia =>
     instantiate only [= getElem_def, insert]
-    cases #096a
+    cases #222c
     next =>
       cases #d280
       next => sorry
@@ -116,7 +116,7 @@ example (m : IndexMap α β) (a a' : α) (b : β) (h : a' ∈ m.insert a b) :
     (m.insert a b)[a'] = if h' : a' == a then b else m[a'] := by
   grind -ring -linarith -lia =>
     instantiate only [= getElem_def, insert]
-    cases #096a
+    cases #222c
     next =>
       cases #d280
       next => sorry

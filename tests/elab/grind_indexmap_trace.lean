@@ -248,7 +248,7 @@ info: Try these:
   [apply] ⏎
     instantiate only [= mem_indices_of_mem, insert, = getElem_def]
     instantiate only [= getElem?_neg, = getElem?_pos]
-    cases #096a
+    cases #222c
     · cases #d2a1
       · instantiate only
         instantiate only [= Array.getElem_set]
@@ -264,7 +264,7 @@ info: Try these:
         instantiate only [= HashMap.mem_insert, = HashMap.getElem_insert, = Array.getElem_push]
   [apply] finish only [= mem_indices_of_mem, insert, = getElem_def, = getElem?_neg, = getElem?_pos, = Array.getElem_set,
     = HashMap.mem_insert, = HashMap.getElem_insert, size, = Array.getElem_push, usr getElem_indices_lt, usr WF2,
-    = size_keys, WF', #096a, #d2a1]
+    = size_keys, WF', #222c, #d2a1]
 -/
 #guard_msgs in
 example (m : IndexMap α β) (a a' : α) (b : β) (h : a' ∈ m.insert a b) :
@@ -276,7 +276,7 @@ example (m : IndexMap α β) (a a' : α) (b : β) (h : a' ∈ m.insert a b) :
   grind =>
     instantiate only [= mem_indices_of_mem, insert, = getElem_def]
     instantiate only [= getElem?_neg, = getElem?_pos]
-    cases #096a
+    cases #222c
     · cases #d2a1
       · instantiate only
         instantiate only [= Array.getElem_set]
@@ -296,14 +296,14 @@ example (m : IndexMap α β) (a a' : α) (b : β) (h : a' ∈ m.insert a b) :
 info: Try these:
   [apply] grind only [= mem_indices_of_mem, insert, = getElem_def, = getElem?_neg, = getElem?_pos, = Array.getElem_set,
     = HashMap.mem_insert, = HashMap.getElem_insert, size, = Array.getElem_push, usr getElem_indices_lt, usr WF2,
-    = size_keys, WF', #096a, #d2a1]
+    = size_keys, WF', #222c, #d2a1]
   [apply] grind only [= mem_indices_of_mem, insert, = getElem_def, = getElem?_neg, = getElem?_pos, = Array.getElem_set,
     = HashMap.mem_insert, = HashMap.getElem_insert, size, = Array.getElem_push, usr getElem_indices_lt, usr WF2,
     = size_keys, WF']
   [apply] grind =>
     instantiate only [= mem_indices_of_mem, insert, = getElem_def]
     instantiate only [= getElem?_neg, = getElem?_pos]
-    cases #096a
+    cases #222c
     · cases #d2a1
       · instantiate only
         instantiate only [= Array.getElem_set]
@@ -328,7 +328,7 @@ example (m : IndexMap α β) (a a' : α) (b : β) (h : a' ∈ m.insert a b) :
   grind =>
     instantiate only [= mem_indices_of_mem, insert, = getElem_def]
     instantiate only [= getElem?_neg, = getElem?_pos]
-    cases #096a
+    cases #222c
     · cases #d2a1
       · instantiate only
         instantiate only [= Array.getElem_set]
@@ -348,19 +348,19 @@ example (m : IndexMap α β) (a a' : α) (b : β) (h : a' ∈ m.insert a b) :
     (m.insert a b)[a'] = if h' : a' == a then b else m[a'] := by
   grind only [= mem_indices_of_mem, insert, = getElem_def, = getElem?_neg, = getElem?_pos,
     = Array.getElem_set, size, = HashMap.mem_insert, = HashMap.getElem_insert, = Array.getElem_push,
-    usr getElem_indices_lt, usr WF2, ← WF3, WF', #096a, #d2a1]
+    usr getElem_indices_lt, usr WF2, ← WF3, WF', #222c, #d2a1]
 
 /--
 info: Try these:
   [apply] ⏎
     instantiate only [findIdx, insert, = mem_indices_of_mem]
     instantiate only [= getElem?_neg, = getElem?_pos]
-    cases #4028
+    cases #be93
     · instantiate only [findIdx]
     · instantiate only
       instantiate only [= HashMap.mem_insert, = HashMap.getElem_insert]
   [apply] finish only [findIdx, insert, = mem_indices_of_mem, = getElem?_neg, = getElem?_pos, = HashMap.mem_insert,
-    = HashMap.getElem_insert, #4028]
+    = HashMap.getElem_insert, #be93]
 -/
 #guard_msgs in
 example (m : IndexMap α β) (a : α) (b : β) :
@@ -371,13 +371,13 @@ example (m : IndexMap α β) (a : α) (b : β) :
 info: Try these:
   [apply] grind
   [apply] grind only [findIdx, insert, = mem_indices_of_mem, = getElem?_neg, = getElem?_pos, = HashMap.mem_insert,
-    = HashMap.getElem_insert, #4028]
+    = HashMap.getElem_insert, #be93]
   [apply] grind only [findIdx, insert, = mem_indices_of_mem, = getElem?_neg, = getElem?_pos, = HashMap.mem_insert,
     = HashMap.getElem_insert]
   [apply] grind =>
     instantiate only [findIdx, insert, = mem_indices_of_mem]
     instantiate only [= getElem?_neg, = getElem?_pos]
-    cases #4028
+    cases #be93
     · instantiate only [findIdx]
     · instantiate only
       instantiate only [= HashMap.mem_insert, = HashMap.getElem_insert]

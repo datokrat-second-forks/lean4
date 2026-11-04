@@ -53,7 +53,7 @@ example [CommRing α] (a b c : α)
 trace: [facts] Asserted facts
   [_] (bs.set i₂ v₂ ⋯).size = bs.size
   [_] (as.set i₁ v₁ ⋯).size = as.size
-  [_] (bs.set i₂ v₂ ⋯)[j] = if i₂ = j then v₂ else bs[j]
+  [_] (bs.set i₂ v₂ ⋯)[j] = uif i₂ = j then v₂ else bs[j]
 ---
 trace: [props] True propositions
   [_] j < (bs.set i₂ v₂ ⋯).size
@@ -64,7 +64,7 @@ trace: [eqc] Equivalence classes
   [eqc] {cs, bs.set i₂ v₂ ⋯}
   [eqc] {as.size, bs.size, cs.size, (as.set i₁ v₁ ⋯).size, (bs.set i₂ v₂ ⋯).size}
   [eqc] {cs[j], bs[j], (bs.set i₂ v₂ ⋯)[j]}
-    [eqc] {if i₂ = j then v₂ else bs[j]}
+    [eqc] {uif i₂ = j then v₂ else bs[j]}
   [eqc] {as.size = 0, bs.size = 0, cs.size = 0}
   [eqc] others
     [eqc] {↑as.size, ↑bs.size, ↑cs.size, ↑(bs.set i₂ v₂ ⋯).size}
@@ -142,14 +142,14 @@ trace: [grind] Grind state
   [facts] Asserted facts
     [_] (bs.set i₂ v₂ ⋯).size = bs.size
     [_] (as.set i₁ v₁ ⋯).size = as.size
-    [_] (bs.set i₂ v₂ ⋯)[j] = if i₂ = j then v₂ else bs[j]
+    [_] (bs.set i₂ v₂ ⋯)[j] = uif i₂ = j then v₂ else bs[j]
   [props] True propositions
     [_] j < (bs.set i₂ v₂ ⋯).size
     [_] j < bs.size
   [eqc] Equivalence classes
     [eqc] {as.size, bs.size, cs.size, (as.set i₁ v₁ ⋯).size, (bs.set i₂ v₂ ⋯).size}
     [eqc] {cs[j], bs[j], (bs.set i₂ v₂ ⋯)[j]}
-      [eqc] {if i₂ = j then v₂ else bs[j]}
+      [eqc] {uif i₂ = j then v₂ else bs[j]}
     [eqc] {as.size = 0, bs.size = 0, cs.size = 0}
     [eqc] others
       [eqc] {↑as.size, ↑bs.size, ↑cs.size, ↑(bs.set i₂ v₂ ⋯).size}

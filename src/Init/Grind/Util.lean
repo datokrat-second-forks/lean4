@@ -23,6 +23,9 @@ theorem nestedProof (p : Prop) {h : p} : p := h
 -- that `t =?= Grind.nestedDecidable t`
 abbrev nestedDecidable {p : Prop} (h : Decidable p) : Decidable p := h
 
+-- Like `ite` and `dite` (see `Init.Grind.Tactics`), never used in E-matching patterns.
+attribute [grind symbol 0] UDecidable.ite UDecidable.dite
+
 /-- A helper gadget for annotating nested `UDecidable` instances in goals. -/
 abbrev nestedUDecidable {p : Prop} (h : UDecidable p) : UDecidable p := h
 

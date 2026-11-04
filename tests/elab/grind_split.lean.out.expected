@@ -11,7 +11,7 @@
 [grind.eqc] (p ∨ q) = p
 [grind.eqc] (¬p) = False
 [grind.eqc] (¬p ∨ q) = q
-[grind.eqc] (if p then a else b) = c
+[grind.eqc] (uif p then a else b) = c
 [grind.eqc] R a = True
 [grind.eqc] R b = True
 [grind.eqc] R c = False
