@@ -66,6 +66,13 @@ theorem RArray.get_eq_getImpl : @RArray.get = @RArray.getImpl := by
 instance : GetElem (RArray α) Nat α (fun _ _ => True) where
   getElem a n _ := a.get n
 
+instance : GetElem? (RArray α) Nat α (fun _ _ => True) where
+  getElem? a n := some (a.get n)
+
+instance : LawfulGetElem (RArray α) Nat α (fun _ _ => True) where
+  getElem?_def a n _ :=
+    (UDecidable.dite_eq_left (t := fun _ => some a[n]) (e := fun _ => none) trivial).symm
+
 def RArray.size : RArray α → Nat
   | leaf _ => 1
   | branch _ l r => l.size + r.size

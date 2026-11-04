@@ -41,8 +41,9 @@ builtin_cbv_simproc cbv_eval simpArrayGetElem? (@GetElem?.getElem? (Array _) Nat
   let some idx := Sym.getNatValue? n | return .rfl
   let sortLevel ← Sym.getLevel α
   let .succ u := sortLevel | return .rfl
-  -- `xs[n]?` does not reduce definitionally, because `Array`'s `getElem?` decides the bound with
-  -- `UDecidable`. The bound itself is checked with `Nat.ble`, which the kernel evaluates.
+  -- Proved with `getElem?_pos`/`getElem?_neg` rather than `rfl`, so that the proof does not depend
+  -- on how `Array`'s `getElem?` is implemented. The bound is checked with `Nat.ble`, which the
+  -- kernel evaluates.
   let size := mkApp2 (mkConst ``Array.size [u]) α xs
   let bleTrue (a b : Expr) : MetaM Expr := do
     mkAppOptM ``Nat.le_of_ble_eq_true #[some a, some b, some (← mkEqRefl (mkConst ``Bool.true))]

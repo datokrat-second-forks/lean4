@@ -167,6 +167,20 @@ export LawfulGetElem (getElem?_def getElem!_def)
 instance (priority := low) [GetElem coll idx elem valid] [∀ xs i, UDecidable (valid xs i)] :
     LawfulGetElem coll idx elem valid where
 
+/--
+Proves `LawfulGetElem.getElem?_def` for a `getElem?` that decides `valid xs i` with a `Bool`
+`b`, so that it reduces when `b` does.
+-/
+theorem dcond_eq_decidableGetElem? [GetElem coll idx elem valid] {xs : coll} {i : idx} {b : Bool}
+    (hb : b = true ↔ valid xs i) [UDecidable (valid xs i)] :
+    (bif h : b then some (xs[i]'(hb.1 h)) else none) = decidableGetElem? xs i := by
+  cases b with
+  | true =>
+    exact (UDecidable.dite_eq_left (t := fun h => some xs[i]) (e := fun _ => none) (hb.1 rfl)).symm
+  | false =>
+    exact (UDecidable.dite_eq_right (t := fun h => some xs[i]) (e := fun _ => none)
+      fun h => Bool.noConfusion (hb.2 h)).symm
+
 @[simp, grind =] theorem getElem?_pos [GetElem? cont idx elem dom] [LawfulGetElem cont idx elem dom]
     (c : cont) (i : idx) (h : dom c i) : c[i]? = some (c[i]'h) := by
   have : UDecidable (dom c i) := .isTrue h
@@ -392,16 +406,15 @@ instance : GetElem (Array α) Nat α fun xs i => i < xs.size where
   getElem xs i h := xs.getInternal i h
 
 -- We provide a `GetElem?` instance, rather than using the low priority instance,
--- so that we use the `@[extern]` definition of `get!Internal`.
+-- so that `getElem?` reduces and `getElem!` uses the `@[extern]` definition of `get!Internal`.
 instance : GetElem? (Array α) Nat α fun xs i => i < xs.size where
-  getElem? xs i := decidableGetElem? xs i
+  getElem? xs i := bif h : i <ᵇ xs.size then some (xs[i]'(lt_of_decideLT_eq_true h)) else none
   getElem! xs i := xs.get!Internal i
 
 instance : LawfulGetElem (Array α) Nat α fun xs i => i < xs.size where
-  getElem?_def xs i h := by
-    simp only [getElem?, decidableGetElem?]
+  getElem?_def xs i _ := dcond_eq_decidableGetElem? (xs := xs) (i := i) decideLT_eq_true_iff
   getElem!_def xs i := by
-    simp only [getElem!, getElem?, decidableGetElem?, get!Internal, getD, getElem]
+    simp only [getElem!, getElem?, get!Internal, getD, getElem]
     split <;> rfl
 
 @[simp] theorem getInternal_eq_getElem (a : Array α) (i : Nat) (h) :
@@ -418,5 +431,12 @@ namespace Lean.Syntax
 
 instance : GetElem Syntax Nat Syntax fun _ _ => True where
   getElem stx i _ := stx.getArg i
+
+instance : GetElem? Syntax Nat Syntax fun _ _ => True where
+  getElem? stx i := some (stx.getArg i)
+
+instance : LawfulGetElem Syntax Nat Syntax fun _ _ => True where
+  getElem?_def stx i _ :=
+    (UDecidable.dite_eq_left (t := fun _ => some stx[i]) (e := fun _ => none) trivial).symm
 
 end Lean.Syntax

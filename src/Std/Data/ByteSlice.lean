@@ -125,6 +125,12 @@ def get (s : ByteSlice) (i : Fin s.size) : UInt8 :=
 instance : GetElem ByteSlice Nat UInt8 fun xs i => i < xs.size where
   getElem xs i h := xs.get ⟨i, h⟩
 
+instance : GetElem? ByteSlice Nat UInt8 fun xs i => i < xs.size where
+  getElem? xs i := bif h : i <ᵇ xs.size then some (xs[i]'(lt_of_decideLT_eq_true h)) else none
+
+instance : LawfulGetElem ByteSlice Nat UInt8 fun xs i => i < xs.size where
+  getElem?_def xs i _ := dcond_eq_decidableGetElem? (xs := xs) (i := i) decideLT_eq_true_iff
+
 /--
 Extracts a byte from the byte slice, or returns a default value `v₀` when the index is out of
 bounds.

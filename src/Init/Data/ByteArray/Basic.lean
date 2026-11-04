@@ -82,6 +82,12 @@ def get : (a : @& ByteArray) → (i : @& Nat) → (h : i < a.size := by get_elem
 instance : GetElem ByteArray Nat UInt8 fun xs i => i < xs.size where
   getElem xs i h := xs.get i
 
+instance : GetElem? ByteArray Nat UInt8 fun xs i => i < xs.size where
+  getElem? xs i := bif h : i <ᵇ xs.size then some (xs[i]'(lt_of_decideLT_eq_true h)) else none
+
+instance : LawfulGetElem ByteArray Nat UInt8 fun xs i => i < xs.size where
+  getElem?_def xs i _ := dcond_eq_decidableGetElem? (xs := xs) (i := i) decideLT_eq_true_iff
+
 instance : GetElem ByteArray USize UInt8 fun xs i => i.toFin < xs.size where
   getElem xs i h := xs.uget i h
 

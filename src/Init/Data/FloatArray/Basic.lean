@@ -72,6 +72,12 @@ def get? (ds : FloatArray) (i : Nat) : Option Float :=
 instance : GetElem FloatArray Nat Float fun xs i => i < xs.size where
   getElem xs i h := xs.get i h
 
+instance : GetElem? FloatArray Nat Float fun xs i => i < xs.size where
+  getElem? xs i := bif h : i <ᵇ xs.size then some (xs[i]'(lt_of_decideLT_eq_true h)) else none
+
+instance : LawfulGetElem FloatArray Nat Float fun xs i => i < xs.size where
+  getElem?_def xs i _ := dcond_eq_decidableGetElem? (xs := xs) (i := i) decideLT_eq_true_iff
+
 instance : GetElem FloatArray USize Float fun xs i => i.toNat < xs.size where
   getElem xs i h := xs.uget i h
 

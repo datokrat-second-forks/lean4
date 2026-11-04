@@ -116,6 +116,12 @@ instance [Inhabited α] : Inhabited (Vector α n) where
 instance : GetElem (Vector α n) Nat α fun _ i => i < n where
   getElem xs i h := get xs ⟨i, h⟩
 
+instance : GetElem? (Vector α n) Nat α fun _ i => i < n where
+  getElem? xs i := bif h : i <ᵇ n then some (xs[i]'(lt_of_decideLT_eq_true h)) else none
+
+instance : LawfulGetElem (Vector α n) Nat α fun _ i => i < n where
+  getElem?_def xs i _ := dcond_eq_decidableGetElem? (xs := xs) (i := i) decideLT_eq_true_iff
+
 /-- Check if there is an element which satisfies `a == ·`. -/
 @[expose]
 def contains [BEq α] (xs : Vector α n) (a : α) : Bool := xs.toArray.contains a

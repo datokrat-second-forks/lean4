@@ -109,6 +109,12 @@ def get (s : Subarray α) (i : Fin s.size) : α :=
 instance : GetElem (Subarray α) Nat α fun xs i => i < xs.size where
   getElem xs i h := xs.get ⟨i, h⟩
 
+instance : GetElem? (Subarray α) Nat α fun xs i => i < xs.size where
+  getElem? xs i := bif h : i <ᵇ xs.size then some (xs[i]'(lt_of_decideLT_eq_true h)) else none
+
+instance : LawfulGetElem (Subarray α) Nat α fun xs i => i < xs.size where
+  getElem?_def xs i _ := dcond_eq_decidableGetElem? (xs := xs) (i := i) decideLT_eq_true_iff
+
 /--
 Extracts an element from the subarray, or returns a default value `v₀` when the index is out of
 bounds.

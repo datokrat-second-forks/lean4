@@ -89,7 +89,7 @@ Returns the `i`th least significant bit.
 
 /-- Returns the `i`th least significant bit, or `none` if `i ≥ w`. -/
 @[inline] def getLsb? (x : BitVec w) (i : Nat) : Option Bool :=
-  uif h : i < w then some (getLsb x ⟨i, h⟩) else none
+  bif h : i <ᵇ w then some (getLsb x ⟨i, lt_of_decideLT_eq_true h⟩) else none
 
 /--
 Returns the `i`th most significant bit.
@@ -117,6 +117,12 @@ section getElem
 
 instance : GetElem (BitVec w) Nat Bool fun _ i => i < w where
   getElem xs i h := xs.getLsb ⟨i, h⟩
+
+instance : GetElem? (BitVec w) Nat Bool fun _ i => i < w where
+  getElem? xs i := bif h : i <ᵇ w then some (xs[i]'(lt_of_decideLT_eq_true h)) else none
+
+instance : LawfulGetElem (BitVec w) Nat Bool fun _ i => i < w where
+  getElem?_def xs i _ := dcond_eq_decidableGetElem? (xs := xs) (i := i) decideLT_eq_true_iff
 
 /-- We prefer `x[i]` as the simp normal form for `getLsb'` -/
 @[simp, grind =] theorem getLsb_eq_getElem (x : BitVec w) (i : Fin w) :
