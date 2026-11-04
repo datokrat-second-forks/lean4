@@ -162,6 +162,11 @@ theorem down_pure_intro {φ : Prop} (h : φ) : (pure (σs:=[]) φ).down := by si
 
 @[simp] theorem _root_.ULift.down_dite {φ : Prop} [Decidable φ] (t : φ → α) (e : ¬φ → α) : (ULift.down (if h : φ then ⟨t h⟩ else ⟨e h⟩)) = if h : φ then t h else e h := apply_dite _ _ _ _
 @[simp] theorem _root_.ULift.down_ite {φ : Prop} [Decidable φ] (t e : α) : (ULift.down (if φ then ⟨t⟩ else ⟨e⟩)) = if φ then t else e := apply_ite _ _ _ _
+@[simp] theorem _root_.ULift.down_udite {φ : Prop} [UDecidable φ] (t : φ → α) (e : ¬φ → α) : (ULift.down (uif h : φ then ⟨t h⟩ else ⟨e h⟩)) = uif h : φ then t h else e h := by
+  cases UDecidable.em φ with
+  | inl h => rw [UDecidable.dite_eq_left h, UDecidable.dite_eq_left h]
+  | inr h => rw [UDecidable.dite_eq_right h, UDecidable.dite_eq_right h]
+@[simp] theorem _root_.ULift.down_uite {φ : Prop} [UDecidable φ] (t e : α) : (ULift.down (uif φ then ⟨t⟩ else ⟨e⟩)) = uif φ then t else e := UDecidable.apply_ite _
 
 /-! # Miscellaneous -/
 

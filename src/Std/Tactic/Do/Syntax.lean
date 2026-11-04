@@ -196,6 +196,8 @@ macro (name := mleave) "mleave" : tactic =>
               $(mkIdent ``Std.Do.ExceptConds.entails_false):term,
               $(mkIdent ``ULift.down_ite):term,
               $(mkIdent ``ULift.down_dite):term,
+              $(mkIdent ``ULift.down_uite):term,
+              $(mkIdent ``ULift.down_udite):term,
               $(mkIdent ``List.Cursor.prefix_at):term,
               $(mkIdent ``List.Cursor.suffix_at):term,
               $(mkIdent ``List.Cursor.current_at):term,
@@ -203,6 +205,7 @@ macro (name := mleave) "mleave" : tactic =>
               $(mkIdent ``and_imp):term,
               $(mkIdent ``and_true):term,
               $(mkIdent ``dite_eq_ite):term,
+              $(mkIdent ``UDecidable.dite_eq_ite):term,
               $(mkIdent ``exists_prop):term,
               $(mkIdent ``true_implies):term] at *))
 

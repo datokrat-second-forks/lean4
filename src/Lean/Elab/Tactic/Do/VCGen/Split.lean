@@ -23,6 +23,9 @@ inductive SplitInfo where
   | ite (e : Expr)
   | dite (e : Expr)
   | cond (e : Expr)
+  | uite (e : Expr)
+  | udite (e : Expr)
+  | dcond (e : Expr)
   | matcher (matcherApp : MatcherApp)
   deriving Inhabited
 
@@ -32,6 +35,9 @@ def resTy (info : SplitInfo) : Option Expr := match info with
   | ite e => e.getArg! 0
   | dite e => e.getArg! 0
   | cond e => e.getArg! 0
+  | uite e => e.getArg! 0
+  | udite e => e.getArg! 0
+  | dcond e => e.getArg! 0
   -- For a matcher, the motive has type `(discr1 : α) → ... → (discrN : α) → Type`.
   -- We want to return `Type` component and fail if it depends on any of the discriminant values.
   | matcher matcherApp => do
@@ -51,6 +57,9 @@ def altInfos (info : SplitInfo) : Array (Nat × Expr) := match info with
   | ite e => #[(0, e.getArg! 3), (0, e.getArg! 4)]
   | dite e => #[(1, e.getArg! 3), (1, e.getArg! 4)]
   | cond e => #[(0, e.getArg! 2), (0, e.getArg! 3)]
+  | uite e => #[(0, e.getArg! 3), (0, e.getArg! 4)]
+  | udite e => #[(1, e.getArg! 3), (1, e.getArg! 4)]
+  | dcond e => #[(1, e.getArg! 2), (1, e.getArg! 3)]
   | matcher matcherApp => matcherApp.altNumParams.mapIdx fun idx numParams =>
       (numParams, matcherApp.alts[idx]!)
 
@@ -59,6 +68,9 @@ def expr : SplitInfo → Expr
   | .ite e => e
   | .dite e => e
   | .cond e => e
+  | .uite e => e
+  | .udite e => e
+  | .dcond e => e
   | .matcher matcherApp => matcherApp.toExpr
 
 /--
@@ -66,8 +78,9 @@ Introduces fvars for all varying parts of a `SplitInfo` and provides the abstrac
 `SplitInfo` and fvars to the continuation.
 
 For `ite`/`dite`, introduces `c : Prop`, `dec : Decidable c`, `t : mα` (or `t : c → mα`),
-`e : mα` (or `e : ¬c → mα`).
+`e : mα` (or `e : ¬c → mα`), and likewise with `dec : UDecidable c` for `uite`/`udite`.
 For `cond`, introduces `c : Bool`, `t : mα`, `e : mα`.
+For `dcond`, introduces `c : Bool`, `t : c = true → mα`, `e : c = false → mα`.
 For `matcher`, introduces discriminant fvars and alternative fvars, builds a non-dependent
 motive `fun _ ... _ => mα`, and adjusts matcher universe levels.
 
@@ -105,6 +118,30 @@ def withAbstract {n} {α} [MonadLiftT MetaM n] [MonadControlT MetaM n] [Monad n]
     withLocalDeclD `e resTy fun e => do
     let u ← liftMetaM <| getLevel resTy
     k (.cond <| mkApp4 (mkConst ``_root_.cond [u]) resTy c t e) #[c, t, e]
+  | .uite _ =>
+    withLocalDeclD `c (mkSort 0) fun c =>
+    withLocalDeclD `dec (mkApp (mkConst ``UDecidable) c) fun dec =>
+    withLocalDeclD `t resTy fun t =>
+    withLocalDeclD `e resTy fun e => do
+    let u ← liftMetaM <| getLevel resTy
+    k (.uite <| mkApp5 (mkConst ``UDecidable.ite [u]) resTy c dec t e) #[c, dec, t, e]
+  | .udite _ =>
+    withLocalDeclD `c (mkSort 0) fun c =>
+    withLocalDeclD `dec (mkApp (mkConst ``UDecidable) c) fun dec => do
+    let tTy ← liftMetaM <| mkArrow c resTy
+    let eTy ← liftMetaM <| mkArrow (mkNot c) resTy
+    withLocalDeclD `t tTy fun t =>
+    withLocalDeclD `e eTy fun e => do
+    let u ← liftMetaM <| getLevel resTy
+    k (.udite <| mkApp5 (mkConst ``UDecidable.dite [u]) resTy c dec t e) #[c, dec, t, e]
+  | .dcond _ =>
+    withLocalDeclD `c (mkConst ``Bool) fun c => do
+    let tTy ← liftMetaM <| mkArrow (← mkEq c (mkConst ``Bool.true)) resTy
+    let eTy ← liftMetaM <| mkArrow (← mkEq c (mkConst ``Bool.false)) resTy
+    withLocalDeclD `t tTy fun t =>
+    withLocalDeclD `e eTy fun e => do
+    let u ← liftMetaM <| getLevel resTy
+    k (.dcond <| mkApp4 (mkConst ``Bool.dcond [u]) resTy c t e) #[c, t, e]
   | .matcher matcherApp => do
     -- Abstract the discriminants as a dependent telescope: a later discriminant's type may mention an earlier one.
     let discrDecls := matcherApp.discrs.mapIdx fun i discr =>
@@ -183,6 +220,36 @@ def splitWith
       let t ← onAlt `isTrue resTy 0 { fields := #[] }
       let e ← onAlt `isFalse resTy 1 { fields := #[] }
       return mkApp4 (mkConst ``_root_.cond [u]) resTy c t e
+  | uite e => do
+    let u ← getLevel resTy
+    let c := e.getArg! 1
+    let h := e.getArg! 2
+    if useSplitter then -- UDecidable.dite is the "splitter" for UDecidable.ite
+      let n ← liftMetaM <| mkFreshUserName `h
+      let t ← withLocalDecl n .default c fun h => do mkLambdaFVars #[h] (← onAlt `isTrue resTy 0 { fields := #[h] })
+      let e ← withLocalDecl n .default (mkNot c) fun h => do mkLambdaFVars #[h] (← onAlt `isFalse resTy 1 { fields := #[h] })
+      return mkApp5 (mkConst ``UDecidable.dite [u]) resTy c h t e
+    else
+      let t ← onAlt `isTrue resTy 0 { fields := #[] }
+      let e ← onAlt `isFalse resTy 1 { fields := #[] }
+      return mkApp5 (mkConst ``UDecidable.ite [u]) resTy c h t e
+  | udite e => do
+    let u ← getLevel resTy
+    let c := e.getArg! 1
+    let h := e.getArg! 2
+    let n ← liftMetaM <| mkFreshUserName `h
+    let t ← withLocalDecl n .default c fun h => do mkLambdaFVars #[h] (← onAlt `isTrue resTy 0 { args := #[h], fields := #[h] })
+    let e ← withLocalDecl n .default (mkNot c) fun h => do mkLambdaFVars #[h] (← onAlt `isFalse resTy 1 { args := #[h], fields := #[h] })
+    return mkApp5 (mkConst ``UDecidable.dite [u]) resTy c h t e
+  | dcond e => do
+    let u ← getLevel resTy
+    let c := e.getArg! 1
+    let n ← liftMetaM <| mkFreshUserName `h
+    let hTrue ← liftMetaM <| mkEq c (mkConst ``Bool.true)
+    let hFalse ← liftMetaM <| mkEq c (mkConst ``Bool.false)
+    let t ← withLocalDecl n .default hTrue fun h => do mkLambdaFVars #[h] (← onAlt `isTrue resTy 0 { args := #[h], fields := #[h] })
+    let e ← withLocalDecl n .default hFalse fun h => do mkLambdaFVars #[h] (← onAlt `isFalse resTy 1 { args := #[h], fields := #[h] })
+    return mkApp4 (mkConst ``Bool.dcond [u]) resTy c t e
   | matcher matcherApp => do
     -- Do not abstract `match h :` discriminants: the alternatives' equality binders
     -- `h : discr = pattern` mention the discriminant, so substituting it in the motive would be
@@ -199,7 +266,7 @@ def splitWith
 
 def simpDiscrs? (info : SplitInfo) (e : Expr) : SimpM (Option Simp.Result) := match info with
   | dite _ | ite _ => return none -- Tricky because we need to simultaneously rewrite  `[Decidable c]`
-  | cond _ => return none
+  | cond _ | dcond _ | uite _ | udite _ => return none
   | matcher matcherApp => Simp.simpMatchDiscrs? matcherApp.toMatcherInfo e
 
 end SplitInfo
@@ -211,19 +278,26 @@ def getSplitInfo? (e : Expr) : MetaM (Option SplitInfo) := do
     return some (SplitInfo.dite e)
   if e.isAppOf ``cond then
     return some (SplitInfo.cond e)
+  if e.isAppOf ``UDecidable.ite then
+    return some (SplitInfo.uite e)
+  if e.isAppOf ``UDecidable.dite then
+    return some (SplitInfo.udite e)
+  if e.isAppOf ``Bool.dcond then
+    return some (SplitInfo.dcond e)
   if let .some matcherApp ← matchMatcherApp? (alsoCasesOn := true) e then
     return some (SplitInfo.matcher matcherApp)
   else
     return none
 
 def rwIfOrMatcher (idx : Nat) (e : Expr) : MetaM Simp.Result := do
-  if e.isAppOf ``ite || e.isAppOf ``dite then
+  if e.isAppOf ``ite || e.isAppOf ``dite || e.isAppOf ``UDecidable.ite
+      || e.isAppOf ``UDecidable.dite then
     let c := e.getArg! 1
     let c := if idx = 0 then c else mkNot c
     let .some fv ← findLocalDeclWithType? c
       | throwError "Failed to find proof for if condition {c}"
     rwIfWith (mkFVar fv) e
-  else if e.isAppOf ``cond then
+  else if e.isAppOf ``cond || e.isAppOf ``Bool.dcond then
     let c := e.getArg! 1
     let h ← mkEq c (mkConst (if idx = 0 then ``Bool.true else ``Bool.false))
     let .some fv ← findLocalDeclWithType? h

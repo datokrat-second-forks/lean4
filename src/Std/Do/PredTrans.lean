@@ -249,3 +249,15 @@ theorem apply_dite {ps} {Q : PostCond α ps} (c : Prop) [Decidable c] (t : c →
 @[simp]
 theorem apply_ite {ps} {Q : PostCond α ps} (c : Prop) [Decidable c] (t : PredTrans ps α) (e : PredTrans ps α) :
   (if c then t else e).apply Q = if c then t.apply Q else e.apply Q := by split <;> rfl
+
+@[simp]
+theorem apply_udite {ps} {Q : PostCond α ps} (c : Prop) [UDecidable c] (t : c → PredTrans ps α) (e : ¬ c → PredTrans ps α) :
+  (uif h : c then t h else e h).apply Q = uif h : c then (t h).apply Q else (e h).apply Q := by
+  cases UDecidable.em c with
+  | inl h => rw [UDecidable.dite_eq_left h, UDecidable.dite_eq_left h]
+  | inr h => rw [UDecidable.dite_eq_right h, UDecidable.dite_eq_right h]
+
+@[simp]
+theorem apply_uite {ps} {Q : PostCond α ps} (c : Prop) [UDecidable c] (t : PredTrans ps α) (e : PredTrans ps α) :
+  (uif c then t else e).apply Q = uif c then t.apply Q else e.apply Q :=
+  UDecidable.apply_ite (PredTrans.apply · Q)

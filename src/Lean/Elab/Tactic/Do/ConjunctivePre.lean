@@ -96,8 +96,8 @@ def conjunctiveArgs? (env : Environment) : Name → Option (Nat × List Nat)
   | ``wp => some (10, [8, 9])
   | ``Prod.fst | ``Prod.snd => some (3, [2])
   | ``Prod.mk => some (4, [2, 3])
-  | ``ite | ``dite => some (5, [3, 4])
-  | ``cond => some (4, [2, 3])
+  | ``ite | ``dite | ``UDecidable.ite | ``UDecidable.dite => some (5, [3, 4])
+  | ``cond | ``Bool.dcond => some (4, [2, 3])
   -- `binderNameHint v b e` is definitionally `e`.
   | ``binderNameHint => some (6, [5])
   | c => (getMatcherInfoCore? env c).map fun info =>
