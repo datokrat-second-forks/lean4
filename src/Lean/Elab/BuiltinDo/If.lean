@@ -17,29 +17,6 @@ namespace Lean.Elab.Do
 open Lean.Parser.Term
 open Lean.Meta
 
-open InternalSyntax in
-/--
-If the given syntax is a `doIf`, return an equivalent `doIf` that has an `else` but no `else if`s or
-`if let`s.
--/
-@[builtin_macro Lean.Parser.Term.doIf] def expandDoIf : Macro := fun stx =>
-  match stx with
-  | `(doElem|if $_:doIfProp then $_ else $_) =>
-    Macro.throwUnsupported
-  | `(doElem|if%$tk $cond:doIfCond then $t $[else if%$tks $conds:doIfCond then $ts]* $[else $e?]?) => do
-    let mut e : Syntax ← e?.getDM `(doSeq| skip%$tk)
-    let mut eIsSeq := true
-    for (cond, t) in Array.zip (conds.reverse.push cond) (ts.reverse.push t) do
-      e ← if eIsSeq then pure e else `(doSeq|$(⟨e⟩):doElem)
-      e ← match cond with
-        | `(doIfCond|let $pat := $d) => `(doElem| match $d:term with | $pat:term => $t | _ => $(⟨e⟩))
-        | `(doIfCond|let $pat ← $d)  => `(doElem| match ← $d:term with | $pat:term => $t | _ => $(⟨e⟩))
-        | `(doIfCond|$cond:doIfProp) => `(doElem| if $cond:doIfProp then $t else $(⟨e⟩))
-        | _                          => Macro.throwUnsupported
-      eIsSeq := false
-    return e
-  | _ => Macro.throwUnsupported
-
 @[builtin_doElem_elab Lean.Parser.Term.doIf] def elabDoIf : DoElab := fun stx dec => do
   let `(doIf|if $cond:doIfCond then $thenSeq else $elseSeq) := stx | throwUnsupportedSyntax
   let info := (← inferControlInfoSeq thenSeq).alternative (← inferControlInfoSeq elseSeq)
@@ -71,30 +48,49 @@ where
 /-!
 `uif` and `bif` in `do` blocks. Their syntax is taken apart by position: the layout is
 `[kw, cond, "then", thenSeq, elseIfs, else?]`, as for `doIf`, where each `elseIfs` entry is
-`[elseKw, cond, "then", seq]` and `else?` is `["else", seq]` if present. `cond` is a `doIfProp`
-(`[optional [h, ":"], c]`).
+`[[else, kw], cond, "then", seq]` and `else?` is `["else", seq]` if present. `cond` is a `doIfProp`
+(`[optional [h, ":"], c]`), or a `doIfCond` in an `if` or `else if`.
 -/
 
 private def mkDoSeqOfElem (elem : Syntax) : MacroM Syntax :=
   `(doSeq| $(⟨elem⟩):doElem)
 
 open InternalSyntax in
-/-- Rewrites `else uif`/`else bif` chains and a missing `else` into nested `uif`/`bif`s with `else`. -/
-private def expandDoCondChain : Macro := fun stx => do
+/--
+Rewrites an `if`/`uif`/`bif` chain into nested canonical elements, i.e. `if`/`uif`/`bif` with a
+`doIfProp` condition and an `else`, or a `match` for `if let`. The links `else if`, `else uif` and
+`else bif` may follow each other in any order, and a missing `else` becomes `skip`.
+-/
+private def expandDoIfChain : Macro := fun stx => do
   let elseIfs := stx[4].getArgs
-  if elseIfs.isEmpty && !stx[5].isNone then Macro.throwUnsupported
+  if elseIfs.isEmpty && !stx[5].isNone && !stx[1].isOfKind ``doIfLet then
+    Macro.throwUnsupported
+  let kindOfKw (kw : Syntax) : SyntaxNodeKind :=
+    match kw.getAtomVal with
+    | "uif" => ``doUIf
+    | "bif" => ``doBIf
+    | _ => ``doIf
+  let branches := #[(stx.getKind, stx[0], stx[1], stx[3])] ++
+    elseIfs.map fun g => (kindOfKw g[0][1], g[0][1], g[1], g[3])
   let mut e : Syntax ← if stx[5].isNone then `(doSeq| skip%$(stx[0])) else pure stx[5][1]
-  let branches := #[(stx[1], stx[3])] ++ elseIfs.map fun g => (g[1], g[3])
-  let mut first := true
-  for (cond, thenSeq) in branches.reverse do
-    unless first do e ← mkDoSeqOfElem e
-    first := false
-    e := Syntax.node stx.getHeadInfo stx.getKind
-      #[stx[0], cond, stx[2], thenSeq, mkNullNode, mkNullNode #[mkAtom "else", e]]
+  let mut eIsSeq := true
+  for (k, kw, cond, t) in branches.reverse do
+    unless eIsSeq do e ← mkDoSeqOfElem e
+    eIsSeq := false
+    if k == ``doIf then
+      e ← match cond with
+        | `(doIfCond|let $pat := $d) => `(doElem| match $d:term with | $pat:term => $(⟨t⟩) | _ => $(⟨e⟩))
+        | `(doIfCond|let $pat ← $d)  => `(doElem| match ← $d:term with | $pat:term => $(⟨t⟩) | _ => $(⟨e⟩))
+        | `(doIfCond|$cond:doIfProp) => `(doElem| if%$kw $cond:doIfProp then $(⟨t⟩) else $(⟨e⟩))
+        | _                          => Macro.throwUnsupported
+    else
+      e := Syntax.node stx.getHeadInfo k
+        #[kw, cond, mkAtom "then", t, mkNullNode, mkNullNode #[mkAtom "else", e]]
   return e
 
-@[builtin_macro Lean.Parser.Term.doUIf] def expandDoUIf : Macro := expandDoCondChain
-@[builtin_macro Lean.Parser.Term.doBIf] def expandDoBIf : Macro := expandDoCondChain
+@[builtin_macro Lean.Parser.Term.doIf] def expandDoIf : Macro := expandDoIfChain
+@[builtin_macro Lean.Parser.Term.doUIf] def expandDoUIf : Macro := expandDoIfChain
+@[builtin_macro Lean.Parser.Term.doBIf] def expandDoBIf : Macro := expandDoIfChain
 
 private def controlInfoDoCond : ControlInfoHandler := fun stx => do
   if !stx.raw[4].getArgs.isEmpty || stx.raw[5].isNone then throwUnsupportedSyntax

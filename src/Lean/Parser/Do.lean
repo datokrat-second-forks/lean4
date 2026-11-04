@@ -171,16 +171,30 @@ def doIfProp    := leading_parser (withAnonymousAntiquot := false)
 def doIfCond    :=
   withAntiquot (mkAntiquot "doIfCond" decl_name% (anonymous := false) (isPseudoKind := true)) <|
     doIfLet <|> doIfProp
+/--
+Internal syntax used in the expansion of `while` and `repeat ... until`: `bif` if the condition is a
+`Bool`, `uif` otherwise. The legacy `do` elaborator treats it as `if`.
+-/
+@[builtin_doElem_parser] def InternalSyntax.doIfAuto := leading_parser
+  "if_auto% " >> optional (atomic (binderIdent >> " : ")) >> termParser >> " then " >> doSeq >>
+    " else " >> doSeq
+def elseUIf := atomic (group (withPosition ("else " >> checkLineEq >> " uif ")))
+def elseBIf := atomic (group (withPosition ("else " >> checkLineEq >> " bif ")))
+/--
+An `else if`, `else uif` or `else bif` link of an `if`/`uif`/`bif` chain in a `do` block. Any of the
+three may follow any other: `[elseKw, cond, "then", seq]`, where `elseKw` is `["else", kw]` and
+`cond` is a `doIfCond` after `if` and a `doIfProp` after `uif`/`bif`.
+-/
+def doElseChainLink (msg : String) : Parser :=
+  checkColGe msg >> group (ppDedent ppSpace >> ppRealFill (
+    ((elseIf >> doIfCond) <|> (elseUIf >> doIfProp) <|> (elseBIf >> doIfProp)) >> " then " >> doSeq))
 -- must reset cache as `withPositionAfterLinebreak` will look at syntax not produced by this parser (or even
 -- current category call)
 @[builtin_doElem_parser] def doIf := leading_parser withResetCache <| withPositionAfterLinebreak <| ppRealGroup <|
   ppRealFill (ppIndent ("if " >> doIfCond >> " then") >> ppSpace >> doSeq) >>
-  many (checkColGe "'else if' in 'do' must be indented" >>
-    group (ppDedent ppSpace >> ppRealFill (elseIf >> doIfCond >> " then " >> doSeq))) >>
+  many (doElseChainLink "'else if' in 'do' must be indented") >>
   optional (checkColGe "'else' in 'do' must be indented" >>
     ppDedent ppSpace >> ppRealFill ("else " >> doSeq))
-def elseUIf := atomic (group (withPosition ("else " >> checkLineEq >> " uif ")))
-def elseBIf := atomic (group (withPosition ("else " >> checkLineEq >> " bif ")))
 /--
 `uif c then ... else ...` in `do` blocks. Like `if`, the branches are `do` sequences, so they can
 `return`, `break` or reassign mutable variables, but the condition is decided with `UDecidable`.
@@ -188,8 +202,7 @@ def elseBIf := atomic (group (withPosition ("else " >> checkLineEq >> " bif ")))
 -/
 @[builtin_doElem_parser] def doUIf := leading_parser withResetCache <| withPositionAfterLinebreak <| ppRealGroup <|
   ppRealFill (ppIndent ("uif " >> doIfProp >> " then") >> ppSpace >> doSeq) >>
-  many (checkColGe "'else uif' in 'do' must be indented" >>
-    group (ppDedent ppSpace >> ppRealFill (elseUIf >> doIfProp >> " then " >> doSeq))) >>
+  many (doElseChainLink "'else uif' in 'do' must be indented") >>
   optional (checkColGe "'else' in 'do' must be indented" >>
     ppDedent ppSpace >> ppRealFill ("else " >> doSeq))
 /--
@@ -199,8 +212,7 @@ branches have `h : c = true` and `h : c = false`, respectively, and the result i
 -/
 @[builtin_doElem_parser] def doBIf := leading_parser withResetCache <| withPositionAfterLinebreak <| ppRealGroup <|
   ppRealFill (ppIndent ("bif " >> doIfProp >> " then") >> ppSpace >> doSeq) >>
-  many (checkColGe "'else bif' in 'do' must be indented" >>
-    group (ppDedent ppSpace >> ppRealFill (elseBIf >> doIfProp >> " then " >> doSeq))) >>
+  many (doElseChainLink "'else bif' in 'do' must be indented") >>
   optional (checkColGe "'else' in 'do' must be indented" >>
     ppDedent ppSpace >> ppRealFill ("else " >> doSeq))
 @[builtin_doElem_parser] def doUnless := leading_parser

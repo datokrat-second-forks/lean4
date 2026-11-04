@@ -1835,6 +1835,12 @@ mutual
               return mkTerminalAction term
             else
               return mkSeq term (← doSeqToCode doElems)
+          else if k == ``Parser.Term.InternalSyntax.doIfAuto then
+            -- `while`/`repeat ... until` conditions stay `Decidable` in the legacy elaborator.
+            let doIf := mkNode ``Parser.Term.doIf #[mkAtomFrom doElem[0] "if",
+              mkNode ``Parser.Term.doIfProp #[doElem[1], doElem[2]], doElem[3], doElem[4],
+              mkNullNode, mkNullNode #[doElem[5], doElem[6]]]
+            doIfToCode doIf doElems
           else if k == ``Parser.Term.InternalSyntax.doSkip then
             -- In the legacy elaborator, `skip` is treated as `pure PUnit.unit`.
             let term ← withRef doElem `(pure PUnit.unit)

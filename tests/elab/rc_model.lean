@@ -171,7 +171,6 @@ theorem incRefHugeMt_spec (rc : Int32) (n : USize) (h : isUnstuckMt rc) :
     case vc1.step.isTrue =>
       rename_i b mb rc1 n1 hg chunk rc2 n2 hinv
       obtain ⟨hvar, hmt, hsst, hex⟩ := hinv
-      simp only [Bool.and_eq_true, decide_eq_true_eq] at hg
       have hle : chunk ≤ n1 := Std.min_le_left
       have hle2 : chunk ≤ LEAN_RC_INC_MAX := Std.min_le_right
       have h1 : n2.toNat = n1.toNat - chunk.toNat := BitVec.toNat_sub_of_le hle
@@ -347,7 +346,6 @@ private theorem incRefHugeMt_descends (rc : Int32) (n : USize) :
   case vc1.step.isTrue =>
     rename_i b mb rc1 n1 hg chunk rc2 n2 hinv
     obtain ⟨hvar, hmt, hdesc⟩ := hinv
-    simp only [Bool.and_eq_true, decide_eq_true_eq] at hg
     have hle : chunk ≤ n1 := Std.min_le_left
     have hle2 : chunk ≤ LEAN_RC_INC_MAX := Std.min_le_right
     have h1 : n2.toNat = n1.toNat - chunk.toNat := BitVec.toNat_sub_of_le hle
