@@ -614,9 +614,10 @@ variable (F : (x : α) → ((y : α) → InvImage (· < ·) h y x → motive y) 
 /-- Helper gadget that prevents reduction of `Nat.eager n` unless `n` evaluates to a ground term. -/
 @[implicit_reducible]
 def Nat.eager (n : Nat) : Nat :=
-  if Nat.beq n n = true then n else n
+  bif Nat.beq n n then n else n
 
-theorem Nat.eager_eq (n : Nat) : Nat.eager n = n := ite_self n
+theorem Nat.eager_eq (n : Nat) : Nat.eager n = n := by
+  unfold Nat.eager; cases Nat.beq n n <;> rfl
 
 /--
 A well-founded fixpoint operator specialized for `Nat`-valued measures. Given a measure `h`, it expects

@@ -114,13 +114,13 @@ This function has a logical model in terms of `Float.Model`. It is compiled to t
 Strict inequality of floating-point numbers. Typically used via the `<` operator.
 -/
 @[extern "lean_float_decLt"] def Float.lt : Float → Float → Bool :=
-  fun a b => a.toModel < b.toModel
+  fun a b => a.toModel <ᵇ b.toModel
 
 /--
 Non-strict inequality of floating-point numbers. Typically used via the `≤` operator.
 -/
 @[extern "lean_float_decLe"] def Float.le : Float → Float → Bool :=
-  fun a b => a.toModel ≤ b.toModel
+  fun a b => a.toModel ≤ᵇ b.toModel
 
 /--
 Bit-for-bit conversion from `UInt64`. Interprets a `UInt64` as a `Float`, ignoring the numeric value
@@ -328,7 +328,7 @@ instance : Inhabited Float where
   default := UInt64.toFloat 0
 
 protected def Float.repr (n : Float) (prec : Nat) : Std.Format :=
-  if n < UInt64.toFloat 0 then Repr.addAppParen (toString n) prec else toString n
+  bif n.lt (UInt64.toFloat 0) then Repr.addAppParen (toString n) prec else toString n
 
 instance : Repr Float where
   reprPrec := Float.repr

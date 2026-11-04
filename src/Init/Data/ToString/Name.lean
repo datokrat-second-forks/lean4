@@ -26,8 +26,8 @@ namespace Lean.Name
 
 -- If you change this, also change the corresponding function in `Init.Meta`.
 private partial def needsNoEscapeAsciiRest (s : String) (i : Nat) : Bool :=
-  if h : i < s.utf8ByteSize then
-    let c := s.getUTF8Byte ⟨i⟩ h
+  bif h : i <ᵇ s.utf8ByteSize then
+    let c := s.getUTF8Byte ⟨i⟩ (lt_of_decideLT_eq_true h)
     isIdRestAscii c && needsNoEscapeAsciiRest s (i + 1)
   else
     true
@@ -53,10 +53,10 @@ Names that are valid identifiers are not escaped, and otherwise, if they do not 
 -- If you change this, also change the corresponding function in `Init.Meta`.
 @[inline]
 def escapePart (s : String) (force : Bool := false) : Option String :=
-  if h : s.utf8ByteSize > 0 then
-    if !force && needsNoEscape s h then
+  bif h : s.utf8ByteSize >ᵇ 0 then
+    bif !force && needsNoEscape s (lt_of_decideLT_eq_true h) then
       some s
-    else if s.any isIdEndEscape then
+    else bif s.any isIdEndEscape then
       none
     else
       some <| escape s
@@ -79,10 +79,10 @@ def toStringWithSep (n : Name) (isToken : String → Bool := fun _ => false) : S
     -- Escape the last component if the identifier would otherwise be a token
     let r := toStringWithSep n isToken
     let r' := r ++ sep ++ (maybeEscape s false)
-    if escape && isToken r' then r ++ sep ++ (maybeEscape s true) else r'
+    bif escape && isToken r' then r ++ sep ++ (maybeEscape s true) else r'
   | num n v         => toStringWithSep n (isToken := fun _ => false) ++ sep ++ Nat.repr v
 where
-  maybeEscape s force := if escape then escapePart s force |>.getD s else s
+  maybeEscape s force := bif escape then escapePart s force |>.getD s else s
 
 /--
 Converts a name to a string.
@@ -102,7 +102,7 @@ def toStringWithToken (n : Name) (escape := true) (isToken : String → Bool) : 
   toStringWithSep "." (escape && !n.isInaccessibleUserName && !n.hasMacroScopes && !maybePseudoSyntax) n isToken
 where
   maybePseudoSyntax :=
-    if n == `_ then
+    bif n == `_ then
       -- output hole as is
       true
     else if let .str _ s := n.getRoot then

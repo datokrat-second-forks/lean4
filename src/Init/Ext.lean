@@ -73,7 +73,7 @@ The `pat*` patterns are processed using the `rintro` tactic.
 If no patterns are supplied, then variables are introduced anonymously using the `intros` tactic.
 -/
 macro "ext1" xs:(colGt ppSpace rintroPat)* : tactic =>
-  if xs.isEmpty then `(tactic| apply_ext_theorem <;> intros)
+  bif xs.isEmpty then `(tactic| apply_ext_theorem <;> intros)
   else `(tactic| apply_ext_theorem <;> rintro $xs*)
 
 end Elab.Tactic.Ext

@@ -26,7 +26,7 @@ def mapList (f : List α → β) (tasks : List (Task α)) (prio := Task.Priority
 where
   go
     | [], as =>
-      if sync then
+      bif sync then
         .pure <| f as.reverse
       else
         Task.spawn (prio := prio) fun _ => f as.reverse

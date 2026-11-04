@@ -76,7 +76,7 @@ def toBitVec : Sign → BitVec 1
 Constructs a sign from a bitvector, with positive sign denoted by `0`.
 -/
 def ofBitVec (b  : BitVec 1) : Sign :=
-  if b = 0#1 then .positive else .negative
+  bif b == 0#1 then .positive else .negative
 
 end Sign
 

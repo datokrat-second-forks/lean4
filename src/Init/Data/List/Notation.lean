@@ -56,7 +56,7 @@ macro_rules
       | i+1, true  => expandListLit i false result
       | i+1, false => expandListLit i true  (← ``(List.cons $(⟨elems.elemsAndSeps.get!Internal i⟩) $result))
     let size := elems.elemsAndSeps.size
-    if size < 64 then
+    bif size <ᵇ 64 then
       expandListLit size (size % 2 == 0) (← ``(List.nil))
     else
       `(%[ $elems,* | List.nil ])

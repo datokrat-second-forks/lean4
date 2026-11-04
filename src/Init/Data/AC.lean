@@ -71,7 +71,7 @@ def evalList (β : Sort u) [EvalInformation α β] (ctx : α) : List Nat → β
 
 def insert (x : Nat) : List Nat → List Nat
   | [] => [x]
-  | a :: as => if x < a then x :: a :: as else a :: insert x as
+  | a :: as => bif x <ᵇ a then x :: a :: as else a :: insert x as
 
 def sort (xs : List Nat) : List Nat :=
   let rec loop : List Nat → List Nat → List Nat
@@ -82,7 +82,7 @@ def sort (xs : List Nat) : List Nat :=
 def mergeIdem (xs : List Nat) : List Nat :=
   let rec loop : Nat → List Nat → List Nat
     | curr, next :: rest =>
-      if curr = next then
+      bif curr =ᵇ next then
         loop curr rest
       else
         curr :: loop next rest
@@ -108,8 +108,8 @@ def removeNeutrals [info : ContextInformation α] (ctx : α) : List Nat → List
 def norm [info : ContextInformation α] (ctx : α) (e : Expr) : List Nat :=
   let xs := e.toList
   let xs := removeNeutrals ctx xs
-  let xs := if info.isComm ctx then sort xs else xs
-  if info.isIdem ctx then mergeIdem xs else xs
+  let xs := bif info.isComm ctx then sort xs else xs
+  bif info.isIdem ctx then mergeIdem xs else xs
 
 noncomputable def List.two_step_induction
   {motive : List Nat → Sort u}

@@ -51,7 +51,7 @@ private theorem RArray.get_eq_def (a : RArray α) (n : Nat) :
 def RArray.getImpl (a : RArray α) (n : Nat) : α :=
   match a with
   | .leaf x => x
-  | .branch p l r => if n < p then l.getImpl n else r.getImpl n
+  | .branch p l r => bif n <ᵇ p then l.getImpl n else r.getImpl n
 
 @[csimp]
 theorem RArray.get_eq_getImpl : @RArray.get = @RArray.getImpl := by
@@ -60,8 +60,10 @@ theorem RArray.get_eq_getImpl : @RArray.get = @RArray.getImpl := by
   | leaf _ => rfl
   | branch p l r ihl ihr =>
     rw [RArray.getImpl, RArray.get_eq_def]
-    simp only [ihl, ihr, ← Nat.not_le, ← Nat.ble_eq, ite_not]
-    cases hnp : Nat.ble p n <;> rfl
+    simp only [ihl, ihr]
+    cases hnp : Nat.ble p n
+    · rw [Bool.cond_decideLT_pos (Nat.gt_of_not_le (by simpa using hnp))]
+    · rw [Bool.cond_decideLT_neg (Nat.not_lt_of_le (by simpa using hnp))]
 
 instance : GetElem (RArray α) Nat α (fun _ _ => True) where
   getElem a n _ := a.get n

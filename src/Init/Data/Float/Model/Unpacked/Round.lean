@@ -156,10 +156,10 @@ def roundWithAccuracy (spec : Format) (sign : Sign) (mantissa : Nat) (exponent :
   let (finalExtendedMantissa, finalExponent) := shiftToTargetExponent spec roundedEm₁ e₁ .exact
   let finalMantissa := finalExtendedMantissa.mantissa
 
-  if h : finalMantissa = 0 then
+  bif h : finalMantissa =ᵇ 0 then
     .zero sign
   else
-    .finite sign finalMantissa finalExponent (Nat.pos_of_ne_zero h)
+    .finite sign finalMantissa finalExponent (Nat.pos_of_ne_zero (decideEq_eq_false_iff.1 h))
 
 /--
 If the target exponent is smaller than the given exponent, decreases the exponent of the mantissa to

@@ -75,7 +75,7 @@ def filterM {m : Type → Type v} [Monad m] {α : Type} (p : α → m Bool) (q :
     m (Queue α) := do
   let dList ← q.dList.filterM p
   let eList ← q.eList.filterM p
-  if dList.isEmpty then
+  bif dList.isEmpty then
     return { dList := eList.reverse, eList := [] }
   else
     return { dList, eList }

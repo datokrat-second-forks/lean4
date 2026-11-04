@@ -50,9 +50,9 @@ def pack (spec : Format) : UnpackedFloat → BitVec spec.numBits
   | .finite s m e _ =>
     let actualMantissaBits := m.log2
     let biasedExponent := (e + spec.exponentBias + spec.mantissaBitsWithoutImplicit).toNat
-    if 2 ^ spec.exponentBits ≤ biasedExponent + 1 then
+    bif 2 ^ spec.exponentBits ≤ᵇ biasedExponent + 1 then
       packedInfinity spec s
-    else if actualMantissaBits + 1 = spec.mantissaBits then
+    else bif actualMantissaBits + 1 =ᵇ spec.mantissaBits then
       -- normal
       -- Observe that the transformation of the mantissa clears the implicit bit
       packComponents spec s (BitVec.ofNat _ biasedExponent) (BitVec.ofNat _ m)
@@ -93,17 +93,17 @@ def unpack (spec : Format) (b : BitVec spec.numBits) : UnpackedFloat :=
   let exponent : Int := (exponentVec.toNat : Int) - (spec.exponentBias + spec.mantissaBitsWithoutImplicit)
   let signVec : BitVec 1 := unpackSign b
   let sign := Sign.ofBitVec signVec
-  if exponentVec = -1#_ then
-    if mantissaVec = 0#_ then
+  bif exponentVec == -1#_ then
+    bif mantissaVec == 0#_ then
       .infinity sign
     else
       .notANumber
-  else if exponentVec = 0#_ then
-    if h : mantissaVec = 0#_ then
+  else bif exponentVec == 0#_ then
+    bif h : mantissaVec == 0#_ then
       .zero sign
     else
       -- subnormal
-      .finite sign mantissaVec.toNat (exponent + 1) (by simpa [BitVec.toNat_pos, BitVec.pos_iff_ne_zero])
+      .finite sign mantissaVec.toNat (exponent + 1) (by simpa [BitVec.toNat_pos, BitVec.pos_iff_ne_zero] using h)
   else
     -- normal
     .finite sign (1#1 ++ mantissaVec).toNat exponent (by simp)

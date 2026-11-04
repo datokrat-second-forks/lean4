@@ -144,9 +144,9 @@ private meta def mkAttributeCmds
     for id in ids.getElems do
       let idName := id.getId
       let (attrName, attrKey) :=
-        if idName == `simp then
+        bif idName == `simp then
           (`simprocAttr, "simproc")
-        else if idName == `seval then
+        else bif idName == `seval then
           (`sevalprocAttr, "sevalproc")
         else
           let idName := idName.appendAfter "_proc"

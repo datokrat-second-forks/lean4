@@ -1341,7 +1341,7 @@ end antitone
 namespace Example
 
 def findF (P : Nat → Bool) (rec : Nat → Option Nat) (x : Nat) : Option Nat :=
-  if P x then
+  bif P x then
     some x
   else
     rec (x + 1)

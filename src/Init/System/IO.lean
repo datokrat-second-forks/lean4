@@ -303,7 +303,7 @@ def mapTasks (f : List α → BaseIO β) (tasks : List (Task α)) (prio := Task.
 where
   go
     | [], as =>
-      if sync then
+      bif sync then
         return .pure (← f as.reverse)
       else
         f as.reverse |>.asTask prio
@@ -986,7 +986,7 @@ the handle may block and/or return data.
 partial def Handle.readBinToEndInto (h : Handle) (buf : ByteArray) : IO ByteArray := do
   let rec loop (acc : ByteArray) : IO ByteArray := do
     let buf ← h.read 1024
-    if buf.isEmpty then
+    bif buf.isEmpty then
       return acc
     else
       loop (acc ++ buf)
@@ -1026,11 +1026,11 @@ and/or return data.
 partial def Handle.lines (h : Handle) : IO (Array String) := do
   let rec read (lines : Array String) := do
     let line ← h.getLine
-    if line.isEmpty then
+    bif line.isEmpty then
       pure lines
-    else if line.back == '\n' then
+    else bif line.back == '\n' then
       let line := line.dropEnd 1 |>.copy
-      let line := if line.back == '\r' then line.dropEnd 1 |>.copy else line
+      let line := bif line.back == '\r' then line.dropEnd 1 |>.copy else line
       read <| lines.push line
     else
       pure <| lines.push line
@@ -1182,16 +1182,16 @@ partial def walkDir (p : FilePath) (enter : FilePath → IO Bool := fun _ => pur
   Prod.snd <$> StateT.run (go p) #[]
 where
   go p := do
-    if !(← enter p) then
+    bif !(← enter p) then
       return ()
     for d in (← p.readDir) do
       modify (·.push d.path)
       match (← d.path.metadata.toBaseIO) with
       | .ok { type := .symlink, .. } =>
         let p' ← FS.realPath d.path
-        if (← p'.isDir) then
+        bif (← p'.isDir) then
           -- do not call `enter` on a non-directory symlink
-          if (← enter p) then
+          bif (← enter p) then
             go p'
       | .ok { type := .dir, .. } => go d.path
       | .ok _ => pure ()
@@ -1214,7 +1214,7 @@ def readBinFile (fname : FilePath) : IO ByteArray := do
   let size := mdata.byteSize.toUSize
   let handle ← IO.FS.Handle.mk fname .read
   let buf ←
-    if size > 0 then
+    bif size >ᵇ 0 then
       handle.read mdata.byteSize.toUSize
     else
       pure <| ByteArray.emptyWithCapacity 0
@@ -1314,7 +1314,7 @@ namespace FS
 Creates a directory at the specified path, creating all missing parents as directories.
 -/
 partial def createDirAll (p : FilePath) : IO Unit := do
-  if ← p.isDir then
+  bif (← p.isDir) then
     return ()
   if let some parent := p.parent then
     createDirAll parent
@@ -1322,7 +1322,7 @@ partial def createDirAll (p : FilePath) : IO Unit := do
     createDir p
   catch
     | e =>
-      if ← p.isDir then
+      bif (← p.isDir) then
         pure ()  -- I guess someone else was faster
       else
         throw e
@@ -1335,7 +1335,7 @@ created during execution.
 partial def removeDirAll (p : FilePath) : IO Unit := do
   for ent in (← p.readDir) do
     -- Do not follow symlinks
-    if (← ent.path.symlinkMetadata).type == .dir then
+    bif (← ent.path.symlinkMetadata).type == .dir then
       removeDirAll ent.path
     else
       removeFile ent.path
@@ -1566,7 +1566,7 @@ The specifications of standard input, output, and error handles in `args` are ig
 -/
 def run (args : SpawnArgs) (input? : Option String := none) : IO String := do
   let out ← output args input?
-  if out.exitCode != 0 then
+  bif out.exitCode != 0 then
     throw <| IO.userError s!"process '{args.cmd}' exited with code {out.exitCode}\
       \nstderr:\
       \n{out.stderr}"
@@ -1620,9 +1620,9 @@ Examples:
  * `{read := true, execution := true : AccessRight}.flags = 5`
 -/
 def AccessRight.flags (acc : AccessRight) : UInt32 :=
-  let r : UInt32 := if acc.read      then 0x4 else 0
-  let w : UInt32 := if acc.write     then 0x2 else 0
-  let x : UInt32 := if acc.execution then 0x1 else 0
+  let r : UInt32 := bif acc.read      then 0x4 else 0
+  let w : UInt32 := bif acc.write     then 0x2 else 0
+  let x : UInt32 := bif acc.execution then 0x1 else 0
   r.lor <| w.lor x
 
 /--
@@ -1717,9 +1717,9 @@ def ofBuffer (r : Ref Buffer) : Stream where
     { b with data := data.copySlice 0 b.data b.pos data.size false, pos := b.pos + data.size }
   getLine := do
     let buf ← r.modifyGet fun b =>
-      let pos := match b.data.findIdx? (start := b.pos) fun u => u == 0 || u = '\n'.toNat.toUInt8 with
+      let pos := match b.data.findIdx? (start := b.pos) fun u => u == 0 || u == '\n'.toNat.toUInt8 with
         -- include '\n', but not '\0'
-        | some pos => if b.data.get! pos == 0 then pos else pos + 1
+        | some pos => bif b.data.get! pos == 0 then pos else pos + 1
         | none     => b.data.size
       (b.data.extract b.pos pos, { b with pos := pos })
     match String.fromUTF8? buf with
@@ -1740,7 +1740,7 @@ the stream may block and/or return data.
 partial def readBinToEndInto (s : Stream) (buf : ByteArray) : IO ByteArray := do
   let rec loop (acc : ByteArray) : IO ByteArray := do
     let buf ← s.read 1024
-    if buf.isEmpty then
+    bif buf.isEmpty then
       return acc
     else
       loop (acc ++ buf)
@@ -1780,11 +1780,11 @@ and/or return data.
 partial def lines (s : Stream) : IO (Array String) := do
   let rec read (lines : Array String) := do
     let line ← s.getLine
-    if line.isEmpty then
+    bif line.isEmpty then
       pure lines
-    else if line.back == '\n' then
+    else bif line.back == '\n' then
       let line := line.dropEnd 1 |>.copy
-      let line := if line.back == '\r' then line.dropEnd 1 |>.copy else line
+      let line := bif line.back == '\r' then line.dropEnd 1 |>.copy else line
       read <| lines.push line
     else
       pure <| lines.push line
@@ -1802,7 +1802,7 @@ def withIsolatedStreams [Monad m] [MonadFinally m] [MonadLiftT BaseIO m] (x : m 
   let bOut ← mkRef { : Stream.Buffer }
   let r ← withStdin (Stream.ofBuffer bIn) <|
     withStdout (Stream.ofBuffer bOut) <|
-      (if isolateStderr then withStderr (Stream.ofBuffer bOut) else id) <|
+      (bif isolateStderr then withStderr (Stream.ofBuffer bOut) else id) <|
         x
   let bOut ← liftM (m := BaseIO) bOut.get
   let out := String.fromUTF8! bOut.data

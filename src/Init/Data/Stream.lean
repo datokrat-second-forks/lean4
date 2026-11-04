@@ -101,7 +101,8 @@ instance : Stream (List α) α where
 
 instance : Stream (Subarray α) α where
   next? s :=
-    if h : s.start < s.stop then
+    bif h : s.start <ᵇ s.stop then
+      have h := lt_of_decideLT_eq_true h
       have : s.start + 1 ≤ s.stop := Nat.succ_le_of_lt h
       some (s.array[s.start]'(Nat.lt_of_lt_of_le h s.stop_le_array_size),
         ⟨{ s.internalRepresentation with start := s.start + 1, start_le_stop := this }⟩)
@@ -110,7 +111,7 @@ instance : Stream (Subarray α) α where
 
 instance : Stream Std.Legacy.Range Nat where
   next? r :=
-    if r.start < r.stop then
+    bif r.start <ᵇ r.stop then
       some (r.start, { r with start := r.start + r.step })
     else
       none

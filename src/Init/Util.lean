@@ -36,7 +36,7 @@ Currently supported on Linux only.
 -/
 @[never_extract]
 def dbgStackTraceIf {α : Type u} (cond : Bool) (f : Unit → α) : α :=
-  if cond then dbgStackTrace f else f ()
+  bif cond then dbgStackTrace f else f ()
 
 @[extern "lean_dbg_sleep"]
 def dbgSleep {α : Type u} (ms : UInt32) (f : Unit → α) : α := f ()

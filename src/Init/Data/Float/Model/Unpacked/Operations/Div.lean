@@ -20,7 +20,7 @@ Returns the accuracy corresponding to the point `y + (num/den)ulp`.
 Assumes `num < den`.
 -/
 def accuracyOfFraction (num den : Nat) : Accuracy :=
-  if num = 0 then
+  bif num =ᵇ 0 then
     .exact
   else
     .inexact (compare (2 * num) den)

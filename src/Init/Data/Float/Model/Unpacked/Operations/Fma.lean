@@ -26,21 +26,21 @@ def fma (spec : Format) : UnpackedFloat → UnpackedFloat → UnpackedFloat → 
   | .zero _, .infinity _, _ => .notANumber
   | .infinity _, .zero _, _ => .notANumber
   | .infinity sign₁, .infinity sign₂, .infinity sign₃ =>
-    if sign₁ * sign₂ == sign₃ then .infinity sign₃ else .notANumber
+    bif sign₁ * sign₂ == sign₃ then .infinity sign₃ else .notANumber
   | .infinity sign₁, .finite sign₂ .., .infinity sign₃ =>
-    if sign₁ * sign₂ == sign₃ then .infinity sign₃ else .notANumber
+    bif sign₁ * sign₂ == sign₃ then .infinity sign₃ else .notANumber
   | .finite sign₁ .., .infinity sign₂, .infinity sign₃ =>
-    if sign₁ * sign₂ == sign₃ then .infinity sign₃ else .notANumber
+    bif sign₁ * sign₂ == sign₃ then .infinity sign₃ else .notANumber
   | .infinity sign₁, .infinity sign₂, _ => .infinity (sign₁ * sign₂)
   | .infinity sign₁, .finite sign₂ .., _ => .infinity (sign₁ * sign₂)
   | .finite sign₁ .., .infinity sign₂, _ => .infinity (sign₁ * sign₂)
   | _, _, .infinity sign₃ => .infinity sign₃
   | .zero sign₁, .zero sign₂, .zero sign₃ =>
-    if sign₁ * sign₂ == sign₃ then .zero sign₃ else .zero .positive
+    bif sign₁ * sign₂ == sign₃ then .zero sign₃ else .zero .positive
   | .zero sign₁, .finite sign₂ .., .zero sign₃ =>
-    if sign₁ * sign₂ == sign₃ then .zero sign₃ else .zero .positive
+    bif sign₁ * sign₂ == sign₃ then .zero sign₃ else .zero .positive
   | .finite sign₁ .., .zero sign₂, .zero sign₃ =>
-    if sign₁ * sign₂ == sign₃ then .zero sign₃ else .zero .positive
+    bif sign₁ * sign₂ == sign₃ then .zero sign₃ else .zero .positive
   | .zero _, _, z => z
   | _, .zero _, z => z
   | .finite s₁ m₁ e₁ _, .finite s₂ m₂ e₂ _, .zero _ =>

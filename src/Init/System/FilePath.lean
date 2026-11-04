@@ -47,7 +47,7 @@ On platforms that support multiple separators, `System.FilePath.pathSeparator` i
 on the platform. `System.FilePath.pathSeparators` lists all supported separators.
 -/
 def pathSeparator : Char :=
-  if isWindows then '\\' else '/'
+  bif isWindows then '\\' else '/'
 
 /--
 The list of all path separator characters supported on the current platform.
@@ -56,7 +56,7 @@ On platforms that support multiple separators, `System.FilePath.pathSeparator` i
 expected by users on the platform.
 -/
 def pathSeparators : List Char :=
-  if isWindows then ['\\', '/'] else ['/']
+  bif isWindows then ['\\', '/'] else ['/']
 
 /--
 The character that separates file extensions from file names.
@@ -68,7 +68,7 @@ The file extension expected for executable binaries on the current platform, or 
 such extension.
 -/
 def exeExtension : String :=
-  if isWindows then "exe" else ""
+  bif isWindows then "exe" else ""
 
 /--
 Normalizes a path, returning an equivalent path that may better follow platform conventions.
@@ -86,15 +86,15 @@ def normalize (p : FilePath) : FilePath := Id.run do
   let mut p := normalizeDriveLetter p
   -- normalize separator
   unless pathSeparators.length == 1 do
-    p := ⟨p.toString.map fun c => if pathSeparators.contains c then pathSeparator else c⟩
+    p := ⟨p.toString.map fun c => bif pathSeparators.contains c then pathSeparator else c⟩
   return p
 where
   normalizeDriveLetter (p : FilePath) : FilePath := Id.run do
-    if !isWindows then
+    bif !isWindows then
       return p
 
     if let [driveLetter, ':'] := (p.toString.chars.take 2).toList then
-      if driveLetter.isLower then
+      bif driveLetter.isLower then
         return ⟨p.toString.capitalize⟩
       else
         return p
@@ -125,7 +125,7 @@ If `sub` is an absolute path, then `p` is discarded and `sub` is returned. If `s
 path, then it is attached to `p` with the platform-specific path separator.
 -/
 def join (p sub : FilePath) : FilePath :=
-  if sub.isAbsolute then
+  bif sub.isAbsolute then
     sub
   else
     ⟨p.toString ++ pathSeparator.toString ++ sub.toString⟩
@@ -140,7 +140,7 @@ private def posOfLastSep (p : FilePath) : Option p.toString.Pos :=
   p.toString.revFind? pathSeparators.contains
 
 private def afterRootDirectory (p : FilePath) : p.toString.Pos :=
-  if pathSeparators.contains p.toString.front then
+  bif pathSeparators.contains p.toString.front then
     p.toString.startPos.nextn 1
   else
     p.toString.startPos.nextn 3
@@ -153,12 +153,12 @@ Otherwise, the path's parent directory is returned.
 -/
 def parent (p : FilePath) : Option FilePath :=
   let extractParentPath := FilePath.mk <$> String.Slice.copy <$> String.sliceTo _ <$> posOfLastSep p
-  if p.isAbsolute then
+  bif p.isAbsolute then
     let afterRootDirectory := afterRootDirectory p
-    if afterRootDirectory.IsAtEnd then
+    uif afterRootDirectory.IsAtEnd then
       -- `p` is a root directory
       none
-    else if (posOfLastSep p).bind String.Pos.next? = some afterRootDirectory then
+    else bif (posOfLastSep p).bind String.Pos.next? == some afterRootDirectory then
       -- `p` is a direct child of the root
       some ⟨String.sliceTo _ afterRootDirectory |>.copy⟩
     else
@@ -178,7 +178,7 @@ def fileName (p : FilePath) : Option String :=
   let lastPart := match posOfLastSep p with
     | some sepPos => (String.sliceFrom _ sepPos.next!).copy
     | none        => p.toString
-  if lastPart.isEmpty || lastPart == "." || lastPart == ".." then none else some lastPart
+  bif lastPart.isEmpty || lastPart == "." || lastPart == ".." then none else some lastPart
 
 /--
 Extracts the stem (non-extension) part of `p.fileName`.
@@ -240,7 +240,7 @@ Unlike `System.FilePath.withExtension`, this does not remove any existing extens
 def addExtension (p : FilePath) (ext : String) : FilePath :=
   match p.fileName with
   | none => p
-  | some fname => p.withFileName (if ext.isEmpty then fname else fname ++ "." ++ ext)
+  | some fname => p.withFileName (bif ext.isEmpty then fname else fname ++ "." ++ ext)
 
 /--
 Replaces the current extension in a path `p` with `ext`, adding it if there is no extension. If the
@@ -258,7 +258,7 @@ Examples:
 def withExtension (p : FilePath) (ext : String) : FilePath :=
   match p.fileStem with
   | none => p
-  | some stem => p.withFileName (if ext.isEmpty then stem else stem ++ "." ++ ext)
+  | some stem => p.withFileName (bif ext.isEmpty then stem else stem ++ "." ++ ext)
 
 /--
 Splits a path into a list of individual file names at the platform-specific path separator.
@@ -288,7 +288,7 @@ The character that is used to separate the entries in the `$PATH` (or `%PATH%`) 
 This value is platform dependent.
 -/
 protected def separator : Char :=
-  if isWindows then ';' else ':'
+  bif isWindows then ';' else ':'
 
 /--
 Separates the entries in the `$PATH` (or `%PATH%`) environment variable by the current

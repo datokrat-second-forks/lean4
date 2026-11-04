@@ -112,13 +112,13 @@ This function has a logical model in terms of `Float32.Model`. It is compiled to
 Strict inequality of floating-point numbers. Typically used via the `<` operator.
 -/
 @[extern "lean_float32_decLt"] def Float32.lt : Float32 → Float32 → Bool :=
-  fun a b => a.toModel < b.toModel
+  fun a b => a.toModel <ᵇ b.toModel
 
 /--
 Non-strict inequality of floating-point numbers. Typically used via the `≤` operator.
 -/
 @[extern "lean_float32_decLe"] def Float32.le : Float32 → Float32 → Bool :=
-  fun a b => a.toModel ≤ b.toModel
+  fun a b => a.toModel ≤ᵇ b.toModel
 
 /--
 Bit-for-bit conversion from `UInt32`. Interprets a `UInt32` as a `Float32`, ignoring the numeric
@@ -330,7 +330,7 @@ instance : Inhabited Float32 where
   default := UInt64.toFloat32 0
 
 protected def Float32.repr (n : Float32) (prec : Nat) : Std.Format :=
-  if n < UInt64.toFloat32 0 then Repr.addAppParen (toString n) prec else toString n
+  bif n.lt (UInt64.toFloat32 0) then Repr.addAppParen (toString n) prec else toString n
 
 instance : Repr Float32 where
   reprPrec := Float32.repr

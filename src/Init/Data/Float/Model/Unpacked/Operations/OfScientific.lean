@@ -18,19 +18,19 @@ namespace Float.Model.UnpackedFloat
 
 /-- Computes `m * 10 ^ e`. -/
 def ofScientific (spec : Format) (m : Nat) (e : Int) : UnpackedFloat :=
-  if hm : m = 0 then
+  bif hm : m =ᵇ 0 then
     .zero .positive
   -- Safety check to avoid computing huge powers of ten
-  else if e > 2 ^ spec.exponentBits then
+  else bif e >ᵇ 2 ^ spec.exponentBits then
     .infinity .positive
   -- Safety check to avoid computing huge powers of ten
-  else if e < -((2 ^ spec.exponentBits : Int) + m.log2) then
+  else bif e <ᵇ -((2 ^ spec.exponentBits : Int) + m.log2) then
     .zero .positive
-  else if 0 ≤ e then
-    mul spec (.finite .positive (m <<< spec.mantissaBits) (-spec.mantissaBits) (by simpa [Nat.pos_iff_ne_zero]))
+  else bif 0 ≤ᵇ e then
+    mul spec (.finite .positive (m <<< spec.mantissaBits) (-spec.mantissaBits) (by simpa [Nat.pos_iff_ne_zero] using decideEq_eq_false_iff.1 hm))
       (.finite .positive (10 ^ e.toNat) 0 (Nat.pow_pos (by decide)))
   else
-    div spec (.finite .positive m 0 (Nat.pos_iff_ne_zero.2 hm))
+    div spec (.finite .positive m 0 (Nat.pos_iff_ne_zero.2 (decideEq_eq_false_iff.1 hm)))
       (.finite .positive (10 ^ (-e).toNat) 0 (Nat.pow_pos (by decide)))
 
 end Float.Model.UnpackedFloat

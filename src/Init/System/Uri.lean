@@ -41,10 +41,10 @@ def decodeUri (uri : String) : String := Id.run do
   let percent := '%'.toNat.toUInt8
   while h : i < len do
     let c := rawBytes[i]
-    (decoded, i) := if h₁ : c == percent ∧ i + 1 < len then
+    (decoded, i) := bif h₁ : c == percent && i + 1 <ᵇ len then
       let h1 := rawBytes[i + 1]
       if let some hd1 := hexDigitToUInt8? h1 then
-        if h₂ : i + 2 < len then
+        bif h₂ : i + 2 <ᵇ len then
           let h2 := rawBytes[i + 2]
           if let some hd2 := hexDigitToUInt8? h2 then
             -- decode the hex digits into a byte.
@@ -62,17 +62,17 @@ def decodeUri (uri : String) : String := Id.run do
       (decoded.push c, i + 1)
   return String.fromUTF8! decoded
 where hexDigitToUInt8? (c : UInt8) : Option UInt8 :=
-  if zero ≤ c ∧ c ≤ nine then some (c - zero)
-  else if lettera ≤ c ∧ c ≤ letterf then some (c - lettera + 10)
-  else if letterA ≤ c ∧ c ≤ letterF then some (c - letterA + 10)
+  bif zero ≤ᵇ c && c ≤ᵇ nine then some (c - zero)
+  else bif lettera ≤ᵇ c && c ≤ᵇ letterf then some (c - lettera + 10)
+  else bif letterA ≤ᵇ c && c ≤ᵇ letterF then some (c - letterA + 10)
   else none
 
 def rfc3986ReservedChars : List Char := [ ';', ':', '?', '#', '[', ']', '@', '&', '=', '+', '$', ',', '!', '\'', '(', ')', '*', '%', ' ' ]
 
 def uriEscapeAsciiChar (c : Char) : String :=
-  if rfc3986ReservedChars.contains c || c < ' ' then
+  bif rfc3986ReservedChars.contains c || c <ᵇ ' ' then
     "%" ++ uInt8ToHex c.toNat.toUInt8
-  else if (Char.toNat c) < 127 then
+  else bif (Char.toNat c) <ᵇ 127 then
     c.toString
   else
     c.toString.toUTF8.foldl (fun s b => s ++ "%" ++ (uInt8ToHex b)) ""
@@ -97,24 +97,24 @@ def unescapeUri (s: String) : String :=
 private def normalizeDriveLetter (uri : String) : String :=
   -- lower-case drive letters seem to be preferred in URIs
   match (uri.chars.take 2).toList with
-  | [driveLetter, ':'] => if driveLetter.isUpper then uri.decapitalize else uri
+  | [driveLetter, ':'] => bif driveLetter.isUpper then uri.decapitalize else uri
   | _ => uri
 
 /-- Convert the given FilePath to a "file:///encodedpath" Uri. -/
 def pathToUri (fname : System.FilePath) : String := Id.run do
   let mut uri := fname.normalize.toString
-  if System.Platform.isWindows then
+  bif System.Platform.isWindows then
     uri := normalizeDriveLetter uri
-    uri := uri.map (fun c => if c == '\\' then '/' else c)
+    uri := uri.map (fun c => bif c == '\\' then '/' else c)
   uri := uri.foldl (fun s c => s ++ UriEscape.uriEscapeAsciiChar c) ""
-  let result := if uri.startsWith "/" then "file://" ++ uri else "file:///" ++ uri
+  let result := bif uri.startsWith "/" then "file://" ++ uri else "file:///" ++ uri
   result
 
 -- On Windows, the path "/c:/temp" needs to become "C:/temp"
 private def normalizeDriveExpression (p : String.Slice) : String :=
   match (p.chars.take 3).toList with
   | ['/', driveLetter, ':'] =>
-    if driveLetter.isAlpha then
+    bif driveLetter.isAlpha then
       (p.drop 1).copy.capitalize
     else p.copy
   | _ => p.copy
@@ -126,8 +126,8 @@ def fileUriToPath? (uri : String) : Option System.FilePath :=
   | none => none
   | some p =>
     let p := p.dropWhile (fun c => c != '/') -- drop the hostname.
-    if System.Platform.isWindows then
-      some ((normalizeDriveExpression p).map (fun c => if c == '/' then '\\' else c))
+    bif System.Platform.isWindows then
+      some ((normalizeDriveExpression p).map (fun c => bif c == '/' then '\\' else c))
     else
       some p.copy
 

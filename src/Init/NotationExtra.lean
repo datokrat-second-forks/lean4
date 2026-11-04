@@ -50,11 +50,11 @@ meta def expandBracketedBindersAux (combinator : Syntax) (binders : Array Syntax
 meta def expandExplicitBinders (combinatorDeclName : Name) (explicitBinders : Syntax) (body : Syntax) : MacroM Syntax := do
   let combinator := mkCIdentFrom (← getRef) combinatorDeclName
   let explicitBinders := explicitBinders[0]
-  if explicitBinders.getKind == ``Lean.unbracketedExplicitBinders then
+  bif explicitBinders.getKind == ``Lean.unbracketedExplicitBinders then
     let idents   := explicitBinders[0].getArgs
-    let type? := if explicitBinders[1].isNone then none else some explicitBinders[1][1]
+    let type? := bif explicitBinders[1].isNone then none else some explicitBinders[1][1]
     expandExplicitBindersAux combinator idents type? body
-  else if explicitBinders.getArgs.all (·.getKind == ``Lean.bracketedExplicitBinders) then
+  else bif explicitBinders.getArgs.all (·.getKind == ``Lean.bracketedExplicitBinders) then
     expandBracketedBindersAux combinator explicitBinders.getArgs body
   else
     Macro.throwError "unexpected explicit binder"
@@ -285,7 +285,7 @@ macro_rules
 
 macro_rules
   | `(%[ $[$x],* | $k ]) =>
-    if x.size < 8 then
+    bif x.size <ᵇ 8 then
       x.foldrM (β := Term) (init := k) fun x k =>
         `(List.cons $x $k)
     else

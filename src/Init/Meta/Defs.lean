@@ -55,9 +55,9 @@ def versionStringCore :=
     (toString version.patch)
 
 def versionString :=
-  if version.specialDesc ≠ "" then
+  bif version.specialDesc != "" then
     String.Internal.append (String.Internal.append versionStringCore "-") version.specialDesc
-  else if version.isRelease then
+  else bif version.isRelease then
     versionStringCore
   else
     (String.Internal.append (String.Internal.append versionStringCore ", commit ") githash)
@@ -66,8 +66,8 @@ def origin :=
   "leanprover/lean4"
 
 def toolchain :=
-  if version.specialDesc ≠ ""  then
-    if version.isRelease then
+  bif version.specialDesc != ""  then
+    bif version.isRelease then
       String.Internal.append
         (String.Internal.append
           (String.Internal.append
@@ -77,7 +77,7 @@ def toolchain :=
         version.specialDesc
     else
       String.Internal.append (String.Internal.append origin ":") version.specialDesc
-  else if version.isRelease then
+  else bif version.isRelease then
     String.Internal.append (String.Internal.append origin ":v") versionStringCore
   else
     ""
@@ -96,50 +96,50 @@ opaque Internal.hasLLVMBackend (u : Unit) : Bool
 
 /-- Valid identifier names -/
 @[inline] def isGreek (c : Char) : Bool :=
-  0x391 ≤ c.val && c.val ≤ 0x3dd
+  0x391 ≤ᵇ c.val && c.val ≤ᵇ 0x3dd
 
 def isLetterLike (c : Char) : Bool :=
-  (0x3b1  ≤ c.val && c.val ≤ 0x3c9 && c.val ≠ 0x3bb) ||                     -- Lower greek, but lambda
-  (0x391  ≤ c.val && c.val ≤ 0x3A9 && c.val ≠ 0x3A0 && c.val ≠ 0x3A3) ||    -- Upper greek, but Pi and Sigma
-  (0x3ca  ≤ c.val && c.val ≤ 0x3fb) ||                                      -- Coptic letters
-  (0x1f00 ≤ c.val && c.val ≤ 0x1ffe) ||                                     -- Polytonic Greek Extended Character Set
-  (0x2100 ≤ c.val && c.val ≤ 0x214f) ||                                     -- Letter like block
-  (0x1d49c ≤ c.val && c.val ≤ 0x1d59f) ||                                   -- Latin letters, Script, Double-struck, Fractur
-  (0x00c0 ≤ c.val && c.val ≤ 0x00ff && c.val ≠ 0x00d7 && c.val ≠ 0x00f7) || -- Latin-1 supplement letters but × and ÷
-  (0x0100 ≤ c.val && c.val ≤ 0x017f)                                        -- Latin Extended-A
+  (0x3b1  ≤ᵇ c.val && c.val ≤ᵇ 0x3c9 && c.val != 0x3bb) ||                      -- Lower greek, but lambda
+  (0x391  ≤ᵇ c.val && c.val ≤ᵇ 0x3A9 && c.val != 0x3A0 && c.val != 0x3A3) ||    -- Upper greek, but Pi and Sigma
+  (0x3ca  ≤ᵇ c.val && c.val ≤ᵇ 0x3fb) ||                                        -- Coptic letters
+  (0x1f00 ≤ᵇ c.val && c.val ≤ᵇ 0x1ffe) ||                                       -- Polytonic Greek Extended Character Set
+  (0x2100 ≤ᵇ c.val && c.val ≤ᵇ 0x214f) ||                                       -- Letter like block
+  (0x1d49c ≤ᵇ c.val && c.val ≤ᵇ 0x1d59f) ||                                     -- Latin letters, Script, Double-struck, Fractur
+  (0x00c0 ≤ᵇ c.val && c.val ≤ᵇ 0x00ff && c.val != 0x00d7 && c.val != 0x00f7) || -- Latin-1 supplement letters but × and ÷
+  (0x0100 ≤ᵇ c.val && c.val ≤ᵇ 0x017f)                                          -- Latin Extended-A
 
 @[inline] def isNumericSubscript (c : Char) : Bool :=
-  0x2080 ≤ c.val && c.val ≤ 0x2089
+  0x2080 ≤ᵇ c.val && c.val ≤ᵇ 0x2089
 
 def isSubScriptAlnum (c : Char) : Bool :=
   isNumericSubscript c ||
-  (0x2090 ≤ c.val && c.val ≤ 0x209c) ||
-  (0x1d62 ≤ c.val && c.val ≤ 0x1d6a) ||
+  (0x2090 ≤ᵇ c.val && c.val ≤ᵇ 0x209c) ||
+  (0x1d62 ≤ᵇ c.val && c.val ≤ᵇ 0x1d6a) ||
   c.val == 0x2c7c
 
 @[inline] def isIdFirst (c : Char) : Bool :=
-  c.isAlpha || c = '_' || isLetterLike c
+  c.isAlpha || c == '_' || isLetterLike c
 
 @[inline] private def isAlphaAscii (c : UInt8) : Bool :=
-  'a'.toUInt8 ≤ c && c ≤ 'z'.toUInt8
-    || 'A'.toUInt8 ≤ c && c ≤ 'Z'.toUInt8
+  'a'.toUInt8 ≤ᵇ c && c ≤ᵇ 'z'.toUInt8
+    || 'A'.toUInt8 ≤ᵇ c && c ≤ᵇ 'Z'.toUInt8
 
 @[inline] def isIdFirstAscii (c : UInt8) : Bool :=
-  isAlphaAscii c || c = '_'.toUInt8
+  isAlphaAscii c || c == '_'.toUInt8
 
 @[inline] private def isAlphanumAscii (c : UInt8) : Bool :=
-  isAlphaAscii c || '0'.toUInt8 ≤ c && c ≤ '9'.toUInt8
+  isAlphaAscii c || '0'.toUInt8 ≤ᵇ c && c ≤ᵇ '9'.toUInt8
 
 @[inline] def isIdRest (c : Char) : Bool :=
-  c.isAlphanum || c = '_' || c = '\'' || c == '!' || c == '?' || isLetterLike c || isSubScriptAlnum c
+  c.isAlphanum || c == '_' || c == '\'' || c == '!' || c == '?' || isLetterLike c || isSubScriptAlnum c
 
 @[inline] def isIdRestAscii (c : UInt8) : Bool :=
-  isAlphanumAscii c || c = '_'.toUInt8 || c = '\''.toUInt8 || c == '!'.toUInt8 || c == '?'.toUInt8
+  isAlphanumAscii c || c == '_'.toUInt8 || c == '\''.toUInt8 || c == '!'.toUInt8 || c == '?'.toUInt8
 
 def idBeginEscape := '«'
 def idEndEscape   := '»'
-@[inline] def isIdBeginEscape (c : Char) : Bool := c = idBeginEscape
-@[inline] def isIdEndEscape (c : Char) : Bool := c = idEndEscape
+@[inline] def isIdBeginEscape (c : Char) : Bool := c == idBeginEscape
+@[inline] def isIdEndEscape (c : Char) : Bool := c == idEndEscape
 namespace Name
 
 def getRoot : Name → Name
@@ -168,8 +168,8 @@ inner-loop function like `Name.toString`.
 
 -- If you change this, also change the corresponding function in `Init.Data.ToString.Name`.
 private partial def needsNoEscapeAsciiRest (s : String) (i : Nat) : Bool :=
-  if h : i < s.utf8ByteSize then
-    let c := String.Internal.getUTF8Byte s i h
+  bif h : i <ᵇ s.utf8ByteSize then
+    let c := String.Internal.getUTF8Byte s i (lt_of_decideLT_eq_true h)
     isIdRestAscii c && needsNoEscapeAsciiRest s (i + 1)
   else
     true
@@ -195,10 +195,10 @@ Names that are valid identifiers are not escaped, and otherwise, if they do not 
 -- If you change this, also change the corresponding function in `Init.Data.ToString.Name`.
 @[inline]
 private def Internal.Meta.escapePart (s : String) (force : Bool := false) : Option String :=
-  if h : s.utf8ByteSize > 0 then
-    if !force && needsNoEscape s h then
+  bif h : s.utf8ByteSize >ᵇ 0 then
+    bif !force && needsNoEscape s (lt_of_decideLT_eq_true h) then
       some s
-    else if String.Internal.any s isIdEndEscape then
+    else bif String.Internal.any s isIdEndEscape then
       none
     else
       some <| escape s
@@ -221,10 +221,10 @@ private def Internal.Meta.toStringWithSep (n : Name) (isToken : String → Bool 
     -- Escape the last component if the identifier would otherwise be a token
     let r := toStringWithSep n isToken
     let r' := String.Internal.append (String.Internal.append r sep) (maybeEscape s false)
-    if escape && isToken r' then String.Internal.append (String.Internal.append r sep) (maybeEscape s true) else r'
+    bif escape && isToken r' then String.Internal.append (String.Internal.append r sep) (maybeEscape s true) else r'
   | num n v         => String.Internal.append (String.Internal.append (toStringWithSep n (isToken := fun _ => false)) sep) (Nat.repr v)
 where
-  maybeEscape s force := if escape then escapePart s force |>.getD s else s
+  maybeEscape s force := bif escape then escapePart s force |>.getD s else s
 
 /--
 Converts a name to a string.
@@ -244,7 +244,7 @@ private def Internal.Meta.toStringWithToken (n : Name) (escape := true) (isToken
   toStringWithSep "." (escape && !n.isInaccessibleUserName && !n.hasMacroScopes && !maybePseudoSyntax) n isToken
 where
   maybePseudoSyntax :=
-    if n == `_ then
+    bif n == `_ then
       -- output hole as is
       true
     else if let .str _ s := n.getRoot then
@@ -278,7 +278,7 @@ protected def reprPrec (n : Name) (prec : Nat) : Std.Format :=
   | anonymous => Std.Format.text "Lean.Name.anonymous"
   | num p i => Repr.addAppParen ("Lean.Name.mkNum " ++ Name.reprPrec p max_prec ++ " " ++ repr i) prec
   | str p s =>
-    if p.hasNum then
+    bif p.hasNum then
       Repr.addAppParen ("Lean.Name.mkStr " ++ Name.reprPrec p max_prec ++ " " ++ repr s) prec
     else
       Std.Format.text "`" ++ Internal.Meta.toString n
@@ -293,21 +293,21 @@ def capitalize : Name → Name
 def replacePrefix : Name → Name → Name → Name
   | anonymous,   anonymous, newP => newP
   | anonymous,   _,         _    => anonymous
-  | n@(str p s), queryP,    newP => if n == queryP then newP else Name.mkStr (p.replacePrefix queryP newP) s
-  | n@(num p s), queryP,    newP => if n == queryP then newP else Name.mkNum (p.replacePrefix queryP newP) s
+  | n@(str p s), queryP,    newP => bif n == queryP then newP else Name.mkStr (p.replacePrefix queryP newP) s
+  | n@(num p s), queryP,    newP => bif n == queryP then newP else Name.mkNum (p.replacePrefix queryP newP) s
 
 /--
   `eraseSuffix? n s` return `n'` if `n` is of the form `n == n' ++ s`.
 -/
 def eraseSuffix? : Name → Name → Option Name
   | n,       anonymous => some n
-  | str p s, str p' s' => if s == s' then eraseSuffix? p p' else none
-  | num p s, num p' s' => if s == s' then eraseSuffix? p p' else none
+  | str p s, str p' s' => bif s == s' then eraseSuffix? p p' else none
+  | num p s, num p' s' => bif s == s' then eraseSuffix? p p' else none
   | _,       _         => none
 
 /-- Remove macros scopes, apply `f`, and put them back -/
 @[inline] def modifyBase (n : Name) (f : Name → Name) : Name :=
-  if n.hasMacroScopes then
+  bif n.hasMacroScopes then
     let view := extractMacroScopes n
     { view with name := f view.name }.review
   else
@@ -579,8 +579,8 @@ def getSubstring? (stx : Syntax) (withLeading := true) (withTrailing := true) : 
   | SourceInfo.original lead startPos _ _, SourceInfo.original _ _ trail stopPos =>
     some {
       str      := lead.str
-      startPos := if withLeading then lead.startPos else startPos
-      stopPos  := if withTrailing then trail.stopPos else stopPos
+      startPos := bif withLeading then lead.startPos else startPos
+      stopPos  := bif withTrailing then trail.stopPos else stopPos
     }
   | _, _ => none
 
@@ -620,10 +620,10 @@ def unsetTrailing (stx : Syntax) : Syntax :=
   | _                                     => stx
 
 @[specialize] private partial def updateFirst {α} [Inhabited α] (a : Array α) (f : α → Option α) (i : Nat) : Option (Array α) :=
-  if h : i < a.size then
+  bif h : i <ᵇ a.size then
     let v := a[i]
     match f v with
-    | some v => some <| a.set i v h
+    | some v => some <| a.set i v (lt_of_decideLT_eq_true h)
     | none   => updateFirst a f (i+1)
   else
     none
@@ -703,7 +703,7 @@ partial def expandMacros (stx : Syntax) (p : SyntaxNodeKind → Bool := fun k =>
   withRef stx do
     match stx with
     | .node info k args => do
-      if p k then
+      bif p k then
         match (← expandMacro? stx) with
         | some stxNew => expandMacros stxNew
         | none        => do
@@ -794,7 +794,7 @@ def mkSepArray (as : Array Syntax) (sep : Syntax) : Array Syntax := Id.run do
   let mut i := 0
   let mut r := #[]
   for a in as do
-    if i > 0 then
+    bif i >ᵇ 0 then
       r := r.push sep |>.push a
     else
       r := r.push a
@@ -833,7 +833,7 @@ The provided array should not include the separators.
 Like `Syntax.TSepArray.ofElems` but for untyped syntax.
 -/
 def SepArray.ofElems {sep} (elems : Array Syntax) : SepArray sep :=
-⟨mkSepArray elems (if String.Internal.isEmpty sep then mkNullNode else mkAtom sep)⟩
+⟨mkSepArray elems (bif String.Internal.isEmpty sep then mkNullNode else mkAtom sep)⟩
 
 /--
 Constructs a typed separated array from elements by adding suitable separators.
@@ -842,7 +842,7 @@ The generated separators' source location is that of the syntax returned by `get
 -/
 def SepArray.ofElemsUsingRef [Monad m] [MonadRef m] {sep} (elems : Array Syntax) : m (SepArray sep) := do
   let ref ← getRef;
-  return ⟨mkSepArray elems (if String.Internal.isEmpty sep then mkNullNode else mkAtomFrom ref sep)⟩
+  return ⟨mkSepArray elems (bif String.Internal.isEmpty sep then mkNullNode else mkAtomFrom ref sep)⟩
 
 /--
 Constructs a typed separated array from elements by adding suitable separators.
@@ -938,68 +938,68 @@ def mkNameLit (val : String) (info := SourceInfo.none) : NameLit :=
    for Syntax objects representing these numerals. -/
 
 private partial def decodeBinLitAux (s : String) (i : String.Pos.Raw) (val : Nat) : Option Nat :=
-  if String.Internal.atEnd s i then some val
+  bif String.Internal.atEnd s i then some val
   else
     let c := String.Internal.get s i
-    if c == '0' then decodeBinLitAux s (String.Internal.next s i) (2*val)
-    else if c == '1' then decodeBinLitAux s (String.Internal.next s i) (2*val + 1)
-    else if c == '_' then decodeBinLitAux s (String.Internal.next s i) val
+    bif c == '0' then decodeBinLitAux s (String.Internal.next s i) (2*val)
+    else bif c == '1' then decodeBinLitAux s (String.Internal.next s i) (2*val + 1)
+    else bif c == '_' then decodeBinLitAux s (String.Internal.next s i) val
     else none
 
 private partial def decodeOctalLitAux (s : String) (i : String.Pos.Raw) (val : Nat) : Option Nat :=
-  if String.Internal.atEnd s i then some val
+  bif String.Internal.atEnd s i then some val
   else
     let c := String.Internal.get s i
-    if '0' ≤ c && c ≤ '7' then decodeOctalLitAux s (String.Internal.next s i) (8*val + c.toNat - '0'.toNat)
-    else if c == '_' then decodeOctalLitAux s (String.Internal.next s i) val
+    bif '0' ≤ᵇ c && c ≤ᵇ '7' then decodeOctalLitAux s (String.Internal.next s i) (8*val + c.toNat - '0'.toNat)
+    else bif c == '_' then decodeOctalLitAux s (String.Internal.next s i) val
     else none
 
 private def decodeHexDigit (s : String) (i : String.Pos.Raw) : Option (Nat × String.Pos.Raw) :=
   let c := String.Internal.get s i
   let i := String.Internal.next s i
-  if '0' ≤ c && c ≤ '9' then some (c.toNat - '0'.toNat, i)
-  else if 'a' ≤ c && c ≤ 'f' then some (10 + c.toNat - 'a'.toNat, i)
-  else if 'A' ≤ c && c ≤ 'F' then some (10 + c.toNat - 'A'.toNat, i)
+  bif '0' ≤ᵇ c && c ≤ᵇ '9' then some (c.toNat - '0'.toNat, i)
+  else bif 'a' ≤ᵇ c && c ≤ᵇ 'f' then some (10 + c.toNat - 'a'.toNat, i)
+  else bif 'A' ≤ᵇ c && c ≤ᵇ 'F' then some (10 + c.toNat - 'A'.toNat, i)
   else none
 
 private partial def decodeHexLitAux (s : String) (i : String.Pos.Raw) (val : Nat) : Option Nat :=
-  if String.Internal.atEnd s i then some val
+  bif String.Internal.atEnd s i then some val
   else match decodeHexDigit s i with
     | some (d, i) => decodeHexLitAux s i (16*val + d)
     | none        =>
-      if String.Internal.get s i == '_' then decodeHexLitAux s (String.Internal.next s i) val
+      bif String.Internal.get s i == '_' then decodeHexLitAux s (String.Internal.next s i) val
       else none
 
 private partial def decodeDecimalLitAux (s : String) (i : String.Pos.Raw) (val : Nat) : Option Nat :=
-  if String.Internal.atEnd s i then some val
+  bif String.Internal.atEnd s i then some val
   else
     let c := String.Internal.get s i
-    if '0' ≤ c && c ≤ '9' then decodeDecimalLitAux s (String.Internal.next s i) (10*val + c.toNat - '0'.toNat)
-    else if c == '_' then decodeDecimalLitAux s (String.Internal.next s i) val
+    bif '0' ≤ᵇ c && c ≤ᵇ '9' then decodeDecimalLitAux s (String.Internal.next s i) (10*val + c.toNat - '0'.toNat)
+    else bif c == '_' then decodeDecimalLitAux s (String.Internal.next s i) val
     else none
 
 def decodeNatLitVal? (s : String) : Option Nat :=
   let len := String.Internal.length s
-  if len == 0 then none
+  bif len == 0 then none
   else
     let c := String.Internal.get s 0
-    if c == '0' then
-      if len == 1 then some 0
+    bif c == '0' then
+      bif len == 1 then some 0
       else
         let c := String.Internal.get s ⟨1⟩
-        if c == 'x' || c == 'X' then decodeHexLitAux s ⟨2⟩ 0
-        else if c == 'b' || c == 'B' then decodeBinLitAux s ⟨2⟩ 0
-        else if c == 'o' || c == 'O' then decodeOctalLitAux s ⟨2⟩ 0
-        else if c.isDigit then decodeDecimalLitAux s 0 0
+        bif c == 'x' || c == 'X' then decodeHexLitAux s ⟨2⟩ 0
+        else bif c == 'b' || c == 'B' then decodeBinLitAux s ⟨2⟩ 0
+        else bif c == 'o' || c == 'O' then decodeOctalLitAux s ⟨2⟩ 0
+        else bif c.isDigit then decodeDecimalLitAux s 0 0
         else none
-    else if c.isDigit then decodeDecimalLitAux s 0 0
+    else bif c.isDigit then decodeDecimalLitAux s 0 0
     else none
 
 def isLit? (litKind : SyntaxNodeKind) (stx : Syntax) : Option String :=
   match stx with
   | Syntax.node _ k args =>
-    if h : k == litKind ∧ args.size = 1 then
-      match args[0]'(Nat.lt_of_sub_eq_succ h.2) with
+    bif h : k == litKind && args.size =ᵇ 1 then
+      match args[0]'(Nat.lt_of_sub_eq_succ (eq_of_decideEq_eq_true (cast (Bool.and_eq_true _ _) h).2)) with
       | (Syntax.atom _ val) => some val
       | _ => none
     else
@@ -1024,66 +1024,66 @@ string such as `123`, `123.456e7` and returns a triple `(n, sign, e)` with value
 -/
 partial def decodeScientificLitVal? (s : String) : Option (Nat × Bool × Nat) :=
   let len := String.Internal.length s
-  if len == 0 then none
+  bif len == 0 then none
   else
     let c := String.Internal.get s 0
-    if c.isDigit then
+    bif c.isDigit then
       decode 0 0
     else none
 where
   decodeAfterExp (i : String.Pos.Raw) (val : Nat) (e : Nat) (sign : Bool) (exp : Nat) : Option (Nat × Bool × Nat) :=
-    if String.Internal.atEnd s i then
-      if sign then
+    bif String.Internal.atEnd s i then
+      bif sign then
         some (val, sign, exp + e)
-      else if exp >= e then
+      else bif exp ≥ᵇ e then
         some (val, sign, exp - e)
       else
         some (val, true, e - exp)
     else
       let c := String.Internal.get s i
-      if '0' ≤ c && c ≤ '9' then
+      bif '0' ≤ᵇ c && c ≤ᵇ '9' then
         decodeAfterExp (String.Internal.next s i) val e sign (10*exp + c.toNat - '0'.toNat)
-      else if c == '_' then
+      else bif c == '_' then
         decodeAfterExp (String.Internal.next s i) val e sign exp
       else
         none
 
   decodeExp (i : String.Pos.Raw) (val : Nat) (e : Nat) : Option (Nat × Bool × Nat) :=
-    if String.Internal.atEnd s i then none else
+    bif String.Internal.atEnd s i then none else
     let c := String.Internal.get s i
-    if c == '-' then
+    bif c == '-' then
        decodeAfterExp (String.Internal.next s i) val e true 0
-    else if c == '+' then
+    else bif c == '+' then
        decodeAfterExp (String.Internal.next s i) val e false 0
     else
        decodeAfterExp i val e false 0
 
   decodeAfterDot (i : String.Pos.Raw) (val : Nat) (e : Nat) : Option (Nat × Bool × Nat) :=
-    if String.Internal.atEnd s i then
+    bif String.Internal.atEnd s i then
       some (val, true, e)
     else
       let c := String.Internal.get s i
-      if '0' ≤ c && c ≤ '9' then
+      bif '0' ≤ᵇ c && c ≤ᵇ '9' then
         decodeAfterDot (String.Internal.next s i) (10*val + c.toNat - '0'.toNat) (e+1)
-      else if c == '_' then
+      else bif c == '_' then
         decodeAfterDot (String.Internal.next s i) val e
-      else if c == 'e' || c == 'E' then
+      else bif c == 'e' || c == 'E' then
         decodeExp (String.Internal.next s i) val e
       else
         none
 
   decode (i : String.Pos.Raw) (val : Nat) : Option (Nat × Bool × Nat) :=
-    if String.Internal.atEnd s i then
+    bif String.Internal.atEnd s i then
       none
     else
       let c := String.Internal.get s i
-      if '0' ≤ c && c ≤ '9' then
+      bif '0' ≤ᵇ c && c ≤ᵇ '9' then
         decode (String.Internal.next s i) (10*val + c.toNat - '0'.toNat)
-      else if c == '_' then
+      else bif c == '_' then
         decode (String.Internal.next s i) val
-      else if c == '.' then
+      else bif c == '.' then
         decodeAfterDot (String.Internal.next s i) val 0
-      else if c == 'e' || c == 'E' then
+      else bif c == 'e' || c == 'E' then
         decodeExp (String.Internal.next s i) val 0
       else
         none
@@ -1106,17 +1106,17 @@ def toNat (stx : Syntax) : Nat :=
 def decodeQuotedChar (s : String) (i : String.Pos.Raw) : Option (Char × String.Pos.Raw) := do
   let c := String.Internal.get s i
   let i := String.Internal.next s i
-  if c == '\\' then pure ('\\', i)
-  else if c = '\"' then pure ('\"', i)
-  else if c = '\'' then pure ('\'', i)
-  else if c = 'r'  then pure ('\r', i)
-  else if c = 'n'  then pure ('\n', i)
-  else if c = 't'  then pure ('\t', i)
-  else if c = 'x'  then
+  bif c == '\\' then pure ('\\', i)
+  else bif c == '\"' then pure ('\"', i)
+  else bif c == '\'' then pure ('\'', i)
+  else bif c == 'r'  then pure ('\r', i)
+  else bif c == 'n'  then pure ('\n', i)
+  else bif c == 't'  then pure ('\t', i)
+  else bif c == 'x'  then
     let (d₁, i) ← decodeHexDigit s i
     let (d₂, i) ← decodeHexDigit s i
     pure (Char.ofNat (16*d₁ + d₂), i)
-  else if c = 'u'  then do
+  else bif c == 'u'  then do
     let (d₁, i) ← decodeHexDigit s i
     let (d₂, i) ← decodeHexDigit s i
     let (d₃, i) ← decodeHexDigit s i
@@ -1138,11 +1138,11 @@ def decodeStringGap (s : String) (i : String.Pos.Raw) : Option String.Pos.Raw :=
 partial def decodeStrLitAux (s : String) (i : String.Pos.Raw) (acc : String) : Option String := do
   let c := String.Internal.get s i
   let i := String.Internal.next s i
-  if c == '\"' then
+  bif c == '\"' then
     pure acc
-  else if String.Internal.atEnd s i then
+  else bif String.Internal.atEnd s i then
     none
-  else if c == '\\' then do
+  else bif c == '\\' then do
     if let some (c, i) := decodeQuotedChar s i then
       decodeStrLitAux s i (String.push acc c)
     else if let some i := decodeStringGap s i then
@@ -1161,7 +1161,7 @@ By counting the number of leading `#`'s, we can extract the `...string...`.
 partial def decodeRawStrLitAux (s : String) (i : String.Pos.Raw) (num : Nat) : String :=
   let c := String.Internal.get s i
   let i := String.Internal.next s i
-  if c == '#' then
+  bif c == '#' then
     decodeRawStrLitAux s i (num + 1)
   else
     String.Internal.extract s i ⟨s.utf8ByteSize - (num + 1)⟩
@@ -1175,7 +1175,7 @@ If it returns `none` then the string literal is ill-formed, which indicates a bu
 The function is not required to return `none` if the string literal is ill-formed.
 -/
 def decodeStrLit (s : String) : Option String :=
-  if String.Internal.get s 0 == 'r' then
+  bif String.Internal.get s 0 == 'r' then
     some <| decodeRawStrLitAux s ⟨1⟩ 0
   else
     decodeStrLitAux s ⟨1⟩ ""
@@ -1193,7 +1193,7 @@ def isStrLit? (stx : Syntax) : Option String :=
 
 def decodeCharLit (s : String) : Option Char := do
   let c := String.Internal.get s ⟨1⟩
-  if c == '\\' then do
+  bif c == '\\' then do
     let (c, _) ← decodeQuotedChar s ⟨2⟩
     pure c
   else
@@ -1206,24 +1206,24 @@ def isCharLit? (stx : Syntax) : Option Char :=
 
 private partial def splitNameLitAux (ss : Substring.Raw) (acc : List Substring.Raw) : List Substring.Raw :=
   let splitRest (ss : Substring.Raw) (acc : List Substring.Raw) : List Substring.Raw :=
-    if Substring.Raw.Internal.front ss == '.' then
+    bif Substring.Raw.Internal.front ss == '.' then
       splitNameLitAux (Substring.Raw.Internal.drop ss 1) acc
-    else if Substring.Raw.Internal.isEmpty ss then
+    else bif Substring.Raw.Internal.isEmpty ss then
       acc
     else
       []
-  if Substring.Raw.Internal.isEmpty ss then []
+  bif Substring.Raw.Internal.isEmpty ss then []
   else
     let curr := Substring.Raw.Internal.front ss
-    if isIdBeginEscape curr then
+    bif isIdBeginEscape curr then
       let escapedPart := Substring.Raw.Internal.takeWhile ss (!isIdEndEscape ·)
       let escapedPart := { escapedPart with stopPos := String.Pos.Raw.Internal.min ss.stopPos (String.Internal.next escapedPart.str escapedPart.stopPos) }
-      if !isIdEndEscape (Substring.Raw.Internal.get escapedPart <| Substring.Raw.Internal.prev escapedPart ⟨escapedPart.bsize⟩) then []
+      bif !isIdEndEscape (Substring.Raw.Internal.get escapedPart <| Substring.Raw.Internal.prev escapedPart ⟨escapedPart.bsize⟩) then []
       else splitRest (Substring.Raw.Internal.extract ss ⟨escapedPart.bsize⟩ ⟨ss.bsize⟩) (escapedPart :: acc)
-    else if isIdFirst curr then
+    else bif isIdFirst curr then
       let idPart := Substring.Raw.Internal.takeWhile ss isIdRest
       splitRest (Substring.Raw.Internal.extract ss ⟨idPart.bsize⟩ ⟨ss.bsize⟩) (idPart :: acc)
-    else if curr.isDigit then
+    else bif curr.isDigit then
       let idPart := Substring.Raw.Internal.takeWhile ss Char.isDigit
       splitRest (Substring.Raw.Internal.extract ss ⟨idPart.bsize⟩ ⟨ss.bsize⟩) (idPart :: acc)
     else
@@ -1248,9 +1248,9 @@ def _root_.Substring.Raw.toName (s : Substring.Raw) : Name :=
   | comps => comps.foldr (init := Name.anonymous)
     fun comp n =>
       let comp := Substring.Raw.Internal.toString comp
-      if isIdBeginEscape (String.Internal.front comp) then
+      bif isIdBeginEscape (String.Internal.front comp) then
         Name.mkStr n (String.Internal.dropRight (String.Internal.drop comp 1) 1)
-      else if (String.Internal.front comp).isDigit then
+      else bif (String.Internal.front comp).isDigit then
         if let some k := decodeNatLitVal? comp then
           Name.mkNum n k
         else
@@ -1268,7 +1268,7 @@ def _root_.String.toName (s : String) : Name :=
   s.toRawSubstring.toName
 
 def decodeNameLit (s : String) : Option Name :=
-  if String.Internal.get s 0 == '`' then
+  bif String.Internal.get s 0 == '`' then
     match (Substring.Raw.Internal.drop s.toRawSubstring 1).toName with
     | .anonymous => none
     | name => some name
@@ -1281,7 +1281,7 @@ def isNameLit? (stx : Syntax) : Option Name :=
   | _        => none
 
 def hasArgs : Syntax → Bool
-  | Syntax.node _ _ args => args.size > 0
+  | Syntax.node _ _ args => args.size >ᵇ 0
   | _                    => false
 
 def isAtom : Syntax → Bool
@@ -1305,8 +1305,8 @@ def getOptionalIdent? (stx : Syntax) : Option Name :=
   | none     => none
 
 partial def findAux (p : Syntax → Bool) : Syntax → Option Syntax
-  | stx@(Syntax.node _ _ args) => if p stx then some stx else args.findSome? (findAux p)
-  | stx                        => if p stx then some stx else none
+  | stx@(Syntax.node _ _ args) => bif p stx then some stx else args.findSome? (findAux p)
+  | stx                        => bif p stx then some stx else none
 
 def find? (stx : Syntax) (p : Syntax → Bool) : Option Syntax :=
   findAux p stx
@@ -1339,10 +1339,10 @@ partial def getHexNumSize (s : Syntax.HexNum) : Nat :=
   | _        => 0
 where
   go (s : String) (p : String.Pos.Raw) (n : Nat) : Nat :=
-    if String.Internal.atEnd s p then
+    bif String.Internal.atEnd s p then
       n
     else
-      go s (String.Internal.next s p) (if String.Internal.get s p = '_' then n else n + 1)
+      go s (String.Internal.next s p) (bif String.Internal.get s p == '_' then n else n + 1)
 
 /--
 Extracts the parsed name from the syntax of an identifier.
@@ -1437,7 +1437,7 @@ instance : Quote Substring.Raw := ⟨fun s => Syntax.mkCApp ``String.toRawSubstr
 
 -- in contrast to `Name.toString`, we can, and want to be, precise here
 private def getEscapedNameParts? (acc : List String) : Name → Option (List String)
-  | Name.anonymous => if acc.isEmpty then none else some acc
+  | Name.anonymous => bif acc.isEmpty then none else some acc
   | Name.str n s => do
     let s ← Name.Internal.Meta.escapePart s false
     getEscapedNameParts? (s::acc) n
@@ -1466,13 +1466,13 @@ instance [Quote α `term] : Quote (List α) `term where
   quote := private quoteList
 
 private def quoteArray [Quote α `term] (xs : Array α) : Term :=
-  if xs.size <= 8 then
+  bif xs.size ≤ᵇ 8 then
     go 0 #[]
   else
     Syntax.mkCApp ``List.toArray #[quote xs.toList]
 where
   go (i : Nat) (args : Array Term) : Term :=
-    if h : i < xs.size then
+    bif h : i <ᵇ xs.size then
       go (i+1) (args.push (quote xs[i]))
     else
       Syntax.mkCApp (Name.mkStr2 "Array" (String.Internal.append "mkArray" (toString xs.size))) args
@@ -1517,14 +1517,14 @@ abbrev getSepElems := @getEvenElems
 open Lean
 
 private partial def filterSepElemsMAux {m : Type → Type} [Monad m] (a : Array Syntax) (p : Syntax → m Bool) (i : Nat) (acc : Array Syntax) : m (Array Syntax) := do
-  if h : i < a.size then
+  bif h : i <ᵇ a.size then
     let stx := a[i]
-    if (← p stx) then
-      if acc.isEmpty then
+    bif (← p stx) then
+      bif acc.isEmpty then
         filterSepElemsMAux a p (i+2) (acc.push stx)
-      else if hz : i ≠ 0 then
-        have : i.pred < i := Nat.pred_lt hz
-        have : i.pred < a.size := Nat.lt_trans this h
+      else bif hz : i ≠ᵇ 0 then
+        have : i.pred < i := Nat.pred_lt (ne_of_decideNe_eq_true hz)
+        have : i.pred < a.size := Nat.lt_trans this (lt_of_decideLT_eq_true h)
         let sepStx := a[i.pred]
         filterSepElemsMAux a p (i+2) ((acc.push sepStx).push stx)
       else
@@ -1551,9 +1551,9 @@ def filterSepElems (a : Array Syntax) (p : Syntax → Bool) : Array Syntax :=
   Id.run <| a.filterSepElemsM (pure <| p ·)
 
 private partial def mapSepElemsMAux {m : Type → Type} [Monad m] (a : Array Syntax) (f : Syntax → m Syntax) (i : Nat) (acc : Array Syntax) : m (Array Syntax) := do
-  if h : i < a.size then
+  bif h : i <ᵇ a.size then
     let stx := a[i]
-    if i % 2 == 0 then do
+    bif i % 2 == 0 then do
       let stx ← f stx
       mapSepElemsMAux a f (i+1) (acc.push stx)
     else
@@ -1585,7 +1585,7 @@ def TSepArray.getElems (sa : TSepArray k sep) : TSyntaxArray k :=
 Adds an element to the end of a separated array, adding a separator as needed.
 -/
 def TSepArray.push (sa : TSepArray k sep) (e : TSyntax k) : TSepArray k sep :=
-  if sa.elemsAndSeps.isEmpty then
+  bif sa.elemsAndSeps.isEmpty then
     { elemsAndSeps := #[e] }
   else
     { elemsAndSeps := sa.elemsAndSeps.push (mkAtom sep) |>.push e }
@@ -1626,18 +1626,18 @@ private def decodeInterpStrQuotedChar (s : String) (i : String.Pos.Raw) : Option
   | none   =>
     let c := String.Internal.get s i
     let i := String.Internal.next s i
-    if c == '{' then pure ('{', i)
+    bif c == '{' then pure ('{', i)
     else none
 
 private partial def decodeInterpStrLit (s : String) : Option String :=
   let rec loop (i : String.Pos.Raw) (acc : String) : Option String :=
     let c := String.Internal.get s i
     let i := String.Internal.next s i
-    if c == '\"' || c == '{' then
+    bif c == '\"' || c == '{' then
       pure acc
-    else if String.Internal.atEnd s i then
+    else bif String.Internal.atEnd s i then
       none
-    else if c == '\\' then do
+    else bif c == '\\' then do
       if let some (c, i) := decodeInterpStrQuotedChar s i then
         loop i (String.push acc c)
       else if let some i := decodeStringGap s i then
@@ -1667,13 +1667,13 @@ def expandInterpolatedStrChunks (chunks : Array Syntax) (mkAppend : Syntax → S
     let elem ← match elem.isInterpolatedStrLit? with
       | none     => withRef elem <| mkElem elem
       | some str =>
-        if String.Internal.isEmpty str then continue
+        bif String.Internal.isEmpty str then continue
         else withRef elem <| mkLit str
-    if result.isMissing then
+    bif result.isMissing then
       result := elem
     else
       result ← mkAppend result elem
-  if result.isMissing then
+  bif result.isMissing then
     mkLit ""
   else
     return result
@@ -1819,7 +1819,7 @@ either a `Lean.Parser.Tactic.optConfig`, `Lean.Parser.Tactic.config`, or these w
 New metaprograms should use `Lean.Elab.ConfigEval.foldConfigM` instead.
 -/
 partial def getConfigItems (c : Syntax) : TSyntaxArray ``configItem :=
-  if c.isOfKind nullKind then
+  bif c.isOfKind nullKind then
     c.getArgs.flatMap getConfigItems
   else
     match c with

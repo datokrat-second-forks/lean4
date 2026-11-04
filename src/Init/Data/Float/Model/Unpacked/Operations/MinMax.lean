@@ -26,7 +26,7 @@ def minimum : UnpackedFloat → UnpackedFloat → UnpackedFloat
   | _, .notANumber => .notANumber
   | .zero .negative, .zero _ => .zero .negative
   | .zero .positive, .zero s => .zero s
-  | a, b => if a.le b then a else b
+  | a, b => bif a.le b then a else b
 
 /--
 Computes the IEEE-754-2019 `minimumNumber` of two floats. A `NaN` operand is ignored in favor of
@@ -41,7 +41,7 @@ def minimumNumber : UnpackedFloat → UnpackedFloat → UnpackedFloat
   | a, .notANumber => a
   | .zero .negative, .zero _ => .zero .negative
   | .zero .positive, .zero s => .zero s
-  | a, b => if a.le b then a else b
+  | a, b => bif a.le b then a else b
 
 /--
 Computes the IEEE-754-2019 `maximum` of two floats. The result is `NaN` if either operand is
@@ -55,7 +55,7 @@ def maximum : UnpackedFloat → UnpackedFloat → UnpackedFloat
   | _, .notANumber => .notANumber
   | .zero .positive, .zero _ => .zero .positive
   | .zero .negative, .zero s => .zero s
-  | a, b => if a.le b then b else a
+  | a, b => bif a.le b then b else a
 
 /--
 Computes the IEEE-754-2019 `maximumNumber` of two floats. A `NaN` operand is ignored in favor of
@@ -70,6 +70,6 @@ def maximumNumber : UnpackedFloat → UnpackedFloat → UnpackedFloat
   | a, .notANumber => a
   | .zero .positive, .zero _ => .zero .positive
   | .zero .negative, .zero s => .zero s
-  | a, b => if a.le b then b else a
+  | a, b => bif a.le b then b else a
 
 end Float.Model.UnpackedFloat

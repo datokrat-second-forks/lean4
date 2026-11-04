@@ -49,7 +49,7 @@ protected def orElse' {δ} [Backtrackable δ σ] (x₁ x₂ : EStateM ε σ α) 
   match x₁ s with
   | Result.error e₁ s₁ =>
     match x₂ (Backtrackable.restore s₁ d) with
-    | Result.error e₂ s₂ => Result.error (if useFirstEx then e₁ else e₂) s₂
+    | Result.error e₂ s₂ => Result.error (bif useFirstEx then e₁ else e₂) s₂
     | ok                 => ok
   | ok                 => ok
 

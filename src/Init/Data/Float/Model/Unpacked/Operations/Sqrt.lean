@@ -33,7 +33,7 @@ def sqrtCore (spec : Format) (m : Nat) (e : Int) : Nat × Int × Accuracy :=
   -- Let x := Real.sqrt m. Then
   -- `x < root + 1/2` ↔ `x^2 < root^2 + root + 1/4` ↔ `rem < root + 1/4` ↔ `rem ≤ root`.
   -- `x = root + 1/2` is impossible.
-  let accuracy : Accuracy := if rem = 0 then .exact else .inexact (if rem ≤ root then .lt else .gt)
+  let accuracy : Accuracy := bif rem =ᵇ 0 then .exact else .inexact (bif rem ≤ᵇ root then .lt else .gt)
   (root, targetExponent, accuracy)
 
 /--

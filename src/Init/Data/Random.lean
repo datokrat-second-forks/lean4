@@ -59,12 +59,12 @@ def stdNext : StdGen → Nat × StdGen
   | ⟨s1, s2⟩ =>
     let k    : Int := Int.ofNat (s1 / 53668)
     let s1'  : Int := 40014 * (Int.ofNat s1 - k * 53668) - k * 12211
-    let s1'' : Nat := if s1' < 0 then (s1' + 2147483563).toNat else s1'.toNat
+    let s1'' : Nat := bif s1' <ᵇ 0 then (s1' + 2147483563).toNat else s1'.toNat
     let k'   : Int := Int.ofNat (s2 / 52774)
     let s2'  : Int := 40692 * (Int.ofNat s2 - k' * 52774) - k' * 3791
-    let s2'' : Nat := if s2' < 0 then (s2' + 2147483399).toNat else s2'.toNat
+    let s2'' : Nat := bif s2' <ᵇ 0 then (s2' + 2147483399).toNat else s2'.toNat
     let z    : Int := Int.ofNat s1'' - Int.ofNat s2''
-    let z'   : Nat := if z < 1 then (z + 2147483562).toNat else z.toNat % 2147483562
+    let z'   : Nat := bif z <ᵇ 1 then (z + 2147483562).toNat else z.toNat % 2147483562
     (z', ⟨s1'', s2''⟩)
 
 /--
@@ -72,8 +72,8 @@ Splits a `StdGen` into two separate states.
 -/
 def stdSplit : StdGen → StdGen × StdGen
   | g@⟨s1, s2⟩ =>
-    let newS1  := if s1 = 2147483562 then 1 else s1 + 1
-    let newS2  := if s2 = 1          then 2147483398 else s2 - 1
+    let newS1  := bif s1 =ᵇ 2147483562 then 1 else s1 + 1
+    let newS2  := bif s2 =ᵇ 1          then 2147483398 else s2 - 1
     let newG   := (stdNext g).2
     let leftG  := StdGen.mk newS1 newG.2
     let rightG := StdGen.mk newG.1 newS2
@@ -100,8 +100,8 @@ private partial def randNatAux {gen : Type u} [RandomGen gen] (genLo genMag : Na
 
 /-- Generates a random natural number in the interval [lo, hi]. -/
 def randNat {gen : Type u} [RandomGen gen] (g : gen) (lo hi : Nat) : Nat × gen :=
-  let lo'            := if lo > hi then hi else lo
-  let hi'            := if lo > hi then lo else hi
+  let lo'            := bif lo >ᵇ hi then hi else lo
+  let hi'            := bif lo >ᵇ hi then lo else hi
   let (genLo, genHi) := RandomGen.range g
   let genMag         := genHi - genLo + 1
       /-
@@ -119,7 +119,7 @@ def randNat {gen : Type u} [RandomGen gen] (g : gen) (lo hi : Nat) : Nat × gen 
 /-- Generates a random Boolean. -/
 def randBool {gen : Type u} [RandomGen gen] (g : gen) : Bool × gen :=
   let (v, g') := randNat g 0 1
-  (v = 1, g')
+  (v =ᵇ 1, g')
 
 initialize IO.stdGenRef : IO.Ref StdGen ←
   let seed := UInt64.toNat (ByteArray.toUInt64LE! (← IO.getRandomBytes 8))

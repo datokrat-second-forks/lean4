@@ -542,7 +542,7 @@ syntax:min term " <| " term:min : term
 
 macro_rules
   | `($f $args* <| $a) =>
-    if a.raw.isMissing then
+    bif a.raw.isMissing then
       -- Ensures that `$f $args* <|` is elaborated as `$f $args*`, not `$f $args* sorry`.
       -- For the latter, the elaborator produces `TermInfo` where the missing argument has already
       -- been applied as `sorry`, which inhibits some language server functionality that relies
@@ -552,7 +552,7 @@ macro_rules
     else
       `($f $args* $a)
   | `($f <| $a) =>
-    if a.raw.isMissing then
+    bif a.raw.isMissing then
       `($f)
     else
       `($f $a)
@@ -578,7 +578,7 @@ syntax:min term atomic(" $" ws) term:min : term
 
 macro_rules
   | `($f $args* $ $a) =>
-    if a.raw.isMissing then
+    bif a.raw.isMissing then
       -- Ensures that `$f $args* $` is elaborated as `$f $args*`, not `$f $args* sorry`.
       -- For the latter, the elaborator produces `TermInfo` where the missing argument has already
       -- been applied as `sorry`, which inhibits some language server functionality that relies
@@ -588,7 +588,7 @@ macro_rules
     else
       `($f $args* $a)
   | `($f $ $a) =>
-    if a.raw.isMissing then
+    bif a.raw.isMissing then
       `($f)
     else
       `($f $a)

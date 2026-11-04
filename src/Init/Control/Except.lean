@@ -268,7 +268,7 @@ By default, the first is thrown, because the `<|>` operator throws the second.
 -/
 @[always_inline, inline]
 def orelse' [MonadExcept ε m] {α : Type v} (t₁ t₂ : m α) (useFirstEx := true) : m α :=
-  tryCatch t₁ fun e₁ => tryCatch t₂ fun e₂ => throw (if useFirstEx then e₁ else e₂)
+  tryCatch t₁ fun e₁ => tryCatch t₂ fun e₂ => throw (bif useFirstEx then e₁ else e₂)
 
 end MonadExcept
 

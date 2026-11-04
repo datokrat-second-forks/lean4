@@ -230,28 +230,28 @@ instance : LawfulOrderLT $typeName where
 
   )
   if let some nbits := bits.raw.isNatLit? then
-    if nbits > 8 then
+    bif nbits >ᵇ 8 then
       cmds := cmds.push <| ←
         `(@[simp] theorem toNat_toUInt8 (x : $typeName) : x.toUInt8.toNat = x.toNat % 2 ^ 8 := (rfl))
-    if nbits < 16 then
+    bif nbits <ᵇ 16 then
       cmds := cmds.push <| ←
         `(@[simp] theorem toNat_toUInt16 (x : $typeName) : x.toUInt16.toNat = x.toNat := (rfl))
-    else if nbits > 16 then
+    else bif nbits >ᵇ 16 then
       cmds := cmds.push <| ←
         `(@[simp] theorem toNat_toUInt16 (x : $typeName) : x.toUInt16.toNat = x.toNat % 2 ^ 16 := (rfl))
-    if nbits < 32 then
+    bif nbits <ᵇ 32 then
       cmds := cmds.push <| ←
         `(@[simp] theorem toNat_toUInt32 (x : $typeName) : x.toUInt32.toNat = x.toNat := (rfl))
-    else if nbits > 32 then
+    else bif nbits >ᵇ 32 then
       cmds := cmds.push <| ←
         `(@[simp] theorem toNat_toUInt32 (x : $typeName) : x.toUInt32.toNat = x.toNat % 2 ^ 32 := (rfl))
-    if nbits ≤ 32 then
+    bif nbits ≤ᵇ 32 then
       cmds := cmds.push <| ←
         `(@[simp] theorem toNat_toUSize (x : $typeName) : x.toUSize.toNat = x.toNat := (rfl))
     else
       cmds := cmds.push <| ←
         `(@[simp] theorem toNat_toUSize (x : $typeName) : x.toUSize.toNat = x.toNat % 2 ^ System.Platform.numBits := (rfl))
-    if nbits < 64 then
+    bif nbits <ᵇ 64 then
       cmds := cmds.push <| ←
         `(@[simp] theorem toNat_toUInt64 (x : $typeName) : x.toUInt64.toNat = x.toNat := (rfl))
   unless isUSize do

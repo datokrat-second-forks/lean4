@@ -47,9 +47,9 @@ macro (name := declareSimpLikeTactic) doc?:(docComment)?
     "declare_simp_like_tactic" opt:((simpAllKind <|> dsimpKind)?)
     ppSpace tacName:ident ppSpace tacToken:str ppSpace cfg:optConfig : command => do
   let (kind, tkn, stx) ←
-    if opt.raw.isNone then
+    bif opt.raw.isNone then
       pure (← `(``simp), ← `("simp"), ← `($[$doc?:docComment]? syntax (name := $tacName) $tacToken:str optConfig (discharger)? (&" only")? (" [" (simpStar <|> simpErase <|> simpLemma),* "]")? (location)? : tactic))
-    else if opt.raw[0].getKind == ``simpAllKind then
+    else bif opt.raw[0].getKind == ``simpAllKind then
       pure (← `(``simpAll), ← `("simp_all"), ← `($[$doc?:docComment]? syntax (name := $tacName) $tacToken:str optConfig (discharger)? (&" only")? (" [" (simpErase <|> simpLemma),* "]")? : tactic))
     else
       pure (← `(``dsimp), ← `("dsimp"), ← `($[$doc?:docComment]? syntax (name := $tacName) $tacToken:str optConfig (discharger)? (&" only")? (" [" (simpErase <|> simpLemma),* "]")? (location)? : tactic))

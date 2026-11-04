@@ -153,7 +153,7 @@ private structure SpaceResult where
   deriving Inhabited
 
 @[inline] private def merge (w : Nat) (r₁ : SpaceResult) (r₂ : Nat → SpaceResult) : SpaceResult :=
-  if Nat.blt w r₁.space || r₁.foundLine then
+  bif Nat.blt w r₁.space || r₁.foundLine then
     r₁
   else
     let r₂ := r₂ (w - r₁.space);
@@ -161,10 +161,10 @@ private structure SpaceResult where
 
 private def spaceUptoLine : Format → Bool → Int → Nat → SpaceResult
   | nil,          _,       _, _ => {}
-  | line,         flatten, _, _ => if flatten then { space := 1 } else { foundLine := true }
+  | line,         flatten, _, _ => bif flatten then { space := 1 } else { foundLine := true }
   | align force,  flatten, m, w =>
-    if flatten && !force then {}
-    else if w < m then
+    bif flatten && !force then {}
+    else bif (w : Int) <ᵇ m then
       { space := (m - w).toNat }
     else
       { foundLine := true }
@@ -265,7 +265,7 @@ private partial def be (w : Nat) [Monad m] [MonadPrettyFormat m] : List WorkGrou
     | nest n f => be w (gs' ({ i with f, indent := i.indent + n }::is))
     | text s =>
       let p := String.Internal.posOf s '\n'
-      if p == s.rawEndPos then
+      bif p == s.rawEndPos then
         pushOutput s
         endTags i.activeTags
         be w (gs' is)
@@ -275,14 +275,14 @@ private partial def be (w : Nat) [Monad m] [MonadPrettyFormat m] : List WorkGrou
         let is := { i with f := text (String.Internal.extract s (String.Internal.next s p) s.rawEndPos) }::is
         -- after a hard line break, re-evaluate whether to flatten the remaining group
         -- note that we shouldn't start flattening after a hard break outside a group
-        if g.fla == .disallow then
+        bif g.fla == .disallow then
           be w (gs' is)
         else
           pushGroup g.flb is gs w >>= be w
     | line =>
       match g.flb with
       | FlattenBehavior.allOrNone =>
-        if g.fla.shouldFlatten then
+        bif g.fla.shouldFlatten then
           -- flatten line = text " "
           pushOutput " "
           endTags i.activeTags
@@ -298,10 +298,10 @@ private partial def be (w : Nat) [Monad m] [MonadPrettyFormat m] : List WorkGrou
           endTags i.activeTags
           pushGroup FlattenBehavior.fill is gs w >>= be w
         -- if preceding fill item fit in a single line, try to fit next one too
-        if g.fla.shouldFlatten then
+        bif g.fla.shouldFlatten then
           let gs'@(g'::_) ← pushGroup FlattenBehavior.fill is gs (w - String.Internal.length " ")
             | panic "unreachable"
-          if g'.fla.shouldFlatten then
+          bif g'.fla.shouldFlatten then
             pushOutput " "
             endTags i.activeTags
             be w gs'  -- TODO: use `return`
@@ -310,13 +310,13 @@ private partial def be (w : Nat) [Monad m] [MonadPrettyFormat m] : List WorkGrou
         else
           breakHere
     | align force =>
-      if g.fla.shouldFlatten && !force then
+      bif g.fla.shouldFlatten && !force then
         -- flatten (align false) = nil
         endTags i.activeTags
         be w (gs' is)
       else
         let k ← currColumn
-        if k < i.indent then
+        bif (k : Int) <ᵇ i.indent then
           pushOutput (String.Internal.pushn "" ' ' (i.indent - k).toNat)
           endTags i.activeTags
           be w (gs' is)
@@ -325,7 +325,7 @@ private partial def be (w : Nat) [Monad m] [MonadPrettyFormat m] : List WorkGrou
           endTags i.activeTags
           be w (gs' is)
     | group f flb =>
-      if g.fla.shouldFlatten then
+      bif g.fla.shouldFlatten then
         -- flatten (group f) = flatten f
         be w (gs' ({ i with f }::is))
       else

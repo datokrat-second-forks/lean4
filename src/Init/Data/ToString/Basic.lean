@@ -85,8 +85,8 @@ instance : ToString Format where
   toString f := f.pretty
 
 def addParenHeuristic (s : String) : String :=
-  if String.Internal.isPrefixOf "(" s || String.Internal.isPrefixOf "[" s || String.Internal.isPrefixOf "{" s || String.Internal.isPrefixOf "#[" s then s
-  else if !(String.Internal.any s Char.isWhitespace) then s
+  bif String.Internal.isPrefixOf "(" s || String.Internal.isPrefixOf "[" s || String.Internal.isPrefixOf "{" s || String.Internal.isPrefixOf "#[" s then s
+  else bif !(String.Internal.any s Char.isWhitespace) then s
   else String.Internal.append (String.Internal.append "(" s) ")"
 
 instance {α : Type u} [ToString α] : ToString (Option α) := ⟨fun

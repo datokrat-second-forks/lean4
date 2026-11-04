@@ -33,11 +33,11 @@ exactly.
    Float.ofBits 0x4480F0CF064DD592]
 
 @[expose] protected def Float.ofScientific (m : Nat) (s : Bool) (e : Nat) : Float :=
-  if h : m < 2 ^ 53 ∧ e ≤ 22 then
+  bif h : m <ᵇ 2 ^ 53 && e ≤ᵇ 22 then
     -- Fast case: both `m` and `10 ^ e` are representable as floats.
     let powerOfTen : Float :=
       exactlyRepresentablePowersOfTen[e]'(by simp [exactlyRepresentablePowersOfTen]; omega)
-    if s then
+    bif s then
       m.toUInt64.toFloat / powerOfTen
     else
       m.toUInt64.toFloat * powerOfTen
@@ -46,7 +46,7 @@ exactly.
     -- https://www.exploringbinary.com/correct-decimal-to-floating-point-using-big-integers/
     -- is difficult to get right in the case of subnormals and isn't faster than just going through
     -- the model. So, we go through the model.
-    let e := if s then Int.negOfNat e else Int.ofNat e
+    let e := bif s then Int.negOfNat e else Int.ofNat e
     Float.ofModel (Float.Model.ofScientific m e)
 
 /--
@@ -96,15 +96,15 @@ exactly.
 
 @[expose] protected def Float32.ofScientific (m : Nat) (s : Bool) (e : Nat) : Float32 :=
   -- See comments on `Float.ofScientific`.
-  if h : m < 2 ^ 23 ∧ e ≤ 10 then
+  bif h : m <ᵇ 2 ^ 23 && e ≤ᵇ 10 then
     let powerOfTen : Float32 :=
       exactlyRepresentablePowersOfTen[e]'(by simp [exactlyRepresentablePowersOfTen]; omega)
-    if s then
+    bif s then
       m.toUInt64.toFloat32 / powerOfTen
     else
       m.toUInt64.toFloat32 * powerOfTen
   else
-    let e := if s then Int.negOfNat e else Int.ofNat e
+    let e := bif s then Int.negOfNat e else Int.ofNat e
     Float32.ofModel (Float32.Model.ofScientific m e)
 
 instance : OfScientific Float32 where
