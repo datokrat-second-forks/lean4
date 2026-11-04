@@ -51,7 +51,7 @@ def Zipper.step (it : IterM (α := Zipper α β) Id (α × β)) : IterStep (Iter
   match it.internalState with
   | .done => .done
   | .consEntries es z' =>
-    if h : 0 < es.size then
+    bif h : 0 <ᵇ es.size then
       let z : Zipper α β := .consEntries (es.drop 1) z'
       match es[0] with
       | .null => .skip ⟨z⟩
@@ -60,7 +60,7 @@ def Zipper.step (it : IterM (α := Zipper α β) Id (α × β)) : IterStep (Iter
     else
       .skip ⟨z'⟩
   | .consCollision keys vals hsz z' =>
-    if h : 0 < vals.size then
+    bif h : 0 <ᵇ vals.size then
       .yield ⟨.consCollision (keys.drop 1) (vals.drop 1) (by simp [*]) z'⟩ (keys[0], vals[0])
     else
       .skip ⟨z'⟩

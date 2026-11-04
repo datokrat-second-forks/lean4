@@ -99,18 +99,18 @@ partial def render (h : Html) : String :=
   }
 where
   go (acc : String) (q : RenderWorkItemStack) : String :=
-    if h : q.kinds.size = 0 then
+    bif h : q.kinds.size =ᵇ 0 then
       acc
     else
-      let (kind, q) := q.popKind h
+      let (kind, q) := q.popKind (ne_of_decideEq_eq_false h)
       match kind with
       | .html =>
         let (h, q) := q.popHtml!
         match h with
         | .element tag attrs children =>
           let q :=
-            if children.isEmpty then
-              if isVoidElement tag then
+            bif children.isEmpty then
+              bif isVoidElement tag then
                 q.pushKind .endVoidElement
               else
                 let q := q.pushKind .endElement |>.pushStr tag
@@ -131,7 +131,7 @@ where
       | .attr =>
         let (k, q) := q.popStr!
         let (v, q) := q.popStr!
-        if v.isEmpty then
+        bif v.isEmpty then
           go (acc ++ s!" {k}") q
         else
           go (acc ++ s!" {k}=\"{escapeAttrVal v}\"") q

@@ -20,7 +20,7 @@ public meta def Element.checkNamesMatch (stx : Element) : CoreM Unit := do
   if let { startTag, endTag? := some endTag, .. } ← stx.view then
     let startTagName ← startTag.name.view
     let endTagName ← endTag.name.view
-    if endTagName.toLower != startTagName.toLower then
+    bif endTagName.toLower != startTagName.toLower then
       let hint ← MessageData.hint m!"Replace with start tag" #[startTagName] (ref? := endTag.name)
       throwErrorAt endTag.name
         m!"Mismatched end tag, expected `{startTagName}` but got `{endTagName}`{hint}"
@@ -29,7 +29,7 @@ public meta def Element.checkNamesMatch (stx : Element) : CoreM Unit := do
 public meta def Element.checkNoVoidChildren (stx : Element) : CoreM Unit := do
   if let { startTag, children? := some _, .. } ← stx.view then
     let tagName ← startTag.name.view
-    if isVoidElement tagName then
+    bif isVoidElement tagName then
       let hint ←
         -- Everything up to the start tag's `>` is kept; children and end tag are dropped.
         let some ltPos := startTag.lt.getPos? | pure m!""
@@ -105,12 +105,12 @@ meta partial def elabContent (stx : Content) : TermElabM Expr := withRef stx do
       es := es.push e
     | .textComments tcs => withRef tcs.getSyntax do←
       let val ← tcs.getText
-      if val.isEmpty then continue
+      bif val.isEmpty then continue
       let e := mkApp (.const ``Html.text []) (toExpr val)
       es := es.push e
     | .interp isMany stx => withRef stx do←
       let i ← stx.view
-      let tm ← if isMany then `(Html.ofCollection $(i.term)) else pure i.term
+      let tm ← bif isMany then `(Html.ofCollection $(i.term)) else pure i.term
       let e ← elabTermEnsuringType tm (Expr.const ``Html [])
       es := es.push e
   match es with

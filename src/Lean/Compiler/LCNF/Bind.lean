@@ -47,7 +47,7 @@ where
         | .alt ctorName params k _ => return .alt ctorName params (← go k)
         | .default k => return .default (← go k)
         | .ctorAlt info k _ => return .ctorAlt info (← go k)
-      if alts.isEmpty then
+      bif alts.isEmpty then
         throwError "`Code.bind` failed, empty `cases` found"
       let resultType ← mkCasesResultType alts
       return .cases ⟨c.typeName, resultType, c.discr, alts⟩
@@ -98,7 +98,7 @@ where
     | _ =>
       let type := type.instantiateRev xs
       let type' := type.headBeta
-      if type' != type then
+      bif type' != type then
         go type' #[] ps
       else
         return ps
@@ -123,7 +123,7 @@ def etaExpandCore (type : Expr) (params : Array (Param .pure)) (value : Code .pu
   return (params, value)
 
 def etaExpandCore? (type : Expr) (params : Array (Param .pure)) (value : Code .pure) : CompilerM (Option (Array (Param .pure) × Code .pure)) := do
-  if isEtaExpandCandidateCore type params then
+  bif isEtaExpandCandidateCore type params then
     etaExpandCore type params value
   else
     return none

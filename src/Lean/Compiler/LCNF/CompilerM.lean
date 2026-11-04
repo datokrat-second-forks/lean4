@@ -199,11 +199,11 @@ where
     | _ => go e
 
   go (e : Expr) : Expr :=
-    if e.hasFVar then
+    bif e.hasFVar then
       match e with
       | .fvar fvarId => match s[fvarId]? with
-        | some (.fvar fvarId') => if translator then .fvar fvarId' else go (.fvar fvarId')
-        | some (.type e _) => if translator then e else go e
+        | some (.fvar fvarId') => bif translator then .fvar fvarId' else go (.fvar fvarId')
+        | some (.type e _) => bif translator then e else go e
         | some .erased => erasedExpr
         | none => e
       | .lit .. | .const .. | .sort .. | .mvar .. | .bvar .. => e
@@ -239,7 +239,7 @@ expressions that are free variables, `lcErased`, or type formers.
 partial def normFVarImp (s : FVarSubst pu) (fvarId : FVarId) (translator : Bool) : NormFVarResult :=
   match s[fvarId]? with
   | some (.fvar fvarId') =>
-    if translator then
+    bif translator then
       .fvar fvarId'
     else
       normFVarImp s fvarId' translator
@@ -259,7 +259,7 @@ private partial def normArgImp (s : FVarSubst pu) (arg : Arg pu) (translator : B
   | .fvar fvarId =>
     match s[fvarId]? with
     | some (arg'@(.fvar _)) =>
-      if translator then arg' else normArgImp s arg' translator
+      bif translator then arg' else normArgImp s arg' translator
     | some (arg'@.erased) | some (arg'@(.type _ _)) => arg'
     | none => arg
   | .type e _ => arg.updateType! (normExprImp s e translator)
@@ -366,7 +366,7 @@ def mkFreshBinderName (binderName := `_x): CompilerM Name := do
   return declName
 
 def ensureNotAnonymous (binderName : Name) (baseName : Name) : CompilerM Name :=
-  if binderName.isAnonymous then
+  bif binderName.isAnonymous then
     mkFreshBinderName baseName
   else
     return binderName

@@ -29,7 +29,7 @@ def sorted [Inhabited α] [LT α] [DecidableLT α] : Probe α α := fun data => 
 def sortedBySize (pu : Purity) : Probe (Decl pu) (Nat × Decl pu) := fun decls =>
   let decls := decls.map fun decl => (decl.size, decl)
   return decls.qsort fun (sz₁, decl₁) (sz₂, decl₂) =>
-    if sz₁ == sz₂ then Name.lt decl₁.name decl₂.name else sz₁ < sz₂
+    bif sz₁ == sz₂ then Name.lt decl₁.name decl₂.name else sz₁ < sz₂
 
 def countUnique [ToString α] [BEq α] [Hashable α] : Probe α (α × Nat) := fun data => do
   let mut map := Std.HashMap.emptyWithCapacity data.size
@@ -84,7 +84,7 @@ partial def filterByLet (pu : Purity) (f : LetDecl pu → CompilerM Bool) : Prob
   filter (·.value.isCodeAndM go)
 where
   go : Code pu → CompilerM Bool
-  | .let decl k => do if (← f decl) then return true else go k
+  | .let decl k => do bif (← f decl) then return true else go k
   | .fun decl k _ | .jp decl k => go decl.value <||> go k
   | .cases cs => cs.alts.anyM (go ·.getCode)
   | .jmp .. | .return .. | .unreach .. => return false
@@ -96,7 +96,7 @@ partial def filterByFun (pu : Purity) (f : FunDecl pu → CompilerM Bool) : Prob
 where
   go : Code pu → CompilerM Bool
   | .let _ k | .jp _ k  => go k
-  | .fun decl k _ => do if (← f decl) then return true else go decl.value <||> go k
+  | .fun decl k _ => do bif (← f decl) then return true else go decl.value <||> go k
   | .cases cs => cs.alts.anyM (go ·.getCode)
   | .jmp .. | .return .. | .unreach .. => return false
   | .sset (k := k) .. | .uset (k := k) .. | .inc (k := k) .. | .dec (k := k) .. | .del (k := k) ..
@@ -108,7 +108,7 @@ where
   go : Code pu → CompilerM Bool
   | .let _ k => go k
   | .fun decl k _ => go decl.value <||> go k
-  | .jp decl k => do if (← f decl) then return true else go decl.value <||> go k
+  | .jp decl k => do bif (← f decl) then return true else go decl.value <||> go k
   | .cases cs => cs.alts.anyM (go ·.getCode)
   | .jmp .. | .return .. | .unreach .. => return false
   | .sset (k := k) .. | .uset (k := k) .. | .inc (k := k) .. | .dec (k := k) .. | .del (k := k) ..
@@ -120,7 +120,7 @@ partial def filterByFunDecl (pu : Purity) (f : FunDecl pu → CompilerM Bool) :
 where
   go : Code pu → CompilerM Bool
   | .let _ k => go k
-  | .fun decl k _ | .jp decl k => do if (← f decl) then return true else go decl.value <||> go k
+  | .fun decl k _ | .jp decl k => do bif (← f decl) then return true else go decl.value <||> go k
   | .cases cs => cs.alts.anyM (go ·.getCode)
   | .jmp .. | .return .. | .unreach .. => return false
   | .sset (k := k) .. | .uset (k := k) .. | .inc (k := k) .. | .dec (k := k) .. | .del (k := k) ..
@@ -132,7 +132,7 @@ where
   go : Code pu → CompilerM Bool
   | .let _ k => go k
   | .fun decl k _ | .jp decl k => go decl.value <||> go k
-  | .cases cs => do if (← f cs) then return true else cs.alts.anyM (go ·.getCode)
+  | .cases cs => do bif (← f cs) then return true else cs.alts.anyM (go ·.getCode)
   | .jmp .. | .return .. | .unreach .. => return false
   | .sset (k := k) .. | .uset (k := k) .. | .inc (k := k) .. | .dec (k := k) .. | .del (k := k) ..
   | .setTag (k := k) .. | .oset (k := k) .. => go k

@@ -20,7 +20,7 @@ If `lt := false`, then sorts expressions in decreasing order.
 -/
 def sortExprs (es : Array Expr) (lt := true) : Array Expr × Perm :=
   let es := es.mapIdx fun i e => (e, i)
-  let es := if lt then
+  let es := bif lt then
     es.qsort fun (e₁, _) (e₂, _) => e₁.lt e₂
   else
     es.qsort fun (e₁, _) (e₂, _) => e₂.lt e₁

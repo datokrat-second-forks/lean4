@@ -52,12 +52,12 @@ run_meta
 otherwise fails and reports the unexpected character. -/
 private def satisfyCharFn (p : Char → Bool) (expected : List String) : ParserFn := fun c s =>
   let i := s.pos
-  if h : c.atEnd i then
+  bif h : c.atEnd i then
     s.mkEOIError expected
-  else if p (c.get' i h) then
-    s.next' c i h
+  else bif p (c.get' i (Bool.ne_true_of_eq_false h)) then
+    s.next' c i (Bool.ne_true_of_eq_false h)
   else
-    s.mkUnexpectedError s!"unexpected character '{c.get' i h}'" expected
+    s.mkUnexpectedError s!"unexpected character '{c.get' i (Bool.ne_true_of_eq_false h)}'" expected
 
 /-- Parses one character matching {name}`firstP` followed by many matching {name}`manyP`,
 followed by optional trailing whitespace (including Lean-language comments).
@@ -104,9 +104,9 @@ partial def decodeCharacterReferenceAt (s : String) (i : String.Pos.Raw)
     CoreM (String × String.Pos.Raw) := do
   -- The body is an optional `#` followed by at least one ASCII alphanumeric.
   let j := i.next s
-  let k := if j.get s == '#' then j.next s else j
+  let k := bif j.get s == '#' then j.next s else j
   let bodyEnd := skipAlphanum s k
-  if bodyEnd.get s != ';' then
+  bif bodyEnd.get s != ';' then
     let hint ← MessageData.hint m!"Escape the ampersand" #["&amp;"] (ref? := refAt i j)
     throwErrorAt (refAt i bodyEnd)
       m!"Unterminated HTML character reference '{i.extract s bodyEnd}'{hint}"
@@ -114,12 +114,12 @@ partial def decodeCharacterReferenceAt (s : String) (i : String.Pos.Raw)
   match characterReference? (j.extract s bodyEnd) with
   | some val => return (val, refEnd)
   | none =>
-    let kind := if j.get s == '#' then "numeric" else "named"
+    let kind := bif j.get s == '#' then "numeric" else "named"
     throwErrorAt (refAt i refEnd) m!"Invalid HTML {kind} character reference `{i.extract s refEnd}`"
 where
   skipAlphanum (s : String) (i : String.Pos.Raw) : String.Pos.Raw :=
-    if h : i.atEnd s then i
-    else if (i.get' s h).isAlphanum then skipAlphanum s (i.next' s h)
+    bif h : i.atEnd s then i
+    else bif (i.get' s (Bool.ne_true_of_eq_false h)).isAlphanum then skipAlphanum s (i.next' s (Bool.ne_true_of_eq_false h))
     else i
 
 /-- Decodes HTML character references in {name}`ref`, leaving other characters unchanged. -/
@@ -127,16 +127,16 @@ partial def decodeCharacterReferences (ref : TSyntax `str) : CoreM String :=
   go ref.getString ⟨0⟩ ""
 where
   go (s : String) (i : String.Pos.Raw) (out : String) : CoreM String := do
-    if h : i.atEnd s then
+    bif h : i.atEnd s then
       return out
     else
-      let c := i.get' s h
-      if c == '&' then
+      let c := i.get' s (Bool.ne_true_of_eq_false h)
+      bif c == '&' then
         let (val, refEnd) ← decodeCharacterReferenceAt s i
           (fun s e => subsyntaxNodeAtom ref ⟨s.byteIdx+1⟩ ⟨e.byteIdx+1⟩)
         go s refEnd (out ++ val)
       else
-        go s (i.next' s h) (out.push c)
+        go s (i.next' s (Bool.ne_true_of_eq_false h)) (out.push c)
 
 /-! ## Raw symbols -/
 
@@ -151,12 +151,12 @@ def rawSymbol (sym : String) (trailingWs := false) (expected : List String := [s
   fn := rawFn (trailingWs := trailingWs) fun c s =>
     let i := s.pos
     let j : String.Pos.Raw := ⟨i.byteIdx + sym.utf8ByteSize⟩
-    if j.byteIdx ≤ c.endPos.byteIdx && c.extract i j == sym then
+    bif j.byteIdx ≤ᵇ c.endPos.byteIdx && c.extract i j == sym then
       s.setPos j
-    else if h : c.atEnd i then
+    else bif h : c.atEnd i then
       s.mkEOIError expected
     else
-      s.mkUnexpectedError s!"unexpected character '{c.get' i h}'" expected
+      s.mkUnexpectedError s!"unexpected character '{c.get' i (Bool.ne_true_of_eq_false h)}'" expected
 
 @[combinator_parenthesizer rawSymbol]
 def rawSymbol.parenthesizer (sym : String) (_ : Bool) (_ : List String) :=
@@ -185,7 +185,7 @@ def interp (trailingWs : Bool := false) : Parser := interpWith decl_name% "{" tr
 @[run_parser_attribute_hooks]
 def interpMany (trailingWs : Bool := false) : Parser := interpWith decl_name% "{..." trailingWs
 
-abbrev interpKind (isMany : Bool) := if isMany then ``interpMany else ``interp
+abbrev interpKind (isMany : Bool) := bif isMany then ``interpMany else ``interp
 abbrev Interp (isMany : Bool) := TSyntax (interpKind isMany)
 
 /-- A single-element {lit}`{ term }` or many-element {lit}`{... term }` interpolation. -/
@@ -200,7 +200,7 @@ structure InterpView (isMany : Bool) where
 
 def Interp.view [Monad m] [MonadError m] (stx : Interp isMany) : m (InterpView isMany) :=
   let stx := stx.raw
-  if stx.getKind == interpKind isMany then
+  bif stx.getKind == interpKind isMany then
     return { openBrace := stx[0], term := ⟨stx[1]⟩, closeBrace := stx[2] }
   else
     Elab.throwUnsupportedSyntax
@@ -247,7 +247,7 @@ then it is discarded. -/
 private def flushWs (acc : TextAcc) : TextAcc :=
   let keep := acc.pendingWs && !(acc.out.isEmpty && acc.pendingNewline)
   { acc with
-      out := if keep then acc.out.push ' ' else acc.out
+      out := bif keep then acc.out.push ' ' else acc.out
       pendingWs := false
       pendingNewline := false }
 
@@ -255,7 +255,7 @@ private def flushWs (acc : TextAcc) : TextAcc :=
 Trailing whitespace is removed if it contains a newline,
 and otherwise collapsed to a single space. -/
 private def finish (acc : TextAcc)  : String :=
-  if acc.pendingNewline then acc.out
+  bif acc.pendingNewline then acc.out
   else acc.flushWs.out
 
 /-- Appends the text of {name}`t` to the accumulator,
@@ -265,17 +265,17 @@ private partial def push (acc : TextAcc) (t : Text)  : CoreM TextAcc := do
   go (← viewNodeAtom t) ⟨0⟩ acc
 where
   go (s : String) (i : String.Pos.Raw) (acc : TextAcc) : CoreM TextAcc := do
-    if i.atEnd s then
+    bif i.atEnd s then
       return acc
     let c := i.get s
     let j := i.next s
-    if c == '\n' || c == '\r' then
+    bif c == '\n' || c == '\r' then
       go s j { acc with pendingWs := true, pendingNewline := true }
-    else if isAsciiWhitespace c then
+    else bif isAsciiWhitespace c then
       go s j { acc with pendingWs := true }
     else
       let acc := acc.flushWs
-      if c == '&' then
+      bif c == '&' then
         let (val, refEnd) ← decodeCharacterReferenceAt s i (fun s e => subsyntaxNodeAtom t s e)
         go s refEnd { acc with out := acc.out ++ val }
       else
@@ -287,28 +287,28 @@ end TextAcc
 
 private partial def commentContentsFn : ParserFn := fun c s =>
   let i := s.pos
-  if h : c.atEnd i then
+  bif h : c.atEnd i then
     s.mkEOIError ["'-->' (end of HTML comment)"]
-  else if c.get' i h == '-' && c.get ⟨i.byteIdx + 1⟩ == '-' then
-    if c.get ⟨i.byteIdx + 2⟩ == '>' then
+  else bif c.get' i (Bool.ne_true_of_eq_false h) == '-' && c.get ⟨i.byteIdx + 1⟩ == '-' then
+    bif c.get ⟨i.byteIdx + 2⟩ == '>' then
       s.setPos ⟨i.byteIdx + 3⟩
-    else if c.get ⟨i.byteIdx + 2⟩ == '!' && c.get ⟨i.byteIdx + 3⟩ == '>' then
+    else bif c.get ⟨i.byteIdx + 2⟩ == '!' && c.get ⟨i.byteIdx + 3⟩ == '>' then
       s.mkUnexpectedError "HTML comment may not contain '--!>'"
     else
-      commentContentsFn c (s.setPos (c.next' i h))
-  else if c.get' i h == '<'
+      commentContentsFn c (s.setPos (c.next' i (Bool.ne_true_of_eq_false h)))
+  else bif c.get' i (Bool.ne_true_of_eq_false h) == '<'
       && c.get ⟨i.byteIdx + 1⟩ == '!'
       && c.get ⟨i.byteIdx + 2⟩ == '-'
       && c.get ⟨i.byteIdx + 3⟩ == '-' then
     s.mkUnexpectedError "HTML comment may not contain '<!--'"
   else
-    commentContentsFn c (s.setPos (c.next' i h))
+    commentContentsFn c (s.setPos (c.next' i (Bool.ne_true_of_eq_false h)))
 
 /-- Consumes the start `<!--` of an HTML comment,
 then continues with {name}`commentContentsFn`. -/
 private partial def commentFn : ParserFn := fun c s =>
   let i := s.pos
-  if c.get i != '<'
+  bif c.get i != '<'
       || c.get ⟨i.byteIdx + 1⟩ != '!'
       || c.get ⟨i.byteIdx + 2⟩ != '-'
       || c.get ⟨i.byteIdx + 3⟩ != '-' then
@@ -393,9 +393,9 @@ inductive AttrValView where
 decoding character references when the value is a string literal. -/
 def AttrVal.view [Monad m] [MonadError m] (stx : AttrVal) : m AttrValView := do
   let c := stx.raw[0]
-  if c.getKind == `str then
+  bif c.getKind == `str then
     return .str ⟨c⟩
-  else if c.getKind == interpKind false then
+  else bif c.getKind == interpKind false then
     return .interp ⟨c⟩
   else
     Elab.throwUnsupportedSyntax
@@ -435,15 +435,15 @@ inductive AttrView where
 
 def Attr.view [Monad m] [MonadError m] (stx : Attr) : m AttrView :=
   let c := stx.raw[0]
-  if c.getKind == attrNameKind then
+  bif c.getKind == attrNameKind then
     let val? := stx.raw[1]
-    if val?.getNumArgs == 0 then
+    bif val?.getNumArgs == 0 then
       return .bool ⟨c⟩
     else
       return .val { name := ⟨c⟩, eq := val?[0], val := ⟨val?[1]⟩ }
-  else if c.getKind == interpKind true then
+  else bif c.getKind == interpKind true then
     return .interp true ⟨c⟩
-  else if c.getKind == interpKind false then
+  else bif c.getKind == interpKind false then
     return .interp false ⟨c⟩
   else
     Elab.throwUnsupportedSyntax
@@ -494,10 +494,10 @@ structure ElementView where
 
 def Element.view [Monad m] [MonadError m] (stx : Element) : m ElementView := do
   let stx := stx.raw
-  if stx.getKind == elementKind then
+  bif stx.getKind == elementKind then
     let attrs : Array Attr := stx[2].getArgs.map (⟨·⟩)
     let startTag : TagView := { lt := stx[0], name := ⟨stx[1]⟩, attrs, gt := stx[3] }
-    if stx.getNumArgs == 4 then
+    bif stx.getNumArgs == 4 then
       return { startTag }
     let endTag : TagView := { lt := stx[5], name := ⟨stx[6]⟩, attrs := #[], gt := stx[7] }
     return { startTag, children? := some ⟨stx[4]⟩, endTag? := endTag }
@@ -515,7 +515,7 @@ def contentWith (itemFn : ParserFn) : Parser :=
       andthenInfo (elementWith skip).info <| andthenInfo interpMany.info <|
       andthenInfo interp.info <| andthenInfo comment.info text.info
     -- Antiquotations are only recognized inside quotations, so that `$` is text in literals.
-    fn c s := if c.quotDepth > 0 then (withAntiquotFn antiquotP.fn contentFn) c s else contentFn c s
+    fn c s := bif c.quotDepth >ᵇ 0 then (withAntiquotFn antiquotP.fn contentFn) c s else contentFn c s
   }
 
 private partial def contentItemFn : ParserFn := fun c s =>
@@ -547,11 +547,11 @@ partial def content.parenthesizer : Parenthesizer :=
 
 partial def contentItem.parenthesizer : Parenthesizer := do
   let k := (← Syntax.MonadTraverser.getCur).getKind
-  if k == textKind then text.parenthesizer
-  else if k == commentKind then comment.parenthesizer
-  else if k == interpKind false then interp.parenthesizer
-  else if k == interpKind true then interpMany.parenthesizer
-  else if k == elementKind then elementWith.parenthesizer content.parenthesizer
+  bif k == textKind then text.parenthesizer
+  else bif k == commentKind then comment.parenthesizer
+  else bif k == interpKind false then interp.parenthesizer
+  else bif k == interpKind true then interpMany.parenthesizer
+  else bif k == elementKind then elementWith.parenthesizer content.parenthesizer
   else throwError "Unexpected syntax node kind `{k}` in HTML content"
 end
 
@@ -564,11 +564,11 @@ partial def content.formatter : Formatter :=
 
 partial def contentItem.formatter : Formatter := do
   let k := (← Syntax.MonadTraverser.getCur).getKind
-  if k == textKind then text.formatter
-  else if k == commentKind then comment.formatter
-  else if k == interpKind false then interp.formatter
-  else if k == interpKind true then interpMany.formatter
-  else if k == elementKind then elementWith.formatter content.formatter
+  bif k == textKind then text.formatter
+  else bif k == commentKind then comment.formatter
+  else bif k == interpKind false then interp.formatter
+  else bif k == interpKind true then interpMany.formatter
+  else bif k == elementKind then elementWith.formatter content.formatter
   else throwError "Unexpected syntax node kind `{k}` in HTML content"
 end
 
@@ -626,25 +626,25 @@ def Content.view [Monad m] [MonadError m] (c : Content) : m (Array ContentItemVi
   let mut tcs : Array (Text ⊕ Comment) := #[]
   for stx in c.raw.getArgs do
     let k := stx.getKind
-    if k == textKind then
+    bif k == textKind then
       tcs := tcs.push <| .inl ⟨stx⟩
-    else if k == commentKind then
+    else bif k == commentKind then
       tcs := tcs.push <| .inr ⟨stx⟩
     else
       items := items.push <| .textComments { stxs := tcs }
       tcs := #[]
       items := items.push (← viewItem stx)
-  if !tcs.isEmpty then
+  bif !tcs.isEmpty then
     items := items.push <| .textComments { stxs := tcs }
   return items
 where
   viewItem (stx : Syntax) : m ContentItemView := withRef stx do
     let k := stx.getKind
-    if k == interpKind false then
+    bif k == interpKind false then
       return .interp false ⟨stx⟩
-    else if k == interpKind true then
+    else bif k == interpKind true then
       return .interp true ⟨stx⟩
-    else if k == elementKind then
+    else bif k == elementKind then
       return .element ⟨stx⟩
     else
       Elab.throwUnsupportedSyntax

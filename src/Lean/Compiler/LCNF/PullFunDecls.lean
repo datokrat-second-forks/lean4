@@ -45,7 +45,7 @@ where
     match as with
     | [] => return (keep, dep)
     | a :: as =>
-      if a.used.contains fvarId then
+      bif a.used.contains fvarId then
         go as keep (a :: dep)
       else
         go as (a :: keep) dep
@@ -76,7 +76,7 @@ def findParamsDeps (params : Array (Param pu)) : PullM (Array ToPull) := do
 Construct the code `fun p.decl k` or `jp p.decl k`.
 -/
 def ToPull.attach (p : ToPull) (k : Code .pure) : Code .pure :=
-  if p.isFun then
+  bif p.isFun then
     .fun p.decl k
   else
     .jp p.decl k
@@ -103,7 +103,7 @@ where
       for h : j in *...ps.size do
         unless (← visited j) do
           let pj := ps[j]
-          if pj.used.contains pi.decl.fvarId then
+          bif pj.used.contains pi.decl.fvarId then
             visit j
       modify fun (k, visited) => (pi.attach k, visited)
 
@@ -138,7 +138,7 @@ partial def addToPull (isFun : Bool) (decl : FunDecl .pure) : PullM Unit := do
   modify fun _ => []
   let mut value ← pull decl.value
   value ← attachParamsDeps decl.params value
-  if isFun then
+  bif isFun then
     /- Recall that a local function declaration cannot jump to join points defined out of its scope. -/
     value ← attachJps value
   let decl ← decl.update' decl.type value

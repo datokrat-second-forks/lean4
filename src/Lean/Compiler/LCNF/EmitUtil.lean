@@ -28,7 +28,7 @@ public partial def collectUsedDecls (decls : Array Name) :
 where
   go (names : Array Name) : StateRefT CollectUsedDeclsState CoreM Unit :=
     names.forM fun name => do
-      if (← get).visited.contains name then return
+      bif (← get).visited.contains name then return
       modify fun s => { s with visited := s.visited.insert name }
       if let some decl ← getLocalImpureDecl? name then
         modify fun s => { s with localDecls := s.localDecls.push decl }

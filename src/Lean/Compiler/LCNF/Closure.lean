@@ -127,10 +127,10 @@ mutual
     unless (← get).visited.contains fvarId do
       markVisited fvarId
       let ctx ← read
-      if ctx.inScope fvarId then
+      bif ctx.inScope fvarId then
         /- We only collect the variables in the scope of the function application being specialized. -/
         if let some funDecl ← findFunDecl? fvarId then
-          if ctx.abstract funDecl.fvarId then
+          bif ctx.abstract funDecl.fvarId then
             modify fun s => { s with params := s.params.push <| funDecl.toParam false }
           else
             collectFunDecl funDecl
@@ -140,7 +140,7 @@ mutual
           modify fun s => { s with params := s.params.push param }
         else if let some letDecl ← findLetDecl? fvarId then
           collectType letDecl.type
-          if ctx.abstract letDecl.fvarId then
+          bif ctx.abstract letDecl.fvarId then
             modify fun s => { s with params := s.params.push <| { letDecl with borrow := false } }
           else
             collectLetValue letDecl.value
@@ -150,7 +150,7 @@ mutual
 
   /-- Collect dependencies of the given expression. -/
   partial def collectType (type : Expr) : ClosureM Unit := do
-    if type.hasFVar then
+    bif type.hasFVar then
       type.forEachWhere Expr.isFVar fun e => collectFVar e.fvarId!
 
 end

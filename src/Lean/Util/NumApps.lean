@@ -54,7 +54,7 @@ def numApps (e : Expr) (threshold : Nat := 0) : IO (Array (Name × Nat)) := do
   let counters := unsafe NumApps.main e
   let mut result := #[]
   for (declName, num) in counters do
-    if num > threshold then
+    bif num >ᵇ threshold then
       result := result.push (declName, num)
   return result.qsort fun a b => a.2 > b.2
 

@@ -58,7 +58,7 @@ protected partial def toFormat : Value → Format
   | bot => "⊥"
   | top => "⊤"
   | ctor i vs =>
-    if vs.isEmpty then
+    bif vs.isEmpty then
       format i
     else
       .paren <| format i ++ .join (vs.toList.map fun v => " " ++ Value.toFormat v)
@@ -85,7 +85,7 @@ partial def addChoice (env : Environment) (vs : List Value) (v : Value) : List V
   match vs, v with
   | [], v => [v]
   | v1@(ctor i1 vs1) :: cs, ctor i2 vs2 =>
-    if i1 == i2 then
+    bif i1 == i2 then
       ctor i1 (Array.zipWith (merge env) vs1 vs2) :: cs
     else
       v1 :: addChoice env cs v
@@ -100,7 +100,7 @@ partial def merge (env : Environment) (v1 v2 : Value) : Value :=
     | bot, v | v, bot => v
     | top, _ | _, top => top
     | ctor i1 vs1, ctor i2 vs2 =>
-      if i1 == i2 then
+      bif i1 == i2 then
         ctor i1 (Array.zipWith (merge env) vs1 vs2)
       else
         choice [v1, v2]
@@ -112,15 +112,15 @@ partial def merge (env : Environment) (v1 v2 : Value) : Value :=
   | .top | .bot => newValue
   | .choice vs => cleanup vs
   | .ctor ctorName .. =>
-    if eligible newValue && inductHasNumCtors ctorName env 1 then
+    bif eligible newValue && inductHasNumCtors ctorName env 1 then
       top
     else
       newValue
 where
   cleanup (vs : List Value) : Value := Id.run do
-    if vs.all eligible then
+    bif vs.all eligible then
       let .ctor ctorName .. := vs.head! | unreachable!
-      if inductHasNumCtors ctorName env vs.length then
+      bif inductHasNumCtors ctorName env vs.length then
         top
       else
         choice vs
@@ -154,18 +154,18 @@ where
       match v with
       | ctor i vs =>
         let induct := inductValOfCtor i env
-        if forbiddenTypes.contains induct.name then
+        bif forbiddenTypes.contains induct.name then
           top
         else
           let cont forbiddenTypes' :=
             ctor i (vs.map (go · forbiddenTypes' remainingDepth))
-          if induct.isRec then
+          bif induct.isRec then
             cont <| forbiddenTypes.insert induct.name
           else
             cont forbiddenTypes
       | choice vs =>
         let vs := vs.map (go · forbiddenTypes remainingDepth)
-        if vs.elem top then
+        bif vs.elem top then
           top
         else
           choice vs
@@ -191,17 +191,17 @@ partial def containsCtor : Value → Name → Bool
 Obtain the arguments of a certain constructor within the `Value`.
 -/
 partial def getCtorArgs : Value → Name → Option (Array Value)
-| .ctor i args ..,  j => if i == j then some args else none
+| .ctor i args ..,  j => bif i == j then some args else none
 | .choice vs .., j => do
   for variant in vs do
     if let .ctor i args .. := variant then
-      if i == j then
+      bif i == j then
         return args
   none
 | _, _ => none
 
 partial def ofNat (n : Nat) : Value :=
-  if n > maxValueDepth then
+  bif n >ᵇ maxValueDepth then
     .top
   else
     goSmall n
@@ -240,7 +240,7 @@ auxiliary declarations + the final `FVarId` of the declaration that
 contains the actual literal. If it is not a literal return none.
 -/
 partial def getLiteral (v : Value) : CompilerM (Option ((Array (CodeDecl .pure)) × FVarId)) := do
-  if isLiteral v then
+  bif isLiteral v then
     let literal ← go v
     return some literal
   else
@@ -426,7 +426,7 @@ def updateFunDeclParamsAssignment (params : Array (Param .pure)) (args : Array (
     let paramVal ← findVarValue param.fvarId
     let argVal ← findArgValue arg
     let newVal := .widening env paramVal argVal
-    if newVal != paramVal then
+    bif newVal != paramVal then
       modifyAssignment (·.insert param.fvarId newVal)
       ret := true
   /-
@@ -435,7 +435,7 @@ def updateFunDeclParamsAssignment (params : Array (Param .pure)) (args : Array (
   sophisticated analysis. Hence we will set all of the non applied ones
   to top.
   -/
-  if params.size != args.size then
+  bif params.size != args.size then
     for param in params[args.size...*] do
       ret := (← findVarValue param.fvarId) == .bot
       updateVarAssignment param.fvarId .top
@@ -446,7 +446,7 @@ def updateFunDeclParamsTop (params : Array (Param .pure)) : InterpM Bool := do
   for param in params do
     let paramVal ← findVarValue param.fvarId
     let newVal := .top
-    if newVal != paramVal then
+    bif newVal != paramVal then
       modifyAssignment (·.insert param.fvarId newVal)
       ret := true
   return ret
@@ -512,7 +512,7 @@ where
       args.forM handleFunArg
       match (← getDecl? declName) with
       | some ⟨_, decl⟩ =>
-        if decl.getArity == args.size then
+        bif decl.getArity == args.size then
           match getFunctionSummary? env declName with
           | some v => return v
           | none => return (← findFunVal? declName).getD .top
@@ -521,7 +521,7 @@ where
       | none =>
         let some (.ctorInfo info) := env.find? declName | return .top
         let args := args[info.numParams...*].toArray
-        if info.numFields == args.size then
+        bif info.numFields == args.size then
           return .ctor declName (← args.mapM findArgValue)
         else
           return .top
@@ -549,7 +549,7 @@ where
   handleFunVar (var : FVarId) : InterpM Unit := do
     if let some funDecl ← findFunDecl? var then
       let updated ← updateFunDeclParamsTop funDecl.params
-      if updated then
+      bif updated then
         /- We must reset the value of nested function declaration
         parameters since they depend on `args` values. -/
         resetNestedFunDeclParams funDecl.value
@@ -557,7 +557,7 @@ where
 
   interpFunCall (funDecl : FunDecl .pure) (args : Array (Arg .pure)) : InterpM Unit := do
     let updated ← updateFunDeclParamsAssignment funDecl.params args
-    if updated then
+    bif updated then
       /- We must reset the value of nested function declaration
       parameters since they depend on `args` values. -/
       resetNestedFunDeclParams funDecl.value
@@ -572,7 +572,7 @@ def inferStep : InterpM Bool := do
   let ctx ← read
   for h : idx in *...ctx.decls.size do
     let decl := ctx.decls[idx]
-    if !decl.safe then
+    bif !decl.safe then
       continue
 
     let currentVal ← getFunVal idx
@@ -584,7 +584,7 @@ def inferStep : InterpM Bool := do
           interpCode code
       | .extern .. => updateCurrFnSummary .top
     let newVal ← getFunVal idx
-    if currentVal != newVal then
+    bif currentVal != newVal then
       return true
   return false
 
@@ -595,7 +595,7 @@ partial def inferMain (n : Nat := 0) : InterpM Unit := do
   let ctx ← read
   modify fun s => { s with assignments := ctx.decls.map fun _ => {} }
   let modified ← inferStep
-  if modified then
+  bif modified then
     inferMain (n + 1)
   else
     trace[Compiler.elimDeadBranches] m!"Termination after {n} steps"
@@ -621,13 +621,13 @@ where
       let processAlt typ alt := do
         match alt with
         | .alt ctor args body =>
-          if discrVal.containsCtor ctor then
+          bif discrVal.containsCtor ctor then
             let constantInfos ← args.filterMapM fun param => do
               if let some val := assignment[param.fvarId]? then
                 if let some literal ← val.getLiteral then
                   return some (param, literal)
               return none
-            if constantInfos.size != 0 then
+            bif constantInfos.size != 0 then
               let (body, subst) ← constantInfos.foldlM (init := (← go body, {})) fun (body, subst) (param, decls, var) => do
                 return (attachCodeDecls decls body, subst.insert param.fvarId (.fvar var))
               let body ← replaceFVars body subst false
@@ -659,7 +659,7 @@ def Decl.elimDeadBranches (decls : Array (Decl .pure)) : CompilerM (Array (Decl 
     the constructor that we inferred for them. For more information
     refer to the docstring of `Decl.safe`.
     -/
-    if decls[i]!.safe then .bot else .top
+    bif decls[i]!.safe then .bot else .top
   let mut funVals := decls.size.fold (init := .empty) fun i _ p => p.push (initialVal i)
   let ctx := { decls }
   let mut state := { assignments, funVals }
@@ -672,7 +672,7 @@ def Decl.elimDeadBranches (decls : Array (Decl .pure)) : CompilerM (Array (Decl 
     decls.size.fold (init := e) fun i _ env =>
       addFunctionSummary env decls[i].name funVals[i]!
 
-  decls.mapIdxM fun i decl => if decl.safe then elimDead assignments[i]! decl else return decl
+  decls.mapIdxM fun i decl => bif decl.safe then elimDead assignments[i]! decl else return decl
 
 def elimDeadBranches : Pass :=
   { name := `elimDeadBranches, run := Decl.elimDeadBranches, phase := .mono, phaseOut := .mono }

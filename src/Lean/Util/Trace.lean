@@ -124,7 +124,7 @@ private def isTracingEnabledForExport (opts : Options) (cls : Name) : BaseIO Boo
   -- Replicate `checkTraceOption` fast path to make sure it happens before `IORef.get` (which
   -- itself is slower than `MonadTrace.getInheritedTraceOptions` but at least that's only on the
   -- slow path).
-  if !opts.hasTrace then
+  bif !opts.hasTrace then
     return false
   return checkTraceOption (← inheritedTraceOptions.get) opts cls
 
@@ -157,11 +157,11 @@ def addTrace (cls : Name) (msg : MessageData) : m Unit := do
   modifyTraces (·.push { ref, msg := .trace { collapsed := false, cls } msg #[] })
 
 @[inline] def trace (cls : Name) (msg : Unit → MessageData) : m Unit := do
-  if (← isTracingEnabledFor cls) then
+  bif (← isTracingEnabledFor cls) then
     addTrace cls (msg ())
 
 @[inline] def traceM (cls : Name) (mkMsg : m MessageData) : m Unit := do
-  if (← isTracingEnabledFor cls) then
+  bif (← isTracingEnabledFor cls) then
     let msg ← mkMsg
     addTrace cls msg
 
@@ -225,7 +225,7 @@ invocations, which is the common case."
 
 @[inline] private def withStartStop [Monad m] [MonadLiftT BaseIO m] (opts : Options) (act : m α) :
     m (α × Float × Float) := do
-  if trace.profiler.useHeartbeats.get opts then
+  bif trace.profiler.useHeartbeats.get opts then
     let start ← IO.getNumHeartbeats
     let a ← act
     let stop ← IO.getNumHeartbeats
@@ -237,7 +237,7 @@ invocations, which is the common case."
     return (a, start.toFloat / 1000000000, stop.toFloat / 1000000000)
 
 @[inline] def trace.profiler.threshold.unitAdjusted (o : Options) : Float :=
-  if trace.profiler.useHeartbeats.get o then
+  bif trace.profiler.useHeartbeats.get o then
     (trace.profiler.threshold.get o).toFloat
   else
     -- milliseconds to seconds
@@ -297,7 +297,7 @@ instance : ExceptToTraceResult ε (Option α) where
 instance : ExceptToTraceResult ε Expr where
   toTraceResult
     | .error _ => .error
-    | .ok e => if e.hasSyntheticSorry then .failure else .success
+    | .ok e => bif e.hasSyntheticSorry then .failure else .success
 
 instance (priority := low) : ExceptToTraceResult ε α where
   toTraceResult
@@ -335,7 +335,7 @@ def withTraceNode [always : MonadAlwaysExcept ε m] [MonadLiftT BaseIO m]
     (msg : Except ε α → m MessageData) (k : m α) (collapsed := true) (tag := "") : m α := do
   -- unrestricted here and in `postCallback`: trace and profiler collection only
   let opts ← getOptionsUnrestricted
-  if !opts.hasTrace then
+  bif !opts.hasTrace then
     return (← k)
   let clsEnabled ← isTracingEnabledFor cls
   unless clsEnabled || trace.profiler.get opts do
@@ -356,7 +356,7 @@ where
     let mut m ← try msg res catch _ => pure m!"<exception thrown while producing trace node message>"
     let result := res.toTraceResult
     let mut data : TraceData := { cls, collapsed, tag, result? := some result }
-    if trace.profiler.get opts then
+    bif trace.profiler.get opts then
       data := { data with startTime := start, stopTime := stop }
     addTraceNode oldTraces data ref m
     MonadExcept.ofExcept res
@@ -388,11 +388,11 @@ def registerTraceClass (traceClassName : Name) (inherited := false) (ref : Name 
     defValue := false
     descr := "enable/disable tracing for the given module and submodules"
   }
-  if inherited then
+  bif inherited then
     inheritedTraceOptions.modify (·.insert optionName)
 
 private meta def expandTraceMacro (id : Syntax) (s : Syntax) : MacroM DoElem := do
-  let msg ← if s.getKind == interpolatedStrKind then `(m! $(⟨s⟩)) else `(($(⟨s⟩) : MessageData))
+  let msg ← bif s.getKind == interpolatedStrKind then `(m! $(⟨s⟩)) else `(($(⟨s⟩) : MessageData))
   -- A term, not a `bif` element, so that the legacy `do` elaborator accepts it; the inner `do`
   -- keeps nested actions in `msg` inside the branch.
   `(doElem| do
@@ -420,7 +420,7 @@ def withTraceNodeBefore [MonadRef m] [AddMessageContext m] [MonadOptions m]
     (msg : Unit → m MessageData) (k : m α) (collapsed := true) (tag := "") : m α := do
   -- unrestricted here and in `postCallback`: trace and profiler collection only
   let opts ← getOptionsUnrestricted
-  if !opts.hasTrace then
+  bif !opts.hasTrace then
     return (← k)
   let clsEnabled ← isTracingEnabledFor cls
   unless clsEnabled || trace.profiler.get opts do
@@ -443,20 +443,20 @@ where
     let result := res.toTraceResult
     let mut msg := msg
     let mut data : TraceData := { cls, collapsed, tag, result? := some result }
-    if trace.profiler.get opts then
+    bif trace.profiler.get opts then
       data := { data with startTime := start, stopTime := stop }
     addTraceNode oldTraces data ref msg
     MonadExcept.ofExcept res
 
 def addTraceAsMessages [Monad m] [MonadRef m] [MonadLog m] [MonadTrace m] : m Unit := do
   -- unrestricted: profiler collection only
-  if trace.profiler.isExporting (← getOptionsUnrestricted) then
+  bif trace.profiler.isExporting (← getOptionsUnrestricted) then
     -- do not add trace messages if the profile is being exported (`trace.profiler.output` or
     -- `trace.profiler.serve`) as it would be redundant, pretty printing the trace messages is
     -- expensive, and `getResetTraces` would consume the data we want to export
     return
   let traces ← getResetTraces
-  if traces.isEmpty then
+  bif traces.isEmpty then
     return
   let mut pos2traces : Std.HashMap (String.Pos.Raw × String.Pos.Raw) (Array MessageData) := ∅
   for traceElem in traces do

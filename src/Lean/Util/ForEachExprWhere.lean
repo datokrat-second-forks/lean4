@@ -57,7 +57,7 @@ unsafe def visited (e : Expr) : ForEachM m Bool := do
     return false
 
 def checked (e : Expr) : ForEachM m Bool := do
-  if (← get).checked.contains e then
+  bif (← get).checked.contains e then
     return true
   else
     modify fun s => { s with checked := s.checked.insert e }

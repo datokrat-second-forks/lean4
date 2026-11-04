@@ -55,8 +55,8 @@ instance : ToString Purity where
 @[inline]
 def Purity.withAssertPurity [Inhabited α] (is : Purity) (should : Purity)
     (k : (is = should) → α) : α :=
-  if h : is = should then
-    k h
+  bif h : is =ᵇ should then
+    k (eq_of_decideEq_eq_true h)
   else
     panic! s!"Purity should be {should} but is {is}, this is a bug"
 
@@ -157,14 +157,14 @@ def CtorInfo.isScalar (info : CtorInfo) : Bool :=
   !info.isRef
 
 def CtorInfo.type (info : CtorInfo) : Expr :=
-  if info.isRef then ImpureType.object else ImpureType.tagged
+  bif info.isRef then ImpureType.object else ImpureType.tagged
 
 def CtorInfo.checkValid (info : CtorInfo) : CoreM Unit := do
-  if info.cidx > maxCtorTag && info.isRef then
+  bif info.cidx >ᵇ maxCtorTag && info.isRef then
     throwError s!"tag for constructor '{info.name}' is too big, this is a limitation of the current runtime"
-  if info.size > maxCtorNumObjs then
+  bif info.size >ᵇ maxCtorNumObjs then
     throwError s!"constructor '{info.name}' has too many object fields"
-  if info.ssize + info.usize * usizeSize > maxCtorScalarsSize then
+  bif info.ssize + info.usize * usizeSize >ᵇ maxCtorScalarsSize then
     throwError s!"constructor '{info.name}' has too many scalar fields"
 
 inductive LetValue (pu : Purity) where
@@ -498,7 +498,7 @@ def attachCodeDecls (decls : Array (CodeDecl pu)) (code : Code pu) : Code pu :=
   go decls.size code
 where
   go (i : Nat) (code : Code pu) : Code pu :=
-    if i > 0 then
+    bif i >ᵇ 0 then
       match decls[i-1]! with
       | .let decl => go (i-1) (.let decl code)
       | .fun decl _ => go (i-1) (.fun decl code)
@@ -1055,7 +1055,8 @@ def Decl.inlineable (decl : Decl pu) : Bool :=
   | none => false
 
 def Decl.castPurity! (decl : Decl pu1) (pu2 : Purity) : Decl pu2 :=
-  if h : pu1 = pu2 then
+  bif h : pu1 =ᵇ pu2 then
+    have h := eq_of_decideEq_eq_true h
     h ▸ decl
   else
     panic! s!"Purity {pu1} does not match {pu2}, this is a bug"
@@ -1106,17 +1107,17 @@ Return `true` if `decl` is supposed to be inlined/specialized.
 -/
 def Decl.isTemplateLike (decl : Decl pu) : CoreM Bool := do
   let env ← getEnv
-  if !hasNospecializeAttribute env decl.name && (← hasLocalInst decl.type) then
+  bif !hasNospecializeAttribute env decl.name && (← hasLocalInst decl.type) then
     return true -- `decl` applications will be specialized
-  else if ← isInstanceReducible decl.name then
+  else bif (← isInstanceReducible decl.name) then
     return true -- `decl` is "fuel" for code specialization
-  else if decl.inlineable || hasSpecializeAttribute env decl.name then
+  else bif decl.inlineable || hasSpecializeAttribute env decl.name then
     return true -- `decl` is going to be inlined or specialized
   else
     return false
 
 private partial def collectType (e : Expr) : FVarIdHashSet → FVarIdHashSet :=
-  if e.hasFVar then
+  bif e.hasFVar then
     match e with
     | .forallE _ d b _ => collectType b ∘ collectType d
     | .lam _ d b _     => collectType b ∘ collectType d
@@ -1206,7 +1207,7 @@ See comment at `recursive` field.
 partial def markRecDecls (decls : Array (Decl pu)) : Array (Decl pu)  :=
   let (_, isRec) := go |>.run {}
   decls.map fun decl =>
-    if isRec.contains decl.name then
+    bif isRec.contains decl.name then
       { decl with recursive := true }
     else
       decl
@@ -1219,7 +1220,7 @@ where
     | .let decl k =>
       match decl.value with
       | .const declName .. | .fap declName .. | .pap declName .. =>
-        if decls.any (·.name == declName) then
+        bif decls.any (·.name == declName) then
           modify fun s => s.insert declName
       | _ => pure ()
       visit k
@@ -1230,13 +1231,13 @@ where
     decls.forM (·.value.forCodeM visit)
 
 def instantiateRangeArgs (e : Expr) (beginIdx endIdx : Nat) (args : Array (Arg pu)) : Expr :=
-  if !e.hasLooseBVars then
+  bif !e.hasLooseBVars then
     e
   else
     e.instantiateRange beginIdx endIdx (args.map (·.toExpr))
 
 def instantiateRevRangeArgs (e : Expr) (beginIdx endIdx : Nat) (args : Array (Arg pu)) : Expr :=
-  if !e.hasLooseBVars then
+  bif !e.hasLooseBVars then
     e
   else
     e.instantiateRevRange beginIdx endIdx (args.map (·.toExpr))

@@ -52,7 +52,7 @@ where
     modify fun s =>
       let old := s.values.getD fvarId .bot
       let new := old.join v
-      if old == new then
+      bif old == new then
         s
       else
         { s with values := s.values.insert fvarId new, modified := true }
@@ -69,7 +69,7 @@ where
     match decl.value with
     | .code .. =>
       for p in decl.params do
-        let init := if p.borrow then .borrow else .top
+        let init := bif p.borrow then .borrow else .top
         modify fun s => { s with values := s.values.insert p.fvarId init }
     | _ => return ()
 
@@ -78,14 +78,14 @@ where
     match decl.value with
     | .code code => collectCode code
     | _ => pure ()
-    if (← get).modified then loop
+    bif (← get).modified then loop
 
   collectCode (code : Code .impure) : InferM Unit := do
     match code with
     | .jp decl k =>
       for p in decl.params do
         unless (← get).values.contains p.fvarId do
-          let init := if p.borrow then .borrow else .bot
+          let init := bif p.borrow then .borrow else .bot
           modify fun s => { s with values := s.values.insert p.fvarId init }
       collectCode k
       collectCode decl.value
@@ -125,10 +125,10 @@ where
         let parentVal ← getOwnedness parent
         join z parentVal
     | .fap _ args =>
-      let value := if args.isEmpty then .borrow else .own
+      let value := bif args.isEmpty then .borrow else .own
       join z value
     | .ctor i _ =>
-      let value := if i.isScalar then .borrow else .own
+      let value := bif i.isScalar then .borrow else .own
       join z value
     | .fvar .. | .pap .. | .sproj .. | .uproj .. | .erased .. | .lit .. =>
       join z .own

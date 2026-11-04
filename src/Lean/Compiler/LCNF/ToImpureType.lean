@@ -14,13 +14,13 @@ import Init.Data.Format.Macro
 namespace Lean.Compiler.LCNF
 
 def impureTypeForEnum (numCtors : Nat) : Expr :=
-  if numCtors == 1 then
+  bif numCtors == 1 then
     ImpureType.tagged
-  else if numCtors < Nat.pow 2 8 then
+  else bif numCtors <ᵇ Nat.pow 2 8 then
     ImpureType.uint8
-  else if numCtors < Nat.pow 2 16 then
+  else bif numCtors <ᵇ Nat.pow 2 16 then
     ImpureType.uint16
-  else if numCtors < Nat.pow 2 32 then
+  else bif numCtors <ᵇ Nat.pow 2 32 then
     ImpureType.uint32
   else
     ImpureType.tagged
@@ -97,20 +97,20 @@ def computeImpureType (name : Name) : CoreM Expr := do
         let fieldType ← field.fvarId!.getType
         let lcnfFieldType ← toLCNFType fieldType
         let monoFieldType ← toMonoType lcnfFieldType
-        if !monoFieldType.isErased then return true
+        bif !monoFieldType.isErased then return true
       return false
-    if !hasRelevantField then
+    bif !hasRelevantField then
       numScalarCtors := numScalarCtors + 1
-  if numScalarCtors == numCtors then
+  bif numScalarCtors == numCtors then
     return impureTypeForEnum numCtors
-  else if numScalarCtors == 0 then
+  else bif numScalarCtors == 0 then
     return ImpureType.object
   else
     return ImpureType.tobject
 
 /-- Eagerly computes and persists the IR type of inductive `name`; see `compileDecls`. -/
 public def setImpureType (name : Name) : CoreM Unit := do
-  if (builtinImpureType? name).isSome then return
+  bif (builtinImpureType? name).isSome then return
   unless (impureTypeExt.find? (← getEnv) name).isSome do
     modifyEnv (impureTypeExt.insert · name (← computeImpureType name))
 
@@ -143,7 +143,7 @@ public partial def toImpureType (type : Expr) : CoreM Expr := do
     -- an arrow type producing `lcAny`. The runtime representation of
     -- erased values is a tagged scalar, so this means that any such
     -- polymorphic type must be represented as `.tobject`.
-    if isAnyProducingType b then
+    bif isAnyProducingType b then
       return ImpureType.tobject
     else
       return ImpureType.object
@@ -200,7 +200,7 @@ public def spillLinkIdx : Nat :=
 
 /-- The number of spill objects of a constructor with `numObjs` object fields. -/
 public def numSpillObjs (numObjs : Nat) : Nat :=
-  if numObjs ≤ maxCtorNumObjs then 0 else (numObjs - 1) / spillLinkIdx
+  bif numObjs ≤ᵇ maxCtorNumObjs then 0 else (numObjs - 1) / spillLinkIdx
 
 /-- The constructor information of a spill object of constructor `ctorName` with `size` fields. -/
 public def spillCtorInfo (ctorName : Name) (size : Nat) : CtorInfo :=
@@ -265,11 +265,11 @@ where
           .pure <| .scalar 8 0 ImpureType.float
         | _ => unreachable!
         fields := fields.push ctorField
-      if numSpillObjs nextIdx > 0 then
+      bif numSpillObjs nextIdx >ᵇ 0 then
         fields := fields.map fun
           | .object i type =>
             let depth := i / spillLinkIdx
-            if depth == 0 then .object i type else .spilled depth (i % spillLinkIdx) type
+            bif depth == 0 then .object i type else .spilled depth (i % spillLinkIdx) type
           | field => field
         nextIdx := spillLinkIdx + 1
       let numObjs := nextIdx
@@ -285,20 +285,20 @@ where
         Id.run <| StateT.run (s := nextOffset) <| fields.mapM fun field => do
           match field with
           | .scalar sz _ type => do
-            if sz == size then
+            bif sz == size then
               let offset ← modifyGet fun nextOffset => (nextOffset, nextOffset + sz)
               return .scalar sz offset type
             else
               return field
           | .object .. | .spilled .. | .usize _ | .erased | .void => return field
       let mut nextOffset := 0
-      if has8BScalar then
+      bif has8BScalar then
         ⟨fields, nextOffset⟩ := adjustScalarsForSize fields 8 nextOffset
-      if has4BScalar then
+      bif has4BScalar then
         ⟨fields, nextOffset⟩ := adjustScalarsForSize fields 4 nextOffset
-      if has2BScalar then
+      bif has2BScalar then
         ⟨fields, nextOffset⟩ := adjustScalarsForSize fields 2 nextOffset
-      if has1BScalar then
+      bif has1BScalar then
         ⟨fields, nextOffset⟩ := adjustScalarsForSize fields 1 nextOffset
       return {
         ctorInfo := {

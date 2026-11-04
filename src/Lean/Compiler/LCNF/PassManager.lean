@@ -27,8 +27,8 @@ instance : ToString Phase where
 
 def Phase.withPurityCheck [Inhabited α] (pp : Phase) (ip : Purity)
     (x : pp.toPurity = ip → α) : α :=
-  if h : pp.toPurity = ip then
-    x h
+  bif h : pp.toPurity =ᵇ ip then
+    x (eq_of_decideEq_eq_true h)
   else
     panic! s!"Compiler error: {pp} is not equivalent to IR phase {ip}, this is a bug"
 
@@ -129,7 +129,7 @@ namespace PassManager
 
 private def validatePasses (phase : Phase) (passes : Array Pass) : CoreM Unit := do
   for pass in passes do
-    if pass.phase != phase then
+    bif pass.phase != phase then
       throwError s!"{pass.name} has phase {pass.phase} but should have {phase}"
 
 def validate (manager : PassManager) : CoreM Unit := do
@@ -141,8 +141,8 @@ def findOccurrenceBounds (targetName : Name) (passes : Array Pass) : CoreM (Nat 
   let mut lowest := none
   let mut highest := none
   for pass in passes do
-      if pass.name == targetName then
-        lowest := if lowest.isNone then some pass.occurrence else lowest
+      bif pass.name == targetName then
+        lowest := bif lowest.isNone then some pass.occurrence else lowest
         highest := some pass.occurrence
   let ⟨some lowestVal, some highestVal⟩ := Prod.mk lowest highest | throwError s!"Could not find any occurrence of {targetName}"
   return ⟨lowestVal, highestVal⟩
@@ -166,7 +166,7 @@ def withEachOccurrence (phase : Phase) (targetName : Name) (f : Nat → PassInst
     let mut passes := passes
     for occurrence in lowestOccurrence...=highestOccurrence do
       let installer := f occurrence
-      if installer.phase != phase then
+      bif installer.phase != phase then
         panic! "phase mismatch"
       passes ← installer.install passes
     return passes

@@ -95,11 +95,11 @@ where
         ```
         where `_alt.<idx>` is an auxiliary declaration created by `inlineMatcher`
         -/
-        if decl.fvarId == fvarId then
+        bif decl.fvarId == fvarId then
           match decl.value with
           | .fvar f args =>
             let binderName ← getBinderName f
-            if binderName.getPrefix == `_alt then
+            bif binderName.getPrefix == `_alt then
               if let some funDecl ← findFun? f then
                 eraseLetDecl decl
                 if let some altJp := (← get).get? f then
@@ -149,7 +149,7 @@ where
       let alts ← c.alts.mapM fun
         | .alt ctorName params k => return .alt ctorName params (← go k)
         | .default k => return .default (← go k)
-      if alts.isEmpty then
+      bif alts.isEmpty then
         throwError "`Code.bind` failed, empty `cases` found"
       let resultType ← mkCasesResultType alts
       return .cases ⟨c.typeName, resultType, c.discr, alts⟩
@@ -160,7 +160,7 @@ def seqToCode (seq : Array Element) (k : Code .pure) : CompilerM (Code .pure) :=
   go seq seq.size k
 where
   go (seq : Array Element) (i : Nat) (c : Code .pure) : CompilerM (Code .pure) := do
-    if i > 0 then
+    bif i >ᵇ 0 then
       match seq[i-1]! with
       | .jp decl => go seq (i - 1) (.jp decl c)
       | .fun decl => go seq (i - 1) (.fun decl c)
@@ -176,13 +176,13 @@ where
         return .unreach type
       | .cases auxParam cases =>
         if let .return fvarId := c then
-          if auxParam.fvarId == fvarId then
+          bif auxParam.fvarId == fvarId then
             eraseParam auxParam
             go seq (i - 1) (.cases cases)
           else
             -- `cases` is dead code
             go seq (i - 1) c
-        else if auxParam.type.headBeta.isForall then
+        else bif auxParam.type.headBeta.isForall then
           /-
           `cases` produces a function. Thus, we create a local function to store
           result instead of a join point that takes a closure.
@@ -346,7 +346,7 @@ are type formers. This can happen when we have a field whose type is, for exampl
 def applyToAny (type : Expr) : M Expr := do
   let toAny := (← get).toAny
   return type.replace fun
-    | .fvar fvarId => if toAny.contains fvarId then some anyExpr else none
+    | .fvar fvarId => bif toAny.contains fvarId then some anyExpr else none
     | _ => none
 
 def toLCNFType (type : Expr) : M Expr := do
@@ -359,7 +359,7 @@ def toLCNFType (type : Expr) : M Expr := do
     return type'
 
 def cleanupBinderName (binderName : Name) : CompilerM Name :=
-  if binderName.hasMacroScopes then
+  bif binderName.hasMacroScopes then
     let binderName := binderName.eraseMacroScopes
     mkFreshBinderName binderName
   else
@@ -408,7 +408,7 @@ def visitBoundedLambda (e : Expr) (n : Nat) : M (Array (Param .pure) × Expr) :=
   go e n #[] #[]
 where
   go (e : Expr) (n : Nat) (xs : Array Expr) (ps : Array (Param .pure)) := do
-    if n == 0 then
+    bif n == 0 then
       return (ps, e.instantiateRev xs)
     else if let .lam binderName type body _ := e then
       let type := type.instantiateRev xs
@@ -430,26 +430,26 @@ def mustEtaExpand (env : Environment) (e : Expr) : Bool :=
 Eta-expand with `n` lambdas.
 -/
 def etaExpandN (e : Expr) (n : Nat) : M Expr := do
-  if n == 0 then
+  bif n == 0 then
     return e
   else liftMetaM do
     Meta.forallBoundedTelescope (← Meta.inferType e) n fun xs _ =>
       Meta.mkLambdaFVars xs (mkAppN e xs)
 
 def checkComputable (ref : Name) : M Unit := do
-  if (← read).ignoreNoncomputable then
+  bif (← read).ignoreNoncomputable then
     return
-  if ref matches ``Quot.mk | ``Quot.lift || isExtern (← getEnv) ref || (getImplementedBy? (← getEnv) ref).isSome then
+  bif ref matches ``Quot.mk | ``Quot.lift || isExtern (← getEnv) ref || (getImplementedBy? (← getEnv) ref).isSome then
     return
   -- The executable code of a recursive definition comes from its `_unsafe_rec` implementation (see
   -- `getDeclInfo?`), so `ref` is noncomputable whenever that implementation is. This case arises in a
   -- `noncomputable section`, where the failure to compile the `_unsafe_rec` version is tolerated and
   -- only that auxiliary is marked `noncomputable`, leaving `ref` itself unmarked.
-  if isNoncomputable (← getEnv) ref || isNoncomputable (← getEnv) (mkUnsafeRecName ref) then
-    if ref == `Erased.out then
+  bif isNoncomputable (← getEnv) ref || isNoncomputable (← getEnv) (mkUnsafeRecName ref) then
+    bif ref == `Erased.out then
       throwNamedError lean.dependsOnNoncomputable m!"failed to compile definition: it depends on 'Erased.out', which recovers the value of an erased variable. An erased variable's value is available in specifications such as `invariant` clauses and `assert`s, but not in compiled code. Consider marking the definition as 'noncomputable'."
     throwNamedError lean.dependsOnNoncomputable m!"failed to compile definition, consider marking it as 'noncomputable' because it depends on '{.ofConstName ref}', which is 'noncomputable'"
-  else if getOriginalConstKind? (← getEnv) ref matches some .axiom | some .quot | some .induct | some .thm then
+  else bif getOriginalConstKind? (← getEnv) ref matches some .axiom | some .quot | some .induct | some .thm then
     throwNamedError lean.dependsOnNoncomputable f!"`{ref}` not supported by code generator; consider marking definition as `noncomputable`"
 
 /--
@@ -472,7 +472,7 @@ returns the beta reduced `e (lcProof p₁) ... (lcProof pₙ)`.
 -/
 def mkProofOverApp (e : Expr) (n : Nat) : MetaM Expr := do
   let mut type ← Meta.inferType e
-  if type.getNumHeadForalls < n then
+  bif type.getNumHeadForalls <ᵇ n then
     type ← Meta.forallBoundedTelescope type n Meta.mkForallFVars
   go type n #[]
 where
@@ -494,11 +494,11 @@ where it generates terms such as `fun {α} => ReaderT.pure`
 partial def etaReduceImplicit (e : Expr) : Expr :=
   match e with
   | .lam _ d b bi =>
-    if bi.isImplicit then
+    bif bi.isImplicit then
       let b' := etaReduceImplicit b
       match b' with
       | .app f (.bvar 0) =>
-        if !f.hasLooseBVar 0 then
+        bif !f.hasLooseBVar 0 then
           f.lowerLooseBVars 1 1
         else
           e.updateLambdaE! d b'
@@ -549,14 +549,14 @@ where
     let .const declName us := fn | return none
     if let some info ← Meta.getMatcherInfo? declName then
       let numArgs := args.size
-      if numArgs < info.arity then
+      bif numArgs <ᵇ info.arity then
         etaExpandN e (info.arity - numArgs)
       else
         let overappliedArgs := args[info.arity...*].toArray
         let mut args := args[0...info.arity].toArray
         let altNumParams := info.altNumParams
         let rec aux (i : Nat) (args : Array Expr) (letFVars : Array Expr) : MetaM Expr := do
-          if h : i < altNumParams.size then
+          bif h : i <ᵇ altNumParams.size then
             let altIdx := i + info.getFirstAltPos
             let numParams := altNumParams[i]
             let alt ← normalizeAlt args[altIdx]! numParams
@@ -568,7 +568,7 @@ where
             Meta.mkLetFVars letFVars value
         let inlined ← liftMetaM <| aux 0 args #[]
         return some <| mkAppN inlined overappliedArgs
-    else if ← Meta.isMatcherLike declName then
+    else bif (← Meta.isMatcherLike declName) then
       let info ← getConstInfo declName
       let value ← Core.instantiateValueLevelParams info us
       /-
@@ -583,9 +583,9 @@ where
 
   normalizeAlt (e : Expr) (numParams : Nat) : MetaM Expr :=
     Meta.lambdaTelescope e fun xs body => do
-      if xs.size == numParams then
+      bif xs.size == numParams then
         return e
-      else if xs.size > numParams then
+      else bif xs.size >ᵇ numParams then
         let body ← Meta.mkLambdaFVars xs[numParams...*] body
         let body ← Meta.withLetDecl (← mkFreshUserName `_k) (← Meta.inferType body) body fun x => Meta.mkLetFVars #[x] x
         Meta.mkLambdaFVars xs[*...numParams] body
@@ -607,7 +607,7 @@ where
     let eType? := (← read).expectedType
     let ignoreNoncomputable := (← read).ignoreNoncomputable
     let key : CacheKey := { expr := e, expectedType? := eType?, ignoreNoncomputable }
-    if useCache then
+    bif useCache then
       if let some arg := (← get).cache.find? key then
         return arg
     let r : Arg .pure ← match e with
@@ -618,19 +618,19 @@ where
       | .lam ..      => visitLambda e
       | .letE ..     => visitLet e #[]
       | .lit lit     => visitLit lit
-      | .fvar fvarId => if (← get).toAny.contains fvarId then pure .erased else pure (.fvar fvarId)
+      | .fvar fvarId => bif (← get).toAny.contains fvarId then pure .erased else pure (.fvar fvarId)
       | .forallE .. | .mvar .. | .bvar .. | .sort ..  => unreachable!
-    modify fun s => if useCache && s.shouldCache then { s with cache := s.cache.insert key r } else s
+    modify fun s => bif useCache && s.shouldCache then { s with cache := s.cache.insert key r } else s
     return r
 
   visit (e : Expr) (useCache := true) : M (Arg .pure) := withIncRecDepth do
-    if isLCProof e then
+    bif isLCProof e then
       return .erased
     let type ← liftMetaM <| Meta.inferType e
-    if (← liftMetaM <| Meta.isProp type) then
+    bif (← liftMetaM <| Meta.isProp type) then
       /- We erase proofs. -/
       return .erased
-    if (← isTypeFormerType type) then
+    bif (← isTypeFormerType type) then
       /-
       We erase type formers unless they occur as application arguments.
       Recall that we usually do not generate code for functions that return type,
@@ -643,15 +643,15 @@ where
     letValueToArg (.lit (litToValue lit))
 
   visitAppArg (e : Expr) : M (Arg .pure) := do
-    if isLCProof e then
+    bif isLCProof e then
       return .erased
     let type ← liftMetaM <| Meta.inferType e
-    if (← liftMetaM <| Meta.isProp type) then
+    bif (← liftMetaM <| Meta.isProp type) then
       /- We erase proofs. -/
       return .erased
-    if (← isTypeFormerType type) then
+    bif (← isTypeFormerType type) then
       /- Predicates are erased (e.g., `Eq`) -/
-      if isPredicateType (← toLCNFType type) then
+      bif isPredicateType (← toLCNFType type) then
         return .erased
       else
         /- Types and Type formers are not put into A-normal form -/
@@ -664,14 +664,14 @@ where
     let env ← getEnv
     let .const declName us := f | unreachable!
     let args ← args.mapM (withoutExpectedType do visitAppArg ·)
-    if hasNeverExtractAttribute env declName then
+    bif hasNeverExtractAttribute env declName then
       modify fun s => {s with shouldCache := false }
     letValueToArg <| .const declName us args
 
   /-- Eta expand if under applied, otherwise apply k -/
   etaIfUnderApplied (e : Expr) (arity : Nat) (k : M (Arg .pure)) : M (Arg .pure) := do
     let numArgs := e.getAppNumArgs
-    if numArgs < arity then
+    bif numArgs <ᵇ arity then
       visit (← etaExpandN e (arity - numArgs))
     else
       k
@@ -685,7 +685,7 @@ where
   ```
   -/
   mkOverApplication (app : (Arg .pure)) (args : Array Expr) (arity : Nat) : M (Arg .pure) := do
-    if args.size == arity then
+    bif args.size == arity then
       return app
     else
       match app with
@@ -709,7 +709,7 @@ where
     | .ctor ctorName numParams =>
       let mut (ps, e) ← withoutExpectedType do
         visitBoundedLambda e numParams
-      if ps.size < numParams then
+      bif ps.size <ᵇ numParams then
         e ← etaExpandN e (numParams - ps.size)
         let (ps', e', _) ← withoutExpectedType do
           ToLCNF.visitLambda e
@@ -721,7 +721,7 @@ where
       -/
       ps ← ps.mapM fun p => do
         let type ← inferType p.toExpr
-        if (← isTypeFormerType type) then
+        bif (← isTypeFormerType type) then
           modify fun s => { s with toAny := s.toAny.insert p.fvarId }
         /-
         Recall that we may have dependent fields. Example:
@@ -744,10 +744,10 @@ where
       let mut resultType ← toLCNFType (← liftMetaM do Meta.inferType (mkAppN e.getAppFn args[*...arity]))
       let typeName := casesInfo.indName
       let .inductInfo indVal ← getConstInfo typeName | unreachable!
-      if casesInfo.numAlts == 0 then
+      bif casesInfo.numAlts == 0 then
         /- `casesOn` of an empty type. -/
         mkUnreachable resultType
-      else if ← Meta.MetaM.run' <| Meta.isInductivePredicateVal indVal then
+      else bif (← Meta.MetaM.run' <| Meta.isInductivePredicateVal indVal) then
         assert! casesInfo.numAlts == 1
         let numParams := indVal.numParams
         let numIndices := indVal.numIndices
@@ -771,7 +771,7 @@ where
               fieldArgs := fieldArgs.push fieldArg
             return fieldArgs
         let f := args[casesInfo.altsRange.lower]!
-        if args.size == casesInfo.arity then
+        bif args.size == casesInfo.arity then
           visit (mkAppN f fieldArgs)
         else
           withoutExpectedType do
@@ -809,7 +809,7 @@ where
         withReader (fun ctx =>
             { ctx with ignoreNoncomputable := ctx.ignoreNoncomputable || ctorInfo?.any (idx < ·.numParams) }) do
           visitAppArg arg
-      if hasNeverExtractAttribute env declName then
+      bif hasNeverExtractAttribute env declName then
         modify fun s => {s with shouldCache := false }
       letValueToArg <| .const declName us args
 
@@ -834,7 +834,7 @@ where
     withoutExpectedType do
     etaIfUnderApplied e arity do
       let args := e.getAppArgs
-      let minor := if e.isAppOf ``Eq.rec || e.isAppOf ``Eq.ndrec then args[3]! else args[5]!
+      let minor := bif e.isAppOf ``Eq.rec || e.isAppOf ``Eq.ndrec then args[3]! else args[5]!
       let minor ← visit minor
       mkOverApplication minor args arity
 
@@ -843,7 +843,7 @@ where
     withoutExpectedType do
     etaIfUnderApplied e arity do
       let args := e.getAppArgs
-      let minor := if e.isAppOf ``HEq.rec || e.isAppOf ``HEq.ndrec then args[3]! else args[6]!
+      let minor := bif e.isAppOf ``HEq.rec || e.isAppOf ``HEq.ndrec then args[3]! else args[6]!
       let minor ← visit minor
       mkOverApplication minor args arity
 
@@ -894,11 +894,11 @@ where
         let rhs ← liftMetaM rhs.toCtorIfLit
         match (← liftMetaM <| Meta.isConstructorApp? lhs), (← liftMetaM <| Meta.isConstructorApp? rhs) with
         | some lhsCtorVal, some rhsCtorVal =>
-          if lhsCtorVal.name == rhsCtorVal.name then
+          bif lhsCtorVal.name == rhsCtorVal.name then
             let numNonPropFields ← liftMetaM <| Meta.forallTelescope lhsCtorVal.type fun params _ =>
               params[lhsCtorVal.numParams...*].foldlM (init := 0) fun n param => do
                 let type ← param.fvarId!.getType
-                return if !(← Meta.isProp type) then n + 1 else n
+                return bif !(← Meta.isProp type) then n + 1 else n
             visitMajor numNonPropFields
           else
             let type ← toLCNFType (← liftMetaM <| Meta.inferType e)
@@ -920,10 +920,10 @@ where
 
   visitProjFn (projInfo : ProjectionFunctionInfo) (e : Expr) : M (Arg .pure) := do
     let typeName := projInfo.ctorName.getPrefix
-    if isRuntimeBuiltinType typeName then
+    bif isRuntimeBuiltinType typeName then
       let numArgs := e.getAppNumArgs
       let arity := projInfo.numParams + 1
-      if numArgs < arity then
+      bif numArgs <ᵇ arity then
         visit (← etaExpandN e (arity - numArgs))
       else
         visitAppDefaultConst e.getAppFn e.getAppArgs
@@ -942,25 +942,25 @@ where
   visitAppCore (e : Expr) : M (Arg .pure) := do
     if let .const declName us := e.getAppFn then
       checkComputable declName
-      if declName == ``Quot.lift then
+      bif declName == ``Quot.lift then
         visitQuotLift e
-      else if declName == ``Quot.mk then
+      else bif declName == ``Quot.mk then
         visitCtor 3 e
-      else if declName == ``Eq.rec || declName == ``Eq.recOn || declName == ``Eq.ndrec then
+      else bif declName == ``Eq.rec || declName == ``Eq.recOn || declName == ``Eq.ndrec then
         visitEqRec e
-      else if declName == ``HEq.rec || declName == ``HEq.ndrec then
+      else bif declName == ``HEq.rec || declName == ``HEq.ndrec then
         visitHEqRec e
-      else if declName == ``And.rec || declName == ``Iff.rec then
+      else bif declName == ``And.rec || declName == ``Iff.rec then
         visitAndIffRecCore e (minorPos := 3)
-      else if declName == ``False.rec || declName == ``Empty.rec then
+      else bif declName == ``False.rec || declName == ``Empty.rec then
         visitFalseRec e
-      else if declName == ``lcUnreachable then
+      else bif declName == ``lcUnreachable then
         visitLcUnreachable e
       else if let some casesInfo ← getCasesInfo? declName then
         visitCases casesInfo e
       else if let some arity ← getCtorArity? declName then
         visitCtor arity e
-      else if isNoConfusion (← getEnv) declName then
+      else bif isNoConfusion (← getEnv) declName then
         visitNoConfusion e
       else if let some projInfo ← getProjectionFnInfo? declName then
         visitProjFn projInfo e
@@ -994,7 +994,7 @@ where
     ```
     which will inline foo in the body of `f`, but will only inline `f` if it is small.
     -/
-    if !b.isLambda && !mustEtaExpand (← getEnv) b then
+    bif !b.isLambda && !mustEtaExpand (← getEnv) b then
       /-
       We use eta-reduction to make sure we avoid the overhead introduced by
       the implicit lambda feature when declaring instances.
@@ -1015,7 +1015,7 @@ where
     visit e
 
   visitProj (s : Name) (i : Nat) (e : Expr) : M (Arg .pure) := do
-    if isRuntimeBuiltinType s then
+    bif isRuntimeBuiltinType s then
       let structInfo := getStructureInfo (← getEnv) s
       let projExpr ← liftMetaM <| Meta.mkProjection e structInfo.fieldNames[i]!
       visitApp projExpr
@@ -1034,7 +1034,7 @@ where
     | .letE binderName type value body _ =>
       let type := type.instantiateRev xs
       let value := value.instantiateRev xs
-      if (← (liftMetaM <| Meta.isProp type) <||> isTypeFormerType type) then
+      bif (← (liftMetaM <| Meta.isProp type) <||> isTypeFormerType type) then
         visitLet body (xs.push value) alts
       else
         let type' ← toLCNFType type
@@ -1048,7 +1048,7 @@ where
         let value' ← match isMatcherAlt, alts[value]? with
           | true, some arg => pure arg
           | _, _ => withExpectedType type' do visit value (useCache := !isMatcherAlt)
-        let alts := if isMatcherAlt then alts.insert value value' else alts
+        let alts := bif isMatcherAlt then alts.insert value value' else alts
         let letDecl ← mkLetDecl binderName type value type' value'
         visitLet body (xs.push (.fvar letDecl.fvarId)) alts
     | _ =>

@@ -19,25 +19,25 @@ namespace Expr
   | _ => none
 
 @[inline] def app1? (e : Expr) (fName : Name) : Option Expr :=
-  if e.isAppOfArity fName 1 then
+  bif e.isAppOfArity fName 1 then
     some e.appArg!
   else
     none
 
 @[inline] def app2? (e : Expr) (fName : Name) : Option (Expr × Expr) :=
-  if e.isAppOfArity fName 2 then
+  bif e.isAppOfArity fName 2 then
     some (e.appFn!.appArg!, e.appArg!)
   else
     none
 
 @[inline] def app3? (e : Expr) (fName : Name) : Option (Expr × Expr × Expr) :=
-  if e.isAppOfArity fName 3 then
+  bif e.isAppOfArity fName 3 then
     some (e.appFn!.appFn!.appArg!, e.appFn!.appArg!, e.appArg!)
   else
     none
 
 @[inline] def app4? (e : Expr) (fName : Name) : Option (Expr × Expr × Expr × Expr) :=
-  if e.isAppOfArity fName 4 then
+  bif e.isAppOfArity fName 4 then
     some (e.appFn!.appFn!.appFn!.appArg!, e.appFn!.appFn!.appArg!, e.appFn!.appArg!, e.appArg!)
   else
     none
@@ -76,7 +76,7 @@ def natAdd? (e : Expr) : Option (Expr × Expr) :=
   e.app2? ``Nat.add
 
 @[inline] def arrow? : Expr → Option (Expr × Expr)
-  | Expr.forallE _ α β _ => if β.hasLooseBVars then none else some (α, β)
+  | Expr.forallE _ α β _ => bif β.hasLooseBVars then none else some (α, β)
   | _                    => none
 
 def isEq (e : Expr) :=
@@ -93,16 +93,16 @@ def isDIte (e : Expr) :=
 
 partial def listLit? (e : Expr) : Option (Expr × List Expr) :=
   let rec loop (e : Expr) (acc : List Expr) :=
-    if e.isAppOfArity' ``List.nil 1 then
+    bif e.isAppOfArity' ``List.nil 1 then
       some (e.appArg!', acc.reverse)
-    else if e.isAppOfArity' ``List.cons 3 then
+    else bif e.isAppOfArity' ``List.cons 3 then
       loop e.appArg!' (e.appFn!'.appArg!' :: acc)
     else
       none
   loop e []
 
 def arrayLit? (e : Expr) : Option (Expr × List Expr) :=
-  if e.isAppOfArity' ``List.toArray 2 then
+  bif e.isAppOfArity' ``List.toArray 2 then
     listLit? e.appArg!'
   else
     none

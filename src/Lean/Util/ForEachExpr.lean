@@ -22,7 +22,7 @@ variable {ω : Type} {m : Type → Type} [STWorld ω m] [MonadLiftT (ST ω) m] [
 namespace ForEachExpr
 def visit (g : Expr → m Bool) (e : Expr) : MonadCacheT Expr Unit m Unit :=
   checkCache e fun _ => do
-    if (← g e) then
+    bif (← g e) then
       match e with
       | .forallE _ d b _   => do visit g d; visit g b
       | .lam _ d b _       => do visit g d; visit g b

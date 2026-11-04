@@ -86,9 +86,9 @@ def attachCodeDecls (decls : Array (CodeDecl .pure)) (code : Code .pure) : SimpM
   go decls.size code
 where
   go (i : Nat) (code : Code .pure) : SimpM (Code .pure) := do
-    if i > 0 then
+    bif i >ᵇ 0 then
       let decl := decls[i-1]!
-      if (← isUsed decl.fvarId) then
+      bif (← isUsed decl.fvarId) then
         match decl with
         | .let decl => markUsedLetDecl decl; go (i-1) (.let decl code)
         | .fun decl => markUsedFunDecl decl; go (i-1) (.fun decl code)

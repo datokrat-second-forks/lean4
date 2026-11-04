@@ -40,13 +40,13 @@ private def getTransparencyExt : Phase → EnvExtension (List Name × NameSet)
 
 
 def isDeclTransparent (env : Environment) (phase : Phase) (declName : Name) : Bool := Id.run do
-  if !env.header.isModule then
+  bif !env.header.isModule then
     return true
   let (_, map) := getTransparencyExt phase |>.getState env
   map.contains declName
 
 def setDeclTransparent (env : Environment) (phase : Phase) (declName : Name) : Environment :=
-  if isDeclTransparent env phase declName then
+  bif isDeclTransparent env phase declName then
     env
   else
     getTransparencyExt phase |>.modifyState env fun s =>
@@ -93,7 +93,7 @@ def mkDeclExt (phase : Phase) (name : Name := by exact decl_name%) :
       let all := sortedEntries s declLt
       let exported := all.filterMap fun decl => do
         guard <| isDeclPublic env decl.name
-        if isDeclTransparent env phase decl.name then
+        bif isDeclTransparent env phase decl.name then
           some decl
         else
           some { decl with value := .extern { entries := [.opaque] } }
@@ -229,7 +229,7 @@ def getImpureDeclIndices (env : Environment) (targets : Array Name) : Std.HashMa
   let targetSet := Std.HashSet.ofArray targets
   let mut i := set.size
   for name in names do
-    if targetSet.contains name then
+    bif targetSet.contains name then
       map := map.insert name i
     assert! i != 0
     i := i - 1

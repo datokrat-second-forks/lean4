@@ -47,23 +47,23 @@ body and referenced declarations based on that.
 -/
 partial def markDeclPublicRec (phase : Phase) (decl : Decl pu) : CompilerM Unit := do
   modifyEnv (setDeclPublic · decl.name)
-  if (← shouldExportBody decl) then
+  bif (← shouldExportBody decl) then
     unless isDeclTransparent (← getEnv) phase decl.name do
       trace[Compiler.inferVisibility] m!"Marking {decl.name} as transparent because it is opaque and its body looks relevant"
       modifyEnv (setDeclTransparent · phase decl.name)
     decl.value.forCodeM fun code =>
       for ref in collectUsedDecls code do
         if let some refDecl ← getLocalDeclAt? ref phase then
-          if !isDeclPublic (← getEnv) ref then
+          bif !isDeclPublic (← getEnv) ref then
             trace[Compiler.inferVisibility] m!"Marking {ref} as opaque because it is used by transparent {decl.name}"
             markDeclPublicRec phase refDecl
 
 /-- Checks whether references in the given declaration adhere to phase distinction. -/
 partial def checkMeta (origDecl : Decl pu) : CompilerM Unit := do
-  if !(← getEnv).header.isModule || (← compiler.inLeanIR.getM) || !(← compiler.checkMeta.getM) then
+  bif !(← getEnv).header.isModule || (← compiler.inLeanIR.getM) || !(← compiler.checkMeta.getM) then
     return
   let irPhases := getIRPhases (← getEnv) origDecl.name
-  if irPhases == .all then
+  bif irPhases == .all then
     return
   -- If the meta decl is public, we want to ensure it can only refer to public meta imports so that
   -- references to private imports cannot escape the current module. In particular, we check that
@@ -73,26 +73,26 @@ partial def checkMeta (origDecl : Decl pu) : CompilerM Unit := do
 where go (isMeta isPublic : Bool) (decl : Decl pu) : StateT NameSet CompilerM Unit := do
   decl.value.forCodeM fun code =>
     for ref in collectUsedDecls code do
-      if (← get).contains ref then
+      bif (← get).contains ref then
         continue
       modify (·.insert ref)
       let env ← getEnv
-      if isMeta && isPublic then
+      bif isMeta && isPublic then
         if let some modIdx := env.getModuleIdxFor? ref then
-          if isMarkedMeta env ref then
-            if env.header.modules[modIdx]?.any (!·.isExported) then
+          bif isMarkedMeta env ref then
+            bif env.header.modules[modIdx]?.any (!·.isExported) then
               throwError "Invalid public `meta` definition `{.ofConstName origDecl.name}`, \
                 `{.ofConstName ref}` is not accessible here; consider adding \
                 `public import {env.header.moduleNames[modIdx]!}`"
           else
             -- TODO: does not account for `public import` + `meta import`, which is not the same
-            if env.header.modules[modIdx]?.any (!·.isExported) then
+            bif env.header.modules[modIdx]?.any (!·.isExported) then
               throwError "Invalid public `meta` definition `{.ofConstName origDecl.name}`, \
                 `{.ofConstName ref}` is not accessible here; consider adding \
                 `public meta import {env.header.moduleNames[modIdx]!}`"
       let relaxedCheck := compiler.relaxedMetaCheck.get (← getOptions) && !env.isImportedConst ref
       let irPhases := getIRPhases env ref
-      if !relaxedCheck && irPhases == .runtime && isMeta then
+      bif !relaxedCheck && irPhases == .runtime && isMeta then
         if let some modIdx := env.getModuleIdxFor? ref then
           -- We use `public` here as a conservative default (and most common case) as necessary
           -- visibility is only clear at the end of the file.
@@ -102,9 +102,9 @@ where go (isMeta isPublic : Bool) (decl : Decl pu) : StateT NameSet CompilerM Un
         else
           throwError "Invalid `meta` definition `{.ofConstName origDecl.name}`, \
         `{.ofConstName ref}` not marked `meta`"
-      if !relaxedCheck && irPhases == .comptime && !isMeta then
+      bif !relaxedCheck && irPhases == .comptime && !isMeta then
         if let some modIdx := env.getModuleIdxFor? ref then
-          if !isMarkedMeta env ref then
+          bif !isMarkedMeta env ref then
             throwError "Invalid definition `{.ofConstName origDecl.name}`, may not access \
               declaration `{.ofConstName ref}` imported as `meta`; consider adding \
               `import {env.header.moduleNames[modIdx]!}`"
@@ -114,7 +114,7 @@ where go (isMeta isPublic : Bool) (decl : Decl pu) : StateT NameSet CompilerM Un
       -- We allow auxiliary defs to be used in either phase but we need to recursively check
       -- *their* references in this case. We also need to do this for non-auxiliary defs in case a
       -- public meta def tries to use a private meta import via a local private meta def :/ .
-      if irPhases == .all || isPublic && isPrivateName ref then
+      bif irPhases == .all || isPublic && isPrivateName ref then
         if let some ⟨_, refDecl⟩ ← getLocalDecl? ref then
           go isMeta isPublic (refDecl.castPurity! pu)
 
@@ -129,27 +129,27 @@ partial def checkTemplateVisibility : Pass where
   phase := .base
   name := `checkTemplateVisibility
   run decls := do
-    if (← getEnv).header.isModule then
+    bif (← getEnv).header.isModule then
       for decl in decls do
         -- A private template-like decl cannot directly be used by a different module. If it could be used
         -- indirectly via a public template-like, we do a recursive check when checking the latter.
-        if !isPrivateName decl.name && (← decl.isTemplateLike) then
+        bif !isPrivateName decl.name && (← decl.isTemplateLike) then
           let isMeta := isMarkedMeta (← getEnv) decl.name
           go decl decl |>.run' {}
     return decls
 where go (origDecl decl : Decl .pure) : StateT NameSet CompilerM Unit := do
   decl.value.forCodeM fun code =>
     for ref in collectUsedDecls code do
-      if (← get).contains ref then
+      bif (← get).contains ref then
         continue
       modify (·.insert ref)
       if let some localDecl := baseExt.getState (← getEnv) |>.find? ref then
         -- check transitively through local decls
-        if isPrivateName localDecl.name && (← localDecl.isTemplateLike) then
+        bif isPrivateName localDecl.name && (← localDecl.isTemplateLike) then
           go origDecl localDecl
       else if let some modIdx := (← getEnv).getModuleIdxFor? ref then
-        if (← getEnv).header.modules[modIdx]?.any (!·.isExported) then
-          if !(← compiler.inLeanIR.getM) then
+        bif (← getEnv).header.modules[modIdx]?.any (!·.isExported) then
+          bif !(← compiler.inLeanIR.getM) then
             throwError "Cannot compile inline/specializing declaration `{.ofConstName origDecl.name}` as \
               it uses `{.ofConstName ref}` of module `{(← getEnv).header.moduleNames[modIdx]!}` \
               which must be imported publicly. This limitation may be lifted in the future."
@@ -162,9 +162,9 @@ def inferVisibility (phase : Phase) : Pass where
   phase
   name := `inferVisibility
   run decls := do
-    if (← getEnv).header.isModule then
+    bif (← getEnv).header.isModule then
       for decl in decls do
-        if (← getEnv).setExporting true |>.contains decl.name then
+        bif (← getEnv).setExporting true |>.contains decl.name then
           trace[Compiler.inferVisibility] m!"Marking {decl.name} as opaque because it is a public def"
           markDeclPublicRec phase decl
     return decls

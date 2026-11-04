@@ -46,9 +46,9 @@ def inlineCandidate? (e : LetValue .pure) : SimpM (Option InlineCandidateInfo) :
     else if let some decl ← findLetDecl? argFVarId then
       e := decl.value
       if let .const declName _ _ := e then
-        if (← isCtor? declName).isSome then
+        bif (← isCtor? declName).isSome then
           throwError m!"`inline` applied to constructor '{declName}' is invalid"
-        else if (← getLocalDecl? declName).isNone then
+        else bif (← getLocalDecl? declName).isNone then
           throwError m!"`inline` applied to non-local declaration '{declName}' is invalid"
     else
       assert! (← findParam? (pu := .pure) argFVarId).isSome
@@ -59,8 +59,8 @@ def inlineCandidate? (e : LetValue .pure) : SimpM (Option InlineCandidateInfo) :
     let some ⟨.pure, decl⟩ ← getDecl? declName | return none
     let .code code := decl.value | return none
     let shouldInline : SimpM Bool := do
-      if !decl.inlineIfReduceAttr && decl.recursive then return false
-      if mustInline then return true
+      bif !decl.inlineIfReduceAttr && decl.recursive then return false
+      bif mustInline then return true
       /-
       We don't inline instances tagged with `[inline]/[always_inline]/[inline_if_reduce]` at the base phase.
       We assume that at the base phase these annotations are for the instance methods that will be lambda lifted during the base phase.
@@ -68,7 +68,7 @@ def inlineCandidate? (e : LetValue .pure) : SimpM (Option InlineCandidateInfo) :
       the end of the base phase. The goal is to make them cheap to inline in actual code.
       By inlining their definitions we would be just generating extra work for the lambda lifter.
       -/
-      if (← inBasePhase) then
+      bif (← inBasePhase) then
         /-
         We claim it is correct to use `Meta.isInstance` because
         1. `shouldInline` is called during LCNF compilation, which runs at `addDecl` time
@@ -80,25 +80,25 @@ def inlineCandidate? (e : LetValue .pure) : SimpM (Option InlineCandidateInfo) :
         want the TC-scoped notion: declarations active as instances during elaboration. Manual
         aux decls bearing `[instance_reducible]` without `[instance]` should not count.
         -/
-        if (← Meta.isInstance decl.name) then
+        bif (← Meta.isInstance decl.name) then
           return false
         -- This is done to avoid inlining `_override` implementations for computed fields in the
         -- base phase, since `cases` constructs have not yet been replaced by their underlying
         -- implementation, and thus inlining `_override` implementations for computed fields will
         -- expose a constructor/`cases` mismatch.
         -- TODO: Find a better solution for this problem.
-        if decl.name matches .str _ "_override" then return false
-      if decl.alwaysInlineAttr then return true
+        bif decl.name matches .str _ "_override" then return false
+      bif decl.alwaysInlineAttr then return true
       -- TODO: check inlining quota
-      if decl.inlineAttr || decl.inlineIfReduceAttr then return true
-      if decl.noinlineAttr then return false
+      bif decl.inlineAttr || decl.inlineIfReduceAttr then return true
+      bif decl.noinlineAttr then return false
       isSmall code
     unless (← shouldInline) do return none
     /- check arity -/
     let arity := decl.getArity
     let inlinePartial := (← read).config.inlinePartial
-    if !mustInline && !inlinePartial && args.size < arity then return none
-    if decl.inlineIfReduceAttr then
+    bif !mustInline && !inlinePartial && args.size <ᵇ arity then return none
+    bif decl.inlineIfReduceAttr then
       let some paramIdx := decl.isCasesOnParam? | return none
       unless paramIdx < args.size do return none
       let arg := args[paramIdx]!

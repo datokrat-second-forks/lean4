@@ -31,7 +31,7 @@ partial def reduce (code : Code .pure) : ReduceM (Code .pure) := do
     let mut mask := #[]
     let mut paramsNew := #[]
     for param in decl.params.reverse do
-      if used.contains param.fvarId then
+      bif used.contains param.fvarId then
         used := collectUsedAtExpr used param.type
         mask := mask.push true
         paramsNew := paramsNew.push param
@@ -40,7 +40,7 @@ partial def reduce (code : Code .pure) : ReduceM (Code .pure) := do
         mask := mask.push false
     mask := mask.reverse
     paramsNew := paramsNew.reverse
-    if paramsNew.size != decl.params.size then
+    bif paramsNew.size != decl.params.size then
       let type ← mkForallParams paramsNew (← value.inferType)
       let decl ← decl.update type paramsNew value
       let k ← withReader (·.insert decl.fvarId mask) (reduce k)
@@ -56,7 +56,7 @@ partial def reduce (code : Code .pure) : ReduceM (Code .pure) := do
     if let some mask := (← read).get? fvarId then
       let mut argsNew := #[]
       for keep in mask, arg in args do
-        if keep then
+        bif keep then
           argsNew := argsNew.push arg
       return .jmp fvarId argsNew
     else

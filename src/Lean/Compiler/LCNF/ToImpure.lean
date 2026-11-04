@@ -49,7 +49,7 @@ instance : MonadFVarSubstState ToImpureM .pure where
 
 def Param.toImpure (p : Param .pure) : ToImpureM (Param .impure) := do
   let type ← toImpureType p.type
-  if type.isVoid || type.isErased then
+  bif type.isVoid || type.isErased then
     addSubst p.fvarId .erased
 
   let p := { p with type }
@@ -106,7 +106,7 @@ def Arg.toImpure (arg : Arg .pure) : ToImpureM (Arg .impure) := do
 public def lowerResultType (type : Expr) (arity : Nat) : CoreM Expr :=
   toImpureType (resultTypeForArity type arity)
 where resultTypeForArity (type : Lean.Expr) (arity : Nat) : Expr :=
-  if arity == 0 then
+  bif arity == 0 then
     type
   else
     match type with
@@ -117,7 +117,7 @@ where resultTypeForArity (type : Lean.Expr) (arity : Nat) : Expr :=
 def litValueImpureType (v : LCNF.LitValue) : Expr :=
   match v with
   | .nat n =>
-    if n < UInt32.size then ImpureType.tagged else ImpureType.tobject
+    bif n <ᵇ UInt32.size then ImpureType.tagged else ImpureType.tobject
   | .str .. => ImpureType.object
   | .uint8 .. => ImpureType.uint8
   | .uint16 .. => ImpureType.uint16
@@ -136,7 +136,7 @@ partial def lowerLet (decl : LetDecl .pure) (k : Code .pure) : ToImpureM (Code .
     continueLet decl
   | .proj typeName i fvarId =>
     if let some info ← hasTrivialImpureStructure? typeName then
-      if info.fieldIdx == i then
+      bif info.fieldIdx == i then
         addSubst decl.fvarId (.fvar fvarId)
       else
         addSubst decl.fvarId .erased
@@ -171,14 +171,14 @@ partial def lowerLet (decl : LetDecl .pure) (k : Code .pure) : ToImpureM (Code .
         k.toImpure
       else
         let type ← nameToImpureType ctorVal.induct
-        if type.isScalar then
+        bif type.isScalar then
           let decl := ⟨decl.fvarId, decl.binderName, type, .lit (.impureTypeScalarNumLit type ctorVal.cidx)⟩
           let res ← continueLet decl
           return res
 
         let ⟨ctorInfo, fields⟩ ← getCtorLayout name
         let irArgs := irArgs.extract (start := ctorVal.numParams)
-        if irArgs.size != fields.size then
+        bif irArgs.size != fields.size then
           -- An overapplied constructor arises from compiler
           -- transformations on unreachable code
           return .unreach (ImpureType.tobject) -- TODO: need a more precise type for this
@@ -253,9 +253,9 @@ where
   mkApplication (name : Name) (numParams : Nat) (args : Array (Arg .impure)) :
       ToImpureM (Code .impure) := do
     let numArgs := args.size
-    if numArgs < numParams then
+    bif numArgs <ᵇ numParams then
       mkPap name args
-    else if numArgs == numParams then
+    else bif numArgs == numParams then
       mkFap name args
     else
       mkOverApplication name numParams args
@@ -268,7 +268,7 @@ partial def Code.toImpure (c : Code .pure) : ToImpureM (Code .impure) := do
     let keepMask := params.map fun p => !(p.type.isVoid || p.type.isErased)
     modify fun s => { s with jpParamMask := s.jpParamMask.insert decl.fvarId keepMask }
     let filteredParams := (params.zip keepMask).foldl (init := #[]) fun acc (p, keep) =>
-      if keep then acc.push p else acc
+      bif keep then acc.push p else acc
     let value ← decl.value.toImpure
     let k ← k.toImpure
     let type ← lowerResultType decl.type params.size
@@ -278,7 +278,7 @@ partial def Code.toImpure (c : Code .pure) : ToImpureM (Code .impure) := do
   | .jmp fvarId args =>
     let keepMask := (← get).jpParamMask[fvarId]!
     let filteredArgs ← (args.zip keepMask).foldlM (init := #[]) fun acc (a, keep) => do
-      if keep then return acc.push (← a.toImpure) else return acc
+      bif keep then return acc.push (← a.toImpure) else return acc
     return .jmp fvarId filteredArgs
   | .cases c =>
     if let some info ← hasTrivialImpureStructure? c.typeName then
@@ -288,7 +288,7 @@ partial def Code.toImpure (c : Code .pure) : ToImpureM (Code .impure) := do
       assert! info.fieldIdx < ps.size
       for idx in 0...ps.size do
         let p := ps[idx]!
-        if idx == info.fieldIdx then
+        bif idx == info.fieldIdx then
           addSubst p.fvarId (.fvar c.discr)
         else
           addSubst p.fvarId .erased
@@ -347,13 +347,13 @@ where
     let taggedReturn := taggedReturnAttr.hasTag (← getEnv) decl.name
     match decl.value with
     | .code code =>
-      if taggedReturn then
+      bif taggedReturn then
         throwError m!"Error while compiling function '{decl.name}': @[tagged_return] is only valid for extern declarations"
       let value ← code.toImpure
       return { decl with type := resultType, params, value := .code value }
     | .extern externAttrData =>
-      if taggedReturn then
-        if resultType.isScalar then
+      bif taggedReturn then
+        bif resultType.isScalar then
           throwError m!"@[tagged_return] on function '{decl.name}' with scalar return type {resultType}"
         else
           resultType := ImpureType.tagged

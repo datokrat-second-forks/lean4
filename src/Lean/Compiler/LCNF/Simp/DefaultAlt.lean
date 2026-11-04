@@ -15,18 +15,18 @@ namespace Lean.Compiler.LCNF
 namespace Simp
 
 def addDefaultAlt (alts : Array (Alt .pure)) : SimpM (Array (Alt .pure)) := do
-  if alts.size <= 1 then
+  bif alts.size ≤ᵇ 1 then
     return alts
   else
     let some (rootAlt, otherAlts) ← chooseRootAlt alts | return alts
     let mut differentAlts := #[]
     let mut eqvAlts := #[]
     for alt in otherAlts do
-      if ← hasNoUsedParams alt <&&> (pure <| alt.getCode.alphaEqv rootAlt.getCode) then
+      bif (← hasNoUsedParams alt <&&> (pure <| alt.getCode.alphaEqv rootAlt.getCode)) then
         eqvAlts := eqvAlts.push alt
       else
         differentAlts := differentAlts.push alt
-    if eqvAlts.isEmpty then return alts
+    bif eqvAlts.isEmpty then return alts
     markSimplified
     eraseParams rootAlt.getParams
     eqvAlts.forM fun alt => do
@@ -39,7 +39,7 @@ where
     let rootAlt := alts[rootIdx]!
     let mut otherAlts := Array.emptyWithCapacity (alts.size - 1)
     for idx in 0...alts.size do
-      if idx != rootIdx then
+      bif idx != rootIdx then
         otherAlts := otherAlts.push alts[idx]!
     return (rootAlt, otherAlts)
 

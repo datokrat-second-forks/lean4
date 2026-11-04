@@ -2153,11 +2153,11 @@ private partial def parseNamedCharRefData (data : String) : Array (String × Str
   go 0 (Array.emptyWithCapacity 2125)
 where
   space (i : String.Pos.Raw) : String.Pos.Raw :=
-    if h : i.atEnd data then i
-    else if i.get' data h == ' ' then i
-    else space (i.next' data h)
+    bif h : i.atEnd data then i
+    else bif i.get' data (Bool.ne_true_of_eq_false h) == ' ' then i
+    else space (i.next' data (Bool.ne_true_of_eq_false h))
   go (i : String.Pos.Raw) (acc : Array (String × String)) : Array (String × String) :=
-    if i.atEnd data then acc
+    bif i.atEnd data then acc
     else
       let nameEnd := space i
       let denotationStart := nameEnd.next data
@@ -2189,11 +2189,11 @@ must denote a Unicode scalar value that is not U+0000, U+000D,
 a noncharacter, or a control other than ASCII whitespace. -/
 def characterReference? (ref : String) : Option String :=
   let i : String.Pos.Raw := 0
-  if h : i.atEnd ref then none
-  else if i.get' ref h == '#' then
-    let i := i.next' ref h
-    if h : i.atEnd ref then none
-    else if i.get' ref h == 'x' || i.get' ref h == 'X' then numeric 16 ref (i.next' ref h)
+  bif h : i.atEnd ref then none
+  else bif i.get' ref (Bool.ne_true_of_eq_false h) == '#' then
+    let i := i.next' ref (Bool.ne_true_of_eq_false h)
+    bif h : i.atEnd ref then none
+    else bif i.get' ref (Bool.ne_true_of_eq_false h) == 'x' || i.get' ref (Bool.ne_true_of_eq_false h) == 'X' then numeric 16 ref (i.next' ref (Bool.ne_true_of_eq_false h))
     else numeric 10 ref i
   else namedCharacterReference? ref
 where
@@ -2202,18 +2202,18 @@ where
     let mut i := i
     while h : ¬i.atEnd ref do
       let d ← digit? (i.get' ref h)
-      if d ≥ radix then none
+      bif d ≥ᵇ radix then none
       n := n * radix + d
-      if n > 0x10FFFF then none -- exceeded Unicode range
+      bif n >ᵇ 0x10FFFF then none -- exceeded Unicode range
       i := i.next' ref h
     let c := Char.ofNat n
-    if c == '\x00' || c == '\x0d' || isNonCharacter c || (isControl c && !isAsciiWhitespace c) then
+    bif c == '\x00' || c == '\x0d' || isNonCharacter c || (isControl c && !isAsciiWhitespace c) then
       none
     return String.singleton c
   digit? (c : Char) : Option Nat :=
-    if '0' ≤ c && c ≤ '9' then some (c.toNat - '0'.toNat)
-    else if 'a' ≤ c && c ≤ 'f' then some (10 + c.toNat - 'a'.toNat)
-    else if 'A' ≤ c && c ≤ 'F' then some (10 + c.toNat - 'A'.toNat)
+    bif '0' ≤ᵇ c && c ≤ᵇ '9' then some (c.toNat - '0'.toNat)
+    else bif 'a' ≤ᵇ c && c ≤ᵇ 'f' then some (10 + c.toNat - 'a'.toNat)
+    else bif 'A' ≤ᵇ c && c ≤ᵇ 'F' then some (10 + c.toNat - 'A'.toNat)
     else none
 
 end Lean.Html

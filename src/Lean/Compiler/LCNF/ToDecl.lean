@@ -29,10 +29,10 @@ def getDeclInfo? (declName : Name) : CoreM (Option ConstantInfo) := do
 def declIsNotUnsafe (declName : Name) : CoreM Bool := do
   let env ← getEnv
   let some info := env.find? declName | return true
-  if info.isUnsafe then
+  bif info.isUnsafe then
     return false
   else
-    if info matches .opaqueInfo .. then
+    bif info matches .opaqueInfo .. then
       -- check if its a partial def
       return env.find? (Compiler.mkUnsafeRecName declName) |>.isNone
     else
@@ -69,7 +69,7 @@ def toDecl (declName : Name) : CompilerM (Decl .pure) := do
     let type ← Meta.MetaM.run' (toLCNFType info.type)
     let params ← paramsFromTypeBinders type
     return { name := declName, params, type, value := .extern externAttrData, levelParams := info.levelParams, safe, inlineAttr? }
-  else if hasInitAttr env declName then
+  else bif hasInitAttr env declName then
     let type ← Meta.MetaM.run' (toLCNFType info.type)
     let params ← paramsFromTypeBinders type
     return { name := declName, params, type, value := .extern { entries := [] }, levelParams := info.levelParams, safe, inlineAttr? }
@@ -87,9 +87,9 @@ def toDecl (declName : Name) : CompilerM (Decl .pure) := do
       pure { name := declName, params := #[], type, value := .code code, levelParams := info.levelParams, safe, inlineAttr? }
     /- `toLCNF` may eta-reduce simple declarations. -/
     decl ← decl.etaExpand
-    if compiler.ignoreBorrowAnnotation.get (← getOptions) then
+    bif compiler.ignoreBorrowAnnotation.get (← getOptions) then
       decl := { decl with params := ← decl.params.mapM (·.updateBorrow false) }
-    if isExport env decl.name && decl.params.any (·.borrow) then
+    bif isExport env decl.name && decl.params.any (·.borrow) then
       throwError m!" Declaration {decl.name} is marked as `export` but some of its parameters have borrow annotations.\n Consider using `set_option compiler.ignoreBorrowAnnotation true in` to suppress the borrow annotations in its type.\n If the declaration is part of an `export`/`extern` pair make sure to also suppress the annotations at the `extern` declaration."
     return decl
 

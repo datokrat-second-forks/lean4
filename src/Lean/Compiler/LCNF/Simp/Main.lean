@@ -122,14 +122,14 @@ partial def inlineApp? (letDecl : LetDecl .pure) (k : Code .pure) : SimpM (Optio
   let numArgs := info.args.size
   withInlining letDecl.value info.recursive do
   let fvarId := letDecl.fvarId
-  if numArgs < info.arity then
+  bif numArgs <ᵇ info.arity then
     let funDecl ← specializePartialApp info
     addFVarSubst fvarId funDecl.fvarId
     markSimplified
     simp (.fun funDecl k)
   else
     let code ← betaReduce info.params info.value info.args[*...info.arity]
-    if k.isReturnOf fvarId && numArgs == info.arity then
+    bif k.isReturnOf fvarId && numArgs == info.arity then
       /- Easy case, the continuation `k` is just returning the result of the application. -/
       markSimplified
       simp code
@@ -137,7 +137,7 @@ partial def inlineApp? (letDecl : LetDecl .pure) (k : Code .pure) : SimpM (Optio
       let code ← simp code
       let simpK (result : FVarId) : SimpM (Code .pure) := do
         /- `result` contains the result of the inlined code -/
-        if numArgs > info.arity then
+        bif numArgs >ᵇ info.arity then
           let decl ← mkAuxLetDecl (.fvar result info.args[info.arity...*])
           addFVarSubst fvarId decl.fvarId
           simp (.let decl k)
@@ -145,14 +145,14 @@ partial def inlineApp? (letDecl : LetDecl .pure) (k : Code .pure) : SimpM (Optio
           addFVarSubst fvarId result
           simp k
       markSimplified
-      if oneExitPointQuick code then
+      bif oneExitPointQuick code then
         -- TODO: if `k` is small, we should also inline it here
         code.bind fun fvarId' => do
           markUsedFVar fvarId'
           simpK fvarId'
       else
         let expectedType ← inferAppType info.fType (info.args[*...info.arity]).toArray
-        if expectedType.headBeta.isForall then
+        bif expectedType.headBeta.isForall then
           /-
           If `code` returns a function, we create an auxiliary local function declaration (and eta-expand it)
           instead of creating a join point that takes a closure as an argument.
@@ -217,13 +217,13 @@ Simplify `code`
 -/
 partial def simp (code : Code .pure) : SimpM (Code .pure) := withIncRecDepth do
   incVisited
-  if (← get).visited % 128 == 0 then
+  bif (← get).visited % 128 == 0 then
     checkSystem "LCNF simp"
   match code with
   | .let decl k =>
     let baseDecl := decl
     let mut decl ← normLetDecl baseDecl
-    if baseDecl != decl then
+    bif baseDecl != decl then
       markSimplified
     if let some value ← simpValue? decl.value then
       markSimplified
@@ -231,7 +231,7 @@ partial def simp (code : Code .pure) : SimpM (Code .pure) := withIncRecDepth do
     -- This `decl.value != .erased` check is required because `.return` takes
     -- and `FVarId` rather than `Arg`, and the substitution will end up
     -- creating a new erased let decl in that case.
-    if decl.type.isErased && decl.value != .erased then
+    bif decl.type.isErased && decl.value != .erased then
       addSubst decl.fvarId (.erased : Arg .pure)
       eraseLetDecl decl
       simp k
@@ -256,7 +256,7 @@ partial def simp (code : Code .pure) : SimpM (Code .pure) := withIncRecDepth do
       attachCodeDecls decls k
     else
       let k ← simp k
-      if (← isUsed decl.fvarId) then
+      bif (← isUsed decl.fvarId) then
         markUsedLetDecl decl
         return code.updateLet! decl k
       else
@@ -266,7 +266,7 @@ partial def simp (code : Code .pure) : SimpM (Code .pure) := withIncRecDepth do
   | .fun decl k | .jp decl k =>
     let mut decl := decl
     let toBeInlined ← isOnceOrMustInline decl.fvarId
-    if toBeInlined then
+    bif toBeInlined then
       /-
       If the declaration will be inlined, it is wasteful to eagerly simplify it.
       So, we just normalize it (i.e., apply the substitution to it).
@@ -277,8 +277,8 @@ partial def simp (code : Code .pure) : SimpM (Code .pure) := withIncRecDepth do
       Note that functions in `decl` will be marked as used even if `decl` is not actually used.
       They will only be deleted in the next pass. TODO: investigate whether this is a problem.
       -/
-      if code.isFun then
-        if decl.isEtaExpandCandidate then
+      bif code.isFun then
+        bif decl.isEtaExpandCandidate then
           /- We must apply substitution before trying to eta-expand, otherwise `inferType` may fail. -/
           decl ← normFunDecl decl
           /-
@@ -289,8 +289,8 @@ partial def simp (code : Code .pure) : SimpM (Code .pure) := withIncRecDepth do
           markSimplified
       decl ← simpFunDecl decl
     let k ← simp k
-    if (← isUsed decl.fvarId) then
-      if toBeInlined then
+    bif (← isUsed decl.fvarId) then
+      bif toBeInlined then
         /-
         `decl` was supposed to be inlined, but there are still references to it.
         Thus, we must all variables in `decl` as used. Recall it was not eagerly simplified.
@@ -325,7 +325,7 @@ partial def simp (code : Code .pure) : SimpM (Code .pure) := withIncRecDepth do
         let alts ← c.alts.mapMonoM fun alt => do
           match alt with
           | .alt ctorName ps k =>
-            if !(k matches .unreach ..) && (← ps.anyM fun p => isInductiveWithNoCtors p.type) then
+            bif !(k matches .unreach ..) && (← ps.anyM fun p => isInductiveWithNoCtors p.type) then
               let type ← k.inferType
               eraseCode k
               markSimplified
@@ -339,11 +339,11 @@ partial def simp (code : Code .pure) : SimpM (Code .pure) := withIncRecDepth do
           match alt with
           | .default k => return k
           | .alt _ params k =>
-            if !(← params.anyM (isUsed ·.fvarId)) then
+            bif !(← params.anyM (isUsed ·.fvarId)) then
               params.forM (eraseParam ·)
               markSimplified
               return k
-        if alts.all (·.getCode matches .unreach ..) then
+        bif alts.all (·.getCode matches .unreach ..) then
           alts.forM (liftM <| ·.getParams.forM eraseParam)
           markSimplified
           return .unreach resultType

@@ -48,9 +48,9 @@ section
 
   private partial def readHeaderFields (h : FS.Stream) : IO (List (String × String)) := do
     let l ← h.getLine
-    if l.isEmpty then
+    bif l.isEmpty then
       throw $ userError "Stream was closed"
-    if l = "\r\n" then
+    bif l =ᵇ "\r\n" then
       pure []
     else
       match parseHeaderField l with
@@ -58,7 +58,7 @@ section
         let tail ← readHeaderFields h
         pure (hf :: tail)
       | none =>
-        if isLean3Request l then
+        bif isLean3Request l then
           throw $ userError s!"A Lean 3 request was received. Please ensure that your editor has a Lean 4 compatible extension installed. For VSCode, this is\n\n    https://github.com/leanprover/vscode-lean4 "
         else
           throw $ userError s!"Invalid header field: {repr l}"

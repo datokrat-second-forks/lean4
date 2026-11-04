@@ -25,7 +25,7 @@ def isCompilerRelevantMData (_mdata : MData) : Bool :=
 Return `true` if `e` is a `lcCast` application.
 -/
 def isLcCast? (e : Expr) : Option Expr :=
-  if e.isAppOfArity ``lcCast 3 then
+  bif e.isAppOfArity ``lcCast 3 then
     some e.appArg!
   else
     none

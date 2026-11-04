@@ -99,11 +99,11 @@ def restore (i : Nat) [Monad m] : M m Unit :=
 
 def tryCur [Monad m] : M m Bool := do
   let maxCalls := (← read).maxCalls
-  if maxCalls > 0 && (← get).numCalls ≥ maxCalls then
+  bif maxCalls >ᵇ 0 && (← get).numCalls ≥ᵇ maxCalls then
     throw ()
   else
     modify fun s => { s with numCalls := s.numCalls + 1 }
-    if (← (← read).test (← get).cur) then
+    bif (← (← read).test (← get).cur) then
       markFound (m := m)
       return true
     else
@@ -129,7 +129,7 @@ def init [Monad m] : M m Unit := do
   for h : i in *...initialMask.size do
     unless initialMask[i] do
       add i
-    if (← tryCur) then return
+    bif (← tryCur) then return
 
 /--
 **Pruning (minimization phase).**
@@ -162,7 +162,7 @@ def prune [Monad m] : M m Unit := do
 
 def main [Monad m] : M m Unit := do
   init
-  if (← get).found then
+  bif (← get).found then
     prune
 
 /--
@@ -190,10 +190,10 @@ public def search
     (test : Array Bool → m Bool)
     (maxCalls : Nat := 0) -- 0 means unbounded
     : m Result := do
-  if (← test initialMask) then
+  bif (← test initialMask) then
     return { paramMask := initialMask, numCalls := 1, status := .precise }
   let (r, s) ← main { initialMask, test, maxCalls} |>.run |>.run { cur := initialMask, numCalls := 1 }
-  let status := if s.found then
+  let status := bif s.found then
     match r with
     | .ok _ => .precise
     | .error _ => .approx

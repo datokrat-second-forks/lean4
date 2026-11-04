@@ -134,7 +134,7 @@ def setBlack : RBNode α β → RBNode α β
   | e              => e
 
 @[specialize] def insert (t : RBNode α β) (k : α) (v : β k) : RBNode α β :=
-  if isRed t then setBlack (ins cmp t k v)
+  bif isRed t then setBlack (ins cmp t k v)
   else ins cmp t k v
 
 end Insert
@@ -186,10 +186,10 @@ variable (cmp : α → α → Ordering)
   | node _ a y v b =>
     match cmp x y with
     | Ordering.lt =>
-      if a.isBlack then balLeft (del x a) y v b
+      bif a.isBlack then balLeft (del x a) y v b
       else node red (del x a) y v b
     | Ordering.gt =>
-      if b.isBlack then balRight a y v (del x b)
+      bif b.isBlack then balRight a y v (del x b)
       else node red a y v (del x b)
     | Ordering.eq => appendTrees a b
 
@@ -417,7 +417,7 @@ def intersectBy {γ : Type v₁} {δ : Type v₂} (mergeFn : α → β → γ �
 "`key`/`val`"-pairs in `m` where `f key val` returns `true`.
 -/
 def filter (f : α → β → Bool) (m : RBMap α β cmp) : RBMap α β cmp :=
-  m.fold (fun r k v => if f k v then r.insert k v else r) {}
+  m.fold (fun r k v => bif f k v then r.insert k v else r) {}
 
 /--
 `filterMap f m` filters an `RBMap` and simultaneously modifies the filtered values.

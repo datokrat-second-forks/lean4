@@ -28,7 +28,7 @@ structure State where
 abbrev M := StateM State
 
 partial def main (e : Expr) (offset : Nat) : M Unit := do
-  if offset < e.looseBVarRange then
+  bif offset <ᵇ e.looseBVarRange then
     unless (← get).visited.contains (offset, e) do
       modify fun s => { s with visited := s.visited.insert (offset, e) }
       match e with
@@ -51,7 +51,7 @@ Returns a set of indices relative to `offset`.
 Specification: `i ∈ e.collectLooseBVars offset ↔ e.hasLooseBVar (i + offset)`.
 -/
 def collectLooseBVars (e : Expr) (offset : Nat := 0) : Std.HashSet Nat :=
-  if e.hasLooseBVars then
+  bif e.hasLooseBVars then
     let (_, s) := CollectLooseBVars.main e offset |>.run {}
     s.bvars
   else

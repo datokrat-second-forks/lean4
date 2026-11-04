@@ -59,7 +59,7 @@ partial def Code.applyRenaming (code : Code pu) (r : Renaming) : CompilerM (Code
 end
 
 def Decl.applyRenaming (decl : Decl pu) (r : Renaming) : CompilerM (Decl pu) := do
-  if r.isEmpty then
+  bif r.isEmpty then
     return decl
   else
     let params ← decl.params.mapMonoM (·.applyRenaming r)

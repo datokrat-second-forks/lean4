@@ -25,7 +25,7 @@ abbrev Visitor := State → State
 
 mutual
   partial def visitLevel (u : Level) : Visitor := fun s =>
-    if !u.hasParam || s.visitedLevel.contains u then s
+    bif !u.hasParam || s.visitedLevel.contains u then s
     else collect u { s with visitedLevel := s.visitedLevel.insert u }
 
   partial def collect : Level → Visitor
@@ -41,8 +41,8 @@ def visitLevels (us : List Level) : Visitor :=
 
 mutual
   partial def visitExpr (e : Expr) : Visitor := fun s =>
-    if !e.hasLevelParam then s
-    else if s.visitedExpr.contains e then s
+    bif !e.hasLevelParam then s
+    else bif s.visitedExpr.contains e then s
     else main e { s with visitedExpr := s.visitedExpr.insert e }
 
   partial def main : Expr → Visitor
@@ -59,10 +59,10 @@ end
 
 partial def State.getUnusedLevelParam (s : CollectLevelParams.State) (pre : Name := `v) : Level :=
   let v := mkLevelParam pre;
-  if s.visitedLevel.contains v then
+  bif s.visitedLevel.contains v then
     let rec loop (i : Nat) :=
       let v := mkLevelParam (pre.appendIndexAfter i);
-      if s.visitedLevel.contains v then loop (i+1) else v
+      bif s.visitedLevel.contains v then loop (i+1) else v
     loop 1
   else
     v

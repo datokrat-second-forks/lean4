@@ -211,7 +211,7 @@ where
       | .str .. => failure
       go k
     | .ctor i objArgs =>
-      if i.isScalar then
+      bif i.isScalar then
         record decl.fvarId (.arg (.tagged i.cidx))
         go k
       else
@@ -219,7 +219,7 @@ where
         let usizeArgs := Array.replicate i.usize 0
         -- Align to 8 bytes for alignment with lean_object*
         let align (v a : Nat) : Nat :=
-          (v / a) * a + a * (if v % a != 0 then 1 else 0)
+          (v / a) * a + a * (bif v % a != 0 then 1 else 0)
         let alignedSsize := align i.ssize 8
         let ssizeArgs := Array.replicate alignedSsize 0
         compileSetChain decl.fvarId i objArgs usizeArgs ssizeArgs k
@@ -347,7 +347,7 @@ where
       | _ => failure
     | .fap ``Array.push #[.erased, .fvar arrId, .fvar elemId] =>
       let .arrayBuilder elems remainingCapacity := (← get).groundMap[arrId]! | failure
-      if remainingCapacity > 1 then failure
+      bif remainingCapacity >ᵇ 1 then failure
       let .arg elemArg := (← get).groundMap[elemId]! | failure
       return .array (elemArg :: elems).toArray.reverse
     | .fap c #[] =>
@@ -410,7 +410,7 @@ Detect whether `d` can be compiled to a `SimpleGroundExpr`. If it can record the
 -/
 def Decl.detectSimpleGround (d : Decl .impure) : CompilerM Unit := do
   let .code code := d.value | return ()
-  if d.type.isPossibleRef && d.params.isEmpty then
+  bif d.type.isPossibleRef && d.params.isEmpty then
     if let some groundExpr ← compileToSimpleGroundExpr code then
       trace[Compiler.simpleGround] m!"Marked {d.name} as simple ground expr"
       modifyEnv fun env => addSimpleGroundDecl env d.name groundExpr

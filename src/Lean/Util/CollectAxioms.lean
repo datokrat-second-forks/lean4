@@ -103,7 +103,7 @@ def ExportedAxiomsState.find? (s : ExportedAxiomsState) (env : Environment)
     (c : Name) : Option (Array Name) :=
   match env.getModuleIdxFor? c with
   | some modIdx =>
-    if h : modIdx.toNat < s.importedModuleEntries.size then
+    bif h : modIdx.toNat <ᵇ s.importedModuleEntries.size then
       match s.importedModuleEntries[modIdx].binSearch (c, #[]) (fun a b => Name.quickLt a.1 b.1) with
       | some entry => some entry.2
       | none       => none
@@ -132,7 +132,7 @@ builtin_initialize exportedAxiomsExt :
       -- module-local.
       let allNames := env.checked.get.constants.foldStage2
         (fun names name _ =>
-          if (exportedEnv.find? name).isSome then names.push name
+          bif (exportedEnv.find? name).isSome then names.push name
           else names) #[]
       -- Compute axioms within a shared state (for caching across declarations).
       -- Use `privateEnv` so that `collect` can see all constant bodies.

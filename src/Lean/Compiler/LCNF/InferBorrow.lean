@@ -96,7 +96,7 @@ where
           { m with
             map := m.map.insert (.decl decl.name) (initParamsIfNotExported exported decl.params),
             annotatedBorrows := decl.params.foldl (init := m.annotatedBorrows) fun acc p =>
-              if p.borrow then acc.insert p.fvarId else acc
+              bif p.borrow then acc.insert p.fvarId else acc
           }
         goCode decl.name code
       | .extern .. => return ()
@@ -105,7 +105,7 @@ where
     ps.map fun p => { p with borrow := p.type.isPossibleRef }
 
   initParamsIfNotExported (exported : Bool) (ps : Array (Param .impure)) : Array (Param .impure) :=
-    if exported then
+    bif exported then
       ps.map ({ · with borrow := false })
     else
       initParams ps
@@ -117,7 +117,7 @@ where
         { m with
           map := m.map.insert (.jp declName decl.fvarId) (initParams decl.params),
           annotatedBorrows := decl.params.foldl (init := m.annotatedBorrows) fun acc p =>
-            if p.borrow then acc.insert p.fvarId else acc
+            bif p.borrow then acc.insert p.fvarId else acc
         }
       goCode declName decl.value
       goCode declName k
@@ -267,7 +267,7 @@ where
   go : InferM Unit := do
     for (_, params) in (← get).paramMap.map do
       for param in params do
-        if !param.borrow && param.type.isPossibleRef then
+        bif !param.borrow && param.type.isPossibleRef then
           -- if the param already disqualifies as borrow now this is because of an annotation
           ownFVar param.fvarId .ownedAnnotation
     modify fun s => { s with modified := false }
@@ -275,7 +275,7 @@ where
 
   loop : InferM Unit := do
     step
-    if (← get).modified then
+    bif (← get).modified then
       modify fun s => { s with modified := false }
       loop
     else
@@ -286,7 +286,7 @@ where
 
   ownFVar (fvarId : FVarId) (reason : OwnReason) : InferM Unit := do
     unless (← get).owned.contains fvarId do
-      if !reason.isForced && (← get).paramMap.annotatedBorrows.contains fvarId then
+      bif !reason.isForced && (← get).paramMap.annotatedBorrows.contains fvarId then
         trace[Compiler.inferBorrow] "user annotation blocked owning {← PP.run <| PP.ppFVar fvarId}: {← reason.toString}"
       else
         trace[Compiler.inferBorrow] "own {← PP.run <| PP.ppFVar fvarId}: {← reason.toString}"
@@ -316,9 +316,9 @@ where
       -- linear in a nice fashion please make a PR
       modify fun s => { s with paramMap := s.paramMap.erase k }
       let ps ← ps.mapM fun p => do
-        if !p.borrow then
+        bif !p.borrow then
           return p
-        else if ← isOwned p.fvarId then
+        else bif (← isOwned p.fvarId) then
           modify fun s => { s with modified := true }
           return { p with borrow := false }
         else
@@ -352,7 +352,7 @@ where
       let arg := args[i]
       let p := ps[i]!
       if let .fvar x := arg then
-        if (← isOwned x) then ownFVar p.fvarId reason
+        bif (← isOwned x) then ownFVar p.fvarId reason
 
 
   /-- Mark `args[i]` as owned if it is one of the parameters that are currently in scope.
@@ -368,7 +368,7 @@ where
   ownArgsIfParam (z : FVarId) (args : Array (Arg .impure)) : InferM Unit := do
     for arg in args do
       if let .fvar x := arg then
-        if (← read).paramSet.contains x then
+        bif (← read).paramSet.contains x then
           ownFVar x (.constructorArg z)
 
   collectLetValue (z : FVarId) (v : LetValue .impure) : InferM Unit := do
@@ -376,29 +376,29 @@ where
     | .reset _ x => ownFVar z (.resetReuse z); ownFVar x (.resetReuse z)
     | .reuse x _ _ args => ownFVar z (.resetReuse z); ownFVar x (.resetReuse z); ownArgsIfParam z args
     | .oproj _ x _ =>
-      if ← isOwned x then ownFVar z (.forwardProjectionProp z)
-      if ← isOwned z then ownFVar x (.backwardProjectionProp z)
+      bif (← isOwned x) then ownFVar z (.forwardProjectionProp z)
+      bif (← isOwned z) then ownFVar x (.backwardProjectionProp z)
     -- Keep in sync with ExplicitRC, PropagateBorrow
     | .fap ``Array.getInternal args =>
       if let .fvar parent := args[1]! then
-        if ← isOwned parent then ownFVar z (.forwardProjectionProp z)
+        bif (← isOwned parent) then ownFVar z (.forwardProjectionProp z)
     | .fap ``Array.get!Internal args =>
       if let .fvar parent := args[1]! then
-        if ← isOwned parent then ownFVar z (.forwardProjectionProp z)
+        bif (← isOwned parent) then ownFVar z (.forwardProjectionProp z)
       if let .fvar parent := args[2]! then
-        if ← isOwned parent then ownFVar z (.forwardProjectionProp z)
+        bif (← isOwned parent) then ownFVar z (.forwardProjectionProp z)
     | .fap ``Array.uget args =>
       if let .fvar parent := args[1]! then
-        if ← isOwned parent then ownFVar z (.forwardProjectionProp z)
+        bif (← isOwned parent) then ownFVar z (.forwardProjectionProp z)
     | .fap f args =>
       -- Constants remain alive at least until the end of execution and can thus effectively be seen
       -- as a "borrowed" read.
-      if args.size > 0 then
+      bif args.size >ᵇ 0 then
         let ps ← getParamInfo (.decl f)
         ownFVar z (.functionCallResult z)
         ownArgsUsingParams args ps (.functionCallArg z)
     | .ctor i args =>
-      if !i.isScalar then
+      bif !i.isScalar then
         ownFVar z (.constructorResult z); ownArgsIfParam z args
     | .fvar x args =>
       ownFVar z (.functionCallResult z); ownFVar x (.fvarCall z); ownArgs (.fvarCall z) args
@@ -410,7 +410,7 @@ where
     | .fap f args, .return ret =>
       -- NOTE: we currently support TCO for self-calls only, once we do mutual TCO this needs to be
       -- expanded
-      if (← read).currDecl == f && x == ret then
+      bif (← read).currDecl == f && x == ret then
         let ps ← getParamInfo (.decl f)
         ownParamsUsingArgs args ps (.tailCallPreservation f)
     | _, _ => return ()

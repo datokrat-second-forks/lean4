@@ -37,9 +37,9 @@ partial def withCheckpoint (x : PullM (Code .pure)) : PullM (Code .pure) := do
   let c ← withNewScope x
   let toPull := (← get).toPull
   let rec go (i : Nat) (included : FVarIdSet) : StateM (Array (LetDecl .pure)) (Code .pure) := do
-    if h : i < toPull.size then
+    bif h : i <ᵇ toPull.size then
       let letDecl := toPull[i]
-      if letDecl.dependsOn included then
+      bif letDecl.dependsOn included then
         let c ← go (i+1) (included.insert letDecl.fvarId)
         return .let letDecl c
       else
@@ -57,7 +57,7 @@ def attachToPull (c : Code .pure) : PullM (Code .pure) := do
 
 def shouldPull (decl : LetDecl .pure) : PullM Bool := do
   unless decl.dependsOn (← read).included do
-    if (← (← read).isCandidateFn decl (← read).included) then
+    bif (← (← read).isCandidateFn decl (← read).included) then
       modify fun s => { s with toPull := s.toPull.push decl }
       return true
   return false
@@ -75,7 +75,7 @@ mutual
         let alts ← c.alts.mapMonoM pullAlt
         return code.updateAlts! alts
     | .let decl k =>
-      if (← shouldPull decl) then
+      bif (← shouldPull decl) then
         pullDecls k
       else
         withFVar decl.fvarId do return code.updateCont! (← pullDecls k)
@@ -106,14 +106,14 @@ def Decl.pullInstances (decl : Decl .pure) : CompilerM (Decl .pure) :=
   decl.pullLetDecls fun letDecl candidates => do
     -- TODO: Correctly represent these dependencies so this check isn't required.
     if let .const _ _ args := letDecl.value then
-      if args.any (· == .erased) then return false
+      bif args.any (· == .erased) then return false
     if let .fvar _ args := letDecl.value then
-      if args.any (· == .erased) then return false
+      bif args.any (· == .erased) then return false
     -- A saturated `Decidable` is the outcome of running a decision procedure rather than a
     -- dictionary, so pulling it out of a branch or lambda would run the procedure unconditionally.
-    if letDecl.type.isAppOf ``Decidable then
+    bif letDecl.type.isAppOf ``Decidable then
       return false
-    if (← isClass? letDecl.type).isSome then
+    bif (← isClass? letDecl.type).isSome then
       return true
     else if let .proj _ _ fvarId := letDecl.value then
       return candidates.contains fvarId

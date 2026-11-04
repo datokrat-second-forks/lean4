@@ -48,7 +48,7 @@ def mkBoxedVersion (sig : Signature .impure) : CompilerM (Decl .impure) := do
   let mut body := #[]
   let mut args := Array.emptyWithCapacity sig.params.size
   for oldParam in sig.params, newParam in newParams do
-    if !oldParam.type.isScalar then
+    bif !oldParam.type.isScalar then
       args := args.push <| .fvar newParam.fvarId
     else
       let decl ← mkLetDecl (oldParam.binderName.str "boxed") oldParam.type (.unbox newParam.fvarId)
@@ -57,7 +57,7 @@ def mkBoxedVersion (sig : Signature .impure) : CompilerM (Decl .impure) := do
   let appDecl ← mkLetDecl `res sig.type (.fap sig.name args)
   body := body.push <| .let appDecl
   let value ←
-    if !sig.type.isScalar then
+    bif !sig.type.isScalar then
       pure <| attachCodeDecls body (.return appDecl.fvarId)
     else
       let decl ← mkLetDecl `r sig.type.boxed (.box sig.type appDecl.fvarId)
@@ -79,7 +79,7 @@ For all declarations in `decls` add their `_boxed` version if required.
 -/
 public def addBoxedVersions (decls : Array (Decl .impure)) : CompilerM (Array (Decl .impure)) := do
   let boxedDecls ← decls.filterMapM fun decl => do
-    if ← requiresBoxedVersion decl.toSignature then
+    bif (← requiresBoxedVersion decl.toSignature) then
       let boxed ← mkBoxedVersion decl.toSignature
       return some boxed
     else
@@ -134,7 +134,7 @@ def isExpensiveConstantValueBoxing (x : FVarId) (xType : Expr) :
     let some val ← findLetValue? x | return none
     match val with
     | .lit _ => return some val
-    | .fap _ args => return if args.size == 0 then some val else none
+    | .fap _ args => return bif args.size == 0 then some val else none
     | _ => return none
 
 /--
@@ -144,7 +144,7 @@ If `fvarIdType` is scalar, then we need to box it. Otherwise, we need to unbox i
 -/
 def mkCast (fvarId : FVarId) (fvarIdType : Expr) (expectedType : Expr) :
     BoxM (LetValue .impure) := do
-  if expectedType.isScalar then
+  bif expectedType.isScalar then
     return .unbox fvarId
   else
     match ← isExpensiveConstantValueBoxing fvarId fvarIdType with
@@ -185,7 +185,7 @@ def mkCast (fvarId : FVarId) (fvarIdType : Expr) (expectedType : Expr) :
 def castVarIfNeeded (fvarId : FVarId) (expectedType : Expr) (k : FVarId → BoxM (Code .impure)) :
     BoxM (Code .impure) := do
   let fvarIdType ← getType fvarId
-  if typesEqvForBoxing fvarIdType expectedType then
+  bif typesEqvForBoxing fvarIdType expectedType then
     k fvarId
   else
     let v ← mkCast fvarId fvarIdType expectedType
@@ -210,7 +210,7 @@ def castArgsIfNeededAux (args : Array (Arg .impure)) (typeFromIdx : Nat → Expr
     | .erased => newArgs := newArgs.push arg
     | .fvar fvarId =>
       let fvarIdType ← getType fvarId
-      if typesEqvForBoxing fvarIdType expectedType then
+      bif typesEqvForBoxing fvarIdType expectedType then
         newArgs := newArgs.push arg
       else
         let v ← mkCast fvarId fvarIdType expectedType
@@ -235,7 +235,7 @@ def boxArgsIfNeeded (args : Array (Arg .impure)) (k : Array (Arg .impure) → Bo
 
 def unboxResultIfNeeded (code : Code .impure) (decl : LetDecl .impure) (k : Code .impure) :
     BoxM (Code .impure) := do
-  if decl.type.isScalar then
+  bif decl.type.isScalar then
     let auxDecl ← mkLetDecl .anonymous tobject decl.value
     let decl ← decl.updateValue (.unbox auxDecl.fvarId)
     return .let auxDecl <| .let decl k
@@ -244,7 +244,7 @@ def unboxResultIfNeeded (code : Code .impure) (decl : LetDecl .impure) (k : Code
 
 def castResultIfNeeded (code : Code .impure) (decl : LetDecl .impure) (expType : Expr)
     (k : Code .impure) : BoxM (Code .impure) := do
-  if typesEqvForBoxing decl.type expType then
+  bif typesEqvForBoxing decl.type expType then
     return code.updateLet! decl k
   else
     let boxedTy := decl.type.boxed
@@ -304,7 +304,7 @@ where
     | .uproj .. => return usize
     | .erased => return tagged
     | .lit (.nat n) =>
-      if n ≤ maxSmallNat then
+      bif n ≤ᵇ maxSmallNat then
         return tagged
       else
         return currentType
@@ -321,7 +321,7 @@ where
     let k ← k.explicitBoxing
     match decl.value with
     | .ctor i args =>
-      if i.isScalar && type.isScalar then
+      bif i.isScalar && type.isScalar then
         let decl ← decl.updateValue (.lit (.impureTypeScalarNumLit type i.cidx))
         return code.updateLet! decl k
       else
@@ -339,7 +339,7 @@ where
         castResultIfNeeded code decl sig.type k
     | .pap f args =>
       let some sig ← getImpureSignature? f | unreachable!
-      let f := if ← requiresBoxedVersion sig then mkBoxedName f else f
+      let f := bif (← requiresBoxedVersion sig) then mkBoxedName f else f
       boxArgsIfNeeded args fun args => do
         let decl ← decl.updateValue (decl.value.updatePap! f args)
         return code.updateLet! decl k

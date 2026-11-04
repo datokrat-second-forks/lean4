@@ -76,11 +76,11 @@ where
       else
         let mut result := mkConst declName
         let mut type ← getOtherDeclBaseType declName us
-        if type.isErased then return erasedExpr
+        bif type.isErased then return erasedExpr
         for arg in args do
           let .forallE _ d b _ := type.headBeta | unreachable!
           let arg := arg.headBeta
-          if d matches .const ``lcErased _ | .sort _ then
+          bif d matches .const ``lcErased _ | .sort _ then
             result := mkApp result (← toMonoType arg)
           else
             result := mkApp result anyExpr
@@ -113,7 +113,7 @@ signature on demand and cached for the current module.
 def getOtherDeclMonoType (declName : Name) : CoreM Expr := do
   if let some type := monoTypeExt.find? (← getEnv) declName then
     return type
-  if (← getEnv).find? declName matches some (.inductInfo _) | some (.ctorInfo _) then
+  bif (← getEnv).find? declName matches some (.inductInfo _) | some (.ctorInfo _) then
     throwError "`{declName}` was not compiled; `compileDecls` must run on inductive types first"
   let type ← toMonoType (← getOtherDeclBaseType declName [])
   -- avoid `addEntry` for local-only caching

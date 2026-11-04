@@ -60,7 +60,7 @@ mutual
       match pu with
       | .pure => { lctx with funDeclsPure := lctx.funDeclsPure.erase decl.fvarId }
       | .impure => { lctx with funDeclsImpure := lctx.funDeclsImpure.erase decl.fvarId }
-    if recursive then
+    bif recursive then
       eraseCode decl.value <| eraseParams lctx decl.params
     else
       lctx

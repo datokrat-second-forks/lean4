@@ -129,7 +129,7 @@ Convert a Lean type into a LCNF type used by the code generator.
 -/
 partial def toLCNFType (type : Expr) : MetaM Expr := do
   let res ← go type
-  if (← getEnv).header.isModule then
+  bif (← getEnv).header.isModule then
     -- Under the module system, `type` may reduce differently in different modules, leading to
     -- IR-level mismatches and thus undefined behavior. We want to make this part independent of the
     -- current module and its view of the environment but until then, we force the user to make
@@ -142,7 +142,7 @@ partial def toLCNFType (type : Expr) : MetaM Expr := do
     -- ignored in non-`module`s and thus mismatches with upstream `module`s may again occur.
     let res'? ← observing <| withExporting <| go type
     if let .ok res' := res'? then
-      if res != res' then
+      bif res != res' then
         let mut reason := m!"locally inferred compilation type{indentD res}\n\
           differs from type{indentD res'}\n\
           that would be inferred in other modules. This usually means that a type `def` involved \
@@ -157,7 +157,7 @@ partial def toLCNFType (type : Expr) : MetaM Expr := do
             let count := count - origDiag.unfoldAxiomCounter.findD n 0
             guard <| count > 0 && getOriginalConstKind? env n matches some .defn
             return m!"{.ofConstName n} ↦ {count}"
-          if !blocked.isEmpty then
+          bif !blocked.isEmpty then
             reason := m!"locally inferred compilation type differs from type that would be \
               inferred in other modules. Some of the following definitions may need to be \
               `@[expose]`d to fix this mismatch: {indentD <| .joinSep blocked Format.line}\n"
@@ -168,7 +168,7 @@ partial def toLCNFType (type : Expr) : MetaM Expr := do
   return res
 where
   go type := do
-    if ← isProp type then
+    bif (← isProp type) then
       return erasedExpr
     let type ← whnfEta type
     match type with
@@ -178,7 +178,7 @@ where
       withLocalDecl n bi d fun x => do
         let d ← go d
         let b ← go (b.instantiate1 x)
-        if b.isErased then
+        bif b.isErased then
           return b
         else
           return Expr.lam n d (b.abstract #[x]) bi
@@ -195,7 +195,7 @@ where
     let type ← withTransparency .all do
       whnf type
     let type' := type.eta
-    if type' != type then
+    bif type' != type then
       whnfEta type'
     else
       return type
@@ -207,7 +207,7 @@ where
       withLocalDecl n bi d fun x => do
         let isBorrowed := isMarkedBorrowed d
         let mut d := (← go d).abstract xs
-        if isBorrowed then
+        bif isBorrowed then
           d := markBorrowed d
         return .forallE n d (← visitForall b (xs.push x)) bi
     | _ =>
@@ -217,13 +217,13 @@ where
   visitApp (f : Expr) (args : Array Expr) := do
     let fNew ← match f with
       | .const declName us =>
-        if (← getEnv).isExporting && isPrivateName declName then
+        bif (← getEnv).isExporting && isPrivateName declName then
           -- This branch can happen under `backward.privateInPublic`; restore original behavior of
           -- failing here, which is caught and ignored above by `observing`.
           throwError "internal compiler error: private in public"
         -- `UDecidable` carries no data in the logic; compiled code represents an instance by the
         -- `Bool` given to `UDecidable.mk` (see `ToLCNF`).
-        if declName == `UDecidable then
+        bif declName == `UDecidable then
           return mkConst ``Bool
         let .inductInfo _ ← getConstInfo declName | return anyExpr
         pure <| .const declName us
@@ -231,9 +231,9 @@ where
       | _ => return anyExpr
     let mut result := fNew
     for arg in args do
-      if ← isProp arg <||> isPropFormer arg then
+      bif (← isProp arg <||> isPropFormer arg) then
         result := mkApp result erasedExpr
-      else if ← isTypeFormer arg then
+      else bif (← isTypeFormer arg) then
         result := mkApp result (← go arg)
       else
         result := mkApp result (mkConst ``lcAny)
@@ -245,14 +245,14 @@ partial def joinTypes (a b : Expr) : Expr :=
   joinTypes? a b |>.getD (mkConst ``lcAny)
 
 partial def joinTypes? (a b : Expr) : Option Expr := do
-  if a.isErased || b.isErased then
+  bif a.isErased || b.isErased then
     return erasedExpr -- See comment at `compatibleTypes`.
-  else if a == b then
+  else bif a == b then
     return a
   else
     let a' := a.headBeta
     let b' := b.headBeta
-    if a != a' || b != b' then
+    bif a != a' || b != b' then
       joinTypes? a' b'
     else
       match a, b with
@@ -296,7 +296,7 @@ def instantiateForall (type : Expr) (ps : Array Expr) : CoreM Expr :=
   go 0 type
 where
   go (i : Nat) (type : Expr) : CoreM Expr :=
-    if h : i < ps.size then
+    bif h : i <ᵇ ps.size then
       if let .forallE _ _ b _ := type.headBeta then
         go (i+1) (b.instantiate1 ps[i])
       else
@@ -332,7 +332,7 @@ partial def maybeTypeFormerType (type : Expr) : Bool :=
 -/
 def isClass? (type : Expr) : CoreM (Option Name) := do
   let .const declName _ := type.getAppFn | return none
-  if isClass (← getEnv) declName then
+  bif isClass (← getEnv) declName then
     return declName
   else
     return none

@@ -80,7 +80,7 @@ def getIndInfo? (type : Expr) (ind : Name) : CoreM (Option (List Level × Array 
   unless type.getAppNumArgs >= info.numParams do return none
   let args := type.getAppArgs[*...info.numParams].toArray.map fun
     | .fvar fvarId => .fvar fvarId
-    | e => if e.isErased then .erased else .type e
+    | e => bif e.isErased then .erased else .type e
   return some (us, args)
 
 /--

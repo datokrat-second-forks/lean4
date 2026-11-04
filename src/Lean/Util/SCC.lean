@@ -70,7 +70,7 @@ private def updateLowLinkOf (a : α) (v : Option Nat) : M α Unit :=
     lowlink? := match d.lowlink?, v with
       | i, none => i
       | none, i => i
-      | some i, some j => if i < j then i else j
+      | some i, some j => bif i <ᵇ j then i else j
   }
 
 private def addSCC (a : α) : M α Unit := do
@@ -79,7 +79,7 @@ private def addSCC (a : α) : M α Unit := do
     | b::bs, newSCC => do
       resetOnStack b;
       let newSCC := b::newSCC;
-      if a != b then
+      bif a != b then
         add bs newSCC
       else
         modify fun s => { s with stack := bs, sccs := newSCC :: s.sccs }
@@ -89,25 +89,25 @@ private partial def sccAux (successorsOf : α → List α) (a : α) : M α Unit 
   push a
   (successorsOf a).forM fun b => do
     let bData ← getDataOf b;
-    if bData.index?.isNone then
+    bif bData.index?.isNone then
       -- `b` has not been visited yet
       sccAux successorsOf b;
       let bData ← getDataOf b;
       updateLowLinkOf a bData.lowlink?
-    else if bData.onStack then do
+    else bif bData.onStack then do
       -- `b` is on the stack. So, it must be in the current SCC
       -- The edge `(a, b)` is pointing to an SCC already found and must be ignored
       updateLowLinkOf a bData.index?
     else
       pure ()
   let aData ← getDataOf a;
-  if aData.lowlink? == aData.index? then
+  bif aData.lowlink? == aData.index? then
     addSCC a
 
 def scc (vertices : List α) (successorsOf : α → List α) : List (List α) :=
   let main : M α Unit := vertices.forM fun a => do
     let aData ← getDataOf a
-    if aData.index?.isNone then sccAux successorsOf a
+    bif aData.index?.isNone then sccAux successorsOf a
   let (_, s) := main.run {}
   s.sccs.reverse
 

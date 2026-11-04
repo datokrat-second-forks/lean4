@@ -91,9 +91,10 @@ private theorem size_push {ks : Array α} {vs : Array β} (h : ks.size = vs.size
 
 partial def insertAtCollisionNodeAux [BEq α] : CollisionNode α β → Nat → α → β → CollisionNode α β
   | n@⟨Node.collision keys vals heq, _⟩, i, k, v =>
-    if h : i < keys.size then
+    bif h : i <ᵇ keys.size then
+      have h := lt_of_decideLT_eq_true h
       let k' := keys[i];
-      if k == k' then
+      bif k == k' then
          let j : Fin vals.size := ⟨i, by rw [←heq]; assumption⟩
          ⟨Node.collision (keys.set i k) (vals.set j v) (size_set heq ⟨i, h⟩ j k v), IsCollisionNode.mk _ _ _⟩
       else insertAtCollisionNodeAux n (i+1) k v
@@ -118,12 +119,13 @@ def mkCollisionNode (k₁ : α) (v₁ : β) (k₂ : α) (v₂ : β) : Node α β
 partial def insertAux [BEq α] [Hashable α] : Node α β → USize → USize → α → β → Node α β
   | Node.collision keys vals heq, _, depth, k, v =>
     let newNode := insertAtCollisionNode ⟨Node.collision keys vals heq, IsCollisionNode.mk _ _ _⟩ k v
-    if depth >= maxDepth || getCollisionNodeSize newNode < maxCollisions then newNode.val
+    bif depth ≥ᵇ maxDepth || getCollisionNodeSize newNode <ᵇ maxCollisions then newNode.val
     else match newNode with
       | ⟨Node.entries _, h⟩ => nomatch h
       | ⟨Node.collision keys vals heq, _⟩ =>
         let rec traverse (i : Nat) (entries : Node α β) : Node α β :=
-          if h : i < keys.size then
+          bif h : i <ᵇ keys.size then
+            have h := lt_of_decideLT_eq_true h
             let k := keys[i]
             have : i < vals.size := heq ▸ h
             let v := vals[i]
@@ -140,17 +142,18 @@ partial def insertAux [BEq α] [Hashable α] : Node α β → USize → USize �
       | Entry.null        => Entry.entry k v
       | Entry.ref node    => Entry.ref $ insertAux node (div2Shift h shift) (depth+1) k v
       | Entry.entry k' v' =>
-        if k == k' then Entry.entry k v
+        bif k == k' then Entry.entry k v
         else Entry.ref $ mkCollisionNode k' v' k v
 
 def insert {_ : BEq α} {_ : Hashable α} : PersistentHashMap α β → α → β → PersistentHashMap α β
   | { root }, k, v => { root := insertAux root (hash k |>.toUSize) 1 k v }
 
 partial def findAtAux [BEq α] (keys : Array α) (vals : Array β) (heq : keys.size = vals.size) (i : Nat) (k : α) : Option β :=
-  if h : i < keys.size then
+  bif h : i <ᵇ keys.size then
+    have h := lt_of_decideLT_eq_true h
     let k' := keys[i]
     have : i < vals.size := by rw [←heq]; assumption
-    if k == k' then some vals[i]
+    bif k == k' then some vals[i]
     else findAtAux keys vals heq (i+1) k
   else none
 
@@ -160,7 +163,7 @@ partial def findAux [BEq α] : @&Node α β → USize → α → Option β
     match entries[j]! with
     | Entry.null       => none
     | Entry.ref node   => findAux node (div2Shift h shift) k
-    | Entry.entry k' v => if k == k' then some v else none
+    | Entry.entry k' v => bif k == k' then some v else none
   | Node.collision keys vals heq, _, k => findAtAux keys vals heq 0 k
 
 def find? {_ : BEq α} {_ : Hashable α} : @&PersistentHashMap α β → α → Option β
@@ -178,10 +181,11 @@ instance {_ : BEq α} {_ : Hashable α} : GetElem (PersistentHashMap α β) α (
   | none   => panic! "key is not in the map"
 
 partial def findEntryAtAux [BEq α] (keys : Array α) (vals : Array β) (heq : keys.size = vals.size) (i : Nat) (k : α) : Option (α × β) :=
-  if h : i < keys.size then
+  bif h : i <ᵇ keys.size then
+    have h := lt_of_decideLT_eq_true h
     let k' := keys[i]
     have : i < vals.size := by rw [←heq]; assumption
-    if k == k' then some (k', vals[i])
+    bif k == k' then some (k', vals[i])
     else findEntryAtAux keys vals heq (i+1) k
   else none
 
@@ -191,16 +195,16 @@ partial def findEntryAux [BEq α] : @&Node α β → USize → α → Option (α
     match entries[j]! with
     | Entry.null       => none
     | Entry.ref node   => findEntryAux node (div2Shift h shift) k
-    | Entry.entry k' v => if k == k' then some (k', v) else none
+    | Entry.entry k' v => bif k == k' then some (k', v) else none
   | Node.collision keys vals heq, _, k => findEntryAtAux keys vals heq 0 k
 
 def findEntry? {_ : BEq α} {_ : Hashable α} : @&PersistentHashMap α β → α → Option (α × β)
   | { root }, k => findEntryAux root (hash k |>.toUSize) k
 
 partial def findKeyDAtAux [BEq α] (keys : Array α) (vals : Array β) (heq : keys.size = vals.size) (i : Nat) (k : α) (k₀ : α) : α :=
-  if h : i < keys.size then
+  bif h : i <ᵇ keys.size then
     let k' := keys[i]
-    if k == k' then k'
+    bif k == k' then k'
     else findKeyDAtAux keys vals heq (i+1) k k₀
   else k₀
 
@@ -210,7 +214,7 @@ partial def findKeyDAux [BEq α] : Node α β → USize → α → α → α
     match entries[j]! with
     | .null       => k₀
     | .ref node   => findKeyDAux node (div2Shift h shift) k k₀
-    | .entry k' _ => if k == k' then k' else k₀
+    | .entry k' _ => bif k == k' then k' else k₀
   | .collision keys vals heq, _, k, k₀ => findKeyDAtAux keys vals heq 0 k k₀
 
 /--
@@ -220,9 +224,9 @@ A more efficient `m.findEntry? a |>.map (·.1) |>.getD a₀`
   findKeyDAux m.root (hash a |>.toUSize) a a₀
 
 partial def containsAtAux [BEq α] (keys : Array α) (vals : Array β) (heq : keys.size = vals.size) (i : Nat) (k : α) : Bool :=
-  if h : i < keys.size then
+  bif h : i <ᵇ keys.size then
     let k' := keys[i]
-    if k == k' then true
+    bif k == k' then true
     else containsAtAux keys vals heq (i+1) k
   else false
 
@@ -239,7 +243,7 @@ def contains [BEq α] [Hashable α] : PersistentHashMap α β → α → Bool
   | { root }, k => containsAux root (hash k |>.toUSize) k
 
 partial def isUnaryEntries (a : Array (Entry α β (Node α β))) (i : Nat) (acc : Option (α × β)) : Option (α × β) :=
-  if h : i < a.size then
+  bif h : i <ᵇ a.size then
     match a[i] with
     | Entry.null      => isUnaryEntries a (i+1) acc
     | Entry.ref _     => none
@@ -252,7 +256,8 @@ partial def isUnaryEntries (a : Array (Entry α β (Node α β))) (i : Nat) (acc
 def isUnaryNode : Node α β → Option (α × β)
   | Node.entries entries         => isUnaryEntries entries 0 none
   | Node.collision keys vals heq =>
-    if h : 1 = keys.size then
+    bif h : 1 =ᵇ keys.size then
+      have h := eq_of_decideEq_eq_true h
       have : 0 < keys.size := by rw [←h]; decide
       have : 0 < vals.size := by rw [←heq]; assumption
       some (keys[0], vals[0])
@@ -276,7 +281,7 @@ partial def eraseAux [BEq α] : Node α β → USize → α → Node α β
     match entry with
     | Entry.null       => n
     | Entry.entry k' _ =>
-      if k == k' then Node.entries (entries.set! j Entry.null) else n
+      bif k == k' then Node.entries (entries.set! j Entry.null) else n
     | Entry.ref node   =>
       let entries := entries.set! j Entry.null
       let newNode := eraseAux node (div2Shift h shift) k
@@ -322,7 +327,7 @@ partial def alterAux [BEq α] [Hashable α] (f : Option β → Option β) : Node
         | some v => Entry.entry k v
         | none   => Entry.null
       | Entry.entry k' v' =>
-        if k == k' then
+        bif k == k' then
           match f (some v') with
           | some v => Entry.entry k v
           | none   => Entry.null
@@ -350,7 +355,8 @@ variable {σ : Type w}
 partial def foldlMAux (f : σ → α → β → m σ) : Node α β → σ → m σ
   | Node.collision keys vals heq, acc =>
     let rec traverse (i : Nat) (acc : σ) : m σ := do
-      if h : i < keys.size then
+      bif h : i <ᵇ keys.size then
+        have h := lt_of_decideLT_eq_true h
         let k := keys[i]
         have : i < vals.size := heq ▸ h
         let v := vals[i]

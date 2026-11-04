@@ -73,7 +73,7 @@ partial def Code.elimDead (code : Code pu) : M (Code pu) := do
   match code with
   | .let decl k =>
     let k ← k.elimDead
-    if (← get).contains decl.fvarId || !decl.value.safeToElim then
+    bif (← get).contains decl.fvarId || !decl.value.safeToElim then
       /- Remark: we don't need to collect `decl.type` because LCNF local declarations do not occur in types. -/
       collectLetValueM decl.value
       return code.updateCont! k
@@ -82,7 +82,7 @@ partial def Code.elimDead (code : Code pu) : M (Code pu) := do
       return k
   | .fun decl k _ | .jp decl k =>
     let k ← k.elimDead
-    if (← get).contains decl.fvarId then
+    bif (← get).contains decl.fvarId then
       let decl ← visitFunDecl decl
       return code.updateFun! decl k
     else
@@ -97,14 +97,14 @@ partial def Code.elimDead (code : Code pu) : M (Code pu) := do
   | .unreach .. => return code
   | .oset fvarId _ y k _ =>
     let k ← k.elimDead
-    if (← get).contains fvarId then
+    bif (← get).contains fvarId then
       collectArgM y
       return code.updateCont! k
     else
       return k
   | .uset fvarId _ y k _ | .sset fvarId _ _ y _ k _ =>
     let k ← k.elimDead
-    if (← get).contains fvarId then
+    bif (← get).contains fvarId then
       collectFVarM y
       return code.updateCont! k
     else

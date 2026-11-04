@@ -175,9 +175,9 @@ See comment at `.fixedNeutral`.
 private def hasFwdDeps (decl : Decl .pure) (paramsInfo : Array SpecParamInfo) (j : Nat) : Bool := Id.run do
   let param := decl.params[j]!
   for h : k in (j+1)...decl.params.size do
-    if paramsInfo[k]!.causesSpecialization || paramsInfo[k]! matches .fixedInst .. then
+    bif paramsInfo[k]!.causesSpecialization || paramsInfo[k]! matches .fixedInst .. then
       let param' := decl.params[k]
-      if param'.type.containsFVar param.fvarId then
+      bif param'.type.containsFVar param.fvarId then
         return true
   return false
 
@@ -194,7 +194,7 @@ def computeSpecEntries (decls : Array (Decl .pure)) (autoSpecialize : Name → O
     (alreadySpecialized : Array Bool) : CompilerM (Array SpecEntry) := do
   let mut declsInfo := #[]
   for decl in decls do
-    if hasNospecializeAttribute (← getEnv) decl.name then
+    bif hasNospecializeAttribute (← getEnv) decl.name then
       declsInfo := declsInfo.push (.replicate decl.params.size .other)
     else
       let specArgs? := getSpecializationArgs? (← getEnv) decl.name
@@ -203,31 +203,31 @@ def computeSpecEntries (decls : Array (Decl .pure)) (autoSpecialize : Name → O
       for h :i in *...decl.params.size do
         let param := decl.params[i]
         let info ←
-          if contains i then
+          bif contains i then
             pure .user
           /-
           If the user tagged class (e.g., `Inhabited`) with the `@[nospecialize]` attribute,
           then parameters of this type should not be considered for specialization.
           -/
-          else if isNoSpecType (← getEnv) param.type then
+          else bif isNoSpecType (← getEnv) param.type then
             pure .other
-          else if isTypeFormerType param.type then
+          else bif isTypeFormerType param.type then
             pure .fixedNeutral
-          else if (← isArrowClass? param.type).isSome then
+          else bif (← isArrowClass? param.type).isSome then
             pure (.fixedInst (weak := isWeakSpecType (← getEnv) param.type))
           /-
           Recall that if `specArgs? == some #[]`, then user annotated function with `@[specialize]`, but did not
           specify which arguments must be specialized besides instances. In this case, we try to specialize
           any "fixed higher-order argument"
           -/
-          else if autoSpecialize decl.name specArgs? && param.type matches .forallE .. then
+          else bif autoSpecialize decl.name specArgs? && param.type matches .forallE .. then
             pure .fixedHO
           else
             pure .other
         paramsInfo := paramsInfo.push info
         pure ()
       declsInfo := declsInfo.push paramsInfo
-  if declsInfo.any fun paramsInfo => paramsInfo.any SpecParamInfo.causesSpecialization then
+  bif declsInfo.any fun paramsInfo => paramsInfo.any SpecParamInfo.causesSpecialization then
     let m := mkFixedParamsMap decls
     let mut entries := Array.emptyWithCapacity decls.size
     for hi : i in *...decls.size do
@@ -235,13 +235,13 @@ def computeSpecEntries (decls : Array (Decl .pure)) (autoSpecialize : Name → O
       let mut paramsInfo := declsInfo[i]!
       let some mask := m.find? decl.name | unreachable!
       paramsInfo := Array.zipWith (as := paramsInfo) (bs := mask) fun info fixed =>
-        if fixed || info matches .user then
+        bif fixed || info matches .user then
           info
         else
           .other
       for j in *...paramsInfo.size do
         let mut info := paramsInfo[j]!
-        if info matches .fixedNeutral && !hasFwdDeps decl paramsInfo j then
+        bif info matches .fixedNeutral && !hasFwdDeps decl paramsInfo j then
           paramsInfo := paramsInfo.set! j .other
       entries := entries.push {
         declName := decl.name,
@@ -266,7 +266,7 @@ def saveSpecEntries (decls : Array (Decl .pure)) : CompilerM Unit := do
     (fun _ specArgs? => specArgs? == some #[])
     (Array.replicate decls.size false)
   for entry in entries do
-    if entry.paramsInfo.any SpecParamInfo.causesSpecialization then
+    bif entry.paramsInfo.any SpecParamInfo.causesSpecialization then
       trace[Compiler.specialize.info] "{entry.declName} {entry.paramsInfo}"
       modifyEnv fun env => specExtension.addEntry env entry
 

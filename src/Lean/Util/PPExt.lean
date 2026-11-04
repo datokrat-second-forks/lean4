@@ -77,14 +77,14 @@ private def PPContext.unrestricted (ctx : PPContext) : PPContext :=
 
 def ppExprWithInfos (ctx : PPContext) (e : Expr) : BaseIO FormatWithInfos := do
   let ctx := ctx.unrestricted
-  if pp.raw.get ctx.opts then
+  bif pp.raw.get ctx.opts then
     let e := instantiateMVarsCore ctx.mctx e |>.1
     return format (toString e)
   else
     match (← ppExt.getState ctx.env |>.ppExprWithInfos ctx e |>.toBaseIO) with
     | .ok fmt => return fmt
     | .error ex =>
-      if pp.rawOnError.get ctx.opts then
+      bif pp.rawOnError.get ctx.opts then
         pure f!"[Error pretty printing expression: {ex}. Falling back to raw printer.]{Format.line}{e}"
       else
         pure f!"failed to pretty print expression (use 'set_option pp.rawOnError true' for raw representation)"
@@ -94,20 +94,20 @@ def ppConstNameWithInfos (ctx : PPContext) (n : Name) : BaseIO FormatWithInfos :
   match (← ppExt.getState ctx.env |>.ppConstNameWithInfos ctx n |>.toBaseIO) with
   | .ok fmt => return fmt
   | .error ex =>
-    if pp.rawOnError.get ctx.opts then
+    bif pp.rawOnError.get ctx.opts then
       pure f!"[Error pretty printing constant: {ex}. Falling back to raw printer.]{Format.line}{format n}"
     else
       pure f!"failed to pretty print constant (use 'set_option pp.rawOnError true' for raw representation)"
 
 def ppTerm (ctx : PPContext) (stx : Term) : BaseIO Format := do
   let ctx := ctx.unrestricted
-  if pp.raw.get ctx.opts then
+  bif pp.raw.get ctx.opts then
     return formatRawTerm ctx stx
   else
     match (← ppExt.getState ctx.env |>.ppTerm ctx stx  |>.toBaseIO) with
     | .ok fmt => return fmt
     | .error ex =>
-      if pp.rawOnError.get ctx.opts then
+      bif pp.rawOnError.get ctx.opts then
         pure f!"[Error pretty printing syntax: {ex}. Falling back to raw printer.]{Format.line}{formatRawTerm ctx stx}"
       else
         pure f!"failed to pretty print term (use 'set_option pp.rawOnError true' for raw representation)"
@@ -117,7 +117,7 @@ def ppLevel (ctx : PPContext) (l : Level) : BaseIO Format := do
   match (← ppExt.getState ctx.env |>.ppLevel ctx l |>.toBaseIO) with
   | .ok fmt => return fmt
   | .error ex =>
-    if pp.rawOnError.get ctx.opts then
+    bif pp.rawOnError.get ctx.opts then
       pure f!"[Error pretty printing level: {ex}. Falling back to raw printer.]{Format.line}{l.format true ctx.mctx.findLevelIndex?}"
     else
       pure f!"failed to pretty print level (use 'set_option pp.rawOnError true' for raw representation)"
@@ -127,7 +127,7 @@ def ppGoal (ctx : PPContext) (mvarId : MVarId) : BaseIO Format := do
   match (← ppExt.getState ctx.env |>.ppGoal ctx mvarId |>.toBaseIO) with
   | .ok fmt => return fmt
   | .error ex =>
-    if pp.rawOnError.get ctx.opts then
+    bif pp.rawOnError.get ctx.opts then
       pure f!"[Error pretty printing goal: {ex}. Falling back to raw printer.]{Format.line}{formatRawGoal mvarId}"
     else
       pure f!"failed to pretty print goal (use 'set_option pp.rawOnError true' for raw representation)"

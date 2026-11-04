@@ -25,7 +25,7 @@ def RArray.ofFn {n : Nat} (f : Fin n → α) (h : 0 < n) : RArray α :=
   go 0 n h (Nat.le_refl _)
 where
   go (lb ub : Nat) (h1 : lb < ub) (h2 : ub ≤ n) : RArray α :=
-    if h : lb + 1 = ub then
+    bif h : lb + 1 =ᵇ ub then
       .leaf (f ⟨lb, Nat.lt_of_lt_of_le h1 h2⟩)
     else
       let mid := (lb + ub)/2

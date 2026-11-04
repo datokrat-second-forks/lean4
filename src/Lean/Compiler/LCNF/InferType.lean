@@ -99,7 +99,7 @@ def mkForallParams (params : Array (Param .pure)) (type : Expr) : InferTypeM Exp
     k (.fvar fvarId)
 
 def inferConstType (declName : Name) (us : List Level) : CompilerM Expr := do
-  if declName == ``lcErased then
+  bif declName == ``lcErased then
     return erasedExpr
   else if let some ⟨_, decl⟩ ← getDecl? declName then
     return decl.instantiateTypeLevelParams us
@@ -175,33 +175,33 @@ mutual
     let failed {α} : Unit → InferTypeM α := fun _ =>
       throwError "invalid projection{indentExpr (mkProj structName idx (mkFVar s))}"
     let structType := (← getType s).headBeta
-    if structType.isErased then
+    bif structType.isErased then
       /- TODO: after we erase universe variables, we can just extract a better type using just `structName` and `idx`. -/
       return erasedExpr
-    else if structType.isAny then
+    else bif structType.isAny then
       return anyExpr
     else
       matchConstStructure structType.getAppFn failed fun structVal structLvls ctorVal =>
         let structTypeArgs := structType.getAppArgs
-        if structVal.numParams + structVal.numIndices != structTypeArgs.size then
+        bif structVal.numParams + structVal.numIndices != structTypeArgs.size then
           failed ()
         else do
           let mut ctorType ← inferAppType (mkAppN (mkConst ctorVal.name structLvls) structTypeArgs[*...structVal.numParams])
           for _ in *...idx do
             match ctorType with
             | .forallE _ _ body _ =>
-              if body.hasLooseBVars then
+              bif body.hasLooseBVars then
                 -- This can happen when one of the fields is a type or type former.
                 ctorType := body.instantiate1 anyExpr
               else
                 ctorType := body
             | _ =>
-              if ctorType.isErased then return erasedExpr
+              bif ctorType.isErased then return erasedExpr
               failed ()
           match ctorType with
           | .forallE _ d _ _ => return d
           | _ =>
-            if ctorType.isErased then return erasedExpr
+            bif ctorType.isErased then return erasedExpr
             failed ()
 
   partial def getLevel? (type : Expr) : InferTypeM (Option Level) := do
@@ -314,7 +314,7 @@ def mkAuxJpDecl' (param : Param pu) (code : Code pu) (prefixName := `_jp) :
   mkAuxFunDeclAux params code prefixName
 
 def mkCasesResultType (alts : Array (Alt pu)) : CompilerM Expr := do
-  if alts.isEmpty then
+  bif alts.isEmpty then
     throwError "`Code.bind` failed, empty `cases` found"
   let mut resultType ← alts[0]!.inferType
   for alt in alts[1...*] do
@@ -349,15 +349,15 @@ Return `true` if the given LCNF are equivalent.
 `List Nat` and `(fun x => List x) Nat` are both equivalent.
 -/
 partial def eqvTypes (a b : Expr) : Bool :=
-  if a == b then
+  bif a == b then
     true
-  else if a.isErased && b.isErased then
+  else bif a.isErased && b.isErased then
     -- `◾ α` is equivalent to `◾`
     true
   else
     let a' := a.headBeta
     let b' := b.headBeta
-    if a != a' || b != b' then
+    bif a != a' || b != b' then
       eqvTypes a' b'
     else
       match a, b with

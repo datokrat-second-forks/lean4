@@ -34,10 +34,10 @@ For example, if `dir` contains `A/B/C.lean`, `f` is called with `A.B.C`.
 partial def forEachModuleInDir [Monad m] [MonadLiftT IO m]
     (dir : FilePath) (f : Lean.Name → m PUnit) : m PUnit := do
   for entry in (← dir.readDir) do
-    if (← liftM (m := IO) <| entry.path.isDir) then
+    bif (← liftM (m := IO) <| entry.path.isDir) then
       let n := Lean.Name.mkSimple entry.fileName
       forEachModuleInDir entry.path (f <| n ++ ·)
-    else if entry.path.extension == some "lean" then
+    else bif entry.path.extension == some "lean" then
       f <| Lean.Name.mkSimple <| FilePath.withExtension entry.fileName "" |>.toString
 
 def realPathNormalized (p : FilePath) : IO FilePath :=
@@ -72,14 +72,14 @@ def findWithExt (sp : SearchPath) (ext : String) (mod : Name) : IO (Option FileP
 /-- Like `findWithExt`, but ensures the returned path exists. -/
 def findModuleWithExt (sp : SearchPath) (ext : String) (mod : Name) : IO (Option FilePath) := do
   if let some path ← findWithExt sp ext mod then
-    if ← path.pathExists then
+    bif (← path.pathExists) then
       return some path
   return none
 
 def findAllWithExt (sp : SearchPath) (ext : String) : IO (Array FilePath) := do
   let mut paths := #[]
   for p in sp do
-    if (← p.isDir) then
+    bif (← p.isDir) then
       paths := paths ++ (← p.walkDir).filter (·.extension == some ext)
   return paths
 
@@ -93,7 +93,7 @@ def getBuildDir : IO FilePath := do
 def getLibDir (leanSysroot : FilePath) : IO FilePath := do
   let mut buildDir := leanSysroot
   -- use stage1 stdlib with stage0 executable (which should never be distributed outside of the build directory)
-  if Internal.isStage0 () then
+  bif Internal.isStage0 () then
     buildDir := buildDir / ".." / "stage1"
   return buildDir / "lib" / "lean"
 
@@ -139,7 +139,7 @@ partial def findOLean (mod : Name) : IO FilePath := do
   let sp ← searchPathRef.get
   let pkg := mod.getRoot
   let (cachedSp, cache) ← oleanRootCacheRef.get
-  let cache := if cachedSp == sp then cache else []
+  let cache := bif cachedSp == sp then cache else []
   if let some root := cache.lookup pkg then
     return modToFilePath root mod "olean"
   if let some root ← sp.findRootWithExt "olean" mod then
@@ -176,9 +176,9 @@ def moduleNameOfFileName (fname : FilePath) (rootDir : Option FilePath) : IO Nam
     | some rootDir => pure rootDir
     | none         => IO.currentDir
   let mut rootDir ← realPathNormalized rootDir
-  if !rootDir.toString.endsWith System.FilePath.pathSeparator.toString then
+  bif !rootDir.toString.endsWith System.FilePath.pathSeparator.toString then
     rootDir := ⟨rootDir.toString ++ System.FilePath.pathSeparator.toString⟩
-  if !rootDir.toString.isPrefixOf fname.normalize.toString then
+  bif !rootDir.toString.isPrefixOf fname.normalize.toString then
     throw $ IO.userError s!"input file '{fname}' must be contained in root directory ({rootDir})"
   -- NOTE: use `fname` instead of `fname.normalize` to preserve casing on all platforms
   let fnameSuffix := fname.toString.drop rootDir.toString.length

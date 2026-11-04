@@ -94,7 +94,7 @@ def iter (s : SMap α β) :=
 
 /-- Move from stage 1 into stage 2. -/
 def switch (m : SMap α β) : SMap α β :=
-  if m.stage₁ then { m with stage₁ := false } else m
+  bif m.stage₁ then { m with stage₁ := false } else m
 
 @[inline] def foldStage2 {σ : Type w} (f : σ → α → β → σ) (s : σ) (m : SMap α β) : σ :=
   m.map₂.foldl f s

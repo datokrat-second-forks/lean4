@@ -195,7 +195,7 @@ def toStringArgs (ys : Array (Arg .impure)) : EmitM (List String) :=
 
 def emitArgs (args : Array (Arg .impure)) : EmitM Unit := do
   for h : i in 0...args.size do
-    if i > 0 then emit ", "
+    bif i >ᵇ 0 then emit ", "
     emit args[i]
 
 def emitLns [EmitToString α] (as : List α) : EmitM Unit :=
@@ -214,13 +214,13 @@ def quoteString (s : String) : String :=
   let q := "\"";
   let q := s.foldl
     (fun q c => q ++
-      if c == '\n' then "\\n"
-      else if c == '\r' then "\\r"
-      else if c == '\t' then "\\t"
-      else if c == '\\' then "\\\\"
-      else if c == '\"' then "\\\""
-      else if c == '?' then "\\?" -- avoid trigraphs
-      else if c.toNat <= 31 then
+      bif c == '\n' then "\\n"
+      else bif c == '\r' then "\\r"
+      else bif c == '\t' then "\\t"
+      else bif c == '\\' then "\\\\"
+      else bif c == '\"' then "\\\""
+      else bif c == '?' then "\\?" -- avoid trigraphs
+      else bif c.toNat ≤ᵇ 31 then
         -- Use octal escapes instead of hex escapes because C hex escapes are
         -- greedy: "\x01abc" would be parsed as the single escape \x01abc rather
         -- than \x01 followed by "abc".  Octal escapes consume at most 3 digits.
@@ -247,7 +247,7 @@ where
     match getExportNameFor? env n with
     | some (.str .anonymous s) => return s
     | some _                   => throwInvalidExportName n
-    | none                     => return if n == `main then leanMainFn else getSymbolStem env n
+    | none                     => return bif n == `main then leanMainFn else getSymbolStem env n
 
 def emitCName (n : Name) : EmitM Unit :=
   toCName n >>= emit
@@ -294,9 +294,9 @@ def emitFileHeader : EmitM Unit := do
   ]
 
 def ctorScalarSizeExpression (usize : Nat) (ssize : Nat) : String :=
-  if usize == 0 then
+  bif usize == 0 then
     s!"{ssize}"
-  else if ssize == 0 then
+  else bif ssize == 0 then
     s!"sizeof(size_t)*{usize}"
   else
     s!"sizeof(size_t)*{usize} + {ssize}"
@@ -312,7 +312,7 @@ partial def emitGroundDecl (decl : Decl .impure) (cppBaseName : String) : EmitM 
 where
   compileGround (e : SimpleGroundExpr) : GroundM Unit := do
     let valueName ← compileGroundToValue e
-    let declPrefix := if isClosedTermName (← getEnv) decl.name then "static" else "LEAN_EXPORT"
+    let declPrefix := bif isClosedTermName (← getEnv) decl.name then "static" else "LEAN_EXPORT"
     emitLn <| s!"{declPrefix} const lean_object* {cppBaseName} = (const lean_object*)&{valueName};"
 
   compileGroundToValue (e : SimpleGroundExpr) : GroundM String := do
@@ -381,7 +381,7 @@ where
 
   groundNameMkStrToCLit (args : Array (Name × UInt64)) : GroundM String := do
     assert! args.size > 0
-    if h : args.size = 1 then
+    bif h : args.size =ᵇ 1 then
       let (ref, hash) := args[0]
       let hash := uint64ToByteArrayLE hash
       compileCtor 1 #[.tagged 0, .reference ref] #[] hash
@@ -471,9 +471,9 @@ where
   emitFnDecl (decl : Decl .impure) (isExternal : Bool) : EmitM Unit := do
     let env ← getEnv
     let cppBaseName ← toCName decl.name
-    if isSimpleGroundDecl env decl.name then
+    bif isSimpleGroundDecl env decl.name then
       emitGroundDecl decl cppBaseName
-    else if isClosedTermName env decl.name then
+    else bif isClosedTermName env decl.name then
       emitFnDeclClosed decl cppBaseName
     else
       emitFnDeclStandard decl.toSignature isExternal
@@ -492,12 +492,12 @@ where
     let ps := sig.params
     let env ← getEnv
 
-    if ps.isEmpty then
-      if isExternal then
+    bif ps.isEmpty then
+      bif isExternal then
         emit "extern "
       else
         emit "LEAN_EXPORT "
-    else if !isExternal then
+    else bif !isExternal then
       emit "LEAN_EXPORT "
     emit <| sig.type.toCType ++ " " ++ cppBaseName
     unless ps.isEmpty do
@@ -505,19 +505,19 @@ where
       -- We omit void parameters, note that they are guaranteed not to occur in boxed functions
       let ps := paramsWithoutVoid ps
       -- We omit erased parameters for extern constants
-      let ps := if isExternC env sig.name then paramsWithoutErased ps else ps
-      if ps.size > closureMaxArgs && isBoxedName sig.name then
+      let ps := bif isExternC env sig.name then paramsWithoutErased ps else ps
+      bif ps.size >ᵇ closureMaxArgs && isBoxedName sig.name then
         emit "lean_object**"
       else
         ps.size.forM fun i _ => do
-          if i > 0 then emit ", "
+          bif i >ᵇ 0 then emit ", "
           emit ps[i].type.toCType
       emit ")"
     emitLn ";"
 
 def offsetExpression (i : Nat) (offset : Nat) : String :=
-  if i > 0 then
-    if offset > 0 then
+  bif i >ᵇ 0 then
+    bif offset >ᵇ 0 then
       s!"sizeof(void*)*{i} + {offset}"
     else
       s!"sizeof(void*)*{i}"
@@ -536,7 +536,7 @@ where
   go (code : Code .impure) (didChange : Bool) : EmitM Bool := do
     match code with
     | .let decl k =>
-      if ← isTailCall code then
+      bif (← isTailCall code) then
         return didChange
       else
         declareVar decl.binderName decl.type
@@ -581,7 +581,7 @@ where
       emitCApp3 "lean_ctor_set" targetId i arg; emitLn ";"
 
   emitCtor (info : CtorInfo) (args : Array (Arg .impure)) : EmitM Unit := do
-    if info.size == 0 && info.usize == 0 && info.ssize == 0 then do
+    bif info.size == 0 && info.usize == 0 && info.ssize == 0 then do
       withEmitAssignment do emitCApp1 "lean_box" info.cidx
     else do
       withEmitAssignment do emitAllocCtor info
@@ -606,7 +606,7 @@ where
     emit "else"
     withEmitBlock do
       withEmitAssignment do emit fvarId
-      if update then
+      bif update then
         emitCApp2 "lean_ctor_set_tag" decl.fvarId info.cidx; emitLn ";"
     emitCtorSetArgs decl.fvarId args
 
@@ -624,9 +624,9 @@ where
 
   emitLeanFunReference (ty : Expr) (f : Name) : EmitM Unit := do
     let env ← getEnv
-    if isSimpleGroundDecl env f then
+    bif isSimpleGroundDecl env f then
       emit s!"((lean_object*)({← toCName f}))"
-    else if isClosedTermName env f then
+    else bif isClosedTermName env f then
       let cname ← toCName f
       let cnameRef := s!"&{cname}"
       let tokenRef := s!"&{toOnceTokenName cname}"
@@ -647,14 +647,14 @@ where
             |>.unzip
         emit fn; emit "("
         for h : i in 0...args.size do
-          if i > 0 then emit ", "
+          bif i >ᵇ 0 then emit ", "
           emit args[i]
         emit ")"
       | some (.inline _ pat) =>
         emit (expandExternPattern pat (← toStringArgs args))
       | some .opaque | none =>
         emitLeanFunReference decl.type fn
-        if args.size > 0 then
+        bif args.size >ᵇ 0 then
           let (_, args) :=
             ps.zip args
               |>.filter (fun (p, _) => !p.type.isVoid)
@@ -673,7 +673,7 @@ where
 
   emitAp (fvarId : FVarId) (args : Array (Arg .impure)) : EmitM Unit := do
     assert! !args.isEmpty
-    if args.size > closureMaxArgs then
+    bif args.size >ᵇ closureMaxArgs then
       withEmitBlock do
         emit "lean_object* _aargs[] = {"; emitArgs args; emitLn "};"
         withEmitAssignment do
@@ -701,7 +701,7 @@ where
       | .uint64 v => emit v; emit "ULL"
       | .usize v => emit "((size_t)"; emit v; emit "ULL)"
       | .nat v =>
-        if v < UInt32.size then
+        bif v <ᵇ UInt32.size then
           emit "lean_unsigned_to_nat("; emit v; emit "u)"
         else
           emit "lean_cstr_to_nat(\""; emit v; emit "\")"
@@ -727,7 +727,7 @@ def emitTailCall (decl : LetDecl .impure) : EmitM Unit := do
   let ps ← getCurrParams
   assert! ps.size == args.size
   let (ps, args) := ps.zip args |>.filter (fun (p, _) => !p.type.isVoid) |>.unzip
-  if overwriteParam ps args then
+  bif overwriteParam ps args then
     withEmitBlock do
       for h : i in 0...ps.size do
         let p := ps[i]
@@ -765,7 +765,7 @@ where
     for h1 : i in 0...ps.size do
       let p := ps[i]
       for h2 : j in (i+1)...args.size do
-        if paramEqArg p args[j] then
+        bif paramEqArg p args[j] then
           return true
     return false
 
@@ -781,7 +781,7 @@ partial def emitBasicBlock (code : Code .impure) : EmitM Unit := do
   match code with
   | .jp (k := k) .. => emitBasicBlock k
   | .let decl k =>
-    if ← isTailCall code then
+    bif (← isTailCall code) then
       emitTailCall decl
     else
       emitLetDecl decl
@@ -813,11 +813,11 @@ partial def emitBasicBlock (code : Code .impure) : EmitM Unit := do
   | .unreach .. => emitUnreach
 where
   emitInc (fvarId : FVarId) (n : Nat) (check : Bool) : EmitM Unit := do
-    if n == 1 then
-      let incFn := if check then "lean_inc" else "lean_inc_ref"
+    bif n == 1 then
+      let incFn := bif check then "lean_inc" else "lean_inc_ref"
       emitCApp1 incFn fvarId
     else
-      let incFn := if check then "lean_inc_n" else "lean_inc_ref_n"
+      let incFn := bif check then "lean_inc_n" else "lean_inc_ref_n"
       emitCApp2 incFn fvarId n
     emitLn ";"
 
@@ -828,7 +828,7 @@ where
     | some objs =>
       emitCApp2 "lean_dec_ref_known" fvarId objs
     | none =>
-      let decFn := if check then "lean_dec" else "lean_dec_ref"
+      let decFn := bif check then "lean_dec" else "lean_dec_ref"
       emitCApp1 decFn fvarId
     emitLn ";"
 
@@ -853,7 +853,7 @@ where
     emitLn ";"
 
   isIf (cs : Cases .impure) : EmitM (Option (Nat × Code .impure × Code .impure)) := do
-    if h : cs.alts.size = 2 then
+    bif h : cs.alts.size =ᵇ 2 then
       match cs.alts[0] with
       | .ctorAlt info k => return some (info.cidx, k, cs.alts[1].getCode)
       | _ => return none
@@ -862,7 +862,7 @@ where
 
   emitTag (fvarId : FVarId) : EmitM Unit := do
     let type ← getType fvarId
-    if type.isObj then do
+    bif type.isObj then do
       emitCApp1 "lean_obj_tag" fvarId
     else
       emit fvarId
@@ -894,7 +894,7 @@ where
   emitJmp (fvarId : FVarId) (args : Array (Arg .impure)) : EmitM Unit := do
     let some jpDecl ← findFunDecl? (pu := .impure) fvarId | unreachable!
     let ps := jpDecl.params
-    if args.size != ps.size then
+    bif args.size != ps.size then
       throwError "invalid jump"
     for arg in args, p in ps do
       emit p.binderName; emit " = "; emit arg; emitLn ";"
@@ -916,7 +916,7 @@ partial def emitJoinPoints (code : Code .impure) : EmitM Unit := do
 partial def emitCode (code : Code .impure) : EmitM Unit := do
   withEmitBlock do
     let declared ← declareVars code
-    if declared then emitLn ""
+    bif declared then emitLn ""
     emitBasicBlock code
     emitJoinPoints code
 
@@ -980,39 +980,39 @@ def withErrRet (emitIORes : EmitM Unit) : EmitM Unit := do
   emitLn "if (lean_io_result_is_error(res)) return res;"
 
 def emitMarkPersistent (decl : Decl .impure) : EmitM Unit := do
-  if decl.type.isObj then
+  bif decl.type.isObj then
     emitCApp1 "lean_mark_persistent" (← toCName decl.name); emitLn ";"
 
 def emitDeclInit (decl : Decl .impure) (isBuiltin : Bool) : EmitM Unit := do
   let env ← getEnv
-  if (isBuiltin && isIOUnitBuiltinInitFn env decl.name) || isIOUnitInitFn env decl.name then
+  bif (isBuiltin && isIOUnitBuiltinInitFn env decl.name) || isIOUnitInitFn env decl.name then
     withErrRet do
       emitCName decl.name; emit "()"
     emitLn "lean_dec_ref(res);"
-  else if decl.params.isEmpty then
+  else bif decl.params.isEmpty then
     if let some initFn := (guard isBuiltin *> getBuiltinInitFnNameFor? env decl.name) <|> getInitFnNameFor? env decl.name then
       withErrRet do
         emitCName initFn; emit "()"
       emitCName decl.name
-      if decl.type.isScalar then
+      bif decl.type.isScalar then
         emitLn <| " = " ++ decl.type.unboxOpName ++ "(lean_io_result_get_value(res));"
       else
         emitLn " = lean_io_result_get_value(res);"
         emitMarkPersistent decl
       emitLn "lean_dec_ref(res);"
-    else if !(isClosedTermName env decl.name || isSimpleGroundDecl env decl.name) then
+    else bif !(isClosedTermName env decl.name || isSimpleGroundDecl env decl.name) then
       emitCName decl.name; emit " = "; emitCInitName decl.name; emitLn "();"
       emitMarkPersistent decl
 
 def emitInitFn (phases : IRPhases) : EmitM Unit := do
   let env ← getEnv
   let impInitFns ← env.imports.filterMapM fun imp => do
-    if phases != .all && imp.isMeta != (phases == .comptime) then
+    bif phases != .all && imp.isMeta != (phases == .comptime) then
       return none
     let some idx := env.getModuleIdx? imp.module
       | throwError "(internal) import without module index" -- should be unreachable
     let pkg? := env.getModulePackageByIdx? idx
-    let fn := mkModuleInitializationFunctionName (phases := if phases == .all then .all else if imp.isMeta then .runtime else phases) imp.module pkg?
+    let fn := mkModuleInitializationFunctionName (phases := bif phases == .all then .all else bif imp.isMeta then .runtime else phases) imp.module pkg?
     emitLn s!"lean_object* {fn}(uint8_t builtin);"
     return some fn
   -- Every module initializes the runtime for itself so that external users of a Lean library do
@@ -1022,9 +1022,9 @@ def emitInitFn (phases : IRPhases) : EmitM Unit := do
   -- must not call it themselves.
   let modName ← getModName
   let leanInitFn? :=
-    if phases == .comptime then
+    bif phases == .comptime then
       none
-    else if usesModuleFrom env `Lean && !(`Lean).isPrefixOf modName then
+    else bif usesModuleFrom env `Lean && !(`Lean).isPrefixOf modName then
       some "lean_initialize"
     else
       some "lean_initialize_runtime_module"
@@ -1045,7 +1045,7 @@ def emitInitFn (phases : IRPhases) : EmitM Unit := do
       emit s!"{fn}(builtin)"
     emitLn "lean_dec_ref(res);"
   for decl in (← getLocalDecls) do
-    if phases == .all || (phases == .comptime) == isMarkedMeta env decl.name then
+    bif phases == .all || (phases == .comptime) == isMarkedMeta env decl.name then
       emitDeclInit decl (isBuiltin := phases != .comptime)
   emitLn "return lean_io_result_mk_ok(lean_box(0));"
   emitLn "}"
@@ -1091,7 +1091,7 @@ where
   emitMainFn (decl : Decl .impure) : EmitM Unit := do
     let .code .. := decl.value | throwError "Expected Lean function declaration as `main`"
     let ps := decl.params
-    if ps.size != 1 && ps.size != 2 then
+    bif ps.size != 1 && ps.size != 2 then
       throwError "invalid main function, incorrect arity when generating code"
     let env ← getEnv
     emitLns [
@@ -1101,7 +1101,7 @@ where
       "#endif",
       "lean_object* run_main(int argc, char ** argv) {"
     ]
-    if ps.size == 2 then
+    bif ps.size == 2 then
       emitLns [
         "    lean_object* in = lean_box(0);",
         "    int i = argc;",
@@ -1141,7 +1141,7 @@ where
     emitLns [
       "  lean_finalize_task_manager();",
       "  if (lean_io_result_is_ok(res)) {",
-      "    int ret = " ++ if hasExitCode then "lean_unbox_uint32(lean_io_result_get_value(res));" else "0;",
+      "    int ret = " ++ bif hasExitCode then "lean_unbox_uint32(lean_io_result_get_value(res));" else "0;",
       "    lean_dec_ref(res);",
       "    return ret;",
       "  } else {",
@@ -1162,7 +1162,7 @@ def main : EmitM Unit := do
   emitFileHeader
   emitFnDecls
   emitFns
-  if (← getEnv).header.isModule then
+  bif (← getEnv).header.isModule then
     emitInitFn (phases := .runtime)
     emitInitFn (phases := .comptime)
     emitLegacyInitFn

@@ -119,8 +119,8 @@ def isGround [TraverseFVar α] (e : α) : SpecializeM Bool := do
   let fvarId := decl.fvarId
   withReader (x := x) fun ctx => { ctx with
     scope := ctx.scope.insert fvarId
-    underApplied := if isUnderApplied then ctx.underApplied.insert fvarId else ctx.underApplied
-    ground := if grd then ctx.ground.insert fvarId else ctx.ground
+    underApplied := bif isUnderApplied then ctx.underApplied.insert fvarId else ctx.underApplied
+    ground := bif grd then ctx.ground.insert fvarId else ctx.ground
   }
 
 @[inline] def withFunDecl (decl : FunDecl .pure) (x : SpecializeM α) : SpecializeM α := do
@@ -130,7 +130,7 @@ def isGround [TraverseFVar α] (e : α) : SpecializeM Bool := do
   let fvarId := decl.fvarId
   withReader (x := x) fun ctx => { ctx with
     scope := ctx.scope.insert fvarId
-    ground := if grd then ctx.ground.insert fvarId else ctx.ground
+    ground := bif grd then ctx.ground.insert fvarId else ctx.ground
   }
 
 namespace Collector
@@ -218,7 +218,7 @@ Return `true` if it is worth using arguments `args` for specialization given the
 -/
 def shouldSpecialize (specEntry : SpecEntry) (args : Array (Arg .pure)) : SpecializeM Bool := do
   let hoCheck :=
-    if specEntry.alreadySpecialized then
+    bif specEntry.alreadySpecialized then
       fun arg => do
         /-
         If we have `f p` where `p` is a param it makes no sense to specialize as we will just
@@ -255,8 +255,8 @@ def shouldSpecialize (specEntry : SpecEntry) (args : Array (Arg .pure)) : Specia
     | .other => pure ()
     | .fixedNeutral => pure () -- If we want to monomorphize types such as `Array`, we need to change here
     | .fixedInst true => pure ()  -- weak: don't trigger specialization on its own
-    | .fixedInst false | .user => if ← isGround arg then return true
-    | .fixedHO => if ← hoCheck arg then return true
+    | .fixedInst false | .user => bif (← isGround arg) then return true
+    | .fixedHO => bif (← hoCheck arg) then return true
 
   return false
 
@@ -270,7 +270,7 @@ def expandCodeDecls (decls : Array (CodeDecl .pure)) (body : LetValue .pure) : C
     | .let decl => decl.value.toExpr
     | .fun decl | .jp decl => decl.toExpr
   let rec go (i : Nat) (subst : Array Expr) : Expr :=
-    if h : i < values.size then
+    bif h : i <ᵇ values.size then
       let value := values[i].abstractRange i xs
       let value := value.instantiateRev subst
       go (i+1) (subst.push value)
@@ -293,7 +293,7 @@ def mkKey (params : Array (Param .pure)) (decls : Array (CodeDecl .pure)) (body 
       ToExpr.mkLambdaM params (← ToExpr.abstractM body)
   let pre e := do
     -- beta reduce if possible
-    if e.isHeadBetaTarget then
+    bif e.isHeadBetaTarget then
       return .visit e.headBeta
     else
       return .continue
@@ -361,13 +361,13 @@ return the arguments that have not been considered for specialization.
 def getRemainingArgs (paramsInfo : Array SpecParamInfo) (args : Array (Arg .pure)) : Array (Arg .pure) := Id.run do
   let mut result := #[]
   for info in paramsInfo, arg in args do
-    if info matches .other then
+    bif info matches .other then
       result := result.push arg
   return result ++ args[paramsInfo.size...*]
 
 def paramsToGroundVars (params : Array (Param .pure)) : CompilerM FVarIdSet :=
   params.foldlM (init := {}) fun r p => do
-    if isTypeFormerType p.type || (← isArrowClass? p.type).isSome then
+    bif isTypeFormerType p.type || (← isArrowClass? p.type).isSome then
       return r.insert p.fvarId
     else
       return r
@@ -397,8 +397,8 @@ mutual
   -/
   partial def specializeApp? (e : LetValue .pure) : SpecializeM (Option (LetValue .pure)) := do
     let .const declName us args := e | return none
-    if args.isEmpty then return none
-    if (← isInstanceReducible declName) then return none
+    bif args.isEmpty then return none
+    bif (← isInstanceReducible declName) then return none
     let some specEntry ← getSpecEntry? declName | return none
     unless (← shouldSpecialize specEntry args) do return none
     let some ⟨.pure, decl⟩ ← getDecl? declName | return none
@@ -481,14 +481,14 @@ Run specialization on the body of `decl`.
 -/
 def specializeDecl (decl : Decl .pure) : SpecializeM (Decl .pure × Bool) := do
   trace[Compiler.specialize.step] m!"Working {decl.name}"
-  if (← decl.isTemplateLike) then
+  bif (← decl.isTemplateLike) then
     return (decl, false)
   else
     resetChanged
     let value ← withParams decl.params <| decl.value.mapCodeM visitCode
     let changed ← hasChanged
     let mut updated := { decl with value }
-    if changed then
+    bif changed then
       updated ← updated.simp {}
     trace[Compiler.specialize.step] m!"Result {decl.name}: {← ppDecl updated}"
     return (updated, changed)
@@ -507,7 +507,7 @@ def updateLocalSpecParamInfo : SpecializeM Unit := do
   for entry in infos do
     if let some mask := (← get).parentMasks[entry.declName]? then
       let maskInfo info :=
-        mask.zipWith info (f := fun b i => if !b && (i.causesSpecialization || i matches .fixedInst ..) then .other else i)
+        mask.zipWith info (f := fun b i => bif !b && (i.causesSpecialization || i matches .fixedInst ..) then .other else i)
       let entry := { entry with paramsInfo := maskInfo entry.paramsInfo }
       modify fun s => {
         s with
@@ -519,10 +519,10 @@ def updateLocalSpecParamInfo : SpecializeM Unit := do
 partial def loop (round : Nat := 0) : SpecializeM Unit := do
   let targets ← modifyGet (fun s => (s.workingDecls, { s with workingDecls := #[] }))
   let limit := (← getConfig).maxRecSpecialize
-  if targets.isEmpty then
+  bif targets.isEmpty then
     trace[Compiler.specialize.step] m!"Termination after {round} rounds"
     for (declName, paramsInfo) in (← get).localSpecParamInfo do
-      if paramsInfo.any SpecParamInfo.causesSpecialization then
+      bif paramsInfo.any SpecParamInfo.causesSpecialization then
         trace[Compiler.specialize.info] "{declName} {paramsInfo}"
         modifyEnv fun env => specExtension.addEntry env {
           declName,
@@ -530,7 +530,7 @@ partial def loop (round : Nat := 0) : SpecializeM Unit := do
           alreadySpecialized := true
         }
     return ()
-  else if round > limit then
+  else bif round >ᵇ limit then
     throwError m!"Exceeded recursive specialization limit ({limit}), consider increasing it with `set_option compiler.maxRecSpecialize {limit}`"
 
   trace[Compiler.specialize.step] m!"Round: {round}"
@@ -538,7 +538,7 @@ partial def loop (round : Nat := 0) : SpecializeM Unit := do
     let ground ← Specialize.paramsToGroundVars decl.params
     let (newDecl, changed) ← withReader (fun ctx => { ctx with ground, declName := decl.name }) do
       specializeDecl decl
-    if changed then
+    bif changed then
       modify fun s => { s with workingDecls := s.workingDecls.push newDecl }
     else
       modify fun s => { s with processedDecls := s.processedDecls.push newDecl }

@@ -35,13 +35,13 @@ private def escapeTable : { xs : ByteArray // xs.size = 256 } :=
 
 private def escapeAux (acc : String) (c : Char) : String :=
   -- escape ", \, \n and \r, keep all other characters ≥ 0x20 and render characters < 0x20 with \u
-  if c = '"' then -- hack to prevent emacs from regarding the rest of the file as a string: "
+  bif c =ᵇ '"' then -- hack to prevent emacs from regarding the rest of the file as a string: "
     acc ++ "\\\""
-  else if c = '\\' then
+  else bif c =ᵇ '\\' then
     acc ++ "\\\\"
-  else if c = '\n' then
+  else bif c =ᵇ '\n' then
     acc ++ "\\n"
-  else if c = '\x0d' then
+  else bif c =ᵇ '\x0d' then
     acc ++ "\\r"
   -- the c.val ≤ 0x10ffff check is technically redundant,
   -- since Lean chars are unicode scalar values ≤ 0x10ffff.
@@ -49,7 +49,7 @@ private def escapeAux (acc : String) (c : Char) : String :=
   -- the JSON standard is not definite: both directly printing the character
   -- and encoding it with multiple \u is allowed, and it is up to parsers to make the
   -- decision.
-  else if 0x0020 ≤ c.val ∧ c.val ≤ 0x10ffff then
+  else bif 0x0020 ≤ᵇ c.val && c.val ≤ᵇ 0x10ffff then
     acc.push c
   else
     let n := c.toNat;
@@ -66,11 +66,11 @@ private def needEscape (s : String) : Bool :=
   go s 0
 where
   go (s : String) (i : Nat) : Bool :=
-    if h : i < s.utf8ByteSize then
-      let byte := s.getUTF8Byte ⟨i⟩ h
+    bif h : i <ᵇ s.utf8ByteSize then
+      let byte := s.getUTF8Byte ⟨i⟩ (lt_of_decideLT_eq_true h)
       have h1 : byte.toNat < 256 := UInt8.toNat_lt_size byte
       have h2 : escapeTable.val.size = 256 := escapeTable.property
-      if escapeTable.val.get byte.toNat (Nat.lt_of_lt_of_eq h1 h2.symm) == 0 then
+      bif escapeTable.val.get byte.toNat (Nat.lt_of_lt_of_eq h1 h2.symm) == 0 then
         go s (i + 1)
       else
         true
@@ -80,7 +80,7 @@ where
 @[inline]
 def escape (s : String) (acc : String := "") : String :=
   -- If we don't have any characters that need to be escaped we can just append right away.
-  if needEscape s then
+  bif needEscape s then
     s.foldl escapeAux acc
   else
     acc ++ s
@@ -172,10 +172,10 @@ partial def compress (j : Json) : String :=
   }
 where
   go (acc : String) (q : CompressWorkItemQueue) : String :=
-    if h : q.kinds.size = 0 then
+    bif h : q.kinds.size =ᵇ 0 then
       acc
     else
-      let (kind, q) := q.popKind h
+      let (kind, q) := q.popKind (ne_of_decideEq_eq_false h)
       match kind with
       | .json =>
         let (j, q) := q.popValue!
@@ -196,7 +196,7 @@ where
           go (acc ++ "{") (kvs.foldr (init := q) fun k j acc => acc.pushKind .objectField |>.pushObjectFieldKey k |>.pushValue j)
       | .arrayElem =>
         let (j, q) := q.popValue!
-        if h : q.kinds.size = 0 then
+        bif h : q.kinds.size =ᵇ 0 then
           go acc {
             kinds := #[.comma, .json]
             values := #[j]
@@ -204,7 +204,7 @@ where
           }
         else
           let kind := q.kinds[q.kinds.size - 1]
-          if kind matches .arrayEnd then
+          bif kind matches .arrayEnd then
             go acc (q.pushKind .json |>.pushValue j)
           else
             go acc (q.pushKind .comma |>.pushKind .json |>.pushValue j)
@@ -213,7 +213,7 @@ where
       | .objectField =>
         let (k, q) := q.popObjectFieldKey!
         let (j, q) := q.popValue!
-        if h : q.kinds.size = 0 then
+        bif h : q.kinds.size =ᵇ 0 then
           go (renderString k acc ++ ":") {
             kinds := #[.comma, .json]
             values := #[j]
@@ -221,7 +221,7 @@ where
           }
         else
           let kind := q.kinds[q.kinds.size - 1]
-          if kind matches .objectEnd then
+          bif kind matches .objectEnd then
             go (renderString k acc ++ ":") (q.pushKind .json |>.pushValue j)
           else
             go (renderString k acc ++ ":") (q.pushKind .comma |>.pushKind .json |>.pushValue j)

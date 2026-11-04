@@ -39,7 +39,7 @@ def getMaxOccs (alts : Array (Alt .impure)) : Alt .impure × Nat := Id.run do
   let mut max    := getNumOccsOf alts 0
   for h : i in 1...alts.size do
     let curr := getNumOccsOf alts i
-    if curr > max then
+    bif curr >ᵇ max then
        maxAlt := alts[i]
        max    := curr
   return (maxAlt, max)
@@ -54,7 +54,7 @@ where
     let code := alts[i]!.getCode
     let mut n := 1
     for h : j in (i+1)...alts.size do
-      if Code.alphaEqv alts[j].getCode code then
+      bif Code.alphaEqv alts[j].getCode code then
         n := n + 1
     return n
 
@@ -63,17 +63,17 @@ Add a default case to the given `cases` alternatives if there
 are alternatives with equivalent (aka alpha equivalent) right hand sides.
 -/
 def addDefaultAlt (alts : Array (Alt .impure)) : CompilerM (Array (Alt .impure)) := do
-  if alts.size <= 1 || alts.any (· matches .default ..) then
+  bif alts.size ≤ᵇ 1 || alts.any (· matches .default ..) then
     return alts
   else
     let (max, noccs) := getMaxOccs alts
-    if noccs == 1 then
+    bif noccs == 1 then
       return alts
     else
       let mut altsNew := #[]
       let mut first := true
       for alt in alts do
-        if Code.alphaEqv alt.getCode max.getCode then
+        bif Code.alphaEqv alt.getCode max.getCode then
           let .ctorAlt _ k := alt | unreachable!
           unless first do
             eraseCode k
@@ -91,9 +91,9 @@ def filterUnreachable (alts : Array (Alt .impure)) : Array (Alt .impure) :=
 def simplifyCases (c : Cases .impure) : CompilerM (Code .impure) := do
   let alts := filterUnreachable c.alts
   let alts ← addDefaultAlt alts
-  if alts.size == 0 then
+  bif alts.size == 0 then
     return .unreach c.resultType
-  else if h : alts.size = 1 then
+  else bif h : alts.size =ᵇ 1 then
     return alts[0].getCode
   else
     return .cases <| c.updateAlts alts
@@ -116,9 +116,9 @@ def Decl.simpCase (decl : Decl .impure) : CompilerM (Decl .impure) := do
   return { decl with value }
 
 public def ensureHasDefault (alts : Array (Alt .impure)) : Array (Alt .impure) :=
-  if alts.any (· matches .default ..) then
+  bif alts.any (· matches .default ..) then
     alts
-  else if alts.size < 2 then
+  else bif alts.size <ᵇ 2 then
     alts
   else
     let last := alts.back!

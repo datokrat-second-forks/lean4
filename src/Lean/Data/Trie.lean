@@ -63,24 +63,24 @@ instance : Inhabited (Trie α) where
 /-- Insert or update the value at the given key `s`.  -/
 partial def upsert (t : Trie α) (s : String) (f : Option α → α) : Trie α :=
   let rec insertEmpty (i : Nat) : Trie α :=
-    if h : i < s.utf8ByteSize then
-      let c := s.getUTF8Byte ⟨i⟩ h
+    bif h : i <ᵇ s.utf8ByteSize then
+      let c := s.getUTF8Byte ⟨i⟩ (lt_of_decideLT_eq_true h)
       let t := insertEmpty (i + 1)
       node1 none c t
     else
       leaf (f .none)
   let rec loop
     | i, leaf v =>
-      if h : i < s.utf8ByteSize then
-        let c := s.getUTF8Byte ⟨i⟩ h
+      bif h : i <ᵇ s.utf8ByteSize then
+        let c := s.getUTF8Byte ⟨i⟩ (lt_of_decideLT_eq_true h)
         let t := insertEmpty (i + 1)
         node1 v c t
       else
         leaf (f v)
     | i, node1 v c' t' =>
-      if h : i < s.utf8ByteSize then
-        let c := s.getUTF8Byte ⟨i⟩ h
-        if c == c'
+      bif h : i <ᵇ s.utf8ByteSize then
+        let c := s.getUTF8Byte ⟨i⟩ (lt_of_decideLT_eq_true h)
+        bif c == c'
         then node1 v c' (loop (i + 1) t')
         else
           let t := insertEmpty (i + 1)
@@ -88,8 +88,8 @@ partial def upsert (t : Trie α) (s : String) (f : Option α → α) : Trie α :
       else
         node1 (f v) c' t'
     | i, node v cs ts =>
-      if h : i < s.utf8ByteSize then
-        let c := s.getUTF8Byte ⟨i⟩ h
+      bif h : i <ᵇ s.utf8ByteSize then
+        let c := s.getUTF8Byte ⟨i⟩ (lt_of_decideLT_eq_true h)
         match cs.findIdx? (· == c) with
           | none   =>
             let t := insertEmpty (i + 1)
@@ -108,21 +108,21 @@ partial def insert (t : Trie α) (s : String) (val : α) : Trie α :=
 partial def find? (t : Trie α) (s : String) : Option α :=
   let rec loop
     | i, leaf val =>
-      if i < s.utf8ByteSize then
+      bif i <ᵇ s.utf8ByteSize then
         none
       else
         val
     | i, node1 val c' t' =>
-      if h : i < s.utf8ByteSize then
-        let c := s.getUTF8Byte ⟨i⟩ h
-        if c == c'
+      bif h : i <ᵇ s.utf8ByteSize then
+        let c := s.getUTF8Byte ⟨i⟩ (lt_of_decideLT_eq_true h)
+        bif c == c'
         then loop (i + 1) t'
         else none
       else
         val
     | i, node val cs ts =>
-      if h : i < s.utf8ByteSize then
-        let c := s.getUTF8Byte ⟨i⟩ h
+      bif h : i <ᵇ s.utf8ByteSize then
+        let c := s.getUTF8Byte ⟨i⟩ (lt_of_decideLT_eq_true h)
         match cs.findIdx? (· == c) with
         | none   => none
         | some idx => loop (i + 1) ts[idx]!
@@ -150,12 +150,12 @@ partial def values (t : @&Trie α) : Array α := go t |>.run #[] |>.2
 partial def findPrefix (t : Trie α) (pre : String) : Array α := go t 0
   where
     go (t : Trie α) (i : Nat) : Array α :=
-      if h : i < pre.utf8ByteSize then
-        let c := pre.getUTF8Byte ⟨i⟩ h
+      bif h : i <ᵇ pre.utf8ByteSize then
+        let c := pre.getUTF8Byte ⟨i⟩ (lt_of_decideLT_eq_true h)
         match t with
         | leaf _val => .empty
         | node1 _val c' t' =>
-          if c == c'
+          bif c == c'
           then go t' (i + 1)
           else .empty
         | node _val cs ts =>
@@ -172,19 +172,19 @@ partial def matchPrefix (s : String) (t : Trie α) (i : String.Pos.Raw)
     (endByte_valid : endByte ≤ s.utf8ByteSize := by simp) : Option α :=
   let rec loop
     | leaf v, _, res =>
-      if v.isSome then v else res
+      bif v.isSome then v else res
     | node1 v c' t', i, res =>
-      let res := if v.isSome then v else res
-      if h : i < endByte then
+      let res := bif v.isSome then v else res
+      bif h : i <ᵇ endByte then
         let c := s.getUTF8Byte ⟨i⟩ (by simp [String.Pos.Raw.lt_iff]; omega)
-        if c == c'
+        bif c == c'
         then loop t' (i + 1) res
         else res
       else
         res
     | node v cs ts, i, res =>
-      let res := if v.isSome then v else res
-      if h : i < endByte then
+      let res := bif v.isSome then v else res
+      bif h : i <ᵇ endByte then
         let c := s.getUTF8Byte ⟨i⟩ (by simp [String.Pos.Raw.lt_iff]; omega)
         match cs.findIdx? (· == c) with
         | none => res

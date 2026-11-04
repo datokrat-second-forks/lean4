@@ -25,7 +25,7 @@ abbrev Visitor := State → State
 
 mutual
   partial def visitLevel (u : Level) : Visitor := fun s =>
-    if !u.hasMVar || s.visitedLevel.contains u then s
+    bif !u.hasMVar || s.visitedLevel.contains u then s
     else collect u { s with visitedLevel := s.visitedLevel.insert u }
 
   partial def collect : Level → Visitor
@@ -38,8 +38,8 @@ end
 
 mutual
   partial def visitExpr (e : Expr) : Visitor := fun s =>
-    if !e.hasMVar then s
-    else if s.visitedExpr.contains e then s
+    bif !e.hasMVar then s
+    else bif s.visitedExpr.contains e then s
     else main e { s with visitedExpr := s.visitedExpr.insert e }
 
   partial def main : Expr → Visitor

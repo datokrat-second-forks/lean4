@@ -42,7 +42,7 @@ abbrev ToExprM := ReaderT Nat $ StateM LevelMap
   return go (← read) (← get) params.size e
 where
   go (offset : Nat) (m : LevelMap) (i : Nat) (e : Expr) : Expr :=
-   if i > 0 then
+   bif i >ᵇ 0 then
      let param  := params[i-1]!
      let domain := param.type.abstract' (offset - 1) m
      go (offset - 1) m (i - 1) (.lam param.binderName domain e .default)
@@ -64,7 +64,7 @@ private abbrev _root_.Lean.FVarId.toExprM (fvarId : FVarId) : ToExprM Expr :=
   go 0
 where
   @[specialize] go (i : Nat) : ToExprM α := do
-    if h : i < params.size then
+    bif h : i <ᵇ params.size then
       withFVar params[i].fvarId (go (i+1))
     else
       k

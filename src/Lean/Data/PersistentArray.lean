@@ -69,7 +69,7 @@ partial def getAux [Inhabited α] : PersistentArrayNode α → USize → USize �
   | leaf cs, i, _     => cs[i.toNat]!
 
 def get! [Inhabited α] (t : PersistentArray α) (i : Nat) : α :=
-  if i >= t.tailOff then
+  bif i ≥ᵇ t.tailOff then
     t.tail[i - t.tailOff]!
   else
     getAux t.root (USize.ofNat i) t.shift
@@ -87,7 +87,7 @@ partial def setAux : PersistentArrayNode α → USize → USize → α → Persi
   | leaf cs, i, _,     a => leaf (cs.set! i.toNat a)
 
 def set (t : PersistentArray α) (i : Nat) (a : α) : PersistentArray α :=
-  if i >= t.tailOff then
+  bif i ≥ᵇ t.tailOff then
     { t with tail := t.tail.set! (i - t.tailOff) a }
   else
     { t with root := setAux t.root (USize.ofNat i) t.shift a }
@@ -101,33 +101,33 @@ def set (t : PersistentArray α) (i : Nat) (a : α) : PersistentArray α :=
   | leaf cs, i, _     => leaf (cs.modify i.toNat f)
 
 @[specialize] def modify [Inhabited α] (t : PersistentArray α) (i : Nat) (f : α → α) : PersistentArray α :=
-  if i >= t.tailOff then
+  bif i ≥ᵇ t.tailOff then
     { t with tail := t.tail.modify (i - t.tailOff) f }
   else
     { t with root := modifyAux f t.root (USize.ofNat i) t.shift }
 
 partial def mkNewPath (shift : USize) (a : Array α) : PersistentArrayNode α :=
-  if shift == 0 then
+  bif shift == 0 then
     leaf a
   else
     node (mkEmptyArray.push (mkNewPath (shift - initShift) a))
 
 partial def insertNewLeaf : PersistentArrayNode α → USize → USize → Array α → PersistentArrayNode α
   | node cs,   i, shift, a =>
-    if i < branching then
+    bif i <ᵇ branching then
       node (cs.push (leaf a))
     else
       let j     := div2Shift i shift
       let i     := mod2Shift i shift
       let shift := shift - initShift
-      if j.toNat < cs.size then
+      bif j.toNat <ᵇ cs.size then
          node <| cs.modify j.toNat fun c => insertNewLeaf c i shift a
       else
          node <| cs.push <| mkNewPath shift a
   | n, _, _, _ => n -- unreachable
 
 def mkNewTail (t : PersistentArray α) : PersistentArray α :=
-  if t.size <= (mul2Shift 1 (t.shift + initShift)).toNat then
+  bif t.size ≤ᵇ (mul2Shift 1 (t.shift + initShift)).toNat then
     { t with
       tail    := mkEmptyArray, root := insertNewLeaf t.root (USize.ofNat (t.size - 1)) t.shift t.tail,
       tailOff := t.size }
@@ -143,7 +143,7 @@ def tooBig : Nat := USize.size / 8
 
 def push (t : PersistentArray α) (a : α) : PersistentArray α :=
   let r := { t with tail := t.tail.push a, size := t.size + 1 }
-  if r.tail.size < branching.toNat || t.size >= tooBig then
+  bif r.tail.size <ᵇ branching.toNat || t.size ≥ᵇ tooBig then
     r
   else
     mkNewTail r
@@ -153,16 +153,16 @@ private def emptyArray {α : Type u} : Array (PersistentArrayNode α) :=
 
 partial def popLeaf : PersistentArrayNode α → Option (Array α) × Array (PersistentArrayNode α)
   | node cs =>
-    if h : cs.size ≠ 0 then
+    bif h : cs.size ≠ᵇ 0 then
       let idx := cs.size - 1
       let last := cs[idx]
       let cs'  := cs.set idx default
       match popLeaf last with
       | (none,   _)       => (none, emptyArray)
       | (some l, newLast) =>
-        if newLast.size == 0 then
+        bif newLast.size == 0 then
           let cs' := cs'.pop
-          if cs'.isEmpty then (some l, emptyArray) else (some l, cs')
+          bif cs'.isEmpty then (some l, emptyArray) else (some l, cs')
         else
           (some l, cs'.set idx (node newLast) (by simp only [cs', Array.size_set]; omega))
     else
@@ -170,7 +170,7 @@ partial def popLeaf : PersistentArrayNode α → Option (Array α) × Array (Per
   | leaf vs   => (some vs, emptyArray)
 
 def pop (t : PersistentArray α) : PersistentArray α :=
-  if t.tail.size > 0 then
+  bif t.tail.size >ᵇ 0 then
     { t with tail := t.tail.pop, size := t.size - 1 }
   else
     match popLeaf t.root with
@@ -208,10 +208,10 @@ variable {β : Type v}
   | leaf vs, i, _, b => vs.foldlM (init := b) (start := i.toNat) f
 
 @[specialize] def foldlM (t : PersistentArray α) (f : β → α → m β) (init : β) (start : Nat := 0) : m β := do
-  if start == 0 then
+  bif start == 0 then
     let b ← foldlMAux f t.root init
     t.tail.foldlM f b
-  else if start >= t.tailOff then
+  else bif start ≥ᵇ t.tailOff then
     t.tail.foldlM (init := init) (start := start - t.tailOff) f
   else do
     let b ← foldlFromMAux f t.root (USize.ofNat start) t.shift init
@@ -290,9 +290,9 @@ instance [Monad m] : ForIn m (PersistentArray α) α where
   | leaf vs, i, _ => vs.forM (start := i.toNat) f
 
 @[specialize] def forM (t : PersistentArray α) (f : α → m PUnit) (start : Nat := 0) : m PUnit := do
-  if start == 0 then
+  bif start == 0 then
     forMFrom0 t f
-  else if start >= t.tailOff then
+  else bif start ≥ᵇ t.tailOff then
     t.tail.forM (start := start - t.tailOff) f
   else do
     forFromMAux f t.root (USize.ofNat start) t.shift
@@ -307,13 +307,13 @@ end
   Id.run <| t.foldrM (pure <| f · ·) init
 
 @[inline] def filter (as : PersistentArray α) (p : α → Bool) : PersistentArray α :=
-  as.foldl (init := {}) fun asNew a => if p a then asNew.push a else asNew
+  as.foldl (init := {}) fun asNew a => bif p a then asNew.push a else asNew
 
 def toArray (t : PersistentArray α) : Array α :=
   t.foldl Array.push #[]
 
 def append (t₁ t₂ : PersistentArray α) : PersistentArray α :=
-  if t₁.isEmpty then
+  bif t₁.isEmpty then
     t₂
   else
     t₂.foldl PersistentArray.push t₁

@@ -27,12 +27,12 @@ f y :=
 `idx` is the index of the parameter used in the `cases` statement.
 -/
 def isJpCases? (decl : FunDecl .pure) : CompilerM (Option Nat) := do
-  if decl.params.size == 0 then
+  bif decl.params.size == 0 then
     return none
   else
     let small := (← getConfig).smallThreshold
     let rec go (code : Code .pure) (prefixSize : Nat) : Option Nat :=
-      if prefixSize > small then none else
+      bif prefixSize >ᵇ small then none else
       match code with
       | .let _ k => go k (prefixSize + 1) /- TODO: we should have uniform heuristics for estimating the size. -/
       | .cases c => decl.params.findIdx? fun param => c.discr == param.fvarId
@@ -127,8 +127,8 @@ where
     let dependsOnDiscr := k.dependsOn singleton || decls.any (·.dependsOn singleton)
     for h : i in *...params.size do
       let param := params[i]
-      if targetParamIdx == i then
-        if dependsOnDiscr then
+      bif targetParamIdx == i then
+        bif dependsOnDiscr then
           paramsNew := paramsNew.push (← internalizeParam param)
         paramsNew := paramsNew ++ (← fields.mapM internalizeParam)
       else
@@ -141,7 +141,7 @@ where
 /-- Create the arguments for a jump to an auxiliary join point created using `mkJpAlt`. -/
 private def mkJmpNewArgs (args : Array (Arg .pure)) (targetParamIdx : Nat)
     (fields : Array (Arg .pure)) (dependsOnTarget : Bool) : Array (Arg .pure) :=
-  if dependsOnTarget then
+  bif dependsOnTarget then
     args[*...=targetParamIdx] ++ fields ++ args[targetParamIdx<...*]
   else
     args[*...targetParamIdx] ++ fields ++ args[targetParamIdx<...*]
@@ -239,7 +239,7 @@ where
   visitJp? (decl : FunDecl .pure) (k : Code .pure) :
       ReaderT JpCasesInfoMap (StateRefT Ctor2JpCasesAlt DiscrM) (Option (Code .pure)) := do
     let some info := (← read).get? decl.fvarId | return none
-    if info.ctorNames.isEmpty then return none
+    bif info.ctorNames.isEmpty then return none
     -- This join point satisfies `isJpCases?` and there are jumps with constructors in `info` to it.
     let (decls, cases) := extractJpCases decl.value
     let mut jpAltMap := {}
@@ -250,7 +250,7 @@ where
       | .default k =>
         let k ← visit k
         let explicitCtorNames := cases.getCtorNames
-        if info.ctorNames.any fun ctorNameInJump => !explicitCtorNames.contains ctorNameInJump then
+        bif info.ctorNames.any fun ctorNameInJump => !explicitCtorNames.contains ctorNameInJump then
           let jpAlt ← mkJpAlt decls decl.params info.paramIdx #[] k (default := true)
           jpAltDecls := jpAltDecls.push (.jp jpAlt.decl)
           eraseCode k
@@ -263,7 +263,7 @@ where
           altsNew := altsNew.push (alt.updateCode k)
       | .alt ctorName fields k =>
         let k ← withDiscrCtor cases.discr ctorName fields <| visit k
-        if info.ctorNames.contains ctorName then
+        bif info.ctorNames.contains ctorName then
           let jpAlt ← mkJpAlt decls decl.params info.paramIdx fields k (default := false)
           jpAltDecls := jpAltDecls.push (.jp jpAlt.decl)
           jpAltMap := jpAltMap.insert ctorName jpAlt
@@ -285,7 +285,7 @@ where
     let .fvar argFVarId := args[info.paramIdx]! | return none
     let some ctorInfo ← findCtor? argFVarId | return none
     let some jpAlt := ctorJpAltMap.find? ctorInfo.getName | return none
-    if jpAlt.default then
+    bif jpAlt.default then
       let argsNew := mkJmpNewArgs args info.paramIdx #[] jpAlt.dependsOnDiscr
       return some <| .jmp jpAlt.decl.fvarId argsNew
     else

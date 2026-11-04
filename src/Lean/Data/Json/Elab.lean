@@ -75,7 +75,7 @@ macro_rules
       | _                     => Macro.throwUnsupported
     `(Lean.Json.mkObj [$[($ks, json% $vs)],*])
   | `(json% $stx)           =>
-    if stx.raw.isAntiquot then
+    bif stx.raw.isAntiquot then
       let stx := ⟨stx.raw.getAntiquotTerm⟩
       `(Lean.toJson $stx)
     else

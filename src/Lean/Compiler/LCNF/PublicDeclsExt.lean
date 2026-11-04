@@ -21,10 +21,10 @@ public def mkOrderedDeclSetExt : IO (EnvExtension (List Name × NameSet)) :=
     (replay? := some <| fun oldState newState _ s =>
       let newEntries := takeNewEntriesRev newState.1 oldState.1
       newEntries.foldl (init := s) fun s n =>
-        if s.2.contains n then
+        bif s.2.contains n then
           s
         else
-          (n :: s.1, if newState.2.contains n then s.2.insert n else s.2))
+          (n :: s.1, bif newState.2.contains n then s.2.insert n else s.2))
 
 /--
 Set of declarations to be exported to other modules; visibility shared by base/mono/IR phases.
@@ -32,7 +32,7 @@ Set of declarations to be exported to other modules; visibility shared by base/m
 builtin_initialize publicDeclsExt : EnvExtension (List Name × NameSet) ← mkOrderedDeclSetExt
 
 public def isDeclPublic (env : Environment) (declName : Name) : Bool := Id.run do
-  if !env.header.isModule then
+  bif !env.header.isModule then
     return true
   -- The IR compiler may call the boxed variant it introduces after we do visibility inference, so
   -- use same visibility as base decl.
@@ -43,7 +43,7 @@ public def isDeclPublic (env : Environment) (declName : Name) : Bool := Id.run d
   map.contains inferFor
 
 public def setDeclPublic (env : Environment) (declName : Name) : Environment :=
-  if isDeclPublic env declName then
+  bif isDeclPublic env declName then
     env
   else
     publicDeclsExt.modifyState env fun s =>

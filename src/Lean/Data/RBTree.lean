@@ -112,7 +112,7 @@ def seteq (t₁ t₂ : RBTree α cmp) : Bool :=
   subset t₁ t₂ && subset t₂ t₁
 
 def union (t₁ t₂ : RBTree α cmp) : RBTree α cmp :=
-  if t₁.isEmpty then
+  bif t₁.isEmpty then
     t₂
   else
     t₂.fold .insert t₁

@@ -15,15 +15,15 @@ namespace Lean.Expr
 
 /-- Returns true if the free variables in `a` are subset of the free variables in `b`. -/
 def fvarsSubset (a b : Expr) : Bool :=
-  if !a.hasFVar then
+  bif !a.hasFVar then
     true -- Empty set is subset of anything
-  else if !b.hasFVar then
+  else bif !b.hasFVar then
     false -- Empty set is not a superset of a nonempty set.
   else
     let s := collectFVars {} b
     Option.isNone <| a.findExt? fun e =>
-      if !e.hasFVar then .done
-      else if e.isFVar && !s.fvarSet.contains e.fvarId! then .found
+      bif !e.hasFVar then .done
+      else bif e.isFVar && !s.fvarSet.contains e.fvarId! then .found
       else .visit
 
 end Lean.Expr

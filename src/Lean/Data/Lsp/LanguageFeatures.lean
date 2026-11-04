@@ -112,10 +112,10 @@ instance : FromJson CompletionIdentifier where
   fromJson?
     | .str s =>
       let c := s.front
-      if c == 'c' then
+      bif c == 'c' then
         let declName := String.Pos.Raw.extract s ⟨1⟩ s.rawEndPos |>.toName
         .ok <| .const declName
-      else if c == 'f' then
+      else bif c == 'f' then
         let id := ⟨String.Pos.Raw.extract s ⟨1⟩ s.rawEndPos |>.toName⟩
         .ok <| .fvar id
       else
@@ -146,7 +146,7 @@ instance : ToJson ResolvableCompletionItemData where
 instance : FromJson ResolvableCompletionItemData where
   fromJson?
     | .arr elems => do
-      if elems.size < 3 then
+      bif elems.size <ᵇ 3 then
         .error "Expected array of size 3 in `FromJson` instance of `ResolvableCompletionItemData"
       let uri : DocumentUri ← fromJson? elems[0]!
       let line : Nat ← fromJson? elems[1]!
