@@ -595,12 +595,13 @@ Put the given expression in `LCNF`.
 public partial def toLCNF (e : Expr) (eType : Expr) : CompilerM (Code .pure) := do
   run eType do toCode (← visit e)
 where
-  visitCore (e : Expr) : M (Arg .pure) := withIncRecDepth do
+  visitCore (e : Expr) (useCache := true) : M (Arg .pure) := withIncRecDepth do
     let eType? := (← read).expectedType
     let ignoreNoncomputable := (← read).ignoreNoncomputable
     let key : CacheKey := { expr := e, expectedType? := eType?, ignoreNoncomputable }
-    if let some arg := (← get).cache.find? key then
-      return arg
+    if useCache then
+      if let some arg := (← get).cache.find? key then
+        return arg
     let r : Arg .pure ← match e with
       | .app ..      => visitApp e
       | .const ..    => visitApp e
@@ -611,10 +612,10 @@ where
       | .lit lit     => visitLit lit
       | .fvar fvarId => if (← get).toAny.contains fvarId then pure .erased else pure (.fvar fvarId)
       | .forallE .. | .mvar .. | .bvar .. | .sort ..  => unreachable!
-    modify fun s => if s.shouldCache then { s with cache := s.cache.insert key r } else s
+    modify fun s => if useCache && s.shouldCache then { s with cache := s.cache.insert key r } else s
     return r
 
-  visit (e : Expr) : M (Arg .pure) := withIncRecDepth do
+  visit (e : Expr) (useCache := true) : M (Arg .pure) := withIncRecDepth do
     if isLCProof e then
       return .erased
     let type ← liftMetaM <| Meta.inferType e
@@ -628,7 +629,7 @@ where
       by this branch can be reachable if we cannot establish whether the function produces a type or not.
       -/
       return .erased
-    visitCore e
+    visitCore e useCache
 
   visitLit (lit : Literal) : M (Arg .pure) :=
     letValueToArg (.lit (litToValue lit))
@@ -1015,19 +1016,33 @@ where
       | .erased | .type .. => return .erased
       | .fvar fvarId => letValueToArg <| .proj s i fvarId
 
-  visitLet (e : Expr) (xs : Array Expr) : M (Arg .pure) := do
+  /--
+  `alts` maps the values of the `_alt` declarations `inlineMatcher` created for the current matcher
+  to their translations.
+  -/
+  visitLet (e : Expr) (xs : Array Expr) (alts : Std.HashMap Expr (Arg .pure) := {}) :
+      M (Arg .pure) := do
     match e with
     | .letE binderName type value body _ =>
       let type := type.instantiateRev xs
       let value := value.instantiateRev xs
       if (← (liftMetaM <| Meta.isProp type) <||> isTypeFormerType type) then
-        visitLet body (xs.push value)
+        visitLet body (xs.push value) alts
       else
         let type' ← toLCNFType type
-        let value' ← withExpectedType type' do
-          visit value
+        /-
+        Identical alternatives of one matcher share their function (e.g. for `| a | b => rhs`), but
+        alternatives of different matchers must not share it through the cache: e.g. for nested
+        `cond`s with an identical branch, the shared function would be used in two local functions,
+        so it would be neither inlined nor turned into a join point, but lambda-lifted.
+        -/
+        let isMatcherAlt := binderName.eraseMacroScopes == `_alt
+        let value' ← match isMatcherAlt, alts[value]? with
+          | true, some arg => pure arg
+          | _, _ => withExpectedType type' do visit value (useCache := !isMatcherAlt)
+        let alts := if isMatcherAlt then alts.insert value value' else alts
         let letDecl ← mkLetDecl binderName type value type' value'
-        visitLet body (xs.push (.fvar letDecl.fvarId))
+        visitLet body (xs.push (.fvar letDecl.fvarId)) alts
     | _ =>
       let e := e.instantiateRev xs
       visit e
