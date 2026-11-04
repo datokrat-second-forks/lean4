@@ -2579,11 +2579,11 @@ evaluate the `Decidable` instance, so they reduce in the kernel. `simp` rewrites
 -/
 
 /-- `a =ᵇ b` decides `a = b` with the `DecidableEq` instance. -/
-@[inline] def decideEq [DecidableEq α] (a b : α) : Bool :=
+@[inline, implicit_reducible] def decideEq [DecidableEq α] (a b : α) : Bool :=
   decide (a = b)
 
 /-- `a ≠ᵇ b` decides `a ≠ b` with the `DecidableEq` instance. -/
-@[inline] def decideNe [DecidableEq α] (a b : α) : Bool :=
+@[inline, implicit_reducible] def decideNe [DecidableEq α] (a b : α) : Bool :=
   decide (a ≠ b)
 
 @[inherit_doc] infix:50 " <ᵇ " => decideLT

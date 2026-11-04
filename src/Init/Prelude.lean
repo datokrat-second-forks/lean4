@@ -1459,11 +1459,11 @@ abbrev DecidableLT (α : Type u) [LT α] := DecidableRel (LT.lt : α → α → 
 abbrev DecidableLE (α : Type u) [LE α] := DecidableRel (LE.le : α → α → Prop)
 
 /-- `a <ᵇ b` decides `a < b` with the `DecidableLT` instance. -/
-@[inline] def decideLT {α : Type u} [LT α] [DecidableLT α] (a b : α) : Bool :=
+@[inline, implicit_reducible] def decideLT {α : Type u} [LT α] [DecidableLT α] (a b : α) : Bool :=
   decide (LT.lt a b)
 
 /-- `a ≤ᵇ b` decides `a ≤ b` with the `DecidableLE` instance. -/
-@[inline] def decideLE {α : Type u} [LE α] [DecidableLE α] (a b : α) : Bool :=
+@[inline, implicit_reducible] def decideLE {α : Type u} [LE α] [DecidableLE α] (a b : α) : Bool :=
   decide (LE.le a b)
 
 /--
@@ -3820,15 +3820,15 @@ Returns the sequence of bytes in a character's UTF-8 encoding.
 @[implicit_reducible]
 def String.utf8EncodeChar (c : Char) : List UInt8 :=
   let v := c.val.toNat
-  ite (LE.le v 0x7f)
+  cond (decideLE v 0x7f)
     (List.cons (UInt8.ofNat v) List.nil)
-    (ite (LE.le v 0x7ff)
+    (cond (decideLE v 0x7ff)
       (List.cons
         (UInt8.ofNat (HAdd.hAdd (HMod.hMod (HDiv.hDiv v 64) 0x20) 0xc0))
         (List.cons
           (UInt8.ofNat (HAdd.hAdd (HMod.hMod v 0x40) 0x80))
           List.nil))
-      (ite (LE.le v 0xffff)
+      (cond (decideLE v 0xffff)
         (List.cons
           (UInt8.ofNat (HAdd.hAdd (HMod.hMod (HDiv.hDiv v 4096) 0x10) 0xe0))
           (List.cons
