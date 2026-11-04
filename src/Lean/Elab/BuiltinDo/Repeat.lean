@@ -41,8 +41,7 @@ remove the following code without breaking the do block's type.
 /-!
 `while c do s`, `repeat s until c` and `unless c do s` decide `c` with `bif` if it is a `Bool` and
 with `uif` otherwise. The macros expand to the internal `if_auto%` element, laid out as
-`[kw, optional [h, ":"], c, "then", thenSeq, "else", elseSeq]`, whose elaborator picks `bif` or
-`uif` once nested actions in `c` are lifted.
+`[kw, optional [h, ":"], c, "then", thenSeq, "else", elseSeq]`.
 -/
 
 private def mkDoIfAuto (kw : Syntax) (hyp cond thenSeq elseSeq : Syntax) : Syntax :=
@@ -72,34 +71,5 @@ open InternalSyntax in
   let `(doUnless| unless%$tk $cond do $body) := stx | throwUnsupportedSyntax
   let ifAuto := mkDoIfAuto tk mkNullNode cond (← `(doSeq| skip%$tk)) body
   Term.withMacroExpansion stx ifAuto <| withRef ifAuto <| elabDoElem ⟨ifAuto⟩ dec
-
-/--
-Whether the loop condition `c` is a `Bool`. It is elaborated without expected type and the state is
-restored afterwards, so `bif`/`uif` elaborates it again. Conditions whose type is not known to be
-`Bool` count as propositions, as in an `if`.
--/
-private def isBoolCond (c : Term) : TermElabM Bool := do
-  let s ← saveState
-  try
-    let e ← Term.withoutErrToSorry <| Term.elabTerm c none
-    Term.synthesizeSyntheticMVars (postpone := .yes)
-    let ty ← Meta.whnfR (← instantiateMVars (← Meta.inferType e))
-    return ty.isConstOf ``Bool
-  catch _ =>
-    return false
-  finally
-    s.restore
-
-@[builtin_doElem_elab Lean.Parser.Term.InternalSyntax.doIfAuto] def elabDoIfAuto : DoElab := fun stx dec => do
-  let stx := stx.raw
-  let isBool ← isBoolCond ⟨stx[2]⟩
-  let stxNew := mkNode (if isBool then ``doBIf else ``doUIf)
-    #[mkAtomFrom stx[0] (if isBool then "bif" else "uif"), mkNode ``doIfProp #[stx[1], stx[2]],
-      mkAtom "then", stx[4], mkNullNode, mkNullNode #[mkAtom "else", stx[6]]]
-  Term.withMacroExpansion stx stxNew <| withRef stxNew <| elabDoElem ⟨stxNew⟩ dec
-
-@[builtin_doElem_control_info Lean.Parser.Term.InternalSyntax.doIfAuto]
-def controlInfoDoIfAuto : ControlInfoHandler := fun stx => do
-  return (← inferControlInfoSeq ⟨stx.raw[4]⟩).alternative (← inferControlInfoSeq ⟨stx.raw[6]⟩)
 
 end Lean.Elab.Do

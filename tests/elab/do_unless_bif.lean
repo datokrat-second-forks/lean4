@@ -3,10 +3,10 @@ open Std.Do
 
 /-!
 Tests that `unless c do s` decides `c` with `bif` when `c : Bool` and with `uif` when `c` is a
-proposition, like `while` and `repeat ... until`: nested actions in `c` are lifted first, the body
-can use `return`/`break`/`continue` and reassign mutable variables, old-style `Decidable` conditions
-still elaborate, the legacy `do` elaborator keeps the `Decidable` `if`, and `mvcgen` verifies such
-code.
+proposition, like `while` and `repeat ... until`: nested actions in `c` are lifted first, the choice
+waits until the type of `c` is known (also for `while`), the body can use `return`/`break` and
+reassign mutable variables, old-style `Decidable` conditions still elaborate, the legacy `do`
+elaborator keeps the `Decidable` `if`, and `mvcgen` verifies such code.
 -/
 
 /-! ## `Bool` conditions become `bif` -/
@@ -118,6 +118,40 @@ fun xs p =>
 /-- info: 2 -/
 #guard_msgs in
 #eval checkAll [1, 2, 3, 4] (fun x => pure (x % 2 == 0))
+
+/-! ## Conditions whose type is only known later -/
+
+def unfound (n : Nat) (b : Option (Array Bool)) : List Nat := Id.run do
+  let found := if let some v := b then v.map fun x : Bool => x else Array.replicate n false
+  let mut r := []
+  for i in *...n do
+    unless found[i]! do
+      r := i :: r
+  return r
+
+#guard unfound 3 (some #[true, false, true]) == [1]
+
+def failures (xs : List Bool) : IO Nat := do
+  let rs ← xs.mapM fun success => do
+    unless success do
+      return 1
+    return 0
+  return rs.sum
+
+/-- info: 2 -/
+#guard_msgs in
+#eval failures [true, false, false]
+
+def whileLater (xs : List Bool) : IO Nat := do
+  let rs ← xs.mapM fun b => do
+    while b do
+      return 1
+    return 0
+  return rs.sum
+
+/-- info: 1 -/
+#guard_msgs in
+#eval whileLater [true, false]
 
 /-! ## `unless` as a term -/
 

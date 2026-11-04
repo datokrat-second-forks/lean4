@@ -178,6 +178,13 @@ Internal syntax used in the expansion of `while` and `repeat ... until`: `bif` i
 @[builtin_doElem_parser] def InternalSyntax.doIfAuto := leading_parser
   "if_auto% " >> optional (atomic (binderIdent >> " : ")) >> termParser >> " then " >> doSeq >>
     " else " >> doSeq
+/--
+Internal syntax for the term `if_auto%` elaborates to: `cond`/`Bool.dcond` if the condition is a
+`Bool`, `UDecidable.ite`/`dite` otherwise.
+-/
+@[builtin_term_parser] def InternalSyntax.termIteAuto := leading_parser
+  "ite_auto% " >> optional (atomic (binderIdent >> " : ")) >> termParser >> " then " >> termParser >>
+    " else " >> termParser
 def elseUIf := atomic (group (withPosition ("else " >> checkLineEq >> " uif ")))
 def elseBIf := atomic (group (withPosition ("else " >> checkLineEq >> " bif ")))
 /--

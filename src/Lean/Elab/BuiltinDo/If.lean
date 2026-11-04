@@ -103,21 +103,23 @@ def controlInfoDoUIf : ControlInfoHandler := controlInfoDoCond
 def controlInfoDoBIf : ControlInfoHandler := controlInfoDoCond
 
 /--
-Elaborates a canonical `uif`/`bif` (no `else uif` chain, with `else`). `mkTerm` receives the
-elaborated branches and builds the term.
+Elaborates `kw cond then thenSeq else elseSeq`. `mkTerm` receives the elaborated branches and builds
+the term.
 -/
+private def elabDoCondCore (kw cond : Syntax) (thenSeq elseSeq : DoSeq) (dec : DoElemCont)
+    (mkTerm : Term → Term → TermElabM Term) : DoElabM Expr := do
+  let info := (← inferControlInfoSeq thenSeq).alternative (← inferControlInfoSeq elseSeq)
+  dec.withDuplicableCont info fun dec => do
+  doElabToSyntax m!"then branch of {kw} with condition {cond}" (elabDoSeq thenSeq dec) fun then_ => do
+  doElabToSyntax m!"else branch of {kw} with condition {cond}" (elabDoSeq elseSeq dec) fun else_ => do
+  let mγ ← mkMonadApp (← read).doBlockResultType
+  Term.elabTermEnsuringType (← mkTerm then_ else_) mγ
+
+/-- Elaborates a canonical `uif`/`bif` (no `else uif` chain, with `else`). -/
 private def elabDoCond (stx : Syntax) (dec : DoElemCont)
     (mkTerm : Term → Term → TermElabM Term) : DoElabM Expr := do
   if !stx[4].getArgs.isEmpty || stx[5].isNone then throwUnsupportedSyntax
-  let thenSeq : DoSeq := ⟨stx[3]⟩
-  let elseSeq : DoSeq := ⟨stx[5][1]⟩
-  let cond := stx[1]
-  let info := (← inferControlInfoSeq thenSeq).alternative (← inferControlInfoSeq elseSeq)
-  dec.withDuplicableCont info fun dec => do
-  doElabToSyntax m!"then branch of {stx[0]} with condition {cond}" (elabDoSeq thenSeq dec) fun then_ => do
-  doElabToSyntax m!"else branch of {stx[0]} with condition {cond}" (elabDoSeq elseSeq dec) fun else_ => do
-  let mγ ← mkMonadApp (← read).doBlockResultType
-  Term.elabTermEnsuringType (← mkTerm then_ else_) mγ
+  elabDoCondCore stx[0] stx[1] ⟨stx[3]⟩ ⟨stx[5][1]⟩ dec mkTerm
 
 /-- The hypothesis name of a `doIfProp`, if it has one. -/
 private def doIfPropHyp? (prop : Syntax) : Option Term :=
@@ -141,3 +143,47 @@ private def doIfPropHyp? (prop : Syntax) : Option Term :=
     match doIfPropHyp? prop with
     | none => `(cond $c $then_ $else_)
     | some h => `(Bool.dcond $c (fun $h => $then_) (fun $h => $else_))
+
+/--
+`if_auto% [h :] c then s else t`, laid out as `[kw, optional [h, ":"], c, "then", s, "else", t]`,
+elaborates to the term `let_mvar% ?c := c; wait_if_type_mvar% ?c; ite_auto% [h :] ?c then s' else t'`.
+Like `if`, it waits until the type of `c` is known.
+-/
+@[builtin_doElem_elab Lean.Parser.Term.InternalSyntax.doIfAuto] def elabDoIfAuto : DoElab := fun stx dec => do
+  let stx := stx.raw
+  let c : Term := ⟨stx[2]⟩
+  elabDoCondCore stx[0] c ⟨stx[4]⟩ ⟨stx[6]⟩ dec fun then_ else_ => withFreshMacroScope do
+    let mvar ← withRef c `(?c)
+    let iteAuto := mkNode ``Lean.Parser.Term.InternalSyntax.termIteAuto
+      #[mkAtomFrom stx[0] "ite_auto%", stx[1], mvar, mkAtom "then", then_, mkAtom "else", else_]
+    `(let_mvar% ?c := $c; wait_if_type_mvar% ?c; $(⟨iteAuto⟩))
+
+@[builtin_doElem_control_info Lean.Parser.Term.InternalSyntax.doIfAuto]
+def controlInfoDoIfAuto : ControlInfoHandler := fun stx => do
+  return (← inferControlInfoSeq ⟨stx.raw[4]⟩).alternative (← inferControlInfoSeq ⟨stx.raw[6]⟩)
+
+end Lean.Elab.Do
+
+namespace Lean.Elab.Term
+
+/--
+`ite_auto% [h :] c then t else e` is `cond`/`Bool.dcond` if `c` is a `Bool` and
+`UDecidable.ite`/`dite` otherwise, including when the type of `c` is still unknown.
+-/
+@[builtin_term_elab Lean.Parser.Term.InternalSyntax.termIteAuto] def elabTermIteAuto : TermElab :=
+  fun stx expectedType? => do
+    let c ← elabTerm stx[2] none
+    let isBool := (← Meta.whnfR (← instantiateMVars (← Meta.inferType c))).isConstOf ``Bool
+    let cStx ← exprToSyntax c
+    let t : Term := ⟨stx[4]⟩
+    let e : Term := ⟨stx[6]⟩
+    let stxNew ← if stx[1].isNone then
+      if isBool then `(cond $cStx $t $e) else `(UDecidable.ite $cStx $t $e)
+    else
+      let h := stx[1][0]
+      let h : Term := ⟨if h.isOfKind ``Lean.binderIdent then h[0] else h⟩
+      if isBool then `(Bool.dcond $cStx (fun $h => $t) (fun $h => $e))
+      else `(UDecidable.dite $cStx (fun $h => $t) (fun $h => $e))
+    withMacroExpansion stx stxNew <| elabTerm stxNew expectedType?
+
+end Lean.Elab.Term
