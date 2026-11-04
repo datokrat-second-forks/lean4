@@ -606,8 +606,8 @@ theorem get?ₘ_eq_getValueCast? [Ord α] [TransOrd α] [LawfulEqOrd α] [BEq α
   rw [get?ₘ, applyCell_eq_apply_toListModel hto (fun l _ => getValueCast? k l)]
   · rintro ⟨(_|p), hp⟩ -
     · simp [Cell.get?]
-    · simp only [Cell.get?, Option.toList_some, getValueCast?, ← compare_eq_iff_beq,
-        compare_eq_iff_eq, Option.some_eq_dite_none_right, exists_prop, and_true]
+    · simp only [Cell.get?, Option.toList_some, getValueCast?, 
+        ]
       simp [compare_eq_iff_eq.mp (hp p rfl)]
   · exact fun l₁ l₂ h => getValueCast?_of_perm
   · exact fun l₁ l₂ h => getValueCast?_append_of_containsKey_eq_false
@@ -1140,7 +1140,7 @@ theorem toListModel_alterₘ [Ord α] [TransOrd α] [LawfulEqOrd α] [BEq α] [L
   · simp only [Cell.alter, Cell.ofOption, alterKey, Option.toList_some]
     have h : a = l.fst := compare_eq_iff_eq.mp <| hl l rfl
     cases h
-    simp only [getValueCast?, beq_self_eq_true, ↓reduceDIte, cast_eq]
+    simp only [getValueCast?, beq_self_eq_true, Bool.dcond_true, cast_eq]
     cases f _
     · simp [eraseKey]
     · simp [insertEntry, containsKey, replaceEntry]

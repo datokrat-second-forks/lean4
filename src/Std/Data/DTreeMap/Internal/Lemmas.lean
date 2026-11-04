@@ -63,9 +63,19 @@ theorem compare_ne_iff_beq_eq_false {a b : α} :
     compare a b ≠ Ordering.eq ↔ (a == b) = false := by
   simp only [ne_eq, compare_eq_iff_beq, Bool.not_eq_true]
 
+/-! The list model states its conditionals with `uif`; the tree map statements still use `if`. -/
+
+private theorem ite_eq_uite {α : Sort u} {c : Prop} {_ : Decidable c} {t e : α} :
+    ite c t e = @UDecidable.ite α c (UDecidable.ofDecidable c) t e :=
+  (@UDecidable.ite_eq_ite α c (UDecidable.ofDecidable c) _ t e).symm
+
+private theorem dite_eq_udite {α : Sort u} {c : Prop} {_ : Decidable c} {t : c → α}
+    {e : ¬c → α} : dite c t e = @UDecidable.dite α c (UDecidable.ofDecidable c) t e :=
+  (@UDecidable.dite_eq_dite α c (UDecidable.ofDecidable c) _ t e).symm
+
 private meta def helperLemmaNames : Array Name :=
   #[``compare_eq_iff_beq, ``compare_beq_eq_beq, ``compare_ne_iff_beq_eq_false,
-    ``Bool.not_eq_true, ``mem_iff_contains]
+    ``Bool.not_eq_true, ``mem_iff_contains, ``ite_eq_uite, ``dite_eq_udite]
 
 private meta def modifyMap : Std.HashMap Name Name :=
   .ofList

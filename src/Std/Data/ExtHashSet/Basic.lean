@@ -122,6 +122,10 @@ instance [BEq α] [Hashable α] [EquivBEq α] [LawfulHashable α]
     {m : ExtHashSet α} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs (Decidable (a ∈ m.inner))
 
+instance [BEq α] [Hashable α] [EquivBEq α] [LawfulHashable α]
+    {m : ExtHashSet α} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs (UDecidable (a ∈ m.inner))
+
 /-- Removes the element if it exists. -/
 @[inline] def erase [EquivBEq α] [LawfulHashable α] (m : ExtHashSet α) (a : α) : ExtHashSet α :=
   ⟨m.inner.erase a⟩

@@ -149,7 +149,6 @@ theorem Cache.WF.push_cache {decls : Array (Decl α)} {cache : HashMap (Decl α)
     rw [HashMap.getElem?_insert] at hfound
     split at hfound
     · next heq =>
-      simp only [beq_iff_eq] at heq
       simp only [Option.some.injEq] at hfound
       subst heq hfound
       constructor <;> simp
@@ -294,7 +293,6 @@ where
           rw [HashMap.getElem?_insert] at hfound
           split at hfound
           next heq =>
-            simp only [beq_iff_eq] at heq
             simp only [Option.some.injEq] at hfound
             subst heq hfound
             exact ⟨hidx, hdecl⟩
@@ -305,7 +303,7 @@ where
           rw [HashMap.getElem?_insert]
           split
           next heq =>
-            simp only [beq_iff_eq, Decl.atom.injEq] at heq
+            simp only [Decl.atom.injEq] at heq
             subst heq
             have := huniq idx i hidx h a hdecl hatom
             rw [this]

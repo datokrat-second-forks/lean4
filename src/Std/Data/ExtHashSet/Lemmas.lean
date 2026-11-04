@@ -136,7 +136,7 @@ theorem eq_empty_iff_size_eq_zero [EquivBEq α] [LawfulHashable α] : m = ∅ �
 
 @[grind =]
 theorem size_insert [EquivBEq α] [LawfulHashable α] {k : α} :
-    (m.insert k).size = if k ∈ m then m.size else m.size + 1 :=
+    (m.insert k).size = uif k ∈ m then m.size else m.size + 1 :=
   ExtHashMap.size_insertIfNew
 
 theorem size_le_size_insert [EquivBEq α] [LawfulHashable α] {k : α} : m.size ≤ (m.insert k).size :=
@@ -174,7 +174,7 @@ theorem mem_of_mem_erase [EquivBEq α] [LawfulHashable α] {k a : α} : a ∈ m.
 
 @[grind =]
 theorem size_erase [EquivBEq α] [LawfulHashable α] {k : α} :
-    (m.erase k).size = if k ∈ m then m.size - 1 else m.size :=
+    (m.erase k).size = uif k ∈ m then m.size - 1 else m.size :=
   ExtHashMap.size_erase
 
 theorem size_erase_le [EquivBEq α] [LawfulHashable α] {k : α} : (m.erase k).size ≤ m.size :=
@@ -190,7 +190,7 @@ theorem get?_empty [EquivBEq α] [LawfulHashable α] {a : α} : (∅ : ExtHashSe
 
 @[grind =]
 theorem get?_insert [EquivBEq α] [LawfulHashable α] {k a : α} :
-    (m.insert k).get? a = if k == a ∧ ¬k ∈ m then some k else m.get? a :=
+    (m.insert k).get? a = uif k == a ∧ ¬k ∈ m then some k else m.get? a :=
   ExtHashMap.getKey?_insertIfNew
 
 theorem contains_eq_isSome_get? [EquivBEq α] [LawfulHashable α] {a : α} :
@@ -228,7 +228,7 @@ theorem get?_eq_none [EquivBEq α] [LawfulHashable α] {a : α} : ¬a ∈ m → 
 
 @[grind =]
 theorem get?_erase [EquivBEq α] [LawfulHashable α] {k a : α} :
-    (m.erase k).get? a = if k == a then none else m.get? a :=
+    (m.erase k).get? a = uif k == a then none else m.get? a :=
   ExtHashMap.getKey?_erase
 
 @[simp]
@@ -251,7 +251,7 @@ theorem get?_eq_some [LawfulBEq α] {k : α} (h : k ∈ m) : m.get? k = some k :
 @[grind =]
 theorem get_insert [EquivBEq α] [LawfulHashable α] {k a : α} {h₁} :
     (m.insert k).get a h₁ =
-      if h₂ : k == a ∧ ¬k ∈ m then k else m.get a (mem_of_mem_insert' h₁ h₂) :=
+      uif h₂ : k == a ∧ ¬k ∈ m then k else m.get a (mem_of_mem_insert' h₁ h₂) :=
   ExtHashMap.getKey_insertIfNew (h₁ := h₁)
 
 @[simp, grind =]
@@ -289,7 +289,7 @@ theorem get!_empty [EquivBEq α] [LawfulHashable α] [Inhabited α] {a : α} :
 
 @[grind =]
 theorem get!_insert [Inhabited α] [EquivBEq α] [LawfulHashable α] {k a : α} :
-    (m.insert k).get! a = if k == a ∧ ¬k ∈ m then k else m.get! a :=
+    (m.insert k).get! a = uif k == a ∧ ¬k ∈ m then k else m.get! a :=
   ExtHashMap.getKey!_insertIfNew
 
 theorem get!_eq_default_of_contains_eq_false [Inhabited α] [EquivBEq α] [LawfulHashable α] {a : α} :
@@ -302,7 +302,7 @@ theorem get!_eq_default [Inhabited α] [EquivBEq α] [LawfulHashable α] {a : α
 
 @[grind =]
 theorem get!_erase [Inhabited α] [EquivBEq α] [LawfulHashable α] {k a : α} :
-    (m.erase k).get! a = if k == a then default else m.get! a :=
+    (m.erase k).get! a = uif k == a then default else m.get! a :=
   ExtHashMap.getKey!_erase
 
 @[simp]
@@ -342,7 +342,7 @@ theorem getD_empty [EquivBEq α] [LawfulHashable α] {a fallback : α} :
   ExtHashMap.getKeyD_empty
 
 @[grind =] theorem getD_insert [EquivBEq α] [LawfulHashable α] {k a fallback : α} :
-    (m.insert k).getD a fallback = if k == a ∧ ¬k ∈ m then k else m.getD a fallback :=
+    (m.insert k).getD a fallback = uif k == a ∧ ¬k ∈ m then k else m.getD a fallback :=
   ExtHashMap.getKeyD_insertIfNew
 
 theorem getD_eq_fallback_of_contains_eq_false [EquivBEq α] [LawfulHashable α]
@@ -355,7 +355,7 @@ theorem getD_eq_fallback [EquivBEq α] [LawfulHashable α] {a fallback : α} :
   ExtHashMap.getKeyD_eq_fallback
 
 @[grind =] theorem getD_erase [EquivBEq α] [LawfulHashable α] {k a fallback : α} :
-    (m.erase k).getD a fallback = if k == a then fallback else m.getD a fallback :=
+    (m.erase k).getD a fallback = uif k == a then fallback else m.getD a fallback :=
   ExtHashMap.getKeyD_erase
 
 @[simp]
@@ -919,7 +919,7 @@ theorem not_mem_inter_of_not_mem_right [EquivBEq α] [LawfulHashable α] {k : α
 /- get? -/
 theorem get?_inter [EquivBEq α] [LawfulHashable α] {k : α} :
     (m₁ ∩ m₂).get? k =
-    if k ∈ m₂ then m₁.get? k else none :=
+    uif k ∈ m₂ then m₁.get? k else none :=
   ExtHashMap.getKey?_inter
 
 theorem get?_inter_of_mem_right [EquivBEq α] [LawfulHashable α]
@@ -948,7 +948,7 @@ theorem get_inter [EquivBEq α] [LawfulHashable α]
 /- getD -/
 theorem getD_inter [EquivBEq α] [LawfulHashable α] {k fallback : α} :
     (m₁ ∩ m₂).getD k fallback =
-    if k ∈ m₂ then m₁.getD k fallback else fallback :=
+    uif k ∈ m₂ then m₁.getD k fallback else fallback :=
   ExtHashMap.getKeyD_inter
 
 theorem getD_inter_of_mem_right [EquivBEq α] [LawfulHashable α]
@@ -969,7 +969,7 @@ theorem getD_inter_of_not_mem_left [EquivBEq α] [LawfulHashable α]
 /- get! -/
 theorem get!_inter [EquivBEq α] [LawfulHashable α] [Inhabited α] {k : α} :
     (m₁ ∩ m₂).get! k =
-    if k ∈ m₂ then m₁.get! k else default :=
+    uif k ∈ m₂ then m₁.get! k else default :=
   ExtHashMap.getKey!_inter
 
 theorem get!_inter_of_mem_right [EquivBEq α] [LawfulHashable α] [Inhabited α]
@@ -1089,7 +1089,7 @@ theorem not_mem_diff_of_mem_right [EquivBEq α] [LawfulHashable α] {k : α}
 /- get? -/
 theorem get?_diff [EquivBEq α] [LawfulHashable α] {k : α} :
     (m₁ \ m₂).get? k =
-    if k ∈ m₂ then none else m₁.get? k :=
+    uif k ∈ m₂ then none else m₁.get? k :=
   ExtHashMap.getKey?_diff
 
 theorem get?_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α]
@@ -1118,7 +1118,7 @@ theorem get_diff [EquivBEq α] [LawfulHashable α]
 /- getD -/
 theorem getD_diff [EquivBEq α] [LawfulHashable α] {k fallback : α} :
     (m₁ \ m₂).getD k fallback =
-    if k ∈ m₂ then fallback else m₁.getD k fallback :=
+    uif k ∈ m₂ then fallback else m₁.getD k fallback :=
   ExtHashMap.getKeyD_diff
 
 theorem getD_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α]
@@ -1139,7 +1139,7 @@ theorem getD_diff_of_not_mem_left [EquivBEq α] [LawfulHashable α]
 /- get! -/
 theorem get!_diff [EquivBEq α] [LawfulHashable α] [Inhabited α] {k : α} :
     (m₁ \ m₂).get! k =
-    if k ∈ m₂ then default else m₁.get! k :=
+    uif k ∈ m₂ then default else m₁.get! k :=
   ExtHashMap.getKey!_diff
 
 theorem get!_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α] [Inhabited α]

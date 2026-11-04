@@ -62,7 +62,7 @@ def Cache.insert (cache : Cache aig) (expr : BVExpr w) (refs : AIG.RefVec aig w)
     split
     next heq =>
       rcases k with ⟨w, expr⟩
-      simp only [beq_iff_eq, Key.mk.injEq] at heq
+      simp only [Key.mk.injEq] at heq
       rcases heq with ⟨heq1, heq2⟩
       symm at heq1
       subst heq1

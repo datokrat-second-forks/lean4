@@ -41,10 +41,10 @@ theorem Inv1.lt_of_get?_eq_some [EquivBEq α] {n m : Nat} (map : HashMap α Nat)
     match hx : x == y with
     | true =>
       simp only [beq_iff_eq] at hx
-      simp only [hx, beq_self_eq_true, ↓reduceIte, Option.some.injEq]
+      simp only [hx, beq_self_eq_true, ↓reduceUIte, Option.some.injEq]
       omega
     | false =>
-      simp only [BEq.symm_false hx, Bool.false_eq_true, ↓reduceIte]
+      simp only [BEq.symm_false hx, Bool.false_eq_true, ↓reduceUIte]
       intro h
       specialize ih3 h
       omega
@@ -63,23 +63,23 @@ theorem Inv1.property [EquivBEq α] {n m : Nat} (x y : α) (map : HashMap α Nat
     match hx : z == x with
     | false =>
       simp only [beq_eq_false_iff_ne, ne_eq] at hx
-      simp only [beq_iff_eq, hx, ↓reduceIte] at hfound1
+      simp only [beq_iff_eq, hx, ↓reduceUIte] at hfound1
       match hy : z == y with
       | false =>
         simp only [beq_eq_false_iff_ne, ne_eq] at hy
-        simp only [beq_iff_eq, hy, ↓reduceIte] at hfound2
+        simp only [beq_iff_eq, hy, ↓reduceUIte] at hfound2
         exact ih3 hfound1 hfound2
       | true =>
-        simp only [hy, ↓reduceIte, Option.some.injEq] at hfound2
+        simp only [hy, ↓reduceUIte, Option.some.injEq] at hfound2
         have := Inv1.lt_of_get?_eq_some _ _ ih1 hfound1
         omega
     | true =>
-      simp only [hx, ↓reduceIte, Option.some.injEq] at hfound1
+      simp only [hx, ↓reduceUIte, Option.some.injEq] at hfound1
       rcases hfound1 with ⟨rfl⟩
       match hy : z == y with
       | false =>
         simp only [beq_eq_false_iff_ne, ne_eq] at hy
-        simp only [beq_iff_eq, hy, ↓reduceIte] at hfound2
+        simp only [beq_iff_eq, hy, ↓reduceUIte] at hfound2
         have := Inv1.lt_of_get?_eq_some _ _ ih1 hfound2
         omega
       | true =>
@@ -120,7 +120,7 @@ theorem Inv2.property (decls : Array (Decl α)) (idx upper : Nat) (map : HashMap
     rw [HashMap.getElem?_insert]
     match heq2 : a' == a with
     | .false =>
-      simp only [Bool.false_eq_true, ↓reduceIte]
+      simp only [Bool.false_eq_true, ↓reduceUIte]
       cases Nat.eq_or_lt_of_le hidx with
       | inl hidxeq =>
         subst hidxeq
@@ -128,7 +128,7 @@ theorem Inv2.property (decls : Array (Decl α)) (idx upper : Nat) (map : HashMap
       | inr hlt =>
         exact ih5 hlt heq
     | true =>
-      exact Option.isSome_iff_exists.mp rfl
+      exact Option.isSome_iff_exists.mp (by simp)
   | oldAtom ih1 ih2 ih3 ih4 ih5 =>
     simp_all only [true_implies]
     rename_i idx' _ _ _

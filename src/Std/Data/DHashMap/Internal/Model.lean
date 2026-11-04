@@ -336,11 +336,11 @@ def getKey!ₘ [BEq α] [Hashable α] [Inhabited α] (m : Raw₀ α β) (a : α)
 
 /-- Internal implementation detail of the hash map -/
 def insertₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) : Raw₀ α β :=
-  if m.containsₘ a then m.replaceₘ a b else Raw₀.expandIfNecessary (m.consₘ a b)
+  bif m.containsₘ a then m.replaceₘ a b else Raw₀.expandIfNecessary (m.consₘ a b)
 
 /-- Internal implementation detail of the hash map -/
 def insertIfNewₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) : Raw₀ α β :=
-  if m.containsₘ a then m else Raw₀.expandIfNecessary (m.consₘ a b)
+  bif m.containsₘ a then m else Raw₀.expandIfNecessary (m.consₘ a b)
 
 /-- Internal implementation detail of the hash map -/
 def eraseₘaux [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) : Raw₀ α β :=
@@ -348,15 +348,15 @@ def eraseₘaux [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) : Raw₀ α �
 
 /-- Internal implementation detail of the hash map -/
 def eraseₘ [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) : Raw₀ α β :=
-  if m.containsₘ a then m.eraseₘaux a else m
+  bif m.containsₘ a then m.eraseₘaux a else m
 
 /-- Internal implementation detail of the hash map -/
 def alterₘ [BEq α] [Hashable α] [LawfulBEq α] (m : Raw₀ α β) (a : α)
     (f : Option (β a) → Option (β a)) : Raw₀ α β :=
-  if h : m.containsₘ a then
+  bif h : m.containsₘ a then
     let buckets' := updateBucket m.1.buckets m.2 a (fun l => l.alter a f)
     let size' :=
-      if Raw₀.containsₘ ⟨withComputedSize buckets', by simpa [buckets'] using m.2⟩ a
+      bif Raw₀.containsₘ ⟨withComputedSize buckets', by simpa [buckets'] using m.2⟩ a
       then m.1.size else m.1.size - 1
     ⟨⟨size', buckets'⟩, by simpa [buckets'] using m.2⟩
   else
@@ -375,10 +375,10 @@ variable {β : Type v}
 /-- Internal implementation detail of the hash map -/
 def alterₘ [BEq α] [Hashable α] (m : Raw₀ α (fun _ => β)) (a : α)
     (f : Option β → Option β) : Raw₀ α (fun _ => β) :=
-  if h : m.containsₘ a then
+  bif h : m.containsₘ a then
     let buckets' := updateBucket m.1.buckets m.2 a (fun l => AssocList.Const.alter a f l)
     let size' :=
-      if Raw₀.containsₘ ⟨withComputedSize buckets', by simpa [buckets'] using m.2⟩ a
+      bif Raw₀.containsₘ ⟨withComputedSize buckets', by simpa [buckets'] using m.2⟩ a
       then m.1.size else m.1.size - 1
     ⟨⟨size', buckets'⟩, by simpa [buckets'] using m.2⟩
   else
@@ -419,7 +419,7 @@ def eraseListₘ [BEq α] [Hashable α] (m : Raw₀ α β) (l : List α) : Raw�
 
 /-- Internal implementation detail of the hash map -/
 def diffₘ [BEq α] [Hashable α] (m₁ m₂ : Raw₀ α β) : Raw₀ α β :=
-  if m₁.1.size ≤ m₂.1.size then
+  bif m₁.1.size ≤ᵇ m₂.1.size then
     filterₘ m₁ (fun k _ => !containsₘ m₂ k)
   else
     eraseManyEntries m₁ (toListModel m₂.1.buckets)
@@ -432,7 +432,7 @@ def insertListIfNewₘ [BEq α] [Hashable α] (m : Raw₀ α β) (l : List ((a :
 
 /-- Internal implementation detail of the hash map -/
 def unionₘ [BEq α] [Hashable α] (m₁ m₂ : Raw₀ α β) : Raw₀ α β :=
-  if m₁.1.size ≤ m₂.1.size then
+  bif m₁.1.size ≤ᵇ m₂.1.size then
     insertListIfNewₘ m₂ (toListModel m₁.1.buckets)
   else
     insertListₘ m₁ (toListModel m₂.1.buckets)
@@ -551,7 +551,7 @@ theorem modify_eq_alter [BEq α] [Hashable α] [LawfulBEq α] (m : Raw₀ α β)
       simp only [AssocList.contains_eq] at h
       simp only [AssocList.modify_eq_alter, AssocList.contains_eq,
         containsKey_of_perm AssocList.toList_alter, ← modifyKey_eq_alterKey,
-        containsKey_modifyKey, h, reduceIte]
+        containsKey_modifyKey, h, Bool.cond_true]
     · rfl
 
 theorem modify_eq_modifyₘ [BEq α] [Hashable α] [LawfulBEq α] (m : Raw₀ α β) (a : α)
@@ -581,7 +581,7 @@ theorem modify_eq_alter [BEq α] [Hashable α] [EquivBEq α] (m : Raw₀ α (fun
       simp only [AssocList.contains_eq] at h
       simp only [AssocList.Const.modify_eq_alter, AssocList.contains_eq,
         containsKey_of_perm AssocList.Const.toList_alter, ← Const.modifyKey_eq_alterKey,
-        Const.containsKey_modifyKey, h, reduceIte]
+        Const.containsKey_modifyKey, h, Bool.cond_true]
     · rfl
 
 theorem modify_eq_modifyₘ [BEq α] [Hashable α] [EquivBEq α] (m : Raw₀ α (fun _ => β)) (a : α)

@@ -140,6 +140,9 @@ instance [BEq α] [Hashable α] : Membership α (DHashMap α β) where
 instance [BEq α] [Hashable α] {m : DHashMap α β} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs <| Decidable (m.contains a)
 
+instance [BEq α] [Hashable α] {m : DHashMap α β} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs <| UDecidable (m.contains a = true)
+
 @[inline, inherit_doc Raw.get] def get [LawfulBEq α] (m : DHashMap α β) (a : α)
     (h : a ∈ m) : β a :=
   Raw₀.get ⟨m.1, m.2.size_buckets_pos⟩ a h
@@ -387,7 +390,7 @@ section Unverified
 @[inline] def partition (f : (a : α) → β a → Bool)
     (m : DHashMap α β) : DHashMap α β × DHashMap α β :=
   m.fold (init := (∅, ∅)) fun ⟨l, r⟩  a b =>
-    if f a b then
+    bif f a b then
       (l.insert a b, r)
     else
       (l, r.insert a b)

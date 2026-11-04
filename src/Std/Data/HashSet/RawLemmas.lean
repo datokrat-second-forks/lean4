@@ -170,7 +170,7 @@ theorem mem_insert_self [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} : 
 theorem mem_of_get_eq {k v : α} {w} (_ : m.get k w = v) : k ∈ m := w
 
 @[grind =] theorem size_insert [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} :
-    (m.insert k).size = if k ∈ m then m.size else m.size + 1 :=
+    (m.insert k).size = uif k ∈ m then m.size else m.size + 1 :=
   HashMap.Raw.size_insertIfNew h.out
 
 theorem size_le_size_insert [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} :
@@ -214,7 +214,7 @@ theorem mem_of_mem_erase [EquivBEq α] [LawfulHashable α] (h : m.WF) {k a : α}
 
 @[grind =]
 theorem size_erase [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} :
-    (m.erase k).size = if k ∈ m then m.size - 1 else m.size :=
+    (m.erase k).size = uif k ∈ m then m.size - 1 else m.size :=
   HashMap.Raw.size_erase h.out
 
 theorem size_erase_le [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} :
@@ -238,7 +238,7 @@ theorem get?_of_isEmpty [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : α} :
   HashMap.Raw.getKey?_of_isEmpty h.out
 
 @[grind =] theorem get?_insert [EquivBEq α] [LawfulHashable α] (h : m.WF) {k a : α} :
-    (m.insert k).get? a = if k == a ∧ ¬k ∈ m then some k else m.get? a :=
+    (m.insert k).get? a = uif k == a ∧ ¬k ∈ m then some k else m.get? a :=
   HashMap.Raw.getKey?_insertIfNew h.out
 
 theorem contains_eq_isSome_get? [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : α} :
@@ -276,7 +276,7 @@ theorem get?_eq_none [EquivBEq α] [LawfulHashable α] (h : m.WF) {a : α} :
   HashMap.Raw.getKey?_eq_none h.out
 
 @[grind =] theorem get?_erase [EquivBEq α] [LawfulHashable α] (h : m.WF) {k a : α} :
-    (m.erase k).get? a = if k == a then none else m.get? a :=
+    (m.erase k).get? a = uif k == a then none else m.get? a :=
   HashMap.Raw.getKey?_erase h.out
 
 theorem get?_beq [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} :
@@ -297,11 +297,11 @@ theorem get?_eq_some [LawfulBEq α] (h : m.WF) {k : α} (h' : k ∈ m) :
 
 @[grind =] theorem get_insert [EquivBEq α] [LawfulHashable α] (h : m.WF) {k a : α} {h₁} :
     (m.insert k).get a h₁ =
-      if h₂ : k == a ∧ ¬k ∈ m then k else m.get a (mem_of_mem_insert' h h₁ h₂) :=
+      uif h₂ : k == a ∧ ¬k ∈ m then k else m.get a (mem_of_mem_insert' h h₁ h₂) :=
   HashMap.Raw.getKey_insertIfNew (h₁ := h₁) h.out
 
 theorem toList_insert_perm [EquivBEq α] [LawfulHashable α] (h : m.WF) {k : α} :
-    (m.insert k).toList.Perm (if k ∈ m then m.toList else k :: m.toList) :=
+    (m.insert k).toList.Perm (uif k ∈ m then m.toList else k :: m.toList) :=
   HashMap.Raw.keys_insertIfNew_perm (v := ()) h.out
 
 @[simp, grind =]
@@ -353,7 +353,7 @@ theorem get!_of_isEmpty [Inhabited α] [EquivBEq α] [LawfulHashable α] (h : m.
   HashMap.Raw.getKey!_of_isEmpty h.out
 
 @[grind =] theorem get!_insert [Inhabited α] [EquivBEq α] [LawfulHashable α] (h : m.WF) {k a : α} :
-    (m.insert k).get! a = if k == a ∧ ¬k ∈ m then k else m.get! a :=
+    (m.insert k).get! a = uif k == a ∧ ¬k ∈ m then k else m.get! a :=
   HashMap.Raw.getKey!_insertIfNew h.out
 
 theorem get!_eq_default_of_contains_eq_false [Inhabited α] [EquivBEq α] [LawfulHashable α]
@@ -366,7 +366,7 @@ theorem get!_eq_default [Inhabited α] [EquivBEq α] [LawfulHashable α] (h : m.
   HashMap.Raw.getKey!_eq_default h.out
 
 @[grind =] theorem get!_erase [Inhabited α] [EquivBEq α] [LawfulHashable α] (h : m.WF) {k a : α} :
-    (m.erase k).get! a = if k == a then default else m.get! a :=
+    (m.erase k).get! a = uif k == a then default else m.get! a :=
   HashMap.Raw.getKey!_erase h.out
 
 @[simp]
@@ -414,7 +414,7 @@ theorem getD_of_isEmpty [EquivBEq α] [LawfulHashable α] (h : m.WF) {a fallback
   HashMap.Raw.getKeyD_of_isEmpty h.out
 
 @[grind =] theorem getD_insert [EquivBEq α] [LawfulHashable α] (h : m.WF) {k a fallback : α} :
-    (m.insert k).getD a fallback = if k == a ∧ ¬k ∈ m then k else m.getD a fallback :=
+    (m.insert k).getD a fallback = uif k == a ∧ ¬k ∈ m then k else m.getD a fallback :=
   HashMap.Raw.getKeyD_insertIfNew h.out
 
 theorem getD_eq_fallback_of_contains_eq_false [EquivBEq α] [LawfulHashable α] (h : m.WF)
@@ -427,7 +427,7 @@ theorem getD_eq_fallback [EquivBEq α] [LawfulHashable α] (h : m.WF) {a fallbac
   HashMap.Raw.getKeyD_eq_fallback h.out
 
 @[grind =] theorem getD_erase [EquivBEq α] [LawfulHashable α] (h : m.WF) {k a fallback : α} :
-    (m.erase k).getD a fallback = if k == a then fallback else m.getD a fallback :=
+    (m.erase k).getD a fallback = uif k == a then fallback else m.getD a fallback :=
   HashMap.Raw.getKeyD_erase h.out
 
 @[simp]
@@ -1051,7 +1051,7 @@ theorem get?_inter [EquivBEq α] [LawfulHashable α]
     (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} :
     (m₁ ∩ m₂).get? k =
-    if k ∈ m₂ then m₁.get? k else none :=
+    uif k ∈ m₂ then m₁.get? k else none :=
   @HashMap.Raw.getKey?_inter _ _ _ _ m₁.inner m₂.inner _ _ h₁.out h₂.out k
 
 theorem get?_inter_of_mem_right [EquivBEq α] [LawfulHashable α]
@@ -1084,7 +1084,7 @@ theorem getD_inter [EquivBEq α]
     [LawfulHashable α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} :
     (m₁ ∩ m₂).getD k fallback =
-    if k ∈ m₂ then m₁.getD k fallback else fallback :=
+    uif k ∈ m₂ then m₁.getD k fallback else fallback :=
   @HashMap.Raw.getKeyD_inter _ _ _ _ m₁.inner m₂.inner _ _ h₁.out h₂.out k fallback
 
 theorem getD_inter_of_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF)
@@ -1107,7 +1107,7 @@ theorem get!_inter [EquivBEq α] [LawfulHashable α] [Inhabited α]
     (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k : α} :
     (m₁ ∩ m₂).get! k =
-    if k ∈ m₂ then m₁.get! k else default :=
+    uif k ∈ m₂ then m₁.get! k else default :=
   @HashMap.Raw.getKey!_inter _ _ _ _ m₁.inner m₂.inner _ _ _ h₁.out h₂.out k
 
 theorem get!_inter_of_mem_right [Inhabited α]
@@ -1244,7 +1244,7 @@ theorem get?_diff [EquivBEq α] [LawfulHashable α]
     (h₁ : m₁.WF) (h₂ : m₂.WF)
     {k : α} :
     (m₁ \ m₂).get? k =
-    if k ∈ m₂ then none else m₁.get? k :=
+    uif k ∈ m₂ then none else m₁.get? k :=
   @HashMap.Raw.getKey?_diff _ _ _ _ m₁.inner m₂.inner _ _ h₁.out h₂.out k
 
 theorem get?_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α]
@@ -1276,7 +1276,7 @@ theorem get?_diff_of_mem_right [EquivBEq α] [LawfulHashable α]
 theorem getD_diff [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k fallback : α} :
     (m₁ \ m₂).getD k fallback =
-    if k ∈ m₂ then fallback else m₁.getD k fallback :=
+    uif k ∈ m₂ then fallback else m₁.getD k fallback :=
   @HashMap.Raw.getKeyD_diff _ _ _ _ m₁.inner m₂.inner _ _ h₁.out h₂.out k fallback
 
 theorem getD_diff_of_not_mem_right [EquivBEq α] [LawfulHashable α] (h₁ : m₁.WF)
@@ -1299,7 +1299,7 @@ theorem get!_diff [EquivBEq α] [LawfulHashable α] [Inhabited α]
     (h₁ : m₁.WF)
     (h₂ : m₂.WF) {k : α} :
     (m₁ \ m₂).get! k =
-    if k ∈ m₂ then default else m₁.get! k :=
+    uif k ∈ m₂ then default else m₁.get! k :=
   @HashMap.Raw.getKey!_diff _ _ _ _ m₁.inner m₂.inner _ _ _ h₁.out h₂.out k
 
 theorem get!_diff_of_not_mem_right [Inhabited α]

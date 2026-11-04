@@ -205,7 +205,7 @@ where
   go (i : Nat) (source : Array (AssocList α β))
       (target : { d : Array (AssocList α β) // 0 < d.size }) :
       { d : Array (AssocList α β) // 0 < d.size } :=
-    if h : i < source.size then
+    bif h : i <ᵇ source.size then
       let es := source[i]
       -- We erase `es` from `source` to make sure we can reuse its memory cells
       -- when performing es.foldl
@@ -218,7 +218,7 @@ where
 /-- Internal implementation detail of the hash map -/
 @[inline] def expandIfNecessary [BEq α] [Hashable α] (m : Raw₀ α β) : Raw₀ α β :=
   let ⟨⟨size, buckets⟩, hm⟩ := m
-  if numBucketsForCapacity size ≤ buckets.size then
+  bif numBucketsForCapacity size ≤ᵇ buckets.size then
     ⟨⟨size, buckets⟩, hm⟩
   else
     let ⟨buckets', h'⟩ := expand ⟨buckets, by simpa⟩
@@ -229,7 +229,7 @@ def insert [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) : Raw�
   let ⟨⟨size, buckets⟩, hm⟩ := m
   let ⟨i, h⟩ := mkIdx buckets.size hm (hash a)
   let bkt := buckets[i]
-  if bkt.contains a then
+  bif bkt.contains a then
     let buckets' := buckets.uset i .nil h
     ⟨⟨size, buckets'.uset i (bkt.replace a b) (by simpa [buckets'])⟩, by simpa [buckets']⟩
   else
@@ -244,7 +244,7 @@ def insert [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) : Raw�
   let size' := size
   let ⟨i, hi⟩ := mkIdx buckets.size hm (hash a)
   let bucket := buckets[i]
-  if bucket.contains a then
+  bif bucket.contains a then
     let buckets := buckets.uset i .nil hi
     let bucket := bucket.modify a f
     ⟨⟨size, buckets.uset i bucket (by simpa [buckets])⟩, (by simpa [buckets])⟩
@@ -258,7 +258,7 @@ def insert [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) : Raw�
   let size' := size
   let ⟨i, hi⟩ := mkIdx buckets.size hm (hash a)
   let bucket := buckets[i]
-  if bucket.contains a then
+  bif bucket.contains a then
     let buckets := buckets.uset i .nil hi
     let bucket := AssocList.Const.modify a f bucket
     ⟨⟨size, buckets.uset i bucket (by simpa [buckets])⟩, (by simpa [buckets])⟩
@@ -271,10 +271,10 @@ def insert [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) : Raw�
   let ⟨⟨size, buckets⟩, hm⟩ := m
   let ⟨i, h⟩ := mkIdx buckets.size hm (hash a)
   let bkt := buckets[i]
-  if bkt.contains a then
+  bif bkt.contains a then
     let buckets' := buckets.uset i .nil h
     let bkt' := bkt.alter a f
-    let size' := if bkt'.contains a then size else size - 1
+    let size' := bif bkt'.contains a then size else size - 1
     ⟨⟨size', buckets'.uset i bkt' (by simpa [buckets'])⟩, by simpa [buckets']⟩
   else
     match f none with
@@ -290,10 +290,10 @@ def insert [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) : Raw�
   let ⟨⟨size, buckets⟩, hm⟩ := m
   let ⟨i, h⟩ := mkIdx buckets.size hm (hash a)
   let bkt := buckets[i]
-  if bkt.contains a then
+  bif bkt.contains a then
     let buckets' := buckets.uset i .nil h
     let bkt' := AssocList.Const.alter a f bkt
-    let size' := if bkt'.contains a then size else size - 1
+    let size' := bif bkt'.contains a then size else size - 1
     ⟨⟨size', buckets'.uset i bkt' (by simpa [buckets'])⟩, by simpa [buckets']⟩
   else
     match f none with
@@ -309,7 +309,7 @@ def insert [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) : Raw�
   let ⟨⟨size, buckets⟩, hm⟩ := m
   let ⟨i, h⟩ := mkIdx buckets.size hm (hash a)
   let bkt := buckets[i]
-  if bkt.contains a then
+  bif bkt.contains a then
     let buckets' := buckets.uset i .nil h
     (true, ⟨⟨size, buckets'.uset i (bkt.replace a b) (by simpa [buckets'])⟩, by simpa [buckets']⟩)
   else
@@ -323,7 +323,7 @@ def insert [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) : Raw�
   let ⟨⟨size, buckets⟩, hm⟩ := m
   let ⟨i, h⟩ := mkIdx buckets.size hm (hash a)
   let bkt := buckets[i]
-  if bkt.contains a then
+  bif bkt.contains a then
     (true, ⟨⟨size, buckets⟩, hm⟩)
   else
     let size'    := size + 1
@@ -335,7 +335,7 @@ def insertIfNew [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) (b : β a) : 
   let ⟨⟨size, buckets⟩, hm⟩ := m
   let ⟨i, h⟩ := mkIdx buckets.size hm (hash a)
   let bkt := buckets[i]
-  if bkt.contains a then
+  bif bkt.contains a then
     ⟨⟨size, buckets⟩, hm⟩
   else
     let size'    := size + 1
@@ -422,7 +422,7 @@ def erase [BEq α] [Hashable α] (m : Raw₀ α β) (a : α) : Raw₀ α β :=
   let ⟨⟨size, buckets⟩, hb⟩ := m
   let ⟨i, h⟩ := mkIdx buckets.size hb (hash a)
   let bkt := buckets[i]
-  if bkt.contains a then
+  bif bkt.contains a then
     let buckets' := buckets.uset i .nil h
     ⟨⟨size - 1, buckets'.uset i (bkt.erase a) (by simpa [buckets'])⟩, by simpa [buckets']⟩
   else
@@ -491,19 +491,19 @@ def interSmaller [BEq α] [Hashable α] (m₁ : Raw₀ α β) (m₂ : Raw α β)
 
 /-- Internal implementation detail of the hash map -/
 @[inline] def union [BEq α] [Hashable α] (m₁ m₂ : Raw₀ α β) : Raw₀ α β :=
-  if m₁.1.size ≤ m₂.1.size then (m₂.insertManyIfNew m₁.1).1 else (m₁.insertMany m₂.1).1
+  bif m₁.1.size ≤ᵇ m₂.1.size then (m₂.insertManyIfNew m₁.1).1 else (m₁.insertMany m₂.1).1
 
 /-- Internal implementation detail of the hash map -/
 def inter [BEq α] [Hashable α] (m₁ m₂ : Raw₀ α β) : Raw₀ α β :=
-  if m₁.1.size ≤ m₂.1.size then m₁.filter fun k _ => m₂.contains k else interSmaller m₁ m₂
+  bif m₁.1.size ≤ᵇ m₂.1.size then m₁.filter fun k _ => m₂.contains k else interSmaller m₁ m₂
 
 /-- Internal implementation detail of the hash map -/
 def beq [BEq α] [LawfulBEq α] [Hashable α] [∀ k, BEq (β k)] (m₁ m₂ : Raw₀ α β) : Bool :=
-  if m₁.1.size ≠ m₂.1.size then false else m₁.1.all (fun k v => m₂.get? k == some v)
+  bif m₁.1.size ≠ᵇ m₂.1.size then false else m₁.1.all (fun k v => m₂.get? k == some v)
 
 /-- Internal implementation detail of the hash map -/
 @[inline] def diff [BEq α] [Hashable α] (m₁ m₂ : Raw₀ α β) : Raw₀ α β :=
-  if m₁.1.size ≤ m₂.1.size then m₁.filter (fun k _ => !m₂.contains k) else (eraseManyEntries m₁ m₂.1).1
+  bif m₁.1.size ≤ᵇ m₂.1.size then m₁.filter (fun k _ => !m₂.contains k) else (eraseManyEntries m₁ m₂.1).1
 
 
 section
@@ -518,7 +518,7 @@ def Const.get? [BEq α] [Hashable α] (m : Raw₀ α (fun _ => β)) (a : α) : O
 
 /-- Internal implementation detail of the hash map -/
 def Const.beq [BEq α] [Hashable α] [BEq β] (m₁ m₂ : Raw₀ α (fun _ => β)) : Bool :=
-  if m₁.1.size ≠ m₂.1.size then false else m₁.1.all (fun k v => Const.get? m₂ k == some v)
+  bif m₁.1.size ≠ᵇ m₂.1.size then false else m₁.1.all (fun k v => Const.get? m₂ k == some v)
 
 /-- Internal implementation detail of the hash map -/
 def Const.get [BEq α] [Hashable α] (m : Raw₀ α (fun _ => β)) (a : α)

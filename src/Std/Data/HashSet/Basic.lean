@@ -125,6 +125,9 @@ instance [BEq α] [Hashable α] : Membership α (HashSet α) where
 instance [BEq α] [Hashable α] {m : HashSet α} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs (Decidable (a ∈ m.inner))
 
+instance [BEq α] [Hashable α] {m : HashSet α} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs (UDecidable (a ∈ m.inner))
+
 /-- Removes the element if it exists. -/
 @[cbv_opaque, inline] def erase (m : HashSet α) (a : α) : HashSet α :=
   ⟨m.inner.erase a⟩

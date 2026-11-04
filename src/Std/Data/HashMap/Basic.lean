@@ -145,6 +145,9 @@ instance [BEq α] [Hashable α] : Membership α (HashMap α β) where
 instance [BEq α] [Hashable α] {m : HashMap α β} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs (Decidable (a ∈ m.inner))
 
+instance [BEq α] [Hashable α] {m : HashMap α β} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs (UDecidable (a ∈ m.inner))
+
 /--
 The notation `m[a]` or `m[a]'h` is preferred over calling this function directly.
 

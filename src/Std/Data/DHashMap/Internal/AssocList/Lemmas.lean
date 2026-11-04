@@ -75,14 +75,14 @@ theorem getCast_eq [BEq α] [LawfulBEq α] {l : AssocList α β} {a : α} {h} :
     l.getCast a h = getValueCast a l.toList (contains_eq.symm.trans h) := by
   induction l
   · simp [contains] at h
-  next k v t ih => simp only [getCast, toList_cons, List.getValueCast_cons, ih]
+  next k v t ih => simp only [Bool.dcond_eq_udite, getCast, toList_cons, List.getValueCast_cons, ih]
 
 @[simp]
 theorem get_eq {β : Type v} [BEq α] {l : AssocList α (fun _ => β)} {a : α} {h} :
     l.get a h = getValue a l.toList (contains_eq.symm.trans h) := by
   induction l
   · simp [contains] at h
-  next k v t ih => simp only [get, toList_cons, List.getValue_cons, ih]
+  next k v t ih => simp only [Bool.dcond_eq_udite, get, toList_cons, List.getValue_cons, ih]
 
 @[simp]
 theorem getEntry_eq [BEq α] {l : AssocList α β} {a : α} {h} :
@@ -90,7 +90,7 @@ theorem getEntry_eq [BEq α] {l : AssocList α β} {a : α} {h} :
   induction l
   · simp [contains] at h
   next k v t ih =>
-    simp only [getEntry, toList_cons, List.getEntry_cons, ih]
+    simp only [Bool.dcond_eq_udite, getEntry, toList_cons, List.getEntry_cons, ih]
 
 @[simp]
 theorem getEntry?_eq [BEq α] {l : AssocList α β} {a : α} :
@@ -98,7 +98,7 @@ theorem getEntry?_eq [BEq α] {l : AssocList α β} {a : α} :
   induction l
   · simp only [getEntry?, toList_nil, getEntry?_nil]
   next k v t ih =>
-    simp only [getEntry?, ih, toList_cons, getEntry?_cons]
+    simp only [Bool.cond_eq_ite, getEntry?, ih, toList_cons, getEntry?_cons]
 
 @[simp]
 theorem getEntryD_eq [BEq α] {l : AssocList α β} {a : α} {fallback : (a : α) × β a} :
@@ -106,7 +106,7 @@ theorem getEntryD_eq [BEq α] {l : AssocList α β} {a : α} {fallback : (a : α
   induction l
   · simp only [getEntryD, toList_nil, getEntryD_nil]
   next k v t ih =>
-    simp only [getEntryD, ih, toList_cons, getEntryD_cons]
+    simp only [Bool.cond_eq_ite, getEntryD, ih, toList_cons, getEntryD_cons]
 
 @[simp]
 theorem getEntry!_eq [BEq α] {l : AssocList α β} {a : α} [Inhabited ((a : α) × β a)] :
@@ -114,7 +114,7 @@ theorem getEntry!_eq [BEq α] {l : AssocList α β} {a : α} [Inhabited ((a : α
   induction l
   · simp only [getEntry!, toList_nil, getEntry!_nil]
   next k v t ih =>
-    simp only [getEntry!, ih, toList_cons, List.getEntry!_cons]
+    simp only [Bool.cond_eq_ite, getEntry!, ih, toList_cons, List.getEntry!_cons]
 
 @[simp]
 theorem getCastD_eq [BEq α] [LawfulBEq α] {l : AssocList α β} {a : α} {fallback : β a} :
@@ -122,7 +122,7 @@ theorem getCastD_eq [BEq α] [LawfulBEq α] {l : AssocList α β} {a : α} {fall
   induction l
   · simp [getCastD]
   · simp_all [getCastD, List.getValueCastD, List.getValueCast?_cons,
-      apply_dite (fun x => Option.getD x fallback)]
+      UDecidable.apply_dite (fun x => Option.getD x fallback)]
 
 @[simp]
 theorem getD_eq {β : Type v} [BEq α] {l : AssocList α (fun _ => β)} {a : α} {fallback : β} :
@@ -142,7 +142,7 @@ theorem getCast!_eq [BEq α] [LawfulBEq α] {l : AssocList α β} {a : α} [Inha
   induction l
   · simp [getCast!, List.getValueCast!]
   · simp_all [getCast!, List.getValueCast!, List.getValueCast!, List.getValueCast?_cons,
-      apply_dite Option.get!]
+      UDecidable.apply_dite Option.get!]
 
 @[simp]
 theorem get!_eq {β : Type v} [BEq α] [Inhabited β] {l : AssocList α (fun _ => β)} {a : α} :
@@ -161,21 +161,21 @@ theorem getKey_eq [BEq α] {l : AssocList α β} {a : α} {h} :
     l.getKey a h = List.getKey a l.toList (contains_eq.symm.trans h) := by
   induction l
   · simp [contains] at h
-  next k v t ih => simp only [getKey, toList_cons, List.getKey_cons, ih]
+  next k v t ih => simp only [Bool.dcond_eq_udite, getKey, toList_cons, List.getKey_cons, ih]
 
 @[simp]
 theorem getKeyD_eq [BEq α] {l : AssocList α β} {a fallback : α} :
     l.getKeyD a fallback = List.getKeyD a l.toList fallback := by
   induction l
   · simp [getKeyD, List.getKeyD]
-  · simp_all [getKeyD, List.getKeyD, apply_ite (fun x => Option.getD x fallback)]
+  · simp_all [getKeyD, List.getKeyD, UDecidable.apply_ite (fun x => Option.getD x fallback)]
 
 @[simp]
 theorem getKey!_eq [BEq α] [Inhabited α] {l : AssocList α β} {a : α} :
     l.getKey! a = List.getKey! a l.toList := by
   induction l
   · simp [getKey!, List.getKey!]
-  · simp_all [getKey!, List.getKey!, apply_ite Option.get!]
+  · simp_all [getKey!, List.getKey!, UDecidable.apply_ite Option.get!]
 
 @[simp]
 theorem toList_replace [BEq α] {l : AssocList α β} {a : α} {b : β a} :
@@ -233,7 +233,7 @@ theorem toList_filter {f : (a : α) → β a → Bool} {l : AssocList α β} :
   induction l' generalizing l
   · simp [filter.go]
   next k v t ih =>
-    simp only [filter.go, toList_cons, List.filter_cons, cond_eq_ite]
+    simp only [Bool.cond_eq_ite, filter.go, toList_cons, List.filter_cons, cond_eq_ite]
     split
     · exact (ih _).trans (by simpa using perm_middle.symm)
     · exact ih _
@@ -271,7 +271,7 @@ theorem modify_eq_alter [BEq α] [LawfulBEq α] {a : α} {f : β a → β a} {l 
     modify a f l = alter a (·.map f) l := by
   induction l
   · rfl
-  next ih => simp only [modify, beq_iff_eq, alter, Option.map_some, ih]
+  next ih => simp only [modify, alter, Option.map_some, ih]
 
 namespace Const
 

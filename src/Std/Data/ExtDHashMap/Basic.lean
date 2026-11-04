@@ -180,6 +180,9 @@ instance [EquivBEq α] [LawfulHashable α] : Membership α (ExtDHashMap α β) w
 instance [EquivBEq α] [LawfulHashable α] {m : ExtDHashMap α β} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs <| Decidable (m.contains a)
 
+instance [EquivBEq α] [LawfulHashable α] {m : ExtDHashMap α β} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs <| UDecidable (m.contains a = true)
+
 @[inline, inherit_doc DHashMap.get]
 def get [LawfulBEq α] (m : ExtDHashMap α β) (a : α)
     (h : a ∈ m) : β a :=
