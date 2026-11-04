@@ -189,6 +189,9 @@ instance : Membership α (DTreeMap α β cmp) where
 instance {m : DTreeMap α β cmp} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs <| Decidable (m.contains a)
 
+instance {m : DTreeMap α β cmp} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs <| UDecidable (m.contains a = true)
+
 /-- Returns the number of mappings present in the map. -/
 @[inline]
 def size (t : DTreeMap α β cmp) : Nat :=
@@ -827,7 +830,7 @@ def foldr (f : (a : α) → β a → δ → δ) (init : δ) (t : DTreeMap α β 
 @[inline] def partition (f : (a : α) → β a → Bool)
     (t : DTreeMap α β cmp) : DTreeMap α β cmp × DTreeMap α β cmp :=
   t.foldl (init := (∅, ∅)) fun ⟨l, r⟩ a b =>
-    if f a b then
+    bif f a b then
       (l.insert a b, r)
     else
       (l, r.insert a b)

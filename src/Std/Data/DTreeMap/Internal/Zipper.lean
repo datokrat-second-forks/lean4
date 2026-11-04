@@ -438,7 +438,7 @@ variable {α : Type u} {β : α → Type v}
 public def RxcIterator.step [Ord α] : RxcIterator α β → IterStep (IterM (α := RxcIterator α β) Id ((a : α) × β a)) ((a : α) × β a)
   | ⟨.done, _⟩ => .done
   | ⟨.cons k v t it, upper⟩ =>
-    if (compare k upper).isLE then
+    bif (compare k upper).isLE then
       .yield ⟨it.prependMap t, upper⟩ ⟨k, v⟩
     else
       .done
@@ -494,12 +494,12 @@ theorem RxcIterator.step_done [Ord α] {upper : α} : ({ iter := .done, upper :=
 @[simp]
 theorem RxcIterator.step_cons_of_LE [Ord α] {upper : α} {h : (compare k upper).isLE} : ({ iter := (.cons k v t it), upper := upper } : RxcIterator α β).step = .yield ⟨it.prependMap t, upper⟩ ⟨k,v⟩ := by
   rw [step, h]
-  simp only [↓reduceIte]
+  rfl
 
 @[simp]
 theorem RxcIterator.step_cons_of_not_LE [Ord α] {upper : α} {h : (compare k upper).isLE = false} : ({ iter := (.cons k v t it), upper := upper } : RxcIterator α β).step = .done := by
   rw [step, h]
-  simp only [Bool.false_eq_true, ↓reduceIte]
+  rfl
 
 @[simp]
 theorem RxcIterator.val_run_step_toIterM_iter [Ord α] {z : RxcIterator α β} : (⟨z⟩ : Iter (α := RxcIterator α β) ((a : α) × β a)).toIterM.step.run.inflate.val = z.step := by
@@ -571,7 +571,7 @@ variable {α : Type u} {β : α → Type v}
 public def RxoIterator.step [Ord α] : RxoIterator α β → IterStep (IterM (α := RxoIterator α β) Id ((a : α) × β a)) ((a : α) × β a)
   | ⟨.done, _⟩ => .done
   | ⟨.cons k v t it, upper⟩ =>
-    if (compare k upper).isLT then
+    bif (compare k upper).isLT then
       .yield ⟨it.prependMap t, upper⟩ ⟨k, v⟩
     else
       .done
@@ -627,12 +627,12 @@ theorem RxoIterator.step_done [Ord α] {upper : α} : ({ iter := .done, upper :=
 @[simp]
 theorem RxoIterator.step_cons_of_isLT [Ord α] {upper : α} {h : (compare k upper).isLT} : ({ iter := (.cons k v t it), upper := upper } : RxoIterator α β).step = .yield ⟨it.prependMap t, upper⟩ ⟨k,v⟩ := by
   rw [step, h]
-  simp only [↓reduceIte]
+  rfl
 
 @[simp]
 theorem RxoIterator.step_cons_of_isLT_eq_false [Ord α] {upper : α} {h : (compare k upper).isLT = false} : ({ iter := (.cons k v t it), upper := upper } : RxoIterator α β).step = .done := by
   rw [step, h]
-  simp only [Bool.false_eq_true, ↓reduceIte]
+  rfl
 
 @[simp]
 theorem RxoIterator.val_run_step_toIterM_iter [Ord α] {z : RxoIterator α β} : (⟨z⟩ : Iter (α := RxoIterator α β) ((a : α) × β a)).toIterM.step.run.inflate.val = z.step := by

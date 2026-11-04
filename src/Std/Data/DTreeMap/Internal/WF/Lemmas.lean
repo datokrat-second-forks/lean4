@@ -606,8 +606,7 @@ theorem get?ₘ_eq_getValueCast? [Ord α] [TransOrd α] [LawfulEqOrd α] [BEq α
   rw [get?ₘ, applyCell_eq_apply_toListModel hto (fun l _ => getValueCast? k l)]
   · rintro ⟨(_|p), hp⟩ -
     · simp [Cell.get?]
-    · simp only [Cell.get?, Option.toList_some, getValueCast?, 
-        ]
+    · simp only [Cell.get?, Option.toList_some, getValueCast?]
       simp [compare_eq_iff_eq.mp (hp p rfl)]
   · exact fun l₁ l₂ h => getValueCast?_of_perm
   · exact fun l₁ l₂ h => getValueCast?_append_of_containsKey_eq_false

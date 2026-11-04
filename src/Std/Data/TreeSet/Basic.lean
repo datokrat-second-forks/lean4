@@ -147,6 +147,9 @@ instance : Membership α (TreeSet α cmp) where
 instance {m : TreeSet α cmp} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs <| Decidable (m.contains a)
 
+instance {m : TreeSet α cmp} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs <| UDecidable (m.contains a = true)
+
 /-- Returns the number of mappings present in the map. -/
 @[inline]
 def size (t : TreeSet α cmp) : Nat :=

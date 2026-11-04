@@ -131,6 +131,9 @@ instance [TransCmp cmp] : Membership α (ExtTreeMap α β cmp) where
 instance [TransCmp cmp] {m : ExtTreeMap α β cmp} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs <| Decidable (m.contains a)
 
+instance [TransCmp cmp] {m : ExtTreeMap α β cmp} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs <| UDecidable (m.contains a = true)
+
 @[inline, inherit_doc ExtDTreeMap.size]
 def size (t : ExtTreeMap α β cmp) : Nat :=
   t.inner.size

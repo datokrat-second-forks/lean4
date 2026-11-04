@@ -130,7 +130,7 @@ def glue (l r : Impl α β) (hl : l.Balanced) (hr : r.Balanced) (hlr : BalancedA
     match r with
     | .leaf => l
     | .inner sz' k' v' l'' r'' =>
-      if sz < sz' then
+      bif sz <ᵇ sz' then
         let ⟨dk, dv, ⟨dt, hdt, hdt'⟩⟩ := minView k' v' l'' r'' ✓ ✓ ✓
         balanceLErase dk dv (.inner sz k v l' r') dt hl ✓
           (by as_aux_lemma =>
@@ -163,7 +163,7 @@ def glue! (l r : Impl α β) : Impl α β :=
     match r with
     | .leaf => l
     | r@(.inner sz' k' v' l'' r'') =>
-      if sz < sz' then
+      bif sz <ᵇ sz' then
         let d := minView! k' v' l'' r''
         balanceL! d.k d.v l d.tree
       else
@@ -227,10 +227,10 @@ def link (k : α) (v : β k) (l r : Impl α β) (hl : l.Balanced) (hr : r.Balanc
       let d := insertMax k v (inner szl k' v' l' r') ✓
       ⟨d.impl, ✓, ✓⟩
     | (inner szr k'' v'' l'' r'') =>
-      if h₁ : delta * szl < szr then
+      bif h₁ : delta * szl <ᵇ szr then
         let ⟨ℓ, hℓ₁, hℓ₂⟩ := link k v (inner szl k' v' l' r') l'' ✓ ✓
         ⟨balanceLErase k'' v'' ℓ r'' ✓ ✓ ✓, ✓, ✓⟩
-      else if h₂ : delta * szr < szl then
+      else bif h₂ : delta * szr <ᵇ szl then
         let ⟨ℓ, hℓ₁, hℓ₂⟩ := link k v r' (inner szr k'' v'' l'' r'') ✓ ✓
         ⟨balanceRErase k' v' l' ℓ ✓ ✓ ✓, ✓, ✓⟩
       else
@@ -249,9 +249,9 @@ def link! (k : α) (v : β k) (l r : Impl α β) : Impl α β :=
     match r with
     | leaf => insertMax! k v l
     | r@(inner szr k'' v'' l'' r'') =>
-      if delta * szl < szr then
+      bif delta * szl <ᵇ szr then
         balanceL! k'' v'' (link! k v l l'') r''
-      else if delta * szr < szl then
+      else bif delta * szr <ᵇ szl then
         balanceR! k' v' l' (link! k v r' r)
       else
         .inner (l.size + 1 + r.size) k v l r
@@ -266,10 +266,10 @@ def link2 (l r : Impl α β) (hl : l.Balanced) (hr : r.Balanced) :
     match hr' : r with
     | leaf => ⟨l, ✓, ✓⟩
     | (inner szr k'' v'' l'' r'') =>
-      if h₁ : delta * szl < szr then
+      bif h₁ : delta * szl <ᵇ szr then
         let ⟨ℓ, hℓ₁, hℓ₂⟩ := link2 l l'' ✓ ✓
         ⟨balanceLErase k'' v'' ℓ r'' ✓ ✓ ✓, ✓, ✓⟩
-      else if h₂ : delta * szr < szl then
+      else bif h₂ : delta * szr <ᵇ szl then
         let ⟨ℓ, hℓ₁, hℓ₂⟩ := link2 r' r ✓ ✓
         ⟨balanceRErase k' v' l' ℓ ✓ ✓ ✓, ✓, ✓⟩
       else
@@ -286,9 +286,9 @@ def link2! (l r : Impl α β) : Impl α β :=
     match r with
     | leaf => l
     | r@(inner szr k'' v'' l'' r'') =>
-      if delta * szl < szr then
+      bif delta * szl <ᵇ szr then
         balanceL! k'' v'' (link2! l l'') r''
-      else if delta * szr < szl then
+      else bif delta * szr <ᵇ szl then
         balanceR! k' v' l' (link2! r' r )
       else
         glue! l r
@@ -382,7 +382,7 @@ where -- workaround for https://github.com/leanprover/lean4/issues/6058
 @[inline]
 def insertIfNew [Ord α] (k : α) (v : β k) (t : Impl α β) (hl : t.Balanced) :
     SizedBalancedTree α β t.size (t.size + 1) :=
-  if t.contains k then ⟨t, ✓, ✓, ✓⟩ else t.insert k v ✓
+  bif t.contains k then ⟨t, ✓, ✓, ✓⟩ else t.insert k v ✓
 
 /--
 Slower version of `insertIfNew` which can be used in the absence of balance
@@ -391,13 +391,13 @@ information but still assumes the preconditions of `insertIfNew`, otherwise migh
 @[inline]
 def insertIfNew! [Ord α] (k : α) (v : β k) (t : Impl α β) :
     Impl α β :=
-  if t.contains k then t else t.insert! k v
+  bif t.contains k then t else t.insert! k v
 
 /-- Returns the pair `(t.contains k, t.insertIfNew k v)`. -/
 @[inline]
 def containsThenInsertIfNew [Ord α] (k : α) (v : β k) (t : Impl α β) (hl : t.Balanced) :
     Bool × SizedBalancedTree α β t.size (t.size + 1) :=
-  if t.contains k then (true, ⟨t, ✓, ✓, ✓⟩) else (false, t.insert k v ✓)
+  bif t.contains k then (true, ⟨t, ✓, ✓, ✓⟩) else (false, t.insert k v ✓)
 
 /--
 Slower version of `containsThenInsertIfNew` which can be used in the absence of balance
@@ -406,7 +406,7 @@ information but still assumes the preconditions of `containsThenInsertIfNew`, ot
 @[inline]
 def containsThenInsertIfNew! [Ord α] (k : α) (v : β k) (t : Impl α β) :
     Bool × Impl α β :=
-  if t.contains k then (true, t) else (false, t.insert! k v)
+  bif t.contains k then (true, t) else (false, t.insert! k v)
 
 /-- Implementation detail of the tree map -/
 @[inline]
@@ -557,7 +557,7 @@ Computes the union of the given tree maps. If a key appears in both maps, the en
 This function always merges the smaller map into the larger map.
 -/
 def union [Ord α] (t₁ t₂ : Impl α β) (h₁ : t₁.Balanced) (h₂ : t₂.Balanced) : Impl α β :=
-  if t₁.size ≤ t₂.size then (t₂.insertManyIfNew t₁ h₂) else (t₁.insertMany t₂ h₁)
+  bif t₁.size ≤ᵇ t₂.size then (t₂.insertManyIfNew t₁ h₂) else (t₁.insertMany t₂ h₁)
 
 /--
 Slower version of `insertMany` which can be used in absence of balance information but still
@@ -587,7 +587,7 @@ def insertManyIfNew! [Ord α] {ρ : Type w} [ForIn Id ρ ((a : α) × β a)] (t 
 Slower version of `union` which can be used in absence of balance information but still assumes the preconditions of `union`, otherwise might panic.
 -/
 def union! [Ord α] (t₁ t₂ : Impl α β) : Impl α β :=
-  if t₁.size ≤ t₂.size then (t₂.insertManyIfNew! t₁) else (t₁.insertMany! t₂)
+  bif t₁.size ≤ᵇ t₂.size then (t₂.insertManyIfNew! t₁) else (t₁.insertMany! t₂)
 
 namespace Const
 
@@ -820,30 +820,30 @@ def interSmaller [Ord α] (m₁ : Impl α β) (m₂ : Impl α β) : Impl α β :
 
 /-- Internal implementation detail of the hash map -/
 def inter [Ord α] (m₁ m₂ : Impl α β) (h₁ : Balanced m₁) : Impl α β :=
-  if m₁.size ≤ m₂.size then (m₁.filter (fun k _ => m₂.contains k) h₁).impl else interSmaller m₁ m₂
+  bif m₁.size ≤ᵇ m₂.size then (m₁.filter (fun k _ => m₂.contains k) h₁).impl else interSmaller m₁ m₂
 
 /-- Slower version of `inter!` which can be used in the absence of balance
 information but still assumes the preconditions of `filter`, otherwise might panic. -/
 def inter! [Ord α] (m₁ m₂ : Impl α β): Impl α β :=
-  if m₁.size ≤ m₂.size then m₁.filter! (fun k _ => m₂.contains k) else interSmaller m₁ m₂
+  bif m₁.size ≤ᵇ m₂.size then m₁.filter! (fun k _ => m₂.contains k) else interSmaller m₁ m₂
 
 /-- Internal implementation detail of the tree map -/
 def beq [Ord α] [LawfulEqOrd α] [∀ k, BEq (β k)] (t₁ t₂ : Impl α β) : Bool :=
-  if t₁.size ≠ t₂.size then false else t₁.all (fun k v => t₂.get? k == some v)
+  bif t₁.size ≠ᵇ t₂.size then false else t₁.all (fun k v => t₂.get? k == some v)
 
 /--
 Computes the difference of the given tree maps.
 This function always iterates through the smaller map.
 -/
 def diff [Ord α] (t₁ t₂ : Impl α β) (h₁ : t₁.Balanced) : Impl α β :=
-  if t₁.size ≤ t₂.size then (t₁.filter (fun p _ => !t₂.contains p) h₁).impl else (t₁.eraseManyEntries t₂ h₁)
+  bif t₁.size ≤ᵇ t₂.size then (t₁.filter (fun p _ => !t₂.contains p) h₁).impl else (t₁.eraseManyEntries t₂ h₁)
 
 /--
 Slower version of `diff` which can be used in the absence of balance
 information but still assumes the preconditions of `diff`, otherwise might panic.
 -/
 def diff! [Ord α] (t₁ t₂ : Impl α β) : Impl α β :=
-  if t₁.size ≤ t₂.size then t₁.filter! (fun p _ => !t₂.contains p) else t₁.eraseManyEntries! t₂
+  bif t₁.size ≤ᵇ t₂.size then t₁.filter! (fun p _ => !t₂.contains p) else t₁.eraseManyEntries! t₂
 
 /--
 Changes the mapping of the key `k` by applying the function `f` to the current mapped value
@@ -962,7 +962,7 @@ variable {β : Type v}
 
 /-- Internal implementation detail of the hash map -/
 def beq [Ord α] [BEq β] (t₁ t₂ : Impl α fun _ => β) : Bool :=
-  if t₁.size ≠ t₂.size then false else t₁.all (fun k v => Const.get? t₂ k == some v)
+  bif t₁.size ≠ᵇ t₂.size then false else t₁.all (fun k v => Const.get? t₂ k == some v)
 
 local instance : Coe (Type v) (α → Type v) where coe γ := fun _ => γ
 

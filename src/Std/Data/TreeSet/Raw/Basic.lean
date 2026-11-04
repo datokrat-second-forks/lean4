@@ -132,6 +132,9 @@ instance : Membership α (Raw α cmp) where
 instance {t : Raw α cmp} {a : α} : Decidable (a ∈ t) :=
   inferInstanceAs <| Decidable (t.contains a)
 
+instance {t : Raw α cmp} {a : α} : UDecidable (a ∈ t) :=
+  inferInstanceAs <| UDecidable (t.contains a = true)
+
 @[inline, inherit_doc TreeSet.empty]
 def size (t : Raw α cmp) : Nat :=
   t.inner.size

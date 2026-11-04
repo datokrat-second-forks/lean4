@@ -143,6 +143,9 @@ instance [TransCmp cmp] : Membership α (ExtTreeSet α cmp) where
 instance [TransCmp cmp] {m : ExtTreeSet α cmp} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs <| Decidable (m.contains a)
 
+instance [TransCmp cmp] {m : ExtTreeSet α cmp} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs <| UDecidable (m.contains a = true)
+
 /-- Returns the number of mappings present in the map. -/
 @[inline]
 def size (t : ExtTreeSet α cmp) : Nat :=

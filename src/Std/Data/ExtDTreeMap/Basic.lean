@@ -192,6 +192,9 @@ instance [TransCmp cmp] : Membership α (ExtDTreeMap α β cmp) where
 instance [TransCmp cmp] {m : ExtDTreeMap α β cmp} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs <| Decidable (m.contains a)
 
+instance [TransCmp cmp] {m : ExtDTreeMap α β cmp} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs <| UDecidable (m.contains a = true)
+
 @[inline, inherit_doc DTreeMap.size]
 def size (t : ExtDTreeMap α β cmp) : Nat :=
   t.lift (fun m => m.size) (fun _ _ h => h.size_eq)
@@ -714,7 +717,7 @@ def foldr [TransCmp cmp] (f : (a : α) → β a → δ → δ) (init : δ) (t : 
 def partition [TransCmp cmp] (f : (a : α) → β a → Bool)
     (t : ExtDTreeMap α β cmp) : ExtDTreeMap α β cmp × ExtDTreeMap α β cmp :=
   t.foldl (init := (∅, ∅)) fun ⟨l, r⟩ a b =>
-    if f a b then
+    bif f a b then
       (l.insert a b, r)
     else
       (l, r.insert a b)

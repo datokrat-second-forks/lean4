@@ -64,6 +64,9 @@ theorem contains_iff_mem {_ : Ord α} {t : Impl α β} {k : α} : t.contains k �
 instance [Ord α] {m : Impl α β} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs <| Decidable (m.contains a)
 
+instance [Ord α] {m : Impl α β} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs <| UDecidable (m.contains a = true)
+
 theorem Ordered.mem_inner_iff_mem_right [Ord α] (sz a v) (l r : Impl α β)
     (k : α) (h : compare k a = .gt) :
     k ∈ inner sz a v l r ↔ k ∈ r := by
@@ -619,7 +622,7 @@ def getEntryGE [Ord α] [TransOrd α] (k : α) :
 def getEntryGT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .gt) → (a : α) × β a
   | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
-  | .inner _ ky y l r, ho, he => if hkky : compare k ky = .lt then
+  | .inner _ ky y l r, ho, he => bif hkky : (compare k ky).isLT then
         getEntryGTD k l ⟨ky, y⟩
       else
         getEntryGT k r ho.right <| by
@@ -627,7 +630,7 @@ def getEntryGT [Ord α] [TransOrd α] (k : α) :
           refine ⟨a, ?_, hc⟩
           apply Ordered.mem_inner_iff_mem_right .. |>.mp hm
           apply TransCmp.gt_of_gt_of_isGE hc
-          simpa [← Ordering.isGE_eq_false, Bool.not_eq_false] using hkky
+          simpa [← Ordering.not_isLT_eq_isGE] using hkky
 
 /-- Implementation detail of the tree map -/
 def getEntryLE [Ord α] [TransOrd α] (k : α) :
@@ -646,7 +649,7 @@ def getEntryLE [Ord α] [TransOrd α] (k : α) :
 def getEntryLT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .lt) → (a : α) × β a
   | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
-  | .inner _ ky y l r, ho, he => if hkky : compare k ky = .gt then
+  | .inner _ ky y l r, ho, he => bif hkky : (compare k ky).isGT then
         getEntryLTD k r ⟨ky, y⟩
       else
         getEntryLT k l ho.left <| by
@@ -654,7 +657,7 @@ def getEntryLT [Ord α] [TransOrd α] (k : α) :
           refine ⟨a, ?_, hc⟩
           apply Ordered.mem_inner_iff_mem_left .. |>.mp hm
           apply TransCmp.lt_of_lt_of_isLE hc
-          simpa [← Ordering.isLE_eq_false, Bool.not_eq_false] using hkky
+          simpa [← Ordering.not_isGT_eq_isLE] using hkky
 
 /-- Implementation detail of the tree map -/
 @[inline]
@@ -759,7 +762,7 @@ def getKeyGE [Ord α] [TransOrd α] (k : α) :
 def getKeyGT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .gt) → α
   | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
-  | .inner _ ky y l r, ho, he => if hkky : compare k ky = .lt then
+  | .inner _ ky y l r, ho, he => bif hkky : (compare k ky).isLT then
         getKeyGTD k l ky
       else
         getKeyGT k r ho.right <| by
@@ -767,7 +770,7 @@ def getKeyGT [Ord α] [TransOrd α] (k : α) :
           refine ⟨a, ?_, hc⟩
           apply Ordered.mem_inner_iff_mem_right .. |>.mp hm
           apply TransCmp.gt_of_gt_of_isGE hc
-          simpa [← Ordering.isGE_eq_false, Bool.not_eq_false] using hkky
+          simpa [← Ordering.not_isLT_eq_isGE] using hkky
 
 /-- Implementation detail of the tree map -/
 def getKeyLE [Ord α] [TransOrd α] (k : α) :
@@ -786,7 +789,7 @@ def getKeyLE [Ord α] [TransOrd α] (k : α) :
 def getKeyLT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .lt) → α
   | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
-  | .inner _ ky y l r, ho, he => if hkky : compare k ky = .gt then
+  | .inner _ ky y l r, ho, he => bif hkky : (compare k ky).isGT then
         getKeyLTD k r ky
       else
         getKeyLT k l ho.left <| by
@@ -794,7 +797,7 @@ def getKeyLT [Ord α] [TransOrd α] (k : α) :
           refine ⟨a, ?_, hc⟩
           apply Ordered.mem_inner_iff_mem_left .. |>.mp hm
           apply TransCmp.lt_of_lt_of_isLE hc
-          simpa [← Ordering.isLE_eq_false, Bool.not_eq_false] using hkky
+          simpa [← Ordering.not_isGT_eq_isLE] using hkky
 
 namespace Const
 
@@ -986,7 +989,7 @@ def getEntryGE [Ord α] [TransOrd α] (k : α) :
 def getEntryGT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .gt) → α × β
   | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
-  | .inner _ ky y l r, ho, he => if hkky : compare k ky = .lt then
+  | .inner _ ky y l r, ho, he => bif hkky : (compare k ky).isLT then
         getEntryGTD k l ⟨ky, y⟩
       else
         getEntryGT k r ho.right <| by
@@ -994,7 +997,7 @@ def getEntryGT [Ord α] [TransOrd α] (k : α) :
           refine ⟨a, ?_, hc⟩
           apply Ordered.mem_inner_iff_mem_right .. |>.mp hm
           apply TransCmp.gt_of_gt_of_isGE hc
-          simpa [← Ordering.isGE_eq_false, Bool.not_eq_false] using hkky
+          simpa [← Ordering.not_isLT_eq_isGE] using hkky
 
 /-- Implementation detail of the tree map -/
 def getEntryLE [Ord α] [TransOrd α] (k : α) :
@@ -1013,7 +1016,7 @@ def getEntryLE [Ord α] [TransOrd α] (k : α) :
 def getEntryLT [Ord α] [TransOrd α] (k : α) :
     (t : Impl α β) → (ho : t.Ordered) → (he : ∃ a ∈ t, compare a k = .lt) → α × β
   | .leaf, _, he => False.elim <| by obtain ⟨_, ha, _⟩ := he; cases ha
-  | .inner _ ky y l r, ho, he => if hkky : compare k ky = .gt then
+  | .inner _ ky y l r, ho, he => bif hkky : (compare k ky).isGT then
         getEntryLTD k r ⟨ky, y⟩
       else
         getEntryLT k l ho.left <| by
@@ -1021,7 +1024,7 @@ def getEntryLT [Ord α] [TransOrd α] (k : α) :
           refine ⟨a, ?_, hc⟩
           apply Ordered.mem_inner_iff_mem_left .. |>.mp hm
           apply TransCmp.lt_of_lt_of_isLE hc
-          simpa [← Ordering.isLE_eq_false, Bool.not_eq_false] using hkky
+          simpa [← Ordering.not_isGT_eq_isLE] using hkky
 
 end Const
 

@@ -111,9 +111,9 @@ def balanceL (k : α) (v : β k) (l r : Impl α β) (hlb : Balanced l) (hrb : Ba
   | inner rs _ _ _ _ => match l with
     | leaf => .inner (1 + rs) k v .leaf r
     | inner ls lk lv ll lr =>
-      if hlsd : delta * rs < ls then match ll, lr with
+      bif hlsd : delta * rs <ᵇ ls then match ll, lr with
         | inner lls _ _ _ _, inner lrs lrk lrv lrl lrr =>
-          if lrs < ratio * lls then
+          bif lrs <ᵇ ratio * lls then
             .inner (1 + ls + rs) lk lv ll (.inner (1 + rs + lrs) k v (inner lrs lrk lrv lrl lrr) r)
           else
             .inner (1 + ls + rs) lrk lrv (.inner (1 + lls + lrl.size) lk lv ll lrl)
@@ -142,9 +142,9 @@ def balanceLErase (k : α) (v : β k) (l r : Impl α β) (hlb : Balanced l) (hrb
   | (inner rs _ _ _ _) => match l with
     | leaf => .inner (1 + rs) k v .leaf r
     | (inner ls lk lv ll lr) =>
-      if hlsd : delta * rs < ls then match ll, lr with
+      bif hlsd : delta * rs <ᵇ ls then match ll, lr with
         | inner lls _ _ _ _, inner lrs lrk lrv lrl lrr =>
-          if lrs < ratio * lls then
+          bif lrs <ᵇ ratio * lls then
             .inner (1 + ls + rs) lk lv ll (.inner (1 + rs + lrs) k v lr r)
           else
             .inner (1 + ls + rs) lrk lrv (.inner (1 + lls + lrl.size) lk lv ll lrl)
@@ -172,9 +172,9 @@ but still assumes that the preconditions of `balanceL` or `balanceL` are satisfi
   | (inner rs _ _ _ _) => match l with
     | leaf => .inner (1 + rs) k v .leaf r
     | inner ls lk lv ll lr =>
-      if ls > delta * rs then match ll, lr with
+      bif ls >ᵇ delta * rs then match ll, lr with
         | inner lls _ _ _ _, inner lrs lrk lrv lrl lrr =>
-          if lrs < ratio * lls then
+          bif lrs <ᵇ ratio * lls then
             .inner (1 + ls + rs) lk lv ll (.inner (1 + rs + lrs) k v lr r)
           else
             .inner (1 + ls + rs) lrk lrv (.inner (1 + lls + lrl.size) lk lv ll lrl)
@@ -206,9 +206,9 @@ def balanceR (k : α) (v : β k) (l r : Impl α β) (hlb : Balanced l) (hrb : Ba
   | inner ls _ _ _ _ => match r with
     | leaf => .inner (1 + ls) k v l .leaf
     | inner rs rk rv rl rr =>
-      if hrsd : rs > delta * ls then match rl, rr with
+      bif hrsd : rs >ᵇ delta * ls then match rl, rr with
         | inner rls rlk rlv rll rlr, .inner rrs _ _ _ _ =>
-          if rls < ratio * rrs then
+          bif rls <ᵇ ratio * rrs then
             .inner (1 + ls + rs) rk rv (.inner (1 + ls + rls) k v l (.inner rls rlk rlv rll rlr)) rr
           else
             .inner (1 + ls + rs) rlk rlv (.inner (1 + ls + rll.size) k v l rll)
@@ -236,9 +236,9 @@ def balanceRErase (k : α) (v : β k) (l r : Impl α β) (hlb : Balanced l) (hrb
   | inner ls _ _ _ _ => match r with
     | leaf => .inner (1 + ls) k v l .leaf
     | inner rs rk rv rl rr =>
-      if hrsd : rs > delta * ls then match rl, rr with
+      bif hrsd : rs >ᵇ delta * ls then match rl, rr with
         | inner rls rlk rlv rll rlr, .inner rrs _ _ _ _ =>
-          if rls < ratio * rrs then
+          bif rls <ᵇ ratio * rrs then
             .inner (1 + ls + rs) rk rv (.inner (1 + ls + rls) k v l rl) rr
           else
             .inner (1 + ls + rs) rlk rlv (.inner (1 + ls + rll.size) k v l rll)
@@ -266,9 +266,9 @@ def balanceR! (k : α) (v : β k) (l r : Impl α β) : Impl α β :=
   | inner ls _ _ _ _ => match r with
     | leaf => .inner (1 + ls) k v l .leaf
     | inner rs rk rv rl rr =>
-      if rs > delta * ls then match rl, rr with
+      bif rs >ᵇ delta * ls then match rl, rr with
         | inner rls rlk rlv rll rlr, .inner rrs _ _ _ _ =>
-          if rls < ratio * rrs then
+          bif rls <ᵇ ratio * rrs then
             .inner (1 + ls + rs) rk rv (.inner (1 + ls + rls) k v l rl) rr
           else
             .inner (1 + ls + rs) rlk rlv (.inner (1 + ls + rll.size) k v l rll)
@@ -306,10 +306,10 @@ def balance (k : α) (v : β k) (l r : Impl α β) (hl : Balanced l) (hr : Balan
       | .inner lls _ _ _ _, .inner lrs lrk lrv lrl lrr =>
         .inner (1 + ls) lk lv ll (.inner (1 + lrs) k v (.inner lrs lrk lrv lrl lrr) .leaf)
     | .inner rs rk rv rl rr =>
-      if h₁ : delta * ls < rs then
+      bif h₁ : delta * ls <ᵇ rs then
         match rl, rr with
         | .inner rls rlk rlv rll rlr, .inner rrs _ _ _ _ =>
-          if rls < ratio * rrs then
+          bif rls <ᵇ ratio * rrs then
             .inner (1 + ls + rs) rk rv (.inner (1 + ls + rls) k v l rl) rr
           else
             .inner (1 + ls + rs) rlk rlv (.inner (1 + ls + rll.size) k v l rll)
@@ -324,10 +324,10 @@ def balance (k : α) (v : β k) (l r : Impl α β) (hl : Balanced l) (hr : Balan
           simp only [delta] at h₁
           have := hl.one_le
           omega)
-      else if h₂ : delta * rs < ls then
+      else bif h₂ : delta * rs <ᵇ ls then
         match ll, lr with
         | .inner lls _ _ _ _, .inner lrs lrk lrv lrl lrr =>
-          if lrs < ratio * lls then
+          bif lrs <ᵇ ratio * lls then
             .inner (1 + ls + rs) lk lv ll (.inner (1 + rs + lrs) k v lr r)
           else
             .inner (1 + ls + rs) lrk lrv (.inner (1 + lls + lrl.size) lk lv ll lrl)
@@ -372,20 +372,20 @@ def balance! (k : α) (v : β k) (l r : Impl α β) : Impl α β :=
       | .inner _ _ _ _ _, .inner lrs lrk lrv lrl lrr =>
         .inner (1 + ls) lk lv ll (.inner (1 + lrs) k v (.inner lrs lrk lrv lrl lrr) .leaf)
     | .inner rs rk rv rl rr =>
-      if _ : delta * ls < rs then
+      bif _ : delta * ls <ᵇ rs then
         match rl, rr with
         | .inner rls rlk rlv rll rlr, .inner rrs _ _ _ _ =>
-          if rls < ratio * rrs then
+          bif rls <ᵇ ratio * rrs then
             .inner (1 + ls + rs) rk rv (.inner (1 + ls + rls) k v l rl) rr
           else
             .inner (1 + ls + rs) rlk rlv (.inner (1 + ls + rll.size) k v l rll)
               (.inner (1 + rrs + rlr.size) rk rv rlr rr)
         | inner _ _ _ _ _, .leaf => panic! "balance! input was not balanced"
         | .leaf, _ => panic! "balance! input was not balanced"
-      else if _ : delta * rs < ls then
+      else bif _ : delta * rs <ᵇ ls then
         match ll, lr with
         | .inner lls _ _ _ _, .inner lrs lrk lrv lrl lrr =>
-          if lrs < ratio * lls then
+          bif lrs <ᵇ ratio * lls then
             .inner (1 + ls + rs) lk lv ll (.inner (1 + rs + lrs) k v lr r)
           else
             .inner (1 + ls + rs) lrk lrv (.inner (1 + lls + lrl.size) lk lv ll lrl)
@@ -483,7 +483,7 @@ theorem size_doubleR (k : α) (v : β k) (lk : α) (lv : β lk) (ll : Impl α β
 /-- Internal implementation detail of the tree map -/
 def rotateL (k : α) (v : β k) (l : Impl α β) (rk : α) (rv : β rk) (rl rr : Impl α β) :
     Impl α β :=
-  if rl.size < ratio * rr.size then
+  bif rl.size <ᵇ ratio * rr.size then
     singleL k v l rk rv rl rr
   else
     match rl with
@@ -501,7 +501,7 @@ theorem size_rotateL {k : α} {v : β k} {l : Impl α β} {rk : α} {rv : β rk}
 
 /-- Internal implementation detail of the tree map -/
 def rotateR (k : α) (v : β k) (lk : α) (lv : β lk) (ll lr : Impl α β) (r : Impl α β) : Impl α β :=
-  if lr.size < ratio * ll.size then
+  bif lr.size <ᵇ ratio * ll.size then
     singleR k v lk lv ll lr r
   else
     match lr with
@@ -519,13 +519,13 @@ theorem size_rotateR {k : α} {v : β k} {lk : α} {lv : β lk} {ll lr : Impl α
 
 /-- Internal implementation detail of the tree map -/
 def balanceₘ (k : α) (v : β k) (l r : Impl α β) : Impl α β :=
-  if l.size + r.size ≤ 1 then
+  bif l.size + r.size ≤ᵇ 1 then
     bin k v l r
-  else if h : r.size > delta * l.size then
+  else bif h : r.size >ᵇ delta * l.size then
     match r with
     | leaf => False.elim <| by simp [size_leaf] at h
     | inner _ rk rv rl rr => rotateL k v l rk rv rl rr
-  else if h : l.size > delta * r.size then
+  else bif h : l.size >ᵇ delta * r.size then
     match l with
     | leaf => False.elim <| by simp [size_leaf] at h
     | inner _ lk lv ll lr => rotateR k v lk lv ll lr r
@@ -533,6 +533,7 @@ def balanceₘ (k : α) (v : β k) (l r : Impl α β) : Impl α β :=
     bin k v l  r
 
 attribute [Std.Internal.tree_tac] and_true true_and and_self heq_eq_eq inner.injEq
+attribute [Std.Internal.tree_tac] decideLT_eq_udecide decideLE_eq_udecide Bool.cond_udecide Bool.dcond_udecide
 
 theorem balance!_eq_balanceₘ {k v} {l r : Impl α β} (hlb : l.Balanced) (hrb : r.Balanced)
     (hlr : BalanceLErasePrecond l.size r.size ∨ BalanceLErasePrecond r.size l.size) :
@@ -543,50 +544,50 @@ theorem balance!_eq_balanceₘ {k v} {l r : Impl α β} (hlb : l.Balanced) (hrb 
   · split <;> simp_all [Std.Internal.tree_tac]
   · split <;> simp_all only [Std.Internal.tree_tac]
     · omega
-    · rw [dite_eq_left (by omega)]
-      simp only [rotateL, Std.Internal.tree_tac, ite_self]
+    · rw [UDecidable.dite_eq_left (by omega)]
+      simp only [rotateL, Std.Internal.tree_tac, UDecidable.ite_self]
       omega
   next l r =>
     simp only  [Std.Internal.tree_tac, rotateL] at *
     suffices h : l.size = 0 ∧ r.size = 0 by
-      simp only [h.1, h.2, reduceDIte, Nat.not_lt_zero]
+      simp only [h.1, h.2, reduceUDIte, Nat.not_lt_zero]
       cases l <;> cases r <;> simp_all [Std.Internal.tree_tac]
     omega
   · simp only [size_leaf, size_inner]
     simp_all [Std.Internal.tree_tac]
-    rw [ite_eq_right (by omega)]
-    rw [ite_eq_left (by omega), rotateL, ite_eq_left]
+    rw [UDecidable.ite_eq_right (by omega)]
+    rw [UDecidable.ite_eq_left (by omega), rotateL, Bool.cond_decideLT_pos]
     all_goals
       simp only [Std.Internal.tree_tac] at *
       omega
   · simp_all [Std.Internal.tree_tac]
   next l r =>
     simp_all only [Std.Internal.tree_tac]
-    rw [ite_eq_right (by omega)]
-    rw [dite_eq_right (by omega), dite_eq_left (by omega), rotateR]
+    rw [UDecidable.ite_eq_right (by omega)]
+    rw [UDecidable.dite_eq_right (by omega), UDecidable.dite_eq_left (by omega), rotateR]
     suffices h : l.size = 0 ∧ r.size = 0 by
       simp only [h.1, h.2]
       cases l <;> cases r <;> simp_all [Std.Internal.tree_tac]
     omega
   · simp_all only [rotateR, Std.Internal.tree_tac]
-    rw [ite_eq_right (by omega), dite_eq_right (by omega), dite_eq_left (by omega), ite_eq_left (by omega)]
+    rw [UDecidable.ite_eq_right (by omega), UDecidable.dite_eq_right (by omega), UDecidable.dite_eq_left (by omega), UDecidable.ite_eq_left (by omega)]
     simp only [inner.injEq, heq_eq_eq, and_true]
     omega
   · simp_all only [Std.Internal.tree_tac]
-    rw [ite_eq_right (by omega)]
+    rw [UDecidable.ite_eq_right (by omega)]
     simp only [Std.Internal.tree_tac, rotateR]
-    rw [ite_eq_left (by omega), dite_eq_right (by omega), dite_eq_left (by omega)]
+    rw [UDecidable.ite_eq_left (by omega), UDecidable.dite_eq_right (by omega), UDecidable.dite_eq_left (by omega)]
     simp only [inner.injEq, heq_eq_eq, and_self, and_true, true_and]
     omega
   · simp_all only [Std.Internal.tree_tac]
-    rw [ite_eq_right]
-    · repeat simp_all only [rotateL, dite_true, Std.Internal.tree_tac, ite_true]
+    rw [UDecidable.ite_eq_right]
+    · repeat simp_all only [rotateL, UDecidable.dite_true, Std.Internal.tree_tac, UDecidable.ite_true]
       omega
     · simp only [Nat.not_le] at *
       omega
   · rw [rotateL]
-    repeat simp_all only [Std.Internal.tree_tac, dite_true, Nat.not_lt]
-    rw [ite_eq_right (by omega), ite_eq_right (by omega)]
+    repeat simp_all only [Std.Internal.tree_tac, UDecidable.dite_true, Nat.not_lt]
+    rw [UDecidable.ite_eq_right (by omega), UDecidable.ite_eq_right (by omega)]
     simp only [Std.Internal.tree_tac, Nat.add_right_cancel_iff] at *
     omega
   · exfalso
@@ -599,12 +600,14 @@ theorem balance!_eq_balanceₘ {k v} {l r : Impl α β} (hlb : l.Balanced) (hrb 
     simp only [delta] at ‹delta * _ < _›
     have := hlb.one_le
     omega
-  · repeat simp_all only [Std.Internal.tree_tac, rotateR, dite_true, ite_true, dite_false]
-    rw [ite_eq_right (by omega)]
+  · repeat simp_all only [Std.Internal.tree_tac, rotateR, UDecidable.dite_true, UDecidable.ite_true, UDecidable.dite_false]
+    rw [UDecidable.ite_eq_right (by omega)]
     simp only [inner.injEq, heq_eq_eq, and_true, true_and]
     omega
-  · repeat simp_all only [balanced_inner_iff, ratio, size_inner, dite_true, dite_false]
-    rw [ite_eq_right (by omega), rotateR, ratio, size_inner, size_inner, ite_eq_right (by omega)]
+  · repeat simp_all only [balanced_inner_iff, ratio, size_inner]
+    rw [Bool.cond_decideLE_neg (by omega), Bool.dcond_decideLT_neg (by omega),
+      Bool.dcond_decideLT_pos (by omega), rotateR, ratio, size_inner, size_inner,
+      Bool.cond_decideLT_neg (by omega)]
     simp only [Std.Internal.tree_tac, Nat.reduceMul] at *
     omega
   · exfalso
@@ -617,8 +620,8 @@ theorem balance!_eq_balanceₘ {k v} {l r : Impl α β} (hlb : l.Balanced) (hrb 
     simp only [delta] at ‹delta * _ < _›
     have := hrb.one_le
     omega
-  · repeat simp only [Std.Internal.tree_tac, dite_false, *] at *
-    rw [ite_eq_right (by omega)]
+  · repeat simp only [Std.Internal.tree_tac, UDecidable.dite_false, *] at *
+    rw [UDecidable.ite_eq_right (by omega)]
     ac_rfl
 
 theorem Balanced.map {t₁ t₂ : Impl α β} : t₁.Balanced → t₁ = t₂ → t₂.Balanced
@@ -676,14 +679,13 @@ theorem balanceL_eq_balanceLErase {k : α} {v : β k} {l r : Impl α β} {hlb hr
     balanceL k v l r hlb hrb hlr = balanceLErase k v l r hlb hrb hlr.erase := by
   fun_cases balanceL
   all_goals dsimp only [balanceLErase]
-  all_goals simp only [↓reduceDIte, ↓reduceIte, *]
+  all_goals simp only [↓reduceDCond, ↓reduceCond, *]
 
 theorem balanceLErase_eq_balanceL! {k : α} {v : β k} {l r : Impl α β} {hlb hrb hlr} :
     balanceLErase k v l r hlb hrb hlr = balanceL! k v l r := by
   fun_cases balanceL!
   all_goals dsimp only [balanceLErase]
-  all_goals simp only [*]
-  all_goals dsimp only [dreduceDIte, dreduceIte]
+  all_goals simp only [↓reduceDCond, ↓reduceCond, *]
   all_goals contradiction
 
 theorem balanceL!_eq_balance! {k : α} {v : β k} {l r : Impl α β} (hlb : l.Balanced)
@@ -699,14 +701,13 @@ theorem balanceL!_eq_balance! {k : α} {v : β k} {l r : Impl α β} (hlb : l.Ba
 theorem balanceR_eq_balanceRErase {k : α} {v : β k} {l r : Impl α β} {hlb hrb hlr} :
     balanceR k v l r hlb hrb hlr = balanceRErase k v l r hlb hrb hlr.erase := by
   fun_cases balanceR <;>
-    simp only [balanceRErase, ↓reduceDIte, ↓reduceIte, *]
+    simp only [balanceRErase, ↓reduceDCond, ↓reduceCond, *]
 
 theorem balanceRErase_eq_balanceR! {k : α} {v : β k} {l r : Impl α β} {hlb hrb hlr} :
     balanceRErase k v l r hlb hrb hlr = balanceR! k v l r := by
   fun_cases balanceR!
   all_goals dsimp only [balanceRErase, balanceR!]
-  all_goals simp only [*]
-  all_goals dsimp only [dreduceDIte, dreduceIte]
+  all_goals simp only [↓reduceDCond, ↓reduceCond, *]
   all_goals contradiction
 
 theorem balanceR!_eq_balance! {k : α} {v : β k} {l r : Impl α β} (hlb : l.Balanced)
@@ -721,7 +722,7 @@ theorem balance_eq_balance! {k : α} {v : β k} {l r : Impl α β} {hlb hrb hlr}
     balance k v l r hlb hrb hlr = balance! k v l r := by
   fun_cases balance!
   all_goals dsimp only [balance]
-  all_goals simp only [↓reduceDIte, ↓reduceIte, *]
+  all_goals simp only [↓reduceDCond, ↓reduceCond, *]
   all_goals contradiction
 
 theorem balance_eq_inner [Ord α] {sz k v} {l r : Impl α β}
@@ -732,26 +733,28 @@ theorem balance_eq_inner [Ord α] {sz k v} {l r : Impl α β}
   rw [hl'.2.2.2]
   split; rfl
   replace hl' := hl'.2.2.1.resolve_left ‹_›
-  simp only [Nat.not_lt_of_le, hl'.1, hl'.2, reduceDIte, bin]
+  simp only [Nat.not_lt_of_le, hl'.1, hl'.2, ↓reduceDCond, bin]
 
 theorem balance!_desc {k : α} {v : β k} {l r : Impl α β} (hlb : l.Balanced) (hrb : r.Balanced)
     (hlr : BalanceLErasePrecond l.size r.size ∨ BalanceLErasePrecond r.size l.size) :
     (balance! k v l r).size = l.size + 1 + r.size ∧ (balance! k v l r).Balanced := by
   rw [balance!_eq_balanceₘ hlb hrb hlr, balanceₘ]
   fun_cases balanceₘ k v l r
-  · rw [ite_eq_left ‹_›, bin, balanced_inner_iff]
+  · rw [Bool.cond_decideLE_pos ‹_›, bin, balanced_inner_iff]
     exact ⟨rfl, hlb, hrb, Or.inl ‹_›, rfl⟩
-  · rw [ite_eq_right ‹_›, dite_eq_left ‹_›]
+  · subst ‹r = _›
+    rw [Bool.cond_decideLE_neg ‹_›, Bool.dcond_decideLT_pos ‹_›]
     simp only [size_rotateL (.left ‹_›), size_bin, size_inner]
     rw [← Balanced.eq ‹_›]
     refine ⟨rfl, ?_⟩
     apply balanced_rotateL <;> assumption
-  · rw [ite_eq_right ‹_›, dite_eq_right ‹_›, dite_eq_left ‹_›]
+  · subst ‹l = _›
+    rw [Bool.cond_decideLE_neg ‹_›, Bool.dcond_decideLT_neg ‹_›, Bool.dcond_decideLT_pos ‹_›]
     simp only [size_rotateR (.right ‹_›), size_bin, size_inner]
     rw [← Balanced.eq ‹_›]
     refine ⟨rfl, ?_⟩
     apply balanced_rotateR <;> assumption
-  · rw [ite_eq_right ‹_›, dite_eq_right ‹_›, dite_eq_right ‹_›]
+  · rw [Bool.cond_decideLE_neg ‹_›, Bool.dcond_decideLT_neg ‹_›, Bool.dcond_decideLT_neg ‹_›]
     exact ⟨rfl, ✓⟩
 
 @[Std.Internal.tree_tac]

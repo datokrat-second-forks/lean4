@@ -134,6 +134,9 @@ instance : Membership α (TreeMap α β cmp) where
 instance {m : TreeMap α β cmp} {a : α} : Decidable (a ∈ m) :=
   inferInstanceAs <| Decidable (m.contains a)
 
+instance {m : TreeMap α β cmp} {a : α} : UDecidable (a ∈ m) :=
+  inferInstanceAs <| UDecidable (m.contains a = true)
+
 @[inline, inherit_doc DTreeMap.size]
 def size (t : TreeMap α β cmp) : Nat :=
   t.inner.size

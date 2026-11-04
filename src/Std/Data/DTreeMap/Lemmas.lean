@@ -144,7 +144,7 @@ theorem isEmpty_eq_size_eq_zero :
   Impl.isEmpty_eq_size_eq_zero t.wf
 
 @[grind =] theorem size_insert [TransCmp cmp] {k : α} {v : β k} :
-    (t.insert k v).size = if t.contains k then t.size else t.size + 1 :=
+    (t.insert k v).size = uif t.contains k then t.size else t.size + 1 :=
   Impl.size_insert t.wf
 
 theorem size_le_size_insert [TransCmp cmp] {k : α} {v : β k} :
@@ -193,7 +193,7 @@ theorem mem_of_mem_erase [TransCmp cmp] {k a : α} :
   Impl.mem_of_mem_erase t.wf
 
 @[grind =] theorem size_erase [TransCmp cmp] {k : α} :
-    (t.erase k).size = if t.contains k then t.size - 1 else t.size :=
+    (t.erase k).size = uif t.contains k then t.size - 1 else t.size :=
   Impl.size_erase t.wf
 
 theorem size_erase_le [TransCmp cmp] {k : α} :
@@ -235,7 +235,7 @@ theorem get?_of_isEmpty [TransCmp cmp] [LawfulEqCmp cmp] {a : α} :
 
 @[grind =] theorem get?_insert [TransCmp cmp] [LawfulEqCmp cmp] {a k : α} {v : β k} :
     (t.insert k v).get? a =
-      if h : cmp k a = .eq then some (cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h)) v) else t.get? a :=
+      uif h : cmp k a = .eq then some (cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h)) v) else t.get? a :=
   Impl.get?_insert t.wf
 
 @[simp]
@@ -274,7 +274,7 @@ theorem get?_eq_none [TransCmp cmp] [LawfulEqCmp cmp] {a : α} :
   Impl.get?_eq_none t.wf
 
 @[grind =] theorem get?_erase [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} :
-    (t.erase k).get? a = if cmp k a = .eq then none else t.get? a :=
+    (t.erase k).get? a = uif cmp k a = .eq then none else t.get? a :=
   Impl.get?_erase t.wf
 
 @[simp]
@@ -297,7 +297,7 @@ theorem get?_of_isEmpty [TransCmp cmp] {a : α} :
 
 @[grind =] theorem get?_insert [TransCmp cmp] {a k : α} {v : β} :
     get? (t.insert k v) a =
-      if cmp k a = .eq then some v else get? t a :=
+      uif cmp k a = .eq then some v else get? t a :=
   Impl.Const.get?_insert t.wf
 
 @[simp]
@@ -336,7 +336,7 @@ theorem get?_eq_none [TransCmp cmp] {a : α} :
   Impl.Const.get?_eq_none t.wf
 
 @[grind =] theorem get?_erase [TransCmp cmp] {k a : α} :
-    get? (t.erase k) a = if cmp k a = .eq then none else get? t a :=
+    get? (t.erase k) a = uif cmp k a = .eq then none else get? t a :=
   Impl.Const.get?_erase t.wf
 
 @[simp]
@@ -355,7 +355,7 @@ end Const
 
 @[grind =] theorem get_insert [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} {v : β k} {h₁} :
     (t.insert k v).get a h₁ =
-      if h₂ : cmp k a = .eq then
+      uif h₂ : cmp k a = .eq then
         cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h₂)) v
       else
         t.get a (mem_of_mem_insert h₁ h₂) :=
@@ -377,11 +377,11 @@ theorem Const.toArray_insert_perm {β : Type v} {t : DTreeMap α (fun _ => β) c
   Impl.Const.toArray_insert_perm t.2
 
 theorem keys_insertIfNew_perm [BEq α] [TransCmp cmp] [LawfulBEqCmp cmp] {k : α} {v : β k} :
-    (t.insertIfNew k v).keys.Perm (if k ∈ t then t.keys else k :: t.keys) :=
+    (t.insertIfNew k v).keys.Perm (uif k ∈ t then t.keys else k :: t.keys) :=
   Impl.keys_insertIfNew_perm t.2
 
 theorem keysArray_insertIfNew_perm [BEq α] [TransCmp cmp] [LawfulBEqCmp cmp] {k : α} {v : β k} :
-    (t.insertIfNew k v).keysArray.Perm (if k ∈ t then t.keysArray else t.keysArray.push k) :=
+    (t.insertIfNew k v).keysArray.Perm (uif k ∈ t then t.keysArray else t.keysArray.push k) :=
   Impl.keysArray_insertIfNew_perm t.2
 
 @[simp]
@@ -412,7 +412,7 @@ variable {β : Type v} {t : DTreeMap α β cmp}
 
 @[grind =] theorem get_insert [TransCmp cmp] {k a : α} {v : β} {h₁} :
     get (t.insert k v) a h₁ =
-      if h₂ : cmp k a = .eq then v
+      uif h₂ : cmp k a = .eq then v
       else get t a (mem_of_mem_insert h₁ h₂) :=
   Impl.Const.get_insert t.wf
 
@@ -458,7 +458,7 @@ theorem get!_of_isEmpty [TransCmp cmp] [LawfulEqCmp cmp] {a : α} [Inhabited (β
 
 @[grind =] theorem get!_insert [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} [Inhabited (β a)] {v : β k} :
     (t.insert k v).get! a =
-      if h : cmp k a = .eq then cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h)) v else t.get! a :=
+      uif h : cmp k a = .eq then cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h)) v else t.get! a :=
   Impl.get!_insert t.wf
 
 @[simp]
@@ -475,7 +475,7 @@ theorem get!_eq_default [TransCmp cmp] [LawfulEqCmp cmp] {a : α} [Inhabited (β
   Impl.get!_eq_default t.wf
 
 @[grind =] theorem get!_erase [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} [Inhabited (β a)] :
-    (t.erase k).get! a = if cmp k a = .eq then default else t.get! a :=
+    (t.erase k).get! a = uif cmp k a = .eq then default else t.get! a :=
   Impl.get!_erase t.wf
 
 @[simp]
@@ -513,7 +513,7 @@ theorem get!_of_isEmpty [TransCmp cmp] [Inhabited β] {a : α} :
   Impl.Const.get!_of_isEmpty t.wf
 
 @[grind =] theorem get!_insert [TransCmp cmp] [Inhabited β] {k a : α} {v : β} :
-    get! (t.insert k v) a = if cmp k a = .eq then v else get! t a :=
+    get! (t.insert k v) a = uif cmp k a = .eq then v else get! t a :=
   Impl.Const.get!_insert t.wf
 
 @[simp]
@@ -529,7 +529,7 @@ theorem get!_eq_default [TransCmp cmp] [Inhabited β] {a : α} :
   Impl.Const.get!_eq_default t.wf
 
 @[grind =] theorem get!_erase [TransCmp cmp] [Inhabited β] {k a : α} :
-    get! (t.erase k) a = if cmp k a = .eq then default else get! t a :=
+    get! (t.erase k) a = uif cmp k a = .eq then default else get! t a :=
   Impl.Const.get!_erase t.wf
 
 @[simp]
@@ -574,7 +574,7 @@ theorem getD_of_isEmpty [TransCmp cmp] [LawfulEqCmp cmp] {a : α} {fallback : β
 
 @[grind =] theorem getD_insert [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} {fallback : β a} {v : β k} :
     (t.insert k v).getD a fallback =
-      if h : cmp k a = .eq then
+      uif h : cmp k a = .eq then
         cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h)) v
       else t.getD a fallback :=
   Impl.getD_insert t.wf
@@ -593,7 +593,7 @@ theorem getD_eq_fallback [TransCmp cmp] [LawfulEqCmp cmp] {a : α} {fallback : �
   Impl.getD_eq_fallback t.wf
 
 @[grind =] theorem getD_erase [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} {fallback : β a} :
-    (t.erase k).getD a fallback = if cmp k a = .eq then fallback else t.getD a fallback :=
+    (t.erase k).getD a fallback = uif cmp k a = .eq then fallback else t.getD a fallback :=
   Impl.getD_erase t.wf
 
 @[simp]
@@ -635,7 +635,7 @@ theorem getD_of_isEmpty [TransCmp cmp] {a : α} {fallback : β} :
   Impl.Const.getD_of_isEmpty t.wf
 
 @[grind =] theorem getD_insert [TransCmp cmp] {k a : α} {fallback v : β} :
-    getD (t.insert k v) a fallback = if cmp k a = .eq then v else getD t a fallback :=
+    getD (t.insert k v) a fallback = uif cmp k a = .eq then v else getD t a fallback :=
   Impl.Const.getD_insert t.wf
 
 @[simp]
@@ -652,7 +652,7 @@ theorem getD_eq_fallback [TransCmp cmp] {a : α} {fallback : β} :
   Impl.Const.getD_eq_fallback t.wf
 
 @[grind =] theorem getD_erase [TransCmp cmp] {k a : α} {fallback : β} :
-    getD (t.erase k) a fallback = if cmp k a = .eq then
+    getD (t.erase k) a fallback = uif cmp k a = .eq then
       fallback
     else
       getD t a fallback :=
@@ -702,7 +702,7 @@ theorem getKey?_of_isEmpty [TransCmp cmp] {a : α} :
   Impl.getKey?_of_isEmpty t.wf
 
 @[grind =] theorem getKey?_insert [TransCmp cmp] {a k : α} {v : β k} :
-    (t.insert k v).getKey? a = if cmp k a = .eq then some k else t.getKey? a :=
+    (t.insert k v).getKey? a = uif cmp k a = .eq then some k else t.getKey? a :=
   Impl.getKey?_insert t.wf
 
 @[simp]
@@ -745,7 +745,7 @@ theorem getKey?_eq_none [TransCmp cmp] {a : α} :
   Impl.getKey?_eq_none t.wf
 
 @[grind =] theorem getKey?_erase [TransCmp cmp] {k a : α} :
-    (t.erase k).getKey? a = if cmp k a = .eq then none else t.getKey? a :=
+    (t.erase k).getKey? a = uif cmp k a = .eq then none else t.getKey? a :=
   Impl.getKey?_erase t.wf
 
 @[simp]
@@ -771,7 +771,7 @@ theorem getKey?_eq_some [TransCmp cmp] [LawfulEqCmp cmp] {k : α} (h' : k ∈ t)
 
 @[grind =] theorem getKey_insert [TransCmp cmp] {k a : α} {v : β k} {h₁} :
     (t.insert k v).getKey a h₁ =
-      if h₂ : cmp k a = .eq then
+      uif h₂ : cmp k a = .eq then
         k
       else
         t.getKey a (mem_of_mem_insert h₁ h₂) :=
@@ -823,7 +823,7 @@ theorem getKey!_of_isEmpty [TransCmp cmp] [Inhabited α] {a : α} :
   Impl.getKey!_of_isEmpty t.wf
 
 @[grind =] theorem getKey!_insert [TransCmp cmp] [Inhabited α] {k a : α}
-    {v : β k} : (t.insert k v).getKey! a = if cmp k a = .eq then k else t.getKey! a :=
+    {v : β k} : (t.insert k v).getKey! a = uif cmp k a = .eq then k else t.getKey! a :=
   Impl.getKey!_insert t.wf
 
 @[simp]
@@ -840,7 +840,7 @@ theorem getKey!_eq_default [TransCmp cmp] [Inhabited α] {a : α} :
   Impl.getKey!_eq_default t.wf
 
 @[grind =] theorem getKey!_erase [TransCmp cmp] [Inhabited α] {k a : α} :
-    (t.erase k).getKey! a = if cmp k a = .eq then default else t.getKey! a :=
+    (t.erase k).getKey! a = uif cmp k a = .eq then default else t.getKey! a :=
   Impl.getKey!_erase t.wf
 
 @[simp]
@@ -889,7 +889,7 @@ theorem getKeyD_of_isEmpty [TransCmp cmp] {a fallback : α} :
 
 @[grind =] theorem getKeyD_insert [TransCmp cmp] {k a fallback : α} {v : β k} :
     (t.insert k v).getKeyD a fallback =
-      if cmp k a = .eq then k else t.getKeyD a fallback :=
+      uif cmp k a = .eq then k else t.getKeyD a fallback :=
   Impl.getKeyD_insert t.wf
 
 @[simp]
@@ -907,7 +907,7 @@ theorem getKeyD_eq_fallback [TransCmp cmp] {a fallback : α} :
 
 @[grind =] theorem getKeyD_erase [TransCmp cmp] {k a fallback : α} :
     (t.erase k).getKeyD a fallback =
-      if cmp k a = .eq then fallback else t.getKeyD a fallback :=
+      uif cmp k a = .eq then fallback else t.getKeyD a fallback :=
   Impl.getKeyD_erase t.wf
 
 @[simp]
@@ -986,7 +986,7 @@ theorem mem_of_mem_insertIfNew' [TransCmp cmp] {k a : α} {v : β k} :
   Impl.mem_of_mem_insertIfNew' t.wf
 
 @[grind =] theorem size_insertIfNew [TransCmp cmp] {k : α} {v : β k} :
-    (t.insertIfNew k v).size = if k ∈ t then t.size else t.size + 1 :=
+    (t.insertIfNew k v).size = uif k ∈ t then t.size else t.size + 1 :=
   Impl.size_insertIfNew t.wf
 
 theorem size_le_size_insertIfNew [TransCmp cmp] {k : α} {v : β k} :
@@ -999,7 +999,7 @@ theorem size_insertIfNew_le [TransCmp cmp] {k : α} {v : β k} :
 
 @[grind =] theorem get?_insertIfNew [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} {v : β k} :
     (t.insertIfNew k v).get? a =
-      if h : cmp k a = .eq ∧ ¬ k ∈ t then
+      uif h : cmp k a = .eq ∧ ¬ k ∈ t then
         some (cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h.1)) v)
       else
         t.get? a :=
@@ -1007,7 +1007,7 @@ theorem size_insertIfNew_le [TransCmp cmp] {k : α} {v : β k} :
 
 @[grind =] theorem get_insertIfNew [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} {v : β k} {h₁} :
     (t.insertIfNew k v).get a h₁ =
-      if h₂ : cmp k a = .eq ∧ ¬ k ∈ t then
+      uif h₂ : cmp k a = .eq ∧ ¬ k ∈ t then
         cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h₂.1)) v
       else
         t.get a (mem_of_mem_insertIfNew' h₁ h₂) :=
@@ -1015,7 +1015,7 @@ theorem size_insertIfNew_le [TransCmp cmp] {k : α} {v : β k} :
 
 @[grind =] theorem get!_insertIfNew [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} [Inhabited (β a)] {v : β k} :
     (t.insertIfNew k v).get! a =
-      if h : cmp k a = .eq ∧ ¬ k ∈ t then
+      uif h : cmp k a = .eq ∧ ¬ k ∈ t then
         cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h.1)) v
       else
         t.get! a :=
@@ -1023,7 +1023,7 @@ theorem size_insertIfNew_le [TransCmp cmp] {k : α} {v : β k} :
 
 @[grind =] theorem getD_insertIfNew [TransCmp cmp] [LawfulEqCmp cmp] {k a : α} {fallback : β a} {v : β k} :
     (t.insertIfNew k v).getD a fallback =
-      if h : cmp k a = .eq ∧ ¬ k ∈ t then
+      uif h : cmp k a = .eq ∧ ¬ k ∈ t then
         cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp h.1)) v
       else
         t.getD a fallback :=
@@ -1035,44 +1035,44 @@ variable {β : Type v} {t : DTreeMap α β cmp}
 
 @[grind =] theorem get?_insertIfNew [TransCmp cmp] {k a : α} {v : β} :
     get? (t.insertIfNew k v) a =
-      if cmp k a = .eq ∧ ¬ k ∈ t then some v else get? t a :=
+      uif cmp k a = .eq ∧ ¬ k ∈ t then some v else get? t a :=
   Impl.Const.get?_insertIfNew t.wf
 
 @[grind =] theorem get_insertIfNew [TransCmp cmp] {k a : α} {v : β} {h₁} :
     get (t.insertIfNew k v) a h₁ =
-      if h₂ : cmp k a = .eq ∧ ¬ k ∈ t then v else get t a (mem_of_mem_insertIfNew' h₁ h₂) :=
+      uif h₂ : cmp k a = .eq ∧ ¬ k ∈ t then v else get t a (mem_of_mem_insertIfNew' h₁ h₂) :=
   Impl.Const.get_insertIfNew t.wf
 
 @[grind =] theorem get!_insertIfNew [TransCmp cmp] [Inhabited β] {k a : α} {v : β} :
-    get! (t.insertIfNew k v) a = if cmp k a = .eq ∧ ¬ k ∈ t then v else get! t a :=
+    get! (t.insertIfNew k v) a = uif cmp k a = .eq ∧ ¬ k ∈ t then v else get! t a :=
   Impl.Const.get!_insertIfNew t.wf
 
 @[grind =] theorem getD_insertIfNew [TransCmp cmp] {k a : α} {fallback v : β} :
     getD (t.insertIfNew k v) a fallback =
-      if cmp k a = .eq ∧ ¬ k ∈ t then v else getD t a fallback :=
+      uif cmp k a = .eq ∧ ¬ k ∈ t then v else getD t a fallback :=
   Impl.Const.getD_insertIfNew t.wf
 
 end Const
 
 @[grind =] theorem getKey?_insertIfNew [TransCmp cmp] {k a : α} {v : β k} :
     (t.insertIfNew k v).getKey? a =
-      if cmp k a = .eq ∧ ¬ k ∈ t then some k else t.getKey? a :=
+      uif cmp k a = .eq ∧ ¬ k ∈ t then some k else t.getKey? a :=
   Impl.getKey?_insertIfNew t.wf
 
 @[grind =] theorem getKey_insertIfNew [TransCmp cmp] {k a : α} {v : β k} {h₁} :
     (t.insertIfNew k v).getKey a h₁ =
-      if h₂ : cmp k a = .eq ∧ ¬ k ∈ t then k
+      uif h₂ : cmp k a = .eq ∧ ¬ k ∈ t then k
       else t.getKey a (mem_of_mem_insertIfNew' h₁ h₂) :=
   Impl.getKey_insertIfNew t.wf
 
 @[grind =] theorem getKey!_insertIfNew [TransCmp cmp] [Inhabited α] {k a : α} {v : β k} :
     (t.insertIfNew k v).getKey! a =
-      if cmp k a = .eq ∧ ¬ k ∈ t then k else t.getKey! a :=
+      uif cmp k a = .eq ∧ ¬ k ∈ t then k else t.getKey! a :=
   Impl.getKey!_insertIfNew t.wf
 
 @[grind =] theorem getKeyD_insertIfNew [TransCmp cmp] {k a fallback : α} {v : β k} :
     (t.insertIfNew k v).getKeyD a fallback =
-      if cmp k a = .eq ∧ ¬ k ∈ t then k else t.getKeyD a fallback :=
+      uif cmp k a = .eq ∧ ¬ k ∈ t then k else t.getKeyD a fallback :=
   Impl.getKeyD_insertIfNew t.wf
 
 @[simp, grind =]
@@ -1854,7 +1854,7 @@ theorem get?_insertMany_list_of_mem [TransCmp cmp]
 theorem get?_insertMany_list [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
     {l : List (α × β)} {k : α} :
     get? (insertMany t l) k =
-      (l.findSomeRev? (fun ⟨a, b⟩ => if cmp a k = .eq then some b else none)).or (get? t k) :=
+      (l.findSomeRev? (fun ⟨a, b⟩ => uif cmp a k = .eq then some b else none)).or (get? t k) :=
   Impl.Const.get?_insertMany_list t.wf
 
 theorem get_insertMany_list_of_contains_eq_false [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
@@ -2014,7 +2014,7 @@ theorem isEmpty_insertManyIfNewUnit_list [TransCmp cmp] {l : List α} :
 theorem get?_insertManyIfNewUnit_list [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp]
     {l : List α} {k : α} :
     get? (insertManyIfNewUnit t l) k =
-      if k ∈ t ∨ l.contains k then some () else none :=
+      uif k ∈ t ∨ l.contains k then some () else none :=
   Impl.Const.get?_insertManyIfNewUnit_list t.wf
 
 @[simp]
@@ -2415,7 +2415,7 @@ theorem isEmpty_unitOfList [TransCmp cmp] {l : List α} :
 
 @[simp]
 theorem get?_unitOfList [TransCmp cmp] [BEq α] [LawfulBEqCmp cmp] {l : List α} {k : α} :
-    get? (unitOfList l cmp) k = if l.contains k then some () else none :=
+    get? (unitOfList l cmp) k = uif l.contains k then some () else none :=
   Impl.Const.get?_insertManyIfNewUnit_empty_list
 
 @[simp]
@@ -2804,7 +2804,7 @@ theorem Equiv.inter_congr {t₃ t₄ : DTreeMap α β cmp} [TransCmp cmp]
 /- get? -/
 theorem get?_inter [TransCmp cmp] [LawfulEqCmp cmp] {k : α} :
     (t₁ ∩ t₂).get? k =
-    if k ∈ t₂ then t₁.get? k else none :=
+    uif k ∈ t₂ then t₁.get? k else none :=
   Impl.get?_inter t₁.wf t₂.wf
 
 theorem get?_inter_of_mem_right [TransCmp cmp] [LawfulEqCmp cmp]
@@ -2837,7 +2837,7 @@ theorem get_inter [TransCmp cmp] [LawfulEqCmp cmp]
 theorem getD_inter [TransCmp cmp] [LawfulEqCmp cmp]
     {k : α} {fallback : β k} :
     (t₁ ∩ t₂).getD k fallback =
-    if k ∈ t₂ then t₁.getD k fallback else fallback :=
+    uif k ∈ t₂ then t₁.getD k fallback else fallback :=
   Impl.getD_inter t₁.wf t₂.wf
 
 theorem getD_inter_of_mem_right [TransCmp cmp] [LawfulEqCmp cmp]
@@ -2862,7 +2862,7 @@ theorem getD_inter_of_not_mem_left [TransCmp cmp] [LawfulEqCmp cmp]
 theorem get!_inter [TransCmp cmp] [LawfulEqCmp cmp]
     {k : α} [Inhabited (β k)] :
     (t₁ ∩ t₂).get! k =
-    if k ∈ t₂ then t₁.get! k else default :=
+    uif k ∈ t₂ then t₁.get! k else default :=
   Impl.get!_inter t₁.wf t₂.wf
 
 theorem get!_inter_of_mem_right [TransCmp cmp] [LawfulEqCmp cmp]
@@ -2887,7 +2887,7 @@ theorem get!_inter_of_not_mem_left [TransCmp cmp] [LawfulEqCmp cmp]
 theorem getKey?_inter [TransCmp cmp]
     {k : α} :
     (t₁ ∩ t₂).getKey? k =
-    if k ∈ t₂ then t₁.getKey? k else none :=
+    uif k ∈ t₂ then t₁.getKey? k else none :=
   Impl.getKey?_inter t₁.wf t₂.wf
 
 theorem getKey?_inter_of_mem_right [TransCmp cmp]
@@ -2919,7 +2919,7 @@ theorem getKey_inter [TransCmp cmp]
 /- getKeyD -/
 theorem getKeyD_inter [TransCmp cmp] {k fallback : α} :
     (t₁ ∩ t₂).getKeyD k fallback =
-    if k ∈ t₂ then t₁.getKeyD k fallback else fallback :=
+    uif k ∈ t₂ then t₁.getKeyD k fallback else fallback :=
   Impl.getKeyD_inter t₁.wf t₂.wf
 
 theorem getKeyD_inter_of_mem_right [TransCmp cmp] {k fallback : α} (h : k ∈ t₂) :
@@ -2941,7 +2941,7 @@ theorem getKeyD_inter_of_not_mem_left [TransCmp cmp] {k fallback : α} (h : ¬k 
 theorem getKey!_inter [Inhabited α] [TransCmp cmp]
     {k : α} :
     (t₁ ∩ t₂).getKey! k =
-    if k ∈ t₂ then t₁.getKey! k else default :=
+    uif k ∈ t₂ then t₁.getKey! k else default :=
   Impl.getKey!_inter t₁.wf t₂.wf
 
 theorem getKey!_inter_of_mem_right [Inhabited α] [TransCmp cmp]
@@ -3028,7 +3028,7 @@ variable {β : Type v} {t₁ t₂ : DTreeMap α (fun _ => β) cmp}
 /- get? -/
 theorem get?_inter [TransCmp cmp] {k : α} :
     Const.get? (t₁ ∩ t₂) k =
-    if k ∈ t₂ then Const.get? t₁ k else none :=
+    uif k ∈ t₂ then Const.get? t₁ k else none :=
   Impl.Const.get?_inter t₁.wf t₂.wf
 
 theorem get?_inter_of_mem_right [TransCmp cmp]
@@ -3061,7 +3061,7 @@ theorem get_inter [TransCmp cmp]
 theorem getD_inter [TransCmp cmp]
     {k : α} {fallback : β} :
     Const.getD (t₁ ∩ t₂) k fallback =
-    if k ∈ t₂ then Const.getD t₁ k fallback else fallback :=
+    uif k ∈ t₂ then Const.getD t₁ k fallback else fallback :=
   Impl.Const.getD_inter t₁.wf t₂.wf
 
 theorem getD_inter_of_mem_right [TransCmp cmp]
@@ -3086,7 +3086,7 @@ theorem getD_inter_of_not_mem_left [TransCmp cmp]
 theorem get!_inter [TransCmp cmp] [Inhabited β]
     {k : α} :
     Const.get! (t₁ ∩ t₂) k =
-    if k ∈ t₂ then Const.get! t₁ k else default :=
+    uif k ∈ t₂ then Const.get! t₁ k else default :=
   Impl.Const.get!_inter t₁.wf t₂.wf
 
 theorem get!_inter_of_mem_right [TransCmp cmp] [Inhabited β]
@@ -3196,7 +3196,7 @@ theorem Equiv.diff_congr {t₃ t₄ : DTreeMap α β cmp} [TransCmp cmp]
 /- get? -/
 theorem get?_diff [TransCmp cmp] [LawfulEqCmp cmp] {k : α} :
     (t₁ \ t₂).get? k =
-    if k ∈ t₂ then none else t₁.get? k :=
+    uif k ∈ t₂ then none else t₁.get? k :=
   Impl.get?_diff t₁.wf t₂.wf
 
 theorem get?_diff_of_not_mem_right [TransCmp cmp] [LawfulEqCmp cmp]
@@ -3228,7 +3228,7 @@ theorem get_diff [TransCmp cmp] [LawfulEqCmp cmp]
 theorem getD_diff [TransCmp cmp] [LawfulEqCmp cmp]
     {k : α} {fallback : β k} :
     (t₁ \ t₂).getD k fallback =
-    if k ∈ t₂ then fallback else t₁.getD k fallback :=
+    uif k ∈ t₂ then fallback else t₁.getD k fallback :=
   Impl.getD_diff t₁.wf t₂.wf
 
 theorem getD_diff_of_not_mem_right [TransCmp cmp] [LawfulEqCmp cmp]
@@ -3253,7 +3253,7 @@ theorem getD_diff_of_not_mem_left [TransCmp cmp] [LawfulEqCmp cmp]
 theorem get!_diff [TransCmp cmp] [LawfulEqCmp cmp]
     {k : α} [Inhabited (β k)] :
     (t₁ \ t₂).get! k =
-    if k ∈ t₂ then default else t₁.get! k :=
+    uif k ∈ t₂ then default else t₁.get! k :=
   Impl.get!_diff t₁.wf t₂.wf
 
 theorem get!_diff_of_not_mem_right [TransCmp cmp] [LawfulEqCmp cmp]
@@ -3278,7 +3278,7 @@ theorem get!_diff_of_not_mem_left [TransCmp cmp] [LawfulEqCmp cmp]
 theorem getKey?_diff [TransCmp cmp]
     {k : α} :
     (t₁ \ t₂).getKey? k =
-    if k ∈ t₂ then none else t₁.getKey? k :=
+    uif k ∈ t₂ then none else t₁.getKey? k :=
   Impl.getKey?_diff t₁.wf t₂.wf
 
 theorem getKey?_diff_of_not_mem_right [TransCmp cmp]
@@ -3309,7 +3309,7 @@ theorem getKey_diff [TransCmp cmp]
 /- getKeyD -/
 theorem getKeyD_diff [TransCmp cmp] {k fallback : α} :
     (t₁ \ t₂).getKeyD k fallback =
-    if k ∈ t₂ then fallback else t₁.getKeyD k fallback :=
+    uif k ∈ t₂ then fallback else t₁.getKeyD k fallback :=
   Impl.getKeyD_diff t₁.wf t₂.wf
 
 theorem getKeyD_diff_of_not_mem_right [TransCmp cmp] {k fallback : α} (h : ¬k ∈ t₂) :
@@ -3331,7 +3331,7 @@ theorem getKeyD_diff_of_not_mem_left [TransCmp cmp] {k fallback : α} (h : ¬k �
 theorem getKey!_diff [Inhabited α] [TransCmp cmp]
     {k : α} :
     (t₁ \ t₂).getKey! k =
-    if k ∈ t₂ then default else t₁.getKey! k :=
+    uif k ∈ t₂ then default else t₁.getKey! k :=
   Impl.getKey!_diff t₁.wf t₂.wf
 
 theorem getKey!_diff_of_not_mem_right [Inhabited α] [TransCmp cmp]
@@ -3389,7 +3389,7 @@ variable {β : Type v} {t₁ t₂ : DTreeMap α (fun _ => β) cmp}
 /- get? -/
 theorem get?_diff [TransCmp cmp] {k : α} :
     Const.get? (t₁ \ t₂) k =
-    if k ∈ t₂ then none else Const.get? t₁ k :=
+    uif k ∈ t₂ then none else Const.get? t₁ k :=
   Impl.Const.get?_diff t₁.wf t₂.wf
 
 theorem get?_diff_of_not_mem_right [TransCmp cmp]
@@ -3421,7 +3421,7 @@ theorem get_diff [TransCmp cmp]
 theorem getD_diff [TransCmp cmp]
     {k : α} {fallback : β} :
     Const.getD (t₁ \ t₂) k fallback =
-    if k ∈ t₂ then fallback else Const.getD t₁ k fallback :=
+    uif k ∈ t₂ then fallback else Const.getD t₁ k fallback :=
   Impl.Const.getD_diff t₁.wf t₂.wf
 
 theorem getD_diff_of_not_mem_right [TransCmp cmp]
@@ -3446,7 +3446,7 @@ theorem getD_diff_of_not_mem_left [TransCmp cmp]
 theorem get!_diff [TransCmp cmp] [Inhabited β]
     {k : α} :
     Const.get! (t₁ \ t₂) k =
-    if k ∈ t₂ then default else Const.get! t₁ k :=
+    uif k ∈ t₂ then default else Const.get! t₁ k :=
   Impl.Const.get!_diff t₁.wf t₂.wf
 
 theorem get!_diff_of_not_mem_right [TransCmp cmp] [Inhabited β]
@@ -3487,14 +3487,14 @@ theorem isEmpty_alter [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
 theorem contains_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).contains k' =
-      if cmp k k' = .eq then (f (t.get? k)).isSome else t.contains k' :=
+      uif cmp k k' = .eq then (f (t.get? k)).isSome else t.contains k' :=
   Impl.contains_alter t.wf
 
 @[grind =]
 theorem mem_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
     {f : Option (β k) → Option (β k)} :
     k' ∈ t.alter k f ↔
-      if cmp k k' = .eq then (f (t.get? k)).isSome = true else k' ∈ t :=
+      uif cmp k k' = .eq then (f (t.get? k)).isSome = true else k' ∈ t :=
   Impl.mem_alter t.wf
 
 theorem mem_alter_of_compare_eq [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
@@ -3529,9 +3529,9 @@ theorem mem_alter_of_not_compare_eq [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
 theorem size_alter [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).size =
-      if k ∈ t ∧ (f (t.get? k)).isNone then
+      uif k ∈ t ∧ (f (t.get? k)).isNone then
         t.size - 1
-      else if k ∉ t ∧ (f (t.get? k)).isSome then
+      else uif k ∉ t ∧ (f (t.get? k)).isSome then
         t.size + 1
       else
         t.size :=
@@ -3571,7 +3571,7 @@ theorem size_le_size_alter [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
 theorem get?_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).get? k' =
-      if h : cmp k k' = .eq then
+      uif h : cmp k k' = .eq then
         cast (congrArg (Option ∘ β) (LawfulEqCmp.compare_eq_iff_eq.mp h)) (f (t.get? k))
       else
         t.get? k' :=
@@ -3587,7 +3587,7 @@ theorem get?_alter_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
 theorem get_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
     {f : Option (β k) → Option (β k)} {hc : k' ∈ (t.alter k f)} :
     (t.alter k f).get k' hc =
-      if heq : cmp k k' = .eq then
+      uif heq : cmp k k' = .eq then
         haveI h' : (f (t.get? k)).isSome := mem_alter_of_compare_eq heq |>.mp hc
         cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp heq)) <| (f (t.get? k)).get <| h'
       else
@@ -3606,7 +3606,7 @@ theorem get_alter_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
 theorem get!_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α} [Inhabited (β k')]
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).get! k' =
-      if heq : cmp k k' = .eq then
+      uif heq : cmp k k' = .eq then
         (f (t.get? k)).map (cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp heq))) |>.get!
       else
         t.get! k' :=
@@ -3622,7 +3622,7 @@ theorem get!_alter_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α} [Inhabited (β
 theorem getD_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α} {fallback : β k'}
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).getD k' fallback =
-      if heq : cmp k k' = .eq then
+      uif heq : cmp k k' = .eq then
         f (t.get? k) |>.map (cast (congrArg β <| LawfulEqCmp.compare_eq_iff_eq.mp heq)) |>.getD fallback
       else
         t.getD k' fallback :=
@@ -3638,29 +3638,29 @@ theorem getD_alter_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α} {fallback : β
 theorem getKey?_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' : α}
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).getKey? k' =
-      if cmp k k' = .eq then
-        if (f (t.get? k)).isSome then some k else none
+      uif cmp k k' = .eq then
+        uif (f (t.get? k)).isSome then some k else none
       else
         t.getKey? k' :=
   Impl.getKey?_alter t.wf
 
 theorem getKey?_alter_self [TransCmp cmp] [LawfulEqCmp cmp] {k : α}
     {f : Option (β k) → Option (β k)} :
-    (t.alter k f).getKey? k = if (f (t.get? k)).isSome then some k else none :=
+    (t.alter k f).getKey? k = uif (f (t.get? k)).isSome then some k else none :=
   Impl.getKey?_alter_self t.wf
 
 @[grind =]
 theorem getKey!_alter [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k k' : α}
     {f : Option (β k) → Option (β k)} : (t.alter k f).getKey! k' =
-      if cmp k k' = .eq then
-        if (f (t.get? k)).isSome then k else default
+      uif cmp k k' = .eq then
+        uif (f (t.get? k)).isSome then k else default
       else
         t.getKey! k' :=
   Impl.getKey!_alter t.wf
 
 theorem getKey!_alter_self [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k : α}
     {f : Option (β k) → Option (β k)} :
-    (t.alter k f).getKey! k = if (f (t.get? k)).isSome then k else default :=
+    (t.alter k f).getKey! k = uif (f (t.get? k)).isSome then k else default :=
   Impl.getKey!_alter_self t.wf
 
 @[simp]
@@ -3673,8 +3673,8 @@ theorem getKey_alter_self [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k : �
 theorem getKeyD_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' fallback : α}
     {f : Option (β k) → Option (β k)} :
     (t.alter k f).getKeyD k' fallback =
-      if cmp k k' = .eq then
-        if (f (t.get? k)).isSome then k else fallback
+      uif cmp k k' = .eq then
+        uif (f (t.get? k)).isSome then k else fallback
       else
         t.getKeyD k' fallback :=
   Impl.getKeyD_alter t.wf
@@ -3682,7 +3682,7 @@ theorem getKeyD_alter [TransCmp cmp] [LawfulEqCmp cmp] {k k' fallback : α}
 @[simp]
 theorem getKeyD_alter_self [TransCmp cmp] [LawfulEqCmp cmp] [Inhabited α] {k : α}
     {fallback : α} {f : Option (β k) → Option (β k)} :
-    (t.alter k f).getKeyD k fallback = if (f (t.get? k)).isSome then k else fallback :=
+    (t.alter k f).getKeyD k fallback = uif (f (t.get? k)).isSome then k else fallback :=
   Impl.getKeyD_alter_self t.wf
 
 namespace Const
@@ -3703,13 +3703,13 @@ theorem isEmpty_alter [TransCmp cmp] {k : α} {f : Option β → Option β} :
 @[grind =]
 theorem contains_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β} :
     (alter t k f).contains k' =
-      if cmp k k' = .eq then (f (get? t k)).isSome else t.contains k' :=
+      uif cmp k k' = .eq then (f (get? t k)).isSome else t.contains k' :=
   Impl.Const.contains_alter t.wf
 
 @[grind =]
 theorem mem_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β} :
     k' ∈ alter t k f ↔
-      if cmp k k' = .eq then (f (get? t k)).isSome = true else k' ∈ t :=
+      uif cmp k k' = .eq then (f (get? t k)).isSome = true else k' ∈ t :=
   Impl.Const.mem_alter t.wf
 
 theorem mem_alter_of_compare_eq [TransCmp cmp] {k k' : α} {f : Option β → Option β}
@@ -3740,9 +3740,9 @@ theorem mem_alter_of_not_compare_eq [TransCmp cmp] {k k' : α} {f : Option β �
 @[grind =]
 theorem size_alter [TransCmp cmp] {k : α} {f : Option β → Option β} :
     (alter t k f).size =
-      if k ∈ t ∧ (f (get? t k)).isNone then
+      uif k ∈ t ∧ (f (get? t k)).isNone then
         t.size - 1
-      else if k ∉ t ∧ (f (get? t k)).isSome then
+      else uif k ∉ t ∧ (f (get? t k)).isSome then
         t.size + 1
       else
         t.size :=
@@ -3779,7 +3779,7 @@ theorem size_le_size_alter [TransCmp cmp] {k : α} {f : Option β → Option β}
 @[grind =]
 theorem get?_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β} :
     get? (alter t k f) k' =
-      if cmp k k' = .eq then
+      uif cmp k k' = .eq then
         f (get? t k)
       else
         get? t k' :=
@@ -3794,7 +3794,7 @@ theorem get?_alter_self [TransCmp cmp] {k : α} {f : Option β → Option β} :
 theorem get_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β}
     {hc : k' ∈ (alter t k f)} :
     get (alter t k f) k' hc =
-      if heq : cmp k k' = .eq then
+      uif heq : cmp k k' = .eq then
         haveI h' : (f (get? t k)).isSome := mem_alter_of_compare_eq heq |>.mp hc
         (f (get? t k)).get h'
       else
@@ -3812,7 +3812,7 @@ theorem get_alter_self [TransCmp cmp] {k : α} {f : Option β → Option β}
 @[grind =]
 theorem get!_alter [TransCmp cmp] {k k' : α} [Inhabited β] {f : Option β → Option β} :
     get! (alter t k f) k' =
-      if cmp k k' = .eq then
+      uif cmp k k' = .eq then
         (f (get? t k)).get!
       else
         get! t k' :=
@@ -3826,7 +3826,7 @@ theorem get!_alter_self [TransCmp cmp] {k : α} [Inhabited β] {f : Option β �
 @[grind =]
 theorem getD_alter [TransCmp cmp] {k k' : α} {fallback : β} {f : Option β → Option β} :
     getD (alter t k f) k' fallback =
-      if cmp k k' = .eq then
+      uif cmp k k' = .eq then
         f (get? t k) |>.getD fallback
       else
         getD t k' fallback :=
@@ -3841,35 +3841,35 @@ theorem getD_alter_self [TransCmp cmp] {k : α} {fallback : β}
 @[grind =]
 theorem getKey?_alter [TransCmp cmp] {k k' : α} {f : Option β → Option β} :
     (alter t k f).getKey? k' =
-      if cmp k k' = .eq then
-        if (f (get? t k)).isSome then some k else none
+      uif cmp k k' = .eq then
+        uif (f (get? t k)).isSome then some k else none
       else
         t.getKey? k' :=
   Impl.Const.getKey?_alter t.wf
 
 theorem getKey?_alter_self [TransCmp cmp] {k : α} {f : Option β → Option β} :
-    (alter t k f).getKey? k = if (f (get? t k)).isSome then some k else none :=
+    (alter t k f).getKey? k = uif (f (get? t k)).isSome then some k else none :=
   Impl.Const.getKey?_alter_self t.wf
 
 @[grind =]
 theorem getKey!_alter [TransCmp cmp] [Inhabited α] {k k' : α} {f : Option β → Option β} :
     (alter t k f).getKey! k' =
-      if cmp k k' = .eq then
-        if (f (get? t k)).isSome then k else default
+      uif cmp k k' = .eq then
+        uif (f (get? t k)).isSome then k else default
       else
         t.getKey! k' :=
   Impl.Const.getKey!_alter t.wf
 
 theorem getKey!_alter_self [TransCmp cmp] [Inhabited α] {k : α}
     {f : Option β → Option β} :
-    (alter t k f).getKey! k = if (f (get? t k)).isSome then k else default :=
+    (alter t k f).getKey! k = uif (f (get? t k)).isSome then k else default :=
   Impl.Const.getKey!_alter_self t.wf
 
 @[grind =]
 theorem getKey_alter [TransCmp cmp] [Inhabited α] {k k' : α} {f : Option β → Option β}
     {hc : k' ∈ alter t k f} :
     (alter t k f).getKey k' hc =
-      if heq : cmp k k' = .eq then
+      uif heq : cmp k k' = .eq then
         k
       else
         haveI h' : t.contains k' := mem_alter_of_not_compare_eq heq |>.mp hc
@@ -3885,8 +3885,8 @@ theorem getKey_alter_self [TransCmp cmp] [Inhabited α] {k : α} {f : Option β 
 @[grind =]
 theorem getKeyD_alter [TransCmp cmp] {k k' fallback : α} {f : Option β → Option β} :
     (alter t k f).getKeyD k' fallback =
-      if cmp k k' = .eq then
-        if (f (get? t k)).isSome then k else fallback
+      uif cmp k k' = .eq then
+        uif (f (get? t k)).isSome then k else fallback
       else
         t.getKeyD k' fallback :=
   Impl.Const.getKeyD_alter t.wf
@@ -3894,7 +3894,7 @@ theorem getKeyD_alter [TransCmp cmp] {k k' fallback : α} {f : Option β → Opt
 @[simp]
 theorem getKeyD_alter_self [TransCmp cmp] [Inhabited α] {k : α} {fallback : α}
     {f : Option β → Option β} :
-    (alter t k f).getKeyD k fallback = if (f (get? t k)).isSome then k else fallback :=
+    (alter t k f).getKeyD k fallback = uif (f (get? t k)).isSome then k else fallback :=
   Impl.Const.getKeyD_alter_self t.wf
 
 end Const
@@ -3932,7 +3932,7 @@ theorem size_modify {k : α} {f : β k → β k} :
 @[grind =]
 theorem get?_modify {k k' : α} {f : β k → β k} :
     (t.modify k f).get? k' =
-      if h : cmp k k' = .eq then
+      uif h : cmp k k' = .eq then
         (cast (congrArg (Option ∘ β) (LawfulEqCmp.compare_eq_iff_eq.mp h)) ((t.get? k).map f))
       else
         t.get? k' :=
@@ -3946,7 +3946,7 @@ theorem get?_modify_self {k : α} {f : β k → β k} :
 @[grind =]
 theorem get_modify {k k' : α} {f : β k → β k} {hc : k' ∈ t.modify k f} :
     (t.modify k f).get k' hc =
-      if heq : cmp k k' = .eq then
+      uif heq : cmp k k' = .eq then
         haveI h' : k ∈ t := mem_congr heq |>.mpr <| mem_modify.mp hc
         cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp heq)) <| f (t.get k h')
       else
@@ -3963,7 +3963,7 @@ theorem get_modify_self {k : α} {f : β k → β k} {hc : k ∈ t.modify k f} :
 @[grind =]
 theorem get!_modify {k k' : α} [hi : Inhabited (β k')] {f : β k → β k} :
     (t.modify k f).get! k' =
-      if heq : cmp k k' = .eq then
+      uif heq : cmp k k' = .eq then
         t.get? k |>.map f |>.map (cast (congrArg β (LawfulEqCmp.compare_eq_iff_eq.mp heq))) |>.get!
       else
         t.get! k' :=
@@ -3977,7 +3977,7 @@ theorem get!_modify_self {k : α} [Inhabited (β k)] {f : β k → β k} :
 @[grind =]
 theorem getD_modify {k k' : α} {fallback : β k'} {f : β k → β k} :
     (t.modify k f).getD k' fallback =
-      if heq : cmp k k' = .eq then
+      uif heq : cmp k k' = .eq then
         t.get? k |>.map f |>.map (cast (congrArg β <| LawfulEqCmp.compare_eq_iff_eq.mp heq)) |>.getD fallback
       else
         t.getD k' fallback :=
@@ -3991,34 +3991,34 @@ theorem getD_modify_self {k : α} {fallback : β k} {f : β k → β k} :
 @[grind =]
 theorem getKey?_modify {k k' : α} {f : β k → β k} :
     (t.modify k f).getKey? k' =
-      if cmp k k' = .eq then
-        if k ∈ t then some k else none
+      uif cmp k k' = .eq then
+        uif k ∈ t then some k else none
       else
         t.getKey? k' :=
   Impl.getKey?_modify t.wf
 
 theorem getKey?_modify_self {k : α} {f : β k → β k} :
-    (t.modify k f).getKey? k = if k ∈ t then some k else none :=
+    (t.modify k f).getKey? k = uif k ∈ t then some k else none :=
   Impl.getKey?_modify_self t.wf
 
 @[grind =]
 theorem getKey!_modify [Inhabited α] {k k' : α} {f : β k → β k} :
     (t.modify k f).getKey! k' =
-      if cmp k k' = .eq then
-        if k ∈ t then k else default
+      uif cmp k k' = .eq then
+        uif k ∈ t then k else default
       else
         t.getKey! k' :=
   Impl.getKey!_modify t.wf
 
 theorem getKey!_modify_self [Inhabited α] {k : α} {f : β k → β k} :
-    (t.modify k f).getKey! k = if k ∈ t then k else default :=
+    (t.modify k f).getKey! k = uif k ∈ t then k else default :=
   Impl.getKey!_modify_self t.wf
 
 @[grind =]
 theorem getKey_modify [Inhabited α] {k k' : α} {f : β k → β k}
     {hc : k' ∈ t.modify k f} :
     (t.modify k f).getKey k' hc =
-      if cmp k k' = .eq then
+      uif cmp k k' = .eq then
         k
       else
         haveI h' : k' ∈ t := mem_modify.mp hc
@@ -4033,14 +4033,14 @@ theorem getKey_modify_self [Inhabited α] {k : α} {f : β k → β k}
 @[grind =]
 theorem getKeyD_modify {k k' fallback : α} {f : β k → β k} :
     (t.modify k f).getKeyD k' fallback =
-      if cmp k k' = .eq then
-        if k ∈ t then k else fallback
+      uif cmp k k' = .eq then
+        uif k ∈ t then k else fallback
       else
         t.getKeyD k' fallback :=
   Impl.getKeyD_modify t.wf
 
 theorem getKeyD_modify_self [Inhabited α] {k fallback : α} {f : β k → β k} :
-    (t.modify k f).getKeyD k fallback = if k ∈ t then k else fallback :=
+    (t.modify k f).getKeyD k fallback = uif k ∈ t then k else fallback :=
   Impl.getKeyD_modify_self t.wf
 
 end Dependent
@@ -4072,7 +4072,7 @@ theorem size_modify {k : α} {f : β → β} :
 @[grind =]
 theorem get?_modify {k k' : α} {f : β → β} :
     get? (modify t k f) k' =
-      if cmp k k' = .eq then
+      uif cmp k k' = .eq then
         (get? t k).map f
       else
         get? t k' :=
@@ -4086,7 +4086,7 @@ theorem get?_modify_self {k : α} {f : β → β} :
 @[grind =]
 theorem get_modify {k k' : α} {f : β → β} {hc : k' ∈ modify t k f} :
     get (modify t k f) k' hc =
-      if heq : cmp k k' = .eq then
+      uif heq : cmp k k' = .eq then
         haveI h' : k ∈ t := mem_congr heq |>.mpr <| mem_modify.mp hc
         f (get t k h')
       else
@@ -4103,7 +4103,7 @@ theorem get_modify_self {k : α} {f : β → β} {hc : k ∈ modify t k f} :
 @[grind =]
 theorem get!_modify {k k' : α} [hi : Inhabited β] {f : β → β} :
     get! (modify t k f) k' =
-      if cmp k k' = .eq then
+      uif cmp k k' = .eq then
         get? t k |>.map f |>.get!
       else
         get! t k' :=
@@ -4117,7 +4117,7 @@ theorem get!_modify_self {k : α} [Inhabited β] {f : β → β} :
 @[grind =]
 theorem getD_modify {k k' : α} {fallback : β} {f : β → β} :
     getD (modify t k f) k' fallback =
-      if cmp k k' = .eq then
+      uif cmp k k' = .eq then
         get? t k |>.map f |>.getD fallback
       else
         getD t k' fallback :=
@@ -4131,34 +4131,34 @@ theorem getD_modify_self {k : α} {fallback : β} {f : β → β} :
 @[grind =]
 theorem getKey?_modify {k k' : α} {f : β → β} :
     (modify t k f).getKey? k' =
-      if cmp k k' = .eq then
-        if k ∈ t then some k else none
+      uif cmp k k' = .eq then
+        uif k ∈ t then some k else none
       else
         t.getKey? k' :=
   Impl.Const.getKey?_modify t.wf
 
 theorem getKey?_modify_self {k : α} {f : β → β} :
-    (modify t k f).getKey? k = if k ∈ t then some k else none :=
+    (modify t k f).getKey? k = uif k ∈ t then some k else none :=
   Impl.Const.getKey?_modify_self t.wf
 
 @[grind =]
 theorem getKey!_modify [Inhabited α] {k k' : α} {f : β → β} :
     (modify t k f).getKey! k' =
-      if cmp k k' = .eq then
-        if k ∈ t then k else default
+      uif cmp k k' = .eq then
+        uif k ∈ t then k else default
       else
         t.getKey! k' :=
   Impl.Const.getKey!_modify t.wf
 
 theorem getKey!_modify_self [Inhabited α] {k : α} {f : β → β} :
-    (modify t k f).getKey! k = if k ∈ t then k else default :=
+    (modify t k f).getKey! k = uif k ∈ t then k else default :=
   Impl.Const.getKey!_modify_self t.wf
 
 @[grind =]
 theorem getKey_modify [Inhabited α] {k k' : α} {f : β → β}
     {hc : k' ∈ modify t k f} :
     (modify t k f).getKey k' hc =
-      if cmp k k' = .eq then
+      uif cmp k k' = .eq then
         k
       else
         haveI h' : k' ∈ t := mem_modify.mp hc
@@ -4173,14 +4173,14 @@ theorem getKey_modify_self [Inhabited α] {k : α} {f : β → β}
 @[grind =]
 theorem getKeyD_modify {k k' fallback : α} {f : β → β} :
     (modify t k f).getKeyD k' fallback =
-      if cmp k k' = .eq then
-        if k ∈ t then k else fallback
+      uif cmp k k' = .eq then
+        uif k ∈ t then k else fallback
       else
         t.getKeyD k' fallback :=
   Impl.Const.getKeyD_modify t.wf
 
 theorem getKeyD_modify_self [Inhabited α] {k fallback : α} {f : β → β} :
-    (modify t k f).getKeyD k fallback = if k ∈ t then k else fallback :=
+    (modify t k f).getKeyD k fallback = uif k ∈ t then k else fallback :=
   Impl.Const.getKeyD_modify_self t.wf
 
 end Const
@@ -4227,7 +4227,7 @@ theorem isSome_minKey?_iff_isEmpty_eq_false [TransCmp cmp] :
 
 @[grind =] theorem minKey?_insert [TransCmp cmp] {k v} :
     (t.insert k v).minKey? =
-      some (t.minKey?.elim k fun k' => if cmp k k' |>.isLE then k else k') :=
+      some (t.minKey?.elim k fun k' => uif cmp k k' |>.isLE then k else k') :=
   Impl.minKey?_insert t.wf
 
 @[grind =] theorem isSome_minKey?_insert [TransCmp cmp] {k v} :
@@ -4365,7 +4365,7 @@ theorem minKey?_le_minKey?_erase [TransCmp cmp] {k km kme} :
 
 @[grind =] theorem minKey?_insertIfNew [TransCmp cmp] {k v} :
     (t.insertIfNew k v).minKey? =
-      some (t.minKey?.elim k fun k' => if cmp k k' = .lt then k else k') :=
+      some (t.minKey?.elim k fun k' => uif cmp k k' = .lt then k else k') :=
   Impl.minKey?_insertIfNew t.wf
 
 @[grind =] theorem isSome_minKey?_insertIfNew [TransCmp cmp] {k v} :
@@ -4407,7 +4407,7 @@ namespace Const
 variable {β : Type v} {t : DTreeMap α β cmp}
 
 @[grind =] theorem minKey?_modify [TransCmp cmp] {k f} :
-    (Const.modify t k f).minKey? = t.minKey?.map fun km => if cmp km k = .eq then k else km :=
+    (Const.modify t k f).minKey? = t.minKey?.map fun km => uif cmp km k = .eq then k else km :=
   Impl.Const.minKey?_modify t.wf
 
 @[simp]
@@ -4455,7 +4455,7 @@ theorem minKey_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] {he km} :
 
 @[grind =] theorem minKey_insert [TransCmp cmp] {k v} :
     (t.insert k v).minKey isEmpty_insert =
-      t.minKey?.elim k fun k' => if cmp k k' |>.isLE then k else k' :=
+      t.minKey?.elim k fun k' => uif cmp k k' |>.isLE then k else k' :=
   Impl.minKey_insert t.wf
 
 theorem minKey_insert_le_minKey [TransCmp cmp] {k v he} :
@@ -4528,7 +4528,7 @@ theorem minKey_le_minKey_erase [TransCmp cmp] {k he} :
 
 @[grind =] theorem minKey_insertIfNew [TransCmp cmp] {k v} :
     (t.insertIfNew k v).minKey isEmpty_insertIfNew =
-      t.minKey?.elim k fun k' => if cmp k k' = .lt then k else k' :=
+      t.minKey?.elim k fun k' => uif cmp k k' = .lt then k else k' :=
   Impl.minKey_insertIfNew t.wf
 
 theorem minKey_insertIfNew_le_minKey [TransCmp cmp] {k v he} :
@@ -4564,7 +4564,7 @@ variable {β : Type v} {t : DTreeMap α β cmp}
 
 @[grind =] theorem minKey_modify [TransCmp cmp] {k f he} :
     (modify t k f).minKey he =
-      if cmp (t.minKey <| cast (congrArg (· = false) isEmpty_modify) he) k = .eq then
+      uif cmp (t.minKey <| cast (congrArg (· = false) isEmpty_modify) he) k = .eq then
         k
       else
         (t.minKey <| cast (congrArg (· = false) isEmpty_modify) he) :=
@@ -4617,7 +4617,7 @@ theorem minKey!_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] [Inhabite
 
 @[grind =] theorem minKey!_insert [TransCmp cmp] [Inhabited α] {k v} :
     (t.insert k v).minKey! =
-      (t.minKey?.elim k fun k' => if cmp k k' |>.isLE then k else k') :=
+      (t.minKey?.elim k fun k' => uif cmp k k' |>.isLE then k else k') :=
   Impl.minKey!_insert t.wf
 
 theorem minKey!_insert_le_minKey! [TransCmp cmp] [Inhabited α] (he : t.isEmpty = false) {k v} :
@@ -4681,7 +4681,7 @@ theorem minKey!_le_minKey!_erase [TransCmp cmp] [Inhabited α] {k}
 
 @[grind =] theorem minKey!_insertIfNew [TransCmp cmp] [Inhabited α] {k v} :
     (t.insertIfNew k v).minKey! =
-      t.minKey?.elim k fun k' => if cmp k k' = .lt then k else k' :=
+      t.minKey?.elim k fun k' => uif cmp k k' = .lt then k else k' :=
   Impl.minKey!_insertIfNew t.wf
 
 theorem minKey!_insertIfNew_le_minKey! [TransCmp cmp] [Inhabited α] (he : t.isEmpty = false) {k v} :
@@ -4716,7 +4716,7 @@ variable {β : Type v} {t : DTreeMap α β cmp}
 
 @[grind =] theorem minKey!_modify [TransCmp cmp] [Inhabited α] {k f}
     (he : (modify t k f).isEmpty = false) :
-    (modify t k f).minKey! = if cmp t.minKey! k = .eq then k else t.minKey! :=
+    (modify t k f).minKey! = uif cmp t.minKey! k = .eq then k else t.minKey! :=
   Impl.Const.minKey!_modify t.wf he
 
 @[simp]
@@ -4765,7 +4765,7 @@ theorem minKeyD_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp]
 
 @[grind =] theorem minKeyD_insert [TransCmp cmp] {k v fallback} :
     (t.insert k v |>.minKeyD fallback) =
-      (t.minKey?.elim k fun k' => if cmp k k' |>.isLE then k else k') :=
+      (t.minKey?.elim k fun k' => uif cmp k k' |>.isLE then k else k') :=
   Impl.minKeyD_insert t.wf
 
 theorem minKeyD_insert_le_minKeyD [TransCmp cmp] (he : t.isEmpty = false)
@@ -4825,7 +4825,7 @@ theorem minKeyD_le_minKeyD_erase [TransCmp cmp] {k}
 
 @[grind =] theorem minKeyD_insertIfNew [TransCmp cmp] {k v fallback} :
     (t.insertIfNew k v |>.minKeyD fallback) =
-      t.minKey?.elim k fun k' => if cmp k k' = .lt then k else k' :=
+      t.minKey?.elim k fun k' => uif cmp k k' = .lt then k else k' :=
   Impl.minKeyD_insertIfNew t.wf
 
 theorem minKeyD_insertIfNew_le_minKeyD [TransCmp cmp]
@@ -4862,7 +4862,7 @@ variable {β : Type v} {t : DTreeMap α β cmp}
 @[grind =] theorem minKeyD_modify [TransCmp cmp] {k f}
     (he : (modify t k f).isEmpty = false) {fallback} :
     (modify t k f |>.minKeyD fallback) =
-      if cmp (t.minKeyD fallback) k = .eq then k else (t.minKeyD fallback) :=
+      uif cmp (t.minKeyD fallback) k = .eq then k else (t.minKeyD fallback) :=
   Impl.Const.minKeyD_modify t.wf he
 
 @[simp, grind =]
@@ -4929,7 +4929,7 @@ theorem isSome_maxKey?_iff_isEmpty_eq_false [TransCmp cmp] :
 
 @[grind =] theorem maxKey?_insert [TransCmp cmp] {k v} :
     (t.insert k v).maxKey? =
-      some (t.maxKey?.elim k fun k' => if cmp k' k|>.isLE then k else k') :=
+      some (t.maxKey?.elim k fun k' => uif cmp k' k|>.isLE then k else k') :=
   Impl.maxKey?_insert t.wf
 
 @[grind =] theorem isSome_maxKey?_insert [TransCmp cmp] {k v} :
@@ -5025,7 +5025,7 @@ theorem maxKey?_erase_le_maxKey? [TransCmp cmp] {k km kme} :
 
 @[grind =] theorem maxKey?_insertIfNew [TransCmp cmp] {k v} :
     (t.insertIfNew k v).maxKey? =
-      some (t.maxKey?.elim k fun k' => if cmp k' k = .lt then k else k') :=
+      some (t.maxKey?.elim k fun k' => uif cmp k' k = .lt then k else k') :=
   Impl.maxKey?_insertIfNew t.wf
 
 @[grind =] theorem isSome_maxKey?_insertIfNew [TransCmp cmp] {k v} :
@@ -5066,7 +5066,7 @@ namespace Const
 variable {β : Type v} {t : DTreeMap α β cmp}
 
 @[grind =] theorem maxKey?_modify [TransCmp cmp] {k f} :
-    (Const.modify t k f).maxKey? = t.maxKey?.map fun km => if cmp km k = .eq then k else km :=
+    (Const.modify t k f).maxKey? = t.maxKey?.map fun km => uif cmp km k = .eq then k else km :=
   Impl.Const.maxKey?_modify t.wf
 
 @[simp, grind =]
@@ -5115,7 +5115,7 @@ theorem maxKey_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] {he km} :
 
 @[grind =] theorem maxKey_insert [TransCmp cmp] {k v} :
     (t.insert k v).maxKey isEmpty_insert =
-      t.maxKey?.elim k fun k' => if cmp k' k |>.isLE then k else k' :=
+      t.maxKey?.elim k fun k' => uif cmp k' k |>.isLE then k else k' :=
   Impl.maxKey_insert t.wf
 
 theorem maxKey_le_maxKey_insert [TransCmp cmp] {k v he} :
@@ -5188,7 +5188,7 @@ theorem maxKey_erase_le_maxKey [TransCmp cmp] {k he} :
 
 @[grind =] theorem maxKey_insertIfNew [TransCmp cmp] {k v} :
     (t.insertIfNew k v).maxKey isEmpty_insertIfNew =
-      t.maxKey?.elim k fun k' => if cmp k' k = .lt then k else k' :=
+      t.maxKey?.elim k fun k' => uif cmp k' k = .lt then k else k' :=
   Impl.maxKey_insertIfNew t.wf
 
 theorem maxKey_le_maxKey_insertIfNew [TransCmp cmp] {k v he} :
@@ -5224,7 +5224,7 @@ variable {β : Type v} {t : DTreeMap α β cmp}
 
 theorem maxKey_modify [TransCmp cmp] {k f he} :
     (modify t k f).maxKey he =
-      if cmp (t.maxKey <| cast (congrArg (· = false) isEmpty_modify) he) k = .eq then
+      uif cmp (t.maxKey <| cast (congrArg (· = false) isEmpty_modify) he) k = .eq then
         k
       else
         (t.maxKey <| cast (congrArg (· = false) isEmpty_modify) he) :=
@@ -5277,7 +5277,7 @@ theorem maxKey!_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp] [Inhabite
 
 @[grind =] theorem maxKey!_insert [TransCmp cmp] [Inhabited α] {k v} :
     (t.insert k v).maxKey! =
-      (t.maxKey?.elim k fun k' => if cmp k' k |>.isLE then k else k') :=
+      (t.maxKey?.elim k fun k' => uif cmp k' k |>.isLE then k else k') :=
   Impl.maxKey!_insert t.wf
 
 theorem maxKey!_le_maxKey!_insert [TransCmp cmp] [Inhabited α] (he : t.isEmpty = false) {k v} :
@@ -5341,7 +5341,7 @@ theorem maxKey!_erase_le_maxKey! [TransCmp cmp] [Inhabited α] {k}
 
 @[grind =] theorem maxKey!_insertIfNew [TransCmp cmp] [Inhabited α] {k v} :
     (t.insertIfNew k v).maxKey! =
-      t.maxKey?.elim k fun k' => if cmp k' k = .lt then k else k' :=
+      t.maxKey?.elim k fun k' => uif cmp k' k = .lt then k else k' :=
   Impl.maxKey!_insertIfNew t.wf
 
 theorem maxKey!_le_maxKey!_insertIfNew [TransCmp cmp] [Inhabited α] (he : t.isEmpty = false) {k v} :
@@ -5377,7 +5377,7 @@ variable {β : Type v} {t : DTreeMap α β cmp}
 
 theorem maxKey!_modify [TransCmp cmp] [Inhabited α] {k f}
     (he : (modify t k f).isEmpty = false) :
-    (modify t k f).maxKey! = if cmp t.maxKey! k = .eq then k else t.maxKey! :=
+    (modify t k f).maxKey! = uif cmp t.maxKey! k = .eq then k else t.maxKey! :=
   Impl.Const.maxKey!_modify t.wf he
 
 @[simp]
@@ -5427,7 +5427,7 @@ theorem maxKeyD_eq_iff_mem_and_forall [TransCmp cmp] [LawfulEqCmp cmp]
 @[grind =]
 theorem maxKeyD_insert [TransCmp cmp] {k v fallback} :
     (t.insert k v |>.maxKeyD fallback) =
-      (t.maxKey?.elim k fun k' => if cmp k' k |>.isLE then k else k') :=
+      (t.maxKey?.elim k fun k' => uif cmp k' k |>.isLE then k else k') :=
   Impl.maxKeyD_insert t.wf
 
 theorem maxKeyD_le_maxKeyD_insert [TransCmp cmp] (he : t.isEmpty = false)
@@ -5488,7 +5488,7 @@ theorem maxKeyD_erase_le_maxKeyD [TransCmp cmp] {k}
 @[grind =]
 theorem maxKeyD_insertIfNew [TransCmp cmp] {k v fallback} :
     (t.insertIfNew k v |>.maxKeyD fallback) =
-      t.maxKey?.elim k fun k' => if cmp k' k = .lt then k else k' :=
+      t.maxKey?.elim k fun k' => uif cmp k' k = .lt then k else k' :=
   Impl.maxKeyD_insertIfNew t.wf
 
 theorem maxKeyD_le_maxKeyD_insertIfNew [TransCmp cmp]
@@ -5525,7 +5525,7 @@ variable {β : Type v} {t : DTreeMap α β cmp}
 theorem maxKeyD_modify [TransCmp cmp] {k f}
     (he : (modify t k f).isEmpty = false) {fallback} :
     (modify t k f |>.maxKeyD fallback) =
-      if cmp (t.maxKeyD fallback) k = .eq then k else (t.maxKeyD fallback) :=
+      uif cmp (t.maxKeyD fallback) k = .eq then k else (t.maxKeyD fallback) :=
   Impl.Const.maxKeyD_modify t.wf he
 
 @[simp, grind =]

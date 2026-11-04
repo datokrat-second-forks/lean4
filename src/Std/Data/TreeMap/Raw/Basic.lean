@@ -146,6 +146,9 @@ instance : Membership α (Raw α β cmp) where
 instance {t : Raw α β cmp} {a : α} : Decidable (a ∈ t) :=
   inferInstanceAs <| Decidable (t.contains a)
 
+instance {t : Raw α β cmp} {a : α} : UDecidable (a ∈ t) :=
+  inferInstanceAs <| UDecidable (t.contains a = true)
+
 @[inline, inherit_doc DTreeMap.Raw.size]
 def size (t : Raw α β cmp) : Nat :=
   t.inner.size
