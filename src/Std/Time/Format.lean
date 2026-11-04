@@ -347,7 +347,7 @@ def fromTime12Hour (input : String) : Except String PlainTime := do
 Formats a `PlainTime` value into a 12-hour format string (`hh:mm:ss aa`).
 -/
 def toTime12Hour (input : PlainTime) : String :=
-  Formats.time12Hour.formatBuilder (input.hour.emod 12 (by decide) |>.add 1) input.minute input.second (if input.hour.val ≥ 12 then HourMarker.pm else HourMarker.am)
+  Formats.time12Hour.formatBuilder (input.hour.emod 12 (by decide) |>.add 1) input.minute input.second (bif input.hour.val ≥ᵇ 12 then HourMarker.pm else HourMarker.am)
 
 /--
 Parses a `String` in the `Time12Hour` or `Time24Hour` format and returns a `PlainTime`.
@@ -426,7 +426,7 @@ year `yy` is read as `19yy` when `yy ≥ 70` and as `20yy` otherwise.
 -/
 def fromHTTPDateString (input : String) : Except String DateTime :=
   Formats.httpDate.parse input
-  <|> (Formats.httpDateRFC850.parse input).map (fun date => if date.year ≥ 2070 then date.subYearsClip 100 else date)
+  <|> (Formats.httpDateRFC850.parse input).map (fun date => bif date.year ≥ᵇ 2070 then date.subYearsClip 100 else date)
   <|> Formats.httpDateAscTime.parse input
   <|> Formats.httpDateAscTimePadded.parse input
 

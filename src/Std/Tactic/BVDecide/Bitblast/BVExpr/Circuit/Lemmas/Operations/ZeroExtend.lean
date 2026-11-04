@@ -92,7 +92,7 @@ theorem go_denote_eq (aig : AIG α) (w : Nat) (input : AIG.RefVec aig w) (newWid
           assign
         ⟧
           =
-        if hidx : idx < w then
+        uif hidx : idx < w then
            ⟦aig, input.get idx hidx, assign⟧
         else
            false
@@ -107,7 +107,7 @@ theorem go_denote_eq (aig : AIG α) (w : Nat) (input : AIG.RefVec aig w) (newWid
       split at hgo
       next hsplit =>
         rw [heq] at hsplit
-        simp only [hsplit, ↓reduceDIte]
+        simp only [hsplit, ↓reduceUDIte]
         rw [← hgo]
         rw [go_get]; case hidx => omega
         rw [AIG.RefVec.get_push_ref_eq']
@@ -117,7 +117,7 @@ theorem go_denote_eq (aig : AIG α) (w : Nat) (input : AIG.RefVec aig w) (newWid
         · omega
       next hsplit =>
         rw [heq] at hsplit
-        simp only [hsplit, ↓reduceDIte]
+        simp only [hsplit, ↓reduceUDIte]
         rw [← hgo]
         rw [go_get]; case hidx => omega
         rw [AIG.RefVec.get_push_ref_eq']
@@ -145,7 +145,7 @@ theorem denote_blastZeroExtend (aig : AIG α) (target : ExtendTarget aig newWidt
     ∀ (idx : Nat) (hidx : idx < newWidth),
         ⟦(blastZeroExtend aig target).aig, (blastZeroExtend aig target).vec.get idx hidx, assign⟧
           =
-        if hidx : idx < target.w then
+        uif hidx : idx < target.w then
            ⟦aig, target.vec.get idx hidx, assign⟧
         else
            false

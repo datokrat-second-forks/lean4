@@ -22,13 +22,13 @@ structure Options where
   /--
   Accumulate the amount of idle time the event loop spends in the event provider.
   -/
-  accumulateIdleTime : Bool := False
+  accumulateIdleTime : Bool := false
 
   /--
   Block a SIGPROF signal when polling for new events. It's commonly used for unnecessary wakeups
   when using a sampling profiler.
   -/
-  blockSigProfSignal : Bool := False
+  blockSigProfSignal : Bool := false
 
 /--
 Configures the event loop with the specified options.

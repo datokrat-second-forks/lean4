@@ -38,14 +38,14 @@ Checks if a byte is a valid character in a percent-encoded URI component. Valid 
 unreserved characters or the percent sign (for escape sequences).
 -/
 def isEncodedChar (rule : UInt8 → Bool) (c : UInt8) : Bool :=
-  isAsciiByte c ∧ (rule c ∨ isHexDigitByte c ∨ c = '%'.toUInt8)
+  isAsciiByte c && (rule c || (isHexDigitByte c || c == '%'.toUInt8))
 
 /--
 Checks if a byte is valid in a percent-encoded query string component. Extends `isEncodedChar` to also
 allow '+' which represents space in application/x-www-form-urlencoded format.
 -/
 def isEncodedQueryChar (rule : UInt8 → Bool) (c : UInt8) : Bool :=
-  isEncodedChar rule c ∨ c = '+'.toUInt8
+  isEncodedChar rule c || c == '+'.toUInt8
 
 /--
 Checks if all characters in a `ByteArray` are allowed in an encoded URI component. This is a fast check
@@ -81,13 +81,13 @@ For example:
 -/
 def isValidPercentEncoding (ba : ByteArray) : Bool :=
   let rec loop (i : Nat) : Bool :=
-    if h : i < ba.size then
-      let c := ba[i]'h
-      if c = '%'.toUInt8 then
-          if h₂ : i + 2 < ba.size then
+    bif h : i <ᵇ ba.size then
+      let c := ba[i]'(lt_of_decideLT_eq_true h)
+      bif c == '%'.toUInt8 then
+          bif h₂ : i + 2 <ᵇ ba.size then
             let d1 := ba[i + 1]'(by omega)
-            let d2 := ba[i + 2]'h₂
-            if isHexDigitByte d1 && isHexDigitByte d2 then
+            let d2 := ba[i + 2]'(lt_of_decideLT_eq_true h₂)
+            bif isHexDigitByte d1 && isHexDigitByte d2 then
               loop (i + 3)
           else false
         else false
@@ -101,7 +101,7 @@ Converts a nibble (4-bit value, 0-15) to its hexadecimal digit representation. R
 values 0-9, and 'A'-'F' for values 10-15.
 -/
 def hexDigit (n : UInt8) : UInt8 :=
-  if n < 10 then (n + '0'.toUInt8)
+  bif n <ᵇ 10 then (n + '0'.toUInt8)
   else (n - 10 + 'A'.toUInt8)
 
 /--
@@ -109,11 +109,11 @@ Converts a hexadecimal digit character to its numeric value (0-15).
 Returns `none` if the character is not a valid hex digit.
 -/
 def hexDigitToUInt8? (c : UInt8) : Option UInt8 :=
-  if c ≥ '0'.toUInt8 && c ≤ '9'.toUInt8 then
+  bif c ≥ᵇ '0'.toUInt8 && c ≤ᵇ '9'.toUInt8 then
     some (c - '0'.toUInt8)
-  else if c ≥ 'a'.toUInt8 && c ≤ 'f'.toUInt8 then
+  else bif c ≥ᵇ 'a'.toUInt8 && c ≤ᵇ 'f'.toUInt8 then
     some (c - 'a'.toUInt8 + 10)
-  else if c ≥ 'A'.toUInt8 && c ≤ 'F'.toUInt8 then
+  else bif c ≥ᵇ 'A'.toUInt8 && c ≤ᵇ 'F'.toUInt8 then
     some (c - 'A'.toUInt8 + 10)
   else
     none
@@ -296,8 +296,8 @@ Encodes a raw string into an `EncodedString` with automatic proof construction. 
 -/
 def encode (s : String) : EncodedString r :=
   s.toUTF8.foldl (init := EncodedString.empty) fun acc c =>
-    if h : isAsciiByte c ∧ r c then
-      acc.push c (by simp [isEncodedChar]; exact And.intro h.left (Or.inl h.right))
+    bif h : isAsciiByte c && r c then
+      acc.push c (by have h := (Bool.and_eq_true _ _).mp h; simp [isEncodedChar]; exact And.intro h.left (Or.inl h.right))
     else
       byteToHex c acc
 
@@ -306,8 +306,8 @@ Attempts to create an `EncodedString` from a `ByteArray`. Returns `some` if the 
 valid encoded characters and all percent signs are followed by exactly two hex digits, `none` otherwise.
 -/
 def ofByteArray? (ba : ByteArray) : Option (EncodedString r) :=
-  if h : IsAllowedEncodedChars r ba then
-    if isValidPercentEncoding ba then some ⟨ba, h⟩ else none
+  bif h : ba.data.all (isEncodedChar r) then
+    bif isValidPercentEncoding ba then some ⟨ba, h⟩ else none
   else none
 
 /--
@@ -353,10 +353,10 @@ def decode (es : EncodedString r) : Option String := Id.run do
   let percent := '%'.toNat.toUInt8
   while h : i < len do
     let c := rawBytes[i]
-    (decoded, i) := if h₁ : c == percent ∧ i + 1 < len then
+    (decoded, i) := bif h₁ : c == percent && i + 1 <ᵇ len then
       let h1 := rawBytes[i + 1]
       if let some hd1 := hexDigitToUInt8? h1 then
-        if h₂ : i + 2 < len then
+        bif h₂ : i + 2 <ᵇ len then
           let h2 := rawBytes[i + 2]
           if let some hd2 := hexDigitToUInt8? h2 then
             (decoded.push (hd1 * 16 + hd2), i + 3)
@@ -374,7 +374,7 @@ instance : Repr (EncodedString r) where
   reprPrec es n := reprPrec (toString es) n
 
 instance : BEq (EncodedString r) where
-  beq x y := x.toByteArray = y.toByteArray
+  beq x y := x.toByteArray == y.toByteArray
 
 instance : Hashable (EncodedString r) where
   hash x := Hashable.hash x.toByteArray
@@ -424,8 +424,8 @@ Attempts to create an `EncodedQueryString` from a `ByteArray`. Returns `some` if
 only valid encoded query characters and all percent signs are followed by exactly two hex digits, `none` otherwise.
 -/
 def ofByteArray? (ba : ByteArray) (r : UInt8 → Bool := isQueryChar) : Option (EncodedQueryString r) :=
-  if h : IsAllowedEncodedQueryChars r ba then
-    if isValidPercentEncoding ba then some ⟨ba, h⟩ else none
+  bif h : ba.data.all (isEncodedQueryChar r) then
+    bif isValidPercentEncoding ba then some ⟨ba, h⟩ else none
   else none
 
 /--
@@ -480,9 +480,9 @@ are kept as-is, spaces are encoded as '+', and all other characters are percent-
 -/
 def encode (s : String) (r : UInt8 → Bool := isQueryChar) : EncodedQueryString r :=
   s.toUTF8.foldl (init := EncodedQueryString.empty) fun acc c =>
-    if h : isAsciiByte c ∧ r c then
-      acc.push c (by simp [isEncodedQueryChar, isEncodedChar]; exact Or.inl (And.intro h.left (Or.inl h.right)))
-    else if _ : c = ' '.toUInt8 then
+    bif h : isAsciiByte c && r c then
+      acc.push c (by have h := (Bool.and_eq_true _ _).mp h; simp [isEncodedQueryChar, isEncodedChar]; exact Or.inl (And.intro h.left (Or.inl h.right)))
+    else bif _ : c == ' '.toUInt8 then
       acc.push '+'.toUInt8 (by simp [isEncodedQueryChar])
     else
       byteToHex c acc
@@ -508,12 +508,12 @@ def decode (es : EncodedQueryString r) : Option String := Id.run do
   let plus := '+'.toNat.toUInt8
   while h : i < len do
     let c := rawBytes[i]
-    (decoded, i) := if c == plus then
+    (decoded, i) := bif c == plus then
       (decoded.push ' '.toNat.toUInt8, i + 1)
-    else if h₁ : c == percent ∧ i + 1 < len then
+    else bif h₁ : c == percent && i + 1 <ᵇ len then
       let h1 := rawBytes[i + 1]
       if let some hd1 := hexDigitToUInt8? h1 then
-        if h₂ : i + 2 < len then
+        bif h₂ : i + 2 <ᵇ len then
           let h2 := rawBytes[i + 2]
           if let some hd2 := hexDigitToUInt8? h2 then
             (decoded.push (hd1 * 16 + hd2), i + 3)
@@ -536,7 +536,7 @@ instance : Repr (EncodedQueryString r) where
   reprPrec es n := reprPrec (toString es) n
 
 instance : BEq (EncodedQueryString r) where
-  beq x y := x.toByteArray = y.toByteArray
+  beq x y := x.toByteArray == y.toByteArray
 
 instance : Hashable (EncodedQueryString r) where
   hash x := Hashable.hash x.toByteArray

@@ -36,7 +36,7 @@ theorem denote_blastAppend (aig : AIG α) (target : AppendTarget aig newWidth)
         assign
       ⟧
         =
-      if hr : idx < target.rw then
+      uif hr : idx < target.rw then
          ⟦aig, target.rhs.get idx hr, assign⟧
       else
          have := target.h

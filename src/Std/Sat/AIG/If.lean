@@ -90,6 +90,10 @@ theorem ite_as_bool (d l r : Bool) : (if d then l else r) = ((d && l) || (!d && 
   revert d l r
   decide
 
+theorem cond_as_bool (d l r : Bool) : (bif d then l else r) = ((d && l) || (!d && r)) := by
+  revert d l r
+  decide
+
 @[deprecated Std.Sat.AIG.ite_as_bool (since := "2026-07-21")]
 theorem if_as_bool (d : Bool) (l : Bool) (r : Bool) : (if d = Bool.true then l else r) = (d && l || !d && r) := Std.Sat.AIG.ite_as_bool d l r
 
@@ -97,8 +101,8 @@ theorem if_as_bool (d : Bool) (l : Bool) (r : Bool) : (if d = Bool.true then l e
 theorem denote_mkIfCached {aig : AIG α} {input : TernaryInput aig} :
     ⟦aig.mkIfCached input, assign⟧
       =
-    if ⟦aig, input.discr, assign⟧ then ⟦aig, input.lhs, assign⟧ else ⟦aig, input.rhs, assign⟧ := by
-  rw [ite_as_bool]
+    bif ⟦aig, input.discr, assign⟧ then ⟦aig, input.lhs, assign⟧ else ⟦aig, input.rhs, assign⟧ := by
+  rw [cond_as_bool]
   simp only [mkIfCached]
   simp only [TernaryInput.cast, Ref.cast_eq, Ref.cast, denote_mkOrCached, denote_projected_entry,
     denote_mkAndCached, denote_mkNotCached]
@@ -128,8 +132,8 @@ def ite (aig : AIG α) (input : IfInput aig w) : RefVecEntry α w :=
 where
   go {w : Nat} (aig : AIG α) (curr : Nat) (hcurr : curr ≤ w) (discr : Ref aig)
       (lhs rhs : RefVec aig w) (s : RefVec aig curr) : RefVecEntry α w :=
-    if hcurr : curr < w then
-      let input := ⟨discr, lhs.get curr hcurr, rhs.get curr hcurr⟩
+    bif hcurr : curr <ᵇ w then
+      let input := ⟨discr, lhs.get curr (lt_of_decideLT_eq_true hcurr), rhs.get curr (lt_of_decideLT_eq_true hcurr)⟩
       let res := mkIfCached aig input
       let aig := res.aig
       let ref := res.ref
@@ -250,7 +254,7 @@ theorem denote_go {w : Nat} (aig : AIG α) (curr : Nat) (hcurr : curr ≤ w) (di
         assign
       ⟧
         =
-      if ⟦aig, discr, assign⟧ then
+      bif ⟦aig, discr, assign⟧ then
         ⟦aig, lhs.get idx hidx1, assign⟧
       else
         ⟦aig, rhs.get idx hidx1, assign⟧ := by
@@ -290,7 +294,7 @@ theorem denote_ite {aig : AIG α} {input : IfInput aig w} :
   ∀ (idx : Nat) (hidx : idx < w),
     ⟦(ite aig input).aig, (ite aig input).vec.get idx hidx, assign⟧
       =
-    if ⟦aig, input.discr, assign⟧ then
+    bif ⟦aig, input.discr, assign⟧ then
       ⟦aig, input.lhs.get idx hidx, assign⟧
     else
       ⟦aig, input.rhs.get idx hidx, assign⟧ := by

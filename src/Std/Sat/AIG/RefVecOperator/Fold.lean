@@ -30,8 +30,8 @@ where
   go (aig : AIG α) (acc : Ref aig) (idx : Nat) (len : Nat) (input : RefVec aig len)
      (f : (aig : AIG α) → BinaryInput aig → Entrypoint α) [LawfulOperator α BinaryInput f] :
      Entrypoint α :=
-    if hidx : idx < len then
-      let res := f aig ⟨acc, input.get idx hidx⟩
+    bif hidx : idx <ᵇ len then
+      let res := f aig ⟨acc, input.get idx (lt_of_decideLT_eq_true hidx)⟩
       let aig := res.aig
       let newAcc := res.ref
       let input := input.cast <| by
@@ -151,9 +151,8 @@ theorem denote_go_and {aig : AIG α} (acc : AIG.Ref aig) (curr : Nat)
         · simp [hacc, hrest]
         · intro idx hidx1 hidx2
           specialize hrest idx hidx1 (by omega)
-          rw [← hrest]
           rw [AIG.LawfulOperator.denote_mem_prefix (f := AIG.mkAndCached)]
-          · simp
+          · simp [hrest]
           · simp [Ref.hgate]
     · omega
   · rw [← hgo]

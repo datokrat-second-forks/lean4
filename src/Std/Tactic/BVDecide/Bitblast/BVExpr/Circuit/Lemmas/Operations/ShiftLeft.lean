@@ -94,7 +94,7 @@ theorem go_denote_eq (aig : AIG α) (distance : Nat) (input : AIG.RefVec aig w)
           assign
         ⟧
           =
-        if hidx : idx < distance then
+        uif hidx : idx < distance then
           false
         else
           ⟦aig, input.get (idx - distance) (by omega), assign⟧
@@ -161,7 +161,7 @@ theorem denote_blastShiftLeftConst (aig : AIG α) (target : ShiftTarget aig w)
           assign
         ⟧
           =
-        if hidx : idx < target.distance then
+        uif hidx : idx < target.distance then
           false
         else
           ⟦aig, target.vec.get (idx - target.distance) (by omega), assign⟧
@@ -199,7 +199,7 @@ theorem twoPowShift_eq (aig : AIG α) (target : TwoPowShiftTarget aig w) (lhs : 
         denote_blastShiftLeftConst]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastShiftLeftConst) (h := Ref.hgate _)]
       rw [hright]
-      simp only [hif1, ↓reduceIte]
+      simp only [hif1, Bool.cond_true]
       have hmod : 2 ^ pow % 2 ^ n = 2 ^ pow := by
         apply Nat.mod_eq_of_lt
         apply Nat.pow_lt_pow_of_lt <;> omega
@@ -222,7 +222,7 @@ theorem twoPowShift_eq (aig : AIG α) (target : TwoPowShiftTarget aig w) (lhs : 
         denote_blastShiftLeftConst]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastShiftLeftConst) (h := Ref.hgate _)]
       rw [hright]
-      simp only [hif1, Bool.false_eq_true, ↓reduceIte]
+      simp only [hif1, Bool.cond_false]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastShiftLeftConst) (h := Ref.hgate _)]
       rw [hleft]
       simp

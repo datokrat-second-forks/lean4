@@ -21,7 +21,7 @@ set_option linter.all true
 `Ordinal` represents a bounded value for second, which ranges between 0 and 59 or 60. This accounts
 for potential leap second.
 -/
-def Ordinal (leap : Bool) := Bounded.LE 0 (.ofNat (if leap then 60 else 59))
+def Ordinal (leap : Bool) := Bounded.LE 0 (.ofNat (bif leap then 60 else 59))
 
 instance : LE (Ordinal leap) where
   le x y := LE.le x.val y.val
@@ -100,21 +100,21 @@ namespace Ordinal
 Creates an `Ordinal` from an integer, ensuring the value is within bounds.
 -/
 @[inline]
-def ofInt (data : Int) (h : 0 ≤ data ∧ data ≤ Int.ofNat (if leap then 60 else 59)) : Ordinal leap :=
+def ofInt (data : Int) (h : 0 ≤ data ∧ data ≤ Int.ofNat (bif leap then 60 else 59)) : Ordinal leap :=
   Bounded.LE.mk data h
 
 /--
 Creates an `Ordinal` from a natural number, ensuring the value is within bounds.
 -/
 @[inline]
-def ofNat (data : Nat) (h : data ≤ (if leap then 60 else 59)) : Ordinal leap :=
+def ofNat (data : Nat) (h : data ≤ (bif leap then 60 else 59)) : Ordinal leap :=
   Bounded.LE.ofNat data h
 
 /--
 Creates an `Ordinal` from a `Fin`, ensuring the value is within bounds.
 -/
 @[inline]
-def ofFin (data : Fin (if leap then 61 else 60)) : Ordinal leap :=
+def ofFin (data : Fin ((bif leap then 60 else 59) + 1)) : Ordinal leap :=
   match leap with
   | true => Bounded.LE.ofFin data
   | false => Bounded.LE.ofFin data

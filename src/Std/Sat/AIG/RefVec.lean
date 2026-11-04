@@ -130,7 +130,7 @@ theorem get_append (lhs : RefVec aig lw) (rhs : RefVec aig rw) (idx : Nat)
     (hidx : idx < lw + rw) :
     (lhs.append rhs).get idx hidx
       =
-    if h : idx < lw then
+    uif h : idx < lw then
       lhs.get idx h
     else
       rhs.get (idx - lw) (by omega) := by
@@ -147,8 +147,8 @@ theorem get_append (lhs : RefVec aig lw) (rhs : RefVec aig rw) (idx : Nat)
 
 @[inline]
 def getD (s : RefVec aig len) (idx : Nat) (alt : Ref aig) : Ref aig :=
-  if hidx : idx < len then
-    s.get idx hidx
+  bif hidx : idx <ᵇ len then
+    s.get idx (lt_of_decideLT_eq_true hidx)
   else
     alt
 
@@ -168,9 +168,9 @@ def countKnown (aig : AIG α) (s : RefVec aig len) : Nat :=
   go aig s 0 0
 where
   go (aig : AIG α) (s : RefVec aig len) (idx : Nat) (acc : Nat) : Nat :=
-    if h : idx < len then
+    bif h : idx <ᵇ len then
       let ref := s.refs[idx]
-      let decl := aig.decls[ref.gate]'(s.hrefs h)
+      let decl := aig.decls[ref.gate]'(s.hrefs (lt_of_decideLT_eq_true h))
       match decl with
       | .false => go aig s (idx + 1) (acc + 1)
       | _ => go aig s (idx + 1) acc

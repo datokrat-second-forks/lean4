@@ -28,8 +28,8 @@ structure GetLsbDTarget (aig : AIG α) where
   idx : Nat
 
 def blastGetLsbD (aig : AIG α) (target : GetLsbDTarget aig) : AIG.Ref aig :=
-  if h : target.idx < target.w then
-    target.vec.get target.idx h
+  bif h : target.idx <ᵇ target.w then
+    target.vec.get target.idx (lt_of_decideLT_eq_true h)
   else
     aig.mkConstCached false
 

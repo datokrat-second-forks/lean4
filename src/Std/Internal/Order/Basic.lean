@@ -120,7 +120,7 @@ open _root_.Classical in
 /-- Embedding of propositions into an CompleteLattice type. `⌜p⌝` embeds `p : Prop` as `⊤` if `p` holds
 and `⊥` otherwise. -/
 noncomputable def CompleteLattice.ofProp [CompleteLattice l] (p : Prop) : l :=
-  if p then ⊤ else ⊥
+  uif p then ⊤ else ⊥
 
 @[inherit_doc CompleteLattice.ofProp]
 scoped notation "⌜" p "⌝" => CompleteLattice.ofProp p

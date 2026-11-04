@@ -137,7 +137,7 @@ private theorem not_quotedStringChar_ofNat_aux :
   decide
 
 theorem not_quotedStringChar_of_not_qdtext_not_dquote_backslash :
-    ∀ c : Char, c < '\x80' → ¬(qdtext (c)) ∧ ¬((c = '\"') || (c = '\\')) →
+    ∀ c : Char, c < '\x80' → ¬(qdtext (c)) ∧ ¬((c == '\"') || (c == '\\')) →
     ¬(quotedStringChar c) := by
   intro c hlt hq
   simpa [Char.ofNat_toNat] using
@@ -168,9 +168,9 @@ ctext = HTAB / SP / %x21-27 / %x2A-5B / %x5D-7E
 @[inline]
 def ctext (c : Char) : Bool :=
   (c matches '\t' | ' ') ||
-  ('!' ≤ c ∧ c ≤ '\'') ||
-  ('*' ≤ c ∧ c ≤ '[') ||
-  (']' ≤ c ∧ c ≤ '~')
+  ('!' ≤ᵇ c && c ≤ᵇ '\'') ||
+  ('*' ≤ᵇ c && c ≤ᵇ '[') ||
+  (']' ≤ᵇ c && c ≤ᵇ '~')
 
 /--
 etagc = "!" / %x23-7E
@@ -178,7 +178,7 @@ etagc = "!" / %x23-7E
 -/
 @[inline]
 def etagc (c : Char) : Bool :=
-  c = '!' || ('#' ≤ c ∧ c ≤ '~')
+  c == '!' || ('#' ≤ᵇ c && c ≤ᵇ '~')
 
 /--
 OWS = *( SP / HTAB )  (character class only)
@@ -241,9 +241,9 @@ Checks if a byte is an alphanumeric digit (0-9, a-z, or A-Z).
 -/
 @[inline]
 def isAlphaNum (c : UInt8) : Bool :=
-  (c ≥ '0'.toUInt8 && c ≤ '9'.toUInt8) ||
-  (c ≥ 'a'.toUInt8 && c ≤ 'z'.toUInt8) ||
-  (c ≥ 'A'.toUInt8 && c ≤ 'Z'.toUInt8)
+  (c ≥ᵇ '0'.toUInt8 && c ≤ᵇ '9'.toUInt8) ||
+  (c ≥ᵇ 'a'.toUInt8 && c ≤ᵇ 'z'.toUInt8) ||
+  (c ≥ᵇ 'A'.toUInt8 && c ≤ᵇ 'Z'.toUInt8)
 
 /--
 Checks whether `c` is an ASCII alphanumeric character.
@@ -275,7 +275,7 @@ alphanumeric, hyphen, period, underscore, and tilde.
 @[inline]
 def isUnreserved (c : UInt8) : Bool :=
   isAlphaNum c ||
-  (c = '-'.toUInt8 || c = '.'.toUInt8 || c = '_'.toUInt8 || c = '~'.toUInt8)
+  (c == '-'.toUInt8 || c == '.'.toUInt8 || c == '_'.toUInt8 || c == '~'.toUInt8)
 
 /--
 Checks if a byte is a sub-delimiter character according to RFC 3986.
@@ -283,9 +283,9 @@ Sub-delimiters are: `!`, `$`, `&`, `'`, `(`, `)`, `*`, `+`, `,`, `;`, `=`.
 -/
 @[inline]
 def isSubDelims (c : UInt8) : Bool :=
-  c = '!'.toUInt8 || c = '$'.toUInt8 || c = '&'.toUInt8 || c = ('\'' : Char).toUInt8 ||
-  c = '('.toUInt8 || c = ')'.toUInt8 || c = '*'.toUInt8 || c = '+'.toUInt8 ||
-  c = ','.toUInt8 || c = ';'.toUInt8 || c = '='.toUInt8
+  c == '!'.toUInt8 || c == '$'.toUInt8 || c == '&'.toUInt8 || c == ('\'' : Char).toUInt8 ||
+  c == '('.toUInt8 || c == ')'.toUInt8 || c == '*'.toUInt8 || c == '+'.toUInt8 ||
+  c == ','.toUInt8 || c == ';'.toUInt8 || c == '='.toUInt8
 
 /--
 Checks if a byte is a valid path character (`pchar`) according to RFC 3986.
@@ -296,7 +296,7 @@ so this predicate only covers the non-percent characters.
 -/
 @[inline]
 def isPChar (c : UInt8) : Bool :=
-  isUnreserved c || isSubDelims c || c = ':'.toUInt8 || c = '@'.toUInt8
+  isUnreserved c || isSubDelims c || c == ':'.toUInt8 || c == '@'.toUInt8
 
 /--
 Checks if a byte is a valid character in a URI query component according to RFC 3986.
@@ -304,7 +304,7 @@ Checks if a byte is a valid character in a URI query component according to RFC 
 -/
 @[inline]
 def isQueryChar (c : UInt8) : Bool :=
-  isPChar c || c = '/'.toUInt8 || c = '?'.toUInt8
+  isPChar c || c == '/'.toUInt8 || c == '?'.toUInt8
 
 /--
 Checks if a byte is a valid character in a URI fragment component according to RFC 3986.
@@ -312,7 +312,7 @@ Checks if a byte is a valid character in a URI fragment component according to R
 -/
 @[inline]
 def isFragmentChar (c : UInt8) : Bool :=
-  isPChar c || c = '/'.toUInt8 || c = '?'.toUInt8
+  isPChar c || c == '/'.toUInt8 || c == '?'.toUInt8
 
 /--
 Checks if a byte is a valid character in a URI userinfo component according to RFC 3986.
@@ -323,7 +323,7 @@ that provides it.
 -/
 @[inline]
 def isUserInfoChar (c : UInt8) : Bool :=
-  isUnreserved c || isSubDelims c || c = ':'.toUInt8
+  isUnreserved c || isSubDelims c || c == ':'.toUInt8
 
 /--
 Checks if a byte is a valid character in a URI query component,
@@ -334,6 +334,6 @@ but disallows `&` and `=` so they can be treated as structural separators.
 -/
 @[inline]
 def isQueryDataChar (c : UInt8) : Bool :=
-  isQueryChar c && c ≠ '&'.toUInt8 && c ≠ '='.toUInt8
+  isQueryChar c && c != '&'.toUInt8 && c != '='.toUInt8
 
 end Std.Http.Internal.Char

@@ -174,18 +174,15 @@ theorem denote_blast (aig : AIG α) (lhs rhs : BitVec w) (assign : α → Bool)
       rw [BitVec.mulRec_zero_eq]
       simp only [Nat.succ_eq_add_one, RefVec.denote_ite,
         denote_blastConst,
-        BitVec.ofNat_eq_ofNat, BitVec.getLsbD_zero, Bool.ite_false_right,
-        UDecidable.decide_bool_eq_true]
+        BitVec.ofNat_eq_ofNat, BitVec.getLsbD_zero]
       split
       next heq =>
-        rw [← hright] at heq
-        · simp [heq, hleft]
-        · omega
+        rw [hright] at heq
+        simp [heq, hleft]
       next heq =>
-        simp only [Bool.not_eq_true] at heq
-        rw [← hright] at heq
-        · simp [heq]
-        · omega
+        rw [hright] at heq
+        simp only [heq, Bool.false_eq_true, ↓reduceUIte]
+        simp
 
 
 end blastMul

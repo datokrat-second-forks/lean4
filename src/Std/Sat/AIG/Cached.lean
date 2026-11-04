@@ -64,7 +64,7 @@ Beyond caching this function also implements a subset of the optimizations prese
 def mkGateCached (aig : AIG α) (input : BinaryInput aig) : Entrypoint α :=
   let lhs := input.lhs.gate
   let rhs := input.rhs.gate
-  if lhs < rhs then
+  bif lhs <ᵇ rhs then
     go aig ⟨input.lhs, input.rhs⟩
   else
     go aig ⟨input.rhs, input.lhs⟩
@@ -100,9 +100,9 @@ where
       | _, .some true => ⟨⟨decls, cache, hdag, hzero, hconst⟩, ⟨lhs, linv, by assumption⟩⟩
       -- No constant inputs
       | _, _ =>
-        if lhs == rhs then
+        bif lhs == rhs then
            -- Idempotency
-          if linv == rinv then
+          bif linv == rinv then
             ⟨⟨decls, cache, hdag, hzero, hconst⟩, ⟨lhs, linv, by assumption⟩⟩
           -- Contradiction
           else

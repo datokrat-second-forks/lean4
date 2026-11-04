@@ -32,8 +32,8 @@ where
   go (aig : AIG BVBit) (w : Nat) (a : Nat) (curr : Nat) (s : AIG.RefVec aig curr)
     (hcurr : curr ≤ w) :
     AIG.RefVecEntry BVBit w :=
-  if hcurr : curr < w then
-    let res := aig.mkAtomCached ⟨a, ⟨curr, hcurr⟩⟩
+  bif hcurr : curr <ᵇ w then
+    let res := aig.mkAtomCached ⟨a, ⟨curr, (lt_of_decideLT_eq_true hcurr)⟩⟩
     let aig := res.aig
     let bitRef := res.ref
     let s := s.cast <| AIG.LawfulOperator.le_size (f := AIG.mkAtomCached) ..

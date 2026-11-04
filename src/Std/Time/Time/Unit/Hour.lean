@@ -82,9 +82,9 @@ def toRelative (ordinal : Ordinal) : Bounded.LE 1 12 :=
 Converts an Ordinal into a 1-based hour representation within the range of 1 to 24.
 -/
 def shiftTo1BasedHour (ordinal : Ordinal) : Bounded.LE 1 24 :=
-  if h : ordinal.val < 1
+  bif h : ordinal.val <ᵇ 1
     then Internal.Bounded.LE.ofNatWrapping 24 (by decide)
-    else ordinal.truncateBottom (Int.not_lt.mp h) |>.expandTop (by decide)
+    else ordinal.truncateBottom (Int.not_lt.mp (not_lt_of_decideLT_eq_false h)) |>.expandTop (by decide)
 /--
 Creates an `Ordinal` from a natural number, ensuring the value is within the valid bounds for hours.
 -/

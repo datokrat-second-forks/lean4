@@ -97,7 +97,7 @@ Attempts to create a `CustomStatus` from a numeric code and a reason phrase stri
 `none` if the phrase contains invalid characters.
 -/
 def ofCodeAndPhrase? (code : UInt16) (phrase : String) : Option CustomStatus :=
-  if h : IsValidReasonPhrase phrase ∧ (100 ≤ code ∧ code ≤ 999) ∧ ¬isKnownStatusCode code then
+  uif h : IsValidReasonPhrase phrase ∧ (100 ≤ code ∧ code ≤ 999) ∧ ¬isKnownStatusCode code then
     some ⟨code, phrase, h.left, h.right.left, h.right.right⟩
   else
     none
@@ -575,7 +575,7 @@ def ofCode (reasonPhrase : Option { x : String // IsValidReasonPhrase x }) (code
   | n =>
     let ph := reasonPhrase.getD ⟨"Unknown", by decide⟩
 
-    if h : (100 ≤ n ∧ n ≤ 999) ∧ ¬isKnownStatusCode n then
+    uif h : (100 ≤ n ∧ n ≤ 999) ∧ ¬isKnownStatusCode n then
       some <| .other ⟨n, ph.val, ph.property, h.left, h.right⟩
     else
       none
@@ -588,7 +588,7 @@ Reference: https://httpwg.org/specs/rfc9110.html#status.codes
 -/
 @[inline]
 def isInformational (c : Status) : Bool :=
-  100 ≤ c.toCode ∧ c.toCode < 200
+  100 ≤ᵇ c.toCode && c.toCode <ᵇ 200
 
 /--
 Checks if the status code is a success status, meaning that the request was successfully received,
@@ -598,7 +598,7 @@ Reference: https://httpwg.org/specs/rfc9110.html#status.codes
 -/
 @[inline]
 def isSuccess (c : Status) : Bool :=
-  200 ≤ c.toCode ∧ c.toCode < 300
+  200 ≤ᵇ c.toCode && c.toCode <ᵇ 300
 
 /--
 Checks if the type of the status code is redirection, meaning that further action needs to be taken
@@ -608,7 +608,7 @@ Reference: https://httpwg.org/specs/rfc9110.html#status.codes
 -/
 @[inline]
 def isRedirection (c : Status) : Bool :=
-  300 ≤ c.toCode ∧ c.toCode < 400
+  300 ≤ᵇ c.toCode && c.toCode <ᵇ 400
 
 /--
 Checks if the type of the status code is a client error, meaning that the request contains bad syntax
@@ -618,7 +618,7 @@ Reference: https://httpwg.org/specs/rfc9110.html#status.codes
 -/
 @[inline]
 def isClientError (c : Status) : Bool :=
-  400 ≤ c.toCode ∧ c.toCode < 500
+  400 ≤ᵇ c.toCode && c.toCode <ᵇ 500
 
 /--
 Checks if the type of the status code is a server error, meaning that the server failed to fulfill
@@ -628,7 +628,7 @@ Reference: https://httpwg.org/specs/rfc9110.html#status.codes
 -/
 @[inline]
 def isServerError (c : Status) : Bool :=
-  500 ≤ c.toCode ∧ c.toCode < 600
+  500 ≤ᵇ c.toCode && c.toCode <ᵇ 600
 
 /--
 Checks if the status code indicates an error (either client error 4xx or server error 5xx).
@@ -637,7 +637,7 @@ Reference: https://httpwg.org/specs/rfc9110.html#status.codes
 -/
 @[inline]
 def isError (c : Status) : Bool :=
-  c.isClientError ∨ c.isServerError
+  c.isClientError || c.isServerError
 
 /--
 Returns the standard reason phrase for an HTTP status code as defined in RFC 9110.

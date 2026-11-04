@@ -90,8 +90,8 @@ Turn the combined structure into a single contiguous ByteArray.
 -/
 @[inline]
 def toByteArray (cb : ChunkedBuffer) : ByteArray :=
-  if h : 1 = cb.data.size then
-    cb.data[0]'(Nat.le_of_eq h)
+  bif h : 1 =ᵇ cb.data.size then
+    cb.data[0]'(Nat.le_of_eq (eq_of_decideEq_eq_true h))
   else
     cb.data.foldl (· ++ ·) (.emptyWithCapacity cb.size)
 
@@ -114,7 +114,7 @@ Checks whether the buffer is empty.
 -/
 @[inline]
 def isEmpty (bb : ChunkedBuffer) : Bool :=
-  bb.size = 0
+  bb.size =ᵇ 0
 
 instance : Inhabited ChunkedBuffer := ⟨empty⟩
 

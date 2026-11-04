@@ -75,7 +75,7 @@ def ofString? (s : String) : Option Value :=
   -- A field value does not include leading or trailing whitespace.
   let val := s.trimAscii.toString
 
-  if h : IsValidHeaderValue val then
+  uif h : IsValidHeaderValue val then
     some ⟨val, h⟩
   else
     none

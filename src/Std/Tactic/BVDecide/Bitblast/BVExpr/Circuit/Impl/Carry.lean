@@ -39,9 +39,9 @@ where
   go {w : Nat} (aig : AIG α) (lhs rhs : AIG.RefVec aig w) (curr : Nat)
       (cin : AIG.Ref aig) :
       AIG.Entrypoint α :=
-    if hidx : curr < w then
-      let lin := lhs.get curr hidx
-      let rin := rhs.get curr hidx
+    bif hidx : curr <ᵇ w then
+      let lin := lhs.get curr (lt_of_decideLT_eq_true hidx)
+      let rin := rhs.get curr (lt_of_decideLT_eq_true hidx)
       let res := mkFullAdderCarry aig ⟨lin, rin, cin⟩
       have := AIG.LawfulOperator.le_size (f := mkFullAdderCarry) ..
       let aig := res.aig

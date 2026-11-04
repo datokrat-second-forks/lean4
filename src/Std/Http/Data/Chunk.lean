@@ -70,7 +70,7 @@ Attempts to create an `ExtensionName` from a `String`, returning `none` if the s
 invalid characters or is empty.
 -/
 def ofString? (s : String) : Option ExtensionName :=
-  if h : IsValidExtensionName s then
+  bif h : isToken s then
     some ⟨s, h⟩
   else
     none
@@ -137,7 +137,7 @@ Attempts to create an `ExtensionValue` from a `String`, returning `none` if the 
 characters that cannot be encoded as an HTTP quoted-string.
 -/
 def ofString? (s : String) : Option ExtensionValue :=
-  if h : IsValidExtensionValue s then
+  bif h : s.toList.all Char.quotedStringChar then
     some ⟨s, h⟩
   else
     none

@@ -90,7 +90,7 @@ theorem go_eval_eq_eval (expr : BVLogicalExpr) (aig : AIG BVBit) (assign : BVExp
         exact hinv
   | ite discr lhs rhs dih lih rih =>
     simp only [go, Ref.cast_eq, denote_mkIfCached, denote_projected_entry,
-      eval_ite, Bool.ite_eq_cond_iff]
+      eval_ite, ← Std.Tactic.BVDecide.Normalize.ite_eq_cond]
     apply ite_congr
     · rw [go_denote_mem_prefix (hstart := ?h)]
       case h =>

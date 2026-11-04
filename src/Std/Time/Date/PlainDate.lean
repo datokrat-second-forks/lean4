@@ -79,8 +79,8 @@ Creates a new `PlainDate` from year, month, and day components.
 -/
 @[inline]
 def ofYearMonthDay? (year : Year.Offset) (month : Month.Ordinal) (day : Day.Ordinal) : Option PlainDate :=
-  if valid : year.Valid month day
-    then some (PlainDate.mk year month day valid)
+  bif valid : day ≤ᵇ month.days year.isLeap
+    then some (PlainDate.mk year month day (le_of_decideLE_eq_true valid))
     else none
 
 /--
@@ -96,15 +96,15 @@ Creates a `PlainDate` from the number of days since January 1st, 1970.
 -/
 def ofEpochDay (day : Day.Offset) : PlainDate :=
   let z := day.toInt + 719468
-  let era := (if z ≥ 0 then z else z - 146096).tdiv 146097
+  let era := (bif z ≥ᵇ 0 then z else z - 146096).tdiv 146097
   let doe := z - era * 146097
   let yoe := (doe - doe.tdiv 1460 + doe.tdiv 36524 - doe.tdiv 146096).tdiv 365
   let y := yoe + era * 400
   let doy := doe - (365 * yoe + yoe.tdiv 4 - yoe.tdiv 100)
   let mp := (5 * doy + 2).tdiv 153
   let d := doy - (153 * mp + 2).tdiv 5 + 1
-  let m := mp + (if mp < 10 then 3 else -9)
-  let y := y + (if m <= 2 then 1 else 0)
+  let m := mp + (bif mp <ᵇ 10 then 3 else -9)
+  let y := y + (bif m ≤ᵇ 2 then 1 else 0)
   .ofYearMonthDayClip y (.clip m (by decide)) (.clip d (by decide))
 
 /--
@@ -144,12 +144,12 @@ def inLeapYear (date : PlainDate) : Bool :=
 Converts a `PlainDate` to the number of days since 1970-01-01T00:00:00.
 -/
 def toEpochDay (date : PlainDate) : Day.Offset :=
-  let y : Int := if date.month.toInt > 2 then date.year else date.year.toInt - 1
-  let era : Int := (if y ≥ 0 then y else y - 399).tdiv 400
+  let y : Int := bif date.month.toInt >ᵇ 2 then date.year else date.year.toInt - 1
+  let era : Int := (bif y ≥ᵇ 0 then y else y - 399).tdiv 400
   let yoe : Int := y - era * 400
   let m : Int := date.month.toInt
   let d : Int := date.day.toInt
-  let doy := (153 * (m + (if m > 2 then -3 else 9)) + 2).tdiv 5 + d - 1
+  let doy := (153 * (m + (bif m >ᵇ 2 then -3 else 9)) + 2).tdiv 5 + d - 1
   let doe := yoe * 365 + yoe.tdiv 4 - yoe.tdiv 100 + doy
 
   .ofInt (era * 146097 + doe - 719468)
@@ -303,7 +303,7 @@ Calculates the `Weekday` of a given `PlainDate` using Zeller's Congruence for th
 -/
 def weekday (date : PlainDate) : Weekday :=
   let days := date.toEpochDay.val
-  let res := if days ≥ -4 then (days + 4) % 7 else (days + 5) % 7 + 6
+  let res := bif days ≥ᵇ -4 then (days + 4) % 7 else (days + 5) % 7 + 6
   .ofOrdinal (Bounded.LE.ofNatWrapping res (by decide))
 
 /--
@@ -325,11 +325,11 @@ def withWeekday (date : PlainDate) (desiredWeekday : Weekday) : PlainDate :=
   let offset := desiredWeekday.toOrdinal |>.subBounds weekday
 
   let offset : Bounded.LE 0 6 :=
-    if h : offset.val < 0 then
-      offset.truncateTop (Int.le_sub_one_of_lt h) |>.addBounds (.exact 7)
+    bif h : offset.val <ᵇ 0 then
+      offset.truncateTop (Int.le_sub_one_of_lt (lt_of_decideLT_eq_true h)) |>.addBounds (.exact 7)
       |>.expandBottom (by decide)
     else
-      offset.truncateBottom (Int.not_lt.mp h)
+      offset.truncateBottom (Int.not_lt.mp (not_lt_of_decideLT_eq_false h))
       |>.expandTop (by decide)
 
   date.addDays (Day.Offset.ofInt offset.toInt)
@@ -349,7 +349,7 @@ def startOfWeekBasedYear (year : Year.Offset) (firstDay : Weekday) (minimalDays 
   let daysInNewYearWeek : Bounded.LE 1 7 := Bounded.LE.exact 7 |>.subBounds localDay
   let weekStart := jan1 |>.subDays (Day.Offset.ofNat localDay.toNat)
 
-  if daysInNewYearWeek.val >= minimalDays.val then
+  bif daysInNewYearWeek.val ≥ᵇ minimalDays.val then
     weekStart
   else
     weekStart.addDays 7
@@ -364,7 +364,7 @@ def weekOfYear (date : PlainDate) (firstDay : Weekday := .monday) (minDaysBounde
   let year := date.year
   let thisYearStart := startOfWeekBasedYear year firstDay minDaysBounded
 
-  if date.toEpochDay < thisYearStart.toEpochDay then
+  bif date.toEpochDay <ᵇ thisYearStart.toEpochDay then
     let prevYearStart := startOfWeekBasedYear (year - 1) firstDay minDaysBounded
     let interval := date.toEpochDay - prevYearStart.toEpochDay
     let interval := Bounded.LE.ofNatWrapping interval.val (by decide) (lo := 0) (hi := 370)
@@ -372,7 +372,7 @@ def weekOfYear (date : PlainDate) (firstDay : Weekday := .monday) (minDaysBounde
     w.add 1
   else
     let nextYearStart := startOfWeekBasedYear (year + 1) firstDay minDaysBounded
-    if date.toEpochDay >= nextYearStart.toEpochDay then
+    bif date.toEpochDay ≥ᵇ nextYearStart.toEpochDay then
       1
     else
       let interval := date.toEpochDay - thisYearStart.toEpochDay
@@ -387,11 +387,11 @@ and `minDays` as the minimum number of days in the first week of the year (defau
 def weekYear (date : PlainDate) (firstDay : Weekday := .monday) (minDays : Bounded.LE 0 6 := Bounded.LE.mk 4 (by decide)) : Year.Offset :=
   let year := date.year
   let thisYearStart := startOfWeekBasedYear year firstDay minDays
-  if date.toEpochDay < thisYearStart.toEpochDay then
+  bif date.toEpochDay <ᵇ thisYearStart.toEpochDay then
     year - 1
   else
     let nextYearStart := startOfWeekBasedYear (year + 1) firstDay minDays
-    if date.toEpochDay >= nextYearStart.toEpochDay then
+    bif date.toEpochDay ≥ᵇ nextYearStart.toEpochDay then
       year + 1
     else
       year

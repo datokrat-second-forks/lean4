@@ -77,7 +77,7 @@ theorem size_empty : Clause.size (Clause.empty : Clause α) = 0 := by
 @[inline]
 def add (c : Clause α) (atom : α) (pol : Bool) : Clause α where
   atoms := c.atoms.push atom
-  polarities := c.polarities.push (if pol then 1 else 0)
+  polarities := c.polarities.push (bif pol then 1 else 0)
   size_polarities := by rw [ByteArray.size_push, Array.size_push, c.size_polarities]
   isBool_polarities := by
     intro i h
@@ -106,7 +106,7 @@ The polarity of the literal at index `i` of `c`; `false` if `i` is out of bounds
 -/
 @[expose]
 def polarity (c : Clause α) (i : Nat) : Bool :=
-  if h : i < c.polarities.size then c.polarities[i] == 1 else false
+  bif h : i <ᵇ c.polarities.size then c.polarities[i] == 1 else false
 
 theorem Internal.polarity_eq_data {c : Clause α} {i : Nat} :
     c.polarity i = (c.polarities.data[i]?.getD 0 == 1) := by
@@ -121,14 +121,14 @@ theorem Internal.polarity_eq_data {c : Clause α} {i : Nat} :
 
 theorem Internal.polarity_eq_getElem {c : Clause α} {i : Nat} (h : i < c.polarities.size) :
     c.polarity i = (c.polarities[i] == 1) := by
-  rw [polarity, dite_eq_left h]
+  rw [polarity, Bool.dcond_decideLT_pos h]
 
 @[simp]
 theorem polarity_empty : (Clause.empty : Clause α).polarity i = false := by
   simp [Internal.polarity_eq_data, Clause.empty]
 
 theorem polarity_add {c : Clause α} {i : Nat} :
-    (c.add atom pol).polarity i = if i = c.size then pol else c.polarity i := by
+    (c.add atom pol).polarity i = uif i = c.size then pol else c.polarity i := by
   simp only [add, Internal.polarity_eq_data, ByteArray.data_push, Array.getElem?_push,
     ByteArray.size_data, Internal.size_eq_size_polarities]
   by_cases h : i = c.polarities.size
@@ -272,10 +272,10 @@ def contains [BEq α] (c : Clause α) (lit : Literal α) : Bool :=
   go 0
 where
   go (i : Nat) : Bool :=
-    if h : i < c.size then
+    bif h : i <ᵇ c.size then
       have h1 := by simpa [Internal.size_eq_size_atoms] using h
       have h2 := by simpa [Internal.size_eq_size_polarities] using h
-      if c.atoms[i]'h1 == lit.1 && (c.polarities[i]'h2 == 1) == lit.2 then
+      bif c.atoms[i]'h1 == lit.1 && (c.polarities[i]'h2 == 1) == lit.2 then
         true
       else
         go (i + 1)
@@ -400,10 +400,10 @@ def erase [BEq α] (c : Clause α) (lit : Literal α) : Clause α :=
   go 0 empty
 where
   go (i : Nat) (acc : Clause α) : Clause α :=
-    if h : i < c.size then
-      let atom := c.atoms[i]'(by rw [← Internal.size_eq_size_atoms]; exact h)
-      let pol := (c.polarities[i]'(by rw [c.size_polarities]; exact h)) == 1
-      if atom == lit.fst && pol == lit.snd then
+    bif h : i <ᵇ c.size then
+      let atom := c.atoms[i]'(by rw [← Internal.size_eq_size_atoms]; exact lt_of_decideLT_eq_true h)
+      let pol := (c.polarities[i]'(by rw [c.size_polarities]; exact lt_of_decideLT_eq_true h)) == 1
+      bif atom == lit.fst && pol == lit.snd then
         go (i + 1) acc
       else
         go (i + 1) (acc.add atom pol)
@@ -419,7 +419,7 @@ private theorem literals_erase_go [BEq α] [LawfulBEq α] {c : Clause α} {lit :
     have hlt : i < c.literals.length := by rw [length_literals]; exact h
     have hlit : c.literals[i] = lit := by
       rw [Internal.getElem_literals hlt, Internal.polarity_eq_getElem (by rw [c.size_polarities]; exact h)]
-      simp only [atom, pol, Bool.and_eq_true, beq_iff_eq] at heq
+      simp only [atom, pol, beq_iff_eq] at heq
       simp [heq.1, heq.2]
     rw [List.drop_eq_getElem_cons hlt, List.filter_cons, hlit]
     simp [ih]
@@ -428,7 +428,7 @@ private theorem literals_erase_go [BEq α] [LawfulBEq α] {c : Clause α} {lit :
     have hlit : c.literals[i] = (atom, pol) := by
       rw [Internal.getElem_literals hlt, Internal.polarity_eq_getElem (by rw [c.size_polarities]; exact h)]
     have hne : ((atom, pol) : Literal α) != lit := by
-      simp only [atom, pol, Bool.and_eq_true, beq_iff_eq, not_and] at heq
+      simp only [atom, pol, beq_iff_eq, not_and] at heq
       simp only [bne_iff_ne, ne_eq, Prod.ext_iff, not_and]
       exact heq
     rw [List.drop_eq_getElem_cons hlt, List.filter_cons, hlit, ih, literals_add]
@@ -481,7 +481,7 @@ theorem Internal.polarities_append {c1 c2 : Clause α} :
 
 theorem polarity_append {c1 c2 : Clause α} {i : Nat} :
     (c1 ++ c2).polarity i =
-      if i < c1.size then c1.polarity i else c2.polarity (i - c1.size) := by
+      uif i < c1.size then c1.polarity i else c2.polarity (i - c1.size) := by
   have h1 : c1.polarities.data.size = c1.size := by
     rw [ByteArray.size_data, ← Internal.size_eq_size_polarities]
   simp only [Internal.polarity_eq_data, Internal.polarities_append, ByteArray.data_append,
@@ -503,11 +503,11 @@ theorem literals_append {c1 c2 : Clause α} :
     simp only [Internal.atoms_append]
     by_cases hi : i < c1.size
     · have hi' : i < c1.atoms.size := by simpa [Internal.size_eq_size_atoms] using hi
-      rw [ite_eq_left hi, Array.getElem_append_left hi',
+      rw [UDecidable.ite_eq_left hi, Array.getElem_append_left hi',
         List.getElem_append_left (by simpa [length_literals] using hi),
         Internal.getElem_literals]
     · have hi' : ¬ i < c1.atoms.size := by simpa [Internal.size_eq_size_atoms] using hi
-      rw [ite_eq_right hi, Array.getElem_append_right (by omega),
+      rw [UDecidable.ite_eq_right hi, Array.getElem_append_right (by omega),
         List.getElem_append_right (by simp only [length_literals]; omega), Internal.getElem_literals]
       simp [length_literals, Internal.size_eq_size_atoms]
 

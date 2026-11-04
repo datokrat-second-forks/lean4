@@ -94,7 +94,7 @@ theorem go_denote_eq (aig : AIG α) (distance : Nat) (input : AIG.RefVec aig w)
           assign
         ⟧
           =
-        if hidx : (distance + idx) < w then
+        uif hidx : (distance + idx) < w then
           ⟦aig, input.get (distance + idx) (by omega), assign⟧
         else
           false
@@ -157,7 +157,7 @@ theorem denote_blastShiftRightConst (aig : AIG α) (target : ShiftTarget aig w)
           assign
         ⟧
           =
-        if hidx : (target.distance + idx) < w then
+        uif hidx : (target.distance + idx) < w then
           ⟦aig, target.vec.get (target.distance + idx) (by omega), assign⟧
         else
           false
@@ -198,7 +198,7 @@ theorem go_denote_eq (aig : AIG α) (distance : Nat) (input : AIG.RefVec aig w)
           assign
         ⟧
           =
-        if hidx : (distance + idx) < w then
+        uif hidx : (distance + idx) < w then
           ⟦aig, input.get (distance + idx) (by omega), assign⟧
         else
           ⟦aig, input.get (w - 1) (by omega), assign⟧
@@ -212,7 +212,7 @@ theorem go_denote_eq (aig : AIG α) (distance : Nat) (input : AIG.RefVec aig w)
       split at hgo
       next hlt =>
         rw [heq] at hlt
-        simp only [hlt, ↓reduceDIte]
+        simp only [hlt, ↓reduceUDIte]
         dsimp only at hgo
         rw [← hgo]
         rw [go_get]; case hidx => omega
@@ -221,7 +221,7 @@ theorem go_denote_eq (aig : AIG α) (distance : Nat) (input : AIG.RefVec aig w)
         · omega
       next hlt =>
         rw [heq] at hlt
-        simp only [hlt, ↓reduceDIte]
+        simp only [hlt, ↓reduceUDIte]
         dsimp only at hgo
         rw [← hgo]
         rw [go_get]; case hidx => omega
@@ -251,7 +251,7 @@ theorem denote_blastArithShiftRightConst (aig : AIG α) (target : ShiftTarget ai
           assign
         ⟧
           =
-        if hidx : (target.distance + idx) < w then
+        uif hidx : (target.distance + idx) < w then
           ⟦aig, target.vec.get (target.distance + idx) (by omega), assign⟧
         else
           ⟦aig, target.vec.get (w - 1) (by omega), assign⟧
@@ -289,7 +289,7 @@ theorem twoPowShift_eq (aig : AIG α) (target : TwoPowShiftTarget aig w) (lhs : 
         denote_blastShiftRightConst]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastShiftRightConst) (h := Ref.hgate _)]
       rw [hright]
-      simp only [hif1, ↓reduceIte]
+      simp only [hif1, Bool.cond_true]
       have hmod : 2 ^ pow % 2 ^ n = 2 ^ pow := by
         apply Nat.mod_eq_of_lt
         apply Nat.pow_lt_pow_of_lt <;> omega
@@ -307,7 +307,7 @@ theorem twoPowShift_eq (aig : AIG α) (target : TwoPowShiftTarget aig w) (lhs : 
         denote_blastShiftRightConst]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastShiftRightConst) (h := Ref.hgate _)]
       rw [hright]
-      simp only [hif1, Bool.false_eq_true, ↓reduceIte]
+      simp only [hif1, Bool.cond_false]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastShiftRightConst) (h := Ref.hgate _)]
       rw [hleft]
       simp
@@ -422,7 +422,7 @@ theorem twoPowShift_eq (aig : AIG α) (target : TwoPowShiftTarget aig w) (lhs : 
         denote_blastArithShiftRightConst]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastArithShiftRightConst) (h := Ref.hgate _)]
       rw [hright]
-      simp only [hif1, ↓reduceIte]
+      simp only [hif1, Bool.cond_true]
       have hmod : 2 ^ pow % 2 ^ n = 2 ^ pow := by
         apply Nat.mod_eq_of_lt
         apply Nat.pow_lt_pow_of_lt <;> omega
@@ -440,7 +440,7 @@ theorem twoPowShift_eq (aig : AIG α) (target : TwoPowShiftTarget aig w) (lhs : 
         denote_blastArithShiftRightConst]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastArithShiftRightConst) (h := Ref.hgate _)]
       rw [hright]
-      simp only [hif1, Bool.false_eq_true, ↓reduceIte]
+      simp only [hif1, Bool.cond_false]
       rw [AIG.LawfulVecOperator.denote_mem_prefix (f := blastArithShiftRightConst) (h := Ref.hgate _)]
       rw [hleft]
       simp

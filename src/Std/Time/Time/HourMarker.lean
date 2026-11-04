@@ -55,7 +55,7 @@ namespace HourMarker
 `ofOrdinal` converts an `Hour.Ordinal` value to an `HourMarker`, indicating whether it is AM or PM.
 -/
 def ofOrdinal (time : Hour.Ordinal) : HourMarker :=
-  if time.val ≥ 12 then
+  bif time.val ≥ᵇ 12 then
     .pm
   else
     .am
@@ -65,24 +65,24 @@ Converts a 12-hour clock time to a 24-hour clock time based on the `HourMarker`.
 -/
 def toAbsolute (marker : HourMarker) (time : Bounded.LE 1 12) : Hour.Ordinal :=
   match marker with
-  | .am => if time.val = 12 then 0 else time.expand (by decide) (by decide)
-  | .pm => if time.val = 12 then 12 else time.add 12 |>.emod 24 (by decide)
+  | .am => bif time.val =ᵇ 12 then 0 else time.expand (by decide) (by decide)
+  | .pm => bif time.val =ᵇ 12 then 12 else time.add 12 |>.emod 24 (by decide)
 
 /--
 Converts a 24-hour clock time to a 12-hour clock time with a `HourMarker`.
 -/
 def toRelative (hour : Hour.Ordinal) : Bounded.LE 1 12 × HourMarker :=
-  if h₀ : hour.val = 0 then
+  bif h₀ : hour.val =ᵇ 0 then
     (⟨12, by decide⟩, .am)
-  else if h₁ : hour.val ≤ 12 then
-     if hour.val = 12 then
+  else bif h₁ : hour.val ≤ᵇ 12 then
+     bif hour.val =ᵇ 12 then
       (⟨12, by decide⟩, .pm)
     else
-      Int.ne_iff_lt_or_gt.mp h₀ |>.by_cases
+      Int.ne_iff_lt_or_gt.mp (decideEq_eq_false_iff.mp h₀) |>.by_cases
         (nomatch Int.not_le.mpr · <| hour.property.left)
-        (⟨hour.val, And.intro · h₁⟩, .am)
+        (⟨hour.val, And.intro · (le_of_decideLE_eq_true h₁)⟩, .am)
   else
-    let h := Int.not_le.mp h₁
+    let h := Int.not_le.mp (decideLE_eq_false_iff.mp h₁)
     let t := hour |>.truncateBottom h |>.sub 12
     (t.expandTop (by decide), .pm)
 

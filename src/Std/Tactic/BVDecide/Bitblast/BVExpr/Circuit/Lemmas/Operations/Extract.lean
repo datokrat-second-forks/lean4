@@ -81,7 +81,7 @@ theorem denote_blastExtract (aig : AIG α) (target : ExtractTarget aig newWidth)
     ∀ (idx : Nat) (hidx : idx < newWidth),
         ⟦(blastExtract aig target).aig, (blastExtract aig target).vec.get idx hidx, assign⟧
           =
-        if h : (target.start + idx) < target.w then
+        uif h : (target.start + idx) < target.w then
           ⟦aig, target.vec.get (target.start + idx) h, assign⟧
         else
           false

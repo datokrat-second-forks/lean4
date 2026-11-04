@@ -151,7 +151,7 @@ unavoidable in your code, consider using `RecursiveMutex`.
 -/
 def Mutex.tryAtomically [Monad m] [MonadLiftT BaseIO m] [MonadFinally m]
     (mutex : Mutex α) (k : AtomicT α m β) : m (Option β) := do
-  if ← mutex.mutex.tryLock then
+  bif ← mutex.mutex.tryLock then
     try
       some <$> k mutex.ref
     finally

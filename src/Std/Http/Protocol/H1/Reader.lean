@@ -175,7 +175,7 @@ by discarding already-parsed bytes before appending.
 @[inline]
 def feed (data : ByteArray) (reader : Reader dir) : Reader dir :=
   { reader with input :=
-    if reader.input.atEnd
+    bif reader.input.atEnd
       then data.iter
       else (reader.input.array.extract reader.input.pos reader.input.array.size ++ data).iter }
 

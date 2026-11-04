@@ -284,7 +284,7 @@ where
       (hcomp : ∀ (i : Nat) (h : i < decls.size), i < idx → ∀ (a : α),
         decls[i] = .atom a → map[Decl.atom a]? = some i) :
       Cache α decls :=
-    if hidx : idx < decls.size then
+    bif hidx : idx <ᵇ decls.size then
       match hdecl : decls[idx] with
       | .atom a =>
         have hsound' : ∀ (decl : Decl α) (i : Nat), (map.insert (.atom a) idx)[decl]? = some i →
@@ -295,7 +295,7 @@ where
           next heq =>
             simp only [Option.some.injEq] at hfound
             subst heq hfound
-            exact ⟨hidx, hdecl⟩
+            exact ⟨lt_of_decideLT_eq_true hidx, hdecl⟩
           next => exact hsound decl i hfound
         have hcomp' : ∀ (i : Nat) (h : i < decls.size), i < idx + 1 → ∀ (b : α),
             decls[i] = .atom b → (map.insert (.atom a) idx)[Decl.atom b]? = some i := by
@@ -305,7 +305,7 @@ where
           next heq =>
             simp only [Decl.atom.injEq] at heq
             subst heq
-            have := huniq idx i hidx h a hdecl hatom
+            have := huniq idx i (lt_of_decideLT_eq_true hidx) h a hdecl hatom
             rw [this]
           next heq =>
             have hne : i ≠ idx := by
@@ -495,7 +495,7 @@ where
       (hinv : IsDAG α decls) (idx : Nat) (hidx : idx < decls.size) :
       StateM (HashSet (Fin decls.size)) String := do
     let fidx : Fin decls.size := Fin.mk idx hidx
-    if (← get).contains fidx then
+    bif (← get).contains fidx then
       return acc
     modify (fun s ↦ s.insert fidx)
     match elem : decls[idx] with
@@ -511,7 +511,7 @@ where
       let laig ← go (acc ++ curr) decls hinv lidx (by omega)
       go laig decls hinv ridx (by omega)
   invEdgeStyle (isInv : Bool) : String :=
-    if isInv then " [color=red]" else " [color=blue]"
+    bif isInv then " [color=red]" else " [color=blue]"
   toGraphvizString {α : Type} [DecidableEq α] [ToString α] [Hashable α] (decls : Array (Decl α))
       (idx : Fin decls.size) : String :=
     match decls[idx] with
@@ -614,7 +614,7 @@ def isConstant (aig : AIG α) (ref : Ref aig) (b : Bool) : Bool :=
   let ⟨gate, invert, hgate⟩ := ref
   let decl := aig.decls[gate]'hgate
   match decl with
-  | .false => invert = b
+  | .false => invert == b
   | _ => false
 
 /--

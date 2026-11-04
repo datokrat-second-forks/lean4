@@ -20,11 +20,11 @@ namespace State
 def checkRatHintsExhaustive (s : State) (ratHints : Array (Nat × Array Nat))
     (negPivot : Literal Nat) : Bool :=
   let set : Std.HashSet Nat := .ofArray <| ratHints.map (·.1)
-  s.all fun idx c => ¬negPivot ∈ c ∨ set.contains idx
+  s.all fun idx c => !c.contains negPivot || set.contains idx
 
 public def checkRat (s : State) (clause : CNF.Clause Nat) (pivot : Literal Nat)
     (rupHints : Array Nat) (ratHints : Array (Nat × Array Nat)) : Bool := Id.run do
-  if pivot ∉ clause then
+  bif !clause.contains pivot then
     return false
   let some assign := Assignment.ofClause clause | return true
   match s.propagateHints assign rupHints with
@@ -32,7 +32,7 @@ public def checkRat (s : State) (clause : CNF.Clause Nat) (pivot : Literal Nat)
   | .error => return false
   | .extended assign =>
     let negPivot := pivot.negate
-    if !s.checkRatHintsExhaustive ratHints negPivot then
+    bif !s.checkRatHintsExhaustive ratHints negPivot then
       return false
     return ratHints.all fun (idx, hints) =>
       match s.get? idx with
@@ -54,11 +54,12 @@ theorem checkRatHintsExhaustive_spec {s : State} {ratHints : Array (Nat × Array
   intro c hc hmem
   simp only [checkRatHintsExhaustive, HashSet.ofArray_eq_ofList, Array.toList_map,
     HashSet.contains_ofList, List.contains_eq_mem, List.mem_map, Array.mem_toList_iff, Prod.exists,
-    exists_and_right, exists_eq_right, UDecidable.decide_eq_true_eq] at h
+    exists_and_right, exists_eq_right] at h
   rcases forall_of_all_eq_true h c hc with ⟨idx, hidx1, hidx2⟩
-  simp only [UDecidable.decide_eq_true_eq] at hidx2
+  simp only [Bool.or_eq_true, Bool.not_eq_true', UDecidable.decide_eq_true_eq] at hidx2
   rcases hidx2 with hidx2 | hidx2
-  · contradiction
+  · rw [← Bool.not_eq_true, CNF.Clause.contains_iff_mem] at hidx2
+    contradiction
   · rcases hidx2 with ⟨hints, hmem⟩
     exists idx, hints
 
@@ -78,7 +79,7 @@ theorem checkRat_spec {s : State} {clause : CNF.Clause Nat} {pivot : Literal Nat
   all_goals mleave
   · simp
   · constructor
-    · simp_all
+    · simp_all [CNF.Clause.contains_iff_mem]
     · intros
       apply CNF.entails_clause_append_left
       apply Assignment.entails_clause_of_unsat_of_ofClause_eq_some
@@ -90,7 +91,7 @@ theorem checkRat_spec {s : State} {clause : CNF.Clause Nat} {pivot : Literal Nat
   · next hmemp assign hassign newAssign hprop negPivot hex =>
     intro hloop
     constructor
-    · simp_all
+    · simp_all [CNF.Clause.contains_iff_mem]
     · intro c' hmem hpmem
       rw [Array.all_eq_true'] at hloop
       rcases checkRatHintsExhaustive_spec (by simpa using hex) c' hmem hpmem with ⟨idx, hints, hidx1, hidx2⟩
@@ -155,7 +156,7 @@ theorem checkRat_spec {s : State} {clause : CNF.Clause Nat} {pivot : Literal Nat
           rw [CNF.isNegationOf_def] at hspec1
           simpa [hspec1] using hsat2
   · constructor
-    · simp_all
+    · simp_all [CNF.Clause.contains_iff_mem]
     · intros
       apply CNF.entails_clause_append_left
       apply CNF.entails_clause_of_forall_sat

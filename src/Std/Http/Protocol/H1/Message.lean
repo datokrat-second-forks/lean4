@@ -91,7 +91,7 @@ def Message.Head.getSize (message : Message.Head dir) (allowEOFBody : Bool) : Op
       match contentLength with
       | some #[cl] => .fixed <$> (Header.ContentLength.parse cl |>.map (·.length))
       | some _ => none -- To avoid request smuggling with malformed/multiple content-length headers.
-      | none => if allowEOFBody then some (.fixed 0) else none
+      | none => bif allowEOFBody then some (.fixed 0) else none
 
   -- Single transfer-encoding header.
   | some #[header] =>
@@ -102,7 +102,7 @@ def Message.Head.getSize (message : Message.Head dir) (allowEOFBody : Bool) : Op
         -- HTTP/1.0 does not define chunked transfer encoding (RFC 2068 §19.4.6).
         -- A server MUST NOT use chunked with an HTTP/1.0 peer; likewise, an
         -- HTTP/1.0 request carrying Transfer-Encoding: chunked is malformed.
-        if message.version == .v10 then none else some .chunked
+        bif message.version == .v10 then none else some .chunked
     | _, _ => none -- To avoid request smuggling when TE and CL are mixed.
 
   -- We disallow multiple transfer-encoding headers.
@@ -124,7 +124,7 @@ def Message.Head.shouldKeepAlive (message : Message.Head dir) : Bool :=
   match tokens? with
   | none => false
   | some tokens =>
-      if message.version == .v11 then
+      bif message.version == .v11 then
         !tokens.any (· == "close")
       else
         tokens.any (· == "keep-alive")

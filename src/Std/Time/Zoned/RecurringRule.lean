@@ -51,7 +51,7 @@ Returns the `Day.Offset` (days since epoch) for a `TransitionSpec.mwd` in the gi
 Finds the `w`-th occurrence of weekday `d` in month `m`; if `w = 5`, returns the last occurrence.
 -/
 def toEpochDayMWD (year : Year.Offset) (month : Month.Ordinal) (week : Week.Aligned.Ordinal) (day : Weekday.Ordinal) : Day.Offset :=
-  if week.val == 5 then
+  bif week.val == 5 then
     -- "week 5" means the last occurrence of `day` in `month`.
     -- Start from the last day of the month and walk backwards to the desired weekday.
     let lastDay := month.days year.isLeap
@@ -75,7 +75,7 @@ Returns the `Day.Offset` (days since epoch) for a `TransitionSpec.julian` in the
 -/
 def toEpochDayJulian (year : Year.Offset) (day : Bounded.LE 1 365) : Day.Offset :=
   let jan1 := PlainDate.ofYearMonthDayClip year 1 1
-  let extra : Int := if year.isLeap && day.val >= 60 then 1 else 0
+  let extra : Int := bif year.isLeap && day.val ≥ᵇ 60 then 1 else 0
   jan1.toEpochDay + Day.Offset.ofInt (day.val - 1 + extra)
 
 /--

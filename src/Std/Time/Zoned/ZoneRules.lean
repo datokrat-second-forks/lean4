@@ -157,10 +157,10 @@ or `none` if the timestamp precedes all transitions.
 -/
 def findTransitionIndexForTimestamp (transitions : Array Transition) (timestamp : Timestamp) : Option Nat :=
   let value := timestamp.toSecondsSinceUnixEpoch
-  match transitions.findIdx? (fun t => t.time.val > value.val) with
+  match transitions.findIdx? (fun t => t.time.val >ᵇ value.val) with
   | some 0 => none
   | some i => some (i - 1)
-  | none => if transitions.isEmpty then none else some (transitions.size - 1)
+  | none => bif transitions.isEmpty then none else some (transitions.size - 1)
 
 /--
 Finds the transition in effect at a given timestamp in `Array Transition`.
@@ -212,11 +212,11 @@ def timezoneAt (rule : RecurringRule) (tm : Timestamp) : TimeZone := Id.run do
   let dstStart := transitionUtcSeconds startRule year rule.stdOffset
   let dstEnd   := transitionUtcSeconds endRule year dst.offset
 
-  if dstStart ≤ dstEnd then
-    if dstStart ≤ secs && secs < dstEnd then dstTz else stdTz
+  bif dstStart ≤ᵇ dstEnd then
+    bif dstStart ≤ᵇ secs && secs <ᵇ dstEnd then dstTz else stdTz
   else
     -- Southern Hemisphere: DST spans the year boundary
-    if secs < dstEnd || dstStart ≤ secs then dstTz else stdTz
+    bif secs <ᵇ dstEnd || dstStart ≤ᵇ secs then dstTz else stdTz
 
 end RecurringRule
 
@@ -258,7 +258,7 @@ def findLocalTimeTypeForTimestamp (zr : ZoneRules) (timestamp : Timestamp) : Loc
   let some t := zr.transitions[lastIdx]?
     | return zr.initialLocalTimeType
 
-  let some rule := if lastIdx + 1 == zr.transitions.size then zr.transitionRule else none
+  let some rule := bif lastIdx + 1 == zr.transitions.size then zr.transitionRule else none
     | return t.localTimeType
 
   let tz := rule.timezoneAt timestamp
@@ -279,7 +279,7 @@ def findLocalTimeTypeForWallTime (zr : ZoneRules) (wallTime : WallTime) : LocalT
 
   for t in zr.transitions do
     let localTransitionTime := t.timestamp.toWallTime ltt.gmtOffset
-    if wallTime < localTransitionTime then
+    bif wallTime <ᵇ localTransitionTime then
       return ltt
     ltt := t.localTimeType
 

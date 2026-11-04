@@ -146,7 +146,7 @@ private meta def convertPlainDateTime (d : Std.Time.PlainDateTime) : MacroM (TSy
 private meta def convertDateTime (d : Std.Time.DateTime) (identifier := false) : MacroM (TSyntax `term) := do
   let plain ← convertPlainDateTime d.toPlainDateTime
 
-  if identifier then
+  bif identifier then
     `(Std.Time.DateTime.ofPlainDateTime $plain <$> Std.Time.Database.defaultGetZoneRules $(Syntax.mkStrLit d.timezone.name))
   else
     `(Std.Time.DateTime.ofPlainDateTime $plain (Std.Time.TimeZone.ZoneRules.ofTimeZone $(← convertTimezone d.timezone)))

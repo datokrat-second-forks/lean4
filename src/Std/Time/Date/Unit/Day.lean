@@ -74,7 +74,7 @@ def ofInt (data : Int) (h : 1 ≤ data ∧ data ≤ 31) : Ordinal :=
 `OfYear` represents the day ordinal within a year, which can be bounded between 1 and 365 or 366,
 depending on whether it's a leap year.
 -/
-@[expose] def OfYear (leap : Bool) := Bounded.LE 1 (.ofNat (if leap then 366 else 365))
+@[expose] def OfYear (leap : Bool) := Bounded.LE 1 (.ofNat (bif leap then 366 else 365))
 
 instance : Repr (OfYear leap) where
   reprPrec r p := reprPrec r.val p
@@ -97,7 +97,7 @@ Creates an ordinal for a specific day within the year, ensuring that the provide
 is within the valid range for the year, which can be 1 to 365 or 366 for leap years.
 -/
 @[inline]
-def ofNat (data : Nat) (h : data ≥ 1 ∧ data ≤ (if leap then 366 else 365) := by decide) : OfYear leap :=
+def ofNat (data : Nat) (h : data ≥ 1 ∧ data ≤ (bif leap then 366 else 365) := by decide) : OfYear leap :=
   Bounded.LE.ofNat' data h
 
 end OfYear

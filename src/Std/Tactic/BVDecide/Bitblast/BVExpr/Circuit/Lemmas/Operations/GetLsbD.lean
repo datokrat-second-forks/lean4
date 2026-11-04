@@ -44,7 +44,7 @@ theorem denote_getD_eq_getLsbD (aig : AIG α) (assign : α → Bool) (x : BitVec
 theorem denote_blastGetLsbD (aig : AIG α) (target : GetLsbDTarget aig) (assign : α → Bool) :
     ⟦aig, blastGetLsbD aig target, assign⟧
       =
-    if h : target.idx < target.w then
+    uif h : target.idx < target.w then
       ⟦aig, target.vec.get target.idx h, assign⟧
     else
       false := by

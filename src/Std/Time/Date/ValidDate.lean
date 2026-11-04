@@ -64,13 +64,14 @@ Transforms a `Day.Ordinal.OfYear` into a tuple of a `Month` and a `Day`.
 def ofOrdinal (ordinal : Day.Ordinal.OfYear leap) : ValidDate leap :=
     let rec go (idx : Month.Ordinal) (acc : Int) (h : ordinal.val > acc) (p : acc = (cumulativeDays leap idx).val) : ValidDate leap :=
       let monthDays := days leap idx
-      if h₁ : ordinal.val ≤ acc + monthDays.val then
+      bif h₁ : ordinal.val ≤ᵇ acc + monthDays.val then
+        have h₁ := le_of_decideLE_eq_true h₁
         let bounded := Bounded.LE.mk ordinal.val (And.intro h h₁) |>.sub acc
         let bounded : Bounded.LE 1 monthDays.val := bounded.cast (by omega) (by omega)
         let days₁ : Day.Ordinal := ⟨bounded.val, And.intro bounded.property.left (Int.le_trans bounded.property.right monthDays.property.right)⟩
         ⟨⟨idx, days₁⟩, Int.le_trans bounded.property.right (by simp +zetaDelta)⟩
       else by
-        let h₂ := Int.not_le.mp h₁
+        let h₂ := Int.not_le.mp (decideLE_eq_false_iff.mp h₁)
 
         have h₃ : idx.val < 12 := Int.not_le.mp <| λh₃ => by
           have h₅ := ordinal.property.right

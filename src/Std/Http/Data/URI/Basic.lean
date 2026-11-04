@@ -70,7 +70,7 @@ Returns `none` if the scheme is invalid per RFC 3986 Section 3.1.
 def ofString? (s : String) : Option Scheme :=
   let lower := s.toLower
 
-  if h : IsValidScheme lower then
+  uif h : IsValidScheme lower then
     some ⟨lower, h⟩
   else
     none
@@ -87,13 +87,13 @@ def ofString! (s : String) : Scheme :=
 Returns the default port number for this URI scheme: 443 for `https`, 80 for everything else.
 -/
 def defaultPort (scheme : URI.Scheme) : UInt16 :=
-  if scheme.val == "https" then 443 else 80
+  bif scheme.val == "https" then 443 else 80
 
 /--
 Returns the URI scheme for a given port: `"https"` for 443, `"http"` otherwise.
 -/
 def ofPort (port : UInt16) : URI.Scheme :=
-  if port == 443 then ⟨"https", by decide⟩ else ⟨"http", by decide⟩
+  bif port == 443 then ⟨"https", by decide⟩ else ⟨"http", by decide⟩
 
 end Scheme
 
@@ -158,7 +158,7 @@ References:
 def isValidDomainLabel (s : String) : Bool :=
   let chars := s.toList
   decide (chars.length ≤ 63) &&
-    chars.all (fun c => isAsciiAlphaNumChar c ∨ c = '-') &&
+    chars.all (fun c => isAsciiAlphaNumChar c || c == '-') &&
     (chars.head?.map isAsciiAlphaNumChar |>.getD false) &&
     (chars.getLast?.map isAsciiAlphaNumChar |>.getD false)
 
@@ -189,10 +189,10 @@ constraints.
 -/
 def ofString? (s : String) : Option DomainName :=
   let lower := s.toLower
-  if h₁ : lower.isEmpty then
+  bif h₁ : lower.isEmpty then
     none
-  else if h₃ : IsValidDomainName lower then
-    some ⟨lower, IsLowerCase.isLowerCase_toLower, h₃, h₁⟩
+  else uif h₃ : IsValidDomainName lower then
+    some ⟨lower, IsLowerCase.isLowerCase_toLower, h₃, by simp [h₁]⟩
   else
     none
 
@@ -222,7 +222,7 @@ deriving Inhabited, BEq
 
 instance : Repr Host where
   reprPrec x prec :=
-    let nestPrec := (if prec ≥ 1024 then 1 else 2)
+    let nestPrec := (bif prec ≥ᵇ 1024 then 1 else 2)
     let name := "Std.Http.URI.Host"
 
     let repr (ctr : String) a :=
@@ -319,7 +319,7 @@ deriving Inhabited, Repr, BEq
 instance : ToString Path where
   toString path :=
     let result := String.intercalate "/" (path.segments.map toString).toList
-    if path.absolute then "/" ++ result else result
+    bif path.absolute then "/" ++ result else result
 
 namespace Path
 
@@ -332,7 +332,7 @@ def isEmpty (p : Path) : Bool := p.segments.isEmpty
 Returns the parent path by removing the last segment. If the path is empty, returns the path unchanged.
 -/
 def parent (p : Path) : Path :=
-  if p.segments.isEmpty then p
+  bif p.segments.isEmpty then p
   else { p with segments := p.segments.pop }
 
 /--
@@ -340,7 +340,7 @@ Joins two paths. If the second path is absolute, it is returned as-is. Otherwise
 segments are appended to the first path.
 -/
 def join (p1 : Path) (p2 : Path) : Path :=
-  if p2.absolute then p2
+  bif p2.absolute then p2
   else { p1 with segments := p1.segments ++ p2.segments }
 
 /--
@@ -365,9 +365,9 @@ def normalize (p : Path) : Path :=
     | [] =>
       output.reverse
     | segStr :: rest =>
-      if toString segStr == "." then
+      bif toString segStr == "." then
         loop rest output
-      else if toString segStr == ".." then
+      else bif toString segStr == ".." then
         match output with
         | [] => loop rest []
         | _ :: tail => loop rest tail
@@ -438,7 +438,7 @@ Finds the first value of a query parameter by key name. Returns `none` if the ke
 The value remains encoded as `EncodedQueryParam`.
 -/
 def findEncoded? (query : Query) (key : EncodedQueryParam) : Option (Option EncodedQueryParam) :=
-  let matchingKey := Array.find? (fun x => x.fst.toByteArray = key.toByteArray) query
+  let matchingKey := Array.find? (fun x => x.fst.toByteArray == key.toByteArray) query
   matchingKey.map (fun x => x.snd)
 
 /--
@@ -454,7 +454,7 @@ The values remain encoded as `EncodedQueryParam`.
 -/
 def findAllEncoded (query : Query) (key : EncodedQueryParam) : Array (Option EncodedQueryParam) :=
   query.filterMap (fun x =>
-    if x.fst.toByteArray = key.toByteArray then
+    bif x.fst.toByteArray =ᵇ key.toByteArray then
       some x.snd
     else
       none)
@@ -494,7 +494,7 @@ def ofList (pairs : List (EncodedQueryParam × Option EncodedQueryParam)) : Quer
 Checks if a query parameter exists.
 -/
 def containsEncoded (query : Query) (key : EncodedQueryParam) : Bool :=
-  query.any (fun x => x.fst.toByteArray = key.toByteArray)
+  query.any (fun x => x.fst.toByteArray == key.toByteArray)
 
 /--
 Checks if a query parameter exists by raw key string. The key is percent-encoded before matching.
@@ -507,7 +507,7 @@ Removes all occurrences of a query parameter by key name.
 -/
 def eraseEncoded (query : Query) (key : EncodedQueryParam) : Query :=
   query.filter (fun x =>
-    x.fst.toByteArray ≠ key.toByteArray
+    x.fst.toByteArray != key.toByteArray
   )
 
 /--
@@ -559,7 +559,7 @@ instance : Insert (String × String) Query :=
 
 instance : ToString Query where
   toString q :=
-    if q.isEmpty then "" else
+    bif q.isEmpty then "" else
       let encodedParams := q.toList.map fun (key, value) =>
         Query.formatQueryParam key value
       "?" ++ String.intercalate "&" encodedParams
@@ -569,7 +569,7 @@ Formats an optional query component, preserving `some .empty` as an explicit emp
 -/
 def formatOption : Option Query → String
   | none => ""
-  | some q => if q.isEmpty then "?" else toString q
+  | some q => bif q.isEmpty then "?" else toString q
 
 end Query
 
@@ -779,7 +779,7 @@ def build (b : Builder) : URI :=
   let scheme := (b.scheme.getD ⟨"https", by decide⟩)
 
   let authority :=
-    if b.host.isSome then
+    bif b.host.isSome then
       some {
         userInfo := b.userInfo
         host := b.host.getD default
@@ -802,7 +802,7 @@ def build (b : Builder) : URI :=
     scheme
     authority := authority
     path
-    query := if query.isEmpty then none else some query
+    query := bif query.isEmpty then none else some query
     fragment := b.fragment
   }
 
@@ -883,7 +883,7 @@ Constructs the canonical `host[:port]` string, omitting the port when it is the 
 -/
 def hostHeader (o : URI.Origin) : String :=
   let defaultPort := URI.Scheme.defaultPort o.scheme
-  if o.port == defaultPort then toString o.host
+  bif o.port == defaultPort then toString o.host
   else s!"{o.host}:{o.port}"
 
 end URI.Origin

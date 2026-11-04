@@ -52,7 +52,7 @@ private def takeChunk (full : Full) : AtomicT State Async (Option Chunk) := do
   | .closed => pure none
   | .ready =>
     set State.sent
-    if full.data.isEmpty then
+    bif full.data.isEmpty then
       pure none
     else
       pure (some (Chunk.ofByteArray full.data))

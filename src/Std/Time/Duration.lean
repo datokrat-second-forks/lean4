@@ -43,10 +43,10 @@ deriving Repr, DecidableEq
 instance : ToString Duration where
   toString s :=
     let (sign, secs, nanos) :=
-      if s.second.val > 0 then ("" ,s.second, s.nano.val)
-      else if s.second.val < 0 then ("-", -s.second, -s.nano.val)
-      else if s.nano.val < 0 then ("-", -s.second, -s.nano.val) else ("", s.second, s.nano.val)
-    sign ++ toString secs ++ (if s.nano.val == 0 then "" else "." ++ (leftPad 9 <| toString nanos)) ++ "s"
+      bif s.second.val >ᵇ 0 then ("" ,s.second, s.nano.val)
+      else bif s.second.val <ᵇ 0 then ("-", -s.second, -s.nano.val)
+      else bif s.nano.val <ᵇ 0 then ("-", -s.second, -s.nano.val) else ("", s.second, s.nano.val)
+    sign ++ toString secs ++ (bif s.nano.val == 0 then "" else "." ++ (leftPad 9 <| toString nanos)) ++ "s"
   where
     leftPad n s := "".pushn '0' (n - s.length) ++ s
 
@@ -128,7 +128,7 @@ Checks if the duration is zero seconds and zero nanoseconds.
 -/
 @[inline]
 def isZero (d : Duration) : Bool :=
-  d.second.val = 0 ∧ d.nano.val = 0
+  d.second.val =ᵇ 0 && d.nano.val =ᵇ 0
 
 /--
 Converts a `Duration` to a `Second.Offset`

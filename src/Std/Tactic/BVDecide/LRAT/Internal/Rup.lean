@@ -33,10 +33,10 @@ public def propagateHints (s : State) (assign : Assignment) (hints : Array Nat) 
     for (atom, pol) in hintClause do
       match assign.get? atom with
       | some value =>
-        if value == pol then
+        bif value == pol then
           match unit with
           | some u =>
-            if u == atom then
+            bif u == atom then
               continue
             else
               return .error
@@ -44,7 +44,7 @@ public def propagateHints (s : State) (assign : Assignment) (hints : Array Nat) 
             unit := some atom
         else
           let isUnit := match unit with | some u => u == atom | none => false
-          if isUnit then return .error else continue
+          bif isUnit then return .error else continue
       | none =>
         match unit with
         | none =>
@@ -103,7 +103,6 @@ theorem propagateHints_spec (s : State) (assign : Assignment) (hints : Array Nat
   · next pref1 cur1 suff1 hfor1 b1 curAssign hintClause hclause hout pref cur suff hfor b st
       assignNow unit value hget hval u hunit hueq ih =>
     simp only [unit, st, assignNow] at hunit hget ⊢
-    simp only [beq_iff_eq] at hval hueq
     subst hueq
     simp only [true_and, reduceCtorEq, false_and, and_false, exists_false, or_false,
       List.forall_mem_append, List.forall_mem_singleton] at ih ⊢
@@ -127,9 +126,8 @@ theorem propagateHints_spec (s : State) (assign : Assignment) (hints : Array Nat
     exact Or.inr ih.left
   · simp
   · next pref1 cur1 suff1 hfor1 b1 curAssign hintClause hclause hout pref cur suff hfor b st
-      assignNow unit value hget hval isUnit hisU ih =>
-    simp only [isUnit, unit, st, assignNow] at hisU hget ⊢
-    simp only [beq_iff_eq] at hval
+      assignNow unit value hget hval hisU ih =>
+    simp only [unit, st, assignNow] at hisU hget ⊢
     simp only [true_and, reduceCtorEq, false_and, and_false, exists_false, or_false,
       List.forall_mem_append, List.forall_mem_singleton] at ih ⊢
     replace ih := ih.right
@@ -137,7 +135,6 @@ theorem propagateHints_spec (s : State) (assign : Assignment) (hints : Array Nat
     subst hcur
     split at hisU
     · next u heq =>
-      simp only [beq_iff_eq] at hisU
       simp only [heq] at ih ⊢
       have hne : u ≠ cur.fst := by simpa using hisU
       rcases ih with ⟨pol, hnone, hins, hall⟩ | hsame

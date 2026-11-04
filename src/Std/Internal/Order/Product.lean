@@ -405,11 +405,11 @@ variable {α : Type u} {β : Type v} [CompleteLattice α] [CompleteLattice β]
 
 theorem Prod.fst_ofProp (p : Prop) : (⌜p⌝ : α × β).fst = ⌜p⌝ := by
   by_cases hp : p <;>
-    simp only [CompleteLattice.ofProp, hp, ↓reduceIte, Prod.fst_top, Prod.fst_bot]
+    simp only [CompleteLattice.ofProp, hp, ↓reduceUIte, Prod.fst_top, Prod.fst_bot]
 
 theorem Prod.snd_ofProp (p : Prop) : (⌜p⌝ : α × β).snd = ⌜p⌝ := by
   by_cases hp : p <;>
-    simp only [CompleteLattice.ofProp, hp, ↓reduceIte, Prod.snd_top, Prod.snd_bot]
+    simp only [CompleteLattice.ofProp, hp, ↓reduceUIte, Prod.snd_top, Prod.snd_bot]
 
 theorem Prod.fst_himp (a b : α × β) : (a ⇨ b).fst = a.fst ⇨ b.fst := by
   unfold himp PreservesSup.upperAdjoint

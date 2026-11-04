@@ -218,7 +218,7 @@ def toSeconds (leap : Bool) (month : Ordinal) : Second.Offset :=
   let daysAcc := #[0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
   let days : Day.Offset := daysAcc[month.toNat]!
   let time := days.toSeconds
-  if leap && month.toNat ≥ 2
+  bif leap && month.toNat ≥ᵇ 2
     then time + 86400
     else time
 
@@ -261,8 +261,8 @@ private def cumulativeSizes : { val : Array Day.Offset // val.size = 12 } :=
 Gets the number of days in a month.
 -/
 def days (leap : Bool) (month : Ordinal) : Day.Ordinal :=
-  if month.val = 2 then
-    if leap then 29 else 28
+  bif month.val =ᵇ 2 then
+    bif leap then 29 else 28
   else
     let ⟨months, p⟩ := monthSizesNonLeap
     let index : Fin 12 := (month.sub 1).toFin (by decide)
@@ -287,9 +287,9 @@ def cumulativeDays (leap : Bool) (month : Ordinal) : Day.Offset := by
   let index : Fin 12 := (month.sub 1).toFin (by decide)
   rw [← p] at index
   let res := months[index]
-  exact res + (if leap ∧ month.val > 2 then 1 else 0)
+  exact res + (bif leap && month.val >ᵇ 2 then 1 else 0)
 
-theorem cumulativeDays_le (leap : Bool) (month : Month.Ordinal) : cumulativeDays leap month ≥ 0 ∧ cumulativeDays leap month ≤ 334 + (if leap then 1 else 0) := by
+theorem cumulativeDays_le (leap : Bool) (month : Month.Ordinal) : cumulativeDays leap month ≥ 0 ∧ cumulativeDays leap month ≤ 334 + (bif leap then 1 else 0) := by
   match month with
   | ⟨1, _⟩ | ⟨2, _⟩ | ⟨3, _⟩  | ⟨4, _⟩  | ⟨5, _⟩  | ⟨6, _⟩  | ⟨7, _⟩  | ⟨8, _⟩  | ⟨9, _⟩  | ⟨10, _⟩  | ⟨11, _⟩ | ⟨12, _⟩ =>
     simp [cumulativeSizes, Bounded.LE.sub, Bounded.LE.add, Bounded.LE.toFin, cumulativeDays]
@@ -319,7 +319,7 @@ Clips the day to be within the valid range.
 @[inline]
 def clipDay (leap : Bool) (month : Month.Ordinal) (day : Day.Ordinal) : Day.Ordinal :=
   let max : Day.Ordinal := month.days leap
-  if day.val > max.val
+  bif day.val >ᵇ max.val
     then max
     else day
 

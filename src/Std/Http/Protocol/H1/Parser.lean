@@ -67,7 +67,7 @@ partial def manyItems {α : Type} (parser : Parser (Option α)) (maxCount : Nat)
     | some x =>
       let acc := acc.push x
 
-      if acc.size > maxCount then
+      bif acc.size >ᵇ maxCount then
         fail s!"too many items: {acc.size} > {maxCount}"
 
       go acc
@@ -109,7 +109,7 @@ ignore at least one empty line (CRLF) received prior to the request-line."
 def skipLeadingRequestEmptyLines (limits : H1.Config) : Parser Unit := do
   let mut count := 0
   while (← peekWhen? (· == '\r'.toUInt8)).isSome do
-    if count >= limits.maxLeadingEmptyLines then
+    bif count ≥ᵇ limits.maxLeadingEmptyLines then
       fail "too many leading empty lines"
     crlf
     count := count + 1
@@ -130,7 +130,7 @@ padding is rejected rather than silently truncated.
 def ows (limits : H1.Config) : Parser Unit := do
   discard <| takeWhileUpTo isOwsByte limits.maxSpaceSequence
 
-  if (← peekWhen? isOwsByte) |>.isSome then
+  bif (← peekWhen? isOwsByte) |>.isSome then
     fail "invalid space sequence"
   else
     pure ()
@@ -140,9 +140,9 @@ Parses a single ASCII hex digit and returns its numeric value (`0`–`15`).
 -/
 def hexDigit : Parser UInt8 := do
   let b ← any
-  if isHexDigitByte b then
-    if b ≥ '0'.toUInt8 && b ≤ '9'.toUInt8 then return b - '0'.toUInt8
-    else if b ≥ 'A'.toUInt8 && b ≤ 'F'.toUInt8 then return b - 'A'.toUInt8 + 10
+  bif isHexDigitByte b then
+    bif b ≥ᵇ '0'.toUInt8 && b ≤ᵇ '9'.toUInt8 then return b - '0'.toUInt8
+    else bif b ≥ᵇ 'A'.toUInt8 && b ≤ᵇ 'F'.toUInt8 then return b - 'A'.toUInt8 + 10
     else return b - 'a'.toUInt8 + 10
   else fail s!"invalid hex digit {Char.ofUInt8 b |>.quote}"
 
@@ -154,12 +154,12 @@ partial def hex : Parser Nat := do
   let rec go (acc : Nat) (count : Nat) : Parser Nat := do
     match ← optional (attempt hexDigit) with
     | some d =>
-        if count + 1 > 16 then
+        bif count + 1 >ᵇ 16 then
           fail "chunk size too large"
         else
           go (acc * 16 + d.toNat) (count + 1)
     | none =>
-        if count = 0 then
+        bif count =ᵇ 0 then
           -- Preserve EOF as incremental chunk-size parsing can request more data.
           -- For non-EOF invalid bytes, keep the specific parse failure.
           let _ ← peek!
@@ -247,8 +247,8 @@ Fails with `"uri too long"` if the target exceeds the configured limit.
 -/
 def parseURI (limits : H1.Config) : Parser ByteArray := do
   let uri ← takeUntilUpTo (· == ' '.toUInt8) limits.maxUriLength
-  if uri.size == limits.maxUriLength then
-    if (← peekWhen? (· != ' '.toUInt8)) |>.isSome then
+  bif uri.size == limits.maxUriLength then
+    bif (← peekWhen? (· != ' '.toUInt8)) |>.isSome then
       fail "uri too long"
 
   return uri.toByteArray
@@ -276,9 +276,9 @@ public def parseRequestLine (limits : H1.Config) : Parser Request.Head := do
   skipLeadingRequestEmptyLines limits
   let method ← parseMethod <* sp
   let (uri, (major, minor)) ← parseRequestLineBody limits
-  if major == 1 ∧ minor == 1 then
+  bif major == 1 && minor == 1 then
     return ⟨method, .v11, uri, .empty⟩
-  else if major == 1 ∧ minor == 0 then
+  else bif major == 1 && minor == 0 then
     return ⟨method, .v10, uri, .empty⟩
   else
     fail "unsupported HTTP version"
@@ -319,7 +319,7 @@ field-line = field-name ":" OWS field-value OWS CRLF
 -/
 public def parseSingleHeader (limits : H1.Config) : Parser (Option (String × String)) := do
   let next ← peek?
-  if next == some '\r'.toUInt8 ∨ next == some '\n'.toUInt8 then
+  bif next == some '\r'.toUInt8 || next == some '\n'.toUInt8 then
     crlf
     pure none
   else
@@ -334,7 +334,7 @@ def parseQuotedPair : Parser UInt8 := do
   skipByte '\\'.toUInt8
   let b ← any
 
-  if quotedPairChar (Char.ofUInt8 b) then
+  bif quotedPairChar (Char.ofUInt8 b) then
     return b
   else
     fail s!"invalid quoted-pair byte: {Char.ofUInt8 b |>.quote}"
@@ -350,21 +350,21 @@ partial def parseQuotedString (maxLength : Nat) : Parser String := do
   let rec loop (buf : ByteArray) (length : Nat) : Parser ByteArray := do
     let b ← any
 
-    if b == '"'.toUInt8 then
+    bif b == '"'.toUInt8 then
       return buf
-    else if b == '\\'.toUInt8 then
+    else bif b == '\\'.toUInt8 then
       let next ← any
-      if quotedPairChar (Char.ofUInt8 next)
+      bif quotedPairChar (Char.ofUInt8 next)
         then
           let length := length + 1
-          if length > maxLength then
+          bif length >ᵇ maxLength then
             fail "quoted-string too long"
           else
             loop (buf.push next) length
         else fail s!"invalid quoted-pair byte: {Char.ofUInt8 next |>.quote}"
-    else if isQdText b then
+    else bif isQdText b then
       let length := length + 1
-      if length > maxLength then
+      bif length >ᵇ maxLength then
         fail "quoted-string too long"
       else
         loop (buf.push b) length
@@ -381,7 +381,7 @@ def parseChunkExt (limits : H1.Config) : Parser (Chunk.ExtensionName × Option C
   let some name := Chunk.ExtensionName.ofString? name
     | fail "invalid extension name"
 
-  if (← peekWhen? (· == '='.toUInt8)) |>.isSome then
+  bif (← peekWhen? (· == '='.toUInt8)) |>.isSome then
     -- RFC 9112 §7.1.1: BWS is allowed around "=".
     -- The `<* ows limits` after the name already consumed any trailing whitespace,
     -- so these ows calls are no-ops in practice, but kept for explicit grammar correspondence.
@@ -416,7 +416,7 @@ Parses a single chunk in chunked transfer encoding.
 -/
 public def parseChunkPartial (limits : H1.Config) : Parser (Option (Nat × Array (Chunk.ExtensionName × Option Chunk.ExtensionValue) × ByteSlice)) := do
   let (size, ext) ← parseChunkSize limits
-  if size == 0 then
+  bif size == 0 then
     return none
   else
     let data ← take size
@@ -426,9 +426,9 @@ public def parseChunkPartial (limits : H1.Config) : Parser (Option (Nat × Array
 Parses fixed-size data that can be incomplete.
 -/
 public def parseFixedSizeData (size : Nat) : Parser TakeResult := fun it =>
-  if it.remainingBytes = 0 then
+  bif it.remainingBytes =ᵇ 0 then
     .error it .eof
-  else if it.remainingBytes < size then
+  else bif it.remainingBytes <ᵇ size then
     .success (it.forward it.remainingBytes) (.incomplete it.array[it.idx...(it.idx+it.remainingBytes)] (size - it.remainingBytes))
   else
     .success (it.forward size) (.complete (it.array[it.idx...(it.idx+size)]))
@@ -462,7 +462,7 @@ attacks where a downstream proxy might re-interpret them.
 def parseTrailerHeader (limits : H1.Config) : Parser (Option (String × String)) := do
   let result ← parseSingleHeader limits
   if let some (name, _) := result then
-    if isForbiddenTrailerField name then
+    bif isForbiddenTrailerField name then
       fail s!"forbidden trailer field: {name}"
   return result
 
@@ -505,7 +505,7 @@ def parseStatusCode (limits : H1.Config) : Parser Status := do
   sp
   let phrase ← parseReasonPhrase limits <* crlf
 
-  if h : IsValidReasonPhrase phrase then
+  bif h : phrase.toList.all Std.Http.Internal.Char.reasonPhraseChar then
     if let some status := Status.ofCode (some ⟨phrase, h⟩) code.toUInt16 then
       return status
 
@@ -520,9 +520,9 @@ mapped to an error event, use `parseStatusLineRawVersion`.
 public def parseStatusLine (limits : H1.Config) : Parser Response.Head := do
   let (major, minor) ← parseHttpVersionNumber <* sp
   let status ← parseStatusCode limits
-  if major == 1 ∧ minor == 1 then
+  bif major == 1 && minor == 1 then
     return { status, version := .v11, headers := .empty }
-  else if major == 1 ∧ minor == 0 then
+  else bif major == 1 && minor == 0 then
     return { status, version := .v10, headers := .empty }
   else
     fail "unsupported HTTP version"

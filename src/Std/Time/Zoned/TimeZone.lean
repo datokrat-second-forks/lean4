@@ -59,12 +59,12 @@ Converts an `Offset` to a string in ISO 8601 format. The `colon` parameter deter
 and minute components are separated by a colon (e.g., "+01:00" or "+0100").
 -/
 def toIsoString (offset : Offset) (colon : Bool) : String :=
-  let (sign, time) := if offset.second.val ≥ 0 then ("+", offset.second) else ("-", -offset.second)
+  let (sign, time) := bif offset.second.val ≥ᵇ 0 then ("+", offset.second) else ("-", -offset.second)
   let hour : Hour.Offset := time.toHours
   let minute := Int.ediv (Int.tmod time.val 3600) 60
-  let hourStr := if hour.val < 10 then s!"0{hour.val}" else toString hour.val
-  let minuteStr := if minute < 10 then s!"0{minute}" else toString minute
-    if colon then s!"{sign}{hourStr}:{minuteStr}"
+  let hourStr := bif hour.val <ᵇ 10 then s!"0{hour.val}" else toString hour.val
+  let minuteStr := bif minute <ᵇ 10 then s!"0{minute}" else toString minute
+    bif colon then s!"{sign}{hourStr}:{minuteStr}"
     else s!"{sign}{hourStr}{minuteStr}"
 
 /--

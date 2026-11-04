@@ -126,7 +126,7 @@ thread is undefined behavior.
 -/
 def SharedMutex.tryAtomically [Monad m] [MonadLiftT BaseIO m] [MonadFinally m]
     (mutex : SharedMutex α) (k : AtomicT α m β) : m (Option β) := do
-  if ← mutex.mutex.tryWrite then
+  bif ← mutex.mutex.tryWrite then
     try
       some <$> k mutex.ref
     finally
@@ -160,7 +160,7 @@ same thread is undefined behavior.
 -/
 def SharedMutex.tryAtomicallyRead [Monad m] [MonadLiftT BaseIO m] [MonadFinally m]
     (mutex : SharedMutex α) (k : ReaderT α m β) : m (Option β) := do
-  if ← mutex.mutex.tryRead then
+  bif ← mutex.mutex.tryRead then
     try
       let state ← (mutex.ref.get : BaseIO α)
       some <$> k state

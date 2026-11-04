@@ -175,14 +175,14 @@ Returns true if the buffer contains no elements.
 -/
 private def isEmpty [Monad m] [MonadLiftT (ST IO.RealWorld) m] : AtomicT (Bounded.State α) m Bool := do
   let mut st ← get
-  return st.size = 0
+  return st.size =ᵇ 0
 
 /--
 Returns true if the buffer is at full capacity.
 -/
 private def isFull : AtomicT (Bounded.State α) BaseIO Bool := do
   let mut st ← get
-  return st.size ≥ st.capacity
+  return st.size ≥ᵇ st.capacity.val
 
 /--
 Enqueues an element to the back of the circular buffer.
@@ -223,7 +223,7 @@ private def getSlot
 Subscribes a new `Receiver` in the `Bounded` channel.
 -/
 private def trySend' (v : α) : AtomicT (Bounded.State α) BaseIO (Option Nat) := do
-  if ← isFull then
+  bif ← isFull then
     return none
   else
     let st ← enqueue v (← get)
@@ -237,36 +237,37 @@ private def trySend' (v : α) : AtomicT (Bounded.State α) BaseIO (Option Nat) :
 
 private def trySend (ch : Bounded α) (v : α) : BaseIO (Option Nat) := do
   ch.state.atomically do
-    if (← get).closed then
+    bif (← get).closed then
       return none
-    else if (← get).receivers.isEmpty then
+    else bif (← get).receivers.isEmpty then
       return (some 0)
     else
       trySend' v
 
 private partial def send (ch : Bounded α) (v : α) : BaseIO (Task (Except Broadcast.Error Nat)) := do
   ch.state.atomically do
-    if (← get).closed then
+    bif (← get).closed then
       return .pure <| .error .closed
-    else if (← get).receivers.isEmpty then
+    else bif (← get).receivers.isEmpty then
       return .pure <| .ok 0
-    else if let some receivers ← trySend' v then
-      return .pure <| .ok receivers
     else
-      let promise ← IO.Promise.new
-      modify fun st => { st with producers := st.producers.enqueue promise }
+      if let some receivers ← trySend' v then
+        return .pure <| .ok receivers
+      else
+        let promise ← IO.Promise.new
+        modify fun st => { st with producers := st.producers.enqueue promise }
 
-      BaseIO.bindTask promise.result? fun res => do
-        if res.getD false then
-          Bounded.send ch v
-        else
-          return .pure <| .error .closed
+        BaseIO.bindTask promise.result? fun res => do
+          bif res.getD false then
+            Bounded.send ch v
+          else
+            return .pure <| .error .closed
 
 private def close (ch : Bounded α) : EIO Broadcast.Error Unit := do
   ch.state.atomically do
     let st ← get
 
-    if st.closed then
+    bif st.closed then
       throw .alreadyClosed
 
     for consumer in st.waiters.toArray do
@@ -287,9 +288,9 @@ namespace Receiver
 private def getSlotValue [Monad m] [MonadLiftT (ST IO.RealWorld) m]
     (slot : IO.Ref (Slot α)) (next : Nat) : AtomicT (Bounded.State α) m (Option α × Bool) :=
   slot.modifyGet fun slot =>
-    if next != slot.pos then
+    bif next != slot.pos then
       ((none, false), slot)
-    else if slot.remaining == 1 then
+    else bif slot.remaining == 1 then
       ((slot.value, true), { slot with value := none, remaining := 0 })
     else
       ((slot.value, false), { slot with remaining := slot.remaining - 1 })
@@ -298,7 +299,7 @@ private def getValueByPosition [Monad m] [MonadLiftT (ST IO.RealWorld) m]
     [MonadLiftT BaseIO m] (next : Nat) : AtomicT (Bounded.State α) m (Option α) := do
   let mut st ← get
 
-  if ← isEmpty then
+  bif ← isEmpty then
     return none
 
   let id := next % st.capacity
@@ -307,7 +308,7 @@ private def getValueByPosition [Monad m] [MonadLiftT (ST IO.RealWorld) m]
   let (some val, shouldDequeue) ← getSlotValue slot next
     | return none
 
-  if shouldDequeue then
+  bif shouldDequeue then
     st := dequeue st
 
     if let some (producer, producers) := st.producers.dequeue? then
@@ -363,20 +364,22 @@ private def tryRecv (ch : Bounded.Receiver α) : BaseIO (Option α) :=
 
 private partial def recv (ch : Bounded.Receiver α) : BaseIO (Task (Option α)) := do
   ch.state.atomically do
-    if ¬ (← get).receivers.contains ch.id then
-      return .pure none
-    else if let some val ← tryRecv' ch.id then
-      return .pure <| some val
-    else if (← get).closed then
+    bif !(← get).receivers.contains ch.id then
       return .pure none
     else
-      let promise ← IO.Promise.new
-      modify fun st => { st with waiters := st.waiters.enqueue ⟨promise, none⟩ }
-      BaseIO.bindTask promise.result? fun res => do
-        if res.getD false then
-          Bounded.Receiver.recv ch
-        else
+      if let some val ← tryRecv' ch.id then
+        return .pure <| some val
+      else
+        bif (← get).closed then
           return .pure none
+        else
+          let promise ← IO.Promise.new
+          modify fun st => { st with waiters := st.waiters.enqueue ⟨promise, none⟩ }
+          BaseIO.bindTask promise.result? fun res => do
+            bif res.getD false then
+              Bounded.Receiver.recv ch
+            else
+              return .pure none
 
 private partial def forAsync
     (f : α → BaseIO Unit) (ch : Bounded.Receiver α)
@@ -392,25 +395,25 @@ private def recvReady'
     (receiverId : Nat) : AtomicT (State α) m Bool := do
   let st ← get
 
-  if st.closed then
+  bif st.closed then
     return true
 
   let some next := st.receivers.get? receiverId
     | return false
 
-  if st.size = 0 then
+  bif st.size =ᵇ 0 then
     return false
   else
     let id := next % st.capacity
     let slot ← getSlot id
     let slotVal ← slot.get
-    return slotVal.pos = next
+    return slotVal.pos =ᵇ next
 
 open Async in
 private partial def recvSelector (ch : Bounded.Receiver α) : Selector (Option α) where
   tryFn := do
     ch.state.atomically do
-      if ← recvReady' ch.id then
+      bif ← recvReady' ch.id then
         let val ← tryRecv' ch.id
         return some val
       else
@@ -430,7 +433,7 @@ private partial def recvSelector (ch : Bounded.Receiver α) : Selector (Option �
 where
   registerAux (ch : Bounded.Receiver α) (waiter : Waiter (Option α)) : IO Unit := do
     ch.state.atomically do
-      if ← recvReady' ch.id then
+      bif ← recvReady' ch.id then
         let lose := do
           let st ← get
           if let some (waiter, waiters) := st.waiters.dequeue? then
@@ -448,7 +451,7 @@ where
           match res? with
           | none => return ()
           | some res =>
-            if res then
+            bif res then
               registerAux ch waiter
             else
               let lose := return ()

@@ -118,12 +118,12 @@ This operation might be useful when e.g. using the literals to index into an arr
 without conducting bounds checks.
 -/
 def relabelFin (f : CNF Nat) : CNF (Fin f.numLiterals) :=
-  if h : ∃ v, VarMem v f then
+  uif h : ∃ v, VarMem v f then
     let n := f.numLiterals
     f.relabel fun i =>
-      if w : i < n then
+      bif w : i <ᵇ n then
         -- This branch will always hold
-        ⟨i, w⟩
+        ⟨i, (lt_of_decideLT_eq_true w)⟩
       else
         ⟨0, numLiterals_pos h.choose_spec⟩
   else

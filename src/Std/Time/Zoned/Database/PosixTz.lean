@@ -25,7 +25,7 @@ open Std.Internal.Parsec Std.Internal.Parsec.String
 -- Parse digits and validate them into a Bounded.LE type, with an optional extra predicate.
 private def parseBoundedNat {lo hi : Int} (name : String) (extra : Int → Bool := fun _ => true) : Parser (Bounded.LE lo hi) := do
   let n ← Int.ofNat <$> digits
-  if !extra n then fail s!"{name} {n} out of range"
+  bif !extra n then fail s!"{name} {n} out of range"
 
   match Bounded.LE.ofInt n with
   | some b => pure b
@@ -40,7 +40,7 @@ private def posixParseSign : Parser Int :=
 -- `maxHour` caps the hour field; POSIX requires 0–24, extended mode allows 0–167.
 private def posixParseHMS (maxHour : Nat := 24) : Parser Second.Offset := do
   let rawH ← digits
-  if rawH > maxHour then fail s!"hour {rawH} out of range 0-{maxHour}"
+  bif rawH >ᵇ maxHour then fail s!"hour {rawH} out of range 0-{maxHour}"
 
   let h : Bounded.LE 0 167 ← match Bounded.LE.ofNat? rawH with
     | some b => pure b
@@ -60,11 +60,11 @@ private def posixParseOffset : Parser TimeZone.Offset := do
 
 -- <quoted-name> ::= "<" <quoted-char> { <quoted-char> } ">"
 private def quotedName : Parser String :=
-  manyChars (satisfy (fun c => Char.isAlphanum c ∨ c == '+' ∨ c == '-'))
+  manyChars (satisfy (fun c => Char.isAlphanum c || c == '+' || c == '-'))
 
 -- <tzname> ::= <alpha>{3,} | "<" <char>+ ">"
 private def posixParseName : Parser String := do
-  if (← peek?) == some '<'
+  bif (← peek?) == some '<'
     then skip *> quotedName <* attempt (pchar '>')
     else manyChars asciiLetter
 
@@ -73,13 +73,13 @@ private def posixParseMwdSpec : Parser TransitionSpec := do
   skipChar 'M'
 
   let month ← parseBoundedNat "month" <* skipChar '.'
-  let week ← parseBoundedNat "week" (· ≤ 5) <* skipChar '.'
+  let week ← parseBoundedNat "week" (· ≤ᵇ 5) <* skipChar '.'
 
   -- Convert POSIX day (0=Sunday … 6=Saturday) to ISO ordinal (1=Monday … 7=Sunday).
   let d ← digits
-  if d > 6 then fail s!"day {d} out of range 0-6"
+  bif d >ᵇ 6 then fail s!"day {d} out of range 0-6"
 
-  let day ← match (Bounded.LE.ofInt (if d == 0 then 7 else Int.ofNat d)) with
+  let day ← match (Bounded.LE.ofInt (bif d == 0 then 7 else Int.ofNat d)) with
     | some wd => pure wd
     | none => fail s!"day {d} out of range 0-6"
 
@@ -100,7 +100,7 @@ private def posixParseJulian0Spec : Parser TransitionSpec := do
 private def posixParseDstOffset (stdOffset : TimeZone.Offset) : Parser TimeZone.Offset := do
   let c ← peek?
   if let some ch := c then
-    if ch.isDigit || ch == '+' || ch == '-' then posixParseOffset
+    bif ch.isDigit || ch == '+' || ch == '-' then posixParseOffset
     else pure ⟨Second.Offset.ofInt (stdOffset.second.val + 3600)⟩
   else pure ⟨Second.Offset.ofInt (stdOffset.second.val + 3600)⟩
 
@@ -120,7 +120,7 @@ private def posixParseRule (extended : Bool := false) : Parser TransitionRule :=
   let parseTime := attempt <| do
     skipChar '/'
     let sign ← posixParseSign
-    let t ← posixParseHMS (maxHour := if extended then 167 else 24)
+    let t ← posixParseHMS (maxHour := bif extended then 167 else 24)
     return Second.Offset.ofInt (sign * t.val)
 
   let time ← parseTime <|> pure defaultTime.toSeconds
@@ -131,22 +131,22 @@ private def posixParseRule (extended : Bool := false) : Parser TransitionRule :=
 private def parsePosixTzP (extended : Bool := false) : Parser RecurringRule := do
   let stdName ← posixParseName
 
-  if stdName.isEmpty then
+  bif stdName.isEmpty then
     fail "empty timezone name"
 
   let stdOffset ← posixParseOffset
 
-  if (← isEof) then
+  bif (← isEof) then
     return { stdName, stdOffset }
 
   let dstName ← posixParseName
 
-  if dstName.isEmpty then
+  bif dstName.isEmpty then
     return { stdName, stdOffset }
 
   let dstOffset ← posixParseDstOffset stdOffset
 
-  if (← peek?) != some ',' then
+  bif (← peek?) != some ',' then
     return { stdName, stdOffset, dst := some { name := dstName, offset := dstOffset } }
 
   let startRule ← skip *> posixParseRule extended

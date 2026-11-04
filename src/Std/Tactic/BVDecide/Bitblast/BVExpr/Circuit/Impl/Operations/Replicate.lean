@@ -39,7 +39,7 @@ def blastReplicate (aig : AIG α) (target : ReplicateTarget aig newWidth) :
 where
   go {aig : AIG α} {w : Nat} (n : Nat) (input : AIG.RefVec aig w) (curr : Nat) (hcurr : curr ≤ n)
       (s : AIG.RefVec aig (w * curr)) : AIG.RefVec aig (w * n) :=
-    if h : curr < n then
+    bif h : curr <ᵇ n then
       let s := s.append input
       go n input (curr + 1) (by omega) s
     else

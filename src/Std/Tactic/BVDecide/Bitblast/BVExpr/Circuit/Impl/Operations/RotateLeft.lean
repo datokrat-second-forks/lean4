@@ -34,8 +34,8 @@ where
   go {aig : AIG α} (input : AIG.RefVec aig w) (distance : Nat) (curr : Nat) (hcurr : curr ≤ w)
       (s : AIG.RefVec aig curr) :
       AIG.RefVec aig w :=
-  if hcurr1 : curr < w then
-    if hcurr2 : curr < distance % w then
+  bif hcurr1 : curr <ᵇ w then
+    bif hcurr2 : curr <ᵇ distance % w then
       let ref := input.get (w - (distance % w) + curr) (by omega)
       let s := s.push ref
       go input distance (curr + 1) (by omega) s

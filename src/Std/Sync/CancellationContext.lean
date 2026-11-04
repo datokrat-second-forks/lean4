@@ -60,7 +60,7 @@ Otherwise, creates a new child that will be cancelled when the parent is cancell
 -/
 def fork (root : CancellationContext) : BaseIO CancellationContext := do
   root.state.atomically do
-    if ← root.token.isCancelled then
+    bif ← root.token.isCancelled then
       return root
 
     let token ← Std.CancellationToken.new
@@ -96,7 +96,7 @@ private partial def cancelChildren (state : CancellationContext.State) (id : UIn
 Cancels this context and all child contexts with the given reason.
 -/
 def cancel (x : CancellationContext) (reason : CancellationReason) : BaseIO Unit := do
-  if ← x.token.isCancelled then
+  bif ← x.token.isCancelled then
     return
 
   x.state.atomically do

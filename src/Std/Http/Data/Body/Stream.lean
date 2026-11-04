@@ -148,7 +148,7 @@ private def pruneFinishedWaiters [Monad m] [MonadLiftT (ST IO.RealWorld) m] :
   let pendingConsumer ←
     match st.pendingConsumer with
     | some (.select waiter) =>
-      if ← waiter.checkFinished then
+      bif ← waiter.checkFinished then
         pure none
       else
         pure st.pendingConsumer
@@ -158,7 +158,7 @@ private def pruneFinishedWaiters [Monad m] [MonadLiftT (ST IO.RealWorld) m] :
   let interestWaiter ←
     match st.interestWaiter with
     | some waiter =>
-      if ← waiter.checkFinished then
+      bif ← waiter.checkFinished then
         pure none
       else
         pure st.interestWaiter
@@ -212,7 +212,7 @@ private def recvReadyResult' [Monad m] [MonadLiftT (ST IO.RealWorld) m] [MonadLi
 private def close' [Monad m] [MonadLiftT (ST IO.RealWorld) m] [MonadLiftT BaseIO m] :
     AtomicT State m Unit := do
   let st ← get
-  if st.closed then
+  bif st.closed then
     return ()
 
   if let some consumer := st.pendingConsumer then
@@ -261,7 +261,7 @@ or `some none` at end-of-stream (channel closed with no pending producer).
 def tryRecvBody (stream : Stream) : Async (Option (Option Chunk)) :=
   stream.state.atomically do
     Channel.pruneFinishedWaiters
-    if ← Channel.recvReady' then
+    bif ← Channel.recvReady' then
       match ← Channel.recvReadyResult' with
       | .ok result => return some result
       | .error err => throw err
@@ -274,7 +274,7 @@ private def recv' (stream : Stream) : BaseIO (AsyncTask (Option Chunk)) := do
 
     let { closed, closeError, .. } ← get
 
-    if closed then
+    bif closed then
       match closeError with
       | some err => return Task.pure (.error err)
       | none => return AsyncTask.pure none
@@ -284,7 +284,7 @@ private def recv' (stream : Stream) : BaseIO (AsyncTask (Option Chunk)) := do
 
     let st ← get
 
-    if st.pendingConsumer.isSome then
+    bif st.pendingConsumer.isSome then
       return Task.pure (.error (IO.Error.userError "only one blocked consumer is allowed"))
 
     let promise ← IO.Promise.new
@@ -318,7 +318,7 @@ def closeIfAbandoned (stream : Stream) : Async Bool :=
   stream.state.atomically do
     Channel.pruneFinishedWaiters
     let st ← get
-    if !st.closed && st.pendingConsumer.isNone then
+    bif !st.closed && st.pendingConsumer.isNone then
       Channel.close'
       return true
     else
@@ -332,7 +332,7 @@ This function does not overwrite an existing error.
 def closeWithError (stream : Stream) (err : IO.Error) : Async Unit :=
   stream.state.atomically do
     modify fun st =>
-      if st.closeError.isNone then { st with closeError := some err }
+      bif st.closeError.isNone then { st with closeError := some err }
       else st
 
     Channel.close'
@@ -370,7 +370,7 @@ def recvSelector (stream : Stream) : Selector (Option Chunk) where
   tryFn := do
     stream.state.atomically do
       Channel.pruneFinishedWaiters
-      if ← Channel.recvReady' then
+      bif ← Channel.recvReady' then
         match ← Channel.recvReadyResult' with
         | .ok result => return some result
         | .error err => throw err
@@ -380,14 +380,14 @@ def recvSelector (stream : Stream) : Selector (Option Chunk) where
   registerFn waiter := do
     stream.state.atomically do
       Channel.pruneFinishedWaiters
-      if ← Channel.recvReady' then
+      bif ← Channel.recvReady' then
         let lose := return ()
         let win promise := do
           promise.resolve (← Channel.recvReadyResult')
         waiter.race lose win
       else
         let st ← get
-        if st.pendingConsumer.isSome then
+        bif st.pendingConsumer.isSome then
           throw (.userError "only one blocked consumer is allowed")
 
         set { st with pendingConsumer := some (.select waiter) }
@@ -469,7 +469,7 @@ partial def readAll
     | some chunk =>
       let result := result ++ chunk.data
       if let some max := maximumSize then
-        if result.size.toUInt64 > max then
+        bif result.size.toUInt64 >ᵇ max then
           throw (.userError s!"body exceeded maximum size of {max} bytes")
       loop result
 
@@ -499,7 +499,7 @@ partial def drain
     | some chunk =>
       let consumed := consumed + chunk.data.size.toUInt64
       if let some limit := drainLimit then
-        if consumed > limit then
+        bif consumed >ᵇ limit then
           closeStream
           return ()
       loop consumed
@@ -514,18 +514,18 @@ private def collapseForSend
     Channel.pruneFinishedWaiters
     let st ← get
 
-    if st.closed then
+    bif st.closed then
       return .error (.userError "channel closed")
 
     let merged := match st.pendingIncompleteChunk with
       | some pending =>
         {
           data := pending.data ++ chunk.data
-          extensions := if pending.extensions.isEmpty then chunk.extensions else pending.extensions
+          extensions := bif pending.extensions.isEmpty then chunk.extensions else pending.extensions
         }
       | none => chunk
 
-    if incomplete then
+    bif incomplete then
       set { st with pendingIncompleteChunk := some merged }
       return .ok none
     else
@@ -542,13 +542,13 @@ private partial def send' (stream : Stream) (chunk : Chunk) : Async Unit := do
     Channel.pruneFinishedWaiters
     let st ← get
 
-    if st.closed then
+    bif st.closed then
       return .error (IO.Error.userError "channel closed")
 
     if let some consumer := st.pendingConsumer then
       let success ← consumer.resolve (.ok (some chunk))
 
-      if success then
+      bif success then
         set {
           st with
           pendingConsumer := none
@@ -558,11 +558,12 @@ private partial def send' (stream : Stream) (chunk : Chunk) : Async Unit := do
       else
         set { st with pendingConsumer := none }
         return .ok (some false)
-    else if st.pendingProducer.isSome then
-      return .error (IO.Error.userError "only one blocked producer is allowed")
     else
-      set { st with pendingProducer := some { chunk, done } }
-      return .ok none
+      bif st.pendingProducer.isSome then
+        return .error (IO.Error.userError "only one blocked producer is allowed")
+      else
+        set { st with pendingProducer := some { chunk, done } }
+        return .ok none
 
   match result with
   | .error err =>
@@ -590,7 +591,7 @@ def send (stream : Stream) (chunk : Chunk) (incomplete : Bool := false) : Async 
   | .error err => throw err
   | .ok none => pure ()
   | .ok (some toSend) =>
-    if toSend.data.isEmpty ∧ toSend.extensions.isEmpty then
+    bif toSend.data.isEmpty && toSend.extensions.isEmpty then
       return ()
 
     send' stream toSend
@@ -613,9 +614,9 @@ def interestSelector (stream : Stream) : Selector Bool where
     stream.state.atomically do
       Channel.pruneFinishedWaiters
       let st ← get
-      if st.pendingConsumer.isSome then
+      bif st.pendingConsumer.isSome then
         return some true
-      else if st.closed then
+      else bif st.closed then
         return some false
       else
         return none
@@ -625,17 +626,17 @@ def interestSelector (stream : Stream) : Selector Bool where
       Channel.pruneFinishedWaiters
       let st ← get
 
-      if st.pendingConsumer.isSome then
+      bif st.pendingConsumer.isSome then
         let lose := return ()
         let win promise := do
           promise.resolve (.ok true)
         waiter.race lose win
-      else if st.closed then
+      else bif st.closed then
         let lose := return ()
         let win promise := do
           promise.resolve (.ok false)
         waiter.race lose win
-      else if st.interestWaiter.isSome then
+      else bif st.interestWaiter.isSome then
         throw (.userError "only one blocked interest selector is allowed")
       else
         set { st with interestWaiter := some waiter }
@@ -671,7 +672,7 @@ Creates a body from a fixed byte array.
 def fromBytes (content : ByteArray) : Async Stream := do
   stream fun s => do
     s.setKnownSize (some (.fixed content.size))
-    if content.size > 0 then
+    bif content.size >ᵇ 0 then
       s.send (Chunk.ofByteArray content)
 
 /--

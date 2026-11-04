@@ -234,7 +234,7 @@ def filterMap (headers : Headers) (f : Header.Name → Header.Value → Option H
 Filters header key-value pairs, keeping only those that satisfy the predicate.
 -/
 def filter (headers : Headers) (f : Header.Name → Header.Value → Bool) : Headers :=
-  headers.filterMap (fun k v => if f k v then some v else none)
+  headers.filterMap (fun k v => bif f k v then some v else none)
 
 /--
 Updates all the values of a header if it exists.

@@ -108,7 +108,7 @@ def recvSelector (s : Socket) (size : UInt64) : Selector (ByteArray × Option So
     tryFn := do
       let readableWaiter ← s.native.waitReadable
 
-      if ← readableWaiter.isResolved then
+      bif ← readableWaiter.isResolved then
         let res ← s.recv size
         return some res
       else

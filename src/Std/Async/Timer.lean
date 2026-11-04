@@ -29,7 +29,7 @@ The timeout of the underlying timer. Longer durations are clamped, since they ca
 -/
 private def timeoutOf (duration : Std.Time.Millisecond.Offset) : UInt64 :=
   let ms := duration.toInt.toNat
-  if ms < UInt64.size then ms.toUInt64 else (UInt64.size - 1).toUInt64
+  bif ms <ᵇ UInt64.size then ms.toUInt64 else (UInt64.size - 1).toUInt64
 
 namespace Sleep
 
@@ -85,7 +85,7 @@ def selector (s : Sleep) : Selector Unit :=
   {
     tryFn := do
       let sleepWaiter ← s.native.next
-      if ← sleepWaiter.isResolved then
+      bif ← sleepWaiter.isResolved then
         return some ()
       else
         s.native.cancel

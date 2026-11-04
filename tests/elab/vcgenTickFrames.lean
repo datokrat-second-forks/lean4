@@ -53,7 +53,7 @@ theorem ofProp_meet_sup (p : Prop) (X : L → Prop) :
       refine PartialOrder.rel_trans ?_ (le_sup _ (y := ⌜p⌝ ⊓ x) ⟨x, hx, rfl⟩)
       exact le_meet _ _ _ (CompleteLattice.le_ofProp x p hp) PartialOrder.rel_refl
     · refine PartialOrder.rel_trans (meet_le_left _ _) ?_
-      simp only [CompleteLattice.ofProp, hp, ↓reduceIte]
+      simp only [CompleteLattice.ofProp, hp, ↓reduceUIte]
       exact bot_le _
   · apply sup_le
     rintro y ⟨x, hx, rfl⟩

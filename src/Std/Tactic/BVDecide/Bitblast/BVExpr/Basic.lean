@@ -442,8 +442,8 @@ def eval (assign : Assignment) : BVExpr w → BitVec w
     This formulation improves performance, as in a well formed expression the condition always holds
     so there is no need for the more involved `BitVec.truncate` logic.
     -/
-    if h : packedBv.w = w then
-      h ▸ packedBv.bv
+    bif h : packedBv.w =ᵇ w then
+      eq_of_decideEq_eq_true h ▸ packedBv.bv
     else
       packedBv.bv.truncate w
   | .const val => val

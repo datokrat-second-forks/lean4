@@ -2,9 +2,10 @@ import Lean
 import Std.Time
 
 /-!
-`Nat.sqrt`, `Nat.nextPowerOfTwo` and the `Std.Time.Internal.Bounded` constructors branch with
+`Nat.sqrt`, `Nat.nextPowerOfTwo` and the generic `Std.Time.Internal.Bounded.ofInt?` branch with
 `uif`, i.e. on `UDecidable` instances. Compiled
 code still computes them, and their lemmas still apply. They no longer reduce in the kernel.
+The `Bounded.LE` constructors on concrete bounds (`clip`, `ofInt`, `ofNat?`) use `bif` and reduce.
 -/
 
 open Lean Meta in
@@ -19,7 +20,6 @@ def checkUDecidable (declName : Name) : MetaM Unit := do
 
 run_meta checkUDecidable ``Nat.sqrt
 run_meta checkUDecidable ``Std.Time.Internal.Bounded.ofInt?
-run_meta checkUDecidable ``Std.Time.Internal.Bounded.LE.clip
 
 /-- info: [0, 1, 1, 2, 3, 4, 100] -/
 #guard_msgs in
@@ -46,6 +46,9 @@ open Std.Time.Internal in
 example (n : Nat) : Nat.sqrt n * Nat.sqrt n ≤ n := Nat.sqrt_le n
 example (n : Nat) : n ≤ n.nextPowerOfTwo := Nat.le_nextPowerOfTwo n
 example (n : Nat) : n.nextPowerOfTwo.isPowerOfTwo := Nat.isPowerOfTwo_nextPowerOfTwo n
+
+open Std.Time.Internal in
+example : (Bounded.LE.clip (lo := 0) (hi := 5) 6 (by decide)).val = 5 := by decide
 
 /-! The kernel cannot evaluate them anymore. -/
 

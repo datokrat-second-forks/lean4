@@ -114,8 +114,8 @@ variable.
 -/
 def cnfSatAssignment (aig : AIG α) (assign1 : α → Bool) : Nat → Bool :=
   fun idx =>
-    if h : idx < aig.decls.size then
-      ⟦aig, ⟨idx, false, h⟩, assign1⟧
+    bif h : idx <ᵇ aig.decls.size then
+      ⟦aig, ⟨idx, false, (lt_of_decideLT_eq_true h)⟩, assign1⟧
     else
       false
 
@@ -642,7 +642,7 @@ def detectIte {aig : AIG α} (root : Nat) (h : root < aig.decls.size) : Option (
   match hroot : aig.decls[root]'h with
   | .gate l r =>
     -- We expect the structure to be a conjunction of disjunctions
-    if !l.invert || !r.invert then
+    bif !l.invert || !r.invert then
       none
     else
       -- Match l = (l0 ∧ l1) and r = (r0 ∧ r1)
@@ -654,16 +654,16 @@ def detectIte {aig : AIG α} (root : Nat) (h : root < aig.decls.size) : Option (
 where
   go (l r l0 l1 r0 r1 : Fanin) : Option (Fanin × Fanin × Fanin) :=
     -- ¬(l0 ∧ l1) ∧ ¬(¬l0 ∧ r1) = (l0 → ¬l1) ∧ (¬l0 → ¬r1)
-    if l0 = r0.flip true then
+    bif l0 =ᵇ r0.flip true then
       some (l0, l1.flip true, r1.flip true)
     -- ¬(l0 ∧ l1) ∧ ¬(r0 ∧ ¬l0) = (l0 → ¬l1) ∧ (¬l0 → ¬r0)
-    else if l0 = r1.flip true then
+    else bif l0 =ᵇ r1.flip true then
       some (l0, l1.flip true, r0.flip true)
     -- ¬(l0 ∧ l1) ∧ ¬(¬l1 ∧ r1) = (l1 → ¬l0) ∧ (¬l0 → ¬r1)
-    else if l1 = r0.flip true then
+    else bif l1 =ᵇ r0.flip true then
       some (l1, l0.flip true, r1.flip true)
     -- ¬(l0 ∧ l1) ∧ ¬(r0 ∧ ¬l1) = (l1 → ¬l0) ∧ (¬l1 → ¬r0)
-    else if l1 = r1.flip true then
+    else bif l1 =ᵇ r1.flip true then
       some (l1, l0.flip true, r0.flip true)
     else
       none
@@ -768,8 +768,7 @@ theorem denote_detectIte {root h c t f} (heq : detectIte root h = some ⟨c, t, 
       simp only at heq
       split at heq
       · next hl hr =>
-        simp only [Bool.or_eq_true, Bool.not_eq_eq_eq_not, Bool.not_true, not_or,
-          Bool.not_eq_false] at hinvert
+        simp only [not_or, Bool.not_eq_false] at hinvert
         apply detectIte.denote_go heq hroot hl hr hinvert.left hinvert.right
       · simp at heq
   · simp at heq
@@ -784,7 +783,7 @@ public def toCNF' (entry : Entrypoint α) (state : toCNF.State entry.aig) : toCN
 where
   go (aig : AIG α) (upper : Nat) (h : upper < aig.decls.size) (state : toCNF.State aig) :
       { out : toCNF.State aig // toCNF.State.IsExtensionBy state out upper h } :=
-    if hmarked : state.cache.marks[upper]'(by have := state.cache.hmarks; omega) then
+    bif hmarked : state.cache.marks[upper]'(by have := state.cache.hmarks; omega) then
       ⟨state, by apply toCNF.State.IsExtensionBy_rfl <;> assumption⟩
     else
       let decl := aig.decls[upper]

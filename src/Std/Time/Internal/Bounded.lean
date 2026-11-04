@@ -149,8 +149,8 @@ Creates a new `Bounded` integer.
 -/
 @[inline]
 def ofInt { lo hi : Int } (val : Int) : Option (Bounded.LE lo hi) :=
-  uif h : lo ≤ val ∧ val ≤ hi
-    then some ⟨val, h⟩
+  bif h : lo ≤ᵇ val && val ≤ᵇ hi
+    then some ⟨val, by simpa only [Bool.and_eq_true, decideLE_eq_true_iff] using h⟩
     else none
 
 /--
@@ -165,8 +165,8 @@ Convert a `Nat` to a `Bounded.LE` if it checks.
 -/
 @[inline]
 def ofNat? { hi : Nat } (val : Nat) : Option (Bounded.LE 0 hi) :=
-  uif h : val ≤ hi then
-    some <| ofNat val h
+  bif h : val ≤ᵇ hi then
+    some <| ofNat val (le_of_decideLE_eq_true h)
   else
     none
 
@@ -182,9 +182,9 @@ Convert a `Nat` to a `Bounded.LE` using the lower boundary too.
 -/
 @[inline]
 def clip (val : Int) (h : lo ≤ hi) : Bounded.LE lo hi :=
-  uif h₀ : lo ≤ val then
-    uif h₁ : val ≤ hi
-      then ⟨val, And.intro h₀ h₁⟩
+  bif h₀ : lo ≤ᵇ val then
+    bif h₁ : val ≤ᵇ hi
+      then ⟨val, And.intro (le_of_decideLE_eq_true h₀) (le_of_decideLE_eq_true h₁)⟩
       else ⟨hi, And.intro h (Int.le_refl hi)⟩
   else ⟨lo, And.intro (Int.le_refl lo) h⟩
 
@@ -235,8 +235,8 @@ Convert a `Fin` to a `Bounded.LE`.
 -/
 @[inline]
 def ofFin' {lo : Nat} (fin : Fin (Nat.succ hi)) (h : lo ≤ hi) : Bounded.LE lo hi :=
-  uif h₁ : fin.val ≥ lo
-    then ofNat' fin.val (And.intro h₁ ((Nat.le_of_lt_succ fin.isLt)))
+  bif h₁ : fin.val ≥ᵇ lo
+    then ofNat' fin.val (And.intro (le_of_decideLE_eq_true h₁) ((Nat.le_of_lt_succ fin.isLt)))
     else ofNat' lo (And.intro (Nat.le_refl lo) h)
 
 /--
@@ -460,10 +460,10 @@ will be a new bounded number with bounds `0` to `i - 1`.
 -/
 @[inline]
 def abs (bo :  Bounded.LE (-i) i) : Bounded.LE 0 i :=
-  uif h : bo.val ≥ 0 then
-    bo.truncateBottom h
+  bif h : bo.val ≥ᵇ 0 then
+    bo.truncateBottom (le_of_decideLE_eq_true h)
   else by
-    let r := bo.truncateTop (Int.le_of_lt (Int.not_le.mp h)) |>.neg
+    let r := bo.truncateTop (Int.le_of_lt (Int.not_le.mp (not_le_of_decideLE_eq_false h))) |>.neg
     rw [Int.neg_neg] at r
     exact r
 

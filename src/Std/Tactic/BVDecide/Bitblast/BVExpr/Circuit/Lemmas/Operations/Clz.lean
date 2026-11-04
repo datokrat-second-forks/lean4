@@ -37,7 +37,7 @@ theorem go_denote_eq {w : Nat} (aig : AIG α)
     (acc : AIG.RefVec aig w) (xc : AIG.RefVec aig w) (x : BitVec w) (assign : α → Bool)
     (hx : ∀ (idx : Nat) (hidx : idx < w), ⟦aig, xc.get idx hidx, assign⟧ = x.getLsbD idx)
     (hacc : ∀ (idx : Nat) (hidx : idx < w),
-      if curr = 0 then ⟦aig, acc.get idx hidx, assign⟧ = (BitVec.ofNat w w).getLsbD idx
+      uif curr = 0 then ⟦aig, acc.get idx hidx, assign⟧ = (BitVec.ofNat w w).getLsbD idx
       else ⟦aig, acc.get idx hidx, assign⟧ = (BitVec.clzAuxRec x (curr - 1)).getLsbD idx)
     :
     ∀ (idx : Nat) (hidx : idx < w),
@@ -60,7 +60,7 @@ theorem go_denote_eq {w : Nat} (aig : AIG α)
         · simp [hx]
         · simp [Ref.hgate]
       · intro idx hidx
-        simp only [Nat.add_eq_zero_iff, Nat.succ_ne_self, and_false, reduceIte,
+        simp only [Nat.add_eq_zero_iff, Nat.succ_ne_self, and_false, ↓reduceUIte,
           Nat.add_one_sub_one]
         rw [RefVec.denote_ite]
         split
@@ -81,11 +81,11 @@ theorem go_denote_eq {w : Nat} (aig : AIG α)
           next h1 h2 =>
             obtain ⟨curr, hcurr⟩ : ∃ curr', curr = curr' + 1 := by apply Nat.exists_eq_add_one.mpr (by omega)
             subst hcurr
-            have hxc : x.getLsbD (curr + 1) = false := by rw [hx] at h1; simp at h1; exact h1
+            have hxc : x.getLsbD (curr + 1) = false := by rw [hx] at h1; exact h1
             simp [hacc, BitVec.clzAuxRec_succ, hxc]
     case isFalse h =>
       rw [← hgo]
-      simp only [show ¬curr = 0 by omega, reduceIte] at hacc
+      simp only [show ¬curr = 0 by omega, ↓reduceUIte] at hacc
       simp only [hacc, BitVec.clzAuxRec_eq_clzAuxRec_of_le (x := x) (n := curr - 1) (by omega)]
 
 end blastClz
@@ -105,7 +105,7 @@ theorem denote_blastClz (aig : AIG α) (xc : RefVec aig w) (x : BitVec w) (assig
   rw [← hb, blastClz.go_denote_eq (x := x) (w := w)]
   · exact hx
   · intro idx hidx
-    simp only [reduceIte, BitVec.natCast_eq_ofNat]
+    simp only [↓reduceUIte, BitVec.natCast_eq_ofNat]
     rw [denote_blastConst]
 
 end bitblast

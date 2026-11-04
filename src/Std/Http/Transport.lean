@@ -107,7 +107,7 @@ def recvJoined (recvChan : Std.CloseableChannel ByteArray) (expect : Option UInt
     let mut result := first
     repeat
       if let some expect := expect then
-        if result.size.toUInt64 ≥ expect then break
+        bif result.size.toUInt64 ≥ᵇ expect then break
 
       match ← recvChan.tryRecv with
       | none => break
@@ -180,8 +180,8 @@ def tryRecv? (client : Mock.Client) (_expect : UInt64 := 0) : BaseIO (Option Byt
 Closes the mock server and client.
 -/
 def close (client : Mock.Client) : IO Unit := do
-  if !(← client.shared.clientToServer.isClosed) then client.shared.clientToServer.close
-  if !(← client.shared.serverToClient.isClosed) then client.shared.serverToClient.close
+  bif !(← client.shared.clientToServer.isClosed) then client.shared.clientToServer.close
+  bif !(← client.shared.serverToClient.isClosed) then client.shared.serverToClient.close
 
 end Mock.Client
 
@@ -230,8 +230,8 @@ def tryRecv? (server : Mock.Server) (_expect : UInt64 := 0) : BaseIO (Option Byt
 Closes the mock server and client.
 -/
 def close (server : Mock.Server) : IO Unit := do
-  if !(← server.shared.clientToServer.isClosed) then server.shared.clientToServer.close
-  if !(← server.shared.serverToClient.isClosed) then server.shared.serverToClient.close
+  bif !(← server.shared.clientToServer.isClosed) then server.shared.clientToServer.close
+  bif !(← server.shared.serverToClient.isClosed) then server.shared.serverToClient.close
 
 
 end Mock.Server

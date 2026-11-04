@@ -64,7 +64,7 @@ theorem go_get_aux (aig : AIG α) (n : Nat) (curr : Nat) (hcurr : curr ≤ n)
   · dsimp only
     rw [go_get_aux]; case hidx => rw [Nat.mul_add]; omega
     rw [AIG.RefVec.get_append]
-    simp only [hidx, ↓reduceDIte]
+    simp only [hidx, ↓reduceUDIte]
   · dsimp only
     simp only [RefVec.get, Ref.mk.injEq]
     have : curr = n := by omega
@@ -89,7 +89,7 @@ theorem go_get (aig : AIG α) (n : Nat) (curr : Nat) (hcurr : curr ≤ n)
       rw [go_get_aux]
       rw [AIG.RefVec.get_append]
       · have : ¬ (idx < w * curr) := by omega
-        simp only [this, ↓reduceDIte]
+        simp only [this, ↓reduceUDIte]
         congr 1
         rw [← Nat.sub_mul_mod (k := curr)]
         · rw [Nat.mod_eq_of_lt]

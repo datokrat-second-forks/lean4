@@ -191,7 +191,7 @@ Determines the transfer encoding mode based on explicit setting, body closure st
 def determineTransferMode (writer : Writer dir) : Body.Length :=
   if let some mode := writer.knownSize then
     mode
-  else if writer.userClosedBody then
+  else bif writer.userClosedBody then
     .fixed writer.userDataBytes
   else
     .chunked
@@ -204,7 +204,7 @@ during the chunked-encoding write step — see `writeChunkedBody`.
 -/
 @[inline]
 def addUserData (data : Array Chunk) (writer : Writer dir) : Writer dir :=
-  if writer.canAcceptData then
+  bif writer.canAcceptData then
     let extraBytes := data.foldl (fun acc c => acc + c.data.size) 0
     { writer with userData := writer.userData ++ data, userDataBytes := writer.userDataBytes + extraBytes }
   else
@@ -214,20 +214,20 @@ def addUserData (data : Array Chunk) (writer : Writer dir) : Writer dir :=
 Writes accumulated user data to output using fixed-size encoding.
 -/
 def writeFixedBody (writer : Writer dir) (limitSize : Nat) : Writer dir × Nat :=
-  if writer.userData.size = 0 then
+  bif writer.userData.size =ᵇ 0 then
     (writer, limitSize)
   else
     let (chunks, pending, totalSize) := writer.userData.foldl (fun (state : Array ByteArray × Array Chunk × Nat) chunk =>
       let (acc, pending, size) := state
-      if size >= limitSize then
+      bif size ≥ᵇ limitSize then
         (acc, pending.push chunk, size)
       else
         let remaining := limitSize - size
         let takeSize := min chunk.data.size remaining
         let dataPart := chunk.data.extract 0 takeSize
-        let acc := if takeSize = 0 then acc else acc.push dataPart
+        let acc := bif takeSize =ᵇ 0 then acc else acc.push dataPart
         let size := size + takeSize
-        if takeSize < chunk.data.size then
+        bif takeSize <ᵇ chunk.data.size then
           let pendingChunk : Chunk := { chunk with data := chunk.data.extract takeSize chunk.data.size }
           (acc, pending.push pendingChunk, size)
         else
@@ -243,7 +243,7 @@ Writes accumulated user data to output using chunked transfer encoding.
 Empty chunks are silently discarded. See `Chunk.empty` for the protocol-level rationale.
 -/
 def writeChunkedBody (writer : Writer dir) : Writer dir :=
-  if writer.userData.size = 0 then
+  bif writer.userData.size =ᵇ 0 then
     writer
   else
     let data := writer.userData.filter (fun c => !c.data.isEmpty)

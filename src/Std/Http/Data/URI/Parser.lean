@@ -49,19 +49,19 @@ private def peekIs (p : UInt8 → Bool) : Parser Bool := do
 
 -- scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
 private def parseScheme (config : URI.Config) : Parser URI.Scheme := do
-  if config.maxSchemeLength = 0 then
+  bif config.maxSchemeLength =ᵇ 0 then
     fail "scheme length limit is 0 (no scheme allowed)"
 
   let first : UInt8 ← satisfy isAlphaByte
   let rest ← takeWhileAtMost
     (fun c =>
-      isAlphaNum c ∨
-      c = '+'.toUInt8 ∨ c = '-'.toUInt8 ∨ c = '.'.toUInt8)
+      isAlphaNum c ||
+      c == '+'.toUInt8 || c == '-'.toUInt8 || c == '.'.toUInt8)
     (config.maxSchemeLength - 1)
   let schemeBytes := ByteArray.empty.push first ++ rest.toByteArray
   let str := String.fromUTF8! schemeBytes |>.toLower
 
-  if h : URI.IsValidScheme str then
+  uif h : URI.IsValidScheme str then
     return ⟨str, h⟩
   else
     fail "invalid scheme"
@@ -75,7 +75,7 @@ private def parsePortNumber : Parser UInt16 := do
   let some portNum := String.toNat? portStr
     | fail s!"invalid port number: {portStr}"
 
-  if portNum > 65535 then
+  bif portNum >ᵇ 65535 then
     fail s!"port number too large: {portNum}"
 
   return portNum.toUInt16
@@ -84,18 +84,18 @@ private def parsePortNumber : Parser UInt16 := do
 private def parseUserInfo (config : URI.Config) : Parser URI.UserInfo := do
   let userBytesName ← takeWhileAtMost
     (fun x =>
-      x ≠ ':'.toUInt8 ∧
-      (isUserInfoChar x ∨ x = '%'.toUInt8))
+      x != ':'.toUInt8 &&
+      (isUserInfoChar x || x == '%'.toUInt8))
     config.maxUserInfoLength
 
   let some userNameEncoded := URI.EncodedUserInfo.ofByteArray? userBytesName.toByteArray
     | fail "invalid percent encoding in user info"
 
-  let userPassEncoded ← if ← peekIs (· == ':'.toUInt8) then
+  let userPassEncoded ← bif ← peekIs (· == ':'.toUInt8) then
       skip
 
       let userBytesPass ← takeWhileAtMost
-        (fun x => isUserInfoChar x ∨ x = '%'.toUInt8)
+        (fun x => isUserInfoChar x || x == '%'.toUInt8)
         config.maxUserInfoLength
 
       let some userPassEncoded := URI.EncodedUserInfo.ofByteArray? userBytesPass.toByteArray
@@ -114,7 +114,7 @@ private def parseIPv6 : Parser Net.IPv6Addr := do
   skipByte '['.toUInt8
 
   let result ← takeWhile1AtMost
-    (fun x => x = ':'.toUInt8 ∨ x = '.'.toUInt8 ∨ isHexDigitByte x)
+    (fun x => x == ':'.toUInt8 || x == '.'.toUInt8 || isHexDigitByte x)
     256
 
   skipByte ']'.toUInt8
@@ -128,7 +128,7 @@ private def parseIPv6 : Parser Net.IPv6Addr := do
 -- IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
 private def parseIPv4 : Parser Net.IPv4Addr := do
   let result ← takeWhile1AtMost
-    (fun x => x = '.'.toUInt8 ∨ isDigitByte x)
+    (fun x => x == '.'.toUInt8 || isDigitByte x)
     256
 
   let ipv4Str := String.fromUTF8! result.toByteArray
@@ -141,21 +141,21 @@ private def parseIPv4 : Parser Net.IPv4Addr := do
 -- Note: RFC 1123 allows domain labels to start with digits, so we must try IPv4
 -- first and fall back to reg-name parsing if it fails.
 private def parseHost (config : URI.Config) : Parser URI.Host := do
-  if (← peekWhen? (· == '['.toUInt8)).isSome then
+  bif (← peekWhen? (· == '['.toUInt8)).isSome then
     return .ipv6 (← parseIPv6)
   else
-    if (← peekWhen? isDigitByte).isSome then
+    bif (← peekWhen? isDigitByte).isSome then
       if let some ipv4 ← tryOpt parseIPv4 then
         return .ipv4 ipv4
 
     -- It needs to be a legal DNS label, so it differs from reg-name.
     let some str := String.fromUTF8? (← takeWhile1AtMost
-      (fun x => isAlphaNum x ∨ x = '-'.toUInt8 ∨ x = '.'.toUInt8)
+      (fun x => isAlphaNum x || x == '-'.toUInt8 || x == '.'.toUInt8)
       config.maxHostLength).toByteArray
       | fail s!"invalid host"
 
     let lower := str.toLower
-    if h : URI.IsValidDomainName lower ∧ ¬lower.isEmpty then
+    uif h : URI.IsValidDomainName lower ∧ ¬lower.isEmpty then
       return .name ⟨lower, .isLowerCase_toLower, h⟩
     else
       fail s!"invalid domain name: {str}"
@@ -170,13 +170,13 @@ private def parseAuthority (config : URI.Config) : Parser URI.Authority := do
   let host ← parseHost config
 
   let port : URI.Port ←
-    if ← peekIs (· == ':'.toUInt8) then
+    bif ← peekIs (· == ':'.toUInt8) then
       skipByte ':'.toUInt8
-      if (← peekWhen? isDigitByte).isSome then
+      bif (← peekWhen? isDigitByte).isSome then
         pure (.value (← parsePortNumber))
       else
         let next ← peek?
-        if next.isNone || next.any (fun c => c = '/'.toUInt8 ∨ c = '?'.toUInt8 ∨ c = '#'.toUInt8) then
+        bif next.isNone || next.any (fun c => c == '/'.toUInt8 || c == '?'.toUInt8 || c == '#'.toUInt8) then
           pure .empty
         else
           fail "invalid port number"
@@ -187,7 +187,7 @@ private def parseAuthority (config : URI.Config) : Parser URI.Authority := do
 
 -- segment = *pchar
 private def parseSegment (config : URI.Config) : Parser ByteSlice := do
-  takeWhileAtMost (fun c => isPChar c ∨ c = '%'.toUInt8) config.maxSegmentLength
+  takeWhileAtMost (fun c => isPChar c || c == '%'.toUInt8) config.maxSegmentLength
 
 /-
 path = path-abempty ; begins with "/" or is empty
@@ -207,24 +207,24 @@ path-empty    = 0<pchar>
 Parses a URI path with combined parsing and validation.
 -/
 def parsePath (config : URI.Config) (forceAbsolute : Bool) (allowEmpty : Bool) : Parser URI.Path := do
-  let isPathDelimiter : UInt8 → Bool := fun c => c = '?'.toUInt8 ∨ c = '#'.toUInt8
+  let isPathDelimiter : UInt8 → Bool := fun c => c == '?'.toUInt8 || c == '#'.toUInt8
   let mut isAbsolute := false
   let mut segments : Array _ := #[]
   let mut totalLength := 0
 
   let isSegmentOrSlash ←
-    peekIs (fun c => isPChar c ∨ c = '%'.toUInt8 ∨ c = '/'.toUInt8)
+    peekIs (fun c => isPChar c || c == '%'.toUInt8 || c == '/'.toUInt8)
 
-  if ¬allowEmpty ∧ ((← isEof) ∨ ¬isSegmentOrSlash) then
+  bif !allowEmpty && ((← isEof) || !isSegmentOrSlash) then
     fail "need a path"
 
   -- Check if path is absolute
-  if ← peekIs (· == '/'.toUInt8) then
+  bif ← peekIs (· == '/'.toUInt8) then
     isAbsolute := true
     totalLength := totalLength + 1
     skip
-  else if forceAbsolute then
-    if allowEmpty ∧ ((← isEof) ∨ ¬isSegmentOrSlash) then
+  else bif forceAbsolute then
+    bif allowEmpty && ((← isEof) || !isSegmentOrSlash) then
       return { segments := segments, absolute := isAbsolute }
     else
       fail "require '/' in path"
@@ -234,13 +234,13 @@ def parsePath (config : URI.Config) (forceAbsolute : Bool) (allowEmpty : Bool) :
   -- Parse segments
   while (← peek?).isSome do
     let some next := (← peek?) | break
-    if isPathDelimiter next then
+    bif isPathDelimiter next then
       break
 
-    if ¬(next = '/'.toUInt8 ∨ isPChar next ∨ next = '%'.toUInt8) then
+    bif !(next == '/'.toUInt8 || isPChar next || next == '%'.toUInt8) then
       break
 
-    if segments.size >= config.maxPathSegments then
+    bif segments.size ≥ᵇ config.maxPathSegments then
       fail s!"too many path segments (limit: {config.maxPathSegments})"
 
     let segmentBytes ← parseSegment config
@@ -248,20 +248,20 @@ def parsePath (config : URI.Config) (forceAbsolute : Bool) (allowEmpty : Bool) :
       | fail "invalid percent encoding in path segment"
 
     totalLength := totalLength + segmentBytes.size
-    if totalLength > config.maxTotalPathLength then
+    bif totalLength >ᵇ config.maxTotalPathLength then
       fail s!"path too long (limit: {config.maxTotalPathLength} bytes)"
 
     segments := segments.push segmentStr
 
-    if (← peek?).any (· == '/'.toUInt8) then
+    bif (← peek?).any (· == '/'.toUInt8) then
       totalLength := totalLength + 1
-      if totalLength > config.maxTotalPathLength then
+      bif totalLength >ᵇ config.maxTotalPathLength then
         fail s!"path too long (limit: {config.maxTotalPathLength} bytes)"
       skip
       -- If path ends with '/', add empty segment
       let next ← peek?
-      if next.isNone || next.any isPathDelimiter then
-        if segments.size >= config.maxPathSegments then
+      bif next.isNone || next.any isPathDelimiter then
+        bif segments.size ≥ᵇ config.maxPathSegments then
           fail s!"too many path segments (limit: {config.maxPathSegments})"
         segments := segments.push (URI.EncodedString.empty)
     else
@@ -272,17 +272,17 @@ def parsePath (config : URI.Config) (forceAbsolute : Bool) (allowEmpty : Bool) :
 -- query = *( pchar / "/" / "?" )
 private def parseQuery (config : URI.Config) : Parser URI.Query := do
   let queryBytes ←
-    takeWhileAtMost (fun c => isQueryChar c ∨ c = '%'.toUInt8) config.maxQueryLength
+    takeWhileAtMost (fun c => isQueryChar c || c == '%'.toUInt8) config.maxQueryLength
 
   let some queryStr := String.fromUTF8? queryBytes.toByteArray
     | fail "invalid query string"
 
-  if queryStr.isEmpty then
+  bif queryStr.isEmpty then
     return URI.Query.empty
 
   let rawPairs := queryStr.split '&'
 
-  if rawPairs.length > config.maxQueryParams then
+  bif rawPairs.length >ᵇ config.maxQueryParams then
     fail s!"too many query parameters (limit: {config.maxQueryParams})"
 
   let pairs : Option URI.Query := rawPairs.foldM (init := URI.Query.empty) fun acc pair => do
@@ -304,7 +304,7 @@ private def parseQuery (config : URI.Config) : Parser URI.Query := do
 --  fragment = *( pchar / "/" / "?" )
 private def parseFragment (config : URI.Config) : Parser URI.EncodedFragment := do
   let fragmentBytes ←
-    takeWhileAtMost (fun c => isFragmentChar c ∨ c = '%'.toUInt8) config.maxFragmentLength
+    takeWhileAtMost (fun c => isFragmentChar c || c == '%'.toUInt8) config.maxFragmentLength
 
   let some fragmentStr := URI.EncodedFragment.ofByteArray? fragmentBytes.toByteArray
     | fail "invalid percent encoding in fragment"
@@ -316,7 +316,7 @@ private def parseHierPart (config : URI.Config) : Parser (Option URI.Authority �
   -- RFC 3986 §3.2 allows an empty reg-name, so `file:///path` (empty host) is valid.
   -- When parseAuthority fails on an empty host, treat authority as absent so the
   -- scheme guard in callers fires correctly on non-http(s) URIs.
-  if (← tryOpt (skipString "//")).isSome then
+  bif (← tryOpt (skipString "//")).isSome then
     let authority ← tryOpt (attempt (parseAuthority config))
     let path ← parsePath config true true  -- path-abempty (must start with "/" or be empty)
     return (authority, path)
@@ -360,7 +360,7 @@ where
   -- origin-form = absolute-path [ "?" query ]
   -- absolute-path = 1*( "/" segment )
   origin : Parser RequestTarget := attempt do
-    if ← peekIs (· == '/'.toUInt8) then
+    bif ← peekIs (· == '/'.toUInt8) then
       let path ← parsePath config true true
       let query ← optional (skipByte '?'.toUInt8 *> parseQuery config)
 
@@ -380,9 +380,9 @@ where
   -- letting `http:80` fall through to authority-form parsing.
   absoluteHttp : Parser RequestTarget := attempt do
     let scheme ← parseScheme config
-    if scheme.val = "http" || scheme.val = "https" then
+    bif scheme.val == "http" || scheme.val == "https" then
       skipByte ':'.toUInt8
-      if ← peekIs (· == '/'.toUInt8) then
+      bif ← peekIs (· == '/'.toUInt8) then
         let (authority, path) ← parseHierPart config
         let query ← optional (skipByteChar '?' *> parseQuery config)
         return .absoluteForm { scheme, path, authority, query, fragment := none }
@@ -464,20 +464,20 @@ def parseHostHeader (config : URI.Config := {}) : Parser (URI.Host × URI.Port) 
   let host ← parseHost config
 
   let port : URI.Port ←
-    if ← peekIs (· == ':'.toUInt8) then
+    bif ← peekIs (· == ':'.toUInt8) then
       skipByte ':'.toUInt8
-      if (← peekWhen? isDigitByte).isSome then
+      bif (← peekWhen? isDigitByte).isSome then
         pure (.value (← parsePortNumber))
       else
         let next ← peek?
-        if next.isNone then
+        bif next.isNone then
           pure .empty
         else
           fail "invalid host header port"
     else
       pure .omitted
 
-  if ¬(← isEof) then
+  bif !(← isEof) then
     fail "invalid host header"
 
   return (host, port)

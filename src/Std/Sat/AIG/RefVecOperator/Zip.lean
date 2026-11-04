@@ -87,8 +87,8 @@ where
       (lhs rhs : RefVec aig len) (f : (aig : AIG α) → BinaryInput aig → Entrypoint α)
       [LawfulOperator α BinaryInput f] [LawfulZipOperator α f] :
       RefVecEntry α len :=
-    if hidx : idx < len then
-      let res := f aig ⟨lhs.get idx hidx, rhs.get idx hidx⟩
+    bif hidx : idx <ᵇ len then
+      let res := f aig ⟨lhs.get idx (lt_of_decideLT_eq_true hidx), rhs.get idx (lt_of_decideLT_eq_true hidx)⟩
       let aig := res.aig
       let newRef := res.ref
       have := by

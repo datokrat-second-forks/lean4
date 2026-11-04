@@ -27,7 +27,7 @@ In windows it uses the current `icu.h` in Windows SDK. If it's linux or macos th
 files.
 -/
 def defaultGetZoneRules (name : String) : IO TimeZone.ZoneRules := do
-  if System.Platform.isWindows
+  bif System.Platform.isWindows
     then getZoneRules WindowsDb.default name
     else getZoneRules TZdb.default name
 
@@ -37,6 +37,6 @@ In windows it uses the current `icu.h` in Windows SDK. If it's linux or macos th
 files.
 -/
 def defaultGetLocalZoneRules : IO TimeZone.ZoneRules := do
-  if System.Platform.isWindows
+  bif System.Platform.isWindows
     then getLocalZoneRules WindowsDb.default
     else getLocalZoneRules TZdb.default
