@@ -80,7 +80,7 @@ theorem length_toList_le {o : Option α} : o.toList.length ≤ 1 := by
 
 @[grind =]
 theorem length_toList {o : Option α} :
-    o.toList.length = if o.isSome then 1 else 0 := by
+    o.toList.length = uif o.isSome then 1 else 0 := by
   cases o <;> simp
 
 @[simp]

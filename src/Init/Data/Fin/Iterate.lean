@@ -28,10 +28,10 @@ other more specialized theorems.
 -/
 def hIterateFrom (P : Nat → Sort _) {n} (f : ∀(i : Fin n), P i.val → P (i.val+1))
       (i : Nat) (ubnd : i ≤ n) (a : P i) : P n :=
-  if g : i < n then
-    hIterateFrom P f (i+1) g (f ⟨i, g⟩ a)
+  bif g : i <ᵇ n then
+    hIterateFrom P f (i+1) (lt_of_decideLT_eq_true g) (f ⟨i, lt_of_decideLT_eq_true g⟩ a)
   else
-    have p : i = n := (or_iff_left g).mp (Nat.eq_or_lt_of_le ubnd)
+    have p : i = n := (or_iff_left (decideLT_eq_false_iff.1 g)).mp (Nat.eq_or_lt_of_le ubnd)
     _root_.cast (congrArg P p) a
   termination_by n - i
   decreasing_by decreasing_trivial_pre_omega
@@ -69,12 +69,12 @@ private theorem hIterateFrom_elim {P : Nat → Sort _}(Q : ∀(i : Nat), P i →
     have g : ¬ (i < n) := by simp at p; simp [p]
     have r : Q n (_root_.cast (congrArg P p) s) :=
       @Eq.rec Nat i (fun k eq => Q k (_root_.cast (congrArg P eq) s)) init n p
-    simp only [g, dite_false]; exact r
+    rw [Bool.dcond_neg (decideLT_eq_false_iff.2 g)]; exact r
   | succ j inv =>
     unfold hIterateFrom
     have d : Nat.succ i + j = n := by simp [Nat.succ_add]; exact p
     have g : i < n := Nat.le.intro d
-    simp only [g]
+    rw [Bool.dcond_pos (decideLT_eq_true_iff.2 g)]
     exact inv _ _ (step ⟨i,g⟩ s init) d
 
 /--

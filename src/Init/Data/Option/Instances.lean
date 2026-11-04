@@ -47,6 +47,30 @@ instance decidableExistsMem {p : α → Prop} [DecidablePred p] :
   | none => isFalse nofun
   | some a => if h : p a then isTrue ⟨_, rfl, h⟩ else isFalse fun ⟨_, ⟨rfl, hn⟩⟩ => h hn
 
+/-- The implementation of `instUDecidableMem` in compiled code and `cbv`. -/
+@[expose, inline, instance_reducible] def instUDecidableMemImpl [UDecidableEq α] (j : α)
+    (o : Option α) : UDecidable (j ∈ o) :=
+  inferInstanceAs <| UDecidable (o = some j)
+
+noncomputable instance instUDecidableMem [UDecidableEq α] (j : α) (o : Option α) :
+    UDecidable (j ∈ o) :=
+  UDecidable.classical _
+
+@[csimp] theorem instUDecidableMem_csimp : @instUDecidableMem = @instUDecidableMemImpl := rfl
+
+/-- The implementation of `instUDecidableExistsMem` in compiled code and `cbv`. -/
+@[expose, inline, instance_reducible] def instUDecidableExistsMemImpl {p : α → Prop}
+    [UDecidablePred p] : ∀ o : Option α, UDecidable (Exists fun a => a ∈ o ∧ p a)
+  | none => UDecidable.isFalse nofun
+  | some a => UDecidable.ofIff (p a) ⟨fun h => ⟨_, rfl, h⟩, fun ⟨_, ⟨rfl, h⟩⟩ => h⟩
+
+noncomputable instance instUDecidableExistsMem {p : α → Prop} [UDecidablePred p] (o : Option α) :
+    UDecidable (Exists fun a => a ∈ o ∧ p a) :=
+  UDecidable.classical _
+
+@[csimp] theorem instUDecidableExistsMem_csimp :
+    @instUDecidableExistsMem = @instUDecidableExistsMemImpl := rfl
+
 /--
 Given an optional value and a function that can be applied when the value is `some`, returns the
 result of applying the function if this is possible.

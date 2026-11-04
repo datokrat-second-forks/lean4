@@ -30,7 +30,7 @@ Example:
 
 /-- Inner loop for `Fin.foldl`. `Fin.foldl.loop n f x i = f (f (f x i) ...) (n-1)`. -/
 @[specialize, semireducible] def foldl.loop (n) (f : α → Fin n → α) (x : α) (i : Nat) : α :=
-  if h : i < n then loop n f (f x ⟨i, h⟩) (i+1) else x
+  bif h : i <ᵇ n then loop n f (f x ⟨i, lt_of_decideLT_eq_true h⟩) (i+1) else x
 termination_by n - i
 
 /-- Tail-recursive implementation of `Fin.foldl`, used by the compiler. -/
@@ -76,7 +76,7 @@ Fin.foldlM n f x₀ = do
   ```
   -/
   @[specialize] loop (x : α) (i : Nat) : m α := do
-    if h : i < n then f x ⟨i, h⟩ >>= (loop · (i+1)) else pure x
+    bif h : i <ᵇ n then f x ⟨i, lt_of_decideLT_eq_true h⟩ >>= (loop · (i+1)) else pure x
   termination_by n - i
   decreasing_by decreasing_trivial_pre_omega
 
@@ -119,10 +119,10 @@ Fin.foldrM n f xₙ = do
 
 private theorem foldlM_loop_lt [Monad m] (f : α → Fin n → m α) (x) (h : i < n) :
     foldlM.loop n f x i = f x ⟨i, h⟩ >>= (foldlM.loop n f . (i+1)) := by
-  rw [foldlM.loop, dite_eq_left h]
+  rw [foldlM.loop, Bool.dcond_pos (decideLT_eq_true_iff.2 h)]
 
 private theorem foldlM_loop_eq [Monad m] (f : α → Fin n → m α) (x) : foldlM.loop n f x n = pure x := by
-  rw [foldlM.loop, dite_eq_right (Nat.lt_irrefl _)]
+  rw [foldlM.loop, Bool.dcond_neg (decideLT_eq_false_iff.2 (Nat.lt_irrefl _))]
 
 private theorem foldlM_loop [Monad m] (f : α → Fin (n+1) → m α) (x) (h : i < n+1) :
     foldlM.loop (n+1) f x i = f x ⟨i, h⟩ >>= (foldlM.loop n (fun x j => f x j.succ) . i) := by
@@ -240,10 +240,10 @@ theorem foldrM_add [Monad m] [LawfulMonad m] (f : Fin (n + k) → α → m α) :
 
 private theorem foldl_loop_lt (f : α → Fin n → α) (x) (h : i < n) :
     foldl.loop n f x i = foldl.loop n f (f x ⟨i, h⟩) (i+1) := by
-  rw [foldl.loop, dite_eq_left h]
+  rw [foldl.loop, Bool.dcond_pos (decideLT_eq_true_iff.2 h)]
 
 private theorem foldl_loop_eq (f : α → Fin n → α) (x) : foldl.loop n f x n = x := by
-  rw [foldl.loop, dite_eq_right (Nat.lt_irrefl _)]
+  rw [foldl.loop, Bool.dcond_neg (decideLT_eq_false_iff.2 (Nat.lt_irrefl _))]
 
 private theorem foldl_loop (f : α → Fin (n+1) → α) (x) (h : i < n+1) :
     foldl.loop (n+1) f x i = foldl.loop n (fun x j => f x j.succ) (f x ⟨i, h⟩) i := by

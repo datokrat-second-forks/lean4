@@ -40,7 +40,7 @@ instance : LawfulUpwardEnumerable (Fin n) where
 instance : LawfulUpwardEnumerableLE (Fin n) where
   le_iff x y := by
     simp only [le_def, UpwardEnumerable.LE, pRangeSuccMany?_eq, Fin.addNat?_eq_dite,
-      Option.dite_none_right_eq_some, Option.some.injEq, ← val_inj, exists_prop]
+      Option.udite_none_right_eq_some, Option.some.injEq, ← val_inj, exists_prop]
     exact ⟨fun h => ⟨y - x, by grind⟩, by grind⟩
 
 instance : Least? (Fin 0) where
@@ -84,7 +84,7 @@ instance : Rxc.LawfulHasSize (Fin n) where
   size_eq_succ_of_succ?_eq_some lo hi x h h' := by
     simp only [pRangeSucc?_eq, Fin.addNat?_eq_dite] at h'
     by_cases hc : (lo : Nat) + 1 < n
-    · simp only [hc, dite_eq_left, Option.some.injEq] at h'
+    · simp only [hc, ↓reduceUDIte, Option.some.injEq] at h'
       subst h'
       simp only [rxcHasSize_eq, Fin.le_def] at h ⊢
       omega

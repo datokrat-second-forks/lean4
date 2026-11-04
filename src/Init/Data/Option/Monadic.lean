@@ -164,7 +164,8 @@ theorem forIn_join [Monad m] [LawfulMonad m]
 @[simp, grind =] theorem filterM_none [Applicative m] (p : α → m Bool) :
     none.filterM p = pure none := rfl
 @[grind =] theorem filterM_some [Applicative m] (p : α → m Bool) (a : α) :
-    (some a).filterM p = (fun b => if b then some a else none) <$> p a := rfl
+    (some a).filterM p = (fun b => uif b = true then some a else none) <$> p a :=
+  congrArg (· <$> p a) (funext fun _ => Bool.cond_eq_ite ..)
 
 theorem sequence_join [Applicative m] [LawfulApplicative m] {o : Option (Option (m α))} :
     o.join.sequence = join <$> sequence (o.map sequence) := by
@@ -179,7 +180,7 @@ theorem mapM_join [Applicative m] [LawfulApplicative m] {f : α → m β} {o : O
   cases o <;> simp
 
 theorem mapM_guard [Applicative m] {x : α} {p : α → Bool} {f : α → m β} :
-    (guard p x).mapM f = if p x then some <$> f x else pure none := by
+    (guard p x).mapM f = uif p x then some <$> f x else pure none := by
   simp only [guard_eq_ite]
   split <;> simp
 

@@ -24,7 +24,7 @@ Examples:
 -/
 @[inline, expose]
 protected def addNat? (i : Fin n) (m : Nat) : Option (Fin n) :=
-  if h : i + m < n then some ⟨i + m, h⟩ else none
+  bif h : i + m <ᵇ n then some ⟨i + m, lt_of_decideLT_eq_true h⟩ else none
 
 theorem addNat?_eq_some {i : Fin n} (h : i + m < n) : i.addNat? m = some ⟨i + m, h⟩ := by
   simp [Fin.addNat?, h]
@@ -45,10 +45,10 @@ theorem addNat?_zero {i : Fin n} : i.addNat? 0 = some i := by
 
 @[grind =]
 theorem addNat?_eq_dite {i : Fin n} :
-    i.addNat? m = if h : i + m < n then some ⟨i + m, h⟩ else none := by
-  rfl
+    i.addNat? m = uif h : i + m < n then some ⟨i + m, h⟩ else none := by
+  simp [Fin.addNat?]
 
 @[deprecated Fin.addNat?_eq_dite (since := "2026-07-21")]
-theorem addNat?_eq_dif {n : Nat} {m : Nat} {i : Fin n} : i.addNat? m = if h : ↑i + m < n then Option.some ⟨↑i + m, h⟩ else Option.none := Fin.addNat?_eq_dite
+theorem addNat?_eq_dif {n : Nat} {m : Nat} {i : Fin n} : i.addNat? m = uif h : ↑i + m < n then Option.some ⟨↑i + m, h⟩ else Option.none := Fin.addNat?_eq_dite
 
 end Fin

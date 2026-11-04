@@ -215,7 +215,7 @@ theorem pbind_eq_bind_attach {o : Option α} {f : (a : α) → o = some a → Op
 
 theorem attach_filter {o : Option α} {p : α → Bool} :
     (o.filter p).attach =
-      o.attach.bind fun ⟨x, h⟩ => if h' : p x then some ⟨x, by simp_all⟩ else none := by
+      o.attach.bind fun ⟨x, h⟩ => uif h' : p x then some ⟨x, by simp_all⟩ else none := by
   cases o with
   | none => simp
   | some a =>
@@ -274,7 +274,7 @@ theorem toArray_pmap {p : α → Prop} {o : Option α} {f : (a : α) → p a →
 
 theorem attach_pfilter {o : Option α} {p : (a : α) → o = some a → Bool} :
     (o.pfilter p).attach =
-      o.attach.pbind fun x h => if h' : p x (by simp_all) then
+      o.attach.pbind fun x h => uif h' : p x (by simp_all) then
         some ⟨x.1, by simpa [pfilter_eq_some_iff] using ⟨_, h'⟩⟩ else none := by
   cases o with
   | none => simp
@@ -284,13 +284,13 @@ theorem attach_pfilter {o : Option α} {p : (a : α) → o = some a → Bool} :
     split <;> simp [*]
 
 theorem attach_guard {p : α → Bool} {x : α} :
-    (guard p x).attach = if h : p x then some ⟨x, by simp_all⟩ else none := by
+    (guard p x).attach = uif h : p x then some ⟨x, by simp_all⟩ else none := by
   rw [attach_congr guard_eq_ite]
   split <;> simp [*]
 
 theorem attachWith_guard {q : α → Bool} {x : α} {P : α → Prop}
     {h : ∀ a, guard q x = some a → P a} :
-    (guard q x).attachWith P h = if h' : q x then some ⟨x, h _ (by simp_all)⟩ else none := by
+    (guard q x).attachWith P h = uif h' : q x then some ⟨x, h _ (by simp_all)⟩ else none := by
   simp only [guard_eq_ite]
   split <;> simp [*]
 

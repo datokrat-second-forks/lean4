@@ -633,7 +633,7 @@ theorem get_none_eq_iff_true {h} : (none : Option α).get h = a ↔ True := by
   simp only [guard, Bool.cond_eq_ite]
   split <;> simp
 
-@[grind =] theorem getD_guard : (guard p a).getD b = if p a then a else b := by
+@[grind =] theorem getD_guard : (guard p a).getD b = uif p a then a else b := by
   simp only [guard, Bool.cond_eq_ite]
   split <;> simp
 
@@ -755,7 +755,7 @@ theorem get_merge {o o' : Option α} {f : α → α → α} {i : α} [Std.Lawful
 @[simp, grind =] theorem elim_some (x : β) (f : α → β) (a : α) : (some a).elim x f = f a := rfl
 
 @[grind =] theorem elim_filter {o : Option α} {b : β} :
-    Option.elim (Option.filter p o) b f = Option.elim o b (fun a => if p a then f a else b) :=
+    Option.elim (Option.filter p o) b f = Option.elim o b (fun a => uif p a then f a else b) :=
   match o with
   | none => rfl
   | some a =>
@@ -767,7 +767,7 @@ theorem get_merge {o o' : Option α} {f : α → α → α} {i : α} [Std.Lawful
     o.join.elim b f = o.elim b (·.elim b f) := by
   cases o <;> simp
 
-theorem elim_guard : (guard p a).elim b f = if p a then f a else b := by
+theorem elim_guard : (guard p a).elim b f = uif p a then f a else b := by
   cases h : p a <;> simp [*, guard]
 
 @[simp]
@@ -790,11 +790,12 @@ If `α` is non-empty, then there exists some `v : α` and this arbitrary element
 Otherwise, it is `none`.
 -/
 noncomputable def choice (α : Type _) : Option α :=
-  if h : Nonempty α then some (Classical.choice h) else none
+  haveI := UDecidable.classical (Nonempty α)
+  uif h : Nonempty α then some (Classical.choice h) else none
 
 theorem choice_eq_some [Subsingleton α] (a : α) : choice α = some a := by
   simp [choice]
-  rw [dite_eq_left (⟨a⟩ : Nonempty α)]
+  rw [UDecidable.dite_eq_left (⟨a⟩ : Nonempty α)]
   simp; apply Subsingleton.elim
 
 @[simp]
@@ -810,7 +811,8 @@ theorem isNone_choice_iff_not_nonempty : (choice α).isNone ↔ ¬Nonempty α :=
 grind_pattern isNone_choice_iff_not_nonempty => (choice α).isNone
 
 theorem isSome_choice_iff_nonempty : (choice α).isSome ↔ Nonempty α :=
-  ⟨fun h => ⟨(choice α).get h⟩, fun h => by simp only [choice, dite_eq_left h, isSome_some]⟩
+  ⟨fun h => ⟨(choice α).get h⟩,
+    fun h => by simp only [choice, UDecidable.dite_eq_left h, isSome_some]⟩
 
 grind_pattern isSome_choice_iff_nonempty => (choice α).isSome
 
@@ -857,7 +859,7 @@ theorem or_eq_left_of_isSome {o o' : Option α} : o.isSome = true → o.or o' = 
 theorem or_none : or o none = o := by
   cases o <;> rfl
 
-theorem or_eq_ite : or o o' = if o.isSome then o else o' := by
+theorem or_eq_ite : or o o' = uif o.isSome then o else o' := by
   cases o <;> simp
 
 @[deprecated or_eq_ite +typeChanged (since := "2026-07-29")]
@@ -1358,7 +1360,7 @@ theorem pmap_congr {α : Type u} {β : Type v}
 
 theorem pmap_guard {q : α → Bool} {p : α → Prop} (f : (x : α) → p x → β) {x : α}
     (h : ∀ (a : α), guard q x = some a → p a) :
-    (guard q x).pmap f h = if h' : q x then some (f x (h _ (by simp_all))) else none := by
+    (guard q x).pmap f h = uif h' : q x then some (f x (h _ (by simp_all))) else none := by
   simp only [guard_eq_ite]
   split <;> simp_all
 
@@ -1391,7 +1393,7 @@ theorem pelim_congr_left {o o' : Option α } {b : β} {f : (a : α) → (a ∈ o
 
 @[grind =] theorem pelim_filter {o : Option α} {b : β} {f : (a : α) → a ∈ o.filter p → β} :
     Option.pelim (Option.filter p o) b f =
-      Option.pelim o b (fun a h => if hp : p a then f a (Option.mem_filter_iff.2 ⟨h, hp⟩) else b) :=
+      Option.pelim o b (fun a h => uif hp : p a then f a (Option.mem_filter_iff.2 ⟨h, hp⟩) else b) :=
   match o with
   | none => rfl
   | some a =>
@@ -1411,7 +1413,7 @@ theorem pelim_congr {o o' : Option α} {b b' : β}
   cases ho; cases hb; cases o <;> apply_assumption
 
 theorem pelim_guard {a : α} {f : (a' : α) → guard p a = some a' → β} :
-    (guard p a).pelim b f = if h : p a then f a (by simpa) else b := by
+    (guard p a).pelim b f = uif h : p a then f a (by simpa) else b := by
   simp only [guard, Bool.cond_eq_ite]
   split <;> simp
 
@@ -1497,7 +1499,7 @@ theorem eq_some_of_pfilter_eq_some {o : Option α} {p : (a : α) → o = some a 
     simp only [pfilter, Option.filter]
 
 @[simp] theorem pfilter_filter {o : Option α} {p : α → Bool} {q : (a : α) → o.filter p = some a → Bool} :
-    (o.filter p).pfilter q = o.pfilter (fun a h => if h' : p a then q a (Option.filter_eq_some_iff.2 ⟨h, h'⟩) else false) := by
+    (o.filter p).pfilter q = o.pfilter (fun a h => uif h' : p a then q a (Option.filter_eq_some_iff.2 ⟨h, h'⟩) else false) := by
   cases o with
   | none => simp
   | some a =>
@@ -1514,7 +1516,7 @@ theorem eq_some_of_pfilter_eq_some {o : Option α} {p : (a : α) → o = some a 
 
 @[simp] theorem pfilter_pfilter {o : Option α} {p : (a : α) → o = some a → Bool}
     {q : (a : α) → o.pfilter p = some a → Bool} :
-    (o.pfilter p).pfilter q = o.pfilter (fun a h => if h' : p a h then q a (Option.pfilter_eq_some_iff.2 ⟨h, h'⟩) else false) := by
+    (o.pfilter p).pfilter q = o.pfilter (fun a h => uif h' : p a h then q a (Option.pfilter_eq_some_iff.2 ⟨h, h'⟩) else false) := by
   cases o with
   | none => simp
   | some a =>
@@ -1549,11 +1551,11 @@ theorem pfilter_eq_pbind_ite {α : Type _} {o : Option α}
       split <;> simp
 
 @[grind =] theorem join_pfilter {o : Option (Option α)} {p : (o' : Option α) → o = some o' → Bool} :
-    (o.pfilter p).join = o.pbind (fun o' ho' => if p o' ho' then o' else none) := by
+    (o.pfilter p).join = o.pbind (fun o' ho' => uif p o' ho' then o' else none) := by
   cases o <;> simp <;> split <;> simp
 
 @[grind =] theorem elim_pfilter {o : Option α} {b : β} {f : α → β} {p : (a : α) → o = some a → Bool} :
-    (o.pfilter p).elim b f = o.pelim b (fun a ha => if p a ha then f a else b) := by
+    (o.pfilter p).elim b f = o.pelim b (fun a ha => uif p a ha then f a else b) := by
   cases o with
   | none => simp
   | some a =>
@@ -1563,7 +1565,7 @@ theorem pfilter_eq_pbind_ite {α : Type _} {o : Option α}
 @[grind =] theorem pelim_pfilter {o : Option α} {b : β} {p : (a : α) → o = some a → Bool}
     {f : (a : α) → o.pfilter p = some a → β} :
     (o.pfilter p).pelim b f = o.pelim b
-      (fun a ha => if hp : p a ha then f a (pfilter_eq_some_iff.2 ⟨_, hp⟩) else b) := by
+      (fun a ha => uif hp : p a ha then f a (pfilter_eq_some_iff.2 ⟨_, hp⟩) else b) := by
   cases o with
   | none => simp
   | some a =>

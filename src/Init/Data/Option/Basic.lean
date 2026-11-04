@@ -8,6 +8,7 @@ module
 prelude
 public import Init.Control.Basic
 public import Init.Grind.Tactics
+public import Init.UDecidable.Basic
 
 public section
 
@@ -178,7 +179,7 @@ is analogous to `List.filterM`.
 -/
 @[inline] protected def filterM [Applicative m] (p : α → m Bool) : Option α → m (Option α)
   | none => pure none
-  | some a => (fun b => if b then some a else none) <$> p a
+  | some a => (fun b => bif b then some a else none) <$> p a
 
 /--
 Keeps an optional value only if it satisfies a Boolean predicate.
@@ -290,6 +291,36 @@ instance (r : α → β → Prop) [s : DecidableRel r] : DecidableRel (Option.le
   | some x, some y => s x y
   | some _, none   => isFalse not_false
   | none,   none   => isTrue trivial
+
+/-- The implementation of `instUDecidableLt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instUDecidableLtImpl (r : α → β → Prop) [s : UDecidableRel r] :
+    UDecidableRel (Option.lt r)
+  | none,   some _ => UDecidable.isTrue trivial
+  | some x, some y => s x y
+  | some _, none   => UDecidable.isFalse not_false
+  | none,   none   => UDecidable.isFalse not_false
+
+noncomputable instance instUDecidableLt (r : α → β → Prop) [UDecidableRel r] :
+    UDecidableRel (Option.lt r) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUDecidableLt_csimp : @instUDecidableLt = @instUDecidableLtImpl := rfl
+
+/-- The implementation of `instUDecidableLe` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instUDecidableLeImpl (r : α → β → Prop) [s : UDecidableRel r] :
+    UDecidableRel (Option.le r)
+  | none,   some _ => UDecidable.isTrue trivial
+  | some x, some y => s x y
+  | some _, none   => UDecidable.isFalse not_false
+  | none,   none   => UDecidable.isTrue trivial
+
+noncomputable instance instUDecidableLe (r : α → β → Prop) [UDecidableRel r] :
+    UDecidableRel (Option.le r) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUDecidableLe_csimp : @instUDecidableLe = @instUDecidableLeImpl := rfl
 
 namespace SomeLtNone
 

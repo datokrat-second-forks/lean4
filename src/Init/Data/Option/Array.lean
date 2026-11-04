@@ -78,7 +78,7 @@ theorem size_toArray_le {o : Option α} : o.toArray.size ≤ 1 := by
 
 @[grind =]
 theorem size_toArray {o : Option α} :
-    o.toArray.size = if o.isSome then 1 else 0 := by
+    o.toArray.size = uif o.isSome then 1 else 0 := by
   cases o <;> simp
 
 @[simp]

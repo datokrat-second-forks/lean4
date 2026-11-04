@@ -132,7 +132,7 @@ attribute [scoped instance] instNatCast
 end NatCast
 
 def intCast [NeZero n] (a : Int) : Fin n :=
-  if 0 ≤ a then
+  bif 0 ≤ᵇ a then
     Fin.ofNat n a.natAbs
   else
     - Fin.ofNat n a.natAbs
@@ -154,7 +154,9 @@ end IntCast
 
 open Fin.IntCast in
 theorem intCast_def {n : Nat} [NeZero n] (x : Int) :
-    (x : Fin n) = if 0 ≤ x then Fin.ofNat n x.natAbs else -Fin.ofNat n x.natAbs := rfl
+    (x : Fin n) = uif 0 ≤ x then Fin.ofNat n x.natAbs else -Fin.ofNat n x.natAbs := by
+  show Fin.intCast x = _
+  rw [Fin.intCast, decideLE_eq_udecide, Bool.cond_udecide]
 
 /-! ### order -/
 
@@ -378,7 +380,7 @@ theorem val_add_one_of_lt {n : Nat} {i : Fin n.succ} (h : i < last _) : (i + 1).
   | n + 1 => by ext; rw [val_add, val_zero, val_last, val_one, Nat.mod_self]
 
 theorem val_add_one {n : Nat} (i : Fin (n + 1)) :
-    ((i + 1 : Fin (n + 1)) : Nat) = if i = last _ then (0 : Nat) else i + 1 := by
+    ((i + 1 : Fin (n + 1)) : Nat) = uif i = last _ then (0 : Nat) else i + 1 := by
   match Nat.eq_or_lt_of_le (le_last i) with
   | .inl h => cases Fin.eq_of_val_eq h; simp
   | .inr h => simpa [Fin.ne_of_lt h] using val_add_one_of_lt h
@@ -1002,7 +1004,7 @@ For the induction:
 @[elab_as_elim] def reverseInduction {motive : Fin (n + 1) → Sort _} (last : motive (Fin.last n))
     (cast : ∀ i : Fin n, motive i.succ → motive (castSucc i)) (i : Fin (n + 1)) : motive i :=
   let rec go (j : Nat) (h) (h2 : i ≤ j) (x : motive ⟨j, h⟩) : motive i :=
-    if hi : i.1 = j then _root_.cast (by simp [← hi]) x
+    bif hi : i.1 =ᵇ j then _root_.cast (by simp [← eq_of_decideEq_eq_true hi]) x
     else match j with
       | 0 => False.elim (by omega)
       | j + 1 => go j (by omega) (by omega) (cast ⟨j, by omega⟩ x)
@@ -1019,11 +1021,12 @@ private theorem reverseInduction_castSucc_aux {n : Nat} {motive : Fin (n + 1) �
   induction j generalizing i with
   | zero => omega
   | succ j ih =>
-    rw [reverseInduction.go, dite_eq_right (by exact Nat.ne_of_lt h2)]
+    rw [reverseInduction.go, Bool.dcond_neg (decideEq_eq_false_iff.2 (by exact Nat.ne_of_lt h2))]
     by_cases hij : i = j
     · subst hij; simp [reverseInduction.go]
     · dsimp only
-      rw [ih _ _ (by omega), eq_comm, reverseInduction.go, dite_eq_right (by change i.1 + 1 ≠ _; omega)]
+      rw [ih _ _ (by omega), eq_comm, reverseInduction.go,
+        Bool.dcond_neg (decideEq_eq_false_iff.2 (by change i.1 + 1 ≠ _; omega))]
 
 @[simp, grind =] theorem reverseInduction_castSucc {n : Nat} {motive : Fin (n + 1) → Sort _} {zero succ}
     (i : Fin n) : reverseInduction (motive := motive) zero succ (castSucc i) =
@@ -1065,18 +1068,20 @@ as `Fin.natAdd m (j : Fin n)`.
 @[elab_as_elim] def addCases {m n : Nat} {motive : Fin (m + n) → Sort u}
     (left : ∀ i, motive (castAdd n i)) (right : ∀ i, motive (natAdd m i))
     (i : Fin (m + n)) : motive i :=
-  if hi : (i : Nat) < m then (castAdd_castLT n i hi) ▸ (left (castLT i hi))
-  else (natAdd_subNat_cast (Nat.le_of_not_lt hi)) ▸ (right _)
+  bif hi : (i : Nat) <ᵇ m then
+    (castAdd_castLT n i (lt_of_decideLT_eq_true hi)) ▸ (left (castLT i (lt_of_decideLT_eq_true hi)))
+  else (natAdd_subNat_cast (Nat.le_of_not_lt (decideLT_eq_false_iff.1 hi))) ▸ (right _)
 
 @[simp, grind =] theorem addCases_left {m n : Nat} {motive : Fin (m + n) → Sort _} {left right} (i : Fin m) :
     addCases (motive := motive) left right (Fin.castAdd n i) = left i := by
-  rw [addCases, dite_eq_left (castAdd_lt _ _)]; rfl
+  rw [addCases, Bool.dcond_pos (decideLT_eq_true_iff.2 (castAdd_lt _ _))]; rfl
 
 @[simp, grind =]
 theorem addCases_right {m n : Nat} {motive : Fin (m + n) → Sort _} {left right} (i : Fin n) :
     addCases (motive := motive) left right (natAdd m i) = right i := by
   have : ¬(natAdd m i : Nat) < m := Nat.not_lt.2 (le_coe_natAdd ..)
-  rw [addCases, dite_eq_right this]; exact eq_of_heq <| (eqRec_heq _ _).trans (by congr 1; simp)
+  rw [addCases, Bool.dcond_neg (decideLT_eq_false_iff.2 this)]
+  exact eq_of_heq <| (eqRec_heq _ _).trans (by congr 1; simp)
 
 /-! ### zero -/
 
@@ -1151,7 +1156,7 @@ theorem coe_sub_iff_lt {a b : Fin n} : (↑(a - b) : Nat) = n + a - b ↔ a < b 
 
 @[grind =]
 theorem val_neg {n : Nat} [NeZero n] (x : Fin n) :
-    (-x).val = if x = 0 then 0 else n - x.val := by
+    (-x).val = uif x = 0 then 0 else n - x.val := by
   change (n - ↑x) % n = _
   split <;> rename_i h
   · simp_all
