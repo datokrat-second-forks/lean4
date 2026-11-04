@@ -53,21 +53,21 @@ determines whether the local let declaration's value should be omitted.
 -/
 def ppGoal.shouldShowLetValue (tactic : Bool) (e : Expr) : MetaM Bool := do
   -- Atomic expressions never get omitted by the following logic, so we can do an early return here.
-  if e.isAtomic then
+  bif e.isAtomic then
     return true
   let options ← getOptions
-  if pp.showLetValues.get options then
+  bif pp.showLetValues.get options then
     return true
   let threshold := pp.showLetValues.threshold.get options
-  let threshold := max threshold (if tactic then pp.showLetValues.tactic.threshold.get options else 0)
+  let threshold := max threshold (bif tactic then pp.showLetValues.tactic.threshold.get options else 0)
   let threshold := min 254 threshold
   return e.approxDepth.toNat ≤ threshold
 
 private def addLine (fmt : Format) : Format :=
-  if fmt.isNil then fmt else fmt ++ "\n"
+  bif fmt.isNil then fmt else fmt ++ "\n"
 
 def getGoalPrefix (mvarDecl : MetavarDecl) : String :=
-  if isLHSGoal? mvarDecl.type |>.isSome then
+  bif isLHSGoal? mvarDecl.type |>.isSome then
     -- use special prefix for `conv` goals
     "| "
   else
@@ -89,7 +89,7 @@ def ppGoal (mvarId : MVarId) : MetaM Format := do
       -- The following two `let rec`s are being used to control the generated code size.
       -- Then should be remove after we rewrite the compiler in Lean
       let rec pushPending (ids : List Name) (type? : Option Expr) (fmt : Format) : MetaM Format := do
-        if ids.isEmpty then
+        bif ids.isEmpty then
           return fmt
         else
           let fmt := addLine fmt
@@ -104,7 +104,7 @@ def ppGoal (mvarId : MVarId) : MetaM Format := do
         | .ldecl _ _ varName type (nondep := true) .. =>
           let varName := varName.simpMacroScopes
           let type ← instantiateMVars type
-          if prevType? == none || prevType? == some type then
+          bif prevType? == none || prevType? == some type then
             return (varName :: varNames, some type, fmt)
           else do
             let fmt ← pushPending varNames prevType? fmt
@@ -117,7 +117,7 @@ def ppGoal (mvarId : MVarId) : MetaM Format := do
           let typeFmt ← ppExpr type
           let mut fmtElem  := format varName ++ " : " ++ typeFmt
           let val ← instantiateMVars val
-          if ← ppGoal.shouldShowLetValue tactic val then
+          bif (← ppGoal.shouldShowLetValue tactic val) then
             let valFmt ← ppExpr val
             fmtElem := fmtElem ++ " :=" ++ Format.nest indent (Format.line ++ valFmt)
           else
@@ -125,7 +125,7 @@ def ppGoal (mvarId : MVarId) : MetaM Format := do
           let fmt := fmt ++ fmtElem.group
           return ([], none, fmt)
       let (varNames, type?, fmt) ← lctx.foldlM (init := ([], none, Format.nil)) fun (varNames, prevType?, fmt) (localDecl : LocalDecl) =>
-         if !ppAuxDecls && localDecl.isAuxDecl || !ppImplDetailHyps && localDecl.isImplementationDetail then
+         bif !ppAuxDecls && localDecl.isAuxDecl || !ppImplDetailHyps && localDecl.isImplementationDetail then
            return (varNames, prevType?, fmt)
          else
            ppVars varNames prevType? fmt localDecl

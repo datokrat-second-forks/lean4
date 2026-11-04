@@ -14,7 +14,7 @@ public section
 namespace Lean.Meta
 
 @[inline] def testHelper (e : Expr) (p : Expr → MetaM Bool) : MetaM Bool := do
-  if (← p e) then
+  bif (← p e) then
     return true
   else
     p (← whnf e)
@@ -38,7 +38,7 @@ def matchEqHEq? (e : Expr) : MetaM (Option (Expr × Expr × Expr)) := do
   if let some r ← matchEq? e then
     return some r
   else if let some (α, lhs, β, rhs) ← matchHEq? e then
-    if (← isDefEq α β) then
+    bif (← isDefEq α β) then
       return some (α, lhs, rhs)
     return none
   else
@@ -64,7 +64,7 @@ def matchNot? (e : Expr) : MetaM (Option Expr) :=
     if let some e := e.not? then
       return e
     else if let some (a, b) := e.arrow? then
-      if (← matchFalse b) then return some a else return none
+      bif (← matchFalse b) then return some a else return none
     else
       return none
 

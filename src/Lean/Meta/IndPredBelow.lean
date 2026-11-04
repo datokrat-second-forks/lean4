@@ -93,12 +93,12 @@ def mkBelowInductive (motiveIdx minorIdx : Nat) (ctx : Context) : MetaM (Nat × 
     let minor := ctx.minors[minorIdx]!
     let minorName ← minor.fvarId!.getUserName
     let minorType ← inferType minor
-    if minorType.getForallBody.getAppFn != motive then
+    bif minorType.getForallBody.getAppFn != motive then
       break
     let ctorName := name ++ minorName
     let ctorType ← forallTelescope minorType fun minorArgs body => do
       let rec go (i : Nat) (vars : Array Expr) : MetaM Expr := do
-        if h : i < minorArgs.size then
+        bif h : i <ᵇ minorArgs.size then
           let type ← inferType minorArgs[i]
           if let some _ := isIH type ctx then
             -- minorArgs[i] : (a : Nat) → motive (f a)
@@ -134,7 +134,7 @@ def mkBelowInductives (ctx : Context) : MetaM Unit := do
 
 def withBRecOnArgs (k : (newMinors : Array Expr) → (proofArgs : Array Expr) → MetaM Unit) (ctx : Context) : MetaM Unit := do
   let rec go (i : Nat) (newMinors : Array Expr) : MetaM Unit := do
-    if h : i < ctx.motives.size then
+    bif h : i <ᵇ ctx.motives.size then
       let motive := ctx.motives[i]
       let motiveType ← inferType motive
       -- {motive : (a : Nat) → (x : ABC a) → Prop}
@@ -155,7 +155,7 @@ def withBRecOnArgs (k : (newMinors : Array Expr) → (proofArgs : Array Expr) �
         let belowCtorName := ctx.belowNames[i]! ++ name
         let expr ← forallTelescope minorType fun minorArgs res => do
           let rec go2 (j : Nat) (vars args : Array Expr) : MetaM Expr := do
-            if h : j < minorArgs.size then
+            bif h : j <ᵇ minorArgs.size then
               let type ← inferType minorArgs[j]
               if let some i' := isIH type ctx then
                 -- minorArgs[j] : (a : Nat) → motive (f a)
@@ -186,7 +186,7 @@ def mkBRecOn (ctx : Context) : MetaM Unit := do
   withBRecOnArgs (ctx := ctx) fun newMinors proofArgs => do
     let nmotives := ctx.motives.size
     let lparams := ctx.levelParams.map Level.param
-    let lparams := if ctx.largeElim then Level.zero :: lparams else lparams
+    let lparams := bif ctx.largeElim then Level.zero :: lparams else lparams
     for i in *...nmotives do
       let motive := ctx.motives[i]!
       let motiveType ← inferType motive
@@ -212,11 +212,11 @@ public def mkBelow (indName : Name) : MetaM Unit :=
   withTraceNode `Meta.IndPredBelow (fun _ => return m!"{indName}") do
   unless (← isInductivePredicate indName) do return
   let indVal ← getConstInfoInduct indName
-  if indVal.isUnsafe || !indVal.isRec then return
+  bif indVal.isUnsafe || !indVal.isRec then return
   let levelParams := indVal.levelParams
   let recVal ← getConstInfoRec (indName ++ `rec)
-  let largeElim := recVal.levelParams.length > levelParams.length
-  let t := if largeElim then recVal.instantiateTypeLevelParams [.zero] else recVal.type
+  let largeElim := recVal.levelParams.length >ᵇ levelParams.length
+  let t := bif largeElim then recVal.instantiateTypeLevelParams [.zero] else recVal.type
   let n := recVal.numParams + recVal.numMotives + recVal.numMinors
   forallBoundedTelescope t (some n) fun as _ => do
     let params := as.extract 0 recVal.numParams
@@ -343,11 +343,11 @@ public partial def mkBelowMatcher (matcherApp : MatcherApp) (belowParams : Array
       newDecls := newDecls.modify j (· ++ newDeclsAdd)
     input := { input with discrInfos := input.discrInfos.insertIdx! (i + 1) {}, lhss := newLHSs.toList }
     matchTypeAdd := matchTypeAdd.push (i, belowName)
-  if matchTypeAdd.isEmpty then
+  bif matchTypeAdd.isEmpty then
     return none
   -- adds below vars in between the existing vars
   let rec addVars (j : Nat) (vars : Array Expr) (k : Array Expr → MetaM Expr) : MetaM Expr := do
-    if h : j < matchTypeAdd.size then
+    bif h : j <ᵇ matchTypeAdd.size then
       let (i, belowIndName) := matchTypeAdd[j]
       let type ← toBelowType belowIndName vars[i]!
       withLocalDeclD `below type fun var => addVars (j + 1) (vars.insertIdx! (i + 1) var) k

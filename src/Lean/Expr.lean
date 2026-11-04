@@ -184,15 +184,15 @@ opaque Expr.mkAppData (fData : Data) (aData : Data) : Data
 instance : Repr Expr.Data where
   reprPrec v prec := Id.run do
     let mut r := "Expr.mkData " ++ toString v.hash
-    if v.looseBVarRange != 0 then
+    bif v.looseBVarRange != 0 then
       r := r ++ " (looseBVarRange := " ++ toString v.looseBVarRange ++ ")"
-    if v.approxDepth != 0 then
+    bif v.approxDepth != 0 then
       r := r ++ " (approxDepth := " ++ toString v.approxDepth ++ ")"
-    if v.hasFVar then
+    bif v.hasFVar then
       r := r ++ " (hasFVar := " ++ toString v.hasFVar ++ ")"
-    if v.hasExprMVar then
+    bif v.hasExprMVar then
       r := r ++ " (hasExprMVar := " ++ toString v.hasExprMVar ++ ")"
-    if v.hasLevelMVar then
+    bif v.hasLevelMVar then
       r := r ++ " (hasLevelMVar := " ++ toString v.hasLevelMVar ++ ")"
     Repr.addAppParen r prec
 
@@ -772,7 +772,7 @@ def mkAppN (f : Expr) (args : Array Expr) : Expr :=
   args.foldl mkApp f
 
 private def mkAppRangeAux (n : Nat) (args : Array Expr) (i : Nat) (e : Expr) : Expr :=
-  if i < n then mkAppRangeAux n args (i+1) (mkApp e args[i]!) else e
+  bif i <ᵇ n then mkAppRangeAux n args (i+1) (mkApp e args[i]!) else e
 
 /-- `mkAppRange f i j #[a_1, ..., a_i, ..., a_j, ... ]` ==> the expression `f a_i ... a_{j-1}` -/
 def mkAppRange (f : Expr) (i j : Nat) (args : Array Expr) : Expr :=
@@ -796,8 +796,8 @@ opaque quickLt (a : @& Expr) (b : @& Expr) : Bool
 opaque lt (a : @& Expr) (b : @& Expr) : Bool
 
 def quickComp (a b : Expr) : Ordering :=
-  if quickLt a b then .lt
-  else if quickLt b a then .gt
+  bif quickLt a b then .lt
+  else bif quickLt b a then .gt
   else .eq
 
 /--
@@ -1372,7 +1372,7 @@ def inferImplicit (e : Expr) (numParams : Nat) (considerRange : Bool) : Expr :=
   match e, numParams with
   | Expr.forallE n d b bi, i + 1 =>
     let b       := inferImplicit b i considerRange
-    let newInfo := if bi.isExplicit && hasLooseBVarInExplicitDomain b 0 considerRange then BinderInfo.implicit else bi
+    let newInfo := bif bi.isExplicit && hasLooseBVarInExplicitDomain b 0 considerRange then BinderInfo.implicit else bi
     mkForall n newInfo d b
   | e, _ => e
 
@@ -1564,7 +1564,7 @@ abbrev PersistentExprStructMap (α : Type) := PHashMap ExprStructEq α
 namespace Expr
 
 private def mkAppRevRangeAux (revArgs : Array Expr) (start : Nat) (b : Expr) (i : Nat) : Expr :=
-  if i ≤ start then b
+  bif i ≤ᵇ start then b
   else
     let i := i - 1
     mkAppRevRangeAux revArgs start (mkApp b revArgs[i]!) i
@@ -1589,7 +1589,7 @@ If `useZeta` is true, the function also performs zeta-reduction (reduction of le
 opportunities for beta reduction.
 -/
 partial def betaRev (f : Expr) (revArgs : Array Expr) (useZeta := false) (preserveMData := false) : Expr :=
-  if revArgs.size == 0 then f
+  bif revArgs.size == 0 then f
   else
     let sz := revArgs.size
     let rec go (e : Expr) (i : Nat) : Expr :=
@@ -1598,17 +1598,17 @@ partial def betaRev (f : Expr) (revArgs : Array Expr) (useZeta := false) (preser
         mkAppRevRange (e.instantiateRange n sz revArgs) 0 n revArgs
       match e with
       | .lam _ _ b _ =>
-        if i + 1 < sz then
+        bif i + 1 <ᵇ sz then
           go b (i+1)
         else
           b.instantiate revArgs
       | .letE _ _ v b _ =>
-        if useZeta && i < sz then
+        bif useZeta && i <ᵇ sz then
           go (b.instantiate1 v) i
         else
           done ()
       | .mdata _ b =>
-        if preserveMData then
+        bif preserveMData then
           done ()
         else
           go b i
@@ -1655,7 +1655,7 @@ def isHeadBetaTargetFn (useZeta : Bool) : Expr → Bool
 /-- `(fun x => e) a` ==> `e[x/a]`. -/
 def headBeta (e : Expr) : Expr :=
   let f := e.getAppFn
-  if f.isHeadBetaTargetFn false then betaRev f e.getAppRevArgs else e
+  bif f.isHeadBetaTargetFn false then betaRev f e.getAppRevArgs else e
 
 /--
 Return true if the given expression is a target for (head) beta reduction.
@@ -1666,9 +1666,9 @@ def isHeadBetaTarget (e : Expr) (useZeta := false) : Bool :=
   e.isApp && e.getAppFn.isHeadBetaTargetFn useZeta
 
 private def etaExpandedBody : Expr → Nat → Nat → Option Expr
-  | app f (bvar j), n+1, i => if j == i then etaExpandedBody f n (i+1) else none
+  | app f (bvar j), n+1, i => bif j == i then etaExpandedBody f n (i+1) else none
   | _,              _+1, _ => none
-  | f,              0,   _ => if f.hasLooseBVars then none else some f
+  | f,              0,   _ => bif f.hasLooseBVars then none else some f
 
 private def etaExpandedAux : Expr → Nat → Option Expr
   | lam _ _ b _, n => etaExpandedAux b (n+1)
@@ -1692,14 +1692,14 @@ def etaExpandedStrict? : Expr → Option Expr
 
 /-- Return `some e'` if `e` is of the form `optParam _ e'` -/
 def getOptParamDefault? (e : Expr) : Option Expr :=
-  if e.isAppOfArity ``optParam 2 then
+  bif e.isAppOfArity ``optParam 2 then
     some e.appArg!
   else
     none
 
 /-- Return `some e'` if `e` is of the form `autoParam _ e'` -/
 def getAutoParamTactic? (e : Expr) : Option Expr :=
-  if e.isAppOfArity ``autoParam 2 then
+  bif e.isAppOfArity ``autoParam 2 then
     some e.appArg!
   else
     none
@@ -1738,9 +1738,9 @@ Examples:
 partial def consumeTypeAnnotations (e : Expr) : Expr :=
   match e with
   | .app (.const c _) a =>
-    if c == ``outParam || c == ``semiOutParam then consumeTypeAnnotations a else e
+    bif c == ``outParam || c == ``semiOutParam then consumeTypeAnnotations a else e
   | .app (.app (.const c _) a) _ =>
-    if c == ``optParam || c == ``autoParam then consumeTypeAnnotations a else e
+    bif c == ``optParam || c == ``autoParam then consumeTypeAnnotations a else e
   | _ => e
 
 /--
@@ -1755,9 +1755,9 @@ partial def cleanupAnnotations (e : Expr) : Expr :=
   match e with
   | .mdata _ b => cleanupAnnotations b
   | .app (.const c _) a =>
-    if c == ``outParam || c == ``semiOutParam then cleanupAnnotations a else e
+    bif c == ``outParam || c == ``semiOutParam then cleanupAnnotations a else e
   | .app (.app (.const c _) a) _ =>
-    if c == ``optParam || c == ``autoParam then cleanupAnnotations a else e
+    bif c == ``optParam || c == ``autoParam then cleanupAnnotations a else e
   | _ => e
 
 /--
@@ -1791,11 +1791,11 @@ partial def getForallArity : Expr → Nat
   | .mdata _ b       => getForallArity b
   | .forallE _ _ b _ => getForallArity b + 1
   | e                =>
-    if e.isHeadBetaTarget then
+    bif e.isHeadBetaTarget then
       getForallArity e.headBeta
     else
       let e' := e.cleanupAnnotations
-      if e != e' then getForallArity e' else 0
+      bif e != e' then getForallArity e' else 0
 
 /--
 Checks if an expression is a "natural number numeral in normal form",
@@ -1824,7 +1824,7 @@ def int? (e : Expr) : Option Int :=
 
 /-- Return true iff `e` contains a free variable which satisfies `p`. -/
 @[inline] def hasAnyFVar (e : Expr) (p : FVarId → Bool) : Bool :=
-  let rec @[specialize] visit (e : Expr) := if !e.hasFVar then false else
+  let rec @[specialize] visit (e : Expr) := bif !e.hasFVar then false else
     match e with
     | Expr.forallE _ d b _   => visit d || visit b
     | Expr.lam _ d b _       => visit d || visit b
@@ -1842,7 +1842,7 @@ def containsFVar (e : Expr) (fvarId : FVarId) : Bool :=
 
 /-- Return true iff `e` contains a metavariable which satisfies `p` -/
 @[inline] def hasAnyMVar (e : Expr) (p : MVarId → Bool) : Bool :=
-  let rec @[specialize] visit (e : Expr) := if !e.hasExprMVar then false else
+  let rec @[specialize] visit (e : Expr) := bif !e.hasExprMVar then false else
     match e with
     | Expr.forallE _ d b _   => visit d || visit b
     | Expr.lam _ d b _       => visit d || visit b
@@ -1877,7 +1877,7 @@ def updateApp! (e : Expr) (newFn : Expr) (newArg : Expr) : Expr :=
 
 @[inline] def updateFVar! (e : Expr) (fvarIdNew : FVarId) : Expr :=
   match e with
-  | .fvar fvarId => if fvarId == fvarIdNew then e else .fvar fvarIdNew
+  | .fvar fvarId => bif fvarId == fvarIdNew then e else .fvar fvarIdNew
   | _            => panic! "fvar expected"
 
 @[inline] private unsafe def updateConst!Impl (e : Expr) (newLevels : List Level) : Expr :=
@@ -1999,7 +1999,7 @@ def eta (e : Expr) : Expr :=
     let b' := b.eta
     match b' with
     | .app f (.bvar 0) =>
-      if !f.hasLooseBVar 0 then
+      bif !f.hasLooseBVar 0 then
         f.lowerLooseBVars 1 1
       else
         e.updateLambdaE! d b'
@@ -2068,7 +2068,7 @@ def setAppPPExplicitForExposingMVars (e : Expr) : Expr :=
   match e with
   | app .. =>
     let f    := e.getAppFn.setPPExplicit false
-    let args := e.getAppArgs.map fun arg => if arg.hasMVar then arg else arg.setPPExplicit false
+    let args := e.getAppArgs.map fun arg => bif arg.hasMVar then arg else arg.setPPExplicit false
     mkAppN f args |>.setPPExplicit true
   | _      => e
 
@@ -2118,7 +2118,7 @@ Return `some e'` if `e = mkAnnotation kind e'`
 -/
 def annotation? (kind : Name) (e : Expr) : Option Expr :=
   match e with
-  | .mdata d b => if d.size == 1 && d.getBool kind false then some b else none
+  | .mdata d b => bif d.size == 1 && d.getBool kind false then some b else none
   | _          => none
 
 /--
@@ -2155,7 +2155,7 @@ Annotate the pattern `p` with `stx`. This is an auxiliary annotation
 for producing better hover information.
 -/
 def mkPatternWithRef (p : Expr) (stx : Syntax) : Expr :=
-  if patternWithRef? p |>.isSome then
+  bif patternWithRef? p |>.isSome then
     p
   else
     mkMData (KVMap.empty.insert patternRefAnnotationKey (DataValue.ofSyntax stx)) p
@@ -2184,7 +2184,7 @@ def isLHSGoal? (e : Expr) : Option Expr :=
   match annotation? `_lhsGoal e with
   | none => none
   | some e =>
-    if e.isAppOfArity `Eq 3 then
+    bif e.isAppOfArity `Eq 3 then
       some e.appFn!.appArg!
     else
       none
@@ -2431,7 +2431,7 @@ def mkIntDvd (a b : Expr) : Expr :=
 def mkIntLit (n : Int) : Expr :=
   let r := mkRawNatLit n.natAbs
   let r := mkApp3 (mkConst ``OfNat.ofNat [Level.zero]) Int.mkType r (mkApp (mkConst ``instOfNat) r)
-  if n < 0 then
+  bif n <ᵇ 0 then
     mkIntNeg r
   else
     r

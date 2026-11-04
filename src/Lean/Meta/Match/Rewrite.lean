@@ -26,72 +26,72 @@ def rwIfWith (hc : Expr) (e : Expr) : MetaM Simp.Result := do
   match_expr e with
   | ite@ite α c h t f =>
     let us := ite.constLevels!
-    if (← isDefEq c (← inferType hc)) then
+    bif (← isDefEq c (← inferType hc)) then
       return {
         expr := t
         proof? := (mkAppN (mkConst ``ite_eq_left us) #[c, h, hc, α, t, f])
       }
-    if (← isDefEq (mkNot c) (← inferType hc)) then
+    bif (← isDefEq (mkNot c) (← inferType hc)) then
       return {
         expr := f
         proof? := (mkAppN (mkConst ``ite_eq_right us) #[c, h, hc, α, t, f])
       }
   | dite@dite α c h t f =>
     let us := dite.constLevels!
-    if (← isDefEq c (← inferType hc)) then
+    bif (← isDefEq c (← inferType hc)) then
       return {
         expr := t.beta #[hc]
         proof? := (mkAppN (mkConst ``dite_eq_left us) #[c, h, hc, α, t, f])
       }
-    if (← isDefEq (mkNot c) (← inferType hc)) then
+    bif (← isDefEq (mkNot c) (← inferType hc)) then
       return {
         expr := f.beta #[hc]
         proof? := (mkAppN (mkConst ``dite_eq_right us) #[c, h, hc, α, t, f])
       }
   | ite@UDecidable.ite α c h t f =>
     let us := ite.constLevels!
-    if (← isDefEq c (← inferType hc)) then
+    bif (← isDefEq c (← inferType hc)) then
       return {
         expr := t
         proof? := mkAppN (mkConst ``UDecidable.ite_eq_left us) #[c, h, hc, α, t, f]
       }
-    if (← isDefEq (mkNot c) (← inferType hc)) then
+    bif (← isDefEq (mkNot c) (← inferType hc)) then
       return {
         expr := f
         proof? := mkAppN (mkConst ``UDecidable.ite_eq_right us) #[c, h, hc, α, t, f]
       }
   | dite@UDecidable.dite α c h t f =>
     let us := dite.constLevels!
-    if (← isDefEq c (← inferType hc)) then
+    bif (← isDefEq c (← inferType hc)) then
       return {
         expr := t.beta #[hc]
         proof? := mkAppN (mkConst ``UDecidable.dite_eq_left us) #[c, h, hc, α, t, f]
       }
-    if (← isDefEq (mkNot c) (← inferType hc)) then
+    bif (← isDefEq (mkNot c) (← inferType hc)) then
       return {
         expr := f.beta #[hc]
         proof? := mkAppN (mkConst ``UDecidable.dite_eq_right us) #[c, h, hc, α, t, f]
       }
   | cond@cond α c t f =>
     let us := cond.constLevels!
-    if (← isDefEq (← inferType hc) (← mkEq c (mkConst ``Bool.true))) then
+    bif (← isDefEq (← inferType hc) (← mkEq c (mkConst ``Bool.true))) then
       return {
         expr := t
         proof? := (mkAppN (mkConst ``Bool.cond_pos us) #[α, c, t, f, hc])
       }
-    if (← isDefEq (← inferType hc) (← mkEq c (mkConst ``Bool.false))) then
+    bif (← isDefEq (← inferType hc) (← mkEq c (mkConst ``Bool.false))) then
       return {
         expr := f
         proof? := (mkAppN (mkConst ``Bool.cond_neg us) #[α, c, t, f, hc])
       }
   | dcond@Bool.dcond α c t f =>
     let us := dcond.constLevels!
-    if (← isDefEq (← inferType hc) (← mkEq c (mkConst ``Bool.true))) then
+    bif (← isDefEq (← inferType hc) (← mkEq c (mkConst ``Bool.true))) then
       return {
         expr := t.beta #[hc]
         proof? := mkAppN (mkConst ``Bool.dcond_pos us) #[α, c, t, f, hc]
       }
-    if (← isDefEq (← inferType hc) (← mkEq c (mkConst ``Bool.false))) then
+    bif (← isDefEq (← inferType hc) (← mkEq c (mkConst ``Bool.false))) then
       return {
         expr := f.beta #[hc]
         proof? := mkAppN (mkConst ``Bool.dcond_neg us) #[α, c, t, f, hc]
@@ -112,14 +112,14 @@ See `Lean.Meta.Tactic.FunInd.buildInductionBody` and `Lean.Elab.Tactic.Do.VCGen.
 of how to coerce `MatherApp.transform` into doing the substitution on the motive for you.
 -/
 def rwMatcher (altIdx : Nat) (e : Expr) : MetaM Simp.Result := do
-  if e.isAppOf ``PSum.casesOn || e.isAppOf ``PSigma.casesOn then
+  bif e.isAppOf ``PSum.casesOn || e.isAppOf ``PSigma.casesOn then
     let mut e := e
     while true do
       if let some e' ← reduceRecMatcher? e then
           e := e'.headBeta
       else
         let e' := e.headBeta
-        if e != e' then
+        bif e != e' then
           e := e'
         else
           break
@@ -145,7 +145,7 @@ def rwMatcher (altIdx : Nat) (e : Expr) : MetaM Simp.Result := do
         if let some (_, lhs, _, rhs) := eqType.heq? then pure (true, lhs, rhs) else
         if let some (_, lhs, rhs) := eqType.eq? then pure (false, lhs, rhs) else
         throwError m!"Type of `{.ofConstName eqnThm}` is not an equality"
-      if !(← isDefEq e lhs) then
+      bif !(← isDefEq e lhs) then
         throwError m!"Left-hand side `{lhs}` of `{.ofConstName eqnThm}` does not apply to `{e}`"
       /-
       Here we instantiate the hypotheses of the congruence equation theorem
@@ -160,20 +160,20 @@ def rwMatcher (altIdx : Nat) (e : Expr) : MetaM Simp.Result := do
       for h in hyps do
         unless (← h.isAssigned) do
           let hType ← h.getType
-          if Simp.isEqnThmHypothesis hType then
+          bif Simp.isEqnThmHypothesis hType then
             -- Using unrestricted h.substVars here does not work well; it could
             -- even introduce a dependency on the `oldIH` we want to eliminate
             h.assumption <|> throwError "Failed to discharge `{h}`"
-          else if hType.isEq then
+          else bif hType.isEq then
             h.assumption <|> h.refl <|> throwError m!"Failed to resolve `{h}`"
-          else if hType.isHEq then
+          else bif hType.isHEq then
             h.assumption <|> h.hrefl <|> throwError m!"Failed to resolve `{h}`"
       let unassignedHyps ← hyps.filterM fun h => return !(← h.isAssigned)
       unless unassignedHyps.isEmpty do
         throwError m!"Not all hypotheses of `{.ofConstName eqnThm}` could be discharged: {unassignedHyps}"
       let rhs ← instantiateMVars rhs
       let proof ← instantiateMVars proof
-      let proof ← if isHeq then
+      let proof ← bif isHeq then
           try mkEqOfHEq proof
           catch e => throwError m!"Could not un-HEq `{proof}`:{indentD e.toMessageData} "
         else

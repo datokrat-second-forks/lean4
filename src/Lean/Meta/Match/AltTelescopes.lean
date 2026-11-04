@@ -43,7 +43,7 @@ namespace Lean.Meta.Match
 partial def forallAltVarsTelescope (altType : Expr) (altInfo : AltParamInfo)
   (k : (patVars : Array Expr) → (args : Array Expr) → (mask : Array Bool) → (type : Expr) → MetaM α) : MetaM α := do
   assert! altInfo.numOverlaps = 0
-  if altInfo.hasUnitThunk then
+  bif altInfo.hasUnitThunk then
     let type ← whnfForall altType
     let type ← Match.unfoldNamedPattern type
     let type ← instantiateForall type #[mkConst ``Unit.unit]
@@ -54,7 +54,7 @@ where
   go (ys : Array Expr) (args : Array Expr) (mask : Array Bool) (i : Nat) (type : Expr) : MetaM α := do
     let type ← whnfForall type
 
-    if i < altInfo.numFields then
+    bif i <ᵇ altInfo.numFields then
       let Expr.forallE n d b .. := type
         | throwError "expecting {altInfo.numFields} parameters, but found type{indentExpr altType}"
 
@@ -62,12 +62,12 @@ where
       withLocalDeclD n d fun y => do
         let typeNew := b.instantiate1 y
         if let some (_, lhs, rhs) ← matchEq? d then
-          if lhs.isFVar && ys.contains lhs && args.contains lhs && isNamedPatternProof typeNew y then
+          bif lhs.isFVar && ys.contains lhs && args.contains lhs && isNamedPatternProof typeNew y then
               let some j  := ys.finIdxOf? lhs | unreachable!
               let ys      := ys.eraseIdx j
               let some k  := args.idxOf? lhs | unreachable!
               let mask    := mask.set! k false
-              let args    := args.map fun arg => if arg == lhs then rhs else arg
+              let args    := args.map fun arg => bif arg == lhs then rhs else arg
               let arg     ← mkEqRefl rhs
               let typeNew := typeNew.replaceFVar lhs rhs
               return ← withReplaceFVarId lhs.fvarId! rhs do
@@ -112,7 +112,7 @@ partial def forallAltTelescope (altType : Expr) (altInfo : AltParamInfo) (numDis
 where
   go (ys : Array Expr) (eqs : Array Expr) (args : Array Expr) (mask : Array Bool) (i : Nat) (type : Expr) : MetaM α := do
     let type ← whnfForall type
-    if i < numDiscrEqs then
+    bif i <ᵇ numDiscrEqs then
       let Expr.forallE n d b .. := type
         | throwError "expecting {numDiscrEqs} equalities, but found type{indentExpr altType}"
       let arg ← if let some (_, _, rhs) ← matchEq? d then

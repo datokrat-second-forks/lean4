@@ -38,7 +38,7 @@ where
   | arg::args => do
     let argType ← inferType arg
     forallTelescope argType fun arg_args arg_type => do
-      if motives.contains arg_type.getAppFn then
+      bif motives.contains arg_type.getAppFn then
         let name ← arg.fvarId!.getUserName
         let type' ← forallTelescope argType fun args _ => mkForallFVars args (.sort rlvl)
         withLocalDeclD name type' fun arg' => do
@@ -114,7 +114,7 @@ public def mkBelow (indName : Name) : MetaM Unit := do
   withTraceNode `Meta.mkBelow (fun _ => return m!"{indName}") do
   let .inductInfo indVal ← getConstInfo indName | return
   unless indVal.isRec do return
-  if ← isPropFormerType indVal.type then return
+  bif (← isPropFormerType indVal.type) then return
 
   let recName := mkRecName indName
   let belowName := mkBelowName indName
@@ -122,7 +122,7 @@ public def mkBelow (indName : Name) : MetaM Unit := do
 
   -- If this is the first inductive in a mutual group with nested inductives,
   -- generate the constructions for the nested inductives now
-  if indVal.all[0]! = indName then
+  bif indVal.all[0]! =ᵇ indName then
     for i in *...indVal.numNested do
       let recName := recName.appendIndexAfter (i + 1)
       let belowName := belowName.appendIndexAfter (i + 1)
@@ -311,7 +311,7 @@ public def mkBRecOn (indName : Name) : MetaM Unit := do
   withTraceNode `Meta.mkBRecOn (fun _ => return m!"{indName}") do
   let .inductInfo indVal ← getConstInfo indName | return
   unless indVal.isRec do return
-  if ← isPropFormerType indVal.type then return
+  bif (← isPropFormerType indVal.type) then return
 
   let recName := mkRecName indName
   let brecOnName := mkBRecOnName indName
@@ -319,7 +319,7 @@ public def mkBRecOn (indName : Name) : MetaM Unit := do
 
   -- If this is the first inductive in a mutual group with nested inductives,
   -- generate the constructions for the nested inductives now.
-  if indVal.all[0]! = indName then
+  bif indVal.all[0]! =ᵇ indName then
     for i in *...indVal.numNested do
       let recName := recName.appendIndexAfter (i + 1)
       let brecOnName := brecOnName.appendIndexAfter (i + 1)

@@ -61,7 +61,7 @@ partial def mkHCongrWithArity (f : Expr) (numArgs : Nat) : MetaM CongrTheorem :=
   let fType ← inferType f
   forallBoundedTelescope fType numArgs (cleanupAnnotations := true) fun xs _ =>
   forallBoundedTelescope fType numArgs (cleanupAnnotations := true) fun ys _ => do
-    if xs.size != numArgs then
+    bif xs.size != numArgs then
       throwError "failed to generate `hcongr` theorem: expected {numArgs} arguments, but got {xs.size} for{indentExpr f}"
     else
       let lctx := addPrimeToFVarUserNames ys (← getLCtx) |> setBinderInfosD ys |> setBinderInfosD xs
@@ -81,12 +81,12 @@ partial def mkHCongrWithArity (f : Expr) (numArgs : Nat) : MetaM CongrTheorem :=
 where
   withNewEqs {α} (xs ys : Array Expr) (k : Array Expr → Array CongrArgKind → MetaM α) : MetaM α :=
     let rec loop (i : Nat) (eqs : Array Expr) (kinds : Array CongrArgKind) := do
-      if i < xs.size then
+      bif i <ᵇ xs.size then
         let x := xs[i]!
         let y := ys[i]!
         let xType := (← inferType x).cleanupAnnotations
         let yType := (← inferType y).cleanupAnnotations
-        if xType == yType then
+        bif xType == yType then
           withLocalDeclD ((`e).appendIndexAfter (i+1)) (← mkEq x y) fun h =>
             loop (i+1) (eqs.push h) (kinds.push .eq)
         else
@@ -112,7 +112,7 @@ where
       let motive := motive.bindingBody!
       let minor ← mkProof type
       let mut major := eqPr
-      if (← whnf (← inferType eqPr)).isHEq then
+      bif (← whnf (← inferType eqPr)).isHEq then
         major ← mkEqOfHEq major
       let motive ← mkLambdaFVars #[b] motive
       mkLambdaFVars #[a, b, eqPr] (← mkEqNDRec motive minor major)
@@ -127,8 +127,8 @@ private def fixKindsForDependencies (info : FunInfo) (kinds : Array CongrArgKind
   let mut kinds := kinds
   for i in *...info.paramInfo.size do
     for hj : j in (i+1)...info.paramInfo.size do
-      if info.paramInfo[j].backDeps.contains i then
-        if kinds[j]! matches .eq | .fixed then
+      bif info.paramInfo[j].backDeps.contains i then
+        bif kinds[j]! matches .eq | .fixed then
           -- We must fix `i` because there is a `j` that depends on `i` and `j` is not cast-fixed.
           kinds := kinds.set! i .fixed
           break
@@ -146,9 +146,9 @@ Tests whether we should use `subsingletonInst` kind for instances which depend o
 (Otherwise `fixKindsForDependencies`will downgrade them to Fixed
 -/
 private def shouldUseSubsingletonInst (info : FunInfo) (kinds : Array CongrArgKind) (i : Nat) : Bool := Id.run do
-  if info.paramInfo[i]!.isDecInst then
+  bif info.paramInfo[i]!.isDecInst then
     for j in info.paramInfo[i]!.backDeps do
-      if kinds[j]! matches .eq then
+      bif kinds[j]! matches .eq then
         return true
   return false
 
@@ -176,7 +176,7 @@ private def getClassSubobjectMask? (f : Expr) : MetaM (Option (Array Bool)) := d
     let env ← getEnv
     let mut mask := #[]
     for h : i in *...xs.size do
-      if i < val.numParams then
+      bif i <ᵇ val.numParams then
         mask := mask.push false
       else
         let localDecl ← xs[i].fvarId!.getDecl
@@ -210,20 +210,20 @@ def getCongrSimpKinds (f : Expr) (info : FunInfo) (replaceUDecInsts := true) :
   let mut result := #[]
   let mask? ← getClassSubobjectMask? f
   for h : i in *...info.paramInfo.size do
-    if info.resultDeps.contains i then
+    bif info.resultDeps.contains i then
       result := result.push .fixed
-    else if info.paramInfo[i].isProp then
+    else bif info.paramInfo[i].isProp then
       result := result.push .cast
-    else if info.paramInfo[i].isInstance then
+    else bif info.paramInfo[i].isInstance then
       if let some mask := mask? then
-        if h2 : i < mask.size then
-          if mask[i] then
+        bif h2 : i <ᵇ mask.size then
+          bif mask[i] then
             -- Parameter is a subobject field of a class constructor. See comment above.
             result := result.push .eq
             continue
-      if shouldUseSubsingletonInst info result i then
+      bif shouldUseSubsingletonInst info result i then
         result := result.push .subsingletonInst
-      else if replaceUDecInsts && hasClassical && shouldReplaceUDecInst info result i then
+      else bif replaceUDecInsts && hasClassical && shouldReplaceUDecInst info result i then
         result := result.push .cast
       else
         result := result.push .fixed
@@ -240,16 +240,16 @@ def getCongrSimpKindsForArgZero (info : FunInfo) : MetaM (Array CongrArgKind) :=
   let hasClassical := (← getEnv).contains ``UDecidable.classical
   let mut result := #[]
   for h : i in *...info.paramInfo.size do
-    if info.resultDeps.contains i then
+    bif info.resultDeps.contains i then
       result := result.push .fixed
-    else if i == 0 then
+    else bif i == 0 then
       result := result.push .eq
-    else if info.paramInfo[i].isProp then
+    else bif info.paramInfo[i].isProp then
       result := result.push .cast
-    else if info.paramInfo[i].isInstance then
-      if shouldUseSubsingletonInst info result i then
+    else bif info.paramInfo[i].isInstance then
+      bif shouldUseSubsingletonInst info result i then
         result := result.push .subsingletonInst
-      else if hasClassical && shouldReplaceUDecInst info result i then
+      else bif hasClassical && shouldReplaceUDecInst info result i then
         result := result.push .cast
       else
         result := result.push .fixed
@@ -285,7 +285,7 @@ Remark: deps is sorted.
 private partial def mkCast (fvarId : FVarId) (type : Expr) (deps : Array Nat) (eqs : Array (Option EqInfo)) : MetaM Expr := do
   -- Remark: we use the `subst` tactic to avoid re-implementing the `revert`/`intro` logic used there.
   let eqs := deps.filterMap fun idx => eqs[idx]!
-  if eqs.isEmpty then return mkFVar fvarId
+  bif eqs.isEmpty then return mkFVar fvarId
   let mvar ← mkFreshExprMVar type
   let mut mvarId := mvar.mvarId!
   let mut s : FVarSubst := {}
@@ -318,9 +318,9 @@ Creates a congruence theorem that is useful for the simplifier and `congr` tacti
 partial def mkCongrSimpCore? (f : Expr) (info : FunInfo) (kinds : Array CongrArgKind) (subsingletonInstImplicitRhs : Bool := true) : MetaM (Option CongrTheorem) := do
   if let some result ← mk? f info kinds then
     return some result
-  else if hasCastLike kinds then
+  else bif hasCastLike kinds then
     -- Simplify kinds and try again
-    let kinds := kinds.map fun kind => if kind matches .cast | .subsingletonInst then .fixed else kind
+    let kinds := kinds.map fun kind => bif kind matches .cast | .subsingletonInst then .fixed else kind
     mk? f info kinds
   else
     return none
@@ -336,9 +336,9 @@ where
     try
       let fType ← inferType f
       forallBoundedTelescope fType kinds.size (cleanupAnnotations := true) fun lhss _ => do
-        if lhss.size != kinds.size then return none
+        bif lhss.size != kinds.size then return none
         let rec go (i : Nat) (rhss : Array Expr) (eqs : Array (Option EqInfo)) (hyps : Array Expr) : MetaM CongrTheorem := do
-          if i == kinds.size then
+          bif i == kinds.size then
             let lhs := mkAppN f lhss
             let rhs := mkAppN f rhss
             let type ← mkForallFVars hyps (← mkEq lhs rhs)
@@ -356,7 +356,7 @@ where
             | .fixed => go (i+1) (rhss.push lhss[i]!) (eqs.push none) hyps
             | .cast =>
               let rhsType := (← inferType lhss[i]!).replaceFVars (lhss[*...rhss.size]) rhss
-              let rhs ← if info.paramInfo[i]!.isUDecInst then
+              let rhs ← bif info.paramInfo[i]!.isUDecInst then
                 -- Casting would embed the equations into the instance and break later `rw`s.
                 forallTelescopeReducing rhsType fun xs type =>
                   mkLambdaFVars xs (mkApp (mkConst ``UDecidable.classical) type.appArg!)
@@ -369,7 +369,7 @@ where
                 let lhs := lhss[i]!
                 let lhsType ← inferType lhs
                 let rhsType := lhsType.replaceFVars (lhss[*...rhss.size]) rhss
-                let rhsBi   := if subsingletonInstImplicitRhs then .instImplicit else .implicit
+                let rhsBi   := bif subsingletonInstImplicitRhs then .instImplicit else .implicit
                 withLocalDecl (← lhss[i]!.fvarId!.getDecl).userName rhsBi rhsType fun rhs => do
                   go (i+1) (rhss.push rhs) (eqs.push <| some <| .decSubsingleton lhs.fvarId! rhs.fvarId!) (hyps.push rhs)
         return some (← go 0 #[] #[] #[])
@@ -378,7 +378,7 @@ where
 
   mkProof (type : Expr) (kinds : Array CongrArgKind) : MetaM Expr := do
     let rec go (i : Nat) (type : Expr) : MetaM Expr := do
-      if i == kinds.size then
+      bif i == kinds.size then
         let some (_, lhs, _) := type.eq? | unreachable!
         mkEqRefl lhs
       else
@@ -438,7 +438,7 @@ builtin_initialize
   registerReservedNameAction fun name => do
     let .str p s := name | return false
     unless (← getEnv).contains p do return false
-    if isHCongrReservedNameSuffix s then
+    bif isHCongrReservedNameSuffix s then
       let numArgs := (s.drop 7).toNat!
       try MetaM.run' do
         let info ← getConstInfo p
@@ -453,7 +453,7 @@ builtin_initialize
           modifyEnv fun env => congrKindsExt.insert env name congrThm.argKinds
         return true
       catch _ => return false
-    else if s == congrSimpSuffix then
+    else bif s == congrSimpSuffix then
       try MetaM.run' do
         let cinfo ← getConstInfo p
         let f := mkConst p (cinfo.levelParams.map mkLevelParam)

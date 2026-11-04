@@ -100,9 +100,9 @@ Lean's short version string (i.e., what is printed by `lean --short-version`).
 This is the Lean equivalent of of the C++ `LEAN_VERSION_STRING` / `g_short_version_string`.
 -/
 def shortVersionString : String :=
-  if version.specialDesc ≠ "" then
+  bif version.specialDesc ≠ᵇ "" then
     s!"{versionStringCore}-{version.specialDesc}"
-  else if !version.isRelease then
+  else bif !version.isRelease then
     s!"{versionStringCore}-pre"
   else
     versionStringCore
@@ -110,9 +110,9 @@ def shortVersionString : String :=
 /-- The full Lean version header (i.e, what is printed by `lean --version`). -/
 def versionHeader : String := Id.run do
   let mut ver := shortVersionString
-  if Platform.target ≠ "" then
+  bif Platform.target ≠ᵇ "" then
     ver := s!"{ver}, {Platform.target}"
-  if githash ≠ "" then
+  bif githash ≠ᵇ "" then
     ver := s!"{ver}, commit {githash}"
   s!"Lean (version {ver}, {Internal.getBuildType ()})"
 
@@ -122,13 +122,13 @@ A string containing the list of additional features Lean was built with.
 This is printed by `lean --features`.
 -/
 def featuresString :=
-  if Internal.hasLLVMBackend () then
+  bif Internal.hasLLVMBackend () then
     "[LLVM]"
   else "[]"
 
 /-- Print the Lean CLI help message. -/
 def displayHelp (useStderr : Bool) : IO Unit := do
-  let out ← if useStderr then IO.getStderr else IO.getStdout
+  let out ← bif useStderr then IO.getStderr else IO.getStdout
   out.putStrLn    versionHeader
   out.putStrLn    "Miscellaneous"
   out.putStrLn    "  -h, --help             display this message"
@@ -152,7 +152,7 @@ def displayHelp (useStderr : Bool) : IO Unit := do
   out.putStrLn    "                         (in megabytes)"
   out.putStrLn    "  -T, --timeout=num      maximum number of memory allocations per task"
   out.putStrLn    "                         this is a deterministic way of interrupting long running tasks"
-  if Internal.isMultiThread () then
+  bif Internal.isMultiThread () then
     out.putStrLn  "  -j, --threads=num      number of threads used to process lean files"
     out.putStrLn  "  -s, --tstack=num       thread stack size in Kb"
     out.putStrLn  "      --server           start lean in server mode"
@@ -172,7 +172,7 @@ def displayHelp (useStderr : Bool) : IO Unit := do
   out.putStrLn    "      --incr-load=file   EXPERIMENTAL: reuse a snapshot saved by `--incr-(header-)save` at start of run"
   out.putStrLn    "      --incr-header-save=file"
   out.putStrLn    "                         EXPERIMENTAL: like `--incr-save`, but save only the header (state after importing)"
-  if Internal.isDebug () then
+  bif Internal.isDebug () then
     out.putStrLn  "      --debug=tag        enable assertions with the given tag"
   out.putStrLn    "      -D name=value      set a configuration option (see set_option command)"
 
@@ -209,7 +209,7 @@ def defaultTrustLevel : UInt32 :=
 
 /-- Returns the default number of threads for the shell's task manager. -/
 def defaultNumThreads : UInt32 :=
-  if Internal.isMultiThread () then
+  bif Internal.isMultiThread () then
     Platform.Internal.getHardwareConcurrency ()
   else 0
 
@@ -263,11 +263,11 @@ def checkOptArg (optName : String) (optArg? : Option String) : IO String := do
 
 def setConfigOption (opts : Options) (arg : String) : IO Options := do
   let pos := arg.find '='
-  if h : pos.IsAtEnd then
+  bif h : pos =ᵇ arg.endPos then
     throw <| .userError "invalid -D parameter, argument must contain '='"
   else
     let name := arg.sliceTo pos |>.toName
-    let val := arg.sliceFrom (pos.next h) |>.copy
+    let val := arg.sliceFrom (pos.next (ne_of_decideEq_eq_false h)) |>.copy
     if let some decl := (← getOptionDecls).find? name then
       Language.Lean.setOption opts decl name val
     else
@@ -292,8 +292,8 @@ def ShellOptions.process (opts : ShellOptions)
     let arg ← checkOptArg "j" optArg?
     let some numThreads := arg.toNat?
       | throwExpectedNumeric "j"
-    if h : numThreads < UInt32.size then
-      let numThreads := UInt32.ofNatLT numThreads h
+    bif h : numThreads <ᵇ UInt32.size then
+      let numThreads := UInt32.ofNatLT numThreads (lt_of_decideLT_eq_true h)
       let forwardedArgs := opts.forwardedArgs.push s!"-j{arg}";
       return {opts with forwardedArgs, numThreads}
     else
@@ -322,8 +322,8 @@ def ShellOptions.process (opts : ShellOptions)
     let some stackSize := arg.toNat?
       | throwExpectedNumeric "s"
     let stackSize := stackSize / 4 * 4 * 1024
-    if h : stackSize < USize.size then
-      let stackSize := USize.ofNatLT stackSize h
+    bif h : stackSize <ᵇ USize.size then
+      let stackSize := USize.ofNatLT stackSize (lt_of_decideLT_eq_true h)
       Internal.setThreadStackSize stackSize
       let forwardedArgs := opts.forwardedArgs.push s!"-s{arg}"
       return {opts with forwardedArgs}
@@ -362,8 +362,8 @@ def ShellOptions.process (opts : ShellOptions)
     let arg ← checkOptArg "t" optArg?
     let some trustLevel := arg.toNat?
       | throwExpectedNumeric "t"
-    if h : trustLevel < UInt32.size then
-      let trustLevel := UInt32.ofNatLT trustLevel h
+    bif h : trustLevel <ᵇ UInt32.size then
+      let trustLevel := UInt32.ofNatLT trustLevel (lt_of_decideLT_eq_true h)
       let forwardedArgs := opts.forwardedArgs.push s!"-t{arg}";
       return {opts with forwardedArgs, trustLevel}
     else
@@ -396,7 +396,7 @@ def ShellOptions.process (opts : ShellOptions)
   | 'P' => -- `--profile`
     return {opts with leanOpts := profiler.set opts.leanOpts true}
   | 'B' => -- `--debug=tag`
-    if Internal.isDebug () then
+    bif Internal.isDebug () then
       let arg ← checkOptArg "B" optArg?
       Internal.enableDebug arg
       return opts
@@ -405,11 +405,11 @@ def ShellOptions.process (opts : ShellOptions)
     let arg ← checkOptArg "p" optArg?
     let (path, fn?) :=
       let pos := arg.find '='
-      if h : pos.IsAtEnd then
+      bif h : pos =ᵇ arg.endPos then
         (FilePath.mk arg, none)
       else
         let path := arg.sliceTo pos
-        let initFn := arg.sliceFrom (pos.next h)
+        let initFn := arg.sliceFrom (pos.next (ne_of_decideEq_eq_false h))
         (FilePath.mk path.copy, some initFn.copy)
     Lean.loadPlugin path fn?
     let forwardedArgs := opts.forwardedArgs.push s!"-p{arg}"
@@ -458,17 +458,17 @@ where
 @[export lean_shell_main]
 def shellMain (args : List String) (opts : ShellOptions) : IO UInt32 := do
   let opts := { opts with leanOpts := opts.leanOpts.mergeBy (fun _ _ v => v) (Internal.getOptionOverrides ()) }
-  if opts.printPrefix then
+  bif opts.printPrefix then
     IO.println (← getBuildDir)
     return 0
-  if opts.printLibDir then
+  bif opts.printLibDir then
     IO.println (← getLibDir (← getBuildDir))
     return 0
   let maxMemory := maxMemory.get opts.leanOpts
-  if maxMemory != 0 then
+  bif maxMemory != 0 then
     Internal.setMaxMemory (maxMemory.toUSize * 1024 * 1024)
   let timeout := timeout.get opts.leanOpts
-  if timeout != 0 then
+  bif timeout != 0 then
     Internal.setMaxHeartbeat (timeout.toUSize * 1000)
   match opts.component with
   | .frontend =>
@@ -477,9 +477,9 @@ def shellMain (args : List String) (opts : ShellOptions) : IO UInt32 := do
     return ← Server.Watchdog.watchdogMain opts.forwardedArgs.toList
   | .worker =>
     return ← Server.FileWorker.workerMain opts.leanOpts
-  if opts.onlyDeps && opts.depsJson then
+  bif opts.onlyDeps && opts.depsJson then
     let fns ←
-      if opts.useStdin then
+      bif opts.useStdin then
         (← IO.getStdin).lines
       else
         pure args.toArray
@@ -489,28 +489,28 @@ def shellMain (args : List String) (opts : ShellOptions) : IO UInt32 := do
     match args with
     | fileName :: args => (some fileName, args)
     | [] => (none, args)
-  if !opts.run && !args.isEmpty then
+  bif !opts.run && !args.isEmpty then
     IO.eprintln "Expected exactly one file name"
     displayHelp (useStderr := true)
     return 1
   let fileName ←
     if let some fileName := fileName? then
       pure fileName
-    else if opts.useStdin then
+    else bif opts.useStdin then
       pure "<stdin>"
     else
       IO.eprintln "Expected exactly one file name"
       displayHelp (useStderr := true)
       return 1
   let contents ← String.fromUTF8Lossy <$> do
-    if opts.useStdin then
+    bif opts.useStdin then
       (← IO.getStdin).readBinToEnd
     else
       IO.FS.readBinFile fileName
-  if opts.onlyDeps then
+  bif opts.onlyDeps then
     Elab.printImports contents fileName
     return 0
-  if opts.onlySrcDeps then
+  bif opts.onlySrcDeps then
     Elab.printImportSrcs contents fileName
     return 0
   -- Quick and dirty `#lang` support
@@ -519,7 +519,7 @@ def shellMain (args : List String) (opts : ShellOptions) : IO UInt32 := do
     if let some contents := contents.dropPrefix? "#lang" then
       let endLinePos := contents.find '\n'
       let langId := contents.sliceTo endLinePos |>.trimAscii
-      if langId == "lean4" then
+      bif langId == "lean4" then
         pure () -- do nothing for now
       else
         IO.eprintln s!"unknown language '{langId}'\n";
@@ -534,7 +534,7 @@ def shellMain (args : List String) (opts : ShellOptions) : IO UInt32 := do
       pure setup.name
     else if let some fileName := fileName? then
       try moduleNameOfFileName fileName opts.rootDir? catch e =>
-        if opts.oleanFileName?.isNone && opts.cFileName?.isNone then
+        bif opts.oleanFileName?.isNone && opts.cFileName?.isNone then
           pure `_stdin
         else
           throw e
@@ -547,7 +547,7 @@ def shellMain (args : List String) (opts : ShellOptions) : IO UInt32 := do
     (incrLoadFileName? := opts.incrLoadFileName?)
     (incrHeaderSaveFileName? := opts.incrHeaderSaveFileName?)
   if let some env := env? then
-    if opts.run then
+    bif opts.run then
       return ← runMain env opts.leanOpts args
     if let some c := opts.cFileName? then
       writeFileAtomically c fun out => do
@@ -560,12 +560,12 @@ def shellMain (args : List String) (opts : ShellOptions) : IO UInt32 := do
       profileitIO "LLVM code generation" opts.leanOpts do
         emitLLVM env mainModuleName bc
   displayCumulativeProfilingTimes
-  if Internal.hasAddressSanitizer () then
-    return if env?.isSome then 0 else 1
+  bif Internal.hasAddressSanitizer () then
+    return bif env?.isSome then 0 else 1
   else
     -- When not using the address/leak sanitizer, we interrupt execution without garbage collecting.
     -- This is useful when profiling improvements to Lean startup time.
-    IO.Process.exit <| if env?.isSome then 0 else 1
+    IO.Process.exit <| bif env?.isSome then 0 else 1
 where
   writeFileAtomically (name : FilePath) (f : IO.FS.Handle → IO Unit) : IO Unit := do
     let pid ← Std.IO.Process.getId
@@ -576,6 +576,6 @@ where
         h.flush
       IO.FS.rename tempName name
     catch e =>
-      if ← tempName.pathExists then
+      bif (← tempName.pathExists) then
         IO.FS.removeFile tempName
       throw e

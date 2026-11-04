@@ -20,7 +20,7 @@ Given types `tᵢ`, return the tuple type `t₁ × t₂ × … × tₙ`.
 For `n = 0`, return `PUnit` with the given level + 1.
 -/
 def mkProdN (ts : Array Expr) (u : Level /- used as `Type u` -/) : MetaM Expr := do
-  if h : ts.size > 0 then
+  bif h : ts.size >ᵇ 0 then
     let mut tupleTy := ts.back
     let mut u ← getDecLevel tupleTy
     let mut ts := ts.pop
@@ -39,7 +39,7 @@ Given expressions `eᵢ`, return the tuple `(e₁, e₂, …, eₙ)` and its typ
 For `n = 0`, return `PUnit.unit` with the given level + 1.
 -/
 def mkProdMkN (es : Array Expr) (u : Level /- used as `Type u` -/) : MetaM (Expr × Expr) := do
-  if h : es.size > 0 then
+  bif h : es.size >ᵇ 0 then
     let mut tuple := es.back
     let mut tupleTy ← inferType tuple
     let mut u ← getDecLevel tupleTy

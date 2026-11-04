@@ -16,7 +16,7 @@ public section
 namespace Lean.Meta
 
 private def mkAnd? (args : Array Expr) : Option Expr := Id.run do
-  if args.isEmpty then
+  bif args.isEmpty then
     return none
   else
     let mut result := args.back!
@@ -26,7 +26,7 @@ private def mkAnd? (args : Array Expr) : Option Expr := Id.run do
 
 def elimOptParam (type : Expr) : CoreM Expr := do
   Core.transform type fun e =>
-    if e.isAppOfArity ``optParam 2 then
+    bif e.isAppOfArity ``optParam 2 then
       return TransformStep.visit (e.getArg! 0)
     else
       return .continue
@@ -35,9 +35,9 @@ private def mkEqs (args1 args2 : Array Expr) (skipIfPropOrEq : Bool := true) : M
   let mut eqs := #[]
   for arg1 in args1, arg2 in args2 do
     let arg1Type ← inferType arg1
-    if !skipIfPropOrEq then
+    bif !skipIfPropOrEq then
       eqs := eqs.push (← mkEqHEq arg1 arg2)
-    else if !(← isProp arg1Type) && arg1 != arg2 then
+    else bif !(← isProp arg1Type) && arg1 != arg2 then
       eqs := eqs.push (← mkEqHEq arg1 arg2)
   return eqs
 
@@ -52,7 +52,7 @@ private def mkInjectiveTheoremTypeCore? (ctorVal : ConstructorVal) (useEq : Bool
       let eq ← mkEq lhs rhs
       let eqs ← mkEqs args1 args2
       if let some andEqs := mkAnd? eqs then
-        let result ← if useEq then
+        let result ← bif useEq then
           mkEq eq andEqs
         else
           mkArrow eq andEqs
@@ -60,17 +60,17 @@ private def mkInjectiveTheoremTypeCore? (ctorVal : ConstructorVal) (useEq : Bool
       else
         return none
     let rec mkArgs2 (i : Nat) (type : Expr) (args2 args2New : Array Expr) : MetaM (Option Expr) := do
-      if h : i < args1.size then
+      bif h : i <ᵇ args1.size then
         let .forallE n d b _  ← whnf type | throwError "unexpected constructor type for `{ctorVal.name}`"
         let arg1 := args1[i]
-        if occursOrInType (← getLCtx) arg1 resultType then
+        bif occursOrInType (← getLCtx) arg1 resultType then
           mkArgs2 (i + 1) (b.instantiate1 arg1) (args2.push arg1) args2New
         else
-          withLocalDecl n (if useEq then BinderInfo.default else BinderInfo.implicit) d fun arg2 =>
+          withLocalDecl n (bif useEq then BinderInfo.default else BinderInfo.implicit) d fun arg2 =>
             mkArgs2 (i + 1) (b.instantiate1 arg2) (args2.push arg2) (args2New.push arg2)
       else
         k args2 args2New
-    if useEq then
+    bif useEq then
       mkArgs2 0 type #[] #[]
     else
       withImplicitBinderInfos (params ++ args1) do
@@ -185,7 +185,7 @@ register_builtin_option genInjectivity : Bool := {
 }
 
 def mkInjectiveTheorems (declName : Name) : MetaM Unit := do
-  if (← getEnv).contains ``Eq.propIntro && genInjectivity.get (← getOptions) &&  !(← isInductivePredicate declName) then
+  bif (← getEnv).contains ``Eq.propIntro && genInjectivity.get (← getOptions) &&  !(← isInductivePredicate declName) then
     withTraceNode `Meta.injective (fun _ => return m!"{declName}") do
     let info ← getConstInfoInduct declName
     unless info.isUnsafe do
@@ -198,7 +198,7 @@ def mkInjectiveTheorems (declName : Name) : MetaM Unit := do
       for ctor in info.ctors do
         withExporting (isExporting := !isPrivateName ctor) do
           let ctorVal ← getConstInfoCtor ctor
-          if ctorVal.numFields > 0 then
+          bif ctorVal.numFields >ᵇ 0 then
             mkInjectiveTheorem ctorVal
             mkInjectiveEqTheorem ctorVal
 
@@ -210,7 +210,7 @@ def getCtorAppIndices? (ctorApp : Expr) : MetaM (Option (Array Expr)) := do
   type.withApp fun typeFn typeArgs => do
     let .const declName _ := typeFn | return none
     let .inductInfo val ← getConstInfo declName | return none
-    if val.numIndices == 0 then return some #[]
+    bif val.numIndices == 0 then return some #[]
     return some typeArgs[val.numParams...*].toArray
 
 private structure MkHInjTypeResult where
@@ -242,7 +242,7 @@ private def mkHInjType? (ctorVal : ConstructorVal) : MetaM (Option MkHInjTypeRes
       else
         return none
     let rec mkArgs2 (i : Nat) (type : Expr) (args2 : Array Expr) : MetaM (Option MkHInjTypeResult) := do
-      if h : i < args1.size then
+      bif h : i <ᵇ args1.size then
         let .forallE n d b _  ← whnf type | throwError "unexpected constructor type for `{ctorVal.name}`"
         let arg1 := args1[i]
         withLocalDecl n .implicit d fun arg2 =>

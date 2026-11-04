@@ -86,15 +86,15 @@ private partial def mkKey (e : Expr) : CanonM UInt64 := do
         -- We instantiate assigned metavariables because the
         -- pretty-printer also instantiates them.
         let eNew ← instantiateMVars e
-        if eNew == e then return hash e else mkKey eNew
+        bif eNew == e then return hash e else mkKey eNew
       | .mdata _ a => mkKey a
       | .app .. =>
         let f := e.getAppFn
-        if f.isMVar then
+        bif f.isMVar then
           let eNew ← instantiateMVars e
           unless eNew == e do
             return (← mkKey eNew)
-        let info ← if f.hasLooseBVars then
+        let info ← bif f.hasLooseBVars then
           -- If `f` has loose bound variables, `getFunInfo` will fail.
           -- This can only happen if `f` contains local variables.
           -- Instead we use an empty `FunInfo`, which results in the
@@ -105,9 +105,9 @@ private partial def mkKey (e : Expr) : CanonM UInt64 := do
           getFunInfo f
         let mut k ← mkKey f
         for i in *...e.getAppNumArgs do
-          if h : i < info.paramInfo.size then
+          bif h : i <ᵇ info.paramInfo.size then
             let info := info.paramInfo[i]
-            if info.isExplicit && !info.isProp then
+            bif info.isExplicit && !info.isProp then
               k := mixHash k (← mkKey (e.getArg! i))
           else
               k := mixHash k (← mkKey (e.getArg! i))
@@ -135,7 +135,7 @@ def canon (e : Expr) : CanonM Expr := do
     withTransparency (← read) do
       for e' in es' do
         -- Found an expression `e'` that is definitionally equal to `e` and share the same key.
-        if (← isDefEq e e') then
+        bif (← isDefEq e e') then
           return e'
       -- `e` is not definitionally equal to any expression in `es'`. We claim this should be rare.
       modify fun { cache, keyToExprs } => { cache, keyToExprs := keyToExprs.insert k (e :: es') }

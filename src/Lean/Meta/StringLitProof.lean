@@ -41,13 +41,13 @@ def mkStringLitNeProof (s₁ s₂ : String) : MetaM Expr := do
   let minLen := min l₁.length l₂.length
   let diffIdx := Id.run do
     for i in [:minLen] do
-      if l₁[i]! ≠ l₂[i]! then return i
+      bif l₁[i]! ≠ᵇ l₂[i]! then return i
     return minLen
   -- Build the list inequality proof, dispatching on whether it's a character
   -- difference or a prefix/length difference
   let listEq := mkApp3 (mkConst ``Eq [.succ .zero]) listCharTy l₁Expr l₂Expr
   let listNeProof ←
-    if diffIdx < minLen then
+    bif diffIdx <ᵇ minLen then
       -- Both lists have a character at diffIdx: project to Nat via get!Internal + toNat,
       -- then use Nat.ne_of_beq_eq_false rfl (avoids Decidable instances entirely)
       let inhabCharExpr := mkConst ``Char.instInhabited
@@ -81,7 +81,7 @@ def mkStringLitNeProof (s₁ s₂ : String) : MetaM Expr := do
         listCharTy listCharTy l₁Expr l₂Expr dropFn
       -- The longer list's drop has a head element; the shorter list's drop is []
       let (hdChar, tlList) :=
-        if l₁.length ≤ l₂.length then
+        bif l₁.length ≤ᵇ l₂.length then
           let dropped := l₂.drop minLen
           (dropped.head!, dropped.tail!)
         else
@@ -92,7 +92,7 @@ def mkStringLitNeProof (s₁ s₂ : String) : MetaM Expr := do
       -- cons_ne_nil hd tl : hd :: tl ≠ []
       let consNeNil := mkApp3 (mkConst ``List.cons_ne_nil [.zero]) charConst hdExpr tlExpr
       let dropNeProof :=
-        if l₁.length ≤ l₂.length then
+        bif l₁.length ≤ᵇ l₂.length then
           -- l₁ is shorter: drop l₁ = [], drop l₂ = hd :: tl, need [] ≠ hd :: tl
           mkApp4 (mkConst ``Ne.symm [.succ .zero]) listCharTy
             (mkApp3 (mkConst ``List.cons [.zero]) charConst hdExpr tlExpr)

@@ -16,7 +16,7 @@ open Lean
 
 private abbrev withInstantiatedMVars (e : Expr) (k : Expr → OptionT MetaM α) : OptionT MetaM α := do
   let eNew ← instantiateMVars e
-  if eNew.getAppFn.isMVar then
+  bif eNew.getAppFn.isMVar then
     failure
   else
     k eNew
@@ -108,9 +108,9 @@ private def isNatZero (e : Expr) : MetaM Bool := do
   | _      => return false
 
 def mkOffset (e : Expr) (offset : Nat) : MetaM Expr := do
-  if offset == 0 then
+  bif offset == 0 then
     return e
-  else if (← isNatZero e) then
+  else bif (← isNatZero e) then
     return mkNatLit offset
   else
     return mkNatAdd e (mkNatLit offset)
@@ -119,29 +119,29 @@ def isDefEqOffset (s t : Expr) : MetaM LBool := do
   let ifNatExpr (x : MetaM LBool) : MetaM LBool := do
     let type ← inferType s
     -- Remark: we use `withNewMCtxDepth` to make sure we don't assign metavariables when performing the `isDefEq` test
-    if (← withNewMCtxDepth <| Meta.isExprDefEqAux type (mkConst ``Nat)) then
+    bif (← withNewMCtxDepth <| Meta.isExprDefEqAux type (mkConst ``Nat)) then
       x
     else
       return LBool.undef
   let isDefEq (s t) : MetaM LBool :=
     ifNatExpr <| toLBoolM <| Meta.isExprDefEqAux s t
-  if !(← getConfig).offsetCnstrs then
+  bif !(← getConfig).offsetCnstrs then
     return LBool.undef
   else
     match (← isOffset? s) with
     | some (s, k₁) =>
       match (← isOffset? t) with
       | some (t, k₂) => -- s+k₁ =?= t+k₂
-        if k₁ == k₂ then
+        bif k₁ == k₂ then
           isDefEq s t
-        else if k₁ < k₂ then
+        else bif k₁ <ᵇ k₂ then
           isDefEq s (← mkOffset t (k₂ - k₁))
         else
           isDefEq (← mkOffset s (k₁ - k₂)) t
       | none =>
         match (← evalNat t) with
         | some v₂ => -- s+k₁ =?= v₂
-          if v₂ ≥ k₁ then
+          bif v₂ ≥ᵇ k₁ then
             isDefEq s (mkNatLit <| v₂ - k₁)
           else
             ifNatExpr <| return LBool.false
@@ -152,7 +152,7 @@ def isDefEqOffset (s t : Expr) : MetaM LBool := do
       | some v₁ =>
         match (← isOffset? t) with
         | some (t, k₂) => -- v₁ =?= t+k₂
-          if v₁ ≥ k₂ then
+          bif v₁ ≥ᵇ k₂ then
             isDefEq (mkNatLit <| v₁ - k₂) t
           else
             ifNatExpr <| return LBool.false

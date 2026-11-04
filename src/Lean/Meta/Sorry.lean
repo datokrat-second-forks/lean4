@@ -39,7 +39,7 @@ Returns `sorryAx type synthetic`. Recall that `synthetic` is true if this sorry 
 See also `Lean.Meta.mkLabeledSorry`, for creating a `sorry` that is labeled or unique.
 -/
 def mkSorry (type : Expr) (synthetic : Bool) : MetaM Expr := do
-  if !(← hasConst ``sorryAx) then
+  bif !(← hasConst ``sorryAx) then
     -- Abort if we are not ready yet to generate `sorry`s in bootstrapping contexts.
     Elab.throwAbortCommand
   let u ← getLevel type
@@ -81,7 +81,7 @@ Constructs a `sorryAx`.
 * If `unique` is true, the `sorry` is unique, in the sense that it is not defeq to any other `sorry` created by `mkLabeledSorry`.
 -/
 def mkLabeledSorry (type : Expr) (synthetic : Bool) (unique : Bool) : MetaM Expr := do
-  if !(← hasConst ``Lean.Name) then
+  bif !(← hasConst ``Lean.Name) then
     -- Abort if we are not ready yet to generate `sorry`s in bootstrapping contexts.
     Elab.throwAbortCommand
   let tag ←
@@ -100,7 +100,7 @@ def mkLabeledSorry (type : Expr) (synthetic : Bool) (unique : Bool) : MetaM Expr
       }
     else
       SorryLabelView.encode {}
-  if unique then
+  bif unique then
     let e ← mkSorry (mkForall `tag .default (mkConst ``Lean.Name) type) synthetic
     return .app e (toExpr tag)
   else
@@ -134,8 +134,8 @@ stripping off any arguments in case the `sorry` is standing in for a function.
 For labeled sorries, includes the label information.
 -/
 def Expr.getSorry? (e : Expr) : Option Expr :=
-  if e.isSorry then
-    if (Meta.isLabeledSorry? e).isSome then
+  bif e.isSorry then
+    bif (Meta.isLabeledSorry? e).isSome then
       e.getBoundedAppFn (e.getAppNumArgs - 3)
     else
       e.getBoundedAppFn (e.getAppNumArgs - 2)

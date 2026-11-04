@@ -21,11 +21,11 @@ def canUnfoldDefault (cfg : Config) (info : ConstantInfo) : CoreM Bool := do
   | .default => return !(← isIrreducible info.name)
   | m =>
     let status ← getReducibilityStatus info.name
-    if status == .reducible then
+    bif status == .reducible then
       return true
-    else if status == .instanceReducible && (m == .instances || m == .implicit) then
+    else bif status == .instanceReducible && (m == .instances || m == .implicit) then
       return true
-    else if status == .implicitReducible && m == .implicit then
+    else bif status == .implicitReducible && m == .implicit then
       return true
     else
       return false
@@ -35,11 +35,11 @@ Alternative can-unfold predicate used inside `whnfMatcher`.
 See module comment above `unfoldNestedDIte` in `Lean.Meta.WHNF`.
 -/
 def canUnfoldAtMatcher (cfg : Config) (info : ConstantInfo) : CoreM Bool := do
-  if (← canUnfoldDefault cfg info) then
+  bif (← canUnfoldDefault cfg info) then
     return true
   /- Beyond what the normal transparency allows, we additionally unfold
      certain definitions to expose constructors in match discriminants. -/
-  if hasMatchPatternAttribute (← getEnv) info.name then
+  bif hasMatchPatternAttribute (← getEnv) info.name then
     return true
   return info.name == ``OfNat.ofNat -- needed to reduce numeric literals in match discriminants
    || info.name == ``NatCast.natCast -- needed for `↑m` in match discriminants (pervasive in Int proofs)
@@ -79,7 +79,7 @@ def getUnfoldableConst? (constName : Name) : MetaM (Option ConstantInfo) := do
   let some ainfo := (← getEnv).findAsync? constName | throwUnknownConstantAt (← getRef) constName
   match ainfo.kind with
   | .thm => return none
-  | .defn => if (← canUnfold ainfo.toConstantInfo) then return ainfo.toConstantInfo else return none
+  | .defn => bif (← canUnfold ainfo.toConstantInfo) then return ainfo.toConstantInfo else return none
   | _ => return none
 
 /--
@@ -88,7 +88,7 @@ As with `getUnfoldableConst?` but return `none` instead of failing if the consta
 def getUnfoldableConstNoEx? (constName : Name) : MetaM (Option ConstantInfo) := do
   match (← getEnv).find? constName with
   | some (.thmInfo _)          => return none
-  | some (info@(.defnInfo _)) => if (← canUnfold info) then return info else return none
+  | some (info@(.defnInfo _)) => bif (← canUnfold info) then return info else return none
   | some (.axiomInfo _)       => recordUnfoldAxiom constName; return none
   | _                         => return none
 

@@ -115,14 +115,14 @@ instance : MonadMCtx M where
   modifyMCtx f := modify fun s => { s with mctx := f s.mctx }
 
 partial def normLevel (u : Level) : M Level := do
-  if !u.hasMVar then
+  bif !u.hasMVar then
     return u
   else match u with
     | .succ v      => return u.updateSucc! (← normLevel v)
     | .max v w     => return u.updateMax! (← normLevel v) (← normLevel w)
     | .imax v w    => return u.updateIMax! (← normLevel v) (← normLevel w)
     | .mvar mvarId =>
-      if (← getMCtx).getLevelDepth mvarId != (← getMCtx).depth then
+      bif (← getMCtx).getLevelDepth mvarId != (← getMCtx).depth then
         return u
       else
         let s ← get
@@ -135,7 +135,7 @@ partial def normLevel (u : Level) : M Level := do
     | u => return u
 
 partial def normExpr (e : Expr) : M Expr := do
-  if !e.hasMVar then
+  bif !e.hasMVar then
     pure e
   else match e with
     | .const _ us      => return e.updateConst! (← us.mapM normLevel)
@@ -147,7 +147,7 @@ partial def normExpr (e : Expr) : M Expr := do
     | .mdata _ b       => return e.updateMData! (← normExpr b)
     | .proj _ _ b      => return e.updateProj! (← normExpr b)
     | .mvar mvarId     =>
-      if !(← mvarId.isAssignable) then
+      bif !(← mvarId.isAssignable) then
         return e
       else
         let s ← get
@@ -221,9 +221,9 @@ def getInstances (type : Expr) : MetaM (Array Instance) := do
       let env ← getEnv
       let mut result ← result.filterMapM fun e => match e.val with
         | .const constName us =>
-          if erasedInstances.contains constName then
+          bif erasedInstances.contains constName then
             return none
-          else if env.isExporting && !env.contains constName then
+          else bif env.isExporting && !env.contains constName then
             -- private instances must not leak into public scope
             return none
           else
@@ -233,12 +233,12 @@ def getInstances (type : Expr) : MetaM (Array Instance) := do
             }
         | _ => panic! "global instance is not a constant"
       for linst in localInstances do
-        if linst.className == className then
+        bif linst.className == className then
           let synthOrder ← forallTelescopeReducing (← inferType linst.fvar) fun xs _ => do
-            if xs.isEmpty then return #[]
+            bif xs.isEmpty then return #[]
             let mut order := #[]
             for i in *...xs.size, x in xs do
-              if (← getFVarLocalDecl x).binderInfo == .instImplicit then
+              bif (← getFVarLocalDecl x).binderInfo == .instImplicit then
                 order := order.push i
             return order
           result := result.push { val := linst.fvar, synthOrder }
@@ -249,7 +249,7 @@ def mkGeneratorNode? (key mvar : Expr) : MetaM (Option GeneratorNode) := do
   let mvarType  ← inferType mvar
   let mvarType  ← instantiateMVars mvarType
   let instances ← getInstances mvarType
-  if instances.isEmpty then
+  bif instances.isEmpty then
     return none
   else
     let mctx ← getMCtx
@@ -349,7 +349,7 @@ def getSubgoals (lctx : LocalContext) (localInsts : LocalInstances) (xs : Array 
   If it succeeds, the result is a new updated metavariable context and a new list of subgoals.
   A subgoal is created for each instance implicit parameter of `inst`. -/
 def tryResolve (mvar : Expr) (inst : Instance) : MetaM (Option (MetavarContext × List Expr)) := do
-  if (← isDiagnosticsEnabled) then
+  bif (← isDiagnosticsEnabled) then
     if let .const declName _ := inst.val.getAppFn then
       recordInstance declName
   let mvarType   ← inferType mvar
@@ -363,7 +363,7 @@ def tryResolve (mvar : Expr) (inst : Instance) : MetaM (Option (MetavarContext �
     subgoals.forM fun subgoal => subgoal.mvarId!.markInstanceTyped
     withTraceNode `Meta.synthInstance.tryResolve (fun _ => do withMCtx (← getMCtx) do
         return m!"{← instantiateMVars mvarTypeBody} ≟ {← instantiateMVars instTypeBody}") do
-    if (← isDefEq mvarTypeBody instTypeBody) then
+    bif (← isDefEq mvarTypeBody instTypeBody) then
       /-
       We set `etaReduce := true`.
       For example, suppose `e` is the local variable `inst x y`, and `xs` is `#[x, y]`, then
@@ -418,7 +418,7 @@ def tryResolve (mvar : Expr) (inst : Instance) : MetaM (Option (MetavarContext �
       metavariables too, but checking the body is cheaper and good enough in practice,
       and we want to remove this check altogether (see note above).
       -/
-      if !(← instantiateMVars mvarTypeBody).hasExprMVar then
+      bif !(← instantiateMVars mvarTypeBody).hasExprMVar then
         -- Remark: `mvar` is not assigned here: `tryResolve` runs on the generator node's
         -- metavariable context snapshot, in which `mvar` is fresh.
         mvar.mvarId!.assign instVal
@@ -433,7 +433,7 @@ def tryResolve (mvar : Expr) (inst : Instance) : MetaM (Option (MetavarContext �
 def tryAnswer (mctx : MetavarContext) (mvar : Expr) (answer : Answer) : SynthM (Option MetavarContext) :=
   withMCtx mctx do
     let (_, _, val) ← openAbstractMVarsResult answer.result
-    if (← isDefEq mvar val) then
+    bif (← isDefEq mvar val) then
       return some (← getMCtx)
     else
       return none
@@ -445,7 +445,7 @@ def wakeUp (answer : Answer) : Waiter → SynthM Unit
        containing universe metavariables, and not check `answer.result.paramNames.isEmpty`.
        We use `openAbstractMVarsResult` to construct the universe metavariables
        at the correct depth. -/
-    if answer.result.numMVars == 0 then
+    bif answer.result.numMVars == 0 then
       modify fun s => { s with result? := answer.result }
     else
       let (_, _, answerExpr) ← openAbstractMVarsResult answer.result
@@ -473,7 +473,7 @@ private def mkAnswer (cNode : ConsumerNode) : MetaM Answer :=
   And then, store it in the tabled entries map, and wakeup waiters. -/
 def addAnswer (cNode : ConsumerNode) : SynthM Unit := do
   withMCtx cNode.mctx do
-  if cNode.size ≥ (← read).maxResultSize then
+  bif cNode.size ≥ᵇ (← read).maxResultSize then
     trace[Meta.synthInstance.answer] "{crossEmoji} {← instantiateMVars (← inferType cNode.mvar)}{Format.line}(size: {cNode.size} ≥ {(← read).maxResultSize})"
   else
     withTraceNode `Meta.synthInstance.answer
@@ -482,7 +482,7 @@ def addAnswer (cNode : ConsumerNode) : SynthM Unit := do
     -- Remark: `answer` does not contain assignable or assigned metavariables.
     let key := cNode.key
     let { waiters, answers } ← getEntry key
-    if isNewAnswer answers answer then
+    bif isNewAnswer answers answer then
       let newEntry := { waiters, answers := answers.push answer }
       modify fun s => { s with tableEntries := s.tableEntries.insert key newEntry }
       waiters.forM (wakeUp answer)
@@ -521,14 +521,14 @@ private def hasUnusedArguments : Expr → Bool
 private def removeUnusedArguments? (mctx : MetavarContext) (mvar : Expr) : MetaM (Option (Expr × Expr)) :=
   withMCtx mctx do
     let mvarType ← instantiateMVars (← inferType mvar)
-    if !hasUnusedArguments mvarType then
+    bif !hasUnusedArguments mvarType then
       return none
     else
       forallTelescope mvarType fun xs body => do
         let ys ← xs.foldrM (init := []) fun x ys => do
-          if body.containsFVar x.fvarId! then
+          bif body.containsFVar x.fvarId! then
             return x :: ys
-          else if (← ys.anyM fun y => return (← inferType y).containsFVar x.fvarId!) then
+          else bif (← ys.anyM fun y => return (← inferType y).containsFVar x.fvarId!) then
             return x :: ys
           else
             return ys
@@ -598,7 +598,7 @@ def getTop : SynthM GeneratorNode :=
 /-- Try the next instance in the node on the top of the generator stack. -/
 def generate : SynthM Unit := do
   let gNode ← getTop
-  if gNode.currInstanceIdx == 0  then
+  bif gNode.currInstanceIdx == 0  then
     modify fun s => { s with generatorStack := s.generatorStack.pop }
   else
     let key  := gNode.key
@@ -607,10 +607,10 @@ def generate : SynthM Unit := do
     let mctx := gNode.mctx
     let mvar := gNode.mvar
     /- See comment at `typeHasMVars` -/
-    if (← getRecordedOption backward.synthInstance.canonInstances) then
+    bif (← getRecordedOption backward.synthInstance.canonInstances) then
       unless gNode.typeHasMVars do
         if let some entry := (← get).tableEntries[key]? then
-          if entry.answers.any fun answer => answer.result.numMVars == 0 then
+          bif entry.answers.any fun answer => answer.result.numMVars == 0 then
             /-
             We already have an answer that:
               1. its result does not have metavariables.
@@ -661,10 +661,10 @@ def resume : SynthM Unit := do
 def step : SynthM Bool := do
   checkSystem
   let s ← get
-  if !s.resumeStack.isEmpty then
+  bif !s.resumeStack.isEmpty then
     resume
     return true
-  else if !s.generatorStack.isEmpty then
+  else bif !s.generatorStack.isEmpty then
     generate
     return true
   else
@@ -674,7 +674,7 @@ def getResult : SynthM (Option AbstractMVarsResult) :=
   return (← get).result?
 
 partial def synth : SynthM (Option AbstractMVarsResult) := do
-  if (← step) then
+  bif (← step) then
     match (← getResult) with
     | none        => synth
     | some result => return result
@@ -692,7 +692,7 @@ def main (type : Expr) (maxResultSize : Nat) : MetaM (Option AbstractMVarsResult
        -- unrestricted: a limit, exceeding it throws
        (action.run { maxResultSize, maxHeartbeats := getMaxHeartbeats (← getOptionsUnrestricted) } |>.run' {})
        fun ex =>
-         if ex.isRuntime then
+         bif ex.isRuntime then
            throwError "failed to synthesize{indentExpr type}\n{ex.toMessageData}{useDiagnosticMsg}"
          else
            throw ex
@@ -750,32 +750,32 @@ private def preprocess (type : Expr) : MetaM PreprocessResult :=
   forallTelescopeReducing type fun xs typeBody => do
     let typeBody ← whnf typeBody
     let type ← mkForallFVars xs typeBody
-    if !type.hasMVar then return { type, kind := .noMVars }
+    bif !type.hasMVar then return { type, kind := .noMVars }
     /-
     **Note**: Workaround for classes such as `class ToLevel.{u}`. They do not have any parameters,
     the universe parameter inference engine at `Class.lean` assumes `u` is an output parameter,
     but this is not correct. We can remove this check after we update `Class.lean` and perform an
     update stage0
     -/
-    if typeBody.isConst then return { type, kind := .mvarsNoOutputParams }
+    bif typeBody.isConst then return { type, kind := .mvarsNoOutputParams }
     let c := typeBody.getAppFn
     let .const declName us := c | return { type, kind := .mvarsNoOutputParams }
     let env ← getEnv
     let some outParamsPos := getOutParamPositions? env declName | return { type, kind := .mvarsNoOutputParams }
     let some outLevelParamPos := getOutLevelParamPositions? env declName | unreachable!
-    if outParamsPos.isEmpty && outLevelParamPos.isEmpty then return { type, kind := .mvarsNoOutputParams }
-    let c := if outLevelParamPos.isEmpty then c else
+    bif outParamsPos.isEmpty && outLevelParamPos.isEmpty then return { type, kind := .mvarsNoOutputParams }
+    let c := bif outLevelParamPos.isEmpty then c else
       let rec normLevels (us : List Level) (i : Nat) : List Level :=
         match us with
         | [] => []
         | u :: us =>
-          let u := if i ∈ outLevelParamPos then keyLevelWildcard else u
+          let u := bif outLevelParamPos.contains i then keyLevelWildcard else u
           u :: normLevels us (i+1)
       mkConst declName (normLevels us 0)
     let rec norm (e : Expr) (i : Nat) : Expr :=
       match e with
       | .app f a =>
-        let a := if i ∈ outParamsPos then keyExprWildcard else a
+        let a := bif outParamsPos.contains i then keyExprWildcard else a
         mkApp (norm f (i-1)) a
       | _ => c
     let typeBody := norm typeBody (typeBody.getAppNumArgs - 1)
@@ -785,25 +785,25 @@ private def preprocess (type : Expr) : MetaM PreprocessResult :=
 private partial def preprocessOutParam (type : Expr) : MetaM Expr :=
   forallTelescope type fun xs typeBody => do
     /- **Note**: See similar test at preprocess. -/
-    if typeBody.isConst then return type
+    bif typeBody.isConst then return type
     let c := typeBody.getAppFn
     let .const declName us := c | return type
     let env ← getEnv
     let some outParamsPos := getOutParamPositions? env declName | return type
     let some outLevelParamPos := getOutLevelParamPositions? env declName | unreachable!
-    if outParamsPos.isEmpty && outLevelParamPos.isEmpty then return type
-    let c ← if outLevelParamPos.isEmpty then pure c else
+    bif outParamsPos.isEmpty && outLevelParamPos.isEmpty then return type
+    let c ← bif outLevelParamPos.isEmpty then pure c else
       -- Replace universe parameters corresponding to output parameters with fresh universe metavariables.
       let rec preprocessLevels (us : List Level) (i : Nat) : MetaM (List Level) := do
         match us with
         | [] => return []
         | u :: us =>
-          let u ← if i ∈ outLevelParamPos then mkFreshLevelMVar else pure u
+          let u ← bif outLevelParamPos.contains i then mkFreshLevelMVar else pure u
           let us ← preprocessLevels us (i+1)
           return u :: us
       pure <| mkConst declName (← preprocessLevels us 0)
     let rec preprocessArgs (type : Expr) (i : Nat) (args : Array Expr) : MetaM (Array Expr) := do
-      if h : i < args.size then
+      bif h : i <ᵇ args.size then
         let type ← whnf type
         match type with
         | .forallE _ d b _ => do
@@ -812,7 +812,7 @@ private partial def preprocessOutParam (type : Expr) : MetaM Expr :=
           We should not simply check `d.isOutParam`. See `checkOutParam` and issue #1852.
           If an instance implicit argument depends on an `outParam`, it is treated as an `outParam` too.
           -/
-          let arg ← if outParamsPos.contains i then mkFreshExprMVar d else pure arg
+          let arg ← bif outParamsPos.contains i then mkFreshExprMVar d else pure arg
           let args := args.set i arg
           preprocessArgs (b.instantiate1 arg) (i+1) args
         | _ =>
@@ -820,7 +820,7 @@ private partial def preprocessOutParam (type : Expr) : MetaM Expr :=
       else
         return args
     let args := typeBody.getAppArgs
-    if outParamsPos.isEmpty then
+    bif outParamsPos.isEmpty then
       mkForallFVars xs (mkAppN c args)
     else
       let cType ← inferType c
@@ -866,17 +866,17 @@ in issue #796, the universe constraint flows through the type `E.{?v} a` of a lo
 instance occurring in `result`.
 -/
 private def checkMayHaveSideEffects (result : Expr) : MetaM Bool := do
-  if result.hasExprMVar || result.hasLevelMVar then return true
+  bif result.hasExprMVar || result.hasLevelMVar then return true
   let mut s := collectFVars {} result
   let mut i := 0
   while h : i < s.fvarIds.size do
     let localDecl ← s.fvarIds[i].getDecl
     let type ← instantiateMVars localDecl.type
-    if type.hasExprMVar || type.hasLevelMVar then return true
+    bif type.hasExprMVar || type.hasLevelMVar then return true
     s := collectFVars s type
     if let some value := localDecl.value? then
       let value ← instantiateMVars value
-      if value.hasExprMVar || value.hasLevelMVar then return true
+      bif value.hasExprMVar || value.hasLevelMVar then return true
       s := collectFVars s value
     i := i + 1
   return false
@@ -948,10 +948,10 @@ private def _root_.Lean.RecordedDeps.mergeInto (child parent : RecordedDeps) : R
   let options := child.options.foldl (init := parent.options) fun l n =>
     -- A lookup answering differently from the parent's `base` was served by a write the parent
     -- itself opened, so it is not a dependency of the parent.
-    if l.contains n || parent.base.find? n != child.base.find? n then l else l.push n
+    bif l.contains n || parent.base.find? n != child.base.find? n then l else l.push n
   -- Keep the parent's earlier generation, as in `recordExtGenAccess`.
   let extGens := child.extGens.foldl (init := parent.extGens) fun l d =>
-    if l.any (·.1 == d.1) then l else l.push d
+    bif l.any (·.1 == d.1) then l else l.push d
   { parent with options, extGens }
 
 /--
@@ -967,7 +967,7 @@ private def SynthInstanceCache.insertEntry (c : SynthInstanceCache) (key : Synth
 /-- Adds `entry` to the transient tier, and to the persistent tier if `persist` is set. -/
 private def insertCacheEntry (key : SynthInstanceCacheKey) (entry : SynthInstanceCacheEntry)
     (persist : Bool) : MetaM Unit := do
-  if persist then
+  bif persist then
     -- not `Meta.modifyEnv`, which would clear `Meta.Cache`
     modifyThe Core.State fun s =>
       { s with env := s.env.setSynthCache (s.env.synthCache.insertEntry key entry) }
@@ -989,12 +989,12 @@ private def findCachedResult? (key : SynthInstanceCacheKey) : MetaM (Option Synt
       pure (entry, true)
     else
       return none
-  if entry.deps.baseTrackedGen != env.trackedGen ||
+  bif entry.deps.baseTrackedGen != env.trackedGen ||
       entry.deps.baseChangeLogPos != env.declChangeLog.size then
     -- Re-stamped, so that later lookups skip the environment checks just done.
     let entry := { entry with deps := { entry.deps with
       baseTrackedGen := env.trackedGen, baseChangeLogPos := env.declChangeLog.size } }
-    if persistent then
+    bif persistent then
       modifyThe Core.State fun s =>
         { s with env := s.env.setSynthCache (s.env.synthCache.insertEntry key entry) }
     else
@@ -1007,7 +1007,7 @@ This function tries to avoid the potentially expensive `check` at `applyCachedAb
 -/
 private def applyCachedAbstractResult? (type : Expr) (abstResult? : Option AbstractMVarsResult) : MetaM (Option Expr) := do
   let some abstResult := abstResult? | return none
-  if abstResult.numMVars == 0 && abstResult.paramNames.isEmpty then
+  bif abstResult.numMVars == 0 && abstResult.paramNames.isEmpty then
     /-
     Result does not introduce new metavariables, thus we don't need to perform (again)
     the `check` at `applyAbstractResult?`.
@@ -1062,25 +1062,25 @@ Adds the free variables of `e` to the closure, and transitively those of their t
 private partial def addFVars (e : Expr) : M Unit := do
   unless e.hasFVar do return
   for id in (collectFVars {} e).fvarIds do
-    if (← get).bail then return
-    if (← get).fvarSet.contains id then continue
+    bif (← get).bail then return
+    bif (← get).fvarSet.contains id then continue
     let decl ← id.getDecl
     modify fun s => { s with decls := s.decls.push decl }
     -- NOTE: A nondependent `ldecl` (`have`) has `none` as `value?` but as it hides its value from
     -- definitional unfolding as well, it is safe to consider it a value-less ldecl.
-    if decl.value?.isSome then
+    bif decl.value?.isSome then
       modify fun s => { s with bail := true }
       return
     -- `Expr.hasMVar` is a syntactic flag: it stays set for metavariables that are already
     -- assigned, whose values are context-free. Instantiate before deciding to bail.
     let mut type := decl.type
-    if type.hasMVar then
+    bif type.hasMVar then
       type ← instantiateMVars type
-      if type.hasMVar then
+      bif type.hasMVar then
         modify fun s => { s with bail := true, stuckType? := some type }
         return
     addFVars type
-    if (← get).bail then return
+    bif (← get).bail then return
     modify fun s =>
       { s with fvarSet := s.fvarSet.insert id, types := s.types.push (type.abstract s.idx2fvar),
                idx2fvar := s.idx2fvar.push (.fvar id) }
@@ -1104,16 +1104,16 @@ private def getClosure? (localInsts : LocalInstances) : MetaM (Option SynthNormC
     -- `addFVars` depends on a declaration's type and on whether it has a value.
     let sameDecl (decl : LocalDecl) : Bool := (lctx.find? decl.fvarId).any fun decl' =>
       decl'.type == decl.type && decl'.value?.isSome == decl.value?.isSome
-    if memo.localInsts == localInsts && memo.decls.all sameDecl then
+    bif memo.localInsts == localInsts && memo.decls.all sameDecl then
       match memo.stuckType? with
       | none      => return memo.closure?
-      | some type => if (← instantiateMVars type).hasMVar then return none
+      | some type => bif (← instantiateMVars type).hasMVar then return none
   let (_, st) ← (localInsts.forM fun (li : LocalInstance) =>
     -- The key only covers the types of free variables. A local instance that is another term, such
     -- as a metavariable (see `LocalInstance.fvar`), can have a type mentioning other variables.
-    if li.fvar.isFVar then addFVars li.fvar else modify fun s => { s with bail := true }).run {}
+    bif li.fvar.isFVar then addFVars li.fvar else modify fun s => { s with bail := true }).run {}
   let closure? :=
-    if st.bail then none
+    bif st.bail then none
     else some { fvarSet := st.fvarSet, idx2fvar := st.idx2fvar, types := st.types }
   modifyMCtx (·.setSynthNormMemo
     { localInsts, decls := st.decls, closure?, stuckType? := st.stuckType? })
@@ -1134,7 +1134,7 @@ private def normalizeContext? (cacheKeyType : Expr) (localInsts : LocalInstances
     { fvarSet := closure.fvarSet, idx2fvar := closure.idx2fvar, types := closure.types }
   let (_, st) ← (addFVars cacheKeyType).run st0
   -- without free variables, the key is context-free as it is
-  if st.bail || st.idx2fvar.isEmpty then return none
+  bif st.bail || st.idx2fvar.isEmpty then return none
   let canonLocalInsts := localInsts.map fun li => { li with fvar := li.fvar.abstract st.idx2fvar }
   return some { normType := cacheKeyType.abstract st.idx2fvar, canonLocalInsts,
                 fvarTypes := st.types, idx2fvar := st.idx2fvar }
@@ -1150,7 +1150,7 @@ private def cacheValue? (kind : PreprocessKind) (abstResult? : Option AbstractMV
   -- A closed result is stored with an empty `AbstractMVarsResult`, so that
   -- `applyCachedAbstractResult?` skips the `check`.
   abstResult?.bind fun abstResult =>
-    if abstResult.numMVars == 0 && abstResult.paramNames.isEmpty && kind matches .noMVars | .mvarsNoOutputParams then
+    bif abstResult.numMVars == 0 && abstResult.paramNames.isEmpty && kind matches .noMVars | .mvarsNoOutputParams then
       result?.map fun result => { expr := result, paramNames := #[], mvars := #[] }
     else
       some abstResult
@@ -1247,7 +1247,7 @@ def synthInstanceCore? (type : Expr) (maxResultSize? : Option Nat := none) : Met
     -- A query repeated in the same context is found under the key as it is, without normalizing it.
     let rawEntry? ← findCachedResult? rawKey
     -- Queries with metavariables are not normalized: it costs more than the sharing gains.
-    let norm? ← if rawEntry?.isSome || !(kind matches .noMVars) then pure none
+    let norm? ← bif rawEntry?.isSome || !(kind matches .noMVars) then pure none
       else SynthNorm.normalizeContext? cacheKeyType localInsts
     let cacheKey := match norm? with
       | some c => { cacheKey with
@@ -1298,7 +1298,7 @@ def synthInstanceCore? (type : Expr) (maxResultSize? : Option Nat := none) : Met
             -- The out-param check depends on the query's output parameters, which are not part of
             -- the key, and can be stuck on them. Serving the entry is then stuck in the same way:
             -- nothing to compare.
-            if ex matches .internal .. then return served? else throw ex
+            bif ex matches .internal .. then return served? else throw ex
         catch ex => pure <| .error s!"exception: {← ex.toMessageData.toString}"
       IO.setNumHeartbeats heartbeats
       -- `toString` rather than the pretty printer, which would read options under recording
@@ -1309,7 +1309,7 @@ def synthInstanceCore? (type : Expr) (maxResultSize? : Option Nat := none) : Met
         | .error e, _ => some e
         | .ok none, none => none
         | .ok (some a), some b =>
-          if a.numMVars == b.numMVars && a.paramNames == b.paramNames && a.expr == b.expr then none
+          bif a.numMVars == b.numMVars && a.paramNames == b.paramNames && a.expr == b.expr then none
           else some (fmt (some a))
         | .ok r, _ => some (fmt r)
       if let some fresh := mismatch? then
@@ -1329,7 +1329,7 @@ def synthInstanceCore? (type : Expr) (maxResultSize? : Option Nat := none) : Met
     | some entry =>
       trace[Meta.synthInstance.cache] "cached: {type}"
       -- The used entry's dependencies become dependencies of the enclosing query, if any.
-      if parentRecording then
+      bif parentRecording then
         modifyThe Core.State fun s => { s with recordedDeps := entry.deps.mergeInto s.recordedDeps }
       checkHit entry.result?
       let result? ← applyCachedAbstractResult? type entry.result?
@@ -1346,7 +1346,7 @@ def synthInstanceCore? (type : Expr) (maxResultSize? : Option Nat := none) : Met
     -- Restore the enclosing accumulator, merging this query's dependencies into it.
     modifyThe Core.State fun s => { s with
       env := s.env.setRecordingDeps parentRecording
-      recordedDeps := if parentRecording then s.recordedDeps.mergeInto parentDeps else parentDeps }
+      recordedDeps := bif parentRecording then s.recordedDeps.mergeInto parentDeps else parentDeps }
 
 def synthInstance? (type : Expr) (maxResultSize? : Option Nat := none) : MetaM (Option Expr) := do
   -- unrestricted: profiler collection only
@@ -1387,7 +1387,7 @@ private def synthPendingImp (mvarId : MVarId) : MetaM Bool := withIncRecDepth <|
       return false
     | some _ =>
       let max ← getRecordedOption maxSynthPendingDepth
-      if (← read).synthPendingDepth > max then
+      bif (← read).synthPendingDepth >ᵇ max then
         trace[Meta.synthPending] "too many nested synthPending invocations"
         recordSynthPendingFailure mvarDecl.type
         return false
@@ -1399,7 +1399,7 @@ private def synthPendingImp (mvarId : MVarId) : MetaM Bool := withIncRecDepth <|
           | none     =>
             return false
           | some val =>
-            if (← mvarId.isAssigned) then
+            bif (← mvarId.isAssigned) then
               return false
             else
               mvarId.assign val

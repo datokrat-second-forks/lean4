@@ -91,7 +91,7 @@ def getReducibilityStatusCore (env : Environment) (declName : Name) : Reducibili
   | none => (reducibilityCoreExt.getState (asyncDecl := declName) env).find? declName |>.getD .semireducible
 
 private def setReducibilityStatusCore (env : Environment) (declName : Name) (status : ReducibilityStatus) (attrKind : AttributeKind) (currNamespace : Name) : Environment :=
-  if attrKind matches .global then
+  bif attrKind matches .global then
     match env.getModuleIdxFor? declName with
     | some _ =>
       -- Trying to set the attribute of a declaration defined in an imported module.
@@ -143,7 +143,7 @@ private def validate (declName : Name) (status : ReducibilityStatus) (attrKind :
     | .scoped =>
       throwError "failed to set reducibility status for `{.ofConstName declName}`, the `scoped` modifier is not recommended for this kind of attribute{suffix}"
     | .global =>
-      if (← getEnv).getModuleIdxFor? declName matches some _ then
+      bif (← getEnv).getModuleIdxFor? declName matches some _ then
         throwError "failed to set reducibility status, `{.ofConstName declName}` has not been defined in this file, consider using the `local` modifier{suffix}"
       match status with
       | .reducible =>
@@ -162,7 +162,7 @@ private def validate (declName : Name) (status : ReducibilityStatus) (attrKind :
         unless statusOld matches .semireducible do
           throwError "failed to set `[instance_reducible]`, `{.ofConstName declName}` is not currently `[semireducible]`, but `{statusOld.toAttrString}`{suffix}"
       | .semireducible =>
-        if statusOld matches .semireducible then do
+        bif statusOld matches .semireducible then do
           throwError "failed to set `[semireducible]` for `{.ofConstName declName}` because it already is `[semireducible]`{suffix}"
         else
           throwError "failed to set `[semireducible]` for `{.ofConstName declName}`{suffix}"

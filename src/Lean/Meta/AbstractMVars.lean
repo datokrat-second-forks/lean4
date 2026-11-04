@@ -42,9 +42,9 @@ def mkFreshFVarId : M FVarId :=
   return { name := (← mkFreshId) }
 
 private partial def abstractLevelMVars (u : Level) : M Level := do
-  if !(← get).abstractLevels then
+  bif !(← get).abstractLevels then
     return u
-  if !u.hasMVar then
+  bif !u.hasMVar then
     return u
   else
     match u with
@@ -56,7 +56,7 @@ private partial def abstractLevelMVars (u : Level) : M Level := do
     | Level.mvar mvarId =>
       let s ← get
       let depth := s.mctx.getLevelDepth mvarId;
-      if depth != s.mctx.depth then
+      bif depth != s.mctx.depth then
         return u -- metavariables from lower depths are treated as constants
       else
         match s.lmap[mvarId]? with
@@ -71,7 +71,7 @@ private partial def abstractLevelMVars (u : Level) : M Level := do
 Abstracts metavariables in `e`. Assumes `instantiateMVars` has been applied to `e`.
 -/
 partial def abstractExprMVars (e : Expr) : M Expr := do
-  if !e.hasMVar then
+  bif !e.hasMVar then
     return e
   else
     match e with
@@ -88,7 +88,7 @@ partial def abstractExprMVars (e : Expr) : M Expr := do
     | e@(Expr.letE _ t v b _)  => return e.updateLetE! (← abstractExprMVars t) (← abstractExprMVars v) (← abstractExprMVars b)
     | e@(Expr.mvar mvarId)     =>
       let decl := (← getMCtx).getDecl mvarId
-      if decl.depth != (← getMCtx).depth then
+      bif decl.depth != (← getMCtx).depth then
         return e
       else
         match (← get).emap[mvarId]? with
@@ -98,7 +98,7 @@ partial def abstractExprMVars (e : Expr) : M Expr := do
           let type   ← abstractExprMVars (← instantiateMVars decl.type)
           let fvarId ← mkFreshFVarId
           let fvar := mkFVar fvarId;
-          let userName ← if decl.userName.isAnonymous then
+          let userName ← bif decl.userName.isAnonymous then
             pure <| (`x).appendIndexAfter (← get).fvars.size
           else
             pure decl.userName

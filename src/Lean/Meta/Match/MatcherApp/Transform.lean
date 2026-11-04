@@ -20,7 +20,7 @@ namespace Lean.Meta.MatcherApp
 
 /-- Auxiliary function for MatcherApp.addArg -/
 private partial def updateAlts (unrefinedArgType : Expr) (typeNew : Expr) (altNumParams : Array Nat) (alts : Array Expr) (refined : Bool) (i : Nat) : MetaM (Array Expr) := do
-  if h : i < alts.size then
+  bif h : i <ᵇ alts.size then
     let alt       := alts[i]
     let numParams := altNumParams[i]!
     let typeNew ← whnfD typeNew
@@ -35,7 +35,7 @@ private partial def updateAlts (unrefinedArgType : Expr) (typeNew : Expr) (altNu
         -- `x` is the new argument we are adding to the alternative. It is only abstracted here, so
         -- we do not need to check whether it is a local instance.
         withLocalDeclNoLocalInstanceUpdate n bi t fun x => do
-          let refined ← if refined then
+          let refined ← bif refined then
             pure refined
           else
             pure <| !(← isDefEq unrefinedArgType t)
@@ -43,7 +43,7 @@ private partial def updateAlts (unrefinedArgType : Expr) (typeNew : Expr) (altNu
       updateAlts unrefinedArgType (b.instantiate1 alt) altNumParams (alts.set i alt) refined (i+1)
     | _ => throwError "unexpected type at MatcherApp.addArg"
   else
-    if refined then
+    bif refined then
       return alts
     else
       throwError "failed to add argument to matcher application, argument type was not refined by `casesOn`"
@@ -78,7 +78,7 @@ def addArg (matcherApp : MatcherApp) (e : Expr) : MetaM MatcherApp :=
     let eType ← inferType e
     let eTypeAbst := matcherApp.discrs.size.foldRev (init := eType) fun i _ eTypeAbst =>
       let discr     := matcherApp.discrs[i]
-      if discr.isFVar then
+      bif discr.isFVar then
         let motiveArg := motiveArgs[i]!
         eTypeAbst.replaceFVar discr motiveArg
       else
@@ -284,7 +284,7 @@ def transform
   let isCasesOn := isCasesOnRecursor (← getEnv) matcherApp.matcherName
 
   let numDiscrEqs ←
-    if isCasesOn then pure 0 else
+    bif isCasesOn then pure 0 else
     match ← getMatcherInfo? matcherApp.matcherName with
     | some info => pure info.getNumDiscrEqs
     | none      => throwError "matcher {matcherApp.matcherName} has no MatchInfo found"
@@ -302,8 +302,8 @@ def transform
     let mut addHEqualities : Array (Option Bool) := #[]
     let mut discrInfos' := #[]
     for arg in motiveArgs, discr in discrs', di in matcherApp.discrInfos do
-      if addEqualities && di.hName?.isNone then
-        if ← isProof arg then
+      bif addEqualities && di.hName?.isNone then
+        bif (← isProof arg) then
           addHEqualities := addHEqualities.push none
           discrInfos' := discrInfos'.push di
         else
@@ -329,10 +329,10 @@ def transform
     match b with
     | none => pure ()
     | some is_heq =>
-        remaining' := remaining'.push (← (if is_heq then mkHEqRefl else mkEqRefl) discr)
+        remaining' := remaining'.push (← (bif is_heq then mkHEqRefl else mkEqRefl) discr)
         extraEqualities := extraEqualities + 1
 
-  if useSplitter && !isCasesOn then
+  bif useSplitter && !isCasesOn then
     let aux1 := mkAppN (mkConst matcherApp.matcherName matcherLevels.toList) params'
     let aux1 := mkApp aux1 motive'
     let aux1 := mkAppN aux1 discrs'
@@ -364,7 +364,7 @@ def transform
         let altType ← instantiateForall altType ys
         -- Look past the splitter's thunking unit parameter, if present. The splitter can have one
         -- even if the matcher has none, e.g. when it eliminates the variables of `n@5`.
-        let altType ← if splitterAltInfo.hasUnitThunk then
+        let altType ← bif splitterAltInfo.hasUnitThunk then
             instantiateForall altType #[mkConst ``Unit.unit]
           else
             pure altType
@@ -378,7 +378,7 @@ def transform
                         catch _ => throwError "unexpected matcher application, insufficient number of parameters in alternative"
               let alt' ← onAlt altIdx altType { args, fields := ys, overlaps := ys2, discrEqs := ys3, extraEqs := ys4 } alt
               mkLambdaFVars (ys ++ ys2 ++ ys3 ++ ys4) alt'
-        if splitterAltInfo.hasUnitThunk then
+        bif splitterAltInfo.hasUnitThunk then
           -- The splitter expects a thunked alternative, but we don't want the `x : Unit` to be in
           -- the context (e.g. in functional induction), so use Function.const rather than a lambda
           mkAppM ``Function.const #[mkConst ``Unit, alt']
@@ -475,7 +475,7 @@ def inferMatchType (matcherApp : MatcherApp) : MetaM MatcherApp := do
           -- logInfo m!"altIH: {xs} => {altIH}"
           let altType ← inferType termAltBody
           for x in xs2 do
-            if altType.hasAnyFVar (· == x.fvarId!) then
+            bif altType.hasAnyFVar (· == x.fvarId!) then
               throwError "Type {altType} of alternative {termAlt} still depends on {x}"
           -- logInfo m!"altIH type: {altType}"
           mkLambdaFVars xs1 altType

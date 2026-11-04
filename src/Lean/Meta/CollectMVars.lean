@@ -62,7 +62,7 @@ private partial def addMVars (e : Expr) (includeDelayed := false) : StateRefT (S
   let mut s ← get
   set ({} : Std.HashSet MVarId) -- Ensure that `s` is not shared.
   for mvarId in mvars do
-    if ← pure includeDelayed <||> notM (mvarId.isDelayedAssigned) then
+    bif (← pure includeDelayed <||> notM (mvarId.isDelayedAssigned)) then
       s := s.insert mvarId
   set s
   mvars.forM go
@@ -78,7 +78,7 @@ private partial def go (mvarId : MVarId) (includeDelayed := false) : StateRefT (
         addMVars val includeDelayed
     if let (some ass) ← getDelayedMVarAssignment? mvarId then
       let pendingMVarId := ass.mvarIdPending
-      if ← notM pendingMVarId.isAssignedOrDelayedAssigned then
+      bif (← notM pendingMVarId.isAssignedOrDelayedAssigned) then
         modify (·.insert pendingMVarId)
       go pendingMVarId includeDelayed
 

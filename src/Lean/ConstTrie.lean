@@ -64,18 +64,18 @@ are `k`'s prefix extended by one component.
 where
   /-- The first index in `[lo, hi)` whose key hash is at least `h`. -/
   @[specialize] lowerBound (h : UInt64) (lo hi : Nat) : Nat :=
-    if _ : lo < hi then
+    bif _ : lo <ᵇ hi then
       let mid := (lo + hi) / 2
-      if (keyOf cs[mid]!).hash < h then lowerBound h (mid + 1) hi else lowerBound h lo mid
+      bif (keyOf cs[mid]!).hash <ᵇ h then lowerBound h (mid + 1) hi else lowerBound h lo mid
     else
       lo
   termination_by hi - lo
   /-- Confirms the final component among the children with key hash `h`, starting at `j`. -/
   @[specialize] scanRun (h : UInt64) (j : Nat) : Option Nat :=
-    if _ : j < cs.size then
+    bif _ : j <ᵇ cs.size then
       let c := keyOf cs[j]!
-      if c.hash == h then
-        if lastPartEq c k then some j else scanRun h (j + 1)
+      bif c.hash == h then
+        bif lastPartEq c k then some j else scanRun h (j + 1)
       else
         none
     else
@@ -116,9 +116,9 @@ def findAux (t : ConstTrie α) (path : Array Name) (i : Nat) : Option α :=
     | some j => findAux cs[j]! path (i - 1)
     | none   => none
   match t with
-  | .leaf _ v => if i == 0 then some v else none
-  | .inner _ cs => if h : i = 0 then none else child cs h
-  | .node _ v cs => if h : i = 0 then some v else child cs h
+  | .leaf _ v => bif i == 0 then some v else none
+  | .inner _ cs => bif h : i =ᵇ 0 then none else child cs (ne_of_decideEq_eq_false h)
+  | .node _ v cs => bif h : i =ᵇ 0 then some v else child cs (ne_of_decideEq_eq_false h)
 termination_by i
 
 public def find? (t : ConstTrie α) (n : Name) : Option α :=
@@ -146,7 +146,7 @@ def parentOf : Name → Name
 
 /-- Records the edges from `cur` and its prefixes to their parents, up to the first one seen. -/
 def Builder.addName (b : Builder α) (cur : Name) : Builder α :=
-  if _ : cur != .anonymous && !b.seen.contains cur then
+  bif _ : cur != .anonymous && !b.seen.contains cur then
     Builder.addName { b with
       seen     := b.seen.insert cur
       children := b.children.alter (parentOf cur) fun cs? => some ((cs?.getD #[]).push cur) }
@@ -176,7 +176,7 @@ public def ofArrays (names : Array Name) (vals : Array α) : ConstTrie α :=
   (go 0 {}).toTrie .anonymous (depthBound names)
 where
   go (i : Nat) (b : Builder α) : Builder α :=
-    if h : i < names.size ∧ i < vals.size then
+    bif h : i <ᵇ names.size && i <ᵇ vals.size then
       let b : Builder α := { b with values := b.values.insert names[i] vals[i] }
       go (i + 1) (b.addName names[i])
     else
@@ -251,7 +251,7 @@ def key : ImportedTree α → Name
 def findValAux : ImportedTree α → Array Name → Nat → Option α
   | .mod _ tr, path, i => tr.findAux path i
   | .lazy _ e? children, path, i =>
-    if _ : i = 0 then
+    bif _ : i =ᵇ 0 then
       e?.map (·.1)
     else
       let cs := children.get
@@ -259,7 +259,7 @@ def findValAux : ImportedTree α → Array Name → Nat → Option α
       | some j => findValAux cs[j]! path (i - 1)
       | none   => none
   | .merged _ e? cs, path, i =>
-    if _ : i = 0 then
+    bif _ : i =ᵇ 0 then
       e?.map (·.1)
     else
       match findChildIdx? cs key path[i - 1]! with
@@ -272,7 +272,7 @@ def findEntryAux : ImportedTree α → Array Name → Nat → Option (α × Nat)
   | .mod modIdx tr, path, i =>
     (tr.findAux path i).map (·, modIdx)
   | .lazy _ e? children, path, i =>
-    if _ : i = 0 then
+    bif _ : i =ᵇ 0 then
       e?
     else
       let cs := children.get
@@ -280,7 +280,7 @@ def findEntryAux : ImportedTree α → Array Name → Nat → Option (α × Nat)
       | some j => findEntryAux cs[j]! path (i - 1)
       | none   => none
   | .merged _ e? cs, path, i =>
-    if _ : i = 0 then
+    bif _ : i =ᵇ 0 then
       e?
     else
       match findChildIdx? cs key path[i - 1]! with
@@ -422,11 +422,11 @@ key in key hash order. `single` receives a child whose key occurs in only one of
 where
   @[specialize] go (sorted : Array (UInt64 × Nat × {c // IsCandChild cands c})) (idx : Nat)
       (s : σ) : σ :=
-    if h : idx < sorted.size then
+    bif h : idx <ᵇ sorted.size then
       let (hash₀, i, c) := sorted[idx]
       let idx := idx + 1
-      if h' : idx < sorted.size then
-        if sorted[idx].1 == hash₀ then
+      bif h' : idx <ᵇ sorted.size then
+        bif sorted[idx].1 == hash₀ then
           let ⟨(groups, idx'), hgroups, _⟩ := gather sorted hash₀ idx #[#[(i, c.1)]]
             (GroupsOk.push (groups := #[]) (by simp [GroupsOk]) (i, c.1) c.2)
           go sorted idx' (flush groups hgroups 0 s)
@@ -444,8 +444,8 @@ where
   gather (sorted : Array (UInt64 × Nat × {c // IsCandChild cands c})) (hash₀ : UInt64) (idx : Nat)
       (groups : Array (Array (Nat × ConstTrie α))) (hgroups : GroupsOk cands groups) :
       {r : Array (Array (Nat × ConstTrie α)) × Nat // GroupsOk cands r.1 ∧ idx ≤ r.2} :=
-    if h : idx < sorted.size then
-      if sorted[idx].1 == hash₀ then
+    bif h : idx <ᵇ sorted.size then
+      bif sorted[idx].1 == hash₀ then
         let (_, i, c) := sorted[idx]
         let ⟨groups, hgroups⟩ : {gs // GroupsOk cands gs} :=
           match groups.findIdx? fun g => lastPartEq g[0]!.2.key c.1.key with
@@ -460,11 +460,12 @@ where
   termination_by sorted.size - idx
   @[specialize] flush (groups : Array (Array (Nat × ConstTrie α)))
       (hgroups : GroupsOk cands groups) (k : Nat) (s : σ) : σ :=
-    if h : k < groups.size then
+    bif h : k <ᵇ groups.size then
+      have h := lt_of_decideLT_eq_true h
       let g := groups[k]
       have hg := hgroups g (Array.getElem_mem h)
       flush groups hgroups (k + 1)
-        (if g.size == 1 then single s g[0]!.1 g[0]!.2 else multi s g hg.1 hg.2)
+        (bif g.size == 1 then single s g[0]!.1 g[0]!.2 else multi s g hg.1 hg.2)
     else
       s
   termination_by groups.size - k
@@ -512,11 +513,11 @@ def collectDupsAux (covered : Array UInt64) (key : Name)
     let mut common : UInt64 := 0xFFFFFFFFFFFFFFFF
     for (i, _) in cands do
       common := common &&& covered[i]!
-    if common != 0 then
+    bif common != 0 then
       return acc
   let mut acc := acc
   let entries := cands.filterMap fun (i, t) => t.val?.map ((·, i))
-  if entries.size > 1 then
+  bif entries.size >ᵇ 1 then
     acc := acc.push { name := key, entries }
   -- no duplicate can hide below a single-module subtree, so those are skipped without a visit
   return foldChildGroups cands acc (fun acc _ _ => acc)
@@ -533,17 +534,17 @@ modules share a mask bit are skipped, as their pairs are conflict-checked alread
 -/
 public def collectDuplicates (trees : Array (Nat × ConstTrie α))
     (covered : Array UInt64 := #[]) : Array (Duplicate α) :=
-  if trees.size < 2 then #[]
+  bif trees.size <ᵇ 2 then #[]
   else collectDupsAux covered .anonymous trees #[]
 
 def mergeLazy (resolve : Array (α × Nat) → Option (α × Nat)) (key : Name)
     (cands : Array (Nat × ConstTrie α)) : ImportedTree α :=
-  if cands.size == 1 then
+  bif cands.size == 1 then
     let (i, t) := cands[0]!
     .mod i t
   else
     let entries := cands.filterMap fun (i, t) => t.val?.map ((·, i))
-    .lazy key (if entries.size < 2 then entries[0]? else resolve entries)
+    .lazy key (bif entries.size <ᵇ 2 then entries[0]? else resolve entries)
       (Thunk.mk fun _ => expandLazy cands)
 termination_by (maxSize cands, 1)
 decreasing_by exact Prod.Lex.right _ (by decide)

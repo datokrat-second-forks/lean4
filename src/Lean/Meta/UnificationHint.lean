@@ -60,7 +60,7 @@ where
     match e with
     | Expr.forallE _ d b _ => do
       let c ← decodeConstraint d
-      if b.hasLooseBVars then
+      bif b.hasLooseBVars then
         throw m!"invalid unification hint constraint, unexpected dependency{indentExpr e}"
       decode b (cs.push c)
     | _ => do
@@ -109,12 +109,12 @@ def tryUnificationHints (t s : Expr) : MetaM Bool := do
   trace[Meta.isDefEq.hint] "{t} =?= {s}"
   unless (← getConfig).unificationHints do
     return false
-  if t.isMVar then
+  bif t.isMVar then
     return false
   let hints ← getRecordedHints
   let candidates ← withConfigWithKey config <| hints.discrTree.getMatch t
   for candidate in candidates do
-    if (← tryCandidate candidate) then
+    bif (← tryCandidate candidate) then
       return true
   return false
 where
@@ -133,7 +133,7 @@ where
         match decodeUnificationHint body with
         | Except.error _ => return none
         | Except.ok hint =>
-          if (← isDefEqPattern hint.pattern.lhs t <&&> isDefEqPattern hint.pattern.rhs s) then
+          bif (← isDefEqPattern hint.pattern.lhs t <&&> isDefEqPattern hint.pattern.rhs s) then
             return some hint
           else
             return none
@@ -145,7 +145,7 @@ where
           unless (← Meta.isExprDefEqAux c.lhs c.rhs) do
             return false
         for x in xs, bi in bis do
-          if bi == BinderInfo.instImplicit then
+          bif bi == BinderInfo.instImplicit then
             match (← trySynthInstance (← inferType x)) with
             | LOption.some val => unless (← isDefEq x val) do return false
             | _                => return false

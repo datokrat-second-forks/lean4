@@ -26,14 +26,14 @@ def addBuiltinDeclarationRanges (declName : Name) (declRanges : DeclarationRange
   builtinDeclRanges.modify (·.insert declName declRanges)
 
 def addDeclarationRanges [Monad m] [MonadEnv m] (declName : Name) (declRanges : DeclarationRanges) : m Unit := do
-  if declName.isAnonymous then
+  bif declName.isAnonymous then
     -- This can happen on elaboration of partial syntax and would panic in `modifyState` otherwise
     return
   -- A second write is ignored: `initialize` reports the ranges twice (early, then for the generated
   -- `opaque`), and a failed declaration must not replace those of an existing one of the same name.
   -- A failed declaration can still leave ranges behind for a name that does not exist.
   -- only the state visible on this branch, as in `MapDeclarationExtension.insert`
-  if declRangeExt.contains (asyncMode := .local) (← getEnv) declName then
+  bif declRangeExt.contains (asyncMode := .local) (← getEnv) declName then
     return
   modifyEnv fun env => declRangeExt.insert env declName declRanges
 
@@ -46,7 +46,7 @@ def findDeclarationRangesCore? [Monad m] [MonadEnv m] (declName : Name) : m (Opt
 
 def findDeclarationRanges? [Monad m] [MonadEnv m] [MonadLiftT BaseIO m] (declName : Name) : m (Option DeclarationRanges) := do
   let env ← getEnv
-  let ranges ← if isAuxRecursor env declName || isNoConfusion env declName || (← isRec declName)  then
+  let ranges ← bif isAuxRecursor env declName || isNoConfusion env declName || (← isRec declName)  then
     findDeclarationRangesCore? declName.getPrefix
   else
     findDeclarationRangesCore? declName

@@ -45,7 +45,7 @@ abbrev M := ReaderT Context <| StateRefT State IO
 /-- Check if a `Name` still needs processing. If so, move it from `remaining` to `pending`. -/
 def isTodo (name : Name) : M Bool := do
   let r := (← get).remaining
-  if r.contains name then
+  bif r.contains name then
     modify fun s => { s with remaining := s.remaining.erase name, pending := s.pending.insert name }
     return true
   else
@@ -72,11 +72,11 @@ The construct the `Declaration` from its stored `ConstantInfo`,
 and add it to the environment.
 -/
 partial def replayConstant (name : Name) : M Unit := do
-  if ← isTodo name then
+  bif (← isTodo name) then
     let some ci := (← read).newConstants[name]? | unreachable!
     replayConstants ci.getUsedConstantsAsSet
     -- Check that this name is still pending: a mutual block may have taken care of it.
-    if (← get).pending.contains name then
+    bif (← get).pending.contains name then
       try
         match ci with
         | .defnInfo   info =>
@@ -88,7 +88,7 @@ partial def replayConstant (name : Name) : M Unit := do
           -- system -- as we have more data loaded than it, we might encounter duplicate private
           -- theorems where elaboration under the module system would have only one of them in scope.
           if let some (.thmInfo info') := (← get).env.find? ci.name then
-            if info.name == info'.name &&
+            bif info.name == info'.name &&
               info.type == info'.type &&
               info.levelParams == info'.levelParams &&
               info.all == info'.all
@@ -149,7 +149,7 @@ def checkPostponedConstructors : M Unit := do
   for ctor in (← get).postponedConstructors do
     match (← get).env.find? ctor, (← read).newConstants[ctor]? with
     | some (.ctorInfo info), some (.ctorInfo info') =>
-      if ! (info == info') then throw <| IO.userError s!"Invalid constructor {ctor}"
+      bif ! (info == info') then throw <| IO.userError s!"Invalid constructor {ctor}"
     | _, _ => throw <| IO.userError s!"No such constructor {ctor}"
 
 /--
@@ -160,7 +160,7 @@ def checkPostponedRecursors : M Unit := do
   for ctor in (← get).postponedRecursors do
     match (← get).env.find? ctor, (← read).newConstants[ctor]? with
     | some (.recInfo info), some (.recInfo info') =>
-      if ! (info == info') then throw <| IO.userError s!"Invalid recursor {ctor}"
+      bif ! (info == info') then throw <| IO.userError s!"Invalid recursor {ctor}"
     | _, _ => throw <| IO.userError s!"No such recursor {ctor}"
 
 end Replay
@@ -179,7 +179,7 @@ public def replay (newConstants : Std.HashMap Name ConstantInfo) (env : Kernel.E
   for (n, ci) in newConstants.toList do
     -- We skip unsafe constants, and also partial constants.
     -- Later we may want to handle partial constants.
-    if !ci.isUnsafe && !ci.isPartial then
+    bif !ci.isUnsafe && !ci.isPartial then
       remaining := remaining.insert n
   let (_, s) ← StateRefT'.run (s := { env, remaining }) do
     ReaderT.run (r := { newConstants }) do

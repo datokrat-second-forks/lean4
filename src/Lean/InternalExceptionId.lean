@@ -29,7 +29,7 @@ This method is usually invoked using the `initialize` command.
 -/
 def registerInternalExceptionId (name : Name) : IO InternalExceptionId := do
   let exs ← internalExceptionsRef.get
-  if exs.contains name then throw <| IO.userError s!"invalid internal exception id, '{name}' has already been used"
+  bif exs.contains name then throw <| IO.userError s!"invalid internal exception id, '{name}' has already been used"
   let nextIdx := exs.size
   internalExceptionsRef.modify fun a => a.push name
   pure { idx := nextIdx }
@@ -42,7 +42,7 @@ def InternalExceptionId.toString (id : InternalExceptionId) : String :=
 def InternalExceptionId.getName (id : InternalExceptionId) : IO Name :=  do
   let exs ← internalExceptionsRef.get
   let i := id.idx;
-  if h : i < exs.size then
+  bif h : i <ᵇ exs.size then
     return exs[i]
   else
     throw <| IO.userError "invalid internal exception id"

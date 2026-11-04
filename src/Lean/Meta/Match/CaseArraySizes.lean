@@ -35,7 +35,7 @@ def mkArrayGetLit (a : Expr) (i : Nat) (n : Nat) (h : Expr) : MetaM Expr := do
 partial def introArrayLit (mvarId : MVarId) (a : Expr) (n : Nat) (xNamePrefix : Name) (aSizeEqN : Expr) : MetaM MVarId := do
   let α ← getArrayArgType a
   let rec loop (i : Nat) (xs : Array Expr) (args : Array Expr) := do
-    if i < n then
+    bif i <ᵇ n then
       withLocalDeclD (xNamePrefix.appendIndexAfter (i+1)) α fun xi => do
         let xs := xs.push xi
         let ai ← mkArrayGetLit a i n aSizeEqN
@@ -73,7 +73,7 @@ public def caseArraySizes (mvarId : MVarId) (fvarId : FVarId) (sizes : Array Nat
     subgoals.mapIdxM fun i subgoal => do
       let subst  := subgoal.subst
       let mvarId := subgoal.mvarId
-      if h : i < sizes.size then
+      bif h : i <ᵇ sizes.size then
         let hEqSz  := (subst.get hEq).fvarId!
         let n := sizes[i]
         mvarId.withContext do

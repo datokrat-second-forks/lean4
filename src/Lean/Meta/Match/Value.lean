@@ -15,18 +15,18 @@ namespace Lean.Meta
 /-- Return true is `e` is a term that should be processed by the `match`-compiler using `casesValues` -/
 def isMatchValue (e : Expr) : MetaM Bool := do
   let e ← instantiateMVars e
-  if (← getNatValue? e).isSome then return true
-  if (← getIntValue? e).isSome then return true
-  if (← getFinValue? e).isSome then return true
-  if (← getBitVecValue? e).isSome then return true
-  if (getStringValue? e).isSome then return true
-  if (← getCharValue? e).isSome then return true
-  if (← getUInt8Value? e).isSome then return true
-  if (← getUInt16Value? e).isSome then return true
-  if (← getUInt32Value? e).isSome then return true
-  if (← getUInt64Value? e).isSome then return true
-  if (← getFloatValue? e).isSome then return true
-  if (← getFloat32Value? e).isSome then return true
+  bif (← getNatValue? e).isSome then return true
+  bif (← getIntValue? e).isSome then return true
+  bif (← getFinValue? e).isSome then return true
+  bif (← getBitVecValue? e).isSome then return true
+  bif (getStringValue? e).isSome then return true
+  bif (← getCharValue? e).isSome then return true
+  bif (← getUInt8Value? e).isSome then return true
+  bif (← getUInt16Value? e).isSome then return true
+  bif (← getUInt32Value? e).isSome then return true
+  bif (← getUInt64Value? e).isSome then return true
+  bif (← getFloatValue? e).isSome then return true
+  bif (← getFloat32Value? e).isSome then return true
   return false
 
 end Lean.Meta

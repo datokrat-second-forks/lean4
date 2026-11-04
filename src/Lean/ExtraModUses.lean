@@ -48,7 +48,7 @@ current module but may in the future.
 -/
 public def recordIndirectModUse (kind : String) (declName : Name) : m Unit := do
   -- We can assume this is called from the main thread only and that the list of entries is short
-  if !(indirectModUseExt.getEntries (asyncMode := .mainOnly) (← getEnv) |>.contains { kind, declName }) then
+  bif !(indirectModUseExt.getEntries (asyncMode := .mainOnly) (← getEnv) |>.contains { kind, declName }) then
     trace[extraModUses] "recording indirect mod use of `{declName}` ({kind})"
     modifyEnv (indirectModUseExt.addEntry · { kind, declName })
 
@@ -80,13 +80,13 @@ public def getExtraModUses (env : Environment) (modIdx : ModuleIdx) : Array Extr
 public def copyExtraModUses (src dest : Environment) : Environment := Id.run do
   let mut env := dest
   for entry in extraModUses.getEntries (asyncMode := .local) src do
-    if !(extraModUses.getState (asyncMode := .local) env).contains entry then
+    bif !(extraModUses.getState (asyncMode := .local) env).contains entry then
       env := extraModUses.addEntry env entry
   env
 
 def recordExtraModUseCore (mod : Name) (isMeta : Bool) (hint : Name := .anonymous) : m Unit := do
   let entry := { module := mod, isExported := (← getEnv).isExporting, isMeta }
-  if !(extraModUses.getState (asyncMode := .local) (← getEnv)).contains entry then
+  bif !(extraModUses.getState (asyncMode := .local) (← getEnv)).contains entry then
     trace[extraModUses] "recording {if entry.isExported then "public" else "private"} \
       {if isMeta then "meta" else "regular"} extra mod use {mod}\
       {if hint.isAnonymous then m!"" else m!" of {hint}"}"
@@ -100,7 +100,7 @@ NOTE: Directly recording a module name does not trigger including indirect depen
 `recordIndirectModUse`, prefer `recordExtraModUseFromDecl` instead.
 -/
 public def recordExtraModUse (modName : Name) (isMeta : Bool) : m Unit := do
-  if modName != (← getEnv).mainModule then
+  bif modName != (← getEnv).mainModule then
     recordExtraModUseCore modName isMeta
 
 /--
@@ -130,7 +130,7 @@ public def isExtraRevModUse (env : Environment) (modIdx : ModuleIdx) : Bool :=
 
 /-- Records this module to be preserved as an import by `shake`. -/
 public def recordExtraRevUseOfCurrentModule : m Unit := do
-  if isExtraRevModUseExt.getEntries (asyncMode := .local) (← getEnv) |>.isEmpty then
+  bif isExtraRevModUseExt.getEntries (asyncMode := .local) (← getEnv) |>.isEmpty then
     trace[extraModUses] "recording extra reverse use of current module"
     modifyEnv (isExtraRevModUseExt.addEntry · ())
 

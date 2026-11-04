@@ -62,7 +62,7 @@ Given a telescope of FVars of type `tᵢ`, iterates `PSigma` to produce the type
 `t₁ ⊗' t₂ …`.
 -/
 def packType (xs : Array Expr) : MetaM Expr := do
-  if xs.isEmpty then
+  bif xs.isEmpty then
     return mkConst ``Unit
   let mut d ← inferType xs.back!
   for x in xs.pop.reverse do
@@ -75,13 +75,13 @@ Create a unary application by packing the given arguments using `PSigma.mk`.
 The `type` should be the expected type of the packed argument, as created with `packType`.
 -/
 partial def pack (type : Expr) (args : Array Expr) : Expr :=
-  if args.isEmpty then
+  bif args.isEmpty then
     mkConst ``Unit.unit
   else
     go 0 type
 where
   go (i : Nat) (type : Expr) : Expr :=
-    if h : i < args.size - 1 then
+    bif h : i <ᵇ args.size - 1 then
       let arg := args[i]
       assert! type.isAppOfArity ``PSigma 2
       let us := type.getAppFn.constLevels!
@@ -100,11 +100,11 @@ Unpacks a unary packed argument created with `Unary.pack`.
 Throws an error if the expression is not of that form.
 -/
 def unpack (arity : Nat) (e : Expr) : Option (Array Expr) := do
-  if arity = 0 then return #[]
+  bif arity =ᵇ 0 then return #[]
   let mut e := e
   let mut args := #[]
   while args.size + 1 < arity do
-    if e.isAppOfArity ``PSigma.mk 4 then
+    bif e.isAppOfArity ``PSigma.mk 4 then
       args := args.push (e.getArg! 2)
       e := e.getArg! 3
     else
@@ -118,7 +118,7 @@ def unpack (arity : Nat) (e : Expr) : Option (Array Expr) := do
   Example: `mkTupleElems a 4` returns `#[a.1, a.2.1, a.2.2.1, a.2.2.2]`.
   -/
 private def mkTupleElems (t : Expr) (arity : Nat) : Array Expr := Id.run do
-  if arity = 0 then return #[]
+  bif arity =ᵇ 0 then return #[]
   let mut result := #[]
   let mut t := t
   for _ in *...(arity - 1 : Nat) do
@@ -131,13 +131,13 @@ Given a type `t` of the form `(x : A) → (y : B[x]) → … → (z : D[x,y]) �
 returns the curried type `(x : A ⊗' B ⊗' … ⊗' D) → R[x.1, x.2.1, x.2.2]`.
 -/
 def uncurryType (varNames : Array Name) (type : Expr) : MetaM Expr := do
-  if varNames.isEmpty then
+  bif varNames.isEmpty then
     mkArrow (mkConst ``Unit) type
   else
     forallBoundedTelescope type varNames.size fun xs _ => do
       assert! xs.size = varNames.size
       let d ← packType xs
-      let name := if xs.size == 1 then varNames[0]! else `_x
+      let name := bif xs.size == 1 then varNames[0]! else `_x
       withLocalDeclD name d fun tuple => do
         let elems := mkTupleElems tuple xs.size
         let codomain ← instantiateForall type elems
@@ -171,7 +171,7 @@ Given expression `e` of type `(x : A) → (y : B[x]) → … → (z : D[x,y]) �
 returns an expression of type `(x : A ⊗' B ⊗' … ⊗' D) → R[x.1, x.2.1, x.2.2]`.
 -/
 def uncurry (varNames : Array Name) (e : Expr) : MetaM Expr := do
-  if varNames.isEmpty then
+  bif varNames.isEmpty then
     return mkLambda `x .default (mkConst ``Unit) e
   else
     let type ← inferType e
@@ -213,7 +213,7 @@ Given expression `e` of type `(x : A ⊗' B ⊗' … ⊗' D) → R[x]`
 return expression of type `(x : A) → (y : B) → … → (z : D) → R[(x,y,z)]`
 -/
 private partial def curry (varNames : Array Name) (e : Expr) : MetaM Expr := do
-  if varNames.isEmpty then
+  bif varNames.isEmpty then
     return e.beta #[mkConst ``Unit.unit]
   let type ← whnfForall (← inferType e)
   unless type.isForall do
@@ -269,12 +269,12 @@ to create the mutual-packed argument of type `domain`.
 -/
 def pack (numFuncs : Nat) (domain : Expr) (fidx : Nat) (arg : Expr) : MetaM Expr := do
   let rec go (i : Nat) (type : Expr) : MetaM Expr := do
-    if i >= numFuncs - 1 then
+    bif i ≥ᵇ numFuncs - 1 then
       return arg
     else
       (← whnfD type).withApp fun f args => do
         assert! args.size == 2
-        if i == fidx then
+        bif i == fidx then
           return mkApp3 (mkConst ``PSum.inl f.constLevels!) args[0]! args[1]! arg
         else
           let r ← go (i+1) args[1]!
@@ -292,10 +292,10 @@ def unpack (numFuncs : Nat) (expr : Expr) : Option (Nat × Expr) := do
   let mut funidx := 0
   let mut e := expr
   while funidx + 1 < numFuncs do
-    if e.isAppOfArity ``PSum.inr 3 then
+    bif e.isAppOfArity ``PSum.inr 3 then
       e := e.getArg! 2
       funidx := funidx + 1
-    else if e.isAppOfArity ``PSum.inl 3 then
+    else bif e.isAppOfArity ``PSum.inl 3 then
       e := e.getArg! 2
       break
     else
@@ -313,7 +313,7 @@ This function assumes (and does not check) that `Rᵢ` all have the same level.
 def mkCodomain (types : Array Expr) (x : Expr) : MetaM Expr := do
   let u ← forallBoundedTelescope types[0]! (some 1) fun _ body => getLevel body
   let rec go (x : Expr) (i : Nat) : MetaM Expr := do
-    if i < types.size - 1 then
+    bif i <ᵇ types.size - 1 then
       let xType ← whnfD (← inferType x)
       assert! xType.isAppOfArity ``PSum 2
       let xTypeArgs := xType.getAppArgs
@@ -344,7 +344,7 @@ if they are all the same.
 
 -/
 def uncurryType (types : Array Expr) : MetaM Expr := do
-  if types.size = 1 then
+  bif types.size =ᵇ 1 then
     return types[0]!
   let types ← types.mapM whnfForall
   types.forM fun type => do
@@ -581,7 +581,7 @@ where
   go : List Expr → Array Expr → MetaM α
   | [], acc => k acc
   | t::ts, acc => do
-    let name := if argsPacker.numFuncs = 1 then name else .mkSimple s!"{name}{acc.size + 1}"
+    let name := bif argsPacker.numFuncs =ᵇ 1 then name else .mkSimple s!"{name}{acc.size + 1}"
     withLocalDeclD name t fun x => do
       go ts (acc.push x)
 

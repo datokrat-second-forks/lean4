@@ -46,7 +46,7 @@ Similar to `resolveGlobalName`, but also executes reserved name actions.
 def realizeGlobalName (id : Name) : CoreM (List (Name × List String)) := do
   let cs ← resolveGlobalName id
   cs.filterM fun (c, _) => do
-    if (← getEnv).contains c then
+    bif (← getEnv).contains c then
       return true
     else
       try

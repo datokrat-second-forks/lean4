@@ -42,7 +42,7 @@ def mkPULift (r : Level) (t : Expr) : MetaM Expr := do
 
 def withMkPULiftUp (t : Expr) (k : Expr → MetaM Expr) : MetaM Expr := do
   let t ← whnf t
-  if t.isAppOfArity `PULift 1 then
+  bif t.isAppOfArity `PULift 1 then
     let t' := t.appArg!
     let e ← k t'
     return mkApp2 (mkConst `PULift.up (t.appFn!.constLevels!)) t' e
@@ -51,7 +51,7 @@ def withMkPULiftUp (t : Expr) (k : Expr → MetaM Expr) : MetaM Expr := do
 
 def mkPULiftDown (e : Expr) : MetaM Expr := do
   let t ← whnf (← inferType e)
-  if t.isAppOfArity `PULift 1 then
+  bif t.isAppOfArity `PULift 1 then
     let t' := t.appArg!
     return mkApp2 (mkConst `PULift.down t.appFn!.constLevels!) t' e
   else
@@ -79,7 +79,7 @@ public def mkConstructorElimName (indName : Name) (conName : Name) : Name :=
 
 def mkCtorElimType (indName : Name) : MetaM Unit := do
   let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!
-  if info.numCtors = 0 then return
+  bif info.numCtors =ᵇ 0 then return
   let casesOnName := mkCasesOnName indName
   let casesOnInfo ← getConstVal casesOnName
   let e ← forallTelescope casesOnInfo.type fun xs _ =>
@@ -216,7 +216,7 @@ public def mkCtorElim (indName : Name) : MetaM Unit := do
   -- Do not do anything if there are not multiple constructors
   unless indVal.numCtors > 1 do return
   -- Do not do anything unless its a type and can elim to type
-  if (← isPropFormerType indVal.type) then return
+  bif (← isPropFormerType indVal.type) then return
   unless (← isLargeEliminating indName) do return
 
   -- Expose if indName is not private

@@ -50,10 +50,10 @@ public def refutableHasNotBit? (e : Expr) : MetaM (Option Expr) := do
   match_expr e with
   | Nat.hasNotBit mask bit =>
     let bit' ← whnf bit -- reduce ctorIdxApp, to get closed terms
-    if bit'.hasFVar then return none
+    bif bit'.hasFVar then return none
     -- Reduce to get equalities
     let some (_, lhs, rhs) ← matchNe? (mkApp2 (mkConst `Nat.hasNotBit) mask bit') | unreachable!
-    if (← isDefEq lhs rhs) then
+    bif (← isDefEq lhs rhs) then
       return some <| mkApp3 (mkConst ``Nat.eq_of_beq_eq_true) lhs rhs reflBoolTrue
     else
       return none

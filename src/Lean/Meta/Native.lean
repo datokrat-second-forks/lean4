@@ -36,9 +36,9 @@ It is the basis for `native_decide` and `bv_decide` tactics.
 -/
 public def nativeEqTrue (tacticName : Name) (e : Expr) (axiomDeclRange? : Option Syntax := none) : MetaM NativeEqTrueResult  := do
   let e ← instantiateMVars e
-  if e.hasFVar then
+  bif e.hasFVar then
     throwError m!"Tactic `{tacticName}` failed: Cannot native decide proposition with free variables:{indentExpr e}"
-  if e.hasMVar then
+  bif e.hasMVar then
     throwError m!"Tactic `{tacticName}` failed: Cannot native decide proposition with metavariables:{indentExpr e}"
   let levels := (collectLevelParams {} e).params.toList
   let isTrue ← withoutModifyingEnv do

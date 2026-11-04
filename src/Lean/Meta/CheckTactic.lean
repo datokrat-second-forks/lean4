@@ -21,7 +21,7 @@ def matchCheckGoalType (stx : Syntax) (goalType : Expr) : MetaM (Expr × Expr ×
   let type ← mkFreshExprMVar (some (.sort u))
   let val  ← mkFreshExprMVar (some type)
   let extType := mkAppN (.const ``CheckGoalType [u]) #[type, val]
-  if !(← isDefEq goalType extType) then
+  bif !(← isDefEq goalType extType) then
     throwErrorAt stx "Goal{indentExpr goalType}\nis expected to match {indentExpr extType}"
   pure (val, type, u)
 

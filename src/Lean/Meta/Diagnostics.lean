@@ -16,10 +16,10 @@ namespace Lean.Meta
 def collectAboveThreshold [BEq α] [Hashable α] (counters : PHashMap α Nat) (threshold : Nat) (p : α → Bool) (lt : α → α → Bool) : Array (α × Nat) := Id.run do
   let mut r := #[]
   for (declName, counter) in counters do
-    if counter > threshold then
-    if p declName then
+    bif counter >ᵇ threshold then
+    bif p declName then
       r := r.push (declName, counter)
-  return r.qsort fun (d₁, c₁) (d₂, c₂) => if c₁ == c₂ then lt d₁ d₂ else c₁ > c₂
+  return r.qsort fun (d₁, c₁) (d₂, c₂) => bif c₁ == c₂ then lt d₁ d₂ else c₁ > c₂
 
 def subCounters [BEq α] [Hashable α] (newCounters oldCounters : PHashMap α Nat) : PHashMap α Nat := Id.run do
   let mut result := {}
@@ -42,7 +42,7 @@ def mkDiagSummary (cls : Name) (counters : PHashMap Name Nat) (p : Name → Bool
   -- unrestricted: diagnostics only
   let threshold := diagnostics.threshold.get (← getOptionsUnrestricted)
   let entries := collectAboveThreshold counters threshold p Name.lt
-  if entries.isEmpty then
+  bif entries.isEmpty then
     return {}
   else
     let mut data := #[]
@@ -65,7 +65,7 @@ def mkDiagSummaryForUsedInstances : MetaM DiagSummary := do
   mkDiagSummary `type_class (← get).diag.instanceCounter
 
 def mkDiagSynthPendingFailure (failures : PHashMap Expr MessageData) : MetaM DiagSummary := do
-  if failures.isEmpty then
+  bif failures.isEmpty then
     return {}
   else
     let mut data := #[]
@@ -77,15 +77,15 @@ def mkDiagSynthPendingFailure (failures : PHashMap Expr MessageData) : MetaM Dia
 We use below that this returns `m` unchanged if `s.isEmpty`
 -/
 def appendSection (m : Array MessageData) (cls : Name) (header : String) (s : DiagSummary) (resultSummary := true) : Array MessageData :=
-  if s.isEmpty then
+  bif s.isEmpty then
     m
   else
-    let header := if resultSummary then s!"{header} (max: {s.max}, num: {s.data.size}):" else header
+    let header := bif resultSummary then s!"{header} (max: {s.max}, num: {s.data.size}):" else header
     m.push <| .trace { cls } header s.data
 
 /-- Logs diagnostics and resets the counters -/
 def reportDiag : MetaM Unit := do
-  if (← isDiagnosticsEnabled) then
+  bif (← isDiagnosticsEnabled) then
     -- Diagnostic output may reference private declarations (e.g. `_match_*`,
     -- `_sparseCasesOn_*`) that are not visible in exporting mode (issue #13581).
     withoutExporting do

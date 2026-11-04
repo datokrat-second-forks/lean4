@@ -45,7 +45,7 @@ def registerMatchEqns (matchDeclName : Name) (matchEqns : MatchEqns) : CoreM Uni
       have : Inhabited _ := ⟨map⟩
       match map.find? matchDeclName with
       | some prev =>
-        if prev.eqnNames != matchEqns.eqnNames then
+        bif prev.eqnNames != matchEqns.eqnNames then
           panic! s!"match equations for `{matchDeclName}` are already registered"
         else
           map
@@ -74,7 +74,7 @@ Returns `true` if `declName` is the name of a `match` equational theorem.
 def isMatchEqnTheorem (env : Environment) (declName : Name) : Bool := Id.run do
   -- avoid blocking on async decls whose names look nothing like matchers
   let .str _ s := declName.eraseMacroScopes | return false
-  if !isEqnLikeSuffix s then
+  bif !isEqnLikeSuffix s then
     return false
   (matchEqnsExt.getState (asyncMode := .async .asyncEnv) (asyncDecl := declName) env).eqns.contains declName
 

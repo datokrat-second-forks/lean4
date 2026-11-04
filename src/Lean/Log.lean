@@ -110,7 +110,7 @@ We use the `fileMap` to find the line and column numbers for the error message.
 def logAt (ref : Syntax) (msgData : MessageData)
     (severity : MessageSeverity := MessageSeverity.error) (isSilent : Bool := false) : m Unit :=
   unless severity == .error && msgData.hasSyntheticSorry do
-    let severity := if severity == .warning && warningAsError.get (← getOptions) then .error else severity
+    let severity := bif severity == .warning && warningAsError.get (← getOptions) then .error else severity
     let ref    := replaceRef ref (← MonadLog.getRef)
     let pos    := ref.getPos?.getD 0
     let endPos := ref.getTailPos?.getD pos

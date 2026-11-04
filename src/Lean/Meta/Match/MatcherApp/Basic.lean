@@ -33,7 +33,7 @@ def matchMatcherApp? [Monad m] [MonadEnv m] [MonadError m] (e : Expr) (alsoCases
   if let .const declName declLevels := e.getAppFn then
     if let some info ← getMatcherInfo? declName then
       let args := e.getAppArgs
-      if args.size < info.arity then
+      bif args.size <ᵇ info.arity then
         return none
       return some {
         info with
@@ -46,7 +46,7 @@ def matchMatcherApp? [Monad m] [MonadEnv m] [MonadError m] (e : Expr) (alsoCases
         remaining     := args[(info.numParams + 1 + info.numDiscrs + info.numAlts)...args.size]
       }
 
-    if alsoCasesOn && isCasesOnRecursor (← getEnv) declName then
+    bif alsoCasesOn && isCasesOnRecursor (← getEnv) declName then
       let indName := declName.getPrefix
       let .inductInfo info ← getConstInfo indName | return none
       let args := e.getAppArgs
@@ -57,7 +57,7 @@ def matchMatcherApp? [Monad m] [MonadEnv m] [MonadError m] (e : Expr) (alsoCases
       let discrInfos := .replicate (info.numIndices + 1) {}
       let alts       := args[(info.numParams + 1 + info.numIndices + 1)...(info.numParams + 1 + info.numIndices + 1 + info.numCtors)]
       let remaining  := args[(info.numParams + 1 + info.numIndices + 1 + info.numCtors)...*]
-      let uElimPos?  := if info.levelParams.length == declLevels.length then none else some 0
+      let uElimPos?  := bif info.levelParams.length == declLevels.length then none else some 0
       let altInfos   ← info.ctors.toArray.mapM fun ctor => do
         let .ctorInfo ctorInfo ← getConstInfo ctor | panic! "expected constructor"
         return { numFields := ctorInfo.numFields, numOverlaps := 0, hasUnitThunk := false  : Match.AltParamInfo}

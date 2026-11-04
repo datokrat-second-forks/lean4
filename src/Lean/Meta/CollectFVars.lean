@@ -32,7 +32,7 @@ where
   getNext? : StateRefT Nat (StateRefT CollectFVars.State MetaM) (Option FVarId) := do
     let s ← getThe CollectFVars.State
     let i ← get
-    if h : i < s.fvarIds.size then
+    bif h : i <ᵇ s.fvarIds.size then
       let r := s.fvarIds[i]
       modify (· + 1)
       return some r
@@ -55,7 +55,7 @@ def removeUnused (vars : Array Expr) (used : CollectFVars.State) : MetaM (LocalC
   let lctx ← getLCtx
   let (lctx, localInsts, newVars, _) ← vars.foldrM
     (fun var (lctx, localInsts, newVars, used) => do
-      if used.fvarSet.contains var.fvarId! then
+      bif used.fvarSet.contains var.fvarId! then
         let varType ← inferType var
         let (_, used) ← varType.collectFVars.run used
         pure (lctx, localInsts, newVars.push var, used)

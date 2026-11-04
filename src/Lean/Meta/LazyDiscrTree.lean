@@ -77,11 +77,11 @@ def tmpStar := mkMVar tmpMVarId
   potentially subject to independent changes.
 -/
 def ignoreArg (a : Expr) (i : Nat) (infos : Array ParamInfo) : MetaM Bool := do
-  if h : i < infos.size then
+  bif h : i <ᵇ infos.size then
     let info := infos[i]
-    if info.isInstance then
+    bif info.isInstance then
       return true
-    else if info.isImplicit || info.isStrictImplicit then
+    else bif info.isImplicit || info.isStrictImplicit then
       return !(← isType a)
     else
       isProof a
@@ -90,7 +90,7 @@ def ignoreArg (a : Expr) (i : Nat) (infos : Array ParamInfo) : MetaM Bool := do
 
 partial def pushArgsAux (infos : Array ParamInfo) : Nat → Expr → Array Expr → MetaM (Array Expr)
   | i, .app f a, todo => do
-    if (← ignoreArg a i infos) then
+    bif (← ignoreArg a i infos) then
       pushArgsAux infos (i-1) f (todo.push tmpStar)
     else
       pushArgsAux infos (i-1) f (todo.push a)
@@ -103,19 +103,19 @@ partial def pushArgsAux (infos : Array ParamInfo) : Nat → Expr → Array Expr 
   - `Nat.succ x` where `isNumeral x`
   - `OfNat.ofNat _ x _` where `isNumeral x` -/
 partial def isNumeral (e : Expr) : Bool :=
-  if e.isRawNatLit then true
+  bif e.isRawNatLit then true
   else
     let f := e.getAppFn
-    if !f.isConst then false
+    bif !f.isConst then false
     else
       let fName := f.constName!
-      if fName == ``Nat.succ && e.getAppNumArgs == 1 then isNumeral e.appArg!
-      else if fName == ``OfNat.ofNat && e.getAppNumArgs == 3 then isNumeral (e.getArg! 1)
-      else if fName == ``Nat.zero && e.getAppNumArgs == 0 then true
+      bif fName == ``Nat.succ && e.getAppNumArgs == 1 then isNumeral e.appArg!
+      else bif fName == ``OfNat.ofNat && e.getAppNumArgs == 3 then isNumeral (e.getArg! 1)
+      else bif fName == ``Nat.zero && e.getAppNumArgs == 0 then true
       else false
 
 partial def toNatLit? (e : Expr) : Option Literal :=
-  if isNumeral e then
+  bif isNumeral e then
     if let some n := loop e then
       some (.natVal n)
     else
@@ -128,12 +128,12 @@ where
     match f with
     | .lit (.natVal n) => return n
     | .const fName .. =>
-      if fName == ``Nat.succ && e.getAppNumArgs == 1 then
+      bif fName == ``Nat.succ && e.getAppNumArgs == 1 then
         let r ← loop e.appArg!
         return r+1
-      else if fName == ``OfNat.ofNat && e.getAppNumArgs == 3 then
+      else bif fName == ``OfNat.ofNat && e.getAppNumArgs == 3 then
         loop (e.getArg! 1)
-      else if fName == ``Nat.zero && e.getAppNumArgs == 0 then
+      else bif fName == ``Nat.zero && e.getAppNumArgs == 0 then
         return 0
       else
         failure
@@ -151,12 +151,12 @@ def isNatType (e : Expr) : MetaM Bool :=
   This function assumes `e.isAppOf fName`
 -/
 def isNatOffset (fName : Name) (e : Expr) : MetaM Bool := do
-  if fName == ``Nat.add && e.getAppNumArgs == 2 then
+  bif fName == ``Nat.add && e.getAppNumArgs == 2 then
     return isNumeral e.appArg!
-  else if fName == ``Add.add && e.getAppNumArgs == 4 then
-    if (← isNatType (e.getArg! 0)) then return isNumeral e.appArg! else return false
-  else if fName == ``HAdd.hAdd && e.getAppNumArgs == 6 then
-    if (← isNatType (e.getArg! 1)) then return isNumeral e.appArg! else return false
+  else bif fName == ``Add.add && e.getAppNumArgs == 4 then
+    bif (← isNatType (e.getArg! 0)) then return isNumeral e.appArg! else return false
+  else bif fName == ``HAdd.hAdd && e.getAppNumArgs == 6 then
+    bif (← isNatType (e.getArg! 1)) then return isNumeral e.appArg! else return false
   else
     return fName == ``Nat.succ && e.getAppNumArgs == 1
 
@@ -182,9 +182,9 @@ discussion.
 def elimLooseBVarsByBeta (e : Expr) : CoreM Expr :=
   Core.transform e
     (pre := fun e => do
-      if !e.hasLooseBVars then
+      bif !e.hasLooseBVars then
         return .done e
-      else if e.isHeadBetaTarget then
+      else bif e.isHeadBetaTarget then
         return .visit e.headBeta
       else
         return .continue)
@@ -199,8 +199,8 @@ def getKeyArgs (e : Expr) (isMatch root : Bool) :
   match e.getAppFn with
   | .lit v         => return (.lit v, #[])
   | .const c _     =>
-    if (← getConfig).isDefEqStuckEx && e.hasExprMVar then
-      if (← isReducible c) then
+    bif (← getConfig).isDefEqStuckEx && e.hasExprMVar then
+      bif (← isReducible c) then
         /- `e` is a term `c ...` s.t. `c` is reducible and `e` has metavariables, but it was not
             unfolded.  This can happen if the metavariables in `e` are "blocking" smart unfolding.
            If `isDefEqStuckEx` is enabled, then we must throw the `isDefEqStuck` exception to
@@ -212,9 +212,9 @@ def getKeyArgs (e : Expr) (isMatch root : Bool) :
         let args := e.getAppArgs
         let start := matcherInfo.getFirstDiscrPos
         for arg in args[start...(start + matcherInfo.numDiscrs)] do
-          if arg.hasExprMVar then
+          bif arg.hasExprMVar then
             Meta.throwIsDefEqStuck
-      else if (← isRec c) then
+      else bif (← isRec c) then
         /- Similar to the previous case, but for `match` and recursor applications. It may be stuck
            (i.e., did not reduce) because of metavariables. -/
         Meta.throwIsDefEqStuck
@@ -224,11 +224,11 @@ def getKeyArgs (e : Expr) (isMatch root : Bool) :
     let nargs := e.getAppNumArgs
     return (.fvar fvarId nargs, e.getAppRevArgs)
   | .mvar mvarId   =>
-    if isMatch then
+    bif isMatch then
       return (.other, #[])
     else do
       let cfg ← getConfig
-      if cfg.isDefEqStuckEx then
+      bif cfg.isDefEqStuckEx then
         /-
           When the configuration flag `isDefEqStuckEx` is set to true,
           we want `isDefEq` to throw an exception whenever it tries to assign
@@ -244,7 +244,7 @@ def getKeyArgs (e : Expr) (isMatch root : Bool) :
           This is incorrect because it is equivalent to saying that there is no solution even if
           the caller assigns `?m` and try again. -/
         return (.star, #[])
-      else if (← mvarId.isReadOnlyOrSyntheticOpaque) then
+      else bif (← mvarId.isReadOnlyOrSyntheticOpaque) then
         return (.other, #[])
       else
         return (.star, #[])
@@ -253,8 +253,8 @@ def getKeyArgs (e : Expr) (isMatch root : Bool) :
     return (.proj s i nargs, #[a] ++ e.getAppRevArgs)
   | .forallE _ d b _ =>
     -- See comment at elimLooseBVarsByBeta
-    let b ← if b.hasLooseBVars then elimLooseBVarsByBeta b else pure b
-    if b.hasLooseBVars then
+    let b ← bif b.hasLooseBVars then elimLooseBVarsByBeta b else pure b
+    bif b.hasLooseBVars then
       return (.other, #[])
     else
       return (.arrow, #[d, b])
@@ -337,7 +337,7 @@ Specialization of Lean.Meta.DiscrTree.pushArgs
 -/
 def pushArgs (root : Bool) (todo : Array Expr) (e : Expr) :
     MetaM (Key × Array Expr) := do
-  if hasNoindexAnnotation e then
+  bif hasNoindexAnnotation e then
     return (.star, todo)
   else
     let e ← reduceDT e root
@@ -353,7 +353,7 @@ def pushArgs (root : Bool) (todo : Array Expr) (e : Expr) :
       unless root do
         if let some v := MatchClone.toNatLit? e then
           return (.lit v, todo)
-        if (← MatchClone.shouldAddAsStar c e) then
+        bif (← MatchClone.shouldAddAsStar c e) then
           return (.star, todo)
       let nargs := e.getAppNumArgs
       push (.const c nargs) nargs todo
@@ -365,21 +365,21 @@ def pushArgs (root : Bool) (todo : Array Expr) (e : Expr) :
 
       TODO: add better support for projections that are functions
       -/
-      let a := if isClass (← getEnv) s then mkNoindexAnnotation a else a
+      let a := bif isClass (← getEnv) s then mkNoindexAnnotation a else a
       let nargs := e.getAppNumArgs
       push (.proj s i nargs) nargs (todo.push a)
     | .fvar _fvarId   =>
       return (.star, todo)
     | .mvar mvarId   =>
-      if mvarId == MatchClone.tmpMVarId then
+      bif mvarId == MatchClone.tmpMVarId then
         -- We use `tmp to mark implicit arguments and proofs
         return (.star, todo)
       else
         failure
     | .forallE _ d b _ =>
       -- See comment at elimLooseBVarsByBeta
-      let b ← if b.hasLooseBVars then MatchClone.elimLooseBVarsByBeta b else pure b
-      if b.hasLooseBVars then
+      let b ← bif b.hasLooseBVars then MatchClone.elimLooseBVarsByBeta b else pure b
+      bif b.hasLooseBVars then
         return (.other, todo)
       else
         return (.arrow, (todo.push d).push b)
@@ -396,7 +396,7 @@ def rootKey (e : Expr) : MetaM (Key × Array Expr) :=
   pushArgs true (Array.mkEmpty initCapacity) e
 
 partial def buildPath (op : Bool → Array Expr → Expr → MetaM (Key × Array Expr)) (root : Bool) (todo : Array Expr) (keys : Array Key) : MetaM (Array Key) := do
-  if todo.isEmpty then
+  bif todo.isEmpty then
     return keys
   else
     let e    := todo.back!
@@ -453,15 +453,15 @@ def evalLazyEntry
     : MatchM α (Array α × TrieIndex × Std.HashMap Key TrieIndex) := do
   let (values, starIdx, children) := p
   let (todo, lctx, v) := entry
-  if todo.isEmpty then
+  bif todo.isEmpty then
     let values := values.push v
     pure (values, starIdx, children)
   else
     let e    := todo.back!
     let todo := todo.pop
     let (k, todo) ← withLCtx lctx.1 lctx.2 <| pushArgs false todo e
-    if k == .star then
-      if starIdx = 0 then
+    bif k == .star then
+      bif starIdx =ᵇ 0 then
         let starIdx ← newTrie (todo, lctx, v)
         pure (values, starIdx, children)
       else
@@ -492,7 +492,7 @@ partial def evalLazyEntries
 def evalNode (c : TrieIndex) :
     MatchM α (Array α × TrieIndex × Std.HashMap Key TrieIndex) := do
   let .node vs star cs pending := (←get)[c]!
-  if pending.size = 0 then
+  bif pending.size =ᵇ 0 then
     return (vs, star, cs)
   else
     setTrie c default
@@ -502,7 +502,7 @@ def evalNode (c : TrieIndex) :
 
 def dropKeyAux (next : TrieIndex) (rest : List Key) :
     MatchM α Unit :=
-  if next = 0 then
+  bif next =ᵇ 0 then
     pure ()
   else do
     let (_, star, children) ← evalNode next
@@ -510,7 +510,7 @@ def dropKeyAux (next : TrieIndex) (rest : List Key) :
     | [] =>
       modify (·.set! next {values := #[], star, children})
     | k :: r => do
-      let next := if k == .star then star else children.getD k 0
+      let next := bif k == .star then star else children.getD k 0
       dropKeyAux next r
 
 /--
@@ -545,13 +545,13 @@ structure MatchResult (α : Type) where
 namespace MatchResult
 
 def push (r : MatchResult α) (score : Nat) (e : Array α) : MatchResult α :=
-  if e.isEmpty then
+  bif e.isEmpty then
     r
-  else if score < r.elts.size then
+  else bif score <ᵇ r.elts.size then
     { elts := r.elts.modify score (·.push e) }
   else
     let rec loop (a : Array (Array (Array α))) :=
-        if a.size < score then
+        bif a.size <ᵇ score then
           loop (a.push #[])
         else
           { elts := a.push #[e] }
@@ -607,16 +607,16 @@ user expectations, this code must add paths we want to prioritize and return
 results earlier are added last.
 -/
 partial def getMatchLoop (cases : Array PartialMatch) (result : MatchResult α) : MatchM α (MatchResult α) := do
-  if cases.isEmpty then
+  bif cases.isEmpty then
     pure result
   else do
     let ca := cases.back!
     let cases := cases.pop
     let (vs, star, cs) ← evalNode ca.c
-    if ca.todo.isEmpty then
+    bif ca.todo.isEmpty then
       let result := result.push ca.score vs
       getMatchLoop cases result
-    else if star == 0 && cs.isEmpty then
+    else bif star == 0 && cs.isEmpty then
       getMatchLoop cases result
     else
       let e     := ca.todo.back!
@@ -625,7 +625,7 @@ partial def getMatchLoop (cases : Array PartialMatch) (result : MatchResult α) 
           Thus, `todo` is not used linearly when there is `Key.star` edge
           and there is an edge for `k` and `k != Key.star`. -/
       let pushStar (cases : Array PartialMatch) :=
-        if star = 0 then
+        bif star =ᵇ 0 then
           cases
         else
           cases.push { todo, score := ca.score, c := star }
@@ -734,7 +734,7 @@ def toLazy (d : PreDiscrTree α) : LazyDiscrTree α :=
 /-- Merge two discrimination trees. -/
 protected def append (x y : PreDiscrTree α) : PreDiscrTree α :=
   let (x, y, f) :=
-        if x.roots.size ≥ y.roots.size then
+        bif x.roots.size ≥ᵇ y.roots.size then
           (x, y, fun y x => x ++ y)
         else
           (y, x, fun x y => x ++ y)
@@ -809,7 +809,7 @@ Check if a private declaration is accessible from the current environment.
 - Imported private declarations are accessible only in the module system with `import all`.
 -/
 private def isAccessiblePrivateName (env : Environment) (declName : Name) : Bool :=
-  if !isPrivateName declName then
+  bif !isPrivateName declName then
     false -- Not private; the isInternalDetail check should still apply
   else
     match env.getModuleIdxFor? declName with
@@ -836,8 +836,8 @@ def addConstImportData
     (tree : PreDiscrTree α)
     (act : Name → AsyncConstantInfo → MetaM (Array (InitEntry α)))
     (c : AsyncConstantInfo) : BaseIO (PreDiscrTree α) := do
-  if c.isUnsafe then return tree
-  if blacklistInsertion env c.name then return tree
+  bif c.isUnsafe then return tree
+  bif blacklistInsertion env c.name then return tree
   let { ngen, core := core_cache, «meta» := meta_cache } ← cacheRef.get
   let mstate : Meta.State := { cache := meta_cache }
   cacheRef.set (Cache.empty ngen)
@@ -896,7 +896,7 @@ partial def loadImportedModule
     (mname : Name)
     (mdata : ModuleData)
     (i : Nat := 0) : BaseIO (PreDiscrTree α) := do
-  if h : i < mdata.constants.size then
+  bif h : i <ᵇ mdata.constants.size then
     let tree ← addConstImportData cctx env mname d cacheRef tree act
       (.ofConstantInfo mdata.constants[i])
     loadImportedModule cctx env act d cacheRef tree mname mdata (i+1)
@@ -909,7 +909,7 @@ def createImportedEnvironmentSeq (cctx : Core.Context) (ngen : NameGenerator) (e
       let cacheRef ← IO.mkRef (Cache.empty ngen)
       go (← ImportData.new) cacheRef {} start stop
     where go d cacheRef (tree : PreDiscrTree α) (start stop : Nat) : BaseIO _ := do
-            if start < stop then
+            bif start <ᵇ stop then
               let mname := env.header.moduleNames[start]!
               let mdata := env.header.moduleData[start]!
               let tree ← loadImportedModule cctx env act d cacheRef tree mname mdata
@@ -951,7 +951,7 @@ def dropKeys (t : LazyDiscrTree α) (keys : List (List LazyDiscrTree.Key)) : Met
 
 /-- Collect all values from a subtree recursively and clear them. -/
 partial def collectSubtreeAux (next : TrieIndex) : MatchM α (Array α) :=
-  if next = 0 then
+  bif next =ᵇ 0 then
     pure #[]
   else do
     let (values, star, children) ← evalNode next
@@ -968,7 +968,7 @@ partial def collectSubtreeAux (next : TrieIndex) : MatchM α (Array α) :=
 /-- Navigate to a key path and return all values in that subtree, then drop them. -/
 def extractKeyAux (next : TrieIndex) (rest : List Key) :
     MatchM α (Array α) :=
-  if next = 0 then
+  bif next =ᵇ 0 then
     pure #[]
   else do
     let (_, star, children) ← evalNode next
@@ -977,7 +977,7 @@ def extractKeyAux (next : TrieIndex) (rest : List Key) :
       -- At the target node: collect ALL values from entire subtree
       collectSubtreeAux next
     | k :: r => do
-      let next := if k == .star then star else children.getD k 0
+      let next := bif k == .star then star else children.getD k 0
       extractKeyAux next r
 
 /-- Extract and drop entries at a specific key, returning the dropped entries. -/
@@ -1013,17 +1013,17 @@ def createImportedDiscrTree [Monad m] [MonadLog m] [AddMessageContext m] [MonadO
   let rec
     /-- Allocate constants to tasks according to `constantsPerTask`. -/
     go ngen tasks start cnt idx := do
-      if h : idx < env.header.moduleData.size then
+      bif h : idx <ᵇ env.header.moduleData.size then
         let mdata := env.header.moduleData[idx]
         let cnt := cnt + mdata.constants.size
-        if cnt > constantsPerTask then
+        bif cnt >ᵇ constantsPerTask then
           let (childNGen, ngen) := ngen.mkChild
           let t ← liftM <| createImportedEnvironmentSeq cctx childNGen env act start (idx+1) |>.asTask
           go ngen (tasks.push t) (idx+1) 0 (idx+1)
         else
           go ngen tasks start cnt (idx+1)
       else
-        if start < n then
+        bif start <ᵇ n then
           let (childNGen, _) := ngen.mkChild
           let t ← (createImportedEnvironmentSeq cctx childNGen env act start n).asTask
           pure (tasks.push t)

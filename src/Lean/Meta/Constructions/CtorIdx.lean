@@ -60,7 +60,7 @@ def mkCtorIdxImpl (indName : Name) (levelParams : List Name) (declType : Expr) :
 
   modifyEnv fun env => addToCompletionBlackList env implName
   modifyEnv fun env => addProtected env implName
-  if isMarkedMeta (← getEnv) indName then
+  bif isMarkedMeta (← getEnv) indName then
     modifyEnv (markMeta · implName)
 
   setInlineAttribute implName .alwaysInline
@@ -79,9 +79,9 @@ public def mkCtorIdx (indName : Name) : MetaM Unit :=
   prependError m!"failed to construct `T.ctorIdx` for `{.ofConstName indName}`:" do
     unless genCtorIdx.get (← getOptions) do return
     let declName := mkCtorIdxName indName
-    if (← hasConst declName) then return
+    bif (← hasConst declName) then return
     let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!
-    if (← isPropFormerType info.type) then return
+    bif (← isPropFormerType info.type) then return
     let casesOnName := mkCasesOnName indName
     let casesOnInfo ← getConstInfo casesOnName
     unless casesOnInfo.levelParams.length > info.levelParams.length do return
@@ -96,7 +96,7 @@ public def mkCtorIdx (indName : Name) : MetaM Unit :=
       let declType ← mkArrow indType natType
       let declType ← mkForallFVars xs declType
       let declValue ← withLocalDeclD `x indType fun x => do
-        let value ← if info.numCtors = 1 then
+        let value ← bif info.numCtors =ᵇ 1 then
           pure (mkRawNatLit 0)
         else
           let motive ← mkLambdaFVars (indices.push x) natType
@@ -124,11 +124,11 @@ public def mkCtorIdx (indName : Name) : MetaM Unit :=
       addDecl decl
       modifyEnv fun env => addToCompletionBlackList env declName
       modifyEnv fun env => addProtected env declName
-      if isMarkedMeta (← getEnv) indName then
+      bif isMarkedMeta (← getEnv) indName then
         modifyEnv (markMeta · declName)
-      if info.numCtors = 1 then
+      bif info.numCtors =ᵇ 1 then
         setInlineAttribute declName .macroInline
-      else if !Compiler.LCNF.isRuntimeBuiltinType indName then
+      else bif !Compiler.LCNF.isRuntimeBuiltinType indName then
         /-
         This branch is not just an optimization, calling getObjTagNat on:
         - a single ctor inductive is wrong if it is an inductive with trivial structure that gets

@@ -53,7 +53,7 @@ def getMethodSpecsInfo (instName : Name) : MetaM MethodSpecsInfo := do
     let mut privateSpecs := false
 
     for field in structInfo.fieldNames, arg in body.getAppArgsN structInfo.fieldNames.size do
-      if (← isProof arg) then continue
+      bif (← isProof arg) then continue
       let arg := arg.eta
       let f := arg.getAppFn
       let ys := arg.getAppArgs
@@ -129,7 +129,7 @@ builtin_initialize methodSpecsSimpExtension : SimpExtension ←
 
 def mkSpecTheoremName (env : Environment) (instName : Name) (privateSpecs : Bool) (suffix : String) : Name :=
   let thmName := instName.str suffix
-  if privateSpecs then mkPrivateName env thmName else thmName
+  bif privateSpecs then mkPrivateName env thmName else thmName
 
 def startsWithFollowedByNumber (s p : String) : Bool :=
   (s.dropPrefix? p).any (·.isNat)
@@ -149,8 +149,8 @@ def isSpecThmNameFor (env : Environment) (name : Name) : Option Name := do
       -- the class may not be visible, e.g. when checking a private name in the exported environment
       let clsInfo ← getStructureInfo? env attrData.clsName
       for fieldName in clsInfo.fieldNames do
-        if isSpecThmLikeSuffix fieldName s then
-          if name == mkSpecTheoremName env p attrData.privateSpecs s then
+        bif isSpecThmLikeSuffix fieldName s then
+          bif name == mkSpecTheoremName env p attrData.privateSpecs s then
             return p
       none
 
@@ -216,7 +216,7 @@ public partial def getMethodSpecTheorems (instName : Name) (op : String) : MetaM
   let env ← getEnv
   while true do
     let thmName := mkSpecTheoremName (← getEnv) instName methodSpecInfos.privateSpecs s!"{op}_spec_{i+1}"
-    if env.containsOnBranch thmName then
+    bif env.containsOnBranch thmName then
       thms := thms.push thmName
       i := i + 1
     else

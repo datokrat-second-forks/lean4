@@ -58,7 +58,7 @@ partial def main (a b : Expr) (mode : ReduceMode := .none) : MetaM Bool := do
   lt a b
 where
   reduce (e : Expr) : MetaM Expr := do
-    if e.hasLooseBVars then
+    bif e.hasLooseBVars then
       -- We don't reduce terms occurring inside binders.
       -- See issue #1841.
       -- TODO: investigate whether we have to create temporary fresh free variables in practice.
@@ -70,22 +70,22 @@ where
       | .none => return e
 
   lt (a b : Expr) : MetaM Bool := do
-    if a == b then
+    bif a == b then
       -- We used to have an "optimization" using only pointer equality.
       -- This was a bad idea, `==` is often much cheaper than `acLt`.
       return false
     -- We ignore metadata
-    else if a.isMData then
+    else bif a.isMData then
       lt a.mdataExpr! b
-    else if b.isMData then
+    else bif b.isMData then
       lt a b.mdataExpr!
     else
       lpo (← reduce a) (← reduce b)
 
   ltPair (a₁ a₂ b₁ b₂ : Expr) : MetaM Bool := do
-    if (← lt a₁ b₁) then
+    bif (← lt a₁ b₁) then
       return true
-    else if (← lt b₁ a₁) then
+    else bif (← lt b₁ a₁) then
       return false
     else
       lt a₂ b₂
@@ -95,7 +95,7 @@ where
     -- since we go inside binders without extending the local context.
     -- See `lexSameCtor` and `allChildrenLt`
     -- See issue #3705.
-    if f.hasLooseBVars then
+    bif f.hasLooseBVars then
       return #[]
     else
       return (← getFunInfoNArgs f numArgs).paramInfo
@@ -103,30 +103,30 @@ where
   ltApp (a b : Expr) : MetaM Bool := do
     let aFn := a.getAppFn
     let bFn := b.getAppFn
-    if (← lt aFn bFn) then
+    bif (← lt aFn bFn) then
       return true
-    else if (← lt bFn aFn) then
+    else bif (← lt bFn aFn) then
       return false
     else
       let aArgs := a.getAppArgs
       let bArgs := b.getAppArgs
-      if aArgs.size < bArgs.size then
+      bif aArgs.size <ᵇ bArgs.size then
         return true
-      else if aArgs.size > bArgs.size then
+      else bif aArgs.size >ᵇ bArgs.size then
         return false
       else
         let infos ← getParamsInfo aFn aArgs.size
         for i in *...infos.size do
           -- We ignore instance implicit arguments during comparison
-          if !infos[i]!.isInstance then
-            if (← lt aArgs[i]! bArgs[i]!) then
+          bif !infos[i]!.isInstance then
+            bif (← lt aArgs[i]! bArgs[i]!) then
               return true
-            else if (← lt bArgs[i]! aArgs[i]!) then
+            else bif (← lt bArgs[i]! aArgs[i]!) then
               return false
         for i in infos.size...aArgs.size do
-          if (← lt aArgs[i]! bArgs[i]!) then
+          bif (← lt aArgs[i]! bArgs[i]!) then
             return true
-          else if (← lt bArgs[i]! aArgs[i]!) then
+          else bif (← lt bArgs[i]! aArgs[i]!) then
             return false
         return false
 
@@ -143,7 +143,7 @@ where
     | .const n ..   => return Name.lt n b.constName! -- We ignore the levels
     | .lit v ..     => return Literal.lt v b.litValue!
     -- Composite
-    | .proj _ i e ..    => if i != b.projIdx! then return i < b.projIdx! else lt e b.projExpr!
+    | .proj _ i e ..    => bif i != b.projIdx! then return i < b.projIdx! else lt e b.projExpr!
     | .app ..           => ltApp a b
     | .lam _ d e ..     => ltPair d e b.bindingDomain! b.bindingBody!
     | .forallE _ d e .. => ltPair d e b.bindingDomain! b.bindingBody!
@@ -159,11 +159,11 @@ where
         let infos ← getParamsInfo f args.size
         for i in *...infos.size do
           -- We ignore instance implicit arguments during comparison
-          if !infos[i]!.isInstance then
-            if !(← lt args[i]! b) then
+          bif !infos[i]!.isInstance then
+            bif !(← lt args[i]! b) then
               return false
         for h : i in infos.size...args.size do
-          if !(← lt args[i] b) then
+          bif !(← lt args[i] b) then
             return false
         return true
     | .lam _ d e ..     => lt d b <&&> lt e b
@@ -177,16 +177,16 @@ where
   lpo (a b : Expr) : MetaM Bool := do
     checkSystem "Lean.Meta.acLt"
     -- Case 1: `a < b` if for some child `b_i` of `b`, we have `b_i >= a`
-    if (← someChildGe b a) then
+    bif (← someChildGe b a) then
       return true
-    else if a.ctorWeight > b.ctorWeight then
+    else bif a.ctorWeight >ᵇ b.ctorWeight then
       return false
     else
       -- Case 2: `a < b` if `a.ctorWeight < b.ctorWeight` and for all children `a_i` of `a`, `a_i < b`
       -- Case 3: `a < b` if `a` & `b` have the same ctor, and `a` is lexicographically smaller, and for all children `a_i` of a, `a_i < b`
-      if !(← allChildrenLt a b) then
+      bif !(← allChildrenLt a b) then
         return false -- Cases 2 and 3 can't be true
-      else if a.ctorWeight < b.ctorWeight then
+      else bif a.ctorWeight <ᵇ b.ctorWeight then
         return true -- Case 2
       else
         -- `a.ctorWeight == b.ctorWeight`

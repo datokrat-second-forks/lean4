@@ -24,7 +24,7 @@ def hasAssignableLevelMVar : Level → MetaM Bool
 
 /-- Return `true` iff expression contains a metavariable that can be assigned. -/
 partial def hasAssignableMVar (e : Expr) : MetaM Bool :=
-  if !e.hasMVar then
+  bif !e.hasMVar then
     return false
   else
     go e |>.run' {}
@@ -44,8 +44,8 @@ where
     | .proj _ _ e      => visit e
     | .mvar mvarId     => mvarId.isAssignable
   visit (e : Expr) : StateRefT ExprSet MetaM Bool := do
-    if !e.hasMVar then return false
-    if (← get).contains e then return false
+    bif !e.hasMVar then return false
+    bif (← get).contains e then return false
     modify fun s => s.insert e
     go e
 

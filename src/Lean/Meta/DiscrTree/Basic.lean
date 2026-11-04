@@ -63,7 +63,7 @@ partial def Trie.format [ToFormat α] : Trie α → Format
   | .chain k c => Format.group $ Format.paren $
     "chain " ++ Std.format k ++ " => " ++ format c
   | .node vs cs => Format.group $ Format.paren $
-    "node" ++ (if vs.isEmpty then Format.nil else " " ++ Std.format vs)
+    "node" ++ (bif vs.isEmpty then Format.nil else " " ++ Std.format vs)
     ++ Format.join (cs.toList.map fun ⟨k, c⟩ => Format.line ++ Format.paren (Std.format k ++ " => " ++ format c))
 
 instance [ToFormat α] : ToFormat (Trie α) := ⟨Trie.format⟩
@@ -71,7 +71,7 @@ instance [ToFormat α] : ToFormat (Trie α) := ⟨Trie.format⟩
 partial def format [ToFormat α] (d : DiscrTree α) : Format :=
   let (_, r) := d.root.foldl
     (fun (p : Bool × Format) k c =>
-      (false, p.2 ++ (if p.1 then Format.nil else Format.line) ++ Format.paren (Std.format k ++ " => " ++ Std.format c)))
+      (false, p.2 ++ (bif p.1 then Format.nil else Format.line) ++ Format.paren (Std.format k ++ " => " ++ Std.format c)))
     (true, Format.nil)
   Format.group r
 
@@ -90,14 +90,14 @@ where
     return some key
 
   mkApp (f : MessageData) (args : Array MessageData) (parenIfNonAtomic : Bool) : CoreM MessageData := do
-    if args.isEmpty then
+    bif args.isEmpty then
       return f
     else
       let mut r := m!""
       for arg in args do
         r := r ++ Format.line ++ arg
       r := f ++ .nest 2 r
-      if parenIfNonAtomic then
+      bif parenIfNonAtomic then
         return .paren r
       else
         return .group r
@@ -125,7 +125,7 @@ where
     return r
 
 private def createNodes (keys : Array Key) (v : α) (i : Nat) : Trie α :=
-  if h : i < keys.size then
+  bif h : i <ᵇ keys.size then
     let k := keys[i]
     let c := createNodes keys v (i+1)
     .chain k c
@@ -143,8 +143,8 @@ private def insertVal [BEq α] (vs : Array α) (v : α) : Array α :=
   loop 0
 where
   loop (i : Nat) : Array α :=
-    if h : i < vs.size then
-      if v == vs[i] then
+    bif h : i <ᵇ vs.size then
+      bif v == vs[i] then
         vs.set i v
       else
         loop (i+1)
@@ -154,8 +154,8 @@ where
 
 private def insertAux [BEq α] (keys : Array Key) (v : α) : Nat → Trie α → Trie α
   | i, .chain k c =>
-    if h : i < keys.size then
-      if keys[i] == k then
+    bif h : i <ᵇ keys.size then
+      bif keys[i] == k then
         .chain k (insertAux keys v (i+1) c)
       else
         .node #[] <|
@@ -163,7 +163,7 @@ private def insertAux [BEq α] (keys : Array Key) (v : α) : Nat → Trie α →
     else
       .node #[v] #[(k, c)]
   | i, .node vs cs =>
-    if h : i < keys.size then
+    bif h : i <ᵇ keys.size then
       let k := keys[i]
       let c := Id.run $ cs.binInsertM
           (fun a b => a.1 < b.1)
@@ -176,7 +176,7 @@ private def insertAux [BEq α] (keys : Array Key) (v : α) : Nat → Trie α →
 termination_by i => keys.size - i
 
 def insertKeyValue [BEq α] (d : DiscrTree α) (keys : Array Key) (v : α) : DiscrTree α :=
-  if keys.isEmpty then panic! "invalid key sequence"
+  bif keys.isEmpty then panic! "invalid key sequence"
   else
     let k := keys[0]!
     { d with root :=
@@ -191,15 +191,15 @@ def insertCore [BEq α] (d : DiscrTree α) (keys : Array Key) (v : α) : DiscrTr
 
 private def getEntriesWithKeysAux (keys : Array Key) : Nat → Trie α → Array α
   | i, .chain k c =>
-    if h : i < keys.size then
-      if keys[i] == k then
+    bif h : i <ᵇ keys.size then
+      bif keys[i] == k then
         getEntriesWithKeysAux keys (i + 1) c
       else
         #[]
     else
       #[]
   | i, .node vs cs =>
-    if h : i < keys.size then
+    bif h : i <ᵇ keys.size then
       let k := keys[i]
       match cs.binSearch (k, default) (fun a b => a.1 < b.1) with
       | none => #[]
@@ -212,7 +212,7 @@ termination_by i => keys.size - i
 Returns all entries that have exactly the provided key sequence.
 -/
 def getEntriesWithKeys (d : DiscrTree α) (keys : Array Key) : Array α :=
-  if keys.isEmpty then panic! "invalid key sequence"
+  bif keys.isEmpty then panic! "invalid key sequence"
   else
     let k := keys[0]!
     match d.root.find? k with

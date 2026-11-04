@@ -96,7 +96,7 @@ def MatcherInfo.getMotivePos (info : MatcherInfo) : Nat :=
 def getNumEqsFromDiscrInfos (infos : Array DiscrInfo) : Nat := Id.run do
   let mut r := 0
   for info in infos do
-    if info.hName?.isSome then
+    bif info.hName?.isSome then
       r := r + 1
   return r
 
@@ -105,7 +105,7 @@ def MatcherInfo.getNumDiscrEqs (info : MatcherInfo) : Nat :=
 
 def MatcherInfo.altNumParams (info : MatcherInfo) : Array Nat :=
   info.altInfos.map fun {numFields, numOverlaps, hasUnitThunk} =>
-    numFields + numOverlaps + (if hasUnitThunk then 1 else 0) + info.getNumDiscrEqs
+    numFields + numOverlaps + (bif hasUnitThunk then 1 else 0) + info.getNumDiscrEqs
 
 
 namespace Extension
@@ -168,9 +168,9 @@ def isMatcher [Monad m] [MonadEnv m] (declName : Name) : m Bool :=
 
 def isMatcherAppCore? (env : Environment) (e : Expr) : Option MatcherInfo :=
   let fn := e.getAppFn
-  if fn.isConst then
+  bif fn.isConst then
     if let some matcherInfo := getMatcherInfoCore? env fn.constName! then
-      if e.getAppNumArgs ≥ matcherInfo.arity then some matcherInfo else none
+      bif e.getAppNumArgs ≥ᵇ matcherInfo.arity then some matcherInfo else none
     else
       none
   else

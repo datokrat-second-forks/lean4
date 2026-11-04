@@ -32,7 +32,7 @@ def _root_.Lean.MVarId.contradictionQuick (mvarId : MVarId) : MetaM Bool := do
             mvarId.assign (← mkAbsurd (← mvarId.getType) (mkFVar pFVarId) localDecl.toExpr)
             return true
           negMap := negMap.insert p localDecl.fvarId
-        if (← isProp localDecl.type) then
+        bif (← isProp localDecl.type) then
           if let some nFVarId := negMap[localDecl.type]? then
             mvarId.assign (← mkAbsurd (← mvarId.getType) localDecl.toExpr (mkFVar nFVarId))
             return true
@@ -50,7 +50,7 @@ def injectionAnyCandidate? (type : Expr) : MetaM (Option (Expr × Expr)) := do
   if let some (_, lhs, rhs) ← matchEq? type then
     return some (lhs, rhs)
   else if let some (α, lhs, β, rhs) ← matchHEq? type then
-    if (← isDefEq α β) then
+    bif (← isDefEq α β) then
       return some (lhs, rhs)
   return none
 
@@ -94,14 +94,14 @@ where
   -/
   loop (mvarId : MVarId) (forbidden : FVarIdSet) : MetaM Unit := do
     trace[Meta.Match.matchEqs] "proveSubgoalLoop\n{mvarId}"
-    if (← mvarId.contradictionQuick) then
+    bif (← mvarId.contradictionQuick) then
       return ()
     match (← injectionAny mvarId forbidden) with
     | .solved => return ()
     | .failed =>
       let mvarId' ← substVars mvarId
-      if mvarId' == mvarId then
-        if (← mvarId.contradictionCore {}) then
+      bif mvarId' == mvarId then
+        bif (← mvarId.contradictionCore {}) then
           return ()
         throwError "failed to solve overlap assumption, unsolved subgoal{indentD mvarId}"
       else

@@ -28,7 +28,7 @@ where
 /-- `mkMaxArgsDiff mvarId (max u_1 ... (mvar mvarId) ... u_n) v` => `max v u_1 ... u_n` -/
 private def mkMaxArgsDiff (mvarId : LMVarId) : Level → Level → Level
   | Level.max u v,     acc => mkMaxArgsDiff mvarId v <| mkMaxArgsDiff mvarId u acc
-  | l@(Level.mvar id), acc => if id != mvarId then mkLevelMax' acc l else acc
+  | l@(Level.mvar id), acc => bif id != mvarId then mkLevelMax' acc l else acc
   | l,                 acc => mkLevelMax' acc l
 
 /--
@@ -54,7 +54,7 @@ private def tryApproxSelfMax (u v : Level) : MetaM Bool := do
   | _ => return false
 where
   solve (v' : Level) (mvarId : LMVarId) : MetaM Bool := do
-    if u == v' then
+    bif u == v' then
       trace[Meta.isLevelDefEq.step] "tryApproxSelfMax {mkLevelMVar mvarId} := {u}"
       assignLevelMVar mvarId u
       return true
@@ -74,11 +74,11 @@ private def tryApproxMaxMax (u v : Level) : MetaM Bool := do
   | _, _ => return false
 where
   solve (u₁ u₂ v' : Level) (mvarId : LMVarId) : MetaM Bool := do
-    if u₁ == v' then
+    bif u₁ == v' then
       trace[Meta.isLevelDefEq.step] "tryApproxMaxMax {mkLevelMVar mvarId} := {u₂}"
       assignLevelMVar mvarId u₂
       return true
-    else if u₂ == v' then
+    else bif u₂ == v' then
       trace[Meta.isLevelDefEq.step] "tryApproxMaxMax {mkLevelMVar mvarId} := {u₁}"
       assignLevelMVar mvarId u₁
       return true
@@ -101,19 +101,19 @@ mutual
   private partial def solve (u v : Level) : MetaM LBool := do
     match u, v with
     | Level.mvar mvarId, _ =>
-      if (← mvarId.isReadOnly) then
+      bif (← mvarId.isReadOnly) then
         return LBool.undef
-      else if (← isMVarWithGreaterDepth v mvarId) then
+      else bif (← isMVarWithGreaterDepth v mvarId) then
         -- If both `u` and `v` are both metavariables, but depth of v is greater, then we assign `v := u`.
         -- This can only happen when levelAssignDepth is set to a smaller value than depth (e.g. during TC synthesis)
         trace[Meta.isLevelDefEq.step] "{v} := {u}"
         assignLevelMVar v.mvarId! u
         return LBool.true
-      else if !u.occurs v then
+      else bif !u.occurs v then
         trace[Meta.isLevelDefEq.step] "{u} := {v}"
         assignLevelMVar u.mvarId! v
         return LBool.true
-      else if v.isMax && !strictOccursMax u v then
+      else bif v.isMax && !strictOccursMax u v then
         solveSelfMax u.mvarId! v
         return LBool.true
       else
@@ -125,19 +125,19 @@ mutual
       Bool.toLBool <$> isLevelDefEqAux Level.zero v₂
     | Level.zero, Level.succ .. => return LBool.false
     | Level.succ u, v =>
-      if v.isParam then
+      bif v.isParam then
         return LBool.false
-      else if u.isMVar && u.occurs v then
+      else bif u.isMVar && u.occurs v then
         return LBool.undef
       else
         match (← Meta.decLevel? v) with
         | some v => Bool.toLBool <$> isLevelDefEqAux u v
         | none   => return LBool.undef
     | _, _ =>
-      if (← read).univApprox then
-        if (← tryApproxSelfMax u v) then
+      bif (← read).univApprox then
+        bif (← tryApproxSelfMax u v) then
           return LBool.true
-        if (← tryApproxMaxMax u v) then
+        bif (← tryApproxMaxMax u v) then
           return LBool.true
       return LBool.undef
 
@@ -147,26 +147,26 @@ mutual
     | lhs, rhs => do
       withTraceNodeBefore `Meta.isLevelDefEq (fun _ =>
           withSetOptionByName `pp.instantiateMVars false do addMessageContext m!"{lhs} =?= {rhs}") do
-      if lhs.getLevelOffset == rhs.getLevelOffset then
+      bif lhs.getLevelOffset == rhs.getLevelOffset then
         return lhs.getOffset == rhs.getOffset
       else
         let lhs' ← instantiateLevelMVars lhs
         let lhs' := lhs'.normalize
         let rhs' ← instantiateLevelMVars rhs
         let rhs' := rhs'.normalize
-        if lhs != lhs' || rhs != rhs' then
+        bif lhs != lhs' || rhs != rhs' then
           isLevelDefEqAux lhs' rhs'
         else
           let r ← solve lhs rhs;
-          if r != LBool.undef then
+          bif r != LBool.undef then
             return r == LBool.true
           else
             let r ← solve rhs lhs;
-            if r != LBool.undef then
+            bif r != LBool.undef then
               return r == LBool.true
-            else if !(← hasAssignableLevelMVar lhs <||> hasAssignableLevelMVar rhs) then
+            else bif !(← hasAssignableLevelMVar lhs <||> hasAssignableLevelMVar rhs) then
               let cfg ← getConfig
-              if cfg.isDefEqStuckEx && (lhs.isMVar || rhs.isMVar) then do
+              bif cfg.isDefEqStuckEx && (lhs.isMVar || rhs.isMVar) then do
                 trace[Meta.isLevelDefEq.stuck] "{lhs} =?= {rhs}"
                 Meta.throwIsDefEqStuck
               else

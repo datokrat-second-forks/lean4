@@ -129,7 +129,7 @@ structure State where
 abbrev ClosureM := ReaderT Context $ StateRefT State MetaM
 
 @[inline] def visitLevel (f : Level → ClosureM Level) (u : Level) : ClosureM Level := do
-  if !u.hasMVar && !u.hasParam then
+  bif !u.hasMVar && !u.hasParam then
     pure u
   else
     let s ← get
@@ -141,7 +141,7 @@ abbrev ClosureM := ReaderT Context $ StateRefT State MetaM
       pure v
 
 @[inline] def visitExpr (f : Expr → ClosureM Expr) (e : Expr) : ClosureM Expr := do
-  if !e.hasLevelParam && !e.hasFVar && !e.hasMVar then
+  bif !e.hasLevelParam && !e.hasFVar && !e.hasMVar then
     pure e
   else
     let s ← get
@@ -176,7 +176,7 @@ def preprocess (e : Expr) : ClosureM Expr := do
   -- If we are not zetaDelta-expanding let-decls, then we use `check` to find
   -- which let-decls are dependent. We say a let-decl is dependent if its lambda abstraction is type incorrect.
   -- There is nothing to find when the local context has no let-decls.
-  if !ctx.zetaDelta && ctx.hasLetDecls then
+  bif !ctx.zetaDelta && ctx.hasLetDecls then
     check e
   pure e
 
@@ -255,9 +255,9 @@ def collectExpr (e : Expr) : ClosureM Expr := do
 
 partial def pickNextToProcessAux (lctx : LocalContext) (i : Nat) (toProcess : Array ToProcessElement) (elem : ToProcessElement)
     : ToProcessElement × Array ToProcessElement :=
-  if h : i < toProcess.size then
+  bif h : i <ᵇ toProcess.size then
     let elem' := toProcess[i]
-    if (lctx.get! elem.fvarId).index < (lctx.get! elem'.fvarId).index then
+    bif (lctx.get! elem.fvarId).index <ᵇ (lctx.get! elem'.fvarId).index then
       pickNextToProcessAux lctx (i+1) (toProcess.set i elem) elem'
     else
       pickNextToProcessAux lctx (i+1) toProcess elem
@@ -267,7 +267,7 @@ partial def pickNextToProcessAux (lctx : LocalContext) (i : Nat) (toProcess : Ar
 def pickNextToProcess? : ClosureM (Option ToProcessElement) := do
   let lctx ← getLCtx
   let s ← get
-  if s.toProcess.isEmpty then
+  bif s.toProcess.isEmpty then
     pure none
   else
     modifyGet fun s =>
@@ -295,7 +295,7 @@ partial def process : ClosureM Unit := do
     | .ldecl _ _ userName type val nondep _ =>
       let zetaDeltaFVarIds ← getZetaDeltaFVarIds
       -- Note: If `nondep` is true then `zetaDeltaFVarIds.contains fvarId` must be false.
-      if nondep || !zetaDeltaFVarIds.contains fvarId then
+      bif nondep || !zetaDeltaFVarIds.contains fvarId then
         /- Non-dependent let-decl
 
             Recall that if `fvarId` is in `zetaDeltaFVarIds`, then we zetaDelta-expanded it
@@ -324,12 +324,12 @@ partial def process : ClosureM Unit := do
     match decl with
     | .cdecl _ _ n ty bi _ =>
       let ty := ty.abstractRange i xs
-      if isLambda then
+      bif isLambda then
         Lean.mkLambda n bi ty b
       else
         Lean.mkForall n bi ty b
     | .ldecl _ _ n ty val nondep _ =>
-      if b.hasLooseBVar 0 then
+      bif b.hasLooseBVar 0 then
         let ty  := ty.abstractRange i xs
         let val := val.abstractRange i xs
         mkLet n ty val b nondep
@@ -371,7 +371,7 @@ private partial def sortDecls (sortedDecls : Array LocalDecl) (sortedArgs : Arra
   (toSortDecls : Array LocalDecl) (toSortArgs : Array Expr) : CoreM (Array LocalDecl × Array Expr):= do
   assert! sortedDecls.size = sortedArgs.size
   assert! toSortDecls.size = toSortArgs.size
-  if toSortDecls.isEmpty then
+  bif toSortDecls.isEmpty then
     return (sortedDecls, sortedArgs)
   trace[Meta.Closure] "MVars to abstract, topologically sorting the abstracted variables"
   let mut m : Std.HashMap FVarId (LocalDecl × Expr) := {}
@@ -382,17 +382,17 @@ private partial def sortDecls (sortedDecls : Array LocalDecl) (sortedArgs : Arra
 
   let rec visit (fvarId : FVarId) : StateT TopoSort CoreM Unit := do
     let some (decl, arg) := m.get? fvarId | return
-    if (← get).doneMark.contains decl.fvarId then
+    bif (← get).doneMark.contains decl.fvarId then
       return ()
     trace[Meta.Closure] "Sorting decl {mkFVar decl.fvarId} : {decl.type}"
-    if (← get).tempMark.contains decl.fvarId then
+    bif (← get).tempMark.contains decl.fvarId then
       throwError "cycle detected in sorting abstracted variables"
     assert! !decl.isLet (allowNondep := true) -- should all be cdecls
     modify fun s => { s with tempMark := s.tempMark.insert decl.fvarId }
     let type := decl.type
     type.forEach' fun e => do
-      if e.hasFVar then
-        if e.isFVar then
+      bif e.hasFVar then
+        bif e.isFVar then
           visit e.fvarId!
         return true
       else
@@ -446,7 +446,7 @@ def mkAuxDefinition (name : Name) (type : Expr) (value : Expr) (zetaDelta : Bool
   let decl := Declaration.defnDecl (← mkDefinitionValInferringUnsafe name result.levelParams.toList
     result.type result.value  hints)
   addDecl decl
-  if compile then
+  bif compile then
     compileDecl decl (logErrors := logCompileErrors)
   return mkAppN (mkConst name result.levelArgs.toList) result.exprArgs
 

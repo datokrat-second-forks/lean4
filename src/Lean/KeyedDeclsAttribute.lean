@@ -31,9 +31,9 @@ abbrev Key := Name
 def evalIdentKey (stx : Syntax) : AttrM Key := do
   let stx ← Attribute.Builtin.getIdent stx
   let kind := stx.getId
-  if (← getEnv).contains kind then
+  bif (← getEnv).contains kind then
     recordExtraModUseFromDecl (isMeta := false) kind
-    if (← Elab.getInfoState).enabled then
+    bif (← Elab.getInfoState).enabled then
       Elab.addConstInfo stx kind none
   pure kind
 
@@ -177,7 +177,7 @@ protected unsafe def init {γ} (df : Def γ) (attrDeclName : Name := by exact de
 def getEntries {γ} (attr : KeyedDeclsAttribute γ) (env : Environment) (key : Name) : List (AttributeEntry γ) :=
   let s := attr.ext.getState env
   let attrs := s.table.findD key []
-  if s.erased.isEmpty then
+  bif s.erased.isEmpty then
     attrs
   else
     attrs.filter fun attr => !s.erased.contains attr.declName

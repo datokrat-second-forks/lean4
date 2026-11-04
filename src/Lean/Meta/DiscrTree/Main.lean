@@ -102,11 +102,11 @@ private def tmpStar := mkMVar tmpMVarId
   and `ignoreArg` would return true for any term of the form `noIndexing t`.
 -/
 private def ignoreArg (a : Expr) (i : Nat) (infos : Array ParamInfo) : MetaM Bool := do
-  if h : i < infos.size then
+  bif h : i <ᵇ infos.size then
     let info := infos[i]
-    if info.isInstance then
+    bif info.isInstance then
       return true
-    else if info.isImplicit || info.isStrictImplicit then
+    else bif info.isImplicit || info.isStrictImplicit then
       return !(← isType a)
     else
       isProof a
@@ -115,7 +115,7 @@ private def ignoreArg (a : Expr) (i : Nat) (infos : Array ParamInfo) : MetaM Boo
 
 private partial def pushArgsAux (infos : Array ParamInfo) : Nat → Expr → Array Expr → MetaM (Array Expr)
   | i, .app f a, todo => do
-    if (← ignoreArg a i infos) then
+    bif (← ignoreArg a i infos) then
       pushArgsAux infos (i-1) f (todo.push tmpStar)
     else
       pushArgsAux infos (i-1) f (todo.push a)
@@ -128,19 +128,19 @@ private partial def pushArgsAux (infos : Array ParamInfo) : Nat → Expr → Arr
   - `Nat.succ x` where `isNumeral x`
   - `OfNat.ofNat _ x _` where `isNumeral x` -/
 private partial def isNumeral (e : Expr) : Bool :=
-  if e.isRawNatLit then true
+  bif e.isRawNatLit then true
   else
     let f := e.getAppFn
-    if !f.isConst then false
+    bif !f.isConst then false
     else
       let fName := f.constName!
-      if fName == ``Nat.succ && e.getAppNumArgs == 1 then isNumeral e.appArg!
-      else if fName == ``OfNat.ofNat && e.getAppNumArgs == 3 then isNumeral (e.getArg! 1)
-      else if fName == ``Nat.zero && e.getAppNumArgs == 0 then true
+      bif fName == ``Nat.succ && e.getAppNumArgs == 1 then isNumeral e.appArg!
+      else bif fName == ``OfNat.ofNat && e.getAppNumArgs == 3 then isNumeral (e.getArg! 1)
+      else bif fName == ``Nat.zero && e.getAppNumArgs == 0 then true
       else false
 
 private partial def toNatLit? (e : Expr) : Option Literal :=
-  if isNumeral e then
+  bif isNumeral e then
     if let some n := loop e then
       some (.natVal n)
     else
@@ -153,12 +153,12 @@ where
     match f with
     | .lit (.natVal n) => return n
     | .const fName .. =>
-      if fName == ``Nat.succ && e.getAppNumArgs == 1 then
+      bif fName == ``Nat.succ && e.getAppNumArgs == 1 then
         let r ← loop e.appArg!
         return r+1
-      else if fName == ``OfNat.ofNat && e.getAppNumArgs == 3 then
+      else bif fName == ``OfNat.ofNat && e.getAppNumArgs == 3 then
         loop (e.getArg! 1)
-      else if fName == ``Nat.zero && e.getAppNumArgs == 0 then
+      else bif fName == ``Nat.zero && e.getAppNumArgs == 0 then
         return 0
       else
         failure
@@ -176,12 +176,12 @@ private def isNatType (e : Expr) : MetaM Bool :=
   This function assumes `e.isAppOf fName`
 -/
 private def isOffset (fName : Name) (e : Expr) : MetaM Bool := do
-  if fName == ``Nat.add && e.getAppNumArgs == 2 then
+  bif fName == ``Nat.add && e.getAppNumArgs == 2 then
     return isNumeral e.appArg!
-  else if fName == ``Add.add && e.getAppNumArgs == 4 then
-    if (← isNatType (e.getArg! 0)) then return isNumeral e.appArg! else return false
-  else if fName == ``HAdd.hAdd && e.getAppNumArgs == 6 then
-    if (← isNatType (e.getArg! 1)) then return isNumeral e.appArg! else return false
+  else bif fName == ``Add.add && e.getAppNumArgs == 4 then
+    bif (← isNatType (e.getArg! 0)) then return isNumeral e.appArg! else return false
+  else bif fName == ``HAdd.hAdd && e.getAppNumArgs == 6 then
+    bif (← isNatType (e.getArg! 1)) then return isNumeral e.appArg! else return false
   else
     return fName == ``Nat.succ && e.getAppNumArgs == 1
 
@@ -237,12 +237,12 @@ where
   step (e : Expr) := do
     let e ← whnfCore e
     match (← unfoldDefinition? e) with
-    | some e' => if isBadKey e'.getAppFn then return e else step e'
+    | some e' => bif isBadKey e'.getAppFn then return e else step e'
     | none    => return e
 
 /-- whnf for the discrimination tree module -/
 def reduceDT (e : Expr) (root : Bool) : MetaM Expr :=
-  if root then reduceUntilBadKey e else reduce e
+  bif root then reduceUntilBadKey e else reduce e
 
 /- Remark: we use `shouldAddAsStar` only for nested terms, and `root == false` for nested terms -/
 
@@ -265,14 +265,14 @@ For example, it was introduced by another tactic. Thus, when populating the disc
 we use `noIndexAtArgs := true`. See comment: https://github.com/leanprover/lean4/issues/2670#issuecomment-1758889365
 -/
 private def pushArgs (root : Bool) (todo : Array Expr) (e : Expr) (noIndexAtArgs : Bool) : MetaM (Key × Array Expr) := do
-  if hasNoindexAnnotation e then
+  bif hasNoindexAnnotation e then
     return (.star, todo)
   else
     let e ← reduceDT e root
     let fn := e.getAppFn
     let push (k : Key) (nargs : Nat) (todo : Array Expr): MetaM (Key × Array Expr) := do
       let info ← getFunInfoNArgs fn nargs
-      let todo ← if noIndexAtArgs then
+      let todo ← bif noIndexAtArgs then
         pure <| pushWildcards nargs todo
       else
         pushArgsAux info.paramInfo (nargs-1) e todo
@@ -284,7 +284,7 @@ private def pushArgs (root : Bool) (todo : Array Expr) (e : Expr) (noIndexAtArgs
       unless root do
         if let some v := toNatLit? e then
           return (.lit v, todo)
-        if (← shouldAddAsStar c e) then
+        bif (← shouldAddAsStar c e) then
           return (.star, todo)
       let nargs := e.getAppNumArgs
       push (.const c nargs) nargs todo
@@ -295,17 +295,17 @@ private def pushArgs (root : Bool) (todo : Array Expr) (e : Expr) (noIndexAtArgs
 
       TODO: add better support for projections that are functions
       -/
-      let a := if isClass (← getEnv) s then mkNoindexAnnotation a else a
+      let a := bif isClass (← getEnv) s then mkNoindexAnnotation a else a
       let nargs := e.getAppNumArgs
       push (.proj s i nargs) nargs (todo.push a)
     | .fvar fvarId   =>
       let nargs := e.getAppNumArgs
       push (.fvar fvarId nargs) nargs todo
     | .mvar mvarId   =>
-      if mvarId == tmpMVarId then
+      bif mvarId == tmpMVarId then
         -- We use `tmp to mark implicit arguments and proofs
         return (.star, todo)
-      else if (← mvarId.isReadOnlyOrSyntheticOpaque) then
+      else bif (← mvarId.isReadOnlyOrSyntheticOpaque) then
         return (.other, todo)
       else
         return (.star, todo)
@@ -315,7 +315,7 @@ private def pushArgs (root : Bool) (todo : Array Expr) (e : Expr) (noIndexAtArgs
 
 @[inherit_doc pushArgs]
 partial def mkPathAux (root : Bool) (todo : Array Expr) (keys : Array Key) (noIndexAtArgs : Bool) : MetaM (Array Key) := do
-  if todo.isEmpty then
+  bif todo.isEmpty then
     return keys
   else
     let e    := todo.back!
@@ -342,7 +342,7 @@ but only if its key is not of the form `#[*]` or `#[=, *, *, *]`.
 -/
 def insertIfSpecific [BEq α] (d : DiscrTree α) (e : Expr) (v : α) (noIndexAtArgs := false) : MetaM (DiscrTree α) := do
   let keys ← mkPath e noIndexAtArgs
-  if keys == #[Key.star] || keys == #[Key.const `Eq 3, Key.star, Key.star, Key.star] then
+  bif keys == #[Key.star] || keys == #[Key.const `Eq 3, Key.star, Key.star, Key.star] then
     return d
   else
     return d.insertKeyValue keys v
@@ -356,8 +356,8 @@ private def getKeyArgs (e : Expr) (isMatch root : Bool) : MetaM (Key × Array Ex
   match e.getAppFn with
   | .lit v         => return (.lit v, #[])
   | .const c _     =>
-    if (← getConfig).isDefEqStuckEx && e.hasExprMVar then
-      if (← isReducible c) then
+    bif (← getConfig).isDefEqStuckEx && e.hasExprMVar then
+      bif (← isReducible c) then
         /- `e` is a term `c ...` s.t. `c` is reducible and `e` has metavariables, but it was not unfolded.
            This can happen if the metavariables in `e` are "blocking" smart unfolding.
            If `isDefEqStuckEx` is enabled, then we must throw the `isDefEqStuck` exception to postpone TC resolution.
@@ -378,9 +378,9 @@ private def getKeyArgs (e : Expr) (isMatch root : Bool) : MetaM (Key × Array Ex
         -- A matcher application is stuck is one of the discriminants has a metavariable
         let args := e.getAppArgs
         for arg in args[matcherInfo.getFirstDiscrPos...(matcherInfo.getFirstDiscrPos + matcherInfo.numDiscrs)] do
-          if arg.hasExprMVar then
+          bif arg.hasExprMVar then
             Meta.throwIsDefEqStuck
-      else if (← isRec c) then
+      else bif (← isRec c) then
         /- Similar to the previous case, but for `match` and recursor applications. It may be stuck (i.e., did not reduce)
            because of metavariables. -/
         Meta.throwIsDefEqStuck
@@ -390,11 +390,11 @@ private def getKeyArgs (e : Expr) (isMatch root : Bool) : MetaM (Key × Array Ex
     let nargs := e.getAppNumArgs
     return (.fvar fvarId nargs, e.getAppRevArgs)
   | .mvar mvarId   =>
-    if isMatch then
+    bif isMatch then
       return (.other, #[])
     else do
       let cfg ← getConfig
-      if cfg.isDefEqStuckEx then
+      bif cfg.isDefEqStuckEx then
         /-
           When the configuration flag `isDefEqStuckEx` is set to true,
           we want `isDefEq` to throw an exception whenever it tries to assign
@@ -410,7 +410,7 @@ private def getKeyArgs (e : Expr) (isMatch root : Bool) : MetaM (Key × Array Ex
           This is incorrect because it is equivalent to saying that there is no solution even if
           the caller assigns `?m` and try again. -/
         return (.star, #[])
-      else if (← mvarId.isReadOnlyOrSyntheticOpaque) then
+      else bif (← mvarId.isReadOnlyOrSyntheticOpaque) then
         return (.other, #[])
       else
         return (.star, #[])
@@ -438,24 +438,24 @@ private abbrev findKey (cs : Array (Key × Trie α)) (k : Key) : Option (Key × 
 private partial def getMatchLoop (todo : Array Expr) (c : Trie α) (result : Array α) : MetaM (Array α) := do
   match c with
   | .chain key child =>
-    if todo.isEmpty then
+    bif todo.isEmpty then
       return result
     else
       let e     := todo.back!
       let todo  := todo.pop
       let (k, args) ← getMatchKeyArgs e (root := false)
-      if key == .star then
+      bif key == .star then
         getMatchLoop todo child result
       else
-        if key == k then
+        bif key == k then
           getMatchLoop (todo ++ args) child result
         else
           return result
 
   | .node vs cs =>
-    if todo.isEmpty then
+    bif todo.isEmpty then
       return result ++ vs
-    else if cs.isEmpty then
+    else bif cs.isEmpty then
       return result
     else
       let e     := todo.back!
@@ -466,7 +466,7 @@ private partial def getMatchLoop (todo : Array Expr) (c : Trie α) (result : Arr
          Thus, `todo` is not used linearly when there is `Key.star` edge
          and there is an edge for `k` and `k != Key.star`. -/
       let visitStar (result : Array α) : MetaM (Array α) :=
-        if first.1 == .star then
+        bif first.1 == .star then
           getMatchLoop todo first.2 result
         else
           return result
@@ -504,16 +504,16 @@ def getMatch (d : DiscrTree α) (e : Expr) : MetaM (Array α) :=
 partial def getMatchWithExtra (d : DiscrTree α) (e : Expr) : MetaM (Array (α × Nat)) := do
   let (k, result) ← getMatchCore d e
   let result := result.map (·, 0)
-  if !e.isApp then
+  bif !e.isApp then
     return result
-  else if !(← mayMatchPrefix k) then
+  else bif !(← mayMatchPrefix k) then
     return result
   else
     go e.appFn! 1 result
 where
   mayMatchPrefix (k : Key) : MetaM Bool :=
     let cont (k : Key) : MetaM Bool :=
-      if d.root.find? k |>.isSome then
+      bif d.root.find? k |>.isSome then
         return true
       else
         mayMatchPrefix k
@@ -525,7 +525,7 @@ where
 
   go (e : Expr) (numExtra : Nat) (result : Array (α × Nat)) : MetaM (Array (α × Nat)) := do
     let result := result ++ (← getMatchCore d e).2.map (., numExtra)
-    if e.isApp then
+    bif e.isApp then
       go e.appFn! (numExtra + 1) result
     else
       return result
@@ -596,15 +596,15 @@ where
     | skip+1, .chain key child =>
       process (skip + key.arity) todo child result
     | skip+1, .node _  cs =>
-      if cs.isEmpty then
+      bif cs.isEmpty then
         return result
       else
         cs.foldlM (init := result) fun result ⟨k, c⟩ => process (skip + k.arity) todo c result
     | 0, _ =>
-      if todo.isEmpty then
+      bif todo.isEmpty then
         return result ++ c.nodeValues
       let cs := c.nodeChildren
-      if cs.isEmpty then
+      bif cs.isEmpty then
         return result
       else
         let e     := todo.back!
@@ -612,7 +612,7 @@ where
         let (k, args) ← getUnifyKeyArgs e (root := false)
         let visitStar (result : Array α) : MetaM (Array α) :=
           let first := cs[0]!
-          if first.1 == .star then
+          bif first.1 == .star then
             process 0 todo first.2 result
           else
             return result

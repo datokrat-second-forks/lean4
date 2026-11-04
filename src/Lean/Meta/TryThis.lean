@@ -67,7 +67,7 @@ interesting fields:
 `decorated := false` turns this off. -/
 @[deprecated "`SuggestionStyle` is not used anymore." (since := "2025-08-14")]
 def SuggestionStyle.error (decorated := true) : SuggestionStyle :=
-  let style := if decorated then
+  let style := bif decorated then
     json% {
       -- The VS code error foreground theme color (`--vscode-errorForeground`).
       color: "var(--vscode-errorForeground)",
@@ -80,7 +80,7 @@ def SuggestionStyle.error (decorated := true) : SuggestionStyle :=
 argument `decorated := false` turns this off. -/
 @[deprecated "`SuggestionStyle` is not used anymore." (since := "2025-08-14")]
 def SuggestionStyle.warning (decorated := true) : SuggestionStyle :=
-  if decorated then
+  bif decorated then
     json% {
       -- The `.gold` CSS class, which the infoview uses when e.g. building a file.
       className: "gold pointer dim",
@@ -117,7 +117,7 @@ def SuggestionStyle.value (t : Float) (showValueInHoverText := true) : Suggestio
     -- interpolates linearly from 0º to 120º with 95% saturation and lightness
     -- varying around 50% in HSL space
     style: { color: $(s!"hsl({(t * 120).round} 95% {60 * ((t - 0.5)^2 + 0.75)}%)") },
-    title: $(if showValueInHoverText then s!"Apply suggestion ({t})" else "Apply suggestion")
+    title: $(bif showValueInHoverText then s!"Apply suggestion ({t})" else "Apply suggestion")
   }
 
 /-- Holds a `suggestion` for replacement, along with `preInfo` and `postInfo` strings to be printed

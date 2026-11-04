@@ -61,7 +61,7 @@ where
         let subgoals ← mvarId.cases xs[casesOnInfo.majorPos]!.fvarId!
         subgoals.forM fun s => s.mvarId.withContext do
           assert! s.ctorName.isSome
-          if s.ctorName.get! ∈ casesOnInfo.insterestingCtors then
+          bif casesOnInfo.insterestingCtors.contains s.ctorName.get! then
             let hyp := s.subst.get hyp'
             let ctorIdxAppEq := s.subst.get ctorIdxAppEq
             let (subst, mvarId) ← substEq s.mvarId ctorIdxAppEq.fvarId!
@@ -92,7 +92,7 @@ def isName (env : Environment) (n : Name) : Bool :=
 builtin_initialize registerReservedNamePredicate isName
 
 builtin_initialize registerReservedNameAction fun name => do
-  if isName (← getEnv) name then
+  bif isName (← getEnv) name then
     let name' ← MetaM.run' <| getSparseCasesOnEq name.getPrefix
     assert! name = name'
     return true

@@ -63,14 +63,14 @@ def isPrivateName (n : Name) : Bool :=
 private def privateToUserNameAux (n : Name) (h : isPrivateName n) : Name :=
   match hn : n with
   | .str p s => .str (privateToUserNameAux p h) s
-  | .num p i => if h' : isPrivatePrefix n then .anonymous else .num (privateToUserNameAux p ?_) i
+  | .num p i => bif h' : isPrivatePrefix n then .anonymous else .num (privateToUserNameAux p ?_) i
 where finally simp_all [isPrivateName]
 
 /--
 Returns the user name corresponding to the private name `n` or `none` if `n` is not a private name.
 -/
 def privateToUserName? (n : Name) : Option Name :=
-  if h : isPrivateName n then privateToUserNameAux n h
+  bif h : isPrivateName n then privateToUserNameAux n h
   else none
 
 /--
@@ -78,7 +78,7 @@ Returns the user name corresponding to the private name `n` or `n` itself if `n`
 private name.
 -/
 def privateToUserName (n : Name) : Name :=
-  if h : isPrivateName n then privateToUserNameAux n h
+  bif h : isPrivateName n then privateToUserNameAux n h
   else n
 
 /--
@@ -88,7 +88,7 @@ Otherwise, returns `none`.
 def privatePrefix? (n : Name) : Option Name :=
   match n with
   | .str p _ => privatePrefix? p
-  | .num p _ => if isPrivatePrefix n then n else privatePrefix? p
+  | .num p _ => bif isPrivatePrefix n then n else privatePrefix? p
   | _ => none
 
 end Lean

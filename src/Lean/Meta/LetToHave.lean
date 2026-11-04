@@ -112,7 +112,7 @@ private def Context.check (ctx : Context) : Bool := !ctx.letFVars.isEmpty
 
 /-- If we don't need full typechecking, returns `e`, otherwise evaluates `m`. -/
 private def whenCheck (e : Expr) (m : M Result) : M Result := do
-  if (← read).check then m else return { expr := e, type? := none }
+  bif (← read).check then m else return { expr := e, type? := none }
 
 /-- Executes `m` in a context where `letFVars := fvars`. -/
 private def withLetFVars (fvars : List FVarId) (m : M α) : M α := do
@@ -139,7 +139,7 @@ private def checkCache (e : Expr) (m : M Result) : M Result := do
     return r
   else
     -- `2` was not experimentally optimized
-    let r ← if canSkip (maxDepth := 2) e then
+    let r ← bif canSkip (maxDepth := 2) e then
       pure { expr := e, type? := none }
     else
       m
@@ -148,7 +148,7 @@ private def checkCache (e : Expr) (m : M Result) : M Result := do
 
 /-- Like `findMCache?` but checks that `e` doesn't have any loose bvars. -/
 private def findCacheNoBVars? (e : Expr) : M (Option Result) :=
-  if e.hasLooseBVars then pure none else findCache? e
+  bif e.hasLooseBVars then pure none else findCache? e
 
 private def visitFVar (e : Expr) : MetaM Result := do
   let some decl ← e.fvarId!.findDecl? | e.fvarId!.throwUnknown
@@ -170,7 +170,7 @@ private def visitDepExpr (e : Expr) : M Unit := do
     for fvarId in (collectFVars {} e).fvarIds do
       unless visited.contains fvarId do
         visited := visited.insert fvarId
-        if ← fvarId.isLetVar then
+        bif (← fvarId.isLetVar) then
           addZetaDeltaFVarId fvarId
         worklist := worklist.push (← fvarId.getType)
 
@@ -190,19 +190,19 @@ private def checkMVar (mvarId : MVarId) (args : Array Expr) : M Unit := do
     let pendingDecl ← mvarIdPending.getDecl
     for fvar in fvars, arg in args do
       let fvarDecl := pendingDecl.lctx.getFVar! fvar
-      if fvarDecl.isLet then
+      bif fvarDecl.isLet then
         visitDepExpr arg
 
 private def visitMVar (e : Expr) : M Result := do
   let some decl ← e.mvarId!.findDecl? | throwUnknownMVar e.mvarId!
-  if (← read).check then checkMVar e.mvarId! #[]
+  bif (← read).check then checkMVar e.mvarId! #[]
   return { expr := e, type? := decl.type }
 
 private def visitConst (e : Expr) : M Result := do
   whenCheck e do
     let .const constName us := e | unreachable!
     let cinfo ← getConstVal constName
-    if cinfo.levelParams.length == us.length then
+    bif cinfo.levelParams.length == us.length then
       let type ← instantiateTypeLevelParams cinfo us
       return { expr := e, type? := type }
     else
@@ -212,10 +212,10 @@ private def visitConst (e : Expr) : M Result := do
 When checking, makes sure that `r.type?` is of the form `Expr.sort _`.
 -/
 private def ensureType (r : Result) : M Result := do
-  if (← read).check then
+  bif (← read).check then
     let type ← r.type
     let r := { r with type? := type }
-    if type.isSort then
+    bif type.isSort then
       return r
     else
       let .sort u ← whnf type | throwTypeExpected r
@@ -229,7 +229,7 @@ private def ensureType (r : Result) : M Result := do
 Note: We want to cache all prefixes of each application, hence no `instantiateRevRange`-type logic here.
 -/
 private def visitApp (e : Expr) (f a : Result) : M Result := do
-  if (← read).check then
+  bif (← read).check then
     let mut fType ← f.type
     unless fType.isForall do
       fType ← whnf fType
@@ -249,7 +249,7 @@ private partial def visitType (e : Expr) : M Result := do
   ensureType r
 
 private partial def visitAppArgs (e : Expr) : M Result := do
-  if (← read).check then
+  bif (← read).check then
     if let .mvar mvarId := e.getAppFn then
       checkMVar mvarId e.getAppArgs
     let rec go (e : Expr) : M Result := do
@@ -264,7 +264,7 @@ private partial def visitAppArgs (e : Expr) : M Result := do
     return { expr := ← go' e, type? := none }
 
 private partial def visitForall (e : Expr) : M Result := do
-  if canSkip e then
+  bif canSkip e then
     return { expr := e, type? := none }
   else
     go (← getLCtx) #[] #[] e
@@ -285,7 +285,7 @@ where
           finalize fvars doms e'
   finalize (fvars : Array Expr) (doms : Array Result) (body : Result) : M Result := do
     let e' := (← getLCtx).mkForall fvars body
-    if (← read).check then
+    bif (← read).check then
       let bodyLevel := (← ensureType body).type?.get!.sortLevel!
       let u ← doms.foldrM (init := bodyLevel) fun dom u =>
         return mkLevelIMax' (← dom.type).sortLevel! u
@@ -300,7 +300,7 @@ Enters the entire telescope at once.
 We do not check the cache at each step of the telescope since we assume that there are no unused variables.
 -/
 private partial def visitLambdaLet (e : Expr) : M Result := do
-  if canSkip e then
+  bif canSkip e then
     return { expr := e, type? := none }
   else
     go (← getLCtx) #[] e (← read).letFVars
@@ -328,7 +328,7 @@ where
           throwError "invalid let declaration, term{indentExpr v}{← mkHasTypeButIsExpectedMsg vType t}"
       let fvarId ← mkFreshFVarId
       let lctx  := lctx.mkLetDecl fvarId n t v nondep
-      let letFVars := if nondep then letFVars else fvarId :: letFVars
+      let letFVars := bif nondep then letFVars else fvarId :: letFVars
       go lctx (fvars.push (.fvar fvarId)) b letFVars
     | _ =>
       inCtx (finalize fvars <=< visit) e
@@ -353,15 +353,15 @@ where
         }
       | .ldecl _ _ n t v nondep _ => do
         let nondep ←
-          if nondep then pure true
-          else if !(← getZetaDeltaFVarIds).contains fvarId then incCount; pure true
+          bif nondep then pure true
+          else bif !(← getZetaDeltaFVarIds).contains fvarId then incCount; pure true
           else pure false
         let t := t.abstractRange i fvars
         let v := v.abstractRange i fvars
         pure {
           expr := Expr.letE n t v res.expr nondep
           type? := res.type?.map fun type =>
-            if type.hasLooseBVar 0 then
+            bif type.hasLooseBVar 0 then
               Expr.letE n t v type nondep
             else
               type.lowerLooseBVars 1 1
@@ -376,7 +376,7 @@ private partial def visitProj (e : Expr) (structName : Name) (idx : Nat) (struct
   matchConstStructure structType.getAppFn failed fun structVal structLvls ctorVal => do
     unless structVal.name == structName do failed ()
     let structTypeArgs := structType.getAppArgs
-    if structVal.numParams + structVal.numIndices != structTypeArgs.size then
+    bif structVal.numParams + structVal.numIndices != structTypeArgs.size then
       failed ()
     let mut ctorType ← inferType <| mkAppN (mkConst ctorVal.name structLvls) structTypeArgs[*...structVal.numParams]
     let mut args := #[]
@@ -388,7 +388,7 @@ private partial def visitProj (e : Expr) (structName : Name) (idx : Nat) (struct
         j := i
       let .forallE _ dom body _ := ctorType | failed ()
       let dom := dom.instantiateRevRange j i args
-      if prop then unless ← isProp dom do failed ()
+      bif prop then unless ← isProp dom do failed ()
       args := args.push <| Expr.proj structName i struct
       ctorType := body
       lastFieldTy := dom
@@ -417,12 +417,12 @@ private def main (e : Expr) : MetaM Expr := do
   Prod.fst <$> withTraceNode `Meta.letToHave (fun
       | .ok (_, msg) => pure msg
       | .error ex => pure ex.toMessageData) do
-    if hasDepLet e then
+    bif hasDepLet e then
       withTrackingZetaDelta <|
       withTransparency TransparencyMode.all <|
       withInferTypeConfig do
         let (r, s) ← visit e |>.run {} |>.run {}
-        if s.count == 0 then
+        bif s.count == 0 then
           trace[Meta.letToHave] "result: (no change)"
         else
           trace[Meta.letToHave] "result:{indentExpr r.expr}"

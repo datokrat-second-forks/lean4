@@ -18,7 +18,7 @@ namespace Lean.Meta
 def compatibleCtors (ctorName₁ ctorName₂ : Name) : MetaM Bool := do
   let ctorInfo₁ ← getConstInfoCtor ctorName₁
   let ctorInfo₂ ← getConstInfoCtor ctorName₂
-  if ctorInfo₁.induct != ctorInfo₂.induct then
+  bif ctorInfo₁.induct != ctorInfo₂.induct then
     return false
   else
     let (_, _, ctorType₁) ← forallMetaTelescope ctorInfo₁.type

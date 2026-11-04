@@ -83,7 +83,7 @@ public def mkCasesOnSameCtorHet (declName : Name) (indName : Name) : MetaM Unit 
               let motive2 ← mkLambdaFVars ism2 (mkAppN motive (ism1 ++ ism2))
               let alt ← forallTelescope ctorType fun zs2 _ => do
                 mkLambdaFVars zs2 <| mkAppN alts[i]! (zs1 ++ zs2)
-              let e := if info.numCtors = 1 then
+              let e := bif info.numCtors =ᵇ 1 then
                 let casesOn := mkConst (mkCasesOnName indName) (v :: us)
                 mkAppN casesOn (params ++ #[motive2] ++ ism2 ++ #[alt])
               else
@@ -161,7 +161,7 @@ public def mkCasesOnSameCtor (declName : Name) (indName : Name) : MetaM Unit := 
           let ctorApp2 := mkAppN ctor fields2
           let e := mkAppN motive (is ++ #[ctorApp1, ctorApp2, (← mkEqRefl (mkNatLit i))])
           let e ← mkForallFVars zs12 e
-          let e ← if zs12.isEmpty then mkArrow (mkConst ``Unit) e else pure e
+          let e ← bif zs12.isEmpty then mkArrow (mkConst ``Unit) e else pure e
           let name := match ctorName with
             | Name.str _ s => Name.mkSimple s
             | _ => Name.mkSimple s!"alt{i+1}"
@@ -194,7 +194,7 @@ public def mkCasesOnSameCtor (declName : Name) (indName : Name) : MetaM Unit := 
             let some (goal, _) ← Cases.unifyEqs? newRefls.size goal {}
                 | throwError "unifyEqns? unexpectedly closed goal"
             let hyp := alts[i]!
-            let hyp := if zs1.isEmpty && zs2.isEmpty then mkApp hyp (mkConst ``Unit.unit) else hyp
+            let hyp := bif zs1.isEmpty && zs2.isEmpty then mkApp hyp (mkConst ``Unit.unit) else hyp
             let [] ← goal.apply hyp
               | throwError "could not apply {hyp} to close\n{goal}"
             mkLambdaFVars (zs1 ++ zs2) (← instantiateMVars alt)

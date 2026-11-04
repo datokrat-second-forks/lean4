@@ -61,9 +61,9 @@ def validateDefEqAttr (declName : Name) : AttrM Unit := do
           addPPExplicitToExposeDiff lhs rhs
         let mut msg := m!"Not a definitional equality: the left-hand side{indentExpr lhs}\nis \
           not definitionally equal to the right-hand side{indentExpr rhs}"
-        if (← getEnv).isExporting then
+        bif (← getEnv).isExporting then
           let okPrivately ← withoutExporting <| isDefEqCareful lhs rhs
-          if okPrivately then
+          bif okPrivately then
             msg := msg ++ .note m!"This theorem is exported from the current module. \
               This requires that all definitions that need to be unfolded to prove this \
               theorem must be exposed."
@@ -129,13 +129,13 @@ private partial def isRflProofCore (type : Expr) (proof : Expr) : CoreM Bool := 
     else
       return false
   | _ =>
-    if type.isAppOfArity ``Eq 3 then
-      if proof.isAppOfArity ``Eq.refl 2 || proof.isAppOfArity ``rfl 2 then
+    bif type.isAppOfArity ``Eq 3 then
+      bif proof.isAppOfArity ``Eq.refl 2 || proof.isAppOfArity ``rfl 2 then
         return true
-      else if proof.isAppOfArity ``Eq.symm 4 then
+      else bif proof.isAppOfArity ``Eq.symm 4 then
         -- `Eq.symm` of rfl proof is a rfl proof
         isRflProofCore type proof.appArg! -- small hack: we don't need to set the exact type
-      else if proof.getAppFn.isConst then
+      else bif proof.getAppFn.isConst then
         -- The application of a `defeq` or `backward_defeq` theorem is a `rfl` proof
         let env ← getEnv
         let c := proof.getAppFn.constName!
@@ -186,6 +186,6 @@ def inferDefEqAttr (declName : Name) : MetaM Unit := do
       unless strict do
         logError m!"Theorem {declName} has a `rfl`-proof but could not be validated \
           as a definitional equality:{indentD e.toMessageData}"
-    if strict then
+    bif strict then
       defeqAttr.setTag declName
     backwardDefeqAttr.setTag declName

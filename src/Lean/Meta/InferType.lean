@@ -35,9 +35,9 @@ This function reduces the new application to `f m = f n`.
 We use this to implement `inferAppType`.
 -/
 partial def Expr.instantiateBetaRevRange (e : Expr) (start : Nat) (stop : Nat) (args : Array Expr) : Expr :=
-  if e.hasLooseBVars && stop > start then
+  bif e.hasLooseBVars && stop >ᵇ start then
     assert! stop ≤ args.size
-    if args.any (·.consumeMData.isLambda) start stop then
+    bif args.any (·.consumeMData.isLambda) start stop then
       visit e 0 |>.run
     else
       -- If there are no lambdas, then `instantiateRevRange` suffices.
@@ -52,12 +52,12 @@ where
     -- Recall that `looseBVarRange` for `Expr.bvar` is `vidx+1`.
     -- So, we must have `offset ≤ vidx`, since `offset < e.looseBVarRange`
     let n := stop - start
-    if vidx < offset + n then
+    bif vidx <ᵇ offset + n then
       args[stop - (vidx - offset) - 1]!.liftLooseBVars 0 offset
     else
       Expr.bvar (vidx - n)
   visitWithoutBeta (e : Expr) (offset : Nat) : MonadStateCacheT (ExprStructEq × Nat) Expr Id Expr := do
-    if offset >= e.looseBVarRange then
+    bif offset ≥ᵇ e.looseBVarRange then
       -- `e` doesn't have free variables
       return e
     else
@@ -70,7 +70,7 @@ where
   visitApp (e f a : Expr) (offset : Nat) : MonadStateCacheT (ExprStructEq × Nat) Expr Id Expr :=
     return e.updateApp! (← visitWithoutBeta f offset) (← visit a offset)
   visit (e : Expr) (offset : Nat) : MonadStateCacheT (ExprStructEq × Nat) Expr Id Expr :=
-    if offset >= e.looseBVarRange then
+    bif offset ≥ᵇ e.looseBVarRange then
       -- `e` doesn't have free variables
       return e
     else checkCache ({ val := e : ExprStructEq }, offset) fun _ => do
@@ -84,7 +84,7 @@ where
       | .app f a =>
         let head := e.getAppFn
         -- try to beta reduce if the head is a bound variable
-        if head.isBVar then
+        bif head.isBVar then
           -- using `visit` instead of `visitBVar` for the `offset >= vidx` check and for caching `liftLooseBVars`
           let head ← visit head offset
           let revArgs ← e.getAppRevArgs.mapM (visit · offset)
@@ -120,7 +120,7 @@ def throwIncorrectNumberOfLevels {α} (constName : Name) (us : List Level) : Met
 
 private def inferConstType (c : Name) (us : List Level) : MetaM Expr := do
   let cinfo ← getConstVal c
-  if cinfo.levelParams.length == us.length then
+  bif cinfo.levelParams.length == us.length then
     instantiateTypeLevelParams cinfo us
   else
     throwIncorrectNumberOfLevels c us
@@ -137,15 +137,15 @@ private structure LevelSubst where
   lvls       : List Level := []
 
 @[inline] private def LevelSubst.apply (σ : LevelSubst) (u : Level) : Level :=
-  if σ.paramNames.isEmpty then u else u.instantiateParams σ.paramNames σ.lvls
+  bif σ.paramNames.isEmpty then u else u.instantiateParams σ.paramNames σ.lvls
 
 @[inline] private def LevelSubst.applyList (σ : LevelSubst) (us : List Level) : List Level :=
-  if σ.paramNames.isEmpty then us else us.map σ.apply
+  bif σ.paramNames.isEmpty then us else us.map σ.apply
 
 /-- `inferConstType c us`, as the uninstantiated type and the substitution to apply to it. -/
 private def inferConstTypeLazy (c : Name) (us : List Level) : MetaM (Expr × LevelSubst) := do
   let cinfo ← getConstVal c
-  if cinfo.levelParams.length == us.length then
+  bif cinfo.levelParams.length == us.length then
     return (cinfo.type, { paramNames := cinfo.levelParams, lvls := us })
   else
     throwIncorrectNumberOfLevels c us
@@ -159,7 +159,7 @@ private def inferProjType (structName : Name) (idx : Nat) (e : Expr) : MetaM Exp
     unless structVal.name == structName do
       failed ()
     let structTypeArgs := structType.getAppArgs
-    if structVal.numParams + structVal.numIndices != structTypeArgs.size then
+    bif structVal.numParams + structVal.numIndices != structTypeArgs.size then
       failed ()
     else do
       let mut ctorType ← inferAppType (mkConst ctorVal.name structLvls) structTypeArgs[*...<structVal.numParams]
@@ -167,7 +167,7 @@ private def inferProjType (structName : Name) (idx : Nat) (e : Expr) : MetaM Exp
         ctorType ← whnf ctorType
         match ctorType with
         | .forallE _ _ body _ =>
-          if body.hasLooseBVars then
+          bif body.hasLooseBVars then
             ctorType := body.instantiate1 <| mkProj structName i e
           else
             ctorType := body
@@ -192,7 +192,7 @@ def getLevel (type : Expr) : MetaM Level := do
   match typeType with
   | Expr.sort lvl     => return lvl
   | Expr.mvar mvarId  =>
-    if (← mvarId.isReadOnlyOrSyntheticOpaque) then
+    bif (← mvarId.isReadOnlyOrSyntheticOpaque) then
       throwTypeExpected type
     else
       let lvl ← mkFreshLevelMVar
@@ -229,7 +229,7 @@ private def inferFVarType (fvarId : FVarId) : MetaM Expr := do
   | none   => fvarId.throwUnknown
 
 @[inline] private def checkInferTypeCache (e : Expr) (inferType : MetaM Expr) : MetaM Expr := do
-  if !(← read).cacheInferType || e.hasMVar then
+  bif !(← read).cacheInferType || e.hasMVar then
     Core.checkInterrupted
     inferType
   else
@@ -253,7 +253,7 @@ because it overrides unrelated configurations.
 @[inline] def withInferTypeConfig (x : MetaM α) : MetaM α :=
   withAtLeastTransparency .default do
     let cfg ← getConfig
-    if cfg.beta && cfg.iota && cfg.zeta && cfg.zetaHave && cfg.zetaDelta && cfg.proj == .yesWithDelta && cfg.etaStruct == .all then
+    bif cfg.beta && cfg.iota && cfg.zeta && cfg.zetaHave && cfg.zetaDelta && cfg.proj == .yesWithDelta && cfg.etaStruct == .all then
       x
     else
       withConfig (fun cfg => { cfg with beta := true, iota := true, zeta := true, zetaHave := true, zetaDelta := true, proj := .yesWithDelta, etaStruct := .all }) x
@@ -441,7 +441,7 @@ where
   checkProp (σ : LevelSubst) : (e : Expr) → (numArgs : Nat) → ArrowPropResult
     | .sort u,          0   =>
       let u := σ.apply u
-      if u.isNeverZero then .false else if u.isZero then .true else .undef
+      bif u.isNeverZero then .false else bif u.isZero then .true else .undef
     | .forallE _ _ b _, n+1 => checkProp σ b n
     | .mdata _ e,       n   => checkProp σ e n
     /- `outParam` is used in many polymorphic functions in Lean. -/
@@ -618,7 +618,7 @@ def arrowDomainsN (n : Nat) (type : Expr) : MetaM (Array Expr) := do
       throwError "type {type} does not have {n} parameters"
     let types ← xs.mapM (inferType ·)
     for t in types do
-      if t.hasAnyFVar (fun fvar => xs.contains (.fvar fvar)) then
+      bif t.hasAnyFVar (fun fvar => xs.contains (.fvar fvar)) then
         throwError "unexpected dependent type {t} in {type}"
     return types
 

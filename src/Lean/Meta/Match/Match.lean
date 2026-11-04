@@ -118,9 +118,9 @@ private def checkNumPatterns (numDiscrs : Nat) (lhss : List AltLHS) : MetaM Unit
     let doThrow (kind : String) := withExistingLocalDecls lhs.fvarDecls do
       throwIncorrectNumberOfPatternsAt lhs.ref kind numDiscrs lhs.patterns.length
         (lhs.patterns.map Pattern.toMessageData)
-    if lhs.patterns.length < numDiscrs then
+    bif lhs.patterns.length <ᵇ numDiscrs then
       doThrow "Not enough"
-    else if lhs.patterns.length > numDiscrs then
+    else bif lhs.patterns.length >ᵇ numDiscrs then
       -- This case should be impossible, as an alternative with too many patterns will cause an
       -- error to be thrown in `Lean.Elab.Term.elabPatterns`
       doThrow "Too many"
@@ -133,7 +133,7 @@ private partial def withEqs (lhs rhs : Array Expr) (discrInfos : Array DiscrInfo
   go 0 #[]
 where
   go (i : Nat) (hs : Array Expr) : MetaM α := do
-    if i < lhs.size then
+    bif i <ᵇ lhs.size then
       if let some hName := discrInfos[i]!.hName? then
         withLocalDeclD hName (← mkEqHEq lhs[i]! rhs[i]!) fun h =>
           go (i+1) (hs.push h)
@@ -190,17 +190,17 @@ where
     | lhs::lhss =>
       let idx := notAlts.size
       let xs := lhs.fvarDecls.toArray.map LocalDecl.toExpr
-      let (notAltHs, notAltIdxs) ← if isSplitter.isSome then mkSplitterHyps idx lhs notAlts else pure (#[], #[])
+      let (notAltHs, notAltIdxs) ← bif isSplitter.isSome then mkSplitterHyps idx lhs notAlts else pure (#[], #[])
       let minorType ← mkMinorType xs lhs notAltHs
       -- We only compute a `notAlt` if the index of the current alternative is part of the overlaps,
       -- that is `idx ∈ isSplitter.get!.overlapping idx'` for some alternative index `idx'`.
-      let notAlt ← if overlappingAlts.contains idx then mkNotAlt xs lhs else pure default
+      let notAlt ← bif overlappingAlts.contains idx then mkNotAlt xs lhs else pure default
       let hasParams := !xs.isEmpty || !notAltHs.isEmpty || discrInfos.any fun info => info.hName?.isSome
-      let minorType := if hasParams then minorType else mkSimpleThunkType minorType
+      let minorType := bif hasParams then minorType else mkSimpleThunkType minorType
       let minorName := (`h).appendIndexAfter (idx+1)
       trace[Meta.Match.debug] "minor premise {minorName} : {minorType}"
       withLocalDeclD minorName minorType fun minor => do
-        let rhs    := if hasParams then mkAppN minor xs else mkApp minor (mkConst `Unit.unit)
+        let rhs    := bif hasParams then mkAppN minor xs else mkApp minor (mkConst `Unit.unit)
         let minors := minors.push minor
         let altInfos := altInfos.push { numFields := xs.size, numOverlaps := notAltHs.size, hasUnitThunk := !hasParams }
         let fvarDecls ← lhs.fvarDecls.mapM instantiateLocalDeclMVars
@@ -285,8 +285,8 @@ def isCurrVarInductive (p : Problem) : MetaM Bool := do
     return val?.isSome
 
 private def isConstructorTransition (p : Problem) : StateRefT State MetaM Bool := do
-  if !(← isCurrVarInductive p) then return false
-  if p.alts.isEmpty then
+  bif !(← isCurrVarInductive p) then return false
+  bif p.alts.isEmpty then
     /- When there are no alternatives left and we have already accumulated enough
        counter-examples, stop exploring further case splits. This prevents
        combinatorial explosion when generating "missing cases" diagnostics. -/
@@ -306,8 +306,8 @@ private def isValueTransition (p : Problem) : Bool :=
      | _                    => false
 
 private def isValueOnlyTransitionCore (p : Problem) (isValue : Expr → MetaM Bool) : MetaM Bool := do
-  if hasVarPattern p then return false
-  if !hasValPattern p then return false
+  bif hasVarPattern p then return false
+  bif !hasValPattern p then return false
   p.alts.allM fun alt => do
      match alt.patterns with
      | .val v :: _   => isValue v
@@ -360,9 +360,9 @@ as `x ≋ e` If
 -/
 private def reorientCnstrs (alt : Alt) : Alt :=
   let cnstrs := alt.cnstrs.map fun (lhs, rhs) =>
-    if rhs.isFVar && alt.isLocalDecl rhs.fvarId! then
+    bif rhs.isFVar && alt.isLocalDecl rhs.fvarId! then
       (rhs, lhs)
-    else if !lhs.isFVar && rhs.isFVar then
+    else bif !lhs.isFVar && rhs.isFVar then
       (rhs, lhs)
     else
       (lhs, rhs)
@@ -379,9 +379,9 @@ user-friendly than showing possibly match-compilation-internal variable names.
 private def filterTrivialCnstrs (alt : Alt) : MetaM Alt := do
    let cnstrs ← withExistingLocalDecls alt.fvarDecls do
      alt.cnstrs.filterM fun (lhs, rhs) => do
-       if (← isDefEqGuarded lhs rhs) then
+       bif (← isDefEqGuarded lhs rhs) then
          return false
-       else if lhs.isFVar then
+       else bif lhs.isFVar then
          return false
        else
          return true
@@ -403,8 +403,8 @@ where
     match cnstrs with
     | [] => return (none, [])
     | (lhs, rhs) :: cnstrs =>
-      if lhs.isFVar && alt.isLocalDecl lhs.fvarId! then
-        if !(← dependsOn rhs lhs.fvarId!) && (← isDefEqGuarded (← inferType lhs) (← inferType rhs)) then
+      bif lhs.isFVar && alt.isLocalDecl lhs.fvarId! then
+        bif !(← dependsOn rhs lhs.fvarId!) && (← isDefEqGuarded (← inferType lhs) (← inferType rhs)) then
           return (some (lhs.fvarId!, rhs), cnstrs)
       let (p, cnstrs) ← go cnstrs
       return (p, (lhs, rhs) :: cnstrs)
@@ -421,7 +421,7 @@ where
     | some alt => go alt
     | none =>
       let alt ← filterTrivialCnstrs alt
-      if alt.cnstrs.isEmpty then
+      bif alt.cnstrs.isEmpty then
         mvarId.withContext do
           let eType ← inferType alt.rhs
           let (notAltsMVarIds, _, eType) ← forallMetaBoundedTelescope eType alt.notAltIdxs.size
@@ -454,7 +454,7 @@ private partial def contradiction (mvarId : MVarId) : MetaM Bool := do
   mvarId.withContext do
     withTraceNode `Meta.Match.match (msg := (fun _ => return m!"Match.contradiction")) do
     trace[Meta.Match.match] m!"Match.contradiction:\n{mvarId}"
-    if (← mvarId.contradictionCore {}) then
+    bif (← mvarId.contradictionCore {}) then
       trace[Meta.Match.match] "Contradiction found!"
       return true
     else
@@ -484,7 +484,7 @@ where
     | [] =>
       let mvarId ← p.mvarId.exfalso
       /- TODO: allow users to configure which tactic is used to close leaves. -/
-      if (← contradiction mvarId) then
+      bif (← contradiction mvarId) then
         trace[Meta.Match.match] "contradiction succeeded"
       else
         trace[Meta.Match.match] "contradiction failed, missing alternative"
@@ -539,7 +539,7 @@ private def throwCasesException (p : Problem) (ex : Exception) : MetaM α := do
   match ex with
   | .error ref msg =>
     let exampleMsg :=
-      if hasNonTrivialExample p then m!" after processing{indentD <| examplesToMessageData p.examples}" else ""
+      bif hasNonTrivialExample p then m!" after processing{indentD <| examplesToMessageData p.examples}" else ""
     throw <| Exception.error ref <| msg.composePreservingKind <| m!"{exampleMsg}\n" ++
               "the dependent pattern matcher can solve the following kinds of equations\n" ++
               "- <var> = <term> and <term> = <var>\n" ++
@@ -550,7 +550,7 @@ private def throwCasesException (p : Problem) (ex : Exception) : MetaM α := do
 private def collectCtors (p : Problem) : Array Name :=
   p.alts.foldl (init := #[]) fun ctors alt =>
     match alt.patterns with
-    | .ctor n _ _ _ :: _ => if ctors.contains n then ctors else ctors.push n
+    | .ctor n _ _ _ :: _ => bif ctors.contains n then ctors else ctors.push n
     | _                  => ctors
 
 private def processConstructor (p : Problem) : MetaM (Array Problem) := do
@@ -560,7 +560,7 @@ private def processConstructor (p : Problem) : MetaM (Array Problem) := do
     -- We use a sparse case analysis only if there is at least one non-constructor pattern,
     -- but not just because there are constructors missing (in that case we benefit from
     -- the eager split in ruling out constructors by type or by a more explicit error message)
-    if backward.match.sparseCases.get (← getOptions) && hasInaccessiblePattern p then
+    bif backward.match.sparseCases.get (← getOptions) && hasInaccessiblePattern p then
       let ctors := collectCtors p
       trace[Meta.Match.match] "using sparse cases: {ctors}"
       pure (some ctors)
@@ -571,22 +571,22 @@ private def processConstructor (p : Problem) : MetaM (Array Problem) := do
        try
          p.mvarId.cases x.fvarId! (interestingCtors? := interestingCtors?)
        catch ex =>
-         if p.alts.isEmpty then
+         bif p.alts.isEmpty then
            /- If we have no alternatives and dependent pattern matching fails, then a "missing cases" error is better than a "stuck" error message. -/
            return none
          else
            throwCasesException p ex
-     if subgoals.isEmpty then
+     bif subgoals.isEmpty then
        /- Easy case: we have solved problem `p` since there are no subgoals -/
        return some #[]
-     else if !p.alts.isEmpty then
+     else bif !p.alts.isEmpty then
        return some subgoals
      else do
        let isRec ← withGoalOf p <| hasRecursiveType x
         /- If there are no alternatives and the type of the current variable is recursive, we do NOT consider
           a constructor-transition to avoid nontermination.
           TODO: implement a more general approach if this is not sufficient in practice -/
-       if isRec then
+       bif isRec then
          return none
        else
          return some subgoals
@@ -630,12 +630,12 @@ private def processConstructor (p : Problem) : MetaM (Array Problem) := do
 private def processNonVariable (p : Problem) : MetaM Problem := withGoalOf p do
   let x :: xs := p.vars | unreachable!
   if let some (ctorVal, xArgs) ← withTransparency .default <| constructorApp'? x then
-    if hasCtorPattern p then
+    bif hasCtorPattern p then
       let xFields := xArgs.extract ctorVal.numParams xArgs.size
       let alts ← p.alts.filterMapM fun alt => do
         match alt.patterns with
         | .ctor ctorName _ _ fields :: ps   =>
-          if ctorName != ctorVal.name then
+          bif ctorName != ctorVal.name then
             return none
           else
             return some { alt with patterns := fields ++ ps }
@@ -653,7 +653,7 @@ private def processNonVariable (p : Problem) : MetaM Problem := withGoalOf p do
 private def collectValues (p : Problem) : Array Expr :=
   p.alts.foldl (init := #[]) fun values alt =>
     match alt.patterns with
-    | .val v :: _ => if values.contains v then values else values.push v
+    | .val v :: _ => bif values.contains v then values else values.push v
     | _           => values
 
 private def isFirstPatternInaccessible (alt : Alt) : Bool :=
@@ -680,7 +680,7 @@ private def processValue (p : Problem) : MetaM (Array Problem) := do
   let subgoals ← caseValues p.mvarId x.fvarId! values (needHyps := needHyps)
   subgoals.mapIdxM fun i subgoal => do
     trace[Meta.Match.match] "processValue subgoal\n{MessageData.ofGoal subgoal.mvarId}"
-    if h : i < values.size then
+    bif h : i <ᵇ values.size then
       let value := values[i]
       -- (x = value) branch
       let subst := subgoal.subst
@@ -706,7 +706,7 @@ private def processValue (p : Problem) : MetaM (Array Problem) := do
 private def collectArraySizes (p : Problem) : Array Nat :=
   p.alts.foldl (init := #[]) fun sizes alt =>
     match alt.patterns with
-    | .arrayLit _ ps :: _ => let sz := ps.length; if sizes.contains sz then sizes else sizes.push sz
+    | .arrayLit _ ps :: _ => let sz := ps.length; bif sizes.contains sz then sizes else sizes.push sz
     | _                   => sizes
 
 private def processArrayLit (p : Problem) : MetaM (Array Problem) := do
@@ -715,7 +715,7 @@ private def processArrayLit (p : Problem) : MetaM (Array Problem) := do
   let sizes := collectArraySizes p
   let subgoals ← caseArraySizes p.mvarId x.fvarId! sizes
   subgoals.mapIdxM fun i subgoal => do
-    if h : i < sizes.size then
+    bif h : i <ᵇ sizes.size then
       let size     := sizes[i]
       let subst    := subgoal.subst
       let elems    := subgoal.elems.toList
@@ -759,7 +759,7 @@ private def expandIntValuePattern (p : Problem) : MetaM Problem := do
     | .val n :: ps =>
       match (← getIntValue? n) with
       | some i =>
-        if i >= 0 then
+        bif i ≥ᵇ 0 then
         return { alt with patterns := .ctor ``Int.ofNat [] [] [.val (toExpr i.toNat)] :: ps }
         else
         return { alt with patterns := .ctor ``Int.negSucc [] [] [.val (toExpr (-(i + 1)).toNat)] :: ps }
@@ -822,9 +822,9 @@ private def List.moveToFront [Inhabited α] (as : List α) (i : Nat) : List α :
 
 /-- Move variable `#i` to the beginning of the to-do list `p.vars`. -/
 private def moveToFront (p : Problem) (i : Nat) : Problem :=
-  if i == 0 then
+  bif i == 0 then
     p
-  else if i < p.vars.length then
+  else bif i <ᵇ p.vars.length then
     { p with
       vars := List.moveToFront p.vars i
       alts := p.alts.map fun alt => { alt with patterns := List.moveToFront alt.patterns i }
@@ -843,7 +843,7 @@ private def firstRefutablePattern (p : Problem) : Option Nat :=
   | _ => none
 
 def isExFalsoTransition (p : Problem) : MetaM Bool := do
-  if p.alts.isEmpty then
+  bif p.alts.isEmpty then
     withGoalOf p do
       let targetType ← p.mvarId.getType
       return !targetType.isFalse
@@ -863,7 +863,7 @@ def hasIndependentPatterns (p : Problem) : Bool :=
     for v in p.vars, p in alt.patterns do
       match p with
       | .inaccessible e =>
-        if e == v then
+        bif e == v then
           -- Skip inaccessible pattern that's are equal to the variable, these are “done”
           continue
         else
@@ -880,7 +880,7 @@ def processIndependentPatterns (p : Problem) : MetaM Problem := withGoalOf p do
     for var in p.vars, pat in alt.patterns do
       match pat with
       | .inaccessible e =>
-        if e == var then
+        bif e == var then
           donePrefix := donePrefix + 1
         else
           break
@@ -901,7 +901,7 @@ def processIndependentPatterns (p : Problem) : MetaM Problem := withGoalOf p do
         trace[Meta.Match.match] "processing variable pattern"
         let patterns := (p.vars.take (donePrefix + 1)).map .inaccessible ++ remainingPats
         let alt' ← withExistingLocalDecls alt.fvarDecls do
-          if (← isDefEqGuarded (← fvarId.getType) (← inferType v)) then
+          bif (← isDefEqGuarded (← fvarId.getType) (← inferType v)) then
             return { alt with patterns }.replaceFVarId fvarId v
           else
             let cnstrs := (mkFVar fvarId, v) :: alt.cnstrs
@@ -941,7 +941,7 @@ def processIndependentPatterns (p : Problem) : MetaM Problem := withGoalOf p do
   return { p with alts := alts' }
 
 private def isFirstVarDoneTransition (p : Problem) : Bool := Id.run do
-  if p.alts.isEmpty then
+  bif p.alts.isEmpty then
     return false
   let x :: _ := p.vars | unreachable!
   return p.alts.all fun alt => Id.run do
@@ -956,7 +956,7 @@ private def processFirstVarDone (p : Problem) : Problem :=
     alts := p.alts.map fun alt => { alt with patterns := alt.patterns.tail! } }
 
 private def tracedForM (xs : Array α) (process : α → StateRefT State MetaM Unit) : StateRefT State MetaM Unit :=
-  if xs.size > 1 then
+  bif xs.size >ᵇ 1 then
     for x in xs, i in [:xs.size] do
       withTraceNode `Meta.Match.match (msg := (fun _ => return m!"subgoal {i+1}/{xs.size}")) do
         process x
@@ -966,33 +966,33 @@ private def tracedForM (xs : Array α) (process : α → StateRefT State MetaM U
 
 private partial def process (p : Problem) : StateRefT State MetaM Unit := do
   traceState p
-  if isDone p then
+  bif isDone p then
     traceStep ("leaf")
     processLeaf p
     return
 
-  if (← isExFalsoTransition p) then
+  bif (← isExFalsoTransition p) then
     traceStep ("ex falso")
     let p ← processExFalso p
     process p
     return
 
-  if hasIndependentPatterns p then
+  bif hasIndependentPatterns p then
     traceStep ("processing independent prefixes of patterns")
     let p ← processIndependentPatterns p
     process p
     return
 
-  if isFirstVarDoneTransition p then
+  bif isFirstVarDoneTransition p then
     traceStep ("first var done")
     let p := processFirstVarDone p
     process p
     return
 
-  if backward.match.rowMajor.get (← getOptions) then
+  bif backward.match.rowMajor.get (← getOptions) then
     match firstRefutablePattern p with
     | some i =>
-      if i > 0 then
+      bif i >ᵇ 0 then
         traceStep ("move var to front")
         process (moveToFront p i)
         return
@@ -1006,38 +1006,38 @@ private partial def process (p : Problem) : StateRefT State MetaM Unit := do
         process p
         return
 
-  if (← isNatValueTransition p) then
+  bif (← isNatValueTransition p) then
     traceStep ("nat value to constructor")
     process (← expandNatValuePattern p)
     return
 
-  if (← isIntValueTransition p) then
+  bif (← isIntValueTransition p) then
     traceStep ("int value to constructor")
     process (← expandIntValuePattern p)
     return
 
-  if (← isFinValueTransition p) then
+  bif (← isFinValueTransition p) then
     traceStep ("fin value to constructor")
     process (← expandFinValuePattern p)
     return
 
-  if (← isBitVecValueTransition p) then
+  bif (← isBitVecValueTransition p) then
     traceStep ("bitvec value to constructor")
     process (← expandBitVecValuePattern p)
     return
 
-  if !isNextVar p then
+  bif !isNextVar p then
     traceStep ("non variable")
     let p ← processNonVariable p
     process p
     return
 
-  if (← isConstructorTransition p) then
+  bif (← isConstructorTransition p) then
     let ps ← processConstructor p
     tracedForM ps process
     return
 
-  if p.alts.isEmpty then
+  bif p.alts.isEmpty then
     -- Note that for inductive types, `isConstructorTransition` does something on empty matches
     -- For all others, drop the variable here
     traceStep ("empty match transition")
@@ -1045,17 +1045,17 @@ private partial def process (p : Problem) : StateRefT State MetaM Unit := do
     process p
     return
 
-  if isValueTransition p then
+  bif isValueTransition p then
     let ps ← processValue p
     tracedForM ps process
     return
 
-  if isArrayLitTransition p then
+  bif isArrayLitTransition p then
     let ps ← processArrayLit p
     tracedForM ps process
     return
 
-  if (← hasNatValPattern p) then
+  bif (← hasNatValPattern p) then
     -- This branch is reachable when `p`, for example, is just values without an else-alternative.
     -- We added it just to get better error messages.
     traceStep ("nat value to constructor")
@@ -1066,7 +1066,7 @@ private partial def process (p : Problem) : StateRefT State MetaM Unit := do
   throwNonSupported p
 
 private def getUElimPos? (matcherLevels : List Level) (uElim : Level) : MetaM (Option Nat) :=
-  if uElim == Level.zero then
+  bif uElim == Level.zero then
     return none
   else match matcherLevels.idxOf? uElim with
     | none => throwError "Dependent match elimination failed: Universe level not found"
@@ -1102,7 +1102,7 @@ def mkMatcherAuxDefinition (name : Name) (type : Expr) (value : Expr) (isSplitte
   let mut nameNew? := none
   unless isSplitter do
     nameNew? := (matcherExt.getState env).find? key
-    if nameNew?.isNone && key.isPrivate then
+    bif nameNew?.isNone && key.isPrivate then
       -- private contexts may reuse public matchers
       nameNew? := (matcherExt.getState env).find? { key with isPrivate := false }
   match nameNew? with
@@ -1124,10 +1124,10 @@ def mkMatcherAuxDefinition (name : Name) (type : Expr) (value : Expr) (isSplitte
       unless isSplitter do
         modifyEnv fun env => matcherExt.modifyState env fun s => s.insert key name
         addMatcherInfo name mi
-      if compile then
+      bif compile then
         setInlineAttribute name
       enableRealizationsForConst name
-      if compile then
+      bif compile then
         compileDecl decl
     return (mkMatcherConst name, some addMatcher)
 
@@ -1162,7 +1162,7 @@ def withCleanLCtxFor (m : MkMatcherInput) (k : MetaM α) : MetaM α := do
   let s ← m.collectDependencies
   let lctx ← getLCtx
   let lctx := lctx.foldr (init := lctx) fun localDecl lctx =>
-    if s.contains localDecl.fvarId then lctx else lctx.erase localDecl.fvarId
+    bif s.contains localDecl.fvarId then lctx else lctx.erase localDecl.fvarId
   let localInstances := (← getLocalInstances).eraseAll (!s.contains ·)
   withLCtx lctx localInstances k
 
@@ -1186,7 +1186,7 @@ def mkMatcher (input : MkMatcherInput) : MetaM MatcherResult := withCleanLCtxFor
      If it is not Level.zero, we create a matcher that can eliminate in any universe level.
      This is useful for implementing `MatcherApp.addArg` because it may have to change the universe level. -/
   let uElim ← getLevel matchTypeBody
-  let uElimGen ← if uElim == Level.zero then pure Level.zero else mkFreshLevelMVar
+  let uElimGen ← bif uElim == Level.zero then pure Level.zero else mkFreshLevelMVar
   let mkMatcher (type val : Expr) (altInfos : Array AltParamInfo) (s : State) : MetaM MatcherResult := do
     trace[Meta.Match.debug] "matcher value: {val}\ntype: {type}"
     /- The option `bootstrap.gen_matcher_code` is a helper hack. It is useful, for example,
@@ -1218,7 +1218,7 @@ def mkMatcher (input : MkMatcherInput) : MetaM MatcherResult := withCleanLCtxFor
 
     trace[Meta.Match.debug] "matcher: {matcher}"
     let unusedAltIdxs := lhss.length.fold (init := []) fun i _ r =>
-      if s.used.contains i then r else i::r
+      bif s.used.contains i then r else i::r
     return {
       matcher,
       counterExamples := s.counterExamples,
@@ -1229,7 +1229,7 @@ def mkMatcher (input : MkMatcherInput) : MetaM MatcherResult := withCleanLCtxFor
   let motiveType ← mkForallFVars discrs (mkSort uElimGen)
   trace[Meta.Match.debug] "motiveType: {motiveType}"
   withLocalDeclD `motive motiveType fun motive => do
-  if discrInfos.any fun info => info.hName?.isSome then
+  bif discrInfos.any fun info => info.hName?.isSome then
     forallBoundedTelescope matchType numDiscrs fun discrs' _ => do
     let (mvarType, isEqMask) ← withEqs discrs discrs' discrInfos fun eqs => do
       let mvarType ← mkForallFVars eqs (mkAppN motive discrs')
@@ -1246,8 +1246,8 @@ def mkMatcher (input : MkMatcherInput) : MetaM MatcherResult := withCleanLCtxFor
       let mut rfls := #[]
       let mut isEqMaskIdx := 0
       for discr in discrs, info in discrInfos do
-        if info.hName?.isSome then
-          if isEqMask[isEqMaskIdx]! then
+        bif info.hName?.isSome then
+          bif isEqMask[isEqMaskIdx]! then
             rfls := rfls.push (← mkEqRefl discr)
           else
             rfls := rfls.push (← mkHEqRefl discr)
@@ -1288,7 +1288,7 @@ def getMkMatcherInputInContext (matcherApp : MatcherApp) (unfoldNamed : Bool) : 
   let lhss ← forallBoundedTelescope matcherType (some matcherApp.alts.size) fun alts _ =>
     alts.mapM fun alt => do
     let ty ← inferType alt
-    let ty ← if unfoldNamed then unfoldNamedPattern ty else pure ty
+    let ty ← bif unfoldNamed then unfoldNamedPattern ty else pure ty
     forallTelescope ty fun xs body => do
     let xs ← xs.filterM fun x => dependsOn body x.fvarId!
     body.withApp fun _ args => do

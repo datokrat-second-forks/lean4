@@ -74,7 +74,7 @@ def StructureInfo.lt (i₁ i₂ : StructureInfo) : Bool :=
   Name.quickLt i₁.structName i₂.structName
 
 def StructureInfo.getProjFn? (info : StructureInfo) (i : Nat) : Option Name :=
-  if h : i < info.fieldNames.size then
+  bif h : i <ᵇ info.fieldNames.size then
     let fieldName := info.fieldNames[i]
     info.fieldInfo.binSearch { fieldName := fieldName, projFn := default, subobject? := none, binderInfo := default } StructureFieldInfo.lt |>.map (·.projFn)
   else
@@ -112,7 +112,7 @@ def registerStructure (env : Environment) (e : StructureDescr) : Environment :=
   have : Inhabited Environment := ⟨env⟩
   -- Write-once, as for `MapDeclarationExtension.insert`, except for `setStructureParents` below
   -- adding the parent info once the parent projections exist.
-  if structureExt.getState env |>.snd.map.contains e.structName then
+  bif structureExt.getState env |>.snd.map.contains e.structName then
     panic! s!"structure `{e.structName}` is already registered"
   else
     structureExt.addEntry (log := .decl e.structName) env {
@@ -203,7 +203,7 @@ If `structName` contains the field itself, returns that,
 and otherwise recursively looks into parents that are subobjects.
 -/
 partial def findField? (env : Environment) (structName : Name) (fieldName : Name) : Option Name :=
-  if (getStructureFields env structName).contains fieldName then
+  bif (getStructureFields env structName).contains fieldName then
     some structName
   else
     getStructureSubobjects env structName |>.findSome? (findField? env · fieldName)
@@ -220,7 +220,7 @@ partial def findParentProjStruct? (env : Environment) (structName : Name) (projN
 where
   -- Use a cache to navigate the DAG in polynomial time
   go (structName : Name) : StateM NameSet (Option Name) := do
-    if (← get).contains structName then
+    bif (← get).contains structName then
       return none
     else
       let parentInfos := getStructureParentInfo env structName
@@ -248,7 +248,7 @@ private partial def getStructureFieldsFlattenedAux (env : Environment) (structNa
   (getStructureFields env structName).foldl (init := fullNames) fun fullNames fieldName =>
     match isSubobjectField? env structName fieldName with
     | some parentStructName =>
-      let fullNames := if includeSubobjectFields then fullNames.push fieldName else fullNames
+      let fullNames := bif includeSubobjectFields then fullNames.push fieldName else fullNames
       getStructureFieldsFlattenedAux env parentStructName fullNames includeSubobjectFields
     | none                  => fullNames.push fieldName
 
@@ -305,11 +305,11 @@ def mkInheritedDefaultFnOfProjFn (projFn : Name) : Name :=
 private def getFnForFieldUsing? (mkName : Name → Name) (env : Environment) (structName : Name) (fieldName : Name) : Option Name :=
   if let some projName := getProjFnForField? env structName fieldName then
     let defFn := mkName projName
-    if env.contains defFn then defFn else none
+    bif env.contains defFn then defFn else none
   else
     -- Check if we have a default function for a default values overridden by substructure.
     let defFn := mkName (structName ++ fieldName)
-    if env.contains defFn then defFn else none
+    bif env.contains defFn then defFn else none
 
 /--
 Returns the name of the auxiliary definition that defines a default value for the field, if any such definition exists.
@@ -347,7 +347,7 @@ partial def getPathToBaseStructure? (env : Environment) (baseStructName : Name) 
   OptionT.run (go structName []) |>.run' {}
 where
   go (structName : Name) (path : List Name) : OptionT (StateM NameSet) (List Name) := do
-    if baseStructName == structName then
+    bif baseStructName == structName then
       return path.reverse
     else
       guard <| !(← get).contains structName
@@ -508,7 +508,7 @@ where
       for i in *...hi do
         let parent := resOrders[i]![0]!
         let consistent resOrder := resOrder[1...*].all (· != parent)
-        if resOrders[*...<i].all consistent && resOrders[i<...hi].all consistent then
+        bif resOrders[*...<i].all consistent && resOrders[i<...hi].all consistent then
           return (n' == 0, parent)
     -- unreachable, but correct default:
     return (false, resOrders[0]![0]!)

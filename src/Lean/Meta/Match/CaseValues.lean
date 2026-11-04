@@ -97,7 +97,7 @@ public def caseValues (mvarId : MVarId) (fvarId : FVarId) (values : Array Expr) 
       let (subst, thenMVarId) ← introSubstEq thenMVarId (substLHS := true)
       let subgoals := subgoals.push { mvarId := thenMVarId, newHs := #[], subst }
       let (hs', elseMVarId) ←
-        if needHyps then
+        bif needHyps then
           let (elseH, elseMVarId) ← elseMVarId.intro1P
           pure (hs.push elseH, elseMVarId)
         else

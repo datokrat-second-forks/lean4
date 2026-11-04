@@ -99,7 +99,7 @@ def ImportArtifacts.oleanParts (inServer : Bool) (arts : ImportArtifacts) : Arra
     if let some sFile := arts.oleanServer? then
       -- For uniformity, Lake always provides us with .olean.server, so load it only when we are in
       -- server mode or we need it to load further files.
-      if inServer || arts.oleanPrivate?.isSome then
+      bif inServer || arts.oleanPrivate?.isSome then
         fnames := fnames.push sFile
       if let some pFile := arts.oleanPrivate? then
         fnames := fnames.push pFile

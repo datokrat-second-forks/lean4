@@ -36,7 +36,7 @@ builtin_initialize matchPatternAttr : TagAttribute ←
     `match_pattern "mark that a definition can be used in a pattern (remark: the dependent pattern matching compiler will unfold the definition)"
     (validate := fun declName => do
       withExporting (isExporting := !isPrivateName declName) do
-        if !(← getConstInfo declName).isDefinition then
+        bif !(← getConstInfo declName).isDefinition then
           throwError "invalid `@[match_pattern]` attribute, `{.ofConstName declName}` is not an exposed definition")
 
 def hasMatchPatternAttribute (env : Environment) (n : Name) : Bool :=

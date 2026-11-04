@@ -53,7 +53,7 @@ Determines the local declaration kind of a binder using its name.
 Names that begin with `__` are implementation details (`.implDetail`).
 -/
 def LocalDeclKind.ofBinderName (binderName : Name) : LocalDeclKind :=
-  if binderName.isImplementationDetail then
+  bif binderName.isImplementationDetail then
     .implDetail
   else
     .default
@@ -372,7 +372,7 @@ def getFVars (lctx : LocalContext) : Array Expr :=
   lctx.getFVarIds.map mkFVar
 
 private partial def popTailNoneAux (a : PArray (Option LocalDecl)) : PArray (Option LocalDecl) :=
-  if h : a.size = 0 then a
+  bif h : a.size =ᵇ 0 then a
   else match a[a.size - 1] with
     | none   => popTailNoneAux a.pop
     | some _ => a
@@ -386,25 +386,25 @@ def erase (lctx : LocalContext) (fvarId : FVarId) : LocalContext :=
       { fvarIdToDecl      := map.erase fvarId
         decls             := popTailNoneAux (decls.set decl.index none)
         auxDeclToFullName :=
-          if decl.isAuxDecl then auxDeclToFullName.erase fvarId else auxDeclToFullName }
+          bif decl.isAuxDecl then auxDeclToFullName.erase fvarId else auxDeclToFullName }
 
 def pop (lctx : LocalContext) : LocalContext :=
   match lctx with
   | { fvarIdToDecl := map, decls := decls, auxDeclToFullName } =>
-    if _ : decls.size = 0 then lctx
+    bif _ : decls.size =ᵇ 0 then lctx
     else match decls[decls.size - 1] with
       | none      => lctx -- unreachable
       | some decl =>
         { fvarIdToDecl      := map.erase decl.fvarId
           decls             := popTailNoneAux decls.pop
           auxDeclToFullName :=
-            if decl.isAuxDecl then auxDeclToFullName.erase decl.fvarId else auxDeclToFullName }
+            bif decl.isAuxDecl then auxDeclToFullName.erase decl.fvarId else auxDeclToFullName }
 
 def findFromUserName? (lctx : LocalContext) (userName : Name) : Option LocalDecl :=
   lctx.decls.findSomeRev? fun decl =>
     match decl with
     | none      => none
-    | some decl => if decl.userName == userName then some decl else none
+    | some decl => bif decl.userName == userName then some decl else none
 
 def getFromUserName! (lctx : LocalContext) (userName : Name) : LocalDecl :=
   match lctx.findFromUserName? userName with
@@ -416,12 +416,12 @@ def usesUserName (lctx : LocalContext) (userName : Name) : Bool :=
 
 private partial def getUnusedNameAux (lctx : LocalContext) (suggestion : Name) (i : Nat) : Name × Nat :=
   let curr := suggestion.appendIndexAfter i
-  if lctx.usesUserName curr then getUnusedNameAux lctx suggestion (i + 1)
+  bif lctx.usesUserName curr then getUnusedNameAux lctx suggestion (i + 1)
   else (curr, i + 1)
 
 def getUnusedName (lctx : LocalContext) (suggestion : Name) : Name :=
   let suggestion := suggestion.eraseMacroScopes
-  if lctx.usesUserName suggestion then (getUnusedNameAux lctx suggestion 1).1
+  bif lctx.usesUserName suggestion then (getUnusedNameAux lctx suggestion 1).1
   else suggestion
 
 def lastDecl (lctx : LocalContext) : Option LocalDecl :=
@@ -541,16 +541,16 @@ def size (lctx : LocalContext) : Nat :=
   Id.run <| lctx.findDeclRevM? (pure <| f ·)
 
 partial def isSubPrefixOfAux (a₁ a₂ : PArray (Option LocalDecl)) (exceptFVars : Array Expr) (i j : Nat) : Bool :=
-  if h : i < a₁.size then
+  bif h : i <ᵇ a₁.size then
     match a₁[i] with
     | none       => isSubPrefixOfAux a₁ a₂ exceptFVars (i+1) j
     | some decl₁ =>
-      if exceptFVars.any fun fvar => fvar.fvarId! == decl₁.fvarId then
+      bif exceptFVars.any fun fvar => fvar.fvarId! == decl₁.fvarId then
         isSubPrefixOfAux a₁ a₂ exceptFVars (i+1) j
-      else if h2 : j < a₂.size then
+      else bif h2 : j <ᵇ a₂.size then
         match a₂[j] with
         | none       => isSubPrefixOfAux a₁ a₂ exceptFVars i (j+1)
-        | some decl₂ => if decl₁.fvarId == decl₂.fvarId then isSubPrefixOfAux a₁ a₂ exceptFVars (i+1) (j+1) else isSubPrefixOfAux a₁ a₂ exceptFVars i (j+1)
+        | some decl₂ => bif decl₁.fvarId == decl₂.fvarId then isSubPrefixOfAux a₁ a₂ exceptFVars (i+1) (j+1) else isSubPrefixOfAux a₁ a₂ exceptFVars i (j+1)
       else false
   else true
 
@@ -566,7 +566,7 @@ def isSubPrefixOf (lctx₁ lctx₂ : LocalContext) (exceptFVars : Array Expr := 
     let x := xs[i]
     let handleCDecl (n : Name) (ty : Expr) (bi : BinderInfo) : Expr :=
       let ty := ty.abstractRange i xs;
-      if isLambda then
+      bif isLambda then
         Lean.mkLambda n bi ty b
       else
         Lean.mkForall n bi ty b
@@ -574,9 +574,9 @@ def isSubPrefixOf (lctx₁ lctx₂ : LocalContext) (exceptFVars : Array Expr := 
     | some (.cdecl _ _ n ty bi _)  =>
       handleCDecl n ty bi
     | some (.ldecl _ _ n ty val nondep _) =>
-      if nondep && generalizeNondepLet then
+      bif nondep && generalizeNondepLet then
         handleCDecl n ty .default
-      else if !usedLetOnly || b.hasLooseBVar 0 then
+      else bif !usedLetOnly || b.hasLooseBVar 0 then
         let ty  := ty.abstractRange i xs
         let val := val.abstractRange i xs
         mkLet n ty val b nondep
@@ -615,13 +615,13 @@ def mkForall (lctx : LocalContext) (xs : Array Expr) (b : Expr) (usedLetOnly : B
 /-- If option `pp.sanitizeNames` is set to `true`, add tombstone to shadowed local declaration names and ones contains macroscopes. -/
 def sanitizeNames (lctx : LocalContext) : StateM NameSanitizerState LocalContext := do
   let st ← get
-  if !getSanitizeNames st.options then pure lctx else
+  bif !getSanitizeNames st.options then pure lctx else
     StateT.run' (s := ({} : NameSet)) <|
       lctx.decls.size.foldRevM (init := lctx) fun i _ lctx => do
         match lctx.decls[i]! with
         | none      => pure lctx
         | some decl =>
-          if decl.userName.hasMacroScopes || (← get).contains decl.userName then do
+          bif decl.userName.hasMacroScopes || (← get).contains decl.userName then do
             modify fun s => s.insert decl.userName
             let userNameNew ← liftM <| sanitizeName decl.userName
             pure <| lctx.setUserName decl.fvarId userNameNew
@@ -658,9 +658,9 @@ index exclusively, if any.
 def findFromUserNames (lctx : LocalContext) (userNames : Std.HashMap Name α) (start := 0) : Array LocalDecl :=
   Array.reverse <| Id.run <| ExceptT.runCatch do
     let (_, acc) ← lctx.foldrM (init := (userNames, #[])) fun decl (userNames, acc) => do
-      if userNames.isEmpty then throw acc -- stop when we found all user names
-      if decl.index < start then throw acc       -- stop when we passed over the start index
-      if userNames.contains decl.userName then
+      bif userNames.isEmpty then throw acc -- stop when we found all user names
+      bif decl.index <ᵇ start then throw acc       -- stop when we passed over the start index
+      bif userNames.contains decl.userName then
         pure (userNames.erase decl.userName, acc.push decl)
       else
         pure (userNames, acc)
@@ -681,11 +681,11 @@ instance [MonadLift m n] [MonadLCtx m] : MonadLCtx n where
 def getLocalHyps [Monad m] [MonadLCtx m] : m (Array Expr) := do
   let mut hs := #[]
   for d in ← getLCtx do
-    if !d.isImplementationDetail then hs := hs.push d.toExpr
+    bif !d.isImplementationDetail then hs := hs.push d.toExpr
   return hs
 
 def LocalDecl.replaceFVarId (fvarId : FVarId) (e : Expr) (d : LocalDecl) : LocalDecl :=
-  if d.fvarId == fvarId then d
+  bif d.fvarId == fvarId then d
   else match d with
     | .cdecl idx id n type bi k => .cdecl idx id n (type.replaceFVarId fvarId e) bi k
     | .ldecl idx id n type val nondep k => .ldecl idx id n (type.replaceFVarId fvarId e) (val.replaceFVarId fvarId e) nondep k
