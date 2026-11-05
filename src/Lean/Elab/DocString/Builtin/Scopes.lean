@@ -33,6 +33,6 @@ instance : FromDocArg DocScope where
       return .import (modNames.map (·.getId))
     | .ident x =>
       let y := x.getId.eraseMacroScopes
-      bif y == `local then pure .local
+      uif y == `local then pure .local
       else throwErrorAt x "Unexpected identifier, expected `local` or a string of imports"
     | .num n => throwErrorAt n "Unexpected number `{n}`"

@@ -52,11 +52,11 @@ Elaborates a `TerminationBy` to an `TerminationMeasure`.
 def TerminationMeasure.elab (funName : Name) (type : Expr) (arity extraParams : Nat)
     (hint : TerminationBy) : TermElabM TerminationMeasure := withDeclName funName do
   assert! extraParams ≤ arity
-  bif h : hint.vars.size >ᵇ extraParams then
+  uif h : hint.vars.size > extraParams then
     let mut msg := m!"{parameters hint.vars.size} bound in `termination_by`, but the body of " ++
       m!"{funName} only binds {parameters extraParams}."
     if let `($ident:ident) := hint.vars[0] then
-      bif ident.getId.isSuffixOf funName then
+      uif ident.getId.isSuffixOf funName then
           msg := msg ++ m!" (Since Lean v4.6.0, the `termination_by` clause no longer " ++
             "expects the function name here.)"
     throwErrorAt hint.ref msg
@@ -70,7 +70,7 @@ def TerminationMeasure.elab (funName : Name) (type : Expr) (arity extraParams : 
         let body ← Lean.Elab.Term.withSynthesize <| elabTermEnsuringType hint.body none
 
         -- Structural recursion: The body has to be a single parameter, whose index we return
-        bif hint.structural then unless (ys ++ xs).contains body do
+        uif hint.structural then unless (ys ++ xs).contains body do
           let params := MessageData.andList ((ys ++ xs).toList.map (m!"'{·}'"))
           throwErrorAt hint.ref m!"The termination measure of a structurally recursive " ++
             m!"function must be one of the parameters {params}, but{indentExpr body}\nisn't " ++
@@ -114,17 +114,17 @@ def TerminationMeasure.delab (arity : Nat) (extraParams : Nat) (measure : Termin
       -- any variable not mentioned syntactically (it may appear in the `Expr`, so do not just use
       -- `e.bindingBody!.hasLooseBVar`) should be delaborated as a hole.
       let vars  : TSyntaxArray [`ident, `Lean.Parser.Term.hole] :=
-        Array.map (fun (i : Ident) => bif stxBody.raw.hasIdent i.getId then i else hole) vars
+        Array.map (fun (i : Ident) => uif stxBody.raw.hasIdent i.getId then i else hole) vars
       -- drop trailing underscores
       let mut vars := vars
       while ! vars.isEmpty && vars.back!.raw.isOfKind ``hole do vars := vars.pop
-      bif measure.structural then
-        bif vars.isEmpty then
+      uif measure.structural then
+        uif vars.isEmpty then
           `(terminationBy|termination_by structural $stxBody)
         else
           `(terminationBy|termination_by structural $vars* => $stxBody)
       else
-        bif vars.isEmpty then
+        uif vars.isEmpty then
           `(terminationBy|termination_by $stxBody)
         else
           `(terminationBy|termination_by $vars* => $stxBody)

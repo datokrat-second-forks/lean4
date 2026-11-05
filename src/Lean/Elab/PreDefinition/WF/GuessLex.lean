@@ -112,7 +112,7 @@ def naryVarNames (xs : Array Name) : MetaM (Array Name) := do
   let mut ns : Array Name := #[]
   for h : i in *...xs.size do
     let n := xs[i]
-    let n ← bif n.hasMacroScopes then
+    let n ← uif n.hasMacroScopes then
         freshen ns (.mkSimple s!"x{i+1}")
       else
         pure n
@@ -120,7 +120,7 @@ def naryVarNames (xs : Array Name) : MetaM (Array Name) := do
   return ns
   where
     freshen  (ns : Array Name) (n : Name): MetaM Name := do
-      bif !(ns.elem n) && (← resolveGlobalName n).isEmpty then
+      uif !(ns.elem n) && (← resolveGlobalName n).isEmpty then
         return n
       else
         freshen ns (n.appendAfter "'")
@@ -152,12 +152,12 @@ line up).
 -/
 def mayOmitSizeOf (is_mutual : Bool) (args : Array Expr) (x : Expr) : MetaM Bool := do
   let t ← inferType x
-  bif is_mutual
+  uif is_mutual
   then
     withReducible (isDefEq t (.const `Nat []))
   else
     try
-      bif t.hasAnyFVar (fun fvar => args.contains (.fvar fvar)) then
+      uif t.hasAnyFVar (fun fvar => args.contains (.fvar fvar)) then
         pure false
       else
         let u ← getLevel t
@@ -186,12 +186,12 @@ def simpleMeasures (preDefs : Array PreDefinition) (fixedParamPerms : FixedParam
           -- If the `SizeOf` instance produces a constant (e.g. because it's type is a `Prop` or
           -- `Type`), then ignore this parameter
           let sizeOf ← whnfD (← mkAppM ``sizeOf #[x])
-          bif sizeOf.isLit then continue
+          uif sizeOf.isLit then continue
 
           let natFn ← mkLambdaFVars params (← mkAppM ``sizeOf #[x])
           -- Determine if we need to exclude `sizeOf` in the measure we show/pass on.
           let fn ←
-            bif  (← mayOmitSizeOf is_mutual xs x)
+            uif  (← mayOmitSizeOf is_mutual xs x)
             then mkLambdaFVars params x
             else pure natFn
           ret := ret.push { ref := .missing, structural := false, fn, natFn }
@@ -215,7 +215,7 @@ partial def withRecApps {α} (recFnName : Name) (fixedPrefixSize : Nat) (param :
   return as
 where
   processRec (param : Expr) (e : Expr) : M recFnName α Unit := do
-    bif e.getAppNumArgs <ᵇ fixedPrefixSize + 1 then
+    uif e.getAppNumArgs < fixedPrefixSize + 1 then
       loop param (← etaExpand e)
     else
       let a ← k param e.getAppArgs
@@ -224,7 +224,7 @@ where
   processApp (param : Expr) (e : Expr) : M recFnName α Unit := do
     e.withApp fun f args => do
       args.forM (loop param)
-      bif f.isConstOf recFnName then
+      uif f.isConstOf recFnName then
         processRec param e
       else
         loop param f
@@ -233,7 +233,7 @@ where
     modifyGetThe (HasConstCache #[recFnName]) (HasConstCache.contains e |>.run)
 
   loop (param : Expr) (e : Expr) : M recFnName α Unit := do
-    bif !(← containsRecFn e) then
+    uif !(← containsRecFn e) then
       return
     match e with
     | Expr.lam n d b c =>
@@ -255,7 +255,7 @@ where
       else
         loop param b
     | Expr.proj _n _i e => loop param e
-    | Expr.const .. => bif e.isConstOf recFnName then processRec param e
+    | Expr.const .. => uif e.isConstOf recFnName then processRec param e
     | Expr.app .. =>
       match (← matchMatcherApp? (alsoCasesOn := true) e) with
       | some matcherApp =>
@@ -328,15 +328,15 @@ specific.
 -/
 def filterSubsumed (rcs : Array RecCallWithContext ) : Array RecCallWithContext := Id.run do
   rcs.filterPairsM fun rci rcj => do
-    bif rci.caller == rcj.caller && rci.callee == rcj.callee &&
+    uif rci.caller == rcj.caller && rci.callee == rcj.callee &&
       rci.params == rcj.params && rci.args == rcj.args then
       -- same goals; check contexts.
         let lci := rci.ctxt.savedLocalContext
         let lcj := rcj.ctxt.savedLocalContext
-        bif lci.isSubPrefixOf lcj then
+        uif lci.isSubPrefixOf lcj then
           -- rci is better
           return (true, false)
-        else bif lcj.isSubPrefixOf lci then
+        else uif lcj.isSubPrefixOf lci then
           -- rcj is better
           return (false, true)
     return (true, true)
@@ -379,13 +379,13 @@ partial def isNatCmp (e : Expr) : MetaM (Option (Expr × Expr)) := withReducible
       | GE.ge α _ e₁ e₂ => pure (α, e₂, e₁)
       | _ => return none
 
-    bif (←isDefEq α (mkConst ``Nat)) then
+    uif (←isDefEq α (mkConst ``Nat)) then
       return some (e₁, e₂)
     else
       return none
 
 private partial def conjuncts (p : Expr) (acc : List Expr) : List Expr :=
-  bif p.isAppOfArity ``And 2 then
+  uif p.isAppOfArity ``And 2 then
     conjuncts p.appFn!.appArg! (conjuncts p.appArg! acc)
   else
     p :: acc
@@ -403,8 +403,8 @@ where
   boolEq? (t : Expr) : MetaM (Option (Expr × Bool)) := do
     let_expr Eq α c v ← t | return none
     unless α.isConstOf ``Bool do return none
-    bif v.isConstOf ``Bool.true then return some (c, true)
-    bif v.isConstOf ``Bool.false then return some (c, false)
+    uif v.isConstOf ``Bool.true then return some (c, true)
+    uif v.isConstOf ``Bool.false then return some (c, false)
     return none
 
 def complexMeasures (preDefs : Array PreDefinition) (fixedParamPerms : FixedParamPerms)
@@ -429,11 +429,11 @@ def complexMeasures (preDefs : Array PreDefinition) (fixedParamPerms : FixedPara
             if let some (e₁, e₂) ← isNatCmp t then
               -- We only want to consider these expressions if they depend only on the function's
               -- immediate arguments, so check that
-              bif e₁.hasAnyFVar (! params.contains ·) then continue
-              bif e₂.hasAnyFVar (! params.contains ·) then continue
+              uif e₁.hasAnyFVar (! params.contains ·) then continue
+              uif e₂.hasAnyFVar (! params.contains ·) then continue
               -- If e₁ does not depend on any varying parameters, simply ignore it
               let e₁_is_const := ! e₁.hasAnyFVar (varyingFVars.contains ·)
-              let body := bif e₁_is_const then e₂ else mkNatSub e₂ e₁
+              let body := uif e₁_is_const then e₂ else mkNatSub e₂ e₁
               -- Avoid adding simple measures
               unless body.isFVar do
                 let fn ← mkLambdaFVars rc.params body
@@ -485,7 +485,7 @@ def evalRecCall (callerName: Name) (decrTactic? : Option DecreasingBy) (callerMe
       let mvarId := mvar.mvarId!
       let mvarId ← mvarId.cleanup
       try
-        bif rel =ᵇ .eq then
+        uif rel = .eq then
           MVarId.refl mvarId
         else do
           Lean.Elab.Term.TermElabM.run' do Term.withDeclName callerName do
@@ -559,9 +559,9 @@ def inspectCall (rc : RecCallCache) : MutualMeasure → MetaM GuessLexRel
     let calleeMeasureIdx := tmIdxs[rc.rcc.callee]!
     rc.eval callerMeasureIdx calleeMeasureIdx
   | .func funIdx => do
-    bif rc.rcc.caller == funIdx && rc.rcc.callee != funIdx then
+    uif rc.rcc.caller == funIdx && rc.rcc.callee != funIdx then
       return .lt
-    bif rc.rcc.caller != funIdx && rc.rcc.callee == funIdx then
+    uif rc.rcc.caller != funIdx && rc.rcc.callee == funIdx then
       return .no_idea
     else
       return .eq
@@ -580,20 +580,20 @@ partial def generateCombinations? (numMeasures : Array Nat) (threshold : Nat := 
 where
   -- Enumerate all permissible uniform combinations
   goUniform (idx : Nat) : OptionT (StateM (Array (Array Nat))) Unit  := do
-    bif numMeasures.all (idx < ·) then
+    uif numMeasures.all (idx < ·) then
       modify (·.push (Array.replicate numMeasures.size idx))
       goUniform (idx + 1)
 
   -- Enumerate all other permissible combinations
   go (fidx : Nat) : OptionT (ReaderT (Array Nat) (StateM (Array (Array Nat)))) Unit := do
-    bif h : fidx <ᵇ numMeasures.size then
+    uif h : fidx < numMeasures.size then
       let n := numMeasures[fidx]
       for idx in *...n do withReader (·.push idx) (go (fidx + 1))
     else
       let comb ← read
       unless comb.all (· == comb[0]!) do
         modify (·.push comb)
-      bif (← get).size >ᵇ threshold then
+      uif (← get).size > threshold then
         failure
 
 /--
@@ -607,7 +607,7 @@ def generateMeasures (numMeasures : Array Nat) : MetaM (Array MutualMeasure) := 
       | throwError "Too many combinations"
 
   let func_measures :=
-    bif numMeasures.size >ᵇ 1 then
+    uif numMeasures.size > 1 then
       (List.range numMeasures.size).toArray
     else
       #[]
@@ -628,7 +628,7 @@ partial def solve {m} {α} [Monad m] (measures : Array α)
   go measures calls #[]
   where
   go (measures : Array α) (calls : Array (α → m GuessLexRel)) (acc : Array α) := do
-    bif calls.isEmpty then return .some acc
+    uif calls.isEmpty then return .some acc
 
     -- Find the first measure that has at least one < and otherwise only = or <=
     for h : measureIdx in *...measures.size do
@@ -638,15 +638,15 @@ partial def solve {m} {α} [Monad m] (measures : Array α)
       let mut todo := #[]
       for call in calls do
         let entry ← call measure
-        bif entry =ᵇ .lt then
+        uif entry = .lt then
           has_lt := true
         else
           todo := todo.push call
-          bif entry != .le && entry != .eq then
+          uif entry != .le && entry != .eq then
             all_le := false
             break
       -- No progress here? Try the next measure
-      bif !(has_lt && all_le) then continue
+      uif !(has_lt && all_le) then continue
       -- We found a suitable measure, remove it from the list (mild optimization)
       let measures' := measures.eraseIdx measureIdx
       return ← go measures' todo (acc.push measure)
@@ -662,22 +662,22 @@ def formatTable : Array (Array String) → String := fun xss => Id.run do
   let mut colWidths := xss[0]!.map (fun _ => 0)
   for hi : i in *...xss.size do
     for hj : j in *...xss[i].size do
-      bif xss[i][j].positions.length >ᵇ colWidths[j]! then
+      uif xss[i][j].positions.length > colWidths[j]! then
         colWidths := colWidths.set! j xss[i][j].positions.length
   let mut str := ""
   for hi : i in *...xss.size do
     for hj : j in *...xss[i].size do
       let s := xss[i][j]
-      bif j >ᵇ 0 then -- right-align
+      uif j > 0 then -- right-align
         for _ in *...(colWidths[j]! - s.positions.length) do
           str := str ++ " "
       str := str ++ s
-      bif j =ᵇ 0 then -- left-align
+      uif j = 0 then -- left-align
         for _ in *...(colWidths[j]! - s.positions.length) do
           str := str ++ " "
-      bif j + 1 <ᵇ xss[i].size then
+      uif j + 1 < xss[i].size then
         str := str ++ " "
-    bif i + 1 <ᵇ xss.size then
+    uif i + 1 < xss.size then
       str := str ++ "\n"
   return str
 
@@ -689,7 +689,7 @@ def RecCallWithContext.posString (rcc : RecCallWithContext) : MetaM String := do
   let endPosStr := match rcc.ref.getTailPos? with
   | some endPos =>
     let endPosition := fileMap.toPosition endPos
-    bif endPosition.line =ᵇ position.line then
+    uif endPosition.line = position.line then
       s!"-{endPosition.column}"
     else
       s!"-{endPosition.line}:{endPosition.column}"
@@ -700,7 +700,7 @@ def RecCallWithContext.posString (rcc : RecCallWithContext) : MetaM String := do
 /-- How to present the basic measure in the table header, possibly abbreviated. -/
 def measureHeader (measure : BasicMeasure) : StateT (Nat × String) MetaM String := do
   let s ← measure.toString
-  bif s.positions.length >ᵇ 5 then
+  uif s.positions.length > 5 then
     let (i, footer) ← get
     let i := i + 1
     let footer := footer ++ s!"#{i}: {s}\n"
@@ -724,7 +724,7 @@ def explainNonMutualFailure (measures : Array BasicMeasure) (rcs : Array RecCall
       row := row.push (← rc.prettyEntry argIdx argIdx)
     table := table.push row
   let out := formatTable table
-  bif footer.isEmpty then
+  uif footer.isEmpty then
     return out
   else
     return out ++ "\n\n" ++ footer
@@ -743,7 +743,7 @@ def explainMutualFailure (declNames : Array Name) (measuress : Array (Array Basi
       f!"at {← rc.rcc.posString}:\n"
 
     let mut table : Array (Array String) := #[#[""] ++ headerss[caller]!]
-    bif caller =ᵇ callee then
+    uif caller = callee then
       -- For self-calls, only the diagonal is interesting, so put it into one row
       let mut row := #[""]
       for argIdx in *...measuress[caller]!.size do
@@ -767,7 +767,7 @@ def explainFailure (declNames : Array Name) (measuress : Array (Array BasicMeasu
     (rcs : Array RecCallCache) : MetaM Format := do
   let mut r : Format := "The basic measures relate at each recursive call as follows:\n" ++
     "(<, ≤, =: relation proved, ? all proofs failed, _: no proof attempted)\n"
-  bif declNames.size =ᵇ 1 then
+  uif declNames.size = 1 then
     r := r ++ (← explainNonMutualFailure measuress[0]! rcs)
   else
     r := r ++ (← explainMutualFailure declNames measuress rcs)
@@ -794,7 +794,7 @@ def toTerminationMeasures (preDefs : Array PreDefinition) (fixedParamPerms : Fix
       withUserNames xs userVarNamess[funIdx]! do
         let args := solution.map fun
           | .args tmIdxs => measures[tmIdxs[funIdx]!]!.fn.beta params
-          | .func funIdx' => mkNatLit <| bif funIdx' == funIdx then 1 else 0
+          | .func funIdx' => mkNatLit <| uif funIdx' == funIdx then 1 else 0
         let fn ← mkLambdaFVars params (← mkProdElem args)
         return { ref := .missing, structural := false, fn}
 
@@ -806,7 +806,7 @@ def reportTerminationMeasures (preDefs : Array PreDefinition) (termMeasures : Te
     let stx := do
       let arity ← lambdaTelescope preDef.value fun xs _ => pure xs.size
       termMeasure.delab arity (extraParams := preDef.termination.extraParams)
-    bif showInferredTerminationBy.get (← getOptions) then
+    uif showInferredTerminationBy.get (← getOptions) then
       logInfoAt preDef.ref m!"Inferred termination measure:\n{← stx}"
     if let some ref := preDef.termination.terminationBy?? then
       Tactic.TryThis.addSuggestion ref (← stx)

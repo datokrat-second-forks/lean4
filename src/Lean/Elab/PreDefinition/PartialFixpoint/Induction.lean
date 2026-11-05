@@ -24,7 +24,7 @@ def mkAdmAnd (α instα adm₁ adm₂ : Expr) : MetaM Expr :=
 partial def mkAdmProj (packedInst : Expr) (i : Nat) (e : Expr) : MetaM Expr := do
   if let some inst ← whnfUntil packedInst ``instCCPOPProd then
     let_expr instCCPOPProd α β instα instβ := inst | throwError "mkAdmProj: unexpected instance {inst}"
-    bif i == 0 then
+    uif i == 0 then
       mkAppOptM ``admissible_pprod_fst #[α, β, instα, instβ, none, e]
     else
       let e ← mkAdmProj instβ (i - 1) e
@@ -56,7 +56,7 @@ def unfoldPredRel (predType : Expr) (lhs rhs : Expr) (fixpointType : PartialFixp
   forallTelescopeReducing predType fun ts _ => do
     let mut lhs : Expr := mkAppN lhs ts
     let rhs : Expr := mkAppN rhs ts
-    bif reducePremise then
+    uif reducePremise then
         lhs ← whnf lhs
     match fixpointType with
     | .inductiveFixpoint =>
@@ -94,13 +94,13 @@ def unfoldPredRelMutual (eqnInfo : EqnInfo) (body : Expr) (reduceConclusion : Bo
 def maskArray {α} (mask : Array Bool) (xs : Array α) : Array α := Id.run do
   let mut ys := #[]
   for b in mask, x in xs do
-    bif b then ys := ys.push x
+    uif b then ys := ys.push x
   return ys
 
 /-- Appends `_1` etc to `base` unless `n == 1` -/
 def numberNames (n : Nat) (base : String) : Array Name :=
   .ofFn (n := n) fun ⟨i, _⟩ =>
-    bif n == 1 then .mkSimple base else .mkSimple s!"{base}_{i+1}"
+    uif n == 1 then .mkSimple base else .mkSimple s!"{base}_{i+1}"
 
 def getInductionPrinciplePostfix (name : Name) (isMutual : Bool) (strong : Bool := false) : MetaM Name := do
   let some eqnInfo := eqnInfoExt.find? (← getEnv) name | throwError "{name} is not defined by partial_fixpoint, inductive_fixpoint, nor coinductive_fixpoint"
@@ -130,7 +130,7 @@ def mkIsMeetProof (predTypes predVars wComponents fInsts : Array Expr)
     (fixpointTypes : Array PartialFixpointType) : MetaM Expr := do
   let componentProofs ← predTypes.mapIdxM fun i predType =>
     forallTelescopeReducing predType fun ts _ => do
-      let leafLemma := bif isCoinductiveFixpoint fixpointTypes[i]! then
+      let leafLemma := uif isCoinductiveFixpoint fixpointTypes[i]! then
           ``ReverseImplicationOrder.is_meet_or
         else
           ``ImplicationOrder.is_meet_and
@@ -166,7 +166,7 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
   prependError m!"Cannot derive fixpoint induction principle (please report this issue)" do
     let some eqnInfo := eqnInfoExt.find? (← getEnv) name |
       throwError "{name} is not defined by partial_fixpoint"
-    bif strong && !eqnInfo.fixpointType.all isLatticeTheoretic then
+    uif strong && !eqnInfo.fixpointType.all isLatticeTheoretic then
       throwError "strong induction principles are only supported for inductive_fixpoint and coinductive_fixpoint"
     let infos ← eqnInfo.declNames.mapM getConstInfoDefn
     let e' ← eqnInfo.fixedParamPerms.perms[0]!.forallTelescope infos[0]!.type fun xs => do
@@ -176,7 +176,7 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
       -- The body should now be of the form of the form (fix … ).2.2.1
       -- We strip the projections (if present)
       let body' := PProdN.stripProjs body.eta -- TODO: Eta more carefully?
-      bif eqnInfo.fixpointType.all isLatticeTheoretic then
+      uif eqnInfo.fixpointType.all isLatticeTheoretic then
         -- We strip it until we reach an application of `lfp_montotone`
         let some fixApp ← whnfUntil body' ``lfp_monotone
           | throwError "Unexpected function body {body}, could not whnfUntil lfp_monotone"
@@ -197,12 +197,12 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
         withLocalDeclsDND predicates fun predVars => do
           -- A joint approximation to the fixpoint
           let predVar ← PProdN.mk 0 predVars
-          bif strong then
+          uif strong then
               -- The pointwise meet of the candidate predicates and the defined predicates:
               -- disjunction for coinductive components, conjunction for inductive ones
               let wComponents ← predTypes.mapIdxM fun i predType =>
                 forallTelescopeReducing predType fun ts _ => do
-                  let conn := bif isCoinductiveFixpoint eqnInfo.fixpointType[i]! then ``Or else ``And
+                  let conn := uif isCoinductiveFixpoint eqnInfo.fixpointType[i]! then ``Or else ``And
                   mkLambdaFVars ts <|
                     mkApp2 (mkConst conn) (mkAppN predVars[i]! ts) (fInsts[i]!.beta ts)
               let wPacked ← PProdN.mk 0 wComponents
@@ -238,7 +238,7 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
                 let e' ← mkExpectedTypeHint e' conclType
                 -- For the `strong_mutual_induct` variant, we are done.
                 -- Else, project out the appropriate element
-                let e' ← bif isMutual then
+                let e' ← uif isMutual then
                     pure e'
                   else
                     PProdN.projM infos.size (eqnInfo.declNames.idxOf name) e'
@@ -283,7 +283,7 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
               let e' := mkApp e' packedPremise
               -- For the `mutual_induct` variant, we are done.
               -- Else, project out the appropriate element
-              let e' ← bif isMutual then
+              let e' ← uif isMutual then
                   pure e'
                 else
                   PProdN.projM infos.size (eqnInfo.declNames.idxOf name) e'
@@ -359,7 +359,7 @@ def deriveInduction (name : Name) (isMutual : Bool) (strong : Bool := false) : M
                   return mkApp motive fInst
               trace[Elab.definition.partialFixpoint.induction] "packedConclusion: {packedConclusion}, index is: {(eqnInfo.declNames.idxOf name)}"
               let e' ← mkExpectedTypeHint e' packedConclusion
-              let e' ← bif isMutual then
+              let e' ← uif isMutual then
                 pure e'
               else
                 PProdN.projM infos.size (eqnInfo.declNames.idxOf name) e'
@@ -411,7 +411,7 @@ builtin_initialize
   registerReservedNamePredicate isInductName
 
   registerReservedNameAction fun name => do
-    bif isInductName (← getEnv) name then
+    uif isInductName (← getEnv) name then
       let .str p s := name | return false
       let isMutual := s.endsWith "mutual_induct" || s.endsWith "mutual_fixpoint_induct"
       let strong := s.startsWith "strong_"
@@ -468,9 +468,9 @@ def mkOptionAdm (motive : Expr) : MetaM Expr := do
     pure inst
 
 def derivePartialCorrectness (name : Name) (isConclusionMutual : Bool) : MetaM Unit := do
-  let inductName := name ++ bif isConclusionMutual then `mutual_partial_correctness else `partial_correctness
+  let inductName := name ++ uif isConclusionMutual then `mutual_partial_correctness else `partial_correctness
   realizeConst name inductName do
-  let fixpointInductThm := name ++ bif isConclusionMutual then `mutual_fixpoint_induct else `fixpoint_induct
+  let fixpointInductThm := name ++ uif isConclusionMutual then `mutual_fixpoint_induct else `fixpoint_induct
   unless (← getEnv).contains fixpointInductThm do
     deriveInduction name isConclusionMutual
 
@@ -492,7 +492,7 @@ def derivePartialCorrectness (name : Name) (isConclusionMutual : Bool) : MetaM U
           withLocalDeclD (← mkFreshUserName `r) γ fun r =>
             mkForallFVars (ys.push r) (.sort 0)
       let motiveDecls ← motiveTypes.mapIdxM fun i motiveType => do
-        let n := bif infos.size =ᵇ 1 then .mkSimple "motive"
+        let n := uif infos.size = 1 then .mkSimple "motive"
                                    else .mkSimple s!"motive_{i+1}"
         pure (n, fun _ => pure motiveType)
       withLocalDeclsD motiveDecls fun motives => do

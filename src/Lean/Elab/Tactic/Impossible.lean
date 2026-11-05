@@ -37,11 +37,11 @@ private def mkImpossibleNegType (mainGoal : MVarId) (goalType : Expr)
   let r ← Closure.mkValueTypeClosure revertedType (mkConst ``True)
     (zetaDelta := false)
   let rTypeLevels ←
-    bif cfg.levels then r.levelParams.mapM fun _ => mkFreshLevelMVar
+    uif cfg.levels then r.levelParams.mapM fun _ => mkFreshLevelMVar
     else pure r.levelArgs
   let rType := r.type.instantiateLevelParamsArray r.levelParams rTypeLevels
   let negType ← forallBoundedTelescope rType (some r.exprArgs.size) fun ms revBody => do
-    let negBody ← bif (← Meta.isProp revBody) then
+    let negBody ← uif (← Meta.isProp revBody) then
       pure (mkNot revBody)
     else
       mkArrow revBody (mkConst ``False)
@@ -49,7 +49,7 @@ private def mkImpossibleNegType (mainGoal : MVarId) (goalType : Expr)
   let mvarNames ← r.exprArgs.mapM fun mvarExpr => do
     let .mvar mvarId := mvarExpr | return `x
     let n := (← mvarId.getDecl).userName
-    return bif n.isAnonymous then `x else n
+    return uif n.isAnonymous then `x else n
   return (negType, mvarNames)
 
 declare_config_elab elabImpossibleConfig Parser.Tactic.ImpossibleConfig
@@ -62,7 +62,7 @@ def evalImpossible : Tactic := fun stx => do
   let tacs := stx[3]
   let mainGoal ← getMainGoal
   let goalType ← mainGoal.withContext do instantiateMVars (← mainGoal.getType)
-  bif goalType.hasLevelMVar then
+  uif goalType.hasLevelMVar then
     throwErrorAt kw "\
       `impossible`: goal contains universe metavariables{indentExpr goalType}"
   let (negType, mvarNames) ← mkImpossibleNegType mainGoal goalType cfg

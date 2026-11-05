@@ -29,7 +29,7 @@ def HeaderSyntax.isModule (header : HeaderSyntax) : Bool :=
 def HeaderSyntax.imports (stx : HeaderSyntax) (includeInit : Bool := true) : Array Import :=
   match stx with
   | `(Parser.Module.header| $[module%$moduleTk]? $[prelude%$preludeTk]? $importsStx*) =>
-    let imports := bif preludeTk.isNone && includeInit then
+    let imports := uif preludeTk.isNone && includeInit then
         #[{ module := `Init : Import }, { module := `Init, isMeta := true : Import }]
       else #[]
     imports ++ importsStx.map fun
@@ -70,21 +70,21 @@ def checkDeprecatedImports
   if let some headerStx := origHeaderStx? <|> headerStx? then
     match headerStx with
     | `(Parser.Module.header| $[module%$moduleTk]? $[prelude%$_]? $importsStx*) =>
-      bif moduleTk.any (·.getTrailing?.any (·.toString.contains "deprecated_module: ignore")) then
+      uif moduleTk.any (·.getTrailing?.any (·.toString.contains "deprecated_module: ignore")) then
         opts := linter.deprecated.module.set opts false
       for impStx in importsStx do
         match impStx with
         | `(Parser.Module.import| $[public%$_]? $[meta%$_]? import $[all%$_]? $n) =>
-          bif impStx.raw.getTrailing?.any (·.toString.contains "deprecated_module: ignore") then
+          uif impStx.raw.getTrailing?.any (·.toString.contains "deprecated_module: ignore") then
             ignoreDeprecatedImports := ignoreDeprecatedImports.insert n.getId
           if let some pos := impStx.raw.getPos? then
             importPositions := importPositions.insert n.getId pos
         | _ => pure ()
     | _ => pure ()
-  bif !linter.deprecated.module.get opts then
+  uif !linter.deprecated.module.get opts then
     return messages
   imports.foldl (init := messages) fun messages imp =>
-    bif ignoreDeprecatedImports.contains imp.module then
+    uif ignoreDeprecatedImports.contains imp.module then
       messages
     else
     match env.getModuleIdx? imp.module with
@@ -112,7 +112,7 @@ private def osForbiddenNames : Array String :=
     "LPT¹", "LPT²", "LPT³"]
 
 private def checkComponentPortability (comp : String) : Option String :=
-  bif osForbiddenNames.contains comp.toUpper then
+  uif osForbiddenNames.contains comp.toUpper then
     some s!"'{comp}' is a reserved file name on some operating systems"
   else if let some c := osForbiddenChars.find? (comp.contains ·) then
     some s!"contains character '{c}' which is forbidden on some operating systems"
@@ -147,8 +147,8 @@ def processHeaderCore
     (headerStx? : Option HeaderSyntax := none)
     (origHeaderStx? : Option HeaderSyntax := none)
     : IO (Environment × MessageLog) := do
-  let level := bif isModule then
-    bif Elab.inServer.get opts then
+  let level := uif isModule then
+    uif Elab.inServer.get opts then
       .server
     else
       .exported

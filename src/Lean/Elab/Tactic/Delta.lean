@@ -18,7 +18,7 @@ def deltaLocalDecl (declNames : Array Name) (fvarId : FVarId) : TacticM Unit := 
   let mvarId ← getMainGoal
   let localDecl ← fvarId.getDecl
   let typeNew ← deltaExpand localDecl.type declNames.contains
-  bif typeNew == localDecl.type then
+  uif typeNew == localDecl.type then
     throwTacticEx `delta mvarId m!"did not delta reduce {declNames} at {localDecl.userName}"
   replaceMainGoal [← mvarId.replaceLocalDeclDefEq fvarId typeNew]
 
@@ -26,7 +26,7 @@ def deltaTarget (declNames : Array Name) : TacticM Unit := do
   let mvarId ← getMainGoal
   let target ← getMainTarget
   let targetNew ← deltaExpand target declNames.contains
-  bif targetNew == target then
+  uif targetNew == target then
     throwTacticEx `delta mvarId m!"did not delta reduce {declNames}"
   replaceMainGoal [← mvarId.replaceTargetDefEq targetNew]
 

@@ -25,13 +25,13 @@ open TSyntax.Compat
 
 /-- `C[$(e)]` ~> `let a := e; C[$a]`. Used in the implementation of antiquot splices. -/
 private partial def floatOutAntiquotTerms (stx : Syntax) : StateT (Syntax → TermElabM Syntax) TermElabM Syntax :=
-  bif isAntiquots stx && !isEscapedAntiquot (getCanonicalAntiquot stx) then
+  uif isAntiquots stx && !isEscapedAntiquot (getCanonicalAntiquot stx) then
     let e := getAntiquotTerm (getCanonicalAntiquot stx)
-    bif !e.isIdent || !e.getId.isAtomic then
+    uif !e.isIdent || !e.getId.isAtomic then
       withFreshMacroScope do
         let a ← `(__stx_lift)
         modify (fun _ (stx : Syntax) => (`(let $a:ident := $e; $stx) : TermElabM Syntax))
-        let stx := bif stx.isOfKind choiceKind then
+        let stx := uif stx.isOfKind choiceKind then
             mkNullNode <| stx.getArgs.map (·.setArg 2 a)
           else
             stx.setArg 2 a
@@ -96,12 +96,12 @@ def mkNode (b : ArrayStxBuilder) (k : SyntaxNodeKind) : TermElabM Term := do
 end ArrayStxBuilder
 
 def tryAddSyntaxNodeKindInfo (stx : Syntax) (k : SyntaxNodeKind) : TermElabM Unit := do
-  bif (← getEnv).contains k then
+  uif (← getEnv).contains k then
     addTermInfo' stx (← mkConstWithFreshMVarLevels k)
   else
     -- HACK to support built in categories, which use a different naming convention
     let k := ``Lean.Parser.Category ++ k
-    bif (← getEnv).contains k then
+    uif (← getEnv).contains k then
       addTermInfo' stx (← mkConstWithFreshMVarLevels k)
 
 instance : Quote Syntax.Preresolved where
@@ -112,7 +112,7 @@ instance : Quote Syntax.Preresolved where
 /-- Elaborate the content of a syntax quotation term -/
 private partial def quoteSyntax : Syntax → TermElabM Term
   | Syntax.ident _ rawVal val preresolved => do
-    bif !hygiene.get (← getOptions) then
+    uif !hygiene.get (← getOptions) then
       return ← `(Syntax.ident info $(quote rawVal) $(quote val) $(quote preresolved))
     -- Add global scopes at compilation time (now), add macro scope at runtime (in the quotation).
     -- See the paper for details.
@@ -133,25 +133,25 @@ private partial def quoteSyntax : Syntax → TermElabM Term
     if let some (k, _) := stx.antiquotKind? then
       if let some name := getAntiquotKindSpec? stx then
         tryAddSyntaxNodeKindInfo name k
-    bif isAntiquots stx && !isEscapedAntiquot (getCanonicalAntiquot stx) then
+    uif isAntiquots stx && !isEscapedAntiquot (getCanonicalAntiquot stx) then
       let ks := antiquotKinds stx
       `(@TSyntax.raw $(quote <| ks.map (·.1)) $(getAntiquotTerm (getCanonicalAntiquot stx)))
-    else bif isTokenAntiquot stx && !isEscapedAntiquot stx then
+    else uif isTokenAntiquot stx && !isEscapedAntiquot stx then
       match stx[0] with
       | Syntax.atom _ val => `(Syntax.atom (SourceInfo.fromRef $(getAntiquotTerm stx) (canonical := true)) $(quote val))
       | _                 => throwErrorAt stx "expected token"
-    else bif isAntiquotSuffixSplice stx && !isEscapedAntiquot (getCanonicalAntiquot (getAntiquotSuffixSpliceInner stx)) then
+    else uif isAntiquotSuffixSplice stx && !isEscapedAntiquot (getCanonicalAntiquot (getAntiquotSuffixSpliceInner stx)) then
       -- splices must occur in a `many` node
       throwErrorAt stx "unexpected antiquotation splice"
-    else bif isAntiquotSplice stx && !isEscapedAntiquot stx then
+    else uif isAntiquotSplice stx && !isEscapedAntiquot stx then
       throwErrorAt stx "unexpected antiquotation splice"
     else
       -- if escaped antiquotation, decrement by one escape level
       let stx := unescapeAntiquot stx
       let mut args := ArrayStxBuilder.empty
-      let appendName := bif (← getEnv).contains ``Array.append then ``Array.append else ``Array.appendCore
+      let appendName := uif (← getEnv).contains ``Array.append then ``Array.append else ``Array.appendCore
       for arg in stx.getArgs do
-        bif k == nullKind && isAntiquotSuffixSplice arg && !isEscapedAntiquot (getCanonicalAntiquot (getAntiquotSuffixSpliceInner arg)) then
+        uif k == nullKind && isAntiquotSuffixSplice arg && !isEscapedAntiquot (getCanonicalAntiquot (getAntiquotSuffixSpliceInner arg)) then
           let antiquot := getAntiquotSuffixSpliceInner arg
           let ks := antiquotKinds antiquot |>.map (·.1)
           let val := getAntiquotTerm (getCanonicalAntiquot antiquot)
@@ -165,12 +165,12 @@ private partial def quoteSyntax : Syntax → TermElabM Term
               let sep := quote <| getSepFromSplice arg
               `(@TSepArray.elemsAndSeps $(quote ks) $sep $val)
             | k         => throwErrorAt arg "invalid antiquotation suffix splice kind `{k}`"
-        else bif k == nullKind && isAntiquotSplice arg && !isEscapedAntiquot arg then
+        else uif k == nullKind && isAntiquotSplice arg && !isEscapedAntiquot arg then
           let k := antiquotSpliceKind? arg
           let (arg, bindLets) ← floatOutAntiquotTerms arg |>.run pure
           let inner ← (getAntiquotSpliceContents arg).mapM quoteSyntax
           let ids ← getAntiquotationIds arg
-          bif ids.isEmpty then
+          uif ids.isEmpty then
             throwErrorAt stx "antiquotation splice must contain at least one antiquotation"
           let arr ← match k with
             | `optional => `(match $[$ids:ident],* with
@@ -179,7 +179,7 @@ private partial def quoteSyntax : Syntax → TermElabM Term
             | _ =>
               let arr ← ids[*...(ids.size - 1)].foldrM (fun id arr => `(Array.zip $id:ident $arr)) ids.back!
               `(Array.map (fun $(← mkTuple ids) => $(inner[0]!)) $arr)
-          let arr ← bif k == `sepBy then
+          let arr ← uif k == `sepBy then
             `(mkSepArray $arr $(getSepStxFromSplice arg))
           else
             pure arr
@@ -194,9 +194,9 @@ private partial def quoteSyntax : Syntax → TermElabM Term
   | Syntax.missing => throwUnsupportedSyntax
 
 def addNamedQuotInfo (stx : Syntax) (k : SyntaxNodeKind) : TermElabM SyntaxNodeKind := do
-  bif stx.getNumArgs == 3 && stx[0].isAtom then
+  uif stx.getNumArgs == 3 && stx[0].isAtom then
     let s := stx[0].getAtomVal
-    bif s.length >ᵇ 3 then
+    uif s.length > 3 then
       if let (some l, some r) := (stx[0].getPos? true, stx[0].getTailPos? true) then
         -- HACK: The atom is the string "`(foo|", so chop off the edges.
         let name := stx[0].setInfo <| .synthetic ⟨l.1 + 2⟩ ⟨r.1 - 1⟩ (canonical := true)
@@ -244,7 +244,7 @@ def mkSyntaxQuotation (stx : Syntax) (kind : Name) : TermElabM Syntax := do
      by an unhygienic prototype implementation. -/
 
 def stxQuot.expand (stx : Syntax) : TermElabM Syntax := do
-  let stx := bif stx.getNumArgs == 1 then stx[0] else stx
+  let stx := uif stx.getNumArgs == 1 then stx[0] else stx
   let kind ← getQuotKind stx
   let stx ← quoteSyntax stx.getQuotContent
   mkSyntaxQuotation stx kind
@@ -332,17 +332,17 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
     onMatch := fun taken => covered (adaptRhs rhsFn ∘ noOpMatchAdaptPats taken) (taken matches unconditional)
   }
   -- quotation pattern
-  bif isQuot pat then do
+  uif isQuot pat then do
     let quoted := getQuotContent pat
     if let some (k, _) := quoted.antiquotKind? then
       if let some name := getAntiquotKindSpec? quoted then
         tryAddSyntaxNodeKindInfo name k
-    bif quoted.isAtom || quoted.isOfKind `patternIgnore then
+    uif quoted.isAtom || quoted.isOfKind `patternIgnore then
       -- We assume that atoms are uniquely determined by the node kind and never have to be checked
       unconditionally pure
-    else bif quoted.isTokenAntiquot then
+    else uif quoted.isTokenAntiquot then
       unconditionally (`(have $(quoted.getAntiquotTerm) := __discr; $(·)))
-    else bif isAntiquots quoted && !isEscapedAntiquot (getCanonicalAntiquot quoted) then
+    else uif isAntiquots quoted && !isEscapedAntiquot (getCanonicalAntiquot quoted) then
       -- quotation contains a single antiquotation
       let (ks, pseudoKinds) := antiquotKinds quoted |>.unzip
       let rhsFn := match getAntiquotTerm (getCanonicalAntiquot quoted) with
@@ -359,11 +359,11 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
       --   let id := stx; let e := stx; ...
       -- else
       --   let e := stx; ...
-      bif (getCanonicalAntiquot quoted)[3].isNone || pseudoKinds.all id then unconditionally rhsFn else pure {
+      uif (getCanonicalAntiquot quoted)[3].isNone || pseudoKinds.all id then unconditionally rhsFn else pure {
         check   := shape ks none,
         onMatch := fun
           | taken@(shape ks' sz) =>
-            bif ks' == ks then
+            uif ks' == ks then
               covered (adaptRhs rhsFn ∘ noOpMatchAdaptPats taken) (exhaustive := sz.isNone)
             else uncovered
           | _ => undecided,
@@ -371,9 +371,9 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
           let cond ← ks.foldlM (fun cond k => `(or $cond (Syntax.isOfKind __discr $(quote k)))) (← `(false))
           `(cond $cond $(← yes []) $(← no)),
       }
-    else bif isAntiquotSuffixSplice quoted then throwErrorAt quoted "unexpected antiquotation splice"
-    else bif isAntiquotSplice quoted then throwErrorAt quoted "unexpected antiquotation splice"
-    else bif quoted.getArgs.size == 1 && isAntiquotSuffixSplice quoted[0] then
+    else uif isAntiquotSuffixSplice quoted then throwErrorAt quoted "unexpected antiquotation splice"
+    else uif isAntiquotSplice quoted then throwErrorAt quoted "unexpected antiquotation splice"
+    else uif quoted.getArgs.size == 1 && isAntiquotSuffixSplice quoted[0] then
       let inner := getAntiquotSuffixSpliceInner quoted[0]
       let ks := antiquotKinds inner |>.map (·.1)
       unconditionally <| match getAntiquotTerm (getCanonicalAntiquot inner) with
@@ -384,10 +384,10 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
           | `sepBy    => `(have $id := @TSepArray.mk $(quote ks) $(quote <| getSepFromSplice quoted[0]) (Syntax.getArgs __discr); $rhs)
           | k         => throwErrorAt quoted "invalid antiquotation suffix splice kind `{k}`"
         | anti         => fun _   => throwErrorAt anti "unsupported antiquotation kind in pattern"
-    else bif quoted.getArgs.size == 1 && isAntiquotSplice quoted[0] then pure {
+    else uif quoted.getArgs.size == 1 && isAntiquotSplice quoted[0] then pure {
       check   := other pat,
       onMatch := fun
-        | other pat' => bif pat' == pat then covered pure (exhaustive := true) else undecided
+        | other pat' => uif pat' == pat then covered pure (exhaustive := true) else undecided
         | _          => undecided,
       doMatch := fun yes no => do
         let splice := quoted[0]
@@ -406,7 +406,7 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
                 | _                         => $no))
         | _ =>
           let mut discrs ← `(Syntax.getArgs __discr)
-          bif k == `sepBy then
+          uif k == `sepBy then
             discrs ← `(Array.getSepElems $discrs)
           let tuple ← mkTuple ids
           let mut yes := yes
@@ -416,7 +416,7 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
               for id in ids do
                 yes ← `(have $id := tuples.map (fun $tuple => $id); $yes)
               `(tuples)
-          let contents := bif contents.size == 1
+          let contents := uif contents.size == 1
             then contents[0]!
             else mkNullNode contents
           -- We use `no_error_if_unused%` in auxiliary `match`-syntax to avoid spurious error messages,
@@ -442,9 +442,9 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
         check    := slice idx numSuffix
         onMatch  := fun
           | slice p s =>
-            bif p == idx && s == numSuffix then
+            uif p == idx && s == numSuffix then
               let argPats := quoted.getArgs.mapIdx fun i arg =>
-                let arg := bif (i : Nat) == idx then mkNullNode #[arg] else arg
+                let arg := uif (i : Nat) == idx then mkNullNode #[arg] else arg
                 Unhygienic.run `(`($(arg)))
               covered (fun (pats, rhs) => pure (argPats.toList ++ pats, rhs)) (exhaustive := true)
             else uncovered
@@ -469,7 +469,7 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
           -- Atoms are matched only within literals because it would be a waste of time for keywords
           -- such as `if` and `then` and would blow up the generated code.
           -- See also `elabMatchSyntax` docstring below.
-          bif quoted.isIdent || lit then
+          uif quoted.isIdent || lit then
             -- NOTE: We could make this case split more precise by refining `HeadCheck`,
             -- but matching on literals is quite rare.
             other quoted
@@ -477,21 +477,21 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
             shape [kind] argPats.size,
         onMatch := fun
           | other stx' =>
-            bif quoted.isIdent || lit then
-              bif quoted == stx' then
+            uif quoted.isIdent || lit then
+              uif quoted == stx' then
                 covered pure (exhaustive := true)
               else
                 uncovered
             else
               undecided
           | shape ks sz =>
-            bif ks == [kind] && sz == argPats.size then
+            uif ks == [kind] && sz == argPats.size then
               covered (fun (pats, rhs) => pure (argPats.toList ++ pats, rhs)) (exhaustive := true)
             else
               uncovered
           | _ => undecided,
         doMatch := fun yes no => do
-          let (cond, newDiscrs) ← bif lit then
+          let (cond, newDiscrs) ← uif lit then
             let cond ← `(Syntax.matchesLit __discr $(quote kind) $(quote (isLit? kind quoted).get!))
             pure (cond, [])
           else
@@ -552,9 +552,9 @@ private partial def compileStxMatch (discrs : List Term) (alts : List Alt) : Ter
       | covered f exh =>
         -- we can only factor out a common check if there are no undecided patterns in between;
         -- otherwise we would change the order of alternatives
-        bif undecidedAlts.isEmpty then
+        uif undecidedAlts.isEmpty then
           yesAlts ← yesAlts.push <$> f (alt'.1.tail!, alt'.2)
-          bif !exh then
+          uif !exh then
             nonExhaustiveAlts := nonExhaustiveAlts.push alt'
         else
           (floatedLetDecls, alt') ← deduplicate floatedLetDecls alt'
@@ -569,7 +569,7 @@ private partial def compileStxMatch (discrs : List Term) (alts : List Alt) : Ter
     let mut stx ← info.doMatch
       (yes := fun newDiscrs => do
         let mut yesAlts := yesAlts
-        bif !undecidedAlts.isEmpty then
+        uif !undecidedAlts.isEmpty then
           -- group undecided alternatives in a new default case `| discr2, ... => match discr, discr2, ... with ...`
           let vars ← discrs.mapM fun _ => withFreshMacroScope `(__discr)
           let pats := List.replicate newDiscrs.length (Unhygienic.run `(_)) ++ vars
@@ -605,7 +605,7 @@ private def markRhss (rhss : Array Term) : TermElabM (NameMap Nat × IdxSet × A
   let mut ignoreIfUnused : IdxSet := {}
   let mut rhssNew := #[]
   for rhs in rhss do
-    bif hasNoErrorIfUnused rhs then
+    uif hasNoErrorIfUnused rhs then
       ignoreIfUnused := ignoreIfUnused.insert rhssNew.size
     let (idx, rhs) ← withFreshMacroScope do
       let idx ← `(alt_idx)
@@ -650,7 +650,7 @@ private def checkUnusedAlts (stx : Syntax) (alts : Array Syntax) (altIdxMap : Na
 def match_syntax.expand (stx : Syntax) : TermElabM Syntax := do
   match stx with
   | `(match $[$discrs:term],* with $[|%$alt $[$patss],* => $rhss]*) => do
-    bif !patss.any (·.any (fun
+    uif !patss.any (·.any (fun
       | `($_@$pat) => pat.raw.isQuot
       | pat        => pat.raw.isQuot)) then
       -- no quotations => fall back to regular `match`
@@ -658,7 +658,7 @@ def match_syntax.expand (stx : Syntax) : TermElabM Syntax := do
     let (altIdxMap, ignoreIfUnused, rhss) ← markRhss rhss
     -- call `getQuotKind` on all the patterns, which adds
     -- term info for all `(foo| ...)` as a side effect
-    patss.forM (·.forM fun ⟨pat⟩ => do bif pat.isQuot then _ ← getQuotKind pat)
+    patss.forM (·.forM fun ⟨pat⟩ => do uif pat.isQuot then _ ← getQuotKind pat)
     let stx ← compileStxMatch discrs.toList (patss.map (·.toList) |>.zip rhss).toList
     let stx ← checkUnusedAlts stx alt altIdxMap ignoreIfUnused
     trace[Elab.match_syntax.result] "{stx}"

@@ -38,16 +38,16 @@ namespace Lean.Elab.Tactic.Do
 def contractBinderIdents (binder : Syntax) : Array Ident :=
   match binder with
   | `(Lean.Parser.Term.bracketedBinderF| ($ids* $[: $_]? $(_annot?)?)) =>
-      ids.filterMap fun b => bif b.raw.isIdent then some ⟨b.raw⟩ else none
+      ids.filterMap fun b => uif b.raw.isIdent then some ⟨b.raw⟩ else none
   | _ =>
-      bif binder.isIdent then #[⟨binder⟩] else #[]
+      uif binder.isIdent then #[⟨binder⟩] else #[]
 
 /-- The path from a `declVal` alternative to its `optional whereDecls` child. `declValToWhereFinally`
 in `Lean.Elab.MutualDef` walks the same indices to reach the section this one strips. -/
 private def whereDeclsPath? (v : Syntax) : Option (List Nat) :=
-  bif v.isOfKind ``Lean.Parser.Command.declValSimple then some [3]
-  else bif v.isOfKind ``Lean.Parser.Command.whereStructInst then some [2]
-  else bif v.isOfKind ``Lean.Parser.Command.declValEqns then some [0, 2]
+  uif v.isOfKind ``Lean.Parser.Command.declValSimple then some [3]
+  else uif v.isOfKind ``Lean.Parser.Command.whereStructInst then some [2]
+  else uif v.isOfKind ``Lean.Parser.Command.declValEqns then some [0, 2]
   else none
 
 private def getPath (s : Syntax) : List Nat → Syntax
@@ -63,17 +63,17 @@ returning them and the `declVal` with the section removed. -/
 private def extractSpecSection (v : Syntax) : MacroM (Option Syntax × Syntax) := do
   let some path := whereDeclsPath? v | return (none, v)
   let optWd := getPath v path
-  bif optWd.isNone then return (none, v)
+  uif optWd.isNone then return (none, v)
   -- `whereDecls = "where"(0) >> letRecDecls(1) >> optional whereFinally(2)`
   -- `whereFinally = "finally"(0) >> optional tacticSeq(1) >> subsections(2)`
   -- `whereFinallySubsection = "| "(0) >> ident(1) >> "=>"(2) >> tacticSeq(3)`
   let wd := optWd[0]
   let optWf := wd[2]
-  bif optWf.isNone then return (none, v)
+  uif optWf.isNone then return (none, v)
   let wf := optWf[0]
   let (specs, others) := wf[2].getArgs.partition (·[1].getId.eraseMacroScopes == `spec)
-  bif specs.isEmpty then return (none, v)
-  bif h : 1 <ᵇ specs.size then
+  uif specs.isEmpty then return (none, v)
+  uif h : 1 < specs.size then
     Macro.throwErrorAt specs[1] "duplicate `spec` section"
   let wf' := wf.setArg 2 (mkNullNode others)
   return (some specs[0]![3], setPath v path (mkNullNode #[wd.setArg 2 (mkNullNode #[wf'])]))
@@ -106,7 +106,7 @@ def expandDefContract : Macro := fun stx => do
   -- Error recovery on the declVal form might have instead parsed the decl as a contractDeclVal.
   -- If that is the case, we stop any attempt at expansion because it will just fail again in the
   -- `def` elaborator.
-  bif givenStx.isNone && requiresStx.isNone && ensuresStx.isNone && throwsStx.getNumArgs == 0 then
+  uif givenStx.isNone && requiresStx.isNone && ensuresStx.isNone && throwsStx.getNumArgs == 0 then
     Macro.throwUnsupported
 
   -- Construct `cleanDeclaration`, the regular, non-contract definition that the specification
@@ -117,8 +117,8 @@ def expandDefContract : Macro := fun stx => do
   -- Contract def needs the proper Std.WP definitions to be imported.
   unless (← Macro.hasDecl ``Std.WP.Triple) do
     Macro.throwErrorAt
-      (bif !givenStx.isNone then givenStx else bif !requiresStx.isNone then requiresStx
-       else bif !ensuresStx.isNone then ensuresStx else throwsStx)
+      (uif !givenStx.isNone then givenStx else uif !requiresStx.isNone then requiresStx
+       else uif !ensuresStx.isNone then ensuresStx else throwsStx)
       "`given`/`requires`/`ensures`/`throws` contracts elaborate to a `vcgen`-proved \
 specification theorem; add `import Std.WP` to use them."
 
@@ -127,16 +127,16 @@ specification theorem; add `import Std.WP` to use them."
   let specId := mkIdentFrom fId (fId.getId ++ `spec)
   let sigBinders := sig[0].getArgs
   -- `f.spec` quantifies the `given` binders but applies `f` to the signature's arguments alone.
-  let givenBinders := bif givenStx.isNone then #[] else givenStx[0][1].getArgs
+  let givenBinders := uif givenStx.isNone then #[] else givenStx[0][1].getArgs
   let binders : TSyntaxArray [`ident, ``Lean.Parser.Term.hole, ``Lean.Parser.Term.bracketedBinder] :=
     (sigBinders ++ givenBinders).map (⟨·⟩)
   let args := sigBinders.flatMap contractBinderIdents
-  let pre : Term ← bif requiresStx.isNone then `(⊤) else
+  let pre : Term ← uif requiresStx.isNone then `(⊤) else
     match requiresStx[0] with
     | `(requiresClause| requires $f:basicFun) => `(fun $f:basicFun)
     | `(requiresClause| requires $p:term) => pure p
     | _ => Macro.throwUnsupported
-  let post : Term ← bif ensuresStx.isNone then `(fun _ => ⊤) else
+  let post : Term ← uif ensuresStx.isNone then `(fun _ => ⊤) else
     match ensuresStx[0] with
     | `(ensuresClause| ensures $f:basicFun) => `(fun $f:basicFun)
     | _ => Macro.throwUnsupported
@@ -157,7 +157,7 @@ specification theorem; add `import Std.WP` to use them."
       ⟨mkNode `Lean.Parser.Term.contractEPosts #[mkAtom "contract_eposts%", eposts]⟩
     `(⦃ $pre ⦄ $fId $args* ⦃ $post; $epostsGadget ⦄)
   let msg : TSyntax `str := ⟨Syntax.mkStrLit <|
-    bif specStep?.isSome then
+    uif specStep?.isSome then
       s!"unproved verification conditions for the contract of `{fId.getId}`; \
 the `where finally | spec => ...` section does not discharge them"
     else
@@ -197,18 +197,18 @@ def elabContractEPosts : Term.TermElab := fun stx expectedType? => do
   -- Wait for the type of the exception postconditions, so the slot instances resolve.
   Term.tryPostponeIfNoneOrMVar expectedType?
   if let some expectedType := expectedType? then
-    bif (← instantiateMVars expectedType).hasExprMVar then
+    uif (← instantiateMVars expectedType).hasExprMVar then
       Term.tryPostpone
   let e ← Term.withSynthesize <| Term.elabTerm stx[1] expectedType?
   let e ← instantiateMVars e
   -- Unfold each `EPostSlot.set` to the body of its instance, e.g. `set R ⊥` to `(R, ⊥.snd)`.
   let e' ← Meta.transform e (post := fun e => do
-    bif e.isAppOf ``Std.WP.EPostSlot.set then
+    uif e.isAppOf ``Std.WP.EPostSlot.set then
       if let some e' ← Meta.unfoldProjInst? e then return .visit e'
     return .continue)
   -- Without progress above, `e` is the bare `⊥` of a contract without `throws` clauses; keep it,
   -- so the spec prints in the short `⦃Q⦄` form. Otherwise rewrite the projections of `⊥`.
-  bif e' == e then
+  uif e' == e then
     return e
   simpOnlyWith #[``Lean.Order.Prod.fst_bot, ``Lean.Order.Prod.snd_bot, ``Std.WP.EStackEnd.bot_eq]
     e'

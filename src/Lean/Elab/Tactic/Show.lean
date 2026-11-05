@@ -29,7 +29,7 @@ where
       -- re-run first goal for error message
       tryGoal newType firstGoal (← getGoals).tail [] manyError
     | goal :: goals =>
-      bif goals.isEmpty && (prevRev.isEmpty || !(← read).recover) then
+      uif goals.isEmpty && (prevRev.isEmpty || !(← read).recover) then
         -- optimization for single goal / last goal without error recovery
         tryGoal newType goal goals prevRev simpleError
       else

@@ -54,7 +54,7 @@ and if so returns that expression.
 def isCoeOf? (e : Expr) : MetaM (Option Expr) := do
   if let Expr.const fn .. := e.getAppFn then
     if let some info ← getCoeFnInfo? fn then
-      bif e.getAppNumArgs == info.numArgs then
+      uif e.getAppNumArgs == info.numArgs then
         return e.getArg! info.coercee
   return none
 
@@ -64,7 +64,7 @@ and if so returns that type and the natural number.
 -/
 def isNumeral? (e : Expr) : Option (Expr × Nat) :=
   -- TODO: cleanup, and possibly remove duplicate
-  bif e.isConstOf ``Nat.zero then
+  uif e.isConstOf ``Nat.zero then
     (mkConst ``Nat, 0)
   else if let Expr.app (Expr.app (Expr.app (Expr.const ``OfNat.ofNat ..) α ..)
       (Expr.lit (Literal.natVal n) ..) ..) .. := e.consumeMData then
@@ -93,13 +93,13 @@ def splittingProcedure (expr : Expr) : MetaM Simp.Result := do
   let Expr.app (Expr.app op x ..) y .. := expr | return {expr}
 
   let Expr.forallE _ γ (Expr.forallE _ γ' ty ..) .. ← inferType op | return {expr}
-  bif γ'.hasLooseBVars || ty.hasLooseBVars then return {expr}
+  uif γ'.hasLooseBVars || ty.hasLooseBVars then return {expr}
   unless ← isDefEq γ γ' do return {expr}
 
   let msg := m!"splitting {expr}"
   let msg
     | .error _ => return msg
-    | .ok r => return bif r.expr == expr then msg else m!"{msg} to {r.expr}"
+    | .ok r => return uif r.expr == expr then msg else m!"{msg} to {r.expr}"
   withTraceNode `Tactic.norm_cast msg do
 
   try
@@ -157,7 +157,7 @@ partial def upwardAndElim (up : SimpTheorems) (e : Expr) : SimpM Simp.Step := do
     Simp.rewrite? e up.post up.erased (tag := "squash") (rflOnly := false)
   let r := r.getD { expr := e }
   let r ← r.mkEqTrans (← splittingProcedure r.expr)
-  bif r.expr == e then return Simp.Step.done {expr := e}
+  uif r.expr == e then return Simp.Step.done {expr := e}
   return Simp.Step.visit r
 
 /--
@@ -166,7 +166,7 @@ Returns a pair of the new expression and proof that they are equal.
 -/
 def numeralToCoe (e : Expr) : MetaM Simp.Result := do
   let some (α, n) := isNumeral? e | failure
-  bif (← whnf α).isConstOf ``Nat then failure
+  uif (← whnf α).isConstOf ``Nat then failure
   let newE ← mkAppOptM ``Nat.cast #[α, none, toExpr n]
   let some pr ← proveEqUsingDown e newE | failure
   return pr
@@ -219,12 +219,12 @@ open Term
   match stx with
   | `(mod_cast $e:term) =>
     withExpectedType expectedType? fun expectedType => do
-    bif (← instantiateMVars expectedType).hasExprMVar then tryPostpone
+    uif (← instantiateMVars expectedType).hasExprMVar then tryPostpone
     let expectedType' ← derive expectedType
     let e ← Term.elabTerm e expectedType'.expr
     synthesizeSyntheticMVars
     let eTy ← instantiateMVars (← inferType e)
-    bif eTy.hasExprMVar then tryPostpone
+    uif eTy.hasExprMVar then tryPostpone
     let eTy' ← derive eTy
     unless ← isDefEq eTy'.expr expectedType'.expr do
       throwTypeMismatchError "mod_cast" expectedType'.expr eTy'.expr e
@@ -255,7 +255,7 @@ def evalNormCast0 : Tactic := fun stx => do
     withMainContext do
       match loc with
       | Location.targets hyps target =>
-        bif target then (normCastTarget cfg)
+        uif target then (normCastTarget cfg)
         (← getFVarIds hyps).forM (normCastHyp cfg)
       | Location.wildcard =>
         normCastTarget cfg

@@ -21,7 +21,7 @@ def mLeftRightCore (right : Bool) (mvar : MVarId) : MetaM MVarId := do
 
   let mkApp3 (.const ``SPred.or _) σs L R := goal.target | throwError "target is not SPred.or"
 
-  let (thm, keep) := bif right then (``SPred.or_intro_r', R) else (``SPred.or_intro_l', L)
+  let (thm, keep) := uif right then (``SPred.or_intro_r', R) else (``SPred.or_intro_l', L)
 
   let newGoal ← mkFreshExprSyntheticOpaqueMVar {goal with target := keep}.toExpr
   mvar.assign (mkApp5 (mkConst thm [goal.u]) σs goal.hyps L R newGoal)

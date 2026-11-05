@@ -34,7 +34,7 @@ def throwAutoBoundImplicitLocal [MonadExceptOf Exception m] (n : Name) : m α :=
 def isAutoBoundImplicitLocalException? (ex : Exception) : Option Name :=
   match ex with
   | Exception.internal id k =>
-    bif id == autoBoundImplicitExceptionId then
+    uif id == autoBoundImplicitExceptionId then
       some <| k.getName `localId `x
     else
       none

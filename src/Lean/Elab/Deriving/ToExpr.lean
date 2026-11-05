@@ -53,7 +53,7 @@ def mkToTypeExpr (indVal : InductiveVal) (argNames : Array Name) : TermElabM Ter
     let mut args : Array Term := #[]
     for argName in argNames, x in xs do
       let a := mkIdent argName
-      bif (← Meta.isType x) then
+      uif (← Meta.isType x) then
         args := args.push <| ← ``(toTypeExpr $a)
       else
         args := args.push <| ← ``(toExpr $a)
@@ -85,9 +85,9 @@ where
         let mut ctorArgs := #[]
         let mut rhsArgs : Array Term := #[]
         let mkArg (x : Expr) (a : Term) : TermElabM Term := do
-          bif (← inferType x).isAppOf indVal.name then
+          uif (← inferType x).isAppOf indVal.name then
             `($(mkIdent auxFunName) $levelInsts* $a)
-          else bif (← Meta.isType x) then
+          else uif (← Meta.isType x) then
             ``(toTypeExpr $a)
           else
             ``(toExpr $a)
@@ -156,7 +156,7 @@ def mkAuxFunction (ctx : Deriving.Context) (i : Nat) : TermElabM Command := do
     let inst := mkIdent (← mkFreshUserName `inst)
     return (inst, ← `(explicitBinderF| ($inst : ToLevel.{$(mkIdent u)})))
   let mut body ← mkToExprBody header indVal auxFunName toLevelInsts
-  bif ctx.usePartial then
+  uif ctx.usePartial then
     let letDecls ← mkLocalInstanceLetDecls ctx header.argNames toLevelInsts
     body ← mkLet letDecls body
   /- We need to alter the last binder (the one for the "target") to have explicit universe levels
@@ -166,7 +166,7 @@ def mkAuxFunction (ctx : Deriving.Context) (i : Nat) : TermElabM Command := do
     | `(bracketedBinderF| ($a : $ty)) => do `(bracketedBinderF| ($a : $(← updateIndType indVal ty)))
     | _ => throwError "(internal error) expecting inst binder"
   let binders := header.binders.pop ++ levelBinders ++ #[← addLevels header.binders.back!]
-  bif ctx.usePartial then
+  uif ctx.usePartial then
     `(partial def $(mkIdent auxFunName):ident $binders:bracketedBinder* : Expr := $body:term)
   else
     `(def $(mkIdent auxFunName):ident $binders:bracketedBinder* : Expr := $body:term)
@@ -192,7 +192,7 @@ def mkInstanceCmds (ctx : Deriving.Context) (typeNames : Array Name) :
     TermElabM (Array Command) := do
   let mut instances := #[]
   for indVal in ctx.typeInfos, auxFunName in ctx.auxFunNames do
-    bif typeNames.contains indVal.name then
+    uif typeNames.contains indVal.name then
       let argNames     ← mkInductArgNames indVal
       let binders      ← mkImplicitBinders argNames
       let binders      := binders ++ (← mkInstImplicitBinders ``ToExpr indVal argNames)
@@ -222,7 +222,7 @@ def mkToExprInstanceCmds (declNames : Array Name) : TermElabM (Array Syntax) := 
 The main entry point to the `ToExpr` deriving handler.
 -/
 def mkToExprInstanceHandler (declNames : Array Name) : CommandElabM Bool := do
-  bif (← declNames.allM isInductive) && declNames.size >ᵇ 0 then
+  uif (← declNames.allM isInductive) ∧ declNames.size > 0 then
     let cmds ← withFreshMacroScope <| liftTermElabM <| mkToExprInstanceCmds declNames
     -- Enable autoimplicits, used for universe levels.
     withScope (fun scope => { scope with opts := autoImplicit.set scope.opts true }) do

@@ -191,7 +191,7 @@ open MessageData in
 partial instance : ToMessageData RCasesPatt := ⟨fmt 0⟩ where
   /-- parenthesize the message if the precedence is above `tgt` -/
   parenAbove (tgt p : Nat) (m : MessageData) : MessageData :=
-    bif tgt <ᵇ p then m.paren else m
+    uif tgt < p then m.paren else m
   /-- format an `RCasesPatt` with the given precedence: 0 = lo, 1 = med, 2 = hi -/
   fmt : Nat → RCasesPatt → MessageData
   | p, paren _ pat => fmt p pat
@@ -213,18 +213,18 @@ tactics.
 -/
 def processConstructor (ref : Syntax) (info : Array ParamInfo)
     (explicit : Bool) (idx : Nat) (ps : List/-Π-/ RCasesPatt) : List/-Π-/ Name × List/-Π-/ RCasesPatt :=
-  bif _ : idx <ᵇ info.size then
-    bif !explicit && info[idx].binderInfo != .default then
+  uif _ : idx < info.size then
+    uif !explicit && info[idx].binderInfo != .default then
       let (ns, tl) := processConstructor ref info explicit (idx+1) ps
       (`_ :: ns, default :: tl)
-    else bif idx+1 <ᵇ info.size then
+    else uif idx+1 < info.size then
       let p := ps.headD default
       let (ns, tl) := processConstructor ref info explicit (idx+1) (ps.tailD [])
       (p.name?.getD `_ :: ns, p :: tl)
     else match ps with
       | []  => ([`_], [default])
       | [p] => ([p.name?.getD `_], [p])
-      | ps  => ([`_], [(bif explicit then .explicit ref else id) (.tuple ref ps)])
+      | ps  => ([`_], [(uif explicit then .explicit ref else id) (.tuple ref ps)])
   else ([], [])
 termination_by info.size - idx
 
@@ -282,7 +282,7 @@ partial def rcasesCore (g : MVarId) (fs : FVarSubst) (clears : Array FVarId) (e 
     let (fs, g) ← substEq g (← asFVar e) fs
     cont g fs clears a
   | .one ref _ =>
-    bif e.isFVar then
+    uif e.isFVar then
       Term.addLocalVarInfo ref e
     cont g fs clears a
   | .clear ref =>
@@ -336,7 +336,7 @@ partial def rcasesCore (g : MVarId) (fs : FVarSubst) (clears : Array FVarId) (e 
       align : List/-Π-/ (Name × List/-Π-/ RCasesPatt) → TermElabM (List/-Π-/ (Name × List/-Π-/ RCasesPatt) × α)
       | [] => pure ([], a)
       | (tgt, ps) :: as => do
-        bif tgt == ctorName then
+        uif tgt == ctorName then
           let fs := fs.append goal.subst
           (as, ·) <$> rcasesContinue goal.mvarId fs clears a (ps.zip goal.fields.toList) cont
         else
@@ -365,7 +365,7 @@ end
 def tryClearMany' (goal : MVarId) (fvarIds : Array FVarId) : MetaM MVarId := do
   let mut toErase := fvarIds
   for localDecl in (← goal.getDecl).lctx do
-    bif (← findLocalDeclDependsOn localDecl toErase.contains) then
+    uif (← findLocalDeclDependsOn localDecl toErase.contains) then
       toErase := toErase.push localDecl.fvarId
   goal.tryClearMany toErase
 
@@ -409,7 +409,7 @@ def generalizeExceptFVar (goal : MVarId) (args : Array GeneralizeArg) :
   let mut result := #[]
   let mut j := 0
   for arg in args do
-    bif arg.expr.isFVar && arg.hName?.isNone then
+    uif arg.expr.isFVar && arg.hName?.isNone then
       result := result.push arg.expr
     else
       result := result.push (mkFVar fvarIdsNew[j]!)
@@ -489,7 +489,7 @@ partial def rintroCore (g : MVarId) (fs : FVarSubst) (clears : Array FVarId) (a 
     let (v, g) ← withRef pat.ref <| g.intro (pat.name?.getD `_)
     rcasesCore g fs clears (.fvar v) a pat cont
   | `(rintroPat| ($(pats)* $[: $ty?']?)) =>
-    let ref := bif pats.size == 1 then pat.raw else .missing
+    let ref := uif pats.size == 1 then pat.raw else .missing
     rintroContinue g fs clears ref pats (ty?' <|> ty?) a cont
   | _ => throwUnsupportedSyntax
 
@@ -504,7 +504,7 @@ partial def rintroContinue (g : MVarId) (fs : FVarSubst) (clears : Array FVarId)
 where
   /-- Runs `rintroContinue` on `pats[i...*]` -/
   loop i g fs clears a := do
-    bif h : i <ᵇ pats.size then
+    uif h : i < pats.size then
       rintroCore g fs clears a ref pats[i] ty? (loop (i+1))
     else cont g fs clears a
 

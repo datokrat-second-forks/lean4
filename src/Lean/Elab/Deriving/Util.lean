@@ -57,7 +57,7 @@ def mkInstImplicitBinders (className : Name) (indVal : InductiveVal) (argNames :
       try
         let x := xs[i]
         let c ← mkAppM className #[x]
-        bif (← isTypeCorrect c) then
+        uif (← isTypeCorrect c) then
           let argName := argNames[i]!
           let binder : Syntax ← `(instBinderF| [ $(mkCIdent className):ident $(mkIdent argName):ident ])
           binders := binders.push binder
@@ -74,10 +74,10 @@ def withoutExposeFromCtors (typeName : Name) (cont : CommandElabM α) : CommandE
   let mut typeInfos := #[]
   for typeName in indVal.all do
     typeInfos := typeInfos.push (← getConstInfoInduct typeName)
-  bif typeInfos.any (·.ctors.any isPrivateName) then
-    bif !isPrivateName typeName then
+  uif typeInfos.any (·.ctors.any isPrivateName) then
+    uif !isPrivateName typeName then
       -- The topmost scope should be the one from the `deriving` command itself
-      bif (← getScope).attrs.any (· matches `(Parser.Term.attrInstance| expose)) then
+      uif (← getScope).attrs.any (· matches `(Parser.Term.attrInstance| expose)) then
         throwError "cannot use `deriving ... @[expose]` with `{.ofConstName typeName}` as it has one or more private constructors"
     withScope (fun sc => { sc with
         attrs := sc.attrs.filter (!· matches `(Parser.Term.attrInstance| expose)) }) cont
@@ -107,7 +107,7 @@ def mkContext (className : Name) (fnPrefix : String) (typeName : Name) (supports
     typeInfos := typeInfos.push (← getConstInfoInduct typeName)
   let instName ← mkInstName className typeName
   let mut auxFunNames := #[]
-  bif indVal.all.length =ᵇ 1 then
+  uif indVal.all.length = 1 then
     auxFunNames := auxFunNames.push (instName ++ .mkSimple fnPrefix)
   else
     for i in [:indVal.all.length] do
@@ -148,7 +148,7 @@ def mkInstanceCmds (ctx : Context) (className : Name) (typeNames : Array Name) (
   let mut instances := #[]
   for i in *...ctx.typeInfos.size do
     let indVal       := ctx.typeInfos[i]!
-    bif typeNames.contains indVal.name then
+    uif typeNames.contains indVal.name then
       let auxFunName   := ctx.auxFunNames[i]!
       let argNames     ← mkInductArgNames indVal
       let binders      ← mkImplicitBinders argNames
@@ -156,7 +156,7 @@ def mkInstanceCmds (ctx : Context) (className : Name) (typeNames : Array Name) (
       let indType      ← mkInductiveApp indVal argNames
       let type         ← `($(mkCIdent className) $indType)
       let mut val      := mkIdent auxFunName
-      bif useAnonCtor then
+      uif useAnonCtor then
         val ← `(⟨$val⟩)
       let instCmd ← `(instance $(mkIdent ctx.instName):ident $binders:implicitBinder* : $type := $val)
       instances := instances.push instCmd

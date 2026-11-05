@@ -37,7 +37,7 @@ def symInit (goal : Goal) : GrindM (List TGrind × Goal) := do
   -- Apply proof by contradiction if the target is not already `False`
   let target ← goal.mvarId.getType
   unless target.isFalse do
-    let mvarId ← bif (← isProp target) then pure goal.mvarId else goal.mvarId.exfalso
+    let mvarId ← uif (← isProp target) then pure goal.mvarId else goal.mvarId.exfalso
     if let some mvarId ← mvarId.byContra? then
       -- `byContra?` produces `⊢ ¬target → False`, introduce the negated hypothesis
       let (_, mvarId) ← mvarId.intro1
@@ -64,22 +64,22 @@ def symInit (goal : Goal) : GrindM (List TGrind × Goal) := do
     let sym := (← read).sym
     withTracing do
     let solved ← liftGrindM do
-      let (initSeq, goal') ← bif sym then symInit goal else pure ([], goal)
+      let (initSeq, goal') ← uif sym then symInit goal else pure ([], goal)
       match (← a.run goal') with
       | .closed seq =>
         let seq := initSeq ++ seq
         let finishTac ← mkFinishTactic seq preserved
         let seqTac := Action.mkGrindSeq seq
         let mut suggestions : Array Tactic.TryThis.Suggestion := #[]
-        bif (← Action.checkSeqAt saved₀ goal₀ seq) then
+        uif (← Action.checkSeqAt saved₀ goal₀ seq) then
           suggestions := suggestions.push { suggestion := .tsyntax seqTac }
-        bif (← Action.checkSeqAt saved₀ goal₀ [finishTac]) then
+        uif (← Action.checkSeqAt saved₀ goal₀ [finishTac]) then
           suggestions := suggestions.push { suggestion := .tsyntax finishTac }
-        bif suggestions.isEmpty then
+        uif suggestions.isEmpty then
           /- If `suggestions` is empty, then both `Action.checkSeqAt` calls above have failed and none of the generated tactics could close the goal. -/
           logWarning m!"generated tactic cannot close the goal{indentD (← Action.mkGrindNext seq)}\nInitial goal\n{goal₀.mvarId}"
           suggestions := #[{ suggestion := .tsyntax seqTac }]
-        bif suggestions.size == 1 then
+        uif suggestions.size == 1 then
           Tactic.TryThis.addSuggestion stx suggestions[0]!
         else
           Tactic.TryThis.addSuggestions stx suggestions
@@ -89,7 +89,7 @@ def symInit (goal : Goal) : GrindM (List TGrind × Goal) := do
         let result ← mkResult params (some goal)
         throwError "`finish?` failed\n{← result.toMessageData}"
         return false
-    bif solved then
+    uif solved then
       replaceMainGoal []
 
 end Lean.Elab.Tactic.Grind

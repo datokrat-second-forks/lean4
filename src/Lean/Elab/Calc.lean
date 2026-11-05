@@ -19,7 +19,7 @@ Decompose `e` into `(r, a, b)`.
 Remark: it assumes the last two arguments are explicit.
 -/
 def getCalcRelation? (e : Expr) : MetaM (Option (Expr × Expr × Expr)) := do
-  bif e.getAppNumArgs <ᵇ 2 then
+  uif e.getAppNumArgs < 2 then
     return none
   else
     return some (e.appFn!.appFn!, e.appFn!.appArg!, e.appArg!)
@@ -132,7 +132,7 @@ def throwCalcFailure (steps : Array CalcStepView) (expectedType result : Expr) :
   let resultType := (← instantiateMVars (← inferType result)).headBeta
   let some (r, lhs, rhs) ← getCalcRelation? resultType | unreachable!
   if let some (er, elhs, erhs) ← getCalcRelation? expectedType then
-    bif (← isDefEqGuarded r er) then
+    uif (← isDefEqGuarded r er) then
       let mut failed := false
       unless ← isDefEqGuarded lhs elhs do
         let (lhs, elhs) ← addPPExplicitToExposeDiff lhs elhs
@@ -148,7 +148,7 @@ def throwCalcFailure (steps : Array CalcStepView) (expectedType result : Expr) :
           invalid 'calc' step, right-hand side is{indentD m!"{rhs} : {rhsTy}"}\n\
           but is expected to be{indentD m!"{erhs} : {erhsTy}"}"
         failed := true
-      bif failed then
+      uif failed then
         throwAbortTerm
   throwTypeMismatchError "'calc' expression" expectedType resultType result
 

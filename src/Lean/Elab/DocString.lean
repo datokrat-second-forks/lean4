@@ -254,9 +254,9 @@ where
       | .fvar fv => some fv
       | _ => none
     repeat
-      bif lctx.size =ᵇ 0 then break
+      uif lctx.size = 0 then break
       if let some decl := lctx.lastDecl then
-        bif sectionFVars.any (· == decl.fvarId) then break
+        uif sectionFVars.any (· == decl.fvarId) then break
         else
           lctx := lctx.pop
           localInstances := localInstances.erase decl.fvarId
@@ -266,7 +266,7 @@ where
     let mut i := 0
     let mut x := none
     repeat -- Consume parameters until we find one that matches or run out
-      bif x.isNone then
+      uif x.isNone then
         x := names[i]?
         i := i + 1
       type ← Meta.withLCtx lctx localInstances <| Meta.whnf type
@@ -277,12 +277,12 @@ where
           localInstances := localInstances.push {className := c, fvar := .fvar fv}
 
         if let some (some x') := x then
-          bif x'.getKind == ``hole then
+          uif x'.getKind == ``hole then
             -- A `_` parameter has no name, so it matches no binder. Drop it from the cursor
             -- and align the remaining parameters by name; each lifted binder, including
             -- captured variables, is introduced under its own name below.
             x := none
-          else bif x'.getId == y then
+          else uif x'.getId == y then
             lctx := lctx.mkLocalDecl fv y ty
             Meta.withLCtx lctx localInstances <|
               addTermInfo' x' (.fvar fv) (lctx? := some lctx) (expectedType? := ty)
@@ -290,7 +290,7 @@ where
             x := none
             continue
         else if let some none := x then
-          bif bi == .instImplicit then
+          uif bi == .instImplicit then
             lctx := lctx.mkLocalDecl fv y ty
             type := body.instantiate1 (.fvar fv)
             x := none
@@ -308,14 +308,14 @@ where
       getNames binderStx[1]
     | ``instBinder =>
       let x := binderStx[1][0]
-      bif x.isMissing then pure #[none] else pure #[some x]
+      uif x.isMissing then pure #[none] else pure #[some x]
     | k =>
       -- A parameter bound by an unbracketed identifier or `_`, as in `def f x` or `where go _`.
-      bif k == identKind || k == ``hole then pure #[some binderStx]
+      uif k == identKind || k == ``hole then pure #[some binderStx]
       else throwErrorAt binderStx "Couldn't interpret binder {binderStx}"
   getNames (ids : Syntax) : TermElabM (Array (Option Syntax)) :=
     ids.getArgs.mapM fun x =>
-      bif x.getKind == identKind || x.getKind == ``hole then
+      uif x.getKind == identKind || x.getKind == ``hole then
         pure (some x)
       else throwErrorAt x "identifier or `_` expected"
 
@@ -429,8 +429,8 @@ instance : FromDocArg DataValue where
     | .num x => pure <| .ofNat x.getNat
     | .ident x => do
       let y ← realizeGlobalConstNoOverloadWithInfo x
-      bif y == ``true then pure <| .ofBool true
-      else bif y == ``false then pure <| .ofBool false
+      uif y == ``true then pure <| .ofBool true
+      else uif y == ``false then pure <| .ofBool false
       else
         let bools ← #[``true, ``false] |>.mapM unresolveNameGlobalAvoidingLocals
         let h ← MessageData.hint m!"Use a Boolean:" (bools.map fun x => s!"{x}") (ref? := some x)
@@ -442,8 +442,8 @@ instance : FromDocArg Bool where
     match v with
     | .ident x => do
       let x' ← realizeGlobalConstNoOverloadWithInfo x
-      bif x' == ``true then return true
-      else bif x' == ``false then return false
+      uif x' == ``true then return true
+      else uif x' == ``false then return false
       else throwErrorAt x m!"Expected {.ofConstName ``true} or {.ofConstName ``false} but got {.ofConstName x'}"
     | other => throwErrorAt other.syntax "Expected a Boolean"
 
@@ -502,7 +502,7 @@ protected def takeNamed [FromDocArg α] (name : Name) (default : α) :
   let args ← get
   for h : i in [0:args.size] do
     if let some (x, v) := asNamed args[i] then
-      bif x.getId.eraseMacroScopes == name then
+      uif x.getId.eraseMacroScopes == name then
         set (σ := Array (TSyntax ``Parser.arg)) (args[:i] ++ args[i+1:])
         let v ← DocArg.ofSyntax v
         return (← FromDocArg.fromDocArg v)
@@ -519,7 +519,7 @@ protected def takeMany [FromDocArg α] (name : Name) :
   let mut others := #[]
   for arg in args do
     if let some (x, v) := asNamed arg then
-      bif x.getId.eraseMacroScopes == name then
+      uif x.getId.eraseMacroScopes == name then
         let v ← DocArg.ofSyntax v
         thisArg := thisArg.push v
         continue
@@ -536,7 +536,7 @@ protected def takeFlag (name : Name) (default : Bool) : StateT (Array (TSyntax `
   let args ← get
   for h : i in [0:args.size] do
     if let some (x, v) := asFlag args[i] then
-      bif x.getId.eraseMacroScopes == name then
+      uif x.getId.eraseMacroScopes == name then
         set (σ := Array (TSyntax ``Parser.arg)) (args[:i] ++ args[i+1:])
         return v
   return default
@@ -621,18 +621,18 @@ private def genWrapper (declName : Name) (argType : Option Expr) (retType : Expr
     let argSpec ← forallTelescope c.type fun args ret => do
       let mut argSpec : Array ArgSpec := #[]
 
-      for arg in (bif argType.isSome then (args[:args.size-1] : Array _) else args) do
+      for arg in (uif argType.isSome then (args[:args.size-1] : Array _) else args) do
         let localDecl ← arg.fvarId!.getDecl
         let name := localDecl.userName
         let argType := localDecl.type
         let asView? ←
           match view? with
           | some (viewTy, get) =>
-            bif (← isDefEq argType viewTy) then pure (some (viewTy, get)) else pure none
+            uif (← isDefEq argType viewTy) then pure (some (viewTy, get)) else pure none
           | none => pure none
         -- The parameters are the arguments, then the view, then the content.
         if let some (.view prev ..) := argSpec.find? (· matches .view ..) then
-          bif asView?.isSome then
+          uif asView?.isSome then
             throwError "`{.ofConstName declName}` takes the view of the element twice, as \
               `{prev}` and as `{name}`, but there can be at most one view."
           else
@@ -641,9 +641,9 @@ private def genWrapper (declName : Name) (argType : Option Expr) (retType : Expr
         -- A parameter whose type is another element's view is a mistake worth naming, because it
         -- would otherwise be read as an argument and fail to find a `FromDocArg` instance.
         let mut otherView? : Option (Name × String) := none
-        bif asView?.isNone then
+        uif asView?.isNone then
           for (viewName, kind) in elementViews do
-            bif (← isDefEq argType (.const viewName [])) then
+            uif (← isDefEq argType (.const viewName [])) then
               otherView? := some (viewName, kind)
         if let some (viewName, kind) := otherView? then
           match view? with
@@ -655,11 +655,11 @@ private def genWrapper (declName : Name) (argType : Option Expr) (retType : Expr
               is the view of a {kind}. This extension has no view."
         if let some (viewTy, get) := asView? then
           argSpec := argSpec.push (.view name viewTy get)
-        else bif argType.isAppOfArity' ``optParam 2 then
+        else uif argType.isAppOfArity' ``optParam 2 then
           argSpec := argSpec.push (.named name (argType.getArg! 0) (argType.getArg! 1))
-        else bif argType.isAppOfArity' ``many 1 then
+        else uif argType.isAppOfArity' ``many 1 then
           argSpec := argSpec.push (.many name (argType.getArg!' 0))
-        else bif argType.isAppOfArity' ``flag 1 then
+        else uif argType.isAppOfArity' ``flag 1 then
           let e ← whnf (argType.getArg!' 0)
           match_expr e with
           | true => argSpec := argSpec.push (.flag name true)
@@ -698,14 +698,14 @@ private def genWrapper (declName : Name) (argType : Option Expr) (retType : Expr
         safety := .safe
       }
       -- The wrapper shows the declaration's documentation.
-      bif (← findInternalDocString? (← getEnv) declName).isSome then
+      uif (← findInternalDocString? (← getEnv) declName).isSome then
         addInheritedDocString name declName
     return name
   else
     throwError m!"`{MessageData.ofConstName declName}` not found"
 where
   build (i : Nat) (argSpec : Array ArgSpec) (args : Array Expr) (body : Option Expr): MetaM Expr := do
-    bif h : i <ᵇ argSpec.size then
+    uif h : i < argSpec.size then
       match argSpec[i] with
       | .positional name type =>
         let arg ← mkAppOptM ``Lean.Doc.takePositional #[type, none, toExpr name]
@@ -970,7 +970,7 @@ In module mode, docstring extensions are invoked at elaboration time, so the und
 must be marked `meta`.
 -/
 private def checkDocExtMeta (decl : Name) (kind : String) : CoreM Unit := do
-  bif (← getEnv).header.isModule && !isMarkedMeta (← getEnv) decl then
+  uif (← getEnv).header.isModule && !isMarkedMeta (← getEnv) decl then
     throwError m!"`{.ofConstName decl}` must be marked `meta` to be used as a docstring {kind}"
 
 builtin_initialize registerBuiltinAttribute {
@@ -1231,9 +1231,9 @@ Returns the element type's name and the name of the generated wrapper. Errors if
 the expected form or if `X` has no `TypeName` instance.
 -/
 private def mkMdRendererWrapper (decl : Name) (isInline : Bool) : MetaM (Name × Name) := do
-  let ofName := bif isInline then ``Doc.InlineMdRendererOf else ``Doc.BlockMdRendererOf
-  let mkName := bif isInline then ``Doc.mkInlineMdRenderer else ``Doc.mkBlockMdRenderer
-  let wrapperTy := mkConst (bif isInline then ``Doc.InlineMdRenderer else ``Doc.BlockMdRenderer)
+  let ofName := uif isInline then ``Doc.InlineMdRendererOf else ``Doc.BlockMdRendererOf
+  let mkName := uif isInline then ``Doc.mkInlineMdRenderer else ``Doc.mkBlockMdRenderer
+  let wrapperTy := mkConst (uif isInline then ``Doc.InlineMdRenderer else ``Doc.BlockMdRenderer)
   let t := (← getConstInfo decl).type
   unless t.isAppOfArity ofName 1 do
     throwError "`{.ofConstName decl}` must have type `{.ofConstName ofName} X` for custom elements of type `X`"
@@ -1329,12 +1329,12 @@ def resolveBuiltinDocName {α : Type} (builtins : NameMap α) (x : Name) : TermE
   for decl in openDecls do
     match decl with
     | .simple ns exs =>
-      bif !exs.any (· == x) then
+      uif !exs.any (· == x) then
         if let some v := builtins.get? (ns ++ x) then return some v
     | .explicit openedId declName =>
-      bif openedId == x then
+      uif openedId == x then
         if let some v := builtins.get? declName then return some v
-      else bif openedId.isPrefixOf x then
+      else uif openedId.isPrefixOf x then
         let candidate := x.replacePrefix openedId declName
         if let some v := builtins.get? candidate then return some v
 
@@ -1468,8 +1468,8 @@ register_builtin_option doc.verso.suggestions : Bool := {
 def suggestionName (name : Name) : TermElabM Name := do
   let name' ←
     -- Builtin expander names never need namespacing
-    bif (← builtinDocRoles.get).contains name then pure (some name)
-    else bif (← builtinDocCodeBlocks.get).contains name then pure (some name)
+    uif (← builtinDocRoles.get).contains name then pure (some name)
+    else uif (← builtinDocCodeBlocks.get).contains name then pure (some name)
     else pure none
   match name' with
     | some (.str _ s) =>
@@ -1477,7 +1477,7 @@ def suggestionName (name : Name) : TermElabM Name := do
       let simpleName := .str .anonymous s
       let qualifiedBuiltin := `Lean.Doc ++ simpleName
       -- Local shadowing check
-      bif (← resolveLocalName simpleName).isSome then
+      uif (← resolveLocalName simpleName).isSome then
         return qualifiedBuiltin
       -- Global shadowing check: try to resolve the simple name and see
       -- if it resolves to something other than the builtin role
@@ -1488,7 +1488,7 @@ def suggestionName (name : Name) : TermElabM Name := do
         match resolved? with
         | some resolved =>
           -- If it resolves to the builtin, use simple name; otherwise qualified
-          bif resolved == qualifiedBuiltin then return simpleName
+          uif resolved == qualifiedBuiltin then return simpleName
           else return qualifiedBuiltin
         | none =>
           -- Nothing to shadow
@@ -1496,7 +1496,7 @@ def suggestionName (name : Name) : TermElabM Name := do
     | some n => return n
     | none =>
       -- If it exists, unresolve it
-      bif (← getEnv).contains name then
+      uif (← getEnv).contains name then
         unresolveNameGlobalAvoidingLocals name
       else
         -- Fall back to doing nothing
@@ -1535,7 +1535,7 @@ def mkSuggestion
 
 def nameOrBuiltinName [Monad m] [MonadEnv m] (x : Name) : m Name := do
   let env ← getEnv
-  bif env.contains x then return x
+  uif env.contains x then return x
   else return `Lean.Doc ++ x
 
 /--
@@ -1545,19 +1545,19 @@ name is shadowed. Returns display names suitable for `mkSuggestion`.
 def findShadowedNames {α : Type}
     (nonBuiltIns : NameMap (Array Name)) (builtins : NameMap α) (x : Name) :
     TermElabM (Array Name) := do
-  bif x.isAnonymous then return #[]
+  uif x.isAnonymous then return #[]
   let mut candidates : NameSet := {}
   for (fullName, _) in nonBuiltIns do
-    bif x.isSuffixOf fullName then
+    uif x.isSuffixOf fullName then
       candidates := candidates.insert fullName
   for (fullName, _) in builtins do
-    bif x.isSuffixOf fullName then
+    uif x.isSuffixOf fullName then
       candidates := candidates.insert fullName
   let mut result := #[]
   for c in candidates do
     let displayName ← suggestionName c
     -- Only suggest if the display name differs from what the user wrote
-    bif displayName != x then
+    uif displayName != x then
       result := result.push displayName
   return result
 
@@ -1568,7 +1568,7 @@ def shadowedHint {α : Type}
     (envEntries : NameMap (Array Name)) (builtins : NameMap α)
     (name : Ident) (kind : String) : DocM MessageData := do
   let candidates ← findShadowedNames envEntries builtins name.getId
-  bif candidates.isEmpty then return m!""
+  uif candidates.isEmpty then return m!""
   let ss := candidates.map fun c => (c.toString, none, none)
   mkSuggestion name m!"`{name}` shadows a {kind}. Use the full name of the shadowed {kind}:" ss
 
@@ -1595,7 +1595,7 @@ def refName (name : VersoRefName) : DocM String := do
   -- The parser reads a name with `refNameFn`, which allows the same set of characters as these. If
   -- this exception is thrown, it's due to metaprograms behaving badly.
   let str := name.getVersoRefName
-  bif str.isEmpty then
+  uif str.isEmpty then
     throwErrorAt name "A reference name may not be empty"
   if let some c := (str.find? (!Doc.Parser.isRefNameChar ·)).map (·.get!) then
     throwErrorAt name m!"A reference name may not contain {repr c}"
@@ -1634,7 +1634,7 @@ public partial def elabInline (stx : TSyntax ``Parser.inline) :
   | .code v =>
     let content := v.content
     let code := v.getVersoCode
-    bif doc.verso.suggestions.get (← getOptions) then
+    uif doc.verso.suggestions.get (← getOptions) then
       if let some ⟨b, e⟩ := stx.raw.getRange? then
         let suggesters ← codeSuggestions
         let mut suggestions := #[]
@@ -1679,14 +1679,14 @@ public partial def elabInline (stx : TSyntax ``Parser.inline) :
         return res
       catch
         | e@(.internal id _) =>
-          bif id == unsupportedSyntaxExceptionId then
+          uif id == unsupportedSyntaxExceptionId then
             continue
           else throw e
         | e => throw e
     throwUnknownDocElem (docRoleExt.getState (← getEnv)) (← builtinDocRoles.get) name "role"
 where
   withSpace (s : String) : String :=
-    bif s.startsWith " " then s else " " ++ s
+    uif s.startsWith " " then s else " " ++ s
 
 /--
 Elaborates the syntax of an block-level document element to an actual block-level document element.
@@ -1715,7 +1715,7 @@ public partial def elabBlock (stx : TSyntax ``Parser.block) :
         return .mk (← item.term.mapM elabInline) (← item.desc.mapM elabBlock)
   | .footnoteRef v =>
     let refStr ← refName v.name
-    bif (← getThe InternalState).footnotes.contains refStr then
+    uif (← getThe InternalState).footnotes.contains refStr then
       throwErrorAt v.name m!"Reference already found"
     else
       let content ← v.content.mapM elabInline
@@ -1726,7 +1726,7 @@ public partial def elabBlock (stx : TSyntax ``Parser.block) :
     return .empty
   | .linkRef v =>
     let refStr ← refName v.name
-    bif (← getThe InternalState).urls.contains refStr then
+    uif (← getThe InternalState).urls.contains refStr then
       throwErrorAt v.name m!"Reference already found"
     else
       modifyThe InternalState fun st =>
@@ -1747,13 +1747,13 @@ public partial def elabBlock (stx : TSyntax ``Parser.block) :
         return res
       catch
         | e@(.internal id _) =>
-          bif id == unsupportedSyntaxExceptionId then
+          uif id == unsupportedSyntaxExceptionId then
             continue
           else throw e
         | e => throw e
     throwUnknownDocElem (docDirectiveExt.getState (← getEnv)) (← builtinDocDirectives.get) name "directive"
   | .codeblock { name? := none, openFence := opener,  content, .. } =>
-    bif doc.verso.suggestions.get (← getOptions) then
+    uif doc.verso.suggestions.get (← getOptions) then
       if let some ⟨b, e⟩ := opener.raw.getRange? then
         let suggesters ← codeBlockSuggestions
         let mut suggestions := #[]
@@ -1790,7 +1790,7 @@ public partial def elabBlock (stx : TSyntax ``Parser.block) :
         return res
       catch
         | e@(.internal id _) =>
-          bif id == unsupportedSyntaxExceptionId then
+          uif id == unsupportedSyntaxExceptionId then
             continue
           else throw e
         | e => throw e
@@ -1809,24 +1809,24 @@ public partial def elabBlock (stx : TSyntax ``Parser.block) :
         return res
       catch
         | e@(.internal id _) =>
-          bif id == unsupportedSyntaxExceptionId then
+          uif id == unsupportedSyntaxExceptionId then
             continue
           else throw e
         | e => throw e
     throwUnknownDocElem (docCommandExt.getState (← getEnv)) (← builtinDocCommands.get) name "document command"
   | .metadata .. =>
     let h ←
-      bif stx.raw.getRange?.isSome then m!"Remove it".hint #[""] (ref? := stx)
+      uif stx.raw.getRange?.isSome then m!"Remove it".hint #[""] (ref? := stx)
       else pure m!""
     logError m!"Part metadata is not supported in docstrings.{h}"
     return .empty
   | .header .. => throwErrorAt stx "Unsupported syntax: {stx}"
 where
   withSpace (s : String) : String :=
-    bif s.endsWith " " then s else s ++ " "
+    uif s.endsWith " " then s else s ++ " "
 
 def takeFirst? (xs : Array α) : Option (α × Array α) :=
-  bif h : xs.size >ᵇ 0 then
+  uif h : xs.size > 0 then
     some (xs[0], xs.extract 1)
   else none
 
@@ -1839,8 +1839,8 @@ partial def elabBlocks' (level : Nat) :
     let blocks ← getThe (TSyntaxArray ``Parser.block)
     if let some (x, xs) := takeFirst? blocks then
       if let some (.header { level := n, content := headerName, .. }) := BlockView.of x then
-        bif n <ᵇ level then return (pre, sub)
-        else bif n =ᵇ level then
+        uif n < level then return (pre, sub)
+        else uif n = level then
           set xs
           let (content, subParts) ← elabBlocks' (level + 1)
           let title ←
@@ -1877,7 +1877,7 @@ def elabModSnippet'
   let mut maxLevel := level
   for b in blocks do
     if let some (.header { level := n, content, .. }) := BlockView.of b then
-        bif n >ᵇ maxLevel then
+        uif n > maxLevel then
           logErrorAt b m!"Incorrect header nesting: expected at most `{"#".pushn '#' maxLevel}` \
             but got `{"#".pushn '#' n}`"
         else
@@ -2017,7 +2017,7 @@ namespaces are open. Non-builtin elements use `MessageData.ofConstName` so they 
 shortest unambiguous form.
 -/
 def docElementMessage (extension : Name) : BaseIO MessageData := do
-  bif (← isBuiltin) then
+  uif (← isBuiltin) then
     match extension with
     | .str _ s => return s
     | _ => return .ofConstName extension

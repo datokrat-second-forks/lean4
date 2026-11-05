@@ -47,7 +47,7 @@ def withExtHyps (struct : Name) (flat : Bool)
   withLocalDecl `x .implicit (mkAppN structC params) fun x => do
   withLocalDecl `y .implicit (mkAppN structC params) fun y => do
     let mut hyps := #[]
-    let fields ← bif flat then
+    let fields ← uif flat then
       pure <| getStructureFieldsFlattened (← getEnv) struct (includeSubobjectFields := false)
     else
       pure <| getStructureFields (← getEnv) struct
@@ -84,13 +84,13 @@ def mkExtIffType (extThmName : Name) : MetaM Expr := withLCtx {} {} do
     for fvar in toRevert do
       unless ← Meta.isProof fvar do
         throwError "Argument `{fvar}` is not a proof, but all arguments after `{x}` and `{y}` must be proofs"
-      bif fvars.fvarSet.contains fvar.fvarId! then
+      uif fvars.fvarSet.contains fvar.fvarId! then
         throwError "Argument `{fvar}` is depended upon by a subsequent argument, which is not supported for arguments after `{x}` and `{y}`"
     let conj := mkAndN (← toRevert.mapM (inferType ·)).toList
     -- Make everything implicit except for inst implicits
     let mut newBis := #[]
     for fvar in args[*...startIdx] do
-      bif (← fvar.fvarId!.getBinderInfo) matches .default | .strictImplicit then
+      uif (← fvar.fvarId!.getBinderInfo) matches .default | .strictImplicit then
         newBis := newBis.push (fvar.fvarId!, .implicit)
     withNewBinderInfos newBis do
       mkForallFVars args[*...startIdx] <| mkIff ty conj
@@ -116,7 +116,7 @@ def realizeExtTheorem (structName : Name) (flat : Bool) : TermElabM Name := do
             -- introduce the params, do cases on 'x' and 'y', and then substitute each equation
             (← `(by intro $params* {..} {..}; intros; subst_eqs; rfl))
         let pf ← instantiateMVars pf
-        bif pf.hasMVar then throwError "Internal error: Synthesized `ext` proof contains metavariables{indentD pf}"
+        uif pf.hasMVar then throwError "Internal error: Synthesized `ext` proof contains metavariables{indentD pf}"
         let info ← getConstInfo structName
         addDecl <| Declaration.thmDecl {
           name := extName
@@ -153,7 +153,7 @@ def realizeExtIffTheorem (extName : Name) : TermElabM Name := do
             · intro h; cases h; and_intros <;> (intros; first | rfl | simp | fail "Failed to prove converse of ext theorem")
             · intro; (repeat cases ‹_ ∧ _›); apply $(mkCIdent extName) <;> assumption)
         let pf ← instantiateMVars pf
-        bif pf.hasMVar then throwError "Internal error: Synthesized `ext_iff` proof contains metavariables{indentD pf}"
+        uif pf.hasMVar then throwError "Internal error: Synthesized `ext_iff` proof contains metavariables{indentD pf}"
         addDecl <| Declaration.thmDecl {
           name := extIffName
           type
@@ -186,7 +186,7 @@ builtin_initialize registerBuiltinAttribute {
     let iff := iffFalse?.isNone
     let flat := flatFalse?.isNone
     let mut declName := declName
-    bif isStructure (← getEnv) declName then
+    uif isStructure (← getEnv) declName then
       declName ← withRef stx <| realizeExtTheorem declName flat
     else if let some stx := flatFalse? then
       throwErrorAt stx "Unexpected `flat` configuration on `[ext]` theorem"
@@ -202,7 +202,7 @@ builtin_initialize registerBuiltinAttribute {
     let priority ← liftMacroM <| evalPrio (prio.getD (← `(prio| default)))
     extExtension.add {declName, keys, priority} kind
     -- Realize iff theorem
-    bif iff then
+    uif iff then
       discard <| withRef stx <| realizeExtIffTheorem declName
   erase := fun declName => do
     let s := extExtension.getState (← getEnv)
@@ -254,7 +254,7 @@ def tryIntros [Monad m] [MonadLiftT TermElabM m] (g : MVarId) (pats : List (TSyn
   match pats with
   | [] => k (← (g.intros : TermElabM _)).2 []
   | p::ps =>
-    bif (← (g.withContext g.getType' : TermElabM _)).isForall then
+    uif (← (g.withContext g.getType' : TermElabM _)).isForall then
       let mut n := 0
       for g in ← RCases.rintro #[p] none g do
         n := n.max (← tryIntros g ps k)
@@ -282,7 +282,7 @@ def withExtN [Monad m] [MonadLiftT TermElabM m] [MonadExcept Exception m]
   match depth with
   | 0 => k g pats
   | depth+1 => do
-    bif failIfUnchanged then
+    uif failIfUnchanged then
       withExt1 g pats fun g pats => withExtN g pats k depth (failIfUnchanged := false)
     else try
       withExt1 g pats fun g pats => withExtN g pats k depth (failIfUnchanged := false)
@@ -308,8 +308,8 @@ public def extCore (g : MVarId) (pats : List (TSyntax `rcasesPat))
     let pats := RCases.expandRIntroPats pats
     let depth := n.map (·.getNat) |>.getD 100
     let (used, gs) ← extCore (← getMainGoal) pats.toList depth
-    bif RCases.linter.unusedRCasesPattern.get (← getOptions) then
-      bif used <ᵇ pats.size then
+    uif RCases.linter.unusedRCasesPattern.get (← getOptions) then
+      uif used < pats.size then
         let unused := MessageData.andList <| pats[used...*].toList.map (m!"`{·}`")
         Linter.logLint RCases.linter.unusedRCasesPattern (mkNullNode pats[used...*].toArray)
           m!"`ext` did not consume the patterns {unused}"

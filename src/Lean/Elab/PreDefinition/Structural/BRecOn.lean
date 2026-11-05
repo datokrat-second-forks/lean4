@@ -69,7 +69,7 @@ private def withBelowDict [Inhabited α] (below : Expr) (numIndParams : Nat)
   let numTypeFormers := positions.size
   let belowType ← inferType below
   trace[Elab.definition.structural] "belowType: {belowType}"
-  bif (← isTracingEnabledFor `Elab.definition.structural) then
+  uif (← isTracingEnabledFor `Elab.definition.structural) then
     unless (← isTypeCorrect below) do
       trace[Elab.definition.structural] "not type correct!"
   belowType.withApp fun f args => do
@@ -94,7 +94,7 @@ private def withBelowDict [Inhabited α] (below : Expr) (numIndParams : Nat)
       let belowDict := mkAppN pre packedCs
       let belowDict := mkAppN belowDict finalArgs
       trace[Elab.definition.structural] "initial belowDict for {Cs}:{indentExpr belowDict}"
-      bif (← isTracingEnabledFor `Elab.definition.structural) then
+      uif (← isTracingEnabledFor `Elab.definition.structural) then
         unless (← isTypeCorrect belowDict) do
           trace[Elab.definition.structural] "not type correct!"
       k Cs belowDict
@@ -130,7 +130,7 @@ private partial def replaceRecApps (recArgInfos : Array RecArgInfo) (positions :
   let containsRecFn (e : Expr) : StateRefT (HasConstCache recFnNames) MetaM Bool :=
     modifyGet (HasConstCache.contains e |>.run ·)
   let rec loop (below : Expr) (e : Expr) : StateRefT (HasConstCache recFnNames) MetaM Expr := do
-    bif !(← containsRecFn e) then
+    uif !(← containsRecFn e) then
       return e
     match e with
     | Expr.lam n d b c =>
@@ -169,7 +169,7 @@ private partial def replaceRecApps (recArgInfos : Array RecArgInfo) (positions :
             return mkAppN (← loop below f) (← args.mapM (loop below))
       match (← matchMatcherApp? (alsoCasesOn := true) e) with
       | some matcherApp =>
-        bif recArgInfos.all (fun recArgInfo => !recArgHasLooseBVarsAt recArgInfo.fnName recArgInfo.recArgPos e) then
+        uif recArgInfos.all (fun recArgInfo => !recArgHasLooseBVarsAt recArgInfo.fnName recArgInfo.recArgPos e) then
           processApp e
         else
           /- Here is an example we currently do not handle
@@ -248,10 +248,10 @@ def mkBRecOnConst (recArgInfos : Array RecArgInfo) (positions : Positions)
     (motives : Array Expr) (isIndPred : Bool) : MetaM (Nat → Expr) := do
   let indGroup := recArgInfos[0]!.indGroupInst
   let motive := motives[0]!
-  let brecOnUniv ← bif isIndPred then pure 0 else lambdaTelescope motive fun _ type => getLevel type
+  let brecOnUniv ← uif isIndPred then pure 0 else lambdaTelescope motive fun _ type => getLevel type
   let brecOnCons := fun idx =>
     let n := indGroup.brecOnName idx
-    let us := bif isIndPred then indGroup.levels else brecOnUniv :: indGroup.levels
+    let us := uif isIndPred then indGroup.levels else brecOnUniv :: indGroup.levels
     mkAppN (.const n us) indGroup.params
   -- Pick one as a prototype
   let brecOnAux := brecOnCons 0

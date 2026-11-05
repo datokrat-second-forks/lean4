@@ -98,7 +98,7 @@ key if an `exact` handler would also apply.
 private partial def HandlerTrie.find? (trie : HandlerTrie) (key : Name) (kind : EvalConfigItemHandlerKind) :
     Option (Name × EvalConfigItemHandler) := do
   let root := key.getRoot
-  bif root.isAnonymous then
+  uif root.isAnonymous then
     match kind with
     | .exact => return (.anonymous, ← trie.exact?)
     | .wildcard => return (.anonymous, ← trie.wildcard?)
@@ -122,7 +122,7 @@ but it is implemented to replace handlers.
 private partial def HandlerTrie.insert (trie : HandlerTrie) (h : EvalConfigItemHandler) (key : Name := h.key) :
     HandlerTrie :=
   let root := key.getRoot
-  bif root.isAnonymous then
+  uif root.isAnonymous then
     let projFn? := trie.projFn? <|> h.projFn?
     let struct? := trie.struct? <|> h.struct?
     match h.kind with
@@ -141,7 +141,7 @@ private partial def HandlerTrie.insert (trie : HandlerTrie) (h : EvalConfigItemH
 private partial def HandlerTrie.insertStruct (trie : HandlerTrie) (key : Name) (struct : Name) :
     HandlerTrie :=
   let root := key.getRoot
-  bif root.isAnonymous then
+  uif root.isAnonymous then
     let struct := trie.struct?.getD struct
     { trie with struct? := some struct }
   else
@@ -160,15 +160,15 @@ also makes use of the cached `item.bool?` value.
 -/
 def evalBoolItem (item : ConfigItem) : TermElabM Bool := do
   if let some b := item.bool? then
-    bif (← getInfoState).enabled then
-      addTermInfo' item.value (bif b then toExpr true else toExpr false)
+    uif (← getInfoState).enabled then
+      addTermInfo' item.value (uif b then toExpr true else toExpr false)
     return b
   else
     evalTermOrExprWithElab ⟨item.value⟩
 
 def addConstInfo' (ref : Syntax) (projFn : Name) : TermElabM Unit := do
-  bif (← getInfoState).enabled then
-    bif (← getEnv).contains projFn then -- in case we are in Lean prelude
+  uif (← getInfoState).enabled then
+    uif (← getEnv).contains projFn then -- in case we are in Lean prelude
       addConstInfo ref projFn
 
 private structure State where
@@ -251,7 +251,7 @@ where
         let key := keyPrefix ++ field
         let proj ← mkProjection self field
         let some projFn := proj.getAppFn.constName? | panic! "(Internal error) Invalid projection {inlineExpr proj}"
-        bif (← hasToOmit key projFn) then
+        uif (← hasToOmit key projFn) then
           trace[Elab.ConfigEval] "key `{key}` was excluded, skipping"
           continue
         let fieldTy ← inferType proj
@@ -261,9 +261,9 @@ where
         trace[Elab.ConfigEval] m!"key `{key}` hasExact: {hasExact}, hasWildcard: {hasWildcard}"
         let mut synthesizedHandler := false
         -- If there's no exact key for this field yet, synthesize a handler
-        bif !hasExact then
+        uif !hasExact then
           let mut body ← `(pure { config with $(mkIdent key):ident := value })
-          bif (← withReducible <| isDefEq fieldTy (mkConst ``Bool)) then
+          uif (← withReducible <| isDefEq fieldTy (mkConst ``Bool)) then
             trace[Elab.ConfigEval] "field `{.ofConstName projFn}`, using {.ofConstName ``evalBoolItem}"
             body ← `(fun config item => evalBoolItem item >>= fun value => $body:term)
             trie := trie.insert { ref := struct, key, kind := .exact, body, projFn? := projFn }
@@ -286,9 +286,9 @@ where
             body ← `(fun _ item => $body)
             trie := trie.insert { ref := struct, key, kind := .exact, body, projFn? := projFn }
         if let some structName' := (← whnfR fieldTy).constName? then
-          bif isStructure (← getEnv) structName' then
+          uif isStructure (← getEnv) structName' then
             trie := trie.insertStruct key structName'
-            bif (← try checkStruct structName'; pure true catch _ => pure false) then
+            uif (← try checkStruct structName'; pure true catch _ => pure false) then
               /-
               Heuristic: if there is already a handler for an exact match, we shouldn't report errors
               if sub-keys can't be used. In Mathlib for example, the `linarith` tactic has configuration
@@ -307,14 +307,14 @@ where
     let mut trie : HandlerTrie := {}
     trie := trie.insertStruct Name.anonymous structName
     for handler in view.handlers do
-      bif handler.key.isAnonymous && handler.kind matches .exact then
+      uif handler.key.isAnonymous && handler.kind matches .exact then
         throwErrorAt handler.ref "Unexpected empty key for handler"
       if let some (key, _) := trie.find? handler.key handler.kind then
         throwErrorAt handler.ref "Duplicate handler for key `{key}`"
       trie := trie.insert handler
     trie ← visitStruct trie .anonymous structName allowFailure
     unless (← hasToOmit `config structName) || (trie.find? `config .exact).isSome do
-      bif (← hasInstance ``EvalExpr (mkConst structName)) then
+      uif (← hasInstance ``EvalExpr (mkConst structName)) then
         -- Only use an `EvalExpr` instance; we don't have plans to support structure instance notation with `EvalTerm`.
         let cfgBody ← `(fun _ item => (evalExprWithElab ⟨item.value⟩ : TermElabM $struct))
         trie := trie.insert { ref := tk, key := `config, kind := .exact, body := cfgBody }
@@ -327,7 +327,7 @@ where
     let bodyApplied (handler : EvalConfigItemHandler) : TermElabM Term := do
       `(($handler.body : $struct → ConfigItem → TermElabM $struct) config item')
     let handleChildren (onFail : Term) : TermElabM Term := do
-      bif children.isEmpty then
+      uif children.isEmpty then
         return onFail
       else
         let children ← children.mapM fun (s, trie') => return (s, ← assemble trie' onFail)
@@ -339,7 +339,7 @@ where
     let handleWildcard : TermElabM Term := do
       if let some h := wildcard? then
         let body ← bodyApplied h
-        bif children.isEmpty then
+        uif children.isEmpty then
           return body
         else
           let jp ← withFreshMacroScope `(ident| doWildcard)

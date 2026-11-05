@@ -50,10 +50,10 @@ structure MonadInfo where
   v : Level
   /-- The cached `PUnit` expression. -/
   cachedPUnit : Expr :=
-    bif u matches .zero then mkConst ``Unit else mkConst ``PUnit [mkLevelSucc u]
+    uif u matches .zero then mkConst ``Unit else mkConst ``PUnit [mkLevelSucc u]
   /-- The cached `PUnit.unit` expression. -/
   cachedPUnitUnit : Expr :=
-    bif u matches .zero then mkConst ``Unit.unit else mkConst ``PUnit.unit [mkLevelSucc u]
+    uif u matches .zero then mkConst ``Unit.unit else mkConst ``PUnit.unit [mkLevelSucc u]
 
 -- Same pattern as for `Methods`/`MethodsRef` in `SimpM`.
 private opaque ContInfoRefPointed : NonemptyType.{0}
@@ -311,7 +311,7 @@ def mkBindApp (α β e k : Expr) : DoElabM Expr := do
 def DoOps.default : DoOps where
   mkPureApp α e := do
     let info := (← read).monadInfo
-    bif (← read).deadCode matches .deadSyntactically then
+    uif (← read).deadCode matches .deadSyntactically then
       -- There is no dead syntax here. Just return a fresh metavariable so that we don't
       -- do the `Term.ensureHasType` check below.
       return ← mkFreshExprMVar (mkApp info.m α)
@@ -329,7 +329,7 @@ def DoOps.default : DoOps where
     let instBind ← Term.mkInstMVar (mkApp (mkConst ``Bind [info.u, info.v]) info.m)
     return mkApp6 (mkConst ``Bind.bind [info.u, info.v]) info.m instBind α β e k
   isPureApp? e :=
-    bif e.isAppOfArity ``Pure.pure 4 then some (e.getArg! 3) else none
+    uif e.isAppOfArity ``Pure.pure 4 then some (e.getArg! 3) else none
   splitMonadApp? type := do
     let .app m resultType := type.consumeMData | return none
     unless ← isType resultType do return none
@@ -359,11 +359,11 @@ def declareMutVars (xs : Array Ident) (erased : Bool) (k : DoElabM α) : DoElabM
 
 /-- Register the given name as that of a `mut` variable if the syntax token `mut` is present. -/
 def declareMutVar? (mutTk? : Option Syntax) (x : Ident) (erased : Bool) (k : DoElabM α) : DoElabM α :=
-  bif mutTk?.isSome then declareMutVar x erased k else k
+  uif mutTk?.isSome then declareMutVar x erased k else k
 
 /-- Register the given names as that of `mut` variables if the syntax token `mut` is present. -/
 def declareMutVars? (mutTk? : Option Syntax) (xs : Array Ident) (erased : Bool) (k : DoElabM α) : DoElabM α :=
-  bif mutTk?.isSome then declareMutVars xs erased k else k
+  uif mutTk?.isSome then declareMutVars xs erased k else k
 
 /-- Look up a declared `mut` variable by its raw `Name`. -/
 def findMutVar? (n : Name) : DoElabM (Option MutVar) := do
@@ -371,7 +371,7 @@ def findMutVar? (n : Name) : DoElabM (Option MutVar) := do
 
 /-- Throw an error if the given name is not a declared `mut` variable. -/
 def throwUnlessMutVarDeclared (x : Ident) : DoElabM Unit := do
-  bif (← findMutVar? x.getId).isNone then
+  uif (← findMutVar? x.getId).isNone then
     let xMsg ← MessageData.ofUserName x.getId
     throwErrorAt x "Variable `{xMsg}` cannot be mutated. Only variables declared using `let mut` can be mutated.
       If you did not intend to mutate but define `{xMsg}`, consider using `let {xMsg}` instead"
@@ -494,7 +494,7 @@ Otherwise, an error is logged and a new continuation is returned that calls `dec
 result. The error is reported at `ref`.
 -/
 def DoElemCont.ensureHasTypeAt (dec : DoElemCont) (ref : Syntax) (elementType : Expr) : DoElabM DoElemCont := do
-  bif (← isDefEqGuarded dec.resultType elementType) then
+  uif (← isDefEqGuarded dec.resultType elementType) then
     return dec
   let errMessage := mkMonadicResultTypeMismatchError dec.resultType elementType
   unless (← readThe Term.Context).errToSorry do
@@ -546,9 +546,9 @@ def DoElemCont.mkBindUnlessPure (dec : DoElemCont) (e : Expr) : DoElabM Expr := 
     -- First try to contract `e >>= pure` into `e`.
     -- Reason: for `pure e >>= pure`, we want to get `pure e` and not `have xFVar := e; pure xFVar`.
     if let some pureArg := ops.isPureApp? body' then
-      bif pureArg == xFVar then
+      uif pureArg == xFVar then
         let body'' ← mkPureApp eResultTy xFVar
-        bif (← withNewMCtxDepth do isDefEq body' body'') then
+        uif (← withNewMCtxDepth do isDefEq body' body'') then
           return e
 
     -- Now test whether we can contract `pure e >>= k` into `have xFVar := e; k xFVar`. We zeta `xFVar` when
@@ -561,8 +561,8 @@ def DoElemCont.mkBindUnlessPure (dec : DoElemCont) (e : Expr) : DoElabM Expr := 
         let isDuplicable ← isDefEq eResultTy (← mkPUnit)
           -- <||> pure eRes.isFVar -- this is too aggressive; users expect to see "useless binds" after elaboration
         return (isPure, isDuplicable)
-      bif isPure then
-        bif isDuplicable then
+      uif isPure then
+        uif isDuplicable then
           return ← body.replaceFVarsM #[xFVar] #[eRes]
 
     let body ← Term.ensureHasType (← mkMonadApp kResultTy) body
@@ -592,7 +592,7 @@ def DoElemCont.elabAsSyntacticallyDeadCode (dec : DoElemCont) : DoElabM Unit :=
 
 /-- Wrap `dec.k` so it elaborates as dead iff `info.noFallthrough`. -/
 def DoElemCont.withDeadCodeFromInfo (dec : DoElemCont) (info : ControlInfo) : DoElemCont :=
-  { dec with k := withDeadCode (bif info.noFallthrough then .deadSemantically else .alive) dec.k }
+  { dec with k := withDeadCode (uif info.noFallthrough then .deadSemantically else .alive) dec.k }
 
 /--
 If `x` is a `mut` variable, record that its current binding aliases the original `let mut` binding,
@@ -601,7 +601,7 @@ so that go-to-definition and find-references treat both as the same variable.
 def registerMutVarAlias (x : Name) : DoElabM Unit := do
   if let some baseMutVar ← findMutVar? x then
     let id := (← getFVarFromUserName x).fvarId!
-    bif id != baseMutVar.baseId then
+    uif id != baseMutVar.baseId then
       pushInfoLeaf <| .ofFVarAliasInfo (baseMutVar.mkAliasInfo id)
 
 /-- Bind `x` to `carried.out` at the underlying type while `k` runs, and zeta-substitute the
@@ -613,7 +613,7 @@ def withErasedProj (x : Ident) (k : DoElabM Expr) (info : Bool := true) : DoElab
     | throwError "the carried binding of erased variable `{x.getId}` has type{indentExpr carried.type}\ninstead of an `Erased` type"
   let outVal := mkApp2 (mkConst ``Erased.out c.constLevels!) t carried.toExpr
   withLetDecl x.getId t outVal (nondep := true) fun xv => do
-    bif info then
+    uif info then
       Term.addLocalVarInfo x xv
     -- Uses of `x` resolve to the projection, so alias it to the variable's base binding for
     -- find-references and rename.
@@ -635,12 +635,12 @@ def mkErasedMkApp (e : Expr) : MetaM Expr := do
 carries the `Erased` value. -/
 def MutVar.stateType (mv : MutVar) : MetaM Expr := do
   let t := (← getLocalDeclFromUserName mv.getId).type
-  bif mv.erased then return mkApp (mkConst ``Erased [← getLevel t]) t else return t
+  uif mv.erased then return mkApp (mkConst ``Erased [← getLevel t]) t else return t
 
 /-- The current value of `mv` as packed into runtime state. -/
 def MutVar.stateValue (mv : MutVar) : MetaM Expr := do
   let v := (← getLocalDeclFromUserName mv.getId).toExpr
-  bif mv.erased then mkErasedMkApp v else return v
+  uif mv.erased then mkErasedMkApp v else return v
 
 /--
 Given a list of mut vars `vars` and an FVar `tupleVar` binding a tuple, bind the mut vars to the
@@ -698,7 +698,7 @@ def observingPostpone (x : DoElabM α) : DoElabM (Option α) := do
   catch ex => match ex with
     | .error .. => throw ex
     | .internal id _ =>
-      bif id == postponeExceptionId then
+      uif id == postponeExceptionId then
         s.restore
         pure none
       else
@@ -721,7 +721,7 @@ This is useful for control-flow constructs like `if` and `match`, where multiple
 branches share the continuation.
 -/
 def DoElemCont.withDuplicableCont (nondupDec : DoElemCont) (callerInfo : ControlInfo) (caller : DoElemCont → DoElabM Expr) : DoElabM Expr := do
-  bif nondupDec.kind matches .duplicable .. then
+  uif nondupDec.kind matches .duplicable .. then
     return ← caller nondupDec
   let γ := (← read).doBlockResultType
   let mγ ← mkMonadApp γ
@@ -764,7 +764,7 @@ def DoElemCont.withDuplicableCont (nondupDec : DoElemCont) (callerInfo : Control
     -- Here we unconditionally add a pending MVar.
     doElabToSyntax "join point RHS" elabBody (Term.postponeElabTerm · mγ)
 
-  bif callerInfo.numRegularExits >ᵇ 1 then
+  uif callerInfo.numRegularExits > 1 then
     mkLetFVars (generalizeNondepLet := false) #[jp] body
   else
     return (← body.abstractM #[jp]).instantiateBetaRevRange 0 1 #[joinRhs]
@@ -832,10 +832,10 @@ private partial def extractMonadInfo (ops : DoOps) (expectedType? : Option Expr)
     | some r => return r
     | none =>
       let typeNew ← whnfCore type
-      bif typeNew != type then
+      uif typeNew != type then
         extract? typeNew
       else
-        bif typeNew.getAppFn.isMVar then
+        uif typeNew.getAppFn.isMVar then
           mkUnknownMonadResult
         else match (← unfoldDefinition? typeNew) with
           | some typeNew => extract? typeNew
@@ -873,11 +873,11 @@ private def liftNestedActionDelimiter (k : SyntaxNodeKind) : Bool :=
 
 private def letDeclArgHasBinders (letDeclArg : Syntax) : Bool :=
   let k := letDeclArg.getKind
-  bif k == ``Parser.Term.letPatDecl then
+  uif k == ``Parser.Term.letPatDecl then
     false
-  else bif k == ``Parser.Term.letEqnsDecl then
+  else uif k == ``Parser.Term.letEqnsDecl then
     true
-  else bif k == ``Parser.Term.letIdDecl then
+  else uif k == ``Parser.Term.letIdDecl then
     -- letIdLhs := letId >> many (ppSpace >> letIdBinder) >> optType
     let binders := letDeclArg[1]
     binders.getNumArgs > 0
@@ -892,12 +892,12 @@ private def letDeclHasBinders (letDecl : Syntax) : Bool :=
 private def nestedActionForbiddenBinder (stx : Syntax) : Bool :=
   let k := stx.getKind
   -- TODO: make this extensible in the future.
-  bif k == ``Parser.Term.fun || k == ``Parser.Term.matchAlts ||
+  uif k == ``Parser.Term.fun || k == ``Parser.Term.matchAlts ||
      k == ``Parser.Term.doLetRec || k == ``Parser.Term.letrec then
      -- It is never ok to lift over this kind of binder
     true
   -- The following kinds of `let`-expressions require extra checks to decide whether they contain binders or not
-  else bif k == ``Parser.Term.letDecl then
+  else uif k == ``Parser.Term.letDecl then
     letDeclHasBinders stx
   else
     false
@@ -905,18 +905,18 @@ private def nestedActionForbiddenBinder (stx : Syntax) : Bool :=
 -- TODO: we must track whether we are inside a quotation or not.
 private partial def hasNestedActionsToLift : Syntax → Bool
   | Syntax.node _ k args =>
-    bif liftNestedActionDelimiter k then false
+    uif liftNestedActionDelimiter k then false
     -- NOTE: We don't check for lifts in quotations here, which doesn't break anything but merely makes this rare case a
     -- bit slower
-    else bif k == ``Parser.Term.nestedAction then true
+    else uif k == ``Parser.Term.nestedAction then true
     -- For `pure` if-then-else, we only lift `(<- ...)` occurring in the condition.
-    else bif k == ``termDepIfThenElse || k == ``termIfThenElse then args.size >= 2 && hasNestedActionsToLift args[1]!
+    else uif k == ``termDepIfThenElse || k == ``termIfThenElse then args.size >= 2 && hasNestedActionsToLift args[1]!
     else args.any hasNestedActionsToLift
   | _ => false
 
 private partial def expandNestedActionsAux (baseId : Name) (inQuot : Bool) (inBinder : Bool) : Syntax → StateT (Array DoElem) DoElabM Syntax
   | stx@(Syntax.node i k args) =>
-    bif k == choiceKind then do
+    uif k == choiceKind then do
       -- choice node: check that lifts are consistent
       let alts ← stx.getArgs.mapM (expandNestedActionsAux baseId inQuot inBinder · |>.run #[])
       let (_, lifts) := alts[0]!
@@ -924,16 +924,16 @@ private partial def expandNestedActionsAux (baseId : Name) (inQuot : Bool) (inBi
         throwErrorAt stx "Cannot lift nested action `{stx}` over inconsistent syntax variants.\nConsider lifting out the binding manually."
       modify (· ++ lifts)
       return .node i k (alts.map (·.1))
-    else bif liftNestedActionDelimiter k then
+    else uif liftNestedActionDelimiter k then
       return stx
     -- For `pure` if-then-else, we only lift `(<- ...)` occurring in the condition.
-    else bif h : args.size ≥ᵇ 2 && (k == ``termDepIfThenElse || k == ``termIfThenElse) then do
+    else uif h : args.size ≥ 2 ∧ (k == ``termDepIfThenElse || k == ``termIfThenElse) then do
       let inAntiquot := stx.isAntiquot && !stx.isEscapedAntiquot
       let arg1 ← expandNestedActionsAux baseId (inQuot && !inAntiquot || stx.isQuot) inBinder args[1]
       let args := args.set! 1 arg1
       return Syntax.node i k args
-    else bif k == ``Parser.Term.nestedAction && !inQuot then withFreshMacroScope do
-      bif inBinder then
+    else uif k == ``Parser.Term.nestedAction && !inQuot then withFreshMacroScope do
+      uif inBinder then
         throwErrorAt stx "Cannot lift nested action `{stx}` over a binder.\nThis error usually happens when you are trying to lift a method nested in a `fun`, `let`, or `match`-alternative, and it can often be fixed by adding a missing `do`."
       let arg ← expandNestedActionsAux baseId inQuot inBinder args[1]!
       -- Pre-stage0-update format stored a term in `args[1]`; the new format stores a doElem.
@@ -941,7 +941,7 @@ private partial def expandNestedActionsAux (baseId : Name) (inQuot : Bool) (inBi
       let isDoElem :=
         (Parser.getParserCategory? (← getEnv) `doElem).any (·.kinds.contains arg.getKind)
       let act : DoElem ←
-        bif isDoElem then pure ⟨arg⟩
+        uif isDoElem then pure ⟨arg⟩
         else let t : Term := ⟨arg⟩; `(doElem| $t:term)
       -- keep name deterministic across choice branches
       let id ← mkIdentFromRef (.num baseId (← get).size)
@@ -956,7 +956,7 @@ private partial def expandNestedActionsAux (baseId : Name) (inQuot : Bool) (inBi
   | stx => return stx
 
 def expandNestedActions (stx : TSyntax kind) : DoElabM (Array DoElem × TSyntax kind) := do
-  bif !hasNestedActionsToLift stx then
+  uif !hasNestedActionsToLift stx then
     return (#[], stx)
   else
     let baseId ← withFreshMacroScope (MonadQuotation.addMacroScope `__do_lift)
@@ -1003,10 +1003,10 @@ private def elabDoElemFns (stx : DoElem) (cont : DoElemCont)
         elabFn.value stx cont
       catch ex => match ex with
         | .internal id _ =>
-          bif id == unsupportedSyntaxExceptionId then
+          uif id == unsupportedSyntaxExceptionId then
             s.restore
             elabDoElemFns stx cont elabFns
-          else bif catchExPostpone && id == postponeExceptionId then
+          else uif catchExPostpone && id == postponeExceptionId then
             s.restore
             doElabToSyntax m!"do element {stx}" (elabFn.value stx cont) (Term.postponeElabTerm · expectedType)
           else
@@ -1039,10 +1039,10 @@ partial def elabDoElem (stx : DoElem) (cont : DoElemCont) (catchExPostpone : Boo
   profileitM Exception "do element elaborator" (decl := k) (← getOptions) <|
   withRef stx <| withIncRecDepth <| withFreshMacroScope <| do
   let mγ ← mkMonadApp (← read).doBlockResultType
-  bif (← read).deadCode matches .deadSyntactically then
+  uif (← read).deadCode matches .deadSyntactically then
     logWarningAt stx "This `do` element and its control-flow region are dead code. Consider removing it."
     return ← mkFreshExprMVar mγ (userName := `deadCode)
-  bif (← read).deadCode matches .deadSemantically then
+  uif (← read).deadCode matches .deadSemantically then
     logWarningAt stx "This `do` element and its control-flow region are dead code. Consider refactoring your code to remove it."
   withDeadCode .alive do -- we have warned for this doElem. No need to warn for every element of the block
   if let some (decl, stxNew) ← Term.expandMacroReportingDeprecated? stx then
@@ -1051,7 +1051,7 @@ partial def elabDoElem (stx : DoElem) (cont : DoElemCont) (catchExPostpone : Boo
         withRef stxNew <| withDeprecationContextForDoElem stx cont (elabDoElem ⟨stxNew⟩ ·)
 
   let (doElems, stx) ← expandNestedActions stx
-  bif !doElems.isEmpty then
+  uif !doElems.isEmpty then
     return ← elabDoElems1 (doElems.push stx) cont
 
   -- After `expandNestedActions`, as syntax with nested actions is elaborated again without them
@@ -1062,7 +1062,7 @@ partial def elabDoElem (stx : DoElem) (cont : DoElemCont) (catchExPostpone : Boo
     withDeprecationContextForDoElem stx cont (elabDoElemFns stx · elabFns catchExPostpone)
 
 partial def elabDoElems1 (doElems : Array DoElem) (cont : DoElemCont) (catchExPostpone : Bool := true) : DoElabM Expr := do
-  bif h : doElems.size =ᵇ 0 then
+  uif h : doElems.size = 0 then
     throwError "Empty array of `do` elements passed to `elabDoElems1`."
   else
   let back := doElems.back
@@ -1080,7 +1080,7 @@ partial def elabDoSeq (doSeq : DoSeq) (cont : DoElemCont) (catchExPostpone : Boo
     elabDoElems1 (getDoElems doSeq) cont catchExPostpone
   catch ex => match ex with
     | .internal id _ =>
-      bif catchExPostpone && id == postponeExceptionId then
+      uif catchExPostpone && id == postponeExceptionId then
         s.restore
         let expectedType ← mkMonadApp (← read).doBlockResultType
         doElabToSyntax m!"do sequence {doSeq}" (elabDoSeq doSeq cont) (Term.postponeElabTerm · expectedType)

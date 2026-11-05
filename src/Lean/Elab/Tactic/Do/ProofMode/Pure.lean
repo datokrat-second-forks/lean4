@@ -86,7 +86,7 @@ private def extractPureProp (e : Expr) : MetaM (Option Expr) := do
   let f := e.getAppFn
   unless f.isConstOf ``SPred.pure do return none
   let args := e.getAppArgs
-  bif args.size <ᵇ 2 then return none
+  uif args.size < 2 then return none
   let σs := args[0]!
   let n ← TypeList.length σs
   unless n = args.size - 2 do return none
@@ -101,7 +101,7 @@ partial def _root_.Lean.MVarId.applyRflAndAndIntro (mvar : MVarId) : MetaM Unit 
   let ty ← mvar.getType >>= instantiateMVarsIfMVarApp
   let ty ← (·.getD ty) <$> extractPureProp ty
   trace[Elab.Tactic.Do.spec] "pure Prop: {ty}"
-  bif ty.isAppOf ``True then
+  uif ty.isAppOf ``True then
     mvar.assign (mkConst ``True.intro)
   else if let some (lhs, rhs) := ty.app2? ``And then
     let hlhs ← mkFreshExprMVar lhs

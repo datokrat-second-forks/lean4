@@ -20,15 +20,15 @@ namespace Lean.Elab.Term
 Expand `optional «precedence»` where
  «precedence» := leading_parser " : " >> precedenceParser -/
 def expandOptPrecedence (stx : Syntax) : MacroM (Option Nat) :=
-  bif stx.isNone then
+  uif stx.isNone then
     return none
   else
     return some (← evalPrec stx[0][1])
 
 private def mkParserSeq (ds : Array (Term × Nat)) : TermElabM (Term × Nat) := do
-  bif h₀ : ds.size =ᵇ 0 then
+  uif h₀ : ds.size = 0 then
     throwUnsupportedSyntax
-  else bif h₁ : ds.size =ᵇ 1 then
+  else uif h₁ : ds.size = 1 then
     pure ds[0]
   else
     let mut (r, stackSum) := ds[0]
@@ -53,7 +53,7 @@ private def markAsTrailingParser (lhsPrec : Nat) : ToParserDescrM Unit := set (s
 
 def ensureUnaryOutput (x : Term × Nat) : Term :=
   let (stx, stackSz) := x
-  bif stackSz != 1 then
+  uif stackSz != 1 then
     Unhygienic.run ``(ParserDescr.unary $(quote `group) $stx)
   else
     stx
@@ -64,13 +64,13 @@ def ensureUnaryOutput (x : Term × Nat) : Term :=
 /-- (Try to) add a term info for the category `catName` at `ref`. -/
 def addCategoryInfo (ref : Syntax) (catName : Name) : TermElabM Unit := do
   let declName := ``Lean.Parser.Category ++ catName
-  bif (← getEnv).contains declName then
+  uif (← getEnv).contains declName then
     addTermInfo' ref (Lean.mkConst declName)
 
 /-- (Try to) add a term info for the alias with info `info` at `ref`. -/
 def addAliasInfo (ref : Syntax) (info : Parser.ParserAliasInfo) : TermElabM Unit := do
-  bif (← getInfoState).enabled then
-    bif (← getEnv).contains info.declName then
+  uif (← getInfoState).enabled then
+    uif (← getEnv).contains info.declName then
       addTermInfo' ref (Lean.mkConst info.declName)
 
 def checkLeftRec (stx : Syntax) : ToParserDescrM Bool := do
@@ -91,13 +91,13 @@ def elabParserName? (stx : Syntax.Ident) : TermElabM (Option Parser.ParserResolu
   match ← Parser.resolveParserName stx with
   | [n@(.category catId)] =>
     if let some cat := Parser.getParserCategory? (← getEnv) catId then
-      bif !(← hasConst cat.declName) && (← withoutExporting <| hasConst cat.declName) then
+      uif !(← hasConst cat.declName) && (← withoutExporting <| hasConst cat.declName) then
         throwError "unknown category `{catId}`, must be imported publicly"
       recordExtraModUseFromDecl (isMeta := true) cat.declName
     addCategoryInfo stx catId
     return n
   | [n@(.parser parser _)] =>
-    bif getIRPhases (← getEnv) parser == .runtime then
+    uif getIRPhases (← getEnv) parser == .runtime then
       throwError m!"Declaration `{.ofConstName parser}` must be marked or imported as `meta` to be used as parser"
     recordExtraModUseFromDecl (isMeta := true) parser
     addTermInfo' stx (Lean.mkConst parser)
@@ -125,27 +125,27 @@ partial def toParserDescr (stx : Syntax) (catName : Name) : TermElabM (Term × O
 where
   process (stx : Syntax) : ToParserDescr := withRef stx do
     let kind := stx.getKind
-    bif kind == nullKind then
+    uif kind == nullKind then
       processSeq stx
-    else bif kind == choiceKind then
+    else uif kind == choiceKind then
       process stx[0]
-    else bif kind == ``Lean.Parser.Syntax.paren then
+    else uif kind == ``Lean.Parser.Syntax.paren then
       process stx[1]
-    else bif kind == ``Lean.Parser.Syntax.cat then
+    else uif kind == ``Lean.Parser.Syntax.cat then
       processNullaryOrCat stx
-    else bif kind == ``Lean.Parser.Syntax.unary then
+    else uif kind == ``Lean.Parser.Syntax.unary then
       processAlias stx[0] #[stx[2]]
-    else bif kind == ``Lean.Parser.Syntax.binary then
+    else uif kind == ``Lean.Parser.Syntax.binary then
       processAlias stx[0] #[stx[2], stx[4]]
-    else bif kind == ``Lean.Parser.Syntax.sepBy then
+    else uif kind == ``Lean.Parser.Syntax.sepBy then
       processSepBy stx
-    else bif kind == ``Lean.Parser.Syntax.sepBy1 then
+    else uif kind == ``Lean.Parser.Syntax.sepBy1 then
       processSepBy1 stx
-    else bif kind == ``Lean.Parser.Syntax.atom then
+    else uif kind == ``Lean.Parser.Syntax.atom then
       processAtom stx
-    else bif kind == ``Lean.Parser.Syntax.nonReserved then
+    else uif kind == ``Lean.Parser.Syntax.nonReserved then
       processNonReserved stx
-    else bif kind == ``Lean.Parser.Syntax.unicodeAtom then
+    else uif kind == ``Lean.Parser.Syntax.unicodeAtom then
       processUnicode stx
     else
       match (← liftM (Term.expandMacroReportingDeprecated? stx : TermElabM _)) with
@@ -155,8 +155,8 @@ where
   /-- Sequence (aka NullNode) -/
   processSeq (stx : Syntax) := do
     let args := stx.getArgs
-    bif (← checkLeftRec stx[0]) then
-      bif args.size == 1 then throwErrorAt stx "invalid atomic left recursive syntax"
+    uif (← checkLeftRec stx[0]) then
+      uif args.size == 1 then throwErrorAt stx "invalid atomic left recursive syntax"
       let args := args.eraseIdxIfInBounds 0
       let args ← args.mapM fun arg => withNestedParser do process arg
       mkParserSeq args
@@ -170,7 +170,7 @@ where
 
   processParserCategory (stx : Syntax) := do
     let catName := stx[0].getId.eraseMacroScopes
-    bif (← read).first && catName == (← read).catName then
+    uif (← read).first && catName == (← read).catName then
       throwErrorAt stx "invalid atomic left recursive syntax"
     let prec? ← liftMacroM <| expandOptPrecedence stx[1]
     let prec := prec?.getD 0
@@ -182,7 +182,7 @@ where
     addAliasInfo id info
     let args' ← args.mapM (withNestedParser ∘ process)
     -- wrap lone string literals in `<|>` in dedicated node (#1275)
-    let args' ← bif aliasName == `orelse then  -- TODO: generalize if necessary
+    let args' ← uif aliasName == `orelse then  -- TODO: generalize if necessary
       args.zipWithM (bs := args') fun arg arg' => do
         let mut #[arg] := arg.getArgs | return arg'
         let sym ← match arg with
@@ -194,7 +194,7 @@ where
     else
       pure args'
     let (args', stackSz) := if let some stackSz := info.stackSz? then
-      bif !info.autoGroupArgs then
+      uif !info.autoGroupArgs then
         (args'.map (·.1), stackSz)
       else
         (args'.map ensureUnaryOutput, stackSz)
@@ -218,7 +218,7 @@ where
       let stackSz := 1
       return (mkIdentFrom stx c, stackSz)
     | some (.parser c (isDescr := false)) =>
-      bif (← Parser.getParserAliasInfo id).declName == c then
+      uif (← Parser.getParserAliasInfo id).declName == c then
         -- prefer parser alias over base declaration because it has more metadata, #2249
         ensureNoPrec stx
         return (← processAlias ident #[])
@@ -236,14 +236,14 @@ where
   processSepBy (stx : Syntax) := do
     let p ← ensureUnaryOutput <$> withNestedParser do process stx[1]
     let sep := stx[3]
-    let psep ← bif stx[4].isNone then `(ParserDescr.symbol $sep) else ensureUnaryOutput <$> withNestedParser do process stx[4][1]
+    let psep ← uif stx[4].isNone then `(ParserDescr.symbol $sep) else ensureUnaryOutput <$> withNestedParser do process stx[4][1]
     let allowTrailingSep := !stx[5].isNone
     return (← `((with_annotate_term $(stx[0]) @ParserDescr.sepBy) $p $sep $psep $(quote allowTrailingSep)), 1)
 
   processSepBy1 (stx : Syntax) := do
     let p ← ensureUnaryOutput <$> withNestedParser do process stx[1]
     let sep := stx[3]
-    let psep ← bif stx[4].isNone then `(ParserDescr.symbol $sep) else ensureUnaryOutput <$> withNestedParser do process stx[4][1]
+    let psep ← uif stx[4].isNone then `(ParserDescr.symbol $sep) else ensureUnaryOutput <$> withNestedParser do process stx[4][1]
     let allowTrailingSep := !stx[5].isNone
     return (← `((with_annotate_term $(stx[0]) @ParserDescr.sepBy1) $p $sep $psep $(quote allowTrailingSep)), 1)
 
@@ -268,7 +268,7 @@ where
     let atom ← validAtom stx[0]
     /- For syntax categories where initialized with `LeadingIdentBehavior` different from default (e.g., `tactic`), we automatically mark
        the first symbol as nonReserved. -/
-    bif (← read).behavior != Parser.LeadingIdentBehavior.default && (← read).first then
+    uif (← read).behavior != Parser.LeadingIdentBehavior.default && (← read).first then
       return (← `(ParserDescr.nonReservedSymbol $(quote atom) false), 1)
     else
       return (← `(ParserDescr.symbol $(quote atom)), 1)
@@ -308,9 +308,9 @@ private def declareSyntaxCatQuotParser (catName : Name) : CommandElabM Unit := d
   let docString? := stx[0].getOptional?.map fun stx => ⟨stx⟩
   let catName    := stx[2].getId
   let catBehavior :=
-    bif stx[3].isNone then
+    uif stx[3].isNone then
       Parser.LeadingIdentBehavior.default
-    else bif stx[3][3].getKind == ``Parser.Command.catBehaviorBoth then
+    else uif stx[3][3].getKind == ``Parser.Command.catBehaviorBoth then
       Parser.LeadingIdentBehavior.both
     else
       Parser.LeadingIdentBehavior.symbol
@@ -336,13 +336,13 @@ private partial def mkNameFromParserSyntax (catName : Name) (stx : Syntax) : Mac
 where
   visit (stx : Syntax) (acc : String) : String :=
     match stx.isStrLit? with
-    | some val => acc ++ (val.trimAscii.copy.map fun c => bif c.isWhitespace then '_' else c).capitalize
+    | some val => acc ++ (val.trimAscii.copy.map fun c => uif c.isWhitespace then '_' else c).capitalize
     | none =>
       match stx with
       | Syntax.node _ k args =>
-        bif k == ``Lean.Parser.Syntax.cat then
+        uif k == ``Lean.Parser.Syntax.cat then
           acc ++ "_"
-        else bif k == ``Lean.Parser.Syntax.unicodeAtom && args.size >ᵇ 1 then
+        else uif k == ``Lean.Parser.Syntax.unicodeAtom ∧ args.size > 1 then
           -- in `unicode(" ≥ ", " >= ")` only visit `" ≥ "`.
           visit args[1]! acc
         else
@@ -366,11 +366,11 @@ where
  -/
 private partial def isAtomLikeSyntax (stx : Syntax) : Bool :=
   let kind := stx.getKind
-  bif kind == nullKind then
+  uif kind == nullKind then
     isAtomLikeSyntax stx[0] && isAtomLikeSyntax stx[stx.getNumArgs - 1]
-  else bif kind == choiceKind then
+  else uif kind == choiceKind then
     isAtomLikeSyntax stx[0] -- see toParserDescr
-  else bif kind == ``Lean.Parser.Syntax.paren then
+  else uif kind == ``Lean.Parser.Syntax.paren then
     isAtomLikeSyntax stx[1]
   else
     kind == ``Lean.Parser.Syntax.atom
@@ -403,7 +403,7 @@ def isLocalAttrKind (attrKind : Syntax) : Bool :=
 Add macro scope to `name` if it does not already have them, and `attrKind` is `local`.
 -/
 private def addMacroScopeIfLocal [MonadQuotation m] [Monad m] (name : Name) (attrKind : Syntax) : m Name := do
-  bif isLocalAttrKind attrKind && !name.hasMacroScopes then
+  uif isLocalAttrKind attrKind && !name.hasMacroScopes then
     MonadQuotation.addMacroScope name
   else
     return name
@@ -431,7 +431,7 @@ def elabSyntax (stx : Syntax) : CommandElabM Name := do
   withExporting (isExporting := !isLocalAttrKind attrKind) do
   let catId := catStx.getId.eraseMacroScopes
   if let some cat := Parser.getParserCategory? (← getEnv) catId then
-    bif !(← hasConst cat.declName) && (← withoutExporting <| hasConst cat.declName) then
+    uif !(← hasConst cat.declName) && (← withoutExporting <| hasConst cat.declName) then
       throwErrorAt catStx "unknown category `{catId}`, must be imported publicly"
     -- The category must be imported but is not directly referenced afterwards.
     recordExtraModUseFromDecl (isMeta := true) cat.declName
@@ -440,7 +440,7 @@ def elabSyntax (stx : Syntax) : CommandElabM Name := do
   liftTermElabM <| Term.addCategoryInfo catStx catId
   let syntaxParser := mkNullNode ps
   -- If the user did not provide an explicit precedence, we assign `maxPrec` to atom-like syntax and `leadPrec` otherwise.
-  let precDefault  := bif isAtomLikeSyntax syntaxParser then Parser.maxPrec else Parser.leadPrec
+  let precDefault  := uif isAtomLikeSyntax syntaxParser then Parser.maxPrec else Parser.leadPrec
   let prec ← match prec? with
     | some prec => liftMacroM <| evalPrec prec
     | none      => pure precDefault
@@ -461,7 +461,7 @@ def elabSyntax (stx : Syntax) : CommandElabM Name := do
   let prio ← liftMacroM <| evalOptPrio prio?
   let idRef := (name?.map (·.raw)).getD tk
   let mut stxNodeKind := (← getCurrNamespace) ++ name
-  bif attrKind matches `(attrKind| local) then
+  uif attrKind matches `(attrKind| local) then
     stxNodeKind := mkPrivateName (← getEnv) stxNodeKind
   let catParserId := mkIdentFrom idRef (catId.appendAfter "_parser")
   let (val, lhsPrec?) ← runTermElabM fun _ => Term.toParserDescr syntaxParser catId
@@ -502,7 +502,7 @@ def checkRuleKind (actual expected : SyntaxNodeKind) : Bool :=
 
 def inferMacroRulesAltKind : TSyntax ``matchAlt → CommandElabM SyntaxNodeKind
   | `(matchAltExpr| | $pat:term => $_) => do
-    bif !pat.raw.isQuot then
+    uif !pat.raw.isQuot then
       throwUnsupportedSyntax
     let quoted := getQuotContent pat
     pure quoted.getKind
@@ -517,13 +517,13 @@ def checkRuleAltKind (cmdName : String) (k : SyntaxNodeKind) (alt : TSyntax ``ma
   match alt with
   | `(matchAltExpr| | $pats,* => $rhs) => do
     let pat := pats.elemsAndSeps[0]!
-    bif !pat.isQuot then
+    uif !pat.isQuot then
       throwUnsupportedSyntax
     let quoted := getQuotContent pat
     let k' := quoted.getKind
-    bif checkRuleKind k' k then
+    uif checkRuleKind k' k then
       pure alt
-    else bif k' == choiceKind then
+    else uif k' == choiceKind then
        match quoted.getArgs.find? fun quotAlt => checkRuleKind quotAlt.getKind k with
        | none        => throwErrorAt alt "invalid {cmdName} alternative, expected syntax node kind `{k}`"
        | some quoted =>
@@ -539,15 +539,15 @@ Infer syntax kind `k` from first pattern, put alternatives of same kind into new
 leave remaining alternatives (via `mkCmd none`) to be recursively expanded. -/
 def expandNoKindMacroRulesAux (alts : Array (TSyntax ``matchAlt)) (cmdName : String) (mkCmd : Option Name → Array (TSyntax ``matchAlt) → CommandElabM Command) : CommandElabM Command := do
   let mut k ← inferMacroRulesAltKind alts[0]!
-  bif k.isStr && k.getString! == "antiquot" then
+  uif k.isStr && k.getString! == "antiquot" then
     k := k.getPrefix
-  bif k == choiceKind then
+  uif k == choiceKind then
     throwErrorAt alts[0]!
       "invalid {cmdName} alternative, multiple interpretations for pattern (solution: specify node kind using `{cmdName} (kind := ...) ...`)"
   else
     let altsK    ← alts.filterM fun alt => return checkRuleKind (← inferMacroRulesAltKind alt) k
     let altsNotK ← alts.filterM fun alt => return !checkRuleKind (← inferMacroRulesAltKind alt) k
-    bif altsNotK.isEmpty then
+    uif altsNotK.isEmpty then
       mkCmd k altsK
     else
       `($(← mkCmd k altsK):command $(← mkCmd none altsNotK))

@@ -79,15 +79,15 @@ builtin_initialize registerBuiltinAttribute {
       -- We have a replacement provided
       unless Array.any paramNames (· == newArg) do
         throwError "`{newArg}` is not a parameter of `{declName}`"
-      bif Array.any paramNames (· == oldArg) then
+      uif Array.any paramNames (· == oldArg) then
         throwError "`{oldArg}` is still a parameter of `{declName}`; \
           rename it to `{newArg}` before adding `@[deprecated_arg]`"
     else
       -- We do not have a replacement provided
-      bif Array.any paramNames (· == oldArg) then
+      uif Array.any paramNames (· == oldArg) then
         throwError "`{oldArg}` is still a parameter of `{declName}`; \
           remove it before adding `@[deprecated_arg]`"
-    bif since?.isNone then
+    uif since?.isNone then
       logWarning <| m!"`[deprecated_arg]` attribute should specify the date or library version \
         at which the deprecation was introduced, using `(since := \"...\")`" ++
         (← Linter.mkSinceHint stx)

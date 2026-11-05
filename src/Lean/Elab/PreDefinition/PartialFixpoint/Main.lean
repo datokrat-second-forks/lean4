@@ -50,7 +50,7 @@ private def unReplaceRecApps {α} (preDefs : Array PreDefinition) (fixedParamPer
       let f := f[0]!
       -- Replace f with calls to the constants
       let e := e.replace fun e => do
-        bif e == f then return packedFn else none
+        uif e == f then return packedFn else none
       -- And reduce projection and beta redexes
       -- (This is a bit blunt; we could try harder to only replace the projection and beta-redexes
       -- introduced above)
@@ -78,7 +78,7 @@ def partialFixpoint (docCtx : LocalContext × LocalInstances) (preDefs : Array P
   let hints := preDefs.filterMap (·.termination.partialFixpoint?)
   assert! preDefs.size = hints.size
   -- We check if any fixpoints were defined lattice-theoretically
-  bif hints.any fun x => isLatticeTheoretic x.fixpointType then
+  uif hints.any fun x => isLatticeTheoretic x.fixpointType then
     -- If yes, then we expect all of them to be defined using lattice theory
     assert! hints.all fun x => isLatticeTheoretic x.fixpointType
 
@@ -139,7 +139,7 @@ def partialFixpoint (docCtx : LocalContext × LocalInstances) (preDefs : Array P
     -- Error reporting hook, presenting monotonicity errors in terms of recursive functions
     let failK {α} f (monoThms : Array Name) : MetaM α := do
       unReplaceRecApps preDefs fixedParamPerms fixedArgs f fun t => do
-        let extraMsg := bif monoThms.isEmpty then m!"" else
+        let extraMsg := uif monoThms.isEmpty then m!"" else
           m!"Tried to apply {.andList (monoThms.toList.map (m!"'{.ofConstName ·}'"))}, but failed.\n\
              Possible cause: A missing `{.ofConstName ``MonoBind}` instance.\n\
              Use `set_option trace.Elab.Tactic.monotonicity true` to debug."
@@ -175,7 +175,7 @@ def partialFixpoint (docCtx : LocalContext × LocalInstances) (preDefs : Array P
         let hmono ← Term.withSynthesize <| Term.elabTermEnsuringType term goal
         let hmono ← instantiateMVars hmono
         let mvars ← getMVars hmono
-        bif mvars.isEmpty then
+        uif mvars.isEmpty then
           pure (goal, hmono)
         else
           discard <| Term.logUnassignedUsingErrorInfos mvars
@@ -194,7 +194,7 @@ def partialFixpoint (docCtx : LocalContext × LocalInstances) (preDefs : Array P
     trace[Elab.definition.partialFixpoint] "packedValue: {packedValue}"
 
     let declName :=
-      bif preDefs.size =ᵇ 1 && fixedParamPerms.fixedArePrefix then
+      uif preDefs.size = 1 ∧ fixedParamPerms.fixedArePrefix then
         preDefs[0]!.declName
       else
         preDefs[0]!.declName ++ `mutual

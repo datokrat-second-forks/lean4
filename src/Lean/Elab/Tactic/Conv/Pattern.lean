@@ -26,11 +26,11 @@ partial def matchPattern? (pattern : AbstractMVarsResult) (e : Expr) : MetaM (Op
        sure we can match the pattern inside of binders. So, it is not needed in most cases. -/
     let (_, _, pattern) ← openAbstractMVarsResult pattern
     let rec go? (e : Expr) : MetaM (Option (Expr × Array Expr)) := do
-      bif e.toHeadIndex != pattern.toHeadIndex then
+      uif e.toHeadIndex != pattern.toHeadIndex then
         return none
-      else bif (← isDefEqGuarded pattern e) then
+      else uif (← isDefEqGuarded pattern e) then
         return some (e, #[])
-      else bif e.isApp then
+      else uif e.isApp then
         return (← go? e.appFn!).map fun (f, extra) => (f, extra.push e.appArg!)
       else
         return none
@@ -84,10 +84,10 @@ def accept (mvarId : MVarId) : PatternMatchState → PatternMatchState
 end PatternMatchState
 
 private def pre (pattern : AbstractMVarsResult) (state : IO.Ref PatternMatchState) (e : Expr) : SimpM Simp.Step := do
-  bif (← state.get).isDone then
+  uif (← state.get).isDone then
     return Simp.Step.done { expr := e }
   else if let some (e, extraArgs) ← matchPattern? pattern e then
-    bif (← state.get).isReady then
+    uif (← state.get).isReady then
       let (rhs, newGoal) ← mkConvGoalFor e
       state.modify (·.accept newGoal.mvarId!)
       let mut proof := newGoal

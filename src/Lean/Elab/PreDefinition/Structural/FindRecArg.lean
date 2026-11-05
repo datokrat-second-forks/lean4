@@ -19,7 +19,7 @@ open Meta
 def prettyParam (xs : Array Expr) (i : Nat) : MetaM MessageData := do
   let x := xs[i]!
   let n ← x.fvarId!.getUserName
-  addMessageContextFull <| bif n.hasMacroScopes then m!"#{i+1}" else m!"{x}"
+  addMessageContextFull <| uif n.hasMacroScopes then m!"#{i+1}" else m!"{x}"
 
 def prettyRecArg (xs : Array Expr) (value : Expr) (recArgInfo : RecArgInfo) : MetaM MessageData := do
   lambdaTelescope value fun ys _ =>
@@ -27,7 +27,7 @@ def prettyRecArg (xs : Array Expr) (value : Expr) (recArgInfo : RecArgInfo) : Me
 
 def prettyParameterSet (fnNames : Array Name) (xs : Array Expr) (values : Array Expr)
     (recArgInfos : Array RecArgInfo) : MetaM MessageData := do
-  bif fnNames.size =ᵇ 1 then
+  uif fnNames.size = 1 then
     return m!"parameter " ++ (← prettyRecArg xs values[0]! recArgInfos[0]!)
   else
     let mut l := #[]
@@ -39,7 +39,7 @@ private def getIndexMinPos (xs : Array Expr) (indices : Array Expr) : Nat := Id.
   let mut minPos := xs.size
   for index in indices do
     match xs.idxOf? index with
-    | some pos => bif pos <ᵇ minPos then minPos := pos
+    | some pos => uif pos < minPos then minPos := pos
     | _        => pure ()
   return minPos
 
@@ -48,7 +48,7 @@ private def hasBadIndexDep? (ys : Array Expr) (indices : Array Expr) : MetaM (Op
   for index in indices do
     let indexType ← inferType index
     for y in ys do
-      bif !indices.contains y && (← dependsOn indexType y.fvarId!) then
+      uif !indices.contains y && (← dependsOn indexType y.fvarId!) then
         return some (index, y)
   return none
 
@@ -56,7 +56,7 @@ private def hasBadIndexDep? (ys : Array Expr) (indices : Array Expr) : MetaM (Op
 private def hasBadParamDep? (ys : Array Expr) (indParams : Array Expr) : MetaM (Option (Expr × Expr)) := do
   for p in indParams do
     for y in ys do
-      bif (← dependsOn p y.fvarId!) then
+      uif (← dependsOn p y.fvarId!) then
         return some (p, y)
   return none
 
@@ -66,21 +66,21 @@ various sanity checks on the parameter (is it even of inductive type etc).
 -/
 def getRecArgInfo (fnName : Name) (fixedParamPerm : FixedParamPerm) (xs : Array Expr) (i : Nat) : MetaM RecArgInfo := do
   assert! fixedParamPerm.size = xs.size
-  bif h : i <ᵇ xs.size then
-    bif fixedParamPerm.isFixed i then
+  uif h : i < xs.size then
+    uif fixedParamPerm.isFixed i then
       throwError "it is unchanged in the recursive calls"
     let x := xs[i]
     let localDecl ← getFVarLocalDecl x
-    bif localDecl.isLet then
+    uif localDecl.isLet then
       throwError "it is a let-binding"
     let xType ← whnfD localDecl.type
     matchConstInduct xType.getAppFn (fun _ => throwError "its type is not an inductive") fun indInfo us => do
     let indArgs    : Array Expr := xType.getAppArgs
     let indParams  : Array Expr := indArgs[*...indInfo.numParams]
     let indIndices : Array Expr := indArgs[indInfo.numParams...*]
-    bif !indIndices.all Expr.isFVar then
+    uif !indIndices.all Expr.isFVar then
       throwError "its type {indInfo.name} is an inductive family and indices are not variables{indentExpr xType}"
-    else bif !indIndices.allDiff then
+    else uif !indIndices.allDiff then
       throwError "its type {indInfo.name} is an inductive family and indices are not pairwise distinct{indentExpr xType}"
     else
       let ys := fixedParamPerm.pickVarying xs
@@ -190,23 +190,23 @@ def argsInGroup (group : IndGroupInst) (xs : Array Expr) (value : Expr)
 
   recArgInfos.filterMapM fun recArgInfo => do
     -- Is this argument from the same mutual group of inductives?
-    bif (← group.isDefEq recArgInfo.indGroupInst) then
+    uif (← group.isDefEq recArgInfo.indGroupInst) then
       return (.some recArgInfo)
 
     -- Can this argument be understood as the auxiliary type former of a nested inductive?
-    bif nestedTypeFormers.isEmpty then return .none
+    uif nestedTypeFormers.isEmpty then return .none
     lambdaTelescope value fun ys _ => do
       let args := recArgInfo.fixedParamPerm.buildArgs xs ys
       let x := args[recArgInfo.recArgPos]!
       for nestedTypeFormer in nestedTypeFormers, indIdx in group.all.size...group.numMotives do
         let xType ← whnfD (← inferType x)
         let (indIndices, _, type) ← forallMetaTelescope nestedTypeFormer
-        bif (← isDefEqGuarded type xType) then
+        uif (← isDefEqGuarded type xType) then
           let indIndices ← indIndices.mapM instantiateMVars
-          bif !indIndices.all Expr.isFVar then
+          uif !indIndices.all Expr.isFVar then
             -- throwError "indices are not variables{indentExpr xType}"
             continue
-          bif !indIndices.allDiff then
+          uif !indIndices.allDiff then
             -- throwError "indices are not pairwise distinct{indentExpr xType}"
             continue
           -- TODO: Do we have to worry about the indices ending up in the fixed prefix here?
@@ -226,11 +226,11 @@ def argsInGroup (group : IndGroupInst) (xs : Array Expr) (value : Expr)
 def maxCombinationSize : Nat := 10
 
 def allCombinations (xss : Array (Array α)) : Option (Array (Array α)) :=
-  bif xss.foldl (· * ·.size) 1 >ᵇ maxCombinationSize then
+  uif xss.foldl (· * ·.size) 1 > maxCombinationSize then
     none
   else
     let rec go i acc : Array (Array α):=
-      bif h : i <ᵇ xss.size then
+      uif h : i < xss.size then
         xss[i].flatMap fun x => go (i + 1) (acc.push x)
       else
         #[acc]
@@ -270,7 +270,7 @@ def findRecArgCandidates (fnNames : Array Name) (fixedParamPerms : FixedParamPer
   -- Inductive groups to consider
   let groups ← inductiveGroups recArgInfoss.flatten
   trace[Elab.definition.structural] "inductive groups: {groups}"
-  bif groups.isEmpty then
+  uif groups.isEmpty then
     report := report ++ "no parameters suitable for structural recursion"
   -- Consider each group
   for group in groups do

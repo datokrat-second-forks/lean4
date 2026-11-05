@@ -22,7 +22,7 @@ open Meta
   let stx := stx[1]
   tryPostponeIfNoneOrMVar expectedType?
   let e ← elabTerm stx none
-  bif expectedType?.isNone then
+  uif expectedType?.isNone then
     throwError "invalid coercion notation, expected type is not known"
   ensureHasType expectedType? e
 
@@ -51,41 +51,41 @@ open Meta
     match expectedType? with
     | some expectedType =>
       let expectedType ← whnf expectedType
-      bif expectedType.getAppFn.isMVar then throwExpTypeUnknown
+      uif expectedType.getAppFn.isMVar then throwExpTypeUnknown
       matchConstInduct expectedType.getAppFn
         (fun _ => throwError m!"Invalid `⟨...⟩` notation: The expected type{inlineExpr expectedType}is not an inductive type"
                     ++ usageNote)
         (fun ival _ => do
           match ival.ctors with
           | [ctor] =>
-            bif (← isInaccessiblePrivateName ctor) then
+            uif (← isInaccessiblePrivateName ctor) then
               throwError "Invalid `⟨...⟩` notation: Constructor for `{ival.name}` is marked as private"
             let cinfo ← getConstInfoCtor ctor
             let numExplicitFields ← forallTelescopeReducing cinfo.type fun xs _ => do
               let mut n := 0
               for h : i in cinfo.numParams...xs.size do
-                bif (← getFVarLocalDecl xs[i]).binderInfo.isExplicit then
+                uif (← getFVarLocalDecl xs[i]).binderInfo.isExplicit then
                   n := n + 1
               return n
             let mut args := args.getElems
-            bif args.size <ᵇ numExplicitFields then
-              let fieldsStr := bif numExplicitFields == 1 then "fields" else "field"
+            uif args.size < numExplicitFields then
+              let fieldsStr := uif numExplicitFields == 1 then "fields" else "field"
               let providedStr :=
-                bif args.size == 0 then "none were"
-                else bif args.size == 1 then "only 1 was"
+                uif args.size == 0 then "none were"
+                else uif args.size == 1 then "only 1 was"
                 else s!"only {args.size} were"
               let errMsg := m!"Insufficient number of fields for `⟨...⟩` constructor: Constructor \
                 `{ctor}` has {numExplicitFields} explicit {fieldsStr}, but {providedStr} provided"
-              bif (← read).errToSorry then
+              uif (← read).errToSorry then
                 logError errMsg
               else
                 throwError errMsg
               for _ in args.size...numExplicitFields do
                 let s ← mkLabeledSorry (← mkFreshTypeMVar) (synthetic := true) (unique := false)
                 args := args.push <| ← exprToSyntax s
-            let newStx ← bif args.size == numExplicitFields then
+            let newStx ← uif args.size == numExplicitFields then
               `($(mkCIdentFrom stx ctor (canonical := true)) $(args)*)
-            else bif numExplicitFields == 0 then
+            else uif numExplicitFields == 0 then
               throwError "Insufficient number of fields for `⟨...⟩` constructor: Constructor \
                 `{ctor}` does not have explicit fields, but {args.size} \
                 {if args.size == 1 then "was" else "were"} provided"
@@ -174,7 +174,7 @@ private def elabParserMacroAux (prec e : Term) (withAnonymousAntiquot : Bool) : 
       (mkAntiquot $(quote s) $kind $(quote withAnonymousAntiquot))
       (leadingNode $kind $prec $e))
     -- cache only unparameterized parsers
-    bif (← getLCtx).all (·.isAuxDecl) then
+    uif (← getLCtx).all (·.isAuxDecl) then
       p ← ``(withCache $kind $p)
     return p
   | _  => throwError "invalid `leading_parser` macro, unexpected declaration name"
@@ -220,7 +220,7 @@ private def elabTParserMacroAux (prec lhsPrec e : Term) : TermElabM Syntax := do
   let c ← elabTerm cond none
   let isBool := (← Meta.whnfR (← instantiateMVars (← Meta.inferType c))).isConstOf ``Bool
   let cStx ← exprToSyntax c
-  let stxNew ← bif isBool then `(cond $cStx $body $msg) else `(if $cStx then $body else $msg)
+  let stxNew ← uif isBool then `(cond $cStx $body $msg) else `(if $cStx then $body else $msg)
   withMacroExpansion stx stxNew <| elabTerm stxNew expectedType?
 
 register_builtin_option debugAssertions : Bool := {
@@ -233,7 +233,7 @@ register_builtin_option debugAssertions : Bool := {
 @[builtin_term_elab Lean.Parser.Term.debugAssert]  def elabDebugAssert : TermElab :=
   adaptExpander fun
     | `(Parser.Term.debugAssert| debug_assert! $cond; $body) => do
-      bif debugAssertions.get (← getOptions) then
+      uif debugAssertions.get (← getOptions) then
         `(assert! $cond; $body)
       else
         return body
@@ -251,7 +251,7 @@ register_builtin_option debugAssertions : Bool := {
 /-- Return syntax `Prod.mk elems[0] (Prod.mk elems[1] ... (Prod.mk elems[elems.size - 2] elems[elems.size - 1])))` -/
 partial def mkPairs (elems : Array Term) : MacroM Term :=
   let rec loop (i : Nat) (acc : Term) := do
-    bif i >ᵇ 0 then
+    uif i > 0 then
       let i    := i - 1
       let elem := elems[i]!
       let acc ← `(Prod.mk $elem $acc)
@@ -263,7 +263,7 @@ partial def mkPairs (elems : Array Term) : MacroM Term :=
 /-- Return syntax `PProd.mk elems[0] (PProd.mk elems[1] ... (PProd.mk elems[elems.size - 2] elems[elems.size - 1])))` -/
 partial def mkPPairs (elems : Array Term) : MacroM Term :=
   let rec loop (i : Nat) (acc : Term) := do
-    bif i >ᵇ 0 then
+    uif i > 0 then
       let i    := i - 1
       let elem := elems[i]!
       let acc ← `(PProd.mk $elem $acc)
@@ -275,7 +275,7 @@ partial def mkPPairs (elems : Array Term) : MacroM Term :=
 /-- Return syntax `MProd.mk elems[0] (MProd.mk elems[1] ... (MProd.mk elems[elems.size - 2] elems[elems.size - 1])))` -/
 partial def mkMPairs (elems : Array Term) : MacroM Term :=
   let rec loop (i : Nat) (acc : Term) := do
-    bif i >ᵇ 0 then
+    uif i > 0 then
       let i    := i - 1
       let elem := elems[i]!
       let acc ← `(MProd.mk $elem $acc)
@@ -310,8 +310,8 @@ The search is delimited by cdot binders (any syntax satisfying `isCDotBinderKind
 -/
 partial def hasCDot : Syntax → Option Name → Bool
   | s@(Syntax.node _ k args), info? =>
-    bif isCDotBinderKind k then false
-    else bif isCDotForInfo s info? then true
+    uif isCDotBinderKind k then false
+    else uif isCDotForInfo s info? then true
     else args.any (fun s => hasCDot s info?)
   | _, _ => false
 
@@ -326,15 +326,15 @@ Examples:
 - `f · · b` => `fun x1 x2 => f x1 x2 b`
 -/
 partial def expandCDot? (stx : Term) (hygieneInfo? : Option Name) : MacroM (Option Term) := do
-  bif hasCDot stx hygieneInfo? then
+  uif hasCDot stx hygieneInfo? then
     withFreshMacroScope do
       let mut (newStx, binders) ← (go stx).run #[]
-      bif binders.size == 1 then
+      uif binders.size == 1 then
         -- It is nicer using `x` over `x1` if there is only a single binder.
         let x1 := binders[0]!
         let x ← mkVarFrom x1 "x"
         binders := binders.set! 0 x
-        newStx ← newStx.replaceM fun s => pure (bif s == x1 then x else none)
+        newStx ← newStx.replaceM fun s => pure (uif s == x1 then x else none)
       `(fun $binders* => $(⟨newStx⟩))
   else
     pure none
@@ -353,16 +353,16 @@ where
   go (stx : Syntax) : StateT (Array Ident) MacroM Syntax :=
     match stx with
     | .node _ k args => do
-      bif isCDotForInfo stx hygieneInfo? then
+      uif isCDotForInfo stx hygieneInfo? then
         let id ← mkVarFrom stx s!"x{(← get).size + 1}"
         modify (fun s => s.push id)
         pure id
-      else bif isCDotBinderKind k then
+      else uif isCDotBinderKind k then
         pure stx
       else
         let args ←
-          bif k == choiceKind then
-            bif args.isEmpty then
+          uif k == choiceKind then
+            uif args.isEmpty then
               return stx
             let s ← get
             let args' ← args.mapM (fun arg => go arg |>.run s)
@@ -386,7 +386,7 @@ def elabCDotFunctionAlias? (stx : Term) : TermElabM (Option Expr) := do
   let stx ← liftMacroM <| expandMacros stx
   match stx with
   | `(fun $binders* => $f $args*) =>
-    bif binders.raw.toList.isPerm args.raw.toList then
+    uif binders.raw.toList.isPerm args.raw.toList then
       try Term.resolveId? f catch _ => return none
     else
       return none
@@ -396,12 +396,12 @@ def elabCDotFunctionAlias? (stx : Term) : TermElabM (Option Expr) := do
   | `(fun $binders* => rightact% $f $a $b)
   | `(fun $binders* => binrel% $f $a $b)
   | `(fun $binders* => binrel_no_prop% $f $a $b) =>
-    bif binders == #[a, b] || binders == #[b, a] then
+    uif binders == #[a, b] || binders == #[b, a] then
       try Term.resolveId? f catch _ => return none
     else
       return none
   | `(fun $binders* => unop% $f $a) =>
-    bif binders == #[a] then
+    uif binders == #[a] then
       try Term.resolveId? f catch _ => return none
     else
       return none
@@ -442,7 +442,7 @@ where
 
 /-- Return `true` if `lhs` is a free variable and `rhs` does not depend on it. -/
 private def isSubstCandidate (lhs rhs : Expr) : MetaM Bool :=
-  bif lhs.isFVar then
+  uif lhs.isFVar then
     return !(← dependsOn rhs lhs.fvarId!)
   else
     return false
@@ -452,7 +452,7 @@ private def isSubstCandidate (lhs rhs : Expr) : MetaM Bool :=
   Otherwise, return `(fun x => k x) e`
 -/
 private def withLocalIdentFor (stx : Term) (e : Expr) (k : Term → TermElabM Expr) : TermElabM Expr := do
-  bif e.isFVar then
+  uif e.isFVar then
     k stx
   else
     let id ← mkFreshUserName `h
@@ -503,17 +503,17 @@ private def withLocalIdentFor (stx : Term) (e : Expr) (k : Term → TermElabM Ex
              unless (← isDefEq hExpectedType hTypeNew) do
                throw ex
              let motive ← mkMotive rhs hTypeAbst
-             bif !(← isTypeCorrect motive) then
+             uif !(← isTypeCorrect motive) then
                return (h, some motive)
              else
                return (← mkEqRec motive h (← mkEqSymm heq), none)
          let motive ← mkMotive lhs expectedAbst
-         bif badMotive?.isSome || !(← isTypeCorrect motive) then
+         uif badMotive?.isSome || !(← isTypeCorrect motive) then
            -- Before failing try to use `subst`
-           bif (← (isSubstCandidate lhs rhs <||> isSubstCandidate rhs lhs)) then
+           uif (← (isSubstCandidate lhs rhs <||> isSubstCandidate rhs lhs)) then
              withLocalIdentFor heqStx heq fun heqStx => do
                let h ← instantiateMVars h
-               bif h.hasMVar then
+               uif h.hasMVar then
                  -- If `h` has metavariables, we try to elaborate `hStx` again after we substitute `heqStx`
                  -- Remark: re-elaborating `hStx` may be problematic if `hStx` contains the `lhs` of `heqStx` which will be eliminated by `subst`
                  let stxNew ← `(by subst $heqStx; exact $hStx)
@@ -545,7 +545,7 @@ private def withLocalIdentFor (stx : Term) (e : Expr) (k : Term → TermElabM Ex
 @[builtin_term_elab stateRefT] def elabStateRefT : TermElab := fun stx _ => do
   let σ ← elabType stx[1]
   let mut mStx := stx[2]
-  bif mStx.getKind == ``Lean.Parser.Term.macroDollarArg then
+  uif mStx.getKind == ``Lean.Parser.Term.macroDollarArg then
     mStx := mStx[1]
   let m ← elabTerm mStx (← mkArrow (mkSort Level.one) (mkSort Level.one))
   let ω ← mkFreshExprMVar (mkSort Level.one)
@@ -562,13 +562,13 @@ def elabUnsafe : TermElab := fun stx expectedType? =>
   match stx with
   | `(unsafe $t) => do
     let t ← elabTermAndSynthesize t expectedType?
-    bif (← logUnassignedUsingErrorInfos (← getMVars t)) then
+    uif (← logUnassignedUsingErrorInfos (← getMVars t)) then
       throwAbortTerm
     let t ← mkAuxDefinitionFor (compile := false) (← mkAuxName `unsafe) t
     let .const unsafeFn unsafeLvls .. := t.getAppFn | unreachable!
     let .defnInfo unsafeDefn ← getConstInfo unsafeFn | unreachable!
     let implName ← mkAuxName `unsafe_impl
-    bif (← read).declName?.any (isMarkedMeta (← getEnv)) then
+    uif (← read).declName?.any (isMarkedMeta (← getEnv)) then
       modifyEnv (markMeta · unsafeFn)
       modifyEnv (markMeta · implName)
     setInlineAttribute unsafeFn .alwaysInline
@@ -589,7 +589,7 @@ def elabUnsafe : TermElab := fun stx expectedType? =>
   match stx with
   | `(by_elab $cmds:doSeq) => do
     if let `(Lean.Parser.Term.doSeq| $e:term) := cmds then
-      bif e matches `(Lean.Parser.Term.doSeq| fun $[$_args]* => $_) then
+      uif e matches `(Lean.Parser.Term.doSeq| fun $[$_args]* => $_) then
         let tac ← unsafe evalTerm
           (Option Expr → TermElabM Expr)
           (Lean.mkForall `x .default

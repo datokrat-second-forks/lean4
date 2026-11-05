@@ -29,7 +29,7 @@ inductive NormMode where
   let config ← elabGrindConfig stx[1]
   let mode : NormMode := match stx[2].getOptional? with
     | none => .legacy
-    | some s => bif s[0].getAtomVal == "sym" then .sym else .check
+    | some s => uif s[0].getAtomVal == "sym" then .sym else .check
   let mvarId ← getMainGoal
   let target ← instantiateMVars (← mvarId.getType)
   let params ← Meta.Grind.mkDefaultParams config
@@ -46,7 +46,7 @@ inductive NormMode where
       let e₂ ← Sym.shareCommon r₂.expr
       unless Sym.isSameExpr e₁ e₂ do
         let report (hidden : Bool) : MetaM Unit := do
-          let hidden := bif hidden then " (in hidden arguments)" else ""
+          let hidden := uif hidden then " (in hidden arguments)" else ""
           throwError "`grind_norm` discrepancy{hidden}\nlegacy:{indentExpr e₁}\nsym:{indentExpr e₂}"
         let same : MetaM Bool := return (← ppExpr e₁).pretty == (← ppExpr e₂).pretty
         unless (← same) do report false

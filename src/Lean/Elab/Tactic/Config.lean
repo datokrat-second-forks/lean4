@@ -95,7 +95,7 @@ def elabConfig (recover : Bool) (structName : Name) (items : Array ConfigItemVie
     for item in items do
       try
         let option := item.option.getId.eraseMacroScopes
-        bif option == `config then
+        uif option == `config then
           unless fields.isEmpty do
             -- Flush fields. Even though these values will not be used, we still want to elaborate them.
             source? ← mkStructInst source? fields
@@ -109,7 +109,7 @@ def elabConfig (recover : Bool) (structName : Name) (items : Array ConfigItemVie
         else
           addCompletionInfo <| CompletionInfo.fieldId item.option option {} structName
           let (path, projFn) ← withRef item.option <| expandField structName option
-          bif item.bool then
+          uif item.bool then
             -- Verify that the type is `Bool`
             unless (← getConstInfo projFn).type.bindingBody! == .const ``Bool [] do
               throwErrorAt item.ref m!"Option is not boolean-valued, so `({option} := ...)` syntax must be used"
@@ -119,7 +119,7 @@ def elabConfig (recover : Bool) (structName : Name) (items : Array ConfigItemVie
               -- Special case: `(opt := by tacs)` uses the `tacs` syntax itself
               withRef item.value <| `(Unhygienic.run `(tacticSeq| $seq))
             | value => pure value
-          bif seenFields.contains path then
+          uif seenFields.contains path then
             -- Flush fields. There is a duplicate, but we still want to elaborate both.
             source? ← mkStructInst source? fields
             seenFields := {}
@@ -128,7 +128,7 @@ def elabConfig (recover : Bool) (structName : Name) (items : Array ConfigItemVie
             $(mkCIdentFrom item.option path (canonical := true)):ident := $value)
           seenFields := seenFields.insert path
       catch ex =>
-        bif recover then
+        uif recover then
           logException ex
         else
           throw ex

@@ -24,7 +24,7 @@ private def congrImplies (mvarId : MVarId) : MetaM (List MVarId) := do
   return [mvarId₁, mvarId₂]
 
 private def isImplies (e : Expr) : MetaM Bool :=
-  bif e.isArrow then
+  uif e.isArrow then
     isProp e.bindingDomain! <&&> isProp e.bindingBody!
   else
     return false
@@ -45,11 +45,11 @@ private partial def mkCongrThm (origTag : Name) (f : Expr) (args : Array Expr) (
     | .fixed | .cast =>
       eNew := mkApp eNew arg
       proof := mkApp proof arg;
-      bif addImplicitArgs || argInfo.isExplicit then
+      uif addImplicitArgs || argInfo.isExplicit then
         mvarIdsNew := mvarIdsNew.push none
     | .eq =>
-      bif addImplicitArgs || argInfo.isExplicit then
-        let tag ← bif nameSubgoals then
+      uif addImplicitArgs || argInfo.isExplicit then
+        let tag ← uif nameSubgoals then
           pure (appendTag origTag (← whnf (← inferType proof)).bindingName!)
         else pure origTag
         let (rhs, mvarNew) ← mkConvGoalFor arg tag
@@ -66,8 +66,8 @@ private partial def mkCongrThm (origTag : Name) (f : Expr) (args : Array Expr) (
       proof := mkApp proof rhs
       mvarIdsNewInsts := mvarIdsNewInsts.push (some rhs.mvarId!)
     | .heq | .fixedNoParam => unreachable!
-  bif congrThm.argKinds.size <ᵇ args.size then
-    bif congrThm.argKinds.size == 0 then
+  uif congrThm.argKinds.size < args.size then
+    uif congrThm.argKinds.size == 0 then
       throwError "`congr` conv tactic failed to create congruence theorem"
     let (proof', mvarIdsNew', mvarIdsNewInsts') ←
       mkCongrThm origTag eNew args[funInfo.getArity...*] addImplicitArgs nameSubgoals
@@ -91,9 +91,9 @@ def congr (mvarId : MVarId) (addImplicitArgs := false) (nameSubgoals := true) :
   let origTag ← mvarId.getTag
   let (lhs, rhs) ← getLhsRhsCore mvarId
   let lhs := (← instantiateMVars lhs).cleanupAnnotations
-  bif (← isImplies lhs) then
+  uif (← isImplies lhs) then
     return (← congrImplies mvarId).map Option.some
-  else bif lhs.isApp then
+  else uif lhs.isApp then
     let (proof, mvarIdsNew, mvarIdsNewInsts) ←
       mkCongrThm origTag lhs.getAppFn lhs.getAppArgs addImplicitArgs nameSubgoals
     resolveRhsFromProof "congr" rhs proof
@@ -139,7 +139,7 @@ private partial def mkCongrArgZeroThm (tacticName : String) (origTag : Name) (f 
       let (rhs, mvarNew) ← mkConvGoalFor arg origTag
       eNew := mkApp eNew rhs
       proof := mkApp3 proof arg rhs mvarNew
-      bif mvarIdNew?.isSome then throwError "`{tacticName}` conv tactic failed, cannot select argument"
+      uif mvarIdNew?.isSome then throwError "`{tacticName}` conv tactic failed, cannot select argument"
       mvarIdNew? := some mvarNew.mvarId!
     | .subsingletonInst =>
       proof := mkApp proof arg
@@ -156,13 +156,13 @@ Implements `arg` for foralls. If `domain` is true, accesses the domain, otherwis
 -/
 def congrArgForall (tacticName : String) (domain : Bool) (mvarId : MVarId) (lhs rhs : Expr) : MetaM (List MVarId) := do
   let .forallE n t b bi := lhs | unreachable!
-  bif domain then
-    bif !b.hasLooseBVars then
+  uif domain then
+    uif !b.hasLooseBVars then
       let (t', g) ← mkConvGoalFor t (← mvarId.getTag)
       mvarId.assign <| ← mkAppM ``implies_congr #[g, ← mkEqRefl b]
       resolveRhs tacticName rhs (.forallE n t' b bi)
       return [g.mvarId!]
-    else bif (← isProp b <&&> isProp lhs) then
+    else uif (← isProp b <&&> isProp lhs) then
       let (_rhs, g) ← mkConvGoalFor t (← mvarId.getTag)
       let proof ← mkAppM ``forall_prop_congr_dom #[g, .lam n t b .default]
       resolveRhsFromProof tacticName rhs proof
@@ -186,11 +186,11 @@ def congrArgForall (tacticName : String) (domain : Bool) (mvarId : MVarId) (lhs 
 def congrArgN (tacticName : String) (mvarId : MVarId) (i : Int) (explicit : Bool) : MetaM (List MVarId) := mvarId.withContext do
   let (lhs, rhs) ← getLhsRhsCore mvarId
   let lhs := (← instantiateMVars lhs).cleanupAnnotations
-  bif lhs.isForall then
-    bif i <ᵇ -2 || i == 0 || i >ᵇ 2 then throwError "invalid `{tacticName}` conv tactic, index is out of bounds for pi type"
+  uif lhs.isForall then
+    uif i < -2 ∨ i == 0 ∨ i > 2 then throwError "invalid `{tacticName}` conv tactic, index is out of bounds for pi type"
     let domain := i == 1 || i == -2
     return ← congrArgForall tacticName domain mvarId lhs rhs
-  else bif lhs.isApp then
+  else uif lhs.isApp then
     lhs.withApp fun f xs => do
       let (f, xs) ← applyArgs f xs i
       let (proof, mvarIdNew, mvarIdsNewInsts) ← mkCongrArgZeroThm tacticName (← mvarId.getTag) f xs
@@ -201,9 +201,9 @@ def congrArgN (tacticName : String) (mvarId : MVarId) (i : Int) (explicit : Bool
     throwError "invalid `{tacticName}` conv tactic, application or implication expected{indentExpr lhs}"
 where
   applyArgs (f : Expr) (xs : Array Expr) (i : Int) : MetaM (Expr × Array Expr) := do
-    bif explicit then
-      let i := bif i >ᵇ 0 then i - 1 else i + xs.size
-      bif i <ᵇ 0 || i ≥ᵇ (xs.size : Int) then
+    uif explicit then
+      let i := uif i > 0 then i - 1 else i + xs.size
+      uif i < 0 ∨ i ≥ (xs.size : Int) then
         throwError "invalid `{tacticName}` tactic, application has {xs.size} argument(s) but the index is out of bounds"
       let idx := i.natAbs
       return (mkAppN f xs[*...idx], xs[idx...*])
@@ -217,16 +217,16 @@ where
           j := k
         let .forallE _ _ b bi := fType | failure
         fType := b
-        bif bi.isExplicit then
+        uif bi.isExplicit then
           explicitIdxs := explicitIdxs.push k
-      let i := bif i >ᵇ 0 then i - 1 else i + explicitIdxs.size
-      bif i <ᵇ 0 || i ≥ᵇ (explicitIdxs.size : Int) then
+      let i := uif i > 0 then i - 1 else i + explicitIdxs.size
+      uif i < 0 ∨ i ≥ (explicitIdxs.size : Int) then
         throwError "invalid `{tacticName}` tactic, application has {explicitIdxs.size} explicit argument(s) but the index is out of bounds"
       let idx := explicitIdxs[i.natAbs]!
       return (mkAppN f xs[*...idx], xs[idx...*])
 
 def evalArg (tacticName : String) (i : Int) (explicit : Bool) : TacticM Unit := do
-  bif i == 0 then
+  uif i == 0 then
     replaceMainGoal [← congrFunN (← getMainGoal)]
   else
     replaceMainGoal (← congrArgN tacticName (← getMainGoal) i explicit)
@@ -234,7 +234,7 @@ def evalArg (tacticName : String) (i : Int) (explicit : Bool) : TacticM Unit := 
 @[builtin_tactic Lean.Parser.Tactic.Conv.arg] def elabArg : Tactic := fun stx => do
   match stx with
   | `(conv| arg $[@%$tk?]? $[-%$neg?]? $i:num) =>
-    let i : Int := bif neg?.isSome then -i.getNat else i.getNat
+    let i : Int := uif neg?.isSome then -i.getNat else i.getNat
     evalArg "arg" i (explicit := tk?.isSome)
   | _ => throwUnsupportedSyntax
 
@@ -318,7 +318,7 @@ private def ext (userName? : Option Name) : TacticM Unit := do
 
 @[builtin_tactic Lean.Parser.Tactic.Conv.ext] def evalExt : Tactic := fun stx => do
   let ids := stx[1].getArgs
-  bif ids.isEmpty then
+  uif ids.isEmpty then
     ext none
   else
     for id in ids do

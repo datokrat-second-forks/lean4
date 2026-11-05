@@ -30,7 +30,7 @@ private def elabDoCatch (lifter : EffectForwarder) (body : Expr) (catch_ : TSynt
       -- First thing we do is try and resolve the instance. This might instantiate `ε` and enables
       -- use of dot notation in `catch | .error .. => ..`.
       let catcher ←
-        bif eType?.isSome then
+        uif eType?.isSome then
           let inst ← Term.mkInstMVar <| mkApp2 (mkConst ``MonadExceptOf [uε, mi.u, mi.v]) ε mi.m
           pure <| mkApp6 (mkConst ``tryCatchThe [uε, mi.u, mi.v])
             ε mi.m inst lifter.liftedDoBlockResultType body
@@ -46,7 +46,7 @@ private def elabDoCatch (lifter : EffectForwarder) (body : Expr) (catch_ : TSynt
   let `(doTry| try $trySeq:doSeq $[$catches]* $[finally $finSeq?]?) := stx | throwUnsupportedSyntax
 --  let `(doTry| try $trySeq:doSeq $[catch $xs $[: $eTypes?]? => $catchSeqs]* $[finally $finSeq?]?) := stx | throwUnsupportedSyntax
   checkMutVarsForShadowing <| catches.filterMap (fun | `(doCatch| catch $x:ident $[: $_]? => $_) => some x | _ => none)
-  bif catches.isEmpty && finSeq?.isNone then
+  uif catches.isEmpty && finSeq?.isNone then
     throwError "Invalid `try`. There must be a `catch` or `finally`."
   -- We cannot use join points because `tryCatch` and `tryFinally` are never tail-resumptive.
   -- (Proof: `do tryCatch e h; throw x ≠ tryCatch (do e; throw x) (fun e => do h e; throw x)`)

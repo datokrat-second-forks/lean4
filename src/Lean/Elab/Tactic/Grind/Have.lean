@@ -17,7 +17,7 @@ open Meta Lean.Meta.Grind
 elaboration but not enforced (use `elabTermEnsuringType` to enforce an expected type). -/
 def elabTerm (stx : Syntax) (expectedType? : Option Expr) (mayPostpone := false) : GrindTacticM Expr :=
   withRef stx do Term.withoutTacticIncrementality true do withMainContext do
-    bif (← read).recover then
+    uif (← read).recover then
       go
     else
       Term.withoutErrToSorry go
@@ -34,8 +34,8 @@ where
   let e ← elabTerm stx' none
   let .letE n t v _ _ := e
     | throwError "elaborated term is not a `have` declaration{indentExpr e}"
-  bif t.hasMVar then throwError "type has metavariables{indentExpr t}"
-  bif v.hasMVar then throwError "value has metavariables{indentExpr v}"
+  uif t.hasMVar then throwError "type has metavariables{indentExpr t}"
+  uif v.hasMVar then throwError "value has metavariables{indentExpr v}"
   let goal ← getMainGoal
   let mvarId ← goal.mvarId.assert n t v
   let goal := { goal with mvarId }
@@ -45,7 +45,7 @@ where
 @[builtin_grind_tactic Parser.Tactic.Grind.haveSilent] def evalHaveSilent : GrindTactic := fun stx => withMainContext do
   let `(grind| have $[$id?:ident]? : $prop:term) := stx | throwUnsupportedSyntax
   let id := if let some id := id? then id.getId else `this
-  let id := bif id.hasMacroScopes then id else markGrindName id
+  let id := uif id.hasMacroScopes then id else markGrindName id
   let prop ← elabTerm prop none
   let mvar ← mkFreshExprMVar prop
   let mvarId := mvar.mvarId!

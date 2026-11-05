@@ -53,20 +53,20 @@ private def resumePostponed (savedContext : SavedContext) (stx : Syntax) (mvarId
               That is, the method does not have an opportunity to check whether `result` has the expected type or not. -/
             withRef stx <| ensureHasType expectedType result
           /- We must perform `occursCheck` here since `result` may contain `mvarId` when it has synthetic `sorry`s. -/
-          bif (← occursCheck mvarId result) then
+          uif (← occursCheck mvarId result) then
             mvarId.assign result
             return true
           else
             return false
     catch
      | ex@(.internal id _) =>
-       bif id == postponeExceptionId then
+       uif id == postponeExceptionId then
          s.restore (restoreInfo := true)
          return false
        else
          throw ex
      | ex@(.error ..) =>
-       bif postponeOnError then
+       uif postponeOnError then
          s.restore (restoreInfo := true)
          return false
        else
@@ -87,9 +87,9 @@ private def synthesizePendingInstMVar (instMVar : MVarId) (extraErrorMsg? : Opti
 /-- Returns `true` if `instMVar` got stuck before and none of the metavariables it was blocked on has been assigned since. -/
 private def isStuckTCUnchanged (instMVar : MVarId) : TermElabM Bool := do
   let some (mvarIds, levelMVarIds) := (← get).stuckTCMVars.get? instMVar | return false
-  bif (← instMVar.isAssigned) then return false
-  bif (← mvarIds.anyM fun mvarId => return (← mvarId.isAssigned) || (← mvarId.isDelayedAssigned)) then return false
-  bif (← levelMVarIds.anyM isLevelMVarAssigned) then return false
+  uif (← instMVar.isAssigned) then return false
+  uif (← mvarIds.anyM fun mvarId => return (← mvarId.isAssigned) || (← mvarId.isDelayedAssigned)) then return false
+  uif (← levelMVarIds.anyM isLevelMVarAssigned) then return false
   return true
 
 /--
@@ -98,9 +98,9 @@ input that can change, i.e., the instance metavariable is unassigned and the loc
 no metavariables.
 -/
 private def recordStuckTC (instMVar : MVarId) : TermElabM Unit := instMVar.withContext do
-  bif (← instMVar.isAssigned) || (← read).ignoreTCFailures then return
+  uif (← instMVar.isAssigned) || (← read).ignoreTCFailures then return
   for localInst in (← getLocalInstances) do
-    bif (← instantiateMVars (← inferType localInst.fvar)).hasMVar then return
+    uif (← instantiateMVars (← inferType localInst.fvar)).hasMVar then return
   let type ← instantiateMVars (← instMVar.getType)
   let mvarIds ← getMVars type
   let levelMVarIds := (collectLevelMVars {} type).result
@@ -142,14 +142,14 @@ private partial def synthesizeUsingDefaultPrio (mvarId : MVarId) (prio : Nat) : 
       | [] => return false
       | defaultInstances =>
         for (defaultInstance, instPrio) in defaultInstances do
-          bif instPrio == prio then
-            bif (← synthesizeUsingDefaultInstance mvarId defaultInstance) then
+          uif instPrio == prio then
+            uif (← synthesizeUsingDefaultInstance mvarId defaultInstance) then
               return true
         return false
 where
   synthesizeUsingDefault (mvarId : MVarId) : TermElabM Bool := do
     for prio in (← getDefaultInstancesPriorities) do
-      bif (← synthesizeUsingDefaultPrio mvarId prio) then
+      uif (← synthesizeUsingDefaultPrio mvarId prio) then
         return true
     return false
 
@@ -162,14 +162,14 @@ where
 
   synthesizeUsingInstancesStep (mvarIds : List MVarId) : TermElabM (List MVarId) :=
     mvarIds.filterM fun mvarId => do
-      bif (← synthesizePendingInstMVar' mvarId) then
+      uif (← synthesizePendingInstMVar' mvarId) then
         return false
       else
         return true
 
   synthesizeUsingInstances (mvarIds : List MVarId) : TermElabM (List MVarId) := do
     let mvarIds' ← synthesizeUsingInstancesStep mvarIds
-    bif mvarIds'.length <ᵇ mvarIds.length then
+    uif mvarIds'.length < mvarIds.length then
       synthesizeUsingInstances mvarIds'
     else
       return mvarIds'
@@ -183,12 +183,12 @@ where
       /- The `coeAtOutParam` feature may mark output parameters of local instances as `syntheticOpaque`.
          This kind of parameter is not assignable by default. We use `withAssignableSyntheticOpaque` to workaround this behavior
          when processing default instances. TODO: try to avoid `withAssignableSyntheticOpaque`. -/
-      bif (← withAssignableSyntheticOpaque <| isDefEqGuarded (mkMVar mvarId) candidate) then
+      uif (← withAssignableSyntheticOpaque <| isDefEqGuarded (mkMVar mvarId) candidate) then
         -- Succeeded. Collect new TC problems
         trace[Elab.defaultInstance] "isDefEq worked {mkMVar mvarId} : {← inferType (mkMVar mvarId)} =?= {candidate} : {← inferType candidate}"
         let mut pending := []
         for h : i in *...bis.size do
-          bif bis[i] == BinderInfo.instImplicit then
+          uif bis[i] == BinderInfo.instImplicit then
             pending := mvars[i]!.mvarId! :: pending
         synthesizePending pending
       else
@@ -198,7 +198,7 @@ where
     match mvarIds with
     | [] => return none
     | mvarId :: mvarIds =>
-      bif (← synthesizeUsingDefault mvarId) then
+      uif (← synthesizeUsingDefault mvarId) then
         return mvarIds
       else if let some mvarIds' ← synthesizeSomeUsingDefault? mvarIds then
         return mvarId :: mvarIds'
@@ -207,7 +207,7 @@ where
 
   synthesizePending (mvarIds : List MVarId) : TermElabM Bool := do
     let mvarIds ← synthesizeUsingInstances mvarIds
-    bif mvarIds.isEmpty then return true
+    uif mvarIds.isEmpty then return true
     let some mvarIds ← synthesizeSomeUsingDefault? mvarIds | return false
     synthesizePending mvarIds
 
@@ -220,7 +220,7 @@ private def synthesizeSomeUsingDefaultPrio (prio : Nat) : TermElabM Bool := do
       let some mvarDecl ← getSyntheticMVarDecl? mvarId | visit pendingMVars (mvarId :: pendingMVarsNew)
       match mvarDecl.kind with
       | .typeClass .. => -- TODO: use `errorMsg?` in `typeClass`.
-        bif (← withRef mvarDecl.stx <| synthesizeUsingDefaultPrio mvarId prio) then
+        uif (← withRef mvarDecl.stx <| synthesizeUsingDefaultPrio mvarId prio) then
           modify fun s => { s with pendingMVars := pendingMVars.reverse ++ pendingMVarsNew }
           return true
         else
@@ -238,7 +238,7 @@ private def synthesizeUsingDefault : TermElabM Bool := do
   let prioSet ← getDefaultInstancesPriorities
   /- Recall that `prioSet` is stored in descending order -/
   for prio in prioSet do
-    bif (← synthesizeSomeUsingDefaultPrio prio) then
+    uif (← synthesizeSomeUsingDefaultPrio prio) then
       return true
   return false
 
@@ -275,11 +275,11 @@ def explainStuckTypeclassProblem (typeclassProblem : Expr) : TermElabM (Option M
     match kind with
     | .forallE _ argType rest _ =>
       kind := rest
-      bif !(argType.isOutParam || argType.isSemiOutParam) then
+      uif !(argType.isOutParam || argType.isSemiOutParam) then
         let arg ← instantiateExprMVars arg
         if let .mvar _ := arg then
           stuckArguments := stuckArguments.push ord
-        else bif (arg.collectMVars {}).result.size >ᵇ 0 then
+        else uif (arg.collectMVars {}).result.size > 0 then
           stuckArguments := stuckArguments.push ord
           simpleMVars := false
     | _ => return .none -- Unexpected type structure; fall back to default error
@@ -288,18 +288,18 @@ def explainStuckTypeclassProblem (typeclassProblem : Expr) : TermElabM (Option M
   let .sort _ := kind
     | return .none -- Unexpected type structure; fall back to default error
   let nStuck := stuckArguments.size
-  bif nStuck =ᵇ 0 then
+  uif nStuck = 0 then
     return .none -- This is not a simple inputs-have-metavariables issue
 
   -- Formulate error message
   let containMVars :=
-    bif simpleMVars then
+    uif simpleMVars then
       nStuck.plural "is a metavariable" "are metavariables"
     else
       nStuck.plural "contains metavariables" "contain metavariables"
 
   let theTypeArguments :=
-    bif args.length =ᵇ 1 then
+    uif args.length = 1 then
       "the type argument"
     else
       s!"the {(stuckArguments.toList.map (·.succ.toOrdinal)).toOxford} type {nStuck.plural "argument" "arguments"}"
@@ -370,7 +370,7 @@ private def reportStuckSyntheticMVars (ignoreStuckTC := false) : TermElabM Unit 
     match (decl1.kind, decl2.kind) with
      | (.typeClass _, .typeClass _) =>
        match (decl1.stx.getRange?, decl2.stx.getRange?) with
-        | (.some r1, .some r2) => bif r1.bsize != r2.bsize then
+        | (.some r1, .some r2) => uif r1.bsize != r2.bsize then
             r1.bsize <= r2.bsize
           else
             r1.start <= r2.start
@@ -386,7 +386,7 @@ private def reportStuckSyntheticMVars (ignoreStuckTC := false) : TermElabM Unit 
 private def getSomeSyntheticMVarsRef : TermElabM Syntax := do
   for mvarId in (← get).pendingMVars do
     if let some decl ← getSyntheticMVarDecl? mvarId then
-      bif decl.stx.getPos?.isSome then
+      uif decl.stx.getPos?.isSome then
         return decl.stx
   return .missing
 
@@ -401,7 +401,7 @@ private def throwStuckAtUniverseCnstr : TermElabM Unit := do
   for entry in entries do
     let mut lhs := entry.lhs
     let mut rhs := entry.rhs
-    bif Level.normLt rhs lhs then
+    uif Level.normLt rhs lhs then
       (lhs, rhs) := (rhs, lhs)
     unless found.contains (lhs, rhs) do
       found := found.insert (lhs, rhs)
@@ -472,7 +472,7 @@ private def TacticMVarKind.logError (tacticCode : Syntax) (kind : TacticMVarKind
   | fieldAutoParam fieldName structName => logErrorAt tacticCode m!"could not synthesize default value for field '{fieldName}' of '{structName}' using tactics"
 
 private def TacticMVarKind.maybeWithoutRecovery (kind : TacticMVarKind) (m : TacticM α) : TacticM α := do
-  bif kind matches .autoParam .. | .fieldAutoParam .. then
+  uif kind matches .autoParam .. | .fieldAutoParam .. then
     withoutErrToSorry <| Tactic.withoutRecover <| m
   else
     m
@@ -504,7 +504,7 @@ mutual
     -- aux theorem in the end so that we cannot leak references to private decls into the exporting
     -- context.
     let mut mvarId' := mvarId
-    bif isNoLongerExporting then
+    uif isNoLongerExporting then
       let mvarDecl ← getMVarDecl mvarId
       mvarId' := (← mkFreshExprMVarAt mvarDecl.lctx mvarDecl.localInstances mvarDecl.type mvarDecl.kind).mvarId!
     withExporting (isExporting := wasExporting && !isNoLongerExporting) do
@@ -534,14 +534,14 @@ mutual
             withoutTacticIncrementality true do
               synthesizeSyntheticMVars (postpone := .no)
           unless remainingGoals.isEmpty do
-            bif report then
+            uif report then
               kind.logError tacticCode
               reportUnsolvedGoals remainingGoals
             else
               throwError "unsolved goals\n{goalsToMessageData remainingGoals}"
-          bif isNoLongerExporting then
+          uif isNoLongerExporting then
             let mut e ← instantiateExprMVars (.mvar mvarId')
-            bif !e.isFVar then
+            uif !e.isFVar then
               e ← mvarId'.withContext do
                 withExporting (isExporting := wasExporting) do
                   -- Like `abstractProof`, but use the expected and not given type here as
@@ -549,9 +549,9 @@ mutual
                   mkAuxTheorem (cache := !e.hasSorry) (← mvarId.getType) e (zetaDelta := true)
             mvarId.assign e)
       fun ex => do
-        bif report then
+        uif report then
           kind.logError tacticCode
-        bif report && (← read).errToSorry then
+        uif report && (← read).errToSorry then
           for mvarId in (← getMVars (mkMVar mvarId')) do
             mvarId.admit
           logException ex
@@ -564,16 +564,16 @@ mutual
     withRef mvarSyntheticDecl.stx do
     match mvarSyntheticDecl.kind with
     | .typeClass extraErrorMsg? =>
-      bif (← isStuckTCUnchanged mvarId) then return false
-      bif (← synthesizePendingInstMVar mvarId extraErrorMsg?) then
+      uif (← isStuckTCUnchanged mvarId) then return false
+      uif (← synthesizePendingInstMVar mvarId extraErrorMsg?) then
         return true
       recordStuckTC mvarId
       return false
     | .coe _header? expectedType e _f? _ => mvarId.withContext do
-      bif (← withDefault do isDefEq (← inferType e) expectedType) then
+      uif (← withDefault do isDefEq (← inferType e) expectedType) then
         -- Types may be defeq now due to mvar assignments, type class
         -- defaulting, etc.
-        bif (← occursCheck mvarId e) then
+        uif (← occursCheck mvarId e) then
           mvarId.assign e
           return true
       if let .some (coerced, expandedCoeDecls) ← coerceCollectingNames? e expectedType then
@@ -581,7 +581,7 @@ mutual
           stx := mvarSyntheticDecl.stx
           value := Dynamic.mk <| CoeExpansionTrace.mk expandedCoeDecls
         })
-        bif (← occursCheck mvarId coerced) then
+        uif (← occursCheck mvarId coerced) then
           mvarId.assign coerced
           return true
       return false
@@ -589,7 +589,7 @@ mutual
     | .postponed savedContext => resumePostponed savedContext mvarSyntheticDecl.stx mvarId postponeOnError
     | .tactic tacticCode savedContext kind delayOnMVars =>
       withSavedContext savedContext do
-        bif runTactics && !(delayOnMVars && (← mvarId.getType >>= instantiateExprMVars).hasExprMVar) then
+        uif runTactics && !(delayOnMVars && (← mvarId.getType >>= instantiateExprMVars).hasExprMVar) then
           runTactic mvarId tacticCode kind
           return true
         else
@@ -613,8 +613,8 @@ mutual
        -- We use `traceM` because we want to make sure the metavar local context is used to trace the message
        traceM `Elab.postpone (mvarId.withContext do addMessageContext m!"resuming {mkMVar mvarId}")
        let succeeded ← synthesizeSyntheticMVar mvarId postponeOnError runTactics
-       bif succeeded then markAsResolved mvarId
-       trace[Elab.postpone] bif succeeded then format "succeeded" else format "not ready yet"
+       uif succeeded then markAsResolved mvarId
+       trace[Elab.postpone] uif succeeded then format "succeeded" else format "not ready yet"
        pure !succeeded
     -- Merge new synthetic metavariables with `remainingPendingMVars`, i.e., metavariables that still couldn't be synthesized
     modify fun s => { s with pendingMVars := s.pendingMVars ++ remainingPendingMVars }
@@ -639,9 +639,9 @@ mutual
     let rec loop (_ : Unit) : TermElabM Unit := do
       withRef (← getSomeSyntheticMVarsRef) <| withIncRecDepth do
         unless (← get).pendingMVars.isEmpty do
-          bif (← synthesizeSyntheticMVarsStep (postponeOnError := false) (runTactics := false)) then
+          uif (← synthesizeSyntheticMVarsStep (postponeOnError := false) (runTactics := false)) then
             loop ()
-          else bif postpone != .yes then
+          else uif postpone != .yes then
             /- Resume pending metavariables with "elaboration postponement" disabled.
                We postpone elaboration errors in this step by setting `postponeOnError := true`.
                Example:
@@ -658,18 +658,18 @@ mutual
                We the type of `x` may learn later its type and it may contain implicit and/or auto arguments.
                By disabling postponement, we are essentially giving up the opportunity of learning `x`s type
                and assume it does not have implicit and/or auto arguments. -/
-            bif (← withoutPostponing <| synthesizeSyntheticMVarsStep (postponeOnError := true) (runTactics := false)) then
+            uif (← withoutPostponing <| synthesizeSyntheticMVarsStep (postponeOnError := true) (runTactics := false)) then
               loop ()
-            else bif (← synthesizeUsingDefault) then
+            else uif (← synthesizeUsingDefault) then
               loop ()
-            else bif (← withoutPostponing <| synthesizeSyntheticMVarsStep (postponeOnError := false) (runTactics := false)) then
+            else uif (← withoutPostponing <| synthesizeSyntheticMVarsStep (postponeOnError := false) (runTactics := false)) then
               loop ()
-            else bif (← synthesizeSyntheticMVarsStep (postponeOnError := false) (runTactics := true)) then
+            else uif (← synthesizeSyntheticMVarsStep (postponeOnError := false) (runTactics := true)) then
               loop ()
-            else bif postpone == .no then
+            else uif postpone == .no then
               reportStuckSyntheticMVars ignoreStuckTC
     loop ()
-    bif postpone == .no then
+    uif postpone == .no then
      processPostponedUniverseConstraints
 end
 
@@ -678,7 +678,7 @@ def synthesizeSyntheticMVarsNoPostponing (ignoreStuckTC := false) : TermElabM Un
 
 /-- Keep invoking `synthesizeUsingDefault` until it returns false. -/
 private partial def synthesizeUsingDefaultLoop : TermElabM Unit := do
-  bif (← synthesizeUsingDefault) then
+  uif (← synthesizeUsingDefault) then
     synthesizeSyntheticMVars (postpone := .yes)
     synthesizeUsingDefaultLoop
 
@@ -692,7 +692,7 @@ private partial def withSynthesizeImp (k : TermElabM α) (postpone : PostponeBeh
    try
      let a ← k
      synthesizeSyntheticMVars (postpone := postpone)
-     bif postpone == .yes then
+     uif postpone == .yes then
        synthesizeUsingDefaultLoop
      return a
    finally

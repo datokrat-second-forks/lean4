@@ -17,7 +17,7 @@ open Std.Do SPred.Tactic
 open Lean Elab Tactic Meta
 
 def _root_.Lean.Elab.Tactic.Do.ProofMode.MGoal.exact (goal : MGoal) (hyp : Syntax) : OptionT MetaM Expr := do
-  bif goal.findHyp? hyp.getId |>.isNone then failure
+  uif goal.findHyp? hyp.getId |>.isNone then failure
   let focusRes ← goal.focusHypWithInfo ⟨hyp⟩
   OptionT.mk do
   let proof := mkApp5 (mkConst ``Exact.assumption [goal.u]) goal.σs goal.hyps focusRes.restHyps goal.target focusRes.proof

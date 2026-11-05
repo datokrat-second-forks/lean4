@@ -149,7 +149,7 @@ def withAbstract {n} {α} [MonadLiftT MetaM n] [MonadControlT MetaM n] [Monad n]
       ((`discr).appendIndexAfter (i+1), fun (prior : Array Expr) => liftMetaM do
         let mut ty ← inferType discr
         for j in *...i do
-          bif matcherApp.discrs[j]!.isFVar then
+          uif matcherApp.discrs[j]!.isFVar then
             ty := ty.replaceFVar matcherApp.discrs[j]! prior[j]!
         return ty)
     withLocalDeclsD discrDecls fun discrs => do
@@ -207,7 +207,7 @@ def splitWith
     let u ← getLevel resTy
     let c := e.getArg! 1
     let h := e.getArg! 2
-    bif useSplitter then -- dite is the "splitter" for ite
+    uif useSplitter then -- dite is the "splitter" for ite
       let n ← liftMetaM <| mkFreshUserName `h
       let t ← withLocalDecl n .default c fun h => do mkLambdaFVars #[h] (← onAlt `isTrue resTy 0 { fields := #[h] })
       let e ← withLocalDecl n .default (mkNot c) fun h => do mkLambdaFVars #[h] (← onAlt `isFalse resTy 1 { fields := #[h] })
@@ -227,7 +227,7 @@ def splitWith
   | cond e => do
     let u ← getLevel resTy
     let c := e.getArg! 1
-    bif useSplitter then -- Bool.dcond is the "splitter" for cond
+    uif useSplitter then -- Bool.dcond is the "splitter" for cond
       let n ← liftMetaM <| mkFreshUserName `h
       let t ← withBoolCaseHyp n c true fun h => onAlt `isTrue resTy 0 { fields := #[h] }
       let e ← withBoolCaseHyp n c false fun h => onAlt `isFalse resTy 1 { fields := #[h] }
@@ -240,7 +240,7 @@ def splitWith
     let u ← getLevel resTy
     let c := e.getArg! 1
     let h := e.getArg! 2
-    bif useSplitter then -- UDecidable.dite is the "splitter" for UDecidable.ite
+    uif useSplitter then -- UDecidable.dite is the "splitter" for UDecidable.ite
       let n ← liftMetaM <| mkFreshUserName `h
       let t ← withLocalDecl n .default c fun h => do mkLambdaFVars #[h] (← onAlt `isTrue resTy 0 { fields := #[h] })
       let e ← withLocalDecl n .default (mkNot c) fun h => do mkLambdaFVars #[h] (← onAlt `isFalse resTy 1 { fields := #[h] })
@@ -286,17 +286,17 @@ def simpDiscrs? (info : SplitInfo) (e : Expr) : SimpM (Option Simp.Result) := ma
 end SplitInfo
 
 def getSplitInfo? (e : Expr) : MetaM (Option SplitInfo) := do
-  bif e.isAppOf ``ite then
+  uif e.isAppOf ``ite then
     return some (SplitInfo.ite e)
-  bif e.isAppOf ``dite then
+  uif e.isAppOf ``dite then
     return some (SplitInfo.dite e)
-  bif e.isAppOf ``cond then
+  uif e.isAppOf ``cond then
     return some (SplitInfo.cond e)
-  bif e.isAppOf ``UDecidable.ite then
+  uif e.isAppOf ``UDecidable.ite then
     return some (SplitInfo.uite e)
-  bif e.isAppOf ``UDecidable.dite then
+  uif e.isAppOf ``UDecidable.dite then
     return some (SplitInfo.udite e)
-  bif e.isAppOf ``Bool.dcond then
+  uif e.isAppOf ``Bool.dcond then
     return some (SplitInfo.dcond e)
   if let .some matcherApp ← matchMatcherApp? (alsoCasesOn := true) e then
     return some (SplitInfo.matcher matcherApp)
@@ -304,16 +304,16 @@ def getSplitInfo? (e : Expr) : MetaM (Option SplitInfo) := do
     return none
 
 def rwIfOrMatcher (idx : Nat) (e : Expr) : MetaM Simp.Result := do
-  bif e.isAppOf ``ite || e.isAppOf ``dite || e.isAppOf ``UDecidable.ite
+  uif e.isAppOf ``ite || e.isAppOf ``dite || e.isAppOf ``UDecidable.ite
       || e.isAppOf ``UDecidable.dite then
     let c := e.getArg! 1
-    let c := bif idx =ᵇ 0 then c else mkNot c
+    let c := uif idx = 0 then c else mkNot c
     let .some fv ← findLocalDeclWithType? c
       | throwError "Failed to find proof for if condition {c}"
     rwIfWith (mkFVar fv) e
-  else bif e.isAppOf ``cond || e.isAppOf ``Bool.dcond then
+  else uif e.isAppOf ``cond || e.isAppOf ``Bool.dcond then
     let c := e.getArg! 1
-    let h ← mkEq c (mkConst (bif idx =ᵇ 0 then ``Bool.true else ``Bool.false))
+    let h ← mkEq c (mkConst (uif idx = 0 then ``Bool.true else ``Bool.false))
     if let .some fv ← findLocalDeclWithType? h then
       return ← rwIfWith (mkFVar fv) e
     -- `withBoolCaseHyp` may have introduced the propositional view instead.

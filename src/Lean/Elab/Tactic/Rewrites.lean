@@ -41,12 +41,12 @@ def evalExact : Tactic := fun stx => do
   withLocation (expandOptLocation (Lean.mkOptionalNode loc))
     fun f => do
       let some a ← f.findDecl? | return
-      bif a.isImplementationDetail then return
+      uif a.isImplementationDetail then return
       let target ← instantiateMVars (← f.getType)
       let hyps ← localHypotheses (except := [f])
       let results ← findRewrites hyps moduleRef goal target (stopAtRfl := false) forbidden
       reportOutOfHeartbeats `rewrites tk
-      bif results.isEmpty then
+      uif results.isEmpty then
         throwError "Could not find any lemmas which can rewrite the hypothesis {← f.getUserName}"
       for r in results do withMCtx r.mctx do
         Tactic.TryThis.addRewriteSuggestion tk [(r.expr, r.symm)]
@@ -61,7 +61,7 @@ def evalExact : Tactic := fun stx => do
       let hyps ← localHypotheses
       let results ← findRewrites hyps moduleRef goal target (stopAtRfl := true) forbidden
       reportOutOfHeartbeats `rewrites tk
-      bif results.isEmpty then
+      uif results.isEmpty then
         throwError "Could not find any lemmas which can rewrite the goal"
       let mut state ← saveState
       if let some r := results[0]? then

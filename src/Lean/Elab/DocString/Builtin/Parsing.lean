@@ -43,7 +43,7 @@ private def argumentRange [Monad m] [MonadRef m] (xs : TSyntaxArray ``Parser.inl
   let ref ← getRef
   if let some { brackets := some (opener, closer), .. } := RoleView.of ⟨ref⟩ then
     return mkNullNode (#[opener] ++ xs.map (·.raw) ++ #[closer])
-  bif xs.all isBlank then return ref
+  uif xs.all isBlank then return ref
   return mkNullNode (xs.map (·.raw))
 where
   isBlank (x : TSyntax ``Parser.inline) : Bool :=
@@ -58,7 +58,7 @@ content if so. Throws an error otherwise.
 def onlyCode [Monad m] [MonadError m] (xs : TSyntaxArray ``Parser.inline) :
     m VersoCode := do
   let codes ← onlyCodes xs
-  bif h : codes.size =ᵇ 1 then return codes[0]
+  uif h : codes.size = 1 then return codes[0]
   else throwErrorAt (← argumentRange xs) "Expected precisely 1 code argument"
 
 private def strLitRange [Monad m] [MonadFileMap m] (s : StrLit) : m Lean.Syntax.Range := do
@@ -77,20 +77,20 @@ private def parseFromContents (p : ParserFn) (contents : String) : m Syntax := d
   let env ← getEnv
   let ictx := mkInputContext contents (← getFileName)
   let s := p.run ictx { env, options := ← getOptions } (getTokenTable env) (mkParserState contents)
-  bif !s.allErrors.isEmpty then
+  uif !s.allErrors.isEmpty then
     throwError (s.toErrorMsg ictx)
-  else bif ictx.atEnd s.pos then
+  else uif ictx.atEnd s.pos then
     pure s.stxStack.back
   else
     throwError ((s.mkError "end of input").toErrorMsg ictx)
 
 def parseContent (p : ParserFn) (tok : Syntax) (contents : String) : m Syntax := do
-  bif (tok.getPos? (canonicalOnly := true)).isNone then
+  uif (tok.getPos? (canonicalOnly := true)).isNone then
     return ← parseFromContents p contents
   let text ← getFileMap
   let env ← getEnv
   let ⟨pos, endPos⟩ ← strLitRange ⟨tok⟩
-  let endPos := bif endPos ≤ᵇ text.source.rawEndPos then endPos else text.source.rawEndPos
+  let endPos := uif endPos ≤ text.source.rawEndPos then endPos else text.source.rawEndPos
   let ictx :=
     mkInputContext text.source (← getFileName)
       (endPos := endPos) (endPos_valid := by simp only [endPos]; split <;> simp [*])
@@ -98,26 +98,26 @@ def parseContent (p : ParserFn) (tok : Syntax) (contents : String) : m Syntax :=
   let s := (mkParserState text.source).setPos pos
   let s := p.run ictx { env, options := ← getOptions } (getTokenTable env) s
 
-  bif !s.allErrors.isEmpty  then
+  uif !s.allErrors.isEmpty  then
     throwError (s.toErrorMsg ictx)
-  else bif ictx.atEnd s.pos then
+  else uif ictx.atEnd s.pos then
     pure s.stxStack.back
   else
     throwError ((s.mkError "end of input").toErrorMsg ictx)
 
 def parseQuotedStrLit (p : ParserFn) (strLit : StrLit) : m Syntax := do
-  bif (strLit.raw.getPos? (canonicalOnly := true)).isNone then
+  uif (strLit.raw.getPos? (canonicalOnly := true)).isNone then
     return ← parseFromContents p strLit.getString
   let text ← getFileMap
   let env ← getEnv
   let ⟨pos, _⟩ ← strLitRange strLit
   let pos ← do
     let mut pos := pos
-    bif pos.get text.source == 'r' then
+    uif pos.get text.source == 'r' then
       pos := pos.next text.source
       while pos.get text.source == '#' do
         pos := pos.next text.source
-    bif pos.get text.source == '"' then
+    uif pos.get text.source == '"' then
       pure <| pos.next text.source
     else
       throwErrorAt strLit "Not a quoted string literal"
@@ -126,7 +126,7 @@ def parseQuotedStrLit (p : ParserFn) (strLit : StrLit) : m Syntax := do
   let s := mkParserState str
   let s := p.run ictx { env, options := ← getOptions } (getTokenTable env) s
 
-  bif !s.allErrors.isEmpty then
+  uif !s.allErrors.isEmpty then
     let s := { s with
         pos := reposition text pos str s.pos
         recoveredErrors := s.recoveredErrors.map fun
@@ -135,7 +135,7 @@ def parseQuotedStrLit (p : ParserFn) (strLit : StrLit) : m Syntax := do
           { e with unexpectedTk := repositionSyntax text pos str e.unexpectedTk }
       }
     throwError (s.toErrorMsg ictx)
-  else bif ictx.atEnd s.pos then
+  else uif ictx.atEnd s.pos then
     pure <| repositionSyntax text pos str s.stxStack.back
   else
     throwError ((s.mkError "end of input").toErrorMsg ictx)
@@ -166,21 +166,21 @@ where
 
 def parseContent' (p : ParserFn) (tok : Syntax) (contents : String) : m (Syntax × Bool) := do
   let s : StrLit := ⟨tok⟩
-  bif (tok.getPos? (canonicalOnly := true)).isNone then
+  uif (tok.getPos? (canonicalOnly := true)).isNone then
     let env ← getEnv
     let ictx := mkInputContext contents (← getFileName)
     let st := p.run ictx { env, options := ← getOptions } (getTokenTable env) (mkParserState contents)
     let err ←
-      bif !st.allErrors.isEmpty then
+      uif !st.allErrors.isEmpty then
         logError (st.toErrorMsg ictx); pure true
-      else bif !ictx.atEnd st.pos then
+      else uif !ictx.atEnd st.pos then
         logError ((st.mkError "end of input").toErrorMsg ictx); pure true
       else pure false
     return (st.stxStack.back, err)
   let text ← getFileMap
   let env ← getEnv
   let endPos := s.raw.getTailPos? true |>.get!
-  let endPos := bif endPos ≤ᵇ text.source.rawEndPos then endPos else text.source.rawEndPos
+  let endPos := uif endPos ≤ text.source.rawEndPos then endPos else text.source.rawEndPos
   let ictx :=
     mkInputContext text.source (← getFileName)
       (endPos := endPos) (endPos_valid := by simp only [endPos]; split <;> simp [*])
@@ -189,10 +189,10 @@ def parseContent' (p : ParserFn) (tok : Syntax) (contents : String) : m (Syntax 
   let s := p.run ictx { env, options := ← getOptions } (getTokenTable env) s
 
   let err ←
-    bif !s.allErrors.isEmpty then
+    uif !s.allErrors.isEmpty then
       logError (s.toErrorMsg ictx)
       pure true
-    else bif !ictx.atEnd s.pos then
+    else uif !ictx.atEnd s.pos then
       logError ((s.mkError "end of input").toErrorMsg ictx)
       pure true
     else pure false

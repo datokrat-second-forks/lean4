@@ -105,7 +105,7 @@ def conjunctiveArgs? (env : Environment) : Name → Option (Nat × List Nat)
 
 /-- Whether every occurrence of `qs` in `e` lies in a conjunctive context. -/
 partial def isConjunctiveIn (env : Environment) (qs : Array MVarId) (e : Expr) : Bool :=
-  bif !occursMVar qs e then true else
+  uif !occursMVar qs e then true else
   match e with
   | .mdata _ b => isConjunctiveIn env qs b
   | .lam _ dom body _ | .forallE _ dom body _ => !occursMVar qs dom && isConjunctiveIn env qs body
@@ -117,7 +117,7 @@ partial def isConjunctiveIn (env : Environment) (qs : Array MVarId) (e : Expr) :
       match conjunctiveArgs? env c with
       | some (arity, conj) =>
         arity ≤ args.size && (List.range args.size).all fun i =>
-          bif conj.contains i then isConjunctiveIn env qs args[i]! else !occursMVar qs args[i]!
+          uif conj.contains i then isConjunctiveIn env qs args[i]! else !occursMVar qs args[i]!
       | none => false
     | _ => false
 
@@ -126,10 +126,10 @@ postconditions. -/
 public def isConjunctiveInPosts (concl : Expr) (binders : Array Expr) : MetaM Bool := do
   let some (pre, prog, post, eposts) := specComponents? concl | return false
   let qs := #[post, eposts].filterMap fun e => match e.eta with | .mvar q => some q | _ => none
-  bif qs.isEmpty then return false
-  bif occursMVar qs prog then return false
+  uif qs.isEmpty then return false
+  uif occursMVar qs prog then return false
   for b in binders do
-    bif occursMVar qs (← inferType b) then return false
+    uif occursMVar qs (← inferType b) then return false
   return isConjunctiveIn (← getEnv) qs pre
 
 end Lean.Elab.Tactic.VCGen.SpecAttr

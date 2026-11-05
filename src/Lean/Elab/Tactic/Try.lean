@@ -45,7 +45,7 @@ combinators such as `first`, `attempt_all`, `<;>`, `;`, and `try`.
 /-- Returns `true` if `fvarId` has an accessible name. -/
 private def isAccessible (fvarId : FVarId) : MetaM Bool := do
   let localDecl ← fvarId.getDecl
-  bif localDecl.userName.hasMacroScopes then
+  uif localDecl.userName.hasMacroScopes then
     return false
   else
     -- Check whether variable has been shadowed
@@ -80,7 +80,7 @@ def evalSuggestExact : TacticM (TSyntax `tactic) := do
     let .none ← LibrarySearch.librarySearch mvarId tactic allowFailure
       | throwError "`exact?` failed"
     let proof := (← instantiateMVars (mkMVar mvarId)).headBeta
-    let tac ← bif (← isExprAccessible proof) then
+    let tac ← uif (← isExprAccessible proof) then
       let stx ← PrettyPrinter.delab proof
       `(tactic| exact $stx)
     else withExposedNames do
@@ -102,9 +102,9 @@ private def appendSuggestion (suggestions : Array (TSyntax `tactic)) (tac : TSyn
 
 /-- Returns a tactic representing all given suggestions `tacs`. -/
 private def mkTrySuggestions (tacs : Array (TSyntax `tactic)) : TacticM (TSyntax `tactic) := do
-  bif tacs.isEmpty then
+  uif tacs.isEmpty then
     throwError "`mkTrySuggestions` failed"
-  else bif tacs.size == 1 then
+  else uif tacs.size == 1 then
     return tacs[0]!
   else
     `(tactic| try_suggestions $tacs*)
@@ -133,18 +133,18 @@ private def appendSeq (tacs : Array (TSyntax `tactic)) (tac : TSyntax `tactic) :
       return tacs ++ tacs'
   | `(tactic| · $tseq:tacticSeq) =>
     if let some tacs' := getTacSeqElems? tseq then
-      bif !tacs'.any isCDotTac then
+      uif !tacs'.any isCDotTac then
         return tacs ++ tacs'
   | _ => pure ()
   return tacs.push tac
 
 private def mkSeq (tacs : Array (TSyntax `tactic)) (terminal : Bool) : CoreM (TSyntax `tactic) := do
   let tacs := filterSkipDone tacs
-  bif tacs.size =ᵇ 0 then
-    bif terminal then `(tactic| done) else `(tactic| skip)
-  else bif tacs.size =ᵇ 1 then
+  uif tacs.size = 0 then
+    uif terminal then `(tactic| done) else `(tactic| skip)
+  else uif tacs.size = 1 then
     return tacs[0]!
-  else bif terminal then
+  else uif terminal then
     `(tactic| · $tacs;*)
   else
     `(tactic| ($tacs;*))
@@ -176,12 +176,12 @@ private def getSuggestionsCore (tac : TSyntax `tactic): Array (TSyntax `tactic) 
 
 /-- Return tactics that could solve all subgoals. -/
 private def getTacsSolvedAll (tacs2 : Array (Array (TSyntax `tactic))) : Array (TSyntax `tactic) := Id.run do
-  bif tacs2.isEmpty then
+  uif tacs2.isEmpty then
     return #[]
   else
     let mut r := #[]
     for tac2 in tacs2[0]! do
-      bif tacs2[1...*].all (·.contains tac2) then
+      uif tacs2[1...*].all (·.contains tac2) then
         r := r.push tac2
     return r
 
@@ -191,13 +191,13 @@ private def eraseTacs (tacss : Array (Array (TSyntax `tactic))) (tacs : Array (T
 
 /-- Returns tactic kinds that could solve all subgoals. -/
 private def getKindsSolvedAll (tacss : Array (Array (TSyntax `tactic))) : Array SyntaxNodeKind := Id.run do
-  bif tacss.isEmpty then
+  uif tacss.isEmpty then
     return #[]
   else
     let mut r := #[]
     for tacs0 in tacss[0]! do
       let k := tacs0.raw.getKind
-      bif tacss[1...*].all fun tacs => tacs.any fun tac => tac.raw.getKind == k then
+      uif tacss[1...*].all fun tacs => tacs.any fun tac => tac.raw.getKind == k then
         r := r.push k
     return r
 
@@ -205,7 +205,7 @@ private def evalSuggestAtomic (tac : TSyntax `tactic) : TacticM (TSyntax `tactic
   let goals ← getGoals
   evalTactic tac.raw
   let goals' ← getGoals
-  bif goals == goals' then
+  uif goals == goals' then
     `(tactic| skip)
   else
     return tac
@@ -272,7 +272,7 @@ do not need to call it, since the recursive call already enforces the invariant 
 sub-tactic in terminal mode.
 -/
 private def checkTerminalGoals : TryTacticM Unit := do
-  bif (← read).terminal then
+  uif (← read).terminal then
     unless (← getGoals).isEmpty do
       throwError "unsolved goals"
 
@@ -306,7 +306,7 @@ builtin_initialize registerBuiltinAttribute {
       | `(attr| try_suggestion $n:num) => pure n.getNat
       | `(attr| try_suggestion) => pure 1000  -- Default priority
       | _ => throwError "invalid `try_suggestion` attribute syntax"
-    let attrKind := bif kind == AttributeKind.local then AttributeKind.local else AttributeKind.global
+    let attrKind := uif kind == AttributeKind.local then AttributeKind.local else AttributeKind.global
     trySuggestionExtension.add {
       name := declName,
       prio := prio
@@ -316,13 +316,13 @@ builtin_initialize registerBuiltinAttribute {
 /-- Elaborate `register_try?_tactic` command -/
 @[builtin_command_elab registerTryTactic]
 def elabRegisterTryTactic : Command.CommandElab := fun stx => do
-  bif !(← getEnv).header.moduleNames.contains `Lean.Elab.Tactic.Try then
+  uif !(← getEnv).header.moduleNames.contains `Lean.Elab.Tactic.Try then
     logWarning "Add `import Lean.Elab.Tactic.Try` before using the `register_try?_tactic` command."
     return
   -- stx[0]: optional docComment, stx[1]: "register_try?_tactic",
   -- stx[2]: optional priority clause, stx[3]: tacticSeq
   let doc? := stx[0]
-  let prio := bif stx[2].isNone then 1000 else stx[2][0][3].isNatLit?.getD 1000
+  let prio := uif stx[2].isNone then 1000 else stx[2][0][3].isNatLit?.getD 1000
   let tacStx := stx[3]
 
   -- Generate a unique name based on a hash of the tactic syntax
@@ -343,7 +343,7 @@ def elabRegisterTryTactic : Command.CommandElab := fun stx => do
       | Except.ok stx => return #[⟨stx⟩]
       | Except.error _ => return #[])
 
-  let finalCmd := bif doc?.isNone then cmd else ⟨doc?.setArg 1 cmd.raw⟩
+  let finalCmd := uif doc?.isNone then cmd else ⟨doc?.setArg 1 cmd.raw⟩
   Command.elabCommand finalCmd
 
 /--
@@ -415,7 +415,7 @@ def withOriginalHeartbeats (x : TryTacticM α) : TryTacticM α := do
     (withTheReader Core.Context (fun c => { c with maxHeartbeats := originalMaxHeartbeats }) do
       withCurrHeartbeats x)
     (fun ex => do
-      bif Exception.isMaxHeartbeat ex then
+      uif Exception.isMaxHeartbeat ex then
         throwError "tactic exceeded heartbeat limit"
       else
         throw ex)
@@ -436,13 +436,13 @@ private def mergeParams (ps1 ps2 : Array Syntax) : Array Syntax := Id.run do
   return r
 
 private def mergeSimp? (tac1 tac2 : TSyntax `tactic) : Option (TSyntax `tactic) := Id.run do
-  bif setSimpParams tac1 #[] != setSimpParams tac2 #[] then return none
+  uif setSimpParams tac1 #[] != setSimpParams tac2 #[] then return none
   let ps1 := getSimpParams tac1
   let ps2 := getSimpParams tac2
   return some (setSimpParams tac1 (mergeParams ps1 ps2))
 
 private def mergeGrind? (tac1 tac2 : TSyntax `tactic) : Option (TSyntax `tactic) := Id.run do
-  bif setGrindParams tac1 #[] != setGrindParams tac2 #[] then return none
+  uif setGrindParams tac1 #[] != setGrindParams tac2 #[] then return none
   let ps1 := getGrindParams tac1
   let ps2 := getGrindParams tac2
   return some (setGrindParams tac1 (mergeParams ps1 ps2))
@@ -451,18 +451,18 @@ private def merge? (tac1 tac2 : TSyntax `tactic) : Option (TSyntax `tactic) :=
   let k := tac1.raw.getKind
   -- TODO: we can make this extensible by having a command that allows users to register
   -- `merge?` functions for different tactics.
-  bif k == ``Parser.Tactic.simp then
+  uif k == ``Parser.Tactic.simp then
     mergeSimp? tac1 tac2
-  else bif k == ``Parser.Tactic.grind then
+  else uif k == ``Parser.Tactic.grind then
     mergeGrind? tac1 tac2
   else
     none
 
 private def mergeAll? (tacs : Array (TSyntax `tactic)) : TryTacticM (Option (TSyntax `tactic)) := do
-  bif !(← read).config.merge || tacs.isEmpty then
+  uif !(← read).config.merge || tacs.isEmpty then
     return none
   let tac0 := tacs[0]!
-  bif tacs.any fun tac => tac.raw.getKind != tac0.raw.getKind then
+  uif tacs.any fun tac => tac.raw.getKind != tac0.raw.getKind then
     return none
   let mut tac := tac0
   for h : i in 1...tacs.size do
@@ -481,19 +481,19 @@ the user.
 -/
 -- TODO: we may add a mechanism for making this extensible.
 private def isOnlyAndNonOnly (tacs2 : Array (TSyntax `tactic)) : Bool := Id.run do
-  bif tacs2.isEmpty then return false
+  uif tacs2.isEmpty then return false
   let k := tacs2[0]!.raw.getKind
   unless tacs2.all fun tac => tac.raw.getKind == k do return false
-  bif k == ``Parser.Tactic.simp then
+  uif k == ``Parser.Tactic.simp then
     return tacs2.any (isSimpOnly ·) && tacs2.any (!isSimpOnly ·)
-  else bif k == ``Parser.Tactic.grind then
+  else uif k == ``Parser.Tactic.grind then
     return tacs2.any (isGrindOnly ·) && tacs2.any (!isGrindOnly ·)
   else
     return false
 
 private def mkChainResult (tac1 : TSyntax `tactic) (tacss2 : Array (TSyntax `tactic)) : TryTacticM (TSyntax `tactic) := do
   let tacss2 := tacss2.map getSuggestionsCore
-  bif (← isTracingEnabledFor `try.debug) then
+  uif (← isTracingEnabledFor `try.debug) then
     trace[try.debug] "mkChainResultCore tac1{indentD tac1}"
     let mut i : Nat := 0
     for tacs2 in tacss2 do
@@ -524,28 +524,28 @@ private def mkChainResult (tac1 : TSyntax `tactic) (tacss2 : Array (TSyntax `tac
     (_, acc) ← go tacss2 0 [] (some k) |>.run acc
   -- Remove tactics with kind in `kinds`. Again, we claim mixed kind solutions are suboptimal.
   let tacss2 := tacss2.map fun s => s.filter fun tac => !kinds.contains tac.raw.getKind
-  bif (!acc.isEmpty && tacss2.all fun s => !s.isEmpty)
+  uif (!acc.isEmpty && tacss2.all fun s => !s.isEmpty)
      -- We only include partial solutions if there are no other solutions.
      || (acc.isEmpty && tacss2.any fun s => !s.isEmpty) then
     (_, acc) ← go tacss2 0 [] none |>.run acc
   mkTrySuggestions acc
 where
   go (tacss2 : Array (Array (TSyntax `tactic))) (i : Nat) (acc : List (TSyntax `tactic)) (kind? : Option SyntaxNodeKind) : StateT (Array (TSyntax `tactic)) TryTacticM Unit := do
-    bif (← get).size >ᵇ (← read).config.max then
+    uif (← get).size > (← read).config.max then
       return ()
-    else bif h : i <ᵇ tacss2.size then
-      bif tacss2[i].isEmpty then
+    else uif h : i < tacss2.size then
+      uif tacss2[i].isEmpty then
         go tacss2 (i+1) ((← `(tactic| sorry)) :: acc) kind?
       else
         for tac in tacss2[i] do
           if let some kind := kind? then
-            bif tac.raw.getKind == kind then
+            uif tac.raw.getKind == kind then
               go tacss2 (i+1) (tac :: acc) kind?
           else
             go tacss2 (i+1) (tac :: acc) kind?
     else
       let tacs2 := acc.toArray.reverse
-      bif kind?.isSome && isOnlyAndNonOnly tacs2 then
+      uif kind?.isSome && isOnlyAndNonOnly tacs2 then
         -- Suboptimal combination. See comment at `isOnlyAndNonOnly`
         return ()
       let tac ← if let some tac2 ← mergeAll? tacs2 then
@@ -568,9 +568,9 @@ private def evalSuggestGrindTrace : TryTactic := fun tac => do
     replaceMainGoal []
     for tac1 in tacs do
       trace[try.debug] ">> {tac1}"
-    bif (← read).config.only then
+    uif (← read).config.only then
       -- If config has +suggestions, only return the 'only' version, not the original
-      bif configHasSuggestionsOrLocals configStx then
+      uif configHasSuggestionsOrLocals configStx then
         mkTrySuggestions tacs
       else
         mkTrySuggestions (#[tac] ++ tacs)
@@ -587,10 +587,10 @@ private def evalSuggestSimpTrace : TryTactic := fun tac => do (← getMainGoal).
       let stats ← simpLocation ctx (simprocs := simprocs) none <| (loc.map expandLocation).getD (.targets #[] true)
       trace[try.debug] "`simp` succeeded"
       checkTerminalGoals
-      bif (← read).config.only then
+      uif (← read).config.only then
         let tac' ← mkSimpCallStx tac stats.usedTheorems
         -- If config has +suggestions, only return the 'only' version, not the original
-        bif configHasSuggestionsOrLocals configStx then
+        uif configHasSuggestionsOrLocals configStx then
           mkTrySuggestions #[tac']
         else
           mkTrySuggestions #[tac, tac']
@@ -609,7 +609,7 @@ private def evalSuggestSimpAllTrace : TryTactic := fun tac => do
         -- Get library suggestions if +suggestions is present
         let config ← elabSimpConfig configStx (kind := .simpAll)
         let mut argsArray : TSyntaxArray [`Lean.Parser.Tactic.simpErase, `Lean.Parser.Tactic.simpLemma] := #[]
-        bif config.suggestions then
+        uif config.suggestions then
           let lsConfig : LibrarySuggestions.Config := { caller := some "simp_all" }
           let lsConfig := match config.maxSuggestions with
             | some n => { lsConfig with maxSuggestions := n }
@@ -626,8 +626,8 @@ private def evalSuggestSimpAllTrace : TryTactic := fun tac => do
         -- If +suggestions was present, we need to create a tactic without +suggestions,
         -- either with the resolved suggestions or without arguments if none were found
         -- Note: We use simp_all (without ?) for execution, not simp_all?
-        let tacForExec ← bif config.suggestions then
-          bif argsArray.isEmpty then
+        let tacForExec ← uif config.suggestions then
+          uif argsArray.isEmpty then
             `(tactic| simp_all)
           else
             `(tactic| simp_all [$argsArray,*])
@@ -641,14 +641,14 @@ private def evalSuggestSimpAllTrace : TryTactic := fun tac => do
         | some mvarId => replaceMainGoal [mvarId]
         trace[try.debug] "`simp_all` succeeded"
         checkTerminalGoals
-        bif (← read).config.only then
+        uif (← read).config.only then
           -- Remove +suggestions and +locals from config for the output (similar to SimpTrace.lean)
           let filteredCfg ← filterSuggestionsAndLocalsFromSimpConfig configStx
           -- Convert simp_all? to simp_all for mkSimpCallStx (similar to simpTraceToSimp)
           let tacWithoutTrace ← `(tactic| simp_all $filteredCfg:optConfig $[only%$_only]? $[[$_args,*]]?)
           let tac' ← mkSimpCallStx tacWithoutTrace stats.usedTheorems
           -- If config has +suggestions or +locals, only return the 'only' version, not the original
-          bif hasSuggestionsOrLocals then
+          uif hasSuggestionsOrLocals then
             mkTrySuggestions #[tac']
           else
             mkTrySuggestions #[tac, tac']
@@ -672,16 +672,16 @@ private def evalSuggestChain (tac1 tac2 : TSyntax `tactic) : TryTacticM (TSyntax
   let mut i : Nat := 0
   for goal in goals do
     setGoals [goal]
-    let tac2' : TSyntax `tactic ← (evalSuggest tac2) <|> (bif (← read).config.missing then `(tactic| sorry) else failure)
+    let tac2' : TSyntax `tactic ← (evalSuggest tac2) <|> (uif (← read).config.missing then `(tactic| sorry) else failure)
     i := i + 1
     tac2s := tac2s.push tac2'
-  bif tac2s.all isSorry then
+  uif tac2s.all isSorry then
     throwError "`<;>` failed"
   mkChainResult tac1 tac2s
 
 /-- `evalSuggest` for a sequence of tactics. -/
 private def evalSuggestSeq (tacs : Array (TSyntax `tactic)) : TryTacticM (TSyntax `tactic) := do
-  bif (← read).terminal then
+  uif (← read).terminal then
     let mut result := #[]
     for i in *...(tacs.size - 1 : Nat) do
       result := appendSeq result (← withNonTerminal <| evalSuggest tacs[i]!)
@@ -703,12 +703,12 @@ private def evalSuggestTacticSeq (s : TSyntax ``Parser.Tactic.tacticSeq) : TryTa
 
 /-- `evalSuggest` for `first` tactic. -/
 private partial def evalSuggestFirst (tacs : Array (TSyntax ``Parser.Tactic.tacticSeq)) : TryTacticM (TSyntax `tactic) := do
-  bif tacs.size == 0 then
+  uif tacs.size == 0 then
     throwError "`first` expects at least one argument"
   go 0
 where
   go (i : Nat) : TryTacticM (TSyntax `tactic) := do
-    bif i =ᵇ tacs.size - 1 then
+    uif i = tacs.size - 1 then
       evalSuggestTacticSeq tacs[i]!
     else
       evalSuggestTacticSeq tacs[i]! <|> go (i+1)
@@ -729,7 +729,7 @@ where
     -- Remark: we considered using `acc.size < (← read).config.max` here to truncate the search,
     -- but it had a negative effect when using `<;>`. We could miss a preferred solution `induction e <;> grind`
     -- because only a subset of the goals were solved by simpler tactics such as `rfl` and `simp`.
-    bif i <ᵇ tacs.size then
+    uif i < tacs.size then
       match (← observing (evalSuggestTacticSeq tacs[i]!)) with
       | .ok tac s =>
         trace[try.debug] "`attempt_all` argument succeeded{indentD tac}"
@@ -765,7 +765,7 @@ private partial def evalSuggestAttemptAllPar (tacs : Array (TSyntax ``Parser.Tac
     | .ok (tac, s) =>
       trace[try.debug] "`attempt_all_par` argument succeeded{indentD tac}"
       acc := appendSuggestion acc tac
-      bif firstSaved?.isNone then
+      uif firstSaved?.isNone then
         firstSaved? := some s
     | .error _ => pure ()
 
@@ -849,7 +849,7 @@ where
     | evalFns => eval tac (← Tactic.saveState) evalFns #[]
 
   throwExs (tac : TSyntax `tactic) (failures : Array EvalTacticFailure) : TryTacticM (TSyntax `tactic) := do
-    bif h : 0 <ᵇ failures.size  then
+    uif h : 0 < failures.size  then
       let fail := failures[failures.size - 1]
       fail.state.restore (restoreInfo := true)
       throw fail.exception
@@ -868,9 +868,9 @@ where
         let failures := failures.push ⟨ex, ← Tactic.saveState⟩
         s.restore (restoreInfo := true); eval tac s evalFns failures
       | .internal id _ =>
-        bif id == unsupportedSyntaxExceptionId then
+        uif id == unsupportedSyntaxExceptionId then
           s.restore (restoreInfo := true); eval tac s evalFns failures
-        else bif id == abortTacticExceptionId then
+        else uif id == abortTacticExceptionId then
           let failures := failures.push ⟨ex, ← Tactic.saveState⟩
           s.restore (restoreInfo := true); eval tac s evalFns failures
         else
@@ -887,13 +887,13 @@ private def getSuggestions (tac : TSyntax `tactic) : Array Tactic.TryThis.Sugges
 
 private def throwEvalAndSuggestFailed (config : Try.Config) : TacticM α := do
   let goal ← getMainGoal
-  bif config.missing then
+  uif config.missing then
     Meta.throwTacticEx `«try?» goal "consider using `grind` manually"
   else
     Meta.throwTacticEx `«try?» goal "consider using `grind` manually, or `try? +missing` for partial proofs containing `sorry`"
 
 private def addSuggestions (tk : Syntax) (s : Array Tactic.TryThis.Suggestion) : TacticM Unit := do
-  bif s.size == 1 then
+  uif s.size == 1 then
     Tactic.TryThis.addSuggestion tk s[0]! (origSpan? := (← getRef))
   else
     Tactic.TryThis.addSuggestions tk (s.map fun stx => stx) (origSpan? := (← getRef))
@@ -907,7 +907,7 @@ def evalAndCollectSuggestions (tac : TSyntax `tactic) (originalMaxHeartbeats : N
     catch _ =>
       throwEvalAndSuggestFailed config
   let s := (getSuggestions tac')[*...config.max].toArray
-  bif s.isEmpty then
+  uif s.isEmpty then
     throwEvalAndSuggestFailed config
   return s
 
@@ -922,7 +922,7 @@ private def toIdent (declName : Name) : MetaM Ident := do
   return mkIdent (← unresolveNameGlobalAvoidingLocals declName)
 
 private def mkFirstStx (tacs : Array (TSyntax `tactic)) : CoreM (TSyntax `tactic) :=
-  bif tacs.size =ᵇ 1 then
+  uif tacs.size = 1 then
     return tacs[0]!
   else
     `(tactic| first $[| $tacs:tactic]*)
@@ -978,7 +978,7 @@ open Try.Collector in
 private def mkFunIndStx (uniques : NameSet) (expr : Expr) (cont : TSyntax `tactic) :
     MetaM (TSyntax `tactic) := do
   let fn := expr.getAppFn.constName!
-  bif uniques.contains fn then
+  uif uniques.contains fn then
       -- If it is unambiguous, use `fun_induction foo` without arguments
       `(tactic| fun_induction $(← toIdent fn):term <;> $cont)
   else
@@ -987,7 +987,7 @@ private def mkFunIndStx (uniques : NameSet) (expr : Expr) (cont : TSyntax `tacti
       let stx ← PrettyPrinter.delab expr
       let tac₁ ← `(tactic| fun_induction $stx <;> $cont)
       -- if expr has no inaccessible names, use as is
-      bif isAccessible then
+      uif isAccessible then
         pure tac₁
       else
         -- if it has inaccessible names, still try without, in case they are all implicit
@@ -1010,7 +1010,7 @@ private def mkIndStx (cand : InductionCandidate) (cont : TSyntax `tactic) :
     let stx ← PrettyPrinter.delab fvar
     let tac₁ ← `(tactic| induction $stx:term <;> $cont)
     -- if fvar has no inaccessible names, use as is
-    bif isAccessible then
+    uif isAccessible then
       pure tac₁
     else
       -- if it has inaccessible names, still try without, in case they are all implicit
@@ -1089,7 +1089,7 @@ private def evalAndSuggestWithBy (tk : Syntax) (tac : TSyntax `tactic) (original
     (config : Try.Config) (footer : MessageData := MessageData.nil) : TacticM Unit := do
   let suggestions ← evalAndCollectSuggestions tac originalMaxHeartbeats config
   let termSuggestions ← suggestions.mapM wrapSuggestionWithBy
-  bif termSuggestions.size == 1 then
+  uif termSuggestions.size == 1 then
     Tactic.TryThis.addSuggestion tk termSuggestions[0]! (origSpan? := (← getRef)) (footer := footer)
   else
     Tactic.TryThis.addSuggestions tk termSuggestions (origSpan? := (← getRef)) (footer := footer)
@@ -1108,7 +1108,7 @@ def elabTryCore (tk : Syntax) (config : Try.Config) (footer : MessageData := Mes
       let goal ← getMainGoal
       let info ← Try.collect goal config
       let stx ← mkTryEvalSuggestStx goal info
-      bif config.wrapWithBy then
+      uif config.wrapWithBy then
         evalAndSuggestWithBy tk stx originalMaxHeartbeats config (footer := footer)
       else
         evalAndSuggest tk stx originalMaxHeartbeats config
@@ -1142,7 +1142,7 @@ def collectTryCoreSuggestions (config : Try.Config := {}) :
     let originalMaxHeartbeats ← getMaxHeartbeats
     let tac ← `(tactic| ($tac:tacticSeq))
     withUnlimitedHeartbeats do
-      bif config.wrapWithBy then
+      uif config.wrapWithBy then
         evalAndSuggestWithBy tk tac originalMaxHeartbeats config
       else
         evalAndSuggest tk tac originalMaxHeartbeats config

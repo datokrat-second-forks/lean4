@@ -18,7 +18,7 @@ open Meta
 private def ensureValidNamespace (name : Name) : MacroM Unit := do
   match name with
   | .str p s =>
-    bif s == "_root_" then
+    uif s == "_root_" then
       Macro.throwError s!"invalid namespace `{name}`, `_root_` is a reserved namespace"
     ensureValidNamespace p
   | .num .. => Macro.throwError s!"invalid namespace `{name}`, it must not contain numeric parts"
@@ -29,14 +29,14 @@ private def setDeclIdName (declId : Syntax) (nameNew : Name) : Syntax :=
   -- We should not update the name of `def _root_.` declarations
   assert! !(`_root_).isPrefixOf id
   let idStx := mkIdent nameNew |>.raw.setInfo declId.getHeadInfo
-  bif declId.isIdent then
+  uif declId.isIdent then
     idStx
   else
     declId.setArg 0 idStx
 
 /-- Return `true` if `stx` is a `Command.declaration`, and it is a declaration that always has a name. -/
 private def isNamedDecl (stx : Syntax) : Bool :=
-  bif !stx.isOfKind ``Lean.Parser.Command.declaration then
+  uif !stx.isOfKind ``Lean.Parser.Command.declaration then
     false
   else
     let decl := stx[1]
@@ -57,12 +57,12 @@ private def isInstanceDecl (stx : Syntax) : Bool :=
 
 /-- Return `some name` if `stx` is a declaration named `name` -/
 private def getDeclName? (stx : Syntax) : Option Name := do
-  bif isNamedDecl stx then
+  uif isNamedDecl stx then
     let (id, _) := expandDeclIdCore stx[1][1]
     some id
-  else bif isInstanceDecl stx then
+  else uif isInstanceDecl stx then
     let optDeclId := stx[1][3]
-    bif optDeclId.isNone then none
+    uif optDeclId.isNone then none
     else
       let (id, _) := expandDeclIdCore optDeclId[0]
       some id
@@ -74,9 +74,9 @@ Update the name of the given declaration.
 This function assumes `stx` is not a nameless instance.
 -/
 private def setDeclName (stx : Syntax) (name : Name) : Syntax :=
-  bif isNamedDecl stx then
+  uif isNamedDecl stx then
     stx.setArg 1 <| stx[1].setArg 1 <| setDeclIdName stx[1][1] name
-  else bif isInstanceDecl stx then
+  else uif isInstanceDecl stx then
     -- We never set the name of nameless instance declarations
     assert! !stx[1][3].isNone
     stx.setArg 1 <| stx[1].setArg 3 <| stx[1][3].setArg 0 <| setDeclIdName stx[1][3][0] name
@@ -89,7 +89,7 @@ private def setDeclName (stx : Syntax) (name : Name) : Syntax :=
 -/
 private def expandDeclNamespace? (stx : Syntax) : MacroM (Option (Name × Syntax)) := do
   let some name := getDeclName? stx | return none
-  bif (`_root_).isPrefixOf name then
+  uif (`_root_).isPrefixOf name then
     ensureValidNamespace (name.replacePrefix `_root_ Name.anonymous)
     return none
   let scpView := extractMacroScopes name
@@ -133,7 +133,7 @@ def elabAxiom (modifiers : Modifiers) (stx : Syntax) : CommandElabM Unit := do
         addDecl decl
 
         Term.applyAttributesAt declName modifiers.attrs AttributeApplicationTime.afterTypeChecking
-        bif isExtern (← getEnv) declName then
+        uif isExtern (← getEnv) declName then
           compileDecl decl
         if let some doc := docString? then
           addDocString declName binders doc
@@ -163,7 +163,7 @@ def elabDeclaration : CommandElab := fun stx => do
   let modifiers : TSyntax ``Parser.Command.declModifiers := ⟨stx[0]⟩
   let decl     := stx[1]
   let declKind := decl.getKind
-  bif isDefLike decl then
+  uif isDefLike decl then
     -- only case implementing incrementality currently
     elabMutualDef #[stx]
   else withoutCommandIncrementality true do
@@ -171,12 +171,12 @@ def elabDeclaration : CommandElab := fun stx => do
     -- handling
     withInitQuotContext (getDeclName? stx |>.map hash) do
     let mut modifiers ← elabModifiers modifiers
-    bif (← getScope).isMeta && modifiers.computeKind == .regular then
+    uif (← getScope).isMeta && modifiers.computeKind == .regular then
       modifiers := { modifiers with computeKind := .meta }
     withExporting (isExporting := modifiers.isInferredPublic (← getEnv)) do
-      bif declKind == ``Lean.Parser.Command.«axiom» then
+      uif declKind == ``Lean.Parser.Command.«axiom» then
         elabAxiom modifiers decl
-      else bif declKind == ``Lean.Parser.Command.«inductive»
+      else uif declKind == ``Lean.Parser.Command.«inductive»
           || declKind == ``Lean.Parser.Command.«coinductive»
           || declKind == ``Lean.Parser.Command.classInductive
           || declKind == ``Lean.Parser.Command.«structure» then
@@ -200,10 +200,10 @@ private def isMutualPreambleCommand (stx : Syntax) : Bool :=
 
 private partial def splitMutualPreamble (elems : Array Syntax) : Option (Array Syntax × Array Syntax) :=
   let rec loop (i : Nat) : Option (Array Syntax × Array Syntax) :=
-    bif h : i <ᵇ elems.size then
-      bif isMutualPreambleCommand elems[i] then
+    uif h : i < elems.size then
+      uif isMutualPreambleCommand elems[i] then
         loop (i+1)
-      else bif i == 0 then
+      else uif i == 0 then
         none -- `mutual` block does not contain any preamble commands
       else
         some (elems[*...i], elems[i...elems.size])
@@ -232,7 +232,7 @@ where
       | n' :: ns => go (findCommon n.components n'.components) ns
   findCommon (as bs : List Name) : Name :=
     match as, bs with
-    | a :: as, b :: bs => bif a == b then a ++ findCommon as bs else .anonymous
+    | a :: as, b :: bs => uif a == b then a ++ findCommon as bs else .anonymous
     | _, _ => .anonymous
 
 
@@ -244,7 +244,7 @@ def expandMutualNamespace : Macro := fun stx => do
     | none        => Macro.throwUnsupported
     | some (n, _) => nss := nss.push n
   let common := findCommonPrefix nss.toList
-  bif common.isAnonymous then Macro.throwUnsupported
+  uif common.isAnonymous then Macro.throwUnsupported
   let elemsNew ← stx[1].getArgs.mapM fun elem => do
     let some name := getDeclName? elem | unreachable!
     let view := extractMacroScopes name
@@ -261,16 +261,16 @@ def expandMutualElement : Macro := fun stx => do
   for elem in stx[1].getArgs do
     -- Don't trigger the `expandNamespacedDecl` macro, the namespace is handled by the mutual def
     -- elaborator directly instead
-    bif !elem.isOfKind ``Parser.Command.declaration then
+    uif !elem.isOfKind ``Parser.Command.declaration then
       if let some elemNew ← expandMacro? elem then
-        bif elemNew.isOfKind nullKind then
+        uif elemNew.isOfKind nullKind then
           elemsNew := elemsNew ++ elemNew.getArgs
         else
           elemsNew := elemsNew.push elemNew
         modified := true
         continue
     elemsNew := elemsNew.push elem
-  bif modified then
+  uif modified then
     return stx.setArg 1 (mkNullNode elemsNew)
   else
     Macro.throwUnsupported
@@ -288,11 +288,11 @@ def expandMutualPreamble : Macro := fun stx =>
 @[builtin_command_elab «mutual», builtin_incremental]
 def elabMutual : CommandElab := fun stx => do
   withExporting (isExporting := (← getScope).isPublic) do
-  bif isMutualDefLike stx then
+  uif isMutualDefLike stx then
     -- only case implementing incrementality currently
     elabMutualDef stx[1].getArgs
   else withoutCommandIncrementality true do
-    bif (← isMutualInductive stx) then
+    uif (← isMutualInductive stx) then
       elabMutualInductive stx[1].getArgs
     else
       throwError "invalid mutual block: either all elements of the block must be inductive/structure declarations, or they must all be definitions/theorems/abbrevs"
@@ -302,9 +302,9 @@ def elabMutual : CommandElab := fun stx => do
   let mut attrInsts := #[]
   let mut toErase := #[]
   for attrKindStx in stx[2].getSepArgs do
-    bif attrKindStx.getKind == ``Lean.Parser.Command.eraseAttr then
+    uif attrKindStx.getKind == ``Lean.Parser.Command.eraseAttr then
       let attrName := attrKindStx[1].getId.eraseMacroScopes
-      bif isAttribute (← getEnv) attrName then
+      uif isAttribute (← getEnv) attrName then
         toErase := toErase.push attrName
       else
         logErrorAt attrKindStx m!"unknown attribute [{attrName}]"
@@ -323,7 +323,7 @@ def elabMutual : CommandElab := fun stx => do
         realizeGlobalConstWithInfos ident
       catch _ =>
         let name := ident.getId.eraseMacroScopes
-        bif (← Simp.isBuiltinSimproc name) then
+        uif (← Simp.isBuiltinSimproc name) then
           pure [name]
         else
           throwUnknownConstantAt ident name
@@ -333,7 +333,7 @@ def elabMutual : CommandElab := fun stx => do
     Term.applyAttributes declName attrs
     for attrName in toErase do
       Attribute.erase declName attrName
-    bif (← getEnv).isImportedConst declName then
+    uif (← getEnv).isImportedConst declName then
       if let some attr := attrs.find? (·.kind != .local) then
         -- If an imported declaration is marked with a non-local attribute, Shake must be informed
         -- about this indirect reference
@@ -342,14 +342,14 @@ def elabMutual : CommandElab := fun stx => do
 @[builtin_command_elab Lean.Parser.Command.«initialize»] def elabInitialize : CommandElab
   | stx@`($declModifiers:declModifiers $kw:initializeKeyword $[$id? : $type? ←]? $doSeq) => do
     withExporting (isExporting := (← getScope).isPublic) do
-    let attrId := mkIdentFrom stx <| bif kw.raw[0].isToken "initialize" then `init else `builtin_init
+    let attrId := mkIdentFrom stx <| uif kw.raw[0].isToken "initialize" then `init else `builtin_init
     if let (some id, some type) := (id?, type?) then
       let `(Parser.Command.declModifiersT| $[$doc?:docComment]? $[@[$attrs?,*]]? $(vis?)? $[meta%$meta?]? $[unsafe%$unsafe?]?) := stx[0]
         | throwErrorAt declModifiers "invalid initialization command, unexpected modifiers"
       let defStx ← `($[$doc?:docComment]? @[$attrId:ident initFn, $(attrs?.getD ∅),*] $(vis?)? $[meta%$meta?]? opaque $id : $type)
       let mut fullId := (← getCurrNamespace) ++ id.getId
       let visibility ← elabVisibility vis?
-      bif !visibility.isInferredPublic (← getEnv) then
+      uif !visibility.isInferredPublic (← getEnv) then
         fullId := mkPrivateName (← getEnv) fullId
       -- We need to add `id`'s ranges *before* elaborating `initFn` (and then `id` itself) as
       -- otherwise the info context created by `with_decl_name` will be incomplete and break the

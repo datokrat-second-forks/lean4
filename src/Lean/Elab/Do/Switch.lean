@@ -37,13 +37,13 @@ def expandTermReturn : Macro := toDoElem ``Parser.Term.doReturn
 
 @[builtin_term_elab «do»]
 def elabDo : TermElab := fun stx expectedType? => do
-  bif backward.do.legacy.get (← getOptions) then
+  uif backward.do.legacy.get (← getOptions) then
     Term.Do.elabDo stx expectedType?
   else
     Elab.Do.elabDo stx expectedType?
 
 @[builtin_term_elab nestedAction] def elabTermNestedAction : TermElab := fun stx ty => do
-  bif backward.do.legacy.get (← getOptions) then
+  uif backward.do.legacy.get (← getOptions) then
     Term.elabNestedAction stx ty
   else
     Elab.Do.elabNestedAction stx ty

@@ -57,7 +57,7 @@ def hintNames (binder : Expr) : VCGenM (Array Name) := do
   unless binder.isLambda do
     binder := (← instantiateMVarsIfMVarAppS binder).cleanupAnnotations.headBeta
   if let .lam n _ _ _ := binder then
-    bif isProgramName n then return #[n]
+    uif isProgramName n then return #[n]
   stateMatcherAltNames? binder
 
 /-- The components of the right-nested tuple `e`: `(a, b, c)` has `#[a, b, c]`. -/
@@ -78,14 +78,14 @@ partial def consumeBinderNameHintExpr (goal : MVarId) (e : Expr) :
   let leaves := tupleLeaves (e.getArg! 3 n)
   let names ← hintNames (e.getArg! 4 n)
   let mut goal := goal
-  bif names.size == leaves.size then
+  uif names.size == leaves.size then
     for leaf in leaves, name in names do
       let .fvar fvarId := leaf | continue
-      bif (← fvarId.getDecl).userName.hasMacroScopes && isProgramName name then
+      uif (← fvarId.getDecl).userName.hasMacroScopes && isProgramName name then
         trace[Elab.Tactic.Do.vcgen] "binder-name-hint: rename {Expr.fvar fvarId} to {name}"
         goal ← liftMetaM <| goal.rename fvarId name
   let payload := e.getArg! 5 n
-  let stripped ← bif n == 6 then pure payload else betaRevS payload (e.getAppArgs.extract 6 n).reverse
+  let stripped ← uif n == 6 then pure payload else betaRevS payload (e.getAppArgs.extract 6 n).reverse
   return some ((← consumeBinderNameHintExpr goal stripped).getD (goal, stripped))
 
 /-- Consume the hints of the target, and of either side of `pre ⊑ rhs`. A hint of the precondition
@@ -104,7 +104,7 @@ public def consumeBinderNameHint? (goal : MVarId) (target : Expr) : VCGenM (Opti
   if let some (g, stripped) ← consumeBinderNameHintExpr goal rhs then
     goal := g
     rhs' := stripped
-  bif isSameExpr pre pre' && isSameExpr rhs rhs' then return none
+  uif isSameExpr pre pre' && isSameExpr rhs rhs' then return none
   let target ← mkAppNS target.getAppFn #[α, inst, pre', rhs']
   return some (← goal.replaceTargetDefEqFast target)
 

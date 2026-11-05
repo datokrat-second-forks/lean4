@@ -16,7 +16,7 @@ open Meta
   let goal ← getMainGoal
   let target ← goal.mvarId.getType
   let target' ← liftSymM <| Sym.liftLets target
-  bif Sym.isSameExpr target target' then
+  uif Sym.isSameExpr target target' then
     throwError "`lift_lets` made no progress"
   let mvarId ← goal.mvarId.replaceTargetDefEq target'
   replaceMainGoal [{ goal with mvarId }]

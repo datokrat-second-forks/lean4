@@ -34,10 +34,10 @@ instance : ToFormat Attribute where
   ```
 -/
 def toAttributeKind (attrKindStx : Syntax) : MacroM AttributeKind := do
-  bif attrKindStx[0].isNone then
+  uif attrKindStx[0].isNone then
     return AttributeKind.global
-  else bif attrKindStx[0][0].getKind == ``Lean.Parser.Term.scoped then
-    bif (← Macro.getCurrNamespace).isAnonymous then
+  else uif attrKindStx[0][0].getKind == ``Lean.Parser.Term.scoped then
+    uif (← Macro.getCurrNamespace).isAnonymous then
       throw <| Macro.Exception.error (← getRef) "Scoped attributes must be used inside namespaces"
     return AttributeKind.scoped
   else
@@ -54,7 +54,7 @@ def elabAttr [Monad m] [MonadEnv m] [MonadResolveName m] [MonadError m] [MonadMa
     let attrKind ← liftMacroM <| toAttributeKind attrInstance[0]
     let attr := attrInstance[1]
     let attr ← liftMacroM <| expandMacros attr
-    let attrName ← bif attr.getKind == ``Parser.Attr.simple then
+    let attrName ← uif attr.getKind == ``Parser.Attr.simple then
       pure attr[0].getId.eraseMacroScopes
     else match attr.getKind with
       | .str _ s => pure <| Name.mkSimple s
@@ -62,12 +62,12 @@ def elabAttr [Monad m] [MonadEnv m] [MonadResolveName m] [MonadError m] [MonadMa
     let .ok _impl := getAttributeImpl (← getEnv) attrName
       | throwError "Unknown attribute `[{attrName}]`"
     if let .ok impl := getAttributeImpl (← getEnv) attrName then
-      bif regularInitAttr.getParam? (← getEnv) impl.ref |>.isSome then  -- skip `builtin_initialize` attributes
+      uif regularInitAttr.getParam? (← getEnv) impl.ref |>.isSome then  -- skip `builtin_initialize` attributes
         -- Reject attribute uses where the implementation's module has been loaded for IR only as
         -- this would make it `inServer`-dependent and confused shake as well (#13599).
         if let some idx := (← getEnv).getModuleIdxFor? impl.ref then
           let env ← getEnv
-          bif env.header.modules[idx]?.any (!·.hasData) then
+          uif env.header.modules[idx]?.any (!·.hasData) then
             let modName := env.header.modules[idx]!.module
             throwError m!"Cannot use attribute `[{attrName}]`: module `{modName}` is loaded for IR \
               only (reached as a private `meta` dependency). Add an import of `{modName}`."

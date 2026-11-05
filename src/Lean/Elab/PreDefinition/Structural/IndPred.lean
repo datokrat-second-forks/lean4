@@ -79,7 +79,7 @@ partial def replaceIndPredRecApps (recArgInfos : Array RecArgInfo) (positions : 
               return ← replaceIndPredRecApp recArgInfos[fidx]! ctx fidx positions e args
           return mkAppN (← loop ctx f) args
       let some matcherApp ← matchMatcherApp? e | processApp e
-      bif recArgInfos.all (fun i => !recArgHasLooseBVarsAt i.fnName i.recArgPos e) then
+      uif recArgInfos.all (fun i => !recArgHasLooseBVarsAt i.fnName i.recArgPos e) then
         return ← processApp e
       trace[Elab.definition.structural] "matcherApp before adding below transformation:\n{matcherApp.toExpr}"
       let nrealParams := recArgInfos[0]!.indGroupInst.params.size
@@ -106,7 +106,7 @@ public def withFunTypes (values : Array Expr) (k : Array Expr → MetaM α) : Me
   go 0 #[]
 where
   go (i : Nat) (res : Array Expr) : MetaM α :=
-    bif h : i <ᵇ values.size then
+    uif h : i < values.size then
       lambdaTelescope values[i] fun xs value => do
         let type := (← inferType value).headBeta
         let funType ← mkLambdaFVars xs type

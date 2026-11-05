@@ -29,7 +29,7 @@ def reduceProjAndUnfold? (e : Expr) : MetaM (Option Expr) := do
   let .proj _ idx s := e | return none
   let s' ← Lean.Meta.whnf s
   let some f ← Lean.Meta.projectCore? s' idx | return none
-  bif isSameExpr s s' then return some f else return some (← Sym.unfoldReducible f)
+  uif isSameExpr s s' then return some f else return some (← Sym.unfoldReducible f)
 
 /--
 Repeatedly reduces head redexes in `e`, cycling through the following reductions until
@@ -53,12 +53,12 @@ public partial def reduceHead? (e : Expr) : SymM (Option Expr) :=
       | .mdata _ f => go lastReduction f rargs
       | .app f a => go lastReduction f (rargs.push a)
       | .lam .. =>
-        bif rargs.size =ᵇ 0 then return lastReduction
+        uif rargs.size = 0 then return lastReduction
         let e' ← betaRevS f rargs
         go (some e') e'.getAppFn e'.getAppRevArgs
       | .const name .. =>
         -- projections
-        bif (← isProjectionFn name) then
+        uif (← isProjectionFn name) then
           let some e' ← Meta.unfoldDefinition? (mkAppRev f rargs) | return lastReduction
           let e' ← Sym.shareCommonInc e'
           go lastReduction e'.getAppFn e'.getAppRevArgs  -- intentional lastReduction! see docstring

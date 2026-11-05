@@ -52,7 +52,7 @@ def expandOptDeclSig (stx : Syntax) : Syntax × Option Syntax :=
   -- many Term.bracketedBinder >> Term.optType
   let binders := stx[0]
   let optType := stx[1] -- optional (leading_parser " : " >> termParser)
-  bif optType.isNone then
+  uif optType.isNone then
     (binders, none)
   else
     let typeSpec := optType[0]
@@ -82,7 +82,7 @@ def sortDeclLevelParams (scopeParams : List Name) (allUserParams : List Name) (u
   | none   =>
     -- Recall that `allUserParams` (like `scopeParams`) are in reverse order. That is, the last declared universe is the first element of the list.
     -- The following `foldl` will reverse the elements and produce a list of universe levels using the user given order.
-    let result := allUserParams.foldl (fun result levelName => bif usedParams.elem levelName then levelName :: result else result) []
+    let result := allUserParams.foldl (fun result levelName => uif usedParams.elem levelName then levelName :: result else result) []
     let remaining := usedParams.filter (fun levelParam => !allUserParams.elem levelParam)
     let remaining := remaining.qsort Name.lt
     return result ++ remaining.toList

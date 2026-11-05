@@ -36,7 +36,7 @@ where
 
   elabDite h cond thenSeq elseSeq dec := do
     let elabDiteBranch (then_ : Bool) : DoElabM Expr := do
-      elabDoSeq (bif then_ then thenSeq else elseSeq) dec
+      elabDoSeq (uif then_ then thenSeq else elseSeq) dec
     doElabToSyntax "then branch of if with condition {cond}" (elabDiteBranch true) fun then_ => do
     doElabToSyntax "else branch of if with condition {cond}" (elabDiteBranch false) fun else_ => do
     let mγ ← mkMonadApp (← read).doBlockResultType
@@ -63,7 +63,7 @@ Rewrites an `if`/`uif`/`bif` chain into nested canonical elements, i.e. `if`/`ui
 -/
 private def expandDoIfChain : Macro := fun stx => do
   let elseIfs := stx[4].getArgs
-  bif elseIfs.isEmpty && !stx[5].isNone && !stx[1].isOfKind ``doIfLet then
+  uif elseIfs.isEmpty && !stx[5].isNone && !stx[1].isOfKind ``doIfLet then
     Macro.throwUnsupported
   let kindOfKw (kw : Syntax) : SyntaxNodeKind :=
     match kw.getAtomVal with
@@ -72,12 +72,12 @@ private def expandDoIfChain : Macro := fun stx => do
     | _ => ``doIf
   let branches := #[(stx.getKind, stx[0], stx[1], stx[3])] ++
     elseIfs.map fun g => (kindOfKw g[0][1], g[0][1], g[1], g[3])
-  let mut e : Syntax ← bif stx[5].isNone then `(doSeq| skip%$(stx[0])) else pure stx[5][1]
+  let mut e : Syntax ← uif stx[5].isNone then `(doSeq| skip%$(stx[0])) else pure stx[5][1]
   let mut eIsSeq := true
   for (k, kw, cond, t) in branches.reverse do
     unless eIsSeq do e ← mkDoSeqOfElem e
     eIsSeq := false
-    bif k == ``doIf then
+    uif k == ``doIf then
       e ← match cond with
         | `(doIfCond|let $pat := $d) => `(doElem| match $d:term with | $pat:term => $(⟨t⟩) | _ => $(⟨e⟩))
         | `(doIfCond|let $pat ← $d)  => `(doElem| match ← $d:term with | $pat:term => $(⟨t⟩) | _ => $(⟨e⟩))
@@ -93,7 +93,7 @@ private def expandDoIfChain : Macro := fun stx => do
 @[builtin_macro Lean.Parser.Term.doBIf] def expandDoBIf : Macro := expandDoIfChain
 
 private def controlInfoDoCond : ControlInfoHandler := fun stx => do
-  bif !stx.raw[4].getArgs.isEmpty || stx.raw[5].isNone then throwUnsupportedSyntax
+  uif !stx.raw[4].getArgs.isEmpty || stx.raw[5].isNone then throwUnsupportedSyntax
   return (← inferControlInfoSeq ⟨stx.raw[3]⟩).alternative (← inferControlInfoSeq ⟨stx.raw[5][1]⟩)
 
 @[builtin_doElem_control_info Lean.Parser.Term.doUIf]
@@ -118,15 +118,15 @@ private def elabDoCondCore (kw cond : Syntax) (thenSeq elseSeq : DoSeq) (dec : D
 /-- Elaborates a canonical `uif`/`bif` (no `else uif` chain, with `else`). -/
 private def elabDoCond (stx : Syntax) (dec : DoElemCont)
     (mkTerm : Term → Term → TermElabM Term) : DoElabM Expr := do
-  bif !stx[4].getArgs.isEmpty || stx[5].isNone then throwUnsupportedSyntax
+  uif !stx[4].getArgs.isEmpty || stx[5].isNone then throwUnsupportedSyntax
   elabDoCondCore stx[0] stx[1] ⟨stx[3]⟩ ⟨stx[5][1]⟩ dec mkTerm
 
 /-- The hypothesis name of a `doIfProp`, if it has one. -/
 private def doIfPropHyp? (prop : Syntax) : Option Term :=
-  bif prop[0].isNone then none
+  uif prop[0].isNone then none
   else
     let h := prop[0][0]
-    some ⟨bif h.isOfKind ``Lean.binderIdent then h[0] else h⟩
+    some ⟨uif h.isOfKind ``Lean.binderIdent then h[0] else h⟩
 
 /--
 Builds `let_mvar% ?c := c; wait_if_type_mvar% ?c; t ?c`, so that the term waits until the type of `c`
@@ -184,12 +184,12 @@ namespace Lean.Elab.Term
     let cStx ← exprToSyntax c
     let t : Term := ⟨stx[4]⟩
     let e : Term := ⟨stx[6]⟩
-    let stxNew ← bif stx[1].isNone then
-      bif isBool then `(cond $cStx $t $e) else `(UDecidable.ite $cStx $t $e)
+    let stxNew ← uif stx[1].isNone then
+      uif isBool then `(cond $cStx $t $e) else `(UDecidable.ite $cStx $t $e)
     else
       let h := stx[1][0]
-      let h : Term := ⟨bif h.isOfKind ``Lean.binderIdent then h[0] else h⟩
-      bif isBool then `(Bool.dcond $cStx (fun $h => $t) (fun $h => $e))
+      let h : Term := ⟨uif h.isOfKind ``Lean.binderIdent then h[0] else h⟩
+      uif isBool then `(Bool.dcond $cStx (fun $h => $t) (fun $h => $e))
       else `(UDecidable.dite $cStx (fun $h => $t) (fun $h => $e))
     withMacroExpansion stx stxNew <| elabTerm stxNew expectedType?
 

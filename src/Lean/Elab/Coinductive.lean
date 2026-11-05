@@ -314,12 +314,12 @@ def mkCasesOnCoinductive (infos : Array InductiveVal) : MetaM Unit := do
       and replace all constructors of the original type.
     -/
     let goalTypeWithParamsApplied := goalTypeWithParamsApplied.replace (fun e =>
-      bif e.isApp then
+      uif e.isApp then
         let bodyArgs := e.getAppArgs[info.numParams:]
-        bif e.isAppOf info.name then
+        uif e.isAppOf info.name then
           mkAppN (mkConst (removeFunctorPostfix info.name) levels) <| params ++ bodyArgs
         else
-          bif allCtors.any e.isAppOf then
+          uif allCtors.any e.isAppOf then
             let bodyArgs := e.getAppArgs[info.numParams:]
             mkAppN (mkConst (removeFunctorPostfixInCtor (e.getAppFn.constName)) levels)
               <| params ++ bodyArgs
@@ -484,7 +484,7 @@ public def elabCoinductive (coinductiveElabData : Array CoinductiveElabData) : T
         partialFixpoint? := .some {
             ref := coinductiveElabData[idx]!.ref
             term? := coinductiveElabData[idx]!.monotonicity?
-            fixpointType := bif coinductiveElabData[idx]!.isGreatest then
+            fixpointType := uif coinductiveElabData[idx]!.isGreatest then
                               .coinductiveFixpoint else .inductiveFixpoint
         }
         decreasingBy? := .none

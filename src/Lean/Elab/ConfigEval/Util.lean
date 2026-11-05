@@ -24,7 +24,7 @@ partial def makeStringMatcher (discr : Ident) (cases : Array (String × Term)) (
   build 0 cases.size cases
 where
   build (start stop : Nat) (cases : Array (String × Term)) : TermElabM Term := do
-    bif stop - start ≤ᵇ 5 then
+    uif stop - start ≤ 5 then
       -- Switch to if/else chains once we get to a small number of options.
       cases[start:stop].foldrM (init := onFail) fun (s, body) res =>
         `(bif $discr == $(quote s) then $body else $res)
@@ -61,7 +61,7 @@ private partial def planDerivation (className : Name) (type : Expr)
 where
   go (plan : Array Expr) (processing : ExprSet) (type : Expr) : TermElabM (Array Expr) := withIncRecDepth do
     trace[Elab.ConfigEval] "plan: {plan}, processing: {processing.toList}, type: {type}"
-    bif plan.contains type then
+    uif plan.contains type then
       return plan
     else
       let cls ← mkAppM className #[type]
@@ -86,7 +86,7 @@ where
     for i in inst.synthOrder do
       let x := xs[i]!
       let depCls ← instantiateMVars (← whnf (← inferType x))
-      bif depCls.isAppOfArity className 1 then -- foralls not supported
+      uif depCls.isAppOfArity className 1 then -- foralls not supported
         let depType := depCls.appArg!
         depTypes := depTypes.push depType
       else

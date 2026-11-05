@@ -9,7 +9,7 @@ public import Lean.Elab.Term
 import Lean.Elab.Binders
 namespace Lean.Elab.Tactic
 public def renameInaccessibles (mvarId : MVarId) (hs : TSyntaxArray ``binderIdent) : TermElabM MVarId := do
-  bif hs.isEmpty then
+  uif hs.isEmpty then
     return mvarId
   else
     let mvarDecl ← mvarId.getDecl
@@ -30,17 +30,17 @@ public def renameInaccessibles (mvarId : MVarId) (hs : TSyntaxArray ``binderIden
       match lctx.getAt? j with
       | none => pure ()
       | some localDecl =>
-        bif localDecl.isImplementationDetail then
+        uif localDecl.isImplementationDetail then
           continue
         let inaccessible := !(extractMacroScopes localDecl.userName |>.equalScope callerScopes)
         let shadowed := found.contains localDecl.userName
-        bif inaccessible || shadowed then
+        uif inaccessible || shadowed then
           if let `(binderIdent| $h:ident) := hs.back! then
             let newName := h.getId
             lctx := lctx.setUserName localDecl.fvarId newName
             info := info.push (localDecl.fvarId, h)
           hs := hs.pop
-          bif hs.isEmpty then
+          uif hs.isEmpty then
             break
         found := found.insert localDecl.userName
     unless hs.isEmpty do

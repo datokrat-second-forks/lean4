@@ -24,7 +24,7 @@ Returns the "const unfold" theorem (`f.eq_unfold`) for the given declaration.
 This is not extensible, and always builds on the unfold theorem (`f.eq_def`).
 -/
 def getConstUnfoldEqnFor? (declName : Name) : MetaM (Option Name) := do
-  bif (← getUnfoldEqnFor? (nonRec := true) declName).isNone then
+  uif (← getUnfoldEqnFor? (nonRec := true) declName).isNone then
     trace[ReservedNameAction] "getConstUnfoldEqnFor? {declName} failed, no unfold theorem available"
     return none
   let name := mkEqLikeNameFor (← getEnv) declName eqUnfoldThmSuffix
@@ -42,7 +42,7 @@ def getConstUnfoldEqnFor? (declName : Name) : MetaM (Option Name) := do
       return type
     let value ← withNewMCtxDepth do
       let main ← mkFreshExprSyntheticOpaqueMVar type
-      bif (← tryURefl main.mvarId!) then -- try to make a rfl lemma if possible
+      uif (← tryURefl main.mvarId!) then -- try to make a rfl lemma if possible
         instantiateMVars main
       else forallTelescope info.type fun xs _eq => do
         let mut proof ← mkConstWithLevelParams unfoldEqnName
@@ -62,10 +62,10 @@ def getConstUnfoldEqnFor? (declName : Name) : MetaM (Option Name) := do
 builtin_initialize
   registerReservedNameAction fun name => do
     let .str p s := name | return false
-    bif s == eqUnfoldThmSuffix then
+    uif s == eqUnfoldThmSuffix then
       let env := (← getEnv).setExporting false
       for p in [p, privateToUserName p] do
-        bif env.isSafeDefinition p then
+        uif env.isSafeDefinition p then
           return (← MetaM.run' <| getConstUnfoldEqnFor? p).isSome
     return false
 

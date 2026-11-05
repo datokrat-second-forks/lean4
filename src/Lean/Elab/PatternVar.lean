@@ -67,16 +67,16 @@ private def throwCtorExpected {α} (ident : Option Syntax) : M α := do
   let env ← getEnv
   let mut candidates : Array Name := #[]
   for (c, _) in env.constants do
-    bif isPrivateName c then continue
-    bif !(name.isSuffixOf c) then continue
-    bif env.isConstructor c || hasMatchPatternAttribute env c then
+    uif isPrivateName c then continue
+    uif !(name.isSuffixOf c) then continue
+    uif env.isConstructor c || hasMatchPatternAttribute env c then
       candidates := candidates.push c
 
-  bif candidates.size =ᵇ 0 then
+  uif candidates.size = 0 then
     throwError message
   -- Sort for deterministic output (iteration order of `env.constants` is not stable)
   candidates := candidates.qsort Name.lt
-  let oneOfThese := bif h : candidates.size =ᵇ 1 then m!"`{candidates[0]}`" else m!"one of these"
+  let oneOfThese := uif h : candidates.size = 1 then m!"`{candidates[0]}`" else m!"one of these"
   let hint ← m!"Using {oneOfThese} would be valid:".hint (ref? := idStx) (candidates.map fun candidate => {
     suggestion := mkIdent candidate
     toCodeActionTitle? := .some (s!"Change to {·}")
@@ -112,16 +112,16 @@ structure Context where
 
 private def throwInvalidNamedArgs (ctx : Context) (h : !ctx.namedArgs.isEmpty) : MetaM α := do
   let names := (ctx.namedArgs.map fun narg => m!"`{narg.name}`").toList
-  let nameStr := bif names.length == 1 then "name" else "names"
+  let nameStr := uif names.length == 1 then "name" else "names"
   let validNames := ctx.paramDecls.filterMap fun (name, _) =>
-    bif name.hasMacroScopes then none else some name
+    uif name.hasMacroScopes then none else some name
   have h := Nat.zero_lt_of_ne_zero (mt Array.isEmpty_iff_size_eq_zero.mpr (Bool.not_eq.mp h))
   -- We offer hints only for the first argument
   let firstNamedArg := ctx.namedArgs[0]'h
   let replacementSpan := firstNamedArg.ref[1]
   let unused := validNames.filter (!ctx.usedNames.contains ·)
   let hint ← do
-    bif replacementSpan.getHeadInfo matches .original .. then
+    uif replacementSpan.getHeadInfo matches .original .. then
       let suggestions := unused.map fun validName =>
         { suggestion := validName.toString
           span? := replacementSpan
@@ -144,15 +144,15 @@ private def getNextParam (ctx : Context) : (Name × BinderInfo) × Context :=
 
 private def throwWrongArgCount (ctx : Context) (tooMany : Bool) : M α := do
   let numExpectedArgs :=
-    (bif ctx.explicit then ctx.paramDecls else ctx.paramDecls.filter (·.2.isExplicit)).size
+    (uif ctx.explicit then ctx.paramDecls else ctx.paramDecls.filter (·.2.isExplicit)).size
   -- If we have too few arguments because we skipped invalid named args, show that error instead
-  bif !tooMany && !ctx.namedArgs.isEmpty then checkNamedArgs
-  let argKind := bif ctx.explicit then "" else "explicit "
-  let argWord := bif numExpectedArgs == 1 then "argument" else "arguments"
-  let discrepancyKind := bif tooMany then "Too many" else "Not enough"
+  uif !tooMany && !ctx.namedArgs.isEmpty then checkNamedArgs
+  let argKind := uif ctx.explicit then "" else "explicit "
+  let argWord := uif numExpectedArgs == 1 then "argument" else "arguments"
+  let discrepancyKind := uif tooMany then "Too many" else "Not enough"
   let mut msg := m!"Invalid pattern: {discrepancyKind} arguments to `{ctx.funId}`; \
     expected {numExpectedArgs} {argKind}{argWord}"
-  bif !tooMany then
+  uif !tooMany then
     msg := msg ++ .hint' "To ignore all remaining arguments, use the ellipsis notation `..`"
   throwError msg
 where
@@ -167,12 +167,12 @@ where
       if let some idx := ctx'.namedArgs.findFinIdx? fun namedArg => namedArg.name == name then
         ctx := { ctx with namedArgs := ctx.namedArgs.eraseIdx idx
                           usedNames := ctx.usedNames.insert name }
-    bif h : !ctx.namedArgs.isEmpty then
+    uif h : !ctx.namedArgs.isEmpty then
       throwInvalidNamedArgs ctx h
 
 private def finalize (ctx : Context) : M Syntax := do
-  bif ctx.args.isEmpty then
-    bif h : !ctx.namedArgs.isEmpty then
+  uif ctx.args.isEmpty then
+    uif h : !ctx.namedArgs.isEmpty then
       throwInvalidNamedArgs ctx h
     else
       let fStx ← `(@$(ctx.funId):ident)
@@ -185,7 +185,7 @@ private def isNextArgAccessible (ctx : Context) : Bool :=
   match ctx.ctorVal? with
   | some ctorVal => i ≥ ctorVal.numParams -- For constructor applications only fields are accessible
   | none =>
-    bif h : i <ᵇ ctx.paramDecls.size then
+    uif h : i < ctx.paramDecls.size then
       -- For `[match_pattern]` applications, only explicit parameters are accessible.
       let d := ctx.paramDecls[i]
       d.2.isExplicit
@@ -198,16 +198,15 @@ private def processVar (idStx : Syntax) : M Syntax := do
   let id := idStx.getId
   unless id.eraseMacroScopes.isAtomic do
     throwError "Invalid pattern variable: Variable name must be atomic, but `{id}` has multiple components"
-  bif (← get).found.contains id then
+  uif (← get).found.contains id then
     throwError "Invalid pattern variable: Variable name `{id}` was already used"
   modify fun s => { s with vars := s.vars.push idStx, found := s.found.insert id }
   return idStx
 
 private def samePatternsVariables (startingAt : Nat) (s₁ s₂ : State) : Bool := Id.run do
-  bif h₁ : s₁.vars.size =ᵇ s₂.vars.size then
-    have h₁ := eq_of_decideEq_eq_true h₁
+  uif h₁ : s₁.vars.size = s₂.vars.size then
     for h₂ : i in startingAt...s₁.vars.size do
-      bif s₁.vars[i] != s₂.vars[i] then
+      uif s₁.vars[i] != s₂.vars[i] then
         return false
     true
   else
@@ -216,30 +215,30 @@ private def samePatternsVariables (startingAt : Nat) (s₁ s₂ : State) : Bool 
 open TSyntax.Compat in
 partial def collect (stx : Syntax) : M Syntax := withRef stx <| withFreshMacroScope do
   let k := stx.getKind
-  bif k == identKind then
+  uif k == identKind then
     processId stx
-  else bif k == ``Lean.Parser.Term.app then
+  else uif k == ``Lean.Parser.Term.app then
     processCtorApp stx
-  else bif k == ``Lean.Parser.Term.anonymousCtor then
+  else uif k == ``Lean.Parser.Term.anonymousCtor then
     let elems ← stx[1].getArgs.mapSepElemsM collect
     return stx.setArg 1 <| mkNullNode elems
-  else bif k == ``Lean.Parser.Term.dotIdent then
+  else uif k == ``Lean.Parser.Term.dotIdent then
     -- TODO: validate that `stx` corresponds to a valid constructor or match pattern
     return stx
-  else bif k == ``Lean.Parser.Term.hole then
+  else uif k == ``Lean.Parser.Term.hole then
     `(.( $stx ))
-  else bif k == ``Lean.Parser.Term.syntheticHole then
+  else uif k == ``Lean.Parser.Term.syntheticHole then
     `(.( $stx ))
-  else bif k == ``Lean.Parser.Term.typeAscription then
+  else uif k == ``Lean.Parser.Term.typeAscription then
     -- Ignore type term
     let t := stx[1]
     let t ← collect t
     return stx.setArg 1 t
-  else bif k == ``Lean.Parser.Term.explicitUniv then
+  else uif k == ``Lean.Parser.Term.explicitUniv then
     processCtor stx[0]
-  else bif k == ``Lean.Parser.Term.explicit then
+  else uif k == ``Lean.Parser.Term.explicit then
     processCtor stx
-  else bif k == ``Lean.Parser.Term.namedPattern then
+  else uif k == ``Lean.Parser.Term.namedPattern then
     /- Recall that
       ```
       def namedPattern := check... >> trailing_parser "@" >> optional (atomic (ident >> ":")) >> termParser
@@ -247,7 +246,7 @@ partial def collect (stx : Syntax) : M Syntax := withRef stx <| withFreshMacroSc
      -/
     let id := stx[0]
     discard <| processVar id
-    let h ← bif stx[2].isNone then
+    let h ← uif stx[2].isNone then
       `(h)
     else
       pure stx[2][0]
@@ -255,7 +254,7 @@ partial def collect (stx : Syntax) : M Syntax := withRef stx <| withFreshMacroSc
     let pat ← collect pat
     discard <| processVar h
     ``(_root_.namedPattern $id $pat $h)
-  else bif k == ``Lean.Parser.Term.binop then
+  else uif k == ``Lean.Parser.Term.binop then
     /-
     We support `binop%` syntax in patterns because we
     wanted to support `x+1` in patterns.
@@ -272,22 +271,22 @@ partial def collect (stx : Syntax) : M Syntax := withRef stx <| withFreshMacroSc
     let lhs ← collect stx[2]
     let rhs ← collect stx[3]
     return stx.setArg 2 lhs |>.setArg 3 rhs
-  else bif k == ``Lean.Parser.Term.unop then
+  else uif k == ``Lean.Parser.Term.unop then
     let arg ← collect stx[2]
     return stx.setArg 2 arg
-  else bif k == ``Lean.Parser.Term.inaccessible then
+  else uif k == ``Lean.Parser.Term.inaccessible then
     return stx
-  else bif k == strLitKind then
+  else uif k == strLitKind then
     return stx
-  else bif k == numLitKind then
+  else uif k == numLitKind then
     return stx
-  else bif k == scientificLitKind then
+  else uif k == scientificLitKind then
     return stx
-  else bif k == charLitKind then
+  else uif k == charLitKind then
     return stx
-  else bif k == ``Lean.Parser.Term.quotedName || k == ``Lean.Parser.Term.doubleQuotedName then
+  else uif k == ``Lean.Parser.Term.quotedName || k == ``Lean.Parser.Term.doubleQuotedName then
     return stx
-  else bif k == choiceKind then
+  else uif k == choiceKind then
     let args := stx.getArgs
     /- Remark: If there is a `Term.structInst` alternative, we resolve the `choice` node to it. This is a hack to get rid of
        Set-like notation in patterns. Recall that in Mathlib `{a, b}` can be a set with two elements or the
@@ -326,13 +325,13 @@ where
 
   processCtorApp (stx : Syntax) : M Syntax := do
     let (f, namedArgs, args, ellipsis) ← expandApp stx
-    bif f.getKind == ``Parser.Term.dotIdent then
+    uif f.getKind == ``Parser.Term.dotIdent then
       let namedArgsNew ← namedArgs.mapM fun
         -- We must ensure that `ref[1]` remains original to allow named-argument hints
         | { ref, name, val := Arg.stx arg, .. } => withRef ref do `(Lean.Parser.Term.namedArgument| ($(ref[1]) := $(← collect arg)))
         | _ => unreachable!
       let mut argsNew ← args.mapM fun | Arg.stx arg => collect arg | _ => unreachable!
-      bif ellipsis then
+      uif ellipsis then
         argsNew := argsNew.push (mkNode ``Parser.Term.ellipsis #[mkAtomFrom stx ".."])
       return Syntax.mkApp f (namedArgsNew ++ argsNew)
     else
@@ -350,7 +349,7 @@ where
         match (← getEnv).find? fName with
         | some (ConstantInfo.ctorInfo _) => processCtor stx
         | some _ =>
-          bif hasMatchPatternAttribute (← getEnv) fName then
+          uif hasMatchPatternAttribute (← getEnv) fName then
             processCtor stx
           else
             processVar stx
@@ -360,14 +359,14 @@ where
   pushNewArg (accessible : Bool) (ctx : Context) (arg : Arg) : M Context := do
     match arg with
     | Arg.stx stx =>
-      let stx ← bif accessible then collect stx else pure stx
+      let stx ← uif accessible then collect stx else pure stx
       return { ctx with newArgs := ctx.newArgs.push stx }
     | _ => unreachable!
 
   processExplicitArg (accessible : Bool) (ctx : Context) : M Context := do
     match ctx.args with
     | [] =>
-      bif ctx.ellipsis then
+      uif ctx.ellipsis then
         pushNewArg accessible ctx (Arg.stx (← `(_)))
       else
         throwWrongArgCount ctx false
@@ -375,13 +374,13 @@ where
       pushNewArg accessible { ctx with args := args } arg
 
   processImplicitArg (accessible : Bool) (ctx : Context) : M Context := do
-    bif ctx.explicit then
+    uif ctx.explicit then
       processExplicitArg accessible ctx
     else
       pushNewArg accessible ctx (Arg.stx (← `(_)))
 
   processCtorAppContext (ctx : Context) : M Syntax := do
-    bif isDone ctx then
+    uif isDone ctx then
       finalize ctx
     else
       let accessible := isNextArgAccessible ctx
@@ -418,7 +417,7 @@ where
       processCtorAppContext
         { funId := fId, explicit := explicit, ctorVal? := val, paramDecls := paramDecls, namedArgs := namedArgs, args := args, ellipsis := ellipsis }
     | _ =>
-      bif hasMatchPatternAttribute (← getEnv) fName then
+      uif hasMatchPatternAttribute (← getEnv) fName then
         processCtorAppContext
           { funId := fId, explicit := explicit, ctorVal? := none, paramDecls := paramDecls, namedArgs := namedArgs, args := args, ellipsis := ellipsis }
       else

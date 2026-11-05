@@ -33,7 +33,7 @@ def runTermElab (k : TermElabM α) (mayPostpone := false) : TacticM α :=
   -- incrementality state of a calling incrementality-enabled tactic.
   Term.withoutTacticIncrementality true do
     /- If error recovery is disabled, we disable `Term.withoutErrToSorry` -/
-    bif (← read).recover then
+    uif (← read).recover then
       go
     else
       Term.withoutErrToSorry go
@@ -62,7 +62,7 @@ def elabTermEnsuringType (stx : Syntax) (expectedType? : Option Expr) (mayPostpo
     return e
 
 def logUnassignedAndAbort (mvarIds : Array MVarId) : TacticM Unit := do
-   bif (← Term.logUnassignedUsingErrorInfos mvarIds) then
+   uif (← Term.logUnassignedUsingErrorInfos mvarIds) then
      throwAbortTactic
 
 def filterOldMVars (mvarIds : Array MVarId) (mvarCounterSaved : Nat) : MetaM (Array MVarId) := do
@@ -88,7 +88,7 @@ def closeMainGoalUsing (tacName : Name) (x : Expr → Name → TacticM Expr) (ch
   Tactic.tryCatch
     (mvarId.withContext do
       let val ← x (← mvarId.getType) (← mvarId.getTag)
-      bif checkNewUnassigned then
+      uif checkNewUnassigned then
         let mvars ← filterOldMVars (← getMVars val) mvarCounterSaved
         logUnassignedAndAbort mvars
       unless (← mvarId.checkedAssign val) do
@@ -107,7 +107,7 @@ def sortMVarIdArrayByIndex [MonadMCtx m] [Monad m] (mvarIds : Array MVarId) : m 
   return mvarIds.qsort fun mvarId₁ mvarId₂ =>
     let decl₁ := mctx.getDecl mvarId₁
     let decl₂ := mctx.getDecl mvarId₂
-    bif decl₁.index != decl₂.index then
+    uif decl₁.index != decl₂.index then
       decl₁.index < decl₂.index
     else
       Name.quickLt mvarId₁.name mvarId₂.name
@@ -152,7 +152,7 @@ def withCollectingNewGoalsFrom (k : TacticM Expr) (parentTag : Name) (tagSuffix 
   and the resulting term is `fun x => ?n x`. Then, `getMVarsNoDelayed` would return `?n` as a new goal
   which would be confusing since it has type `Nat -> Nat`.
   -/
-  bif allowNaturalHoles then
+  uif allowNaturalHoles then
     withTheReader Term.Context (fun ctx => { ctx with holesAsSyntheticOpaque := ctx.holesAsSyntheticOpaque || allowNaturalHoles }) do
       /-
       We also enable the assignment of synthetic metavariables, otherwise we will fail to
@@ -209,7 +209,7 @@ def refineCore (stx : Syntax) (tagSuffix : Name) (allowNaturalHoles : Bool) : Ta
     let (val, mvarIds') ← elabTermWithHoles stx (← getMainTarget) tagSuffix allowNaturalHoles
     let mvarId ← getMainGoal
     let val ← instantiateMVars val
-    bif val == mkMVar mvarId then
+    uif val == mkMVar mvarId then
       /- `val == mkMVar mvarId` is `true` when we've refined the main goal. Refining the main goal
       (e.g. `refine ?a` when `?a` is the main goal) is an unlikely practice; further, it shouldn't
       be possible to create new mvarIds during elaboration when doing so. But in the rare event
@@ -217,7 +217,7 @@ def refineCore (stx : Syntax) (tagSuffix : Name) (allowNaturalHoles : Bool) : Ta
       replaceMainGoal (mvarId :: mvarIds')
     else
       /- Ensure that the main goal does not occur in `val`. -/
-      bif val.findMVar? (· == mvarId) matches some _ then
+      uif val.findMVar? (· == mvarId) matches some _ then
         throwError "`refine` tactic failed, value{indentExpr val}\ndepends on the main goal metavariable `{mkMVar mvarId}`"
       mvarId.assign val
       replaceMainGoal mvarIds'
@@ -263,7 +263,7 @@ def refineCore (stx : Syntax) (tagSuffix : Name) (allowNaturalHoles : Bool) : Ta
    ```
 -/
 def elabTermForApply (stx : Syntax) (mayPostpone := true) : TacticM Expr := do
-  bif stx.isIdent then
+  uif stx.isIdent then
     match (← Term.resolveId? stx (withInfo := true)) with
     | some e => return e
     | _      => pure ()
@@ -282,7 +282,7 @@ def getFVarIds (ids : Array Syntax) : TacticM (Array FVarId) := do
 def evalApplyLikeTactic (tac : MVarId → Expr → MetaM (List MVarId)) (e : Syntax) : TacticM Unit := do
   withMainContext do
     let mut val ← instantiateMVars (← elabTermForApply e)
-    bif val.isMVar then
+    uif val.isMVar then
       /-
       If `val` is a metavariable, we force the elaboration of postponed terms.
       This is useful for producing a more useful error message in examples such as
@@ -309,7 +309,7 @@ declare_config_elab elabConstructorConfig Parser.Tactic.ConstructorConfig
 private def evalConstructorCore (stx : Syntax) (cfg : Parser.Tactic.ConstructorConfig) : TacticM Unit :=
   withMainContext do
     let (mvarIds', ctors) ← (← getMainGoal).constructorCore (findAll := !cfg.first)
-    bif ctors.size >ᵇ 1 then
+    uif ctors.size > 1 then
       let others := ctors.toList.drop 1
       let othersMsg := MessageData.andList (others.map fun c => m!"`{MessageData.ofConstName c}`")
       let suggestion : Meta.Hint.Suggestion :=
@@ -372,7 +372,7 @@ def elabAsFVar (stx : Syntax) (userName? : Option Name := none) : TacticM FVarId
       let fvarId ← withoutModifyingState <| withNewMCtxDepth <| withoutRecover do
         let type ← elabTerm typeStx none (mayPostpone := true)
         let fvarId? ← (← getLCtx).findDeclRevM? fun localDecl => do
-          bif !localDecl.isImplementationDetail && (← isDefEq type localDecl.type) then return localDecl.fvarId else return none
+          uif !localDecl.isImplementationDetail && (← isDefEq type localDecl.type) then return localDecl.fvarId else return none
         match fvarId? with
         | none => throwError "Failed to find a hypothesis with type{indentExpr type}"
         | some fvarId => return fvarId

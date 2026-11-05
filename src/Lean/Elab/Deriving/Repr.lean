@@ -30,15 +30,15 @@ def mkBodyForStruct (header : Header) (indVal : InductiveVal) : TermElabM Term :
   let target     := mkIdent header.targetNames[0]!
   forallTelescopeReducing ctorVal.type fun xs _ => do
     let mut fields ← `(Format.nil)
-    bif xs.size != numParams + fieldNames.size then
+    uif xs.size != numParams + fieldNames.size then
       throwError "`deriving Repr` failed, unexpected number of fields in structure"
     for h : i in *...fieldNames.size do
       let fieldName := fieldNames[i]
       let fieldNameLit := Syntax.mkStrLit (toString fieldName)
       let x := xs[numParams + i]!
-      bif i != 0 then
+      uif i != 0 then
         fields ← `($fields ++ "," ++ Format.line)
-      bif (← isType x <||> isProof x) then
+      uif (← isType x <||> isProof x) then
         fields ← `($fields ++ $fieldNameLit ++ " := " ++ "_")
       else
         let indent := Syntax.mkNumLit <| toString ((toString fieldName |>.chars.length) + " := ".lengthAssumingAscii)
@@ -66,16 +66,16 @@ where
           -- Note: some inductive parameters are explicit if they were promoted from indices,
           -- so we process all constructor arguments in the same loop.
           let x := xs[i]
-          let a ← mkIdent <$> bif i <ᵇ indVal.numParams then pure header.argNames[i]! else mkFreshUserName `a
-          bif i <ᵇ indVal.numParams then
+          let a ← mkIdent <$> uif i < indVal.numParams then pure header.argNames[i]! else mkFreshUserName `a
+          uif i < indVal.numParams then
             -- add `_` for inductive parameters, they are inaccessible
             ctorArgs := ctorArgs.push (← `(_))
           else
             ctorArgs := ctorArgs.push a
-          bif (← x.fvarId!.getBinderInfo).isExplicit then
-            bif (← inferType x).isAppOf indVal.name then
+          uif (← x.fvarId!.getBinderInfo).isExplicit then
+            uif (← inferType x).isAppOf indVal.name then
               rhs ← `($rhs ++ Format.line ++ $(mkIdent auxFunName):ident $a:ident max_prec)
-            else bif (← isType x <||> isProof x) then
+            else uif (← isType x <||> isProof x) then
               rhs ← `($rhs ++ Format.line ++ "_")
             else
               rhs ← `($rhs ++ Format.line ++ reprArg $a)
@@ -85,7 +85,7 @@ where
     return alts
 
 def mkBody (header : Header) (indVal : InductiveVal) (auxFunName : Name) : TermElabM Term := do
-  bif isStructure (← getEnv) indVal.name then
+  uif isStructure (← getEnv) indVal.name then
     mkBodyForStruct header indVal
   else
     mkBodyForInduct header indVal auxFunName
@@ -95,11 +95,11 @@ def mkAuxFunction (ctx : Context) (i : Nat) : TermElabM Command := do
   let indVal     := ctx.typeInfos[i]!
   let header     ← mkReprHeader indVal
   let mut body   ← mkBody header indVal auxFunName
-  bif ctx.usePartial then
+  uif ctx.usePartial then
     let letDecls ← mkLocalInstanceLetDecls ctx `Repr header.argNames
     body ← mkLet letDecls body
   let binders    := header.binders
-  bif ctx.usePartial then
+  uif ctx.usePartial then
     `(@[no_expose] partial def $(mkIdent auxFunName):ident $binders:bracketedBinder* : Format := $body:term)
   else
     `(@[no_expose] def $(mkIdent auxFunName):ident $binders:bracketedBinder* : Format := $body:term)
@@ -121,7 +121,7 @@ private def mkReprInstanceCmd (declName : Name) : TermElabM (Array Syntax) := do
 open Command
 
 def mkReprInstanceHandler (declNames : Array Name) : CommandElabM Bool := do
-  bif (← declNames.allM isInductive) then
+  uif (← declNames.allM isInductive) then
     for declName in declNames do
       withoutExposeFromCtors declName do
         let cmds ← liftTermElabM <| mkReprInstanceCmd declName

@@ -38,7 +38,7 @@ open Lean.Meta
 @[builtin_doElem_elab Lean.Parser.Term.doMatchExpr] def elabDoMatchExpr : DoElab := fun stx dec => do
   let `(doMatchExpr| match_expr $[(meta := false)%$metaFalseTk?]? $discr with $alts) := stx | throwUnsupportedSyntax
   let info ← inferControlInfoElem stx
-  bif metaFalseTk?.isNone then -- i.e., implicitly (meta := true)
+  uif metaFalseTk?.isNone then -- i.e., implicitly (meta := true)
     let x := mkIdentFrom discr (← mkFreshUserName `__x)
     elabDoIdDecl x none (← `(doElem| instantiateMVarsIfMVarApp $discr)) do
       elabDoMatchExprNoMeta info x alts dec
@@ -47,7 +47,7 @@ open Lean.Meta
 where elabDoMatchExprNoMeta (info : ControlInfo) (discr : Term) (alts : TSyntax ``matchExprAlts) (dec : DoElemCont) : DoElabM Expr := do
   dec.withDuplicableCont info fun dec => do
     let rec elabMatch i (altsArr : Array (TSyntax ``matchExprAlt)) := do
-      bif h : i <ᵇ altsArr.size then
+      uif h : i < altsArr.size then
         match altsArr[i] with
         | `(matchExprAltExpr| | $pattern => $seq) =>
           let vars ← getExprPatternVarsEx pattern

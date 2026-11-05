@@ -97,13 +97,13 @@ inductive Tree α where | node : α → Vector (Tree α) n → Tree α
 
 -/
 def IndGroupInst.nestedTypeFormers (igi : IndGroupInst) : MetaM (Array Expr) := do
-  bif igi.numNested =ᵇ 0 then return #[]
+  uif igi.numNested = 0 then return #[]
   -- We extract this information from the motives of the recursor
   let recName := mkRecName igi.all[0]!
   let recInfo ← getConstInfoRec recName
   assert! recInfo.numMotives = igi.numMotives
   let lvls :=
-    bif igi.levels.length =ᵇ recInfo.levelParams.length then igi.levels
+    uif igi.levels.length = recInfo.levelParams.length then igi.levels
     else Level.zero :: igi.levels
   let aux := mkAppN (.const recName lvls) igi.params
   let motives ← inferArgumentTypesN recInfo.numMotives aux

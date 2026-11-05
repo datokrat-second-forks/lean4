@@ -24,7 +24,7 @@ def rwTarget (symm : Bool) (term : Syntax) : GrindTacticM Unit := do
     let mvarCounterSaved := (← getMCtx).mvarCounter
     let r ← Term.withSynthesize do
       let heq ← Term.elabTerm term none true
-      bif heq.hasSyntheticSorry then
+      uif heq.hasSyntheticSorry then
         throwAbortTactic
       unless (← occursCheck goal.mvarId heq) do
         throwErrorAt term "Occurs check failed: Expression{indentExpr heq}\ncontains the goal {Expr.mvar goal.mvarId}"
@@ -36,19 +36,19 @@ def rwTarget (symm : Bool) (term : Syntax) : GrindTacticM Unit := do
       -/
       let heqType ← instantiateMVars (← inferType heq)
       let heqType' ← Sym.unfoldReducible heqType
-      let heq ← bif isSameExpr heqType heqType' then pure heq else mkExpectedTypeHint heq heqType'
+      let heq ← uif isSameExpr heqType heqType' then pure heq else mkExpectedTypeHint heq heqType'
       goal.mvarId.rewrite (← goal.mvarId.getType) heq symm
     let mctx ← getMCtx
     let mvarIds := r.mvarIds.filter fun mvarId => (mctx.getDecl mvarId |>.index) >= mvarCounterSaved
     let eNew ← liftSymM <| Sym.preprocessExpr r.eNew
-    bif eNew.hasExprMVar then
+    uif eNew.hasExprMVar then
       throwError "`rw` failed, resulting target contains metavariables{indentExpr eNew}"
     let mvarId ← goal.mvarId.replaceTargetEq eNew r.eqProof
     let mvarIds ← mvarIds.filterM fun mvarId => return !(← mvarId.isAssigned)
     let sideGoals ← mvarIds.mapM fun mvarId => do
       let target ← mvarId.getType
       let target' ← liftSymM <| Sym.preprocessExpr target
-      bif isSameExpr target target' then
+      uif isSameExpr target target' then
         -- The metavariable was created by `forallMetaTelescopeReducing` with kind `.natural`;
         -- prevent it from being assigned by unification in later steps.
         mvarId.setKind .syntheticOpaque
@@ -66,7 +66,7 @@ def tryTrivialClose : GrindTacticM Unit := do
   let goal ← getMainGoal
   goal.withContext do
     let target ← goal.mvarId.getType
-    bif target.isTrue then
+    uif target.isTrue then
       goal.mvarId.assign (mkConst ``True.intro)
       replaceMainGoal []
       return ()
@@ -75,13 +75,13 @@ def tryTrivialClose : GrindTacticM Unit := do
       replaceMainGoal []
     match_expr target with
     | Eq α lhs rhs =>
-      bif isSameExpr lhs rhs then
+      uif isSameExpr lhs rhs then
         close <| mkApp2 (mkConst ``Eq.refl [← getLevel α]) α lhs
     | Iff lhs rhs =>
-      bif isSameExpr lhs rhs then
+      uif isSameExpr lhs rhs then
         close <| mkApp (mkConst ``Iff.refl) lhs
     | HEq α lhs β rhs =>
-      bif isSameExpr α β && isSameExpr lhs rhs then
+      uif isSameExpr α β && isSameExpr lhs rhs then
         close <| mkApp2 (mkConst ``HEq.refl [← getLevel α]) α lhs
     | _ => return ()
 

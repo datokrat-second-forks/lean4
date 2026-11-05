@@ -23,11 +23,11 @@ It applies zeta and zetaDelta-reduction to eliminate let-free-vars.
 -/
 private def preprocessPropToDecide (expectedType : Expr) : TermElabM Expr := do
   let mut expectedType ← instantiateMVars expectedType
-  bif expectedType.hasFVar then
+  uif expectedType.hasFVar then
     expectedType ← zetaReduce expectedType
-  bif expectedType.hasMVar then
+  uif expectedType.hasMVar then
     throwError "Expected type must not contain metavariables{indentExpr expectedType}"
-  bif expectedType.hasFVar then
+  uif expectedType.hasFVar then
     throwError m!"Expected type must not contain free variables{indentExpr expectedType}"
       ++ .hint' m!"Use the `+revert` option to automatically clean up and revert free variables"
   return expectedType
@@ -40,10 +40,10 @@ private partial def blameDecideReductionFailure (expr : Expr) : MetaM Expr := wi
   let expr ← whnf expr
   let numArgs := expr.getAppNumArgs
   -- If it's the Bool recursor or the Decidable recursor, then blame the major premise.
-  bif numArgs ≥ᵇ 4 && (expr.isAppOf ``Bool.rec || expr.isAppOf ``Decidable.rec) then
+  uif numArgs ≥ 4 ∧ (expr.isAppOf ``Bool.rec || expr.isAppOf ``Decidable.rec) then
     return ← blameDecideReductionFailure (expr.getArg! 3 numArgs)
   -- If it's the Decidable constructor, then blame the first parameter.
-  bif expr.isAppOfArity `Decidable.intro 3 then
+  uif expr.isAppOfArity `Decidable.intro 3 then
     return ← blameDecideReductionFailure expr.appFn!.appArg!
   -- If it's decide (the first projection of Decidable), then blame the parameter
   if let .proj ``Decidable 0 e := expr then
@@ -51,17 +51,17 @@ private partial def blameDecideReductionFailure (expr : Expr) : MetaM Expr := wi
   -- If it is a matcher, look for a discriminant that's a Bool or a Decidable instance to blame.
   if let .const c _ := expr.getAppFn then
     if let some info ← getMatcherInfo? c then
-      bif info.arity ≤ᵇ numArgs then
+      uif info.arity ≤ numArgs then
         let args := expr.getAppArgs
         for i in *...info.numDiscrs do
           let expr' := args[info.numParams + 1 + i]!
           let type ← inferType expr'
           let type ← whnf type
-          bif type.isConstOf ``Bool then
+          uif type.isConstOf ``Bool then
             let expr'' ← whnf expr'
             unless expr''.isConstOf ``Bool.true || expr''.isConstOf ``Bool.false do
               return ← blameDecideReductionFailure expr''
-          else bif type.isAppOf ``Decidable then
+          else uif type.isAppOf ``Decidable then
             let expr'' ← whnf (.proj ``Decidable 0 expr')
             unless expr''.isConstOf ``Bool.true || expr''.isConstOf ``Bool.false do
               return ← blameDecideReductionFailure expr''
@@ -81,19 +81,19 @@ def elabNativeDecideCore (tacticName : Name) (expectedType : Expr) : TacticM Exp
     return mkApp3 (mkConst ``of_decide_eq_true) expectedType s prf
 
 def evalDecideCore (tacticName : Name) (cfg : Parser.Tactic.DecideConfig) : TacticM Unit := do
-  bif cfg.revert then
+  uif cfg.revert then
     -- In revert mode: clean up the local context and then revert everything that is left.
     liftMetaTactic1 fun g => do
       let g ← g.cleanup
       let (_, g) ← g.revert (clearAuxDeclsInsteadOfRevert := true) (← g.getDecl).lctx.getFVarIds
       return g
   closeMainGoalUsing tacticName fun expectedType _ => do
-    bif cfg.kernel && cfg.native then
+    uif cfg.kernel && cfg.native then
       throwError "Tactic `{tacticName}` failed: Cannot simultaneously set both `+kernel` and `+native`"
     let expectedType ← preprocessPropToDecide expectedType
-    bif cfg.native then
+    uif cfg.native then
       elabNativeDecideCore tacticName expectedType
-    else bif cfg.kernel then
+    else uif cfg.kernel then
       doKernel expectedType
     else
       doElab expectedType
@@ -104,7 +104,7 @@ where
     let inst := dec.appArg!
     -- reduce `dec`
     let r ← withAtLeastTransparency .default <| whnf dec
-    bif r.isConstOf ``true then
+    uif r.isConstOf ``true then
       -- Success!
       let eq := mkApp3 (mkConst ``Eq [1]) (mkConst ``Bool) dec (mkConst ``Bool.true)
       let refl := mkExpectedPropHint reflBoolTrue eq
@@ -137,7 +137,7 @@ where
           (do
             let dec := mkApp2 (mkConst ``Decidable.decide) expectedType s
             let r ← withAtLeastTransparency .default <| whnf dec
-            bif r.isConstOf ``true then
+            uif r.isConstOf ``true then
               return m!"\
                 Tactic `{tacticName}` failed. The elaborator is able to reduce the \
                 `{.ofConstName ``Decidable}` instance, but the kernel fails with:\n\
@@ -146,7 +146,7 @@ where
           (fun _ => return ex.toMessageData)
 
   diagnose (expectedType s : Expr) (r : Expr) : MetaM MessageData := do
-    bif r.isConstOf ``false then
+    uif r.isConstOf ``false then
       return m!"\
         Tactic `{tacticName}` proved that the proposition\
         {indentExpr expectedType}\n\
@@ -158,26 +158,26 @@ where
       let unfolded := (← get).diag.unfoldCounter.foldl (init := #[]) fun cs n _ => cs.push n
       let unfoldedInsts ← unfolded |>.qsort Name.lt |>.filterMapM fun n => do
         let e ← mkConstWithLevelParams n
-        bif (← Meta.isClass? (← inferType e)) == ``Decidable then
+        uif (← Meta.isClass? (← inferType e)) == ``Decidable then
           return m!"`{.ofConst e}`"
         else
           return none
       return (reason, unfoldedInsts)
     let stuckMsg :=
-      bif unfoldedInsts.isEmpty then
+      uif unfoldedInsts.isEmpty then
         m!"Reduction got stuck at{indentExpr reason}"
       else
-        let instances := bif unfoldedInsts.size == 1 then "instance" else "instances"
+        let instances := uif unfoldedInsts.size == 1 then "instance" else "instances"
         m!"After unfolding the {instances} {.andList unfoldedInsts.toList}, \
         reduction got stuck at{indentExpr reason}"
     let hint :=
-      bif reason.isAppOf ``Eq.rec then
+      uif reason.isAppOf ``Eq.rec then
         .hint' m!"Reduction got stuck on `▸` ({.ofConstName ``Eq.rec}), \
           which suggests that one of the `{.ofConstName ``Decidable}` instances is defined using tactics such as `rw` or `simp`. \
           To avoid tactics, make use of functions such as \
           `{.ofConstName `inferInstanceAs}` or `{.ofConstName ``decidable_of_decidable_of_iff}` \
           to alter a proposition."
-      else bif reason.isAppOf ``Classical.choice then
+      else uif reason.isAppOf ``Classical.choice then
         .hint' m!"Reduction got stuck on `{.ofConstName ``Classical.choice}`, \
           which indicates that a `{.ofConstName ``Decidable}` instance \
           is defined using classical reasoning, proving an instance exists rather than giving a concrete construction. \

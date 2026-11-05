@@ -12,7 +12,7 @@ open Meta Lean.Meta.Grind
 public def elabAnchorRef (anchor : TSyntax `hexnum) : CoreM AnchorRef := do
   let numDigits := anchor.getHexNumSize
   let val := anchor.getHexNumVal
-  bif val ≥ᵇ UInt64.size then
+  uif val ≥ UInt64.size then
     throwError "invalid anchor, value is too big"
   let anchorPrefix := val.toUInt64
   return { numDigits, anchorPrefix }

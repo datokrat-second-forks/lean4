@@ -37,20 +37,20 @@ def checkNotAlreadyDeclared {m} [Monad m] [MonadEnv m] [MonadError m] [MonadFina
       stx := (← getRef)
       expr := (← mkConstWithLevelParams declName)
     }
-  bif env.contains declName then
+  uif env.contains declName then
     addInfo declName
     match privateToUserName? declName with
     | none          => throwError "`{.ofConstName declName true}` has already been declared"
     | some declName => throwError "private declaration `{.ofConstName declName true}` has already been declared"
-  bif isReservedName env (privateToUserName declName) || isReservedName env (mkPrivateName (← getEnv) declName) then
+  uif isReservedName env (privateToUserName declName) || isReservedName env (mkPrivateName (← getEnv) declName) then
     throwError "`{.ofConstName declName}` is a reserved name"
-  bif env.contains (mkPrivateName env declName) then
+  uif env.contains (mkPrivateName env declName) then
     addInfo (mkPrivateName env declName)
     throwError "a private declaration `{.ofConstName declName true}` has already been declared"
   match privateToUserName? declName with
   | none => pure ()
   | some declName =>
-    bif env.contains declName then
+    uif env.contains declName then
       addInfo declName
       throwError "a non-private declaration `{.ofConstName declName true}` has already been declared"
 
@@ -82,7 +82,7 @@ backward compatibility. It needs to be initialized apropriately first before cal
 as e.g. done in `elabDeclaration`.
 -/
 def Visibility.isInferredPublic (env : Environment) (v : Visibility) : Bool :=
-  bif env.isExporting || !env.header.isModule then !v.isPrivate else v.isPublic
+  uif env.isExporting || !env.header.isModule then !v.isPrivate else v.isPublic
 
 /--
 Converts optional visibility syntax to a `Visibility` value. `isExample` marks the modifiers of an
@@ -98,15 +98,15 @@ def elabVisibility [Monad m] [MonadError m] [MonadEnv m] [MonadOptions m] [Monad
   | some v =>
     match v with
     | `(Parser.Command.visibility| private) =>
-      bif v.raw.getHeadInfo matches .original .. then  -- skip macro output
-        bif env.header.isModule && !env.isExporting then
+      uif v.raw.getHeadInfo matches .original .. then  -- skip macro output
+        uif env.header.isModule && !env.isExporting then
           Linter.logLintIf linter.redundantVisibility v
             m!"`private` has no effect in a `module` file outside `public section`; \
             declarations are already `private` by default"
       pure .private
     | `(Parser.Command.visibility| public) =>
-      bif v.raw.getHeadInfo matches .original .. then  -- skip macro output
-        bif (env.isExporting && !isExample) || !env.header.isModule then
+      uif v.raw.getHeadInfo matches .original .. then  -- skip macro output
+        uif (env.isExporting && !isExample) || !env.header.isModule then
           Linter.logLintIf linter.redundantVisibility v
             m!"`public` is the default visibility{
               if env.header.isModule then " inside a `public section`" else ""
@@ -184,10 +184,10 @@ instance : ToFormat Modifiers := ⟨fun m =>
      | .regular   => []
      | .private   => [f!"private"]
      | .public    => [f!"public"])
-    ++ (bif m.isProtected then [f!"protected"] else [])
+    ++ (uif m.isProtected then [f!"protected"] else [])
     ++ (match m.computeKind with | .regular => [] | .meta => [f!"meta"] | .noncomputable => [f!"noncomputable"])
     ++ (match m.recKind with | RecKind.partial => [f!"partial"] | RecKind.nonrec => [f!"nonrec"] | _ => [])
-    ++ (bif m.isUnsafe then [f!"unsafe"] else [])
+    ++ (uif m.isUnsafe then [f!"unsafe"] else [])
     ++ m.attrs.toList.map (fun attr => format attr)
   Format.bracket "{" (Format.joinSep components ("," ++ Format.line)) "}"⟩
 
@@ -214,17 +214,17 @@ def elabModifiers (stx : TSyntax ``Parser.Command.declModifiers) (isExample := f
   let visibilityStx := stx.raw[2]
   let protectedStx  := stx.raw[3]
   let computeKind   :=
-    bif stx.raw[4].isNone then
+    uif stx.raw[4].isNone then
       .regular
-    else bif stx.raw[4][0].getKind == ``Parser.Command.meta then
+    else uif stx.raw[4][0].getKind == ``Parser.Command.meta then
       .meta
     else
       .noncomputable
   let unsafeStx     := stx.raw[5]
   let recKind       :=
-    bif stx.raw[6].isNone then
+    uif stx.raw[6].isNone then
       RecKind.default
-    else bif stx.raw[6][0].getKind == ``Parser.Command.partial then
+    else uif stx.raw[6][0].getKind == ``Parser.Command.partial then
       RecKind.partial
     else
       RecKind.nonrec
@@ -246,20 +246,20 @@ If `protected`, register `declName` as protected in the environment.
 -/
 def applyVisibility (modifiers : Modifiers) (declName : Name) : m Name := do
   let mut declName := declName
-  bif !modifiers.visibility.isInferredPublic (← getEnv) then
+  uif !modifiers.visibility.isInferredPublic (← getEnv) then
     declName := mkPrivateName (← getEnv) declName
   checkNotAlreadyDeclared declName
-  bif modifiers.isProtected then
+  uif modifiers.isProtected then
     modifyEnv fun env => addProtected env declName
   pure declName
 
 def checkIfShadowingStructureField (declName : Name) : m Unit := do
   match declName with
   | Name.str pre .. =>
-    bif isStructure (← getEnv) pre then
+    uif isStructure (← getEnv) pre then
       let fieldNames := getStructureFieldsFlattened (← getEnv) pre
       for fieldName in fieldNames do
-        bif pre ++ fieldName == declName then
+        uif pre ++ fieldName == declName then
           throwError "invalid declaration name `{.ofConstName declName}`, structure `{pre}` has field `{fieldName}`"
   | _ => pure ()
 
@@ -269,20 +269,20 @@ def mkDeclName (currNamespace : Name) (modifiers : Modifiers) (shortName : Name)
   let view := extractMacroScopes shortName
   let name := view.name
   let isRootName := (`_root_).isPrefixOf name
-  bif name == `_root_ then
+  uif name == `_root_ then
     throwError "invalid declaration name `_root_`, `_root_` is a prefix used to refer to the 'root' namespace"
-  let declName := bif isRootName then { view with name := name.replacePrefix `_root_ Name.anonymous }.review else currNamespace ++ shortName
-  bif isRootName then
+  let declName := uif isRootName then { view with name := name.replacePrefix `_root_ Name.anonymous }.review else currNamespace ++ shortName
+  uif isRootName then
     let .str p s := name | throwError "invalid declaration name `{name}`"
     shortName := Name.mkSimple s
     currNamespace := p.replacePrefix `_root_ Name.anonymous
   checkIfShadowingStructureField declName
   let declName ← applyVisibility modifiers declName
-  bif modifiers.isProtected then
+  uif modifiers.isProtected then
     match currNamespace with
     | .str _ s => return (declName, Name.mkSimple s ++ shortName)
     | _ =>
-      bif shortName.isAtomic then
+      uif shortName.isAtomic then
         throwError "protected declarations must be in a namespace"
       return (declName, shortName)
   else
@@ -296,7 +296,7 @@ def mkDeclName (currNamespace : Name) (modifiers : Modifiers) (shortName : Name)
   but we also accept a single identifier to users to make macro writing more convenient .
 -/
 def expandDeclIdCore (declId : Syntax) : Name × Syntax :=
-  bif declId.isIdent then
+  uif declId.isIdent then
     (declId.getId, mkNullNode)
   else
     let id             := declId[0].getId
@@ -329,14 +329,14 @@ This commands also stores the doc string stored in `modifiers`.
 def expandDeclId (currNamespace : Name) (currLevelNames : List Name) (declId : Syntax) (modifiers : Modifiers) : TermElabM ExpandDeclIdResult := do
   -- ident >> optional (".{" >> sepBy1 ident ", " >> "}")
   let (shortName, optUnivDeclStx) := expandDeclIdCore declId
-  let levelNames ← bif optUnivDeclStx.isNone then
+  let levelNames ← uif optUnivDeclStx.isNone then
     pure currLevelNames
   else
     let extraLevels := optUnivDeclStx[1].getArgs.getEvenElems
     extraLevels.foldlM
       (fun levelNames idStx =>
         let id := idStx.getId
-        bif levelNames.elem id then
+        uif levelNames.elem id then
           withRef idStx <| throwAlreadyDeclaredUniverseLevel id
         else
           pure (id :: levelNames))
@@ -360,7 +360,7 @@ along with the declaration.
 -/
 @[inline] def withDeprecationContextFromAttrs [MonadWithReaderOf Core.Context m]
     (attrs : Array Attribute) : m α → m α :=
-  bif attrs.any (·.name == `deprecated) then withoutCheckDeprecated else id
+  uif attrs.any (·.name == `deprecated) then withoutCheckDeprecated else id
 
 end Term
 

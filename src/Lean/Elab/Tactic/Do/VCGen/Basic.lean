@@ -109,7 +109,7 @@ def addSubGoalAsVC (goal : MVarId) : VCGenM PUnit := do
   -- VC to the user as-is, without abstracting any variables in the local context.
   -- This only makes sense for synthetic opaque metavariables.
   goal.setKind .syntheticOpaque
-  bif isSpecInvariantType (← getEnv) ty then
+  uif isSpecInvariantType (← getEnv) ty then
     modify fun s => { s with invariants := s.invariants.push goal }
   else
     modify fun s => { s with vcs := s.vcs.push goal }
@@ -151,7 +151,7 @@ def isDuplicable (e : Expr) : Bool := match e with
   | .app .. => e.isAppOf ``OfNat.ofNat
 
 def withLetDeclShared (name : Name) (type : Expr) (val : Expr) (k : Bool → Expr → (Expr → VCGenM Expr) → VCGenM α) (kind : LocalDeclKind := .default) : VCGenM α :=
-  bif isDuplicable val then
+  uif isDuplicable val then
     k false val pure
   else
     withLetDecl name type val (kind := kind) fun fv => do
@@ -161,11 +161,11 @@ def withLetDeclShared (name : Name) (type : Expr) (val : Expr) (k : Bool → Exp
 def isJP (n : Name) : Bool := n.eraseMacroScopes == `__do_jp
 
 partial def getNumJoinParams (joinTy : Expr) (resTy : Expr) : MetaM Nat := do
-  bif joinTy.isMData then
+  uif joinTy.isMData then
     return ← getNumJoinParams joinTy.consumeMData resTy
-  bif joinTy == resTy then
+  uif joinTy == resTy then
     return 0
-  else bif joinTy.isForall then
+  else uif joinTy.isForall then
     return 1 + (← getNumJoinParams joinTy.consumeMData.bindingBody! resTy)
   else
     throwError "getNumJoinParams: residual joinTy not a forall: {joinTy}"
@@ -180,7 +180,7 @@ partial def reduceProjBeta? (e : Expr) : MetaM (Option Expr) :=
       | .mdata _ f => go lastReduction f rargs
       | .app f a => go lastReduction f (rargs.push a)
       | .lam .. =>
-        bif rargs.size =ᵇ 0 then return lastReduction
+        uif rargs.size = 0 then return lastReduction
         let e' := f.betaRev rargs
         go (some e') e'.getAppFn e'.getAppRevArgs
       | .const name .. =>
@@ -208,7 +208,7 @@ def mkSpecContext (optConfig : Syntax) (lemmas : Syntax) (ignoreStarArg := false
   let mut simpStuff := #[]
   let mut starArg := false
   for arg in lemmas[1].getSepArgs do
-    bif arg.getKind == ``simpErase then
+    uif arg.getKind == ``simpErase then
       try
         -- Try and build SpecTheorems for the lemma to erase to see if it's
         -- meant to be interpreted by SpecTheorems. Otherwise fall back to SimpTheorems.
@@ -224,7 +224,7 @@ def mkSpecContext (optConfig : Syntax) (lemmas : Syntax) (ignoreStarArg := false
         specThms := specThms.erase specThm.proof
       catch _ =>
         simpStuff := simpStuff.push ⟨arg⟩ -- simp tracks its own erase stuff
-    else bif arg.getKind == ``simpLemma then
+    else uif arg.getKind == ``simpLemma then
       unless arg[0].isNone && arg[1].isNone do
         -- When there is ←, →, ↑ or ↓ then this is for simp
         simpStuff := simpStuff.push ⟨arg⟩
@@ -246,7 +246,7 @@ def mkSpecContext (optConfig : Syntax) (lemmas : Syntax) (ignoreStarArg := false
         catch _ =>
           simpStuff := simpStuff.push ⟨arg⟩
       | _ => withRef term <| throwError "Could not resolve spec theorem `{term}`"
-    else bif arg.getKind == ``simpStar then
+    else uif arg.getKind == ``simpStar then
       starArg := true
       simpStuff := simpStuff.push ⟨arg⟩
     else
@@ -259,7 +259,7 @@ def mkSpecContext (optConfig : Syntax) (lemmas : Syntax) (ignoreStarArg := false
     (simpTheorems := getSpecSimpTheorems)
     (ignoreStarArg := ignoreStarArg)
   -- logInfo m!"{res.ctx.simpTheorems.map (·.toUnfold.toList)}"
-  bif starArg && !ignoreStarArg then
+  uif starArg && !ignoreStarArg then
     let fvars ← getPropHyps
     for fvar in fvars do
       unless specThms.isErased (.local fvar) do
@@ -278,7 +278,7 @@ def mkSpecContext (optConfig : Syntax) (lemmas : Syntax) (ignoreStarArg := false
 def withLocalSpecs [Monad m] [MonadControlT VCGenM m] (xs : Array Expr) (k : m α) : m α :=
   controlAt VCGenM fun runInBase => do
     let rec loop i : VCGenM _ := do
-      bif h : i <ᵇ xs.size then
+      uif h : i < xs.size then
         let x := xs[i]
         try
           let thm ← mkSpecTheoremFromLocal x.fvarId! (eval_prio low)

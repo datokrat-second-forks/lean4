@@ -25,9 +25,9 @@ def WhereFinallyView.isNone (o : WhereFinallyView) : Bool := o.ref.isMissing && 
 def mkWhereFinallyView {m} [Monad m] [MonadError m] (stx : TSyntax ``Parser.Term.whereDecls) : m WhereFinallyView := do
   -- Fail gracefully upon partial parses/missing where or finally sections
   let whereFinally := stx.raw[2][0]
-  bif whereFinally.isMissing then
+  uif whereFinally.isMissing then
     return { ref := stx, tactic := ⟨.missing⟩ }
-  bif !whereFinally[2][0].isMissing then
+  uif !whereFinally[2][0].isMissing then
     throwErrorAt stx "`where ... finally` does not currently support any named sub-sections `| sectionName => ...`"
   let tactic := ⟨whereFinally[1]⟩
   return { ref := whereFinally, tactic }

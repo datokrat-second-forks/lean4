@@ -201,7 +201,7 @@ partial def ofElem (stx : DoElem) : TermElabM ControlInfo := do
     -- warning on subsequent elements is actionable.
     let info ← ofSeq bodySeq
     return { info with  -- keep only reassigns and returnsEarly
-      numRegularExits := bif info.breaks then 1 else 0,
+      numRegularExits := uif info.breaks then 1 else 0,
       continues := false,
       breaks := false,
       noFallthrough := !info.breaks,
@@ -257,10 +257,10 @@ partial def ofElem (stx : DoElem) : TermElabM ControlInfo := do
 partial def ofLetOrReassignArrow (reassignment : Bool) (decl : TSyntax [``doIdDecl, ``doPatDecl]) : TermElabM ControlInfo := do
   match decl with
   | `(doIdDecl| $x:ident $[: $_]? ← $rhs) =>
-    let reassigns := bif reassignment then #[x] else #[]
+    let reassigns := uif reassignment then #[x] else #[]
     ofLetOrReassign reassigns rhs none none
   | `(doPatDecl| $pattern $[: $_]? ← $rhs $[| $otherwise? $[$body??]?]?) =>
-    let reassigns ← bif reassignment then getPatternVarsEx pattern else pure #[]
+    let reassigns ← uif reassignment then getPatternVarsEx pattern else pure #[]
     ofLetOrReassign reassigns rhs otherwise? body??.join
   | _ => throwError "Not a let or reassignment declaration: {toString decl}"
 

@@ -82,7 +82,7 @@ private def mkReplacementHint (stx : Syntax) : CoreM MessageData := do
   -- Elaborators may rewrite syntax before elaborating it, e.g. by lifting nested actions out of a
   -- `do` element, and the replacement of such syntax does not reflect the source
   let isRewritten (s : Syntax) := (s.isAtom || s.isIdent) && !(s.getHeadInfo matches .original ..)
-  bif (stx.find? isRewritten).isSome then return .nil
+  uif (stx.find? isRewritten).isSome then return .nil
   -- A failing replacement, even one exceeding a resource limit, must not prevent the warning
   tryCatchRuntimeEx
     (do
@@ -119,14 +119,14 @@ def checkDeprecatedSyntax (stx : Syntax) (macroStack : MacroStack) : CoreM Unit 
     unless (← Core.shouldCheckDeprecated stx) do
       return
     let extraMsg := entry.textSuffix
-    bif stx.getHeadInfo matches .original .. then
+    uif stx.getHeadInfo matches .original .. then
       Linter.logLint Linter.linter.deprecated.syntax stx
         (m!"syntax '{kind}' has been deprecated{extraMsg}" ++ (← mkReplacementHint stx))
       return
     match macroStack with
     | { before := macroStx, .. } :: { before := callerStx, .. } :: _ =>
       let expandedFrom :=
-        bif callerStx.getKind != macroStx.getKind then
+        uif callerStx.getKind != macroStx.getKind then
           m!" (expanded from '{callerStx.getKind}')"
         else m!""
       Linter.logLint Linter.linter.deprecated.syntax macroStx
@@ -148,7 +148,7 @@ these macros.
 -/
 def checkDeprecatedQuotedSyntax (stx : Syntax) : CoreM Unit := do
   let some entry := (deprecatedSyntaxExt.getState (← getEnv)).find? stx.getKind | return
-  bif stx.getHeadInfo matches .synthetic .. then return
+  uif stx.getHeadInfo matches .synthetic .. then return
   unless Linter.getLinterValue Linter.linter.deprecated.syntax (← Linter.getLinterOptions) do
     return
   unless (← Core.shouldCheckDeprecated stx) do

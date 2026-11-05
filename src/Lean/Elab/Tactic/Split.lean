@@ -20,9 +20,9 @@ open Meta
   let loc := expandOptLocation stx[2]
   match loc with
   | Location.targets hyps simplifyTarget =>
-    bif (hyps.size >ᵇ 0 && simplifyTarget) || hyps.size >ᵇ 1 then
+    uif (hyps.size > 0 ∧ simplifyTarget) ∨ hyps.size > 1 then
       throwMultipleLocationsAt stx[2] simplifyTarget hyps
-    bif simplifyTarget then
+    uif simplifyTarget then
       liftMetaTactic fun mvarId => do
        let some mvarIds ← splitTarget? mvarId | throwCouldNotSplitGoal mvarId
         return mvarIds
@@ -42,17 +42,17 @@ open Meta
       return mvarIds
 where
   traceHint : MessageData := .ofLazyM do
-    bif ! (← getBoolOption `trace.split.failure) then
+    uif ! (← getBoolOption `trace.split.failure) then
       return .hint' m!"Use `set_option trace.split.failure true` to display additional diagnostic information"
     else return .nil
 
   throwTermUnsupported (t : Term) (loc : Option Syntax) := do
     withMainContext do
       let mut error := m!"Tactic `split` failed: Specifying a term to split is not supported yet"
-      bif t.raw.isIdent then
+      uif t.raw.isIdent then
         let name := t.raw.getId
         let lctx ← getLCtx
-        bif name.isStr && loc.isNone then
+        uif name.isStr && loc.isNone then
           if let some decl := lctx.findFromUserName? name then
             let e := decl.toExpr
             let hint ← MessageData.hint
@@ -62,9 +62,9 @@ where
       throwErrorAt t error
 
   throwMultipleLocationsAt (stx : Syntax) (simplifyTarget : Bool) (hyps : Array Syntax) {α} : MetaM α := do
-    let goalStr := bif simplifyTarget then "the goal and " else ""
+    let goalStr := uif simplifyTarget then "the goal and " else ""
     let hypsStr :=
-      (bif hyps.size == 1 then m!"hypothesis" else m!"hypotheses") ++
+      (uif hyps.size == 1 then m!"hypothesis" else m!"hypotheses") ++
       MessageData.andList (hyps.toList.map (m!"`{·}`"))
     throwErrorAt stx m!"Tactic `split` failed: Specifying multiple targets ({goalStr ++ hypsStr}) is not supported"
       ++ .hint' m!"Specify a single target to split, or use `split at *` to split the first target that can be automatically split"
@@ -82,7 +82,7 @@ where
     let note := .note "`split at *` does not attempt to split at non-propositional hypotheses \
       or those on which other hypotheses depend. It may still be possible to manually split a \
       hypothesis using `split at`"
-    bif fvarIds.size >ᵇ 0 then
+    uif fvarIds.size > 0 then
       let fvarMsgs := fvarIds.toList.map (m!"`{Expr.fvar ·}`")
       let fvarMsgs := MessageData.joinSep fvarMsgs ", "
       Meta.throwTacticEx `split mvarId <|
@@ -99,9 +99,9 @@ where
       else
         return false
     let kind? ←
-      bif type.isAppOf ``And then pure <| some "conjunction"
-      else bif type.isAppOf ``Prod then pure <| some "pair"
-      else bif (← isFnStructureConst type.getAppFn) then pure <| some "structure"
+      uif type.isAppOf ``And then pure <| some "conjunction"
+      else uif type.isAppOf ``Prod then pure <| some "pair"
+      else uif (← isFnStructureConst type.getAppFn) then pure <| some "structure"
       else pure <| none
     if let some kind := kind? then
       return .hint' m!"If you meant to destruct this {kind}, use the `cases` tactic instead"

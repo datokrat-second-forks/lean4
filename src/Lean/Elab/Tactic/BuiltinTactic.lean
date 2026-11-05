@@ -37,7 +37,7 @@ partial def evalSepTactics : Tactic := goEven
 where
   -- `stx[0]` is the next tactic step, if any
   goEven stx := do
-    bif stx.getNumArgs == 0 then
+    uif stx.getNumArgs == 0 then
       -- No more tactic steps, but if the parent still passed us a tactic snapshot
       -- bundle (e.g. for an empty `by` body) we must resolve its promise so that
       -- consumers walking the snapshot tree (like the language-server info-tree
@@ -110,7 +110,7 @@ where
           -- incremental reporting done in `inner?`. Do use default range in all other cases so that
           -- reporting ranges are properly nested.
           reportingRange :=
-            bif stxs.getNumArgs == 0 then .skip else SnapshotTask.defaultReportingRange stxs
+            uif stxs.getNumArgs == 0 then .skip else SnapshotTask.defaultReportingRange stxs
         }]
       }
       -- Run `tac` in a fresh info tree state and store resulting state in snapshot for
@@ -148,7 +148,7 @@ where
         goOdd stxs
   -- `stx[0]` is the next separator, if any
   goOdd stx := do
-    bif stx.getNumArgs == 0 then
+    uif stx.getNumArgs == 0 then
       return
     saveTacticInfoForToken stx[0] -- add `TacticInfo` node for `;`
     -- disable further reuse on separator change as to not reuse wrong `TacticInfo`
@@ -192,7 +192,7 @@ def evalTacticCDot : Tactic := fun stx => do
     Term.withNarrowedArgTacticReuse (argIdx := 1) evalTactic stx
 
 private def getOptRotation (stx : Syntax) : Nat :=
-  bif stx.isNone then 1 else stx[0].toNat
+  uif stx.isNone then 1 else stx[0].toNat
 
 @[builtin_tactic Parser.Tactic.rotateLeft] def evalRotateLeft : Tactic := fun stx => do
   let n := getOptRotation stx[1]
@@ -223,7 +223,7 @@ def elabSetOption : Tactic := fun stx => do
       Term.withoutTacticIncrementality (stx[1].getId == `diagnostics) do
         Term.withNarrowedArgTacticReuse (argIdx := 5) evalTactic stx
     finally
-      bif stx[1].getId == `diagnostics then
+      uif stx[1].getId == `diagnostics then
         reportDiag
 
 @[builtin_tactic Parser.Tactic.allGoals] def evalAllGoals : Tactic := fun stx => do
@@ -239,7 +239,7 @@ def elabSetOption : Tactic := fun stx => do
           evalTactic stx[1]
           pure abort)
         (fun ex => do
-          bif (← read).recover then
+          uif (← read).recover then
             logException ex
             let msgLog ← Core.getMessageLog
             saved.restore
@@ -249,7 +249,7 @@ def elabSetOption : Tactic := fun stx => do
           else
             throw ex)
       mvarIdsNew := mvarIdsNew ++ (← getUnsolvedGoals)
-  bif abort then
+  uif abort then
     throwAbortTactic
   setGoals mvarIdsNew.toList
 
@@ -275,7 +275,7 @@ def evalTacticSeq : Tactic :=
   Term.withNarrowedArgTacticReuse (argIdx := 0) evalTactic
 
 partial def evalChoiceAux (choiceStx : Syntax) (i : Nat) : TacticM Unit :=
-  bif i <ᵇ choiceStx.getNumArgs then
+  uif i < choiceStx.getNumArgs then
     let tactic := choiceStx.getArg i
     catchInternalId unsupportedSyntaxExceptionId
       (do
@@ -296,7 +296,7 @@ partial def evalChoiceAux (choiceStx : Syntax) (i : Nat) : TacticM Unit :=
 @[builtin_tactic failIfSuccess] def evalFailIfSuccess : Tactic := fun stx =>
   Term.withoutErrToSorry <| withoutRecover do
     let tactic := stx[1]
-    bif (← try evalTactic tactic; pure true catch _ => pure false) then
+    uif (← try evalTactic tactic; pure true catch _ => pure false) then
       throwError "The tactic provided to `fail_if_success` succeeded but was expected to fail:{indentD stx[1]}"
 
 @[builtin_tactic traceState] def evalTraceState : Tactic := fun _ => do
@@ -330,7 +330,7 @@ partial def evalChoiceAux (choiceStx : Syntax) (i : Nat) : TacticM Unit :=
     for t in ts, i in 0...* do
       -- We want `intro` and `intro h` to have similar tactic info so that the goal states
       -- are similar at each position, so we include `intro` with the first argument for the tactic info range.
-      let ctxRef := bif i == 0 then mkNullNode #[tk, t] else t
+      let ctxRef := uif i == 0 then mkNullNode #[tk, t] else t
       withTacticInfoContext ctxRef <| withRef t do evalArg t
   | _ => throwUnsupportedSyntax
 where
@@ -360,7 +360,7 @@ where
   introStep (nref : Syntax) (n : Name) (typeStx? : Option Syntax := none) : TacticM Unit := do
     let mvarIdOrig ← getMainGoal
     let subst := n == `rfl
-    let n := bif subst then `_ else n
+    let n := uif subst then `_ else n
     let fvarId ← liftMetaTacticAux fun mvarId => do
       let (fvarId, mvarId) ← mvarId.intro n
       pure (fvarId, [mvarId])
@@ -383,7 +383,7 @@ where
         logUnassignedAndAbort mvars
         liftMetaTactic1 fun mvarId => mvarId.replaceLocalDeclDefEq fvarId type
     withMainContext do
-      bif subst then
+      uif subst then
         -- Note: the mdata prevents `rfl` from getting highlighted like a variable
         Term.addTermInfo' nref (.mdata {} fvar)
         liftMetaTactic1 fun mvarId => return (← substEq mvarId fvarId).2
@@ -439,13 +439,13 @@ where
     let pushFVarId (fvarIds : Array FVarId) (x : Term) (fvarId : FVarId) : TacticM (Array FVarId) := do
       unless ← fvarId.isLetVar do
         throwErrorAt x "Hypothesis `{mkFVar fvarId}` is not a local definition."
-      bif fvarIds.contains fvarId then
+      uif fvarIds.contains fvarId then
         throwErrorAt x "Hypothesis `{mkFVar fvarId}` appears multiple times."
       return fvarIds.push fvarId
     for arg in args do
       match arg with
       | `(clearValueArg| *) =>
-        bif hasStar then
+        uif hasStar then
           throwErrorAt arg "Multiple `*` arguments provided."
         hasStar := true
       | `(clearValueArg| ($h : $x = $v)) =>
@@ -478,7 +478,7 @@ where
       for hypStx in hypStxs, hypFVarId in hypFVarIds do
         Term.addTermInfo' (isBinder := true) hypStx (Expr.fvar hypFVarId)
     let toClear ← g.withContext do
-      bif hasStar then pure <| (← getLocalHyps).map Expr.fvarId!
+      uif hasStar then pure <| (← getLocalHyps).map Expr.fvarId!
       else sortFVarIds fvarIds
     let mut succeeded := false
     for fvarId in toClear.reverse do
@@ -486,7 +486,7 @@ where
         g ← g.clearValue fvarId
         succeeded := true
       catch _ =>
-        bif fvarIds.contains fvarId then
+        uif fvarIds.contains fvarId then
           g.withContext do throwError "Tactic `clear_value` failed, the value of `{Expr.fvar fvarId}` cannot be cleared.\n{g}"
     unless succeeded do
       g.withContext do throwError "Tactic `clear_value` failed to clear any values.\n{g}"
@@ -503,7 +503,7 @@ def forEachVar (hs : Array Syntax) (tac : MVarId → FVarId → MetaM MVarId) : 
   match stx with
   | `(tactic| subst $hs*) => forEachVar hs fun mvarId fvarId => do
     let decl ← fvarId.getDecl
-    bif decl.isLet then
+    uif decl.isLet then
       -- Zeta delta reduce the let and eliminate it.
       let (_, mvarId) ← mvarId.withReverted #[fvarId] fun mvarId' fvars => mvarId'.withContext do
         let tgt ← mvarId'.getType
@@ -565,13 +565,13 @@ where
       | [] => pure <| MessageData.note m!"There are no cases to select."
       | [availableName] =>
         let msg := m!"The only available case tag is {showTagName availableName}."
-        bif isOriginalStx then
+        uif isOriginalStx then
           MessageData.hint msg (mkSuggestions #[availableName]) (ref? := tagStx)
         else
           pure <| MessageData.hint' msg
       | availableNames =>
         let msg := "Available tags:"
-        bif isOriginalStx then
+        uif isOriginalStx then
           MessageData.hint msg (mkSuggestions availableNames.toArray) (ref? := tagStx)
         else
           pure <| MessageData.hint' m!"{msg}{commaList <| availableNames.map showTagName}"
@@ -592,7 +592,7 @@ where
     names.map fun name =>
       { suggestion := name.toString
         toCodeActionTitle? := some fun s => s!"Change case name: {s}"
-        preInfo? := bif names.size == 1 then none else s!"`{name}`: " : Hint.Suggestion }
+        preInfo? := uif names.size == 1 then none else s!"`{name}`: " : Hint.Suggestion }
 
 @[builtin_tactic «case», builtin_incremental]
 def evalCase : Tactic
@@ -632,11 +632,11 @@ def evalCase : Tactic
 
 @[builtin_tactic «first»] partial def evalFirst : Tactic := fun stx => do
   let tacs := stx[1].getArgs
-  bif tacs.isEmpty then throwUnsupportedSyntax
+  uif tacs.isEmpty then throwUnsupportedSyntax
   loop tacs 0
 where
   loop (tacs : Array Syntax) (i : Nat) :=
-    bif i == tacs.size - 1 then
+    uif i == tacs.size - 1 then
       evalTactic tacs[i]![1]
     else
       evalTactic tacs[i]![1] <|> loop tacs (i+1)

@@ -28,10 +28,10 @@ private def mkAuxiliaryMatchTerm (parentTag : Name) (matchTac : Syntax) : MacroM
     -- must generate a separate mvar for each `| $patGroup | ... => ...` as they can have different local contexts
     for patGroup in alt[1].getSepArgs do
       let mut alt := alt.setArg 1 (mkNullNode #[patGroup])
-      bif holeOrTacticSeq.isOfKind ``Parser.Term.syntheticHole then
+      uif holeOrTacticSeq.isOfKind ``Parser.Term.syntheticHole then
         pure ()
-      else bif holeOrTacticSeq.isOfKind ``Parser.Term.hole then
-        let tag := bif alts.size >ᵇ 1 then parentTag ++ (`match).appendIndexAfter nextIdx else parentTag
+      else uif holeOrTacticSeq.isOfKind ``Parser.Term.hole then
+        let tag := uif alts.size > 1 then parentTag ++ (`match).appendIndexAfter nextIdx else parentTag
         let holeName := mkIdentFrom holeOrTacticSeq tag
         let newHole ← `(?$holeName:ident)
         nextIdx := nextIdx + 1

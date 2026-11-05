@@ -80,7 +80,7 @@ def fixLevelParams (preDefs : Array PreDefinition) (scopeLevelNames allUserLevel
       let us := levelParams.map mkLevelParam
       let fixExpr (e : Expr) : Expr :=
         e.replace fun c => match c with
-          | Expr.const declName _ => bif preDefs.any fun preDef => preDef.declName == declName then some $ Lean.mkConst declName us else none
+          | Expr.const declName _ => uif preDefs.any fun preDef => preDef.declName == declName then some $ Lean.mkConst declName us else none
           | _ => none
       return preDefs.map fun preDef =>
         { preDef with
@@ -97,11 +97,11 @@ Applies `Meta.letToHave` to the values of defs, instances, and abbrevs.
 Does not apply the transformation to values that are proofs, or to unsafe definitions.
 -/
 def letToHaveValue (preDef : PreDefinition) : MetaM PreDefinition := withRef preDef.ref do
-  bif !cleanup.letToHave.get (← getOptions)
+  uif !cleanup.letToHave.get (← getOptions)
       || preDef.modifiers.isUnsafe
       || preDef.kind matches .theorem | .example | .opaque then
     return preDef
-  else bif (← Meta.isProp preDef.type) then
+  else uif (← Meta.isProp preDef.type) then
     return preDef
   else
     let value ← Meta.letToHave preDef.value
@@ -111,14 +111,14 @@ def letToHaveValue (preDef : PreDefinition) : MetaM PreDefinition := withRef pre
 Applies `Meta.letToHave` to the type of the predef.
 -/
 def letToHaveType (preDef : PreDefinition) : MetaM PreDefinition := withRef preDef.ref do
-  bif !cleanup.letToHave.get (← getOptions) || preDef.kind matches .example then
+  uif !cleanup.letToHave.get (← getOptions) || preDef.kind matches .example then
     return preDef
   else
     let type ← Meta.letToHave preDef.type
     return { preDef with type }
 
 def abstractNestedProofs (preDef : PreDefinition) (cache := true) : MetaM PreDefinition := withRef preDef.ref do
-  bif preDef.kind.isTheorem || preDef.kind.isExample then
+  uif preDef.kind.isTheorem || preDef.kind.isExample then
     pure preDef
   else do
     let value ←
@@ -146,9 +146,9 @@ register_builtin_option diagnostics.threshold.proofSize : Nat := {
 }
 
 private def reportTheoremDiag (d : TheoremVal) : TermElabM Unit := do
-  bif (← isDiagnosticsEnabled) then
+  uif (← isDiagnosticsEnabled) then
     let proofSize ← d.value.numObjs
-    bif proofSize >ᵇ diagnostics.threshold.proofSize.get (← getOptions) then
+    uif proofSize > diagnostics.threshold.proofSize.get (← getOptions) then
       let sizeMsg := MessageData.trace { cls := `size } m!"{proofSize}" #[]
       let constOccs ← d.value.numApps (threshold := diagnostics.threshold.get (← getOptions))
       let constOccsMsg ← constOccs.mapM fun (declName, numOccs) => return MessageData.trace { cls := `occs } m!"{.ofConstName declName} ↦ {numOccs}" #[]
@@ -180,14 +180,14 @@ private def addNonRecAux (docCtx : LocalContext × LocalInstances) (preDef : Pre
     (all : List Name) (applyAttrAfterCompilation := true) (cacheProofs := true) (cleanupValue := false)
     (isRecursive := false) (abstractProofs := true) : TermElabM Unit :=
   withRef preDef.ref do
-    let preDef ← bif abstractProofs then abstractNestedProofs (cache := cacheProofs) preDef else pure preDef
+    let preDef ← uif abstractProofs then abstractNestedProofs (cache := cacheProofs) preDef else pure preDef
     let preDef ← letToHaveType preDef
-    let preDef ← bif cleanupValue then letToHaveValue preDef else pure preDef
+    let preDef ← uif cleanupValue then letToHaveValue preDef else pure preDef
     let mkDefDecl : TermElabM Declaration :=
       return Declaration.defnDecl {
           name := preDef.declName, levelParams := preDef.levelParams, type := preDef.type, value := preDef.value
           hints := ReducibilityHints.regular (getMaxHeight (← getEnv) preDef.value + 1)
-          safety := bif preDef.modifiers.isUnsafe then DefinitionSafety.unsafe else DefinitionSafety.safe,
+          safety := uif preDef.modifiers.isUnsafe then DefinitionSafety.unsafe else DefinitionSafety.safe,
           all }
     let mkThmDecl : TermElabM Declaration := do
       let d := {
@@ -207,25 +207,25 @@ private def addNonRecAux (docCtx : LocalContext × LocalInstances) (preDef : Pre
         pure <| Declaration.defnDecl {
           name := preDef.declName, levelParams := preDef.levelParams, type := preDef.type, value := preDef.value
           hints := ReducibilityHints.«abbrev»
-          safety := bif preDef.modifiers.isUnsafe then DefinitionSafety.unsafe else DefinitionSafety.safe,
+          safety := uif preDef.modifiers.isUnsafe then DefinitionSafety.unsafe else DefinitionSafety.safe,
           all }
       | DefKind.def | DefKind.example => mkDefDecl
-      | DefKind.«instance» => bif (← Meta.isProp preDef.type) then mkThmDecl else mkDefDecl
+      | DefKind.«instance» => uif (← Meta.isProp preDef.type) then mkThmDecl else mkDefDecl
     addDecl decl
-    bif isRecursive then markAsRecursive preDef.declName
+    uif isRecursive then markAsRecursive preDef.declName
     applyAttributesOf #[preDef] AttributeApplicationTime.afterTypeChecking
     match preDef.modifiers.computeKind with
     -- Tags may have been added by `elabMutualDef` already, but that is not the only caller
-    | .meta          => bif !isMarkedMeta (← getEnv) preDef.declName then modifyEnv (markMeta · preDef.declName)
-    | .noncomputable => bif !isNoncomputable (asyncMode := .local) (← getEnv) preDef.declName then modifyEnv (addNoncomputable · preDef.declName)
+    | .meta          => uif !isMarkedMeta (← getEnv) preDef.declName then modifyEnv (markMeta · preDef.declName)
+    | .noncomputable => uif !isNoncomputable (asyncMode := .local) (← getEnv) preDef.declName then modifyEnv (addNoncomputable · preDef.declName)
     | _              => pure ()
-    bif compile && shouldGenCodeFor preDef then
+    uif compile && shouldGenCodeFor preDef then
       compileDecl decl
-    bif applyAttrAfterCompilation then
+    uif applyAttrAfterCompilation then
       saveEqnAffectingOptions preDef.declName
       enableRealizationsForConst preDef.declName
     addPreDefDocs docCtx preDef
-    bif applyAttrAfterCompilation then
+    uif applyAttrAfterCompilation then
       applyAttributesOf #[preDef] AttributeApplicationTime.afterCompilation
     addPreDefInfo preDef
 
@@ -249,8 +249,8 @@ def addNonRec (docCtx : LocalContext × LocalInstances) (preDef : PreDefinition)
   Eliminate recursive application annotations containing syntax. These annotations are used by the well-founded recursion module
   to produce better error messages. -/
 def eraseRecAppSyntaxExpr (e : Expr) : CoreM Expr := do
-  bif e.find? hasRecAppSyntax |>.isSome then
-    Core.transform e (post := fun e => pure <| TransformStep.done <| bif hasRecAppSyntax e then e.mdataExpr! else e)
+  uif e.find? hasRecAppSyntax |>.isSome then
+    Core.transform e (post := fun e => pure <| TransformStep.done <| uif hasRecAppSyntax e then e.mdataExpr! else e)
   else
     return e
 
@@ -285,14 +285,14 @@ def addAndCompileUnsafe
 def addAndCompilePartialRec
     (docCtx : LocalContext × LocalInstances) (preDefs : Array PreDefinition) :
     TermElabM Unit := do
-  bif preDefs.all shouldGenCodeFor then
+  uif preDefs.all shouldGenCodeFor then
     withEnableInfoTree false do
       addAndCompileUnsafe docCtx (safety := DefinitionSafety.partial) <| preDefs.map fun preDef =>
         { preDef with
           declName  := Compiler.mkUnsafeRecName preDef.declName
           value     := preDef.value.replace fun e => match e with
             | Expr.const declName us =>
-              bif preDefs.any fun preDef => preDef.declName == declName then
+              uif preDefs.any fun preDef => preDef.declName == declName then
                 some <| mkConst (Compiler.mkUnsafeRecName declName) us
               else
                 none
@@ -303,16 +303,16 @@ private def containsRecFn (recFnNames : Array Name) (e : Expr) : Bool :=
   (e.find? fun e => e.isConst && recFnNames.contains e.constName!).isSome
 
 def ensureNoRecFn (recFnNames : Array Name) (e : Expr) : MetaM Unit := do
-  bif containsRecFn recFnNames e then
+  uif containsRecFn recFnNames e then
     Meta.forEachExpr e fun e => do
-      bif e.getAppFn.isConst && recFnNames.contains e.getAppFn.constName! then
+      uif e.getAppFn.isConst && recFnNames.contains e.getAppFn.constName! then
         throwError "unexpected occurrence of recursive application{indentExpr e}"
 
 /--
 Checks that all codomains have the same level, throws an error otherwise.
 -/
 def checkCodomainsLevel (preDefs : Array PreDefinition) : MetaM Unit := do
-  bif preDefs.size =ᵇ 1 then return
+  uif preDefs.size = 1 then return
   let arities ← preDefs.mapM fun preDef =>
     lambdaTelescope preDef.value fun xs _ => return xs.size
   forallBoundedTelescope preDefs[0]!.type arities[0]!  fun _ type₀ => do

@@ -38,7 +38,7 @@ def showStateAt (ref : Syntax) (filter? : Option (TSyntax `grind_filter)) : Grin
 
 def evalSepTactics (stx : Syntax) : GrindTacticM Unit := do
   for arg in stx.getArgs, i in *...stx.getArgs.size do
-    bif i % 2 == 0 then
+    uif i % 2 == 0 then
       match arg with
       | `(Parser.Tactic.Grind.grindStep| $tac:grind) => evalGrindTactic tac
       | `(Parser.Tactic.Grind.grindStep| $tac:grind | $[$filter?]?) =>
@@ -110,7 +110,7 @@ def evalCheck (tacticName : Name) (k : GoalM Bool)
      so that satellite solvers (lia, ring, linarith) see all hypotheses.
      This matches the behavior of these tactics in default tactic mode
      where `lia` can close `x > 1 → x + y + z > 0` directly. -/
-  bif (← read).sym then
+  uif (← read).sym then
     match (← liftActionCore <| Action.intros 0 >> Action.assertAll) with
     | .closed   => return () -- closed the goal
     | .subgoals => pure () -- continue
@@ -122,7 +122,7 @@ def evalCheck (tacticName : Name) (k : GoalM Bool)
     processToDo
     unless (← Grind.getConfig).verbose do return ()
     unless recover do return ()
-    bif (← get).inconsistent then return ()
+    uif (← get).inconsistent then return ()
     let some msg ← pp? (← get) | return ()
     logInfo msg
 
@@ -146,7 +146,7 @@ def ematchThms (only : Bool) (thms : Array EMatchTheorem) : GrindTacticM Unit :=
   -- **TODO**: add `instantiate` action that takes `thms`
   let progress ← liftGoalM do
     let thms ← thms.mapM (preprocessTheorem · 0)
-    bif only then ematchOnly thms else ematch thms
+    uif only then ematchOnly thms else ematch thms
   unless progress do
     throwError "`instantiate` tactic failed to instantiate new facts, use `show_patterns` to see active theorems and their patterns."
   liftAction Action.assertAll
@@ -155,7 +155,7 @@ def ematchThms (only : Bool) (thms : Array EMatchTheorem) : GrindTacticM Unit :=
   let `(grind| instantiate $[ only%$only ]? $[ approx ]? $[ [ $[$thmRefs?:thm],* ] ]?) := stx | throwUnsupportedSyntax
   let goal ← getMainGoal
   let only := only.isSome
-  let initThms ← bif only then goal.getActiveMatchEqTheorems else pure #[]
+  let initThms ← uif only then goal.getActiveMatchEqTheorems else pure #[]
   let mut thms := initThms
   if let some thmRefs := thmRefs? then
     for thmRef in thmRefs do
@@ -178,7 +178,7 @@ where
       -- cache the theorem types.
       let type ← inferType thm.proof
       let anchor ← liftGrindM <| getAnchor type
-      bif anchorRef.matches anchor then
+      uif anchorRef.matches anchor then
         -- **Note**: We display the anchor term at most once.
         unless found.contains type do
           logTheoremAnchor thm.proof
@@ -192,12 +192,12 @@ where
       collectThms anchorRef goal.ematch.thms
       collectThms anchorRef goal.ematch.newThms
       get
-    bif thms.isEmpty then
+    uif thms.isEmpty then
       throwError "no local theorems"
     return thms
 
   ensureNoMinIndexable (minIndexable : Bool) : MetaM Unit := do
-    bif minIndexable then
+    uif minIndexable then
       throwError "redundant modifier `!` in `grind` parameter"
 
   elabEMatchTheorem (declName : Name) (kind : Grind.EMatchTheoremKind) (minIndexable : Bool) : GrindTacticM (Array EMatchTheorem) := do
@@ -212,14 +212,14 @@ where
         let thm₂ ← Grind.mkEMatchTheoremForDecl declName (.eqRhs gen) params.symPrios
         return #[thm₁, thm₂]
       | _ =>
-        bif kind matches .eqLhs _ | .eqRhs _ then
+        uif kind matches .eqLhs _ | .eqRhs _ then
           ensureNoMinIndexable minIndexable
         let thm ← Grind.mkEMatchTheoremForDecl declName kind params.symPrios (minIndexable := minIndexable)
         return #[thm]
     | .defn =>
-      bif (← isReducible declName) then
+      uif (← isReducible declName) then
         throwError "`{.ofConstName declName}` is a reducible definition, `grind` automatically unfolds them"
-      bif !kind.isEqLhs && !kind.isDefault then
+      uif !kind.isEqLhs && !kind.isDefault then
         throwError "invalid `grind` parameter, `{.ofConstName declName}` is a definition, the only acceptable (and redundant) modifier is '='"
       ensureNoMinIndexable minIndexable
       let some thms ← Grind.mkEMatchEqTheoremsForDef? declName
@@ -240,7 +240,7 @@ where
       let params := (← read).params
       let thms := params.extensions.find (.decl declName)
       let thms := thms.filter fun thm => thm.kind == .user
-      bif thms.isEmpty then
+      uif thms.isEmpty then
         throwError "invalid use of `usr` modifier, `{.ofConstName declName}` does not have patterns specified with the command `grind_pattern`"
       return thms.toArray
     | .ematch kind =>
@@ -248,7 +248,7 @@ where
     | .infer =>
       let goal ← getMainGoal
       let thms := goal.ematch.thmMap.find (.decl declName)
-      bif thms.isEmpty then
+      uif thms.isEmpty then
         elabEMatchTheorem declName (.default false) minIndexable
       else
         return thms.toArray
@@ -258,12 +258,12 @@ where
 def logAnchor (c : SplitInfo) : TermElabM Unit := do
   let e := c.getExpr
   let stx ← getRef
-  bif e.isFVar || e.isConst then
+  uif e.isFVar || e.isConst then
     /-
     **Note**: When `e` is a constant or free variable, the hover displays `e`
     -/
     Term.addTermInfo' stx e
-  else bif (← isType e) then
+  else uif (← isType e) then
     /-
     **Note**: If `e` is a type, we create a fake `sorry` to force `e` to be displayed
     when we hover over the anchor.
@@ -282,7 +282,7 @@ def split? (c : SplitInfo) : Action := fun goal kna kp => do
   let (.ready numCases isRec _, goal) ← GoalM.run goal (checkSplitStatus c)
     | throwError "`cases` tactic failed, case-split is not ready{indentExpr c.getExpr}"
   let gen := goal.getGeneration c.getExpr
-  let genNew := bif numCases >ᵇ 1 || isRec then gen+1 else gen
+  let genNew := uif numCases > 1 ∨ isRec then gen+1 else gen
   let a : Action :=
     Action.splitCore c numCases isRec (stopAtFirstFailure := false) (compress := false) >> Action.intros genNew >> Action.assertAll
   a goal kna kp
@@ -302,11 +302,11 @@ def drainRawFacts : GrindTacticM Bool := do
   let (anchor, ordinal) ← match stx with
     | `(grind| cases #$anchor:hexnum) => pure ((anchor : TSyntax `hexnum), 1)
     | `(grind| cases #$anchor:hexnum/$i:num) =>
-      bif i.getNat == 0 then
+      uif i.getNat == 0 then
         throwErrorAt i "invalid anchor ordinal, it must be ≥ 1"
       pure (anchor, i.getNat)
     | _ => throwUnsupportedSyntax
-  bif (← drainRawFacts) then return ()
+  uif (← drainRawFacts) then return ()
   withMainContext do
   let anchorRef ← elabAnchorRef anchor
   let c? ← liftGoalM do
@@ -314,14 +314,14 @@ def drainRawFacts : GrindTacticM Bool := do
     let mut firstMatch? := none
     for c in (← get).split.candidates do
       let a ← c.getAnchor
-      bif anchorRef.matches a then
-        bif firstMatch?.isNone then
+      uif anchorRef.matches a then
+        uif firstMatch?.isNone then
           firstMatch? := some c
-        bif (← checkSplitStatus c) matches .ready .. then
+        uif (← checkSplitStatus c) matches .ready .. then
           remaining := remaining - 1
-          bif remaining == 0 then
+          uif remaining == 0 then
             return some c
-    bif ordinal == 1 then
+    uif ordinal == 1 then
       /-
       **Note**: Fall back to a candidate that is not ready so that `split?` can
       produce a more informative error message.
@@ -347,7 +347,7 @@ def mkCasesSuggestions (candidates : Array SplitCandidateWithAnchor) (numDigits 
     let anchorPrefix := anchor >>> shift
     let ordinal := counts.getD anchorPrefix 0
     counts := counts.insert anchorPrefix (ordinal + 1)
-    let tac ← bif ordinal == 0 then
+    let tac ← uif ordinal == 0 then
       `(grind| cases $anchorStx:anchor)
     else
       `(grind| cases $anchorStx:anchor/$(quote (ordinal + 1)):num)
@@ -360,7 +360,7 @@ def mkCasesSuggestions (candidates : Array SplitCandidateWithAnchor) (numDigits 
 
 @[builtin_grind_tactic casesTrace] def evalCasesTrace : GrindTactic := fun stx => do
   let `(grind| cases? $[$filter?]?) := stx | throwUnsupportedSyntax
-  bif (← drainRawFacts) then return ()
+  uif (← drainRawFacts) then return ()
   withMainContext do
   let filter ← elabFilter filter?
   let { candidates, numDigits } ← liftGoalM <| getSplitCandidateAnchors filter.eval
@@ -375,7 +375,7 @@ def mkCasesSuggestions (candidates : Array SplitCandidateWithAnchor) (numDigits 
   the composition would never fail. `cases_next` must fail when there is no split
   candidate (see `grind_finish_trace.lean`); `repeat`/`first` idioms rely on it.
   -/
-  bif (← drainRawFacts) then return ()
+  uif (← drainRawFacts) then return ()
   liftAction (Action.splitNext (stopAtFirstFailure := false))
 
 @[builtin_grind_tactic Parser.Tactic.Grind.focus] def evalFocus : GrindTactic := fun stx => do
@@ -398,7 +398,7 @@ def mkCasesSuggestions (candidates : Array SplitCandidateWithAnchor) (numDigits 
           evalGrindTactic stx[1]
           pure abort)
         (fun ex => do
-          bif (← read).recover then
+          uif (← read).recover then
             logException ex
             let msgLog ← Core.getMessageLog
             saved.restore
@@ -408,7 +408,7 @@ def mkCasesSuggestions (candidates : Array SplitCandidateWithAnchor) (numDigits 
           else
             throw ex)
       goalsNew := goalsNew ++ (← getUnsolvedGoals)
-  bif abort then
+  uif abort then
     throwAbortTactic
   setGoals goalsNew.toList
 
@@ -511,7 +511,7 @@ where
   loop s 0
 where
   loop (s : Array (TSyntax ``Parser.Tactic.Grind.grindSeq)) (i : Nat) :=
-    bif i == s.size - 1 then
+    uif i == s.size - 1 then
       evalGrindTactic s[i]!
     else
       evalGrindTactic s[i]! <|> loop s (i+1)
@@ -519,7 +519,7 @@ where
 @[builtin_grind_tactic failIfSuccess] def evalFailIfSuccess : GrindTactic := fun stx =>
   Term.withoutErrToSorry <| withoutRecover do
     let tactic := stx[1]
-    bif (← try evalGrindTactic tactic; pure true catch _ => pure false) then
+    uif (← try evalGrindTactic tactic; pure true catch _ => pure false) then
       throwError "The tactic provided to `fail_if_success` succeeded but was expected to fail:{indentD stx[1]}"
 
 @[builtin_grind_tactic «fail»] def evalFail : GrindTactic := fun stx => do
@@ -554,7 +554,7 @@ where
 @[builtin_grind_tactic mbtc] def elabMBTC : GrindTactic := fun _ => do
   liftGoalM do
     discard <| Solvers.check
-    bif (← get).inconsistent then
+    uif (← get).inconsistent then
       return ()
     let progress ← Solvers.mbtc
     unless progress do

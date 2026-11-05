@@ -23,9 +23,9 @@ open Meta
 open TSyntax.Compat
 
 private def getDoSeqElems (doSeq : Syntax) : List Syntax :=
-  bif doSeq.getKind == ``Parser.Term.doSeqBracketed then
+  uif doSeq.getKind == ``Parser.Term.doSeqBracketed then
     doSeq[1].getArgs.toList.map fun arg => arg[0]
-  else bif doSeq.getKind == ``Parser.Term.doSeqIndent then
+  else uif doSeq.getKind == ``Parser.Term.doSeqIndent then
     doSeq[0].getArgs.toList.map fun arg => arg[0]
   else
     []
@@ -50,11 +50,11 @@ private def nestedActionDelimiter (k : SyntaxNodeKind) : Bool :=
 /-- Given `stx` which is a `letPatDecl`, `letEqnsDecl`, or `letIdDecl`, return true if it has binders. -/
 private def letDeclArgHasBinders (letDeclArg : Syntax) : Bool :=
   let k := letDeclArg.getKind
-  bif k == ``Parser.Term.letPatDecl then
+  uif k == ``Parser.Term.letPatDecl then
     false
-  else bif k == ``Parser.Term.letEqnsDecl then
+  else uif k == ``Parser.Term.letEqnsDecl then
     true
-  else bif k == ``Parser.Term.letIdDecl || k == ``Parser.Term.letIdDeclNoBinders then
+  else uif k == ``Parser.Term.letIdDecl || k == ``Parser.Term.letIdDeclNoBinders then
     -- letIdLhs := binderIdent >> checkWsBefore "expected space before binders" >> many (ppSpace >> letIdBinder)) >> optType
     let binders := letDeclArg[1]
     binders.getNumArgs > 0
@@ -69,16 +69,16 @@ private def letDeclHasBinders (letDecl : Syntax) : Bool :=
 private def nestedActionForbiddenBinder (stx : Syntax) : Bool :=
   let k := stx.getKind
   -- TODO: make this extensible in the future.
-  bif k == ``Parser.Term.fun || k == ``Parser.Term.matchAlts ||
+  uif k == ``Parser.Term.fun || k == ``Parser.Term.matchAlts ||
      k == ``Parser.Term.doLetRec || k == ``Parser.Term.letrec then
      -- It is never ok to lift over this kind of binder
     true
   -- The following kinds of `let`-expressions require extra checks to decide whether they contain binders or not
-  else bif k == ``Parser.Term.let then
+  else uif k == ``Parser.Term.let then
     letDeclHasBinders stx[1]
-  else bif k == ``Parser.Term.doLet then
+  else uif k == ``Parser.Term.doLet then
     letDeclHasBinders stx[3]
-  else bif k == ``Parser.Term.doLetArrow then
+  else uif k == ``Parser.Term.doLetArrow then
     letDeclArgHasBinders stx[3]
   else
     false
@@ -86,12 +86,12 @@ private def nestedActionForbiddenBinder (stx : Syntax) : Bool :=
 -- TODO: we must track whether we are inside a quotation or not.
 private partial def hasNestedAction : Syntax → Bool
   | Syntax.node _ k args =>
-    bif nestedActionDelimiter k then false
+    uif nestedActionDelimiter k then false
     -- NOTE: We don't check for lifts in quotations here, which doesn't break anything but merely makes this rare case a
     -- bit slower
-    else bif k == ``Parser.Term.nestedAction then true
+    else uif k == ``Parser.Term.nestedAction then true
     -- For `pure` if-then-else, we only lift `(<- ...)` occurring in the condition.
-    else bif k == ``termDepIfThenElse || k == ``termIfThenElse then args.size >= 2 && hasNestedAction args[1]!
+    else uif k == ``termDepIfThenElse || k == ``termIfThenElse then args.size >= 2 && hasNestedAction args[1]!
     else args.any hasNestedAction
   | _ => false
 
@@ -122,10 +122,10 @@ private partial def extractBind (expectedType? : Option Expr) : TermElabM Extrac
     | some r => return r
     | none =>
       let typeNew ← whnfCore type
-      bif typeNew != type then
+      uif typeNew != type then
         extract? typeNew
       else
-        bif typeNew.getAppFn.isMVar then
+        uif typeNew.getAppFn.isMVar then
           mkUnknownMonadResult
         else match (← unfoldDefinition? typeNew) with
           | some typeNew => extract? typeNew
@@ -365,7 +365,7 @@ def attachJPs (jpDecls : Array JPDecl) (k : Code) : Code :=
   jpDecls.foldr attachJP k
 
 def mkFreshJP (ps : Array (Var × Bool)) (body : Code) : TermElabM JPDecl := do
-  let ps ← bif ps.isEmpty then
+  let ps ← uif ps.isEmpty then
     let y ← `(y)
     pure #[(y.raw, false)]
   else
@@ -396,7 +396,7 @@ def eraseOptVar (rs : VarSet) (x? : Option Var) : VarSet :=
 def mkSimpleJmp (ref : Syntax) (rs : VarSet) (c : Code) : StateRefT (Array JPDecl) TermElabM Code := do
   let xs := varSetToArray rs
   let jp ← addFreshJP (xs.map fun x => (x, true)) c
-  bif xs.isEmpty then
+  uif xs.isEmpty then
     let unit ← ``(Unit.unit)
     return Code.jmp ref jp #[unit]
   else
@@ -490,7 +490,7 @@ We implement the method as follows. Let `us` be `c.uvars`, then
 3- Same as 2 for `continue`.
 -/
 def pullExitPoints (c : Code) : TermElabM Code := do
-  bif hasExitPoint c then
+  uif hasExitPoint c then
     let (c, jpDecls) ← (pullExitPointsAux {} c).run #[]
     return attachJPs jpDecls c
   else
@@ -502,13 +502,13 @@ partial def extendUpdatedVarsAux (c : Code) (ws : VarSet) : TermElabM Code :=
     | .joinpoint j ps b k    => return .joinpoint j ps (← update b) (← update k)
     | .seq e k               => return .seq e (← update k)
     | .match ref g ds t alts =>
-      bif alts.any fun alt => alt.vars.any fun x => ws.contains x.getId then
+      uif alts.any fun alt => alt.vars.any fun x => ws.contains x.getId then
         -- If a pattern variable is shadowing a variable in ws, we `pullExitPoints`
         pullExitPoints c
       else
         return .match ref g ds t (← alts.mapM fun alt => do pure { alt with rhs := (← update alt.rhs) })
     | .matchExpr ref «meta» d alts e =>
-      bif alts.any fun alt => alt.vars.any fun x => ws.contains x.getId then
+      uif alts.any fun alt => alt.vars.any fun x => ws.contains x.getId then
         -- If a pattern variable is shadowing a variable in ws, we `pullExitPoints`
         pullExitPoints c
       else
@@ -517,14 +517,14 @@ partial def extendUpdatedVarsAux (c : Code) (ws : VarSet) : TermElabM Code :=
         return .matchExpr ref «meta» d alts e
     | .ite ref none o c t e => return .ite ref none o c (← update t) (← update e)
     | .ite ref (some h) o cond t e =>
-      bif ws.contains h.getId then
+      uif ws.contains h.getId then
         -- if the `h` at `if h : c then t else e` shadows a variable in `ws`, we `pullExitPoints`
         pullExitPoints c
       else
         return Code.ite ref (some h) o cond (← update t) (← update e)
     | .reassign xs stx k => return .reassign xs stx (← update k)
     | .decl xs stx k => do
-      bif xs.any fun x => ws.contains x.getId then
+      uif xs.any fun x => ws.contains x.getId then
         -- One the declared variables is shadowing a variable in `ws`
         pullExitPoints c
       else
@@ -538,7 +538,7 @@ We **cannot** simply update the field `c.uvars`, because `c` may have shadowed s
 See discussion at `pullExitPoints`.
 -/
 partial def extendUpdatedVars (c : CodeBlock) (ws : VarSet) : TermElabM CodeBlock := do
-  bif ws.any fun x _ => !c.uvars.contains x then
+  uif ws.any fun x _ => !c.uvars.contains x then
     -- `ws` contains a variable that is not in `c.uvars`, but in `c.dvars` (i.e., it has been shadowed)
     pure { code := (← extendUpdatedVarsAux c.code ws), uvars := ws }
   else
@@ -581,7 +581,7 @@ def mkReassignCore (xs : Array Var) (stx : Syntax) (c : CodeBlock) : TermElabM C
   let ws := insertVars us xs
   -- If `xs` contains a new updated variable, then we must use `extendUpdatedVars`.
   -- See discussion at `pullExitPoints`
-  let code ← bif xs.any fun x => !us.contains x.getId then extendUpdatedVarsAux c.code ws else pure c.code
+  let code ← uif xs.any fun x => !us.contains x.getId then extendUpdatedVarsAux c.code ws else pure c.code
   pure { code := .reassign xs stx code, uvars := ws }
 
 def mkSeq (action : Syntax) (c : CodeBlock) : CodeBlock :=
@@ -656,9 +656,9 @@ def concat (terminal : CodeBlock) (kRef : Syntax) (y? : Option Var) (k : CodeBlo
 def getLetIdVars (letId : Syntax) : Array Var :=
   assert! letId.isOfKind ``Parser.Term.letId
   -- def letId := leading_parser binderIdent <|> hygieneInfo
-  bif letId[0].isIdent then
+  uif letId[0].isIdent then
     #[letId[0]]
-  else bif letId[0].isOfKind hygieneInfoKind then
+  else uif letId[0].isOfKind hygieneInfoKind then
     #[HygieneInfo.mkIdent letId[0] `this (canonical := true)]
   else
     #[]
@@ -692,11 +692,11 @@ def getLetEqnsDeclVars (letEqnsDecl : Syntax) : Array Var :=
 def getLetDeclVars (letDecl : Syntax) : TermElabM (Array Var) := do
   -- def letDecl := leading_parser letIdDecl <|> letPatDecl <|> letEqnsDecl
   let arg := letDecl[0]
-  bif arg.getKind == ``Parser.Term.letIdDecl || arg.getKind == ``Parser.Term.letIdDeclNoBinders then
+  uif arg.getKind == ``Parser.Term.letIdDecl || arg.getKind == ``Parser.Term.letIdDeclNoBinders then
     return getLetIdDeclVars arg
-  else bif arg.getKind == ``Parser.Term.letPatDecl then
+  else uif arg.getKind == ``Parser.Term.letPatDecl then
     getLetPatDeclVars arg
-  else bif arg.getKind == ``Parser.Term.letEqnsDecl then
+  else uif arg.getKind == ``Parser.Term.letEqnsDecl then
     return getLetEqnsDeclVars arg
   else
     throwError "unexpected kind of let declaration"
@@ -731,18 +731,18 @@ def getDoPatDeclVars (doPatDecl : Syntax) : TermElabM (Array Var) := do
 -- leading_parser "let " >> optional "mut " >> letConfig >> (doIdDecl <|> doPatDecl)
 def getDoLetArrowVars (doLetArrow : Syntax) : TermElabM (Array Var) := do
   let decl := doLetArrow[3]
-  bif decl.getKind == ``Parser.Term.doIdDecl then
+  uif decl.getKind == ``Parser.Term.doIdDecl then
     return #[getDoIdDeclVar decl]
-  else bif decl.getKind == ``Parser.Term.doPatDecl then
+  else uif decl.getKind == ``Parser.Term.doPatDecl then
     getDoPatDeclVars decl
   else
     throwError "unexpected kind of `do` declaration"
 
 def getDoReassignVars (doReassign : Syntax) : TermElabM (Array Var) := do
   let arg := doReassign[0]
-  bif arg.getKind == ``Parser.Term.letIdDecl || arg.getKind == ``Parser.Term.letIdDeclNoBinders then
+  uif arg.getKind == ``Parser.Term.letIdDecl || arg.getKind == ``Parser.Term.letIdDeclNoBinders then
     return getLetIdDeclVars arg
-  else bif arg.getKind == ``Parser.Term.letPatDecl then
+  else uif arg.getKind == ``Parser.Term.letPatDecl then
     getLetPatDeclVars arg
   else
     throwError "unexpected kind of reassignment"
@@ -758,7 +758,7 @@ private def expandDoIf? (stx : Syntax) : MacroM (Option Syntax) := match stx wit
     let mut e      := e?.getD (← `(doSeq|pure PUnit.unit))
     let mut eIsSeq := true
     for (cond, t) in Array.zip (conds.reverse.push cond) (ts.reverse.push t) do
-      e ← bif eIsSeq then pure e else `(doSeq|$e:doElem)
+      e ← uif eIsSeq then pure e else `(doSeq|$e:doElem)
       e ← match cond with
         | `(doIfCond|let $pat := $d) => `(doElem| match $d:term with | $pat:term => $t | _ => $e)
         | `(doIfCond|let $pat ← $d)  => `(doElem| match ← $d:term with | $pat:term => $t | _ => $e)
@@ -811,9 +811,9 @@ Note that we are not restricting the macro power since the
 actions to be in the same universe.
 -/
 private def mkTuple (elems : Array Syntax) : MacroM Syntax := do
-  bif elems.size =ᵇ 0 then
+  uif elems.size = 0 then
     mkUnit
-  else bif h : elems.size =ᵇ 1 then
+  else uif h : elems.size = 1 then
     return elems[0]
   else
     elems.extract 0 (elems.size - 1) |>.foldrM (init := elems.back!) fun elem tuple =>
@@ -821,7 +821,7 @@ private def mkTuple (elems : Array Syntax) : MacroM Syntax := do
 
 /-- Return `some action` if `doElem` is a `doExpr <action>`-/
 def isDoExpr? (doElem : Syntax) : Option Syntax :=
-  bif doElem.getKind == ``Parser.Term.doExpr then
+  uif doElem.getKind == ``Parser.Term.doExpr then
     some doElem[0]
   else
     none
@@ -846,9 +846,9 @@ def isDoExpr? (doElem : Syntax) : Option Syntax :=
   We use this method when expanding the `for-in` notation.
 -/
 private def destructTuple (uvars : Array Var) (x : Syntax) (body : Syntax) : MacroM Syntax := do
-  bif uvars.size =ᵇ 0 then
+  uif uvars.size = 0 then
     return body
-  else bif h : uvars.size =ᵇ 1 then
+  else uif h : uvars.size = 1 then
     `(let $(uvars[0]):ident := $x; $body)
   else
     destruct uvars.toList x body
@@ -1000,7 +1000,7 @@ def returnToTerm (val : Syntax) : M Syntax := do
   let ctx ← read
   let u ← mkUVarTuple
   match ctx.kind with
-  | .regular         => bif ctx.uvars.isEmpty then ``(Pure.pure $val) else ``(Pure.pure (MProd.mk $val $u))
+  | .regular         => uif ctx.uvars.isEmpty then ``(Pure.pure $val) else ``(Pure.pure (MProd.mk $val $u))
   | .forIn           => ``(Pure.pure (ForInStep.done $u))
   | .forInWithReturn => ``(Pure.pure (ForInStep.done (MProd.mk (some $val) $u)))
   | .nestedBC        => unreachable!
@@ -1036,7 +1036,7 @@ def actionTerminalToTerm (action : Syntax) : M Syntax := withRef action <| withF
   let ctx ← read
   let u ← mkUVarTuple
   match ctx.kind with
-  | .regular         => bif ctx.uvars.isEmpty then pure action else ``(Bind.bind $action fun y => Pure.pure (MProd.mk y $u))
+  | .regular         => uif ctx.uvars.isEmpty then pure action else ``(Bind.bind $action fun y => Pure.pure (MProd.mk y $u))
   | .forIn           => ``(Bind.bind $action fun (_ : PUnit) => Pure.pure (ForInStep.yield $u))
   | .forInWithReturn => ``(Bind.bind $action fun (_ : PUnit) => Pure.pure (ForInStep.yield (MProd.mk none $u)))
   | .nestedBC        => unreachable!
@@ -1045,13 +1045,13 @@ def actionTerminalToTerm (action : Syntax) : M Syntax := withRef action <| withF
   | .nestedPRBC      => ``(Bind.bind $action fun y => (Pure.pure (DoResultPRBC.«pure» y $u)))
 
 def seqToTerm (action : Syntax) (k : Syntax) : M Syntax := withRef action <| withFreshMacroScope do
-  bif action.getKind == ``Parser.Term.doDbgTrace then
+  uif action.getKind == ``Parser.Term.doDbgTrace then
     let msg := action[1]
     `(dbg_trace $msg; $k)
-  else bif action.getKind == ``Parser.Term.doAssert then
+  else uif action.getKind == ``Parser.Term.doAssert then
     let cond := action[1]
     `(assert! $cond; $k)
-  else bif action.getKind == ``Parser.Term.doDebugAssert then
+  else uif action.getKind == ``Parser.Term.doDebugAssert then
     let cond := action[1]
     `(debugAssert| debug_assert! $cond; $k)
   else
@@ -1060,17 +1060,17 @@ def seqToTerm (action : Syntax) (k : Syntax) : M Syntax := withRef action <| wit
 
 def declToTerm (decl : Syntax) (k : Syntax) : M Syntax := withRef decl <| withFreshMacroScope do
   let kind := decl.getKind
-  bif kind == ``Parser.Term.doLet then
+  uif kind == ``Parser.Term.doLet then
     let letConfig : TSyntax ``Parser.Term.letConfig := ⟨decl[2]⟩
     let letDecl := decl[3]
     `(let $letConfig:letConfig $letDecl:letDecl; $k)
-  else bif kind == ``Parser.Term.doLetRec then
+  else uif kind == ``Parser.Term.doLetRec then
     let letRecToken := decl[0]
     let letRecDecls := decl[1]
     return mkNode ``Parser.Term.letrec #[letRecToken, letRecDecls, mkNullNode, k]
-  else bif kind == ``Parser.Term.doLetArrow then
+  else uif kind == ``Parser.Term.doLetArrow then
     let arg := decl[3]
-    bif arg.getKind == ``Parser.Term.doIdDecl then
+    uif arg.getKind == ``Parser.Term.doIdDecl then
       let id     := arg[0]
       let type   := expandOptType id arg[1]
       let doElem := arg[3]
@@ -1082,7 +1082,7 @@ def declToTerm (decl : Syntax) (k : Syntax) : M Syntax := withRef decl <| withFr
       | none        => Macro.throwErrorAt decl "unexpected kind of `do` declaration"
     else
       Macro.throwErrorAt decl "unexpected kind of `do` declaration"
-  else bif kind == ``Parser.Term.doHave then
+  else uif kind == ``Parser.Term.doHave then
     -- The `have` term is of the form  `"have " >> letDecl >> optSemicolon termParser`
     let args := decl.getArgs
     let args := args ++ #[mkNullNode /- optional ';' -/, k]
@@ -1099,14 +1099,14 @@ def reassignToTerm (reassign : Syntax) (k : Syntax) : MacroM Syntax := withRef r
     Macro.throwErrorAt reassign "unexpected kind of `do` reassignment"
 
 def mkIte (optIdent : Syntax) (cond : Syntax) (thenBranch : Syntax) (elseBranch : Syntax) : MacroM Syntax := do
-  bif optIdent.isNone then
+  uif optIdent.isNone then
     ``(if $cond then $thenBranch else $elseBranch)
   else
     let h := optIdent[0]
     ``(if $h:ident : $cond then $thenBranch else $elseBranch)
 
 def mkJoinPoint (j : Name) (ps : Array (Syntax × Bool)) (body : Syntax) (k : Syntax) : M Syntax := withRef body <| withFreshMacroScope do
-  let pTypes ← ps.mapM fun ⟨id, useTypeOf⟩ => do bif useTypeOf then `(type_of% $id) else `(_)
+  let pTypes ← ps.mapM fun ⟨id, useTypeOf⟩ => do uif useTypeOf then `(type_of% $id) else `(_)
   let ps     := ps.map (·.1)
   /-
   We use `let_delayed` instead of `let` for join points to make sure `$k` is elaborated before `$body`.
@@ -1176,7 +1176,7 @@ where
       let elseBranch := mkNode ``Parser.Term.matchExprElseAlt #[mkAtomFrom ref "|", mkHole ref, mkAtomFrom ref "=>", (← toTerm elseBranch)]
       let termMatchExprAlts := mkNode ``Parser.Term.matchExprAlts #[mkNullNode termAlts, elseBranch]
       let body := mkNode ``Parser.Term.matchExpr #[mkAtomFrom ref "match_expr", d', mkAtomFrom ref "with", termMatchExprAlts]
-      bif «meta» then
+      uif «meta» then
         `(Bind.bind (instantiateMVarsIfMVarApp $d) fun discr => $body)
       else
         `(let discr := $d; $body)
@@ -1217,12 +1217,12 @@ def matchNestedTermResult (term : Syntax) (uvars : Array Var) (a r bc : Bool) : 
   let u ← mkTuple uvars
   match a, r, bc with
   | true, false, false =>
-    bif uvars.isEmpty then
+    uif uvars.isEmpty then
       return toDoElems (← `(do $term:term))
     else
       return toDoElems (← `(do let r ← $term:term; $u:term := r.2; pure r.1))
   | false, true, false =>
-    bif uvars.isEmpty then
+    uif uvars.isEmpty then
       return toDoElems (← `(do let r ← $term:term; return r))
     else
       return toDoElems (← `(do let r ← $term:term; $u:term := r.2; return r.1))
@@ -1279,7 +1279,7 @@ structure Context where
 abbrev M := ReaderT Context TermElabM
 
 def withNewMutableVars {α} (newVars : Array Var) (mutable : Bool) (x : M α) : M α :=
-  withReader (fun ctx => bif mutable then { ctx with mutableVars := insertVars ctx.mutableVars newVars } else ctx) x
+  withReader (fun ctx => uif mutable then { ctx with mutableVars := insertVars ctx.mutableVars newVars } else ctx) x
 
 def checkReassignable (xs : Array Var) : M Unit := do
   let throwInvalidReassignment (x : Name) : M Unit :=
@@ -1294,7 +1294,7 @@ def checkNotShadowingMutable (xs : Array Var) : M Unit := do
     throwError "mutable variable `{x.simpMacroScopes}` cannot be shadowed"
   let ctx ← read
   for x in xs do
-    bif ctx.mutableVars.contains x.getId then
+    uif ctx.mutableVars.contains x.getId then
       withRef x <| throwInvalidShadowing x.getId
 
 def withFor {α} (x : M α) : M α :=
@@ -1308,7 +1308,7 @@ def mkForInBody  (_ : Syntax) (forInBody : CodeBlock) : M ToForInTermResult := d
   let ctx ← read
   let uvars := forInBody.uvars
   let uvars := varSetToArray uvars
-  let term ← liftMacroM <| ToTerm.run forInBody.code ctx.m ctx.returnType uvars (bif hasReturn forInBody.code then ToTerm.Kind.forInWithReturn else ToTerm.Kind.forIn)
+  let term ← liftMacroM <| ToTerm.run forInBody.code ctx.m ctx.returnType uvars (uif hasReturn forInBody.code then ToTerm.Kind.forInWithReturn else ToTerm.Kind.forIn)
   return ⟨uvars, term⟩
 
 def ensureInsideFor : M Unit :=
@@ -1322,7 +1322,7 @@ def ensureEOS (doElems : List Syntax) : M Unit :=
 variable (baseId : Name) in
 private partial def expandNestedActionAux (inQuot : Bool) (inBinder : Bool) : Syntax → StateT (List Syntax) M Syntax
   | stx@(Syntax.node i k args) =>
-    bif k == choiceKind then do
+    uif k == choiceKind then do
       -- choice node: check that lifts are consistent
       let alts ← stx.getArgs.mapM (expandNestedActionAux inQuot inBinder · |>.run [])
       let (_, lifts) := alts[0]!
@@ -1330,16 +1330,16 @@ private partial def expandNestedActionAux (inQuot : Bool) (inBinder : Bool) : Sy
         throwErrorAt stx "cannot lift `(<- ...)` over inconsistent syntax variants, consider lifting out the binding manually"
       modify (· ++ lifts)
       return .node i k (alts.map (·.1))
-    else bif nestedActionDelimiter k then
+    else uif nestedActionDelimiter k then
       return stx
     -- For `pure` if-then-else, we only lift `(<- ...)` occurring in the condition.
-    else bif h : args.size ≥ᵇ 2 && (k == ``termDepIfThenElse || k == ``termIfThenElse) then do
+    else uif h : args.size ≥ 2 ∧ (k == ``termDepIfThenElse || k == ``termIfThenElse) then do
       let inAntiquot := stx.isAntiquot && !stx.isEscapedAntiquot
       let arg1 ← expandNestedActionAux (inQuot && !inAntiquot || stx.isQuot) inBinder args[1]
       let args := args.set! 1 arg1
       return Syntax.node i k args
-    else bif k == ``Parser.Term.nestedAction && !inQuot then withFreshMacroScope do
-      bif inBinder then
+    else uif k == ``Parser.Term.nestedAction && !inQuot then withFreshMacroScope do
+      uif inBinder then
         throwErrorAt stx "cannot lift `(<- ...)` over a binder, this error usually happens when you are trying to lift a method nested in a `fun`, `let`, or `match`-alternative, and it can often be fixed by adding a missing `do`"
       let arg := args[1]!
       -- The parser has been extended to accept arbitrary `doElem`s, but the legacy `do` elaborator
@@ -1348,9 +1348,9 @@ private partial def expandNestedActionAux (inQuot : Bool) (inBinder : Bool) : Sy
       let isDoElem :=
         (Parser.getParserCategory? (← getEnv) `doElem).any (·.kinds.contains arg.getKind)
       let termArg ←
-        bif arg.getKind == ``Parser.Term.doExpr then
+        uif arg.getKind == ``Parser.Term.doExpr then
           pure arg[0]
-        else bif isDoElem then
+        else uif isDoElem then
           throwErrorAt arg "the legacy `do` elaborator only supports a term after `←`; use `set_option backward.do.legacy false` to enable the new elaborator with full `doElem` support"
         else
           pure arg
@@ -1368,7 +1368,7 @@ private partial def expandNestedActionAux (inQuot : Bool) (inBinder : Bool) : Sy
   | stx => return stx
 
 def expandNestedAction (doElem : Syntax) : M (List Syntax × Syntax) := do
-  bif !hasNestedAction doElem then
+  uif !hasNestedAction doElem then
     return ([], doElem)
   else
     let baseId ← withFreshMacroScope (MonadQuotation.addMacroScope `__do_lift)
@@ -1377,7 +1377,7 @@ def expandNestedAction (doElem : Syntax) : M (List Syntax × Syntax) := do
 
 def checkLetArrowRHS (doElem : Syntax) : M Unit := do
   let kind := doElem.getKind
-  bif kind == ``Parser.Term.doLetArrow ||
+  uif kind == ``Parser.Term.doLetArrow ||
      kind == ``Parser.Term.doLet ||
      kind == ``Parser.Term.doLetRec ||
      kind == ``Parser.Term.doHave ||
@@ -1393,7 +1393,7 @@ def checkLetArrowRHS (doElem : Syntax) : M Unit := do
 def doReturnToCode (doReturn : Syntax) (doElems: List Syntax) : M CodeBlock := withRef doReturn do
   ensureEOS doElems
   let argOpt := doReturn[1]
-  let arg ← bif argOpt.isNone then liftMacroM mkUnit else pure argOpt[0]
+  let arg ← uif argOpt.isNone then liftMacroM mkUnit else pure argOpt[0]
   return mkReturn (← getRef) arg
 
 structure Catch where
@@ -1439,7 +1439,7 @@ mutual
   -/
   partial def doLetArrowToCode (doLetArrow : Syntax) (doElems : List Syntax) : M CodeBlock := do
     let decl    := doLetArrow[3]
-    bif decl.getKind == ``Parser.Term.doIdDecl then
+    uif decl.getKind == ``Parser.Term.doIdDecl then
       let y := decl[0]
       checkNotShadowingMutable #[y]
       let doElem := decl[3]
@@ -1452,20 +1452,20 @@ mutual
         match doElems with
         | []       => pure c
         | kRef::_  => concat c kRef y k
-    else bif decl.getKind == ``Parser.Term.doPatDecl then
+    else uif decl.getKind == ``Parser.Term.doPatDecl then
       let pattern := decl[0]
       let optType := decl[1]
       let doElem  := decl[3]
       let optElse := decl[4]
-      bif optElse.isNone then withFreshMacroScope do
-        let auxDo ← bif optType.isNone then
-          bif isMutableLet doLetArrow then
+      uif optElse.isNone then withFreshMacroScope do
+        let auxDo ← uif optType.isNone then
+          uif isMutableLet doLetArrow then
             `(do let%$doLetArrow __discr ← $doElem; let%$doLetArrow mut $pattern:term := __discr)
           else
             `(do let%$doLetArrow __discr ← $doElem; let%$doLetArrow $pattern:term := __discr)
         else
           let ty := optType[0][1]
-          bif isMutableLet doLetArrow then
+          uif isMutableLet doLetArrow then
             `(do let%$doLetArrow __discr : $ty ← $doElem; let%$doLetArrow mut $pattern:term := __discr)
           else
             `(do let%$doLetArrow __discr : $ty ← $doElem; let%$doLetArrow $pattern:term := __discr)
@@ -1473,13 +1473,13 @@ mutual
       else
         let elseSeq := optElse[1]
         let contSeq := optElse[2][0] -- 0 unwraps the optional; if none then getDoSeqElems is empty
-        let contSeq ← bif isMutableLet doLetArrow then
+        let contSeq ← uif isMutableLet doLetArrow then
           let vars ← (← getPatternVarsEx pattern).mapM fun var => `(doElem| let mut $var := $var)
           pure (vars ++ (getDoSeqElems contSeq).toArray)
         else
           pure (getDoSeqElems contSeq).toArray
         let contSeq := mkDoSeq contSeq
-        let auxDo ← bif optType.isNone then
+        let auxDo ← uif optType.isNone then
           `(do let%$doLetArrow __discr ← $doElem; match%$doLetArrow __discr with | $pattern:term => $contSeq | _ => $elseSeq)
         else
           let ty := optType[0][1]
@@ -1494,7 +1494,7 @@ mutual
     let val     := doLetElse[5]
     let elseSeq := doLetElse[7]
     let bodySeq := doLetElse[8][0]
-    let contSeq ← bif isMutableLet doLetElse then
+    let contSeq ← uif isMutableLet doLetElse then
       let vars ← (← getPatternVarsEx pattern).mapM fun var => `(doElem| let mut $var := $var)
       pure (vars ++ (getDoSeqElems bodySeq).toArray)
     else
@@ -1511,18 +1511,18 @@ mutual
   -/
   partial def doReassignArrowToCode (doReassignArrow : Syntax) (doElems : List Syntax) : M CodeBlock := do
     let decl := doReassignArrow[0]
-    bif decl.getKind == ``Parser.Term.doIdDecl then
+    uif decl.getKind == ``Parser.Term.doIdDecl then
       let doElem := decl[3]
       let y      := decl[0]
       let auxDo ← `(do let r ← $doElem; $y:ident := r)
       doSeqToCode <| getDoSeqElems (getDoSeq auxDo) ++ doElems
-    else bif decl.getKind == ``Parser.Term.doPatDecl then
+    else uif decl.getKind == ``Parser.Term.doPatDecl then
       let pattern := decl[0]
       let optType := decl[1]
       let doElem  := decl[3]
       let optElse := decl[4]
-      bif optElse.isNone then withFreshMacroScope do
-        let auxDo ← bif optType.isNone then
+      uif optElse.isNone then withFreshMacroScope do
+        let auxDo ← uif optType.isNone then
           `(do let __discr ← $doElem; $pattern:term := __discr)
         else
           let ty := optType[0][1]
@@ -1571,7 +1571,7 @@ mutual
     -- `do` elaborator builds.
     unless doFor[2].isNone && doFor[3].isNone do throwUnsupportedSyntax
     let doForDecls := doFor[1].getSepArgs
-    bif h : doForDecls.size >ᵇ 1 then
+    uif h : doForDecls.size > 1 then
       /-
         Expand
         ```
@@ -1611,7 +1611,7 @@ mutual
                    do $body)
         doSeqToCode (getDoSeqElems (getDoSeq auxDo) ++ doElems)
     else withRef doFor do
-      let h?        := bif doForDecls[0]![0].isNone then none else some doForDecls[0]![0][0]
+      let h?        := uif doForDecls[0]![0].isNone then none else some doForDecls[0]![0][0]
       let x         := doForDecls[0]![1]
       withRef x <| checkNotShadowingMutable (← getPatternVarsEx x)
       let xs        := doForDecls[0]![3]
@@ -1624,7 +1624,7 @@ mutual
       -- server to identify them as conceptually identical variables
       let uvars := uvars.map fun v => ctx.mutableVars.getD v.getId v
       let uvarsTuple ← liftMacroM do mkTuple uvars
-      bif hasReturn forInBodyCodeBlock.code then
+      uif hasReturn forInBodyCodeBlock.code then
         let forInBody ← liftMacroM <| destructTuple uvars (← `(r)) forInBody
         let optType ← `(Option $((← read).returnType))
         let forInTerm ← if let some h := h? then
@@ -1645,7 +1645,7 @@ mutual
           annotate doFor (← `(for_in'% $(xs) $uvarsTuple fun $x $h r => $forInBody))
         else
           annotate doFor (← `(for_in% $(xs) $uvarsTuple fun $x r => $forInBody))
-        bif doElems.isEmpty then
+        uif doElems.isEmpty then
           let auxDo ← `(do let r ← $forInTerm:term;
                            $uvarsTuple:term := r;
                            Pure.pure (ensure_expected_type% "type mismatch, `for`" PUnit.unit))
@@ -1681,7 +1681,7 @@ mutual
     let alts      := doMatchExpr[4][0].getArgs -- Array of `doMatchExprAlt`
     let alts ← alts.mapM fun alt => do
       let pat      := alt[1]
-      let var?     := bif pat[0].isNone then none else some pat[0][0]
+      let var?     := uif pat[0].isNone then none else some pat[0][0]
       let funName  := pat[1]
       let pvars    := pat[2].getArgs
       let rhs      := alt[3]
@@ -1704,14 +1704,14 @@ mutual
     let tryCode ← doSeqToCode (getDoSeqElems doTry[1])
     let optFinally := doTry[3]
     let catches ← doTry[2].getArgs.mapM fun catchStx : Syntax => do
-      bif catchStx.getKind == ``Parser.Term.doCatch then
+      uif catchStx.getKind == ``Parser.Term.doCatch then
         let x       := catchStx[1]
-        bif x.isIdent then
+        uif x.isIdent then
           withRef x <| checkNotShadowingMutable #[x]
         let optType := catchStx[2]
         let c ← doSeqToCode (getDoSeqElems catchStx[4])
         return { x := x, optType := optType, codeBlock := c : Catch }
-      else bif catchStx.getKind == ``Parser.Term.doCatchMatch then
+      else uif catchStx.getKind == ``Parser.Term.doCatchMatch then
         let matchAlts := catchStx[1]
         let x ← `(ex)
         let auxDo ← `(do match ex with $matchAlts)
@@ -1719,8 +1719,8 @@ mutual
         return { x := x, codeBlock := c, optType := mkNullNode : Catch }
       else
         throwError "unexpected kind of `catch`"
-    let finallyCode? ← bif optFinally.isNone then pure none else some <$> doSeqToCode (getDoSeqElems optFinally[0][1])
-    bif catches.isEmpty && finallyCode?.isNone then
+    let finallyCode? ← uif optFinally.isNone then pure none else some <$> doSeqToCode (getDoSeqElems optFinally[0][1])
+    uif catches.isEmpty && finallyCode?.isNone then
       throwError "invalid `try`, it must have a `catch` or `finally`"
     let ctx ← read
     let ws    := getTryCatchUpdatedVars tryCode catches finallyCode?
@@ -1734,7 +1734,7 @@ mutual
     let term ← toTerm tryCode
     let term ← catches.foldlM (init := term) fun term «catch» => do
       let catchTerm ← toTerm «catch».codeBlock
-      bif «catch».optType.isNone then
+      uif «catch».optType.isNone then
         annotate doTry (← ``(MonadExcept.tryCatch $term (fun $(«catch».x):ident => $catchTerm)))
       else
         let type : Syntax := «catch».optType[1]
@@ -1744,7 +1744,7 @@ mutual
       | some finallyCode => withRef optFinally do
         unless finallyCode.uvars.isEmpty do
           throwError "`finally` currently does not support reassignments"
-        bif hasBreakContinueReturn finallyCode.code then
+        uif hasBreakContinueReturn finallyCode.code then
           throwError "`finally` currently does `return`, `break`, nor `continue`"
         let finallyTerm ← liftMacroM <| ToTerm.run finallyCode.code ctx.m ctx.returnType {} ToTerm.Kind.regular
         annotate doTry (← ``(tryFinally $term $finallyTerm))
@@ -1765,86 +1765,86 @@ mutual
       | some doElem => doSeqToCode [doElem]
       | none =>
         let (liftedDoElems, doElem) ← expandNestedAction doElem
-        bif !liftedDoElems.isEmpty then
+        uif !liftedDoElems.isEmpty then
           doSeqToCode (liftedDoElems ++ [doElem] ++ doElems)
         else
           let ref := doElem
           let k := doElem.getKind
-          bif k == ``Parser.Term.doLet then
+          uif k == ``Parser.Term.doLet then
             let vars ← getDoLetVars doElem
             checkNotShadowingMutable vars
             mkVarDeclCore vars doElem <$> withNewMutableVars vars (isMutableLet doElem) (doSeqToCode doElems)
-          else bif k == ``Parser.Term.doHave then
+          else uif k == ``Parser.Term.doHave then
             let vars ← getDoHaveVars doElem
             checkNotShadowingMutable vars
             mkVarDeclCore vars doElem <$> (doSeqToCode doElems)
-          else bif k == ``Parser.Term.doLetRec then
+          else uif k == ``Parser.Term.doLetRec then
             let vars ← getDoLetRecVars doElem
             checkNotShadowingMutable vars
             mkVarDeclCore vars doElem <$> (doSeqToCode doElems)
-          else bif k == ``Parser.Term.doReassign then
+          else uif k == ``Parser.Term.doReassign then
             let vars ← getDoReassignVars doElem
             checkReassignable vars
             let k ← doSeqToCode doElems
             mkReassignCore vars doElem k
-          else bif k == ``Parser.Term.doLetArrow then
+          else uif k == ``Parser.Term.doLetArrow then
             doLetArrowToCode doElem doElems
-          else bif k == ``Parser.Term.doLetElse then
+          else uif k == ``Parser.Term.doLetElse then
             doLetElseToCode doElem doElems
-          else bif k == ``Parser.Term.doReassignArrow then
+          else uif k == ``Parser.Term.doReassignArrow then
             doReassignArrowToCode doElem doElems
-          else bif k == ``Parser.Term.doIf then
+          else uif k == ``Parser.Term.doIf then
             doIfToCode doElem doElems
-          else bif k == ``Parser.Term.doUnless then
+          else uif k == ``Parser.Term.doUnless then
             doUnlessToCode doElem doElems
-          else bif k == ``Parser.Term.doRepeat then
+          else uif k == ``Parser.Term.doRepeat then
             unless doElem[1].isNone && doElem[2].isNone do throwUnsupportedSyntax
             let seq := doElem[3]
             let expanded ← `(doElem| for _ in Loop.mk do $seq)
             doSeqToCode (expanded :: doElems)
-          else bif k == ``Parser.Term.doFor then withFreshMacroScope do
+          else uif k == ``Parser.Term.doFor then withFreshMacroScope do
             doForToCode doElem doElems
-          else bif k == ``Parser.Term.doMatch then
+          else uif k == ``Parser.Term.doMatch then
             doMatchToCode doElem doElems
-          else bif k == ``Parser.Term.doMatchExpr then
+          else uif k == ``Parser.Term.doMatchExpr then
             doMatchExprToCode doElem doElems
-          else bif k == ``Parser.Term.doTry then
+          else uif k == ``Parser.Term.doTry then
             doTryToCode doElem doElems
-          else bif k == ``Parser.Term.doBreak then
+          else uif k == ``Parser.Term.doBreak then
             ensureInsideFor
             ensureEOS doElems
             return mkBreak ref
-          else bif k == ``Parser.Term.doContinue then
+          else uif k == ``Parser.Term.doContinue then
             ensureInsideFor
             ensureEOS doElems
             return mkContinue ref
-          else bif k == ``Parser.Term.doReturn then
+          else uif k == ``Parser.Term.doReturn then
             doReturnToCode doElem doElems
-          else bif k == ``Parser.Term.doDbgTrace then
+          else uif k == ``Parser.Term.doDbgTrace then
             return mkSeq doElem (← doSeqToCode doElems)
-          else bif k == ``Parser.Term.doAssert then
+          else uif k == ``Parser.Term.doAssert then
             return mkSeq doElem (← doSeqToCode doElems)
-          else bif k == ``Parser.Term.doDebugAssert then
+          else uif k == ``Parser.Term.doDebugAssert then
             return mkSeq doElem (← doSeqToCode doElems)
-          else bif k == ``Parser.Term.doNested then
+          else uif k == ``Parser.Term.doNested then
             let nestedDoSeq := doElem[1]
             doSeqToCode (getDoSeqElems nestedDoSeq ++ doElems)
-          else bif k == ``Parser.Term.doExpr then
+          else uif k == ``Parser.Term.doExpr then
             let term := doElem[0]
-            bif doElems.isEmpty then
+            uif doElems.isEmpty then
               return mkTerminalAction term
             else
               return mkSeq term (← doSeqToCode doElems)
-          else bif k == ``Parser.Term.InternalSyntax.doIfAuto then
+          else uif k == ``Parser.Term.InternalSyntax.doIfAuto then
             -- `while`/`repeat ... until` conditions stay `Decidable` in the legacy elaborator.
             let doIf := mkNode ``Parser.Term.doIf #[mkAtomFrom doElem[0] "if",
               mkNode ``Parser.Term.doIfProp #[doElem[1], doElem[2]], doElem[3], doElem[4],
               mkNullNode, mkNullNode #[doElem[5], doElem[6]]]
             doIfToCode doIf doElems
-          else bif k == ``Parser.Term.InternalSyntax.doSkip then
+          else uif k == ``Parser.Term.InternalSyntax.doSkip then
             -- In the legacy elaborator, `skip` is treated as `pure PUnit.unit`.
             let term ← withRef doElem `(pure PUnit.unit)
-            bif doElems.isEmpty then
+            uif doElems.isEmpty then
               return mkTerminalAction term
             else
               return mkSeq term (← doSeqToCode doElems)

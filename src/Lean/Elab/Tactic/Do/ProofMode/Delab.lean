@@ -41,24 +41,24 @@ where
       -- Since neither name equates to the other, we erase the macro scopes here and look up `h` in
       -- a separate map, adding back the default `✝` suffix by unconditionally starting from idx 0.
       let mIdx :=
-        bif hyp.name.hasMacroScopes then
+        uif hyp.name.hasMacroScopes then
           -- NB: inaccessibles always start with 0 for the initial ✝
           .some (inaccessibles.getD name 0)
         else
           accessibles.find? name
       let (idx, name') :=
         if let some idx := mIdx then
-          (idx + 1, name.appendAfter <| bif idx == 0 then "✝" else "✝" ++ idx.toSuperscriptString)
+          (idx + 1, name.appendAfter <| uif idx == 0 then "✝" else "✝" ++ idx.toSuperscriptString)
         else
           (0, name)
       let name' := mkIdent name'
       let stx ← `(Std.Tactic.Do.mgoalHyp| $name' : $(← SPred.Notation.unpack (← withMDataExpr <| delab)))
-      bif hyp.name.hasMacroScopes then
+      uif hyp.name.hasMacroScopes then
         inaccessibles := inaccessibles.insert name idx
       else
         accessibles := accessibles.insert name idx
       return (accessibles, inaccessibles, lines.push stx)
-    bif (parseAnd? hyps).isSome then
+    uif (parseAnd? hyps).isSome then
       -- SPred.and : ∀ {σs : List Type}, SPred σs → SPred σs → SPred σs
       -- first delab `rhs` in `SPred.and σs lhs rhs`, then `lhs`.
       let acc_rhs ← withAppArg <| delabHypotheses acc

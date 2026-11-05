@@ -21,7 +21,7 @@ open Meta
     let mut hIdents := #[]
     let mut args := #[]
     for arg in stx[1].getSepArgs do
-      let hName? ← bif arg[0].isNone then
+      let hName? ← uif arg[0].isNone then
         pure none
       else
         hIdents := hIdents.push arg[0][0]

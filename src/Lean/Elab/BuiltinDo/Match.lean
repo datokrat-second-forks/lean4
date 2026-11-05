@@ -53,13 +53,13 @@ private def expandToTermMatch : DoElab := fun stx dec => do
   let dependent := dep?.getD ⟨.missing⟩ matches `(trueVal| true)
   trace[Elab.do.match] "expandToTermMatch. dependent: {dependent}, doBlockResultType: {doBlockResultType}, dec.resultType: {dec.resultType}"
   let complexDec := withNewMCtxDepth <| not <$> isDefEqGuarded dec.resultType doBlockResultType
-  bif (← pure dependent <&&> complexDec) then
+  uif (← pure dependent <&&> complexDec) then
     throwError "Dependent match is not supported when the result type of the `do` block \
       {indentExpr doBlockResultType}\n is different to the result type of the `match` \
       {indentExpr dec.resultType}"
   dec.withDuplicableCont info fun dec => do
   let rec loop i (alts : Array (TSyntax ``matchAlt)) := do
-    bif h : i <ᵇ alts.size then
+    uif h : i < alts.size then
       match alts[i] with
       | `(matchAltExpr| | $patterns,* => $seq) =>
         let vars ← getPatternsVarsEx patterns
@@ -79,12 +79,12 @@ private def expandToTermMatch : DoElab := fun stx dec => do
 private def expandNonAtomicDiscrs? (discrs : TSyntaxArray ``matchDiscr) : DoElabM (Option (TSyntaxArray ``matchDiscr)) := do
   -- Recall that
   -- matchDiscr := leading_parser optional (ident >> ":") >> termParser
-  bif (← discrs.allM fun discr => Term.isAtomicDiscr discr.raw[1]) then
+  uif (← discrs.allM fun discr => Term.isAtomicDiscr discr.raw[1]) then
     return none
   let mut newDiscrs := #[]
   for discr in discrs do
     let `(matchDiscr| $[$h? :]? $term) := discr | throwUnsupportedSyntax
-    bif (← Term.isAtomicDiscr term) then
+    uif (← Term.isAtomicDiscr term) then
       newDiscrs := newDiscrs.push discr
     else
       trace[Elab.do.match] "elabNonAtomicDiscrs: {term}"
@@ -150,7 +150,7 @@ private def mkDepMatchMotive (discrs : Array Term.Discr) (body : Expr) : TermEla
     -- gets de Bruijn index 0). Non-fvar discriminants occupy index slots but won't match,
     -- preserving correct de Bruijn numbering.
     let earlierDiscrs := discrs[:idx].toArray.map (·.expr) |>.reverse
-    let discrType := bif earlierDiscrs.isEmpty then discrType else discrType.abstract earlierDiscrs
+    let discrType := uif earlierDiscrs.isEmpty then discrType else discrType.abstract earlierDiscrs
     let userName ← mkUserNameFor discr.expr
     matchType := mkForall userName .default discrType matchType
   return matchType
@@ -177,7 +177,7 @@ private def elabMatchAlt (discrs : Array Term.Discr) (matchType : Expr)
           trace[Elab.do.match] "elabMatchAlt: {alt.lhs}"
           let rhs ← elabDoSeq alt.rhs dec
           let xs := altLHS.fvarDecls.toArray.map LocalDecl.toExpr ++ eqs
-          let rhs ← bif xs.isEmpty then pure <| mkSimpleThunk rhs else mkLambdaFVars xs rhs
+          let rhs ← uif xs.isEmpty then pure <| mkSimpleThunk rhs else mkLambdaFVars xs rhs
           trace[Elab.do.match] "rhs: {rhs}"
           return (altLHS, rhs)
 
@@ -252,16 +252,16 @@ def getAltsPatternVars (alts : TSyntaxArray ``matchAlt) : TermElabM (Array Ident
   -- Expand simple matches to `let`
   if let `(matchAltExpr| | $y:ident => $seq) := alts.getD 0 ⟨.missing⟩ then
     if let `(matchDiscr| $discr:term) := discrs.getElems.getD 0 ⟨.missing⟩ then
-      bif alts.size == 1 && (← Term.isPatternVar y) then
+      uif alts.size == 1 && (← Term.isPatternVar y) then
         let newStx ← `(doSeq| let $y:ident := $discr; do $(⟨seq⟩))
         return ← Term.withMacroExpansion stx newStx <| elabDoSeq ⟨newStx⟩ dec
 
   -- Expand syntax_match to a term match. This is OK because it is never dependent.
-  bif isSyntaxMatch alts then
+  uif isSyntaxMatch alts then
     return ← expandToTermMatch stx dec
 
   -- If the user has explicitly requested a dependent match, we expand to a term match as well.
-  bif dep.getD ⟨.missing⟩ matches `(trueVal| true) then
+  uif dep.getD ⟨.missing⟩ matches `(trueVal| true) then
     return ← expandToTermMatch stx dec
 
   if let some stx := motive? then

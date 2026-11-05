@@ -106,7 +106,7 @@ def elabDischParen : SymDischargerElab := fun stx => do
 
 @[builtin_sym_discharger dischGrind]
 def elabDischGrind : SymDischargerElab := fun _ => do
-  bif (← getGoals).isEmpty then return dischargeNone
+  uif (← getGoals).isEmpty then return dischargeNone
   let goal ← getMainGoal
   liftGrindM <| goal.mkSymSimpDischarger
 

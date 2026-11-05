@@ -76,9 +76,9 @@ Other categories are left unchanged.
 def parenthesizeReplacement (cat : Name) (stx newStx : Syntax) : CoreM Syntax := do
   unless cat == `term || cat == `tactic do
     return newStx
-  bif (← try bindsAsTightly cat stx newStx catch _ => pure false) then
+  uif (← try bindsAsTightly cat stx newStx catch _ => pure false) then
     return newStx
-  bif cat == `term then
+  uif cat == `term then
     `(($(⟨newStx⟩)))
   else
     `(tactic| ($(⟨newStx⟩):tactic))
@@ -88,16 +88,16 @@ open PrettyPrinter.Formatter in
 def needsSpaceBetween (left right : String.Slice) : CoreM Bool := do
   let mut left := left.takeEndWhile (!·.isWhitespace) |>.copy
   let right := right.takeWhile (!·.isWhitespace) |>.copy
-  bif left.isEmpty || right.isEmpty then return false
+  uif left.isEmpty || right.isEmpty then return false
   let table := Parser.getTokenTable (← getEnv)
   -- The left word may contain several tokens, e.g. `(-`.
   while !left.isEmpty do
     let parsed ← parseTokenCore left table
-    bif parsed.hasError || parsed.pos == 0 then
+    uif parsed.hasError || parsed.pos == 0 then
       -- The window can start inside a comment, string, or escaped identifier.
       left := (left.drop 1).copy
       continue
-    bif parsed.pos == left.rawEndPos then
+    uif parsed.pos == left.rawEndPos then
       let rightParsed ← parseTokenCore right table
       let rightIdent := !rightParsed.hasError && rightParsed.stxStack.back.isIdent
       return ← needsTokenSeparator left right parsed.stxStack.back.isIdent rightIdent table
@@ -115,15 +115,15 @@ public def formatReplacement (cat : Name) (stx newStx : Syntax) (range : Syntax.
   let (indent, column) := Meta.Tactic.TryThis.getIndentAndColumn map range
   let suggestion : Meta.Tactic.TryThis.SuggestionText := .tsyntax (kind := cat) ⟨newStx⟩
   let mut text ← suggestion.prettyExtra (indent := indent) (column := column)
-  bif (← needsSpaceBetween (map.source.sliceTo (map.source.pos! range.start)) text.toSlice) then
+  uif (← needsSpaceBetween (map.source.sliceTo (map.source.pos! range.start)) text.toSlice) then
     text := " " ++ text
   -- The trailing trivia of `stx` stays in place and separates the replacement from the next token
-  bif stx.getTrailingSize >ᵇ 0 then
+  uif stx.getTrailingSize > 0 then
     return text
   let suffix := map.source.sliceFrom (map.source.pos! range.stop)
   -- Qualified identifiers also represent field notation, which requires adjacency to `.`.
   unless cat == `term && newStx.isIdent && suffix.startsWith "." do
-    bif (← needsSpaceBetween text.toSlice suffix) then
+    uif (← needsSpaceBetween text.toSlice suffix) then
       text := text ++ " "
   return text
 

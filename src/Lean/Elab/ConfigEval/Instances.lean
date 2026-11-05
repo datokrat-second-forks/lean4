@@ -30,9 +30,9 @@ namespace EvalTerm
 def evalBoolStx : Term → TermElabM (Bool × Expr) :=
   evalTermWithInfo' fun stx =>
     let id := stx.raw.getId.eraseMacroScopes
-    bif id == `true || id == ``true then
+    uif id == `true || id == ``true then
       return true
-    else bif id == `false || id == ``false then
+    else uif id == `false || id == ``false then
       return false
     else
       match stx with
@@ -58,10 +58,10 @@ def evalStringStx : Term → TermElabM (String × Expr) :=
 
 def evalNameStx : Term → TermElabM (Name × Expr) :=
   evalTermWithInfo' fun stx => do
-    bif stx.raw.isOfKind ``Parser.Term.quotedName then
+    uif stx.raw.isOfKind ``Parser.Term.quotedName then
       if let some n := stx.raw[0].isNameLit? then
         return n
-    bif stx.raw.isOfKind ``Parser.Term.doubleQuotedName then
+    uif stx.raw.isOfKind ``Parser.Term.doubleQuotedName then
       -- Always allow quoting private names.
       return ← withoutExporting do
         let n ← realizeGlobalConstNoOverloadWithInfo stx.raw[2]
@@ -216,7 +216,7 @@ partial def evalListExpr {α : Type} (ev : Expr → MetaM α) (e : Expr) (didWHN
     let vs ← evalListExpr ev xs (didWHNF := false)
     return v :: vs
   | _ =>
-    bif didWHNF then
+    uif didWHNF then
       throwError "Could not evaluate the expression{indentExpr e}\nof type `{.ofConstName ``List}`."
     else
       evalListExpr ev (← whnf e) (didWHNF := true)

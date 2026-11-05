@@ -95,7 +95,7 @@ def commitWhen (t : OmegaM (α × Bool)) : OmegaM α := do
   let state ← getThe State
   let cache ← getThe Cache
   let (a, r) ← t
-  bif !r then do
+  uif !r then do
     modifyThe State fun _ => state
     modifyThe Cache fun _ => cache
   pure a
@@ -168,13 +168,13 @@ branch it evaluates to under which condition. `α` is `Int` or `Nat`.
 def conditionalFacts (α e : Expr) : MetaM (List Expr) := do
   match e.getAppFnArgs with
   | (``ite, #[β, i, dec, t, f]) =>
-    bif β == α then return [mkApp5 (.const ``ite_disjunction [0]) α i dec t f]
+    uif β == α then return [mkApp5 (.const ``ite_disjunction [0]) α i dec t f]
   | (``UDecidable.ite, #[β, i, dec, t, f]) =>
-    bif β == α then return [mkApp5 (.const ``uite_disjunction [0]) α i dec t f]
+    uif β == α then return [mkApp5 (.const ``uite_disjunction [0]) α i dec t f]
   | (``cond, #[β, c, t, f]) =>
-    bif β == α then return [mkApp4 (.const ``cond_disjunction [0]) α c t f]
+    uif β == α then return [mkApp4 (.const ``cond_disjunction [0]) α c t f]
   | (``Bool.dcond, #[β, c, t, f]) =>
-    bif β == α then
+    uif β == α then
       let pf := mkApp4 (.const ``dcond_disjunction [0]) α c t f
       -- State the branches beta-reduced, so that their values are recognized as atoms.
       let branch (v k : Expr) : MetaM Expr := do
@@ -275,7 +275,7 @@ def lookup (e : Expr) : OmegaM (Nat × Option (List Expr)) := do
   | none =>
   trace[omega] "New atom: {e}"
   let facts ← analyzeAtom e
-  bif (← isTracingEnabledFor `omega) then
+  uif (← isTracingEnabledFor `omega) then
     unless facts.isEmpty do
       trace[omega] "New facts: {← facts.mapM fun e => inferType e}"
   let i ← modifyGetThe State fun c =>

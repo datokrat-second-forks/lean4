@@ -67,10 +67,10 @@ where
 
   assignMVars (mvars : List MVarId) : VCGenM PUnit := do
     for mvar in mvars do
-      bif (← mvar.isAssigned) then continue
+      uif (← mvar.isAssigned) then continue
       -- trace[Elab.Tactic.Do.vcgen] "assignMVars {← mvar.getTag}, isDelayedAssigned: {← mvar.isDelayedAssigned},\n{mvar}"
       let some prf ← (tryGoal mvar).run | addSubGoalAsVC mvar
-      bif (← mvar.isAssigned) then
+      uif (← mvar.isAssigned) then
         throwError "Tried to assign metavariable `{← mvar.getTag}`, but it has already been assigned. MVar: {mvar}\nAssignment: {mkMVar mvar}\nNew assignment: {prf}"
       mvar.assign prf
 
@@ -83,10 +83,10 @@ where
     if let .lam binderName .. := f then
       burnOne
       return ← mIntroForall goal ⟨mkIdent (← mkFreshUserName binderName)⟩ (fun g => onGoal g name)
-    bif f.isLet || f.isConstOf ``SPred.imp then
+    uif f.isLet || f.isConstOf ``SPred.imp then
       burnOne
       return ← mIntro goal (← `(binderIdent| _)) (fun g => onGoal g name)
-    bif f.isConstOf ``PredTrans.apply then
+    uif f.isConstOf ``PredTrans.apply then
       return ← onWPApp goal name
     onFail { goal with target := T } name
 
@@ -110,7 +110,7 @@ where
       return ← withLetDeclShared (← mkFreshUserName x) ty val fun shared fv leave => do
       let e' := (body.instantiate1 fv).betaRev e.getAppRevArgs
       let info? ← getSplitInfo? e'
-      bif shared && isJP x && (← read).config.jp && info?.isSome then
+      uif shared && isJP x && (← read).config.jp && info?.isSome then
         leave (← onJoinPoint fv val (goal.withNewProg e') info?.get! name)
       else
         leave (← onWPApp (goal.withNewProg e') name)
@@ -132,7 +132,7 @@ where
 
     -- delta-unfold definitions according to reducibility and spec attributes,
     -- apply specifications
-    bif f.isConst || f.isFVar then
+    uif f.isConst || f.isFVar then
       burnOne
       -- Now try looking up and applying a spec
       let (prf, specHoles) ← try
@@ -202,7 +202,7 @@ where
       let res ← liftMetaM <| rwIfOrMatcher idx e
       -- When `FunInd.rwMatcher` fails, it returns no proof. We'd loop in that case,
       -- so we rather throw an error.
-      bif res.proof?.isNone then
+      uif res.proof?.isNone then
         throwError "Bug in `mvcgen`: `rwMatcher` failed to rewrite {indentExpr e}\n\
           Check the output of `trace.Elab.Tactic.Do.vcgen.split` for more info."
       let prf ← withAltCtx idx params <| onWPApp (goal.withNewProg res.expr) (name ++ altSuff)
@@ -330,7 +330,7 @@ where
 
       -- Abstract φ over the altParams in order to instantiate info.hyps below
       let φ ←
-        bif altParams == #[mkConst ``Unit.unit] then -- See `Match.forallAltVarsTelescope`
+        uif altParams == #[mkConst ``Unit.unit] then -- See `Match.forallAltVarsTelescope`
           pure <| mkLambda `_ .default (mkConst ``Unit) φ
         else
           mkLambdaFVars altParams φ
@@ -367,7 +367,7 @@ def elabInvariants (stx : Syntax) (invariants : Array MVarId) (suggestInvariant 
       let alt := alts[n]
       match alt with
       | `(invariantDotAlt| · $rhs) =>
-        bif dotOrCase matches .false then
+        uif dotOrCase matches .false then
           logErrorAt alt m!"Alternation between labelled and bulleted invariants is not supported."
           break
         dotOrCase := .true
@@ -377,7 +377,7 @@ def elabInvariants (stx : Syntax) (invariants : Array MVarId) (suggestInvariant 
         withRef rhs do
         discard <| evalTacticAt (← `(tactic| exact $rhs)) mv
       | `(invariantCaseAlt| | $tag $args* => $rhs) =>
-        bif dotOrCase matches .true then
+        uif dotOrCase matches .true then
           logErrorAt alt m!"Alternation between labelled and bulleted invariants is not supported."
           break
         dotOrCase := .false
@@ -388,7 +388,7 @@ def elabInvariants (stx : Syntax) (invariants : Array MVarId) (suggestInvariant 
         let some mv := do invariants[(← n?) - 1]? | do
           logErrorAt alt m!"No invariant with label {tag} {repr tag}."
           continue
-        bif (← mv.isAssigned) then
+        uif (← mv.isAssigned) then
           logErrorAt alt m!"Invariant {n?.get!} is already assigned."
           continue
         withRef rhs do
@@ -396,7 +396,7 @@ def elabInvariants (stx : Syntax) (invariants : Array MVarId) (suggestInvariant 
       | _ => logErrorAt alt m!"Expected `invariantDotAlt`, got {alt}"
 
     if let `(invariantsKW| invariants) := invariantsKW then
-      bif alts.size <ᵇ invariants.size then
+      uif alts.size < invariants.size then
         let missingTypes ← invariants[alts.size:].toArray.mapM (·.getType)
         throwErrorAt stx m!"Lacking definitions for the following invariants.\n{toMessageList missingTypes}"
     else
@@ -404,7 +404,7 @@ def elabInvariants (stx : Syntax) (invariants : Array MVarId) (suggestInvariant 
       let mut suggestions := #[]
       for i in 0...invariants.size do
         let mv := invariants[i]!
-        bif (← mv.isAssigned) then
+        uif (← mv.isAssigned) then
           continue
         -- A failing suggestion (e.g. an invariant shape the analysis does not understand)
         -- degrades to "no suggestion" rather than failing the tactic.
@@ -413,7 +413,7 @@ def elabInvariants (stx : Syntax) (invariants : Array MVarId) (suggestInvariant 
           suggestions := suggestions.push (← `(invariantDotAlt| · $invariant))
       let alts' := alts ++ suggestions
       let stx' ← `(invariantAlts|invariants $alts'*)
-      bif suggestions.size >ᵇ 0 then
+      uif suggestions.size > 0 then
         Lean.Meta.Tactic.TryThis.addSuggestion stx stx'
       else
         logInfoAt stx m!"There were no suggestions for missing invariants."
@@ -459,7 +459,7 @@ def elabMVCGen : Tactic := fun stx => withMainContext do
     | some n => .limited n
     | none => .unlimited
   let goal ← getMainGoal
-  let goal ← bif ctx.config.elimLets then elimLets goal else pure goal
+  let goal ← uif ctx.config.elimLets then elimLets goal else pure goal
   let { invariants, vcs } ← VCGen.genVCs goal ctx fuel
   trace[Elab.Tactic.Do.vcgen] "after genVCs {← (invariants ++ vcs).mapM fun m => m.getTag}"
   let runOnVCs (tac : TSyntax `tactic) (extraMsg : MessageData) (vcs : Array MVarId) : TermElabM (Array MVarId) :=
@@ -469,14 +469,14 @@ def elabMVCGen : Tactic := fun stx => withMainContext do
           Tactic.run vc (Tactic.evalTactic tac *> Tactic.pruneSolvedGoals))
         (fun ex => throwError "Error while running {tac} on {vc}\nMessage: {indentD ex.toMessageData}\n{extraMsg}")
   let invariants ←
-    bif ctx.config.leave then runOnVCs (← `(tactic| try mleave)) "Try again with -leave." invariants else pure invariants
+    uif ctx.config.leave then runOnVCs (← `(tactic| try mleave)) "Try again with -leave." invariants else pure invariants
   trace[Elab.Tactic.Do.vcgen] "before elabInvariants {← (invariants ++ vcs).mapM fun m => m.getTag}"
   elabInvariants stx[3] invariants (suggestInvariant vcs)
   let invariants ← invariants.filterM (not <$> ·.isAssigned)
   trace[Elab.Tactic.Do.vcgen] "before trying trivial VCs {← (invariants ++ vcs).mapM fun m => m.getTag}"
   let vcs ← do
-    let vcs ← bif ctx.config.trivial then runOnVCs (← `(tactic| try mvcgen_trivial)) "Try again with -trivial." vcs else pure vcs
-    let vcs ← bif ctx.config.leave then runOnVCs (← `(tactic| try mleave)) "Try again with -leave." vcs else pure vcs
+    let vcs ← uif ctx.config.trivial then runOnVCs (← `(tactic| try mvcgen_trivial)) "Try again with -trivial." vcs else pure vcs
+    let vcs ← uif ctx.config.leave then runOnVCs (← `(tactic| try mleave)) "Try again with -leave." vcs else pure vcs
     pure vcs
   -- Eliminating lets here causes some metavariables in `mkFreshPair_triple` to become nonassignable
   -- so we don't do it. Presumably some weird delayed assignment thing is going on.

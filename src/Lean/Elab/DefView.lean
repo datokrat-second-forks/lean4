@@ -148,7 +148,7 @@ def mkDefViewOfAbbrev (modifiers : Modifiers) (stx : Syntax) : DefView :=
 def mkDefViewOfDef (modifiers : Modifiers) (stx : Syntax) : DefView :=
   -- leading_parser "def " >> declId >> optDeclSig >> declVal >> optDefDeriving
   let (binders, type) := expandOptDeclSig stx[2]
-  let deriving? := bif stx[4].isNone then none else some stx[4][1].getSepArgs
+  let deriving? := uif stx[4].isNone then none else some stx[4][1].getSepArgs
   { ref := stx, headerRef := mkNullNode stx.getArgs[*...3], kind := DefKind.def, modifiers,
     declId := stx[1], binders, type? := type, value := stx[3], deriving?,
     docString? := modifiers.docString? }
@@ -170,7 +170,7 @@ def mkDefViewOfInstance (modifiers : Modifiers) (stx : Syntax) : CommandElabM De
   let (binders, type) := expandDeclSig stx[4]
   let declId ← match stx[3].getOptional? with
     | some declId =>
-      bif (← isTracingEnabledFor `Elab.instance.mkInstanceName) then
+      uif (← isTracingEnabledFor `Elab.instance.mkInstanceName) then
         let id ← mkInstanceName binders.getArgs type
         trace[Elab.instance.mkInstanceName] "generated {(← getCurrNamespace) ++ id} for {declId}"
       pure declId
@@ -190,7 +190,7 @@ def mkDefViewOfOpaque (modifiers : Modifiers) (stx : Syntax) : CommandElabM DefV
   let val ← match stx[3].getOptional? with
     | some val => pure val
     | none     =>
-      let val ← bif modifiers.isUnsafe then `(default_or_ofNonempty% unsafe) else `(default_or_ofNonempty%)
+      let val ← uif modifiers.isUnsafe then `(default_or_ofNonempty% unsafe) else `(default_or_ofNonempty%)
       `(Parser.Command.declValSimple| := $val)
   return {
     ref := stx, headerRef := mkNullNode stx.getArgs[*...3], kind := DefKind.opaque, modifiers := modifiers,
@@ -218,21 +218,21 @@ def isDefLike (stx : Syntax) : Bool :=
 
 def mkDefView (modifiers : Modifiers) (stx : Syntax) : CommandElabM DefView := do
   let declKind := stx.getKind
-  let modifiers := bif modifiers.computeKind == .regular && (← getScope).isMeta &&
+  let modifiers := uif modifiers.computeKind == .regular && (← getScope).isMeta &&
       declKind != ``Parser.Command.theorem && declKind != ``Parser.Command.example then
     { modifiers with computeKind := .meta }
   else modifiers
-  bif declKind == ``Parser.Command.«abbrev» then
+  uif declKind == ``Parser.Command.«abbrev» then
     return mkDefViewOfAbbrev modifiers stx
-  else bif declKind == ``Parser.Command.definition then
+  else uif declKind == ``Parser.Command.definition then
     return mkDefViewOfDef modifiers stx
-  else bif declKind == ``Parser.Command.theorem then
+  else uif declKind == ``Parser.Command.theorem then
     return mkDefViewOfTheorem modifiers stx
-  else bif declKind == ``Parser.Command.opaque then
+  else uif declKind == ``Parser.Command.opaque then
     mkDefViewOfOpaque modifiers stx
-  else bif declKind == ``Parser.Command.instance then
+  else uif declKind == ``Parser.Command.instance then
     mkDefViewOfInstance modifiers stx
-  else bif declKind == ``Parser.Command.example then
+  else uif declKind == ``Parser.Command.example then
     return mkDefViewOfExample modifiers stx
   else
     throwError "unexpected kind of definition"

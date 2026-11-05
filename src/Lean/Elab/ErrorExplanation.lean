@@ -64,11 +64,11 @@ private def macroDeclMap :=
   builtin_term_elab logNamedWarningMacro, builtin_term_elab logNamedWarningAtMacro]
 def elabCheckedNamedError : TermElab := fun stx expType? => do
   if let some (module, decl) := macroDeclMap.get? stx.getKind then
-    bif !(← getEnv).contains decl then
+    uif !(← getEnv).contains decl then
       throwError m!"The constant `{decl}` has not been imported" ++
         .hint' m!"Add `import {module}` to this file's header to use this macro"
   let (id, numArgsExpected) :=
-    bif stx.isOfKind ``throwNamedErrorAtMacro || stx.isOfKind ``logNamedErrorAtMacro
+    uif stx.isOfKind ``throwNamedErrorAtMacro || stx.isOfKind ``logNamedErrorAtMacro
         || stx.isOfKind ``logNamedWarningAtMacro then
     (stx[2], 5)
   else
@@ -76,7 +76,7 @@ def elabCheckedNamedError : TermElab := fun stx expType? => do
   -- Remove the message term from the span. If we have a trailing `.`, we fail to parse the message
   -- term and so leave `stx` unchanged. The in-progress identifier will always be the penultimate
   -- argument of `span`.
-  let span := bif stx.getNumArgs == numArgsExpected then
+  let span := uif stx.getNumArgs == numArgsExpected then
     stx.setArgs (stx.getArgs[*...(stx.getNumArgs - 1)])
   else
     stx
@@ -103,20 +103,20 @@ open Command in
   let tp := mkConst ``ErrorExplanation.Metadata
   let metadata ← runTermElabM <| fun _ => unsafe do
     let e ← elabTermEnsuringType t tp
-    bif e.hasSyntheticSorry then throwAbortTerm
+    uif e.hasSyntheticSorry then throwAbortTerm
     evalExpr ErrorExplanation.Metadata tp e
   let name := id.getId
-  bif name.isAnonymous then
+  uif name.isAnonymous then
     throwErrorAt id "Invalid name for error explanation: `{id}`"
-  bif name.hasMacroScopes then
+  uif name.hasMacroScopes then
     -- Use `id` rather than `name` for nicer rendering
     throwErrorAt id m!"Invalid name `{id}`: Error explanations cannot have inaccessible names. \
       This error often occurs when an error explanation is generated using a macro."
-  bif name.getNumParts != 2 then
+  uif name.getNumParts != 2 then
     throwErrorAt id m!"Invalid name `{name}`: Error explanation names must have two components"
       ++ .note m!"The first component of an error explanation name identifies the package from \
         which the error originates, and the second identifies the error itself."
-  bif errorExplanationExt.getState (← getEnv) |>.contains name then
+  uif errorExplanationExt.getState (← getEnv) |>.contains name then
     throwErrorAt id m!"Cannot add explanation: An error explanation already exists for `{name}`"
   let (declLoc? : Option DeclarationLocation) ← do
     let map ← getFileMap

@@ -30,11 +30,11 @@ builtin_initialize
           | throwError "Invalid `[inherit_doc]` attribute: Could not infer doc source"
         -- allow inheriting private docstrings
         let declName ← withoutExporting <| Elab.realizeGlobalConstNoOverloadWithInfo id
-        bif (← findSimpleDocString? (← getEnv) decl (includeBuiltin := false)).isSome then
+        uif (← findSimpleDocString? (← getEnv) decl (includeBuiltin := false)).isSome then
           logWarning m!"{← mkConstWithLevelParams decl} already has a doc string"
         -- Outside the server, we do not have access to all docstrings
-        bif !(← getEnv).header.isModule || Elab.inServer.get (← getOptions) then
-          bif (← findInternalDocString? (← getEnv) declName).isNone then
+        uif !(← getEnv).header.isModule || Elab.inServer.get (← getOptions) then
+          uif (← findInternalDocString? (← getEnv) declName).isNone then
             logWarningAt id m!"{← mkConstWithLevelParams declName} does not have a doc string"
         addInheritedDocString decl declName
       | _  => throwError "Invalid `[inherit_doc]` attribute syntax"

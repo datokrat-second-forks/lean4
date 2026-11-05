@@ -67,7 +67,7 @@ where
         | _ => throwError "unknown parser declaration/category/alias `{id}`"
     | stx, term => do
       -- can't match against `` `(stx| ($stxs*)) `` as `*` is interpreted as the `stx` operator
-      bif stx.raw.isOfKind ``Parser.Syntax.paren then
+      uif stx.raw.isOfKind ``Parser.Syntax.paren then
         -- translate argument `v:(p1 ... pn)` where all but one `pi` produce zero nodes to
         -- `v:pi` using that single `pi`
         let nonNullaryNodes ← stx.raw[1].getArgs.filterM fun

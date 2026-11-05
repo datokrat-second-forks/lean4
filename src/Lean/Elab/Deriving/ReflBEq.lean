@@ -18,9 +18,9 @@ open TSyntax.Compat in
 open Parser.Tactic in
 def mkReflBEqInstanceCmds (declName : Name) : TermElabM (Array Syntax) := do
   let indVal ← getConstInfoInduct declName
-  bif indVal.all.length >ᵇ 1 then
+  uif indVal.all.length > 1 then
     throwError "Deriving `ReflBEq` for mutual inductives is not supported"
-  bif indVal.isNested then
+  uif indVal.isNested then
     throwError "Deriving `ReflBEq` for nested inductives is not supported"
 
   let argNames     ← mkInductArgNames indVal
@@ -43,7 +43,7 @@ def mkReflBEqInstance (declName : Name) : CommandElabM Unit := do
     cmds.forM elabCommand
 
 def mkReflBEqInstanceHandler (declNames : Array Name) : CommandElabM Bool := do
-  bif (← declNames.allM isInductive) then
+  uif (← declNames.allM isInductive) then
     for declName in declNames do
       mkReflBEqInstance declName
     return true

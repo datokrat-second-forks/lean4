@@ -48,14 +48,14 @@ def ensureEvalExpr
     let evalExprDef := mkIdent (instName ++ Name.mkSimple "evalExpr")
     let mut exprCases : Array (String × Term) := #[]
     for ctorName in ival.ctors do
-      bif useCtor ival ctorName then
+      uif useCtor ival ctorName then
         let (xs, _, _) ← forallMetaTelescopeReducing (← inferType (mkConst ctorName))
         let .str _ ctorName' := ctorName | unreachable!
         let vs ← xs.mapM fun _ => mkIdent <$> Core.mkFreshUserName `v
         let val ← `(pure ($(mkCIdent ctorName) $vs*))
         let recArgs ← xs.mapM fun x => return (← instantiateMVars (← inferType x)) == type'
         let val ← (((Array.range xs.size).zip recArgs).zip vs).foldrM (init := val) fun ((idx, recArg), v) val =>
-          bif recArg then
+          uif recArg then
             `($evalExprDef args[$(quote idx)]! >>= fun $v => $val)
           else
             `(EvalExpr.evalExpr args[$(quote idx)]! >>= fun $v => $val)
@@ -75,7 +75,7 @@ where
       | throwError "`{.ofConstName indTypeName}` is not an inductive type"
     unless ival.levelParams.isEmpty && ival.numParams == 0 && ival.numIndices == 0 do
       throwError "`{.ofConstName indTypeName}` has universe parameters, parameters, or indices"
-    bif ival.isNested || ival.isReflexive then
+    uif ival.isNested || ival.isReflexive then
       throwError "`{.ofConstName indTypeName}` has unsupported recursion"
     return ival
   useCtor (ival : InductiveVal) (ctorName : Name) : Bool :=
@@ -84,15 +84,15 @@ where
     let ival ← getIndType type
     let mut deps := #[]
     for ctorName in ival.ctors do
-      bif useCtor ival ctorName then
+      uif useCtor ival ctorName then
         let (xs, bis, _) ← forallMetaTelescopeReducing (← inferType (mkConst ctorName))
         unless bis.all (·.isExplicit) do
           throwError "Every field of `{.ofConstName ctorName}` must be explicit"
         for x in xs do
           let xTy ← inferType x
-          bif xTy.hasMVar then
+          uif xTy.hasMVar then
             throwError "Field `{x}` of `{.ofConstName ctorName}` is dependent"
-          bif xTy == type then
+          uif xTy == type then
             continue
           deps := deps.push xTy
     return deps

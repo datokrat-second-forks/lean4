@@ -28,16 +28,16 @@ def getDeclarationRange? [Monad m] [MonadFileMap m] (stx : Syntax) : m (Option D
   This function converts the given `Syntax` into one that represents its "selection range".
 -/
 def getDeclarationSelectionRef (stx : Syntax) : Syntax :=
-  bif stx.isOfKind ``Lean.Parser.Command.instance then
+  uif stx.isOfKind ``Lean.Parser.Command.instance then
     -- must skip `attrKind` and `optPrio` for `instance`
-    bif !stx[3].isNone then
+    uif !stx[3].isNone then
       stx[3][0]
     else
       stx[1]
   else
-    bif stx[1][0].isIdent then
+    uif stx[1][0].isIdent then
       stx[1][0]  -- `declId`
-    else bif stx[1].isIdent then
+    else uif stx[1].isIdent then
       stx[1]  -- raw `ident`
     else
       stx[0]
@@ -64,7 +64,7 @@ for their commands.
 -/
 def addDeclarationRangesForBuiltin [Monad m] [MonadEnv m] [MonadFileMap m] (declName : Name)
     (modsStx : TSyntax ``Parser.Command.declModifiers) (declStx : Syntax) : m Unit := do
-  bif declStx.getKind == ``Parser.Command.«example» then
+  uif declStx.getKind == ``Parser.Command.«example» then
     return ()
   let stx := mkNullNode #[modsStx, declStx]
   addDeclarationRangesFromSyntax declName stx (getDeclarationSelectionRef declStx)

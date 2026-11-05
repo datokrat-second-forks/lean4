@@ -55,14 +55,14 @@ open Parser Term
 Converts syntax representing a `match_expr` else-alternative into an `ElseAlt`.
 -/
 def toElseAlt? (stx : Syntax) : Option ElseAlt :=
-  bif !stx.isOfKind ``matchExprElseAlt then none else
+  uif !stx.isOfKind ``matchExprElseAlt then none else
   some { rhs := stx[3] }
 
 /--
 Converts syntax representing a `match_expr` alternative into an `Alt`.
 -/
 def toAlt? (stx : Syntax) : Option Alt :=
-  bif !stx.isOfKind ``matchExprAlt then none else
+  uif !stx.isOfKind ``matchExprAlt then none else
   match stx[1] with
   | `(matchExprPat| $[$var? @]? $funName:ident $pvars*) =>
     let pvars := pvars.toList.reverse.map fun arg =>
@@ -79,8 +79,8 @@ Returns the function names of alternatives that do not have any pattern variable
 def getFunNamesToMatch (alts : List Alt) : List Ident := Id.run do
   let mut funNames := #[]
   for alt in alts do
-    bif alt.pvars.isEmpty then
-      bif Option.isNone <| funNames.find? fun funName => funName.getId == alt.funName.getId then
+    uif alt.pvars.isEmpty then
+      uif Option.isNone <| funNames.find? fun funName => funName.getId == alt.funName.getId then
         funNames := funNames.push alt.funName
   return funNames.toList
 
@@ -133,7 +133,7 @@ def getParams (alt : Alt) : MacroM (Array (TSyntax ``bracketedBinder)) := do
   params := params ++ (← alt.pvars.toArray.reverse.filterMapM fun
     | none => return none
     | some arg => return some (← `(bracketedBinderF| ($arg : Expr))))
-  bif params.isEmpty then
+  uif params.isEmpty then
     return #[(← `(bracketedBinderF| (_ : Unit)))]
   return params
 
@@ -144,10 +144,10 @@ associated with the given alternative. The arguments are the actuals stored in `
 -/
 def getActuals (discr : Term) (alt : Alt) : MacroM (Array Term) := do
   let mut actuals := #[]
-  bif alt.var?.isSome then
+  uif alt.var?.isSome then
     actuals := actuals.push discr
   actuals := actuals ++ alt.actuals.toArray
-  bif actuals.isEmpty then
+  uif actuals.isEmpty then
     return #[← `(())]
   return actuals
 
@@ -168,14 +168,14 @@ partial def generate (discr : Term) (alts : List Alt) (elseAlt : ElseAlt) : Macr
   let rec loop (discr : Term) (alts : List Alt) : MacroM Term := withFreshMacroScope do
     let funNamesToMatch := getFunNamesToMatch alts
     let saveActual := shouldSaveActual alts
-    let actual ← bif saveActual then `(a) else `(_)
+    let actual ← uif saveActual then `(a) else `(_)
     let altsNext := next alts actual
-    let body ← bif altsNext.isEmpty then
+    let body ← uif altsNext.isEmpty then
       `($kElse ())
     else
       let discr' ← `(__discr)
       let body ← loop discr' altsNext
-      bif saveActual then
+      uif saveActual then
         `(bif h : ($discr).isApp then let a := Expr.appArg $discr h; let __discr := Expr.appFnCleanup $discr h; $body else $kElse ())
       else
         `(bif h : ($discr).isApp then let __discr := Expr.appFnCleanup $discr h; $body else $kElse ())

@@ -148,7 +148,7 @@ def ControlStack.mkBreak (base : ControlStack) (hasContinue : Bool) : DoElabM Ex
   let α ← mkFreshResultType `α
   -- When there's an outer `continue` layer as well, we account for that by applying `stM` of
   -- `OptionT` to `α`.
-  let α := bif hasContinue then mkApp (mkConst ``Option [mi.u]) α else α
+  let α := uif hasContinue then mkApp (mkConst ``Option [mi.u]) α else α
   let mγ ← mkMonadApp (← read).doBlockResultType
   let res ← base.runInBase <| mkApp3 (mkConst ``BreakT.break [mi.u, mi.v]) α mi.m inst
   let ty ← inferType res
@@ -211,10 +211,10 @@ def EffectForwarder.ofCont (info : ControlInfo) (dec : DoElemCont) : DoElabM Eff
   let ρ := (← getReturnCont).resultType
   let σ ← mkProdN (← reassignedMutVars.mapM (·.stateType)) mi.u
 
-  let needEarlyReturn := bif info.returnsEarly then some ρ else none
+  let needEarlyReturn := uif info.returnsEarly then some ρ else none
   let needBreak := info.breaks && (← getBreakCont).isSome
   let needContinue := info.continues && (← getContinueCont).isSome
-  let needState := bif reassignedMutVars.isEmpty then none else some (reassignedMutVars, σ)
+  let needState := uif reassignedMutVars.isEmpty then none else some (reassignedMutVars, σ)
   let mut returnBase? := none
   let mut breakBase? := none
   let mut continueBase? := none
@@ -225,10 +225,10 @@ def EffectForwarder.ofCont (info : ControlInfo) (dec : DoElemCont) : DoElabM Eff
     controlStack := ControlStack.earlyReturnT mi ρ controlStack
   if let some (reassignedMutVars, σ) := needState then
     controlStack := ControlStack.stateT mi reassignedMutVars σ controlStack
-  bif needBreak then
+  uif needBreak then
     breakBase? := some controlStack
     controlStack := ControlStack.breakT mi controlStack
-  bif needContinue then
+  uif needContinue then
     continueBase? := some controlStack
     controlStack := ControlStack.continueT mi controlStack
   return {

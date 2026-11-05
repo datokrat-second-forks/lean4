@@ -40,8 +40,8 @@ private def messageToString (msg : Message) (reportPos? : Option Nat) :
   let mut str ← msg.data.toString
   unless msg.caption == "" do
     str := msg.caption ++ ":\n" ++ str
-  bif !("\n".isPrefixOf str) then str := " " ++ str
-  bif msg.isTrace then
+  uif !("\n".isPrefixOf str) then str := " " ++ str
+  uif msg.isTrace then
     str := "trace:" ++ str
   else
     match msg.severity with
@@ -52,9 +52,9 @@ private def messageToString (msg : Message) (reportPos? : Option Nat) :
     let showRelPos (line : Nat) (pos : Position) := s!"+{pos.line - line}:{pos.column}"
     let showEndPos := msg.endPos.elim "*" fun endPos =>
       -- Omit ending line if the same as starting line:
-      bif endPos.line =ᵇ msg.pos.line then s!"{endPos.column}" else showRelPos line endPos
+      uif endPos.line = msg.pos.line then s!"{endPos.column}" else showRelPos line endPos
     str := s!"@ {showRelPos line msg.pos}...{showEndPos}\n" ++ str
-  bif str.isEmpty || str.back != '\n' then
+  uif str.isEmpty || str.back != '\n' then
     str := str ++ "\n"
   return str
 
@@ -130,7 +130,7 @@ def parseGuardMsgsSpec (spec? : Option (TSyntax ``guardMsgsSpec)) : CommandElabM
   let mut p? : Option (Message → FilterSpec) := none
   let pushP (action : FilterSpec) (msgP : Message → Bool) (p? : Option (Message → FilterSpec))
       (msg : Message) : FilterSpec :=
-    bif msgP msg then
+    uif msgP msg then
       action
     else
       (p?.getD fun _ => .pass) msg
@@ -214,7 +214,7 @@ def runAndCollectMessages (cmd : Syntax) : CommandElabM MessageLog := do
     let mut toCheck : MessageLog := MessageLog.empty
     let mut toPassthrough : MessageLog := MessageLog.empty
     for msg in msgs.toList do
-      bif msg.isSilent then
+      uif msg.isSilent then
         continue
       match filterFn msg with
       | .check       => toCheck := toCheck.add msg
@@ -222,26 +222,26 @@ def runAndCollectMessages (cmd : Syntax) : CommandElabM MessageLog := do
       | .pass => toPassthrough := toPassthrough.add msg
     let map ← getFileMap
     let reportPos? :=
-      bif reportPositions then
+      uif reportPositions then
         tk.getPos?.map (map.toPosition · |>.line)
       else none
     let strings ← toCheck.toList.mapM (messageToString · reportPos?)
     let strings := ordering.apply strings
     let res := "---\n".intercalate strings |>.trimAscii |>.copy
-    let passed := bif substring then
+    let passed := uif substring then
       -- Substring mode: check that expected appears within res (after whitespace normalization)
       (whitespace.apply res).contains (whitespace.apply expected)
     else
       -- Exact mode: check equality (after whitespace normalization)
       whitespace.apply expected == whitespace.apply res
-    bif passed then
+    uif passed then
       -- Passed. Only put toPassthrough messages back on the message log
       modify fun st => { st with messages := toPassthrough }
     else
       -- Failed. Put all the messages back on the message log and add an error
       modify fun st => { st with messages := msgs }
       let feedback :=
-        bif guard_msgs.diff.get (← getOptions) then
+        uif guard_msgs.diff.get (← getOptions) then
           let diff := Diff.diff (expected.split '\n').toStringArray (res.split '\n').toStringArray
           Diff.linesToString diff
         else res
@@ -270,9 +270,9 @@ def guardMsgsCodeAction : CommandCodeAction := fun _ _ _ node => do
       let some start := stx.getPos? true | return eager
       let some tail := stx.setArg 0 mkNullNode |>.getPos? true | return eager
       let res := revealTrailingWhitespace res
-      let newText := bif res.isEmpty then
+      let newText := uif res.isEmpty then
         ""
-      else bif res.length ≤ᵇ 100-7 && !res.contains '\n' then -- TODO: configurable line length?
+      else uif res.length ≤ 100-7 ∧ !res.contains '\n' then -- TODO: configurable line length?
         s!"/-- {res} -/\n"
       else
         s!"/--\n{res}\n-/\n"
@@ -290,12 +290,12 @@ def guardMsgsCodeAction : CommandCodeAction := fun _ _ _ node => do
     -- Check if any message contains "PANIC"
     let mut foundPanic := false
     for msg in msgs.toList do
-      bif msg.isSilent then continue
+      uif msg.isSilent then continue
       let msgStr ← msg.data.toString
-      bif msgStr.contains "PANIC" then
+      uif msgStr.contains "PANIC" then
         foundPanic := true
         break
-    bif foundPanic then
+    uif foundPanic then
       -- Success - clear the messages so they don't appear
       modify fun st => { st with messages := MessageLog.empty }
     else

@@ -28,7 +28,7 @@ partial def elabSymDSimproc (stx : Syntax) : GrindTacticM DSimproc := do
     catch ex =>
       match ex with
       | .internal id _ =>
-        bif id == unsupportedSyntaxExceptionId then continue
+        uif id == unsupportedSyntaxExceptionId then continue
         else throw ex
       | _ => throw ex
   throwErrorAt stx "unsupported sym_dsimproc syntax `{stx.getKind}`"

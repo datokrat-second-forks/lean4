@@ -28,7 +28,7 @@ This means that both `H args` and `T args` have type `SPred []`.
 -/
 def getSPredGoalHypsAndTarget (type : Expr) : MetaM (Option (Level × Expr × Expr)) := do
   let args := type.getAppArgs
-  bif (type.isAppOf ``Std.Tactic.Do.MGoalEntails || type.isAppOf ``SPred.entails) && args.size >ᵇ 2 then
+  uif (type.isAppOf ``Std.Tactic.Do.MGoalEntails || type.isAppOf ``SPred.entails) ∧ args.size > 2 then
     return (type.getAppFn.constLevels![0]!, (type.getArg! 1).beta args[3:], (type.getArg! 2).beta args[3:])
   let some decl := (← getLCtx).lastDecl | return none
   let hyps := decl.type.consumeMData
@@ -37,9 +37,9 @@ def getSPredGoalHypsAndTarget (type : Expr) : MetaM (Option (Level × Expr × Ex
   return (lvl, toAssertion lvl hyps, toAssertion lvl type)
 where
   getULiftDownLevel (expr : Expr) : Option Level :=
-    bif expr.isAppOfArity ``ULift.down 2 then some expr.getAppFn.constLevels![0]! else none
+    uif expr.isAppOfArity ``ULift.down 2 then some expr.getAppFn.constLevels![0]! else none
   toAssertion (lvl : Level) (prop : Expr) : Expr :=
-    bif prop.isAppOfArity ``ULift.down 2 then
+    uif prop.isAppOfArity ``ULift.down 2 then
       prop.getArg! 1
     else
       SPred.mkPure lvl (TypeList.mkNil lvl) prop
@@ -69,11 +69,11 @@ def classifyInvariantUse (assertion : Expr) (inv : MVarId) : ClassifyInvariantUs
   -- There we have `assertion = ?inv.1 payload args`.
   -- The chain of `.2.2...1` is normalized to nested applications of `Prod.fst` and `Prod.snd`:
   --   `@Prod.fst _ _ (@Prod.snd _ _ (@Prod.snd _ _ ... ?inv)) payload args`
-  bif !assertion.isAppOf ``Prod.fst then return .notAnInvariantUse
+  uif !assertion.isAppOf ``Prod.fst then return .notAnInvariantUse
   let mut head := assertion.getArg! 2 -- indices 0 and 1 are type args
   let mut conditionIdx := 0
   while head != mkMVar inv do
-    bif !head.isAppOfArity ``Prod.snd 4 then return .notAnInvariantUse -- cannot classify as a use of the invariant!
+    uif !head.isAppOfArity ``Prod.snd 4 then return .notAnInvariantUse -- cannot classify as a use of the invariant!
     conditionIdx := conditionIdx + 1
     head := head.getRevArg! 1
   -- `head` is ?inv => Found the end of the chain.
@@ -81,7 +81,7 @@ def classifyInvariantUse (assertion : Expr) (inv : MVarId) : ClassifyInvariantUs
 
   let args := assertion.getAppArgs
   -- logWarning m!"Found Prod.fst. Args: {args}"
-  bif args.size <ᵇ 4 then return .notAnInvariantUse -- not an overapplication of `Prod.fst`. Types should prohibit this case
+  uif args.size < 4 then return .notAnInvariantUse -- not an overapplication of `Prod.fst`. Types should prohibit this case
   let payload := args[3]!
   let stateArgs := args[4:]
   -- `stateArgs` can be non-empty when `σs` is non-empty.
@@ -105,7 +105,7 @@ uses the `Option ρ` component according to early return semantics.
   NB: When `n=0`, we have `Prod (Option ρ) PUnit` rather than `Option ρ`.
 -/
 def hasEarlyReturn (vcs : Array MVarId) (inv : MVarId) (letMutsTy : Expr) : MetaM (Option (Expr × Expr)) := do
-  bif !(letMutsTy.isAppOf ``Prod) || letMutsTy.getAppNumArgs <ᵇ 2 then return none
+  uif !(letMutsTy.isAppOf ``Prod) ∨ letMutsTy.getAppNumArgs < 2 then return none
   let_expr Option ρ := letMutsTy.getArg! 0 | return none
   let σ := letMutsTy.getArg! 1
 
@@ -152,7 +152,7 @@ def hasEarlyReturn (vcs : Array MVarId) (inv : MVarId) (letMutsTy : Expr) : Meta
     -- The following check could be smarter. Essentially it tries to construct a proof that
     -- `suff = []` or `acc = (none, _)` and returns `none` upon failure.
     -- NB: There always is at least one `invariantUse.letMuts`.
-    bif !invariantUse.cursorSuffix.isAppOf ``List.nil && !invariantUse.letMuts[0]!.isAppOf ``Option.none then
+    uif !invariantUse.cursorSuffix.isAppOf ``List.nil && !invariantUse.letMuts[0]!.isAppOf ``Option.none then
       -- logWarning m!"No early return! Not a `List.nil`: {invariantUse.cursorSuffix} and not an `Option.none`: {invariantUse.letMuts[0]!}"
       return none
 
@@ -163,12 +163,12 @@ def collectFVarsToRevert (e : Expr)(dontRevert : FVarId → Bool) : MetaM (Array
   repeat do
     let new ← collectForwardDeps xs false
     let new := new.filter (not <| dontRevert ·.fvarId!)
-    bif new.size == xs.size then xs := new; break
+    uif new.size == xs.size then xs := new; break
     let types ← new.mapM inferType
     let forbidden : FVarIdSet := new.foldl (·.insert ·.fvarId!) {}
     let s := (types.foldl collectFVars {}).fvarIds |>.filter fun x => !forbidden.contains x && !dontRevert x
     xs := new ++ s.map mkFVar
-    bif s.isEmpty then break -- no need for another iteration; collectForwardDeps is idempotent
+    uif s.isEmpty then break -- no need for another iteration; collectForwardDeps is idempotent
   return xs
 
 /-- Largely lifted from `Lean.MetavarContext.MkBinding.mkAuxMVarType`. -/
@@ -190,7 +190,7 @@ def revertFVarsInTypeExcept (e : Expr) (dontRevert : FVarId → Bool) : MetaM Ex
       let type := type.abstractRange i xs
       return mkApp3 (mkConst ``SPred.forall [← getLevel type, lvl]) type (TypeList.mkNil lvl) (Lean.mkLambda n .default type e)
     | LocalDecl.ldecl (nondep := false) _ _ n type value _ =>
-      bif e.hasLooseBVar 0 then
+      uif e.hasLooseBVar 0 then
         let type := type.headBeta
         let type := type.abstractRange i xs
         let value := value.abstractRange i xs
@@ -262,8 +262,8 @@ def collectInvariantHints (vcs : Array MVarId) (inv : MVarId) (xs : Expr) (letMu
       if let .success invariantUse := classifyInvariantUse spredTarget inv then
         -- This is the `xs.prefix = []` case.
         -- vc.withContext <| logWarning m!"Invariant use: {invariantUse.letMutsTuple}"
-        bif invariantUse.conditionIdx != 0 then continue -- concerns the success conditions
-        bif invariantUse.cursorPrefix.isAppOf ``List.nil then
+        uif invariantUse.conditionIdx != 0 then continue -- concerns the success conditions
+        uif invariantUse.cursorPrefix.isAppOf ``List.nil then
           -- eqNil := `(xs.prefix = [])
           let xsPrefix ← mkProjection xs `prefix
           let eqNil ← mkEq xsPrefix invariantUse.cursorPrefix
@@ -274,8 +274,8 @@ def collectInvariantHints (vcs : Array MVarId) (inv : MVarId) (xs : Expr) (letMu
       if let .success invariantUse := classifyInvariantUse spredHyps inv then
         -- This is a `xs.suffix = []` case.
         -- vc.withContext <| logWarning m!"Found spredHyp: {spredHyps}"
-        bif invariantUse.conditionIdx != 0 then continue -- concerns the success conditions
-        bif invariantUse.cursorSuffix.isAppOf ``List.nil && invariantUse.letMutsTuple.isFVar then
+        uif invariantUse.conditionIdx != 0 then continue -- concerns the success conditions
+        uif invariantUse.cursorSuffix.isAppOf ``List.nil && invariantUse.letMutsTuple.isFVar then
           let xsPrefix ← mkProjection xs `suffix
           let eqNil ← mkEq xsPrefix invariantUse.cursorSuffix
           let dontRevert fvarId := fvarId == invariantUse.letMutsTuple.fvarId! || lctx.contains fvarId
@@ -298,15 +298,15 @@ def collectInvariantHints (vcs : Array MVarId) (inv : MVarId) (xs : Expr) (letMu
         points := points.push (conds.getArg! 2)
         n := n + 1
         conds := conds.getArg! 3
-      bif points.size >ᵇ failureConds.points.size then
+      uif points.size > failureConds.points.size then
         -- Just overwrite the existing entry. Computing a join here is overkill for the few cases
         -- where this is going to be used.
         failureConds := { failureConds with points := points }
-        bif conds.isConstOf ``PUnit.unit then
+        uif conds.isConstOf ``PUnit.unit then
           failureConds := { failureConds with default := .punit }
-        else bif conds.isAppOfArity ``ExceptConds.false 1 then
+        else uif conds.isAppOfArity ``ExceptConds.false 1 then
           failureConds := { failureConds with default := .false }
-        else bif conds.isAppOfArity ``ExceptConds.true 1 then
+        else uif conds.isAppOfArity ``ExceptConds.true 1 then
           failureConds := { failureConds with default := .true }
         else
           failureConds := { failureConds with default := .other conds }
@@ -329,7 +329,7 @@ partial def tryHoistPure (e : Expr) : Expr :=
   | some (lvl, e) => SPred.mkPure lvl (TypeList.mkNil lvl) e
 where
   go (e : Expr) : Option (Level × Expr) := do
-    bif e.isAppOfArity ``SPred.pure 2 then
+    uif e.isAppOfArity ``SPred.pure 2 then
       return (e.getAppFn.constLevels![0]!, e.getArg! 1)
     if let some (_, lhs, rhs) := e.app3? ``SPred.and then
       let (_, lhs) ← go lhs
@@ -414,7 +414,7 @@ public def suggestInvariant (vcs : Array MVarId) (inv : MVarId) : TacticM Term :
         let (res2, _) ← Lean.Meta.simp onReturn ctx simprocs
         return (← Lean.PrettyPrinter.delab res1.expr, ← Lean.PrettyPrinter.delab res2.expr)
       -- Now the configuration mess.
-      bif failureConds.points.isEmpty then
+      uif failureConds.points.isEmpty then
         match failureConds.default with
         | .false | .punit =>
           `(Invariant.withEarlyReturnNewDo (onReturn := fun r letMuts => $onReturn) (onContinue := fun xs letMuts => $onContinue))
@@ -438,8 +438,8 @@ public def suggestInvariant (vcs : Array MVarId) (inv : MVarId) : TacticM Term :
     withLocalDeclD `letMuts letMutsTy fun letMuts => do
     let successBody ← Lean.PrettyPrinter.delab (success.beta #[xs, letMuts])
     -- Configuration mess
-    bif failureConds.points.isEmpty && not (failureConds.default matches .other _) then
-      bif (failureConds.default matches .true) then
+    uif failureConds.points.isEmpty && not (failureConds.default matches .other _) then
+      uif (failureConds.default matches .true) then
         `(⇓? ⟨xs, letMuts⟩ => $successBody)
       else
         `(⇓ ⟨xs, letMuts⟩ => $successBody)

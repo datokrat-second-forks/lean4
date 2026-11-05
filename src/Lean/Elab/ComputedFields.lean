@@ -92,16 +92,16 @@ def getComputedFieldValue (computedField : Name) (ctorTerm : Expr) : MetaM Expr 
     else
       unfoldDefinition val
   let val ← whnfHeadPred val (return ctorTerm.occurs ·)
-  bif !ctorTerm.occurs val then return val
+  uif !ctorTerm.occurs val then return val
   throwError "computed field {computedField} does not reduce for constructor {ctorName}"
 
 def validateComputedFields : M Unit := do
   let {compFieldVars, indices, val ..} ← read
   for cf in compFieldVars do
     let ty ← inferType cf
-    bif ty.containsFVar val.fvarId! then
+    uif ty.containsFVar val.fvarId! then
       throwError "computed field {cf}'s type must not depend on value{indentExpr ty}"
-    bif indices.any (ty.containsFVar ·.fvarId!) then
+    uif indices.any (ty.containsFVar ·.fvarId!) then
       throwError "computed field {cf}'s type must not depend on indices{indentExpr ty}"
 
 def mkImplType : M Name := do
@@ -113,7 +113,7 @@ def mkImplType : M Name := do
        ctors := ← ctors.mapM fun ctor => do
          forallTelescope (← inferType (mkAppN (mkConst ctor lparams) params)) fun fields retTy => do
            let retTy := mkAppN (mkConst name lparams) retTy.getAppArgs
-           let type ← mkForallFVars (params ++ (bif (← isScalarField ctor) then #[] else compFieldVars) ++ fields) retTy
+           let type ← mkForallFVars (params ++ (uif (← isScalarField ctor) then #[] else compFieldVars) ++ fields) retTy
            return { name := ctor ++ `_impl, type } }]
   return name
 
@@ -136,7 +136,7 @@ def overrideCasesOn : M Unit := do
         indices ++ #[← mkUnsafeCastTo majorImplTy major] ++
         (← minors.zipWithM (bs:=ctors.toArray) fun minor ctor => do
           forallTelescope (← inferType minor) fun args _ => do
-            mkLambdaFVars ((bif (← isScalarField ctor) then #[] else compFieldVars) ++ args)
+            mkLambdaFVars ((uif (← isScalarField ctor) then #[] else compFieldVars) ++ args)
               (← mkUnsafeCastTo constMotive (mkAppN minor args)))
   let nameOverride := mkCasesOnName name ++ `_override
   addDecl <| .defnDecl { casesOn with
@@ -157,7 +157,7 @@ def overrideConstructors : M Unit := do
     let computedFieldVals ←
       -- elaborating a non-exposed def body
       withoutExporting do
-        bif (← isScalarField ctor) then pure #[] else
+        uif (← isScalarField ctor) then pure #[] else
           compFields.mapM (getComputedFieldValue · ctorTerm)
     addDecl <| .defnDecl {
       name := ctor ++ `_override
@@ -169,13 +169,13 @@ def overrideConstructors : M Unit := do
       safety := .unsafe
     }
     setImplementedBy ctor (ctor ++ `_override)
-    bif (← isScalarField ctor) then setInlineAttribute (ctor ++ `_override)
+    uif (← isScalarField ctor) then setInlineAttribute (ctor ++ `_override)
 
 def overrideComputedFields : M Unit := do
   let {name, levelParams, ctors, compFields, compFieldVars, lparams, params, indices, val ..} ← read
   withLocalDeclD `x (mkAppN (mkConst (name ++ `_impl) lparams) (params ++ indices)) fun xImpl => do
   for cfn in compFields, cf in compFieldVars do
-    bif isExtern (← getEnv) cfn then
+    uif isExtern (← getEnv) cfn then
       compileDecls #[cfn]
       continue
     let cases ←
@@ -183,7 +183,7 @@ def overrideComputedFields : M Unit := do
       withoutExporting do
         ctors.toArray.mapM fun ctor => do
           forallTelescope (← inferType (mkAppN (mkConst ctor lparams) params)) fun fields _ => do
-            bif (← isScalarField ctor) then
+            uif (← isScalarField ctor) then
               mkLambdaFVars fields <|
                 ← getComputedFieldValue cfn (mkAppN (mkConst ctor lparams) (params ++ fields))
             else
@@ -206,7 +206,7 @@ def overrideComputedFields : M Unit := do
 
 def mkComputedFieldOverrides (declName : Name) (compFields : Array Name) : MetaM Unit := do
   let ind ← getConstInfoInduct declName
-  bif ind.ctors.length <ᵇ 2 then
+  uif ind.ctors.length < 2 then
     throwError "computed fields require at least two constructors"
   let lparams := ind.levelParams.map mkLevelParam
   forallTelescope ind.type fun paramsIndices _ => do

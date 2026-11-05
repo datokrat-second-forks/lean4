@@ -37,7 +37,7 @@ def _root_.Lean.Meta.Grind.Params.eraseEMatchCore (params : Grind.Params) (declN
   { params with extensions := params.extensions.modify 0 fun ext => { ext with ematch := ext.ematch.erase (.decl declName) } }
 
 def _root_.Lean.Meta.Grind.Params.eraseEMatch (params : Grind.Params) (declName : Name) : MetaM Grind.Params := do
-  bif !wasOriginallyTheorem (← getEnv) declName then
+  uif !wasOriginallyTheorem (← getEnv) declName then
     if let some eqns ← getEqnsFor? declName then
       unless eqns.all fun eqn => params.containsEMatch eqn do
         Grind.throwNotMarkedWithGrindAttribute declName
@@ -88,7 +88,7 @@ def parseModifier (s : String) : CoreM Grind.AttrKind := do
   | _ => throwError "unexpected modifier {s}"
 
 def ensureNoMinIndexable (minIndexable : Bool) : MetaM Unit := do
-  bif minIndexable then
+  uif minIndexable then
     throwError "redundant modifier `!` in `grind` parameter"
 
 public def addEMatchTheorem (params : Grind.Params) (id : Ident) (declName : Name)
@@ -102,25 +102,25 @@ public def addEMatchTheorem (params : Grind.Params) (id : Ident) (declName : Nam
       ensureNoMinIndexable minIndexable
       let thm₁ ← Grind.mkEMatchTheoremForDecl declName (.eqLhs gen) params.symPrios
       let thm₂ ← Grind.mkEMatchTheoremForDecl declName (.eqRhs gen) params.symPrios
-      bif warn &&
+      uif warn &&
           params.extensions.containsWithSamePatterns thm₁.origin thm₁.patterns thm₁.cnstrs &&
           params.extensions.containsWithSamePatterns thm₂.origin thm₂.patterns thm₂.cnstrs then
         warnRedundantEMatchArg params.extensions declName
       return { params with extra := params.extra.push thm₁ |>.push thm₂ }
     | _ =>
-      bif kind matches .eqLhs _ | .eqRhs _ then
+      uif kind matches .eqLhs _ | .eqRhs _ then
         ensureNoMinIndexable minIndexable
-      let thm ← bif suggest && !Grind.backward.grind.inferPattern.get (← getOptions) then
+      let thm ← uif suggest && !Grind.backward.grind.inferPattern.get (← getOptions) then
         Grind.mkEMatchTheoremAndSuggest id declName params.symPrios minIndexable (isParam := true)
       else
         Grind.mkEMatchTheoremForDecl declName kind params.symPrios (minIndexable := minIndexable)
-      bif warn && params.extensions.containsWithSamePatterns thm.origin thm.patterns thm.cnstrs then
+      uif warn && params.extensions.containsWithSamePatterns thm.origin thm.patterns thm.cnstrs then
         warnRedundantEMatchArg params.extensions declName
       return { params with extra := params.extra.push thm }
   | .defn =>
-    bif (← isReducible declName) then
+    uif (← isReducible declName) then
       throwError "`{.ofConstName declName}` is a reducible definition, `grind` automatically unfolds them"
-    bif !kind.isEqLhs && !kind.isDefault then
+    uif !kind.isEqLhs && !kind.isDefault then
       throwError "invalid `grind` parameter, `{.ofConstName declName}` is a definition, the only acceptable (and redundant) modifier is '='"
     ensureNoMinIndexable minIndexable
     let some thms ← Grind.mkEMatchEqTheoremsForDef? declName
@@ -157,7 +157,7 @@ def processAnchor (params : Grind.Params) (val : TSyntax `hexnum) : CoreM Grind.
   return { params with anchorRefs? := some <| anchorRefs.push anchorRef }
 
 def checkNoRevert (params : Grind.Params) : CoreM Unit := do
-  bif params.config.revert then
+  uif params.config.revert then
     throwError "invalid `grind` parameter, only global declarations are allowed when `+revert` is used"
 
 /--
@@ -194,10 +194,10 @@ def processTermParam (params : Grind.Params)
     let e ← Term.elabTerm term .none
     Term.synthesizeSyntheticMVars (postpone := .no) (ignoreStuckTC := true)
     let e ← instantiateMVars e
-    bif e.hasSyntheticSorry then
+    uif e.hasSyntheticSorry then
       return .none
     let e := e.eta
-    bif e.hasMVar then
+    uif e.hasMVar then
       let r ← abstractMVars e
       -- See the docstring: a term whose holes are all proofs is a fact, not a theorem.
       let proofHolesOnly ← r.mvars.allM fun mvar => isProof mvar
@@ -208,7 +208,7 @@ def processTermParam (params : Grind.Params)
   let type ← inferType proof
   unless (← isProp type) do
     throwError "invalid `grind` parameter, proof term expected"
-  bif type.isForall && !(proofHolesOnly && levelParams.isEmpty && mod?.isNone) then
+  uif type.isForall && !(proofHolesOnly && levelParams.isEmpty && mod?.isNone) then
     let mkThm (kind : Grind.EMatchTheoremKind) (idx : Nat) : MetaM Grind.EMatchTheorem := do
       let id := ((`extra).appendIndexAfter idx)
       let some thm ← Grind.mkEMatchTheoremWithKind? (.stx id p) levelParams proof kind params.symPrios (minIndexable := minIndexable)
@@ -220,7 +220,7 @@ def processTermParam (params : Grind.Params)
       ensureNoMinIndexable minIndexable
       return { params with extra := params.extra.push (← mkThm (.eqLhs gen) idx) |>.push (← mkThm (.eqRhs gen) idx) }
     | _ =>
-      bif kind matches .eqLhs _ | .eqRhs _ then
+      uif kind matches .eqLhs _ | .eqRhs _ then
         ensureNoMinIndexable minIndexable
       return { params with extra := params.extra.push (← mkThm kind idx) }
   else
@@ -242,13 +242,13 @@ def processParam (params : Grind.Params)
   let declName ← try
     realizeGlobalConstNoOverloadWithInfo id
   catch err =>
-    bif (← resolveLocalName id.getId).isSome then
+    uif (← resolveLocalName id.getId).isSome then
       throwErrorAt id "redundant parameter `{id}`, `grind` uses local hypotheses automatically"
     else if let some ext ← Grind.getExtension? id.getId then
       if let some mod := mod? then
         throwErrorAt mod "invalid use of modifier in `grind` attribute `{id.getId}`"
       return { params with extensions := params.extensions.push (ext.getState (← getEnv)) }
-    else bif !id.getId.getPrefix.isAnonymous then
+    else uif !id.getId.getPrefix.isAnonymous then
       -- Fall back to term elaboration for compound identifiers like `foo.le` (dot notation on declarations)
       return (← processTermParam params p mod? id minIndexable)
     else
@@ -264,20 +264,20 @@ def processParam (params : Grind.Params)
     -- the user pattern is coming from.
     let thms := (← Grind.grindExt.getEMatchTheorems).find (.decl declName)
     let thms := thms.filter fun thm => thm.kind == .user
-    bif thms.isEmpty then
+    uif thms.isEmpty then
       throwErrorAt p "invalid use of `usr` modifier, `{.ofConstName declName}` does not have patterns specified with the command `grind_pattern`"
     for thm in thms do
       params := { params with extra := params.extra.push thm }
   | .ematch kind =>
     params ← withRef p <| addEMatchTheorem params id declName kind minIndexable
   | .cases eager =>
-    bif incremental then throwError "`cases` parameter is not supported here"
+    uif incremental then throwError "`cases` parameter is not supported here"
     ensureNoMinIndexable minIndexable
     withRef p <| Grind.validateCasesAttr declName eager
     params := params.insertCasesTypes declName eager
   | .intro =>
     if let some info ← Grind.isCasesAttrPredicateCandidate? declName false then
-      bif incremental then throwError "`cases` parameter is not supported here"
+      uif incremental then throwError "`cases` parameter is not supported here"
       for ctor in info.ctors do
         params ← withRef p <| addEMatchTheorem params id ctor (.default false) minIndexable
     else
@@ -296,7 +296,7 @@ def processParam (params : Grind.Params)
         for ctor in info.ctors do
           -- **Note**: We should not warn if `declName` is an inductive
           params ← withRef p <| addEMatchTheorem params id ctor (.default false) minIndexable (warn := False)
-    else bif (← isFactDecl declName params.symPrios) then
+    else uif (← isFactDecl declName params.symPrios) then
       params ← withRef p <| addFact params declName minIndexable
     else
       params ← withRef p <| addEMatchTheorem params id declName (.default false) minIndexable (suggest := true)
@@ -323,14 +323,14 @@ public def elabGrindParams (params : Grind.Params) (ps : TSyntaxArray ``Parser.T
     try
       match p with
       | `(Parser.Tactic.grindParam| - $id:ident) =>
-        bif incremental then
+        uif incremental then
           throwErrorAt p "invalid `-` occurrence, it can only be used at the `grind` tactic entry point"
         let declName ← realizeGlobalConstNoOverloadWithInfo id
         withRef id <| Term.checkDeprecatedCore declName
         if let some declName ← Grind.isCasesAttrCandidate? declName false then
           Grind.ensureNotBuiltinCases declName
           params ← params.eraseCasesTypes declName
-        else bif params.isInjectiveTheorem declName then
+        else uif params.isInjectiveTheorem declName then
           params := params.eraseInj declName
         else
           params ← params.eraseEMatch declName
@@ -356,7 +356,7 @@ public def elabGrindParams (params : Grind.Params) (ps : TSyntaxArray ``Parser.T
         params ← processAnchor params anchor
       | _ => throwError "unexpected `grind` parameter{indentD p}"
     catch ex =>
-      bif !lax then throw ex
+      uif !lax then throw ex
   return params
 
 namespace Grind
@@ -380,7 +380,7 @@ Removes all theorems that are not `match`-equations nor local theorems.
 def filterThms (thms : PArray EMatchTheorem) : GrindM (PArray EMatchTheorem) := do
   let mut result := {}
   for thm in thms do
-    bif (← shouldKeep thm) then
+    uif (← shouldKeep thm) then
       result := result.push thm
   return result
 
@@ -433,11 +433,11 @@ Helper method for processing parameters in tactics such as `finish` and `finish?
 -/
 public def withParams (params : Grind.Params) (ps : TSyntaxArray ``Parser.Tactic.grindParam) (only : Bool)
     (k : GrindTacticM α) : GrindTacticM α := do
-  bif !only && ps.isEmpty then
+  uif !only && ps.isEmpty then
     k
   else
     let mut params := params
-    bif only then
+    uif only then
       params := { params with
         extensions  := params.extensions.map fun ext => { ext with ematch := {} }
         anchorRefs? := none
@@ -445,7 +445,7 @@ public def withParams (params : Grind.Params) (ps : TSyntaxArray ``Parser.Tactic
     params ← elabGrindParams params ps (only := only) (incremental := true)
     let anchorRefs? := params.anchorRefs?
     withReader (fun c => { c with params, ctx.anchorRefs? := anchorRefs? }) do
-    bif only then
+    uif only then
       -- Cleanup main goal before adding new facts
       let goal ← getMainGoal
       let goal ← liftGrindM do
