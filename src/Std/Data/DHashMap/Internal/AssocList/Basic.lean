@@ -97,20 +97,20 @@ variable {β : Type v}
 /-- Internal implementation detail of the hash map -/
 def get? [BEq α] (a : α) : AssocList α (fun _ => β) → Option β
   | nil => none
-  | cons k v es => bif k == a then some v else get? a es
+  | cons k v es => uif k == a then some v else get? a es
 
 end
 
 /-- Internal implementation detail of the hash map -/
 def getCast? [BEq α] [LawfulBEq α] (a : α) : AssocList α β → Option (β a)
   | nil => none
-  | cons k v es => bif h : k == a then some (cast (congrArg β (eq_of_beq h)) v)
+  | cons k v es => uif h : k == a then some (cast (congrArg β (eq_of_beq h)) v)
       else es.getCast? a
 
 /-- Internal implementation detail of the hash map -/
 def getEntry? [BEq α] (a : α) : (l : AssocList α β) → Option ((a : α) × β a)
   | nil => none
-  | cons k v es => bif k == a then some ⟨k, v⟩
+  | cons k v es => uif k == a then some ⟨k, v⟩
       else es.getEntry? a
 
 /-- Internal implementation detail of the hash map -/
@@ -120,79 +120,79 @@ def contains [BEq α] (a : α) : AssocList α β → Bool
 
 /-- Internal implementation detail of the hash map -/
 def get {β : Type v} [BEq α] (a : α) : (l : AssocList α (fun _ => β)) → l.contains a → β
-  | cons k v es, h => bif hka : k == a then v else get a es
-      (by rw [← h, contains, hka, Bool.false_or])
+  | cons k v es, h => uif hka : k == a then v else get a es
+      (by rw [← h, contains, Bool.eq_false_of_ne_true hka, Bool.false_or])
 
 /-- Internal implementation detail of the hash map -/
 def getCast [BEq α] [LawfulBEq α] (a : α) : (l : AssocList α β) → l.contains a → β a
-  | cons k v es, h => bif hka : k == a then cast (congrArg β (eq_of_beq hka)) v
-      else es.getCast a (by rw [← h, contains, hka, Bool.false_or])
+  | cons k v es, h => uif hka : k == a then cast (congrArg β (eq_of_beq hka)) v
+      else es.getCast a (by rw [← h, contains, Bool.eq_false_of_ne_true hka, Bool.false_or])
 
 /-- Internal implementation detail of the hash map -/
 def getEntry [BEq α] (a : α) : (l : AssocList α β) → l.contains a → (a : α) × β a
-  | cons k v es, h => bif hka : k == a then ⟨k, v⟩
-      else es.getEntry a (by rw [← h, contains, hka, Bool.false_or])
+  | cons k v es, h => uif hka : k == a then ⟨k, v⟩
+      else es.getEntry a (by rw [← h, contains, Bool.eq_false_of_ne_true hka, Bool.false_or])
 
 /-- Internal implementation detail of the hash map -/
 def getEntryD [BEq α] (a : α) (fallback : (a : α) × β a) : AssocList α β → (a : α) × β a
   | nil => fallback
-  | cons k v es => bif k == a then ⟨k, v⟩ else es.getEntryD a fallback
+  | cons k v es => uif k == a then ⟨k, v⟩ else es.getEntryD a fallback
 
 /-- Internal implementation detail of the hash map -/
 def getEntry! [BEq α] (a : α) [Inhabited ((a : α) × β a)] : AssocList α β → (a : α) × β a
   | nil => default
-  | cons k v es => bif k == a then ⟨k, v⟩ else es.getEntry! a
+  | cons k v es => uif k == a then ⟨k, v⟩ else es.getEntry! a
 
 /-- Internal implementation detail of the hash map -/
 def getKey [BEq α] (a : α) : (l : AssocList α β) → l.contains a → α
-  | cons k _ es, h => bif hka : k == a then k
-      else es.getKey a (by rw [← h, contains, hka, Bool.false_or])
+  | cons k _ es, h => uif hka : k == a then k
+      else es.getKey a (by rw [← h, contains, Bool.eq_false_of_ne_true hka, Bool.false_or])
 
 /-- Internal implementation detail of the hash map -/
 def getCast! [BEq α] [LawfulBEq α] (a : α) [Inhabited (β a)] : AssocList α β → β a
   | nil => panic! "key is not present in hash table"
-  | cons k v es => bif h : k == a then cast (congrArg β (eq_of_beq h)) v else es.getCast! a
+  | cons k v es => uif h : k == a then cast (congrArg β (eq_of_beq h)) v else es.getCast! a
 
 /-- Internal implementation detail of the hash map -/
 def getKey? [BEq α] (a : α) : AssocList α β → Option α
   | nil => none
-  | cons k _ es => bif k == a then some k else es.getKey? a
+  | cons k _ es => uif k == a then some k else es.getKey? a
 
 /-- Internal implementation detail of the hash map -/
 def get! {β : Type v} [BEq α] [Inhabited β] (a : α) : AssocList α (fun _ => β) → β
   | nil => panic! "key is not present in hash table"
-  | cons k v es => bif k == a then v else es.get! a
+  | cons k v es => uif k == a then v else es.get! a
 
 /-- Internal implementation detail of the hash map -/
 def getKey! [BEq α] [Inhabited α] (a : α) : AssocList α β → α
   | nil => panic! "key is not present in hash table"
-  | cons k _ es => bif k == a then k else es.getKey! a
+  | cons k _ es => uif k == a then k else es.getKey! a
 
 /-- Internal implementation detail of the hash map -/
 def getCastD [BEq α] [LawfulBEq α] (a : α) (fallback : β a) : AssocList α β → β a
   | nil => fallback
-  | cons k v es => bif h : k == a then cast (congrArg β (eq_of_beq h)) v
+  | cons k v es => uif h : k == a then cast (congrArg β (eq_of_beq h)) v
       else es.getCastD a fallback
 
 /-- Internal implementation detail of the hash map -/
 def getD {β : Type v} [BEq α] (a : α) (fallback : β) : AssocList α (fun _ => β) → β
   | nil => fallback
-  | cons k v es => bif k == a then v else es.getD a fallback
+  | cons k v es => uif k == a then v else es.getD a fallback
 
 /-- Internal implementation detail of the hash map -/
 def getKeyD [BEq α] (a : α) (fallback : α) : AssocList α β → α
   | nil => fallback
-  | cons k _ es => bif k == a then k else es.getKeyD a fallback
+  | cons k _ es => uif k == a then k else es.getKeyD a fallback
 
 /-- Internal implementation detail of the hash map -/
 def replace [BEq α] (a : α) (b : β a) : AssocList α β → AssocList α β
   | nil => nil
-  | cons k v l => bif k == a then cons a b l else cons k v (replace a b l)
+  | cons k v l => uif k == a then cons a b l else cons k v (replace a b l)
 
 /-- Internal implementation detail of the hash map -/
 def erase [BEq α] (a : α) : AssocList α β → AssocList α β
   | nil => nil
-  | cons k v l => bif k == a then l else cons k v (l.erase a)
+  | cons k v l => uif k == a then l else cons k v (l.erase a)
 
 /-- Internal implementation detail of the hash map -/
 @[specialize]
@@ -200,7 +200,7 @@ def modify [BEq α] [LawfulBEq α] (a : α) (f : β a → β a) :
     AssocList α β → AssocList α β
   | nil => nil
   | cons k v l =>
-    bif h : k == a then
+    uif h : k == a then
       have h' : k = a := eq_of_beq h
       let b := f (cast (congrArg β h') v)
       cons a b l
@@ -215,7 +215,7 @@ def alter [BEq α] [LawfulBEq α] (a : α) (f : Option (β a) → Option (β a))
     | none => nil
     | some b => cons a b nil
   | cons k v l =>
-    bif h : k == a then
+    uif h : k == a then
       have h' : k = a := eq_of_beq h
       match f (some (cast (congrArg β h') v)) with
       | none => l
@@ -232,7 +232,7 @@ def modify [BEq α] {β : Type v} (a : α) (f : β → β) :
     AssocList α (fun _ => β) → AssocList α (fun _ => β)
   | nil => nil
   | cons k v l =>
-    bif k == a then
+    uif k == a then
       cons a (f v) l
     else
       cons k v (modify a f l)
@@ -245,7 +245,7 @@ def alter [BEq α] {β : Type v} (a : α) (f : Option β → Option β) :
     | none => nil
     | some b => AssocList.cons a b nil
   | cons k v l =>
-    bif k == a then
+    uif k == a then
       match f (some v) with
       | none => l
       | some b => cons a b l
@@ -280,7 +280,7 @@ where
 where
   @[specialize] go (acc : AssocList α β) : AssocList α β → AssocList α β
   | nil => acc
-  | cons k v t => bif f k v then go (cons k v acc) t else go acc t
+  | cons k v t => uif f k v then go (cons k v acc) t else go acc t
 
 end AssocList
 

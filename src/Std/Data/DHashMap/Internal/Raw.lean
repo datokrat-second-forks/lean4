@@ -80,8 +80,8 @@ theorem contains_eq [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) {a : α} :
   simp [Raw.contains, h.size_buckets_pos]
 
 theorem get_eq [BEq α] [Hashable α] [LawfulBEq α] {m : Raw α β} {a : α} {h : a ∈ m} :
-    m.get a h = Raw₀.get ⟨m, by change Bool.dcond .. = true at h; split at h <;> simp_all⟩ a
-      (by change Bool.dcond .. = true at h; split at h <;> simp_all) := (rfl)
+    m.get a h = Raw₀.get ⟨m, by change UDecidable.dite .. = true at h; split at h <;> simp_all⟩ a
+      (by change UDecidable.dite .. = true at h; split at h <;> simp_all) := (rfl)
 
 theorem getD_eq [BEq α] [Hashable α] [LawfulBEq α] {m : Raw α β} (h : m.WF) {a : α}
     {fallback : β a} : m.getD a fallback = Raw₀.getD ⟨m, h.size_buckets_pos⟩ a fallback := by
@@ -96,8 +96,8 @@ theorem getKey?_eq [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) {a : α} :
   simp [Raw.getKey?, h.size_buckets_pos]
 
 theorem getKey_eq [BEq α] [Hashable α] {m : Raw α β} {a : α} {h : a ∈ m} :
-    m.getKey a h = Raw₀.getKey ⟨m, by change Bool.dcond .. = true at h; split at h <;> simp_all⟩ a
-      (by change Bool.dcond .. = true at h; split at h <;> simp_all) := (rfl)
+    m.getKey a h = Raw₀.getKey ⟨m, by change UDecidable.dite .. = true at h; split at h <;> simp_all⟩ a
+      (by change UDecidable.dite .. = true at h; split at h <;> simp_all) := (rfl)
 
 theorem getKeyD_eq [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) {a fallback : α} :
     m.getKeyD a fallback = Raw₀.getKeyD ⟨m, h.size_buckets_pos⟩ a fallback := by
@@ -130,12 +130,12 @@ theorem insertMany_eq [BEq α] [Hashable α] {m : Raw α β} (h : m.WF) {ρ : Ty
 
 theorem ofList_eq [BEq α] [Hashable α] {l : List ((a : α) × β a)} :
     Raw.ofList l = Raw₀.insertMany Raw₀.emptyWithCapacity l := by
-  simp only [Raw.ofList, Raw.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceDCond]
+  simp only [Raw.ofList, Raw.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceUDIte]
   congr
 
 theorem ofArray_eq [BEq α] [Hashable α] {a : Array ((a : α) × β a)} :
     Raw.ofArray a = Raw₀.insertMany Raw₀.emptyWithCapacity a := by
-  simp only [Raw.ofArray, Raw.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceDCond]
+  simp only [Raw.ofArray, Raw.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceUDIte]
   congr
 
 theorem alter_eq [BEq α] [LawfulBEq α] [Hashable α] {m : Raw α β} (h : m.WF) {k : α} {f : Option (β k) → Option (β k)} :
@@ -176,12 +176,12 @@ theorem Const.insertMany_eq [BEq α] [Hashable α] {m : Raw α (fun _ => β)} (h
 
 theorem Const.ofList_eq [BEq α] [Hashable α] {l : List (α × β)} :
     Raw.Const.ofList l = Raw₀.Const.insertMany Raw₀.emptyWithCapacity l := by
-  simp only [Raw.Const.ofList, Raw.Const.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceDCond]
+  simp only [Raw.Const.ofList, Raw.Const.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceUDIte]
   congr
 
 theorem Const.ofArray_eq [BEq α] [Hashable α] {a : Array (α × β)} :
     Raw.Const.ofArray a = Raw₀.Const.insertMany Raw₀.emptyWithCapacity a := by
-  simp only [Raw.Const.ofArray, Raw.Const.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceDCond]
+  simp only [Raw.Const.ofArray, Raw.Const.insertMany, (Raw.WF.empty).size_buckets_pos ∅, ↓reduceUDIte]
   congr
 
 theorem Const.insertManyIfNewUnit_eq {ρ : Type w} [ForIn Id ρ α] [BEq α] [Hashable α]
@@ -192,13 +192,13 @@ theorem Const.insertManyIfNewUnit_eq {ρ : Type w} [ForIn Id ρ α] [BEq α] [Ha
 theorem Const.unitOfList_eq [BEq α] [Hashable α] {l : List α} :
     Raw.Const.unitOfList l = Raw₀.Const.insertManyIfNewUnit Raw₀.emptyWithCapacity l := by
   simp only [Raw.Const.unitOfList, Raw.Const.insertManyIfNewUnit, (Raw.WF.empty).size_buckets_pos ∅,
-    ↓reduceDCond]
+    ↓reduceUDIte]
   congr
 
 theorem Const.unitOfArray_eq [BEq α] [Hashable α] {a : Array α} :
     Raw.Const.unitOfArray a = Raw₀.Const.insertManyIfNewUnit Raw₀.emptyWithCapacity a := by
   simp only [Raw.Const.unitOfArray, Raw.Const.insertManyIfNewUnit, (Raw.WF.empty).size_buckets_pos ∅,
-    ↓reduceDCond]
+    ↓reduceUDIte]
   congr
 
 theorem Const.get?_eq [BEq α] [Hashable α] {m : Raw α (fun _ => β)} (h : m.WF) {a : α} :
@@ -207,8 +207,8 @@ theorem Const.get?_eq [BEq α] [Hashable α] {m : Raw α (fun _ => β)} (h : m.W
 
 theorem Const.get_eq [BEq α] [Hashable α] {m : Raw α (fun _ => β)} {a : α} {h : a ∈ m} :
     Raw.Const.get m a h = Raw₀.Const.get
-      ⟨m, by change Bool.dcond .. = true at h; split at h <;> simp_all⟩ a
-      (by change Bool.dcond .. = true at h; split at h <;> simp_all) :=
+      ⟨m, by change UDecidable.dite .. = true at h; split at h <;> simp_all⟩ a
+      (by change UDecidable.dite .. = true at h; split at h <;> simp_all) :=
   (rfl)
 
 theorem Const.getD_eq [BEq α] [Hashable α] {m : Raw α (fun _ => β)} (h : m.WF) {a : α}

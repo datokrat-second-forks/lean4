@@ -280,7 +280,7 @@ theorem forIn_eq_forIn_toListModel {δ : Type w} {l : Raw α β} {m : Type w →
 
 theorem all_eq_all_toListModel {p : (a: α) → β a → Bool} {m : Raw α β} :
     m.all p = (toListModel m.buckets).all (fun x => p x.1 x.2) := by
-  simp only [Raw.all, ForIn.forIn, Bool.cond_eq_ite, Bool.not_eq_true', Id.run_bind]
+  simp only [Raw.all, ForIn.forIn, Bool.not_eq_true', Id.run_bind]
   rw [forIn_eq_forIn_toListModel, ← toList_eq_toListModel, forIn_eq_forIn']
   induction m.toList with
   | nil => simp only [all_nil, forIn'_nil, Id.run_pure]
@@ -348,12 +348,12 @@ private theorem expand.go_pos [Hashable α] {i : Nat} {source : Array (AssocList
     {target : { d : Array (AssocList α β) // 0 < d.size }} (h : i < source.size) :
     expand.go i source target = go (i + 1)
       (source.set i .nil) ((source[i]).foldl (reinsertAux hash) target) := by
-  rw [expand.go, Bool.dcond_decideLT_pos h]
+  rw [expand.go, UDecidable.dite_eq_left h]
 
 private theorem expand.go_neg [Hashable α] {i : Nat} {source : Array (AssocList α β)}
     {target : { d : Array (AssocList α β) // 0 < d.size}} (h : ¬i < source.size) :
     expand.go i source target = target := by
-  rw [expand.go, Bool.dcond_decideLT_neg h]
+  rw [expand.go, UDecidable.dite_eq_right h]
 
 private theorem expand.go_eq [BEq α] [Hashable α] [PartialEquivBEq α] (source : Array (AssocList α β))
     (target : {d : Array (AssocList α β) // 0 < d.size}) : expand.go 0 source target =
@@ -654,7 +654,7 @@ theorem toListModel_insertₘ [BEq α] [Hashable α] [EquivBEq α] [LawfulHashab
     exact toListModel_replaceₘ _ h _ _
   next h' =>
     rw [containsₘ_eq_containsKey h] at h'
-    rw [insertEntry_of_containsKey_eq_false h']
+    rw [insertEntry_of_containsKey_eq_false (Bool.eq_false_of_ne_true h')]
     refine (Raw₀.toListModel_expandIfNecessary _).trans ?_
     exact toListModel_consₘ m h a b
 
@@ -714,7 +714,7 @@ theorem isHashSelf_alterₘ [BEq α] [Hashable α] [LawfulBEq α] (m : Raw₀ α
     split
     · exact h.buckets_hash_self
     · refine (wfImp_expandIfNecessary _ (wfImp_consₘ _ h _ _ ?_)).buckets_hash_self
-      exact hc
+      exact Bool.eq_false_of_ne_true hc
 
 theorem toListModel_alterₘ [BEq α] [Hashable α] [LawfulBEq α] {m : Raw₀ α β} (h : Raw.WFImp m.1)
     {a : α} {f : Option (β a) → Option (β a)} :
@@ -724,18 +724,18 @@ theorem toListModel_alterₘ [BEq α] [Hashable α] [LawfulBEq α] {m : Raw₀ �
   · exact toListModel_updateBucket_alter h
   next hc =>
     rw [containsₘ_eq_containsKey h] at hc
-    rw [alterKey, getValueCast?_eq_none hc]
+    rw [alterKey, getValueCast?_eq_none (Bool.eq_false_of_ne_true hc)]
     split
     next hn =>
       simp only [hn]
       rw [eraseKey_of_containsKey_eq_false]
-      exact hc
+      exact Bool.eq_false_of_ne_true hc
     next hs =>
       simp only [hs]
       refine Perm.trans (toListModel_expandIfNecessary _) ?_
       refine Perm.trans (toListModel_consₘ m h _ _) ?_
       rw [insertEntry_of_containsKey_eq_false]
-      exact hc
+      exact Bool.eq_false_of_ne_true hc
 
 theorem toListModel_alter [BEq α] [Hashable α] [LawfulBEq α] {m : Raw₀ α β} (h : Raw.WFImp m.1)
     {a : α} {f : Option (β a) → Option (β a)} :
@@ -752,7 +752,7 @@ theorem wfImp_alterₘ [BEq α] [Hashable α] [LawfulBEq α] {m : Raw₀ α β} 
     split
     next h₁ =>
       rw [containsₘ_eq_containsKey h] at h₁
-      simp only [length_alterKey, h.size_eq, UDecidable.dite_eq_left h₁, Bool.cond_eq_ite]
+      simp only [length_alterKey, h.size_eq, UDecidable.dite_eq_left h₁]
       rw [containsₘ_eq_containsKey (by apply wfImp_updateBucket_alter h)]
       simp only [buckets_withComputedSize]
       simp only [containsKey_of_perm <| toListModel_updateBucket_alter h]
@@ -761,12 +761,12 @@ theorem wfImp_alterₘ [BEq α] [Hashable α] [LawfulBEq α] {m : Raw₀ α β} 
     next h₁ =>
       rw [containsₘ_eq_containsKey h] at h₁
       rw [alterKey]
-      rw [getValueCast?_eq_none <| h₁]
+      rw [getValueCast?_eq_none <| Bool.eq_false_of_ne_true h₁]
       split
       next heq =>
-        rw [heq, h.size_eq, length_eraseKey, UDecidable.ite_eq_right (Bool.ne_true_of_eq_false h₁)]
+        rw [heq, h.size_eq, length_eraseKey, UDecidable.ite_eq_right h₁]
       next heq =>
-        rw [heq, size_expandIfNecessary, consₘ, length_insertEntry, UDecidable.ite_eq_right (Bool.ne_true_of_eq_false h₁), h.size_eq]
+        rw [heq, size_expandIfNecessary, consₘ, length_insertEntry, UDecidable.ite_eq_right h₁, h.size_eq]
 
 theorem wfImp_alter [BEq α] [Hashable α] [LawfulBEq α] {m : Raw₀ α β}
     (h : Raw.WFImp m.1) {a : α} {f : Option (β a) → Option (β a)} : Raw.WFImp (m.alter a f).1 := by
@@ -812,7 +812,7 @@ theorem isHashSelf_alterₘ [BEq α] [EquivBEq α] [Hashable α] [LawfulHashable
     split
     · exact h.buckets_hash_self
     · refine (wfImp_expandIfNecessary _ (wfImp_consₘ _ h _ _ ?_)).buckets_hash_self
-      exact hc
+      exact Bool.eq_false_of_ne_true hc
 
 theorem toListModel_alterₘ [BEq α] [EquivBEq α] [Hashable α] [LawfulHashable α]
     {m : Raw₀ α (fun _ => β)} (h : Raw.WFImp m.1) {a : α} {f : Option β → Option β} :
@@ -822,18 +822,18 @@ theorem toListModel_alterₘ [BEq α] [EquivBEq α] [Hashable α] [LawfulHashabl
   · exact toListModel_updateBucket_alter h
   next hc =>
     rw [containsₘ_eq_containsKey h] at hc
-    rw [Const.alterKey, getValue?_eq_none.mpr hc]
+    rw [Const.alterKey, getValue?_eq_none.mpr (Bool.eq_false_of_ne_true hc)]
     split
     next hn =>
       simp only [hn]
       rw [eraseKey_of_containsKey_eq_false]
-      exact hc
+      exact Bool.eq_false_of_ne_true hc
     next hs =>
       simp only [hs]
       refine Perm.trans (toListModel_expandIfNecessary _) ?_
       refine Perm.trans (toListModel_consₘ m h _ _) ?_
       rw [insertEntry_of_containsKey_eq_false]
-      exact hc
+      exact Bool.eq_false_of_ne_true hc
 
 theorem toListModel_alter [BEq α] [EquivBEq α] [Hashable α] [LawfulHashable α]
     {m : Raw₀ α (fun _ => β)} (h : Raw.WFImp m.1) {a : α} {f : Option β → Option β} :
@@ -850,7 +850,7 @@ theorem wfImp_alterₘ [BEq α] [EquivBEq α] [Hashable α] [LawfulHashable α] 
     split
     next h₁ =>
       rw [containsₘ_eq_containsKey h] at h₁
-      simp only [Const.length_alterKey, h.size_eq, UDecidable.dite_eq_left h₁, Bool.cond_eq_ite]
+      simp only [Const.length_alterKey, h.size_eq, UDecidable.dite_eq_left h₁]
       rw [containsₘ_eq_containsKey (by apply wfImp_updateBucket_alter h)]
       simp only [buckets_withComputedSize]
       simp only [containsKey_of_perm <| toListModel_updateBucket_alter h]
@@ -859,12 +859,12 @@ theorem wfImp_alterₘ [BEq α] [EquivBEq α] [Hashable α] [LawfulHashable α] 
     next h₁ =>
       rw [containsₘ_eq_containsKey h] at h₁
       rw [Const.alterKey]
-      rw [getValue?_eq_none.mpr <| h₁]
+      rw [getValue?_eq_none.mpr <| Bool.eq_false_of_ne_true h₁]
       split
       next heq =>
-        rw [heq, h.size_eq, length_eraseKey, UDecidable.ite_eq_right (Bool.ne_true_of_eq_false h₁)]
+        rw [heq, h.size_eq, length_eraseKey, UDecidable.ite_eq_right h₁]
       next heq =>
-        rw [heq, size_expandIfNecessary, consₘ, length_insertEntry, UDecidable.ite_eq_right (Bool.ne_true_of_eq_false h₁), h.size_eq]
+        rw [heq, size_expandIfNecessary, consₘ, length_insertEntry, UDecidable.ite_eq_right h₁, h.size_eq]
 
 theorem wfImp_alter [BEq α] [EquivBEq α] [Hashable α] [LawfulHashable α] {m : Raw₀ α (fun _ => β)}
     (h : Raw.WFImp m.1) {a : α} {f : Option β → Option β} : Raw.WFImp (Const.alter m a f).1 := by
@@ -1036,7 +1036,7 @@ theorem toListModel_eraseₘ [BEq α] [Hashable α] [EquivBEq α] [LawfulHashabl
   split
   · exact toListModel_eraseₘaux m a h
   next h' =>
-    exact toListModel_perm_eraseKey_of_containsₘ_eq_false _ _ h h'
+    exact toListModel_perm_eraseKey_of_containsₘ_eq_false _ _ h (Bool.eq_false_of_ne_true h')
 
 theorem wfImp_eraseₘ [BEq α] [Hashable α] [EquivBEq α] [LawfulHashable α] {m : Raw₀ α β} {a : α}
     (h : Raw.WFImp m.1) : Raw.WFImp (m.eraseₘ a).1 := by

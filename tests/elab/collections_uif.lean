@@ -5,7 +5,7 @@ import Std.Data.Iterators
 Spot checks for the collections after the switch from `Decidable` `if` to `uif` in the lemma
 statements of `List`, `Array`, `Vector`, the iterators and the ranges, and to `bif` in the remaining
 definitions (`Array.setIfInBounds`, iterator steps, range loops and `UpwardEnumerable` instances,
-`ByteArray`, `FloatArray`, `ByteSlice`): the restated lemmas have the expected shape and work with
+`ByteArray`, `FloatArray`, `ByteSlice` lookups): the restated lemmas have the expected shape and work with
 `simp`/`grind`, and the converted definitions still reduce on literals.
 -/
 
@@ -98,9 +98,12 @@ example : (ByteArray.mk #[1, 2]).iter.next.hasPrev = true := by decide
 example : ((FloatArray.mk #[1, 2, 3]).get? 5).isNone = true := by decide
 example : (FloatArray.mk #[1, 2, 3]).foldl (fun a _ => a + 1) 0 = 3 := by decide
 
-example : ((ByteArray.mk #[1, 2, 3]).toByteSlice).getD 1 0 = 2 := by decide
-example : ((ByteArray.mk #[1, 2, 3]).toByteSlice 1 3).size = 2 := by decide
-example : ((ByteArray.mk #[1, 2, 3]).toByteSlice.slice 1 2).size = 1 := by decide
-example : ((ByteArray.mk #[1, 2, 3]).toByteSlice).contains 7 = false := by decide +kernel
+/-! `ByteArray.toByteSlice` and `ByteSlice.slice` use `uif`, so slices built with them evaluate with
+`cbv` rather than `decide`. -/
+
+example : ((ByteArray.mk #[1, 2, 3]).toByteSlice).getD 1 0 = 2 := by cbv
+example : ((ByteArray.mk #[1, 2, 3]).toByteSlice 1 3).size = 2 := by cbv
+example : ((ByteArray.mk #[1, 2, 3]).toByteSlice.slice 1 2).size = 1 := by cbv
+example : ((ByteArray.mk #[1, 2, 3]).toByteSlice).contains 7 = false := by cbv
 
 example : List.zipIdxLE (fun a b => decide (a ≤ b)) (1, 2) (1, 3) = true := by decide

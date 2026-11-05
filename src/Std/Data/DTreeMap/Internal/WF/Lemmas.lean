@@ -1139,7 +1139,7 @@ theorem toListModel_alterₘ [Ord α] [TransOrd α] [LawfulEqOrd α] [BEq α] [L
   · simp only [Cell.alter, Cell.ofOption, alterKey, Option.toList_some]
     have h : a = l.fst := compare_eq_iff_eq.mp <| hl l rfl
     cases h
-    simp only [getValueCast?, beq_self_eq_true, Bool.dcond_true, cast_eq]
+    simp only [getValueCast?, beq_self_eq_true, ↓reduceUDIte, cast_eq]
     cases f _
     · simp [eraseKey]
     · simp [insertEntry, containsKey, replaceEntry]
@@ -1412,7 +1412,7 @@ theorem toListModel_alterₘ [Ord α] [TransOrd α] [BEq α] [LawfulBEqOrd α] {
     cases f none <;> rfl
   · simp only [Cell.Const.alter, Cell.ofOption, Const.alterKey, Option.toList_some]
     have := OrientedCmp.eq_symm <| hl l rfl
-    simp only [getValue?, compare_eq_iff_beq.mp this, Bool.cond_true]
+    simp only [getValue?, compare_eq_iff_beq.mp this, ↓reduceUIte]
     cases f _
     · simp [eraseKey, compare_eq_iff_beq.mp this]
     · simp [insertEntry, containsKey, replaceEntry, compare_eq_iff_beq.mp this]

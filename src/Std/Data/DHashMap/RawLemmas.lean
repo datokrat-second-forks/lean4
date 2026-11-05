@@ -1831,7 +1831,7 @@ theorem insertMany_ind {motive : Raw α β → Prop} (m : Raw α β) (l : ρ)
   split
   · rename_i h
     refine Raw₀.insertMany_ind ⟨m, h⟩ l init (fun m a b h => ?_)
-    simpa only [Raw.insert, m.2, ↓reduceDCond] using insert m.1 a b h
+    simpa only [Raw.insert, m.2, ↓reduceUDIte] using insert m.1 a b h
   · exact init
 
 @[simp, grind =]
@@ -3416,7 +3416,7 @@ theorem insertMany_ind {motive : Raw α (fun _ => β) → Prop} (m : Raw α fun 
   split
   · rename_i h
     refine Raw₀.Const.insertMany_ind ⟨m, h⟩ l init (fun m a b h => ?_)
-    simpa only [Raw.insert, m.2, ↓reduceDCond] using insert m.1 a b h
+    simpa only [Raw.insert, m.2, ↓reduceUDIte] using insert m.1 a b h
   · exact init
 
 @[simp, grind =]
@@ -3628,7 +3628,7 @@ theorem insertManyIfNewUnit_ind {motive : Raw α (fun _ => Unit) → Prop}
   split
   · rename_i h
     refine Raw₀.Const.insertManyIfNewUnit_ind ⟨m, h⟩ l init (fun m a h => ?_)
-    simpa only [Raw.insertIfNew, m.2, ↓reduceDCond] using insert m.1 a h
+    simpa only [Raw.insertIfNew, m.2, ↓reduceUDIte] using insert m.1 a h
   · exact init
 
 @[simp]

@@ -390,7 +390,7 @@ section Unverified
 @[inline] def partition (f : (a : α) → β a → Bool)
     (m : DHashMap α β) : DHashMap α β × DHashMap α β :=
   m.fold (init := (∅, ∅)) fun ⟨l, r⟩  a b =>
-    bif f a b then
+    uif f a b then
       (l.insert a b, r)
     else
       (l, r.insert a b)

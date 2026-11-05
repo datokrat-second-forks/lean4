@@ -85,13 +85,13 @@ instance [Monad m] : ForIn m (Raw α β) ((a : α) × β a) where
 /-- Checks if all elements satisfy the predicate, short-circuiting if a predicate fails. -/
 @[inline] def all (m : Raw α β) (p : (a : α) → β a → Bool) : Bool := Id.run do
   for a in m do
-    bif !p a.1 a.2 then return false
+    uif !p a.1 a.2 then return false
   return true
 
 /-- Checks if any element satisfies the predicate, short-circuiting if a predicate succeeds. -/
 @[inline] def any (m : Raw α β) (p : (a : α) → β a → Bool) : Bool := Id.run do
   for a in m do
-    bif p a.1 a.2 then return true
+    uif p a.1 a.2 then return true
   return false
 
 end Raw

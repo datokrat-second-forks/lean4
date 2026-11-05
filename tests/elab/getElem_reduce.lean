@@ -44,9 +44,10 @@ example : (ByteArray.mk #[1, 2, 3])[2]! = 3 := by decide +kernel
 example : ((FloatArray.mk #[1, 2, 3])[1]?).isSome = true := rfl
 example : ((FloatArray.mk #[1, 2, 3])[5]?).isNone = true := by decide
 
-example : ((ByteArray.mk #[1, 2, 3]).toByteSlice)[2]? = some 3 := rfl
-example : ((ByteArray.mk #[1, 2, 3]).toByteSlice)[5]? = none := by decide
-example : ((ByteArray.mk #[1, 2, 3]).toByteSlice)[2]! = 3 := by decide +kernel
+-- `ByteArray.toByteSlice` uses `uif`, so slices built with it evaluate with `cbv` only.
+example : ((ByteArray.mk #[1, 2, 3]).toByteSlice)[2]? = some 3 := by cbv
+example : ((ByteArray.mk #[1, 2, 3]).toByteSlice)[5]? = none := by cbv
+example : ((ByteArray.mk #[1, 2, 3]).toByteSlice)[2]! = 3 := by cbv
 
 example : (Lean.RArray.branch 1 (.leaf 3) (.leaf 4))[1]? = some 4 := rfl
 example : (Lean.RArray.leaf 3)[0]! = 3 := by decide
