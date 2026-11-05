@@ -36,8 +36,8 @@ where
   go (aig : AIG α) (input : AIG.RefVec aig w) (distance : Nat) (curr : Nat) (hcurr : curr ≤ w)
       (s : AIG.RefVec aig curr) :
       AIG.RefVecEntry α w :=
-  bif hidx : curr <ᵇ w then
-    bif hdist : curr <ᵇ distance then
+  uif hidx : curr < w then
+    uif hdist : curr < distance then
       let zeroRef := aig.mkConstCached false
       let s := s.push zeroRef
       go aig input distance (curr + 1) (by omega) s
@@ -100,7 +100,7 @@ structure TwoPowShiftTarget (aig : AIG α) (w : Nat) where
 
 def twoPowShift (aig : AIG α) (target : TwoPowShiftTarget aig w) : AIG.RefVecEntry α w :=
   let ⟨n, lhs, rhs, pow⟩ := target
-  bif h : pow <ᵇ n then
+  uif h : pow < n then
     let res := blastShiftLeftConst aig ⟨lhs, 2 ^ pow⟩
     let aig := res.aig
     let shifted := res.vec
@@ -108,7 +108,7 @@ def twoPowShift (aig : AIG α) (target : TwoPowShiftTarget aig w) : AIG.RefVecEn
     have := AIG.LawfulVecOperator.le_size (f := blastShiftLeftConst) ..
     let rhs := rhs.cast this
     let lhs := lhs.cast this
-    AIG.RefVec.ite aig ⟨rhs.get pow (lt_of_decideLT_eq_true h), shifted, lhs⟩
+    AIG.RefVec.ite aig ⟨rhs.get pow h, shifted, lhs⟩
   else
     ⟨aig, lhs⟩
 
@@ -137,7 +137,7 @@ end blastShiftLeft
 def blastShiftLeft (aig : AIG α) (target : AIG.ArbitraryShiftTarget aig w) :
     AIG.RefVecEntry α w :=
   let ⟨n, input, distance⟩ := target
-  bif n =ᵇ 0 then
+  uif n = 0 then
     ⟨aig, input⟩
   else
     let res := blastShiftLeft.twoPowShift aig ⟨_, input, distance, 0⟩
@@ -150,7 +150,7 @@ where
   go {n : Nat} (aig : AIG α) (distance : AIG.RefVec aig n) (curr : Nat)
       (acc : AIG.RefVec aig w) :
       AIG.RefVecEntry α w :=
-    bif curr <ᵇ n - 1 then
+    uif curr < n - 1 then
       let res := blastShiftLeft.twoPowShift aig ⟨_, acc, distance, curr + 1⟩
       let aig := res.aig
       let acc := res.vec

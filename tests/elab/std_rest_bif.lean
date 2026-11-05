@@ -21,11 +21,11 @@ example : BVLogicalExpr.eval (.leaf ⟨5#8⟩)
     (.ite (.const true) (.literal (.getLsbD (BVExpr.var 0 : BVExpr 8) 0)) (.const false)) = true := by
   decide
 
-/-! CNF clauses. -/
+/-! CNF clauses use `uif` (they run natively, the kernel never unfolds them), so `cbv` evaluates them. -/
 
-example : ((CNF.Clause.empty.add 1 true).add 2 false).polarity 0 = true := rfl
-example : ((CNF.Clause.empty.add 1 true).add 2 false).polarity 1 = false := by decide
-example : ((CNF.Clause.empty.add 1 true).add 2 false).polarity 7 = false := by decide
+example : ((CNF.Clause.empty.add 1 true).add 2 false).polarity 0 = true := by cbv
+example : ((CNF.Clause.empty.add 1 true).add 2 false).polarity 1 = false := by cbv
+example : ((CNF.Clause.empty.add 1 true).add 2 false).polarity 7 = false := by cbv
 
 /-! Small `bv_decide` goals exercising the bitblaster and the LRAT checker. -/
 

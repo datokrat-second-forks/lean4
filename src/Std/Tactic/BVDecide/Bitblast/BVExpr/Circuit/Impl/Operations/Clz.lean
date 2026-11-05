@@ -31,9 +31,9 @@ def blastClz (aig : AIG α) (x : AIG.RefVec aig w) :
   go aig x 0 wconst
 where
   go (aig : AIG α) (x : AIG.RefVec aig w) (curr : Nat) (acc : AIG.RefVec aig w) :=
-    bif hc : curr <ᵇ w then
+    uif hc : curr < w then
       let lhs := blastConst aig (w := w) (w - 1 - curr)
-      let res := AIG.RefVec.ite aig ⟨x.get curr (lt_of_decideLT_eq_true hc), lhs, acc⟩
+      let res := AIG.RefVec.ite aig ⟨x.get curr hc, lhs, acc⟩
       let aig := res.aig
       let acc := res.vec
       have := AIG.LawfulVecOperator.le_size (f := AIG.RefVec.ite) ..

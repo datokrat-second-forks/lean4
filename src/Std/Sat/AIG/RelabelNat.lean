@@ -248,7 +248,7 @@ def ofAIGAux (aig : AIG α) : State α aig.decls aig.decls.size :=
   go aig.decls 0 .empty
 where
   go (decls : Array (Decl α)) (idx : Nat) (state : State α decls idx) : State α decls decls.size :=
-    bif hidx : idx <ᵇ decls.size then
+    uif hidx : idx < decls.size then
       let decl := decls[idx]
       match hdecl : decl with
       | .atom a => go decls (idx + 1) (state.addAtom a hdecl)

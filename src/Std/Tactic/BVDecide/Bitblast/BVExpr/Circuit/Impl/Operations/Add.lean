@@ -161,7 +161,7 @@ def mkFullAdder (aig : AIG α) (input : FullAdderInput aig) : FullAdderOutput ai
   ⟨aig, outRef, carryRef, hle⟩
 
 def blastAdd (aig : AIG α) (input : AIG.BinaryRefVec aig w) : AIG.RefVecEntry α w :=
-  bif input.lhs.countKnown <ᵇ input.rhs.countKnown then
+  uif input.lhs.countKnown < input.rhs.countKnown then
     blast aig input
   else
     let ⟨lhs, rhs⟩ := input
@@ -175,9 +175,9 @@ where
   go (aig : AIG α) (lhs rhs : AIG.RefVec aig w) (curr : Nat) (hcurr : curr ≤ w) (cin : AIG.Ref aig)
       (s : AIG.RefVec aig curr) :
       AIG.RefVecEntry α w :=
-    bif hidx : curr <ᵇ w then
-      let lin := lhs.get curr (lt_of_decideLT_eq_true hidx)
-      let rin := rhs.get curr (lt_of_decideLT_eq_true hidx)
+    uif hidx : curr < w then
+      let lin := lhs.get curr hidx
+      let rin := rhs.get curr hidx
       let res := mkFullAdder aig ⟨lin, rin, cin⟩
       let aig := res.aig
       let outRef := res.out

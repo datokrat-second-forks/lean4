@@ -26,7 +26,7 @@ namespace Parser
 
 private def getPivot (clause : Array Int) : Literal Nat :=
   let pivotInt := clause[0]!
-  bif pivotInt >ᵇ 0 then
+  uif pivotInt > 0 then
     (pivotInt.natAbs, true)
   else
     (pivotInt.natAbs, false)
@@ -52,7 +52,7 @@ clause that the current proof step is producing, that is not the case.
 @[inline]
 def parsePos : Parser Nat := do
   let ident ← digits
-  bif ident == 0 then
+  uif ident == 0 then
     fail "id was 0"
   else
     return ident
@@ -87,7 +87,7 @@ def parseDelete : Parser IntAction := do
 
 @[inline]
 def parseLit : Parser Int := do
-  bif (← peek!) == '-'.toUInt8 then
+  uif (← peek!) == '-'.toUInt8 then
     parseNeg
   else
     Int.ofNat <$> parsePos
@@ -119,7 +119,7 @@ def parseRat (ident : Nat) : Parser IntAction := do
   | 0, 0 => return .addEmpty ident rupHints
   | 0, _ => fail "There cannot be any ratHints for adding the empty clause"
   | _, 0 =>
-    bif rupHints.isEmpty then
+    uif rupHints.isEmpty then
       -- An addition without any hints can only be checked as a RAT step without resolution
       -- candidates, e.g. a BVA definition clause on a fresh pivot variable.
       return .addRat ident clause (getPivot clause) #[] #[]
@@ -130,7 +130,7 @@ def parseRat (ident : Nat) : Parser IntAction := do
 def parseAction : Parser IntAction := do
   let ident ← parseId
   skipByteChar ' '
-  bif (← peek!) == 'd'.toUInt8 then
+  uif (← peek!) == 'd'.toUInt8 then
     parseDelete
   else
     parseRat ident
@@ -139,10 +139,10 @@ partial def parseActions : Parser (Array IntAction) :=
   go #[]
 where
   go (actions : Array IntAction) : Parser (Array IntAction) := do
-    bif (← peek!) == 'c'.toUInt8 then
+    uif (← peek!) == 'c'.toUInt8 then
       let _ ← many (satisfy (fun c => c != '\n'.toUInt8 && c != '\r'.toUInt8))
       skipNewline
-      bif ← isEof then
+      uif ← isEof then
         return actions
       else
         go actions
@@ -150,7 +150,7 @@ where
       let action ← parseAction
       skipNewline
       let actions := actions.push action
-      bif ← isEof then
+      uif ← isEof then
         return actions
       else
         go actions
@@ -169,15 +169,15 @@ partial def parseLit : Parser Int := do
 where
   go (uidx : UInt64) (shift : UInt64) : Parser Int := do
     let uch ← any
-    bif shift == 28 && ((uch &&& ~~~15) != 0) then
+    uif shift == 28 && ((uch &&& ~~~15) != 0) then
       fail "Excessive literal"
-    else bif uch == 0 then
+    else uif uch == 0 then
       fail "Invalid zero byte in literal"
     else
       let uidx := uidx ||| ((uch &&& 127).toUInt64 <<< shift)
-      bif uch &&& 128 == 0 then
+      uif uch &&& 128 == 0 then
         let idx := uidx >>> 1
-        bif (1 &&& uidx) != 0 then
+        uif (1 &&& uidx) != 0 then
           return (-(idx).toNat : Int)
         else
           return (idx.toNat : Int)
@@ -187,7 +187,7 @@ where
 @[inline]
 def parseNeg : Parser Nat := do
   let lit ← parseLit
-  bif lit <ᵇ 0 then
+  uif lit < 0 then
     return lit.natAbs
   else
     fail "parsed non negative lit where negative was expected"
@@ -195,7 +195,7 @@ def parseNeg : Parser Nat := do
 @[inline]
 def parsePos : Parser Nat := do
   let lit ← parseLit
-  bif lit >ᵇ 0 then
+  uif lit > 0 then
     return lit.natAbs
   else
     fail "parsed non positive lit where positive was expected"
@@ -209,7 +209,7 @@ partial def manyTillZero (parser : Parser α) : Parser (Array α) :=
 where
   @[specialize]
   go (acc : Array α) : Parser (Array α) := do
-    bif (← peek!) == 0 then
+    uif (← peek!) == 0 then
       return acc
     else
       let elem ← parser
@@ -222,7 +222,7 @@ where
   @[specialize]
   go (acc : Array α) : Parser (Array α) := do
     let byte ← peek!
-    bif (1 &&& byte != 0) || byte == 0 then
+    uif (1 &&& byte != 0) || byte == 0 then
       return acc
     else
       let elem ← parser
@@ -247,9 +247,9 @@ def parseRatHints : Parser (Array (Nat × Array Nat)) := do
 
 def parseAction : Parser IntAction := do
   let discr ← any
-  bif discr == 'a'.toUInt8 then
+  uif discr == 'a'.toUInt8 then
     parseAdd
-  else bif discr == 'd'.toUInt8 then
+  else uif discr == 'd'.toUInt8 then
     parseDelete
   else
     fail s!"Expected a or d got: {discr}"
@@ -265,7 +265,7 @@ where
     | 0, 0 => return .addEmpty ident rupHints
     | 0, _ => fail "There cannot be any ratHints for adding the empty clause"
     | _, 0 =>
-      bif rupHints.isEmpty then
+      uif rupHints.isEmpty then
         -- An addition without any hints can only be checked as a RAT step without resolution
         -- candidates, e.g. a BVA definition clause on a fresh pivot variable.
         return .addRat ident clause (getPivot clause) #[] #[]
@@ -290,7 +290,7 @@ Based on the first byte parses the input either as a binary or non-binary LRAT.
 -/
 def parseActions : Parser (Array IntAction) := do
   let byte ← peek!
-  bif byte == 'a'.toUInt8 || byte == 'd'.toUInt8 then
+  uif byte == 'a'.toUInt8 || byte == 'd'.toUInt8 then
     Binary.parseActions
   else
     Text.parseActions
@@ -351,7 +351,7 @@ partial def lratProofToBinary (proof : Array IntAction) : ByteArray :=
   go 0 (ByteArray.emptyWithCapacity (4 * proof.size))
 where
   go (idx : Nat) (acc : ByteArray) : ByteArray :=
-    bif h : idx <ᵇ proof.size then
+    uif h : idx < proof.size then
       let acc :=
         match proof[idx] with
         | .addEmpty id hints =>
@@ -393,7 +393,7 @@ where
 
   addInt (acc : ByteArray) (lit : Int) : ByteArray :=
     let mapped :=
-      bif lit >ᵇ 0 then
+      uif lit > 0 then
         2 * lit.natAbs
       else
         2 * lit.natAbs + 1
@@ -403,11 +403,11 @@ where
 
   variableLengthEncode (acc : ByteArray) (lit : UInt64) : ByteArray :=
     -- once the literal is 0 we don't need to add another byte.
-    bif lit == 0 then
+    uif lit == 0 then
       acc
     else
       let chunk :=
-        bif lit >ᵇ 127 then
+        uif lit > 127 then
           (lit.toUInt8 &&& 127) ||| 128
         else
           lit.toUInt8 &&& 127
@@ -432,7 +432,7 @@ Dump `proof` into `path`, either in the binary or non-binary LRAT format, depend
 def dumpLRATProof (path : System.FilePath) (proof : Array IntAction) (binaryProofs : Bool) :
     IO Unit := do
   let out :=
-    bif binaryProofs then
+    uif binaryProofs then
       lratProofToBinary proof
     else
       lratProofToString proof |>.toUTF8

@@ -38,7 +38,7 @@ where
   go {aig : AIG α} {w : Nat} (input : AIG.RefVec aig w) (start : Nat) (curr : Nat)
       (hcurr : curr ≤ newWidth) (s : AIG.RefVec aig curr) :
       AIG.RefVec aig newWidth :=
-  bif h : curr <ᵇ newWidth then
+  uif h : curr < newWidth then
     let falseRef := aig.mkConstCached false
     let nextRef := input.getD (start + curr) falseRef
     let s := s.push nextRef

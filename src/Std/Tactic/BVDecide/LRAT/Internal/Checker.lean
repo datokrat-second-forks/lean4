@@ -23,19 +23,19 @@ public def check (proof : Array IntAction) (formula : CNF Nat) : Bool :=
   go state proof 0
 where
   go (state : State) (proof : Array IntAction) (idx : Nat) : Bool :=
-    bif h : idx <ᵇ proof.size then
+    uif h : idx < proof.size then
       let step := proof[idx]
       match step with
       | .addEmpty id rupHints => state.checkEmpty rupHints
       | .addRup id clause rupHints =>
         let clause := convertClause clause
-        bif state.checkRup clause rupHints then
+        uif state.checkRup clause rupHints then
           go (state.add clause) proof (idx + 1)
         else
           false
       | .addRat id clause pivot rupHints ratHints =>
         let clause := convertClause clause
-        bif state.checkRat clause ⟨pivot.1 - 1, pivot.2⟩ rupHints ratHints then
+        uif state.checkRat clause ⟨pivot.1 - 1, pivot.2⟩ rupHints ratHints then
           go (state.add clause) proof (idx + 1)
         else
           false
@@ -45,9 +45,9 @@ where
 
   convertClause (clause : Array Int) : CNF.Clause Nat :=
     .ofLiterals <| clause.toList.filterMap fun int =>
-      bif int >ᵇ 0 then
+      uif int > 0 then
         some (int.natAbs - 1, true)
-      else bif int <ᵇ 0 then
+      else uif int < 0 then
         some (int.natAbs - 1, false)
       else
         none

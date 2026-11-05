@@ -24,7 +24,7 @@ def checkRatHintsExhaustive (s : State) (ratHints : Array (Nat × Array Nat))
 
 public def checkRat (s : State) (clause : CNF.Clause Nat) (pivot : Literal Nat)
     (rupHints : Array Nat) (ratHints : Array (Nat × Array Nat)) : Bool := Id.run do
-  bif !clause.contains pivot then
+  uif !clause.contains pivot then
     return false
   let some assign := Assignment.ofClause clause | return true
   match s.propagateHints assign rupHints with
@@ -32,7 +32,7 @@ public def checkRat (s : State) (clause : CNF.Clause Nat) (pivot : Literal Nat)
   | .error => return false
   | .extended assign =>
     let negPivot := pivot.negate
-    bif !s.checkRatHintsExhaustive ratHints negPivot then
+    uif !s.checkRatHintsExhaustive ratHints negPivot then
       return false
     return ratHints.all fun (idx, hints) =>
       match s.get? idx with

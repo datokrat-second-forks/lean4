@@ -47,8 +47,8 @@ where
       This formulation improves performance, as in a well formed expression the condition always holds
       so there is no need for the more involved `BitVec.truncate` logic.
       -/
-      bif h : packedBv.w =ᵇ w then
-        return eq_of_decideEq_eq_true h ▸ packedBv.bv
+      uif h : packedBv.w = w then
+        return h ▸ packedBv.bv
       else
         return packedBv.bv.truncate w
     | .const val => return val
@@ -72,7 +72,7 @@ partial def BVLogicalExpr.evalEfficientM (expr : BVLogicalExpr) : EvalM σ Bool 
   | .const b => return b
   | .not x => return !(← evalEfficientM x)
   | .gate g x y => return g.eval (← evalEfficientM x) (← evalEfficientM y)
-  | .ite d l r => bif (← evalEfficientM d) then evalEfficientM l else evalEfficientM r
+  | .ite d l r => uif (← evalEfficientM d) then evalEfficientM l else evalEfficientM r
 
 public def BVExpr.evalEfficient (assign : Nat → BVExpr.PackedBitVec) (expr : BVExpr w) :
     BitVec w :=

@@ -178,7 +178,7 @@ def ofClause (clause : CNF.Clause Nat) : Option Assignment := Id.run do
   let mut assign := .empty
   for lit in clause do
     if let some value := assign.get? lit.1 then
-      bif value == lit.2 then
+      uif value == lit.2 then
         return none
     else
       assign := assign.insert lit.1 !lit.2
@@ -200,7 +200,7 @@ theorem ofClause_spec (clause : CNF.Clause Nat) :
   all_goals mleave
   · next pref lit suff hfor state assignment value hvalue heq ih =>
     simp only [Prod.forall, reduceCtorEq, false_and, and_false, exists_const, or_false,
-      Option.some.injEq, true_and, exists_eq_left', false_or] at ⊢ ih hvalue heq
+      Option.some.injEq, true_and, exists_eq_left', false_or, beq_iff_eq] at ⊢ ih hvalue heq
     exists lit.fst, lit.snd
     replace ih := ih.right lit.fst !lit.snd
     simp only [heq, assignment] at hvalue
@@ -284,10 +284,10 @@ def extendOfClauseWithout (assign : Assignment) (c : CNF.Clause Nat) (lit : Lite
     Option Assignment := Id.run do
   let mut newAssign := assign
   for l in c do
-    bif l == lit then
+    uif l == lit then
       continue
     if let some value := newAssign.get? l.1 then
-      bif value == l.2 then
+      uif value == l.2 then
         return none
     else
       newAssign := newAssign.insert l.1 !l.2

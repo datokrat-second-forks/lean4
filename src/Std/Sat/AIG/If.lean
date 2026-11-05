@@ -132,8 +132,8 @@ def ite (aig : AIG α) (input : IfInput aig w) : RefVecEntry α w :=
 where
   go {w : Nat} (aig : AIG α) (curr : Nat) (hcurr : curr ≤ w) (discr : Ref aig)
       (lhs rhs : RefVec aig w) (s : RefVec aig curr) : RefVecEntry α w :=
-    bif hcurr : curr <ᵇ w then
-      let input := ⟨discr, lhs.get curr (lt_of_decideLT_eq_true hcurr), rhs.get curr (lt_of_decideLT_eq_true hcurr)⟩
+    uif hcurr : curr < w then
+      let input := ⟨discr, lhs.get curr hcurr, rhs.get curr hcurr⟩
       let res := mkIfCached aig input
       let aig := res.aig
       let ref := res.ref

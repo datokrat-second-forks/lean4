@@ -121,9 +121,9 @@ def relabelFin (f : CNF Nat) : CNF (Fin f.numLiterals) :=
   uif h : ∃ v, VarMem v f then
     let n := f.numLiterals
     f.relabel fun i =>
-      bif w : i <ᵇ n then
+      uif w : i < n then
         -- This branch will always hold
-        ⟨i, (lt_of_decideLT_eq_true w)⟩
+        ⟨i, w⟩
       else
         ⟨0, numLiterals_pos h.choose_spec⟩
   else

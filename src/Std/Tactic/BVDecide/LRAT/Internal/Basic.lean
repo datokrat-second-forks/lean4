@@ -52,7 +52,7 @@ def all (s : State) (p : Nat → CNF.Clause Nat → Bool) : Bool :=
   go 0
 where
   @[specialize] go (i : Nat) : Bool :=
-    bif h : i <ᵇ s.formula.size then
+    uif h : i < s.formula.size then
       match s.formula[i] with
       | some c => p (i + 1) c && go (i + 1)
       | none => go (i + 1)

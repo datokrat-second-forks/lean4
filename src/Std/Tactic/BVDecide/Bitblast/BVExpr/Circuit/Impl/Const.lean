@@ -30,7 +30,7 @@ def blastConst (aig : AIG α) (val : BitVec w) : AIG.RefVec aig w :=
 where
   go (aig : AIG α) (val : BitVec w) (curr : Nat) (s : AIG.RefVec aig curr) (hcurr : curr ≤ w) :
       AIG.RefVec aig w :=
-    bif hcurr : curr <ᵇ w then
+    uif hcurr : curr < w then
       let bitRef := aig.mkConstCached (val.getLsbD curr)
       let s := s.push bitRef
       go aig val (curr + 1) s (by omega)

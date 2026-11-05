@@ -78,7 +78,7 @@ def blastExtractAndExtend (aig : AIG α) (target : blastExtractAndExtendTarget a
 where
   go {aig : AIG α} {w : Nat} (idx : Nat) (x : AIG.RefVec aig w) (acc : AIG.RefVec aig (w * idx))
       (h : idx ≤ w) (h' : outWidth = w * w) :=
-    bif hidx : idx <ᵇ w then
+    uif hidx : idx < w then
       let res := blastExtractAndExtendBit aig ⟨idx, x⟩
       have := AIG.LawfulVecOperator.le_size (f := blastExtractAndExtendBit) ..
       let aig := res.aig
@@ -152,7 +152,7 @@ where
   go {aig : AIG α} {w len : Nat} (iterNum : Nat)
     (oldLayer : AIG.RefVec aig (len * w)) (newLayer : AIG.RefVec aig (iterNum * w))
     (hold : 2 * (iterNum - 1) < len) (hout : outWidth = (len + 1) / 2 * w) :=
-  bif  hlen : 0 <ᵇ len - (iterNum * 2) then
+  uif  hlen : 0 < len - (iterNum * 2) then
     -- lhs
     let res := blastExtract aig ⟨oldLayer, 2 * iterNum * w⟩
     let aig := res.aig
@@ -243,7 +243,7 @@ def blastCpopTree (aig : AIG α) (target : blastCpopTreeTarget aig w) :
   go x h
 where
   go {aig : AIG α} {len : Nat} (x : AIG.RefVec aig (len * w)) (h : 0 < len) :=
-    bif hlt : 1 <ᵇ len  then
+    uif hlt : 1 < len  then
       let res := blastCpopLayer aig ⟨x, by simp, h⟩ (outWidth := (len + 1) / 2 * w)
       go res.vec (by omega)
     else
@@ -292,12 +292,12 @@ instance : AIG.LawfulVecOperator α blastCpopTreeTarget blastCpopTree where
 /-- Extend all the  bits in the input BitVec w `x` to have width `w`,
   then construct the parallel-prefix-sum circuit. -/
 def blastCpop (aig : AIG α) (x : AIG.RefVec aig w) : AIG.RefVecEntry α w :=
-  bif hw : 1 <ᵇ w then
+  uif hw : 1 < w then
     let res := blastExtractAndExtend aig (outWidth := w * w) ⟨x, by rfl⟩
     let aig := res.aig
     let extendedBits := res.vec
     blastCpopTree aig ⟨extendedBits, by omega⟩
-  else bif hw' : 0 <ᵇ w then
+  else uif hw' : 0 < w then
     ⟨aig, x⟩
   else
     let zero := blastConst aig (w := w) 0

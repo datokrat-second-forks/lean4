@@ -34,15 +34,15 @@ namespace BVExpr
 namespace bitblast
 
 def blastMul (aig : AIG α) (input : AIG.BinaryRefVec aig w) : AIG.RefVecEntry α w :=
-  bif input.lhs.countKnown <ᵇ input.rhs.countKnown then
+  uif input.lhs.countKnown < input.rhs.countKnown then
     blast aig input
   else
     let ⟨lhs, rhs⟩ := input
     blast aig ⟨rhs, lhs⟩
 where
   blast (aig : AIG α) (input : AIG.BinaryRefVec aig w) : AIG.RefVecEntry α w :=
-    bif h : w =ᵇ 0 then
-      ⟨aig, eq_of_decideEq_eq_true h ▸ .empty⟩
+    uif h : w = 0 then
+      ⟨aig, h ▸ .empty⟩
     else
       have : 0 < w := by omega
       let zero := blastConst aig 0
@@ -57,9 +57,9 @@ where
 
   go (aig : AIG α) (lhs rhs : AIG.RefVec aig w) (curr : Nat) (acc : AIG.RefVec aig w) :
       AIG.RefVecEntry α w :=
-    bif h : curr <ᵇ w then
+    uif h : curr < w then
       -- If the rhs is false we can skip this iteration as we would add zero
-      bif aig.isConstant (rhs.get curr (lt_of_decideLT_eq_true h)) false then
+      uif aig.isConstant (rhs.get curr h) false then
         go aig lhs rhs (curr + 1) acc
       else
         let res := blastShiftLeftConst aig ⟨lhs, curr⟩
@@ -76,7 +76,7 @@ where
         let lhs := lhs.cast this
         let rhs := rhs.cast this
         let acc := acc.cast this
-        let res := AIG.RefVec.ite aig ⟨rhs.get curr (lt_of_decideLT_eq_true h), added, acc⟩
+        let res := AIG.RefVec.ite aig ⟨rhs.get curr h, added, acc⟩
         let aig := res.aig
         let acc := res.vec
         have := by apply AIG.LawfulVecOperator.le_size (f := AIG.RefVec.ite)
