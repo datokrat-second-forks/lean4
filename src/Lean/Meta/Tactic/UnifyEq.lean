@@ -51,7 +51,7 @@ def unifyEq? (mvarId : MVarId) (eqFVarId : FVarId) (subst : FVarSubst := {})
              : MetaM (Option UnifyEqResult) := do
    mvarId.withContext do
     let eqDecl ← eqFVarId.getDecl
-    bif eqDecl.type.isHEq then
+    uif eqDecl.type.isHEq then
       let mvarId ← heqToEq' mvarId eqDecl
       return some { mvarId, subst, numNewEqs := 1 }
     else match eqDecl.type.eq? with
@@ -72,10 +72,10 @@ def unifyEq? (mvarId : MVarId) (eqFVarId : FVarId) (subst : FVarSubst := {})
           -/
           if let some (subst, mvarId) ← observing? (substCore mvarId eqFVarId symm subst (tryToSkip := true)) then
             return some { mvarId, subst }
-          else bif (← isDefEq a b) then
+          else uif (← isDefEq a b) then
             /- Skip equality -/
             return some { mvarId := (←  mvarId.clear eqFVarId), subst }
-          else bif (← acyclic mvarId (mkFVar eqFVarId)) then
+          else uif (← acyclic mvarId (mkFVar eqFVarId)) then
             return none -- this alternative has been solved
           else
             throwError "Dependent elimination failed: Failed to solve equation{indentExpr eqDecl.type}"
@@ -84,10 +84,10 @@ def unifyEq? (mvarId : MVarId) (eqFVarId : FVarId) (subst : FVarSubst := {})
           unless (← getEnv).contains ``Nat.Internal.elimOffset do return none
           let some (xa, ka) ← toOffset? a | return none
           let some (xb, kb) ← toOffset? b | return none
-          bif ka == 0 || kb == 0 then return none -- use default noConfusion
-          let (x, y, k) ← bif ka <ᵇ kb then
+          uif ka == 0 || kb == 0 then return none -- use default noConfusion
+          let (x, y, k) ← uif ka < kb then
             pure (xa, (← mkAdd xb (mkNatLit (kb - ka))), ka)
-          else bif ka =ᵇ kb then
+          else uif ka = kb then
             pure (xa, xb, ka)
           else
             pure ((← mkAdd xa (mkNatLit (ka - kb))), xb, kb)
@@ -103,7 +103,7 @@ def unifyEq? (mvarId : MVarId) (eqFVarId : FVarId) (subst : FVarSubst := {})
         let rec injection (a b : Expr) := do
           if let some mvarId ← injectionOffset? a b then
             return some { mvarId, numNewEqs := 1, subst }
-          bif (← isConstructorApp a <&&> isConstructorApp b) then
+          uif (← isConstructorApp a <&&> isConstructorApp b) then
             /- ctor_i ... = ctor_j ... -/
             match (← injectionCore mvarId eqFVarId) with
             | InjectionResultCore.solved                   => return none -- this alternative has been solved
@@ -111,7 +111,7 @@ def unifyEq? (mvarId : MVarId) (eqFVarId : FVarId) (subst : FVarSubst := {})
           else
             let a' ← whnf a
             let b' ← whnf b
-            bif a' != a || b' != b then
+            uif a' != a || b' != b then
               /- Reduced lhs/rhs of current equality -/
               let prf := mkFVar eqFVarId
               let aEqb'  ← mkEq a' b'
@@ -133,7 +133,7 @@ def unifyEq? (mvarId : MVarId) (eqFVarId : FVarId) (subst : FVarSubst := {})
         | Expr.fvar .., _   => /- x = t -/ substEq (symm := false)
         | _, Expr.fvar ..   => /- t = x -/ substEq (symm := true)
         | a, b              =>
-          bif (← isDefEq a b) then
+          uif (← isDefEq a b) then
             /- Skip equality -/
             return some { mvarId := (← mvarId.clear eqFVarId), subst }
           else

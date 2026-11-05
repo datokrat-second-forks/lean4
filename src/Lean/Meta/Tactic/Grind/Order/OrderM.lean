@@ -25,7 +25,7 @@ abbrev getStructId : OrderM Nat :=
 def getOrder : OrderM Sym.Arith.Order := do
   let s ← Sym.Arith.getArithState
   let structId ← getStructId
-  bif h : structId <ᵇ s.orders.size then
+  uif h : structId < s.orders.size then
     return s.orders[structId]
   else
     throwError "`grind` internal error, invalid order structure id"

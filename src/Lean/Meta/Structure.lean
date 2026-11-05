@@ -50,16 +50,16 @@ Notes:
 def mkProjections (n : Name) (projDecls : Array StructProjDecl) (instImplicit : Bool) : MetaM Unit :=
   withLCtx {} {} do
     let indVal ← getConstInfoInduct n
-    bif indVal.numCtors != 1 then
+    uif indVal.numCtors != 1 then
       throwError "cannot generate projections for `{.ofConstName n}`, does not have exactly one constructor"
     let ctorVal ← getConstInfoCtor indVal.ctors.head!
     let isPredicate ← isPropFormerType indVal.type
     let lvls := indVal.levelParams.map mkLevelParam
     forallBoundedTelescope ctorVal.type indVal.numParams fun params ctorType => do
-      bif params.size != indVal.numParams then
+      uif params.size != indVal.numParams then
         throwError "projection generation failed, `{.ofConstName n}` is an ill-formed inductive datatype"
       let selfType := mkAppN (.const n lvls) params
-      let selfBI : BinderInfo := bif instImplicit then .instImplicit else .default
+      let selfBI : BinderInfo := uif instImplicit then .instImplicit else .default
       withLocalDecl `self selfBI selfType fun self => do
         let projArgs := params.push self
         -- Make modifications to parameter binder infos that apply to all projections
@@ -67,11 +67,11 @@ def mkProjections (n : Name) (projDecls : Array StructProjDecl) (instImplicit : 
         for param in params do
           let fvarId := param.fvarId!
           let decl ← fvarId.getDecl
-          bif !decl.binderInfo.isInstImplicit && !decl.type.isOutParam then
+          uif !decl.binderInfo.isInstImplicit && !decl.type.isOutParam then
             /- We reset the implicit binder to have it be inferred by `Expr.inferImplicit`.
                However, outparams must be implicit. -/
             lctx := lctx.setBinderInfo fvarId .default
-          else bif decl.binderInfo.isInstImplicit && instImplicit then
+          else uif decl.binderInfo.isInstImplicit && instImplicit then
             lctx := lctx.setBinderInfo fvarId .implicit
         -- Construct the projection functions:
         let mut ctorType := ctorType
@@ -88,7 +88,7 @@ def mkProjections (n : Name) (projDecls : Array StructProjDecl) (instImplicit : 
                 too many structure parameter overrides"
             let resultType := ctorType.bindingDomain!.consumeTypeAnnotations
             let isProp ← isProp resultType
-            bif isPredicate && !isProp then
+            uif isPredicate && !isProp then
               throwErrorAt ref "\
                 failed to generate projection `{projName}` for the 'Prop'-valued type `{.ofConstName n}`, \
                 field must be a proof, but it has type\
@@ -99,10 +99,10 @@ def mkProjections (n : Name) (projDecls : Array StructProjDecl) (instImplicit : 
             let projVal := lctx.mkLambda projArgs <| Expr.proj n i self
             let cval : ConstantVal := { name := projName, levelParams := indVal.levelParams, type := projType }
             withRef ref do
-              bif isProp then
+              uif isProp then
                 let env ← getEnv
                 addDecl <|
-                  bif env.hasUnsafe projType || env.hasUnsafe projVal then
+                  uif env.hasUnsafe projType || env.hasUnsafe projVal then
                     -- Theorems cannot be unsafe, using opaque instead.
                     Declaration.opaqueDecl { cval with value := projVal, isUnsafe := true }
                   else
@@ -112,7 +112,7 @@ def mkProjections (n : Name) (projDecls : Array StructProjDecl) (instImplicit : 
                 -- Projections have special compiler support. No need to compile.
                 addDecl <| Declaration.defnDecl decl
                 -- Recall: we want instance projections to be in "reducible canonical form"
-                bif !instImplicit then
+                uif !instImplicit then
                   setReducibleAttribute projName
             modifyEnv fun env => addProjectionFnInfo env projName ctorVal.name indVal.numParams i instImplicit
             let proj := mkApp (mkAppN (.const projName lvls) params) self
@@ -139,7 +139,7 @@ def etaStruct? (e : Expr) (p : Name → Bool) : MetaM (Option Expr) := do
   return x
 where
   sameParams (params1 params2 : Array Expr) : MetaM Bool := withNewMCtxDepth do
-    bif params1.size == params2.size then
+    uif params1.size == params2.size then
       for p1 in params1, p2 in params2 do
         unless ← isDefEqGuarded p1 p2 do
           return false
@@ -154,19 +154,19 @@ where
   -/
   getProjectedExpr (ctor induct : Name) (params : Array Expr) (idx : Nat) (e : Expr) (x? : Option Expr) : MetaM (Option Expr) := do
     if let .proj S i x := e then
-      bif i == idx && induct == S && (x? |>.map (· == x) |>.getD true) then
+      uif i == idx && induct == S && (x? |>.map (· == x) |>.getD true) then
         let ety ← whnf (← inferType e)
         let params' := ety.getAppArgs
-        bif (← sameParams params params') then
+        uif (← sameParams params params') then
           return x
       return none
     if let .const fn _ := e.getAppFn then
       if let some info ← getProjectionFnInfo? fn then
-        bif info.ctorName == ctor && info.i == idx && e.getAppNumArgs == info.numParams + 1 then
+        uif info.ctorName == ctor && info.i == idx && e.getAppNumArgs == info.numParams + 1 then
           let x := e.appArg!
-          bif (x? |>.map (· == x) |>.getD true) then
+          uif (x? |>.map (· == x) |>.getD true) then
             let params' := e.appFn!.getAppArgs
-            bif (← sameParams params params') then
+            uif (← sameParams params params') then
               return e.appArg!
     return none
 
@@ -204,7 +204,7 @@ partial def instantiateStructDefaultValueFn?
   for param in params do
     let .lam _ t b _ := val | return none
     -- If no levels given, need to unify to solve for level mvars.
-    bif levels?.isNone then
+    uif levels?.isNone then
       unless (← isDefEq (← inferType param) t) do return none
     val := b.instantiate1 param
   go? {} val
@@ -213,7 +213,7 @@ where
     match e with
     | .lam n d b _ =>
       let some val ← fieldVal? n | return none
-      bif (← isDefEq (← inferType val) d) then
+      uif (← isDefEq (← inferType val) d) then
         go? (usedFields.insert n) (b.instantiate1 val)
       else
         return none

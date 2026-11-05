@@ -22,7 +22,7 @@ namespace Lean
 /-- Adds given declaration to the environment, respecting `debug.skipKernelTC`. -/
 def Kernel.Environment.addDecl (env : Environment) (opts : Options) (decl : Declaration)
     (cancelTk? : Option IO.CancelToken := none) : Except Exception Environment :=
-  bif debug.skipKernelTC.get opts then
+  uif debug.skipKernelTC.get opts then
     addDeclWithoutChecking env decl
   else
     addDeclCore env (Core.getMaxHeartbeats opts).toUSize (maxRecDepth.get opts).toUSize decl cancelTk?
@@ -56,14 +56,14 @@ private def registerNamePrefixes (env : Environment) (name : Name) : Environment
   let name := privateToUserName name
   match name with
     | .str _ s =>
-      bif s.front == '_' then
+      uif s.front == '_' then
         -- Do not register namespaces that only contain internal declarations.
         env
       else
         go env name
     | _ => env
 where go env
-  | .str p _ => bif isNamespaceName p then go (env.registerNamespace p) p else env
+  | .str p _ => uif isNamespaceName p then go (env.registerNamespace p) p else env
   | _        => env
 
 /-- If `warn.sorry` is set to true, then, so long as the message log does not already have any errors,
@@ -78,8 +78,8 @@ If the `warn.sorry` option is set to true and there are no errors in the log alr
 logs a warning if the declaration uses `sorry`.
 -/
 def warnIfUsesSorry (decl : Declaration) : CoreM Unit := do
-  bif warn.sorry.get (← getOptions) then
-    bif !(← MonadLog.hasErrors) && decl.hasSorry then
+  uif warn.sorry.get (← getOptions) then
+    uif !(← MonadLog.hasErrors) && decl.hasSorry then
       -- Find an actual sorry expression to use for `sorry`.
       -- That way the user can hover over it to see its type and use "go to definition" if it is a labeled sorry.
       let findSorry : StateRefT (Array (Bool × MessageData)) MetaM Unit := decl.forEachSorryM fun s => do
@@ -121,17 +121,17 @@ private def addDeclCore (decl : Declaration) (forceExpose : Bool) : CoreM Unit :
   let mut exportedInfo? := none
   let (name, info, kind) ← match decl with
     | .thmDecl thm =>
-      bif !forceExpose && (← getEnv).header.isModule then
+      uif !forceExpose && (← getEnv).header.isModule then
         trace[addDecl] "exporting theorem {thm.name} as axiom"
         exportedInfo? := some <| .axiomInfo { thm with isUnsafe := false }
       pure (thm.name, .thmInfo thm, .thm)
     | .defnDecl defn | .mutualDefnDecl [defn] =>
-      bif !forceExpose && (← getEnv).header.isModule && !(← getEnv).isExporting then
+      uif !forceExpose && (← getEnv).header.isModule && !(← getEnv).isExporting then
         trace[addDecl] "exporting definition {defn.name} as axiom"
         exportedInfo? := some <| .axiomInfo { defn with isUnsafe := defn.safety != .safe }
       pure (defn.name, .defnInfo defn, .defn)
     | .opaqueDecl op =>
-      bif !forceExpose && (← getEnv).header.isModule && !(← getEnv).isExporting then
+      uif !forceExpose && (← getEnv).header.isModule && !(← getEnv).isExporting then
         trace[addDecl] "exporting opaque {op.name} as axiom"
         exportedInfo? := some <| .axiomInfo { op with }
       pure (op.name, .opaqueInfo op, .opaque)
@@ -142,11 +142,11 @@ private def addDeclCore (decl : Declaration) (forceExpose : Bool) : CoreM Unit :
 
   -- Check early so we can avoid related env ext panics that would happen before the check in the
   -- kernel.
-  bif (← getEnv).containsOnBranch name then
+  uif (← getEnv).containsOnBranch name then
     throwKernelException <| .alreadyDeclared (← getEnv).toKernelEnv name
 
-  bif decl.getTopLevelNames.all isPrivateName then
-    bif (← ResolveName.backward.privateInPublic.getM) then
+  uif decl.getTopLevelNames.all isPrivateName then
+    uif (← ResolveName.backward.privateInPublic.getM) then
       trace[addDecl] "private decl under `privateInPublic`, exporting as is"
       exportedInfo? := some info
     else
@@ -154,9 +154,9 @@ private def addDeclCore (decl : Declaration) (forceExpose : Bool) : CoreM Unit :
       exportedInfo? := none
   else
     -- preserve original constant kind in extension if different from exported one
-    bif exportedInfo?.isSome then
+    uif exportedInfo?.isSome then
       -- may already have been done by `recordOriginalConstKind`
-      bif (privateConstKindsExt.find? (asyncMode := .local) (← getEnv) name).isNone then
+      uif (privateConstKindsExt.find? (asyncMode := .local) (← getEnv) name).isNone then
         modifyEnv (privateConstKindsExt.insert · name kind)
     else
       trace[addDecl] "no matching exporting rules, exporting as is"
@@ -178,7 +178,7 @@ private def addDeclCore (decl : Declaration) (forceExpose : Bool) : CoreM Unit :
     finally
       async.commitCheckEnv (← getEnv)
 
-  bif Elab.async.get (← getOptions) then
+  uif Elab.async.get (← getOptions) then
     let cancelTk ← IO.CancelToken.new
     let checkAct ← Core.wrapAsyncAsSnapshot (cancelTk? := cancelTk) fun _ => doAddAndCommit
     let t ← BaseIO.mapTask checkAct env.checked
@@ -245,7 +245,7 @@ def addDecl (decl : Declaration) (forceExpose := false) : CoreM Unit := do
 def addAndCompile (decl : Declaration) (logCompileErrors : Bool := true)
     (markMeta : Bool := false) : CoreM Unit := do
   addDecl decl
-  bif markMeta then
+  uif markMeta then
     for n in decl.getNames do
       modifyEnv (Lean.markMeta · n)
   compileDecl decl (logErrors := logCompileErrors)

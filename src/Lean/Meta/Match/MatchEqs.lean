@@ -30,11 +30,11 @@ partial def mkAppDiscrEqs (alt : Expr) (heqs : Array Expr) (numDiscrEqs : Nat) :
   go alt (← inferType alt) 0
 where
   go e ty i := do
-    bif i <ᵇ numDiscrEqs then
+    uif i < numDiscrEqs then
       let Expr.forallE n d b .. := ty
         | throwError "expecting {numDiscrEqs} equalities, but found type{indentExpr alt}"
       for heq in heqs do
-        bif (← isDefEq (← inferType heq) d) then
+        uif (← isDefEq (← inferType heq) d) then
           return ← go (mkApp e heq) (b.instantiate1 heq) (i+1)
       throwError "Could not find equation {n} : {d} among {heqs}"
     else
@@ -44,15 +44,15 @@ where
 private def substSomeVar (mvarId : MVarId) : MetaM (Array MVarId) := mvarId.withContext do
   for localDecl in (← getLCtx) do
     if let some (_, lhs, rhs) ← matchEq? localDecl.type then
-      bif lhs.isFVar then
-        bif !(← dependsOn rhs lhs.fvarId!) then
+      uif lhs.isFVar then
+        uif !(← dependsOn rhs lhs.fvarId!) then
           match (← subst? mvarId lhs.fvarId!) with
           | some mvarId => return #[mvarId]
           | none => pure ()
   throwError "substSomeVar failed"
 
 private def unfoldElimOffset (mvarId : MVarId) : MetaM MVarId := do
-  bif Option.isNone <| (← mvarId.getType).find? fun e => e.isConstOf ``Nat.Internal.elimOffset then
+  uif Option.isNone <| (← mvarId.getType).find? fun e => e.isConstOf ``Nat.Internal.elimOffset then
     throwError "goal's target does not contain `Nat.Internal.elimOffset`"
   mvarId.deltaTarget (· == ``Nat.Internal.elimOffset)
 
@@ -69,7 +69,7 @@ partial def proveCondEqThm (matchDeclName : Name) (type : Expr)
   let mvar0  ← mkFreshExprSyntheticOpaqueMVar type
   trace[Meta.Match.matchEqs] "proveCondEqThm {mvar0.mvarId!}"
   let mut mvarId := mvar0.mvarId!
-  bif heqNum >ᵇ 0 then
+  uif heqNum > 0 then
     mvarId := (← mvarId.introN heqPos).2
     for _ in *...heqNum do
       (_, mvarId) ← introSubstEq mvarId
@@ -99,7 +99,7 @@ where
       (splitSparseCasesOn mvarId)
       <|>
       (do let mvarId' ← simpIfTarget mvarId (useDecide := true) (useNewSemantics := true)
-          bif mvarId' == mvarId then throwError "simpIf failed"
+          uif mvarId' == mvarId then throwError "simpIf failed"
           return #[mvarId'])
       <|>
       (do if let some (s₁, s₂) ← splitIfTarget? mvarId (useNewSemantics := true) then
@@ -119,13 +119,13 @@ where
   annotated with `h : discr`.
 -/
 private partial def withNewAlts (numDiscrEqs : Nat) (discrs : Array Expr) (patterns : Array Expr) (alts : Array Expr) (k : Array Expr → MetaM α) : MetaM α :=
-  bif numDiscrEqs == 0 then
+  uif numDiscrEqs == 0 then
     k alts
   else
     go 0 #[]
 where
   go (i : Nat) (altsNew : Array Expr) : MetaM α := do
-   bif h : i <ᵇ alts.size then
+   uif h : i < alts.size then
      let altLocalDecl ← getFVarLocalDecl alts[i]
      let typeNew := altLocalDecl.type.replaceFVars discrs patterns
      withLocalDecl altLocalDecl.userName altLocalDecl.binderInfo typeNew fun altNew =>
@@ -221,7 +221,7 @@ where go baseName splitterName := withConfig (fun c => { c with etaStruct := .no
 
     let needsSplitter := !matchInfo.overlaps.isEmpty || (constInfo.type.find? (isNamedPattern )).isSome
 
-    bif needsSplitter then
+    uif needsSplitter then
       withMkMatcherInput matchDeclName (unfoldNamed := true) fun matcherInput => do
         let matcherInput := { matcherInput with
           matcherName := splitterName

@@ -154,7 +154,7 @@ structure FunAtom where
   isBoolAtom : Bool
 
 def FunAtom.atomExpr (funAtom : FunAtom) : Sym.SymM Expr :=
-  bif funAtom.isBoolAtom then mkBoolAtomWrapper funAtom.funExpr else pure funAtom.funExpr
+  uif funAtom.isBoolAtom then mkBoolAtomWrapper funAtom.funExpr else pure funAtom.funExpr
 
 /--
 The state associated with the theory of uninterpreted functions (UF).
@@ -364,8 +364,8 @@ def atomsAssignmentExpr : ReifyM Expr := do
 where
   updateAtomsAssignment : ReifyM Expr := do
     let as ← atoms
-    bif h : 0 <ᵇ as.size then
-      let ras := Lean.RArray.ofArray as (lt_of_decideLT_eq_true h)
+    uif h : 0 < as.size then
+      let ras := Lean.RArray.ofArray as h
       let packedType := mkConst ``BVExpr.PackedBitVec
       let pack := fun (width, expr) => mkApp2 (mkConst ``BVExpr.PackedBitVec.mk) (toExpr width) expr
       let newAtomsAssignment ← Sym.shareCommon <| ← ras.toExpr packedType pack
@@ -388,7 +388,7 @@ def lookup (e : Expr) (width : Nat) (synthetic : Bool) : ReifyM Nat := do
   let key := { expr := e }
   match (← getThe State).atoms[key]? with
   | some atom =>
-    bif width != atom.width then
+    uif width != atom.width then
       panic! "The same atom occurs with different widths, this is a bug"
     return atom.atomNumber
   | none =>

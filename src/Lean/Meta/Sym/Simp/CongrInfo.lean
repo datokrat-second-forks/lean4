@@ -14,7 +14,7 @@ def isFixedPrefix? (argKinds : Array CongrArgKind) : Option Nat :=
   go 0
 where
   goEq (pre : Nat) (i : Nat) : Option Nat :=
-    bif h : i <ᵇ argKinds.size then
+    uif h : i < argKinds.size then
       match argKinds[i] with
       | .fixed => none
       | .eq => goEq pre (i+1)
@@ -23,7 +23,7 @@ where
       some pre
 
   go (i : Nat) : Option Nat :=
-    bif h : i <ᵇ argKinds.size then
+    uif h : i < argKinds.size then
       match argKinds[i] with
       | .fixed => go (i+1)
       | .eq => goEq i (i+1)
@@ -32,12 +32,12 @@ where
       none
 
 def mkCongrInfo (f : Expr) (replaceUDecInsts : Bool) : SymM CongrInfo := do
-  bif (← isProof f) then
+  uif (← isProof f) then
     return .none
   let info ← getFunInfo f
   let argKinds ← getCongrSimpKinds f info replaceUDecInsts
-  bif argKinds.all fun k => match k with | .fixed | .eq => true | _ => false then
-    bif argKinds.all (· == .fixed) then
+  uif argKinds.all fun k => match k with | .fixed | .eq => true | _ => false then
+    uif argKinds.all (· == .fixed) then
       return .none
     else if let some prefixSize := isFixedPrefix? argKinds then
       return .fixedPrefix prefixSize (argKinds.size - prefixSize)
@@ -45,18 +45,18 @@ def mkCongrInfo (f : Expr) (replaceUDecInsts : Bool) : SymM CongrInfo := do
       return .interlaced (argKinds.map (· == .eq))
   else if let .const declName us := f then
     if let some thm ← mkCongrSimpForConst? declName us then
-      bif thm.argKinds == argKinds then
+      uif thm.argKinds == argKinds then
         return .congrTheorem thm
   let some thm ← mkCongrSimpCore? f info argKinds | return .none
   return .congrTheorem thm
 
 public def getCongrInfo (f : Expr) (replaceUDecInsts := true) : SymM CongrInfo := do
   let s ← get
-  let cache := bif replaceUDecInsts then s.congrInfo else s.congrInfoFixedUDec
+  let cache := uif replaceUDecInsts then s.congrInfo else s.congrInfoFixedUDec
   if let some info := cache.find? { expr := f } then
     return info
   let info ← mkCongrInfo f replaceUDecInsts
-  bif replaceUDecInsts then
+  uif replaceUDecInsts then
     modify fun s => { s with congrInfo := s.congrInfo.insert { expr := f } info }
   else
     modify fun s => { s with congrInfoFixedUDec := s.congrInfoFixedUDec.insert { expr := f } info }

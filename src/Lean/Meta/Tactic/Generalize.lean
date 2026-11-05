@@ -34,7 +34,7 @@ private partial def generalizeCore (mvarId : MVarId) (args : Array GeneralizeArg
     let tag ← mvarId.getTag
     let target ← instantiateMVars (← mvarId.getType)
     let rec go (i : Nat) : MetaM Expr := do
-      bif _h : i <ᵇ args.size then
+      uif _h : i < args.size then
         let arg := args[i]
         let e ← instantiateMVars arg.expr
         let eType ← instantiateMVars (← inferType e)
@@ -48,20 +48,20 @@ private partial def generalizeCore (mvarId : MVarId) (args : Array GeneralizeArg
     unless (← isTypeCorrect targetNew) do
       throwTacticEx `generalize mvarId m!"result is not type correct{indentExpr targetNew}"
     let es := args.map (·.expr)
-    bif !args.any fun arg => arg.hName?.isSome then
+    uif !args.any fun arg => arg.hName?.isSome then
       let mvarNew ← mkFreshExprSyntheticOpaqueMVar targetNew tag
       mvarId.assign (mkAppN mvarNew es)
       mvarNew.mvarId!.introNP args.size
     else
       let (rfls, targetNew) ← forallBoundedTelescope targetNew args.size fun xs type => do
         let rec go' (i : Nat) : MetaM (List Expr × Expr) := do
-          bif _h : i <ᵇ xs.size then
+          uif _h : i < xs.size then
             let arg := args[i]!
             if let some hName := arg.hName? then
               let xType ← inferType xs[i]
               let e ← instantiateMVars arg.expr
               let eType ← instantiateMVars (← inferType e)
-              let (hType, r) ← bif (← isDefEq xType eType) then
+              let (hType, r) ← uif (← isDefEq xType eType) then
                 pure (← mkEq e xs[i], ← mkEqRefl e)
               else
                 pure (← mkHEq e xs[i], ← mkHEqRefl e)
@@ -138,7 +138,7 @@ of the generalizing expressions.
 -/
 def _root_.Lean.MVarId.generalizeHyp (mvarId : MVarId) (args : Array GeneralizeArg) (hyps : Array FVarId := #[])
     (fvarSubst : FVarSubst := {}) (transparency := TransparencyMode.instances) : MetaM (FVarSubst × Array FVarId × MVarId) := do
-  bif hyps.isEmpty then
+  uif hyps.isEmpty then
     -- trivial case
     return (fvarSubst, ← mvarId.generalize args transparency)
   let args ← args.mapM fun arg => return { arg with expr := ← instantiateMVars arg.expr }

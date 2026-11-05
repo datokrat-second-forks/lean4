@@ -670,7 +670,7 @@ There are a few gotchas concerning delayed assignments.
   assignment to `?pending` is ground (i.e., does not contain unassigned metavariables).
 -/
 def instantiateMVars [Monad m] [MonadMCtx m] (e : Expr) : m Expr := do
-  bif !e.hasMVar then
+  uif !e.hasMVar then
     return e
   else
     let (r, mctx) := instantiateMVarsCore (← getMCtx) e
@@ -722,9 +722,9 @@ private instance : MonadMCtx M where
   modifyMCtx f := modify fun s => { s with mctx := f s.mctx }
 
 private def shouldVisit (e : Expr) : M Bool := do
-  bif !e.hasMVar && !e.hasFVar then
+  uif !e.hasMVar && !e.hasFVar then
     return false
-  else bif (← get).visited.contains e then
+  else uif (← get).visited.contains e then
     return false
   else
     modify fun s => { s with visited := s.visited.insert e }
@@ -733,7 +733,7 @@ private def shouldVisit (e : Expr) : M Bool := do
 @[specialize] private partial def dep (pf : FVarId → Bool) (pm : MVarId →  Bool) (e : Expr) : M Bool :=
   let rec
     visit (e : Expr) : M Bool := do
-      bif !(← shouldVisit e) then
+      uif !(← shouldVisit e) then
         pure false
       else
         visitMain e,
@@ -748,11 +748,11 @@ private def shouldVisit (e : Expr) : M Bool := do
       | .mdata _ b       => visit b
       | e@(.app ..)      => do
         let f := e.getAppFn
-        bif f.isMVar then
+        uif f.isMVar then
           let e' ← instantiateMVars e
-          bif e'.getAppFn != f then
+          uif e'.getAppFn != f then
             visitMain e'
-          else bif pm f.mvarId! then
+          else uif pm f.mvarId! then
             return true
           else
             visitApp e
@@ -762,7 +762,7 @@ private def shouldVisit (e : Expr) : M Bool := do
         match (← getExprMVarAssignment? mvarId) with
         | some a => visit a
         | none   =>
-          bif pm mvarId then
+          uif pm mvarId then
             return true
           else
             let lctx := (← getMCtx).getDecl mvarId |>.lctx
@@ -772,7 +772,7 @@ private def shouldVisit (e : Expr) : M Bool := do
   visit e
 
 @[inline] private partial def main (pf : FVarId → Bool) (pm : MVarId → Bool) (e : Expr) : M Bool :=
-  bif !e.hasFVar && !e.hasMVar then pure false else dep pf pm e
+  uif !e.hasFVar && !e.hasMVar then pure false else dep pf pm e
 
 end DependsOn
 
@@ -797,7 +797,7 @@ depends on a free variable `x` s.t. `pf x` is `true` or an unassigned metavariab
   match localDecl with
   | .cdecl (type := t) ..  => findExprDependsOn t pf pm
   | .ldecl (type := t) (value := v) (nondep := nondep) .. =>
-    bif generalizeNondepLet && nondep then
+    uif generalizeNondepLet && nondep then
       findExprDependsOn t pf pm
     else
       let (result, { mctx, .. }) := (DependsOn.main pf pm t <||> DependsOn.main pf pm v).run { mctx := (← getMCtx) }
@@ -821,18 +821,18 @@ def localDeclDependsOn [Monad m] [MonadMCtx m] (localDecl : LocalDecl) (fvarId :
 
 /-- Similar to `exprDependsOn`, but `x` can be a free variable or an unassigned metavariable. -/
 def exprDependsOn' [Monad m] [MonadMCtx m] (e : Expr) (x : Expr) : m Bool :=
-  bif x.isFVar then
+  uif x.isFVar then
     findExprDependsOn e (x.fvarId! == ·)
-  else bif x.isMVar then
+  else uif x.isMVar then
     findExprDependsOn e (pm := (x.mvarId! == ·))
   else
     return false
 
 /-- Similar to `localDeclDependsOn`, but `x` can be a free variable or an unassigned metavariable. -/
 def localDeclDependsOn' [Monad m] [MonadMCtx m] (localDecl : LocalDecl) (x : Expr) (generalizeNondepLet := true) : m Bool :=
-  bif x.isFVar then
+  uif x.isFVar then
     findLocalDeclDependsOn localDecl (x.fvarId! == ·) (generalizeNondepLet := generalizeNondepLet)
-  else bif x.isMVar then
+  else uif x.isMVar then
     findLocalDeclDependsOn localDecl (pm := (x.mvarId! == ·)) (generalizeNondepLet := generalizeNondepLet)
   else
     return false
@@ -870,7 +870,7 @@ def addExprMVarDecl (mctx : MetavarContext)
       type
       kind
       numScopeArgs }
-    userNames := bif userName.isAnonymous then mctx.userNames else mctx.userNames.insert userName mvarId }
+    userNames := uif userName.isAnonymous then mctx.userNames else mctx.userNames.insert userName mvarId }
 
 def addExprMVarDeclExp (mctx : MetavarContext) (mvarId : MVarId) (userName : Name) (lctx : LocalContext) (localInstances : LocalInstances)
     (type : Expr) (kind : MetavarKind) : MetavarContext :=
@@ -916,7 +916,7 @@ def setMVarUserName (mctx : MetavarContext) (mvarId : MVarId) (userName : Name) 
     decls := mctx.decls.insert mvarId { decl with userName := userName }
     userNames :=
       let userNames := mctx.userNames.erase decl.userName
-      bif userName.isAnonymous then userNames else userNames.insert userName mvarId }
+      uif userName.isAnonymous then userNames else userNames.insert userName mvarId }
 
 /--
   Low-level version of `setMVarUserName`.
@@ -984,7 +984,7 @@ def isAnonymousMVar (mctx : MetavarContext) (mvarId : MVarId) : Bool :=
 def incDepth (mctx : MetavarContext) (allowLevelAssignments := false) : MetavarContext :=
   let depth := mctx.depth + 1
   let levelAssignDepth :=
-    bif allowLevelAssignments then mctx.levelAssignDepth else depth
+    uif allowLevelAssignments then mctx.levelAssignDepth else depth
   { mctx with depth, levelAssignDepth }
 
 namespace MkBinding
@@ -1041,9 +1041,9 @@ instance : MonadHashMapCacheAdapter ExprStructEq Expr M where
 private def getLocalDeclWithSmallestIdx (lctx : LocalContext) (xs : Array Expr) : LocalDecl := Id.run do
   let mut d : LocalDecl := lctx.getFVar! xs[0]!
   for x in xs[1...*] do
-    bif x.isFVar then
+    uif x.isFVar then
       let curr := lctx.getFVar! x
-      bif curr.index <ᵇ d.index then
+      uif curr.index < d.index then
         d := curr
   return d
 
@@ -1087,27 +1087,27 @@ private def getLocalDeclWithSmallestIdx (lctx : LocalContext) (xs : Array Expr) 
   we have changed how we compile recursive definitions.
 -/
 def collectForwardDeps (lctx : LocalContext) (toRevert : Array Expr) (generalizeNondepLet := true) : M (Array Expr) := do
-  bif toRevert.size == 0 then
+  uif toRevert.size == 0 then
     pure toRevert
   else
-    bif (← preserveOrder) then
+    uif (← preserveOrder) then
       -- Make sure toRevert[j] does not depend on toRevert[i] for j < i
       toRevert.size.forM fun i _ => do
         let fvar := toRevert[i]
         i.forM fun j _ => do
           let prevFVar := toRevert[j]
           let prevDecl := lctx.getFVar! prevFVar
-          bif (← localDeclDependsOn prevDecl fvar.fvarId! (generalizeNondepLet := generalizeNondepLet)) then
+          uif (← localDeclDependsOn prevDecl fvar.fvarId! (generalizeNondepLet := generalizeNondepLet)) then
             throw (Exception.revertFailure (← getMCtx) lctx toRevert prevDecl.userName.toString)
-    let newToRevert      := bif (← preserveOrder) then toRevert else Array.mkEmpty toRevert.size
+    let newToRevert      := uif (← preserveOrder) then toRevert else Array.mkEmpty toRevert.size
     let firstDeclToVisit := getLocalDeclWithSmallestIdx lctx toRevert
     let initSize         := newToRevert.size
     lctx.foldlM (init := newToRevert) (start := firstDeclToVisit.index) fun (newToRevert : Array Expr) decl => do
-      bif initSize.any fun i _ => decl.fvarId == newToRevert[i]!.fvarId! then
+      uif initSize.any fun i _ => decl.fvarId == newToRevert[i]!.fvarId! then
         return newToRevert
-      else bif toRevert.any fun x => decl.fvarId == x.fvarId! then
+      else uif toRevert.any fun x => decl.fvarId == x.fvarId! then
         return newToRevert.push decl.toExpr
-      else bif (← findLocalDeclDependsOn decl (newToRevert.any fun x => x.fvarId! == ·) (generalizeNondepLet := generalizeNondepLet)) then
+      else uif (← findLocalDeclDependsOn decl (newToRevert.any fun x => x.fvarId! == ·) (generalizeNondepLet := generalizeNondepLet)) then
         return newToRevert.push decl.toExpr
       else
         return newToRevert
@@ -1116,14 +1116,14 @@ def collectForwardDeps (lctx : LocalContext) (toRevert : Array Expr) (generalize
     We use this function when we create auxiliary metavariables at `elimMVarDepsAux`. -/
 def reduceLocalContext (lctx : LocalContext) (toRevert : Array Expr) : LocalContext :=
   toRevert.foldr (init := lctx) fun x lctx =>
-    bif x.isFVar then lctx.erase x.fvarId! else lctx
+    uif x.isFVar then lctx.erase x.fvarId! else lctx
 
 /-- Return free variables in `xs` that are in the local context `lctx` -/
 private def getInScope (lctx : LocalContext) (xs : Array Expr) : Array Expr :=
   xs.foldl (init := #[]) fun scope x =>
-    bif !x.isFVar then
+    uif !x.isFVar then
       scope
-    else bif lctx.contains x.fvarId! then
+    else uif lctx.contains x.fvarId! then
       scope.push x
     else
       scope
@@ -1141,17 +1141,17 @@ private def getInScope (lctx : LocalContext) (xs : Array Expr) : Array Expr :=
   how let-decl free variables are handled. -/
 private def mkMVarApp (lctx : LocalContext) (mvar : Expr) (xs : Array Expr) (kind : MetavarKind) : Expr :=
   xs.foldl (init := mvar) fun e x =>
-    bif !x.isFVar then
+    uif !x.isFVar then
       e
     else
       match kind with
       | MetavarKind.syntheticOpaque => mkApp e x
-      | _                           => bif (lctx.getFVar! x).isLet then e else mkApp e x
+      | _                           => uif (lctx.getFVar! x).isLet then e else mkApp e x
 
 mutual
 
   private partial def visit (xs : Array Expr) (e : Expr) : M Expr :=
-    bif !e.hasMVar then pure e else checkCache { val := e : ExprStructEq } fun _ => elim xs e
+    uif !e.hasMVar then pure e else checkCache { val := e : ExprStructEq } fun _ => elim xs e
 
   private partial def elim (xs : Array Expr) (e : Expr) : M Expr :=
     match e with
@@ -1176,7 +1176,7 @@ mutual
     let e ← abstractRangeAux xs xs.size e
     xs.size.foldRevM (init := e) fun i _ e => do
       let x := xs[i]
-      bif x.isFVar then
+      uif x.isFVar then
         match lctx.getFVar! x with
         | LocalDecl.cdecl _ _ n type bi _ =>
           let type := type.headBeta
@@ -1187,7 +1187,7 @@ mutual
           let type ← abstractRangeAux xs i type
           return Lean.mkForall n .default type e
         | LocalDecl.ldecl (nondep := false) _ _ n type value _ =>
-          bif !usedLetOnly || e.hasLooseBVar 0 then
+          uif !usedLetOnly || e.hasLooseBVar 0 then
             let type := type.headBeta
             let type  ← abstractRangeAux xs i type
             let value ← abstractRangeAux xs i value
@@ -1211,7 +1211,7 @@ mutual
         let mvarDecl := (← get).mctx.getDecl x.mvarId!
         let type := mvarDecl.type.headBeta
         let type ← abstractRangeAux xs i type
-        let id ← bif mvarDecl.userName.isAnonymous then mkFreshBinderName else pure mvarDecl.userName
+        let id ← uif mvarDecl.userName.isAnonymous then mkFreshBinderName else pure mvarDecl.userName
         return Lean.mkForall id (← read).binderInfoForMVars type e
   where
     abstractRangeAux (xs : Array Expr) (i : Nat) (e : Expr) : M Expr := do
@@ -1229,7 +1229,7 @@ mutual
     let mvarDecl  := (← getMCtx).getDecl mvarId
     let mvarLCtx  := mvarDecl.lctx
     let toRevert  := getInScope mvarLCtx xs
-    bif toRevert.size == 0 then
+    uif toRevert.size == 0 then
       let args ← args.mapM (visit xs)
       return (mkAppN (mkMVar mvarId) args, #[])
     else
@@ -1244,7 +1244,7 @@ mutual
           A potential disadvantage is that `isDefEq` will not eagerly use `synthPending` for natural metavariables.
           That being said, we should try this approach as soon as we have an extensive test suite.
       -/
-      let newMVarKind := bif !(← mvarId.isAssignable) then MetavarKind.syntheticOpaque else mvarDecl.kind
+      let newMVarKind := uif !(← mvarId.isAssignable) then MetavarKind.syntheticOpaque else mvarDecl.kind
       let args ← args.mapM (visit xs)
       -- Note that `toRevert` only contains free variables at this point since it is the result of `getInScope`;
       -- after `collectForwardDeps`, this may no longer be the case because it may include metavariables
@@ -1262,7 +1262,7 @@ mutual
           mctx := s.mctx.addExprMVarDecl newMVarId Name.anonymous newMVarLCtx newLocalInsts newMVarType newMVarKind numScopeArgs,
           ngen := s.ngen.next
         }
-      bif !mvarDecl.kind.isSyntheticOpaque then
+      uif !mvarDecl.kind.isSyntheticOpaque then
         mvarId.assign result
       else
         /- If `mvarId` is the lhs of a delayed assignment `?m #[x_1, ... x_n] := ?mvarPending`,
@@ -1284,14 +1284,14 @@ mutual
     | Expr.mvar mvarId =>
       match (← getExprMVarAssignment? mvarId) with
       | some newF =>
-        bif newF.isLambda then
+        uif newF.isLambda then
           let args ← args.mapM (visit xs)
           /- Arguments in `args` can become irrelevant after we beta reduce. -/
           elim xs <| newF.betaRev args.reverse
         else
           elimApp xs newF args
       | none =>
-        bif (← read).mvarIdsToAbstract.contains mvarId then
+        uif (← read).mvarIdsToAbstract.contains mvarId then
           return mkAppN f (← args.mapM (visit xs))
         else
           -- We set `usedLetOnly := true` to avoid unnecessary let binders in the new metavariable type.
@@ -1302,7 +1302,7 @@ mutual
 end
 
 partial def elimMVarDeps (xs : Array Expr) (e : Expr) : M Expr :=
-  bif !e.hasMVar then
+  uif !e.hasMVar then
     return e
   else
     withFreshCache do
@@ -1331,10 +1331,10 @@ partial def revert (xs : Array Expr) (mvarId : MVarId) : M (Expr × Array Expr) 
   pure (e.abstractRange i xs)
 
 private def mkLambda' (x : Name) (bi : BinderInfo) (t : Expr) (b : Expr) (etaReduce : Bool) : Expr :=
-  bif etaReduce then
+  uif etaReduce then
     match b with
     | .app f (.bvar 0) =>
-      bif !f.hasLooseBVar 0 then
+      uif !f.hasLooseBVar 0 then
         f.lowerLooseBVars 1 1
       else
         mkLambda x bi t b
@@ -1365,12 +1365,12 @@ def mkBinding (isLambda : Bool) (lctx : LocalContext) (xs : Array Expr) (e : Exp
   let e ← abstractRange xs xs.size e
   xs.size.foldRevM (init := e) fun i _ e => do
       let x := xs[i]
-      bif x.isFVar then
+      uif x.isFVar then
         let handleCDecl (n : Name) (type : Expr) (bi : BinderInfo) : M Expr := do
-          bif !usedOnly || e.hasLooseBVar 0 then
+          uif !usedOnly || e.hasLooseBVar 0 then
             let type := type.headBeta;
             let type ← abstractRange xs i type
-            bif isLambda then
+            uif isLambda then
               return mkLambda' n bi type e etaReduce
             else
               return Lean.mkForall n bi type e
@@ -1380,9 +1380,9 @@ def mkBinding (isLambda : Bool) (lctx : LocalContext) (xs : Array Expr) (e : Exp
         | LocalDecl.cdecl _ _ n type bi _ =>
           handleCDecl n type bi
         | LocalDecl.ldecl _ _ n type value nondep _ =>
-          bif generalizeNondepLet && nondep then
+          uif generalizeNondepLet && nondep then
             handleCDecl n type .default
-          else bif !usedLetOnly || e.hasLooseBVar 0 then
+          else uif !usedLetOnly || e.hasLooseBVar 0 then
             let type  ← abstractRange xs i type
             let value ← abstractRange xs i value
             return mkLet n type value e nondep
@@ -1392,8 +1392,8 @@ def mkBinding (isLambda : Bool) (lctx : LocalContext) (xs : Array Expr) (e : Exp
         let mvarDecl := (← get).mctx.getDecl x.mvarId!
         let type := mvarDecl.type.headBeta
         let type ← abstractRange xs i type
-        let id ← bif mvarDecl.userName.isAnonymous then mkFreshBinderName else pure mvarDecl.userName
-        bif isLambda then
+        let id ← uif mvarDecl.userName.isAnonymous then mkFreshBinderName else pure mvarDecl.userName
+        uif isLambda then
           return mkLambda' id (← read).binderInfoForMVars type e etaReduce
         else
           return Lean.mkForall id (← read).binderInfoForMVars type e
@@ -1413,7 +1413,7 @@ def revert (xs : Array Expr) (mvarId : MVarId) (preserveOrder : Bool) : MkBindin
   MkBinding.revert xs mvarId { preserveOrder, quotContext := ctx.quotContext }
 
 def mkBinding (isLambda : Bool) (xs : Array Expr) (e : Expr) (usedOnly : Bool := false) (usedLetOnly : Bool := true) (etaReduce := false) (generalizeNondepLet := true) (binderInfoForMVars := BinderInfo.implicit) : MkBindingM Expr := fun ctx =>
-  let mvarIdsToAbstract := xs.foldl (init := {}) fun s x => bif x.isMVar then s.insert x.mvarId! else s
+  let mvarIdsToAbstract := xs.foldl (init := {}) fun s x => uif x.isMVar then s.insert x.mvarId! else s
   MkBinding.mkBinding isLambda ctx.lctx xs e usedOnly usedLetOnly etaReduce generalizeNondepLet { preserveOrder := false, binderInfoForMVars, mvarIdsToAbstract, quotContext := ctx.quotContext }
 
 @[inline] def mkLambda (xs : Array Expr) (e : Expr) (usedOnly : Bool := false) (usedLetOnly : Bool := true) (etaReduce := false) (generalizeNondepLet := true) (binderInfoForMVars := BinderInfo.implicit) : MkBindingM Expr :=
@@ -1445,7 +1445,7 @@ partial def isWellFormed [Monad m] [MonadMCtx m] (lctx : LocalContext) : Expr �
   | .lit ..              => return true
   | .mvar mvarId         => do
     let mvarDecl := (← getMCtx).getDecl mvarId;
-    bif mvarDecl.lctx.isSubPrefixOf lctx then
+    uif mvarDecl.lctx.isSubPrefixOf lctx then
       return true
     else match (← getExprMVarAssignment? mvarId) with
       | none   => return false
@@ -1479,7 +1479,7 @@ partial def mkParamName : M Name := do
   let ctx ← read
   let s ← get
   let newParamName := ctx.paramNamePrefix.appendIndexAfter s.nextParamIdx
-  bif ctx.alreadyUsedPred newParamName then
+  uif ctx.alreadyUsedPred newParamName then
     modify fun s => { s with nextParamIdx := s.nextParamIdx + 1 }
     mkParamName
   else do
@@ -1497,7 +1497,7 @@ partial def visitLevel (u : Level) : M Level := do
     match (← getLevelMVarAssignment? mvarId) with
     | some v => visitLevel v
     | none   =>
-      bif (← read).except mvarId then
+      uif (← read).except mvarId then
         return u
       else
         let p ← mkParamName
@@ -1506,7 +1506,7 @@ partial def visitLevel (u : Level) : M Level := do
         return p
 
 partial def main (e : Expr) : M Expr :=
-  bif !e.hasMVar then
+  uif !e.hasMVar then
     return e
   else
     checkCache { val := e : ExprStructEq } fun _ => do

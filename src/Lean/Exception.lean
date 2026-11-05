@@ -110,7 +110,7 @@ def mkUnknownIdentifierMessageCore [Monad m] [MonadEnv m] [MonadError m] (msg : 
     (declHint := Name.anonymous) : m MessageData := do
   let mut msg := msg
   let env ← getEnv
-  bif !declHint.isAnonymous && env.isExporting && (env.setExporting false).contains declHint then
+  uif !declHint.isAnonymous && env.isExporting && (env.setExporting false).contains declHint then
     let c := .withContext {
       env := env.setExporting false, opts := {}, mctx := {}, lctx := {} } <| .ofConstName declHint
     msg := match (env.setExporting false).getModuleIdxFor? declHint with
@@ -118,7 +118,7 @@ def mkUnknownIdentifierMessageCore [Monad m] [MonadEnv m] [MonadError m] (msg : 
         msg ++ .note m!"A private declaration `{c}` (from the current module) exists but would need to be public to access here."
       | some idx =>
         let mod := env.header.moduleNames[idx]!
-        bif isPrivateName declHint then
+        uif isPrivateName declHint then
           msg ++ .note m!"A private declaration `{c}` (from `{mod}`) exists but would need to be public to access here."
         else
           msg ++ .note m!"A public declaration `{c}` exists but is imported privately; consider adding `public import {mod}`."
@@ -191,7 +191,7 @@ def Exception.isInterrupt : Exception → Bool
 Throw an error exception for the given kernel exception.
 -/
 def throwKernelException [Monad m] [MonadError m] [MonadOptions m] (ex : Kernel.Exception) : m α := do
-  bif ex matches .interrupted then
+  uif ex matches .interrupted then
     throwInterruptException
   Lean.throwError <| ex.toMessageData (← getOptions)
 
@@ -250,7 +250,7 @@ We use this combinator to prevent stack overflows.
 @[inline] def withIncRecDepth [Monad m] [MonadError m] [MonadRecDepth m] (x : m α) : m α := do
   let curr ← MonadRecDepth.getRecDepth
   let max  ← MonadRecDepth.getMaxRecDepth
-  bif max != 0 && curr == max then
+  uif max != 0 && curr == max then
     throwMaxRecDepthAt (← getRef)
   else
     MonadRecDepth.withRecDepth (curr+1) x

@@ -38,7 +38,7 @@ public def reduceZeta? (e : Expr) : SymM (Option Expr) := do
   let f := e.getAppFn
   let .letE .. := f | return none
   let f ← go f #[]
-  bif e.isApp then
+  uif e.isApp then
     return some (← mkAppNS f e.getAppArgs)
   else
     return some f
@@ -58,7 +58,7 @@ public def reduceZetaDelta? (e : Expr) (unfold : FVarId → Bool := fun _ => tru
   let .fvar fvarId := e.getAppFn | return none
   unless unfold fvarId do return none
   let some value := (← fvarId.getDecl).value? | return none
-  bif e.isApp then
+  uif e.isApp then
     return some (← mkAppNS value e.getAppArgs)
   else
     return some value
@@ -70,7 +70,7 @@ Class projections are not reduced; instances are handled by instance synthesis.
 public def reduceProjApp? (e : Expr) : SymM (Option Expr) := do
   let .const declName _ := e.getAppFn | return none
   let some info ← getProjectionFnInfo? declName | return none
-  bif info.fromClass then return none
+  uif info.fromClass then return none
   let some e ← unfoldDefinition? e | return none
   -- The structure argument is put in weak head normal form to expose its constructor. As in
   -- `Meta.simp`, only reducible definitions are unfolded for that, whatever the ambient transparency.

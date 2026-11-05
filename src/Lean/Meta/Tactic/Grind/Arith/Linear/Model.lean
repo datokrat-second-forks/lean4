@@ -14,7 +14,7 @@ namespace Lean.Meta.Grind.Arith.Linear
 
 def getAssignment? (s : Struct) (e : Expr) : Option Rat := Id.run do
   let some x := s.varMap.find? { expr := e } | return none
-  bif h : x <ᵇ s.assignment.size then
+  uif h : x < s.assignment.size then
     return some s.assignment[x]
   else
     return none
@@ -40,20 +40,20 @@ where
     if let some val := model.get? e then
       return val
     match_expr e with
-    | Neg.neg _ i a => bif isNegInst s i then return - (← go a) else failure
-    | HAdd.hAdd _ _ _ i a b => bif isAddInst s i then return (← go a) + (← go b) else failure
-    | HSub.hSub _ _ _ i a b => bif isSubInst s i then return (← go a) - (← go b) else failure
-    | HMul.hMul _ _ _ i a b => bif isHomoMulInst s i then return (← go a) * (← go b) else failure
+    | Neg.neg _ i a => uif isNegInst s i then return - (← go a) else failure
+    | HAdd.hAdd _ _ _ i a b => uif isAddInst s i then return (← go a) + (← go b) else failure
+    | HSub.hSub _ _ _ i a b => uif isSubInst s i then return (← go a) - (← go b) else failure
+    | HMul.hMul _ _ _ i a b => uif isHomoMulInst s i then return (← go a) * (← go b) else failure
     | HSMul.hSMul _ _ _ i a b =>
-      bif isSMulIntInst s i then
+      uif isSMulIntInst s i then
         let k ← getIntValue? a
         return k * (← go b)
-      else bif isSMulNatInst s i then
+      else uif isSMulNatInst s i then
         let k ← getNatValue? a
         return k * (← go b)
       else
         failure
-    | Zero.zero _ i => bif isZeroInst s i then return 0 else failure
+    | Zero.zero _ i => uif isZeroInst s i then return 0 else failure
     | OfNat.ofNat _ n _ => let k ← getNatValue? n; return k
     | _ => failure
 
@@ -76,7 +76,7 @@ private def assignTerms (goal : Goal) (structId : Nat) (model : Std.HashMap Expr
   let s ← linearExt.getStateCore goal
   let struct := s.structs[structId]!
   for (e, structId') in s.exprToStructIdEntries do
-    bif structId == structId' && !model.contains e then
+    uif structId == structId' && !model.contains e then
       if let some v ← evalTermAt? e struct model then
         model := assignEqc goal e v model
   return model
@@ -91,8 +91,8 @@ def mkModel (goal : Goal) (structId : Nat) : MetaM (Array (Expr × Rat)) := do
   -- Assign on expressions associated with cutsat terms or interpreted terms
   for e in goal.exprs do
     let node ← goal.getENode e
-    bif node.isRoot then
-    bif (← hasType s.type node) then
+    uif node.isRoot then
+    uif (← hasType s.type node) then
       if let some v := getAssignment? s node.self then
         model := assignEqc goal node.self v model
   model ← assignTerms goal structId model
@@ -101,7 +101,7 @@ def mkModel (goal : Goal) (structId : Nat) : MetaM (Array (Expr × Rat)) := do
     let node ← goal.getENode e
     let i := node.self
     let some n := toQ? i | pure ()
-    bif model[n]?.isNone then
+    uif model[n]?.isNone then
       let some v := model[i]? | pure ()
       model := assignEqc goal n v model
   let r ← finalizeModel goal (hasType s.type) model

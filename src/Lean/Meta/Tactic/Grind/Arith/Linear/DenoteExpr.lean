@@ -22,7 +22,7 @@ def _root_.Lean.Grind.Linarith.Poly.denoteExpr (p : Poly) : M Expr := do
   | .add k x p => go p (← denoteTerm k x)
 where
   denoteTerm (k : Int) (x : Var) : M Expr := do
-    bif k == 1 then
+    uif k == 1 then
       return (← getStruct).vars[x]!
     else
       return mkApp2 (← getStruct).zsmulFn (mkIntLit k) (← getStruct).vars[x]!
@@ -52,7 +52,7 @@ def DiseqCnstr.denoteExpr (c : DiseqCnstr) : M Expr := do
   return mkNot (← mkEq (← c.p.denoteExpr) (← getStruct).ofNatZero)
 
 private def denoteIneq (p : Poly) (strict : Bool) : M Expr := do
-  bif strict then
+  uif strict then
     return mkApp2 (← getLtFn) (← p.denoteExpr) (← getStruct).ofNatZero
   else
     return mkApp2 (← getLeFn) (← p.denoteExpr) (← getStruct).ofNatZero

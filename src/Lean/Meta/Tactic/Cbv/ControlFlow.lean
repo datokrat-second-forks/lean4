@@ -48,7 +48,7 @@ public def withCbvOpaqueGuard (x : MetaM α) : MetaM α := do
   let prevCustomCanUnfoldPredicate? := (← readThe Meta.Context).customCanUnfoldPredicate?
   let prevCanUnfoldPredicateConfig := (← readThe Meta.Context).config.canUnfoldPredicateConfig
   withCanUnfoldPred (fun cfg info => do
-    bif (← isCbvOpaque info.name) then return false
+    uif (← isCbvOpaque info.name) then return false
     match prevCustomCanUnfoldPredicate? with
     | .some f => f cfg info
     | .none =>
@@ -68,7 +68,7 @@ for `Decidable p'`.
 -/
 def rewriteDecidableInstance (inst : Expr) : SimpM (Result × Expr) :=
   inst.withApp fun fn args => do
-    bif args.isEmpty then
+    uif args.isEmpty then
       return (.rfl, inst)
     let ty ← Meta.inferType fn
     let p ← forallTelescopeReducing (whnfType := true) ty fun vars body => do←
@@ -132,10 +132,10 @@ def simpAndMatchIteDecidable (f α c inst a b : Expr) (fallback : SimpM Result) 
     match (← simp inst) with
     | .rfl _ cd =>
       let r ← matchIteDecidable f α c inst a b inst fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
     | .step inst' _ _ cd =>
       let r ← matchIteDecidable f α c inst a b inst' fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
 
 /-- Like `simpAndMatchIteDecidable`, but for the congruence case where `c` was simplified to `c'`. -/
 def simpAndMatchIteDecidableCongr (f α c inst a b c' h inst' : Expr) (fallback : SimpM Result) : SimpM Result := do
@@ -158,31 +158,31 @@ def simpAndMatchIteDecidableCongr (f α c inst a b c' h inst' : Expr) (fallback 
     match (← simp inst') with
     | .rfl _ cd =>
       let r ← matchIteDecidableCongr f α c inst a b c' h inst' fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
     | .step inst'' _ _ cd =>
       let r ← matchIteDecidableCongr f α c inst a b c' h inst'' fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
 
 /-- Like `simpIte` but also evaluates `Decidable.decide` when the condition does not
 reduce to `True`/`False` directly. -/
 builtin_cbv_simproc ↓ simpIteCbv (@ite _ _ _ _ _) := fun e => do
   let numArgs := e.getAppNumArgs
-  bif numArgs <ᵇ 5 then return .rfl (done := true)
+  uif numArgs < 5 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 5) fun e => do
     let_expr f@ite α c inst a b := e | return .rfl
     -- See Sym.Simp.ControlFlow.simpIte for why cd is propagated to all branches.
     match (← simp c) with
     | .rfl _ cd =>
-      bif (← isTrueExpr c) then
+      uif (← isTrueExpr c) then
         return .step a (mkApp4 (mkConst ``ite_true f.constLevels!) α inst a b) (contextDependent := cd)
-      else bif (← isFalseExpr c) then
+      else uif (← isFalseExpr c) then
         return .step b (mkApp4 (mkConst ``ite_false f.constLevels!) α inst a b) (contextDependent := cd)
       else
         simpAndMatchIteDecidable f α c inst a b do return mkRflResult (done := true) (contextDependent := cd)
     | .step c' h _ cd =>
-      bif (← isTrueExpr c') then
+      uif (← isTrueExpr c') then
         return .step a (mkApp (e.replaceFn ``ite_eq_left_of_eq_true) h) (contextDependent := cd)
-      else bif (← isFalseExpr c') then
+      else uif (← isFalseExpr c') then
         return .step b (mkApp (e.replaceFn ``ite_eq_right_of_eq_false) h) (contextDependent := cd)
       else
         let (condRes, inst') ← rewriteDecidableInstance inst
@@ -251,10 +251,10 @@ def simpAndMatchDIteDecidable (f α c inst a b : Expr) (fallback : SimpM Result)
     match (← simp inst) with
     | .rfl _ cd =>
       let r ← matchDIteDecidable f α c inst a b inst fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
     | .step inst' _ _ cd =>
       let r ← matchDIteDecidable f α c inst a b inst' fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
 
 /-- Like `simpAndMatchDIteDecidable`, but for the congruence case where `c` was simplified to `c'`. -/
 def simpAndMatchDIteDecidableCongr (f α c inst a b c' h inst' : Expr) (fallback : SimpM Result) : SimpM Result := do
@@ -283,34 +283,34 @@ def simpAndMatchDIteDecidableCongr (f α c inst a b c' h inst' : Expr) (fallback
     match (← simp inst') with
     | .rfl _ cd =>
       let r ← matchDIteDecidableCongr f α c inst a b c' h inst' fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
     | .step inst'' _ _ cd =>
       let r ← matchDIteDecidableCongr f α c inst a b c' h inst'' fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
 
 /-- Like `simpDIte` but also evaluates `Decidable.decide` when the condition does not
 reduce to `True`/`False` directly. -/
 builtin_cbv_simproc ↓ simpDIteCbv (@dite _ _ _ _ _) := fun e => do
   let numArgs := e.getAppNumArgs
-  bif numArgs <ᵇ 5 then return .rfl (done := true)
+  uif numArgs < 5 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 5) fun e => do
     let_expr f@dite α c inst a b := e | return .rfl
     match (← simp c) with
     | .rfl _ cd =>
-      bif (← isTrueExpr c) then
+      uif (← isTrueExpr c) then
         let a' ← share <| a.betaRev #[mkConst ``True.intro]
         return .step a' (mkApp4 (mkConst ``dite_true f.constLevels!) α inst a b) (contextDependent := cd)
-      else bif (← isFalseExpr c) then
+      else uif (← isFalseExpr c) then
         let b' ← share <| b.betaRev #[mkConst ``not_false]
         return .step b' (mkApp4 (mkConst ``dite_false f.constLevels!) α inst a b) (contextDependent := cd)
       else
         simpAndMatchDIteDecidable f α c inst a b do return mkRflResult (done := true) (contextDependent := cd)
     | .step c' h _ cd =>
-      bif (← isTrueExpr c') then
+      uif (← isTrueExpr c') then
         let h' ← shareCommon <| mkOfEqTrueCore c h
         let a ← share <| a.betaRev #[h']
         return .step a (mkApp (e.replaceFn ``dite_eq_left_of_eq_true) h) (contextDependent := cd)
-      else bif (← isFalseExpr c') then
+      else uif (← isFalseExpr c') then
         let h' ← shareCommon <| mkOfEqFalseCore c h
         let b ← share <| b.betaRev #[h']
         return .step b (mkApp (e.replaceFn ``dite_eq_right_of_eq_false) h) (contextDependent := cd)
@@ -365,10 +365,10 @@ def simpAndMatchDecideDecidable (p inst : Expr) (fallback : SimpM Result) : Simp
     match (← simp inst) with
     | .rfl _ cd =>
       let r ← matchDecideDecidable p inst inst fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
     | .step inst' _ _ cd =>
       let r ← matchDecideDecidable p inst inst' fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
 
 /-- Like `simpDecideByInstWithFallback`, but for the case where `p` was simplified to `p'`. -/
 def simpAndMatchDecideDecidableCongr (p p' h inst inst' : Expr) (fallback : SimpM Result) : SimpM Result := do
@@ -382,10 +382,10 @@ def simpAndMatchDecideDecidableCongr (p p' h inst inst' : Expr) (fallback : Simp
     match (← simp inst') with
     | .rfl _ cd =>
       let r ← matchDecideDecidableCongr p p' h inst inst' fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
     | .step inst'' _ _ cd =>
       let r ← matchDecideDecidableCongr p p' h inst inst'' fallback
-      return bif cd && !r.isContextDependent then r.withContextDependent else r
+      return uif cd && !r.isContextDependent then r.withContextDependent else r
 
 /-- Simplify `Decidable.decide` by simplifying the proposition and reducing the instance.
 
@@ -396,21 +396,21 @@ but the instance doesn't reduce to `isTrue`/`isFalse`, falls back to rebuilding
 `decide p'` with a congruence proof. -/
 builtin_cbv_simproc ↓ simpDecideCbv (@Decidable.decide _ _) := fun e => do
   let numArgs := e.getAppNumArgs
-  bif numArgs <ᵇ 2 then return .rfl (done := true)
+  uif numArgs < 2 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 2) fun e => do
     let_expr Decidable.decide p inst := e | return .rfl
     match (← simp p) with
     | .rfl _ cd =>
-      bif (← isTrueExpr p) then
+      uif (← isTrueExpr p) then
         return .step (← getBoolTrueExpr) (mkApp (mkConst ``decide_true) inst) (contextDependent := cd)
-      else bif (← isFalseExpr p) then
+      else uif (← isFalseExpr p) then
         return .step (← getBoolFalseExpr) (mkApp (mkConst ``decide_false) inst) (contextDependent := cd)
       else
         simpAndMatchDecideDecidable p inst do return mkRflResult (done := true) (contextDependent := cd)
     | .step p' hp _ cd =>
-      bif (← isTrueExpr p') then
+      uif (← isTrueExpr p') then
         return .step (← getBoolTrueExpr) (mkApp3 (mkConst ``Sym.decide_prop_eq_true) p inst hp) (contextDependent := cd)
-      else bif (← isFalseExpr p') then
+      else uif (← isFalseExpr p') then
         return .step (← getBoolFalseExpr) (mkApp3 (mkConst ``Sym.decide_prop_eq_false) p inst hp) (contextDependent := cd)
       else
         let (condRes, inst') ← rewriteDecidableInstance inst
@@ -430,7 +430,7 @@ rewriting with `UDecidable.decide_mk`. The condition `c` is left alone.
 -/
 builtin_cbv_simproc ↓ simpUDecideCbv (@UDecidable.decide _ _) := fun e => do
   let numArgs := e.getAppNumArgs
-  bif numArgs <ᵇ 2 then return .rfl (done := true)
+  uif numArgs < 2 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 2) fun e => do
     let_expr UDecidable.decide c inst := e | return .rfl
     let decideFn := mkApp (mkConst ``UDecidable.decide) c
@@ -465,7 +465,7 @@ def evalUDecide (c inst : Expr) : SimpM (Option (Bool × Expr) × Bool) := do
 /-- Takes the branch of `uif c then a else b` that the instance evaluates to. -/
 builtin_cbv_simproc ↓ simpUIteCbv (@UDecidable.ite _ _ _ _ _) := fun e => do
   let numArgs := e.getAppNumArgs
-  bif numArgs <ᵇ 5 then return .rfl (done := true)
+  uif numArgs < 5 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 5) fun e => do
     let_expr f@UDecidable.ite α c inst a b := e | return .rfl
     match (← evalUDecide c inst) with
@@ -480,7 +480,7 @@ builtin_cbv_simproc ↓ simpUIteCbv (@UDecidable.ite _ _ _ _ _) := fun e => do
 /-- Like `simpUIteCbv`, but for `uif h : c then a h else b h`. -/
 builtin_cbv_simproc ↓ simpUDIteCbv (@UDecidable.dite _ _ _ _ _) := fun e => do
   let numArgs := e.getAppNumArgs
-  bif numArgs <ᵇ 5 then return .rfl (done := true)
+  uif numArgs < 5 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 5) fun e => do
     let_expr f@UDecidable.dite α c inst a b := e | return .rfl
     match (← evalUDecide c inst) with

@@ -22,9 +22,9 @@ def checkEqc (root : ENode) : GoalM Unit := do
     -- The root of `curr` must be `root`
     assert! isSameExpr (← getRoot curr) root.self
     -- Check congruence root
-    bif curr.isApp then
+    uif curr.isApp then
       if let some { e } := (← get).congrTable.find? { e := curr } then
-        bif (← hasSameType e.getAppFn curr.getAppFn) then
+        uif (← hasSameType e.getAppFn curr.getAppFn) then
           assert! isSameExpr e (← getCongrRoot curr)
       else
         assert! (← isCongrRoot curr)
@@ -41,7 +41,7 @@ def checkEqc (root : ENode) : GoalM Unit := do
     assert! isSameExpr n root.self
     -- Go to next element
     curr ← getNext curr
-    bif isSameExpr root.self curr then
+    uif isSameExpr root.self curr then
       break
   -- The size of the equivalence class is correct.
   assert! root.size == size
@@ -65,8 +65,8 @@ partial def checkMatchCondNestedChild (e : Expr) (lhs pat : Expr) : GoalM Bool :
     unless ctorInfo.name == patInfo.name && pat.getAppNumArgs == numArgs do continue
     let args := c.getAppArgs
     for i in ctorInfo.numParams...numArgs do
-      bif patArgs[i]!.getAppFn.isBVar then continue
-      bif (← checkChild e args[i]! <||> checkMatchCondNestedChild e args[i]! patArgs[i]!) then
+      uif patArgs[i]!.getAppFn.isBVar then continue
+      uif (← checkChild e args[i]! <||> checkMatchCondNestedChild e args[i]! patArgs[i]!) then
         return true
   return false
 
@@ -78,11 +78,11 @@ def checkMatchCondParent (e : Expr) (parent : Expr) : GoalM Bool := do
       | return false
     match_expr d with
     | Eq _ lhs rhs =>
-      bif (← checkChild e lhs) then return true -- found it
-      bif !lhs.hasLooseBVars && (← checkMatchCondNestedChild e lhs rhs) then return true
+      uif (← checkChild e lhs) then return true -- found it
+      uif !lhs.hasLooseBVars && (← checkMatchCondNestedChild e lhs rhs) then return true
     | HEq α lhs _ rhs =>
-      bif (← checkChild e α <||> checkChild e lhs) then return true -- found it
-      bif !lhs.hasLooseBVars && (← checkMatchCondNestedChild e lhs rhs) then return true
+      uif (← checkChild e α <||> checkChild e lhs) then return true -- found it
+      uif !lhs.hasLooseBVars && (← checkMatchCondNestedChild e lhs rhs) then return true
     | _ => pure ()
     curr := b
   return false
@@ -90,11 +90,11 @@ def checkMatchCondParent (e : Expr) (parent : Expr) : GoalM Bool := do
 def checkParents (e : Expr) : GoalM Unit := do
   -- **Note**: We skip `funCC` parents because the parent-child relationship uses
   -- one-level decomposition (`appFn!`/`appArg!`) rather than full `getAppArgs`/`getAppFn`.
-  bif (← isRoot e) then
+  uif (← isRoot e) then
     for parent in (← getParents e).elems do
-      bif parent.isApp && (← useFunCC parent) then
+      uif parent.isApp && (← useFunCC parent) then
         pure ()
-      else bif isMatchCond parent then
+      else uif isMatchCond parent then
         unless (← checkMatchCondParent e parent) do
           throwError "e: {e}, parent: {parent}"
         assert! (← checkMatchCondParent e parent)
@@ -102,15 +102,15 @@ def checkParents (e : Expr) : GoalM Unit := do
         let mut found := false
         -- There is an argument `arg` s.t. root of `arg` is `e`.
         for arg in parent.getAppArgs do
-          bif (← checkChild e arg) then
+          uif (← checkChild e arg) then
             found := true
             break
         -- Recall that we have support for `Expr.forallE` propagation. See `ForallProp.lean`.
         if let .forallE _ d b _ := parent then
-          bif (← checkChild e d) then
+          uif (← checkChild e d) then
             found := true
           unless b.hasLooseBVars do
-            bif (← checkChild e b) then
+            uif (← checkChild e b) then
               found := true
         unless found do
           unless (← checkChild e parent.getAppFn) do
@@ -159,21 +159,21 @@ def checkCongrTable : GoalM Unit := do
 
 /-- Checks invariants if `grind.debug` is enabled. -/
 public def checkInvariants (expensive := false) : GoalM Unit := do
-  bif (← isDebugEnabled) then
+  uif (← isDebugEnabled) then
     checkCongrTable
     for e in (← getExprs) do
       let node ← getENode e
       checkParents node.self
       -- Interpreted nodes must be literals in `grind` normal form: a non-canonical spelling
       -- breaks the assumption that distinct interpreted nodes denote distinct values.
-      bif node.interpreted then
+      uif node.interpreted then
         assert! (← Sym.Canon.normNumLit? node.self).isNone
-      bif node.isRoot then
+      uif node.isRoot then
         checkEqc node
-    bif expensive then
+    uif expensive then
       checkPtrEqImpliesStructEq
     Solvers.checkInvariants
-  bif expensive && grind.debug.proofs.get (← getOptions) then
+  uif expensive && grind.debug.proofs.get (← getOptions) then
     checkProofs
 
 @[inherit_doc Grind.checkInvariants]

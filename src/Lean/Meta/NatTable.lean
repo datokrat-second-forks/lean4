@@ -23,12 +23,12 @@ Builds an expression of type `Nat → $type` that returns the `es[i]`, using bin
 The array must be non-empty.
 -/
 public def mkNatLookupTable (i : Expr) (type : Expr) (es : Array Expr) : MetaM Expr := do
-  bif h : es.size =ᵇ 0 then
+  uif h : es.size = 0 then
     panic! "mkNatLookupTable: expected non-empty array"
   else
     let u ← getLevel type
     let rec go (start stop : Nat) (hstart : start < stop := by omega) (hstop : stop ≤ es.size := by omega) : MetaM Expr := do
-      bif h : start + 1 =ᵇ stop then
+      uif h : start + 1 = stop then
         return es[start]
       else
         let mid := (start + stop) / 2

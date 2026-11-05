@@ -17,12 +17,12 @@ public section
 namespace Lean.Meta.Grind.Arith.Cutsat
 
 def LeCnstr.norm (c : LeCnstr) : LeCnstr :=
-  let c := bif c.p.isSorted then
+  let c := uif c.p.isSorted then
     c
   else
     { p := c.p.norm, h := .norm c }
   let k := c.p.gcdCoeffs'
-  bif k != 1 then
+  uif k != 1 then
     { p := c.p.div k, h := .divCoeffs c }
   else
     c
@@ -34,7 +34,7 @@ containing the monomial `b*x`, eliminate `x` by applying substitution.
 def LeCnstr.applyEq (a : Int) (x : Var) (c₁ : EqCnstr) (b : Int) (c₂ : LeCnstr) : GoalM LeCnstr := do
   let p := c₁.p
   let q := c₂.p
-  let p := bif a ≥ᵇ 0 then
+  let p := uif a ≥ 0 then
     q.mul a |>.combine (p.mul (-b))
   else
     p.mul b |>.combine (q.mul (-a))
@@ -55,7 +55,7 @@ def _root_.Int.Internal.Linear.Poly.isNegEq (p₁ p₂ : Poly) : Bool :=
 
 def LeCnstr.erase (c : LeCnstr) : GoalM Unit := do
   let .add a x _ := c.p | c.throwUnexpected
-  bif a <ᵇ 0 then
+  uif a < 0 then
     modify' fun s => { s with lowers := s.lowers.modify x fun cs' => cs'.filter fun c' => c'.p != c.p }
   else
     modify' fun s => { s with uppers := s.uppers.modify x fun cs' => cs'.filter fun c' => c'.p != c.p }
@@ -68,9 +68,9 @@ an imply equality by searching a upper (lower) bound constraint `c'` such that
 private def findEq (c : LeCnstr) : GoalM Bool := do
   let .add a x _ := c.p | c.throwUnexpected
   let s ← get'
-  let cs' := bif a <ᵇ 0 then s.uppers[x]! else s.lowers[x]!
+  let cs' := uif a < 0 then s.uppers[x]! else s.lowers[x]!
   for c' in cs' do
-    bif c.p.isNegEq c'.p then
+    uif c.p.isNegEq c'.p then
       c'.erase
       let eq := { p := c.p, h := .ofLeGe c c' : EqCnstr }
       trace[grind.debug.lia.eq] "new eq: {← eq.pp}"
@@ -93,7 +93,7 @@ where
     let s ← get'
     let cs' := s.diseqs[x]!
     for c' in cs' do
-      bif c.p == c'.p || c.p.isNegEq c'.p then
+      uif c.p == c'.p || c.p.isNegEq c'.p then
         -- Remove `c'`
         modify' fun s => { s with diseqs := s.diseqs.modify x fun cs' => cs'.filter fun c => c.p != c'.p }
         return some { p := c.p.addConst 1, h := .ofLeDiseq c c' }
@@ -102,27 +102,27 @@ where
 set_option compiler.ignoreBorrowAnnotation true in
 @[export lean_grind_cutsat_assert_le]
 def LeCnstr.assertImpl (c : LeCnstr) : GoalM Unit := do
-  bif (← inconsistent) then return ()
+  uif (← inconsistent) then return ()
   trace[grind.lia.assert] "{← c.pp}"
   let c ← c.norm.applySubsts
-  bif c.isUnsat then
+  uif c.isUnsat then
     trace[grind.lia.assert.unsat] "{← c.pp}"
     setInconsistent (.le c)
     return ()
-  bif c.isTrivial then
+  uif c.isTrivial then
     trace[grind.lia.assert.trivial] "{← c.pp}"
     return ()
   let .add a x _ := c.p | c.throwUnexpected
-  bif (← findEq c) then
+  uif (← findEq c) then
     return ()
   let c ← (← refineWithDiseq c).markStored
   trace[grind.lia.assert.store] "{← c.pp}"
   c.p.updateOccs
-  bif a <ᵇ 0 then
+  uif a < 0 then
     modify' fun s => { s with lowers := s.lowers.modify x (·.push c) }
   else
     modify' fun s => { s with uppers := s.uppers.modify x (·.push c) }
-  bif (← c.satisfied) == .false then
+  uif (← c.satisfied) == .false then
     resetAssignmentFrom x
 
 /-- Asserts a constraint coming from the core. -/
@@ -146,7 +146,7 @@ def propagateIntLe (e : Expr) (eqTrue : Bool) : GoalM Unit := do
   if let some 0 ← getIntValue? b then
     if let some p ← toPoly? a then
       trace[grind.debug.lia.norm] "normalized: {e}"
-      let c ← bif eqTrue then
+      let c ← uif eqTrue then
         pure { p, h := .core e : LeCnstr }
       else
         pure { p := p.mul (-1) |>.addConst 1, h := .coreNeg e p : LeCnstr }
@@ -157,18 +157,18 @@ def propagateIntLe (e : Expr) (eqTrue : Bool) : GoalM Unit := do
   let lhs ← toLinearExpr a gen
   let rhs ← toLinearExpr b gen
   let p := lhs.sub rhs |>.norm
-  let p := bif eqTrue then p else p.mul (-1) |>.addConst 1
+  let p := uif eqTrue then p else p.mul (-1) |>.addConst 1
   let c := { p, h := .coreExpr e eqTrue lhs rhs : LeCnstr }
   c.assertCore
 
 def propagateNatLe (e : Expr) (eqTrue : Bool) : GoalM Unit := do
   let_expr LE.le _ _ a b := e | return ()
-  let thm := bif eqTrue then mkConst ``Nat.ToInt.of_le else mkConst ``Nat.ToInt.of_not_le
+  let thm := uif eqTrue then mkConst ``Nat.ToInt.of_le else mkConst ``Nat.ToInt.of_not_le
   let gen ← getGeneration e
   let (a', h₁) ← natToInt a
   let (b', h₂) ← natToInt b
   let thm := mkApp6 thm a b a' b' h₁ h₂
-  let (a', b') := bif eqTrue then (a', b') else (mkIntAdd b' (mkIntLit 1), a')
+  let (a', b') := uif eqTrue then (a', b') else (mkIntAdd b' (mkIntLit 1), a')
   let lhs ← toLinearExpr a' gen
   let rhs ← toLinearExpr b' gen
   let p := lhs.sub rhs |>.norm
@@ -178,9 +178,9 @@ def propagateNatLe (e : Expr) (eqTrue : Bool) : GoalM Unit := do
 def propagateLe (e : Expr) (eqTrue : Bool) : GoalM Unit := do
   unless (← getConfig).lia do return ()
   let_expr LE.le α _ _ _ := e | return ()
-  bif α.isConstOf ``Nat then
+  uif α.isConstOf ``Nat then
     propagateNatLe e eqTrue
-  else bif α.isConstOf ``Int then
+  else uif α.isConstOf ``Int then
     propagateIntLe e eqTrue
 
 end Lean.Meta.Grind.Arith.Cutsat

@@ -27,7 +27,7 @@ def injection? (mvarId : MVarId) (fvarId : FVarId) : MetaM (Option MVarId) := mv
   let_expr Eq _ a b := decl.type | return none
   match (← isConstructorAppCore? a), (← isConstructorAppCore? b) with
   | some aCtor, some bCtor =>
-    bif aCtor.name != bCtor.name then return none -- Simplifier handles this case
+    uif aCtor.name != bCtor.name then return none -- Simplifier handles this case
     let target ← mvarId.getType
     let val ← mkNoConfusion target (mkFVar fvarId)
     let .forallE _ targetNew _ _ ← whnfD (← inferType val) | return none

@@ -32,7 +32,7 @@ def isCoeDecl (env : Environment) (declName : Name) : Bool :=
 private partial def recProjTarget (e : Expr) (nm : Name := e.getAppFn.constName!) : MetaM Name := do
   let some info ← getProjectionFnInfo? nm | return nm
   let target := e.getArgD info.numParams (.sort .zero)
-  bif target.getAppFn.isConst then
+  uif target.getAppFn.isConst then
     recProjTarget target
   else
     return nm
@@ -45,9 +45,9 @@ partial def expandCoe (e : Expr) : MetaM (Expr × List Name) := StateT.run (s :=
   withReducibleAndInstances do
     transform e fun e => do
       let f := e.getAppFn
-      bif f.isConst then
+      uif f.isConst then
         let declName := f.constName!
-        bif isCoeDecl (← getEnv) declName then
+        uif isCoeDecl (← getEnv) declName then
           /-
           Unfolding an instance projection corresponds to unfolding the target of the projection
           (and then reducing the projection). Thus we can recursively visit projections before
@@ -61,12 +61,12 @@ partial def expandCoe (e : Expr) : MetaM (Expr × List Name) := StateT.run (s :=
             argument) or `CoeDep.coe` (instance in the fourth argument) and that argument is an
             application of a constant, record this constant's name.
             -/
-            let instIdx? := bif declName =ᵇ ``Coe.coe then some 2
-              else bif declName =ᵇ ``CoeDep.coe then some 3 else none
+            let instIdx? := uif declName = ``Coe.coe then some 2
+              else uif declName = ``CoeDep.coe then some 3 else none
             if let some instIdx := instIdx? then
               if let some inst := e.getAppArgs[instIdx]? then
                 let g := inst.getAppFn
-                bif g.isConst then
+                uif g.isConst then
                   let instName := g.constName!
                   StateT.set (instName :: (← StateT.get))
             return .visit e'.headBeta
@@ -208,13 +208,13 @@ def coerceMonadLift? (e expectedType : Expr) : MetaM (Option Expr) := do
   let some (m, α) ← isTypeApp? eType | return none
   -- Need to save and restore the state in case `m` and `n` are defeq but not monads to prevent this procedure from having side effects.
   let saved ← saveState
-  bif (← isDefEq m n) then
+  uif (← isDefEq m n) then
     let some monadInst ← isMonad? n | restoreState saved; return none
     try
       let (result, _) ← expandCoe (← mkAppOptM ``Lean.Internal.coeM #[m, α, β, none, monadInst, e])
       pure result
     catch _ => restoreState saved; return none
-  else bif autoLift.get (← getOptions) then
+  else uif autoLift.get (← getOptions) then
     try
       -- Construct lift from `m` to `n`
       -- Note: we cannot use mkAppM here because mkAppM does not assign universe metavariables,
@@ -232,7 +232,7 @@ def coerceMonadLift? (e expectedType : Expr) : MetaM (Option Expr) := do
       let u_3 ← getDecLevel expectedType
       let eNew := mkAppN (Lean.mkConst ``liftM [u_1, u_2, u_3]) #[m, n, monadLiftVal, α, e]
       let eNewType ← inferType eNew
-      bif (← isDefEq expectedType eNewType) then
+      uif (← isDefEq expectedType eNewType) then
         return some eNew -- approach 2 worked
       else
         let some monadInst ← isMonad? n | return none
@@ -262,9 +262,9 @@ applied.
 def coerceCollectingNames? (expr expectedType : Expr) : MetaM (LOption (Expr × List Name)) := do
   if let some lifted ← coerceMonadLift? expr expectedType then
     return .some (lifted, [])
-  bif (← whnfR expectedType).isForall then
+  uif (← whnfR expectedType).isForall then
     if let some fn ← coerceToFunction? expr then
-      bif (← isDefEq (← inferType fn) expectedType) then
+      uif (← isDefEq (← inferType fn) expectedType) then
         return .some (fn, [])
   coerceSimpleRecordingNames? expr expectedType
 

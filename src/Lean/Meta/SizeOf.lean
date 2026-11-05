@@ -17,7 +17,7 @@ private partial def mkLocalInstances (params : Array Expr) (k : Array Expr → M
   loop 0 #[]
 where
   loop (i : Nat) (insts : Array Expr) : MetaM α := do
-    bif h : i <ᵇ params.size then
+    uif h : i < params.size then
       let param := params[i]
       let paramType ← inferType param
       let instType? ← forallTelescopeReducing paramType fun xs _ => do
@@ -43,7 +43,7 @@ where
 -/
 private def isInductiveHypothesis? (motiveFVars : Array Expr) (fvar : Expr) : MetaM (Option Expr) := do
   forallTelescopeReducing (← inferType fvar) fun _ type =>
-    bif type.isApp && motiveFVars.contains type.getAppFn then
+    uif type.isApp && motiveFVars.contains type.getAppFn then
       return some type.appArg!
     else
       return none
@@ -59,7 +59,7 @@ private def isRecField? (motiveFVars : Array Expr) (minorFVars : Array Expr) (fv
   let mut idx := 0
   for minorFVar in minorFVars do
     if let some fvar' ← isInductiveHypothesis? motiveFVars minorFVar then
-      bif fvar == fvar'.getAppFn then
+      uif fvar == fvar'.getAppFn then
         return some idx
     idx := idx + 1
   return none
@@ -68,7 +68,7 @@ private partial def mkSizeOfMotives (motiveFVars : Array Expr) (k : Array Expr �
   loop 0 #[]
 where
   loop (i : Nat) (motives : Array Expr) : MetaM α := do
-    bif h : i <ᵇ motiveFVars.size then
+    uif h : i < motiveFVars.size then
       let type ← inferType motiveFVars[i]
       let motive ← forallTelescopeReducing type fun xs _ => do
         mkLambdaFVars xs <| mkConst ``Nat
@@ -79,9 +79,9 @@ where
 
 private partial def ignoreFieldType (type : Expr) : MetaM Bool := do
   let type ← whnf type
-  bif type.isForall then
+  uif type.isForall then
     -- TODO: add support for finite domains
-    bif type.isArrow && type.bindingDomain!.isConstOf ``Unit then
+    uif type.isArrow && type.bindingDomain!.isConstOf ``Unit then
       ignoreFieldType type.bindingBody!
     else
       return true
@@ -94,7 +94,7 @@ private def ignoreField (x : Expr) : MetaM Bool := do
 
 /-- See `ignoreField`. We have support for functions of the form `Unit → ...` -/
 private partial def mkSizeOfRecFieldFormIH (ih : Expr) : MetaM Expr := do
-  bif (← whnf (← inferType ih)).isForall then
+  uif (← whnf (← inferType ih)).isForall then
      mkSizeOfRecFieldFormIH (mkApp ih (mkConst ``Unit.unit))
   else
      return ih
@@ -104,7 +104,7 @@ private partial def mkSizeOfMinors (motiveFVars : Array Expr) (minorFVars : Arra
   loop 0 #[]
 where
   loop (i : Nat) (minors : Array Expr) : MetaM α := do
-    bif i <ᵇ minorFVars.size then
+    uif i < minorFVars.size then
       forallTelescopeReducing (← inferType minorFVars[i]!) fun xs _ => do
       forallBoundedTelescope (← inferType minorFVars'[i]!) xs.size fun xs' _ => do
         let mut minor ← mkNumeral (mkConst ``Nat) 1
@@ -236,7 +236,7 @@ mutual
   /-- Construct minor premise proof for `mkSizeOfAuxLemmaProof`. `ys` contains fields and inductive hypotheses for the minor premise. -/
   private partial def mkMinorProof (ys : Array Expr) (lhs rhs : Expr) : M Expr := do
     trace[Meta.sizeOf.minor] "{lhs} =?= {rhs}"
-    bif (← isDefEq lhs rhs) then
+    uif (← isDefEq lhs rhs) then
       mkEqRefl rhs
     else
       match (← whnfI lhs).natAdd?, (← whnfI rhs).natAdd? with
@@ -254,14 +254,14 @@ mutual
     - `mkSizeOfAuxLemma` application. This case happens when we have multiple levels of nesting
   -/
   private partial def mkMinorProofStep (ys : Array Expr) (lhs rhs : Expr) : M Expr := do
-    bif (← isDefEq lhs rhs) then
+    uif (← isDefEq lhs rhs) then
       mkEqRefl rhs
     else
       let lhs ← recToSizeOf lhs
       trace[Meta.sizeOf.minor.step] "{lhs} =?= {rhs}"
       let target ← mkEq lhs rhs
       for y in ys do
-        bif (← isDefEq (← inferType y) target) then
+        uif (← isDefEq (← inferType y) target) then
           return y
       mkSizeOfAuxLemma lhs rhs
 
@@ -281,7 +281,7 @@ mutual
       mkSizeOf (ys : Array Expr) : M Expr := do
       for sizeOfFn in (← read).sizeOfFns do
         let candidate := mkAppN (mkAppN (mkConst sizeOfFn sizeOfLevels) sizeOfBaseArgs) ys
-        bif (← isTypeCorrect candidate) then
+        uif (← isTypeCorrect candidate) then
           return candidate
       throwFailed
     let major := lhs.appArg!
@@ -312,7 +312,7 @@ mutual
               match target.eq? with
               | none => throwFailed
               | some (_, lhs, rhs) =>
-                bif (← isDefEq lhs rhs) then
+                uif (← isDefEq lhs rhs) then
                   mkLambdaFVars ys (← mkEqRefl rhs)
                 else
                   let lhs ← unfoldDefinition lhs -- Unfold `_sizeOf_<idx>`
@@ -356,7 +356,7 @@ mutual
         | Level.param n => return n
         | _ => throwFailed
       let thmName  := fName.appendAfter "_eq"
-      bif (← getEnv).contains thmName then
+      uif (← getEnv).contains thmName then
         -- Auxiliary lemma has already been defined
         return mkAppN (mkConst thmName us) lhs.getAppArgs
       else
@@ -391,7 +391,7 @@ end
 
 /-- Prove SizeOf spec lemma of the form `sizeOf <ctor-application> = 1 + sizeOf <field_1> + ... + sizeOf <field_n> -/
 partial def main (lhs rhs : Expr) : M Expr := do
-  bif (← isDefEq lhs rhs) then
+  uif (← isDefEq lhs rhs) then
     mkEqRefl rhs
   else
     /- Expand lhs and rhs to obtain `Nat.add` applications -/
@@ -401,7 +401,7 @@ partial def main (lhs rhs : Expr) : M Expr := do
 where
   loop (lhs rhs : Expr) : M Expr := do
     trace[Meta.sizeOf.loop] "{lhs} =?= {rhs}"
-    bif (← isDefEq lhs rhs) then
+    uif (← isDefEq lhs rhs) then
       mkEqRefl rhs
     else
       match (← whnfI lhs).natAdd?, (← whnfI rhs).natAdd? with
@@ -413,7 +413,7 @@ where
         throwUnexpected m!"expected 'Nat.add' application, lhs is {indentExpr lhs}\nrhs is{indentExpr rhs}"
 
   step (lhs rhs : Expr) : M Expr := do
-    bif (← isDefEq lhs rhs) then
+    uif (← isDefEq lhs rhs) then
       mkEqRefl rhs
     else
       let lhs ← recToSizeOf lhs
@@ -452,7 +452,7 @@ private def mkSizeOfSpecTheorem (indInfo : InductiveVal) (sizeOfFns : Array Name
       trace[Meta.sizeOf] "sizeOf spec theorem name: {thmName}"
       trace[Meta.sizeOf] "sizeOf spec theorem type: {thmType}"
       let thmValue ← withoutExporting do
-        let thmValue ← bif indInfo.isNested then
+        let thmValue ← uif indInfo.isNested then
           SizeOfSpecNested.main lhs rhs |>.run {
             indInfo, sizeOfFns, ctorName, params, localInsts, recMap
           }
@@ -493,7 +493,7 @@ def mkSizeOfInstances (typeName : Name) : MetaM Unit := do
   prependError m!"failed to generate `SizeOf` instance for `{.ofConstName typeName}`:" do
     let indInfo ← withoutExporting <| getConstInfoInduct typeName
     withExporting (isExporting := !isPrivateName typeName && !indInfo.ctors.any isPrivateName) do
-    bif (← getEnv).contains ``SizeOf && genSizeOf.get (← getOptions) && !(← isInductivePredicate typeName)
+    uif (← getEnv).contains ``SizeOf && genSizeOf.get (← getOptions) && !(← isInductivePredicate typeName)
        && (← isLargeEliminating typeName) then
       withTraceNode `Meta.sizeOf (fun _ => return m!"{typeName}") do
         unless indInfo.isUnsafe do
@@ -527,7 +527,7 @@ def mkSizeOfInstances (typeName : Name) : MetaM Unit := do
                       }
                     registerInstance instDeclName AttributeKind.global (eval_prio default)
                     enableRealizationsForConst instDeclName
-          bif genSizeOfSpec.get (← getOptions) then
+          uif genSizeOfSpec.get (← getOptions) then
             mkSizeOfSpecTheorems indInfo.all.toArray fns recMap
 
 builtin_initialize

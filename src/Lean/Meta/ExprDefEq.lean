@@ -141,9 +141,9 @@ def isAbstractedUnassignedMVar : Expr → MetaM Bool
   | .lam _ _ b _ => isAbstractedUnassignedMVar b
   | .app a _ => isAbstractedUnassignedMVar a
   | .mvar mvarId => do
-    bif (← mvarId.isReadOnlyOrSyntheticOpaque) then
+    uif (← mvarId.isReadOnlyOrSyntheticOpaque) then
       pure false
-    else bif (← mvarId.isAssigned) then
+    else uif (← mvarId.isAssigned) then
       pure false
     else
       pure true
@@ -169,14 +169,14 @@ def isAbstractedUnassignedMVar : Expr → MetaM Bool
 -/
 private def isDefEqEtaStruct (a b : Expr) : MetaM Bool := do
   matchConstCtor b.getAppFn (fun _ => return false) fun ctorVal us => do
-    bif (← useEtaStruct ctorVal.induct) then
+    uif (← useEtaStruct ctorVal.induct) then
       matchConstCtor a.getAppFn (fun _ => go ctorVal us) fun _ _ => return false
     else
       return false
 where
   /-- if `b` is a *partially* applied constructor, we compare eta-expanded versions of `a` and `b`.-/
   expandIfNeeded ctorVal k := do
-    bif ctorVal.numParams + ctorVal.numFields == b.getAppNumArgs then
+    uif ctorVal.numParams + ctorVal.numFields == b.getAppNumArgs then
       k a b
     else
       let bType ← inferType b
@@ -188,10 +188,10 @@ where
         k a' b'
 
   go ctorVal us := do
-    bif !isNonRecStructure (← getEnv) ctorVal.induct then
+    uif !isNonRecStructure (← getEnv) ctorVal.induct then
       trace[Meta.isDefEq.eta.struct] "failed, type is not a structure{indentExpr b}"
       return false
-    bif !(← isDefEq (← inferType a) (← inferType b)) then
+    uif !(← isDefEq (← inferType a) (← inferType b)) then
       return false
     checkpointDefEq do expandIfNeeded ctorVal fun a b => do
       let args := b.getAppArgs
@@ -199,7 +199,7 @@ where
       for h : i in ctorVal.numParams...args.size do
         let j := i - ctorVal.numParams
         let proj ← mkProjFn ctorVal us params j a
-        bif (← isProof proj) then
+        uif (← isProof proj) then
           unless ← isAbstractedUnassignedMVar args[i] do
             -- Skip expensive unification problem that is likely solved
             -- using proof irrelevance.  We already know that `proj` and
@@ -230,7 +230,7 @@ where
   The fresh free variable `x` also busts the cache.
   See https://github.com/leanprover/lean4/pull/2002 -/
 private def isDefEqEta (a b : Expr) : MetaM LBool := do
-  bif a.isLambda && !b.isLambda then
+  uif a.isLambda && !b.isLambda then
     let bType ← inferType b
     let bType ← whnfD bType
     match bType with
@@ -244,7 +244,7 @@ private def isDefEqEta (a b : Expr) : MetaM LBool := do
 /-- Support for reducing Nat basic operations. -/
 def isDefEqNat (s t : Expr) : MetaM LBool := do
   let isDefEq (s t) : MetaM LBool := toLBoolM <| Meta.isExprDefEqAux s t
-  bif s.hasFVar || s.hasMVar || t.hasFVar || t.hasMVar then
+  uif s.hasFVar || s.hasMVar || t.hasFVar || t.hasMVar then
     pure LBool.undef
   else
     let s? ← reduceNat? s
@@ -258,9 +258,9 @@ def isDefEqNat (s t : Expr) : MetaM LBool := do
 /-- Support for constraints of the form `("..." =?= String.ofList cs)` -/
 def isDefEqStringLit (s t : Expr) : MetaM LBool := do
   let isDefEq (s t) : MetaM LBool := toLBoolM <| Meta.isExprDefEqAux s t
-  bif s.isStringLit && t.isAppOf ``String.ofList then
+  uif s.isStringLit && t.isAppOf ``String.ofList then
     isDefEq (← s.toCtorIfLit) t
-  else bif s.isAppOf ``String.ofList && t.isStringLit then
+  else uif s.isAppOf ``String.ofList && t.isStringLit then
     isDefEq s (← t.toCtorIfLit)
   else
     pure LBool.undef
@@ -271,9 +271,9 @@ def isDefEqStringLit (s t : Expr) : MetaM LBool := do
 def isEtaUnassignedMVar (e : Expr) : MetaM Bool := do
   match e.etaExpanded? with
   | some (.mvar mvarId) =>
-    bif (← mvarId.isReadOnlyOrSyntheticOpaque) then
+    uif (← mvarId.isReadOnlyOrSyntheticOpaque) then
       pure false
-    else bif (← mvarId.isAssigned) then
+    else uif (← mvarId.isAssigned) then
       pure false
     else
       pure true
@@ -330,12 +330,12 @@ least `.implicit`, so both `[instance_reducible]` and `[implicit_reducible]` unf
 -/
 @[inline] def withImplicitConfig (x : MetaM α) : MetaM α := do
   let old ← getTransparency
-  bif old.lt .implicit then
+  uif old.lt .implicit then
     trace[Meta.isDefEq.transparency]
       "raising transparency {toString old} → implicit"
   withAtLeastTransparency .implicit do
     let cfg ← getConfig
-    bif cfg.beta && cfg.iota && cfg.zeta && cfg.zetaHave && cfg.zetaDelta && cfg.proj == .yesWithDelta then
+    uif cfg.beta && cfg.iota && cfg.zeta && cfg.zetaHave && cfg.zetaDelta && cfg.proj == .yesWithDelta then
       x
     else
       withConfig (fun cfg => { cfg with beta := true, iota := true, zeta := true, zetaHave := true, zetaDelta := true, proj := .yesWithDelta }) x
@@ -382,11 +382,11 @@ private def isDefEqArgsFirstPass
     let info := paramInfo[i]
     let a₁ := args₁[i]!
     let a₂ := args₂[i]!
-    bif info.dependsOnHigherOrderOutParam || info.higherOrderOutParam then
+    uif info.dependsOnHigherOrderOutParam || info.higherOrderOutParam then
       trace[Meta.isDefEq] "found messy {a₁} =?= {a₂}"
       postponedHO := postponedHO.push i
-    else bif info.isExplicit then
-      bif info.isProp then
+    else uif info.isExplicit then
+      uif info.isProp then
         unless ← isAbstractedUnassignedMVar a₁ <||> isAbstractedUnassignedMVar a₂ do
           -- Skip expensive unification problem that is likely solved
           -- using proof irrelevance.  We already know that `a₁` and
@@ -395,18 +395,18 @@ private def isDefEqArgsFirstPass
           continue
       unless (← Meta.isExprDefEqAux a₁ a₂) do
         return .failed
-    else bif (← isEtaUnassignedMVar a₁ <||> isEtaUnassignedMVar a₂) then
+    else uif (← isEtaUnassignedMVar a₁ <||> isEtaUnassignedMVar a₂) then
       -- Easy cases are still argument unifications at an implicit position, so they get the same
       -- transparency bump as the second pass.
       -- See `tests/elab/isDefEqArgsFirstPassBump.lean` for an example of when this is relevant.
-      bif respectTransparency && (info.binderInfo.isInstImplicit || implicitBump) then
+      uif respectTransparency && (info.binderInfo.isInstImplicit || implicitBump) then
         unless (← withImplicitConfig <| Meta.isExprDefEqAux a₁ a₂) do
           return .failed
       else
         unless (← Meta.isExprDefEqAux a₁ a₂) do
           return .failed
     else
-      bif info.isProp then
+      uif info.isProp then
         unless ← isAbstractedUnassignedMVar a₁ <||> isAbstractedUnassignedMVar a₂ do
           -- Skip expensive unification problem that is likely solved
           -- using proof irrelevance.  We already know that `a₁` and
@@ -424,7 +424,7 @@ transparency is higher.
 @[inline] def withExactInstancesConfig (x : MetaM α) : MetaM α := do
   withTransparency .instances do
     let cfg ← getConfig
-    bif cfg.beta && cfg.iota && cfg.zeta && cfg.zetaHave && cfg.zetaDelta && cfg.proj == .yesWithDelta then
+    uif cfg.beta && cfg.iota && cfg.zeta && cfg.zetaHave && cfg.zetaDelta && cfg.proj == .yesWithDelta then
       x
     else
       withConfig (fun cfg => { cfg with beta := true, iota := true, zeta := true, zetaHave := true, zetaDelta := true, proj := .yesWithDelta }) x
@@ -459,15 +459,15 @@ private partial def isDefEqArgs (f : Expr) (args₁ args₂ : Array Expr) : Meta
     be triggered for parameters explicitly marked for instance resolution, not merely
     for parameters whose types happen to be class types.
     -/
-    bif info.binderInfo.isInstImplicit then
+    uif info.binderInfo.isInstImplicit then
       discard <| trySynthPending a₁
       discard <| trySynthPending a₂
-    bif respectTransparency && (info.binderInfo.isInstImplicit || implicitBump) then
+    uif respectTransparency && (info.binderInfo.isInstImplicit || implicitBump) then
       -- Bump to `.implicit` so that `[instance_reducible]` and `[implicit_reducible]` definitions
       -- both unfold. For instance-implicit arguments, this is especially necessary for diamond
       -- resolution.
       unless (← withImplicitConfig <| Meta.isExprDefEqAux a₁ a₂) do return false
-    else bif respectTransparency then
+    else uif respectTransparency then
       unless (← Meta.isExprDefEqAux a₁ a₂) do return false
     else
       -- Old behavior
@@ -475,10 +475,10 @@ private partial def isDefEqArgs (f : Expr) (args₁ args₂ : Array Expr) : Meta
   for i in postponedHO do
     let a₁   := args₁[i]!
     let a₂   := args₂[i]!
-    bif respectTransparency && (finfo.paramInfo[i]!.isInstance || implicitBump) then
+    uif respectTransparency && (finfo.paramInfo[i]!.isInstance || implicitBump) then
       unless (← withImplicitConfig <| Meta.isExprDefEqAux a₁ a₂) do return false
     -- Old behavior
-    else bif !respectTransparency && finfo.paramInfo[i]!.isInstance then
+    else uif !respectTransparency && finfo.paramInfo[i]!.isInstance then
       unless (← withInferTypeConfig <| Meta.isExprDefEqAux a₁ a₂) do return false
     else
       unless (← Meta.isExprDefEqAux a₁ a₂) do return false
@@ -497,12 +497,12 @@ private partial def isDefEqArgs (f : Expr) (args₁ args₂ : Array Expr) : Meta
   may use local instances. -/
 @[specialize] partial def isDefEqBindingDomain (fvars : Array Expr) (ds₂ : Array Expr) (k : MetaM Bool) : MetaM Bool :=
   let rec loop (i : Nat) := do
-    bif h : i <ᵇ fvars.size then do
+    uif h : i < fvars.size then do
       let fvar := fvars[i]
       let fvarDecl ← getFVarLocalDecl fvar
       let fvarType := fvarDecl.type
       let d₂       := ds₂[i]!
-      bif (← Meta.isExprDefEqAux fvarType d₂) then
+      uif (← Meta.isExprDefEqAux fvarType d₂) then
         match (← isClass? fvarType) with
         | some className => withNewLocalInstance className fvar <| loop (i+1)
         | none           => loop (i+1)
@@ -608,12 +608,12 @@ answers, so `fun i : α => inst i` becomes `inst`, whose inferred type might hav
 binder type.
 -/
 private def checkTypesForInstanceTypedMVarAssignment (mvarType vType v : Expr) : MetaM Bool := do
-  bif (← withExactInstancesConfig <| Meta.isExprDefEqAux mvarType vType) then
+  uif (← withExactInstancesConfig <| Meta.isExprDefEqAux mvarType vType) then
     return true
 
   unless mvarType.isForall do return false
   let okAtHigherTransparency ←
-    bif (← respectTransparencyAtTypes) then
+    uif (← respectTransparencyAtTypes) then
       withImplicitConfig <| Meta.isExprDefEqAux mvarType vType
     else
       withInferTypeConfig <| Meta.isExprDefEqAux mvarType vType
@@ -635,23 +635,23 @@ fallback, assigning the metavariable would fail, surprising to the user.
 private def synthInstanceTypedMVarAndUnify (mvar v : Expr) : MetaM Bool := do
   checkpointDefEq do
     unless (← Meta.synthPending mvar.mvarId!) do
-      bif (← isDiagnosticsEnabled) then
+      uif (← isDiagnosticsEnabled) then
         trace[diagnostics] "failure when assigning instance metavariable with type{indentExpr (← inferType mvar)}\nthe candidate value{indentExpr v}\nwas rejected and the instance could not be synthesized directly.\nWorkaround: `set_option backward.isDefEq.respectTransparency.instanceSearchTypes false`"
       return false
     let inst ← instantiateMVars mvar
-    bif (← Meta.isExprDefEqAux v inst) then
+    uif (← Meta.isExprDefEqAux v inst) then
       return true
     else
-      bif (← isDiagnosticsEnabled) then
+      uif (← isDiagnosticsEnabled) then
         trace[diagnostics] "failure when assigning instance metavariable with type{indentExpr (← inferType mvar)}\nthe rejected candidate value{indentExpr v}\nis not definitionally equal to the synthesized instance{indentExpr inst}\nWorkaround: `set_option backward.isDefEq.respectTransparency.instanceSearchTypes false`"
       return false
 
 private def checkTypesAndAssign (mvar : Expr) (v : Expr) : MetaM Bool :=
   withTraceNodeBefore `Meta.isDefEq.assign.checkTypes (fun _ => return m!"({mvar} : {← inferType mvar}) := ({v} : {← inferType v})") do
-    bif !mvar.isMVar then
+    uif !mvar.isMVar then
       trace[Meta.isDefEq.assign.checkTypes] "metavariable expected"
       return false
-    bif (← mvar.mvarId!.isInstanceTyped) && (← getOptionFlags).respectTransparencyInstanceSearchTypes then
+    uif (← mvar.mvarId!.isInstanceTyped) && (← getOptionFlags).respectTransparencyInstanceSearchTypes then
       -- The value assigned to an instance-typed metavariable must have the expected type up to
       -- instance transparency: either the candidate value `v` already is such a value, or we
       -- synthesize the instance now and require the candidate to be definitionally equal to the
@@ -660,10 +660,10 @@ private def checkTypesAndAssign (mvar : Expr) (v : Expr) : MetaM Bool :=
       -- of metavariables contained in it.
       -- See `tests/elab/9077.lean` for examples that show the necessity of this behavior.
       let v ← instantiateMVars v
-      bif (← spineMVarsAdmissible v) then
+      uif (← spineMVarsAdmissible v) then
         let mvarType ← inferType mvar
         let vType ← inferType v
-        bif (← checkTypesForInstanceTypedMVarAssignment mvarType vType v) then
+        uif (← checkTypesForInstanceTypedMVarAssignment mvarType vType v) then
           mvar.mvarId!.assign v
           return true
       synthInstanceTypedMVarAndUnify mvar v
@@ -671,19 +671,19 @@ private def checkTypesAndAssign (mvar : Expr) (v : Expr) : MetaM Bool :=
       -- must check whether types are definitionally equal or not, before assigning and returning true
       let mvarType ← inferType mvar
       let vType ← inferType v
-      bif (← respectTransparencyAtTypes) then
+      uif (← respectTransparencyAtTypes) then
         withImplicitConfig do
-          bif (← Meta.isExprDefEqAux mvarType vType) then
+          uif (← Meta.isExprDefEqAux mvarType vType) then
             mvar.mvarId!.assign v
             return true
           else
-            bif (← isDiagnosticsEnabled) then withInferTypeConfig do
-              bif (← Meta.isExprDefEqAux mvarType vType) then
+            uif (← isDiagnosticsEnabled) then withInferTypeConfig do
+              uif (← Meta.isExprDefEqAux mvarType vType) then
                 trace[diagnostics] "failure when assigning metavariable with type{indentExpr mvarType}\nwhich is not definitionally equal to{indentExpr vType}\nwhen using `.implicit` transparency, but it is with `.default`.\nWorkaround: `set_option backward.isDefEq.respectTransparency.types false`"
             return false
       else
         withInferTypeConfig do
-          bif (← Meta.isExprDefEqAux mvarType vType) then
+          uif (← Meta.isExprDefEqAux mvarType vType) then
             mvar.mvarId!.assign v
             return true
           else
@@ -720,7 +720,7 @@ This method assumes that for any `xs[i]` and `xs[j]` where `i < j`, we have that
 where the index is the position in the local context.
 -/
 private partial def mkLambdaFVarsWithLetDeps (xs : Array Expr) (v : Expr) : MetaM (Option Expr) := do
-  bif !(← hasLetDeclsInBetween) then
+  uif !(← hasLetDeclsInBetween) then
     mkLambdaFVars xs v (etaReduce := true)
   else
     let ys ← addLetDeps
@@ -736,11 +736,11 @@ where
       for i in (start+1)...stop do
         match lctx.getAt? i with
         | some localDecl =>
-          bif localDecl.isLet then
+          uif localDecl.isLet then
             return true
         | _ => pure ()
       return false
-    bif xs.size ≤ᵇ 1 then
+    uif xs.size ≤ 1 then
       return false
     else
       return check (← getLCtx)
@@ -759,7 +759,7 @@ where
         | .proj _ _ b        => visit b
         | .fvar fvarId       =>
           let localDecl ← fvarId.getDecl
-          bif localDecl.isLet && localDecl.index >ᵇ (← read) then
+          uif localDecl.isLet ∧ localDecl.index > (← read) then
             modify fun s => s.insert localDecl.fvarId
         | _ => pure ()
     visit (← instantiateMVars e) |>.run
@@ -773,13 +773,13 @@ where
   collectLetDepsAux : Nat → ReaderT Nat (StateRefT FVarIdHashSet MetaM) Unit
     | 0   => return ()
     | i+1 => do
-      bif i+1 == (← read) then
+      uif i+1 == (← read) then
         return ()
       else
         match (← getLCtx).getAt? (i+1) with
         | none => collectLetDepsAux i
         | some localDecl =>
-          bif (← get).contains localDecl.fvarId then
+          uif (← get).contains localDecl.fvarId then
             collectLetDeclsFrom localDecl.type
             match localDecl.value? with
             | some val => collectLetDeclsFrom val
@@ -808,7 +808,7 @@ where
       match lctx.getAt? i with
       | none => pure ()
       | some localDecl =>
-        bif s.contains localDecl.fvarId then
+        uif s.contains localDecl.fvarId then
           ys := ys.push localDecl.toExpr
     return ys
 
@@ -1024,7 +1024,7 @@ mutual
   partial def checkFVar (fvar : Expr) : CheckAssignmentM Expr := do
     let ctxMeta ← readThe Meta.Context
     let ctx ← read
-    bif ctx.mvarDecl.lctx.containsFVar fvar then
+    uif ctx.mvarDecl.lctx.containsFVar fvar then
       pure fvar
     else
       let lctx := ctxMeta.lctx
@@ -1045,7 +1045,7 @@ mutual
       -/
       | some (.ldecl (nondep := false) (value := v) ..) => check v
       | _ =>
-        bif ctx.fvars.contains fvar then pure fvar
+        uif ctx.fvars.contains fvar then pure fvar
         else
           traceM `Meta.isDefEq.assign.outOfScopeFVar do addAssignmentInfo fvar
           throwOutOfScopeFVar
@@ -1053,25 +1053,25 @@ mutual
   partial def checkMVar (mvar : Expr) : CheckAssignmentM Expr := do
     let mvarId := mvar.mvarId!
     let ctx  ← read
-    bif mvarId == ctx.mvarId then
+    uif mvarId == ctx.mvarId then
       traceM `Meta.isDefEq.assign.occursCheck <| addAssignmentInfo "occurs check failed"
       throwCheckAssignmentFailure
     if let some v ← getExprMVarAssignment? mvarId then
       return (← check v)
     let some mvarDecl ← mvarId.findDecl?
       | throwUnknownMVar mvarId
-    bif ctx.hasCtxLocals then
+    uif ctx.hasCtxLocals then
       throwCheckAssignmentFailure -- It is not a pattern, then we fail and fall back to FO unification
     if let some d ← getDelayedMVarAssignment? mvarId then
       -- we must perform occurs-check at `d.mvarIdPending`
       unless (← occursCheck ctx.mvarId (mkMVar d.mvarIdPending)) do
         traceM `Meta.isDefEq.assign.occursCheck <| addAssignmentInfo "occurs check failed"
         throwCheckAssignmentFailure
-    bif mvarDecl.lctx.isSubPrefixOf ctx.mvarDecl.lctx ctx.fvars then
+    uif mvarDecl.lctx.isSubPrefixOf ctx.mvarDecl.lctx ctx.fvars then
       /- The local context of `mvar` - free variables being abstracted is a subprefix of the metavariable being assigned.
          We "subtract" variables being abstracted because we use `elimMVarDeps` -/
       return mvar
-    bif mvarDecl.depth != (← getMCtx).depth || mvarDecl.kind.isSyntheticOpaque then
+    uif mvarDecl.depth != (← getMCtx).depth || mvarDecl.kind.isSyntheticOpaque then
       traceM `Meta.isDefEq.assign.readOnlyMVarWithBiggerLCtx <| addAssignmentInfo (mkMVar mvarId)
       throwCheckAssignmentFailure
     let cfg ← getConfig
@@ -1091,10 +1091,10 @@ mutual
        we must also erase it.
     -/
     let toErase ← mvarDecl.lctx.foldlM (init := #[]) fun toErase localDecl => do
-      bif ctx.mvarDecl.lctx.contains localDecl.fvarId then
+      uif ctx.mvarDecl.lctx.contains localDecl.fvarId then
         return toErase
-      else bif ctx.fvars.any fun fvar => fvar.fvarId! == localDecl.fvarId then
-        bif (← findLocalDeclDependsOn localDecl fun fvarId => toErase.contains fvarId) then
+      else uif ctx.fvars.any fun fvar => fvar.fvarId! == localDecl.fvarId then
+        uif (← findLocalDeclDependsOn localDecl fun fvarId => toErase.contains fvarId) then
           -- localDecl depends on a variable that will be erased. So, we must add it to `toErase` too
           return toErase.push localDecl.fvarId
         else
@@ -1119,7 +1119,7 @@ mutual
   partial def assignToConstFun (mvar : Expr) (numArgs : Nat) (newMVar : Expr) : MetaM Bool := do
     let mvarType ← inferType mvar
     forallBoundedTelescope mvarType numArgs fun xs _ => do
-      bif xs.size != numArgs then return false
+      uif xs.size != numArgs then return false
       let some v ← mkLambdaFVarsWithLetDeps xs newMVar | return false
       let some v ← checkAssignmentAux mvar.mvarId! #[] false v | return false
       checkTypesAndAssign mvar v
@@ -1131,16 +1131,16 @@ mutual
   partial def checkApp (e : Expr) : CheckAssignmentM Expr :=
     e.withApp fun f args => do
       let cfg ← getConfig
-      bif f.isMVar && cfg.ctxApprox && args.all Expr.isFVar then
+      uif f.isMVar && cfg.ctxApprox && args.all Expr.isFVar then
         let f ← check f
         catchInternalId outOfScopeExceptionId
           (do
             let args ← args.mapM check
             return mkAppN f args)
           (fun ex => do
-            bif !f.isMVar then
+            uif !f.isMVar then
               throw ex
-            bif (← f.mvarId!.isDelayedAssigned) then
+            uif (← f.mvarId!.isDelayedAssigned) then
               throw ex
             let eType ← inferType e
             let mvarType ← check eType
@@ -1148,7 +1148,7 @@ mutual
                Note that `mvarType` may be different from `eType`. -/
             let ctx ← read
             let newMVar ← mkAuxMVar ctx.mvarDecl.lctx ctx.mvarDecl.localInstances mvarType
-            bif (← assignToConstFun f args.size newMVar) then
+            uif (← assignToConstFun f args.size newMVar) then
               pure newMVar
             else
               throw ex)
@@ -1158,7 +1158,7 @@ mutual
         return mkAppN f args
 
   partial def check (e : Expr) : CheckAssignmentM Expr := do
-    bif !e.hasExprMVar && !e.hasFVar then
+    uif !e.hasExprMVar && !e.hasFVar then
       return e
     else checkCache e fun _ =>
       match e with
@@ -1188,7 +1188,7 @@ mutual
             ```
             still fails because we do reduce the rhs to `0`. We assume this is not an issue in practice.
             -/
-            bif (id == outOfScopeExceptionId || id == checkAssignmentExceptionId) && e.isHeadBetaTarget then
+            uif (id == outOfScopeExceptionId || id == checkAssignmentExceptionId) && e.isHeadBetaTarget then
               checkApp e.headBeta
             else
               throw ex
@@ -1327,14 +1327,14 @@ def checkAssignment (mvarId : MVarId) (fvars : Array Expr) (v : Expr) : MetaM (O
   for fvar in fvars do
     unless (← occursCheck mvarId (← inferType fvar)) do
       return none
-  bif !v.hasExprMVar && !v.hasFVar then
+  uif !v.hasExprMVar && !v.hasFVar then
     pure (some v)
   else
     let mvarDecl ← mvarId.getDecl
     let hasCtxLocals := fvars.any fun fvar => mvarDecl.lctx.containsFVar fvar
     let ctx ← read
     let mctx ← getMCtx
-    let v ← bif CheckAssignmentQuick.check hasCtxLocals mctx ctx.lctx mvarDecl mvarId fvars v then
+    let v ← uif CheckAssignmentQuick.check hasCtxLocals mctx ctx.lctx mvarDecl mvarId fvars v then
       pure v
     else if let some v ← CheckAssignment.checkAssignmentAux mvarId fvars hasCtxLocals (← instantiateMVars v) then
       pure v
@@ -1358,7 +1358,7 @@ private def processAssignmentFOApproxAux (mvar : Expr) (args : Array Expr) (v : 
   match v with
   | .mdata _ e => processAssignmentFOApproxAux mvar args e
   | .app f a   =>
-    bif args.isEmpty then
+    uif args.isEmpty then
       pure false
     else
       Meta.isExprDefEqAux args.back! a <&&> Meta.isExprDefEqAux (mkAppRange mvar 0 (args.size - 1) args) f
@@ -1383,12 +1383,12 @@ private def processAssignmentFOApproxAux (mvar : Expr) (args : Array Expr) (v : 
 private partial def processAssignmentFOApprox (mvar : Expr) (args : Array Expr) (v : Expr) : MetaM Bool :=
   let rec loop (v : Expr) := do
     let cfg ← getConfig
-    bif !cfg.foApprox then
+    uif !cfg.foApprox then
       pure false
     else
       trace[Meta.isDefEq.foApprox] "{mvar} {args} := {v}"
       let v := v.headBeta
-      bif (← checkpointDefEq <| processAssignmentFOApproxAux mvar args v) then
+      uif (← checkpointDefEq <| processAssignmentFOApproxAux mvar args v) then
         pure true
       else
         match (← unfoldDefinition? v) with
@@ -1408,7 +1408,7 @@ private partial def simpAssignmentArgAux (e : Expr) : MetaM Expr := do
    We apply it to each `aᵢ`. It instantiates assigned metavariables if `aᵢ` is of the form `f[?n] b₁ ... bₘ`,
    and then removes metadata, and zeta-expand let-decls. -/
 private def simpAssignmentArg (arg : Expr) : MetaM Expr := do
-  let arg ← bif arg.getAppFn.hasExprMVar then instantiateMVars arg else pure arg
+  let arg ← uif arg.getAppFn.hasExprMVar then instantiateMVars arg else pure arg
   simpAssignmentArgAux arg
 
 /-- Assign `mvar := fun a_1 ... a_{numArgs} => v`.
@@ -1416,7 +1416,7 @@ private def simpAssignmentArg (arg : Expr) : MetaM Expr := do
 private def assignConst (mvar : Expr) (numArgs : Nat) (v : Expr) : MetaM Bool := do
   let mvarDecl ← mvar.mvarId!.getDecl
   forallBoundedTelescope mvarDecl.type numArgs fun xs _ => do
-    bif xs.size != numArgs then
+    uif xs.size != numArgs then
       pure false
     else
       let some v ← mkLambdaFVarsWithLetDeps xs v | pure false
@@ -1448,23 +1448,23 @@ private partial def processConstApprox (mvar : Expr) (args : Array Expr) (patter
   let mvarId := mvar.mvarId!
   let mvarDecl ← mvarId.getDecl
   let numArgs := args.size
-  bif mvarDecl.numScopeArgs != numArgs && !cfg.constApprox then
+  uif mvarDecl.numScopeArgs != numArgs && !cfg.constApprox then
     return false
-  else bif patternVarPrefix == 0 then
+  else uif patternVarPrefix == 0 then
     defaultCase
   else
     let argsPrefix : Array Expr := args[*...patternVarPrefix]
     let type ← instantiateForall mvarDecl.type argsPrefix
     let suffixSize := numArgs - argsPrefix.size
     forallBoundedTelescope type suffixSize fun xs _ => do
-      bif xs.size != suffixSize then
+      uif xs.size != suffixSize then
         defaultCase
       else
         let some v ← mkLambdaFVarsWithLetDeps xs v | defaultCase
         let rec go (argsPrefix : Array Expr) (v : Expr) : MetaM Bool := do
           trace[Meta.isDefEq] "processConstApprox.go {mvar} {argsPrefix} := {v}"
           let rec cont : MetaM Bool := do
-            bif argsPrefix.isEmpty then
+            uif argsPrefix.isEmpty then
               defaultCase
             else
               let some v ← mkLambdaFVarsWithLetDeps #[argsPrefix.back!] v | defaultCase
@@ -1473,7 +1473,7 @@ private partial def processConstApprox (mvar : Expr) (args : Array Expr) (patter
           | none      => cont
           | some vNew =>
             let some vNew ← mkLambdaFVarsWithLetDeps argsPrefix vNew | cont
-            bif argsPrefix.any (fun arg => mvarDecl.lctx.containsFVar arg) then
+            uif argsPrefix.any (fun arg => mvarDecl.lctx.containsFVar arg) then
               /- We need to type check `vNew` because abstraction using `mkLambdaFVars` may have produced
                  a type incorrect term. See discussion at A2 -/
               (isTypeCorrect vNew <&&> checkTypesAndAssign mvar vNew) <||> cont
@@ -1491,15 +1491,15 @@ private partial def processAssignment (mvarApp : Expr) (v : Expr) : MetaM Bool :
       let cfg ← getConfig
       let useFOApprox (args : Array Expr) : MetaM Bool :=
         processAssignmentFOApprox mvar args v <||> processConstApprox mvar args i v
-      bif h : i <ᵇ args.size then
+      uif h : i < args.size then
         let arg := args[i]
         let arg ← simpAssignmentArg arg
         let args := args.set i arg
         match arg with
         | .fvar fvarId =>
-          bif args[*...i].any fun prevArg => prevArg == arg then
+          uif args[*...i].any fun prevArg => prevArg == arg then
             useFOApprox args
-          else bif mvarDecl.lctx.contains fvarId && !cfg.quasiPatternApprox then
+          else uif mvarDecl.lctx.contains fvarId && !cfg.quasiPatternApprox then
             useFOApprox args
           else
             process (i+1) args v
@@ -1507,7 +1507,7 @@ private partial def processAssignment (mvarApp : Expr) (v : Expr) : MetaM Bool :
           useFOApprox args
       else
         let v ← instantiateMVars v -- enforce A4
-        bif v.getAppFn == mvar then
+        uif v.getAppFn == mvar then
           -- using A6
           useFOApprox args
         else
@@ -1517,10 +1517,10 @@ private partial def processAssignment (mvarApp : Expr) (v : Expr) : MetaM Bool :
           | some v => do
             trace[Meta.isDefEq.assign.beforeMkLambda] "{mvar} {args} := {v}"
             let some v ← mkLambdaFVarsWithLetDeps args v | return false
-            bif args.any (fun arg => mvarDecl.lctx.containsFVar arg) then
+            uif args.any (fun arg => mvarDecl.lctx.containsFVar arg) then
               /- We need to type check `v` because abstraction using `mkLambdaFVars` may have produced
                  a type incorrect term. See discussion at A2 -/
-              bif (← isTypeCorrect v) then
+              uif (← isTypeCorrect v) then
                 checkTypesAndAssign mvar v
               else
                 trace[Meta.isDefEq.assign.typeError] "{mvar} := {v}"
@@ -1538,12 +1538,12 @@ private partial def processAssignment (mvarApp : Expr) (v : Expr) : MetaM Bool :
   ```
 -/
 private def processAssignment' (mvarApp : Expr) (v : Expr) : MetaM Bool := do
-  bif (← processAssignment mvarApp v) then
+  uif (← processAssignment mvarApp v) then
     return true
   else
     let vNew ← whnf v
-    bif vNew != v then
-      bif mvarApp == vNew then
+    uif vNew != v then
+      uif mvarApp == vNew then
         return true
       else
         processAssignment mvarApp vNew
@@ -1578,7 +1578,7 @@ private def isDefEqLeftRight (fn : Name) (t s : Expr) : MetaM LBool := do
 private def isNonTrivialRegular (info : DefinitionVal) : MetaM Bool := do
   match info.hints with
   | .regular d =>
-    bif d >ᵇ 2 then
+    uif d > 2 then
       -- If definition depth is greater than 2, we claim it is not a trivial definition
       return true
     -- After consuming the lambda expressions, we consider a regular definition non-trivial if it is not "simple".
@@ -1713,7 +1713,7 @@ private def unfoldBothDefEq (fn : Name) (t s : Expr) : MetaM LBool := do
     unfold s (pure .undef) fun s =>
       isDefEqLeftRight fn t s
   | .app _ _,     .app _ _     =>
-    bif (← tryHeuristic t s) then
+    uif (← tryHeuristic t s) then
       return .true
     else
       unfold t
@@ -1738,13 +1738,13 @@ private def unfoldComparingHeadsDefEq (tInfo sInfo : ConstantInfo) (t s : Expr) 
       (pure LBool.undef) -- `t` and `s` failed to be unfolded
       (fun s => isDefEqRight sInfo.name t s))
     (fun tNew =>
-      bif sameHeadSymbol tNew s then
+      uif sameHeadSymbol tNew s then
         isDefEqLeft tInfo.name tNew s
       else
         unfold s
           (isDefEqLeft tInfo.name tNew s)
           (fun sNew =>
-            bif sameHeadSymbol t sNew then
+            uif sameHeadSymbol t sNew then
               isDefEqRight sInfo.name t sNew
             else
               isDefEqLeftRight tInfo.name tNew sNew))
@@ -1755,12 +1755,12 @@ private def unfoldComparingHeadsDefEq (tInfo sInfo : ConstantInfo) (t s : Expr) 
 
     Auxiliary method for isDefEqDelta -/
 private def unfoldDefEq (tInfo sInfo : ConstantInfo) (t s : Expr) : MetaM LBool :=
-  bif !t.hasExprMVar && !s.hasExprMVar then
+  uif !t.hasExprMVar && !s.hasExprMVar then
     /- If `t` and `s` do not contain metavariables,
        we simulate strategy used in the kernel. -/
-    bif tInfo.hints.lt sInfo.hints then
+    uif tInfo.hints.lt sInfo.hints then
       unfold t (unfoldComparingHeadsDefEq tInfo sInfo t s) fun t => isDefEqLeft tInfo.name t s
-    else bif sInfo.hints.lt tInfo.hints then
+    else uif sInfo.hints.lt tInfo.hints then
       unfold s (unfoldComparingHeadsDefEq tInfo sInfo t s) fun s => isDefEqRight sInfo.name t s
     else
       unfoldComparingHeadsDefEq tInfo sInfo t s
@@ -1776,14 +1776,14 @@ private def unfoldDefEq (tInfo sInfo : ConstantInfo) (t s : Expr) : MetaM LBool 
 
   Auxiliary method for isDefEqDelta -/
 private def unfoldReducibleDefEq (tInfo sInfo : ConstantInfo) (t s : Expr) : MetaM LBool := do
-  bif (← shouldReduceReducibleOnly) then
+  uif (← shouldReduceReducibleOnly) then
     unfoldDefEq tInfo sInfo t s
   else
     let tReducible ← isReducible tInfo.name
     let sReducible ← isReducible sInfo.name
-    bif tReducible && !sReducible then
+    uif tReducible && !sReducible then
       unfold t (unfoldDefEq tInfo sInfo t s) fun t => isDefEqLeft tInfo.name t s
-    else bif !tReducible && sReducible then
+    else uif !tReducible && sReducible then
       unfold s (unfoldDefEq tInfo sInfo t s) fun s => isDefEqRight sInfo.name t s
     else
       unfoldDefEq tInfo sInfo t s
@@ -1829,7 +1829,7 @@ where
     let some { fromClass := true, .. } := projInfo? | return none -- It is not a class projection
     let some e ← unfoldDefinition? e | return none
     let e ← whnfCore e
-    bif e.isAppOf declName then return some e
+    uif e.isAppOf declName then return some e
     let .const name _ := e.getAppFn | return none
     -- Keep going if new `e` is also a class projection
     packedInstanceOf? (← getProjectionFnInfo? name) e declName
@@ -1863,7 +1863,7 @@ private def isDefEqDelta (t s : Expr) : MetaM LBool := do
   | some tInfo, none       => unfold t (pure LBool.undef) fun t => isDefEqLeft tInfo.name t s
   | none,       some sInfo => unfold s (pure LBool.undef) fun s => isDefEqRight sInfo.name t s
   | some tInfo, some sInfo =>
-    bif tInfo.name == sInfo.name then
+    uif tInfo.name == sInfo.name then
       unfoldBothDefEq tInfo.name t s
     else
       unfoldNonProjFnDefEq tInfo sInfo t s
@@ -1874,10 +1874,10 @@ private def isAssigned : Expr → MetaM Bool
 
 private def expandDelayedAssigned? (t : Expr) : MetaM (Option Expr) := do
   let tFn := t.getAppFn
-  bif !tFn.isMVar then return none
+  uif !tFn.isMVar then return none
   let some { fvars, mvarIdPending } ← getDelayedMVarAssignment? tFn.mvarId! | return none
   let tNew ← instantiateMVars t
-  bif tNew != t then return some tNew
+  uif tNew != t then return some tNew
   /-
     If `assignSyntheticOpaque` is true, we must follow the delayed assignment.
     Recall a delayed assignment `mvarId [xs] := mvarIdPending` is morally an assignment
@@ -1898,7 +1898,7 @@ private def expandDelayedAssigned? (t : Expr) : MetaM (Option Expr) := do
   -/
   unless (← getConfig).assignSyntheticOpaque do return none
   let tArgs := t.getAppArgs
-  bif tArgs.size <ᵇ fvars.size then return none
+  uif tArgs.size < fvars.size then return none
   return some (mkAppRange (mkMVar mvarIdPending) fvars.size tArgs.size tArgs)
 
 private def isAssignable : Expr → MetaM Bool
@@ -1931,13 +1931,13 @@ private def etaEq (t s : Expr) : Bool :=
   performance foot-gun. Users can use the backward compatibility flag to restore the old behavior.
 -/
 private def withProofIrrelTransparency (k : MetaM α) : MetaM α := do
-  bif (← getOptionFlags).respectTransparency then
+  uif (← getOptionFlags).respectTransparency then
     k
   else
     withInferTypeConfig k
 
 private def isDefEqProofIrrel (t s : Expr) : MetaM LBool := do
-  bif (← getConfig).proofIrrelevance then
+  uif (← getConfig).proofIrrelevance then
     match (← isProofQuick t) with
     | LBool.false =>
       pure LBool.undef
@@ -1947,7 +1947,7 @@ private def isDefEqProofIrrel (t s : Expr) : MetaM LBool := do
       toLBoolM <| withProofIrrelTransparency <| Meta.isExprDefEqAux tType sType
     | LBool.undef =>
       let tType ← inferType t
-      bif (← isProp tType) then
+      uif (← isProp tType) then
         let sType ← inferType s
         toLBoolM <| withProofIrrelTransparency <| Meta.isExprDefEqAux tType sType
       else
@@ -1960,17 +1960,17 @@ private def isDefEqProofIrrel (t s : Expr) : MetaM LBool := do
    - Otherwise, try to assign `?m` to a constant function of the form `fun x_1 ... x_n => ?n`
      where `?n` is a fresh metavariable. See `assignConst`. -/
 private def isDefEqMVarSelf (mvar : Expr) (args₁ args₂ : Array Expr) : MetaM Bool := do
-  bif args₁.size != args₂.size then
+  uif args₁.size != args₂.size then
     pure false
-  else bif (← isDefEqArgs mvar args₁ args₂) then
+  else uif (← isDefEqArgs mvar args₁ args₂) then
     pure true
-  else bif !(← isAssignable mvar) then
+  else uif !(← isAssignable mvar) then
     pure false
   else
     let cfg ← getConfig
     let mvarId := mvar.mvarId!
     let mvarDecl ← mvarId.getDecl
-    bif mvarDecl.numScopeArgs == args₁.size || cfg.constApprox then
+    uif mvarDecl.numScopeArgs == args₁.size || cfg.constApprox then
       let type ← inferType (mkAppN mvar args₁)
       let auxMVar ← mkAuxMVar mvarDecl.lctx mvarDecl.localInstances type
       assignConst mvar args₁.size auxMVar
@@ -1984,7 +1984,7 @@ Consumes unused lets/haves, depending on the current configuration.
 -/
 private partial def consumeLetIfZeta (e : Expr) : MetaM Expr := do
   let cfg ← getConfig
-  bif cfg.zeta || cfg.zetaUnused then
+  uif cfg.zeta || cfg.zetaUnused then
     return consumeUnusedLet e (consumeNondep := cfg.zetaUnused || cfg.zetaHave)
   else
     return e
@@ -1997,14 +1997,14 @@ private partial def isDefEqQuick (t s : Expr) : MetaM LBool := do
   match t, s with
   | .lit  l₁,      .lit l₂     => return (l₁ == l₂).toLBool
   | .sort u,       .sort v     => toLBoolM <| isLevelDefEqAux u v
-  | .lam ..,       .lam ..     => bif t == s then pure LBool.true else toLBoolM <| isDefEqBinding t s
-  | .forallE ..,   .forallE .. => bif t == s then pure LBool.true else toLBoolM <| isDefEqBinding t s
+  | .lam ..,       .lam ..     => uif t == s then pure LBool.true else toLBoolM <| isDefEqBinding t s
+  | .forallE ..,   .forallE .. => uif t == s then pure LBool.true else toLBoolM <| isDefEqBinding t s
   -- | .mdata _ t _, s               => isDefEqQuick t s
   -- | t,            .mdata _ s _    => isDefEqQuick t s
   | .fvar fvarId₁, .fvar fvarId₂ => do
-    bif fvarId₁ == fvarId₂ then
+    uif fvarId₁ == fvarId₂ then
       return .true
-    else bif (← fvarId₁.isLetVar <||> fvarId₂.isLetVar) then
+    else uif (← fvarId₁.isLetVar <||> fvarId₂.isLetVar) then
       return .undef
     else
       -- If `t` and `s` are not proofs or let-variables, we still return `.undef` and let other rules (e.g., unit-like) kick in.
@@ -2040,19 +2040,19 @@ private partial def isDefEqQuickOther (t s : Expr) : MetaM LBool := do
     isDefEqQuick t s
   else if let some s := patternAnnotation? s then
     isDefEqQuick t s
-  else bif t == s then
+  else uif t == s then
     return LBool.true
-  else bif etaEq t s || etaEq s t then
+  else uif etaEq t s || etaEq s t then
     return LBool.true  -- t =?= (fun xs => t xs)
   else
     let tFn := t.getAppFn
     let sFn := s.getAppFn
-    bif !tFn.isMVar && !sFn.isMVar then
+    uif !tFn.isMVar && !sFn.isMVar then
       return LBool.undef
-    else bif (← isAssigned tFn) then
+    else uif (← isAssigned tFn) then
       let t ← instantiateMVars t
       isDefEqQuick t s
-    else bif (← isAssigned sFn) then
+    else uif (← isAssigned sFn) then
       let s ← instantiateMVars s
       isDefEqQuick t s
     else if let some t ← expandDelayedAssigned? t then
@@ -2068,18 +2068,18 @@ private partial def isDefEqQuickOther (t s : Expr) : MetaM LBool := do
 --    else if (← isSynthetic sFn <&&> trySynthPending sFn) then
 --      let s ← instantiateMVars s
 --      isDefEqQuick t s
-    else bif tFn.isMVar && sFn.isMVar && tFn == sFn then
+    else uif tFn.isMVar && sFn.isMVar && tFn == sFn then
       Bool.toLBool <$> isDefEqMVarSelf tFn t.getAppArgs s.getAppArgs
     else
       let tAssign? ← isAssignable tFn
       let sAssign? ← isAssignable sFn
-      let assignableMsg (b : Bool) := bif b then "[assignable]" else "[nonassignable]"
+      let assignableMsg (b : Bool) := uif b then "[assignable]" else "[nonassignable]"
       trace[Meta.isDefEq] "{t} {assignableMsg tAssign?} =?= {s} {assignableMsg sAssign?}"
-      bif tAssign? && !sAssign? then
+      uif tAssign? && !sAssign? then
         toLBoolM <| processAssignment' t s
-      else bif !tAssign? && sAssign? then
+      else uif !tAssign? && sAssign? then
         toLBoolM <| processAssignment' s t
-      else bif !tAssign? && !sAssign? then
+      else uif !tAssign? && !sAssign? then
         /- Trying to unify `?m ... =?= ?n ...` where both `?m` and `?n` cannot be assigned.
            This can happen when both of them are `syntheticOpaque` (e.g., metavars associated with tactics), or a metavariables
            from previous levels.
@@ -2124,7 +2124,7 @@ private partial def isDefEqQuickOther (t s : Expr) : MetaM LBool := do
         | LBool.false => return LBool.false
         | _ =>
           let cfg ← getConfig
-          bif cfg.isDefEqStuckEx then do
+          uif cfg.isDefEqStuckEx then do
             trace[Meta.isDefEq.stuck] "{t} =?= {s}"
             Meta.throwIsDefEqStuck
           else
@@ -2134,15 +2134,15 @@ private partial def isDefEqQuickOther (t s : Expr) : MetaM LBool := do
 
 /-- Both `t` and `s` are terms of the form `?m ...` -/
 private partial def isDefEqQuickMVarMVar (t s : Expr) : MetaM LBool := do
-  bif s.isMVar && !t.isMVar then
+  uif s.isMVar && !t.isMVar then
      /- Solve `?m t =?= ?n` by trying first `?n := ?m t`.
         Reason: this assignment is precise. -/
-     bif (← checkpointDefEq (processAssignment s t)) then
+     uif (← checkpointDefEq (processAssignment s t)) then
        return LBool.true
      else
        toLBoolM <| processAssignment t s
   else
-     bif (← checkpointDefEq (processAssignment t s)) then
+     uif (← checkpointDefEq (processAssignment t s)) then
        return LBool.true
      else
        toLBoolM <| processAssignment s t
@@ -2159,11 +2159,11 @@ end
   match (← getStuckMVar? e) with
   | some mvarId =>
     trace[Meta.isDefEq.stuckMVar] "found stuck MVar {mkMVar mvarId} : {← inferType (mkMVar mvarId)}"
-    bif (← Meta.synthPending mvarId) then
+    uif (← Meta.synthPending mvarId) then
       let e ← instantiateMVars e
       successK e
     else
-      bif (← getConfig).isDefEqStuckEx then
+      uif (← getConfig).isDefEqStuckEx then
         /-
         When `isDefEqStuckEx := true` and `mvar` was created in a previous level,
         we should throw an exception. See issue #2736 for a situation where this can happen.
@@ -2187,7 +2187,7 @@ end
         was **not** created by the type class resolution procedure.
         -/
         let mvarDecl ← mvarId.getDecl
-        bif mvarDecl.depth <ᵇ (← getMCtx).depth then
+        uif mvarDecl.depth < (← getMCtx).depth then
           Meta.throwIsDefEqStuck
       failK
   | none   => failK
@@ -2226,8 +2226,8 @@ private def isDefEqDeltaStep (t s : Expr) : MetaM DeltaStepResult := do
     | .eq =>
       -- Remark: if `t` and `s` are both some `f`-application, we use `tryHeuristic`
       -- if `f` is not a projection. The projection case generates a performance regression.
-      bif tInfo.name == sInfo.name then
-        bif t.isApp && s.isApp && (← tryHeuristic t s) then
+      uif tInfo.name == sInfo.name then
+        uif t.isApp && s.isApp && (← tryHeuristic t s) then
           return .eq
         else
           unfoldBoth t s
@@ -2281,13 +2281,13 @@ private def isDefEqProj : Expr → Expr → MetaM Bool
        for instance-implicit parameters. -/
     let fromClass := isClass (← getEnv) m
     let isDefEqStructArgs (x : MetaM Bool) : MetaM Bool :=
-      bif fromClass then withImplicitConfig x else x
-    bif (← read).inTypeClassResolution then
+      uif fromClass then withImplicitConfig x else x
+    uif (← read).inTypeClassResolution then
       -- See comment at `inTypeClassResolution`
       pure (i == j && m == n) <&&> isDefEqStructArgs (Meta.isExprDefEqAux t s)
-    else bif !(← getOptionFlags).lazyProjDelta then
+    else uif !(← getOptionFlags).lazyProjDelta then
       pure (i == j && m == n) <&&> isDefEqStructArgs (Meta.isExprDefEqAux t s)
-    else bif i == j && m == n then
+    else uif i == j && m == n then
       isDefEqStructArgs (isDefEqProjDelta t s i)
     else
       return false
@@ -2297,7 +2297,7 @@ private def isDefEqProj : Expr → Expr → MetaM Bool
 where
   /-- If `structName` is a structure with a single field and `(?m ...).1 =?= v`, then solve constraint as `?m ... =?= ⟨v⟩` -/
   isDefEqSingleton (structName : Name) (s : Expr) (v : Expr) : MetaM Bool := do
-    bif isClass (← getEnv) structName then
+    uif isClass (← getEnv) structName then
       /-
       We disable this feature if `structName` is a class. See issue #2011.
       The example at issue #2011, the following weird
@@ -2316,17 +2316,17 @@ where
       -/
       return false
     let some ctorVal := getNonRecStructureCtor? (← getEnv) structName | return false
-    bif ctorVal.numFields != 1 then
+    uif ctorVal.numFields != 1 then
       return false -- It is not a non-recursive structure with a single field.
     let sType ← whnf (← inferType s)
     let sTypeFn := sType.getAppFn
-    bif !sTypeFn.isConstOf structName then
+    uif !sTypeFn.isConstOf structName then
       return false
     let s ← whnf s
     let sFn := s.getAppFn
-    bif !sFn.isMVar then
+    uif !sFn.isMVar then
       return false
-    bif (← isAssignable sFn) then
+    uif (← isAssignable sFn) then
       let ctorApp := mkApp (mkAppN (mkConst ctorVal.name sTypeFn.constLevels!) sType.getAppArgs) v
       processAssignment' s ctorApp
     else
@@ -2340,7 +2340,7 @@ where
 private def isDefEqApp (t s : Expr) : MetaM Bool := do
   let tFn := t.getAppFn
   let sFn := s.getAppFn
-  bif tFn.isConst && sFn.isConst && tFn.constName! == sFn.constName! then
+  uif tFn.isConst && sFn.isConst && tFn.constName! == sFn.constName! then
     /- See comment at `tryHeuristic` explaining why we process arguments before universe levels. -/
     checkpointDefEq (isDefEqArgs tFn t.getAppArgs s.getAppArgs <&&> isListLevelDefEqAux tFn.constLevels! sFn.constLevels!)
   else
@@ -2379,14 +2379,14 @@ private def isDefEqUnitLike (t : Expr) (s : Expr) : MetaM Bool := do
   let tType ← inferType t
   let useCache := !tType.hasFVar && !tType.hasExprMVar && (← read).customCanUnfoldPredicate?.isNone
   let isUnit ←
-    bif useCache then do
+    uif useCache then do
       let key ← mkExprConfigCacheKey tType
       match (← cachedUnitLike? key) with
       | some b => pure b
       | none => cacheUnitLike key (← isUnitLikeType tType)
     else
       isUnitLikeType tType
-  bif !isUnit then return false
+  uif !isUnit then return false
   Meta.isExprDefEqAux tType (← inferType s)
 
 /--
@@ -2398,7 +2398,7 @@ private def isDefEqProjInst (t : Expr) (s : Expr) : MetaM LBool := do
   unless (← getTransparency) matches .instances | .implicit do return .undef
   let t? ← unfoldProjInstWhenInstances? t
   let s? ← unfoldProjInstWhenInstances? s
-  bif t?.isSome || s?.isSome then
+  uif t?.isSome || s?.isSome then
     toLBoolM <| Meta.isExprDefEqAux (t?.getD t) (s?.getD s)
   else
     return .undef
@@ -2415,7 +2415,7 @@ private def isDefEqLateSpecialCases (t s : Expr) : MetaM LBool := do
   match (← isDefEqProjInst t s) with
   | .undef =>
     match (← isDefEqStringLit t s) with
-    | .undef => return bif (← isDefEqUnitLike t s) then .true else .undef
+    | .undef => return uif (← isDefEqUnitLike t s) then .true else .undef
     | r      => return r
   | r => return r
 
@@ -2432,8 +2432,8 @@ succeed.
 See `tests/elab/isDefEqProjInstWithMVar.lean` for an example that fails with the old behavior.
 -/
 private def isDefEqAppFallback (t : Expr) (s : Expr) : MetaM Bool := do
-  bif (← getOptionFlags).throwOnStuckAfterApp then
-    bif (← isDefEqOnFailure t s) then return true
+  uif (← getOptionFlags).throwOnStuckAfterApp then
+    uif (← isDefEqOnFailure t s) then return true
     whenUndefDo (isDefEqLateSpecialCases t s) do
     isDefEqOnFailure t s
   else
@@ -2442,19 +2442,19 @@ private def isDefEqAppFallback (t : Expr) (s : Expr) : MetaM Bool := do
     let r? ← catchInternalId isDefEqStuckExceptionId (some <$> isDefEqOnFailure t s) fun _ => do
       saved.restore
       return none
-    bif r? == some true then return true
-    bif (← isDefEqLateSpecialCases t s) matches .true then return true
-    bif r?.isNone then
+    uif r? == some true then return true
+    uif (← isDefEqLateSpecialCases t s) matches .true then return true
+    uif r?.isNone then
       Meta.throwIsDefEqStuck
     return false
 
 private def isExprDefEqExpensive (t : Expr) (s : Expr) : MetaM Bool := do
   whenUndefDo (isDefEqEta t s) do
   whenUndefDo (isDefEqEta s t) do
-  bif (← isDefEqProj t s) then return true
+  uif (← isDefEqProj t s) then return true
   let t' ← whnfCore t
   let s' ← whnfCore s
-  bif t != t' || s != s' then
+  uif t != t' || s != s' then
     Meta.isExprDefEqAux t' s'
   else
     whenUndefDo (isDefEqNat t s) do
@@ -2464,12 +2464,12 @@ private def isExprDefEqExpensive (t : Expr) (s : Expr) : MetaM Bool := do
     -- otherwise we would end up applying it at every step of a reduction chain
     -- as soon as one of the sides is a constructor application,
     -- which is very costly because it requires us to unify the fields.
-    bif (← (isDefEqEtaStruct t s <||> isDefEqEtaStruct s t)) then
+    uif (← (isDefEqEtaStruct t s <||> isDefEqEtaStruct s t)) then
       return true
-    bif t.isConst && s.isConst then
-      bif t.constName! == s.constName! then isListLevelDefEqAux t.constLevels! s.constLevels! else return false
-    else bif (← pure t.isApp <&&> pure s.isApp) then
-      bif (← isDefEqApp t s) then return true
+    uif t.isConst && s.isConst then
+      uif t.constName! == s.constName! then isListLevelDefEqAux t.constLevels! s.constLevels! else return false
+    else uif (← pure t.isApp <&&> pure s.isApp) then
+      uif (← isDefEqApp t s) then return true
       isDefEqAppFallback t s
     else
       whenUndefDo (isDefEqLateSpecialCases t s) do
@@ -2480,7 +2480,7 @@ inductive DefEqCacheKind where
   | permanent -- problem does not have mvars and we are using standard config, we can use one persistent cache.
 
 private def getDefEqCacheKind (t s : Expr) : MetaM DefEqCacheKind := do
-  bif t.hasMVar || s.hasMVar || (← read).customCanUnfoldPredicate?.isSome then
+  uif t.hasMVar || s.hasMVar || (← read).customCanUnfoldPredicate?.isSome then
     return .transient
   else
     return .permanent
@@ -2519,7 +2519,7 @@ private def cacheResult (keyInfo : DefEqCacheKeyInfo) (result : Bool) : MetaM Un
     modifyDefEqTransientCache fun c => c.insert key result
 
 private def whnfCoreAtDefEq (e : Expr) : MetaM Expr := do
-  bif (← getOptionFlags).lazyWhnfCore then
+  uif (← getOptionFlags).lazyWhnfCore then
     withConfig (fun ctx => { ctx with proj := .yesWithDeltaI }) <| whnfCore e
   else
     whnfCore e
@@ -2529,7 +2529,7 @@ set_option compiler.ignoreBorrowAnnotation true in
 partial def isExprDefEqAuxImpl (t : Expr) (s : Expr) : MetaM Bool := withIncRecDepth do
   withTraceNodeBefore `Meta.isDefEq (fun _ => do
     -- unrestricted: trace collection only
-    bif trace.Meta.isDefEq.printTransparency.get (← getOptionsUnrestricted) then
+    uif trace.Meta.isDefEq.printTransparency.get (← getOptionsUnrestricted) then
       return m!"[{toString (← getTransparency)}] {t} =?= {s}"
     else
       return m!"{t} =?= {s}") do
@@ -2573,7 +2573,7 @@ partial def isExprDefEqAuxImpl (t : Expr) (s : Expr) : MetaM Bool := withIncRecD
   -/
   let t' ← whnfCoreAtDefEq t
   let s' ← whnfCoreAtDefEq s
-  bif t != t' || s != s' then
+  uif t != t' || s != s' then
     isExprDefEqAuxImpl t' s'
   else
     /-
@@ -2597,7 +2597,7 @@ partial def isExprDefEqAuxImpl (t : Expr) (s : Expr) : MetaM Bool := withIncRecD
       return false
     | .undef =>
       let result ← isExprDefEqExpensive t s
-      bif numPostponed == (← getNumPostponed) then
+      uif numPostponed == (← getNumPostponed) then
         trace[Meta.isDefEq.cache] "cache {result} for {t} =?= {s}"
         cacheResult k result
       return result

@@ -69,7 +69,7 @@ public def load (lratPath : System.FilePath) (trimProofs : Bool) : Core.CoreM (A
   trace[Meta.Tactic.sat] s!"LRAT proof has {proof.size} steps before trimming"
 
   let proof ←
-    bif trimProofs then
+    uif trimProofs then
       withTraceNode `Meta.Tactic.sat (fun _ => return "Trimming LRAT proof") do
         -- lazyPure to prevent compiler lifting
         let trimmed ← IO.lazyPure (fun _ => LRAT.trim proof)

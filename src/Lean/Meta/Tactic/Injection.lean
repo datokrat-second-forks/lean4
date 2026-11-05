@@ -16,7 +16,7 @@ def getCtorNumPropFields (ctorInfo : ConstructorVal) : MetaM Nat := do
   forallTelescopeReducing ctorInfo.type fun xs _ => do
     let mut numProps := 0
     for i in *...ctorInfo.numFields do
-      bif (← isProp (← inferType xs[ctorInfo.numParams + i]!)) then
+      uif (← isProp (← inferType xs[ctorInfo.numParams + i]!)) then
         numProps := numProps + 1
     return numProps
 
@@ -40,7 +40,7 @@ def injectionCore (mvarId : MVarId) (fvarId : FVarId) : MetaM InjectionResultCor
           trace[Meta.Tactic.injection] "applying noConfusion to {← inferType prf} at\n{mvarId}"
           let val ← withTransparency .default <| mkNoConfusion target prf
           trace[Meta.Tactic.injection] "got no-confusion principle{indentExpr val}\nof type{indentExpr (← inferType val)}"
-          bif aCtor.name != bCtor.name then
+          uif aCtor.name != bCtor.name then
             mvarId.assign val
             return InjectionResultCore.solved
           else
@@ -67,7 +67,7 @@ def injectionCore (mvarId : MVarId) (fvarId : FVarId) : MetaM InjectionResultCor
         | _, _ => throwTacticEx `injection mvarId "equality of constructor applications expected"
     let prf := mkFVar fvarId
     if let some (α, a, β, b) := type.heq? then
-      bif (← isDefEq α β) then
+      uif (← isDefEq α β) then
         go (← mkEq a b) (← mkEqOfHEq prf)
       else
         go type prf
@@ -128,12 +128,12 @@ where
     | d+1, fvarId :: fvarIds => do
       let cont := do
         go (d+1) fvarIds mvarId newNames forbidden
-      bif forbidden.contains fvarId then
+      uif forbidden.contains fvarId then
         cont
       else if let some (_, lhs, rhs) ← matchEqHEq? (← fvarId.getType) then
         let lhs ← whnf lhs
         let rhs ← whnf rhs
-        bif lhs.isRawNatLit && rhs.isRawNatLit then
+        uif lhs.isRawNatLit && rhs.isRawNatLit then
           cont
         else
           try

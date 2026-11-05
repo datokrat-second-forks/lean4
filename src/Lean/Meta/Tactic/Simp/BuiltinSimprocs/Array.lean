@@ -27,7 +27,7 @@ builtin_dsimproc [simp, seval] reduceGetElem? (@GetElem?.getElem? (Array _) Nat 
   let_expr GetElem?.getElem? _ _ α _ _ xs n ← e | return .continue
   let some n ← Nat.fromExpr? n | return .continue
   let some xs ← getArrayLit? xs | return .continue
-  let r ← bif h : n <ᵇ xs.size then mkSome α xs[n] else mkNone α
+  let r ← uif h : n < xs.size then mkSome α xs[n] else mkNone α
   return .done r
 
 set_option linter.coreInternal.internalModule false in -- User-facing builtin simprocs are fine
@@ -36,7 +36,7 @@ builtin_dsimproc [simp, seval] reduceGetElem! (@GetElem?.getElem! (Array _) Nat 
   let_expr GetElem?.getElem! _ _ α _ _ _ xs n ← e | return .continue
   let some n ← Nat.fromExpr? n | return .continue
   let some xs ← getArrayLit? xs | return .continue
-  let r ← bif h : n <ᵇ xs.size then pure xs[n] else mkDefault α
+  let r ← uif h : n < xs.size then pure xs[n] else mkDefault α
   return .done r
 
 end Array

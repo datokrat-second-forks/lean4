@@ -74,7 +74,7 @@ def checkVars : GoalM Unit := do
   let s ← get'
   let mut num := 0
   for ({ expr }, var) in s.varMap do
-    bif h : var <ᵇ s.vars.size then
+    uif h : var < s.vars.size then
       let expr' := s.vars[var]
       assert! isSameExpr expr expr'
     else

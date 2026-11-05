@@ -49,7 +49,7 @@ def MVarId.nthConstructor
         if let some e := expected? then unless ival.ctors.length == e do
           throwTacticEx name goal
             s!"{name} tactic works for inductive types with exactly {e} constructors"
-        bif h : idx <ᵇ ival.ctors.length then
+        uif h : idx < ival.ctors.length then
           goal.apply <| mkConst ival.ctors[idx] us
         else
           throwTacticEx name goal s!"index {idx} out of bounds, only {ival.ctors.length} constructors"
@@ -102,7 +102,7 @@ def mkExistsList (args : List Expr) (inner : Expr) : MetaM Expr :=
     (fun arg i:Expr => do
       let t ← inferType arg
       let l := (← inferType t).sortLevel!
-      bif arg.occurs i || l != Level.zero
+      uif arg.occurs i || l != Level.zero
         then pure (mkApp2 (.const `Exists [l]) t
           (updateLambdaBinderInfoD! <| ← mkLambdaFVars #[arg] i))
         else pure <| mkApp2 (mkConst `And) t i)
@@ -170,7 +170,7 @@ def constrToProp (univs : List Level) (params : List Expr) (idxs : List Expr) (c
       let ty ← idx.fvarId!.getType
       let instTy ← inferType inst
       let u := (← inferType ty).sortLevel!
-      bif (← isDefEq ty instTy)
+      uif (← isDefEq ty instTy)
       then pure (mkApp3 (.const `Eq [u]) ty idx inst)
       else pure (mkApp4 (.const `HEq [u]) ty idx instTy inst))
     let (n, r) ← match bs.filterMap id, eqs with
@@ -179,7 +179,7 @@ def constrToProp (univs : List Level) (params : List Expr) (idxs : List Expr) (c
     | bs', [] => do
       let t : Expr ← bs'.getLast!.fvarId!.getType
       let l := (← inferType t).sortLevel!
-      bif l == Level.zero then do
+      uif l == Level.zero then do
         let r ← mkExistsList (List.init bs') t
         pure (none, subst r)
       else do
@@ -218,7 +218,7 @@ do
   let subgoals ← mvar'.cases h
   let _ ← (shape.zip subgoals.toList).zipIdx.mapM fun ⟨⟨⟨shape, t⟩, subgoal⟩, p⟩ ↦ do
     let vars := subgoal.fields
-    let si := (shape.zip vars.toList).filterMap (fun ⟨c,v⟩ ↦ bif c then some v else none)
+    let si := (shape.zip vars.toList).filterMap (fun ⟨c,v⟩ ↦ uif c then some v else none)
     let mvar'' ← select p (subgoals.size - 1) subgoal.mvarId
     match t with
     | none => do
@@ -333,7 +333,7 @@ def mkIffOfInductivePropImpl (inductVal : InductiveVal) (rel : Name) : MetaM Uni
   using `uniq_name` -/
 
   let (thmTy, shape, existential) ← Meta.forallTelescopeReducing type fun fvars ty ↦ do
-    bif !ty.isProp then throwError "mk_iff only applies to prop-valued declarations"
+    uif !ty.isProp then throwError "mk_iff only applies to prop-valued declarations"
     let lhs := mkAppN (mkConst inductVal.name univs) fvars
     let fvars' := fvars.toList
     let shape_rhss ← constrs.mapM (constrToProp univs (fvars'.take params) (fvars'.drop params))

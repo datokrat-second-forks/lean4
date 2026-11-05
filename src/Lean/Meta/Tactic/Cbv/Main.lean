@@ -182,7 +182,7 @@ def handleConstApp : Simproc := fun e => do
 def isPartialApp (e : Expr) : Sym.SymM Bool := do
   let eType ← Sym.inferType e
   -- Fast path: a syntactically functional type cannot whnf to a non-function.
-  bif eType matches .forallE .. then return true
+  uif eType matches .forallE .. then return true
   let eType ← whnfD eType
   return eType matches .forallE ..
 
@@ -197,9 +197,9 @@ def handleApp : Simproc := fun e => do
   let fn := e.getAppFn
   match fn with
   | .const constName _ =>
-    bif (← isCbvOpaque constName) then
+    uif (← isCbvOpaque constName) then
       return markAsDoneIfFailed <| ← tryCbvTheorems e
-    bif (← isPartialApp e) then
+    uif (← isPartialApp e) then
       return markAsDoneIfFailed <| ← tryCbvTheorems e
     let info ← getConstInfo constName
     tryCSimpUDecidable <|> tryCbvTheorems <|> (guardSimproc (fun _ => info.hasValue) handleConstApp) <|> reduceRecMatcher <| e
@@ -208,7 +208,7 @@ def handleApp : Simproc := fun e => do
 
 def handleOpaqueConst : Simproc := fun e => do
   let .const constName _ := e | return .rfl
-  bif (← isCbvOpaque constName) then
+  uif (← isCbvOpaque constName) then
     return markAsDoneIfFailed <| ← tryCbvTheorems e
   return .rfl
 
@@ -240,7 +240,7 @@ Last resort for nested dependent projections, whose composite is non-dependent.
 def trySpineCongrArg (e : Expr) (cd : Bool) : Sym.Simp.SimpM Result := do
   let (projs, base) := peelProjSpine e
   -- A single projection over an unchanged struct was already handled by `handleProj`.
-  bif projs.size <ᵇ 2 then
+  uif projs.size < 2 then
     return .rfl (done := true) cd
   let res ← simp base
   let .step base' proof _ cd' := res
@@ -261,7 +261,7 @@ def trySpineCongrArg (e : Expr) (cd : Bool) : Sym.Simp.SimpM Result := do
   let mut newE := base'
   for p in projs.reverse do
     newE ← p.updateProjS! newE
-  bif Sym.isSameExpr newE e then
+  uif Sym.isSameExpr newE e then
     return .rfl (done := true) cd
   return .step newE newProof cd
 
@@ -295,7 +295,7 @@ def handleProj : Simproc := fun e => do
     let congrArgFun := Lean.mkLambda `x .default type <| .proj typeName idx <| .bvar 0
     let congrArgFunType ← Sym.inferType congrArgFun
     -- If the type of a projection function is non-dependent, we can safely prove `e.i = e'.i` from `e = e'`
-    bif congrArgFunType.isArrow then
+    uif congrArgFunType.isArrow then
       let .forallE _ α β _ := congrArgFunType | unreachable!
       let u ← Sym.getLevel α
       let v ← Sym.getLevel β
@@ -328,7 +328,7 @@ like `p.1 x`), simplify the function head and lift the proof via `congrArg`.
 def simplifyAppFn : Simproc := fun e => do
     unless e.isApp do return .rfl
     let fn := e.getAppFn
-    bif fn.isLambda || fn.isConst then
+    uif fn.isLambda || fn.isConst then
       return .rfl
     else
     let res ← simp fn
@@ -349,7 +349,7 @@ def handleConst : Simproc := fun e => do
   let .const n lvls := e | return .rfl
   let info ← getConstInfo n
   unless info.isDefinition do return .rfl
-  bif (← isPartialApp e) then return .rfl
+  uif (← isPartialApp e) then return .rfl
   unless info.hasValue && info.levelParams.length == lvls.length do return .rfl
   let fBody ← instantiateValueLevelParams info lvls
   let fBody ← Sym.unfoldReducible fBody
@@ -370,7 +370,7 @@ def cbvPreStep : Simproc := fun e => do
   | .const .. => handleOpaqueConst >> (tryCbvTheorems <|> handleConst) <| e
   | .app .. => tryMatcher <|> simplifyAppFn <| e
   | .letE .. =>
-    bif e.letNondep! then
+    uif e.letNondep! then
       let betaAppResult ← toBetaApp e
       return .step (betaAppResult.e) (betaAppResult.h)
     else
@@ -443,7 +443,7 @@ public def cbvGoalCore (mvarId : MVarId) : Sym.SymM (Option MVarId) := do
     match result with
     | .rfl _ _ => pure ()
     | .step target' proof _ _ =>
-      bif target'.isTrue then
+      uif target'.isTrue then
         mvarIdNew.assign (← mkOfEqTrue proof)
         return none
       else
@@ -475,7 +475,7 @@ public def cbvHyp (mvarId : MVarId) (fvarId : FVarId) : MetaM (Option MVarId) :=
     match result with
     | .rfl .. => return some mvarId
     | .step type' proof _ _ =>
-      bif type'.isFalse then
+      uif type'.isFalse then
         mvarId.assign (← mkFalseElim (← mvarId.getType) (← mkEqMP proof localDecl.toExpr))
         return none
       else
@@ -514,9 +514,9 @@ public def cbvDecideGoal (m : MVarId) : MetaM Unit := do
     let result ← cbvCore lhs config
     trace[Meta.Tactic.cbv] "decide_cbv:{indentExpr lhs}\n==>{indentExpr (result.getResultExpr lhs)}"
     let checkResult (e : Expr) (onTrue : Sym.SymM Unit) : Sym.SymM Unit := do
-      bif (← Sym.isBoolTrueExpr e) then
+      uif (← Sym.isBoolTrueExpr e) then
         onTrue
-      else bif (← Sym.isBoolFalseExpr e) then
+      else uif (← Sym.isBoolFalseExpr e) then
         throwError "`decide_cbv` failed: the proposition evaluates to `false`"
       else
         throwError "`decide_cbv` failed: could not reduce the expression to a boolean value; got stuck at: {indentExpr e}"

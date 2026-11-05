@@ -229,8 +229,8 @@ def Seq.sharesVar (s₁ s₂ : Seq) : Bool :=
   | .var x,     .cons y s₂ => x == y || sharesVar (.var x) s₂
   | .cons x s₁, .var y     => x == y || sharesVar s₁ (.var y)
   | .cons x s₁, .cons y s₂ =>
-    bif x == y then true
-    else bif x <ᵇ y then s₁.sharesVar (.cons y s₂)
+    uif x == y then true
+    else uif x < y then s₁.sharesVar (.cons y s₂)
     else sharesVar (.cons x s₁) s₂
 
 example : Seq.sharesVar 0 0 = true := by simp [Seq.sharesVar, OfNat.ofNat]
@@ -278,19 +278,19 @@ where
   go (s₁ s₂ : Seq) (r₁ c r₂ : Option Seq) : Option (Seq × Seq × Seq) :=
     match s₁, s₂ with
     | .var x, .var y =>
-      bif x == y then mkResult (rev r₁) (rev (push c x)) (rev r₂)
+      uif x == y then mkResult (rev r₁) (rev (push c x)) (rev r₂)
       else mkResult (rev (push r₁ x)) (rev c) (rev (push r₂ y))
     | .var x, .cons y s₂ =>
-      bif x == y then mkResult (rev r₁) (rev (push c x)) (app (rev r₂) s₂)
-      else bif x <ᵇ y then mkResult (rev (push r₁ x)) (rev c) (app (rev r₂) (.cons y s₂))
+      uif x == y then mkResult (rev r₁) (rev (push c x)) (app (rev r₂) s₂)
+      else uif x < y then mkResult (rev (push r₁ x)) (rev c) (app (rev r₂) (.cons y s₂))
       else go (.var x) s₂ r₁ c (push r₂ y)
     | .cons x s₁, .var y =>
-      bif x == y then mkResult (app (rev r₁) s₁) (rev (push c x)) (rev r₂)
-      else bif x <ᵇ y then go s₁ (.var y) (push r₁ x) c r₂
+      uif x == y then mkResult (app (rev r₁) s₁) (rev (push c x)) (rev r₂)
+      else uif x < y then go s₁ (.var y) (push r₁ x) c r₂
       else mkResult (app (rev r₁) (.cons x s₁)) (rev c) (rev (push r₂ y))
     | .cons x s₁, .cons y s₂ =>
-      bif x == y then go s₁ s₂ r₁ (push c x) r₂
-      else bif x <ᵇ y then go s₁ (.cons y s₂) (push r₁ x) c r₂
+      uif x == y then go s₁ s₂ r₁ (push c x) r₂
+      else uif x < y then go s₁ (.cons y s₂) (push r₁ x) c r₂
       else go (.cons x s₁) s₂ r₁ c (push r₂ y)
 
 /--

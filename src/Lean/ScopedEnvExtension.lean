@@ -73,7 +73,7 @@ def Descr.tracksScopes (descr : Descr α β σ) : Bool :=
 
 /-- Notes on `s` that the entry `b` was added to it; see `State.scopeChanged`. -/
 def Descr.noteScopeChange (descr : Descr α β σ) (s : State σ) (b : β) : State σ :=
-  bif descr.tracksScopes then
+  uif descr.tracksScopes then
     { s with
       scopeChanged := true
       scopeChangedDecls := match descr.entryDecl? with
@@ -128,7 +128,7 @@ def addEntryFn (descr : Descr α β σ) (s : StateStack α β σ) (e : Entry β)
         scopedEntries := scopedEntries.insert ns b
         newEntries    := (Entry.«scoped» ns (descr.toOLeanEntry b)) :: newEntries
         stateStack    := stateStack.map fun s =>
-          bif s.activeScopes.contains ns then
+          uif s.activeScopes.contains ns then
             descr.noteScopeChange { s with state := descr.addEntry s.state b } b
           else
             s
@@ -200,7 +200,7 @@ private def ScopedEnvExtension.modifyScopes (ext : ScopedEnvExtension α β σ) 
     (changed : Bool) (f : StateStack α β σ → StateStack α β σ) (changedDecls : Array Name := #[]) :
     Environment :=
   let record := changed && ext.descr.tracksScopes
-  let env := bif record && ext.descr.logWrites then
+  let env := uif record && ext.descr.logWrites then
     changedDecls.foldl Environment.logDeclChange env
   else env
   -- unlogged: logged above if the state in effect changes
@@ -259,7 +259,7 @@ def stateStackModify (ext : ScopedEnvExtension α β σ) (states : List (State �
   | [] => states
   | top :: states =>
     let top := ext.descr.noteScopeChange { top with state := ext.descr.addEntry top.state b } b
-    let bot := bif top.delimitsLocal then states else stateStackModify ext states b
+    let bot := uif top.delimitsLocal then states else stateStackModify ext states b
     top :: bot
 
 def ScopedEnvExtension.addLocalEntry (ext : ScopedEnvExtension α β σ) (env : Environment) (b : β) : Environment :=
@@ -288,7 +288,7 @@ def ScopedEnvExtension.activateScoped (ext : ScopedEnvExtension α β σ) (env :
     (namespaceName : Name) : Environment := Id.run do
   let s := ext.ext.getState (asyncMode := .local) env
   let top :: stack := s.stateStack | return env
-  bif top.activeScopes.contains namespaceName then
+  uif top.activeScopes.contains namespaceName then
     return env
   let activeScopes := top.activeScopes.insert namespaceName
   let bs? := s.scopedEntries.map.find? namespaceName

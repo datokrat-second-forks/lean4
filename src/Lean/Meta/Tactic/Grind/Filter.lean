@@ -19,7 +19,7 @@ public inductive Filter where
 
 -- **Note**: facts may not have been internalized if they are equalities.
 def getGen (e : Expr) : GoalM Nat := do
-  bif (← alreadyInternalized e) then
+  uif (← alreadyInternalized e) then
     getGeneration e
   else match_expr e with
    | Eq _ lhs rhs => return max (← getGeneration lhs) (← getGeneration rhs)

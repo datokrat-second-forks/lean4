@@ -26,9 +26,9 @@ builtin_dsimproc [simp, seval] reduceAppend ((_ ++ _ : String)) := fun e => do
   return .done <| toExpr (a ++ b)
 
 private partial def reduceListChar (e : Expr) (s : String) : SimpM DStep := do
-  bif e.isAppOfArity ``List.nil 1 then
+  uif e.isAppOfArity ``List.nil 1 then
     return .done <| toExpr s
-  else bif e.isAppOfArity ``List.cons 3 then
+  else uif e.isAppOfArity ``List.cons 3 then
     let some c ← Char.fromExpr? e.appFn!.appArg! | return .continue
     reduceListChar e.appArg! (s.push c)
   else

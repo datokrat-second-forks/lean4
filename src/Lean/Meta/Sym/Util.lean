@@ -81,7 +81,7 @@ public def _root_.Lean.Expr.checkMaxShared (e : Expr) (msg := "") : SymM Unit :=
       throwNotMaxShared e
 where
   throwNotMaxShared (e : Expr) : SymM Unit := do
-    let msg := bif msg == "" then msg else s!"[{msg}] "
+    let msg := uif msg == "" then msg else s!"[{msg}] "
     throwError "{msg}term is not in the maximally shared table{indentExpr e}"
 
 /-- Debug helper: throws if any subexpression of the goal's target type is not in the table of maximally shared. -/
@@ -99,7 +99,7 @@ def levelsAlreadyNormalized (e : Expr) : Bool :=
 Normalizes universe levels in constants and sorts.
 -/
 public def normalizeLevels (e : Expr) : CoreM Expr := do
-  bif levelsAlreadyNormalized e then return e
+  uif levelsAlreadyNormalized e then return e
   let pre (e : Expr) := do
     match e with
     | .sort u => return .done <| e.updateSort! u.normalize

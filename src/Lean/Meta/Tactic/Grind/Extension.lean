@@ -202,7 +202,7 @@ def mkExtension (name : Name := by exact decl_name%) : IO Extension :=
           | .decl declName => declName
           | _ => unreachable!
         | .ext declName | .cases declName _ | .funCC declName => declName
-      bif isPrivateName declName then ⟨none, none, some e⟩
+      uif isPrivateName declName then ⟨none, none, some e⟩
       else .uniform (some e)
   }
 

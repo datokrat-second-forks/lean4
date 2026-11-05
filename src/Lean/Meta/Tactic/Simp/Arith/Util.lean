@@ -21,7 +21,7 @@ private def isSupportedCommRingType (type : Expr) : Bool :=
   | _ => false
 
 private def isNumeral (e : Expr) : Bool :=
-  bif e.isRawNatLit then true else
+  uif e.isRawNatLit then true else
   match_expr e with
   | OfNat.ofNat _ n _ => n.isRawNatLit
   | Neg.neg _ _ a =>
@@ -33,7 +33,7 @@ private def isNumeral (e : Expr) : Bool :=
 def isLinearTerm? (e : Expr) : Option Expr :=
   match_expr e with
   | HAdd.hAdd α _ _ _ _ _ => .guard isSupportedType α
-  | HMul.hMul α _ _ _ a b => bif isNumeral a || isNumeral b then .guard isSupportedType α else none
+  | HMul.hMul α _ _ _ a b => uif isNumeral a || isNumeral b then .guard isSupportedType α else none
   | HSub.hSub α _ _ _ _ _ => .guard isSupportedCommRingType α
   | Neg.neg α _ _ => .guard isSupportedCommRingType α
   | Nat.succ _ => some Nat.mkType

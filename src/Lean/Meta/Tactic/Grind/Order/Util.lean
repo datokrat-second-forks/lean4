@@ -16,19 +16,19 @@ def Cnstr.pp (c : Cnstr NodeId) : OrderM MessageData := do
   let op := match c.kind with
     | .le => "≤"
     | .lt => "<"
-  bif c.k != 0 then
+  uif c.k != 0 then
     return m!"{Arith.quoteIfArithTerm u} {op} {Arith.quoteIfArithTerm v} + {c.k}"
   else
     return m!"{Arith.quoteIfArithTerm u} {op} {Arith.quoteIfArithTerm v}"
 
 def Weight.compare (a b : Weight) : Ordering :=
-  bif a.k <ᵇ b.k then
+  uif a.k < b.k then
     .lt
-  else bif a.k >ᵇ b.k then
+  else uif a.k > b.k then
     .gt
-  else bif a.strict == b.strict then
+  else uif a.strict == b.strict then
     .eq
-  else bif a.strict && !b.strict then
+  else uif a.strict && !b.strict then
     /-
     **Note**: Recall that we view a constraint of the
     form `x < y + k` as `x ≤ y + (k - ε)` where `ε` is
@@ -67,7 +67,7 @@ def Weight.isZero (a : Weight) : Bool :=
   a.k == 0 && !a.strict
 
 instance : ToString Weight where
-  toString a := bif a.strict then s!"{a.k}-ε" else s!"{a.k}"
+  toString a := uif a.strict then s!"{a.k}-ε" else s!"{a.k}"
 
 def ToPropagate.pp (todo : ToPropagate) : OrderM MessageData := do
   match todo with

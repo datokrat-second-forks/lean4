@@ -31,14 +31,14 @@ private def mkEqAndProof (lhs rhs : Expr) : MetaM (Expr × Expr) := do
   let lhsType ← inferType lhs
   let rhsType ← inferType rhs
   let u       ← getLevel lhsType
-  bif (← isDefEq lhsType rhsType) then
+  uif (← isDefEq lhsType rhsType) then
     pure (mkApp3 (mkConst ``Eq [u]) lhsType lhs rhs, mkApp2 (mkConst ``Eq.refl [u]) lhsType lhs)
   else
     pure (mkApp4 (mkConst ``HEq [u]) lhsType lhs rhsType rhs, mkApp2 (mkConst ``HEq.refl [u]) lhsType lhs)
 
 partial def withNewEqs (targets targetsNew : Array Expr) (k : Array Expr → Array Expr → MetaM α) : MetaM α :=
   let rec loop (i : Nat) (newEqs : Array Expr) (newRefls : Array Expr) := do
-    bif i <ᵇ targets.size then
+    uif i < targets.size then
       let (newEqType, newRefl) ← mkEqAndProof targets[i]! targetsNew[i]!
       withLocalDeclD `h newEqType fun newEq => do
         loop (i+1) (newEqs.push newEq) (newRefls.push newRefl)
@@ -167,14 +167,14 @@ structure Context where
 
 private def mkCasesContext? (majorFVarId : FVarId) : MetaM (Option Context) := do
   let env ← getEnv
-  bif !env.contains `Eq || !env.contains `HEq then
+  uif !env.contains `Eq || !env.contains `HEq then
     pure none
   else
     let majorDecl ← majorFVarId.getDecl
     let majorType ← whnf majorDecl.type
     majorType.withApp fun f args => matchConstInduct f (fun _ => pure none) fun ival _ =>
-      bif args.size != ival.numIndices + ival.numParams then pure none
-      else bif !env.contains (Name.mkStr ival.name "casesOn") then pure none
+      uif args.size != ival.numIndices + ival.numParams then pure none
+      else uif !env.contains (Name.mkStr ival.name "casesOn") then pure none
       else return some {
         inductiveVal  := ival,
         majorDecl     := majorDecl,
@@ -189,12 +189,12 @@ We say the major premise has independent indices IF
    all local declarations different from the major and its indices do not depend on the indices.
 -/
 private def hasIndepIndices (ctx : Context) : MetaM Bool := do
-  bif ctx.majorTypeIndices.isEmpty then
+  uif ctx.majorTypeIndices.isEmpty then
     return true
-  else bif ctx.majorTypeIndices.any fun idx => !idx.isFVar then
+  else uif ctx.majorTypeIndices.any fun idx => !idx.isFVar then
     /- One of the indices is not a free variable. -/
     return false
-  else bif ctx.majorTypeIndices.size.any fun i _ => i.any fun j _ => ctx.majorTypeIndices[i] == ctx.majorTypeIndices[j] then
+  else uif ctx.majorTypeIndices.size.any fun i _ => i.any fun j _ => ctx.majorTypeIndices[i] == ctx.majorTypeIndices[j] then
     /- An index occurs more than once -/
     return false
   else
@@ -220,7 +220,7 @@ private def elimAuxIndices (s₁ : GeneralizeIndicesSubgoal) (s₂ : Array Cases
 private def toCasesSubgoals (s : Array InductionSubgoal) (ctorNames : Array Name) (majorFVarId : FVarId) (us : List Level) (params : Array Expr)
     : Array CasesSubgoal :=
   s.mapIdx fun i s =>
-    bif _ : i <ᵇ ctorNames.size then
+    uif _ : i < ctorNames.size then
       let ctorName := ctorNames[i]
       let ctorApp  := mkAppN (mkAppN (mkConst ctorName us) params) s.fields
       let subst := s.subst.erase majorFVarId |>.insert majorFVarId ctorApp
@@ -229,7 +229,7 @@ private def toCasesSubgoals (s : Array InductionSubgoal) (ctorNames : Array Name
       { s with ctorName := none }
 
 partial def unifyEqs? (numEqs : Nat) (mvarId : MVarId) (subst : FVarSubst) (caseName? : Option Name := none): MetaM (Option (MVarId × FVarSubst)) := withIncRecDepth do
-  bif numEqs == 0 then
+  uif numEqs == 0 then
     return some (mvarId, subst)
   else
     let (eqFVarId, mvarId) ← mvarId.intro1
@@ -260,14 +260,14 @@ private def inductionCasesOn (mvarId : MVarId) (majorFVarId : FVarId) (givenName
     let hasNE := (← getEnv).contains ``Nat.hasNotBit
     -- We can only create a sparse casesOn if we have `ctorIdx` (in particular, if it is a type)
     let hasCtorIdx := (← getEnv).contains (mkCtorIdxName ctx.inductiveVal.name)
-    bif hasNE && hasCtorIdx && !interestingCtors.isEmpty &&
-      interestingCtors.size <ᵇ ctx.inductiveVal.ctors.length then
+    uif hasNE ∧ hasCtorIdx ∧ !interestingCtors.isEmpty ∧
+      interestingCtors.size < ctx.inductiveVal.ctors.length then
       let casesOn ← Lean.Meta.mkSparseCasesOn ctx.inductiveVal.name interestingCtors
       let s ← mvarId.induction majorFVarId casesOn givenNames
       return toCasesSubgoals s interestingCtors majorFVarId us params
 
   let casesOn :=
-    bif useNatCasesAuxOn && ctx.inductiveVal.name == ``Nat && (← getEnv).contains ``Nat.casesAuxOn then
+    uif useNatCasesAuxOn && ctx.inductiveVal.name == ``Nat && (← getEnv).contains ``Nat.casesAuxOn then
       ``Nat.casesAuxOn
     else
       mkCasesOnName ctx.inductiveVal.name
@@ -287,7 +287,7 @@ def cases (mvarId : MVarId) (majorFVarId : FVarId) (givenNames : Array AltVarNam
         /- Remark: if caller does not need a `FVarSubst` (variable substitution), and `hasIndepIndices ctx` is true,
            then we can also use the simple case. This is a minor optimization, and we currently do not even
            allow callers to specify whether they want the `FVarSubst` or not. -/
-        bif (← hasIndepIndices ctx) then
+        uif (← hasIndepIndices ctx) then
           -- Simple case
           inductionCasesOn mvarId majorFVarId givenNames ctx (useNatCasesAuxOn := useNatCasesAuxOn)
             (interestingCtors? := interestingCtors?)
@@ -322,11 +322,11 @@ def _root_.Lean.MVarId.casesRec (mvarId : MVarId) (p : LocalDecl → MetaM Bool)
   saturate mvarId fun mvarId =>
     mvarId.withContext do
       for localDecl in (← getLCtx) do
-        bif (← p localDecl) then
+        uif (← p localDecl) then
           let r? ← observing? do
             let r ← mvarId.cases localDecl.fvarId
             return r.toList.map (·.mvarId)
-          bif r?.isSome then
+          uif r?.isSome then
             return r?
       return none
 

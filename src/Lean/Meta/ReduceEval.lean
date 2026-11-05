@@ -35,8 +35,8 @@ instance [ReduceEval α] : ReduceEval (Option α) where
     let e ← whnf e
     let Expr.const c .. ← pure e.getAppFn | throwFailedToEval e
     let nargs := e.getAppNumArgs
-    bif      c == ``Option.none && nargs == 0 then pure none
-    else bif c == ``Option.some && nargs == 1 then some <$> reduceEval e.appArg!
+    uif      c == ``Option.none && nargs == 0 then pure none
+    else uif c == ``Option.some && nargs == 1 then some <$> reduceEval e.appArg!
     else throwFailedToEval e
 
 instance : ReduceEval String where
@@ -48,12 +48,12 @@ private partial def evalName (e : Expr) : MetaM Name := do
   let e ← whnf e
   let Expr.const c _ ← pure e.getAppFn | throwFailedToEval e
   let nargs := e.getAppNumArgs
-  bif      c == ``Lean.Name.anonymous && nargs == 0 then pure Name.anonymous
-  else bif c == ``Lean.Name.str && nargs == 2 then do
+  uif      c == ``Lean.Name.anonymous && nargs == 0 then pure Name.anonymous
+  else uif c == ``Lean.Name.str && nargs == 2 then do
     let n ← evalName $ e.getArg! 0
     let s ← reduceEval $ e.getArg! 1
     pure $ Name.mkStr n s
-  else bif c == ``Lean.Name.num && nargs == 2 then do
+  else uif c == ``Lean.Name.num && nargs == 2 then do
     let n ← evalName $ e.getArg! 0
     let u ← reduceEval $ e.getArg! 1
     pure $ Name.mkNum n u
@@ -78,7 +78,7 @@ instance [ReduceEval α] : ReduceEval (List α) where
 instance [NeZero n] : ReduceEval (Fin n) where
   reduceEval := private fun e => do
     let e ← whnf e
-    bif e.isAppOfArity ``Fin.mk 3 then
+    uif e.isAppOfArity ``Fin.mk 3 then
       return Fin.ofNat _ (← reduceEval (e.getArg! 1))
     else
       throwFailedToEval e
@@ -86,7 +86,7 @@ instance [NeZero n] : ReduceEval (Fin n) where
 instance {n : Nat} : ReduceEval (BitVec n) where
   reduceEval := private fun e => do
     let e ← whnf e
-    bif e.isAppOfArity ``BitVec.ofFin 2 then
+    uif e.isAppOfArity ``BitVec.ofFin 2 then
       have : 2^n - 1 + 1 = 2^n := Nat.sub_one_add_one_eq_of_pos (Nat.two_pow_pos n)
       let _ : ReduceEval (Fin (2^n)) := this ▸ (inferInstanceAs <| ReduceEval (Fin (2^n - 1 + 1)))
       pure ⟨(← reduceEval (e.getArg! 1))⟩
@@ -96,9 +96,9 @@ instance {n : Nat} : ReduceEval (BitVec n) where
 instance : ReduceEval Bool where
   reduceEval := private fun e => do
     let e ← whnf e
-    bif e.isAppOf ``true then
+    uif e.isAppOf ``true then
       pure true
-    else bif e.isAppOf ``false then
+    else uif e.isAppOf ``false then
       pure false
     else
       throwFailedToEval e
@@ -115,9 +115,9 @@ instance : ReduceEval BinderInfo where
 instance : ReduceEval Literal where
   reduceEval := private fun e => do
     let e ← whnf e
-    bif e.isAppOfArity ``Literal.natVal 1 then
+    uif e.isAppOfArity ``Literal.natVal 1 then
       return .natVal (← reduceEval (e.getArg! 0))
-    else bif e.isAppOfArity ``Literal.strVal 1 then
+    else uif e.isAppOfArity ``Literal.strVal 1 then
       return .strVal (← reduceEval (e.getArg! 0))
     else
       throwFailedToEval e
@@ -125,7 +125,7 @@ instance : ReduceEval Literal where
 instance : ReduceEval MVarId where
   reduceEval e := private do
     let e ← whnf e
-    bif e.isAppOfArity ``MVarId.mk 1 then
+    uif e.isAppOfArity ``MVarId.mk 1 then
       return ⟨← reduceEval (e.getArg! 0)⟩
     else
       throwFailedToEval e
@@ -133,7 +133,7 @@ instance : ReduceEval MVarId where
 instance : ReduceEval LevelMVarId where
   reduceEval e := private do
     let e ← whnf e
-    bif e.isAppOfArity ``LevelMVarId.mk 1 then
+    uif e.isAppOfArity ``LevelMVarId.mk 1 then
       return ⟨← reduceEval (e.getArg! 0)⟩
     else
       throwFailedToEval e
@@ -141,7 +141,7 @@ instance : ReduceEval LevelMVarId where
 instance : ReduceEval FVarId where
   reduceEval e := private do
     let e ← whnf e
-    bif e.isAppOfArity ``FVarId.mk 1 then
+    uif e.isAppOfArity ``FVarId.mk 1 then
       return ⟨← reduceEval (e.getArg! 0)⟩
     else
       throwFailedToEval e

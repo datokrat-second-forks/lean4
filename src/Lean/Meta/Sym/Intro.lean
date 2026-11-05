@@ -20,14 +20,14 @@ names are made inaccessible (fresh macro scopes); otherwise they are accessible 
 (incrementally built) local context.
 -/
 def introCore (mvarId : MVarId) (max : Nat) (names : Array Name) (hygienic : Bool) : SymM (Array FVarId × MVarId) := do
-  bif max == 0 then return (#[], mvarId)
+  uif max == 0 then return (#[], mvarId)
   let env ← getEnv
   let mvarDecl ← mvarId.getDecl
   /-
   Helper function for constructing a value to assign to `mvarId`. We don't need max sharing here.
   -/
   let rec mkValueLoop (i : Nat) (type : Expr) (body : Expr) : Expr :=
-    bif i ≥ᵇ max then
+    uif i ≥ max then
       body
     else match type with
       | .mdata _ type => mkValueLoop i type body
@@ -53,7 +53,7 @@ def introCore (mvarId : MVarId) (max : Nat) (names : Array Name) (hygienic : Boo
     assignDelayedMVar auxMVar.mvarId! fvars mvarId'
     mvarId.assign val
   let finalize (lctx : LocalContext) (localInsts : LocalInstances) (fvars : Array Expr) (type : Expr) : SymM (Array Expr × MVarId) := do
-    bif fvars.isEmpty then
+    uif fvars.isEmpty then
       return (#[], mvarId)
     let type ← instantiateRevS type fvars
     let mvar' ← mkFreshExprMVarAt lctx localInsts type .syntheticOpaque mvarDecl.userName
@@ -61,7 +61,7 @@ def introCore (mvarId : MVarId) (max : Nat) (names : Array Name) (hygienic : Boo
     mkValueAndAssign fvars mvarId'
     return (fvars, mvarId')
   let mkName (lctx : LocalContext) (binderName : Name) (i : Nat) : MetaM Name := do
-    bif h : i <ᵇ names.size then
+    uif h : i < names.size then
       return names[i]
     else
       mkFreshBinderNameForTacticCore lctx binderName hygienic
@@ -71,7 +71,7 @@ def introCore (mvarId : MVarId) (max : Nat) (names : Array Name) (hygienic : Boo
     else
       localInsts
   let rec visit (i : Nat) (lctx : LocalContext) (localInsts : LocalInstances) (fvars : Array Expr) (type : Expr) : SymM (Array Expr × MVarId) := do
-    bif i ≥ᵇ max then
+    uif i ≥ max then
       finalize lctx localInsts fvars type
     else match type with
     | .mdata _ type => visit i lctx localInsts fvars type
@@ -120,11 +120,11 @@ Returns `.goal newDecls mvarId` with new introduced free variable Ids and the up
 Returns `.failed` if no new declaration was introduced.
 -/
 public def intros (mvarId : MVarId) (names : Array Name := #[]) (hygienic : Bool := true) : SymM IntrosResult := do
-  let result ← bif names.isEmpty then
+  let result ← uif names.isEmpty then
     introCore mvarId hugeNat #[] hygienic
   else
     introCore mvarId names.size names hygienic
-  bif result.1.isEmpty then
+  uif result.1.isEmpty then
     return .failed
   return .goal result.1 result.2
 

@@ -43,10 +43,10 @@ declare_config_elab elabBVDecideConfig Lean.Elab.Tactic.BVDecide.BVDecideConfig
 
 open Elab.Tactic.BVDecide in
 def isPotentialTypeAnalysisType (cfg : BVDecideConfig) (declName : Name) : CoreM Bool := do
-  bif (← pure cfg.enums <&&> isEnumType declName) then
+  uif (← pure cfg.enums <&&> isEnumType declName) then
     return true
   let env ← getEnv
-  bif !cfg.structures || !isStructure env declName then
+  uif !cfg.structures || !isStructure env declName then
     return false
   let .inductInfo info ← getConstInfo declName | return false
   return !info.isRec

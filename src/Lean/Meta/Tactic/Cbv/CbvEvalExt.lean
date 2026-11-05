@@ -54,11 +54,11 @@ def mkCbvTheoremFromConst (declName : Name) (inv : Bool := false) : MetaM CbvEva
   unless (← isProp type) do throwError "{val} is not a theorem and thus cannot be marked with `cbv_eval` attribute"
   let (fnName, thmDeclName) ← forallTelescope type fun xs body => do
     let some (_, lhs, rhs) := body.eq? | throwError "The conclusion {type} of theorem {val} is not an equality"
-    let matchSide := bif inv then rhs else lhs
+    let matchSide := uif inv then rhs else lhs
     let some constName := matchSide.getAppFn.constName?
       | throwError "The rewrite side of theorem {val} is not an application of a constant"
     let mut thmDeclName := declName
-    bif inv then
+    uif inv then
       let invType ← mkForallFVars xs (← mkEq rhs lhs)
       let invVal ← mkLambdaFVars xs (← mkEqSymm (mkAppN val xs))
       thmDeclName ← mkAuxLemma (kind? := `_cbv_eval) cinfo.levelParams invType invVal
@@ -81,7 +81,7 @@ def CbvEvalState.addEntry (s : CbvEvalState) (e : CbvEvalEntry) : CbvEvalState :
 /-- Rebuild the `Theorems` for a given `appFn` from the entries that target it. -/
 private def CbvEvalState.rebuildLemmas (entries : NameMap <| Array CbvEvalEntry) (appFn : Name) (lemmas : NameMap Theorems) : NameMap Theorems := 
   let appFnEntries := entries.getD appFn #[] 
-  bif appFnEntries.isEmpty then
+  uif appFnEntries.isEmpty then
     lemmas.erase appFn
   else
     lemmas.insert appFn (appFnEntries.foldl (fun thms e => thms.insert e.thm) {})
@@ -89,11 +89,11 @@ private def CbvEvalState.rebuildLemmas (entries : NameMap <| Array CbvEvalEntry)
 /-- Erase a theorem from the state. Returns `none` if the theorem is not found. -/
 def CbvEvalState.erase (s : CbvEvalState) (declName : Name) : Option CbvEvalState := do
   let (appFn, oldEntries) ← s.entries.foldl (init := none) fun acc appFn entries =>
-    bif acc.isSome then acc
-    else bif entries.any (·.origin == declName) then some (appFn, entries)
+    uif acc.isSome then acc
+    else uif entries.any (·.origin == declName) then some (appFn, entries)
     else none
   let newEntries := oldEntries.filter (·.origin != declName)
-  let entries := bif newEntries.isEmpty then s.entries.erase appFn
+  let entries := uif newEntries.isEmpty then s.entries.erase appFn
     else s.entries.insert appFn newEntries
   return { lemmas := rebuildLemmas entries appFn s.lemmas, entries }
 
@@ -108,7 +108,7 @@ builtin_initialize cbvEvalExt : CbvEvalExtension ←
       match entry.thm.declName with
       | none => ⟨none, none, none⟩
       | some n =>
-        bif isPrivateName n then ⟨none, none, some entry⟩
+        uif isPrivateName n then ⟨none, none, some entry⟩
         else .uniform (some entry)
   }
 

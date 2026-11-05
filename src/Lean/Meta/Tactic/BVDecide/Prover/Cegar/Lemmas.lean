@@ -24,7 +24,7 @@ public inductive ProcessHypResult where
 public def Cegar.processNewHyps : CegarM ProcessHypResult := do
   withTraceNode `Meta.Tactic.bv (fun _ => return m!"Processing new lemmas") do
     let hypQueue ← CegarM.drainNewHyps
-    bif hypQueue.isEmpty then return .none
+    uif hypQueue.isEmpty then return .none
     let target := .mvarIdTarget (← read).goal
     let ctx := (← CegarM.getTacticContext).preProcessContext
     let ctx :=
@@ -42,7 +42,7 @@ public def Cegar.processNewHyps : CegarM ProcessHypResult := do
       Normalize.PreProcessM.run ctx target do
         Normalize.PreProcessM.setCaches caches
         Normalize.bvNormalize <| hypQueue.map (·.hyp)
-    bif solved then return .solved
+    uif solved then return .solved
     CegarM.setPreProcessCaches state.caches
     let hypQueue := state.hypotheses
 
@@ -50,7 +50,7 @@ public def Cegar.processNewHyps : CegarM ProcessHypResult := do
     for hyp in hypQueue do
       checkSystem "bv_decide"
 
-      bif hyp.type.isConstOf ``True then
+      uif hyp.type.isConstOf ``True then
         continue
 
       LemmaM.resetLemmas
@@ -60,7 +60,7 @@ public def Cegar.processNewHyps : CegarM ProcessHypResult := do
       else
         throwError m!"Failed to reify CEGAR lemma {hyp}"
 
-    bif sats.isEmpty then
+    uif sats.isEmpty then
       return .none
 
     let sat ← sats.foldlM (init := (← get).satExpr) (SatAtBVLogical.and · ·)

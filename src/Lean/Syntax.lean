@@ -28,7 +28,7 @@ protected structure Lean.Syntax.Range where
   deriving Inhabited, Repr, BEq, Hashable
 
 def Lean.Syntax.Range.contains (r : Lean.Syntax.Range) (pos : String.Pos.Raw) (includeStop := false) : Bool :=
-  r.start <= pos && (bif includeStop then pos <= r.stop else pos < r.stop)
+  r.start <= pos && (uif includeStop then pos <= r.stop else pos < r.stop)
 
 /--
 Checks whether `sub` is contained in `super`.
@@ -38,9 +38,9 @@ an inclusive upper bound.
 def Lean.Syntax.Range.includes (super sub : Lean.Syntax.Range)
     (includeSuperStop := false) (includeSubStop := false) : Bool :=
   super.start <= sub.start && (
-    bif includeSuperStop && !includeSubStop then
+    uif includeSuperStop && !includeSubStop then
       sub.stop.byteIdx <= super.stop.byteIdx + 1
-    else bif !includeSuperStop && includeSubStop then
+    else uif !includeSuperStop && includeSubStop then
       sub.stop < super.stop
     else
       sub.stop <= super.stop
@@ -48,8 +48,8 @@ def Lean.Syntax.Range.includes (super sub : Lean.Syntax.Range)
 
 def Lean.Syntax.Range.overlaps (first second : Lean.Syntax.Range)
     (includeFirstStop := false) (includeSecondStop := false) : Bool :=
-  (bif includeFirstStop then second.start <= first.stop else second.start < first.stop) &&
-    (bif includeSecondStop then first.start <= second.stop else first.start < second.stop)
+  (uif includeFirstStop then second.start <= first.stop else second.start < first.stop) &&
+    (uif includeSecondStop then first.start <= second.stop else first.start < second.stop)
 
 def Lean.Syntax.Range.bsize (r : Lean.Syntax.Range) : Nat :=
   r.stop.byteIdx - r.start.byteIdx
@@ -147,10 +147,10 @@ partial def structRangeEq : Syntax → Syntax → Bool
 
 /-- Like `structRangeEq` but prints trace on failure if `trace.Elab.reuse` is activated. -/
 def structRangeEqWithTraceReuse (opts : Options) (stx1 stx2 : Syntax) : Bool :=
-  bif stx1.structRangeEq stx2 then
+  uif stx1.structRangeEq stx2 then
     true
   else
-    bif opts.getBool `trace.Elab.reuse then
+    uif opts.getBool `trace.Elab.reuse then
       dbg_trace "reuse stopped:
 {stx1.formatStx (showInfo := true)} !=
 {stx2.formatStx (showInfo := true)}"
@@ -171,10 +171,10 @@ partial def eqWithInfo : Syntax → Syntax → Bool
 
 /-- Like `eqWithInfo` but prints trace on failure if `trace.Elab.reuse` is activated. -/
 def eqWithInfoAndTraceReuse (opts : Options) (stx1 stx2 : Syntax) : Bool :=
-  bif stx1.eqWithInfo stx2 then
+  uif stx1.eqWithInfo stx2 then
     true
   else
-    bif opts.getBool `trace.Elab.reuse then
+    uif opts.getBool `trace.Elab.reuse then
       dbg_trace "reuse stopped:
 {stx1.formatStx (showInfo := true)} !=
 {stx2.formatStx (showInfo := true)}"
@@ -197,7 +197,7 @@ def setAtomVal : Syntax → String → Syntax
 
 @[inline] def ifNodeKind {β} (stx : Syntax) (kind : SyntaxNodeKind) (hyes : SyntaxNode → β) (hno : Unit → β) : β :=
   match stx with
-  | Syntax.node i k args => bif k == kind then hyes ⟨Syntax.node i k args, IsNode.mk i k args⟩ else hno ()
+  | Syntax.node i k args => uif k == kind then hyes ⟨Syntax.node i k args, IsNode.mk i k args⟩ else hno ()
   | _                    => hno ()
 
 def asNode : Syntax → SyntaxNode
@@ -255,7 +255,7 @@ def eraseQuoteMacroScopes (stx : Syntax) : Syntax :=
     | ident info rawVal val preresolved =>
       -- Quotations keep the identifier as written as its raw value, while identifiers created from
       -- a name with macro scopes contain them (`x._@...`) in their raw value
-      bif rawVal.contains '@' then
+      uif rawVal.contains '@' then
         ident info rawVal val preresolved
       else
         ident info rawVal val.eraseMacroScopes preresolved
@@ -307,7 +307,7 @@ partial def updateTrailing (trailing : Substring.Raw) : Syntax → Syntax
   | Syntax.atom info val               => Syntax.atom (info.updateTrailing trailing) val
   | Syntax.ident info rawVal val pre   => Syntax.ident (info.updateTrailing trailing) rawVal val pre
   | n@(Syntax.node info k args)        =>
-    bif h : args.size =ᵇ 0 then n
+    uif h : args.size = 0 then n
     else
      let i    := args.size - 1
      let last := updateTrailing trailing args[i]
@@ -330,7 +330,7 @@ def identComponents? (stx : Syntax) (nFields? : Option Nat := none) : Option (Li
     -- With original info, we assume that `rawStr` represents `val`.
     let nameComps := nameComps val nFields?
     let rawComps := splitNameLit rawStr
-    bif !rawComps.isEmpty then
+    uif !rawComps.isEmpty then
       let rawComps :=
         if let some nFields := nFields? then
           let nPrefix := rawComps.length - nFields
@@ -339,11 +339,11 @@ def identComponents? (stx : Syntax) (nFields? : Option Nat := none) : Option (Li
           rawStr.extract 0 ⟨prefixSz⟩ :: rawComps.drop nPrefix
         else
           rawComps
-      bif nameComps.length == rawComps.length then
+      uif nameComps.length == rawComps.length then
         let comps := nameComps.zip rawComps |>.map fun (id, ss) =>
           let off := ss.startPos.unoffsetBy rawStr.startPos
-          let lead := bif off == 0 then lead else "".toRawSubstring
-          let trail := bif ss.stopPos == rawStr.stopPos then trail else "".toRawSubstring
+          let lead := uif off == 0 then lead else "".toRawSubstring
+          let trail := uif ss.stopPos == rawStr.stopPos then trail else "".toRawSubstring
           let info := original lead (pos.offsetBy off) trail (pos.offsetBy off |>.offsetBy ⟨ss.bsize⟩)
           ident info ss id []
         let seps := rawComps.dropLast.map fun ss =>
@@ -376,7 +376,7 @@ def identComponents (stx : Syntax) (nFields? : Option Nat := none) : List Syntax
   | ident si rawStr val _ => Id.run do
     let val := val.eraseMacroScopes
     -- Early return if the name has at most one component
-    bif val.getNumParts ≤ᵇ 1 then
+    uif val.getNumParts ≤ 1 then
       return [ident si rawStr val []]
     match si with
     | SourceInfo.original .. =>
@@ -418,7 +418,7 @@ partial instance [Monad m] : ForIn m TopDown Syntax where
       | ForInStep.yield b' =>
         let mut b := b'
         if let Syntax.node _ k args := stx then
-          bif firstChoiceOnly && k == choiceKind then
+          uif firstChoiceOnly && k == choiceKind then
             return ← loop args[0]! b
           else
             for arg in args do
@@ -438,7 +438,7 @@ partial def reprint (stx : Syntax) : Option String := do
     | atom info val           => s := s ++ reprintLeaf info val
     | ident info rawVal _ _   => s := s ++ reprintLeaf info rawVal.toString
     | node _    kind args     =>
-      bif kind == choiceKind then
+      uif kind == choiceKind then
         -- this visit the first arg twice, but that should hardly be a problem
         -- given that choice nodes are quite rare and small
         let s0 ← reprint args[0]!
@@ -459,7 +459,7 @@ where
 
 def hasMissing (stx : Syntax) : Bool := Id.run do
   for stx in stx.topDown do
-    bif stx.isMissing then
+    uif stx.isMissing then
       return true
   return false
 
@@ -495,29 +495,29 @@ def setCur (t : Traverser) (stx : Syntax) : Traverser :=
 
 /-- Advance to the `idx`-th child of the current node. -/
 def down (t : Traverser) (idx : Nat) : Traverser :=
-  bif idx <ᵇ t.cur.getNumArgs then
+  uif idx < t.cur.getNumArgs then
     { cur := t.cur.getArg idx, parents := t.parents.push <| t.cur.setArg idx default, idxs := t.idxs.push idx }
   else
     { cur := Syntax.missing, parents := t.parents.push t.cur, idxs := t.idxs.push idx }
 
 /-- Advance to the parent of the current node, if any. -/
 def up (t : Traverser) : Traverser :=
-  bif t.parents.size >ᵇ 0 then
-    let cur := bif t.idxs.back! <ᵇ t.parents.back!.getNumArgs then t.parents.back!.setArg t.idxs.back! t.cur else t.parents.back!
+  uif t.parents.size > 0 then
+    let cur := uif t.idxs.back! < t.parents.back!.getNumArgs then t.parents.back!.setArg t.idxs.back! t.cur else t.parents.back!
     { cur := cur, parents := t.parents.pop, idxs := t.idxs.pop }
   else
     t
 
 /-- Advance to the left sibling of the current node, if any. -/
 def left (t : Traverser) : Traverser :=
-  bif t.parents.size >ᵇ 0 then
+  uif t.parents.size > 0 then
     t.up.down (t.idxs.back! - 1)
   else
     t
 
 /-- Advance to the right sibling of the current node, if any. -/
 def right (t : Traverser) : Traverser :=
-  bif t.parents.size >ᵇ 0 then
+  uif t.parents.size > 0 then
     t.up.down (t.idxs.back! + 1)
   else
     t
@@ -565,8 +565,8 @@ def isQuot : Syntax → Bool
   | _                                             => false
 
 def getQuotContent (stx : Syntax) : Syntax :=
-  let stx := bif stx.getNumArgs == 1 then stx[0] else stx
-  bif stx.isOfKind `Lean.Parser.Term.dynamicQuot then
+  let stx := uif stx.getNumArgs == 1 then stx[0] else stx
+  uif stx.isOfKind `Lean.Parser.Term.dynamicQuot then
     stx[3]
   else
     stx[1]
@@ -580,7 +580,7 @@ def isAntiquots (stx : Syntax) : Bool :=
   stx.isAntiquot || (stx.isOfKind choiceKind && stx.getNumArgs > 0 && stx.getArgs.all isAntiquot)
 
 def getCanonicalAntiquot (stx : Syntax) : Syntax :=
-  bif stx.isOfKind choiceKind then
+  uif stx.isOfKind choiceKind then
     stx[0]
   else
     stx
@@ -588,13 +588,13 @@ def getCanonicalAntiquot (stx : Syntax) : Syntax :=
 def mkAntiquotNode (kind : Name) (term : Syntax) (nesting := 0) (name : Option String := none) (isPseudoKind := false) : Syntax :=
   let nesting := mkNullNode (.replicate nesting (mkAtom "$"))
   let term :=
-    bif term.isIdent then term
-    else bif term.isOfKind `Lean.Parser.Term.hole then term[0]
+    uif term.isIdent then term
+    else uif term.isOfKind `Lean.Parser.Term.hole then term[0]
     else mkNode `antiquotNestedExpr #[mkAtom "(", term, mkAtom ")"]
   let name := match name with
     | some name => mkNode `antiquotName #[mkAtom ":", mkAtom name]
     | none      => mkNullNode
-  mkNode (kind ++ (bif isPseudoKind then `pseudo else Name.anonymous) ++ `antiquot) #[mkAtom "$", nesting, term, name]
+  mkNode (kind ++ (uif isPseudoKind then `pseudo else Name.anonymous) ++ `antiquot) #[mkAtom "$", nesting, term, name]
 
 -- Antiquotations can be escaped as in `$$x`, which is useful for nesting macros. Also works for antiquotation splices.
 def isEscapedAntiquot (stx : Syntax) : Bool :=
@@ -602,16 +602,16 @@ def isEscapedAntiquot (stx : Syntax) : Bool :=
 
 -- Also works for antiquotation splices.
 def unescapeAntiquot (stx : Syntax) : Syntax :=
-  bif isAntiquot stx then
+  uif isAntiquot stx then
     stx.setArg 1 <| mkNullNode stx[1].getArgs.pop
   else
     stx
 
 -- Also works for token antiquotations.
 def getAntiquotTerm (stx : Syntax) : Syntax :=
-  let e := bif stx.isAntiquot then stx[2] else stx[3]
-  bif e.isIdent then e
-  else bif e.isAtom then mkNode `Lean.Parser.Term.hole #[e]
+  let e := uif stx.isAntiquot then stx[2] else stx[3]
+  uif e.isIdent then e
+  else uif e.isAtom then mkNode `Lean.Parser.Term.hole #[e]
   else
     -- `e` is from `"(" >> termParser >> ")"`
     e[1]
@@ -623,7 +623,7 @@ def antiquotKind? : Syntax → Option (SyntaxNodeKind × Bool)
   | _                                             => none
 
 def antiquotKinds (stx : Syntax) : List (SyntaxNodeKind × Bool) :=
-  bif stx.isOfKind choiceKind then
+  uif stx.isOfKind choiceKind then
     stx.getArgs.filterMap antiquotKind? |>.toList
   else
     match antiquotKind? stx with
@@ -643,7 +643,7 @@ def getAntiquotSpliceContents (stx : Syntax) : Array Syntax :=
 
 -- `$[..],*` or `$x,*` ~> `,*`
 def getAntiquotSpliceSuffix (stx : Syntax) : Syntax :=
-  bif stx.isAntiquotSplice then
+  uif stx.isAntiquotSplice then
     stx[5]
   else
     stx[1]
@@ -680,13 +680,13 @@ protected abbrev Stack := List (Syntax × Nat)
 
 /-- Return stack of syntax nodes satisfying `visit`, starting with such a node that also fulfills `accept` (default "is leaf"), and ending with the root. -/
 partial def findStack? (root : Syntax) (visit : Syntax → Bool) (accept : Syntax → Bool := fun stx => !stx.hasArgs) : Option Syntax.Stack :=
-  bif visit root then go [] root else none
+  uif visit root then go [] root else none
 where
   go (stack : Syntax.Stack) (stx : Syntax) : Option Syntax.Stack := Id.run do
-    bif accept stx then
+    uif accept stx then
       return (stx, 0) :: stack  -- the first index is arbitrary as there is no preceding element
     for i in *...stx.getNumArgs do
-      bif visit stx[i] then
+      uif visit stx[i] then
         if let some stack := go ((stx, i) :: stack) stx[i] then
           return stack
     return none
@@ -705,7 +705,7 @@ otherwise returns `none`.
 -/
 def addTrailing? (stx : Syntax) (trailing : Substring.Raw) : Option Syntax := do
   if let some (.original leading pos innerTrailing endPos) := stx.getTailInfo? then
-    bif innerTrailing.stopPos == trailing.startPos then
+    uif innerTrailing.stopPos == trailing.startPos then
       let trailing := { innerTrailing with stopPos := trailing.stopPos }
       return stx.setTailInfo (.original leading pos trailing endPos)
   none

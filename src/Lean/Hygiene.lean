@@ -47,8 +47,8 @@ protected def run {α : Type} (x : Unhygienic α) : α := (x ⟨Syntax.missing, 
 end Unhygienic
 
 private def mkInaccessibleUserNameAux (unicode : Bool) (name : Name) (idx : Nat) : Name :=
-  bif unicode then
-    bif idx == 0 then
+  uif unicode then
+    uif idx == 0 then
       name.appendAfter "✝"
     else
       name.appendAfter ("✝" ++ idx.toSuperscriptString)
@@ -61,7 +61,7 @@ private def mkInaccessibleUserName (unicode : Bool) : Name → Name
   | .num .anonymous idx =>
     mkInaccessibleUserNameAux unicode Name.anonymous idx
   | .num p idx =>
-    bif unicode then
+    uif unicode then
       (mkInaccessibleUserName unicode p).appendAfter ("⁻" ++ idx.toSuperscriptString)
     else
       Name.mkNum (mkInaccessibleUserName unicode p) idx
@@ -84,7 +84,7 @@ structure NameSanitizerState where
 private partial def mkFreshInaccessibleUserName (userName : Name) (idx : Nat) : StateM NameSanitizerState Name := do
   let s ← get
   let userNameNew := mkInaccessibleUserName (Std.Format.getUnicode s.options) (Name.mkNum userName idx)
-  bif s.nameStem2Idx.contains userNameNew then
+  uif s.nameStem2Idx.contains userNameNew then
     mkFreshInaccessibleUserName userName (idx+1)
   else do
     modify fun s => { s with nameStem2Idx := s.nameStem2Idx.insert userName (idx+1) }
@@ -102,13 +102,13 @@ private partial def sanitizeSyntaxAux : Syntax → StateM NameSanitizerState Syn
   | stx@(Syntax.ident _ _ n _) => do
     let n ← match (← get).userName2Sanitized.find? n with
       | some n' => pure n'
-      | none    => bif n.hasMacroScopes then sanitizeName n else pure n
+      | none    => uif n.hasMacroScopes then sanitizeName n else pure n
     return mkIdentFrom stx n
   | Syntax.node info k args => Syntax.node info k <$> args.mapM sanitizeSyntaxAux
   | stx => pure stx
 
 def sanitizeSyntax (stx : Syntax) : StateM NameSanitizerState Syntax := do
-  bif getSanitizeNames (← get).options then
+  uif getSanitizeNames (← get).options then
     sanitizeSyntaxAux stx
   else
     pure stx

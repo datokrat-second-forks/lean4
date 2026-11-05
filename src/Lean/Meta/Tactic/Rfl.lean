@@ -67,12 +67,12 @@ attribute [refl].
 def _root_.Lean.MVarId.applyRfl (goal : MVarId) : MetaM Unit := goal.withContext do
   -- NB: uses whnfR, we do not want to unfold the relation itself
   let t ← whnfR <|← instantiateMVars <|← goal.getType
-  bif t.getAppNumArgs <ᵇ 2 then
+  uif t.getAppNumArgs < 2 then
     throwTacticEx `rfl goal <| m!"Expected the goal to be a binary relation"
       ++ MessageData.hint' m!"Reflexivity tactics can only be used on goals of the form `x ~ x` or `R x x`"
 
   -- Special case HEq here as it has a different argument order.
-  bif t.isAppOfArity ``HEq 4 then
+  uif t.isAppOfArity ``HEq 4 then
     let gs ← goal.applyConst ``HEq.refl
     unless gs.isEmpty do
       throwTacticEx `rfl goal <| MessageData.tagged `Tactic.unsolvedGoals <| m!"unsolved goals\n{
@@ -91,7 +91,7 @@ def _root_.Lean.MVarId.applyRfl (goal : MVarId) : MetaM Unit := goal.withContext
       return m!"The left-hand side{indentExpr lhs}\nis not definitionally equal to the right-hand side{indentExpr rhs}"
     throwTacticEx `rfl goal explanation
 
-  bif rel.isAppOfArity `Eq 1 then
+  uif rel.isAppOfArity `Eq 1 then
     -- The common case is equality: just use `Eq.refl`
     let us := rel.appFn!.constLevels!
     let α :=  rel.appArg!
@@ -106,7 +106,7 @@ def _root_.Lean.MVarId.applyRfl (goal : MVarId) : MetaM Unit := goal.withContext
     for lem in ← (reflExt.getState (← getEnv)).getMatch rel do
       try
         let gs ← goal.apply (← mkConstWithFreshMVarLevels lem) (term? := m!"'{.ofConstName lem}'")
-        bif gs.isEmpty then return () else
+        uif gs.isEmpty then return () else
           throwError MessageData.tagged `Tactic.unsolvedGoals <| m!"unsolved goals\n{
             goalsToMessageData gs}"
       catch e =>
@@ -135,7 +135,7 @@ If this can't be done, returns the original `MVarId`.
 def _root_.Lean.MVarId.liftReflToEq (mvarId : MVarId) : MetaM MVarId := do
   mvarId.checkNotAssigned `liftReflToEq
   let .app (.app rel _) _ ← withReducible mvarId.getType' | return mvarId
-  bif rel.isAppOf `Eq then
+  uif rel.isAppOf `Eq then
     -- No need to lift Eq to Eq
     return mvarId
   for lem in ← (reflExt.getState (← getEnv)).getMatch rel do

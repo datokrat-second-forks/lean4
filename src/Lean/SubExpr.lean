@@ -43,42 +43,42 @@ def isRoot (p : Pos) : Bool := p.asNat < maxChildren
 
 /-- The coordinate deepest in the Pos. -/
 def head (p : Pos) : Nat :=
-  bif p.isRoot then panic! "already at top"
+  uif p.isRoot then panic! "already at top"
   else p.asNat % maxChildren
 
 def tail (p : Pos) : Pos :=
-  bif p.isRoot then panic! "already at top"
+  uif p.isRoot then panic! "already at top"
   else (p.asNat - p.head) / maxChildren
 
 def push (p : Pos) (c : Nat) : Pos :=
-  bif c ≥ᵇ maxChildren then panic! s!"invalid coordinate {c}"
+  uif c ≥ maxChildren then panic! s!"invalid coordinate {c}"
   else p.asNat * maxChildren + c
 
 variable {α : Type} [Inhabited α]
 
 /-- Fold over the position starting at the root and heading to the leaf-/
 partial def foldl  (f : α → Nat → α) (init : α) (p : Pos) : α :=
-  bif p.isRoot then init else f (foldl f init p.tail) p.head
+  uif p.isRoot then init else f (foldl f init p.tail) p.head
 
 /-- Fold over the position starting at the leaf and heading to the root-/
 partial def foldr  (f : Nat → α → α) (p : Pos) (init : α) : α :=
-  bif p.isRoot then init else foldr f p.tail (f p.head init)
+  uif p.isRoot then init else foldr f p.tail (f p.head init)
 
 /-- monad-fold over the position starting at the root and heading to the leaf -/
 partial def foldlM  [Monad M] (f : α → Nat → M α) (init : α) (p : Pos) : M α :=
   have : Inhabited (M α) := inferInstance
-  bif p.isRoot then pure init else do foldlM f init p.tail >>= (f · p.head)
+  uif p.isRoot then pure init else do foldlM f init p.tail >>= (f · p.head)
 
 /-- monad-fold over the position starting at the leaf and finishing at the root. -/
 partial def foldrM [Monad M] (f : Nat → α → M α) (p : Pos) (init : α) : M α :=
-  bif p.isRoot then pure init else f p.head init >>= foldrM f p.tail
+  uif p.isRoot then pure init else f p.head init >>= foldrM f p.tail
 
 def depth (p : Pos) :=
   p.foldr (init := 0) fun _ => Nat.succ
 
 /-- Returns true if `pred` is true for each coordinate in `p`.-/
 def all (pred : Nat → Bool) (p : Pos) : Bool :=
-  (Id.run <| OptionT.run (foldrM (fun n a => bif pred n then pure a else failure) p ())) |>.isSome
+  (Id.run <| OptionT.run (foldrM (fun n a => uif pred n then pure a else failure) p ())) |>.isSome
 
 def append : Pos → Pos → Pos := foldl push
 

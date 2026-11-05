@@ -62,7 +62,7 @@ builtin_initialize normSymExt : SimpleScopedEnvExtension NormSymEntry NormSymThe
     addEntry := NormSymTheorems.addEntry
     exportEntry? := fun _ e =>
       if let some declName := e.declName? then
-        bif isPrivateName declName then ⟨none, none, some e⟩ else .uniform (some e)
+        uif isPrivateName declName then ⟨none, none, some e⟩ else .uniform (some e)
       else .uniform (some e)
   }
 
@@ -87,14 +87,14 @@ def addNormTheorem (declName : Name) (post inv : Bool) (attrKind : AttributeKind
   for simpThm in simpThms do
     normExt.add (.thm simpThm) attrKind
     let some thm ← mkNormSymTheorem? simpThm | continue
-    normSymExt.add (bif post then .post thm else .pre thm) attrKind
-    bif post && simpThm.rfl then
+    normSymExt.add (uif post then .post thm else .pre thm) attrKind
+    uif post && simpThm.rfl then
       normSymExt.add (.dsimp (.thm thm)) attrKind
 
 /-- Adds the `[grind unfold]` declaration `declName` to `normSymExt`. -/
 def addNormSymDeclToUnfold (declName : Name) (attrKind : AttributeKind) : MetaM Unit := do
   -- `Sym` preprocessing unfolds reducible declarations (e.g., `GE.ge`, `Ne`) eagerly.
-  bif (← isReducible declName) then return
+  uif (← isReducible declName) then return
   try
     for thm in (← Sym.Simp.mkTheoremsFromDecl declName) do
       normSymExt.add (.post thm) attrKind
@@ -169,7 +169,7 @@ def getAttrKindCore (stx : Syntax) : CoreM AttrKind := do
 
 /-- Return theorem kind for `stx` of the form `(Attr.grindMod)?` -/
 def getAttrKindFromOpt (stx : Syntax) : CoreM AttrKind := do
-  bif stx[1].isNone then
+  uif stx[1].isNone then
     return .infer
   else
     getAttrKindCore stx[1][0]
@@ -313,15 +313,15 @@ private def mkGrindAttr (attrName : Name) (minIndexable : Bool) (showInfo : Bool
           ext.addEMatchAttrAndSuggest stx declName attrKind (← getGlobalSymbolPriorities) (minIndexable := minIndexable) (showInfo := showInfo)
       | .inj => ext.addInjectiveAttr declName attrKind
     erase := fun declName => MetaM.run' do
-      bif showInfo then
+      uif showInfo then
         throwError "`[{attrName}?]` is a helper attribute for displaying inferred patterns, if you want to remove the attribute, consider using `[{attrName}]` instead"
-      bif (← isCasesAttrCandidate declName false) then
+      uif (← isCasesAttrCandidate declName false) then
         ext.eraseCasesAttr declName
-      else bif (← ext.isExtTheorem declName) then
+      else uif (← ext.isExtTheorem declName) then
         ext.eraseExtAttr declName
-      else bif (← ext.isInjectiveTheorem declName) then
+      else uif (← ext.isInjectiveTheorem declName) then
         ext.eraseInjectiveAttr declName
-      else bif (← ext.hasFunCCAttr declName) then
+      else uif (← ext.hasFunCCAttr declName) then
         ext.eraseFunCCAttr declName
       else
         ext.eraseEMatchAttr declName

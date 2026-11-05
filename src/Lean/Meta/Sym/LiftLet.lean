@@ -161,12 +161,12 @@ def substEnv (xs : PArray Expr) (e : Expr) : M Expr := do
   replaceS e fun sub offset => do
     match sub with
     | .bvar idx =>
-      bif idx ≥ᵇ offset then
+      uif idx ≥ offset then
         pure (some xs[n - (idx - offset) - 1]!)
       else
         pure (some sub)
     | .lit _ | .mvar _ | .fvar _ | .const _ _ | .sort _ => pure (some sub)
-    | _ => bif offset ≥ᵇ sub.looseBVarRange then pure (some sub) else pure none
+    | _ => uif offset ≥ sub.looseBVarRange then pure (some sub) else pure none
 
 /--
 Main traversal. `xs` maps the de Bruijn indices of the enclosing (lifted) `let` binders
@@ -176,15 +176,15 @@ partial def go (xs : PArray Expr) (e : Expr) : M Expr := do
   match e with
   | .bvar idx =>
     let n := xs.size
-    bif _ : idx <ᵇ n then
+    uif _ : idx < n then
       return xs[n - idx - 1]
     else
       throwError "`Sym.liftLets` internal error, input term is not closed"
   | .fvar .. | .mvar .. | .sort .. | .const .. | .lit .. => return e
   | _ =>
-    bif !e.hasLooseBVars then
+    uif !e.hasLooseBVars then
       -- The result does not depend on `xs`; see `State.cacheClosed`.
-      bif !(← hasLiftableLet e) then
+      uif !(← hasLiftableLet e) then
         return e
       if let some r := (← get).cacheClosed[{ expr := e : ExprPtr }]? then
         return r
@@ -221,7 +221,7 @@ type/value and the body) is traversed exactly once.
 -/
 def mkLets (e : Expr) : M Expr := do
   let decls := (← get).decls
-  bif decls.isEmpty then
+  uif decls.isEmpty then
     return e
   let mut posMap : Std.HashMap FVarId Nat := {}
   let mut i := 0
@@ -238,7 +238,7 @@ def mkLets (e : Expr) : M Expr := do
         else
           pure (some sub)
       | .lit _ | .mvar _ | .bvar _ | .const _ _ | .sort _ => pure (some sub)
-      | _ => bif !sub.hasFVar then pure (some sub) else pure none
+      | _ => uif !sub.hasFVar then pure (some sub) else pure none
   let mut r ← abst e decls.size
   let mut j := decls.size
   for d in decls.reverse do
@@ -265,7 +265,7 @@ Assumptions:
 If nothing is lifted, the result is pointer-equal to `e` (check with `isSameExpr`).
 -/
 public def liftLets (e : Expr) : SymM Expr := do
-  bif e.hasLooseBVars then
+  uif e.hasLooseBVars then
     throwError "`Sym.liftLets` internal error, input term has loose bound variables"
   let x : LiftLet.M Expr := do LiftLet.mkLets (← LiftLet.go {} e)
   x.run' {}

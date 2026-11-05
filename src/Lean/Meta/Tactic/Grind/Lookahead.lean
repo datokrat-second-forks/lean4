@@ -42,7 +42,7 @@ private def tryLookahead (e : Expr) : GoalM Bool :=
     let mvar ← mkFreshExprSyntheticOpaqueMVar target tag
     let goalAux := { goal with mvarId := mvar.mvarId!, toProcess := {} }
     let gen ← getGeneration e
-    bif (← solve goalAux gen).isNone then
+    uif (← solve goalAux gen).isNone then
       return some (← instantiateMVars mvar)
     else
       return none
@@ -57,25 +57,25 @@ private def tryLookahead (e : Expr) : GoalM Bool :=
 def lookahead : GoalM Bool := do
   unless (← getConfig).lookahead do
     return false
-  bif (← get).split.lookaheads.isEmpty then
+  uif (← get).split.lookaheads.isEmpty then
     return false
   let mut postponed := []
   let mut progress := false
   let infos := (← get).split.lookaheads
   modify fun s => { s with split.lookaheads := [] }
   for info in infos do
-    bif (← isInconsistent) then
+    uif (← isInconsistent) then
       return true
     match (← checkSplitStatus info) with
     | .resolved => progress := true
     | .ready _ _ true
     | .notReady => postponed := info :: postponed
     | .ready _ _ false =>
-      bif (← tryLookahead info.getExpr) then
+      uif (← tryLookahead info.getExpr) then
         progress := true
       else
         postponed := info :: postponed
-  bif progress then
+  uif progress then
     modify fun s => { s with
       split.lookaheads := s.split.lookaheads ++ postponed.reverse
     }

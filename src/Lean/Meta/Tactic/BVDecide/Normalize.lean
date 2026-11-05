@@ -38,13 +38,13 @@ def passPipeline : PreProcessM (List Pass) := do
   let mut passPipeline := [rewriteRulesPass]
   let cfg ← PreProcessM.getConfig
 
-  bif cfg.acNf then
+  uif cfg.acNf then
     passPipeline := passPipeline ++ [bvAcNormalizePass]
 
-  bif cfg.embeddedConstraintSubst && cfg.andFlattening then
+  uif cfg.embeddedConstraintSubst && cfg.andFlattening then
     passPipeline := passPipeline ++ [andFlatteningPass]
 
-  bif cfg.embeddedConstraintSubst then
+  uif cfg.embeddedConstraintSubst then
     passPipeline := passPipeline ++ [embeddedConstraintPass]
 
   return passPipeline
@@ -58,7 +58,7 @@ def withCaches (x : PreProcessM α) : PreProcessM α := do
   if let some caches ← PreProcessM.withGrindGoal Grind.BVDecide.getCaches then
     PreProcessM.setCaches caches
   let res ← x
-  bif (← PreProcessM.isPushMode) then
+  uif (← PreProcessM.isPushMode) then
     discard <| PreProcessM.withGrindGoal <| Grind.BVDecide.setCaches (← PreProcessM.getCaches)
   return res
 
@@ -67,7 +67,7 @@ public def bvNormalize (hyps? : Option (Array Hyp) := none) : PreProcessM Bool :
     if let some hyps := hyps? then
       modify fun s => { s with hypotheses := hyps }
     else
-      bif (← PreProcessM.collectTargetHyps) then return true
+      uif (← PreProcessM.collectTargetHyps) then return true
     withCaches runPipeline
 where
   /--
@@ -78,10 +78,10 @@ where
     trace[Meta.Tactic.bv] m!"Running preprocessing pipeline"
     let cfg ← PreProcessM.getConfig
 
-    bif cfg.structures || cfg.enums then
-      bif (← typeAnalysisPass.run) then return true
+    uif cfg.structures || cfg.enums then
+      uif (← typeAnalysisPass.run) then return true
 
-    bif (← reductionPass.run) then return true
+    uif (← reductionPass.run) then return true
 
     /-
     There is a tension between the structures and enums pass at play:
@@ -99,23 +99,23 @@ where
        enums pass as described above. This comes down to adding a few more lemmas to a simp
        invocation that is going to happen in the enums pass anyway and should thus be cheap.
     -/
-    bif cfg.structures then
-      bif (← structuresPass.run) then return true
+    uif cfg.structures then
+      uif (← structuresPass.run) then return true
 
-    bif cfg.enums then
-      bif (← enumsPass.run) then return true
+    uif cfg.enums then
+      uif (← enumsPass.run) then return true
 
-    bif cfg.fixedInt then
-      bif (← intToBitVecPass.run) then return true
+    uif cfg.fixedInt then
+      uif (← intToBitVecPass.run) then return true
 
     let pipeline ← passPipeline
-    bif (← Pass.fixpointPipeline pipeline) then return true
+    uif (← Pass.fixpointPipeline pipeline) then return true
     /-
     Run short circuiting once post fixpoint, as it increases the size of terms with
     the aim of exposing potential short-circuit reasoning to the solver.
     -/
-    bif cfg.shortCircuit then
-      bif (← shortCircuitPass.run) then return true
+    uif cfg.shortCircuit then
+      uif (← shortCircuitPass.run) then return true
 
     return false
 

@@ -46,7 +46,7 @@ private def delayedEqProof : Expr := mkConst (Name.mkSimple "[grind_delayed_eq_p
 
 private def assignmentToMessageData (assignment : Array Expr) : Array MessageData :=
   assignment.reverse.map fun e =>
-    bif isSameExpr e unassigned then m!"_" else m!"{e}"
+    uif isSameExpr e unassigned then m!"_" else m!"{e}"
 
 /--
 Choice point for the backtracking search.
@@ -124,9 +124,9 @@ This function assumes `bidx < c.assignment.size`.
 Recall that we initialize the assignment array with the number of theorem parameters.
 -/
 private def assign? (c : Choice) (bidx : Nat) (e : Expr) : OptionT GoalM Choice := do
-  bif h : bidx <ᵇ c.assignment.size then
+  uif h : bidx < c.assignment.size then
     let v := c.assignment[bidx]
-    bif isSameExpr v unassigned then
+    uif isSameExpr v unassigned then
       return { c with assignment := c.assignment.set bidx e }
     else
       guard (← isEqv v e)
@@ -140,9 +140,9 @@ Assigns `bidx` with the marker for a delayed equality proof for generalized patt
 The proof is assigned after we have the complete assignment.
 -/
 private def assignDelayedEqProof? (c : Choice) (bidx : Nat) : OptionT GoalM Choice := do
-  bif h : bidx <ᵇ c.assignment.size then
+  uif h : bidx < c.assignment.size then
     let v := c.assignment[bidx]
-    bif isSameExpr v unassigned then
+    uif isSameExpr v unassigned then
       return { c with assignment := c.assignment.set bidx delayedEqProof }
     else
       return c
@@ -198,17 +198,17 @@ private def matchGroundPattern (pArg eArg : Expr) : GoalM Bool := do
   are not assigned. These universe metavariables are created at `internalizePattern` for universe polymorphic
   ground patterns. They are not common, but they occur in practice.
   -/
-  bif pArg.hasLevelMVar then
+  uif pArg.hasLevelMVar then
     withoutModifyingMCtx <| withReducibleAndInstances <| isDefEq pArg eArg
   else
     isEqv pArg eArg <||> withReducibleAndInstances (isDefEq pArg eArg)
 
 /-- Matches a pattern argument. See `matchArgs?`. -/
 private def matchArg? (c : Choice) (pArg : Expr) (eArg : Expr) : OptionT GoalM Choice := do
-  bif isPatternDontCare pArg then
+  uif isPatternDontCare pArg then
     return c
   let c ← saveSource c eArg
-  bif pArg.isBVar then
+  uif pArg.isBVar then
     assign? c pArg.bvarIdx! eArg
   else if let some pArg := groundPattern? pArg then
     guard (← matchGroundPattern pArg eArg)
@@ -218,7 +218,7 @@ private def matchArg? (c : Choice) (pArg : Expr) (eArg : Expr) : OptionT GoalM C
     assert! !isPatternDontCare pArg
     return { c with cnstrs := .offset none pArg k eArg :: c.cnstrs }
   else if let some (genInfo, pArg) := isGenPattern? pArg then
-    bif pArg.isBVar then
+    uif pArg.isBVar then
       let c ← assign? c pArg.bvarIdx! eArg
       genInfo.assign? c eArg
     else if let some pArg := groundPattern? pArg then
@@ -243,7 +243,7 @@ and `none` otherwise. It may update `c`s assignment and list of constraints to b
 processed.
 -/
 private partial def matchArgs? (c : Choice) (p : Expr) (e : Expr) : OptionT GoalM Choice := do
-  bif !p.isApp then return c -- Done
+  uif !p.isApp then return c -- Done
   let pArg := p.appArg!
   let eArg := e.appArg!
   let c ← matchArg? c pArg eArg
@@ -255,7 +255,7 @@ private partial def matchArgsPrefix? (c : Choice) (p : Expr) (e : Expr) : Option
   let en := e.getAppNumArgs
   guard (pn <= en)
   let c ← saveSource c e
-  bif pn == en then
+  uif pn == en then
     matchArgs? c p e
   else
     matchArgs? c p (e.getAppPrefix pn)
@@ -296,12 +296,12 @@ private partial def processMatch (c : Choice) (genInfo? : Option GenPatternInfo)
   repeat
     let n ← getENode curr
     -- Remark: we use `<` because the instance generation is the maximum term generation + 1
-    bif isCandidate n pFn numArgs maxGeneration then
+    uif isCandidate n pFn numArgs maxGeneration then
       if let some c ← assignGenInfo? genInfo? c e |>.run then
       if let some c ← matchArgs? c p curr |>.run then
         pushChoice (c.updateGen n.generation)
     curr ← getNext curr
-    bif isSameExpr curr e then break
+    uif isSameExpr curr e then break
 
 /--
 Matches offset pattern `pArg+k` with term `e` with respect to choice `c`.
@@ -311,16 +311,16 @@ private partial def processOffset (c : Choice) (genInfo? : Option GenPatternInfo
   let mut curr := e
   repeat
     let n ← getENode curr
-    bif n.generation <ᵇ maxGeneration then
+    uif n.generation < maxGeneration then
       if let some (eArg, k') ← Sym.Arith.isOffset? curr |>.run then
         if let some c ← assignGenInfo? genInfo? c e |>.run then
-          bif k' <ᵇ k then
+          uif k' < k then
             let c := c.updateGen n.generation
             pushChoice { c with cnstrs := .offset none pArg (k - k') eArg :: c.cnstrs }
-          else bif k' == k then
+          else uif k' == k then
             if let some c ← matchArg? c pArg eArg |>.run then
               pushChoice (c.updateGen n.generation)
-          else bif k' >ᵇ k then
+          else uif k' > k then
             let eArg' := mkNatAdd eArg (mkNatLit (k' - k))
             let eArg' ← shareCommon (← canon eArg')
             internalize eArg' (n.generation+1)
@@ -328,22 +328,22 @@ private partial def processOffset (c : Choice) (genInfo? : Option GenPatternInfo
               pushChoice (c.updateGen n.generation)
       else if let some k' ← Sym.Arith.evalNat? curr |>.run then
         if let some c ← assignGenInfo? genInfo? c e |>.run then
-          bif k' ≥ᵇ k then
+          uif k' ≥ k then
             let eArg' := mkNatLit (k' - k)
             let eArg' ← shareCommon (← canon eArg')
             internalize eArg' (n.generation+1)
             if let some c ← matchArg? c pArg eArg' |>.run then
               pushChoice (c.updateGen n.generation)
     curr ← getNext curr
-    bif isSameExpr curr e then break
+    uif isSameExpr curr e then break
 
 /--
 Returns "applications" in the given goal that may match `p`.
 We say "applications," because we assume a constant is a zero-ary application.
 -/
 private def getAppsOf (p : Expr) : GoalM (Option (List Expr)) := do
-  bif p.isConst then
-    bif (← alreadyInternalized p) then
+  uif p.isConst then
+    uif (← alreadyInternalized p) then
       return some [p]
     else
       return none
@@ -357,8 +357,8 @@ private def processContinue (c : Choice) (p : Expr) : M Unit := do
   let maxGeneration ← getMaxGeneration
   for app in apps do
     let n ← getENode app
-    bif n.generation <ᵇ maxGeneration
-       && (n.heqProofs || n.isCongrRoot) then
+    uif n.generation < maxGeneration
+       ∧ (n.heqProofs || n.isCongrRoot) then
       if let some c ← matchArgsPrefix? c p app |>.run then
         let gen := n.generation
         let c := { c with gen := Nat.max gen c.gen }
@@ -375,7 +375,7 @@ and the `MatchCond` propagators assume the annotated conditions have this shape.
 -/
 private partial def annotateEqnTypeConds (prop : Expr) (k : Expr → M Expr := pure) : M Expr := do
   if let .forallE n d b bi := prop then
-    let d := bif isMatchCondCandidate d then
+    let d := uif isMatchCondCandidate d then
       markAsPreMatchCond d
     else
       d
@@ -406,7 +406,7 @@ private def collectConstsWithLevelMVars (e : Expr) : CoreM (Array Expr) := do
 where
   go : StateRefT (Std.HashSet Expr) CoreM Unit := do
     e.forEach fun e => do
-      bif e.isConst && e.hasLevelMVar then
+      uif e.isConst && e.hasLevelMVar then
         modify (·.insert e)
 
 /--
@@ -450,23 +450,23 @@ private def assignUnassignedLevelMVars (us : Array LMVarId) (proof : Expr) (prop
       let consts : Std.HashSet Expr := Std.HashSet.ofList <| apps.map Expr.getAppFn
       candidates := candidates.push (c, consts.toArray)
   candidates := candidates.qsort fun (c₁, cs₁) (c₂, cs₂) =>
-    bif cs₁.size == cs₂.size then c₁.quickLt c₂ else cs₁.size < cs₂.size
+    uif cs₁.size == cs₂.size then c₁.quickLt c₂ else cs₁.size < cs₂.size
   let rec search (us : Array Level) (i : Nat) : StateRefT (Array (Expr × Expr)) MetaM Unit := do
     checkSystem "grind"
-    bif h : i <ᵇ candidates.size then
+    uif h : i < candidates.size then
       let (c, cs) := candidates[i]
       for c' in cs do
         let saved ← getMCtx
         try
-          bif (← isDefEq c c') then
+          uif (← isDefEq c c') then
             -- update pending universe metavariables
             let us ← us.filterMapM fun u => do
               let u ← instantiateLevelMVars u
-              bif (← hasAssignableLevelMVar u) then
+              uif (← hasAssignableLevelMVar u) then
                 return some u
               else
                 return none
-            bif us.isEmpty then
+            uif us.isEmpty then
               -- all universe metavariables have been assigned
               let prop ← instantiateMVars prop
               let proof ← instantiateMVars proof
@@ -498,13 +498,13 @@ Recall that new instances are internalized later, after a full round of ematchin
 private def addNewInstance (thm : EMatchTheorem) (proof : Expr) (generation : Nat)
     (guards : List TheoremGuard) (sources : PHashSet EMatchDiagNode) : M Unit := do
   let proof ← instantiateMVars proof
-  bif grind.debug.proofs.get (← getOptions) then
+  uif grind.debug.proofs.get (← getOptions) then
     check proof
   let prop ← inferType proof
   let us ← getUnassignedLevelMVars prop
-  bif !us.isEmpty then
+  uif !us.isEmpty then
     let pps ← assignUnassignedLevelMVars us proof prop
-    bif pps.isEmpty then
+    uif pps.isEmpty then
       reportEMatchIssue! "failed to instantiate `{thm.origin.pp}`, proposition contains universe metavariables{indentExpr prop}"
       return ()
     for (proof, prop) in pps do
@@ -515,7 +515,7 @@ where
   go (proof prop : Expr) : M Unit := do
     let mut proof := proof
     let mut prop := prop
-    bif (← getConfig).trace || (← getConfig).markInstances then
+    uif (← getConfig).trace || (← getConfig).markInstances then
       /-
       **Note**: It is incorrect to use `mkFreshId` here because we use `withFreshNGen` at
       `instantiateTheorem`. So, we generate an unique id by using the number of instances generated so far.
@@ -524,12 +524,12 @@ where
       let uniqueId := Name.num `_grind_inst (← getNumTheoremInstances)
       proof := markTheoremInstanceProof proof uniqueId
       modify fun s => { s with instanceMap := s.instanceMap.insert uniqueId thm }
-    bif (← isMatchEqLikeDeclName thm.origin.key) then
+    uif (← isMatchEqLikeDeclName thm.origin.key) then
       prop ← annotateMatchEqnType prop (← read).initApp
       -- We must add a hint here because `annotateMatchEqnType` introduces `simpMatchDiscrsOnly` and
       -- `Grind.PreMatchCond` which are not reducible.
       proof := mkExpectedPropHint proof prop
-    else bif (← isEqnThm thm.origin.key) then
+    else uif (← isEqnThm thm.origin.key) then
       prop ← annotateEqnTypeConds prop
       -- We must add a hint because `annotateEqnTypeConds` introduces `Grind.PreMatchCond`
       -- which is not reducible.
@@ -543,7 +543,7 @@ where
 private def synthesizeInsts (mvars : Array Expr) (bis : Array BinderInfo) : OptionT M Unit := do
   let thm := (← read).thm
   for mvar in mvars, bi in bis do
-    bif bi.isInstImplicit && !(← mvar.mvarId!.isAssigned) then
+    uif bi.isInstImplicit && !(← mvar.mvarId!.isAssigned) then
       let type ← inferType mvar
       unless (← synthInstanceAndAssign mvar type) do
         reportEMatchIssue! "failed to synthesize instance when instantiating {thm.origin.pp}{indentExpr type}"
@@ -577,8 +577,8 @@ where
   checkEqvToLhs? (rhs : Expr) : GoalM (Option Expr) := withoutModifyingState do
     internalize rhs (← getGeneration lhs)
     processToDo
-    bif (← isEqv lhs rhs) then
-      bif heq then
+    uif (← isEqv lhs rhs) then
+      uif heq then
         return some (← mkHEqProof lhs rhs)
       else
         return some (← mkEqProof lhs rhs)
@@ -599,9 +599,9 @@ a term that is structurally equal.
 **Note**: If this solution is not robust enough, we should store the original `lhs` when we perform an delayed assignment.
 -/
 private def findOriginalGeneralizedPatternLhs (lhs : Expr) : OptionT (StateT Choice M) Expr := do
-  bif (← alreadyInternalized lhs) then return lhs
+  uif (← alreadyInternalized lhs) then return lhs
   for val in (← get).assignment do
-    bif val == lhs then
+    uif val == lhs then
       return val
   reportEMatchIssue! "invalid generalized pattern at `{(← read).thm.origin.pp}`\nwhen processing argument{indentExpr lhs}"
   failure
@@ -651,12 +651,12 @@ private def processUnassigned (mvars : Array Expr) (i : Nat) (v : Expr) (h : i <
     The term `xs[j]` in our goal e-matches the pattern because we have the equality `xs.reverse = xs`.
     However, the implicit proof at `xs[j]` has type `j < xs.size` instead of `j < xs.reverse.size`.
     -/
-    bif (← isProp vType) then
+    uif (← isProp vType) then
       modify (unassign · bidx)
     else
       reportEMatchIssue! "type error constructing proof for {thm.origin.pp}\nwhen assigning metavariable {mvars[i]} with {indentExpr v}\n{← mkHasTypeButIsExpectedMsg vType mvarIdType}"
       failure
-  bif (← isDefEqD mvarIdType vType) then
+  uif (← isDefEqD mvarIdType vType) then
     unless (← mvarId.checkedAssign v) do unassignOrFail
   else
     if let some heq ← withoutReportingMVarIssues <| proveEq? vType mvarIdType (abstract := true) then
@@ -673,13 +673,13 @@ private def processUnassigned (mvars : Array Expr) (i : Nat) (v : Expr) (h : i <
 private def applyAssignment (mvars : Array Expr) : OptionT (StateT Choice M) Unit := do
   let numParams := (← read).thm.numParams
   let rec go (i : Nat) := do
-    bif h : i <ᵇ mvars.size then
+    uif h : i < mvars.size then
       let bidx := numParams - i - 1
       let v := (← get).assignment[bidx]!
-      bif isSameExpr v delayedEqProof then
-        processDelayed mvars i (lt_of_decideLT_eq_true h)
-      else bif !isSameExpr v unassigned then
-        processUnassigned mvars i v (lt_of_decideLT_eq_true h)
+      uif isSameExpr v delayedEqProof then
+        processDelayed mvars i h
+      else uif !isSameExpr v unassigned then
+        processUnassigned mvars i v h
       go (i + 1)
   go 0
 
@@ -742,15 +742,15 @@ where
     | .mdata _ e
     | .proj _ _ e      => go e
     | .app .. => e.withApp fun f args => do
-      bif f.hasLooseBVars then
+      uif f.hasLooseBVars then
         go f; args.forM go
       else
         let paramInfo := (← getFunInfo f).paramInfo
         for h : i in *...args.size do
           let arg := args[i]
-          bif h : i <ᵇ paramInfo.size then
+          uif h : i < paramInfo.size then
             let pinfo := paramInfo[i]
-            bif pinfo.isExplicit && !pinfo.isProp then
+            uif pinfo.isExplicit && !pinfo.isProp then
               go arg
           else
             go arg
@@ -763,8 +763,8 @@ private partial def isValue (e : Expr) (strict : Bool) : MetaM Bool := do
   | OfNat.ofNat _ n _ => return (← getNatValue? n).isSome
   | HDiv.hDiv _ _ _ _ a b => isValue a strict <&&> isValue b strict
   | _ =>
-    bif e.isLambda && !strict then return true
-    bif (← isLitValue e) then return true
+    uif e.isLambda && !strict then return true
+    uif (← isLitValue e) then return true
     let some (ctorVal, args) ← constructorApp'? e | return false
     for h : i in ctorVal.numParams...args.size do
       unless (← isValue args[i] strict) do return false
@@ -784,7 +784,7 @@ In the example above, a `map_map` instance should be added to the logical contex
 Remark: `proof` is used to extract the universe parameters in the proof.
 -/
 private def checkConstraints (thm : EMatchTheorem) (gen : Nat) (proof : Expr) (args : Array Expr) : GoalM Bool := do
-  bif thm.cnstrs.isEmpty then return true
+  uif thm.cnstrs.isEmpty then return true
   /- **Note**: Only top-level theorems have constraints. -/
   let .const declName us := proof | return true
   let info ← getConstInfo declName
@@ -807,7 +807,7 @@ private def checkConstraints (thm : EMatchTheorem) (gen : Nat) (proof : Expr) (a
     | .check _ | .guard _ => return true
 
 private def collectGuards (thm : EMatchTheorem) (proof : Expr) (args : Array Expr) : GoalM (List TheoremGuard) := do
-  bif thm.cnstrs.isEmpty then return []
+  uif thm.cnstrs.isEmpty then return []
   /- **Note**: Only top-level theorems have constraints. -/
   let .const declName us := proof | return []
   unless thm.cnstrs.any fun c => c matches .check _ | .guard _ do return []
@@ -817,7 +817,7 @@ private def collectGuards (thm : EMatchTheorem) (proof : Expr) (args : Array Exp
     let e := e.instantiateRev args
     let e := e.instantiateLevelParams info.levelParams us
     let e ← instantiateMVars e
-    bif e.hasMVar then
+    uif e.hasMVar then
       reportIssue! "guard for `{thm.origin.pp}` was skipped because it contains metavariables after theorem instantiation{indentExpr e}"
       return none
     return some e
@@ -845,15 +845,15 @@ private partial def instantiateTheorem (c : Choice) : M Unit := withDefault do w
   let numParams := thm.numParams
   assert! c.assignment.size == numParams
   let (mvars, bis, _) ← forallMetaBoundedTelescope (← inferType proof) numParams
-  bif mvars.size != thm.numParams then
+  uif mvars.size != thm.numParams then
     reportEMatchIssue! "unexpected number of parameters at {thm.origin.pp}"
     return ()
   let (some _, c) ← applyAssignment mvars |>.run c | return ()
   let some _ ← synthesizeInsts mvars bis | return ()
-  bif (← checkConstraints thm c.gen proof mvars) then
+  uif (← checkConstraints thm c.gen proof mvars) then
     let guards ← collectGuards thm proof mvars
     let proof := mkAppN proof mvars
-    bif (← mvars.allM (·.mvarId!.isAssigned)) then
+    uif (← mvars.allM (·.mvarId!.isAssigned)) then
       addNewInstance thm proof c.gen guards c.sources
     else
       let mvars ← mvars.filterM fun mvar => return !(← mvar.mvarId!.isAssigned)
@@ -867,9 +867,9 @@ private def processChoices : M Unit := do
   let maxGeneration ← getMaxGeneration
   while !(← get).choiceStack.isEmpty do
     checkSystem "ematch"
-    bif (← checkMaxInstancesExceeded) then return ()
+    uif (← checkMaxInstancesExceeded) then return ()
     let c ← modifyGet fun s : SearchState => (s.choiceStack.head!, { s with choiceStack := s.choiceStack.tail! })
-    bif c.gen <ᵇ maxGeneration then
+    uif c.gen < maxGeneration then
       match c.cnstrs with
       | [] => instantiateTheorem c
       | .match genInfo? p e :: cnstrs => processMatch { c with cnstrs } genInfo? p e
@@ -884,9 +884,9 @@ private def main (p : Expr) (cnstrs : List Cnstr) : M Unit := do
   let useMT      := (← read).useMT
   let gmt        := (← getThe Goal).ematch.gmt
   for app in apps do
-    bif (← checkMaxInstancesExceeded) then return ()
+    uif (← checkMaxInstancesExceeded) then return ()
     let n ← getENode app
-    bif (n.heqProofs || n.isCongrRoot) &&
+    uif (n.heqProofs || n.isCongrRoot) &&
        (!useMT || n.mt == gmt) then
       withInitApp app do
         if let some c ← matchArgsPrefix? { cnstrs, assignment, gen := n.generation } p app |>.run then
@@ -908,9 +908,9 @@ private def matchEqBwdPat (p : Expr) : M Unit := do
   let false      ← getFalseExpr
   let mut curr   := false
   repeat
-    bif (← checkMaxInstancesExceeded) then return ()
+    uif (← checkMaxInstancesExceeded) then return ()
     let n ← getENode curr
-    bif (n.heqProofs || n.isCongrRoot) &&
+    uif (n.heqProofs || n.isCongrRoot) &&
        (!useMT || n.mt == gmt) then
       let_expr Eq α lhs rhs := n.self | pure ()
       if let some c₀ ← matchArg? { cnstrs := [], assignment, gen := n.generation } pα α |>.run then
@@ -921,22 +921,22 @@ private def matchEqBwdPat (p : Expr) : M Unit := do
           processChoices
         go lhs rhs
         go rhs lhs
-    bif isSameExpr n.next false then return ()
+    uif isSameExpr n.next false then return ()
     curr := n.next
 
 def instantiateGroundTheorem (thm : EMatchTheorem) : M Unit := do
-  bif (← markTheoremInstance thm.proof #[]) then
+  uif (← markTheoremInstance thm.proof #[]) then
     let proof ← thm.getProofWithFreshMVarLevels
     addNewInstance thm proof 0 [] {}
 
 def ematchTheorem (thm : EMatchTheorem) : M Unit := do
-  bif (← checkMaxInstancesExceeded) then return ()
-  bif thm.numParams == 0 then
+  uif (← checkMaxInstancesExceeded) then return ()
+  uif thm.numParams == 0 then
     instantiateGroundTheorem thm
   else withReader (fun ctx => { ctx with thm }) do
     let ps := thm.patterns
     match ps, (← read).useMT with
-    | [p],   _     => bif isEqBwdPattern p then matchEqBwdPat p else main p []
+    | [p],   _     => uif isEqBwdPattern p then matchEqBwdPat p else main p []
     | p::ps, false => main p (ps.map (.continue ·))
     | _::_,  true  => tryAll ps []
     | _,     _     => unreachable!
@@ -970,7 +970,7 @@ private def ematchCore (extraThms : Array EMatchTheorem) : GoalM InstanceMap := 
     withReader (fun ctx => { ctx with useMT := false }) do
       ematchTheorems newThms
       extraThms.forM ematchTheorem
-  bif (← checkMaxInstancesExceeded <||> checkMaxEmatchExceeded) then
+  uif (← checkMaxInstancesExceeded <||> checkMaxEmatchExceeded) then
     return {}
   else
     let (_, s) ← go (← get).ematch.thms (← get).ematch.newThms |>.run
@@ -997,7 +997,7 @@ def ematch' (extraThms : Array EMatchTheorem := #[]) : GoalM (Bool × InstanceMa
     (← get).ematch.numDelayedInstances != numDelayedInstances
   -- Matching offset patterns and activating guards internalizes terms, which queues work.
   processToDo
-  bif (← getConfig).markInstances then
+  uif (← getConfig).markInstances then
     modifyThe Grind.State fun s => { s with instanceMap := s.instanceMap.insertMany map.toArray }
   return (progress, map)
 
@@ -1011,13 +1011,13 @@ def ematch (extraThms : Array EMatchTheorem := #[]) : GoalM Bool :=
 def ematchOnly (thms : Array EMatchTheorem) : GoalM Bool := do
   let numInstances := (← get).ematch.numInstances
   let (_, s) ← go |>.run
-  bif (← getConfig).markInstances then
+  uif (← getConfig).markInstances then
     modifyThe Grind.State fun st => { st with instanceMap := st.instanceMap.insertMany s.instanceMap.toArray }
   return (← get).ematch.numInstances != numInstances
 where
   go : EMatch.M Unit := do profileitM Exception "grind ematch" (← getOptions) do
     withReader (fun ctx => { ctx with useMT := false }) do
-      bif (← checkMaxInstancesExceeded <||> checkMaxEmatchExceeded) then
+      uif (← checkMaxInstancesExceeded <||> checkMaxEmatchExceeded) then
         return ()
       thms.forM ematchTheorem
 

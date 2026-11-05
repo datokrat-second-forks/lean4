@@ -69,7 +69,7 @@ partial def trySubstVarsAndContradiction (mvarId : MVarId) (forbidden : FVarIdSe
     match (← injections mvarId (forbidden := forbidden)) with
     | .solved => return true -- closed goal
     | .subgoal mvarId' _ forbidden =>
-      bif mvarId' == mvarId then
+      uif mvarId' == mvarId then
         contradiction mvarId
       else
         trySubstVarsAndContradiction mvarId' forbidden
@@ -82,23 +82,23 @@ def processNextEq : M Bool := do
       let eqType ← inferType (mkFVar eq)
       -- See `substRHS`. Recall that if `rhs` is a variable then if must be in `s.xs`
       if let some (_, lhs, rhs) ← matchEq? eqType then
-        bif (← isDefEq lhs rhs) then
+        uif (← isDefEq lhs rhs) then
           let mvarId ← s.mvarId.clear eq
           modify fun s => { s with mvarId }
           return true
-        bif rhs.isFVar && s.xs.contains rhs.fvarId! then
+        uif rhs.isFVar && s.xs.contains rhs.fvarId! then
           substRHS eq rhs.fvarId!
           return true
       if let some _ ← matchHEq? eqType then
         -- Try to convert `HEq` into `Eq`
         let (eqNew, mvarId) ← heqToEq s.mvarId eq (tryToClear := true)
-        bif mvarId != s.mvarId then
+        uif mvarId != s.mvarId then
           modify fun s => { s with mvarId, eqs := eqNew :: s.eqs }
           return true
         -- If it is not possible, we try to show the hypothesis is redundant by substituting even
         -- variables that are not at `s.xs`, and then use contradiction.
         else
-          bif (← trySubstVarsAndContradiction s.mvarId) then
+          uif (← trySubstVarsAndContradiction s.mvarId) then
             return false
       try
         -- Try to simplify equation using `injection` tactic.
@@ -111,9 +111,9 @@ def processNextEq : M Bool := do
     return true
 
 partial def go : M Bool := do
-  bif (← isDone) then
+  uif (← isDone) then
     return true
-  else bif (← processNextEq) then
+  else uif (← processNextEq) then
     go
   else
     return false
@@ -132,7 +132,7 @@ public partial def simpH (mvarId : MVarId) (numEqs : Nat) : MetaM (Option MVarId
   let (xs, mvarId) ← mvarId.introN numVars
   let (eqs, mvarId) ← mvarId.introN numEqs
   let (r, s) ← SimpH.go |>.run { mvarId, xs := xs.toList, eqs := eqs.toList }
-  bif r then
+  uif r then
     s.mvarId.withContext do
       let eqs := s.eqsNew.reverse.toArray
       let mvarId' := s.mvarId

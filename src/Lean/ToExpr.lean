@@ -38,7 +38,7 @@ instance : ToExpr Nat where
 
 instance : ToExpr Int where
   toTypeExpr := .const ``Int []
-  toExpr i := bif 0 ≤ᵇ i then
+  toExpr i := uif 0 ≤ i then
     mkNat i.toNat
   else
     mkApp3 (.const ``Neg.neg [0]) (.const ``Int []) (.const ``Int.instNegInt [])
@@ -51,7 +51,7 @@ where
 
 instance : ToExpr Rat where
   toTypeExpr := .const ``Rat []
-  toExpr i   := bif i.den == 1 then
+  toExpr i   := uif i.den == 1 then
     mkInt i.num
   else
     mkApp6 (.const ``HDiv.hDiv [0, 0, 0]) (.const ``Rat []) (.const ``Rat []) (.const ``Rat [])
@@ -59,7 +59,7 @@ instance : ToExpr Rat where
       (mkInt i.num) (mkInt i.den)
 where
   mkInt (i : Int) : Expr :=
-    bif 0 ≤ᵇ i then
+    uif 0 ≤ i then
       mkNat i.toNat
     else
       mkApp3 (.const ``Neg.neg [0]) (.const ``Rat []) (.const ``Rat.instNeg [])
@@ -119,7 +119,7 @@ instance : ToExpr USize where
 
 instance : ToExpr Int8 where
   toTypeExpr := mkConst ``Int8
-  toExpr i := bif 0 ≤ᵇ i then
+  toExpr i := uif 0 ≤ i then
     mkNat i.toNatClampNeg
   else
     mkApp3 (.const ``Neg.neg [0]) (.const ``Int8 []) (.const ``Int8.instNeg [])
@@ -132,7 +132,7 @@ where
 
 instance : ToExpr Int16 where
   toTypeExpr := mkConst ``Int16
-  toExpr i := bif 0 ≤ᵇ i then
+  toExpr i := uif 0 ≤ i then
     mkNat i.toNatClampNeg
   else
     mkApp3 (.const ``Neg.neg [0]) (.const ``Int16 []) (.const ``Int16.instNeg [])
@@ -145,7 +145,7 @@ where
 
 instance : ToExpr Int32 where
   toTypeExpr := mkConst ``Int32
-  toExpr i := bif 0 ≤ᵇ i then
+  toExpr i := uif 0 ≤ i then
     mkNat i.toNatClampNeg
   else
     mkApp3 (.const ``Neg.neg [0]) (.const ``Int32 []) (.const ``Int32.instNeg [])
@@ -158,7 +158,7 @@ where
 
 instance : ToExpr Int64 where
   toTypeExpr := mkConst ``Int64
-  toExpr i := bif 0 ≤ᵇ i then
+  toExpr i := uif 0 ≤ i then
     mkNat i.toNatClampNeg
   else
     mkApp3 (.const ``Neg.neg [0]) (.const ``Int64 []) (.const ``Int64.instNeg [])
@@ -171,7 +171,7 @@ where
 
 instance : ToExpr ISize where
   toTypeExpr := mkConst ``ISize
-  toExpr i := bif 0 ≤ᵇ i then
+  toExpr i := uif 0 ≤ i then
     mkNat i.toNatClampNeg
   else
     mkApp3 (.const ``Neg.neg [0]) (.const ``ISize []) (.const ``ISize.instNeg [])
@@ -183,7 +183,7 @@ where
         (.app (.const ``ISize.instOfNat []) r)
 
 instance : ToExpr Bool where
-  toExpr     := fun b => bif b then mkConst ``Bool.true else mkConst ``Bool.false
+  toExpr     := fun b => uif b then mkConst ``Bool.true else mkConst ``Bool.false
   toTypeExpr := mkConst ``Bool
 
 instance : ToExpr Char where
@@ -203,7 +203,7 @@ instance : ToExpr System.FilePath where
   toTypeExpr := mkConst ``System.FilePath
 
 private def Name.toExprAux (n : Name) : Expr :=
-  bif isSimple n 0 then
+  uif isSimple n 0 then
     mkStr n 0 #[]
   else
     go n

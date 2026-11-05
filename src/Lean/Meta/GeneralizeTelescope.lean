@@ -20,12 +20,12 @@ structure Entry where
   modified : Bool
 
 partial def updateTypes (e eNew : Expr) (entries : Array Entry) (i : Nat) : MetaM (Array Entry) :=
-  bif h : i <ᵇ entries.size then
+  uif h : i < entries.size then
     let entry := entries[i]
     match entry with
     | ⟨_, type, _⟩ => do
       let typeAbst ← kabstract type e
-      bif typeAbst.hasLooseBVars then do
+      uif typeAbst.hasLooseBVars then do
         let typeNew := typeAbst.instantiate1 eNew
         let entries := entries.set i { entry with type := typeNew, modified := true }
         updateTypes e eNew entries (i+1)
@@ -36,7 +36,7 @@ partial def updateTypes (e eNew : Expr) (entries : Array Entry) (i : Nat) : Meta
 
 partial def generalizeTelescopeAux {α} (k : Array Expr → MetaM α)
     (entries : Array Entry) (i : Nat) (fvars : Array Expr) : MetaM α := do
-  bif h : i <ᵇ entries.size then
+  uif h : i < entries.size then
     let replace (baseUserName : Name) (e : Expr) (type : Expr) : MetaM α := do
       let userName ← mkFreshUserName baseUserName
       withLocalDeclD userName type fun x => do
@@ -49,7 +49,7 @@ partial def generalizeTelescopeAux {α} (k : Array Expr → MetaM α)
       | .cdecl .. => generalizeTelescopeAux k entries (i+1) (fvars.push e)
       | .ldecl .. => replace localDecl.userName e type
     | ⟨e, type, modified⟩ =>
-      bif modified then
+      uif modified then
         unless (← isTypeCorrect type) do
           throwError "failed to create telescope generalizing {entries.map Entry.expr}"
       replace `x e type

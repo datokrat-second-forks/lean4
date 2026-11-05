@@ -33,7 +33,7 @@ namespace Normalize
 
 def getBitVecSize (domainSize : Nat) : Nat :=
   let bvSize := Nat.log2 domainSize
-  bif 2^bvSize == domainSize then
+  uif 2^bvSize == domainSize then
     bvSize
   else
     bvSize + 1
@@ -51,9 +51,9 @@ The inverse function to `mkRealizedName` for supported suffixes.
 -/
 def isRealizedName? (env : Environment) (name : Name) : Option (Name × String) := Id.run do
   let .str p s := name | return none
-  bif !isSupportedSuffix s then return none
+  uif !isSupportedSuffix s then return none
   let some declName := [p, privateToUserName p].find? (env.setExporting false).contains | return none
-  bif name != mkRealizedName env declName s then return none
+  uif name != mkRealizedName env declName s then return none
   return some (declName, s)
 where
   isSupportedSuffix (s : String) : Bool :=
@@ -67,10 +67,10 @@ For a given `fn` if it is an `enumToBitVec` function return the enum it is assoc
 -/
 public def enumToBitVecType? (env : Environment) (fn : Name) : Option Name := Id.run do
   let .str _ s := fn | return none
-  bif s != enumToBitVecSuffix then return none
+  uif s != enumToBitVecSuffix then return none
   let some decl := env.setExporting false |>.find? fn | return none
   let .forallE _ (.const enumType _) _ _ := decl.type | return none
-  bif fn != mkRealizedName env enumType enumToBitVecSuffix then return none
+  uif fn != mkRealizedName env enumType enumToBitVecSuffix then return none
   return enumType
 
 /--
@@ -82,7 +82,7 @@ def getEnumToBitVecFor (declName : Name) : MetaM Name := do
   realizeConst declName enumToBitVecName do
     let env ← getEnv
     let .inductInfo inductiveInfo ← getConstInfo declName | throwError m!"{.ofConstName declName} is not an inductive."
-    bif !(← isEnumType declName) then
+    uif !(← isEnumType declName) then
       throwError m!"{.ofConstName declName} is not an enum inductive."
     let domainSize := inductiveInfo.ctors.length
     let bvSize := getBitVecSize domainSize
@@ -338,7 +338,7 @@ where
 
           let discrParams := discrType.constLevels!
           let rec intersperseDefault hs idx acc := do
-            bif idx == inductiveInfo.numCtors then
+            uif idx == inductiveInfo.numCtors then
               return acc.reverse
             else
               match hs with
@@ -347,7 +347,7 @@ where
                 let new := (idx, mkApp hdefault ctor)
                 intersperseDefault hs (idx + 1) (new :: acc)
               | hs@((cidx, h) :: tail) =>
-                bif cidx == idx then
+                uif cidx == idx then
                   let new := (idx, mkApp h (mkConst ``Unit.unit))
                   intersperseDefault tail (idx + 1) (new :: acc)
                 else
@@ -382,7 +382,7 @@ def getMatchEqCondFor (declName : Name) : MetaM Name := do
 builtin_initialize
   registerReservedNamePredicate fun env name => Id.run do
     let some (declName, suffix) := isRealizedName? env name | return false
-    bif suffix == matchEqCondSuffix then
+    uif suffix == matchEqCondSuffix then
       isMatcherCore env declName
     else
       true
@@ -390,20 +390,20 @@ builtin_initialize
 builtin_initialize
   registerReservedNameAction fun name => do
     let some (p, s) := isRealizedName? (← getEnv) name | return false
-    bif s == matchEqCondSuffix then
-      bif (← isMatcher p) then
+    uif s == matchEqCondSuffix then
+      uif (← isMatcher p) then
         discard <| MetaM.run' (getMatchEqCondFor p)
         return true
       else
         return false
-    else bif (← isEnumType p) then
-      bif s == enumToBitVecSuffix then
+    else uif (← isEnumType p) then
+      uif s == enumToBitVecSuffix then
         discard <| MetaM.run' (getEnumToBitVecFor p)
         return true
-      else bif s == eqIffEnumToBitVecEqSuffix then
+      else uif s == eqIffEnumToBitVecEqSuffix then
         discard <| MetaM.run' (getEqIffEnumToBitVecEqFor p)
         return true
-      else bif s == enumToBitVecLeSuffix then
+      else uif s == enumToBitVecLeSuffix then
         discard <| MetaM.run' (getEnumToBitVecLeFor p)
         return true
       else
@@ -419,7 +419,7 @@ It will check if `x` is a constructor and if that is the case constant fold it t
 def enumToBitVecCtor : Sym.Simp.Simproc := fun e => do
   let .app (.const fn ..) (.const arg ..) := e | return .rfl
   let some p := enumToBitVecType? (← getEnv) fn | return .rfl
-  bif !(← isEnumType p) then return .rfl
+  uif !(← isEnumType p) then return .rfl
   let .inductInfo inductiveInfo ← getConstInfo p | unreachable!
   let ctors := inductiveInfo.ctors
   let some ctorIdx := ctors.findIdx? (· == arg) | return .rfl
@@ -459,7 +459,7 @@ public partial def enumsPass : Pass where
       let analysis ← PreProcessM.getTypeAnalysis
       let interestingEnums := analysis.interestingEnums
       -- invariant: if there is no interesting enums there also can't be interesting matchers
-      bif interestingEnums.isEmpty then return false
+      uif interestingEnums.isEmpty then return false
 
       let mut methods := {}
       let mut relevantLemmas : Sym.Simp.Theorems := {}
@@ -491,11 +491,11 @@ public partial def enumsPass : Pass where
       -- presence of control flow.
       let cfg ← PreProcessM.getConfig
       methods ← addDefaultTypeAnalysisLemmas methods
-      bif cfg.structures then
+      uif cfg.structures then
         methods ← addStructureSimpLemmas methods
 
       -- same for fixed integers
-      bif cfg.fixedInt then
+      uif cfg.fixedInt then
         methods ← addIntToBitVecLemmas goal methods
 
       let cfg ← PreProcessM.getConfig
@@ -504,7 +504,7 @@ public partial def enumsPass : Pass where
       }
 
       let solved ← PreProcessM.mapSimpHyps methods config
-      bif solved then return true
+      uif solved then return true
       discard <| postprocess goal |>.run' {}
       return false
 where
@@ -520,7 +520,7 @@ where
       let mut relevantIndex : Std.HashSet Name := {}
       for enum in analysis.interestingEnums do
         let domainSize := (← getConstInfoInduct enum).ctors.length
-        bif decide domainSize.isPowerOfTwo then continue
+        uif decide domainSize.isPowerOfTwo then continue
         relevantIndex := relevantIndex.insert enum
 
       let processor e := do
@@ -530,7 +530,7 @@ where
         hypotheses could contain the same term but we still do not want to duplicate bounds
         hypotheses for it.
         -/
-        bif (← get).seen.contains ⟨e⟩ then return ()
+        uif (← get).seen.contains ⟨e⟩ then return ()
         let .app (.const fn ..) val := e | unreachable!
         let some enumType := enumToBitVecType? (← getEnv) fn | return ()
         unless relevantIndex.contains enumType do return ()

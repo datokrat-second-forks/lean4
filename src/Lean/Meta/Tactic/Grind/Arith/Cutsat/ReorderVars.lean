@@ -34,11 +34,11 @@ private def updateUpper (a : Nat) (x : Var) : CollectM Unit := do
 
 private def updateMin (a : Nat) (x : Var) : CollectM Unit := do
   modify fun infos => infos.modify x fun info =>
-    { info with minCoeff := bif info.minCoeff == 0 then a else min a info.minCoeff }
+    { info with minCoeff := uif info.minCoeff == 0 then a else min a info.minCoeff }
 
 private def updateVarCoeff (a : Int) (x : Var) : CollectM Unit := do
   updateMin a.natAbs x
-  bif a <ᵇ 0 then updateLower a.natAbs x else updateUpper a.natAbs x
+  uif a < 0 then updateLower a.natAbs x else updateUpper a.natAbs x
 
 private def updateDvd (a : Nat) (x : Var) : CollectM Unit := do
   modify fun infos => infos.modify x fun info => { info with maxDvdCoeff := max a info.maxDvdCoeff }
@@ -154,7 +154,7 @@ the order changes; it is used after a `requestReorder`.
 -/
 def reorderVars (force := false) : GoalM Unit := do
   let s ← get'
-  bif s.vars.isEmpty then return () -- nothing to reorder
+  uif s.vars.isEmpty then return () -- nothing to reorder
   let infos ← collectVarInfo
   let new2old ← sortVars infos
   let old2new := mkPermInv new2old

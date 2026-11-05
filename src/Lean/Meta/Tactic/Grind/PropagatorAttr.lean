@@ -27,7 +27,7 @@ builtin_initialize builtinPropagatorsRef : IO.Ref BuiltinPropagators ← IO.mkRe
 private def registerBuiltinPropagatorCore (declName : Name) (up : Bool) (proc : Propagator) : IO Unit := do
   unless (← initializing) do
     throw (IO.userError s!"invalid builtin `grind` propagator declaration, it can only be registered during initialization")
-  bif up then
+  uif up then
     builtinPropagatorsRef.modify fun { up, down } => { up := up.insert declName proc, down }
   else
     builtinPropagatorsRef.modify fun { up, down } => { up, down := down.insert declName proc }
@@ -41,7 +41,7 @@ def registerBuiltinDownwardPropagator (declName : Name) (proc : Propagator) : IO
 private def addBuiltin (propagatorName : Name) (stx : Syntax) : AttrM Unit := do
   let go : MetaM Unit := withoutExporting do  -- result will be private anyway
     let up := stx[1].getKind == ``Lean.Parser.Tactic.simpPost
-    let addDeclName := bif up then
+    let addDeclName := uif up then
       ``registerBuiltinUpwardPropagator
     else
       ``registerBuiltinDownwardPropagator

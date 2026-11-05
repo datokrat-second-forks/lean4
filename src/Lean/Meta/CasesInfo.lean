@@ -69,13 +69,13 @@ public def getCasesInfo? (declName : Name) : CoreM (Option CasesInfo) := do
       -- We recognize the per-ctor elims side condition here
       let xsTys ← (xs.extract (discrPos+1)).mapM inferType
       let hasSideCondition : Bool := !xsTys.isEmpty && xsTys[0]!.getForallBody.getAppFn != r.getAppFn
-      let altsRange := (discrPos + (bif hasSideCondition then 2 else 1))...arity
+      let altsRange := (discrPos + (uif hasSideCondition then 2 else 1))...arity
       let altNumParams ← altsRange.toArray.mapM fun idx => do
         forallTelescope (xsTys[idx - discrPos - 1]!) fun ys mr => do
           assert! mr.isApp
           let motiveArg := mr.appArg!
           -- If the motive is applied to the major premise...
-          bif motiveArg.isFVar then
+          uif motiveArg.isFVar then
             -- Then this is the catch-all case of a sparse match
             assert! motiveArg == xs[discrPos]!
             return .default ys.size

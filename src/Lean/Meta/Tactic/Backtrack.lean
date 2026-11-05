@@ -121,7 +121,7 @@ private def run (goals : List MVarId) (n : Nat) (curr acc : List MVarId) : MetaM
       return acc.reverse
   | g :: gs =>
   -- Discard any goals which have already been assigned.
-  bif (← g.isAssigned) then
+  uif (← g.isAssigned) then
     withTraceNode trace (fun _ => return m!"discarding already assigned goal {g}") do
       run goals (n+1) gs acc
   else
@@ -131,7 +131,7 @@ private def run (goals : List MVarId) (n : Nat) (curr acc : List MVarId) : MetaM
     (fun _ => return m!"working on: {← addMessageContextFull g}")
     do
       -- Check if we should suspend the search here:
-      bif (← cfg.suspend g) then
+      uif (← cfg.suspend g) then
         withTraceNode trace
           (fun _ => return m!"⏸️ suspending search and returning as subgoal") do
         run goals (n+1) gs (g :: acc)
@@ -160,7 +160,7 @@ private partial def processIndependentGoals (orig : List MVarId) (goals remainin
   -- (which should be solvable without affecting the solvability of other goals)
   -- and all the others.
   let (igs, ogs) ← remaining.partitionM (MVarId.isIndependentOf goals)
-  bif igs.isEmpty then
+  uif igs.isEmpty then
     -- If there are no independent goals, we solve all the goals together via backtracking search.
     return (← run cfg trace next orig cfg.maxDepth remaining [])
   else
@@ -179,9 +179,9 @@ private partial def processIndependentGoals (orig : List MVarId) (goals remainin
     let goals' := (← goals.filterM (fun g => do pure !(← g.isAssigned))) ++ newSubgoals
     -- If `commitIndependentGoals` is `true`, we will return the new goals
     -- regardless of whether we can make further progress on the other goals.
-    bif cfg.commitIndependentGoals && !newSubgoals.isEmpty then
+    uif cfg.commitIndependentGoals && !newSubgoals.isEmpty then
       return newSubgoals ++ failed ++ (← (processIndependentGoals orig goals' ogs <|> pure ogs))
-    else bif !failed.isEmpty then
+    else uif !failed.isEmpty then
       -- If `commitIndependentGoals` is `false`, and we failed on any of the independent goals,
       -- then overall failure is inevitable so we can stop here.
       failure

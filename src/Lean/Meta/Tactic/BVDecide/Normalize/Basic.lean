@@ -365,7 +365,7 @@ Drops the caches of all passes that maintain one. In `bv_decide_push` mode this 
 caches are the very thing that we want to hand to the next invocation.
 -/
 def dropPassCaches : PreProcessM Unit := do
-  bif !(← read).keepCaches then
+  uif !(← read).keepCaches then
     setCaches {}
 
 @[inline]
@@ -375,9 +375,9 @@ def getTypeAnalysis : PreProcessM TypeAnalysis := do
 @[inline]
 def lookupInterestingStructure (n : Name) : PreProcessM (Option Bool) := do
   let s ← getTypeAnalysis
-  bif s.uninteresting.contains n then
+  uif s.uninteresting.contains n then
     return some false
-  else bif s.interestingStructures.contains n then
+  else uif s.interestingStructures.contains n then
     return some true
   else
     return none
@@ -437,7 +437,7 @@ def flatMapHyps [Monad m] [MonadTrace m] [MonadOptions m] [AddMessageContext m] 
     match h : res.size with
     | 1 =>
       let newHyp := res[0]
-      bif newHyp != hyp then
+      uif newHyp != hyp then
         trace[Meta.Tactic.bv] m!"{hyp.type}  ==>  {newHyp.type}"
         setDidChange
     | 0 | n + 2 =>
@@ -455,11 +455,11 @@ def mapIdxHyps [Monad m] [MonadLiftT PreProcessM m] [MonadError m] [MonadMCtx m]
   for h : idx in 0...hyps.size do
     let hyp := hyps[idx]
     let newHyp ← f idx hyp
-    bif newHyp.type.isFalse then
+    uif newHyp.type.isFalse then
       PreProcessM.closeTarget newHyp.value
       return true
     else
-      bif hyp != newHyp then
+      uif hyp != newHyp then
         trace[Meta.Tactic.bv] m!"{hyp.type}  ==>  {newHyp.type}"
         setDidChange
       newHyps := newHyps.push newHyp
@@ -567,11 +567,11 @@ where
     checkSystem "bv_decide"
     PreProcessM.resetDidChange
     for pass in passes do
-      bif (← pass.run) then
+      uif (← pass.run) then
         trace[Meta.Tactic.bv] "Fixpoint iteration solved the goal"
         return true
 
-    bif (← PreProcessM.didChange) then
+    uif (← PreProcessM.didChange) then
       trace[Meta.Tactic.bv] m!"Rerunning pipeline"
       go
     else

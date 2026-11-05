@@ -41,8 +41,8 @@ def motivePos (info : RecursorInfo) : Nat := info.numParams
 def firstIndexPos (info : RecursorInfo) : Nat := info.majorPos - info.numIndices
 
 def isMinor (info : RecursorInfo) (pos : Nat) : Bool :=
-  bif pos ≤ᵇ info.motivePos then false
-  else bif info.firstIndexPos ≤ᵇ pos && pos ≤ᵇ info.majorPos then false
+  uif pos ≤ info.motivePos then false
+  else uif info.firstIndexPos ≤ pos ∧ pos ≤ info.majorPos then false
   else true
 
 def numMinors (info : RecursorInfo) : Nat :=
@@ -71,17 +71,17 @@ instance : ToString RecursorInfo := ⟨fun info =>
 end RecursorInfo
 
 private def getMajorPosIfAuxRecursor? (declName : Name) (majorPos? : Option Nat) : MetaM (Option Nat) :=
-  bif majorPos?.isSome then pure majorPos?
+  uif majorPos?.isSome then pure majorPos?
   else do
     let env ← getEnv
-    bif !isAuxRecursor env declName then pure none
+    uif !isAuxRecursor env declName then pure none
     else match declName with
     | .str p s =>
-      bif s != recOnSuffix && s != casesOnSuffix && s != brecOnSuffix then
+      uif s != recOnSuffix && s != casesOnSuffix && s != brecOnSuffix then
         pure none
       else do
         let val ← getConstInfoRec (mkRecName p)
-        pure $ some (val.numParams + val.numIndices + (bif s == casesOnSuffix then 1 else val.numMotives))
+        pure $ some (val.numParams + val.numIndices + (uif s == casesOnSuffix then 1 else val.numMotives))
     | _ => pure none
 
 private def checkMotive (declName : Name) (motive : Expr) (motiveArgs : Array Expr) : MetaM Unit :=
@@ -91,8 +91,8 @@ private def checkMotive (declName : Name) (motive : Expr) (motiveArgs : Array Ex
 /-- Compute number of parameters for (user-defined) recursor.
    We assume a parameter is anything that occurs before the motive -/
 private partial def getNumParams (xs : Array Expr) (motive : Expr) (i : Nat) : Nat :=
-  bif h : i <ᵇ xs.size then
-    bif motive == xs[i] then i
+  uif h : i < xs.size then
+    uif motive == xs[i] then i
     else getNumParams xs motive (i+1)
   else
     i
@@ -101,13 +101,13 @@ private def getMajorPosDepElim (declName : Name) (majorPos? : Option Nat) (xs : 
     : MetaM (Expr × Nat × Bool) := do
   match majorPos? with
   | some majorPos =>
-    bif h : majorPos <ᵇ xs.size then
+    uif h : majorPos < xs.size then
       let major   := xs[majorPos]
       let depElim := motiveArgs.contains major
       pure (major, majorPos, depElim)
     else throwError "invalid major premise position for user defined recursor, recursor has only {xs.size} arguments"
   | none => do
-    bif motiveArgs.isEmpty then
+    uif motiveArgs.isEmpty then
       throwError "invalid user defined recursor, `{.ofConstName declName}` does not support dependent elimination, and position of the major premise was not specified (solution: set attribute `[recursor <pos>]`, where `<pos>` is the position of the major premise)"
     let major := motiveArgs.back!
     match xs.idxOf? major with
@@ -122,7 +122,7 @@ private def getParamsPos (declName : Name) (xs : Array Expr) (numParams : Nat) (
     | some j => paramsPos := paramsPos.push (some j)
     | none   => do
       let localDecl ← x.fvarId!.getDecl
-      bif localDecl.binderInfo.isInstImplicit then
+      uif localDecl.binderInfo.isInstImplicit then
         paramsPos := paramsPos.push none
       else
         throwError"invalid user defined recursor `{.ofConstName declName}`, type of the major premise does not contain the recursor parameter"
@@ -149,7 +149,7 @@ private def getUnivLevelPos (declName : Name) (lparams : List Name) (motiveLvl :
   let Ilevels := Ilevels.toArray
   let mut univLevelPos := #[]
   for p in lparams do
-    bif motiveLvl == mkLevelParam p then
+    uif motiveLvl == mkLevelParam p then
       univLevelPos := univLevelPos.push RecursorUnivLevelPos.motive
     else
       match Ilevels.findIdx? fun u => u == mkLevelParam p with
@@ -162,23 +162,23 @@ private def getProduceMotiveAndRecursive (xs : Array Expr) (numParams numIndices
   let mut produceMotive := #[]
   let mut recursor      := false
   for h : i in *...xs.size do
-    bif i <ᵇ numParams + 1 then
+    uif i < numParams + 1 then
       continue --skip parameters and motive
-    bif majorPos - numIndices ≤ᵇ i && i ≤ᵇ majorPos then
+    uif majorPos - numIndices ≤ i ∧ i ≤ majorPos then
       continue -- skip indices and major premise
     -- process minor premise
     let x := xs[i]
     let xType ← inferType x
     (produceMotive, recursor) ← forallTelescopeReducing xType fun minorArgs minorResultType => minorResultType.withApp fun res _ => do
       let produceMotive := produceMotive.push (res == motive)
-      let recursor ← bif recursor then pure recursor else minorArgs.anyM fun minorArg => do
+      let recursor ← uif recursor then pure recursor else minorArgs.anyM fun minorArg => do
         let minorArgType ← inferType minorArg
         pure (minorArgType.find? fun e => e == motive).isSome
       pure (produceMotive, recursor)
   pure (produceMotive.toList, recursor)
 
 private def checkMotiveResultType (declName : Name) (motiveArgs : Array Expr) (motiveResultType : Expr) (motiveTypeParams : Array Expr) : MetaM Unit := do
-  bif !motiveResultType.isSort || motiveArgs.size != motiveTypeParams.size then
+  uif !motiveResultType.isSort || motiveArgs.size != motiveTypeParams.size then
     throwError "invalid user defined recursor `{.ofConstName declName}`, motive must have a type of the form (C : Pi (i : B A), I A i -> Type), where A is a (possibly empty) sequence of variables (aka parameters), (i : B A) is a (possibly empty) telescope (aka indices), and I is a constant"
 
 private def mkRecursorInfoCore (declName : Name) (majorPos? : Option Nat) : MetaM RecursorInfo := do
@@ -188,8 +188,8 @@ private def mkRecursorInfoCore (declName : Name) (majorPos? : Option Nat) : Meta
     checkMotive declName motive motiveArgs
     let numParams := getNumParams xs motive 0
     let (major, majorPos, depElim) ← getMajorPosDepElim declName majorPos? xs motiveArgs
-    let numIndices := bif depElim then motiveArgs.size - 1 else motiveArgs.size
-    bif majorPos <ᵇ numIndices then
+    let numIndices := uif depElim then motiveArgs.size - 1 else motiveArgs.size
+    uif majorPos < numIndices then
       throwError "invalid user defined recursor `{.ofConstName declName}`, indices must occur before major premise"
     let majorType ← inferType major
     majorType.withApp fun I Iargs =>
@@ -221,9 +221,9 @@ private def mkRecursorInfoCore (declName : Name) (majorPos? : Option Nat) : Meta
 @[builtin_attr_parser] def «recursor» := leading_parser "recursor " >> numLit
 -/
 def Attribute.Recursor.getMajorPos (stx : Syntax) : AttrM Nat := do
-  bif stx.getKind == `Lean.Parser.Attr.recursor then
+  uif stx.getKind == `Lean.Parser.Attr.recursor then
     let pos := stx[1].isNatLit?.getD 0
-    bif pos == 0 then
+    uif pos == 0 then
       throwErrorAt stx "major premise position must be greater than zero"
     return pos - 1
   else

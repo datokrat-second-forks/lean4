@@ -27,14 +27,14 @@ def shortCircuitProc : Sym.Simp.Simproc := fun e => withDoneResult do
   let_expr BitVec w := α | return .rfl
   let_expr HMul.hMul _ _ _ _ llhs lrhs := lhs | return .rfl
   let_expr HMul.hMul _ _ _ _ rlhs rrhs := rhs | return .rfl
-  bif Sym.isSameExpr llhs rlhs then
+  uif Sym.isSameExpr llhs rlhs then
     let condition1 := mkApp (mkConst ``Bool.not) (mkApp4 (mkConst ``BEq.beq [0]) α inst lrhs rrhs)
     let condition2 := mkApp (mkConst ``Bool.not) e
     let condition ← Sym.share <|
       mkApp (mkConst ``Bool.not) (mkApp2 (mkConst ``Bool.and) condition1 condition2)
     let proof := mkApp4 (mkConst ``mul_beq_mul_short_circuit_right) w llhs lrhs rrhs
     return .step condition proof
-  else bif Sym.isSameExpr lrhs rrhs then
+  else uif Sym.isSameExpr lrhs rrhs then
     let condition1 := mkApp (mkConst ``Bool.not) (mkApp4 (mkConst ``BEq.beq [0]) α inst llhs rlhs)
     let condition2 := mkApp (mkConst ``Bool.not) e
     let condition ← Sym.share <|

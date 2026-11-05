@@ -38,7 +38,7 @@ def addSimpMatchDiscrsOnly (s : Simprocs) : CoreM Simprocs := do
 
 /-- Erases `Grind.simpMatchDiscrsOnly` annotations. -/
 def eraseSimpMatchDiscrsOnly (e : Expr) : MetaM Simp.Result := do
-  bif e.find? isSimpMatchDiscrsOnly |>.isNone then
+  uif e.find? isSimpMatchDiscrsOnly |>.isNone then
     return { expr := e }
   else
     let pre (e : Expr) := do

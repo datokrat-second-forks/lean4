@@ -56,13 +56,13 @@ def simpStep : Simproc := fun e => do
   | .lam .. => simpLambda e
   | .forallE .. => simpForall e
   | .letE .. => simpLet e
-  | .app .. => bif isLitApp e then return .rfl else simpAppArgs e
+  | .app .. => uif isLitApp e then return .rfl else simpAppArgs e
 
 set_option compiler.ignoreBorrowAnnotation true in
 @[export lean_sym_simp]
 def simpImpl (e₁ : Expr) : SimpM Result := withIncRecDepth do
   let numSteps := (← get).numSteps
-  bif numSteps ≥ᵇ (← getConfig).maxSteps then
+  uif numSteps ≥ (← getConfig).maxSteps then
     throwError "`simp` failed: maximum number of steps exceeded"
   let key : ExprPtr := { expr := e₁ }
   if let some result := (← get).persistentCache.find? key then
@@ -72,7 +72,7 @@ def simpImpl (e₁ : Expr) : SimpM Result := withIncRecDepth do
     trace[sym.simp.debug.cache] "transient cache hit: {e₁}"
     return result
   let numSteps := numSteps + 1
-  bif numSteps % 1000 == 0 then
+  uif numSteps % 1000 == 0 then
     checkSystem "simp"
   modify fun s => { s with numSteps }
   let r₁ ← pre e₁
@@ -84,7 +84,7 @@ def simpImpl (e₁ : Expr) : SimpM Result := withIncRecDepth do
   -- If `pre` was context-dependent (cd₁ = true) but returned `.rfl`, it might
   -- succeed in another context. Propagate cd₁ so the cached result for `e₁`
   -- lands in the transient cache and gets re-evaluated after binder entry.
-  let r₂ := bif cd₁ && !r₂.isContextDependent then r₂.withContextDependent else r₂
+  let r₂ := uif cd₁ && !r₂.isContextDependent then r₂.withContextDependent else r₂
   match r₂ with
   | .rfl _ _ | .step _ _ true _ => cacheResult e₁ r₂
   | .step e₂ h₁ false cd₁ => cacheResult e₁ (← mkEqTransResult e₁ e₂ h₁ (← simp e₂) cd₁)

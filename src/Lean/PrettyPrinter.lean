@@ -36,7 +36,7 @@ register_builtin_option pp.exprSizes : Bool := {
 }
 
 private def maybePrependExprSizes (e : Expr) (f : Format) : MetaM Format := do
-  bif pp.exprSizes.get (← getOptions) then
+  uif pp.exprSizes.get (← getOptions) then
     return f!"[size {e.sizeWithoutSharing}/{← e.numObjs}/{← (ShareCommon.shareCommon' e).numObjs}] {f}"
   else
     return f
@@ -85,7 +85,7 @@ open Delaborator in
 def ppSignature (c : Name) : MetaM FormatWithInfos := do
   let decl ← getConstInfo c
   let e := Expr.const c (decl.levelParams.map mkLevelParam)
-  bif pp.raw.get (← getOptions) then
+  uif pp.raw.get (← getOptions) then
     return s!"{e} : {decl.type}"
   else
     let (stx, infos) ← delabCore e (delab := delabConstWithSignature)
@@ -147,7 +147,7 @@ argument is implicit, which is what the default `toMessageData` for `Expr` does.
 Panics if `e` is not a constant.
 -/
 def ofConst (e : Expr) : MessageData :=
-  bif e.isConst then
+  uif e.isConst then
     let delab : Delab := withOptionAtCurrPos `pp.tagAppFns true delabConst
     .ofFormatWithInfosM (PrettyPrinter.ppExprWithInfos (delab := delab) e)
   else

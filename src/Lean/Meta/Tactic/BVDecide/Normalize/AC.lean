@@ -141,7 +141,7 @@ def VarStateM.exprToVar (e : Expr) : VarStateM VarIndex := do
 /-- Return the expression that is represented by a specific variable index. -/
 def VarStateM.varToExpr (idx : VarIndex) : VarStateM Expr := do
   let varToExpr := (← get).varToExpr
-  bif h : idx <ᵇ varToExpr.size then
+  uif h : idx < varToExpr.size then
     return varToExpr[idx]
   else
     throwError "internal error (this is a bug!): index {idx} out of range, \
@@ -169,7 +169,7 @@ where
     return coeff.alter idx (fun c => some <| (c.getD 0) + 1)
   go (coeff : CoefficientsMap) : Expr → VarStateM CoefficientsMap
     | e@(AC.bin op' x y) => do
-        bif op.isSameKind op' then
+        uif op.isSameKind op' then
           let coeff ← go coeff x
           let coeff ← go coeff y
           return coeff
@@ -195,7 +195,7 @@ for all valid variable indices `idx`.
 -/
 def SharedCoefficients.compute (x y : CoefficientsMap) : VarStateM SharedCoefficients := do
   let swappedXy := x.size >ᵇ y.size
-  let (x, y) := bif swappedXy then (y, x) else (x, y)
+  let (x, y) := uif swappedXy then (y, x) else (x, y)
   -- This is O(|x|) = O(min(|x|, |y|)) as we sort by size above.
   let common : CoefficientsMap := x.fold (init := {}) fun common idx xCnt =>
     match y[idx]? with
@@ -208,7 +208,7 @@ def SharedCoefficients.compute (x y : CoefficientsMap) : VarStateM SharedCoeffic
   let y : CoefficientsMap := common.fold (init := y) fun y idx commonCnt =>
     y.modify idx (fun cnt => cnt - commonCnt)
 
-  let (x, y) := bif swappedXy then (y, x) else (x, y)
+  let (x, y) := uif swappedXy then (y, x) else (x, y)
   return { x, y, common }
 
 /-- Compute the canonical expression for a given set of coefficients.
@@ -269,7 +269,7 @@ def canonicalizeWithSharing (P : Expr) (lhs rhs : Expr) : Sym.Simp.SimpM Sym.Sim
     return .rfl
 
   -- Ignore cases where LHS and RHS ops are different.
-  bif op != op' then
+  uif op != op' then
     trace[Meta.Tactic.bv] "Operations mismatch:
       the left-hand-side has operation {op}
         {indentExpr lhs}
@@ -297,7 +297,7 @@ def canonicalizeWithSharing (P : Expr) (lhs rhs : Expr) : Sym.Simp.SimpM Sym.Sim
 
     let oldExpr := mkApp2 P lhs rhs
     let newExpr := mkApp2 P lNew rNew
-    bif oldExpr == newExpr then return .rfl
+    uif oldExpr == newExpr then return .rfl
     let proof ← proveEqualityByAC oldExpr newExpr
 
     return .step (← Sym.share newExpr) proof

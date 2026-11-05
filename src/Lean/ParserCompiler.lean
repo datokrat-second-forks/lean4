@@ -33,8 +33,8 @@ def Context.tyName {α} (ctx : Context α) : Name := ctx.categoryAttr.defn.value
 def replaceParserTy {α} (ctx : Context α) (e : Expr) : Expr :=
   e.replace fun e =>
     -- strip `optParam`
-    let e := bif e.isOptParam then e.appFn!.appArg! else e
-    bif e.isConstOf `Lean.Parser.Parser then mkConst ctx.tyName else none
+    let e := uif e.isOptParam then e.appFn!.appArg! else e
+    uif e.isConstOf `Lean.Parser.Parser then mkConst ctx.tyName else none
 
 open Meta Parser in
 /-- Takes an expression of type `Parser`, and determines the syntax kind of the root node it produces. -/
@@ -42,11 +42,11 @@ partial def parserNodeKind? (e : Expr) : MetaM (Option Name) := do
   let reduceEval? e : MetaM (Option Name) := do
     try pure <| some (← reduceEval e) catch _ => pure none
   let e ← whnfCore e
-  bif e matches Expr.lam .. | Expr.letE .. then
+  uif e matches Expr.lam .. | Expr.letE .. then
     lambdaLetTelescope (preserveNondepLet := false) e fun _ e => parserNodeKind? e
-  else bif e.isAppOfArity ``leadingNode 3 || e.isAppOfArity ``trailingNode 4 || e.isAppOfArity ``node 2 then
+  else uif e.isAppOfArity ``leadingNode 3 || e.isAppOfArity ``trailingNode 4 || e.isAppOfArity ``node 2 then
     reduceEval? (e.getArg! 0)
-  else bif e.isAppOfArity ``withAntiquot 2 then
+  else uif e.isAppOfArity ``withAntiquot 2 then
     parserNodeKind? (e.getArg! 1)
   else forallTelescope (← inferType e.getAppFn) fun params _ => do
     let lctx ← getLCtx
@@ -83,7 +83,7 @@ partial def compileParserExpr (e : Expr) : MetaM Expr := do
           let arg   := args[i]!
           let paramTy ← inferType param
           let resultTy ← forallTelescope paramTy fun _ b => pure b
-          let arg ← bif resultTy.isConstOf ctx.tyName then compileParserExpr arg else pure arg
+          let arg ← uif resultTy.isConstOf ctx.tyName then compileParserExpr arg else pure arg
           p := mkApp p arg
         return p
     let env ← getEnv
@@ -93,7 +93,7 @@ partial def compileParserExpr (e : Expr) : MetaM Expr := do
       let c' := c ++ ctx.varName
       let cinfo ← getConstInfo c
       let resultTy ← forallTelescope cinfo.type fun _ b => pure b
-      bif resultTy.isConstOf ``Lean.Parser.TrailingParser || resultTy.isConstOf ``Lean.Parser.Parser then do
+      uif resultTy.isConstOf ``Lean.Parser.TrailingParser || resultTy.isConstOf ``Lean.Parser.Parser then do
         -- synthesize a new `[combinatorAttr c]`
         let some value ← pure cinfo.value?
           | throwError "don't know how to generate {ctx.varName} for non-definition `{e}`"
@@ -112,12 +112,12 @@ partial def compileParserExpr (e : Expr) : MetaM Expr := do
         -- `ctx.combinatorAttr` may enforce correct use of the modifier, infer now.
         addAndCompile decl (markMeta := isMarkedMeta (← getEnv) c)
         modifyEnv (ctx.combinatorAttr.setDeclFor · c c')
-        bif cinfo.type.isConst then
+        uif cinfo.type.isConst then
           if let some kind ← parserNodeKind? cinfo.value! then
             -- If the parser is parameter-less and produces a node of kind `kind`,
             -- then tag the compiled definition as `[(builtin)Parenthesizer kind]`
             -- (or `[(builtin)Formatter kind]`, resp.)
-            let attrName := bif builtin then ctx.categoryAttr.defn.builtinName else ctx.categoryAttr.defn.name
+            let attrName := uif builtin then ctx.categoryAttr.defn.builtinName else ctx.categoryAttr.defn.name
             -- Create syntax node for a simple attribute of the form
             -- `def simple := leading_parser ident >> optional (ident <|> priorityParser)`
             let stx := mkNode `Lean.Parser.Attr.simple #[mkIdent attrName, mkNullNode #[mkIdent kind]]

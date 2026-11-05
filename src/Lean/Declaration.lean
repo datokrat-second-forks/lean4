@@ -459,8 +459,8 @@ of theorems and opaque declarations are also returned.
 def value? (info : ConstantInfo) (allowOpaque := false) : Option Expr :=
   match info with
   | .defnInfo {value, ..}   => some value
-  | .thmInfo  {value, ..}   => bif allowOpaque then some value else none
-  | .opaqueInfo {value, ..} => bif allowOpaque then some value else none
+  | .thmInfo  {value, ..}   => uif allowOpaque then some value else none
+  | .opaqueInfo {value, ..} => uif allowOpaque then some value else none
   | _                       => none
 
 /--
@@ -482,8 +482,8 @@ of theorems and opaque declarations are also returned.
 def value! (info : ConstantInfo) (allowOpaque := false) : Expr :=
   match info with
   | .defnInfo {value, ..}   => value
-  | .thmInfo  {value, ..}   => bif allowOpaque then value else panic! "declaration with value expected"
-  | .opaqueInfo {value, ..} => bif allowOpaque then value else panic! "declaration with value expected"
+  | .thmInfo  {value, ..}   => uif allowOpaque then value else panic! "declaration with value expected"
+  | .opaqueInfo {value, ..} => uif allowOpaque then value else panic! "declaration with value expected"
   | _                       => panic! s!"declaration with value expected, but {info.name} has none"
 
 def hints : ConstantInfo → ReducibilityHints

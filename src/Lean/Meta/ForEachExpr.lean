@@ -61,7 +61,7 @@ partial def forEachExpr'
   let _ : MonadLiftT (ST IO.RealWorld) m := { monadLift := fun x => liftM (m := MetaM) (liftM (m := ST IO.RealWorld) x) }
   let rec visit (e : Expr) : MonadCacheT Expr Unit m Unit :=
     checkCache e fun _ => do
-      bif (← liftM (fn e)) then
+      uif (← liftM (fn e)) then
         match e with
         | .forallE ..   => visitForall visit e
         | .lam ..       => visitLambda visit e
@@ -94,15 +94,15 @@ private def shouldInferBinderName (x : Expr) : m Bool := do
 def setMVarUserNamesAt (e : Expr) (isTarget : Array Expr) : MetaM (Array MVarId) := do
   let toReset ← IO.mkRef #[]
   forEachExpr (← instantiateMVars e) fun e => do
-    bif e.isApp then
+    uif e.isApp then
       let args := e.getAppArgs
       for h : i in *...args.size do
         let arg := args[i]
-        bif arg.isMVar && isTarget.contains arg then
+        uif arg.isMVar && isTarget.contains arg then
           let mvarId := arg.mvarId!
-          bif (← mvarId.getDecl).userName.isAnonymous then
+          uif (← mvarId.getDecl).userName.isAnonymous then
             forallBoundedTelescope (← inferType e.getAppFn) (some (i+1)) fun xs _ => do
-              bif i <ᵇ xs.size then
+              uif i < xs.size then
                 let mvarId := arg.mvarId!
                 let userName ← mkFreshUserName (← getFVarLocalDecl xs[i]!).userName
                 toReset.modify (·.push mvarId)
@@ -125,7 +125,7 @@ def resetMVarUserNames (toReset : Array MVarId) : MetaM Unit := do
   The "renaming" is temporary.
 -/
 def mkForallFVars' (xs : Array Expr) (type : Expr) : MetaM Expr := do
-  bif (← xs.anyM shouldInferBinderName) then
+  uif (← xs.anyM shouldInferBinderName) then
     let setMVarsAt (e : Expr) : StateRefT (Array MVarId) MetaM Unit := do
       let mvarIds ← setMVarUserNamesAt e xs
       modify (· ++ mvarIds)

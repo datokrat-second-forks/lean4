@@ -135,7 +135,7 @@ where
       else addAsVar e
     | Int.neg a => return .neg (← toLinearExpr a)
     | Neg.neg _ i a =>
-      bif (← DefEq.isInstNegInt i) then
+      uif (← DefEq.isInstNegInt i) then
         /-
         A negative numeral `-n` is reified as `.num (-n)` rather than `.neg (.num n)`.
         `simpExpr?` and the other simprocs decide whether a term is already in normal form by
@@ -149,24 +149,24 @@ where
       else addAsVar e
     | Int.add a b => return .add (← toLinearExpr a) (← toLinearExpr b)
     | Add.add _ i a b =>
-      bif (← DefEq.isInstAddInt i) then return .add (← toLinearExpr a) (← toLinearExpr b)
+      uif (← DefEq.isInstAddInt i) then return .add (← toLinearExpr a) (← toLinearExpr b)
       else addAsVar e
     | HAdd.hAdd _ _ _ i a b =>
-      bif (← DefEq.isInstHAddInt i) then return .add (← toLinearExpr a) (← toLinearExpr b)
+      uif (← DefEq.isInstHAddInt i) then return .add (← toLinearExpr a) (← toLinearExpr b)
       else addAsVar e
     | Int.sub a b => return .sub (← toLinearExpr a) (← toLinearExpr b)
     | Sub.sub _ i a b =>
-      bif (← DefEq.isInstSubInt i) then return .sub (← toLinearExpr a) (← toLinearExpr b)
+      uif (← DefEq.isInstSubInt i) then return .sub (← toLinearExpr a) (← toLinearExpr b)
       else addAsVar e
     | HSub.hSub _ _ _ i a b =>
-      bif (← DefEq.isInstHSubInt i) then return .sub (← toLinearExpr a) (← toLinearExpr b)
+      uif (← DefEq.isInstHSubInt i) then return .sub (← toLinearExpr a) (← toLinearExpr b)
       else addAsVar e
     | Int.mul a b => mul a b
     | Mul.mul _ i a b =>
-      bif (← DefEq.isInstMulInt i) then mul a b
+      uif (← DefEq.isInstMulInt i) then mul a b
       else addAsVar e
     | HMul.hMul _ _ _ i a b =>
-      bif (← DefEq.isInstHMulInt i) then mul a b
+      uif (← DefEq.isInstHMulInt i) then mul a b
       else addAsVar e
     | _ => addAsVar e
 
@@ -223,7 +223,7 @@ end ToLinear
 
 def toLinearExpr (e : Expr) : MetaM (Int.Internal.Linear.Expr × Array Expr) := do
   let (e, atoms) ← ToLinear.run (ToLinear.toLinearExpr e)
-  bif atoms.size == 1 then
+  uif atoms.size == 1 then
     return (e, atoms)
   else
     let (atoms, perm) := sortExprs atoms (lt := false)
@@ -234,7 +234,7 @@ def toLinearExpr (e : Expr) : MetaM (Int.Internal.Linear.Expr × Array Expr) := 
 private def adapter (e : Expr) (k : Expr → ToLinear.M (Option (Int.Internal.Linear.Expr × Int.Internal.Linear.Expr))) : MetaM (Option (Int.Internal.Linear.Expr × Int.Internal.Linear.Expr × Array Expr)) := do
   let (some (lhs, rhs), atoms) ← ToLinear.run (k e)
     | return none
-  bif atoms.size ≤ᵇ 1 then
+  uif atoms.size ≤ 1 then
     return some (lhs, rhs, atoms)
   else
     -- We use `lt := false` because `Poly.norm` sorts variables in decreasing order.
@@ -253,7 +253,7 @@ def leCnstr? (e : Expr) : MetaM (Option (Int.Internal.Linear.Expr × Int.Interna
 def dvdCnstr? (e : Expr) : MetaM (Option (Int × Int.Internal.Linear.Expr × Array Expr)) := do
   let (some (d, e), atoms) ← ToLinear.run (ToLinear.dvdCnstr? e)
     | return none
-  bif atoms.size ≤ᵇ 1 then
+  uif atoms.size ≤ 1 then
     return some (d, e, atoms)
   else
     let (atoms, perm) := sortExprs atoms (lt := false)
@@ -261,8 +261,8 @@ def dvdCnstr? (e : Expr) : MetaM (Option (Int × Int.Internal.Linear.Expr × Arr
     return some (d, e, atoms)
 
 def toContextExpr (ctx : Array Expr) : MetaM Expr :=
-  bif h : 0 <ᵇ ctx.size then
-    RArray.toExpr (mkConst ``Int) id (RArray.ofArray ctx (lt_of_decideLT_eq_true h))
+  uif h : 0 < ctx.size then
+    RArray.toExpr (mkConst ``Int) id (RArray.ofArray ctx h)
   else
     RArray.toExpr (mkConst ``Int) id (RArray.leaf (mkIntLit 0))
 

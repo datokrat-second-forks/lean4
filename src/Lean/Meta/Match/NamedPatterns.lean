@@ -22,7 +22,7 @@ public def isNamedPattern (e : Expr) : Bool :=
 
 public def isNamedPattern? (e : Expr) : Option Expr :=
   let e := e.consumeMData
-  bif e.getAppNumArgs == 4 && e.getAppFn.consumeMData.isConstOf ``namedPattern then
+  uif e.getAppNumArgs == 4 && e.getAppFn.consumeMData.isConstOf ``namedPattern then
     some e
   else
     none

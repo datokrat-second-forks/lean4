@@ -29,8 +29,8 @@ def MVarRenaming.insert (s : MVarRenaming) (mvarId mvarId' : MVarId) : MVarRenam
   { s with map := s.map.insert mvarId mvarId' }
 
 def MVarRenaming.apply (s : MVarRenaming) (e : Expr) : Expr :=
-  bif !e.hasMVar then e
-  else bif s.map.isEmpty then e
+  uif !e.hasMVar then e
+  else uif s.map.isEmpty then e
   else e.replace fun e => match e with
     | Expr.mvar mvarId => match s.map.get? mvarId with
       | none           => e

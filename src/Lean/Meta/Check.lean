@@ -71,7 +71,7 @@ Remark: this method implements simple heuristics; we should extend it as we find
 error messages.
 -/
 partial def addPPExplicitToExposeDiff (a b : Expr) : MetaM (Expr × Expr) := do
-  bif (← getOptions).getBool `pp.all false || (← getOptions).getBool `pp.explicit false then
+  uif (← getOptions).getBool `pp.all false || (← getOptions).getBool `pp.explicit false then
     return (a, b)
   else
     -- We want to be able to assign metavariables to work out what why `isDefEq` failed,
@@ -93,23 +93,23 @@ where
         let (a, b') ← visit a b'
         return (a, b.updateMData! b')
       | .const nm _, .const nm' _ =>
-        bif nm != nm' then
+        uif nm != nm' then
           return (a, b)
         else
           return (a.setPPUniverses true, b.setPPUniverses true)
       | .proj _ i a', .proj _ j b' =>
-        bif i != j then
+        uif i != j then
           return (a, b)
         else
           let (a', b') ← visit a' b'
           return (a.updateProj! a', b.updateProj! b')
       | .app .., .app .. =>
-        bif a.getAppNumArgs != b.getAppNumArgs then
+        uif a.getAppNumArgs != b.getAppNumArgs then
           return (a, b)
-        else bif a.getAppFn'.isMVar || b.getAppFn'.isMVar then
+        else uif a.getAppFn'.isMVar || b.getAppFn'.isMVar then
           -- This is a failed higher-order unification. Do not proceed to `isDefEq`.
           return (a, b)
-        else bif !(← isDefEq a.getAppFn b.getAppFn) then
+        else uif !(← isDefEq a.getAppFn b.getAppFn) then
           let (fa, fb) ← visit a.getAppFn b.getAppFn
           return (mkAppN fa a.getAppArgs, mkAppN fb b.getAppArgs)
         else
@@ -133,23 +133,23 @@ where
             aFnType := abody.instantiate1 as[i]!
             bFnType := bbody.instantiate1 bs[i]!
             unless (← isDefEq as[i]! bs[i]!) do
-              bif abi.isExplicit && bbi.isExplicit then
+              uif abi.isExplicit && bbi.isExplicit then
                 firstExplicitDiff? := firstExplicitDiff? <|> some i
               else
                 firstImplicitDiff? := firstImplicitDiff? <|> some i
           -- Some special cases
           let fn? : Option Name :=
             match a.getAppFn, b.getAppFn with
-            | .const ca .., .const cb .. => bif ca == cb then ca else none
+            | .const ca .., .const cb .. => uif ca == cb then ca else none
             | _, _ => none
-          bif fn? == ``OfNat.ofNat && as.size ≥ᵇ 3 && firstImplicitDiff? == some 0 then
+          uif fn? == ``OfNat.ofNat ∧ as.size ≥ 3 ∧ firstImplicitDiff? == some 0 then
             -- Even if there is an explicit diff, it is better to see that the type is different.
             return (a.setPPNumericTypes true, b.setPPNumericTypes true)
-          bif fn? == ``sorryAx then
+          uif fn? == ``sorryAx then
             -- If these are `sorry`s with differing source positions, make sure the delaborator shows the positions.
             if let some { module? := moda? } := isLabeledSorry? a then
               if let some { module? := modb? } := isLabeledSorry? b then
-                bif moda? != modb? then
+                uif moda? != modb? then
                   return (a.setOption `pp.sorrySource true, b.setOption `pp.sorrySource true)
           -- General case
           if let some i := firstExplicitDiff? <|> firstImplicitDiff? then
@@ -158,12 +158,12 @@ where
             bs := bs.set! i bi
           let a := mkAppN a.getAppFn as
           let b := mkAppN b.getAppFn bs
-          bif firstExplicitDiff?.isSome then
+          uif firstExplicitDiff?.isSome then
             return (a, b)
           else
             return (a.setPPExplicit true, b.setPPExplicit true)
       | .forallE na ta ba bia, .forallE nb tb bb bib =>
-        bif !(← isDefEq ta tb) then
+        uif !(← isDefEq ta tb) then
           let (ta, tb) ← visit ta tb
           let a := Expr.forallE na ta ba bia
           let b := Expr.forallE nb tb bb bib
@@ -174,7 +174,7 @@ where
             let (ba', bb') ← visit (ba.instantiate1 arg) (bb.instantiate1 arg)
             return (Expr.forallE na ta (ba'.abstract #[arg]) bia, Expr.forallE nb tb (bb'.abstract #[arg]) bib)
       | .lam na ta ba bia, .lam nb tb bb bib =>
-        bif !(← isDefEq ta tb) then
+        uif !(← isDefEq ta tb) then
           let (ta, tb) ← visit ta tb
           let a := Expr.lam na ta ba bia
           let b := Expr.lam nb tb bb bib
@@ -194,14 +194,14 @@ def throwLetTypeMismatchMessage {α} (fvarId : FVarId) : MetaM α := do
   | some (LocalDecl.ldecl _ _ _ t v nondep _) => do
     let vType ← inferType v
     let (vType, t) ← addPPExplicitToExposeDiff vType t
-    let declKind := bif nondep then "have" else "let"
+    let declKind := uif nondep then "have" else "let"
     throwError "invalid {declKind} declaration, term{indentExpr v}\nhas type{indentExpr vType}\nbut is expected to have type{indentExpr t}"
   | _ => unreachable!
 
 /-- Adds note about definitions not unfolded because of the module system, if any. -/
 def mkUnfoldAxiomsNote (givenType expectedType : Expr) : MetaM MessageData := do
   let env ← getEnv
-  bif env.header.isModule then
+  uif env.header.isModule then
     let origDiag := (← get).diag
     try
       let _ ← observing <| withSetOption diagnostics true <| isDefEq givenType expectedType
@@ -209,7 +209,7 @@ def mkUnfoldAxiomsNote (givenType expectedType : Expr) : MetaM MessageData := do
         let count := count - origDiag.unfoldAxiomCounter.findD n 0
         guard <| count > 0 && getOriginalConstKind? env n matches some .defn
         return m!"{.ofConstName n} ↦ {count}"
-      bif !blocked.isEmpty then
+      uif !blocked.isEmpty then
         return MessageData.note m!"The following definitions were not unfolded because \
           their definition is not exposed:{indentD <| .joinSep blocked Format.line}"
     finally
@@ -233,7 +233,7 @@ def mkHasTypeButIsExpectedMsg (givenType expectedType : Expr)
     let mut msg ← (try
       let givenTypeType ← inferType givenType
       let expectedTypeType ← inferType expectedType
-      bif (← isDefEqGuarded givenTypeType expectedTypeType) then
+      uif (← isDefEqGuarded givenTypeType expectedTypeType) then
         let (givenType, expectedType) ← addPPExplicitToExposeDiff givenType expectedType
         let trailing := trailing?.map (m!"\n" ++ ·) |>.getD .nil
         pure m!"has type{indentExpr givenType}\n\
@@ -256,7 +256,7 @@ def throwAppTypeMismatch (f a : Expr) : MetaM α := do
   -- Clarify that `a` is "last" only if it may be confused with some preceding argument; otherwise,
   -- avoid this wording because it may be misleading if more arguments follow `a`, e.g., if `f a` is
   -- a subexpression of `f a b`
-  let argDescStr := bif f.getAppArgs.any (· == a) then
+  let argDescStr := uif f.getAppArgs.any (· == a) then
     m!"last{indentExpr a}\nargument "
   else
     m!"argument{indentExpr a}\n"
@@ -287,7 +287,7 @@ def checkApp (f a : Expr) : MetaM Unit := do
 def checkProj (structName : Name) (idx : Nat) (e : Expr) : MetaM Unit := do
   let structType ← whnf (← inferType e)
   let projType ← inferType (mkProj structName idx e)
-  bif (← isProp structType) && !(← isProp projType) then
+  uif (← isProp structType) && !(← isProp projType) then
     throwError "invalid projection{indentExpr (mkProj structName idx e)}\nfrom type{indentExpr structType}"
 
 private partial def checkAux (e : Expr) : MetaM Unit := do

@@ -34,13 +34,13 @@ Helper function for implementing `abstractFVars` (and possible variants in the f
       return some e
     | _ =>
       -- Non-atomic expressions.
-      bif !e.hasFVar then
+      uif !e.hasFVar then
         -- Stop visiting: `e` does not contain free variables.
         return some e
       let some maxFVarId? := maxFVar.find? ⟨e⟩
         | return none -- maxFVar information is not available, keep visiting
       let maxIndex := (lctx.find? maxFVarId?.get!).get!.index
-      bif maxIndex <ᵇ minIndex then
+      uif maxIndex < minIndex then
         -- Stop visiting: maximal free variable in `e` is smaller than minimal free variable being abstracted.
         return some e
       else
@@ -62,13 +62,13 @@ Assumptions:
 the `maxFVar` cache contains information for every subterm in `e`.
 -/
 public def abstractFVarsRange (e : Expr) (start : Nat) (xs : Array Expr) : SymM Expr := do
-  bif !e.hasFVar then return e
-  bif h : start <ᵇ xs.size then
+  uif !e.hasFVar then return e
+  uif h : start < xs.size then
     let toDeBruijn? (fvarId : FVarId) : Option Nat :=
       let rec go (bidx : Nat) (i : Nat) (h : i < xs.size) : Option Nat :=
-        bif xs[i].fvarId! == fvarId then
+        uif xs[i].fvarId! == fvarId then
           some bidx
-        else bif i >ᵇ start then
+        else uif i > start then
           go (bidx + 1) (i - 1) (by omega)
         else
           none
@@ -86,15 +86,15 @@ rebuilding a telescope.
 Makes the same assumptions as `abstractFVarsRange`; the minimal variable must be `xs[0]`.
 -/
 public def abstractFVarsPrefix (e : Expr) (n : Nat) (xs : Array Expr) : SymM Expr := do
-  bif !e.hasFVar then return e
+  uif !e.hasFVar then return e
   let n := min n xs.size
-  bif h : 0 <ᵇ n then
+  uif h : 0 < n then
     have : n ≤ xs.size := Nat.min_le_right ..
     let toDeBruijn? (fvarId : FVarId) : Option Nat :=
       let rec go (bidx : Nat) (i : Nat) (h : i < n) : Option Nat :=
-        bif xs[i].fvarId! == fvarId then
+        uif xs[i].fvarId! == fvarId then
           some bidx
-        else bif _ : i >ᵇ 0 then
+        else uif _ : i > 0 then
           go (bidx + 1) (i - 1) (by omega)
         else
           none

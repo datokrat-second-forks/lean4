@@ -31,13 +31,13 @@ private def _root_.Int.Internal.Linear.Poly.substVar (p : Poly) : GoalM (Option 
   return some (x, c, p')
 
 def EqCnstr.norm (c : EqCnstr) : EqCnstr :=
-  bif c.p.isSorted then
+  uif c.p.isSorted then
     c
   else
     { p := c.p.norm, h := .norm c }
 
 def DiseqCnstr.norm (c : DiseqCnstr) : DiseqCnstr :=
-  bif c.p.isSorted then
+  uif c.p.isSorted then
     c
   else
     { p := c.p.norm, h := .norm c }
@@ -66,9 +66,9 @@ private def DiseqCnstr.findLe (c : DiseqCnstr) : GoalM Bool := do
   let .add _ x _ := c.p | c.throwUnexpected
   let s ← get'
   let go (atLower : Bool) : GoalM Bool := do
-    let cs' := bif atLower then s.lowers[x]! else s.uppers[x]!
+    let cs' := uif atLower then s.lowers[x]! else s.uppers[x]!
     for c' in cs' do
-      bif c.p == c'.p || c.p.isNegEq c'.p then
+      uif c.p == c'.p || c.p.isNegEq c'.p then
         c'.erase
         { p := c'.p.addConst 1, h := .ofLeDiseq c' c : LeCnstr }.assert
         return true
@@ -76,29 +76,29 @@ private def DiseqCnstr.findLe (c : DiseqCnstr) : GoalM Bool := do
   go true <||> go false
 
 def DiseqCnstr.assert (c : DiseqCnstr) : GoalM Unit := do
-  bif (← inconsistent) then return ()
+  uif (← inconsistent) then return ()
   trace[grind.lia.assert] "{← c.pp}"
   let c ← c.norm.applySubsts
-  bif c.p.isUnsatDiseq then
+  uif c.p.isUnsatDiseq then
     trace[grind.lia.assert.unsat] "{← c.pp}"
     setInconsistent (.diseq c)
     return ()
-  bif c.isTrivial then
+  uif c.isTrivial then
     trace[grind.lia.assert.trivial] "{← c.pp}"
     return ()
   let k := c.p.gcdCoeffs c.p.getConst
-  let c := bif k == 1 then
+  let c := uif k == 1 then
     c
   else
     { p := c.p.div k, h := .divCoeffs c }
-  bif (← c.findLe) then
+  uif (← c.findLe) then
     return ()
   let .add _ x _ := c.p | c.throwUnexpected
   let c ← c.markStored
   c.p.updateOccs
   trace[grind.lia.assert.store] "{← c.pp}"
   modify' fun s => { s with diseqs := s.diseqs.modify x (·.push c) }
-  bif (← c.satisfied) == .false then
+  uif (← c.satisfied) == .false then
     resetAssignmentFrom x
 
 /--
@@ -110,12 +110,12 @@ def _root_.Int.Internal.Linear.Poly.pickVarToElim? (p : Poly) : Option (Int × V
   | .add k x p => go k x p
 where
   go (k : Int) (x : Var) (p : Poly) : Int × Var :=
-    bif k == 1 || k == -1 then
+    uif k == 1 || k == -1 then
       (k, x)
     else match p with
       | .num _ => (k, x)
       | .add k' x' p =>
-        bif k'.natAbs <ᵇ k.natAbs then
+        uif k'.natAbs < k.natAbs then
           go k' x' p
         else
           go k x p
@@ -128,7 +128,7 @@ partial def EqCnstr.applySubsts (c : EqCnstr) : GoalM EqCnstr := withIncRecDepth
 private def updateDvdCnstr (a : Int) (x : Var) (c : EqCnstr) (y : Var) : GoalM Unit := do
   let some c' := (← get').dvds[y]! | return ()
   let b := c'.p.coeff x
-  bif b == 0 then return ()
+  uif b == 0 then return ()
   modify' fun s => { s with dvds := s.dvds.set y none }
   let c' ← c'.applyEq a x c b
   c'.assert
@@ -144,13 +144,13 @@ private def updateLeCnstrs (a : Int) (x : Var) (c₁ : EqCnstr) (todo : Array (I
   for (b, c₂) in todo do
     let c₂ ← c₂.applyEq a x c₁ b
     c₂.assert
-    bif (← inconsistent) then return ()
+    uif (← inconsistent) then return ()
 
 /--
 Given an equation `c₁` containing `a*x`, eliminate `x` from lower bound inequalities of `y`.
 -/
 private def updateLowers (a : Int) (x : Var) (c : EqCnstr) (y : Var) : GoalM Unit := do
-  bif (← inconsistent) then return ()
+  uif (← inconsistent) then return ()
   let (lowers', todo) := splitLeCnstrs x (← get').lowers[y]!
   modify' fun s => { s with lowers := s.lowers.set y lowers' }
   updateLeCnstrs a x c todo
@@ -159,7 +159,7 @@ private def updateLowers (a : Int) (x : Var) (c : EqCnstr) (y : Var) : GoalM Uni
 Given an equation `c₁` containing `a*x`, eliminate `x` from upper bound inequalities of `y`.
 -/
 private def updateUppers (a : Int) (x : Var) (c : EqCnstr) (y : Var) : GoalM Unit := do
-  bif (← inconsistent) then return ()
+  uif (← inconsistent) then return ()
   let (uppers', todo) := splitLeCnstrs x (← get').uppers[y]!
   modify' fun s => { s with uppers := s.uppers.set y uppers' }
   updateLeCnstrs a x c todo
@@ -168,19 +168,19 @@ private def splitDiseqs (x : Var) (cs : PArray DiseqCnstr) : PArray DiseqCnstr �
   split cs fun c => c.p.coeff x
 
 private def updateDiseqs (a : Int) (x : Var) (c : EqCnstr) (y : Var) : GoalM Unit := do
-  bif (← inconsistent) then return ()
+  uif (← inconsistent) then return ()
   let (diseqs', todo) := splitDiseqs x (← get').diseqs[y]!
   modify' fun s => { s with diseqs := s.diseqs.set y diseqs' }
   for (b, c₂) in todo do
     let c₂ ← c₂.applyEq a x c b
     c₂.assert
-    bif (← inconsistent) then return ()
+    uif (← inconsistent) then return ()
 
 /-- Returns `some k` if the given variable has been eliminate with equality `y = k` -/
 private def isVarEqConst? (y : Var) : GoalM (Option (Int × EqCnstr)) := do
   let some c := (← get').elimEqs[y]! | return none
   let .add k₁ _ (.num k₂) := c.p | return none
-  bif k₂ % k₁ != 0 then return none
+  uif k₂ % k₁ != 0 then return none
   return some (- k₂/k₁, c)
 
 /-- Returns `some k` if `e` is represented by a variable `y` that has been eliminate with equality `y = k` -/
@@ -197,11 +197,11 @@ structure PropagateMul.State where
 private partial def propagateNonlinearMul (x : Var) : GoalM Bool := do
   let e ← getVar x
   let (_, { a?, k, cs, n }) ← go e |>.run {}
-  bif k == 0 || n == 0 then
+  uif k == 0 || n == 0 then
     let c := { p := .add 1 x (.num (-k)), h := .mul none cs : EqCnstr }
     c.assert
     return true
-  else bif n >ᵇ 1 then
+  else uif n > 1 then
     return false
   else
     let some a := a? | unreachable!
@@ -214,14 +214,14 @@ where
   goVar (e : Expr) : StateT PropagateMul.State GoalM Unit := do
     if let some (k', c) ← isExprEqConst? e then
       modify fun { a?, k, cs, n } => { a?, k := k*k', cs := cs.push (e, k', c), n }
-    else bif (← get).n == 0 then
+    else uif (← get).n == 0 then
       modify fun { k, cs, .. } => { a? := some e, k, cs, n := 1 }
     else
       modify fun { k, cs, a?, n } => { a?, k, cs, n := n + 1 }
 
   go (e : Expr) : StateT PropagateMul.State GoalM Unit := do
     let_expr HMul.hMul _ _ _ i a b := e | goVar e
-    bif (← Structural.isInstHMulInt i) then
+    uif (← Structural.isInstHMulInt i) then
       go a; go b
     else
       goVar e
@@ -274,7 +274,7 @@ private def propagateNonlinearPow (x : Var) : GoalM Bool := do
       pure (kb.toNat, some cb)
     else
       return false
-  bif (← Sym.Arith.checkExp kb |>.run).isNone then return false
+  uif (← Sym.Arith.checkExp kb |>.run).isNone then return false
   let c' ← pure { p := .add 1 x (.num (-(ka^kb))), h := .pow ka ca? kb cb? : EqCnstr }
   c'.assert
   return true
@@ -296,11 +296,11 @@ def propagateNonlinearTerms (y : Var) : GoalM Unit := do
   modify' fun s => { s with nonlinearOccs := s.nonlinearOccs.insert y occs }
 
 private def updateElimEqs (a : Int) (x : Var) (c : EqCnstr) (y : Var) : GoalM Unit := do
-  bif (← inconsistent) then return ()
+  uif (← inconsistent) then return ()
   assert! x != y
   let some c₂ := (← get').elimEqs[y]! | return ()
   let b := c₂.p.coeff x
-  bif b == 0 then return ()
+  uif b == 0 then return ()
   let c₂ ← { p := c₂.p.mul a |>.combine (c.p.mul (-b)), h := .subst x c₂ c : EqCnstr }.markStored
   trace[grind.debug.lia.elimEq] "updated: {← getVar y}, {← c₂.pp}"
   modify' fun s => { s with elimEqs := s.elimEqs.set y (some c₂) }
@@ -348,7 +348,7 @@ private def EqCnstr.elimVar (c : EqCnstr) (k : Int) (x : Var) : GoalM Unit := do
   trace[grind.debug.lia.subst] ">> {← getVar x}, {← c.pp}"
   trace[grind.lia.assert.store] "{← c.pp}"
   trace[grind.debug.lia.elimEq] "{← getVar x}, {← c.pp}"
-  bif (← c.satisfied) == .false then
+  uif (← c.satisfied) == .false then
     resetAssignmentFrom x
   modify' fun s => { s with
     elimEqs := s.elimEqs.set x (some c)
@@ -356,7 +356,7 @@ private def EqCnstr.elimVar (c : EqCnstr) (k : Int) (x : Var) : GoalM Unit := do
   }
   updateOccs k x c
   c.p.updateOccsForElimEq x
-  bif (← inconsistent) then return ()
+  uif (← inconsistent) then return ()
   propagateNonlinearTerms x
 
 private def _root_.Int.Internal.Linear.Poly.toLinearExpr : Poly → Int.Internal.Linear.Expr
@@ -394,32 +394,32 @@ private def EqCnstr.elimNonUnit (c : EqCnstr) (k : Int) (x : Var) : GoalM Unit :
   let c' : EqCnstr := { p := .add (-m) σ dvd.p, h := .ofDvdDiv dvd e σ t }
   trace[grind.debug.lia.elimEq] "omega step for {← getVar x}: {← c'.pp}"
   c'.elimVar (c'.p.coeff x) x
-  bif (← inconsistent) then return ()
+  uif (← inconsistent) then return ()
   c.assert
 
 set_option compiler.ignoreBorrowAnnotation true in
 @[export lean_grind_cutsat_assert_eq]
 def EqCnstr.assertImpl (c : EqCnstr) : GoalM Unit := withIncRecDepth do
-  bif (← inconsistent) then return ()
+  uif (← inconsistent) then return ()
   trace[grind.lia.assert] "{← c.pp}"
   let c ← c.norm.applySubsts
-  bif c.p.isUnsatEq then
+  uif c.p.isUnsatEq then
     trace[grind.lia.assert.unsat] "{← c.pp}"
     setInconsistent (.eq c)
     return ()
-  bif c.isTrivial then
+  uif c.isTrivial then
     trace[grind.lia.assert.trivial] "{← c.pp}"
     return ()
   let k := c.p.gcdCoeffs'
-  bif c.p.getConst % k >ᵇ 0 then
+  uif c.p.getConst % k > 0 then
     setInconsistent (.eq c)
     return ()
-  let c := bif k == 1 then
+  let c := uif k == 1 then
     c
   else
     { p := c.p.div k, h := .divCoeffs c }
   let some (k, x) := c.p.pickVarToElim? | c.throwUnexpected
-  bif k.natAbs == 1 then
+  uif k.natAbs == 1 then
     c.elimVar k x
   else
     c.elimNonUnit k x
@@ -469,9 +469,9 @@ private def processNewNatEq (a b : Expr) : GoalM Unit := do
 
 def processNewEq (a b : Expr) : GoalM Unit := do
   unless (← getConfig).lia do return ()
-  bif (← isNatTerm a <&&> isNatTerm b) then
+  uif (← isNatTerm a <&&> isNatTerm b) then
     processNewNatEq a b
-  else bif (← isIntTerm a <&&> isIntTerm b) then
+  else uif (← isIntTerm a <&&> isIntTerm b) then
     processNewIntEq a b
 
 private def processNewIntDiseq (a b : Expr) : GoalM Unit := do
@@ -508,9 +508,9 @@ private def processNewNatDiseq (a b : Expr) : GoalM Unit := do
 
 def processNewDiseq (a b : Expr) : GoalM Unit := do
   unless (← getConfig).lia do return ()
-  bif (← isNatTerm a <&&> isNatTerm b) then
+  uif (← isNatTerm a <&&> isNatTerm b) then
     processNewNatDiseq a b
-  else bif (← isIntTerm a <&&> isIntTerm b) then
+  else uif (← isIntTerm a <&&> isIntTerm b) then
     processNewIntDiseq a b
 
 /-- Different kinds of terms internalized by this module. -/
@@ -545,9 +545,9 @@ private def isForbiddenParent (parent? : Option Expr) (k : SupportedTermKind) : 
   let .const declName _ := parent.getAppFn | return false
   -- TODO: document `NatCast.natCast` case.
   -- Remark: we added it to prevent natCast_sub from being expanded twice.
-  bif declName == ``NatCast.natCast then return true
-  bif k matches .div | .mod | .sub | .pow | .neg | .natAbs | .toNat | .natCast | .finVal | .finMk then return false
-  bif declName == ``HAdd.hAdd || declName == ``LE.le || declName == ``Dvd.dvd then return true
+  uif declName == ``NatCast.natCast then return true
+  uif k matches .div | .mod | .sub | .pow | .neg | .natAbs | .toNat | .natCast | .finVal | .finMk then return false
+  uif declName == ``HAdd.hAdd || declName == ``LE.le || declName == ``Dvd.dvd then return true
   match k with
   | .add => return false
   | .mul => return declName == ``HMul.hMul
@@ -572,11 +572,11 @@ In both cases, if `p` contains nonlinear monomials that the comm-ring solver sim
 the constraint becomes `x = p'`.
 -/
 private def internalizeInt (e : Expr) : GoalM Unit := do
-  bif (← hasVar e) then return ()
+  uif (← hasVar e) then return ()
   if let some p ← toPoly? e then
     trace[grind.debug.lia.internalize] "{aquote e}:= {← p.pp}"
     let x ← mkVar e
-    bif p == .add 1 x (.num 0) then
+    uif p == .add 1 x (.num 0) then
       -- It is pointless to assert `x = x`
       -- This can happen if `e` is a nonlinear term (e.g., `e` is `a*b`)
       return
@@ -630,10 +630,10 @@ private def assertLinearFact (h : Expr) (gen : Nat) : GoalM Unit := do
   | _ => throwError "internal `grind` error, unexpected linear fact{indentExpr (← inferType h)}"
 
 private def expandDivMod (a : Expr) (b : Int) : GoalM Unit := do
-  bif (← get').divMod.contains (a, b) then return ()
+  uif (← get').divMod.contains (a, b) then return ()
   modify' fun s => { s with divMod := s.divMod.insert (a, b) }
   let b' ← shareCommon (mkIntLit b)
-  bif b == 0 || b == 1 || b == -1 then
+  uif b == 0 || b == 1 || b == -1 then
     /-
     We cannot assume terms have been normalized.
     Recall that terms may not be normalized because of dependencies.
@@ -642,10 +642,10 @@ private def expandDivMod (a : Expr) (b : Int) : GoalM Unit := do
     internalize b' gen
     let ediv ← shareCommon (mkIntDiv a b'); internalize ediv gen
     let emod ← shareCommon (mkIntMod a b'); internalize emod gen
-    bif b == 0 then
+    uif b == 0 then
       pushEq emod a <| mkApp (mkConst ``Int.emod_zero) a
       pushEq ediv b' <| mkApp (mkConst ``Int.ediv_zero) a
-    else bif b == 1 then
+    else uif b == 1 then
       let zero ← shareCommon (mkIntLit 0); internalize zero gen
       pushEq emod zero <| mkApp (mkConst ``Int.emod_one) a
       pushEq ediv a <| mkApp (mkConst ``Int.ediv_one) a
@@ -663,7 +663,7 @@ private def expandDivMod (a : Expr) (b : Int) : GoalM Unit := do
     let gen ← getGeneration a
     -- Cutsat is the only arithmetic solver in `lia`. Elsewhere, solvers such as the ring solver use
     -- these facts through the E-graph.
-    bif (← getIdentity) == `lia then
+    uif (← getIdentity) == `lia then
       assertLinearFact h₁ gen
       assertLinearFact h₂ gen
       assertLinearFact h₃ gen
@@ -674,7 +674,7 @@ private def expandDivMod (a : Expr) (b : Int) : GoalM Unit := do
 
 private def propagateDiv (e : Expr) : GoalM Unit := do
   let_expr HDiv.hDiv _ _ _ inst a b ← e | return ()
-  bif (← Structural.isInstHDivInt inst) then
+  uif (← Structural.isInstHDivInt inst) then
     if let some b ← getIntValue? b then
       expandDivMod a b
     else
@@ -683,7 +683,7 @@ private def propagateDiv (e : Expr) : GoalM Unit := do
 
 private def propagateMod (e : Expr) : GoalM Unit := do
   let_expr HMod.hMod _ _ _ inst a b ← e | return ()
-  bif (← Structural.isInstHModInt inst) then
+  uif (← Structural.isInstHModInt inst) then
     if let some b ← getIntValue? b then
       expandDivMod a b
     else
@@ -698,7 +698,7 @@ private def propagateToNat (e : Expr) : GoalM Unit := do
   pushNewFact <| mkApp (mkConst ``Nat.ToInt.ofNat_toNat) a
 
 private def internalizeIntTerm (e type : Expr) (parent? : Option Expr) (k : SupportedTermKind) : GoalM Unit := do
-  bif isForbiddenParent parent? k then return ()
+  uif isForbiddenParent parent? k then return ()
   trace[grind.debug.lia.internalize] "{e} : {type}"
   match k with
   | .div => propagateDiv e
@@ -713,14 +713,14 @@ private def propagateNatSub (e : Expr) : GoalM Unit := do
   pushNewFact <| mkApp2 (mkConst ``Int.Internal.Linear.natCast_sub) a b
 
 private def internalizeNatTerm (e type : Expr) (parent? : Option Expr) (k : SupportedTermKind) : GoalM Unit := do
-  bif (← isNatTerm e) then return () -- already internalized
+  uif (← isNatTerm e) then return () -- already internalized
   match k with
   | .sub => propagateNatSub e
   | .natAbs => propagateNatAbs e
   | .toNat => propagateToNat e
   | _ => pure ()
-  bif isForbiddenParent parent? k then return ()
-  bif (← get').natToIntMap.contains { expr := e } then return ()
+  uif isForbiddenParent parent? k then return ()
+  uif (← get').natToIntMap.contains { expr := e } then return ()
   let e'h ← natToInt e
   trace[grind.debug.lia.internalize] "{e} : {type}"
   trace[grind.debug.lia.toInt] "{e} ==> {e'h.1}"
@@ -733,7 +733,7 @@ private def internalizeNatTerm (e type : Expr) (parent? : Option Expr) (k : Supp
   assert an equality
   -/
   match_expr e'h.1 with
-  | NatCast.natCast _ _ a => bif e == a then return ()
+  | NatCast.natCast _ _ a => uif e == a then return ()
   | _ => pure ()
   let e'' ← toLinearExpr e'h.1
   let p := e''.norm
@@ -789,13 +789,13 @@ def internalize (e : Expr) (parent? : Option Expr) : GoalM Unit := do
     -/
     cutsatExt.markTerm arg
   let some (k, type) ← getKindAndType? e | return ()
-  bif type.isConstOf ``Int then
+  uif type.isConstOf ``Int then
     internalizeIntTerm e type parent? k
-  else bif type.isConstOf ``Nat then
+  else uif type.isConstOf ``Nat then
     internalizeNatTerm e type parent? k
   else
-    bif isForbiddenParent parent? k then return ()
-    bif k matches .num then
+    uif isForbiddenParent parent? k then return ()
+    uif k matches .num then
       /-
       Numerals that can be evaluated are only marked as solver terms; model-based theory
       combination computes their values directly. We do not create accessor applications
@@ -807,10 +807,10 @@ def internalize (e : Expr) (parent? : Option Expr) : GoalM Unit := do
       other term: E-matching theorems are often keyed on their accessor applications
       (e.g., `Fin.val_one`).
       -/
-      bif (← canBeEvaluated type) then
+      uif (← canBeEvaluated type) then
         cutsatExt.markTerm e
         return ()
-    bif (← hasVar e) then return ()
+    uif (← hasVar e) then return ()
     let internalizeMarker (marker : Expr) : GoalM Unit := do
       -- The marker may be an enclosing application whose internalization is in progress: this
       -- hook runs for `e` when the marker visits it. The marker's own hook runs once its

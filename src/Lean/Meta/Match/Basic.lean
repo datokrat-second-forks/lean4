@@ -42,7 +42,7 @@ where
   visit (p : Pattern) := do
     match p with
     | inaccessible e                 =>
-      bif annotate then
+      uif annotate then
         pure (mkInaccessible e)
       else
         pure e
@@ -50,7 +50,7 @@ where
     | val e                          => pure e
     | as fvarId p hId                =>
       -- TODO
-      bif annotate then
+      uif annotate then
         mkNamedPattern (mkFVar fvarId) (mkFVar hId) (← visit p)
       else
         visit p
@@ -163,7 +163,7 @@ namespace Alt
 
 partial def toMessageData (alt : Alt) : MetaM MessageData := do
   withExistingLocalDecls alt.fvarDecls do
-    let mut msg := bif alt.fvarDecls.isEmpty then m!"" else
+    let mut msg := uif alt.fvarDecls.isEmpty then m!"" else
        alt.fvarDecls.map (fun d => m!"{d.toExpr}:({d.type})") ++ m!"\n"
     msg := msg ++ m!"|- {alt.patterns.map Pattern.toMessageData} => {alt.rhs}"
     for (lhs, rhs) in alt.cnstrs do
@@ -202,7 +202,7 @@ inductive Example where
 namespace Example
 
 partial def replaceFVarId (fvarId : FVarId) (ex : Example) : Example → Example
-  | var x        => bif x == fvarId then ex else var x
+  | var x        => uif x == fvarId then ex else var x
   | ctor n exs   => ctor n $ exs.map (replaceFVarId fvarId ex)
   | arrayLit exs => arrayLit $ exs.map (replaceFVarId fvarId ex)
   | ex           => ex
@@ -288,13 +288,13 @@ partial def toPattern (e : Expr) : MetaM Pattern := do
         match e.getArg! 1, e.getArg! 3 with
         | Expr.fvar x, Expr.fvar h => return Pattern.as x p h
         | _,           _   => throwError "Unexpected occurrence of auxiliary declaration 'namedPattern'"
-      else bif (← isMatchValue e) then
+      else uif (← isMatchValue e) then
         return Pattern.val e
-      else bif e.isFVar then
+      else uif e.isFVar then
         return Pattern.var e.fvarId!
       else
         let newE ← whnf e
-        bif newE != e then
+        uif newE != e then
           toPattern newE
         else matchConstCtor e.getAppFn (fun _ => throwError "Unexpected pattern{indentExpr e}") fun v us => do
           let args := e.getAppArgs

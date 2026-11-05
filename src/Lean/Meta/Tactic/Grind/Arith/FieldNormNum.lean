@@ -173,7 +173,7 @@ partial def eval (e : Expr) : M (Rat × Expr) := do
     let h := mkApp3 (mkConst ``Grind.Field.NormNum.intCast_eq [ctx.u]) ctx.type ctx.fieldInst (toExpr v)
     return ((v : Rat), h)
   | HPow.hPow _ _ _ inst a b =>
-    bif (← isNPowInst inst) then
+    uif (← isNPowInst inst) then
       let (v₁, h₁) ← eval a
       let some n ← getNatValue? b | failure
       let ctx ← read
@@ -183,7 +183,7 @@ partial def eval (e : Expr) : M (Rat × Expr) := do
       let h := mkApp9 (mkConst ``Grind.Field.NormNum.npow_eq [ctx.u]) ctx.type ctx.fieldInst ctx.isChar0Inst
         a (toExpr n) (toExpr v₁) (toExpr v) eagerReflBoolTrue h₁
       return (v, h)
-    else bif (← isZPowInst inst) then
+    else uif (← isZPowInst inst) then
       let (v₁, h₁) ← eval a
       let some n ← getIntValue? b | failure
       let ctx ← read
@@ -228,11 +228,11 @@ public def normFieldExpr? (e : Expr) (type : Expr) : MetaM (Option (Expr × Expr
   run? type do
     let (v, h) ← eval e
     let ctx ← read
-    bif v.den == 1 then
+    uif v.den == 1 then
       let r ← mkIntCast v.num
       let h := mkApp7 (mkConst ``Grind.Field.NormNum.eq_int [ctx.u]) ctx.type ctx.fieldInst e (toExpr v) (toExpr v.num) eagerReflBoolTrue h
       return (r, h)
-    else bif v.num == 1 then
+    else uif v.num == 1 then
       let r ← mkNatCast v.den
       let r ← mkAppM ``Inv.inv #[r]
       let h := mkApp7 (mkConst ``Grind.Field.NormNum.eq_inv [ctx.u]) ctx.type ctx.fieldInst e (toExpr v) (toExpr v.den) eagerReflBoolTrue h

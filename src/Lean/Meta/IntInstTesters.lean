@@ -79,43 +79,43 @@ end Structural
 namespace DefEq
 
 def isInstNegInt (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstNegInt e) then return true
+  uif (← Structural.isInstNegInt e) then return true
   isDefEqI e Int.mkInstNeg
 
 def isInstAddInt (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstAddInt e) then return true
+  uif (← Structural.isInstAddInt e) then return true
   isDefEqI e Int.mkInstAdd
 
 def isInstHAddInt (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstHAddInt e) then return true
+  uif (← Structural.isInstHAddInt e) then return true
   isDefEqI e Int.mkInstHAdd
 
 def isInstSubInt (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstSubInt e) then return true
+  uif (← Structural.isInstSubInt e) then return true
   isDefEqI e Int.mkInstSub
 
 def isInstHSubInt (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstHSubInt e) then return true
+  uif (← Structural.isInstHSubInt e) then return true
   isDefEqI e Int.mkInstHSub
 
 def isInstMulInt (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstMulInt e) then return true
+  uif (← Structural.isInstMulInt e) then return true
   isDefEqI e Int.mkInstMul
 
 def isInstHMulInt (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstHMulInt e) then return true
+  uif (← Structural.isInstHMulInt e) then return true
   isDefEqI e Int.mkInstHMul
 
 def isInstLTInt (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstLTInt e) then return true
+  uif (← Structural.isInstLTInt e) then return true
   isDefEqI e Int.mkInstLT
 
 def isInstLEInt (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstLEInt e) then return true
+  uif (← Structural.isInstLEInt e) then return true
   isDefEqI e Int.mkInstLE
 
 def isInstDvdInt (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstDvdInt e) then return true
+  uif (← Structural.isInstDvdInt e) then return true
   isDefEqI e (mkConst ``Int.instDvd)
 
 end DefEq

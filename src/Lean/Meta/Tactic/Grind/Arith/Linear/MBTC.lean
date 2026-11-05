@@ -14,15 +14,15 @@ public section
 namespace Lean.Meta.Grind.Arith.Linear
 
 private partial def toRatValue? (a : Expr) : Option Rat :=
-  bif a.isAppOfArity ``Zero.zero 2 then
+  uif a.isAppOfArity ``Zero.zero 2 then
     some 0
-  else bif a.isAppOfArity ``One.one 2 then
+  else uif a.isAppOfArity ``One.one 2 then
     some 1
-  else bif a.isAppOfArity ``OfNat.ofNat 3 then
+  else uif a.isAppOfArity ``OfNat.ofNat 3 then
     toRatValue? (a.getArg! 1)
-  else bif a.isAppOfArity ``Neg.neg 3 then
+  else uif a.isAppOfArity ``Neg.neg 3 then
     (- ·) <$> toRatValue? a.appArg!
-  else bif a.isAppOfArity ``HDiv.hDiv 6 then
+  else uif a.isAppOfArity ``HDiv.hDiv 6 then
     (· / ·) <$> toRatValue? a.appFn!.appArg! <*> toRatValue? a.appArg!
   else if let .lit (.natVal n) := a then
     some (mkRat n 1)
@@ -39,7 +39,7 @@ private def hasTheoryVar (e : Expr) : GoalM Bool := do
   return (← linearExt.hasTermAtRoot e) || (toRatValue? e).isSome
 
 private def isInterpreted (e : Expr) : GoalM Bool := do
-  bif isInterpretedTerm e then return true
+  uif isInterpretedTerm e then return true
   let f := e.getAppFn
   return f.isConstOf ``LE.le || f.isConstOf ``LT.lt || f.isConstOf ``Dvd.dvd
 

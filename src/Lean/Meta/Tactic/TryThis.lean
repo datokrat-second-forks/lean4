@@ -137,7 +137,7 @@ def addSuggestions (ref : Syntax) (suggestions : Array Suggestion)
     (codeActionPrefix? : Option String := none)
     (diffGranularity : Hint.DiffGranularity := .none)
     (footer : MessageData := MessageData.nil) : CoreM Unit := do
-  bif suggestions.isEmpty then throwErrorAt ref "No suggestions available"
+  uif suggestions.isEmpty then throwErrorAt ref "No suggestions available"
   let hintSuggestions := suggestions.map fun s => {
     span? := origSpan?
     diffGranularity
@@ -162,7 +162,7 @@ private def evalTacticWithState (initialState : Tactic.SavedState) (tac : TSynta
       let type ← (← getMainGoal).getType
       let type ← instantiateMVars type
       let expectedType ← instantiateMVars expectedType
-      bif type != expectedType then
+      uif type != expectedType then
         throwError "Tactic did not produce expected goal"
   finally
     currState.restore
@@ -192,13 +192,13 @@ Remark: We cannot determine if a tactic requires `expose_names` merely by inspec
 private def mkValidatedTactic (tac : TSyntax `tactic) (msg : MessageData)
     (initialState : Tactic.SavedState) (expectedType? : Option Expr := none) :
     TacticM (Option (TSyntax `tactic × MessageData)) := do
-  bif (← isValidTactic initialState tac expectedType?) then
+  uif (← isValidTactic initialState tac expectedType?) then
     return some (tac, msg)
   else
     -- Note: we must use `(expose_names; _)` and not `· expose_names; _` to avoid generating
     -- spurious tactic-abort exceptions, since these tactics may not close the goal
     let tac ← `(tactic| (expose_names; $tac))
-    bif (← isValidTactic initialState tac expectedType?) then
+    uif (← isValidTactic initialState tac expectedType?) then
       return some (tac, m!"(expose_names; {msg})")
     else
       return none
@@ -218,10 +218,10 @@ private def mkExactSuggestionSyntax (e : Expr) (useRefine : Bool) :
     MetaM (TSyntax `tactic × MessageData) :=
   withOptions (pp.mvars.set · false) <| withExposedNames do
   let exprStx ← delabToRefinableSyntax e
-  let tac ← bif useRefine then `(tactic| refine $exprStx) else `(tactic| exact $exprStx)
+  let tac ← uif useRefine then `(tactic| refine $exprStx) else `(tactic| exact $exprStx)
   -- We must add the message context here to account for exposed names
   let exprMessage ← addMessageContext <| MessageData.ofExpr e
-  let tacMessage := bif useRefine then m!"refine {exprMessage}" else m!"exact {exprMessage}"
+  let tacMessage := uif useRefine then m!"refine {exprMessage}" else m!"exact {exprMessage}"
   return (tac, tacMessage)
 
 private def addExactSuggestionCore (addSubgoalsMsg : Bool) (checkState? : Option Tactic.SavedState) (e : Expr) :
@@ -234,7 +234,7 @@ private def addExactSuggestionCore (addSubgoalsMsg : Bool) (checkState? : Option
   let some (suggestion, messageData) ← mkValidatedTactic suggestion messageData checkState
     | let messageData := m!"(expose_names; {messageData})"
       return .inr <| mkFailedToMakeTacticMsg m!"a {if hasMVars then "partial " else ""}proof" messageData
-  let postInfo? ← bif !addSubgoalsMsg || mvars.isEmpty then pure none else
+  let postInfo? ← uif !addSubgoalsMsg || mvars.isEmpty then pure none else
     let mut str := "\n-- Remaining subgoals:"
     for g in mvars do
       -- TODO: use a MessageData.ofExpr instead of rendering to string
@@ -271,7 +271,7 @@ def addExactSuggestion (ref : Syntax) (e : Expr)
     addSuggestion ref suggestion
       (origSpan? := origSpan?) (codeActionPrefix? := codeActionPrefix?)
   | .inr message =>
-    bif tacticErrorAsInfo then logInfo message else throwError message
+    uif tacticErrorAsInfo then logInfo message else throwError message
 
 /-- Add `exact e` or `refine e` suggestions if they can be successfully generated; for those that
 cannot, display messages indicating the invalid generated tactics.
@@ -357,7 +357,7 @@ def addHaveSuggestion (ref : Syntax) (h? : Option Name) (t? : Option Expr) (e : 
     let estx ← delabToRefinableSyntax e
     let (tac, msg) ← if let some t := t? then
       let tstx ← delabToRefinableSyntax t
-      bif prop then
+      uif prop then
         match h? with
         | some h => pure (← `(tactic| have $(mkIdent h):ident : $tstx := $estx), m!"have {h} : {t} := {e}")
         | none => pure (← `(tactic| have : $tstx := $estx), m!"have : {t} := {e}")
@@ -365,7 +365,7 @@ def addHaveSuggestion (ref : Syntax) (h? : Option Name) (t? : Option Expr) (e : 
         let h := h?.getD `_
         pure (← `(tactic| let $(mkIdent h):ident : $tstx := $estx), m!"let {h} : {t} := {e}")
     else
-      bif prop then
+      uif prop then
         match h? with
         | some h => pure (← `(tactic| have $(mkIdent h):ident := $estx), m!"have {h} := {e}")
         | none => pure (← `(tactic| have := $estx), m!"have := {e}")
@@ -404,7 +404,7 @@ def addRewriteSuggestion (ref : Syntax) (rules : List (Expr × Bool))
   let mut (tac, tacMsg, extraMsg) ← withExposedNames do
     let rulesStx := TSepArray.ofElems <| ← rules.toArray.mapM fun ⟨e, symm⟩ => do
       let t ← delabToRefinableSyntax e
-      bif symm then `(rwRule| ← $t:term) else `(rwRule| $t:term)
+      uif symm then `(rwRule| ← $t:term) else `(rwRule| $t:term)
     -- The seemingly superfluous `:=` below is a workaround for issue #2663
     let mut tac := ← do
       let loc ← loc?.mapM fun loc => do `(location| at $(← delab loc):term)
@@ -415,9 +415,9 @@ def addRewriteSuggestion (ref : Syntax) (rules : List (Expr × Bool))
     -- thus giving more information in the hovers.
     -- Perhaps in future we will have a better way to attach elaboration information to
     -- `Syntax` embedded in a `MessageData`.
-    let toMessageData (e : Expr) : MessageData := bif e.isConst then .ofConst e else .ofExpr e
+    let toMessageData (e : Expr) : MessageData := uif e.isConst then .ofConst e else .ofExpr e
     let rulesMsg := MessageData.sbracket <| MessageData.joinSep
-      (rules.map fun ⟨e, symm⟩ => (bif symm then "← " else "") ++ toMessageData e) ", "
+      (rules.map fun ⟨e, symm⟩ => (uif symm then "← " else "") ++ toMessageData e) ", "
     let mut tacMsg ← addMessageContext <|
       if let some loc := loc? then
         m!"rw {rulesMsg} at {loc}"

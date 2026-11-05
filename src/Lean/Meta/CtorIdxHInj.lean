@@ -30,7 +30,7 @@ partial def mkHInjectiveTheorem? (thmName : Name) (indVal : InductiveVal) : Meta
       let ctorIdxApp2 := mkAppN (mkConst (mkCtorIdxName indVal.name) us) (xs2.push x2)
       let mut thmType ← mkEq ctorIdxApp1 ctorIdxApp2
       for a1 in (xs1.push x1).reverse, a2 in (xs2.push x2).reverse do
-        bif (← isProof a1) then
+        uif (← isProof a1) then
           continue
         let name := (← a1.fvarId!.getUserName).appendAfter "_eq"
         let eq ← mkEqHEq a1 a2
@@ -46,7 +46,7 @@ partial def mkHInjectiveTheorem? (thmName : Name) (indVal : InductiveVal) : Meta
 where
   repeatIntroSubstRefl (mvarId : MVarId) : MetaM Unit := do
     let type ← mvarId.getType
-    bif type.isForall then
+    uif type.isForall then
       let (h, mvarId) ← mvarId.intro1
       let (h, mvarId) ← heqToEq mvarId h
       let (_, mvarId) ← substEq mvarId h

@@ -46,7 +46,7 @@ def mkLabelExt (name : Name := by exact decl_name%) : IO LabelExtension :=
   registerSimpleScopedEnvExtension {
     name     := name
     initial  := #[]
-    addEntry := fun d e => bif d.contains e then d else d.push e
+    addEntry := fun d e => uif d.contains e then d else d.push e
   }
 
 /-- Helper function for `registerLabelAttr`. -/

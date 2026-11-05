@@ -71,7 +71,7 @@ def LinearExpr.toArith (ctx : Array Expr) (e : LinearExpr) : MetaM Expr := do
   | mulR a k => return mkNatMul (← toArith ctx a) (mkNatLit k)
 
 def LinearCnstr.toArith (ctx : Array Expr) (c : LinearCnstr) : MetaM Expr := do
-  bif c.eq then
+  uif c.eq then
     return mkNatEq (← LinearExpr.toArith ctx c.lhs) (← LinearExpr.toArith ctx c.rhs)
   else
     return mkNatLE (← LinearExpr.toArith ctx c.lhs) (← LinearExpr.toArith ctx c.rhs)
@@ -113,25 +113,25 @@ where
         | none => addAsVar e
     match_expr e with
     | OfNat.ofNat _ n i =>
-      bif (← Structural.isInstOfNatNat i) then
+      uif (← Structural.isInstOfNatNat i) then
         toLinearExpr n
-      else bif (← isDefEqI i (mkInstOfNatNat n)) then
+      else uif (← isDefEqI i (mkInstOfNatNat n)) then
         toLinearExpr n
       else addAsVar e
     | Nat.succ a => return inc (← toLinearExpr a)
     | Nat.add a b => return add (← toLinearExpr a) (← toLinearExpr b)
     | Add.add _ i a b =>
-      bif (← DefEq.isInstAddNat i) then return add (← toLinearExpr a) (← toLinearExpr b)
+      uif (← DefEq.isInstAddNat i) then return add (← toLinearExpr a) (← toLinearExpr b)
       else addAsVar e
     | HAdd.hAdd _ _ _ i a b =>
-      bif (← DefEq.isInstHAddNat i) then return add (← toLinearExpr a) (← toLinearExpr b)
+      uif (← DefEq.isInstHAddNat i) then return add (← toLinearExpr a) (← toLinearExpr b)
       else addAsVar e
     | Nat.mul a b => mul a b
     | Mul.mul _ i a b =>
-      bif (← DefEq.isInstMulNat i) then mul a b
+      uif (← DefEq.isInstMulNat i) then mul a b
       else addAsVar e
     | HMul.hMul _ _ _ i a b =>
-      bif (← DefEq.isInstHMulNat i) then mul a b
+      uif (← DefEq.isInstHMulNat i) then mul a b
       else addAsVar e
     | _ => addAsVar e
 
@@ -170,7 +170,7 @@ end ToLinear
 
 def toLinearExpr (e : Expr) : MetaM (LinearExpr × Array Expr) := do
   let (e, atoms) ← ToLinear.run (ToLinear.toLinearExpr e)
-  bif atoms.size == 1 then
+  uif atoms.size == 1 then
     return (e, atoms)
   else
     let (atoms, perm) := sortExprs atoms
@@ -180,7 +180,7 @@ def toLinearExpr (e : Expr) : MetaM (LinearExpr × Array Expr) := do
 def toLinearCnstr? (e : Expr) : MetaM (Option (LinearCnstr × Array Expr)) := do
   let (some c, atoms) ← ToLinear.run (ToLinear.toLinearCnstr? e)
     | return none
-  bif atoms.size ≤ᵇ 1 then
+  uif atoms.size ≤ 1 then
     return some (c, atoms)
   else
     let (atoms, perm) := sortExprs atoms
@@ -188,8 +188,8 @@ def toLinearCnstr? (e : Expr) : MetaM (Option (LinearCnstr × Array Expr)) := do
     return some (c, atoms)
 
 def toContextExpr (ctx : Array Expr) : MetaM Expr := do
-  bif h : 0 <ᵇ ctx.size then
-    RArray.toExpr (mkConst ``Nat) id (RArray.ofArray ctx (lt_of_decideLT_eq_true h))
+  uif h : 0 < ctx.size then
+    RArray.toExpr (mkConst ``Nat) id (RArray.ofArray ctx h)
   else
     RArray.toExpr (mkConst ``Nat) id (RArray.leaf (mkNatLit 0))
 

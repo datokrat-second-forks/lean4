@@ -34,7 +34,7 @@ def mkErrorStringWithPos (fileName : String) (pos : Position) (msg : String)
   let endPos := match endPos with
     | some endPos => s!"-{endPos.line}:{endPos.column}"
     | none        => ""
-  let label := bif name.isSome || kind.isSome then
+  let label := uif name.isSome || kind.isSome then
     let name := name.map (s!"({·})")
     s!" {kind.getD ""}{name.getD ""}:"
   else
@@ -289,7 +289,7 @@ def ofConstName (constName : Name) (fullNames : Bool := false) : MessageData :=
       let msg ← ofFormatWithInfos <$> match ctx? with
         | .none => pure (format constName)
         | .some ctx =>
-          let ctx := bif fullNames then { ctx with opts := ctx.opts.set `pp.fullNames fullNames } else ctx
+          let ctx := uif fullNames then { ctx with opts := ctx.opts.set `pp.fullNames fullNames } else ctx
           ppConstNameWithInfos ctx constName
       return Dynamic.mk msg)
     (fun _ => false)
@@ -385,12 +385,12 @@ partial def formatAux : NamingContext → Option MessageDataContext → MessageD
   | nCtx, ctx,       group d                  => Format.group <$> formatAux nCtx ctx d
   | nCtx, ctx,       trace data header children => do
     let childFmts ← children.mapM (formatAux nCtx ctx)
-    bif data.cls.isAnonymous then
+    uif data.cls.isAnonymous then
       -- Sequence of top-level traces collected by `addTraceAsMessages`, do not indent.
       return .joinSep childFmts.toList "\n"
 
     let mut msg := f!"[{data.cls}]"
-    bif data.startTime != 0 then
+    uif data.startTime != 0 then
       msg := f!"{msg} [{data.stopTime - data.startTime}]"
     let headerFmt ← formatAux nCtx ctx header
     let headerFmt := match data.result? with
@@ -399,7 +399,7 @@ partial def formatAux : NamingContext → Option MessageDataContext → MessageD
     msg := f!"{msg} {headerFmt.nest 2}"
     let mut children := children
     if let some maxNum := ctx.map (maxTraceChildren.get ·.opts) then
-      bif maxNum >ᵇ 0 && children.size >ᵇ maxNum then
+      uif maxNum > 0 ∧ children.size > maxNum then
         children := children.take maxNum |>.push <|
           ofFormat f!"{children.size - maxNum} more entries... (increase `maxTraceChildren` to see more)"
     return .nest 2 (.joinSep (msg::childFmts.toList) "\n")
@@ -427,9 +427,9 @@ instance : Coe MVarId MessageData := ⟨ofGoal⟩
 instance : Coe (Option Expr) MessageData := ⟨fun o => match o with | none => "none" | some e => ofExpr e⟩
 
 partial def arrayExpr.toMessageData (es : Array Expr) (i : Nat) (acc : MessageData) : MessageData :=
-  bif h : i <ᵇ es.size then
+  uif h : i < es.size then
     let e   := es[i];
-    let acc := bif i == 0 then acc ++ ofExpr e else acc ++ ", " ++ ofExpr e;
+    let acc := uif i == 0 then acc ++ ofExpr e else acc ++ ", " ++ ofExpr e;
     toMessageData es (i+1) acc
   else
     acc ++ "]"
@@ -570,7 +570,7 @@ where
   | .anonymous => .anonymous
   | .str p s =>
     let p' := stripNestedNamePrefix p
-    bif p'.isAnonymous && s == "nested" then
+    uif p'.isAnonymous && s == "nested" then
       .anonymous
     else
       .str p' s
@@ -584,7 +584,7 @@ Note: we use this labeling mechanism so that we can have error kinds that are no
 shown to the user, without having to validate the presence of an error explanation at runtime.
 -/
 def errorNameOfKind? : Name → Option Name
-  | .str p last => bif last == errorNameSuffix then some p else none
+  | .str p last => uif last == errorNameSuffix then some p else none
   | _ => none
 
 /--
@@ -607,7 +607,7 @@ namespace SerialMessage
 
 protected def toString (msg : SerialMessage) (includeEndPos := false) : String := Id.run do
   let mut str := msg.data
-  let endPos := bif includeEndPos then msg.endPos else none
+  let endPos := uif includeEndPos then msg.endPos else none
   unless msg.caption == "" do
     str := msg.caption ++ ":\n" ++ str
   match msg.severity with
@@ -616,7 +616,7 @@ protected def toString (msg : SerialMessage) (includeEndPos := false) : String :
     str := mkErrorStringWithPos msg.fileName msg.pos str endPos "warning" (errorNameOfKind? msg.kind)
   | .error       =>
     str := mkErrorStringWithPos msg.fileName msg.pos str endPos "error" (errorNameOfKind? msg.kind)
-  bif str.isEmpty || str.back != '\n' then
+  uif str.isEmpty || str.back != '\n' then
     str := str ++ "\n"
   return str
 
@@ -768,7 +768,7 @@ def inlineExpr (e : Expr) (maxInlineLength := 30) : MessageData :=
     (fun ctx => do
       let msg := MessageData.ofExpr e
       let render ← msg.formatExpensively ctx
-      bif render.positions.length >ᵇ maxInlineLength || render.any (· == '\n') then
+      uif render.positions.length > maxInlineLength ∨ render.any (· == '\n') then
         return indentD msg ++ "\n"
       else
         return " `" ++ msg ++ "` ")
@@ -784,7 +784,7 @@ def inlineExprTrailing (e : Expr) (maxInlineLength := 30) : MessageData :=
     (fun ctx => do
       let msg := MessageData.ofExpr e
       let render ← msg.formatExpensively ctx
-      bif render.positions.length >ᵇ maxInlineLength || render.any (· == '\n') then
+      uif render.positions.length > maxInlineLength ∨ render.any (· == '\n') then
         return indentD msg
       else
         return " `" ++ msg ++ "`")

@@ -20,7 +20,7 @@ partial def mkGeneralizationForbiddenSet (targets : Array Expr) (forbidden : FVa
   let mut s := CollectFVars.State.ofFVarSet forbidden
   let mut todo := #[]
   for target in targets do
-    bif target.isFVar then
+    uif target.isFVar then
       todo := todo.push target.fvarId!
     else
       s := collectFVars s (← instantiateMVars (← inferType target))
@@ -43,7 +43,7 @@ where
     match todo with
     | [] => return s
     | fvarId::todo =>
-      bif s.contains fvarId then
+      uif s.contains fvarId then
         loop todo s
       else
         let (todo, s) ← visit fvarId todo <| s.insert fvarId
@@ -60,12 +60,12 @@ where
   recursive declarations.
 -/
 def getFVarSetToGeneralize (targets : Array Expr) (forbidden : FVarIdSet) (ignoreLetDecls := false) : MetaM FVarIdSet := do
-  let mut s : FVarIdSet := targets.foldl (init := {}) fun s target => bif target.isFVar then s.insert target.fvarId! else s
+  let mut s : FVarIdSet := targets.foldl (init := {}) fun s target => uif target.isFVar then s.insert target.fvarId! else s
   let mut r : FVarIdSet := {}
   for localDecl in (← getLCtx) do
     unless forbidden.contains localDecl.fvarId do
       unless localDecl.isAuxDecl || localDecl.binderInfo.isInstImplicit || (ignoreLetDecls && localDecl.isLet) do
-      bif (← findLocalDeclDependsOn localDecl (s.contains ·)) then
+      uif (← findLocalDeclDependsOn localDecl (s.contains ·)) then
         r := r.insert localDecl.fvarId
         s := s.insert localDecl.fvarId
   return r

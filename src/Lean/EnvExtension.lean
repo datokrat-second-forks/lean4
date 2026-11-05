@@ -95,12 +95,10 @@ comparing the names directly: one `Name.quickCmp` per probe instead of up to two
 The USize cutoff keeps `lo + hi` below `USize.size`, including on 32-bit platforms.
 -/
 def findSortedByName? (entries : Array (Name × α)) (declName : Name) : Option (Name × α) :=
-  bif h : 0 <ᵇ entries.size then
-    bif hs : entries.size <ᵇ 2147483647 then
-      have hs := lt_of_decideLT_eq_true hs
+  uif h : 0 < entries.size then
+    uif hs : entries.size < 2147483647 then
       goUSize hs 0 (USize.ofNat32 (entries.size - 1) (by omega)) (by simp) (by simp; omega)
     else
-      have hs := not_lt_of_decideLT_eq_false hs
       go 0 (entries.size - 1) (by omega) (by omega)
   else none
 where
@@ -116,10 +114,9 @@ where
       rw [USize.toNat_add, USize.toNat_one, Nat.mod_eq_of_lt (by omega)]
     let e := entries.uget m (by omega)
     match Name.quickCmp e.1 declName with
-    | .lt => bif h : m + 1 ≤ᵇ hi then have h := le_of_decideLE_eq_true h; goUSize hsize (m + 1) hi h hhi else none
+    | .lt => uif h : m + 1 ≤ hi then goUSize hsize (m + 1) hi h hhi else none
     | .gt =>
-      bif h : lo <ᵇ m then
-        have h := lt_of_decideLT_eq_true h
+      uif h : lo < m then
         have hlt : lo.toNat < m.toNat := h
         have hp : (m - 1).toNat = m.toNat - 1 := by
           rw [USize.toNat_sub_of_le _ _ (by
@@ -140,8 +137,8 @@ where
     let m := (lo + hi) / 2
     let e := entries[m]'(by omega)
     match Name.quickCmp e.1 declName with
-    | .lt => bif h : m + 1 ≤ᵇ hi then have h := le_of_decideLE_eq_true h; go (m + 1) hi h hhi else none
-    | .gt => bif h : m =ᵇ 0 || m - 1 <ᵇ lo then none else go lo (m - 1) (by omega) (by omega)
+    | .lt => uif h : m + 1 ≤ hi then go (m + 1) hi h hhi else none
+    | .gt => uif h : m = 0 ∨ m - 1 < lo then none else go lo (m - 1) (by omega) (by omega)
     | .eq => some e
   termination_by hi + 1 - lo
 
@@ -150,21 +147,19 @@ def findByName? (entries : Array (Name × α)) (declName : Name) : Option (Name 
   go 0
 where
   go (i : Nat) : Option (Name × α) :=
-    bif h : i <ᵇ entries.size then
+    uif h : i < entries.size then
       let e := entries[i]
-      bif e.1 == declName then some e else go (i + 1)
+      uif e.1 == declName then some e else go (i + 1)
     else
       none
   termination_by entries.size - i
 
 /-- `names.binSearchContains declName Name.quickLt`, comparing as `findSortedByName?` does. -/
 def containsSortedName (names : Array Name) (declName : Name) : Bool :=
-  bif h : 0 <ᵇ names.size then
-    bif hs : names.size <ᵇ 2147483647 then
-      have hs := lt_of_decideLT_eq_true hs
+  uif h : 0 < names.size then
+    uif hs : names.size < 2147483647 then
       goUSize hs 0 (USize.ofNat32 (names.size - 1) (by omega)) (by simp) (by simp; omega)
     else
-      have hs := not_lt_of_decideLT_eq_false hs
       go 0 (names.size - 1) (by omega) (by omega)
   else false
 where
@@ -179,10 +174,9 @@ where
     have hnext : (m + 1).toNat = m.toNat + 1 := by
       rw [USize.toNat_add, USize.toNat_one, Nat.mod_eq_of_lt (by omega)]
     match Name.quickCmp (names.uget m (by omega)) declName with
-    | .lt => bif h : m + 1 ≤ᵇ hi then have h := le_of_decideLE_eq_true h; goUSize hsize (m + 1) hi h hhi else false
+    | .lt => uif h : m + 1 ≤ hi then goUSize hsize (m + 1) hi h hhi else false
     | .gt =>
-      bif h : lo <ᵇ m then
-        have h := lt_of_decideLT_eq_true h
+      uif h : lo < m then
         have hlt : lo.toNat < m.toNat := h
         have hp : (m - 1).toNat = m.toNat - 1 := by
           rw [USize.toNat_sub_of_le _ _ (by
@@ -202,8 +196,8 @@ where
   go (lo hi : Nat) (hlo : lo ≤ hi) (hhi : hi < names.size) : Bool :=
     let m := (lo + hi) / 2
     match Name.quickCmp (names[m]'(by omega)) declName with
-    | .lt => bif h : m + 1 ≤ᵇ hi then have h := le_of_decideLE_eq_true h; go (m + 1) hi h hhi else false
-    | .gt => bif h : m =ᵇ 0 || m - 1 <ᵇ lo then false else go lo (m - 1) (by omega) (by omega)
+    | .lt => uif h : m + 1 ≤ hi then go (m + 1) hi h hhi else false
+    | .gt => uif h : m = 0 ∨ m - 1 < lo then false else go lo (m - 1) (by omega) (by omega)
     | .eq => true
   termination_by hi + 1 - lo
 
@@ -231,7 +225,7 @@ instance : Inhabited TagDeclarationExtension :=
   inferInstanceAs (Inhabited (SimplePersistentEnvExtension Name NameSet))
 
 def tag (ext : TagDeclarationExtension) (env : Environment) (declName : Name) : Environment :=
-  bif declName.isAnonymous then
+  uif declName.isAnonymous then
     -- This case might happen on partial elaboration; ignore instead of triggering any panics below
     env
   else
@@ -239,7 +233,7 @@ def tag (ext : TagDeclarationExtension) (env : Environment) (declName : Name) : 
     assert! env.getModuleIdxFor? declName |>.isNone -- See comment at `TagDeclarationExtension`
     -- Only the state visible on this branch, as in `MapDeclarationExtension.insert`: a tag added on
     -- the still-running branch of `declName` is missed, which only costs a superfluous log entry.
-    bif ext.getState (asyncMode := .local) env |>.contains declName then
+    uif ext.getState (asyncMode := .local) env |>.contains declName then
       env
     else
       ext.addEntry (asyncDecl := declName) (log := .decl declName) env declName
@@ -300,7 +294,7 @@ def insert (ext : MapDeclarationExtension α) (env : Environment) (declName : Na
   -- elaborating `declName` (e.g. a theorem's proof) still runs, and waiting for it would stall the
   -- write. This still catches every double write whose first write is visible here, in particular
   -- all sequential ones; it misses only a first write made on that still-running branch.
-  else bif !allowOverwrite &&
+  else uif !allowOverwrite &&
       (ext.toPersistentEnvExtension.getState (asyncMode := .local) env).contains declName then
     panic! s!"cannot insert `{declName}` into `{ext.name}`, it is already present; \
       declaration-keyed extension entries are write-once (pass `allowOverwrite := true` if this \

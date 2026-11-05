@@ -26,10 +26,10 @@ def _root_.Lean.MVarId.clear (mvarId : MVarId) (fvarId : FVarId) : MetaM MVarId 
     let tag ← mvarId.getTag
     lctx.forM fun localDecl => do
       unless localDecl.fvarId == fvarId do
-        bif (← localDeclDependsOn localDecl fvarId) then
+        uif (← localDeclDependsOn localDecl fvarId) then
           throwTacticEx `clear mvarId m!"variable '{localDecl.toExpr}' depends on '{mkFVar fvarId}'"
     let mvarDecl ← mvarId.getDecl
-    bif (← exprDependsOn mvarDecl.type fvarId) then
+    uif (← exprDependsOn mvarDecl.type fvarId) then
       throwTacticEx `clear mvarId m!"target depends on '{mkFVar fvarId}'"
     let lctx := lctx.erase fvarId
     let localInsts ← getLocalInstances
@@ -71,7 +71,7 @@ def _root_.Lean.MVarId.tryClearMany' (goal : MVarId) (fvarIds : Array FVarId) :
     fvarIds.foldrM (init := (goal, Array.mkEmpty fvarIds.size))
       fun h (goal, cleared) => do
         let goal' ← goal.tryClear h
-        let cleared := bif goal == goal' then cleared else cleared.push h
+        let cleared := uif goal == goal' then cleared else cleared.push h
         return (goal', cleared)
 
 end Lean.Meta

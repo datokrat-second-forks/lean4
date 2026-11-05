@@ -69,7 +69,7 @@ where
   trySplit (hyp : Hyp) :
       StateRefT AndFlattenState FlattenM (Option (Hyp × Hyp)) := do
     let typ := hyp.type
-    bif (← FlattenM.isCached typ) then
+    uif (← FlattenM.isCached typ) then
       return none
     else
       FlattenM.cache typ

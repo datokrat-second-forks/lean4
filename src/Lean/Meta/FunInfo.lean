@@ -29,7 +29,7 @@ deriving BEq, Hashable, TypeName
       | .const c ls =>
         -- If `fn` is only a single constant, we can share the result with any thread that can see `c`
         -- as well.
-        bif ls.any (·.hasMVar) then
+        uif ls.any (·.hasMVar) then
           -- However, if any level mvars are present, other threads should not be able to encounter
           -- the same `fn` and sharing would just waste time.
           k
@@ -40,7 +40,7 @@ deriving BEq, Hashable, TypeName
     return finfo
 
 @[inline] private def whenHasVar {α} (e : Expr) (deps : α) (k : α → α) : α :=
-  bif e.hasFVar then k deps else deps
+  uif e.hasFVar then k deps else deps
 
 private def collectDeps (fvars : Array Expr) (e : Expr) : Array Nat :=
   let rec visit (e : Expr) (deps : Array Nat) : Array Nat :=
@@ -54,21 +54,21 @@ private def collectDeps (fvars : Array Expr) (e : Expr) : Array Nat :=
     | .fvar ..         =>
       match fvars.idxOf? e with
       | none   => deps
-      | some i => bif deps.contains i then deps else deps.push i
+      | some i => uif deps.contains i then deps else deps.push i
     | _ => deps
   let deps := visit e #[]
   deps.qsort (fun i j => i < j)
 
 /-- Update `hasFwdDeps` fields using new `backDeps` -/
 private def updateHasFwdDeps (pinfo : Array ParamInfo) (backDeps : Array Nat) : Array ParamInfo :=
-  bif backDeps.size == 0 then
+  uif backDeps.size == 0 then
     pinfo
   else
     -- update hasFwdDeps fields
     pinfo.mapIdx fun i info =>
-      bif info.hasFwdDeps then
+      uif info.hasFwdDeps then
         info
-      else bif backDeps.contains i then
+      else uif backDeps.contains i then
         { info with hasFwdDeps := true }
       else
         info
@@ -119,7 +119,7 @@ private def getFunInfoAux (fn : Expr) (maxArgs? : Option Nat) : MetaM FunInfo :=
             isUDecInst := (← forallTelescopeReducing decl.type fun _ type =>
               return type.isAppOf ``UDecidable)
           }
-          bif isInstance then
+          uif isInstance then
             /- Collect higher order output parameters of this class IF `isInstance` is `true` -/
             let some className := className? | unreachable!
             /- Collect higher order output parameters of this class IF `isInstance` is `true` -/
@@ -127,10 +127,10 @@ private def getFunInfoAux (fn : Expr) (maxArgs? : Option Nat) : MetaM FunInfo :=
               unless outParamPositions.isEmpty do
                 let args := decl.type.getAppArgs
                 for h2 : i in *...args.size do
-                  bif outParamPositions.contains i then
+                  uif outParamPositions.contains i then
                     let arg := args[i]
                     if let some idx := fvars.idxOf? arg then
-                      bif (← whnf (← inferType arg)).isForall then
+                      uif (← whnf (← inferType arg)).isForall then
                         paramInfo := paramInfo.modify idx fun info => { info with higherOrderOutParam := true }
                         higherOrderOutParams := higherOrderOutParams.insert arg.fvarId!
         let resultDeps := collectDeps fvars type

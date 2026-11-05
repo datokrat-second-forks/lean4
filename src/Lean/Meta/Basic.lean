@@ -468,7 +468,7 @@ def _root_.Lean.Environment.synthCache (env : Environment) : SynthInstanceCache 
   | some v =>
     -- safety: only `setSynthCache` stores a value
     let c : PersistentSynthInstanceCache := unsafe unsafeCast v
-    bif c.gen == env.trackedGen then c.entries else {}
+    uif c.gen == env.trackedGen then c.entries else {}
   | none   => {}
 
 /-- Replaces the persistent tier of the type class resolution cache; see `Environment.synthCache`. -/
@@ -787,7 +787,7 @@ def SynthInstanceCache.rollBack (c : SynthInstanceCache) (env : Environment) : S
         e.deps.baseChangeLogPos ≤ env.declChangeLog.size &&
         e.deps.baseConstGen ≤ env.constGen with
     | []       => c.erase key
-    | entries' => bif entries'.length == entries.length then c else c.insert key entries'
+    | entries' => uif entries'.length == entries.length then c else c.insert key entries'
 
 /-- Restore backtrackable parts of the state. -/
 def SavedState.restore (b : SavedState) : MetaM Unit := do
@@ -803,9 +803,9 @@ def SavedState.restore (b : SavedState) : MetaM Unit := do
     { s with env := s.env.raiseRecordingConstGen env.recordingConstGen }
   modify fun s => { s with
     mctx := b.meta.mctx, zetaDeltaFVarIds := b.meta.zetaDeltaFVarIds, postponed := b.meta.postponed
-    cache := bif restored.constGen >ᵇ env.constGen then
+    cache := uif restored.constGen > env.constGen then
       { s.cache with synthInstance := b.meta.cache.synthInstance }
-    else bif stampsRolledBack then
+    else uif stampsRolledBack then
       { s.cache with synthInstance := s.cache.synthInstance.rollBack restored }
     else s.cache }
 
@@ -880,7 +880,7 @@ def mkExprConfigCacheKey (expr : Expr) : MetaM ExprConfigCacheKey :=
 
 def mkDefEqCacheKey (lhs rhs : Expr) : MetaM DefEqCacheKey := do
   let configKey := (← read).configKey
-  bif Expr.quickLt lhs rhs then
+  uif Expr.quickLt lhs rhs then
     return { lhs, rhs, configKey }
   else
     return { lhs := rhs, rhs := lhs, configKey }
@@ -897,7 +897,7 @@ def resetSynthInstanceCache : MetaM Unit := do
   modifyCache fun c => {c with synthInstance := {}}
 
 @[inline] def modifyDiag (f : Diagnostics → Diagnostics) : MetaM Unit := do
-  bif (← isDiagnosticsEnabled) then
+  uif (← isDiagnosticsEnabled) then
     modify fun { mctx, cache, zetaDeltaFVarIds, postponed, diag } => { mctx, cache, zetaDeltaFVarIds, postponed, diag := f diag }
 
 /-- If diagnostics are enabled, record that `declName` has been unfolded. -/
@@ -929,7 +929,7 @@ def recordInstance (declName : Name) : MetaM Unit := do
 
 /-- If diagnostics are enabled, record that synth pending failures. -/
 def recordSynthPendingFailure (type : Expr) : MetaM Unit := do
-  bif (← isDiagnosticsEnabled) then
+  uif (← isDiagnosticsEnabled) then
     unless (← get).diag.synthPendingFailures.contains type do
       -- We need to save the full context since type class resolution uses multiple metavar contexts and different local contexts
       let msg ← addMessageContextFull m!"{type}"
@@ -1057,7 +1057,7 @@ set_option compiler.ignoreBorrowAnnotation true in
 
 def whnfForall (e : Expr) : MetaM Expr := do
   let e' ← whnf e
-  bif e'.isForall then pure e' else pure e
+  uif e'.isForall then pure e' else pure e
 
 -- withIncRecDepth for a monad `n` such that `[MonadControlT MetaM n]`
 protected def withIncRecDepth (x : n α) : n α :=
@@ -1164,7 +1164,7 @@ def _root_.Lean.MVarId.getKind (mvarId : MVarId) : MetaM MetavarKind :=
 
 /-- Return `true` if `e` is a synthetic (or synthetic opaque) metavariable -/
 def isSyntheticMVar (e : Expr) : MetaM Bool := do
-  bif e.isMVar then
+  uif e.isMVar then
      return (← e.mvarId!.getKind) matches .synthetic | .syntheticOpaque
   else
      return false
@@ -1194,7 +1194,7 @@ Recall `isDefEq` will not assign a value to `mvarId` if `mvarId.isReadOnlyOrSynt
 -/
 def _root_.Lean.MVarId.isReadOnlyOrSyntheticOpaque (mvarId : MVarId) : MetaM Bool := do
   let mvarDecl ← mvarId.getDecl
-  bif mvarDecl.depth != (← getMCtx).depth then
+  uif mvarDecl.depth != (← getMCtx).depth then
     return true
   else
     match mvarDecl.kind with
@@ -1284,7 +1284,7 @@ Returns `true` if another local declaration in the local context depends on `fva
 def _root_.Lean.FVarId.hasForwardDeps (fvarId : FVarId) : MetaM Bool := do
   let decl ← fvarId.getDecl
   (← getLCtx).foldlM (init := false) (start := decl.index + 1) fun found other =>
-    bif found then
+    uif found then
       return true
     else
       localDeclDependsOn other fvarId
@@ -1358,13 +1358,13 @@ def collectForwardDeps (toRevert : Array Expr) (preserveOrder : Bool) (generaliz
 - if `generalizeNondepLet = true` then nondependent `ldecl`s become foralls too.
  -/
 def mkForallFVars (xs : Array Expr) (e : Expr) (usedOnly : Bool := false) (usedLetOnly : Bool := true) (generalizeNondepLet := true) (binderInfoForMVars := BinderInfo.implicit) : MetaM Expr :=
-  bif xs.isEmpty then return e else liftMkBindingM <| MetavarContext.mkForall xs e usedOnly usedLetOnly generalizeNondepLet binderInfoForMVars
+  uif xs.isEmpty then return e else liftMkBindingM <| MetavarContext.mkForall xs e usedOnly usedLetOnly generalizeNondepLet binderInfoForMVars
 
 /-- Takes an array `xs` of free variables and metavariables and a
 body term `e` and creates `fun ..xs => e`, suitably
 abstracting `e` and the types in `xs`. -/
 def mkLambdaFVars (xs : Array Expr) (e : Expr) (usedOnly : Bool := false) (usedLetOnly : Bool := true) (etaReduce : Bool := false) (generalizeNondepLet := true) (binderInfoForMVars := BinderInfo.implicit) : MetaM Expr :=
-  bif xs.isEmpty then return e else liftMkBindingM <| MetavarContext.mkLambda xs e usedOnly usedLetOnly etaReduce generalizeNondepLet binderInfoForMVars
+  uif xs.isEmpty then return e else liftMkBindingM <| MetavarContext.mkLambda xs e usedOnly usedLetOnly etaReduce generalizeNondepLet binderInfoForMVars
 
 def mkLetFVars (xs : Array Expr) (e : Expr) (usedLetOnly := true) (generalizeNondepLet := true) (binderInfoForMVars := BinderInfo.implicit) : MetaM Expr :=
   mkLambdaFVars xs e (usedLetOnly := usedLetOnly) (generalizeNondepLet := generalizeNondepLet) (binderInfoForMVars := binderInfoForMVars)
@@ -1374,7 +1374,7 @@ def mkFunUnit (a : Expr) : MetaM Expr :=
   return Lean.mkLambda (← mkFreshUserName `x) BinderInfo.default (mkConst ``Unit) a
 
 def elimMVarDeps (xs : Array Expr) (e : Expr) (preserveOrder : Bool := false) : MetaM Expr :=
-  bif xs.isEmpty then pure e else liftMkBindingM <| MetavarContext.elimMVarDeps xs e preserveOrder
+  uif xs.isEmpty then pure e else liftMkBindingM <| MetavarContext.elimMVarDeps xs e preserveOrder
 
 /-- `withConfig f x` executes `x` using the updated configuration object obtained by applying `f`. -/
 @[inline] def withConfig (f : Config → Config) : n α → n α :=
@@ -1420,7 +1420,7 @@ See also `withTrackingZetaDeltaSet` for tracking zeta-delta reductions.
 -/
 def withZetaDeltaSet (s : FVarIdSet) : n α → n α :=
   mapMetaM fun x =>
-    bif s.isEmpty then
+    uif s.isEmpty then
       x
     else
       withFreshCache <| withReader (fun ctx => { ctx with zetaDeltaSet := s }) x
@@ -1477,7 +1477,7 @@ See also `withZetaDeltaSet`, which does not interact with zeta-delta tracking.
 -/
 def withTrackingZetaDeltaSet (s : FVarIdSet) : n α → n α :=
   mapMetaM fun x =>
-    bif s.isEmpty then
+    uif s.isEmpty then
       withReader (fun ctx => { ctx with trackZetaDelta := false }) <| withResetZetaDeltaFVarIds x
     else
       withFreshCache <| withReader (fun ctx => { ctx with zetaDeltaSet := s, trackZetaDelta := true }) <| withResetZetaDeltaFVarIds x
@@ -1493,7 +1493,7 @@ private def Context.setTransparency (ctx : Context) (transparency : Transparency
   -- We avoid `withConfig` for performance reasons. `setTransparency` rebuilds `Config`,
   -- `ConfigWithKey` and `Context`, so skip it when the mode is already in effect.
   mapMetaM <| withReader fun ctx =>
-    bif ctx.config.transparency == mode then ctx else ctx.setTransparency mode
+    uif ctx.config.transparency == mode then ctx else ctx.setTransparency mode
 
 /-- `withDefault x` executes `x` using the default transparency setting. -/
 @[inline] def withDefault (x : n α) : n α :=
@@ -1526,7 +1526,7 @@ Recall that `.none < .reducible < .instances < .implicit < .default < .all`.
 -/
 @[inline] def withAtLeastTransparency (mode : TransparencyMode) : n α → n α :=
   mapMetaM <| withReader fun ctx =>
-    bif ctx.config.transparency.lt mode then ctx.setTransparency mode else ctx
+    uif ctx.config.transparency.lt mode then ctx.setTransparency mode else ctx
 
 /-- Execute `x` allowing `isDefEq` to assign synthetic opaque metavariables. -/
 @[inline] def withAssignableSyntheticOpaque (x : n α) : n α :=
@@ -1541,7 +1541,7 @@ Recall that `.none < .reducible < .instances < .implicit < .default < .all`.
   mapMetaM savingCacheImpl
 
 def getTheoremInfo (info : ConstantInfo) : MetaM (Option ConstantInfo) := do
-  bif (← shouldReduceAll) then
+  uif (← shouldReduceAll) then
     return some info
   else
     return none
@@ -1551,7 +1551,7 @@ private def getDefInfoTemp (info : ConstantInfo) : MetaM (Option ConstantInfo) :
   | .all => return some info
   | .default => return some info
   | _ =>
-    bif (← isReducible info.name) then
+    uif (← isReducible info.name) then
       return some info
     else
       return none
@@ -1568,7 +1568,7 @@ private def getConstTemp? (constName : Name) : MetaM (Option ConstantInfo) := do
   | none                                  => throwUnknownConstantAt (← getRef) constName
 
 private def isClassQuickConst? (constName : Name) : MetaM (LOption Name) := do
-  bif isClass (← getEnv) constName then
+  uif isClass (← getEnv) constName then
     return .some constName
   else
     match (← getConstTemp? constName) with
@@ -1602,7 +1602,7 @@ private partial def isClassQuick? : Expr → MetaM (LOption Name)
 
 private def withNewLocalInstanceImp (className : Name) (fvar : Expr) (k : MetaM α) : MetaM α := do
   let localDecl ← getFVarLocalDecl fvar
-  bif localDecl.isImplementationDetail then
+  uif localDecl.isImplementationDetail then
     k
   else
     withReader (fun ctx => { ctx with localInstances := ctx.localInstances.push { className := className, fvar := fvar } }) k
@@ -1626,7 +1626,7 @@ mutual
     - `isClassExpensive` uses `whnf` which depends (indirectly) on the set of local instances. -/
   private partial def withNewLocalInstancesImp
       (fvars : Array Expr) (i : Nat) (k : MetaM α) : MetaM α := do
-    bif h : i <ᵇ fvars.size then
+    uif h : i < fvars.size then
       let fvar := fvars[i]
       let decl ← getFVarLocalDecl fvar
       match (← isClassQuick? decl.type) with
@@ -1678,9 +1678,9 @@ mutual
     let rec process (lctx : LocalContext) (fvars : Array Expr) (j : Nat) (type : Expr) : MetaM α := do
       match type with
       | .forallE n d b bi =>
-        bif fvarsSizeLtMaxFVars fvars maxFVars? then
+        uif fvarsSizeLtMaxFVars fvars maxFVars? then
           let d     := d.instantiateRevRange j fvars.size fvars
-          let d     := bif cleanupAnnotations then d.cleanupAnnotations else d
+          let d     := uif cleanupAnnotations then d.cleanupAnnotations else d
           let fvarId ← mkFreshFVarId
           let lctx  := lctx.mkLocalDecl fvarId n d bi
           let fvar  := mkFVar fvarId
@@ -1695,11 +1695,11 @@ mutual
         let type := type.instantiateRevRange j fvars.size fvars;
         withReader (fun ctx => { ctx with lctx := lctx }) do
           withNewLocalInstancesImp fvars j do
-            bif reducing && fvarsSizeLtMaxFVars fvars maxFVars? then
+            uif reducing && fvarsSizeLtMaxFVars fvars maxFVars? then
               let newType ← whnf type
-              bif newType.isForall then
+              uif newType.isForall then
                 process lctx fvars fvars.size newType
-              else bif whnfTypeIfReducing then
+              else uif whnfTypeIfReducing then
                 k fvars newType
               else
                 k fvars type
@@ -1710,15 +1710,15 @@ mutual
   private partial def forallTelescopeReducingAux (type : Expr) (maxFVars? : Option Nat) (k : Array Expr → Expr → MetaM α) (cleanupAnnotations : Bool) (whnfType : Bool) : MetaM α := do
     match maxFVars? with
     | some 0 =>
-      bif whnfType then
+      uif whnfType then
         k #[] (← whnf type)
       else
         k #[] type
     | _ => do
       let newType ← whnf type
-      bif newType.isForall then
+      uif newType.isForall then
         forallTelescopeReducingAuxAux true maxFVars? newType k cleanupAnnotations whnfType
-      else bif whnfType then
+      else uif whnfType then
         k #[] newType
       else
         k #[] type
@@ -1731,7 +1731,7 @@ mutual
     match type.getAppFn with
     | .const c _ =>
       let env ← getEnv
-      bif isClass env c then
+      uif isClass env c then
         return some c
       else
         return none
@@ -1840,17 +1840,17 @@ where
     match fvarsSizeLtMaxFVars fvars maxFVars?, consumeLambda, consumeLet, e with
     | true, true, _, .lam n d b bi =>
       let d := d.instantiateRevRange 0 fvars.size fvars
-      let d := bif cleanupAnnotations then d.cleanupAnnotations else d
+      let d := uif cleanupAnnotations then d.cleanupAnnotations else d
       let fvarId ← mkFreshFVarId
       let lctx := lctx.mkLocalDecl fvarId n d bi
       let fvar := mkFVar fvarId
       process true consumeLet lctx (fvars.push fvar) b
     | true, _, true, .letE n t v b nondep => do
-      bif !nondep && nondepLetOnly then
+      uif !nondep && nondepLetOnly then
         finish e
       else
         let t := t.instantiateRevRange 0 fvars.size fvars
-        let t := bif cleanupAnnotations then t.cleanupAnnotations else t
+        let t := uif cleanupAnnotations then t.cleanupAnnotations else t
         let v := v.instantiateRevRange 0 fvars.size fvars
         let fvarId ← mkFreshFVarId
         let lctx := lctx.mkLetDecl fvarId n t v (nondep && preserveNondepLet)
@@ -1939,23 +1939,23 @@ private partial def forallMetaTelescopeReducingAux
   process #[] #[] 0 e
 where
   process (mvars : Array Expr) (bis : Array BinderInfo) (j : Nat) (type : Expr) : MetaM (Array Expr × Array BinderInfo × Expr) := do
-    bif maxMVars?.isEqSome mvars.size then
+    uif maxMVars?.isEqSome mvars.size then
       let type := type.instantiateRevRange j mvars.size mvars;
       return (mvars, bis, type)
     else
       match type with
       | .forallE n d b bi =>
         let d  := d.instantiateRevRange j mvars.size mvars
-        let k  := bif bi.isInstImplicit then  MetavarKind.synthetic else kind
+        let k  := uif bi.isInstImplicit then  MetavarKind.synthetic else kind
         let mvar ← mkFreshExprMVar d k n
         let mvars := mvars.push mvar
         let bis   := bis.push bi
         process mvars bis j b
       | _ =>
         let type := type.instantiateRevRange j mvars.size mvars;
-        bif reducing then do
+        uif reducing then do
           let newType ← whnf type;
-          bif newType.isForall then
+          uif newType.isForall then
             process mvars bis mvars.size newType
           else
             return (mvars, bis, type)
@@ -1990,7 +1990,7 @@ where
     let finalize : Unit → MetaM (Array Expr × Array BinderInfo × Expr) := fun _ => do
       let type := type.instantiateRevRange j mvars.size mvars
       return (mvars, bis, type)
-    bif maxMVars?.isEqSome mvars.size then
+    uif maxMVars?.isEqSome mvars.size then
       finalize ()
     else
       match type with
@@ -2050,7 +2050,7 @@ partial def withLocalDecls
   loop #[]
 where
   loop [Inhabited α] (acc : Array Expr) : n α := do
-    bif acc.size <ᵇ declInfos.size then
+    uif acc.size < declInfos.size then
       let (name, bi, typeCtor) := declInfos[acc.size]!
       withLocalDecl name bi (←typeCtor acc) (fun x => loop (acc.push x)) kind
     else
@@ -2103,7 +2103,7 @@ def withImplicitBinderInfos (bs : Array Expr) (k : n α) : n α :=
 def withInstImplicitAsImplicit (xs : Array Expr) (k : MetaM α) : MetaM α := do
   let newBinderInfos ← xs.filterMapM fun x => do
     let bi ← x.fvarId!.getBinderInfo
-    bif bi == .instImplicit then
+    uif bi == .instImplicit then
       return some (x.fvarId!, .implicit)
     else
       return none
@@ -2112,7 +2112,7 @@ def withInstImplicitAsImplicit (xs : Array Expr) (k : MetaM α) : MetaM α := do
 private def withPrimedNamesImp (xs : Array Expr) (k : MetaM α) : MetaM α := do
   let lctx ← getLCtx
   let lctx := lctx.modifyLocalDecls fun decl =>
-    bif xs.contains (mkFVar decl.fvarId) then
+    uif xs.contains (mkFVar decl.fvarId) then
       decl.setUserName (decl.userName.appendAfter "'")
     else
       decl
@@ -2163,7 +2163,7 @@ def withLocalInstancesImp (decls : List LocalDecl) (k : MetaM α) : MetaM α := 
         -- Ensure we don't add the same local instance multiple times.
         unless localInsts.any fun localInst => localInst.fvar.isFVarOf decl.fvarId do
           localInsts := localInsts.push { className, fvar := decl.toExpr }
-  bif localInsts.size == size then
+  uif localInsts.size == size then
     k
   else
     withReader (fun ctx => { ctx with localInstances := localInsts }) k
@@ -2256,7 +2256,7 @@ private def freshenUserNamesSinceIdx [MonadLiftT MetaM n] (lctx : LocalContext) 
   for i in [idx:lctx.numIndices] do
     let some decl := lctx.decls[i]! | continue
     let n := decl.userName
-    bif !n.hasMacroScopes then
+    uif !n.hasMacroScopes then
       lctx := lctx.setUserName decl.fvarId (← liftMetaM <| mkFreshUserName n)
   return lctx
 
@@ -2360,7 +2360,7 @@ def setInlineAttribute (declName : Name) (kind := Compiler.InlineAttributeKind.i
   | .error msg => throwError msg
 
 private partial def instantiateForallAux (ps : Array Expr) (i : Nat) (e : Expr) : MetaM Expr := do
-  bif h : i <ᵇ ps.size then
+  uif h : i < ps.size then
     let p := ps[i]
     match (← whnf e) with
     | .forallE _ _ b _ => instantiateForallAux ps (i+1) (b.instantiate1 p)
@@ -2373,7 +2373,7 @@ def instantiateForall (e : Expr) (ps : Array Expr) : MetaM Expr :=
   instantiateForallAux ps 0 e
 
 private partial def instantiateLambdaAux (ps : Array Expr) (i : Nat) (e : Expr) : MetaM Expr := do
-  bif h : i <ᵇ ps.size then
+  uif h : i < ps.size then
     let p := ps[i]
     match (← whnf e) with
     | .lam _ _ b _ => instantiateLambdaAux ps (i+1) (b.instantiate1 p)
@@ -2421,7 +2421,7 @@ def instantiateForallWithParamInfos (e : Expr) (args : Array Expr) (cleanupAnnot
     match e with
     | .forallE name type e' binderInfo =>
       let type := type.instantiateRevRange j i args
-      let type := bif cleanupAnnotations then type.cleanupAnnotations else type
+      let type := uif cleanupAnnotations then type.cleanupAnnotations else type
       res := res.push { name, type, binderInfo }
       e := e'
     | _ => throwError "invalid `instantiateForallWithParams`, too many parameters{indentExpr e}"
@@ -2450,7 +2450,7 @@ def instantiateLambdaWithParamInfos (e : Expr) (args : Array Expr) (cleanupAnnot
     match e with
     | .forallE name type e' binderInfo =>
       let type := type.instantiateRevRange j i args
-      let type := bif cleanupAnnotations then type.cleanupAnnotations else type
+      let type := uif cleanupAnnotations then type.cleanupAnnotations else type
       res := res.push { name, type, binderInfo }
       e := e'
     | _ => throwError "invalid `instantiateForallWithParams`, too many parameters{indentExpr e}"
@@ -2555,7 +2555,7 @@ That is, `inductive` type in `Prop`.
 def isInductivePredicate? (declName : Name) : MetaM (Option InductiveVal) := do
   match (← getEnv).find? declName with
   | some (.inductInfo info) =>
-    bif (← isInductivePredicateVal info) then
+    uif (← isInductivePredicateVal info) then
       return some info
     else
       return none
@@ -2582,8 +2582,8 @@ def getResetPostponed : MetaM (PersistentArray PostponedEntry) := do
 private def exposeRelevantUniverses (e : Expr) (p : Level → Bool) : Expr :=
   e.replace fun e =>
     match e with
-    | .const _ us => bif us.any p then some (e.setPPUniverses true) else none
-    | .sort u     => bif p u then some (e.setPPUniverses true) else none
+    | .const _ us => uif us.any p then some (e.setPPUniverses true) else none
+    | .sort u     => uif p u then some (e.setPPUniverses true) else none
     | _           => none
 
 private def mkLevelErrorMessageCore (header : String) (entry : PostponedEntry) : MetaM MessageData := do
@@ -2612,7 +2612,7 @@ private def processPostponedStep (exceptionOnFailure : Bool) : MetaM Bool := do
   let ps ← getResetPostponed
   for p in ps do
     unless (← withReader (fun ctx => { ctx with defEqCtx? := p.ctx? }) <| isLevelDefEqAux p.lhs p.rhs) do
-      bif exceptionOnFailure then
+      uif exceptionOnFailure then
         withRef p.ref do
           throwError (← mkLevelErrorMessage p)
       else
@@ -2620,7 +2620,7 @@ private def processPostponedStep (exceptionOnFailure : Bool) : MetaM Bool := do
   return true
 
 partial def processPostponed (mayPostpone : Bool := true) (exceptionOnFailure := false) : MetaM Bool := do
-  bif (← getNumPostponed) == 0 then
+  uif (← getNumPostponed) == 0 then
     return true
   else
     let numPostponedBegin ← getNumPostponed
@@ -2628,20 +2628,20 @@ partial def processPostponed (mayPostpone : Bool := true) (exceptionOnFailure :=
         (fun _ => return m!"processing #{numPostponedBegin} postponed is-def-eq level constraints") do
       let rec loop : MetaM Bool := do
         let numPostponed ← getNumPostponed
-        bif numPostponed == 0 then
+        uif numPostponed == 0 then
           return true
         else
-          bif !(← processPostponedStep exceptionOnFailure) then
+          uif !(← processPostponedStep exceptionOnFailure) then
             return false
           else
             let numPostponed' ← getNumPostponed
-            bif numPostponed' == 0 then
+            uif numPostponed' == 0 then
               return true
-            else bif numPostponed' <ᵇ numPostponed then
+            else uif numPostponed' < numPostponed then
               loop
             -- If we cannot postpone anymore, `Config.univApprox := true`, but we haven't tried universe approximations yet,
             -- then try approximations before failing.
-            else bif !mayPostpone && (← getConfig).univApprox && !(← read).univApprox then
+            else uif !mayPostpone && (← getConfig).univApprox && !(← read).univApprox then
               withReader (fun ctx => { ctx with univApprox := true }) loop
             else
               trace[Meta.isLevelDefEq.postponed] "no progress solving pending is-def-eq level constraints"
@@ -2670,8 +2670,8 @@ partial def processPostponed (mayPostpone : Bool := true) (exceptionOnFailure :=
   modifyDefEqTransientCache fun _ => {}
   let postponed ← getResetPostponed
   try
-    bif (← x) then
-      bif (← processPostponed mayPostpone) then
+    uif (← x) then
+      uif (← processPostponed mayPostpone) then
         let newPostponed ← getPostponed
         setPostponed (postponed ++ newPostponed)
         return true
@@ -2777,7 +2777,7 @@ def etaExpand (e : Expr) : MetaM Expr :=
 If `e` is of the form `?m ...` instantiate metavars
 -/
 def instantiateMVarsIfMVarApp (e : Expr) : MetaM Expr := do
-  bif e.getAppFn.isMVar then
+  uif e.getAppFn.isMVar then
     instantiateMVars e
   else
     return e
@@ -2835,7 +2835,7 @@ to avoid creating an un-collectable promise cycle.
 def realizeValue [BEq α] [Hashable α] [TypeName α] [TypeName β] (forConst : Name) (key : α) (realize : MetaM β) :
     MetaM β := do
   let env ← getEnv
-  bif !env.areRealizationsEnabledForConst forConst then
+  uif !env.areRealizationsEnabledForConst forConst then
     return (← realize)
   let coreCtx ← readThe Core.Context
   let coreCtx := {
@@ -2928,7 +2928,7 @@ def realizeConst (forConst : Name) (constName : Name) (realize : MetaM Unit) :
   -- If `constName` is already known on this branch, avoid the trace node. We should not use
   -- `contains` as it could block as well as find realizations on other branches, which would lack
   -- the relevant local environment extension state when accessed on this branch.
-  bif env.containsOnBranch constName then
+  uif env.containsOnBranch constName then
     return
   withTraceNode `Meta.realizeConst (fun _ => return constName) do
     let coreCtx ← readThe Core.Context
@@ -2980,14 +2980,14 @@ where
           -- constant is realized independently from two modules that are later imported together
           -- (diamond import pattern).
           let namePrefix :=
-            bif isPrivateName constName then mkPrivateName env constName else constName
+            uif isPrivateName constName then mkPrivateName env constName else constName
           withDeclNameForAuxNaming namePrefix do
             withoutExporting (when := isPrivateName constName) do
               realize
           -- Meta code working on a non-exported declaration should usually do so inside
           -- `withoutExporting` but we're lenient here in case this call is the only one that needs
           -- the setting.
-          bif !((← getEnv).setExporting false).contains constName then
+          uif !((← getEnv).setExporting false).contains constName then
             throwError "Lean.Meta.realizeConst: {constName} was not added to the environment")
         <* addTraceAsMessages
     let res? ← act |>.run' |>.run coreCtx { env } |>.toBaseIO

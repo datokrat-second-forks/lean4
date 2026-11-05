@@ -29,7 +29,7 @@ theorem isPrivatePrefix_of_privatePrefix?_eq_some {n : Name}
 /-- Alternate specification of `privatePrefix?` -/
 theorem appendCore_privatePrefix?_privateToUserName {n : Name} (h : isPrivateName n) :
     ((privatePrefix? n).get (by rwa [isSome_privatePrefix?])).appendCore (privateToUserName n) = n := by
-  rw [privateToUserName, Bool.dcond_pos h]
+  rw [privateToUserName, UDecidable.dite_eq_left h]
   fun_induction privateToUserNameAux with simp_all [privatePrefix?]
 
 theorem isPrivateName_iff_privateToUserName_ne_self {n : Name} :
@@ -184,8 +184,8 @@ theorem privatePrefix?_mkPrivateNameCore {modNm nm : Name} (h : modNm.hasNum = f
   | str => simp [privatePrefix?, *]
   | num pre i ih =>
     simp only [Name.appendCore, privatePrefix?]
-    rw [Bool.cond_neg, ih]
-    refine Bool.eq_false_iff.2 fun h' => ?_
+    rw [UDecidable.ite_eq_right, ih]
+    intro h'
     replace h' : isPrivatePrefix ((privateHeader.appendCore modNm).num 0 |>.appendCore (pre.num i)) := h'
     have := isPrivatePrefix_of_privatePrefix?_eq_some ih
     have := isPrivatePrefix_appendCore_right this |>.mp h'

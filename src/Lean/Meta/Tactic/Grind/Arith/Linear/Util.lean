@@ -123,7 +123,7 @@ def _root_.Lean.Grind.Linarith.Poly.eval? (p : Poly) : LinearM (Option Rat) := d
   let rec go (v : Rat) : Poly → Option Rat
     | .nil => some v
     | .add k x p =>
-      bif _ : x <ᵇ a.size then
+      uif _ : x < a.size then
         go (v + k*a[x]) p
       else
         none
@@ -134,7 +134,7 @@ Returns `.true` if `c` is satisfied by the current partial model,
 -/
 def IneqCnstr.satisfied (c : IneqCnstr) : LinearM LBool := do
   let some v ← c.p.eval? | return .undef
-  bif c.strict then
+  uif c.strict then
     return decide (v < 0) |>.toLBool
   else
     return decide (v <= 0) |>.toLBool
@@ -152,7 +152,7 @@ def getVar (x : Var) : LinearM Expr :=
 
 /-- Returns `true` if the linarith state is inconsistent. -/
 def inconsistent : LinearM Bool := do
-  bif (← isInconsistent) then return true
+  uif (← isInconsistent) then return true
   return (← getStruct).conflict?.isSome
 
 /-- Returns `true` if `x` has been eliminated using an equality constraint. -/
@@ -218,10 +218,10 @@ def _root_.Lean.Grind.Linarith.Poly.pickVarToElim? (p : Poly) : Option (Int × V
   | .add k x p => go k x p
 where
   go (k : Int) (x : Var) (p : Poly) : Int × Var :=
-    bif k == 1 || k == -1 then
+    uif k == 1 || k == -1 then
       (k, x)
     else match p with
       | .nil => (k, x)
-      | .add k' x' p => bif k'.natAbs <ᵇ k.natAbs then go k' x' p else go k x p
+      | .add k' x' p => uif k'.natAbs < k.natAbs then go k' x' p else go k x p
 
 end Lean.Meta.Grind.Arith.Linear

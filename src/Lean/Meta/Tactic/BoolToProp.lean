@@ -49,7 +49,7 @@ def boolCondToProp? (c : Expr) (value : Bool) : MetaM (Option (Expr × Expr)) :=
       pure (← simp e ctx).1
     catch _ =>
       return none
-  bif r.expr == e then return none
+  uif r.expr == e then return none
   return some (r.expr, ← r.getProof)
 
 /--
@@ -62,8 +62,8 @@ def _root_.Lean.MVarId.boolCondBinderToProp? (mvarId : MVarId) (c : Expr) :
   let .forallE n d body bi ← instantiateMVars (← mvarId.getType) | return none
   let_expr Eq α c' v := d | return none
   unless α.isConstOf ``Bool && c' == c do return none
-  let some value := (bif v.isConstOf ``Bool.true then some true
-    else bif v.isConstOf ``Bool.false then some false else none) | return none
+  let some value := (uif v.isConstOf ``Bool.true then some true
+    else uif v.isConstOf ``Bool.false then some false else none) | return none
   let some (p, pr) ← boolCondToProp? c value | return none
   let newTarget ← withLocalDecl n bi p fun hp => do
     mkForallFVars #[hp] (body.instantiate1 (← mkEqMPR pr hp))

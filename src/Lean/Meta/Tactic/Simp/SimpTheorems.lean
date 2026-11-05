@@ -191,13 +191,13 @@ mutual
       else
         return false
     | _ =>
-      bif type.isAppOfArity ``Eq 3 then
-        bif proof.isAppOfArity ``Eq.refl 2 || proof.isAppOfArity ``rfl 2 then
+      uif type.isAppOfArity ``Eq 3 then
+        uif proof.isAppOfArity ``Eq.refl 2 || proof.isAppOfArity ``rfl 2 then
           return true
-        else bif proof.isAppOfArity ``Eq.symm 4 then
+        else uif proof.isAppOfArity ``Eq.symm 4 then
           -- `Eq.symm` of rfl theorem is a rfl theorem
           isRflProofCore includeBackward type proof.appArg! -- small hack: we don't need to set the exact type
-        else bif proof.getAppFn.isConst then
+        else uif proof.getAppFn.isConst then
           -- The application of a `rfl` theorem is a `rfl` theorem
           -- A constant which is a `rfl` theorem is a `rfl` theorem
           isRflTheoremCore includeBackward proof.getAppFn.constName!
@@ -207,7 +207,7 @@ mutual
         return false
 
   private partial def isRflTheoremCore (includeBackward : Bool) (declName : Name) : CoreM Bool := do
-    bif backward.dsimp.useDefEqAttr.get (← getOptions) then
+    uif backward.dsimp.useDefEqAttr.get (← getOptions) then
       let env ← getEnv
       return defeqAttr.hasTag env declName ||
         (includeBackward && backwardDefeqAttr.hasTag env declName)
@@ -250,7 +250,7 @@ def isBackwardRflProof (proof : Expr) : MetaM Bool := do
 
 instance : ToFormat SimpTheorem where
   format s :=
-    let perm := bif s.perm then ":perm" else ""
+    let perm := uif s.perm then ":perm" else ""
     let name := format s.origin.key
     let prio := f!":{s.priority}"
     name ++ prio ++ perm
@@ -268,7 +268,7 @@ def ppOrigin [Monad m] [MonadEnv m] [MonadError m] : Origin → m MessageData
   | .other n => return n
 
 def ppSimpTheorem [Monad m] [MonadEnv m] [MonadError m] (s : SimpTheorem) : m MessageData := do
-  let perm := bif s.perm then ":perm" else ""
+  let perm := uif s.perm then ":perm" else ""
   let name ← ppOrigin s.origin
   let prio := m!":{s.priority}"
   return name ++ prio ++ perm
@@ -305,7 +305,7 @@ private partial def isPerm : Expr → Expr → MetaM Bool
 
 private def checkBadRewrite (lhs rhs : Expr) : MetaM Unit := do
   let lhs ← withSimpGlobalConfig <| DiscrTree.reduceDT lhs (root := true)
-  bif lhs == rhs && lhs.isFVar then
+  uif lhs == rhs && lhs.isFVar then
     throwError "Invalid simp theorem: Equation is equivalent to{indentExpr (← mkEq lhs rhs)}"
 
 private partial def shouldPreprocess (type : Expr) : MetaM Bool :=
@@ -326,25 +326,25 @@ private partial def preprocess (e type : Expr) (inv : Bool) (isGlobal : Bool) : 
 where
   go (e type : Expr) : MetaM (List (Expr × Expr)) := do
   let type ← whnf type
-  bif type.isForall then
+  uif type.isForall then
     forallTelescopeReducing type fun xs type => do
       let e := mkAppN e xs
       let ps ← go e type
       ps.mapM fun (e, type) =>
         return (← mkLambdaFVars xs e, ← mkForallFVars xs type)
   else if let some (_, lhs, rhs) := type.eq? then
-    bif isGlobal then
+    uif isGlobal then
       checkBadRewrite lhs rhs
-    bif inv then
+    uif inv then
       let type ← mkEq rhs lhs
       let e    ← mkEqSymm e
       return [(e, type)]
     else
       return [(e, type)]
   else if let some (lhs, rhs) := type.iff? then
-    bif isGlobal then
+    uif isGlobal then
       checkBadRewrite lhs rhs
-    bif inv then
+    uif inv then
       let type ← mkEq rhs lhs
       let e    ← mkEqSymm (← mkPropExt e)
       return [(e, type)]
@@ -353,26 +353,26 @@ where
       let e    ← mkPropExt e
       return [(e, type)]
   else if let some (_, lhs, rhs) := type.ne? then
-    bif inv then
+    uif inv then
       throwError m!"Invalid `←` modifier: Cannot be applied to simp theorems of the form `a ≠ b`"
         ++ .note m!"This simp theorem will rewrite{inlineExpr (← mkEq lhs rhs)}to `{.ofConstName ``False}`, \
                     which should not be applied in the reverse direction"
-    bif rhs.isConstOf ``Bool.true then
+    uif rhs.isConstOf ``Bool.true then
       return [(← mkAppM ``Bool.of_not_eq_true #[e], ← mkEq lhs (mkConst ``Bool.false))]
-    else bif rhs.isConstOf ``Bool.false then
+    else uif rhs.isConstOf ``Bool.false then
       return [(← mkAppM ``Bool.of_not_eq_false #[e], ← mkEq lhs (mkConst ``Bool.true))]
     let type ← mkEq (← mkEq lhs rhs) (mkConst ``False)
     let e    ← mkEqFalse e
     return [(e, type)]
   else if let some p := type.not? then
-    bif inv then
+    uif inv then
       throwError m!"Invalid `←` modifier: Cannot be applied to simp theorems of the form `¬ P`"
         ++ .note m!"This simp theorem will rewrite{inlineExpr p}to `{.ofConstName ``False}`, which should not \
                     be applied in the reverse direction"
     if let some (_, lhs, rhs) := p.eq? then
-      bif rhs.isConstOf ``Bool.true then
+      uif rhs.isConstOf ``Bool.true then
         return [(← mkAppM ``Bool.of_not_eq_true #[e], ← mkEq lhs (mkConst ``Bool.false))]
-      else bif rhs.isConstOf ``Bool.false then
+      else uif rhs.isConstOf ``Bool.false then
         return [(← mkAppM ``Bool.of_not_eq_false #[e], ← mkEq lhs (mkConst ``Bool.true))]
     let type ← mkEq p (mkConst ``False)
     let e    ← withoutExporting do mkEqFalse e
@@ -382,7 +382,7 @@ where
     let e₂ := mkProj ``And 1 e
     return (← go e₁ type₁) ++ (← go e₂ type₂)
   else
-    bif inv then
+    uif inv then
       throwError m!"Invalid `←` modifier: Cannot be applied to a rule that rewrites to `True`"
         ++ .note m!"This simp theorem will rewrite{inlineExpr type}to `True`, which should not be applied in the reverse direction"
     let type ← mkEq type (mkConst ``True)
@@ -400,13 +400,13 @@ private def mkSimpTheoremKeys (type : Expr) (noIndexAtArgs : Bool) (checkLhs : B
     match type.eq? with
     | some (_, lhs, rhs) =>
       let keys ← DiscrTree.mkPath lhs noIndexAtArgs
-      bif checkLhs then
-        bif warning.simp.varHead.get (← getOptions) && keys[0]? == some .star then
+      uif checkLhs then
+        uif warning.simp.varHead.get (← getOptions) && keys[0]? == some .star then
           logWarning m!"Left-hand side of simp theorem has a variable as head symbol. \
             This means the theorem will be tried on every simp step, which can be expensive. \
             This may be acceptable for `local` or `scoped` simp lemmas.\n\
             Use `set_option warning.simp.varHead false` to disable this warning."
-        bif warning.simp.otherHead.get (← getOptions) && keys[0]? == some .other then
+        uif warning.simp.otherHead.get (← getOptions) && keys[0]? == some .other then
           logWarning m!"Left-hand side of simp theorem is headed by a `.other` key in the \
             discrimination tree (e.g. because it is a lambda expression). \
             This theorem will be tried against all expressions that also have a `.other` key as head, \
@@ -427,8 +427,8 @@ private def mkSimpTheoremCore (origin : Origin) (e : Expr) (levelParams : Array 
   let type ← instantiateMVars (← inferType e)
   let (keys, perm) ← mkSimpTheoremKeys type noIndexAtArgs checkLhs
   let rfl ← isRflProof proof
-  let backwardRfl ← bif rfl then pure true else isBackwardRflProof proof
-  bif rfl && simp.rfl.checkTransparency.get (← getOptions) then
+  let backwardRfl ← uif rfl then pure true else isBackwardRflProof proof
+  uif rfl && simp.rfl.checkTransparency.get (← getOptions) then
     forallTelescopeReducing type fun _ type => do
       let checkDefEq (lhs rhs : Expr) := do
         unless (← withConfig
@@ -459,7 +459,7 @@ def mkSimpTheoremFromConst (declName : Name) (post := true) (inv := false)
   withSimpGlobalConfig do
     let type ← inferType val
     checkTypeIsProp type
-    bif inv || (← shouldPreprocess type) then
+    uif inv || (← shouldPreprocess type) then
       let mut r := #[]
       for (val, type) in (← preprocess val type inv (isGlobal := true)) do
         let auxName ← mkAuxLemma (kind? := `_simp) cinfo.levelParams type val (inferRfl := true)
@@ -473,9 +473,9 @@ def mkSimpTheoremFromConst (declName : Name) (post := true) (inv := false)
       return #[← withoutExporting do mkSimpTheoremCore origin (mkConst declName us) #[] (mkConst declName) post prio (noIndexAtArgs := false) (checkLhs := checkLhs)]
 
 def SimpTheorem.getValue (simpThm : SimpTheorem) : MetaM Expr := do
-  bif simpThm.proof.isConst && simpThm.levelParams.isEmpty then
+  uif simpThm.proof.isConst && simpThm.levelParams.isEmpty then
     let info ← getConstVal simpThm.proof.constName!
-    bif info.levelParams.isEmpty then
+    uif info.levelParams.isEmpty then
       return simpThm.proof
     else
       return simpThm.proof.updateConst! (← info.levelParams.mapM fun _ => mkFreshLevelMVar)
@@ -492,7 +492,7 @@ private def preprocessProof (val : Expr) (inv : Bool) : MetaM (Array Expr) := do
 def mkSimpTheoremFromExpr (id : Origin) (levelParams : Array Name) (proof : Expr) (inv := false)
     (post := true) (prio : Nat := eval_prio default) (config : ConfigWithKey := simpGlobalConfig) :
     MetaM (Array SimpTheorem) := do
-  bif proof.isConst then
+  uif proof.isConst then
     -- Recall that we use `simpGlobalConfig` for processing global declarations.
     mkSimpTheoremFromConst proof.constName! post inv prio
   else
@@ -548,7 +548,7 @@ Moreover, users will have to use `f.eq_def` if they want to force the definition
 unfolded.
 -/
 def Simp.unfoldEvenWithEqns (declName : Name) : CoreM Bool := do
-  bif hasSmartUnfoldingDecl (← getEnv) declName then return true
+  uif hasSmartUnfoldingDecl (← getEnv) declName then return true
   unless (← isRecursiveDefinition declName) do return true
   return false
 
@@ -560,9 +560,9 @@ def mkSimpEntryOfDeclToUnfold (declName : Name) : MetaM (Array SimpEntry) := do
   let mut entries : Array SimpEntry := #[]
   -- NOTE: the latter condition is only to preserve previous behavior where simp accepts even things
   -- that neither theorems nor unfoldable. This should likely be tightened up in the future.
-  bif !(← getConstInfo declName).isDefinition && getOriginalConstKind? (← getEnv) declName == some .defn then
+  uif !(← getConstInfo declName).isDefinition && getOriginalConstKind? (← getEnv) declName == some .defn then
     throwError "Invalid simp theorem `{.ofConstName declName}`: Expected a definition with an exposed body"
-  bif (← Simp.ignoreEquations declName) then
+  uif (← Simp.ignoreEquations declName) then
     entries := entries.push (.toUnfold declName)
   else if let some eqns ← getEqnsFor? declName then
     for h : i in *...eqns.size do
@@ -578,13 +578,13 @@ def mkSimpEntryOfDeclToUnfold (declName : Name) : MetaM (Array SimpEntry) := do
       Definitions with more than 100 equational theorems will use priority 1 for all
       but the last (a heuristic, not perfect).
       -/
-      let prio := bif eqns.size >ᵇ 100 then
-        bif i + 1 =ᵇ eqns.size then 0 else 1
+      let prio := uif eqns.size > 100 then
+        uif i + 1 = eqns.size then 0 else 1
       else
         100 - i
       let thms ← mkSimpTheoremFromConst eqn (prio := prio)
       entries := entries ++ thms.map (.thm ·)
-    bif (← Simp.unfoldEvenWithEqns declName) then
+    uif (← Simp.unfoldEvenWithEqns declName) then
       entries := entries.push (.toUnfold declName)
   else
     entries := entries.push (.toUnfold declName)
@@ -622,7 +622,7 @@ partial def SimpTheorems.eraseCore (d : SimpTheorems) (thmId : Origin) : SimpThe
     d
 
 private def eraseIfExists (d : SimpTheorems) (thmId : Origin) : SimpTheorems :=
-  bif d.lemmaNames.contains thmId then
+  uif d.lemmaNames.contains thmId then
     d.eraseCore thmId
   else
     d
@@ -643,7 +643,7 @@ def SimpTheorems.unerase (d : SimpTheorems) (thmId : Origin) : SimpTheorems :=
 def SimpTheorems.addSimpTheorem (d : SimpTheorems) (e : SimpTheorem) : SimpTheorems :=
   -- Erase the converse, if it exists
   let d := eraseFwdIfBwd d e
-  bif e.post then
+  uif e.post then
     { d with post := d.post.insertKeyValue e.keys e, lemmaNames := updateLemmaNames d.lemmaNames }
   else
     { d with pre := d.pre.insertKeyValue e.keys e, lemmaNames := updateLemmaNames d.lemmaNames }
@@ -674,7 +674,7 @@ def SimpTheorems.registerDeclToUnfoldThms (d : SimpTheorems) (declName : Name) (
 
 def SimpTheorems.erase [Monad m] [MonadLog m] [AddMessageContext m] [MonadOptions m]
     (d : SimpTheorems) (thmId : Origin) : m SimpTheorems := do
-  bif d.isLemma thmId ||
+  uif d.isLemma thmId ||
     match thmId with
     | .decl declName .. => d.isDeclToUnfold declName || d.toUnfoldThms.contains declName
     | _ => false
@@ -683,7 +683,7 @@ def SimpTheorems.erase [Monad m] [MonadLog m] [AddMessageContext m] [MonadOption
 
   -- `attribute [-simp] foo` should also undo `attribute [simp ←] foo`.
   if let some thmId' := thmId.converse then
-    bif d.isLemma thmId' then
+    uif d.isLemma thmId' then
       return d.eraseCore thmId'
 
   logWarning m!"`{thmId.key}` does not have the `[simp]` attribute"
@@ -742,7 +742,7 @@ def mkSimpExt (name : Name := by exact decl_name%) : IO SimpExtension :=
           | _ => unreachable!
         | .toUnfold n => n
         | .toUnfoldThms n _ => n
-      bif isPrivateName declName then ⟨none, none, some e⟩
+      uif isPrivateName declName then ⟨none, none, some e⟩
       else .uniform (some e)
   }
 
@@ -776,7 +776,7 @@ This avoids the need for efficiently merging the `SimpTheorems` data structure.
 abbrev SimpTheoremsArray := Array SimpTheorems
 
 def SimpTheoremsArray.addTheorem (thmsArray : SimpTheoremsArray) (id : Origin) (h : Expr) (config : ConfigWithKey := simpGlobalConfig) : MetaM SimpTheoremsArray :=
-  bif thmsArray.isEmpty then
+  uif thmsArray.isEmpty then
     let thms : SimpTheorems := {}
     return #[ (← thms.add id #[] h (config := config)) ]
   else

@@ -45,7 +45,7 @@ def recordHyp (hyp : Hyp) : CollectM Unit := do
 
 @[inline]
 def withFixedInt (x : CollectM (Option α)) : CollectM (Option α) := do
-  bif (← read).fixedInt then
+  uif (← read).fixedInt then
     x
   else
     return none
@@ -68,7 +68,7 @@ where
     let trueExpr ← Sym.getTrueExpr
     let trueEqc ← Grind.getEqc trueExpr
     for prop in trueEqc do
-      bif prop == trueExpr then
+      uif prop == trueExpr then
         continue
       recordHyp {
         name := .anonymous
@@ -84,7 +84,7 @@ where
     let falseExpr ← Sym.getFalseExpr
     let falseEqc ← Grind.getEqc falseExpr
     for prop in falseEqc do
-      bif prop == falseExpr then
+      uif prop == falseExpr then
         continue
       recordHyp {
         name := .anonymous
@@ -104,7 +104,7 @@ where
         let homogeneous := !node.heqProofs
         let eqc ← Grind.getEqc root
         for e in eqc do
-          bif e == representative then continue
+          uif e == representative then continue
           unless homogeneous do
             unless ← Grind.hasSameType e representative do continue
           recordHyp {
@@ -118,9 +118,9 @@ where
     let type ← Sym.inferType root
     match_expr type with
     | Bool =>
-      bif (← Grind.isEqBoolTrue root) then
+      uif (← Grind.isEqBoolTrue root) then
         return some (← Sym.getBoolTrueExpr)
-      else bif (← Grind.isEqBoolFalse root) then
+      else uif (← Grind.isEqBoolFalse root) then
         return some (← Sym.getBoolFalseExpr)
       else
         return some root
@@ -155,7 +155,7 @@ where
   collectNumBits : CollectM Unit := do
     let numBits ← Sym.share <| mkConst ``System.Platform.numBits
     let eqc ← Grind.getEqc numBits
-    bif eqc.isEmpty then return ()
+    uif eqc.isEmpty then return ()
     if let some constant := eqc.find? (Sym.getNatValue? · |>.isSome) then
       recordHyp {
         name := .anonymous
@@ -195,7 +195,7 @@ def symByContradiction (goal : MVarId) : Sym.SymM (Array FVarId × MVarId) := do
       let goal ← goal.exfalso
       let goal ← Sym.preprocessMVar goal
       return (fvarIds, goal)
-    bif goalType.isFalse then
+    uif goalType.isFalse then
       return (fvarIds, goal)
     let some goal ← goal.byContra? | unreachable!
     let goal ← Sym.preprocessMVar goal
@@ -231,8 +231,8 @@ def setupTarget : PreProcessM (Option (Array Hyp)) := do
         }
   | .grindTarget g =>
     let isPush ← PreProcessM.isPushMode
-    let (introduced, g) ← bif isPush then pure (#[], g) else setupGrindTarget g
-    bif g.inconsistent then return none
+    let (introduced, g) ← uif isPush then pure (#[], g) else setupGrindTarget g
+    uif g.inconsistent then return none
     let cfg ← PreProcessM.getConfig
     let (hyps, g) ← Grind.GoalM.run g do
       let hypotheses ← collectGoalHyps cfg

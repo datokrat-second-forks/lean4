@@ -74,7 +74,7 @@ partial def transform {m} [Monad m] [MonadLiftT CoreM m] [MonadControlT CoreM m]
 
 /-- Applies beta reduction to all beta-reducible subexpressions in `e`. -/
 def betaReduce (e : Expr) : CoreM Expr :=
-  transform e (pre := fun e => return bif e.isHeadBetaTarget then .visit e.headBeta else .continue)
+  transform e (pre := fun e => return uif e.isHeadBetaTarget then .visit e.headBeta else .continue)
 
 end Core
 
@@ -135,15 +135,15 @@ partial def transformWithCache {m} [Monad m] [MonadLiftT MetaM m] [MonadControlT
         | e => visitPost (← mkLetFVars (usedLetOnly := usedLetOnly) (generalizeNondepLet := false) fvars (← visit (e.instantiateRev fvars)))
       let visitApp (e : Expr) : MonadCacheT ExprStructEq Expr m Expr :=
         e.withApp fun f args => do
-        let f ← bif skipConstInApp && f.isConst then pure f else visit f
-        bif skipInstances then
+        let f ← uif skipConstInApp && f.isConst then pure f else visit f
+        uif skipInstances then
           let infos := (← getFunInfoNArgs f args.size).paramInfo
           let mut args := args.toVector
           for h : i in *...args.size do
             let arg := args[i]
-            bif h : i <ᵇ infos.size then
+            uif h : i < infos.size then
               let info := infos[i]
-              bif skipInstances && info.isInstance then
+              uif skipInstances && info.isInstance then
                 continue
               args := args.set i (← visit arg)
             else
@@ -200,10 +200,10 @@ def zetaReduce (e : Expr) (zetaDelta := true) (zetaHave := true) (beta := true) 
   let n := (← getLCtx).numIndices
   let unfold? (fvarId : FVarId) : MetaM (Option Expr) := do
     let some decl ← fvarId.findDecl? | return none
-    bif !zetaDelta && decl.index <ᵇ n then return none
+    uif !zetaDelta ∧ decl.index < n then return none
     -- Values for nondep ldecls created by `transform` are valid.
     return decl.value? (allowNondep := zetaHave && decl.index ≥ n)
-  bif beta then
+  uif beta then
     transform e (usedLetOnly := true) (pre := fun e => do
       let .fvar fvarId := e.getAppFn | return .continue
       let some value ← unfold? fvarId | return .continue
@@ -220,7 +220,7 @@ For example, if `x` has value `fun y => y + 1` and appears as `x 2`, the result 
 -/
 def zetaDeltaFVars (e : Expr) (fvars : Array FVarId) : MetaM Expr :=
   let unfold? (fvarId : FVarId) : MetaM (Option Expr) := do
-    bif fvars.contains fvarId then
+    uif fvars.contains fvarId then
       fvarId.getValue?
     else
       return none
@@ -240,10 +240,10 @@ def unfoldDeclsFrom (biggerEnv : Environment) (e : Expr) : CoreM Expr := do
     setEnv biggerEnv -- `e` has declarations from `biggerEnv` that are not in `env`
     let pre (e : Expr) : CoreM TransformStep := do
       let .const declName us := e | return .continue
-      bif env.contains declName then
+      uif env.contains declName then
         return .done e
       let some info := biggerEnv.find? declName | return .done e
-      bif info.hasValue (allowOpaque := true) then
+      uif info.hasValue (allowOpaque := true) then
         return .visit (← instantiateValueLevelParams info us (allowOpaque := true))
       else
         return .done e
@@ -269,7 +269,7 @@ def unfoldIfArgIsAppOf (fnNames : Array Name) (numSectionVars : Nat) (e : Expr) 
   -- Unfold abstracted proofs
   Core.transform e
     (pre := fun e => e.withAppRev fun f revArgs => do
-      bif f.isConst then
+      uif f.isConst then
         /-
         How do we avoid unfolding declarations where the user happened to
         have called with the recursive function as an unsaturated argument?
@@ -283,7 +283,7 @@ def unfoldIfArgIsAppOf (fnNames : Array Name) (numSectionVars : Nat) (e : Expr) 
         (The code below is restricted to theorems, as otherwise it would unfold
         matchers, which can also abstract over recursive calls without an `mdata` wrapper, #2102.)
         -/
-        bif revArgs.any isInterestingArg then
+        uif revArgs.any isInterestingArg then
           if let some info@(.thmInfo _) := env.find? f.constName! then
             return .visit <| (← instantiateValueLevelParams info f.constLevels! (allowOpaque := true)).betaRev revArgs
       return .continue)

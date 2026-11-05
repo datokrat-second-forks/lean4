@@ -277,9 +277,9 @@ partial def readableDiff (s s' : String) (granularity : DiffGranularity := .auto
     -- Given that `Diff.diff` returns a minimal diff, any length-≤3 diff can only have edits at the
     -- front and back, or at a single interior point. This will always be fairly readable (and
     -- splitting by a larger unit would likely only be worse)
-    bif charArrDiff.size ≤ᵇ 3 || approxEditDistance ≤ᵇ maxCharDiffDistance then
+    uif charArrDiff.size ≤ 3 ∨ approxEditDistance ≤ maxCharDiffDistance then
       charArrDiff.map fun (act, cs) => (act, String.ofList cs.toList)
-    else bif approxEditDistance ≤ᵇ maxWordDiffDistance then
+    else uif approxEditDistance ≤ maxWordDiffDistance then
       wordDiff
     else
       maxDiff
@@ -341,13 +341,13 @@ where
           -- End of insertion: if this was a substitution, new and old have whitespace here; if it
           -- wasn't, only new has whitespace here
           let ws' := wss'[wss'Idx]!
-          let wsDiff := bif inSubst then
+          let wsDiff := uif inSubst then
             mkWhitespaceDiff wss[wssIdx]! ws'
           else
             #[(.insert, ws')]
           withWs := withWs ++ wsDiff
           wss'Idx := wss'Idx + 1
-          bif inSubst then wssIdx := wssIdx + 1
+          uif inSubst then wssIdx := wssIdx + 1
           inSubst := false
         | .delete, .delete =>
           -- Deletion separator: include and mark as deleted
@@ -362,7 +362,7 @@ where
           unless inSubst || ws.contains '\n' do
             withWs := withWs.push (.delete, ws)
             wssIdx := wssIdx + 1
-          bif inSubst then wss'Idx := wss'Idx + 1
+          uif inSubst then wss'Idx := wss'Idx + 1
           inSubst := false
         | .insert, .delete | .delete, .insert =>
           -- "Substitution point": don't include any whitespace, since we're switching this word
@@ -382,7 +382,7 @@ where
     #[(.delete, s), (.insert, s')]
 
   mkWhitespaceDiff (oldWs newWs : String) :=
-    bif !oldWs.contains '\n' then
+    uif !oldWs.contains '\n' then
       Diff.diff oldWs.toList.toArray newWs.toList.toArray |> joinCharDiff
     else
       #[(.skip, newWs)]
@@ -394,11 +394,11 @@ where
     splitWordsAux s 0 0 #[] #[]
 
   splitWordsAux (s : String) (b : String.Pos.Raw) (i : String.Pos.Raw) (r ws : Array String) : Array String × Array String :=
-    bif h : i.atEnd s then
+    uif h : i.atEnd s then
       (r.push (String.Pos.Raw.extract s b i), ws)
     else
-      have := Nat.sub_lt_sub_left (Nat.gt_of_not_le (mt decideLE_eq_true_iff.2 (Bool.ne_true_of_eq_false h))) (String.Pos.Raw.lt_next s _)
-      bif (i.get s).isWhitespace then
+      have := Nat.sub_lt_sub_left (Nat.gt_of_not_le (mt decideLE_eq_true_iff.2 h)) (String.Pos.Raw.lt_next s _)
+      uif (i.get s).isWhitespace then
         let skipped := (Substring.Raw.mk s i s.rawEndPos).takeWhile (·.isWhitespace)
         let i' := skipped.stopPos
         splitWordsAux s i' i' (r.push (String.Pos.Raw.extract s b i)) (ws.push (String.Pos.Raw.extract s i i'))
@@ -407,13 +407,13 @@ where
 
   joinEdits {α} (ds : Array (Diff.Action × α)) : Array (Diff.Action × Array α) :=
     ds.foldl (init := #[]) fun acc (act, c) =>
-      bif h : acc.isEmpty then
+      uif h : acc.isEmpty then
         #[(act, #[c])]
       else
         have : acc.size - 1 < acc.size := Nat.sub_one_lt <| mt Array.size_eq_zero_iff.mp <|
-          Array.isEmpty_eq_false_iff.mp (Bool.of_not_eq_true (Bool.ne_true_of_eq_false h))
+          Array.isEmpty_eq_false_iff.mp (Bool.of_not_eq_true h)
         let (act', cs) := acc[acc.size - 1]
-        bif act == act' then
+        uif act == act' then
           acc.set (acc.size - 1) (act, cs.push c)
         else
           acc.push (act, #[c])
@@ -452,11 +452,11 @@ def mkSuggestionsMessage (suggestions : Array Suggestion) (ref : Syntax)
         pure <| readableDiff rangeContents suggestionText suggestion.diffGranularity
     let mut edits := edits
     if let some previewRange := suggestion.previewSpan? >>= Syntax.getRange? then
-      bif previewRange.includes range then
+      uif previewRange.includes range then
         let map ← getFileMap
-        bif previewRange.start <ᵇ range.start then
+        uif previewRange.start < range.start then
           edits := #[(.skip, (String.Pos.Raw.extract map.source previewRange.start range.start))] ++ edits
-        bif range.stop <ᵇ previewRange.stop then
+        uif range.stop < previewRange.stop then
           edits := edits.push (.skip, (String.Pos.Raw.extract map.source range.stop previewRange.stop))
     let preInfo := suggestion.preInfo?.getD ""
     let postInfo := suggestion.postInfo?.getD ""
@@ -464,7 +464,7 @@ def mkSuggestionsMessage (suggestions : Array Suggestion) (ref : Syntax)
       ! (suggestion.diffGranularity matches .none) && suggestion.messageData?.isNone
         || suggestion.previewSpan?.isSome
     let suggestionMsg :=
-      bif ! isDiffSuggestion then
+      uif ! isDiffSuggestion then
         let applyButton := MessageData.ofWidget {
           id := ``textInsertionWidget
           javascriptHash := textInsertionWidget.javascriptHash
@@ -487,7 +487,7 @@ def mkSuggestionsMessage (suggestions : Array Suggestion) (ref : Syntax)
           range: $edit.range
         }
         let diffString :=
-          bif suggestion.diffGranularity matches .none then
+          uif suggestion.diffGranularity matches .none then
             edits.foldl (· ++ ·.2) ""
           else
             mkDiffString edits
@@ -497,7 +497,7 @@ def mkSuggestionsMessage (suggestions : Array Suggestion) (ref : Syntax)
             props := return json
           } diffString
         let msg := m!"{preInfo}{diffWidget}{postInfo}"
-        bif suggestions.size == 1 && !forceList then
+        uif suggestions.size == 1 && !forceList then
           m!"\n{msg}"
         else
           m!"\n" ++ MessageData.nest 2 m!"• {msg}"

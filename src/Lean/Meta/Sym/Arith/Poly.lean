@@ -60,7 +60,7 @@ Example `w.x^3.y^2.z` div `x^2.z` returns `w.x.y^2`
     match compare pw₁.x pw₂.x with
     | .eq =>
       let k := pw₁.k - pw₂.k
-      bif k == 0 then
+      uif k == 0 then
         div m₁ m₂
       else
         .mult { x := pw₁.x, k } (div m₁ m₂)

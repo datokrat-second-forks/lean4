@@ -79,8 +79,8 @@ supports only normalization, but not equational reasoning.
 See comment at `propagateMul`.
 -/
 private def isUnsupportedSemiring? (type : Expr) : GoalM (Option Expr) := do
-  bif isSupportedSemiringQuick type then return none
-  bif (← getCommRingId? type).isSome then return none
+  uif isSupportedSemiringQuick type then return none
+  uif (← getCommRingId? type).isSome then return none
   if let some id ← getCommSemiringId? type then
     -- CommSemiring also needs `propagateMul` because the ring envelope approach
     -- does not propagate `0 * a = 0` back to original terms.
@@ -118,14 +118,14 @@ builtin_grind_propagator propagateMul ↑HMul.hMul := fun e => do
   let aRoot ← getRoot a
   let bRoot ← getRoot b
   if let some n ← isOfNat? aRoot then
-    bif n == 0 then
+    uif n == 0 then
       pushEq e aRoot <| mkApp5 (mkConst ``Grind.Semiring.zero_mul_congr [u]) α₁ semiringInst a b (← mkEqProof a aRoot)
-    else bif n == 1 then
+    else uif n == 1 then
       pushEq e b <| mkApp5 (mkConst ``Grind.Semiring.one_mul_congr [u]) α₁ semiringInst a b (← mkEqProof a aRoot)
   else if let some n ← isOfNat? bRoot then
-    bif n == 0 then
+    uif n == 0 then
       pushEq e bRoot <| mkApp5 (mkConst ``Grind.Semiring.mul_zero_congr [u]) α₁ semiringInst a b (← mkEqProof b bRoot)
-    else bif n == 1 then
+    else uif n == 1 then
       pushEq e a <| mkApp5 (mkConst ``Grind.Semiring.mul_one_congr [u]) α₁ semiringInst a b (← mkEqProof b bRoot)
 
 end Lean.Meta.Grind.Arith

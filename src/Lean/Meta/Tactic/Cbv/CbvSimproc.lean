@@ -87,7 +87,7 @@ def registerBuiltinCbvSimproc (declName : Name)
   unless (← initializing) do
     throw (IO.userError s!"Invalid builtin cbv simproc declaration: \
       It can only be registered during initialization")
-  bif (← builtinCbvSimprocDeclsRef.get).keys.contains declName then
+  uif (← builtinCbvSimprocDeclsRef.get).keys.contains declName then
     throw (IO.userError s!"Invalid builtin cbv simproc declaration \
       `{privateToUserName declName}`: It has already been declared")
   builtinCbvSimprocDeclsRef.modify fun { keys := ks, procs } =>
@@ -144,7 +144,7 @@ def registerCbvSimproc (declName : Name) (keys : Array DiscrTree.Key) : CoreM Un
   unless (env.getModuleIdxFor? declName).isNone do
     throwError "Invalid cbv simproc declaration `{.ofConstName declName}`: \
       It is declared in an imported module"
-  bif (← isCbvSimproc declName) then
+  uif (← isCbvSimproc declName) then
     throwError "Invalid cbv simproc declaration `{.ofConstName declName}`: \
       It has already been declared"
   modifyEnv fun env => cbvSimprocDeclExt.modifyState env fun s =>
@@ -195,11 +195,11 @@ def addCbvSimprocAttrCore (declName : Name) (kind : AttributeKind)
   cbvSimprocExtension.add { declName, phase, keys, proc } kind
 
 def parseCbvSimprocPhase (stx : Syntax) : CbvSimprocPhase :=
-  bif stx.isNone then .post
+  uif stx.isNone then .post
   else
     let inner := stx[0]
-    bif inner.getKind == `Lean.Parser.Tactic.simpPre then .pre
-    else bif inner.getKind == `Lean.Parser.cbvSimprocEval then .eval
+    uif inner.getKind == `Lean.Parser.Tactic.simpPre then .pre
+    else uif inner.getKind == `Lean.Parser.cbvSimprocEval then .eval
     else .post
 
 def addCbvSimprocAttr (declName : Name) (stx : Syntax)
@@ -255,7 +255,7 @@ def getCbvSimprocs : CoreM CbvSimprocs :=
 def cbvSimprocDispatch (tree : DiscrTree CbvSimprocEntry)
     (erased : PHashSet Name) : Simproc := fun e => do
   let candidates := Sym.getMatchWithExtra (← getMCtx) tree e
-  bif candidates.isEmpty then
+  uif candidates.isEmpty then
     return .rfl
   for (entry, numExtra) in candidates do
     unless erased.contains entry.declName do
@@ -265,13 +265,13 @@ def cbvSimprocDispatch (tree : DiscrTree CbvSimprocEntry)
           | .ok (Result.rfl true _) => return m!"simproc {simprocName}: done{indentExpr e}"
           | .ok _                   => return m!"simproc {simprocName}: no change"
           | .error err              => return m!"simproc {simprocName}: {err.toMessageData}") do
-        bif numExtra == 0 then
+        uif numExtra == 0 then
           entry.proc e
         else
           simpOverApplied e numExtra entry.proc
-      bif result matches .step _ _ _ _ then
+      uif result matches .step _ _ _ _ then
         return result
-      bif result matches .rfl (done := true) then
+      uif result matches .rfl (done := true) then
         return result
   return .rfl
 

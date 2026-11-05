@@ -12,16 +12,16 @@ namespace Lean.Meta.Sym
 private def max (fvarId1? : Option FVarId) (fvarId2? : Option FVarId) : MetaM (Option FVarId) := do
   let some fvarId1 := fvarId1? | return fvarId2?
   let some fvarId2 := fvarId2? | return fvarId1?
-  bif fvarId1 == fvarId2 then return fvarId1?
+  uif fvarId1 == fvarId2 then return fvarId1?
   let localDecl1 ← fvarId1.getDecl
   let localDecl2 ← fvarId2.getDecl
-  bif localDecl1.index >ᵇ localDecl2.index then
+  uif localDecl1.index > localDecl2.index then
     return fvarId1?
   else
     return fvarId2?
 
 private abbrev check (e : Expr) (k : SymM (Option FVarId)) : SymM (Option FVarId) := do
-  bif e.hasFVar || e.hasMVar then
+  uif e.hasFVar || e.hasMVar then
     if let some fvarId? := (← get).maxFVar.find? { expr := e } then
       return fvarId?
     else
@@ -48,7 +48,7 @@ def getMaxFVar? (e : Expr) : SymM (Option FVarId) := do
   | .mvar mvarId => check e do
     let mvarDecl ← mvarId.getDecl
     let lctx := mvarDecl.lctx
-    bif lctx.decls.isEmpty then return none
+    uif lctx.decls.isEmpty then return none
     let some last := lctx.lastDecl | unreachable! -- SymM local contexts do not have holes
     return some last.fvarId
 

@@ -35,11 +35,11 @@ where
   go (body : Expr) (m : Nat) (i : Nat) : Expr := Id.run do
     match m with
     | 0 =>
-      bif hasLooseBVarsInRange body n then default
+      uif hasLooseBVarsInRange body n then default
       else body.lowerLooseBVars n n
     | m+1 =>
       let .app f (.bvar j) := body | default
-      bif j == i then go f m (i+1) else default
+      uif j == i then go f m (i+1) else default
 
 /--
 If `e` is of the form `(fun x₁ ... xₙ => f x₁ ... xₙ)` and `f` does not contain `x₁`, ..., `xₙ`,
@@ -48,7 +48,7 @@ then returns `f`. Otherwise, returns `e`.
 Returns the original expression when not reducible to enable pointer equality checks.
 -/
 public def etaReduce (e : Expr) : Expr :=
-  bif e.isLambda then go e 0 else e
+  uif e.isLambda then go e 0 else e
 where
   go (body : Expr) (n : Nat) : Expr :=
     match body with
@@ -73,7 +73,7 @@ where
     | .forallE _ d b _ => cache e (e.updateForallE! (← visit d) (← visit b))
     | .lam _ d b _ =>
       let e' := etaReduce.go e e 0
-      bif isSameExpr e e' then
+      uif isSameExpr e e' then
         cache e (e.updateLambdaE! (← visit d) (← visit b))
       else
         cache e (← visit e')

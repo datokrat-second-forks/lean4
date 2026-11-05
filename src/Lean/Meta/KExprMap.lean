@@ -30,7 +30,7 @@ def KExprMap.find? (m : KExprMap α) (e : Expr) : MetaM (Option α) := do
   | none => return none
   | some ps =>
     for ⟨e', a⟩ in ps do
-      bif (← isDefEq e e') then
+      uif (← isDefEq e e') then
         return some a
     return none
 
@@ -38,7 +38,7 @@ private def updateList (ps : AssocList Expr α) (e : Expr) (v : α) : MetaM (Ass
   match ps with
   | AssocList.nil => return AssocList.cons e v ps
   | AssocList.cons e' v' ps =>
-    bif (← isDefEq e e') then
+    uif (← isDefEq e e') then
       return AssocList.cons e v ps
     else
       return AssocList.cons e' v' (← updateList ps e v)

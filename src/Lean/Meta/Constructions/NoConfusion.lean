@@ -38,7 +38,7 @@ def mkNoConfusionCtorArg (ctorName : Name) (P : Expr) : MetaM Expr := do
   withPrimedNames fields2 do
     let mut t := P
     for f1 in fields1.reverse, f2 in fields2.reverse do
-      bif (← isProof f1) then
+      uif (← isProof f1) then
         continue
       let name := (← f1.fvarId!.getUserName).appendAfter "_eq"
       let eq ← mkEqHEq f1 f2
@@ -99,7 +99,7 @@ def mkNoConfusionType (indName : Name) : MetaM Unit := do
         let altTypes ← arrowDomainsN info.numCtors t1
         let alts ← altTypes.mapIdxM fun i altType => do
           forallTelescope altType fun zs1 _ => do
-            bif useLinearConstruction then
+            uif useLinearConstruction then
               let ctorIdxApp := mkAppN (mkConst (mkCtorIdxName indName) us) (xs2 ++ ysx2)
               let alt ← mkIfNatEq PType (ctorIdxApp) (mkRawNatLit i)
                 («else» := fun _ => pure P) fun h => do
@@ -122,7 +122,7 @@ def mkNoConfusionType (indName : Name) : MetaM Unit := do
               let altTypes2 ← arrowDomainsN info.numCtors t2
               let alts2 ← altTypes2.mapIdxM fun j altType2 => do
                 forallTelescope altType2 fun zs2 _ => do
-                  bif i =ᵇ j then
+                  uif i = j then
                     let k := (← mkNoConfusionCtorArg conName P).beta (xs1 ++ zs1 ++ xs2 ++ zs2)
                     let t ← mkArrow k P
                     mkLambdaFVars zs2 t
@@ -153,7 +153,7 @@ def withEqTelescope [Inhabited α] (xs ys : Array Expr) (k : Array Expr → Meta
 where
   go | x::xs', y::ys', eqs => do
       let eq ← mkEqHEq x y
-      let name := bif xs.size >ᵇ 1 then (`eq).appendIndexAfter (eqs.size + 1) else `eq
+      let name := uif xs.size > 1 then (`eq).appendIndexAfter (eqs.size + 1) else `eq
       withLocalDeclD name eq fun v =>
         go xs' ys' (eqs.push v)
       | _, _, eqs => k eqs
@@ -168,12 +168,12 @@ def withNeededEqTelescope [Inhabited α] (xs ys : Array Expr) (k : Array Expr �
   go xs.toList ys.toList #[] #[]
 where
   go | x::xs', y::ys', vs, eqs => do
-      bif !xs'.isEmpty && (← isDefEq x y) then
+      uif !xs'.isEmpty && (← isDefEq x y) then
         let eq ← mkEqRefl x
         go xs' ys' vs (eqs.push eq)
       else
         let eq ← mkEqHEq x y
-        let name := bif xs.size >ᵇ 1 then (`eq).appendIndexAfter (eqs.size + 1) else `eq
+        let name := uif xs.size > 1 then (`eq).appendIndexAfter (eqs.size + 1) else `eq
         withLocalDeclD name eq fun v =>
           go xs' ys' (vs.push v) (eqs.push v)
       | _, _, vs, eqs => k vs eqs
@@ -289,7 +289,7 @@ two constructor applications with different fields but same indices.
 def mkNoConfusionCtors (declName : Name) : MetaM Unit := do
   let .inductInfo indVal ← getConstInfo declName | return
   unless (← isLargeEliminating declName) do return
-  bif (← isPropFormerType indVal.type) then return
+  uif (← isPropFormerType indVal.type) then return
   let recInfo ← getConstInfo (mkRecName declName)
   let noConfusionName := Name.mkStr declName "noConfusion"
 
@@ -299,7 +299,7 @@ def mkNoConfusionCtors (declName : Name) : MetaM Unit := do
 
   for ctor in indVal.ctors do
     let ctorInfo ← getConstInfoCtor ctor
-    bif ctorInfo.numFields >ᵇ 0 then
+    uif ctorInfo.numFields > 0 then
       forallBoundedTelescope ctorInfo.type ctorInfo.numParams fun xs t => do
       withLocalDeclD `P (.sort v) fun P =>
       forallBoundedTelescope t ctorInfo.numFields fun fields1 _ => do
@@ -331,7 +331,7 @@ def mkNoConfusionCtors (declName : Name) : MetaM Unit := do
             -- Equalities for indices. May require going from Eq to HEq
             for eq in eqs do
               let needsHEq := (← whnfForall (← inferType e)).bindingDomain!.isHEq
-              bif needsHEq && (← inferType eq).isEq then
+              uif needsHEq && (← inferType eq).isEq then
                 e := mkApp e (← mkHEqOfEq eq)
               else
                 e := mkApp e eq
@@ -355,7 +355,7 @@ def mkNoConfusionCtors (declName : Name) : MetaM Unit := do
 def mkNoConfusionCore (declName : Name) : MetaM Unit := do
   let .inductInfo indVal ← getConstInfo declName | return
   unless (← isLargeEliminating declName) do return
-  bif (← isPropFormerType indVal.type) then return
+  uif (← isPropFormerType indVal.type) then return
 
   mkNoConfusionType declName
   mkNoConfusionCoreImp declName
@@ -364,7 +364,7 @@ def mkNoConfusionCore (declName : Name) : MetaM Unit := do
 def mkNoConfusionEnum (enumName : Name) : MetaM Unit := do
   -- A sort-polymorphic enum such as `inductive T : Sort u | a | b` passes `isEnumType`, but has no
   -- `.ctorIdx`. Fall back to `mkNoConfusionCore`, which bails out on such types.
-  bif (← getEnv).contains ``noConfusionEnum && (← getEnv).contains (mkCtorIdxName enumName) then
+  uif (← getEnv).contains ``noConfusionEnum && (← getEnv).contains (mkCtorIdxName enumName) then
     mkNoConfusionType
     mkNoConfusion
   else
@@ -382,7 +382,7 @@ where
     withLocalDeclD `y enumType fun y => do
       let declType  ← mkForallFVars #[P, x, y] sortV
       let declValue ←
-        bif info.numCtors =ᵇ 1 then
+        uif info.numCtors = 1 then
           mkLambdaFVars #[P, x, y] (← mkArrow P P)
         else
           let ctorIdx := mkConst (mkCtorIdxName enumName) us
@@ -412,7 +412,7 @@ where
     withLocalDeclD `h (← mkEq x y) fun h => do
       let declType  ← mkForallFVars #[P, x, y, h] (mkApp3 noConfusionType P x y)
       let declValue ← mkLambdaFVars #[P, x, y, h] <| ← do
-        bif info.numCtors =ᵇ 1 then
+        uif info.numCtors = 1 then
           withLocalDeclD `p P fun p => mkLambdaFVars #[p] p
         else
           mkAppOptM ``noConfusionEnum #[none, ctorIdx, P, x, y, h]
@@ -430,7 +430,7 @@ where
 
 public def mkNoConfusion (declName : Name) : MetaM Unit := do
   withTraceNode `Meta.mkNoConfusion (fun _ => return m!"{declName}") do
-  bif (← isEnumType declName) then
+  uif (← isEnumType declName) then
     mkNoConfusionEnum declName
   else
     mkNoConfusionCore declName

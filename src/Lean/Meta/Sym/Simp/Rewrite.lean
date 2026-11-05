@@ -49,7 +49,7 @@ public def Theorem.rewrite (thm : Theorem) (e : Expr) (d : Discharger := dischar
     for h : i in *...args.size do
       let arg := args[i]
       if let .mvar mvarId := arg then
-        bif (← mvarId.isAssigned) then
+        uif (← mvarId.isAssigned) then
           let arg ← instantiateMVarsS arg
           args := args.set i arg
         else
@@ -57,7 +57,7 @@ public def Theorem.rewrite (thm : Theorem) (e : Expr) (d : Discharger := dischar
           -- Metavariables created by `match?` (index ≥ `mvarCounterSaved`) stand for
           -- hypotheses/instances not covered by the pattern and must be discharged.
           -- Metavariables occurring in `e` itself are opaque atoms; leave them as-is.
-          bif decl.index ≥ᵇ mvarCounterSaved then
+          uif decl.index ≥ mvarCounterSaved then
             match (← d decl.type) with
             | .failed cd =>
               isCD := isCD || cd
@@ -68,22 +68,22 @@ public def Theorem.rewrite (thm : Theorem) (e : Expr) (d : Discharger := dischar
               -- Dischargers are not required to return maximally shared proofs. Sharing is
               -- needed only when the hypothesis occurs in `rhs`, and the proof consequently
               -- becomes part of the resulting term.
-              let val ← bif thm.rhsVarMask.testBit i then
+              let val ← uif thm.rhsVarMask.testBit i then
                 shareCommon (← instantiateMVars val)
               else
                 instantiateMVars val
               mvarId.assign val
               args := args.set i val
-      else bif arg.hasMVar then
+      else uif arg.hasMVar then
         let arg ← instantiateMVarsS arg
         args := args.set i arg
     let proof := mkValue thm.expr thm.pattern us args.toArray
     let rhs   := thm.rhs.instantiateLevelParams thm.pattern.levelParams us
     let rhs   ← share rhs
     let expr  ← instantiateRevBetaS rhs args.toArray
-    bif isSameExpr e expr then
+    uif isSameExpr e expr then
       return mkRflResultCD isCD
-    else bif !(← checkPerm thm.perm e expr) then
+    else uif !(← checkPerm thm.perm e expr) then
       return mkRflResultCD isCD
     else
       return .step expr proof (contextDependent := isCD)
@@ -91,7 +91,7 @@ public def Theorem.rewrite (thm : Theorem) (e : Expr) (d : Discharger := dischar
     return .rfl
 where
   checkPerm (perm : Bool) (e result : Expr) : MetaM Bool := do
-    bif !perm then return true
+    uif !perm then return true
     acLt result e
 
 /--
@@ -104,13 +104,13 @@ def rewriteUsing (candidates : Array (Theorem × Nat)) (e : Expr) (d : Discharge
   -- context A might succeed (with higher priority) and produce a different result.
   let mut anyCD := anyCD
   for (thm, numExtra) in candidates do
-    let result ← bif numExtra == 0 then
+    let result ← uif numExtra == 0 then
       thm.rewrite e d
     else
       simpOverApplied e numExtra (thm.rewrite · d)
     anyCD := anyCD || result.isContextDependent
-    bif !result.isRfl then
-      return (bif anyCD && !result.isContextDependent then result.withContextDependent else result, anyCD)
+    uif !result.isRfl then
+      return (uif anyCD && !result.isContextDependent then result.withContextDependent else result, anyCD)
   return (mkRflResultCD anyCD, anyCD)
 
 /--
@@ -120,7 +120,7 @@ Rewrites `e` using the first applicable theorem in `thms`. The fallback theorems
 public def Theorems.rewrite (thms : Theorems) (d : Discharger := dischargeNone) : Simproc := fun e => do
   let mctx ← getMCtx
   let (result, anyCD) ← rewriteUsing (thms.getMatchWithExtra mctx e) e d false
-  bif result.isRfl && !thms.fallback.root.isEmpty then
+  uif result.isRfl && !thms.fallback.root.isEmpty then
     return (← rewriteUsing (thms.getFallbackMatchWithExtra mctx e) e d anyCD).1
   return result
 

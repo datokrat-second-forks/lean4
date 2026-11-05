@@ -34,7 +34,7 @@ where
       let r ← dsimp (← instantiateRevBetaS e fvars)
       match r with
       | .rfl _ =>
-        bif modified then
+        uif modified then
           return .step (← mkForallFVarsS fvars e)
         else
           return .rfl

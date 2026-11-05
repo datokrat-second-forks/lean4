@@ -54,7 +54,7 @@ def mkBranchingMessages (cost : Std.HashMap EMatchDiagNode Float) : GraphM (Opti
   let nodes := (← read).info.toList
     |>.filter (·.2.children.size ≥ limit)
     |>.mergeSort fun lhs rhs => Prod.lexLt (rhs.2.children.size, cost[rhs.1]!) (lhs.2.children.size, cost[lhs.1]!)
-  bif nodes.isEmpty then return none
+  uif nodes.isEmpty then return none
 
   let mut msgs := #[]
   for (node, { children, lctx }) in nodes do
@@ -82,7 +82,7 @@ def mkCostMessages (diag : Array EMatchDiagInfo) :
   let nodes := (← read).info.toList
     |>.filter (costs[·.1]! ≥ limit)
     |>.mergeSort (fun lhs rhs => costs[rhs.1]! ≤ costs[lhs.1]!)
-  bif nodes.isEmpty then return (none, costs)
+  uif nodes.isEmpty then return (none, costs)
 
   let mut msgs := #[]
   for (node, info) in nodes do
@@ -92,7 +92,7 @@ def mkCostMessages (diag : Array EMatchDiagInfo) :
   return (some msg, costs)
 
 def countersWithOriginToMessageData (header : String) (cls : Name) (data : Array (Origin × Name × Nat)) : MetaM MessageData := do
-  let data := data.qsort fun (_, n₁, c₁) (_, n₂, c₂) => bif c₁ == c₂ then Name.lt n₁ n₂ else c₁ > c₂
+  let data := data.qsort fun (_, n₁, c₁) (_, n₂, c₂) => uif c₁ == c₂ then Name.lt n₁ n₂ else c₁ > c₂
   let data ← data.mapM fun (origin, name, counter) =>
     match origin with
     | .decl _ => return .trace { cls } m!"{.ofConstName name} ↦ {counter}" #[]
@@ -127,7 +127,7 @@ public def mkEMatchDiagMessages (trace : PArray EMatchDiagInfo) (counters : Coun
     let msg? ← ReaderT.run (mkBranchingMessages cost) graph
     if let some msg := msg? then msgs := msgs.push msg
 
-  bif msgs.isEmpty then return none
+  uif msgs.isEmpty then return none
 
   return some <| .trace { cls := `ematch } "E-matching Diagnostics" msgs
 

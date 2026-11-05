@@ -67,7 +67,7 @@ builtin_initialize identifierSuggestionsImpl : (PersistentEnvExtension (Name × 
         | -- Attributes parsed _before the suggest_for notation is added
           .node _ ``Parser.Attr.simple #[.ident _ _ `suggest_for [], .node _ `null #[id]] => pure #[id]
         | _ => throwError "Invalid `[suggest_for]` attribute syntax {repr stx}"
-      bif isPrivateName decl then
+      uif isPrivateName decl then
         throwError "Cannot make suggestions for private names"
       let altIds := altSyntaxIds.map (·.getId)
       modifyEnv (existingToIncorrect.addEntry · (decl, altIds))
@@ -113,7 +113,7 @@ path prefix: if there is a suggestion for replacing `Foo.Bar.jazz` with `Foo.Bar
 public def throwUnknownNameWithSuggestions (constName : Name) (idOrConst := "identifier") (declHint := constName) (ref? : Option Syntax := .none) (extraMsg : MessageData := .nil) : TermElabM α := do
   let suggestions := (← getSuggestions constName).toArray
   let ref := ref?.getD (← getRef)
-  let hint ← bif suggestions.size =ᵇ 0 then
+  let hint ← uif suggestions.size = 0 then
       pure MessageData.nil
     else
       -- Modify suggestions to have the same structure as the user-provided identifier, but only
@@ -126,13 +126,13 @@ public def throwUnknownNameWithSuggestions (constName : Name) (idOrConst := "ide
         | .none => id
         | .some prefixName => fun (suggestion : Name) =>
             let candidate := suggestion.replacePrefix prefixName .anonymous
-            bif (ResolveName.resolveGlobalName env {} ns openDecls candidate |>.length) != 1 then
+            uif (ResolveName.resolveGlobalName env {} ns openDecls candidate |>.length) != 1 then
               suggestion
             else
               candidate
 
-      let alternative := bif h : suggestions.size =ᵇ 1 then m!"`{.ofConstName suggestions[0]}`" else m!"one of these"
-      let inPlaceOfThis := bif rawId.isAnonymous then .nil else m!" in place of `{.ofName rawId}`"
+      let alternative := uif h : suggestions.size = 1 then m!"`{.ofConstName suggestions[0]}`" else m!"one of these"
+      let inPlaceOfThis := uif rawId.isAnonymous then .nil else m!" in place of `{.ofName rawId}`"
       m!"Perhaps you meant {alternative}{inPlaceOfThis}:".hint (suggestions.map fun suggestion =>
         let modified := modifySuggestion suggestion
         {

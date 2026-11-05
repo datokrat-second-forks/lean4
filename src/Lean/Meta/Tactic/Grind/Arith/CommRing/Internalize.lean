@@ -38,7 +38,7 @@ private def getType? (e : Expr) : Option Expr :=
 
 private def isForbiddenParent (parent? : Option Expr) : Bool :=
   if let some parent := parent? then
-    bif getType? parent |>.isSome then
+    uif getType? parent |>.isSome then
       true
     else
       -- We also ignore the following parents.
@@ -77,7 +77,7 @@ private def toInt? (e : Expr) : RingM (Option Int) := do
     unless (← isNegInst i) do return none
     let_expr OfNat.ofNat _ n _ := a | return none
     let some v ← getNatValue? n | return none
-    bif v == 0 then return none
+    uif v == 0 then return none
     return some (-v)
   | OfNat.ofNat _ n _ =>
     let some v ← getNatValue? n | return none
@@ -85,7 +85,7 @@ private def toInt? (e : Expr) : RingM (Option Int) := do
   | _ => return none
 
 private def isInvInst (inst : Expr) : RingM Bool := do
-  bif (← getCommRing).fieldInst?.isNone then return false
+  uif (← getCommRing).fieldInst?.isNone then return false
   return isSameExpr (← getInvFn).appArg! inst
 
 /--
@@ -107,10 +107,10 @@ private def processInv (e inst a : Expr) : RingM Unit := do
   unless (← isInvInst inst) do return ()
   let ring ← getCommRing
   let some fieldInst := ring.fieldInst? | return ()
-  bif (← getCommRingState).invSet.contains a then return ()
+  uif (← getCommRingState).invSet.contains a then return ()
   modifyCommRingState fun s => { s with invSet := s.invSet.insert a }
   if let some k ← toInt? a then
-    bif k == 0 then
+    uif k == 0 then
       /-
       **Remark:** We have a normalization rule for `0⁻¹ = 0`, but we may still encounter `0⁻¹` for one of the following reasons:
       - `0⁻¹` appears in a subterm that cannot be rewritten by `simp` without introducing a type error.
@@ -120,13 +120,13 @@ private def processInv (e inst a : Expr) : RingM Unit := do
       -/
       pushEq e a <| mkApp2 (mkConst ``Grind.Field.inv_zero [ring.u]) ring.type fieldInst
       return ()
-    bif (← hasChar) then
+    uif (← hasChar) then
       let (charInst, c) ← getCharInst
-      bif c == 0 then
+      uif c == 0 then
         let expected ← mkEq (mkApp2 (← getMulFn) a e) (← denoteNum 1)
         pushInvFact expected <|
           mkApp5 (mkConst ``Grind.CommRing.inv_int_eq [ring.u]) ring.type fieldInst charInst (mkIntLit k) eagerReflBoolTrue
-      else bif k % c == 0 then
+      else uif k % c == 0 then
         let expected ← mkEq e (← denoteNum 0)
         pushInvFact expected <|
           mkApp6 (mkConst ``Grind.CommRing.inv_zero_eqC [ring.u]) ring.type (mkNatLit c) fieldInst charInst (mkIntLit k) eagerReflBoolTrue
@@ -146,7 +146,7 @@ private def processPowIdentityVars : RingM Unit := do
   let some (powIdentityInst, csInst, p) := ring.powIdentityInst? | return ()
   let startIdx := (← getCommRingState).powIdentityVarCount
   let vars := (← getRingState).vars
-  bif startIdx ≥ᵇ vars.size then return ()
+  uif startIdx ≥ vars.size then return ()
   for i in [startIdx:vars.size] do
     let x := vars[i]!
     trace_goal[grind.ring] "PowIdentity: pushing x^{p} = x for {x}"
@@ -166,14 +166,14 @@ private def internalizeInv (e : Expr) : GoalM Bool := do
   | _ => return false
 
 def internalize (e : Expr) (parent? : Option Expr) : GoalM Unit := do
-  bif !(← getConfig).ring then return ()
-  bif isIntModuleVirtualParent parent? then
+  uif !(← getConfig).ring then return ()
+  uif isIntModuleVirtualParent parent? then
     -- `e` is an auxiliary term used to convert `CommRing` to `IntModule`
     return ()
-  bif (← internalizeInv e) then return ()
+  uif (← internalizeInv e) then return ()
   let some type := getType? e | return ()
-  bif isForbiddenParent parent? then return ()
-  bif (← pure (isIneqParent parent?) <&&> Cutsat.isCutsatType type) then return ()
+  uif isForbiddenParent parent? then return ()
+  uif (← pure (isIneqParent parent?) <&&> Cutsat.isCutsatType type) then return ()
   if let some ringId ← getCommRingId? type then RingM.run ringId do
     let some re ← reify? e | return ()
     trace_goal[grind.ring.internalize] "[{ringId}]: {e}"

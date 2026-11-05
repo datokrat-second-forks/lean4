@@ -23,7 +23,7 @@ public def IneqCnstr.assert (c : IneqCnstr) : LinearM Unit := do
   trace[grind.linarith.assert] "{← c.denoteExpr}"
   match c.p with
   | .nil =>
-    bif c.strict then
+    uif c.strict then
       trace[grind.linarith.unsat] "{← c.denoteExpr}"
       setInconsistent (.lt c)
     else
@@ -31,18 +31,18 @@ public def IneqCnstr.assert (c : IneqCnstr) : LinearM Unit := do
   | .add a x _ =>
     trace[grind.linarith.assert.store] "{← c.denoteExpr}"
     c.p.updateOccs
-    bif a <ᵇ 0 then
+    uif a < 0 then
       modifyStruct fun s => { s with lowers := s.lowers.modify x (·.push c) }
     else
       modifyStruct fun s => { s with uppers := s.uppers.modify x (·.push c) }
-    bif (← c.satisfied) == .false then
+    uif (← c.satisfied) == .false then
       resetAssignmentFrom x
 
 def propagateCommRingIneq (e : Expr) (lhs rhs : Expr) (strict : Bool) (eqTrue : Bool) : LinearM Unit := do
   let some lhs ← withRingM <| CommRing.reify? lhs (skipVar := false) | return ()
   let some rhs ← withRingM <| CommRing.reify? rhs (skipVar := false) | return ()
   let generation ← getGeneration e
-  bif eqTrue then
+  uif eqTrue then
     let p := (lhs.sub rhs).toPoly
     let c : RingIneqCnstr := { p, strict, h := .core e lhs rhs }
     let c ← c.cleanupDenominators
@@ -52,7 +52,7 @@ def propagateCommRingIneq (e : Expr) (lhs rhs : Expr) (strict : Bool) (eqTrue : 
     let p := lhs.norm
     let c : IneqCnstr := { p, strict, h := .ring c lhs }
     c.assert
-  else bif (← isLinearOrder <&&> hasLawfulLT) then
+  else uif (← isLinearOrder <&&> hasLawfulLT) then
     let p := (rhs.sub lhs).toPoly
     let strict := !strict
     let c : RingIneqCnstr := { p, strict, h := .notCore e lhs rhs }
@@ -70,11 +70,11 @@ def propagateCommRingIneq (e : Expr) (lhs rhs : Expr) (strict : Bool) (eqTrue : 
 def propagateIntModuleIneq (e : Expr) (lhs rhs : Expr) (strict : Bool) (eqTrue : Bool) : LinearM Unit := do
   let some lhs ← reify? lhs (skipVar := false) | return ()
   let some rhs ← reify? rhs (skipVar := false) | return ()
-  bif eqTrue then
+  uif eqTrue then
     let p := (lhs.sub rhs).norm
     let c : IneqCnstr := { p, strict, h := .core e lhs rhs }
     c.assert
-  else bif (← isLinearOrder <&&> hasLawfulLT) then
+  else uif (← isLinearOrder <&&> hasLawfulLT) then
     let p := (rhs.sub lhs).norm
     let strict := !strict
     let c : IneqCnstr := { p, strict, h := .notCore e lhs rhs }
@@ -90,7 +90,7 @@ def propagateNatModuleIneq (e : Expr) (lhs rhs : Expr) (strict : Bool) (eqTrue :
   LinearM.run ns.structId do
   let some lhs₂ ← reify? lhs₁ (skipVar := false) | return ()
   let some rhs₂ ← reify? rhs₁ (skipVar := false) | return ()
-  bif eqTrue then
+  uif eqTrue then
     let p := (lhs₂.sub rhs₂).norm
     let c : IneqCnstr := { p, strict, h := .coreOfNat e ns.id lhs₂ rhs₂ }
     c.assert
@@ -110,31 +110,31 @@ public def propagateIneq (e : Expr) (eqTrue : Bool) : GoalM Unit := do
   let rhs := e.getArg! 3 numArgs
   if let some structId ← getStructId? α then LinearM.run structId do
     let s ← getStruct
-    let strict ← bif isInstOf s.leFn? inst then
+    let strict ← uif isInstOf s.leFn? inst then
       pure false
-    else bif isInstOf s.ltFn? inst then
+    else uif isInstOf s.ltFn? inst then
       pure true
     else
       return ()
-    bif strict && s.lawfulOrderLTInst?.isNone then
+    uif strict && s.lawfulOrderLTInst?.isNone then
       modifyStruct fun s => { s with ignored := s.ignored.push e }
       return ()
-    bif (← isOrderedCommRing) then
+    uif (← isOrderedCommRing) then
       propagateCommRingIneq e lhs rhs strict eqTrue
     -- TODO: non-commutative ring normalizer
     else
       propagateIntModuleIneq e lhs rhs strict eqTrue
   else if let some natStructId ← getNatStructId? α then OfNatModuleM.run natStructId do
     let s ← getNatStruct
-    bif s.leInst?.isNone || s.isPreorderInst?.isNone || s.orderedAddInst?.isNone then return ()
-    let strict ← bif some inst == s.leInst? then
+    uif s.leInst?.isNone || s.isPreorderInst?.isNone || s.orderedAddInst?.isNone then return ()
+    let strict ← uif some inst == s.leInst? then
       pure false
-    else bif some inst == s.ltInst? then
+    else uif some inst == s.ltInst? then
       pure true
     else
       return ()
-    bif strict && s.lawfulOrderLTInst?.isNone then return ()
-    bif !eqTrue && s.isLinearInst?.isNone then return ()
+    uif strict && s.lawfulOrderLTInst?.isNone then return ()
+    uif !eqTrue && s.isLinearInst?.isNone then return ()
     propagateNatModuleIneq e lhs rhs strict eqTrue
 
 end Lean.Meta.Grind.Arith.Linear

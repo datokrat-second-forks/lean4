@@ -55,34 +55,34 @@ builtin_simproc_decl simpEq (@Eq _ _ _) := fun e => do
   match_expr α with
   | Bool =>
     let .const rhsName _ := rhs.getAppFn | return .continue
-    bif rhsName == ``true || rhsName == ``false then return .continue
+    uif rhsName == ``true || rhsName == ``false then return .continue
     let .const lhsName _ := lhs.getAppFn | return .continue
-    bif lhsName == ``true || lhsName == ``false then
+    uif lhsName == ``true || lhsName == ``false then
       -- Just apply comm
       let e' := mkApp3 f α rhs lhs
       return .visit { expr := e', proof? := mkApp2 (mkConst ``Grind.flip_bool_eq) lhs rhs }
-    bif isBoolEqTarget lhsName || isBoolEqTarget rhsName then
+    uif isBoolEqTarget lhsName || isBoolEqTarget rhsName then
       -- Convert into `(lhs = true) = (rhs = true)`
       let tr := mkConst ``true
       let e' ← mkEq (mkApp3 f α lhs tr) (mkApp3 f α rhs tr)
       return .visit { expr := e', proof? := mkApp2 (mkConst ``Grind.bool_eq_to_prop) lhs rhs }
     return .continue
   | _ =>
-    bif lhs == rhs then
+    uif lhs == rhs then
       let u := f.constLevels!
       return .done { expr := mkConst ``True, proof? := mkApp2 (mkConst ``eq_self u) α lhs }
-    else bif rhs == mkConst ``True then
+    else uif rhs == mkConst ``True then
       return .done { expr := lhs, proof? := mkApp (mkConst ``Grind.eq_true_eq) lhs }
-    else bif rhs == mkConst ``False then
+    else uif rhs == mkConst ``False then
       return .visit { expr := mkNot lhs, proof? := mkApp (mkConst ``Grind.eq_false_eq) lhs }
   return .continue
 
 builtin_simproc_decl simpDIte (@dite _ _ _ _ _) := fun e => do
  let_expr f@dite α c inst a b ← e | return .continue
  let .lam _ _ aBody _ := a | return .continue
- bif aBody.hasLooseBVars then return .continue
+ uif aBody.hasLooseBVars then return .continue
  let .lam _ _ bBody _ := b | return .continue
- bif bBody.hasLooseBVars then return .continue
+ uif bBody.hasLooseBVars then return .continue
  let us := f.constLevels!
  let expr := mkApp5 (mkConst ``ite us) α c inst aBody bBody
  return .visit { expr, proof? := some (mkApp5 (mkConst ``dite_eq_ite us) c α aBody bBody inst) }
@@ -90,9 +90,9 @@ builtin_simproc_decl simpDIte (@dite _ _ _ _ _) := fun e => do
 builtin_simproc_decl simpUDIte (@UDecidable.dite _ _ _ _ _) := fun e => do
  let_expr f@UDecidable.dite α c inst a b ← e | return .continue
  let .lam _ _ aBody _ := a | return .continue
- bif aBody.hasLooseBVars then return .continue
+ uif aBody.hasLooseBVars then return .continue
  let .lam _ _ bBody _ := b | return .continue
- bif bBody.hasLooseBVars then return .continue
+ uif bBody.hasLooseBVars then return .continue
  let us := f.constLevels!
  let expr := mkApp5 (mkConst ``UDecidable.ite us) α c inst aBody bBody
  return .visit { expr, proof? := some (mkApp5 (mkConst ``UDecidable.dite_eq_ite us) α c inst aBody bBody) }
@@ -106,7 +106,7 @@ builtin_simproc_decl pushNot (Not _) := fun e => do
  | Or q r => return .visit { expr := mkApp2 (mkConst ``And) (mkNot q) (mkNot r), proof? := some <| mkApp2 (mkConst ``Grind.not_or) q r }
  | Not q => return .visit { expr := q, proof? := some <| mkApp (mkConst ``Grind.not_not) q }
  | f@Eq α a b =>
-   bif α.isProp then
+   uif α.isProp then
      return .visit { expr := mkApp3 f α a (mkNot b), proof? := some <| mkApp2 (mkConst ``Grind.not_eq_prop) a b }
    else match_expr b with
      | Bool.true => return .visit { expr := mkApp3 f α a (mkConst ``Bool.false), proof? := some <| mkApp (mkConst ``Bool.not_eq_true) a }
@@ -125,7 +125,7 @@ builtin_simproc_decl pushNot (Not _) := fun e => do
    | _ => return .continue
  | _ =>
   if let .forallE n α b info := p then
-    bif !b.hasLooseBVars && (← isProp α) then
+    uif !b.hasLooseBVars && (← isProp α) then
       return .visit { expr := mkAnd α (mkNot b), proof? := some <| mkApp2 (mkConst ``Grind.not_implies) α b }
     else
       let p    := mkLambda n info α b
@@ -145,9 +145,9 @@ builtin_simproc_decl simpOr (Or _ _) := fun e => do
   | _ =>
   match_expr q with
   | Or q r =>
-    bif p.isForall then return .continue
-    bif q.isForall then return .visit { expr := mkOr q (mkOr p r), proof? := some <| mkApp3 (mkConst ``Grind.or_swap12) p q r }
-    bif r.isForall then return .visit { expr := mkOr r (mkOr q p), proof? := some <| mkApp3 (mkConst ``Grind.or_swap13) p q r }
+    uif p.isForall then return .continue
+    uif q.isForall then return .visit { expr := mkOr q (mkOr p r), proof? := some <| mkApp3 (mkConst ``Grind.or_swap12) p q r }
+    uif r.isForall then return .visit { expr := mkOr r (mkOr q p), proof? := some <| mkApp3 (mkConst ``Grind.or_swap13) p q r }
     return .continue
   | True => return .visit { expr := q, proof? := some <| mkApp (mkConst ``or_true) p }
   | False => return .visit { expr := p, proof? := some <| mkApp (mkConst ``or_false) p }
@@ -196,7 +196,7 @@ protected def getSimprocs : MetaM (Array Simprocs) := do
   return #[s]
 
 private def addDeclToUnfold (s : SimpTheorems) (declName : Name) : MetaM SimpTheorems := do
-  bif (← getEnv).contains declName then
+  uif (← getEnv).contains declName then
     s.addDeclToUnfold declName
   else
     return s

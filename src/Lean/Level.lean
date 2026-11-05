@@ -18,7 +18,7 @@ namespace Lean
 
 -- This is intentionally in the `Lean` namespace to avoid polluting the `Nat` namespace.
 def Nat.imax (n m : Nat) : Nat :=
-  bif m =ᵇ 0 then 0 else Nat.max n m
+  uif m = 0 then 0 else Nat.max n m
 
 /--
  Cached hash code, cached results, and other data for `Level`.
@@ -52,11 +52,11 @@ opaque Level.mkData (h : UInt64) (depth : Nat := 0) (hasMVar hasParam : Bool := 
 instance : Repr Level.Data where
   reprPrec v prec := Id.run do
     let mut r := "Level.mkData " ++ toString v.hash
-    bif v.depth != 0 then
+    uif v.depth != 0 then
       r := r ++ " (depth := " ++ toString v.depth ++ ")"
-    bif v.hasMVar then
+    uif v.hasMVar then
       r := r ++ " (hasMVar := " ++ toString v.hasMVar ++ ")"
-    bif v.hasParam then
+    uif v.hasParam then
       r := r ++ " (hasParam := " ++ toString v.hasParam ++ ")"
     Repr.addAppParen r prec
 
@@ -275,22 +275,22 @@ def normLtAux : Level → Nat → Level → Nat → Bool
   | succ l₁, k₁, l₂, k₂ => normLtAux l₁ (k₁+1) l₂ k₂
   | l₁, k₁, succ l₂, k₂ => normLtAux l₁ k₁ l₂ (k₂+1)
   | l₁@(max l₁₁ l₁₂), k₁, l₂@(max l₂₁ l₂₂), k₂ =>
-    bif l₁ == l₂ then k₁ < k₂
-    else bif l₁₁ != l₂₁ then normLtAux l₁₁ 0 l₂₁ 0
+    uif l₁ == l₂ then k₁ < k₂
+    else uif l₁₁ != l₂₁ then normLtAux l₁₁ 0 l₂₁ 0
     else normLtAux l₁₂ 0 l₂₂ 0
   | l₁@(imax l₁₁ l₁₂), k₁, l₂@(imax l₂₁ l₂₂), k₂ =>
-    bif l₁ == l₂ then k₁ < k₂
-    else bif l₁₁ != l₂₁ then normLtAux l₁₁ 0 l₂₁ 0
+    uif l₁ == l₂ then k₁ < k₂
+    else uif l₁₁ != l₂₁ then normLtAux l₁₁ 0 l₂₁ 0
     else normLtAux l₁₂ 0 l₂₂ 0
-  | param n₁, k₁, param n₂, k₂ => bif n₁ == n₂ then k₁ < k₂ else Name.lt n₁ n₂ -- use `Name.lt` because it is lexicographical
+  | param n₁, k₁, param n₂, k₂ => uif n₁ == n₂ then k₁ < k₂ else Name.lt n₁ n₂ -- use `Name.lt` because it is lexicographical
   /-
     We also use `Name.lt` in the following case to make sure universe parameters in a declaration
     are not affected by shifted indices. We used to use `Name.quickLt` which is not stable over shifted indices (the hashcodes change),
     and changes to the elaborator could affect the universe parameters and break code that relies on an explicit order.
     Example: test `tests/lean/343.lean`.
    -/
-  | mvar n₁, k₁, mvar n₂, k₂ => bif n₁ == n₂ then k₁ < k₂ else Name.lt n₁.name n₂.name
-  | l₁, k₁, l₂, k₂ => bif l₁ == l₂ then k₁ < k₂ else ctorToNat l₁ < ctorToNat l₂
+  | mvar n₁, k₁, mvar n₂, k₂ => uif n₁ == n₂ then k₁ < k₂ else Name.lt n₁.name n₂.name
+  | l₁, k₁, l₂, k₂ => uif l₁ == l₂ then k₁ < k₂ else ctorToNat l₁ < ctorToNat l₂
 
 /--
   A total order on level expressions that has the following properties
@@ -312,7 +312,7 @@ private def mkIMaxAux : Level → Level → Level
   | _,    zero   => zero
   | zero, u      => u
   | succ zero, u => u
-  | u₁,   u₂     => bif u₁ == u₂ then u₁ else mkLevelIMax u₁ u₂
+  | u₁,   u₂     => uif u₁ == u₂ then u₁ else mkLevelIMax u₁ u₂
 
 /-- Auxiliary function used at `normalize` -/
 @[specialize] private partial def getMaxArgsAux (normalize : Level → Level) : Level → Bool → Array Level → Array Level
@@ -321,7 +321,7 @@ private def mkIMaxAux : Level → Level → Level
   | l,           true,              lvls => lvls.push l
 
 private def accMax (result : Level) (prev : Level) (offset : Nat) : Level :=
-  bif result.isZero then prev.addOffset offset
+  uif result.isZero then prev.addOffset offset
   else mkLevelMax result (prev.addOffset offset)
 
 /--
@@ -334,11 +334,11 @@ private def accMax (result : Level) (prev : Level) (offset : Nat) : Level :=
    - `result` is the accumulator
 -/
 private partial def mkMaxAux (lvls : Array Level) (extraK : Nat) (i : Nat) (prev : Level) (prevK : Nat) (result : Level) : Level :=
-  bif h : i <ᵇ lvls.size then
+  uif h : i < lvls.size then
     let lvl   := lvls[i]
     let curr  := lvl.getLevelOffset
     let currK := lvl.getOffset
-    bif curr == prev then
+    uif curr == prev then
       mkMaxAux lvls extraK (i+1) curr currK result
     else
       mkMaxAux lvls extraK (i+1) curr currK (accMax result prev (extraK + prevK))
@@ -350,9 +350,9 @@ private partial def mkMaxAux (lvls : Array Level) (extraK : Nat) (i : Nat) (prev
   It finds the first position that is not an explicit universe.
 -/
 private partial def skipExplicit (lvls : Array Level) (i : Nat) : Nat :=
-  bif h : i <ᵇ lvls.size then
+  uif h : i < lvls.size then
     let lvl := lvls[i]
-    bif lvl.getLevelOffset.isZero then skipExplicit lvls (i+1) else i
+    uif lvl.getLevelOffset.isZero then skipExplicit lvls (i+1) else i
   else
     i
 
@@ -364,22 +364,22 @@ Return true if it finds a level with offset ≥ maxExplicit.
 It assumes `lvls` has been sorted using `normLt`.
 -/
 private partial def isExplicitSubsumedAux (lvls : Array Level) (maxExplicit : Nat) (i : Nat) : Bool :=
-  bif h : i <ᵇ lvls.size then
+  uif h : i < lvls.size then
     let lvl := lvls[i]
-    bif lvl.getOffset ≥ᵇ maxExplicit then true
+    uif lvl.getOffset ≥ maxExplicit then true
     else isExplicitSubsumedAux lvls maxExplicit (i+1)
   else
     false
 
 /-- Auxiliary function for `normalize`. See `isExplicitSubsumedAux` -/
 private def isExplicitSubsumed (lvls : Array Level) (firstNonExplicit : Nat) : Bool :=
-  bif firstNonExplicit == 0 then false
+  uif firstNonExplicit == 0 then false
   else
     let max := lvls[firstNonExplicit - 1]!.getOffset
     isExplicitSubsumedAux lvls max firstNonExplicit
 
 partial def normalize (l : Level) : Level :=
-  bif isAlreadyNormalizedCheap l then l
+  uif isAlreadyNormalizedCheap l then l
   else
     let k := l.getOffset
     let u := l.getLevelOffset
@@ -389,13 +389,13 @@ partial def normalize (l : Level) : Level :=
       let lvls  := getMaxArgsAux normalize l₂ false lvls
       let lvls  := lvls.qsort normLt
       let firstNonExplicit := skipExplicit lvls 0
-      let i := bif isExplicitSubsumed lvls firstNonExplicit then firstNonExplicit else firstNonExplicit - 1
+      let i := uif isExplicitSubsumed lvls firstNonExplicit then firstNonExplicit else firstNonExplicit - 1
       let lvl₁  := lvls[i]!
       let prev  := lvl₁.getLevelOffset
       let prevK := lvl₁.getOffset
       mkMaxAux lvls k (i+1) prev prevK Level.zero
     | imax l₁ l₂ =>
-      bif l₂.isNeverZero then addOffset (normalize (mkLevelMax l₁ l₂)) k
+      uif l₂.isNeverZero then addOffset (normalize (mkLevelMax l₁ l₂)) k
       else
         let l₁ := normalize l₁
         let l₂ := normalize l₂
@@ -457,7 +457,7 @@ def toResult (l : Level) : M Result := do
   | imax l₁ l₂ => return Result.imax (← toResult l₁) (← toResult l₂)
   | param n    => return Result.leaf n
   | mvar n     =>
-    bif !(← read).mvars then
+    uif !(← read).mvars then
       return Result.leaf `_
     else if let some i := (← read).lIndex? n then
       return Result.leaf <| Name.num (Name.mkSimple "?u") (i + 1)
@@ -487,7 +487,7 @@ end
 
 protected partial def Result.quote (r : Result) (prec : Nat) : Syntax.Level :=
   let addParen (s : Syntax.Level) :=
-    bif prec >ᵇ 0 then Unhygienic.run `(level| ( $s )) else s
+    uif prec > 0 then Unhygienic.run `(level| ( $s )) else s
   match r with
   | Result.leaf n         => Unhygienic.run `(level| $(mkIdent n):ident)
   | Result.num  k         => Unhygienic.run `(level| $(quote k):num)
@@ -517,17 +517,17 @@ end Level
 
 @[inline] private def mkLevelMaxCore (u v : Level) (elseK : Unit → Level) : Level :=
   let subsumes (u v : Level) : Bool :=
-    bif v.isExplicit && u.getOffset ≥ᵇ v.getOffset then true
+    uif v.isExplicit ∧ u.getOffset ≥ v.getOffset then true
     else match u with
       | Level.max u₁ u₂ => v == u₁ || v == u₂
       | _ => false
-  bif u == v then u
-  else bif u.isZero then v
-  else bif v.isZero then u
-  else bif subsumes u v then u
-  else bif subsumes v u then v
-  else bif u.getLevelOffset == v.getLevelOffset then
-    bif u.getOffset ≥ᵇ v.getOffset then u else v
+  uif u == v then u
+  else uif u.isZero then v
+  else uif v.isZero then u
+  else uif subsumes u v then u
+  else uif subsumes v u then v
+  else uif u.getLevelOffset == v.getLevelOffset then
+    uif u.getOffset ≥ v.getOffset then u else v
   else
     elseK ()
 
@@ -539,10 +539,10 @@ def simpLevelMax' (u v : Level) (d : Level) : Level :=
   mkLevelMaxCore u v fun _ => d
 
 @[inline] private def mkLevelIMaxCore (u v : Level) (elseK : Unit → Level) : Level :=
-  bif v.isNeverZero then mkLevelMax' u v
-  else bif v.isZero then v
-  else bif u.isZero then v
-  else bif u == v then u
+  uif v.isNeverZero then mkLevelMax' u v
+  else uif v.isZero then v
+  else uif u.isZero then v
+  else uif u == v then u
   else elseK ()
 
 /-- Similar to `mkLevelIMax`, but applies cheap simplifications -/
@@ -604,16 +604,16 @@ where
   go (u : Level) : Level :=
     match u with
     | .zero       => u
-    | .succ v     => bif u.hasParam then u.updateSucc! (go v) else u
-    | .max v₁ v₂  => bif u.hasParam then u.updateMax! (go v₁) (go v₂) else u
-    | .imax v₁ v₂ => bif u.hasParam then u.updateIMax! (go v₁) (go v₂) else u
+    | .succ v     => uif u.hasParam then u.updateSucc! (go v) else u
+    | .max v₁ v₂  => uif u.hasParam then u.updateMax! (go v₁) (go v₂) else u
+    | .imax v₁ v₂ => uif u.hasParam then u.updateIMax! (go v₁) (go v₂) else u
     | .param n    => match s n with
       | some u' => u'
       | none    => u
     | u => u
 
 def getParamSubst : List Name → List Level → Name → Option Level
-  | p::ps, u::us, p' => bif p == p' then some u else getParamSubst ps us p'
+  | p::ps, u::us, p' => uif p == p' then some u else getParamSubst ps us p'
   | _,     _,     _  => none
 
 def instantiateParams (u : Level) (paramNames : List Name) (vs : List Level) : Level :=
@@ -662,7 +662,7 @@ def Level.collectMVars (u : Level) (s : LMVarIdSet := {}) : LMVarIdSet :=
 
 def Level.find? (u : Level) (p : Level → Bool) : Option Level :=
   let rec visit (u : Level) : Option Level :=
-    bif p u then
+    uif p u then
       return u
     else match u with
       | succ v   => visit v

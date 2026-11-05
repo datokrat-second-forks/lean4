@@ -119,7 +119,7 @@ where
         -- Collect fvars appearing in the type of `e`. Computing `bodyType` in particular is where `MetaM` is necessary.
         let bodyTypeFVarIds := (collectFVars {} bodyType).fvarSet
         let bodyTypeDeps : Std.HashSet Nat := Nat.fold fvars.size (init := {}) fun idx _ deps =>
-          bif bodyTypeFVarIds.contains fvars[idx].fvarId! then
+          uif bodyTypeFVarIds.contains fvars[idx].fvarId! then
             deps.insert idx
           else
             deps
@@ -132,7 +132,7 @@ The length of the unused array may be less than the number of `have`s: use `unus
 def HaveTelescopeInfo.computeFixedUsed (info : HaveTelescopeInfo) (keepUnused : Bool) :
     MetaM (Array Bool × Array Bool) := do
   let fixed ← go info.bodyTypeDeps
-  bif keepUnused then
+  uif keepUnused then
     return (fixed, #[])
   else
     let used ← go info.bodyDeps
@@ -149,7 +149,7 @@ where
     -- For each used `have`, in reverse order, update `used`.
     for i in *...numHaves do
       let idx := numHaves - i - 1
-      bif used[idx]! then
+      uif used[idx]! then
         let hinfo := info.haveInfo[idx]!
         used := updateArrayFromBackDeps used hinfo.typeBackDeps
         used := updateArrayFromBackDeps used hinfo.valueBackDeps
@@ -208,7 +208,7 @@ when we simplify values they have their correct local context.
 -/
 private def simpHaveTelescopeAux (info : HaveTelescopeInfo) (fixed : Array Bool) (used : Array Bool)
       (e : Expr) (i : Nat) (xs : Array Expr) : m SimpHaveResult := do
-  bif h : i <ᵇ info.haveInfo.size then
+  uif h : i < info.haveInfo.size then
     let hinfo := info.haveInfo[i]
     -- `x` and `val` are the fvar and value with respect to the local context.
     let x := hinfo.decl.toExpr
@@ -217,7 +217,7 @@ private def simpHaveTelescopeAux (info : HaveTelescopeInfo) (fixed : Array Bool)
     let .letE n t v b true := e | unreachable!
     -- Universe levels to use for each of the `have_*` theorems. It's the level of `val` and the level of the body.
     let us := [hinfo.level, info.level]
-    bif !used.getD i true then
+    uif !used.getD i true then
       /-
       Unused `have`: do not add `x` to the local context then `simp` only the body.
       -/
@@ -236,7 +236,7 @@ private def simpHaveTelescopeAux (info : HaveTelescopeInfo) (fixed : Array Bool)
       let exprType := rb.exprType.lowerLooseBVars 1 1
       let exprInit := mkApp (mkLambda n .default t rb.exprInit) v
       let exprResult := rb.exprResult.lowerLooseBVars 1 1
-      bif rb.modified then
+      uif rb.modified then
         let proof := mkApp6 (mkConst ``have_unused_dep' us) t exprType v (mkLambda n .default t rb.exprInit) expr
           (mkLambda n .default t rb.proof)
         return { expr, exprType, exprInit, exprResult, proof, modified := true }
@@ -245,7 +245,7 @@ private def simpHaveTelescopeAux (info : HaveTelescopeInfo) (fixed : Array Bool)
         let proof := mkApp6 (mkConst ``have_unused' us) t exprType v expr expr
           (mkApp2 (mkConst ``Eq.refl [info.level]) exprType expr)
         return { expr, exprType, exprInit, exprResult, proof, modified := true }
-    else bif fixed.getD i true then
+    else uif fixed.getD i true then
       /-
       Fixed `have` (like `CongrArgKind.fixed`): dsimp the value and simp the body.
       The variable appears in the type of the body.
@@ -253,7 +253,7 @@ private def simpHaveTelescopeAux (info : HaveTelescopeInfo) (fixed : Array Bool)
       let val' ← MonadSimp.dsimp val
       (do trace[Debug.Meta.Tactic.simp] "have telescope; fixed {n} := {val} => {val'}" : MetaM _)
       let vModified := val != val'
-      let v' := bif vModified then val'.abstract xs else v
+      let v' := uif vModified then val'.abstract xs else v
       withExistingLocalDecls [hinfo.decl] <| MonadSimp.withNewLemmas #[x] do
         let rb ← simpHaveTelescopeAux info fixed used b (i + 1) (xs.push x)
         let expr := mkApp (mkLambda n .default t rb.expr) v'
@@ -264,7 +264,7 @@ private def simpHaveTelescopeAux (info : HaveTelescopeInfo) (fixed : Array Bool)
         -- If this is a performance issue, we could try using a `letFun` encoding here make use of the `is_def_eq_args` optimization.
         -- Namely, to guide the defeqs via the sequence
         --   `(fun x => b) v` = `letFun (fun x => b) v` = `letFun (fun x => b) v'` = `(fun x => b) v'`
-        bif rb.modified then
+        uif rb.modified then
           let proof := mkApp6 (mkConst ``have_body_congr_dep' us) t (mkLambda n .default t rb.exprType) v'
             (mkLambda n .default t rb.exprInit) (mkLambda n .default t rb.expr) (mkLambda n .default t rb.proof)
           return { expr, exprType, exprInit, exprResult, proof, modified := true }
@@ -350,12 +350,12 @@ def zetaUnused (e : Expr) : MetaM Expr := do
       i := i - 1
       let x := xs[i]!
       let xFVarId := x.fvarId!
-      bif s.fvarSet.contains xFVarId then
+      uif s.fvarSet.contains xFVarId then
         let decl ← xFVarId.getDecl
         s  := collectFVars s decl.type
         s  := collectFVars s (decl.value (allowNondep := true))
         ys := ys.push x
-    bif ys.size == xs.size then
+    uif ys.size == xs.size then
       return e
     else
       mkLetFVars (generalizeNondepLet := false) ys.reverse body
@@ -367,7 +367,7 @@ Constructs the final result. If `keepUnused` is `false`, it eliminates unused le
 private def SimpHaveResult.toResult (u : Level) (source : Expr) (result : SimpHaveResult) (keepUnused : Bool) : MetaM MonadSimp.Result := do
   match result with
   | { expr, exprType, exprInit, exprResult, proof, modified, .. } =>
-    bif modified then
+    uif modified then
       let proof :=
           -- Add a type hint to convert back into `have` form.
           mkExpectedPropHint (expectedProp := mkApp3 (mkConst ``Eq [u]) exprType source exprResult) <|
@@ -376,21 +376,21 @@ private def SimpHaveResult.toResult (u : Level) (source : Expr) (result : SimpHa
             -- to construct the `SimpHaveResult`.
             -- If the kernel were to support `have` forms of the congruence lemmas this would not be necessary.
             mkExpectedPropHint (expectedProp := mkApp3 (mkConst ``Eq [u]) exprType exprInit expr) proof
-      bif keepUnused then
+      uif keepUnused then
         return .step exprResult proof
       else
         let exprResult' ← zetaUnused exprResult
-        bif exprResult' == exprResult then
+        uif exprResult' == exprResult then
           return .step exprResult proof
         else
           let proof := mkApp6 (mkConst ``Eq.trans [u]) exprType source exprResult exprResult' proof
             (mkApp2 (mkConst ``Eq.refl [u]) exprType exprResult')
           return .step exprResult' proof
-    else bif keepUnused then
+    else uif keepUnused then
       return .rfl
     else
       let exprResult ← zetaUnused source
-      bif exprResult == source then
+      uif exprResult == source then
         return .rfl
       else
         let proof := mkApp2 (mkConst ``Eq.refl [u]) exprType exprResult

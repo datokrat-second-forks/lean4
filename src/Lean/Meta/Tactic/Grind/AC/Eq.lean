@@ -18,7 +18,7 @@ open Lean.Grind
 /-- For each structure `s` s.t. `a` and `b` are elements of, execute `k` -/
 @[specialize] def withExprs (a b : Expr) (k : ACM Unit) : GoalM Unit := do
   let ids₁ ← getTermOpIds a
-  bif ids₁.isEmpty then return ()
+  uif ids₁.isEmpty then return ()
   let ids₂ ← getTermOpIds b
   go ids₁ ids₂
 where
@@ -26,9 +26,9 @@ where
     | [], _ => return ()
     | _, [] => return ()
     | id₁::ids₁, id₂::ids₂ => do
-      bif id₁ == id₂ then
+      uif id₁ == id₂ then
         ACM.run id₁ k; go ids₁ ids₂
-      else bif id₁ <ᵇ id₂ then
+      else uif id₁ < id₂ then
         go ids₁ (id₂::ids₂)
       else
         go (id₁::ids₁) ids₂
@@ -200,7 +200,7 @@ private def DiseqCnstr.assert (c : DiseqCnstr) : ACM Unit := do
   let c ← c.eraseDup
   let c ← c.simplify
   trace[grind.ac.assert] "{← c.denoteExpr}"
-  bif c.lhs == c.rhs then
+  uif c.lhs == c.rhs then
     c.setUnsat
   else
     saveDiseq c
@@ -211,7 +211,7 @@ private def mkEqCnstr (lhs rhs : AC.Seq) (h : EqCnstrProof) : ACM EqCnstr := do
   return { lhs, rhs, h, id }
 
 private def EqCnstr.orient (c : EqCnstr) : EqCnstr :=
-  bif compare c.rhs c.lhs == .gt then
+  uif compare c.rhs c.lhs == .gt then
     { c with lhs := c.rhs, rhs := c.lhs, h := .swap c }
   else
     c
@@ -221,15 +221,15 @@ private def EqCnstr.addToQueue (c : EqCnstr) : ACM Unit := do
   modifyStruct fun s => { s with queue := s.queue.insert c }
 
 private def EqCnstr.superposeWithAC (c₁ : EqCnstr) : ACM Unit := do
-  bif (← checkMaxSteps) then return ()
+  uif (← checkMaxSteps) then return ()
   let lhs₁ := c₁.lhs
   for c₂ in (← getStruct).basis do
     let lhs₂ := c₂.lhs
     trace[grind.debug.ac.superpose] "[{lhs₁.sharesVar lhs₂}]: {← lhs₁.denoteExpr}, {← lhs₂.denoteExpr}"
-    bif lhs₁.sharesVar lhs₂ then
+    uif lhs₁.sharesVar lhs₂ then
       assert! lhs₁ != lhs₂
       let some (r₁, c, r₂) := lhs₁.superposeAC? lhs₂ | unreachable!
-      bif (← isDebugEnabled) then
+      uif (← isDebugEnabled) then
         assert! lhs₁ == r₁.union c
         assert! lhs₂ == r₂.union c
       let c ← mkEqCnstr (c₁.rhs.union r₂) (c₂.rhs.union r₁) (.superpose_ac r₁ c r₂ c₁ c₂)
@@ -240,18 +240,18 @@ private def EqCnstr.superposeA (c₁ c₂ : EqCnstr) : ACM Unit := do
   let lhs₂ := c₂.lhs
   assert! lhs₁ != lhs₂
   if let some (p, c, s) := lhs₁.superpose? lhs₂ then
-    bif (← isDebugEnabled) then
+    uif (← isDebugEnabled) then
       assert! lhs₁ == p ++ c
       assert! lhs₂ == c ++ s
     let c ← mkEqCnstr (c₁.rhs ++ s) (p ++ c₂.rhs) (.superpose p c s c₁ c₂)
     c.addToQueue
 
 private def EqCnstr.superposeWithA (c₁ : EqCnstr) : ACM Unit := do
-  bif (← checkMaxSteps) then return ()
+  uif (← checkMaxSteps) then return ()
   let lhs₁ := c₁.lhs
   for c₂ in (← getStruct).basis do
     let lhs₂ := c₂.lhs
-    bif lhs₁.sharesVar lhs₂ then
+    uif lhs₁.sharesVar lhs₂ then
       c₁.superposeA c₂
       c₂.superposeA c₁
 
@@ -261,7 +261,7 @@ This function is used to implement extra superposition for steps when the
 operator is idempotent
 -/
 private def EqCnstr.addToQueue' (c : EqCnstr) : ACM Unit := do
-  bif (← hasNeutral) && c.rhs.contains 0 then
+  uif (← hasNeutral) && c.rhs.contains 0 then
     (← c.erase0).addToQueue
   else
     c.addToQueue
@@ -303,13 +303,13 @@ private def EqCnstr.superposeAIdempotent (c : EqCnstr) : ACM Unit := do
     c.addToQueue'
 
 private def EqCnstr.superposeWith (c : EqCnstr) : ACM Unit := do
-  bif c.lhs matches .var _ then return ()
-  bif (← isCommutative) then
+  uif c.lhs matches .var _ then return ()
+  uif (← isCommutative) then
     c.superposeWithAC
-    bif (← isIdempotent) then c.superposeACIdempotent
+    uif (← isIdempotent) then c.superposeACIdempotent
   else
     c.superposeWithA
-    bif (← isIdempotent) then c.superposeAIdempotent
+    uif (← isIdempotent) then c.superposeAIdempotent
 
 private def EqCnstr.simplifyBasis (c : EqCnstr) : ACM Unit := do
   let rec go (basis : List EqCnstr) (acc : List EqCnstr) : ACM (List EqCnstr) := do
@@ -328,7 +328,7 @@ private def EqCnstr.simplifyBasis (c : EqCnstr) : ACM Unit := do
 private def addSorted (c : EqCnstr) : List EqCnstr → List EqCnstr
   | [] => [c]
   | c' :: cs =>
-    bif c.lhs.length ≤ᵇ c'.lhs.length then
+    uif c.lhs.length ≤ c'.lhs.length then
       c :: c' :: cs
     else
       c' :: addSorted c cs
@@ -347,16 +347,16 @@ private def EqCnstr.addToBasisAfterSimp (c : EqCnstr) : ACM Unit := do
 
 private def EqCnstr.addToBasis (c : EqCnstr) : ACM Unit := do
   let c ← c.simplify
-  bif c.lhs == c.rhs then return ()
+  uif c.lhs == c.rhs then return ()
   let c := c.orient
   c.addToBasisAfterSimp
 
 private def EqCnstr.assert (c : EqCnstr) : ACM Unit := do
   let c ← c.simplify
-  bif c.lhs == c.rhs then return ()
+  uif c.lhs == c.rhs then return ()
   let c := c.orient
   trace[grind.ac.assert] "{← c.denoteExpr}"
-  bif c.lhs.isVar then
+  uif c.lhs.isVar then
     c.addToBasisAfterSimp
   else
     c.addToQueue
@@ -397,7 +397,7 @@ private def checkDiseqs : ACM Unit := do
   modifyStruct fun s => { s with diseqs := {} }
   for c in diseqs do
     c.assert
-    bif (← isInconsistent) then return
+    uif (← isInconsistent) then return
 
 /-- Simplifies the right-hand-side of the given equation. -/
 def EqCnstr.simplifyRHS (c : EqCnstr) : ACM EqCnstr := do
@@ -409,18 +409,18 @@ def EqCnstr.simplifyRHS (c : EqCnstr) : ACM EqCnstr := do
   while progress do
     progress := false
     incSteps
-    bif (← checkMaxSteps) then return c
-    bif neutral && c.rhs.contains 0 then
+    uif (← checkMaxSteps) then return c
+    uif neutral && c.rhs.contains 0 then
       let rhs := c.rhs.erase0
-      bif rhs != c.rhs then
+      uif rhs != c.rhs then
         c := { c with rhs, h := .erase0_rhs c }
         progress := true
-    bif idempotent then
+    uif idempotent then
       let rhs := c.rhs.eraseDup
-      bif rhs != c.rhs then
+      uif rhs != c.rhs then
         c := { c with rhs, h := .erase_dup_rhs c }
         progress := true
-    bif comm then
+    uif comm then
       if let some (c', r) ← c.rhs.findSimpAC? then
         c := c.simplifyRhsWithAC c' r
         progress := true
@@ -447,7 +447,7 @@ def mkEqData (e : Expr) (r : AC.Expr) : ACM EqData := do
 abbrev PropagateEqMap := Std.HashMap AC.Seq EqData
 
 private def propagateEqs : ACM Bool := do
-  bif (← isInconsistent) then return false
+  uif (← isInconsistent) then return false
   /-
   This is a very simple procedure that does not use any indexing data-structure.
   We don't even cache the simplified expressions.
@@ -455,11 +455,11 @@ private def propagateEqs : ACM Bool := do
   -/
   let go : StateT (Bool × PropagateEqMap) ACM Unit := do
     for e in (← getStruct).vars do
-      bif (← checkMaxSteps) then return
+      uif (← checkMaxSteps) then return
       let r ← asACExpr e
       process e r
     for (e, r) in (← getStruct).denoteEntries do
-      bif (← checkMaxSteps) then return
+      uif (← checkMaxSteps) then return
       process e r
   let (_, (propagated, _)) ← go.run (false, {})
   return propagated
@@ -484,22 +484,22 @@ private def checkStruct : ACM CheckResult := do
     let some c ← getNext? | break
     trace_goal[grind.debug.ac.check] "{← c.denoteExpr}"
     c.addToBasis
-    bif (← isInconsistent) then return .closed
-    bif (← checkMaxSteps) then return .progress
+    uif (← isInconsistent) then return .closed
+    uif (← checkMaxSteps) then return .progress
   checkDiseqs
   modifyStruct fun s => { s with recheck := false }
-  bif (← propagateEqs) then return .propagated
+  uif (← propagateEqs) then return .propagated
   return .progress
 
 def check : GoalM CheckResult := do profileitM Exception "grind ac" (← getOptions) do
-  bif (← checkMaxSteps) then return .none
+  uif (← checkMaxSteps) then return .none
   let mut result : CheckResult := .none
   checkInvariants
   try
     for opId in *...(← get').structs.size do
       let r ← ACM.run opId checkStruct
       result := result.join r
-      bif (← isInconsistent) then return .closed
+      uif (← isInconsistent) then return .closed
     return result
   finally
     checkInvariants

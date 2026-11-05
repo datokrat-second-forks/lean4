@@ -121,13 +121,13 @@ Then, this function returns a proof for edge `u -(k₁+k₂) -> v`.
 Remark: if the order does not support offset `k₁` and `k₂` are zero.
 -/
 public def mkTrans (p₁ : ProofInfo) (p₂ : ProofInfo) (v : NodeId) : OrderM ProofInfo := do
-  bif (← isRing) then
+  uif (← isRing) then
     mkTransOffset p₁ p₂ v
   else
     mkTransCore p₁ p₂ v
 
 def mkPropagateEqTrueProofCore (u v : Expr) (k : Weight) (huv : Expr) (k' : Weight) : OrderM Expr := do
-  bif k.strict == k'.strict then
+  uif k.strict == k'.strict then
     mkEqTrue huv
   else
     assert! k.strict && !k'.strict
@@ -148,7 +148,7 @@ Given a path `u --(k)--> v` justified by proof `huv`,
 construct a proof of `e = True` where `e` is a term corresponding to the edge `u --(k') --> v`
 -/
 public def mkPropagateEqTrueProof (u v : Expr) (k : Weight) (huv : Expr) (k' : Weight) : OrderM Expr := do
-  bif (← isRing) then
+  uif (← isRing) then
     mkPropagateEqTrueProofOffset u v k huv k'
   else
     mkPropagateEqTrueProofCore u v k huv k'
@@ -169,7 +169,7 @@ Constructs a proof of `e = True` where `e` is a term corresponding to the edge `
 with `k` non-negative
 -/
 public def mkPropagateSelfEqTrueProof (u : Expr) (k : Weight) : OrderM Expr := do
-  bif (← isRing) then
+  uif (← isRing) then
     mkPropagateSelfEqTrueProofOffset u k
   else
     assert! !k.strict
@@ -201,7 +201,7 @@ Given a path `u --(k)--> v` justified by proof `huv`,
 construct a proof of `e = False` where `e` is a term corresponding to the edge `u --(k') --> v`
 -/
 public def mkPropagateEqFalseProof (u v : Expr) (k : Weight) (huv : Expr) (k' : Weight) : OrderM Expr := do
-  bif (← isRing) then
+  uif (← isRing) then
     mkPropagateEqFalseProofOffset u v k huv k'
   else
     mkPropagateEqFalseProofCore u v k huv k'
@@ -222,7 +222,7 @@ Constructs a proof of `e = False` where `e` is a term corresponding to the edge 
 `k` is negative.
 -/
 public def mkPropagateSelfEqFalseProof (u : Expr) (k : Weight) : OrderM Expr := do
-  bif (← isRing) then
+  uif (← isRing) then
     mkPropagateSelfEqFalseProofOffset u k
   else
     assert! k.strict
@@ -233,7 +233,7 @@ def mkSelfUnsatProofCore (u : Expr) (h : Expr) : OrderM Expr := do
   return mkApp2 hf u h
 
 def mkSelfUnsatProofOffset (u : Expr) (k : Weight) (h : Expr) : OrderM Expr := do
-  let declName := bif k.strict then
+  let declName := uif k.strict then
     ``Grind.Order.lt_unsat_k
   else
     ``Grind.Order.le_unsat_k
@@ -245,7 +245,7 @@ Returns a proof of `False` using
 `u --(k)--> u` with proof `h` where `k` is negative
 -/
 public def mkSelfUnsatProof (u : Expr) (k : Weight) (h : Expr) : OrderM Expr := do
-  bif (← isRing) then
+  uif (← isRing) then
     mkSelfUnsatProofOffset u k h
   else
     mkSelfUnsatProofCore u h
@@ -258,7 +258,7 @@ def mkUnsatProofCore (u v : Expr) (k₁ : Weight) (h₁ : Expr) (k₂ : Weight) 
 
 def mkUnsatProofOffset (u v : Expr) (k₁ : Weight) (h₁ : Expr) (k₂ : Weight) (h₂ : Expr) : OrderM Expr := do
   let h ← mkTransOffsetProof u v u k₁ k₂ h₁ h₂
-  let declName := bif k₁.strict || k₂.strict then
+  let declName := uif k₁.strict || k₂.strict then
     ``Grind.Order.lt_unsat_k
   else
     ``Grind.Order.le_unsat_k
@@ -271,7 +271,7 @@ Returns a proof of `False` using a negative cycle composed of
 - `v --(k₂)--> u` with proof `h₂`
 -/
 public def mkUnsatProof (u v : Expr) (k₁ : Weight) (h₁ : Expr) (k₂ : Weight) (h₂ : Expr) : OrderM Expr := do
-  bif (← isRing) then
+  uif (← isRing) then
     mkUnsatProofOffset u v k₁ h₁ k₂ h₂
   else
     mkUnsatProofCore u v k₁ h₁ k₂ h₂
@@ -286,7 +286,7 @@ public def mkEqProofOfLeOfLeOffset (u v : Expr) (h₁ : Expr) (h₂ : Expr) : Or
   return mkApp4 h u v h₁ h₂
 
 public def mkEqProofOfLeOfLe (u v : Expr) (h₁ : Expr) (h₂ : Expr) : OrderM Expr := do
-  bif (← isRing) then
+  uif (← isRing) then
     mkEqProofOfLeOfLeOffset  u v h₁ h₂
   else
     mkEqProofOfLeOfLeCore u v h₁ h₂

@@ -36,7 +36,7 @@ builtin_initialize
     descr := "Mark declarations that should not be unfolded by the `cbv` tactic"
     applicationTime := AttributeApplicationTime.afterCompilation
     add   := fun declName _ kind => do
-      bif (← isReducible declName) then
+      uif (← isReducible declName) then
         throwError "`@[cbv_opaque]` cannot be applied to a `@[reducible]` declaration: \
           `{.ofConstName declName}` is reducible, so it is unfolded before `cbv` runs"
       cbvOpaqueExt.add declName kind

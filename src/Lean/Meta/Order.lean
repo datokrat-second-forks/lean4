@@ -28,9 +28,9 @@ of the type `CCPO (∀ x, t[x])`.
 Can handle `CompleteLattice` as well.
 --/
 def mkInstPiOfInstForall (x : Expr) (inst : Expr) : MetaM Expr := do
-  bif (←inferType inst).isAppOf ``CCPO then
+  uif (←inferType inst).isAppOf ``CCPO then
     mkAppOptM ``instCCPOPi #[(← inferType x), none, (← mkLambdaFVars #[x] inst)]
-  else bif (←inferType inst).isAppOf ``CompleteLattice then
+  else uif (←inferType inst).isAppOf ``CompleteLattice then
     mkAppOptM ``instCompleteLatticePi #[(← inferType x), none, (← mkLambdaFVars #[x] inst)]
   else
     throwError "mkInstPiOfInstForall: unexpected type of {inst}"
@@ -50,9 +50,9 @@ with respect to the instance `inst`. The `packedType` is assumed to contain the 
 Can handle `CompleteLattice` as well.
 -/
 def mkFixOfMonFun (packedType : Expr) (packedInst : Expr) (hmono : Expr) : MetaM Expr := do
-  bif (←inferType packedInst).isAppOf ``CCPO then
+  uif (←inferType packedInst).isAppOf ``CCPO then
     mkAppOptM ``fix #[packedType, packedInst, none, hmono]
-  else bif (←inferType packedInst).isAppOf ``CompleteLattice then
+  else uif (←inferType packedInst).isAppOf ``CompleteLattice then
     mkAppOptM ``lfp_monotone #[packedType, packedInst, none, hmono]
   else
     throwError "mkFixOfMonFun: unexpected type of {packedInst}"
@@ -64,9 +64,9 @@ Takes an optional argument with the type `α`. If the optional argument is `none
 it is treated implicitly.
 -/
 def toPartialOrder (packedInst : Expr) (type : Option Expr := .none) := do
-  bif (←inferType packedInst).isAppOf ``CCPO then
+  uif (←inferType packedInst).isAppOf ``CCPO then
     mkAppOptM ``CCPO.toPartialOrder #[type, packedInst]
-  else bif (←inferType packedInst).isAppOf ``CompleteLattice then
+  else uif (←inferType packedInst).isAppOf ``CompleteLattice then
     mkAppOptM ``CompleteLattice.toPartialOrder #[type, packedInst]
   else
     throwError "getUnderlyingOrder: unexpected type of {packedInst}"
@@ -92,9 +92,9 @@ Can handle `CompleteLattice` as well.
 -/
 def mkPackedPPRodInstance (insts : Array Expr) : MetaM Expr := do
   let types ← insts.mapM inferType
-  bif (types.all (fun t => t.isAppOf ``CCPO)) then
+  uif (types.all (fun t => t.isAppOf ``CCPO)) then
     PProdN.genMk mkInstCCPOPProd insts
-  else bif (types.all (fun t => t.isAppOf ``CompleteLattice)) then
+  else uif (types.all (fun t => t.isAppOf ``CompleteLattice)) then
     PProdN.genMk mkInstCompleteLatticePProd insts
   else
     throwError "mkPackedPPRoodInstance: unexpected types {types} of {insts}"

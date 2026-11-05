@@ -115,7 +115,7 @@ instance : Coe SolveByElimConfig BacktrackConfig := ⟨(·.toApplyRulesConfig.to
 def accept (cfg : SolveByElimConfig := {}) (test : MVarId → MetaM Bool) : SolveByElimConfig :=
   { cfg with
     discharge := fun g => do
-      bif (← test g) then
+      uif (← test g) then
         pure none
       else
         cfg.discharge g }
@@ -186,7 +186,7 @@ applied to the instantiations of the original goals, fails or returns `false`.
 -/
 def testSolutions (cfg : SolveByElimConfig := {}) (test : List Expr → MetaM Bool) : SolveByElimConfig :=
   cfg.testPartialSolutions fun sols => do
-    bif sols.any Expr.hasMVar then
+    uif sols.any Expr.hasMVar then
       pure true
     else
       test sols
@@ -203,8 +203,8 @@ def requireUsingAll (cfg : SolveByElimConfig := {}) (use : List Expr) : SolveByE
 Process the `intro` and `constructor` options by implementing the `discharger` tactic.
 -/
 def processOptions (cfg : SolveByElimConfig) : SolveByElimConfig :=
-  let cfg := bif cfg.intro then introsAfter { cfg with intro := false } else cfg
-  let cfg := bif cfg.constructor then constructorAfter { cfg with constructor := false } else cfg
+  let cfg := uif cfg.intro then introsAfter { cfg with intro := false } else cfg
+  let cfg := uif cfg.constructor then constructorAfter { cfg with constructor := false } else cfg
   cfg
 
 end SolveByElimConfig
@@ -266,7 +266,7 @@ def solveByElim (cfg : SolveByElimConfig)
 where
   /-- Run either backtracking search, or repeated application, on the list of goals. -/
   run (cfg : SolveByElimConfig) : List MVarId → MetaM (List MVarId) :=
-    bif cfg.backtracking then
+    uif cfg.backtracking then
       backtrack cfg `Meta.Tactic.solveByElim (applyLemmas cfg lemmas ctx)
     else
       Lean.Meta.repeat1' (maxIters := cfg.maxDepth) (applyFirstLemma cfg lemmas ctx)
@@ -275,7 +275,7 @@ where
 If `symm` is `true`, then adds in symmetric versions of each hypothesis.
 -/
 def saturateSymm (symm : Bool) (hyps : List Expr) : MetaM (List Expr) := do
-  bif symm then
+  uif symm then
     let extraHyps ← hyps.filterMapM fun hyp => try some <$> hyp.applySymm catch _ => pure none
     return hyps ++ extraHyps
   else
@@ -293,7 +293,7 @@ If you need to remove particular local hypotheses, call `solveByElim` directly.
 def _root_.Lean.MVarId.applyRules (cfg : SolveByElimConfig) (lemmas : List (TermElabM Expr))
     (only : Bool := false) (g : MVarId) : MetaM (List MVarId) := do
   let ctx (cfg : SolveByElimConfig) : TermElabM (List Expr) :=
-    bif only then pure []
+    uif only then pure []
     else do saturateSymm cfg.symm (← getLocalHyps).toList
   solveByElim { cfg with backtracking := false } lemmas ctx [g]
 
@@ -349,22 +349,22 @@ that have been explicitly removed via `only` or `[-h]`.)
 -- usually using `elabContextLemmas`.
 def mkAssumptionSet (noDefaults star : Bool) (add remove : List Term) (use : Array Ident) :
     MetaM (List (TermElabM Expr) × (SolveByElimConfig → TermElabM (List Expr))) := do
-  bif star && !noDefaults then
+  uif star && !noDefaults then
     throwError "It doesn't make sense to use `*` without `only`."
 
   let defaults : List (TermElabM Expr) :=
     [← `(rfl), ← `(trivial), ← `(congrFun), ← `(congrArg)].map elab'
   let labelledLemmas := (← use.mapM (Lean.labelled ·.raw.getId)).flatten.toList
     |>.map (liftM <| mkConstWithFreshMVarLevels ·)
-  let lemmas := bif noDefaults then
+  let lemmas := uif noDefaults then
     add.map elab' ++ labelledLemmas
   else
     add.map elab' ++ labelledLemmas ++ defaults
 
-  bif !remove.isEmpty && noDefaults && !star then
+  uif !remove.isEmpty && noDefaults && !star then
     throwError "It doesn't make sense to remove local hypotheses when using `only` without `*`."
   let locals (cfg : SolveByElimConfig) : TermElabM (List Expr) :=
-    bif noDefaults && !star then do pure []
+    uif noDefaults && !star then do pure []
     else do saturateSymm cfg.symm <| (← getLocalHyps).toList.removeAll (← remove.mapM elab')
 
   return (lemmas, locals)

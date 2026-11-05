@@ -32,7 +32,7 @@ private def getType? (e : Expr) : Option Expr :=
 
 private def isForbiddenParent (parent? : Option Expr) : Bool :=
   if let some parent := parent? then
-    bif getType? parent |>.isSome then
+    uif getType? parent |>.isSome then
       true
     else
       -- We also ignore the following parents.
@@ -52,24 +52,24 @@ private def isForbiddenParent (parent? : Option Expr) : Bool :=
 partial def markVars (e : Expr) : LinearM Unit := do
   match_expr e with
   | HAdd.hAdd _ _ _ i a b =>
-    bif isAddInst (← getStruct) i then markVars a; markVars b else markVar e
-  | HSub.hSub _ _ _ i a b => bif isSubInst (← getStruct) i then markVars a; markVars b else markVar e
+    uif isAddInst (← getStruct) i then markVars a; markVars b else markVar e
+  | HSub.hSub _ _ _ i a b => uif isSubInst (← getStruct) i then markVars a; markVars b else markVar e
   | HMul.hMul _ _ _ i a b =>
-    bif isHomoMulInst (← getStruct) i then
-      bif isNumeral a then
+    uif isHomoMulInst (← getStruct) i then
+      uif isNumeral a then
         return (← markVar b)
-      else bif isNumeral b then
+      else uif isNumeral b then
         return (← markVar a)
       else
         markVar a; markVar b; markVar e
         return
     markVar e
   | HSMul.hSMul _ _ _ i a b =>
-    bif isSMulIntInst (← getStruct) i then
-      bif (← getIntValue? a).isSome then
+    uif isSMulIntInst (← getStruct) i then
+      uif (← getIntValue? a).isSome then
         return (← markVar b)
-    bif isSMulNatInst (← getStruct) i then
-      bif (← getNatValue? a).isSome then
+    uif isSMulNatInst (← getStruct) i then
+      uif (← getNatValue? a).isSome then
         return (← markVar b)
     markVar e
   | Neg.neg _ _ a => markVars a
@@ -87,11 +87,11 @@ where
 
 def internalize (e : Expr) (parent? : Option Expr) : GoalM Unit := do
   unless (← getConfig).linarith do return ()
-  bif isIntModuleVirtualParent parent? then
+  uif isIntModuleVirtualParent parent? then
     -- `e` is an auxiliary term used to convert `CommRing` to `IntModule`
     return ()
   let some type := getType? e | return ()
-  bif isForbiddenParent parent? then return ()
+  uif isForbiddenParent parent? then return ()
   if let some structId ← getStructId? type then LinearM.run structId do
     trace[grind.linarith.internalize] "{e}"
     setTermStructId e

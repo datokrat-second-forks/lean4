@@ -41,27 +41,27 @@ or beta for lambda heads) must match on the whole application.
 -/
 public def dsimpAppArgs (e : Expr) : DSimpM Result := do
   let numArgs := e.getAppNumArgs
-  bif h : numArgs =ᵇ 0 then return .rfl
+  uif h : numArgs = 0 then return .rfl
   let f := e.getAppFn
   let info? ← getProofInstInfoOfExpr? f
   let argsInfo? := info?.map (·.argsInfo)
   go argsInfo? numArgs e
 where
   go (argsInfo? : Option (Array ProofInstArgInfo)) (i : Nat) (e : Expr) : DSimpM Result := do
-    bif i =ᵇ 0 then return .rfl
+    uif i = 0 then return .rfl
     let .app f a := e | unreachable!
     let fr ← go argsInfo? (i - 1) f
     let simpInInstances := (← getConfig).instances
     let skip : Bool :=
       match argsInfo? with
       | some ai =>
-        bif h : i - 1 <ᵇ ai.size then
+        uif h : i - 1 < ai.size then
           let { isProof, isInstance } := ai[i - 1]
           isProof || (isInstance && !simpInInstances)
         else
           false  -- over-applied: no info, rewrite
       | none => false
-    let ar ← bif skip then pure .rfl else dsimp a
+    let ar ← uif skip then pure .rfl else dsimp a
     match fr, ar with
     | .rfl _,     .rfl _     => return .rfl
     | .step f' _, .rfl _     => return .step (← e.updateAppS! f' a)

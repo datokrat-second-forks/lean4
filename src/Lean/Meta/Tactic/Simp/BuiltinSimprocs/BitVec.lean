@@ -31,7 +31,7 @@ private def fromExpr? (e : Expr) : SimpM (Option Literal) := do
   return some { n, value }
 
 private def toExpr' (a : BitVec n) : SimpM Expr := do
-  bif (← Simp.getConfig).bitVecOfNat then
+  uif (← Simp.getConfig).bitVecOfNat then
     return toExpr a
   else
     mkNumeral (mkApp (mkConst ``BitVec) (mkNatLit n)) a.toNat
@@ -53,8 +53,7 @@ Helper function for reducing homogeneous binary bitvector operators.
   unless e.isAppOfArity declName arity do return .continue
   let some v₁ ← fromExpr? e.appFn!.appArg! | return .continue
   let some v₂ ← fromExpr? e.appArg! | return .continue
-  bif h : v₁.n =ᵇ v₂.n then
-    have h := eq_of_decideEq_eq_true h
+  uif h : v₁.n = v₂.n then
     return .done <| (← toExpr' (op v₁.value (h ▸ v₂.value)))
   else
     return .continue
@@ -106,8 +105,7 @@ Helper function for reducing bitvector predicates.
   unless e.isAppOfArity declName arity do return .continue
   let some v₁ ← fromExpr? e.appFn!.appArg! | return .continue
   let some v₂ ← fromExpr? e.appArg! | return .continue
-  bif h : v₁.n =ᵇ v₂.n then
-    have h := eq_of_decideEq_eq_true h
+  uif h : v₁.n = v₂.n then
     let b := op v₁.value (h ▸ v₂.value)
     evalPropStep e b
   else
@@ -118,8 +116,7 @@ Helper function for reducing bitvector predicates.
   unless e.isAppOfArity declName arity do return .continue
   let some v₁ ← fromExpr? e.appFn!.appArg! | return .continue
   let some v₂ ← fromExpr? e.appArg! | return .continue
-  bif h : v₁.n =ᵇ v₂.n then
-    have h := eq_of_decideEq_eq_true h
+  uif h : v₁.n = v₂.n then
     let b := op v₁.value (h ▸ v₂.value)
     return .done <| toExpr b
   else
@@ -295,9 +292,9 @@ builtin_dsimproc [simp, seval] reduceOfNat (BitVec.ofNat _ _) := fun e => do
     let bv := BitVec.ofNat n v
     -- `BitVec.ofNat` is the normal form only when `bitVecOfNat := true`; otherwise
     -- literals must be rewritten to the `OfNat.ofNat` form produced by `toExpr'`.
-    bif bv.toNat == v && (← Simp.getConfig).bitVecOfNat then return .continue -- already normalized
+    uif bv.toNat == v && (← Simp.getConfig).bitVecOfNat then return .continue -- already normalized
     return .done (← toExpr' (BitVec.ofNat n v))
-  else bif (← Simp.getConfig).bitVecOfNat then
+  else uif (← Simp.getConfig).bitVecOfNat then
     return .continue
   else
     /-
@@ -317,7 +314,7 @@ builtin_dsimproc [simp, seval] isValue ((OfNat.ofNat _ : BitVec _)) := fun e => 
   let_expr OfNat.ofNat _ m _ ← e | return .continue
   let some m ← Nat.fromExpr? m | return .continue
   let some ⟨_, v⟩ ← getBitVecValue? e | return .continue
-  bif v.toNat == m && !(← Simp.getConfig).bitVecOfNat then
+  uif v.toNat == m && !(← Simp.getConfig).bitVecOfNat then
     return .done e -- already normalized; `OfNat.ofNat` is the normal form when `bitVecOfNat := false`
   return .done (← toExpr' v)
 
@@ -372,8 +369,8 @@ builtin_dsimproc [simp, seval] reduceSetWidth' (setWidth' _ _) := fun e => do
   let_expr setWidth' _ w _ v ← e | return .continue
   let some v ← fromExpr? v | return .continue
   let some w ← Nat.fromExpr? w | return .continue
-  bif h : v.n ≤ᵇ w then
-    return .done <| (← toExpr' (v.value.setWidth' (le_of_decideLE_eq_true h)))
+  uif h : v.n ≤ w then
+    return .done <| (← toExpr' (v.value.setWidth' h))
   else
     return .continue
 

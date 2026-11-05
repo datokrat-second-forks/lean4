@@ -112,10 +112,10 @@ private partial def checkOutParam (i : Nat) (outParamFVarIds : Array FVarId) (ou
       let fvar      := mkFVar fvarId
       let b         := b.instantiate1 fvar
       checkOutParam (i+1) (outParamFVarIds.push fvarId) (outParams.push i) b
-    bif d.isOutParam then
+    uif d.isOutParam then
       addOutParam ()
-    else bif d.hasAnyFVar fun fvarId => outParamFVarIds.contains fvarId then
-      bif bi.isInstImplicit then
+    else uif d.hasAnyFVar fun fvarId => outParamFVarIds.contains fvarId then
+      uif bi.isInstImplicit then
         /- See issue #1852 for a motivation for `bi.isInstImplicit` -/
         addOutParam ()
       else
@@ -151,7 +151,7 @@ where
   go (type : Expr) (i : Nat) (s : CollectLevelParams.State) : CollectLevelParams.State :=
     match type with
     | .forallE _ d b _ =>
-      bif outParams.contains i then
+      uif outParams.contains i then
         go b (i + 1) s
       else
         go b (i + 1) (collectLevelParams s d)
@@ -165,7 +165,7 @@ and it must be the name of constant in `env`.
 Recall that all structures are inductive datatypes.
 -/
 def addClass (env : Environment) (clsName : Name) : Except MessageData Environment := do
-  bif isClass env clsName then
+  uif isClass env clsName then
     throw m!"class has already been declared '{.ofConstName clsName true}'"
   let some decl := env.find? clsName
     | throw m!"unknown declaration '{clsName}'"
@@ -213,7 +213,7 @@ builtin_initialize
       let mut outLevelParams : Array Nat := #[]
       let mut i := 0
       for u in us do
-        bif args.contains u then
+        uif args.contains u then
           outLevelParams := outLevelParams.push i
         i := i + 1
       let outParams := getOutParamPositions? env decl |>.getD #[]

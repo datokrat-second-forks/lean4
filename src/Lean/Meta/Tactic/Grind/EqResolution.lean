@@ -64,9 +64,9 @@ where
       visit m
 
   visit (m : Expr) : TopSortM Unit := do
-    bif (← get).permMark.contains m then
+    uif (← get).permMark.contains m then
       return ()
-    bif (← get).tempMark.contains m then
+    uif (← get).tempMark.contains m then
       failure
     modify fun s => { s with tempMark := s.tempMark.insert m }
     visitTypeOf m
@@ -78,8 +78,8 @@ where
   visitTypeOf (m : Expr) : TopSortM Unit := do
     let type ← instantiateMVars (← inferType m)
     type.forEach' fun e => do
-      bif e.hasExprMVar then
-        bif e.isMVar && ms.contains e then
+      uif e.hasExprMVar then
+        uif e.isMVar && ms.contains e then
           visit e
         return true
       else
@@ -98,19 +98,19 @@ private def eqResCore (prop proof : Expr) : MetaM (Option (Expr × Expr)) := wit
   recall that `¬` is not reducible.
   -/
   let (ms, type) ← forallMetaTelescopeReducingAndUnfoldingNot prop
-  bif ms.isEmpty then return none
+  uif ms.isEmpty then return none
   let mut progress := false
   for m in ms do
     let type ← inferType m
     let_expr Eq _ lhs rhs ← type
       | pure ()
-    bif (← isDefEq lhs rhs) then
+    uif (← isDefEq lhs rhs) then
       unless (← m.mvarId!.checkedAssign (← mkEqRefl lhs)) do
         return none
       progress := true
   unless progress do
     return none
-  bif (← ms.anyM fun m => m.mvarId!.isDelayedAssigned) then
+  uif (← ms.anyM fun m => m.mvarId!.isDelayedAssigned) then
     return none
   let prop' ← instantiateMVars type
   let proof' ← instantiateMVars (mkAppN proof ms)

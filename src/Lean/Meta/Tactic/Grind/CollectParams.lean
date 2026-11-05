@@ -24,12 +24,12 @@ structure State where
 abbrev Collect := StateRefT State CoreM
 
 def pushParam (p : TParam) : Collect Unit := do
-  bif (← get).params.contains p then
+  uif (← get).params.contains p then
     return ()
   modify fun s => { s with params := s.params.push p }
 
 def pushAnchor (a : TAnchor) : Collect Unit := do
-  bif (← get).anchors.contains a then
+  uif (← get).anchors.contains a then
     return ()
   modify fun s => { s with anchors := s.anchors.push a }
 
@@ -103,17 +103,17 @@ that should always be included in the suggestion.
 public def mkGrindOnlyTactics (cfg : TSyntax `Lean.Parser.Tactic.optConfig) (seq : List TGrind)
     (extraParams : Array TParam := #[]) : CoreM (Array (TSyntax `tactic)) := do
   let (hasSorry, params, anchors) ← collectParamsCore seq
-  bif hasSorry then return #[]
+  uif hasSorry then return #[]
   let allParams := params ++ anchors ++ extraParams
   let s₁ ← mkTac allParams
-  bif anchors.isEmpty then
+  uif anchors.isEmpty then
     return #[s₁]
   else
     let s₂ ← mkTac (params ++ extraParams)
     return #[s₁, s₂]
 where
   mkTac (params : Array TParam) : CoreM (TSyntax `tactic) :=
-    bif params.isEmpty then
+    uif params.isEmpty then
       `(tactic| grind $cfg:optConfig only)
     else
       `(tactic| grind $cfg:optConfig only [$params,*])

@@ -12,7 +12,7 @@ namespace Lean.Meta.Sym
 Instantiates metavariables occurring in `e`, and returns a maximally shared term.
 -/
 public def instantiateMVarsS (e : Expr) : SymM Expr := do
-  bif e.hasMVar then
+  uif e.hasMVar then
     -- **Note**: If this is a bottleneck, write a new function that combines both steps.
     shareCommon (← instantiateMVars e)
   else
@@ -23,7 +23,7 @@ Head-only variant of `instantiateMVarsS`: instantiates and reshares only when th
 metavariable, otherwise returns `e` unchanged.
 -/
 public def instantiateMVarsIfMVarAppS (e : Expr) : SymM Expr := do
-  bif e.getAppFn.isMVar then
+  uif e.getAppFn.isMVar then
     instantiateMVarsS e
   else
     return e

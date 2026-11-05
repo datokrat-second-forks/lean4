@@ -51,7 +51,7 @@ private def checkInst (declName : Name) (inst inst' : Expr) : MetaM Unit := do
   let cacheable := isClosedImported env inst && isClosedImported env inst'
   let checked? := checkedInstsExt.getState env
   if let (true, some checked) := (cacheable, checked?) then
-    bif (← checked.get).contains (inst, inst') then return
+    uif (← checked.get).contains (inst, inst') then return
   unless (← withReducibleAndInstances <| isDefEq inst inst') do
     throwError "error while initializing arithmetic operators:\ninstance for `{declName}` {indentExpr inst}\nis not definitionally equal to the expected one {indentExpr inst'}\nwhen only reducible definitions and instances are reduced"
   if let (true, some checked) := (cacheable, checked?) then checked.modify (·.insert (inst, inst'))

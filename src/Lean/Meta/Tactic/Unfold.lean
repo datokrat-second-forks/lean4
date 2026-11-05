@@ -33,26 +33,26 @@ where
 def unfoldTarget (mvarId : MVarId) (declName : Name) : MetaM MVarId := mvarId.withContext do
   let target ← instantiateMVars (← mvarId.getType)
   let r ← unfold target declName
-  bif r.expr == target then throwError "Tactic `unfold` failed to unfold `{.ofConstName declName}` in{indentExpr target}"
+  uif r.expr == target then throwError "Tactic `unfold` failed to unfold `{.ofConstName declName}` in{indentExpr target}"
   applySimpResultToTarget mvarId target r
 
 def unfoldLocalDecl (mvarId : MVarId) (fvarId : FVarId) (declName : Name) : MetaM MVarId := mvarId.withContext do
   let type ← fvarId.getType
   let r ← unfold (← instantiateMVars type) declName
-  bif r.expr == type then throwError "Tactic `unfold` failed to unfold `{.ofConstName declName}` in{indentExpr type}"
+  uif r.expr == type then throwError "Tactic `unfold` failed to unfold `{.ofConstName declName}` in{indentExpr type}"
   let some (_, mvarId) ← applySimpResultToLocalDecl mvarId fvarId r (mayCloseGoal := false) | unreachable!
   return mvarId
 
 def zetaDeltaTarget (mvarId : MVarId) (declFVarId : FVarId) : MetaM MVarId := mvarId.withContext do
   let target ← instantiateMVars (← mvarId.getType)
   let target' ← Meta.zetaDeltaFVars target #[declFVarId]
-  bif target' == target then throwError "Tactic `unfold` failed to unfold `{Expr.fvar declFVarId}` in{indentExpr target}"
+  uif target' == target then throwError "Tactic `unfold` failed to unfold `{Expr.fvar declFVarId}` in{indentExpr target}"
   mvarId.replaceTargetDefEq target'
 
 def zetaDeltaLocalDecl (mvarId : MVarId) (fvarId : FVarId) (declFVarId : FVarId) : MetaM MVarId := mvarId.withContext do
   let type ← fvarId.getType
   let type' ← Meta.zetaDeltaFVars (← instantiateMVars type) #[declFVarId]
-  bif type' == type then throwError "Tactic `unfold` failed to unfold `{Expr.fvar fvarId}` in{indentExpr type}"
+  uif type' == type then throwError "Tactic `unfold` failed to unfold `{Expr.fvar fvarId}` in{indentExpr type}"
   mvarId.replaceLocalDeclDefEq fvarId type'
 
 end Lean.Meta

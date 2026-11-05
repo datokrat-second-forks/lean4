@@ -69,7 +69,7 @@ public def mkSparseCasesOn (indName : Name) (ctors : Array Name) : MetaM Name :=
   for ctor in ctors do
     unless indInfo.ctors.contains ctor do
       throwError "mkSparseCasesOn: constructor {ctor} is not a constructor of {indName}"
-  bif ctors.size =ᵇ indInfo.ctors.length then
+  uif ctors.size = indInfo.ctors.length then
       throwError "mkSparseCasesOn: requested casesOn combinator is not sparse"
 
 
@@ -140,7 +140,7 @@ public def mkSparseCasesOn (indName : Name) (ctors : Array Name) : MetaM Name :=
     -- write-once, as for `MapDeclarationExtension.insert`
     match s.find? key with
     | some prev =>
-      bif prev != declName then
+      uif prev != declName then
         panic! s!"sparse `casesOn` for `{declName}` is already registered as `{prev}`"
       else
         s

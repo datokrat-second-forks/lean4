@@ -66,7 +66,7 @@ the `Nat.succ` found elsewhere in the goal. `grind` eta-reduces the terms it int
 def etaReduce : Simproc := fun e => do
   unless e.isApp do return .rfl
   if let .const n _ := e.getAppFn then
-    bif n == ``Exists || n == ``Subtype then return .rfl
+    uif n == ``Exists || n == ``Subtype then return .rfl
   unless hasEtaReducibleArg e do return .rfl
   let e' ← go e
   return .step e' (← Sym.mkEqRefl e')
@@ -123,31 +123,31 @@ def simpEq : Simproc := fun e => do
   match_expr α with
   | Bool =>
     let .const rhsName _ := rhs.getAppFn | return .rfl
-    bif rhsName == ``true || rhsName == ``false then return .rfl
+    uif rhsName == ``true || rhsName == ``false then return .rfl
     let .const lhsName _ := lhs.getAppFn | return .rfl
-    bif lhsName == ``true || lhsName == ``false then
+    uif lhsName == ``true || lhsName == ``false then
       return .step (← mkAppS₃ f α rhs lhs) (mkApp2 (mkConst ``Grind.flip_bool_eq) lhs rhs)
-    bif isBoolEqTarget lhsName || isBoolEqTarget rhsName then
+    uif isBoolEqTarget lhsName || isBoolEqTarget rhsName then
       let tr ← getBoolTrueExpr
       -- `Bool : Type`, so `f` is `Eq.{1}`, which is also the equality of propositions.
       let e' ← mkAppS₃ f (← mkSortS .zero) (← mkAppS₃ f α lhs tr) (← mkAppS₃ f α rhs tr)
       return .step e' (mkApp2 (mkConst ``Grind.bool_eq_to_prop) lhs rhs)
     return .rfl
   | _ =>
-    bif isSameExpr lhs rhs then
+    uif isSameExpr lhs rhs then
       return .step (← getTrueExpr) (mkApp2 (mkConst ``eq_self f.constLevels!) α lhs) (done := true)
-    else bif rhs.isTrue then
+    else uif rhs.isTrue then
       return .step lhs (mkApp (mkConst ``Grind.eq_true_eq) lhs) (done := true)
-    else bif rhs.isFalse then
+    else uif rhs.isFalse then
       return .step (← mkNotS lhs) (mkApp (mkConst ``Grind.eq_false_eq) lhs)
     return .rfl
 
 /-- Returns the bodies of `a` and `b` if both are lambdas that do not use their argument. -/
 private def nonDepBodies? (a b : Expr) : Option (Expr × Expr) := do
   let .lam _ _ aBody _ := a | none
-  bif aBody.hasLooseBVars then none
+  uif aBody.hasLooseBVars then none
   let .lam _ _ bBody _ := b | none
-  bif bBody.hasLooseBVars then none
+  uif bBody.hasLooseBVars then none
   return (aBody, bBody)
 
 /-- Converts `dite` (`UDecidable.dite`) with non-dependent branches into `ite` (`UDecidable.ite`). -/
@@ -179,7 +179,7 @@ def pushNot : Simproc := fun e => do
   | Or q r => return .step (← mkAndS (← mkNotS q) (← mkNotS r)) (mkApp2 (mkConst ``Grind.not_or) q r)
   | Not q => return .step q (mkApp (mkConst ``Grind.not_not) q)
   | f@Eq α a b =>
-    bif α.isProp then
+    uif α.isProp then
       return .step (← mkAppS₃ f α a (← mkNotS b)) (mkApp2 (mkConst ``Grind.not_eq_prop) a b)
     else match_expr b with
       | Bool.true => return .step (← mkAppS₃ f α a (← getBoolFalseExpr)) (mkApp (mkConst ``Bool.not_eq_true) a)
@@ -195,7 +195,7 @@ def pushNot : Simproc := fun e => do
     return .step e' (mkApp2 (mkConst ``Grind.not_exists [u]) α q)
   | _ =>
     let .forallE n α b info := p | return .rfl
-    bif !b.hasLooseBVars && (← isProp α) then
+    uif !b.hasLooseBVars && (← isProp α) then
       return .step (← mkAndS α (← mkNotS b)) (mkApp2 (mkConst ``Grind.not_implies) α b)
     else
       let q    := mkLambda n info α b
@@ -216,9 +216,9 @@ def simpOr : Simproc := fun e => do
   | _ =>
   match_expr q with
   | Or q r =>
-    bif p.isForall then return .rfl
-    bif q.isForall then return .step (← mkOrS q (← mkOrS p r)) (mkApp3 (mkConst ``Grind.or_swap12) p q r)
-    bif r.isForall then return .step (← mkOrS r (← mkOrS q p)) (mkApp3 (mkConst ``Grind.or_swap13) p q r)
+    uif p.isForall then return .rfl
+    uif q.isForall then return .step (← mkOrS q (← mkOrS p r)) (mkApp3 (mkConst ``Grind.or_swap12) p q r)
+    uif r.isForall then return .step (← mkOrS r (← mkOrS q p)) (mkApp3 (mkConst ``Grind.or_swap13) p q r)
     return .rfl
   | True => return .step q (mkApp (mkConst ``or_true) p)
   | False => return .step p (mkApp (mkConst ``or_false) p)
@@ -229,7 +229,7 @@ def reduceCtorEq : Simproc := fun e => do
   let_expr Eq _ lhs rhs := e | return .rfl
   let some c₁ ← isConstructorApp? lhs | return .rfl
   let some c₂ ← isConstructorApp? rhs | return .rfl
-  bif c₁.name == c₂.name then return .rfl
+  uif c₁.name == c₂.name then return .rfl
   let h ← withLocalDeclD `h e fun h => do
     withDefault <| mkEqFalse' (← mkLambdaFVars #[h] (← mkNoConfusion (mkConst ``False) h))
   return .step (← getFalseExpr) h (done := true)
@@ -237,7 +237,7 @@ def reduceCtorEq : Simproc := fun e => do
 private def isForallOrNot? (e : Expr) : Option (Name × Expr × Expr) :=
   if let .forallE n d b _ := e then
     some (n, d, b)
-  else bif e.isAppOfArity ``Not 1 then
+  else uif e.isAppOfArity ``Not 1 then
     some (`a, e.appArg!, mkConst ``False)
   else
     none
@@ -286,10 +286,10 @@ private partial def forallOr? (e : Expr) : SimpM (Option (Expr × Expr)) := do
 where
   go (xs : Array Expr) (e : Expr) : SimpM (Option (Expr × Expr)) := do
     let .forallE n d b bi := e | return none
-    bif b.isForall then
+    uif b.isForall then
       let d ← Sym.instantiateRevS d xs
       Sym.withLocalDeclS n bi d fun x => go (xs.push x) b
-    else bif xs.isEmpty then
+    else uif xs.isEmpty then
       forallOrCore? e
     else
       let e ← Sym.instantiateRevS e xs
@@ -306,30 +306,30 @@ Normalizes universally quantified propositions and implications:
 -/
 def simpForall : Simproc := fun e => do
   let .forallE varName d b info := e | return .rfl
-  bif !b.hasLooseBVars then
+  uif !b.hasLooseBVars then
     match_expr d with
-    | True => bif (← isProp b) then return .step b (mkApp (mkConst ``Grind.true_imp_eq) b) (done := true)
-    | False => bif (← isProp b) then return .step (← getTrueExpr) (mkApp (mkConst ``Grind.false_imp_eq) b) (done := true)
+    | True => uif (← isProp b) then return .step b (mkApp (mkConst ``Grind.true_imp_eq) b) (done := true)
+    | False => uif (← isProp b) then return .step (← getTrueExpr) (mkApp (mkConst ``Grind.false_imp_eq) b) (done := true)
     | _ =>
     match_expr b with
     | True =>
       -- `d` may be a type, e.g. after the body of `∀ t : α, p t` has been simplified to `True`.
       return .step (← getTrueExpr) (mkApp (mkConst ``implies_true [← getLevel d]) d) (done := true)
-    | False => bif (← isProp d) then return .step (← mkNotS d) (mkApp (mkConst ``Grind.imp_false_eq) d)
+    | False => uif (← isProp d) then return .step (← mkNotS d) (mkApp (mkConst ``Grind.imp_false_eq) d)
     | _ =>
       -- Maximally shared terms: structural equality is pointer equality.
-      bif isSameExpr d b && (← isProp d) then
+      uif isSameExpr d b && (← isProp d) then
         return .step (← getTrueExpr) (mkApp (mkConst ``Grind.imp_self_eq) d) (done := true)
   else
     match_expr d with
     | True =>
       let pTrue ← Sym.instantiateRevBetaS b #[← mkConstS ``True.intro]
-      bif (← isProp pTrue) then
+      uif (← isProp pTrue) then
         let p := mkLambda varName info d b
         return .step pTrue (mkApp (mkConst ``Grind.forall_true) p) (done := true)
     | False =>
       let p := mkLambda varName info d b
-      bif (← isDefEq (← inferType p) (mkForall varName info d (mkSort 0))) then
+      uif (← isDefEq (← inferType p) (mkForall varName info d (mkSort 0))) then
         return .step (← getTrueExpr) (mkApp (mkConst ``forall_false) p) (done := true)
     | _ => pure ()
   if let some (e', h) ← forallOr? e then return .step e' h
@@ -346,30 +346,30 @@ def simpExists : Simproc := fun e => do
   let_expr ex@Exists α fn := e | return .rfl
   let .lam x _ b _ := fn | return .rfl
   let u := ex.constLevels!
-  bif b.isApp && b.getAppNumArgs == 2 then
+  uif b.isApp && b.getAppNumArgs == 2 then
     let .const bDeclName _ := b.appFn!.appFn! | return .rfl
-    bif bDeclName == ``Or then
+    uif bDeclName == ``Or then
       let pRaw := b.appFn!.appArg!
       let qRaw := b.appArg!
       let p ← mkLambdaS x .default α pRaw
       let q ← mkLambdaS x .default α qRaw
       let e' ← mkOrS (← mkAppS₂ ex α p) (← mkAppS₂ ex α q)
       return .step e' (mkApp3 (mkConst ``Grind.exists_or u) α p q)
-    else bif bDeclName == ``And then
+    else uif bDeclName == ``And then
       let pRaw := b.appFn!.appArg!
       let qRaw := b.appArg!
-      bif !pRaw.hasLooseBVars then
+      uif !pRaw.hasLooseBVars then
         let b := pRaw
         let p ← mkLambdaS x .default α qRaw
         let e' ← mkAndS b (← mkAppS₂ ex α p)
         return .step e' (mkApp3 (mkConst ``Grind.exists_and_left u) α p b)
-      else bif !qRaw.hasLooseBVars then
+      else uif !qRaw.hasLooseBVars then
         let p ← mkLambdaS x .default α pRaw
         let b := qRaw
         let e' ← mkAndS (← mkAppS₂ ex α p) b
         return .step e' (mkApp3 (mkConst ``Grind.exists_and_right u) α p b)
-  bif !b.hasLooseBVars then
-    bif (← isProp α) then
+  uif !b.hasLooseBVars then
+    uif (← isProp α) then
       return .step (← mkAndS α b) (mkApp2 (mkConst ``Grind.exists_prop) α b)
     else
       let nonempty ← mkAppS (← mkConstS ``Nonempty u) α

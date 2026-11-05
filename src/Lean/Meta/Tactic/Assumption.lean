@@ -15,9 +15,9 @@ namespace Lean.Meta
 /-- Return a local declaration whose type is definitionally equal to `type`. -/
 def findLocalDeclWithType? (type : Expr) : MetaM (Option FVarId) := do
   (← getLCtx).findDeclRevM? fun localDecl => do
-    bif localDecl.isImplementationDetail then
+    uif localDecl.isImplementationDetail then
       return none
-    else bif (← isDefEq type localDecl.type) then
+    else uif (← isDefEq type localDecl.type) then
       return some localDecl.fvarId
     else
       return none

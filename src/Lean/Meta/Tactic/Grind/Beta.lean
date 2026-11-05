@@ -13,7 +13,7 @@ namespace Lean.Meta.Grind
 def getEqcLambdas (root : ENode) : GoalM (Array Expr) := do
   unless root.hasLambdas do return #[]
   foldEqc root.self (init := #[]) fun n lams =>
-    bif n.self.isLambda then return lams.push n.self else return lams
+    uif n.self.isLambda then return lams.push n.self else return lams
 
 /--
 Returns the root of the functions in the equivalence class containing `e`.
@@ -23,7 +23,7 @@ def getFnRoots (e : Expr) : GoalM (Array Expr) := do
   foldEqc e (init := #[]) fun n fns => do
     let fn := n.self.getAppFn
     let fnRoot := (← getRoot? fn).getD fn
-    bif Option.isNone <| fns.find? (isSameExpr · fnRoot) then
+    uif Option.isNone <| fns.find? (isSameExpr · fnRoot) then
       return fns.push fnRoot
     else
       return fns
@@ -33,17 +33,17 @@ For each `lam` in `lams` s.t. `lam` and `f` are in the same equivalence class,
 propagate `f args = lam args`.
 -/
 def propagateBetaEqs (lams : Array Expr) (f : Expr) (args : Array Expr) : GoalM Unit := do
-  bif args.isEmpty then return ()
+  uif args.isEmpty then return ()
   for lam in lams do
     let rhs := lam.beta args
     unless rhs.isLambda do
       let gen := Nat.max (← getGeneration lam) (← getGeneration f)
       let gen ← args.foldlM (init := gen) fun gen arg => return Nat.max gen (← getGeneration arg)
       let gen := gen + 1
-      bif gen ≥ᵇ (← getMaxGeneration) then
+      uif gen ≥ (← getMaxGeneration) then
         return ()
       let lhs := mkAppN f args
-      bif (← hasSameType f lam) then
+      uif (← hasSameType f lam) then
         let mut h ← mkEqProof f lam
         for arg in args do
           h ← mkCongrFun h arg
@@ -57,7 +57,7 @@ private def isPropagateBetaTarget (e : Expr) : GoalM Bool := do
 where
   go (f : Expr) : GoalM Bool := do
     if let some root ← getRootENode? f then
-      bif root.hasLambdas then
+      uif root.hasLambdas then
         return true
     let .app f _ := f | return false
     go f
@@ -73,7 +73,7 @@ def propagateBetaForNewApp (e : Expr) : GoalM Unit := do
   repeat
     unless args.isEmpty do
       if let some root ← getRootENode? e then
-        bif root.hasLambdas then
+        uif root.hasLambdas then
           propagateBetaEqs (← getEqcLambdas root) e args.reverse
     let .app f arg := e | return ()
     e := f

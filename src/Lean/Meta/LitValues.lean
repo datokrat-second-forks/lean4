@@ -45,7 +45,7 @@ def getNatValue? (e : Expr) : MetaM (Option Nat) := do
 /-- Returns `true` if `getNatValue? e` is `some _`. -/
 def isNatValue (e : Expr) : MetaM Bool := do
   let e := e.consumeMData
-  bif e.isRawNatLit then return true
+  uif e.isRawNatLit then return true
   let_expr OfNat.ofNat type n _ ← e | return false
   unless n.consumeMData.isRawNatLit do return false
   return (← whnfD type).getAppFn.isConstOf ``Nat
@@ -56,7 +56,7 @@ def isNonZeroNatValue (e : Expr) : MetaM Bool := do
   if let .lit (.natVal n) := e then return n != 0
   let_expr OfNat.ofNat type n _ ← e | return false
   let .lit (.natVal n) := n.consumeMData | return false
-  bif n == 0 then return false
+  uif n == 0 then return false
   return (← whnfD type).getAppFn.isConstOf ``Nat
 
 /-- Return `some i` if `e` `OfNat.ofNat`-application encoding an integer, or `Neg.neg`-application of one. -/
@@ -303,13 +303,13 @@ private def isOfNatLitValue (type n : Expr) : MetaM Bool := do
   unless n.consumeMData.isRawNatLit do return false
   let type ← whnfD type
   let .const declName _ := type.getAppFn | return false
-  bif declName == ``Nat || declName == ``Int || declName == ``Rat || declName == ``Float || declName == ``Float32
+  uif declName == ``Nat || declName == ``Int || declName == ``Rat || declName == ``Float || declName == ``Float32
       || declName == ``UInt8 || declName == ``UInt16 || declName == ``UInt32 || declName == ``UInt64
       || declName == ``Int8 || declName == ``Int16 || declName == ``Int32 || declName == ``Int64 then
     return true
-  else bif declName == ``Fin then
+  else uif declName == ``Fin then
     isNonZeroNatValue (← whnfD type.appArg!)
-  else bif declName == ``BitVec then
+  else uif declName == ``BitVec then
     isNatValue (← whnfD type.appArg!)
   else
     return false
@@ -346,7 +346,7 @@ Returns `true` if `e` is a literal value, i.e., one of the `get*Value?` function
 def isLitValue (e : Expr) : MetaM Bool := do
   let e ← instantiateMVars e
   if let .lit (.strVal _) := e then return true
-  bif e.consumeMData.isRawNatLit then return true
+  uif e.consumeMData.isRawNatLit then return true
   match_expr e with
   | OfNat.ofNat type n _ => isOfNatLitValue type n
   | Neg.neg _ _ a => isNegLitValue a
@@ -365,12 +365,12 @@ Otherwise, just return `e`.
 def litToCtor (e : Expr) : MetaM Expr := do
   let e ← instantiateMVars e
   if let some n ← getNatValue? e then
-    bif n =ᵇ 0 then
+    uif n = 0 then
       return mkConst ``Nat.zero
     else
       return .app (mkConst ``Nat.succ) (toExpr (n-1))
   if let some n ← getIntValue? e then
-    bif n <ᵇ 0 then
+    uif n < 0 then
       return .app (mkConst ``Int.negSucc) (toExpr (- (n+1)).toNat)
     else
       return .app (mkConst ``Int.ofNat) (toExpr n.toNat)

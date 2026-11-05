@@ -28,7 +28,7 @@ builtin_cbv_simproc cbv_eval simpArrayGetElem (@GetElem.getElem (Array _) Nat _ 
   let_expr GetElem.getElem _ _ _ _ _ xs n _ := e | return .rfl
   let some elems := getArrayLitElems? xs | return .rfl
   let some idx := Sym.getNatValue? n | return .rfl
-  bif h : idx <ᵇ elems.size then
+  uif h : idx < elems.size then
     let result := elems[idx]
     return .step result (← Sym.mkEqRefl result)
   else
@@ -47,7 +47,7 @@ builtin_cbv_simproc cbv_eval simpArrayGetElem? (@GetElem?.getElem? (Array _) Nat
   let size := mkApp2 (mkConst ``Array.size [u]) α xs
   let bleTrue (a b : Expr) : MetaM Expr := do
     mkAppOptM ``Nat.le_of_ble_eq_true #[some a, some b, some (← mkEqRefl (mkConst ``Bool.true))]
-  bif h : idx <ᵇ elems.size then
+  uif h : idx < elems.size then
     let hlt ← bleTrue (mkNatAdd n (mkNatLit 1)) size
     let proof ← mkAppOptM ``getElem?_pos
       #[some coll, some idxTy, some α, some valid, some inst, none, some xs, some n, some hlt]

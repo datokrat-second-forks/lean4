@@ -66,7 +66,7 @@ The double newline gives better visual separation from the main error message
 -/
 def useDiagnosticMsg : MessageData :=
   MessageData.lazy fun ctx =>
-    bif diagnostics.get ctx.opts then
+    uif diagnostics.get ctx.opts then
       pure ""
     else
       pure <| .hint' s!"Additional diagnostic information may be available using the `set_option {diagnostics.name} true` command."
@@ -103,7 +103,7 @@ partial def mkUniqueName (env : Environment) (g : DeclNameGenerator) («infix» 
     (Name × DeclNameGenerator) := Id.run do
   -- `Name.append` does not allow macro scopes on both operands; as the result of this function is
   -- unlikely to be referenced in a macro; the choice doesn't really matter.
-  let «infix» := bif g.namePrefix.hasMacroScopes && infix.hasMacroScopes then infix.eraseMacroScopes else «infix»
+  let «infix» := uif g.namePrefix.hasMacroScopes && infix.hasMacroScopes then infix.eraseMacroScopes else «infix»
   let base := g.namePrefix ++ «infix»
   let mut g := g
   while isConflict (curr g base) do
@@ -120,7 +120,7 @@ where
     !isPrivateName n && (env.setExporting false).containsOnBranch (mkPrivateName env n)
   curr (g : DeclNameGenerator) (base : Name) : Name := Id.run do
     let mut n := g.idxs.foldr (fun i n => n.appendIndexAfter i) base
-    bif env.header.isModule && !env.isExporting && !isPrivateName n then
+    uif env.header.isModule && !env.isExporting && !isPrivateName n then
       n := mkPrivateName env n
     return n
 
@@ -159,7 +159,7 @@ def withDeclNameForAuxNaming [Monad m] [MonadFinally m] [MonadDeclNameGenerator 
     (name : Name) (x : m α) : m α := do
   let ngen ← getDeclNGen
   -- do not reset index if prefix unchanged
-  bif ngen.namePrefix != name then
+  uif ngen.namePrefix != name then
     try
       setDeclNGen { namePrefix := name }
       x
@@ -183,7 +183,7 @@ structure OptionFlags where
 
 namespace OptionFlags
 
-@[inline] private def flag (b : Bool) (mask : UInt16) : UInt16 := bif b then mask else 0
+@[inline] private def flag (b : Bool) (mask : UInt16) : UInt16 := uif b then mask else 0
 
 @[inline] def respectTransparency (f : OptionFlags) : Bool := f.bits &&& 0x001 != 0
 @[inline] def respectTransparencyTypes (f : OptionFlags) : Bool := f.bits &&& 0x002 != 0
@@ -422,7 +422,7 @@ where
   inlined at every call site.
   -/
   @[noinline] checkedOptions (ctx : Context) : Options :=
-    bif ctx.isRecordingDeps then
+    uif ctx.isRecordingDeps then
       have : Inhabited Options := ⟨ctx.options⟩
       panic! "`getOptions` called inside a computation recording its dependencies; \
         use `Lean.getRecordedOption` for reads that can influence the result and \
@@ -437,7 +437,7 @@ the ambient options; `Lean.withSetOption` does so by construction.
 @[inline] def withOptionsUnrestricted (f : Options → Options) (x : CoreM α) : CoreM α := do
   let options := f (← read).options
   let optionFlags := OptionFlags.ofOptions options
-  bif Kernel.isDiagnosticsEnabled (← getEnv) != optionFlags.diag then
+  uif Kernel.isDiagnosticsEnabled (← getEnv) != optionFlags.diag then
     modifyEnv fun env => Kernel.enableDiag env optionFlags.diag
   withReader
     (fun ctx =>
@@ -450,7 +450,7 @@ the ambient options; `Lean.withSetOption` does so by construction.
 
 instance : MonadWithOptions CoreM where
   withOptions f x := do
-    let f := bif (← read).isRecordingDeps then reportViolation else f
+    let f := uif (← read).isRecordingDeps then reportViolation else f
     withOptionsUnrestricted f x
 where
   /--
@@ -519,7 +519,7 @@ instance : Elab.MonadInfoTree CoreM where
 
 def instantiateTypeLevelParams (c : ConstantVal) (us : List Level) : CoreM Expr := do
   if let some (us', r) := (← get).cache.instLevelType.find? c.name then
-    bif us == us' then
+    uif us == us' then
       return r
   let r := c.instantiateTypeLevelParams us
   modifyInstLevelTypeCache fun s => s.insert c.name (us, r)
@@ -527,7 +527,7 @@ def instantiateTypeLevelParams (c : ConstantVal) (us : List Level) : CoreM Expr 
 
 def instantiateValueLevelParams (c : ConstantInfo) (us : List Level) (allowOpaque := false) : CoreM Expr := do
   if let some (us', r) := (← get).cache.instLevelValue.find? c.name then
-    bif us == us' then
+    uif us == us' then
       return r
   unless c.hasValue (allowOpaque := allowOpaque) do
     throwError "Not a definition or theorem: {.ofConstName c.name}"
@@ -644,7 +644,7 @@ heartbeat tracking (e.g. `SynthInstance`).
  -/
 @[inline] def checkInterrupted : CoreM Unit := do
   if let some tk := (← read).cancelTk? then
-    bif (← tk.isSet) then
+    uif (← tk.isSet) then
       throwInterruptException
 
 /-- withIncRecDepth for a monad `m` such that `[MonadControlT CoreM n]`.
@@ -661,7 +661,7 @@ register_builtin_option debug.moduleNameAtTimeout : Bool := {
 def throwMaxHeartbeat (moduleName : Name) (optionName : Name) (max : Nat) : CoreM Unit := do
   -- unrestricted: message rendering only
   let includeModuleName := debug.moduleNameAtTimeout.get (← getOptionsUnrestricted)
-  let atModuleName := bif includeModuleName then s!" at `{moduleName}`" else ""
+  let atModuleName := uif includeModuleName then s!" at `{moduleName}`" else ""
   throw <| Exception.error (← getRef) <| .tagged `runtime.maxHeartbeats m!"\
     (deterministic) timeout{atModuleName}, maximum number of heartbeats ({max/1000}) has been reached\
     {.note m!"Use `set_option {optionName} <num>` to set the limit."}\
@@ -670,7 +670,7 @@ def throwMaxHeartbeat (moduleName : Name) (optionName : Name) (max : Nat) : Core
 def checkMaxHeartbeatsCore (moduleName : String) (optionName : Name) (max : Nat) : CoreM Unit := do
   unless max == 0 do
     let numHeartbeats ← IO.getNumHeartbeats
-    bif numHeartbeats - (← read).initHeartbeats >ᵇ max then
+    uif numHeartbeats - (← read).initHeartbeats > max then
       throwMaxHeartbeat (.mkSimple moduleName) optionName max
 
 def checkMaxHeartbeats (moduleName : String) : CoreM Unit := do
@@ -720,7 +720,7 @@ instance : MonadLog CoreM where
   getFileName := return (← read).fileName
   hasErrors   := return (← get).messages.hasErrors
   logMessage msg := do
-    bif (← read).suppressElabErrors then
+    uif (← read).suppressElabErrors then
       -- discard elaboration errors, except for a few important and unlikely misleading ones, on
       -- parse error
       unless msg.data.hasTag (· matches `Elab.synthPlaceholder | `Tactic.unsolvedGoals | `lean.inductionWithNoAlts._namedError | `trace) do
@@ -782,14 +782,14 @@ given state.
 def mkSnapshot? (output : String) (ctx : Context) (st : State)
     (desc : String := by exact decl_name%.toString) : BaseIO (Option Language.SnapshotTree) := do
   let mut msgs := st.messages
-  bif !output.isEmpty then
+  uif !output.isEmpty then
     msgs := msgs.add {
       fileName := ctx.fileName
       severity := MessageSeverity.information
       pos      := ctx.fileMap.toPosition <| ctx.ref.getPos?.getD 0
       data     := output
     }
-  bif !msgs.hasUnreported && st.traceState.traces.isEmpty && st.snapshotTasks.isEmpty then
+  uif !msgs.hasUnreported && st.traceState.traces.isEmpty && st.snapshotTasks.isEmpty then
     return none
   return some <| .mk {
     desc
@@ -859,14 +859,14 @@ recorded read of `name` in this scope observes `v` in every context.
     x
   catch ex => match ex with
     | .error ..       => throw ex
-    | .internal id' _ => bif id == id' then h ex else throw ex
+    | .internal id' _ => uif id == id' then h ex else throw ex
 
 @[inline] def catchInternalIds [Monad m] [MonadExcept Exception m] (ids : List InternalExceptionId) (x : m α) (h : Exception → m α) : m α := do
   try
     x
   catch ex => match ex with
     | .error ..      => throw ex
-    | .internal id _ => bif ids.contains id then h ex else throw ex
+    | .internal id _ => uif ids.contains id then h ex else throw ex
 
 /--
   Return true if `ex` was generated by `throwMaxHeartbeat`.
@@ -906,7 +906,7 @@ private def checkUnsupported [Monad m] [MonadEnv m] [MonadError m] (decl : Decla
 If `t` has not finished yet, waits for it under an `Elab.block` trace node. Returns `t`'s result.
 -/
 def traceBlock (tag : String) (t : Task α) : CoreM α := do
-  bif (← IO.hasFinished t) then
+  uif (← IO.hasFinished t) then
     return t.get
   withTraceNode `Elab.block (tag := tag) (fun _ => pure tag) do
     profileitM Exception "blocked" (← getOptions) do
@@ -935,7 +935,7 @@ private def compileDeclsImpl (declNames : Array Name) : CoreM Unit := do
 -- `ref?` is used for error reporting if available
 def compileDecls (decls : Array Name) (logErrors := true) : CoreM Unit := do
   let env ← getEnv
-  bif !Elab.async.get (← getOptions) then
+  uif !Elab.async.get (← getOptions) then
     let _ ← traceBlock "compiler env" (← getEnv).checked
     doCompile
     return
@@ -957,7 +957,7 @@ def compileDecls (decls : Array Name) (logErrors := true) : CoreM Unit := do
 where doCompile := do
   -- don't compile if kernel errored; should be converted into a task dependency when compilation
   -- is made async as well
-  bif !decls.all (← getEnv).constants.contains then
+  uif !decls.all (← getEnv).constants.contains then
     return
   withoutExporting do
     let state ← Core.saveState
@@ -967,19 +967,19 @@ where doCompile := do
       state.restore
       for decl in decls do
         modifyEnv (addNoncomputable · decl)
-      bif logErrors then
+      uif logErrors then
         throw e
 
 def compileDecl (decl : Declaration) (logErrors := true) : CoreM Unit := do
   compileDecls (Compiler.getDeclNamesForCodeGen decl) logErrors
 
 private def recordOptionAccess (name : Name) (value : Option DataValue) : CoreM Unit := do
-  bif (← read).isRecordingDeps then
+  uif (← read).isRecordingDeps then
     -- Repeated lookups of an option dominate, so the membership test comes first. A lookup
     -- answering differently from `base` was served by a write inside the computation, so it is not
     -- a dependency.
     let d := (← get).recordedDeps
-    bif !d.options.contains name && d.base.find? name == value then
+    uif !d.options.contains name && d.base.find? name == value then
       Core.modifyRecordedDeps fun deps => { deps with options := deps.options.push name }
 
 /--
@@ -987,7 +987,7 @@ Inside a recording computation, records the current generation of the generation
 `ext` in `Core.State.recordedDeps`. Callers then read the state with `(genRecorded := true)`.
 -/
 def recordExtGenAccess (ext : EnvExtension σ) : CoreM Unit := do
-  bif !(← read).isRecordingDeps then
+  uif !(← read).isRecordingDeps then
     return
   let d := (← get).recordedDeps
   let some i := ext.genIdx?
@@ -1039,7 +1039,7 @@ exceptions inside the elaborator.
   try
     x
   catch ex =>
-    bif ex.isInterrupt || ex.isRuntime then
+    uif ex.isInterrupt || ex.isRuntime then
       throw ex
     else
       h ex
@@ -1053,7 +1053,7 @@ exceptions.
   try
     x
   catch ex =>
-    bif ex.isInterrupt then
+    uif ex.isInterrupt then
       throw ex
     h ex
 
@@ -1084,7 +1084,7 @@ and then mark it as logged. Otherwise, returns `false`.
 We use this API to ensure we don't log the same kind of warning multiple times.
 -/
 def logMessageKind (kind : Name) : CoreM Bool := do
-  bif (← get).messages.loggedKinds.contains kind then
+  uif (← get).messages.loggedKinds.contains kind then
     return false
   else
     modify fun s => { s with messages.loggedKinds := s.messages.loggedKinds.insert kind }

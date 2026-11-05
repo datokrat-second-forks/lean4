@@ -153,7 +153,7 @@ builtin_simproc [simp, seval] reduceDvd ((_ : Int) ∣ _) := fun e => do
   unless ← matchesInstance i (mkConst ``instDvd) do return .continue
   let some va ← fromExpr? a | return .continue
   let some vb ← fromExpr? b | return .continue
-  bif vb % va == 0 then
+  uif vb % va == 0 then
     return .done { expr := mkConst ``True, proof? := mkApp3 (mkConst ``Int.dvd_eq_true_of_mod_eq_zero) a b eagerReflBoolTrue}
   else
     return .done { expr := mkConst ``False, proof? := mkApp3 (mkConst ``Int.dvd_eq_false_of_mod_ne_zero) a b eagerReflBoolTrue}

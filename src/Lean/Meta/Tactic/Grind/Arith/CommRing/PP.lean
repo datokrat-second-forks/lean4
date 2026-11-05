@@ -36,7 +36,7 @@ private instance : MonadGetVar M where
   getVar x := return (← get).state.vars[x]!
 
 private def toOption (cls : Name) (header : Thunk MessageData) (msgs : Array MessageData) : Option MessageData :=
-  bif msgs.isEmpty then
+  uif msgs.isEmpty then
     none
   else
     some (.trace {cls} header.get msgs)
@@ -79,16 +79,16 @@ def pp? (goal : Goal) (rings : Array Sym.Arith.CommRing) : MetaM (Option Message
       | throwError "`grind` internal error, ring solver state without a `Sym.Arith` record (ring id {i})"
     let some msg ← ppRing? |>.run' { ring, state := s.getRing i } | continue
     msgs := msgs.push msg
-  bif msgs.isEmpty then
+  uif msgs.isEmpty then
     return none
-  else bif h : msgs.size =ᵇ 1 then
+  else uif h : msgs.size = 1 then
     return some msgs[0]
   else
     return some (.trace { cls := `ring } "Rings" msgs)
 
 def addThresholdMessage (goal : Goal) (c : Grind.Config) (msgs : Array MessageData) : IO (Array MessageData) := do
   let s ← ringExt.getStateCore goal
-  bif s.steps ≥ᵇ c.ringSteps then
+  uif s.steps ≥ c.ringSteps then
     return msgs.push <| .trace { cls := `limit } m!"maximum number of ring steps has been reached, threshold: `(ringSteps := {c.ringSteps})`" #[]
   else
     return msgs

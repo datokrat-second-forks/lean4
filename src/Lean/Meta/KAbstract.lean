@@ -29,7 +29,7 @@ to prevent blocking subsequent matches which require different instantiations.
 -/
 def kabstract (e : Expr) (p : Expr) (occs : Occurrences := .all) : MetaM Expr := do
   let e ← instantiateMVars e
-  bif p.isFVar && occs == Occurrences.all then
+  uif p.isFVar && occs == Occurrences.all then
     return e.abstract #[p] -- Easy case
   else
     let pHeadIdx := p.toHeadIndex
@@ -44,18 +44,18 @@ def kabstract (e : Expr) (p : Expr) (occs : Occurrences := .all) : MetaM Expr :=
         | .lam _ d b _     => return e.updateLambdaE! (← visit d offset) (← visit b (offset+1))
         | .forallE _ d b _ => return e.updateForallE! (← visit d offset) (← visit b (offset+1))
         | e                => return e
-      bif e.hasLooseBVars then
+      uif e.hasLooseBVars then
         visitChildren ()
-      else bif e.toHeadIndex != pHeadIdx || e.headNumArgs != pNumArgs then
+      else uif e.toHeadIndex != pHeadIdx || e.headNumArgs != pNumArgs then
         visitChildren ()
       else
         -- We save the metavariable context here,
         -- so that it can be rolled back unless `occs.contains i`.
         let mctx ← getMCtx
-        bif (← isDefEq e p) then
+        uif (← isDefEq e p) then
           let i ← get
           set (i+1)
-          bif occs.contains i then
+          uif occs.contains i then
             return mkBVar offset
           else
             -- Revert the metavariable context,

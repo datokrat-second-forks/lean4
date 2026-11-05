@@ -30,7 +30,7 @@ private def dummy : AlphaKey := { expr := mkConst `__dummy__}
 
 protected def Sym.share1 (e : Expr) : SymM Expr := do
   let prev := (← get).share.set.findD { expr := e } dummy
-  bif isSameExpr prev.expr dummy.expr then
+  uif isSameExpr prev.expr dummy.expr then
     -- `e` is new
     modify fun s => { s with share.set := s.share.set.insert { expr := e } }
     return e
@@ -63,7 +63,7 @@ abbrev liftBuilderM (k : AlphaShareBuilderM α) : SymM α := do
 
 protected def Builder.share1 (e : Expr) : AlphaShareBuilderM Expr := do
   let prev := (← get).set.findD { expr := e } dummy
-  bif isSameExpr prev.expr dummy.expr then
+  uif isSameExpr prev.expr dummy.expr then
     -- `e` is new
     modify fun { set := set } => { set := set.insert { expr := e } }
     return e
@@ -103,42 +103,42 @@ def mkMVarS (mvarId : MVarId) : m Expr :=
 variable [Monad m]
 
 def mkMDataS (d : MData) (e : Expr) : m Expr := do
-  bif (← MonadShareCommon.isDebugEnabled) then
+  uif (← MonadShareCommon.isDebugEnabled) then
     assertShared e
   share1 <| .mdata d e
 
 def mkProjS (structName : Name) (idx : Nat) (struct : Expr) : m Expr := do
-  bif (← MonadShareCommon.isDebugEnabled) then
+  uif (← MonadShareCommon.isDebugEnabled) then
     assertShared struct
   share1 <| .proj structName idx struct
 
 def mkAppS (f a : Expr) : m Expr := do
-  bif (← MonadShareCommon.isDebugEnabled) then
+  uif (← MonadShareCommon.isDebugEnabled) then
     assertShared f
     assertShared a
   share1 <| .app f a
 
 def mkLambdaS (x : Name) (bi : BinderInfo) (t : Expr) (b : Expr) : m Expr := do
-  bif (← MonadShareCommon.isDebugEnabled) then
+  uif (← MonadShareCommon.isDebugEnabled) then
     assertShared t
     assertShared b
   share1 <| .lam x t b bi
 
 def mkForallS (x : Name) (bi : BinderInfo) (t : Expr) (b : Expr) : m Expr := do
-  bif (← MonadShareCommon.isDebugEnabled) then
+  uif (← MonadShareCommon.isDebugEnabled) then
     assertShared t
     assertShared b
   share1 <| .forallE x t b bi
 
 def mkLetS (x : Name) (t : Expr) (v : Expr) (b : Expr) (nondep : Bool := false) : m Expr := do
-  bif (← MonadShareCommon.isDebugEnabled) then
+  uif (← MonadShareCommon.isDebugEnabled) then
     assertShared t
     assertShared v
     assertShared b
   share1 <| .letE x t v b nondep
 
 def mkHaveS (x : Name) (t : Expr) (v : Expr) (b : Expr) : m Expr := do
-  bif (← MonadShareCommon.isDebugEnabled) then
+  uif (← MonadShareCommon.isDebugEnabled) then
     assertShared t
     assertShared v
     assertShared b
@@ -146,33 +146,33 @@ def mkHaveS (x : Name) (t : Expr) (v : Expr) (b : Expr) : m Expr := do
 
 @[inline] def _root_.Lean.Expr.updateAppS! (e : Expr) (newFn : Expr) (newArg : Expr) : m Expr := do
   let .app fn arg := e | panic! "application expected"
-  bif isSameExpr fn newFn && isSameExpr arg newArg then return e else mkAppS newFn newArg
+  uif isSameExpr fn newFn && isSameExpr arg newArg then return e else mkAppS newFn newArg
 
 @[inline] def _root_.Lean.Expr.updateMDataS! (e : Expr) (newExpr : Expr) : m Expr := do
   let .mdata d a := e | panic! "mdata expected"
-  bif isSameExpr a newExpr then return e else mkMDataS d newExpr
+  uif isSameExpr a newExpr then return e else mkMDataS d newExpr
 
 @[inline] def _root_.Lean.Expr.updateProjS! (e : Expr) (newExpr : Expr) : m Expr := do
   let .proj s i a := e | panic! "proj expected"
-  bif isSameExpr a newExpr then return e else mkProjS s i newExpr
+  uif isSameExpr a newExpr then return e else mkProjS s i newExpr
 
 @[inline] def _root_.Lean.Expr.updateForallS! (e : Expr) (newDomain : Expr) (newBody : Expr) : m Expr := do
   let .forallE n d b bi := e | panic! "forall expected"
-  bif isSameExpr d newDomain && isSameExpr b newBody then
+  uif isSameExpr d newDomain && isSameExpr b newBody then
     return e
   else
     mkForallS n bi newDomain newBody
 
 @[inline] def _root_.Lean.Expr.updateLambdaS! (e : Expr) (newDomain : Expr) (newBody : Expr) : m Expr := do
   let .lam n d b bi := e | panic! "lambda expected"
-  bif isSameExpr d newDomain && isSameExpr b newBody then
+  uif isSameExpr d newDomain && isSameExpr b newBody then
     return e
   else
     mkLambdaS n bi newDomain newBody
 
 @[inline] def _root_.Lean.Expr.updateLetS! (e : Expr) (newType : Expr) (newVal : Expr) (newBody : Expr) : m Expr := do
   let .letE n t v b nondep := e | panic! "let expression expected"
-  bif isSameExpr t newType && isSameExpr v newVal && isSameExpr b newBody then
+  uif isSameExpr t newType && isSameExpr v newVal && isSameExpr b newBody then
     return e
   else
     mkLetS n newType newVal newBody nondep
@@ -212,7 +212,7 @@ partial def mkAppRangeS (f : Expr) (beginIdx endIdx : Nat) (args : Array Expr) :
   go endIdx f beginIdx
 where
   go (endIdx : Nat) (b : Expr) (i : Nat) : m Expr := do
-    bif endIdx ≤ᵇ i then return b
+    uif endIdx ≤ i then return b
     else go endIdx (← mkAppS b args[i]!) (i + 1)
 
 /-- `mkAppNS f #[a₀, ..., aₙ]` constructs `f a₀ ... aₙ` with max sharing. -/
@@ -224,7 +224,7 @@ partial def mkAppRevRangeS (f : Expr) (beginIdx endIdx : Nat) (revArgs : Array E
   go revArgs beginIdx f endIdx
 where
   go (revArgs : Array Expr) (start : Nat) (b : Expr) (i : Nat) : m Expr := do
-    bif i ≤ᵇ start then return b
+    uif i ≤ start then return b
     else
       let i := i - 1
       go revArgs start (← mkAppS b revArgs[i]!) i

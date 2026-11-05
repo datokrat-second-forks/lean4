@@ -16,9 +16,9 @@ namespace Lean.Meta
 partial def reduce (e : Expr) (explicitOnly skipTypes skipProofs := true) : MetaM Expr :=
   let rec visit (e : Expr) : MonadCacheT Expr Expr MetaM Expr :=
     checkCache e fun _ => Core.withIncRecDepth do
-      bif (← (pure skipTypes <&&> isType e)) then
+      uif (← (pure skipTypes <&&> isType e)) then
         return e
-      else bif (← (pure skipProofs <&&> isProof e)) then
+      else uif (← (pure skipProofs <&&> isProof e)) then
         return e
       else
         let e ← whnf e
@@ -29,13 +29,13 @@ partial def reduce (e : Expr) (explicitOnly skipTypes skipProofs := true) : Meta
           let finfo ← getFunInfoNArgs f nargs
           let mut args  := e.getAppArgs
           for i in *...args.size do
-            bif h : i <ᵇ finfo.paramInfo.size then
+            uif h : i < finfo.paramInfo.size then
               let info := finfo.paramInfo[i]
-              bif !explicitOnly || info.isExplicit then
+              uif !explicitOnly || info.isExplicit then
                 args ← args.modifyM i visit
             else
               args ← args.modifyM i visit
-          bif f.isConstOf ``Nat.succ && args.size == 1 && args[0]!.isRawNatLit then
+          uif f.isConstOf ``Nat.succ && args.size == 1 && args[0]!.isRawNatLit then
             return mkRawNatLit (args[0]!.rawNatLit?.get! + 1)
           else
             return mkAppN f args

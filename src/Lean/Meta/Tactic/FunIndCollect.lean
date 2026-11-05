@@ -40,15 +40,15 @@ def SeenCalls.isEmpty  (sc : SeenCalls) : Bool :=
 
 def SeenCalls.push (e : Expr) (funIndInfo : FunIndInfo) (args : Array Expr) (calls : SeenCalls) :
     MetaM SeenCalls := do
-  bif funIndInfo.params.size != args.size then return calls
+  uif funIndInfo.params.size != args.size then return calls
   let mut keys := #[]
   for arg in args, kind in funIndInfo.params do
-    bif kind matches .target then
-      bif !arg.isFVar then return calls
+    uif kind matches .target then
+      uif !arg.isFVar then return calls
     unless kind matches .dropped do
       keys := keys.push arg
   let key := (funIndInfo.funName, keys)
-  bif calls.seen.contains key then return calls
+  uif calls.seen.contains key then return calls
   return { calls := calls.calls.push e, seen := calls.seen.insert key }
 
 /--
@@ -60,7 +60,7 @@ def SeenCalls.uniques (calls : SeenCalls) : NameSet := Id.run do
   let mut seenTwice : NameSet := {}
   for (n, _) in calls.seen do
     unless seenTwice.contains n do
-      bif seen.contains n then
+      uif seen.contains n then
         seenTwice := seenTwice.insert n
       else
         seen := seen.insert n

@@ -127,8 +127,8 @@ Helper method for bootstrapping purposes.
 It disables `arith` if support theorems have not been defined yet.
 -/
 private def updateArith (c : Config) : CoreM Config := do
-  bif c.arith then
-    bif (← getEnv).contains ``Nat.Internal.Linear.ExprCnstr.eq_of_toNormPoly_eq then
+  uif c.arith then
+    uif (← getEnv).contains ``Nat.Internal.Linear.ExprCnstr.eq_of_toNormPoly_eq then
       return c
     else
       return { c with arith := false }
@@ -169,13 +169,13 @@ private def mkMetaConfig (c : Config) : MetaM ConfigWithKey := do
     zetaUnused   := c.zetaUnused
     zetaDelta    := c.zetaDelta
     etaStruct    := c.etaStruct
-    proj         := bif c.proj then .yesWithDelta else .no
+    proj         := uif c.proj then .yesWithDelta else .no
     transparency := .reducible
   : Meta.Config }.toConfigWithKey
 
 def mkContext (config : Config := {}) (simpTheorems : SimpTheoremsArray := {}) (congrTheorems : SimpCongrTheorems := {}) (userConfig : Options := {}) : MetaM Context := do
   let config ← updateArith config
-  let config ← bif backward.dsimp.instances.get (← getOptions) then pure { config with instances := true } else pure config
+  let config ← uif backward.dsimp.instances.get (← getOptions) then pure { config with instances := true } else pure config
   return {
     config, userConfig, simpTheorems, congrTheorems
     metaConfig := (← mkMetaConfig config)
@@ -221,7 +221,7 @@ def UsedSimps.contains (s : UsedSimps) (thmId : Origin) : Bool :=
   s.map.contains thmId
 
 def UsedSimps.insert (s : UsedSimps) (thmId : Origin) : UsedSimps :=
-  bif s.map.contains thmId then
+  uif s.map.contains thmId then
     s
   else match s with
     | { map, size } => { map := map.insert thmId size, size := size + 1 }
@@ -307,7 +307,7 @@ set_option compiler.ignoreBorrowAnnotation true in
 opaque dsimp (e : Expr) : SimpM Expr
 
 @[inline] def modifyDiag (f : Diagnostics → Diagnostics) : SimpM Unit := do
-  bif (← isDiagnosticsEnabled) then
+  uif (← isDiagnosticsEnabled) then
     modify fun { cache, congrCache, dsimpCache, usedTheorems, numSteps, diag } => { cache, congrCache, dsimpCache, usedTheorems, numSteps, diag := f diag }
 
 /--
@@ -552,7 +552,7 @@ def recordCongrTheorem (declName : Name) : SimpM Unit := do
 def recordTheoremWithBadKeys (thm : SimpTheorem) : SimpM Unit := do
   modifyDiag fun s =>
     -- check whether it is already there
-    bif unsafe s.thmsWithBadKeys.any fun thm' => ptrEq thm thm' then
+    uif unsafe s.thmsWithBadKeys.any fun thm' => ptrEq thm thm' then
       s
     else
       { s with thmsWithBadKeys := s.thmsWithBadKeys.push thm }
@@ -570,7 +570,7 @@ def Result.getProof' (source : Expr) (r : Result) : MetaM Expr := do
   match r.proof? with
   | some p => return p
   | none   =>
-    bif (← isDefEq source r.expr) then
+    uif (← isDefEq source r.expr) then
       mkEqRefl r.expr
     else
       /- `source` and `r.expr` must be definitionally equal, but
@@ -583,14 +583,14 @@ def Result.mkCast (r : Simp.Result) (e : Expr) : MetaM Expr := do
 
 /-- Construct the `Expr` `h.mpr e`, from a `Simp.Result` with proof `h`. -/
 def Result.mkEqMPR (r : Simp.Result) (e : Expr) : MetaM Expr := do
-  bif r.proof?.isNone && r.expr == e then
+  uif r.proof?.isNone && r.expr == e then
     pure e
   else
     Meta.mkEqMPR (← r.getProof) e
 
 /-- Construct the `Expr` `h.mp e`, from a `Simp.Result` with proof `h`. -/
 def Result.mkEqMP (r : Simp.Result) (e : Expr) : MetaM Expr := do
-  bif r.proof?.isNone && r.expr == e then
+  uif r.proof?.isNone && r.expr == e then
     pure e
   else
     Meta.mkEqMP (← r.getProof) e
@@ -625,10 +625,10 @@ partial def removeUnnecessaryCasts (e : Expr) : MetaM Expr := do
   let mut modified := false
   for i in *...args.size do
     let arg := args[i]!
-    bif isDummyEqRec arg then
+    uif isDummyEqRec arg then
       args := args.set! i (elimDummyEqRec arg)
       modified := true
-  bif modified then
+  uif modified then
     return mkAppN e.getAppFn args
   else
     return e
@@ -637,7 +637,7 @@ where
     (e.isAppOfArity ``Eq.rec 6 || e.isAppOfArity ``Eq.ndrec 6) && e.appArg!.isAppOf ``Eq.refl
 
   elimDummyEqRec (e : Expr) : Expr :=
-    bif isDummyEqRec e then
+    uif isDummyEqRec e then
       elimDummyEqRec e.appFn!.appFn!.appArg!
     else
       e
@@ -647,7 +647,7 @@ Given a simplified function result `r` and arguments `args`, simplify arguments 
 The resulting proof is built using `congr` and `congrFun` theorems.
 -/
 def congrArgs (r : Result) (args : Array Expr) : SimpM Result := do
-  bif args.isEmpty then
+  uif args.isEmpty then
     return r
   else
     let cfg ← getConfig
@@ -655,23 +655,23 @@ def congrArgs (r : Result) (args : Array Expr) : SimpM Result := do
     let mut r := r
     let mut i := 0
     for arg in args do
-      bif h : i <ᵇ infos.size then
+      uif h : i < infos.size then
         trace[Debug.Meta.Tactic.simp] "app [{i}] {infos.size} {arg} hasFwdDeps: {infos[i].hasFwdDeps}"
         let info := infos[i]
-        bif info.isInstance && (!cfg.instances || cfg.ground) then
+        uif info.isInstance && (!cfg.instances || cfg.ground) then
           /-
           **Note**: We don't visit instance implicit arguments when we are reducing ground terms.
           Motivation: many instance implicit arguments are ground, and it does not make sense
           to reduce them if the parent term is not ground.
           -/
           r ← mkCongrFun r arg
-        else bif !info.hasFwdDeps then
+        else uif !info.hasFwdDeps then
           r ← mkCongr r (← simp arg)
-        else bif (← whnfD (← inferType r.expr)).isArrow then
+        else uif (← whnfD (← inferType r.expr)).isArrow then
           r ← mkCongr r (← simp arg)
         else
           r ← mkCongrFun r (← dsimp arg)
-      else bif (← whnfD (← inferType r.expr)).isArrow then
+      else uif (← whnfD (← inferType r.expr)).isArrow then
         r ← mkCongr r (← simp arg)
       else
         r ← mkCongrFun r (← dsimp arg)
@@ -735,30 +735,30 @@ def simpAppUsingCongr (e : Expr) : SimpM Result := do
   let cfg ← getConfig
   let infos := (← getFunInfoNArgs f numArgs).paramInfo
   let rec visit (e : Expr) (i : Nat) : SimpM Result := do
-    bif i == 0 then
+    uif i == 0 then
       simp f
     else
       checkSystem "simp"
       let i := i - 1
       let .app f a := e | unreachable!
       let fr ← visit f i
-      bif h : i <ᵇ infos.size then
+      uif h : i < infos.size then
         let info := infos[i]
         trace[Debug.Meta.Tactic.simp] "app [{i}] {infos.size} {a} hasFwdDeps: {infos[i].hasFwdDeps}"
-        bif info.isInstance && (!cfg.instances || cfg.ground) then
+        uif info.isInstance && (!cfg.instances || cfg.ground) then
           /-
           **Note**: We don't visit instance implicit arguments when we are reducing ground terms.
           Motivation: many instance implicit arguments are ground, and it does not make sense
           to reduce them if the parent term is not ground.
           -/
           mkCongrFun' e fr a
-        else bif !info.hasFwdDeps then
+        else uif !info.hasFwdDeps then
           mkCongr' e fr (← simp a)
-        else bif (← whnfD (← inferType f)).isArrow then
+        else uif (← whnfD (← inferType f)).isArrow then
           mkCongr' e fr (← simp a)
         else
           mkCongrFun' e fr (← dsimp a)
-      else bif (← whnfD (← inferType f)).isArrow then
+      else uif (← whnfD (← inferType f)).isArrow then
         mkCongr' e fr (← simp a)
       else
         mkCongrFun' e fr (← dsimp a)
@@ -771,7 +771,7 @@ Remark: If all argument kinds are `fixed` or `eq`, it returns `none` because
 using simple congruence theorems `congr`, `congrArg`, and `congrFun` produces a more compact proof.
 -/
 def mkCongrSimp? (f : Expr) : SimpM (Option CongrTheorem) := do profileitM Exception "congr simp thm" (← getOptions) do
-  bif f.isConst then bif (← isMatcher f.constName!) then
+  uif f.isConst then uif (← isMatcher f.constName!) then
     -- We always use simple congruence theorems for auxiliary match applications
     return none
   match (← get).congrCache[f]? with
@@ -784,14 +784,14 @@ where
   go? : SimpM (Option CongrTheorem) := do
     let info ← getFunInfo f
     let argKinds ← getCongrSimpKinds f info
-    bif argKinds.all fun k => match k with | .fixed | .eq => true | _ => false then
+    uif argKinds.all fun k => match k with | .fixed | .eq => true | _ => false then
       /- See remark above. -/
       return none
-    else bif !(← getConfig).congrConsts then
+    else uif !(← getConfig).congrConsts then
       mkCongrSimpCore? f info argKinds
     else if let .const declName us := f then
       let some thm ← mkCongrSimpForConst? declName us | mkCongrSimpCore? f info argKinds
-      bif thm.argKinds == argKinds then
+      uif thm.argKinds == argKinds then
         trace[congr.thm] "used global `{thm.proof.getAppFn}`"
         return some thm
       else
@@ -808,7 +808,7 @@ def tryAutoCongrTheorem? (e : Expr) : SimpM (Option Result) := do
   let f := e.getAppFn
   -- TODO: cache
   let some cgrThm ← mkCongrSimp? f | return none
-  bif cgrThm.argKinds.size != e.getAppNumArgs then return none
+  uif cgrThm.argKinds.size != e.getAppNumArgs then return none
   let args := e.getAppArgs
   let infos := (← getFunInfoNArgs f args.size).paramInfo
   let config ← getConfig
@@ -819,9 +819,9 @@ def tryAutoCongrTheorem? (e : Expr) : SimpM (Option Result) := do
   let mut argResults := #[]
   let mut i          := 0 -- index at args
   for arg in args, kind in cgrThm.argKinds do
-    bif config.ground then
-      bif h : i <ᵇ infos.size then
-        bif (infos[i]'(lt_of_decideLT_eq_true h)).isInstance then
+    uif config.ground then
+      uif h : i < infos.size then
+        uif (infos[i]'h).isInstance then
           -- Do not visit instance implicit arguments when `ground := true`
           -- See comment at `congrArgs`
           argsNew := argsNew.push arg
@@ -830,7 +830,7 @@ def tryAutoCongrTheorem? (e : Expr) : SimpM (Option Result) := do
     match kind with
     | CongrArgKind.fixed =>
       let argNew ← dsimp arg
-      bif arg != argNew then
+      uif arg != argNew then
         simplified := true
       argsNew := argsNew.push argNew
     | CongrArgKind.cast  => hasCast := true; argsNew := argsNew.push arg
@@ -839,11 +839,11 @@ def tryAutoCongrTheorem? (e : Expr) : SimpM (Option Result) := do
       let argResult ← simp arg
       argResults := argResults.push argResult
       argsNew    := argsNew.push argResult.expr
-      bif argResult.proof?.isSome then hasProof := true
-      bif arg != argResult.expr then simplified := true
+      uif argResult.proof?.isSome then hasProof := true
+      uif arg != argResult.expr then simplified := true
     | _ => unreachable!
     i := i + 1
-  bif !simplified then return some { expr := e }
+  uif !simplified then return some { expr := e }
   /-
     If `hasProof` is false, we used to return `mkAppN f argsNew` with `proof? := none`.
     However, this created a regression when we started using `proof? := none` for `rfl` theorems.
@@ -868,7 +868,7 @@ def tryAutoCongrTheorem? (e : Expr) : SimpM (Option Result) := do
     equal using `TransparencyMode.reducible` (`Nat.pred` is not reducible).
     Thus, we decided to return here only if the auto generated congruence theorem does not introduce casts.
   -/
-  bif !hasProof && !hasCast then
+  uif !hasProof && !hasCast then
     return some { expr := mkAppN f argsNew }
   let mut proof := cgrThm.proof
   let mut type  := cgrThm.type
@@ -889,7 +889,7 @@ def tryAutoCongrTheorem? (e : Expr) : SimpM (Option Result) := do
     | CongrArgKind.subsingletonInst =>
       subst := subst.push arg
       let clsNew := type.bindingDomain!.instantiateRev subst
-      let instNew ← bif (← isDefEq (← inferType arg) clsNew) then
+      let instNew ← uif (← isDefEq (← inferType arg) clsNew) then
         pure arg
       else
         match (← trySynthInstance clsNew) with
@@ -910,8 +910,8 @@ def tryAutoCongrTheorem? (e : Expr) : SimpM (Option Result) := do
       type := type.bindingBody!.bindingBody!
     | _ => unreachable!
   let some (_, _, rhs) := type.instantiateRev subst |>.eq? | unreachable!
-  let rhs ← bif hasCast then removeUnnecessaryCasts rhs else pure rhs
-  bif hasProof then
+  let rhs ← uif hasCast then removeUnnecessaryCasts rhs else pure rhs
+  uif hasProof then
     return some { expr := rhs, proof? := proof }
   else
     /- See comment above. This is reachable if `hasCast == true`. The `rhs` is not structurally equal to `mkAppN f argsNew` -/
@@ -941,7 +941,7 @@ def DStep.addExtraArgs (s : DStep) (extraArgs : Array Expr) : DStep :=
   | .continue (some eNew) => .continue (mkAppN eNew extraArgs)
 
 def Result.addLambdas (r : Result) (xs : Array Expr) : MetaM Result := do
-  bif xs.isEmpty then return r
+  uif xs.isEmpty then return r
   let eNew ← mkLambdaFVars xs r.expr
   match r.proof? with
   | none   => return { expr := eNew }
@@ -951,7 +951,7 @@ def Result.addLambdas (r : Result) (xs : Array Expr) : MetaM Result := do
     return { expr := eNew, proof? := p }
 
 def Result.addForalls (r : Result) (xs : Array Expr) : MetaM Result := do
-  bif xs.isEmpty then return r
+  uif xs.isEmpty then return r
   let eNew ← mkForallFVars xs r.expr
   match r.proof? with
   | none   => return { expr := eNew }
@@ -977,7 +977,7 @@ This also means that `usedZetaDelta` set might be reporting fvars in `zetaDeltaS
 -/
 private def updateUsedSimpsWithZetaDeltaCore (s : UsedSimps) (zetaDeltaSet : FVarIdSet) (usedZetaDelta : FVarIdSet) : UsedSimps :=
   zetaDeltaSet.foldl (init := s) fun s fvarId =>
-    bif usedZetaDelta.contains fvarId then
+    uif usedZetaDelta.contains fvarId then
       s.insert <| .fvar fvarId
     else
       s
@@ -1010,7 +1010,7 @@ def applySimpResultToTarget (mvarId : MVarId) (target : Expr) (r : Simp.Result) 
   match r.proof? with
   | some proof => mvarId.replaceTargetEq r.expr proof
   | none =>
-    bif target != r.expr then
+    uif target != r.expr then
       mvarId.replaceTargetDefEq r.expr
     else
       return mvarId

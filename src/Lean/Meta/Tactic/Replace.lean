@@ -46,14 +46,14 @@ def _root_.Lean.MVarId.replaceTargetDefEq (mvarId : MVarId) (targetNew : Expr) :
   mvarId.withContext do
     mvarId.checkNotAssigned `change
     let target  ← mvarId.getType
-    bif Expr.equal target targetNew then
+    uif Expr.equal target targetNew then
       return mvarId
     else
       -- For an accurate `Expr.equal` check, we need to instantiate metavariables.
       -- Some tactics depend on this returning the same metavariable to check that they made no progress.
       let target ← instantiateMVars target
       let targetNew ← instantiateMVars targetNew
-      bif Expr.equal target targetNew then
+      uif Expr.equal target targetNew then
         mvarId.setType target -- cache the instantiated type
         return mvarId
       else
@@ -110,14 +110,14 @@ Uses `Expr.equal` for the comparison so that it is possible to update binder nam
 def _root_.Lean.MVarId.replaceLocalDeclDefEq (mvarId : MVarId) (fvarId : FVarId) (typeNew : Expr) : MetaM MVarId := do
   mvarId.withContext do
     let type ← fvarId.getType
-    bif Expr.equal type typeNew then
+    uif Expr.equal type typeNew then
       return mvarId
     else
       -- For an accurate `Expr.equal` check, we need to instantiate metavariables.
       -- Some tactics depend on this returning the same metavariable to check that they made no progress.
       let type ← instantiateMVars type
       let typeNew ← instantiateMVars typeNew
-      bif Expr.equal type typeNew then
+      uif Expr.equal type typeNew then
         mvarId.setFVarType fvarId type -- cache the instantiated type
         return mvarId
       else
@@ -138,7 +138,7 @@ If `checkDefEq = true`, throw an error if `typeNew` is not definitionally equal 
 -/
 def _root_.Lean.MVarId.change (mvarId : MVarId) (targetNew : Expr) (checkDefEq := true) : MetaM MVarId := mvarId.withContext do
   let target ← mvarId.getType
-  bif checkDefEq then
+  uif checkDefEq then
     unless (← isDefEq target targetNew) do
       throwTacticEx `change mvarId m!"given type{indentExpr targetNew}\nis not definitionally equal to{indentExpr target}"
   mvarId.replaceTargetDefEq targetNew
@@ -211,7 +211,7 @@ def _root_.Lean.MVarId.changeLocalDecl (mvarId : MVarId) (fvarId : FVarId) (type
   mvarId.checkNotAssigned `changeLocalDecl
   let (_, mvarId) ← mvarId.withReverted #[fvarId] fun mvarId fvars => mvarId.withContext do
     let check (typeOld : Expr) : MetaM Unit := do
-      bif checkDefEq then
+      uif checkDefEq then
         unless ← isDefEq typeNew typeOld do
           throwTacticEx `changeLocalDecl mvarId
             m!"given type{indentExpr typeNew}\nis not definitionally equal to{indentExpr typeOld}"

@@ -39,7 +39,7 @@ structure State where
 builtin_initialize homExt : SolverExtension State ← registerSolverExtension (return {})
 
 private def init : GoalM Unit := do
-  bif (← homExt.getState).initialized then
+  uif (← homExt.getState).initialized then
     return ()
   let thms ← getHomoTheorems
   let preds ← getHomoPredTheorems
@@ -64,10 +64,10 @@ of equalities and disequalities involving `e`.
 -/
 private def markSourceTerm (e : Expr) : GoalM Unit := do
   let tys ← getSourceTypes
-  bif tys.isEmpty then return ()
+  uif tys.isEmpty then return ()
   let α ← Sym.inferType e
   let .const F _ := α.getAppFn | return ()
-  bif tys.contains F then
+  uif tys.contains F then
     homExt.markTerm e
 
 /--
@@ -116,16 +116,16 @@ private def andMaskSimproc : Sym.Simp.Simproc := fun e => do
   let some (n, k) := maskOnesZeros? cVal | return .rfl
   let nE := mkNatLit n
   let q := mkNatLit (1 <<< n)
-  bif k == 0 then
+  uif k == 0 then
     let e' ← Sym.share <| mkNatMod x q
-    let thm := bif flipped then ``Lean.Grind.Nat.ones_and_eq_mod else ``Lean.Grind.Nat.and_eq_mod
+    let thm := uif flipped then ``Lean.Grind.Nat.ones_and_eq_mod else ``Lean.Grind.Nat.and_eq_mod
     let h := mkApp6 (mkConst thm) x c q nE (mkNatEqRefl c) (mkNatEqRefl q)
     return .step e' h
   else
     let kE := mkNatLit k
     let p := mkNatLit (1 <<< k)
     let e' ← Sym.share <| mkNatMul (mkNatMod (mkNatDiv x p) q) p
-    let thm := bif flipped then ``Lean.Grind.Nat.ones_zeros_and_eq_div_mod_mul else ``Lean.Grind.Nat.and_eq_div_mod_mul
+    let thm := uif flipped then ``Lean.Grind.Nat.ones_zeros_and_eq_div_mod_mul else ``Lean.Grind.Nat.and_eq_div_mod_mul
     let h := mkApp9 (mkConst thm) x c p q kE nE (mkNatEqRefl c) (mkNatEqRefl p) (mkNatEqRefl q)
     return .step e' h
 
@@ -153,7 +153,7 @@ private def mulLargeCoeffSimproc : Sym.Simp.Simproc := fun e => do
   unless c < m && m < 2 * c do return .rfl
   let c'E := mkNatLit (m - c)
   let e' ← Sym.share <| mkNatMod (mkNatSub mE (mkNatMod (mkNatMul c'E x) mE)) mE
-  let thm := bif flipped then ``Lean.Grind.Nat.mul_mod_eq_sub_mul_mod' else ``Lean.Grind.Nat.mul_mod_eq_sub_mul_mod
+  let thm := uif flipped then ``Lean.Grind.Nat.mul_mod_eq_sub_mul_mod' else ``Lean.Grind.Nat.mul_mod_eq_sub_mul_mod
   let h := mkApp5 (mkConst thm) x cE c'E mE (mkNatEqRefl mE)
   return .step e' h
 
@@ -193,7 +193,7 @@ private def mkRewriter : GoalM Sym.Simp.Simproc := do
   let rw := Sym.Simp.evalGround { bitVecOfNat := false } <|> (← getThms).rewrite <|> andMaskSimproc <|> mulLargeCoeffSimproc
   return fun e => do
     let r ← rw e
-    bif !r.isRfl then return r
+    uif !r.isRfl then return r
     return .rfl (done := s.enodeMap.contains { expr := e })
 
 /--
@@ -229,9 +229,9 @@ private def isForbidden (e : Expr) : Bool :=
 
 def internalize (e : Expr) (_parent? : Option Expr) : GoalM Unit := do
   unless (← getConfig).hom do return ()
-  bif isForbidden e then return ()
+  uif isForbidden e then return ()
   -- Check whether term has already been internalized by this solver extension.
-  bif (← homExt.getState).internalized.contains { expr := e } then return ()
+  uif (← homExt.getState).internalized.contains { expr := e } then return ()
   homExt.modifyState fun s => { s with internalized := s.internalized.insert { expr := e } }
   markSourceTerm e
   let generation ← getGeneration e

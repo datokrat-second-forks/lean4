@@ -56,7 +56,7 @@ def validateHomoTheorem (declName : Name) : MetaM Unit := do
       | _ => concl
     let mut covered : FVarIdSet := {}
     for x in xs do
-      bif lhs.containsFVar x.fvarId! then
+      uif lhs.containsFVar x.fvarId! then
         covered := covered.insert x.fvarId!
     -- Close under occurrence in the types of covered parameters.
     let mut changed := true
@@ -65,16 +65,16 @@ def validateHomoTheorem (declName : Name) : MetaM Unit := do
       for x in xs do
         unless covered.contains x.fvarId! do
           for y in xs do
-            bif covered.contains y.fvarId! && (← inferType y).containsFVar x.fvarId! then
+            uif covered.contains y.fvarId! && (← inferType y).containsFVar x.fvarId! then
               covered := covered.insert x.fvarId!
               changed := true
               break
     for x in xs do
-      bif (← getFVarLocalDecl x).binderInfo matches .instImplicit then
+      uif (← getFVarLocalDecl x).binderInfo matches .instImplicit then
         continue
       unless covered.contains x.fvarId! do
         let xType ← inferType x
-        bif (← isProp xType) then
+        uif (← isProp xType) then
           throwError "invalid `[grind hom]` theorem, `{.ofConstName declName}` is conditional: \
             hypothesis{indentExpr xType}\nis not determined by the left-hand side and would have \
             to be discharged when the rule is applied. Homomorphism rules must be unconditional; \
@@ -114,7 +114,7 @@ def addHomoAttr (declName : Name) (attrKind : AttributeKind) (fallback := false)
     validateHomoTheorem declName
     if let some F ← checkEqInjection? declName then
       homoSourceTypesExt.add F attrKind
-  bif fallback then
+  uif fallback then
     validate declName
     homoExt.add { (← Sym.Simp.mkTheoremFromDecl declName) with fallback := true } attrKind
   else
@@ -155,14 +155,14 @@ def addHomoPredAttr (declName : Name) (attrKind : AttributeKind) : MetaM Unit :=
     throwError "invalid `[grind hom_pred]` theorem, `{.ofConstName declName}` is not a proposition"
   forallTelescope info.type fun xs type => do
     let xsExplicit ← xs.filterM fun x => return (← getFVarLocalDecl x).binderInfo.isExplicit
-    bif xsExplicit.isEmpty then
+    uif xsExplicit.isEmpty then
       throwError "invalid `[grind hom_pred]` theorem, `{.ofConstName declName}` must have \
         at least one explicit parameter; the trigger is inferred from an application whose \
         trailing arguments are the theorem's explicit parameters"
     let found? := type.find? fun e => Id.run do
       unless e.isApp && e.getAppFn.isConst do return false
       let args := e.getAppArgs
-      bif args.size <ᵇ xsExplicit.size then return false
+      uif args.size < xsExplicit.size then return false
       return args.extract (args.size - xsExplicit.size) args.size == xsExplicit
     let some found := found?
       | throwError "invalid `[grind hom_pred]` theorem, the conclusion of `{.ofConstName declName}` does not contain an application whose trailing arguments are the theorem's explicit parameters"
@@ -182,7 +182,7 @@ def mkHomoPredInstances (e : Expr) : MetaM (Array (Expr × Expr)) := do
   let args := e.getAppArgs
   let mut result := #[]
   for thm in thms do
-    bif args.size ≥ᵇ thm.arity then
+    uif args.size ≥ thm.arity then
       try
         let proof ← mkAppM thm.declName (args.extract (args.size - thm.arity) args.size)
         result := result.push (proof, ← inferType proof)

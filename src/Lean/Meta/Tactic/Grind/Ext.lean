@@ -18,7 +18,7 @@ def instantiateExtTheorem (thm : Ext.ExtTheorem) (e : Expr) : GoalM Unit := with
   let (mvars, bis, type) ← withDefault <| forallMetaTelescopeReducing (← inferType c)
   let_expr Eq α' lhs' rhs' := type | return ()
   let matchTerm (p : Expr) (e : Expr) : GoalM Bool := do
-    bif p.isMVar then
+    uif p.isMVar then
       p.mvarId!.assign e
       return true
     else
@@ -30,7 +30,7 @@ def instantiateExtTheorem (thm : Ext.ExtTheorem) (e : Expr) : GoalM Unit := with
     return ()
   -- Instantiate type class instances
   for mvar in mvars, bi in bis do
-    bif bi.isInstImplicit && !(← mvar.mvarId!.isAssigned) then
+    uif bi.isInstImplicit && !(← mvar.mvarId!.isAssigned) then
       let type ← inferType mvar
       unless (← synthInstanceAndAssign mvar type) do
         reportIssue! "failed to synthesize instance when instantiating extensionality theorem `{thm.declName}` for {indentExpr e}"
@@ -44,7 +44,7 @@ def instantiateExtTheorem (thm : Ext.ExtTheorem) (e : Expr) : GoalM Unit := with
   let mvars ← mvars.filterM fun mvar => return !(← mvar.mvarId!.isAssigned)
   let proof' ← instantiateMVars (← mkLambdaFVars mvars proof)
   let prop' ← inferType proof'
-  bif proof'.hasMVar || prop'.hasMVar then
+  uif proof'.hasMVar || prop'.hasMVar then
     reportIssue! "failed to apply extensionality theorem `{thm.declName}` for {indentExpr e}\nresulting terms contain metavariables"
     return ()
   trace[grind.ext] "{thm.declName}: {prop'}"

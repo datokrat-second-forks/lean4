@@ -19,7 +19,7 @@ proof is uses `Decidable p` and the auxiliary theorems `eq_true_of_decide`/`eq_f
 -/
 def evalPropStep (p : Expr) (result : Bool) : SimpM Step := do
   let d ← mkDecide p
-  bif result then
+  uif result then
     return .done { expr := mkConst ``True, proof? := mkAppN (mkConst ``eq_true_of_decide) #[p, d.appArg!, (← mkEqRefl (mkConst ``true))] }
   else
     return .done { expr := mkConst ``False, proof? := mkAppN (mkConst ``eq_false_of_decide) #[p, d.appArg!, (← mkEqRefl (mkConst ``false))] }
@@ -33,7 +33,7 @@ def evalEqPropStep (e : Expr) (eq : Bool) (mkNeProof : SimpM Expr) : SimpM Step 
   let α := e.appFn!.appFn!.appArg!
   let a := e.appFn!.appArg!
   let u := e.appFn!.appFn!.appFn!.constLevels!.head!
-  bif eq then
+  uif eq then
     let proof := mkApp2 (mkConst ``eq_true) e (mkApp2 (mkConst ``Eq.refl [u]) α a)
     return .done { expr := mkConst ``True, proof? := proof }
   else
@@ -47,7 +47,7 @@ Like `evalPropStep`, but specialized for `@Ne.{u} α a b`. When the values diffe
 which requires no kernel evaluation.
 -/
 def evalNePropStep (e : Expr) (ne : Bool) (mkNeProof : SimpM Expr) : SimpM Step := do
-  bif ne then
+  uif ne then
     let neProof ← mkNeProof
     let proof := mkApp2 (mkConst ``eq_true) e neProof
     return .done { expr := mkConst ``True, proof? := proof }

@@ -24,10 +24,10 @@ def propagateProjEq (parent : Expr) : GoalM Unit := do
   let ctorNode ← getRootENode arg
   let ctor := ctorNode.self
   unless ctor.isAppOf info.ctorName do return ()
-  let parentNew ← bif isSameExpr arg ctor then
+  let parentNew ← uif isSameExpr arg ctor then
     pure parent
   else
-    let parentNew ← bif ctorNode.heqProofs then
+    let parentNew ← uif ctorNode.heqProofs then
       /-
       When the equivalence class contains heterogeneous equalities,
       type of `arg` and `ctor` may not be definitionally equal.

@@ -30,7 +30,7 @@ def _root_.Lean.MVarId.refl (mvarId : MVarId) (check := true) : MetaM Unit := do
       throwTacticEx `rfl mvarId m!"equality expected{indentExpr targetType}"
     let lhs ← instantiateMVars targetType.appFn!.appArg!
     let rhs ← instantiateMVars targetType.appArg!
-    bif check then
+    uif check then
       let success ← isDefEq lhs rhs
       unless success do
         throwTacticEx `rfl mvarId m!"equality lhs{indentExpr lhs}\nis not definitionally equal to rhs{indentExpr rhs}"

@@ -48,20 +48,20 @@ We use `skipVar := false` when processing inequalities, and `skipVar := true` fo
 partial def reify? (e : Expr) (skipVar : Bool) : LinearM (Option LinExpr) := do
   match_expr e with
   | HAdd.hAdd _ _ _ i a b =>
-    bif isAddInst (← getStruct) i then return some (.add (← go a) (← go b)) else asTopVar e
+    uif isAddInst (← getStruct) i then return some (.add (← go a) (← go b)) else asTopVar e
   | HSub.hSub _ _ _ i a b =>
-    bif isSubInst (← getStruct) i then return some (.sub (← go a) (← go b)) else asTopVar e
+    uif isSubInst (← getStruct) i then return some (.sub (← go a) (← go b)) else asTopVar e
   | HSMul.hSMul _ _ _ i a b =>
     let some r ← processSMul i a b | asTopVar e
     return some r
   | Neg.neg _ i a =>
-    bif isNegInst (← getStruct) i then return some (.neg (← go a)) else asTopVar e
+    uif isNegInst (← getStruct) i then return some (.neg (← go a)) else asTopVar e
   | Zero.zero _ i =>
-    bif isZeroInst (← getStruct) i then return some .zero else asTopVar e
+    uif isZeroInst (← getStruct) i then return some .zero else asTopVar e
   | OfNat.ofNat _ _ _ =>
-    bif (← isOfNatZero e) then return some .zero else asTopVar e
+    uif (← isOfNatZero e) then return some .zero else asTopVar e
   | NatCast.natCast _ _ a =>
-    bif (← getStruct).orderedRingInst?.isSome then
+    uif (← getStruct).orderedRingInst?.isSome then
       assertNatCastNonneg a
     toTopVar e
   | _ => toTopVar e
@@ -74,43 +74,43 @@ where
     reportInstIssue e
     toVar e
   toTopVar (e : Expr) : LinearM (Option LinExpr) := do
-    bif skipVar then
+    uif skipVar then
       return none
     else
       return some (← toVar e)
   asTopVar (e : Expr) : LinearM (Option LinExpr) := do
     reportInstIssue e
-    bif skipVar then
+    uif skipVar then
       return none
     else
       return some (← asVar e)
   isOfNatZero (e : Expr) : LinearM Bool := do
     isDefEqD e (← getStruct).ofNatZero
   processSMul (i a b : Expr) : LinearM (Option LinExpr) := do
-    bif isSMulIntInst (← getStruct) i then
+    uif isSMulIntInst (← getStruct) i then
       let some k ← getIntValue? a | return none
       return some (.intMul k (← go b))
-    else bif isSMulNatInst (← getStruct) i then
+    else uif isSMulNatInst (← getStruct) i then
       let some k ← getNatValue? a | return none
       return some (.natMul k (← go b))
     return none
   go (e : Expr) : LinearM LinExpr := do
     match_expr e with
     | HAdd.hAdd _ _ _ i a b =>
-      bif isAddInst (← getStruct) i then return .add (← go a) (← go b) else asVar e
+      uif isAddInst (← getStruct) i then return .add (← go a) (← go b) else asVar e
     | HSub.hSub _ _ _ i a b =>
-      bif isSubInst (← getStruct) i then return .sub (← go a) (← go b) else asVar e
+      uif isSubInst (← getStruct) i then return .sub (← go a) (← go b) else asVar e
     | HSMul.hSMul _ _ _ i a b =>
       let some r ← processSMul i a b | asVar e
       return r
     | Neg.neg _ i a =>
-      bif isNegInst (← getStruct) i then return .neg (← go a) else asVar e
+      uif isNegInst (← getStruct) i then return .neg (← go a) else asVar e
     | Zero.zero _ i =>
-      bif isZeroInst (← getStruct) i then return .zero else asVar e
+      uif isZeroInst (← getStruct) i then return .zero else asVar e
     | OfNat.ofNat _ _ _ =>
-      bif (← isOfNatZero e) then return .zero else toVar e
+      uif (← isOfNatZero e) then return .zero else toVar e
     | NatCast.natCast _ _ a =>
-      bif (← getStruct).orderedRingInst?.isSome then
+      uif (← getStruct).orderedRingInst?.isSome then
         assertNatCastNonneg a
       toVar e
     | _ => toVar e

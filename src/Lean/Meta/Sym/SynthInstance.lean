@@ -80,22 +80,22 @@ def getBuiltinInstance? (type : Expr) : Option Expr :=
   -- Parametric instances: numerals and decidability of `Int`/`Nat` comparisons.
   match_expr type with
   | OfNat α n =>
-    bif α.isConstOf ``Int then some (mkApp (mkConst ``instOfNat) n)
-    else bif α.isConstOf ``Nat then some (mkApp (mkConst ``instOfNatNat) n)
+    uif α.isConstOf ``Int then some (mkApp (mkConst ``instOfNat) n)
+    else uif α.isConstOf ``Nat then some (mkApp (mkConst ``instOfNatNat) n)
     else none
   | Decidable p =>
     match_expr p with
     | LE.le α i a b =>
-      bif α.isConstOf ``Int && i.isConstOf ``Int.instLEInt then some (mkApp2 (mkConst ``Int.decLe) a b)
-      else bif α.isConstOf ``Nat && i.isConstOf ``instLENat then some (mkApp2 (mkConst ``Nat.decLe) a b)
+      uif α.isConstOf ``Int && i.isConstOf ``Int.instLEInt then some (mkApp2 (mkConst ``Int.decLe) a b)
+      else uif α.isConstOf ``Nat && i.isConstOf ``instLENat then some (mkApp2 (mkConst ``Nat.decLe) a b)
       else none
     | LT.lt α i a b =>
-      bif α.isConstOf ``Int && i.isConstOf ``Int.instLTInt then some (mkApp2 (mkConst ``Int.decLt) a b)
-      else bif α.isConstOf ``Nat && i.isConstOf ``instLTNat then some (mkApp2 (mkConst ``Nat.decLt) a b)
+      uif α.isConstOf ``Int && i.isConstOf ``Int.instLTInt then some (mkApp2 (mkConst ``Int.decLt) a b)
+      else uif α.isConstOf ``Nat && i.isConstOf ``instLTNat then some (mkApp2 (mkConst ``Nat.decLt) a b)
       else none
     | Eq α a b =>
-      bif α.isConstOf ``Int then some (mkApp2 (mkConst ``Int.instDecidableEq) a b)
-      else bif α.isConstOf ``Nat then some (mkApp2 (mkConst ``instDecidableEqNat) a b)
+      uif α.isConstOf ``Int then some (mkApp2 (mkConst ``Int.instDecidableEq) a b)
+      else uif α.isConstOf ``Nat then some (mkApp2 (mkConst ``instDecidableEqNat) a b)
       else none
     | _ => none
   | _ => none
@@ -206,14 +206,14 @@ semiring `s` of the classified `Int` and `Nat`, and `PowIdentity α ?s ?p`, whic
 private def builtinOutParamInst? (type : Expr) : MetaM (Option (Option Expr)) := do
   match_expr type with
   | Grind.IsCharP α s n =>
-    let inst ← bif α.isConstOf ``Int && s == intSemiring then pure (mkConst ``Grind.instIsCharPIntOfNatNat)
-      else bif α.isConstOf ``Nat && s == natSemiring then pure (mkConst ``Grind.instIsCharPNatOfNat)
+    let inst ← uif α.isConstOf ``Int && s == intSemiring then pure (mkConst ``Grind.instIsCharPIntOfNatNat)
+      else uif α.isConstOf ``Nat && s == natSemiring then pure (mkConst ``Grind.instIsCharPNatOfNat)
       else return none
     unless isDeclared (← getEnv) inst do return none
     -- assigns the characteristic `0` of the instance's type, as resolution does
-    bif (← isDefEq n (← inferType inst).appArg!) then return some (some inst) else return none
+    uif (← isDefEq n (← inferType inst).appArg!) then return some (some inst) else return none
   | Grind.PowIdentity α _ _ =>
-    bif α.isConstOf ``Int || α.isConstOf ``Nat then return some none else return none
+    uif α.isConstOf ``Int || α.isConstOf ``Nat then return some none else return none
   | _ => return none
 
 def synthInstanceMeta? (type : Expr) : MetaM (Option Expr) := do profileitM Exception "sym typeclass inference" (← getOptions) (decl := type.getAppFn.constName?.getD .anonymous) do
@@ -221,7 +221,7 @@ def synthInstanceMeta? (type : Expr) : MetaM (Option Expr) := do profileitM Exce
     return inst
   if let some inst? := builtinAlgebraicInsts[type]? then
     let env ← getEnv
-    bif inst?.all (isDeclared env) then return inst?
+    uif inst?.all (isDeclared env) then return inst?
   if let some inst? ← builtinOutParamInst? type then
     return inst?
   catchInternalId isDefEqStuckExceptionId

@@ -26,7 +26,7 @@ def propagateCtorIdxUp (e : Expr) : GoalM Unit := e.withApp fun f xs => do
   unless aNode.ctor do
     return
   let some conInfo ← isConstructorApp? aNode.self | return
-  bif aNode.heqProofs then
+  uif aNode.heqProofs then
     unless (← hasSameType a aNode.self) do
       let b := aNode.self
       let gen := max (← getGeneration a) (← getGeneration b)

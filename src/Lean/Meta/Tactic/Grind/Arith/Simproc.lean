@@ -45,12 +45,12 @@ builtin_simproc_decl expandPow01 (_ ^ _) := fun e => do
   let_expr HPow.hPow α nat α' _ a k := e | return .continue
   let_expr Nat ← nat | return .continue
   if let some k ← getNatValue? k then
-    bif k == 0 then
+    uif k == 0 then
       unless (← isDefEq α α') do return .continue
       let some h ← mkSemiringThm ``Grind.Semiring.pow_zero α | return .continue
       let r ← mkNumeral α 1
       return .done { expr := r, proof? := some (mkApp h a) }
-    else bif k == 1 then
+    else uif k == 1 then
       unless (← isDefEq α α') do return .continue
       let some h ← mkSemiringThm ``Grind.Semiring.pow_one α | return .continue
       return .done { expr := a, proof? := some (mkApp h a) }
@@ -67,7 +67,7 @@ private def isNotFieldQuick (type : Expr) : Bool := Id.run do
 
 builtin_simproc_decl expandDiv (_ / _) := fun e => do
   let_expr f@HDiv.hDiv α β γ _ a b ← e | return .continue
-  bif isNotFieldQuick α then return .continue
+  uif isNotFieldQuick α then return .continue
   unless (← isDefEq α β <&&> isDefEq α γ) do return .continue
   let us := f.constLevels!
   let [u, _, _] := us | return .continue
@@ -80,7 +80,7 @@ builtin_simproc_decl expandDiv (_ / _) := fun e => do
 
 builtin_simproc_decl normFieldInv (_ ⁻¹) := fun e => do
   let_expr Inv.inv α _ a ← e | return .continue
-  bif isNotFieldQuick α then return .continue
+  uif isNotFieldQuick α then return .continue
   match_expr a with
   | NatCast.natCast _ _ _ => return .continue -- Already normalized
   | OfNat.ofNat _ _ _ => return .continue -- Already normalized
@@ -105,7 +105,7 @@ are added to the environment.
 def normInst (instPos : Nat) (inst : Expr) (e : Expr) : SimpM Simp.DStep := do
   unless instPos < e.getAppNumArgs do return .continue
   let instCurr := e.getArg! instPos
-  bif inst == instCurr then return .continue
+  uif inst == instCurr then return .continue
   unless (← withReducibleAndInstances <| isDefEq inst instCurr) do return .continue
   e.withApp fun f args => do
     let args := args.set! instPos inst
@@ -129,7 +129,7 @@ private def isNormNatNum (α n inst : Expr) : Bool := Id.run do
 
 builtin_dsimproc_decl normNatOfNatInst ((OfNat.ofNat _: Nat)) := fun e => do
   let_expr OfNat.ofNat α n inst := e | return .continue
-  bif isNormNatNum α n inst then
+  uif isNormNatNum α n inst then
     return .done e
   let some n ← getNatValue? e | return .continue
   return .done (mkNatLit n)
@@ -154,7 +154,7 @@ private def isNormIntNum (α n inst : Expr) : Bool := Id.run do
 
 builtin_dsimproc_decl normIntOfNatInst ((OfNat.ofNat _: Int)) := fun e => do
   let_expr OfNat.ofNat α n inst := e | return .continue
-  bif isNormIntNum α n inst then
+  uif isNormIntNum α n inst then
     return .done e
   let some n ← getIntValue? e | return .continue
   return .done (mkIntLit n)
@@ -178,7 +178,7 @@ builtin_simproc_decl normIntCastNum (IntCast.intCast _) := fun e => do
   let some ringInst ← synthInstanceMeta? ring | return .continue
   let n ← mkNumeral α k.natAbs
   -- **Note**: TODO missing sanity check on instances
-  bif k <ᵇ 0 then
+  uif k < 0 then
     let some negInst ← synthInstanceMeta? (mkApp (mkConst ``Neg us) α) | return .continue
     let n := mkApp3 (mkConst ``Neg.neg us) α negInst n
     let h := mkApp4 (mkConst ``Grind.Ring.intCast_eq_ofNat_of_nonpos us) α ringInst a eagerReflBoolTrue
@@ -193,7 +193,7 @@ builtin_dsimproc [simp, seval] normPowRatInt ((_ : Rat) ^ (_ : Int)) := fun e =>
   let some v₂ ← getIntValue? b | return .continue
   let warning := (← Simp.getConfig).warnExponents
   unless (← checkExponent v₂.natAbs (warning := warning)) do return .continue
-  bif v₂ <ᵇ 0 then
+  uif v₂ < 0 then
     -- **Note**: we use `Rat.zpow_neg` as a normalization rule
     return .continue
   else

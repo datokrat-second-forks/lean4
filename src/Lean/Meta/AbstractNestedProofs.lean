@@ -47,9 +47,9 @@ def isNonTrivialProof (e : Expr) : MetaM Bool := do
   -- declarations but the code might still be run under `isExporting = true` in order to create the
   -- new aux decls in the public scope. Thus we always shift to the private scope here.
   withoutExporting do
-  bif !(← isProof e) then
+  uif !(← isProof e) then
     return false
-  else bif e.isAppOf ``Grind.nestedProof then
+  else uif e.isAppOf ``Grind.nestedProof then
     -- Grind.nestedProof is a gadget created by the `grind` tactic.
     -- We want to avoid the situation where `grind` keeps creating them,
     -- and this module, which is used by `grind`, keeps abstracting them.
@@ -71,7 +71,7 @@ abbrev M := ReaderT Context $ MonadCacheT ExprStructEq Expr MetaM
 
 partial def visit (e : Expr) : M Expr := do
   checkSystem "abstract nested proofs"
-  bif e.isAtomic then
+  uif e.isAtomic then
     pure e
   else
     let visitBinders (xs : Array Expr) (k : M Expr) : M Expr := do
@@ -88,7 +88,7 @@ partial def visit (e : Expr) : M Expr := do
         lctx := lctx.modifyLocalDecl xFVarId fun _ => localDecl
       withLCtx lctx localInstances k
     checkCache { val := e : ExprStructEq } fun _ => do
-      bif (← isNonTrivialProof e) && !e.hasSorry then
+      uif (← isNonTrivialProof e) && !e.hasSorry then
         /- Ensure proofs nested in type are also abstracted.
            We skip abstraction for proofs containing `sorry` to avoid generating extra
            "declaration uses sorry" warnings for auxiliary theorems: one per abstracted proof
@@ -109,7 +109,7 @@ end AbstractNestedProofs
 
 /-- Replace proofs nested in `e` with new lemmas. The new lemmas are named using `getDeclNGen`. -/
 def abstractNestedProofs (e : Expr) (cache := true) : MetaM Expr := do
-  bif (← isProof e) then
+  uif (← isProof e) then
     -- `e` is a proof itself. So, we don't abstract nested proofs
     return e
   else

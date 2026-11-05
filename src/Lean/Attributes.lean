@@ -68,7 +68,7 @@ builtin_initialize attributeMapRef : IO.Ref (Std.HashMap Name AttributeImpl) ←
 /-- Low level attribute registration function. -/
 def registerBuiltinAttribute (attr : AttributeImpl) : IO Unit := do
   let m ← attributeMapRef.get
-  bif m.contains attr.name then throw (IO.userError s!"Invalid builtin attribute declaration: `{attr.name}` has already been used")
+  uif m.contains attr.name then throw (IO.userError s!"Invalid builtin attribute declaration: `{attr.name}` has already been used")
   unless (← initializing) do
     throw (IO.userError "Failed to register attribute: Attributes can only be registered during initialization")
   attributeMapRef.modify fun m => m.insert attr.name attr
@@ -85,22 +85,22 @@ def registerBuiltinAttribute (attr : AttributeImpl) : IO Unit := do
 -/
 
 def Attribute.Builtin.ensureNoArgs (stx : Syntax) : AttrM Unit := do
-  bif stx.getKind == `Lean.Parser.Attr.simple && stx[1].isNone && stx[2].isNone then
+  uif stx.getKind == `Lean.Parser.Attr.simple && stx[1].isNone && stx[2].isNone then
     return ()
-  else bif stx.getKind == `Lean.Parser.Attr.«class» then
+  else uif stx.getKind == `Lean.Parser.Attr.«class» then
     return ()
   else match stx with
     | Syntax.missing => return () -- In the elaborator, we use `Syntax.missing` when creating attribute views for simple attributes such as `class and `inline
     | _              => throwErrorAt stx "Unexpected attribute argument: This attribute takes no arguments"
 
 def Attribute.Builtin.getIdent? (stx : Syntax) : AttrM (Option Syntax) := do
-  bif stx.getKind == `Lean.Parser.Attr.simple then
-    bif !stx[1].isNone && stx[1][0].isIdent then
+  uif stx.getKind == `Lean.Parser.Attr.simple then
+    uif !stx[1].isNone && stx[1][0].isIdent then
       return some stx[1][0]
     else
       return none
   /- We handle `macro` here because it is handled by the generic `KeyedDeclsAttribute -/
-  else bif stx.getKind == `Lean.Parser.Attr.«macro» || stx.getKind == `Lean.Parser.Attr.«export» then
+  else uif stx.getKind == `Lean.Parser.Attr.«macro» || stx.getKind == `Lean.Parser.Attr.«export» then
     return some stx[1]
   else
     throwErrorAt stx "Unexpected attribute argument"
@@ -119,14 +119,14 @@ def Attribute.Builtin.getId (stx : Syntax) : AttrM Name := do
   return (← getIdent stx).getId
 
 def getAttrParamOptPrio (optPrioStx : Syntax) : AttrM Nat :=
-  bif optPrioStx.isNone then
+  uif optPrioStx.isNone then
     return eval_prio default
   else match optPrioStx[0].isNatLit? with
     | some prio => return prio
     | none => throwErrorAt optPrioStx "Unexpected attribute argument: Expected a priority, but found{indentD optPrioStx}"
 
 def Attribute.Builtin.getPrio (stx : Syntax) : AttrM Nat := do
-  bif stx.getKind == `Lean.Parser.Attr.simple then
+  uif stx.getKind == `Lean.Parser.Attr.simple then
     getAttrParamOptPrio stx[1]
   else
     throwErrorAt stx "Unexpected attribute argument: Expected an optional priority, but found{indentD stx}"
@@ -149,14 +149,14 @@ def throwAttrDeclNotOfExpectedType (attrName declName : Name) (givenType expecte
     but `[{attrName}]` can only be added to declarations of type{indentExpr expectedType}"
 
 def ensureAttrDeclIsPublic (attrName declName : Name) (attrKind : AttributeKind) : AttrM Unit := do
-  bif (← getEnv).header.isModule && attrKind != .local then
+  uif (← getEnv).header.isModule && attrKind != .local then
     withExporting do
       checkPrivateInPublic declName
-      bif !(← hasConst declName) then
+      uif !(← hasConst declName) then
         throwError m!"Cannot add attribute `[{attrName}]`: Declaration `{.ofConstName declName}` must be public"
 
 def ensureAttrDeclIsMeta (attrName declName : Name) (attrKind : AttributeKind) : AttrM Unit := do
-  bif (← getEnv).header.isModule && !isMarkedMeta (← getEnv) declName then
+  uif (← getEnv).header.isModule && !isMarkedMeta (← getEnv) declName then
     throwError m!"Cannot add attribute `[{attrName}]`: Declaration `{.ofConstName declName}` must be marked as `meta`"
   -- Make sure attributed decls can't refer to private meta imports, which is already checked for
   -- public decls.
@@ -197,7 +197,7 @@ def registerTagAttribute (name : Name) (descr : String)
     asyncMode       := asyncMode
     replay?         := some fun _ newState newConsts s =>
       newConsts.foldl (init := s) fun s c =>
-        bif newState.contains c then
+        uif newState.contains c then
           s.insert c
         else s
   }
@@ -274,7 +274,7 @@ def registerParametricAttributeExt (ref : Name) (preserveOrder : Bool := false)
     addImportedFn   := fun _ => pure ([], {})
     addEntryFn      := fun (decls, m) (p : Name × α) => (p.1 :: decls, m.insert p.1 p.2)
     exportEntriesFnEx := fun env (decls, m) => Id.run do
-      let all := bif preserveOrder then
+      let all := uif preserveOrder then
         decls.toArray.reverse.filterMap (fun n => return (n, ← m.find? n))
       else
         let r := m.foldl (fun a n p => a.push (n, p)) #[]
@@ -312,7 +312,7 @@ def getParamFromExt? [Inhabited α]
     (preserveOrder : Bool) (env : Environment) (decl : Name) : Option α :=
   match env.getModuleIdxFor? decl with
   | some modIdx =>
-    let entry? := bif preserveOrder then
+    let entry? := uif preserveOrder then
       findByName? (ext.getModuleEntries env modIdx) decl
     else
       (ext.getModuleEntries env modIdx).binSearch (decl, default) (fun a b => Name.quickLt a.1 b.1)
@@ -326,9 +326,9 @@ def getParam? [Inhabited α] (attr : ParametricAttribute α) (env : Environment)
 
 def setParamFromExt
   (ext : PersistentEnvExtension (Name × α) (Name × α) (List Name × NameMap α)) (attr : AttributeImpl) (env : Environment) (decl : Name) (param : α) : Except String Environment :=
-  bif (env.getModuleIdxFor? decl).isSome then
+  uif (env.getModuleIdxFor? decl).isSome then
     Except.error (s!"Failed to add parametric attribute `[{attr.name}]` to `{decl}`: Declaration is in an imported module")
-  else bif ((ext.getState env).2.find? decl).isSome then
+  else uif ((ext.getState env).2.find? decl).isSome then
     Except.error (s!"Failed to add parametric attribute `[{attr.name}]` to `{decl}`: Attribute has already been set")
   else
     Except.ok (ext.addEntry env (decl, param))
@@ -400,11 +400,11 @@ def getValue [Inhabited α] (attr : EnumAttributes α) (env : Environment) (decl
 
 def setValue (attrs : EnumAttributes α) (env : Environment) (decl : Name) (val : α) : Except String Environment := do
   let pfx := s!"Internal error calling `{attrs.ext.name}.setValue` for `{decl}`"
-  bif (env.getModuleIdxFor? decl).isSome then
+  uif (env.getModuleIdxFor? decl).isSome then
     throw s!"{pfx}: Declaration is in an imported module"
   unless attrs.ext.toEnvExtension.asyncMayModify env decl do
     throw s!"{pfx}: Declaration is not from this async context `{env.asyncPrefix?}`"
-  bif ((attrs.ext.getState (asyncDecl := decl) env).find? decl).isSome then
+  uif ((attrs.ext.getState (asyncDecl := decl) env).find? decl).isSome then
     throw s!"{pfx}: Attribute has already been set"
   return attrs.ext.addEntry (asyncDecl := decl) env (decl, val)
 
@@ -421,7 +421,7 @@ builtin_initialize attributeImplBuilderTableRef : IO.Ref AttributeImplBuilderTab
 
 def registerAttributeImplBuilder (builderId : Name) (builder : AttributeImplBuilder) : IO Unit := do
   let table ← attributeImplBuilderTableRef.get
-  bif table.contains builderId then throw (IO.userError s!"Attribute implementation builder `{builderId}` has already been declared")
+  uif table.contains builderId then throw (IO.userError s!"Attribute implementation builder `{builderId}` has already been declared")
   attributeImplBuilderTableRef.modify fun table => table.insert builderId builder
 
 structure AttributeExtensionOLeanEntry where
@@ -511,7 +511,7 @@ def getAttributeImpl (env : Environment) (attrName : Name) : Except String Attri
 def registerAttributeOfBuilder (env : Environment) (builderId ref : Name) (args : List DataValue) : IO Environment := do
   let entry := {builderId, ref, args}
   let attrImpl ← mkAttributeImplOfEntry entry
-  bif isAttribute env attrImpl.name then
+  uif isAttribute env attrImpl.name then
     throw (IO.userError s!"Invalid builtin attribute declaration: `{attrImpl.name}` has already been used")
   else
     return attributeExtension.addEntry env (entry, attrImpl)
@@ -530,7 +530,7 @@ def updateEnvAttributesImpl (env : Environment) : IO Environment := do
   let map ← attributeMapRef.get
   let s := attributeExtension.getState env
   let s := map.fold (init := s) fun s attrName attrImpl =>
-    bif s.map.contains attrName then
+    uif s.map.contains attrName then
       s
     else
       { s with map := s.map.insert attrName attrImpl }

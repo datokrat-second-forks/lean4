@@ -50,7 +50,7 @@ public def Simp.Result.toSimpGoalResult (result : Simp.Result) (mvarId : MVarId)
     let u ← getLevel decl.type
     let h := mkApp4 (mkConst ``Eq.mpr [u]) decl.type target' h mvarNew
     mvarId.assign h
-    bif target'.isTrue then
+    uif target'.isTrue then
       mvarNew.mvarId!.assign (mkConst ``True.intro)
       return .closed
     else

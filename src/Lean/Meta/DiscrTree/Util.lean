@@ -60,7 +60,7 @@ Generate a trie node from values and an array of children.
 -/
 @[inline]
 def mkNode (vs : Array α) (cs : Array (Key × Trie α)) : Trie α :=
-  bif h : vs.isEmpty && cs.size =ᵇ 1 then
+  uif h : vs.isEmpty ∧ cs.size = 1 then
     .chain cs[0].1 cs[0].2
   else
     .node vs cs
@@ -176,13 +176,13 @@ partial def Trie.mapArraysM (t : DiscrTree.Trie α) (f : Array α → m (Array �
   | .chain k c => do
     let vs ← f #[] -- Corner case. Possible future optimization: modify `mapArraysM` semantics to only call `f` for non-empty arrays and then eliminate this line
     let c ← c.mapArraysM f
-    let cs := bif c.isEmptyNode then #[] else #[(k, c)]
+    let cs := uif c.isEmptyNode then #[] else #[(k, c)]
     return Trie.mkNode vs cs
   | .node vs children => do
     let vs ← f vs
     let children ← children.filterMapM fun (k, child) => do
       let child ← child.mapArraysM f
-      bif child.isEmptyNode then
+      uif child.isEmptyNode then
         return none
       else
         return some (k, child)
@@ -192,7 +192,7 @@ partial def Trie.mapArraysM (t : DiscrTree.Trie α) (f : Array α → m (Array �
 @[inline]
 def mapArraysM (d : DiscrTree α) (f : Array α → m (Array β)) : m (DiscrTree β) := do
   let root ← d.root.mapM (fun t => t.mapArraysM f)
-  pure { root := root.foldl (init := root) fun acc k t => bif t.isEmptyNode then acc.erase k else acc }
+  pure { root := root.foldl (init := root) fun acc k t => uif t.isEmptyNode then acc.erase k else acc }
 
 /-- Apply a function to the array of values at each node in a `DiscrTree`. -/
 @[inline]

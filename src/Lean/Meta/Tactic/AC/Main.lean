@@ -77,7 +77,7 @@ def toACExpr (op l r : Expr) : MetaM (Array Expr × ACExpr) := do
   where
     toPreExpr : Expr → StateT ExprSet MetaM PreExpr
     | e@(bin op₂ l r) => do
-      bif (←isDefEq op op₂) then
+      uif (←isDefEq op op₂) then
         return PreExpr.op (←toPreExpr l) (←toPreExpr r)
       modify fun vars => vars.insert e
       return PreExpr.var e
@@ -99,7 +99,7 @@ def abstractAtoms (preContext : PreContext) (atoms : Array Expr)
   let α ← inferType atoms[0]!
   let u ← getLevel α
   let rec go i (acc : Array (Expr × Option Expr)) (vars : Array Expr) (args : Array Expr) := do
-    bif h : i <ᵇ atoms.size then
+    uif h : i < atoms.size then
       withLocalDeclD `x α fun v => do
         match (← getInstance ``LawfulIdentity #[preContext.op, atoms[i]]) with
         | none =>
@@ -175,7 +175,7 @@ def post (e : Expr) : SimpM Simp.Step := do
   let ctx ← Simp.getContext
   match e, ctx.parent? with
   | bin op₁ l r, some (bin op₂ _ _) =>
-    bif (←isDefEq op₁ op₂) then
+    uif (←isDefEq op₁ op₂) then
       return Simp.Step.done { expr := e }
     match ←preContext op₁ with
     | some pc =>
@@ -232,7 +232,7 @@ def evalNf0 : Tactic := fun stx => do
     withMainContext do
       match loc with
       | Location.targets hyps target =>
-        bif target then acNfTargetTactic
+        uif target then acNfTargetTactic
         (← getFVarIds hyps).forM acNfHypTactic
       | Location.wildcard =>
         acNfTargetTactic

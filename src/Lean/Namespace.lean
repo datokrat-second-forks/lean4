@@ -33,7 +33,7 @@ builtin_initialize namespacesExt : PersistentEnvExtension Name Name State ←
       let capacity := as.foldl (init := 0) fun r e => r + e.size
       let mut map : Std.HashMap Name Environment.Visibility := Std.HashMap.emptyWithCapacity capacity
       for mod in env.header.modules, modEntries in as do
-        let vis := bif mod.isExported then .public else .private
+        let vis := uif mod.isExported then .public else .private
         for e in modEntries do
           map := map.alter e fun
             | some .public => some .public
@@ -54,7 +54,7 @@ namespace Environment
 /-- Register a new namespace in the environment. -/
 public def registerNamespace (env : Environment) (n : Name) : Environment :=
   -- Can only skip registering imported namespaces for public imports
-  bif namespacesExt.getState env |>.find? n |>.any (· == .public) then env else
+  uif namespacesExt.getState env |>.find? n |>.any (· == .public) then env else
     namespacesExt.addEntry env n
 
 /-- Return `true` if `n` is the name of a namespace in `env`. -/

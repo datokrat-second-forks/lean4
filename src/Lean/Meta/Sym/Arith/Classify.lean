@@ -193,7 +193,7 @@ are the same type. Heterogeneous applications, such as `c * xs` with `c : Nat` a
 The types are compared with `isSameExpr`, which relies on the terms being maximally shared.
 -/
 def homoType? (α β γ : Expr) : Option Expr :=
-  bif isSameExpr α β && isSameExpr α γ then some α else none
+  uif isSameExpr α β && isSameExpr α γ then some α else none
 
 /--
 Classify the algebraic structure of `type`, trying the strongest first:
@@ -231,7 +231,7 @@ private def tryOrder? (type : Expr) : SymM (Option Nat) := do
   let leFn ← canonFn <| mkApp2 (mkConst ``LE.le [u]) type leInst
   let (lawfulOrderLTInst?, ltFn?) ← if let some ltInst := ltInst? then
     let inst? ← mkLawfulOrderLTInst? u type ltInst? (some leInst)
-    bif inst?.isNone then
+    uif inst?.isNone then
       pure (none, none)
     else
       pure (inst?, some (← canonFn <| mkApp2 (mkConst ``LT.lt [u]) type ltInst))
@@ -239,7 +239,7 @@ private def tryOrder? (type : Expr) : SymM (Option Nat) := do
     pure (none, none)
   -- The ring link is used by `grind order` for offsets and by the `Sym.Arith` normalizer for
   -- relations; both need `<`.
-  let (ringId?, semiringId?, isCommSemiring, ringInst?, orderedRingInst?, isCommRing) ← bif lawfulOrderLTInst?.isNone then
+  let (ringId?, semiringId?, isCommSemiring, ringInst?, orderedRingInst?, isCommRing) ← uif lawfulOrderLTInst?.isNone then
     pure (none, none, true, none, none, false)
   else match (← classify? type) with
     | .commRing ringId =>

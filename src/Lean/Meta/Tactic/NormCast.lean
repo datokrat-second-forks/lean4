@@ -35,7 +35,7 @@ def getSimpArgs (e : Expr) : MetaM (Array Expr) := do
   | some {argKinds, ..} =>
     let mut args := #[]
     for a in e.getAppArgs, k in argKinds do
-      bif k matches .eq then
+      uif k matches .eq then
         args := args.push a
     return args
 
@@ -43,7 +43,7 @@ def getSimpArgs (e : Expr) : MetaM (Array Expr) := do
 partial def countHeadCoes (e : Expr) : MetaM Nat := do
   if let Expr.const fn .. := e.getAppFn then
     if let some info ← getCoeFnInfo? fn then
-      bif e.getAppNumArgs ≥ᵇ info.numArgs then
+      uif e.getAppNumArgs ≥ info.numArgs then
         return (← countHeadCoes (e.getArg! info.coercee)) + 1
   return 0
 
@@ -52,7 +52,7 @@ partial def countCoes (e : Expr) : MetaM Nat :=
   lambdaTelescope e fun _ e => do
     if let Expr.const fn .. := e.getAppFn then
       if let some info ← getCoeFnInfo? fn then
-        bif e.getAppNumArgs ≥ᵇ info.numArgs then
+        uif e.getAppNumArgs ≥ info.numArgs then
           let mut coes := (← countHeadCoes (e.getArg! info.coercee)) + 1
           for i in info.numArgs...e.getAppNumArgs do
             coes := coes + (← countCoes (e.getArg! i))
@@ -68,26 +68,26 @@ def classifyType (ty : Expr) : MetaM Label :=
   forallTelescopeReducing ty fun _ ty => do
     let ty ← whnf ty
     let (lhs, rhs) ←
-      bif ty.isAppOfArity ``Eq 3 then pure (ty.getArg! 1, ty.getArg! 2)
-      else bif ty.isAppOfArity ``Iff 2 then pure (ty.getArg! 0, ty.getArg! 1)
+      uif ty.isAppOfArity ``Eq 3 then pure (ty.getArg! 1, ty.getArg! 2)
+      else uif ty.isAppOfArity ``Iff 2 then pure (ty.getArg! 0, ty.getArg! 1)
       else throwError "Invalid `norm_cast` lemma: Expected an equality or iff, but found{indentExpr ty}"
     let lhsCoes ← countCoes lhs
     let coeFnNote := MessageData.note m!"coe functions are registered using the `[coe]` attribute"
-    bif lhsCoes =ᵇ 0 then
+    uif lhsCoes = 0 then
       throwError m!"Invalid `norm_cast` lemma: At least one coe function must appear in the left-hand side{indentExpr lhs}" ++ coeFnNote
     let lhsHeadCoes ← countHeadCoes lhs
     let rhsHeadCoes ← countHeadCoes rhs
     let rhsInternalCoes ← countInternalCoes rhs
-    bif lhsHeadCoes =ᵇ 0 then
+    uif lhsHeadCoes = 0 then
       return Label.elim
-    else bif lhsHeadCoes =ᵇ 1 then do
+    else uif lhsHeadCoes = 1 then do
       unless rhsHeadCoes = 0 do
         throwError m!"Invalid `norm_cast` lemma: The right-hand side cannot start with a coe function{indentExpr rhs}" ++ coeFnNote
-      bif rhsInternalCoes =ᵇ 0 then
+      uif rhsInternalCoes = 0 then
         return Label.squash
       else
         return Label.move
-    else bif rhsHeadCoes <ᵇ lhsHeadCoes then do
+    else uif rhsHeadCoes < lhsHeadCoes then do
       return Label.squash
     else do
       throwError m!"\

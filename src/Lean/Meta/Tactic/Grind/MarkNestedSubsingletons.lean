@@ -54,7 +54,7 @@ Classifies a term from its (syntactically known) type `rt`:
 inspect the head symbols, so they are not affected (`isPropQuick` returns `.undef` on them).
 -/
 private def classifyResultType (rt : Expr) : MetaM QuickResult := do
-  bif rt.isAppOf ``Decidable || rt.isAppOf ``UDecidable then
+  uif rt.isAppOf ``Decidable || rt.isAppOf ``UDecidable then
     return .decidable
   match (← isPropQuick rt) with
   | .true  => return .proof
@@ -64,7 +64,7 @@ private def classifyResultType (rt : Expr) : MetaM QuickResult := do
     | .sort .. | .forallE .. => return .no
     | _ =>
       let .const declName _ := rt.getAppFn | return .undef
-      bif (← getConstInfo declName) matches .inductInfo .. then
+      uif (← getConstInfo declName) matches .inductInfo .. then
         return .no
       else
         return .undef
@@ -80,11 +80,11 @@ private def classifyArrow (headType : Expr) (args : Array Expr) : MetaM QuickRes
   go headType 0
 where
   go (type : Expr) (i : Nat) : MetaM QuickResult := do
-    bif i == args.size then
+    uif i == args.size then
       match type with
       | .bvar idx =>
         -- de Bruijn variable `idx` refers to the peeled binder instantiated by `args[i - 1 - idx]`
-        bif h : idx <ᵇ i && i - 1 - idx <ᵇ args.size then
+        uif h : idx < i ∧ i - 1 - idx < args.size then
           classifyResultType args[i - 1 - idx]
         else
           return .undef
@@ -139,7 +139,7 @@ private def isProofOrDecidable (e : Expr) : MetaM ProofOrDecidableResult := do
   | .proof => return .proof (← inferType e)
   | .decidable | .undef =>
     let type ← inferType e
-    bif (← Meta.isProp type) then
+    uif (← Meta.isProp type) then
       return .proof type
     else if let some (p, u) ← isDecidable type then
       return .decidable p u
@@ -157,7 +157,7 @@ partial def markNestedSubsingletons (e : Expr) : GrindM Expr := do profileitM Ex
   visit e |>.run' {}
 where
   visit (e : Expr) : M Expr := do
-    bif isMarkedSubsingletonApp e then
+    uif isMarkedSubsingletonApp e then
       return e -- `e` is already marked
     -- check whether result is cached
     if let some r := (← get).get? { expr := e } then
@@ -169,7 +169,7 @@ where
       modify fun s => s.insert { expr := e } e'
       return e'
     | .decidable p u =>
-      let g := bif u then ``Grind.nestedUDecidable else ``Grind.nestedDecidable
+      let g := uif u then ``Grind.nestedUDecidable else ``Grind.nestedDecidable
       let e' := mkApp2 (mkConst g) (← preprocess p) e
       modify fun s => s.insert { expr := e } e'
       return e'
@@ -194,7 +194,7 @@ where
           unless isSameExpr arg arg' do
             args := args.set i arg'
             modified := true
-        bif modified then
+        uif modified then
           pure <| mkAppN f args.toArray
         else
           pure e
@@ -219,7 +219,7 @@ where
       | e =>
         let e := e.instantiateRev fvars
         let e' ← visit e
-        bif modified || !isSameExpr e e' then
+        uif modified || !isSameExpr e e' then
           mkLambdaFVars fvars e'
         else
           return root
@@ -236,7 +236,7 @@ where
       | e =>
         let e := e.instantiateRev fvars
         let e' ← visit e
-        bif modified || !isSameExpr e e' then
+        uif modified || !isSameExpr e e' then
           mkForallFVars fvars e'
         else
           return root
@@ -272,7 +272,7 @@ private def markNestedProof (e : Expr) : M Expr := do
 Given a proof `e`, mark it with `Lean.Grind.nestedProof`
 -/
 def markProof (e : Expr) : GrindM Expr := do
-  bif e.isAppOf ``Grind.nestedProof then
+  uif e.isAppOf ``Grind.nestedProof then
     return e -- `e` is already marked
   else
     markNestedProof e |>.run' {}

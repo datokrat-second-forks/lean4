@@ -16,7 +16,7 @@ namespace Lean.Meta.Simp
 private def originToKey (thmId : Origin) : MetaM MessageData := do
   match thmId with
   | .decl declName _ _ =>
-    bif (← getEnv).contains declName then
+    uif (← getEnv).contains declName then
       pure m!"{.ofConstName declName}"
     else
       pure m!"{declName} (builtin simproc)"
@@ -26,7 +26,7 @@ private def originToKey (thmId : Origin) : MetaM MessageData := do
 def mkSimpDiagSummary (counters : PHashMap Origin Nat) (usedCounters? : Option (PHashMap Origin Nat) := none) : MetaM DiagSummary := do
   let threshold := diagnostics.threshold.get (← getOptions)
   let entries := collectAboveThreshold counters threshold (fun _ => true) (lt := (· < ·))
-  bif entries.isEmpty then
+  uif entries.isEmpty then
     return {}
   else
     let mut data := #[]
@@ -40,7 +40,7 @@ def mkSimpDiagSummary (counters : PHashMap Origin Nat) (usedCounters? : Option (
     return { data, max := entries[0]!.2 }
 
 private def mkTheoremsWithBadKeySummary (thms : PArray SimpTheorem) : MetaM DiagSummary := do
-  bif thms.isEmpty then
+  uif thms.isEmpty then
     return {}
   else
     let mut data := #[]
@@ -54,7 +54,7 @@ def mkDiagMessages (diag : Simp.Diagnostics) : MetaM (Array MessageData) := do
   let tried ← mkSimpDiagSummary diag.triedThmCounter diag.usedThmCounter
   let congr ← mkDiagSummary `simp diag.congrThmCounter
   let thmsWithBadKeys ← mkTheoremsWithBadKeySummary diag.thmsWithBadKeys
-  bif used.isEmpty && tried.isEmpty && congr.isEmpty && thmsWithBadKeys.isEmpty then
+  uif used.isEmpty && tried.isEmpty && congr.isEmpty && thmsWithBadKeys.isEmpty then
     return #[]
   else
     let m := #[]
@@ -66,7 +66,7 @@ def mkDiagMessages (diag : Simp.Diagnostics) : MetaM (Array MessageData) := do
     return m
 
 def reportDiag (diag : Simp.Diagnostics) : MetaM Unit := do
-  bif (← isDiagnosticsEnabled) then
+  uif (← isDiagnosticsEnabled) then
     -- Diagnostic output may reference private declarations that are not visible
     -- in exporting mode (issue #13581).
     withoutExporting do

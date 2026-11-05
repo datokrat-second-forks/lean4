@@ -36,7 +36,7 @@ where
   | _, p, [], [], acc => pure (p, acc)
   | n, p, [], goals::stk, acc => go n p goals stk acc
   | n, p, g::goals, stk, acc => do
-    bif (← g.isAssigned) then
+    uif (← g.isAssigned) then
       go n p goals stk acc
     else
       match n with

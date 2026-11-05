@@ -42,7 +42,7 @@ def mkLoopWarningMsg (thm : SimpTheorem) : SimpM MessageData := do
 
   let mut others := #[]
   for other in (← get).usedTheorems.toArray do
-    bif other != thm.origin  then
+    uif other != thm.origin  then
       others := others.push other
   unless others.isEmpty do
     msg := msg ++ .note m!"Possibly caused by: {← ppOrigins others}"
@@ -52,8 +52,8 @@ def mkLoopWarningMsg (thm : SimpTheorem) : SimpM MessageData := do
   pure msg
 
 def shouldCheckLoops (force : Bool) (ctxt : Simp.Context) : CoreM Bool := do
-  bif ctxt.config.singlePass then return false
-  bif force then return true
+  uif ctxt.config.singlePass then return false
+  uif force then return true
   return Linter.getLinterValue linter.loopingSimpArgs (← Linter.getLinterOptions)
 
 /--
@@ -70,7 +70,7 @@ def checkLoops (force : Bool) (ctxt : Simp.Context) (methods : Methods) (thm : S
   unless (← shouldCheckLoops force ctxt) do return
 
   -- Ignore theorems depending on the local context for now
-  bif thm.proof.hasFVar then return
+  uif thm.proof.hasFVar then return
 
   let type ← inferType (← thm.getValue)
   forallTelescopeReducing type fun _xs type => do
@@ -84,7 +84,7 @@ def checkLoops (force : Bool) (ctxt : Simp.Context) (methods : Methods) (thm : S
             let _ ← simp rhs
           fun ex => do
             trace[Meta.Tactic.simp.loopProtection] "loop protection for {← ppOrigin thm.origin}: got exception{indentD ex.toMessageData}"
-            bif force then
+            uif force then
               logWarning (← mkLoopWarningMsg thm)
             else
               Linter.logLint linter.loopingSimpArgs (← getRef) (← mkLoopWarningMsg thm)

@@ -47,7 +47,7 @@ public def unfold (declNames : NameSet) : DSimproc := fun e => do
   let env ← getEnv
   unless hasSmartUnfoldingDecl env declName do
     let some value := env.find? declName |>.bind (·.value?) | return .rfl
-    bif value.getNumHeadLambdas >ᵇ e.getAppNumArgs then return .rfl
+    uif value.getNumHeadLambdas > e.getAppNumArgs then return .rfl
   let some e' ← unfoldDefinition? e (ignoreTransparency := true) | return .rfl
   return .step (← shareCommon e')
 

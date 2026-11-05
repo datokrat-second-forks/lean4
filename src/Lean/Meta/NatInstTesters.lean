@@ -82,27 +82,27 @@ end Structural
 namespace DefEq
 
 def isInstAddNat (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstAddNat e) then return true
+  uif (← Structural.isInstAddNat e) then return true
   isDefEqI e Nat.mkInstAdd
 
 def isInstHAddNat (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstHAddNat e) then return true
+  uif (← Structural.isInstHAddNat e) then return true
   isDefEqI e Nat.mkInstHAdd
 
 def isInstMulNat (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstMulNat e) then return true
+  uif (← Structural.isInstMulNat e) then return true
   isDefEqI e Nat.mkInstMul
 
 def isInstHMulNat (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstHMulNat e) then return true
+  uif (← Structural.isInstHMulNat e) then return true
   isDefEqI e Nat.mkInstHMul
 
 def isInstLTNat (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstLTNat e) then return true
+  uif (← Structural.isInstLTNat e) then return true
   isDefEqI e Nat.mkInstLT
 
 def isInstLENat (e : Expr) : MetaM Bool := do
-  bif (← Structural.isInstLENat e) then return true
+  uif (← Structural.isInstLENat e) then return true
   isDefEqI e Nat.mkInstLE
 
 end DefEq

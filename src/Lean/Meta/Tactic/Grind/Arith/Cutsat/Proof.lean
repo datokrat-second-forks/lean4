@@ -126,9 +126,9 @@ private def withPrevEpoch (k : ProofM α) : ProofM α := do
 
 /-- Returns the variables of epoch `epoch` in the cutsat state `s`, if `s` has this epoch. -/
 private def State.getEpochVars? (s : State) (epoch : Nat) : Option (PArray Expr) :=
-  bif epoch == s.varsHistory.size then
+  uif epoch == s.varsHistory.size then
     some s.vars
-  else bif h : epoch <ᵇ s.varsHistory.size then
+  else uif h : epoch < s.varsHistory.size then
     some s.varsHistory[epoch].1
   else
     none
@@ -178,7 +178,7 @@ These are variables before the renaming them.
 private def getVarMap : ProofM (PHashMap ExprPtr Var) := do
   let epoch := (← read).epoch
   let s ← get'
-  bif epoch == s.varsHistory.size then return s.varMap else return s.varsHistory[epoch]!.2
+  uif epoch == s.varsHistory.size then return s.varMap else return s.varsHistory[epoch]!.2
 
 private def getVarOf (e : Expr) : ProofM Var := do
   let some x := (← getVarMap).find? { expr := e } | throwError "`grind` internal error, missing cutsat variable{indentExpr e}"
@@ -188,7 +188,7 @@ private def caching (c : α) (k : ProofM Expr) : ProofM Expr := do
   let addr := unsafe (ptrAddrUnsafe c).toUInt64 >>> 2
   let depth := (← read).depth
   if let some cached := (← get).cache[addr]? then
-    bif cached.depth ≤ᵇ depth then
+    uif cached.depth ≤ depth then
       return cached.proof
   let proof ← k
   modify fun s => { s with cache := s.cache.insert addr { depth, proof } }
@@ -200,7 +200,7 @@ changed, so declarations can still be hoisted to all enclosing case splits of th
 The local context is not changed either, as it extends the one of the goal at `depth`.
 -/
 private def withGoalAtDepth (depth : Nat) (k : ProofM α) : ProofM α := do
-  bif depth == (← read).depth then
+  uif depth == (← read).depth then
     return ← k
   let goal ← getThe Goal
   let some (_, s) := goal.goalStack[depth]?
@@ -229,7 +229,7 @@ private def hoisting (c : α) (depth? : Option Nat) (p : Poly) (type : Expr → 
   if let some fvarId ← findHoistedDecl? depth key then
     return mkFVar fvarId
   let proof ← withGoalAtDepth depth k
-  bif proof.isFVar then return proof
+  uif proof.isFVar then return proof
   let vars ← getCurrVars
   let (fvarId, idx) ← reserveHoistedDecl depth key (type (← p.denoteExpr (vars[·]!)))
   modify fun s => { s with facts := s.facts.push { depth, idx, proof } }
@@ -276,8 +276,8 @@ private def mkRingExprDecl (e : CommRing.RingExpr) : ProofM Expr := do
   declare! ringExprDecls e
 
 private def toContextExprCore (vars : Array Expr) (type : Expr) : MetaM Expr :=
-  bif h : 0 <ᵇ vars.size then
-    RArray.toExpr type id (RArray.ofFn (vars[·]) (lt_of_decideLT_eq_true h))
+  uif h : 0 < vars.size then
+    RArray.toExpr type id (RArray.ofFn (vars[·]) h)
   else
     RArray.toExpr type id (RArray.leaf (mkIntLit 0))
 
@@ -292,7 +292,7 @@ private def getCtxDepth (depth : Nat) (epoch : Nat) (vars : Array Var) : GoalM N
   let some maxVar := vars.back? | return 0
   for d in [:depth], (mvarId, goal) in (← get).goalStack do
     if let some vars := (← cutsatExt.getStateCore { goal with mvarId }).getEpochVars? epoch then
-      bif maxVar <ᵇ vars.size then return d
+      uif maxVar < vars.size then return d
   return depth
 
 private def DvdCnstr.get_d_a (c : DvdCnstr) : GoalM (Int × Int) := do
@@ -327,7 +327,7 @@ private partial def mkMulEqProof (x : Var) (a? : Option Expr) (cs : Array (Expr 
     throwError "`grind` internal error, cutsat failed to construct proof for multiplication equality"
 where
   goVar (e : Expr) : ProofM MulEqProof := do
-    bif some e == a? then
+    uif some e == a? then
       return .mulVar 1 e (mkApp (mkConst ``Int.Internal.Linear.eq_one_mul) e)
     else
       let some (_, k, c) := cs.find? fun (e', _, _) => e' == e | return .none
@@ -337,7 +337,7 @@ where
 
   go (e : Expr) : ProofM MulEqProof := do
     let_expr HMul.hMul _ _ _ i a b := e | goVar e
-    bif !(← Structural.isInstHMulInt i) then goVar e else
+    uif !(← Structural.isInstHMulInt i) then goVar e else
     let ha ← go a
     if let .const 0 h := ha then
       return .const 0 (mkApp3 (mkConst ``Int.Internal.Linear.mul_eq_zero_left) a b h)
@@ -485,7 +485,7 @@ private partial def DvdCnstr.toExprProof (c' : DvdCnstr) : ProofM Expr := cachin
     return mkApp7 (mkConst ``Int.Internal.Linear.dvd_elim) (← getContext) (toExpr c.d) (← mkPolyDecl c.p) (toExpr c'.d) (← mkPolyDecl c'.p) eagerReflBoolTrue (← c.toExprProof)
   | .divCoeffs c =>
     let g := c.p.gcdCoeffs c.d
-    let g := bif c.d <ᵇ 0 then -g else g
+    let g := uif c.d < 0 then -g else g
     return mkApp8 (mkConst ``Int.Internal.Linear.dvd_coeff) (← getContext) (toExpr c.d) (← mkPolyDecl c.p) (toExpr c'.d) (← mkPolyDecl c'.p) (toExpr g) eagerReflBoolTrue (← c.toExprProof)
   | .bmodCoeffs c a =>
     return mkApp7 (mkConst ``Int.Internal.Linear.dvd_bmod_coeffs) (← getContext) (toExpr c.d) (← mkPolyDecl c.p) (← mkPolyDecl c'.p) (toExpr a) eagerReflBoolTrue (← c.toExprProof)
@@ -514,11 +514,11 @@ private partial def DvdCnstr.toExprProof (c' : DvdCnstr) : ProofM Expr := cachin
     let p₂ := c₂.p
     match c₃? with
     | none =>
-      let thmName := bif left then ``Int.Internal.Linear.cooper_left_split_dvd else ``Int.Internal.Linear.cooper_right_split_dvd
+      let thmName := uif left then ``Int.Internal.Linear.cooper_left_split_dvd else ``Int.Internal.Linear.cooper_right_split_dvd
       return mkApp8 (mkConst thmName)
         (← getContext) (← mkPolyDecl p₁) (← mkPolyDecl p₂) (toExpr s.k) (toExpr c'.d) (← mkPolyDecl c'.p) (← s.toExprProof) eagerReflBoolTrue
     | some c₃ =>
-      let thmName := bif left then ``Int.Internal.Linear.cooper_dvd_left_split_dvd1 else ``Int.Internal.Linear.cooper_dvd_right_split_dvd1
+      let thmName := uif left then ``Int.Internal.Linear.cooper_dvd_left_split_dvd1 else ``Int.Internal.Linear.cooper_dvd_right_split_dvd1
       return mkApp10 (mkConst thmName)
         (← getContext) (← mkPolyDecl p₁) (← mkPolyDecl p₂) (← mkPolyDecl c₃.p) (toExpr c₃.d) (toExpr s.k) (toExpr c'.d) (← mkPolyDecl c'.p)
         (← s.toExprProof) eagerReflBoolTrue
@@ -527,7 +527,7 @@ private partial def DvdCnstr.toExprProof (c' : DvdCnstr) : ProofM Expr := cachin
     let p₁ := c₁.p
     let p₂ := c₂.p
     let some c₃ := c₃? | throwError "`grind` internal error, unexpected `cooper₂` proof"
-    let thmName := bif left then ``Int.Internal.Linear.cooper_dvd_left_split_dvd2 else ``Int.Internal.Linear.cooper_dvd_right_split_dvd2
+    let thmName := uif left then ``Int.Internal.Linear.cooper_dvd_left_split_dvd2 else ``Int.Internal.Linear.cooper_dvd_right_split_dvd2
     return mkApp10 (mkConst thmName)
       (← getContext) (← mkPolyDecl p₁) (← mkPolyDecl p₂) (← mkPolyDecl c₃.p) (toExpr c₃.d) (toExpr s.k) (toExpr c'.d) (← mkPolyDecl c'.p)
       (← s.toExprProof) eagerReflBoolTrue
@@ -545,11 +545,11 @@ private partial def LeCnstr.toExprProof (c' : LeCnstr) : ProofM Expr := caching 
     let h ← mkOfEqFalse (← mkEqFalseProof e)
     return mkApp5 (mkConst ``Int.Internal.Linear.le_neg) (← getContext) (← mkPolyDecl p) (← mkPolyDecl c'.p) eagerReflBoolTrue h
   | .coreToInt e pos toIntThm lhs rhs =>
-    let h ← bif pos then pure <| mkOfEqTrueCore e (← mkEqTrueProof e) else pure <| mkOfEqFalseCore e (← mkEqFalseProof e)
+    let h ← uif pos then pure <| mkOfEqTrueCore e (← mkEqTrueProof e) else pure <| mkOfEqFalseCore e (← mkEqFalseProof e)
     let h := mkApp toIntThm h
     return mkApp6 (mkConst ``Int.Internal.Linear.le_norm_expr_rfl) (← getContext) (← mkExprDecl lhs) (← mkExprDecl rhs) (← mkPolyDecl c'.p) (← mkPolyRefl c'.p) h
   | .coreExpr e pos lhs rhs =>
-    bif pos then
+    uif pos then
       let h ← mkOfEqTrue (← mkEqTrueProof e)
       return mkApp6 (mkConst ``Int.Internal.Linear.le_norm_expr_rfl) (← getContext) (← mkExprDecl lhs) (← mkExprDecl rhs) (← mkPolyDecl c'.p) (← mkPolyRefl c'.p) h
     else
@@ -579,7 +579,7 @@ private partial def LeCnstr.toExprProof (c' : LeCnstr) : ProofM Expr := caching 
         ← mkPolyRefl p, eagerReflBoolTrue, ← mkPolyRefl c'.p, ← c₁.toExprProof, ← c₂.toExprProof]
   | .subst x c₁ c₂ =>
     let a := c₁.p.coeff x
-    let thm := bif a ≥ᵇ 0 then
+    let thm := uif a ≥ 0 then
       mkConst ``Int.Internal.Linear.eq_le_subst_nonneg_rfl
     else
       mkConst ``Int.Internal.Linear.eq_le_subst_nonpos_rfl
@@ -604,14 +604,14 @@ private partial def LeCnstr.toExprProof (c' : LeCnstr) : ProofM Expr := caching 
     let { c₁, c₂, c₃?, left } := s.pred
     let p₁ := c₁.p
     let p₂ := c₂.p
-    let coeff := bif left then p₂.leadCoeff else p₁.leadCoeff
+    let coeff := uif left then p₂.leadCoeff else p₁.leadCoeff
     match c₃? with
     | none =>
-      let thmName := bif left then ``Int.Internal.Linear.cooper_left_split_ineq else ``Int.Internal.Linear.cooper_right_split_ineq
+      let thmName := uif left then ``Int.Internal.Linear.cooper_left_split_ineq else ``Int.Internal.Linear.cooper_right_split_ineq
       return mkApp8 (mkConst thmName)
         (← getContext) (← mkPolyDecl p₁) (← mkPolyDecl p₂) (toExpr s.k) (toExpr coeff) (← mkPolyDecl c'.p) (← s.toExprProof) eagerReflBoolTrue
     | some c₃ =>
-      let thmName := bif left then ``Int.Internal.Linear.cooper_dvd_left_split_ineq else ``Int.Internal.Linear.cooper_dvd_right_split_ineq
+      let thmName := uif left then ``Int.Internal.Linear.cooper_dvd_left_split_ineq else ``Int.Internal.Linear.cooper_dvd_right_split_ineq
       return mkApp10 (mkConst thmName)
         (← getContext) (← mkPolyDecl p₁) (← mkPolyDecl p₂) (← mkPolyDecl c₃.p) (toExpr c₃.d) (toExpr s.k) (toExpr coeff) (← mkPolyDecl c'.p) (← s.toExprProof) eagerReflBoolTrue
   | .reorder c => withPrevEpoch <| c.toExprProof
@@ -657,15 +657,15 @@ private partial def CooperSplit.toExprProof (s : CooperSplit) : ProofM Expr := c
       throwError "`grind` internal error, unexpected number of cases at `CooperSplit` hs.size: {hs.size}, n: {n}, left: {left}\nc₁: {← c₁.pp}\nc₂: {← c₂.pp}\nc₃: {← if let some c₃ := c₃? then c₃.pp else pure ""}"
     let (base, pred) ← match c₃? with
       | none =>
-        let thmName := bif left then ``Int.Internal.Linear.cooper_left else ``Int.Internal.Linear.cooper_right
-        let predName := bif left then ``Int.Internal.Linear.cooper_left_split else ``Int.Internal.Linear.cooper_right_split
+        let thmName := uif left then ``Int.Internal.Linear.cooper_left else ``Int.Internal.Linear.cooper_right
+        let predName := uif left then ``Int.Internal.Linear.cooper_left_split else ``Int.Internal.Linear.cooper_right_split
         let base := mkApp7 (mkConst thmName) (← getContext) (← mkPolyDecl p₁) (← mkPolyDecl p₂) (toExpr n)
           eagerReflBoolTrue (← c₁.toExprProof) (← c₂.toExprProof)
         let pred := mkApp3 (mkConst predName) (← getContext) (← mkPolyDecl p₁) (← mkPolyDecl p₂)
         pure (base, pred)
       | some c₃ =>
-        let thmName := bif left then ``Int.Internal.Linear.cooper_dvd_left else ``Int.Internal.Linear.cooper_dvd_right
-        let predName := bif left then ``Int.Internal.Linear.cooper_dvd_left_split else ``Int.Internal.Linear.cooper_dvd_right_split
+        let thmName := uif left then ``Int.Internal.Linear.cooper_dvd_left else ``Int.Internal.Linear.cooper_dvd_right
+        let predName := uif left then ``Int.Internal.Linear.cooper_dvd_left_split else ``Int.Internal.Linear.cooper_dvd_right_split
         let base := mkApp10 (mkConst thmName) (← getContext) (← mkPolyDecl p₁) (← mkPolyDecl p₂) (← mkPolyDecl c₃.p) (toExpr c₃.d) (toExpr n)
           eagerReflBoolTrue (← c₁.toExprProof) (← c₂.toExprProof) (← c₃.toExprProof)
         let pred := mkApp5 (mkConst predName) (← getContext) (← mkPolyDecl p₁) (← mkPolyDecl p₂) (← mkPolyDecl c₃.p) (toExpr c₃.d)
@@ -691,7 +691,7 @@ private partial def UnsatProof.toExprProofCore (h : UnsatProof) : ProofM Expr :=
   | .dvd c =>
     return mkApp5 (mkConst ``Int.Internal.Linear.dvd_unsat) (← getContext) (toExpr c.d) (← mkPolyDecl c.p) eagerReflBoolTrue (← c.toExprProof)
   | .eq c =>
-    bif c.p.isUnsatEq then
+    uif c.p.isUnsatEq then
       return mkApp4 (mkConst ``Int.Internal.Linear.eq_unsat) (← getContext) (← mkPolyDecl c.p) eagerReflBoolTrue (← c.toExprProof)
     else
       let k := c.p.gcdCoeffs'
@@ -741,9 +741,9 @@ private def mkProof (h : Expr) (s : ProofM.State) : GoalM Expr := do
     let numVars := (← getEpochVarsOf (← getGoalAtDepth depth) epoch).size
     let vars := epochVars[epoch]!.filter (· < numVars)
     let atoms := vars.map ((← getEpochVars epoch)[·]!)
-    let name := bif epoch == s.decls.size - 1 then `ctx else (`ctx).appendIndexAfter epoch
+    let name := uif epoch == s.decls.size - 1 then `ctx else (`ctx).appendIndexAfter epoch
     let ctxDepth ← getCtxDepth depth epoch vars
-    bif ctxDepth <ᵇ goalDepth then
+    uif ctxDepth < goalDepth then
       let fvarId ← hoistDecl ctxDepth (.ctx atoms) name ctxType (nondep := false) (front := true) do
         toContextExprCore atoms Int.mkType
       xs := xs.push fvar; vs := vs.push (mkFVar fvarId)
@@ -763,7 +763,7 @@ private def mkProof (h : Expr) (s : ProofM.State) : GoalM Expr := do
     for (depth, { fvar }) in s.ringCtxs do
       let numVars := ((← CommRing.ringExt.getStateCore (← getGoalAtDepth depth)).getRing ringId).vars.size
       let atoms := vars'.filter (· < numVars) |>.map (ringVars[·]!)
-      bif depth <ᵇ goalDepth then
+      uif depth < goalDepth then
         let fvarId ← hoistDecl depth (.ctx atoms) `rctx ctxType (nondep := false) (front := true) do
           toContextExprCore atoms Int.mkType
         xs := xs.push fvar; vs := vs.push (mkFVar fvarId)
@@ -787,7 +787,7 @@ def UnsatProof.toExprProof (h : UnsatProof) : GoalM Expr := do
   mkProof h s
 
 def setInconsistent (h : UnsatProof) : GoalM Unit := do
-  bif (← get').caseSplits then
+  uif (← get').caseSplits then
     -- Let the search procedure in `SearchM` resolve the conflict.
     modify' fun s => { s with conflict? := some h }
   else

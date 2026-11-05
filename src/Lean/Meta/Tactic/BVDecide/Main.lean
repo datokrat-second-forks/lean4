@@ -36,7 +36,7 @@ public def bvDecide' (target : Normalize.Target) (ctx : TacticContext) :
     Grind.GrindM (Except CounterExample Result) := do
   Normalize.PreProcessM.run' ctx.preProcessContext target do
     let solved ← Normalize.bvNormalize
-    bif solved then return .ok ⟨.solvedWithPreProcessing⟩
+    uif solved then return .ok ⟨.solvedWithPreProcessing⟩
 
     match ← bvUnsat (← Normalize.PreProcessM.getTargetMVarId) (← Normalize.PreProcessM.getHyps) ctx with
     | .ok cegarCert => return .ok ⟨cegarCert⟩

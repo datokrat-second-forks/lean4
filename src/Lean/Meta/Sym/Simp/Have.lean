@@ -219,16 +219,16 @@ bound variables at the expected positions.
 def elimAuxApps (e : Expr) (xs : Array Expr) (varDeps : Array (Array Nat)) : SymM Expr := do
   let n := xs.size
   replaceS e fun e offset => do
-    bif offset ≥ᵇ e.looseBVarRange then
+    uif offset ≥ e.looseBVarRange then
       return some e
     match e.getAppFn with
     | .bvar idx =>
-      bif _h : idx ≥ᵇ offset then
-        bif _h : idx <ᵇ offset + n then
+      uif _h : idx ≥ offset then
+        uif _h : idx < offset + n then
           let i := n - (idx - offset) - 1
           let expectedNumArgs := varDeps[i]!.size
           let numArgs := e.getAppNumArgs
-          bif numArgs >ᵇ expectedNumArgs then
+          uif numArgs > expectedNumArgs then
             return none -- Over-applied
           else
             assert! numArgs == expectedNumArgs
@@ -248,9 +248,9 @@ Convert a simplified beta-application back to `have` form.
 -/
 def toHave (e : Expr) (varDeps : Array (Array Nat)) : SymM Expr :=
   e.withApp fun f args => do
-  bif _h : args.size ≠ᵇ varDeps.size then unreachable! else
+  uif _h : args.size ≠ varDeps.size then unreachable! else
   let rec go (f : Expr) (xs : Array Expr) (i : Nat) : SymM Expr := do
-    bif _h : i <ᵇ args.size then
+    uif _h : i < args.size then
       let .lam n t b _ := f | unreachable!
       let varPos := varDeps[i]
       let ys := varPos.map fun i => xs[i]!
@@ -414,14 +414,14 @@ public def simpHaveAndZetaUnused (e₁ : Expr) (simpBody : Simproc) : SimpM Resu
   match r.result with
   | .rfl _ cd =>
     let e₂ ← zetaUnused e₁
-    bif isSameExpr e₁ e₂ then
+    uif isSameExpr e₁ e₂ then
       return mkRflResultCD cd
     else
       let h := mkApp2 (mkConst ``Eq.refl [r.u]) r.α e₂
       return .step e₂ h (contextDependent := cd)
   | .step e₂ h _ cd =>
     let e₃ ← zetaUnused e₂
-    bif isSameExpr e₂ e₃ then
+    uif isSameExpr e₂ e₃ then
       return r.result
     else
       let h := mkApp6 (mkConst ``Eq.trans [r.u]) r.α e₁ e₂ e₃ h
@@ -429,7 +429,7 @@ public def simpHaveAndZetaUnused (e₁ : Expr) (simpBody : Simproc) : SimpM Resu
       return .step e₃ h (contextDependent := cd)
 
 public def simpLet' (simpBody : Simproc) (e : Expr) : SimpM Result := do
-  bif !e.letNondep! then
+  uif !e.letNondep! then
     /-
     **Note**: We don't do anything if it is a dependent `let`.
     Users may decide to `zeta`-expand them or apply `letToHave` at `pre`/`post`.

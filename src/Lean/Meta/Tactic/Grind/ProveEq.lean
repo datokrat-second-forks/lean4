@@ -17,7 +17,7 @@ and internalize the result.
 This is an auxiliary function used at `proveEq?` and `proveHEq?`.
 -/
 private def ensureInternalized (e : Expr) : GoalM Expr := do
-  bif (← alreadyInternalized e) then
+  uif (← alreadyInternalized e) then
     return e
   else
     /-
@@ -121,7 +121,7 @@ private partial def abstractGroundMismatches? (lhs rhs : Expr) : GoalM (Option (
   let rhs ← shareCommon rhs
   let some (f, s) ← go lhs rhs |>.run {} |>.run {} |>.run
     | return none
-  bif s.lhss.isEmpty then
+  uif s.lhss.isEmpty then
     return none
   let f := mkLambdaWithBodyAndVarType s.varTypes f
   let fType ← inferType f
@@ -131,13 +131,13 @@ private partial def abstractGroundMismatches? (lhs rhs : Expr) : GoalM (Option (
   return some (mkAppN f s.lhss.reverse, mkAppN f s.rhss.reverse)
 where
   goCore (lhs rhs : Expr) : AbstractM Expr := do
-    bif (← inBinder) then
-      bif !lhs.hasLooseBVars && !rhs.hasLooseBVars then
+    uif (← inBinder) then
+      uif !lhs.hasLooseBVars && !rhs.hasLooseBVars then
         let lhs ← ensureInternalized lhs
         let rhs ← ensureInternalized rhs
         processToDo
-        bif (← isEqv lhs rhs) then
-        bif (← hasSameType lhs rhs) then
+        uif (← isEqv lhs rhs) then
+        uif (← hasSameType lhs rhs) then
         let varType ← inferType lhs
         let varIdx := (← get).varTypes.size + (← read).offset
         modify fun s => { s with
@@ -170,7 +170,7 @@ where
       return mkLet n₁ (← go t₁ t₂) (← go v₁ v₂) (← withIncOffset <| go b₁ b₂) nd₁
 
   go (lhs rhs : Expr) : AbstractM Expr := do
-    bif isSameExpr lhs rhs then
+    uif isSameExpr lhs rhs then
       return lhs
     let key := ((← read).offset, lhs, rhs)
     if let some e := (← get).cache[key]? then
@@ -195,10 +195,10 @@ propagation. It will not perform case analysis.
 def proveEq? (lhs rhs : Expr) (abstract : Bool := false) : GoalM (Option Expr) := do
   trace[grind.debug.proveEq] "({lhs}) = ({rhs})"
   unless (← hasSameType lhs rhs) do return none
-  bif (← alreadyInternalized lhs <&&> alreadyInternalized rhs) then
-    bif (← isEqv lhs rhs) then
+  uif (← alreadyInternalized lhs <&&> alreadyInternalized rhs) then
+    uif (← isEqv lhs rhs) then
       return some (← mkEqProof lhs rhs)
-    else bif abstract then withoutModifyingState do
+    else uif abstract then withoutModifyingState do
       tryAbstract lhs rhs
     else
       return none
@@ -213,9 +213,9 @@ def proveEq? (lhs rhs : Expr) (abstract : Bool := false) : GoalM (Option Expr) :
     let lhs ← ensureInternalized lhs
     let rhs ← ensureInternalized rhs
     processToDo
-    bif (← isEqv lhs rhs) then
+    uif (← isEqv lhs rhs) then
       return some (← mkEqProof lhs rhs)
-    else bif abstract then
+    else uif abstract then
       tryAbstract lhs rhs
     else
       return none
@@ -226,15 +226,15 @@ where
     let lhs ← ensureInternalized lhs
     let rhs ← ensureInternalized rhs
     processToDo
-    bif (← isEqv lhs rhs) then
+    uif (← isEqv lhs rhs) then
       return some (← mkEqProof lhs rhs)
     else
       return none
 
 /-- Similar to `proveEq?`, but for heterogeneous equality. -/
 def proveHEq? (lhs rhs : Expr) : GoalM (Option Expr) := do
-  bif (← alreadyInternalized lhs <&&> alreadyInternalized rhs) then
-    bif (← isEqv lhs rhs) then
+  uif (← alreadyInternalized lhs <&&> alreadyInternalized rhs) then
+    uif (← isEqv lhs rhs) then
       return some (← mkHEqProof lhs rhs)
     else
       return none

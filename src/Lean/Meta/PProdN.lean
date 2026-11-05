@@ -36,7 +36,7 @@ namespace Lean.Meta
 def mkPProd (e1 e2 : Expr) : MetaM Expr := do
   let lvl1 ← getLevel e1
   let lvl2 ← getLevel e2
-  bif lvl1.isAlwaysZero && lvl2.isAlwaysZero then
+  uif lvl1.isAlwaysZero && lvl2.isAlwaysZero then
     return mkApp2 (.const `And []) e1 e2
   else
     return mkApp2 (.const ``PProd [lvl1, lvl2]) e1 e2
@@ -47,7 +47,7 @@ def mkPProdMk (e1 e2 : Expr) : MetaM Expr := do
   let t2 ← inferType e2
   let lvl1 ← getLevel t1
   let lvl2 ← getLevel t2
-  bif lvl1.isAlwaysZero && lvl2.isAlwaysZero then
+  uif lvl1.isAlwaysZero && lvl2.isAlwaysZero then
     return mkApp4 (.const ``And.intro []) t1 t2 e1 e2
   else
     return mkApp4 (.const ``PProd.mk [lvl1, lvl2]) t1 t2 e1 e2
@@ -92,8 +92,8 @@ def genMk {α : Type _} [Inhabited α] (mk : α → α → MetaM α) (xs : Array
 
 /-- Given types `tᵢ`, produces `t₁ ×' t₂ ×' t₃` -/
 def pack (lvl : Level) (xs : Array Expr) : MetaM Expr := do
-  bif xs.size =ᵇ 0 then
-    bif lvl.isAlwaysZero then return .const ``True []
+  uif xs.size = 0 then
+    uif lvl.isAlwaysZero then return .const ``True []
                         else return .const ``PUnit [lvl]
   genMk mkPProd xs
 
@@ -108,14 +108,14 @@ def unpack (e : Expr) (n : Nat) : MetaM (Array Expr) := do
   | _ => go e n #[]
 where
   go (e : Expr) (remaining : Nat) (acc : Array Expr) : MetaM (Array Expr) := do
-    bif remaining =ᵇ 0 then return acc
+    uif remaining = 0 then return acc
     let .app (.app (.const ``PProd _) a) b := e | return acc.push e
     go b (remaining - 1) (acc.push a)
 
 /-- Given values `xᵢ` of type `tᵢ`, produces value of type `t₁ ×' t₂ ×' t₃` -/
 def mk (lvl : Level) (xs : Array Expr) : MetaM Expr := do
-  bif xs.size =ᵇ 0 then
-    bif lvl.isAlwaysZero then return .const ``True.intro []
+  uif xs.size = 0 then
+    uif lvl.isAlwaysZero then return .const ``True.intro []
                         else return .const ``PUnit.unit [lvl]
   genMk mkPProdMk xs
 
@@ -127,7 +127,7 @@ def proj (n i : Nat) (t e : Expr) : Expr := Id.run <| do
   for _ in *...i do
       value := mkPProdSnd t value
       t := mkTypeSnd t
-  bif i+1 <ᵇ n then
+  uif i+1 < n then
     mkPProdFst t value
   else
     value
@@ -141,7 +141,7 @@ def projM (n i : Nat) (e : Expr) : MetaM Expr := do
   let mut value := e
   for _ in *...i do
       value ← mkPProdSndM value
-  bif i+1 <ᵇ n then
+  uif i+1 < n then
     mkPProdFstM value
   else
     pure value
@@ -169,7 +169,7 @@ It returns a dummy motive `(xs : ) → PUnit` or `(xs : … ) → True` if no ex
 
 -/
 def packLambdas (type : Expr) (es : Array Expr) : MetaM Expr := do
-  bif h : es.size =ᵇ 1 then
+  uif h : es.size = 1 then
     return es[0]
   forallTelescope type fun xs sort => do
     assert! sort.isSort
@@ -185,7 +185,7 @@ The value analogue to `PProdN.packLambdas`.
 It is the identity if `es.size = 1`.
 -/
 def mkLambdas (type : Expr) (es : Array Expr) : MetaM Expr := do
-  bif h : es.size =ᵇ 1 then
+  uif h : es.size = 1 then
     return es[0]
   forallTelescope type fun xs body => do
     let lvl ← getLevel body
@@ -212,15 +212,15 @@ def reduceProjs (e : Expr) : MetaM Expr := do
     | PProd.snd _ _ e' => reduce e' 1
     | And.right _ _ e' => reduce e' 1
     | _ =>
-        bif e.isProj then
+        uif e.isProj then
           reduce e.projExpr! e.projIdx!
         else
           return .continue
   )
 where
   reduce (e : Expr) (i : Nat) : MetaM TransformStep := do
-    bif e.isAppOfArity ``PProd.mk 4 || e.isAppOfArity ``And.intro 2 then
-      bif i =ᵇ 0 then
+    uif e.isAppOfArity ``PProd.mk 4 || e.isAppOfArity ``And.intro 2 then
+      uif i = 0 then
         return .continue e.appFn!.appArg!
       else
         return .continue e.appArg!

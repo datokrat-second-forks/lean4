@@ -166,7 +166,7 @@ See also `Lean.matchConstStructure` for a less restrictive version.
 -/
 @[inline] def matchConstNonRecStructure [Monad m] [MonadEnv m] [MonadError m] (e : Expr) (failK : Unit → m α) (k : InductiveVal → List Level → ConstructorVal → m α) : m α :=
   matchConstInduct e failK fun ival us => do
-    bif ival.isRec || ival.numIndices != 0 then failK ()
+    uif ival.isRec || ival.numIndices != 0 then failK ()
     else match ival.ctors with
       | [ctor] =>
         match (← getConstInfo ctor) with
@@ -209,7 +209,7 @@ def isLargeEliminating [Monad m] [MonadEnv m] [MonadError m] (declName : Name) :
 
 def isEnumType  [Monad m] [MonadEnv m] [MonadError m] (declName : Name) : m Bool := do
   if let ConstantInfo.inductInfo info ← getConstInfo declName then
-    bif !info.type.isProp && info.numTypeFormers == 1 && info.numIndices == 0 && info.numParams == 0
+    uif !info.type.isProp && info.numTypeFormers == 1 && info.numIndices == 0 && info.numParams == 0
        && !info.ctors.isEmpty && !info.isRec && !info.isUnsafe then
       info.ctors.allM fun ctorName => do
         let ConstantInfo.ctorInfo info ← getConstInfo ctorName | return false

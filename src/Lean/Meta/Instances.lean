@@ -97,7 +97,7 @@ builtin_initialize instanceExtension : SimpleScopedEnvExtension InstanceEntry In
     initial  := {}
     addEntry := addInstanceEntry
     exportEntry? := fun _ e =>
-      bif e.globalName?.any (!isPrivateName ·) then .uniform (some e)
+      uif e.globalName?.any (!isPrivateName ·) then .uniform (some e)
       else ⟨none, none, some e⟩
     trackGen := true
   }
@@ -159,7 +159,7 @@ private partial def computeSynthOrder (inst : Expr) (projInfo? : Option Projecti
       forallTelescopeReducing (← inferType classTy.getAppFn) fun args _ => do
       let mut pos := (getOutParamPositions? (← getEnv) className).getD #[]
       for arg in args, i in *...args.size do
-        bif (← inferType arg).isAppOf ``semiOutParam then
+        uif (← inferType arg).isAppOf ``semiOutParam then
           pos := pos.push i
       return pos
     else
@@ -196,7 +196,7 @@ private partial def computeSynthOrder (inst : Expr) (projInfo? : Option Projecti
     let next? ← toSynth.findM? fun i => do
       let argTy ← instantiateMVars (← inferType argMVars[i]!)
       if let some projInfo := projInfo? then
-        bif projInfo.numParams == i then
+        uif projInfo.numParams == i then
           -- See comment regarding `projInfo?` at the beginning of this function
           assignMVarsIn argTy
           return true
@@ -205,14 +205,14 @@ private partial def computeSynthOrder (inst : Expr) (projInfo? : Option Projecti
       let argOutParams ← getSemiOutParamPositionsOf argTy
       let argTyArgs := argTy.getAppArgs
       for i in *...argTyArgs.size, argTyArg in argTyArgs do
-        bif !argOutParams.contains i && argTyArg.hasExprMVar then
+        uif !argOutParams.contains i && argTyArg.hasExprMVar then
           return false
       return true
     let next ←
       match next? with
       | some next => pure next
       | none =>
-        bif synthInstance.checkSynthOrder.get (← getOptions) then
+        uif synthInstance.checkSynthOrder.get (← getOptions) then
           let typeLines := ("" : MessageData).joinSep <| Array.toList <| ← toSynth.mapM fun i => do
             let ty ← instantiateMVars (← inferType argMVars[i]!)
             return indentExpr (ty.setPPExplicit true)
@@ -225,9 +225,9 @@ private partial def computeSynthOrder (inst : Expr) (projInfo? : Option Projecti
     assignMVarsIn (← inferType argMVars[next]!)
     assignMVarsIn argMVars[next]!
 
-  bif synthInstance.checkSynthOrder.get (← getOptions) then
+  uif synthInstance.checkSynthOrder.get (← getOptions) then
     let ty ← instantiateMVars ty
-    bif ty.hasExprMVar then
+    uif ty.hasExprMVar then
       throwError m!"instance does not provide concrete values for (semi-)out-params{indentExpr (ty.setPPExplicit true)}"
 
   trace[Meta.synthOrder] "synthesizing the arguments of {inst} in the order {synthed}:\
@@ -237,13 +237,13 @@ private partial def computeSynthOrder (inst : Expr) (projInfo? : Option Projecti
 
 def checkImpossibleInstance (cinfo : ConstantInfo): MetaM Unit := do
   -- Performantly check if any non-instance binder is unused.
-  bif cinfo.type.hasUnusedForallBindersWhere fun bi _ => !bi.isInstImplicit then do
+  uif cinfo.type.hasUnusedForallBindersWhere fun bi _ => !bi.isInstImplicit then do
     forallTelescope cinfo.type fun args ty => do
       -- Find the fvars used in the type and any instance implicit argument, transitively.
       let getInitialPossibleFVars := do
         ty.collectFVars
         for arg in args do
-          bif (← arg.fvarId!.getBinderInfo).isInstImplicit then
+          uif (← arg.fvarId!.getBinderInfo).isInstImplicit then
             /- The fvarIds in the `CollectFVars.State` should be our possible args. As such, we
             start by adding the instance arguments to the state, rather than computing the
             dependencies of their types. -/
@@ -257,7 +257,7 @@ def checkImpossibleInstance (cinfo : ConstantInfo): MetaM Unit := do
           let some binder ← arg.fvarId!.ppAsBinder | continue
           impossibleArgMsgs := impossibleArgMsgs.push <|
             indentD m!"argument {i}: `{binder}`"
-      bif impossibleArgMsgs.isEmpty then return -- Should not be reachable.
+      uif impossibleArgMsgs.isEmpty then return -- Should not be reachable.
       let msg := m!"\
         This instance has {impossibleArgMsgs.size} \
         argument{if impossibleArgMsgs.size = 1 then "" else "s"} that cannot be \
@@ -266,7 +266,7 @@ def checkImpossibleInstance (cinfo : ConstantInfo): MetaM Unit := do
         These arguments are not instance-implicit and appear neither in another \
         instance-implicit argument nor the return type, so they cannot be inferred using \
         typeclass synthesis."
-      bif cinfo.type.hasSorry then logWarning msg else throwError msg
+      uif cinfo.type.hasSorry then logWarning msg else throwError msg
 
 def checkNonClassInstance (c : Expr) : MetaM Unit := do
   let type ← inferType c
@@ -290,15 +290,15 @@ def addInstance (declName : Name) (attrKind : AttributeKind) (prio : Nat) : Meta
     checkImpossibleInstance cinfo
   let keys ← mkInstanceKey c
   let status ← getReducibilityStatus declName
-  bif status == .semireducible then do
+  uif status == .semireducible then do
     let info ← getConstInfo declName
-    bif info.isDefinition then
-      bif warnClassDefReducibility.get (← getOptions) then
+    uif info.isDefinition then
+      uif warnClassDefReducibility.get (← getOptions) then
         logWarning m!"Definition `{declName}` of class type is semireducible. \
 Most type class instances should be instance-reducible, so consider marking this
 definition with `@[instance_reducible]`. If it is intentionally semireducible, \
 this warning can be disabled with `set_option warn.classDefReducibility false`."
-    else bif wasOriginallyDefn (← getEnv) declName then
+    else uif wasOriginallyDefn (← getEnv) declName then
       logWarning m!"instance `{declName}` must be marked with `@[expose]`"
   let projInfo? ← getProjectionFnInfo? declName
   let synthOrder ← computeSynthOrder c projInfo?
@@ -437,7 +437,7 @@ def getDefaultInstancesPriorities [Monad m] [MonadEnv m] : m PrioritySet :=
 def getDefaultInstances [Monad m] [MonadEnv m] (className : Name) : m (List (Name × Nat)) := do
   let env ← getEnv
   let insts := defaultInstanceExtension.getState env |>.defaultInstances.find? className |>.getD []
-  bif env.isExporting then
+  uif env.isExporting then
     -- private instances must not leak into public scope
     return insts.filter fun (n, _) => env.contains n
   else

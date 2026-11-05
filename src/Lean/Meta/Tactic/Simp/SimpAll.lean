@@ -47,7 +47,7 @@ private def initEntries : M Unit := do
       let ctx := (← get).ctx
       simpThms ← simpThms.addTheorem (.fvar h) proof (config := ctx.indexConfig)
       modify fun s => { s with ctx := s.ctx.setSimpTheorems simpThms }
-      bif hsNonDeps.contains h then
+      uif hsNonDeps.contains h then
         -- We only simplify nondependent hypotheses
         let type ← instantiateMVars localDecl.type
         let entry : Entry := { fvarId := h, userName := localDecl.userName, id := .fvar h, origType := type, type, proof }
@@ -117,14 +117,14 @@ private partial def loop : M Bool := do
         modified := true
         mvarId   := mvarIdNew
       }
-  bif (← get).modified then
+  uif (← get).modified then
     loop
   else
     return false
 
 def main : M (Option MVarId) := do
   initEntries
-  bif (← loop) then
+  uif (← loop) then
     return none -- close the goal
   else
     let mvarId := (← get).mvarId
@@ -136,10 +136,10 @@ def main : M (Option MVarId) := do
     let mut toClear := #[]
     let mut modified := false
     for e in (← get).entries do
-      bif e.type.isTrue then
+      uif e.type.isTrue then
         -- Do not assert `True` hypotheses
         toClear := toClear.push e.fvarId
-      else bif modified || e.type != e.origType then
+      else uif modified || e.type != e.origType then
         toClear := toClear.push e.fvarId
         toAssert := toAssert.push { userName := e.userName, type := e.type, value := e.proof }
         modified := true
@@ -152,7 +152,7 @@ def simpAll (mvarId : MVarId) (ctx : Simp.Context) (simprocs : SimprocsArray := 
   mvarId.withContext do
     let (r, s) ← SimpAll.main.run { stats with mvarId, ctx, simprocs }
     if let .some mvarIdNew := r then
-      bif ctx.config.failIfUnchanged && mvarId == mvarIdNew then
+      uif ctx.config.failIfUnchanged && mvarId == mvarIdNew then
         throwError "simp_all made no progress"
     return (r, { s with })
 

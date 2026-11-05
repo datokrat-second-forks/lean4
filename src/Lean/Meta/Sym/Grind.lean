@@ -154,7 +154,7 @@ def Goal.dischargeSymSimp (goal : Goal) (e : Expr) : GrindM Sym.Simp.DischargeRe
     let mvar ← mkFreshExprSyntheticOpaqueMVar e
     let goal := { goal with mvarId := mvar.mvarId! }
     let goal ← processHypotheses goal
-    bif (← solve goal).isSome then
+    uif (← solve goal).isSome then
       return .failed (contextDependent := true)
     else
       return .solved (← instantiateMVars mvar) (contextDependent := true)

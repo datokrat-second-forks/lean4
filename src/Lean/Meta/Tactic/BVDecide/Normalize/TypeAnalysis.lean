@@ -30,34 +30,34 @@ Determine whether `declName` is an enum inductive `.match_x` definition that is 
 -/
 public def isSupportedMatch (declName : Name) : MetaM (Option MatchKind) := do
   let some info ← getMatcherInfo? declName | return none
-  bif info.discrInfos.size ≠ᵇ 1 then return none
-  bif info.discrInfos[0]!.hName?.isSome then return none
+  uif info.discrInfos.size ≠ 1 then return none
+  uif info.discrInfos[0]!.hName?.isSome then return none
   let .defnInfo defnInfo ← getConstInfo declName | return none
   forallTelescope defnInfo.type fun xs a => do
-    bif xs.size <ᵇ 2 then return none
+    uif xs.size < 2 then return none
     -- Check that discriminator is `EnumInductive`
     let discr := xs[1]!
     let some discrTypeName := (← inferType discr).constName? | return none
-    bif !(← isEnumType discrTypeName) then return none
+    uif !(← isEnumType discrTypeName) then return none
     let .inductInfo inductiveInfo ← getConstInfo discrTypeName | unreachable!
 
     -- Check that motive is `EnumInductive → Sort u`
     let motive := xs[0]!
     let motiveType ← inferType motive
     let some (.const domTypeName .., (.sort (.param ..))) := motiveType.arrow? | return none
-    bif domTypeName != discrTypeName then return none
+    uif domTypeName != discrTypeName then return none
 
     -- Check that resulting type is `motive discr`
     let retTypeOk ← a.withApp fun fn arg =>
       return fn == motive && arg.size == 1 && arg[0]! == discr
-    bif !retTypeOk then return none
+    uif !retTypeOk then return none
     let numCtors := inductiveInfo.numCtors
 
     /-
     At this point the control flow splits and tries to establish that the match is one of the kinds
     that we support.
     -/
-    bif xs.size == numCtors + 2 then
+    uif xs.size == numCtors + 2 then
       /-
       This situation is most likely a full match but it could also be a match like:
       ```
@@ -76,7 +76,7 @@ public def isSupportedMatch (declName : Name) : MetaM (Option MatchKind) := do
       if let some kind ← trySimpleEnum inductiveInfo xs numCtors motive then
         return kind
 
-    bif xs.size >ᵇ 2 then
+    uif xs.size > 2 then
       -- Probably a match with default case
 
       -- Check that all parameters except the last are `h_n EnumInductive.ctor`
@@ -85,19 +85,19 @@ public def isSupportedMatch (declName : Name) : MetaM (Option MatchKind) := do
       for i in *...numConcreteCases do
         let argType ← inferType xs[i + 2]!
         let some (.const ``Unit [], (.app m (.const c ..))) := argType.arrow? | return none
-        bif m != motive then return none
+        uif m != motive then return none
         let .ctorInfo ctorInfo ← getConstInfo c | return none
         handledCtors := handledCtors.push ctorInfo
 
       -- Check that the last parameter looks like a default case one
       let defaultArgType ← inferType xs[xs.size - 1]!
       let defaultOk ← forallTelescope defaultArgType fun args dom => do
-        bif args.size != 1 then return false
+        uif args.size != 1 then return false
         let input := args[0]!
-        bif !(← inferType input).isConstOf discrTypeName then return false
+        uif !(← inferType input).isConstOf discrTypeName then return false
         return dom.withApp fun fn arg => fn == motive && arg.size == 1 && arg[0]! == input
 
-      bif !defaultOk then return none
+      uif !defaultOk then return none
 
       return some <| .enumWithDefault inductiveInfo handledCtors
     else
@@ -110,7 +110,7 @@ where
     for i in *...numCtors do
       let argType ← inferType xs[i + 2]!
       let some (.const ``Unit [], (.app m (.const c ..))) := argType.arrow? | return none
-      bif m != motive then return none
+      uif m != motive then return none
       let .ctorInfo ctorInfo ← getConstInfo c | return none
       handledCtors := handledCtors.push ctorInfo
 
@@ -162,9 +162,9 @@ public partial def typeAnalysisPass : Pass where
 where
   seedRestrictedTypes (types : Array Name) : PreProcessM Unit := do
     for type in types do
-      bif (← isEnumType type) then
+      uif (← isEnumType type) then
         PreProcessM.markInterestingEnum type
-      else bif isStructure (← getEnv) type then
+      else uif isStructure (← getEnv) type then
         PreProcessM.markInterestingStructure type
       else
         throwError "`{type}` is neither a structure nor an enum inductive"
@@ -172,8 +172,8 @@ where
   checkContext (goal : MVarId) : AnalysisM Unit := do
     goal.withContext do
       for decl in ← getLCtx do
-        bif !decl.isLet && !decl.isImplementationDetail then
-          bif (← Meta.isProp decl.type) then continue
+        uif !decl.isLet && !decl.isImplementationDetail then
+          uif (← Meta.isProp decl.type) then continue
           analyzeType (← Sym.instantiateMVarsS decl.type)
 
       for hyp in ← PreProcessM.getHyps do
@@ -189,34 +189,34 @@ where
   structures that contain it.
   -/
   analyzeConst (n : Name) : AnalysisM Bool := do
-    bif isBuiltIn n then return true
+    uif isBuiltIn n then return true
 
     let analysis ← PreProcessM.getTypeAnalysis
-    bif analysis.interestingStructures.contains n || analysis.interestingEnums.contains n then
+    uif analysis.interestingStructures.contains n || analysis.interestingEnums.contains n then
       return true
-    else bif analysis.uninteresting.contains n || analysis.interestingMatchers.contains n then
+    else uif analysis.uninteresting.contains n || analysis.interestingMatchers.contains n then
       return false
 
     -- Matchers are discovered even in a restricted run as they may discriminate on one of the enums
     -- that we were told to use.
     if let some kind ← isSupportedMatch n then
       let restricted := (← read).restricted
-      bif !restricted || analysis.interestingEnums.contains kind.getEnumInfo.name then
+      uif !restricted || analysis.interestingEnums.contains kind.getEnumInfo.name then
         PreProcessM.markInterestingMatcher n kind
       else
         PreProcessM.markUninterestingConst n
       return false
-    else bif (← read).restricted then
+    else uif (← read).restricted then
       PreProcessM.markUninterestingConst n
       return false
-    else bif isStructure (← getEnv) n then
-      bif (← analyzeStructure n) then
+    else uif isStructure (← getEnv) n then
+      uif (← analyzeStructure n) then
         PreProcessM.markInterestingStructure n
         return true
       else
         PreProcessM.markUninterestingConst n
         return false
-    else bif (← isEnumType n) then
+    else uif (← isEnumType n) then
       PreProcessM.markInterestingEnum n
       return true
     else
@@ -228,7 +228,7 @@ where
   -/
   analyzeStructure (n : Name) : AnalysisM Bool := do
     let constInfo ← getConstInfoInduct n
-    bif constInfo.isRec then
+    uif constInfo.isRec then
       return false
 
     let ctorTyp := (← getConstInfoCtor constInfo.ctors.head!).type

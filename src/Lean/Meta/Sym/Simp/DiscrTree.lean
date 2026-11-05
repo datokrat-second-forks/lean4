@@ -49,7 +49,7 @@ whose key sequence is compatible with the query term.
 
 /-- Returns `true` if argument at position `i` should be ignored (is a proof or instance). -/
 def ignoreArg (infos : Array ProofInstArgInfo) (i : Nat) : Bool :=
-  bif h : i <ᵇ infos.size then
+  uif h : i < infos.size then
     let info := infos[i]
     info.isInstance || info.isProof
   else
@@ -68,7 +68,7 @@ with dummy bound variables (which become `Key.star` wildcards).
 def pushArgsUsingInfo (infos : Array ProofInstArgInfo) (i : Nat) (e : Expr) (todo : Array Expr) : Array Expr :=
   match e with
   | .app f a =>
-    bif ignoreArg infos i then
+    uif ignoreArg infos i then
       -- **Note**: We use a dummy bvar, it will be transformed into a `Key.star` later.
       let dummyBVar := .bvar 1000000
       pushArgsUsingInfo infos (i-1) f (todo.push dummyBVar)
@@ -81,7 +81,7 @@ Computes the discrimination tree key for an expression and pushes its subterms o
 Returns `Key.star` for bound variables and `noindex`-annotated terms.
 -/
 def pushArgs (root : Bool) (fnInfos : AssocList Name ProofInstInfo) (todo : Array Expr) (e : Expr) : Key × Array Expr :=
-  bif hasNoindexAnnotation e then
+  uif hasNoindexAnnotation e then
     (.star, todo)
   else
     let fn := e.getAppFn
@@ -90,7 +90,7 @@ def pushArgs (root : Bool) (fnInfos : AssocList Name ProofInstInfo) (todo : Arra
     | .bvar _ => (.star, todo)
     | .forallE _ d b _ => (.arrow, todo.push b |>.push d)
     | .const declName _ =>
-      bif !root && (isOffset' declName e || isQuasiOffset e) then
+      uif !root && (isOffset' declName e || isQuasiOffset e) then
         (.star, todo)
       else
         let numArgs := e.getAppNumArgs
@@ -107,7 +107,7 @@ def pushArgs (root : Bool) (fnInfos : AssocList Name ProofInstInfo) (todo : Arra
 
 /-- Work-list based traversal that builds the key sequence for a pattern. -/
 partial def mkPathAux (root : Bool) (fnInfos : AssocList Name ProofInstInfo) (todo : Array Expr) (keys : Array Key) : Array Key :=
-  bif todo.isEmpty then
+  uif todo.isEmpty then
     keys
   else
     let e    := todo.back!
@@ -147,7 +147,7 @@ see through assignments; unassigned metavariables remain opaque atoms (`Key.othe
 is used only for key computation and need not be maximally shared.
 -/
 partial def resolveAssignedMVars (mctx : MetavarContext) (e : Expr) : Expr :=
-  bif e.hasExprMVar then
+  uif e.hasExprMVar then
     match e.getAppFn with
     | .mvar mvarId =>
       match mctx.getExprAssignmentCore? mvarId with
@@ -168,23 +168,23 @@ def pushArgsTodo (todo : Array Expr) (e : Expr) : Array Expr :=
 partial def getMatchLoop (mctx : MetavarContext) (todo : Array Expr) (c : Trie α) (result : Array α) : Array α :=
   match c with
   | .chain key child =>
-    bif todo.isEmpty then
+    uif todo.isEmpty then
       result
     else
       let e     := resolveAssignedMVars mctx <| etaReduce todo.back!
       let todo  := todo.pop
-      bif key == .star then
+      uif key == .star then
         getMatchLoop mctx todo child result
-      else bif key == getKey e then
+      else uif key == getKey e then
         getMatchLoop mctx (pushArgsTodo todo e) child result
       else
         result
 
   | .node vs cs =>
     let csize := cs.size
-    bif todo.isEmpty then
+    uif todo.isEmpty then
       result ++ vs
-    else bif h : csize =ᵇ 0 then
+    else uif h : csize = 0 then
       result
     else
       let e     := resolveAssignedMVars mctx <| etaReduce todo.back!
@@ -193,7 +193,7 @@ partial def getMatchLoop (mctx : MetavarContext) (todo : Array Expr) (c : Trie �
         /- We must always visit `Key.star` edges since they are wildcards.
           Thus, `todo` is not used linearly when there is `Key.star` edge
           and there is an edge for `k` and `k != Key.star`. -/
-      let result := bif first.1 == .star then
+      let result := uif first.1 == .star then
           getMatchLoop mctx todo first.2 result
         else
           result
@@ -226,16 +226,16 @@ public partial def getMatchWithExtra (mctx : MetavarContext) (d : DiscrTree α) 
   let e := e.consumeMData
   let result := getMatch mctx d e
   let result := result.map (·, 0)
-  bif !e.isApp then
+  uif !e.isApp then
     result
-  else bif !mayMatchPrefix (getKey e) then
+  else uif !mayMatchPrefix (getKey e) then
     result
   else
     go e.appFn! 1 result
 where
   mayMatchPrefix (k : Key) : Bool :=
     let cont (k : Key) : Bool :=
-      bif d.root.find? k |>.isSome then
+      uif d.root.find? k |>.isSome then
         true
       else
         mayMatchPrefix k
@@ -247,7 +247,7 @@ where
   go (e : Expr) (numExtra : Nat) (result : Array (α × Nat)) : Array (α × Nat) :=
     let result := result ++ (getMatch mctx d e).map (., numExtra)
     let e := e.consumeMData
-    bif e.isApp then
+    uif e.isApp then
       go e.appFn! (numExtra + 1) result
     else
       result
