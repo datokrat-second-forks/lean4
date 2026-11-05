@@ -393,10 +393,11 @@ def registerTraceClass (traceClassName : Name) (inherited := false) (ref : Name 
 
 private meta def expandTraceMacro (id : Syntax) (s : Syntax) : MacroM DoElem := do
   let msg ← if s.getKind == interpolatedStrKind then `(m! $(⟨s⟩)) else `(($(⟨s⟩) : MessageData))
+  -- A term, not a `bif` element, so that the legacy `do` elaborator accepts it; the inner `do`
+  -- keeps nested actions in `msg` inside the branch.
   `(doElem| do
     let cls := $(quote id.getId.eraseMacroScopes)
-    if (← Lean.isTracingEnabledFor cls) then
-      Lean.addTrace cls $msg)
+    cond (← Lean.isTracingEnabledFor cls) (do Lean.addTrace cls $msg) (pure ()))
 
 macro "trace[" id:ident "]" s:(interpolatedStr(term) <|> term) : doElem => do
   expandTraceMacro id s.raw

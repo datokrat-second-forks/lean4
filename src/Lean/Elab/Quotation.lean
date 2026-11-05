@@ -400,10 +400,10 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
         | `optional =>
           let nones := .replicate ids.size (← `(none))
           `(let_delayed yes _ $ids* := $yes;
-            if __discr.isNone then yes () $[ $nones]*
-            else match __discr with
-              | `($(mkNullNode contents)) => yes () $[ (some $ids)]*
-              | _                         => $no)
+            cond __discr.isNone (yes () $[ $nones]*)
+              (match __discr with
+                | `($(mkNullNode contents)) => yes () $[ (some $ids)]*
+                | _                         => $no))
         | _ =>
           let mut discrs ← `(Syntax.getArgs __discr)
           if k == `sepBy then
@@ -454,7 +454,7 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
           let sliceDiscr ← `(mkNullNode (__discr.getArgs.extract $(quote idx) (Nat.sub __discr.getNumArgs $(quote numSuffix))))
           let suffixDiscrs ← (List.range numSuffix).mapM fun i =>
             `(Syntax.getArg __discr (Nat.sub __discr.getNumArgs $(quote (numSuffix - i))))
-          `(ite (GE.ge __discr.getNumArgs $(quote (quoted.getNumArgs - 1)))
+          `(cond (decideLE $(quote (quoted.getNumArgs - 1)) __discr.getNumArgs)
               $(← yes (prefixDiscrs ++ sliceDiscr :: suffixDiscrs))
               $(← no))
       }
@@ -501,7 +501,7 @@ private partial def getHeadInfo (alt : Alt) : TermElabM HeadInfo :=
             | _     => `(Syntax.isOfKind __discr $(quote kind))
             let newDiscrs ← (List.range argPats.size).mapM fun i => `(Syntax.getArg __discr $(quote i))
             pure (cond, newDiscrs)
-          `(ite (Eq $cond true) $(← yes newDiscrs) $(← no))
+          `(cond $cond $(← yes newDiscrs) $(← no))
       }
   else match pat with
     | `(_)              => unconditionally pure

@@ -211,12 +211,17 @@ private def elabTParserMacroAux (prec lhsPrec e : Term) : TermElabM Syntax := do
 @[builtin_macro Lean.Parser.Term.unreachable]  def expandUnreachable : Macro := fun _ =>
   `(panic! "unreachable code has been reached")
 
-@[builtin_macro Lean.Parser.Term.assert]  def expandAssert : Macro
-  | `(assert! $cond; $body) =>
-    match cond.raw.reprint with
-    | some code => `(if $cond then $body else panic! ("assertion violation: " ++ $(quote code)))
-    | none => `(if $cond then $body else panic! ("assertion violation"))
-  | _ => Macro.throwUnsupported
+/-- `assert! c; b` branches with `cond` if `c` is a `Bool` and with a `Decidable` `if` otherwise. -/
+@[builtin_term_elab Lean.Parser.Term.assert] def elabAssert : TermElab := fun stx expectedType? => do
+  let `(assert! $cond; $body) := stx | throwUnsupportedSyntax
+  let msg ← match cond.raw.reprint with
+    | some code => `(panic! ("assertion violation: " ++ $(quote code)))
+    | none => `(panic! ("assertion violation"))
+  let c ← elabTerm cond none
+  let isBool := (← Meta.whnfR (← instantiateMVars (← Meta.inferType c))).isConstOf ``Bool
+  let cStx ← exprToSyntax c
+  let stxNew ← bif isBool then `(cond $cStx $body $msg) else `(if $cStx then $body else $msg)
+  withMacroExpansion stx stxNew <| elabTerm stxNew expectedType?
 
 register_builtin_option debugAssertions : Bool := {
   defValue := false

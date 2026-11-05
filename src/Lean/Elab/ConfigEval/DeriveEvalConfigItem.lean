@@ -350,7 +350,7 @@ where
     let handleExact : TermElabM Term := do
       let body ← handleWildcard
       let onAnon ← if let some h := exact? then bodyApplied h else pure onFail
-      `(if item.isAnonymous then $onAnon else $body)
+      `(bif item.isAnonymous then $onAnon else $body)
     let mut body ← handleExact
     if let some projFn := projFn? then
       body ← `(item'.addConstInfo $(quote projFn) >>= fun _ => $body)

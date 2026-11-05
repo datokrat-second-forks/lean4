@@ -27,13 +27,13 @@ where
     if stop - start ≤ 5 then
       -- Switch to if/else chains once we get to a small number of options.
       cases[start:stop].foldrM (init := onFail) fun (s, body) res =>
-        `(if $discr == $(quote s) then $body else $res)
+        `(bif $discr == $(quote s) then $body else $res)
     else
       let mid := (start + stop) / 2
       let (s, _) := cases[mid]!
       let low ← build start mid cases
       let high ← build mid stop cases
-      `(if $discr < $(quote s) then $low else $high)
+      `(bif $discr <ᵇ $(quote s) then $low else $high)
 
 /--
 Returns a list of types that are are missing `cls` instances such that
