@@ -45,9 +45,9 @@ public abbrev IsValidMonth (m : Nat) : Prop :=
   m ≥ 1 ∧ m ≤ 12
 
 public def maxDay (y m : Nat) :  Nat :=
-  bif m =ᵇ 2 then
-    bif y % 4 =ᵇ 0 && (y % 100 ≠ᵇ 0 || y % 400 =ᵇ 0) then 29 else 28
-  else bif m ≤ᵇ 7 then
+  uif m = 2 then
+    uif y % 4 = 0 ∧ (y % 100 ≠ 0 ∨ y % 400 = 0) then 29 else 28
+  else uif m ≤ 7 then
     30 + (m % 2)
   else
     31 - (m % 2)

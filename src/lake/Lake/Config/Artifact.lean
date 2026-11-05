@@ -14,7 +14,7 @@ namespace Lake
 
 /-- Returns the relative file path used for an artifact in the Lake cache (i.e., `{hash}.{ext}`). -/
 @[inline] public def artifactPath (contentHash : Hash) (ext := "art") : FilePath :=
-  bif ext.isEmpty then contentHash.toString else s!"{contentHash}.{ext}"
+  uif ext.isEmpty then contentHash.toString else s!"{contentHash}.{ext}"
 
 /-- The information needed to identify a single artifact within the Lake cache. -/
 public structure ArtifactDescr where
@@ -50,14 +50,14 @@ public instance : ToJson ArtifactDescr := ⟨(toJson ·.relPath)⟩
 public def ofFilePath? (path : FilePath) : Except String ArtifactDescr := do
   let s := path.toString
   let pos := s.find '.'
-  bif h : pos =ᵇ s.endPos then
+  uif h : pos = s.endPos then
     let some hash := Hash.ofString? s
       | throw "expected artifact file name to be a content hash"
     return {hash, ext := ""}
   else
     let some hash := Hash.ofString? <| s.extract s.startPos pos
       | throw "expected artifact file name to be a content hash"
-    let ext := s.extract (pos.next (ne_of_decideEq_eq_false h)) s.endPos
+    let ext := s.extract (pos.next h) s.endPos
     return {hash, ext}
 
 public protected def fromJson? (data : Json) : Except String ArtifactDescr := do

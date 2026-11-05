@@ -20,13 +20,13 @@ public def version.isRelease : Bool :=
   Lean.version.isRelease
 
 public def version.specialDesc : String :=
-  bif isRelease && !Lean.githash.isEmpty then s!"src+{Lean.githash.take 7}" else "src"
+  uif isRelease && !Lean.githash.isEmpty then s!"src+{Lean.githash.take 7}" else "src"
 
 public def versionStringCore : String :=
   s!"{version.major}.{version.minor}.{version.patch}"
 
 public def versionString : String :=
-  bif version.specialDesc ≠ᵇ "" then
+  uif version.specialDesc ≠ "" then
     s!"{versionStringCore}-{version.specialDesc}"
   else
     versionStringCore

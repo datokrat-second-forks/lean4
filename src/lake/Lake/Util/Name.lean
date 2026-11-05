@@ -22,7 +22,7 @@ First tries to convert a string into a legal name.
 If that fails, defaults to making it a simple name (e.g., `Lean.Name.mkSimple`).
 -/
 public def stringToLegalOrSimpleName (s : String) : Name :=
-  bif s.toName.isAnonymous then Lean.Name.mkSimple s else s.toName
+  uif s.toName.isAnonymous then Lean.Name.mkSimple s else s.toName
 
 @[inline] public def NameMap.empty : NameMap α := mkNameMap α
 

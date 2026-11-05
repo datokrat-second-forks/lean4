@@ -58,7 +58,7 @@ public partial def removeDirAllIfExists (path : FilePath) : IO Unit := do
     let mdata ← try ent.path.symlinkMetadata catch
       | .noFileOrDirectory .. => continue -- something else was faster
       | e => throw e
-    bif mdata.type == .dir then
+    uif mdata.type == .dir then
       removeDirAllIfExists ent.path
     else
       removeFileIfExists ent.path
@@ -78,7 +78,7 @@ public partial def copyDirAll (src dst : FilePath) : IO Unit := do
   for ent in ents do
     let srcPath := src / ent.fileName
     let dstPath := dst / ent.fileName
-    bif (← srcPath.isDir) then
+    uif (← srcPath.isDir) then
       copyDirAll srcPath dstPath
     else
       copyFile srcPath dstPath
@@ -88,7 +88,7 @@ public def resolvePath (path : FilePath) : BaseIO FilePath := do
   match (← (IO.FS.realPath path).toBaseIO) with
   | .ok path =>
     -- Real path does not guarantee the file exists on Windows
-    bif (← path.pathExists) then
+    uif (← path.pathExists) then
       return path.normalize
     else
       return ""
@@ -98,4 +98,4 @@ public def resolvePath (path : FilePath) : BaseIO FilePath := do
 /-- Returns the normalized real path of a file if and only if it exists. -/
 @[inline] public def resolvePath? (path : FilePath) : BaseIO (Option FilePath) := do
   let path ← resolvePath path
-  return bif path.toString.isEmpty then none else some path
+  return uif path.toString.isEmpty then none else some path

@@ -46,9 +46,9 @@ public def setupFile
 : BaseIO ExitCode := do
   let path ← resolvePath leanFile
   let configFile ← realConfigFile loadConfig.configFile
-  bif configFile.toString.isEmpty then
+  uif configFile.toString.isEmpty then
     return noConfigFileCode
-  else bif configFile == path then do
+  else uif configFile == path then do
     let setup : ModuleSetup := {
       name := configModuleName
       plugins :=  #[loadConfig.lakeEnv.lake.sharedLib]

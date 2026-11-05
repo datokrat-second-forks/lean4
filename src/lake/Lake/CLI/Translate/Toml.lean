@@ -138,7 +138,7 @@ public protected def Dependency.toToml (dep : Dependency) (t : Table  := {}) : T
     | .git rev =>
       match dep.src? with
       | some (.git (rev := some gitRev) ..) =>
-        bif gitRev == rev then
+        uif gitRev == rev then
           t -- `rev` will be set below
         else t.insert `version s!"git#{rev}"
       | _ => t.insert `rev rev
@@ -166,13 +166,13 @@ meta def genToToml
   (tyName : Name) [info : ConfigInfo tyName]
   (exclude : Array Name := #[])
 : MacroM (Array Command) := do
-  let val ← bif info.arity == 0 then `(t) else
+  let val ← uif info.arity == 0 then `(t) else
     `(t.insert `name $(mkIdent <| .mkSimple s!"x_{info.arity}"))
   let tyArgs := info.arity.fold (init := Array.emptyWithCapacity info.arity) fun i _ as =>
     as.push (mkIdent <| .mkSimple s!"x_{i+1}")
   let ty := Syntax.mkCApp tyName tyArgs
   let val ← info.fields.foldlM (init := val) fun val {name, canonical, ..} => do
-    bif !canonical || exclude.contains name then
+    uif !canonical || exclude.contains name then
       return val
     else
       `($val |>.insertField cfg $(quote name))

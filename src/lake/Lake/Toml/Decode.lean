@@ -42,7 +42,7 @@ namespace Toml
 /-- Run the decode action. If there were errors, throw. Otherwise, return the result. -/
 @[inline] public  def ensureDecode (x : DecodeM α) : EDecodeM α := fun es =>
   match x es with
-  | .ok a es => bif es.isEmpty then .ok a es else .error () es
+  | .ok a es => uif es.isEmpty then .ok a es else .error () es
 
 /-- Run the decode action. If it fails, keep the errors but return `default`. -/
 @[inline] public  def tryDecodeD (default : α) (x : EDecodeM α) : DecodeM α := fun es =>
@@ -187,7 +187,7 @@ end Value
 public def decodeKeyval [dec : DecodeToml α] (k : Name) (v : Value) : EDecodeM α := fun es =>
   let iniPos := es.size
   let f es := es.mapIdx fun i e =>
-    bif iniPos ≤ᵇ i then {e with msg := s!"key {ppKey k}: {e.msg}"} else e
+    uif iniPos ≤ i then {e with msg := s!"key {ppKey k}: {e.msg}"} else e
   match dec.decode v es with
   | .ok a es => .ok a (f es)
   | .error e es => .error e (f es)

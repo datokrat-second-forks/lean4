@@ -77,8 +77,7 @@ public theorem NConfigDecl.data_eq_target (self : NConfigDecl p n)
 
 @[inline] public def ConfigDecl.config?
     (kind : Name) (self : ConfigDecl) : Option (ConfigType kind self.pkg self.name) :=
-  bif h : self.kind =ᵇ kind then
-    have h := eq_of_decideEq_eq_true h
+  uif h : self.kind = kind then
     some <| cast (by rw [h]) self.config
   else
     none
@@ -130,7 +129,7 @@ public abbrev ExternLibDecl := KConfigDecl ExternLib.configKind
 
 @[inline] public def PConfigDecl.opaqueTargetConfig?
     (self : PConfigDecl p) : Option (OpaqueTargetConfig p self.name) :=
-  bif h : self.kind.isAnonymous then
+  uif h : self.kind.isAnonymous then
     some <| self.opaqueTargetConfig h
   else
     none

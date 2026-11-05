@@ -55,7 +55,7 @@ public def Package.uploadRelease
 public def Package.resolveDriver
   (pkg : Package) (kind : String) (driver : String)
 : LakeT IO (Package × String) := do
-  bif driver.isEmpty then
+  uif driver.isEmpty then
     error s!"{pkg.prettyName}: no {kind} driver configured"
   else
     match driver.split '/' |>.toStringList with

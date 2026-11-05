@@ -50,7 +50,7 @@ Registers the job for the top-level build monitor,
   let iniPos := log.endPos
   match (← (withLoggedIO x).toFn fetch pkg? stack store ctx log) with
   | .ok job log =>
-    bif iniPos <ᵇ log.endPos then
+    uif iniPos < log.endPos then
       let (log, jobLog) := log.split iniPos
       let job := job.mapResult (sync := true) (·.prependLog jobLog)
       return .ok job log
@@ -79,7 +79,7 @@ if it is not already (i.e., it has an empty caption).
 @[inline] public def maybeRegisterJob
   (caption : String) (job : Job α)
 : FetchM (Job α) := do
-  bif job.caption.isEmpty then
+  uif job.caption.isEmpty then
     registerJob caption job
   else
     return job

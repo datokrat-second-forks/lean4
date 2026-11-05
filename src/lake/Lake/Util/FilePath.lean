@@ -27,8 +27,8 @@ Convert a relative file path to a platform-independent string.
 Uses `/` as the path separator, even on Windows.
 -/
 public def mkRelPathString (path : FilePath) : String :=
-  bif System.Platform.isWindows then
-    path.toString.map fun c => bif c =ᵇ '\\' then '/' else c
+  uif System.Platform.isWindows then
+    path.toString.map fun c => uif c = '\\' then '/' else c
   else
     path.toString
 
@@ -40,8 +40,8 @@ Joins a two (potentially) relative paths.
 If either path is `.`, this returns the other.
 -/
 public def joinRelative (a b : FilePath) : System.FilePath :=
-  bif b == "." then a
-  else bif a == "." then b
+  uif b == "." then a
+  else uif a == "." then b
   else inline FilePath.join a b
 
 public scoped instance : Div FilePath where
@@ -69,15 +69,15 @@ public def modOfFilePath (path : FilePath) : Name :=
   FilePath.components path.copy |>.foldl .str .anonymous
 where
   removeExts (s : String) (i := s.rawEndPos) (e := s.rawEndPos) :=
-    bif h : i =ᵇ 0 then
+    uif h : i = 0 then
       String.Pos.Raw.extract s 0 e
     else
-      have := String.Pos.Raw.prev_lt_of_pos s i (ne_of_decideEq_eq_false h)
+      have := String.Pos.Raw.prev_lt_of_pos s i h
       let i' := i.prev s
       let c  := i'.get s
-      bif c == FilePath.pathSeparator then
+      uif c == FilePath.pathSeparator then
         String.Pos.Raw.extract s 0 e
-      else bif c == '.' then
+      else uif c == '.' then
         removeExts s i' i'
       else
         removeExts s i' e

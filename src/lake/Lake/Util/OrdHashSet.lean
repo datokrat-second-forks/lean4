@@ -31,7 +31,7 @@ public def mkEmpty (size : Nat) : OrdHashSet α :=
   ⟨∅, .mkEmpty size⟩
 
 public def insert (self : OrdHashSet α) (a : α) : OrdHashSet α :=
-  bif self.toHashSet.contains a then
+  uif self.toHashSet.contains a then
     self
   else
     ⟨self.toHashSet.insert a, self.toArray.push a⟩

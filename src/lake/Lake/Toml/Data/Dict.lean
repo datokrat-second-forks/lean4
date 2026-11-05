@@ -63,7 +63,7 @@ public def contains (k : α) (t : RBDict α β cmp) : Bool :=
   t.indices.contains k
 
 public def findIdx? (k : α) (t : RBDict α β cmp) : Option (Fin t.size) := do
-  let i ← t.indices.get? k; bif h : i <ᵇ t.items.size then some ⟨i, (lt_of_decideLT_eq_true h)⟩ else none
+  let i ← t.indices.get? k; uif h : i < t.items.size then some ⟨i, h⟩ else none
 
 public def findEntry? (k : α) (t : RBDict α β cmp) : Option (α × β) := do
   return t.items[← t.findIdx? k]
@@ -82,8 +82,8 @@ public def push (k : α) (v : β) (t : RBDict α β cmp) : RBDict α β cmp :=
 
 public def insert (k : α) (v : β) (t : RBDict α β cmp) : RBDict α β cmp :=
   if let some i := t.findIdx? k then
-    bif h : i.val <ᵇ t.items.size then
-      {t with items := t.items.set i (k,v) (lt_of_decideLT_eq_true h)}
+    uif h : i.val < t.items.size then
+      {t with items := t.items.set i (k,v) h}
     else
       t.push k v
   else
@@ -91,11 +91,11 @@ public def insert (k : α) (v : β) (t : RBDict α β cmp) : RBDict α β cmp :=
 
 /-- Inserts the value into the dictionary if `p` is `true`. -/
 @[macro_inline, expose] public def insertIf (p : Bool) (k : α) (v : β) (t : RBDict α β cmp) : RBDict α β cmp :=
-  bif p then t.insert k v else t
+  uif p then t.insert k v else t
 
 /-- Inserts the value into the dictionary if `p` is `false`. -/
 @[macro_inline, expose] public def insertUnless (p : Bool) (k : α) (v : β) (t : RBDict α β cmp) : RBDict α β cmp :=
-  bif p then t else t.insert k v
+  uif p then t else t.insert k v
 
 /-- Insert the value into the dictionary if it is not `none`. -/
 @[macro_inline, expose] public def insertSome (k : α) (v? : Option β) (t : RBDict α β cmp) : RBDict α β cmp :=
@@ -115,7 +115,7 @@ public instance : Append (RBDict α β cmp) := ⟨RBDict.append⟩
   {t with items := t.items.map fun ⟨k, v⟩ => ⟨k, f k v⟩}
 
 @[inline] public def filter (p : α → β → Bool) (t : RBDict α β cmp) : RBDict α β cmp :=
-  t.items.foldl (init := {}) fun t (k, v) => bif p k v then t.push k v else t
+  t.items.foldl (init := {}) fun t (k, v) => uif p k v then t.push k v else t
 
 @[inline] public def filterMap (f : α → β → Option γ) (t : RBDict α β cmp) : RBDict α γ cmp :=
   t.items.foldl (init := {}) fun t ⟨k, v⟩ => if let some v := f k v then t.push k v else t

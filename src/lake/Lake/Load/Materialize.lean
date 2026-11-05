@@ -41,7 +41,7 @@ def materializeGitRepo
   let remote := Git.defaultRemote
   let url ← resolveUrl url
   -- # Setup repository
-  bif (← repo.gitExists) then
+  uif (← repo.gitExists) then
     -- The URL may be updated even without a `lake update`.
     -- This ensures a package's `remoteUrl?` reflects Git's by default.
     if let some oldUrl ← repo.getRemoteUrl? remote then
@@ -54,14 +54,14 @@ def materializeGitRepo
       repo.addRemote remote url
     -- Skip fetch if already on revision. Avoids errors when offline.
     -- https://github.com/leanprover/lake/issues/104
-    bif (← repo.getHeadRevision?) =ᵇ some rev then
+    uif (← repo.getHeadRevision?) = some rev then
       checkDiff
       return
-    bif rev.isFullSha1 then
+    uif rev.isFullSha1 then
       -- If missing, `findCommit?` will fetch to try and find it (on a partial clone).
       -- This could be avoided with `--no-lazy-fetch`, but that requires Git 2.45+.
       -- Fetch will happen anyway next, so the higher minimum is not worth it.
-      bif (← repo.findCommit? rev).isSome then
+      uif (← repo.findCommit? rev).isSome then
         -- Skip revision fetch if the exact commit is already available.
         -- May still fetch objects due to the partial clone.
         checkout rev
@@ -78,7 +78,7 @@ def materializeGitRepo
       \n  {rev}\
       \nfrom the Git repository at\
       \n  {url}"
-  bif (← repo.getHeadRevision?) =ᵇ some rev then -- e.g., new tag = old rev
+  uif (← repo.getHeadRevision?) = some rev then -- e.g., new tag = old rev
     checkDiff
     return
   checkout rev
@@ -87,7 +87,7 @@ def materializeGitRepo
   repo.gcAuto
 where
   @[inline] resolveUrl url := do
-    bif (← FilePath.pathExists url) then
+    uif (← FilePath.pathExists url) then
       let some path ← resolvePath? url
         | error s!"{name}: failed to resolve path:\n  {url}"
       return path.toString
@@ -103,7 +103,7 @@ where
     repo.clean
     checkDiff
   @[inline] checkDiff := do
-    bif (← repo.hasDiff) then
+    uif (← repo.hasDiff) then
       logWarning s!"{name}: repository has local changes:\n  {repo.dir}"
 
 public structure MaterializedDep where
@@ -183,12 +183,12 @@ s!"{dep.fullName}: package not found on Reservoir.
 @[inline] def mkPath
   (wsDir relPkgsDir relSrc : FilePath) (dirName : String) (copy update : Bool)
 : IO FilePath := do
-  bif copy then
+  uif copy then
     let relDst := relPkgsDir / dirName
     let dst := wsDir / relDst
-    bif update then
+    uif update then
       removeDirAllIfExists dst
-    else bif (← dst.pathExists) then
+    else uif (← dst.pathExists) then
       return relDst
     let src := wsDir / relSrc
     copyDirAll src dst
@@ -214,7 +214,7 @@ public def Dependency.materialize
       let repoUrl := Git.filterUrl? url |>.getD ""
       materializeGit dep.prettyName (relPkgsDir / dep.dirName) url repoUrl inputRev? subDir?
   else
-    bif dep.scope.isEmpty then
+    uif dep.scope.isEmpty then
       error s!"{dep.prettyName}: ill-formed dependency: \
         dependency is missing a source and is missing a scope for Reservoir"
     let pkg ← id do

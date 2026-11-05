@@ -75,7 +75,7 @@ meta def mkConfigAuxDecls
         mkDefault := fun $structPat => $defVal
     )
     let realNameLit := Name.quoteFrom id id.getId
-    bif parent then
+    uif parent then
       let instId := mkIdentFrom id <| id.getId.modifyBase (structId.getId ++ · |>.str "instConfigParent")
       let cmds ← cmds.push <$> `(
         $[$vis?:visibility]? instance $instId:ident : ConfigParent $structTy $type := ⟨$projId⟩
@@ -105,8 +105,7 @@ meta def mkConfigAuxDecls
           : ConfigFieldInfo
         })
         return {cmds, fields}
-      bif h : 0 <ᵇ ids.size then
-        have h := lt_of_decideLT_eq_true h
+      uif h : 0 < ids.size then
         let data ← addName true data (ids[0]'h)
         let data ← ids.foldlM (start := 1) (addName false) data
         return data

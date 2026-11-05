@@ -38,7 +38,7 @@ public def mkEmpty (size : Nat) : RBArray α β cmp :=
 
 /-- Insert `b` with the key `a`. Does nothing if the key is already present. -/
 public def insert (self : RBArray α β cmp) (a : α) (b : β) : RBArray α β cmp :=
-  bif self.toTreeMap.contains a then
+  uif self.toTreeMap.contains a then
     self
   else
     ⟨self.toTreeMap.insert a b, self.toArray.push b⟩

@@ -226,16 +226,16 @@ def getVersion (obj : JsonObject) : Except String SemVerCore := do
     | (s : String) => StdVer.parse s
     | ver => throw s!"invalid version '{ver}'; \
       you may need to update your 'lean-toolchain'"
-  bif ver.major >ᵇ 1 then
+  uif ver.major > 1 then
     throw s!"schema version '{ver}' is of a higher major version than this \
       Lake's '{Manifest.version}'; you may need to update your 'lean-toolchain'"
-  else bif ver <ᵇ {minor := 5} then
+  else uif ver < {minor := 5} then
     throw s!"incompatible manifest version '{ver}'"
   else
     return ver
 
 def getPackages (ver : StdVer) (obj : JsonObject) : Except String (Array PackageEntry) := do
-  bif ver <ᵇ {minor := 7} then
+  uif ver < {minor := 7} then
     (·.map PackageEntry.ofV6) <$> obj.getD "packages" #[]
   else
     obj.getD "packages" #[]

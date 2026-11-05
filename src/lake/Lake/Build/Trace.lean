@@ -116,9 +116,9 @@ public instance : NilTrace Hash := ⟨nil⟩
 
 /-- Parse a hash from a JSON number. -/
 public def ofJsonNumber? (n : JsonNumber) : Except String Hash :=
-  bif n.exponent =ᵇ 0 && 0 ≤ᵇ n.mantissa then
-    bif h : n.mantissa.toNat <ᵇ UInt64.size then
-      return ⟨.ofNatLT n.mantissa.toNat (lt_of_decideLT_eq_true h)⟩
+  uif n.exponent = 0 ∧ 0 ≤ n.mantissa then
+    uif h : n.mantissa.toNat < UInt64.size then
+      return ⟨.ofNatLT n.mantissa.toNat h⟩
     else
       throw "number too big"
   else
@@ -128,8 +128,8 @@ public def ofJsonNumber? (n : JsonNumber) : Except String Hash :=
 public def ofHex (s : String) : Hash :=
   mk <| s.utf8ByteSize.fold (init := 0) fun i h n =>
     let c := s.getUTF8Byte ⟨i⟩ h
-    bif c ≤ᵇ 57 then n*16 + (c - 48).toUInt64
-    else bif 97 ≤ᵇ c then n*16 + (c - 87).toUInt64 -- c - 'a' + 10 = (c - 87)
+    uif c ≤ 57 then n*16 + (c - 48).toUInt64
+    else uif 97 ≤ c then n*16 + (c - 87).toUInt64 -- c - 'a' + 10 = (c - 87)
     else n*16 + (c - 55).toUInt64 -- c - 'A' + 10 = (c - 55)
 
 -- sanity check
@@ -138,7 +138,7 @@ example : ofHex "0123456789" = ⟨0x0123456789⟩ ∧
 
 /-- Parse a hash from a 16-digit string of hexadecimal digits. -/
 public def ofHex? (s : String) : Option Hash :=
-  bif s.utf8ByteSize =ᵇ 16 && isHex s then ofHex s else none
+  uif s.utf8ByteSize = 16 ∧ isHex s then ofHex s else none
 
 /-- Returns the hash as 16-digit lowercase hex string. -/
 @[inline] public def hex (self : Hash) : String :=
@@ -250,7 +250,7 @@ public instance : ToString TextFilePath := ⟨(·.path.toString)⟩
 
 /-- Compute the hash of a file. If `text := true`, normalize line endings. -/
 @[inline] public def computeFileHash (file : FilePath) (text := false) : IO Hash :=
-  bif text then computeTextFileHash file else computeBinFileHash file
+  uif text then computeTextFileHash file else computeBinFileHash file
 
 /-- Compute the hash of each element of an array and combine them (left-to-right). -/
 @[inline] public def computeArrayHash [ComputeHash α m] [Monad m] (as : Array α) : m Hash :=

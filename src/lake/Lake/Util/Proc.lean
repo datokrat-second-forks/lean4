@@ -13,7 +13,7 @@ namespace Lake
 
 public def mkCmdLog (args : IO.Process.SpawnArgs) : String :=
   let envStr := String.join <| args.env.toList.map fun (k, v) =>
-    bif k == "PATH" then "PATH " else s!"{k}={v.getD ""} " -- PATH too big
+    uif k == "PATH" then "PATH " else s!"{k}={v.getD ""} " -- PATH too big
   let cmdStr := " ".intercalate (args.cmd :: args.args.toList)
   let cwd := args.cwd.getD "."
   s!"{cwd}> {envStr}{cmdStr}"
@@ -40,15 +40,15 @@ public def proc
 : LogIO Unit := do
   withLogErrorPos do
   let out ← rawProc args (input? := input?)
-  bif out.exitCode =ᵇ 0 then
-    logOutput out (bif quiet then logVerbose else logInfo)
+  uif out.exitCode = 0 then
+    logOutput out (uif quiet then logVerbose else logInfo)
   else
     logOutput out logInfo
     error s!"external command '{args.cmd}' exited with code {out.exitCode}"
 
 public def captureProc' (args : IO.Process.SpawnArgs) : LogIO (IO.Process.Output) := do
   let out ← rawProc args (quiet := true)
-  bif out.exitCode =ᵇ 0 then
+  uif out.exitCode = 0 then
     return out
   else errorWithLog do
     logVerbose (mkCmdLog args)
@@ -61,7 +61,7 @@ public def captureProc' (args : IO.Process.SpawnArgs) : LogIO (IO.Process.Output
 public def captureProc? (args : IO.Process.SpawnArgs) : BaseIO (Option String) := do
   EIO.catchExceptions (h := fun _ => pure none) do
     let out ← IO.Process.output args
-    bif out.exitCode =ᵇ 0 then
+    uif out.exitCode = 0 then
       return some out.stdout.trimAscii.copy -- remove, e.g., newline at end
     else
       return none

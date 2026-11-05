@@ -20,8 +20,8 @@ namespace Lake
 
 /-- Convert the string value of an environment variable to a boolean. -/
 public def envToBool? (o : String) : Option Bool :=
-  bif ["y", "yes", "t", "true", "on", "1"].contains o.toLower then some true
-  else bif ["n", "no", "f", "false", "off", "0"].contains o.toLower then some false
+  uif ["y", "yes", "t", "true", "on", "1"].contains o.toLower then some true
+  else uif ["n", "no", "f", "false", "off", "0"].contains o.toLower then some false
   else none
 
 /-! ## Data Structures -/
@@ -39,14 +39,14 @@ public structure ElanInstall where
   go "" 0
 where
   go (acc : String) (pos : String.Pos.Raw) : FilePath :=
-    bif h : pos.atEnd toolchain then
+    uif h : pos.atEnd toolchain then
       FilePath.mk acc
     else
-      let c := pos.get' toolchain (Bool.ne_true_of_eq_false h)
-      let pos' := pos.next' toolchain (Bool.ne_true_of_eq_false h)
-      bif c =ᵇ '/' then
+      let c := pos.get' toolchain h
+      let pos' := pos.next' toolchain h
+      uif c = '/' then
         go (acc ++ "--") pos'
-      else bif c =ᵇ ':'  then
+      else uif c = ':'  then
         go (acc ++ "---") pos'
       else
         go (acc.push c) pos'
@@ -80,7 +80,7 @@ public def leanCcExe (sysroot : FilePath) :=
 
 /-- Standard path of shared libraries in a Lean installation. -/
 public def leanSharedLibDir (sysroot : FilePath) :=
-  bif Platform.isWindows then
+  uif Platform.isWindows then
     sysroot / "bin"
   else
     sysroot / "lib" / "lean"
@@ -89,7 +89,7 @@ public def leanSharedLibDir (sysroot : FilePath) :=
 public def leanSharedDynlibs (sysroot : FilePath) : Array Dynlib :=
   -- libLake_shared links against the split libs on all platforms,
   -- so they must be included in the bundle even when they are empty stubs.
-  bif System.Platform.isWindows then libs winLib else libs unixLib
+  uif System.Platform.isWindows then libs winLib else libs unixLib
 where
   @[inline] winLib name deps :=
     -- On Windows, libraries are in `bin` and link to one another
@@ -158,18 +158,18 @@ A `SearchPath` including the Lean installation's shared library directories
 (i.e., the system library and Lean library directories).
 -/
 public def LeanInstall.sharedLibPath (self : LeanInstall) : SearchPath :=
-  bif Platform.isWindows then
+  uif Platform.isWindows then
     [self.binDir]
   else
     [self.leanLibDir, self.systemLibDir]
 
 /-- The `LEAN_CC` of the Lean installation. -/
 public def LeanInstall.leanCc? (self : LeanInstall) : Option String :=
-  bif self.customCc then some self.cc.toString else none
+  uif self.customCc then some self.cc.toString else none
 
 /-- The link-time flags for the C compiler of the Lean installation. -/
 public def LeanInstall.ccLinkFlags (shared : Bool) (self : LeanInstall) : Array String :=
-  bif shared then self.ccLinkSharedFlags else self.ccLinkStaticFlags
+  uif shared then self.ccLinkSharedFlags else self.ccLinkStaticFlags
 
 /-- Lake executable file name. -/
 public def lakeExe : FilePath :=
@@ -202,7 +202,7 @@ public def LakeInstall.ofLean (lean : LeanInstall) : LakeInstall where
     name := "Lake_shared"
     deps := lean.sharedDynlibs
     path :=
-      bif Platform.isWindows then
+      uif Platform.isWindows then
         lean.binDir / "libLake_shared.dll"
       else
         lean.leanLibDir / s!"libLake_shared.{sharedLibExt}"
@@ -217,7 +217,7 @@ environment variables. If `ELAN` is set but empty, Elan is considered disabled.
 public def findElanInstall? : BaseIO (Option ElanInstall) := do
   if let some home ← IO.getEnv "ELAN_HOME" then
     let elan := (← IO.getEnv "ELAN").getD "elan"
-    bif elan.trimAscii.isEmpty then
+    uif elan.trimAscii.isEmpty then
       return none
     else
       return some {elan, home}
@@ -234,7 +234,7 @@ public def findLeanSysroot? (lean := "lean") : BaseIO (Option FilePath) := do
       cmd := lean,
       args := #["--print-prefix"]
     }
-    bif out.exitCode == 0 then
+    uif out.exitCode == 0 then
       pure <| some <| FilePath.mk <| out.stdout.trimAscii.copy
     else
       pure <| none
@@ -271,7 +271,7 @@ Lean libraries in `<lean-sysroot>/lib/lean`, and its system libraries in
 -/
 public def LeanInstall.get (sysroot : FilePath) (collocated : Bool := false) : BaseIO LeanInstall := do
   let githash ← do
-    bif collocated then
+    uif collocated then
       pure Lean.githash
     else
       -- Remark: This is expensive (at least on Windows), so try to avoid it.
@@ -291,7 +291,7 @@ where
       return FilePath.mk ar
     else
       let ar := leanArExe sysroot
-      bif (← ar.pathExists) then
+      uif (← ar.pathExists) then
         return ar
       else if let some ar ← IO.getEnv "AR" then
         return ar
@@ -302,7 +302,7 @@ where
       return withCustomCc i cc
     else
       let cc := leanCcExe sysroot
-      bif (← cc.pathExists) then
+      uif (← cc.pathExists) then
         return withInternalCc i cc
       else if let some cc ← IO.getEnv "CC" then
         return withCustomCc i cc
@@ -335,7 +335,7 @@ public def findLakeLeanJointHome? : BaseIO (Option FilePath) := do
   if let .ok appPath ← IO.appPath.toBaseIO then
     if let some appDir := appPath.parent then
       let leanExe := appDir / "lean" |>.addExtension FilePath.exeExtension
-      bif (← leanExe.pathExists) then
+      uif (← leanExe.pathExists) then
         return appDir.parent
   return none
 
@@ -353,7 +353,7 @@ by check for `Lake.olean` in the installation's `lib` directory.
 public def getLakeInstall? (lake : FilePath) : BaseIO (Option LakeInstall) := do
   let some home := lakeBuildHome? lake | return none
   let lake : LakeInstall := {home, lake}
-  bif (← lake.libDir / "Lake.olean" |>.pathExists) then
+  uif (← lake.libDir / "Lake.olean" |>.pathExists) then
     return some lake
   return none
 
@@ -373,7 +373,7 @@ public def findLeanInstall? : BaseIO (Option LeanInstall) := do
     return some <| ← LeanInstall.get sysroot
   let lean ← do
     if let some lean ← IO.getEnv "LEAN" then
-      bif lean.trimAscii.isEmpty then
+      uif lean.trimAscii.isEmpty then
         return none
       else
         pure lean
@@ -419,7 +419,7 @@ following the pattern of a regular Lean toolchain.
 public def findInstall? : BaseIO (Option ElanInstall × Option LeanInstall × Option LakeInstall) := do
   let elan? ← findElanInstall?
   if let some sysroot ← findLakeLeanJointHome? then
-    bif (← IO.getEnv "LAKE_OVERRIDE_LEAN").bind envToBool? |>.getD false then
+    uif (← IO.getEnv "LAKE_OVERRIDE_LEAN").bind envToBool? |>.getD false then
       let lake := LakeInstall.ofLean {sysroot}
       return (elan?, ← findLeanInstall?, some lake)
     else

@@ -52,8 +52,8 @@ public abbrev FacetConfig.toKind
 : KFacetConfig kind name := KFacetConfig.mk self h
 
 public def FacetConfig.toKind? (kind : Name) (self : FacetConfig name) : Option (KFacetConfig kind name) :=
-  bif h : self.kind =ᵇ kind then
-    some (self.toKind (eq_of_decideEq_eq_true h))
+  uif h : self.kind = kind then
+    some (self.toKind h)
   else
     none
 

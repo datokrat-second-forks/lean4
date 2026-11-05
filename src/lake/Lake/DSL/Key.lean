@@ -28,7 +28,7 @@ def expandPackageTargetLit
   let `(packageTargetLit|$[+%$mod?]?$tgt) := stx
     | Macro.throwError "ill-formed package target literal"
   let tgtLit := Name.quoteFrom tgt tgt.getId
-  bif mod?.isSome then
+  uif mod?.isSome then
     `(BuildKey.packageModule $pkg $tgtLit)
   else
     `(BuildKey.packageTarget $pkg $tgtLit)

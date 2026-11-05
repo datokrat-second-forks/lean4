@@ -28,18 +28,18 @@ structure State where
 abbrev CompareM := ReaderT Context <| StateT State <| Except String
 
 def addWorklist (n : Lean.Name) : CompareM Unit := do
-  bif !(← get).checked.contains n then
+  uif !(← get).checked.contains n then
     modify fun s => { s with worklist := s.worklist.push n }
 
 def addRelevantConsts (info : Lean.ConstantInfo) : CompareM Unit := do
   runForUsedConsts info addWorklist
 
 partial def loop : CompareM Unit := do
-  bif (← get).worklist.isEmpty then
+  uif (← get).worklist.isEmpty then
     return ()
 
   let target ← modifyGet fun s => (s.worklist.back!, { s with worklist := s.worklist.pop })
-  bif (← get).checked.contains target then
+  uif (← get).checked.contains target then
     loop
   else
     let some challengeConst := (← read).challenge.constMap[target]?
@@ -47,11 +47,11 @@ partial def loop : CompareM Unit := do
     let some solutionConst := (← read).solution.constMap[target]?
       | throw s!"Const not found in solution '{target}'"
 
-    bif (← read).definitionTargets.contains solutionConst.name
+    uif (← read).definitionTargets.contains solutionConst.name
         || (← read).theoremTargets.contains solutionConst.name then
       solutionConst.type.getUsedConstants.forM addWorklist
     else
-      bif challengeConst != solutionConst then
+      uif challengeConst != solutionConst then
         throw s!"Const does not match between challenge and target '{target}'"
       addRelevantConsts solutionConst
 
@@ -81,7 +81,7 @@ public def compareAt (challenge solution : LeanExport.ExportedEnv) (theoremTarge
       | .axiomInfo cc, .axiomInfo sc => pure (cc.toConstantVal, sc.toConstantVal)
       | _, _ => throw s!"Challenge and solution constant kind don't match: '{target}'"
 
-    bif challengeConst != solutionConst then
+    uif challengeConst != solutionConst then
       throw s!"Challenge and solution theorem statement do not match: '{target}'"
 
     worklist := worklist ++ challengeConst.type.getUsedConstants
@@ -101,7 +101,7 @@ public def compareAt (challenge solution : LeanExport.ExportedEnv) (theoremTarge
     unless challengeConst.value.getLambdaBody.isAppOf ``sorryAx do
       throw s!"Challenge definition is not sorried: '{target}'"
 
-    bif !definitionHoleMatches challengeConst solutionConst then
+    uif !definitionHoleMatches challengeConst solutionConst then
       throw s!"Const does not match between challenge and target '{target}'"
 
     worklist := worklist.push solutionConst.name

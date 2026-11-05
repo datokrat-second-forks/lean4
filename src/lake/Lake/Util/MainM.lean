@@ -51,7 +51,7 @@ public instance : MonadExit MainM := ⟨MainM.exit⟩
 
 /-- Try this and catch error codes (i.e., non-zero exits). -/
 @[inline] public def tryCatchError (f : ExitCode → MainM α) (self : MainM α) : MainM α :=
-  self.tryCatchExit fun rc => bif rc =ᵇ 0 then exit 0 else f rc
+  self.tryCatchExit fun rc => uif rc = 0 then exit 0 else f rc
 
 /-- Exit with a generic error code (i.e., 1). -/
 @[inline] public protected def failure : MainM α :=
@@ -59,7 +59,7 @@ public instance : MonadExit MainM := ⟨MainM.exit⟩
 
 /-- If this exits with an error code (i.e., not 0), perform other. -/
 @[inline] public protected def orElse (self : MainM α) (other : Unit → MainM α) : MainM α :=
-  self.tryCatchExit fun rc => bif rc =ᵇ 0 then exit 0 else other ()
+  self.tryCatchExit fun rc => uif rc = 0 then exit 0 else other ()
 
 instance : Alternative MainM where
   failure := MainM.failure

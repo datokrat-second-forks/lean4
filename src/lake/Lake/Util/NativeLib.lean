@@ -15,17 +15,17 @@ namespace Lake
 
 /-- The shared library file extension for the `Platform`. -/
 public def sharedLibExt : String :=
-  bif Platform.isWindows then "dll"
-  else bif Platform.isOSX  then "dylib"
+  uif Platform.isWindows then "dll"
+  else uif Platform.isOSX  then "dylib"
   else "so"
 
 /-- Convert a library name into its static library file name for the `Platform`. -/
 public def nameToStaticLib (name : String) (libPrefixOnWindows := false) : String :=
-  bif libPrefixOnWindows || !System.Platform.isWindows then s!"lib{name}.a" else s!"{name}.a"
+  uif libPrefixOnWindows || !System.Platform.isWindows then s!"lib{name}.a" else s!"{name}.a"
 
 /-- Convert a library name into its shared library file name for the `Platform`. -/
 public def nameToSharedLib (name : String) (libPrefixOnWindows := false) : String :=
-  let libPrefix := bif libPrefixOnWindows || !System.Platform.isWindows then "lib" else ""
+  let libPrefix := uif libPrefixOnWindows || !System.Platform.isWindows then "lib" else ""
   s!"{libPrefix}{name}.{sharedLibExt}"
 
 /--
@@ -33,9 +33,9 @@ The environment variable that stores the search path
 used to find shared libraries on the `Platform`.
 -/
 public def sharedLibPathEnvVar : String :=
-  bif Platform.isWindows then
+  uif Platform.isWindows then
     "PATH"
-  else bif Platform.isOSX then
+  else uif Platform.isOSX then
     "DYLD_LIBRARY_PATH"
   else
     "LD_LIBRARY_PATH"

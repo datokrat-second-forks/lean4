@@ -50,13 +50,13 @@ Parses a `PartialBuildKey` from a `String`.
 Uses the same syntax as the `lake build` / `lake query` CLI.
 -/
 public def parse (s : String) : Except String PartialBuildKey := do
-  bif s.isEmpty then
+  uif s.isEmpty then
     throw "ill-formed target: empty string"
   match s.split ':' |>.toStringList with
   | target :: facets =>
     let target ← parseTarget target
     facets.foldlM (init := target) fun target facet => do
-      bif facet.isEmpty then
+      uif facet.isEmpty then
         throw "ill-formed target: empty facet"
       else
         return .facet target (stringToLegalOrSimpleName facet)
@@ -67,34 +67,34 @@ where
   parseTarget s := do
     match s.split '/' |>.toList with
     | [target] =>
-      bif target.isEmpty then
+      uif target.isEmpty then
         return .package .anonymous
-      bif target.startsWith "@" then
+      uif target.startsWith "@" then
         let pkg := target.drop 1
-        bif pkg.isEmpty then
+        uif pkg.isEmpty then
           return .package .anonymous
         else
           return .package (stringToLegalOrSimpleName pkg.copy)
-      else bif target.startsWith "+" then
+      else uif target.startsWith "+" then
         let mod := target.drop 1
-        bif mod.isEmpty then
+        uif mod.isEmpty then
           throw "ill-formed target: expected module name after '+'"
         else
           return .module (stringToLegalOrSimpleName mod.copy)
       else
         parsePackageTarget .anonymous target
     | [pkg, target] =>
-      let pkg := bif pkg.startsWith "@" then pkg.drop 1 else pkg
-      bif pkg.isEmpty then
+      let pkg := uif pkg.startsWith "@" then pkg.drop 1 else pkg
+      uif pkg.isEmpty then
         parsePackageTarget .anonymous target
       else
         parsePackageTarget (stringToLegalOrSimpleName pkg.copy) target
     | _ =>
       throw "ill-formed target: too many '/'"
   parsePackageTarget pkg target :=
-    bif target.isEmpty then
+    uif target.isEmpty then
       throw s!"ill-formed target: default package targets are not supported in partial build keys"
-    else bif target.startsWith "+" then
+    else uif target.startsWith "+" then
       let target := target.drop 1 |>.copy |> stringToLegalOrSimpleName
       return .packageModule pkg target
     else
@@ -106,7 +106,7 @@ public def toString : (self : PartialBuildKey) → String
 | .package p => match (getPkgName p) with | .anonymous => "" | p => s!"@{p}"
 | .packageModule p m => match (getPkgName p) with | .anonymous => s!"+{m}" | p => s!"{p}/+{m}"
 | .packageTarget p t => match (getPkgName p) with | .anonymous => t.toString | p => s!"{p}/{t}"
-| .facet t f => bif f.isAnonymous then toString t else s!"{toString t}:{f}"
+| .facet t f => uif f.isAnonymous then toString t else s!"{toString t}:{f}"
 where
   /-- Utility for extracting a package's base name from its key name. -/
   getPkgName (p : Name) : Name :=

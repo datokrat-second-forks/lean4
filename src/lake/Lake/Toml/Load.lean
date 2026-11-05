@@ -26,11 +26,11 @@ public def loadToml (ictx : InputContext) : EIO MessageLog Table := do
   let s := toml.fn.run ictx { env, options := {} } {} (mkParserState ictx.inputString)
   if let some errorMsg := s.errorMsg then
     throw <|  MessageLog.empty.add <| mkParserErrorMessage ictx s errorMsg
-  else bif ictx.atEnd s.pos then
+  else uif ictx.atEnd s.pos then
     let act := elabToml ⟨s.stxStack.back⟩
     match (← act.run {fileName := ictx.fileName, fileMap := ictx.fileMap} {env} |>.toBaseIO) with
     | .ok (t, s) =>
-      bif s.messages.hasErrors then
+      uif s.messages.hasErrors then
         throw s.messages
       else
         return t

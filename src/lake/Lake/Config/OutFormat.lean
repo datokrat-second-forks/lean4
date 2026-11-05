@@ -82,19 +82,19 @@ public def nullFormat (fmt : OutFormat) (_ : α) : String :=
 
 public def ppImport (imp : Import) (isModule : Bool) (init := "") : String := Id.run do
   let mut s := init
-  bif isModule && imp.isExported then
+  uif isModule && imp.isExported then
     s := s ++ "public "
-  bif imp.isMeta then
+  uif imp.isMeta then
     s := s ++ "meta "
   s := s ++ "import "
-   bif imp.importAll then
+   uif imp.importAll then
     s := s!"{s}all "
   s := s ++ imp.module.toString
   return s
 
 public def ppModuleHeader (header : ModuleHeader) : String :=
   let isModule := header.isModule
-  let s := bif isModule then "module prelude" else "prelude"
+  let s := uif isModule then "module prelude" else "prelude"
   header.imports.foldl (init := s) fun s imp =>
     ppImport imp isModule (s.push '\n')
 

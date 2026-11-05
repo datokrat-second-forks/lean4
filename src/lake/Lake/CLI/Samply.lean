@@ -31,7 +31,7 @@ open Lean (Json toJson)
 /-- Check that a command is available on PATH. -/
 def requireCmd (cmd : String) (installHint : String) : IO Unit := do
   let result ← IO.Process.output { cmd := "sh", args := #["-c", s!"command -v {cmd}"] }
-  bif result.exitCode != 0 then
+  uif result.exitCode != 0 then
     throw <| IO.userError s!"'{cmd}' not found. {installHint}"
 
 /-- Escape a string for safe interpolation inside a POSIX single-quoted shell argument. -/
@@ -56,7 +56,7 @@ def waitForServer (logFile : String) (proc : IO.Process.Child cfg)
     (port : Nat) (timeoutMs : Nat := 30000) : IO String := do
   let startTime ← IO.monoMsNow
   repeat
-    bif (← IO.monoMsNow) - startTime >ᵇ timeoutMs then
+    uif (← IO.monoMsNow) - startTime > timeoutMs then
       throw <| IO.userError "timeout waiting for samply server to start"
     if let some exitCode ← proc.tryWait then
       throw <| IO.userError s!"samply exited with code {exitCode}:\n{← IO.FS.readFile logFile}"
@@ -87,7 +87,7 @@ def buildSymbolicationRequest (profile : Json)
     let mut frames := #[]
     let mut funcMap := #[]
     for funcIdx in funcs, address in addresses do
-      bif seen.contains funcIdx then continue
+      uif seen.contains funcIdx then continue
       -- Negative indices and addresses denote labels or frames without native code.
       let some (libIdx, address) := (do
         let address ← address.getNat?.toOption
@@ -122,7 +122,7 @@ def applySymbols (profile response : Json)
     for funcIdx in funcMap, frame in frames do
       let some name := (frame.getStr? <|> frame.getObjValAs? String "function").toOption
         | continue
-      bif h : funcIdx <ᵇ names.size then
+      uif h : funcIdx < names.size then
         let name := Lean.Name.Demangle.demangleSymbol name |>.getD name
         names := names.set funcIdx strings.size
         strings := strings.push name
@@ -159,7 +159,7 @@ public def run (binary : String) (passthrough : Array String)
 
   IO.FS.withTempDir fun tmpDir => do
     let rawProfile := (tmpDir / "profile.json.gz").toString
-    let out := outputPath.getD (bif raw then "profile-raw.json.gz" else "profile-demangled.json.gz")
+    let out := outputPath.getD (uif raw then "profile-raw.json.gz" else "profile-demangled.json.gz")
     let (samplyArgs, progArgs) := splitOnDash passthrough
     IO.eprintln "Recording profile..."
     let recorder ← IO.Process.spawn {
@@ -168,10 +168,10 @@ public def run (binary : String) (passthrough : Array String)
               ++ #["--", binary] ++ progArgs
     }
     let exitCode ← recorder.wait
-    bif exitCode != 0 then
+    uif exitCode != 0 then
       throw <| IO.userError s!"samply record failed (exit {exitCode})"
 
-    bif raw then
+    uif raw then
       copyFile rawProfile out
       IO.eprintln s!"Raw profile: {out}"
       return out
@@ -210,13 +210,13 @@ public def run (binary : String) (passthrough : Array String)
       copyFile rawProfile out
       IO.eprintln s!"Wrote demangled profile: {out}"
 
-      bif serve then
+      uif serve then
         IO.eprintln s!"Serving on {serverUrl}/"
         IO.eprintln "\nOpen in Firefox Profiler:"
         IO.eprintln s!"  https://profiler.firefox.com/from-url/{uriEncode s!"{serverUrl}/profile.json"}"
         IO.eprintln "\nPress Ctrl+C to stop."
         let exitCode ← samplyProc.wait
-        bif exitCode != 0 then
+        uif exitCode != 0 then
           throw <| IO.userError s!"samply server exited with code {exitCode}"
       return out
     finally

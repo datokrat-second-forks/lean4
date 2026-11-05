@@ -158,7 +158,7 @@ namespace Package
 
 /-- The identifier passed to Lean to disambiguate the package's native symbols. -/
 public def id? (self : Package) : Option PkgId :=
-  bif self.bootstrap then none else some <| self.origName.toString (escape := false)
+  uif self.bootstrap then none else some <| self.origName.toString (escape := false)
 
 /-- The package version. -/
 @[inline] public def version (self : Package) : StdVer  :=
@@ -258,7 +258,7 @@ public def id? (self : Package) : Option PkgId :=
 
 /-- The packages `remoteUrl` as an `Option` (`none` if empty). -/
 @[inline] public def remoteUrl? (self : Package) : Option String :=
-  bif self.remoteUrl.isEmpty then none else some self.remoteUrl
+  uif self.remoteUrl.isEmpty then none else some self.remoteUrl
 
 /-- The package's `lakeDir` joined with its `buildArchive`. -/
 @[inline] public def buildArchiveFile (self : Package) : FilePath :=
@@ -412,7 +412,7 @@ def reservoirScope (self : Package) : CacheServiceScope :=
 
 /-- The cache scope used to identify the package on Reservoir (if the package is availa ble there). -/
 @[inline] public def reservoirScope? (self : Package) : Option CacheServiceScope :=
-  bif self.scope.isEmpty then none else some self.reservoirScope
+  uif self.scope.isEmpty then none else some self.reservoirScope
 
 /-- Try to find a target configuration in the package with the given name. -/
 public def findTargetDecl? (name : Name) (self : Package) : Option (NConfigDecl self.keyName name) :=

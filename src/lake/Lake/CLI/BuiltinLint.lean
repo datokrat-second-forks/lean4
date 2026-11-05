@@ -58,7 +58,7 @@ public def leanOptOverrides (args : Args) : LeanOptions :=
   let base : Array LeanOption :=
     merged.toArray.map fun (n, b) => ⟨`weak ++ n, .ofBool b⟩
   let base :=
-    bif args.mode == .recordExceptions then
+    uif args.mode == .recordExceptions then
       base.push ⟨`internal.cmdlineSnapshots, .ofBool false⟩
     else
       base
@@ -107,7 +107,7 @@ def collectTextLints
     (env : Environment) (pkgRoot : Name) :
     Array (Name × Array Linter.LintEntry) :=
   Linter.getAllLints env |>.foldl (init := #[]) fun acc (mod, entries) =>
-    bif pkgRoot.isPrefixOf mod && !entries.isEmpty then acc.push (mod, entries) else acc
+    uif pkgRoot.isPrefixOf mod && !entries.isEmpty then acc.push (mod, entries) else acc
 
 /--
 Collects the code quality entries recorded during elaboration (via
@@ -132,7 +132,7 @@ def collectRecordedCodeQuality (args : Args) (linterOpts : Linter.LinterOptions)
     unless mod.getRoot.isPrefixOf m && !collected.contains m do continue
     collected := collected.insert m
     let entries :=
-      bif args.lintOnly then
+      uif args.lintOnly then
         entries.filter fun e => e.linter?.all (Lean.Linter.isLinterEnabledByOptions · linterOpts)
       else entries
     acc := acc ++ entries.map (·.entry)
@@ -173,13 +173,13 @@ def recordExceptionsToFiles (records : Array ExceptionRecord) : IO Unit := do
     let mut fileInserted := 0
     for (ln, opts) in targets do
       let idx := ln - 1
-      bif h : idx <ᵇ lines.size then
+      uif h : idx < lines.size then
         let indent := leadingWhitespace lines[idx]
         let opts := opts.qsort (fun a b => toString a < toString b)
         let newLines := opts.map fun o => s!"{indent}set_option {o} false in {recordedMarker}"
         lines := lines.extract 0 idx ++ newLines ++ lines.extract idx lines.size
         fileInserted := fileInserted + newLines.size
-    bif fileInserted >ᵇ 0 then
+    uif fileInserted > 0 then
       IO.println s!"recording {fileInserted} exception{if fileInserted == 1 then "" else "s"} in {file}"
       IO.FS.writeFile file ("\n".intercalate lines.toList)
 
@@ -232,12 +232,12 @@ def runDeferredChecks (args : Args) (linterOpts : Linter.LinterOptions) (sp : Se
     (env : Environment) (pkgRoot : Name) (docCheckedModules : NameSet) :
     IO DeferredCheckResults := do
   let selected :=
-    bif args.lintOnly then
+    uif args.lintOnly then
       Lean.Linter.isLinterEnabledByOptions linter.doc.deferred.name linterOpts
     else
       Lean.Linter.getLinterValue linter.doc.deferred linterOpts
   unless selected do
-    let outcome := bif args.mode == .recordExceptions then .recorded #[] false else .reported false
+    let outcome := uif args.mode == .recordExceptions then .recorded #[] false else .reported false
     return { outcome, checkedModules := docCheckedModules }
   let (outcome, _) ←
       CoreM.toIO (ctx := { fileName := "", fileMap := default }) (s := { env }) do
@@ -245,7 +245,7 @@ def runDeferredChecks (args : Args) (linterOpts : Linter.LinterOptions) (sp : Se
       (fun m => pkgRoot.isPrefixOf m && !docCheckedModules.contains m)
       (shouldCheck := fun c =>
         return Linter.getLinterValue linter.doc.deferred (← c.options.toLinterOptions))
-    bif args.mode == .recordExceptions then
+    uif args.mode == .recordExceptions then
       let mut recs : Array ExceptionRecord := #[]
       let mut unlocated := false
       for (failMod, c, _) in failures do
@@ -267,7 +267,7 @@ def runDeferredChecks (args : Args) (linterOpts : Linter.LinterOptions) (sp : Se
       return DeferredCheckOutcome.recorded recs unlocated
     else
       for (failMod, c, msg) in failures do
-        let context := bif c.sourceString.isEmpty then "" else s!" ({c.sourceString})"
+        let context := uif c.sourceString.isEmpty then "" else s!" ({c.sourceString})"
         match ← sp.findWithExt "lean" failMod with
         | some file =>
           IO.eprintln s!"{file}: error: in {describeSite c.site}{context}: {← msg.toString}"
@@ -278,7 +278,7 @@ def runDeferredChecks (args : Args) (linterOpts : Linter.LinterOptions) (sp : Se
   -- their checks.
   let mut checkedModules := docCheckedModules
   for m in env.header.moduleNames do
-    bif pkgRoot.isPrefixOf m then
+    uif pkgRoot.isPrefixOf m then
       checkedModules := checkedModules.insert m
   return { outcome, checkedModules }
 
@@ -300,11 +300,11 @@ def runTextLinters (args : Args) (linterOpts : Linter.LinterOptions)
     (env : Environment) (mod : Name) : IO LintingOutcome := do
   let textGroups := collectTextLints env mod.getRoot
   let textGroups :=
-    bif args.lintOnly then
+    uif args.lintOnly then
       textGroups.filterMap fun (m, entries) =>
         let entries := entries.filter fun e =>
           Lean.Linter.isLinterEnabledByOptions e.linter linterOpts
-        bif entries.isEmpty then none else some (m, entries)
+        uif entries.isEmpty then none else some (m, entries)
     else textGroups
   let textFailed := !textGroups.isEmpty
   match args.mode with
@@ -358,15 +358,15 @@ def runEnvironmentLinters (args : Args) (linterOpts : Linter.LinterOptions) (sp 
     (env : Environment) (mod : Name) : IO LintingOutcome := do
   let (outcome, _) ← CoreM.toIO (ctx := { fileName := "", fileMap := default }) (s := { env }) do
     let decls ← Linter.EnvLinter.getDeclsInPackage mod.getRoot
-    let linters ← Linter.EnvLinter.getEnvLinters (bif args.lintOnly then some linterOpts else none)
-    bif linters.isEmpty && args.mode == .report then do
+    let linters ← Linter.EnvLinter.getEnvLinters (uif args.lintOnly then some linterOpts else none)
+    uif linters.isEmpty && args.mode == .report then do
       IO.println s!"-- No environment linters were run for {mod}."
       return .reported false
     let results ← Linter.EnvLinter.lintCore decls linters
     let failed := results.any (!·.2.isEmpty)
     match args.mode with
     | .report =>
-        bif failed then
+        uif failed then
           let fmtResults ←
             Linter.EnvLinter.formatLinterResults results decls
               (groupByFilename := true) (useErrorFormat := true)
@@ -423,7 +423,7 @@ def runPackageCodeQualityChecks (sp : SearchPath) (env : Environment)
     let checks ← CodeQuality.getPackageChecks
     let ⟨outcome, errors⟩ ← CodeQuality.runPackageChecks checks
       { srcSearchPath := sp, topLevelModule := mod }
-    bif !errors.isEmpty then
+    uif !errors.isEmpty then
       anyFailed := true
     for error in errors do
       IO.eprintln (← error.format)
@@ -432,7 +432,7 @@ def runPackageCodeQualityChecks (sp : SearchPath) (env : Environment)
 
 public def run (args : Args) : IO UInt32 := do
   let mods := args.mods
-  bif mods.isEmpty then
+  uif mods.isEmpty then
     IO.eprintln "lake lint: no modules specified for builtin linting"
     return 1
   let envLinterModule : Import := { module := `Lean.Linter.EnvLinter }
@@ -461,7 +461,7 @@ public def run (args : Args) : IO UInt32 := do
     let modFile ← findOLean mod
     let (modData, region) ← readModuleData modFile
     let isModule ← getIsModule modData
-    let level := bif isModule then OLeanLevel.server else OLeanLevel.private
+    let level := uif isModule then OLeanLevel.server else OLeanLevel.private
     unsafe region.free
     let env ← importModules (#[{ module := mod }, envLinterModule] ++ checkImports) {}
       (trustLevel := 1024) (loadExts := true) (level := level)
@@ -478,7 +478,7 @@ public def run (args : Args) : IO UInt32 := do
       anyFailed := anyFailed || textFailed
     | .recorded textRecords unlocated =>
       records := records ++ textRecords
-      bif unlocated then anyUnlocated := true
+      uif unlocated then anyUnlocated := true
     | .codeQualityChecks entries =>
       codeQualityEntries := codeQualityEntries ++ entries
 
@@ -486,40 +486,40 @@ public def run (args : Args) : IO UInt32 := do
 
     match environmentLintingOutcome with
     | .reported declFailed =>
-      bif declFailed then anyFailed := true
+      uif declFailed then anyFailed := true
     | .recorded envRecords envUnlocated =>
       records := records ++ envRecords
-      bif envUnlocated then anyUnlocated := true
+      uif envUnlocated then anyUnlocated := true
     | .codeQualityChecks entries =>
       codeQualityEntries := codeQualityEntries ++ entries
 
-    bif args.mode == .codeQuality then
+    uif args.mode == .codeQuality then
       let (recorded, collected) :=
         collectRecordedCodeQuality args linterOpts env mod metricsCollectedModules
       metricsCollectedModules := collected
       codeQualityEntries := codeQualityEntries ++ recorded
       let ⟨entries, failed⟩ ← runPackageCodeQualityChecks sp env mod
       codeQualityEntries := codeQualityEntries ++ entries
-      bif failed then anyFailed := true
+      uif failed then anyFailed := true
     else
       let deferredResults ← runDeferredChecks args linterOpts sp env mod.getRoot docCheckedModules
       docCheckedModules := deferredResults.checkedModules
       match deferredResults.outcome with
       | .reported failed =>
-        bif failed then anyFailed := true
+        uif failed then anyFailed := true
       | .recorded recs unlocated =>
         records := records ++ recs
-        bif unlocated then anyUnlocated := true
+        uif unlocated then anyUnlocated := true
 
   match args.mode with
   | .report =>
-    return bif anyFailed then 1 else 0
+    return uif anyFailed then 1 else 0
   | .recordExceptions =>
     recordExceptionsToFiles records
-    return bif anyUnlocated then 1 else 0
+    return uif anyUnlocated then 1 else 0
   | .codeQuality =>
     for entry in codeQualityEntries do
       IO.println <| toJson entry
-    return bif anyFailed then 1 else 0
+    return uif anyFailed then 1 else 0
 
 end Lake.BuiltinLint

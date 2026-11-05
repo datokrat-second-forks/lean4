@@ -38,7 +38,7 @@ where
       h.putStrLn <| toString <| ← IO.Process.getPID
     catch
       | .alreadyExists .. => do
-        bif firstTime then
+        uif firstTime then
           let stderr ← IO.getStderr
           stderr.putStrLn s!"\
             warning: waiting for prior `lake build` invocation to finish... \

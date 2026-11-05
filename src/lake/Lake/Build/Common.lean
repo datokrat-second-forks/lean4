@@ -85,7 +85,7 @@ public def BuildMetadata.ofStub (hash : Hash) : BuildMetadata :=
 
 public def BuildMetadata.fromJsonObject? (obj : JsonObject) : Except String BuildMetadata := do
   let depHash ←
-    bif obj.getJson? "schemaVersion" |>.isNone then
+    uif obj.getJson? "schemaVersion" |>.isNone then
       Hash.ofDecimal? (← obj.get "depHash") |>.getDM do
         error "invalid trace: expected string 'depHash' of decimal digits"
     else
@@ -110,7 +110,7 @@ public protected def BuildMetadata.fromJson? (json : Json) : Except String Build
       return data
     | .error e =>
       if let some (.str ver) := o.getJson? "schemaVersion" then
-        bif ver == BuildMetadata.schemaVersion then
+        uif ver == BuildMetadata.schemaVersion then
           error s!"invalid trace: {e}"
       error s!"unknown trace format: {e}"
   | _ =>
@@ -129,7 +129,7 @@ public def BuildMetadata.ofFetch (inputHash : Hash) (outputs : Json) : BuildMeta
 partial def serializeInputs (inputs : Array BuildTrace) : Array (String × Json) :=
   inputs.foldl (init := {}) fun r trace =>
     let val :=
-      bif trace.inputs.isEmpty then
+      uif trace.inputs.isEmpty then
         toJson trace.hash
       else
         toJson (serializeInputs trace.inputs)
@@ -196,11 +196,11 @@ deriving DecidableEq
 
 /-- Constructs an `OutputStatus` from a hash check. -/
 @[inline] public def OutputStatus.ofHashCheck (upToDate : Bool) : OutputStatus :=
-  bif upToDate then .hashUpToDate else .outOfDate
+  uif upToDate then .hashUpToDate else .outOfDate
 
 /-- Constructs an `OutputStatus` from a modification time check. -/
 @[inline] public def OutputStatus.ofMTimeCheck (upToDate : Bool) : OutputStatus :=
-  bif upToDate then .mtimeUpToDate else .outOfDate
+  uif upToDate then .mtimeUpToDate else .outOfDate
 
 /-- Whether the build should be considered up-to-date for rebuilding. -/
 @[inline] public def OutputStatus.isUpToDate (status : OutputStatus) : Bool :=
@@ -215,9 +215,9 @@ deriving DecidableEq
   (info : ι) (depTrace : BuildTrace) (depHash : Option Hash)
   (oldTrace := depTrace.mtime)
 : JobM OutputStatus := do
-  bif depTrace.hash == depHash then
+  uif depTrace.hash == depHash then
     .ofHashCheck <$> checkExists info
-  else bif (← getIsOldMode) then
+  else uif (← getIsOldMode) then
     .ofMTimeCheck <$> oldTrace.checkUpToDate info
   else
     return .outOfDate
@@ -246,11 +246,11 @@ If so, replays the log of the trace if available.
 : JobM OutputStatus := do
   if let .ok data := savedTrace then
     let status ← checkHashUpToDate' info depTrace data.depHash oldTrace
-    bif status.isUpToDate then
+    uif status.isUpToDate then
       updateAction .replay
       replay data.log
     return status
-  else bif (← getIsOldMode) then
+  else uif (← getIsOldMode) then
     .ofMTimeCheck <$> oldTrace.checkUpToDate info
   else
     return .outOfDate
@@ -275,8 +275,8 @@ or if the trace is not up-to-date, the build action will be set to `reuse`.
 -/
 public def SavedTrace.replayCachedIfUpToDate (inputHash : Hash) (self : SavedTrace) : JobM Bool := do
   if let .ok data := self then
-    bif data.depHash == inputHash then
-      bif data.synthetic && data.log.isEmpty then
+    uif data.depHash == inputHash then
+      uif data.synthetic && data.log.isEmpty then
         updateAction .reuse
       else
         updateAction .replay
@@ -311,9 +311,9 @@ and log are saved to `traceFile`, if the build completes without a fatal error
 : JobM α := do
   updateAction action
   let noBuildTraceFile := traceFile.addExtension "nobuild"
-  bif (← getNoBuild) then
+  uif (← getNoBuild) then
     modify ({· with wantsRebuild := true})
-    bif (← traceFile.pathExists) then
+    uif (← traceFile.pathExists) then
       writeBuildTrace noBuildTraceFile depTrace Json.null {}
     error s!"target is out-of-date and needs to be rebuilt"
   else
@@ -352,7 +352,7 @@ then `depTrace` / `oldTrace`. No log will be replayed.
   (action : JobAction := .build) (oldTrace := depTrace.mtime)
 : JobM Bool := do
   let savedTrace ← readTraceFile traceFile
-  bif (← savedTrace.replayIfUpToDate info depTrace oldTrace) then
+  uif (← savedTrace.replayIfUpToDate info depTrace oldTrace) then
     return true
   else
     buildAction depTrace traceFile build action
@@ -413,7 +413,7 @@ If `text := true`, `file` is hashed as a text file rather than a binary file.
 -/
 public def fetchFileHash (file : FilePath) (text := false) : JobM Hash := do
   let hashFile := FilePath.mk <| file.toString ++ ".hash"
-  bif (← getTrustHash) then
+  uif (← getTrustHash) then
     if let some hash ← Hash.load? hashFile then
       return hash
   let hash ← computeFileHash file text
@@ -468,7 +468,7 @@ public def Cache.saveArtifact
   (cache : Cache) (file : FilePath) (ext := "art") (text exe useLocalFile := false)
 : IO Artifact := do
   try
-    bif text then
+    uif text then
       let contents ← IO.FS.readFile file
       let normalized := contents.crlfToLf
       let hash := Hash.ofString normalized
@@ -486,7 +486,7 @@ public def Cache.saveArtifact
       IO.setAccessRights cacheFile ⟨r, r, r⟩
       writeFileHash file hash
       let mtime ← getMTime cacheFile
-      let path := bif useLocalFile then file else cacheFile
+      let path := uif useLocalFile then file else cacheFile
       return {descr, name := file.toString, path, mtime}
     else
       let contents ← IO.FS.readBinFile file
@@ -507,7 +507,7 @@ public def Cache.saveArtifact
       IO.setAccessRights cacheFile ⟨r, r, r⟩
       writeFileHash file hash
       let mtime ← getMTime cacheFile
-      let path := bif useLocalFile then file else cacheFile
+      let path := uif useLocalFile then file else cacheFile
       return {descr, name := file.toString, path, mtime}
   catch e =>
     error s!"failed to cache artifact: {e}"
@@ -559,11 +559,11 @@ unless a mapping for the `inputHash` already exists.
   [ResolveOutputs α] (inputHash : Hash) (savedTrace : SavedTrace) (pkg : Package)
 : JobM (Option α) := do
   if let .ok data := savedTrace then
-    bif data.depHash == inputHash then
+    uif data.depHash == inputHash then
       if let some out := data.outputs? then
         try
           let arts ← resolveOutputs (.ofData out)
-          bif (← pkg.isArtifactCacheWritable) then
+          uif (← pkg.isArtifactCacheWritable) then
             let act := (← getLakeCache).writeOutputs pkg.cacheScope inputHash out (overwrite := false)
             if let .error e ← act.toBaseIO then
               logWarning s!"could not write outputs to cache: {e}"
@@ -669,7 +669,7 @@ public def restoreArtifact (file : FilePath) (art : Artifact) (exe := false) : L
       -- writing to such paths as this can corrupt the cache if the file was hard linked instead
       let r := {read := true, write := false, execution := exe}
       IO.setAccessRights file ⟨r, r, r⟩
-    else bif exe then
+    else uif exe then
       -- Ensure restored executables are executable
       -- They may not have been if acquired through `lake cache get`
       let r := {read := true, write := false, execution := exe}
@@ -680,7 +680,7 @@ public def restoreArtifact (file : FilePath) (art : Artifact) (exe := false) : L
 
 /-- **For internal use only.** -/
 @[inline] public def Internal.getOutputsRef? [Functor m] [MonadBuild m] (pkg : Package) : m (Option CacheRef) :=
-  readThe BuildContext <&> fun ctx => bif pkg.wsIdx =ᵇ ctx.outputsIdx then ctx.outputsRef? else none
+  readThe BuildContext <&> fun ctx => uif pkg.wsIdx = ctx.outputsIdx then ctx.outputsRef? else none
 
 /--
 Uses the current job's trace to search Lake's local artifact cache for an artifact
@@ -715,12 +715,12 @@ public def buildArtifactUnlessUpToDate
       unless (← savedTrace.replayCachedIfUpToDate inputHash) do
         removeFileIfExists file
         writeFetchTrace traceFile inputHash (toJson art.descr)
-      bif restore then
+      uif restore then
         some <$> restoreArtifact file art exe
       else
         return some art
     let art ← id do
-      bif (← pkg.isArtifactCacheWritable) then
+      uif (← pkg.isArtifactCacheWritable) then
         let restore := restore || (← pkg.restoreAllArtifacts)
         if let some art ← fetchArt? restore then
           return art
@@ -728,16 +728,16 @@ public def buildArtifactUnlessUpToDate
           let status ← savedTrace.replayIfUpToDate' file depTrace
           unless status.isUpToDate do
             discard <| doBuild depTrace traceFile
-          bif status.isCacheable then
+          uif status.isCacheable then
             let art ← cacheArtifact file ext text exe restore
             (← getLakeCache).writeOutputs pkg.cacheScope inputHash art.descr
             return art
           else
             computeArtifact file ext text
-      else bif (← savedTrace.replayIfUpToDate file depTrace) then
+      else uif (← savedTrace.replayIfUpToDate file depTrace) then
         computeArtifact file ext text
       else
-        bif (← pkg.isArtifactCacheReadable) then
+        uif (← pkg.isArtifactCacheReadable) then
           if let some art ← fetchArt? (restore := true) then
             return art
         doBuild depTrace traceFile
@@ -747,7 +747,7 @@ public def buildArtifactUnlessUpToDate
     setMTime art traceFile
   else
     let art ←
-      bif (← savedTrace.replayIfUpToDate file depTrace) then
+      uif (← savedTrace.replayIfUpToDate file depTrace) then
         computeArtifact file ext text
       else
         doBuild depTrace traceFile
@@ -814,7 +814,7 @@ In contrast, text file traces have normalized line endings to avoid unnecessary
 rebuilds across platforms.
 -/
 @[inline] public def inputFile (path : FilePath) (text : Bool) : SpawnM (Job FilePath) :=
-  bif text then inputTextFile path else inputBinFile path
+  uif text then inputTextFile path else inputBinFile path
 
 /--
 A build job for a directory of files that are expected to already exist.
@@ -938,9 +938,9 @@ public partial def mkLinkOrder (libs : Array Dynlib) : JobM (Array Dynlib) := do
 where
   go lib (ps : List String) (v : Std.TreeSet String compare) (o : Array Dynlib) := do
     let o := o.push lib
-    bif v.contains lib.name then
+    uif v.contains lib.name then
       return (v, o)
-    bif ps.contains lib.name then
+    uif ps.contains lib.name then
       throw (lib.name :: ps)
     let ps := lib.name :: ps
     let v := v.insert lib.name
@@ -957,7 +957,7 @@ transitive `deps`).
   (objs : Array FilePath) (libs : Array Dynlib)
   (linkDeps := Platform.isWindows)
 : JobM (Array String) := do
-  let libs ← bif linkDeps then mkLinkOrder libs else pure #[]
+  let libs ← uif linkDeps then mkLinkOrder libs else pure #[]
   return mkLinkObjArgs objs libs
 
 @[inline] def mkLeanLinkArgs

@@ -88,7 +88,7 @@ public structure Env where
 
 /-- Returns the home directory of the current user (if possible). -/
 public def getUserHome? : BaseIO (Option FilePath) := do
-  bif System.Platform.isWindows then
+  uif System.Platform.isWindows then
     let some drive ← IO.getEnv "HOMEDRIVE"
       | return none
     let some path ← IO.getEnv "HOMEPATH"
@@ -120,7 +120,7 @@ def ElanInstall.lakeToolchainCache (elan : ElanInstall) (toolchain : String) : C
   ⟨elan.toolchainDir toolchain / "lake" / "cache"⟩
 
 @[inline] def ElanInstall.lakeToolchainCache? (elan : ElanInstall) (toolchain : String) : Option Cache :=
-  bif toolchain.isEmpty then
+  uif toolchain.isEmpty then
     none
   else
     some (elan.lakeToolchainCache toolchain)
@@ -191,7 +191,7 @@ public def compute
 where
   addCacheDirs userHome? toolchain env := do
     if let some dir ← IO.getEnv "LAKE_CACHE_DIR" then
-      bif dir.isEmpty then
+      uif dir.isEmpty then
         return {env with noSystemCache := true}
       else
         return {env with lakeCache? := some ⟨dir⟩, lakeSystemCache? := some ⟨dir⟩}
@@ -213,7 +213,7 @@ where
     else
        return default
   normalizeUrl url :=
-    bif url.back == '/' then url.dropEnd 1 |>.copy else url
+    uif url.back == '/' then url.dropEnd 1 |>.copy else url
 
 /-- The toolchain identifier for the Lake cache corresponding to the environment's toolchain. -/
 @[inline] public def cacheToolchain (env : Env) : CacheToolchain :=
@@ -228,14 +228,14 @@ The override allows one to replace the Lean version used by a library
 custom builds of Lean.
 -/
 public def leanGithash (env : Env) : String :=
-  bif env.githashOverride.isEmpty then env.lean.githash else env.githashOverride
+  uif env.githashOverride.isEmpty then env.lean.githash else env.githashOverride
 
 /--
 The binary search path of the environment (i.e., `PATH`).
 Combines the initial path of the environment with that of the Lean and Lake installations.
 -/
 public def path (env : Env) : SearchPath :=
-  bif env.lake.binDir =ᵇ env.lean.binDir then
+  uif env.lake.binDir = env.lean.binDir then
     env.lean.binDir :: env.initPath
   else
     env.lake.binDir :: env.lean.binDir :: env.initPath
@@ -274,7 +274,7 @@ public def noToolchainVars (env : Env) : Array (String × Option String) :=
   #[
     ("ELAN_TOOLCHAIN", none),
     ("LAKE", none),
-    ("LAKE_CACHE_DIR", bif env.noSystemCache then some "" else env.lakeSystemCache?.map (·.dir.toString)),
+    ("LAKE_CACHE_DIR", uif env.noSystemCache then some "" else env.lakeSystemCache?.map (·.dir.toString)),
     ("LAKE_OVERRIDE_LEAN", none),
     ("LAKE_HOME", none),
     ("LEAN", none),
@@ -288,7 +288,7 @@ public def baseVars (env : Env) : Array (String × Option String)  :=
   #[
     ("ELAN", env.elan?.map (·.elan.toString)),
     ("ELAN_HOME", env.elan?.map (·.home.toString)),
-    ("ELAN_TOOLCHAIN", bif env.toolchain.isEmpty then none else env.toolchain),
+    ("ELAN_TOOLCHAIN", uif env.toolchain.isEmpty then none else env.toolchain),
     ("LAKE", env.lake.lake.toString),
     ("LAKE_HOME", env.lake.home.toString),
     ("LAKE_CONFIG", if let some path := env.lakeConfig? then path.toString else ""),
@@ -315,7 +315,7 @@ public def vars (env : Env) : Array (String × Option String)  :=
     ("LEAN_GITHASH", env.leanGithash),
     ("PATH", some env.path.toString)
   ]
-  bif Platform.isWindows then
+  uif Platform.isWindows then
     vars
   else
     vars.push (sharedLibPathEnvVar, some <| env.sharedLibPath.toString)

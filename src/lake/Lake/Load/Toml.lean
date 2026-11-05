@@ -54,25 +54,25 @@ public instance [DecodeToml α] [ConfigField σ name α] : DecodeField σ name w
 /-! ## Value Decoders -/
 
 def takeNamePart (ss : Substring.Raw) (pre : Name) : (Substring.Raw × Name) :=
-  bif ss.isEmpty then
+  uif ss.isEmpty then
     (ss, .anonymous)
   else
     let curr := ss.front
-    bif isIdBeginEscape curr then
+    uif isIdBeginEscape curr then
       let ss := ss.drop 1
       let startPos := ss.startPos
       let ss := ss.dropWhile (!isIdEndEscape ·)
-      bif isIdEndEscape ss.front then
+      uif isIdEndEscape ss.front then
         let id := String.Pos.Raw.extract ss.str startPos ss.startPos
         (ss, Name.str pre id)
       else
         (ss, .anonymous)
-    else bif isIdFirst curr then
+    else uif isIdFirst curr then
       let startPos := ss.startPos
       let ss := ss.drop 1 |>.dropWhile isIdRest
       let id := String.Pos.Raw.extract ss.str startPos ss.startPos
       (ss, Name.str pre id)
-    else bif curr.isDigit then
+    else uif curr.isDigit then
       let startPos := ss.startPos
       let ss := ss.drop 1 |>.dropWhile Char.isDigit
       let digits := String.Pos.Raw.extract ss.str startPos ss.startPos
@@ -83,21 +83,21 @@ def takeNamePart (ss : Substring.Raw) (pre : Name) : (Substring.Raw × Name) :=
 
 partial def takeName (ss : Substring.Raw) : (Substring.Raw × Name) :=
   let rec takeRest ss pre :=
-    bif ss.front == '.' then
+    uif ss.front == '.' then
       let startPos := ss.startPos
       let (ss, n) := takeNamePart (ss.drop 1) pre
-      bif n.isAnonymous then ({ss with startPos}, pre) else takeRest ss n
+      uif n.isAnonymous then ({ss with startPos}, pre) else takeRest ss n
     else
       (ss, pre)
   let (ss, n) := takeNamePart ss .anonymous
-  bif n.isAnonymous then (ss, .anonymous) else takeRest ss n
+  uif n.isAnonymous then (ss, .anonymous) else takeRest ss n
 
 public def Glob.ofString? (v : String) : Option Glob := do
   let (ss, n) := takeName v.toRawSubstring
-  bif n.isAnonymous then failure
-  bif h : ss.startPos.atEnd ss.str then
+  uif n.isAnonymous then failure
+  uif h : ss.startPos.atEnd ss.str then
     return .one n
-  else bif ss.startPos.get' ss.str (Bool.ne_true_of_eq_false h) == '.' then
+  else uif ss.startPos.get' ss.str h == '.' then
     match (ss.drop 1).front with
     | '+' => return .submodules n
     | '*' => return .andSubmodules n
@@ -124,7 +124,7 @@ public instance : DecodeToml LeanOptionValue := ⟨LeanOptionValue.decodeToml⟩
 public protected def LeanOption.decodeToml (v : Value) : EDecodeM LeanOption := do
   match v with
   | .array ref vs =>
-    bif h : vs.size =ᵇ 2 then ensureDecode do
+    uif h : vs.size = 2 then ensureDecode do
       let name : Name ← tryDecode <| decodeToml vs[0]
       let value ← tryDecode <| decodeToml vs[1]
       return {name, value}
@@ -184,7 +184,7 @@ public partial def Pattern.decodeToml
   have : DecodeToml (PatternDescr α β) := ⟨PatternDescr.decodeToml⟩
   match v with
   | .string _ s =>
-    bif s == "*" then
+    uif s == "*" then
       return .star
     else
       .ofDescr <$> decodeToml v
@@ -277,7 +277,7 @@ public def decodeRoots
   (t : Table) (v : Value) (cfg : LeanLibConfig n)
 : DecodeM (LeanLibConfig n) := do
   let cfg ← decodeField `roots t v cfg
-  bif t.contains `globs then
+  uif t.contains `globs then
     return cfg
   else
     return {cfg with globs := mkFieldDefault `globs cfg}
@@ -388,7 +388,7 @@ meta def genDecodeToml
     as.push (mkIdent <| .mkSimple s!"x_{i+1}")
   let ty := Syntax.mkCApp tyName tyArgs
   let infos ← info.fields.foldlM (init := init) fun infos {name, parent, ..} =>
-    bif parent || exclude.contains name then
+    uif parent || exclude.contains name then
       return infos
     else
       `($infos |>.insert $(quote name))
@@ -460,8 +460,7 @@ where
           unsafe {pkg, name, kind, config, wf_data := fun _ => ⟨lcProof, h⟩}
         -- Check that executables have distinct root module names
         let exeRoots ← id do
-          bif h : kind =ᵇ LeanExe.configKind then
-            have h := eq_of_decideEq_eq_true h
+          uif h : kind = LeanExe.configKind then
             let exeConfig : LeanExeConfig name := cast (by rw [h]; rfl) config
             if let some origExe := r.exeRoots.get? exeConfig.root then
               logDecodeErrorAt val.ref s!"{prettyName}: \
@@ -489,7 +488,7 @@ public def loadTomlConfig (cfg : LoadConfig) : LogIO LakefileConfig := do
     let .ok pkg errs := EStateM.run (s := #[]) do
       let origName ← stringToLegalOrSimpleName <$> table.tryDecode `name
       let wsIdx := cfg.pkgIdx
-      let baseName := bif cfg.pkgName.isAnonymous then origName else cfg.pkgName
+      let baseName := uif cfg.pkgName.isAnonymous then origName else cfg.pkgName
       let keyName := baseName.num wsIdx
       let prettyName := baseName.toString (escape := false)
       let config ← @PackageConfig.decodeToml keyName origName table
@@ -499,7 +498,7 @@ public def loadTomlConfig (cfg : LoadConfig) : LogIO LakefileConfig := do
       let defaultTargets := defaultTargets.map stringToLegalOrSimpleName
       let depConfigs ← table.tryDecodeD `require #[]
       return {pkgDecl, depConfigs, targetDecls, targetDeclMap, defaultTargets}
-    bif errs.isEmpty then
+    uif errs.isEmpty then
       return pkg
     else
       errorWithLog <| errs.forM fun {ref, msg} =>
@@ -518,14 +517,14 @@ def loadLakeConfigCore (path : FilePath) (lakeEnv : Lake.Env) : LogIO LoadedLake
   | .ok table =>
     let .ok config errs := EStateM.run (s := #[]) do
       LakeConfig.decodeToml table
-    bif errs.isEmpty then
+    uif errs.isEmpty then
       let defaultService := .reservoirService lakeEnv.reservoirApiUrl
       let cacheServices : CacheServiceMap ← config.cache.services.foldlM (init := ∅) fun map cfg => do
         let validateUrl name key url := do
-          bif url.isEmpty then
+          uif url.isEmpty then
             error s!"cache service `{name}` is missing field `{key}`"
           else
-            return bif url.back == '/' then url.dropEnd 1 |>.copy else url
+            return uif url.back == '/' then url.dropEnd 1 |>.copy else url
         match cfg.kind with
         | .reservoir => do
           let apiEndpoint ← validateUrl cfg.name "apiEndpoint" cfg.apiEndpoint
@@ -540,7 +539,7 @@ def loadLakeConfigCore (path : FilePath) (lakeEnv : Lake.Env) : LogIO LoadedLake
           error s!"cache service `{cfg.name}` is missing field `kind`"
       let defaultCacheService ← id do
         let name := config.cache.defaultService
-        bif name.isEmpty then
+        uif name.isEmpty then
           return cacheServices.get? `reservoir |>.getD defaultService
         else
           let some service := cacheServices.get? (.mkSimple name)
@@ -549,14 +548,14 @@ def loadLakeConfigCore (path : FilePath) (lakeEnv : Lake.Env) : LogIO LoadedLake
           return service
       let defaultCacheUploadService? ← id do
         let name := config.cache.defaultUploadService
-        bif name.isEmpty then
+        uif name.isEmpty then
           return none
         else
           let some service := cacheServices.get? (.mkSimple name)
             | error s!"the configured default cache upload service `{name}` is not defined; \
                 please add a `cache.service` with that name"
           return some service
-      bif cacheServices.contains `reservoir then
+      uif cacheServices.contains `reservoir then
         return {config, defaultCacheService, defaultCacheUploadService?, cacheServices}
       else
          let cacheServices := cacheServices.insert `reservoir defaultService
@@ -586,7 +585,7 @@ Load the system Lake configuration from tehe environment-configured TOML file.
 -/
 public def loadLakeConfig (lakeEnv : Lake.Env) : LogIO LoadedLakeConfig := do
   if let some path := lakeEnv.lakeConfig? then
-    bif (← path.pathExists) then
+    uif (← path.pathExists) then
       loadLakeConfigCore path lakeEnv
     else return .mkDefault lakeEnv
   else return .mkDefault lakeEnv

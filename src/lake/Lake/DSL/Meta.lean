@@ -29,7 +29,7 @@ def elabMetaIf : CommandElab := fun stx => do
     | throwErrorAt stx "ill-formed meta if command"
   let c ← withRef c <| runTermElabM fun _ =>
     unsafe evalTerm Bool (toTypeExpr Bool) c .unsafe
-  bif c then
+  uif c then
     let cmd := mkNullNode (expandCmdDo t)
     withMacroExpansion (← getRef) cmd <| elabCommand cmd
   else if let some e := e? then
@@ -48,7 +48,7 @@ def elabRunIO : TermElab := fun stx expectedType? =>
     let v ← elabTermEnsuringType (← `(do $t)) expectedType
     synthesizeSyntheticMVarsNoPostponing
     let v ← instantiateMVars v
-    bif (← logUnassignedUsingErrorInfos (← getMVars v)) then
+    uif (← logUnassignedUsingErrorInfos (← getMVars v)) then
       throwAbortTerm
     let v ← mkAppM ``toExprIO #[v]
     let io ← unsafe evalExpr (IO Expr) (mkApp (mkConst ``IO) (mkConst ``Expr)) v

@@ -81,7 +81,7 @@ public def ofString? (t : String) : Option Time := do
 
 public protected def toString (t : Time) : String :=
   let s := s!"{zpad t.hour 2}:{zpad t.minute 2}:{zpad t.second 2}"
-  bif t.fracMantissa =ᵇ 0 then
+  uif t.fracMantissa = 0 then
     s
   else
     s!"{s}.{rpadAscii (zpad t.fracMantissa t.fracExponent) '0' 3}"
@@ -107,7 +107,7 @@ public def ofString? (dt : String) : Option DateTime := do
   match dt.split (fun c => c == 'T' || c == 't' || c == ' ') |>.toList with
   | [d,t] =>
     let d ← Date.ofString? d.copy
-    bif t.back == 'Z' || t.back == 'z' then
+    uif t.back == 'Z' || t.back == 'z' then
       return offsetDateTime d (← Time.ofString? <| t.dropEnd 1 |>.copy)
     else if let [t,o] := t.split '+' |>.toStringList then
       return offsetDateTime d (← Time.ofString? t) <| some (false, ← Time.ofString? o)
@@ -116,7 +116,7 @@ public def ofString? (dt : String) : Option DateTime := do
     else
       return localDateTime d (← Time.ofString? t.copy)
   | [x] =>
-    bif x.contains ':' then
+    uif x.contains ':' then
       return localTime (← Time.ofString? x.copy)
     else
       return localDate (← Date.ofString? x.copy)
@@ -126,7 +126,7 @@ public protected def toString (dt : DateTime) : String :=
   match dt with
   | .offsetDateTime d t o? =>
     if let some (s,o) := o? then
-      bif s then
+      uif s then
         s!"{d}T{t}-{zpad o.hour 2}:{zpad o.minute 2}"
       else
         s!"{d}T{t}+{zpad o.hour 2}:{zpad o.minute 2}"

@@ -110,7 +110,7 @@ public configuration LeanLibConfig (name : Name) extends LeanConfig where
   potentially with exported Lean symbols.
   -/
   nativeFacets (shouldExport : Bool) : Array (ModuleFacet FilePath) :=
-    #[bif shouldExport then Module.oExportFacet else Module.oFacet]
+    #[uif shouldExport then Module.oExportFacet else Module.oFacet]
 
   /--
   Whether downstream packages can `import all` modules of this library.
