@@ -192,13 +192,13 @@ def getArithType? (e : Expr) : Option Expr :=
   | HAdd.hAdd α β γ _ _ _ => homoType? α β γ
   | HSub.hSub α β γ _ _ _ => homoType? α β γ
   | HMul.hMul α β γ _ _ _ => homoType? α β γ
-  | HPow.hPow α β γ _ _ _ => if β.isConstOf ``Nat then homoType? α α γ else none
-  | HSMul.hSMul σ α γ _ _ _ => if σ.isConstOf ``Nat || σ.isConstOf ``Int then homoType? α α γ else none
+  | HPow.hPow α β γ _ _ _ => bif β.isConstOf ``Nat then homoType? α α γ else none
+  | HSMul.hSMul σ α γ _ _ _ => bif σ.isConstOf ``Nat || σ.isConstOf ``Int then homoType? α α γ else none
   | Neg.neg α _ _ => some α
   | HDiv.hDiv α β γ _ _ _ => homoType? α β γ
   | Inv.inv α _ _ => some α
-  | NatCast.natCast α _ a => if (Sym.getNatValue? a).run.isSome then some α else none
-  | IntCast.intCast α _ a => if (Sym.getIntValue? a).run.isSome then some α else none
+  | NatCast.natCast α _ a => bif (Sym.getNatValue? a).run.isSome then some α else none
+  | IntCast.intCast α _ a => bif (Sym.getIntValue? a).run.isSome then some α else none
   | _ => none
 
 /-- `true` if the structure of `kind` is a field. -/
@@ -231,9 +231,9 @@ the structure's, returns `↑k * a` with a proof of `e₁ = ↑k * a` by `Grind.
 canonical ones while checking the expected type.
 -/
 private def mkSMulStep (kind : Kind) (isNat : Bool) (e₁ k a : Expr) : NormM (Expr × Expr) := do
-  let (type, u, castFn, mulFn, thm) ← if kind.isRing then
+  let (type, u, castFn, mulFn, thm) ← bif kind.isRing then
       let ring ← getRing
-      if isNat then
+      bif isNat then
         pure (ring.type, ring.u, ← getNatCastFn, ← getMulFn, mkApp2 (mkConst ``Grind.smul_nat_eq_mul [ring.u]) ring.type ring.semiringInst)
       else
         pure (ring.type, ring.u, ← getIntCastFn, ← getMulFn, mkApp2 (mkConst ``Grind.smul_int_eq_mul [ring.u]) ring.type ring.ringInst)
@@ -242,7 +242,7 @@ private def mkSMulStep (kind : Kind) (isNat : Bool) (e₁ k a : Expr) : NormM (E
       pure (sr.type, sr.u, ← getNatCastFn', ← getMulFn', mkApp2 (mkConst ``Grind.smul_nat_eq_mul [sr.u]) sr.type sr.semiringInst)
   -- `↑k` is `k` itself when the scalar type is the carrier (`Nat` or `Int`); the cast is
   -- definitionally the identity there, and the kernel unfolds it in the expected-type check.
-  let k' := if type.isConstOf (if isNat then ``Nat else ``Int) then k else mkApp castFn k
+  let k' := bif type.isConstOf (if isNat then ``Nat else ``Int) then k else mkApp castFn k
   let e₂ ← share (mkApp2 mulFn k' a)
   return (e₂, mkExpectedPropHint (mkApp2 thm k a) (mkApp3 (mkConst ``Eq [u.succ]) type e₁ e₂))
 
@@ -257,14 +257,14 @@ private def mkCastLitStep? (kind : Kind) (e : Expr) : NormM (Option (Expr × Exp
   match_expr e with
   | NatCast.natCast _ _ a =>
     let some k := (Sym.getNatValue? a).run | return none
-    let (type, u, castFn, semiringInst) ← if kind.isRing then
+    let (type, u, castFn, semiringInst) ← bif kind.isRing then
         let ring ← getRing
         pure (ring.type, ring.u, ← getNatCastFn, ring.semiringInst)
       else
         let sr ← getSemiring
         pure (sr.type, sr.u, ← getNatCastFn', sr.semiringInst)
     unless isSameExpr castFn (← canonExpr e.appFn!) do return none
-    let e₂ ← share (← if kind.isRing then denoteNum k else denoteNatNum k)
+    let e₂ ← share (← bif kind.isRing then denoteNum k else denoteNatNum k)
     let thm := mkApp3 (mkConst ``Grind.Semiring.natCast_eq_ofNat [u]) type semiringInst a
     return some (e₂, mkExpectedPropHint thm (mkApp3 (mkConst ``Eq [u.succ]) type e e₂))
   | IntCast.intCast _ _ a =>
@@ -273,7 +273,7 @@ private def mkCastLitStep? (kind : Kind) (e : Expr) : NormM (Option (Expr × Exp
     unless isSameExpr (← getIntCastFn) (← canonExpr e.appFn!) do return none
     let ring ← getRing
     let e₂ ← share (← denoteNum k)
-    let thmName := if k < 0 then ``Grind.Ring.intCast_eq_ofNat_of_nonpos else ``Grind.Ring.intCast_eq_ofNat_of_nonneg
+    let thmName := bif k <ᵇ 0 then ``Grind.Ring.intCast_eq_ofNat_of_nonpos else ``Grind.Ring.intCast_eq_ofNat_of_nonneg
     let thm := mkApp4 (mkConst thmName [ring.u]) ring.type ring.ringInst a eagerReflBoolTrue
     return some (e₂, mkExpectedPropHint thm (mkApp3 (mkConst ``Eq [ring.u.succ]) ring.type e e₂))
   | _ => return none
@@ -357,7 +357,7 @@ private def getInvVars (vars : Array Expr) : NormM (Array (Var × Nat)) := do
     let_expr Inv.inv _ _ n := e | continue
     unless isSameExpr invFn (← canonExpr e.appFn!) do continue
     let some c := (Sym.getNatValue? n).run | continue
-    if c > 0 then invs := invs.push (x, c)
+    bif c >ᵇ 0 then invs := invs.push (x, c)
   return invs
 
 /-- `true` if some monomial of `p` contains both `x` and `y`. -/
@@ -409,12 +409,12 @@ The reified normal form of `q = num / den`: `num * d⁻¹`, where the atom `d⁻
 -/
 private def mkPolyQExpr (q : PolyQ) (vars : Array Expr) (invs : Array (Var × Nat)) :
     NormM (RingExpr × Array Expr × Array (Var × Nat)) := do
-  if q.den == 1 then return (q.num.toExpr, vars, invs)
+  bif q.den == 1 then return (q.num.toExpr, vars, invs)
   let invD ← share (mkApp (← getInvFn) (← denoteNum q.den))
   let x := (vars.findIdx? (isSameExpr · invD)).getD vars.size
-  let vars := if x == vars.size then vars.push invD else vars
-  let invs := if invs.any (·.1 == x) then invs else invs.push (x, q.den)
-  let re := if q.num == .num 1 then .var x else .mul q.num.toExpr (.var x)
+  let vars := bif x == vars.size then vars.push invD else vars
+  let invs := bif invs.any (·.1 == x) then invs else invs.push (x, q.den)
+  let re := bif q.num == .num 1 then .var x else .mul q.num.toExpr (.var x)
   return (re, vars, invs)
 
 private inductive CoreResult where
@@ -430,10 +430,10 @@ The `RArray` context of the variables `vars`. An empty context holds `(↑0 : α
 case, so the `natCast` operator is initialized only when needed.
 -/
 private def mkContext (type : Expr) (vars : Array Expr) : NormM Expr := do
-  if h : 0 < vars.size then
-    RArray.toExpr type id (RArray.ofFn (vars[·]) h)
+  bif h : 0 <ᵇ vars.size then
+    RArray.toExpr type id (RArray.ofFn (vars[·]) (lt_of_decideLT_eq_true h))
   else
-    let natCastFn ← if (← getKind).isRing then getNatCastFn else getNatCastFn'
+    let natCastFn ← bif (← getKind).isRing then getNatCastFn else getNatCastFn'
     RArray.toExpr type id (RArray.leaf (mkApp natCastFn (mkNatLit 0)))
 
 /-- The `PolyConfig` of the structure: characteristic, (non-)commutativity, and the budget options. -/
@@ -441,7 +441,7 @@ private def polyConfig : NormM PolyConfig := do
   let kind ← getKind
   let char? ← match kind with
     | .commRing _ | .ring _ =>
-      pure ((← getRing).charInst?.bind fun (_, c) => if c != 0 then some c else none)
+      pure ((← getRing).charInst?.bind fun (_, c) => bif c != 0 then some c else none)
     | _ => pure none
   let opts ← getOptions
   return {
@@ -531,7 +531,7 @@ private def chainResults (e e₁ : Expr) (r₁ r₂ : Result) : SymM Result := d
 kernel closes the gap while checking the expected type, as it does for the instances of the output.
 -/
 private def mkDefEqStep (e e' : Expr) : NormM Result := do
-  let (type, u) ← if (← getKind).isRing then
+  let (type, u) ← bif (← getKind).isRing then
       let ring ← getRing; pure (ring.type, ring.u)
     else
       let sr ← getSemiring; pure (sr.type, sr.u)
@@ -543,21 +543,21 @@ with another instance (e.g., `Semiring.natCast` from a generic rewrite rule) is 
 canonical cast, so that it is the same atom as a canonical `↑a`.
 -/
 private def mkAtom (e₁ : Expr) (r : Result) (kept := false) : VisitM m Node := do
-  let (e₁, r) ← if e₁.isAppOfArity ``NatCast.natCast 3 || e₁.isAppOfArity ``IntCast.intCast 3 then
+  let (e₁, r) ← bif e₁.isAppOfArity ``NatCast.natCast 3 || e₁.isAppOfArity ``IntCast.intCast 3 then
       liftNorm do
         let f ← canonExpr e₁.appFn!
-        if isSameExpr f e₁.appFn! then pure (e₁, r)
+        bif isSameExpr f e₁.appFn! then pure (e₁, r)
         else
           let e₂ ← mkAppS f e₁.appArg!
           pure (e₂, ← chainResults e₁ e₂ r (← mkDefEqStep e₁ e₂))
     else pure (e₁, r)
   let x ← liftNorm do
     let x ← mkVar e₁
-    if (← read).charZero then
+    bif (← read).charZero then
       if let .app invF c := e₁ then
-        if isSameExpr (← getInvFn) (← canonExpr invF) then
+        bif isSameExpr (← getInvFn) (← canonExpr invF) then
           if let some k := (Sym.getNatValue? c).run then
-            if k > 0 then modify fun s => { s with invVars := s.invVars.insert x k }
+            bif k >ᵇ 0 then modify fun s => { s with invVars := s.invVars.insert x k }
     return x
   return { r, re := .var x, p := .ofVar x, kept }
 
@@ -588,18 +588,18 @@ is a scalar or both are monomials; any other product is an atom whose factors ar
 separately.
 -/
 private def expandMul (pa pb : Poly) : VisitM m Bool := do
-  if (← read).distrib then return true
-  if (← isScalar pa) then return true
-  if (← isScalar pb) then return true
+  bif (← read).distrib then return true
+  bif (← isScalar pa) then return true
+  bif (← isScalar pb) then return true
   return isMonomial pa && isMonomial pb
 
 /-- The structure's canonical function for the operator, for the ring or semiring kind. -/
 private def opFn (ring semiring : NormM Expr) : VisitM m Expr := do
-  liftNorm do if (← getKind).isRing then ring else semiring
+  liftNorm do bif (← getKind).isRing then ring else semiring
 
 /-- `true` if `pre` (`HAdd.hAdd α α α inst`, ...) is the structure's canonical function `fn` for the operator. -/
 private def isInst (fn pre : Expr) : VisitM m Bool := do
-  if isSameExpr fn pre then return true
+  bif isSameExpr fn pre then return true
   return isSameExpr fn (← liftNorm (canonExpr pre))
 
 end Visit
@@ -619,7 +619,7 @@ in ascending order and are sorted again; in a non-commutative one they are the f
 -/
 private def renameMon (m : Mon) (f : Grind.VarRename) (commutative : Bool) : Mon :=
   let pws := go m #[]
-  let pws := if commutative then pws.qsort fun a b => a.x < b.x else pws
+  let pws := bif commutative then pws.qsort fun a b => a.x < b.x else pws
   pws.foldr (fun pw m => .mult pw m) .unit
 where
   go : Mon → Array Power → Array Power
@@ -713,7 +713,7 @@ private def mulBSteps (p₁ p₂ : Poly) (n items : Nat) : Poly × Nat × Nat :=
 
 /-- The polynomial of the numeral, variable or power `a ^ k` when `a` is a numeral or variable. -/
 private def powAtom? (a : RingExpr) (k : Nat) : Option Poly :=
-  if k == 0 then some (.num 1) else
+  bif k == 0 then some (.num 1) else
   match a with
   | .num n | .intCast n => some (.num (n ^ k))
   | .natCast n => some (.num ((n : Int) ^ k))
@@ -760,7 +760,7 @@ private partial def balSummands (e : RingExpr) (neg : Bool) (acc : List Poly) (n
   | .neg a => balSummands a (!neg) acc n items
   | _ =>
     let (p, n, items) := balLeaf e n items
-    ((if neg then p.mulConst (-1) else p) :: acc, n, items + 1)
+    ((bif neg then p.mulConst (-1) else p) :: acc, n, items + 1)
 where
   /-- The polynomial of a summand, which is not a sum, difference or negation. -/
   balLeaf (e : RingExpr) (n items : Nat) : Poly × Nat × Nat :=
@@ -803,7 +803,7 @@ polynomial they add as a list. Small polynomials (`size` monomials) and short su
 kernel time in both, and a polynomial added as a list about half a comparison.
 -/
 private def useBalanced (re : RingExpr) (size : Nat) : Bool :=
-  if isSmallSum re size then false else
+  bif isSmallSum re size then false else
   let c := certCost re
   2 * c.balSteps + c.items < 2 * c.steps
 
@@ -848,7 +848,7 @@ additions of `Expr.toPPB_k` cost about the number of terms per level.
 -/
 private def packedBal (e : RingExpr) : Bool := Id.run do
   let ss := addSummands e #[]
-  if ss.size < 8 then return false
+  bif ss.size <ᵇ 8 then return false
   let mut acc : Poly := .num 0
   let mut accCost := 0
   let mut total := 0
@@ -868,7 +868,7 @@ where
   countGt (p : Poly) (m : Mon) (n : Nat) : Nat :=
     match p with
     | .num _ => n
-    | .add _ m' p => if m'.grevlex m == .gt then countGt p m (n + 1) else n
+    | .add _ m' p => bif m'.grevlex m == .gt then countGt p m (n + 1) else n
 
 /--
 The arguments `B bal₁ bal₂ l r p hB h₁ h₂` of the packed certificates (`Expr.eq_of_toPPX_eq`)
@@ -904,7 +904,7 @@ private def kronLinExponent₂? (l₁ r₁ l₂ r₂ : RingExpr) : Option Nat :=
   let K₂ ← kronLinExponent? l₂ r₂ kronMaxBits
   let K := max K₁ K₂
   let maxCode := max (max (exprLinCode l₁) (exprLinCode r₁)) (max (exprLinCode l₂) (exprLinCode r₂))
-  if K * (maxCode + 1) > kronMaxBits then none else some K
+  bif K * (maxCode + 1) >ᵇ kronMaxBits then none else some K
 
 /-- The arguments `K l r hl hK h` of the linear Kronecker certificates (`Expr.eq_of_kronLin`). -/
 private def kronLinProofArgs (l r : RingExpr) (K : Nat) : Array Expr :=
@@ -1038,10 +1038,10 @@ private partial def denoteSteps? (pre : Array Expr) (u : Level) (mode : StepMode
       qE := pE
     return some (q, qE, hq)
   | .add a b | .sub a b =>
-    if mode matches .semiring && e matches .sub .. then return none
+    bif mode matches .semiring && e matches .sub .. then return none
     let ra ← denoteSteps? pre u mode a
     let rb ← denoteSteps? pre u mode b
-    if ra.isNone && rb.isNone then return none
+    bif ra.isNone && rb.isNone then return none
     let pa := ra.map (·.1) |>.getD (mode.leafPoly a)
     let pb := rb.map (·.1) |>.getD (mode.leafPoly b)
     let (paE, ha) ← proof a ra
@@ -1053,7 +1053,7 @@ private partial def denoteSteps? (pre : Array Expr) (u : Level) (mode : StepMode
     let pE ← polyE p
     return some (p, pE, mkAppN name (pre ++ #[toExpr a, toExpr b, paE, pbE, pE, ha, hb, reflP pE]))
   | .neg a =>
-    if mode matches .semiring then return none
+    bif mode matches .semiring then return none
     let some (pa, paE, ha) ← denoteSteps? pre u mode a | return none
     let p := mode.neg pa
     let pE ← polyE p
@@ -1088,7 +1088,7 @@ private def denoteStepsBoth? (pre : Array Expr) (u : Level) (mode : StepMode) (l
   let go : StepM (Option ((Expr × Expr) × (Expr × Expr))) := do
     let r₁ ← denoteSteps? pre u mode l
     let r₂ ← denoteSteps? pre u mode r
-    if r₁.isNone && r₂.isNone then return none
+    bif r₁.isNone && r₂.isNone then return none
     return some (← denoteSteps?.proof pre u mode l r₁, ← denoteSteps?.proof pre u mode r r₂)
   go.run' {}
 
@@ -1101,7 +1101,7 @@ private def denoteStepsPair? (pre : Array Expr) (u : Level) (mode : StepMode) (l
   let go : StepM (Option (Expr × Expr × Expr)) := do
     let r₁ ← denoteSteps? pre u mode l
     let r₂ ← denoteSteps? pre u mode r
-    if r₁.isNone && r₂.isNone then return none
+    bif r₁.isNone && r₂.isNone then return none
     let (pE, h₁) ← denoteSteps?.proof pre u mode l r₁
     let (_, h₂) ← denoteSteps?.proof pre u mode r r₂
     return some (pE, h₁, h₂)
@@ -1145,11 +1145,11 @@ private def mkCertificate (e₁ : Expr) (re : RingExpr) (p : Poly) (vars : Array
   let (type, u, inst, char?) ← match kind with
     | .commRing _ =>
       let ring ← getCommRing
-      let char? := ring.charInst?.bind fun (inst, c) => if c != 0 then some (inst, c) else none
+      let char? := ring.charInst?.bind fun (inst, c) => bif c != 0 then some (inst, c) else none
       pure (ring.type, ring.u, ring.commRingInst, char?)
     | .ring _ =>
       let ring ← getRing
-      let char? := ring.charInst?.bind fun (inst, c) => if c != 0 then some (inst, c) else none
+      let char? := ring.charInst?.bind fun (inst, c) => bif c != 0 then some (inst, c) else none
       pure (ring.type, ring.u, ring.ringInst, char?)
     | .commSemiring _ =>
       let sr ← getCommSemiring
@@ -1160,19 +1160,19 @@ private def mkCertificate (e₁ : Expr) (re : RingExpr) (p : Poly) (vars : Array
   -- Fields: inverse atoms with a discharged side condition are cancelled, and in
   -- characteristic zero the numeral inverses become rational coefficients.
   let fc? ← fieldChar0?
-  let invs ← if fc?.isSome then getInvVars vars else pure #[]
+  let invs ← bif fc?.isSome then getInvVars vars else pure #[]
   let ainvsL := invAtomsList ainvs
   let (re', vars, invs) ←
-    if !invs.isEmpty then mkPolyQExpr (p.toPolyQ invs.toList ainvsL) vars invs
-    else if !ainvs.isEmpty then pure ((p.cancelInvs ainvsL).toExpr, vars, invs)
+    bif !invs.isEmpty then mkPolyQExpr (p.toPolyQ invs.toList ainvsL) vars invs
+    else bif !ainvs.isEmpty then pure ((p.cancelInvs ainvsL).toExpr, vars, invs)
     else pure (p.toExpr, vars, invs)
-  let e' ← if kind.isRing then share (← denoteRingExpr' vars re') else share (← denoteSemiringExpr' vars re')
-  if isSameExpr e' e₁ then
+  let e' ← bif kind.isRing then share (← denoteRingExpr' vars re') else share (← denoteSemiringExpr' vars re')
+  bif isSameExpr e' e₁ then
     return .normal
   let ctx ← mkContext type vars
-  let hoka ← if ainvs.isEmpty then pure (mkConst ``True.intro) else pure (mkInvAtomsOk (← getCommRing) ctx vars ainvs)
+  let hoka ← bif ainvs.isEmpty then pure (mkConst ``True.intro) else pure (mkInvAtomsOk (← getCommRing) ctx vars ainvs)
   let ainvsE := toExpr ainvsL
-  let h ← if !invs.isEmpty then
+  let h ← bif !invs.isEmpty then
     let (fieldInst, charInst) := fc?.get!
     let invsE := toExpr invs.toList
     if let (true, some (K, B)) := (ainvs.isEmpty, kronQArgs? re re' invs.toList kronMaxBits) then
@@ -1188,7 +1188,7 @@ private def mkCertificate (e₁ : Expr) (re : RingExpr) (p : Poly) (vars : Array
     let thm := mkApp3 (mkConst ``Grind.CommRing.Expr.eq_of_toPolyQ_eq [u]) type fieldInst charInst
     pure (mkAppN thm #[ctx, toExpr (useBalanced re p.length), invsE, mkInvVarsOk type u ctx invsE, ainvsE, hoka,
       toExpr re, toExpr re', eagerReflBoolTrue])
-  else if !ainvs.isEmpty then
+  else bif !ainvs.isEmpty then
     let thm := mkApp2 (mkConst ``Grind.CommRing.Expr.eq_of_cancelInvs_eq [u]) type inst
     pure (mkApp6 thm ctx ainvsE hoka (toExpr re) (toExpr re') eagerReflBoolTrue)
   else if let (true, some a, some a') := (type.isConstOf ``Int && char?.isNone && isSmallSum re p.length,
@@ -1214,7 +1214,7 @@ private def mkCertificate (e₁ : Expr) (re : RingExpr) (p : Poly) (vars : Array
       let pE := toExpr p
       pure (mkAppN (mkConst ``Grind.CommRing.Expr.eq_of_toPolyX_eq_toExpr [u]) #[type, inst, ctx, toExpr (useBalanced re p.length),
         toExpr re, re'E, pE, mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Poly) pE, reflE])
-  else if kind matches .commRing _ then
+  else bif kind matches .commRing _ then
     -- `p = re.toPolyX_k bal` (`re.toPolyC_k c`) and `re' = p.toExpr_k`, both checked by
     -- definitional equality.
     let thm := match char? with
@@ -1227,7 +1227,7 @@ private def mkCertificate (e₁ : Expr) (re : RingExpr) (p : Poly) (vars : Array
     pure (mkApp5 thm (toExpr re) re'E pE
       (mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Poly) pE)
       (mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Expr) re'E))
-  else if kind matches .commSemiring _ then
+  else bif kind matches .commSemiring _ then
     if let (true, some arcInst, some K) := (linSemiOk re re', ← getAddRightCancelInst?, kronLinExponent? re re' kronMaxBits) then
       pure (mkAppN (mkConst ``Grind.CommRing.Expr.eq_of_kronLinS [u]) (#[type, inst, arcInst, ctx] ++ kronLinProofArgs re re' K))
     else if let (some arcInst, some (K, B)) := (← getAddRightCancelInst?, (kronArgs? re re').filter (semiOk ·.2 re re')) then
@@ -1293,7 +1293,7 @@ kept node `e'` is `e₁` itself; for a plain atom the result is `.rfl` without `
 simplifier still visits its subterms.
 -/
 private def certify (v : Visitor m) (e₁ : Expr) (n : Node) : VisitM m Result := do
-  if n.re matches .var _ then return .rfl (done := n.kept)
+  bif n.re matches .var _ then return .rfl (done := n.kept)
   let (ainvs, cd) ← decideInvAtoms v n.p
   let r ← liftNorm do
     let (f, vars) ← compactVars n.re
@@ -1330,7 +1330,7 @@ private partial def visit (v : Visitor m) (e : Expr) : VisitM m Node := do
   let atom : VisitM m Node := do
     let r ← v.simpAtom e
     let e₁ := r.getResultExpr e
-    if !isSameExpr e₁ e && isInterpreted e₁ then
+    bif !isSameExpr e₁ e && isInterpreted e₁ then
       chainNode e e₁ r (← visit v e₁)
     else
       mkAtom e₁ r
@@ -1380,7 +1380,7 @@ private partial def visit (v : Visitor m) (e : Expr) : VisitM m Node := do
       let na ← visit v a
       let nb ← visit v b
       unless (← isInst (← opFn getMulFn getMulFn') f) do return (← unexpectedBin fa f a b na nb h h')
-      if (← expandMul na.p nb.p) then
+      bif (← expandMul na.p nb.p) then
         binNode fa f a b na nb (.mul na.re nb.re) (SafePoly.mul na.p nb.p) h h'
       else
         keep fa f a b (← normalizeNode v a na) (← normalizeNode v b nb) h h'
@@ -1395,13 +1395,13 @@ private partial def visit (v : Visitor m) (e : Expr) : VisitM m Node := do
       let na ← visit v a
       let ok ← isInst (← liftNorm getNegFn) f
       unless ok do unexpected
-      match (← if ok then runPoly (SafePoly.mulConst (-1) na.p) else pure none) with
+      match (← bif ok then runPoly (SafePoly.mulConst (-1) na.p) else pure none) with
       | some p =>
         -- A negative numeral is reified as `.num (-k)`, the form the normalizer renders it
         -- in, so that `-1 = x` is recognized as an equation between a numeral and an atom.
         -- `-0` stays `.neg (.num 0)`: `.num 0` denotes to `0`, which is not `-0` in a general ring.
         let re := match na.re with
-          | .num k => if k == 0 then .neg na.re else .num (-k)
+          | .num k => bif k == 0 then .neg na.re else .num (-k)
           | re => .neg re
         return { r := (← Simp.mkCongrArg e f a na.r h), re, p }
       | none =>
@@ -1419,7 +1419,7 @@ private partial def visit (v : Visitor m) (e : Expr) : VisitM m Node := do
       -- With `distrib := false`, only a monomial is raised to a power. The exponent is not a
       -- node of the structure, so the power is kept directly when it is over the budget.
       let expand := ok && ((← read).distrib || isMonomial na.p)
-      match (← if expand then runPoly (SafePoly.powNode na.re na.p kv) else pure none) with
+      match (← bif expand then runPoly (SafePoly.powNode na.re na.p kv) else pure none) with
       | some p => return { r := ← congrBin e fa f a k na.r .rfl h h', re := .pow na.re kv, p }
       | none => keep fa f a k (← normalizeNode v a na) .rfl h h'
     | _ => unreachable!
@@ -1514,8 +1514,8 @@ read as the negative `k - c` (balanced residue), otherwise everything would land
 -/
 private def splitPoly (char? : Option Nat) (p : Poly) : Poly × Poly × Int :=
   let neg? (k : Int) : Option Int := match char? with
-    | none => if k < 0 then some (-k) else none
-    | some c => if k > c / 2 then some (c - k) else none
+    | none => bif k <ᵇ 0 then some (-k) else none
+    | some c => bif k >ᵇ (c : Int) / 2 then some (c - k) else none
   match p with
   | .num k => (.num 0, .num 0, (neg? k).map (- ·) |>.getD k)
   | .add k m p =>
@@ -1562,7 +1562,7 @@ private def gcdMonCoeffs (p : Poly) : Nat :=
 where
   go : Poly → Nat → Nat
     | .num _, g => g
-    | .add k _ p, g => let g := Nat.gcd g k.natAbs; if g == 1 then 1 else go p g
+    | .add k _ p, g => let g := Nat.gcd g k.natAbs; bif g == 1 then 1 else go p g
 
 /-- Divides the monomial coefficients of `p` by `k` and drops the constant. -/
 private def divMonCoeffs (k : Nat) : Poly → Poly
@@ -1571,8 +1571,8 @@ private def divMonCoeffs (k : Nat) : Poly → Poly
 
 /-- Extended Euclid. Invariant: `r₀ ≡ t₀ * k` and `r₁ ≡ t₁ * k` modulo `c`. -/
 private partial def modInvGo (c : Nat) (r₀ r₁ t₀ t₁ : Int) : Option Int :=
-  if r₁ == 0 then
-    if r₀ == 1 then some (t₀ % c) else none
+  bif r₁ == 0 then
+    bif r₀ == 1 then some (t₀ % c) else none
   else
     let q := r₀ / r₁
     modInvGo c r₁ (r₀ - q * r₁) t₁ (t₀ - q * t₁)
@@ -1588,7 +1588,7 @@ the inverse of `k`.
 -/
 private def solvableCoeff? (c : Nat) : Poly → Option Int
   | .add k _ (.num _) => some k
-  | .add k₁ _ (.add k₂ _ (.num 0)) => if k₁ + k₂ == c then some k₁ else none
+  | .add k₁ _ (.add k₂ _ (.num 0)) => bif k₁ + k₂ == c then some k₁ else none
   | _ => none
 
 /-- `p` is a numeral or a single variable: the sides of the equations `simp +arith` leaves alone. -/
@@ -1652,10 +1652,10 @@ private def constRelProof? (rel : RelKind) (order? : Option Order) (ring : Ring)
     NormM (Option (Expr × Bool)) := do
   let size := pl.length + pr.length
   -- Linear identities are evaluated at a point (Kronecker substitution with small values).
-  if k == 0 then
-    let p₀? := if char?.isNone then some pl else
+  bif k == 0 then
+    let p₀? := bif char?.isNone then some pl else
       let q := l.toPoly
-      if q == r.toPoly then some q else none
+      bif q == r.toPoly then some q else none
     let smallInt := ring.type.isConstOf ``Int && isSmallSum (.sub l r) size && (toLinearExpr? l).isSome && (toLinearExpr? r).isSome
     if let (false, some _, some K) := (smallInt, p₀?, kronLinExponent? l r kronMaxBits) then
       let ctx ← mkContext ring.type vars
@@ -1671,25 +1671,25 @@ private def constRelProof? (rel : RelKind) (order? : Option Order) (ring : Ring)
       | _, _ => pure ()
   -- Linear `Int` relations use the cheaper certificates of `simp +arith`. With equal sides, each
   -- side is normalized alone.
-  if ring.type.isConstOf ``Int && isSmallSum (.sub l r) size then
+  bif ring.type.isConstOf ``Int && isSmallSum (.sub l r) size then
     if let (some a, some b) := (toLinearExpr? l, toLinearExpr? r) then
       let (name, holds) := match rel with
-        | .eq => if k == 0 then (``Int.Internal.Linear.eq_true_of_norm_eq_k, true) else (``Int.Internal.Linear.eq_eq_false_k, false)
-        | .le => if k == 0 then (``Int.Internal.Linear.le_true_of_norm_eq_k, true)
-          else if k < 0 then (``Int.Internal.Linear.le_eq_true_k, true) else (``Int.Internal.Linear.le_eq_false_k, false)
-        | .lt => if k == 0 then (``Int.Internal.Linear.lt_false_of_norm_eq_k, false) else (.anonymous, false)
+        | .eq => bif k == 0 then (``Int.Internal.Linear.eq_true_of_norm_eq_k, true) else (``Int.Internal.Linear.eq_eq_false_k, false)
+        | .le => bif k == 0 then (``Int.Internal.Linear.le_true_of_norm_eq_k, true)
+          else bif k <ᵇ 0 then (``Int.Internal.Linear.le_eq_true_k, true) else (``Int.Internal.Linear.le_eq_false_k, false)
+        | .lt => bif k == 0 then (``Int.Internal.Linear.lt_false_of_norm_eq_k, false) else (.anonymous, false)
       unless name.isAnonymous do
         let ctx ← mkContext ring.type vars
         return some (mkApp4 (mkConst name) ctx (ofLinearExpr a) (ofLinearExpr b) eagerReflBoolTrue, holds)
   let reflP (p : Poly) := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Poly) (toExpr p)
   -- Equal sides: each side is checked against the polynomial alone.
-  if k == 0 then
+  bif k == 0 then
     let ctx ← mkContext ring.type vars
     -- The packed certificates hold in any commutative ring: in a nonzero characteristic they
     -- apply when the sides have the same polynomial over `Int`.
-    let p₀? := if char?.isNone then some pl else
+    let p₀? := bif char?.isNone then some pl else
       let q := l.toPoly
-      if q == r.toPoly then some q else none
+      bif q == r.toPoly then some q else none
     if let (some _, some (K, B)) := (p₀?, kronArgs? l r) then
       let args := kronProofArgs l r K B
       match rel, order? with
@@ -1713,7 +1713,7 @@ private def constRelProof? (rel : RelKind) (order? : Option Order) (ring : Ring)
             (#[ring.type, inst, o.leInst, ltInst, lawfulInst, o.isPreorderInst, ctx] ++ args), false)
       | _, _ => pure ()
     -- Large products are stated stepwise when there are any (`denoteSteps?`).
-    if size ≥ 64 && (hasProduct l || hasProduct r) then
+    bif size ≥ᵇ 64 && (hasProduct l || hasProduct r) then
       let (pre, mode) := match char? with
         | none => (#[ring.type, inst, ctx], StepMode.ring)
         | some (charInst, c) => (#[ring.type, toExpr c, inst, charInst, ctx], .char c)
@@ -1730,7 +1730,7 @@ private def constRelProof? (rel : RelKind) (order? : Option Order) (ring : Ring)
         | _, _ => pure ()
     -- In a nonzero characteristic, each step of `Expr.toPolyC_k` also reduces coefficients, and
     -- the balanced version pays off for both sides when it does for their difference.
-    let (bal₁, bal₂) := if char?.isSome then
+    let (bal₁, bal₂) := bif char?.isSome then
         let b := useBalanced (.sub l r) size; (b, b)
       else (useBalanced l pl.length, useBalanced r pr.length)
     let sides := #[toExpr bal₁, toExpr bal₂, toExpr l, toExpr r, toExpr pl, reflP pl, reflP pl]
@@ -1754,7 +1754,7 @@ private def constRelProof? (rel : RelKind) (order? : Option Order) (ring : Ring)
   -- A nonzero constant difference with large polynomials: the difference is checked with packed
   -- monomials, or stated stepwise.
   let packed := usePacked (max pl.length pr.length)
-  if k != 0 && char?.isNone then
+  bif k != 0 && char?.isNone then
     let ctx ← mkContext ring.type vars
     let pre := #[ring.type, inst, ctx]
     -- `name`, the sides of the difference, `n` and the instances of the theorem.
@@ -1767,13 +1767,13 @@ private def constRelProof? (rel : RelKind) (order? : Option Order) (ring : Ring)
         let (some ltInst, some lawfulInst, some orderedInst) := (o.ltInst?, o.lawfulOrderLTInst?, o.orderedRingInst?) | pure none
         let insts := #[inst, o.leInst, ltInst, lawfulInst, o.isPreorderInst, orderedInst]
         pure <| some <| match rel with
-          | .le => if k ≤ 0 then (``Grind.CommRing.le_true_of_sub, r, l, mkRawNatLit (-k).toNat, insts)
+          | .le => bif k ≤ᵇ 0 then (``Grind.CommRing.le_true_of_sub, r, l, mkRawNatLit (-k).toNat, insts)
             else (``Grind.CommRing.le_false_of_sub, l, r, mkRawNatLit (k - 1).toNat, insts)
-          | _ => if k < 0 then (``Grind.CommRing.lt_true_of_sub, r, l, mkRawNatLit (-k - 1).toNat, insts)
+          | _ => bif k <ᵇ 0 then (``Grind.CommRing.lt_true_of_sub, r, l, mkRawNatLit (-k - 1).toNat, insts)
             else (``Grind.CommRing.lt_false_of_sub, l, r, mkRawNatLit k.toNat, insts)
     if let some (name, a, b, n, insts) := thm? then
       -- `a - b` is the constant `kab`.
-      let kab := if a == l then k else -k
+      let kab := bif a == l then k else -k
       let bk : RingExpr := .add b (.num kab)
       let h? : Option Expr := if let some K := kronLinExponent? a bk kronMaxBits then
           some (mkAppN (mkConst ``Grind.CommRing.Expr.sub_eq_of_kronLin [u]) (#[ring.type, inst, ctx] ++
@@ -1784,43 +1784,43 @@ private def constRelProof? (rel : RelKind) (order? : Option Order) (ring : Ring)
             #[mkRawNatLit K, mkRawNatLit B, toExpr a, toExpr b, toExpr kab, eagerReflBoolTrue, eagerReflBoolTrue,
               mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Int)
                 (mkApp3 (mkConst ``Grind.CommRing.Expr.kronEval_k) (mkRawNatLit K) (mkRawNatLit B) (toExpr a))]))
-        else if packed then
+        else bif packed then
           -- `a` has the polynomial `pa` and `b` the polynomial `q`.
-          let (pa, q, kab) := if a == l then (pl, pr, k) else (pr, pl, -k)
+          let (pa, q, kab) := bif a == l then (pl, pr, k) else (pr, pl, -k)
           let B := packedBase a b
           let reflP (p : Poly) := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.PPoly) (ofPackedPoly B p)
           some (mkAppN (mkConst ``Grind.CommRing.Expr.sub_eq_of_toPPX [u]) #[ring.type, inst, ctx, mkRawNatLit B,
             toExpr (packedBal a), toExpr (packedBal b), toExpr a, toExpr b, ofPackedPoly B q, mkIntLitK kab, eagerReflBoolTrue,
             reflP pa, reflP q])
-        else if size ≥ 64 && (hasProduct l || hasProduct r) then ((denoteSteps? pre u StepMode.ring (.sub a b)).run' {}).map (·.2.2)
+        else bif size ≥ᵇ 64 && (hasProduct l || hasProduct r) then ((denoteSteps? pre u StepMode.ring (.sub a b)).run' {}).map (·.2.2)
         else none
       if let some h := h? then
-        let args := #[ctx, toExpr l, toExpr r, n, h] ++ (if rel == .eq then #[eagerReflBoolFalse] else #[])
+        let args := #[ctx, toExpr l, toExpr r, n, h] ++ (bif rel == .eq then #[eagerReflBoolFalse] else #[])
         return some (mkAppN (mkConst name [u]) (#[ring.type] ++ insts ++ args), rel != .eq && (k < 0 || (rel == .le && k == 0)))
   let mk (name : Name) (insts : Array Expr) (rhsFirst : Bool) (args : Array Expr) (isTrue : Bool) : NormM (Option (Expr × Bool)) := do
     let ctx ← mkContext ring.type vars
-    let (a, b) := if rhsFirst then (r, l) else (l, r)
+    let (a, b) := bif rhsFirst then (r, l) else (l, r)
     let bal := useBalanced (.sub a b) size
     let thm := mkAppN (mkConst name [u]) (#[ring.type] ++ insts ++ #[ctx, toExpr bal, toExpr l, toExpr r] ++ args)
     return some (thm, isTrue)
   match rel with
   | .eq =>
-    if char?.isNone then
+    bif char?.isNone then
       let some (charInst, 0) := ring.charInst? | return none
       mk ``Grind.CommRing.eq_false_of_poly #[inst, charInst] false #[toExpr k, reflP (.num k), eagerReflBoolFalse] false
     else return none
   | .le | .lt =>
     let some o := order? | return none
     let (some ltInst, some lawfulInst, some orderedInst) := (o.ltInst?, o.lawfulOrderLTInst?, o.orderedRingInst?) | return none
-    if char?.isSome then return none
+    bif char?.isSome then return none
     let insts := #[inst, o.leInst, ltInst, lawfulInst, o.isPreorderInst, orderedInst]
     let nat (n : Nat) : Poly := .num (Int.ofNat n)
     match rel with
     | .le =>
-      if k ≤ 0 then mk ``Grind.CommRing.le_true_of_poly insts true #[mkRawNatLit (-k).toNat, reflP (nat (-k).toNat)] true
+      bif k ≤ᵇ 0 then mk ``Grind.CommRing.le_true_of_poly insts true #[mkRawNatLit (-k).toNat, reflP (nat (-k).toNat)] true
       else mk ``Grind.CommRing.le_false_of_poly insts false #[mkRawNatLit (k - 1).toNat, reflP (nat k.toNat)] false
     | _ =>
-      if k < 0 then mk ``Grind.CommRing.lt_true_of_poly insts true #[mkRawNatLit (-k - 1).toNat, reflP (nat (-k).toNat)] true
+      bif k <ᵇ 0 then mk ``Grind.CommRing.lt_true_of_poly insts true #[mkRawNatLit (-k - 1).toNat, reflP (nat (-k).toNat)] true
       else mk ``Grind.CommRing.lt_false_of_poly insts false #[mkRawNatLit k.toNat, reflP (nat k.toNat)] false
 
 /--
@@ -1834,21 +1834,21 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
     (l r : RingExpr) (pl pr : Poly) (vars : Array Expr) (ainvs : Array (Var × Var × Expr)) (lhsOnly : Bool) : NormM CoreResult := do
   let kind ← getKind
   let budget := (← read).polyCfg
-  if kind.isRing then
+  bif kind.isRing then
     let ring ← getRing
     let u := ring.u
     -- Instance for the certificate theorem: `CommRing` or `Ring`.
-    let inst ← if kind.isComm then pure (← getCommRing).commRingInst else pure ring.ringInst
-    let char? := ring.charInst?.bind fun (inst, c) => if c != 0 then some (inst, c) else none
+    let inst ← bif kind.isComm then pure (← getCommRing).commRingInst else pure ring.ringInst
+    let char? := ring.charInst?.bind fun (inst, c) => bif c != 0 then some (inst, c) else none
     let some p ← (do SafePoly.combine pl (← SafePoly.mulConst (-1) pr) : PolyM Poly).run budget | return .notApplicable
     -- Fields: cancel the discharged inverse atoms; in characteristic zero, split the numerator
     -- of `lhs - rhs`, whose denominator's sign needs `IsLinearOrder` for `≤`/`<`.
     let fc? ← fieldChar0?
-    let mut invs ← if fc?.isSome then getInvVars vars else pure #[]
+    let mut invs ← bif fc?.isSome then getInvVars vars else pure #[]
     let ainvsL := invAtomsList ainvs
-    let linInst? ← if invs.isEmpty || rel == .eq then pure none else
+    let linInst? ← bif invs.isEmpty || rel == .eq then pure none else
       MonadCanon.synthInstance? (mkApp2 (mkConst ``Std.IsLinearOrder [u]) ring.type order?.get!.leInst)
-    if rel != .eq && linInst?.isNone then invs := #[]
+    bif rel != .eq && linInst?.isNone then invs := #[]
     -- `simp +arith` leaves equations between atoms and numerals alone (`x = y`, `x = 3`,
     -- `3 = x`): `grind` and other tactics handle these directly. The sides are classified by
     -- their polynomials, so `2 * 3 - 7 = x` is `-1 = x` and `(7 : Fin 5) = x` is `2 = x`; they
@@ -1856,9 +1856,9 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
     -- through the field normalization below.
     let numOrAtom := lhsOnly && rel == .eq && invs.isEmpty && ainvs.isEmpty && isNumOrAtom pl && isNumOrAtom pr
     -- With inverses of numerals, `lhs - rhs` is `p / den` for the numerator `p` below.
-    let den := if !invs.isEmpty then (p.toPolyQ invs.toList ainvsL).den else 1
-    let p := if !invs.isEmpty then (p.toPolyQ invs.toList ainvsL).num
-      else if !ainvs.isEmpty then p.cancelInvs ainvsL
+    let den := bif !invs.isEmpty then (p.toPolyQ invs.toList ainvsL).den else 1
+    let p := bif !invs.isEmpty then (p.toPolyQ invs.toList ainvsL).num
+      else bif !ainvs.isEmpty then p.cancelInvs ainvsL
       else p
     -- `Int`: like `simp +arith`, divide the coefficients by their gcd `k` (`p = k * q + c`).
     -- An equation whose constant is not divisible by `k` is `False`, and `≤` is tightened by
@@ -1866,44 +1866,44 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
     -- `(q, k, c)` for the certificate (`IntSolver.lean`).
     let mut p := p
     let mut tight? : Option (Poly × Int × Int) := none
-    if ring.type.isConstOf ``Int && invs.isEmpty && ainvs.isEmpty && char?.isNone && rel != .lt && !numOrAtom then
+    bif ring.type.isConstOf ``Int && invs.isEmpty && ainvs.isEmpty && char?.isNone && rel != .lt && !numOrAtom then
       let k := gcdMonCoeffs p
-      if k > 1 then
+      bif k >ᵇ 1 then
         let c := polyConst p
         let q := divMonCoeffs k p
-        if rel == .eq && c % k != 0 then
+        bif rel == .eq && c % k != 0 then
           let ctx ← mkContext ring.type vars
           let h := mkApp7 (mkConst ``Grind.CommRing.eq_norm_unsat_expr) ctx (toExpr l) (toExpr r) (toExpr q) (toExpr (k : Int)) (toExpr c) eagerReflBoolTrue
           let e' ← getFalseExpr
           return .step e' (mkExpectedPropHint h (mkPropEq e e'))
-        p := q.addConst (if rel == .eq then c / k else cdiv c k)
+        p := q.addConst (bif rel == .eq then c / k else cdiv c k)
         tight? := some (q, k, c)
     -- Nonzero characteristic `c`, `lhsOnly`: when `p` is `k * m + k'` or `k * m₁ - k * m₂` and
     -- `k` has an inverse modulo `c`, multiply by it, so that the equation is solved for `m`
     -- below. `scale?` records `k` and its inverse for the certificate.
     let mut scale? : Option (Int × Int) := none
-    if lhsOnly && rel == .eq && kind.isComm && ainvs.isEmpty && !numOrAtom then
+    bif lhsOnly && rel == .eq && kind.isComm && ainvs.isEmpty && !numOrAtom then
       if let some (_, c) := char? then
         if let some k := solvableCoeff? c p then
-          if k != 1 then
+          bif k != 1 then
             if let some k' := modInv? k c then
               p := p.mulConstC k' c
               scale? := some (k, k')
     -- In a field, the numerator of `lhs - rhs` is `0`: the equation is `True`. The sides are
     -- checked alone when they have the same polynomial or the same `PolyQ`.
-    if !invs.isEmpty && rel == .eq && p matches .num 0 then
+    bif !invs.isEmpty && rel == .eq && p matches .num 0 then
       -- Both sides have the same polynomial, before eliminating the inverses: a ring identity,
       -- when it can be checked at a point.
-      if pl == pr && ((kronLinExponent? l r kronMaxBits).isSome || (kronArgs? l r).isSome) then
+      bif pl == pr && ((kronLinExponent? l r kronMaxBits).isSome || (kronArgs? l r).isSome) then
         if let some (h, _) ← constRelProof? rel order? ring u inst char? 0 l r pl pr vars then
           return .step (← getTrueExpr) (mkExpectedPropHint h (mkPropEq e (← getTrueExpr)))
       let (fieldInst, charInst) := fc?.get!
       let ctx ← mkContext ring.type vars
-      let hoka ← if ainvs.isEmpty then pure (mkConst ``True.intro) else pure (mkInvAtomsOk (← getCommRing) ctx vars ainvs)
+      let hoka ← bif ainvs.isEmpty then pure (mkConst ``True.intro) else pure (mkInvAtomsOk (← getCommRing) ctx vars ainvs)
       let invsE := toExpr invs.toList
       let ql := pl.toPolyQ invs.toList ainvsL
       let commRingInst := (← getCommRing).commRingInst
-      let steps? := if pl.length + pr.length ≥ 64 && (hasProduct l || hasProduct r) then
+      let steps? := bif pl.length + pr.length ≥ᵇ 64 && (hasProduct l || hasProduct r) then
           denoteStepsBoth? #[ring.type, commRingInst, ctx] u .ring l r
         else none
       let h := if let (true, some (K, B)) := (ainvs.isEmpty, kronQArgs? l r invs.toList kronMaxBits) then
@@ -1917,12 +1917,12 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
             eagerReflBoolTrue, eagerReflBoolTrue, eagerReflBoolTrue]
         else if let (true, some ((pE, h₁), (_, h₂))) := (pl == pr, steps?) then
           mkAppN (mkConst ``Grind.CommRing.eq_true_of_denote_eq [u]) #[ring.type, commRingInst, ctx, toExpr l, toExpr r, pE, h₁, h₂]
-        else if pl == pr then
+        else bif pl == pr then
           -- Both sides have the same polynomial, before eliminating the inverses.
           let reflP := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Poly) (toExpr pl)
           mkAppN (mkConst ``Grind.CommRing.eq_true_of_toPoly_eq [u]) #[ring.type, commRingInst, ctx,
             toExpr (useBalanced l pl.length), toExpr (useBalanced r pr.length), toExpr l, toExpr r, toExpr pl, reflP, reflP]
-        else if ql == pr.toPolyQ invs.toList ainvsL then
+        else bif ql == pr.toPolyQ invs.toList ainvsL then
           -- Both sides have the same `PolyQ`: each side is normalized alone.
           let qE := mkApp2 (mkConst ``Grind.CommRing.PolyQ.mk) (toExpr ql.num) (mkRawNatLit ql.den)
           let reflQ := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.PolyQ) qE
@@ -1942,42 +1942,42 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
       let e' ← getTrueExpr
       return .step e' (mkExpectedPropHint h (mkPropEq e e'))
     -- `lhs - rhs` is a constant: the relation is `True` or `False`.
-    if invs.isEmpty && ainvs.isEmpty && kind.isComm && tight?.isNone && scale?.isNone && !numOrAtom then
+    bif invs.isEmpty && ainvs.isEmpty && kind.isComm && tight?.isNone && scale?.isNone && !numOrAtom then
       if let .num k := p then
         if let some h ← constRelProof? rel order? ring u inst char? k l r pl pr vars then
-          let e' ← if h.2 then getTrueExpr else getFalseExpr
+          let e' ← bif h.2 then getTrueExpr else getFalseExpr
           return .step e' (mkExpectedPropHint h.1 (mkPropEq e e'))
     -- Like `simp +arith`, the equations `x - y = 0` and `x + k = 0` are written `x = y` and
     -- `x = -k`, and any other equation already of the form `p = 0` is left alone.
     let (lp, rp) ←
-      if numOrAtom then
+      bif numOrAtom then
         pure (pl, pr)
-      else if lhsOnly then
+      else bif lhsOnly then
         match rel, char?, p with
         | .eq, none, .add 1 m₁ (.add (-1) m₂ (.num 0)) => pure (.add 1 m₁ (.num 0), .add 1 m₂ (.num 0))
         | .eq, none, .add (-1) m₂ (.add 1 m₁ (.num 0)) => pure (.add 1 m₁ (.num 0), .add 1 m₂ (.num 0))
         | .eq, none, .add 1 m (.num k) => pure (.add 1 m (.num 0), .num (-k))
         | .eq, some (_, c), .add 1 m₁ (.add k m₂ (.num 0)) =>
-          pure <| if k + 1 == c then (.add 1 m₁ (.num 0), .add 1 m₂ (.num 0)) else (p, .num 0)
+          pure <| bif k + 1 == c then (.add 1 m₁ (.num 0), .add 1 m₂ (.num 0)) else (p, .num 0)
         | .eq, some (_, c), .add 1 m (.num k) => pure (.add 1 m (.num 0), .num ((c - k) % c))
         | _, _, _ =>
-          if rel == .eq && char?.isNone && r == .num 0 && p.toExpr == l then return .normal
+          bif rel == .eq && char?.isNone && r == .num 0 && p.toExpr == l then return .normal
           pure (p, .num 0)
       else
         let (lp, rp, c) := splitPoly (char?.map (·.2)) p
-        pure (if c > 0 then lp.addConst c else lp, if c < 0 then rp.addConst (-c) else rp)
+        pure (bif c >ᵇ 0 then lp.addConst c else lp, bif c <ᵇ 0 then rp.addConst (-c) else rp)
     let l' := lp.toExpr
     let r' := rp.toExpr
     -- A numeral side of a kept `x = k`: a numeral written as such keeps its canonical form, since a
     -- rendered one would use the structure's type as written (`BitVec (id 32)`, `Fin (4 + 1)`)
     -- and be a second literal node; an evaluated one (`2 * 3 - 7`) is rendered.
     let side (p : Poly) (re : RingExpr) (ex : Expr) (ep : RingExpr) : NormM Expr :=
-      if numOrAtom && p matches .num _ && re matches .num _ then canonExpr ex
+      bif numOrAtom && p matches .num _ && re matches .num _ then canonExpr ex
       else denoteRingExpr' vars ep
     let e' ← share (mkApp2 relFn (← side lp l lhs l') (← side rp r rhs r'))
-    if isSameExpr e' e then return .normal
+    bif isSameExpr e' e then return .normal
     let ctx ← mkContext ring.type vars
-    let hoka ← if ainvs.isEmpty then pure (mkConst ``True.intro) else pure (mkInvAtomsOk (← getCommRing) ctx vars ainvs)
+    let hoka ← bif ainvs.isEmpty then pure (mkConst ``True.intro) else pure (mkInvAtomsOk (← getCommRing) ctx vars ainvs)
     let ainvsE := toExpr ainvsL
     let h ← if let some (q, k, c) := tight? then
       pure <| match rel with
@@ -1997,7 +1997,7 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
     else if let (true, some h) := (invs.isEmpty && ainvs.isEmpty && kind.isComm && char?.isNone,
         kronRelProof? rel order? ring.type inst ctx u l r l' r') then
       pure h
-    else if invs.isEmpty && ainvs.isEmpty && kind.isComm && char?.isNone && rp matches .num 0 then
+    else bif invs.isEmpty && ainvs.isEmpty && kind.isComm && char?.isNone && rp matches .num 0 then
       -- `lhs' ⋈ 0`, where `lp` is the polynomial of `lhs - rhs`: both hypotheses of the theorem
       -- are checked by definitional equality.
       let base (name : Name) : Expr := mkApp2 (mkConst name [u]) ring.type inst
@@ -2015,7 +2015,7 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
       pure (mkAppN h #[ctx, toExpr bal, toExpr l, toExpr r, l'E, pE,
         mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Poly) pE,
         mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Expr) l'E])
-    else if invs.isEmpty && ainvs.isEmpty && kind.isComm then
+    else bif invs.isEmpty && ainvs.isEmpty && kind.isComm then
       -- `q` is the polynomial of `lhs - rhs` (`rhs - lhs` for `≤`, `<`); every hypothesis of the
       -- theorem is checked by definitional equality.
       let q := match rel, char? with
@@ -2048,7 +2048,7 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
       let reflE (e : Expr) := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Expr) e
       let args := #[toExpr l, toExpr r, l'E, r'E, qE, toExpr lp, toExpr rp, reflP, reflE l'E, reflE r'E, reflP]
       pure (mkAppN h (#[ctx, toExpr (useBalanced (.sub l r) (pl.length + pr.length))] ++ args))
-    else if invs.isEmpty && ainvs.isEmpty then
+    else bif invs.isEmpty && ainvs.isEmpty then
       -- `thm type [c] inst [charInst]`, then the order instances.
       let base (name : Name) : Expr :=
         match char? with
@@ -2063,7 +2063,7 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
           let o := order?.get!
           mkApp5 (base (relThmName rel char?.isSome)) o.leInst o.ltInst?.get! o.lawfulOrderLTInst?.get! o.isPreorderInst o.orderedRingInst?.get!
       pure (mkApp6 h ctx (toExpr l) (toExpr r) (toExpr l') (toExpr r') eagerReflBoolTrue)
-    else if invs.isEmpty then
+    else bif invs.isEmpty then
       let base (name : Name) : Expr := mkApp2 (mkConst name [u]) ring.type inst
       let h := match rel with
         | .eq => base ``Grind.CommRing.eq_normA_expr
@@ -2143,7 +2143,7 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
           | .le => ``Grind.CommRing.le_true_of_kronLinS
           | .lt => ``Grind.CommRing.lt_false_of_kronLinS
         let h := mkAppN (mkConst name [u]) (#[sr.type, csInst, arcInst] ++ insts ++ #[ctx] ++ kronLinProofArgs l r K)
-        let e' ← if holds then getTrueExpr else getFalseExpr
+        let e' ← bif holds then getTrueExpr else getFalseExpr
         return .step e' (mkExpectedPropHint h (mkPropEq e e'))
       if let (some arcInst, some (K, B)) := (← getAddRightCancelInst?, (kronArgs? l r).filter (semiOk ·.2 l r)) then
         let name := match rel with
@@ -2151,7 +2151,7 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
           | .le => ``Grind.CommRing.le_true_of_kronS
           | .lt => ``Grind.CommRing.lt_false_of_kronS
         let h := mkAppN (mkConst name [u]) (#[sr.type, csInst, arcInst] ++ insts ++ #[ctx] ++ kronProofArgs l r K B)
-        let e' ← if holds then getTrueExpr else getFalseExpr
+        let e' ← bif holds then getTrueExpr else getFalseExpr
         return .step e' (mkExpectedPropHint h (mkPropEq e e'))
       if let some (K, B) := (kronArgs? l r).filter (semiOk ·.2 l r) then
         -- Without `AddRightCancel`, the terms are regrouped in the semiring (`Expr.eq_of_kronSN`).
@@ -2160,7 +2160,7 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
           | .le => ``Grind.CommRing.le_true_of_kronSN
           | .lt => ``Grind.CommRing.lt_false_of_kronSN
         let h := mkAppN (mkConst name [u]) (#[sr.type, csInst] ++ insts ++ #[ctx] ++ kronProofArgs l r K B)
-        let e' ← if holds then getTrueExpr else getFalseExpr
+        let e' ← bif holds then getTrueExpr else getFalseExpr
         return .step e' (mkExpectedPropHint h (mkPropEq e e'))
       if let (true, some arcInst) := (usePacked pl.length && semiOk (packedBase l r) l r, ← getAddRightCancelInst?) then
         let name := match rel with
@@ -2168,26 +2168,26 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
           | .le => ``Grind.CommRing.le_true_of_toPPX_eqS
           | .lt => ``Grind.CommRing.lt_false_of_toPPX_eqS
         let h := mkAppN (mkConst name [u]) (#[sr.type, csInst, arcInst] ++ insts ++ #[ctx] ++ packedArgs l r pl (packedBal l) (packedBal r))
-        let e' ← if holds then getTrueExpr else getFalseExpr
+        let e' ← bif holds then getTrueExpr else getFalseExpr
         return .step e' (mkExpectedPropHint h (mkPropEq e e'))
       -- Large products are stated stepwise when there are any (`denoteSteps?`).
-      if pl.length ≥ 32 && (hasProduct l || hasProduct r) then
+      bif pl.length ≥ᵇ 32 && (hasProduct l || hasProduct r) then
         if let some (pE, h₁, h₂) := denoteStepsPair? #[sr.type, csInst, ctx] u .semiring l r then
           let name := match rel with
             | .eq => ``Grind.CommRing.eq_true_of_denoteS_eq
             | .le => ``Grind.CommRing.le_true_of_denoteS_eq
             | .lt => ``Grind.CommRing.lt_false_of_denoteS_eq
           let h := mkAppN (mkConst name [u]) (#[sr.type, csInst] ++ insts ++ #[ctx, toExpr l, toExpr r, pE, h₁, h₂])
-          let e' ← if holds then getTrueExpr else getFalseExpr
+          let e' ← bif holds then getTrueExpr else getFalseExpr
           return .step e' (mkExpectedPropHint h (mkPropEq e e'))
       let pE := toExpr pl
       let reflP := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Poly) pE
       let h := mkAppN (mkConst name [u]) (#[sr.type, (← getCommSemiring).commSemiringInst] ++ insts ++
         #[ctx, toExpr (useBalanced l pl.length), toExpr (useBalanced r pr.length), toExpr l, toExpr r, pE, reflP, reflP])
-      let e' ← if holds then getTrueExpr else getFalseExpr
+      let e' ← bif holds then getTrueExpr else getFalseExpr
       return .step e' (mkExpectedPropHint h (mkPropEq e e'))
     -- Instance for `eq_normS` / `eq_normS_nc`: `CommSemiring` or `Semiring`.
-    let (inst, normS) ← if kind.isComm then
+    let (inst, normS) ← bif kind.isComm then
         pure ((← getCommSemiring).commSemiringInst, ``Grind.CommRing.eq_normS)
       else
         pure (sr.semiringInst, ``Grind.CommRing.eq_normS_nc)
@@ -2195,7 +2195,7 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
     let cancel? : Option (Expr → Expr → Expr → Expr) ← match rel with
       | .eq =>
         let some addInst ← MonadCanon.synthInstance? (mkApp (mkConst ``Add [u]) sr.type) | pure none
-        let arcInst? ← if kind.isComm then getAddRightCancelInst?
+        let arcInst? ← bif kind.isComm then getAddRightCancelInst?
           else MonadCanon.synthInstance? (mkApp2 (mkConst ``Grind.AddRightCancel [u]) sr.type addInst)
         match arcInst? with
         | none => pure none
@@ -2206,7 +2206,7 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
         let hAdd := mkApp2 (mkConst ``instHAdd [u]) sr.type (mkApp2 (mkConst ``Grind.Semiring.toAdd [u]) sr.type sr.semiringInst)
         let addFn := mkApp4 (mkConst ``HAdd.hAdd [u, u, u]) sr.type sr.type sr.type hAdd
         let ordAdd := mkApp6 (mkConst ``Grind.OrderedRing.toOrderedAdd [u]) sr.type sr.semiringInst o.leInst o.ltInst?.get! o.isPreorderInst o.orderedRingInst?.get!
-        if rel == .le then
+        bif rel == .le then
           pure <| some fun a b c =>
             let iff := mkApp8 (mkConst ``Grind.OrderedAdd.add_le_left_iff [u]) sr.type hAdd o.leInst o.isPreorderInst ordAdd a b c
             mkIffSymm (mkApp2 o.leFn a b) (mkApp2 o.leFn (mkApp2 addFn a c) (mkApp2 addFn b c)) iff
@@ -2218,13 +2218,13 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
             mkIffSymm (mkApp2 ltFn a b) (mkApp2 ltFn (mkApp2 addFn a c) (mkApp2 addFn b c)) iff
     let c := commonPart pl pr
     let hasC := cancel?.isSome && !c.isZero
-    let (lp, rp) := if hasC then (pl.combine (c.mulConst (-1)), pr.combine (c.mulConst (-1))) else (pl, pr)
+    let (lp, rp) := bif hasC then (pl.combine (c.mulConst (-1)), pr.combine (c.mulConst (-1))) else (pl, pr)
     let l' := lp.toExpr
     let r' := rp.toExpr
     let el ← share (← denoteSemiringExpr' vars l')
     let er ← share (← denoteSemiringExpr' vars r')
     let e' ← share (mkApp2 relFn el er)
-    if isSameExpr e' e then return .normal
+    bif isSameExpr e' e then return .normal
     let ctx ← mkContext sr.type vars
     -- Term steps `lhs = lhs' + c` and `rhs = rhs' + c` (without `+ c` when nothing is cancelled).
     -- `px` is the polynomial of `x` and `qx` the one of the rendered `x'`. In a commutative
@@ -2232,13 +2232,13 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
     let cE := toExpr c
     let reflP (p : Expr) := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Poly) p
     let reflE (e : Expr) := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Grind.CommRing.Expr) e
-    let csInst? ← if kind.isComm then pure (some (← getCommSemiring).commSemiringInst) else pure none
-    let arcInst? ← if kind.isComm then getAddRightCancelInst? else pure none
+    let csInst? ← bif kind.isComm then pure (some (← getCommSemiring).commSemiringInst) else pure none
+    let arcInst? ← bif kind.isComm then getAddRightCancelInst? else pure none
     -- With a common part `c`, `lhs = lhs' + c` and `rhs = rhs' + c` are checked at a point and `c`
     -- is cancelled in the certificate (`eq_cancel_of_kronS`), so `c` is not written as a term.
     if let (true, some csInst, some arcInst) := (hasC, csInst?, arcInst?) then
       -- When a side is all common part, its input term stands for `c`, smaller than the expansion.
-      let cX : RingExpr := if lp matches .num 0 then l else if rp matches .num 0 then r else c.toExpr
+      let cX : RingExpr := bif lp matches .num 0 then l else bif rp matches .num 0 then r else c.toExpr
       let lC : RingExpr := .add l' cX
       let rC : RingExpr := .add r' cX
       let insts? : Option (Name × Name × Array Expr) := match rel, order? with
@@ -2261,7 +2261,7 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
           eagerReflBoolTrue, eagerReflBoolTrue, reflI r])
         return .step e' (mkExpectedPropHint h (mkPropEq e e'))
       if let (some (_, name, insts), some (K, B)) := (insts?, kronArgs₂? l lC r rC) then
-        if semiOk B l lC && semiOk B r rC then
+        bif semiOk B l lC && semiOk B r rC then
           let ev (e : RingExpr) := mkApp3 (mkConst ``Grind.CommRing.Expr.kronEval_k) (mkRawNatLit K) (mkRawNatLit B) (toExpr e)
           let reflI (e : RingExpr) := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Int) (ev e)
           let h := mkAppN (mkConst name [u]) (#[sr.type, csInst, arcInst] ++ insts ++ #[ctx, mkRawNatLit K, mkRawNatLit B,
@@ -2291,19 +2291,19 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
       else
       -- Large products are stated stepwise when there are any (`denoteSteps?`).
       let steps? := match csInst? with
-        | some csInst => if px.length ≥ 32 && hasProduct x then
+        | some csInst => bif px.length ≥ᵇ 32 && hasProduct x then
             (denoteSteps? #[sr.type, csInst, ctx] u .semiring x).run' {}
           else none
         | none => none
       let h := if let some (_, pxE, hx) := steps? then
-          if hasC then
+          bif hasC then
             mkAppN (mkConst ``Grind.CommRing.Expr.eq_of_denoteS_eq_add_toExpr [u])
               #[sr.type, inst, ctx, xE, xCE, pxE, toExpr qx, cE, hx, reflE xCE, reflP pxE, eagerReflBoolTrue]
           else
             mkAppN (mkConst ``Grind.CommRing.Expr.eq_of_denoteS_eq_toExpr [u]) #[sr.type, inst, ctx, xE, xCE, pxE, hx, reflE xCE]
-        else if !kind.isComm then
+        else bif !kind.isComm then
           mkApp6 (mkConst normS [u]) sr.type inst ctx xE xCE eagerReflBoolTrue
-        else if hasC then
+        else bif hasC then
           let pxE := toExpr px
           let thm := mkApp2 (mkConst ``Grind.CommRing.Expr.eq_of_toPolyS_eq_add_toExpr [u]) sr.type inst
           mkAppN thm #[ctx, toExpr (useBalanced x px.length), xE, xCE, pxE, toExpr qx, cE, reflP pxE, reflE xCE, reflP pxE, eagerReflBoolTrue]
@@ -2312,17 +2312,17 @@ private def normalizeRelCore (rel : RelKind) (relFn : Expr) (order? : Option Ord
           let thm := mkApp2 (mkConst ``Grind.CommRing.Expr.eq_of_toPolyS_eq_toExpr [u]) sr.type inst
           mkApp7 thm ctx (toExpr (useBalanced x px.length)) xE xCE pxE (reflP pxE) (reflE xCE)
       mkExpectedPropHint h (mkApp3 (mkConst ``Eq [u.succ]) sr.type ex exC)
-    let (lC, rC) : RingExpr × RingExpr := if hasC then (.add l' c.toExpr, .add r' c.toExpr) else (l', r')
-    let elC ← if hasC then share (← denoteSemiringExpr' vars lC) else pure el
-    let erC ← if hasC then share (← denoteSemiringExpr' vars rC) else pure er
-    let r₁ : Result := if isSameExpr lhs elC then .rfl else .step elC (mkTermStep l lC pl lp lhs elC)
-    let r₂ : Result := if isSameExpr rhs erC then .rfl else .step erC (mkTermStep r rC pr rp rhs erC)
+    let (lC, rC) : RingExpr × RingExpr := bif hasC then (.add l' c.toExpr, .add r' c.toExpr) else (l', r')
+    let elC ← bif hasC then share (← denoteSemiringExpr' vars lC) else pure el
+    let erC ← bif hasC then share (← denoteSemiringExpr' vars rC) else pure er
+    let r₁ : Result := bif isSameExpr lhs elC then .rfl else .step elC (mkTermStep l lC pl lp lhs elC)
+    let r₂ : Result := bif isSameExpr rhs erC then .rfl else .step erC (mkTermStep r rC pr rp rhs erC)
     let eR ← mkAppS₂ relFn lhs rhs
     let rel₁ ← match h : eR with
       | .app fa@h':(.app f a) b => congrBin eR fa f a b r₁ r₂ h h'
       | _ => unreachable!
     let eC := rel₁.getResultExpr e
-    if !hasC then
+    bif !hasC then
       match rel₁ with
       | .rfl .. => return .normal
       | .step _ h .. => return .step e' h
@@ -2343,14 +2343,14 @@ private def normalizeDvdCore (e₁ dvdFn : Expr) (k : Int) (x : RingExpr) (p : P
   let c := polyConst p
   let q := divMonCoeffs g p
   let ctx ← mkContext ring.type vars
-  if c % g != 0 then
+  bif c % g != 0 then
     let h := mkApp7 (mkConst ``Grind.CommRing.dvd_norm_unsat_expr) ctx (toExpr k) (toExpr x) (toExpr q) (toExpr (g : Int)) (toExpr c) eagerReflBoolTrue
     let e' ← getFalseExpr
     return .step e' (mkExpectedPropHint h (mkPropEq e₁ e'))
   let k' := k / g
   let x' := (q.addConst (c / g)).toExpr
   let e' ← share (mkApp2 dvdFn (mkIntLit k') (← denoteRingExpr' vars x'))
-  if isSameExpr e' e₁ then return .normal
+  bif isSameExpr e' e₁ then return .normal
   let h := mkApp9 (mkConst ``Grind.CommRing.dvd_norm_expr) ctx (toExpr k) (toExpr x) (toExpr x') (toExpr k') (toExpr q) (toExpr (g : Int)) (toExpr c) eagerReflBoolTrue
   return .step e' (mkExpectedPropHint h (mkPropEq e₁ e'))
 
@@ -2380,7 +2380,7 @@ private def charAboveLimit (kind : Kind) (maxChar? : Option Nat) : m Bool := do
     | .commSemiring id => let r := s.rings[s.semirings[id]!.ringId]!; (r.charInst?, r.symbolicChar)
     | .ring id => let r := s.ncRings[id]!; (r.charInst?, r.symbolicChar)
     | .semiring id => let r := s.ncSemirings[id]!; (r.charInst?, r.symbolicChar)
-  if symbolicChar then return true
+  bif symbolicChar then return true
   let some (_, c) := charInst? | return false
   return c > maxChar
 
@@ -2396,16 +2396,16 @@ private def classifyKind? (α : Expr) : m (Option Kind) := do
 /-- The `normalize?` path for relations; `e` is `rel lhs rhs` with carrier `α`. -/
 private def normalizeRel? (v : Visitor m) (rel : RelKind) (α e lhs rhs : Expr) (lhsOnly distrib : Bool) (maxChar? : Option Nat) : m Result := do
   let some kind ← classifyKind? α | return .rfl
-  if (← charAboveLimit kind maxChar?) then return .rfl
+  bif (← charAboveLimit kind maxChar?) then return .rfl
   let order? ← match rel with
     | .eq => pure none
     | .le | .lt =>
       let some id ← classifyOrder? α | return .rfl
       let o := (← getArithState).orders[id]!
       unless o.orderedRingInst?.isSome do return .rfl
-      if rel == .lt then unless o.lawfulOrderLTInst?.isSome do return .rfl
+      bif rel == .lt then unless o.lawfulOrderLTInst?.isSome do return .rfl
       -- The relation's instance must be the classified one; compare the canonicalized prefix.
-      let fn := if rel == .le then o.leFn else o.ltFn?.get!
+      let fn := bif rel == .le then o.leFn else o.ltFn?.get!
       let ok ← runNormM kind do return isSameExpr fn (← canonExpr e.appFn!.appFn!)
       unless ok do return .rfl
       pure (some o)
@@ -2424,7 +2424,7 @@ private def normalizeRel? (v : Visitor m) (rel : RelKind) (α e lhs rhs : Expr) 
       | .lt, some o => o.ltFn?.get!
       | _, none => e₁.appFn!.appFn!
     -- In a field, the inverse pairs are those of `lhs - rhs`.
-    let (ainvs, cd) ← if (← liftNorm (isFieldKind kind)) then
+    let (ainvs, cd) ← bif (← liftNorm (isFieldKind kind)) then
         match (← runPoly (do SafePoly.combine nl.p (← SafePoly.mulConst (-1) nr.p) : PolyM Poly)) with
         | some pd => decideInvAtoms v pd
         | none => pure (#[], false)
@@ -2436,8 +2436,8 @@ private def normalizeRel? (v : Visitor m) (rel : RelKind) (α e lhs rhs : Expr) 
       normalizeRelCore rel relFn order? e₁ lhs₁ rhs₁ (nl.re.renameVars f) (nr.re.renameVars f)
         (renamePoly nl.p f comm) (renamePoly nr.p f comm) vars ainvs lhsOnly
     match r with
-    | .notApplicable => return if cd then r₀.withContextDependent else r₀
-    | .normal => return if cd then r₀.markAsDone.withContextDependent else r₀.markAsDone
+    | .notApplicable => return bif cd then r₀.withContextDependent else r₀
+    | .normal => return bif cd then r₀.markAsDone.withContextDependent else r₀.markAsDone
     | .step e' h₂ =>
       match r₀ with
       | .rfl _ cd₀ => return .step e' h₂ (done := true) (contextDependent := cd₀ || cd)
@@ -2463,7 +2463,7 @@ that asked for one is `contextDependent`. `distrib` is described at `normalize?`
 private def normalizeTerm? (v : Visitor m) (e : Expr) (distrib : Bool) (maxChar? : Option Nat) : m Result := do
   let some α := getArithType? e | return .rfl
   let some kind ← classifyKind? α | return .rfl
-  if (← charAboveLimit kind maxChar?) then
+  bif (← charAboveLimit kind maxChar?) then
     -- A cast of a numeral still becomes the numeral of the carrier, so that a numeral has one
     -- representation; everything else is left as written.
     let some (e₂, h) ← runNormM kind (mkCastLitStep? kind e) | return .rfl
@@ -2491,7 +2491,7 @@ otherwise (`IntSolver.lean`).
 -/
 private def normalizeDvd? (v : Visitor m) (e dvdFn arg : Expr) (k : Int) (distrib : Bool) (maxChar? : Option Nat) : m Result := do
   let some kind@(.commRing _) ← classifyKind? dvdFn.appFn!.appArg! | return .rfl
-  if (← charAboveLimit kind maxChar?) then return .rfl
+  bif (← charAboveLimit kind maxChar?) then return .rfl
   runNorm kind distrib do
     let n ← visit v arg
     let r₀ ← match h : e with
@@ -2518,7 +2518,7 @@ private def cancelNatSubCore (a b : Expr) (na nb : Node) : NormM (Option (Result
   let pa := renamePoly na.p f true
   let pb := renamePoly nb.p f true
   let c := commonPart pa pb
-  if c.isZero then return none
+  bif c.isZero then return none
   let a' := (pa.combine (c.mulConst (-1))).toExpr
   let b' := (pb.combine (c.mulConst (-1))).toExpr
   let sr ← getCommSemiring
@@ -2529,7 +2529,7 @@ private def cancelNatSubCore (a b : Expr) (na nb : Node) : NormM (Option (Result
     let x₁ := n.r.getResultExpr x
     let xC : RingExpr := .add x' c.toExpr
     let ex ← denote xC
-    if isSameExpr x₁ ex then return n.r
+    bif isSameExpr x₁ ex then return n.r
     let h := mkExpectedPropHint
       (mkApp6 (mkConst ``Grind.CommRing.eq_normS [sr.u]) sr.type sr.commSemiringInst ctx (toExpr (n.re.renameVars f)) (toExpr xC) eagerReflBoolTrue)
       (mkApp3 (mkConst ``Eq [sr.u.succ]) sr.type x₁ ex)
@@ -2616,9 +2616,9 @@ def normalize? [Monad m] [MonadLiftT SymM m] [MonadLiftT MetaM m] (e : Expr) (si
   | LE.le α _ lhs rhs => normalizeRel? v .le α e lhs rhs lhsOnly distrib maxChar?
   | LT.lt α _ lhs rhs => normalizeRel? v .lt α e lhs rhs lhsOnly distrib maxChar?
   | Dvd.dvd α _ k arg =>
-    if α.isConstOf ``Int then
+    bif α.isConstOf ``Int then
       if let some kv := (Sym.getIntValue? k).run then
-        if kv != 0 then
+        bif kv != 0 then
           return ← normalizeDvd? v e e.appFn!.appFn! arg kv distrib maxChar?
     normalizeTerm? v e distrib maxChar?
   | _ => normalizeTerm? v e distrib maxChar?

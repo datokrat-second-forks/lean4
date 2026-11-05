@@ -22,7 +22,7 @@ considerable overhead. We may use `evalExpr` as a fallback in the future.
 
 def checkExp (k : Nat) : OptionT SymM Unit := do
   let exp ← getExpThreshold
-  if k > exp then
+  bif k >ᵇ exp then
     reportIssue! "exponent {k} exceeds threshold for exponentiation `(exp := {exp})`"
     failure
 

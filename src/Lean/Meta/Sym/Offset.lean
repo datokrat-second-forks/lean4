@@ -134,7 +134,7 @@ private def isNatExpr (e : Expr) : Bool :=
   | _ => false
 
 def isNatValue? (e : Expr) : Option Nat :=
-  if isNatExpr e then
+  bif isNatExpr e then
     evalNat? e
   else
     none

@@ -24,16 +24,16 @@ def kronSatBits : Nat := 2 ^ 22
 
 /-- `a * b`, or a value of at least `2 ^ kronSatBits` if `a * b` is larger. -/
 def satMul (a b : Nat) : Nat :=
-  if a.log2 + b.log2 < kronSatBits then a * b else 2 ^ kronSatBits
+  bif a.log2 + b.log2 <ᵇ kronSatBits then a * b else 2 ^ kronSatBits
 
 /--
 `a ^ k`, or a value of at least `2 ^ kronSatBits` if `a ^ k` is larger. A saturated `a` stays
 saturated even for `k = 0`: the kernel still computes the estimate of the base.
 -/
 def satPow (a k : Nat) : Nat :=
-  if kronSatBits ≤ a.log2 then a
-  else if a ≤ 1 then a ^ k
-  else if k * a.log2 < kronSatBits then a ^ k else 2 ^ kronSatBits
+  bif kronSatBits ≤ᵇ a.log2 then a
+  else bif a ≤ᵇ 1 then a ^ k
+  else bif k * a.log2 <ᵇ kronSatBits then a ^ k else 2 ^ kronSatBits
 
 /-- The degree bound `Grind.CommRing.Expr.degB_k` of `e`. -/
 def exprDegB : RingExpr → Nat
@@ -55,23 +55,23 @@ def exprLin : RingExpr → Nat
 
 /-- `Grind.CommRing.Expr.linS_k e`: `exprLin e`, or at least `2` if `e` is not a semiring term. -/
 def exprLinS : RingExpr → Nat
-  | .num k => if k ≥ 0 then 0 else 2
+  | .num k => bif k ≥ᵇ 0 then 0 else 2
   | .natCast _ => 0
   | .var _ => 1
   | .intCast _ | .neg _ | .sub .. => 2
   | .add a b => exprLinS a ||| exprLinS b
   | .mul a b => exprLinS a + exprLinS b
-  | .pow a k => let d := exprLinS a; if 2 ≤ d then 2 else d * k
+  | .pow a k => let d := exprLinS a; bif 2 ≤ᵇ d then 2 else d * k
 
 /-- `Grind.CommRing.Expr.degS_k B e`: `exprDegB e`, or `B` if `e` is not a semiring term. -/
 def exprDegS (B : Nat) : RingExpr → Nat
-  | .num k => if k ≥ 0 then 0 else B
+  | .num k => bif k ≥ᵇ 0 then 0 else B
   | .natCast _ => 0
   | .var _ => 1
   | .intCast _ | .neg _ | .sub .. => B
   | .add a b => max (exprDegS B a) (exprDegS B b)
   | .mul a b => exprDegS B a + exprDegS B b
-  | .pow a k => let d := exprDegS B a; if B ≤ d then B else d * k
+  | .pow a k => let d := exprDegS B a; bif B ≤ᵇ d then B else d * k
 
 /--
 `true` if normalizing `e` multiplies out a sum: a product or power with a sum of nonconstant
@@ -126,7 +126,7 @@ def exprMaxCode (B : Nat) : RingExpr → Nat
   | .neg a => exprMaxCode B a
   | .add a b | .sub a b => max (exprMaxCode B a) (exprMaxCode B b)
   | .mul a b => exprMaxCode B a + exprMaxCode B b
-  | .pow a k => let c := exprMaxCode B a; if k = 0 then c else satMul c k
+  | .pow a k => let c := exprMaxCode B a; bif k =ᵇ 0 then c else satMul c k
 
 /--
 The exponent `K` of a Kronecker certificate whose coefficients are bounded by `norm` and whose
@@ -134,9 +134,9 @@ monomials have codes at most `maxCode`, if the values at the point stay below `m
 have about `K * maxCode` bits.
 -/
 def kronExponent? (norm maxCode maxBits : Nat) : Option Nat :=
-  if maxCode > maxBits then none else
+  bif maxCode >ᵇ maxBits then none else
   let K := (2 * norm).log2 + 1
-  if K * (maxCode + 1) > maxBits then none else some K
+  bif K * (maxCode + 1) >ᵇ maxBits then none else some K
 
 /--
 An upper bound on the codes of the values of `e` and its subterms at the point of the linear
@@ -150,14 +150,14 @@ def exprLinCode : RingExpr → Nat
   | .neg a => exprLinCode a
   | .add a b | .sub a b => max (exprLinCode a) (exprLinCode b)
   | .mul a b => exprLinCode a + exprLinCode b
-  | .pow a k => let c := exprLinCode a; if k = 0 then c else satMul c k
+  | .pow a k => let c := exprLinCode a; bif k =ᵇ 0 then c else satMul c k
 
 /--
 The exponent `K` of the linear Kronecker certificate (`Grind.CommRing.Expr.eq_of_kronLin`) for
 `l` and `r`, if they are linear and the values at the point stay below `maxBits` bits.
 -/
 def kronLinExponent? (l r : RingExpr) (maxBits : Nat) : Option Nat :=
-  if exprLin l ≤ 1 && exprLin r ≤ 1 then
+  bif exprLin l ≤ᵇ 1 && exprLin r ≤ᵇ 1 then
     kronExponent? (exprMajorant l + exprMajorant r) (max (exprLinCode l) (exprLinCode r)) maxBits
   else
     none
@@ -166,7 +166,7 @@ def kronLinExponent? (l r : RingExpr) (maxBits : Nat) : Option Nat :=
 def invLookup (invs : List (Var × Nat)) (x : Var) : Option Nat :=
   match invs with
   | [] => none
-  | (y, c) :: invs => if x < y then none else if y == x then some c else invLookup invs x
+  | (y, c) :: invs => bif x <ᵇ y then none else bif y == x then some c else invLookup invs x
 
 /--
 The coefficient bound and the denominator `Grind.CommRing.Expr.majQ_k` of `e`, where the variables
@@ -204,15 +204,15 @@ where
   /-- `exprMaxCode`, where the variables of `invs` are constants. -/
   go (B : Nat) : RingExpr → Nat
     | .num _ | .natCast _ | .intCast _ => 0
-    | .var x => if (invLookup invs x).isSome then 0 else satPow B x
+    | .var x => bif (invLookup invs x).isSome then 0 else satPow B x
     | .neg a => go B a
     | .add a b | .sub a b => max (go B a) (go B b)
     | .mul a b => go B a + go B b
-    | .pow a k => let c := go B a; if k = 0 then c else satMul c k
+    | .pow a k => let c := go B a; bif k =ᵇ 0 then c else satMul c k
   /-- `exprDegB`, where the variables of `invs` are constants (`Grind.CommRing.Expr.degQB_k`). -/
   deg : RingExpr → Nat
     | .num _ | .natCast _ | .intCast _ => 0
-    | .var x => if (invLookup invs x).isSome then 0 else 1
+    | .var x => bif (invLookup invs x).isSome then 0 else 1
     | .neg a => deg a
     | .add a b | .sub a b => max (deg a) (deg b)
     | .mul a b => deg a + deg b
@@ -221,7 +221,7 @@ where
 /-- `Grind.CommRing.Expr.degQL_k`: `exprLin`, where the variables of `invs` are constants. -/
 def exprDegQL (invs : List (Var × Nat)) : RingExpr → Nat
   | .num _ | .natCast _ | .intCast _ => 0
-  | .var x => if (invLookup invs x).isSome then 0 else 1
+  | .var x => bif (invLookup invs x).isSome then 0 else 1
   | .neg a => exprDegQL invs a
   | .add a b | .sub a b => exprDegQL invs a ||| exprDegQL invs b
   | .mul a b => exprDegQL invs a + exprDegQL invs b
@@ -232,7 +232,7 @@ The exponent `K` of the linear field certificate (`Grind.CommRing.Expr.eq_of_kro
 and `r`, if they are linear in the variables not in `invs` and the values stay below `maxBits` bits.
 -/
 def kronQLinExponent? (l r : RingExpr) (invs : List (Var × Nat)) (maxBits : Nat) : Option Nat :=
-  if exprDegQL invs l ≤ 1 && exprDegQL invs r ≤ 1 then
+  bif exprDegQL invs l ≤ᵇ 1 && exprDegQL invs r ≤ᵇ 1 then
     let (ml, dl) := exprMajQ invs l
     let (mr, dr) := exprMajQ invs r
     kronExponent? (satMul dr ml + satMul dl mr) (max (maxVar l) (maxVar r)) maxBits
@@ -242,10 +242,10 @@ where
   /-- `exprLinCode`, where the variables of `invs` are constants. -/
   maxVar : RingExpr → Nat
     | .num _ | .natCast _ | .intCast _ => 0
-    | .var x => if (invLookup invs x).isSome then 0 else x + 1
+    | .var x => bif (invLookup invs x).isSome then 0 else x + 1
     | .neg a => maxVar a
     | .add a b | .sub a b => max (maxVar a) (maxVar b)
     | .mul a b => maxVar a + maxVar b
-    | .pow a k => let c := maxVar a; if k = 0 then c else satMul c k
+    | .pow a k => let c := maxVar a; bif k =ᵇ 0 then c else satMul c k
 
 end Lean.Meta.Sym.Arith

@@ -17,7 +17,7 @@ Preprocesses types that used for pattern matching and unification.
 public def preprocessType (type : Expr) (zetaReduceLHSOnly := false) (zetaDelta := false) : MetaM Expr := do
   let type ← Sym.unfoldReducible type
   let type ← Core.betaReduce type
-  let type ← if zetaReduceLHSOnly then
+  let type ← bif zetaReduceLHSOnly then
     forallTelescope type fun xs body => do
       match_expr body with
       | f@Eq α lhs rhs => mkForallFVars xs <| mkApp3 f α (← zetaReduce lhs (zetaDelta := zetaDelta)) rhs
@@ -39,10 +39,10 @@ public def mkProofInstArgInfo? (xs : Array Expr) : MetaM (Option ProofInstInfo) 
     let type ← Meta.inferType x
     let isInstance := isClass? env type |>.isSome
     let isProof ← isProp type
-    if isInstance || isProof then
+    bif isInstance || isProof then
       found := true
     argsInfo := argsInfo.push { isInstance, isProof }
-  if found then
+  bif found then
     return some { argsInfo }
   else
     return none

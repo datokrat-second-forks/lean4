@@ -23,7 +23,7 @@ Simplifies a non-dependent `if-then-else` expression.
 -/
 def simpIte : Simproc := fun e => do
   let numArgs := e.getAppNumArgs
-  if numArgs < 5 then return .rfl (done := true)
+  bif numArgs <ᵇ 5 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 5) fun e => do
     let_expr f@ite α c inst a b := e | return .rfl
     -- **cd propagation**: `cd` from `simp c` is propagated to ALL branches.
@@ -33,16 +33,16 @@ def simpIte : Simproc := fun e => do
     -- because in another context `simp c` might not return `.rfl` at all.
     match (← simp c) with
     | .rfl _ cd =>
-      if (← isTrueExpr c) then
+      bif (← isTrueExpr c) then
         return .step a (mkApp4 (mkConst ``ite_true f.constLevels!) α inst a b) (contextDependent := cd)
-      else if (← isFalseExpr  c) then
+      else bif (← isFalseExpr  c) then
         return .step b (mkApp4 (mkConst ``ite_false f.constLevels!) α inst a b) (contextDependent := cd)
       else
         return mkRflResult (done := true) (contextDependent := cd)
     | .step c' h _ cd =>
-      if (← isTrueExpr c') then
+      bif (← isTrueExpr c') then
         return .step a (mkApp (e.replaceFn ``ite_eq_left_of_eq_true) h) (contextDependent := cd)
-      else if (← isFalseExpr c') then
+      else bif (← isFalseExpr c') then
         return .step b (mkApp (e.replaceFn ``ite_eq_right_of_eq_false) h) (contextDependent := cd)
       else
         let .some inst' ← trySynthInstance (mkApp (mkConst ``Decidable) c') | return .rfl
@@ -57,26 +57,26 @@ Simplifies a dependent `if-then-else` expression.
 -/
 def simpDIte : Simproc := fun e => do
   let numArgs := e.getAppNumArgs
-  if numArgs < 5 then return .rfl (done := true)
+  bif numArgs <ᵇ 5 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 5) fun e => do
     let_expr f@dite α c inst a b := e | return .rfl
     -- See `simpIte` for why `cd` is propagated to all branches.
     match (← simp c) with
     | .rfl _ cd =>
-      if (← isTrueExpr c) then
+      bif (← isTrueExpr c) then
         let a' ← share <| a.betaRev #[mkConst ``True.intro]
         return .step a' (mkApp4 (mkConst ``dite_true f.constLevels!) α inst a b) (contextDependent := cd)
-      else if (← isFalseExpr c) then
+      else bif (← isFalseExpr c) then
         let b' ← share <| b.betaRev #[mkConst ``not_false]
         return .step b' (mkApp4 (mkConst ``dite_false f.constLevels!) α inst a b) (contextDependent := cd)
       else
         return mkRflResult (done := true) (contextDependent := cd)
     | .step c' h _ cd =>
-      if (← isTrueExpr c') then
+      bif (← isTrueExpr c') then
         let h' ← shareCommon <| mkOfEqTrueCore c h
         let a ← share <| a.betaRev #[h']
         return .step a (mkApp (e.replaceFn ``dite_eq_left_of_eq_true) h) (contextDependent := cd)
-      else if (← isFalseExpr c') then
+      else bif (← isFalseExpr c') then
         let h' ← shareCommon <| mkOfEqFalseCore c h
         let b ← share <| b.betaRev #[h']
         return .step b (mkApp (e.replaceFn ``dite_eq_right_of_eq_false) h) (contextDependent := cd)
@@ -97,25 +97,25 @@ Simplifies a `UDecidable.ite` expression. A rewritten condition `c'` gets the in
 -/
 def simpUIte : Simproc := fun e => do
   let numArgs := e.getAppNumArgs
-  if numArgs < 5 then return .rfl (done := true)
+  bif numArgs <ᵇ 5 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 5) fun e => do
     let_expr f@UDecidable.ite α c inst a b := e | return .rfl
     -- See `simpIte` for why `cd` is propagated to all branches.
     match (← simp c) with
     | .rfl _ cd =>
-      if (← isTrueExpr c) then
+      bif (← isTrueExpr c) then
         return .step a (mkApp4 (mkConst ``UDecidable.ite_true f.constLevels!) inst α a b) (contextDependent := cd)
-      else if (← isFalseExpr c) then
+      else bif (← isFalseExpr c) then
         return .step b (mkApp4 (mkConst ``UDecidable.ite_false f.constLevels!) inst α a b) (contextDependent := cd)
       else
         return mkRflResult (done := true) (contextDependent := cd)
     | .step c' h _ cd =>
-      if (← isTrueExpr c') then
+      bif (← isTrueExpr c') then
         return .step a (mkApp (e.replaceFn ``UDecidable.ite_eq_left_of_eq_true) h) (contextDependent := cd)
-      else if (← isFalseExpr c') then
+      else bif (← isFalseExpr c') then
         return .step b (mkApp (e.replaceFn ``UDecidable.ite_eq_right_of_eq_false) h) (contextDependent := cd)
       else
-        if (← getConfig).fixUDecidableInsts then return .rfl
+        bif (← getConfig).fixUDecidableInsts then return .rfl
         let inst' ← shareCommon (mkApp (mkConst ``UDecidable.classical) c')
         let e' := e.getBoundedAppFn 4
         let e' ← mkAppS₄ e' c' inst' a b
@@ -127,31 +127,31 @@ Simplifies a `UDecidable.dite` expression. See `simpUIte` for the instance of a 
 -/
 def simpUDIte : Simproc := fun e => do
   let numArgs := e.getAppNumArgs
-  if numArgs < 5 then return .rfl (done := true)
+  bif numArgs <ᵇ 5 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 5) fun e => do
     let_expr f@UDecidable.dite α c inst a b := e | return .rfl
     -- See `simpIte` for why `cd` is propagated to all branches.
     match (← simp c) with
     | .rfl _ cd =>
-      if (← isTrueExpr c) then
+      bif (← isTrueExpr c) then
         let a' ← share <| a.betaRev #[mkConst ``trivial]
         return .step a' (mkApp4 (mkConst ``UDecidable.dite_true f.constLevels!) inst α a b) (contextDependent := cd)
-      else if (← isFalseExpr c) then
+      else bif (← isFalseExpr c) then
         let b' ← share <| b.betaRev #[mkApp (mkConst ``id [.zero]) (mkConst ``False)]
         return .step b' (mkApp4 (mkConst ``UDecidable.dite_false f.constLevels!) inst α a b) (contextDependent := cd)
       else
         return mkRflResult (done := true) (contextDependent := cd)
     | .step c' h _ cd =>
-      if (← isTrueExpr c') then
+      bif (← isTrueExpr c') then
         let h' ← shareCommon <| mkOfEqTrueCore c h
         let a ← share <| a.betaRev #[h']
         return .step a (mkApp (e.replaceFn ``Sym.udite_eq_left_of_eq_true) h) (contextDependent := cd)
-      else if (← isFalseExpr c') then
+      else bif (← isFalseExpr c') then
         let h' ← shareCommon <| mkOfEqFalseCore c h
         let b ← share <| b.betaRev #[h']
         return .step b (mkApp (e.replaceFn ``Sym.udite_eq_right_of_eq_false) h) (contextDependent := cd)
       else
-        if (← getConfig).fixUDecidableInsts then return .rfl
+        bif (← getConfig).fixUDecidableInsts then return .rfl
         let inst' ← shareCommon (mkApp (mkConst ``UDecidable.classical) c')
         let e' := e.getBoundedAppFn 4
         let h ← shareCommon h
@@ -166,22 +166,22 @@ Simplifies a `cond` expression (aka Boolean `if-then-else`).
 -/
 public def simpCond : Simproc := fun e => do
   let numArgs := e.getAppNumArgs
-  if numArgs < 4 then return .rfl (done := true)
+  bif numArgs <ᵇ 4 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 4) fun e => do
     let_expr f@cond α c a b := e | return .rfl
     -- See `simpIte` for why `cd` is propagated to all branches.
     match (← simp c) with
     | .rfl _ cd =>
-      if isSameExpr c (← getBoolTrueExpr) then
+      bif isSameExpr c (← getBoolTrueExpr) then
         return .step a (mkApp3 (mkConst ``cond_true f.constLevels!) α a b) (contextDependent := cd)
-      else if isSameExpr c (← getBoolFalseExpr) then
+      else bif isSameExpr c (← getBoolFalseExpr) then
         return .step b (mkApp3 (mkConst ``cond_false f.constLevels!) α a b) (contextDependent := cd)
       else
         return mkRflResult (done := true) (contextDependent := cd)
     | .step c' h _ cd =>
-      if isSameExpr c' (← getBoolTrueExpr) then
+      bif isSameExpr c' (← getBoolTrueExpr) then
         return .step a (mkApp (e.replaceFn ``Sym.cond_cond_eq_true) h) (contextDependent := cd)
-      else if isSameExpr c' (← getBoolFalseExpr) then
+      else bif isSameExpr c' (← getBoolFalseExpr) then
         return .step b (mkApp (e.replaceFn ``Sym.cond_cond_eq_false) h) (contextDependent := cd)
       else
         let e' := e.getBoundedAppFn 3
@@ -194,7 +194,7 @@ Simplifies a `Bool.dcond` expression (aka dependent Boolean `if-then-else`).
 -/
 public def simpDCond : Simproc := fun e => do
   let numArgs := e.getAppNumArgs
-  if numArgs < 4 then return .rfl (done := true)
+  bif numArgs <ᵇ 4 then return .rfl (done := true)
   propagateOverApplied e (numArgs - 4) fun e => do
     let_expr f@Bool.dcond α c a b := e | return .rfl
     -- See `simpIte` for why `cd` is propagated to all branches.
@@ -202,20 +202,20 @@ public def simpDCond : Simproc := fun e => do
     let boolFalse ← getBoolFalseExpr
     match (← simp c) with
     | .rfl _ cd =>
-      if isSameExpr c boolTrue then
+      bif isSameExpr c boolTrue then
         let a' ← share <| a.betaRev #[mkApp2 (mkConst ``rfl [Level.one]) (mkConst ``Bool) c]
         return .step a' (mkApp3 (mkConst ``Bool.dcond_true f.constLevels!) α a b) (contextDependent := cd)
-      else if isSameExpr c boolFalse then
+      else bif isSameExpr c boolFalse then
         let b' ← share <| b.betaRev #[mkApp2 (mkConst ``rfl [Level.one]) (mkConst ``Bool) c]
         return .step b' (mkApp3 (mkConst ``Bool.dcond_false f.constLevels!) α a b) (contextDependent := cd)
       else
         return mkRflResult (done := true) (contextDependent := cd)
     | .step c' h _ cd =>
-      if isSameExpr c' boolTrue then
+      bif isSameExpr c' boolTrue then
         let h ← shareCommon h
         let a ← share <| a.betaRev #[h]
         return .step a (mkApp (e.replaceFn ``Sym.dcond_cond_eq_true) h) (contextDependent := cd)
-      else if isSameExpr c' boolFalse then
+      else bif isSameExpr c' boolFalse then
         let h ← shareCommon h
         let b ← share <| b.betaRev #[h]
         return .step b (mkApp (e.replaceFn ``Sym.dcond_cond_eq_false) h) (contextDependent := cd)
@@ -253,19 +253,19 @@ Simplifies control-flow expressions such as `if-then-else` and `match` expressio
 It visits only the conditions and discriminants.
 -/
 public def simpControl : Simproc := fun e => do
-  if !e.isApp then return .rfl
+  bif !e.isApp then return .rfl
   let .const declName _ := e.getAppFn | return .rfl
-  if declName == ``ite then
+  bif declName == ``ite then
     simpIte e
-  else if declName == ``cond then
+  else bif declName == ``cond then
     simpCond e
-  else if declName == ``Bool.dcond then
+  else bif declName == ``Bool.dcond then
     simpDCond e
-  else if declName == ``dite then
+  else bif declName == ``dite then
     simpDIte e
-  else if declName == ``UDecidable.ite then
+  else bif declName == ``UDecidable.ite then
     simpUIte e
-  else if declName == ``UDecidable.dite then
+  else bif declName == ``UDecidable.dite then
     simpUDIte e
   else
     simpMatch declName e

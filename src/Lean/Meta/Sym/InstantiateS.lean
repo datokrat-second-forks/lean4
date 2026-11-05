@@ -16,17 +16,17 @@ It assumes the input is maximally shared, and ensures the output is too.
 It assumes `beginIdx ≤ endIdx` and `endIdx ≤ subst.size`
 -/
 public def instantiateRevRangeS (e : Expr) (beginIdx endIdx : Nat) (subst : Array Expr) : SymM Expr :=
-  if !e.hasLooseBVars then pure e else
-  if _ : beginIdx > endIdx then unreachable! else
-  if _ : endIdx > subst.size then unreachable! else
+  bif !e.hasLooseBVars then pure e else
+  bif _ : beginIdx >ᵇ endIdx then unreachable! else
+  bif _ : endIdx >ᵇ subst.size then unreachable! else
   let s := beginIdx
   let n := endIdx - beginIdx
   replaceS e fun e offset => do
     let s₁ := s + offset
     match e with
     | .bvar idx =>
-      if _h : idx >= s₁ then
-        if _h : idx < offset + n then
+      bif _h : idx ≥ᵇ s₁ then
+        bif _h : idx <ᵇ offset + n then
           let v := subst[n - (idx - offset) - 1]
           liftLooseBVarsS' v 0 offset
         else
@@ -36,7 +36,7 @@ public def instantiateRevRangeS (e : Expr) (beginIdx endIdx : Nat) (subst : Arra
     | .lit _ | .mvar _ | .fvar _ | .const _ _ | .sort _ =>
       return some e
     | _ =>
-      if s₁ >= e.looseBVarRange then
+      bif s₁ ≥ᵇ e.looseBVarRange then
         return some e
       else
         return none
@@ -54,14 +54,14 @@ It assumes the input is maximally shared, and ensures the output is too.
 It assumes `beginIdx ≤ endIdx` and `endIdx ≤ subst.size`
 -/
 def instantiateRangeS' (e : Expr) (beginIdx endIdx : Nat) (subst : Array Expr) : AlphaShareBuilderM Expr :=
-  if _ : beginIdx > endIdx then unreachable! else
-  if _ : endIdx > subst.size then unreachable! else
+  bif _ : beginIdx >ᵇ endIdx then unreachable! else
+  bif _ : endIdx >ᵇ subst.size then unreachable! else
   let n := endIdx - beginIdx
   replaceS' e fun e offset => do
     match e with
     | .bvar idx =>
-      if _h : idx >= offset then
-        if _h : idx < offset + n then
+      bif _h : idx ≥ᵇ offset then
+        bif _h : idx <ᵇ offset + n then
           let v := subst[beginIdx + idx - offset]
           liftLooseBVarsS' v 0 offset
         else
@@ -71,7 +71,7 @@ def instantiateRangeS' (e : Expr) (beginIdx endIdx : Nat) (subst : Array Expr) :
     | .lit _ | .mvar _ | .fvar _ | .const _ _ | .sort _ =>
       return some e
     | _ =>
-      if offset >= e.looseBVarRange then
+      bif offset ≥ᵇ e.looseBVarRange then
         return some e
       else
         return none
@@ -89,14 +89,14 @@ public def instantiateS  (e : Expr) (subst : Array Expr) : SymM Expr :=
 
 /-- Internal variant of `betaRevS` that runs in `AlphaShareBuilderM`. -/
 partial def betaRevS' (f : Expr) (revArgs : Array Expr) : AlphaShareBuilderM Expr :=
-  if revArgs.size == 0 then
+  bif revArgs.size == 0 then
     return f
   else
     let sz := revArgs.size
     let rec go (e : Expr) (i : Nat) : AlphaShareBuilderM Expr := do
       match e with
       | .lam _ _ b _ =>
-        if i + 1 < sz then
+        bif i + 1 <ᵇ sz then
           go b (i+1)
         else
           instantiateS' b revArgs
@@ -116,13 +116,13 @@ def save (key : ExprPtr × Nat) (r : Expr) : M Expr := do
 
 /-- Internal variant of `instantiateRevBetaS` that runs in `AlphaShareBuilderM`. -/
 partial def instantiateRevBetaS' (e : Expr) (subst : Array Expr) : AlphaShareBuilderM Expr := do
-  if subst.isEmpty || !e.hasLooseBVars then return e
+  bif subst.isEmpty || !e.hasLooseBVars then return e
   visit e 0 |>.run' {}
 where
   visitBVar (e : Expr) (bidx : Nat) (offset : Nat) : M Expr := do
     let n := subst.size
-    if _h : bidx >= offset then
-      if _h : bidx < offset + n then
+    bif _h : bidx ≥ᵇ offset then
+      bif _h : bidx <ᵇ offset + n then
         let v := subst[n - (bidx - offset) - 1]
         liftLooseBVarsS' v 0 offset
       else
@@ -131,7 +131,7 @@ where
       return e
 
   visitChild (e : Expr) (offset : Nat) : M Expr := do
-    if offset >= e.looseBVarRange then
+    bif offset ≥ᵇ e.looseBVarRange then
       return e
     else
       let key := (⟨e⟩, offset)
@@ -159,7 +159,7 @@ where
       visitAppBeta e f (argsRev.push a') offset (modified || !isSameExpr a a')
     | .bvar bidx =>
       let f' ← visitBVar f bidx offset
-      if modified || !isSameExpr f f' then
+      bif modified || !isSameExpr f f' then
         betaRevS' f' argsRev
       else
         return e
@@ -167,7 +167,7 @@ where
 
   visitApp (e : Expr) (f : Expr) (arg : Expr) (offset : Nat) (_ : e = .app f arg) : M Expr := do
     let arg' ← visitChild arg offset
-    if f.getAppFn.isBVar then
+    bif f.getAppFn.isBVar then
       visitAppBeta e f #[arg'] offset (!isSameExpr arg arg')
     else
       e.updateAppS! (← visitAppDefault f offset) arg'
@@ -199,7 +199,7 @@ With `instantiateRevBetaS`, the type of `?h` becomes `p ?w ∧ q ?w` instead of
 `(fun x => p x ∧ q x) ?w`.
 -/
 public def instantiateRevBetaS (e : Expr) (subst : Array Expr) : SymM Expr := do
-  if !e.hasLooseBVars || subst.isEmpty then return e
+  bif !e.hasLooseBVars || subst.isEmpty then return e
   else liftBuilderM <| instantiateRevBetaS' e subst
 
 /--

@@ -172,7 +172,7 @@ where
     | .forallE _ d b _
     | .lam _ d b _ => go d offset false ∘ go b (offset+1) false
     | .bvar idx => fun mask =>
-      if idx >= offset && !isArg then
+      bif idx ≥ᵇ offset && !isArg then
         let idx := idx - offset
         mask.set! (mask.size - idx - 1) true
       else
@@ -181,7 +181,7 @@ where
 def mkPatternCore (type : Expr) (levelParams : List Name) (varTypes : Array Expr) (pattern : Expr) : MetaM Pattern := do
   let fnInfos ← mkProofInstInfoMapFor pattern
   let checkTypeMask := mkCheckTypeMask pattern varTypes.size
-  let checkTypeMask? := if checkTypeMask.all (· == false) then none else some checkTypeMask
+  let checkTypeMask? := bif checkTypeMask.all (· == false) then none else some checkTypeMask
   let varInfos? ← forallBoundedTelescope type varTypes.size fun xs _ =>
     mkProofInstArgInfo? xs
   return { levelParams, varTypes, pattern, fnInfos, varInfos?, checkTypeMask? }
@@ -190,7 +190,7 @@ def mkPatternFromType (levelParams : List Name) (type : Expr) (num? : Option Nat
   let hugeNumber := 10000000
   let num := num?.getD hugeNumber
   let rec go (i : Nat) (pattern : Expr) (varTypes : Array Expr) : MetaM Pattern := do
-    if i < num then
+    bif i <ᵇ num then
       if let .forallE _ d b _ := pattern then
         return (← go (i+1) b (varTypes.push d))
     mkPatternCore type levelParams varTypes pattern
@@ -318,20 +318,20 @@ def pushCheckTypePending (i : Nat) : UnifyM Unit :=
 def assignExprIfUnassigned (bidx : Nat) (e : Expr) : UnifyM Unit := do
   let s ← get
   let i := s.eAssignment.size - bidx - 1
-  if s.eAssignment[i]!.isNone then
+  bif s.eAssignment[i]!.isNone then
     modify fun s => { s with eAssignment := s.eAssignment.set! i (some e) }
 
 def assignExpr (bidx : Nat) (e : Expr) : UnifyM Bool := do
   let s ← get
   let i := s.eAssignment.size - bidx - 1
   if let some e' := s.eAssignment[i]! then
-    if isSameExpr e e' then return true
+    bif isSameExpr e e' then return true
     else
       pushPending e' e
       return true
   else
     modify fun s => { s with eAssignment := s.eAssignment.set! i (some e) }
-    if (← read).pattern.checkTypeMask?.isSome then
+    bif (← read).pattern.checkTypeMask?.isSome then
       pushCheckTypePending i
     return true
 
@@ -353,7 +353,7 @@ where
     | .max u₁ u₂ | .imax u₁ u₂ => go u₁ || go u₂
     | .param name =>
       let some uidx := isUVar? name | return false
-      if h : uidx < assignment.size then return assignment[uidx].isSome
+      bif h : uidx <ᵇ assignment.size then return assignment[uidx].isSome
       return false
     | _ => false
 
@@ -368,7 +368,7 @@ where
     | .imax u₁ u₂ => return .imax (go u₁) (go u₂)
     | .param name =>
       let some uidx := isUVar? name | return u
-      if h : uidx < assignment.size then
+      bif h : uidx <ᵇ assignment.size then
         let some v := assignment[uidx] | return u
         return v
       else
@@ -397,7 +397,7 @@ def tryApproxSelfMax (u v : Level) : UnifyM Bool := do
   | _ => return false
 where
   solve (v' : Level) (uidx : Nat) : UnifyM Bool := do
-    if v == v' then
+    bif v == v' then
       assignLevel uidx v
     else
       return false
@@ -430,7 +430,7 @@ Returns `true` and add `u =?= v` to pending list IF
 def tryPostponeMaxCnstr (u : Level) (v : Level) : UnifyM Bool := do
   match u with
   | .max u₁ u₂ | .imax u₁ u₂ =>
-    if hasUVar u₁ || hasUVar u₂ then
+    bif hasUVar u₁ || hasUVar u₂ then
       pushLevelPending u v
       return true
     return false
@@ -459,28 +459,28 @@ where
     | .imax _ u, .zero => go u .zero
     | .max u₁ u₂, .max v₁ v₂ =>
       -- tryApproxMaxMax: find a shared concrete arg between both sides
-      if u₂ == v₁ then go u₁ v₂
-      else if u₁ == v₂ then go u₂ v₁
+      bif u₂ == v₁ then go u₁ v₂
+      else bif u₁ == v₂ then go u₂ v₁
       else go u₁ v₁ <&&> go u₂ v₂
     | .imax u₁ u₂, .imax v₁ v₂ => go u₁ v₁ <&&> go u₂ v₂
     | .param uName, _ =>
       if let some uidx := isUVar? uName then
         assignLevel uidx v
-      else if u == v then
+      else bif u == v then
         return true
-      else if v.isMVar && (← read).unify then
+      else bif v.isMVar && (← read).unify then
         pushLevelPending u v
         return true
       else
         return false
     | .mvar _, _ | _, .mvar _ =>
-      if (← read).unify then
+      bif (← read).unify then
         pushLevelPending u v
         return true
       else
         return false
     | _, _ =>
-      if (← tryApproxSelfMax u v) then
+      bif (← tryApproxSelfMax u v) then
         return true
       if let .succ u := u then
         if let some v := decLevel? v then
@@ -488,7 +488,7 @@ where
       if let .succ v := v then
         if let some u := decLevel? u then
           return (← go u v)
-      if (← tryPostponeMaxCnstr u v) then
+      bif (← tryPostponeMaxCnstr u v) then
         return true
       return false
 
@@ -526,9 +526,9 @@ def isQuasiOffsetCnstr (p : Expr) (e : Expr) : Bool :=
 partial def process (p : Expr) (e : Expr) : UnifyM Bool := do
   -- A pattern subterm internalized into the same table as the target shares its pointer, so a
   -- pointer match is a closed term equal to the target with no variables left to bind.
-  if isSameExpr p e then return true
+  bif isSameExpr p e then return true
   let e' := etaReduce e |>.consumeMData
-  if !isSameExpr e e' then
+  bif !isSameExpr e e' then
     -- **Note**: We eagerly eta reduce patterns and consume mdata
     process p e'
   else match p with
@@ -558,9 +558,9 @@ partial def process (p : Expr) (e : Expr) : UnifyM Bool := do
   | .letE .. => unreachable!
 where
   checkMVar (p : Expr) (e : Expr) : UnifyM Bool := do
-    if (← isAssignedMVar e) then
+    bif (← isAssignedMVar e) then
       process p (← instantiateMVarsS e)
-    else if (← read).unify && e.getAppFn.isMVar then
+    else bif (← read).unify && e.getAppFn.isMVar then
       pushPending p e
       return true
     else
@@ -577,19 +577,19 @@ where
     match p, e with
     | .num _, .num _ => unreachable!
     | .num k₁, .add e k₂ =>
-      if k₁ < k₂ then return false
+      bif k₁ <ᵇ k₂ then return false
       process (mkNatLit (k₁ - k₂)) e
     | .add p k₁, .num k₂ =>
-      if k₂ < k₁ then return false
+      bif k₂ <ᵇ k₁ then return false
       process p (← share (mkNatLit (k₂ - k₁)))
     | .add p k₁, .add e k₂ =>
-      if k₁ == k₂ then
+      bif k₁ == k₂ then
         process p e
-      else if k₁ < k₂ then
-        if k₁ == 0 then return false
+      else bif k₁ <ᵇ k₂ then
+        bif k₁ == 0 then return false
         process p (← share (mkNatAdd e (mkNatLit (k₂ - k₁))))
       else
-        if k₂ == 0 then return false
+        bif k₂ == 0 then return false
         process (mkNatAdd p (mkNatLit (k₁ - k₂))) e
 
   processConstApp (declName : Name) (p : Expr) (e : Expr) : UnifyM Bool := do
@@ -600,11 +600,11 @@ where
   processApp (p : Expr) (e : Expr) : UnifyM Bool := withIncRecDepth do
     let f := p.getAppFn
     let .const declName _ := f | processAppDefault p e
-    if (← processConstApp declName p e) then
+    bif (← processConstApp declName p e) then
       return true
     else if let some p' := isOffset?' declName p then
       processOffset p' (toOffset e)
-    else if isQuasiOffsetCnstr p e then
+    else bif isQuasiOffsetCnstr p e then
       -- Postpone: constraint may become an offset one after pattern variables are assigned.
       pushPending p e
       return true
@@ -614,18 +614,18 @@ where
       return false
 
   processAppWithInfo (p : Expr) (e : Expr) (i : Nat) (info : ProofInstInfo) : UnifyM Bool := do
-    let .app fp ap := p | if e.isApp then return false else process p e
+    let .app fp ap := p | bif e.isApp then return false else process p e
     let .app fe ae := e.consumeMData | checkLetVar p e
     unless (← processAppWithInfo fp fe (i - 1) info) do return false
-    if h : i < info.argsInfo.size then
+    bif h : i <ᵇ info.argsInfo.size then
       let argInfo := info.argsInfo[i]
-      if argInfo.isInstance then
+      bif argInfo.isInstance then
         if let .bvar bidx := ap then
           assignExprIfUnassigned bidx ae
         else
           pushInstPending ap ae
         return true
-      else if argInfo.isProof then
+      else bif argInfo.isProof then
         if let .bvar bidx := ap then
           assignExprIfUnassigned bidx ae
         return true
@@ -635,7 +635,7 @@ where
       process ap ae
 
   processAppDefault (p : Expr) (e : Expr) : UnifyM Bool := do
-    let .app fp ap := p | if e.isApp then return false else process p e
+    let .app fp ap := p | bif e.isApp then return false else process p e
     let .app fe ae := e.consumeMData | checkLetVar p e
     unless (← processAppDefault fp fe) do return false
     process ap ae
@@ -678,7 +678,7 @@ partial def isLevelDefEqS (u : Level) (v : Level) : MetaM Bool := do
     -/
     let u' ← substAssignedMVarsAndNormalize u
     let v' ← substAssignedMVarsAndNormalize v
-    if u' != u || v' != v then isLevelDefEqS u' v'
+    bif u' != u || v' != v then isLevelDefEqS u' v'
     else k
   match u, v with
   | .param u, .param v => return u == v
@@ -691,12 +691,12 @@ partial def isLevelDefEqS (u : Level) (v : Level) : MetaM Bool := do
   | .zero, .imax _ v => isLevelDefEqS .zero v
   | .imax _ u, .zero => isLevelDefEqS u .zero
   | .max u₁ u₂, .max v₁ v₂ =>
-    if u₂ == v₁ then isLevelDefEqS u₁ v₂
-    else if u₁ == v₂ then isLevelDefEqS u₂ v₁
+    bif u₂ == v₁ then isLevelDefEqS u₁ v₂
+    else bif u₁ == v₂ then isLevelDefEqS u₂ v₁
     else tryNormalizeFirst (isLevelDefEqS u₁ v₁ <&&> isLevelDefEqS u₂ v₂)
   | .imax u₁ u₂, .imax v₁ v₂ => isLevelDefEqS u₁ v₁ <&&> isLevelDefEqS u₂ v₂
   | _, _ =>
-    if (← tryAssignLevelMVar u v <||> tryAssignLevelMVar v u) then
+    bif (← tryAssignLevelMVar u v <||> tryAssignLevelMVar v u) then
       return true
     else
       tryNormalizeFirst (return false)
@@ -789,7 +789,7 @@ When `unify` is `false`, only metavariables in `mvarsNew` can be assigned. That 
 only metavariables associated with pattern variables can be assigned.
 -/
 def isAssignableMVar (mvarId : MVarId) : DefEqM Bool := do
-  if (← read).unify then
+  bif (← read).unify then
     -- Use default condition
     return !(← mvarId.isReadOnlyOrSyntheticOpaque)
   else
@@ -816,7 +816,7 @@ Examples:
 -/
 def isMillerPatternArgs (e : Expr) : DefEqM Bool := do
   let rec isUniqueArgUpTo (curr : Expr) (e' : Expr) (fvarId : FVarId) : Bool :=
-    if isSameExpr curr e' then
+    bif isSameExpr curr e' then
       true
     else match curr with
       | .app f (.fvar fvarId') => fvarId != fvarId' && isUniqueArgUpTo f e' fvarId
@@ -871,14 +871,14 @@ Remark: `t` may be of the form `?m`.
 -/
 def tryAssignMillerPattern (tFn : Expr) (t : Expr) (s : Expr) (_ : tFn = t.getAppFn) : DefEqM LBool := do
   let .mvar mvarId := tFn | return .undef
-  if !(← isAssignableMVar mvarId) then return .undef
-  if !(← isMillerPatternArgs t) then return .undef
-  let s ← if t.isApp then
+  bif !(← isAssignableMVar mvarId) then return .undef
+  bif !(← isMillerPatternArgs t) then return .undef
+  let s ← bif t.isApp then
     mkLambdaFVarsS t.getAppArgs s
   else
     pure s
-  if !(← mayAssign tFn s) then return .undef
-  if (← read).mvarsToCheckType.contains mvarId then
+  bif !(← mayAssign tFn s) then return .undef
+  bif (← read).mvarsToCheckType.contains mvarId then
     unless (← Sym.isDefEqTypes (← mvarId.getDecl).type (← inferType s)) do
       return .false
   mvarId.assign s
@@ -889,7 +889,7 @@ Structural definitional equality for applications without `ProofInstInfo`.
 Recursively checks function and argument equality.
 -/
 def isDefEqAppDefault (t : Expr) (s : Expr) : DefEqM Bool := do
-  let .app f₁ a₁ := t | if s.isApp then return false else isDefEqMain t s
+  let .app f₁ a₁ := t | bif s.isApp then return false else isDefEqMain t s
   let .app f₂ a₂ := s | return false
   unless (← isDefEqAppDefault f₁ f₂) do return false
   isDefEqMain a₁ a₂
@@ -905,9 +905,9 @@ def tryAssignUnassigned (t : Expr) (s : Expr) : DefEqM Bool := do
 where
   go (t : Expr) (s : Expr) : DefEqM Bool := do
     let .mvar mvarId := t | return false
-    if (← mvarId.isAssigned) then return false
-    if !(← isAssignableMVar mvarId) then return false
-    if !(← mayAssign t s) then return false
+    bif (← mvarId.isAssigned) then return false
+    bif !(← isAssignableMVar mvarId) then return false
+    bif !(← mayAssign t s) then return false
     /-
     **Note**: we don't need to check the type of `mvarId` here even if the variable is marked for
     checking. This is the case because `tryAssignUnassigned` is invoked only from a context where `t` and `s` are the arguments
@@ -921,17 +921,17 @@ Structural definitional equality for applications with `ProofInstInfo`.
 Skips proof arguments (proof irrelevance) and defers instance arguments to `isDefEqI`.
 -/
 def isDefEqAppWithInfo (t : Expr) (s : Expr) (i : Nat) (info : ProofInstInfo) : DefEqM Bool := do
-  let .app f₁ a₁ := t | if s.isApp then return false else isDefEqMain t s
+  let .app f₁ a₁ := t | bif s.isApp then return false else isDefEqMain t s
   let .app f₂ a₂ := s | return false
   unless (← isDefEqAppWithInfo f₁ f₂ (i - 1) info) do return false
-  if h : i < info.argsInfo.size then
+  bif h : i <ᵇ info.argsInfo.size then
     let argInfo := info.argsInfo[i]
-    if argInfo.isInstance then
-      if (← tryAssignUnassigned a₁ a₂) then
+    bif argInfo.isInstance then
+      bif (← tryAssignUnassigned a₁ a₂) then
         return true
       else
         isDefEqI a₁ a₂
-    else if argInfo.isProof then
+    else bif argInfo.isProof then
       discard <| tryAssignUnassigned a₁ a₂
       return true
     else
@@ -964,18 +964,18 @@ definitive because `Sym` assumes canonical forms.
 def isDefEqOffset (t s : Expr) : DefEqM LBool := do
   match isNatValue? t, isNatValue? s with
   | some v₁, some v₂ =>
-    return if v₁ == v₂ then .true else .false
+    return bif v₁ == v₂ then .true else .false
   | some v₁, none =>
     -- `v₁ =?= s' + k₂`
     let some (.add s' k₂) := isOffset? s | return .undef
-    if k₂ ≤ v₁ then
+    bif k₂ ≤ᵇ v₁ then
       toLBoolM <| isDefEqMain (← share (mkNatLit (v₁ - k₂))) s'
     else
       return .false
   | none, some v₂ =>
     -- `t' + k₁ =?= v₂`
     let some (.add t' k₁) := isOffset? t | return .undef
-    if k₁ ≤ v₂ then
+    bif k₁ ≤ᵇ v₂ then
       toLBoolM <| isDefEqMain t' (← share (mkNatLit (v₂ - k₁)))
     else
       return .false
@@ -983,13 +983,13 @@ def isDefEqOffset (t s : Expr) : DefEqM LBool := do
     -- `t' + k₁ =?= s' + k₂`
     let some (.add t' k₁) := isOffset? t | return .undef
     let some (.add s' k₂) := isOffset? s | return .undef
-    if k₁ == k₂ then
+    bif k₁ == k₂ then
       toLBoolM <| isDefEqMain t' s'
-    else if k₁ < k₂ then
-      if k₁ == 0 then return .undef
+    else bif k₁ <ᵇ k₂ then
+      bif k₁ == 0 then return .undef
       toLBoolM <| isDefEqMain t' (← share (mkNatAdd s' (mkNatLit (k₂ - k₁))))
     else
-      if k₂ == 0 then return .undef
+      bif k₂ == 0 then return .undef
       toLBoolM <| isDefEqMain (← share (mkNatAdd t' (mkNatLit (k₁ - k₂)))) s'
 
 set_option compiler.ignoreBorrowAnnotation true in
@@ -998,11 +998,11 @@ set_option compiler.ignoreBorrowAnnotation true in
 -/
 @[export lean_sym_def_eq]
 def isDefEqMainImpl (t : Expr) (s : Expr) : DefEqM Bool := do
-  if isSameExpr t s then return true
+  bif isSameExpr t s then return true
   -- **Note**: `etaReduce` is supposed to be fast, and does not allocate memory
   let t' := etaReduce t
   let s' := etaReduce s
-  if !isSameExpr t t' || !isSameExpr s s' then
+  bif !isSameExpr t t' || !isSameExpr s s' then
     isDefEqMain t' s'
   else match t, s with
   | .lit  l₁,      .lit l₂       => return l₁ == l₂
@@ -1012,14 +1012,14 @@ def isDefEqMainImpl (t : Expr) (s : Expr) : DefEqM Bool := do
   | .mdata _ t,    _             => isDefEqMain t s
   | _,             .mdata _ s    => isDefEqMain t s
   | .fvar fvarId₁, .fvar fvarId₂ =>
-    if (← read).zetaDelta then
-      if fvarId₁ == fvarId₂ then return true
+    bif (← read).zetaDelta then
+      bif fvarId₁ == fvarId₂ then return true
       let decl₁ ← fvarId₁.getDecl
       let decl₂ ← fvarId₂.getDecl
-      if !decl₁.isLet && !decl₂.isLet then
+      bif !decl₁.isLet && !decl₂.isLet then
         -- Both are not let-declarations
         return false
-      else if decl₁.index < decl₂.index then
+      else bif decl₁.index <ᵇ decl₂.index then
         -- If `s` occurs after `t` and it is a let-decl, unfold and recurse
         let some val₂ := decl₂.value? | return false
         isDefEqMain t val₂
@@ -1030,7 +1030,7 @@ def isDefEqMainImpl (t : Expr) (s : Expr) : DefEqM Bool := do
     else
       return fvarId₁ == fvarId₂
   | .const declName₁ us₁, .const declName₂ us₂ =>
-    if declName₁ == declName₂ then
+    bif declName₁ == declName₂ then
       isLevelDefEqListS us₁ us₂
     else
       return false
@@ -1044,9 +1044,9 @@ def isDefEqMainImpl (t : Expr) (s : Expr) : DefEqM Bool := do
   | _, _ =>
     let tFn := t.getAppFn
     let sFn := s.getAppFn
-    if (← isAssignedMVar tFn) then
+    bif (← isAssignedMVar tFn) then
       isDefEqMain (← instantiateMVarsS t) s
-    else if (← isAssignedMVar sFn) then
+    else bif (← isAssignedMVar sFn) then
       isDefEqMain t (← instantiateMVarsS s)
     else
     whenUndefDo (tryAssignMillerPattern tFn t s rfl) do
@@ -1115,7 +1115,7 @@ def mkPreResult : UnifyM MkPreResultResult := do
   let mut instMVars := #[]
   for h : i in *...eAssignment.size do
     if let .some val := eAssignment[i] then
-      if tPending.contains i then
+      bif tPending.contains i then
         let type := varTypes[i]!
         let type ← instantiateLevelParamsS type pattern.levelParams us
         let type ← instantiateRevBetaS type args
@@ -1129,17 +1129,17 @@ def mkPreResult : UnifyM MkPreResultResult := do
       let type := varTypes[i]!
       let type ← instantiateLevelParamsS type pattern.levelParams us
       let type ← instantiateRevBetaS type args
-      if pattern.isInstance i then
+      bif pattern.isInstance i then
         if let .some val ← trySynthInstance type then
           args := args.push (← shareCommon val)
           continue
       let mvar ← mkFreshExprMVar type
       let mvar ← shareCommon mvar
-      if pattern.isInstance i then
+      bif pattern.isInstance i then
         -- Synthesis failed above; record the placeholder so `main` can verify it gets resolved.
         instMVars := instMVars.push mvar.mvarId!
       if let some mask := (← read).pattern.checkTypeMask? then
-        if mask[i]! then
+        bif mask[i]! then
           mvarsToCheckType := mvarsToCheckType.push mvar.mvarId!
       args := args.push mvar
   modify fun s => { s with args, us }
@@ -1147,7 +1147,7 @@ def mkPreResult : UnifyM MkPreResultResult := do
 
 def processPendingLevel : UnifyM Bool := do
   let uPending := (← get).uPending
-  if uPending.isEmpty then return true
+  bif uPending.isEmpty then return true
   let pattern := (← read).pattern
   let us := (← get).us
   for (u, v) in uPending do
@@ -1158,7 +1158,7 @@ def processPendingLevel : UnifyM Bool := do
 
 def processPendingInst : UnifyM Bool := do
   let iPending := (← get).iPending
-  if iPending.isEmpty then return true
+  bif iPending.isEmpty then return true
   let pattern := (← read).pattern
   let us := (← get).us
   let args := (← get).args
@@ -1171,7 +1171,7 @@ def processPendingInst : UnifyM Bool := do
 
 def processPendingExpr (mvarsToCheckType : Array MVarId) : UnifyM Bool := do
   let ePending := (← get).ePending
-  if ePending.isEmpty then return true
+  bif ePending.isEmpty then return true
   let pattern := (← read).pattern
   let us := (← get).us
   let args := (← get).args
@@ -1183,10 +1183,10 @@ def processPendingExpr (mvarsToCheckType : Array MVarId) : UnifyM Bool := do
   -- Only metavariables created by this match (index ≥ `mvarCounterSaved`) are assignable.
   let mvarCounterSaved := (← read).mvarCounterSaved
   let mctx ← getMCtx
-  let mvarsNew := if unify then #[] else args.filterMap fun
+  let mvarsNew := bif unify then #[] else args.filterMap fun
     | .mvar mvarId =>
       match mctx.findDecl? mvarId with
-      | some decl => if decl.index ≥ mvarCounterSaved then some mvarId else none
+      | some decl => bif decl.index ≥ᵇ mvarCounterSaved then some mvarId else none
       | none => none
     | _ => none
   DefEqM.run unify zetaDelta mvarsNew mvarsToCheckType do
@@ -1198,7 +1198,7 @@ def processPendingExpr (mvarsToCheckType : Array MVarId) : UnifyM Bool := do
     return true
 
 def processPending (mvarsToCheckType : Array MVarId) : UnifyM Bool := do
-  if (← noPending) then
+  bif (← noPending) then
     return true
   else
     processPendingLevel <&&> processPendingInst <&&> processPendingExpr mvarsToCheckType

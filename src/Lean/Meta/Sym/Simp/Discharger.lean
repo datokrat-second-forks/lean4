@@ -64,7 +64,7 @@ def resultToDischargeResult (e : Expr) (result : Result) : DischargeResult :=
   match result with
   | .rfl _ cd => .failed cd
   | .step e' h _ cd =>
-    if e'.isTrue then
+    bif e'.isTrue then
       .solved (mkOfEqTrueCore e h) cd
     else
       .failed cd
@@ -104,7 +104,7 @@ It ensures the cached results are discarded, and increases the discharge depth t
 infinite recursion.
 -/
 public def dischargeSimpSelf : Discharger := fun e => do
-  if (← readThe Context).dischargeDepth > (← getConfig).maxDischargeDepth then
+  bif (← readThe Context).dischargeDepth >ᵇ (← getConfig).maxDischargeDepth then
     return .failed
   withoutModifyingCache do
   withTheReader Context (fun ctx => { ctx with dischargeDepth := ctx.dischargeDepth + 1 }) do
@@ -130,8 +130,8 @@ local context. Always context-dependent: available hypotheses change when enteri
 -/
 public def dischargeAssumption : Discharger := fun e => do
   for localDecl in (← getLCtx) do
-    if localDecl.isAuxDecl then continue
-    if (← isDefEq localDecl.type e) then
+    bif localDecl.isAuxDecl then continue
+    bif (← isDefEq localDecl.type e) then
       return .solved localDecl.toExpr true
   return .failed true
 

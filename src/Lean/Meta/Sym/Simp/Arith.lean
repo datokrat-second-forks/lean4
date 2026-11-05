@@ -36,7 +36,7 @@ private def postRelation (e e' : Expr) (h? : Option Expr) (cd : Bool) : SimpM Re
   match (← post e'), h? with
   | .rfl _ cd₂, none => return mkRflResult (done := true) (contextDependent := cd || cd₂)
   | .rfl _ cd₂, some h => return .step e' h (done := true) (contextDependent := cd || cd₂)
-  | r₂, none => return if cd && !r₂.isContextDependent then r₂.withContextDependent else r₂
+  | r₂, none => return bif cd && !r₂.isContextDependent then r₂.withContextDependent else r₂
   | r₂, some h => mkEqTransResult e e' h r₂ cd
 
 /--
@@ -68,10 +68,10 @@ def simpArith (d : Discharger := dischargeNone) (lhsOnly : Bool := false) (distr
     | .failed _ => return none
   match r with
   | .rfl true cd =>
-    if isRelation e then postRelation e e none cd else return r
+    bif isRelation e then postRelation e e none cd else return r
   | .step e' h true cd =>
     -- A relation may normalize to `False` (e.g. `3 * i + 1 = 0` over `Int`).
-    if isRelation e && isRelation e' then
+    bif isRelation e && isRelation e' then
       postRelation e e' (some h) cd
     else
       cacheNormal e' cd
@@ -85,7 +85,7 @@ Returns `some k` if `e` is `a + (k + 1)` for a numeral `k + 1`, i.e., the normal
 private def isNatAddSucc? (e : Expr) : Option (Expr × Nat) := do
   let_expr HAdd.hAdd _ _ _ _ a k := e | none
   let k ← (Sym.getNatValue? k).run
-  if k == 0 then none else some (a, k - 1)
+  bif k == 0 then none else some (a, k - 1)
 
 /-- Returns `true` if `e` is the numeral `0`. -/
 private def isNatZero (e : Expr) : Bool :=
@@ -104,18 +104,18 @@ def simpNatRel : Simproc := fun e => do
   match_expr e with
   | Eq α lhs rhs =>
     let .const ``Nat _ := α | return .rfl
-    if isNatZero rhs then
+    bif isNatZero rhs then
       if let some (a, k) := isNatAddSucc? lhs then
         return .step (← getFalseExpr) (mkApp2 (mkConst ``Grind.Nat.add_succ_eq_zero_eq_false) a (mkRawNatLit k)) (done := true)
-    else if isNatZero lhs then
+    else bif isNatZero lhs then
       if let some (a, k) := isNatAddSucc? rhs then
         return .step (← getFalseExpr) (mkApp2 (mkConst ``Grind.Nat.zero_eq_add_succ_eq_false) a (mkRawNatLit k)) (done := true)
     return .rfl
   | LE.le α _ lhs rhs =>
     let .const ``Nat _ := α | return .rfl
-    if isNatZero lhs then
+    bif isNatZero lhs then
       return .step (← getTrueExpr) (mkApp (mkConst ``Grind.Nat.zero_le_eq_true) rhs) (done := true)
-    else if isNatZero rhs then
+    else bif isNatZero rhs then
       if let some (a, k) := isNatAddSucc? lhs then
         return .step (← getFalseExpr) (mkApp2 (mkConst ``Grind.Nat.add_succ_le_zero_eq_false) a (mkRawNatLit k)) (done := true)
     return .rfl

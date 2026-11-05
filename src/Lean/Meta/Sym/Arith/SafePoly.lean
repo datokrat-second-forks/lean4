@@ -56,12 +56,12 @@ private def checkBudget (p : Poly) : PolyM Unit := do
   let cfg ← read
   if let some maxTerms := cfg.maxTerms? then
     let n := p.numTerms
-    if n > maxTerms then
+    bif n >ᵇ maxTerms then
       reportIssue! "polynomial with {n} monomials exceeds threshold `(sym.arith.maxTerms := {maxTerms})`"
       failure
   if let some maxDegree := cfg.maxDegree? then
     let d := p.degree
-    if d > maxDegree then
+    bif d >ᵇ maxDegree then
       reportIssue! "polynomial of degree {d} exceeds threshold `(sym.arith.maxDegree := {maxDegree})`"
       failure
 
@@ -128,25 +128,25 @@ private def powNC (p : Poly) (k : Nat) : PolyM Poly := withIncRecDepth do
   | k+2 => mul (← powNC p (k+1)) p
 
 def pow (p : Poly) (k : Nat) : PolyM Poly := do
-  if (← read).commutative then powComm p k else powNC p k
+  bif (← read).commutative then powComm p k else powNC p k
 
 private def checkExp' (k : Nat) : PolyM Unit :=
   fun _ => checkExp k
 
 private def mkPowVar (x : Var) (k : Nat) : PolyM Poly := do
   if let some maxDegree := (← read).maxDegree? then
-    if k > maxDegree then
+    bif k >ᵇ maxDegree then
       reportIssue! "polynomial of degree {k} exceeds threshold `(sym.arith.maxDegree := {maxDegree})`"
       failure
   return .ofMon (.mult {x, k} .unit)
 
 /-- Mirror of the numeral cases (`.num`, `.natCast`, `.intCast`) of the `toPoly` functions. -/
 def numNode (n : Int) : PolyM Poly := do
-  if (← read).semiring then return .num n.natAbs else return .num (← applyChar n)
+  bif (← read).semiring then return .num n.natAbs else return .num (← applyChar n)
 
 /-- Mirror of the `.pow a k` case of the `toPoly` functions, given `pa`, the polynomial of `a`. -/
 def powNode (a : RingExpr) (pa : Poly) (k : Nat) : PolyM Poly := do
-  if k == 0 then return .num 1
+  bif k == 0 then return .num 1
   match a with
   | .num n | .intCast n => numPow n
   | .natCast n => numPow n
@@ -155,7 +155,7 @@ def powNode (a : RingExpr) (pa : Poly) (k : Nat) : PolyM Poly := do
 where
   numPow (n : Int) : PolyM Poly := do
     checkExp' k
-    if (← read).semiring then return .num (n.natAbs ^ k) else return .num (← applyChar (n ^ k))
+    bif (← read).semiring then return .num (n.natAbs ^ k) else return .num (← applyChar (n ^ k))
 
 /-- Mirror of `Expr.toPoly`, `Expr.toPolyC`, `Expr.toPoly_nc`, `Expr.toPolyC_nc`. -/
 private partial def toPolyRing (e : RingExpr) : PolyM Poly := do
@@ -168,7 +168,7 @@ private partial def toPolyRing (e : RingExpr) : PolyM Poly := do
   | .neg a   => mulConst (-1) (← toPolyRing a)
   | .sub a b => combine (← toPolyRing a) (← mulConst (-1) (← toPolyRing b))
   | .pow a k =>
-    if k == 0 then
+    bif k == 0 then
       return .num 1
     else match a with
     | .num n =>
@@ -186,7 +186,7 @@ private partial def toPolySemiring (e : SemiringExpr) : PolyM Poly := do
   | .add a b => combine (← toPolySemiring a) (← toPolySemiring b)
   | .mul a b => mul (← toPolySemiring a) (← toPolySemiring b)
   | .pow a k =>
-    if k == 0 then
+    bif k == 0 then
       return .num 1
     else match a with
     | .num n =>
@@ -204,7 +204,7 @@ their non-commutative variants, depending on the configuration. Returns `none` i
 exponent threshold.
 -/
 def toPoly? (e : RingExpr) : PolyM Poly := do
-  if (← read).semiring then
+  bif (← read).semiring then
     SafePoly.toPolySemiring e
   else
     SafePoly.toPolyRing e

@@ -26,7 +26,7 @@ where
   | .letE _ _ _ b _  => go b
   | .forallE _ _ b _ => go b
   | .mdata _ b       => go b
-  | .const n _       => if isClass env n then some n else none
+  | .const n _       => bif isClass env n then some n else none
   | .app f _         => go f
 
 end Lean.Meta.Sym

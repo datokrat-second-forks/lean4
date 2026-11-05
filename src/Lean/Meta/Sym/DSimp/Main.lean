@@ -37,13 +37,13 @@ set_option compiler.ignoreBorrowAnnotation true in
 @[export lean_sym_dsimp]
 def dsimpImpl (e₁ : Expr) : DSimpM Result := withIncRecDepth do
   let numSteps := (← get).numSteps
-  if numSteps >= (← getConfig).maxSteps then
+  bif numSteps ≥ᵇ (← getConfig).maxSteps then
     throwError "`dsimp` failed: maximum number of steps exceeded"
   let key : ExprPtr := { expr := e₁ }
   if let some r := (← get).cache.find? key then
     return r
   let numSteps := numSteps + 1
-  if numSteps % 1000 == 0 then
+  bif numSteps % 1000 == 0 then
     checkSystem "dsimp"
   modify fun s => { s with numSteps }
   let r ← pre e₁

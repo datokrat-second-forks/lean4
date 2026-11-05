@@ -187,7 +187,7 @@ def mkRflResult (done : Bool := false) (contextDependent : Bool := false) : Resu
 
 /-- Like `mkRflResult` with `done := false`. -/
 def mkRflResultCD (contextDependent : Bool) : Result :=
-  if contextDependent then .rfl false true else .rfl
+  bif contextDependent then .rfl false true else .rfl
 
 /-- Returns `true` if this result depends on the local context (e.g., hypotheses). -/
 abbrev Result.isContextDependent : Result → Bool
@@ -287,7 +287,7 @@ abbrev post : Simproc := fun e => do
 
 /-- Caches `r` as the final result for `e`, in the transient cache if it is context-dependent. -/
 abbrev cacheResult (e : Expr) (r : Result) : SimpM Result := do
-  if r.isContextDependent then
+  bif r.isContextDependent then
     modify fun s => { s with transientCache := s.transientCache.insert { expr := e } r }
   else
     modify fun s => { s with persistentCache := s.persistentCache.insert { expr := e } r }

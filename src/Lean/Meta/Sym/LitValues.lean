@@ -69,8 +69,8 @@ def getFinValue? (e : Expr) : OptionT Id FinValue := do
   let_expr Fin n := α | failure
   let n ← getNatValue? n
   let .lit (.natVal v) := v | failure
-  if h : n = 0 then failure else
-  let : NeZero n := ⟨h⟩
+  bif h : n =ᵇ 0 then failure else
+  let : NeZero n := ⟨ne_of_decideEq_eq_false h⟩
   return { n, val := Fin.ofNat n v }
 
 def getCharValue? (e : Expr) : OptionT Id Char := do

@@ -256,7 +256,7 @@ Unfolds all `reducible` declarations occurring in `e`.
 This is meant as a preprocessing step. It does **not** guarantee maximally shared terms
 -/
 def unfoldReducible (e : Expr) : MetaM Expr := do
-  if !(← isUnfoldReducibleTarget e) then return e
+  bif !(← isUnfoldReducibleTarget e) then return e
   Meta.transform e (pre := unfoldReducibleStep)
 
 /--
@@ -265,13 +265,13 @@ The structural simplifier and pattern matcher do not handle kernel projection
 terms; this preprocessing step folds them into projection function applications.
 -/
 def foldProjs (e : Expr) : MetaM Expr := do
-  if Option.isNone <| e.find? fun e => e.isProj then return e
+  bif Option.isNone <| e.find? fun e => e.isProj then return e
   let post (e : Expr) := do
     let .proj structName idx s := e | return .done e
     let some info := getStructureInfo? (← getEnv) structName |
       trace[sym.issues] "found `Expr.proj` but `{structName}` is not marked as structure{indentExpr e}"
       return .done e
-    if h : idx < info.fieldNames.size then
+    bif h : idx <ᵇ info.fieldNames.size then
       let fieldName := info.fieldNames[idx]
       /-
       In the test `grind_cat.lean`, the following operation fails if we are not using default
@@ -382,9 +382,9 @@ come from environment signatures that were never preprocessed.
 private def repairShareViolation (e : Expr) : SymM Expr := do
   let config := (← readThe Context).config
   let mut e := e
-  if config.enforceUnfoldReducible then e ← unfoldReducible e
-  if config.enforceFoldProjs then e ← foldProjs e
-  if config.enforceUnfoldReducible then e ← unfoldReducible e
+  bif config.enforceUnfoldReducible then e ← unfoldReducible e
+  bif config.enforceFoldProjs then e ← foldProjs e
+  bif config.enforceUnfoldReducible then e ← unfoldReducible e
   return e
 
 /--
@@ -412,7 +412,7 @@ private def repairAndShare (e : Expr) (cache : AlphaShareCommon.Cache) : SymM Ex
   -- `unfoldReducible` and `foldProjs` enter binders using `Meta.transform`, which
   -- requires a closed term. Open terms are admitted without repair.
   -- assert! !e.hasLooseBVars
-  if e.hasLooseBVars then throwError "internal error, expression has loose bound variables at `shareCommon`{indentExpr e}"
+  bif e.hasLooseBVars then throwError "internal error, expression has loose bound variables at `shareCommon`{indentExpr e}"
   let e ← repairShareViolation e
   -- The repair only rebuilds the violating parts of the term, so the subterms visited
   -- by the interrupted run still occur in `e` and their cached results remain valid.
@@ -479,11 +479,11 @@ def reportIssue (msg : MessageData) : SymM Unit := do
 
 /-- Reports an issue if `verbose` mode is enabled. Does nothing if `verbose` is `false`. -/
 @[inline] def reportIssueIfVerbose (msg : MessageData) : SymM Unit := do
-  if (← getConfig).verbose then
+  bif (← getConfig).verbose then
     reportIssue msg
 
 private meta def expandReportIssueMacro (s : Syntax) : MacroM DoElem := do
-  let msg ← if s.getKind == interpolatedStrKind then `(m! $(⟨s⟩)) else `(($(⟨s⟩) : MessageData))
+  let msg ← bif s.getKind == interpolatedStrKind then `(m! $(⟨s⟩)) else `(($(⟨s⟩) : MessageData))
   `(doElem| Sym.reportIssueIfVerbose $msg)
 
 /-- Reports an issue if `verbose` mode is enabled. -/
@@ -492,12 +492,12 @@ macro "reportIssue!" s:(interpolatedStr(term) <|> term) : doElem => do
 
 /-- Reports an issue if both `verbose` and `sym.debug` are enabled. Does nothing otherwise. -/
 @[inline] def reportDbgIssue (msg : MessageData) : SymM Unit := do
-  if (← getConfig).verbose then
-    if sym.debug.get (← getOptions) then
+  bif (← getConfig).verbose then
+    bif sym.debug.get (← getOptions) then
       reportIssue msg
 
 meta def expandReportDbgIssueMacro (s : Syntax) : MacroM DoElem := do
-  let msg ← if s.getKind == interpolatedStrKind then `(m! $(⟨s⟩)) else `(($(⟨s⟩) : MessageData))
+  let msg ← bif s.getKind == interpolatedStrKind then `(m! $(⟨s⟩)) else `(($(⟨s⟩) : MessageData))
   `(doElem| Sym.reportDbgIssue $msg)
 
 /-- Similar to `reportIssue!`, but only reports issue if `sym.debug` is set to `true`. -/

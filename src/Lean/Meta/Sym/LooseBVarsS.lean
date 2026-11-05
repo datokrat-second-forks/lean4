@@ -18,11 +18,11 @@ Remark: if `s < d`, then the result is `e`.
 def lowerLooseBVarsS' (e : Expr) (s d : Nat) : AlphaShareBuilderM Expr := do
   replaceS' e fun e offset => do
     let s₁ := s + offset
-    if s₁ >= e.looseBVarRange then
+    bif s₁ ≥ᵇ e.looseBVarRange then
       return some e -- `e` does not contain bound variables with idx >= s₁
     else match e with
     | .bvar idx =>
-      if idx >= s₁ then
+      bif idx ≥ᵇ s₁ then
         return some (← mkBVarS (idx - d))
       else
         return none
@@ -39,11 +39,11 @@ It assumes the input is maximally shared, and ensures the output is too.
 def liftLooseBVarsS' (e : Expr) (s d : Nat) : AlphaShareBuilderM Expr := do
   replaceS' e fun e offset => do
     let s₁ := s + offset
-    if s₁ >= e.looseBVarRange then
+    bif s₁ ≥ᵇ e.looseBVarRange then
       return some e -- `e` does not contain bound variables with idx >= s₁
     else match e with
     | .bvar idx =>
-      if idx >= s₁ then
+      bif idx ≥ᵇ s₁ then
         return some (← mkBVarS (idx + d))
       else
         return none

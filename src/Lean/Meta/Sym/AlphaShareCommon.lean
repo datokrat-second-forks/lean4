@@ -25,7 +25,7 @@ private def alphaHash (e : Expr) : UInt64 :=
   | .bvar .. | .mvar .. | .const .. | .fvar .. | .sort .. | .lit .. =>
     hash e
   | .app f a => mixHash (hashChild f) (hashChild a)
-  | .letE _ _ v b nondep => mixHash (if nondep then 17 else 19) (mixHash (hashChild v) (hashChild b))
+  | .letE _ _ v b nondep => mixHash (bif nondep then 17 else 19) (mixHash (hashChild v) (hashChild b))
   | .forallE _ d b _ | .lam _ d b _ => mixHash (hashChild d) (hashChild b)
   | .mdata _ b => mixHash 13 (hashChild b)
   | .proj n i b => mixHash (mixHash (hash n) (hash i)) (hashChild b)
@@ -147,7 +147,7 @@ private def dummy : AlphaKey := { expr := mkConst `__dummy__}
 
 private def save (e : Expr) (r : Expr) : M Expr := do
   let prev := (← get).set.findD { expr := r } dummy
-  if isSameExpr prev.expr dummy.expr then
+  bif isSameExpr prev.expr dummy.expr then
     -- `r` is new
     modify fun { set, map } => {
       set := set.insert { expr := r }
@@ -175,7 +175,7 @@ private abbrev visit (e : Expr) (k : M Expr) : M Expr := do
   already maximally shared.
   -/
   let prev := (← get).set.findD { expr := e } dummy
-  if isSameExpr prev.expr dummy.expr then
+  bif isSameExpr prev.expr dummy.expr then
     -- `e` has not been hash-consed before
     save e (← k)
   else
@@ -193,7 +193,7 @@ private def go (e : Expr) : M Expr := do
     if let some r := (← get).set.find? { expr := e } then
       return r.expr
     else
-      if isReducible (← read) declName then throw ()
+      bif isReducible (← read) declName then throw ()
       modify fun { set, map } => { set := set.insert { expr := e }, map }
       return e
   | .app f a => visit e (return e.updateApp! (← go f) (← go a))
@@ -202,7 +202,7 @@ private def go (e : Expr) : M Expr := do
   | .lam _ d b _ => visit e (return e.updateLambdaE! (← go d) (← go b))
   | .mdata _ b => visit e (return e.updateMData! (← go b))
   | .proj _ _ b => visit e do
-      if (← read).checkProj then throw ()
+      bif (← read).checkProj then throw ()
       return e.updateProj! (← go b)
 
 /--
@@ -225,7 +225,7 @@ that were processed before the failure.
 
 private def saveInc (e : Expr) : AlphaShareCommonM Expr := do
   let prev := (← get).set.findD { expr := e } dummy
-  if isSameExpr prev.expr dummy.expr then
+  bif isSameExpr prev.expr dummy.expr then
     -- `e` is new
     modify fun { set := set } => { set := set.insert { expr := e } }
     return e
@@ -234,7 +234,7 @@ private def saveInc (e : Expr) : AlphaShareCommonM Expr := do
 
 @[inline] private def visitInc (e : Expr) (k : AlphaShareCommonM Expr) : AlphaShareCommonM Expr := do
   let prev := (← get).set.findD { expr := e } dummy
-  if isSameExpr prev.expr dummy.expr then
+  bif isSameExpr prev.expr dummy.expr then
     -- `e` has now been cached before
     saveInc (← k)
   else
@@ -268,11 +268,11 @@ where
   | .bvar .. | .mvar .. | .fvar .. | .sort .. | .lit .. => saveInc e
   | .const declName _ =>
     let prev := (← get).set.findD { expr := e } dummy
-    if isSameExpr prev.expr dummy.expr then
+    bif isSameExpr prev.expr dummy.expr then
       -- `e` is new. The check runs only here: set membership certifies that a
       -- term was admitted before, and re-checking admitted terms would repeat
       -- the repair on every call when the term was admitted with residual dirt.
-      if isReducible (← read) declName then throw {}
+      bif isReducible (← read) declName then throw {}
       modify fun { set := set } => { set := set.insert { expr := e } }
       return e
     else
@@ -283,7 +283,7 @@ where
   | .lam _ d b _ => visitInc e (return e.updateLambdaE! (← go d) (← go b))
   | .mdata _ b => visitInc e (return e.updateMData! (← go b))
   | .proj _ _ b => visitInc e do
-      if (← read).checkProj then throw {}
+      bif (← read).checkProj then throw {}
       return e.updateProj! (← go b)
 
 end Lean.Meta.Sym

@@ -125,7 +125,7 @@ is handled more efficiently by the specific strategies.
 -/
 public def simpOverApplied (e : Expr) (numArgs : Nat) (simpFn : Expr → SimpM Result) : SimpM Result := do
   let rec visit (e : Expr) (i : Nat) : SimpM Result := do
-    if i == 0 then
+    bif i == 0 then
       simpFn e
     else
       match h : e with
@@ -137,8 +137,8 @@ public def simpOverApplied (e : Expr) (numArgs : Nat) (simpFn : Expr → SimpM R
         let i := i - 1
         let fr ← visit f i
         let .forallE _ α β _ ← whnfD (← inferType f) | unreachable!
-        if !β.hasLooseBVars then
-          if (← isProp α) then
+        bif !β.hasLooseBVars then
+          bif (← isProp α) then
             mkCongr e f a fr .rfl h
           else
             mkCongr e f a fr (← simp a) h
@@ -175,7 +175,7 @@ It only uses congruence (`mkCongrFun`) to propagate changes when the base functi
 -/
 public def propagateOverApplied (e : Expr) (numArgs : Nat) (simpFn : Expr → SimpM Result) : SimpM Result := do
   let rec visit (e : Expr) (i : Nat) : SimpM Result := do
-    if i == 0 then
+    bif i == 0 then
       simpFn e
     else
       let i := i - 1
@@ -194,7 +194,7 @@ If `type` is already a `forall`, returns it unchanged (avoiding unnecessary work
 The result is shared via `share` to maintain maximal sharing invariants.
 -/
 def whnfToForall (type : Expr) : SymM Expr := do
-  if type.isForall then return type
+  bif type.isForall then return type
   let type ← whnfD type
   unless type.isForall do throwError "function type expected{indentD type}"
   share type
@@ -248,10 +248,10 @@ unnecessary type inference when no rewriting occurs.
 -/
 public def simpFixedPrefix (e : Expr) (prefixSize : Nat) (suffixSize : Nat) : SimpM Result := do
   let numArgs := e.getAppNumArgs
-  if numArgs ≤ prefixSize then
+  bif numArgs ≤ᵇ prefixSize then
     -- Nothing to be done
     return .rfl
-  else if numArgs > prefixSize + suffixSize then
+  else bif numArgs >ᵇ prefixSize + suffixSize then
     simpOverApplied e (numArgs - prefixSize - suffixSize) (main suffixSize)
   else
     main (numArgs - prefixSize) e
@@ -260,7 +260,7 @@ where
     return (← go n e).1
 
   go (i : Nat) (e : Expr) : SimpM (Result × Expr) := do
-    if i == 0 then
+    bif i == 0 then
       return (.rfl, default)
     else
       let .app f a := e | unreachable!
@@ -300,22 +300,22 @@ uses `congrFun` to propagate changes from earlier arguments.
 -/
 public def simpInterlaced (e : Expr) (rewritable : Array Bool) : SimpM Result := do
   let numArgs := e.getAppNumArgs
-  if h : numArgs = 0 then
+  bif h : numArgs =ᵇ 0 then
     -- Nothing to be done
     return .rfl
-  else if h : numArgs > rewritable.size then
+  else bif h : numArgs >ᵇ rewritable.size then
     simpOverApplied e (numArgs - rewritable.size) (go rewritable.size · (Nat.le_refl _))
   else
     go numArgs e (by omega)
 where
   go (i : Nat) (e : Expr) (h : i ≤ rewritable.size) : SimpM Result := do
-    if h : i = 0 then
+    bif h : i =ᵇ 0 then
       return .rfl
     else
       match h : e with
       | .app f a =>
         let fr ← go (i - 1) f (by omega)
-        if rewritable[i - 1] then
+        bif rewritable[i - 1] then
           mkCongr e f a fr (← simp a) h
         -- Fixed (non-rewritable) argument: propagate `cd` from the function result.
         else match fr with
@@ -329,9 +329,9 @@ when we get the first non-`.rfl` result.
 -/
 def pushResult (argResults : Array Result) (numEqs : Nat) (result : Result) : Array Result :=
   match result with
-  | .rfl .. => if argResults.size > 0 then argResults.push result else argResults
+  | .rfl .. => bif argResults.size >ᵇ 0 then argResults.push result else argResults
   | .step .. =>
-    if argResults.size < numEqs then
+    bif argResults.size <ᵇ numEqs then
       Array.replicate numEqs .rfl |>.push result
     else
       argResults.push result
@@ -395,7 +395,7 @@ def simpUsingCongrThm (e : Expr) (thm : CongrTheorem) : SimpM Result := do
       match kind with
       | .fixed | .cast =>
         subst := subst.push arg
-        if hasInst then substOld := substOld.push arg
+        bif hasInst then substOld := substOld.push arg
       | .subsingletonInst =>
         subst := subst.push arg
         substOld := substOld.push arg
@@ -403,7 +403,7 @@ def simpUsingCongrThm (e : Expr) (thm : CongrTheorem) : SimpM Result := do
         -- The old instance is reused only if its class is unchanged. A definitional comparison
         -- of the classes would unify the old and new arguments, and the congruence theorem
         -- accepts any instance of the new class.
-        let instNew ← if clsNew == type.bindingDomain!.instantiateRev substOld then
+        let instNew ← bif clsNew == type.bindingDomain!.instantiateRev substOld then
           pure arg
         else
           let .some val ← trySynthInstance clsNew | return .rfl
@@ -414,24 +414,24 @@ def simpUsingCongrThm (e : Expr) (thm : CongrTheorem) : SimpM Result := do
         type := type.bindingBody!
       | .eq =>
         subst := subst.push arg
-        if hasInst then substOld := substOld.push arg
+        bif hasInst then substOld := substOld.push arg
         match argResults[j]! with
         | .rfl _ _ =>
           let h ← mkEqRefl arg
           proof := mkApp2 proof arg h
           subst := subst.push arg |>.push h
-          if hasInst then substOld := substOld.push arg |>.push h
+          bif hasInst then substOld := substOld.push arg |>.push h
         | .step arg' h _ _ =>
           proof := mkApp2 proof arg' h
           subst := subst.push arg' |>.push h
-          if hasInst then substOld := substOld.push arg |>.push h
+          bif hasInst then substOld := substOld.push arg |>.push h
         type := type.bindingBody!.bindingBody!
         j := j + 1
       | _ => unreachable!
     let_expr Eq _ _ rhs := type | unreachable!
     let rhs := rhs.instantiateRev subst
     let hasCast := argKinds.any (· matches .cast)
-    let rhs ← if hasCast then Simp.removeUnnecessaryCasts rhs else pure rhs
+    let rhs ← bif hasCast then Simp.removeUnnecessaryCasts rhs else pure rhs
     let rhs ← share rhs
     -- The result is context-dependent if any simplified argument was.
     let cd := argResults.any (·.isContextDependent)
@@ -456,15 +456,15 @@ def simpUsingCongrThm (e : Expr) (thm : CongrTheorem) : SimpM Result := do
         simpEqArgs f (i-1) (numEqs+1) (pushResult argResults numEqs r) (anyCD || r.isContextDependent) hasInst
       | _ => unreachable!
     | _ =>
-      if argResults.isEmpty then
+      bif argResults.isEmpty then
         return mkRflResultCD anyCD
       else
         let r ← mkNonRflResult argResults.reverse hasInst
-        return if anyCD && !r.isContextDependent then r.withContextDependent else r
+        return bif anyCD && !r.isContextDependent then r.withContextDependent else r
   let numArgs := e.getAppNumArgs
-  if numArgs > argKinds.size then
+  bif numArgs >ᵇ argKinds.size then
     simpOverApplied e (numArgs - argKinds.size) (simpEqArgs · (argKinds.size - 1) 0 #[] false false)
-  else if numArgs < argKinds.size then
+  else bif numArgs <ᵇ argKinds.size then
     /-
     **Note**: under-applied case. This can be optimized, but this case is so
     rare that it is not worth doing it. We just reuse `simpOverApplied`
@@ -498,11 +498,11 @@ discriminants of a `match` expression without touching the branches.
 public def simpAppArgRange (e : Expr) (start stop : Nat) : SimpM Result := do
   let numArgs := e.getAppNumArgs
   assert! start < stop
-  if numArgs < start then return .rfl
+  bif numArgs <ᵇ start then return .rfl
   let numArgs := numArgs - start
   let stop := stop - start
   let rec visit (e : Expr) (i : Nat) : SimpM Result := do
-    if i == 0 then
+    bif i == 0 then
       return .rfl
     let i := i - 1
     match h : e with
@@ -513,10 +513,10 @@ public def simpAppArgRange (e : Expr) (start stop : Nat) : SimpM Result := do
         match fr with
         | .rfl _ cd => return mkRflResultCD cd
         | .step f' hf _ cd => mkCongrFun e f a f' hf h (contextDependent := cd)
-      if i < stop then
+      bif i <ᵇ stop then
         let .forallE _ α β _ ← whnfD (← inferType f) | unreachable!
-        if !β.hasLooseBVars then
-          if (← isProp α) then
+        bif !β.hasLooseBVars then
+          bif (← isProp α) then
             mkCongr e f a fr .rfl h
           else
             mkCongr e f a fr (← simp a) h

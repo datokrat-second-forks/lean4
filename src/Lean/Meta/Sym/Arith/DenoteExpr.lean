@@ -29,7 +29,7 @@ def denoteNum (k : Int) : m Expr := do
   else
     pure <| mkApp3 (mkConst ``Grind.Semiring.ofNat [ring.u]) ring.type ring.semiringInst n
   let e := mkApp3 (mkConst ``OfNat.ofNat [ring.u]) ring.type n ofNatInst
-  if k < 0 then
+  bif k <ᵇ 0 then
     return mkApp (← getNegFn) e
   else
     return e
@@ -37,7 +37,7 @@ def denoteNum (k : Int) : m Expr := do
 /-- Denote a `Power` (variable raised to a power). -/
 def denotePower [MonadGetVar m] (pw : Power) : m Expr := do
   let x ← getVar pw.x
-  if pw.k == 1 then
+  bif pw.k == 1 then
     return x
   else
     return mkApp2 (← getPowFn) x (toExpr pw.k)
@@ -60,7 +60,7 @@ def denotePoly [MonadGetVar m] (p : Poly) : m Expr := do
   | .add k mn p => go p (← denoteTerm k mn)
 where
   denoteTerm (k : Int) (mn : Mon) : m Expr := do
-    if k == 1 then
+    bif k == 1 then
       denoteMon mn
     else
       return mkApp2 (← getMulFn) (← denoteNum k) (← denoteMon mn)
@@ -123,7 +123,7 @@ def denoteSemiringExpr' (vars : Array Expr) (e : SemiringExpr) : m Expr :=
 where
   go : SemiringExpr → m Expr
   | .num k =>
-    if k < 0 then throwError "internal error: negative numeral in semiring expression" else denoteNatNum k.natAbs
+    bif k <ᵇ 0 then throwError "internal error: negative numeral in semiring expression" else denoteNatNum k.natAbs
   | .natCast k => return mkApp (← getNatCastFn') (mkNatLit k)
   | .var x => pure vars[x]!
   | .add a b => return mkApp2 (← getAddFn') (← go a) (← go b)

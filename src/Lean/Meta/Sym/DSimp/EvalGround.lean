@@ -20,7 +20,7 @@ performance issues in the standard `Meta.Simp` simprocs.
 
 def skipIfUnchanged (e : Expr) (result : Result) : Result :=
   match result with
-  | .step e' done => if isSameExpr e e' then .rfl done else result
+  | .step e' done => bif isSameExpr e e' then .rfl done else result
   | _ => result
 
 abbrev evalUnary [ToExpr α] (toValue? : Expr → Option α) (op : α → α) (a : Expr) : DSimpM Result := do
@@ -43,7 +43,7 @@ abbrev evalUnaryInt64 : (op : Int64 → Int64) → (a : Expr) → DSimpM Result 
 
 def evalLog2 (a : Expr) (maxExponent : Nat) : DSimpM Result := do
   let some n := getNatValue? a | return .rfl
-  if n > 2^maxExponent then return .rfl
+  bif n >ᵇ 2^maxExponent then return .rfl
   let e ← share <| toExpr n.log2
   return .step e (done := true)
 
@@ -79,7 +79,8 @@ abbrev evalBinInt64 : (op : Int64 → Int64 → Int64) → (a b : Expr) → DSim
 abbrev evalBinFin' (op : {n : Nat} → Fin n → Fin n → Fin n) (a b : Expr) : DSimpM Result := do
   let some a := getFinValue? a | return .rfl
   let some b := getFinValue? b | return .rfl
-  if h : a.n = b.n then
+  bif h : a.n =ᵇ b.n then
+    have h := eq_of_decideEq_eq_true h
     let e ← share <| toExpr (op a.val (h ▸ b.val))
     return .step e (done := true)
   else
@@ -88,7 +89,8 @@ abbrev evalBinFin' (op : {n : Nat} → Fin n → Fin n → Fin n) (a b : Expr) :
 abbrev evalBinBitVec' (op : {n : Nat} → BitVec n → BitVec n → BitVec n) (a b : Expr) : DSimpM Result := do
   let some a := getBitVecValue? a | return .rfl
   let some b := getBitVecValue? b | return .rfl
-  if h : a.n = b.n then
+  bif h : a.n =ᵇ b.n then
+    have h := eq_of_decideEq_eq_true h
     let e ← share <| toExpr (op a.val (h ▸ b.val))
     return .step e (done := true)
   else
@@ -97,14 +99,14 @@ abbrev evalBinBitVec' (op : {n : Nat} → BitVec n → BitVec n → BitVec n) (a
 abbrev evalPowNat [ToExpr α] (maxExponent : Nat) (toValue? : Expr → Option α) (op : α → Nat → α) (a b : Expr) : DSimpM Result := do
   let some a := toValue? a | return .rfl
   let some b := getNatValue? b | return .rfl
-  if b > maxExponent then return .rfl
+  bif b >ᵇ maxExponent then return .rfl
   let e ← share <| toExpr (op a b)
   return .step e (done := true)
 
 abbrev evalPowInt [ToExpr α] (maxExponent : Nat) (toValue? : Expr → Option α) (op : α → Int → α) (a b : Expr) : DSimpM Result := do
   let some a := toValue? a | return .rfl
   let some b := getIntValue? b | return .rfl
-  if b.natAbs > maxExponent then return .rfl
+  bif b.natAbs >ᵇ maxExponent then return .rfl
   let e ← share <| toExpr (op a b)
   return .step e (done := true)
 
@@ -241,14 +243,14 @@ def evalPow (maxExponent : Nat) (α β : Expr) (a b : Expr) : DSimpM Result :=
   | _ => return .rfl
 
 abbrev shift [ShiftLeft α] [ShiftRight α] (left : Bool) (a b : α) : α :=
-  if left then a <<< b else a >>> b
+  bif left then a <<< b else a >>> b
 
 def evalShift (left : Bool) (α β : Expr) (a b : Expr) : DSimpM Result :=
-  if isSameExpr α β then
+  bif isSameExpr α β then
     match_expr α with
     | Nat => evalBinNat (shift left) a b
-    | Fin _ => if left then evalBinFin' (· <<< ·) a b else evalBinFin' (· >>> ·) a b
-    | BitVec _ => if left then evalBinBitVec' (· <<< ·) a b else evalBinBitVec' (· >>> ·) a b
+    | Fin _ => bif left then evalBinFin' (· <<< ·) a b else evalBinFin' (· >>> ·) a b
+    | BitVec _ => bif left then evalBinBitVec' (· <<< ·) a b else evalBinBitVec' (· >>> ·) a b
     | UInt8 => evalBinUInt8 (shift left) a b
     | UInt16 => evalBinUInt16 (shift left) a b
     | UInt32 => evalBinUInt32 (shift left) a b
@@ -265,13 +267,13 @@ def evalShift (left : Bool) (α β : Expr) (a b : Expr) : DSimpM Result :=
     | Int => do
       let some a := getIntValue? a | return .rfl
       let some b := getNatValue? b | return .rfl
-      let e := if left then a <<< b else a >>> b
+      let e := bif left then a <<< b else a >>> b
       let e ← share <| toExpr e
       return .step e (done := true)
     | BitVec _ => do
       let some a := getBitVecValue? a | return .rfl
       let some b := getNatValue? b | return .rfl
-      let e := if left then a.val <<< b else a.val >>> b
+      let e := bif left then a.val <<< b else a.val >>> b
       let e ← share <| toExpr e
       return .step e (done := true)
     | _ => return .rfl
@@ -279,7 +281,7 @@ def evalShift (left : Bool) (α β : Expr) (a b : Expr) : DSimpM Result :=
     let_expr BitVec _ := α | return .rfl
     let some a := getBitVecValue? a | return .rfl
     let some b := getBitVecValue? b | return .rfl
-    let e := if left then a.val <<< b.val else a.val >>> b.val
+    let e := bif left then a.val <<< b.val else a.val >>> b.val
     let e ← share <| toExpr e
     return .step e (done := true)
   | _ => return .rfl
@@ -325,7 +327,8 @@ abbrev evalBinBoolPredInt64 : (op : Int64 → Int64 → Bool) → (a b : Expr) �
 abbrev evalBinBoolPredFin (op : {n : Nat} → Fin n → Fin n → Bool) (a b : Expr) : DSimpM Result := do
   let some a := getFinValue? a | return .rfl
   let some b := getFinValue? b | return .rfl
-  if h : a.n = b.n then
+  bif h : a.n =ᵇ b.n then
+    have h := eq_of_decideEq_eq_true h
     let r := op a.val (h ▸ b.val)
     let e ← share (toExpr r)
     return .step e (done := true)
@@ -335,7 +338,8 @@ abbrev evalBinBoolPredFin (op : {n : Nat} → Fin n → Fin n → Bool) (a b : E
 abbrev evalBinBoolPredBitVec (op : {n : Nat} → BitVec n → BitVec n → Bool) (a b : Expr) : DSimpM Result := do
   let some a := getBitVecValue? a | return .rfl
   let some b := getBitVecValue? b | return .rfl
-  if h : a.n = b.n then
+  bif h : a.n =ᵇ b.n then
+    have h := eq_of_decideEq_eq_true h
     let r := op a.val (h ▸ b.val)
     let e ← share (toExpr r)
     return .step e (done := true)
@@ -448,7 +452,7 @@ def evalBitVecOfFin (n a : Expr) : DSimpM Result := do
 
 def evalBitVecOfNat (n a : Expr) : DSimpM Result := do
   let some a := getNatValue? a | return .rfl
-  if (getNatValue? n).isSome then return .rfl -- already in normal form
+  bif (getNatValue? n).isSome then return .rfl -- already in normal form
   let some n ← evalNat n |>.run | return .rfl
   let e ← share <| toExpr (BitVec.ofNat n a)
   return .step e (done := true)

@@ -67,7 +67,7 @@ Operations dispatch on the type expression directly. It assumes non-standard ins
 
 def skipIfUnchanged (e : Expr) (result : Result) : Result :=
   match result with
-  | .step e' _ _ cd => if isSameExpr e e' then mkRflResultCD cd else result
+  | .step e' _ _ cd => bif isSameExpr e e' then mkRflResultCD cd else result
   | _ => result
 
 abbrev evalUnary [ToExpr β] (toValue? : Expr → Option α) (op : α → β) (a : Expr) : SimpM Result := do
@@ -111,7 +111,7 @@ Builds the (shared) literal for `a`. The representation is controlled by
 otherwise.
 -/
 def mkBitVecLit (a : BitVec n) : EvalM Expr := do
-  if (← read).bitVecOfNat then
+  bif (← read).bitVecOfNat then
     share <| toExpr a
   else
     let nExpr := mkNatLit n
@@ -146,7 +146,8 @@ abbrev evalBinInt64 : (op : Int64 → Int64 → Int64) → (a b : Expr) → Simp
 abbrev evalBinFin' (op : {n : Nat} → Fin n → Fin n → Fin n) (αExpr : Expr) (a b : Expr) : SimpM Result := do
   let some a := getFinValue? a | return .rfl
   let some b := getFinValue? b | return .rfl
-  if h : a.n = b.n then
+  bif h : a.n =ᵇ b.n then
+    have h := eq_of_decideEq_eq_true h
     let e ← share <| toExpr (op a.val (h ▸ b.val))
     return .step e (mkApp2 (mkConst ``Eq.refl [1]) αExpr e) (done := true)
   else
@@ -155,7 +156,8 @@ abbrev evalBinFin' (op : {n : Nat} → Fin n → Fin n → Fin n) (αExpr : Expr
 abbrev evalBinBitVec' (op : {n : Nat} → BitVec n → BitVec n → BitVec n) (αExpr : Expr) (a b : Expr) : EvalM Result := do
   let some a := getBitVecValue? a | return .rfl
   let some b := getBitVecValue? b | return .rfl
-  if h : a.n = b.n then
+  bif h : a.n =ᵇ b.n then
+    have h := eq_of_decideEq_eq_true h
     let e ← mkBitVecLit (op a.val (h ▸ b.val))
     return .step e (mkApp2 (mkConst ``Eq.refl [1]) αExpr e) (done := true)
   else
@@ -164,14 +166,14 @@ abbrev evalBinBitVec' (op : {n : Nat} → BitVec n → BitVec n → BitVec n) (�
 abbrev evalPowNat [ToExpr α] (maxExponent : Nat) (toValue? : Expr → Option α) (op : α → Nat → α) (a b : Expr) : SimpM Result := do
   let some a := toValue? a | return .rfl
   let some b := getNatValue? b | return .rfl
-  if b > maxExponent then return .rfl
+  bif b >ᵇ maxExponent then return .rfl
   let e ← share <| toExpr (op a b)
   return .step e (mkApp2 (mkConst ``Eq.refl [1]) (ToExpr.toTypeExpr (α := α)) e) (done := true)
 
 abbrev evalPowInt [ToExpr α] (maxExponent : Nat) (toValue? : Expr → Option α) (op : α → Int → α) (a b : Expr) : SimpM Result := do
   let some a := toValue? a | return .rfl
   let some b := getIntValue? b | return .rfl
-  if b.natAbs > maxExponent then return .rfl
+  bif b.natAbs >ᵇ maxExponent then return .rfl
   let e ← share <| toExpr (op a b)
   return .step e (mkApp2 (mkConst ``Eq.refl [1]) (ToExpr.toTypeExpr (α := α)) e) (done := true)
 
@@ -309,14 +311,14 @@ def evalPow (α β : Expr) (a b : Expr) : EvalM Result := do
   | _ => return .rfl
 
 abbrev shift [ShiftLeft α] [ShiftRight α] (left : Bool) (a b : α) : α :=
-  if left then a <<< b else a >>> b
+  bif left then a <<< b else a >>> b
 
 def evalShift (left : Bool) (α β : Expr) (a b : Expr) : EvalM Result :=
-  if isSameExpr α β then
+  bif isSameExpr α β then
     match_expr α with
     | Nat => evalBinNat (shift left) a b
-    | Fin _ => if left then evalBinFin' (· <<< ·) α a b else evalBinFin' (· >>> ·) α a b
-    | BitVec _ => if left then evalBinBitVec' (· <<< ·) α a b else evalBinBitVec' (· >>> ·) α a b
+    | Fin _ => bif left then evalBinFin' (· <<< ·) α a b else evalBinFin' (· >>> ·) α a b
+    | BitVec _ => bif left then evalBinBitVec' (· <<< ·) α a b else evalBinBitVec' (· >>> ·) α a b
     | UInt8 => evalBinUInt8 (shift left) a b
     | UInt16 => evalBinUInt16 (shift left) a b
     | UInt32 => evalBinUInt32 (shift left) a b
@@ -333,13 +335,13 @@ def evalShift (left : Bool) (α β : Expr) (a b : Expr) : EvalM Result :=
     | Int => do
       let some a := getIntValue? a | return .rfl
       let some b := getNatValue? b | return .rfl
-      let e := if left then a <<< b else a >>> b
+      let e := bif left then a <<< b else a >>> b
       let e ← share <| toExpr e
       return .step e (mkApp2 (mkConst ``Eq.refl [1]) α e) (done := true)
     | BitVec _ => do
       let some a := getBitVecValue? a | return .rfl
       let some b := getNatValue? b | return .rfl
-      let e := if left then a.val <<< b else a.val >>> b
+      let e := bif left then a.val <<< b else a.val >>> b
       let e ← mkBitVecLit e
       return .step e (mkApp2 (mkConst ``Eq.refl [1]) α e) (done := true)
     | _ => return .rfl
@@ -347,7 +349,7 @@ def evalShift (left : Bool) (α β : Expr) (a b : Expr) : EvalM Result :=
     let_expr BitVec _ := α | return .rfl
     let some a := getBitVecValue? a | return .rfl
     let some b := getBitVecValue? b | return .rfl
-    let e := if left then a.val <<< b.val else a.val >>> b.val
+    let e := bif left then a.val <<< b.val else a.val >>> b.val
     let e ← mkBitVecLit e
     return .step e (mkApp2 (mkConst ``Eq.refl [1]) α e) (done := true)
   | _ => return .rfl
@@ -372,14 +374,14 @@ def evalIntBDiv (a b : Expr) : SimpM Result := do
 
 def evalLog2 (a : Expr) : EvalM Result := do
   let some n := getNatValue? a | return .rfl
-  if n > 2^(← read).maxExponent then return .rfl
+  bif n >ᵇ 2^(← read).maxExponent then return .rfl
   let e ← share <| toExpr n.log2
   return .step e (mkApp2 (mkConst ``Eq.refl [1]) Nat.mkType e) (done := true)
 
 abbrev evalBinPred (toValue? : Expr → Option α) (trueThm falseThm : Expr) (op : α → α → Bool) (a b : Expr) : SimpM Result := do
   let some va := toValue? a | return .rfl
   let some vb := toValue? b | return .rfl
-  if op va vb then
+  bif op va vb then
     let e ← getTrueExpr
     return .step e (mkApp3 trueThm a b eagerReflBoolTrue) (done := true)
   else
@@ -389,8 +391,9 @@ abbrev evalBinPred (toValue? : Expr → Option α) (trueThm falseThm : Expr) (op
 def evalBitVecPred (n : Expr) (trueThm falseThm : Expr) (op : {n : Nat} → BitVec n → BitVec n → Bool) (a b : Expr) : SimpM Result := do
   let some va := getBitVecValue? a | return .rfl
   let some vb := getBitVecValue? b | return .rfl
-  if h : va.n = vb.n then
-    if op va.val (h ▸ vb.val) then
+  bif h : va.n =ᵇ vb.n then
+    have h := eq_of_decideEq_eq_true h
+    bif op va.val (h ▸ vb.val) then
       let e ← getTrueExpr
       return .step e (mkApp4 trueThm n a b eagerReflBoolTrue) (done := true)
     else
@@ -402,8 +405,9 @@ def evalBitVecPred (n : Expr) (trueThm falseThm : Expr) (op : {n : Nat} → BitV
 def evalFinPred (n : Expr) (trueThm falseThm : Expr) (op : {n : Nat} → Fin n → Fin n → Bool) (a b : Expr) : SimpM Result := do
   let some va := getFinValue? a | return .rfl
   let some vb := getFinValue? b | return .rfl
-  if h : va.n = vb.n then
-    if op va.val (h ▸ vb.val) then
+  bif h : va.n =ᵇ vb.n then
+    have h := eq_of_decideEq_eq_true h
+    bif op va.val (h ▸ vb.val) then
       let e ← getTrueExpr
       return .step e (mkApp4 trueThm n a b eagerReflBoolTrue) (done := true)
     else
@@ -423,7 +427,7 @@ inequality via `congrArg (List.get?Internal · i)`.
 def evalStringEq (a b : Expr) : SimpM Result := do
   let some va := getStringValue? a | return .rfl
   let some vb := getStringValue? b | return .rfl
-  if va = vb then
+  bif va =ᵇ vb then
     let e ← getTrueExpr
     return .step e (mkApp2 (mkConst ``eq_self [.succ .zero]) (mkConst ``String) a) (done := true)
   else
@@ -472,7 +476,7 @@ def evalLE (α : Expr) (a b : Expr) : SimpM Result :=
   | _ => return .rfl
 
 def evalEq (α : Expr) (a b : Expr) : SimpM Result :=
-  if isSameExpr a b then do
+  bif isSameExpr a b then do
     let e ← getTrueExpr
     let u ← getLevel α
     return .step e (mkApp2 (mkConst ``eq_self [u]) α a) (done := true)
@@ -506,7 +510,7 @@ abbrev evalBinBoolPred (toValue? : Expr → Option α) (op : α → α → Bool)
   let some vb := toValue? b | return .rfl
   let r := op va vb
   let e ← share (toExpr r)
-  return .step e (if r then eagerReflBoolTrue else eagerReflBoolFalse) (done := true)
+  return .step e (bif r then eagerReflBoolTrue else eagerReflBoolFalse) (done := true)
 
 abbrev evalBinBoolPredBool : (op : Bool → Bool → Bool) → (a b : Expr) → SimpM Result := evalBinBoolPred getBoolValue?
 abbrev evalBinBoolPredNat : (op : Nat → Nat → Bool) → (a b : Expr) → SimpM Result := evalBinBoolPred getNatValue?
@@ -525,20 +529,22 @@ abbrev evalBinBoolPredChar : (op : Char → Char → Bool) → (a b : Expr) → 
 abbrev evalBinBoolPredFin (op : {n : Nat} → Fin n → Fin n → Bool) (a b : Expr) : SimpM Result := do
   let some a := getFinValue? a | return .rfl
   let some b := getFinValue? b | return .rfl
-  if h : a.n = b.n then
+  bif h : a.n =ᵇ b.n then
+    have h := eq_of_decideEq_eq_true h
     let r := op a.val (h ▸ b.val)
     let e ← share (toExpr r)
-    return .step e (if r then eagerReflBoolTrue else eagerReflBoolFalse) (done := true)
+    return .step e (bif r then eagerReflBoolTrue else eagerReflBoolFalse) (done := true)
   else
     return .rfl
 
 abbrev evalBinBoolPredBitVec (op : {n : Nat} → BitVec n → BitVec n → Bool) (a b : Expr) : SimpM Result := do
   let some a := getBitVecValue? a | return .rfl
   let some b := getBitVecValue? b | return .rfl
-  if h : a.n = b.n then
+  bif h : a.n =ᵇ b.n then
+    have h := eq_of_decideEq_eq_true h
     let r := op a.val (h ▸ b.val)
     let e ← share (toExpr r)
-    return .step e (if r then eagerReflBoolTrue else eagerReflBoolFalse) (done := true)
+    return .step e (bif r then eagerReflBoolTrue else eagerReflBoolFalse) (done := true)
   else
     return .rfl
 
@@ -645,7 +651,7 @@ def evalBitVecToNat (a : Expr) : SimpM Result := do
 def evalBitVecOfNat (n a : Expr) : EvalM Result := do
   let some a ← getNatValue? a |>.run | return .rfl
   -- `BitVec.ofNat` with a literal width is the normal form only when `bitVecOfNat := true`
-  if (← getNatValue? n |>.run).isSome && (← read).bitVecOfNat then return .rfl
+  bif (← getNatValue? n |>.run).isSome && (← read).bitVecOfNat then return .rfl
   if let some nv ← evalNat n |>.run then -- TODO: consider using dsimp
     let r ← mkBitVecLit (BitVec.ofNat nv a)
     return .step r (mkRflBitVec r nv) (done := true)
@@ -655,7 +661,7 @@ def evalBitVecOfNat (n a : Expr) : EvalM Result := do
     width, so `0#w` (e.g., in `BitVec.sdiv_zero`) must become `(0 : BitVec w)` to match
     `(0 : BitVec 32)` after instantiation. The numeral is not reduced modulo `2^w`.
     -/
-    if (← read).bitVecOfNat then return .rfl
+    bif (← read).bitVecOfNat then return .rfl
     let v := mkRawNatLit a
     let type := mkBitVecType n
     let r ← share <| mkApp3 (mkConst ``OfNat.ofNat [0]) type v (mkApp2 (mkConst ``BitVec.instOfNat) n v)
@@ -677,7 +683,7 @@ abbrev evalBitVecNatBool (op : {n : Nat} → BitVec n → Nat → Bool) (a i : E
   let some i := getNatValue? i | return .rfl
   let r := op a.val i
   let e ← share (toExpr r)
-  return .step e (if r then eagerReflBoolTrue else eagerReflBoolFalse) (done := true)
+  return .step e (bif r then eagerReflBoolTrue else eagerReflBoolFalse) (done := true)
 
 abbrev evalBitVecNatBitVec (αExpr : Expr) (op : {n : Nat} → BitVec n → Nat → BitVec n) (a i : Expr) :
     EvalM Result := do
@@ -767,7 +773,7 @@ def evalFinLast (n : Expr) : SimpM Result := do
 
 def evalFinPredecessor (a : Expr) : SimpM Result := do
   let some ⟨_ + 1, i⟩ := getFinValue? a | return .rfl
-  if h : i ≠ 0 then mkFinResult (i.pred h) else return .rfl
+  bif h : i ≠ᵇ 0 then mkFinResult (i.pred (ne_of_decideNe_eq_true h)) else return .rfl
 
 def evalFinCastAdd (m a : Expr) : SimpM Result := do
   let some m := getNatValue? m | return .rfl
@@ -787,17 +793,17 @@ def evalFinNatAdd (n a : Expr) : SimpM Result := do
 def evalFinCastLT (n a : Expr) : SimpM Result := do
   let some n := getNatValue? n | return .rfl
   let some a := getFinValue? a | return .rfl
-  if h : a.val.val < n then mkFinResult (a.val.castLT h) else return .rfl
+  bif h : a.val.val <ᵇ n then mkFinResult (a.val.castLT (lt_of_decideLT_eq_true h)) else return .rfl
 
 def evalFinCastLE (m a : Expr) : SimpM Result := do
   let some m := getNatValue? m | return .rfl
   let some a := getFinValue? a | return .rfl
-  if h : a.n ≤ m then mkFinResult (Fin.castLE h a.val) else return .rfl
+  bif h : a.n ≤ᵇ m then mkFinResult (Fin.castLE (le_of_decideLE_eq_true h) a.val) else return .rfl
 
 def evalFinSubNat (m a : Expr) : SimpM Result := do
   let some m := getNatValue? m | return .rfl
   let some a := getFinValue? a | return .rfl
-  if h : m ≤ a.val.val then
+  bif h : m ≤ᵇ a.val.val then
     mkFinResult (⟨a.val.val - m, by have := a.val.isLt; omega⟩ : Fin (a.n - m))
   else
     return .rfl
@@ -806,8 +812,8 @@ def evalFinSubNat (m a : Expr) : SimpM Result := do
 def evalFinOfNat (n v : Expr) : SimpM Result := do
   let some n := getNatValue? n | return .rfl
   let some v := getNatValue? v | return .rfl
-  if h : n ≠ 0 then
-    have : NeZero n := ⟨h⟩
+  bif h : n ≠ᵇ 0 then
+    have : NeZero n := ⟨(ne_of_decideNe_eq_true h)⟩
     mkFinResult (Fin.ofNat n v)
   else
     return .rfl
@@ -824,11 +830,11 @@ def evalFinLit (e α v : Expr) : SimpM Result := do
   let isCanonical := v.isRawNatLit && (getNatValue? nExpr).isSome
   let some v := (match v with | .lit (.natVal v) => some v | _ => getNatValue? v) | return .rfl
   let some n ← evalNat nExpr |>.run | return .rfl
-  if isCanonical && v < n then return .rfl
-  if h : n ≠ 0 then
-    have : NeZero n := ⟨h⟩
+  bif isCanonical && v <ᵇ n then return .rfl
+  bif h : n ≠ᵇ 0 then
+    have : NeZero n := ⟨(ne_of_decideNe_eq_true h)⟩
     let e' ← share <| toExpr (Fin.ofNat n v)
-    if isSameExpr e e' then return .rfl
+    bif isSameExpr e e' then return .rfl
     return .step e' (mkApp2 (mkConst ``Eq.refl [1]) (ToExpr.toTypeExpr (α := Fin n)) e') (done := true)
   else
     return .rfl
@@ -842,7 +848,7 @@ abbrev evalCharPred (op : Char → Bool) (a : Expr) : SimpM Result := do
   let some a := getCharValue? a | return .rfl
   let r := op a
   let e ← share (toExpr r)
-  return .step e (if r then eagerReflBoolTrue else eagerReflBoolFalse) (done := true)
+  return .step e (bif r then eagerReflBoolTrue else eagerReflBoolFalse) (done := true)
 
 /-- Evaluates `String.push s c` on a string literal and a character literal. -/
 def evalStringPush (s c : Expr) : SimpM Result := do

@@ -38,19 +38,19 @@ public def rewriteWith (thm : Theorem) (e : Expr) : DSimpM Result :=
   for h : i in *...args.size do
     let arg := args[i]
     if let .mvar mvarId := arg then
-      if (← mvarId.isAssigned) then
+      bif (← mvarId.isAssigned) then
         args := args.set i (← instantiateMVarsS arg)
-      else if (← mvarId.getDecl).index ≥ mvarCounterSaved then
+      else bif (← mvarId.getDecl).index ≥ᵇ mvarCounterSaved then
         -- A hypothesis or instance not covered by the pattern. It cannot be discharged.
         return .rfl
-    else if arg.hasMVar then
+    else bif arg.hasMVar then
       args := args.set i (← instantiateMVarsS arg)
   let rhs := thm.rhs.instantiateLevelParams thm.pattern.levelParams us
   let rhs ← share rhs
   let e' ← instantiateRevBetaS rhs args.toArray
-  if isSameExpr e e' then
+  bif isSameExpr e e' then
     return .rfl
-  if thm.perm && !(← acLt e' e) then
+  bif thm.perm && !(← acLt e' e) then
     return .rfl
   return .step e'
 
@@ -62,7 +62,7 @@ def rewriteOverApplied (thm : Theorem) (e : Expr) (numExtra : Nat) : DSimpM Resu
 
 def rewriteUsing (candidates : Array (Theorem × Nat)) (e : Expr) : DSimpM Result := do
   for (thm, numExtra) in candidates do
-    let result ← if numExtra == 0 then rewriteWith thm e else rewriteOverApplied thm e numExtra
+    let result ← bif numExtra == 0 then rewriteWith thm e else rewriteOverApplied thm e numExtra
     if let .step .. := result then
       return result
   return .rfl
@@ -101,18 +101,18 @@ and contributes its equational theorems proved by `rfl`. See also `Sym.Simp.getS
 -/
 public def Decls.mkEntries (declName : Name) : MetaM (Array Decls.Entry) := do
   let info ← getAsyncConstInfo declName
-  if (← isProp info.sig.get.type) then
+  bif (← isProp info.sig.get.type) then
     unless (← isRflTheorem declName) do
       throwError "cannot use `{.ofConstName declName}` as a dsimp theorem, it is not proved by `rfl`"
     return #[.thm (← Sym.Simp.mkTheoremFromDecl declName)]
   let names ← Sym.Simp.getSimpTheoremNames declName
   -- A reducible definition contributes nothing: the `Sym` preprocessing unfolds it.
-  if names.thms.isEmpty then return #[]
+  bif names.thms.isEmpty then return #[]
   let mut entries := #[]
   for name in names.thms do
-    if (← isRflTheorem name) then
+    bif (← isRflTheorem name) then
       entries := entries.push (.thm (← Sym.Simp.mkTheoremFromDecl name))
-  if (← Lean.Meta.Simp.unfoldEvenWithEqns declName) then
+  bif (← Lean.Meta.Simp.unfoldEvenWithEqns declName) then
     entries := entries.push (.unfold declName)
   return entries
 
@@ -125,7 +125,7 @@ public def Decls.ofNames (declNames : Array Name) : MetaM Decls :=
 
 /-- The dsimproc unfolding the definitions and rewriting with the theorems in `decls`. -/
 public def Decls.toDSimproc (decls : Decls) : DSimproc :=
-  let p : DSimproc := if decls.toUnfold.isEmpty then fun _ => return .rfl else unfold decls.toUnfold
-  if decls.thms.isEmpty then p else p >> rewrite decls.thms
+  let p : DSimproc := bif decls.toUnfold.isEmpty then fun _ => return .rfl else unfold decls.toUnfold
+  bif decls.thms.isEmpty then p else p >> rewrite decls.thms
 
 end Lean.Meta.Sym.DSimp

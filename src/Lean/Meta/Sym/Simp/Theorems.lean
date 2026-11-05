@@ -61,7 +61,7 @@ def Theorems.isEmpty (thms : Theorems) : Bool :=
   thms.thms.root.isEmpty && thms.fallback.root.isEmpty
 
 def Theorems.insert (thms : Theorems) (thm : Theorem) : Theorems :=
-  if thm.fallback then
+  bif thm.fallback then
     { thms with fallback := insertPattern thms.fallback thm.pattern thm }
   else
     { thms with thms := insertPattern thms.thms thm.pattern thm }
@@ -97,17 +97,17 @@ private partial def isPermAux (a b : Expr) : IsPermM Unit := do
   match a, b with
   | .bvar i, .bvar j =>
     let offset ← read
-    if i < offset && j < offset then
+    bif i <ᵇ offset && j <ᵇ offset then
       unless i == j do throw ()
-    else if i >= offset && j >= offset then
+    else bif i ≥ᵇ offset && j ≥ᵇ offset then
       let pi := i - offset
       let pj := j - offset
       let fwd ← get
-      if h : pi >= fwd.size then throw () else
+      bif h : pi ≥ᵇ fwd.size then throw () else
       match fwd[pi] with
       | none =>
         -- Check injectivity: pj must not already be a target of another mapping
-        if fwd.contains (some pj) then throw ()
+        bif fwd.contains (some pj) then throw ()
         set (fwd.set pi (some pj))
       | some pj' => unless pj == pj' do throw ()
     else throw ()
@@ -190,7 +190,7 @@ private def mkRhsVarMask (numVars : Nat) (rhs : Expr) : Nat := Id.run do
     **Note**: We are potentially scanning the `rhs` multiple times. We assume this is ok here
     because the `rhs` is usually small, and we cache the loose bvar range in `Expr`.
     -/
-    if rhs.hasLooseBVar (numVars - 1 - i) then
+    bif rhs.hasLooseBVar (numVars - 1 - i) then
       mask := mask ||| (1 <<< i)
   return mask
 
@@ -252,23 +252,23 @@ applications.
 -/
 def getSimpTheoremNames (declName : Name) : MetaM DeclTheoremNames := do
   let info ← getAsyncConstInfo declName
-  if (← isProp info.sig.get.type) then
+  bif (← isProp info.sig.get.type) then
     return { thms := #[declName] }
   unless info.kind matches .defn do
     throwError "cannot use `{.ofConstName declName}` as a simp theorem, it is not a proposition nor a definition with equational theorems"
-  if isUnfoldReducibleCandidate (← getEnv) declName then
+  bif isUnfoldReducibleCandidate (← getEnv) declName then
     -- The `Sym` preprocessing has already unfolded every application of `declName`.
     logWarning m!"`{.ofConstName declName}` is a reducible definition, `Sym.simp` unfolds it during preprocessing"
     return { thms := #[] }
-  if (← Simp.ignoreEquations declName) then
+  bif (← Simp.ignoreEquations declName) then
     throwError "cannot use `{.ofConstName declName}` as a simp theorem, it is a projection, and `Sym.simp` does not support unfolding projections"
   let some eqns ← getEqnsFor? declName
     | throwError "cannot use `{.ofConstName declName}` as a simp theorem, it does not have equational theorems"
   -- Recursive definitions are unfolded by their equational theorems only.
-  if (← isRecursiveDefinition declName) then
+  bif (← isRecursiveDefinition declName) then
     return { thms := eqns }
-  if h : eqns.size = 1 then
-    if (← isUnfoldEqn declName eqns[0]) then
+  bif h : eqns.size =ᵇ 1 then
+    bif (← isUnfoldEqn declName eqns[0]) then
       return { thms := eqns }
   return { thms := eqns, unfold? := (← getUnfoldEqnFor? declName (nonRec := true)) }
 
@@ -300,7 +300,7 @@ def mkSymSimpExt (name : Name := by exact decl_name%) : IO SymSimpExtension :=
     exportEntry? := fun _ thm =>
       match thm.expr with
       | .const declName _ =>
-        if isPrivateName declName then ⟨none, none, some thm⟩
+        bif isPrivateName declName then ⟨none, none, some thm⟩
         else .uniform (some thm)
       | _ => .uniform (some thm)
   }

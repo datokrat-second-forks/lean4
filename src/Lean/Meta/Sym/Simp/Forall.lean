@@ -70,7 +70,7 @@ structure ToArrowResult where
 
 def toArrow (e : Expr) : SymM ToArrowResult := do
   if let .forallE n α β bi := e then
-    if !β.hasLooseBVars then
+    bif !β.hasLooseBVars then
       let { arrow, infos, v } ← toArrow β
       let u ← getLevel α
       let arrow ← mkAppS₂ (← mkConstS ``Arrow [u, v]) α arrow
@@ -107,12 +107,12 @@ partial def simpArrows (e : Expr) (infos : List ArrowInfo) (simpBody : Simproc) 
     -- in another local context (e.g., a conditional rewrite could succeed), which would
     -- lead to a completely different result for the arrow expression.
     let p_r ← simp p
-    if (← isFalseExpr (p_r.getResultExpr p)) && info.v.isZero then
+    bif (← isFalseExpr (p_r.getResultExpr p)) && info.v.isZero then
       match p_r with
       | .rfl _ cd => return (.step (← getTrueExpr) (mkApp (mkConst ``false_arrow) q) (contextDependent := cd), [])
       | .step _ h _ cd => return (.step (← getTrueExpr) (mkApp3 (mkConst ``false_arrow_congr) p q h) (contextDependent := cd), [])
     let (q_r, infos') ← simpArrows q infos' simpBody
-    if (← isTrueExpr (q_r.getResultExpr q)) then
+    bif (← isTrueExpr (q_r.getResultExpr q)) then
       let cd := p_r.isContextDependent || q_r.isContextDependent
       match q_r with
       | .rfl _ _ => return (.step (← getTrueExpr) (mkApp (mkConst ``arrow_true [info.u]) p) (contextDependent := cd), [])
@@ -120,13 +120,13 @@ partial def simpArrows (e : Expr) (infos : List ArrowInfo) (simpBody : Simproc) 
     match p_r, q_r with
     | .rfl _ cd₁, .rfl _ cd₂ =>
       let cd := cd₁ || cd₂
-      if (← isTrueExpr p) && info.v.isZero then
+      bif (← isTrueExpr p) && info.v.isZero then
         return (.step q (mkApp (mkConst ``true_arrow) q) (contextDependent := cd), infos')
       else
         return (mkRflResultCD cd, infos)
     | .step p' h _ cd₁, .rfl _ cd₂ =>
       let cd := cd₁ || cd₂
-      if (← isTrueExpr p') && info.v.isZero then
+      bif (← isTrueExpr p') && info.v.isZero then
         return (.step q (mkApp3 (mkConst ``true_arrow_congr_left) p q h) (contextDependent := cd), infos')
       else
         let e' ← mkAppS₂ f p' q
@@ -134,14 +134,14 @@ partial def simpArrows (e : Expr) (infos : List ArrowInfo) (simpBody : Simproc) 
         return (.step e' proof (contextDependent := cd), info :: infos')
     | .rfl _ cd₁, .step q' h _ cd₂ =>
       let cd := cd₁ || cd₂
-      if (← isTrueExpr p) && info.v.isZero then
+      bif (← isTrueExpr p) && info.v.isZero then
         return (.step q' (mkApp3 (mkConst ``true_arrow_congr_right) q q' h) (contextDependent := cd), infos')
       else
         let e' ← mkAppS₂ f p q'
         let proof := mkApp4 (mkConst ``arrow_congr_right f.constLevels!) p q q' h
         return (.step e' proof (contextDependent := cd), info :: infos')
     | .step p' h₁ _ cd₁, .step q' h₂ _ cd₂ =>
-      if (← isTrueExpr p') && info.v.isZero then
+      bif (← isTrueExpr p') && info.v.isZero then
         return (.step q' (mkApp5 (mkConst ``true_arrow_congr) p q q' h₁ h₂) (contextDependent := cd₁ || cd₂), infos')
       else
         let e' ← mkAppS₂ f p' q'
@@ -221,9 +221,9 @@ def mkPropDomainCastS (p₁ p₂ h a : Expr) : SymM Expr := do
   mkAppS₆ (← mkConstS ``Eq.substr [1]) prop (← mkLambdaS `x .default prop (← mkBVarS 0)) p₂ p₁ h a
 
 public partial def simpForall' (simpArrow : Simproc) (simpBody : Simproc) (e : Expr) : SimpM Result := do
-  if e.isArrow then
+  bif e.isArrow then
     simpArrow e
-  else if (← isProp e) then
+  else bif (← isProp e) then
     go #[] e false
   else
     return .rfl
@@ -239,10 +239,10 @@ where
   -/
   go (xs : Array Expr) (e : Expr) (cd : Bool) : SimpM Result := do
     if let .forallE n d b bi := e then
-      if b.hasLooseBVar 0 then
+      bif b.hasLooseBVar 0 then
         let d ← close xs d
         let mut cd := cd
-        if (← isProp d) then
+        bif (← isProp d) then
           match (← under xs (simp d)) with
           | .rfl _ cd' => cd := cd || cd'
           | .step d' h _ cd' =>
@@ -254,7 +254,7 @@ where
 
   /-- Runs `k`, which simplifies a term under the binders `xs`, with a fresh transient cache. -/
   under {α} (xs : Array Expr) (k : SimpM α) : SimpM α :=
-    if xs.isEmpty then k else withFreshTransientCache k
+    bif xs.isEmpty then k else withFreshTransientCache k
 
   /-- Instantiates the loose bound variables of `e` with `xs`. -/
   close (xs : Array Expr) (e : Expr) : SimpM Expr :=
@@ -266,7 +266,7 @@ where
     match r with
     | .rfl _ cd => return mkRflResultCD (cd₀ || cd)
     | .step b' h done cd =>
-      if xs.isEmpty then
+      bif xs.isEmpty then
         return .step b' h done (cd₀ || cd)
       let h ← mkLambdaFVars xs h
       let e' ← shareCommon (← mkForallFVars xs b')

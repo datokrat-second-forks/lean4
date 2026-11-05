@@ -54,7 +54,7 @@ def mkResultPos (pattern : Pattern) : List Nat := Id.run do
   -- Collect arguments that occur in the pattern
   for fvarId in collectFVars {} (pattern.pattern.instantiateRev auxVars) |>.fvarIds do
     let .num pre idx := fvarId.name | pure ()
-    if pre == auxPrefix then
+    bif pre == auxPrefix then
       found := found.set! idx true
   let argTypes := pattern.varTypes.mapIdx fun i type => type.instantiateRevRange 0 i auxVars
   -- Collect dependent and non-dependent arguments that become new goals
@@ -68,10 +68,10 @@ def mkResultPos (pattern : Pattern) : List Nat := Id.run do
       for j in (i+1)...numArgs do
         unless found[j]! do
           let argType := argTypes[j]!
-          if argType.containsFVar auxVar.fvarId! then
+          bif argType.containsFVar auxVar.fvarId! then
             isDep := true
             break
-      if isDep then
+      bif isDep then
         deps := deps.push i
       else
         nonDeps := nonDeps.push i
