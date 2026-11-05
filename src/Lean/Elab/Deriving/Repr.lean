@@ -80,7 +80,7 @@ where
             else
               rhs ← `($rhs ++ Format.line ++ reprArg $a)
         patterns := patterns.push (← `(@$(mkIdent ctorName):ident $ctorArgs:term*))
-        `(matchAltExpr| | $[$patterns:term],* => Repr.addAppParen (Format.group (Format.nest (if prec >= max_prec then 1 else 2) ($rhs:term))) prec)
+        `(matchAltExpr| | $[$patterns:term],* => Repr.addAppParen (Format.group (Format.nest (bif max_prec ≤ᵇ prec then 1 else 2) ($rhs:term))) prec)
       alts := alts.push alt
     return alts
 

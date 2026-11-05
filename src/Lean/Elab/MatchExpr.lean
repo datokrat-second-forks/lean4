@@ -155,7 +155,7 @@ def toDoubleQuotedName (ident : Ident) : Term :=
   ⟨mkNode ``Parser.Term.doubleQuotedName #[mkAtom "`", mkAtom "`", ident]⟩
 
 /--
-Generates an `if-then-else` tree for implementing a `match_expr` with discriminant `discr`,
+Generates a `bif-then-else` tree for implementing a `match_expr` with discriminant `discr`,
 alternatives `alts`, and else-alternative `elseAlt`.
 -/
 partial def generate (discr : Term) (alts : List Alt) (elseAlt : ElseAlt) : MacroM Syntax := do
@@ -176,14 +176,14 @@ partial def generate (discr : Term) (alts : List Alt) (elseAlt : ElseAlt) : Macr
       let discr' ← `(__discr)
       let body ← loop discr' altsNext
       if saveActual then
-        `(if h : ($discr).isApp then let a := Expr.appArg $discr h; let __discr := Expr.appFnCleanup $discr h; $body else $kElse ())
+        `(bif h : ($discr).isApp then let a := Expr.appArg $discr h; let __discr := Expr.appFnCleanup $discr h; $body else $kElse ())
       else
-        `(if h : ($discr).isApp then let __discr := Expr.appFnCleanup $discr h; $body else $kElse ())
+        `(bif h : ($discr).isApp then let __discr := Expr.appFnCleanup $discr h; $body else $kElse ())
     let mut result := body
     for funName in funNamesToMatch do
       if let some alt := getAltFor? alts funName then
         let actuals ← getActuals discr alt
-        result ← `(if ($discr).isConstOf $(toDoubleQuotedName funName) then $alt.k $actuals* else $result)
+        result ← `(bif ($discr).isConstOf $(toDoubleQuotedName funName) then $alt.k $actuals* else $result)
     return result
   let body ← loop discr' alts
   let mut result ← `(let_delayed __do_jp (_ : Unit) := $(⟨elseAlt.rhs⟩):term; let __discr := Expr.cleanupAnnotations $discr:term; $body:term)

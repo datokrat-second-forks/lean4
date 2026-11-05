@@ -516,6 +516,9 @@ macro_rules
   ppRealGroup(ppRealFill(ppIndent("bif " term " then") ppSpace term)
     ppDedent(ppSpace) ppRealFill("else " term)) : term
 
+-- Unlike `if`, `bif` does not wait for the type of `c`: the expected type `Bool` already fixes a
+-- condition whose type is still a metavariable, and waiting would leave `save_info` annotations
+-- in statements with auto-bound conditions, which `Sym.simp` rewriting does not see through.
 macro_rules
   | `(bif $c then $t else $e) => `(cond $c $t $e)
 

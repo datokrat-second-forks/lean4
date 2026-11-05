@@ -128,10 +128,19 @@ private def doIfPropHyp? (prop : Syntax) : Option Term :=
     let h := prop[0][0]
     some ⟨if h.isOfKind ``Lean.binderIdent then h[0] else h⟩
 
+/--
+Builds `let_mvar% ?c := c; wait_if_type_mvar% ?c; t ?c`, so that the term waits until the type of `c`
+is known, like `if`.
+-/
+private def mkWaitingCond (c : Term) (t : Term → TermElabM Term) : TermElabM Term :=
+  withFreshMacroScope do
+    let mvar ← withRef c `(?c)
+    `(let_mvar% ?c := $c; wait_if_type_mvar% ?c; $(← t mvar))
+
 @[builtin_doElem_elab Lean.Parser.Term.doUIf] def elabDoUIf : DoElab := fun stx dec => do
   let prop := stx.raw[1]
   let c : Term := ⟨prop[1]⟩
-  elabDoCond stx dec fun then_ else_ =>
+  elabDoCond stx dec fun then_ else_ => mkWaitingCond c fun c =>
     match doIfPropHyp? prop with
     | none => `(UDecidable.ite $c $then_ $else_)
     | some h => `(UDecidable.dite $c (fun $h => $then_) (fun $h => $else_))
@@ -152,11 +161,9 @@ Like `if`, it waits until the type of `c` is known.
 @[builtin_doElem_elab Lean.Parser.Term.InternalSyntax.doIfAuto] def elabDoIfAuto : DoElab := fun stx dec => do
   let stx := stx.raw
   let c : Term := ⟨stx[2]⟩
-  elabDoCondCore stx[0] c ⟨stx[4]⟩ ⟨stx[6]⟩ dec fun then_ else_ => withFreshMacroScope do
-    let mvar ← withRef c `(?c)
-    let iteAuto := mkNode ``Lean.Parser.Term.InternalSyntax.termIteAuto
-      #[mkAtomFrom stx[0] "ite_auto%", stx[1], mvar, mkAtom "then", then_, mkAtom "else", else_]
-    `(let_mvar% ?c := $c; wait_if_type_mvar% ?c; $(⟨iteAuto⟩))
+  elabDoCondCore stx[0] c ⟨stx[4]⟩ ⟨stx[6]⟩ dec fun then_ else_ => mkWaitingCond c fun mvar =>
+    return ⟨mkNode ``Lean.Parser.Term.InternalSyntax.termIteAuto
+      #[mkAtomFrom stx[0] "ite_auto%", stx[1], mvar, mkAtom "then", then_, mkAtom "else", else_]⟩
 
 @[builtin_doElem_control_info Lean.Parser.Term.InternalSyntax.doIfAuto]
 def controlInfoDoIfAuto : ControlInfoHandler := fun stx => do

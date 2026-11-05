@@ -217,17 +217,21 @@ embeds proofs about the old condition, unlike a cast of the old instance.
     ppDedent(ppSpace) ppRealFill("else " term)) : term
 
 macro_rules
-  | `(uif $h:ident : $c then $t else $e) =>
-    `(UDecidable.dite $c (fun $h:ident => $t) (fun $h:ident => $e))
-  | `(uif _%$h : $c then $t else $e) =>
-    `(UDecidable.dite $c (fun _%$h => $t) (fun _%$h => $e))
+  | `(uif $h:ident : $c then $t else $e) => do
+    let mvar ← Lean.withRef c `(?m)
+    `(let_mvar% ?m := $c; wait_if_type_mvar% ?m; UDecidable.dite $mvar (fun $h:ident => $t) (fun $h:ident => $e))
+  | `(uif _%$h : $c then $t else $e) => do
+    let mvar ← Lean.withRef c `(?m)
+    `(let_mvar% ?m := $c; wait_if_type_mvar% ?m; UDecidable.dite $mvar (fun _%$h => $t) (fun _%$h => $e))
 
 @[inherit_doc ite] syntax (name := termUIfThenElse)
   ppRealGroup(ppRealFill(ppIndent("uif " term " then") ppSpace term)
     ppDedent(ppSpace) ppRealFill("else " term)) : term
 
 macro_rules
-  | `(uif $c then $t else $e) => `(UDecidable.ite $c $t $e)
+  | `(uif $c then $t else $e) => do
+    let mvar ← Lean.withRef c `(?m)
+    `(let_mvar% ?m := $c; wait_if_type_mvar% ?m; UDecidable.ite $mvar $t $e)
 
 /--
 Constructs a `Max` instance from a decidable `≤` operation.
