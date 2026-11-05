@@ -464,7 +464,7 @@ where
         let mut belowFields := fields.toArray
         let mut i := 0
         let mut curDeclCount := (← get).size
-        while h : i < vars.size do
+        while h : i <ᵇ vars.size do
           let var := vars[i]
           let varType ← inferType var
           let belowArg := varType.getForallBody.appArg!

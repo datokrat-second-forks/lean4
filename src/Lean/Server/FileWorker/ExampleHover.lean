@@ -56,7 +56,8 @@ private def lines (s : String) : Array String := Id.run do
   let mut result := #[]
   let mut lineStart := s.startPos
   let mut iter := lineStart
-  while h : ¬iter.IsAtEnd do
+  while h : iter ≠ᵇ s.endPos do
+    have h := ne_of_decideNe_eq_true h
     let c := iter.get h
     iter := iter.next h
     bif c == '\n' then

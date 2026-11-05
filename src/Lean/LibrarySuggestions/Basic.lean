@@ -358,7 +358,9 @@ def intersperse (selector₁ selector₂ : Selector) (ratio : Float := 0.5) : Se
   let mut count₂ := 0.0
 
   -- Intersperse while both arrays have elements
-  while h : i₁ < suggestions₁.size ∧ i₂ < suggestions₂.size ∧ result.size < c.maxSuggestions do
+  while h : i₁ <ᵇ suggestions₁.size && i₂ <ᵇ suggestions₂.size && result.size <ᵇ c.maxSuggestions do
+    have h : i₁ < suggestions₁.size ∧ i₂ < suggestions₂.size := by
+      simp only [Bool.and_eq_true] at h; exact ⟨lt_of_decideLT_eq_true h.1.1, lt_of_decideLT_eq_true h.1.2⟩
     -- Take from whichever selector keeps the running fraction of `selector₁`
     -- contributions closest to `ratio`. Comparing the two candidate next states
     -- (rather than the achieved fraction) stays accurate at the endpoints, so
@@ -377,12 +379,14 @@ def intersperse (selector₁ selector₂ : Selector) (ratio : Float := 0.5) : Se
       count₂ := count₂ + 1
 
   -- Append remaining elements from selector₁
-  while h : i₁ < suggestions₁.size ∧ result.size < c.maxSuggestions do
+  while h : i₁ <ᵇ suggestions₁.size && result.size <ᵇ c.maxSuggestions do
+    have h : i₁ < suggestions₁.size := by simp only [Bool.and_eq_true] at h; exact lt_of_decideLT_eq_true h.1
     result := result.push suggestions₁[i₁]
     i₁ := i₁ + 1
 
   -- Append remaining elements from selector₂
-  while h : i₂ < suggestions₂.size ∧ result.size < c.maxSuggestions do
+  while h : i₂ <ᵇ suggestions₂.size && result.size <ᵇ c.maxSuggestions do
+    have h : i₂ < suggestions₂.size := by simp only [Bool.and_eq_true] at h; exact lt_of_decideLT_eq_true h.1
     result := result.push suggestions₂[i₂]
     i₂ := i₂ + 1
 

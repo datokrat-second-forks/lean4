@@ -560,11 +560,11 @@ def atBlockStart (c : ParserContext) (s : ParserState) : Bool :=
   let lineStart := c.fileMap.lineStart position.line
   Id.run do
     let mut iter := c.inputString.pos! lineStart
-    while h : iter.offset < s.pos && ¬iter.IsAtEnd && iter.offset < c.endPos do
-      have h : ¬iter.IsAtEnd := by simp at h; exact h.1.2
+    while h : iter.offset <ᵇ s.pos && iter ≠ᵇ c.inputString.endPos && iter.offset <ᵇ c.endPos do
+      have h : ¬iter.IsAtEnd := ne_of_decideNe_eq_true (by simp only [Bool.and_eq_true] at h; exact h.1.2)
       bif (iter.get h).isDigit then
-        while h : ¬iter.IsAtEnd && iter.get!.isDigit && iter.offset < s.pos do
-          iter := iter.next (by simp at h; exact h.1.1)
+        while h : iter ≠ᵇ c.inputString.endPos && iter.get!.isDigit && iter.offset <ᵇ s.pos do
+          iter := iter.next (ne_of_decideNe_eq_true (by simp only [Bool.and_eq_true] at h; exact h.1.1))
         bif h : iter =ᵇ c.inputString.endPos then return false
         else
           have h := ne_of_decideEq_eq_false h
@@ -1463,7 +1463,8 @@ def minContentIndent (text : FileMap) (startPos endPos : String.Pos.Raw)
     bif h : startPos ≤ᵇ text.source.rawEndPos then
       let mut i := text.source.posGE startPos (le_of_decideLE_eq_true h)
       let mut afterNewline := false
-      while h : i ≠ text.source.endPos do
+      while h : i ≠ᵇ text.source.endPos do
+        have h := ne_of_decideNe_eq_true h
         let c := i.get h
         i := i.next h
         bif i >ᵇ endPos then break
@@ -1503,7 +1504,8 @@ public def BlockCtxt.forDocString (text : FileMap) (openPos : String.Pos.Raw)
     let pos := Id.run do
       bif h : startPos ≤ᵇ text.source.rawEndPos then
         let mut pos := text.source.posGE startPos (le_of_decideLE_eq_true h)
-        while h : pos ≠ text.source.endPos do
+        while h : pos ≠ᵇ text.source.endPos do
+          have h := ne_of_decideNe_eq_true h
           bif pos.get h == ' ' then
             pos := pos.next h
           else

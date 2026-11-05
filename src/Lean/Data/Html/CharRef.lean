@@ -2200,7 +2200,8 @@ where
   numeric (radix : Nat) (ref : String) (i : String.Pos.Raw) : Option String := do
     let mut n : Nat := 0
     let mut i := i
-    while h : ¬i.atEnd ref do
+    while h : !i.atEnd ref do
+      have h : ¬i.atEnd ref := by simpa using h
       let d ← digit? (i.get' ref h)
       bif d ≥ᵇ radix then none
       n := n * radix + d

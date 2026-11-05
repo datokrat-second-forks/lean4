@@ -110,7 +110,8 @@ def rewriteManualLinksCore (s : String) : Id (Array (Lean.Syntax.Range × String
   let mut out := ""
   let mut errors := #[]
   let mut iter := s.startPos
-  while h : ¬iter.IsAtEnd do
+  while h : iter ≠ᵇ s.endPos do
+    have h := ne_of_decideNe_eq_true h
     let c := iter.get h
     let pre := iter
     iter := iter.next h
@@ -121,7 +122,8 @@ def rewriteManualLinksCore (s : String) : Id (Array (Lean.Syntax.Range × String
       continue
     | some start =>
       let mut iter' := start
-      while h' : ¬iter'.IsAtEnd do
+      while h' : iter' ≠ᵇ s.endPos do
+        have h' := ne_of_decideNe_eq_true h'
         let c' := iter'.get h'
         let pre' := iter'
         iter' := iter'.next h'

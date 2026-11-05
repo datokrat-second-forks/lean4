@@ -136,7 +136,7 @@ public partial def structuresPass : Pass where
 
       let mut newHyps : Array Hyp := #[]
       let env ← getEnv
-      while h : 0 < worklist.size do
+      while h : 0 <ᵇ worklist.size do
         let (value, structConst, us, params) := worklist.back
         worklist := worklist.pop
         let fields := (getStructureInfo env structConst).fieldNames.size

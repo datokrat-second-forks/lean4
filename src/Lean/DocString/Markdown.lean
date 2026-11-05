@@ -203,7 +203,8 @@ def escape (s : String) : String := Id.run do
   let mut iter := s.startPos
   let mut prev? : Option Char := none
   -- First, escape everything that could start a block, until that's definitely impossible.
-  while h : ¬iter.IsAtEnd do
+  while h : iter ≠ᵇ s.endPos do
+    have h := ne_of_decideNe_eq_true h
     let c := iter.get h
     let nextIter := iter.next h
     let next? : Option Char :=
@@ -216,7 +217,8 @@ def escape (s : String) : String := Id.run do
     unless c.isDigit || "> -+. \t".any c do
       break
   -- Now escape more conservatively. prev? is no longer used.
-  while h : ¬iter.IsAtEnd do
+  while h : iter ≠ᵇ s.endPos do
+    have h := ne_of_decideNe_eq_true h
     let c := iter.get h
     let nextIter := iter.next h
     let next? : Option Char :=
@@ -234,7 +236,8 @@ def longestBacktickRun (str : String) : Nat := Id.run do
   let mut longest := 0
   let mut current := 0
   let mut iter := str.startPos
-  while h : ¬iter.IsAtEnd do
+  while h : iter ≠ᵇ str.endPos do
+    have h := ne_of_decideNe_eq_true h
     let c := iter.get h
     iter := iter.next h
     bif c == '`' then

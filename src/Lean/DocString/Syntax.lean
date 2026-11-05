@@ -218,7 +218,8 @@ Verso does not use escapes such as `\n` for newlines.
 private def unescapeVerso (str : String) : String := Id.run do
   let mut out := ""
   let mut iter := str.startPos
-  while h : ¬iter.IsAtEnd do
+  while h : iter ≠ᵇ str.endPos do
+    have h := ne_of_decideNe_eq_true h
     let c := iter.get h
     iter := iter.next h
     bif c == '\\' then

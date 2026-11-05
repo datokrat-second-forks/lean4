@@ -1409,9 +1409,7 @@ macro "trace_goal[" id:ident "]" s:(interpolatedStr(term) <|> term) : doElem => 
   let msg ← bif s.raw.getKind == interpolatedStrKind then `(m! $(⟨s⟩)) else `(($(⟨s⟩) : MessageData))
   `(doElem| do
     let cls := $(quote id.getId.eraseMacroScopes)
-    if (← Lean.isTracingEnabledFor cls) then
-      updateLastTag
-      Lean.addTrace cls $msg)
+    cond (← Lean.isTracingEnabledFor cls) (do updateLastTag; Lean.addTrace cls $msg) (pure ()))
 
 /--
 A helper function used to mark a theorem instance found by the E-matching module.

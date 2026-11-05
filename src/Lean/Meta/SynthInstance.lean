@@ -869,7 +869,7 @@ private def checkMayHaveSideEffects (result : Expr) : MetaM Bool := do
   bif result.hasExprMVar || result.hasLevelMVar then return true
   let mut s := collectFVars {} result
   let mut i := 0
-  while h : i < s.fvarIds.size do
+  while h : i <ᵇ s.fvarIds.size do
     let localDecl ← s.fvarIds[i].getDecl
     let type ← instantiateMVars localDecl.type
     bif type.hasExprMVar || type.hasLevelMVar then return true

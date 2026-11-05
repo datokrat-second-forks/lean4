@@ -39,11 +39,13 @@ public def levenshtein (str1 str2 : String) (cutoff : Nat) : Option Nat := Id.ru
     v0 := v0.set i i
   let mut iter1 := str1.startPos
   let mut i := 0
-  while h1 : ¬iter1.IsAtEnd do
+  while h1 : iter1 ≠ᵇ str1.endPos do
+    have h1 := ne_of_decideNe_eq_true h1
     v1 := v1.set 0 (i+1)
     let mut iter2 := str2.startPos
     let mut j : Fin (len2 + 1) := 0
-    while h2 : ¬iter2.IsAtEnd do
+    while h2 : iter2 ≠ᵇ str2.endPos do
+      have h2 := ne_of_decideNe_eq_true h2
       let j' : Fin (len2 + 1) := j + 1
       let deletionCost := v0[j'] + 1
       let insertionCost := v1[j] + 1

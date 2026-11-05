@@ -189,10 +189,10 @@ def diff [Inhabited α] (original edited : Array α) : Array (Action × α) :=
       out := out.push <| (.skip, d)
       i := i.succ
       j := j.succ
-    while h : i < original.size do
+    while h : i <ᵇ original.size do
       out := out.push <| (.delete, original[i])
       i := i.succ
-    while h : j < edited.size do
+    while h : j <ᵇ edited.size do
       out := out.push <| (.insert, edited[j])
       j := j.succ
     out
