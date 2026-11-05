@@ -26,7 +26,7 @@ structure FocusResult where
 
 partial def focusHyp (u : Level) (σs : Expr) (e : Expr) (name : Name) : Option FocusResult := do
   if let some hyp := parseHyp? e then
-    if hyp.name = name then
+    bif hyp.name =ᵇ name then
       return ⟨e, emptyHyp u σs, mkApp2 (mkConst ``Focus.this [u]) σs e⟩
     else
       none

@@ -36,7 +36,7 @@ def mkConvGoalFor (lhs : Expr) (tag : Name := .anonymous) : MetaM (Expr × Expr)
 
 def markAsConvGoal (mvarId : MVarId) : MetaM MVarId := do
   let target ← mvarId.getType
-  if isLHSGoal? target |>.isSome then
+  bif isLHSGoal? target |>.isSome then
     return mvarId -- it is already tagged as LHS goal
   mvarId.replaceTargetDefEq (← mkLHSGoal (← mvarId.getType))
 
@@ -133,7 +133,7 @@ def convClear (mvarId : MVarId) (fvarId : FVarId) : MetaM MVarId := do
 /-- Evaluate `sepByIndent conv "; " -/
 def evalSepByIndentConv (stx : Syntax) : TacticM Unit := do
   for arg in stx.getArgs, i in *...stx.getArgs.size do
-    if i % 2 == 0 then
+    bif i % 2 == 0 then
       evalTactic arg
     else
       saveTacticInfoForToken arg
@@ -168,7 +168,7 @@ def remarkAsConvGoal : TacticM Unit := do
   let newGoals ← (← getUnsolvedGoals).mapM fun mvarId => mvarId.withContext do
     let target ← mvarId.getType
     if let some (_, _, rhs) ← matchEq? target then
-      if rhs.getAppFn.isMVar then
+      bif rhs.getAppFn.isMVar then
         mvarId.replaceTargetDefEq (← mkLHSGoal target)
       else
         return mvarId

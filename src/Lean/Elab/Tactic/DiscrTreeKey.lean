@@ -20,7 +20,7 @@ open Lean.Elab.Command
 private def mkKey (e : Expr) (simp : Bool) : MetaM (Array Key) := do
   let (_, _, type) ← withReducible <| forallMetaTelescopeReducing e
   let type ← whnfR type
-  if simp then
+  bif simp then
     withSimpGlobalConfig do
       if let some (_, lhs, _) := type.eq? then
         mkPath lhs

@@ -36,7 +36,7 @@ def getLinterUnnecessarySimpa (o : LinterOptions) : Bool :=
 private def logUnnecessarySimpa (initialState : SavedState) (ref : Syntax)
     (replacement : TSyntax `tactic) : TacticM Unit := do
   let mut msg := m!"`simp` already closes the goal"
-  if ← Meta.Tactic.TryThis.isValidTactic initialState replacement then
+  bif (← Meta.Tactic.TryThis.isValidTactic initialState replacement) then
     let suggestion : Meta.Hint.Suggestion := {
       suggestion := replacement
       span? := ref
@@ -72,7 +72,7 @@ private def evalSimpaCore (useReducible : Bool) : Tactic := fun stx => do
     let stx ← `(tactic| simp $cfg:optConfig $(disch)? $[only%$only]? $[[$args,*]]?)
     let stats ← do
       let { ctx, simprocs, dischargeWrapper, .. } ← withMainContext <| mkSimpContext stx (eraseLocal := false)
-      let ctx := if unfold.isSome then ctx.setAutoUnfold else ctx
+      let ctx := bif unfold.isSome then ctx.setAutoUnfold else ctx
       -- TODO: have `simpa` fail if it doesn't use `simp`.
       let ctx := ctx.setFailIfUnchanged false
       dischargeWrapper.with fun discharge? => do
@@ -80,7 +80,7 @@ private def evalSimpaCore (useReducible : Bool) : Tactic := fun stx => do
         -- The span is `simpa ... using`.
         let mkInfo ← mkInitialTacticInfo (mkNullNode #[tk, usingTk?.getD .missing])
         let (some (_, g), stats) ← simpGoal (← getMainGoal) ctx (simprocs := simprocs) (simplifyTarget := true) (discharge? := discharge?)
-          | if getLinterUnnecessarySimpa (← getLinterOptions) then
+          | bif getLinterUnnecessarySimpa (← getLinterOptions) then
               let ref ← getRef
               logUnnecessarySimpa initialState ref (← mkSimpReplacement none)
             return {}
@@ -88,7 +88,7 @@ private def evalSimpaCore (useReducible : Bool) : Tactic := fun stx => do
         replaceMainGoal [g]
         g.withContext do
           if let some stx := usingArg then
-            if (← getInfoState).enabled then
+            bif (← getInfoState).enabled then
               let trees ← getResetInfoTrees
               withInfoContext (mkInfo := mkInfo) do
                 -- Re-nest info trees so far into tactic info node
@@ -118,7 +118,7 @@ private def evalSimpaCore (useReducible : Bool) : Tactic := fun stx => do
                 let hType ← inferType h
                 let isCompatible : MetaM Bool :=
                   withAssignableSyntheticOpaque <| isDefEq gType hType
-                unless (← if useReducible then withReducible isCompatible else isCompatible) do
+                unless (← bif useReducible then withReducible isCompatible else isCompatible) do
                   -- `e` still is valid in this new local context
                   Term.throwTypeMismatchError gType hType h
                     (header? := some m!"Type mismatch: After simplification, term{indentExpr e}\n")
@@ -126,7 +126,7 @@ private def evalSimpaCore (useReducible : Bool) : Tactic := fun stx => do
                 pushGoal g'
                 closeMainGoal `simpa (checkUnassigned := false) h
             | none =>
-              if getLinterUnnecessarySimpa (← getLinterOptions) then
+              bif getLinterUnnecessarySimpa (← getLinterOptions) then
                 if let .fvar h := e then
                   if let some name := (← getLCtx).getRoundtrippingUserName? h then
                     let hStx : TSyntax `term := ⟨mkIdent name⟩
@@ -147,7 +147,7 @@ private def evalSimpaCore (useReducible : Bool) : Tactic := fun stx => do
           else
             g.assumption
             pure stats
-    if tactic.simp.trace.get (← getOptions) || squeeze.isSome then
+    bif tactic.simp.trace.get (← getOptions) || squeeze.isSome then
       let usingArg : Option Term := usingArg.map (⟨·.raw.unsetTrailing⟩)
       let stx ← match ← mkSimpOnly stx.raw.unsetTrailing stats.usedTheorems with
         | `(tactic| simp $cfg:optConfig $(disch)? $[only%$only]? $[[$args,*]]?) =>

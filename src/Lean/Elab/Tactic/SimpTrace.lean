@@ -57,7 +57,7 @@ def mkSimpCallStx (stx : Syntax) (usedSimps : UsedSimps) : MetaM (TSyntax `tacti
     let config ← elabSimpConfig cfg (kind := .simp)
     let mut argsArray : TSyntaxArray [`Lean.Parser.Tactic.simpStar, `Lean.Parser.Tactic.simpErase, `Lean.Parser.Tactic.simpLemma] :=
       if let some a := args then a.getElems else #[]
-    if config.suggestions then
+    bif config.suggestions then
       -- Get premise suggestions from the premise selector
       let lsConfig : LibrarySuggestions.Config := { caller := some "simp" }
       let lsConfig := match config.maxSuggestions with
@@ -73,18 +73,18 @@ def mkSimpCallStx (stx : Syntax) (usedSimps : UsedSimps) : MetaM (TSyntax `tacti
           let arg ← `(Parser.Tactic.simpLemma| $(mkCIdentFrom ident candidate (canonical := true)):term)
           argsArray := argsArray.push arg
     -- Build the simp syntax with the updated arguments
-    let stxForExecution ← if bang.isSome then
+    let stxForExecution ← bif bang.isSome then
       `(tactic| simp!%$tk $cfg:optConfig $[$discharger]? $[only%$o]? [$argsArray,*] $[$loc]?)
     else
       `(tactic| simp%$tk $cfg:optConfig $[$discharger]? $[only%$o]? [$argsArray,*] $[$loc]?)
     -- Build syntax for suggestion (without +suggestions config)
     let filteredCfg ← filterSuggestionsAndLocalsFromSimpConfig cfg
-    let stxForSuggestion ← if bang.isSome then
+    let stxForSuggestion ← bif bang.isSome then
       `(tactic| simp!%$tk $filteredCfg:optConfig $[$discharger]? $[only%$o]? [$argsArray,*] $[$loc]?)
     else
       `(tactic| simp%$tk $filteredCfg:optConfig $[$discharger]? $[only%$o]? [$argsArray,*] $[$loc]?)
     let { ctx, simprocs, dischargeWrapper, ..} ← mkSimpContext stxForExecution (eraseLocal := false)
-    let ctx := if bang.isSome then ctx.setAutoUnfold else ctx
+    let ctx := bif bang.isSome then ctx.setAutoUnfold else ctx
     let stats ← dischargeWrapper.with fun discharge? =>
       simpLocation ctx (simprocs := simprocs) discharge? <|
         (loc.map expandLocation).getD (.targets #[] true)
@@ -100,7 +100,7 @@ def mkSimpCallStx (stx : Syntax) (usedSimps : UsedSimps) : MetaM (TSyntax `tacti
     let config ← elabSimpConfig cfg (kind := .simpAll)
     let mut argsArray : TSyntaxArray [`Lean.Parser.Tactic.simpErase, `Lean.Parser.Tactic.simpLemma] :=
       if let some a := args then a.getElems else #[]
-    if config.suggestions then
+    bif config.suggestions then
       -- Get premise suggestions from the premise selector
       let lsConfig : LibrarySuggestions.Config := { caller := some "simp_all" }
       let lsConfig := match config.maxSuggestions with
@@ -117,32 +117,32 @@ def mkSimpCallStx (stx : Syntax) (usedSimps : UsedSimps) : MetaM (TSyntax `tacti
           argsArray := argsArray.push arg
     -- Build the simp_all syntax with the updated arguments
     let stxForExecution ←
-      if argsArray.isEmpty then
-        if bang.isSome then
+      bif argsArray.isEmpty then
+        bif bang.isSome then
           `(tactic| simp_all!%$tk $cfg:optConfig $[$discharger]? $[only%$o]?)
         else
           `(tactic| simp_all%$tk $cfg:optConfig $[$discharger]? $[only%$o]?)
       else
-        if bang.isSome then
+        bif bang.isSome then
           `(tactic| simp_all!%$tk $cfg:optConfig $[$discharger]? $[only%$o]? [$argsArray,*])
         else
           `(tactic| simp_all%$tk $cfg:optConfig $[$discharger]? $[only%$o]? [$argsArray,*])
     -- Build syntax for suggestion (without +suggestions config)
     let filteredCfg ← filterSuggestionsAndLocalsFromSimpConfig cfg
     let stxForSuggestion ←
-      if argsArray.isEmpty then
-        if bang.isSome then
+      bif argsArray.isEmpty then
+        bif bang.isSome then
           `(tactic| simp_all!%$tk $filteredCfg:optConfig $[$discharger]? $[only%$o]?)
         else
           `(tactic| simp_all%$tk $filteredCfg:optConfig $[$discharger]? $[only%$o]?)
       else
-        if bang.isSome then
+        bif bang.isSome then
           `(tactic| simp_all!%$tk $filteredCfg:optConfig $[$discharger]? $[only%$o]? [$argsArray,*])
         else
           `(tactic| simp_all%$tk $filteredCfg:optConfig $[$discharger]? $[only%$o]? [$argsArray,*])
     let { ctx, simprocs, .. } ← mkSimpContext stxForExecution (eraseLocal := true)
       (kind := .simpAll) (ignoreStarArg := true)
-    let ctx := if bang.isSome then ctx.setAutoUnfold else ctx
+    let ctx := bif bang.isSome then ctx.setAutoUnfold else ctx
     let (result?, stats) ← simpAll (← getMainGoal) ctx (simprocs := simprocs)
     match result? with
     | none => replaceMainGoal []
@@ -177,13 +177,13 @@ where
 @[builtin_tactic dsimpTrace] def evalDSimpTrace : Tactic := fun stx => withMainContext do withSimpDiagnostics do
   match stx with
   | `(tactic| dsimp?%$tk $[!%$bang]? $cfg:optConfig $[only%$o]? $[[$args,*]]? $(loc)?) =>
-    let stx ← if bang.isSome then
+    let stx ← bif bang.isSome then
       `(tactic| dsimp!%$tk $cfg:optConfig $[only%$o]? $[[$args,*]]? $(loc)?)
     else
       `(tactic| dsimp%$tk $cfg:optConfig $[only%$o]? $[[$args,*]]? $(loc)?)
     let { ctx, simprocs, .. } ←
       withMainContext <| mkSimpContext stx (eraseLocal := false) (kind := .dsimp)
-    let ctx := if bang.isSome then ctx.setAutoUnfold else ctx
+    let ctx := bif bang.isSome then ctx.setAutoUnfold else ctx
     let stats ← dsimpLocation' ctx simprocs <| (loc.map expandLocation).getD (.targets #[] true)
     let stx ← mkSimpCallStx stx stats.usedTheorems
     addSuggestion tk stx (origSpan? := ← getRef)

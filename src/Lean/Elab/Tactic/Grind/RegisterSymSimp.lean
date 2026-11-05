@@ -25,7 +25,7 @@ def elabRegisterSymSimp : CommandElab := fun stx => do
   let id := stx[1]
   let name := id.getId
   -- Check for duplicate variant
-  if (getSymSimpVariant? (← getEnv) name).isSome then
+  bif (getSymSimpVariant? (← getEnv) name).isSome then
     throwErrorAt id "Sym.simp variant `{name}` is already registered"
   let fields := stx[3].getArgs
   let mut pre? : Option Syntax := none

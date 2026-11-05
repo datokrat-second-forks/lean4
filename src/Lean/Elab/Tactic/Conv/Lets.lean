@@ -32,7 +32,7 @@ namespace Lean.Elab.Tactic.Conv
       mvarId.checkNotAssigned `extract_lets
       Meta.extractLets #[lhs] givenNames (config := config) fun fvarIds es _ => do
         let lhs' := es[0]!
-        if fvarIds.isEmpty && lhs == lhs' then
+        bif fvarIds.isEmpty && lhs == lhs' then
           throwTacticEx `extract_lets mvarId m!"made no progress"
         let (rhs', g) ← mkConvGoalFor lhs' (← mvarId.getTag)
         let fvars := fvarIds.map .fvar
@@ -58,7 +58,7 @@ namespace Lean.Elab.Tactic.Conv
     withMainContext do
       let lhs ← getLhs
       let lhs' ← Meta.liftLets lhs config
-      if lhs == lhs' then
+      bif lhs == lhs' then
         throwTacticEx `lift_lets (← getMainGoal) m!"made no progress"
       changeLhs lhs'
   | _ => throwUnsupportedSyntax
@@ -72,7 +72,7 @@ namespace Lean.Elab.Tactic.Conv
     withMainContext do
       let lhs ← getLhs
       let lhs' ← Meta.letToHave lhs
-      if lhs == lhs' then
+      bif lhs == lhs' then
         throwTacticEx `let_to_have (← getMainGoal) m!"made no progress"
       changeLhs lhs'
   | _ => throwUnsupportedSyntax

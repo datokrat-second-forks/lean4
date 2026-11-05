@@ -51,28 +51,28 @@ def exact? (ref : Syntax) (config : Parser.Tactic.LibrarySearchConfig)
     | some suggestions =>
       -- Separate complete solutions (empty remaining goals) from incomplete ones
       let (complete, incomplete) := suggestions.partition (·.1.isEmpty)
-      if requireClose && !config.all then
-        let hint := if suggestions.isEmpty then "" else " Try `apply?` to see partial suggestions."
+      bif requireClose && !config.all then
+        let hint := bif suggestions.isEmpty then "" else " Try `apply?` to see partial suggestions."
         throwError "`exact?` could not close the goal.{hint}"
-      if requireClose && config.all && complete.isEmpty then
-        let hint := if incomplete.isEmpty then "" else " Try `apply?` to see partial suggestions."
+      bif requireClose && config.all && complete.isEmpty then
+        let hint := bif incomplete.isEmpty then "" else " Try `apply?` to see partial suggestions."
         throwError "`exact?` could not close the goal.{hint}"
       reportOutOfHeartbeats `apply? ref
       -- Collect complete solutions and show as a single "Try these:" message
       let completeExprs ← complete.mapM fun (_, suggestionMCtx) =>
         withMCtx suggestionMCtx do
           return (← instantiateMVars (mkMVar mvar)).headBeta
-      if !completeExprs.isEmpty then
+      bif !completeExprs.isEmpty then
         addExactSuggestions ref completeExprs (checkState? := initialState)
       -- Show incomplete solutions only if not requireClose (i.e., for apply?)
       -- Note: we must call addExactSuggestion inside withMCtx because incomplete
       -- solutions have unassigned metavariables that are only valid in that context
-      if !requireClose then
+      bif !requireClose then
         for (_, suggestionMCtx) in incomplete do
           withMCtx suggestionMCtx do
             addExactSuggestion ref (← instantiateMVars (mkMVar mvar)).headBeta
               (checkState? := initialState) (addSubgoalsMsg := true) (tacticErrorAsInfo := true)
-        if suggestions.isEmpty then logError "apply? didn't find any relevant lemmas"
+        bif suggestions.isEmpty then logError "apply? didn't find any relevant lemmas"
       admitGoal goal (synthetic := false)
 
 @[builtin_tactic Lean.Parser.Tactic.exact?]
@@ -98,7 +98,7 @@ def elabExact?Term : TermElab := fun stx expectedType? => do
     let (_, introdGoal) ← goal.mvarId!.intros
     introdGoal.withContext do
       if let some suggestions ← librarySearch introdGoal then
-        if suggestions.isEmpty then logError "`exact?%` didn't find any relevant lemmas"
+        bif suggestions.isEmpty then logError "`exact?%` didn't find any relevant lemmas"
         else logError "`exact?%` could not close the goal. Try `by apply?` to see partial suggestions."
         mkLabeledSorry expectedType (synthetic := true) (unique := true)
       else

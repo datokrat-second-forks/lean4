@@ -33,7 +33,7 @@ where
     let mut i := 0
     for x in xs do
       let xDecl ← x.fvarId!.getDecl
-      if xDecl.userName == lhsId then
+      bif xDecl.userName == lhsId then
         return (xDecl, xs.size - i - 1)
       i := i + 1
     throwErrorAt lhs "invalid constraint, `{lhsId}` is not local variable of the theorem"
@@ -51,7 +51,7 @@ where
     let rhsExpr ← Term.elabTerm rhs expectedType
     Term.synthesizeSyntheticMVars (postpone := .no) (ignoreStuckTC := true)
     let rhsExpr ← instantiateMVars rhsExpr
-    if rhsExpr.hasSyntheticSorry then
+    bif rhsExpr.hasSyntheticSorry then
       throwErrorAt rhs "invalid constraint, rhs contains a synthetic `sorry`"
     let rhsExpr := rhsExpr.eta
     let { paramNames := levelNames, mvars, expr := rhs } ← abstractMVars rhsExpr
@@ -62,9 +62,9 @@ where
   elabProp (xs : Array Expr) (term : Syntax) : TermElabM Expr := do
     let e ← Term.elabTermAndSynthesize term (Expr.sort 0)
     let e ← instantiateMVars e
-    if e.hasSyntheticSorry then
+    bif e.hasSyntheticSorry then
       throwErrorAt term "invalid proposition, it contains a synthetic `sorry`"
-    if e.hasMVar then
+    bif e.hasMVar then
       throwErrorAt term "invalid proposition, it contains metavariables{indentExpr e}"
     return e.abstract xs
 
@@ -84,38 +84,38 @@ where
     let cnstrs := cnstrs.raw[1].getArgs
     cnstrs.toList.mapM fun cnstr => do
       let kind := cnstr.getKind
-      if kind == ``notDefEq then
+      bif kind == ``notDefEq then
         elabNotDefEq xs cnstr[0] cnstr[2]
-      else if kind == ``defEq then
+      else bif kind == ``defEq then
         elabDefEq xs cnstr[0] cnstr[2]
-      else if kind == ``genLt then
+      else bif kind == ``genLt then
         return .genLt cnstr[2].toNat
-      else if kind == ``sizeLt then
+      else bif kind == ``sizeLt then
         let (_, lhs) ← findLHS xs cnstr[1]
         return .sizeLt lhs cnstr[3].toNat
-      else if kind == ``depthLt then
+      else bif kind == ``depthLt then
         let (_, lhs) ← findLHS xs cnstr[1]
         return .depthLt lhs cnstr[3].toNat
-      else if kind == ``maxInsts then
+      else bif kind == ``maxInsts then
         return .maxInsts cnstr[2].toNat
-      else if kind == ``isValue then
+      else bif kind == ``isValue then
         let (_, lhs) ← findLHS xs cnstr[1]
         return .isValue lhs false
-      else if kind == ``isStrictValue then
+      else bif kind == ``isStrictValue then
         let (_, lhs) ← findLHS xs cnstr[1]
         return .isValue lhs true
-      else if kind == ``notValue then
+      else bif kind == ``notValue then
         let (_, lhs) ← findLHS xs cnstr[1]
         return .notValue lhs false
-      else if kind == ``notStrictValue then
+      else bif kind == ``notStrictValue then
         let (_, lhs) ← findLHS xs cnstr[1]
         return .notValue lhs true
-      else if kind == ``isGround then
+      else bif kind == ``isGround then
         let (_, lhs) ← findLHS xs cnstr[1]
         return .isGround lhs
-      else if kind == ``Parser.Command.GrindCnstr.check then
+      else bif kind == ``Parser.Command.GrindCnstr.check then
         return .check (← elabProp xs cnstr[1])
-      else if kind == ``Parser.Command.GrindCnstr.guard then
+      else bif kind == ``Parser.Command.GrindCnstr.guard then
         return .guard (← elabProp xs cnstr[1])
       else
         throwErrorAt cnstr "unexpected constraint"
@@ -204,9 +204,9 @@ def elabGrindLocals (params : Grind.Params) : MetaM Grind.Params := do
     let name := c.name
     -- Filter similar to LibrarySuggestions.isDeniedPremise (but inlined to avoid dependency)
     -- Skip internal details, but allow private names (which are accessible from current module)
-    if name.isInternalDetail && !isPrivateName name then continue
-    if c.kind != .defn then continue
-    if (← isInstanceReducible name) then continue
+    bif name.isInternalDetail && !isPrivateName name then continue
+    bif c.kind != .defn then continue
+    bif (← isInstanceReducible name) then continue
     try
       params ← addEMatchTheorem params (mkIdent name) name (.default false) false (warn := false)
       added := added.push name
@@ -221,18 +221,18 @@ def mkGrindParams
     TermElabM Grind.Params := do
   let params ← match extensions? with
     | some extensions => Grind.mkParams config extensions
-    | none => if only then Grind.mkOnlyParams config else Grind.mkDefaultParams config
+    | none => bif only then Grind.mkOnlyParams config else Grind.mkDefaultParams config
   let mut params ← elabGrindParams { params with identity } ps (lax := config.lax) (only := only)
-  if config.suggestions then
+  bif config.suggestions then
     let lsConfig : LibrarySuggestions.Config := { caller := some "grind" }
     let lsConfig := match config.maxSuggestions with
       | some n => { lsConfig with maxSuggestions := n }
       | none => lsConfig
     params ← elabGrindSuggestions params (← LibrarySuggestions.select mvarId lsConfig)
-  if config.locals then
+  bif config.locals then
     params ← elabGrindLocals params
   trace[grind.debug.inj] "{params.extensions[0]!.inj.getOrigins.map (·.pp)}"
-  if params.anchorRefs?.isSome then
+  bif params.anchorRefs?.isSome then
     /-
     **Note**: anchors are automatically computed in interactive mode where
     hygiene is turned on. So, we must disable hypotheses id cleanup since
@@ -243,7 +243,7 @@ def mkGrindParams
   return params
 
 def checkTerminalAsSorry (mvarId : MVarId) : TacticM Bool := do
-  if debug.terminalTacticsAsSorry.get (← getOptions) then
+  bif debug.terminalTacticsAsSorry.get (← getOptions) then
     mvarId.admit
     replaceMainGoal []
     return true
@@ -259,15 +259,15 @@ def grind
     (head? : Option Syntax := none)
     (identity : Name := `grind)
     : TacticM Unit := do
-  if (← checkTerminalAsSorry mvarId) then return ()
+  bif (← checkTerminalAsSorry mvarId) then return ()
   mvarId.withContext do
     let params ← mkGrindParams config only ps mvarId (extensions? := extensions?) (identity := identity)
-    let params := if Grind.grind.unusedLemmaThreshold.get (← getOptions) > 0 then
+    let params := bif Grind.grind.unusedLemmaThreshold.get (← getOptions) >ᵇ 0 then
       { params with config.markInstances := true }
     else params
     Grind.withProtectedMCtx config mvarId fun mvarId' => do
       let finalize (result : Grind.Result) : TacticM Unit := do
-        if result.hasFailed then
+        bif result.hasFailed then
           throwError "`grind` failed\n{← result.toMessageData}"
         replaceMainGoal []
       if let some seq := seq? then
@@ -283,7 +283,7 @@ def grind
           -- **Note**: We are returning only the first goal that could not be solved.
           let goal? := if let goal :: _ := (← get).goals then some goal else none
           let result ← Grind.liftGrindM <| Grind.mkResult params goal?
-          if goal?.isNone then
+          bif goal?.isNone then
             Grind.liftGrindM <| Grind.checkUnusedActivations mvarId' result.counters
           return result
         finalize result
@@ -303,7 +303,7 @@ def evalGrindCore
     : TacticM Unit := do
   let only := only.isSome
   let params := if let some params := params? then params.getElems else #[]
-  if Grind.grind.warning.get (← getOptions) then
+  bif Grind.grind.warning.get (← getOptions) then
     logWarningAt ref "The `grind` tactic is new and its behavior may change in the future. This project has used `set_option grind.warning true` to discourage its use."
   grind (← getMainGoal) config only params seq? (extensions? := extensions?) (head? := head?) (identity := identity)
 
@@ -317,7 +317,7 @@ def isGrindOnly (stx : TSyntax `tactic) : Bool :=
   stx.raw.getKind == ``Parser.Tactic.grind && !stx.raw[grindOnlyPos].isNone
 
 def setGrindParams (stx : TSyntax `tactic) (params : Array Syntax) : TSyntax `tactic :=
-  if params.isEmpty then
+  bif params.isEmpty then
     ⟨stx.raw.setArg grindParamsPos (mkNullNode)⟩
   else
     let paramsStx := #[mkAtom "[", (mkAtom ",").mkSep params, mkAtom "]"]
@@ -346,7 +346,7 @@ def filterSuggestionsAndLocalsFromGrindConfig (config : TSyntax ``Lean.Parser.Ta
   ⟨config.raw.setArg 0 (nullNode.setArgs filteredItems)⟩
 
 private def elabGrindConfig' (config : TSyntax ``Lean.Parser.Tactic.optConfig) (interactive : Bool) : TacticM Grind.Config := do
-  if interactive then
+  bif interactive then
     elabGrindConfigInteractive config
   else
     elabGrindConfig config
@@ -368,7 +368,7 @@ private def elabGrindConfig' (config : TSyntax ``Lean.Parser.Tactic.optConfig) (
   let only' := only.isSome
   let params := if let some params := params then params.getElems else #[]
   let mvarId ← getMainGoal
-  if (← checkTerminalAsSorry mvarId) then return ()
+  bif (← checkTerminalAsSorry mvarId) then return ()
   mvarId.withContext do
     let params ← mkGrindParams config only' params mvarId (identity := `sym)
     Grind.withProtectedMCtx config mvarId fun mvarId' => do
@@ -378,7 +378,7 @@ private def elabGrindConfig' (config : TSyntax ``Lean.Parser.Tactic.optConfig) (
           Grind.evalGrindTactic seq
         let goal? := if let goal :: _ := (← get).goals then some goal else none
         Grind.liftGrindM <| Grind.mkResult params goal?
-      if result.hasFailed then
+      bif result.hasFailed then
         throwError "`sym` failed\n{← result.toMessageData}"
 
 def evalGrindTraceCore (stx : Syntax) (trace := true) (verbose := true) (useSorry := true) : TacticM (Array (TSyntax `tactic)) := withMainContext do
@@ -398,7 +398,7 @@ def evalGrindTraceCore (stx : Syntax) (trace := true) (verbose := true) (useSorr
       let goal :: goals ← Grind.getGoals
         | -- Goal was closed during initialization
           let configStx' := filterSuggestionsAndLocalsFromGrindConfig configStx
-          if termParamStxs.isEmpty then
+          bif termParamStxs.isEmpty then
             let tac ← `(tactic| grind $configStx':optConfig only)
             return #[tac]
           else
@@ -419,7 +419,7 @@ def evalGrindTraceCore (stx : Syntax) (trace := true) (verbose := true) (useSorr
             let goal :: _ := gs | throwError "`grind?` failed, but resulting goal is not available"
             let result ← Grind.mkResult params (some goal)
             throwError "`grind?` failed\n{← result.toMessageData}"
-        let seq ← if h : seqs.size = 1 then pure seqs[0] else seqs.toList.mapM fun seq => Grind.Action.mkGrindNext seq
+        let seq ← bif h : seqs.size =ᵇ 1 then pure seqs[0] else seqs.toList.mapM fun seq => Grind.Action.mkGrindNext seq
         let configStx' := filterSuggestionsAndLocalsFromGrindConfig configStx
         let tacs ← Grind.mkGrindOnlyTactics configStx' seq termParamStxs
         let seq := Grind.Action.mkGrindSeq seq
@@ -428,7 +428,7 @@ def evalGrindTraceCore (stx : Syntax) (trace := true) (verbose := true) (useSorr
         case-splitting). The tactic was verified with these parameters active, and `cases`
         steps may fail without them.
         -/
-        let tac ← if termParamStxs.isEmpty then
+        let tac ← bif termParamStxs.isEmpty then
           `(tactic| grind $configStx':optConfig => $seq:grindSeq)
         else
           `(tactic| grind $configStx':optConfig [$termParamStxs,*] => $seq:grindSeq)
@@ -438,7 +438,7 @@ def evalGrindTraceCore (stx : Syntax) (trace := true) (verbose := true) (useSorr
 
 @[builtin_tactic Lean.Parser.Tactic.grindTrace] def evalGrindTrace : Tactic := fun stx => do
   let tacs ← evalGrindTraceCore stx
-  if tacs.size == 1 then
+  bif tacs.size == 1 then
     Tactic.TryThis.addSuggestion stx { suggestion := .tsyntax tacs[0]! }
   else
     Tactic.TryThis.addSuggestions stx <| tacs.map fun tac => { suggestion := .tsyntax tac }
@@ -473,7 +473,7 @@ def evalGrindTraceCore (stx : Syntax) (trace := true) (verbose := true) (useSorr
 
 @[builtin_tactic Lean.Parser.Tactic.grobner] def evalGrobner : Tactic := fun stx => do
   let `(tactic| grobner $config:optConfig $[ [$params:grindParam,*] ]?) := stx | throwUnsupportedSyntax
-  if params.isSome then
+  bif params.isSome then
     -- Enable E-matching for the supplied lemmas without the `@[grind]` E-matching rules, and
     -- disable local-theorem E-matching as `lia` does. Other `@[grind]` data (e.g. `inj`) is kept.
     let config ← elabGrobnerConfig config (init := { ematch := ({} : Grind.Config).ematch, genLocal := 0 })

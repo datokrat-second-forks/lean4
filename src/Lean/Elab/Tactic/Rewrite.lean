@@ -26,7 +26,7 @@ def elabRewrite (mvarId : MVarId) (e : Expr) (stx : Syntax)
     (symm : Bool := false) (config := { : Rewrite.Config }) : TacticM RewriteResult := do
   let mvarCounterSaved := (← getMCtx).mvarCounter
   let thm ← elabTerm stx none true
-  if thm.hasSyntheticSorry then
+  bif thm.hasSyntheticSorry then
     throwAbortTactic
   unless ← occursCheck mvarId thm do
     throwErrorAt stx "Occurs check failed: Expression{indentExpr thm}\ncontains the goal {Expr.mvar mvarId}"
@@ -46,7 +46,7 @@ since there are many downstream cases of tactic proofs that later assign data go
 def finishElabRewrite (r : RewriteResult) : MetaM RewriteResult := do
   let mvarIds ← r.mvarIds.filterM (not <$> ·.isAssigned)
   mvarIds.forM fun newMVarId => newMVarId.withContext do
-    if ← Meta.isProp (← newMVarId.getType) then
+    bif (← Meta.isProp (← newMVarId.getType)) then
       newMVarId.setKind .syntheticOpaque
   return { r with mvarIds }
 
@@ -94,13 +94,13 @@ def foldRWRulesSeq (token : Syntax) (rwRulesSeqStx : Syntax) (init : α)
         let term := rule[1]
         let processId (id : Syntax) : TacticM α := do
           -- See if we can interpret `id` as a hypothesis first.
-          if (← withMainContext <| Term.isLocalIdent? id).isSome then
+          bif (← withMainContext <| Term.isLocalIdent? id).isSome then
             x acc symm term
           else
             -- Try to get equation theorems for `id`.
             let declName ← try realizeGlobalConstNoOverload id catch _ => return (← x acc symm term)
             let some eqThms ← getEqnsFor? declName | x acc symm term
-            let hint := if eqThms.size = 1 then m!"" else
+            let hint := bif eqThms.size =ᵇ 1 then m!"" else
               .hint' m!"Try rewriting with `{Name.str declName unfoldThmSuffix}`"
             let rec go : List Name → TacticM α
               | [] => throwError m!"Failed to rewrite using equation theorems for `{.ofConstName declName}`" ++ hint

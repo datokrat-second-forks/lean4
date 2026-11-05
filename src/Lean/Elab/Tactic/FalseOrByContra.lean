@@ -44,7 +44,7 @@ partial def falseOrByContra (g : MVarId) (useClassical : Option Bool := none) : 
     -- We set the transparency back to default; otherwise this breaks when run by a `simp` discharger.
     falseOrByContra (← withTransparency default g.intro1P).2 useClassical
   | _ =>
-    let gs ← if (← isProp ty) then
+    let gs ← bif (← isProp ty) then
       match useClassical with
       | some true => some <$> g.applyConst ``Classical.byContradiction
       | some false =>

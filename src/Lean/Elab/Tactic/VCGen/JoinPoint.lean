@@ -156,36 +156,36 @@ def jumpLocals (jp : JoinPoint) (jump : Jump) : MetaM (Array LocalDecl) := do
   let start := (lctx.get! jp.spec.fvarId!).index + 1
   -- An implementation-detail hypothesis would become an `∃` binder, so it stays out of `?H`.
   return lctx.foldl (start := start) (init := #[]) fun ds d =>
-    if d.isImplementationDetail && d.value?.isNone then ds else ds.push d
+    bif d.isImplementationDetail && d.value?.isNone then ds else ds.push d
 
 /-- `φ` under the local `d`: a `let` for a `let` local, a conjunct `d.type ∧ φ` for a hypothesis
 that `φ` does not depend on, and `∃ d, φ` otherwise. -/
 def bindLocal (d : LocalDecl) (φ : Expr) : VCGenM Expr := do
   -- `mkLambdaFVars`/`mkLetFVars` re-scope a metavariable whose local context contains `d`, such as
   -- the invariant of a loop in the branch.
-  if d.value?.isSome then
+  bif d.value?.isSome then
     return ← mkLetFVars #[d.toExpr] φ (generalizeNondepLet := false)
   let lam ← mkLambdaFVars #[d.toExpr] φ
   -- A conjunct needs no instantiation in its proof, where each `∃` copies the rest.
-  if (← Sym.inferType d.type).isProp && !lam.bindingBody!.hasLooseBVars then
+  bif (← Sym.inferType d.type).isProp && !lam.bindingBody!.hasLooseBVars then
     return mkAnd d.type lam.bindingBody!
   return mkApp2 (mkConst ``Exists [← Sym.getLevel d.type]) d.type lam
 
 /-- The disjunction of `ps[lo:hi]`, balanced so that each disjunct has depth `O(log (hi - lo))`. -/
 partial def mkOrTree (ps : Array Expr) (lo hi : Nat) : Expr :=
-  if hi == lo then mkConst ``False
-  else if hi == lo + 1 then ps[lo]!
+  bif hi == lo then mkConst ``False
+  else bif hi == lo + 1 then ps[lo]!
   else
     let mid := (lo + hi) / 2
     mkOr (mkOrTree ps lo mid) (mkOrTree ps mid hi)
 
 /-- A proof of `φ = mkOrTree ps lo hi` from the proof `k ps[i]` of its disjunct `ps[i]`. -/
 partial def mkOrIntro (φ : Expr) (i lo hi : Nat) (k : Expr → MetaM Expr) : MetaM Expr := do
-  if hi == lo + 1 then
+  bif hi == lo + 1 then
     return ← k φ
   let_expr Or a b := φ | throwError "vcgen +jp: expected a disjunction{indentExpr φ}"
   let mid := (lo + hi) / 2
-  if i < mid then
+  bif i <ᵇ mid then
     return mkApp3 (mkConst ``Or.inl) a b (← mkOrIntro a i lo mid k)
   else
     return mkApp3 (mkConst ``Or.inr) a b (← mkOrIntro b i mid hi k)
@@ -239,7 +239,7 @@ partial def mkTrieProof (φ : Expr) (path : List (Nat × Nat)) (ws : List Expr) 
     MetaM Expr := do
   let (g, n) :: path := path | throwError "vcgen +jp: empty path into{indentExpr φ}"
   mkOrIntro φ g 0 n fun φ => do
-    if path.isEmpty then
+    bif path.isEmpty then
       return ← mkEqsProof φ
     if let .letE _ _ v b _ := φ then
       return ← mkTrieProof (b.instantiate1 v) path ws

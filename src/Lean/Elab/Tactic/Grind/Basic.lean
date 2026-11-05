@@ -86,7 +86,7 @@ def setGoals (goals : List Goal) : GrindTacticM Unit :=
 def pruneSolvedGoals : GrindTacticM Unit := do
   let gs ← getGoals
   let gs ← gs.filterM fun g => do
-    if g.inconsistent then return false
+    bif g.inconsistent then return false
     -- The metavariable may have been assigned by `isDefEq`
     return !(← g.mvarId.isAssigned)
   setGoals gs
@@ -157,13 +157,13 @@ partial def evalGrindTactic (stx : Syntax) : GrindTacticM Unit := do
   profileitM Exception "grind tactic execution" (decl := stx.getKind) (← getOptions) <|
   withRef stx <| withIncRecDepth <| withFreshMacroScope <| match stx with
     | .node _ k _    =>
-      if k == nullKind then
+      bif k == nullKind then
         Term.withoutTacticIncrementality true <| withTacticInfoContext stx do
           stx.getArgs.forM evalGrindTactic
       else withTraceNode `Elab.step (fun _ => return stx) (tag := stx.getKind.toString) do
         let evalFns := grindTacElabAttribute.getEntries (← getEnv) stx.getKind
         let macros  := macroAttribute.getEntries (← getEnv) stx.getKind
-        if evalFns.isEmpty && macros.isEmpty then
+        bif evalFns.isEmpty && macros.isEmpty then
           throwNotAccepted m!"Grind tactic `{stx.getKind}` has not been implemented"
         let s ← Grind.saveState
         expandEval s macros evalFns #[]
@@ -171,7 +171,7 @@ partial def evalGrindTactic (stx : Syntax) : GrindTacticM Unit := do
     | _ => throwError m!"Unexpected grind tactic{indentD stx}"
 where
     throwExs (failures : Array EvalTacticFailure) : GrindTacticM Unit := do
-     if h : 0 < failures.size  then
+     bif h : 0 <ᵇ failures.size  then
        -- For macros we want to report the error from the first registered / last tried rule (#3770)
        let fail := failures[failures.size - 1]
        fail.state.restore (restoreInfo := true)
@@ -197,10 +197,10 @@ where
         let failures := failures.push ⟨ex, ← Grind.saveState⟩
         s.restore (restoreInfo := true); k failures
       | .internal id _ =>
-        if id == unsupportedSyntaxExceptionId then
+        bif id == unsupportedSyntaxExceptionId then
           -- We do not store `unsupportedSyntaxExceptionId`, see throwExs
           s.restore (restoreInfo := true); k failures
-        else if id == abortTacticExceptionId then
+        else bif id == abortTacticExceptionId then
           for msg in (← Core.getMessageLog).toList do
             trace[Elab.tactic.backtrack] msg.data
           let failures := failures.push ⟨ex, ← Grind.saveState⟩
@@ -277,7 +277,7 @@ def withoutRecover (x : GrindTacticM α) : GrindTacticM α :=
 Like `throwErrorAt`, but, if recovery is enabled, logs the error instead.
 -/
 def throwOrLogErrorAt (ref : Syntax) (msg : MessageData) : GrindTacticM Unit := do
-  if (← read).recover then
+  bif (← read).recover then
     logErrorAt ref msg
   else
     throwErrorAt ref msg
@@ -325,7 +325,7 @@ where
   loop : List Goal → GrindTacticM Goal
     | [] => throwNoGoalsToBeSolved
     | goal :: goals => do
-      if goal.inconsistent then
+      bif goal.inconsistent then
         loop goals
       else
         setGoals (goal :: goals)
@@ -425,7 +425,7 @@ def closeUsingOrAdmit (tac : GrindTacticM Unit) : GrindTacticM Unit := do
   tryCatchRuntimeEx
     (focusAndDone tac)
     fun ex => do
-      if (← read).recover then
+      bif (← read).recover then
         logException ex
         admitGoal goal.mvarId
         setGoals goals
@@ -478,8 +478,8 @@ def GrindTacticM.runAtGoal (mvarId : MVarId) (params : Params) (k : GrindTacticM
   let params' := { params with config.useSorry := false }
   let (methods, ctx, sctx, state) ← liftMetaM <| GrindM.runAtGoal mvarId params' (evalTactic? := some evalTactic) fun goal => do
       let goals ←
-        if sym then
-          if goal.inconsistent then
+        bif sym then
+          bif goal.inconsistent then
             /- The goal was already closed while preprocessing the hypotheses, and `goal.mvarId`
                has been assigned. `Sym.preprocessMVar` would clobber that assignment. -/
             pure []

@@ -46,7 +46,7 @@ partial def transferHypNames (P P' : Expr) : MetaM Expr := (·.snd) <$> label (c
           let uniq ← mkFreshId
           let P :: Ps'' := Ps' | return (Ps, { name, uniq, p := P' : Hyp }.toExpr)
           Ps' := Ps''
-          if ← isDefEq P.p P' then
+          bif (← isDefEq P.p P') then
             return (Ps, { P with p := P' }.toExpr)
         unreachable!
 
@@ -56,7 +56,7 @@ def mFrameCore [Monad m] [MonadControlT MetaM m] [MonadLiftT MetaM m]
   let φ ← mkFreshExprMVar (mkSort .zero)
   let P' ← mkFreshExprMVar (mkApp (mkConst ``SPred [goal.u]) goal.σs)
   if let .some inst ← trySynthInstance (mkApp4 (mkConst ``HasFrame [goal.u]) goal.σs P P' φ) then
-    if ← isDefEq (mkConst ``True) φ then return (← kFail)
+    bif (← isDefEq (mkConst ``True) φ) then return (← kFail)
     -- copy the name of P to P' if it is a named hypothesis
     let P' ← transferHypNames P P'
     let goal := { goal with hyps := P' }

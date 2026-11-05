@@ -16,7 +16,7 @@ namespace Lean.Elab.Tactic.Conv
 open Meta Tactic TryThis
 
 def applySimpResult (result : Simp.Result) : TacticM Unit := do
-  if result.proof?.isNone then
+  bif result.proof?.isNone then
     changeLhs result.expr
   else
     updateLhs result.expr (← result.getProof)

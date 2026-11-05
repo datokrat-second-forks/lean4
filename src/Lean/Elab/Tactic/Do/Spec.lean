@@ -41,7 +41,7 @@ public def findSpec (database : SpecTheorems) (wp : Expr) : MetaM SpecTheorem :=
       -- Instantiation for this spec failed. When tracing is enabled, we want to see fine-grained
       -- information why the defeq check failed, so we do it again.
       withOptions (fun o =>
-        if o.getBool `trace.Elab.Tactic.Do.spec then
+        bif o.getBool `trace.Elab.Tactic.Do.spec then
           o |>.set `pp.universes true
             |>.set `trace.Meta.isDefEq true
         else
@@ -50,11 +50,11 @@ public def findSpec (database : SpecTheorems) (wp : Expr) : MetaM SpecTheorem :=
       discard <| check
     return b
   trace[Elab.Tactic.Do.spec] "Specs for {prog}: {specs.map (·.proof)}"
-  if specs.isEmpty then throwError m!"No specs found for {indentExpr prog}\nCandidates: {candidates.map (·.proof)}"
+  bif specs.isEmpty then throwError m!"No specs found for {indentExpr prog}\nCandidates: {candidates.map (·.proof)}"
   return specs[0]!
 
 def elabTermIntoSpecTheorem (stx : TSyntax `term) (expectedTy : Expr) : TacticM SpecTheorem := do
-  if stx.raw.isIdent then
+  bif stx.raw.isIdent then
     match ← Term.resolveId? stx.raw (withInfo := true) with
     | some (.const declName _) => mkSpecTheoremFromConst declName
     | some (.fvar fvarId) => mkSpecTheoremFromLocal fvarId
@@ -87,7 +87,7 @@ mutual
 partial def dischargePostEntails (α : Expr) (ps : Expr) (Q : Expr) (Q' : Expr) (goalTag : Name) : n Expr := do
   -- Often, Q' is fully instantiated while Q contains metavariables. Try refl
   let u ← liftMetaM <| getLevel α >>= decLevel
-  if (← withDefault <| isDefEqGuarded Q Q') then
+  bif (← withDefault <| isDefEqGuarded Q Q') then
     return mkApp3 (mkConst ``PostCond.entails.refl [u]) α ps Q'
   let Q ← whnfR Q
   let Q' ← whnfR Q'
@@ -107,13 +107,13 @@ partial def dischargePostEntails (α : Expr) (ps : Expr) (Q : Expr) (Q' : Expr) 
   mkAppM ``And.intro #[prf₁, prf₂]
 
 partial def dischargeFailEntails (u : Level) (ps : Expr) (Q : Expr) (Q' : Expr) (goalTag : Name) : n Expr := do
-  if ps.isAppOf ``PostShape.pure then
+  bif ps.isAppOf ``PostShape.pure then
     return mkConst ``True.intro
-  if ← withDefault <| isDefEqGuarded Q Q' then
+  bif (← withDefault <| isDefEqGuarded Q Q') then
     return mkApp2 (mkConst ``ExceptConds.entails.refl [u]) ps Q
-  if ← withDefault <| isDefEqGuarded Q (mkApp (mkConst ``ExceptConds.false [u]) ps) then
+  bif (← withDefault <| isDefEqGuarded Q (mkApp (mkConst ``ExceptConds.false [u]) ps)) then
     return mkApp2 (mkConst ``ExceptConds.entails_false [u]) ps Q'
-  if ← withDefault <| isDefEqGuarded Q' (mkApp (mkConst ``ExceptConds.true [u]) ps) then
+  bif (← withDefault <| isDefEqGuarded Q' (mkApp (mkConst ``ExceptConds.true [u]) ps)) then
     return mkApp2 (mkConst ``ExceptConds.entails_true [u]) ps Q
   -- the remaining cases are recursive.
   if let some (_σ, ps) := ps.app2? ``PostShape.arg then
@@ -148,7 +148,7 @@ def dischargeMGoal (goal : MGoal) (goalTag : Name) (tryTrivial : Bool) : n Expr 
   -- Even when we *do not* want to `tryTrivial`, we still use `goal.pureRflAndAndIntro` because
   -- it might assign metavariables as above.
   let some prf ← liftMetaM <| -- withDefault <|
-      if tryTrivial then
+      bif tryTrivial then
         goal.pureTrivial <|> goal.assumption <|> goal.assumptionPure
       else
         goal.pureRflAndAndIntro
@@ -192,7 +192,7 @@ public def mSpec (goal : MGoal) (elabSpecAtWP : Expr → n SpecTheorem) (goalTag
   let env ← getEnv
   for mvar in mvars do
     let ty ← mvar.mvarId!.getType
-    if isSpecInvariantType env ty then mvar.mvarId!.setKind .syntheticOpaque
+    bif isSpecInvariantType env ty then mvar.mvarId!.setKind .syntheticOpaque
 
   -- Apply the spec to the excess arguments of the `wp⟦e⟧ Q` application
   let T := goal.target.consumeMData
@@ -214,7 +214,7 @@ public def mSpec (goal : MGoal) (elabSpecAtWP : Expr → n SpecTheorem) (goalTag
   -- We'll add a trace message if that happens.
   for mvar in mvars do
     let mvar := mvar.mvarId!
-    if (← mvar.getKind) matches .synthetic && !(← liftMetaM <| mvar.isAssigned) then
+    bif (← mvar.getKind) matches .synthetic && !(← liftMetaM <| mvar.isAssigned) then
       match ← trySynthInstance (← mvar.getType) with
       | .some prf => liftMetaM <| mvar.assign prf
       | .none => continue
@@ -235,18 +235,18 @@ public def mSpec (goal : MGoal) (elabSpecAtWP : Expr → n SpecTheorem) (goalTag
 
   -- Discharge the validity proof for the spec if not rfl
   let mut prePrf : Expr → Expr := id
-  if !HPRfl then
+  bif !HPRfl then
     -- let P := (← reduceProjBeta? P).getD P
     -- Try to avoid creating a longer name if the postcondition does not need to create a goal
-    let tag := if !QQ'Rfl then goalTag ++ `pre else goalTag
+    let tag := bif !QQ'Rfl then goalTag ++ `pre else goalTag
     let HPPrf ← dischargeMGoal { goal with target := P } tag tryTrivial
     prePrf := mkApp6 (mkConst ``SPred.entails.trans [u]) goal.σs goal.hyps P goal.target HPPrf
 
   -- Discharge the entailment on postconditions if not rfl
   let mut postPrf : Expr → Expr := id
-  if !QQ'Rfl then
+  bif !QQ'Rfl then
     -- Try to avoid creating a longer name if the precondition does not need to create a goal
-    let tag := if !HPRfl then goalTag ++ `post else goalTag
+    let tag := bif !HPRfl then goalTag ++ `post else goalTag
     let wpApplyQ  := mkApp4 (mkConst ``PredTrans.apply [u]) ps α wp Q  -- wp⟦x⟧.apply Q; that is, T without excess args
     let wpApplyQ' := mkApp4 (mkConst ``PredTrans.apply [u]) ps α wp Q' -- wp⟦x⟧.apply Q'
     let QQ' ← dischargePostEntails α ps Q Q' tag

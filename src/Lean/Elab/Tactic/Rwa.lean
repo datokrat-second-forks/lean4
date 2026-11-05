@@ -29,7 +29,7 @@ private def logUnnecessaryRwa (initialState : SavedState) (ref : Syntax)
   unless Linter.getLinterValue linter.unnecessaryRwa (← Linter.getLinterOptions) do
     return
   let mut msg := m!"`rw` already closes the goal"
-  if ← Meta.Tactic.TryThis.isValidTactic initialState replacement then
+  bif (← Meta.Tactic.TryThis.isValidTactic initialState replacement) then
     let suggestion : Meta.Hint.Suggestion := {
       suggestion := replacement
       span? := ref
@@ -52,7 +52,7 @@ private def evalRwaCore (ref : Syntax) (rewrite : TacticM α) (replacement : TSy
         close rewriteResult
         pure false)
     let sideGoals ← getUnsolvedGoals
-    if closedByRfl && sideGoals.isEmpty then
+    bif closedByRfl && sideGoals.isEmpty then
       logUnnecessaryRwa initialState ref replacement
     evalTactic (← `(tactic| all_goals (first | with_reducible rfl | assumption | skip)))
 

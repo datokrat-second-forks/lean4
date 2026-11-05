@@ -35,7 +35,7 @@ partial def elabSymSimproc (stx : Syntax) : GrindTacticM Simproc := do
     catch ex =>
       match ex with
       | .internal id _ =>
-        if id == unsupportedSyntaxExceptionId then continue
+        bif id == unsupportedSyntaxExceptionId then continue
         else throw ex
       | _ => throw ex
   throwErrorAt stx "unsupported sym_simproc syntax `{stx.getKind}`"
@@ -49,7 +49,7 @@ def elabSymDischarger (stx : Syntax) : GrindTacticM Discharger := do
     catch ex =>
       match ex with
       | .internal id _ =>
-        if id == unsupportedSyntaxExceptionId then continue
+        bif id == unsupportedSyntaxExceptionId then continue
         else throw ex
       | _ => throw ex
   throwErrorAt stx "unsupported sym_discharger syntax `{stx.getKind}`"

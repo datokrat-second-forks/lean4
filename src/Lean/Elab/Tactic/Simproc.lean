@@ -51,7 +51,7 @@ namespace Command
     let declName ← realizeGlobalConstNoOverload declName
     let dsimp ← checkSimprocType declName
     let keys ← elabSimprocKeys pattern
-    let registerProcName := if dsimp then ``registerBuiltinDSimproc else ``registerBuiltinSimproc
+    let registerProcName := bif dsimp then ``registerBuiltinDSimproc else ``registerBuiltinSimproc
     let val := mkAppN (mkConst registerProcName) #[toExpr declName, toExpr keys, mkConst declName]
     let initDeclName ← mkFreshUserName (declName ++ `declare)
     declareBuiltin initDeclName val

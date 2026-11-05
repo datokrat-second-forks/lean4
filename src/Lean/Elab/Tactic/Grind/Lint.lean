@@ -39,11 +39,11 @@ def checkEMatchTheorem (declName : Name) : CoreM Unit := do
 def elabGrindLintSkip : CommandElab := fun stx => do
   let `(#grind_lint skip $[suffix%$sfx?]? $ids:ident*) := stx | throwUnsupportedSyntax
   liftTermElabM do
-  if sfx?.isSome then
+  bif sfx?.isSome then
     -- Skip by suffix
     for id in ids do
       let suffixName := id.getId
-      if skipSuffixExt.getState (← getEnv) |>.contains suffixName then
+      bif skipSuffixExt.getState (← getEnv) |>.contains suffixName then
         throwError "`{suffixName}` is already in the `#grind_lint` skip suffix set"
       modifyEnv fun env => skipSuffixExt.addEntry env suffixName
   else
@@ -51,7 +51,7 @@ def elabGrindLintSkip : CommandElab := fun stx => do
     for id in ids do
       let declName ← realizeGlobalConstNoOverloadWithInfo id
       checkEMatchTheorem declName
-      if skipExt.getState (← getEnv) |>.contains declName then
+      bif skipExt.getState (← getEnv) |>.contains declName then
         throwError "`{declName}` is already in the `#grind_lint` skip set"
       modifyEnv fun env => skipExt.addEntry env declName
 
@@ -62,7 +62,7 @@ def elabGrindLintMute : CommandElab := fun stx => do
   for id in ids do
     let declName ← realizeGlobalConstNoOverloadWithInfo id
     checkEMatchTheorem declName
-    if muteExt.getState (← getEnv) |>.contains declName then
+    bif muteExt.getState (← getEnv) |>.contains declName then
       throwError "`{declName}` is already in the `#grind_lint` mute set"
     modifyEnv fun env => muteExt.addEntry env declName
 
@@ -105,7 +105,7 @@ def thmsToMessageData (thms : PHashMap Grind.Origin Nat) : MetaM MessageData := 
     match origin with
     | .decl declName => some (declName, c)
     | _ => none
-  let data := data.qsort fun (d₁, c₁) (d₂, c₂) => if c₁ == c₂ then Name.lt d₁ d₂ else c₁ > c₂
+  let data := data.qsort fun (d₁, c₁) (d₂, c₂) => bif c₁ == c₂ then Name.lt d₁ d₂ else c₁ > c₂
   let data ← data.mapM fun (declName, counter) =>
     return .trace { cls := `thm } m!"{.ofConst (← mkConstWithLevelParams declName)} ↦ {counter}" #[]
   return .trace { cls := `thm } "instances" data
@@ -123,12 +123,12 @@ def analyzeEMatchTheorem (declName : Name) (params : Params) : MetaM Bool := do
   let result ← Grind.main mvarId params
   let thms := result.counters.thm
   let s := sum thms
-  if s > params.config.min then
-    if s >= params.config.instances then
+  bif s >ᵇ params.config.min then
+    bif s ≥ᵇ params.config.instances then
       logInfo m!"instantiating `{declName}` triggers more than {s} additional `grind` theorem instantiations"
     else
       logInfo m!"instantiating `{declName}` triggers {s} additional `grind` theorem instantiations"
-  if s > params.config.detailed then
+  bif s >ᵇ params.config.detailed then
     logInfo m!"{declName}\n{← thmsToMessageData thms}"
   return s > params.config.min
 
@@ -141,9 +141,9 @@ def elabGrindLintInspect : CommandElab := fun stx => liftTermElabM <| withTheRea
   let mut addCodeAction := false
   for id in ids do
     let declName ← realizeGlobalConstNoOverloadWithInfo id
-    if (← analyzeEMatchTheorem declName params) then
+    bif (← analyzeEMatchTheorem declName params) then
       addCodeAction := true
-  if addCodeAction then
+  bif addCodeAction then
     unless (← getOptions).getBool `trace.grind.ematch.instance do
       let s ← `(command|
         set_option trace.grind.ematch.instance true in
@@ -163,20 +163,20 @@ def getTheorems (prefixes? : Option (Array Name)) (inModule : Bool) : CoreM (Lis
   let env ← getEnv
   return origins.filterMap fun origin => Id.run do
     let .decl declName := origin | return none
-    if skip.contains declName then return none
+    bif skip.contains declName then return none
     -- Check if declName's last component ends with any of the skip suffixes
-    if skipSuffixes.any fun suff => nameEndsWithSuffix declName suff then return none
+    bif skipSuffixes.any fun suff => nameEndsWithSuffix declName suff then return none
     let some prefixes := prefixes? | return some declName
-    if inModule then
+    bif inModule then
       let some modIdx := env.getModuleIdxFor? declName | return none
       let modName := env.header.moduleNames[modIdx]!
-      if prefixes.any fun pre => pre.isPrefixOf modName then
+      bif prefixes.any fun pre => pre.isPrefixOf modName then
         return some declName
       else
         return none
     else
       let keep := prefixes.any fun pre =>
-        if pre == `_root_ then
+        bif pre == `_root_ then
           declName.components.length == 1
         else
           pre.isPrefixOf declName
@@ -195,11 +195,11 @@ def elabGrindLintCheck : CommandElab := fun stx => liftTermElabM <| withTheReade
   let mut problematicTheorems := #[]
   for declName in decls do
     try
-      if (← analyzeEMatchTheorem declName params) then
+      bif (← analyzeEMatchTheorem declName params) then
         problematicTheorems := problematicTheorems.push declName
     catch e =>
       logError m!"{declName} failed with {e.toMessageData}"
-  if !problematicTheorems.isEmpty then
+  bif !problematicTheorems.isEmpty then
     -- Build the "Try this:" suggestion
     let checkCmd ← PrettyPrinter.ppCategory `command stx
     let mut suggestion := Format.pretty checkCmd

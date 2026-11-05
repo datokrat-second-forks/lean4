@@ -41,7 +41,7 @@ public def Prog (info : WPApp) : Expr := info.args[0]!
 /-- The monad of an `m α`-shaped program type, obtained by dropping the value type `α`. For a
 non-monadic program type the type itself is returned. -/
 public def M (info : WPApp) : Expr :=
-  if info.args[0]!.isApp then info.args[0]!.appFn! else info.args[0]!
+  bif info.args[0]!.isApp then info.args[0]!.appFn! else info.args[0]!
 /-- Result/value type argument of `wp`. -/
 public def Value (info : WPApp) : Expr := info.args[1]!
 /-- Predicate/lattice type argument of `wp`. -/
@@ -65,7 +65,7 @@ end WPApp
 /-- The `wp` metadata of `rhs`, or `none` when `rhs` is not a `wp` application. -/
 public def isWPApp? (rhs : Expr) : Option WPApp :=
   rhs.withApp fun head args =>
-    if head.isConstOf ``Std.WP.wp && args.size ≥ 10 then
+    bif head.isConstOf ``Std.WP.wp && args.size ≥ᵇ 10 then
       some { expr := rhs, head, args := args.take 10, excessArgs := args.drop 10 }
     else
       none

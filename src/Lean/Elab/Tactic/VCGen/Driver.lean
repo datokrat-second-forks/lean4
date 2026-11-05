@@ -45,7 +45,7 @@ public def elabInvariant (invariantAlts : Std.HashMap Nat Syntax) (n : Nat) (mv 
     withRef alt <| discard <| Meta.withDefault <| Lean.Elab.runTactic mv tac {} {}
     -- The tactic runs without throwing even when it fails to close the goal;
     -- check explicitly that the MVar got assigned.
-    if ← mv.isAssigned then
+    bif (← mv.isAssigned) then
       -- Preprocess the assignment to `mv` because it will interact with the `SymM` world
       if let some val ← getExprMVarAssignment? mv then
         let val ← unfoldReducible val
@@ -65,10 +65,10 @@ def handleInvariantSubgoals (subgoals : List MVarId) : VCGenM (Array MVarId) := 
   let env ← getEnv
   let mut others : Array MVarId := #[]
   for sg in subgoals do
-    if isSpecInvariantType env (← sg.getType) then
+    bif isSpecInvariantType env (← sg.getType) then
       let n := (← get).invariants.size + 1
       modify fun s => { s with invariants := s.invariants.push sg }
-      if ← elabInvariant (← read).invariantAlts n sg then
+      bif (← elabInvariant (← read).invariantAlts n sg) then
         modify fun s => { s with inlineHandledInvariants := s.inlineHandledInvariants.insert n }
       else
         sg.setKind .syntheticOpaque
@@ -84,7 +84,7 @@ so they never reach this path.
 public def emitVC (goal : Grind.Goal) : VCGenM Unit := do
   let mut goal := { goal with mvarId := ← elimTopPre goal.mvarId }
   goal ← processHypotheses goal
-  if goal.inconsistent then return
+  bif goal.inconsistent then return
   let some mvarId ← cleanupVC goal.mvarId | return
   mvarId.setKind .syntheticOpaque
   modify fun s => { s with vcs := s.vcs.push { goal with mvarId } }
@@ -98,12 +98,12 @@ public def work (scope : Scope) (goal : Grind.Goal) : VCGenM Unit := do
   let mut worklist : Array WorkItem := #[{ goal := { goal with mvarId }, scope }]
   while let some s := worklist.back? do
     worklist := worklist.pop
-    if ← s.goal.mvarId.isAssigned then continue
+    bif (← s.goal.mvarId.isAssigned) then continue
     if let some (jp, jumps) := (← get).pendingJoinPoints[s.goal.mvarId]? then
       modify fun st => { st with pendingJoinPoints := st.pendingJoinPoints.erase s.goal.mvarId }
       finalizeJoinPoint jp jumps
     let goal ← processHypotheses s.goal
-    if goal.inconsistent then continue
+    bif goal.inconsistent then continue
     match ← solve s.scope goal.mvarId with
     | .stop _reason =>
       emitVC goal
@@ -152,7 +152,7 @@ public partial def run (goal : Grind.Goal) (ctx : Context) (scope : Scope)
     g.mvarId.setTag (Name.mkSimple ("vc" ++ toString (idx + 1)) ++ (← g.mvarId.getTag).eraseMacroScopes)
   let vcs ← state.vcs.filterM (not <$> ·.mvarId.isAssigned)
   let unmatchedFrames := state.frameDB.entries.filterMap fun e =>
-    if e.retired then none else some e.frameStx
+    bif e.retired then none else some e.frameStx
   return {
     invariants := state.invariants,
     vcs,

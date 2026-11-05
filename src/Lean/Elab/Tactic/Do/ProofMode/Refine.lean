@@ -48,13 +48,13 @@ partial def mRefineCore (goal : MGoal) (pat : MRefinePat) (k : MGoal → TSyntax
     let f := T.getAppFn'
     let args := T.getAppArgs
     trace[Meta.debug] "f: {f}, args: {args}"
-    if f.isConstOf ``SPred.and && args.size >= 3 then
+    bif f.isConstOf ``SPred.and && args.size ≥ᵇ 3 then
       let T₁ := args[1]!.beta args[3...*]
       let T₂ := args[2]!.beta args[3...*]
       let prf₁ ← mRefineCore { goal with target := T₁ } p k
       let prf₂ ← mRefineCore { goal with target := T₂ } (.tuple ps) k
       return mkApp6 (mkConst ``SPred.and_intro [goal.u]) goal.σs goal.hyps T₁ T₂ prf₁ prf₂
-    else if f.isConstOf ``SPred.exists && args.size >= 3 then
+    else bif f.isConstOf ``SPred.exists && args.size ≥ᵇ 3 then
       let α := args[0]!
       let ψ := args[2]!
       let some witness ← patAsTerm p (some α) | throwError "pattern does not elaborate to a term to instantiate ψ"

@@ -192,7 +192,7 @@ public def FrameDecision.ofFrame (i : FrameInferenceInfo) (frame : Expr) : Frame
       | throwError "frameproc: no lattice split applies to{indentExpr (← m.mvarId!.getType)}"
     -- The split leaves `pre ⊑ frame s⃗` and `pre ⊑ W s⃗`; `specProof` proves the second.
     let subgoals ← gs.filterM fun g => do
-      if (isWPApp? (← g.getType).appArg!).isSome then g.assign goal.specProof; return false
+      bif (isWPApp? (← g.getType).appArg!).isSome then g.assign goal.specProof; return false
       else return true
     return { splitVCProof := m, subgoals }
 

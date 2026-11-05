@@ -94,7 +94,7 @@ def evalBVNormalize : GrindTactic := fun
     let types ← elabBVDecideTypes types cfg
     let (_, state) ← liftGrindM <|
       Normalize.bvNormalize.run (.new (.solve types) cfg) (.grindTarget g)
-    if ← state.target.mvarId.isAssigned then
+    bif (← state.target.mvarId.isAssigned) then
       replaceMainGoal []
     else
       throwError "`bv_normalize` failed to close the goal"

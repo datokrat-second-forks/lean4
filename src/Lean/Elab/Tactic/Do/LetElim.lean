@@ -55,7 +55,7 @@ inductive BVarUses (n : Nat) where
 
 def BVarUses.single {numBVars : Nat} (n : Nat) (_ : n < numBVars := by get_elem_tactic) : BVarUses numBVars :=
   -- NB: BVarUses is indexed by BVars in reverse order
-  .some <| .ofFn fun (i : Fin numBVars) => if i.val = numBVars - 1 - n then .one else .zero
+  .some <| .ofFn fun (i : Fin numBVars) => bif i.val =ᵇ numBVars - 1 - n then .one else .zero
 
 def BVarUses.pop {numBVars : Nat} : BVarUses (numBVars + 1) → (Uses × BVarUses numBVars)
   | .none => (.zero, .none)
@@ -91,14 +91,14 @@ partial def countUsesDecl (fvarId : FVarId) (ty : Expr) (val? : Option Expr) (bo
     | none => pure (none, {})
     | some val => over1Of2 some <$> countUses val subst
   let uses := bodyUses.getD fvarId .zero
-  let fvs := if uses == .zero then bodyUses else bodyUses + tyUses + valUses
+  let fvs := bif uses == .zero then bodyUses else bodyUses + tyUses + valUses
   let fvs := fvs.erase fvarId
   let ty := addMData (MData.empty.setNat `uses uses.toNat) ty
   return (ty, val?, fvs)
 
 partial def countUses (e : Expr) (subst : Array FVarId := #[]) : MetaM (Expr × FVarUses) := match e with
   | .bvar n =>
-    if _ : n < subst.size then
+    bif _ : n <ᵇ subst.size then
       return (e, {(subst[subst.size - 1 - n], .one)})
     else
       throwError "BVar index out of bounds: {n} >= {subst.size}"
@@ -139,7 +139,7 @@ def countUsesLCtx (ctx : LocalContext) (targetUses : FVarUses) : MetaM LocalCont
     return (decls.push decl, fvs)
   -- NB: decls are in reverse order; root comes first
   let decls ← StateRefT'.run' (ω:=IO.RealWorld) (s := decls) <| ctx.decls.mapM fun decl => do
-    if decl.isNone then return decl
+    bif decl.isNone then return decl
     modifyGet fun (decls : Array LocalDecl) => (some decls.back!, decls.pop)
   return { ctx with decls }
 
@@ -154,7 +154,7 @@ def elimLetsCore (e : Expr) (elimTrivial := true) : MetaM Expr := StateRefT'.run
     | .letE _ ty val body _ => do
       let .mdata d _ := ty | return .continue
       let uses := Uses.fromNat (d.getNat `uses 2) -- 2 goes to .many
-      if doNotDup uses val elimTrivial then return .continue
+      bif doNotDup uses val elimTrivial then return .continue
       return .visit (body.instantiate1 val) -- urgh O(n^2). See comment above
     | _ => return .continue
   Meta.transform e (pre := pre)
@@ -169,7 +169,7 @@ def elimLets (mvar : MVarId) (elimTrivial := true) : MetaM MVarId := mvar.withCo
     let .some val := decl.value? | continue
     let .mdata d _ := decl.type | continue
     let uses := Uses.fromNat (d.getNat `uses 2) -- 2 goes to .many
-    if doNotDup uses val elimTrivial then continue
+    bif doNotDup uses val elimTrivial then continue
     fvs := fvs.push (mkFVar decl.fvarId)
     vals := vals.push val
   let ty := ty.replaceFVars fvs vals

@@ -150,7 +150,7 @@ def computeAppendSep (tacticSeq : Syntax) (fileMap : FileMap) : String := Id.run
   let some bodyEnd := tacticSeq.getTailPos? | return " "
   let startPos := fileMap.toPosition bodyStart
   let endPos := fileMap.toPosition bodyEnd
-  if startPos.line == endPos.line then
+  bif startPos.line == endPos.line then
     return "; "
   return "\n" ++ String.ofList (List.replicate startPos.column ' ')
 
@@ -284,10 +284,10 @@ def collectTriggerPoints (cmd : Syntax) (opts : Options) (tree : InfoTree)
   let onSorry := autoTry.onSorry.get opts
   let mut acc : Array Candidate := #[]
   -- Sorry triggers still come from the info tree, since they're per-`sorry`-token.
-  if onSorry then
+  bif onSorry then
     acc := tree.foldInfo (init := acc) fun ctx info acc => Id.run do
       if let .ofTacticInfo tacInfo := info then
-        if isSorryTactic tacInfo.stx then
+        bif isSorryTactic tacInfo.stx then
           if let some goal := tacInfo.goalsBefore.head? then
             let namingCtx : NamingContext :=
               { currNamespace := ctx.currNamespace, openDecls := ctx.openDecls }
@@ -297,7 +297,7 @@ def collectTriggerPoints (cmd : Syntax) (opts : Options) (tree : InfoTree)
               namingCtx, goal }
       return acc
   -- Unsolved-goal triggers come from the message log.
-  if onUnsolved || onEmpty then
+  bif onUnsolved || onEmpty then
     let fileMap ← getFileMap
     let some cmdRange := cmd.getRange? (canonicalOnly := true) | return acc
     -- Dedup key is `(message range, goal mvarid)`: same range + same mvarid is a true
@@ -323,11 +323,11 @@ def collectTriggerPoints (cmd : Syntax) (opts : Options) (tree : InfoTree)
       unless onUnsolved || (onEmpty && isEmpty) do continue
       let ref := mkRangeStx msgRange
       let goals := collectGoalsAndCtxFromMessage msg.data
-      if goals.isEmpty then
+      bif goals.isEmpty then
         trace[autoTry] "Tactic.unsolvedGoals message yielded no (msgCtx, namingCtx, goal) \
           tuples; producer not following the `withContext`/`withNamingContext` contract?"
       for (msgCtx, namingCtx, mvarId) in goals do
-        if seen.contains (msgRange, mvarId) then continue
+        bif seen.contains (msgRange, mvarId) then continue
         seen := seen.insert (msgRange, mvarId)
         acc := acc.push {
           kind := .unsolvedGoal body insertPos, ref,
@@ -347,7 +347,7 @@ def collectSuggestionsForGoal (c : Candidate) : CommandElabM (Array (TSyntax `ta
       try
         Try.collectTryCoreSuggestions {}
       catch e =>
-        if e.isInterrupt || e.isMaxRecDepth then throw e
+        bif e.isInterrupt || e.isMaxRecDepth then throw e
         trace[autoTry] "try? raised: {e.toMessageData}"
         return #[]
     -- Unfold `TacticM` (= `ReaderT Context (StateRefT State TermElabM)`) by hand to
@@ -358,7 +358,7 @@ def collectSuggestionsForGoal (c : Candidate) : CommandElabM (Array (TSyntax `ta
         (tacticAct.run { elaborator := .anonymous }).run' { goals := [c.goal] }
     try Prod.fst <$> term.run {} {}
     catch e =>
-      if e.isInterrupt || e.isMaxRecDepth then throw e
+      bif e.isInterrupt || e.isMaxRecDepth then throw e
       trace[autoTry] "term elab raised: {e.toMessageData}"
       return #[]
 
@@ -371,7 +371,7 @@ the command (so tests are robust to moving the example up or down the file).
 -/
 def emitAppendSuggestions (tacticSeq ref : Syntax) (insertPos : String.Pos.Raw)
     (suggs : Array (TSyntax `tactic)) (cmdLine : Nat) : CommandElabM Unit := do
-  if suggs.isEmpty then return
+  bif suggs.isEmpty then return
   let fileMap ← getFileMap
   let sep := computeAppendSep tacticSeq fileMap
   let origSpan := mkEmptyRangeStx insertPos
@@ -383,7 +383,7 @@ def emitAppendSuggestions (tacticSeq ref : Syntax) (insertPos : String.Pos.Raw)
     -- text in `suggestion` carries the leading separator -- this keeps the [apply]
     -- line readable without losing the appending semantics on click.
     let editText := sep ++ cleanText
-    if showEdits then
+    bif showEdits then
       let pos := fileMap.toPosition insertPos
       let dLine := pos.line - cmdLine + 1  -- match `#guard_msgs (positions := true)`: +N:COL
       logInfoAt ref
@@ -394,7 +394,7 @@ def emitAppendSuggestions (tacticSeq ref : Syntax) (insertPos : String.Pos.Raw)
       toCodeActionTitle? := some (fun _ => "Try this: " ++ cleanText)
     } : Tactic.TryThis.Suggestion)
   liftCoreM <|
-    if formatted.size == 1 then
+    bif formatted.size == 1 then
       Tactic.TryThis.addSuggestion ref formatted[0]! (origSpan? := origSpan)
     else
       Tactic.TryThis.addSuggestions ref formatted (origSpan? := origSpan)
@@ -412,7 +412,7 @@ def runReplaceTryOnGoal (c : Candidate) : CommandElabM Unit := do
       withRef c.ref do
         discard <| Lean.Elab.runTactic c.goal tryStx
     catch e =>
-      if e.isInterrupt || e.isMaxRecDepth then throw e
+      bif e.isInterrupt || e.isMaxRecDepth then throw e
       trace[autoTry] "try? raised: {e.toMessageData}"
 
 /--
@@ -454,7 +454,7 @@ def singleGoalAtInsertPos (tree : InfoTree) (fileMap : FileMap) (c : Candidate) 
   | [r] =>
     let targetGoals := match c.kind with
       | .unsolvedGoal tacticSeq _ =>
-        if tacticSeq.getPos?.isSome then r.tacticInfo.goalsAfter
+        bif tacticSeq.getPos?.isSome then r.tacticInfo.goalsAfter
         else r.tacticInfo.goalsBefore
       | .sorryTactic => r.tacticInfo.goalsBefore
     targetGoals.length == 1
@@ -474,7 +474,7 @@ def autoTryHook : Linter where run := withSetOptionIn fun stx => do
   let onUnsolved := autoTry.onUnsolvedGoal.get opts
   let onSorry := autoTry.onSorry.get opts
   unless onEmpty || onUnsolved || onSorry do return
-  if ← hasNonUnsolvedGoalError stx then
+  bif (← hasNonUnsolvedGoalError stx) then
     trace[autoTry] "skipping: command has non-unsolved-goal errors"
     return
   trace[autoTry] "running: onEmpty={onEmpty} onUnsolved={onUnsolved} onSorry={onSorry}"

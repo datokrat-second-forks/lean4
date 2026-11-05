@@ -38,7 +38,7 @@ into
   ⊢ₛ T
 -/
 partial def mRevertForallN (goal : MGoal) (n : Nat) (hypName : Name) (k : MGoal → m Expr) : m Expr := do
-  if n = 0 then return ← k goal
+  bif n =ᵇ 0 then return ← k goal
   let H := goal.hyps
   let T := goal.target.consumeMData
   let f := T.getAppFn

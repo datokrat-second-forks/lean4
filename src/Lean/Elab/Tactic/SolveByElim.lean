@@ -73,7 +73,7 @@ def parseUsing (s : Option (TSyntax ``using_)) : Array Ident :=
 that specify the lemmas to use. -/
 def processSyntax (cfg : SolveByElimConfig := {}) (only star : Bool) (add remove : List Term)
     (use : Array Ident) (goals : List MVarId) : MetaM (List MVarId) := do
-  if !remove.isEmpty && goals.length > 1 then
+  bif !remove.isEmpty && goals.length >ᵇ 1 then
     throwError "Removing local hypotheses is not supported when operating on multiple goals."
   let ⟨lemmas, ctx⟩ ← mkAssumptionSet only star add remove use
   SolveByElim.solveByElim cfg lemmas ctx goals
@@ -112,19 +112,19 @@ def evalSolveByElim : Tactic
   | `(tactic| solve_by_elim $[*%$s]? $cfg:optConfig $[only%$o]? $[$t:args]? $[$use:using_]?) => do
     let (star, add, remove) := parseArgs t
     let use := parseUsing use
-    let goals ← if s.isSome then
+    let goals ← bif s.isSome then
       getGoals
     else
       pure [← getMainGoal]
     let cfg ← elabConfig cfg
     -- Add library suggestions if +suggestions is enabled
-    let add ← if cfg.suggestions then
+    let add ← bif cfg.suggestions then
       let mainGoal ← getMainGoal
       let suggestions ← LibrarySuggestions.select mainGoal { caller := some "solve_by_elim" }
       let suggestionTerms ← suggestions.toList.filterMapM fun s => do
         -- Only include suggestions for constants that exist
         let env ← getEnv
-        if env.contains s.name then
+        bif env.contains s.name then
           let ident := mkCIdentFrom (← getRef) s.name (canonical := true)
           return some (⟨ident⟩ : Term)
         else

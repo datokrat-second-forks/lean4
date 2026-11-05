@@ -77,7 +77,7 @@ partial def decomposeProdRel (EPosts epostsSpec epostsAbstract : Expr)
       In this case we do not want to create new metavariables for `eposts₁`, `eposts₃`, etc.
       Instead, we will just assign them to `epostsAbstract.snd.fst` and
       `epostsAbstract.snd.snd.fst`, etc. -/
-    if head.isMVar then
+    bif head.isMVar then
       head.mvarId!.assign absHead
       mkAppM ``Prod.mk_le_snd #[tail, epostsAbstract, hTail]
     else
@@ -105,9 +105,9 @@ partial def decomposeProdRel (EPosts epostsSpec epostsAbstract : Expr)
     | _ =>
       let EPostsR ← whnfR EPosts
       -- The terminator is reducibly `PUnit`, under any of its names.
-      if EPostsR.isConstOf ``PUnit then
+      bif EPostsR.isConstOf ``PUnit then
         mkAppM ``Unit.unit_le #[epostsAbstract]
-      else if EPostsR.isForall then
+      else bif EPostsR.isForall then
         -- A bare `ε → σ → Prop`, e.g. of `Except ε`, yields a pointwise VC like a stack component.
         let ssTypes ← forallTelescope EPostsR fun xs _ => xs.drop 1 |>.mapM (Meta.inferType ·)
         let hTy ← mkPostPointwisePremise epostsSpec epostsAbstract EPostsR ssTypes stateArgNames
@@ -272,7 +272,7 @@ def mkSpecBackwardProof (info : WPApp)
         let botEPred ← mkAppOptM ``Lean.Order.bot #[epostsTy, none]
         isDefEqGuarded epostsSpec botEPred
       catch _ => pure false
-    if isBot then
+    bif isBot then
       /- get the proof of `pre ⊑ wp prog postAbstract epostsAbstract`, where `eposts (= ⊥)` is abstracted.
         This proof DOES NOT have a `?epostsImpl` premise -/
       specApplied := mkAppN (wpLemma ``WP.wp_monotone_bot_le)
@@ -361,7 +361,7 @@ public def tryMkBackwardRuleFromSpec (specThm : SpecTheorem) (info : WPApp)
   -- Equality specs (the simp side of `@[spec]`) are normalized to `⊑ wp` form, then handled like
   -- any ordinary `⊑ wp` spec.
   let (specProof, specType) ←
-    if specType.isAppOfArity ``Eq 3 then eqSpecToWp? info specProof specType
+    bif specType.isAppOfArity ``Eq 3 then eqSpecToWp? info specProof specType
     else pure (specProof, specType)
   let_expr PartialOrder.rel Pred' _cl' pre rhs := specType
     | throwError "target not a partial order ⊑ application {specType}"
@@ -437,7 +437,7 @@ public def mkBackwardRuleForSplit
           -- For ite/dite, `bodyType` equals `mkGoal abstractProg` so this is equivalent.
           let prog := bodyType.getArg! 3 |>.getArg! 7
           let res ← rwIfOrMatcher idx prog
-          if res.proof?.isNone then
+          bif res.proof?.isNone then
             throwError "mkBackwardRuleForSplit: rwIfOrMatcher failed for alt {idx}"
           let altParams := altFVars.all
           subgoals[idx]!.mvarId!.assign (← mkForallFVars altParams (mkGoal res.expr))
@@ -469,7 +469,7 @@ def analyzeFrameRule (rule : BackwardRule) (opHead : Name) (numExcess : Nat) :
     for i in [0:resultPos.size] do
       let_expr Lean.Order.PartialOrder.rel _ _ _ rhs := (← premiseType i) | continue
       let opApp := rhs.stripArgsN numExcess
-      if opApp.isAppOf opHead then
+      bif opApp.isAppOf opHead then
         found := some (i, opApp)
         break
     let some (splitVCIdx, opApp) := found

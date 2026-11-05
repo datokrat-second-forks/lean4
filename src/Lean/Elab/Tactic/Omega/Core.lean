@@ -72,7 +72,7 @@ private def bullet (s : String) := "• " ++ s.replace "\n" "\n  "
 def toString : Justification s x → String
   | assumption _ _ i => s!"{x} ∈ {s}: assumption {i}"
   | @tidy s' x' j =>
-    if s == s' && x == x' then j.toString else s!"{x} ∈ {s}: tidying up:\n" ++ bullet j.toString
+    bif s == s' && x == x' then j.toString else s!"{x} ∈ {s}: tidying up:\n" ++ bullet j.toString
   | combine j k =>
     s!"{x} ∈ {s}: combination of:\n" ++ bullet j.toString ++ "\n" ++ bullet k.toString
   | combo a j b k =>
@@ -201,8 +201,8 @@ def isEmpty (p : Problem) : Bool := p.constraints.isEmpty
 
 instance : ToString Problem where
   toString p :=
-    if p.possible then
-      if p.isEmpty then
+    bif p.possible then
+      bif p.isEmpty then
         "trivial"
       else
         "\n".intercalate <|
@@ -230,7 +230,7 @@ without checking if there is already a constraint for these coefficients.
 -/
 def insertConstraint (p : Problem) : Fact → Problem
   | f@⟨x, s, j⟩ =>
-    if s.isImpossible then
+    bif s.isImpossible then
       { p with
         possible := false
         proveFalse? := some (proveFalse j p.assumptions)
@@ -242,7 +242,7 @@ def insertConstraint (p : Problem) : Fact → Problem
         constraints := p.constraints.insert x f
         proveFalse?_spec := p.proveFalse?_spec
         equalities :=
-        if f.constraint.isExact then
+        bif f.constraint.isExact then
           p.equalities.insert x
         else
           p.equalities }
@@ -253,21 +253,22 @@ combining it with any existing constraints for the same coefficients.
 -/
 def addConstraint (p : Problem) : Fact → Problem
   | f@⟨x, s, j⟩ =>
-    if p.possible then
+    bif p.possible then
       match p.constraints[x]? with
       | none =>
         match s with
         | .trivial => p
         | _ => p.insertConstraint f
       | some ⟨x', t, k⟩ =>
-        if h : x = x' then
+        bif h : x =ᵇ x' then
+          have h := eq_of_decideEq_eq_true h
           let r := s.combine t
-          if r = t then
+          bif r =ᵇ t then
             -- No need to overwrite the existing fact
             -- with the same fact with a more complicated justification
             p
           else
-            if r = s then
+            bif r =ᵇ s then
               -- The new constraint is strictly stronger, no need to combine with the old one:
               p.insertConstraint ⟨x, s, j⟩
             else
@@ -290,9 +291,9 @@ def selectEquality (p : Problem) : Option (Coeffs × Nat) :=
   p.equalities.fold (init := none) fun
   | none, c => (c, c.minNatAbs)
   | some (r, m), c =>
-    if 2 ≤ m then
+    bif 2 ≤ᵇ m then
       let m' := c.minNatAbs
-      if (m' < m || m' = m && c.maxNatAbs < r.maxNatAbs) then
+      bif (m' <ᵇ m || m' =ᵇ m && c.maxNatAbs <ᵇ r.maxNatAbs) then
         (c, m')
       else
         (r, m)
@@ -344,10 +345,11 @@ def dealWithHardEquality (p : Problem) (c : Coeffs) : OmegaM Problem :=
     -- We have to store the valid value of the newly introduced variable in the atoms.
     let x := mkApp3 (.const ``bmod_div_term []) (toExpr m) (toExpr c) (← atomsCoeffs)
     let (i, facts?) ← lookup x
-    if hr : r' = r then
+    bif hr : r' =ᵇ r then
+      have hr := eq_of_decideEq_eq_true hr
       match facts? with
       | none => throwError "When solving hard equality, new atom had been seen before!"
-      | some facts => if ! facts.isEmpty then
+      | some facts => bif ! facts.isEmpty then
         throwError "When solving hard equality, there were unexpected new facts!"
       return p.addConstraint { coeffs := _, constraint := _, justification := (hr ▸ j).bmod m r i }
     else
@@ -360,14 +362,14 @@ Solve an equality, by deciding whether it is easy (has a `±1` coefficient) or h
 and delegating to the appropriate function.
 -/
 def solveEquality (p : Problem) (c : Coeffs) (m : Nat) : OmegaM Problem :=
-  if m = 1 then
+  bif m =ᵇ 1 then
     return p.solveEasyEquality c
   else
     p.dealWithHardEquality c
 
 /-- Recursively solve all equalities. -/
 partial def solveEqualities (p : Problem) : OmegaM Problem :=
-  if p.possible then
+  bif p.possible then
     match p.selectEquality with
     | some (c, m) => do (← p.solveEquality c m).solveEqualities
     | none => return p
@@ -486,16 +488,16 @@ def fourierMotzkinData (p : Problem) : Array FourierMotzkinData := Id.run do
     for i in *...n do
       let x := Coeffs.get xs i
       data := data.modify i fun d =>
-        if x = 0 then
+        bif x =ᵇ 0 then
           { d with irrelevant := f :: d.irrelevant }
         else Id.run do
           let s' := s.scale x
           let mut d' := d
-          if s'.lowerBound.isSome then
+          bif s'.lowerBound.isSome then
             d' := { d' with
               lowerBounds := (f, x) :: d'.lowerBounds
               lowerExact := d'.lowerExact && x.natAbs = 1 }
-          if s'.upperBound.isSome then
+          bif s'.upperBound.isSome then
             d' := { d' with
               upperBounds := (f, x) :: d'.upperBounds
               upperExact := d'.upperExact && x.natAbs = 1 }
@@ -515,14 +517,14 @@ def fourierMotzkinSelect (data : Array FourierMotzkinData) : MetaM FourierMotzki
   let mut bestIdx := 0
   let mut bestSize := data[0]!.size
   let mut bestExact := data[0]!.exact
-  if bestSize = 0 then
+  bif bestSize =ᵇ 0 then
     trace[omega] "Selected variable {data[0]!.var}."
     return data[0]!
   for h : i in 1...data.size do
     let exact := data[i].exact
     let size := data[i].size
-    if size = 0 || !bestExact && exact || (bestExact == exact) && size < bestSize then
-      if size = 0 then
+    bif size =ᵇ 0 || !bestExact && exact || (bestExact == exact) && size <ᵇ bestSize then
+      bif size =ᵇ 0 then
         trace[omega] "Selected variable {data[i].var}"
         return data[i]
       bestIdx := i
@@ -554,7 +556,7 @@ Run the `omega` algorithm (for now without dark and grey shadows!) on a problem.
 -/
 partial def runOmega (p : Problem) : OmegaM Problem := do
   trace[omega] "Running omega on:\n{p}"
-  if p.possible then
+  bif p.possible then
     let p' ← p.solveEqualities
     elimination p'
   else
@@ -562,8 +564,8 @@ partial def runOmega (p : Problem) : OmegaM Problem := do
 
 /-- As for `runOmega`, but assuming the first round of solving equalities has already happened. -/
 partial def elimination (p : Problem) : OmegaM Problem :=
-  if p.possible then
-    if p.isEmpty then
+  bif p.possible then
+    bif p.isEmpty then
       return p
     else do
       trace[omega] "Running Fourier-Motzkin elimination on:\n{p}"

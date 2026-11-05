@@ -31,7 +31,7 @@ syntax location         := withPosition(ppGroup(" at" (locationWildcard <|> loca
 -/
 def expandLocation (stx : Syntax) : Location :=
   let arg := stx[1]
-  if arg.getKind == ``Parser.Tactic.locationWildcard then
+  bif arg.getKind == ``Parser.Tactic.locationWildcard then
     Location.wildcard
   else
     let locationHyps := arg[0].getArgs
@@ -40,7 +40,7 @@ def expandLocation (stx : Syntax) : Location :=
     Location.targets hypotheses (numTurnstiles > 0)
 
 def expandOptLocation (stx : Syntax) : Location :=
-  if stx.isNone then
+  bif stx.isNone then
     Location.targets #[] true
   else
     expandLocation stx[0]
@@ -61,7 +61,7 @@ def withLocation (loc : Location) (atLocal : FVarId → TacticM Unit) (atTarget 
     hyps.forM fun hyp => withMainContext do
       let fvarId ← getFVarId hyp
       atLocal fvarId
-    if type then
+    bif type then
       withMainContext atTarget
   | Location.wildcard =>
     let worked ← tryTactic <| withSaveInfoContext <| withMainContext <| atTarget
@@ -70,7 +70,7 @@ def withLocation (loc : Location) (atLocal : FVarId → TacticM Unit) (atTarget 
       let mut worked := worked
       -- We must traverse backwards because the given `atLocal` may use the revert/intro idiom
       for fvarId in (← getLCtx).getFVarIds.reverse do
-        if (← fvarId.getDecl).isImplementationDetail then
+        bif (← fvarId.getDecl).isImplementationDetail then
           continue
         worked := worked || (← tryTactic <| withSaveInfoContext <| withMainContext <| atLocal fvarId)
       unless worked do

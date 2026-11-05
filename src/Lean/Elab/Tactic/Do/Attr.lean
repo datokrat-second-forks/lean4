@@ -124,14 +124,14 @@ private partial def countBVarDependentMVars (xs : Array Expr) (e : Expr) : MetaM
   go e
   where
     go (e : Expr) : MetaM Nat := do
-      if !e.hasExprMVar then return 0
+      bif !e.hasExprMVar then return 0
       match e with
       | .app f a =>
         if let some (_, lhs, rhs) := e.eq? then
           let l := lhs.getAppFn'
           let r := rhs.getAppFn'
-          if l.isMVar && rhs.hasLooseBVars && xs.contains l then return 1
-          if r.isMVar && lhs.hasLooseBVars && xs.contains r then return 1
+          bif l.isMVar && rhs.hasLooseBVars && xs.contains l then return 1
+          bif r.isMVar && lhs.hasLooseBVars && xs.contains r then return 1
           return ← (· + ·) <$> go lhs <*> go rhs
         return ← (· + ·) <$> go f <*> go a
       | .mdata _ e => go e
@@ -156,7 +156,7 @@ in order to assign closed solutions to meta variables. -/
 partial def computeMVarBetaPotentialForSPred (xs : Array Expr) (σs : Expr) (e : Expr) : MetaM Nat :=
   withNewMCtxDepth do
   withConfigWithKey simpSPredConfig do
-  if xs.isEmpty then return 0
+  bif xs.isEmpty then return 0
   let ctx ← Simp.Context.mkDefault
   let mut σs ← whnfR σs
   let mut e := e
@@ -173,7 +173,7 @@ partial def computeMVarBetaPotentialForSPred (xs : Array Expr) (σs : Expr) (e :
       -- We could write a custom function should `simp` become a bottleneck.
     e := r.expr
     let count ← countBVarDependentMVars xs e
-    if count < boundAssignments || e.getAppFn'.isMVar then
+    bif count <ᵇ boundAssignments || e.getAppFn'.isMVar then
       lastSuccess := n
       boundAssignments := count
     σs ← whnfR (σs.getArg! 2)
@@ -295,7 +295,7 @@ Normalises a specification proof so its conclusion is in `pre ⊑ wp …` form.
 -/
 def tripleToWpProof? (proof type : Expr) : MetaM (Option (Expr × Expr)) := do
   let type ← whnfR type
-  if type.isAppOfArity ``Triple 11 then
+  bif type.isAppOfArity ``Triple 11 then
     -- Build the `Triple.le_wp` projection application explicitly from the `Triple` type's own
     -- arguments rather than via `mkAppM`. `mkAppM` would re-synthesise the instance arguments
     -- (`Monad m`, `WPMonad m …`), which fails for transformer specs whose monad is a partially
@@ -307,7 +307,7 @@ def tripleToWpProof? (proof type : Expr) : MetaM (Option (Expr × Expr)) := do
     let proof := mkAppN (.const ``Triple.le_wp lvls) (type.getAppArgs.push proof)
     let type ← instantiateMVars (← inferType proof)
     return some (proof, type)
-  else if type.isAppOfArity ``PartialOrder.rel 4 then
+  else bif type.isAppOfArity ``PartialOrder.rel 4 then
     return some (proof, type)
   else
     return none
@@ -369,7 +369,7 @@ structure SpecTheorems where
 def SpecTheorems.insert (d : SpecTheorems) (e : SpecTheorem) : SpecTheorems :=
   -- Patterns contain no metavariables, so an empty `MetavarContext` suffices.
   let priority := (Sym.getMatch {} d.specs e.pattern.pattern).foldl (init := e.priority) fun pr s =>
-    if s.proof == e.proof then max pr s.priority else pr
+    bif s.proof == e.proof then max pr s.priority else pr
   { d with specs := Sym.insertPattern d.specs e.pattern { e with priority } }
 
 def SpecTheorems.isErased (d : SpecTheorems) (thmId : SpecProof) : Bool :=
@@ -404,17 +404,17 @@ def eraseUnusedVarsFromPattern (p : Sym.Pattern) : Sym.Pattern := Id.run do
   -- binders. `used[j]` becomes `true` once we know variable `j` is reachable from the pattern.
   let mut used := Array.replicate n false
   for j in *...n do
-    if p.pattern.hasLooseBVar (n - 1 - j) then
+    bif p.pattern.hasLooseBVar (n - 1 - j) then
       used := used.set! j true
   -- A variable's type may reference earlier variables, so propagate top-down: when a kept variable
   -- is reached, mark every variable occurring in its type as kept too.
   for j in *...n do
     let i := n - 1 - j
-    if used[i]! then
+    bif used[i]! then
       for k in *...i do
-        if p.varTypes[i]!.hasLooseBVar (i - 1 - k) then
+        bif p.varTypes[i]!.hasLooseBVar (i - 1 - k) then
           used := used.set! k true
-  if used.all (· == true) then return p
+  bif used.all (· == true) then return p
   let kept := (Array.range n).filter (used[·]!)
   -- Rebuild the telescope via fvar placeholders to avoid manual de Bruijn arithmetic.
   let fvars := (Array.range n).map fun i => mkFVar ⟨.num `_sym_prune i⟩
@@ -426,10 +426,10 @@ def eraseUnusedVarsFromPattern (p : Sym.Pattern) : Sym.Pattern := Id.run do
   -- depend on the de Bruijn numbering, so we simply keep the surviving entries.
   let newVarInfos? := p.varInfos?.bind fun infos =>
     let argsInfo := kept.map (infos.argsInfo[·]!)
-    if argsInfo.any fun a => a.isProof || a.isInstance then some { argsInfo } else none
+    bif argsInfo.any fun a => a.isProof || a.isInstance then some { argsInfo } else none
   let newCheckTypeMask? := p.checkTypeMask?.bind fun mask =>
     let newMask := kept.map (mask[·]!)
-    if newMask.all (· == false) then none else some newMask
+    bif newMask.all (· == false) then none else some newMask
   return { p with
     varTypes := newVarTypes
     pattern := newPattern
@@ -440,7 +440,7 @@ def eraseUnusedVarsFromPattern (p : Sym.Pattern) : Sym.Pattern := Id.run do
 def progArgIdx? (declName : Name) : MetaM (Option Nat) := do
   forallTelescope (← getAsyncConstInfo declName).toConstantVal.type fun xs _ => do
     for i in [0:xs.size] do
-      if (← xs[i]!.fvarId!.getUserName) == `x then
+      bif (← xs[i]!.fvarId!.getUserName) == `x then
         return some i
     return none
 
@@ -452,12 +452,12 @@ bare `lhs ⊑ rhs` whose RHS is not a `wp` application (an invariant entailment 
 `none` to skip such non-spec hypotheses instead of failing.
 -/
 def selectProg (type : Expr) : MetaM (Option Expr) := do
-  if type.getAppFn.isConstOf ``Triple then
+  bif type.getAppFn.isConstOf ``Triple then
     let some idx ← progArgIdx? ``Triple | return none
     return type.getAppArgs[idx]?
   match_expr type with
   | PartialOrder.rel _α _inst _pre rhs =>
-    if rhs.getAppFn.isConstOf ``wp then
+    bif rhs.getAppFn.isConstOf ``wp then
       let some idx ← progArgIdx? ``wp | return none
       return rhs.getAppArgs[idx]?
     return none
@@ -511,7 +511,7 @@ fewer args than the actual fully-applied program. This appends the leading foral
 Returns the eta-expanded pattern and the number of extra args (0 if no expansion needed).
 -/
 private def etaExpandEqPattern (pattern : Sym.Pattern) (eqTy : Expr) : Sym.Pattern × Nat :=
-  if !eqTy.isForall then (pattern, 0)
+  bif !eqTy.isForall then (pattern, 0)
   else
     let rec collectDomains (ty : Expr) (acc : Array Expr) : Array Expr :=
       if let .forallE _ d b _ := ty then collectDomains b (acc.push d) else acc
@@ -546,7 +546,7 @@ def mkSpecTheoremFromSimpDecl? (declName : Name) (prio : Nat) : MetaM (Option Sp
     return (lhs, (eqTy, rhs))
   -- Skip no-op equations whose preprocessed LHS key is syntactically the RHS, so rewriting makes no
   -- progress (e.g. `getThe.eq_1 : getThe σ = MonadStateOf.get` after reducible unfolding).
-  if pattern.pattern == rhs then return none
+  bif pattern.pattern == rhs then return none
   let (pattern, etaArgs) := etaExpandEqPattern pattern eqTy
   return some { pattern, proof := .global declName, kind := .simp etaArgs, priority := prio,
                 conjunctivePre := true }
@@ -561,7 +561,7 @@ def mkSpecTheoremFromSimpExpr? (ref : Syntax) (proof : Expr) (levelParams : List
   let (pattern, (eqTy, rhs)) ← Sym.mkPatternFromExprWithKey proof levelParams fun body => do
     let_expr Eq eqTy lhs rhs := body | throwError "conclusion is not an equality{indentExpr body}"
     return (lhs, (eqTy, rhs))
-  if pattern.pattern == rhs then return none
+  bif pattern.pattern == rhs then return none
   let (pattern, etaArgs) := etaExpandEqPattern pattern eqTy
   return some { pattern, proof := .stx (← mkFreshId) ref proof, kind := .simp etaArgs,
                 priority := prio, conjunctivePre := true }
@@ -572,7 +572,7 @@ rewrites, the spec-database counterpart of `simp`'s delta unfolding. `none` for 
 definition, whose unconditional unfolding would not terminate.
 -/
 def unfoldSpecEqn? (declName : Name) : MetaM (Option Name) := do
-  if (← isRecursiveDefinition declName) then return none
+  bif (← isRecursiveDefinition declName) then return none
   getUnfoldEqnFor? declName (nonRec := true)
 
 /--
@@ -595,7 +595,7 @@ def simpSpecTheorems (entries : Array SimpEntry) (prio : Nat) : MetaM (Array Spe
       match thm.origin with
       | .decl declName .. =>
         try
-          if hasOverlapHypothesis (← getAsyncConstInfo declName).toConstantVal.type then
+          bif hasOverlapHypothesis (← getAsyncConstInfo declName).toConstantVal.type then
             trace[Elab.Tactic.Do.specAttr] "Skipping overlap-hypothesis equation {declName}"
           else if let some spec ← mkSpecTheoremFromSimpDecl? declName prio then
             result := result.push spec
@@ -603,7 +603,7 @@ def simpSpecTheorems (entries : Array SimpEntry) (prio : Nat) : MetaM (Array Spe
           trace[Elab.Tactic.Do.specAttr] "Failed to add simp spec {declName}: {e.toMessageData}"
       | .stx .. =>
         try
-          if hasOverlapHypothesis (← inferType thm.proof) then
+          bif hasOverlapHypothesis (← inferType thm.proof) then
             trace[Elab.Tactic.Do.specAttr] "Skipping overlap-hypothesis equation {thm.origin.key}"
           else if let some spec ← mkSpecTheoremFromSimpExpr? .missing thm.proof thm.levelParams.toList prio then
             result := result.push spec
@@ -630,10 +630,10 @@ def SpecExtension.addSimpSpecTheoremsFromConst (ext : SpecExtension) (declName :
     (attrKind : AttributeKind) : MetaM Unit := do
   let async ← getAsyncConstInfo declName
   let info := async.toConstantVal
-  if (← isProp info.type) then
+  bif (← isProp info.type) then
     if let some thm ← mkSpecTheoremFromSimpDecl? declName prio then
       ext.add thm attrKind
-  else if async.kind == .defn then
+  else bif async.kind == .defn then
     for thm in ← simpSpecTheorems (← mkSimpEntryOfDeclToUnfold declName) prio do
       ext.add thm attrKind
   else
@@ -646,13 +646,13 @@ contributes for a definition registered to unfold. Mirrors `addSimpSpecTheoremsF
 erases exactly the entries that annotating `foo` inserted.
 -/
 def specEraseProofs (declName : Name) : MetaM (Array SpecProof) := do
-  if (← mkSpecTheoremFromConst declName).isSome then
+  bif (← mkSpecTheoremFromConst declName).isSome then
     return #[.global declName]
   let async ← getAsyncConstInfo declName
   let info := async.toConstantVal
-  if (← isProp info.type) then
+  bif (← isProp info.type) then
     return #[.global declName]
-  else if async.kind == .defn then
+  else bif async.kind == .defn then
     return (← simpSpecTheorems (← mkSimpEntryOfDeclToUnfold declName) (eval_prio default)).map (·.proof)
   else
     return #[]

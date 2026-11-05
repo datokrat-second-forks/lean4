@@ -59,7 +59,7 @@ public def SpecAttr.SpecTheorem.instantiate (specThm : SpecTheorem) :
       let some (prf, type) ← tripleToWpProof? prf type
         | throwError "expected `Triple` or `⊑ wp` specification, got{indentExpr type}"
       return (xs, bs, prf, type)
-  if etaArgs == 0 then return (xs, bs, prf, type)
+  bif etaArgs == 0 then return (xs, bs, prf, type)
   let_expr Eq eqα _lhs _rhs := type | return (xs, bs, prf, type)
   -- Eta-expand: introduce fresh metavars for leading foralls, then apply congrFun for each.
   let (extraXs, extraBs, _) ← withReducible <| forallMetaBoundedTelescope eqα etaArgs

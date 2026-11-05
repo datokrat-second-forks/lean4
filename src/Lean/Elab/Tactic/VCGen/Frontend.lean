@@ -55,7 +55,7 @@ public def mkContext (lemmas : Syntax) (goal : MVarId) (ignoreStarArg := false) 
   let mut simpTermThms : Array SimpTheorem := #[]
   let mut starArg := false
   for arg in lemmas[1].getSepArgs do
-    if arg.getKind == ``simpErase then
+    bif arg.getKind == ``simpErase then
       -- Try to interpret as a spec theorem erasure; fall back to simp erasure. A definition
       -- registered with `attribute [spec] foo` contributes its unfold equations to the database, so
       -- `[-foo]` must erase each of those proofs, not just a proof named `foo`.
@@ -75,7 +75,7 @@ public def mkContext (lemmas : Syntax) (goal : MVarId) (ignoreStarArg := false) 
       catch _ => pure ()
       unless erased do
         simpStuff := simpStuff.push ⟨arg⟩ -- simp tracks its own erase stuff
-    else if arg.getKind == ``simpLemma then
+    else bif arg.getKind == ``simpLemma then
       unless arg[0].isNone && arg[1].isNone do
         -- When there is ←, →, ↑ or ↓ then this is for simp
         simpStuff := simpStuff.push ⟨arg⟩
@@ -104,10 +104,10 @@ public def mkContext (lemmas : Syntax) (goal : MVarId) (ignoreStarArg := false) 
           let e ← Term.elabTerm term .none
           Term.synthesizeSyntheticMVars (postpone := .no) (ignoreStuckTC := true)
           let e ← instantiateMVars e
-          if e.hasSyntheticSorry then
+          bif e.hasSyntheticSorry then
             return none
           let e := e.eta
-          if e.hasMVar then
+          bif e.hasMVar then
             let r ← abstractMVars e
             return some (r.paramNames, r.expr)
           else
@@ -118,7 +118,7 @@ public def mkContext (lemmas : Syntax) (goal : MVarId) (ignoreStarArg := false) 
           else
             let thms ← mkSimpTheoremFromExpr (.stx (← mkFreshId) arg) levelParams proof
             simpTermThms := simpTermThms ++ thms
-    else if arg.getKind == ``simpStar then
+    else bif arg.getKind == ``simpStar then
       starArg := true
       simpStuff := simpStuff.push ⟨arg⟩
     else
@@ -135,7 +135,7 @@ public def mkContext (lemmas : Syntax) (goal : MVarId) (ignoreStarArg := false) 
   for thm in simpTermThms do
     simpThms := simpThms.addSimpTheorem thm
   -- Add local spec hypotheses when `*` is used.
-  if starArg && !ignoreStarArg then
+  bif starArg && !ignoreStarArg then
     let fvars ← getPropHyps
     for fvar in fvars do
       unless specThms.isErased (.local fvar) do
@@ -172,11 +172,11 @@ public def inferProgType? (goalType : Expr) : MetaM (Option Expr) := withReducib
         (isWPApp? rhs).map (·.Prog)
       else
         body.withApp fun head args =>
-          if head.isConstOf ``Std.WP.Triple && args.size ≥ 3 then some args[2]! else none
+          bif head.isConstOf ``Std.WP.Triple && args.size ≥ᵇ 3 then some args[2]! else none
     let some progTy := progTy? | return none
     let progTy ← whnf progTy
-    if progTy.isApp then
-      if ← isWPMonad progTy.appFn! then
+    bif progTy.isApp then
+      bif (← isWPMonad progTy.appFn!) then
         return some progTy.appFn!
     return some progTy
 
@@ -187,9 +187,9 @@ here. Options with implemented semantics (`elimLets`, `stepLimit`, `invariants?`
 accepted. -/
 def warnIgnoredConfig (config : Do.VCGen.Config) : MetaM Unit := do
   let default : Do.VCGen.Config := {}
-  if config.leave != default.leave then
+  bif config.leave != default.leave then
     logWarning "vcgen: the `leave` config option is currently ignored."
-  if config.trivial != default.trivial then
+  bif config.trivial != default.trivial then
     logWarning "vcgen: the `trivial` config option is currently ignored."
 
 /--
@@ -202,7 +202,7 @@ def elabSymSimpParts
     (extraIds? : Option (Array (TSyntax `ident)))
     : MetaM Sym.Simp.Methods := do
   let variantName := variantId?.map (·.getId) |>.getD .anonymous
-  if !variantName.isAnonymous then
+  bif !variantName.isAnonymous then
     -- TODO: `resolveExtraTheorems`, `elabVariant`, and `elabSymSimproc` in
     -- `Lean.Elab.Tactic.Grind.Sym` are module-private (non-`public section`).
     -- To support named variants here, we need a public API such as:
@@ -225,16 +225,16 @@ def elabSymSimpParts
   let symThms ← Sym.Simp.getSymSimpTheorems
   let pre := Sym.Simp.simpControl >> Sym.Simp.simpArrowTelescope
   let mut post : Sym.Simp.Simproc := Sym.Simp.evalGround >> symThms.rewrite
-  if !extraThms.isEmpty then
+  bif !extraThms.isEmpty then
     let mut thms : Sym.Simp.Theorems := {}
     for thm in extraThms do thms := thms.insert thm
     post := post >> thms.rewrite
   return { pre, post }
 
 def elabSimplifyingAssumptions (simpClause : Syntax) : MetaM (Option Sym.Simp.Methods) := do
-  if simpClause.getNumArgs == 0 then return none
-  let variantId? := if simpClause[1].getNumArgs != 0 then some ⟨simpClause[1][0]⟩ else none
-  let extraIds? := if simpClause[2].getNumArgs != 0
+  bif simpClause.getNumArgs == 0 then return none
+  let variantId? := bif simpClause[1].getNumArgs != 0 then some ⟨simpClause[1][0]⟩ else none
+  let extraIds? := bif simpClause[2].getNumArgs != 0
     then some (simpClause[2][1].getSepArgs.map (⟨·⟩)) else none
   pure (some (← elabSymSimpParts variantId? extraIds?))
 
@@ -261,19 +261,19 @@ def parseInvariantMap (stx : Syntax) :
   let stx' : TSyntax ``invariantAlts := ⟨altsStx⟩
   match stx' with
   | `(invariantAlts| $_invariantsKW $alts*) =>
-    if alts.isEmpty then return some {}
+    bif alts.isEmpty then return some {}
     let mut map : Std.HashMap Nat Syntax := {}
     let mut dotOrCase := LBool.undef
     for h : i in 0...alts.size do
       let alt := alts[i]
       match alt with
       | `(invariantDotAlt| · $_rhs) =>
-        if dotOrCase matches .false then
+        bif dotOrCase matches .false then
           throwErrorAt alt "Alternation between labelled and bulleted invariants is not supported."
         dotOrCase := .true
         map := map.insert (i + 1) alt
       | `(invariantCaseAlt| | $tag $_args* => $_rhs) =>
-        if dotOrCase matches .true then
+        bif dotOrCase matches .true then
           throwErrorAt alt "Alternation between labelled and bulleted invariants is not supported."
         dotOrCase := .false
         let n? : Option Nat := do
@@ -281,7 +281,7 @@ def parseInvariantMap (stx : Syntax) :
           let .str .anonymous s := tag.getId | none
           s.dropPrefix? "inv" >>= String.Slice.toNat?
         let some n := n? | throwErrorAt tag s!"Could not parse invariant label; expected `inv<n>`."
-        if map.contains n then
+        bif map.contains n then
           throwErrorAt tag s!"Duplicate invariant alternative for `inv{n}`."
         map := map.insert n alt
       | _ => throwErrorAt alt "Expected `invariantDotAlt` or `invariantCaseAlt`."
@@ -300,7 +300,7 @@ def elabRemainingInvariants (alts : Std.HashMap Nat Syntax)
   let mut handled := inlineHandled
   for h : i in 0...invariants.size do
     let n := i + 1
-    if handled.contains n then continue
+    bif handled.contains n then continue
     let some alt := alts[n]? | continue
     handled := handled.insert n
     discard <| elabInvariant alts n invariants[i]
@@ -346,7 +346,7 @@ synthetic holes) and the resulting `Sym.Pattern`. -/
 def elabProgPattern (progTy : Expr) (p : Term) : TermElabM (Array Expr × Sym.Pattern) := do
   -- A monad `m : Type → Type` expects the program at `m _` so its overloaded head resolves; a
   -- deep-embedding program type is already saturated and is used directly.
-  let expectedTy ← if (← inferType progTy).isArrow
+  let expectedTy ← bif (← inferType progTy).isArrow
     then pure (mkApp progTy (← mkFreshTypeMVar)) else pure progTy
   let e ← instantiateMVars (← Term.elabTerm p (some expectedTy))
   let xs := (e.collectMVars {}).result.map Expr.mvar
@@ -380,7 +380,7 @@ def elabFrameDB (progTy : Expr) (alts : Array Syntax) : TermElabM FrameDB :=
       let (xs, pat) ← withRef alt <| elabProgPattern progTy progPat
       let varNames ← xs.mapM fun x => do
         let nm := (← x.mvarId!.getDecl).userName
-        return if nm.isAnonymous then none else some nm
+        return bif nm.isAnonymous then none else some nm
       entries := entries.push { pat, varNames, frameStx := frame, srcIdx := i }
       tree := Sym.insertPattern tree pat i
       trace[Elab.Tactic.Do.vcgen] "`frames` pattern elaborated to {pat.pattern}"
@@ -405,9 +405,9 @@ def parseArgs (stx : Syntax) (goal : MVarId) : TermElabM ParsedArgs := goal.with
   let some progTy ← inferProgType? (← goal.getType)
     | throwError "vcgen: could not determine the program type of the goal"
   let frameProcs ← getFrameProcs
-  let untilPat? ← if stx[3].isNone then pure none
+  let untilPat? ← bif stx[3].isNone then pure none
     else some <$> elabUntilPattern progTy ⟨stx[3][1]⟩
-  let frameDB ← if stx[4].isNone then pure ({} : FrameDB)
+  let frameDB ← bif stx[4].isNone then pure ({} : FrameDB)
     else elabFrameDB progTy stx[4][1].getArgs
   let invariantAlts? ← parseInvariantMap stx[5]
   let hypSimpMethods ← elabSimplifyingAssumptions stx[6]
@@ -449,7 +449,7 @@ def elabVCGenDischarge (w? : Option (TSyntax `vcgenDischarge)) :
   match w? with
   | none   => return none
   | some w =>
-    if w.raw.getKind == ``Lean.Parser.Tactic.vcgenDischargeGrind then
+    bif w.raw.getKind == ``Lean.Parser.Tactic.vcgenDischargeGrind then
       return some ⟨w.raw[0]⟩
     else
       throwErrorAt w

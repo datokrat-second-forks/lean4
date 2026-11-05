@@ -38,7 +38,7 @@ def succ? (e : Expr) : Option Expr :=
   match e.getAppFnArgs with
   | (``Nat.succ, #[n]) => some n
   | (``HAdd.hAdd, #[_, _, _, _, a, b]) => do
-     if b == toExpr (1 : Nat) then some a else none
+     bif b == toExpr (1 : Nat) then some a else none
   | _ => none
 
 /--
@@ -76,7 +76,7 @@ def mkEvalRflProof (e : Expr) (lc : LinearCombo) : OmegaM Expr := do
 /-- If `e : Expr` is the `n`-th atom, construct the proof that
 `e = (coordinate n).eval atoms`. -/
 def mkCoordinateEvalAtomsEq (e : Expr) (n : Nat) : OmegaM Expr := do
-  if n < 10 then
+  bif n <ᵇ 10 then
     let atoms ← atoms
     let tail ← mkListLit (.const ``Int []) atoms[n<...*].toArray.toList
     let lem := .str ``LinearCombo s!"coordinate_eval_{n}"
@@ -136,7 +136,7 @@ partial def asLinearComboImpl (e : Expr) : OmegaM (LinearCombo × OmegaM Expr ×
     let lc := {const := i}
     return ⟨lc, mkEvalRflProof e lc, ∅⟩
   | none =>
-    if e.isFVar then
+    bif e.isFVar then
       if let some v ← e.fvarId!.getValue? then
         rewrite e (← mkEqReflWithExpectedType e v)
       else
@@ -177,7 +177,7 @@ partial def asLinearComboImpl (e : Expr) : OmegaM (LinearCombo × OmegaM Expr ×
     let r? ← commitWhen do
       let (xl, xprf, xfacts) ← asLinearCombo x
       let (yl, yprf, yfacts) ← asLinearCombo y
-      if xl.coeffs.isZero ∨ yl.coeffs.isZero then
+      bif xl.coeffs.all (· =ᵇ 0) || yl.coeffs.all (· =ᵇ 0) then
         let prf : OmegaM Expr := do
           let h ← mkDecideProof (mkApp2 (.const ``Or [])
             (.app (.const ``Coeffs.isZero []) (toExpr xl.coeffs))
@@ -204,18 +204,18 @@ partial def asLinearComboImpl (e : Expr) : OmegaM (LinearCombo × OmegaM Expr ×
     | some 0 => rewrite e (mkApp (.const ``Int.ediv_zero []) x)
     | some i => do
       let e' ← mkAppM ``HDiv.hDiv #[x, toExpr i]
-      if i < 0 then
+      bif i <ᵇ 0 then
         rewrite e' (mkApp2 (.const ``Int.ediv_neg []) x (toExpr (-i)))
       else
         mkAtomLinearCombo e'
     | _ => mkAtomLinearCombo e
   | (``Min.min, #[_, _, a, b]) =>
-    if (← cfg).splitMinMax then
+    bif (← cfg).splitMinMax then
       rewrite e (mkApp2 (.const ``Int.min_def []) a b)
     else
       mkAtomLinearCombo e
   | (``Max.max, #[_, _, a, b]) =>
-    if (← cfg).splitMinMax then
+    bif (← cfg).splitMinMax then
       rewrite e (mkApp2 (.const ``Int.max_def []) a b)
     else
       mkAtomLinearCombo e
@@ -293,7 +293,7 @@ where
     | (``HShiftRight.hShiftRight, #[_, _, _, _, a, b]) =>
       rewrite e (mkApp2 (.const ``Int.ofNat_shiftRight_eq_div_pow []) a b)
     | (``Int.natAbs, #[n]) =>
-      if (← cfg).splitNatAbs then
+      bif (← cfg).splitNatAbs then
         rewrite e (mkApp (.const ``Int.ofNat_natAbs []) n)
       else
         mkAtomLinearCombo e
@@ -318,7 +318,7 @@ where
         rewrite e (mkApp3 (.const ``Fin.ofNat_val_sub []) n a b)
       | (``OfNat.ofNat, #[_, y, _]), some m =>
         -- Only do this rewrite if `n` is a nonzero numeral.
-        if m = 0 then
+        bif m =ᵇ 0 then
           mkAtomLinearCombo e
         else
           match y with
@@ -375,7 +375,7 @@ def pushNot (h P : Expr) : MetaM (Option Expr) := do
   trace[omega] "pushing negation: {P}"
   match P with
   | .forallE _ t b _ =>
-    if (← isProp t) && (← isProp b) then
+    bif (← isProp t) && (← isProp b) then
      return some (mkApp4 (.const ``Decidable.and_not_of_not_imp []) t b
       (.app (.const ``Classical.propDecidable []) t) h)
     else
@@ -428,14 +428,14 @@ def pushNot (h P : Expr) : MetaM (Option Expr) := do
 Parse an `Expr` and extract facts, also returning the number of new facts found.
 -/
 partial def addFact (p : MetaProblem) (h : Expr) : OmegaM (MetaProblem × Nat) := do
-  if ! p.problem.possible then
+  bif ! p.problem.possible then
     return (p, 0)
   else
     let t ← instantiateMVars (← whnfR (← inferType h))
     trace[omega] "adding fact: {t}"
     match t with
     | .forallE _ x y _ =>
-      if ← pure t.isArrow <&&> isProp x <&&> isProp y then
+      bif (← pure t.isArrow <&&> isProp x <&&> isProp y) then
         p.addFact (mkApp4 (.const ``Decidable.not_or_of_imp []) x y
           (.app (.const ``Classical.propDecidable []) x) h)
       else
@@ -513,7 +513,7 @@ partial def addFact (p : MetaProblem) (h : Expr) : OmegaM (MetaProblem × Nat) :
         p.addFact (mkApp4 (.const ``Decidable.and_or_not_and_not_of_iff [])
           P₁ P₂ (.app (.const ``Classical.propDecidable []) P₂) h)
       | Or _ _ =>
-        if (← cfg).splitDisjunctions then
+        bif (← cfg).splitDisjunctions then
           return ({ p with disjunctions := p.disjunctions.insert h }, 1)
         else
           return (p, 0)
@@ -529,7 +529,7 @@ partial def processFacts (p : MetaProblem) : OmegaM (MetaProblem × Nat) := do
   match p.facts with
   | [] => pure (p, 0)
   | h :: t =>
-    if p.processedFacts.contains h then
+    bif p.processedFacts.contains h then
       processFacts { p with facts := t }
     else
       let (p₁, n₁) ← MetaProblem.addFact { p with
@@ -544,8 +544,8 @@ end MetaProblem
 Helpful error message when omega cannot find a solution
 -/
 def formatErrorMessage (p : Problem) : OmegaM MessageData := do
-  if p.possible then
-    if p.isEmpty then
+  bif p.possible then
+    bif p.isEmpty then
       return m!"No usable constraints found. You may need to unfold definitions so `omega` can see \
       linear arithmetic facts about `Nat` and `Int`, which may also involve multiplication, \
       division, and modular remainder by constants."
@@ -562,13 +562,13 @@ def formatErrorMessage (p : Problem) : OmegaM MessageData := do
 where
   varNameOf (i : Nat) : String :=
     let c : Char := .ofNat ('a'.toNat + (i % 26))
-    let suffix := if i < 26 then "" else s!"_{i / 26}"
+    let suffix := bif i <ᵇ 26 then "" else s!"_{i / 26}"
     s!"{c}{suffix}"
 
   inScope (s : String) : MetaM Bool := do
     let n := .mkSimple s
-    if (← resolveGlobalName n).isEmpty then
-      if ((← getLCtx).findFromUserName? n).isNone then
+    bif (← resolveGlobalName n).isEmpty then
+      bif ((← getLCtx).findFromUserName? n).isNone then
         return false
     return true
 
@@ -578,7 +578,7 @@ where
     let mut names := #[]
     let mut next := 0
     for h : i in *...mask.size do
-      if mask[i] then
+      bif mask[i] then
         while ← inScope (varNameOf next) do next := next + 1
         names := names.push (varNameOf next)
         next := next + 1
@@ -601,22 +601,22 @@ where
     | ⟨none, some y⟩ => s!"{e} ≤ {y}"
     | ⟨some x, none⟩ => s!"{e} ≥ {x}"
     | ⟨some x, some y⟩ =>
-      if y < x then "∅" else -- should not happen in error messages
+      bif y <ᵇ x then "∅" else -- should not happen in error messages
       s!"{x} ≤ {e} ≤ {y}"
 
   prettyCoeffs (names : Array String) (coeffs : Coeffs) : String :=
     coeffs.toList.zipIdx
       |>.filter (fun (c,_) => c ≠ 0)
       |>.mapIdx (fun j (c,i) =>
-        (if j > 0 then if c > 0 then " + " else " - " else if c > 0 then "" else "- ") ++
-        (if Int.natAbs c = 1 then names[i]! else s!"{c.natAbs}*{names[i]!}"))
+        (bif j >ᵇ 0 then bif c >ᵇ 0 then " + " else " - " else bif c >ᵇ 0 then "" else "- ") ++
+        (bif Int.natAbs c =ᵇ 1 then names[i]! else s!"{c.natAbs}*{names[i]!}"))
       |> String.join
 
   mentioned (atoms : Array Expr) (constraints : Std.HashMap Coeffs Fact) : MetaM (Array Bool) := do
     let initMask := .replicate atoms.size false
     return constraints.fold (init := initMask) fun mask coeffs _ =>
       coeffs.zipIdx.foldl (init := mask) fun mask (c, i) =>
-        if c = 0 then mask else mask.set! i true
+        bif c =ᵇ 0 then mask else mask.set! i true
 
   prettyAtoms (names : Array String) (atoms : Array Expr) (mask : Array Bool) : MessageData :=
     (Array.zip names atoms).toList.zipIdx
@@ -641,7 +641,7 @@ partial def splitDisjunction (m : MetaProblem) : OmegaM Expr := do
         withTraceNode `omega (msg := fun _ => do pure m!"Assuming fact:{indentExpr hType₁}") do
         let m₁ := { m with facts := [h₁], disjunctions := t }
         let (m₁, n) ← m₁.processFacts
-        if 0 < n then
+        bif 0 <ᵇ n then
           let p₁ ← omegaImpl m₁
           let p₁ ← mkLambdaFVars #[h₁] p₁
           return some p₁
@@ -664,7 +664,7 @@ partial def omegaImpl (m : MetaProblem) : OmegaM Expr := do
   guard m.facts.isEmpty
   let p := m.problem
   trace[omega] "Extracted linear arithmetic problem:\nAtoms: {← atomsList}\n{p}"
-  let p' ← if p.possible then p.elimination else pure p
+  let p' ← bif p.possible then p.elimination else pure p
   trace[omega] "After elimination:\nAtoms: {← atomsList}\n{p'}"
   match h₁ : p'.possible, h₂ : p'.proveFalse?, p'.proveFalse?_spec with
   | true, _, _ =>
@@ -694,7 +694,7 @@ def omegaTactic (cfg : OmegaConfig) : TacticM Unit := do
   -- Conservatively expect all of `Init.Omega` to be imported.
   recordExtraModUse (isMeta := false) `Init.Omega
   liftMetaFinishingTactic fun g => do
-    if debug.terminalTacticsAsSorry.get (← getOptions) then
+    bif debug.terminalTacticsAsSorry.get (← getOptions) then
       g.admit
     else
       let some g ← g.falseOrByContra | return ()

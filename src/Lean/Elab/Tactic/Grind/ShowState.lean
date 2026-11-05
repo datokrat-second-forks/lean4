@@ -15,7 +15,7 @@ open Meta.Grind
 
 def ppAsserted? (filter : Filter) (collapsed := false) : GrindTacticM (Option MessageData) := do
     let facts ← liftGoalM do (← get).facts.toArray.filterM fun e => filter.eval e
-    if facts.isEmpty then
+    bif facts.isEmpty then
       return none
     return some <| Grind.ppExprArray `facts "Asserted facts" facts (collapsed := collapsed)
 
@@ -27,9 +27,9 @@ def ppAsserted? (filter : Filter) (collapsed := false) : GrindTacticM (Option Me
 
 def ppProps? (filter : Filter) (isTrue : Bool) (collapsed := false) : GrindTacticM (Option MessageData) := do
   let props ← liftGoalM do
-    let eqc ← getEqc (← if isTrue then getTrueExpr else getFalseExpr)
+    let eqc ← getEqc (← bif isTrue then getTrueExpr else getFalseExpr)
     eqc.toArray.filterM fun e => return (← filter.eval e) && !e.isTrue && !e.isFalse
-  if props.isEmpty then
+  bif props.isEmpty then
     return none
   return some <| Grind.ppExprArray `props s!"{if isTrue then "True" else "False"} propositions" props (collapsed := collapsed)
 
@@ -52,9 +52,9 @@ def ppEqcs? (filter : Filter) (collapsed := false) : GrindTacticM (Option Messag
   let mut otherEqcs   : Array MessageData := #[]
   let goal ← get
   for eqc in goal.getEqcs (sort := true) do
-    if Option.isSome <| eqc.find? (·.isTrue) then
+    bif Option.isSome <| eqc.find? (·.isTrue) then
       pure ()
-    else if Option.isSome <| eqc.find? (·.isFalse) then
+    else bif Option.isSome <| eqc.find? (·.isFalse) then
       pure ()
     else if let e :: _ :: _ := eqc then
       -- We may want to add a flag to pretty print equivalence classes of nested proofs
@@ -65,19 +65,19 @@ def ppEqcs? (filter : Filter) (collapsed := false) : GrindTacticM (Option Messag
       class `{a, b, c}` as a bunch of equations. Thus, if only `b` satisfies the filter,
       then "morally" the equations `b = a` and `b = c` would also satisfy it.
       -/
-      if (← eqc.anyM fun e => filter.eval e) then
+      bif (← eqc.anyM fun e => filter.eval e) then
         let mainEqc ← eqc.filterM fun e => return !(← isSupportApp e)
-        if mainEqc.length <= 1 then
+        bif mainEqc.length ≤ᵇ 1 then
           otherEqcs := otherEqcs.push <| ppEqc eqc
         else
           let supportEqc ← eqc.filterM fun e => isSupportApp e
-          if supportEqc.isEmpty then
+          bif supportEqc.isEmpty then
             regularEqcs := regularEqcs.push <| ppEqc mainEqc
           else
             regularEqcs := regularEqcs.push <| ppEqc mainEqc #[ppEqc supportEqc]
   unless otherEqcs.isEmpty do
     regularEqcs := regularEqcs.push <| .trace { cls := `eqc } "others" otherEqcs
-  if regularEqcs.isEmpty then
+  bif regularEqcs.isEmpty then
     return none
   else
     return MessageData.trace { cls := `eqc, collapsed } "Equivalence classes" regularEqcs
@@ -108,7 +108,7 @@ public def showState (filter : Filter) (isSilent := false) : GrindTacticM Unit :
   let `(grind| show_cases $[$filter?]?) := stx | throwUnsupportedSyntax
   let filter ← elabFilter filter?
   let { candidates, numDigits } ← liftGoalM <| getSplitCandidateAnchors filter.eval
-  if candidates.isEmpty then
+  bif candidates.isEmpty then
     throwError "no case splits"
   let msgs := candidates.map fun { anchor,  e, .. } =>
     .trace { cls := `split } m!"#{anchorToString numDigits anchor} := {e}" #[]

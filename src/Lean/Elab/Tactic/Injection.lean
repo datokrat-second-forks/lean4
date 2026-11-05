@@ -13,7 +13,7 @@ namespace Lean.Elab.Tactic
 
 -- optional (" with " >> many1 ident')
 private def getInjectionNewIds (stx : Syntax) : List Name :=
-  if stx.isNone then
+  bif stx.isNone then
     []
   else
     stx[1].getArgs.toList.map getNameOfIdent'
@@ -24,7 +24,7 @@ private def checkUnusedIds (tacticName : Name) (mvarId : MVarId) (unusedIds : Li
 
 -- TODO: move to a different place?
 private def tryAssumption (mvarId : MVarId) : MetaM (List MVarId) := do
-  if (← mvarId.assumptionCore) then
+  bif (← mvarId.assumptionCore) then
     return []
   else
     return [mvarId]

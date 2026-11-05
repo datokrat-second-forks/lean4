@@ -91,7 +91,7 @@ namespace Lean.Elab.Tactic.BVDecide
 
 def ensureBvDecide : CoreM Unit := do
   let env ← getEnv
-  if (env.getModuleIdx? `Std.Tactic.BVDecide).isNone then
+  bif (env.getModuleIdx? `Std.Tactic.BVDecide).isNone then
     throwError "to use `bv_decide`, please include `import Std.Tactic.BVDecide`"
 
 namespace BVCheck
@@ -124,7 +124,7 @@ def bvCheck (g : MVarId) (hypotheses : Array Normalize.Hyp) (ctx : TacticContext
 def evalBvCheck (target : Normalize.Target) (ctx : TacticContext) (warn : MetaM Unit) :
     Grind.GrindM Unit := do
   Normalize.PreProcessM.run' ctx.preProcessContext target do
-    if ← Normalize.bvNormalize then
+    bif (← Normalize.bvNormalize) then
       warn
     else
       bvCheck (← Normalize.PreProcessM.getTargetMVarId) (← Normalize.PreProcessM.getHyps) ctx
@@ -181,8 +181,8 @@ def evalBvTrace (target : Normalize.Target) (ctx : TacticContext) : Grind.GrindM
   | none =>
     return { lemmas := trace.cegarCert.lemmas, action := .normalize }
   | some .. =>
-    if trace.cegarCert.lemmas.isEmpty then
-      if ctx.config.trimProofs then
+    bif trace.cegarCert.lemmas.isEmpty then
+      bif ctx.config.trimProofs then
         let proof ← loadLRATProof ctx.lratPath
         let trimmed ← IO.ofExcept <| LRAT.trim proof
         dumpLRATProof ctx.lratPath trimmed ctx.config.binaryProofs
@@ -267,7 +267,7 @@ def evalBVNormalize : Tactic := fun
     let (_, state) ← Grind.GrindM.run (params := params) do
       Normalize.bvNormalize.run (.new (.solve types) cfg) (.mvarIdTarget g)
     let goal := state.target.mvarId
-    if ← goal.isAssigned then
+    bif (← goal.isAssigned) then
       replaceMainGoal []
     else
       let hyps := state.hypotheses.map fun hyp => {

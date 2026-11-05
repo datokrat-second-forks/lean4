@@ -34,7 +34,7 @@ public def synthInstanceOpt? (cls : Name) (xs : Array (Option Expr)) :
   withNewMCtxDepth do
     let c ← mkConstWithFreshMVarLevels cls
     let (args, _, _) ← forallMetaTelescopeReducing (← inferType c)
-    if xs.size > args.size then
+    bif xs.size >ᵇ args.size then
       throwError "synthInstanceOpt?: too many arguments for `{cls}`"
     for arg in args, x? in xs do
       if let some x := x? then
@@ -42,7 +42,7 @@ public def synthInstanceOpt? (cls : Name) (xs : Array (Option Expr)) :
     let some inst ← synthInstance? (mkAppN c args) | return none
     let args ← args.mapM instantiateMVars
     let inst ← instantiateMVars inst
-    if inst.hasExprMVar || args.any (·.hasExprMVar) then return none
+    bif inst.hasExprMVar || args.any (·.hasExprMVar) then return none
     return some (args, inst)
 
 /-- Change `goal`'s `Prop`-typed target to the definitionally-equal `targetNew`, assigning `goal` a
@@ -85,13 +85,13 @@ public def Lean.Meta.Sym.BackwardRule.applyChecked (rule : BackwardRule) (goal :
     unless (← read).debug do return r
     let originalType ← goal.getType
     let normalized ← unfoldReducible originalType
-    if normalized == originalType then return r
+    bif normalized == originalType then return r
     let succeeded ← Lean.Meta.withoutModifyingMCtx do
       let goal' ← Meta.mkFreshExprSyntheticOpaqueMVar normalized
       match ← rule.apply goal'.mvarId! with
       | .goals _ => return true
       | .failed => return false
-    if succeeded then
+    bif succeeded then
       let ruleDesc := ruleDesc?.getD <|
         match rule.expr.getAppFn with
         | .const declName _ => m!"`{.ofConstName declName}`"
@@ -108,7 +108,7 @@ open Lean.Elab.Tactic.VCGen
 
 /-- `Grind.processHypotheses` if `Context.internalize` is `true`, otherwise a no-op. -/
 public def processHypotheses (goal : Grind.Goal) : VCGenM Grind.Goal := do
-  if (← read).internalize then Grind.processHypotheses goal else return goal
+  bif (← read).internalize then Grind.processHypotheses goal else return goal
 
 /-- Whether `n` is a program variable's own name: no macro scopes and no implementation-detail
 `__` prefix. Such a name stays accessible in a verification condition. -/
@@ -118,7 +118,7 @@ public def isProgramName (n : Name) : Bool :=
 /-- The leading binders of `type`, stopping at a binder over a product: `∀ (n : Nat) (p : α × β)`
 counts one, because `solve` splits `p` into one binder per component first. -/
 public def numBindersToIntro : Expr → Nat
-  | .forallE _ d b _ => if d.isAppOf ``Prod then 0 else numBindersToIntro b + 1
+  | .forallE _ d b _ => bif d.isAppOf ``Prod then 0 else numBindersToIntro b + 1
   | .letE _ _ _ b _ => numBindersToIntro b + 1
   | _ => 0
 
@@ -132,7 +132,7 @@ public def introsHygienicN (goal : MVarId) (n : Nat) : VCGenM MVarId :=
       | n+1, .letE nm _ _ b _, acc => collectBinders n b (acc.push nm)
       | _, _, acc => acc
     let binderNames := collectBinders n (← goal.getType) #[]
-    if binderNames.isEmpty then return goal
+    bif binderNames.isEmpty then return goal
     let mut names := #[]
     for nm in binderNames do
       names := names.push (← Meta.mkFreshBinderNameForTactic nm)
@@ -189,10 +189,10 @@ public partial def cleanupVC (goal : MVarId) : VCGenM (Option MVarId) :=
   let (goal, ty) ← match ← reduceHead? ty with
     | some ty' => pure (← goal.replaceTargetDefEqFast ty', ty')
     | none => pure (goal, ty)
-  if ty.isAppOf ``True then
+  bif ty.isAppOf ``True then
     goal.assign (mkConst ``True.intro)
     return none
-  else if ty.isAppOf ``And then
+  else bif ty.isAppOf ``And then
     let .goals [g₁, g₂] ← ctx.backwardRules.andIntro.applyChecked goal
       | throwError "cleanupVC: failed to apply {.ofConstName ``And.intro} to{indentExpr ty}"
     match ← cleanupVC g₁, ← cleanupVC g₂ with
@@ -213,7 +213,7 @@ public partial def cleanupVC (goal : MVarId) : VCGenM (Option MVarId) :=
     let goal ← goal.replaceTargetDefEqFast (mkApp3 (mkConst ``Eq [u]) ty lhs rhs)
     -- Synthetic opaque metavariables (e.g. invariant holes) stay rigid; natural
     -- metavariables may be assigned (e.g. `?m := e` for `e = ?m` leaves).
-    if ← isDefEqS lhs rhs then
+    bif (← isDefEqS lhs rhs) then
       goal.assign (mkApp2 (mkConst ``Eq.refl [← Meta.getLevel ty]) ty lhs)
       return none
     else

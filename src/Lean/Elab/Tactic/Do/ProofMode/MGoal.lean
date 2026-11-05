@@ -128,7 +128,7 @@ partial def MGoal.findHyp? (goal : MGoal) (name : Name) : Option (SubExpr.Pos ×
   where
     go (e : Expr) (p : SubExpr.Pos) : Option (SubExpr.Pos × Hyp) := do
       if let some hyp := parseHyp? e then
-        if hyp.name = name then
+        bif hyp.name =ᵇ name then
           return (p, hyp)
         else
           none
@@ -199,12 +199,12 @@ partial def MGoal.renameInaccessibleHyps (goal : MGoal) (idents : Array (TSyntax
   where
     go (H : Expr) : StateT (NameSet × Array (TSyntax ``binderIdent)) MetaM Expr := do
       let mut (shadowed, idents) ← StateT.get
-      if idents.isEmpty then
+      bif idents.isEmpty then
         return H
       if let some _ := parseEmptyHyp? H then
         return H
       if let some hyp := parseHyp? H then
-        if hyp.name.hasMacroScopes || shadowed.contains hyp.name then
+        bif hyp.name.hasMacroScopes || shadowed.contains hyp.name then
           if let `(binderIdent| $name:ident) := idents.back! then
             let hyp := { hyp with name := name.getId }
             StateT.set (shadowed, idents.pop)

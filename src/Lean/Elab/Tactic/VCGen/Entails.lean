@@ -65,12 +65,12 @@ def eqSubstCandidate? (eqn G : Expr) : VCGenM (Option (Expr × Expr × Expr)) :=
   let .fvar fvarId := x | return none
   let lctx ← getLCtx
   let some decl := lctx.find? fvarId | return none
-  if decl.isLet || t.containsFVar fvarId then return none
+  bif decl.isLet || t.containsFVar fvarId then return none
   -- The `maxFVar` entries of `G` let `abstractFVarsRange` skip the subterms without `x`.
   let some maxFVarId ← getMaxFVar? G | return none
-  if (← maxFVarId.getDecl).index < decl.index then return none
+  bif (← maxFVarId.getDecl).index <ᵇ decl.index then return none
   let deps := lctx.foldl (start := decl.index + 1) (init := #[]) fun acc d =>
-    if d.type.containsFVar fvarId then acc.push d.toExpr else acc
+    bif d.type.containsFVar fvarId then acc.push d.toExpr else acc
   -- The first `x` makes `xs[0]` the minimal variable, as `abstractFVarsRange` requires. The last
   -- `x` maps `x` to `#0`. Each local in `deps` maps to an index of at least `1`, so
   -- `looseBVarRange == 1` holds iff `G` mentions no local whose type mentions `x`.
@@ -217,7 +217,7 @@ public def reduceTopAppliedPre? (goal : MVarId) (target pre : Expr) : SymM (Opti
   let mut curCL := instTop
   for x in args.extract 2 args.size do
     let .forallE _ σ τ _ ← instantiateMVarsIfMVarAppS curTy | return none
-    if τ.hasLooseBVars then return none
+    bif τ.hasLooseBVars then return none
     unless curCL.isAppOf ``Lean.Order.instCompleteLatticePi do return none
     let .lam _ _ τCL _ := curCL.appArg! | return none
     let uσ ← Sym.getLevel σ

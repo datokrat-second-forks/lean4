@@ -54,7 +54,7 @@ def elabConfigItems (init : Grind.Config) (items : Array Syntax) :
 
 def withConfigItems (items : Array Syntax)
     (k : GrindTacticM α) : GrindTacticM α := do
-  if items.isEmpty then
+  bif items.isEmpty then
     k
   else
     let config := (← read).ctx.config

@@ -103,7 +103,7 @@ def run (mvarId : MVarId) (x : TacticM Unit) : TermElabM (List MVarId) :=
      try
        x; getUnsolvedGoals
      catch ex =>
-       if isAbortTacticException ex then
+       bif isAbortTacticException ex then
          getUnsolvedGoals
        else
          throw ex
@@ -204,7 +204,7 @@ partial def evalTactic (stx : Syntax) : TacticM Unit := do
   profileitM Exception "tactic execution" (decl := stx.getKind) (← getOptions) <|
   withRef stx <| withIncRecDepth <| withFreshMacroScope <| match stx with
     | .node _ k _    =>
-      if k == nullKind then
+      bif k == nullKind then
         -- Macro writers create a sequence of tactics `t₁ ... tₙ` using `mkNullNode #[t₁, ..., tₙ]`
         -- We could support incrementality here by allocating `n` new snapshot bundles but the
         -- practical value is not clear
@@ -215,7 +215,7 @@ partial def evalTactic (stx : Syntax) : TacticM Unit := do
       else withTraceNode `Elab.step (fun _ => return stx) (tag := stx.getKind.toString) do
         let evalFns := tacticElabAttribute.getEntries (← getEnv) stx.getKind
         let macros  := macroAttribute.getEntries (← getEnv) stx.getKind
-        if evalFns.isEmpty && macros.isEmpty then
+        bif evalFns.isEmpty && macros.isEmpty then
           throwNotAccepted m!"Tactic `{stx.getKind}` has not been implemented"
         let s ← Tactic.saveState
         expandEval s macros evalFns #[]
@@ -223,7 +223,7 @@ partial def evalTactic (stx : Syntax) : TacticM Unit := do
     | _ => throwError m!"Unexpected tactic{indentD stx}"
 where
     throwExs (failures : Array EvalTacticFailure) : TacticM Unit := do
-     if h : 0 < failures.size  then
+     bif h : 0 <ᵇ failures.size  then
        -- For macros we want to report the error from the first registered / last tried rule (#3770)
        let fail := failures[failures.size - 1]
        fail.state.restore (restoreInfo := true)
@@ -246,18 +246,18 @@ where
       let noFallback := noFallbackAttr.hasTag (← getEnv) declName
       match ex with
       | .error .. =>
-        if noFallback then throw ex
+        bif noFallback then throw ex
         trace[Elab.tactic.backtrack] ex.toMessageData
         let failures := failures.push ⟨ex, ← Tactic.saveState⟩
         s.restore (restoreInfo := true); k failures
       | .internal id _ =>
-        if id == unsupportedSyntaxExceptionId then
+        bif id == unsupportedSyntaxExceptionId then
           -- We do not store `unsupportedSyntaxExceptionId`, see throwExs
           -- `unsupportedSyntax` is the elaborator declining the syntax before any commit, so
           -- `[no_fallback]` does not apply here.
           s.restore (restoreInfo := true); k failures
-        else if id == abortTacticExceptionId then
-          if noFallback then throw ex
+        else bif id == abortTacticExceptionId then
+          bif noFallback then throw ex
           for msg in (← Core.getMessageLog).toList do
             trace[Elab.tactic.backtrack] msg.data
           let failures := failures.push ⟨ex, ← Tactic.saveState⟩
@@ -275,7 +275,7 @@ where
               let stx' ← adaptMacro m.value stx
               recordExtraModUseFromDecl (isMeta := true) m.declName
               -- Support incrementality; see also Note [Incremental Macros]
-              if evalFns.isEmpty && ms.isEmpty then  -- Only try incrementality in one branch
+              bif evalFns.isEmpty && ms.isEmpty then  -- Only try incrementality in one branch
                 if let some snap := (← readThe Term.Context).tacSnap? then
                   let nextMacroScope := (← getThe Core.State).nextMacroScope
                   let traceState ← getTraceState
@@ -291,7 +291,7 @@ where
                     guard <| state.term.meta.core.traceState.traces.size == 0
                     guard <| traceState.traces.size == 0
                     return old.val.get
-                  if snap.old?.isSome && old?.isNone then
+                  bif snap.old?.isSome && old?.isNone then
                     snap.old?.forM (·.val.cancelRec)
                   let promise ← IO.Promise.new
                   -- Store new unfolding in the snapshot tree
@@ -332,7 +332,7 @@ where
           withReader ({ · with elaborator := evalFn.declName }) do
           withTacticInfoContext stx <| withDeprecatedSyntaxCheck stx do
             evalFn.value stx
-            if !evalFn.isBuiltin then
+            bif !evalFn.isBuiltin then
               recordExtraModUseFromDecl (isMeta := true) evalFn.declName
         catch ex => handleEx evalFn.declName s failures ex (eval s evalFns)
 
@@ -375,7 +375,7 @@ def closeUsingOrAdmit (tac : TacticM Unit) : TacticM Unit := do
   tryCatchRuntimeEx
     (focusAndDone tac)
     fun ex => do
-      if (← read).recover then
+      bif (← read).recover then
         logException ex
         admitGoal mvarId
         setGoals mvarIds
@@ -442,7 +442,7 @@ def hasErrorMessages (msgs : List Message) : Bool :=
 Like `throwErrorAt`, but, if recovery is enabled, logs the error instead.
 -/
 def throwOrLogErrorAt (ref : Syntax) (msg : MessageData) : TacticM Unit := do
-  if (← read).recover then
+  bif (← read).recover then
     logErrorAt ref msg
   else
     throwErrorAt ref msg
@@ -514,7 +514,7 @@ where
   loop : List MVarId → TacticM MVarId
     | [] => throwNoGoalsToBeSolved
     | mvarId :: mvarIds => do
-      if (← mvarId.isAssigned) then
+      bif (← mvarId.isAssigned) then
         loop mvarIds
       else
         setGoals (mvarId :: mvarIds)
@@ -570,7 +570,7 @@ def ensureHasNoMVars (e : Expr) : TacticM Unit := do
   let e ← instantiateMVars e
   let pendingMVars ← getMVars e
   discard <| Term.logUnassignedUsingErrorInfos pendingMVars
-  if e.hasExprMVar then
+  bif e.hasExprMVar then
     throwError "Tactic failed: Resulting expression contains metavariables{indentExpr e}"
 
 /--
@@ -579,10 +579,10 @@ If `checkUnassigned == true`, then `val` must not contain unassigned metavariabl
 Returns `true` if `val` was successfully used to close the goal.
 -/
 def closeMainGoal (tacName : Name) (val : Expr) (checkUnassigned := true): TacticM Unit := do
-  if checkUnassigned then
+  bif checkUnassigned then
     ensureHasNoMVars val
   let mvarId ← getMainGoal
-  if (← mvarId.checkedAssign val) then
+  bif (← mvarId.checkedAssign val) then
     replaceMainGoal []
   else
     throwTacticEx tacName mvarId m!"attempting to close the goal using{indentExpr val}\nthis is often due to an occurs-check failure"
@@ -634,14 +634,14 @@ def tagUntaggedGoals (parentTag : Name) (newSuffix : Name) (newGoals : List MVar
   let mctx ← getMCtx
   let mut numAnonymous := 0
   for g in newGoals do
-    if mctx.isAnonymousMVar g then
+    bif mctx.isAnonymousMVar g then
       numAnonymous := numAnonymous + 1
   modifyMCtx fun mctx => Id.run do
     let mut mctx := mctx
     let mut idx  := 1
     for g in newGoals do
-      if mctx.isAnonymousMVar g then
-        if numAnonymous == 1 then
+      bif mctx.isAnonymousMVar g then
+        bif numAnonymous == 1 then
           mctx := mctx.setMVarUserName g parentTag
         else
           mctx := mctx.setMVarUserName g (parentTag ++ newSuffix.appendIndexAfter idx)
@@ -650,7 +650,7 @@ def tagUntaggedGoals (parentTag : Name) (newSuffix : Name) (newGoals : List MVar
 
 /- Recall that `ident' := ident <|> Term.hole` -/
 def getNameOfIdent' (id : Syntax) : Name :=
-  if id.isIdent then id.getId else `_
+  bif id.isIdent then id.getId else `_
 
 /--
   Use position of `=> $body` for error messages.

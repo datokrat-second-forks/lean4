@@ -245,9 +245,9 @@ context size so siblings share work. -/
 public def Scope.collectLocalSpecs (scope : Scope) (goal : MVarId) : VCGenM Scope :=
   goal.withContext do
     let lctx ← getLCtx
-    if scope.nextDeclIdx == lctx.decls.size then return scope
+    bif scope.nextDeclIdx == lctx.decls.size then return scope
     let scope ← lctx.foldlM (init := scope) (start := scope.nextDeclIdx) fun scope decl => do
-      if decl.isImplementationDetail then return scope
+      bif decl.isImplementationDetail then return scope
       try
         if let some thm ← mkSpecTheoremFromLocal decl.fvarId (eval_prio low) then
           return scope.insertSpec thm

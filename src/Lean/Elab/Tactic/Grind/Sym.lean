@@ -26,7 +26,7 @@ def evalIntroCore (internalize : Bool) (ids : TSyntaxArray `Lean.binderIdent) : 
   let hygienic := tactic.hygienic.get (← getOptions)
   let goal ← getMainGoal
   let goal ←
-    if ids.isEmpty then
+    bif ids.isEmpty then
       match (← liftSymM <| Grind.Goal.introN goal 1 hygienic) with
       | .goal _ goal => pure goal
       | .failed => throwError "`intro` failed, no binders to introduce"
@@ -37,7 +37,7 @@ def evalIntroCore (internalize : Bool) (ids : TSyntaxArray `Lean.binderIdent) : 
       match (← liftSymM <| Grind.Goal.intros goal names hygienic) with
       | .goal _ goal => pure goal
       | .failed => throwError "`intro` failed"
-  let goal ← if internalize then liftGrindM <| Grind.Goal.internalizeAll goal else pure goal
+  let goal ← bif internalize then liftGrindM <| Grind.Goal.internalizeAll goal else pure goal
   replaceMainGoal [goal]
 
 @[builtin_grind_tactic Parser.Tactic.Grind.symIntro] def evalSymIntro : GrindTactic := fun stx => do
@@ -54,7 +54,7 @@ def evalIntrosCore (internalize : Bool) : GrindTacticM Unit := do
   let goal ← getMainGoal
   match (← liftSymM <| Grind.Goal.intros goal #[] hygienic) with
   | .goal _ goal =>
-    let goal ← if internalize then liftGrindM <| Grind.Goal.internalizeAll goal else pure goal
+    let goal ← bif internalize then liftGrindM <| Grind.Goal.internalizeAll goal else pure goal
     replaceMainGoal [goal]
   | .failed => throwError "`intros` failed"
 
@@ -110,7 +110,7 @@ def getOrCreateBackwardRuleFromTerm (term : Syntax) : GrindTacticM Sym.BackwardR
 @[builtin_grind_tactic Parser.Tactic.Grind.symInternalize] def evalSymInternalize : GrindTactic := fun stx => do
   ensureSym
   let goal ← getMainGoal
-  let num := if stx[1].isNone then 1 else stx[1][0].toNat
+  let num := bif stx[1].isNone then 1 else stx[1][0].toNat
   let goal ← liftGrindM <| Grind.Goal.internalize goal num
   replaceMainGoal [goal]
 
@@ -124,10 +124,10 @@ def getOrCreateBackwardRuleFromTerm (term : Syntax) : GrindTacticM Sym.BackwardR
   ensureSym
   let goal ← getMainGoal
   let target ← goal.mvarId.getType
-  if target.isFalse then
+  bif target.isFalse then
     throwError "`by_contra` failed, target is already `False`"
   -- If target is not a proposition, apply exfalso first
-  let mvarId ← if (← isProp target) then pure goal.mvarId else goal.mvarId.exfalso
+  let mvarId ← bif (← isProp target) then pure goal.mvarId else goal.mvarId.exfalso
   let some mvarId ← mvarId.byContra?
     | throwError "`by_contra` failed"
   -- byContra? produces `⊢ ¬target → False`, introduce the negated hypothesis
@@ -168,7 +168,7 @@ def resolveExtraTheorems (ids? :  Option (Array (TSyntax `ident))) : GrindTactic
 
 /-- Appends the extra theorems `extraThms` to `post`, discharging their side conditions with `d`. -/
 def addExtraTheorems (post : Simproc) (extraThms : Array Theorem) (d : Discharger := dischargeNone) : GrindTacticM Simproc := do
-  if extraThms.isEmpty then return post
+  bif extraThms.isEmpty then return post
   let mut thms : Theorems := {}
   for thm in extraThms do
     thms := thms.insert thm
@@ -202,7 +202,7 @@ def mkDefaultDischarger (goal : Meta.Grind.Goal) : Meta.Grind.GrindM Discharger 
     goal.mkSymSimpDischarger
 
 def elabSimpVariant (variantName : Name) (extraThms : Array Theorem) : GrindTacticM (Sym.Simp.Methods × Sym.Simp.Config) := do
-  if variantName.isAnonymous then
+  bif variantName.isAnonymous then
     let d ← liftGrindM <| mkDefaultDischarger (← getMainGoal)
     return (← mkSimpDefaultMethods extraThms d, {})
   let some v := getSymSimpVariant? (← getEnv) variantName

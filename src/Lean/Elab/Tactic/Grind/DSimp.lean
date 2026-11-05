@@ -22,14 +22,14 @@ def elabDSimpArgs (args? : Option (Array (TSyntax [`token.«*», `ident]))) : Gr
   let mut declNames := #[]
   let lctx ← getLCtx
   for arg in args do
-    if arg.raw.getKind == `ident then
+    bif arg.raw.getKind == `ident then
       if let some decl := lctx.findFromUserName? arg.raw.getId then
         fvarIds := fvarIds.push decl.fvarId
       else
         declNames := declNames.push (← realizeGlobalConstNoOverload arg.raw)
     else
       zetaDeltaAll := true
-  if !fvarIds.isEmpty && zetaDeltaAll then
+  bif !fvarIds.isEmpty && zetaDeltaAll then
     throwError "invalid `dsimp` arguments, local declarations and `*` have been provided"
   return { fvarIds, zetaDeltaAll, declNames }
 
@@ -39,7 +39,7 @@ global declarations (definitions to unfold and `rfl`-theorems) are handled in `p
 -/
 def addDSimpArgs (methods : Sym.DSimp.Methods) (args : DSimpArgs) : GrindTacticM Sym.DSimp.Methods := do
   let mut pre := methods.pre
-  if args.zetaDeltaAll then
+  bif args.zetaDeltaAll then
     pre := pre >> zetaDeltaAll
   unless args.fvarIds.isEmpty do
     pre := pre >> zetaDelta (FVarIdSet.ofArray args.fvarIds)
@@ -61,7 +61,7 @@ def elabOptDSimproc (stx? : Option Syntax) : GrindTacticM DSimproc := do
   elabSymDSimproc stx
 
 def elabDSimpVariant (variantName : Name) (args : DSimpArgs) : GrindTacticM (Sym.DSimp.Methods × Sym.DSimp.Config) := do
-  if variantName.isAnonymous then
+  bif variantName.isAnonymous then
     return (← mkDSimpDefaultMethods args, {})
   let some v := Sym.DSimp.getSymDSimpVariant? (← getEnv) variantName
     | throwError "unknown Sym.dsimp variant `{variantName}`"
@@ -84,7 +84,7 @@ def elabDSimpVariant (variantName : Name) (args : DSimpArgs) : GrindTacticM (Sym
   match result with
   | .rfl _  => throwError "`Sym.dsimp` made no progress"
   | .step target' _ =>
-    if target'.isTrue then
+    bif target'.isTrue then
       goal.mvarId.assign (mkConst ``True.intro)
       replaceMainGoal []
     else

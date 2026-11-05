@@ -20,7 +20,7 @@ open Lean.Order
 
 partial def headBetaUnderLambda (f : Expr) : Expr := Id.run do
   let mut f := f.headBeta
-  if f.isLambda then
+  bif f.isLambda then
     while f.bindingBody!.isHeadBetaTarget do
       f := f.updateLambda! f.bindingInfo! f.bindingDomain! f.bindingBody!.headBeta
   return f
@@ -50,7 +50,7 @@ builtin_initialize registerBuiltinAttribute {
     let_expr monotone α inst_α β inst_β f := targetTy |
       throwError "`[partial_fixpoint_monotone]` attribute only applies to lemmas proving {.ofConstName ``monotone}"
     let f := f.headBeta
-    let f ← if f.isLambda then pure f else etaExpand f
+    let f ← bif f.isLambda then pure f else etaExpand f
     let f := headBetaUnderLambda f
     lambdaBoundedTelescope f 1 fun _ e => do
       let key ← withReducible <| DiscrTree.mkPath e
@@ -64,7 +64,7 @@ def findMonoThms (e : Expr) : MetaM (Array Name) := do
   (monotoneExt.getState (← getEnv)).getMatch e
 
 def defaultFailK (f : Expr) (monoThms : Array Name) : MetaM α :=
-  let extraMsg := if monoThms.isEmpty then m!"" else
+  let extraMsg := bif monoThms.isEmpty then m!"" else
     m!"Tried to apply {.andList (monoThms.toList.map (m!"'{·}'"))}, but failed."
   throwError "Failed to prove monotonicity of:{indentExpr f}\n{extraMsg}"
 
@@ -82,7 +82,7 @@ It's tricky to solve them compositionally from the outside in, so here we constr
 from the inside out.
 -/
 partial def solveMonoCall (α inst_α : Expr) (e : Expr) : MetaM (Option Expr) := do
-  if e.isApp && !e.appArg!.hasLooseBVars then
+  bif e.isApp && !e.appArg!.hasLooseBVars then
     let some hmono ← solveMonoCall α inst_α e.appFn! | return none
     let hmonoType ← inferType hmono
     let_expr monotone _ _ _ inst _ := hmonoType | throwError "Internal error in `solveMonoCall {e}`: unexpected type {hmonoType}"
@@ -90,16 +90,16 @@ partial def solveMonoCall (α inst_α : Expr) (e : Expr) : MetaM (Option Expr) :
     let_expr instOrderPi γ δ inst ← inst | throwError "Internal error in `solveMonoCall {e}`: whnfUntil failed?{indentExpr inst}"
     return ← mkAppOptM ``monotone_apply #[γ, δ, α, inst_α, inst, e.appArg!, none, hmono]
 
-  if e.isProj then
+  bif e.isProj then
     let some hmono ← solveMonoCall α inst_α e.projExpr! | return none
     let hmonoType ← inferType hmono
     let_expr monotone _ _ _ inst _ := hmonoType | throwError "Internal error in `solveMonoCall {e}`: unexpected type {hmonoType}"
     let some inst ← whnfUntil inst ``instPartialOrderPProd | throwError "Internal error in `solveMonoCall {e}`: unexpected instance {inst}"
     let_expr instPartialOrderPProd β γ inst_β inst_γ ← inst | throwError "Internal error in `solveMonoCall {e}`: whnfUntil failed?{indentExpr inst}"
-    let n := if e.projIdx! == 0 then ``PProd.monotone_fst else ``PProd.monotone_snd
+    let n := bif e.projIdx! == 0 then ``PProd.monotone_fst else ``PProd.monotone_snd
     return ← mkAppOptM n #[β, γ, α, inst_β, inst_γ, inst_α, none, hmono]
 
-  if e == .bvar 0 then
+  bif e == .bvar 0 then
     let hmono ← mkAppOptM ``monotone_id #[α, inst_α]
     return some hmono
 
@@ -110,7 +110,7 @@ def solveMonoStep (failK : ∀ {α}, Expr → Array Name → MetaM α := @defaul
   goal.withContext do
   trace[Elab.Tactic.monotonicity] "monotonicity at\n{goal}"
   let type ← goal.getType
-  if type.isForall then
+  bif type.isForall then
     let (_, goal) ← goal.intro1P
     return [goal]
 
@@ -120,18 +120,18 @@ def solveMonoStep (failK : ∀ {α}, Expr → Array Name → MetaM α := @defaul
     -- redexes left by some of the lemmas we tend to apply
     let f ← instantiateMVars f
     let f := f.headBeta
-    let f ← if f.isLambda then pure f else etaExpand f
+    let f ← bif f.isLambda then pure f else etaExpand f
     let f := headBetaUnderLambda f
     let e := f.bindingBody!
 
     -- No recursive calls left
-    if !e.hasLooseBVars then
+    bif !e.hasLooseBVars then
       return ← applyConst goal ``monotone_const
 
     -- NB: `e` is now an open term.
 
     -- Look through mdata
-    if e.isMData then
+    bif e.isMData then
       let f' := f.updateLambdaE! f.bindingDomain! e.mdataExpr!
       let goal' ← mkFreshExprSyntheticOpaqueMVar (mkApp type.appFn! f')
       goal.assign goal'
@@ -139,7 +139,7 @@ def solveMonoStep (failK : ∀ {α}, Expr → Array Name → MetaM α := @defaul
 
     -- Handle let
     if let .letE n t v b nondep := e then
-      if t.hasLooseBVars || v.hasLooseBVars then
+      bif t.hasLooseBVars || v.hasLooseBVars then
         -- We cannot float the let to the context, so just zeta-reduce.
         let b' := f.updateLambdaE! f.bindingDomain! (b.instantiate1 v)
         let goal' ← mkFreshExprSyntheticOpaqueMVar (mkApp type.appFn! b')
@@ -155,14 +155,14 @@ def solveMonoStep (failK : ∀ {α}, Expr → Array Name → MetaM α := @defaul
         return [goal'.mvarId!]
 
     -- Handle lambdas, preserving the name of the binder
-    if e.isLambda then
+    bif e.isLambda then
       let [new_goal] ← applyConst goal ``monotone_of_monotone_apply
         | throwError "Unexpected number of goals after `{.ofConstName ``monotone_of_monotone_apply}`."
       let (_, new_goal) ← new_goal.intro e.bindingName!
       return [new_goal]
 
     -- A recursive call directly here
-    if e.isBVar then
+    bif e.isBVar then
       return ← applyConst goal ``monotone_id
 
     -- A recursive call
@@ -194,10 +194,10 @@ def solveMonoStep (failK : ∀ {α}, Expr → Array Name → MetaM α := @defaul
       let candidate ← id do
         let args := e.getAppArgs
         for i in info.getFirstDiscrPos...(info.getFirstDiscrPos + info.numDiscrs) do
-          if args[i]!.hasLooseBVars then
+          bif args[i]!.hasLooseBVars then
             return false
         return true
-      if candidate then
+      bif candidate then
         -- We could be even more deliberate here and use the `lifter` lemmas
         -- for the match statements instead of the `split` tactic.
         -- For now using `splitMatch` works fine.

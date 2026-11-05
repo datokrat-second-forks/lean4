@@ -24,7 +24,7 @@ The text of a documentation comment as Markdown. A Verso comment is elaborated a
 when it does not parse, its errors are logged and the text is empty.
 -/
 private def docCommentMarkdown (doc : TSyntax ``docComment) : CommandElabM String := do
-  if isVersoDocComment doc then
+  bif isVersoDocComment doc then
     let some blocks ← liftCoreM (parseVersoDocString doc) | return ""
     let ((text, subsections), _) ← liftTermElabM <| (Doc.elabBlocks blocks).execForModule
     liftCoreM <| Doc.MarkdownM.run' <| Doc.ToMarkdown.toMarkdown ({ text, subsections } : VersoDocString)
@@ -39,7 +39,7 @@ private def docCommentMarkdown (doc : TSyntax ``docComment) : CommandElabM Strin
 
     if let some tgt' := alternativeOfTactic (← getEnv) tacName then
         throwErrorAt tac "`{.ofConstName tacName}` is an alternative form of `{.ofConstName tgt'}`"
-    if !(isTactic (← getEnv) tacName) then
+    bif !(isTactic (← getEnv) tacName) then
       throwErrorAt tac "`{.ofConstName tacName}` is not a tactic"
 
     let text ← docCommentMarkdown docs
@@ -81,10 +81,10 @@ where
     let mut firsts := firsts
     for (tok, ps) in table do
       -- Skip antiquotes
-      if tok == `«$» then continue
+      bif tok == `«$» then continue
       for (p, _) in ps do
         for (k, ()) in p.info.collectKinds {} do
-          if tactics.kinds.contains k then
+          bif tactics.kinds.contains k then
             let tok := tok.toString (escape := false)
             -- It's important here that the already-existing mapping is preserved, because it will
             -- contain any user-provided custom name, and these shouldn't be overridden.
@@ -129,7 +129,7 @@ Displays all available tactic tags, with documentation.
     match mapping.find? tag with
     | none => pure .nil
     | some tacs =>
-      if tacs.isEmpty then pure .nil
+      bif tacs.isEmpty then pure .nil
       else
         let tacs := tacs.toArray.qsort (·.toString < ·.toString) |>.toList
         pure (Format.line ++ MessageData.joinSep (← tacs.mapM (showParserName firsts)) ", ")
@@ -137,7 +137,7 @@ Displays all available tactic tags, with documentation.
   let tagDescrs ← (← allTagsWithInfo).mapM fun (name, userName, docs) => do
     pure <| m!"• " ++
       MessageData.nestD (m!"`{name}`" ++
-        (if name.toString != userName then m!" — \"{userName}\"" else MessageData.nil) ++
+        (bif name.toString != userName then m!" — \"{userName}\"" else MessageData.nil) ++
         showDocs docs ++
         (← showTactics name))
 
@@ -185,7 +185,7 @@ def allTacticDocs (includeUnnamed : Bool := true) : MetaM (Array TacticDoc) := d
     let userName? : Option String := firstTokens.get? tac
     let userName ←
       if let some n := userName? then pure n
-      else if includeUnnamed then pure tac.toString
+      else bif includeUnnamed then pure tac.toString
       else continue
 
     docs := docs.push {
