@@ -31643,8 +31643,6 @@ else
 lean_object* v_stxStack_10679_; lean_object* v_pos_10680_; uint8_t v___x_10681_; 
 v_stxStack_10679_ = lean_ctor_get(v_s_10670_, 0);
 v_pos_10680_ = lean_ctor_get(v_s_10670_, 2);
-lean_inc(v_pos_10680_);
-lean_inc_ref(v_ictx_10663_);
 v___x_10681_ = l_Lean_Parser_InputContext_atEnd(v_ictx_10663_, v_pos_10680_);
 if (v___x_10681_ == 0)
 {
@@ -32040,8 +32038,6 @@ lean_object* v_stxStack_10799_; lean_object* v_pos_10800_; uint8_t v___x_10801_;
 lean_del_object(v___x_10717_);
 v_stxStack_10799_ = lean_ctor_get(v_s_10768_, 0);
 v_pos_10800_ = lean_ctor_get(v_s_10768_, 2);
-lean_inc(v_pos_10800_);
-lean_inc_ref(v_ictx_10761_);
 v___x_10801_ = l_Lean_Parser_InputContext_atEnd(v_ictx_10761_, v_pos_10800_);
 if (v___x_10801_ == 0)
 {

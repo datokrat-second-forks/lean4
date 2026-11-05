@@ -30,7 +30,6 @@ uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 lean_object* lean_nat_sub(lean_object*, lean_object*);
 lean_object* lean_string_utf8_prev(lean_object*, lean_object*);
 uint8_t lean_string_dec_eq(lean_object*, lean_object*);
-uint8_t l_String_instDecidableLtRaw(lean_object*, lean_object*);
 lean_object* lean_string_utf8_extract(lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_Name_mkStr1(lean_object*);
 uint8_t l_Lean_Syntax_isOfKind(lean_object*, lean_object*);
@@ -758,7 +757,7 @@ return v___x_165_;
 else
 {
 uint8_t v___x_166_; 
-v___x_166_ = l_String_instDecidableLtRaw(v_i_163_, v_i_161_);
+v___x_166_ = lean_nat_dec_lt(v_i_163_, v_i_161_);
 if (v___x_166_ == 0)
 {
 lean_object* v___x_167_; 

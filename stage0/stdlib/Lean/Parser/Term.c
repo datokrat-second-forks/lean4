@@ -232,6 +232,7 @@ lean_object* l_Lean_Parser_ParserContext_mkEmptySubstringAt(lean_object*, lean_o
 lean_object* l_Lean_Parser_ParserState_pushSyntax(lean_object*, lean_object*);
 lean_object* l_Lean_Parser_ParserState_setPos(lean_object*, lean_object*);
 lean_object* l_Lean_Parser_whitespace(lean_object*, lean_object*);
+uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 lean_object* l_Lean_Parser_node(lean_object*, lean_object*);
 extern lean_object* l_Lean_Doc_Parser_documentInfo;
 lean_object* l_Lean_Parser_SyntaxNodeKindSet_insert(lean_object*, lean_object*);
@@ -13621,10 +13622,10 @@ return v___x_18_;
 LEAN_EXPORT lean_object* l_Lean_Parser_Command_docCommentOpen___lam__0___boxed(lean_object* v_x_25_){
 _start:
 {
-uint32_t v_x_885__boxed_26_; uint8_t v_res_27_; lean_object* v_r_28_; 
-v_x_885__boxed_26_ = lean_unbox_uint32(v_x_25_);
+uint32_t v_x_894__boxed_26_; uint8_t v_res_27_; lean_object* v_r_28_; 
+v_x_894__boxed_26_ = lean_unbox_uint32(v_x_25_);
 lean_dec(v_x_25_);
-v_res_27_ = l_Lean_Parser_Command_docCommentOpen___lam__0(v_x_885__boxed_26_);
+v_res_27_ = l_Lean_Parser_Command_docCommentOpen___lam__0(v_x_894__boxed_26_);
 v_r_28_ = lean_box(v_res_27_);
 return v_r_28_;
 }
@@ -13889,11 +13890,11 @@ v___jp_72_:
 {
 lean_object* v_info_77_; lean_object* v___x_78_; lean_object* v___x_79_; lean_object* v___x_80_; 
 v_info_77_ = lean_alloc_ctor(0, 4, 0);
-lean_ctor_set(v_info_77_, 0, v___y_75_);
+lean_ctor_set(v_info_77_, 0, v___y_74_);
 lean_ctor_set(v_info_77_, 1, v_pos_71_);
 lean_ctor_set(v_info_77_, 2, v___y_76_);
-lean_ctor_set(v_info_77_, 3, v___y_74_);
-v___x_78_ = l_Lean_Parser_ParserState_popSyntax(v___y_73_);
+lean_ctor_set(v_info_77_, 3, v___y_73_);
+v___x_78_ = l_Lean_Parser_ParserState_popSyntax(v___y_75_);
 v___x_79_ = lean_alloc_ctor(2, 2, 0);
 lean_ctor_set(v___x_79_, 0, v_info_77_);
 lean_ctor_set(v___x_79_, 1, v_sym_67_);
@@ -13920,7 +13921,6 @@ v___x_91_ = lean_string_utf8_byte_size(v_sym_67_);
 v_stopPos_92_ = lean_nat_add(v_pos_71_, v___x_91_);
 lean_inc(v_stopPos_92_);
 v___x_93_ = l_Lean_Parser_ParserState_setPos(v_s_81_, v_stopPos_92_);
-lean_inc_ref(v_c_69_);
 v_s_94_ = l_Lean_Parser_takeWhileFn(v___f_68_, v_c_69_, v___x_93_);
 v_pos_95_ = lean_ctor_get(v_s_94_, 2);
 v_inputString_96_ = lean_ctor_get(v_toInputContext_90_, 0);
@@ -13939,9 +13939,9 @@ v___x_100_ = lean_alloc_ctor(0, 3, 0);
 lean_ctor_set(v___x_100_, 0, v_inputString_96_);
 lean_ctor_set(v___x_100_, 1, v_stopPos_92_);
 lean_ctor_set(v___x_100_, 2, v_endPos_97_);
-v___y_73_ = v_s_94_;
-v___y_74_ = v_stopPos_92_;
-v___y_75_ = v___x_98_;
+v___y_73_ = v_stopPos_92_;
+v___y_74_ = v___x_98_;
+v___y_75_ = v_s_94_;
 v___y_76_ = v___x_100_;
 goto v___jp_72_;
 }
@@ -13955,9 +13955,9 @@ v___x_101_ = lean_alloc_ctor(0, 3, 0);
 lean_ctor_set(v___x_101_, 0, v_inputString_96_);
 lean_ctor_set(v___x_101_, 1, v_stopPos_92_);
 lean_ctor_set(v___x_101_, 2, v_pos_95_);
-v___y_73_ = v_s_94_;
-v___y_74_ = v_stopPos_92_;
-v___y_75_ = v___x_98_;
+v___y_73_ = v_stopPos_92_;
+v___y_74_ = v___x_98_;
+v___y_75_ = v_s_94_;
 v___y_76_ = v___x_101_;
 goto v___jp_72_;
 }
@@ -14195,7 +14195,6 @@ lean_inc(v_val_216_);
 lean_dec_ref_known(v___x_215_, 1);
 v___x_217_ = 1;
 v___x_218_ = lean_unsigned_to_nat(1u);
-lean_inc_ref(v_c_206_);
 v_s_219_ = l_Lean_Parser_finishCommentBlock(v___x_217_, v___x_218_, v_c_206_, v_s_207_);
 v_stxStack_220_ = lean_ctor_get(v_s_219_, 0);
 v_lhsPrec_221_ = lean_ctor_get(v_s_219_, 1);
@@ -14418,8 +14417,8 @@ lean_object* v_toInputContext_283_; uint8_t v___x_284_;
 v_toInputContext_283_ = lean_ctor_get(v_c_x27_267_, 0);
 lean_inc_ref(v_toInputContext_283_);
 lean_dec_ref(v_c_x27_267_);
-lean_inc(v_pos_278_);
 v___x_284_ = l_Lean_Parser_InputContext_atEnd(v_toInputContext_283_, v_pos_278_);
+lean_dec_ref(v_toInputContext_283_);
 if (v___x_284_ == 0)
 {
 v___y_247_ = v_s_274_;
@@ -15244,7 +15243,6 @@ v_pos_587_ = lean_ctor_get(v_s_586_, 2);
 lean_inc(v_pos_587_);
 v___x_588_ = 1;
 v___x_589_ = lean_unsigned_to_nat(1u);
-lean_inc_ref(v_c_585_);
 v_s_590_ = l_Lean_Parser_finishCommentBlock(v___x_588_, v___x_589_, v_c_585_, v_s_586_);
 v_pos_591_ = lean_ctor_get(v_s_590_, 2);
 v_errorMsg_592_ = lean_ctor_get(v_s_590_, 4);

@@ -11161,8 +11161,6 @@ else
 lean_object* v_stxStack_3517_; lean_object* v_pos_3518_; uint8_t v___x_3519_; 
 v_stxStack_3517_ = lean_ctor_get(v_s_3510_, 0);
 v_pos_3518_ = lean_ctor_get(v_s_3510_, 2);
-lean_inc(v_pos_3518_);
-lean_inc_ref(v_ictx_3503_);
 v___x_3519_ = l_Lean_Parser_InputContext_atEnd(v_ictx_3503_, v_pos_3518_);
 if (v___x_3519_ == 0)
 {

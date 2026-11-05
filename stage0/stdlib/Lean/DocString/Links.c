@@ -2254,9 +2254,9 @@ goto v___jp_695_;
 }
 else
 {
-uint8_t v_decide_727_; 
-v_decide_727_ = lean_nat_dec_eq(v___x_694_, v___x_691_);
-if (v_decide_727_ == 0)
+uint8_t v___x_727_; 
+v___x_727_ = lean_nat_dec_eq(v___x_694_, v___x_691_);
+if (v___x_727_ == 0)
 {
 lean_object* v___x_728_; lean_object* v___x_729_; lean_object* v___x_730_; 
 lean_del_object(v___x_689_);
@@ -2506,10 +2506,10 @@ return v___x_737_;
 LEAN_EXPORT lean_object* l___private_Init_While_0__repeatM_erased___at___00Lean_rewriteManualLinksCore_spec__0___redArg___boxed(lean_object* v_s_746_, lean_object* v___x_747_, lean_object* v___x_748_, lean_object* v___x_749_, lean_object* v_a_750_){
 _start:
 {
-uint32_t v___x_2291__boxed_751_; lean_object* v_res_752_; 
-v___x_2291__boxed_751_ = lean_unbox_uint32(v___x_749_);
+uint32_t v___x_2329__boxed_751_; lean_object* v_res_752_; 
+v___x_2329__boxed_751_ = lean_unbox_uint32(v___x_749_);
 lean_dec(v___x_749_);
-v_res_752_ = l___private_Init_While_0__repeatM_erased___at___00Lean_rewriteManualLinksCore_spec__0___redArg(v_s_746_, v___x_747_, v___x_748_, v___x_2291__boxed_751_, v_a_750_);
+v_res_752_ = l___private_Init_While_0__repeatM_erased___at___00Lean_rewriteManualLinksCore_spec__0___redArg(v_s_746_, v___x_747_, v___x_748_, v___x_2329__boxed_751_, v_a_750_);
 lean_dec(v___x_747_);
 lean_dec_ref(v_s_746_);
 return v_res_752_;
@@ -2869,10 +2869,10 @@ return v___x_850_;
 LEAN_EXPORT lean_object* l___private_Init_While_0__repeatM_erased___at___00Lean_rewriteManualLinksCore_spec__0___boxed(lean_object* v_s_851_, lean_object* v___x_852_, lean_object* v___x_853_, lean_object* v___x_854_, lean_object* v_inst_855_, lean_object* v_a_856_){
 _start:
 {
-uint32_t v___x_2569__boxed_857_; lean_object* v_res_858_; 
-v___x_2569__boxed_857_ = lean_unbox_uint32(v___x_854_);
+uint32_t v___x_2607__boxed_857_; lean_object* v_res_858_; 
+v___x_2607__boxed_857_ = lean_unbox_uint32(v___x_854_);
 lean_dec(v___x_854_);
-v_res_858_ = l___private_Init_While_0__repeatM_erased___at___00Lean_rewriteManualLinksCore_spec__0(v_s_851_, v___x_852_, v___x_853_, v___x_2569__boxed_857_, v_inst_855_, v_a_856_);
+v_res_858_ = l___private_Init_While_0__repeatM_erased___at___00Lean_rewriteManualLinksCore_spec__0(v_s_851_, v___x_852_, v___x_853_, v___x_2607__boxed_857_, v_inst_855_, v_a_856_);
 lean_dec(v___x_852_);
 lean_dec_ref(v_s_851_);
 return v_res_858_;

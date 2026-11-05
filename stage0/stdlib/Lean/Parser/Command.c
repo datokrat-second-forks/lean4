@@ -179,8 +179,8 @@ uint8_t lean_uint32_dec_eq(uint32_t, uint32_t);
 lean_object* l_instDecidableEqChar___boxed(lean_object*, lean_object*);
 lean_object* l_instBEqOfDecidableEq___redArg___lam__0___boxed(lean_object*, lean_object*, lean_object*);
 uint8_t l_List_elem___redArg(lean_object*, lean_object*, lean_object*);
-lean_object* l_Lean_Parser_takeUntilFn(lean_object*, lean_object*, lean_object*);
-lean_object* l_Lean_Parser_takeWhileFn(lean_object*, lean_object*, lean_object*);
+lean_object* l_Lean_Parser_takeUntilFn___boxed(lean_object*, lean_object*, lean_object*);
+lean_object* l_Lean_Parser_takeWhileFn___boxed(lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_Parser_andthenFn(lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_Parser_recover(lean_object*, lean_object*);
 lean_object* l_Lean_Parser_checkNoWsBefore(lean_object*);
@@ -494,7 +494,7 @@ static const lean_closure_object l___private_Lean_Parser_Command_0__Lean_Parser_
 static const lean_object* l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__2 = (const lean_object*)&l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__2_value;
 static const lean_ctor_object l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__3_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_ctor_object) + sizeof(void*)*3 + 0, .m_other = 3, .m_tag = 0}, .m_objs = {((lean_object*)&l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__0_value),((lean_object*)&l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__1_value),((lean_object*)(((size_t)(1) << 1) | 1))}};
 static const lean_object* l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__3 = (const lean_object*)&l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__3_value;
-static const lean_closure_object l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__4_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*1, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_Lean_Parser_takeWhileFn, .m_arity = 3, .m_num_fixed = 1, .m_objs = {((lean_object*)&l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__2_value)} };
+static const lean_closure_object l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__4_value = {.m_header = {.m_rc = 0, .m_cs_sz = sizeof(lean_closure_object) + sizeof(void*)*1, .m_other = 0, .m_tag = 245}, .m_fun = (void*)l_Lean_Parser_takeWhileFn___boxed, .m_arity = 3, .m_num_fixed = 1, .m_objs = {((lean_object*)&l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__2_value)} };
 static const lean_object* l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__4 = (const lean_object*)&l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__4_value;
 LEAN_EXPORT lean_object* l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil(lean_object*);
 static lean_once_cell_t l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntilWs___closed__0_once = LEAN_ONCE_CELL_INITIALIZER;
@@ -10858,7 +10858,7 @@ _start:
 {
 lean_object* v___x_389_; lean_object* v___x_390_; lean_object* v___x_391_; lean_object* v___x_392_; lean_object* v___x_393_; 
 v___x_389_ = ((lean_object*)(l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__3));
-v___x_390_ = lean_alloc_closure((void*)(l_Lean_Parser_takeUntilFn), 3, 1);
+v___x_390_ = lean_alloc_closure((void*)(l_Lean_Parser_takeUntilFn___boxed), 3, 1);
 lean_closure_set(v___x_390_, 0, v_pred_388_);
 v___x_391_ = ((lean_object*)(l___private_Lean_Parser_Command_0__Lean_Parser_Command_skipUntil___closed__4));
 v___x_392_ = lean_alloc_closure((void*)(l_Lean_Parser_andthenFn), 4, 2);

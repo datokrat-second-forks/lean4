@@ -3307,10 +3307,10 @@ goto _start;
 }
 else
 {
-lean_object* v___x_1013_; uint8_t v_decide_1014_; 
+lean_object* v___x_1013_; uint8_t v___x_1014_; 
 v___x_1013_ = lean_unsigned_to_nat(0u);
-v_decide_1014_ = lean_nat_dec_eq(v_a_1003_, v___x_1013_);
-if (v_decide_1014_ == 0)
+v___x_1014_ = lean_nat_dec_eq(v_a_1003_, v___x_1013_);
+if (v___x_1014_ == 0)
 {
 lean_object* v___x_1015_; uint8_t v_decide_1016_; 
 v___x_1015_ = lean_string_utf8_byte_size(v_s_1001_);

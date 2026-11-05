@@ -764,7 +764,6 @@ LEAN_EXPORT lean_object* l___private_Lean_DocString_Add_0__Lean_mkVersoParseMess
 _start:
 {
 lean_object* v___x_137_; lean_object* v_snd_138_; lean_object* v_fst_139_; lean_object* v_fst_140_; lean_object* v_snd_141_; lean_object* v_fileName_142_; lean_object* v_fileMap_143_; lean_object* v___x_144_; lean_object* v___y_146_; 
-lean_inc_ref(v_ictx_134_);
 v___x_137_ = l_Lean_Doc_Parser_locateError(v_ictx_134_, v_pos_135_, v_e_136_);
 v_snd_138_ = lean_ctor_get(v___x_137_, 1);
 lean_inc(v_snd_138_);

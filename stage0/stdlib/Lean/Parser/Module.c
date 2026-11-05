@@ -55,7 +55,6 @@ lean_object* lean_array_get_size(lean_object*);
 uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 size_t lean_usize_of_nat(lean_object*);
 uint8_t lean_usize_dec_eq(size_t, size_t);
-uint8_t lean_nat_dec_le(lean_object*, lean_object*);
 lean_object* l_Lean_instInhabitedPersistentArrayNode_default___redArg();
 size_t lean_usize_shift_right(size_t, size_t);
 lean_object* lean_usize_to_nat(size_t);
@@ -2436,8 +2435,6 @@ goto v_resetjp_730_;
 v_resetjp_730_:
 {
 uint8_t v___x_733_; 
-lean_inc(v_fst_720_);
-lean_inc_ref(v_inputCtx_710_);
 v___x_733_ = l_Lean_Parser_InputContext_atEnd(v_inputCtx_710_, v_fst_720_);
 if (v___x_733_ == 0)
 {

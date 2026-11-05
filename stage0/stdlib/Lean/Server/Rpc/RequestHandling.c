@@ -1390,11 +1390,11 @@ return v___x_360_;
 LEAN_EXPORT lean_object* l_Lean_Server_handleRpcCall___lam__3___boxed(lean_object* v_method_361_, lean_object* v___x_362_, lean_object* v___x_363_, lean_object* v_sessionId_364_, lean_object* v_params_365_, lean_object* v___x_366_, lean_object* v_snap_367_, lean_object* v___y_368_, lean_object* v___y_369_){
 _start:
 {
-uint8_t v___x_2314__boxed_370_; uint64_t v_sessionId_boxed_371_; lean_object* v_res_372_; 
-v___x_2314__boxed_370_ = lean_unbox(v___x_363_);
+uint8_t v___x_2338__boxed_370_; uint64_t v_sessionId_boxed_371_; lean_object* v_res_372_; 
+v___x_2338__boxed_370_ = lean_unbox(v___x_363_);
 v_sessionId_boxed_371_ = lean_unbox_uint64(v_sessionId_364_);
 lean_dec_ref(v_sessionId_364_);
-v_res_372_ = l_Lean_Server_handleRpcCall___lam__3(v_method_361_, v___x_362_, v___x_2314__boxed_370_, v_sessionId_boxed_371_, v_params_365_, v___x_366_, v_snap_367_, v___y_368_);
+v_res_372_ = l_Lean_Server_handleRpcCall___lam__3(v_method_361_, v___x_362_, v___x_2338__boxed_370_, v_sessionId_boxed_371_, v_params_365_, v___x_366_, v_snap_367_, v___y_368_);
 lean_dec_ref(v___y_368_);
 lean_dec_ref(v_snap_367_);
 lean_dec_ref(v___x_362_);
@@ -1520,10 +1520,10 @@ return v___x_414_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0___redArg___boxed(lean_object* v_x_415_, lean_object* v_x_416_, lean_object* v_x_417_){
 _start:
 {
-size_t v_x_2403__boxed_418_; lean_object* v_res_419_; 
-v_x_2403__boxed_418_ = lean_unbox_usize(v_x_416_);
+size_t v_x_2427__boxed_418_; lean_object* v_res_419_; 
+v_x_2427__boxed_418_ = lean_unbox_usize(v_x_416_);
 lean_dec(v_x_416_);
-v_res_419_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0___redArg(v_x_415_, v_x_2403__boxed_418_, v_x_417_);
+v_res_419_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0___redArg(v_x_415_, v_x_2427__boxed_418_, v_x_417_);
 lean_dec(v_x_417_);
 lean_dec_ref(v_x_415_);
 return v_res_419_;
@@ -1684,10 +1684,10 @@ return v___x_485_;
 LEAN_EXPORT lean_object* l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0___boxed(lean_object* v_00_u03b2_486_, lean_object* v_x_487_, lean_object* v_x_488_, lean_object* v_x_489_){
 _start:
 {
-size_t v_x_2534__boxed_490_; lean_object* v_res_491_; 
-v_x_2534__boxed_490_ = lean_unbox_usize(v_x_488_);
+size_t v_x_2558__boxed_490_; lean_object* v_res_491_; 
+v_x_2558__boxed_490_ = lean_unbox_usize(v_x_488_);
 lean_dec(v_x_488_);
-v_res_491_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0(v_00_u03b2_486_, v_x_487_, v_x_2534__boxed_490_, v_x_489_);
+v_res_491_ = l_Lean_PersistentHashMap_findAux___at___00Lean_PersistentHashMap_find_x3f___at___00Lean_Server_handleRpcCall_spec__0_spec__0(v_00_u03b2_486_, v_x_487_, v_x_2558__boxed_490_, v_x_489_);
 lean_dec(v_x_489_);
 lean_dec_ref(v_x_487_);
 return v_res_491_;

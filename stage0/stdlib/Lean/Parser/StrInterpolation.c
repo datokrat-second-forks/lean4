@@ -162,8 +162,6 @@ _start:
 lean_object* v_pos_39_; lean_object* v_toInputContext_40_; uint8_t v___x_41_; 
 v_pos_39_ = lean_ctor_get(v_s_38_, 2);
 v_toInputContext_40_ = lean_ctor_get(v_c_37_, 0);
-lean_inc(v_pos_39_);
-lean_inc_ref(v_toInputContext_40_);
 v___x_41_ = l_Lean_Parser_InputContext_atEnd(v_toInputContext_40_, v_pos_39_);
 if (v___x_41_ == 0)
 {
@@ -289,8 +287,6 @@ _start:
 lean_object* v_pos_86_; lean_object* v_toInputContext_87_; uint8_t v___x_88_; 
 v_pos_86_ = lean_ctor_get(v_s_85_, 2);
 v_toInputContext_87_ = lean_ctor_get(v_c_84_, 0);
-lean_inc(v_pos_86_);
-lean_inc_ref(v_toInputContext_87_);
 v___x_88_ = l_Lean_Parser_InputContext_atEnd(v_toInputContext_87_, v_pos_86_);
 if (v___x_88_ == 0)
 {

@@ -22,7 +22,7 @@ lean_object* lean_string_utf8_byte_size(lean_object*);
 uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 uint8_t l_Lean_Syntax_Range_contains(lean_object*, lean_object*, uint8_t);
 lean_object* l_Lean_Syntax_getPos_x3f(lean_object*, uint8_t);
-uint8_t l_String_instDecidableLtRaw(lean_object*, lean_object*);
+uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 lean_object* lean_task_pure(lean_object*);
 lean_object* lean_task_bind(lean_object*, lean_object*, lean_object*, uint8_t);
 lean_object* l_mkPanicMessageWithDecl(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
@@ -1254,7 +1254,7 @@ lean_object* v_val_418_; uint8_t v___x_419_;
 v_val_418_ = lean_ctor_get(v___x_417_, 0);
 lean_inc(v_val_418_);
 lean_dec_ref_known(v___x_417_, 1);
-v___x_419_ = l_String_instDecidableLtRaw(v_hoverPos_413_, v_val_418_);
+v___x_419_ = lean_nat_dec_lt(v_hoverPos_413_, v_val_418_);
 lean_dec(v_val_418_);
 return v___x_419_;
 }
