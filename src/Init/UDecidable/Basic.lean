@@ -412,9 +412,19 @@ theorem dite_eq_right_of_decide_eq_false {α : Sort u} {c : Prop} {_ : UDecidabl
 
 /-! Bridges to `Decidable` -/
 
-/-- Every `Decidable` proposition is `UDecidable`. Compiled code represents both by the same `Bool`. -/
-instance (priority := low) ofDecidable (p : Prop) [Decidable p] : UDecidable p :=
+/--
+The implementation of `ofDecidable` in compiled code and `cbv`. Unlike the instance, the compiler
+inlines it in the base phase, where `Decidable.decide` of the `Decidable` instance is unfolded.
+-/
+@[expose, inline, instance_reducible] def ofDecidableImpl (p : Prop) [Decidable p] : UDecidable p :=
   mk (Decidable.decide p) ⟨_root_.of_decide_eq_true, _root_.decide_eq_true⟩
+
+/-- Every `Decidable` proposition is `UDecidable`. Compiled code represents both by the same `Bool`. -/
+noncomputable instance (priority := low) ofDecidable (p : Prop) [Decidable p] : UDecidable p := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem ofDecidable_csimp : @ofDecidable = @ofDecidableImpl := rfl
 
 /-- Every `UDecidable` proposition is `Decidable`. Compiled code represents both by the same `Bool`. -/
 @[expose, instance_reducible] def toDecidable (p : Prop) [UDecidable p] : Decidable p :=
@@ -449,8 +459,11 @@ theorem not_decide_eq_true {p : Prop} [UDecidable p] : ((!decide p) = true) = ¬
   propext ⟨fun h hp => by rw [decide_eq_true hp] at h; exact Bool.noConfusion h,
     fun hnp => by rw [decide_eq_false hnp]; rfl⟩
 
-/-- The implementation of `instAnd` in compiled code and `cbv`. -/
-@[expose, inline, instance_reducible] def instAndImpl (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∧ q) :=
+/--
+The implementation of `instAnd` in compiled code and `cbv`. It is `macro_inline` so that the
+instance arguments are not evaluated eagerly: `q` is only decided if `p` holds.
+-/
+@[expose, macro_inline, instance_reducible] def instAndImpl (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∧ q) :=
   mk (decide p && decide q) (by
     cases em p with
     | inl hp =>
@@ -466,8 +479,11 @@ noncomputable instance instAnd (p q : Prop) [UDecidable p] [UDecidable q] : UDec
 
 @[csimp] theorem instAnd_csimp : @instAnd = @instAndImpl := rfl
 
-/-- The implementation of `instOr` in compiled code and `cbv`. -/
-@[expose, inline, instance_reducible] def instOrImpl (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∨ q) :=
+/--
+The implementation of `instOr` in compiled code and `cbv`. It is `macro_inline` so that the
+instance arguments are not evaluated eagerly: `q` is only decided if `p` fails.
+-/
+@[expose, macro_inline, instance_reducible] def instOrImpl (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p ∨ q) :=
   mk (decide p || decide q) (by
     cases em p with
     | inl hp =>
@@ -523,8 +539,11 @@ noncomputable instance instOr (p q : Prop) [UDecidable p] [UDecidable q] : UDeci
     {_ : UDecidable (p ↔ q)} : decide (p ↔ q) = (decide p == decide q) :=
   (decide_beq_decide p q).symm
 
-/-- The implementation of `instImp` in compiled code and `cbv`. -/
-@[expose, inline, instance_reducible] def instImpImpl (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p → q) :=
+/--
+The implementation of `instImp` in compiled code and `cbv`. It is `macro_inline` so that the
+instance arguments are not evaluated eagerly: `q` is only decided if `p` holds.
+-/
+@[expose, macro_inline, instance_reducible] def instImpImpl (p q : Prop) [UDecidable p] [UDecidable q] : UDecidable (p → q) :=
   mk (!decide p || decide q) (by
     cases em p with
     | inl hp =>
@@ -597,12 +616,12 @@ noncomputable instance instNatLt (n m : Nat) : UDecidable (n < m) := classical _
 
 @[csimp] theorem instNatLt_csimp : @instNatLt = @instNatLtImpl := rfl
 
-/-- The implementation of `instBoolEq` in compiled code and `cbv`. -/
-@[expose, inline, instance_reducible] def instBoolEqImpl : UDecidableEq Bool
-  | true, true => isTrue rfl
-  | false, false => isTrue rfl
-  | true, false => isFalse Bool.noConfusion
-  | false, true => isFalse Bool.noConfusion
+/--
+The implementation of `instBoolEq` in compiled code and `cbv`. Like `Bool.decEq`, it uses `Bool.beq`, so
+`uif b` compiles to a test of `b` itself, without intermediate `Bool` constructor values.
+-/
+@[expose, inline, instance_reducible] def instBoolEqImpl (a b : Bool) : UDecidable (a = b) :=
+  ofReflects (a.beq b) (by cases a <;> cases b <;> first | exact rfl | exact Bool.noConfusion)
 
 noncomputable instance instBoolEq : UDecidableEq Bool := by
   repeat intro
