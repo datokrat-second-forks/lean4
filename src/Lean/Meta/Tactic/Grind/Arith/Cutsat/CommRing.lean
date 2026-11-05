@@ -22,7 +22,7 @@ CommRing interface for cutsat. We use it to normalize nonlinear polynomials.
 /-- Returns `true` if `p` contains a nonlinear monomial. -/
 def _root_.Int.Internal.Linear.Poly.isNonlinear (p : Poly) : GoalM Bool := do
   let .add _ x p := p | return false
-  if (← getVar x).isAppOf ``HMul.hMul || (← getVar x).isAppOf ``HPow.hPow then return true
+  bif (← getVar x).isAppOf ``HMul.hMul || (← getVar x).isAppOf ``HPow.hPow then return true
   p.isNonlinear
 
 def _root_.Int.Internal.Linear.Poly.getGeneration (p : Poly) : GoalM Nat := do
@@ -55,7 +55,7 @@ def _root_.Int.Internal.Linear.Poly.normCommRing? (p : Poly) : GoalM (Option (Co
     -/
     internalize e' gen (some getIntModuleVirtualParent)
     let p'' ← toPoly e'
-    if p == p'' then return none
+    bif p == p'' then return none
     modify' fun s => { s with usedCommRing := true }
     trace[grind.lia.assert.nonlinear] "{← p.pp} ===> {← p''.pp}"
     return some (re, p', p'')

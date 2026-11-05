@@ -62,12 +62,12 @@ def eqCongrSymmPlaceholderProof := mkConst (Name.mkSimple "[eq_congr_symm]")
 /-- Checks the signed magnitude range of a fixed-width literal, excluding negative zero. -/
 private def isSIntValueInRange (declName : Name) (v : Nat) (negative : Bool) : Bool :=
   let limit :=
-    if declName == ``Int8 then 2 ^ 7
-    else if declName == ``Int16 then 2 ^ 15
-    else if declName == ``Int32 then 2 ^ 31
-    else if declName == ``Int64 then 2 ^ 63
+    bif declName == ``Int8 then 2 ^ 7
+    else bif declName == ``Int16 then 2 ^ 15
+    else bif declName == ``Int32 then 2 ^ 31
+    else bif declName == ``Int64 then 2 ^ 63
     else 0
-  if negative then 0 < v && v ≤ limit else v < limit
+  bif negative then 0 < v && v ≤ limit else v < limit
 
 /--
 Returns `true` if `e` is `True`, `False`, or a literal value.
@@ -87,9 +87,9 @@ instance, i.e., when it is in range: the canonicalizer reduces `OfNat` numerals 
 Assumes `e` has no assigned metavariables.
 -/
 def isInterpreted (e : Expr) : MetaM Bool := do
-  if e.isTrue || e.isFalse then return true
+  bif e.isTrue || e.isFalse then return true
   if let .lit (.strVal _) := e then return true
-  if e.consumeMData.isRawNatLit then return true
+  bif e.consumeMData.isRawNatLit then return true
   match_expr e with
   | OfNat.ofNat type n _ =>
     let .lit (.natVal v) := n.consumeMData | return false
@@ -102,7 +102,7 @@ def isInterpreted (e : Expr) : MetaM Bool := do
       unless declName == ``Fin || declName == ``BitVec do return false
       unless (← isNatValue k) do return false
       let k ← whnfD k
-      if declName == ``Fin then
+      bif declName == ``Fin then
         isNonZeroNatValue k
       else
         isNatValue k
@@ -484,7 +484,7 @@ Runs `k` with the transparency setting specified by `Config.reducible`.
 Uses reducible transparency if `reducible` is `true`, otherwise default transparency.
 -/
 abbrev withGTransparency [MonadControlT MetaM n] [MonadLiftT GrindM n] [Monad n] (k : n α) : n α := do
-  let m := if (← getConfig).reducible then .reducible else .default
+  let m := bif (← getConfig).reducible then .reducible else .default
   withTransparency m k
 
 /-- Returns the anchor references (if any) being used to restrict the search. -/
@@ -550,17 +550,17 @@ def saveCases (declName : Name) : GrindM Unit := do
   modify fun s => { s with counters.case := incCounter s.counters.case declName }
 
 def saveAppOf (h : HeadIndex) : GrindM Unit := do
-  if (← isDiagnosticsEnabled) then
+  bif (← isDiagnosticsEnabled) then
     let .const declName := h | return ()
     modify fun s => { s with counters.apps := incCounter s.counters.apps declName }
 
 def saveSplitDiagInfo (c : Expr) (gen : Nat) (numCases : Nat) (splitSource : SplitSource) : GrindM Unit := do
-  if (← isDiagnosticsEnabled) then
+  bif (← isDiagnosticsEnabled) then
     let lctx ← getLCtx
     modify fun s => { s with splitDiags := s.splitDiags.push { c, gen, lctx, numCases, splitSource } }
 
 def saveEMatchDiagInfo (sources : List EMatchDiagNode) (target : EMatchDiagNode) : GrindM Unit := do
-  if (← isEmatchDiagEnabled) then
+  bif (← isEmatchDiagEnabled) then
     let lctx ← getLCtx
     modify fun s => { s with ematchDiags := s.ematchDiags.push { sources, target, lctx } }
 
@@ -718,7 +718,7 @@ private def hashRoot (enodes : ENodeMap) (e : Expr) : UInt64 :=
     hashPtrExpr e
 
 private def hasSameRoot (enodes : ENodeMap) (a b : Expr) : Bool := Id.run do
-  if isSameExpr a b then
+  bif isSameExpr a b then
     return true
   else
     let some n1 := enodes.find? { expr := a } | return false
@@ -742,7 +742,7 @@ private def congrHash (enodes : ENodeMap) (e : Expr) : UInt64 :=
   | _ =>
     match e with
     | .app f a =>
-      if useFunCC' enodes e then
+      bif useFunCC' enodes e then
         mixHash (hashRoot enodes f) (hashRoot enodes a)
       else
         go f (hashRoot enodes a)
@@ -751,7 +751,7 @@ where
   goEq (lhs rhs : Expr) : UInt64 :=
     let h₁ := hashRoot enodes lhs
     let h₂ := hashRoot enodes rhs
-    if h₁ > h₂ then mixHash h₂ h₁ else mixHash h₁ h₂
+    bif h₁ >ᵇ h₂ then mixHash h₂ h₁ else mixHash h₁ h₂
   go (e : Expr) (r : UInt64) : UInt64 :=
     match e with
     | .app f a => go f (mixHash r (hashRoot enodes a))
@@ -805,13 +805,13 @@ private partial def isCongruent (enodes : ENodeMap) (e₁ e₂ : Expr) : Bool :=
   | _ => Id.run do
     let .app f a := e₁ | return false
     let .app g b := e₂ | return false
-    if useFunCC' enodes e₁ then
+    bif useFunCC' enodes e₁ then
       /-
       **Note**: We are not in `MetaM` here. Thus, we cannot check whether `f` and `g` have the same type.
       So, we approximate and try to handle this issue when generating the proof term.
       -/
       useFunCC' enodes e₂ && hasSameRoot enodes a b && hasSameRoot enodes f g
-    else if useFunCC' enodes e₂ then
+    else bif useFunCC' enodes e₂ then
       /-
       Mismatched `funCC` flags: `e₁` uses first-order congruence, `e₂` uses higher-order.
       They hash differently (via `congrHash`), so declaring them congruent here would violate
@@ -826,9 +826,9 @@ where
     ||
     (hasSameRoot enodes lhs₁ rhs₂ && hasSameRoot enodes rhs₁ lhs₂)
   go (a b : Expr) : Bool :=
-    if a.isApp && b.isApp then
+    bif a.isApp && b.isApp then
       hasSameRoot enodes a.appArg! b.appArg! && go a.appFn! b.appFn!
-    else if a.isApp || b.isApp then
+    else bif a.isApp || b.isApp then
       -- Different number of arguments: not congruent.
       false
     else
@@ -1230,7 +1230,7 @@ goal if `depth` is its split depth.
 -/
 def getGoalAtDepth (depth : Nat) : GoalM Goal := do
   let goal ← get
-  if depth == goal.goalStack.size then
+  bif depth == goal.goalStack.size then
     return goal
   let some (mvarId, s) := goal.goalStack[depth]?
     | throwError "`grind` internal error, no case split at depth {depth}"
@@ -1267,7 +1267,7 @@ def hoistDecl (depth : Nat) (key : HoistKey) (name : Name) (type : Expr) (value 
   let fvarId ← mkFreshFVarId
   let decl := { fvarId, name, type, value? := some (← value), nondep }
   modifyThe State fun s => { s with hoistedDecls := s.hoistedDecls.modify goal.mvarId fun decls =>
-    let decls := if front then { decls with front := decls.front.push decl } else { decls with decls := decls.decls.push decl }
+    let decls := bif front then { decls with front := decls.front.push decl } else { decls with decls := decls.decls.push decl }
     { decls with keys := decls.keys.insert key fvarId }
   }
   return fvarId
@@ -1328,11 +1328,11 @@ conversion is safe. Delayed assignments created before `withNewMCtxDepth` are le
 as they are meant to be resolved by other tactics.
 -/
 partial def instantiateMVarsResolvingDelayed (e : Expr) : MetaM Expr := do
-  if !e.hasMVar then return e
+  bif !e.hasMVar then return e
   let mctx ← getMCtx
   for mvarId in (e.collectMVars {}).result do
     if let some decl := mctx.findDecl? mvarId then
-      if decl.depth == mctx.depth then
+      bif decl.depth == mctx.depth then
         if let some { fvars, mvarIdPending } ← getDelayedMVarAssignment? mvarId then
           if let some val ← getExprMVarAssignment? mvarIdPending then
             let pendingDecl ← mvarIdPending.getDecl
@@ -1345,7 +1345,7 @@ Wraps `e` with each declaration in `decls` that `e` uses, directly or through ot
 -/
 def mkHoistedDecls (decls : HoistedDecls) (e : Expr) : MetaM Expr := do
   let all := decls.front.reverse ++ decls.decls
-  if all.isEmpty then return e
+  bif all.isEmpty then return e
   /-
   The declarations may occur in subterms that `instantiateMVars` leaves behind delayed assignments,
   e.g., when the goal contains metavariables created before `grind`.
@@ -1355,7 +1355,7 @@ def mkHoistedDecls (decls : HoistedDecls) (e : Expr) : MetaM Expr := do
   let mut used := collectFVars {} e
   let mut kept := #[]
   for decl in all.reverse do
-    if used.fvarSet.contains decl.fvarId then
+    bif used.fvarSet.contains decl.fvarId then
       let some value := decl.value?
         | throwError "`grind` internal error, hoisted declaration has no value"
       used := collectFVars used value
@@ -1395,9 +1395,9 @@ def Goal.hasPendingLocalDecls (g : Goal) : MetaM Bool := do
   return g.nextDeclIdx < mvarDecl.lctx.decls.size
 
 def updateLastTag : GoalM Unit := do
-  if (← isTracingEnabledFor `grind) then
+  bif (← isTracingEnabledFor `grind) then
     let currTag ← (← get).mvarId.getTag
-    if currTag != (← getThe Grind.State).lastTag then
+    bif currTag != (← getThe Grind.State).lastTag then
       trace[grind] "working on goal `{currTag}`"
       modifyThe Grind.State fun s => { s with lastTag := currTag }
 
@@ -1406,7 +1406,7 @@ Macro similar to `trace[...]`, but it includes the trace message `trace[grind] "
 if the tag has changed since the last trace message.
 -/
 macro "trace_goal[" id:ident "]" s:(interpolatedStr(term) <|> term) : doElem => do
-  let msg ← if s.raw.getKind == interpolatedStrKind then `(m! $(⟨s⟩)) else `(($(⟨s⟩) : MessageData))
+  let msg ← bif s.raw.getKind == interpolatedStrKind then `(m! $(⟨s⟩)) else `(($(⟨s⟩) : MessageData))
   `(doElem| do
     let cls := $(quote id.getId.eraseMacroScopes)
     if (← Lean.isTracingEnabledFor cls) then
@@ -1419,14 +1419,14 @@ It returns `true` if it is a new instance and `false` otherwise.
 -/
 def markTheoremInstance (proof : Expr) (assignment : Array Expr) : GoalM Bool := do
   let k := { proof, assignment }
-  if (← get).ematch.preInstances.contains k then
+  bif (← get).ematch.preInstances.contains k then
     return false
   modify fun s => { s with ematch.preInstances := s.ematch.preInstances.insert k }
   return true
 
 /-- Adds a new fact `prop` with proof `proof` to the queue for preprocessing and the assertion. -/
 def addNewRawFact (proof : Expr) (prop : Expr) (generation : Nat) (splitSource : SplitSource) (ematchDiagSource : EMatchDiagSource) : GoalM Unit := do
-  if (← isDebugEnabled) then
+  bif (← isDebugEnabled) then
     unless (← withGTransparency <| isDefEq (← inferType proof) prop) do
       throwError "`grind` internal error, trying to assert{indentExpr prop}\n\
         with proof{indentExpr proof}\nwhich has type{indentExpr (← inferType proof)}\n\
@@ -1510,7 +1510,7 @@ def isEqBoolFalse (e : Expr) : GoalM Bool := do
 
 /-- Returns `true` if `a` and `b` are in the same equivalence class. -/
 def isEqv (a b : Expr) : GoalM Bool := do
-  if isSameExpr a b then
+  bif isSameExpr a b then
     return true
   else
     let some na ← getENode? a | return false
@@ -1586,13 +1586,13 @@ If `isHEq` is `false`, it pushes `lhs = rhs` with `proof` to `newEqs`.
 Otherwise, it pushes `lhs ≍ rhs`.
 -/
 def pushEqCore (lhs rhs proof : Expr) (isHEq : Bool) : GoalM Unit := do
-  if (← isDebugEnabled) then
+  bif (← isDebugEnabled) then
     unless (← alreadyInternalized lhs) do
       throwError "`grind` internal error, lhs of new equality has not been internalized{indentExpr lhs}"
     unless (← alreadyInternalized rhs) do
       throwError "`grind` internal error, rhs of new equality has not been internalized{indentExpr rhs}"
-    if proof != congrPlaceholderProof && proof != eqCongrSymmPlaceholderProof then
-      let expectedType ← if isHEq then mkHEq lhs rhs else mkEq lhs rhs
+    bif proof != congrPlaceholderProof && proof != eqCongrSymmPlaceholderProof then
+      let expectedType ← bif isHEq then mkHEq lhs rhs else mkEq lhs rhs
       unless (← withGTransparency <| isDefEq (← inferType proof) expectedType) do
         throwError "`grind` internal error, trying to assert equality{indentExpr expectedType}\n\
             with proof{indentExpr proof}\nwhich has type{indentExpr (← inferType proof)}\n\
@@ -1605,7 +1605,7 @@ def hasSameType (a b : Expr) : MetaM Bool := do
   isDefEqD (← inferType a) (← inferType b)
 
 @[inline] def pushEqHEq (lhs rhs proof : Expr) : GoalM Unit := do
-  if (← hasSameType lhs rhs) then
+  bif (← hasSameType lhs rhs) then
     pushEqCore lhs rhs proof (isHEq := false)
   else
     pushEqCore lhs rhs proof (isHEq := true)
@@ -1703,7 +1703,7 @@ Creates an `ENode` for `e` if one does not already exist.
 This method assumes `e` has been hash-consed.
 -/
 def mkENode (e : Expr) (generation : Nat) (funCC : Bool := false) : GoalM Unit := do
-  if (← alreadyInternalized e) then return ()
+  bif (← alreadyInternalized e) then return ()
   let ctor := (← isConstructorAppCore? e).isSome
   let interpreted ← isInterpreted e
   mkENodeCore e interpreted ctor generation funCC
@@ -1727,8 +1727,8 @@ For each equality `b = c` in `parents`, executes `k b c` IF
 @[inline] def forEachDiseq (parents : ParentSet) (k : (lhs : Expr) → (rhs : Expr) → GoalM Unit) : GoalM Unit := do
   for parent in parents.elems do
     let_expr Eq _ b c := parent | continue
-    if (← isEqFalse parent) then
-      if (← isEqv b c) then
+    bif (← isEqFalse parent) then
+      bif (← isEqv b c) then
         /-
         Remark: if `b` and `c` are already in the same equivalence class,
         there is an inconsistency in the TODO queue already, and we can interrupt
@@ -1745,7 +1745,7 @@ def isCongrRoot (e : Expr) : GoalM Bool := do
 /-- Returns the root of the congruence class containing `e`. -/
 partial def getCongrRoot (e : Expr) : GoalM Expr := do
   let n ← getENode e
-  if isSameExpr n.congr e then return e
+  bif isSameExpr n.congr e then return e
   getCongrRoot n.congr
 
 /-- Return `true` if the goal is inconsistent. -/
@@ -1807,7 +1807,7 @@ Returns a proof that `a = b` if they have the same type. Otherwise, returns a pr
 It assumes `a` and `b` are in the same equivalence class.
 -/
 def mkEqHEqProof (a b : Expr) : GoalM Expr := do
-  if (← hasSameType a b) then
+  bif (← hasSameType a b) then
     mkEqProof a b
   else
     mkHEqProof a b
@@ -1852,7 +1852,7 @@ If type of `mvarId` is not `False`, then use `False.elim`.
 -/
 def _root_.Lean.MVarId.assignFalseProof (mvarId : MVarId) (falseProof : Expr) : MetaM Unit := mvarId.withContext do
   let target ← mvarId.getType
-  if target.isFalse then
+  bif target.isFalse then
     /-
     **Note**: We add the marker to assist `getFalseExpr?` used to implement
     non-chronological backtracking. -/
@@ -1898,7 +1898,7 @@ def getExprs : GoalM (PArray Expr) := do
   repeat
     let n ← getENode curr
     f n
-    if isSameExpr n.next e then return ()
+    bif isSameExpr n.next e then return ()
     curr := n.next
 
 /--
@@ -1908,8 +1908,8 @@ Executes `f` to each term in the equivalence class containing `e`, and stops as 
   let mut curr := e
   repeat
     let n ← getENode curr
-    if (← f n) then return true
-    if isSameExpr n.next e then break
+    bif (← f n) then return true
+    bif isSameExpr n.next e then break
     curr := n.next
   return false
 
@@ -1920,7 +1920,7 @@ Executes `f` to each term in the equivalence class containing `e`, and stops as 
   repeat
     let n ← getENode curr
     r ← f n r
-    if isSameExpr n.next e then return r
+    bif isSameExpr n.next e then return r
     curr := n.next
   unreachable!
   return r
@@ -1933,14 +1933,14 @@ def forEachENode (f : ENode → GoalM Unit) : GoalM Unit := do
 def filterENodes (p : ENode → GoalM Bool) : GoalM (Array ENode) := do
   let ref ← IO.mkRef #[]
   forEachENode fun n => do
-    if (← p n) then
+    bif (← p n) then
       ref.modify (·.push n)
   ref.get
 
 def forEachEqcRoot (f : ENode → GoalM Unit) : GoalM Unit := do
   for e in (← getExprs) do
     let n ← getENode e
-    if n.isRoot then
+    bif n.isRoot then
       f n
 
 abbrev Propagator := Expr → GoalM Unit
@@ -1974,18 +1974,18 @@ def evalTactic (goal : Goal) (stx : TSyntax `grind) : GrindM (List Goal) := do
 /-- Returns expressions in the given expression equivalence class. -/
 partial def Goal.getEqc (goal : Goal) (e : Expr) (sort := false) : List Expr :=
   let eqc := go e e #[]
-  if sort then
+  bif sort then
     Array.toList <| eqc.qsort fun e₁ e₂ =>
       let g₁ := goal.getGeneration e₁
       let g₂ := goal.getGeneration e₂
-      if g₁ != g₂ then g₁ < g₂ else e₁.lt e₂
+      bif g₁ != g₂ then g₁ < g₂ else e₁.lt e₂
   else
     eqc.toList
 where
   go (first : Expr) (e : Expr) (acc : Array Expr) : Array Expr := Id.run do
     let some next := goal.getNext? e | acc
     let acc := acc.push e
-    if isSameExpr first next then
+    bif isSameExpr first next then
       return acc
     else
       go first next acc
@@ -1999,11 +1999,11 @@ partial def Goal.getEqcs (goal : Goal) (sort := false) : List (List Expr) := Id.
  let mut r : Array (Nat × Expr × List Expr) := #[]
  for e in goal.exprs do
     let some node := goal.getENode? e | pure ()
-    if node.isRoot then
+    bif node.isRoot then
       let e :: es := goal.getEqc node.self sort | unreachable!
       r := r.push (goal.getGeneration e, e, es)
-  if sort then
-    r := r.qsort fun (g₁, e₁, _) (g₂, e₂, _) => if g₁ != g₂ then g₁ < g₂ else e₁.lt e₂
+  bif sort then
+    r := r.qsort fun (g₁, e₁, _) (g₂, e₂, _) => bif g₁ != g₂ then g₁ < g₂ else e₁.lt e₂
   return r.toList.map fun (_, e, es) => e::es
 
 @[inline, inherit_doc Goal.getEqcs]
@@ -2062,10 +2062,10 @@ where
     | guard :: guards => do
       let { expr := e, .. } ← preprocess guard.e
       internalize e generation
-      if (← isEqTrue e) then
+      bif (← isEqTrue e) then
         go guards
       else
-        if guard.check then
+        bif guard.check then
           addSplitCandidate <| .default e (.guard thm.origin)
         return .next e guards
 
@@ -2076,7 +2076,7 @@ def addTheoremInstance (thm : EMatchTheorem) (proof : Expr) (prop : Expr) (gener
   | .ready =>
     trace_goal[grind.ematch.instance] "{thm.origin.pp}: {prop}"
     saveEMatchTheorem thm
-    let ematchDiagSource ← if (← isEmatchDiagEnabled) then
+    let ematchDiagSource ← bif (← isEmatchDiagEnabled) then
       saveEMatchDiagInfo sources { origin := thm.origin, proof }
       pure (.ematch thm.origin proof)
     else
@@ -2108,7 +2108,7 @@ def getExtTheorems (type : Expr) : GoalM (Array Ext.ExtTheorem) := do
     return thms
   else
     let thms ← Ext.getExtTheorems type
-    let thms ← if (← getConfig).extAll then
+    let thms ← bif (← getConfig).extAll then
       pure thms
     else
       thms.filterM fun thm => isExtTheorem thm.declName
@@ -2249,7 +2249,7 @@ def Solvers.mkInitialStates : IO (Array SolverExtensionState) := do
 
 /-- Returns the ids of the solver extensions that `config` enables. -/
 def Solvers.activeIds (config : Grind.Config) : IO (Array Nat) := do
-  return (← solverExtensionsRef.get).filterMap fun ext => if ext.enabled config then some ext.id else none
+  return (← solverExtensionsRef.get).filterMap fun ext => bif ext.enabled config then some ext.id else none
 
 instance : Inhabited (GoalM σ) where
   default := throwError "<GoalM action default value>"
@@ -2291,11 +2291,11 @@ def Solvers.check? : GoalM (Option (Array Nat)) := do
   let exts ← solverExtensionsRef.get
   let mut result := #[]
   for id in (← readThe Context).activeSolvers do
-    if (← isInconsistent) then
+    bif (← isInconsistent) then
       return some result
-    if (← exts[id]!.check) then
+    bif (← exts[id]!.check) then
       result := result.push id
-  if !result.isEmpty then
+  bif !result.isEmpty then
     processToDo
     return some result
   else
@@ -2309,7 +2309,7 @@ def Solvers.mbtc : GoalM Bool := do
   let exts ← solverExtensionsRef.get
   let mut result := false
   for id in (← readThe Context).activeSolvers do
-    if (← exts[id]!.mbtc) then
+    bif (← exts[id]!.mbtc) then
       result := true
   return result
 
@@ -2343,12 +2343,12 @@ private def findSolverTerm? (id : Nat) (e : Expr) (checkType : Bool) (sTerms : S
   match sTerms with
   | .nil => return none
   | .next id' e' sTerms =>
-    if id == id' then
-      if (← pure !checkType <||> hasSameType e e') then
+    bif id == id' then
+      bif (← pure !checkType <||> hasSameType e e') then
         return some e'
       else
         findSolverTerm? id e checkType sTerms
-    else if id < id' then
+    else bif id <ᵇ id' then
       return none
     else
       findSolverTerm? id e checkType sTerms
@@ -2359,7 +2359,7 @@ Given a new disequality `lhs ≠ rhs`, propagates it to relevant theories.
 def Solvers.propagateDiseqs (lhs rhs : Expr) : GoalM Unit := do
   let lhsRoot ← getRootENode lhs
   let rhsRoot ← getRootENode rhs
-  if lhsRoot.heqProofs || rhsRoot.heqProofs then
+  bif lhsRoot.heqProofs || rhsRoot.heqProofs then
     goHEq lhsRoot rhsRoot none lhsRoot.sTerms
   else
     go lhsRoot.sTerms rhsRoot.sTerms
@@ -2369,10 +2369,10 @@ where
     | .nil, _ => return ()
     | _, .nil => return ()
     | .next id₁ lhs lhsTerms, .next id₂ rhs rhsTerms =>
-      if id₁ == id₂ then
+      bif id₁ == id₂ then
         (← solverExtensionsRef.get)[id₁]!.newDiseq lhs rhs
         go lhsTerms rhsTerms
-      else if id₁ < id₂ then
+      else bif id₁ <ᵇ id₂ then
         go lhsTerms (.next id₂ rhs rhsTerms)
       else
         go (.next id₁ lhs lhsTerms) rhsTerms
@@ -2398,7 +2398,7 @@ If both `lhs` and `rhs` have a term of the solver `id` with their type, runs `k`
 @[specialize]
 private def withSolverTermsOf (id : Nat) (lhs rhs : Expr) (k : Expr → Expr → GoalM Unit) : GoalM Unit := do
   let lhsRoot ← getRootENode lhs
-  if lhsRoot.heqProofs then
+  bif lhsRoot.heqProofs then
     let some lhsTerm ← findSolverTerm? id lhs (checkType := true) lhsRoot.sTerms | return ()
     visitRhs lhsTerm
   else
@@ -2408,16 +2408,16 @@ where
     match sTerms with
     | .nil => return ()
     | .next id' e sTerms =>
-      if id == id' then
+      bif id == id' then
         visitRhs e
-      else if id < id' then
+      else bif id <ᵇ id' then
         return ()
       else
         visitLhs sTerms
 
   visitRhs (lhsTerm : Expr) : GoalM Unit := do
     let rhsRoot ← getRootENode rhs
-    if rhsRoot.heqProofs then
+    bif rhsRoot.heqProofs then
       let some rhsTerm ← findSolverTerm? id rhs (checkType := true) rhsRoot.sTerms | return ()
       k lhsTerm rhsTerm
     else
@@ -2427,9 +2427,9 @@ where
     match sTerms with
     | .nil => return ()
     | .next id' e sTerms =>
-      if id == id' then
+      bif id == id' then
         k lhsTerm e
-      else if id < id' then
+      else bif id <ᵇ id' then
         return ()
       else
         visitRhsTerms lhsTerm sTerms
@@ -2453,7 +2453,7 @@ were added.
 @[inline] private def forEachDiseqOfType (parents : ParentSet) (e : Expr)
     (k : Expr → Expr → GoalM Unit) : GoalM Unit :=
   forEachDiseq parents fun lhs rhs => do
-    if (← hasSameType e lhs) then
+    bif (← hasSameType e lhs) then
       k lhs rhs
 
 /-- Runs the queued `newEq` callback. See `ToProcessElement.solverEq`. -/
@@ -2471,7 +2471,7 @@ def isSameSolverTerms (a b : SolverTerms) : Bool :=
 private def SolverTerms.insert (sTerms : SolverTerms) (id : Nat) (e : Expr) : SolverTerms :=
   match sTerms with
   | .nil => .next id e .nil
-  | .next id' e' sTerms' => if id < id' then .next id e sTerms else .next id' e' (sTerms'.insert id e)
+  | .next id' e' sTerms' => bif id <ᵇ id' then .next id e sTerms else .next id' e' (sTerms'.insert id e)
 
 /--
 Registers `e` as a term of the solver `ext`. If the equivalence class of `e` already has a term
@@ -2488,22 +2488,22 @@ def SolverExtension.markTerm (ext : SolverExtension σ) (e : Expr) : GoalM Unit 
     match sTerms with
     | .nil => return .next id e .nil
     | .next id' e' sTerms' =>
-      if id == id' then
-        if (← pure !root.heqProofs <||> hasSameType e e') then
+      bif id == id' then
+        bif (← pure !root.heqProofs <||> hasSameType e e') then
           modify fun s => { s with toProcess := s.toProcess.push <| .solverEq id e e' }
           return sTerms
         -- `e` and `e'` have different types. Keep searching for a representative with the type of `e`.
-      else if id < id' then
+      else bif id <ᵇ id' then
         return .next id e sTerms
       let sTermsNew ← go sTerms'
-      if isSameSolverTerms sTermsNew sTerms' then
+      bif isSameSolverTerms sTermsNew sTerms' then
         return sTerms
       else
         return .next id' e' sTermsNew
   let sTermsNew ← go root.sTerms
   unless isSameSolverTerms sTermsNew root.sTerms do
     setENode root.self { root with sTerms := sTermsNew }
-    if root.heqProofs then
+    bif root.heqProofs then
       forEachDiseqOfType (← getParents root.self) e (pushSolverDiseqOf id)
     else
       forEachDiseq (← getParents root.self) (pushSolverDiseqOf id)
@@ -2518,7 +2518,7 @@ def SolverExtension.getTerm (ext : SolverExtension σ) (e : ENode) : Option Expr
 where
   go (solverId : Nat) : SolverTerms → Option Expr
     | .nil => none
-    | .next id t rest => if id == solverId then some t else go solverId rest
+    | .next id t rest => bif id == solverId then some t else go solverId rest
 
 /--
 Returns `true` if the root of `e`s equivalence class is already attached to a term
@@ -2549,7 +2549,7 @@ Merges the solver terms of `lhsRoot` into `rhsRoot`, the root of the merged clas
 `heqProofs := true` if the merged class contains heterogeneous equalities.
 -/
 def Solvers.mergeTerms (rhsRoot lhsRoot : ENode) (heqProofs : Bool) : GoalM PendingSolverPropagations := do
-  let (sTerms, data) ← if heqProofs then goHEq else go rhsRoot.sTerms lhsRoot.sTerms
+  let (sTerms, data) ← bif heqProofs then goHEq else go rhsRoot.sTerms lhsRoot.sTerms
   unless sTerms matches .nil do
     -- We have to retrieve the node because other fields have been updated
     let rhsRoot ← getENode rhsRoot.self
@@ -2567,10 +2567,10 @@ where
     | .nil,     .next .. => return (lhsTerms, toPendingDiseqs lhsTerms (← getParents rhsRoot.self))
     | .next .., .nil     => return (rhsTerms, toPendingDiseqs rhsTerms (← getParents lhsRoot.self))
     | .next id₁ rhs rhsTerms, .next id₂ lhs lhsTerms =>
-      if id₁ == id₂ then
+      bif id₁ == id₂ then
         let (s, p) ← go rhsTerms lhsTerms
         return (.next id₁ rhs s, .eq id₁ lhs rhs p)
-      else if id₁ < id₂ then
+      else bif id₁ <ᵇ id₂ then
         let (s, p) ← go rhsTerms (.next id₂ lhs lhsTerms)
         return (.next id₁ rhs s, .diseqs id₁ (← getParents lhsRoot.self) p)
       else
@@ -2600,7 +2600,7 @@ where
     match rhsTerms with
     | .nil => return p
     | .next id rhs rhsTerms =>
-      if (← findSolverTerm? id rhs (checkType := true) lhsRoot.sTerms).isSome then
+      bif (← findSolverTerm? id rhs (checkType := true) lhsRoot.sTerms).isSome then
         goHEqRhs rhsTerms p
       else
         goHEqRhs rhsTerms (.diseqsOfType id rhs (← getParents lhsRoot.self) p)
@@ -2643,7 +2643,7 @@ Recall that in tactics such as `instantiate only [...]`, `match`-declarations ar
 -/
 def Goal.getActiveMatchEqTheorems (goal : Goal) : CoreM (Array EMatchTheorem) := do
   let k (thms : Array EMatchTheorem) (thm : EMatchTheorem) : CoreM (Array EMatchTheorem) := do
-    if (← isMatchEqLikeDeclName thm.origin.key) then
+    bif (← isMatchEqLikeDeclName thm.origin.key) then
       return thms.push thm
     else
       return thms

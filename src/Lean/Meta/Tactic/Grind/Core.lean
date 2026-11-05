@@ -53,7 +53,7 @@ private def removeParents (root : Expr) : GoalM ParentSet := do
   let parents ← getParents root
   for parent in parents.elems do
     -- Recall that we may have `Expr.forallE` in `parents` because of `ForallProp.lean`
-    if (← pure (isCongrRelevant parent) <&&> isCongrRoot parent) then
+    bif (← pure (isCongrRelevant parent) <&&> isCongrRoot parent) then
       trace_goal[grind.debug.parent] "remove: {parent}"
       modify fun s => { s with congrTable := s.congrTable.erase { e := parent } }
   return parents
@@ -64,7 +64,7 @@ This is an auxiliary function performed while merging equivalence classes.
 -/
 private def reinsertParents (parents : ParentSet) : GoalM Unit := do
   for parent in parents.elems do
-    if (← pure (isCongrRelevant parent) <&&> isCongrRoot parent) then
+    bif (← pure (isCongrRelevant parent) <&&> isCongrRoot parent) then
       trace_goal[grind.debug.parent] "reinsert: {parent}"
       addCongrTable parent
 
@@ -96,7 +96,7 @@ private partial def updateMT (root : Expr) : GoalM Unit := do
   let gmt := (← get).ematch.gmt
   for parent in (← getParents root).elems do
     let node ← getENode parent
-    if node.mt < gmt then
+    bif node.mt <ᵇ gmt then
       setENode parent { node with mt := gmt }
       updateMT parent
 
@@ -105,7 +105,7 @@ Tries to apply beta-reduction using the parent applications of the functions in 
 the lambda expressions in `lams`.
 -/
 def propagateBeta (lams : Array Expr) (fns : Array Expr) : GoalM Unit := do
-  if lams.isEmpty then return ()
+  bif lams.isEmpty then return ()
   let lamRoot ← getRoot lams.back!
   trace_goal[grind.debug.beta] "fns: {fns}, lams: {lams}"
   for fn in fns do
@@ -116,7 +116,7 @@ def propagateBeta (lams : Array Expr) (fns : Array Expr) : GoalM Unit := do
       trace_goal[grind.debug.beta] "parent: {parent}"
       repeat
         trace_goal[grind.debug.beta] "curr: {curr}"
-        if (← isEqv curr lamRoot) then
+        bif (← isEqv curr lamRoot) then
           propagateBetaEqs lams curr args.reverse
         let .app f arg := curr
           | break
@@ -135,7 +135,7 @@ private def getFunWithGivenDomain? (lams : Array Expr) (d : Expr) : Option Expr 
     | _ => false
 
 private def propagateUnitConstFuns (lams₁ lams₂ : Array Expr) : GoalM Unit := do
-  if lams₁.isEmpty || lams₂.isEmpty then return ()
+  bif lams₁.isEmpty || lams₂.isEmpty then return ()
   for lam₁ in lams₁ do
     -- Remark: we have heterogeneous equivalence classes. So, we may have functions
     -- with different domains in the same equivalence class.
@@ -143,12 +143,12 @@ private def propagateUnitConstFuns (lams₁ lams₂ : Array Expr) : GoalM Unit :
     let u ← getLevel d₁
     let inh := mkApp (mkConst ``Inhabited [u]) d₁
     let some inhInst ← synthInstance? inh | pure ()
-    let isTarget ← if !b₁.hasLooseBVars then
+    let isTarget ← bif !b₁.hasLooseBVars then
       pure true
     else
       let sub := mkApp (mkConst ``Subsingleton [u]) d₁
       pure (← synthInstance? sub).isSome
-    if isTarget then
+    bif isTarget then
       let some lam₂ := getFunWithGivenDomain? lams₂ d₁ | pure ()
       let .lam _ _ b₂ _ := lam₂ | pure ()
       let val ← preprocessLight <| mkApp2 (mkConst ``default [u]) d₁ inhInst
@@ -160,7 +160,7 @@ private def propagateUnitConstFuns (lams₁ lams₂ : Array Expr) : GoalM Unit :
 private partial def addEqStep (lhs rhs proof : Expr) (isHEq : Bool) : GoalM Unit := do
   let lhsNode ← getENode lhs
   let rhsNode ← getENode rhs
-  if isSameExpr lhsNode.root rhsNode.root then
+  bif isSameExpr lhsNode.root rhsNode.root then
     -- `lhs` and `rhs` are already in the same equivalence class.
     trace_goal[grind.debug] "{← ppENodeRef lhs} and {← ppENodeRef rhs} are already in the same equivalence class"
     return ()
@@ -169,28 +169,28 @@ private partial def addEqStep (lhs rhs proof : Expr) (isHEq : Bool) : GoalM Unit
   let rhsRoot ← getENode rhsNode.root
   let mut valueInconsistency := false
   let mut trueEqFalse := false
-  if lhsRoot.interpreted && rhsRoot.interpreted then
-    if lhsNode.root.isTrue || rhsNode.root.isTrue then
+  bif lhsRoot.interpreted && rhsRoot.interpreted then
+    bif lhsNode.root.isTrue || rhsNode.root.isTrue then
       markAsInconsistent
       trueEqFalse := true
     else
       let hasHEq := isHEq || lhsRoot.heqProofs || rhsRoot.heqProofs
       -- **Note**: We only have to check the types if there are heterogeneous equalities.
-      if (← pure !hasHEq <||> hasSameType lhsRoot.self rhsRoot.self) then
+      bif (← pure !hasHEq <||> hasSameType lhsRoot.self rhsRoot.self) then
         valueInconsistency := true
-  if    (lhsRoot.interpreted && !rhsRoot.interpreted)
+  bif    (lhsRoot.interpreted && !rhsRoot.interpreted)
      || (lhsRoot.ctor && !rhsRoot.ctor)
-     || (lhsRoot.size > rhsRoot.size && !rhsRoot.interpreted && !rhsRoot.ctor) then
+     || (lhsRoot.size >ᵇ rhsRoot.size && !rhsRoot.interpreted && !rhsRoot.ctor) then
     go rhs lhs rhsNode lhsNode rhsRoot lhsRoot true
   else
     go lhs rhs lhsNode rhsNode lhsRoot rhsRoot false
-  if trueEqFalse then
+  bif trueEqFalse then
     closeGoalWithTrueEqFalse
   unless (← isInconsistent) do
-    if lhsRoot.ctor && rhsRoot.ctor then
+    bif lhsRoot.ctor && rhsRoot.ctor then
       propagateCtor lhsRoot.self rhsRoot.self
   unless (← isInconsistent) do
-    if valueInconsistency then
+    bif valueInconsistency then
       closeGoalWithValuesEq lhsRoot.self rhsRoot.self
   trace_goal[grind.debug] "after addEqStep, {← (← get).ppState}"
   checkInvariants
@@ -213,8 +213,8 @@ where
     }
     let lams₁ ← getEqcLambdas lhsRoot
     let lams₂ ← getEqcLambdas rhsRoot
-    let fns₁  ← if lams₁.isEmpty then pure #[] else getFnRoots rhsRoot.self
-    let fns₂  ← if lams₂.isEmpty then pure #[] else getFnRoots lhsRoot.self
+    let fns₁  ← bif lams₁.isEmpty then pure #[] else getFnRoots rhsRoot.self
+    let fns₂  ← bif lams₂.isEmpty then pure #[] else getFnRoots lhsRoot.self
     let parents ← removeParents lhsRoot.self
     updateRoots lhs rhsNode.root
     trace_goal[grind.debug] "{← ppENodeRef lhs} new root {← ppENodeRef rhsNode.root}, {← ppENodeRef (← getRoot lhs)}"
@@ -253,11 +253,11 @@ where
         propagateDown e
       propagateUnitConstFuns lams₁ lams₂
       toPropagateSolvers.propagate
-      if rhsNode.root.isTrue then
+      bif rhsNode.root.isTrue then
         checkDelayedThmInsts toPropagateDown
   checkDelayedThmInsts (toPropagateDown : List Expr) : GoalM Unit := do
-    if (← isInconsistent) then return ()
-    if (← get).ematch.delayedThmInsts.isEmpty then return ()
+    bif (← isInconsistent) then return ()
+    bif (← get).ematch.delayedThmInsts.isEmpty then return ()
     for e in toPropagateDown do
       let some delayedThms := (← get).ematch.delayedThmInsts.find? { expr := e } | pure ()
       modify fun s => { s with ematch.delayedThmInsts := s.ematch.delayedThmInsts.erase { expr := e } }
@@ -276,7 +276,7 @@ where
       it is in the `toProcess` todo array.
       A similar swap is performed at `addCongrTable`.
       -/
-      if isFalseRoot && n.self.isAppOfArity ``Eq 3 && !n.isCongrRoot then
+      bif isFalseRoot && n.self.isAppOfArity ``Eq 3 && !n.isCongrRoot then
         if let some { e } := (← get).congrTable.find? { e := n.self } then
         -- If the current congruence root is already `False`, we don't need to swap
         unless (← isFalseExpr e) do
@@ -292,7 +292,7 @@ private def resetToProcess : GoalM Unit :=
 /-- Pops and returns the next element to be processed. -/
 private def popToProcess? : GoalM (Option ToProcessElement) := do
   let r := (← get).toProcess.back?
-  if r.isSome then
+  bif r.isSome then
     modify fun s => { s with toProcess := s.toProcess.pop }
   return r
 
@@ -330,7 +330,7 @@ where
   go (p : Expr) (isNeg : Bool) : GoalM Unit := do
     match_expr p with
     | Eq α lhs rhs =>
-      if α.isProp then
+      bif α.isProp then
         -- It is morally an iff.
         -- We do not use the `goEq` optimization because we want to register `p` as a case-split
         goFact p isNeg
@@ -341,13 +341,13 @@ where
 
   goFact (p : Expr) (isNeg : Bool) : GoalM Unit := do
     internalize p generation
-    if isNeg then
+    bif isNeg then
       addEq p (← getFalseExpr) (← mkEqFalse proof)
     else
       addEq p (← getTrueExpr) (← mkEqTrue proof)
 
   goEq (p : Expr) (lhs rhs : Expr) (isNeg : Bool) (isHEq : Bool) : GoalM Unit := do
-    if isNeg then
+    bif isNeg then
       internalize p generation
       addEq p (← getFalseExpr) (← mkEqFalse proof)
     else
@@ -371,7 +371,7 @@ set_option compiler.ignoreBorrowAnnotation true in
 @[export lean_grind_process_to_do]
 private def processToDoImpl : GoalM Unit := do
   repeat
-    if (← isInconsistent) then
+    bif (← isInconsistent) then
       resetToProcess
       return ()
     checkSystem "grind"
@@ -385,11 +385,11 @@ private def processToDoImpl : GoalM Unit := do
 
 /-- Adds a new `fact` justified by the given proof and using the given generation. -/
 def add (fact : Expr) (proof : Expr) (generation := 0) : GoalM Unit := do
-  if fact.isTrue then return ()
-  if (← isInconsistent) then return ()
+  bif fact.isTrue then return ()
+  bif (← isInconsistent) then return ()
   -- Work queued since the last drain, e.g. by internalizing patterns of activated theorems.
   processToDo
-  if (← isInconsistent) then return ()
+  bif (← isInconsistent) then return ()
   addFactStep fact proof generation
 
 /-- Adds a new hypothesis. -/

@@ -19,7 +19,7 @@ Throws an exception if target of the given goal contains metavariables.
 -/
 def _root_.Lean.MVarId.ensureNoMVar (mvarId : MVarId) : MetaM Unit := do
   let type ← instantiateMVars (← mvarId.getType)
-  if type.hasExprMVar then
+  bif type.hasExprMVar then
     throwTacticEx `grind mvarId "goal contains metavariables"
 
 /--
@@ -74,7 +74,7 @@ If the target is not `False`, applies `byContradiction`.
 def _root_.Lean.MVarId.byContra? (mvarId : MVarId) : MetaM (Option MVarId) := mvarId.withContext do
   mvarId.checkNotAssigned `grind.by_contra
   let target ← mvarId.getType
-  if target.isFalse then return none
+  bif target.isFalse then return none
   let targetNew ← mkArrow (mkNot target) (mkConst ``False)
   let tag ← mvarId.getTag
   let mvarNew ← mkFreshExprSyntheticOpaqueMVar targetNew tag
@@ -91,9 +91,9 @@ def _root_.Lean.MVarId.clearImplDetails (mvarId : MVarId) : MetaM MVarId := mvar
   mvarId.checkNotAssigned `grind.clear_aux_decls
   let mut toClear := []
   for localDecl in (← getLCtx) do
-    if localDecl.isImplementationDetail then
+    bif localDecl.isImplementationDetail then
       toClear := localDecl.fvarId :: toClear
-  if toClear.isEmpty then
+  bif toClear.isEmpty then
     return mvarId
   let mut mvarId := mvarId
   for fvarId in toClear do
@@ -101,7 +101,7 @@ def _root_.Lean.MVarId.clearImplDetails (mvarId : MVarId) : MetaM MVarId := mvar
       mvarId ← mvarId.clear fvarId
     catch _ =>
       let decl ← fvarId.getDecl
-      if decl.isAuxDecl then
+      bif decl.isAuxDecl then
         let userName := decl.userName
         throwTacticEx `grind mvarId m!"the goal mentions the declaration `{userName}`, which is being defined. To avoid circular reasoning, try rewriting the goal to eliminate `{userName}` before using `grind`."
   return mvarId
@@ -114,7 +114,7 @@ Recall that we still have to process `Expr.forallE` because of `ForallProp.lean`
 Moreover, we may not want to reduce `p → q` to `¬p ∨ q` when `(p q : Prop)`.
 -/
 def eraseIrrelevantMData (e : Expr) : CoreM Expr := do
-  if Option.isNone <| e.find? fun e => e.isMData then return e
+  bif Option.isNone <| e.find? fun e => e.isMData then return e
   let pre (e : Expr) := do
     match e with
     | .letE .. | .lam .. => return .done e
@@ -178,7 +178,7 @@ Recall that `Grind.PreMatchCond` uses default reducibility setting, but
 `Grind.MatchCond` does not.
 -/
 def replacePreMatchCond (e : Expr) : MetaM Simp.Result := do
-  if e.find? isPreMatchCond |>.isNone then
+  bif e.find? isPreMatchCond |>.isNone then
     return { expr := e }
   else
     let pre (e : Expr) := do
@@ -196,9 +196,9 @@ def isDIte (e : Expr) :=
   (e.isAppOf ``dite || e.isAppOf ``UDecidable.dite) && e.getAppNumArgs >= 5
 
 def getBinOp (e : Expr) : Option Expr :=
-  if !e.isApp then none else
+  bif !e.isApp then none else
   let f := e.appFn!
-  if !f.isApp then none else
+  bif !f.isApp then none else
   some f.appFn!
 
 end Lean.Meta.Grind

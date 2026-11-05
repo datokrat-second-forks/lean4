@@ -14,7 +14,7 @@ partial def cleanupDenominators' (c : α)
     (updateCnstr : α → CommRing.Poly → Int → Var → Nat → α)
     : LinearM α := do
   let s ← getStruct
-  if s.fieldInst?.isNone then return c
+  bif s.fieldInst?.isNone then return c
   let some (_, char) := s.charInst? | return c
   unless char == 0 do return c
   withRingM <| go c
@@ -35,7 +35,7 @@ public def RingEqCnstr.cleanupDenominators (c : RingEqCnstr) : LinearM RingEqCns
 
 public def RingDiseqCnstr.cleanupDenominators (c : RingDiseqCnstr) : LinearM RingDiseqCnstr := do
   let s ← getStruct
-  if s.noNatDivInst?.isNone then return c
+  bif s.noNatDivInst?.isNone then return c
   cleanupDenominators' c (·.p) fun c p val x n => { c with p, h := .cancelDen c val x n }
 
 end Lean.Meta.Grind.Arith.Linear

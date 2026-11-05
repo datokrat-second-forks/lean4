@@ -54,7 +54,7 @@ conditions corresponding to overlapping patterns.
 private def addMatchCondsToAlt (alt : Expr) : Expr := Id.run do
   let .forallE _ d b _ := alt
     | return alt
-  let d := if isMatchCondCandidate d then markAsPreMatchCond d else d
+  let d := bif isMatchCondCandidate d then markAsPreMatchCond d else d
   return alt.updateForallE! d (addMatchCondsToAlt b)
 
 /--
@@ -62,7 +62,7 @@ Annotates the `match`-expression conditions in the alternatives in the given
 `match` splitter type.
 -/
 private def addMatchCondsToSplitter (splitterType : Expr) (numAlts : Nat) : Expr := Id.run do
-  if numAlts == 0 then return splitterType
+  bif numAlts == 0 then return splitterType
   let .forallE _ alt b _ := splitterType
     | return splitterType
   return splitterType.updateForallE! (addMatchCondsToAlt alt) (addMatchCondsToSplitter b (numAlts-1))
@@ -102,7 +102,7 @@ where
 
   updateTags (mvars : Array Expr) : MetaM Unit := do
     let tag ← mvarId.getTag
-    if mvars.size == 1 then
+    bif mvars.size == 1 then
       mvars[0]!.mvarId!.setTag tag
     else
       let mut idx := 1

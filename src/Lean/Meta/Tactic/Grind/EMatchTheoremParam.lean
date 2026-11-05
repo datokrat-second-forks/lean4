@@ -21,7 +21,7 @@ where
     let mut found := found
     let mut result := result
     for thm in thms do
-      if !thm.origin matches .decl _ then
+      bif !thm.origin matches .decl _ then
       unless found.contains thm.origin do
         found := found.insert thm.origin
         let type ← inferType thm.proof

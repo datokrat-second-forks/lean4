@@ -49,8 +49,8 @@ def mkNormSymMethods (config : Grind.Config) (thms : NormSymTheorems) : Sym.Simp
   let d : Discharger := Sym.Simp.dischargeSimpSelf
   let mut pre : Simproc := NormSym.eraseMData >> NormSym.preMatchCond >> NormSym.simpMatchDiscrsOnly
     >> Sym.Simp.beta >> NormSym.etaReduce >> Sym.Simp.reduceProj >> Sym.Simp.reduceControl >> Sym.Simp.simpExistsPropDomain
-  if config.zeta then pre := pre >> Sym.Simp.zeta
-  if config.zetaDelta then pre := pre >> Sym.Simp.zetaDeltaAll
+  bif config.zeta then pre := pre >> Sym.Simp.zeta
+  bif config.zetaDelta then pre := pre >> Sym.Simp.zetaDeltaAll
   pre := pre >> NormSym.pushNot >> Sym.Simp.simpArith d (lhsOnly := true) (distrib := config.distrib) (maxChar? := some config.maxChar) >> thms.pre.rewrite d
   -- `grind` keeps bit-vector literals in `OfNat.ofNat` form.
   let post : Simproc := thms.post.rewrite d >> Sym.Simp.evalGround { bitVecOfNat := false } >> Sym.Simp.simpNatRel
@@ -61,8 +61,8 @@ def mkNormSymMethods (config : Grind.Config) (thms : NormSymTheorems) : Sym.Simp
 /-- `Sym.dsimp` methods approximating the legacy `grind` `dsimp` step (`dsimpCore`). -/
 def mkNormSymDSimpMethods (config : Grind.Config) (thms : NormSymTheorems) : Sym.DSimp.Methods := Id.run do
   let mut pre : Sym.DSimp.DSimproc := Sym.DSimp.beta >> Sym.DSimp.dsimpProj >> Sym.DSimp.dsimpMatch
-  if config.zeta then pre := pre >> Sym.DSimp.zeta
-  if config.zetaDelta then pre := pre >> Sym.DSimp.zetaDeltaAll
+  bif config.zeta then pre := pre >> Sym.DSimp.zeta
+  bif config.zetaDelta then pre := pre >> Sym.DSimp.zetaDeltaAll
   let post : Sym.DSimp.DSimproc := thms.dsimp.toDSimproc >> Sym.DSimp.evalGround
   return { pre, post }
 

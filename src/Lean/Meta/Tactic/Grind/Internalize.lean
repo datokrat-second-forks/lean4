@@ -25,20 +25,20 @@ Returns `true` if we can generate a congruence proof for `e₁ = e₂`.
 See paper: Congruence Closure in Intensional Type Theory for additional details.
 -/
 private def isCongruentCheck (e₁ e₂ : Expr) : GoalM Bool := do
-  if (← useFunCC e₁) then
+  bif (← useFunCC e₁) then
     go e₁ e₂
   else
     /- Using first-order approximation. -/
     let f := e₁.getAppFn
     let g := e₂.getAppFn
-    if isSameExpr f g then return true
+    bif isSameExpr f g then return true
     hasSameType f g
 where
   go (e₁ e₂ : Expr) : GoalM Bool := do
     let .app f _ := e₁ | return false
     let .app g _ := e₂ | return false
-    if isSameExpr f g then return true
-    if (← hasSameType f g) then return true
+    bif isSameExpr f g then return true
+    bif (← hasSameType f g) then return true
     go f g
 
 /-- Adds `e` to congruence table. -/
@@ -48,17 +48,17 @@ def addCongrTable (e : Expr) : GoalM Unit := do
     See paper: Congruence Closure in Intensional Type Theory
     **Note**: We do **not** implement the expensive quadratic case used in the paper.
     -/
-    if e.isApp then
+    bif e.isApp then
       unless (← isCongruentCheck e e') do
         reportIssue! "found congruence between{indentExpr e}\nand{indentExpr e'}\nbut functions have different types"
         return ()
     trace_goal[grind.debug.congr] "{e} = {e'}"
-    if (← isEqCongrSymm e e') then
+    bif (← isEqCongrSymm e e') then
       -- **Note**: See comment at `eqCongrSymmPlaceholderProof`
       pushEqHEq e e' eqCongrSymmPlaceholderProof
     else
       pushEqHEq e e' congrPlaceholderProof
-    if (← swapCgrRepr e e') then
+    bif (← swapCgrRepr e e') then
       /-
       Recall that `isDiseq` and `mkDiseqProof?` are implemented using the congruence table.
       So, if `e` is an equality `a = b`, and is the equivalence class of `False`, but `e'` is not,
@@ -89,7 +89,7 @@ where
     return !(← isEqFalse e')
 
 def updateIndicesFound (k : HeadIndex) : GoalM Unit := do
-  if (← get).indicesFound.contains k then return ()
+  bif (← get).indicesFound.contains k then return ()
   modify fun s => { s with indicesFound := s.indicesFound.insert k }
 
 /--
@@ -125,14 +125,14 @@ private def addDefaultSplitCandidate (e : Expr) : GoalM Unit := do
 private def checkAndAddSplitCandidate (e : Expr) : GoalM Unit := do
   match h : e with
   | .app .. =>
-    if (← getConfig).splitIte && (isIte e || isDIte e) then
+    bif (← getConfig).splitIte && (isIte e || isDIte e) then
       addDefaultSplitCandidate e
       return ()
-    if isMorallyIff e then
+    bif isMorallyIff e then
       addDefaultSplitCandidate e
       return ()
-    if (← getConfig).splitMatch then
-      if (← isMatcherApp e) then
+    bif (← getConfig).splitMatch then
+      bif (← isMatcherApp e) then
         if let .reduced _ ← reduceMatcher? e then
           -- When instantiating `match`-equations, we add `match`-applications that can be reduced,
           -- and consequently don't need to be split.
@@ -141,31 +141,31 @@ private def checkAndAddSplitCandidate (e : Expr) : GoalM Unit := do
           addDefaultSplitCandidate e
           return ()
     let .const declName _  := e.getAppFn | return ()
-      if forbiddenSplitTypes.contains declName then
+      bif forbiddenSplitTypes.contains declName then
         return ()
       unless (← isInductivePredicate declName) do
         return ()
-      if (← isSplit declName) then
+      bif (← isSplit declName) then
         addDefaultSplitCandidate e
-      else if (← getConfig).splitIndPred then
+      else bif (← getConfig).splitIndPred then
         addDefaultSplitCandidate e
   | .fvar .. =>
     let .const declName _ := (← whnf (← inferType e)).getAppFn | return ()
-    if (← isSplit declName) then
+    bif (← isSplit declName) then
       addDefaultSplitCandidate e
   | .forallE _ d _ _ =>
     let currSplitSource := (← readThe Context).splitSource
-    if (← getConfig).splitImp then
-      if (← isProp d) then
+    bif (← getConfig).splitImp then
+      bif (← isProp d) then
         addSplitCandidate (.imp e (h ▸ rfl) currSplitSource)
-    else if (← Arith.isRelevantPred d) then
+    else bif (← Arith.isRelevantPred d) then
       -- TODO: should we keep lookahead after we implement non-chronological backtracking?
-      if (← getConfig).lookahead then
+      bif (← getConfig).lookahead then
         addLookaheadCandidate (.imp e (h ▸ rfl) currSplitSource)
       -- We used to add the `split` only if `lookahead := false`, but it was counterintuitive
       -- to make `grind` "stronger" by disabling a feature.
       addSplitCandidate (.imp e (h ▸ rfl) currSplitSource)
-    else if d.isForall && d.bindingBody!.hasLooseBVars && (← isProp d) then
+    else bif d.isForall && d.bindingBody!.hasLooseBVars && (← isProp d) then
       -- `grind` has few propagation rules for assigning `True` to a universal quantifier.
       addSplitCandidate (.imp e (h ▸ rfl) currSplitSource)
   | _ => pure ()
@@ -212,11 +212,11 @@ private partial def internalizePattern (pattern : Expr) (generation : Nat) (orig
   go (← Sym.shareCommonWithoutChecks pattern)
 where
   go (pattern : Expr) : GoalM Expr := do
-    if pattern.isBVar || isPatternDontCare pattern then
+    bif pattern.isBVar || isPatternDontCare pattern then
       return pattern
     else if let some e := groundPattern? pattern then
       let e ← preprocessLight e
-      let e ← if e.hasLevelParam && origin matches .decl _ then
+      let e ← bif e.hasLevelParam && origin matches .decl _ then
         /-
         If `e` has universe parameters and it is **not** local. That is,
         it contains the universe parameters of some global theorem.
@@ -263,8 +263,8 @@ where
   internalizeSimpleMatchCondImp : GoalM Unit := do
     let_expr Grind.MatchCond e := matchCond | return ()
     let .forallE _ d b _ := e | return ()
-    if b.hasLooseBVars then return ()
-    if (← isProp d) then
+    bif b.hasLooseBVars then return ()
+    bif (← isProp d) then
       internalize e generation
     pushEq matchCond e (← mkEqRefl matchCond)
 
@@ -284,10 +284,10 @@ If `Config.matchEqs` is set to `true`, and `f` is `match`-auxiliary function,
 adds its equations to `newThms`.
 -/
 private def addMatchEqns (f : Expr) (generation : Nat) : GoalM Unit := do
-  if !(← getConfig).matchEqs then return ()
+  bif !(← getConfig).matchEqs then return ()
   let .const declName _ := f | return ()
-  if !(← isMatcher declName) then return ()
-  if (← get).ematch.matchEqNames.contains declName then return ()
+  bif !(← isMatcher declName) then return ()
+  bif (← get).ematch.matchEqNames.contains declName then return ()
   modify fun s => { s with ematch.matchEqNames := s.ematch.matchEqNames.insert declName }
   -- for eqn in (← Match.getEquationsFor declName).eqnNames do
   for eqn in (← Match.genMatchCongrEqns declName) do
@@ -333,7 +333,7 @@ private def mkEMatchTheoremWithKind'? (origin : Origin) (levelParams : Array Nam
 
 def activateInjectiveTheorem (injThm : InjectiveTheorem) (generation : Nat) : GoalM Unit := do
   let type ← inferType injThm.proof
-  if type.isForall then
+  bif type.isForall then
     let symPrios ← getSymbolPriorities
     let thm? ← mkEMatchTheoremWithKind'? injThm.origin injThm.levelParams injThm.proof .fwd symPrios
       <||>
@@ -344,7 +344,7 @@ def activateInjectiveTheorem (injThm : InjectiveTheorem) (generation : Nat) : Go
     addNewRawFact injThm.proof type generation (.inj injThm.origin) .other
 
 private def activateInjectiveTheorems (declName : Name) (generation : Nat) : GoalM Unit := do
-  if (← getConfig).inj then
+  bif (← getConfig).inj then
     activateTheoremsCore declName (return (← get).inj.thms)
       (fun thms => modify fun s => { s with inj.thms := thms })
       (fun thm => modify fun s => { s with inj.thms := s.inj.thms.insert thm })
@@ -393,12 +393,12 @@ private def propagateEtaStruct (a : Expr) (generation : Nat) : GoalM Unit := do
   matchConstNonRecStructure aType.getAppFn (fun _ => return ()) fun inductVal us ctorVal => do
     unless a.isAppOf ctorVal.name do
       -- TODO: remove ctorVal.numFields after update stage0
-      if (← isExtTheorem inductVal.name) || ctorVal.numFields == 0 then
+      bif (← isExtTheorem inductVal.name) || ctorVal.numFields == 0 then
         let params := aType.getAppArgs[*...inductVal.numParams]
         let mut ctorApp := mkAppN (mkConst ctorVal.name us) params
         for j in *...ctorVal.numFields do
           let mut proj ← mkProjFn ctorVal us params j a
-          if (← isProof proj) then
+          bif (← isProof proj) then
             proj ← markProof proj
           ctorApp := mkApp ctorApp proj
         ctorApp ← preprocessLight ctorApp
@@ -433,28 +433,28 @@ private def addSplitCandidatesForExt (arg : Expr) (generation : Nat) (parent? : 
   unless parent.isApp do return ()
   let f := parent.getAppFn
   if let .const declName _ := f then
-    if extParentsToIgnore declName then return ()
+    bif extParentsToIgnore declName then return ()
   let type ← inferType arg
   -- Remark: we currently do not perform function extensionality on functions that produce a type that is not a proposition.
   -- We may add an option to enable that in the future.
   let u? ← typeFormerTypeLevel type
-  if u? != .none && u? != some .zero then return ()
+  bif u? != .none && u? != some .zero then return ()
   let mut i  := parent.getAppNumArgs
   let mut it := parent
   repeat
-    if !it.isApp then return ()
+    bif !it.isApp then return ()
     i := i - 1
-    if isSameExpr arg it.appArg! then
+    bif isSameExpr arg it.appArg! then
       found f i type parent
     it := it.appFn!
 where
   found (f : Expr) (i : Nat) (type : Expr) (parent : Expr) : GoalM Unit := do
     let others := (← get).split.argsAt.find? (f, i) |>.getD []
     -- `arg` is recorded once per `(f, i)`. Its candidates were created when it was first found there.
-    if others.any fun other => isSameExpr arg other.arg then return ()
+    bif others.any fun other => isSameExpr arg other.arg then return ()
     trace_goal[grind.debug.ext] "{f}, {i}, {arg}"
     for other in others do
-      if (← isDefEqD type other.type) then
+      bif (← isDefEqD type other.type) then
         let eq := mkApp3 (mkConst ``Eq [← getLevel type]) type arg other.arg
         let eq ← shareCommon eq
         internalize eq generation
@@ -479,7 +479,7 @@ If successful, pushes a new equality between the two terms.
 -/
 private def tryEta (e : Expr) (generation : Nat) : GoalM Unit := do
   let e' := e.eta
-  if e != e' then
+  bif e != e' then
     let e' ← shareCommon e'
     internalize e' generation
     pushEq e e' (← mkEqRefl e)
@@ -488,13 +488,13 @@ private def tryEta (e : Expr) (generation : Nat) : GoalM Unit := do
 Returns `true` if we should use `funCC` for applications of the given constant symbol.
 -/
 private def useFunCongrAtDecl (declName : Name) : GrindM Bool := do
-  if (← hasFunCCModifier declName) then
+  bif (← hasFunCCModifier declName) then
     return true
-  if (← isInstanceReducible declName) then
+  bif (← isInstanceReducible declName) then
     /- **Note**: Instances are support elements. No `funCC` -/
     return false
   if let some projInfo ← getProjectionFnInfo? declName then
-    if projInfo.fromClass then
+    bif projInfo.fromClass then
       /- **Note**: Field of a class are treated as support elements. No `funCC`. -/
       return false
     /- **Note**: Check the type of the field. If it is a function type, use `funCC` -/
@@ -530,11 +530,11 @@ private def getLitKind (e : Expr) : MetaM LitKind := do
   | OfNat.ofNat type n _ =>
     unless n.consumeMData.isRawNatLit do return .notLit
     match_expr type with
-    | BitVec w => return if (← isNatValue (← whnfD w)) then .ofNatFinBitVec else .notLit
-    | Fin k => return if (← isNonZeroNatValue (← whnfD k)) then .ofNatFinBitVec else .notLit
+    | BitVec w => return bif (← isNatValue (← whnfD w)) then .ofNatFinBitVec else .notLit
+    | Fin k => return bif (← isNonZeroNatValue (← whnfD k)) then .ofNatFinBitVec else .notLit
     | _ =>
       let .const declName _ := (← whnfD type).getAppFn | return .notLit
-      if declName == ``Nat || declName == ``Int
+      bif declName == ``Nat || declName == ``Int
           || declName == ``UInt8 || declName == ``UInt16 || declName == ``UInt32 || declName == ``UInt64
           || declName == ``Int8 || declName == ``Int16 || declName == ``Int32 || declName == ``Int64 then
         return .nonParametric
@@ -543,10 +543,10 @@ private def getLitKind (e : Expr) : MetaM LitKind := do
     let_expr OfNat.ofNat type n _ ← a | return .notLit
     unless n.consumeMData.isRawNatLit do return .notLit
     let .const declName _ := (← whnfD type).getAppFn | return .notLit
-    if declName == ``Int || declName == ``Int8 || declName == ``Int16 || declName == ``Int32 || declName == ``Int64 then
+    bif declName == ``Int || declName == ``Int8 || declName == ``Int16 || declName == ``Int32 || declName == ``Int64 then
       return .nonParametric
     return .notLit
-  | Char.ofNat n => return if (← isNatValue n) then .nonParametric else .notLit
+  | Char.ofNat n => return bif (← isNatValue n) then .nonParametric else .notLit
   | _ => return .notLit
 
 /--
@@ -633,10 +633,10 @@ them.
 set_option compiler.ignoreBorrowAnnotation true in
 @[export lean_grind_internalize]
 private partial def internalizeImpl (e : Expr) (generation : Nat) (parent? : Option Expr := none) : GoalM Unit := withIncRecDepth do
-  if (← alreadyInternalized e) then
+  bif (← alreadyInternalized e) then
     trace_goal[grind.debug.internalize] "already internalized: {e}"
-    if (← isDebugEnabled) then
-      if (← get).internalizing.any (isSameExpr · e) then
+    bif (← isDebugEnabled) then
+      bif (← get).internalizing.any (isSameExpr · e) then
         throwError "`grind` internal error, `internalize` reached an application whose arguments are still being internalized{indentExpr e}"
     /-
     Even if `e` has already been internalized, we must check whether it has also been internalized in
@@ -653,7 +653,7 @@ private partial def internalizeImpl (e : Expr) (generation : Nat) (parent? : Opt
     recorded under that application. Otherwise, the candidate for the lambdas at that position
     would never be created.
     -/
-    if e.isLambda then
+    bif e.isLambda then
       addSplitCandidatesForFunext e generation parent?
   else
     go
@@ -689,13 +689,13 @@ where
       mkENode' e generation
       internalizeImpl d generation e
       registerParent e d
-      if b.hasLooseBVars then
+      bif b.hasLooseBVars then
         activateTheoremsForConstsIn b generation
       else
         internalizeImpl b generation e
         registerParent e b
         addCongrTable e
-      if (← isProp d <&&> isProp e) then
+      bif (← isProp d <&&> isProp e) then
         pushPropagateUp e
         checkAndAddSplitCandidate e
       Solvers.internalize e parent?
@@ -723,7 +723,7 @@ where
       | .nonParametric => internalizeNonParametricLiteral e generation parent?
       | .ofNatFinBitVec => internalizeOfNatFinBitVecLiteral e generation parent?
       | .notLit =>
-        if e.isAppOfArity ``Grind.MatchCond 1 then
+        bif e.isAppOfArity ``Grind.MatchCond 1 then
           internalizeMatchCond e generation
         else e.withApp fun f args => do
           let funCC ← useFunCongrAtFn f
@@ -731,7 +731,7 @@ where
           updateAppMap e
           checkAndAddSplitCandidate e
           addMatchEqns f generation
-          if (← isDebugEnabled) then
+          bif (← isDebugEnabled) then
             modify fun s => { s with internalizing := s.internalizing.push e }
             try internalizeArgs f args funCC
             finally modify fun s => { s with internalizing := s.internalizing.pop }
@@ -747,20 +747,20 @@ where
 
   /-- Visits the arguments of `e` and registers `e` as their parent. -/
   internalizeArgs (f : Expr) (args : Array Expr) (funCC : Bool) : GoalM Unit := do
-    if args.size == 2 && f.isConstOf ``Grind.nestedProof then
+    bif args.size == 2 && f.isConstOf ``Grind.nestedProof then
       -- We only internalize the proposition. We can skip the proof because of
       -- proof irrelevance
       let c := args[0]!
       internalizeImpl c generation e
       registerParent e c
       pushEqTrue c <| mkApp2 (mkConst ``eq_true) c args[1]!
-    else if args.size == 2 && (f.isConstOf ``Grind.nestedDecidable || f.isConstOf ``Grind.nestedUDecidable) then
+    else bif args.size == 2 && (f.isConstOf ``Grind.nestedDecidable || f.isConstOf ``Grind.nestedUDecidable) then
       -- We only internalize the proposition. We can skip the instance because it is
       -- a subsingleton
       let c := args[0]!
       internalizeImpl c generation e
       registerParent e c
-    else if (f.isConstOf ``ite || f.isConstOf ``UDecidable.ite) && args.size == 5 then
+    else bif (f.isConstOf ``ite || f.isConstOf ``UDecidable.ite) && args.size == 5 then
       -- Only the condition is internalized; the branches are internalized by `propagateIte`
       -- once the condition is decided. The congruence hash of `e` covers every argument,
       -- so `e` is registered as a parent of all of them: if a branch or the instance is
@@ -772,12 +772,12 @@ where
     else
       if let .const fName _ := f then
         activateTheorems fName generation
-        if funCC then
+        bif funCC then
           internalizeImpl f generation e
       else
         internalizeImpl f generation e
       registerParent e f
-      if funCC then
+      bif funCC then
         let rec traverse (curr : Expr) : GoalM Unit := do
           let .app f a := curr | return ()
           mkENode curr generation (funCC := true)

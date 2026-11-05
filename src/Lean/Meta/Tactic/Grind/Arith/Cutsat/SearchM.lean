@@ -105,7 +105,7 @@ estimating. The restart discards the open case splits, including the enumerated 
 enclosing Cooper split, but a split nested in another one is where enumerations explode.
 -/
 def requestReorder (x : Var) : SearchM Bool := do
-  if (← get').numReorderRequests ≥ (← getConfig).liaReorders then return false
+  bif (← get').numReorderRequests ≥ᵇ (← getConfig).liaReorders then return false
   let e ← getVar x
   trace[grind.debug.lia.search] "reordering request for {quoteIfArithTerm e}"
   modify fun s => { s with reorderRequest? := some e }

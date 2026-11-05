@@ -82,7 +82,7 @@ def checkVars : LinearM Unit := do
   let s ← getStruct
   let mut num := 0
   for ({ expr }, var) in s.varMap do
-    if h : var < s.vars.size then
+    bif h : var <ᵇ s.vars.size then
       let expr' := s.vars[var]
       assert! isSameExpr expr expr'
     else
@@ -97,7 +97,7 @@ def checkStructInvs : LinearM Unit := do
   checkDiseqCnstrs
 
 public def checkInvariants : GoalM Unit := do
-  if (← isDebugEnabled) then
+  bif (← isDebugEnabled) then
   for structId in *...(← get').structs.size do
     LinearM.run structId do
       assert! (← getStructId) == structId

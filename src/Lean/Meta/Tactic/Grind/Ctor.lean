@@ -40,7 +40,7 @@ private partial def propagateInjEqs (eqs : Expr) (proof : Expr) (generation : Na
 private def propagateCtorHomo (α : Expr) (a b : Expr) : GoalM Unit := do
   let ctor₁ := a.getAppFn
   let ctor₂ := b.getAppFn
-  if ctor₁ == ctor₂ then
+  bif ctor₁ == ctor₂ then
     let .const ctorName _ := ctor₁ | return ()
     let injDeclName := mkInjectiveTheoremNameFor ctorName
     unless (← getEnv).contains injDeclName do return ()
@@ -74,11 +74,11 @@ private def propagateCtorHetero (a b : Expr) : GoalM Unit := do
   unless ctorVal₁.induct == ctorVal₂.induct do return ()
   let params₁ := args₁[*...ctorVal₁.numParams]
   let params₂ := args₂[*...ctorVal₂.numParams]
-  if  params₁.size ≠ params₂.size then return () else
+  bif  params₁.size ≠ᵇ params₂.size then return () else
   unless us₁.length == us₂.length do return ()
   unless (← us₁.zip us₂ |>.allM fun (u₁, u₂) => isLevelDefEq u₁ u₂) do return ()
   let gen := max (← getGeneration a) (← getGeneration b)
-  if ctorName₁ == ctorName₂ then
+  bif ctorName₁ == ctorName₂ then
     let hinjDeclName := mkHInjectiveTheoremNameFor ctorName₁
     unless (← getEnv).containsOnBranch hinjDeclName do
       let _ ← executeReservedNameAction hinjDeclName
@@ -103,7 +103,7 @@ and close goal if they are different.
 def propagateCtor (a b : Expr) : GoalM Unit := do
   let aType ← whnfD (← inferType a)
   let bType ← whnfD (← inferType b)
-  if (← isDefEqD aType bType) then
+  bif (← isDefEqD aType bType) then
     propagateCtorHomo aType a b
   else
     propagateCtorHetero a b

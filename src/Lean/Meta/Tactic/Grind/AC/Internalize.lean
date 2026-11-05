@@ -26,9 +26,9 @@ def internalize (e : Expr) (parent? : Option Expr) : GoalM Unit := do
   unless e.isApp && e.appFn!.isApp do return ()
   let op := e.appFn!.appFn!
   let some id ← getOpId? op | return ()
-  if (← isParentSameOpApp parent? op) then return ()
+  bif (← isParentSameOpApp parent? op) then return ()
   ACM.run id do
-    if (← getStruct).denote.contains { expr := e } then return ()
+    bif (← getStruct).denote.contains { expr := e } then return ()
     let e' ← reify e
     modifyStruct fun s => { s with
       denote := s.denote.insert { expr := e } e'

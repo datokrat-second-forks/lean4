@@ -14,7 +14,7 @@ private def checkVars : RingM Unit := do
   let s ← getRingState
   let mut num := 0
   for ({ expr }, var) in s.varMap do
-    if h : var < s.vars.size then
+    bif h : var <ᵇ s.vars.size then
       let expr' := s.vars[var]
       assert! isSameExpr expr expr'
     else
@@ -49,7 +49,7 @@ private def checkRingInvs : RingM Unit := do
   checkDiseqs
 
 def checkInvariants : GoalM Unit := do
-  if (← isDebugEnabled) then
+  bif (← isDebugEnabled) then
   for ringId in *...(← get').rings.size do
     RingM.run ringId do
       assert! (← getRingId) == ringId

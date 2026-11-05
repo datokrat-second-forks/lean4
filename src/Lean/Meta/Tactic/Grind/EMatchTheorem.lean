@@ -69,7 +69,7 @@ def mkOffsetPattern (pat : Expr) (k : Nat) : Expr :=
 
 private def detectOffsets (pat : Expr) : MetaM Expr := do
   let pre (e : Expr) := do
-    if e == pat then
+    bif e == pat then
       -- We only consider nested offset patterns
       return .continue e
     else match e with
@@ -77,7 +77,7 @@ private def detectOffsets (pat : Expr) : MetaM Expr := do
       | _ =>
         let some (e, k) ← isOffset? e
           | return .continue e
-        if k == 0 then return .continue e
+        bif k == 0 then return .continue e
         return .continue <| mkOffsetPattern e k
   Core.transform pat (pre := pre)
 
@@ -97,7 +97,7 @@ private def expandOffsetPatterns (pat : Expr) : CoreM Expr := do
     | _ =>
       let some (e, k) := isOffsetPattern? e
         | return .continue e
-      if k == 0 then return .continue e
+      bif k == 0 then return .continue e
       return .continue <| mkNatAdd e (mkNatLit k)
   Core.transform pat (pre := pre)
 
@@ -198,12 +198,12 @@ private def preprocessMatchCongrEqType (type : Expr) : MetaM Expr := do
       match_expr (← inferType h) with
       | f@Eq α lhs rhs =>
         for i in range do
-          if lhs == args[i]! then
+          bif lhs == args[i]! then
             args := args.set! i (mkGenPattern f.constLevels! α h lhs rhs)
             break
       | f@HEq α lhs β rhs =>
         for i in range do
-          if lhs == args[i]! then
+          bif lhs == args[i]! then
             args := args.set! i (mkGenHEqPattern f.constLevels! α β h lhs rhs)
             break
       | _ => pure ()
@@ -233,11 +233,11 @@ private def detectGeneralizedPatterns? (type : Expr) : MetaM Expr := do
   forallTelescopeReducing type fun hs resultType => do
     let isTarget? (lhs : Expr) (rhs : Expr) (s : FVarSubst) : Option (FVarId × Expr) := Id.run do
       let .fvar fvarId := lhs | return none
-      if !hs.contains lhs then
+      bif !hs.contains lhs then
         return none -- It is a foreign free variable
-      if rhs.containsFVar fvarId then
+      bif rhs.containsFVar fvarId then
         return none -- It is not a generalization if `rhs` contains it
-      if s.contains fvarId then
+      bif s.contains fvarId then
         return none -- Remark: may want to abort instead, it is probably not a generalization
       let rhs := s.apply rhs
       return some (fvarId, rhs)
@@ -251,10 +251,10 @@ private def detectGeneralizedPatterns? (type : Expr) : MetaM Expr := do
         let some (fvarId, rhs) := isTarget? lhs rhs s | pure ()
         s := s.insert fvarId <| mkGenHEqPattern f.constLevels! α β h lhs rhs
       | _ => pure ()
-    if s.isEmpty then
+    bif s.isEmpty then
       return type
     let resultType' := s.apply resultType
-    if resultType' == resultType then
+    bif resultType' == resultType then
       return type
     mkForallFVars hs resultType'
 
@@ -266,9 +266,9 @@ Recall that we infer these generalized patterns automatically for
 -/
 private def inferEMatchProofType (proof : Expr) (gen : Bool) : MetaM Expr := do
   let type ← inferType proof
-  if (← isMatchCongrEqConst proof) then
+  bif (← isMatchCongrEqConst proof) then
     preprocessMatchCongrEqType type
-  else if gen then
+  else bif gen then
     detectGeneralizedPatterns? type
   else
     return type
@@ -281,7 +281,7 @@ private theorem normConfig_zetaDelta : normConfig.zetaDelta = true := rfl
 def preprocessPattern (pat : Expr) (normalizePattern := true) : MetaM Expr := do
   let pat ← instantiateMVars pat
   let pat ← Sym.unfoldReducible pat
-  let pat ← if normalizePattern then
+  let pat ← bif normalizePattern then
     Sym.etaReduceAll (← normalize pat normConfig)
   else
     pure pat
@@ -316,9 +316,9 @@ def EMatchTheoremKind.toAttributeCore (kind : EMatchTheoremKind) : String :=
   | .user           => ""
 
 def EMatchTheoremKind.toAttribute (k : EMatchTheoremKind) (minIndexable : Bool): String :=
-  if k matches .user then
+  bif k matches .user then
     "[grind]"
-  else if minIndexable then
+  else bif minIndexable then
     s!"[grind! {toAttributeCore k}]"
   else
     s!"[grind {toAttributeCore k}]"
@@ -408,12 +408,12 @@ private def isAtomicPattern (e : Expr) : Bool :=
 partial def ppPattern (pattern : Expr) : MessageData := Id.run do
   if let some e := groundPattern? pattern then
     return m!"`[{e}]"
-  else if isPatternDontCare pattern then
+  else bif isPatternDontCare pattern then
     return m!"_"
   else match pattern with
     | .bvar idx => return m!"#{idx}"
     | _ =>
-      if pattern.isAppOfArity ``Grind.offset 2 then
+      bif pattern.isAppOfArity ``Grind.offset 2 then
         let lhs := ppArg <| pattern.getArg! 0
         let rhs := ppPattern <| pattern.getArg! 1
         return m!"{lhs} + {rhs}"
@@ -424,7 +424,7 @@ partial def ppPattern (pattern : Expr) : MessageData := Id.run do
         return r
 where
   ppArg (arg : Expr) : MessageData :=
-    if isAtomicPattern arg then
+    bif isAtomicPattern arg then
       ppPattern arg
     else
       .paren (ppPattern arg)
@@ -459,16 +459,16 @@ private def isCandidateSymbol (declName : Name) (root : Bool) : M Bool := do
   let ctx ← read
   let prio := ctx.symPrios.getPrio declName
   -- Priority 0 are never considered, they are treated as forbidden
-  if prio == 0 then return false
+  bif prio == 0 then return false
   -- If it is the root symbol, then we check whether `prio ≥ minPrio`
-  if root then
+  bif root then
     return prio ≥ ctx.minPrio
   else
     return true
 
 private def saveSymbol (h : HeadIndex) : M Unit := do
   if let .const declName := h then
-    if declName == ``Grind.genHEqPattern || declName == ``Grind.genPattern then
+    bif declName == ``Grind.genHEqPattern || declName == ``Grind.genPattern then
       -- We do not save gadgets in the list of symbols.
       return ()
   unless (← get).symbolSet.contains h do
@@ -476,9 +476,9 @@ private def saveSymbol (h : HeadIndex) : M Unit := do
 
 private def saveSymbolsAt (e : Expr) : M Unit := do
   e.forEach' fun e => do
-    if e.isApp || e.isConst then
+    bif e.isApp || e.isConst then
       if let .const declName _ := e.getAppFn then
-        if isOpaqueForIndexing declName then
+        bif isOpaqueForIndexing declName then
           return false
     match e with
     | .const .. =>
@@ -556,12 +556,12 @@ def getPatternArgKinds (f : Expr) (numArgs : Nat) : MetaM (Array PatternArgKind)
   let pinfos := (← getFunInfoNArgs f numArgs).paramInfo
   forallBoundedTelescope (← inferType f) numArgs fun xs _ => do
     xs.mapIdxM fun idx x => do
-      if (← isProp x) then
+      bif (← isProp x) then
         return .relevant
-      else if (← isProof x) then
+      else bif (← isProof x) then
         return .proof
-      else if (← isTypeFormer x) then
-        if h : idx < pinfos.size then
+      else bif (← isTypeFormer x) then
+        bif h : idx <ᵇ pinfos.size then
           /-
           We originally wanted to ignore types and type formers in `grind` and treat them as supporting elements.
           Thus, we wanted to always return `.typeFormer`. However, we changed our heuristic because of the following example:
@@ -573,12 +573,12 @@ def getPatternArgKinds (f : Expr) (numArgs : Nat) : MetaM (Array PatternArgKind)
           a type or type former is considered a supporting element only if it has forward dependencies.
           Note that this is not the case for `Nonempty`.
           -/
-          if pinfos[idx].hasFwdDeps then return .typeFormer else return .relevant
+          bif pinfos[idx].hasFwdDeps then return .typeFormer else return .relevant
         else
           return .typeFormer
       else
         let xDecl ← x.fvarId!.getDecl
-        if xDecl.binderInfo matches .instImplicit then
+        bif xDecl.binderInfo matches .instImplicit then
           return .instImplicit
         let type := xDecl.type
         /-
@@ -590,30 +590,30 @@ def getPatternArgKinds (f : Expr) (numArgs : Nat) : MetaM (Array PatternArgKind)
         ```
         Recall that a similar approach is used in `simp`.
         -/
-        if (← isClass? type).isSome then
+        bif (← isClass? type).isSome then
           return .instImplicit
-        else if type.isOutParam then
+        else bif type.isOutParam then
           return .outParam
         else
           return .relevant
 
 private def getPatternFn? (pattern : Expr) (inSupport : Bool) (root : Bool) (argKind : PatternArgKind) : M (Option Expr) := do
-  if !pattern.isApp && !pattern.isConst then
+  bif !pattern.isApp && !pattern.isConst then
     return none
   else match pattern.getAppFn with
     | f@(.const declName _) =>
-      if !(← isCandidateSymbol declName root) then
+      bif !(← isCandidateSymbol declName root) then
         return none
-      if declName == ``Grind.genPattern || declName == ``Grind.genHEqPattern then
+      bif declName == ``Grind.genPattern || declName == ``Grind.genHEqPattern then
         return some f
-      if inSupport then
-        if argKind matches .typeFormer | .relevant then
-          if (← isInductive declName) then
+      bif inSupport then
+        bif argKind matches .typeFormer | .relevant then
+          bif (← isInductive declName) then
             return some f
         return none
       return some f
     | f@(.fvar _) =>
-      if inSupport then return none else return some f
+      bif inSupport then return none else return some f
     | _ =>
       return none
 
@@ -640,9 +640,9 @@ private inductive ParentKind where
 private def toParentKind (f : Expr) : ParentKind :=
   match f with
   | .const declName _ =>
-    if declName == ``Grind.eqBwdPattern then
+    bif declName == ``Grind.eqBwdPattern then
       .eqBwdPattern
-    else if declName == ``Grind.genHEqPattern || declName == ``Grind.genPattern then
+    else bif declName == ``Grind.genHEqPattern || declName == ``Grind.genPattern then
       .genPattern
     else
       .regular
@@ -651,7 +651,7 @@ private def toParentKind (f : Expr) : ParentKind :=
 private partial def go (pattern : Expr) (inSupport : Bool) (root : Bool) : M Expr := do
   if let some (e, k) := isOffsetPattern? pattern then
     let e ← goArg e inSupport .relevant .regular
-    if isPatternDontCare e then
+    bif isPatternDontCare e then
       return dontCare
     else
       return mkOffsetPattern e k
@@ -659,7 +659,7 @@ private partial def go (pattern : Expr) (inSupport : Bool) (root : Bool) : M Exp
     | throwError "invalid pattern, (non-forbidden) application expected{indentD (ppPattern pattern)}"
   assert! f.isConst || f.isFVar
   let parentKind := toParentKind f
-  if parentKind matches .regular then
+  bif parentKind matches .regular then
     saveSymbol f.toHeadIndex
   let mut args := pattern.getAppArgs.toVector
   let patternArgKinds ← getPatternArgKinds f args.size
@@ -670,14 +670,14 @@ private partial def go (pattern : Expr) (inSupport : Bool) (root : Bool) : M Exp
   return mkAppN f args.toArray
 where
   goArg (arg : Expr) (inSupport : Bool) (argKind : PatternArgKind) (parentKind : ParentKind) : M Expr := do
-    if !arg.hasLooseBVars then
-      if arg.hasMVar then
+    bif !arg.hasLooseBVars then
+      bif arg.hasMVar then
         pure dontCare
-      else if (← isProof arg) then
+      else bif (← isProof arg) then
         pure dontCare
       else
         let arg ← expandOffsetPatterns arg
-        if !inSupport && parentKind matches .regular then
+        bif !inSupport && parentKind matches .regular then
           /-
           **Note**: We ignore symbols in ground patterns if the parent is the auxiliary ``Grind.eqBwdPattern
           We do that because we want to sign an error in examples such as:
@@ -696,7 +696,7 @@ where
     else match arg with
       | .bvar idx =>
         -- **Note** See comment at `ParentKind.genPattern`.
-        if inSupport && (← foundBVar idx) && !parentKind matches .genPattern then
+        bif inSupport && (← foundBVar idx) && !parentKind matches .genPattern then
           pure dontCare
         else
           saveBVar idx
@@ -737,7 +737,7 @@ private def canBeSynthesized (thmVars : FVarIdSet) (fvarsFound : FVarIdSet) (ins
     forallBoundedTelescope (← inferType classFn) type.getAppNumArgs fun params _ => do
       for param in params, classArg in classArgs do
         let paramType ← inferType param
-        if !paramType.isAppOf ``semiOutParam && !paramType.isAppOf ``outParam then
+        bif !paramType.isAppOf ``semiOutParam && !paramType.isAppOf ``outParam then
           unless checkTypeFVars thmVars fvarsFound classArg do
             return false
       return true
@@ -765,7 +765,7 @@ The missing parameters:
 For type class instance parameters, we must check whether the free variables in class input parameters are available.
 -/
 private def checkCoverage (thmProof : Expr) (numParams : Nat) (bvarsFound : Std.HashSet Nat) : MetaM CheckCoverageResult := do
-  if bvarsFound.size == numParams then return .ok
+  bif bvarsFound.size == numParams then return .ok
   forallBoundedTelescope (← inferType thmProof) numParams fun xs _ => do
     assert! numParams == xs.size
     let patternVars := bvarsFound.toList.map fun bidx => xs[numParams - bidx - 1]!.fvarId!
@@ -774,14 +774,14 @@ private def checkCoverage (thmProof : Expr) (numParams : Nat) (bvarsFound : Std.
     -- Collect free variables occurring in `e`, and insert the ones that are in `thmVars` into `fvarsFound`
     let update (fvarsFound : FVarIdSet) (e : Expr) : FVarIdSet :=
       (collectFVars {} e).fvarIds.foldl (init := fvarsFound) fun s fvarId =>
-        if thmVars.contains fvarId then s.insert fvarId else s
+        bif thmVars.contains fvarId then s.insert fvarId else s
     -- Theorem variables found so far. We initialize with the variables occurring in patterns
     -- Remark: fvarsFound is a subset of thmVars
     let mut fvarsFound := FVarIdSet.ofList patternVars
     for patternVar in patternVars do
       let type ← patternVar.getType
       fvarsFound := update fvarsFound type
-    if fvarsFound.size == numParams then return .ok
+    bif fvarsFound.size == numParams then return .ok
     -- Now, we keep traversing remaining variables and collecting
     -- `processed` contains the variables we have already processed.
     let mut processed := FVarIdSet.ofList patternVars
@@ -793,35 +793,35 @@ private def checkCoverage (thmProof : Expr) (numParams : Nat) (bvarsFound : Std.
         unless processed.contains fvarId do
           let xDecl ← fvarId.getDecl
           let xType := xDecl.type
-          if fvarsFound.contains fvarId then
+          bif fvarsFound.contains fvarId then
             -- Collect free vars in `x`s type and mark as processed
             fvarsFound := update fvarsFound xType
             processed := processed.insert fvarId
             modified := true
           else
             /- **Note**: See comment at `getPatternArgKinds` -/
-            let instImplicit ← if xDecl.binderInfo matches .instImplicit then
+            let instImplicit ← bif xDecl.binderInfo matches .instImplicit then
               pure true
             else
               pure <| (← isClass? xType).isSome
-            if instImplicit then
+            bif instImplicit then
               -- If `x` is instance implicit, check whether
               -- we have found all free variables needed to synthesize instance
-              if (← canBeSynthesized thmVars fvarsFound xType) then
+              bif (← canBeSynthesized thmVars fvarsFound xType) then
                 fvarsFound := fvarsFound.insert fvarId
                 fvarsFound := update fvarsFound xType
                 processed := processed.insert fvarId
                 modified := true
-            else if (← isProp xType) then
+            else bif (← isProp xType) then
               -- If `x` is a proposition, and all theorem variables in `x`s type have already been found
               -- add it to `fvarsFound` and mark it as processed.
-              if checkTypeFVars thmVars fvarsFound xType then
+              bif checkTypeFVars thmVars fvarsFound xType then
                 fvarsFound := fvarsFound.insert fvarId
                 processed := processed.insert fvarId
                 modified := true
-      if fvarsFound.size == numParams then
+      bif fvarsFound.size == numParams then
         return .ok
-      if !modified then
+      bif !modified then
         break
     let mut pos := #[]
     for h : i in *...xs.size do
@@ -839,14 +839,14 @@ private def ppParamsAt (proof : Expr) (numParams : Nat) (paramPos : List Nat) : 
     let mut msg := m!""
     let mut first := true
     for h : i in *...xs.size do
-      if paramPos.contains i then
+      bif paramPos.contains i then
         let x := xs[i]
-        if first then first := false else msg := msg ++ "\n"
+        bif first then first := false else msg := msg ++ "\n"
         msg := msg ++ m!"{x} : {← inferType x}"
     addMessageContextFull msg
 
 private def logPatternWhen (showInfo : Bool) (origin : Origin) (patterns : List Expr) : MetaM Unit := do
-  if showInfo then
+  bif showInfo then
     logInfo m!"{origin.pp}: {patterns.map ppPattern}"
 
 /--
@@ -857,7 +857,7 @@ def mkEMatchTheoremCore (origin : Origin) (levelParams : Array Name) (numParams 
     (patterns : List Expr) (kind : EMatchTheoremKind) (cnstrs : List EMatchTheoremConstraint := []) (showInfo := false) (minIndexable : Bool := false) : MetaM EMatchTheorem := do
   -- the patterns have already been selected, there is no point in using priorities here
   let (patterns, symbols, bvarFound) ← NormalizePattern.main patterns (← getGlobalSymbolPriorities) (minPrio := 1)
-  if symbols.isEmpty then
+  bif symbols.isEmpty then
     throwError "invalid pattern for `{origin.pp}`{indentD (patterns.map ppPattern)}\nthe pattern does not contain constant symbols for indexing"
   trace[grind.ematch.pattern] "{origin.pp}: {patterns.map ppPattern}"
   if let .missing pos ← checkCoverage proof numParams bvarFound then
@@ -899,13 +899,13 @@ def mkEMatchEqTheoremCore (origin : Origin) (levelParams : Array Name) (proof : 
       | Iff lhs rhs => pure (lhs, rhs)
       | HEq _ lhs _ rhs => pure (lhs, rhs)
       | _ => throwError "invalid E-matching equality theorem, conclusion must be an equality{indentExpr type}"
-    let pat := if useLhs then lhs else rhs
+    let pat := bif useLhs then lhs else rhs
     trace[grind.debug.ematch.pattern] "mkEMatchEqTheoremCore: origin: {origin.pp}, pat: {pat}, useLhs: {useLhs}"
     let pat ← preprocessPattern pat normalizePattern
     trace[grind.debug.ematch.pattern] "mkEMatchEqTheoremCore: after preprocessing: {pat}, {← normalize pat normConfig}"
     let pats := splitWhileForbidden (pat.abstract xs)
     return (xs.size, pats)
-  mkEMatchTheoremCore origin levelParams numParams proof patterns (if useLhs then .eqLhs gen else .eqRhs gen)
+  mkEMatchTheoremCore origin levelParams numParams proof patterns (bif useLhs then .eqLhs gen else .eqRhs gen)
     (showInfo := showInfo) (minIndexable := false)
 
 def mkEMatchEqBwdTheoremCore (origin : Origin) (levelParams : Array Name) (proof : Expr) (showInfo := false) : MetaM EMatchTheorem := do
@@ -962,7 +962,7 @@ def Extension.addEMatchEqTheorem (ext : Extension) (declName : Name) : MetaM Uni
 private def getPropTypes (xs : Array Expr) : MetaM (Array Expr) :=
   xs.filterMapM fun x => do
     let type ← inferType x
-    if (← isProp type) then return some type else return none
+    bif (← isProp type) then return some type else return none
 
 /-- State for the (pattern) `CollectorM` monad -/
 private structure Collector.State where
@@ -988,7 +988,7 @@ private def addNewPattern (p : Expr) : CollectorM Unit := do
   trace[grind.debug.ematch.pattern] "found pattern: {ppPattern p}"
   let bvarsFound := (← getThe NormalizePattern.State).bvarsFound
   let done := (← checkCoverage (← read).proof (← read).xs.size bvarsFound) matches .ok
-  if done then
+  bif done then
     trace[grind.debug.ematch.pattern] "found full coverage"
   modify fun s => { s with patterns := s.patterns.push p, done }
 
@@ -1000,12 +1000,12 @@ where
     match e with
     | .app f a    => go f; go a
     | .mdata _ b  => go b
-    | .bvar idx   => modify fun s => if s.contains idx then s else idx :: s
+    | .bvar idx   => modify fun s => bif s.contains idx then s else idx :: s
     | _           => return ()
 
 namespace OldCollector
 private def diff (s : List Nat) (found : Std.HashSet Nat) : List Nat :=
-  if found.isEmpty then s else s.filter fun x => !found.contains x
+  bif found.isEmpty then s else s.filter fun x => !found.contains x
 
 /--
 Returns `true` if pattern `p` contains a child `c` such that
@@ -1022,18 +1022,18 @@ private def hasChildWithSameNewBVars (p : Expr)
     unless arg.isBVar do
     unless isOffsetPattern? arg |>.isSome do
       let sArg := diff (collectPatternBVars arg) alreadyFound
-      if s ⊆ sArg then
+      bif s.all sArg.contains then
         return true
   return false
 
 private partial def collect (e : Expr) : CollectorM Unit := do
-  if (← get).done then return ()
+  bif (← get).done then return ()
   match e with
   | .app .. =>
     trace[grind.debug.ematch.pattern] "collect: {e}"
     let f := e.getAppFn
     let argKinds ← NormalizePattern.getPatternArgKinds f e.getAppNumArgs
-    if (← isPatternFnCandidate f) then
+    bif (← isPatternFnCandidate f) then
       let saved ← getThe NormalizePattern.State
       try
         trace[grind.debug.ematch.pattern] "candidate: {e}"
@@ -1042,7 +1042,7 @@ private partial def collect (e : Expr) : CollectorM Unit := do
           trace[grind.debug.ematch.pattern] "skip, does not contain pattern variables"
           return ()
         let p ← NormalizePattern.normalizePattern p
-        if saved.bvarsFound.size < (← getThe NormalizePattern.State).bvarsFound.size then
+        bif saved.bvarsFound.size <ᵇ (← getThe NormalizePattern.State).bvarsFound.size then
           unless (← hasChildWithSameNewBVars p argKinds saved.bvarsFound) do
             addNewPattern p
             return ()
@@ -1059,7 +1059,7 @@ private partial def collect (e : Expr) : CollectorM Unit := do
       unless argKind.isSupport do
         collect arg
   | .forallE _ d b _ =>
-    if (← pure e.isArrow <&&> isProp d <&&> isProp b) then
+    bif (← pure e.isArrow <&&> isProp d <&&> isProp b) then
       collect d
       collect b
   | _ => return ()
@@ -1068,7 +1068,7 @@ end OldCollector
 
 private def sizeOfDiff (s₁ s₂ : Std.HashSet Nat) : Nat :=
   s₂.fold (init := s₁.size) fun num idx =>
-    if s₁.contains idx then num - 1 else num
+    bif s₁.contains idx then num - 1 else num
 
 /--
 Normalizes `e` if it qualifies as a candidate pattern, and returns
@@ -1097,10 +1097,10 @@ private def normalizePattern? (e : Expr) (argKinds : Array NormalizePattern.Patt
   try
     let p ← NormalizePattern.normalizePattern p
     let numNewBVars ← getNumNewBVars
-    if numNewBVars == 0 then
+    bif numNewBVars == 0 then
       trace[grind.debug.ematch.pattern] "skip, no new variables covered"
       return (← failed)
-    if minIndexable then
+    bif minIndexable then
       let stateAfter ← getThe NormalizePattern.State
       /-
       Checks whether one of `e`s children subsumes it. We say a child `c` subsumes `e`
@@ -1114,12 +1114,12 @@ private def normalizePattern? (e : Expr) (argKinds : Array NormalizePattern.Patt
         unless argKind.isSupport do
         unless arg.isFVar do
         unless isOffsetPattern? arg |>.isSome do
-        if (← isPatternFnCandidate arg.getAppFn) then
+        bif (← isPatternFnCandidate arg.getAppFn) then
           let pArg := arg.abstract (← read).xs
           set stateBefore
           discard <|  NormalizePattern.normalizePattern pArg
           let numArgNewBVars ← getNumNewBVars
-          if numArgNewBVars == numNewBVars then
+          bif numArgNewBVars == numNewBVars then
             trace[grind.debug.ematch.pattern] "skip, subsumed by argument"
             return (← failed)
       set stateAfter
@@ -1132,13 +1132,13 @@ private partial def collect (e : Expr) (minIndexable : Bool) : CollectorM Unit :
   go e
 where
   go (e : Expr) : CollectorM Unit := do
-    if (← get).done then return ()
+    bif (← get).done then return ()
     match e with
     | .app .. =>
       trace[grind.debug.ematch.pattern] "collect: {e}"
       let f := e.getAppFn
       let argKinds ← NormalizePattern.getPatternArgKinds f e.getAppNumArgs
-      if (← isPatternFnCandidate f) then
+      bif (← isPatternFnCandidate f) then
         trace[grind.debug.ematch.pattern] "candidate: {e}"
         if let some p ← normalizePattern? e argKinds minIndexable then
           addNewPattern p
@@ -1150,7 +1150,7 @@ where
         unless argKind.isSupport do
           go arg
     | .forallE _ d b _ =>
-      if (← pure e.isArrow <&&> isProp d <&&> isProp b) then
+      bif (← pure e.isArrow <&&> isProp d <&&> isProp b) then
         go d
         go b
     | _ => return ()
@@ -1171,11 +1171,11 @@ private def collectPatterns? (proof : Expr) (xs : Array Expr) (searchPlaces : Ar
     for place in searchPlaces do
       trace[grind.debug.ematch.pattern] "place: {place}"
       let place ← preprocessPattern place
-      if useOld then
+      bif useOld then
         OldCollector.collect place
       else
         collect place minIndexable
-      if (← get).done then
+      bif (← get).done then
         return some ((← get).patterns.toList)
     return none
   let collect? (useOld : Bool) : MetaM (Option (List Expr × List HeadIndex)) := do
@@ -1183,15 +1183,15 @@ private def collectPatterns? (proof : Expr) (xs : Array Expr) (searchPlaces : Ar
       | return none
     return some (ps, s.symbols.toList)
   let useOld := backward.grind.inferPattern.get (← getOptions)
-  if backward.grind.checkInferPatternDiscrepancy.get (← getOptions) then
+  bif backward.grind.checkInferPatternDiscrepancy.get (← getOptions) then
     let oldResult? ← collect? (useOld := true)
     let newResult? ← collect? (useOld := false)
     let toPattern (result? : Option (List Expr × List HeadIndex)) : List MessageData :=
       let pat := result?.map (·.1) |>.getD []
       pat.map ppPattern
-    if oldResult? != newResult? then
+    bif oldResult? != newResult? then
       logWarning m!"found discrepancy between old and new `grind` pattern inference procedures, old:{indentD (toPattern oldResult?)}\nnew:{indentD (toPattern newResult?)}"
-    return if useOld then oldResult? else newResult?
+    return bif useOld then oldResult? else newResult?
   else
     collect? useOld
 
@@ -1223,7 +1223,7 @@ where
     match e with
     | .app .. =>
       let f := e.getAppFn
-      if (← isPatternFnCandidate f) then
+      bif (← isPatternFnCandidate f) then
         let e ← NormalizePattern.normalizePattern e
         return some e
       else
@@ -1234,7 +1234,7 @@ where
               return r
         return none
     | .forallE _ d b _ =>
-      if (← pure e.isArrow <&&> isProp d <&&> isProp b) then
+      bif (← pure e.isArrow <&&> isProp d <&&> isProp b) then
         if let some d ← visit? d then return d
         visit? b
       else
@@ -1255,9 +1255,9 @@ private def collectUsedPriorities (prios : SymbolPriorities) (searchPlaces : Arr
   for place in searchPlaces do
     s := place.foldConsts (init := s) fun declName s =>
       let prio := prios.getPrio declName
-      if prio > 0 then s.insert prio else s
+      bif prio >ᵇ 0 then s.insert prio else s
   let r := s.toArray
-  if r.isEmpty then
+  bif r.isEmpty then
     return #[eval_prio default]
   else
     return r.qsort fun p₁ p₂ => p₁ > p₂
@@ -1269,7 +1269,7 @@ private partial def collectSingletons (e : Expr) : StateT (Array (Expr × List H
     trace[grind.debug.ematch.pattern] "collect: {e}"
     let f := e.getAppFn
     let argKinds ← NormalizePattern.getPatternArgKinds f e.getAppNumArgs
-    if (← isPatternFnCandidate f) then
+    bif (← isPatternFnCandidate f) then
       -- Reset collector and normalizer states. Recall that we are collecting singleton patterns only.
       set { : NormalizePattern.State }
       set { : Collector.State }
@@ -1282,10 +1282,10 @@ private partial def collectSingletons (e : Expr) : StateT (Array (Expr × List H
         -- **TODO**: `minIndexable` support
         let p ← NormalizePattern.normalizePattern p
         addNewPattern p
-        if (← getThe Collector.State).done then
+        bif (← getThe Collector.State).done then
           let p := (← getThe Collector.State).patterns.back!
           let idxs := (← getThe NormalizePattern.State).symbols
-          if (← get).all fun (p', _) => p != p' then
+          bif (← get).all fun (p', _) => p != p' then
             modify fun s => s.push (p, idxs.toList)
       catch ex =>
         trace[grind.debug.ematch.pattern] "skip, exception during normalization{indentD ex.toMessageData}"
@@ -1295,7 +1295,7 @@ private partial def collectSingletons (e : Expr) : StateT (Array (Expr × List H
       unless argKind.isSupport do
         collectSingletons arg
   | .forallE _ d b _ =>
-    if (← pure e.isArrow <&&> isProp d <&&> isProp b) then
+    bif (← pure e.isArrow <&&> isProp d <&&> isProp b) then
       collectSingletons d
       collectSingletons b
   | _ => return ()
@@ -1367,7 +1367,7 @@ def mkEMatchTheoremWithKind?
     let searchPlaces ← match kind with
       | .fwd =>
         let ps ← getPropTypes xs
-        if ps.isEmpty then
+        bif ps.isEmpty then
           throwError "invalid `grind` forward theorem, theorem `{origin.pp}` does not have propositional hypotheses"
         pure ps
       | .bwd _ => pure #[type]
@@ -1382,7 +1382,7 @@ where
     for minPrio in prios do
       if let some r ← collectPatterns? proof xs searchPlaces symPrios minPrio (minIndexable := minIndexable) then
         return some r
-      else if groundPatterns then
+      else bif groundPatterns then
         if let some (pattern, symbols) ← collectGroundPattern? proof xs searchPlaces symPrios minPrio then
           return some ([pattern], symbols)
     return none
@@ -1409,7 +1409,7 @@ def mkEMatchEqTheoremsForDef? (declName : Name) (showInfo := false) : MetaM (Opt
     mkEMatchEqTheorem eqn (normalizePattern := true) (showInfo := showInfo)
 
 private def Extension.addGrindEqAttr (ext : Extension) (declName : Name) (attrKind : AttributeKind) (thmKind : EMatchTheoremKind) (useLhs := true) (showInfo := false) : MetaM Unit := do
-  if wasOriginallyTheorem (← getEnv) declName then
+  bif wasOriginallyTheorem (← getEnv) declName then
     ext.add (.ematch (← mkEMatchEqTheorem declName (normalizePattern := true) (useLhs := useLhs) (gen := thmKind.gen) (showInfo := showInfo))) attrKind
   else if let some thms ← mkEMatchEqTheoremsForDef? declName (showInfo := showInfo) then
     unless useLhs do
@@ -1419,7 +1419,7 @@ private def Extension.addGrindEqAttr (ext : Extension) (declName : Name) (attrKi
     throwError s!"`{thmKind.toAttribute false}` attribute can only be applied to equational theorems or function definitions"
 
 def EMatchTheorems.eraseDecl (s : EMatchTheorems) (declName : Name) : MetaM EMatchTheorems := do
-  if !wasOriginallyTheorem (← getEnv) declName then
+  bif !wasOriginallyTheorem (← getEnv) declName then
     if let some eqns ← getEqnsFor? declName then
        unless eqns.all fun eqn => s.contains (.decl eqn) do
          throwNotMarkedWithGrindAttribute declName
@@ -1432,7 +1432,7 @@ def EMatchTheorems.eraseDecl (s : EMatchTheorems) (declName : Name) : MetaM EMat
     return s.erase <| .decl declName
 
 private def ensureNoMinIndexable (minIndexable : Bool) : MetaM Unit := do
-  if minIndexable then
+  bif minIndexable then
     throwError "redundant modifier `!` in `grind` attribute"
 
 def Extension.addEMatchAttr (ext : Extension) (declName : Name) (attrKind : AttributeKind) (thmKind : EMatchTheoremKind) (prios : SymbolPriorities)
@@ -1450,7 +1450,7 @@ def Extension.addEMatchAttr (ext : Extension) (declName : Name) (attrKind : Attr
     ext.addGrindEqAttr declName attrKind thmKind (useLhs := false) (showInfo := showInfo)
   | _ =>
     let info ← getAsyncConstInfo declName
-    if !(info.kind matches .thm | .ctor | .axiom) then
+    bif !(info.kind matches .thm | .ctor | .axiom) then
       ensureNoMinIndexable minIndexable
       ext.addGrindEqAttr declName attrKind thmKind (showInfo := showInfo)
     else
@@ -1484,7 +1484,7 @@ def EMatchTheoremKind.toSyntax (kind : EMatchTheoremKind) : CoreM (TSyntax ``Par
 
 private def save (ref : Syntax) (thm : EMatchTheorem) (isParam : Bool) (minIndexable : Bool) : SelectM Unit := do
   -- We only save `thm` if the pattern is different from the ones that were already found.
-  if (← get).thms.all fun thm' => thm.patterns != thm'.patterns then
+  bif (← get).thms.all fun thm' => thm.patterns != thm'.patterns then
     let pats ← thm.patterns.mapM fun p => do
       let pats ← addMessageContextFull (ppPattern p)
       -- **Note**: Add function for adding naming context, or store `MessageData` directly in the suggestion.
@@ -1492,8 +1492,8 @@ private def save (ref : Syntax) (thm : EMatchTheorem) (isParam : Bool) (minIndex
       let openDecls ← getOpenDecls
       let pats := MessageData.withNamingContext {currNamespace, openDecls} pats
       pats.format
-    let openBracket  := if isParam then "" else "["
-    let closeBracket := if isParam then "" else "]"
+    let openBracket  := bif isParam then "" else "["
+    let closeBracket := bif isParam then "" else "]"
     let msg := s!"{closeBracket} for pattern: {pats}"
     let suggestion : Tactic.TryThis.SuggestionText ← match isParam, minIndexable with
       | false, true  => pure <| Tactic.TryThis.SuggestionText.tsyntax (← `(attr|grind! $(← thm.kind.toSyntax)))
@@ -1545,7 +1545,7 @@ def mkEMatchTheoremAndSuggest (ref : Syntax) (declName : Name) (prios : SymbolPr
       | .both =>
         let thm₁ ← mkEMatchTheoremForDecl declName thmKind prios (showInfo := false) (minIndexable := true)
         let thm₂ ← mkEMatchTheoremForDecl declName thmKind prios (showInfo := false) (minIndexable := false)
-        if thm₁.patterns == thm₂.patterns then
+        bif thm₁.patterns == thm₂.patterns then
           -- If both produce the same pattern, we save only `minIndexable := false` since it is more compact
           save ref thm₂ (minIndexable := false) (isParam := isParam)
         else
@@ -1560,9 +1560,9 @@ def mkEMatchTheoremAndSuggest (ref : Syntax) (declName : Name) (prios : SymbolPr
     tryModifier .rightLeft minIndexable
     tryModifier .leftRight minIndexable
   let search : SelectM Unit := do
-    if minIndexable then
+    bif minIndexable then
       searchCore .yes
-    else if isParam then
+    else bif isParam then
       searchCore .both
       tryModifier (.eqLhs false) .no
       tryModifier (.eqRhs false) .no
@@ -1572,9 +1572,9 @@ def mkEMatchTheoremAndSuggest (ref : Syntax) (declName : Name) (prios : SymbolPr
       searchCore .no
       searchCore .yes
   let (_, s) ← search.run {}
-  if h₁ : 0 < s.thms.size then
-    if !isParam || grind.param.codeAction.get (← getOptions) then
-      if s.suggestions.size == 1 then
+  bif h₁ : 0 <ᵇ s.thms.size then
+    bif !isParam || grind.param.codeAction.get (← getOptions) then
+      bif s.suggestions.size == 1 then
         Tactic.TryThis.addSuggestion ref s.suggestions[0]!
       else
         Tactic.TryThis.addSuggestions ref s.suggestions
@@ -1591,10 +1591,10 @@ The parameter `showInfo` is only taken into account when `backward.grind.inferPa
 def Extension.addEMatchAttrAndSuggest (ext : Extension) (ref : Syntax) (declName : Name) (attrKind : AttributeKind) (prios : SymbolPriorities)
     (minIndexable : Bool) (showInfo : Bool) (isParam : Bool := false) : MetaM Unit := do
   let info ← getConstInfo declName
-  if !wasOriginallyTheorem (← getEnv) declName && !info.isCtor && !info.isAxiom then
+  bif !wasOriginallyTheorem (← getEnv) declName && !info.isCtor && !info.isAxiom then
     ensureNoMinIndexable minIndexable
     ext.addGrindEqAttr declName attrKind (.default false) (showInfo := showInfo)
-  else if backward.grind.inferPattern.get (← getOptions) then
+  else bif backward.grind.inferPattern.get (← getOptions) then
     ext.addEMatchAttr declName attrKind (.default false) prios (minIndexable := minIndexable) (showInfo := showInfo)
   else
     let thm ← mkEMatchTheoremAndSuggest ref declName prios minIndexable isParam

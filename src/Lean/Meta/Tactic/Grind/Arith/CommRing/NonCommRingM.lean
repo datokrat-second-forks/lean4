@@ -27,7 +27,7 @@ instance : MonadCanon NonCommRingM where
 protected def NonCommRingM.getRing : NonCommRingM Sym.Arith.Ring := do
   let s ← getArithState
   let ringId := (← read).ringId
-  if h : ringId < s.ncRings.size then
+  bif h : ringId <ᵇ s.ncRings.size then
     return s.ncRings[ringId]
   else
     throwError "`grind` internal error, invalid ringId"

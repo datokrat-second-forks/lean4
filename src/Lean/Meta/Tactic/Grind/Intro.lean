@@ -49,7 +49,7 @@ where
 
 /-- Match conditions can also compare noncanonical signed literals using `normLitValue`. -/
 private def isPatternLitValue (e : Expr) : MetaM Bool := do
-  if e.hasLooseBVars || e.isTrue || e.isFalse then return false
+  bif e.hasLooseBVars || e.isTrue || e.isFalse then return false
   return (← isInterpreted e) || isSIntPatternLitValue e
 
 /--
@@ -58,12 +58,12 @@ a literal supported by match-condition propagation, an offset `p + k`, or a cons
 whose fields are patterns.
 -/
 private partial def isPattern (e : Expr) : MetaM Bool := do
-  if e.getAppFn.isBVar then return true
-  if (← isPatternLitValue e) then return true
+  bif e.getAppFn.isBVar then return true
+  bif (← isPatternLitValue e) then return true
   match_expr e with
   | HAdd.hAdd _ _ _ _ p k =>
     -- Signed offsets require arithmetic normalization before matching.
-    if isSIntPatternLitValue k then return false
+    bif isSIntPatternLitValue k then return false
     return (← isPatternLitValue k <&&> isPattern p)
   | _ => pure ()
   let .const declName _ := e.getAppFn | return false
@@ -98,7 +98,7 @@ We added this feature because it may be coming from external sources
 Other hypotheses are simplified as usual, and become available for E-matching (issue #15697).
 -/
 def preprocessHypothesis (e : Expr) : GoalM Simp.Result := do
-  if (← isMatchCondHyp e) then
+  bif (← isMatchCondHyp e) then
     preprocess (markAsPreMatchCond e)
   else if let some c := isAlreadyNorm? e then
     let c ← shareCommon (← canon c)
@@ -113,26 +113,26 @@ It ensures base name is a simple `Name` and does not have a `_<idx>` suffix
 private def mkBaseName (name : Name) (type : Expr) : MetaM Name := do
   if let .str _ s := name then
     let pos := s.find '_'
-    if h : pos.IsAtEnd then
+    bif h : pos =ᵇ s.endPos then
       return Name.mkSimple s
     else
-      let suffix := s.sliceFrom (pos.next h)
+      let suffix := s.sliceFrom (pos.next (ne_of_decideEq_eq_false h))
       unless suffix.isNat do
         return Name.mkSimple s
       let s := s.sliceTo pos
       unless s.isEmpty do
         return Name.mkSimple s.copy
-  if (← isProp type) then return `h else return `x
+  bif (← isProp type) then return `h else return `x
 
 private def mkCleanName (name : Name) (type : Expr) : GoalM Name := do
-  if (← getConfig).clean then
+  bif (← getConfig).clean then
     let mut name := name
-    if name.hasMacroScopes then
+    bif name.hasMacroScopes then
       name := name.eraseMacroScopes
-      if name == `x || name == `a then
-        if (← isProp type) then
+      bif name == `x || name == `a then
+        bif (← isProp type) then
           name := `h
-    if (← get).clean.used.contains name then
+    bif (← get).clean.used.contains name then
       let base ← mkBaseName name type
       let mut i := if let some i := (← get).clean.next.find? base then i else 1
       repeat
@@ -145,10 +145,10 @@ private def mkCleanName (name : Name) (type : Expr) : GoalM Name := do
     return name
   else if let some originalName := getOriginalName? name then
     return originalName
-  else if name.hasMacroScopes then
+  else bif name.hasMacroScopes then
     let name' := name.eraseMacroScopes
-    if name' == `x || name' == `a then
-      if (← isProp type) then
+    bif name' == `x || name' == `a then
+      bif (← isProp type) then
         return (← mkFreshUserName `h)
     return name
   else
@@ -168,9 +168,9 @@ private def intro1 : GoalM FVarId := do
 private partial def introNext (goal : Goal) (generation : Nat) : GrindM IntroResult := do
   Prod.fst <$> GoalM.run goal do
     let target ← (← get).mvarId.getType
-    if target.isForall then
+    bif target.isForall then
       let p := target.bindingDomain!
-      if !(← isProp p) then
+      bif !(← isProp p) then
         let fvarId ← intro1
         return .newLocal fvarId (← get)
       else
@@ -186,7 +186,7 @@ private partial def introNext (goal : Goal) (generation : Nat) : GrindM IntroRes
           localInsts := localInsts.push { className, fvar }
         match r.proof? with
         | some he =>
-          if target.isArrow then
+          bif target.isArrow then
             let q := qBase
             let u ← getLevel q
             let mvarNew ← mkFreshExprMVarAt lctx localInsts q .syntheticOpaque tag
@@ -209,15 +209,15 @@ private partial def introNext (goal : Goal) (generation : Nat) : GrindM IntroRes
               return .newHyp fvarId { (← get) with mvarId := mvarIdNew }
         | none =>
           -- `p` and `p'` are definitionally equal
-          let q := if target.isArrow then qBase else qBase.instantiate1 (mkFVar fvarId)
+          let q := bif target.isArrow then qBase else qBase.instantiate1 (mkFVar fvarId)
           let mvarNew ← mkFreshExprMVarAt lctx localInsts q .syntheticOpaque tag
           let mvarIdNew := mvarNew.mvarId!
           mvarIdNew.withContext do
             let h ← mkLambdaFVars #[mkFVar fvarId] mvarNew
             mvarId.assign h
             return .newHyp fvarId { (← get) with mvarId := mvarIdNew }
-    else if target.isLet then
-      if (← getConfig).zetaDelta then
+    else bif target.isLet then
+      bif (← getConfig).zetaDelta then
         let targetNew := expandLet target #[]
         let mvarId := (← get).mvarId
         mvarId.withContext do
@@ -228,7 +228,7 @@ private partial def introNext (goal : Goal) (generation : Nat) : GrindM IntroRes
         let fvarId ← intro1
         (← get).mvarId.withContext do
           let localDecl ← fvarId.getDecl
-          if (← isProp localDecl.type) then
+          bif (← isProp localDecl.type) then
             -- Add a non-dependent copy
             let mvarId ← (← get).mvarId.assert (← mkCleanName `h localDecl.type) localDecl.type (mkFVar fvarId)
             return .newDepHyp { (← get) with mvarId }
@@ -258,7 +258,7 @@ private def applyInjection? (goal : Goal) (fvarId : FVarId) : MetaM (Option Goal
     return none
 
 private def exfalsoIfNotProp (goal : Goal) : MetaM Goal := goal.mvarId.withContext do
-  if (← isProp (← goal.mvarId.getType)) then
+  bif (← isProp (← goal.mvarId.getType)) then
     return goal
   else
     return { goal with mvarId := (← goal.mvarId.exfalso) }
@@ -270,7 +270,7 @@ or a universal quantifier that `introNext` then introduces like a syntactic one.
 private def simpTarget (goal : Goal) : GrindM Goal := goal.mvarId.withContext do
   let target ← goal.mvarId.getType
   let r ← simpCore target
-  if r.expr == target then return goal
+  bif r.expr == target then return goal
   let mvarId ← match r.proof? with
     | some h => goal.mvarId.replaceTargetEq r.expr h
     | none => goal.mvarId.replaceTargetDefEq r.expr
@@ -288,11 +288,11 @@ private def applyCases? (goal : Goal) (fvarId : FVarId) (generation : Nat) (kp :
   -/
   let type ← whnf (← fvarId.getType)
   unless (← isEagerCasesCandidate type) do return none
-  if (← cheapCasesOnly) then
+  bif (← cheapCasesOnly) then
     unless (← isCheapInductive type) do return none
   let .const declName _ := type.getAppFn | return none
   saveCases declName
-  let goal ← if !isBuiltinEagerCases declName && (← isProp type) then
+  let goal ← bif !isBuiltinEagerCases declName && (← isProp type) then
     /-
     `cases` only exposes the constructor fields. For a user-defined inductive predicate there is
     no propagator that recovers the proposition from its fields, so it must be asserted as well,
@@ -304,7 +304,7 @@ private def applyCases? (goal : Goal) (fvarId : FVarId) (generation : Nat) (kp :
       markCaseSplitAsResolved (← fvarId.getType)
   else
     pure goal
-  if goal.inconsistent then return some (← kp goal)
+  bif goal.inconsistent then return some (← kp goal)
   let mvarIds ← cases goal.mvarId (mkFVar fvarId)
   -- This is a case split, so the E-matching round counter is reset as in `selectNextSplit?`.
   let subgoals := mvarIds.map fun mvarId => { goal with mvarId, ematch.num := 0 }
@@ -314,22 +314,22 @@ private def applyCases? (goal : Goal) (fvarId : FVarId) (generation : Nat) (kp :
     match (← kp subgoal) with
     | .stuck gs => stuckNew := stuckNew ++ gs
     | .closed seq => seqNew := seqNew ++ seq
-  if stuckNew.isEmpty then
+  bif stuckNew.isEmpty then
     return some (.closed seqNew.toList)
   else
     return some (.stuck stuckNew.toList)
 
 def intro (generation : Nat) : Action := fun goal kna kp => do
-  if goal.inconsistent then return .closed []
+  bif goal.inconsistent then return .closed []
   let target ← goal.mvarId.getType
-  if target.isFalse then
+  bif target.isFalse then
     kna goal
   else match (← introNext goal generation) with
     | .done goal =>
       let goal ← exfalsoIfNotProp goal
       let goal ← simpTarget goal
       let target ← goal.mvarId.getType
-      if target.isForall || target.isLet then
+      bif target.isForall || target.isLet then
         kp goal
       else if let some mvarId ← goal.mvarId.byContra? then
         kp { goal with mvarId }
@@ -358,7 +358,7 @@ def intros (generation : Nat) : Action :=
 
 /-- Asserts a new fact `prop` with proof `proof` to the given `goal`. -/
 private def assertAt (proof : Expr) (prop : Expr) (generation : Nat) : Action := fun goal kna kp => do
-  if (← isEagerCasesCandidate prop) then
+  bif (← isEagerCasesCandidate prop) then
     let mvarId ← goal.mvarId.assert (← mkFreshUserName `h) prop proof
     intros generation { goal with mvarId } kna kp
   else goal.withContext do
@@ -374,7 +374,7 @@ Asserts next fact in the `goal` fact queue.
 Returns `true` if the queue was not empty and `false` otherwise.
 -/
 def assertNext : Action := fun goal kna kp => do
-  if goal.inconsistent then return .closed []
+  bif goal.inconsistent then return .closed []
   let some (fact, newRawFacts) := goal.newRawFacts.dequeue?
     | kna goal
   let goal := { goal with newRawFacts }

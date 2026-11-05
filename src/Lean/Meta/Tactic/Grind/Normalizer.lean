@@ -23,7 +23,7 @@ set_option compiler.ignoreBorrowAnnotation true in
 /-- Normalizes `e` at attribute time (E-matching patterns). -/
 @[export lean_grind_normalize]
 def normalizeImp (e : Expr) (config : Grind.Config) : MetaM Expr := do
-  if backward.grind.normalizer.get (← getOptions) then
+  bif backward.grind.normalizer.get (← getOptions) then
     let (r, _) ← Meta.simp e (← Grind.getSimpContext config) (← Grind.getSimprocs)
     return r.expr
   else Sym.SymM.run do

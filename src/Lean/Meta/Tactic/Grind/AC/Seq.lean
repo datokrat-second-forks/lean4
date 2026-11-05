@@ -33,9 +33,9 @@ where
 protected def Seq.compare (s₁ s₂ : Seq) : Ordering :=
   let len₁ := s₁.length
   let len₂ := s₂.length
-  if len₁ < len₂ then
+  bif len₁ <ᵇ len₂ then
     .lt
-  else if len₁ > len₂ then
+  else bif len₁ >ᵇ len₂ then
     .gt
   else
     lex s₁ s₂
@@ -70,10 +70,10 @@ private inductive StartsWithResult where
 -/
 private def Seq.startsWith (s₁ s₂ : Seq) : StartsWithResult :=
   match s₂, s₁ with
-  | .var x,   .var y       => if x == y then .exact else .false
-  | .var x,   .cons y s    => if x == y then .prefix s else .false
+  | .var x,   .var y       => bif x == y then .exact else .false
+  | .var x,   .cons y s    => bif x == y then .prefix s else .false
   | .cons .., .var _       => .false
-  | .cons x s₂, .cons y s₁ => if x == y then s₁.startsWith s₂ else .false
+  | .cons x s₂, .cons y s₁ => bif x == y then s₁.startsWith s₂ else .false
 
 local infixr:65 "::" => Seq.cons
 local instance : OfNat Seq n where
@@ -110,7 +110,7 @@ inductive SubseqResult where
 -/
 def Seq.subseq (s₁ s₂ : Seq) : SubseqResult :=
   match s₂ with
-  | .var _ => if s₁ == s₂ then .exact else .false
+  | .var _ => bif s₁ == s₂ then .exact else .false
   | .cons x s =>
     match s₂.startsWith s₁ with
     | .false    => go s₁ s (.var x)
@@ -119,7 +119,7 @@ def Seq.subseq (s₁ s₂ : Seq) : SubseqResult :=
 where
   go (s₁ s₂ : Seq) (acc : Seq) :=
     match s₂ with
-    | .var _ => if s₁ == s₂ then .suffix acc.reverse else .false
+    | .var _ => bif s₁ == s₂ then .suffix acc.reverse else .false
     | .cons x s =>
       match s₂.startsWith s₁ with
       | .false    => go s₁ s (.cons x acc)
@@ -154,29 +154,29 @@ It assumes `s₁` and `s₂` are sorted.
 def Seq.subset (s₁ s₂ : Seq) : SubsetResult :=
   match s₁, s₂ with
   | .var x, .var y =>
-    if x == y then .exact else .false
+    bif x == y then .exact else .false
   | .var x, .cons y s₂ =>
-    if x == y then .strict s₂
-    else if x < y then .false
+    bif x == y then .strict s₂
+    else bif x <ᵇ y then .false
     else go (.var x) s₂ (.var y)
   | .cons .., .var _ => .false
   | .cons x s₁, .cons y s₂ =>
-    if x == y then subset s₁ s₂
-    else if x < y then .false
+    bif x == y then subset s₁ s₂
+    else bif x <ᵇ y then .false
     else go (.cons x s₁) s₂ (.var y)
 where
   go (s₁ s₂ acc : Seq) : SubsetResult :=
     match s₁, s₂ with
     | .var x, .var y =>
-      if x == y then .strict acc.reverse else .false
+      bif x == y then .strict acc.reverse else .false
     | .var x, .cons y s₂ =>
-      if x == y then .strict (acc.reverse ++ s₂)
-      else if x < y then .false
+      bif x == y then .strict (acc.reverse ++ s₂)
+      else bif x <ᵇ y then .false
       else go (.var x) s₂ (.cons y acc)
     | .cons .., .var _ => .false
     | .cons x s₁, .cons y s₂ =>
-      if x == y then go s₁ s₂ acc
-      else if x < y then .false
+      bif x == y then go s₁ s₂ acc
+      else bif x <ᵇ y then .false
       else go (.cons x s₁) s₂ (.cons y acc)
 
 example : Seq.subset 1 1 = .exact := rfl
@@ -229,8 +229,8 @@ def Seq.sharesVar (s₁ s₂ : Seq) : Bool :=
   | .var x,     .cons y s₂ => x == y || sharesVar (.var x) s₂
   | .cons x s₁, .var y     => x == y || sharesVar s₁ (.var y)
   | .cons x s₁, .cons y s₂ =>
-    if x == y then true
-    else if x < y then s₁.sharesVar (.cons y s₂)
+    bif x == y then true
+    else bif x <ᵇ y then s₁.sharesVar (.cons y s₂)
     else sharesVar (.cons x s₁) s₂
 
 example : Seq.sharesVar 0 0 = true := by simp [Seq.sharesVar, OfNat.ofNat]
@@ -278,19 +278,19 @@ where
   go (s₁ s₂ : Seq) (r₁ c r₂ : Option Seq) : Option (Seq × Seq × Seq) :=
     match s₁, s₂ with
     | .var x, .var y =>
-      if x == y then mkResult (rev r₁) (rev (push c x)) (rev r₂)
+      bif x == y then mkResult (rev r₁) (rev (push c x)) (rev r₂)
       else mkResult (rev (push r₁ x)) (rev c) (rev (push r₂ y))
     | .var x, .cons y s₂ =>
-      if x == y then mkResult (rev r₁) (rev (push c x)) (app (rev r₂) s₂)
-      else if x < y then mkResult (rev (push r₁ x)) (rev c) (app (rev r₂) (.cons y s₂))
+      bif x == y then mkResult (rev r₁) (rev (push c x)) (app (rev r₂) s₂)
+      else bif x <ᵇ y then mkResult (rev (push r₁ x)) (rev c) (app (rev r₂) (.cons y s₂))
       else go (.var x) s₂ r₁ c (push r₂ y)
     | .cons x s₁, .var y =>
-      if x == y then mkResult (app (rev r₁) s₁) (rev (push c x)) (rev r₂)
-      else if x < y then go s₁ (.var y) (push r₁ x) c r₂
+      bif x == y then mkResult (app (rev r₁) s₁) (rev (push c x)) (rev r₂)
+      else bif x <ᵇ y then go s₁ (.var y) (push r₁ x) c r₂
       else mkResult (app (rev r₁) (.cons x s₁)) (rev c) (rev (push r₂ y))
     | .cons x s₁, .cons y s₂ =>
-      if x == y then go s₁ s₂ r₁ (push c x) r₂
-      else if x < y then go s₁ (.cons y s₂) (push r₁ x) c r₂
+      bif x == y then go s₁ s₂ r₁ (push c x) r₂
+      else bif x <ᵇ y then go s₁ (.cons y s₂) (push r₁ x) c r₂
       else go (.cons x s₁) s₂ r₁ c (push r₂ y)
 
 /--

@@ -13,9 +13,9 @@ public section
 namespace Lean.Meta.Grind.Arith
 
 def isSupportedType (α  : Expr) : GoalM Bool := do
-  if (← Cutsat.isSupportedType α) then
+  bif (← Cutsat.isSupportedType α) then
     return true
-  else if (← Linear.getStructId? α).isSome then
+  else bif (← Linear.getStructId? α).isSome then
     return true
   else
     return false

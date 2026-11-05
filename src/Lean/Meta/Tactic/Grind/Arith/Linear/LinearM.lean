@@ -41,7 +41,7 @@ abbrev getStructId : LinearM Nat :=
 protected def LinearM.getStruct : LinearM Struct := do
   let s ← get'
   let structId ← getStructId
-  if h : structId < s.structs.size then
+  bif h : structId <ᵇ s.structs.size then
     return s.structs[structId]
   else
     throwError "`grind` internal error, invalid structure id"

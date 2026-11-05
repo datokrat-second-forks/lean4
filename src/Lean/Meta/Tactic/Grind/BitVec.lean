@@ -108,7 +108,8 @@ private def binOp (e : Expr) (eval : Expr → Expr → GoalM (Option Expr)) : Go
   binOp e fun r₁ r₂ => do
     let some ⟨n₁, v₁⟩ ← getBitVecValue? r₁ | return none
     let some ⟨n₂, v₂⟩ ← getBitVecValue? r₂ | return none
-    if h : n₁ = n₂ then
+    bif h : n₁ =ᵇ n₂ then
+      have h := eq_of_decideEq_eq_true h
       some <$> mkBVLit n₁ (op v₁ (h ▸ v₂))
     else
       return none

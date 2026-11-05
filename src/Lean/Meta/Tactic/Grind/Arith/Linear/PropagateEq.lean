@@ -29,11 +29,11 @@ private def DiseqCnstr.applyEq? (a : Int) (x : Var) (c₁ : EqCnstr) (b : Int) (
   trace[grind.linarith.subst] "{← getVar x}, {← c₁.denoteExpr}, {← c₂.denoteExpr}"
   let p := c₁.p
   let q := c₂.p
-  if b % a == 0 then
+  bif b % a == 0 then
     let k := - b / a
     let p := p.mul k |>.combine q
     return some { p, h := .subst1 k c₁ c₂ }
-  else if (← hasNoNatZeroDivisors) then
+  else bif (← hasNoNatZeroDivisors) then
     let p := p.mul b |>.combine (q.mul (-a))
     return some { p, h := .subst (-a) b c₁ c₂ }
   else
@@ -57,7 +57,7 @@ private def processNewCommRingEq' (a b : Expr) : LinearM Unit := do
   let lhs ← p.toIntModuleExpr generation
   let some lhs ← reify? lhs (skipVar := false) | return ()
   let p := lhs.norm
-  if p == .nil then return ()
+  bif p == .nil then return ()
   let c₁ : IneqCnstr := { p, strict := false, h := .ringEq c lhs }
   c₁.assert
   let c := { c with p := c.p.mulConst (-1), h := .symm c }
@@ -71,7 +71,7 @@ private def processNewIntModuleEq' (a b : Expr) : LinearM Unit := do
   let some lhs ← reify? a (skipVar := false) | return ()
   let some rhs ← reify? b (skipVar := false) | return ()
   let p := (lhs.sub rhs).norm
-  if p == .nil then return ()
+  bif p == .nil then return ()
   let c₁ : IneqCnstr := { p, strict := false, h := .ofEq a b lhs rhs }
   c₁.assert
   let p := p.mul (-1)
@@ -80,12 +80,12 @@ private def processNewIntModuleEq' (a b : Expr) : LinearM Unit := do
 
 private def EqCnstr.norm (c : EqCnstr) : LinearM (Nat × Var × EqCnstr) := do
   let mut c := c
-  if (← hasNoNatZeroDivisors) then
+  bif (← hasNoNatZeroDivisors) then
     let k := c.p.gcdCoeffs
-    if k != 1 then
+    bif k != 1 then
       c := { p := c.p.div k, h := .coeff k c }
   let some (k, x) := c.p.pickVarToElim? | unreachable!
-  if k < 0 then
+  bif k <ᵇ 0 then
     c := { p := c.p.mul (-1), h := .neg c }
   return (k.natAbs, x, c)
 
@@ -113,7 +113,7 @@ private def updateLeCnstrs (a : Nat) (x : Var) (c₁ : EqCnstr) (todo : Array (I
   for (b, c₂) in todo do
     let c₂ ← c₂.applyEq a x c₁ b
     c₂.assert
-    if (← inconsistent) then return ()
+    bif (← inconsistent) then return ()
 
 private def splitIneqCnstrs (x : Var) (cs : PArray IneqCnstr) : PArray IneqCnstr × Array (Int × IneqCnstr) :=
   split cs fun c => c.p.coeff x
@@ -122,7 +122,7 @@ private def splitIneqCnstrs (x : Var) (cs : PArray IneqCnstr) : PArray IneqCnstr
 Given an equation `c₁` containing `a*x`, eliminate `x` from lower bound inequalities of `y`.
 -/
 private def updateLowers (a : Nat) (x : Var) (c : EqCnstr) (y : Var) : LinearM Unit := do
-  if (← inconsistent) then return ()
+  bif (← inconsistent) then return ()
   let (lowers', todo) := splitIneqCnstrs x (← getStruct).lowers[y]!
   modifyStruct fun s => { s with lowers := s.lowers.set y lowers' }
   updateLeCnstrs a x c todo
@@ -131,7 +131,7 @@ private def updateLowers (a : Nat) (x : Var) (c : EqCnstr) (y : Var) : LinearM U
 Given an equation `c₁` containing `a*x`, eliminate `x` from upper bound inequalities of `y`.
 -/
 private def updateUppers (a : Nat) (x : Var) (c : EqCnstr) (y : Var) : LinearM Unit := do
-  if (← inconsistent) then return ()
+  bif (← inconsistent) then return ()
   let (uppers', todo) := splitIneqCnstrs x (← getStruct).uppers[y]!
   modifyStruct fun s => { s with uppers := s.uppers.set y uppers' }
   updateLeCnstrs a x c todo
@@ -163,20 +163,20 @@ private def DiseqCnstr.assert (c : DiseqCnstr) : LinearM Unit := do
     trace[grind.linarith.assert.store] "{← c.denoteExpr}"
     c.p.updateOccs
     modifyStruct fun s => { s with diseqs := s.diseqs.modify x (·.push c) }
-    if (← c.satisfied) == .false then
+    bif (← c.satisfied) == .false then
       resetAssignmentFrom x
 
 private def splitDiseqs (x : Var) (cs : PArray DiseqCnstr) : PArray DiseqCnstr × Array (Int × DiseqCnstr) :=
   split cs fun c => c.p.coeff x
 
 private def updateDiseqs (a : Int) (x : Var) (c : EqCnstr) (y : Var) : LinearM Unit := do
-  if (← inconsistent) then return ()
+  bif (← inconsistent) then return ()
   let (diseqs', todo) := splitDiseqs x (← getStruct).diseqs[y]!
   modifyStruct fun s => { s with diseqs := s.diseqs.set y diseqs' }
   for (b, c₂) in todo do
     if let some c₂ ← c₂.applyEq? a x c b then
       c₂.assert
-      if (← inconsistent) then return ()
+      bif (← inconsistent) then return ()
     else
       -- Failed to eliminate
       c₂.ignore
@@ -197,13 +197,13 @@ private def isImpliedEq (c : EqCnstr) : LinearM Bool := do
   match c.p with
   | .add (-1) x (.add 1 y .nil)
   | .add 1 x (.add (-1) y .nil) =>
-    if (← isEqv (← getVar x) (← getVar y)) then return false
+    bif (← isEqv (← getVar x) (← getVar y)) then return false
     return true
   | _ => return false
 
 private def ensureLeadCoeffPos (c : EqCnstr) : LinearM EqCnstr := do
   let .add k _ _ := c.p | return c
-  if k < 0 then
+  bif k <ᵇ 0 then
     return { p := c.p.mul (-1), h := .neg c }
   else
     return c
@@ -211,7 +211,7 @@ private def ensureLeadCoeffPos (c : EqCnstr) : LinearM EqCnstr := do
 private def EqCnstr.assert (c : EqCnstr) : LinearM Unit := do
   trace[grind.linarith.assert] "{← c.denoteExpr}"
   let c ← c.applySubsts
-  if c.p == .nil then
+  bif c.p == .nil then
     trace[grind.linarith.trivial] "{← c.denoteExpr}"
     return ()
   let (a, x, c) ← c.norm
@@ -226,7 +226,7 @@ private def EqCnstr.assert (c : EqCnstr) : LinearM Unit := do
   We need this mapping to catch `k*x = p` and `k*y = p`
   -/
   unless (← getStruct).caseSplits do
-    if (← isImpliedEq c) then
+    bif (← isImpliedEq c) then
       propagateImpEq (← ensureLeadCoeffPos c)
   modifyStruct fun s => { s with
     elimEqs := s.elimEqs.set x (some c)
@@ -242,7 +242,7 @@ private def processNewIntModuleEq (a b : Expr) : LinearM Unit := do
   let some lhs ← reify? a (skipVar := false) | return ()
   let some rhs ← reify? b (skipVar := false) | return ()
   let p := (lhs.sub rhs).norm
-  if p == .nil then return ()
+  bif p == .nil then return ()
   let c : EqCnstr := { p, h := .core a b lhs rhs }
   c.assert
 
@@ -254,7 +254,7 @@ private def processNewNatModuleEq' (a b : Expr) : OfNatModuleM Unit := do
     let some lhs ← reify? a' (skipVar := false) | return ()
     let some rhs ← reify? b' (skipVar := false) | return ()
     let p := (lhs.sub rhs).norm
-    if p == .nil then return ()
+    bif p == .nil then return ()
     let c₁ : IneqCnstr := { p, strict := false, h := .ofEqOfNat a b ns.id lhs rhs }
     c₁.assert
     let p := p.mul (-1)
@@ -269,26 +269,26 @@ private def processNewNatModuleEq (a b : Expr) : OfNatModuleM Unit := do
     let some lhs ← reify? a' (skipVar := false) | return ()
     let some rhs ← reify? b' (skipVar := false) | return ()
     let p := (lhs.sub rhs).norm
-    if p == .nil then return ()
+    bif p == .nil then return ()
     let c : EqCnstr := { p, h := .coreOfNat a b ns.id lhs rhs }
     c.assert
 
 def processNewEq (a b : Expr) : GoalM Unit := do
-  if isSameExpr a b then return () -- TODO: check why this is needed
+  bif isSameExpr a b then return () -- TODO: check why this is needed
   if let some structId ← inSameStruct? a b then LinearM.run structId do
-    if (← isOrderedAdd) then
-      if (← isCommRing) then
+    bif (← isOrderedAdd) then
+      bif (← isCommRing) then
         processNewCommRingEq' a b
       else
         processNewIntModuleEq' a b
     else
-      if (← isCommRing) then
+      bif (← isCommRing) then
         processNewCommRingEq a b
       else
         processNewIntModuleEq a b
   else if let some natStructId ← inSameNatStruct? a b then OfNatModuleM.run natStructId do
     let ns ← getNatStruct
-    if ns.orderedAddInst?.isSome then
+    bif ns.orderedAddInst?.isSome then
       processNewNatModuleEq' a b
     else
       processNewNatModuleEq a b
@@ -316,7 +316,7 @@ private def processNewIntModuleDiseq (a b : Expr) : LinearM Unit := do
 
 private def processNewNatModuleDiseq (a b : Expr) : OfNatModuleM Unit := do
   let ns ← getNatStruct
-  if ns.addRightCancelInst?.isSome then
+  bif ns.addRightCancelInst?.isSome then
     let (a', _) ← ofNatModule a
     let (b', _) ← ofNatModule b
     LinearM.run ns.structId do
@@ -331,7 +331,7 @@ private def processNewNatModuleDiseq (a b : Expr) : OfNatModuleM Unit := do
 
 def processNewDiseq (a b : Expr) : GoalM Unit := do
   if let some structId ← inSameStruct? a b then LinearM.run structId do
-    if (← isCommRing) then
+    bif (← isCommRing) then
       processNewCommRingDiseq a b
     else
       processNewIntModuleDiseq a b

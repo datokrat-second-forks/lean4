@@ -25,9 +25,9 @@ private def getEmbeddedLitValue? (e : Expr) : GoalM (Option Rat) := do
     let some k ← getNatValue? k | return none
     let some m ← getLitValueModulus? α | return none
     let m : Int := m
-    let k : Int := if neg then -(k : Int) else (k : Int)
+    let k : Int := bif neg then -(k : Int) else (k : Int)
     let v := k % m
-    let v := if isSignedType α && v ≥ m / 2 then v - m else v
+    let v := bif isSignedType α && v ≥ᵇ m / 2 then v - m else v
     return some (v : Rat)
   match_expr e with
   | OfNat.ofNat α k _ => value? α k false
@@ -47,10 +47,10 @@ private partial def getAssignmentExt? (e : Expr) : GoalM (Option Rat) := do
   have been instantiated.
   -/
   let type ← inferType e
-  if type == Int.mkType then
+  bif type == Int.mkType then
     -- It should have been handled in the previous getAssignment?
     return none
-  else if type == Nat.mkType then
+  else bif type == Nat.mkType then
     -- TODO: improve this case.
     for parent in (← getParents e).elems do
       let_expr NatCast.natCast _ inst _ := parent | pure ()
@@ -62,7 +62,7 @@ private partial def getAssignmentExt? (e : Expr) : GoalM (Option Rat) := do
     -- resolved one step at a time; only the last step is a cutsat (`Nat`/`Int`) term.
     for parent in (← getParents (← getRoot e)).elems do
       if let some a := embeddingArg? parent then
-        if (← isEqv a e) then
+        bif (← isEqv a e) then
           if let some v ← getAssignmentExt? (← getRoot parent) then
             return some v
   return none
@@ -112,7 +112,7 @@ private def isNonlinearTerm (e : Expr) : GoalM Bool :=
   | _ => return false
 
 private def isInterpreted (e : Expr) : GoalM Bool := do
-  if isInterpretedTerm e then
+  bif isInterpretedTerm e then
     return !(← isNonlinearTerm e)
   let f := e.getAppFn
   /-

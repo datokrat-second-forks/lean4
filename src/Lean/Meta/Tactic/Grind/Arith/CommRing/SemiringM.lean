@@ -30,7 +30,7 @@ instance : MonadCanon SemiringM where
 protected def SemiringM.getCommSemiring : SemiringM Sym.Arith.CommSemiring := do
   let s ← getArithState
   let semiringId ← getSemiringId
-  if h : semiringId < s.semirings.size then
+  bif h : semiringId <ᵇ s.semirings.size then
     return s.semirings[semiringId]
   else
     throwError "`grind` internal error, invalid semiringId"
@@ -47,7 +47,7 @@ instance : MonadCommSemiring SemiringM where
 protected def SemiringM.getCommRing : SemiringM Sym.Arith.CommRing := do
   let s ← getArithState
   let ringId := (← getCommSemiring).ringId
-  if h : ringId < s.rings.size then
+  bif h : ringId <ᵇ s.rings.size then
     return s.rings[ringId]
   else
     throwError "`grind` internal error, invalid ringId"

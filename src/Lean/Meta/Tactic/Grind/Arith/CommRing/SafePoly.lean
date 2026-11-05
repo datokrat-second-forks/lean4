@@ -114,7 +114,7 @@ def _root_.Lean.Grind.CommRing.Poly.simpM? (p₁ p₂ : Poly) : RingM (Option Si
     let rec go? (p₁ : Poly) : RingM (Option SimpResult) := do
       match p₁ with
       | .add k₁' m₁ p₁ =>
-        if m₂.divides m₁ && (!checkCoeff || k₂' ∣ k₁') then
+        bif m₂.divides m₁ && (!checkCoeff || k₁' % k₂' =ᵇ 0) then
           let m₂ := m₁.div m₂
           let g  := Nat.gcd k₁'.natAbs k₂'.natAbs
           let k₁ := k₂'/g
@@ -124,7 +124,7 @@ def _root_.Lean.Grind.CommRing.Poly.simpM? (p₁ p₂ : Poly) : RingM (Option Si
         else if let some r ← go? p₁ then
           if let some char ← nonzeroChar? then
             let k := (k₁'*r.k₁) % char
-            if k == 0 then
+            bif k == 0 then
               return some r
             else
               return some { r with p := .add k m₁ r.p }

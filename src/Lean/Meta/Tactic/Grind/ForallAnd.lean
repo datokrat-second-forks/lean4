@@ -45,7 +45,7 @@ where
     | _ =>
       let .forallE n p rest bi := t | return none
       let u ← getLevel p
-      if rest.hasLooseBVars then
+      bif rest.hasLooseBVars then
         withLocalDecl n bi p fun x => do
           let rest := rest.instantiate1 x
           let some (a, b, h?, _) ← go rest | return none

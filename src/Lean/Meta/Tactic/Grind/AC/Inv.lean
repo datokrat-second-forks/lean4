@@ -14,7 +14,7 @@ def checkVars : ACM Unit := do
   let s ← getStruct
   let mut num := 0
   for ({ expr }, var) in s.varMap do
-    if h : var < s.vars.size then
+    bif h : var <ᵇ s.vars.size then
       let expr' := s.vars[var]
       assert! isSameExpr expr expr'
     else
@@ -27,12 +27,12 @@ def checkVars : ACM Unit := do
 Recall that we only (fully) simplify them when adding them to the basis.
 -/
 def checkSeq (s : AC.Seq) (simplified : Bool) : ACM Unit := do
-  if (← isCommutative) then
+  bif (← isCommutative) then
     assert! s.isSorted
-  if simplified then
-    if (← hasNeutral) then
+  bif simplified then
+    bif (← hasNeutral) then
       assert! !s.contains 0 || s == .var 0
-    if (← isIdempotent) then
+    bif (← isIdempotent) then
       assert! s.noAdjacentDuplicates
 
 def checkLhsRhs (lhs rhs : AC.Seq) (simplified : Bool) : ACM Unit := do
@@ -58,7 +58,7 @@ def checkStructInvs : ACM Unit := do
   checkDiseqs
 
 public def checkInvariants : GoalM Unit := do
-  if (← isDebugEnabled) then
+  bif (← isDebugEnabled) then
   for opId in *...(← get').structs.size do
     ACM.run opId checkStructInvs
 

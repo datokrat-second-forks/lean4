@@ -18,7 +18,7 @@ def checkMaxSteps : GoalM Bool := do
   return (← get').steps >= (← getConfig).ringSteps
 
 def checkMaxDegree (p : Poly) : GoalM Bool := do
-  if p.degree >= (← getConfig).ringMaxDegree then
+  bif p.degree ≥ᵇ (← getConfig).ringMaxDegree then
     unless (← get').reportedMaxDegreeIssue do
       modify' fun s => { s with reportedMaxDegreeIssue := true }
       reportIssue! "ring polynomial degree {p.degree} exceeds threshold `(ringMaxDegree := {p.degree})`"
@@ -66,7 +66,7 @@ instance : MonadCanon RingM where
 protected def RingM.getCommRing : RingM Sym.Arith.CommRing := do
   let s ← getArithState
   let ringId ← getRingId
-  if h : ringId < s.rings.size then
+  bif h : ringId <ᵇ s.rings.size then
     return s.rings[ringId]
   else
     throwError "`grind` internal error, invalid ringId"
@@ -106,14 +106,14 @@ def getTermRingId? (e : Expr) : GoalM (Option Nat) := do
 /-- Returns `some c` if the current ring has a nonzero characteristic `c`. -/
 def nonzeroChar? [Monad m] [MonadRing m] : m (Option Nat) := do
   if let some (_, c) := (← getRing).charInst? then
-    if c != 0 then
+    bif c != 0 then
       return some c
   return none
 
 /-- Returns `some (charInst, c)` if the current ring has a nonzero characteristic `c`. -/
 def nonzeroCharInst? [Monad m] [MonadRing m] : m (Option (Expr × Nat)) := do
   if let some (inst, c) := (← getRing).charInst? then
-    if c != 0 then
+    bif c != 0 then
       return some (inst, c)
   return none
 

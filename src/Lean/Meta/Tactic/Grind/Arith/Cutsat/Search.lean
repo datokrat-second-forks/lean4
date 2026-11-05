@@ -25,23 +25,23 @@ def CooperSplit.assert (cs : CooperSplit) : GoalM Unit := do
   let a   := p₁.leadCoeff
   let b   := p₂.leadCoeff
   let p₁' := p.mul b |>.combine (q.mul (-a))
-  let p₁' := p₁'.addConst <| if left then b*k else (-a)*k
+  let p₁' := p₁'.addConst <| bif left then b*k else (-a)*k
   let c₁' := { p := p₁', h := .cooper cs : LeCnstr }
   c₁'.assert
-  if (← inconsistent) then return ()
-  let d := if left then a else b
-  if d.natAbs != 1 then
-    let p₂' := if left then p else q
+  bif (← inconsistent) then return ()
+  let d := bif left then a else b
+  bif d.natAbs != 1 then
+    let p₂' := bif left then p else q
     let p₂' := p₂'.addConst k
     let c₂' := { d, p := p₂', h := .cooper₁ cs : DvdCnstr }
     c₂'.assert
-    if (← inconsistent) then return ()
+    bif (← inconsistent) then return ()
   let some c₃ := c₃? | return ()
   let p₃  := c₃.p
   let d   := c₃.d
   let s   := p₃.tail
   let c   := p₃.leadCoeff
-  let c₃' := if left then
+  let c₃' := bif left then
     let p₃' := p.mul c |>.combine (s.mul (-a))
     let p₃' := p₃'.addConst (c*k)
     { d := a*d, p := p₃', h := .cooper₂ cs : DvdCnstr }
@@ -52,7 +52,7 @@ def CooperSplit.assert (cs : CooperSplit) : GoalM Unit := do
   c₃'.assert
 
 private def checkIsNextVar (x : Var) : GoalM Unit := do
-  if x != (← get').assignment.size then
+  bif x != (← get').assignment.size then
     throwError "`grind` internal error, assigning variable out of order"
 
 private def traceAssignment (x : Var) (v : Rat) : GoalM Unit := do
@@ -69,7 +69,7 @@ private def skipAssignment (x : Var)  : GoalM Unit := do
 
 /-- Assign eliminated variables using `elimEqs` field. -/
 private def assignElimVars : GoalM Unit := do
-  if (← inconsistent) then return ()
+  bif (← inconsistent) then return ()
   go (← get').elimStack
 where
   go (xs : List Var) : GoalM Unit := do
@@ -80,7 +80,7 @@ where
         | throwError "`grind` internal error, eliminated variable must have equation associated with it"
       -- `x` may not be the max variable
       let a := c.p.coeff x
-      if a == 0 then c.throwUnexpected
+      bif a == 0 then c.throwUnexpected
       -- ensure `x` is 0 when evaluating `c.p`
       modify' fun s => { s with assignment := s.assignment.set x 0 }
       let some v ← c.p.eval? | c.throwUnexpected
@@ -115,7 +115,7 @@ def tightUsingDvds (c : LeCnstr) (decFreeOnly : Bool) : SearchM LeCnstr := do
         c := c'
     unless decFreeOnly do
       if let some dvd := s.dvds[z]! then
-        if dvd₀?.all fun dvd₀ => dvd₀.d != dvd.d || dvd₀.p != dvd.p then
+        bif dvd₀?.all fun dvd₀ => dvd₀.d != dvd.d || dvd₀.p != dvd.p then
           if let some c' := tighten c a dvd then
             c := c'
   return c
@@ -147,14 +147,14 @@ private def Bound.update (b? : Option Bound) (val : Rat) (c : LeCnstr) (val₀ :
   match b? with
   | none => some { val, c, val₀, c₀ }
   | some b =>
-    let b := if better val b.val then { b with val, c } else b
-    let b := if better val₀ b.val₀ then { b with val₀, c₀ } else b
+    let b := bif better val b.val then { b with val, c } else b
+    let b := bif better val₀ b.val₀ then { b with val₀, c₀ } else b
     some b
 
 private def evalBound (c : LeCnstr) (lower : Bool) : GoalM Rat := do
   let .add k _ p := c.p | c.throwUnexpected
   let some v ← p.eval? | c.throwUnexpected
-  return if lower then v / (-k) else (-v) / k
+  return bif lower then v / (-k) else (-v) / k
 
 /--
 Assuming all variables smaller than `x` have already been assigned,
@@ -189,13 +189,13 @@ def getDiseqValues (x : Var) : SearchM (Array (Rat × DiseqCnstr)) := do
   for c in s.diseqs[x]! do
     let .add k _ p := c.p | c.throwUnexpected
     let some v ← p.eval? | c.throwUnexpected
-    if (← isApprox) then
+    bif (← isApprox) then
       r := r.push (((-v)/k), c)
     else
       -- We are building an integer model,
       -- if `k` does not divide `v`, we can just ignore the disequality.
       let v := v.num
-      if v % k == 0 then
+      bif v % k == 0 then
         r := r.push ((-v)/k, c)
   return r
 
@@ -221,13 +221,13 @@ def DvdCnstr.getSolutions (c : DvdCnstr) : SearchM DvdSolutionResult := do
   let d := c.d
   let .add a _ p := c.p | c.throwUnexpected
   let some b ← p.eval? | c.throwUnexpected
-  if b.den != 1 then
+  bif b.den != 1 then
     setImprecise
     return .skip
   let b := b.num
   -- We must solve `d ∣ a*x + b`
   let g := d.gcd a
-  if b % g != 0 then
+  bif b % g != 0 then
     return .unsat
   let d := d / g
   let a := a / g
@@ -236,7 +236,7 @@ def DvdCnstr.getSolutions (c : DvdCnstr) : SearchM DvdSolutionResult := do
   -- `α*a = 1 (mod d)`
   let (_, α, _β) := gcdExt a d
   -- `a'*a = 1 (mod d)`
-  let a' := if α < 0 then α % d else α
+  let a' := bif α <ᵇ 0 then α % d else α
   -- `a*x = -b (mod d)`
   -- `x = -b*a' (mod d)`
   -- `x = k*d + -b*a'` for any k
@@ -284,14 +284,14 @@ def findRatDiseq? (v : Rat) (dvals : Array (Rat × DiseqCnstr)) : Option DiseqCn
 
 partial def DvdSolution.geAvoiding (s : DvdSolution) (v : Int) (dvals : Array (Rat × DiseqCnstr)) : Int :=
   let v := s.ge v
-  if inDiseqValues v dvals then
+  bif inDiseqValues v dvals then
     geAvoiding s (v+1) dvals
   else
     v
 
 partial def DvdSolution.leAvoiding (s : DvdSolution) (v : Int) (dvals : Array (Rat × DiseqCnstr)) : Int :=
   let v := s.le v
-  if inDiseqValues v dvals then
+  bif inDiseqValues v dvals then
     leAvoiding s (v-1) dvals
   else
     v
@@ -309,7 +309,7 @@ and `.diseq c` because of the disequality constraint `c`.
 -/
 partial def findIntVal (s : DvdSolution) (lower : Int) (upper : Int) (dvals : Array (Rat × DiseqCnstr)) : FindIntValResult :=
   let v := s.ge lower
-  if v > upper then
+  bif v >ᵇ upper then
     .dvd
   else
     go v
@@ -317,13 +317,13 @@ where
   go (v : Int) : FindIntValResult :=
     if let some c := findDiseq? v dvals then
       let v := s.ge (v+1)
-      if v > upper then .diseq c else go v
+      bif v >ᵇ upper then .diseq c else go v
     else
       .found v
 
 partial def findRatVal (lower upper : Rat) (diseqVals : Array (Rat × DiseqCnstr)) : Rat :=
   let v := (lower + upper)/2
-  if (findRatDiseq? v diseqVals).isSome then
+  bif (findRatDiseq? v diseqVals).isSome then
     findRatVal lower v diseqVals
   else
     v
@@ -333,12 +333,12 @@ def resolveRealLowerUpperConflict (c₁ c₂ : LeCnstr) : GoalM Bool := do
   let .add a₁ _ p₁ := c₁.p | c₁.throwUnexpected
   let .add a₂ _ p₂ := c₂.p | c₂.throwUnexpected
   let p := p₁.mul a₂.natAbs |>.combine (p₂.mul a₁.natAbs)
-  if (← p.satisfiedLe) != .false then
+  bif (← p.satisfiedLe) != .false then
     trace[grind.lia.conflict] "not resolved"
     return false
   else
     let k := p.gcdCoeffs'
-    let c := if k == 1 then
+    let c := bif k == 1 then
       { p, h := .combine c₁ c₂ : LeCnstr }
     else
       { p := p.div k, h := .combineDivCoeffs c₁ c₂ k : LeCnstr }
@@ -360,12 +360,12 @@ def resolveCooperUnary (pred : CooperSplitPred) : SearchM Bool := do
 
 def resolveCooperPred (pred : CooperSplitPred) : SearchM Unit := do
   trace[grind.debug.lia.search.conflict] "[{pred.numCases}]: {← pred.pp}"
-  if (← resolveCooperUnary pred) then
+  bif (← resolveCooperUnary pred) then
     return
   let n := pred.numCases
-  if n > (← getConfig).liaReorderCases then
+  bif n >ᵇ (← getConfig).liaReorderCases then
     let .add _ x _ := pred.c₁.p | pred.c₁.throwUnexpected
-    if (← requestReorder x) then
+    bif (← requestReorder x) then
       return
   let fvarId ← mkCase (.cooper pred #[] {})
   { pred, k := n - 1, h := .dec fvarId : CooperSplit }.assert
@@ -396,13 +396,13 @@ splits `c₁` and resolve with `c₂`.
 -/
 def resolveCooperDiseq (c₁ : DiseqCnstr) (c₂ : LeCnstr) (c₃? : Option DvdCnstr) : SearchM Unit := do
   -- Ensure the coefficient is positive
-  let c₁ := if c₁.p.leadCoeff > 0 then
+  let c₁ := bif c₁.p.leadCoeff >ᵇ 0 then
     { p := c₁.p.mul (-1), h := .neg c₁ : DiseqCnstr }
   else
     c₁
   let c₁ ← c₁.split
   -- After the `c₁.split`, the real shadow may resolve the conflict
-  if (← resolveRealLowerUpperConflict c₁ c₂) then
+  bif (← resolveRealLowerUpperConflict c₁ c₂) then
     return ()
   if let some c₃ := c₃? then
     resolveCooperDvd c₁ c₂ c₃
@@ -414,7 +414,7 @@ Given `c₁` of the form `-a₁*x + p₁ ≤ 0`, and `c` of the form `b*x + p �
 splits `c` and resolve with `c₁`.
 -/
 def resolveRatDiseq (c₁ : LeCnstr) (c : DiseqCnstr) : SearchM Unit := do
-  let c := if c.p.leadCoeff < 0 then
+  let c := bif c.p.leadCoeff <ᵇ 0 then
     { p := c.p.mul (-1), h := .neg c : DiseqCnstr }
   else
     c
@@ -423,7 +423,7 @@ def resolveRatDiseq (c₁ : LeCnstr) (c : DiseqCnstr) : SearchM Unit := do
   assert! b
 
 def processVar (x : Var) : SearchM Unit := do
-  if (← eliminated x) then
+  bif (← eliminated x) then
     trace[grind.debug.lia.search] "eliminated: {← getVar x}"
     /-
     Variable has been eliminated, and will be assigned later after we have assigned
@@ -438,7 +438,7 @@ def processVar (x : Var) : SearchM Unit := do
     | .found solutions => pure solutions
     | .skip => pure {}
     | .unsat =>
-      if (← isApprox) && !(← get).precise then
+      bif (← isApprox) && !(← get).precise then
         /-
         Some variable was assigned a value that ignores one of its constraints, so the
         resolvent may already be present and resolving would not make progress.
@@ -474,29 +474,29 @@ def processVar (x : Var) : SearchM Unit := do
     let c₁ := lo.c
     let c₂ := up.c
     trace[grind.debug.lia.search] "{lower} ≤ {lower.ceil} ≤ {quoteIfArithTerm (← getVar x)} ≤ {upper.floor} ≤ {upper}"
-    if lower > upper then
+    bif lower >ᵇ upper then
       -- Prefer the explanation that does not depend on decisions.
-      let (c₁, c₂) := if lo.val₀ > up.val₀ then (lo.c₀, up.c₀) else (c₁, c₂)
+      let (c₁, c₂) := bif lo.val₀ >ᵇ up.val₀ then (lo.c₀, up.c₀) else (c₁, c₂)
       let .true ← resolveRealLowerUpperConflict c₁ c₂
         | throwError "`grind` internal error, conflict resolution failed"
       return ()
     -- `lower ≤ upper` here
-    if lower.ceil > upper.floor then
-      if (← resolveRealLowerUpperConflict lo.c₀ up.c₀) then
+    bif lower.ceil >ᵇ upper.floor then
+      bif (← resolveRealLowerUpperConflict lo.c₀ up.c₀) then
         return ()
-      if (← resolveRealLowerUpperConflict c₁ c₂) then
+      bif (← resolveRealLowerUpperConflict c₁ c₂) then
         -- Resolved conflict using "real" shadow
         return ()
-      if !(← isApprox) then
+      bif !(← isApprox) then
         resolveCooper c₁ c₂
         return ()
     let r := findIntVal dvdSol lower.ceil upper.floor diseqVals
     if let .found v := r then
       setAssignment x v
       return ()
-    if (← isApprox) then
+    bif (← isApprox) then
       setImprecise
-      if lower < upper then
+      bif lower <ᵇ upper then
         setAssignment x <| findRatVal lower upper diseqVals
       else if let some c := findRatDiseq? lower diseqVals then
         resolveRatDiseq c₁ c
@@ -518,7 +518,7 @@ private def findCase (decVars : FVarIdSet) : SearchM Case := do
     assert! numCases > 0
     let case := (← get).cases[numCases-1]!
     modify fun s => { s with cases := s.cases.pop }
-    if decVars.contains case.fvarId then
+    bif decVars.contains case.fvarId then
       return case
     -- Conflict does not depend on this case.
     trace[grind.debug.lia.search.backtrack] "skipping {case.fvarId.name}"
@@ -528,7 +528,7 @@ def resolveConflict (h : UnsatProof) : SearchM Unit := do
   trace[grind.debug.lia.search.backtrack] "resolve conflict, decision stack: {(← get).cases.toList.map fun c => c.fvarId.name}"
   let decVars := h.collectDecVars.run (← get).decVars
   trace[grind.debug.lia.search.backtrack] "dec vars: {decVars.toList.map (·.name)}"
-  if decVars.isEmpty then
+  bif decVars.isEmpty then
     trace[grind.debug.lia.search.backtrack] "close goal: {← h.pp}"
     closeGoal (← h.toExprProof)
     return ()
@@ -548,7 +548,7 @@ def resolveConflict (h : UnsatProof) : SearchM Unit := do
     let n := pred.numCases
     let hs := hs.push (c.fvarId, h)
     trace[grind.debug.lia.search.backtrack] "cooper #{hs.size + 1}, {← pred.pp}, {hs.map fun p => p.1.name}"
-    let s ← if hs.size + 1 < n then
+    let s ← bif hs.size + 1 <ᵇ n then
       let fvarId ← mkCase (.cooper pred hs decVars')
       pure { pred, k := n - hs.size - 1, h := .dec fvarId : CooperSplit }
     else
@@ -562,11 +562,11 @@ private def searchAssignmentMain : SearchM Unit := do
   repeat
     trace[grind.debug.lia.search] "main loop"
     checkSystem "cutsat"
-    if (← get).reorderRequest?.isSome then
+    bif (← get).reorderRequest?.isSome then
       return ()
-    if (← hasAssignment) then
+    bif (← hasAssignment) then
       return ()
-    if (← isInconsistent) then
+    bif (← isInconsistent) then
       -- `grind` state is inconsistent
       return ()
     if let some c := (← get').conflict? then
@@ -577,11 +577,11 @@ private def searchAssignmentMain : SearchM Unit := do
       We only interrupt below a decision because `resetDecisionStack` then discards the possibly
       pending `conflict?` together with the cases. At level zero, the next iteration resolves it.
       -/
-      if (← (return !(← get).cases.isEmpty) <&&> checkMaxSteps) then
+      bif (← (return !(← get).cases.isEmpty) <&&> checkMaxSteps) then
         trace[grind.debug.lia.search] "search interrupted, maximum number of steps reached"
         setImprecise
         return ()
-    else if (← checkMaxSteps) then
+    else bif (← checkMaxSteps) then
       trace[grind.debug.lia.search] "search interrupted, maximum number of steps reached"
       setImprecise
       return ()
@@ -591,7 +591,7 @@ private def searchAssignmentMain : SearchM Unit := do
       processVar x
 
 private def resetDecisionStack : SearchM Unit := do
-  if (← get).cases.isEmpty then
+  bif (← get).cases.isEmpty then
     -- Nothing to reset
     return ()
   -- Backtrack changes but keep the assignment. Variables created during the search
@@ -641,14 +641,14 @@ private def searchLiaAssignment : GoalM Unit := do
 
 def searchAssignment : GoalM Unit := do
   let precise ← searchQLiaAssignment
-  if (← isInconsistent) then return ()
-  if !(← getConfig).qlia && !precise then
+  bif (← isInconsistent) then return ()
+  bif !(← getConfig).qlia && !precise then
     -- Search for a new model using `.int` mode.
     trace[grind.debug.lia.search] "restart using Cooper resolution"
     modify' fun s => { s with assignment := {} }
     searchLiaAssignment
     trace[grind.debug.lia.search] "after search int model, inconsistent: {← isInconsistent}"
-    if (← isInconsistent) then return ()
+    bif (← isInconsistent) then return ()
   -- If the search was interrupted (`liaSteps` threshold), the assignment is partial.
   unless (← hasAssignment) do return ()
   -- TODO: constructing a model is only worth if `grind` will **not** continue searching.
@@ -663,9 +663,9 @@ There are two kinds of progress:
 The result is `false` if module already has a satisfying assignment.
 -/
 def check : GoalM Bool := do profileitM Exception "grind cutsat" (← getOptions) do
-  if (← hasAssignment) then
+  bif (← hasAssignment) then
     return false
-  else if (← get').steps ≥ (← getConfig).liaSteps then
+  else bif (← get').steps ≥ᵇ (← getConfig).liaSteps then
     -- A previous search reached the `liaSteps` threshold. The solver is disabled to
     -- ensure `grind` does not keep restarting the (bounded) search at every iteration.
     return false

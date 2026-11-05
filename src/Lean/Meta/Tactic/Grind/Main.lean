@@ -112,7 +112,7 @@ private def discharge? (e : Expr) : SimpM (Option Expr) := do
   let r ← Simp.simp e
   if let some p ← Simp.dischargeRfl r.expr then
     return some (mkApp4 (mkConst ``Eq.mpr [Level.zero]) e r.expr (← r.getProof) p)
-  else if r.expr.isTrue then
+  else bif r.expr.isTrue then
     return some (← mkOfEqTrue (← r.getProof))
   else
     return none
@@ -128,7 +128,7 @@ def GrindM.run (x : GrindM α) (params : Params) (evalTactic? : Option EvalTacti
   let config := params.config
   -- The `Sym.simp`-based normalizer is selected by `backward.grind.normalizer := false`; its
   -- theorem set is derived from the legacy one, so both see the same `[grind norm]` declarations.
-  let (symSimpMethods, symDSimpMethods) ← if backward.grind.normalizer.get (← getOptions) then
+  let (symSimpMethods, symDSimpMethods) ← bif backward.grind.normalizer.get (← getOptions) then
       pure ({}, {})
     else
       let thms ← getNormSymTheorems
@@ -173,7 +173,7 @@ private def initENodeCore (e : Expr) (interpreted ctor : Bool) : GoalM Unit := d
 /-- Returns a new goal for the given metavariable. -/
 def mkGoalCore (mvarId : MVarId) : GrindM Goal := do
   let config ← getConfig
-  let mvarId ← if config.clean then mvarId.exposeNames else pure mvarId
+  let mvarId ← bif config.clean then mvarId.exposeNames else pure mvarId
   let trueExpr ← getTrueExpr
   let falseExpr ← getFalseExpr
   let btrueExpr ← getBoolTrueExpr
@@ -208,7 +208,7 @@ structure Result where
   rings       : Array Sym.Arith.CommRing
 
 private def countersToMessageData (header : String) (cls : Name) (data : Array (Name × Nat)) : MetaM MessageData := do
-  let data := data.qsort fun (d₁, c₁) (d₂, c₂) => if c₁ == c₂ then Name.lt d₁ d₂ else c₁ > c₂
+  let data := data.qsort fun (d₁, c₁) (d₂, c₂) => bif c₁ == c₂ then Name.lt d₁ d₂ else c₁ > c₂
   let data ← data.mapM fun (declName, counter) =>
     return .trace { cls } m!"{.ofConstName declName} ↦ {counter}" #[]
   return .trace { cls } header data
@@ -245,7 +245,7 @@ private def mkGlobalDiag (cs : Counters) (simp : Simp.Stats) (ss : PArray SplitD
   let simpMsgs ← Simp.mkDiagMessages simp.diag
   unless simpMsgs.isEmpty do
     msgs := msgs.push <| .trace { cls := `grind} "Simplifier" simpMsgs
-  if msgs.isEmpty then
+  bif msgs.isEmpty then
     return none
   else
     return some <| .trace { cls := `grind } "Diagnostics" msgs
@@ -255,7 +255,7 @@ def Result.hasFailed (r : Result) : Bool :=
 
 def Result.toMessageData (result : Result) : MetaM MessageData := do
   let mut msgs ← result.failure?.toList.mapM (goalToMessageData · result.config result.rings)
-  if result.config.verbose then
+  bif result.config.verbose then
     let mut issues := result.issues
     -- We did not find the following very useful in practice.
     /-
@@ -280,8 +280,8 @@ private partial def collectUsedOrigins (e : Expr) (map : EMatch.InstanceMap) : S
   s.2
 where
   go (e : Expr) : StateM (Std.HashSet ExprPtr × Std.HashSet Origin) Unit := do
-    if isMarkedSubsingletonApp e then return ()
-    if (← get).1.contains { expr := e } then return ()
+    bif isMarkedSubsingletonApp e then return ()
+    bif (← get).1.contains { expr := e } then return ()
     modify fun (v, o) => (v.insert { expr := e }, o)
     if let some uniqueId := EMatch.isTheoremInstanceProof? e then
       if let some thm := map[uniqueId]? then
@@ -302,13 +302,13 @@ Uses grind's instance-marking infrastructure for precise tracking.
 -/
 def checkUnusedActivations (mvarId : MVarId) (counters : Counters) : GrindM Unit := do
   let threshold := grind.unusedLemmaThreshold.get (← getOptions)
-  if threshold == 0 then return ()
+  bif threshold == 0 then return ()
   let proof ← instantiateMVars (mkMVar mvarId)
   let map := (← get).instanceMap
   let usedOrigins := collectUsedOrigins proof map
   let mut unused : Array (Name × Nat) := #[]
   for (origin, count) in counters.thm do
-    if count < threshold then continue
+    bif count <ᵇ threshold then continue
     match origin with
     | .decl declName =>
       unless usedOrigins.contains origin do
@@ -333,16 +333,16 @@ where
   go : ExceptT Unit GoalM Unit := do
     let mvarDecl ← goal.mvarId.getDecl
     mvarDecl.lctx.forM (start := goal.nextDeclIdx) fun localDecl => do
-      if (← isInconsistent) then
+      bif (← isInconsistent) then
         setNextDeclToEnd
         throwThe Unit () -- interrupt
       if let some num := num? then
-        if localDecl.index >= goal.nextDeclIdx + num then
+        bif localDecl.index ≥ᵇ goal.nextDeclIdx + num then
           modify fun goal => { goal with nextDeclIdx := localDecl.index }
           throwThe Unit () -- interrupt
       unless localDecl.isImplementationDetail do
         let type := localDecl.type
-        if (← isProp type) then
+        bif (← isProp type) then
           let r ← preprocessHypothesis type
           match r.proof? with
           | none => add r.expr localDecl.toExpr
@@ -353,8 +353,8 @@ where
 
 private def initCore (mvarId : MVarId) : GrindM Goal := do
   let config ← getConfig
-  let mvarId ← if config.clean || !config.revert then pure mvarId else mvarId.markAccessible
-  let mvarId ← if config.revert then mvarId.revertAll else pure mvarId
+  let mvarId ← bif config.clean || !config.revert then pure mvarId else mvarId.markAccessible
+  let mvarId ← bif config.revert then mvarId.revertAll else pure mvarId
   let mvarId ← mvarId.unfoldReducible
   let mvarId ← mvarId.betaReduce
   -- `have` wraps the goal type in `mdata` (`noImplicitLambda`), which would hide an implication
@@ -362,13 +362,13 @@ private def initCore (mvarId : MVarId) : GrindM Goal := do
   let mvarId ← mvarId.eraseIrrelevantMData
   appendTagSuffix mvarId `grind
   let goal ← mkGoalCore mvarId
-  if config.revert then
+  bif config.revert then
     return goal
   else
     processHypotheses goal
 
 partial def traceEMatchDiagsCompact (diag : PArray EMatchDiagInfo) : GrindM Unit := do
-  if (← isTracingEnabledFor `grind.ematch.diagnostics.compact) then
+  bif (← isTracingEnabledFor `grind.ematch.diagnostics.compact) then
   unless (← isEmatchDiagEnabled) do
     logWarning "use `set_option grind.ematch.diagnostics true` when using `set_option trace.grind.ematch.diagnostics.compact true`"
   withTraceNode `grind.ematch.diagnostics.compact (fun _ => return m!"instances") do
@@ -388,9 +388,9 @@ def mkResult (params : Params) (failure? : Option Goal) : GrindM Result := do
   let ematchDiags := (← get).ematchDiags
   let simp        := { (← get).simp with }
   traceEMatchDiagsCompact ematchDiags
-  if failure?.isNone then
+  bif failure?.isNone then
     -- If there are no failures and diagnostics are enabled, we still report the performance counters.
-    if (← isDiagnosticsEnabled) then
+    bif (← isDiagnosticsEnabled) then
       if let some msg ← mkGlobalDiag counters simp splitDiags ematchDiags then
         logInfo msg
   let rings := (← Sym.Arith.getArithState).rings
@@ -404,13 +404,13 @@ def GrindM.runAtGoal (mvarId : MVarId) (params : Params) (k : Goal → GrindM α
   go.run params (evalTactic? := evalTactic?)
 
 def main (mvarId : MVarId) (params : Params) : MetaM Result := do profileitM Exception "grind" (← getOptions) do
-  let params := if grind.unusedLemmaThreshold.get (← getOptions) > 0 then
+  let params := bif grind.unusedLemmaThreshold.get (← getOptions) >ᵇ 0 then
     { params with config.markInstances := true }
   else params
   GrindM.runAtGoal mvarId params fun goal => do
     let failure? ← solve goal
     let result ← mkResult params failure?
-    if failure?.isNone then
+    bif failure?.isNone then
       checkUnusedActivations mvarId result.counters
     return result
 
@@ -423,14 +423,14 @@ We do not need to erase the delayed assignments from `dAssignment` because they 
 discarded when `withNewMCtxDepth` restores the metavariable context.
 -/
 private def resolveDelayedMVarAssignments (e : Expr) : MetaM Expr := do
-  if !e.hasMVar then return e
+  bif !e.hasMVar then return e
   let e ← instantiateMVarsResolvingDelayed e
   -- Ensure no metavariables at the current depth remain. They would become
   -- dangling references after `withNewMCtxDepth` restores the metavariable context.
   let mctx ← getMCtx
   for mvarId in (e.collectMVars {}).result do
     if let some decl := mctx.findDecl? mvarId then
-      if decl.depth == mctx.depth then
+      bif decl.depth == mctx.depth then
         throwError "`grind` failed, proof contains unresolved internal metavariable {Expr.mvar mvarId}"
   return e
 
@@ -452,7 +452,7 @@ def withProtectedMCtx [Monad m] [MonadControlT MetaM m] [MonadLiftT MetaM m]
   This is particularly important when using `grind -revert`.
   -/
   let mut mvarId ← mvarId.instantiateGoalMVars
-  if config.revert then
+  bif config.revert then
     /-
     **Note**: We now skip implementation details at `addHypotheses`
     -/
@@ -477,9 +477,9 @@ where
     trace[grind.debug.proof] "{val}"
     let type ← inferType val
     -- `grind` proofs are often big, if `abstractProof` is true, we create an auxiliary theorem.
-    let val ← if !config.abstractProof then
+    let val ← bif !config.abstractProof then
       pure val
-    else if (← isProp type) then
+    else bif (← isProp type) then
       mkAuxTheorem type val (zetaDelta := true)
     else
       let auxName ← mkAuxDeclName `grind

@@ -22,7 +22,7 @@ private def getCutsatAssignment? (goal : Goal) (node : ENode) : IO (Option Rat) 
   let some e := cutsatExt.getTerm node | return none
   let s ← cutsatExt.getStateCore goal
   let some x := s.varMap.find? { expr := e } | return none
-  if h : x < s.assignment.size then
+  bif h : x <ᵇ s.assignment.size then
     return s.assignment[x]
   else
     return none
@@ -81,8 +81,8 @@ def mkModel (goal : Goal) : MetaM (Array (Expr × Rat)) := do
   -- Assign on expressions associated with cutsat terms or interpreted terms
   for e in goal.exprs do
     let node ← goal.getENode e
-    if node.isRoot then
-    if (← isIntNatENode node) then
+    bif node.isRoot then
+    bif (← isIntNatENode node) then
       if let some v ← getAssignment? goal node.self then
         model := assignEqc goal node.self v model
   /-
@@ -94,7 +94,7 @@ def mkModel (goal : Goal) : MetaM (Array (Expr × Rat)) := do
     let node ← goal.getENode e
     let i := node.self
     let some n := natCastToInt? i | pure ()
-    if model[n]?.isNone then
+    bif model[n]?.isNone then
       let some v := model[i]? | pure ()
       model := assignEqc goal n v model
   let r ← finalizeModel goal isIntNatENode model

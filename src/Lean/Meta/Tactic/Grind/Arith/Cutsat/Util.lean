@@ -40,7 +40,7 @@ def get' : GoalM State := do
 
 /-- Returns `true` if cutsat natively supports `type`. -/
 def isSupportedType (type : Expr) : GoalM Bool := do
-  if isNatType type || isIntType type then
+  bif isNatType type || isIntType type then
     return true
   else match_expr type with
     | Fin _ => return true
@@ -83,7 +83,7 @@ def canBeEvaluated (α : Expr) : GoalM Bool :=
 
 /-- Returns `true` if the cutsat state is inconsistent. -/
 def inconsistent : GoalM Bool := do
-  if (← isInconsistent) then return true
+  bif (← isInconsistent) then return true
   return (← get').conflict?.isSome
 
 set_option compiler.ignoreBorrowAnnotation true in
@@ -139,19 +139,19 @@ cutsat state. A constraint that was already stored keeps its depth.
 -/
 
 def EqCnstr.markStored (c : EqCnstr) : GoalM EqCnstr := do
-  if c.depth?.isSome then return c
+  bif c.depth?.isSome then return c
   return { c with depth? := some (← getGoalStackDepth) }
 
 def DvdCnstr.markStored (c : DvdCnstr) : GoalM DvdCnstr := do
-  if c.depth?.isSome then return c
+  bif c.depth?.isSome then return c
   return { c with depth? := some (← getGoalStackDepth) }
 
 def LeCnstr.markStored (c : LeCnstr) : GoalM LeCnstr := do
-  if c.depth?.isSome then return c
+  bif c.depth?.isSome then return c
   return { c with depth? := some (← getGoalStackDepth) }
 
 def DiseqCnstr.markStored (c : DiseqCnstr) : GoalM DiseqCnstr := do
-  if c.depth?.isSome then return c
+  bif c.depth?.isSome then return c
   return { c with depth? := some (← getGoalStackDepth) }
 
 def DvdCnstr.isTrivial (c : DvdCnstr) : Bool :=
@@ -246,7 +246,7 @@ def _root_.Int.Internal.Linear.Poly.eval? (p : Poly) : GoalM (Option Rat) := do
   let rec go (v : Rat) : Poly → Option Rat
     | .num k => some (v + k)
     | .add k x p =>
-      if _ : x < a.size then
+      bif _ : x <ᵇ a.size then
         go (v + k*a[x]) p
       else
         none
@@ -264,7 +264,7 @@ Returns `.true` if `c` is satisfied by the current partial model,
 -/
 def DvdCnstr.satisfied (c : DvdCnstr) : GoalM LBool := do
   let some v ← c.p.eval? | return .undef
-  if v.den != 1 then return .false
+  bif v.den != 1 then return .false
   return decide (c.d ∣ v.num) |>.toLBool
 
 def _root_.Int.Internal.Linear.Poly.satisfiedLe (p : Poly) : GoalM LBool := do
@@ -311,11 +311,11 @@ def CooperSplitPred.numCases (pred : CooperSplitPred) : Nat :=
   let a  := pred.c₁.p.leadCoeff
   let b  := pred.c₂.p.leadCoeff
   match pred.c₃? with
-  | none => if pred.left then a.natAbs else b.natAbs
+  | none => bif pred.left then a.natAbs else b.natAbs
   | some c₃ =>
     let c  := c₃.p.leadCoeff
     let d  := c₃.d
-    if pred.left then
+    bif pred.left then
       Int.lcm a (a * d / Int.gcd (a * d) c)
     else
       Int.lcm b (b * d / Int.gcd (b * d) c)

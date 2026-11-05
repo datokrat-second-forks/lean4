@@ -24,11 +24,11 @@ private partial def satisfyDiseqs (goal : Goal) (a : Std.HashMap Expr Rat) (e : 
   for parent in parents.elems do
     let_expr Eq _ lhs rhs := parent | continue
     let some root := goal.getRoot? parent | continue
-    if root.isConstOf ``False then
+    bif root.isConstOf ``False then
       let some lhsRoot := goal.getRoot? lhs | continue
       let some rhsRoot := goal.getRoot? rhs | continue
-      if lhsRoot == e && !checkDiseq rhsRoot then return false
-      if rhsRoot == e && !checkDiseq lhsRoot then return false
+      bif lhsRoot == e && !checkDiseq rhsRoot then return false
+      bif rhsRoot == e && !checkDiseq lhsRoot then return false
   return true
 where
   checkDiseq (other : Expr) : Bool :=
@@ -45,9 +45,9 @@ partial def pickUnusedValue (goal : Goal) (a : Std.HashMap Expr Rat) (e : Expr) 
   go next
 where
   go (next : Int) : Int :=
-    if alreadyUsed.contains next then
+    bif alreadyUsed.contains next then
       go (next+1)
-    else if satisfyDiseqs goal a e next then
+    else bif satisfyDiseqs goal a e next then
       next
     else
       go (next + 1)
@@ -83,15 +83,15 @@ private def assignUnassigned (goal : Goal) (isTarget : ENode → MetaM Bool) (mo
   -- Collect used values
   let mut used : Std.HashSet Int := {}
   for (_, v) in model do
-    if v.den == 1 then
+    bif v.den == 1 then
       used := used.insert v.num
   let mut model := model
   -- Assign the remaining ones with values not used by cutsat
   for e in goal.exprs do
     let node ← goal.getENode e
-    if node.isRoot then
-    if (← isTarget node) then
-    if model[node.self]?.isNone then
+    bif node.isRoot then
+    bif (← isTarget node) then
+    bif model[node.self]?.isNone then
       let v := pickUnusedValue goal model node.self nextVal used
       model := assignEqc goal node.self v model
       used := used.insert v
@@ -103,7 +103,7 @@ private def sortModel (goal : Goal) (m : Array (Expr × Rat)) : Array (Expr × R
   m.qsort fun (e₁, _) (e₂, _) =>
     let g₁ := goal.getGeneration e₁
     let g₂ := goal.getGeneration e₂
-    if g₁ != g₂ then g₁ < g₂ else e₁.lt e₂
+    bif g₁ != g₂ then g₁ < g₂ else e₁.lt e₂
 
 /--
 Converts the given model into a sorted array of pairs `(e, v)` representing assignments `e := v`.
@@ -121,7 +121,7 @@ def finalizeModel (goal : Goal) (isTarget : ENode → MetaM Bool) (model : Std.H
 
 /-- If the given trace class is enabled, trace the model using the class. -/
 def traceModel (traceClass : Name) (model : Array (Expr × Rat)) : MetaM Unit := do
-  if (← isTracingEnabledFor traceClass) then
+  bif (← isTracingEnabledFor traceClass) then
     for (x, v) in model do
       addTrace traceClass m!"{quoteIfArithTerm x} := {v}"
 

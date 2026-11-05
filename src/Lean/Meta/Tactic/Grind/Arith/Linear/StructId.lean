@@ -153,7 +153,7 @@ private def getHSMulNatFn? (u : Level) (type : Expr) : GoalM (Option Expr) := do
 
 def getStructId? (type : Expr) : GoalM (Option Nat) := do
   unless (← getConfig).linarith do return none
-  if (← Cutsat.isCutsatType type) then return none
+  bif (← Cutsat.isCutsatType type) then return none
   if let some id? := (← get').typeIdOf.find? { expr := type } then
     return id?
   else
@@ -162,7 +162,7 @@ def getStructId? (type : Expr) : GoalM (Option Nat) := do
     return id?
 where
   go? : GoalM (Option Nat) := do
-    if type.isAppOfArity ``Grind.IntModule.OfNatModule.Q 2 then
+    bif type.isAppOfArity ``Grind.IntModule.OfNatModule.Q 2 then
       goQ? type.appFn!.appArg! type.appArg!
     else
       goCore?
@@ -269,7 +269,7 @@ where
     let isPreorderInst? ← mkIsPreorderInst? u type leInst?
     let isPartialInst? ← mkIsPartialOrderInst? u type leInst?
     let isLinearInst? ← mkIsLinearOrderInst? u type leInst?
-    if (← getConfig).ring && ringId?.isSome && isPreorderInst?.isNone then
+    bif (← getConfig).ring && ringId?.isSome && isPreorderInst?.isNone then
       /-
       If the type is a `Ring` **and** is not even a preorder **and** `grind ring` is enabled,
       we let `grind ring` process the equalities and disequalities. There is no
@@ -288,9 +288,9 @@ where
       | some leInst, some isPreorderInst =>
         synthInstance? <| mkApp4 (mkConst ``Grind.OrderedAdd [u]) type addInst leInst isPreorderInst
       | _, _ => pure none
-    let isPreorderInst? := if orderedAddInst?.isNone then none else isPreorderInst?
+    let isPreorderInst? := bif orderedAddInst?.isNone then none else isPreorderInst?
     -- preorderInst? may have been reset, check again whether this module is needed.
-    if (← getConfig).ring && ringId?.isSome && isPreorderInst?.isNone then
+    bif (← getConfig).ring && ringId?.isSome && isPreorderInst?.isNone then
       -- See comment above
       modify' fun s => { s with forbiddenNatModules := s.forbiddenNatModules.insert { expr := type } }
       return none
@@ -336,7 +336,7 @@ where
       pure none
     let zsmulFn? ← getHSMulIntFn? u type
     let nsmulFn? ← getHSMulNatFn? u type
-    let homomulFn? ← if commRingInst?.isSome then
+    let homomulFn? ← bif commRingInst?.isSome then
       let mulInst ← getBinHomoInst ``HMul u type
       pure <| some (← internalizeFn <| mkApp4 (mkConst ``HMul.hMul [u, u, u]) type type type mulInst)
     else
@@ -350,13 +350,13 @@ where
     }
     modify' fun s => { s with structs := s.structs.push struct }
     if let some one := one? then
-      if ringInst?.isSome then LinearM.run id do
-        if orderedRingInst?.isSome && lawfulOrderLTInst?.isSome then
+      bif ringInst?.isSome then LinearM.run id do
+        bif orderedRingInst?.isSome && lawfulOrderLTInst?.isSome then
           -- Create `1` variable, and assert strict lower bound `0 < 1` and `0 ≠ 1`
           let x ← mkVar one (mark := false)
           addZeroLtOne x
           addZeroNeOne x
-        else if fieldInst?.isSome || isNonTrivialIsCharInst charInst? then
+        else bif fieldInst?.isSome || isNonTrivialIsCharInst charInst? then
           -- Create `1` variable, and assert `0 ≠ 1`
           let x ← mkVar one (mark := false)
           addZeroNeOne x
@@ -367,8 +367,8 @@ private def mkNatModuleInst? (u : Level) (type : Expr) : GoalM (Option Expr) := 
 
 def getNatStructId? (type : Expr) : GoalM (Option Nat) := do
   unless (← getConfig).linarith do return none
-  if (← get').forbiddenNatModules.contains { expr := type } then return none
-  if (← Cutsat.isCutsatType type) then return none
+  bif (← get').forbiddenNatModules.contains { expr := type } then return none
+  bif (← Cutsat.isCutsatType type) then return none
   if let some id? := (← get').natTypeIdOf.find? { expr := type } then
     return id?
   else

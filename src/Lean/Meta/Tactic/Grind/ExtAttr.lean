@@ -12,12 +12,12 @@ namespace Lean.Meta.Grind
 /-! Grind extensionality attribute to mark which `[ext]` theorems should be used. -/
 
 def validateExtAttr (declName : Name) : CoreM Unit := do
-  if !(← Ext.isExtTheorem declName) then
-  if !(isStructure (← getEnv) declName) then
+  bif !(← Ext.isExtTheorem declName) then
+  bif !(isStructure (← getEnv) declName) then
     throwError "invalid `[grind ext]`, `{.ofConstName declName}` is neither tagged with `[ext]` nor is a structure"
 
 def ExtTheorems.eraseDecl (s : ExtTheorems) (declName : Name) : CoreM ExtTheorems := do
-  if s.contains declName then
+  bif s.contains declName then
     return s.erase declName
   else
     throwError "`{.ofConstName declName}` is not marked with the `[grind ext]` attribute"

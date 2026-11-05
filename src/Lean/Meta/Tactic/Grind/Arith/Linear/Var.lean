@@ -25,7 +25,7 @@ def mkVar (e : Expr) (mark := true) : LinearM Var := do
     elimEqs    := s.elimEqs.push none
   }
   setTermStructId e
-  if mark then
+  bif mark then
     linearExt.markTerm e
   return var
 

@@ -19,11 +19,11 @@ anchors to reference terms in the `grind` state.
 Hashes names for computing anchors (aka stable hash codes)
 -/
 def hashName (n : Name) : UInt64 :=
-  if n.hasMacroScopes || n.isInaccessibleUserName || n.isImplementationDetail then
+  bif n.hasMacroScopes || n.isInaccessibleUserName || n.isImplementationDetail then
     0
-  else if isPrivateName n then
+  else bif isPrivateName n then
     hash (privateToUserName n)
-  else if n.isInternal then
+  else bif n.isInternal then
     /-
     **Note** We consider hashing the prefix, but it was not good enough.
     For example, an internal name may depend on the name of theorem being defined.
@@ -38,8 +38,8 @@ def isHiddenName (n : Name) : Bool :=
 
 -- `mixHash` variant where `0` is treated as don't care
 def mix (a b : UInt64) : UInt64 :=
-  if a == 0 then b
-  else if b == 0 then a
+  bif a == 0 then b
+  else bif b == 0 then a
   else mixHash a b
 
 /--
@@ -49,7 +49,7 @@ it from other hidden variables with the same base name, so we also use its rank 
 def hashHiddenFVar (decl : LocalDecl) : MetaM UInt64 := do
   let baseName := decl.userName.eraseMacroScopes
   let rank := (← getLCtx).foldl (init := 0) fun rank d =>
-    if d.index < decl.index && isHiddenName d.userName && d.userName.eraseMacroScopes == baseName then
+    bif d.index <ᵇ decl.index && isHiddenName d.userName && d.userName.eraseMacroScopes == baseName then
       rank + 1
     else
       rank
@@ -64,11 +64,11 @@ public partial def getAnchor (e : Expr) : GrindM UInt64 := do
       **Note**: we skip matcher declaration names because they may introduce some
       "instability". Recall that `match` auxiliary declarations are reused.
       -/
-      if (← isMatcher declName) then pure 0
+      bif (← isMatcher declName) then pure 0
       else pure <| hashName declName
     | .fvar fvarId =>
       let decl ← fvarId.getDecl
-      if isHiddenName decl.userName then hashHiddenFVar decl
+      bif isHiddenName decl.userName then hashHiddenFVar decl
       else pure <| hashName decl.userName
     | .mdata _ b => getAnchor b
     | .letE n v t b _ =>
@@ -79,18 +79,18 @@ public partial def getAnchor (e : Expr) : GrindM UInt64 := do
     | .bvar idx => pure <| hash idx
     | .lit v => pure <| hash v
     | .app .. => e.withApp fun f args => do
-      if isMarkedSubsingletonConst f && args.size == 2 then
+      bif isMarkedSubsingletonConst f && args.size == 2 then
         -- **Note**: we only visit the type of marked subsingleton terms.
         getAnchor args[0]!
       else
-        let pinfos ← if f.hasLooseBVars then
+        let pinfos ← bif f.hasLooseBVars then
           pure #[]
         else
           pure <| (← getFunInfo f).paramInfo
         let mut r ← getAnchor f
         for h : i in *...args.size do
           let arg := args[i]
-          if h : i < pinfos.size then
+          bif h : i <ᵇ pinfos.size then
             let info := pinfos[i]
             -- **Note**: we ignore instances we computing stable hash codes
             -- TODO: evaluate whether we should ignore regular implicit arguments too.
@@ -124,7 +124,7 @@ public def getNumDigitsForAnchors [HasAnchor α] (es : Array α) : Nat :=
   go 4
 where
   go (numDigits : Nat) : Nat := Id.run do
-    if 4*numDigits  < 64 then
+    bif 4*numDigits  <ᵇ 64 then
       let shift := 64 - 4*numDigits
       let mut found : Std.HashMap UInt64 UInt64 := {}
       for e in es do
@@ -132,7 +132,7 @@ where
         let a' := a >>> shift.toUInt64
         if let some b := found[a']? then
           -- **Note**: if the full anchors are equal, expanding the number of digits does not help.
-          if b != a then
+          bif b != a then
             return (← go (numDigits+1))
         else
           found  := found.insert a' a

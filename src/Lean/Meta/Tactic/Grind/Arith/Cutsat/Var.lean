@@ -32,8 +32,8 @@ private def isNonlinearTerm (e : Expr) : MetaM Bool := do
 
 private def registerNonlinearOcc (arg : Expr) (x : Var) : GoalM Unit := do
   let y ← mkVar arg
-  if (← get').elimEqs[y]!.isSome then
-    if (← propagateNonlinearTerm y x) then
+  bif (← get').elimEqs[y]!.isSome then
+    bif (← propagateNonlinearTerm y x) then
       return ()
   let occs := (← get').nonlinearOccs.find? y |>.getD []
   unless x ∈ occs do
@@ -45,9 +45,9 @@ private partial def registerNonlinearOccsAt (e : Expr) (x : Var) : GoalM Unit :=
   | HDiv.hDiv _ _ _ _ _ b => registerNonlinearOcc b x
   | HMod.hMod _ _ _ _ _ b => registerNonlinearOcc b x
   | HPow.hPow _ _ _ _ a b =>
-    if (← getIntValue? a).isNone then
+    bif (← getIntValue? a).isNone then
       registerNonlinearOcc a x
-    if (← getIntValue? b).isNone && (← getNatValue? b).isNone then
+    bif (← getIntValue? b).isNone && (← getNatValue? b).isNone then
       -- Recall that `b : Nat`, we must create `NatCast.natCast b` and watch it.
       let (b', _) ← mkNatVar b
       internalize b' (← getGeneration b)
@@ -57,7 +57,7 @@ where
   go (e : Expr) : GoalM Unit := do
     match_expr e with
     | HMul.hMul _ _ _ i a b =>
-      if (← isInstHMulInt i) then
+      bif (← isInstHMulInt i) then
         go a; go b
       else
         registerNonlinearOcc e x
@@ -83,7 +83,7 @@ def mkVarImpl (expr : Expr) : GoalM Var := do
   cutsatExt.markTerm expr
   assertNatCast expr var
   assertNonneg expr var
-  if (← isNonlinearTerm expr) then
+  bif (← isNonlinearTerm expr) then
     registerNonlinearOccsAt expr var
   return var
 
@@ -93,7 +93,7 @@ def isInt (e : Expr) : GoalM Bool := do
 def isAdd? (e : Expr) (report := true) : GoalM (Option (Expr × Expr)) := do
   let_expr HAdd.hAdd _ _ _ inst a b ← e | return none
   unless (← isInstHAddInt inst) do
-    if report then
+    bif report then
       reportIssue! "found term with non-standard instance{indentExpr e}"
     return none
   return some (a, b)
@@ -105,7 +105,7 @@ def isMul? (e : Expr) (report := true) : GoalM (Option (Int × Expr)) := do
   let_expr HMul.hMul _ _ _ inst a b ← e
     | return none
   unless (← isInstHMulInt inst) do
-    if report then
+    bif report then
       reportIssue! "found term with non-standard instance{indentExpr e}"
     return none
   let some k ← getIntValue? a
@@ -119,7 +119,7 @@ def addMonomial (e : Expr) (p : Poly) : GoalM Poly := do
   if let some (k, x) ← isMul? e then
     return .add k (← mkVar x) p
   if let some k ← getIntValue? e then
-    if p.isZero then
+    bif p.isZero then
       return .num k
     else
       reportIssue! "monomial expected, found numeral{indentExpr e}\ninternalizing as variable"
@@ -166,7 +166,7 @@ partial def toPoly? (e : Expr) : GoalM (Option Poly) := do
     return some (.num k)
   let some (a, b) ← isAdd? e | monomial? e (.num 0)
   if let some k ← getIntValue? b then
-    if k == 0 then return none
+    bif k == 0 then return none
     go a (.num k)
   else
     let some p ← monomial? b (.num 0) | return none
@@ -174,9 +174,9 @@ partial def toPoly? (e : Expr) : GoalM (Option Poly) := do
 where
   monomial? (e : Expr) (p : Poly) : GoalM (Option Poly) := do
     if let some (k, a) ← isMul? e then
-      if k == 0 || k == 1 || (← isLinearArith a) then return none
+      bif k == 0 || k == 1 || (← isLinearArith a) then return none
       return some (.add k (← mkVar a) p)
-    if (← isLinearArith e) then return none
+    bif (← isLinearArith e) then return none
     return some (.add 1 (← mkVar e) p)
   go (e : Expr) (p : Poly) : GoalM (Option Poly) := do
     let some (a, b) ← isAdd? e | monomial? e p

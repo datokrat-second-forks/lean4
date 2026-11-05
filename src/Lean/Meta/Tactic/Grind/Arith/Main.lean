@@ -13,17 +13,17 @@ public section
 namespace Lean.Meta.Grind.Arith
 
 builtin_grind_propagator propagateLE ↓LE.le := fun e => do
-  if (← isEqTrue e) then
+  bif (← isEqTrue e) then
     Cutsat.propagateLe e (eqTrue := true)
     Linear.propagateIneq e (eqTrue := true)
-  else if (← isEqFalse e) then
+  else bif (← isEqFalse e) then
     Cutsat.propagateLe e (eqTrue := false)
     Linear.propagateIneq e (eqTrue := false)
 
 builtin_grind_propagator propagateLT ↓LT.lt := fun e => do
-  if (← isEqTrue e) then
+  bif (← isEqTrue e) then
     Linear.propagateIneq e (eqTrue := true)
-  else if (← isEqFalse e) then
+  else bif (← isEqFalse e) then
     Linear.propagateIneq e (eqTrue := false)
 
 end Lean.Meta.Grind.Arith

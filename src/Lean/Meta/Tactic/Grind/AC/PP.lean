@@ -17,7 +17,7 @@ private instance : MonadGetStruct M where
   getStruct := get
 
 private def toOption (cls : Name) (header : Thunk MessageData) (msgs : Array MessageData) : Option MessageData :=
-  if msgs.isEmpty then
+  bif msgs.isEmpty then
     none
   else
     some (.trace {cls} header.get msgs)
@@ -43,9 +43,9 @@ private def ppStruct? : M (Option MessageData) := do
   msgs := push msgs (← ppDiseqs?)
   unless msgs.isEmpty do
     let mut info := #[]
-    if (← get).commInst?.isSome then
+    bif (← get).commInst?.isSome then
       info := info.push <| toTraceElem "commutative"
-    if (← get).idempotentInst?.isSome then
+    bif (← get).idempotentInst?.isSome then
       info := info.push <| toTraceElem "idempotent"
     if let some u := (← get).neutral? then
       info := info.push <| toTraceElem m!"identity: `{u}`"
@@ -57,9 +57,9 @@ def pp? (goal : Goal) : MetaM (Option MessageData) := do
   for struct in (← acExt.getStateCore goal).structs do
     let some msg ← ppStruct? |>.run' struct | pure ()
     msgs := msgs.push msg
-  if msgs.isEmpty then
+  bif msgs.isEmpty then
     return none
-  else if h : msgs.size = 1 then
+  else bif h : msgs.size =ᵇ 1 then
     return some msgs[0]
   else
     return some (.trace { cls := `assoc } "Operators" msgs)

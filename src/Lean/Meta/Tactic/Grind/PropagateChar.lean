@@ -44,7 +44,7 @@ builtin_grind_propagator propagateCharValUp ↑Char.val := fun e => do
 character literal. See `propagateCharToNatUp`. -/
 builtin_grind_propagator propagateCharOfNatUp ↑Char.ofNat := fun e => do
   let_expr Char.ofNat n := e | return ()
-  if e.isCharLit then return ()
+  bif e.isCharLit then return ()
   let k := (← getRootENode n).self
   let some v ← getNatValue? k | return ()
   let c ← shareCommon (toExpr (Char.ofNat v))

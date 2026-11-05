@@ -23,7 +23,7 @@ open Structural in
 partial def toLinearExpr (e : Expr) (generation : Nat := 0) : GoalM Int.Internal.Linear.Expr := do
   let toVar (e : Expr) := do
     let e ← shareCommon e
-    if (← alreadyInternalized e) then
+    bif (← alreadyInternalized e) then
       return .var (← mkVar e)
     else
       internalize e generation
@@ -39,16 +39,16 @@ partial def toLinearExpr (e : Expr) (generation : Nat := 0) : GoalM Int.Internal
     if let some n ← getIntValue? e then return .num n
     else toVar e
   | Neg.neg _ i a =>
-    if (← isInstNegInt i) then return .neg (← toLinearExpr a)
+    bif (← isInstNegInt i) then return .neg (← toLinearExpr a)
     else toVar e
   | HAdd.hAdd _ _ _ i a b =>
-    if (← isInstHAddInt i) then return .add (← toLinearExpr a) (← toLinearExpr b)
+    bif (← isInstHAddInt i) then return .add (← toLinearExpr a) (← toLinearExpr b)
     else toVar e
   | HSub.hSub _ _ _ i a b =>
-    if (← isInstHSubInt i) then return .sub (← toLinearExpr a) (← toLinearExpr b)
+    bif (← isInstHSubInt i) then return .sub (← toLinearExpr a) (← toLinearExpr b)
     else toVar e
   | HMul.hMul _ _ _ i a b =>
-    if (← isInstHMulInt i) then mul a b
+    bif (← isInstHMulInt i) then mul a b
     else toVar e
   | _ => toVar e
 

@@ -25,7 +25,7 @@ inductive SplitStatus where
 
 /-- Given `c`, the condition of an `if-then-else`, check whether we need to case-split on the `if-then-else` or not -/
 private def checkIteCondStatus (c : Expr) : GoalM SplitStatus := do
-  if (← isEqTrue c <||> isEqFalse c) then
+  bif (← isEqTrue c <||> isEqFalse c) then
     return .resolved
   else
     return .ready 2
@@ -35,12 +35,12 @@ Given `e` of the form `a ∨ b`, check whether we are ready to case-split on `e`
 That is, `e` is `True`, but neither `a` nor `b` is `True`."
 -/
 private def checkDisjunctStatus (e a b : Expr) : GoalM SplitStatus := do
-  if (← isEqTrue e) then
-    if (← isEqTrue a <||> isEqTrue b) then
+  bif (← isEqTrue e) then
+    bif (← isEqTrue a <||> isEqTrue b) then
       return .resolved
     else
       return .ready 2
-  else if (← isEqFalse e) then
+  else bif (← isEqFalse e) then
     return .resolved
   else
     return .notReady
@@ -50,10 +50,10 @@ Given `e` of the form `a ∧ b`, check whether we are ready to case-split on `e`
 That is, `e` is `False`, but neither `a` nor `b` is `False`.
  -/
 private def checkConjunctStatus (e a b : Expr) : GoalM SplitStatus := do
-  if (← isEqTrue e) then
+  bif (← isEqTrue e) then
     return .resolved
-  else if (← isEqFalse e) then
-    if (← isEqFalse a <||> isEqFalse b) then
+  else bif (← isEqFalse e) then
+    bif (← isEqFalse a <||> isEqFalse b) then
       return .resolved
     else
       return .ready 2
@@ -67,13 +67,13 @@ There are two cases:
 2- `e` is `False`, but neither `a` is `True` and `b` is `False`, nor `a` is `False` and `b` is `True`.
 -/
 private def checkIffStatus (e a b : Expr) : GoalM SplitStatus := do
-  if (← isEqTrue e) then
-    if (← (isEqTrue a <&&> isEqTrue b) <||> (isEqFalse a <&&> isEqFalse b)) then
+  bif (← isEqTrue e) then
+    bif (← (isEqTrue a <&&> isEqTrue b) <||> (isEqFalse a <&&> isEqFalse b)) then
       return .resolved
     else
       return .ready 2
-  else if (← isEqFalse e) then
-    if (← (isEqTrue a <&&> isEqFalse b) <||> (isEqFalse a <&&> isEqTrue b)) then
+  else bif (← isEqFalse e) then
+    bif (← (isEqTrue a <&&> isEqFalse b) <||> (isEqFalse a <&&> isEqTrue b)) then
       return .resolved
     else
       return .ready 2
@@ -84,7 +84,7 @@ private def checkIffStatus (e a b : Expr) : GoalM SplitStatus := do
 private def isCongrToPrevSplit (c : Expr) : GoalM Bool := do
   unless c.isApp do return false
   (← get).split.resolved.foldM (init := false) fun flag { expr := c' } => do
-    if flag then
+    bif flag then
       return true
     else
       return c'.isApp && (← get).isCongruent c c'
@@ -94,25 +94,25 @@ private def checkDefaultSplitStatus (e : Expr) : GoalM SplitStatus := do
   | Or a b => checkDisjunctStatus e a b
   | And a b => checkConjunctStatus e a b
   | Eq _ a b =>
-    if isMorallyIff e then
+    bif isMorallyIff e then
       checkIffStatus e a b
     else
       return .ready 2
   | _ =>
-    if isIte e || isDIte e then
+    bif isIte e || isDIte e then
       return (← checkIteCondStatus (e.getArg! 1))
-    if (← isResolvedCaseSplit e) then
+    bif (← isResolvedCaseSplit e) then
       trace_goal[grind.debug.split] "split resolved: {e}"
       return .resolved
-    if (← isCongrToPrevSplit e) then
+    bif (← isCongrToPrevSplit e) then
       return .resolved
     if let some info := isMatcherAppCore? (← getEnv) e then
       return .ready info.numAlts
     if let .const declName .. := e.getAppFn then
       if let some info ← isInductivePredicate? declName then
-        if (← isEqTrue e) then
+        bif (← isEqTrue e) then
           return .ready info.ctors.length info.isRec
-    if e.isFVar then
+    bif e.isFVar then
       let type ← whnfD (← inferType e)
       let report : GoalM Unit := do
         reportIssue! "cannot perform case-split on {e}, unexpected type{indentExpr type}"
@@ -122,7 +122,7 @@ private def checkDefaultSplitStatus (e : Expr) : GoalM SplitStatus := do
     return .notReady
 
 def checkSplitInfoArgStatus (a b : Expr) (eq : Expr) : GoalM SplitStatus := do
-  if (← isEqTrue eq <||> isEqFalse eq) then return .resolved
+  bif (← isEqTrue eq <||> isEqFalse eq) then return .resolved
   let is := (← get).split.argPosMap[(a, b)]? |>.getD []
   let mut j := a.getAppNumArgs
   let mut it_a := a
@@ -130,7 +130,7 @@ def checkSplitInfoArgStatus (a b : Expr) (eq : Expr) : GoalM SplitStatus := do
   repeat
     unless it_a.isApp && it_b.isApp do return .ready 2
     j := j - 1
-    if j ∉ is then
+    bif !is.contains j then
       let arg_a := it_a.appArg!
       let arg_b := it_b.appArg!
       unless (← isEqv arg_a arg_b) do
@@ -145,16 +145,16 @@ def checkSplitInfoArgStatus (a b : Expr) (eq : Expr) : GoalM SplitStatus := do
   return .ready 2
 
 private def checkForallStatus (imp : Expr) (h : imp.isForall) : GoalM SplitStatus := do
-  if (← isEqTrue imp) then
+  bif (← isEqTrue imp) then
     let p := imp.forallDomain h
     let q := imp.forallBody h
-    if (← isEqTrue p <||> isEqFalse p) then
+    bif (← isEqTrue p <||> isEqFalse p) then
       return .resolved
     unless q.hasLooseBVars do
-      if (← isEqTrue q <||> isEqFalse q) then
+      bif (← isEqTrue q <||> isEqFalse q) then
         return .resolved
     return .ready 2
-  else if (← isEqFalse imp) then
+  else bif (← isEqFalse imp) then
     return .resolved
   else
     return .notReady
@@ -180,8 +180,8 @@ private def checkAnchorRefs (c : SplitInfo) : GrindM Bool := do
 
 /-- Returns the next case-split to be performed. It uses a very simple heuristic. -/
 private def selectNextSplit? : GoalM SplitCandidate := do
-  if (← isInconsistent) then return .none
-  if (← checkMaxCaseSplit) then return .none
+  bif (← isInconsistent) then return .none
+  bif (← checkMaxCaseSplit) then return .none
   go (← get).split.candidates .none []
 where
   go (cs : List SplitInfo) (c? : SplitCandidate) (cs' : List SplitInfo) : GoalM SplitCandidate := do
@@ -194,7 +194,7 @@ where
         modify fun s => { s with ematch.num := 0 }
       return c?
     | c::cs =>
-    if !(← checkAnchorRefs c) then
+    bif !(← checkAnchorRefs c) then
       /-
       **Note**: `grind`s context contains anchor references restricting the
       case-splits that can be performed, and `c` does not matches any of
@@ -207,26 +207,26 @@ where
       | .notReady => go cs c? (c::cs')
       | .resolved => go cs c? cs'
       | .ready numCases isRec tryPostpone =>
-      if (← cheapCasesOnly) && numCases > 1 then
+      bif (← cheapCasesOnly) && numCases >ᵇ 1 then
         go cs c? (c::cs')
       else match c? with
       | .none => go cs (.some c numCases isRec tryPostpone) cs'
       | .some c' numCases' _ tryPostpone' =>
       let isBetter : GoalM Bool := do
-        if tryPostpone' && !tryPostpone then
+        bif tryPostpone' && !tryPostpone then
           return true
-        else if tryPostpone && !tryPostpone' then
+        else bif tryPostpone && !tryPostpone' then
           return false
-        else if numCases == 1 && !isRec && numCases' > 1 then
+        else bif numCases == 1 && !isRec && numCases' >ᵇ 1 then
           return true
         /-
         **Note**: We used to use `getGeneration c.getExpr` instead of `c.getGeneration`.
         This was incorrect. The expression returned by `c.getExpr` may have not been internalized yet.
         -/
-        else if (← c.getGeneration) < (← c'.getGeneration) then
+        else bif (← c.getGeneration) <ᵇ (← c'.getGeneration) then
           return true
         return numCases < numCases'
-      if (← isBetter) then
+      bif (← isBetter) then
           go cs (.some c numCases isRec tryPostpone) (c'::cs')
         else
           go cs c? (c::cs')
@@ -239,8 +239,8 @@ private def mkCasesMajor (c : Expr) : GoalM Expr := do
   match_expr c with
   | And a b => return mkApp3 (mkConst ``Grind.or_of_and_eq_false) a b (← mkEqFalseProof c)
   | Eq _ a b =>
-    if isMorallyIff c then
-      if (← isEqTrue c) then
+    bif isMorallyIff c then
+      bif (← isEqTrue c) then
         return mkApp3 (mkConst ``Grind.of_eq_eq_true) a b (← mkEqTrueProof c)
       else
         return mkApp3 (mkConst ``Grind.of_eq_eq_false) a b (← mkEqFalseProof c)
@@ -249,15 +249,15 @@ private def mkCasesMajor (c : Expr) : GoalM Expr := do
       return mkGrindEM c
   | Not e => return mkGrindEM e
   | _ =>
-    if isIte c || isDIte c then
+    bif isIte c || isDIte c then
       return mkGrindEM (c.getArg! 1)
-    else if (← isEqTrue c) then
+    else bif (← isEqTrue c) then
       return mkOfEqTrueCore c (← mkEqTrueProof c)
     else
       return c
 
 private def casesWithTrace (mvarId : MVarId) (major : Expr) : GoalM (List MVarId) := do
-  if (← getConfig).trace then
+  bif (← getConfig).trace then
     if let .const declName _ := (← whnfD (← inferType major)).getAppFn then
       saveCases declName
   cases mvarId major
@@ -297,7 +297,7 @@ def getSplitCandidateAnchors (filter : Expr → GoalM Bool := fun _ => return tr
     match status with
     | .resolved | .notReady => return none
     | .ready numCases isRec _ =>
-      if (← filter e) then
+      bif (← filter e) then
         return some { e, c, numCases, isRec, anchor }
       else
         return none
@@ -330,8 +330,8 @@ def mkSplitAnchorRefInfo (c : SplitInfo) (candidates? : Option (List SplitInfo) 
   let shift := (64 - 4*numDigits).toUInt64
   let mut ordinal := 0
   for cand in candidates do
-    if cand.anchor >>> shift == anchor >>> shift then
-      if cand.c == c then
+    bif cand.anchor >>> shift == anchor >>> shift then
+      bif cand.c == c then
         return { numDigits, anchor, ordinal }
       ordinal := ordinal + 1
   -- `c` should be in the candidate list; fall back to the first match.
@@ -342,7 +342,7 @@ Creates the anchor reference syntax for the result of `mkSplitAnchorRefInfo`.
 -/
 def SplitAnchorRefInfo.toSyntax (info : SplitAnchorRefInfo) : CoreM (TSyntax `grind) := do
   let anchorStx ← mkAnchorSyntax info.numDigits info.anchor
-  if info.ordinal == 0 then
+  bif info.ordinal == 0 then
     `(grind| cases $anchorStx:anchor)
   else
     `(grind| cases $anchorStx:anchor/$(quote (info.ordinal + 1)):num)
@@ -359,7 +359,7 @@ hypotheses introduced during case analysis. If the proof is of the form `fun _ _
 -/
 private def getFalseProof? (mvarId : MVarId) : MetaM (Option Expr) := mvarId.withContext do
   let proof ← instantiateMVars (mkMVar mvarId)
-  if proof.hasSyntheticSorry then
+  bif proof.hasSyntheticSorry then
     /- **Note**: We do not perform non-chronological backtracking if the proof
     contains synthetic `sorry`. -/
     return none
@@ -370,7 +370,7 @@ where
     match_expr proof with
     | False.elim _ p => return some p
     | False.casesOn _ p => return some p
-    | id α p => if α.isFalse then return some p else return none
+    | id α p => bif α.isFalse then return some p else return none
     | _ =>
       /-
       **Note**: `intros` tactics may hide the `False` proof behind a `casesOn`
@@ -380,7 +380,7 @@ where
       Non-chronological backtracking currently fails in this kind of example.
       -/
       let .lam _ _ b _ := proof | return none
-      if b.hasLooseBVars then return none
+      bif b.hasLooseBVars then return none
       go b
 
 /-- Returns `true` if the given list can be compressed using `<;>` at `splitCore` -/
@@ -409,7 +409,7 @@ private def mkCasesAndThen (cases : TSyntax `grind) (seq : List (TSyntax `grind)
     `(grind| $cases:grind <;> $seq:grind)
 
 private def isCompressibleAlts (alts : Array (List (TSyntax `grind))) : Bool :=
-  if _ : alts.size > 0 then
+  bif _ : alts.size >ᵇ 0 then
     let alt := alts[0]
     isCompressibleSeq alt && alts.all (· == alt)
   else
@@ -424,10 +424,10 @@ def isSorryAlt (alt : List (TSyntax `grind)) : Bool :=
 
 private def mkCasesResultSeq (cases : TSyntax `grind) (alts : Array (List (TSyntax `grind)))
     (compress : Bool) : CoreM (List (TSyntax `grind)) := do
-  if compress && isCompressibleAlts alts then
-    if alts.size > 0 then
+  bif compress && isCompressibleAlts alts then
+    bif alts.size >ᵇ 0 then
       let firstAlt := alts[0]!
-      if isSorryAlt firstAlt then
+      bif isSorryAlt firstAlt then
         /-
         **Note**: It is a bit pointless to return a script of the form `cases #<anchor> <;> sorry`
         -/
@@ -437,7 +437,7 @@ private def mkCasesResultSeq (cases : TSyntax `grind) (alts : Array (List (TSynt
     else
       return [cases]
   else
-    let seq ← if h : alts.size = 1 then
+    let seq ← bif h : alts.size =ᵇ 1 then
       pure alts[0]
     else
       alts.toList.mapM fun s => mkGrindNext s
@@ -462,18 +462,18 @@ def splitCore (c : SplitInfo) (numCases : Nat) (isRec : Bool)
     case-split selection (e.g., `splitNext` via `selectNextSplit?`) must provide the
     original list using `candidates?`.
     -/
-    let anchorInfo? ← if traceEnabled then
+    let anchorInfo? ← bif traceEnabled then
       pure (some (← mkSplitAnchorRefInfo c candidates?))
     else
       pure none
     let gen ← getGeneration cExpr
-    let genNew := if numCases > 1 || isRec then gen+1 else gen
+    let genNew := bif numCases >ᵇ 1 || isRec then gen+1 else gen
     saveSplitDiagInfo cExpr genNew numCases c.source
     markCaseSplitAsResolved cExpr
     trace_goal[grind.split] "{cExpr}, generation: {gen}"
     let mvarIds ← if let .imp e h _ := c then
       casesWithTrace mvarId (mkGrindEM (e.forallDomain h))
-    else if (← isMatcherApp cExpr) then
+    else bif (← isMatcherApp cExpr) then
       casesMatch mvarId cExpr
     else
       casesWithTrace mvarId (← mkCasesMajor cExpr)
@@ -493,7 +493,7 @@ def splitCore (c : SplitInfo) (numCases : Nat) (isRec : Bool)
   let goalStack := goal.goalStack.push (goal.mvarId, goal.toGoalState)
   let subgoals := mvarIds.mapIdx fun i mvarId =>
     let numSplits := goal.split.num
-    let numSplits := if i > 0 || isRec then numSplits + 1 else numSplits
+    let numSplits := bif i >ᵇ 0 || isRec then numSplits + 1 else numSplits
     { goal with
       mvarId, goalStack
       split.num := numSplits
@@ -511,7 +511,7 @@ def splitCore (c : SplitInfo) (numCases : Nat) (isRec : Bool)
   for subgoal in subgoals do
     match (← kp subgoal) with
     | .stuck gs =>
-      if stopAtFirstFailure then
+      bif stopAtFirstFailure then
         /-
         **Note**: We don't need to assign `goal.mvarId` when `stopAtFirstFailure = true`
         because the caller will not be able to process the all failure/stuck goals anyway.
@@ -523,16 +523,16 @@ def splitCore (c : SplitInfo) (numCases : Nat) (isRec : Bool)
       if let some falseProof ← getFalseProof? subgoal.mvarId then
         goal.mvarId.assignFalseProof (← mkHoistedDecls (← getHoistedDecls goal) falseProof)
         return .closed seq
-      else if !seq.isEmpty then
+      else bif !seq.isEmpty then
         /- **Note**: if the sequence is empty, it means the user will never see this goal. -/
         seqNew := seqNew.push seq
   let proof ← mkHoistedDecls (← getHoistedDecls goal) (← instantiateMVars (mkMVar mvarId))
-  if (← goal.mvarId.getType).isFalse then
+  bif (← goal.mvarId.getType).isFalse then
     /- **Note**: We add the marker to assist `getFalseExpr?` -/
     goal.mvarId.assign (mkExpectedPropHint proof (mkConst ``False))
   else
     goal.mvarId.assign proof
-  if stuckNew.isEmpty then
+  bif stuckNew.isEmpty then
     if let some anchorInfo := anchorInfo? then
       let cases ← anchorInfo.toSyntax
       return .closed (← mkCasesResultSeq cases seqNew compress)
@@ -570,7 +570,7 @@ def splitNext (stopAtFirstFailure := true) (compress := true) : Action := fun go
     | kna goal
   let cExpr := c.getExpr
   let gen := goal.getGeneration cExpr
-  let genNew := if numCases > 1 || isRec then gen+1 else gen
+  let genNew := bif numCases >ᵇ 1 || isRec then gen+1 else gen
   let x : Action := splitCore c numCases isRec stopAtFirstFailure compress (candidates? := some candidates) >> intros genNew >> assertAll
   x goal kna kp
 

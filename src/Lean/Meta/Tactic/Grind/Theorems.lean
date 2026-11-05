@@ -131,14 +131,14 @@ def Theorems.find (s : Theorems α) (origin : Origin) : List α :=
 def getProofWithFreshMVarLevels [TheoremLike α] (thm : α) : MetaM Expr := do
   let proof := getProof thm
   let us := getLevelParams thm
-  if proof.isConst && us.isEmpty then
+  bif proof.isConst && us.isEmpty then
     let declName := proof.constName!
     let info ← getConstVal declName
-    if info.levelParams.isEmpty then
+    bif info.levelParams.isEmpty then
       return proof
     else
       mkConstWithFreshMVarLevels declName
-  else if us.isEmpty then
+  else bif us.isEmpty then
     return proof
   else
     let us' ← us.mapM fun _ => mkFreshLevelMVar
@@ -147,7 +147,7 @@ def getProofWithFreshMVarLevels [TheoremLike α] (thm : α) : MetaM Expr := do
 def Theorems.eraseDecl (s : Theorems α) (declName : Name) : MetaM (Theorems α) := do
   let throwErr {α} : MetaM α :=
     throwError "`{.ofConstName declName}` is not marked with the `[grind]` attribute"
-  if !wasOriginallyTheorem (← getEnv) declName then
+  bif !wasOriginallyTheorem (← getEnv) declName then
     if let some eqns ← getEqnsFor? declName then
        unless eqns.all fun eqn => s.contains (.decl eqn) do
          throwErr
@@ -196,11 +196,11 @@ def TheoremsArray.retrieve? (s : TheoremsArray α) (sym : Name) : Option (List �
     if let some (thms, a) := s[i]!.retrieve? sym then
       result := result ++ thms
       s := s.set! i a
-  if result.isEmpty then return none
+  bif result.isEmpty then return none
   return some (result, s)
 
 def TheoremsArray.insert [TheoremLike α] (s : TheoremsArray α) (thm : α) : TheoremsArray α := Id.run do
-  if s.isEmpty then
+  bif s.isEmpty then
     let thms := { : Theorems α}
     #[thms.insert thm]
   else

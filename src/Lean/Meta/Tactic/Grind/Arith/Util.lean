@@ -59,7 +59,7 @@ Returns `some (a, b)` if `e` is of the form
 -/
 def isNatAdd? (e : Expr) : Option (Expr × Expr) :=
   let_expr HAdd.hAdd _ _ _ i a b := e | none
-  if isInstAddNat i then some (a, b) else none
+  bif isInstAddNat i then some (a, b) else none
 
 /--
 Returns `true` if `e` is of the form
@@ -95,7 +95,7 @@ def isArithTerm (e : Expr) : Bool :=
 
 /-- Quote `e` using `「` and `」` if `e` is an arithmetic term that is being treated as a variable. -/
 def quoteIfArithTerm (e : Expr) : MessageData :=
-  if isArithTerm e then
+  bif isArithTerm e then
     aquote e
   else
     e
@@ -105,21 +105,21 @@ def quoteIfArithTerm (e : Expr) : MessageData :=
 - `g = α * a + β * b`.
 -/
 partial def gcdExt (a b : Int) : Int × Int × Int :=
-  if b = 0 then
-    (a.natAbs, if a = 0 then 0 else a / a.natAbs, 0)
+  bif b =ᵇ 0 then
+    (a.natAbs, bif a =ᵇ 0 then 0 else a / a.natAbs, 0)
   else
     let (g, α, β) := gcdExt b (a % b)
     (g, β, α - (a / b) * β)
 
 -- TODO: PArray.shrink and PArray.resize
 partial def shrink (a : PArray Rat) (sz : Nat) : PArray Rat :=
-  if a.size > sz then shrink a.pop sz else a
+  bif a.size >ᵇ sz then shrink a.pop sz else a
 
 partial def resize (a : PArray Rat) (sz : Nat) : PArray Rat :=
-  if a.size > sz then shrink a sz else go a
+  bif a.size >ᵇ sz then shrink a sz else go a
 where
   go (a : PArray Rat) : PArray Rat :=
-    if a.size < sz then go (a.push 0) else a
+    bif a.size <ᵇ sz then go (a.push 0) else a
 
 namespace CollectDecVars
 /-! Helper monad for collecting decision variables in `linarith` and `cutsat` -/
@@ -132,7 +132,7 @@ abbrev CollectDecVarsM := ReaderT FVarIdSet $ StateM State
 
 def alreadyVisited (c : α) : CollectDecVarsM Bool := do
   let addr := unsafe (ptrAddrUnsafe c).toUInt64 >>> 2
-  if (← get).visited.contains addr then return true
+  bif (← get).visited.contains addr then return true
   modify fun s => { s with visited := s.visited.insert addr }
   return false
 
@@ -170,7 +170,7 @@ def isIntModuleVirtualParent (parent? : Option Expr) : Bool :=
   let mut todo := #[]
   for c in cs do
     let b := getCoeff c
-    if b == 0 then
+    bif b == 0 then
       cs' := cs'.push c
     else
       todo := todo.push (b, c)

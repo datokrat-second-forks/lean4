@@ -63,9 +63,9 @@ private def mkKey (e : Expr) (i : Nat) : MetaM Key :=
     let mut args := Array.toVector args
     for h : j in *...args.size do
       let arg := args[j]
-      if i == j then
+      bif i == j then
         args := args.set j mainMark
-      else if !(← Sym.Canon.isSupport info.paramInfo j arg) then
+      else bif !(← Sym.Canon.isSupport info.paramInfo j arg) then
         args := args.set j otherMark
     let mask := mkAppN f args.toArray
     return { mask }
@@ -73,7 +73,7 @@ private def mkKey (e : Expr) (i : Nat) : MetaM Key :=
 private abbrev Map := Std.HashMap Key (List ArgInfo)
 private abbrev Candidates := Std.HashSet SplitInfo
 private def mkCandidate (a b : ArgInfo) (i : Nat) : GoalM SplitInfo := do
-  let (lhs, rhs) := if a.arg.lt b.arg then
+  let (lhs, rhs) := bif a.arg.lt b.arg then
     (a.arg, b.arg)
   else
     (b.arg, a.arg)
@@ -90,12 +90,12 @@ private def isFnInstance (f : Expr) : CoreM Bool := do
 def mbtc (ctx : MBTC.Context) : GoalM Bool := do
   unless (← getConfig).mbtc do return false
   -- It is pointless to run `mbtc` if maximum number of splits has been reached.
-  if (← checkMaxCaseSplit) then return false
+  bif (← checkMaxCaseSplit) then return false
   let mut map : Map := {}
   let mut candidates : Candidates := {}
   for e in (← get).exprs do
-    if e.isApp && !e.isEq && !e.isHEq then
-    if (← isCongrRoot e) then
+    bif e.isApp && !e.isEq && !e.isHEq then
+    bif (← isCongrRoot e) then
     unless (← ctx.isInterpreted e) do
       let f := e.getAppFn
       /-
@@ -103,38 +103,38 @@ def mbtc (ctx : MBTC.Context) : GoalM Bool := do
       `grind` treats instances as support elements, and they are handled by the canonicalizer.
       cast-like internal operations and handled by their associated solver.
       -/
-      if !(← isFnInstance f) && !isCastLikeFn f then
+      bif !(← isFnInstance f) && !isCastLikeFn f then
         let mut i := 0
         for arg in e.getAppArgs do
           let some arg ← getRoot? arg | pure ()
-          if (← ctx.hasTheoryVar arg) then
+          bif (← ctx.hasTheoryVar arg) then
             trace[grind.debug.mbtc] "{arg} @ {f}:{i}"
             let argInfo : ArgInfo := { arg, app := e }
             let key ← mkKey e i
             if let some otherInfos := map[key]? then
               unless otherInfos.any fun info => isSameExpr arg info.arg do
                 for otherInfo in otherInfos do
-                  if (← ctx.eqAssignment arg otherInfo.arg) then
-                    if (← hasSameType arg otherInfo.arg) then
+                  bif (← ctx.eqAssignment arg otherInfo.arg) then
+                    bif (← hasSameType arg otherInfo.arg) then
                       candidates := candidates.insert (← mkCandidate argInfo otherInfo i)
                 map := map.insert key (argInfo :: otherInfos)
             else
               map := map.insert key [argInfo]
           i := i + 1
-  if candidates.isEmpty then
+  bif candidates.isEmpty then
     return false
-  if (← get).split.num > (← getConfig).splits then
+  bif (← get).split.num >ᵇ (← getConfig).splits then
     reportIssue! "skipping `mbtc`, maximum number of splits has been reached `(splits := {(← getConfig).splits})`"
     return false
   let result := candidates.toArray.qsort fun c₁ c₂ => c₁.lt c₂
   let result ← result.filterMapM fun info => do
-    if (← isKnownCaseSplit info) then
+    bif (← isKnownCaseSplit info) then
       return none
     let .arg a b _ eq _ := info | return none
     trace[grind.mbtc] "{eq}"
     internalize eq (Nat.max (← getGeneration a) (← getGeneration b))
     return some info
-  if result.isEmpty then
+  bif result.isEmpty then
     return false
   for info in result do
     addSplitCandidate info

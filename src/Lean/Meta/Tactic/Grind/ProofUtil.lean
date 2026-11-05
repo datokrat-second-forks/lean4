@@ -11,7 +11,7 @@ namespace Lean.Meta.Grind
 
 def mkLetOfMap {_ : Hashable α} {_ : BEq α} (m : Std.HashMap α Expr) (e : Expr)
     (varPrefix : Name) (varType : Expr) (toExpr : α → Expr) : Expr := Id.run do
-  if m.isEmpty then
+  bif m.isEmpty then
     return e
   else
     let as := m.toArray

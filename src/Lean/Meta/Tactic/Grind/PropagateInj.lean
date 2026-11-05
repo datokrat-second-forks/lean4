@@ -43,14 +43,14 @@ def initInjFn (us : List Level) (α β : Expr) (f : Expr) (h : Expr) : GoalM Uni
   modify fun s => { s with inj.fns := s.inj.fns.insert { expr := f } { us, α, β, h } }
   let hidx := f.toHeadIndex
   for e in (← get).appMap.findD hidx [] do
-    if e.isApp && isSameExpr e.appFn! f then
+    bif e.isApp && isSameExpr e.appFn! f then
       mkInjEq e
 
 builtin_grind_propagator propagateInj ↓Function.Injective := fun e => do
   let_expr i@Function.Injective α β f := e | return ()
-  if (← isEqTrue e) then
+  bif (← isEqTrue e) then
     let f' := f.eta
-    let f ← if isSameExpr f f' then
+    let f ← bif isSameExpr f f' then
       pure f
     else
       let f' ← preprocessLight f'

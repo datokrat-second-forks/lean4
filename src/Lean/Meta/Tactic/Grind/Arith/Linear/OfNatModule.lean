@@ -31,7 +31,7 @@ abbrev getNatStructId : OfNatModuleM Nat :=
 def getNatStruct : OfNatModuleM NatStruct := do
   let s ← get'
   let natStructId ← getNatStructId
-  if h : natStructId < s.natStructs.size then
+  bif h : natStructId <ᵇ s.natStructs.size then
     return s.natStructs[natStructId]
   else
     throwError "`grind` internal error, invalid natStructId"
@@ -93,7 +93,7 @@ private partial def ofNatModule' (e : Expr) : OfNatModuleM (Expr × Expr) := do
   let ns ← getNatStruct
   match_expr e with
   | HAdd.hAdd _ _ _ i a b =>
-    if isAddInst ns i then
+    bif isAddInst ns i then
       let (a', ha) ← ofNatModule' a
       let (b', hb) ← ofNatModule' b
       let e' := mkApp2 s.addFn a' b'
@@ -102,7 +102,7 @@ private partial def ofNatModule' (e : Expr) : OfNatModuleM (Expr × Expr) := do
     else
       mkOfNatModuleVar e
   | HSMul.hSMul _ _ _ i a b =>
-    if isSMulInst ns i then
+    bif isSMulInst ns i then
       let (b', hb) ← ofNatModule' b
       let e' := mkApp2 s.nsmulFn a b'
       let h := mkApp6 (mkConst ``Grind.IntModule.OfNatModule.smul_congr [ns.u]) ns.type ns.natModuleInst a b b' hb
@@ -110,14 +110,14 @@ private partial def ofNatModule' (e : Expr) : OfNatModuleM (Expr × Expr) := do
     else
       mkOfNatModuleVar e
   | Zero.zero _ i =>
-    if isZeroInst ns i then
+    bif isZeroInst ns i then
       let e' := s.zero
       let h := mkApp2 (mkConst ``Grind.IntModule.OfNatModule.toQ_zero [ns.u]) ns.type ns.natModuleInst
       pure (e', h)
     else
       mkOfNatModuleVar e
   | OfNat.ofNat _ _ _ =>
-    if (← isDefEqD e ns.zero) then
+    bif (← isDefEqD e ns.zero) then
       let e' := s.zero
       let h := mkApp2 (mkConst ``Grind.IntModule.OfNatModule.toQ_zero [ns.u]) ns.type ns.natModuleInst
       pure (e', h)
@@ -163,23 +163,23 @@ private partial def reify (e : Expr) : ReifyM Grind.Linarith.Expr := do
   let ns ← getNatStruct
   match_expr e with
   | HAdd.hAdd _ _ _ i a b =>
-    if isAddInst ns i then
+    bif isAddInst ns i then
       return .add (← reify a) (← reify b)
     else
       reifyVar e
   | HSMul.hSMul _ _ _ i a b =>
-    if isSMulInst ns i then
+    bif isSMulInst ns i then
       let some a ← getNatValue? a | reifyVar e
       return .natMul a (← reify b)
     else
       reifyVar e
   | Zero.zero _ i =>
-    if isZeroInst ns i then
+    bif isZeroInst ns i then
       return .zero
     else
       reifyVar e
   | OfNat.ofNat _ _ _ =>
-    if (← isDefEqD e ns.zero) then
+    bif (← isDefEqD e ns.zero) then
       return .zero
     else
       reifyVar e
@@ -190,12 +190,12 @@ def normNatModuleDiseq (a b : Expr) : OfNatModuleM Unit := ReifyM.run do
   let eb ← reify b
   let pa := ea.toPolyN
   let pb := eb.toPolyN
-  if pa == pb then
+  bif pa == pb then
     let ns ← getNatStruct
     -- contradiction detected
     let vars := (← get).vars
-    let ctx ← if h : 0 < vars.size then
-      RArray.toExpr ns.type id (RArray.ofFn (vars[·]) h)
+    let ctx ← bif h : 0 <ᵇ vars.size then
+      RArray.toExpr ns.type id (RArray.ofFn (vars[·]) (lt_of_decideLT_eq_true h))
     else
       RArray.toExpr ns.type id (RArray.leaf ns.zero)
     let heq := mkApp6 (mkConst ``Grind.Linarith.eq_normN [ns.u]) ns.type ns.natModuleInst ctx (toExpr ea) (toExpr eb) eagerReflBoolTrue

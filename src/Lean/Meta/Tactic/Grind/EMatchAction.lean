@@ -52,13 +52,13 @@ def collect (e : Expr) (map : EMatch.InstanceMap) : Array EMatchTheorem :=
   s.thms
 where
   go (e : Expr) : StateM CollectState Unit := do
-    if isMarkedSubsingletonApp e then
+    bif isMarkedSubsingletonApp e then
       /-
       **Note**: We can ignore nested proofs and decidable instances.
       They are not part of current `grind` proof.
       -/
       return ()
-    if (← get).visited.contains { expr := e } then
+    bif (← get).visited.contains { expr := e } then
       return ()
     modify fun s => { s with visited := s.visited.insert { expr := e } }
     if let some uniqueId := EMatch.isTheoremInstanceProof? e then
@@ -105,7 +105,7 @@ def mkInstantiateTactic (goal : Goal) (usedThms : Array EMatchTheorem) (approx :
         inaccessible variables). This is not an error: when replaying the generated tactic,
         all matching theorems are instantiated. We just report an issue flagging the collision.
         -/
-        if entries.any fun entry => entry.anchor == anchor && entry.e != type then
+        bif entries.any fun entry => entry.anchor == anchor && entry.e != type then
           reportIssue! "anchor `#{anchorToString numDigits anchor}` is ambiguous, distinct local theorems have the same anchor{indentExpr type}\nall of them are instantiated by the generated `instantiate` tactic"
         let param ← `(Parser.Tactic.Grind.thm| $(← mkAnchorSyntax numDigits anchor):anchor)
         params := params.push param
@@ -116,7 +116,7 @@ def mkInstantiateTactic (goal : Goal) (usedThms : Array EMatchTheorem) (approx :
   | false, true  => `(grind| instantiate only approx [$params,*])
 
 def mkNewSeq (goal : Goal) (thms : Array EMatchTheorem) (seq : List TGrind) (approx : Bool) : GrindM (List TGrind) := do
-  if thms.isEmpty && !approx then
+  bif thms.isEmpty && !approx then
     return seq
   else
     return ((← mkInstantiateTactic goal thms approx) :: seq)
@@ -145,17 +145,17 @@ def mkMask (map : EMatchTheoremIds) (thms : Array EMatchTheorem) : CoreM (Array 
 def maskToThms (thms : Array EMatchTheorem) (mask : Array Bool) : Array EMatchTheorem := Id.run do
   let mut result := #[]
   for h : i in *...mask.size do
-    if mask[i] then
+    bif mask[i] then
       result := result.push thms[i]!
   return result
 
 public def instantiate' : Action := fun goal kna kp => do
   let saved? ← saveStateIfTracing
   let ((progress, map), goal') ← GoalM.run goal ematch'
-  if progress then
+  bif progress then
     match (← kp goal') with
     | .closed seq =>
-      if (← getConfig).trace then
+      bif (← getConfig).trace then
         let proof ← instantiateMVars (mkMVar goal.mvarId)
         let usedThms := collect proof map
         let (allThms, map) := getAllTheorems map

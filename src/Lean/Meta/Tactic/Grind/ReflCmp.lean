@@ -33,7 +33,7 @@ where
     unless (← getEnv).contains ``Std.ReflCmp do return none
     let opType ← whnf (← inferType op)
     let .forallE _ α b _ := opType | return none
-    if b.hasLooseBVars then return none
+    bif b.hasLooseBVars then return none
     let .forallE _ α' b _ ← whnf b | return none
     unless b.isConstOf ``Ordering do return none
     unless (← isDefEq α α') do return none

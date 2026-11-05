@@ -48,7 +48,7 @@ abbrev getOpId : ACM Nat :=
 protected def ACM.getStruct : ACM Struct := do
   let s ← get'
   let opId ← getOpId
-  if h : opId < s.structs.size then
+  bif h : opId <ᵇ s.structs.size then
     return s.structs[opId]
   else
     throwError "`grind` internal error, invalid structure id"
@@ -74,11 +74,11 @@ private def isArithOpInOtherModules (op : Expr) (f : Expr) : GoalM Bool := do
   unless (← getConfig).ring do return false
   -- Remark: if `ring` is disabled we could check whether `cutsat` is enabled and discard `+` and `-`, but this is just a filter.
   let .const declName _ := f | return false
-  if declName == ``HAdd.hAdd || declName == ``HMul.hMul || declName == ``HSub.hSub || declName == ``HDiv.hDiv || declName == ``HPow.hPow then
-    if op.getAppNumArgs == 4 then
+  bif declName == ``HAdd.hAdd || declName == ``HMul.hMul || declName == ``HSub.hSub || declName == ``HDiv.hDiv || declName == ``HPow.hPow then
+    bif op.getAppNumArgs == 4 then
       let α := op.appFn!.appFn!.appArg!
-      if (← Arith.CommRing.getCommRingId? α).isSome then return true
-      if (← Arith.CommRing.getCommSemiringId? α).isSome then return true
+      bif (← Arith.CommRing.getCommRingId? α).isSome then return true
+      bif (← Arith.CommRing.getCommSemiringId? α).isSome then return true
   return false
 
 def getTermOpIds (e : Expr) : GoalM (List Nat) := do
@@ -93,9 +93,9 @@ private def insertOpId (m : PHashMap ExprPtr (List Nat)) (e : Expr) (opId : Nat)
 where
   go : List Nat → List Nat
   | [] => [opId]
-  | id::ids => if opId < id then
+  | id::ids => bif opId <ᵇ id then
     opId :: id :: ids
-  else if opId == id then
+  else bif opId == id then
     opId :: ids
   else
     id :: go ids
@@ -127,14 +127,14 @@ where
   go : GoalM (Option Nat) := do
     let f := op.getAppFn
     if let .const declName _ := f then
-      if notAssoc.contains declName then return none
+      bif notAssoc.contains declName then return none
     let .forallE _ α b _ ← whnf (← inferType op) | return none
-    if b.hasLooseBVars then return none
+    bif b.hasLooseBVars then return none
     let .forallE _ α₂ α₃ _ ← whnf b | return none
-    if α₃.hasLooseBVars then return none
+    bif α₃.hasLooseBVars then return none
     unless (← isDefEq α α₂) do return none
     unless (← isDefEq α α₃) do return none
-    if (← isArithOpInOtherModules op f) then return none
+    bif (← isArithOpInOtherModules op f) then return none
     let u ← getLevel α
     let assocType := mkApp2 (mkConst ``Std.Associative [u]) α op
     let some assocInst ← synthInstance? assocType | return none

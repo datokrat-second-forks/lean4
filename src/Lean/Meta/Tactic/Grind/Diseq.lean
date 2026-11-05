@@ -24,7 +24,7 @@ Remark `a` and `b` are assumed to have the same type.
 def getDiseqFor? (a b : Expr) : GoalM (Option Expr) := do
   let key := mkApp2 dummyEq a b
   let some { e := e' } := (← get).congrTable.find? { e := key } | return none
-  if (← isEqFalse e') then
+  bif (← isEqFalse e') then
     return some e'
   else
     return none
@@ -44,17 +44,17 @@ def mkDiseqProofUsing (a b : Expr) (eq : Expr) : GoalM Expr := do
   let_expr f@Eq α c d := eq | unreachable!
   let u := f.constLevels!
   let h := mkOfEqFalseCore eq (← mkEqFalseProof eq)
-  let (c, d, h) ← if (← isEqv a c <&&> isEqv b d) then
+  let (c, d, h) ← bif (← isEqv a c <&&> isEqv b d) then
     pure (c, d, h)
   else
     pure (d, c, mkApp4 (mkConst ``Ne.symm u) α c d h)
   -- We have `a = c` and `b = d`
-  let h ← if isSameExpr a c then
+  let h ← bif isSameExpr a c then
     pure h
   else
     pure <| mkApp6 (mkConst ``Grind.ne_of_ne_of_eq_left u) α a c d (← mkEqProof a c) h
   -- `h : a ≠ d
-  if isSameExpr b d then
+  bif isSameExpr b d then
     return h
   else
     return mkApp6 (mkConst ``Grind.ne_of_ne_of_eq_right u) α b a d (← mkEqProof b d) h

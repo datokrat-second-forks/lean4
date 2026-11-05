@@ -99,8 +99,8 @@ private def mkACDPrefix (declName : Name) : ProofM Expr := do
 
 private def toContextExpr (vars : Array Expr) : ACM Expr := do
   let s ← getStruct
-  if h : 0 < vars.size then
-    RArray.toExpr (mkApp (mkConst ``PLift [s.u]) s.type) id (RArray.ofFn (vars[·]) h)
+  bif h : 0 <ᵇ vars.size then
+    RArray.toExpr (mkApp (mkConst ``PLift [s.u]) s.type) id (RArray.ofFn (vars[·]) (lt_of_decideLT_eq_true h))
   else unreachable!
 
 private def mkContext (h : Expr) : ProofM Expr := do
@@ -110,7 +110,7 @@ private def mkContext (h : Expr) : ProofM Expr := do
     collectMapVars varDecls collectVar >>
     collectMapVars (← get).seqDecls (·.collectVars) >>
     collectMapVars (← get).exprDecls (·.collectVars) >>
-    (if (← hasNeutral) then (collectVar 0) else id) <| {}
+    (bif (← hasNeutral) then (collectVar 0) else id) <| {}
   let vars'        := usedVars.toArray
   let varRename    := mkVarRename vars'
   let vars         := (← getStruct).vars
@@ -122,7 +122,7 @@ private def mkContext (h : Expr) : ProofM Expr := do
   let h := mkLetOfMap (← get).seqDecls h `s (mkConst ``Grind.AC.Seq) fun p => toExpr <| p.renameVars varRename
   let h := mkLetOfMap (← get).exprDecls h `e (mkConst ``Grind.AC.Expr) fun e => toExpr <| e.renameVars varRename
   let h := h.abstract #[(← read).ctx]
-  if h.hasLooseBVars then
+  bif h.hasLooseBVars then
     let ctxType := mkApp (mkConst ``AC.Context [s.u]) s.type
     let ctxVal := mkApp3 (mkConst ``AC.Context.mk [s.u]) s.type (← toContextExpr vars) s.op
     return .letE `ctx ctxType ctxVal h (nondep := false)
@@ -161,27 +161,27 @@ partial def EqCnstr.toExprProof (c : EqCnstr) : ProofM Expr := do caching c do
     let h ← mkAIPrefix ``AC.eq_erase0_rhs
     return mkApp5 h (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl c.rhs) eagerReflBoolTrue (← c₁.toExprProof)
   | .simp_exact isLhs c₁ c₂ =>
-    let h ← mkPrefix <| if isLhs then ``AC.eq_simp_lhs_exact else ``AC.eq_simp_rhs_exact
-    let o := if isLhs then c₂.rhs else c₂.lhs
+    let h ← mkPrefix <| bif isLhs then ``AC.eq_simp_lhs_exact else ``AC.eq_simp_rhs_exact
+    let o := bif isLhs then c₂.rhs else c₂.lhs
     return mkApp5 h (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl o) (← c₁.toExprProof) (← c₂.toExprProof)
   | .simp_prefix isLhs tail c₁ c₂ =>
-    let h ← mkAPrefix <| if isLhs then ``AC.eq_simp_lhs_prefix else ``AC.eq_simp_rhs_prefix
-    let s' := if isLhs then c.lhs else c.rhs
+    let h ← mkAPrefix <| bif isLhs then ``AC.eq_simp_lhs_prefix else ``AC.eq_simp_rhs_prefix
+    let s' := bif isLhs then c.lhs else c.rhs
     return mkApp9 h (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl tail) (← mkSeqDecl c₂.lhs) (← mkSeqDecl c₂.rhs) (← mkSeqDecl s')
       eagerReflBoolTrue (← c₁.toExprProof) (← c₂.toExprProof)
   | .simp_suffix isLhs head c₁ c₂ =>
-    let h ← mkAPrefix <| if isLhs then ``AC.eq_simp_lhs_suffix else ``AC.eq_simp_rhs_suffix
-    let s' := if isLhs then c.lhs else c.rhs
+    let h ← mkAPrefix <| bif isLhs then ``AC.eq_simp_lhs_suffix else ``AC.eq_simp_rhs_suffix
+    let s' := bif isLhs then c.lhs else c.rhs
     return mkApp9 h (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl head) (← mkSeqDecl c₂.lhs) (← mkSeqDecl c₂.rhs) (← mkSeqDecl s')
       eagerReflBoolTrue (← c₁.toExprProof) (← c₂.toExprProof)
   | .simp_middle isLhs head tail c₁ c₂ =>
-    let h ← mkAPrefix <| if isLhs then ``AC.eq_simp_lhs_middle else ``AC.eq_simp_rhs_middle
-    let s' := if isLhs then c.lhs else c.rhs
+    let h ← mkAPrefix <| bif isLhs then ``AC.eq_simp_lhs_middle else ``AC.eq_simp_rhs_middle
+    let s' := bif isLhs then c.lhs else c.rhs
     return mkApp10 h (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl head) (← mkSeqDecl tail) (← mkSeqDecl c₂.lhs) (← mkSeqDecl c₂.rhs) (← mkSeqDecl s')
       eagerReflBoolTrue (← c₁.toExprProof) (← c₂.toExprProof)
   | .simp_ac isLhs s c₁ c₂ =>
-    let h ← mkACPrefix <| if isLhs then ``AC.eq_simp_lhs_ac else ``AC.eq_simp_rhs_ac
-    let s' := if isLhs then c.lhs else c.rhs
+    let h ← mkACPrefix <| bif isLhs then ``AC.eq_simp_lhs_ac else ``AC.eq_simp_rhs_ac
+    let s' := bif isLhs then c.lhs else c.rhs
     return mkApp9 h (← mkSeqDecl s) (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl c₂.lhs) (← mkSeqDecl c₂.rhs) (← mkSeqDecl s')
       eagerReflBoolTrue (← c₁.toExprProof) (← c₂.toExprProof)
   | .swap c =>
@@ -226,27 +226,27 @@ partial def DiseqCnstr.toExprProof (c : DiseqCnstr) : ProofM Expr := do caching 
     let h ← mkAIPrefix ``AC.diseq_erase0
     return mkApp6 h (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl c.lhs) (← mkSeqDecl c.rhs) eagerReflBoolTrue (← c₁.toExprProof)
   | .simp_exact isLhs c₁ c₂ =>
-    let h ← mkPrefix <| if isLhs then ``AC.diseq_simp_lhs_exact else ``AC.diseq_simp_rhs_exact
-    let o := if isLhs then c₂.rhs else c₂.lhs
+    let h ← mkPrefix <| bif isLhs then ``AC.diseq_simp_lhs_exact else ``AC.diseq_simp_rhs_exact
+    let o := bif isLhs then c₂.rhs else c₂.lhs
     return mkApp5 h (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl o) (← c₁.toExprProof) (← c₂.toExprProof)
   | .simp_prefix isLhs tail c₁ c₂ =>
-    let h ← mkAPrefix <| if isLhs then ``AC.diseq_simp_lhs_prefix else ``AC.diseq_simp_rhs_prefix
-    let s' := if isLhs then c.lhs else c.rhs
+    let h ← mkAPrefix <| bif isLhs then ``AC.diseq_simp_lhs_prefix else ``AC.diseq_simp_rhs_prefix
+    let s' := bif isLhs then c.lhs else c.rhs
     return mkApp9 h (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl tail) (← mkSeqDecl c₂.lhs) (← mkSeqDecl c₂.rhs) (← mkSeqDecl s')
       eagerReflBoolTrue (← c₁.toExprProof) (← c₂.toExprProof)
   | .simp_suffix isLhs head c₁ c₂ =>
-    let h ← mkAPrefix <| if isLhs then ``AC.diseq_simp_lhs_suffix else ``AC.diseq_simp_rhs_suffix
-    let s' := if isLhs then c.lhs else c.rhs
+    let h ← mkAPrefix <| bif isLhs then ``AC.diseq_simp_lhs_suffix else ``AC.diseq_simp_rhs_suffix
+    let s' := bif isLhs then c.lhs else c.rhs
     return mkApp9 h (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl head) (← mkSeqDecl c₂.lhs) (← mkSeqDecl c₂.rhs) (← mkSeqDecl s')
       eagerReflBoolTrue (← c₁.toExprProof) (← c₂.toExprProof)
   | .simp_middle isLhs head tail c₁ c₂ =>
-    let h ← mkAPrefix <| if isLhs then ``AC.diseq_simp_lhs_middle else ``AC.diseq_simp_rhs_middle
-    let s' := if isLhs then c.lhs else c.rhs
+    let h ← mkAPrefix <| bif isLhs then ``AC.diseq_simp_lhs_middle else ``AC.diseq_simp_rhs_middle
+    let s' := bif isLhs then c.lhs else c.rhs
     return mkApp10 h (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl head) (← mkSeqDecl tail) (← mkSeqDecl c₂.lhs) (← mkSeqDecl c₂.rhs) (← mkSeqDecl s')
       eagerReflBoolTrue (← c₁.toExprProof) (← c₂.toExprProof)
   | .simp_ac isLhs s c₁ c₂ =>
-    let h ← mkACPrefix <| if isLhs then ``AC.diseq_simp_lhs_ac else ``AC.diseq_simp_rhs_ac
-    let s' := if isLhs then c.lhs else c.rhs
+    let h ← mkACPrefix <| bif isLhs then ``AC.diseq_simp_lhs_ac else ``AC.diseq_simp_rhs_ac
+    let s' := bif isLhs then c.lhs else c.rhs
     return mkApp9 h (← mkSeqDecl s) (← mkSeqDecl c₁.lhs) (← mkSeqDecl c₁.rhs) (← mkSeqDecl c₂.lhs) (← mkSeqDecl c₂.rhs) (← mkSeqDecl s')
       eagerReflBoolTrue (← c₁.toExprProof) (← c₂.toExprProof)
 

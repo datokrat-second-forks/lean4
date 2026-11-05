@@ -53,7 +53,7 @@ def CasesTypes.isSplit (s : CasesTypes) (declName : Name) : Bool :=
 
 partial def isCasesAttrCandidate? (declName : Name) (eager : Bool) : CoreM (Option Name) := do
   match (← isInductive? declName) with
-  | some info => if !info.isRec || !eager then return some declName else return none
+  | some info => bif !info.isRec || !eager then return some declName else return none
   | _ => return none
 
 def isCasesAttrCandidate (declName : Name) (eager : Bool) : CoreM Bool := do
@@ -65,19 +65,19 @@ def isCasesAttrPredicateCandidate? (declName : Name) (eager : Bool) : MetaM (Opt
 
 def validateCasesAttr (declName : Name) (eager : Bool) : CoreM Unit := do
   unless (← isCasesAttrCandidate declName eager) do
-    if eager then
+    bif eager then
       throwError "invalid `[grind cases eager]`, `{.ofConstName declName}` is not a non-recursive inductive datatype or an alias for one"
     else
       throwError "invalid `[grind cases]`, `{.ofConstName declName}` is not an inductive datatype or an alias for one"
 
 def CasesTypes.eraseDecl (s : CasesTypes) (declName : Name) : CoreM CasesTypes := do
-  if s.contains declName then
+  bif s.contains declName then
     return s.erase declName
   else
     throwNotMarkedWithGrindAttribute declName
 
 def ensureNotBuiltinCases (declName : Name) : CoreM Unit := do
-  if isBuiltinEagerCases declName then
+  bif isBuiltinEagerCases declName then
     throwError "`{.ofConstName declName}` is marked as a built-in case-split for `grind` and cannot be erased"
 
 /--
@@ -88,7 +88,7 @@ We say a free variable is "simple" to be processed by the cases tactic IF:
 private def isSimpleFVar (e : Expr) : MetaM Bool := do
   let .fvar fvarId := e | return false
   let decl ← fvarId.getDecl
-  if decl.index == (← getLCtx).numIndices - 1 then
+  bif decl.index == (← getLCtx).numIndices - 1 then
     -- It is the latest free variable, so there are no forward dependencies
     return true
   else
@@ -133,22 +133,22 @@ def cases (mvarId : MVarId) (e : Expr) : MetaM (List MVarId) := mvarId.withConte
       let .forallE _ targetNew recursorTypeNew _ ← whnf recursorType
         | throwTacticEx `grind.cases mvarId "unexpected recursor type"
       recursorType := recursorTypeNew
-      let tagNew := if recursorInfo.numMinors > 1 then Name.num tag idx else tag
+      let tagNew := bif recursorInfo.numMinors >ᵇ 1 then Name.num tag idx else tag
       let mvar ← mkFreshExprMVarAt lctx localInsts targetNew .syntheticOpaque tagNew
       recursor := mkApp recursor mvar
       mvarIdsNew := mvarIdsNew.push mvar.mvarId!
       idx := idx + 1
     mvarId.assign recursor
     return mvarIdsNew.toList
-  if recursorInfo.numIndices > 0 then
+  bif recursorInfo.numIndices >ᵇ 0 then
     let s ← generalizeIndices' mvarId e
     s.mvarId.withContext do
       k s.mvarId s.fvarId s.indicesFVarIds
-  else if (← isSimpleFVar e) then
+  else bif (← isSimpleFVar e) then
     -- We don't need to revert anything.
     k mvarId e.fvarId! #[]
   else
-    let mvarId ← if (← isProof e) then
+    let mvarId ← bif (← isProof e) then
       mvarId.assert (← mkFreshUserName `x) type e
     else
       mvarId.assertExt (← mkFreshUserName `x) type e

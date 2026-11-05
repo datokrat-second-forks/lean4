@@ -97,11 +97,11 @@ private def legacyDSimpCore (e : Expr) : GrindM Expr := do profileitM Exception 
 
 /-- Simplifies the given expression using the `grind` simprocs and normalization theorems. -/
 def simpCore (e : Expr) : GrindM Simp.Result := do
-  if (← isLegacyNormalizer) then legacySimpCore e else symSimpCore e
+  bif (← isLegacyNormalizer) then legacySimpCore e else symSimpCore e
 
 /-- Similar to `simpCore`, but uses `dsimp`. -/
 def dsimpCore (e : Expr) : GrindM Expr := do
-  if (← isLegacyNormalizer) then legacyDSimpCore e else symDSimpCore e
+  bif (← isLegacyNormalizer) then legacyDSimpCore e else symDSimpCore e
 
 set_option compiler.ignoreBorrowAnnotation true in
 /--

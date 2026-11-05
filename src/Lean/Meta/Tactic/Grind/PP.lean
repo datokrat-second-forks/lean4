@@ -33,9 +33,9 @@ def ppENodeRef (e : Expr) : GoalM MessageData := do
 
 /-- Helper function for pretty printing the state for debugging purposes. -/
 private def Goal.ppENodeDeclValue (goal : Goal) (e : Expr) : MetaM MessageData := do
-  if e.isApp && !(← isLitValue e) then
+  bif e.isApp && !(← isLitValue e) then
     e.withApp fun f args => do
-      let r ← if f.isConst then
+      let r ← bif f.isConst then
         pure m!"{f}"
       else
         goal.ppENodeRef f
@@ -52,11 +52,11 @@ private def Goal.ppENodeDecl (goal : Goal) (e : Expr) : MetaM MessageData := do
   let n ← goal.getENode e
   unless isSameExpr e n.root do
     r := r ++ m!" ↦ {← goal.ppENodeRef n.root}"
-  if n.interpreted then
+  bif n.interpreted then
     r := r ++ ", [val]"
-  if n.ctor then
+  bif n.ctor then
     r := r ++ ", [ctor]"
-  if grind.debug.get (← getOptions) then
+  bif grind.debug.get (← getOptions) then
     if let some target := goal.getTarget? e then
       r := r ++ m!" ↝ {← goal.ppENodeRef target}"
   return r
@@ -69,7 +69,7 @@ def Goal.ppState (goal : Goal) : MetaM MessageData := do
     r := r ++ "\n" ++ (← goal.ppENodeDecl node.self)
   let eqcs := goal.getEqcs (sort := true)
   for eqc in eqcs do
-    if eqc.length > 1 then
+    bif eqc.length >ᵇ 1 then
       r := r ++ "\n" ++ "{" ++ (MessageData.joinSep (← eqc.mapM goal.ppENodeRef) ", ") ++  "}"
   return r
 
@@ -131,19 +131,19 @@ where
     | HPow.hPow _ _ _ _ a _ => go a
     | Neg.neg _ _ a         => go a
     | OfNat.ofNat _ _ _     => .num
-    | _ => if isCastLikeApp e then .cast else .no
+    | _ => bif isCastLikeApp e then .cast else .no
 
 /--
 Returns `true` if `e` is a support-like application.
 Recall that equivalence classes that contain only support applications are displayed in the "others" category.
 -/
 def isSupportApp (e : Expr) : MetaM Bool := do
-  if isArithOfCastLike e then return true
+  bif isArithOfCastLike e then return true
   let .const declName _ := e.getAppFn | return false
   -- Check whether `e` is the projection of a constructor
   if let some info ← getProjectionFnInfo? declName then
-    if e.getAppNumArgs == info.numParams + 1 then
-      if (← isConstructorApp e.appArg!) then
+    bif e.getAppNumArgs == info.numParams + 1 then
+      bif (← isConstructorApp e.appArg!) then
         return true
   return isCastLikeDeclName declName || isGadget declName || isBuiltin declName || isMatcherCore (← getEnv) declName
 
@@ -159,11 +159,11 @@ private def ppEqcs (collapsedProps := true) : M Unit := do
    let mut otherEqcs : Array MessageData := #[]
    let goal ← read
    for eqc in goal.getEqcs (sort := true) do
-     if Option.isSome <| eqc.find? (·.isTrue) then
+     bif Option.isSome <| eqc.find? (·.isTrue) then
        let eqc := eqc.filter fun e => !e.isTrue
        unless eqc.isEmpty do
          trueEqc? := ppExprArray `eqc  "True propositions" eqc.toArray `prop (collapsed := collapsedProps)
-     else if Option.isSome <| eqc.find? (·.isFalse) then
+     else bif Option.isSome <| eqc.find? (·.isFalse) then
        let eqc := eqc.filter fun e => !e.isFalse
        unless eqc.isEmpty do
          falseEqc? := ppExprArray `eqc "False propositions" eqc.toArray `prop (collapsed := collapsedProps)
@@ -171,11 +171,11 @@ private def ppEqcs (collapsedProps := true) : M Unit := do
        -- We may want to add a flag to pretty print equivalence classes of nested proofs
        unless (← isProof e) do
          let mainEqc ← eqc.filterM fun e => return !(← isSupportApp e)
-         if mainEqc.length <= 1 then
+         bif mainEqc.length ≤ᵇ 1 then
            otherEqcs := otherEqcs.push <| ppEqc eqc
          else
            let supportEqc ← eqc.filterM fun e => isSupportApp e
-           if supportEqc.isEmpty then
+           bif supportEqc.isEmpty then
              regularEqcs := regularEqcs.push <| ppEqc mainEqc
            else
              regularEqcs := regularEqcs.push <| ppEqc mainEqc #[ppEqc supportEqc]
@@ -201,12 +201,12 @@ private def ppActiveTheoremPatterns : M Unit := do
 def Arith.Cutsat.pp? (goal : Goal) : MetaM (Option MessageData) := do
   let s ← Arith.Cutsat.cutsatExt.getStateCore goal
   let nodes := s.varMap
-  if nodes.isEmpty then return none
+  bif nodes.isEmpty then return none
   -- The assignment is partial (and does not satisfy the constraints) if the search
   -- was interrupted because the `liaSteps` threshold was reached.
-  if s.assignment.size < s.vars.size then return none
+  bif s.assignment.size <ᵇ s.vars.size then return none
   let model ← Arith.Cutsat.mkModel goal
-  if model.isEmpty then return none
+  bif model.isEmpty then return none
   let mut ms := #[]
   for (e, val) in model do
     ms := ms.push <| .trace { cls := `assign } m!"{Arith.quoteIfArithTerm e} := {val}" #[]
@@ -236,17 +236,17 @@ private def ppThresholds (c : Grind.Config) : M Unit := do
     else
       g
   let mut msgs := #[]
-  if goal.ematch.numInstances ≥ c.instances  then
+  bif goal.ematch.numInstances ≥ᵇ c.instances  then
     msgs := msgs.push <| .trace { cls := `limit } m!"maximum number of instances generated by E-matching has been reached, threshold: `(instances := {c.instances})`" #[]
-  if goal.ematch.num ≥ c.ematch  then
+  bif goal.ematch.num ≥ᵇ c.ematch  then
     msgs := msgs.push <| .trace { cls := `limit } m!"maximum number of E-matching rounds has been reached, threshold: `(ematch := {c.ematch})`" #[]
-  if goal.split.num ≥ c.splits then
+  bif goal.split.num ≥ᵇ c.splits then
     msgs := msgs.push <| .trace { cls := `limit } m!"maximum number of case-splits has been reached, threshold: `(splits := {c.splits})`" #[]
-  if maxGen ≥ c.gen then
+  bif maxGen ≥ᵇ c.gen then
     msgs := msgs.push <| .trace { cls := `limit } m!"maximum term generation has been reached, threshold: `(gen := {c.gen})`" #[]
   msgs ← Arith.CommRing.addThresholdMessage goal c msgs
   let cutsat ← Arith.Cutsat.cutsatExt.getStateCore goal
-  if cutsat.steps ≥ c.liaSteps then
+  bif cutsat.steps ≥ᵇ c.liaSteps then
     msgs := msgs.push <| .trace { cls := `limit } m!"maximum number of steps performed by the `lia` solver has been reached, threshold: `(liaSteps := {c.liaSteps})`" #[]
   unless msgs.isEmpty do
     pushMsg <| .trace { cls := `limits } "Thresholds reached" msgs
@@ -283,7 +283,7 @@ where
     ppThresholds config
 
 def goalToMessageData (goal : Goal) (config : Grind.Config) (rings : Array Sym.Arith.CommRing) : MetaM MessageData := goal.withContext do
-  if config.verbose then
+  bif config.verbose then
     let gm ← goalDiagToMessageData goal config rings
     let r := m!"{.ofGoal goal.mvarId}\n{gm}"
     addMessageContextFull r

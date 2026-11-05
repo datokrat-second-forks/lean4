@@ -26,7 +26,7 @@ instance : MonadCanon NonCommSemiringM where
 protected def NonCommSemiringM.getSemiring : NonCommSemiringM Sym.Arith.Semiring := do
   let s ← getArithState
   let semiringId := (← read).semiringId
-  if h : semiringId < s.ncSemirings.size then
+  bif h : semiringId <ᵇ s.ncSemirings.size then
     return s.ncSemirings[semiringId]
   else
     throwError "`grind` internal error, invalid semiringId"

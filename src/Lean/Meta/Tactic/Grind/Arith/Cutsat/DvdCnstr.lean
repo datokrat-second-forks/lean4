@@ -27,24 +27,24 @@ the leading coefficient becomes `±1`. Example: `32768 ∣ 5*x` becomes `32768 �
 -/
 def DvdCnstr.bmodCoeffs (c : DvdCnstr) : DvdCnstr :=
   let d := c.d.natAbs
-  if d ≤ 1 then c else
+  bif d ≤ᵇ 1 then c else
   let a := match c.p with
     | .add k _ _ =>
-      if k.natAbs == 1 then 1 else
+      bif k.natAbs == 1 then 1 else
       let (g, α, _) := gcdExt k d
-      if g == 1 then α else 1
+      bif g == 1 then α else 1
     | .num _ => 1
-  let p := (if a == 1 then c.p else c.p.mul a).bmodCoeffs d
-  if p == c.p then c else { d := c.d, p, h := .bmodCoeffs c a }
+  let p := (bif a == 1 then c.p else c.p.mul a).bmodCoeffs d
+  bif p == c.p then c else { d := c.d, p, h := .bmodCoeffs c a }
 
 def DvdCnstr.norm (c : DvdCnstr) : DvdCnstr :=
-  let c := if c.p.isSorted then
+  let c := bif c.p.isSorted then
     c
   else
     { d := c.d, p := c.p.norm, h :=.norm c }
   let g := c.p.gcdCoeffs c.d
-  let g := if c.d < 0 then -g else g
-  let c := if c.p.getConst % g == 0 && g != 1 then
+  let g := bif c.d <ᵇ 0 then -g else g
+  let c := bif c.p.getConst % g == 0 && g != 1 then
     { d := c.d/g, p := c.p.div g, h := .divCoeffs c }
   else
     c
@@ -70,18 +70,18 @@ partial def DvdCnstr.applySubsts (c : DvdCnstr) : GoalM DvdCnstr := withIncRecDe
 
 /-- Asserts divisibility constraint. -/
 partial def DvdCnstr.assert (c : DvdCnstr) : GoalM Unit := withIncRecDepth do
-  if (← inconsistent) then return ()
+  bif (← inconsistent) then return ()
   trace[grind.lia.assert] "{← c.pp}"
   -- Substitutions may reintroduce large coefficients, so we normalize again afterwards.
   let c := (← c.norm.applySubsts).norm
-  if c.isUnsat then
+  bif c.isUnsat then
     trace[grind.lia.assert.unsat] "{← c.pp}"
     setInconsistent (.dvd c)
     return ()
-  if c.isTrivial then
+  bif c.isTrivial then
     trace[grind.lia.assert.trivial] "{← c.pp}"
     return ()
-  if c.d == 0 then
+  bif c.d == 0 then
     -- `0 ∣ p` is equivalent to `p = 0`. The model search assumes `d ≠ 0` for
     -- stored divisibility constraints (it computes `_ % d` and `_ / d`).
     let c' : EqCnstr := { p := c.p, h := .ofZeroDvd c }
@@ -89,7 +89,7 @@ partial def DvdCnstr.assert (c : DvdCnstr) : GoalM Unit := withIncRecDepth do
     return ()
   let d₁ := c.d
   let .add a₁ x p₁ := c.p | c.throwUnexpected
-  if (← c.satisfied) == .false then
+  bif (← c.satisfied) == .false then
     resetAssignmentFrom x
   if let some c' := (← get').dvds[x]! then
     let d₂ := c'.d
@@ -131,11 +131,11 @@ def propagateIntDvd (e : Expr) : GoalM Unit := do
   unless (← Structural.isInstDvdInt inst) do return ()
   let some d ← getIntValue? a
     | reportIssue! "non-linear divisibility constraint found{indentExpr e}"; return ()
-  if (← isEqTrue e) then
+  bif (← isEqTrue e) then
     let p ← toPoly b
     let c := { d, p, h := .core e : DvdCnstr }
     c.assertCore
-  else if (← isEqFalse e) then
+  else bif (← isEqFalse e) then
     pushNewFact <| mkApp4 (mkConst ``Int.Internal.Linear.of_not_dvd) a b eagerReflBoolTrue (mkOfEqFalseCore e (← mkEqFalseProof e))
 
 def propagateNatDvd (e : Expr) : GoalM Unit := do
@@ -143,7 +143,7 @@ def propagateNatDvd (e : Expr) : GoalM Unit := do
   unless (← Structural.isInstDvdNat inst) do return ()
   let some d ← getNatValue? d₀
     | reportIssue! "non-linear divisibility constraint found{indentExpr e}"; return ()
-  if (← isEqTrue e) then
+  bif (← isEqTrue e) then
     let (d', h₁) ← natToInt d₀
     let (a', h₂) ← natToInt a
     let gen ← getGeneration e
@@ -152,13 +152,13 @@ def propagateNatDvd (e : Expr) : GoalM Unit := do
     let thm := mkApp6 (mkConst ``Nat.ToInt.of_dvd) d₀ a d' a' h₁ h₂
     let c := { d, p, h := .coreOfNat e thm d e' : DvdCnstr }
     c.assertCore
-  else if (← isEqFalse e) then
+  else bif (← isEqFalse e) then
     pushNewFact <| mkApp3 (mkConst ``Nat.emod_pos_of_not_dvd) d₀ a (mkOfEqFalseCore e (← mkEqFalseProof e))
 
 builtin_grind_propagator propagateDvd ↓Dvd.dvd := fun e => do
   unless (← getConfig).lia do return ()
   let_expr Dvd.dvd α _ _ _ ← e | return ()
-  if α.isConstOf ``Nat then
+  bif α.isConstOf ``Nat then
     propagateNatDvd e
   else
     propagateIntDvd e

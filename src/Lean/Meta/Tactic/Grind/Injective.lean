@@ -26,11 +26,11 @@ private partial def getSymbols (proof : Expr) (hasUniverses : Bool) : MetaM (Lis
   forallTelescope type fun xs type => do
     unless type.isAppOfArity ``Function.Injective 3 do
       throwError "invalid `[grind inj]` theorem, resulting type is not of the form `Function.Injective <fun>`{indentExpr type}"
-    if xs.isEmpty && hasUniverses then
+    bif xs.isEmpty && hasUniverses then
       throwError "invalid `[grind inj]` theorem, theorem has universe levels, but no hypotheses{indentExpr type}"
     let f := type.appArg!.eta
     let cs ← collectFnNames f
-    if cs.isEmpty then
+    bif cs.isEmpty then
       throwError "invalid `[grind inj]` theorem, injective function must use at least one constant function symbol{indentExpr f}"
     return cs.toList.map (.const ·)
 where
@@ -41,14 +41,14 @@ where
       Prod.snd <$> (go f |>.run {})
 
   go (e : Expr) : StateRefT NameSet MetaM Unit := do
-    if e.isApp then e.withApp fun f args => do
+    bif e.isApp then e.withApp fun f args => do
       if let .const declName _ := f then
         modify (·.insert declName)
       let kinds ← NormalizePattern.getPatternArgKinds f args.size
       for h : i in *...args.size do
         let arg  := args[i]
         let kind := kinds[i]?.getD .relevant
-        if kind matches .relevant | .typeFormer then
+        bif kind matches .relevant | .typeFormer then
           go arg
 
 private def symbolsToNames (s : List HeadIndex) : List Name :=
