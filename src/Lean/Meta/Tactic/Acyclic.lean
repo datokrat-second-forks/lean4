@@ -15,7 +15,7 @@ namespace Lean.MVarId
 open Meta
 
 private def isTarget (lhs rhs : Expr) : MetaM Bool := do
-  if !lhs.isFVar || !lhs.occurs rhs then
+  bif !lhs.isFVar || !lhs.occurs rhs then
     return false
   else
     isConstructorApp' rhs
@@ -28,9 +28,9 @@ def acyclic (mvarId : MVarId) (h : Expr) : MetaM Bool := mvarId.withContext do
   let type ← whnfD (← inferType h)
   trace[Meta.Tactic.acyclic] "type: {type}"
   let some (_, lhs, rhs) := type.eq? | return false
-  if (← isTarget lhs rhs) then
+  bif (← isTarget lhs rhs) then
     go h lhs rhs
-  else if (← isTarget rhs lhs) then
+  else bif (← isTarget rhs lhs) then
     go (← mkEqSymm h) rhs lhs
   else
     return false

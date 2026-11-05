@@ -47,7 +47,7 @@ public def reflectBV (g : MVarId) : ReifyM ReflectionResult := g.withContext do
       sats := (sats ++ lemmas).push reflected
     else
       unusedHypotheses := unusedHypotheses.insert hyp
-  if h : sats.size = 0 then
+  bif h : sats.size =ᵇ 0 then
     let mut error := "None of the hypotheses are in the supported BitVec fragment after applying preprocessing.\n"
     error := error ++ "There are three potential reasons for this:\n"
     error := error ++ "1. If you are using custom BitVec constructs simplify them to built-in ones.\n"

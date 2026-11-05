@@ -58,7 +58,7 @@ def grindDischarger (mvarId : MVarId) : MetaM (Option (List MVarId)) := do
     -- Solve the subgoal with grind
     let params ← Grind.mkDefaultParams {}
     let result ← Grind.main subgoal params
-    if result.hasFailed then
+    bif result.hasFailed then
       return none
     else
       return some []
@@ -86,7 +86,7 @@ def tryDischarger (mvarId : MVarId) : MetaM (Option (List MVarId)) := do
       -- Suppress info messages from try?
       Elab.Tactic.withSuppressedMessages do
         Elab.Tactic.evalTactic tacStx
-    if remainingGoals.isEmpty then
+    bif remainingGoals.isEmpty then
       return some []
     else
       return none
@@ -109,11 +109,11 @@ def solveByElim (required : List Expr) (exfalso : Bool) (goals : List MVarId)
       -- `constructor` has been observed to significantly slow down `exact?` in Mathlib.
       constructor := false }
   -- Add grind or try? as a fallback discharger (tried after intro/constructor fail)
-  let cfg := if try? then cfg.withDischarge tryDischarger
-             else if grind then cfg.withDischarge grindDischarger
+  let cfg := bif try? then cfg.withDischarge tryDischarger
+             else bif grind then cfg.withDischarge grindDischarger
              else cfg
   let ⟨lemmas, ctx⟩ ← SolveByElim.mkAssumptionSet false false [] [] #[]
-  let cfg := if !required.isEmpty then cfg.requireUsingAll required else cfg
+  let cfg := bif !required.isEmpty then cfg.requireUsingAll required else cfg
   SolveByElim.solveByElim cfg lemmas ctx goals
 
 /--
@@ -140,14 +140,14 @@ open LazyDiscrTree (InitEntry findMatches)
 private def addImport (name : Name) (c : AsyncConstantInfo) :
     MetaM (Array (InitEntry (Name × DeclMod))) := do
   -- Don't report deprecated lemmas.
-  if Linter.isDeprecated (← getEnv) name then return #[]
+  bif Linter.isDeprecated (← getEnv) name then return #[]
   -- Don't report lemmas from metaprogramming namespaces.
-  if name.isMetaprogramming then return #[] else
+  bif name.isMetaprogramming then return #[] else
   -- Only the signature is needed; this avoids blocking on async theorem bodies (lean4#13705).
   forallTelescope c.toConstantVal.type fun _ type => do
     let e ← InitEntry.fromExpr type (name, DeclMod.none)
     let a := #[e]
-    if e.key == .const ``Iff 2 then
+    bif e.key == .const ``Iff 2 then
       let a := a.push (← e.mkSubEntry 0 (name, DeclMod.mp))
       let a := a.push (← e.mkSubEntry 1 (name, DeclMod.mpr))
       pure a
@@ -212,7 +212,7 @@ def mkHeartbeatCheck (leavePercent : Nat) : MetaM (MetaM Bool) := do
   let hbThreshold := (← getRemainingHeartbeats) * leavePercent / 100
   -- Return true if we should stop
   pure $
-    if maxHB = 0 then
+    bif maxHB =ᵇ 0 then
       pure false
     else do
       return (← getRemainingHeartbeats) < hbThreshold
@@ -230,7 +230,7 @@ def interleaveWith {α β γ} (f : α → γ) (x : Array α) (g : β → γ) (y 
     res := res.push (f x[i])
     res := res.push (g y[i])
   let last :=
-        if x.size > n then
+        bif x.size >ᵇ n then
           (x.extract n x.size).map f
         else
           (y.extract n y.size).map g
@@ -313,7 +313,7 @@ private def librarySearchLemma (cfg : ApplyConfig) (act : List MVarId → MetaM 
     try
       act newGoals
     catch _ =>
-      if ← allowFailure goal then
+      bif (← allowFailure goal) then
         pure newGoals
       else
         failure
@@ -341,10 +341,10 @@ def tryOnEach
     match ← (tryCatch (Except.ok <$> act c) (pure ∘ Except.error)) with
     | .error e =>
       restoreState s
-      if isAbortSpeculation e then
+      bif isAbortSpeculation e then
         break
     | .ok remaining =>
-      if remaining.isEmpty && !collectAll then
+      bif remaining.isEmpty && !collectAll then
         return none
       let ctx ← getMCtx
       restoreState s
@@ -363,7 +363,7 @@ private def librarySearch' (goal : MVarId)
     let cfg : ApplyConfig := { allowSynthFailures := true }
     let shouldAbort ← mkHeartbeatCheck leavePercentHeartbeats
     let act := fun cand => do
-        if ←shouldAbort then
+        bif (←shouldAbort) then
           abortSpeculation
         librarySearchLemma cfg tactic allowFailure cand
     -- First pass: search with droppedKeys (excludes star-indexed lemmas)
@@ -377,12 +377,12 @@ private def librarySearch' (goal : MVarId)
       -- When collectAll = false, any result means we should skip star fallback (return partial).
       -- When collectAll = true, we continue to star lemmas unless we have a complete solution.
       let hasCompleteSolution := results.any (·.1.isEmpty)
-      if hasCompleteSolution || (!collectAll && !results.isEmpty) || !includeStar then
+      bif hasCompleteSolution || (!collectAll && !results.isEmpty) || !includeStar then
         return some results
       -- Second pass: try star-indexed lemmas (those with [*] or [Eq,*,*,*] keys)
       -- No need for librarySearchSymm since getStarLemmas ignores the goal type
       let starLemmas ← getStarLemmas
-      if starLemmas.isEmpty then return some results
+      bif starLemmas.isEmpty then return some results
       let mctx ← getMCtx
       let starCandidates := starLemmas.map ((goal, mctx), ·)
       match ← tryOnEach act starCandidates collectAll with

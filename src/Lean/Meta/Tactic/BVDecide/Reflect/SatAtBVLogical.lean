@@ -66,7 +66,7 @@ public def and (x y : SatAtBVLogical) : ReifyM SatAtBVLogical := do
 
 /-- Given a proof that `x.expr.Unsat`, produce a proof of `False`. -/
 public def proveFalse (x : SatAtBVLogical) (h : Expr) : ReifyM Expr := do
-  if (← get).atoms.isEmpty then
+  bif (← get).atoms.isEmpty then
     throwError "Unable to identify any relevant atoms."
   else
     let atomsList ← ReifyM.atomsAssignmentExpr

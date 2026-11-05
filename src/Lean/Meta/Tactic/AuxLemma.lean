@@ -48,7 +48,7 @@ def mkAuxLemma (levelParams : List Name) (type : Expr) (value : Expr) (kind? : O
   let mkNewAuxLemma := do
     let auxName ← mkAuxDeclName (kind := kind?.getD `_proof)
     let decl :=
-      if env.hasUnsafe type || env.hasUnsafe value then
+      bif env.hasUnsafe type || env.hasUnsafe value then
         -- `result` contains unsafe code, thus we cannot use a theorem.
         Declaration.defnDecl {
           name        := auxName
@@ -62,19 +62,19 @@ def mkAuxLemma (levelParams : List Name) (type : Expr) (value : Expr) (kind? : O
           levelParams, type, value
         }
     addDecl (forceExpose := forceExpose) decl
-    if defeq then defeqAttr.setTag auxName
-    if inferRfl then
+    bif defeq then defeqAttr.setTag auxName
+    bif inferRfl then
       inferDefEqAttr auxName
     modifyEnv fun env => auxLemmasExt.modifyState env fun ⟨lemmas⟩ => ⟨lemmas.insert key (auxName, levelParams)⟩
     return auxName
-  if cache then
+  bif cache then
     if let some (name, levelParams') := s.lemmas.find? key then
-      if levelParams == levelParams' then
+      bif levelParams == levelParams' then
         return name
     -- private contexts may reuse public matchers
-    if key.isPrivate then
+    bif key.isPrivate then
       if let some (name, levelParams') := s.lemmas.find? { key with isPrivate := false } then
-        if levelParams == levelParams' then
+        bif levelParams == levelParams' then
           return name
   mkNewAuxLemma
 

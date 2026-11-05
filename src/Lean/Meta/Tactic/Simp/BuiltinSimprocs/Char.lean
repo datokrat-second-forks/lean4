@@ -118,7 +118,7 @@ builtin_simproc [simp, seval] Nat.reduceDigitCharEq (Nat.digitChar _ = _) := fun
   let some c ← fromExpr? rhs | return .continue
   let digitChars : Array Char :=
     #['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', '*']
-  if digitChars.contains c then return .continue
+  bif digitChars.contains c then return .continue
   let n := lhs.appArg!
   let neProof := mkApp3 (mkConst (Name.mkStr2 "Nat" "digitChar_ne")) n rhs eagerReflBoolTrue
   let proof := mkApp2 (mkConst ``eq_false) e neProof
@@ -135,7 +135,7 @@ builtin_simproc [simp, seval] Nat.reduceEqDigitChar (_ = Nat.digitChar _) := fun
   let some c ← fromExpr? charExpr | return .continue
   let digitChars : Array Char :=
     #['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', '*']
-  if digitChars.contains c then return .continue
+  bif digitChars.contains c then return .continue
   let n := digitCharExpr.appArg!
   let neProof := mkApp3 (mkConst (Name.mkStr2 "Nat" "digitChar_ne")) n charExpr eagerReflBoolTrue
   let neSymProof := mkApp4 (mkConst ``Ne.symm [.succ .zero]) (mkConst ``Char) digitCharExpr charExpr neProof

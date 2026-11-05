@@ -50,16 +50,16 @@ def runSatSolver (solver : Cadical.Solver) : CegarM Cadical.Status := do
   let mut sleepMs := 1
   let maxSleepMs := 64
   while (← IO.getTaskState solveTask) != .finished do
-    if (← CegarM.getSolverTime) == 0 then
+    bif (← CegarM.getSolverTime) == 0 then
       solver.terminate
       break
     if let some tk := (← readThe Core.Context).cancelTk? then
-      if ← tk.isSet then
+      bif (← tk.isSet) then
         solver.terminate
         throwInterruptException
     IO.sleep sleepMs.toUInt32
     CegarM.consumeSolverTime sleepMs
-    sleepMs := if sleepMs ≥ maxSleepMs then sleepMs else sleepMs * 2
+    sleepMs := bif sleepMs ≥ᵇ maxSleepMs then sleepMs else sleepMs * 2
   return solveTask.get
 
 public def Cegar.checkBitVec :
@@ -83,7 +83,7 @@ public def Cegar.checkBitVec :
     let aigSize := aig.decls.size
     trace[Meta.Tactic.bv] s!"AIG has {aigSize} nodes, added {aigSize - prevAigSize} nodes this round"
 
-    if ctx.config.graphviz then
+    bif ctx.config.graphviz then
       IO.FS.writeFile ("." / "aig.gv") <| AIG.toGraphviz entry
 
 

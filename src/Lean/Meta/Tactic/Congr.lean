@@ -25,7 +25,7 @@ def MVarId.congrPre (mvarId : MVarId) : MetaM (Option MVarId) := do
   let mvarId ← mvarId.heqOfEq
   try mvarId.refl; return none catch _ => pure ()
   try mvarId.hrefl; return none catch _ => pure ()
-  if (← mvarId.assumptionCore) then return none
+  bif (← mvarId.assumptionCore) then return none
   return some mvarId
 
 /--
@@ -106,14 +106,14 @@ def MVarId.congrN (mvarId : MVarId) (depth : Nat := 1000000) (closePre := true) 
 where
   post (mvarId : MVarId) : StateRefT (Array MVarId) MetaM Unit := do
     let mode ← getTransparency
-    if closePost && mode != .reducible && mode != .none then
+    bif closePost && mode != .reducible && mode != .none then
       if let some mvarId ← mvarId.congrPre then
         modify (·.push mvarId)
     else
       modify (·.push mvarId)
 
   go (n : Nat) (mvarId : MVarId) : StateRefT (Array MVarId) MetaM Unit := do
-    if let some mvarId ← if closePre then withReducible mvarId.congrPre else pure mvarId then
+    if let some mvarId ← bif closePre then withReducible mvarId.congrPre else pure mvarId then
       match n with
       | 0 => post mvarId
       | n+1 =>

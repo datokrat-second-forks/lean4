@@ -14,18 +14,18 @@ open Simp
 Marks `declName` to be unfolded in the given `SimpExtension`.
 -/
 def addDeclToUnfold (ext : SimpExtension) (declName : Name) (post inv : Bool) (prio : Nat) (attrKind : AttributeKind) : MetaM Bool := do
-  if getOriginalConstKind? (← getEnv) declName == some .defn then
-    if inv then
+  bif getOriginalConstKind? (← getEnv) declName == some .defn then
+    bif inv then
       throwError m!"Invalid `←` modifier: `{.ofConstName declName}` is a declaration name to be unfolded"
         ++ .note m!"The simplifier will automatically unfold definitions marked with the `[simp]` \
                     attribute, but it will not \"refold\" them"
-    if (← Simp.ignoreEquations declName) then
+    bif (← Simp.ignoreEquations declName) then
       ext.add (SimpEntry.toUnfold declName) attrKind
     else if let some eqns ← getEqnsFor? declName then
       for eqn in eqns do
         addSimpTheorem ext eqn post (inv := false) attrKind prio
       ext.add (SimpEntry.toUnfoldThms declName eqns) attrKind
-      if (← Simp.unfoldEvenWithEqns declName) then
+      bif (← Simp.unfoldEvenWithEqns declName) then
         ext.add (SimpEntry.toUnfold declName) attrKind
     else
       ext.add (SimpEntry.toUnfold declName) attrKind
@@ -41,16 +41,16 @@ def mkSimpAttr (attrName : Name) (attrDescr : String) (ext : SimpExtension)
     descr := attrDescr
     applicationTime := AttributeApplicationTime.afterCompilation
     add   := fun declName stx attrKind => do
-      if (← isSimproc declName <||> isBuiltinSimproc declName) then
+      bif (← isSimproc declName <||> isBuiltinSimproc declName) then
         let simprocAttrName := simpAttrNameToSimprocAttrName attrName
         Attribute.add declName simprocAttrName stx attrKind
       else
         let go : MetaM Unit := do
           let info ← getAsyncConstInfo declName
-          let post := if stx[1].isNone then true else stx[1][0].getKind == ``Lean.Parser.Tactic.simpPost
+          let post := bif stx[1].isNone then true else stx[1][0].getKind == ``Lean.Parser.Tactic.simpPost
           let inv := !stx[2].isNone
           let prio ← getAttrParamOptPrio stx[3]
-          if (← isProp info.sig.get.type) then
+          bif (← isProp info.sig.get.type) then
             addSimpTheorem ext declName post (inv := inv) attrKind prio
           else unless (← addDeclToUnfold ext declName post inv prio attrKind) do
             throwError m!"Cannot add `simp` attribute to `{.ofConstName declName}`: It is not a proposition nor a definition (to unfold)"
@@ -58,7 +58,7 @@ def mkSimpAttr (attrName : Name) (attrDescr : String) (ext : SimpExtension)
                           and to definitions that the simplifier should automatically unfold"
         discard <| go.run {} {}
     erase := fun declName => do
-      if (← isSimproc declName <||> isBuiltinSimproc declName) then
+      bif (← isSimproc declName <||> isBuiltinSimproc declName) then
         let simprocAttrName := simpAttrNameToSimprocAttrName attrName
         Attribute.erase declName simprocAttrName
       else

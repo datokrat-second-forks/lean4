@@ -36,12 +36,12 @@ def _root_.Lean.MVarId.rewrite (mvarId : MVarId) (e : Expr) (heq : Expr)
     let cont (heq heqType : Expr) : MetaM RewriteResult := do
       match (← matchEq? heqType) with
       | none =>
-        let valueDescr := if (← Meta.isProp heqType) then "a proof of" else "a value of type"
+        let valueDescr := bif (← Meta.isProp heqType) then "a proof of" else "a value of type"
         throwError m!"Invalid rewrite argument: Expected an equality or iff proof \
           or definition name, but{inlineExpr heq}is {valueDescr}{indentExpr heqType}"
       | some (α, lhs, rhs) =>
         let cont (heq heqType lhs rhs : Expr) : MetaM RewriteResult := do
-          if lhs.getAppFn.isMVar then
+          bif lhs.getAppFn.isMVar then
             throwError "Invalid rewrite argument: The pattern to be substituted is a metavariable (`{lhs}`) in this equality{indentExpr heqType}"
           let e ← instantiateMVars e
           let eAbst ← withConfig (fun oldConfig => { config, oldConfig with }) <| kabstract e lhs config.occs
@@ -52,7 +52,7 @@ def _root_.Lean.MVarId.rewrite (mvarId : MVarId) (e : Expr) (heq : Expr)
           -- construct rewrite proof
           let eNew := eAbst.instantiate1 rhs
           let eNew ← instantiateMVars eNew
-          let eNew ← if rhs.hasBinderNameHint then eNew.resolveBinderNameHint else pure eNew
+          let eNew ← bif rhs.hasBinderNameHint then eNew.resolveBinderNameHint else pure eNew
           let eType ← inferType e
           let motive := Lean.mkLambda `_a BinderInfo.default α eAbst
           try

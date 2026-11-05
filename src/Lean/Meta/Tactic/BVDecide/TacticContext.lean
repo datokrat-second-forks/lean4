@@ -55,9 +55,9 @@ where
   determineSolver : CoreM System.FilePath := do
     let opts ← getOptions
     let option := sat.solver.get opts
-    if option == "" then
+    bif option == "" then
       let cadicalPath := (← IO.appPath).parent.get! / "cadical" |>.withExtension System.FilePath.exeExtension
-      if ← cadicalPath.pathExists then
+      bif (← cadicalPath.pathExists) then
         return cadicalPath
       else
         return "cadical"

@@ -16,10 +16,10 @@ set_option linter.coreInternal.internalModule false in -- User-facing builtin si
 builtin_simproc ↓ [simp, seval] reduceIte (ite _ _ _) := fun e => do
   let_expr f@ite α c i tb eb ← e | return .continue
   let r ← simp c
-  if r.expr.isTrue then
+  bif r.expr.isTrue then
     let pr    := mkApp (mkApp5 (mkConst ``ite_eq_left_of_eq_true f.constLevels!) α c i tb eb) (← r.getProof)
     return .visit { expr := tb, proof? := pr }
-  if r.expr.isFalse then
+  bif r.expr.isFalse then
     let pr    := mkApp (mkApp5 (mkConst ``ite_eq_right_of_eq_false f.constLevels!) α c i tb eb) (← r.getProof)
     return .visit { expr := eb, proof? := pr }
   return .continue
@@ -28,13 +28,13 @@ set_option linter.coreInternal.internalModule false in -- User-facing builtin si
 builtin_simproc ↓ [simp, seval] reduceDIte (dite _ _ _) := fun e => do
   let_expr f@dite α c i tb eb ← e | return .continue
   let r ← simp c
-  if r.expr.isTrue then
+  bif r.expr.isTrue then
     let pr    ← r.getProof
     let h     := mkApp2 (mkConst ``of_eq_true) c pr
     let eNew  := mkApp tb h |>.headBeta
     let prNew := mkApp (mkApp5 (mkConst ``dite_eq_left_of_eq_true f.constLevels!) α c i tb eb) pr
     return .visit { expr := eNew, proof? := prNew }
-  if r.expr.isFalse then
+  bif r.expr.isFalse then
     let pr    ← r.getProof
     let h     := mkApp2 (mkConst ``of_eq_false) c pr
     let eNew  := mkApp eb h |>.headBeta
@@ -46,11 +46,11 @@ set_option linter.coreInternal.internalModule false in -- User-facing builtin si
 builtin_simproc ↓ [simp, seval] reduceUIte (UDecidable.ite _ _ _) := fun e => do
   let_expr f@UDecidable.ite α c i tb eb ← e | return .continue
   let r ← simp c
-  if r.expr.isTrue then
+  bif r.expr.isTrue then
     let thm := mkApp5 (mkConst ``UDecidable.ite_eq_left_of_eq_true f.constLevels!) α c i tb eb
     let pr := mkApp thm (← r.getProof)
     return .visit { expr := tb, proof? := pr }
-  if r.expr.isFalse then
+  bif r.expr.isFalse then
     let thm := mkApp5 (mkConst ``UDecidable.ite_eq_right_of_eq_false f.constLevels!) α c i tb eb
     let pr := mkApp thm (← r.getProof)
     return .visit { expr := eb, proof? := pr }
@@ -60,13 +60,13 @@ set_option linter.coreInternal.internalModule false in -- User-facing builtin si
 builtin_simproc ↓ [simp, seval] reduceUDIte (UDecidable.dite _ _ _) := fun e => do
   let_expr f@UDecidable.dite α c i tb eb ← e | return .continue
   let r ← simp c
-  if r.expr.isTrue then
+  bif r.expr.isTrue then
     let pr ← r.getProof
     let eNew := mkApp tb (mkApp2 (mkConst ``of_eq_true) c pr) |>.headBeta
     let thm := mkApp5 (mkConst ``UDecidable.dite_eq_left_of_eq_true f.constLevels!) α c i tb eb
     let prNew := mkApp thm pr
     return .visit { expr := eNew, proof? := prNew }
-  if r.expr.isFalse then
+  bif r.expr.isFalse then
     let pr ← r.getProof
     let eNew := mkApp eb (mkApp2 (mkConst ``of_eq_false) c pr) |>.headBeta
     let thm := mkApp5 (mkConst ``UDecidable.dite_eq_right_of_eq_false f.constLevels!) α c i tb eb
@@ -85,19 +85,19 @@ rewrite `&&`/`decide` in opposite directions.
 -/
 private def decideBoolCond? (c : Expr) : SimpM (Option (Bool × Expr)) := do
   let r ← simp c
-  if r.expr.isConstOf ``Bool.true then
+  bif r.expr.isConstOf ``Bool.true then
     return some (true, ← r.getProof)
-  if r.expr.isConstOf ``Bool.false then
+  bif r.expr.isConstOf ``Bool.false then
     return some (false, ← r.getProof)
   let some ext ← getSimpExtension? `bool_to_prop | return none
   let eqTrue := mkApp3 (mkConst ``Eq [1]) (mkConst ``Bool) c (mkConst ``Bool.true)
   let rView ← Simp.withFreshCache <| Simp.withSimpTheorems #[← ext.getTheorems] <| simp eqTrue
-  if rView.expr == eqTrue then return none
+  bif rView.expr == eqTrue then return none
   let r ← simp rView.expr
   unless r.expr.isTrue || r.expr.isFalse do return none
   -- `eqTrue = rView.expr = True/False`
   let pr ← mkEqTrans (← rView.getProof) (← r.getProof)
-  if r.expr.isTrue then
+  bif r.expr.isTrue then
     return some (true, mkApp2 (mkConst ``of_eq_true) eqTrue pr)
   let hNot := mkApp2 (mkConst ``of_eq_false) eqTrue pr
   return some (false, mkApp2 (mkConst ``Bool.of_not_eq_true) c hNot)
@@ -106,7 +106,7 @@ set_option linter.coreInternal.internalModule false in -- User-facing builtin si
 builtin_simproc ↓ [simp, seval] reduceCond (cond _ _ _) := fun e => do
   let_expr f@cond α c tb eb ← e | return .continue
   let some (b, h) ← decideBoolCond? c | return .continue
-  if b then
+  bif b then
     return .visit { expr := tb, proof? := mkApp5 (mkConst ``Bool.cond_pos f.constLevels!) α c tb eb h }
   else
     return .visit { expr := eb, proof? := mkApp5 (mkConst ``Bool.cond_neg f.constLevels!) α c tb eb h }
@@ -115,7 +115,7 @@ set_option linter.coreInternal.internalModule false in -- User-facing builtin si
 builtin_simproc ↓ [simp, seval] reduceDCond (Bool.dcond _ _ _) := fun e => do
   let_expr f@Bool.dcond α c tb eb ← e | return .continue
   let some (b, h) ← decideBoolCond? c | return .continue
-  if b then
+  bif b then
     let prNew := mkApp5 (mkConst ``Bool.dcond_pos f.constLevels!) α c tb eb h
     return .visit { expr := (mkApp tb h).headBeta, proof? := prNew }
   else
@@ -141,7 +141,7 @@ builtin_dsimproc ↓ [simp, seval] dreduceIte (ite _ _ _) := fun e => do
   reduce them using the default reduction mode.
   -/
   let r ← simp c
-  if r.expr.isTrue || r.expr.isFalse then
+  bif r.expr.isTrue || r.expr.isFalse then
     let dec := .proj ``Decidable 0 i -- decide is the first projection
     match_expr (← whnfD dec) with
     | Bool.true => return .visit tb
@@ -157,7 +157,7 @@ builtin_dsimproc ↓ [simp, seval] dreduceDIte (dite _ _ _) := fun e => do
   let_expr dite _ c i tb eb ← e | return .continue
   -- See comment at `dreduceIte`
   let r ← simp c
-  if r.expr.isTrue || r.expr.isFalse then
+  bif r.expr.isTrue || r.expr.isFalse then
     let dec := .proj ``Decidable 0 i -- decide is the first projection
     match_expr (← whnfD dec) with
     | Bool.true => return .visit (mkApp tb (mkExpectedPropHint (.proj ``Decidable 1 i) c)).headBeta
@@ -199,7 +199,7 @@ builtin_simproc [simp, seval] reduceCtorEq (_ = _) := fun e => withReducibleAndI
   let_expr Eq _ lhs rhs ← e | return .continue
   match (← constructorApp'? lhs), (← constructorApp'? rhs) with
   | some (c₁, _), some (c₂, _) =>
-    if c₁.name != c₂.name then
+    bif c₁.name != c₂.name then
       withLocalDeclD `h e fun h =>
         return .done { expr := mkConst ``False, proof? := (← withDefault <| mkEqFalse' (← mkLambdaFVars #[h] (← mkNoConfusion (mkConst ``False) h))) }
     else

@@ -46,23 +46,23 @@ where
     for localDecl in (← getLCtx) do
       let usedSet := (← get).2
       unless usedSet.contains localDecl.fvarId do
-        if (← isProp localDecl.type) then
-          if (← dependsOnPred localDecl.type usedSet.contains) then
+        bif (← isProp localDecl.type) then
+          bif (← dependsOnPred localDecl.type usedSet.contains) then
             addUsedFVar localDecl.fvarId
         if let some v := localDecl.value? then
-          if (← dependsOnPred v usedSet.contains) then
+          bif (← dependsOnPred v usedSet.contains) then
             addUsedFVar localDecl.fvarId
 
   collectProps : StateRefT (Bool × FVarIdSet) MetaM Unit := do
     modify fun s => (false, s.2)
     collectPropsStep
-    if (← get).1 then
+    bif (← get).1 then
       collectProps
 
   collectUsed : StateRefT (Bool × FVarIdSet) MetaM FVarIdSet := do
     addUsedFVars (← instantiateMVars (← mvarId.getType))
     toPreserve.forM addUsedFVar
-    if indirectProps then collectProps
+    bif indirectProps then collectProps
     return (← get).2
 
 /--

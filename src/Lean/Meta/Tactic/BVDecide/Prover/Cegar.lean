@@ -20,14 +20,14 @@ namespace Lean.Meta.Tactic.BVDecide
 
 open Cegar in
 public def cegarBlaster (ctx : TacticContext) : UnsatProver CegarCert :=
-  if ctx.config.needsIncremental then
+  bif ctx.config.needsIncremental then
     cegarLoop
   else
     (lratBitblaster ctx).map CegarCert.ofLratCert
 where
   checkTermination : CegarM Unit := do
     checkSystem "bv_decide"
-    if (← CegarM.getRounds) == 0 then
+    bif (← CegarM.getRounds) == 0 then
       throwError m!"bv_decide reached its round limit, consider increasing it via the `cegarRounds` config option"
     CegarM.consumeRound
 
@@ -51,7 +51,7 @@ where
       | .none => CegarM.setDidChange false
 
     let equations := lastCex.filterMap fun (lhs, synth, rhs) =>
-      if synth then none else some (lhs, rhs)
+      bif synth then none else some (lhs, rhs)
 
     let funState := (← getThe BVDecide.State).theoryState.funState
     return .error {

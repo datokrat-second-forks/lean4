@@ -259,33 +259,33 @@ section SimpleUnifiers
 
 def bvAnd (ty lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
   let_expr BitVec wExpr := ty | return .rfl
-  if lhs == rhs then
+  bif lhs == rhs then
     countRule `bvAnd.andSelf
     return .step lhs (mkApp2 (mkConst ``BitVec.and_self) wExpr lhs)
   else
     let some w := Sym.getNatValue? wExpr | return .rfl
     let notAnd : SimprocM (Option Sym.Simp.Result) := tryRule `bvAnd.notAnd do
       let_expr Complement.complement _ _ lhs := lhs | return none
-      if lhs != rhs then return none
+      bif lhs != rhs then return none
       let proof := mkApp2 (mkConst ``BitVec.and_contra') wExpr rhs
       return some <| .step (← mkLit 0#w) proof
 
     let andNot : SimprocM (Option Sym.Simp.Result) := tryRule `bvAnd.andNot do
       let_expr Complement.complement _ _ rhs := rhs | return none
-      if lhs != rhs then return none
+      bif lhs != rhs then return none
       let proof := mkApp2 (mkConst ``BitVec.and_contra) wExpr lhs
       return some <| .step (← mkLit 0#w) proof
 
     let onesAnd : SimprocM (Option Sym.Simp.Result) := tryRule `bvAnd.onesAnd do
       let some ⟨w', lhsValue⟩ := Sym.getBitVecValue? lhs | return none
-      if lhsValue != -1#w' then return none
+      bif lhsValue != -1#w' then return none
       let proof :=
         mkApp2 (mkConst ``Std.Tactic.BVDecide.Normalize.BitVec.ones_and) wExpr rhs
       return some <| .step rhs proof
 
     let andOnes : SimprocM (Option Sym.Simp.Result) := tryRule `bvAnd.andOnes do
       let some ⟨w', rhsValue⟩ := Sym.getBitVecValue? rhs | return none
-      if rhsValue != -1#w' then return none
+      bif rhsValue != -1#w' then return none
       let proof :=
         mkApp2 (mkConst ``Std.Tactic.BVDecide.Normalize.BitVec.and_ones) wExpr lhs
       return some <| .step lhs proof
@@ -299,68 +299,68 @@ def bvAnd (ty lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 def bvAdd (ty lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
   let_expr BitVec wExpr := ty | return .rfl
   let some w := Sym.getNatValue? wExpr | return .rfl
-  if lhs == rhs then
+  bif lhs == rhs then
     let expr ← BitVec.mkMul lhs (← mkLit 2#w) wExpr
     countRule `bvAdd.addSame
     return .step expr (mkApp2 (mkConst ``BitVec.add_same) wExpr lhs)
   else
     let notAdd : SimprocM (Option Sym.Simp.Result) := tryRule `bvAdd.notAdd do
       let_expr Complement.complement _ _ lhs := lhs | return none
-      if lhs != rhs then return none
+      bif lhs != rhs then return none
       let proof := mkApp2 (mkConst ``BitVec.not_add) wExpr rhs
       return some <| .step (← mkLit (-1#w)) proof
 
     let addNot : SimprocM (Option Sym.Simp.Result) := tryRule `bvAdd.addNot do
       let_expr Complement.complement _ _ rhs := rhs | return none
-      if lhs != rhs then return none
+      bif lhs != rhs then return none
       let proof := mkApp2 (mkConst ``BitVec.add_not) wExpr lhs
       return some <| .step (← mkLit (-1#w)) proof
 
     let addNeg : SimprocM (Option Sym.Simp.Result) := tryRule `bvAdd.addNeg do
       let_expr HAdd.hAdd _ _ _ _ rlhs rrhs := rhs | return none
       let some ⟨w', rrhsVal⟩ := Sym.getBitVecValue? rrhs | return none
-      if rrhsVal != 1#w' then return none
+      bif rrhsVal != 1#w' then return none
       let_expr Complement.complement _ _ rlhs := rlhs | return none
-      if rlhs != lhs then return none
+      bif rlhs != lhs then return none
       let proof := mkApp2 (mkConst ``BitVec.add_neg) wExpr lhs
       return some <| .step (← mkLit 0#w) proof
 
     let negAdd : SimprocM (Option Sym.Simp.Result) := tryRule `bvAdd.negAdd do
       let_expr HAdd.hAdd _ _ _ _ llhs lrhs := lhs | return none
       let some ⟨w', lrhsVal⟩ := Sym.getBitVecValue? lrhs | return none
-      if lrhsVal != 1#w' then return none
+      bif lrhsVal != 1#w' then return none
       let_expr Complement.complement _ _ llhs := llhs | return none
-      if llhs != rhs then return none
+      bif llhs != rhs then return none
       let proof := mkApp2 (mkConst ``Std.Tactic.BVDecide.Normalize.BitVec.neg_add) wExpr rhs
       return some <| .step (← mkLit 0#w) proof
 
     let addNegMul : SimprocM (Option Sym.Simp.Result) := tryRule `bvAdd.addNegMul do
       let some ⟨w', rhsVal⟩ := Sym.getBitVecValue? rhs | return none
-      if rhsVal != 1#w' then return none
+      bif rhsVal != 1#w' then return none
       let_expr Complement.complement _ _ lhs := lhs | return none
       let_expr HAdd.hAdd _ _ _ _ llhs lrhs := lhs | return none
-      if llhs.isAppOf ``HMul.hMul then
+      bif llhs.isAppOf ``HMul.hMul then
         let_expr HMul.hMul _ _ _ _ lllhs llrhs := llhs | return none
-        if lllhs == lrhs then
+        bif lllhs == lrhs then
           let newRhs ← BitVec.mkComplement llrhs wExpr
           let expr ← BitVec.mkMul lllhs newRhs wExpr
           let proof := mkApp3 (mkConst ``BitVec.add_neg_mul'') wExpr lllhs llrhs
           return some <| .step expr proof
-        else if llrhs == lrhs then
+        else bif llrhs == lrhs then
           let newLhs ← BitVec.mkComplement lllhs wExpr
           let expr ← BitVec.mkMul newLhs llrhs wExpr
           let proof := mkApp3 (mkConst ``BitVec.add_neg_mul''') wExpr llrhs lllhs
           return some <| .step expr proof
         else
           return none
-      else if lrhs.isAppOf ``HMul.hMul then
+      else bif lrhs.isAppOf ``HMul.hMul then
         let_expr HMul.hMul _ _ _ _ lrlhs lrrhs := lrhs | return none
-        if llhs == lrlhs then
+        bif llhs == lrlhs then
           let newRhs ← BitVec.mkComplement lrrhs wExpr
           let expr ← BitVec.mkMul lrlhs newRhs wExpr
           let proof := mkApp3 (mkConst ``BitVec.add_neg_mul) wExpr lrlhs lrrhs
           return some <| .step expr proof
-        else if llhs == lrrhs then
+        else bif llhs == lrrhs then
           let newLhs ← BitVec.mkComplement lrlhs wExpr
           let expr ← BitVec.mkMul newLhs lrrhs wExpr
           let proof := mkApp3 (mkConst ``BitVec.add_neg_mul') wExpr lrrhs lrlhs
@@ -372,14 +372,14 @@ def bvAdd (ty lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 
     let addShiftLeft : SimprocM (Option Sym.Simp.Result) := tryRule `bvAdd.addShiftLeft do
       let_expr HShiftLeft.hShiftLeft _ _ _ _ rlhs rrhs := rhs | return none
-      if lhs != rrhs then return none
+      bif lhs != rrhs then return none
       let expr ← BitVec.mkOr lhs rhs wExpr
       let proof := mkApp3 (mkConst ``BitVec.add_shiftLeft_eq_or_shiftLeft) wExpr lhs rlhs
       return some <| .step expr proof
 
     let shiftLeftAdd : SimprocM (Option Sym.Simp.Result) := tryRule `bvAdd.shiftLeftAdd do
       let_expr HShiftLeft.hShiftLeft _ _ _ _ llhs lrhs := lhs | return none
-      if rhs != lrhs then return none
+      bif rhs != lrhs then return none
       let expr ← BitVec.mkOr lhs rhs wExpr
       let proof := mkApp3 (mkConst ``BitVec.shiftLeft_add_eq_shiftLeft_or) wExpr rhs llhs
       return some <| .step expr proof
@@ -388,11 +388,11 @@ def bvAdd (ty lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
     let appendZeroAddZeroAppend : SimprocM (Option Sym.Simp.Result) := tryRule `bvAdd.appendZeroAddZeroAppend do
       let_expr HAppend.hAppend llhsTy lrhsTy _ _ llhs lrhs := lhs | return none
       let_expr HAppend.hAppend rlhsTy rrhsTy _ _ rlhs rrhs := rhs | return none
-      if llhsTy != rlhsTy || lrhsTy != rrhsTy then return none
+      bif llhsTy != rlhsTy || lrhsTy != rrhsTy then return none
       let some ⟨lw, lrhsVal⟩ := Sym.getBitVecValue? lrhs | return none
-      if lrhsVal != 0#lw then return none
+      bif lrhsVal != 0#lw then return none
       let some ⟨rw, rlhsVal⟩ := Sym.getBitVecValue? rlhs | return none
-      if rlhsVal != 0#rw then return none
+      bif rlhsVal != 0#rw then return none
       let_expr BitVec wlExpr := llhsTy | return none
       let_expr BitVec wrExpr := lrhsTy | return none
       let expr ← BitVec.mkAppend llhs rrhs wlExpr wrExpr wExpr
@@ -404,11 +404,11 @@ def bvAdd (ty lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
     let zeroAppendAddAppendZero : SimprocM (Option Sym.Simp.Result) := tryRule `bvAdd.zeroAppendAddAppendZero do
       let_expr HAppend.hAppend llhsTy lrhsTy _ _ llhs lrhs := lhs | return none
       let_expr HAppend.hAppend rlhsTy rrhsTy _ _ rlhs rrhs := rhs | return none
-      if llhsTy != rlhsTy || lrhsTy != rrhsTy then return none
+      bif llhsTy != rlhsTy || lrhsTy != rrhsTy then return none
       let some ⟨lw, llhsVal⟩ := Sym.getBitVecValue? llhs | return none
-      if llhsVal != 0#lw then return none
+      bif llhsVal != 0#lw then return none
       let some ⟨rw, rrhsVal⟩ := Sym.getBitVecValue? rrhs | return none
-      if rrhsVal != 0#rw then return none
+      bif rrhsVal != 0#rw then return none
       let_expr BitVec wlExpr := llhsTy | return none
       let_expr BitVec wrExpr := lrhsTy | return none
       let expr ← BitVec.mkAppend rlhs lrhs wlExpr wrExpr wExpr
@@ -430,7 +430,7 @@ def bvAdd (ty lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 def bvShiftRight (α lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
   let_expr BitVec wExpr := α | return .rfl
   let some w := Sym.getNatValue? wExpr | return .rfl
-  if lhs == rhs then
+  bif lhs == rhs then
     let proof := mkApp2 (mkConst ``Std.Tactic.BVDecide.Normalize.BitVec.ushiftRight_self) wExpr lhs
     countRule `bvShiftRight.ushiftRightSelf
     return .step (← mkLit 0#w) proof
@@ -448,19 +448,19 @@ def extractLsb' (wExpr startExpr lenExpr targetExpr : Expr) : SimprocM (Sym.Simp
     let some w := Sym.getNatValue? wExpr | return .rfl
     let some start := Sym.getNatValue? startExpr | return .rfl
     let some len := Sym.getNatValue? lenExpr | return .rfl
-    if start != 0 then return .rfl
-    if len != w then return .rfl
+    bif start != 0 then return .rfl
+    bif len != w then return .rfl
     let proof := mkApp2 (mkConst ``BitVec.extractLsb'_eq_self) wExpr targetExpr
     countRule `bvExtract.full
     return .step targetExpr proof
 
   let res ← tryExtractFull
-  if !res.isRfl then return res
+  bif !res.isRfl then return res
 
   -- For a symbolic start with known widths, we reduce to shift by the symbolic start + setWidth
   -- by the known widths. This is sensible as we can perform a limited degree of reasoning on
   -- symbolic shifts.
-  if (Sym.getNatValue? startExpr).isNone then
+  bif (Sym.getNatValue? startExpr).isNone then
     unless (Sym.getNatValue? wExpr).isSome && (Sym.getNatValue? lenExpr).isSome do return .rfl
     let shifted ← BitVec.mkNatShiftRight targetExpr startExpr wExpr
     let expr ← BitVec.mkSetWidth wExpr lenExpr shifted
@@ -491,7 +491,7 @@ def extractLsb' (wExpr startExpr lenExpr targetExpr : Expr) : SimprocM (Sym.Simp
     let some start := Sym.getNatValue? startExpr | return .rfl
     let some len := Sym.getNatValue? lenExpr | return .rfl
     let some width := Sym.getNatValue? wExpr | return .rfl
-    if !(start == 0 && len ≤ width) then return .rfl
+    bif !(start == 0 && len ≤ᵇ width) then return .rfl
     let lhs' ← BitVec.mkExtractLsb' wExpr startExpr lenExpr lhs
     let rhs' ← BitVec.mkExtractLsb' wExpr startExpr lenExpr rhs
     let expr ← BitVec.mkAdd lhs' rhs' lenExpr
@@ -509,7 +509,7 @@ def extractLsb' (wExpr startExpr lenExpr targetExpr : Expr) : SimprocM (Sym.Simp
     let some start := Sym.getNatValue? startExpr | return .rfl
     let some len := Sym.getNatValue? lenExpr | return .rfl
     let some width := Sym.getNatValue? wExpr | return .rfl
-    if !(start == 0 && len ≤ width) then return .rfl
+    bif !(start == 0 && len ≤ᵇ width) then return .rfl
     let lhs' ← BitVec.mkExtractLsb' wExpr startExpr lenExpr lhs
     let rhs' ← BitVec.mkExtractLsb' wExpr startExpr lenExpr rhs
     let expr ← BitVec.mkMul lhs' rhs' lenExpr
@@ -529,7 +529,7 @@ def extractLsb' (wExpr startExpr lenExpr targetExpr : Expr) : SimprocM (Sym.Simp
     let some start := Sym.getNatValue? startExpr | return .rfl
     let some len := Sym.getNatValue? lenExpr | return .rfl
     let some rhsWidth := Sym.getNatValue? rhsWidthExpr | return .rfl
-    if start + len ≤ rhsWidth then
+    bif start + len ≤ᵇ rhsWidth then
       let expr ← BitVec.mkExtractLsb' rhsWidthExpr startExpr lenExpr rhs
       let proof :=
         mkApp7
@@ -543,7 +543,7 @@ def extractLsb' (wExpr startExpr lenExpr targetExpr : Expr) : SimprocM (Sym.Simp
           (Nat.mkDecideProofLe (← mkLit (start + len)) rhsWidthExpr)
       countRule `bvExtract.append_1
       return .step expr proof
-    else if rhsWidth ≤ start then
+    else bif rhsWidth ≤ᵇ start then
       let expr ← BitVec.mkExtractLsb' lhsWidthExpr (← mkLit (start - rhsWidth)) lenExpr lhs
       let proof :=
         mkApp7
@@ -565,7 +565,7 @@ def extractLsb' (wExpr startExpr lenExpr targetExpr : Expr) : SimprocM (Sym.Simp
     let some initialWidthVal := Sym.getNatValue? wExpr | return .rfl
     let some startVal := Sym.getNatValue? startExpr | return .rfl
     let some lenVal := Sym.getNatValue? lenExpr | return .rfl
-    if !(startVal + lenVal) < initialWidthVal then return .rfl
+    bif !(startVal + lenVal) <ᵇ initialWidthVal then return .rfl
     let newInner ← BitVec.mkExtractLsb' wExpr startExpr lenExpr inner
     let expr ← BitVec.mkComplement newInner lenExpr
     let lt := Nat.mkDecideProofLt (← Nat.mkAdd startExpr lenExpr) wExpr
@@ -615,7 +615,7 @@ def bvSshiftRight' (wExpr vExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := 
   return .step expr proof
 
 def boolAnd (lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
-  if lhs == rhs then
+  bif lhs == rhs then
     countRule `boolAnd.andSelf
     return .step lhs (mkApp (mkConst ``Bool.and_self) lhs)
   else
@@ -641,26 +641,26 @@ def boolAnd (lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 
     let andNotSelf : SimprocM (Option Sym.Simp.Result) := tryRule `boolAnd.andNotSelf do
       let_expr Bool.not rhs := rhs | return none
-      if lhs != rhs then return none
+      bif lhs != rhs then return none
       let proof := mkApp (mkConst ``Bool.and_not_self) lhs
       return some <| .step (← mkLit false) proof
 
     let notAndSelf : SimprocM (Option Sym.Simp.Result) := tryRule `boolAnd.notAndSelf do
       let_expr Bool.not lhs := lhs | return none
-      if lhs != rhs then return none
+      bif lhs != rhs then return none
       let proof := mkApp (mkConst ``Bool.not_and_self) lhs
       return some <| .step (← mkLit false) proof
 
     let andSelfLeft : SimprocM (Option Sym.Simp.Result) := tryRule `boolAnd.andSelfLeft do
       let_expr Bool.and rlhs rrhs := rhs | return none
-      if lhs != rlhs then return none
+      bif lhs != rlhs then return none
       let expr ← Bool.mkAnd lhs rrhs
       let proof := mkApp2 (mkConst ``Bool.and_self_left) lhs rrhs
       return some <| .step expr proof
 
     let andSelfRight : SimprocM (Option Sym.Simp.Result) := tryRule `boolAnd.andSelfRight do
       let_expr Bool.and llhs lrhs := lhs | return none
-      if rhs != lrhs then return none
+      bif rhs != lrhs then return none
       let expr ← Bool.mkAnd llhs rhs
       let proof := mkApp2 (mkConst ``Bool.and_self_right) llhs rhs
       return some <| .step expr proof
@@ -676,7 +676,7 @@ def boolAnd (lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
     return .rfl
 
 def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
-  if lhs == rhs then
+  bif lhs == rhs then
     let proof :=
       mkApp2
         (mkConst ``Std.Tactic.BVDecide.Normalize.BitVec.beq_self_eq_true)
@@ -689,7 +689,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
     let addInj : SimprocM (Option Sym.Simp.Result) := tryRule `bvBeq.addInj do
       let_expr HAdd.hAdd _ _ _ _ llhs lrhs := lhs | return none
       let_expr HAdd.hAdd _ _ _ _ rlhs rrhs := rhs | return none
-      if lrhs == rrhs then
+      bif lrhs == rrhs then
         let expr ← BitVec.mkBEq llhs rlhs wExpr
         let proof :=
           mkApp4 (mkConst ``Std.Tactic.BVDecide.Frontend.Normalize.BitVec.add_left_inj)
@@ -698,7 +698,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
             rlhs
             lrhs
         return some <| .step expr proof
-      else if lrhs == rlhs then
+      else bif lrhs == rlhs then
         let expr ← BitVec.mkBEq llhs rrhs wExpr
         let proof :=
           mkApp4 (mkConst ``Std.Tactic.BVDecide.Frontend.Normalize.BitVec.add_left_inj')
@@ -707,7 +707,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
             rrhs
             lrhs
         return some <| .step expr proof
-      else if llhs == rlhs then
+      else bif llhs == rlhs then
         let expr ← BitVec.mkBEq lrhs rrhs wExpr
         let proof :=
           mkApp4 (mkConst ``Std.Tactic.BVDecide.Frontend.Normalize.BitVec.add_right_inj)
@@ -716,7 +716,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
             rrhs
             llhs
         return some <| .step expr proof
-      else if llhs == rrhs then
+      else bif llhs == rrhs then
         let expr ← BitVec.mkBEq lrhs rlhs wExpr
         let proof :=
           mkApp4 (mkConst ``Std.Tactic.BVDecide.Frontend.Normalize.BitVec.add_right_inj')
@@ -752,7 +752,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 
     let andEqAllOnes : SimprocM (Option Sym.Simp.Result) := tryRule `bvBeq.andEqAllOnes do
       let some ⟨w, rhsVal⟩ := Sym.getBitVecValue? rhs | return none
-      if -1#w != rhsVal then return none
+      bif -1#w != rhsVal then return none
       let_expr HAnd.hAnd _ _ _ _ llhs lrhs := lhs | return none
       let newLhs ← BitVec.mkBEq llhs rhs (← mkLit w)
       let newRhs ← BitVec.mkBEq lrhs rhs (← mkLit w)
@@ -766,7 +766,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 
     let allOnesEqAnd : SimprocM (Option Sym.Simp.Result) := tryRule `bvBeq.allOnesEqAnd do
       let some ⟨w, lhsVal⟩ := Sym.getBitVecValue? lhs | return none
-      if -1#w != lhsVal then return none
+      bif -1#w != lhsVal then return none
       let_expr HAnd.hAnd _ _ _ _ rlhs rrhs := rhs | return none
       let newLhs ← BitVec.mkBEq rlhs lhs (← mkLit w)
       let newRhs ← BitVec.mkBEq rrhs lhs (← mkLit w)
@@ -836,7 +836,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 
     let addLeftEqSelf : SimprocM (Option Sym.Simp.Result) := tryRule `bvBeq.addLeftEqSelf do
       let_expr HAdd.hAdd _ _ _ _ llhs lrhs := lhs | return none
-      if lrhs != rhs then return none
+      bif lrhs != rhs then return none
       let expr ← BitVec.mkBEq llhs (← mkLit 0#w) wExpr
       let proof :=
         mkApp3 (mkConst ``Std.Tactic.BVDecide.Frontend.Normalize.BitVec.add_left_eq_self)
@@ -847,7 +847,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 
     let addRightEqSelf : SimprocM (Option Sym.Simp.Result) := tryRule `bvBeq.addRightEqSelf do
       let_expr HAdd.hAdd _ _ _ _ llhs lrhs := lhs | return none
-      if llhs != rhs then return none
+      bif llhs != rhs then return none
       let expr ← BitVec.mkBEq lrhs (← mkLit 0#w) wExpr
       let proof :=
         mkApp3 (mkConst ``Std.Tactic.BVDecide.Frontend.Normalize.BitVec.add_right_eq_self)
@@ -858,7 +858,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 
     let selfEqAddRight : SimprocM (Option Sym.Simp.Result) := tryRule `bvBeq.selfEqAddRight do
       let_expr HAdd.hAdd _ _ _ _ rlhs rrhs := rhs | return none
-      if rlhs != lhs then return none
+      bif rlhs != lhs then return none
       let expr ← BitVec.mkBEq rrhs (← mkLit 0#w) wExpr
       let proof :=
         mkApp3 (mkConst ``Std.Tactic.BVDecide.Frontend.Normalize.BitVec.self_eq_add_right)
@@ -869,7 +869,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 
     let selfEqAddLeft : SimprocM (Option Sym.Simp.Result) := tryRule `bvBeq.selfEqAddLeft do
       let_expr HAdd.hAdd _ _ _ _ rlhs rrhs := rhs | return none
-      if rrhs != lhs then return none
+      bif rrhs != lhs then return none
       let expr ← BitVec.mkBEq rlhs (← mkLit 0#w) wExpr
       let proof :=
         mkApp3 (mkConst ``Std.Tactic.BVDecide.Frontend.Normalize.BitVec.self_eq_add_left)
@@ -879,11 +879,11 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
       return some <| .step expr proof
 
     let beqNotIte : SimprocM (Option Sym.Simp.Result) := tryRule `bvBeq.beqNotIte do
-      if w == 0 then return none
+      bif w == 0 then return none
       let_expr Complement.complement _ _ inner := rhs | return none
       let_expr cond _ c thenExpr elseExpr := inner | return none
       let wPredExpr ← mkLit (w - 1)
-      if thenExpr == lhs then
+      bif thenExpr == lhs then
         let notB ← BitVec.mkComplement elseExpr wExpr
         let expr ← Bool.mkAnd (← Bool.mkNot c) (← BitVec.mkBEq lhs notB wExpr)
         let proof :=
@@ -893,7 +893,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
             elseExpr
             c
         return some <| .step expr proof
-      else if elseExpr == lhs then
+      else bif elseExpr == lhs then
         let notB ← BitVec.mkComplement thenExpr wExpr
         let expr ← Bool.mkAnd c (← BitVec.mkBEq lhs notB wExpr)
         let proof :=
@@ -907,11 +907,11 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
         return none
 
     let notIteBeq : SimprocM (Option Sym.Simp.Result) := tryRule `bvBeq.notIteBeq do
-      if w == 0 then return none
+      bif w == 0 then return none
       let_expr Complement.complement _ _ inner := lhs | return none
       let_expr cond _ c thenExpr elseExpr := inner | return none
       let wPredExpr ← mkLit (w - 1)
-      if thenExpr == rhs then
+      bif thenExpr == rhs then
         let notB ← BitVec.mkComplement elseExpr wExpr
         let expr ← Bool.mkAnd (← Bool.mkNot c) (← BitVec.mkBEq notB rhs wExpr)
         let proof :=
@@ -921,7 +921,7 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
             elseExpr
             c
         return some <| .step expr proof
-      else if elseExpr == rhs then
+      else bif elseExpr == rhs then
         let notB ← BitVec.mkComplement thenExpr wExpr
         let expr ← Bool.mkAnd c (← BitVec.mkBEq notB rhs wExpr)
         let proof :=
@@ -952,32 +952,32 @@ def bvBeq (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
     return .rfl
 
 def boolBeq (lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
-  if lhs == rhs then
+  bif lhs == rhs then
     let proof := mkApp (mkConst ``Std.Tactic.BVDecide.Normalize.Bool.beq_self_eq_true) lhs
     countRule `boolBeq.beqSelf
     return .step (← mkLit true) proof
   else
     let notSelf : SimprocM (Option Sym.Simp.Result) := tryRule `boolBeq.notSelf do
       let_expr Bool.not rhs := rhs | return none
-      if lhs != rhs then return none
+      bif lhs != rhs then return none
       let proof := mkApp (mkConst ``Bool.beq_not_self) lhs
       return some <| .step (← mkLit false) proof
 
     let selfNot : SimprocM (Option Sym.Simp.Result) := tryRule `boolBeq.selfNot do
       let_expr Bool.not lhs := lhs | return none
-      if lhs != rhs then return none
+      bif lhs != rhs then return none
       let proof := mkApp (mkConst ``Bool.not_beq_self) lhs
       return some <| .step (← mkLit false) proof
 
     let selfLeft : SimprocM (Option Sym.Simp.Result) := tryRule `boolBeq.selfLeft do
       let_expr BEq.beq _ _ rlhs rrhs := rhs | return none
-      if lhs != rlhs then return none
+      bif lhs != rlhs then return none
       let proof := mkApp2 (mkConst ``Bool.beq_self_left) lhs rrhs
       return some <| .step rrhs proof
 
     let selfRight : SimprocM (Option Sym.Simp.Result) := tryRule `boolBeq.selfRight do
       let_expr BEq.beq _ _ llhs lrhs := lhs | return none
-      if rhs != lrhs then return none
+      bif rhs != lrhs then return none
       let proof := mkApp2 (mkConst ``Bool.beq_self_right) llhs rhs
       return some <| .step llhs proof
 
@@ -990,7 +990,7 @@ def boolBeq (lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 def bvCast (nExpr mExpr hExpr targetExpr : Expr) : SimprocM (Sym.Simp.Result) := do
   let some n := Sym.getNatValue? nExpr | return .rfl
   let some m := Sym.getNatValue? mExpr | return .rfl
-  if n != m then return .rfl
+  bif n != m then return .rfl
   let proof := mkApp3 (mkConst ``BitVec.cast_eq) nExpr hExpr targetExpr
   countRule `bvCast
   return .step targetExpr proof
@@ -1021,14 +1021,14 @@ def bvSub (α lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
   return .step expr proof
 
 def ult (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
-  if lhs == rhs then
+  bif lhs == rhs then
     let proof := mkApp2 (mkConst ``Std.Tactic.BVDecide.Normalize.BitVec.lt_irrefl) wExpr lhs
     countRule `ult.ultSelf
     return .step (← mkLit false) proof (done := true)
   else
     let maxUlt : SimprocM (Option Sym.Simp.Result) := tryRule `ult.maxUlt do
       let some ⟨w, lhsValue⟩ := Sym.getBitVecValue? lhs | return none
-      if lhsValue == -1#w then
+      bif lhsValue == -1#w then
         let proof := mkApp2 (mkConst ``Std.Tactic.BVDecide.Normalize.BitVec.max_ult') (← mkLit w) rhs
         return some <| .step (← mkLit Bool.false) proof
       else
@@ -1036,7 +1036,7 @@ def ult (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 
     let lt_allOnes : SimprocM (Option Sym.Simp.Result) := tryRule `ult.lt_allOnes do
       let some ⟨w, rhs⟩ := Sym.getBitVecValue? rhs | return none
-      if rhs != -1#w then return none
+      bif rhs != -1#w then return none
       let expr ← Bool.mkNot (← BitVec.mkBEq lhs (← mkLit (-1#w)) wExpr)
       let proof := mkApp2 (mkConst ``Std.Tactic.BVDecide.Normalize.BitVec.ult_max') wExpr lhs
       return some <| .step expr proof
@@ -1047,14 +1047,14 @@ def ult (wExpr lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 
 def condSimplify (e α c thenExpr elseExpr : Expr) : SimprocM (Sym.Simp.Result) := do
   let [lvl] := e.getAppFn'.constLevels! | return .rfl
-  if thenExpr == elseExpr then
+  bif thenExpr == elseExpr then
     let proof := mkApp3 (mkConst ``Bool.cond_self [lvl]) α c thenExpr
     countRule `condSimplify.condSelf
     return .step thenExpr proof
   else
     let iteThenIte : SimprocM (Option Sym.Simp.Result) := tryRule `condSimplify.iteThenIte do
       let_expr cond _ c2 tThenExpr tElseExpr := thenExpr | return none
-      if c != c2 then return none
+      bif c != c2 then return none
       let expr := mkApp4 (mkConst ``cond [lvl]) α c tThenExpr elseExpr
       let proof :=
         mkApp5 (mkConst ``Std.Tactic.BVDecide.Normalize.Bool.ite_ite_left [lvl])
@@ -1067,7 +1067,7 @@ def condSimplify (e α c thenExpr elseExpr : Expr) : SimprocM (Sym.Simp.Result) 
 
     let iteElseIte : SimprocM (Option Sym.Simp.Result) := tryRule `condSimplify.iteElseIte do
       let_expr cond _ c2 eThenExpr eElseExpr := elseExpr | return none
-      if c != c2 then return none
+      bif c != c2 then return none
       let expr := mkApp4 (mkConst ``cond [lvl]) α c thenExpr eElseExpr
       let proof :=
         mkApp5 (mkConst ``Std.Tactic.BVDecide.Normalize.Bool.ite_ite_right [lvl])
@@ -1080,7 +1080,7 @@ def condSimplify (e α c thenExpr elseExpr : Expr) : SimprocM (Sym.Simp.Result) 
 
     let iteThenIte' : SimprocM (Option Sym.Simp.Result) := tryRule `condSimplify.iteThenIte' do
       let_expr cond _ c2 tThenExpr tElseExpr := thenExpr | return none
-      if tThenExpr != elseExpr then return none
+      bif tThenExpr != elseExpr then return none
       let expr := mkApp4 (mkConst ``cond [lvl]) α (← Bool.mkAnd c (← Bool.mkNot c2)) tElseExpr elseExpr
       let proof :=
         mkApp5 (mkConst ``Std.Tactic.BVDecide.Normalize.Bool.ite_ite_left' [lvl])
@@ -1093,7 +1093,7 @@ def condSimplify (e α c thenExpr elseExpr : Expr) : SimprocM (Sym.Simp.Result) 
 
     let iteElseIte' : SimprocM (Option Sym.Simp.Result) := tryRule `condSimplify.iteElseIte' do
       let_expr cond _ c2 eThenExpr eElseExpr := elseExpr | return none
-      if thenExpr != eThenExpr then return none
+      bif thenExpr != eThenExpr then return none
       let expr :=
         mkApp4 (mkConst ``cond [lvl])
           α
@@ -1111,7 +1111,7 @@ def condSimplify (e α c thenExpr elseExpr : Expr) : SimprocM (Sym.Simp.Result) 
 
     let iteThenIte'' : SimprocM (Option Sym.Simp.Result) := tryRule `condSimplify.iteThenIte'' do
       let_expr cond _ c2 tThenExpr tElseExpr := thenExpr | return none
-      if tElseExpr != elseExpr then return none
+      bif tElseExpr != elseExpr then return none
       let expr :=
         mkApp4 (mkConst ``cond [lvl]) α (← Bool.mkAnd c c2) tThenExpr elseExpr
       let proof :=
@@ -1125,7 +1125,7 @@ def condSimplify (e α c thenExpr elseExpr : Expr) : SimprocM (Sym.Simp.Result) 
 
     let iteElseIte'' : SimprocM (Option Sym.Simp.Result) := tryRule `condSimplify.iteElseIte'' do
       let_expr cond _ c2 eThenExpr eElseExpr := elseExpr | return none
-      if thenExpr != eElseExpr then return none
+      bif thenExpr != eElseExpr then return none
       let expr :=
         mkApp4 (mkConst ``cond [lvl])
           α
@@ -1187,7 +1187,7 @@ def bvUdiv (α lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
   -- BitVec.ofNat w n, where n =def= 2^k
   let some k := Nat.log2Exact n | return .rfl
   -- check that k < w.
-  if k ≥ w then return .rfl
+  bif k ≥ᵇ w then return .rfl
   let wExpr ← mkLit w
   let kExpr ← mkLit k
   let nExpr ← mkLit n
@@ -1202,15 +1202,15 @@ def bvUdiv (α lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
   return .step rhs proof
 
 def isTwoPow (x : BitVec w) : Option Nat :=
-  if x == 0#w then
+  bif x == 0#w then
     none
   else
     go x 0
 where
   go {w : Nat} (x : BitVec w) (counter : Nat) : Option Nat :=
-    if counter < w then
+    bif counter <ᵇ w then
       let attempt := 1#w <<< counter
-      if attempt == x then
+      bif attempt == x then
         some counter
       else
         go x (counter + 1)
@@ -1221,14 +1221,14 @@ def bvMul (α lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
   let_expr BitVec wExpr := α | return .rfl
   let onesMul : SimprocM (Option Sym.Simp.Result) := tryRule `bvMul.onesMul do
     let some ⟨w', lhsVal⟩ := Sym.getBitVecValue? lhs | return none
-    if lhsVal != -1#w' then return none
+    bif lhsVal != -1#w' then return none
     let expr ← BitVec.mkNeg rhs wExpr
     let proof := mkApp2 (mkConst ``BitVec.ones_mul) wExpr rhs
     return some <| .step expr proof
 
   let mulOnes : SimprocM (Option Sym.Simp.Result) := tryRule `bvMul.mulOnes do
     let some ⟨w', rhsVal⟩ := Sym.getBitVecValue? rhs | return none
-    if rhsVal != -1#w' then return none
+    bif rhsVal != -1#w' then return none
     let expr ← BitVec.mkNeg lhs wExpr
     let proof := mkApp2 (mkConst ``BitVec.mul_ones) wExpr lhs
     return some <| .step expr proof
@@ -1276,7 +1276,7 @@ def bvShiftRightNat (α lhsExpr rhsExpr : Expr) : SimprocM (Sym.Simp.Result) := 
   let some w := Sym.getNatValue? wExpr | return .rfl
   match Sym.getNatValue? rhsExpr with
   | some rhs =>
-    if rhs < w then
+    bif rhs <ᵇ w then
       let zero ← mkLit 0#rhs
       let newLen := w - rhs
       let newLenExpr ← mkLit newLen
@@ -1294,7 +1294,7 @@ def bvShiftRightNat (α lhsExpr rhsExpr : Expr) : SimprocM (Sym.Simp.Result) := 
       return .step expr proof (done := true)
   | none =>
     -- Handled by other rewrite rules
-    if isBitVecToNat rhsExpr then return .rfl
+    bif isBitVecToNat rhsExpr then return .rfl
     let (vExpr, clamped, h) ← clampShiftAmount wExpr rhsExpr w
     let expr ← BitVec.mkBvShiftRight lhsExpr clamped wExpr vExpr
     let proof := mkApp5 (mkConst ``BitVec.ushiftRight_eq_ushiftRight_ofNatClamp)
@@ -1308,7 +1308,7 @@ def bvShiftLeftNat (α lhsExpr rhsExpr : Expr) : SimprocM (Sym.Simp.Result) := d
 
   match Sym.getNatValue? rhsExpr with
   | some rhs =>
-    if rhs < w then
+    bif rhs <ᵇ w then
       let zero ← mkLit 0#rhs
       let newLen := w - rhs
       let newLenExpr ← mkLit newLen
@@ -1326,7 +1326,7 @@ def bvShiftLeftNat (α lhsExpr rhsExpr : Expr) : SimprocM (Sym.Simp.Result) := d
       return .step expr proof (done := true)
   | none =>
     -- Handled by other rewrite rules
-    if isBitVecToNat rhsExpr then return .rfl
+    bif isBitVecToNat rhsExpr then return .rfl
     let (vExpr, clamped, h) ← clampShiftAmount wExpr rhsExpr w
     let expr ← BitVec.mkBvShiftLeft lhsExpr clamped wExpr vExpr
     let proof := mkApp5 (mkConst ``BitVec.shiftLeft_eq_shiftLeft_ofNatClamp)
@@ -1336,9 +1336,9 @@ def bvShiftLeftNat (α lhsExpr rhsExpr : Expr) : SimprocM (Sym.Simp.Result) := d
 
 def bvSshiftRightNat (wExpr lhsExpr rhsExpr : Expr) : SimprocM (Sym.Simp.Result) := do
   -- Literal amounts are bitblasted directly via `BVUnOp.arithShiftRightConst`.
-  if (Sym.getNatValue? rhsExpr).isSome then return .rfl
+  bif (Sym.getNatValue? rhsExpr).isSome then return .rfl
   -- Handled by other rewrite rules
-  if isBitVecToNat rhsExpr then return .rfl
+  bif isBitVecToNat rhsExpr then return .rfl
   let some w := Sym.getNatValue? wExpr | return .rfl
   let (vExpr, clamped, h) ← clampShiftAmount wExpr rhsExpr w
   let expr ← BitVec.mkSshiftRight' lhsExpr clamped wExpr vExpr
@@ -1359,8 +1359,8 @@ def bvAppend (α β lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
     let_expr BitVec.extractLsb' _ rstartExpr rlenExpr rhsVal := rhs | return none
     let some rstart := Sym.getNatValue? rstartExpr | return none
     let some rlen := Sym.getNatValue? rlenExpr | return none
-    if lhsVal != rhsVal then return none
-    if lstart != rstart + rlen then return none
+    bif lhsVal != rhsVal then return none
+    bif lstart != rstart + rlen then return none
     let newLenExpr ← mkLit (llen + rlen)
     let expr ← BitVec.mkExtractLsb' wExpr rstartExpr newLenExpr lhsVal
     let proof :=
@@ -1384,8 +1384,8 @@ def bvAppend (α β lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
     let_expr BitVec.extractLsb' _ rstartExpr rlenExpr rhsVal := rhs | return none
     let some rstart := Sym.getNatValue? rstartExpr | return none
     let some rlen := Sym.getNatValue? rlenExpr | return none
-    if lhsVal != rhsVal then return none
-    if lstart != rstart + rlen then return none
+    bif lhsVal != rhsVal then return none
+    bif lstart != rstart + rlen then return none
     let newLenExpr ← mkLit (llen + rlen)
     let extract ← BitVec.mkExtractLsb' wExpr rstartExpr newLenExpr lhsVal
     let expr ← BitVec.mkComplement extract newLenExpr
@@ -1459,7 +1459,7 @@ def bvAppend (α β lhs rhs : Expr) : SimprocM (Sym.Simp.Result) := do
 def setWidth (oldWidthExpr newWidthExpr targetExpr : Expr) : SimprocM (Sym.Simp.Result) := do
   let some oldWidth := Sym.getNatValue? oldWidthExpr | return .rfl
   let some newWidth := Sym.getNatValue? newWidthExpr | return .rfl
-  if newWidth ≤ oldWidth then
+  bif newWidth ≤ᵇ oldWidth then
     let expr ← BitVec.mkExtractLsb' oldWidthExpr (← mkLit 0) newWidthExpr targetExpr
     let proof :=
       mkApp4
@@ -1492,7 +1492,7 @@ def setWidth (oldWidthExpr newWidthExpr targetExpr : Expr) : SimprocM (Sym.Simp.
 def signExtend (oldWidthExpr newWidthExpr targetExpr : Expr) : SimprocM (Sym.Simp.Result) := do
   let some oldWidth := Sym.getNatValue? oldWidthExpr | return .rfl
   let some newWidth := Sym.getNatValue? newWidthExpr | return .rfl
-  if newWidth ≤ oldWidth then
+  bif newWidth ≤ᵇ oldWidth then
     let expr ← BitVec.mkExtractLsb' oldWidthExpr (← mkLit 0) newWidthExpr targetExpr
     let proof :=
       mkApp4

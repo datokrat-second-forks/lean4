@@ -17,12 +17,12 @@ def simpCnstrPos? (e : Expr) : MetaM (Option (Expr × Expr)) := do
   let lhs ← c.toArith atoms
   let c₁ := c.toPoly
   let c₂ := c₁.norm
-  if c₂.isUnsat then
+  bif c₂.isUnsat then
     let r := mkConst ``False
     let p := mkApp3 (mkConst ``Nat.Internal.Linear.ExprCnstr.eq_false_of_isUnsat_k) (← toContextExpr atoms) (toExpr c) eagerReflBoolTrue
     let h := mkExpectedPropHint p (mkPropEq lhs r)
     return some (r, h)
-  else if c₂.isValid then
+  else bif c₂.isValid then
     let r := mkConst ``True
     let p := mkApp3 (mkConst ``Nat.Internal.Linear.ExprCnstr.eq_true_of_isValid_k) (← toContextExpr atoms) (toExpr c) eagerReflBoolTrue
     let h := mkExpectedPropHint p (mkPropEq lhs r)
@@ -30,7 +30,7 @@ def simpCnstrPos? (e : Expr) : MetaM (Option (Expr × Expr)) := do
   else
     let c₂ : LinearCnstr := c₂.toExpr
     let r ← c₂.toArith atoms
-    if r != lhs then
+    bif r != lhs then
       let p := mkApp4 (mkConst ``Nat.Internal.Linear.ExprCnstr.eq_of_toNormPoly_eq_k) (← toContextExpr atoms) (toExpr c) (toExpr c₂) eagerReflBoolTrue
       let h := mkExpectedPropHint p (mkPropEq lhs r)
       return some (r, h)
@@ -71,7 +71,7 @@ def simpExpr? (input : Expr) : MetaM (Option (Expr × Expr)) := do
   let p  := e.toPoly
   let p' := p.norm
   let e' : LinearExpr := p'.toExpr
-  if e' == e then
+  bif e' == e then
     return none
   let p := mkApp4 (mkConst ``Nat.Internal.Linear.Expr.eq_of_toNormPoly_eq_k) (← toContextExpr ctx) (toExpr e) (toExpr e') eagerReflBoolTrue
   let l ← e.toArith ctx

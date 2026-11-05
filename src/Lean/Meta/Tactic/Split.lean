@@ -47,7 +47,7 @@ private def simpMatchCore (matchDeclName : Name) (matchEqDeclName : Name) (e : E
   (·.1) <$> Simp.main e (← getSimpMatchContext) (methods := { pre, discharge? })
 where
   pre (e : Expr) : SimpM Simp.Step := do
-    if e.isAppOf matchDeclName then
+    bif e.isAppOf matchDeclName then
       -- First try to reduce matcher
       match (← reduceRecMatcher? e) with
       | some e' => return .done { expr := e' }
@@ -77,9 +77,9 @@ private partial def withEqs (lhs rhs : Array Expr) (k : Array Expr → Array Exp
   go 0 #[] #[]
 where
   go (i : Nat) (hs : Array Expr) (rfls : Array Expr) : MetaM α := do
-    if i < lhs.size then
+    bif i <ᵇ lhs.size then
       withLocalDeclD (← mkFreshUserName `heq) (← mkEqHEq lhs[i]! rhs[i]!) fun h => do
-        let rfl ← if (← inferType h).isEq then mkEqRefl lhs[i]! else mkHEqRefl lhs[i]!
+        let rfl ← bif (← inferType h).isEq then mkEqRefl lhs[i]! else mkHEqRefl lhs[i]!
         go (i+1) (hs.push h) (rfls.push rfl)
     else
       k hs rfls
@@ -108,8 +108,8 @@ private partial def generalizeMatchPropDiscrs (mvarId : MVarId) (discrs : Array 
   let mut mvarId := mvarId
   let mut discrs' := #[]
   for discr in discrs do
-    if !discr.isFVar then
-      if(← isProof discr) then
+    bif !discr.isFVar then
+      bif (← isProof discr) then
         let (fvarIds, mvarId') ← mvarId.generalize #[{expr := discr}]
         mvarId := mvarId'
         discrs' := discrs'.push (mkFVar fvarIds[0]!)
@@ -148,7 +148,7 @@ private partial def generalizeMatchPropDiscrs (mvarId : MVarId) (discrs : Array 
     ```
 -/
 private partial def generalizeMatchDiscrs (mvarId : MVarId) (matcherDeclName : Name) (motiveType : Expr) (discrs : Array Expr) : MetaM (Array FVarId × Array FVarId × MVarId) := mvarId.withContext do
-  if discrs.all (·.isFVar) then
+  bif discrs.all (·.isFVar) then
     trace[split.debug] "no need to generalize discriminants, all are fvars"
     return (discrs.map (·.fvarId!), #[], mvarId)
   let some matcherInfo ← getMatcherInfo? matcherDeclName | unreachable!
@@ -159,7 +159,7 @@ private partial def generalizeMatchDiscrs (mvarId : MVarId) (matcherDeclName : N
       let foundRef ← IO.mkRef false
       let rec mkNewTarget (e : Expr) : MetaM Expr := do
         let pre (e : Expr) : MetaM TransformStep := do
-          if !e.isAppOfArity matcherDeclName matcherInfo.arity then
+          bif !e.isAppOfArity matcherDeclName matcherInfo.arity then
             return .continue
           let some matcherApp ← matchMatcherApp? e | return .continue
           for matcherDiscr in matcherApp.discrs, discr in discrs do
@@ -173,12 +173,12 @@ private partial def generalizeMatchDiscrs (mvarId : MVarId) (matcherDeclName : N
             let alt := matcherApp.alts[i]
             let altNumParams := matcherApp.altNumParams[i]!
             let altNew ← lambdaTelescope alt fun xs body => do
-              if xs.size < altNumParams || xs.size < numDiscrEqs then
+              bif xs.size <ᵇ altNumParams || xs.size <ᵇ numDiscrEqs then
                 throwError m!"Internal error in `split` tactic: Encountered an unexpected `match` expression alternative"
                   ++ .note m!"This error typically occurs when the `match` expression has been constructed using metaprogramming."
               let body ← mkLambdaFVars xs[altNumParams...*] (← mkNewTarget body)
               let ys  := xs[*...(altNumParams - numDiscrEqs)]
-              if numDiscrEqs == 0 then
+              bif numDiscrEqs == 0 then
                 mkLambdaFVars ys body
               else
                 let altEqs := xs[(altNumParams - numDiscrEqs)...altNumParams]
@@ -212,10 +212,10 @@ where
     - `subst` are terms of the form `h_eq.trans h_altEqNew : discr = pattern`. We use `subst` later to replace occurrences of `h_altEq` with `h_eq.trans h_altEqNew`.
    -/
   withNewAltEqs (matcherInfo : MatcherInfo) (eqs : Array Expr) (altEqs : Array Expr) (k : Array Expr → Array Expr → MetaM Expr) : MetaM Expr := do
-    let eqs' := (eqs.zip matcherInfo.discrInfos).filterMap fun (eq, info) => if info.hName?.isNone then none else some eq
+    let eqs' := (eqs.zip matcherInfo.discrInfos).filterMap fun (eq, info) => bif info.hName?.isNone then none else some eq
     -- `eqs'.size == altEqs.size ≤ eqs.size`
     let rec go (i : Nat) (altEqsNew : Array Expr) (subst : Array Expr) : MetaM Expr := do
-      if i < altEqs.size then
+      bif i <ᵇ altEqs.size then
         let altEqDecl ← getFVarLocalDecl altEqs[i]!
         let eq := eqs'[i]!
         let eqType ← inferType eq
@@ -287,7 +287,7 @@ def applyMatchSplitter (mvarId : MVarId) (matcherDeclName : Name) (us : Array Le
     let (_, mvarIds) ← mvarIds.foldlM (init := (0, [])) fun (i, mvarIds) mvarId => do
       let altInfo := matchEqns.splitterMatchInfo.altInfos[i]!
       let mvarId ←
-        if altInfo.hasUnitThunk then
+        bif altInfo.hasUnitThunk then
           trace[split.debug] "introducing unit param for alt {(i : Nat)}"
           let (unitFvarId, mvarId) ← mvarId.intro1
           mvarId.tryClear unitFvarId
@@ -329,14 +329,14 @@ If `useNewSemantics` is `true`, the flag `backward.split` is ignored. Recall thi
 partial def splitTarget? (mvarId : MVarId) (splitIte := true) (useNewSemantics := false) : MetaM (Option (List MVarId)) := commitWhenSome? do mvarId.withContext do
   let target ← instantiateMVars (← mvarId.getType)
   let rec go (badCases : ExprSet) : MetaM (Option (List MVarId)) := do
-    if let some e ← findSplit? target (if splitIte then .both else .match) badCases then
-      if isIteLike e then
+    if let some e ← findSplit? target (bif splitIte then .both else .match) badCases then
+      bif isIteLike e then
         return (← splitIfTarget? mvarId (useNewSemantics := useNewSemantics)).map fun (s₁, s₂) => [s₁.mvarId, s₂.mvarId]
       else
         try
           splitMatch mvarId e
         catch ex =>
-          if isDiscrGenException ex then
+          bif isDiscrGenException ex then
             trace[split.failure] mkDiscrGenErrorMsg e
           else
             trace[split.failure] "`split` tactic failed at{indentExpr e}\n{ex.toMessageData}"
@@ -349,7 +349,7 @@ partial def splitTarget? (mvarId : MVarId) (splitIte := true) (useNewSemantics :
 def splitLocalDecl? (mvarId : MVarId) (fvarId : FVarId) : MetaM (Option (List MVarId)) := commitWhenSome? do
   mvarId.withContext do
     if let some e ← findSplit? (← instantiateMVars (← inferType (mkFVar fvarId))) then
-      if isIteLike e then
+      bif isIteLike e then
         return (← splitIfLocalDecl? mvarId fvarId).map fun (mvarId₁, mvarId₂) => [mvarId₁, mvarId₂]
       else
         let result? ← commitWhenSome? do try
@@ -359,22 +359,22 @@ def splitLocalDecl? (mvarId : MVarId) (fvarId : FVarId) : MetaM (Option (List MV
           let mvarIds ← mvarIds.mapM fun mvarId => return (← mvarId.introNP num).2
           return some mvarIds
         catch ex =>
-          if isDiscrGenException ex then
+          bif isDiscrGenException ex then
             return none
           else
             throw ex
-        if result?.isSome then
+        bif result?.isSome then
           return result?
         -- Generalization failed, if `fvarId` is a let-decl or has forward dependencies, we try to `assert` a copy and try again
         let localDecl ← fvarId.getDecl
-        if (← pure localDecl.isLet <||> exprDependsOn (← mvarId.getType) fvarId <||> fvarId.hasForwardDeps) then
+        bif (← pure localDecl.isLet <||> exprDependsOn (← mvarId.getType) fvarId <||> fvarId.hasForwardDeps) then
           try
             let mvarId ← mvarId.assert localDecl.userName localDecl.type localDecl.toExpr
             let mvarIds ← splitMatch mvarId e
             let mvarIds ← mvarIds.mapM fun mvarId => return (← mvarId.intro1P).2
             return some mvarIds
           catch ex =>
-            if isDiscrGenException ex then
+            bif isDiscrGenException ex then
               throwDiscrGenError e
             else
               throw ex

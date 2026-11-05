@@ -72,7 +72,7 @@ public def lratBitblaster (ctx : TacticContext) : UnsatProver LratCert :=
     let aigSize := entry.aig.decls.size
     trace[Meta.Tactic.bv] s!"AIG has {aigSize} nodes."
 
-    if ctx.config.graphviz then
+    bif ctx.config.graphviz then
       IO.FS.writeFile ("." / "aig.gv") <| AIG.toGraphviz entry
 
     let cnf ←
@@ -103,7 +103,7 @@ public def lratBitblaster (ctx : TacticContext) : UnsatProver LratCert :=
       let atomsAssignment ← ReifyM.atomsAssignmentMap
       let equations := reconstructCounterExample entry.aig assignment atomsAssignment
       let equations := equations.filterMap fun (lhs, synth, rhs) =>
-        if synth then none else some (lhs, rhs)
+        bif synth then none else some (lhs, rhs)
       return .error {
         goal,
         unusedHypotheses := reflectionResult.unusedHypotheses,

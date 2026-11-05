@@ -56,14 +56,14 @@ def throwNestedTacticEx {α} (tacticName : Name) (ex : Exception) : MetaM α := 
   let nestedMsg := ex.toMessageData
   let msg := m!"Tactic `{tacticName}` failed with a nested error:\n{ex.toMessageData}"
   let kind := nestedMsg.kind
-  let msg := if !kind.isAnonymous then
+  let msg := bif !kind.isAnonymous then
     .tagged (`nested ++ kind) msg
   else msg
   throwError msg
 
 /-- Throw a tactic exception with given tactic name if the given metavariable is assigned. -/
 def _root_.Lean.MVarId.checkNotAssigned (mvarId : MVarId) (tacticName : Name) : MetaM Unit := do
-  if (← mvarId.isAssigned) then
+  bif (← mvarId.isAssigned) then
     let msg := m!"The metavariable below has already been assigned"
       ++ .note "This likely indicates an internal error in this tactic or a prior one"
     throwTacticEx tacticName mvarId msg
@@ -99,7 +99,7 @@ def _root_.Lean.MVarId.getNondepPropHyps (mvarId : MVarId) : MetaM (Array FVarId
   let removeDeps (e : Expr) (candidates : FVarIdHashSet) : MetaM FVarIdHashSet := do
     let e ← instantiateMVars e
     let visit : StateRefT FVarIdHashSet MetaM FVarIdHashSet := do
-      if e.hasFVar then
+      bif e.hasFVar then
         e.forEachWhere Expr.isFVar fun e => modify fun s => s.erase e.fvarId!
       get
     visit |>.run' candidates
@@ -111,15 +111,15 @@ def _root_.Lean.MVarId.getNondepPropHyps (mvarId : MVarId) : MetaM (Array FVarId
         match localDecl.value? with
         | none => pure ()
         | some value => candidates ← removeDeps value candidates
-        if (← isProp localDecl.type) && !localDecl.hasValue then
+        bif (← isProp localDecl.type) && !localDecl.hasValue then
           candidates := candidates.insert localDecl.fvarId
     candidates ← removeDeps (← mvarId.getType) candidates
-    if candidates.isEmpty then
+    bif candidates.isEmpty then
       return #[]
     else
       let mut result := #[]
       for localDecl in (← getLCtx) do
-        if candidates.contains localDecl.fvarId then
+        bif candidates.contains localDecl.fvarId then
           result := result.push localDecl.fvarId
       return result
 
@@ -149,7 +149,7 @@ def getPropHyps : MetaM (Array FVarId) := do
   let mut result := #[]
   for localDecl in (← getLCtx) do
     unless localDecl.isImplementationDetail do
-      if (← isProp localDecl.type) then
+      bif (← isProp localDecl.type) then
         result := result.push localDecl.fvarId
   return result
 

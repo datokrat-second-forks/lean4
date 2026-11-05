@@ -59,7 +59,7 @@ public def rewriteRulesPass : Pass where
       PreProcessM.mapHyps fun hyp => do
         let hyp ← PreProcessM.dsimpHyp .rewrite dsimpMethods dsimpConfig hyp
         PreProcessM.simpHyp .rewrite simpMethods simpConfig hyp
-    if (← isTracingEnabledFor `Meta.Tactic.bv) then
+    bif (← isTracingEnabledFor `Meta.Tactic.bv) then
       let statistics := (← cache.get).statistics.toArray.qsort (fun a b => a.2 > b.2)
       withTraceNode `Meta.Tactic.bv (fun _ => return "rewriteRules simproc statistics:") do
         for (rule, hits) in statistics do

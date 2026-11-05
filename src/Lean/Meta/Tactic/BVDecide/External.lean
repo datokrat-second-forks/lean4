@@ -44,7 +44,7 @@ open LRAT.Parser.Text (skipNewline)
 def parsePartialAssignment : Parser (Bool × (Array (Bool × Nat))) := do
   skipByteChar 'v'
   let idents ← many (attempt wsLit)
-  let idents := idents.map (fun i => if i > 0 then (true, i.natAbs) else (false, i.natAbs))
+  let idents := idents.map (fun i => bif i >ᵇ 0 then (true, i.natAbs) else (false, i.natAbs))
   tryCatch
     (skipString " 0")
     (csuccess := fun _ => pure (true, idents))
@@ -64,7 +64,7 @@ where
   go (acc : Array (Bool × Nat)) : Parser (Array (Bool × Nat)) := do
     let (terminal?, additionalAssignment) ← parsePartialAssignment
     let acc := acc ++ additionalAssignment
-    if terminal? then
+    bif terminal? then
       return acc
     else
       go acc
@@ -116,7 +116,7 @@ where
         return .success { exitCode := exitCode, stdout := stdout, stderr := stderr }
       | none =>
         IO.sleep sleepMs.toUInt32
-        let nextSleepMs := if sleepMs ≥ maxSleepMs then sleepMs else sleepMs * 2
+        let nextSleepMs := bif sleepMs ≥ᵇ maxSleepMs then sleepMs else sleepMs * 2
         go (budgetMs - sleepMs) nextSleepMs maxSleepMs child stdout stderr
 
   killAndWait {cfg} (child : IO.Process.Child cfg) : IO Unit := do
@@ -125,7 +125,7 @@ where
 
   withTimeoutCheck {α : Type} (budgetMs : Nat) (cleanup : CoreM Unit) (x : CoreM (TimedOut α)) :
       CoreM (TimedOut α) := do
-    if budgetMs == 0 then
+    bif budgetMs == 0 then
       cleanup
       return .timeout
     else
@@ -134,7 +134,7 @@ where
   withInterruptCheck {α : Type} (cleanup : CoreM Unit) (x : CoreM α) :
       CoreM α := do
     if let some tk := (← read).cancelTk? then
-      if ← tk.isSet then
+      bif (← tk.isSet) then
         cleanup
         throwInterruptException
     x
@@ -219,12 +219,12 @@ public def satQuery (solverPath : System.FilePath) (problemPath : System.FilePat
   match out? with
   | .timeout => throwSatTimeout
   | .success { exitCode := exitCode, stdout := stdout, stderr := stderr} =>
-    if exitCode == 255 then
+    bif exitCode == 255 then
       throwError s!"Failed to execute external prover:\n{stderr}"
     else
-      if stdout.startsWith "s UNSATISFIABLE" then
+      bif stdout.startsWith "s UNSATISFIABLE" then
         return .unsat
-      else if stdout.startsWith "s SATISFIABLE" then
+      else bif stdout.startsWith "s SATISFIABLE" then
         match ModelParser.parse.run stdout.toUTF8 with
         | .ok assignment =>
           return .sat assignment

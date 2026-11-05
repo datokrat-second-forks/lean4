@@ -20,14 +20,14 @@ private def getLCtxWithExposedNames : MetaM LocalContext := do
   let mut lctx ← getLCtx
   for localDecl in lctx do
     let userName := localDecl.userName
-    if userName.hasMacroScopes then
+    bif userName.hasMacroScopes then
       toRename := toRename.push localDecl.fvarId
     else
       if let some fvarId := map[userName]? then
         -- Variable has been shadowed
         toRename := toRename.push fvarId
       map := map.insert userName localDecl.fvarId
-  if toRename.isEmpty then
+  bif toRename.isEmpty then
     return lctx
   let mut next : Std.HashMap Name Nat := {}
   -- Remark: Shadowed variables may be inserted later.
@@ -36,15 +36,15 @@ private def getLCtxWithExposedNames : MetaM LocalContext := do
   for fvarId in toRename do
     let localDecl := lctx.get! fvarId
     let mut baseName := localDecl.userName
-    if baseName.hasMacroScopes then
+    bif baseName.hasMacroScopes then
       baseName := baseName.eraseMacroScopes
-      if baseName == `x || baseName == `a then
-        if (← isProp localDecl.type) then
+      bif baseName == `x || baseName == `a then
+        bif (← isProp localDecl.type) then
           baseName := `h
     let mut userName := baseName
     let mut i := next[baseName]?.getD 0
     repeat
-      if !map.contains userName then
+      bif !map.contains userName then
         break
       i := i + 1
       userName := baseName.appendIndexAfter i

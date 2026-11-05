@@ -22,7 +22,7 @@ structure OrdSet (α : Type) [Hashable α] [BEq α] where
   deriving Inhabited
 
 def OrdSet.insert {_ : Hashable α} {_ : BEq α} (s : OrdSet α) (a : α) : OrdSet α :=
-  if s.set.contains a then
+  bif s.set.contains a then
     s
   else
     let { elems, set } := s
@@ -61,25 +61,25 @@ def inCurrentModule (declName : Name) : CoreM Bool := do
   return ((← getEnv).getModuleIdxFor? declName).isNone
 
 def isEligible (declName : Name) : M Bool := do
-  if declName.hasMacroScopes then
+  bif declName.hasMacroScopes then
     return false
-  if (← getConfig).main then
+  bif (← getConfig).main then
     return (← inCurrentModule declName)
-  if (← getConfig).name then
+  bif (← getConfig).name then
     let ns ← getCurrNamespace
     return ns.isPrefixOf declName
   return false
 
 def saveEqnCandidate (declName : Name) : M Unit := do
-  if (← isEligible declName) then
+  bif (← isEligible declName) then
     let some eqns ← getEqnsFor? declName | return ()
-    if eqns.isEmpty then return ()
+    bif eqns.isEmpty then return ()
     unless (← Grind.grindExt.isEMatchTheorem eqns[0]!) do
       modify fun s => { s with eqnCandidates := s.eqnCandidates.insert declName }
 
 def getEqDefDecl? (declName : Name) : MetaM (Option Name) := do
   let declName := declName ++ `eq_def
-  if (← Grind.grindExt.isEMatchTheorem declName) then return none
+  bif (← Grind.grindExt.isEMatchTheorem declName) then return none
   try
     let result ← realizeGlobalConstNoOverloadCore declName
     return some result
@@ -87,7 +87,7 @@ def getEqDefDecl? (declName : Name) : MetaM (Option Name) := do
     return none
 
 def saveUnfoldCandidate (declName : Name) : M Unit := do
-  if (← isEligible declName) then
+  bif (← isEligible declName) then
     let some eqDefName ← getEqDefDecl? declName | return ()
     modify fun s => { s with unfoldCandidates := s.unfoldCandidates.insert eqDefName }
 
@@ -96,7 +96,7 @@ def visitConst (declName : Name) : M Unit := do
   saveUnfoldCandidate declName
 
 def saveFunInd (e : Expr) (declName : Name) (args : Array Expr) : M Unit := do
-  if (← isEligible declName) then
+  bif (← isEligible declName) then
     if let some funIndInfo ← getFunIndInfo? (cases := false) (unfolding := true) declName then
       let sc := (← get).funIndCandidates
       let sc' ← sc.push e funIndInfo args
@@ -104,7 +104,7 @@ def saveFunInd (e : Expr) (declName : Name) (args : Array Expr) : M Unit := do
 
 open LibrarySearch in
 def saveLibSearchCandidates (e : Expr) : M Unit := do
-  if (← getConfig).harder then
+  bif (← getConfig).harder then
     for (declName, declMod) in (← libSearchFindDecls e) do
       unless (← Grind.grindExt.isEMatchTheorem declName) do
         let kind := match declMod with
@@ -124,7 +124,7 @@ def checkInductive (localDecl : LocalDecl) : M Unit := do
   -- Use getAppFn to handle both `T` and `T α β ...` cases
   let .const declName _ := type.getAppFn | return ()
   let .inductInfo val ← getConstInfo declName | return ()
-  if (← isEligible declName) then
+  bif (← isEligible declName) then
     unless (← Grind.isGlobalSplit declName) do
       modify fun s => { s with indCandidates := s.indCandidates.push { fvarId := localDecl.fvarId, val } }
 

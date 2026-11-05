@@ -123,15 +123,15 @@ public partial def structuresPass : Pass where
   name := `structures
   run' := do
     let interesting := (← PreProcessM.getTypeAnalysis).interestingStructures
-    if interesting.isEmpty then return false
+    bif interesting.isEmpty then return false
     let goal ← PreProcessM.getTargetMVarId
     goal.withContext do
       let mut worklist := #[]
       for decl in ← getLCtx do
-        if decl.isLet || decl.isImplementationDetail then
+        bif decl.isLet || decl.isImplementationDetail then
           continue
         let .const const us := decl.type.getAppFn | continue
-        if interesting.contains const then
+        bif interesting.contains const then
           worklist := worklist.push (← Sym.share (mkFVar decl.fvarId), const, us, decl.type.getAppArgs)
 
       let mut newHyps : Array Hyp := #[]
@@ -145,7 +145,7 @@ public partial def structuresPass : Pass where
         for proj in 0...fields do
           let projValue ← Sym.share <| ← mkProjFn ctorInfo us params proj value
           let projType ← Sym.inferType projValue
-          if ← Meta.isProp projType then
+          bif (← Meta.isProp projType) then
             newHyps := newHyps.push {
               name := `h
               type := projType
@@ -154,7 +154,7 @@ public partial def structuresPass : Pass where
             }
           else
             let .const const us := projType.getAppFn | continue
-            if interesting.contains const then
+            bif interesting.contains const then
               worklist := worklist.push (projValue, const, us, projType.getAppArgs)
 
       PreProcessM.addHyps newHyps

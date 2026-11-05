@@ -16,7 +16,7 @@ namespace Lean.Meta.Simp
 private def originToKey (thmId : Origin) : MetaM MessageData := do
   match thmId with
   | .decl declName _ _ =>
-    if (← getEnv).contains declName then
+    bif (← getEnv).contains declName then
       pure m!"{.ofConstName declName}"
     else
       pure m!"{declName} (builtin simproc)"
@@ -26,7 +26,7 @@ private def originToKey (thmId : Origin) : MetaM MessageData := do
 def mkSimpDiagSummary (counters : PHashMap Origin Nat) (usedCounters? : Option (PHashMap Origin Nat) := none) : MetaM DiagSummary := do
   let threshold := diagnostics.threshold.get (← getOptions)
   let entries := collectAboveThreshold counters threshold (fun _ => true) (lt := (· < ·))
-  if entries.isEmpty then
+  bif entries.isEmpty then
     return {}
   else
     let mut data := #[]
@@ -40,7 +40,7 @@ def mkSimpDiagSummary (counters : PHashMap Origin Nat) (usedCounters? : Option (
     return { data, max := entries[0]!.2 }
 
 private def mkTheoremsWithBadKeySummary (thms : PArray SimpTheorem) : MetaM DiagSummary := do
-  if thms.isEmpty then
+  bif thms.isEmpty then
     return {}
   else
     let mut data := #[]
@@ -54,7 +54,7 @@ def mkDiagMessages (diag : Simp.Diagnostics) : MetaM (Array MessageData) := do
   let tried ← mkSimpDiagSummary diag.triedThmCounter diag.usedThmCounter
   let congr ← mkDiagSummary `simp diag.congrThmCounter
   let thmsWithBadKeys ← mkTheoremsWithBadKeySummary diag.thmsWithBadKeys
-  if used.isEmpty && tried.isEmpty && congr.isEmpty && thmsWithBadKeys.isEmpty then
+  bif used.isEmpty && tried.isEmpty && congr.isEmpty && thmsWithBadKeys.isEmpty then
     return #[]
   else
     let m := #[]
@@ -66,7 +66,7 @@ def mkDiagMessages (diag : Simp.Diagnostics) : MetaM (Array MessageData) := do
     return m
 
 def reportDiag (diag : Simp.Diagnostics) : MetaM Unit := do
-  if (← isDiagnosticsEnabled) then
+  bif (← isDiagnosticsEnabled) then
     -- Diagnostic output may reference private declarations that are not visible
     -- in exporting mode (issue #13581).
     withoutExporting do

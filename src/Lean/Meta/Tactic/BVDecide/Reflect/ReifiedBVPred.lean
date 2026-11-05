@@ -26,7 +26,8 @@ and `rhs`.
 -/
 public def mkBinPred (lhs rhs : ReifiedBVExpr) (lhsExpr rhsExpr : Expr) (pred : BVBinPred)
     (origExpr : Expr) : ReifyM (Option ReifiedBVPred) := do
-  if h : lhs.width = rhs.width then
+  bif h : lhs.width =ᵇ rhs.width then
+    have h := eq_of_decideEq_eq_true h
     let congrThm := congrThmOfBinPred pred
     let bvExpr : BVPred := .bin (w := lhs.width) lhs.bvExpr pred (h ▸ rhs.bvExpr)
     let expr ← Sym.share <| mkApp4 (mkConst ``BVPred.bin) (toExpr lhs.width) lhs.expr (toExpr pred) rhs.expr

@@ -65,7 +65,7 @@ abbrev M : Type → Type := ReaderT Context <| StateM State
 namespace M
 
 partial def findInitialId (proof : Array IntAction) (curr : Nat := 0) : Except String Nat :=
-  if h : curr < proof.size then
+  bif h : curr <ᵇ proof.size then
     match proof[curr] with
     | .addEmpty id .. | .addRup id .. | .addRat id .. => return id
     | .del .. => findInitialId proof (curr + 1)
@@ -123,7 +123,7 @@ def isUsed (id : Nat) : M Bool := do
 def markUsed (id : Nat) : M Unit := do
   -- If we are referring to a proof step that is not part of the proof, it is part of the CNF.
   -- We do not trim the CNF so just forget about the fact that this step was used.
-  if id >= (← M.getInitialId) then
+  bif id ≥ᵇ (← M.getInitialId) then
     let idx ← idIndex id
     modify (fun s => { s with used := s.used.set! idx 1 })
 
@@ -140,7 +140,7 @@ def updateLastUse (hint : Nat) (user : Nat) : M Unit := do
 
 @[inline]
 def mapIdent (ident : Nat) : M Nat := do
-  if ident < (← getInitialId) then
+  bif ident <ᵇ (← getInitialId) then
     return ident
   else
     let s ← get
@@ -180,12 +180,12 @@ partial def useAnalysis : M Unit := do
 where
   go (worklist : Array Nat) : M Unit := do
     let mut worklist := worklist
-    if h : worklist.size = 0 then
+    bif h : worklist.size =ᵇ 0 then
       return ()
     else
       let id := worklist.back
       worklist := worklist.pop
-      if ← M.isUsed id then
+      bif (← M.isUsed id) then
         go worklist
       else
         M.markUsed id
@@ -217,7 +217,7 @@ def computeToDelete : M (Std.HashMap Nat (Array Nat)) := do
   let mut toDelete : Std.HashMap Nat (Array Nat) := {}
   for h : clauseId in 0...s.lastUse.size do
     let stepId := s.lastUse[clauseId]
-    if stepId == -1 then continue
+    bif stepId == -1 then continue
     let stepId := stepId.natAbs
     toDelete := toDelete.alter stepId
       fun
@@ -235,35 +235,35 @@ def mapping : M (Array IntAction) := do
   let mut nextMapped := initialId
   let mut newProof := #[]
   for id in initialId...=emptyId do
-    if ← M.isUsed id then
+    bif (← M.isUsed id) then
       M.registerIdMap id nextMapped
       -- This should never panic as the use def analysis has already marked this step as being used
       -- so it must exist.
       let step := (← M.consumeProofStep id).get!
       let mut deletions := #[]
 
-      if id != emptyId then
+      bif id != emptyId then
         match step with
         | .addRup _ _ hints =>
           for hint in hints do
-            if (← get).lastUse[hint]! == id then
+            bif (← get).lastUse[hint]! == id then
               deletions := deletions.push hint
         | .addRat _ _ _ rupHints ratHints =>
           for hint in rupHints do
-            if (← get).lastUse[hint]! == id then
+            bif (← get).lastUse[hint]! == id then
               deletions := deletions.push hint
           for (hintA, hintB) in ratHints do
-            if (← get).lastUse[hintA]! == id then
+            bif (← get).lastUse[hintA]! == id then
               deletions := deletions.push hintA
             for hint in hintB do
-              if (← get).lastUse[hint]! == id then
+              bif (← get).lastUse[hint]! == id then
                 deletions := deletions.push hint
         | _ => pure ()
 
       let newStep ← M.mapStep step
       deletions ← deletions.mapM M.mapIdent
       newProof := newProof.push newStep
-      if !deletions.isEmpty then
+      bif !deletions.isEmpty then
         newProof := newProof.push <| .del deletions
       nextMapped := nextMapped + 1
   return newProof

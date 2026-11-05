@@ -29,10 +29,10 @@ structure HypInfo where
 
 def embeddedConstraintProc (minDepth : UInt32) (hypMap : PersistentHashMap Sym.ExprPtr HypInfo) :
     Sym.Simp.Simproc := fun e => do
-  if e.approxDepth < minDepth then
+  bif e.approxDepth <ᵇ minDepth then
     return .rfl (done := true)
   let some { proof, negated } := hypMap.find? ⟨e⟩ | return .rfl
-  if negated then
+  bif negated then
     let proof :=
       mkApp2 (mkConst ``Std.Tactic.BVDecide.Normalize.Bool.eq_false_of_not_eq_true) e proof
     return .step (← Sym.share <| toExpr Bool.false) proof (done := true)
@@ -63,14 +63,14 @@ public def embeddedConstraintPass : Pass where
           match_expr lhs with
           | Bool.not inner => (inner, true)
           | _ => (lhs, false)
-        if !seen.contains ⟨lhs⟩ then
+        bif !seen.contains ⟨lhs⟩ then
           seen := seen.insert ⟨lhs⟩
           relevantHypsIdxMap := relevantHypsIdxMap.insert idx ⟨lhs⟩
           minDepth := minDepth.min lhs.approxDepth.toNat
           relevantHypsMap := relevantHypsMap.insert ⟨lhs⟩ ⟨hyp.value, negated⟩
 
       trace[Meta.Tactic.bv] m!"Chose min depth at: {minDepth}"
-      if relevantHypsMap.isEmpty then
+      bif relevantHypsMap.isEmpty then
         return false
 
       let cfg ← PreProcessM.getConfig

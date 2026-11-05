@@ -78,15 +78,15 @@ def getElimExprInfo (elimExpr : Expr) (baseDeclName? : Option Name := none) : Me
     let env ← getEnv
     for h : i in *...xs.size do
       let x := xs[i]
-      if x != motive && !targets.contains x then
+      bif x != motive && !targets.contains x then
         let xDecl ← x.fvarId!.getDecl
-        if xDecl.binderInfo.isExplicit then
+        bif xDecl.binderInfo.isExplicit then
           let (numFields, provesMotive) := altArity motive 0 xDecl.type
           let name := xDecl.userName
           let declName? := do
             let base ← baseDeclName?
             let altDeclName := base ++ name
-            if env.contains altDeclName then some altDeclName else none
+            bif env.contains altDeclName then some altDeclName else none
           altsInfo := altsInfo.push { name, declName?, numFields, provesMotive }
     pure { elimExpr, elimType,  motivePos, targetsPos, altsInfo, numComplexMotiveArgs := complexMotiveArgs.size }
 
@@ -103,7 +103,7 @@ partial def addImplicitTargets (elimInfo : ElimInfo) (targets : Array Expr) : Me
   for mvar in implicitMVars do
     unless ← mvar.isAssigned do
       let name := (←mvar.getDecl).userName
-      if name.isAnonymous || name.hasMacroScopes then
+      bif name.isAnonymous || name.hasMacroScopes then
         throwError "Failed to infer implicit target"
       else
         throwError "Failed to infer implicit target `{(←mvar.getDecl).userName}`"
@@ -113,8 +113,8 @@ where
       MetaM (Array MVarId × Array Expr) := do
     match (← whnfD type) with
     | Expr.forallE n d b bi =>
-      if elimInfo.targetsPos.contains argIdx then
-        if bi.isExplicit then
+      bif elimInfo.targetsPos.contains argIdx then
+        bif bi.isExplicit then
           unless targetIdx < targets.size do
             throwError "Insufficient number of targets for `{elimInfo.elimExpr}`"
           let target := targets[targetIdx]!
@@ -166,7 +166,7 @@ def mkCustomEliminator (elimName : Name) (induction : Bool) : MetaM CustomElimin
         for hj : j in (i+1)...elimInfo.targetsPos.size do
           let y := xs[elimInfo.targetsPos[j]]!
           let yType ← inferType y
-          if (← dependsOn yType x.fvarId!) then
+          bif (← dependsOn yType x.fvarId!) then
             return true
         return false
       /- We should only use explicit targets when creating the key for the `CustomEliminators` map.

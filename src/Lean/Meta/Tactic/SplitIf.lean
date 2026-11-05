@@ -48,26 +48,26 @@ the result is `some e'` where `e'` is the subterm `(if b then f else g)`
 -/
 private def isCandidate? (env : Environment) (ctx : Context) (e : Expr) : Option Expr := Id.run do
   let ret (e : Expr) : Option Expr :=
-    if ctx.exceptionSet.contains e then none else some e
-  if ctx.kind.considerIte then
-    if e.isAppOf ``ite || e.isAppOf ``dite || e.isAppOf ``UDecidable.ite
+    bif ctx.exceptionSet.contains e then none else some e
+  bif ctx.kind.considerIte then
+    bif e.isAppOf ``ite || e.isAppOf ``dite || e.isAppOf ``UDecidable.ite
         || e.isAppOf ``UDecidable.dite then
       let numArgs := e.getAppNumArgs
-      if numArgs >= 5 && !(e.getArg! 1 5).hasLooseBVars then
+      bif numArgs ≥ᵇ 5 && !(e.getArg! 1 5).hasLooseBVars then
         return ret (e.getBoundedAppFn (numArgs - 5))
-    if e.isAppOf ``cond || e.isAppOf ``Bool.dcond then
+    bif e.isAppOf ``cond || e.isAppOf ``Bool.dcond then
       let numArgs := e.getAppNumArgs
-      if numArgs >= 4 && !(e.getArg! 1).hasLooseBVars then
+      bif numArgs ≥ᵇ 4 && !(e.getArg! 1).hasLooseBVars then
         return ret (e.getBoundedAppFn (numArgs - 4))
-    if e.isAppOf ``Bool.Internal.matchValue then
+    bif e.isAppOf ``Bool.Internal.matchValue then
       let numArgs := e.getAppNumArgs
-      if numArgs >= 6 && !(e.getArg! 1 6).hasLooseBVars && !(e.getArg! 2 6).hasLooseBVars then
+      bif numArgs ≥ᵇ 6 && !(e.getArg! 1 6).hasLooseBVars && !(e.getArg! 2 6).hasLooseBVars then
         return ret (e.getBoundedAppFn (numArgs - 6))
-  if ctx.kind.considerMatch then
+  bif ctx.kind.considerMatch then
     if let some info := isMatcherAppCore? env e then
       let args := e.getAppArgs
       for i in info.getFirstDiscrPos...(info.getFirstDiscrPos + info.numDiscrs) do
-        if args[i]!.hasLooseBVars then
+        bif args[i]!.hasLooseBVars then
           return none
       return ret (e.getBoundedAppFn (args.size - info.arity))
   return none
@@ -123,7 +123,7 @@ partial def findSplit? (e : Expr) (kind : SplitKind := .both) (exceptionSet : Ex
 where
   go (e : Expr) : MetaM (Option Expr) := do
     if let some target ← find? e then
-      if isIteLike target then
+      bif isIteLike target then
         let cond := target.getArg! 1
         -- Try to find a nested `if` in `cond`
         return (← go cond).getD target
@@ -149,19 +149,19 @@ private inductive IfToSplit where
 private def boolEqTrueWithView? (c : Expr) : MetaM (Option Expr) := do
   let_expr Eq α b v := c | return none
   unless α.isConstOf ``Bool && v.isConstOf ``Bool.true do return none
-  return if (← boolCondToProp? b true).isSome then some b else none
+  return bif (← boolCondToProp? b true).isSome then some b else none
 
 /-- Returns what to case split on to eliminate the first `if`-like expression in `e`. -/
 private partial def findIfToSplit? (e : Expr) : MetaM (Option IfToSplit) := do
   if let some iteApp ← findSplit? e .ite then
-    if iteApp.isAppOf ``Bool.Internal.matchValue then
+    bif iteApp.isAppOf ``Bool.Internal.matchValue then
       let_expr Bool.Internal.matchValue _ b p h _ _ := iteApp | return none
       return IfToSplit.prop p (mkApp3 (mkConst ``Decidable.intro) p b h)
     let cond := iteApp.getArg! 1
-    if iteApp.isAppOf ``cond || iteApp.isAppOf ``Bool.dcond then
+    bif iteApp.isAppOf ``cond || iteApp.isAppOf ``Bool.dcond then
       return IfToSplit.bool cond
     let dec := iteApp.getArg! 2
-    if iteApp.isAppOf ``UDecidable.ite || iteApp.isAppOf ``UDecidable.dite then
+    bif iteApp.isAppOf ``UDecidable.ite || iteApp.isAppOf ``UDecidable.dite then
       -- `simp` normalizes `bif b` to `uif b = true`; split it like the `bif`.
       if let some b ← boolEqTrueWithView? cond then
         return IfToSplit.bool b
@@ -188,13 +188,13 @@ def getSimpContext : MetaM Simp.Context := do
   s ← s.addConst ``dite_eq_left
   s ← s.addConst ``dite_eq_right
   -- Missing in files that do not import `Init.UDecidable`.
-  if (← getEnv).contains ``UDecidable.ite_eq_left then
+  bif (← getEnv).contains ``UDecidable.ite_eq_left then
     s ← s.addConst ``UDecidable.ite_eq_left
     s ← s.addConst ``UDecidable.ite_eq_right
     s ← s.addConst ``UDecidable.dite_eq_left
     s ← s.addConst ``UDecidable.dite_eq_right
   -- Missing in files that do not import `Init.Core`.
-  if (← getEnv).contains ``Bool.dcond_neg then
+  bif (← getEnv).contains ``Bool.dcond_neg then
     s ← s.addConst ``Bool.cond_pos
     s ← s.addConst ``Bool.cond_neg
     s ← s.addConst ``Bool.dcond_pos
@@ -228,12 +228,12 @@ private def getSimpContext' : MetaM Simp.Context := do
 private def discharge? (numIndices : Nat) (useDecide : Bool) : Simp.Discharge := fun prop => do
   let prop ← instantiateMVars prop
   trace[Meta.Tactic.splitIf] "discharge? {prop}, {prop.notNot?}"
-  if useDecide then
+  bif useDecide then
     let prop ← instantiateMVars prop
-    if !prop.hasFVar && !prop.hasMVar then
+    bif !prop.hasFVar && !prop.hasMVar then
       let d ← mkDecide prop
       let r ← withDefault <| whnf d
-      if r.isConstOf ``true then
+      bif r.isConstOf ``true then
         return some <| mkApp3 (mkConst ``of_decide_eq_true) prop d.appArg! (← mkEqRefl (mkConst ``true))
   if let some h ← findHyp? prop then
     return some h
@@ -243,24 +243,24 @@ private def discharge? (numIndices : Nat) (useDecide : Bool) : Simp.Discharge :=
   let some p := prop.not? | return none
   let_expr Eq α b v := p | return none
   unless α.isConstOf ``Bool do return none
-  if v.isConstOf ``Bool.true then
+  bif v.isConstOf ``Bool.true then
     let some h ← fromBoolView? (mkApp3 (mkConst ``Eq [1]) α b (mkConst ``Bool.false)) | return none
     return some (mkApp2 (mkConst ``Bool.ne_true_of_eq_false) b h)
-  else if v.isConstOf ``Bool.false then
+  else bif v.isConstOf ``Bool.false then
     let some h ← fromBoolView? (mkApp3 (mkConst ``Eq [1]) α b (mkConst ``Bool.true)) | return none
     return some (mkApp2 (mkConst ``Bool.ne_false_of_eq_true) b h)
   return none
 where
   findHyp? (prop : Expr) : MetaM (Option Expr) := do
     (← getLCtx).findDeclRevM? fun localDecl => do
-     if localDecl.index ≥ numIndices || localDecl.isAuxDecl then
+     bif localDecl.index ≥ᵇ numIndices || localDecl.isAuxDecl then
        return none
-     else if (← isDefEq prop localDecl.type) then
+     else bif (← isDefEq prop localDecl.type) then
        return some localDecl.toExpr
      else match prop.notNot? with
        | none => return none
        | some arg =>
-         if (← isDefEq arg localDecl.type) then
+         bif (← isDefEq arg localDecl.type) then
            return some (mkApp2 (mkConst ``not_not_intro) arg localDecl.toExpr)
          else
            return none
@@ -268,8 +268,8 @@ where
   fromBoolView? (prop : Expr) : MetaM (Option Expr) := do
     let_expr Eq α b v := prop | return none
     unless α.isConstOf ``Bool do return none
-    let some value := (if v.isConstOf ``Bool.true then some true
-      else if v.isConstOf ``Bool.false then some false else none) | return none
+    let some value := (bif v.isConstOf ``Bool.true then some true
+      else bif v.isConstOf ``Bool.false then some false else none) | return none
     let some (p, pr) ← boolCondToProp? b value | return none
     let some h ← findHyp? p | return none
     return some (← mkEqMPR pr h)
@@ -286,7 +286,7 @@ private def reduceIte' (numIndices : Nat) (useDecideBool : Bool) : Simp.Simproc 
   else
     -- `split` may have selected an `if-then-else` nested in `c`.
     let r ← Simp.simp c
-    if r.expr == c then
+    bif r.expr == c then
       return .done { expr := e }
     else
       let c' := r.expr
@@ -314,7 +314,7 @@ private def reduceDIte' (numIndices : Nat) (useDecideBool : Bool) : Simp.Simproc
   else
     -- `split` may have selected an `if-then-else` nested in `c`.
     let r ← Simp.simp c
-    if r.expr == c then
+    bif r.expr == c then
       return .done { expr := e }
     else
       let c' := r.expr
@@ -354,22 +354,22 @@ private def reduceUIte' (numIndices : Nat) (useDecideBool : Bool) : Simp.Simproc
     | return .continue
   let us := f.constLevels!
   if let some h ← discharge? numIndices useDecideBool c then
-    let (e', thm) := if dep then (mkApp tb h |>.headBeta, ``UDecidable.dite_eq_left)
+    let (e', thm) := bif dep then (mkApp tb h |>.headBeta, ``UDecidable.dite_eq_left)
       else (tb, ``UDecidable.ite_eq_left)
     return .done { expr := e', proof? := some (mkApp6 (mkConst thm us) c i h α tb eb) }
   else if let some h ← discharge? numIndices useDecideBool (mkNot c) then
-    let (e', thm) := if dep then (mkApp eb h |>.headBeta, ``UDecidable.dite_eq_right)
+    let (e', thm) := bif dep then (mkApp eb h |>.headBeta, ``UDecidable.dite_eq_right)
       else (eb, ``UDecidable.ite_eq_right)
     return .done { expr := e', proof? := some (mkApp6 (mkConst thm us) c i h α tb eb) }
   else
     -- `split` may have selected an `if-then-else` nested in `c`.
     let r ← Simp.simp c
-    if r.expr == c then
+    bif r.expr == c then
       return .done { expr := e }
     let c' := r.expr
     let h ← r.getProof
     let .some i' ← trySynthInstance (mkApp (mkConst ``UDecidable) c') | return .done { expr := e }
-    if dep then
+    bif dep then
       let tb' := mkApp tb (mkApp4 (mkConst ``Eq.mpr_prop) c c' h (mkBVar 0)) |>.headBeta
       let tb' := mkLambda (← getBinderName tb) .default c' tb'
       let eb' := mkApp eb (mkApp4 (mkConst ``Eq.mpr_not) c c' h (mkBVar 0)) |>.headBeta
@@ -390,21 +390,21 @@ private def reduceCond' (numIndices : Nat) (useDecideBool : Bool) : Simp.Simproc
   let us := f.constLevels!
   let mkEqBool (v : Name) := mkApp3 (mkConst ``Eq [1]) (mkConst ``Bool) b (mkConst v)
   if let some h ← discharge? numIndices useDecideBool (mkEqBool ``Bool.true) then
-    let (e', thm) := if dep then (mkApp tb h |>.headBeta, ``Bool.dcond_pos)
+    let (e', thm) := bif dep then (mkApp tb h |>.headBeta, ``Bool.dcond_pos)
       else (tb, ``Bool.cond_pos)
     return .done { expr := e', proof? := some (mkApp5 (mkConst thm us) α b tb eb h) }
   else if let some h ← discharge? numIndices useDecideBool (mkEqBool ``Bool.false) then
-    let (e', thm) := if dep then (mkApp eb h |>.headBeta, ``Bool.dcond_neg)
+    let (e', thm) := bif dep then (mkApp eb h |>.headBeta, ``Bool.dcond_neg)
       else (eb, ``Bool.cond_neg)
     return .done { expr := e', proof? := some (mkApp5 (mkConst thm us) α b tb eb h) }
   else
     -- `split` may have selected an `if-then-else` nested in `b`.
     let r ← Simp.simp b
-    if r.expr == b then
+    bif r.expr == b then
       return .done { expr := e }
     let b' := r.expr
     let h ← r.getProof
-    if dep then
+    bif dep then
       unless (← getEnv).contains ``Bool.dcond_congr do return .done { expr := e }
       let mkBranch (v : Name) (br : Expr) : MetaM (Expr × Expr) := do
         withLocalDeclD (← getBinderName br) (← mkEq b' (mkConst v)) fun hb => do
@@ -489,7 +489,7 @@ Simplify the `if-then-else` targeted by the `split` tactic. If `useNewSemantics`
 `backward.split` is ignored.
 -/
 def simpIfTarget (mvarId : MVarId) (useDecide := false) (useNewSemantics := false) : MetaM MVarId := do
-  if useNewSemantics || !backward.split.get (← getOptions) then
+  bif useNewSemantics || !backward.split.get (← getOptions) then
     let ctx ← getSimpContext'
     let numIndices ← getNumIndices mvarId
     let s ← getSimprocs numIndices useDecide
@@ -505,7 +505,7 @@ Simplify the `if-then-else` targeted by the `split` tactic. If `useNewSemantics`
 `backward.split` is ignored.
 -/
 def simpIfLocalDecl (mvarId : MVarId) (fvarId : FVarId) (useNewSemantics := false) : MetaM MVarId := do
-  if useNewSemantics || !backward.split.get (← getOptions) then
+  bif useNewSemantics || !backward.split.get (← getOptions) then
     let ctx ← getSimpContext'
     let numIndices ← getNumIndices mvarId
     let s ← getSimprocs numIndices (useDecide := false)
@@ -524,7 +524,7 @@ def splitIfTarget? (mvarId : MVarId) (hName? : Option Name := none) (useNewSeman
   let some (s₁, s₂) ← splitIfAt? mvarId (← mvarId.getType) hName? | return none
   let mvarId₁ ← simpIfTarget s₁.mvarId (useNewSemantics := useNewSemantics)
   let mvarId₂ ← simpIfTarget s₂.mvarId (useNewSemantics := useNewSemantics)
-  if s₁.mvarId == mvarId₁ && s₂.mvarId == mvarId₂ then
+  bif s₁.mvarId == mvarId₁ && s₂.mvarId == mvarId₂ then
     trace[split.failure] "`split` tactic failed to simplify target using new hypotheses Goals:\n{mvarId₁}\n{mvarId₂}"
     return none
   else
@@ -538,7 +538,7 @@ def splitIfLocalDecl? (mvarId : MVarId) (fvarId : FVarId) (hName? : Option Name 
     let some (s₁, s₂) ← splitIfAt? mvarId (← inferType (mkFVar fvarId)) hName? | return none
     let mvarId₁ ← simpIfLocalDecl s₁.mvarId fvarId
     let mvarId₂ ← simpIfLocalDecl s₂.mvarId fvarId
-    if s₁.mvarId == mvarId₁ && s₂.mvarId == mvarId₂ then
+    bif s₁.mvarId == mvarId₁ && s₂.mvarId == mvarId₂ then
       trace[split.failure] "`split` tactic failed to simplify target using new hypotheses Goals:\n{mvarId₁}\n{mvarId₂}"
       return none
     else

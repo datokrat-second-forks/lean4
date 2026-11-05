@@ -35,7 +35,7 @@ def contains (s : FVarSubst) (fvarId : FVarId) : Bool :=
 
 /-- Add entry `fvarId |-> v` to `s` if `s` does not contain an entry for `fvarId`. -/
 def insert (s : FVarSubst) (fvarId : FVarId) (v : Expr) : FVarSubst :=
-  if s.contains fvarId then s
+  bif s.contains fvarId then s
   else
     let map := s.map.mapVal fun e => e.replaceFVarId fvarId v;
     { map := map.insertNew fvarId v }
@@ -53,8 +53,8 @@ def get (s : FVarSubst) (fvarId : FVarId) : Expr :=
 
 /-- Given `e`, for each `(x => v)` in `s` replace `x` with `v` in `e` -/
 def apply (s : FVarSubst) (e : Expr) : Expr :=
-  if s.map.isEmpty then e
-  else if !e.hasFVar then e
+  bif s.map.isEmpty then e
+  else bif !e.hasFVar then e
   else e.replace fun e => match e with
     | Expr.fvar fvarId => match s.map.find? fvarId with
       | none   => e

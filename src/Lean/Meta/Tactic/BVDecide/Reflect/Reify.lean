@@ -40,15 +40,15 @@ def checkFunAtom (e : Expr) : LemmaM (Option (Array Expr)) := do
   let (e, isBoolAtom) ← unwrapBoolAtom e
   trace[Meta.Tactic.bv] m!"Checking for fun atom {e}"
   e.withApp fun fn args => do
-    if args.isEmpty then return none
+    bif args.isEmpty then return none
 
     let interpretedMask ← args.mapM fun arg =>
       (Option.isSome <$> isValidBitVecAtom arg) <||> isValidBoolAtom arg
-    if interpretedMask.all (· == false) then return none
+    bif interpretedMask.all (· == false) then return none
 
     let some congrMask ← getCongrMask fn args | return none
     let interpretedMask := interpretedMask.zip congrMask |>.map fun (l, r) => l && r
-    if interpretedMask.all (· == false) then return none
+    bif interpretedMask.all (· == false) then return none
 
     let funPattern ← getFunctionPattern e interpretedMask
     ReifyM.modifyTheoryState fun ts =>
@@ -61,7 +61,7 @@ def checkFunAtom (e : Expr) : LemmaM (Option (Array Expr)) := do
 
     let mut subAtoms := #[]
     for arg in args, m in interpretedMask do
-      if m then
+      bif m then
         subAtoms := subAtoms.push arg
     return subAtoms
 where
@@ -89,14 +89,14 @@ where
       assert! args.size == mask.size
       let mut decls := #[]
       for arg in args, m in mask do
-        if m then
+        bif m then
           let argType ← Sym.inferType arg
           decls := decls.push (.anonymous, argType)
       withLocalDeclsDND decls fun patternVars => do
         let mut newArgs := #[]
         let mut seen := 0
         for arg in args, m in mask do
-          if m then
+          bif m then
             let patternVar := patternVars[seen]!
             seen := seen + 1
             newArgs := newArgs.push patternVar
@@ -119,17 +119,17 @@ partial def registerAtom (e : Expr) (width : Nat) (synthetic : Bool) :
   let proof := pure none
   let reified := ⟨width, .var ident, expr, proof, expr⟩
   subAtoms.forM fun subAtom => do
-    if ← ReifyM.isAtom subAtom <||> ReifyM.isAtom (← mkBoolAtomWrapper subAtom) then
+    bif (← ReifyM.isAtom subAtom <||> ReifyM.isAtom (← mkBoolAtomWrapper subAtom)) then
       return ()
     else if let some _ ← isValidBitVecAtom subAtom then
       discard <| ReifiedBVExpr.of subAtom
-    else if ← isValidBoolAtom subAtom then
+    else bif (← isValidBoolAtom subAtom) then
       discard <| ReifiedBVLogical.of subAtom
   return reified
 where
   checkTheoryAtom (e : Expr) : LemmaM (Array Expr) := do
-    if synthetic then return #[]
-    if ← ReifyM.isAtom e then return #[]
+    bif synthetic then return #[]
+    bif (← ReifyM.isAtom e) then return #[]
     if let some subAtoms ← checkFunAtom e then return subAtoms
     return #[]
 
@@ -209,7 +209,7 @@ where
     | HShiftLeft.hShiftLeft α β _ _ innerExpr distanceExpr =>
       let distance? ← ReifiedBVExpr.getNatOrBvValue? β distanceExpr
       let_expr BitVec wExpr := α | return none
-      if (Sym.getNatValue? wExpr).isSome && distance?.isSome then
+      bif (Sym.getNatValue? wExpr).isSome && distance?.isSome then
         throwError "internal error: constant shift should have been eliminated."
       let_expr BitVec _ := β | return none
       shiftReflection
@@ -222,7 +222,7 @@ where
     | HShiftRight.hShiftRight α β _ _ innerExpr distanceExpr =>
       let distance? ← ReifiedBVExpr.getNatOrBvValue? β distanceExpr
       let_expr BitVec wExpr := α | return none
-      if (Sym.getNatValue? wExpr).isSome && distance?.isSome then
+      bif (Sym.getNatValue? wExpr).isSome && distance?.isSome then
         throwError "internal error: constant shift should have been eliminated."
       let_expr BitVec _ := β | return none
       shiftReflection
@@ -397,7 +397,8 @@ where
       LemmaM (Option ReifiedBVExpr) := do
     let some lhs ← goOrAtom lhsExpr | return none
     let some rhs ← goOrAtom rhsExpr | return none
-    if h : rhs.width = lhs.width then
+    bif h : rhs.width =ᵇ lhs.width then
+      have h := eq_of_decideEq_eq_true h
       let bvExpr := .bin lhs.bvExpr op (h ▸ rhs.bvExpr)
       let expr ← Sym.share <| mkApp4 (mkConst ``BVExpr.bin) (toExpr lhs.width) lhs.expr (toExpr op) rhs.expr
       let congrThm := mkApp (mkConst congrThm) (toExpr lhs.width)

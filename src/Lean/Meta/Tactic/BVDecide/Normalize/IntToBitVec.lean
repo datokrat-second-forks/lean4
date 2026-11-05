@@ -105,10 +105,10 @@ where
       for hyp in ← PreProcessM.getHyps do
         match_expr hyp.type with
         | Eq eqTyp lhs rhs =>
-          if lhs.isConstOf ``System.Platform.numBits then
+          bif lhs.isConstOf ``System.Platform.numBits then
             let some val ← getNatValue? rhs | return none
             return some (val, hyp.value)
-          else if rhs.isConstOf ``System.Platform.numBits then
+          else bif rhs.isConstOf ``System.Platform.numBits then
             let some val ← getNatValue? lhs | return none
             return some (val, mkApp4 (mkConst ``Eq.symm [1]) eqTyp lhs rhs hyp.value)
         | _ => continue

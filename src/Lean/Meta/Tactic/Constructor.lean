@@ -32,9 +32,9 @@ def _root_.Lean.MVarId.constructorCore (mvarId : MVarId) (cfg : ApplyConfig := {
         for ctor in ival.ctors do
           let applies ← withoutModifyingState do
             return (← observing? (mvarId.apply (Lean.mkConst ctor us) cfg)).isSome
-          if applies then
+          bif applies then
             matching := matching.push ctor
-            if !findAll then break
+            bif !findAll then break
         let some ctor := matching[0]?
           | throwTacticEx `constructor mvarId "no applicable constructor found"
         return (← mvarId.apply (Lean.mkConst ctor us) cfg, matching)
@@ -53,7 +53,7 @@ def _root_.Lean.MVarId.existsIntro (mvarId : MVarId) (w : Expr) : MetaM MVarId :
     matchConstStructure target.getAppFn
       (fun _ => throwTacticEx `exists mvarId "target is not an inductive datatype with one constructor")
       fun _ us cval => do
-        if cval.numFields < 2 then
+        bif cval.numFields <ᵇ 2 then
           throwTacticEx `exists mvarId "constructor must have at least two fields"
         let ctor := mkAppN (Lean.mkConst cval.name us) target.getAppArgs[*...cval.numParams]
         let ctorType ← inferType ctor

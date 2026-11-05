@@ -64,11 +64,11 @@ namespace Lean.Meta
             `whnf` instantiates metavariables, and consumes `MData`, but it also expands the `let`.
           -/
           let newType := (← instantiateMVars type).cleanupAnnotations
-          if newType.isForall || newType.isLet then
+          bif newType.isForall || newType.isLet then
             loop (i+1) lctx fvars fvars.size s newType
           else
             let newType ← whnf newType
-            if newType.isForall then
+            bif newType.isForall then
               loop (i+1) lctx fvars fvars.size s newType
             else
               throwTacticEx `introN mvarId <| m!"There are no additional binders or `let` bindings in the goal to introduce"
@@ -86,7 +86,7 @@ Use this variant when the relevant local context is being built incrementally an
 ambient `← getLCtx` (e.g. when introducing several binders in a single pass).
 -/
 def mkFreshBinderNameForTacticCore (lctx : LocalContext) (binderName : Name) (hygienic := true) : MetaM Name := do
-  if hygienic then
+  bif hygienic then
     mkFreshUserName binderName
   else
     return lctx.getUnusedName binderName
@@ -103,9 +103,9 @@ private def mkAuxNameImp (preserveBinderNames : Bool) (hygienic : Bool) (useName
     (lctx : LocalContext) (binderName : Name) (isExplicit : Bool) : List Name → MetaM (Name × List Name)
   | []         => mkAuxNameWithoutGivenName []
   | n :: rest  => do
-    if useNamesForExplicitOnly && !isExplicit then
+    bif useNamesForExplicitOnly && !isExplicit then
       mkAuxNameWithoutGivenName (n :: rest)
-    else if n != Name.mkSimple "_" then
+    else bif n != Name.mkSimple "_" then
       return (n, rest)
     else
       mkAuxNameWithoutGivenName rest
@@ -113,8 +113,8 @@ where
   mkAuxNameWithoutGivenName (rest : List Name) : MetaM (Name × List Name) := do
     -- Use a nicer binder name than `[anonymous]`.
     -- In this case, we make sure the name is hygienic.
-    let binderName ← if binderName.isAnonymous then mkFreshUserName `a else pure binderName
-    if preserveBinderNames then
+    let binderName ← bif binderName.isAnonymous then mkFreshUserName `a else pure binderName
+    bif preserveBinderNames then
       return (binderName, rest)
     else
       let binderName ← mkFreshBinderNameForTacticCore lctx binderName hygienic
@@ -123,7 +123,7 @@ where
 def introNCore (mvarId : MVarId) (n : Nat) (givenNames : List Name) (useNamesForExplicitOnly : Bool) (preserveBinderNames : Bool)
     : MetaM (Array FVarId × MVarId) := do
   let hygienic := tactic.hygienic.get (← getOptions)
-  if n == 0 then
+  bif n == 0 then
     return (#[], mvarId)
   else
     introNImp mvarId n (mkAuxNameImp preserveBinderNames hygienic useNamesForExplicitOnly) givenNames
@@ -175,7 +175,7 @@ def _root_.Lean.MVarId.intro1_ (mvarId : MVarId) : MetaM MVarId := do
     let target ← mvarId.getType'
     match target with
     | .forallE n β α bi =>
-      if α.hasLooseBVars then
+      bif α.hasLooseBVars then
         throwError "intro1_: expected arrow type\n{mvarId}"
       let tag ← mvarId.getTag
       let newMVar ← mkFreshExprSyntheticOpaqueMVar α tag
@@ -200,7 +200,7 @@ def _root_.Lean.MVarId.intros (mvarId : MVarId) : MetaM (Array FVarId × MVarId)
   let type ← mvarId.getType
   let type ← instantiateMVars type
   let n := getIntrosSize type
-  if n == 0 then
+  bif n == 0 then
     return (#[], mvarId)
   else
     mvarId.introN n

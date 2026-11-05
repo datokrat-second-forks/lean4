@@ -46,19 +46,19 @@ deriving Inhabited, Repr
 builtin_initialize funIndInfoExt : MapDeclarationExtension FunIndInfo ← mkMapDeclarationExtension
 
 def getFunInductName (declName : Name) (unfolding : Bool := false) : Name :=
-  if unfolding then
+  bif unfolding then
     declName ++ `induct_unfolding
   else
     declName ++ `induct
 
 def getFunCasesName (declName : Name) (unfolding : Bool := false) : Name :=
-  if unfolding then
+  bif unfolding then
     declName ++ `fun_cases_unfolding
   else
     declName ++ `fun_cases
 
 def getMutualInductName (declName : Name) (unfolding : Bool := false) : Name :=
-  if unfolding then
+  bif unfolding then
     declName ++ `mutual_induct_unfolding
   else
     declName ++ `mutual_induct
@@ -66,7 +66,7 @@ def getMutualInductName (declName : Name) (unfolding : Bool := false) : Name :=
 def getFunInduct? (unfolding : Bool) (cases : Bool) (declName : Name) : CoreM (Option Name) := do
   let .defnInfo _ ← getConstInfo declName | return none
   try
-    let thmName := if cases then
+    let thmName := bif cases then
       getFunCasesName (unfolding := unfolding) declName
     else
       getFunInductName (unfolding := unfolding) declName

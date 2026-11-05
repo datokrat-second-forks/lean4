@@ -30,23 +30,23 @@ where
     match e.getAppFn with
     | Expr.proj _ _ e => findFVar? e
     | f =>
-      if !f.isConst then
+      bif !f.isConst then
         return none
       else
         let declName := f.constName!
         let args := e.getAppArgs
         match (← getProjectionFnInfo? declName) with
         | some projInfo =>
-          if projInfo.numParams < args.size then
+          bif projInfo.numParams <ᵇ args.size then
             findFVar? args[projInfo.numParams]!
           else
             return none
         | none =>
           matchConstRec f (fun _ => return none) fun recVal _ => do
-            if recVal.getMajorIdx >= args.size then
+            bif recVal.getMajorIdx ≥ᵇ args.size then
               return none
             let major := args[recVal.getMajorIdx]!.consumeMData
-            if major.isFVar then
+            bif major.isFVar then
               return some major.fvarId!
             else
               return none

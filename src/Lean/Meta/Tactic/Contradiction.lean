@@ -57,7 +57,7 @@ instance : MonadBacktrack SavedState M where
   restoreState s := s.restore
 
 partial def elim (mvarId : MVarId) (fvarId : FVarId) : M Bool := do
-  if (← get) == 0 then
+  bif (← get) == 0 then
     trace[Meta.Tactic.contradiction] "elimEmptyInductive out-of-fuel"
     return false
   modify (· - 1)
@@ -70,9 +70,9 @@ partial def elim (mvarId : MVarId) (fvarId : FVarId) : M Bool := do
       let found ← subgoal.mvarId.withContext do
         for field in subgoal.fields do
           let field := subgoal.subst.apply field
-          if field.isFVar then
-            if (← isElimEmptyInductiveCandidate field.fvarId!) then
-              if (← elim subgoal.mvarId field.fvarId!) then
+          bif field.isFVar then
+            bif (← isElimEmptyInductiveCandidate field.fvarId!) then
+              bif (← elim subgoal.mvarId field.fvarId!) then
                 return true
         return false
       unless found do
@@ -83,7 +83,7 @@ end ElimEmptyInductive
 
 private def elimEmptyInductive (mvarId : MVarId) (fvarId : FVarId) (fuel : Nat) : MetaM Bool := do
   mvarId.withContext do
-    if (← isElimEmptyInductiveCandidate fvarId) then
+    bif (← isElimEmptyInductiveCandidate fvarId) then
       commitWhen do
         ElimEmptyInductive.elim (← mvarId.exfalso) fvarId |>.run' fuel
     else
@@ -122,7 +122,7 @@ private def processGenDiseq (mvarId : MVarId) (localDecl : LocalDecl) : MetaM Bo
     let (args, _, _) ← forallMetaTelescope localDecl.type
     let mask  := mkGenDiseqMask localDecl.type
     for arg in args, useRefl in mask do
-      if useRefl then
+      bif useRefl then
         /- Remark: we should not try to use `refl` for equalities that have forward dependencies because
            they correspond to constructor fields. We did not use to have this extra test, and this method failed
            to close the following goal.
@@ -142,7 +142,7 @@ private def processGenDiseq (mvarId : MVarId) (localDecl : LocalDecl) : MetaM Bo
           unless (← isDefEq arg (← mkHEqRefl lhs)) do
             return none
     let falseProof ← instantiateMVars (mkAppN localDecl.toExpr args)
-    if (← hasAssignableMVar falseProof) then
+    bif (← hasAssignableMVar falseProof) then
       return none
     return some (← mkFalseElim (← mvarId.getType) falseProof)
   if let some val := val? then
@@ -158,7 +158,7 @@ See `MVarId.contradiction` for the list of tests performed by this method.
 def _root_.Lean.MVarId.contradictionCore (mvarId : MVarId) (config : Contradiction.Config) : MetaM Bool := do
   mvarId.withContext do
     mvarId.checkNotAssigned `contradiction
-    if (← nestedFalseElim mvarId) then
+    bif (← nestedFalseElim mvarId) then
       return true
     for localDecl in (← getLCtx) do
       unless localDecl.isImplementationDetail do
@@ -174,7 +174,7 @@ def _root_.Lean.MVarId.contradictionCore (mvarId : MVarId) (config : Contradicti
           return true
         -- (h : x ≠ x)
         if let some (_, lhs, rhs) ← matchNe? localDecl.type then
-          if (← isDefEq lhs rhs) then
+          bif (← isDefEq lhs rhs) then
             mvarId.assign (← mkAbsurd (←  mvarId.getType) (← mkEqRefl lhs) localDecl.toExpr)
             return true
         let mut isEq := false
@@ -183,7 +183,7 @@ def _root_.Lean.MVarId.contradictionCore (mvarId : MVarId) (config : Contradicti
           isEq := true
           if let some lhsCtor ← matchConstructorApp? lhs then
           if let some rhsCtor ← matchConstructorApp? rhs then
-          if lhsCtor.name != rhsCtor.name then
+          bif lhsCtor.name != rhsCtor.name then
             mvarId.assign (← mkNoConfusion (← mvarId.getType) localDecl.toExpr)
             return true
         let mut isHEq := false
@@ -192,32 +192,32 @@ def _root_.Lean.MVarId.contradictionCore (mvarId : MVarId) (config : Contradicti
           isHEq := true
           if let some lhsCtor ← matchConstructorApp? lhs then
           if let some rhsCtor ← matchConstructorApp? rhs then
-          if lhsCtor.name != rhsCtor.name then
-            if (← isDefEq α β) then
+          bif lhsCtor.name != rhsCtor.name then
+            bif (← isDefEq α β) then
               mvarId.assign (← mkNoConfusion (← mvarId.getType) (← mkEqOfHEq localDecl.toExpr))
               return true
         -- (h : p) s.t. `decide p` evaluates to `false`
-        if config.useDecide && !localDecl.type.hasFVar then
+        bif config.useDecide && !localDecl.type.hasFVar then
           let type ← instantiateMVars localDecl.type
-          if !type.hasMVar && !type.hasFVar then
+          bif !type.hasMVar && !type.hasFVar then
             try
               let d ← mkDecide localDecl.type
               let r ← withDefault <| whnf d
-              if r.isConstOf ``false then
+              bif r.isConstOf ``false then
                 let hn := mkAppN (mkConst ``of_decide_eq_false) <| d.getAppArgs.push (← mkEqRefl d)
                 mvarId.assign (← mkAbsurd (← mvarId.getType) localDecl.toExpr hn)
                 return true
             catch _ =>
               pure ()
         -- "generalized" diseq
-        if config.genDiseq && isGenDiseq localDecl.type then
-          if (← processGenDiseq mvarId localDecl) then
+        bif config.genDiseq && isGenDiseq localDecl.type then
+          bif (← processGenDiseq mvarId localDecl) then
             return true
         -- (h : <empty-inductive-type>)
-        if config.emptyType && !isEq && !isHEq then
+        bif config.emptyType && !isEq && !isHEq then
           -- We do not use `elimEmptyInductive` for equality, since `cases h` produces a huge proof
           -- when `(h : 10000 = 10001)`. TODO: `cases` add a threshold at `cases`
-          if (← elimEmptyInductive mvarId localDecl.fvarId config.searchFuel) then
+          bif (← elimEmptyInductive mvarId localDecl.fvarId config.searchFuel) then
             return true
     return false
 

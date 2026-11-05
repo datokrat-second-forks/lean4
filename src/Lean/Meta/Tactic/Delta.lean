@@ -12,7 +12,7 @@ namespace Lean.Meta
 
 def delta? (e : Expr) (p : Name → Bool := fun _ => true) (allowOpaque := false) : CoreM (Option Expr) :=
   matchConst e.getAppFn (fun _ => return none) fun fInfo fLvls => do
-    if p fInfo.name && fInfo.hasValue (allowOpaque := allowOpaque) && fInfo.levelParams.length == fLvls.length then
+    bif p fInfo.name && fInfo.hasValue (allowOpaque := allowOpaque) && fInfo.levelParams.length == fLvls.length then
       let f ← instantiateValueLevelParams fInfo fLvls (allowOpaque := allowOpaque)
       return some (f.betaRev e.getAppRevArgs (useZeta := true))
     else

@@ -29,13 +29,13 @@ def getExpectedNumArgs (e : Expr) : MetaM Nat := do
 private def throwApplyError {α} (mvarId : MVarId)
     (eType : Expr) (conclusionType? : Option Expr) (targetType : Expr)
     (term? : Option MessageData) (approx : Bool) : MetaM α := do
-  let config ← if approx then approxDefEq getConfig else getConfig
+  let config ← bif approx then approxDefEq getConfig else getConfig
   throwTacticEx `apply mvarId <| MessageData.ofLazyM (es := #[eType, targetType]) <|
       withConfig (fun _ => config) do
     let conclusionType := conclusionType?.getD eType
-    let note := if conclusionType?.isSome then .note m!"The full type of {term?.getD "the term"} is{indentExpr eType}" else m!""
+    let note := bif conclusionType?.isSome then .note m!"The full type of {term?.getD "the term"} is{indentExpr eType}" else m!""
     let (conclusionType, targetType) ← addPPExplicitToExposeDiff conclusionType targetType
-    let conclusion := if conclusionType?.isNone then "type" else "conclusion"
+    let conclusion := bif conclusionType?.isNone then "type" else "conclusion"
     return m!"could not unify the {conclusion} of {term?.getD "the term"}{indentExpr conclusionType}\n\
       with the goal{indentExpr targetType}{note}{← mkUnfoldAxiomsNote conclusionType targetType}"
 
@@ -44,8 +44,8 @@ def synthAppInstances (tacticName : Name) (mvarId : MVarId) (mvarsNew : Array Ex
   let mut todo := #[]
   -- Collect metavariables to synthesize
   for mvar in mvarsNew, binderInfo in binderInfos do
-    if binderInfo.isInstImplicit then
-      if synthAssignedInstances || !(← mvar.mvarId!.isAssigned) then
+    bif binderInfo.isInstImplicit then
+      bif synthAssignedInstances || !(← mvar.mvarId!.isAssigned) then
         todo := todo.push mvar
   while !todo.isEmpty do
     todo ← step todo
@@ -97,19 +97,19 @@ where
           unless allowSynthFailures do
             throwTacticEx tacticName mvarId "failed to assign synthesized instance"
     if let some ex := ex? then
-      if progressAfterEx then
+      bif progressAfterEx then
         return postponed
       else
         -- There is no point in running `step` again. We should give up (`allowSynthFailures`),
         -- or throw the first exception we found in this `step`.
-        if allowSynthFailures then return #[] else throw ex
+        bif allowSynthFailures then return #[] else throw ex
     else
       -- Done. We successfully synthesized all metavariables.
       return #[]
 
 def appendParentTag (mvarId : MVarId) (newMVars : Array Expr) (binderInfos : Array BinderInfo) : MetaM Unit := do
   let parentTag ← mvarId.getTag
-  if newMVars.size == 1 then
+  bif newMVars.size == 1 then
     -- if there is only one subgoal, we inherit the parent tag
     newMVars[0]!.mvarId!.setTag parentTag
   else
@@ -133,7 +133,7 @@ def postprocessAppMVars (tacticName : Name) (mvarId : MVarId) (newMVars : Array 
 
 private def dependsOnOthers (mvar : Expr) (otherMVars : Array Expr) : MetaM Bool :=
   otherMVars.anyM fun otherMVar => do
-    if mvar == otherMVar then
+    bif mvar == otherMVar then
       return false
     else
       let otherMVarType ← inferType otherMVar
@@ -144,7 +144,7 @@ according to whether the given mvar depends on other mvars in the array.-/
 private def partitionDependentMVars (mvars : Array Expr) : MetaM (Array MVarId × Array MVarId) :=
   mvars.foldlM (init := (#[], #[])) fun (nonDeps, deps) mvar => do
     let currMVarId := mvar.mvarId!
-    if (← dependsOnOthers mvar mvars) then
+    bif (← dependsOnOthers mvar mvars) then
       return (nonDeps, deps.push currMVarId)
     else
       return (nonDeps.push currMVarId, deps)
@@ -160,7 +160,7 @@ private def reorderGoals (mvars : Array Expr) : ApplyNewGoals → MetaM (List MV
 
 /-- Custom `isDefEq` for the `apply` tactic -/
 private def isDefEqApply (approx : Bool) (a b : Expr) : MetaM Bool := do
-  if approx then
+  bif approx then
     approxDefEq <| isDefEqGuarded a b
   else
     isDefEqGuarded a b
@@ -192,7 +192,7 @@ def _root_.Lean.MVarId.apply (mvarId : MVarId) (e : Expr) (cfg : ApplyConfig := 
       le f g := ∀ i, f i ≤ g i
     ```
     -/
-    let rangeNumArgs ← if hasMVarHead then
+    let rangeNumArgs ← bif hasMVarHead then
       pure (numArgs...(numArgs+1))
     else
       let targetTypeNumArgs ← getExpectedNumArgs targetType
@@ -202,17 +202,17 @@ def _root_.Lean.MVarId.apply (mvarId : MVarId) (e : Expr) (cfg : ApplyConfig := 
     See comment above
     -/
     let rec go (i : Nat) : MetaM (Array Expr × Array BinderInfo) := do
-      if i < rangeNumArgs.upper then
+      bif i <ᵇ rangeNumArgs.upper then
         let s ← saveState
         let (newMVars, binderInfos, eType) ← forallMetaTelescopeReducing eType i
-        if (← isDefEqApply cfg.approx eType targetType) then
+        bif (← isDefEqApply cfg.approx eType targetType) then
           return (newMVars, binderInfos)
         else
           s.restore
           go (i+1)
       else
 
-        let conclusionType? ← if rangeNumArgs.lower = 0 then
+        let conclusionType? ← bif rangeNumArgs.lower =ᵇ 0 then
           pure none
         else
           let (_, _, r) ← forallMetaTelescopeReducing eType (some rangeNumArgs.lower)
@@ -260,13 +260,13 @@ partial def splitAndCore (mvarId : MVarId) : MetaM (List MVarId) :=
   mvarId.withContext do
     mvarId.checkNotAssigned `splitAnd
     let type ← mvarId.getType'
-    if !type.isAppOfArity ``And 2 then
+    bif !type.isAppOfArity ``And 2 then
       return [mvarId]
     else
       let tag ← mvarId.getTag
       let rec go (type : Expr) : StateRefT (Array MVarId) MetaM Expr := do
         let type ← whnf type
-        if type.isAppOfArity ``And 2 then
+        bif type.isAppOfArity ``And 2 then
           let p₁ := type.appFn!.appArg!
           let p₂ := type.appArg!
           return mkApp4 (mkConst ``And.intro) p₁ p₂ (← go p₁) (← go p₂)
@@ -310,7 +310,7 @@ def nthConstructor
         if let some e := expected? then unless ival.ctors.length == e do
           throwTacticEx name goal
             s!"{name} tactic works for inductive types with exactly {e} constructors"
-        if h : idx < ival.ctors.length then
+        bif h : idx <ᵇ ival.ctors.length then
           goal.apply <| mkConst ival.ctors[idx] us
         else
           throwTacticEx name goal s!"index {idx} out of bounds, only {ival.ctors.length} constructors"

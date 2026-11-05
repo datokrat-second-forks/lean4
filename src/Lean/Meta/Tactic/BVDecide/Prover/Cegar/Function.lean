@@ -70,7 +70,7 @@ def findConflictWith? (funModel : FunModel) (fn : Expr) (args : Array BVExpr.Pac
   let key : Sym.ExprPtr := { expr := fn }
   let entry ← funModel.model[key]?
   let (value', funExpr') ← entry.map[args]?
-  if value ≠ value' then
+  bif value ≠ᵇ value' then
     return funExpr'
   else
     none
@@ -165,13 +165,13 @@ where
   evalArgs (args : Array Expr) (mask : Array Bool) : CegarM (Array BVExpr.PackedBitVec) := do
     let mut relevantArgs := #[]
     for h : idx in 0...args.size do
-      if !mask[idx]! then continue
+      bif !mask[idx]! then continue
       let arg := args[idx]
-      if (← isValidBitVecAtom arg).isSome then
+      bif (← isValidBitVecAtom arg).isSome then
         let some reified ← ReifiedBVExpr.of arg | unreachable!
         let res := BVExpr.evalEfficient (cex.atomCex.getD · ⟨0#1⟩) reified.bvExpr
         relevantArgs := relevantArgs.push ⟨res⟩
-      else if ← isValidBoolAtom arg then
+      else bif (← isValidBoolAtom arg) then
         let some reified ← ReifiedBVLogical.of arg | unreachable!
         let res := BVLogicalExpr.evalEfficient (cex.atomCex.getD · ⟨0#1⟩) reified.bvExpr
         relevantArgs := relevantArgs.push ⟨BitVec.ofBool res⟩

@@ -68,13 +68,13 @@ Returns `none` iff `hasNextName` is false.
 -/
 def nextNameForBinderName? (binderName : Name) : M (Option Name) := do
   if let some n ← nextName? then
-    if n != `_ then
+    bif n != `_ then
       return n
     else
-      if binderName.isAnonymous then
+      bif binderName.isAnonymous then
         -- Use a nicer binder name than `[anonymous]`.
         mkFreshUserName `a
-      else if (← read).preserveBinderNames || n.hasMacroScopes then
+      else bif (← read).preserveBinderNames || n.hasMacroScopes then
         return n
       else
         mkFreshUserName binderName
@@ -92,12 +92,12 @@ Returns whether a let-like expression with the given type and value is extractab
 given the list `fvars` of binders that inhibit extraction.
 -/
 def isExtractableLet (fvars : List Expr) (n : Name) (t v : Expr) : M (Bool × Name) := do
-  if (← hasNextName) && extractable fvars t && extractable fvars v then
+  bif (← hasNextName) && extractable fvars t && extractable fvars v then
     if let some n ← nextNameForBinderName? n then
       return (true, n)
   -- In lift mode, we temporarily extract non-extractable lets, but we do not make use of `givenNames` for them.
   -- These will be flushed as let/have expressions, and we wish to preserve the original binder name.
-  if (← read).lift then
+  bif (← read).lift then
     return (true, n)
   return (false, n)
 
@@ -108,7 +108,7 @@ def addDecl (decl : LocalDecl) (isLet : Bool) : M Unit := do
   let cfg ← read
   modify fun s => { s with
     decls := s.decls.push { decl, isLet }
-    valueMap := if cfg.merge then s.valueMap.insert decl.value decl.fvarId else s.valueMap
+    valueMap := bif cfg.merge then s.valueMap.insert decl.value decl.fvarId else s.valueMap
   }
 
 /--
@@ -120,7 +120,7 @@ def flushDecls (fvar : FVarId) : M (Array LocalDecl') := do
   let mut toSave := #[]
   let mut toFlush := #[]
   for ldecl in (← get).decls do
-    if ldecl.decl.type.hasAnyFVar (fvarSet.contains ·) || ldecl.decl.value.hasAnyFVar (fvarSet.contains ·) then
+    bif ldecl.decl.type.hasAnyFVar (fvarSet.contains ·) || ldecl.decl.value.hasAnyFVar (fvarSet.contains ·) then
       toFlush := toFlush.push ldecl
       fvarSet := fvarSet.insert ldecl.decl.fvarId
     else
@@ -157,7 +157,7 @@ Used in `lift + merge` mode to ensure that, after merging, if any version was a 
 def ensureIsLet (fvarId : FVarId) : M Unit := do
   modify fun s => { s with
     decls := s.decls.map fun d =>
-      if d.decl.fvarId == fvarId then { d with isLet := true } else d
+      bif d.decl.fvarId == fvarId then { d with isLet := true } else d
   }
 
 /--
@@ -169,7 +169,7 @@ Used for `merge` feature.
 -/
 def withDeclInContext (fvarId : FVarId) (k : M α) : M α := do
   let decls := (← get).decls
-  if (← getLCtx).contains fvarId then
+  bif (← getLCtx).contains fvarId then
     -- Is either pre-existing or already added.
     k
   else if let some idx := decls.findIdx? (·.decl.fvarId == fvarId) then
@@ -184,7 +184,7 @@ Used for `merge` feature when `useContext` is enabled.
 def initializeValueMap : M Unit := do
   let lctx ← getLCtx
   lctx.forM fun decl => do
-    if decl.isLet && !decl.isImplementationDetail then
+    bif decl.isLet && !decl.isImplementationDetail then
       let value ← instantiateMVars decl.value
       modify fun s => { s with valueMap := s.valueMap.insert value decl.fvarId }
 
@@ -208,23 +208,23 @@ Note: the return value may refer to fvars that are not in the current local cont
 -/
 partial def extractCore (fvars : List Expr) (e : Expr) (topLevel : Bool := false) : M Expr := do
   let cfg ← read
-  if e.isAtomic then
+  bif e.isAtomic then
     return e
-  else if !cfg.descend && !topLevel then
+  else bif !cfg.descend && !topLevel then
     return e
   else
     checkCache (topLevel, (e : ExprStructEq)) fun _ => do
-      if !containsLet e then
+      bif !containsLet e then
         return e
       -- Don't honor `proofs := false` or `types := false` for top-level lets, since it's confusing not having them be extracted.
       unless topLevel && (e.isLet || e.isMData) do
-        if !cfg.proofs then
-          if ← isProof e then
+        bif !cfg.proofs then
+          bif (← isProof e) then
             return e
-        if !cfg.types then
-          if ← isType e then
+        bif !cfg.types then
+          bif (← isType e) then
             return e
-      let whenDescend (k : M Expr) : M Expr := do if cfg.descend then k else pure e
+      let whenDescend (k : M Expr) : M Expr := do bif cfg.descend then k else pure e
       match e with
       | .bvar .. | .fvar .. | .mvar .. | .sort .. | .const .. | .lit .. => unreachable!
       | .mdata _ e'      => return e.updateMData! (← extractCore fvars e' (topLevel := topLevel))
@@ -236,10 +236,10 @@ partial def extractCore (fvars : List Expr) (e : Expr) (topLevel : Bool := false
 where
   extractBinder (n : Name) (t b : Expr) (i : BinderInfo) (mk : Expr → Expr → Expr) : M Expr := do
     let t ← extractCore fvars t
-    if (← read).underBinder then
+    bif (← read).underBinder then
       withLocalDecl n i t fun x => do
         let b ← extractCore (x :: fvars) (b.instantiate1 x)
-        if (← read).lift then
+        bif (← read).lift then
           let toFlush ← flushDecls x.fvarId!
           let b := mkLetDecls toFlush b
           return mk t (b.abstract #[x])
@@ -251,18 +251,18 @@ where
     let cfg ← read
     let t ← extractCore fvars t
     let v ← extractCore fvars v
-    if cfg.usedOnly && !b.hasLooseBVars then
+    bif cfg.usedOnly && !b.hasLooseBVars then
       return ← extractCore fvars b (topLevel := topLevel)
-    if cfg.merge then
+    bif cfg.merge then
       if let some fvarId := (← get).valueMap.get? v then
-        if isLet && cfg.lift then ensureIsLet fvarId
+        bif isLet && cfg.lift then ensureIsLet fvarId
         return ← withDeclInContext fvarId <|
           extractCore fvars (b.instantiate1 (.fvar fvarId)) (topLevel := topLevel)
     let (extract, n) ← isExtractableLet fvars n t v
-    if !extract && (!cfg.underBinder || !cfg.descend) then
+    bif !extract && (!cfg.underBinder || !cfg.descend) then
       return e.updateLetE! t v b
     withLetDecl n t v fun x => do
-      if extract then
+      bif extract then
         addDecl (← x.fvarId!.getDecl) isLet
         extractCore fvars (b.instantiate1 x) (topLevel := topLevel)
       else
@@ -271,13 +271,13 @@ where
   extractApp (f : Expr) (args : Array Expr) : M Expr := do
     let cfg ← read
     let f' ← extractCore fvars f
-    if cfg.implicits then
+    bif cfg.implicits then
       return mkAppN f' (← args.mapM (extractCore fvars))
     else
       let (paramInfos, _) ← instantiateForallWithParamInfos (← inferType f) args
       let mut args := args
       for i in *...args.size do
-        if paramInfos[i]!.binderInfo.isExplicit then
+        bif paramInfos[i]!.binderInfo.isExplicit then
           args := args.set! i (← extractCore fvars args[i]!)
       return mkAppN f' args
 
@@ -290,7 +290,7 @@ Main entry point for extracting lets.
 -/
 def extract (es : Array Expr) : M (Array Expr) := do
   let cfg ← read
-  if cfg.merge && cfg.useContext then
+  bif cfg.merge && cfg.useContext then
     initializeValueMap
   es.mapM extractTopLevel
 
@@ -346,7 +346,7 @@ def Lean.MVarId.extractLets (mvarId : MVarId) (givenNames : List Name) (config :
     let ty ← mvarId.getType
     Meta.extractLets #[ty] givenNames (config := config) fun fvarIds es givenNames' => do
       let ty' := es[0]!
-      if fvarIds.isEmpty && ty == ty' then
+      bif fvarIds.isEmpty && ty == ty' then
         throwMadeNoProgress `extract_lets mvarId
       let g ← mkFreshExprSyntheticOpaqueMVar ty' (← mvarId.getTag)
       mvarId.assign <| ← mkLetFVars (usedLetOnly := false) (fvarIds.map .fvar) g
@@ -368,14 +368,14 @@ def Lean.MVarId.extractLetsLocalDecl (mvarId : MVarId) (fvarId : FVarId) (givenN
     | .forallE n t b i =>
       Meta.extractLets #[t] givenNames (config := config) fun fvarIds es givenNames' => do
         let t' := es[0]!
-        if fvarIds.isEmpty && t == t' then
+        bif fvarIds.isEmpty && t == t' then
           throwMadeNoProgress `extract_lets mvarId
         finalize fvarIds givenNames' (.forallE n t' b i)
     | .letE n t v b ndep =>
       Meta.extractLets #[t, v] givenNames (config := config) fun fvarIds es givenNames' => do
         let t' := es[0]!
         let v' := es[1]!
-        if fvarIds.isEmpty && t == t' && v == v' then
+        bif fvarIds.isEmpty && t == t' && v == v' then
           throwMadeNoProgress `extract_lets mvarId
         finalize fvarIds givenNames' (.letE n t' v' b ndep)
     | _ => throwTacticEx `extract_lets mvarId "unexpected auxiliary target"
@@ -391,7 +391,7 @@ def Lean.MVarId.liftLets (mvarId : MVarId) (config : LiftLetsConfig := {}) : Met
     mvarId.checkNotAssigned `lift_lets
     let ty ← mvarId.getType
     let ty' ← Meta.liftLets ty (config := config)
-    if ty == ty' then
+    bif ty == ty' then
       throwMadeNoProgress `lift_lets mvarId
     mvarId.replaceTargetDefEq ty'
 
@@ -409,13 +409,13 @@ def Lean.MVarId.liftLetsLocalDecl (mvarId : MVarId) (fvarId : FVarId) (config : 
     match ← mvarId.getType with
     | .forallE n t b i =>
       let t' ← Meta.liftLets t (config := config)
-      if t == t' then
+      bif t == t' then
         throwMadeNoProgress `lift_lets mvarId
       finalize (.forallE n t' b i)
     | .letE n t v b ndep =>
       let t' ← Meta.liftLets t (config := config)
       let v' ← Meta.liftLets v (config := config)
-      if t == t' && v == v' then
+      bif t == t' && v == v' then
         throwMadeNoProgress `lift_lets mvarId
       finalize (.letE n t' v' b ndep)
     | _ => throwTacticEx `lift_lets mvarId "unexpected auxiliary target"
@@ -434,7 +434,7 @@ def Lean.MVarId.letToHave (mvarId : MVarId) (failIfUnchanged := true) : MetaM MV
     mvarId.checkNotAssigned `let_to_have
     let ty ← mvarId.getType
     let ty' ← Meta.letToHave ty
-    if failIfUnchanged && ty == ty' then
+    bif failIfUnchanged && ty == ty' then
       throwMadeNoProgress `let_to_have mvarId
     mvarId.replaceTargetDefEq ty'
 
@@ -446,6 +446,6 @@ def Lean.MVarId.letToHaveLocalDecl (mvarId : MVarId) (fvarId : FVarId) (failIfUn
     mvarId.checkNotAssigned `let_to_have
     let ty ← fvarId.getType
     let ty' ← Meta.letToHave ty
-    if failIfUnchanged && ty == ty' then
+    bif failIfUnchanged && ty == ty' then
       throwMadeNoProgress `let_to_have mvarId
     mvarId.replaceLocalDeclDefEq fvarId ty'

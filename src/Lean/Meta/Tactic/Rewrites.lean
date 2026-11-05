@@ -29,7 +29,7 @@ builtin_initialize registerTraceClass `Tactic.rewrites.lemmas
 -- `mkApp6 (.const ``congrArg _) α eType lhs rhs motive heq`
 -- in `Lean.Meta.Tactic.Rewrite` and we want `heq`.
 def rewriteResultLemma (r : RewriteResult) : Option Expr :=
-  if r.eqProof.isAppOfArity ``congrArg 6 then
+  bif r.eqProof.isAppOfArity ``congrArg 6 then
     r.eqProof.getArg! 5
   else
     none
@@ -45,16 +45,16 @@ inductive RwDirection : Type where
 
 private def addImport (name : Name) (c : AsyncConstantInfo) :
     MetaM (Array (InitEntry (Name × RwDirection))) := do
-  if c.isUnsafe then return #[]
-  if !allowCompletion (←getEnv) name then return #[]
+  bif c.isUnsafe then return #[]
+  bif !allowCompletion (←getEnv) name then return #[]
   -- Don't report deprecated lemmas.
-  if Linter.isDeprecated (← getEnv) name then return #[]
+  bif Linter.isDeprecated (← getEnv) name then return #[]
   -- We now remove some injectivity lemmas which are not useful to rewrite by.
   match name with
-  | .str _ n => if n = "injEq" ∨ n = "sizeOf_spec" ∨ n.endsWith "_inj" ∨ n.endsWith "_inj'" then return #[]
+  | .str _ n => bif n =ᵇ "injEq" || n =ᵇ "sizeOf_spec" || n.endsWith "_inj" || n.endsWith "_inj'" then return #[]
   | _ => pure ()
   -- Don't report lemmas from metaprogramming namespaces.
-  if name.isMetaprogramming then return #[]
+  bif name.isMetaprogramming then return #[]
   -- Only the signature is needed; this avoids blocking on async theorem bodies (lean4#13705).
   withNewMCtxDepth do withReducible do
     forallTelescopeReducing c.toConstantVal.type fun _ type => do
@@ -72,7 +72,7 @@ def localHypotheses (except : List FVarId := []) : MetaM (Array (Expr × Bool ×
   let r ← getLocalHyps
   let mut result := #[]
   for h in r do
-    if except.contains h.fvarId! then continue
+    bif except.contains h.fvarId! then continue
     let (_, _, type) ← forallMetaTelescopeReducing (← inferType h)
     let type ← whnfR type
     match type.getAppFnArgs with
@@ -180,7 +180,7 @@ def rwLemma (ctx : MetavarContext) (goal : MVarId) (target : Expr) (side : SideC
     trace[Tactic.rewrites] m!"considering {if symm then "← " else ""}{expr}"
     let some result ← some <$> goal.rewrite target expr symm <|> pure none
       | return none
-    if result.mvarIds.isEmpty then
+    bif result.mvarIds.isEmpty then
       let mctx ← getMCtx
       let rfl? ← dischargableWithRfl? mctx result.eNew
       return some { expr, symm, weight, result, mctx, rfl? }
@@ -198,7 +198,7 @@ def rwLemma (ctx : MetavarContext) (goal : MVarId) (target : Expr) (side : SideC
         -- If we succeed, we need to reconstruct the expression to report that we rewrote by.
         let some expr := rewriteResultLemma result | return none
         let expr ← instantiateMVars expr
-        let (expr, symm) := if expr.isAppOfArity ``Eq.symm 4 then
+        let (expr, symm) := bif expr.isAppOfArity ``Eq.symm 4 then
             (expr.getArg! 3, true)
           else
             (expr, false)
@@ -255,13 +255,13 @@ def rewriteCandidates (hyps : Array (Expr × Bool × Nat))
   let mut backward : NameSet := ∅
   let mut deduped := #[]
   for (l, s, w) in candidates do
-    if forbidden.contains l then continue
-    if s then
-      if ¬ backward.contains l then
+    bif forbidden.contains l then continue
+    bif s then
+      bif ! backward.contains l then
         deduped := deduped.push (l, s, w)
         backward := backward.insert l
     else
-      if ¬ forward.contains l then
+      bif ! forward.contains l then
         deduped := deduped.push (l, s, w)
         forward := forward.insert l
 
@@ -272,7 +272,7 @@ def rewriteCandidates (hyps : Array (Expr × Bool × Nat))
   pure <| hyps ++ lemmas
 
 def RewriteResult.newGoal (r : RewriteResult) : Option Expr :=
-  if r.rfl? then
+  bif r.rfl? then
     none
   else
     some r.result.eNew
@@ -299,9 +299,9 @@ def takeListAux (cfg : RewriteResultConfig) (seen : Std.HashMap String Unit) (ac
   let mut seen := seen
   let mut acc := acc
   for (lem, symm, weight) in xs do
-    if (← getRemainingHeartbeats) < cfg.minHeartbeats then
+    bif (← getRemainingHeartbeats) <ᵇ cfg.minHeartbeats then
       return acc
-    if acc.size ≥ cfg.max then
+    bif acc.size ≥ᵇ cfg.max then
       return acc
     let res ←
           withoutModifyingState <| withMCtx cfg.mctx do
@@ -310,11 +310,11 @@ def takeListAux (cfg : RewriteResultConfig) (seen : Std.HashMap String Unit) (ac
     | none => continue
     | some r =>
       let s ← withoutModifyingState <| withMCtx r.mctx r.ppResult
-      if seen.contains s then
+      bif seen.contains s then
         continue
       let rfl? ← dischargableWithRfl? r.mctx r.result.eNew
-      if cfg.stopAtRfl then
-        if rfl? then
+      bif cfg.stopAtRfl then
+        bif rfl? then
           return #[r]
         else
           seen := seen.insert s ()
@@ -334,7 +334,7 @@ def findRewrites (hyps : Array (Expr × Bool × Nat))
   let mctx ← getMCtx
   let candidates ← rewriteCandidates hyps moduleRef target forbidden
   let minHeartbeats : Nat ←
-        if (← getMaxHeartbeats) = 0 then
+        bif (← getMaxHeartbeats) =ᵇ 0 then
           pure 0
         else
           pure <| leavePercentHeartbeats * (← getRemainingHeartbeats) / 100

@@ -44,7 +44,7 @@ def addSimpCongrTheoremEntry (d : SimpCongrTheorems) (e : SimpCongrTheorem) : Si
 where
   insert : List SimpCongrTheorem → List SimpCongrTheorem
     | []     => [e]
-    | e'::es => if e.priority ≥ e'.priority then e::e'::es else e' :: insert es
+    | e'::es => bif e.priority ≥ᵇ e'.priority then e::e'::es else e' :: insert es
 
 builtin_initialize congrExtension : SimpleScopedEnvExtension SimpCongrTheorem SimpCongrTheorems ←
   registerSimpleScopedEnvExtension {
@@ -69,7 +69,7 @@ def mkSimpCongrTheorem (declName : Name) (prio : Nat) : MetaM SimpCongrTheorem :
       let mut i : Nat := 0
       let mut hypothesesPos := #[]
       for x in xs, bi in bis do
-        if bi.isExplicit && !foundMVars.contains x.mvarId! then
+        bif bi.isExplicit && !foundMVars.contains x.mvarId! then
           let rhsFn? ← forallTelescopeReducing (← inferType x) fun ys xType => do
             match xType.eqOrIff? with
             | none => pure none -- skip

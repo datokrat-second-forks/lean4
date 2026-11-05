@@ -48,7 +48,7 @@ public def reconstructCounterExample (aig : Std.Sat.AIG BVBit) (assignment : Arr
     For this situation we do the same as cadical for literals that did not show up in the CNF:
     set them to true.
     -/
-    let varSet := if h : idx < assignment.size then assignment[idx].fst else true
+    let varSet := bif h : idx <ᵇ assignment.size then assignment[idx].fst else true
     let mut bitMap := sparseMap.getD bitVar.var {}
     bitMap := bitMap.insert bitVar.idx varSet
     sparseMap := sparseMap.insert bitVar.var bitMap
@@ -59,7 +59,7 @@ public def reconstructCounterExample (aig : Std.Sat.AIG BVBit) (assignment : Arr
     let mut currentBit := 0
     for (bitIdx, bitValue) in bitMap do
       assert! bitIdx == currentBit
-      if bitValue then
+      bif bitValue then
         value := value ||| (1 <<< currentBit)
       currentBit := currentBit + 1
     let (_, atomExpr, synthetic) := atomsAssignment[bitVecVar]!
@@ -67,7 +67,7 @@ public def reconstructCounterExample (aig : Std.Sat.AIG BVBit) (assignment : Arr
 
   -- There might exist atoms that have not been encoded into CNF, we fill them with 0s
   for (atomId, (width, atomExpr, synthetic)) in atomsAssignment do
-    if sparseMap.contains atomId then continue
+    bif sparseMap.contains atomId then continue
     finalMap := finalMap.push (atomExpr, synthetic, ⟨BitVec.ofNat width 0⟩)
 
   return finalMap
@@ -148,7 +148,7 @@ def addDerivedEquation (var : Expr) (value : Expr) : DiagnosisM Unit :=
 
 def checkRelevantHypsUsed (fvar : FVarId) : DiagnosisM Unit := do
   for hyp in ← unusedHyps do
-    if hyp.type.containsFVar fvar then
+    bif hyp.type.containsFVar fvar then
       addUnusedRelevantHypothesis hyp
 
 /--
@@ -166,73 +166,81 @@ def diagnose : DiagnosisM Unit := do
     match var with
     | .fvar fvarId => checkRelevantHypsUsed fvarId
     | _ =>
-      if ← isFunctionSymbol var then continue
+      bif (← isFunctionSymbol var) then continue
       addUninterpretedSymbol var
 where
   transformEquation (var : Expr) (value : BVExpr.PackedBitVec) : DiagnosisM (Expr × Expr) := do
-    if var.isFVar then
+    bif var.isFVar then
       return (var, toExpr value.bv)
     else
       match_expr var with
       | BitVec.ofBool x =>
         return (x, toExpr <| value.bv == 1)
       | UInt8.toBitVec x =>
-        if h : value.w = 8 then
+        bif h : value.w =ᵇ 8 then
+          have h := eq_of_decideEq_eq_true h
           return (x, toExpr <| UInt8.ofBitVec (h ▸ value.bv))
         else
           throwError m!"Value for UInt8 was not 8 bits but {value.w} bits"
       | UInt16.toBitVec x =>
-        if h : value.w = 16 then
+        bif h : value.w =ᵇ 16 then
+          have h := eq_of_decideEq_eq_true h
           return (x, toExpr <| UInt16.ofBitVec (h ▸ value.bv))
         else
           throwError m!"Value for UInt16 was not 16 bits but {value.w} bits"
       | UInt32.toBitVec x =>
-        if h : value.w = 32 then
+        bif h : value.w =ᵇ 32 then
+          have h := eq_of_decideEq_eq_true h
           return (x, toExpr <| UInt32.ofBitVec (h ▸ value.bv))
         else
           throwError m!"Value for UInt32 was not 32 bits but {value.w} bits"
       | UInt64.toBitVec x =>
-        if h : value.w = 64 then
+        bif h : value.w =ᵇ 64 then
+          have h := eq_of_decideEq_eq_true h
           return (x, toExpr <| UInt64.ofBitVec (h ▸ value.bv))
         else
           throwError m!"Value for UInt64 was not 64 bits but {value.w} bits"
       | USize.toBitVec32 x _ =>
-        if value.w = 32 then
+        bif value.w =ᵇ 32 then
           return (x, toExpr <| USize.ofNat value.bv.toNat)
         else
           throwError m!"Value for USize was not 32 bits but {value.w} bits"
       | USize.toBitVec64 x _ =>
-        if value.w = 64 then
+        bif value.w =ᵇ 64 then
           return (x, toExpr <| USize.ofNat value.bv.toNat)
         else
           throwError m!"Value for USize was not 64 bits but {value.w} bits"
       | Int8.toBitVec x =>
-        if h : value.w = 8 then
+        bif h : value.w =ᵇ 8 then
+          have h := eq_of_decideEq_eq_true h
           return (x, toExpr <| Int8.ofBitVec (h ▸ value.bv))
         else
           throwError m!"Value for Int8 was not 8 bits but {value.w} bits"
       | Int16.toBitVec x =>
-        if h : value.w = 16 then
+        bif h : value.w =ᵇ 16 then
+          have h := eq_of_decideEq_eq_true h
           return (x, toExpr <| Int16.ofBitVec (h ▸ value.bv))
         else
           throwError m!"Value for Int16 was not 16 bits but {value.w} bits"
       | Int32.toBitVec x =>
-        if h : value.w = 32 then
+        bif h : value.w =ᵇ 32 then
+          have h := eq_of_decideEq_eq_true h
           return (x, toExpr <| Int32.ofBitVec (h ▸ value.bv))
         else
           throwError m!"Value for Int32 was not 32 bits but {value.w} bits"
       | Int64.toBitVec x =>
-        if h : value.w = 64 then
+        bif h : value.w =ᵇ 64 then
+          have h := eq_of_decideEq_eq_true h
           return (x, toExpr <| Int64.ofBitVec (h ▸ value.bv))
         else
           throwError m!"Value for Int64 was not 64 bits but {value.w} bits"
       | ISize.toBitVec32 x _ =>
-        if value.w = 32 then
+        bif value.w =ᵇ 32 then
           return (x, toExpr <| ISize.ofInt value.bv.toInt)
         else
           throwError m!"Value for ISize was not 32 bits but {value.w} bits"
       | ISize.toBitVec64 x _ =>
-        if value.w = 64 then
+        bif value.w =ᵇ 64 then
           return (x, toExpr <| ISize.ofInt value.bv.toInt)
         else
           throwError m!"Value for ISize was not 64 bits but {value.w} bits"
@@ -290,10 +298,10 @@ public def explainCounterExampleQuality (counterExample : CounterExample) : Meta
 
   let mut err := m!""
 
-  if !theoryExplanations.isEmpty then
+  bif !theoryExplanations.isEmpty then
     err := err ++ theoryExplanations.foldl (init := m!"") (fun acc exp => acc ++ m!"- " ++ exp ++ m!"\n")
 
-  if spuriorsExplanations.isEmpty then
+  bif spuriorsExplanations.isEmpty then
     err := err ++ m!"The prover found a counterexample, consider the following assignment:\n"
   else
     err := err ++ m!"The prover found a potentially spurious counterexample:\n"

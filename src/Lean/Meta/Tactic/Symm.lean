@@ -116,7 +116,7 @@ def symmSaturate (g : MVarId) : MetaM MVarId := g.withContext do
   for h in hyps do try
     let symm ← h.applySymm
     let symmType ← inferType symm
-    if ¬ (← types.anyM (isDefEq symmType)) then
+    bif ! (← types.anyM (isDefEq symmType)) then
       (_, g') ← g'.note ((← h.fvarId!.getUserName).appendAfter "_symm") symm
   catch _ => g' ← pure g'
   return g'

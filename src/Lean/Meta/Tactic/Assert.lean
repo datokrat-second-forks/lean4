@@ -122,7 +122,7 @@ where
       else
         return e.hasFVar || e.hasExprMVar
   visitLocalDecl (ldecl' : LocalDecl) : StateRefT LocalDecl MetaM Unit :=
-    modify fun ldecl => if ldecl'.index > ldecl.index then ldecl' else ldecl
+    modify fun ldecl => bif ldecl'.index >ᵇ ldecl.index then ldecl' else ldecl
 
 structure Hypothesis where
   userName : Name
@@ -137,7 +137,7 @@ structure Hypothesis where
   Convert the given goal `Ctx |- target` into `Ctx, (hs[0].userName : hs[0].type) ... |-target`.
   It assumes `hs[i].val` has type `hs[i].type`. -/
 def _root_.Lean.MVarId.assertHypotheses (mvarId : MVarId) (hs : Array Hypothesis) : MetaM (Array FVarId × MVarId) := do
-  if hs.isEmpty then
+  bif hs.isEmpty then
     return (#[], mvarId)
   else mvarId.withContext do
     mvarId.checkNotAssigned `assertHypotheses
@@ -153,7 +153,7 @@ def _root_.Lean.MVarId.assertHypotheses (mvarId : MVarId) (hs : Array Hypothesis
       let mut lctx := lctx
       for h : i in *...hs.size do
         let h := hs[i]
-        if h.kind != .default then
+        bif h.kind != .default then
           lctx := lctx.setKind fvarIds[i]! h.kind
       pure lctx
     return (fvarIds, mvarId)

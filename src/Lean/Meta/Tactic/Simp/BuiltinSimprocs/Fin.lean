@@ -39,7 +39,8 @@ private def fromExpr? (e : Expr) : SimpM (Option Value) := do
   unless e.isAppOfArity declName arity do return .continue
   let some v₁ ← fromExpr? e.appFn!.appArg! | return .continue
   let some v₂ ← fromExpr? e.appArg! | return .continue
-  if h : v₁.n = v₂.n then
+  bif h : v₁.n =ᵇ v₂.n then
+    have h := eq_of_decideEq_eq_true h
     let v := op v₁.value (h ▸ v₂.value)
     return .done <| toExpr v
   else
@@ -121,7 +122,7 @@ builtin_dsimproc [simp, seval] isValue ((OfNat.ofNat _ : Fin _)) := fun e => do
   let_expr OfNat.ofNat _ m _ ← e | return .continue
   let some ⟨n, v⟩ ← getFinValue? e | return .continue
   let some m ← getNatValue? m | return .continue
-  if m < n then
+  bif m <ᵇ n then
     -- Design decision: should we return `.continue` instead of `.done` when simplifying.
     -- In the symbolic evaluator, we must return `.done`, otherwise it will unfold the `OfNat.ofNat`
     return .done e
@@ -132,8 +133,8 @@ builtin_dsimproc [simp, seval] reduceFinMk (Fin.mk _ _)  := fun e => do
   let_expr Fin.mk n v _ ← e | return .continue
   let some n ← evalNat n |>.run | return .continue
   let some v ← getNatValue? v | return .continue
-  if h : n ≠ 0 then
-    have : NeZero n := ⟨h⟩
+  bif h : n ≠ᵇ 0 then
+    have : NeZero n := ⟨(ne_of_decideNe_eq_true h)⟩
     return .done <| toExpr (Fin.ofNat n v)
   else
     return .continue
@@ -177,8 +178,8 @@ builtin_dsimproc [simp, seval] reduceCastLT (Fin.castLT _ _) := fun e => do
   unless e.isAppOfArity ``Fin.castLT 4 do return .continue
   let some n ← getNatValue? e.appFn!.appFn!.appFn!.appArg! | return .continue
   let some i ← fromExpr? e.appFn!.appArg! | return .continue
-  if h : i.value < n then
-    return .done <| toExpr (castLT i.value h)
+  bif h : i.value.val <ᵇ n then
+    return .done <| toExpr (castLT i.value (lt_of_decideLT_eq_true h))
   else
     return .continue
 
@@ -187,8 +188,8 @@ builtin_dsimproc [simp, seval] reduceCastLE (Fin.castLE _ _) := fun e => do
   unless e.isAppOfArity ``Fin.castLE 4 do return .continue
   let some m ← getNatValue? e.appFn!.appFn!.appArg! | return .continue
   let some i ← fromExpr? e.appArg! | return .continue
-  if h : i.n ≤ m then
-    return .done <| toExpr (castLE h i.value)
+  bif h : i.n ≤ᵇ m then
+    return .done <| toExpr (castLE (le_of_decideLE_eq_true h) i.value)
   else
     return .continue
 
@@ -199,8 +200,8 @@ builtin_dsimproc [simp, seval] reduceSubNat (Fin.subNat _ _ _) := fun e => do
   unless e.isAppOfArity ``Fin.subNat 4 do return .continue
   let some m ← getNatValue? e.appFn!.appFn!.appArg! | return .continue
   let some i ← fromExpr? e.appFn!.appArg! | return .continue
-  if h : m ≤ i.value then
-    return .done <| toExpr (subNat m (i.value.cast (by omega : i.n = (i.n - m) + m)) h)
+  bif h : m ≤ᵇ i.value then
+    return .done <| toExpr (subNat m (i.value.cast (by omega : i.n = (i.n - m) + m)) (le_of_decideLE_eq_true h))
   else
     return .continue
 
@@ -208,8 +209,8 @@ set_option linter.coreInternal.internalModule false in -- User-facing builtin si
 builtin_dsimproc [simp, seval] reducePred (Fin.pred _ _) := fun e => do
   unless e.isAppOfArity ``Fin.pred 3 do return .continue
   let some ⟨(_ + 1), i⟩ ← fromExpr? e.appFn!.appArg! | return .continue
-  if h : i ≠ 0 then
-    return .done <| toExpr (pred i h)
+  bif h : i ≠ᵇ 0 then
+    return .done <| toExpr (pred i (ne_of_decideNe_eq_true h))
   else
     return .continue
 

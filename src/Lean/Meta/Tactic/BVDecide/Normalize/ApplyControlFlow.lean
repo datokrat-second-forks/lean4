@@ -21,7 +21,7 @@ namespace Normalize
 
 public def applyIteSimproc (headSyms : Std.HashSet Name) :
     Sym.Simp.Simproc := fun e => e.withApp fun fn args => do
-  if h : args.size ≠ 0 then
+  bif h : args.size ≠ᵇ 0 then
     let_expr ite α c instDec t e := args.back | return .rfl
     let .const head _ := fn | return .rfl
     unless headSyms.contains head do return .rfl
@@ -37,7 +37,7 @@ public def applyIteSimproc (headSyms : Std.HashSet Name) :
 
 public def applyCondSimproc (headSyms : Std.HashSet Name) :
     Sym.Simp.Simproc := fun e => e.withApp fun fn args => do
-  if h : args.size ≠ 0 then
+  bif h : args.size ≠ᵇ 0 then
     let_expr cond α c t e := args.back | return .rfl
     let .const head _ := fn | return .rfl
     unless headSyms.contains head do return .rfl

@@ -64,7 +64,7 @@ from trying to unfold `OfNat.ofNat 2` further. -/
 public def isBuiltinValue : Simproc := fun e => return .rfl (isVal e)
 
 public def guardSimproc (p : Expr → Bool) (s : Simproc) : Simproc := fun e => do
-  if p e then s e else return .rfl
+  bif p e then s e else return .rfl
 
 /-- TODO: Handle code duplication -/
 def isAlwaysZero : Level → Bool

@@ -17,13 +17,13 @@ Revert free variables `fvarIds` at goal `mvarId`.
 -/
 def _root_.Lean.MVarId.revert (mvarId : MVarId) (fvarIds : Array FVarId) (preserveOrder : Bool := false)
     (clearAuxDeclsInsteadOfRevert := false) : MetaM (Array FVarId × MVarId) := do
-  if fvarIds.isEmpty then
+  bif fvarIds.isEmpty then
     pure (#[], mvarId)
   else mvarId.withContext do
     mvarId.checkNotAssigned `revert
     unless clearAuxDeclsInsteadOfRevert do
       for fvarId in fvarIds do
-        if (← fvarId.getDecl) |>.isAuxDecl then
+        bif (← fvarId.getDecl) |>.isAuxDecl then
           throwError "Failed to revert `{mkFVar fvarId}`: It is an auxiliary declaration created to \
             represent a recursive reference to an in-progress definition"
     let fvars := fvarIds.map mkFVar
@@ -32,7 +32,7 @@ def _root_.Lean.MVarId.revert (mvarId : MVarId) (fvarIds : Array FVarId) (preser
     let mut mvarId      := mvarId
     let mut toRevertNew := #[]
     for x in toRevert do
-      if (← x.fvarId!.getDecl).isAuxDecl then
+      bif (← x.fvarId!.getDecl).isAuxDecl then
         mvarId ← mvarId.clear x.fvarId!
       else
         toRevertNew := toRevertNew.push x
