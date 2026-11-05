@@ -87,13 +87,13 @@ def ofString! (s : String) : Scheme :=
 Returns the default port number for this URI scheme: 443 for `https`, 80 for everything else.
 -/
 def defaultPort (scheme : URI.Scheme) : UInt16 :=
-  bif scheme.val == "https" then 443 else 80
+  uif scheme.val == "https" then 443 else 80
 
 /--
 Returns the URI scheme for a given port: `"https"` for 443, `"http"` otherwise.
 -/
 def ofPort (port : UInt16) : URI.Scheme :=
-  bif port == 443 then ⟨"https", by decide⟩ else ⟨"http", by decide⟩
+  uif port == 443 then ⟨"https", by decide⟩ else ⟨"http", by decide⟩
 
 end Scheme
 
@@ -189,7 +189,7 @@ constraints.
 -/
 def ofString? (s : String) : Option DomainName :=
   let lower := s.toLower
-  bif h₁ : lower.isEmpty then
+  uif h₁ : lower.isEmpty then
     none
   else uif h₃ : IsValidDomainName lower then
     some ⟨lower, IsLowerCase.isLowerCase_toLower, h₃, by simp [h₁]⟩
@@ -222,7 +222,7 @@ deriving Inhabited, BEq
 
 instance : Repr Host where
   reprPrec x prec :=
-    let nestPrec := (bif prec ≥ᵇ 1024 then 1 else 2)
+    let nestPrec := (uif prec ≥ 1024 then 1 else 2)
     let name := "Std.Http.URI.Host"
 
     let repr (ctr : String) a :=
@@ -319,7 +319,7 @@ deriving Inhabited, Repr, BEq
 instance : ToString Path where
   toString path :=
     let result := String.intercalate "/" (path.segments.map toString).toList
-    bif path.absolute then "/" ++ result else result
+    uif path.absolute then "/" ++ result else result
 
 namespace Path
 
@@ -332,7 +332,7 @@ def isEmpty (p : Path) : Bool := p.segments.isEmpty
 Returns the parent path by removing the last segment. If the path is empty, returns the path unchanged.
 -/
 def parent (p : Path) : Path :=
-  bif p.segments.isEmpty then p
+  uif p.segments.isEmpty then p
   else { p with segments := p.segments.pop }
 
 /--
@@ -340,7 +340,7 @@ Joins two paths. If the second path is absolute, it is returned as-is. Otherwise
 segments are appended to the first path.
 -/
 def join (p1 : Path) (p2 : Path) : Path :=
-  bif p2.absolute then p2
+  uif p2.absolute then p2
   else { p1 with segments := p1.segments ++ p2.segments }
 
 /--
@@ -365,9 +365,9 @@ def normalize (p : Path) : Path :=
     | [] =>
       output.reverse
     | segStr :: rest =>
-      bif toString segStr == "." then
+      uif toString segStr == "." then
         loop rest output
-      else bif toString segStr == ".." then
+      else uif toString segStr == ".." then
         match output with
         | [] => loop rest []
         | _ :: tail => loop rest tail
@@ -454,7 +454,7 @@ The values remain encoded as `EncodedQueryParam`.
 -/
 def findAllEncoded (query : Query) (key : EncodedQueryParam) : Array (Option EncodedQueryParam) :=
   query.filterMap (fun x =>
-    bif x.fst.toByteArray =ᵇ key.toByteArray then
+    uif x.fst.toByteArray = key.toByteArray then
       some x.snd
     else
       none)
@@ -559,7 +559,7 @@ instance : Insert (String × String) Query :=
 
 instance : ToString Query where
   toString q :=
-    bif q.isEmpty then "" else
+    uif q.isEmpty then "" else
       let encodedParams := q.toList.map fun (key, value) =>
         Query.formatQueryParam key value
       "?" ++ String.intercalate "&" encodedParams
@@ -569,7 +569,7 @@ Formats an optional query component, preserving `some .empty` as an explicit emp
 -/
 def formatOption : Option Query → String
   | none => ""
-  | some q => bif q.isEmpty then "?" else toString q
+  | some q => uif q.isEmpty then "?" else toString q
 
 end Query
 
@@ -779,7 +779,7 @@ def build (b : Builder) : URI :=
   let scheme := (b.scheme.getD ⟨"https", by decide⟩)
 
   let authority :=
-    bif b.host.isSome then
+    uif b.host.isSome then
       some {
         userInfo := b.userInfo
         host := b.host.getD default
@@ -802,7 +802,7 @@ def build (b : Builder) : URI :=
     scheme
     authority := authority
     path
-    query := bif query.isEmpty then none else some query
+    query := uif query.isEmpty then none else some query
     fragment := b.fragment
   }
 
@@ -883,7 +883,7 @@ Constructs the canonical `host[:port]` string, omitting the port when it is the 
 -/
 def hostHeader (o : URI.Origin) : String :=
   let defaultPort := URI.Scheme.defaultPort o.scheme
-  bif o.port == defaultPort then toString o.host
+  uif o.port == defaultPort then toString o.host
   else s!"{o.host}:{o.port}"
 
 end URI.Origin

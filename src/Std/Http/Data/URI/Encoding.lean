@@ -81,13 +81,13 @@ For example:
 -/
 def isValidPercentEncoding (ba : ByteArray) : Bool :=
   let rec loop (i : Nat) : Bool :=
-    bif h : i <ᵇ ba.size then
-      let c := ba[i]'(lt_of_decideLT_eq_true h)
-      bif c == '%'.toUInt8 then
-          bif h₂ : i + 2 <ᵇ ba.size then
+    uif h : i < ba.size then
+      let c := ba[i]'h
+      uif c == '%'.toUInt8 then
+          uif h₂ : i + 2 < ba.size then
             let d1 := ba[i + 1]'(by omega)
-            let d2 := ba[i + 2]'(lt_of_decideLT_eq_true h₂)
-            bif isHexDigitByte d1 && isHexDigitByte d2 then
+            let d2 := ba[i + 2]'h₂
+            uif isHexDigitByte d1 && isHexDigitByte d2 then
               loop (i + 3)
           else false
         else false
@@ -296,7 +296,7 @@ Encodes a raw string into an `EncodedString` with automatic proof construction. 
 -/
 def encode (s : String) : EncodedString r :=
   s.toUTF8.foldl (init := EncodedString.empty) fun acc c =>
-    bif h : isAsciiByte c && r c then
+    uif h : isAsciiByte c && r c then
       acc.push c (by have h := (Bool.and_eq_true _ _).mp h; simp [isEncodedChar]; exact And.intro h.left (Or.inl h.right))
     else
       byteToHex c acc
@@ -306,8 +306,8 @@ Attempts to create an `EncodedString` from a `ByteArray`. Returns `some` if the 
 valid encoded characters and all percent signs are followed by exactly two hex digits, `none` otherwise.
 -/
 def ofByteArray? (ba : ByteArray) : Option (EncodedString r) :=
-  bif h : ba.data.all (isEncodedChar r) then
-    bif isValidPercentEncoding ba then some ⟨ba, h⟩ else none
+  uif h : ba.data.all (isEncodedChar r) then
+    uif isValidPercentEncoding ba then some ⟨ba, h⟩ else none
   else none
 
 /--
@@ -353,10 +353,10 @@ def decode (es : EncodedString r) : Option String := Id.run do
   let percent := '%'.toNat.toUInt8
   while h : i <ᵇ len do
     let c := rawBytes[i]
-    (decoded, i) := bif h₁ : c == percent && i + 1 <ᵇ len then
+    (decoded, i) := uif h₁ : c == percent ∧ i + 1 < len then
       let h1 := rawBytes[i + 1]
       if let some hd1 := hexDigitToUInt8? h1 then
-        bif h₂ : i + 2 <ᵇ len then
+        uif h₂ : i + 2 < len then
           let h2 := rawBytes[i + 2]
           if let some hd2 := hexDigitToUInt8? h2 then
             (decoded.push (hd1 * 16 + hd2), i + 3)
@@ -424,8 +424,8 @@ Attempts to create an `EncodedQueryString` from a `ByteArray`. Returns `some` if
 only valid encoded query characters and all percent signs are followed by exactly two hex digits, `none` otherwise.
 -/
 def ofByteArray? (ba : ByteArray) (r : UInt8 → Bool := isQueryChar) : Option (EncodedQueryString r) :=
-  bif h : ba.data.all (isEncodedQueryChar r) then
-    bif isValidPercentEncoding ba then some ⟨ba, h⟩ else none
+  uif h : ba.data.all (isEncodedQueryChar r) then
+    uif isValidPercentEncoding ba then some ⟨ba, h⟩ else none
   else none
 
 /--
@@ -480,9 +480,9 @@ are kept as-is, spaces are encoded as '+', and all other characters are percent-
 -/
 def encode (s : String) (r : UInt8 → Bool := isQueryChar) : EncodedQueryString r :=
   s.toUTF8.foldl (init := EncodedQueryString.empty) fun acc c =>
-    bif h : isAsciiByte c && r c then
+    uif h : isAsciiByte c && r c then
       acc.push c (by have h := (Bool.and_eq_true _ _).mp h; simp [isEncodedQueryChar, isEncodedChar]; exact Or.inl (And.intro h.left (Or.inl h.right)))
-    else bif c == ' '.toUInt8 then
+    else uif c == ' '.toUInt8 then
       acc.push '+'.toUInt8 (by simp [isEncodedQueryChar])
     else
       byteToHex c acc
@@ -508,12 +508,12 @@ def decode (es : EncodedQueryString r) : Option String := Id.run do
   let plus := '+'.toNat.toUInt8
   while h : i <ᵇ len do
     let c := rawBytes[i]
-    (decoded, i) := bif c == plus then
+    (decoded, i) := uif c == plus then
       (decoded.push ' '.toNat.toUInt8, i + 1)
-    else bif h₁ : c == percent && i + 1 <ᵇ len then
+    else uif h₁ : c == percent ∧ i + 1 < len then
       let h1 := rawBytes[i + 1]
       if let some hd1 := hexDigitToUInt8? h1 then
-        bif h₂ : i + 2 <ᵇ len then
+        uif h₂ : i + 2 < len then
           let h2 := rawBytes[i + 2]
           if let some hd2 := hexDigitToUInt8? h2 then
             (decoded.push (hd1 * 16 + hd2), i + 3)

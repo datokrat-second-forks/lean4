@@ -51,7 +51,7 @@ resolved by `win`. If the race is lost some cleanup work can be done in `lose`.
 def Waiter.race [Monad m] [MonadLiftT (ST IO.RealWorld) m] (w : Waiter α)
     (lose : m β) (win : IO.Promise (Except IO.Error α) → m β) : m β := do
   let first ← w.finished.modifyGet fun s => (s == false, true)
-  bif first then
+  uif first then
     win w.promise
   else
     lose
@@ -106,7 +106,7 @@ private def shuffleIt {α : Type u} (xs : Array α) (gen : StdGen) : Array α ×
   go xs gen 0
 where
   go (xs : Array α) (gen : StdGen) (i : Nat) : Array α × StdGen :=
-    bif i <ᵇ xs.size - 1 then
+    uif i < xs.size - 1 then
       let (j, gen) := randNat gen i (xs.size - 1)
       let xs := xs.swapIfInBounds i j
       go xs gen (i + 1)
@@ -141,7 +141,7 @@ def Selectable.combine (selectables : Array (Selectable α)) : IO (Selector α) 
       IO.stdGenRef.set gen
 
       for selectable in selectables do
-        bif ← waiter.checkFinished then
+        uif ← waiter.checkFinished then
           return
 
         let waiterPromise ← IO.Promise.new
@@ -185,7 +185,7 @@ selectors that keep the contract of `Selector.registerFn`.
    error raised while resolving the `Waiter`, or a `registerFn` that throws mid-registration.
 -/
 def Selectable.one (selectables : Array (Selectable α)) : Async α := do
-  bif selectables.isEmpty then
+  uif selectables.isEmpty then
     throw <| .userError "Selectable.one requires at least one Selectable"
 
   let selector ← Selectable.combine selectables
@@ -215,7 +215,7 @@ The protocol for this is as follows:
 3. If none succeed, `none` is returned immediately without blocking.
 -/
 def Selectable.tryOne (selectables : Array (Selectable α)) : Async (Option α) := do
-  bif selectables.isEmpty then
+  uif selectables.isEmpty then
     throw <| .userError "Selectable.tryOne requires at least one Selectable"
 
   let gen ← IO.stdGenRef.get

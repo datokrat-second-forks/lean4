@@ -50,7 +50,7 @@ Returns a promise that resolves once the permit is acquired.
 def Semaphore.acquire (sem : Semaphore) : BaseIO (IO.Promise Unit) := do
   sem.lock.atomically do
     let st ← get
-    bif st.permits >ᵇ 0 then
+    uif st.permits > 0 then
       set { st with permits := st.permits - 1 }
       mkResolvedPromise ()
     else
@@ -64,7 +64,7 @@ Tries to acquire a permit without blocking. Returns `true` on success.
 def Semaphore.tryAcquire (sem : Semaphore) : BaseIO Bool := do
   sem.lock.atomically do
     let st ← get
-    bif st.permits >ᵇ 0 then
+    uif st.permits > 0 then
       set { st with permits := st.permits - 1 }
       return true
     else

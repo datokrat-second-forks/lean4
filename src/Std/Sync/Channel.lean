@@ -109,7 +109,7 @@ private def new : BaseIO (Unbounded α) := do
 private def trySend (ch : Unbounded α) (v : α) : BaseIO Bool := do
   ch.state.atomically do
     let st ← get
-    bif st.closed then
+    uif st.closed then
       return false
     else
       while true do
@@ -117,7 +117,7 @@ private def trySend (ch : Unbounded α) (v : α) : BaseIO Bool := do
         if let some (consumer, consumers) := st.consumers.dequeue? then
           let success ← consumer.resolve (some v)
           set { st with consumers }
-          bif success then
+          uif success then
             break
         else
           set { st with values := st.values.enqueue v }
@@ -126,7 +126,7 @@ private def trySend (ch : Unbounded α) (v : α) : BaseIO Bool := do
       return true
 
 private def send (ch : Unbounded α) (v : α) : BaseIO (Task (Except Error Unit)) := do
-  bif ← Unbounded.trySend ch v then
+  uif ← Unbounded.trySend ch v then
     return .pure <| .ok ()
   else
     return .pure <| .error .closed
@@ -134,7 +134,7 @@ private def send (ch : Unbounded α) (v : α) : BaseIO (Task (Except Error Unit)
 private def close (ch : Unbounded α) : EIO Error Unit := do
   ch.state.atomically do
     let st ← get
-    bif st.closed then throw .alreadyClosed
+    uif st.closed then throw .alreadyClosed
     for consumer in st.consumers.toArray do
       discard <| consumer.resolve none
     set { st with consumers := ∅, closed := true }
@@ -161,7 +161,7 @@ private def recv (ch : Unbounded α) : BaseIO (Task (Option α)) := do
   ch.state.atomically do
     if let some val ← tryRecv' then
       return .pure <| some val
-    else bif (← get).closed then
+    else uif (← get).closed then
       return .pure none
     else
       let promise ← IO.Promise.new
@@ -178,7 +178,7 @@ open Async in
 private def recvSelector (ch : Unbounded α) : Selector (Option α) where
   tryFn := do
     ch.state.atomically do
-      bif ← recvReady' then
+      uif ← recvReady' then
         let val ← tryRecv'
         return some val
       else
@@ -187,7 +187,7 @@ private def recvSelector (ch : Unbounded α) : Selector (Option α) where
   registerFn waiter := do
     ch.state.atomically do
       -- We did drop the lock between `tryFn` and now so maybe ready?
-      bif ← recvReady' then
+      uif ← recvReady' then
         let lose := return ()
         let win promise := do
           -- We know we are ready so the value by this is fine
@@ -251,7 +251,7 @@ private def trySend' (v : α) : AtomicT (Zero.State α) BaseIO Bool := do
     if let some (consumer, consumers) := st.consumers.dequeue? then
       let success ← consumer.resolve (some v)
       set { st with consumers }
-      bif success then
+      uif success then
         break
     else
       return false
@@ -260,16 +260,16 @@ private def trySend' (v : α) : AtomicT (Zero.State α) BaseIO Bool := do
 
 private def trySend (ch : Zero α) (v : α) : BaseIO Bool := do
   ch.state.atomically do
-    bif (← get).closed then
+    uif (← get).closed then
       return false
     else
       trySend' v
 
 private def send (ch : Zero α) (v : α) : BaseIO (Task (Except Error Unit)) := do
   ch.state.atomically do
-    bif (← get).closed then
+    uif (← get).closed then
       return .pure <| .error .closed
-    else bif ← trySend' v then
+    else uif ← trySend' v then
       return .pure <| .ok ()
     else
       let promise ← IO.Promise.new
@@ -282,7 +282,7 @@ private def send (ch : Zero α) (v : α) : BaseIO (Task (Except Error Unit)) := 
 private def close (ch : Zero α) : EIO Error Unit := do
   ch.state.atomically do
     let st ← get
-    bif st.closed then throw .alreadyClosed
+    uif st.closed then throw .alreadyClosed
     for consumer in st.consumers.toArray do
       discard <| consumer.resolve none
     set { st with consumers := ∅, closed := true }
@@ -311,7 +311,7 @@ private def recv (ch : Zero α) : BaseIO (Task (Option α)) := do
     let st ← get
     if let some val ← tryRecv' then
       return .pure <| some val
-    else bif !st.closed then
+    else uif !st.closed then
       let promise ← IO.Promise.new
       set { st with consumers := st.consumers.enqueue (.normal promise) }
       return promise.result?.map (sync := true) (·.bind id)
@@ -328,7 +328,7 @@ open Async in
 private def recvSelector (ch : Zero α) : Selector (Option α) where
   tryFn := do
     ch.state.atomically do
-      bif ← recvReady' then
+      uif ← recvReady' then
         let val ← tryRecv'
         return some val
       else
@@ -337,7 +337,7 @@ private def recvSelector (ch : Zero α) : Selector (Option α) where
   registerFn waiter := do
     ch.state.atomically do
       -- We did drop the lock between `tryFn` and now so maybe ready?
-      bif ← recvReady' then
+      uif ← recvReady' then
         let lose := return ()
         let win promise := do
           -- We know we are ready so the value by this is fine
@@ -447,7 +447,7 @@ private def new (capacity : Nat) (hcap : 0 < capacity) : BaseIO (Bounded α) := 
 
 @[inline]
 private def incMod (idx : Nat) (cap : Nat) : Nat :=
-  bif idx + 1 =ᵇ cap then
+  uif idx + 1 = cap then
     0
   else
     idx + 1
@@ -461,7 +461,7 @@ Precondition: The channel must not be closed.
 -/
 private def trySend' (v : α) : AtomicT (Bounded.State α) BaseIO Bool := do
   let mut st ← get
-  bif st.bufCount =ᵇ st.capacity then
+  uif st.bufCount = st.capacity then
     return false
   else
     st.buf[st.sendIdx]'st.hsend |>.set (some v)
@@ -481,22 +481,22 @@ private def trySend' (v : α) : AtomicT (Bounded.State α) BaseIO Bool := do
 
 private def trySend (ch : Bounded α) (v : α) : BaseIO Bool := do
   ch.state.atomically do
-    bif (← get).closed then
+    uif (← get).closed then
       return false
     else
       trySend' v
 
 private partial def send (ch : Bounded α) (v : α) : BaseIO (Task (Except Error Unit)) := do
   ch.state.atomically do
-    bif (← get).closed then
+    uif (← get).closed then
       return .pure <| .error .closed
-    else bif ← trySend' v then
+    else uif ← trySend' v then
       return .pure <| .ok ()
     else
       let promise ← IO.Promise.new
       modify fun st => { st with producers := st.producers.enqueue promise }
       BaseIO.bindTask promise.result? fun res => do
-        bif res.getD false then
+        uif res.getD false then
           Bounded.send ch v
         else
           return .pure <| .error .closed
@@ -504,7 +504,7 @@ private partial def send (ch : Bounded α) (v : α) : BaseIO (Task (Except Error
 private def close (ch : Bounded α) : EIO Error Unit := do
   ch.state.atomically do
     let st ← get
-    bif st.closed then throw .alreadyClosed
+    uif st.closed then throw .alreadyClosed
     for consumer in st.consumers.toArray do consumer.resolve false
     for producer in st.producers.toArray do producer.resolve false
     set { st with consumers := ∅, producers := ∅, closed := true }
@@ -517,7 +517,7 @@ private def isClosed (ch : Bounded α) : BaseIO Bool :=
 private def tryRecv' [Monad m] [MonadLiftT (ST IO.RealWorld) m] [MonadLiftT BaseIO m] :
     AtomicT (Bounded.State α) m (Option α) := do
   let mut st ← get
-  bif st.bufCount == 0 then
+  uif st.bufCount == 0 then
     return none
   else
     let val ← st.buf[st.recvIdx]'st.hrecv |>.swap none
@@ -544,13 +544,13 @@ private partial def recv (ch : Bounded α) : BaseIO (Task (Option α)) := do
   ch.state.atomically do
     if let some val ← tryRecv' then
       return .pure <| some val
-    else bif (← get).closed then
+    else uif (← get).closed then
       return .pure none
     else
       let promise ← IO.Promise.new
       modify fun st => { st with consumers := st.consumers.enqueue ⟨promise, none⟩ }
       BaseIO.bindTask promise.result? fun res => do
-        bif res.getD false then
+        uif res.getD false then
           Bounded.recv ch
         else
           return .pure none
@@ -565,7 +565,7 @@ open Async in
 private partial def recvSelector (ch : Bounded α) : Selector (Option α) where
   tryFn := do
     ch.state.atomically do
-      bif ← recvReady' then
+      uif ← recvReady' then
         let val ← tryRecv'
         return some val
       else
@@ -586,7 +586,7 @@ where
   registerAux (ch : Bounded α) (waiter : Waiter (Option α)) : IO Unit := do
     ch.state.atomically do
       -- We did drop the lock between `tryFn` and now so maybe ready?
-      bif ← recvReady' then
+      uif ← recvReady' then
         -- if we lose we must trigger the next promise (if available) to avoid deadlocking
         let lose := do
           let st ← get
@@ -605,7 +605,7 @@ where
         IO.chainTask promise.result? fun
           | none => return ()
           | some res =>
-            bif res then
+            uif res then
               registerAux ch waiter
             else
               let lose := return ()

@@ -34,9 +34,9 @@ Emits `qdtext` characters directly and `"` / `\\` as `quoted-pair`.
 The proof `h₀ : quotedStringChar c` guarantees the impossible branch is unreachable.
 -/
 def quoteCore (c : Char) (h₀ : quotedStringChar c) : String :=
-  bif h : qdtext c then
+  uif h : qdtext c then
     .singleton c
-  else bif h₁ : c == '\"' || c == '\\' then
+  else uif h₁ : c == '\"' || c == '\\' then
     .append "\\" (.singleton c)
   else
     absurd h₀ (not_quotedStringChar_of_not_qdtext_not_dquote_backslash _ (quotedStringChar_lt_0x80 h₀) ⟨by simp [h], by simp [h₁]⟩)
@@ -54,7 +54,7 @@ Requires a proof that every character passes `quotedStringChar`.
 def quoteHttpString (s : String) (h : s.toList.all quotedStringChar) : String :=
   let sl := s.toList.attach
 
-  bif sl.all (tchar ·.val) && !sl.isEmpty then
+  uif sl.all (tchar ·.val) && !sl.isEmpty then
     s
   else
     (.append
@@ -69,7 +69,7 @@ Returns `some` with the quoted result when every character passes `quotedStringC
 when any character cannot be represented by the grammar.
 -/
 def quoteHttpString? (s : String) : Option String :=
-  bif h : s.toList.all quotedStringChar then
+  uif h : s.toList.all quotedStringChar then
     some <| quoteHttpString s h
   else
     none
@@ -93,23 +93,23 @@ private inductive UnquoteState where
 Parses an HTTP `quoted-string`, returning the unescaped content when valid.
 -/
 def unquoteHttpString? (s : String) : Option String :=
-  bif s.startsWith '"' then
+  uif s.startsWith '"' then
     match s.foldl (fun (st : UnquoteState) c =>
       match st with
       | .start =>
-          bif c == '"' then .valid false "" else .invalid
+          uif c == '"' then .valid false "" else .invalid
       | .valid false acc =>
-          bif c == '\\' then .valid true acc
-          else bif c == '"' then .done acc
-          else bif qdtext c then .valid false (acc.push c)
+          uif c == '\\' then .valid true acc
+          else uif c == '"' then .done acc
+          else uif qdtext c then .valid false (acc.push c)
           else .invalid
       | .valid true acc =>
-          bif quotedPairChar c then .valid false (acc.push c)
+          uif quotedPairChar c then .valid false (acc.push c)
           else .invalid
       | .done _ | .invalid => .invalid) .start with
     | .done result => some result
     | _ => none
-  else bif s.all Char.tchar then
+  else uif s.all Char.tchar then
     some s
   else
     none

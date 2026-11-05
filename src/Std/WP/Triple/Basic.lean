@@ -45,7 +45,7 @@ open Lean in
 /-- A program whose `match`/`if`/`do` elaboration postpones on a metavariable expected type and so
 needs the monadic-application hint `(_ : _ → _) _` to recover its monad by first-order unification. -/
 private meta partial def isSplitProgram (c : Syntax) : Bool :=
-  bif c.isOfKind `Lean.Parser.Term.paren then
+  uif c.isOfKind `Lean.Parser.Term.paren then
     isSplitProgram c[1]
   else
     c.isOfKind `Lean.Parser.Term.match ||

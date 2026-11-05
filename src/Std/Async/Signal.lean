@@ -257,7 +257,7 @@ def selector (s : Signal.Waiter) : Selector Unit :=
       -- reference to it, so it would keep listening after it is dropped.
       s.native.cancel
       -- A signal that arrived before `cancel` resolved `signalWaiter` instead of being kept.
-      bif ← signalWaiter.isResolved then
+      uif ← signalWaiter.isResolved then
         return some ()
       return none
 

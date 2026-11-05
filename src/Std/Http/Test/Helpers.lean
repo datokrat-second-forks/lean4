@@ -56,7 +56,7 @@ private def withTimeout {α : Type} (name : String) (ms : Nat) (action : IO α) 
   let rec loop : Nat → IO α
     | 0 => do IO.cancel task; throw <| IO.userError s!"'{name}' timed out after {ms}ms"
     | n + 1 => do
-      bif (← IO.getTaskState task) == .finished then
+      uif (← IO.getTaskState task) == .finished then
         match ← IO.wait task with
         | .ok x => pure x
         | .error e => throw e
@@ -149,7 +149,7 @@ Assert `needle` does NOT appear in the response.
 -/
 def assertAbsent (response : ByteArray) (needle : String) : IO Unit := do
   let text := String.fromUTF8! response
-  bif text.contains needle then
+  uif text.contains needle then
     throw <| IO.userError s!"expected NOT to contain {needle.quote}, got:\n{text.quote}"
 
 /--

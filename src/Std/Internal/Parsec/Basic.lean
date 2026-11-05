@@ -107,7 +107,7 @@ def tryCatch (p : Parsec ι α) (csuccess : α → Parsec ι β) (cerror : Unit 
   | .success rem a => csuccess a rem
   | .error rem err =>
     -- We assume that it.s never changes as the `Parsec` monad only modifies `it.pos`.
-    bif Input.pos it =ᵇ Input.pos rem then cerror () rem else .error rem err
+    uif Input.pos it = Input.pos rem then cerror () rem else .error rem err
 
 @[always_inline]
 instance : Monad (Parsec ι) where
@@ -140,7 +140,7 @@ Succeeds only if input is at end-of-file.
 -/
 @[inline]
 def eof : Parsec ι Unit := fun it =>
-  bif Input.hasNext it then
+  uif Input.hasNext it then
     .error it (.other "expected end of input")
   else
     .success it ()
@@ -164,7 +164,7 @@ Gets the next input element.
 -/
 @[inline]
 def any : Parsec ι elem := fun it =>
-  bif h : Input.hasNext it then
+  uif h : Input.hasNext it then
     let c := Input.curr' it h
     let it' := Input.next' it h
     .success it' c
@@ -177,7 +177,7 @@ Checks if the next input element matches some condition.
 @[inline]
 def satisfy (p : elem → Bool) : Parsec ι elem := attempt do
   let c ← any
-  bif p c then return c else fail "condition not satisfied"
+  uif p c then return c else fail "condition not satisfied"
 
 /--
 Fails if `p` succeeds, otherwise succeeds without consuming input.
@@ -193,7 +193,7 @@ Peeks at the next element, returns `some` if exists else `none`, does not consum
 -/
 @[inline]
 def peek? : Parsec ι (Option elem) := fun it =>
-  bif h : Input.hasNext it then
+  uif h : Input.hasNext it then
     .success it (some <| Input.curr' it h)
   else
     .success it none
@@ -206,7 +206,7 @@ def peekWhen? (p : elem → Bool) : Parsec ι (Option elem) := do
   let some data ← peek?
     | return none
 
-  bif p data then
+  uif p data then
     return some data
   else
     return none
@@ -216,7 +216,7 @@ Peeks at the next element, errors on EOF, does not consume input.
 -/
 @[inline]
 def peek! : Parsec ι elem := fun it =>
-  bif h : Input.hasNext it then
+  uif h : Input.hasNext it then
     .success it (Input.curr' it h)
   else
     .error it .eof
@@ -226,7 +226,7 @@ Peeks at the next element or returns a default if at EOF, does not consume input
 -/
 @[inline]
 def peekD (default : elem) : Parsec ι elem := fun it =>
-  bif h : Input.hasNext it then
+  uif h : Input.hasNext it then
     .success it (Input.curr' it h)
   else
     .success it default
@@ -236,7 +236,7 @@ Consumes one element if available, otherwise errors on EOF.
 -/
 @[inline]
 def skip : Parsec ι Unit := fun it =>
-  bif h : Input.hasNext it then
+  uif h : Input.hasNext it then
     .success (Input.next' it h) ()
   else
     .error it .eof

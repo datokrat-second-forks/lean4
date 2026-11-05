@@ -83,7 +83,7 @@ def new (config : Std.Http.Config := {}) (localAddr : Option Net.SocketAddress :
   let context ← Std.CancellationContext.new
   let activeConnections ← Std.Mutex.new 0
   let connectionLimit ←
-    bif config.maxConnections =ᵇ 0 then
+    uif config.maxConnections = 0 then
       pure none
     else
       some <$> Std.Semaphore.new config.maxConnections
@@ -129,14 +129,14 @@ private def frameCancellation (s : Server) (releaseConnectionPermit : Bool := fa
   try
     action
   finally
-    bif releaseConnectionPermit then
+    uif releaseConnectionPermit then
       if let some limit := s.connectionLimit then
         limit.release
 
     s.activeConnections.atomically do
       modify (· - 1)
 
-      bif (← get) =ᵇ 0 && (← s.context.isCancelled) then
+      uif (← get) = 0 ∧ (← s.context.isCancelled) then
         discard <| s.shutdownPromise.send ()
 
 /--
@@ -184,7 +184,7 @@ def serve {σ : Type} [Handler σ]
               (action := do
                 serveConnection client handler config extensions))
         | none =>
-          bif permitAcquired then
+          uif permitAcquired then
             if let some limit := httpServer.connectionLimit then
               limit.release
           break

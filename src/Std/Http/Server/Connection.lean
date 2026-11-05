@@ -119,7 +119,7 @@ private def pollNextEvent
     selectables := selectables.push (.case (Transport.recvSelector socket expectedBytes) (Recv.bytes · |> pure))
 
 
-    bif sources.keepAliveTimeout.isNone then
+    uif sources.keepAliveTimeout.isNone then
       if let some timeout := sources.headerTimeout then
         selectables := selectables.push (.case (← Selector.sleep (timeout - (← Timestamp.now)).toMilliseconds) (fun _ => pure .timeout))
       else
@@ -166,7 +166,7 @@ private def handleContinueEvent
     .case (← Selector.sleep config.lingeringTimeout) (fun _ => pure false)
   ]
 
-  let status := bif canContinue then Status.«continue» else Status.expectationFailed
+  let status := uif canContinue then Status.«continue» else Status.expectationFailed
   return (machine.canContinue status, !canContinue)
 
 /--
@@ -174,7 +174,7 @@ Injects a `Date` header into a response head if `Config.generateDate` is set
 and the response does not already include one.
 -/
 private def prepareResponseHead (config : Config) (head : Response.Head) : Async Response.Head := do
-  bif config.generateDate && !head.headers.contains Header.Name.date then
+  uif config.generateDate && !head.headers.contains Header.Name.date then
     let now := DateTime.ofTimestamp (← Timestamp.now) TimeZone.ZoneRules.UTC
     return { head with headers := head.headers.insert Header.Name.date (Header.Value.ofString! now.toHTTPDateString) }
   else
@@ -199,8 +199,8 @@ private def applyResponse
 
   let responseHead ← prepareResponseHead config res.line
   let machineWithHead := machineSized.send responseHead
-  bif machineWithHead.writer.omitBody then
-    bif !(← Body.isClosed res.body) then
+  uif machineWithHead.writer.omitBody then
+    uif !(← Body.isClosed res.body) then
       Body.close res.body
     return (machineWithHead, none)
   else
@@ -262,16 +262,16 @@ private def processH1Events
       if let some head := st.pendingHead then
         let (newMachine, clearPending) ← handleContinueEvent handler st.machine head config connectionContext
         st := { st with machine := newMachine }
-        bif clearPending then
+        uif clearPending then
           st := { st with pendingHead := none }
 
     | .next =>
       -- Reset all per-request state for the next pipelined request.
-      bif !(← Body.isClosed st.requestStream) then
+      uif !(← Body.isClosed st.requestStream) then
         Body.close st.requestStream
 
       if let some res := st.respStream then
-        bif !(← Body.isClosed res) then
+        uif !(← Body.isClosed res) then
           Body.close res
 
       let newStream ← Body.mkStream
@@ -289,14 +289,14 @@ private def processH1Events
     | .failed err =>
       Handler.onFailure handler (toString err)
 
-      bif !(← Body.isClosed st.requestStream) then
+      uif !(← Body.isClosed st.requestStream) then
         Body.close st.requestStream
 
       st := { st with requiresData := false, pendingHead := none }
       break
 
     | .closeBody =>
-      bif !(← Body.isClosed st.requestStream) then
+      uif !(← Body.isClosed st.requestStream) then
         Body.close st.requestStream
 
     | .close => pure ()
@@ -344,7 +344,7 @@ private def tryDrainBody [Body β]
   | none => pure (machine, some body)
   | some (some chunk) => pure (machine.sendData #[chunk], some body)
   | some none =>
-    bif !(← Body.isClosed body) then Body.close body
+    uif !(← Body.isClosed body) then Body.close body
     pure (machine.userClosedBody, none)
 
 /--
@@ -363,7 +363,7 @@ private def handleRecvEvent
     let mut st := state
 
     -- After the first byte after idle we switch from keep-alive timeout to per-request header timeout.
-    bif st.keepAliveTimeout.isSome then
+    uif st.keepAliveTimeout.isSome then
       st := { st with
         keepAliveTimeout := none
         headerTimeout := some <| (← Timestamp.now) + config.headerTimeout
@@ -379,19 +379,19 @@ private def handleRecvEvent
 
   | .responseBody none =>
     if let some res := state.respStream then
-      bif !(← Body.isClosed res) then Body.close res
+      uif !(← Body.isClosed res) then Body.close res
     return ({ state with machine := state.machine.userClosedBody, respStream := none }, false)
 
   | .bodyInterest interested =>
-    bif interested then
+    uif interested then
       let (newMachine, pulledChunk) := state.machine.pullBody
       let mut st := { state with machine := newMachine }
 
       if let some pulled := pulledChunk then
         try st.requestStream.send pulled.chunk pulled.incomplete
         catch e => Handler.onFailure handler e
-        bif pulled.final then
-          bif !(← Body.isClosed st.requestStream) then
+        uif pulled.final then
+          uif !(← Body.isClosed st.requestStream) then
             Body.close st.requestStream
 
       return (st, false)
@@ -412,8 +412,8 @@ private def handleRecvEvent
     return ({ state with machine := state.machine.closeWithError .internalServerError, handlerDispatched := false }, false)
 
   | .response (.ok res) =>
-    bif state.machine.failed then
-      bif !(← Body.isClosed res.body) then Body.close res.body
+    uif state.machine.failed then
+      uif !(← Body.isClosed res.body) then Body.close res.body
       return ({ state with handlerDispatched := false }, false)
     else
       let (newMachine, newRespStream) ← applyResponse config state.machine res
@@ -441,15 +441,15 @@ private def buildPollSources
     (socket : α) (connectionContext : CancellationContext) (state : ConnectionState β)
     : Async (PollSources α β) := do
   let requestBodyOpen ←
-    bif state.machine.canPullBody then pure !(← Body.isClosed state.requestStream)
+    uif state.machine.canPullBody then pure !(← Body.isClosed state.requestStream)
     else pure false
 
   let requestBodyInterested ←
-    bif state.machine.canPullBody && requestBodyOpen then state.requestStream.hasInterest
+    uif state.machine.canPullBody && requestBodyOpen then state.requestStream.hasInterest
     else pure false
 
   let requestBody ←
-    bif state.machine.canPullBodyNow && requestBodyOpen then pure (some state.requestStream)
+    uif state.machine.canPullBodyNow && requestBodyOpen then pure (some state.requestStream)
     else pure none
 
   -- Include the socket only when there is more to do than waiting for the handler alone.
@@ -458,9 +458,9 @@ private def buildPollSources
     state.machine.writer.sentMessage || (state.machine.canPullBody && requestBodyInterested)
 
   return {
-    socket := bif pollSocket then some socket else none
+    socket := uif pollSocket then some socket else none
     expect := state.expectData
-    response := bif state.handlerDispatched then some state.response else none
+    response := uif state.handlerDispatched then some state.response else none
     responseBody := state.respStream
     requestBody := requestBody
     timeout := state.currentTimeout
@@ -506,7 +506,7 @@ private def handle
     let (newMachine, step) := state.machine.step
     state := { state with machine := newMachine }
 
-    bif step.output.size >ᵇ 0 then
+    uif step.output.size > 0 then
       try Transport.sendAll socket step.output.data
       catch e =>
         Handler.onFailure handler e
@@ -519,20 +519,20 @@ private def handle
     state ← dispatchPendingRequest handler connection.extensions connectionContext state
 
     -- Phase 4: wait for the next IO event when any source needs attention.
-    bif state.requiresData || state.handlerDispatched || state.respStream.isSome || state.machine.canPullBody then
+    uif state.requiresData || state.handlerDispatched || state.respStream.isSome || state.machine.canPullBody then
       state := { state with requiresData := false }
       let sources ← buildPollSources socket connectionContext state
       let event ← pollNextEvent config handler sources
       let (newState, shouldClose) ← handleRecvEvent handler config event state
       state := newState
-      bif shouldClose then break
+      uif shouldClose then break
 
   -- Clean up: close all open streams and the socket.
-  bif !(← Body.isClosed state.requestStream) then
+  uif !(← Body.isClosed state.requestStream) then
     Body.close state.requestStream
 
   if let some res := state.respStream then
-    bif !(← Body.isClosed res) then Body.close res
+    uif !(← Body.isClosed res) then Body.close res
 
   Transport.close socket
 

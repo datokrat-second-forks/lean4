@@ -52,7 +52,7 @@ def Barrier.wait (barrier : Barrier) : BaseIO Bool := do
   barrier.lock.atomically do
     let localGen := (← get).generationId
     modify fun s => { s with count := s.count + 1 }
-    bif (← get).count <ᵇ barrier.numThreads then
+    uif (← get).count < barrier.numThreads then
       barrier.cvar.waitUntil barrier.lock.mutex do
         return (← get).generationId != localGen
       return false

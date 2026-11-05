@@ -22,16 +22,16 @@ elab "#conds " sfx:str : command => Elab.Command.liftTermElabM do
 /-- info: [Bool.dcond] -/
 #guard_msgs in #conds "System.Uri.UriEscape.decodeUri"
 
-/-- info: [Bool.dcond] -/
+/-- info: [Bool.dcond, UDecidable.dite] -/
 #guard_msgs in #conds "Std.Http.URI.EncodedString.decode"
 
-/-- info: [cond, Bool.dcond] -/
+/-- info: [Bool.dcond, UDecidable.ite, UDecidable.dite] -/
 #guard_msgs in #conds "Std.Http.URI.EncodedQueryString.decode"
 
 /-- info: [cond] -/
 #guard_msgs in #conds "Std.Sync.Broadcast.0.Std.Bounded.Receiver.unsubscribe"
 
-/-- info: [cond] -/
+/-- info: [cond, UDecidable.ite] -/
 #guard_msgs in #conds "Std.Http.Server.Connection.handle"
 
 /-- info: [cond] -/

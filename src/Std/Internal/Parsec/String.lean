@@ -42,7 +42,7 @@ protected def Parser.run (p : Parser α) (s : String) : Except String α :=
 Parses the given string.
 -/
 def pstring (s : String) : Parser String := fun it =>
-  bif (it.1.sliceFrom it.2).startsWith s then
+  uif (it.1.sliceFrom it.2).startsWith s then
     .success ⟨_, it.2.nextn s.length⟩ s
   else
     .error it (.other s!"expected: {s}")
@@ -58,7 +58,7 @@ Parses the given char.
 -/
 @[inline]
 def pchar (c : Char) : Parser Char := attempt do
-  bif (← any) == c then pure c else fail s!"expected: '{c}'"
+  uif (← any) == c then pure c else fail s!"expected: '{c}'"
 
 /--
 Skips the given char.
@@ -72,7 +72,7 @@ Parse an ASCII digit `0-9` as a `Char`.
 @[inline]
 def digit : Parser Char := attempt do
   let c ← any
-  bif '0' ≤ᵇ c && c ≤ᵇ '9' then return c else fail s!"digit expected"
+  uif '0' ≤ c ∧ c ≤ '9' then return c else fail s!"digit expected"
 
 /--
 Convert a byte representing `'0'..'9'` to a `Nat`.
@@ -90,10 +90,9 @@ private def digitsCore (acc : Nat) : Parser Nat := fun it =>
   .success ⟨_, it⟩ res
 where
   go {s : String} (it : s.Pos) (acc : Nat) : (Nat × s.Pos) :=
-    bif h : it ≠ᵇ s.endPos then
-      have h := ne_of_decideNe_eq_true h
+    uif h : it ≠ s.endPos then
       let candidate := it.get h
-      bif '0' ≤ᵇ candidate && candidate ≤ᵇ '9' then
+      uif '0' ≤ candidate ∧ candidate ≤ '9' then
         let digit := digitToNat candidate
         let acc := acc * 10 + digit
         go (it.next h) acc
@@ -117,9 +116,9 @@ Parse a hex digit `0-9`, `a-f`, or `A-F` as a `Char`.
 @[inline]
 def hexDigit : Parser Char := attempt do
   let c ← any
-  bif ('0' ≤ᵇ c && c ≤ᵇ '9')
-   || ('a' ≤ᵇ c && c ≤ᵇ 'f')
-   || ('A' ≤ᵇ c && c ≤ᵇ 'F') then return c else fail s!"hex digit expected"
+  uif ('0' ≤ c ∧ c ≤ '9')
+   ∨ ('a' ≤ c ∧ c ≤ 'f')
+   ∨ ('A' ≤ c ∧ c ≤ 'F') then return c else fail s!"hex digit expected"
 
 /--
 Parse an ASCII letter `a-z` or `A-Z` as a `Char`.
@@ -127,13 +126,12 @@ Parse an ASCII letter `a-z` or `A-Z` as a `Char`.
 @[inline]
 def asciiLetter : Parser Char := attempt do
   let c ← any
-  bif ('A' ≤ᵇ c && c ≤ᵇ 'Z') || ('a' ≤ᵇ c && c ≤ᵇ 'z') then return c else fail s!"ASCII letter expected"
+  uif ('A' ≤ c ∧ c ≤ 'Z') ∨ ('a' ≤ c ∧ c ≤ 'z') then return c else fail s!"ASCII letter expected"
 
 private def skipWs {s : String} (it : s.Pos) : s.Pos :=
-  bif h : it ≠ᵇ s.endPos then
-    have h := ne_of_decideNe_eq_true h
+  uif h : it ≠ s.endPos then
     let c := it.get h
-    bif c == '\u0009' || c == '\u000a' || c == '\u000d' || c == '\u0020' then
+    uif c == '\u0009' || c == '\u000a' || c == '\u000d' || c == '\u0020' then
       skipWs (it.next h)
     else
       it
@@ -154,7 +152,7 @@ Takes a fixed amount of chars from the iterator.
 def take (n : Nat) : Parser String := fun it =>
   let right := it.2.nextn n
   let substr := String.Slice.mk it.1 it.2 right String.Pos.le_nextn |>.copy
-  bif substr.length != n then
+  uif substr.length != n then
     .error it .eof
   else
     .success ⟨_, right⟩ substr

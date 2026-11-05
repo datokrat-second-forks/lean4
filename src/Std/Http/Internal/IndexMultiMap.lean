@@ -93,7 +93,7 @@ Retrieves all values for the given key, or `none` if the key is absent.
 -/
 @[inline]
 def getAll? (map : IndexMultiMap α β) (key : α) : Option (Array β) :=
-  bif h : map.indexes.contains key then
+  uif h : map.indexes.contains key then
     some (map.getAll key h)
   else
     none
@@ -103,7 +103,7 @@ Retrieves the first value for the given key, or `none` if the key is absent.
 -/
 @[inline]
 def get? (map : IndexMultiMap α β) (key : α) : Option β :=
-  bif h : map.indexes.contains key then
+  uif h : map.indexes.contains key then
     some (map.get key h)
   else
     none
@@ -193,10 +193,10 @@ If the key is absent, returns the map unchanged.
 -/
 @[inline]
 def update [EquivBEq α] [LawfulHashable α] (map : IndexMultiMap α β) (key : α) (f : β → β) : IndexMultiMap α β :=
-  bif !map.contains key then
+  uif !map.contains key then
     map
   else
-    map.entries.foldl (fun acc (k, v) => acc.insert k (bif k == key then f v else v)) empty
+    map.entries.foldl (fun acc (k, v) => acc.insert k (uif k == key then f v else v)) empty
 
 /--
 Replaces the last value associated with `key` with `value`.
@@ -204,7 +204,7 @@ If the key is absent, returns the map unchanged.
 -/
 @[inline]
 def replaceLast (map : IndexMultiMap α β) (key : α) (value : β) : IndexMultiMap α β :=
-  bif h : map.contains key then
+  uif h : map.contains key then
     let idxs := map.indexes.get key h
     let ⟨nonEmpty, isIn⟩ := map.validity key h
     let lastPos : Fin idxs.size := ⟨idxs.size - 1, Nat.sub_lt nonEmpty (by omega)⟩
@@ -225,10 +225,10 @@ key matches, then re-inserting the survivors.
 -/
 @[inline]
 def erase [EquivBEq α] [LawfulHashable α] (map : IndexMultiMap α β) (key : α) : IndexMultiMap α β :=
-  bif !map.contains key then
+  uif !map.contains key then
     map
   else
-    map.entries.foldl (fun acc (k,v) => bif !(key == k) then acc.insert k v else acc) empty
+    map.entries.foldl (fun acc (k,v) => uif !(key == k) then acc.insert k v else acc) empty
 
 /--
 Removes multiple keys and all their associated values from the map.
@@ -236,7 +236,7 @@ Keys not present in the map are ignored.
 -/
 @[inline]
 def eraseMany [EquivBEq α] [LawfulHashable α] (map : IndexMultiMap α β) (keys : Array α) : IndexMultiMap α β :=
-  map.entries.foldl (fun acc (k,v) => bif !(keys.contains k) then acc.insert k v else acc) empty
+  map.entries.foldl (fun acc (k,v) => uif !(keys.contains k) then acc.insert k v else acc) empty
 
 /--
 Gets the number of entries in the map.

@@ -79,7 +79,7 @@ Parses a content length header value.
 -/
 def parse (v : Value) : Option ContentLength :=
   let s := v.value
-  bif s.isEmpty || !s.all Char.isDigit then none
+  uif s.isEmpty || !s.all Char.isDigit then none
   else s.toNat?.map (.mk)
 
 /--
@@ -100,7 +100,7 @@ Reference: https://www.rfc-editor.org/rfc/rfc9112#section-6.1
 -/
 @[expose]
 def TransferEncoding.Validate (codings : Array String) : Bool :=
-  bif codings.isEmpty || codings.any (fun coding => !isToken coding) then
+  uif codings.isEmpty || codings.any (fun coding => !isToken coding) then
     false
   else
     let chunkedCount := codings.filter (· == "chunked") |>.size
@@ -108,9 +108,9 @@ def TransferEncoding.Validate (codings : Array String) : Bool :=
     -- the sender MUST either apply chunked as the final transfer coding
     let lastIsChunked := codings.back? == some "chunked"
 
-    bif chunkedCount >ᵇ 1 then
+    uif chunkedCount > 1 then
       false
-    else bif chunkedCount == 1 && !lastIsChunked then
+    else uif chunkedCount == 1 && !lastIsChunked then
       false
     else
       true
@@ -151,7 +151,7 @@ Parses a comma-separated list of transfer codings from a header value, validatin
 -/
 def parse (v : Value) : Option TransferEncoding := do
   let codings ← parseTokenList v
-  bif h : TransferEncoding.Validate codings then
+  uif h : TransferEncoding.Validate codings then
     some ⟨codings, h⟩
   else
     none
@@ -204,7 +204,7 @@ Parses a `Connection` header value into normalized tokens.
 -/
 def parse (v : Value) : Option Connection := do
   let tokens ← parseTokenList v
-  bif h : tokens.all isToken then
+  uif h : tokens.all isToken then
     some ⟨tokens, h⟩
   else
     none
@@ -288,7 +288,7 @@ Succeeds only if the value is exactly `100-continue`
 def parse (v : Value) : Option Expect :=
   let normalized := v.value.trimAscii.toString.toLower
 
-  bif normalized == "100-continue" then
+  uif normalized == "100-continue" then
     some ⟨⟩
   else
     none

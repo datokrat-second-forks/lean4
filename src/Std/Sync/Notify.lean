@@ -98,7 +98,7 @@ def notifyOne (x : Notify) : BaseIO Bool := do
       let st ← get
       let some (consumer, rest) := st.consumers.dequeue? | return false
       set { st with consumers := rest }
-      bif ← consumer.resolve () then
+      uif ← consumer.resolve () then
         return true
     return false
 

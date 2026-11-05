@@ -109,7 +109,7 @@ def cancel (x : CancellationToken) (reason : CancellationReason := .cancel) : Ba
   x.state.atomically do
     let mut st ← get
 
-    bif st.reason.isSome then
+    uif st.reason.isSome then
       return
 
     let mut remainingConsumers := st.consumers
@@ -147,7 +147,7 @@ def wait (x : CancellationToken) : IO (AsyncTask Unit) :=
   x.state.atomically do
     let st ← get
 
-    bif st.reason.isSome then
+    uif st.reason.isSome then
       return Task.pure (.ok ())
 
     let promise ← IO.Promise.new
@@ -163,7 +163,7 @@ Creates a selector that waits for cancellation.
 -/
 def selector (token : CancellationToken) : Selector Unit := {
   tryFn := do
-    bif ← token.isCancelled then
+    uif ← token.isCancelled then
       return some ()
     else
       return none
@@ -172,7 +172,7 @@ def selector (token : CancellationToken) : Selector Unit := {
     token.state.atomically do
       let st ← get
 
-      bif st.reason.isSome then
+      uif st.reason.isSome then
         discard <| waiter.race (return false) (fun promise => do
           promise.resolve (.ok ())
           return true)

@@ -308,15 +308,15 @@ Validates an incoming request head and selects the body framing mode.
 -/
 private def checkReceivingMessageHead (message : Message.Head .receiving) : Except H1.Error BodyMode := do
   -- URI Validation
-  bif !isValidRequestTargetForMethod message then
+  uif !isValidRequestTargetForMethod message then
     throw .badMessage
 
   -- Host validation:
   -- • HTTP/1.1: a Host header is REQUIRED (RFC 9112 §3.2).
   -- • HTTP/1.0: Host is optional (RFC 2616 §14.23), but if present it must
   --   be a single, well-formed value (no duplicates, correct authority form).
-  bif message.version == .v11 || message.headers.contains .host then
-    bif !hasSingleAcceptedHostHeader message then
+  uif message.version == .v11 || message.headers.contains .host then
+    uif !hasSingleAcceptedHostHeader message then
       throw .badMessage
 
   -- Gets the size of the message.
@@ -344,15 +344,15 @@ private def checkSendingMessageHead (message : Message.Head .sending) : Except H
 
   let parsedSize := message.getSize false
 
-  bif responseMustNotHaveBody message.status then
+  uif responseMustNotHaveBody message.status then
     match parsedSize with
     | some _ => pure (.fixed 0)
-    | none => bif framingInHeaders then throw .badMessage else pure (.fixed 0)
+    | none => uif framingInHeaders then throw .badMessage else pure (.fixed 0)
   else
     match parsedSize with
     | some (.fixed n) => pure (.fixed n)
     | some .chunked => pure .chunked
-    | none => bif framingInHeaders then throw .badMessage else pure .eof
+    | none => uif framingInHeaders then throw .badMessage else pure .eof
 
 /--
 Direction-dispatched message-head validation.
@@ -370,7 +370,7 @@ to an HTTP/1.0 client.
 -/
 @[inline]
 private def hasExpectContinue (message : Message.Head dir) : Bool :=
-  bif message.version != .v11 then
+  uif message.version != .v11 then
     false
   else
     match message.headers.getAll? Header.Name.expect with
@@ -418,7 +418,7 @@ private def mkPulledChunk? (machine : Machine dir)
     (incomplete : Bool)
     (extensions : Array (Chunk.ExtensionName × Option Chunk.ExtensionValue))
     (data : ByteSlice) : Option PulledChunk :=
-  bif drainBodyInternally machine then
+  uif drainBodyInternally machine then
     none
   else
     some {
@@ -562,7 +562,7 @@ private def parseWith (machine : Machine dir) (parser : Parser α) (limit : Opti
     let usedBytes := remaining - buffer.remainingBytes
 
     if let some limit := limit then
-      bif usedBytes >ᵇ limit then
+      uif usedBytes > limit then
         (machine.setFailure .badMessage, none)
       else
         ({ machine with reader := machine.reader.setInput buffer }, some result)
@@ -570,10 +570,10 @@ private def parseWith (machine : Machine dir) (parser : Parser α) (limit : Opti
       ({ machine with reader := machine.reader.setInput buffer }, some result)
   | .error it .eof =>
     let usedBytesUntilFailure := remaining - it.remainingBytes
-    bif machine.reader.noMoreInput then
+    uif machine.reader.noMoreInput then
       (machine.setFailure .connectionClosed, none)
     else if let some limit := limit then
-      bif usedBytesUntilFailure ≥ᵇ limit
+      uif usedBytesUntilFailure ≥ limit
         then (machine.setFailure .badMessage, none)
         else (machine.addEvent (.needMoreData expect), none)
     else
@@ -592,7 +592,7 @@ disabled, closes reader/writer and emits `.close` instead.
 -/
 private def resetForNextMessage (machine : Machine dir) : Machine dir :=
 
-  bif machine.keepAlive then
+  uif machine.keepAlive then
     { machine with
       reader := {
         state := match dir with | .receiving => .needStartLine | .sending => .pending,
@@ -661,9 +661,9 @@ reader/writer states, and requesting an application answer.
 -/
 private def advanceAfterHeaders (machine : Machine dir) (state : Reader.State dir) : Machine dir :=
   let waitingContinue := waitingContinueAfterHeaders machine
-  let nextState : Reader.State dir := bif waitingContinue then Reader.State.«continue» state else state
+  let nextState : Reader.State dir := uif waitingContinue then Reader.State.«continue» state else state
   let machine := machine.addEvent (.endHeaders machine.reader.messageHead)
-  let machine := bif waitingContinue then machine.addEvent .continue else machine
+  let machine := uif waitingContinue then machine.addEvent .continue else machine
 
   match dir, nextState, machine with
   | .receiving, nextState, machine => machine.setReaderState nextState |>.setWriterState .waitingHeaders |>.addEvent .needAnswer
@@ -677,7 +677,7 @@ framing mode to `.fixed 0` so the reader doesn't block waiting for body bytes.
 private def suppressIncomingBodyIfHead (machine : Machine dir) (mode : BodyMode) : BodyMode :=
   match dir with
   | .sending =>
-    bif machine.writer.messageHead.method == .head then .fixed 0 else mode
+    uif machine.writer.messageHead.method == .head then .fixed 0 else mode
   | .receiving => mode
 
 /--
@@ -695,7 +695,7 @@ private def processHeaders (machine : Machine dir) : Machine dir :=
   | .error err => machine.setFailure err
   | .ok mode =>
     let mode := suppressIncomingBodyIfHead machine mode
-    bif exceedsBodyLimitForMode machine mode then
+    uif exceedsBodyLimitForMode machine mode then
       machine.setFailure .entityTooLarge
     else
       let (machine, state) := readerStateForMode machine mode
@@ -730,10 +730,10 @@ private def writeHead (messageHead : Message.Head dir.swap) (machine : Machine d
     let identityOpt := machine.config.agentName
     match dir, identityOpt with
     | .receiving, some server =>
-      bif headers.contains Header.Name.server then headers
+      uif headers.contains Header.Name.server then headers
       else headers.insert Header.Name.server server
     | .sending, some userAgent =>
-      bif headers.contains Header.Name.userAgent then headers
+      uif headers.contains Header.Name.userAgent then headers
       else headers.insert Header.Name.userAgent userAgent
     | _, none => headers
 
@@ -743,9 +743,9 @@ private def writeHead (messageHead : Message.Head dir.swap) (machine : Machine d
   let headers := headers.erase Header.Name.connection
 
   let headers :=
-    bif !machine.keepAlive then
+    uif !machine.keepAlive then
       headers.insert Header.Name.connection (.mk "close")
-    else bif machine.reader.messageHead.version == .v10 then
+    else uif machine.reader.messageHead.version == .v10 then
       -- RFC 2616 §19.7.1: HTTP/1.0 keep-alive responses must echo Connection: keep-alive
       headers.insert Header.Name.connection (.mk "keep-alive")
     else
@@ -756,11 +756,11 @@ private def writeHead (messageHead : Message.Head dir.swap) (machine : Machine d
   let headers :=
     match dir, messageHead with
     | .receiving, messageHead =>
-      bif responseForbidsFramingHeaders messageHead.status || messageHead.status == .notModified then
+      uif responseForbidsFramingHeaders messageHead.status || messageHead.status == .notModified then
         headers
           |>.erase Header.Name.contentLength
           |>.erase Header.Name.transferEncoding
-      else bif machine.reader.messageHead.version == .v10 && size == .chunked then
+      else uif machine.reader.messageHead.version == .v10 && size == .chunked then
         -- RFC 7230 §3.3.1: connection-close framing for HTTP/1.0 — strip all framing
         -- headers so neither Content-Length nor Transfer-Encoding appears on the wire.
         headers
@@ -796,12 +796,12 @@ Feeds input bytes into the reader side of the machine.
 -/
 @[inline]
 def feed (machine : Machine dir) (data : ByteArray) : Machine dir :=
-  bif machine.isReaderClosed || machine.failed then
+  uif machine.isReaderClosed || machine.failed then
     machine
   else
     let reader := machine.reader.feed data
     let machine := { machine with reader, pullBodyStalled := false }
-    bif reader.remainingBytes >ᵇ maxBufferedInputBytes machine.config then
+    uif reader.remainingBytes > maxBufferedInputBytes machine.config then
       machine.setFailure .entityTooLarge
     else
       machine
@@ -851,7 +851,7 @@ header generation active. Used for responses that must not carry payload bytes.
 def suppressOutgoingBody (machine : Machine dir) (forceZero : Bool := false) : Machine dir :=
   machine.modifyWriter fun w =>
     let knownSize :=
-      bif forceZero then
+      uif forceZero then
         some (.fixed 0)
       else
         w.knownSize
@@ -862,7 +862,7 @@ Rejects user-provided framing headers when framing must come from machine state.
 -/
 @[inline]
 private def failOnFramingHeaders (machine : Machine dir) (framingInHeaders : Bool) : Machine dir :=
-  bif framingInHeaders then
+  uif framingInHeaders then
     failBadMessage machine
   else
     machine
@@ -875,7 +875,7 @@ private def reconcileOutgoingFraming (machine : Machine dir)
     (headerSize : Option Body.Length) (framingInHeaders : Bool) : Machine dir :=
   match machine.writer.knownSize, headerSize with
   | some explicit, some parsed =>
-    bif explicit == parsed then machine else failBadMessage machine
+    uif explicit == parsed then machine else failBadMessage machine
   | some _, none =>
     failOnFramingHeaders machine framingInHeaders
   | none, some parsed =>
@@ -893,7 +893,7 @@ private def maybeSuppressOutgoingBody (machine : Machine dir) (message : Message
     let suppressByStatus := responseMustNotHaveBody message.status
     let suppressByMethod := machine.reader.messageHead.method == .head
     let forceZero := responseForbidsFramingHeaders message.status
-    bif suppressByStatus || suppressByMethod then
+    uif suppressByStatus || suppressByMethod then
       machine.suppressOutgoingBody (forceZero := forceZero)
     else
       machine
@@ -918,7 +918,7 @@ an `Expect: 100-continue` decision separately.
 -/
 @[inline]
 def send (machine : Machine dir) (message : Message.Head dir.swap) : Machine dir :=
-  bif !machine.isWaitingMessage then
+  uif !machine.isWaitingMessage then
     machine
   else
     -- Informational (1xx) responses: write directly to the output buffer and stay in
@@ -928,7 +928,7 @@ def send (machine : Machine dir) (message : Message.Head dir.swap) : Machine dir
       match dir with
       | .receiving => message.status.isInformational
       | .sending => false
-    bif isInterim then
+    uif isInterim then
       -- RFC 9110 §15.2: 1xx responses MUST NOT carry a body, so framing headers
       -- are meaningless and must not be forwarded even if the handler set them.
       let message := Message.Head.setHeaders message
@@ -948,7 +948,7 @@ def send (machine : Machine dir) (message : Message.Head dir.swap) : Machine dir
     let machine := reconcileOutgoingFraming machine headerSize framingInHeaders
     let machine := maybeSuppressOutgoingBody machine message
 
-    bif machine.failed && !hadFailure then
+    uif machine.failed && !hadFailure then
       machine
     else
       match dir, machine with
@@ -966,7 +966,7 @@ def canContinue (machine : Machine dir) (status : Status) : Machine dir :=
   match dir, machine.reader.state with
   | .sending, _ => machine
   | .receiving, Reader.State.«continue» nextState =>
-    bif status == .«continue» then
+    uif status == .«continue» then
       let machine := machine.modifyWriter (fun writer => {
         writer with outputData := Encode.encode (v := .v11) writer.outputData ({ status := .«continue» } : Response.Head)
       })
@@ -989,7 +989,7 @@ response), then stops accepting further input. Otherwise, closes the writer dire
 stops accepting further input.
 -/
 def closeWithError (machine : Machine .receiving) (status : Status) : Machine .receiving :=
-  bif machine.isWaitingMessage then
+  uif machine.isWaitingMessage then
     machine.send { status, headers := .empty |>.insert .connection (.mk "close") }
       |>.userClosedBody
       |>.closeReader
@@ -1002,7 +1002,7 @@ Enqueues body chunks into the writer buffer for encoding and sending.
 -/
 @[inline]
 def sendData (machine : Machine dir) (data : Array Chunk) : Machine dir :=
-  bif data.isEmpty then
+  uif data.isEmpty then
     machine
   else
     machine.modifyWriter (fun writer =>
@@ -1052,23 +1052,23 @@ Depending on reader state and keep-alive, this either resets for next message
 or closes the writer/connection.
 -/
 private def processCompleteStep (machine : Machine dir) : Machine dir :=
-  bif machine.isReaderComplete then
-    bif machine.keepAlive then
+  uif machine.isReaderComplete then
+    uif machine.keepAlive then
       resetForNextMessage machine
     else
       machine.setWriterState .closed
       |>.addEvent .close
-  else bif machine.isReaderClosed then
+  else uif machine.isReaderClosed then
     machine.setWriterState .closed
     |>.addEvent .close
   -- The reader is paused waiting for a `canContinue` decision but the writer
   -- already sent a non-informational response (informational responses stay in
   -- `waitingHeaders` and never reach `.complete`). The body will never be received,
   -- so close the connection regardless of `keepAlive`.
-  else bif machine.isReaderAwaitingContinue then
+  else uif machine.isReaderAwaitingContinue then
     machine.setWriterState .closed
     |>.addEvent .close
-  else bif machine.keepAlive then
+  else uif machine.keepAlive then
     machine
   else
     machine.setWriterState .closed
@@ -1102,8 +1102,8 @@ otherwise treats queued bytes as protocol error.
 -/
 @[inline]
 private partial def processFixedZeroBody (machine : Machine dir) : Machine dir :=
-  bif machine.writer.userData.isEmpty then
-    bif machine.writer.userClosedBody then
+  uif machine.writer.userData.isEmpty then
+    uif machine.writer.userClosedBody then
       completeWriterMessage machine
     else
       machine
@@ -1119,11 +1119,11 @@ and updates writer state for any bytes still pending.
 private partial def processFixedBufferedBody (machine : Machine dir) (n : Nat) : Machine dir :=
   let writer := machine.writer
   let bufferedBytes := bufferedUserDataBytes writer
-  bif bufferedBytes >ᵇ n then
+  uif bufferedBytes > n then
     -- More bytes than declared fixed length. Close the connection instead of
     -- silently truncating and presenting a complete payload to the peer.
     closeOnBadMessage machine
-  else bif bufferedBytes =ᵇ n && !writer.userClosedBody then
+  else uif bufferedBytes = n ∧ !writer.userClosedBody then
     -- Do not flush the final fixed-length bytes until the producer closes.
     -- This lets us detect late overflow chunks as protocol violations.
     machine
@@ -1131,9 +1131,9 @@ private partial def processFixedBufferedBody (machine : Machine dir) (n : Nat) :
     let (writer, remaining) := Writer.writeFixedBody writer n
     let machine := { machine with writer }
     let writer := machine.writer
-    bif remaining =ᵇ 0 then
-      bif writer.userData.isEmpty then
-        bif writer.userClosedBody then
+    uif remaining = 0 then
+      uif writer.userData.isEmpty then
+        uif writer.userClosedBody then
           completeWriterMessage machine
         else
           machine.setWriterState (.writingBodyFixed 0)
@@ -1150,7 +1150,7 @@ reader and writer and terminates the connection.
 -/
 @[inline]
 private partial def processFixedIdleBody (machine : Machine dir) : Machine dir :=
-  bif machine.writer.userClosedBody then
+  uif machine.writer.userClosedBody then
     -- Producer finished without supplying all declared bytes.
     closeOnBadMessage machine
   else
@@ -1162,11 +1162,11 @@ zero/non-zero remaining-length handling.
 -/
 @[inline]
 private partial def processFixedBody (machine : Machine dir) (n : Nat) : Machine dir :=
-  bif machine.writer.omitBody then
+  uif machine.writer.omitBody then
     completeOmittedBody machine
-  else bif n =ᵇ 0 then
+  else uif n = 0 then
     processFixedZeroBody machine
-  else bif machine.writer.userData.size >ᵇ 0 then
+  else uif machine.writer.userData.size > 0 then
     processFixedBufferedBody machine n
   else
     processFixedIdleBody machine
@@ -1175,11 +1175,11 @@ private partial def processFixedBody (machine : Machine dir) (n : Nat) : Machine
 Processes chunked transfer-encoding output (HTTP/1.1).
 -/
 private partial def processChunkedBody (machine : Machine dir) : Machine dir :=
-  bif machine.writer.omitBody then
+  uif machine.writer.omitBody then
     completeOmittedBody machine
-  else bif machine.writer.userClosedBody then
+  else uif machine.writer.userClosedBody then
     machine.modifyWriter Writer.writeFinalChunk |> completeWriterMessage
-  else bif machine.writer.userData.size >ᵇ 0 then
+  else uif machine.writer.userData.size > 0 then
     machine.modifyWriter Writer.writeChunkedBody |> processWrite
   else
     machine
@@ -1188,11 +1188,11 @@ private partial def processChunkedBody (machine : Machine dir) : Machine dir :=
 Processes connection-close body output (HTTP/1.0 server, unknown body length).
 -/
 private partial def processClosingFrameBody (machine : Machine dir) : Machine dir :=
-  bif machine.writer.omitBody then
+  uif machine.writer.omitBody then
     completeOmittedBody machine
-  else bif machine.writer.userClosedBody then
+  else uif machine.writer.userClosedBody then
     machine.modifyWriter Writer.writeRawBody |> completeWriterMessage
-  else bif machine.writer.userData.size >ᵇ 0 then
+  else uif machine.writer.userData.size > 0 then
     machine.modifyWriter Writer.writeRawBody |> processWrite
   else
     machine
@@ -1209,20 +1209,20 @@ Depending on writer state, this may:
 partial def processWrite (machine : Machine dir) : Machine dir :=
   match machine.writer.state with
   | .pending =>
-    bif machine.reader.isClosed then machine.closeWriter else machine
+    uif machine.reader.isClosed then machine.closeWriter else machine
   | .waitingHeaders =>
     match dir with
     | .receiving =>
       -- Detect misuse: userClosedBody set without ever committing a response via `send`.
       -- This happens when the application calls `userClosedBody` after a 1xx interim send
       -- (which keeps `sentMessage = false`) instead of sending the final response.
-      bif !machine.writer.sentMessage && machine.writer.userClosedBody then
+      uif !machine.writer.sentMessage && machine.writer.userClosedBody then
         closeOnBadMessage machine
       else
         machine
     | .sending => machine.addEvent .needAnswer
   | .waitingForFlush =>
-    bif machine.shouldFlush then
+    uif machine.shouldFlush then
       machine.writeHead machine.writer.messageHead
       |> processWrite
     else
@@ -1261,7 +1261,7 @@ private def handleReaderFailed (machine : Machine dir) (error : H1.Error) : Mach
   let machine : Machine dir :=
     match dir with
     | .receiving =>
-      bif !machine.writer.sentMessage && !machine.writer.isClosed then
+      uif !machine.writer.sentMessage && !machine.writer.isClosed then
         machine
        |>.setWriterState .waitingHeaders
        |>.disableKeepAlive
@@ -1307,13 +1307,13 @@ private def emitBodyChunk (machine : Machine dir)
     (closeBody : Bool := false) :
     Machine dir × Option PulledChunk × Bool :=
   let bodySize := data.size
-  bif !fitsBodyLimit machine bodySize then
+  uif !fitsBodyLimit machine bodySize then
     bodyTooLarge machine
   else
     let machine := machine
       |>.addBodyBytes bodySize
       |>.setReaderState nextState
-    let machine := bif closeBody then machine.addEvent .closeBody else machine
+    let machine := uif closeBody then machine.addEvent .closeBody else machine
     (machine, mkPulledChunk? machine final incomplete extensions data, true)
 
 /--
@@ -1349,9 +1349,9 @@ private def parseChunkSizeBody (machine : Machine dir) :
 
   match result with
   | some (size, ext) =>
-    bif size >ᵇ machine.config.maxChunkSize then
+    uif size > machine.config.maxChunkSize then
       bodyTooLarge machine
-    else bif !fitsBodyLimit machine size then
+    else uif !fitsBodyLimit machine size then
       bodyTooLarge machine
     else
       (machine.setReaderState (.readBody (.chunkedBody ext size)), none, true)
@@ -1395,8 +1395,8 @@ either emits available bytes or requests more data.
 private def parseCloseDelimitedBody (machine : Machine dir) :
     Machine dir × Option PulledChunk × Bool :=
   let reader := machine.reader
-  bif reader.input.atEnd then
-    bif reader.noMoreInput then
+  uif reader.input.atEnd then
+    uif reader.noMoreInput then
       emitBodyChunk machine .complete true false #[] .empty (closeBody := true)
     else
       bodyNoProgress (machine.addEvent (.needMoreData none))
@@ -1467,12 +1467,12 @@ private partial def processSendingStartLine (machine : Machine .sending) : Machi
 
   match result with
   | some (status, version) =>
-    bif version == some .v11 then
+    uif version == some .v11 then
       machine
       |>.modifyReader (.setMessageHead { status, version := .v11, headers := .empty })
       |>.setReaderState (.needHeader 0)
       |> processRead
-    else bif version == some .v10 then
+    else uif version == some .v10 then
       -- HTTP/1.0 response: accept and disable keep-alive (shouldKeepAlive returns false
       -- for version ≠ .v11).
       machine
@@ -1494,11 +1494,11 @@ private partial def processNeedStartLine (machine : Machine dir) : Machine dir :
   let reader := machine.reader
 
   -- Closed connection, no more data
-  bif reader.noMoreInput && reader.input.atEnd then
+  uif reader.noMoreInput && reader.input.atEnd then
     machine.setReaderState .closed
 
   -- No more data
-  else bif reader.input.atEnd then
+  else uif reader.input.atEnd then
     machine.addEvent (.needMoreData none)
   else
     match dir, machine with
@@ -1516,9 +1516,9 @@ private partial def processParsedHeader (machine : Machine dir) (headerCount : N
   let reader := machine.reader
   let headerBytes := startRemaining - reader.input.remainingBytes
 
-  bif headerCount ≥ᵇ machine.config.maxHeaders then
+  uif headerCount ≥ machine.config.maxHeaders then
     machine.setFailure .tooManyHeaders
-  else bif reader.headerBytesRead + headerBytes >ᵇ machine.config.maxHeaderBytes then
+  else uif reader.headerBytesRead + headerBytes > machine.config.maxHeaderBytes then
     machine.setFailure .headersTooLarge
   else
     match typedHeader? name value with
@@ -1560,9 +1560,9 @@ private partial def processReadBodyState (machine : Machine dir) (bodyState : Re
   -- semantics so handlers can observe the body stream explicitly.
   let autoDrain := drainBodyInternally machine || (dir matches .sending && bodyState matches .fixed 0)
 
-  bif autoDrain then
+  uif autoDrain then
     let (machine, _pulledChunk, shouldContinue) := parseBody machine bodyState
-    bif shouldContinue then processRead machine else machine
+    uif shouldContinue then processRead machine else machine
   else
     machine
 
@@ -1579,7 +1579,7 @@ private partial def processReaderCompleteState (machine : Machine dir) : Machine
 
     -- RFC 9110 §15.2: 1xx responses are not final; they must not count against the
     -- maxMessages quota (messageCount is not incremented here).
-    bif machine.reader.messageHead.status.isInformational then
+    uif machine.reader.messageHead.status.isInformational then
       { machine with reader := {
         state := .needStartLine,
         input := reader.input,
@@ -1589,12 +1589,12 @@ private partial def processReaderCompleteState (machine : Machine dir) : Machine
         headerBytesRead := 0,
         noMoreInput := reader.noMoreInput
       }}
-    else bif (reader.noMoreInput && reader.input.atEnd) || !machine.keepAlive then
+    else uif (reader.noMoreInput && reader.input.atEnd) || !machine.keepAlive then
       machine.setReaderState .closed
     else
       machine
   | _, machine =>
-    bif (reader.noMoreInput && reader.input.atEnd) || !machine.keepAlive then
+    uif (reader.noMoreInput && reader.input.atEnd) || !machine.keepAlive then
       machine.setReaderState .closed
     else
       machine
@@ -1608,7 +1608,7 @@ body, completion, or failure handling).
 partial def processRead (machine : Machine dir) : Machine dir :=
   match machine.reader.state with
   | .pending =>
-    bif machine.isWriterClosed then
+    uif machine.isWriterClosed then
       machine.setReaderState .closed
     else
       machine
@@ -1652,7 +1652,7 @@ private partial def pullNextChunk (machine : Machine dir) : Machine dir × Optio
     | some _ =>
       (machine, pulledChunk)
     | none =>
-      bif shouldContinue then
+      uif shouldContinue then
         pullNextChunk machine
       else
         (machine, none)

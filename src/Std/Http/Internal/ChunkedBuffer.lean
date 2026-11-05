@@ -90,8 +90,8 @@ Turn the combined structure into a single contiguous ByteArray.
 -/
 @[inline]
 def toByteArray (cb : ChunkedBuffer) : ByteArray :=
-  bif h : 1 =ᵇ cb.data.size then
-    cb.data[0]'(Nat.le_of_eq (eq_of_decideEq_eq_true h))
+  uif h : 1 = cb.data.size then
+    cb.data[0]'(Nat.le_of_eq h)
   else
     cb.data.foldl (· ++ ·) (.emptyWithCapacity cb.size)
 

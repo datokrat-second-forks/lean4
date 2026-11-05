@@ -95,7 +95,7 @@ holding the underlying `BaseRecursiveMutex` in the same thread, does not block.
 -/
 def RecursiveMutex.tryAtomically [Monad m] [MonadLiftT BaseIO m] [MonadFinally m]
     (mutex : RecursiveMutex α) (k : AtomicT α m β) : m (Option β) := do
-  bif ← mutex.mutex.tryLock then
+  uif ← mutex.mutex.tryLock then
     try
       some <$> k mutex.ref
     finally

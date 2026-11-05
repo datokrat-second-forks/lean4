@@ -31,7 +31,7 @@ The keep-alive delay in seconds, which has to fit in a `UInt32`.
 -/
 private def keepAliveDelay (delay : Std.Time.Second.Offset) : IO UInt32 := do
   let seconds := delay.val.toNat
-  bif seconds <ᵇ UInt32.size then
+  uif seconds < UInt32.size then
     return seconds.toUInt32
   throw <| IO.userError s!"keep-alive delay of {seconds} s is too large"
 
@@ -198,7 +198,7 @@ def recvSelector (s : TCP.Socket.Client) (size : UInt64) : Selector (Option Byte
     tryFn := do
       let readableWaiter ← s.native.waitReadable
 
-      bif ← readableWaiter.isResolved then
+      uif ← readableWaiter.isResolved then
         let res ← s.recv? size
         return some res
       else
