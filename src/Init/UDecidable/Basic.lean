@@ -98,7 +98,8 @@ abbrev UDecidableLT (α : Type u) [LT α] := UDecidableRel (LT.lt : α → α �
 
 namespace UDecidable
 
-@[inline] private unsafe def decideImpl (p : Prop) [i : UDecidable p] : Bool := unsafeCast i
+/-- The implementation of `decide`: an instance is represented by its `Bool`. -/
+@[inline] unsafe def decideImpl (p : Prop) [i : UDecidable p] : Bool := unsafeCast i
 
 /--
 The `Bool` that is `true` exactly if `p` holds.
@@ -106,7 +107,7 @@ The `Bool` that is `true` exactly if `p` holds.
 This function is defined classically and does not reduce. Compiled code returns the `Bool` that was
 passed to `UDecidable.mk` when creating the instance.
 -/
-@[irreducible, cbv_opaque, implemented_by decideImpl] def decide (p : Prop) [i : UDecidable p] : Bool :=
+@[irreducible, cbv_opaque, implemented_by (early := true) decideImpl] def decide (p : Prop) [i : UDecidable p] : Bool :=
   (Classical.choice (i.exists_reflects.elim fun b h => ⟨⟨b, h⟩⟩) :
     {b : Bool // b = true ↔ p}).val
 
@@ -153,11 +154,12 @@ theorem of_decide_eq_false {p : Prop} [UDecidable p] (h : decide p = false) : ¬
 instance instCoeDepBool (p : Prop) [UDecidable p] : CoeDep Prop p Bool where
   coe := decide p
 
-@[inline, instance_reducible] private unsafe def mkImpl (b : Bool) (_ : b = true ↔ p) : UDecidable p :=
+/-- The implementation of `mk`: an instance is represented by its `Bool`. -/
+@[inline, instance_reducible] unsafe def mkImpl (b : Bool) (_ : b = true ↔ p) : UDecidable p :=
   unsafeCast b
 
 /-- Proves that `p` is decidable by providing a `Bool` that is `true` exactly if `p` holds. -/
-@[irreducible, cbv_opaque, implemented_by mkImpl] def mk (b : Bool) (h : b = true ↔ p) : UDecidable p :=
+@[irreducible, cbv_opaque, implemented_by (early := true) mkImpl] def mk (b : Bool) (h : b = true ↔ p) : UDecidable p :=
   ⟨b, h⟩
 
 theorem decide_mk (b : Bool) (h : b = true ↔ p) : @decide p (mk b h) = b := by
