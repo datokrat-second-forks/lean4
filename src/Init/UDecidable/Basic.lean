@@ -200,10 +200,6 @@ embeds proofs about the old condition, unlike a cast of the old instance.
   ⟨(Classical.em p).elim (fun h => ⟨true, iff_of_true rfl h⟩)
     (fun h => ⟨false, iff_of_false Bool.noConfusion h⟩)⟩
 
-/-- `UDecidable.ite c t e` is `t` if `c` holds and `e` otherwise. -/
-@[expose, macro_inline] def ite {α : Sort u} (c : Prop) [UDecidable c] (t e : α) : α :=
-  cond (decide c) t e
-
 /--
 `UDecidable.dite c t e` is `t h` if `c` holds, with `h : c`, and `e h` otherwise, with `h : ¬c`.
 -/
@@ -211,6 +207,15 @@ embeds proofs about the old condition, unlike a cast of the old instance.
     α :=
   Bool.dcond (decide c) (fun h => t ((decide_spec c).mp h))
     (fun h => e fun hc => nomatch h.symm.trans ((decide_spec c).mpr hc))
+
+/--
+`UDecidable.ite c t e` is `t` if `c` holds and `e` otherwise.
+
+It is defined via `dite` so that `uif c then t else e = uif h : c then t else e` holds by `rfl`, which
+well-founded recursion relies on to supply the condition to termination proofs.
+-/
+@[expose, macro_inline] def ite {α : Sort u} (c : Prop) [UDecidable c] (t e : α) : α :=
+  dite c (fun _ => t) (fun _ => e)
 
 /-! `uif c then t else e` and `uif h : c then t else e` are the notations for `ite` and `dite`. -/
 
@@ -251,14 +256,6 @@ Constructs a `Min` instance from a decidable `≤` operation.
 def _root_.minOfLe [LE α] [UDecidableLE α] : Min α where
   min x y := uif x ≤ y then x else y
 
-theorem ite_eq_left {c : Prop} [UDecidable c] (hc : c) {α : Sort u} {t e : α} :
-    (uif c then t else e) = t :=
-  (congrArg (fun b => cond b t e) (decide_eq_true hc)).trans rfl
-
-theorem ite_eq_right {c : Prop} [UDecidable c] (hnc : ¬c) {α : Sort u} {t e : α} :
-    (uif c then t else e) = e :=
-  (congrArg (fun b => cond b t e) (decide_eq_false hnc)).trans rfl
-
 private theorem dcond_eq_left {α : Sort u} {b : Bool} (h : b = true) {t : b = true → α}
     {e : b = false → α} : Bool.dcond b t e = t h := by
   cases b with
@@ -278,6 +275,28 @@ theorem dite_eq_left {c : Prop} [UDecidable c] (hc : c) {α : Sort u} {t : c →
 theorem dite_eq_right {c : Prop} [UDecidable c] (hnc : ¬c) {α : Sort u} {t : c → α}
     {e : ¬c → α} : dite c t e = e hnc :=
   dcond_eq_right (decide_eq_false hnc)
+
+theorem ite_eq_left {c : Prop} [UDecidable c] (hc : c) {α : Sort u} {t e : α} :
+    (uif c then t else e) = t :=
+  dite_eq_left hc
+
+theorem ite_eq_right {c : Prop} [UDecidable c] (hnc : ¬c) {α : Sort u} {t e : α} :
+    (uif c then t else e) = e :=
+  dite_eq_right hnc
+
+/--
+The implementation of `ite` in compiled code. The compiler optimizes `cond` better than the
+`Bool.dcond` that `ite` unfolds to (with `Bool.dcond`, the branches of an inlined `uif` on a `Bool`
+are not merged into the condition).
+-/
+@[expose, macro_inline] def iteImpl {α : Sort u} (c : Prop) [UDecidable c] (t e : α) : α :=
+  cond (decide c) t e
+
+@[csimp] theorem ite_csimp : @ite = @iteImpl :=
+  funext fun _ => funext fun c => funext fun _ => funext fun t => funext fun e =>
+    match em c with
+    | .inl hc => (ite_eq_left hc).trans (by rw [iteImpl, decide_eq_true hc]; rfl)
+    | .inr hc => (ite_eq_right hc).trans (by rw [iteImpl, decide_eq_false hc]; rfl)
 
 /-! `simp`'s `uif` simprocs use these, so they must be available wherever `uif` is. -/
 

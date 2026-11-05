@@ -59,12 +59,10 @@ macro "declare_int_theorems" typeName:ident _bits:term:arg : command => do
 
   protected theorem min_def {a b : $typeName} : min a b = uif a ≤ b then a else b := by
     show cond (a ≤ᵇ b) a b = _
-    rw [decideLE_eq_udecide]
-    rfl
+    rw [decideLE_eq_udecide, Bool.cond_udecide]
   protected theorem max_def {a b : $typeName} : max a b = uif a ≤ b then b else a := by
     show cond (a ≤ᵇ b) b a = _
-    rw [decideLE_eq_udecide]
-    rfl
+    rw [decideLE_eq_udecide, Bool.cond_udecide]
 
   open $typeName (min_def le_iff_toBitVec_sle)
   @[simp] protected theorem toBitVec_min {a b : $typeName} : (min a b).toBitVec = uif a.toBitVec.sle b.toBitVec then a.toBitVec else b.toBitVec := by

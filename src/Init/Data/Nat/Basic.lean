@@ -881,8 +881,7 @@ protected abbrev min (n m : Nat) := min n m
 
 @[grind =, lia =] protected theorem min_def {n m : Nat} : min n m = uif n ≤ m then n else m := by
   show cond (n ≤ᵇ m) n m = _
-  rw [decideLE_eq_udecide]
-  rfl
+  rw [decideLE_eq_udecide, Bool.cond_udecide]
 
 instance : Max Nat where
   max n m := bif n ≤ᵇ m then m else n
@@ -902,8 +901,7 @@ protected abbrev max (n m : Nat) := max n m
 
 @[grind =, lia =] protected theorem max_def {n m : Nat} : max n m = uif n ≤ m then m else n := by
   show cond (n ≤ᵇ m) m n = _
-  rw [decideLE_eq_udecide]
-  rfl
+  rw [decideLE_eq_udecide, Bool.cond_udecide]
 
 
 /-! # Auxiliary theorems for well-founded recursion -/

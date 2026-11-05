@@ -57,10 +57,8 @@ inside `uif c then t else e` with the condition.
 -/
 @[wf_preprocess] theorem ite_eq_dite {α : Sort u} {c : Prop} [UDecidable c] {t e : α} :
     (uif c then t else e) =
-      dite c (fun h => binderNameHint h () t) (fun h => binderNameHint h () e) := by
-  cases em c with
-  | inl hc => rw [ite_eq_left hc, dite_eq_left hc]; rfl
-  | inr hc => rw [ite_eq_right hc, dite_eq_right hc]; rfl
+      dite c (fun h => binderNameHint h () t) (fun h => binderNameHint h () e) :=
+  rfl
 
 /-- `uif` agrees with `if` for any pair of instances. -/
 theorem ite_eq_ite {α : Sort u} {c : Prop} [UDecidable c] [Decidable c] {t e : α} :

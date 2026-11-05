@@ -391,13 +391,11 @@ protected theorem le_iff_lt_add_one {a b : Int} : a ≤ b ↔ a < b + 1 := by
 
 @[grind =, lia =] protected theorem min_def (n m : Int) : min n m = uif n ≤ m then n else m := by
   show cond (n ≤ᵇ m) n m = _
-  rw [decideLE_eq_udecide]
-  rfl
+  rw [decideLE_eq_udecide, Bool.cond_udecide]
 
 @[grind =, lia =] protected theorem max_def (n m : Int) : max n m = uif n ≤ m then m else n := by
   show cond (n ≤ᵇ m) m n = _
-  rw [decideLE_eq_udecide]
-  rfl
+  rw [decideLE_eq_udecide, Bool.cond_udecide]
 
 end Int
 namespace Lean.Meta.Grind.Lia

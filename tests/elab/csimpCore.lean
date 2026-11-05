@@ -50,6 +50,7 @@ info: (Acc.rec, Acc.recC)
 (Nat.repeat, Nat.repeatTR)
 (String.utf8EncodeChar, String.utf8EncodeCharFast)
 (Thunk.fn, Thunk.fnImpl)
+(UDecidable.ite, UDecidable.iteImpl)
 (Vector.pmap, Vector.pmapImpl)
 (String.Slice.Pos.next, String.Slice.Pos.nextFast)
 -/

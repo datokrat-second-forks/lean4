@@ -1128,13 +1128,11 @@ theorem ofScientific_def_eq_if {m : Nat} {s : Bool} {e : Nat} :
 
 @[grind =] protected theorem max_def {n m : Rat} : max n m = uif n ≤ m then m else n := by
   show cond (n ≤ᵇ m) m n = _
-  rw [decideLE_eq_udecide]
-  rfl
+  rw [decideLE_eq_udecide, Bool.cond_udecide]
 
 @[grind =] protected theorem min_def {n m : Rat} : min n m = uif n ≤ m then n else m := by
   show cond (n ≤ᵇ m) n m = _
-  rw [decideLE_eq_udecide]
-  rfl
+  rw [decideLE_eq_udecide, Bool.cond_udecide]
 
 
 /-!
