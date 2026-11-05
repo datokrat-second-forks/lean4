@@ -27,7 +27,7 @@ open Lean
 #guard_msgs in #synth UDecidable ("a".startPos = "a".endPos)
 /-- info: Compiler.LCNF.Phase.instUDecidableLt -/
 #guard_msgs in #synth UDecidable (Compiler.LCNF.Phase.base < .mono)
-/-- info: Compiler.LCNF.Phase.base.instUDecidableEq Compiler.LCNF.Phase.mono -/
+/-- info: Compiler.LCNF.instUDecidableEqPhase Compiler.LCNF.Phase.base Compiler.LCNF.Phase.mono -/
 #guard_msgs in #synth UDecidable (Compiler.LCNF.Phase.base = .mono)
 
 structure P where

@@ -22,17 +22,7 @@ inductive Phase where
   /-- In this phase polymorphism has been eliminated. -/
   | mono
   | impure
-  deriving Inhabited, DecidableEq
-
-/-- The implementation of `Phase.instUDecidableEq` in compiled code and `cbv`. -/
-@[inline, instance_reducible] def Phase.instUDecidableEqImpl (a b : Phase) : UDecidable (a = b) :=
-  UDecidable.ofDecidableImpl _
-
-noncomputable instance Phase.instUDecidableEq (a b : Phase) : UDecidable (a = b) := by
-  repeat intro
-  exact UDecidable.classical _
-
-@[csimp] theorem Phase.instUDecidableEq_csimp : @Phase.instUDecidableEq = @Phase.instUDecidableEqImpl := rfl
+  deriving Inhabited, DecidableEq, UDecidableEq
 
 @[expose, reducible] def Phase.toPurity : Phase → Purity
   | .base | .mono => .pure
