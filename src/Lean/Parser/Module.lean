@@ -52,7 +52,7 @@ private partial def mkErrorMessage (c : InputContext) (pos : String.Pos.Raw) (st
     -- if there is an unexpected token, include preceding whitespace as well as the expected token could
     -- be inserted at any of these places to fix the error; see tests/lean/1971.lean
     if let some trailing := lastTrailing stk then
-      bif trailing.stopPos == pos then
+      uif trailing.stopPos == pos then
         pos := trailing.startPos
   { fileName := c.fileName
     pos := c.fileMap.toPosition pos
@@ -77,7 +77,7 @@ def parseHeader (inputCtx : InputContext) : IO (TSyntax ``Module.header × Modul
   let p   := andthenFn whitespace Module.header.fn
   let tokens := Module.updateTokens (getTokenTable dummyEnv)
   let s   := p.run inputCtx { env := dummyEnv, options := {} } tokens (mkParserState inputCtx.inputString)
-  let stx := bif s.stxStack.isEmpty then .missing else s.stxStack.back
+  let stx := uif s.stxStack.isEmpty then .missing else s.stxStack.back
   let mut messages : MessageLog := {}
   for (pos, stk, err) in s.allErrors do
     messages := messages.add <| mkErrorMessage inputCtx pos stk err
@@ -94,7 +94,7 @@ def parseHeader (inputCtx : InputContext) : IO (TSyntax ``Module.header × Modul
     for stx in importsStx do
       if let `(Module.import| $[public%$pubTk?]? $[meta%$metaTk?]? import $[all%$allTk?]? $mod) := stx then
         let mod := mod.getId
-        bif moduleTk?.isNone then
+        uif moduleTk?.isNone then
           if let some tk := pubTk? then
             messages := messages.add <| mkError tk "cannot use `public import` without `module`"
           if let some tk := metaTk? then
@@ -103,7 +103,7 @@ def parseHeader (inputCtx : InputContext) : IO (TSyntax ``Module.header × Modul
             messages := messages.add <| mkError tk "cannot use `import all` without `module`"
         else
           if let some tk := allTk? then
-            bif pubTk?.isSome then
+            uif pubTk?.isSome then
               messages := messages.add <| mkError tk s!"cannot use `all` with `public import`; \
                 consider using separate `public import {mod}` and `import all {mod}` directives \
                 in order to import public data into the public scope and private data into the \
@@ -138,7 +138,7 @@ partial def parseCommand (inputCtx : InputContext) (pmctx : ParserModuleContext)
   let mut messages := messages
   let mut stx := Syntax.missing  -- will always be assigned below
   repeat
-    bif inputCtx.atEnd pos then
+    uif inputCtx.atEnd pos then
       stx := mkEOI inputCtx pos
       break
     let pos' := pos
@@ -148,7 +148,7 @@ partial def parseCommand (inputCtx : InputContext) (pmctx : ParserModuleContext)
     for (rpos, rstk, recovered) in s.recoveredErrors do
       messages := messages.add <| mkErrorMessage inputCtx rpos rstk recovered
     pos := s.pos
-    bif recovering && !s.stxStack.isEmpty && s.stxStack.back.isAntiquot then
+    uif recovering && !s.stxStack.isEmpty && s.stxStack.back.isAntiquot then
       -- top-level antiquotation during recovery is most likely remnant from unfinished quotation, ignore
       continue
     match s.errorMsg with
@@ -158,7 +158,7 @@ partial def parseCommand (inputCtx : InputContext) (pmctx : ParserModuleContext)
       break
     | some errorMsg =>
       -- advance at least one token to prevent infinite loops
-      bif pos == pos' then
+      uif pos == pos' then
         pos := consumeInput inputCtx pmctx pos
       /- We ignore commands where `getPos?` is none. This happens only on commands that have a prefix comprised of optional elements.
           For example, unification hints start with `optional («scoped» <|> «local»)`.
@@ -167,12 +167,12 @@ partial def parseCommand (inputCtx : InputContext) (pmctx : ParserModuleContext)
       unless recovering && ignore do
         messages := messages.add <| mkErrorMessage inputCtx s.pos s.stxStack errorMsg
       recovering := true
-      bif ignore then
+      uif ignore then
         continue
       else
         stx := s.stxStack.back
         break
-  bif mps.hasLeading then
+  uif mps.hasLeading then
     -- File header was empty - set start-of-file leading whitespace on first token in `stx`
     (stx, _) := setStartOfFileLeading stx
   return (stx, { pos, recovering, hasLeading := false }, messages)
@@ -183,8 +183,8 @@ partial def testParseModuleAux (env : Environment) (inputCtx : InputContext) (s 
   let rec parse (state : ModuleParserState) (msgs : MessageLog) (stxs : Array Syntax) :=
     match parseCommand inputCtx { env := env, options := {} } state msgs with
     | (stx, state, msgs) =>
-      bif isTerminalCommand stx then
-        bif !msgs.hasUnreported then
+      uif isTerminalCommand stx then
+        uif !msgs.hasUnreported then
           pure (stxs.push stx)
         else do
           msgs.forM fun msg => msg.toString >>= IO.println

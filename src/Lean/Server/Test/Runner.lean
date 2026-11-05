@@ -284,7 +284,7 @@ def patchUri (s : String) : IO String := do
       |>.filterMap (fun | .matched startPos _ => some startPos | .rejected .. => none)
       |>.toArray.back?
   let deepestMatchPos := matchPositions.foldr (init := path.startPos) fun matchPos deepestMatchPos =>
-    bif matchPos >ᵇ deepestMatchPos then
+    uif matchPos > deepestMatchPos then
       matchPos
     else
       deepestMatchPos
@@ -358,7 +358,7 @@ def request (method : String) [ToJson α] (p : α) (β : Type) [FromJson β] : R
 
 def requestWithLoggedResponse (method : String) [ToJson α] (p : α)
     (β : Type) [FromJson β] [ToJson β] (logParam := true) : RunnerM β := do
-  bif logParam then
+  uif logParam then
     printOutputLn (toJson p)
   let r ← request method p β
   printOutputLn (toJson r)
@@ -369,7 +369,7 @@ def logResponse (method : String) [ToJson α] (p : α)
   discard <| requestWithLoggedResponse method p β logParam
 
 def rpcRequest (method : Name) [ToJson α] (p : α) (β : Type) [FromJson β] : RunnerM β := do
-  bif (← get).rpcSessionId.isNone then
+  uif (← get).rpcSessionId.isNone then
     let connectParams := RpcConnectParams.mk (← get).uri
     let r ← request "$/lean/rpc/connect" connectParams RpcConnected
     modify fun s => { s with
@@ -386,7 +386,7 @@ def rpcRequest (method : Name) [ToJson α] (p : α) (β : Type) [FromJson β] : 
 
 def rpcRequestWithLoggedResponse (method : Name) [ToJson α] (p : α)
     (β : Type) [FromJson β] [ToJson β] (logParam := true) (normalize : β → Client.NormalizeM β := pure) : RunnerM β := do
-  bif logParam then
+  uif logParam then
     printOutputLn (toJson p)
   let r ← rpcRequest method p β
   let r := normalize r |>.run {}
@@ -431,7 +431,7 @@ partial def expandTraces (msg : Client.MsgEmbed) : RunnerM Client.MsgEmbed := do
 
 def processEdit : RunnerM Unit := do
   let s ← get
-  bif ! s.synced then
+  uif ! s.synced then
     throw <| IO.userError s!"cannot use '{s.method}' without syncing first"
   let (delete, insert) ←
     match s.method with
@@ -503,14 +503,14 @@ where
     | Message.notification "textDocument/publishDiagnostics" (some param) =>
       match fromJson? (α := PublishDiagnosticsParams) (toJson param) with
       | Except.ok diagnosticParam =>
-        bif diagnosticParam.diagnostics.any (·.message == msg) then
+        uif diagnosticParam.diagnostics.any (·.message == msg) then
           return
         loop
       | Except.error inner =>
         throw <| IO.userError s!"Cannot decode publishDiagnostics parameters\n{inner}"
     | Message.notification "$/lean/fileProgress" (some param) =>
       if let .ok (p : LeanFileProgressParams) := fromJson? (toJson param) then
-        bif p.processing.any (·.kind == .fatalError) then
+        uif p.processing.any (·.kind == .fatalError) then
           throw <| IO.userError s!"waitForMessage: \
             server reported fatalError before message {repr msg} was emitted"
       loop
@@ -529,7 +529,7 @@ def processCodeAction : RunnerM Unit := do
   }
   let r ← requestWithLoggedResponse "textDocument/codeAction" params (Array CodeAction)
   for x in r do
-    bif x.data?.isNone then
+    uif x.data?.isNone then
       continue
     IO.eprintln s!"Resolution of {x.title}:"
     logResponse "codeAction/resolve" x (logParam := false)
@@ -543,7 +543,7 @@ def processInteractiveDiagnostics : RunnerM Unit := do
   printOutputLn (toJson params)
   let r ← rpcRequest `Lean.Widget.getInteractiveDiagnostics params (Array Client.InteractiveDiagnostic)
   let r := Client.normalizeInteractiveDiagnostics r
-  bif isExpandTraces then
+  uif isExpandTraces then
     let r : Array Client.InteractiveDiagnostic ← r.mapM fun diag => do
       return { diag with
         message := ← diag.message.mapM expandTraces
@@ -572,7 +572,7 @@ def processGoals : RunnerM Unit := do
   }
   let r ← rpcRequestWithLoggedResponse `Lean.Widget.getInteractiveGoals params Client.InteractiveGoals
     (normalize := Client.InteractiveGoals.normalize)
-  bif withPopups then
+  uif withPopups then
     let interactiveTerms := r.goals.flatMap fun goal =>
       goal.hyps.map (fun h => (" ".intercalate h.names.toList, h.type)) |>.push ("goal", goal.type)
     for (termName, interactiveTerm) in interactiveTerms do
@@ -581,7 +581,7 @@ def processGoals : RunnerM Unit := do
         IO.eprintln s!"Popup for {subtree.stripTags}:"
         logRpcResponse `Lean.Widget.InteractiveDiagnostics.infoToInteractive i.info (β := Client.InfoPopup)
           (normalize := fun p => pure p.normalize)
-  bif withGoToLoc then
+  uif withGoToLoc then
     let interactiveTerms := r.goals.flatMap fun goal =>
       goal.hyps.map (fun h => (" ".intercalate h.names.toList, h.type)) |>.push ("goal", goal.type)
     for (termName, interactiveTerm) in interactiveTerms do
@@ -616,7 +616,7 @@ def processCompletion : RunnerM Unit := do
   }
   let r ← requestWithLoggedResponse "textDocument/completion" p CompletionList
   for i in r.items do
-    bif i.data?.isNone then
+    uif i.data?.isNone then
       continue
     IO.eprintln s!"Resolution of {i.label}:"
     logResponse "completionItem/resolve" i (logParam := false)
@@ -683,8 +683,8 @@ def processDirective (_ws directive : String) (directiveTargetLineNo : Nat)
   -- TODO: correctly compute in presence of Unicode
   let pos : Lsp.Position := { line := directiveTargetLineNo, character := directiveTargetColumn }
   let params :=
-    bif h : colon =ᵇ directive.endPos then "{}"
-    else directive.sliceFrom (colon.next (ne_of_decideEq_eq_false h)) |>.trimAscii.copy
+    uif h : colon = directive.endPos then "{}"
+    else directive.sliceFrom (colon.next h) |>.trimAscii.copy
   modify fun s => { s with pos, method, params }
   match method with
   -- `delete: "foo"` deletes the given string's number of characters at the given position.
@@ -726,7 +726,7 @@ def processLine (line : String) : RunnerM Unit := do
       skipLineWithoutDirective
       return
   let directiveTargetColumn :=
-    bif directive.front == '⬑' then ws.rawEndPos.byteIdx else (ws.rawEndPos + "--").byteIdx
+    uif directive.front == '⬑' then ws.rawEndPos.byteIdx else (ws.rawEndPos + "--").byteIdx
   processDirective ws directive directiveTargetLineNo (directiveTargetColumn := directiveTargetColumn)
   skipLineWithDirective
 
@@ -735,11 +735,11 @@ partial def main (args : List String) : IO Unit := do
   let args := args.toArray
   let isProject := args[0]?.any (· == "-p")
   let (ipcCmd, ipcArgs) :=
-    bif isProject then
+    uif isProject then
       ("lake", #["serve", "--", "-DstderrAsMessages=false", "-Dexperimental.module=true"])
     else
       ("lean", #["--server", "-DstderrAsMessages=false", "-Dexperimental.module=true"])
-  let path := bif args.size == 1 then args[0]! else args[1]!
+  let path := uif args.size == 1 then args[0]! else args[1]!
   let uri := s!"file:///{path}"
   -- We want `dbg_trace` tactics to write directly to stderr instead of being caught in reuse
   Ipc.runWith ipcCmd ipcArgs do

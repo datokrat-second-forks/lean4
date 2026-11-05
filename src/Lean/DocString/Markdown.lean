@@ -62,7 +62,7 @@ accumulated footnotes after the main body.
 public def MarkdownM.run' (act : MarkdownM (Array String)) : CoreM String := do
   let (lines, st) ← act.run {}
   let main := "\n".intercalate lines.toList
-  bif st.footnotes.isEmpty then
+  uif st.footnotes.isEmpty then
     return main
   else
     let foots := st.footnotes.toList.map fun (n, t) => s!"[^{n}]:{t}"
@@ -82,7 +82,7 @@ whitespace (which denotes a hard line break).
 -/
 public def prefixLines (p : String) (lines : Array String) : Array String :=
   let pTrim := trimEndSpaces p
-  lines.map fun l => bif l.isEmpty then pTrim else p ++ l
+  lines.map fun l => uif l.isEmpty then pTrim else p ++ l
 
 /--
 Applies one prefix to the first line and a different prefix to subsequent lines. Used for list items,
@@ -92,8 +92,8 @@ public def prefixListLines (head rest : String) (lines : Array String) : Array S
   let headTrim := trimEndSpaces head
   let restTrim := trimEndSpaces rest
   lines.mapIdx fun i l =>
-    let (p, pTrim) := bif i =ᵇ 0 then (head, headTrim) else (rest, restTrim)
-    bif l.isEmpty then pTrim else p ++ l
+    let (p, pTrim) := uif i = 0 then (head, headTrim) else (rest, restTrim)
+    uif l.isEmpty then pTrim else p ++ l
 
 /--
 Concatenates an array of "block" line arrays into one line array, with a single empty separator line
@@ -101,8 +101,8 @@ between adjacent non-empty blocks. Empty input blocks are skipped.
 -/
 public def joinBlocks (blocks : Array (Array String)) : Array String :=
   blocks.foldl (init := #[]) fun acc b =>
-    bif b.isEmpty then acc
-    else bif acc.isEmpty then b
+    uif b.isEmpty then acc
+    else uif acc.isEmpty then b
     else acc.push "" ++ b
 
 /--
@@ -112,7 +112,7 @@ two code spans consecutively, so the zero-width space disambiguates them without
 whitespace.
 -/
 def glueInlineBoundary (l r : String) : String :=
-  bif l.endsWith "`" && r.startsWith "`" then l ++ "​" ++ r
+  uif l.endsWith "`" && r.startsWith "`" then l ++ "​" ++ r
   else l ++ r
 
 /--
@@ -122,13 +122,13 @@ piece is glued onto the first line of the next via `glueInlineBoundary` (so `.te
 -/
 public def joinInlines (parts : Array (Array String)) : Array String :=
   parts.foldl (init := #[]) fun acc next =>
-    bif h : next.size =ᵇ 0 then acc
-    else bif h' : acc.size =ᵇ 0 then next
+    uif h : next.size = 0 then acc
+    else uif h' : acc.size = 0 then next
     else
       let lastIdx := acc.size - 1
-      have : 0 < acc.size := Nat.ne_zero_iff_zero_lt.mp (ne_of_decideEq_eq_false h')
-      have : 0 < next.size := Nat.ne_zero_iff_zero_lt.mp (ne_of_decideEq_eq_false h)
-      have : lastIdx < acc.size := Nat.sub_one_lt (ne_of_decideEq_eq_false h')
+      have : 0 < acc.size := Nat.ne_zero_iff_zero_lt.mp h'
+      have : 0 < next.size := Nat.ne_zero_iff_zero_lt.mp h
+      have : lastIdx < acc.size := Nat.sub_one_lt h'
       let glued := glueInlineBoundary (acc[lastIdx]) next[0]
       acc.set lastIdx glued ++ next.drop 1
 
@@ -203,13 +203,12 @@ def escape (s : String) : String := Id.run do
   let mut iter := s.startPos
   let mut prev? : Option Char := none
   -- First, escape everything that could start a block, until that's definitely impossible.
-  while h : iter ≠ᵇ s.endPos do
-    have h := ne_of_decideNe_eq_true h
+  while h : iter ≠ s.endPos do
     let c := iter.get h
     let nextIter := iter.next h
     let next? : Option Char :=
-      bif h' : nextIter =ᵇ s.endPos then none else some (nextIter.get (ne_of_decideEq_eq_false h'))
-    bif markerPrefixSpecial prev? c next? then
+      uif h' : nextIter = s.endPos then none else some (nextIter.get h')
+    uif markerPrefixSpecial prev? c next? then
       s' := s'.push '\\'
     s' := s'.push c
     prev? := some c
@@ -217,13 +216,12 @@ def escape (s : String) : String := Id.run do
     unless c.isDigit || "> -+. \t".any c do
       break
   -- Now escape more conservatively. prev? is no longer used.
-  while h : iter ≠ᵇ s.endPos do
-    have h := ne_of_decideNe_eq_true h
+  while h : iter ≠ s.endPos do
     let c := iter.get h
     let nextIter := iter.next h
     let next? : Option Char :=
-      bif h' : nextIter =ᵇ s.endPos then none else some (nextIter.get (ne_of_decideEq_eq_false h'))
-    bif midLineSpecial c next? then
+      uif h' : nextIter = s.endPos then none else some (nextIter.get h')
+    uif midLineSpecial c next? then
       s' := s'.push '\\'
     s' := s'.push c
     iter := nextIter
@@ -236,11 +234,10 @@ def longestBacktickRun (str : String) : Nat := Id.run do
   let mut longest := 0
   let mut current := 0
   let mut iter := str.startPos
-  while h : iter ≠ᵇ str.endPos do
-    have h := ne_of_decideNe_eq_true h
+  while h : iter ≠ str.endPos do
     let c := iter.get h
     iter := iter.next h
-    bif c == '`' then
+    uif c == '`' then
       current := current + 1
     else
       longest := max longest current
@@ -256,7 +253,7 @@ def fenceFor (atLeast : Nat) (str : String) : String :=
 
 def quoteCode (str : String) : String :=
   let backticks := fenceFor 0 str
-  let str := bif str.startsWith "`" || str.endsWith "`" then " " ++ str ++ " " else str
+  let str := uif str.startsWith "`" || str.endsWith "`" then " " ++ str ++ " " else str
   backticks ++ str ++ backticks
 
 /--
@@ -275,7 +272,7 @@ def codeBlockLines (str : String) : Array String := Id.run do
   let fence := fenceFor 2 str
   let body := splitNewlines str
   -- Drop a trailing empty so the closing fence isn't preceded by a blank line.
-  let body := bif body.size >ᵇ 0 && body.back!.isEmpty then body.pop else body
+  let body := uif body.size > 0 ∧ body.back!.isEmpty then body.pop else body
   #[fence] ++ body ++ #[fence]
 
 /--
@@ -288,7 +285,7 @@ where
   go : List (Inline i) → String × Inline i
     | [] => ("", .empty)
     | .text s :: more =>
-      bif s.all Char.isWhitespace then
+      uif s.all Char.isWhitespace then
         let (pre, post) := go more
         (s ++ pre, post)
       else
@@ -307,11 +304,11 @@ start or end with whitespace, taking the flanking rules of Markdown into account
 partial def trimRight (inline : Inline i) : (Inline i × String) := go #[inline]
 where
   go (xs : Array (Inline i)) : Inline i × String :=
-    bif h : xs.size =ᵇ 0 then (.empty, "")
+    uif h : xs.size = 0 then (.empty, "")
     else
-      match xs.back (Nat.ne_zero_iff_zero_lt.mp (ne_of_decideEq_eq_false h)) with
+      match xs.back (Nat.ne_zero_iff_zero_lt.mp h) with
       | .text s =>
-        bif s.all Char.isWhitespace then
+        uif s.all Char.isWhitespace then
           let (pre, post) := go xs.pop
           (pre, post ++ s)
         else
@@ -347,27 +344,27 @@ partial def inlineMarkdown [MarkdownInline i] :
     let (pre, mid, post) := trim (.concat xs)
     let inner ← inlineMarkdown { ctx with inEmph := true } mid
     let mut pieces : Array (Array String) := #[]
-    bif !pre.isEmpty then pieces := pieces.push #[pre]
-    bif !ctx.inEmph then pieces := pieces.push #["*"]
+    uif !pre.isEmpty then pieces := pieces.push #[pre]
+    uif !ctx.inEmph then pieces := pieces.push #["*"]
     pieces := pieces.push inner
-    bif !ctx.inEmph then pieces := pieces.push #["*"]
-    bif !post.isEmpty then pieces := pieces.push #[post]
+    uif !ctx.inEmph then pieces := pieces.push #["*"]
+    uif !post.isEmpty then pieces := pieces.push #[post]
     return joinInlines pieces
   | ctx, .bold xs => do
     let (pre, mid, post) := trim (.concat xs)
     let inner ← inlineMarkdown { ctx with inBold := true } mid
     let mut pieces : Array (Array String) := #[]
-    bif !pre.isEmpty then pieces := pieces.push #[pre]
-    bif !ctx.inBold then pieces := pieces.push #["**"]
+    uif !pre.isEmpty then pieces := pieces.push #[pre]
+    uif !ctx.inBold then pieces := pieces.push #["**"]
     pieces := pieces.push inner
-    bif !ctx.inBold then pieces := pieces.push #["**"]
-    bif !post.isEmpty then pieces := pieces.push #[post]
+    uif !ctx.inBold then pieces := pieces.push #["**"]
+    uif !post.isEmpty then pieces := pieces.push #[post]
     return joinInlines pieces
   | ctx, .concat xs => do
     let parts ← xs.mapM (inlineMarkdown ctx)
     return joinInlines parts
   | ctx, .link content url => do
-    bif ctx.inLink then
+    uif ctx.inLink then
       let parts ← content.mapM (inlineMarkdown ctx)
       return joinInlines parts
     else
@@ -421,7 +418,7 @@ partial def blockMarkdown [MarkdownInline i] [MarkdownBlock i b] :
       -- separated from the term with a blank line so the term doesn't fuse into the
       -- first description paragraph.
       let body :=
-        bif item.desc.size ≤ᵇ 1 then termWithColon ++ joinBlocks desc
+        uif item.desc.size ≤ 1 then termWithColon ++ joinBlocks desc
         else joinBlocks (#[termWithColon] ++ desc)
       return prefixListLines "* " "  " body
     return joinBlocks rendered

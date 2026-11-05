@@ -43,7 +43,7 @@ def tacticCheckInstances : Linter where
       -- enclosing tactic-sequence node, which has the syntax of the whole
       -- `by` block and would otherwise be the warning location.
       tree.visitM' (postNode := fun ci info _ => do
-        bif (← warned.get) then return
+        uif (← warned.get) then return
         let .ofTacticInfo ti := info | return
         -- Check `goalsBefore` then `goalsAfter`.
         -- - `goalsBefore` catches an initially-bad goal at the first tactic.
@@ -87,7 +87,7 @@ def tacticCheckInstances : Linter where
                   guard <| getReducibilityStatusCore env n matches .semireducible
                   guard <| !Meta.isInstanceCore env n
                   return m!"{.ofConstName n}"
-              bif candidates.isEmpty then
+              uif candidates.isEmpty then
                 return none
               let remedy : MessageData := match kind with
                 | "initial" => "consider rephrasing the goal or marking"
@@ -110,7 +110,7 @@ def tacticCheckInstances : Linter where
         let ctxAfter  : ContextInfo := { ci with mctx := ti.mctxAfter }
         let failure : Option MessageData ← liftM do
           let m₁ ← ctxBefore.runMetaM {} (check "initial" ti.goalsBefore)
-          bif m₁.isSome then return m₁
+          uif m₁.isSome then return m₁
           ctxAfter.runMetaM {} (check "produced" ti.goalsAfter)
         if let some msg := failure then
           warned.set true

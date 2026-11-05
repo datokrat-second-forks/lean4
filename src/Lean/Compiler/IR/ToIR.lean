@@ -57,7 +57,7 @@ def addDecl (d : Decl) : M Unit :=
 def lowerLitValue (v : LCNF.LitValue) : LitVal × IRType :=
   match v with
   | .nat n =>
-    let type := bif n <ᵇ UInt32.size then .tagged else .tobject
+    let type := uif n < UInt32.size then .tagged else .tobject
     ⟨.num n, type⟩
   | .str s => ⟨.str s, .object⟩
   | .uint8 v => ⟨.num (UInt8.toNat v), .uint8⟩
@@ -196,7 +196,7 @@ def lowerDecl (d : LCNF.Decl .impure) : M (Option Decl) := do
     let maxVar := (← get).nextVarId - 1
     pure <| some <| .fdecl d.name params resultType body { maxJp , maxVar }
   | .extern externAttrData =>
-    bif externAttrData.entries.isEmpty then
+    uif externAttrData.entries.isEmpty then
       -- TODO: This matches the behavior of the old compiler, but we should
       -- find a better way to handle this.
       addDecl (mkDummyExternDecl d.name params resultType)

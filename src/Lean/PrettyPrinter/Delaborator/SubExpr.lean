@@ -58,7 +58,7 @@ Uses `xa` to compute the fold across the arguments of an application,
 where `xf` provides the initial value and is evaluated in the context of the head of the application.
 -/
 partial def withAppFnArgs (xf : m α) (xa : α → m α) : m α := do
-  bif (← getExpr).isApp then
+  uif (← getExpr).isApp then
     let acc ← withAppFn (withAppFnArgs xf xa)
     withAppArg (xa acc)
   else xf
@@ -156,7 +156,7 @@ def HoleIterator.toPos (iter : HoleIterator) : Pos :=
   iter.curr
 
 def HoleIterator.next (iter : HoleIterator) : HoleIterator :=
-  bif (iter.curr+1) == iter.top then
+  uif (iter.curr+1) == iter.top then
     ⟨2*iter.top, Pos.maxChildren*iter.top⟩
   else ⟨iter.curr+1, iter.top⟩
 

@@ -52,7 +52,7 @@ def getNamesFrom {m} [Monad m] [MonadEnv m] [MonadFileMap m] (pos : String.Pos.R
   let fm ← getFileMap
   let mut nms := #[]
   for (nm, rgs) in drs do
-    bif pos ≤ᵇ fm.ofPosition rgs.range.pos then
+    uif pos ≤ fm.ofPosition rgs.range.pos then
       let ofPos1 := fm.ofPosition rgs.selectionRange.pos
       let ofPos2 := fm.ofPosition rgs.selectionRange.endPos
       nms := nms.push (mkIdentFrom (.ofRange ⟨ofPos1, ofPos2⟩) nm)
@@ -74,18 +74,18 @@ def getAliasSyntax {m} [Monad m] [MonadResolveName m] (stx : Syntax) : m (Array 
 
 @[inherit_doc linter.extra.dupNamespace]
 def dupNamespace : Linter where run := withSetOptionIn fun stx ↦ do
-  bif getLinterValue linter.extra.dupNamespace (← getLinterOptions) then
+  uif getLinterValue linter.extra.dupNamespace (← getLinterOptions) then
     let mut aliases := #[]
     if let some exp := stx.find? (·.isOfKind `Lean.Parser.Command.export) then
       aliases ← getAliasSyntax exp
     for id in (← getNamesFrom (stx.getPos?.getD default)) ++ aliases do
       let declName := id.getId
-      bif declName.hasMacroScopes || isPrivateName declName then continue
+      uif declName.hasMacroScopes || isPrivateName declName then continue
       let nm := declName.components
       let duplicated :=
-        bif (← getBoolOption `linter.extra.dupNamespace.consecutiveOnly (defValue := true)) then
+        uif (← getBoolOption `linter.extra.dupNamespace.consecutiveOnly (defValue := true)) then
           -- Only check consecutive components
-          nm.zip (nm.tailD []) |>.filterMap fun (x, y) ↦ bif x == y then some x else none
+          nm.zip (nm.tailD []) |>.filterMap fun (x, y) ↦ uif x == y then some x else none
         else
           -- Collect distinct components which appear more than once.
           List.eraseDups <| nm.filter (fun comp ↦ nm.count comp > 1)

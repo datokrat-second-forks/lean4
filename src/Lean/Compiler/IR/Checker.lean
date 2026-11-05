@@ -29,12 +29,12 @@ def throwCheckerError {α : Type} (msg : String) : M α := do
   throwError "failed to compile definition, compiler IR check failed at `{.ofConstName declName}`. Error: {msg}"
 
 def markVar (x : VarId) : M Unit := do
-  bif (← get).foundVars.contains x.idx then
+  uif (← get).foundVars.contains x.idx then
     throwCheckerError s!"variable index {x.idx} has already been used"
   modify fun s => { s with foundVars := s.foundVars.insert x.idx }
 
 def markJP (j : JoinPointId) : M Unit := do
-  bif (← get).foundJPs.contains j.idx then
+  uif (← get).foundJPs.contains j.idx then
     throwCheckerError s!"join point index {j.idx} has already been used"
   modify fun s => { s with foundJPs := s.foundJPs.insert j.idx }
 
@@ -118,13 +118,13 @@ def checkExpr (ty : IRType) (e : Expr) : M Unit := do
   | .fap f ys =>
     checkFullApp f ys
   | .ctor c ys =>
-    bif c.cidx >ᵇ maxCtorTag && c.isRef then
+    uif c.cidx > maxCtorTag ∧ c.isRef then
       throwCheckerError s!"tag for constructor '{c.name}' is too big, this is a limitation of the current runtime"
-    bif c.size >ᵇ maxCtorNumObjs then
+    uif c.size > maxCtorNumObjs then
       throwCheckerError s!"constructor '{c.name}' has too many object fields"
-    bif c.ssize + c.usize * usizeSize >ᵇ maxCtorScalarsSize then
+    uif c.ssize + c.usize * usizeSize > maxCtorScalarsSize then
       throwCheckerError s!"constructor '{c.name}' has too many scalar fields"
-    bif c.isRef then
+    uif c.isRef then
       checkObjType ty
       checkArgs ys
   | .reset _ x =>
@@ -152,7 +152,7 @@ def checkExpr (ty : IRType) (e : Expr) : M Unit := do
     | .object | .tobject =>
       checkObjType ty
     | .struct _ tys | .union _ tys =>
-      bif h : i <ᵇ tys.size then
+      uif h : i < tys.size then
         checkEqTypes (tys[i]) ty
       else
         throwCheckerError "invalid proj index"

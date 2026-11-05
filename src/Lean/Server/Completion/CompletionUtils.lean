@@ -29,12 +29,11 @@ where
   -/
   goFastScalar (aSize bSize aPos bPos : USize)
       (ha : aSize = a.utf8ByteSize.toUSize) (hb : bSize = b.utf8ByteSize.toUSize) : Bool :=
-    bif haPos : aPos <ᵇ aSize then
-      have haPos := lt_of_decideLT_eq_true haPos
+    uif haPos : aPos < aSize then
       let aByte := String.Internal.ugetUTF8Byte a aPos
         (Std.lt_of_lt_of_le (USize.lt_iff_toNat_lt.1 haPos) (ha ▸ USize.toNat_ofNat_le))
       -- If `a` contains a non-ASCII byte we give up on the fast path
-      bif aByte &&& 0x80 != 0 then
+      uif aByte &&& 0x80 != 0 then
         go ⟨aPos.toNat⟩ ⟨bPos.toNat⟩
       else
         scan aByte.toAsciiLower aByte.toAsciiUpper aSize bSize aPos bPos ha hb
@@ -43,16 +42,15 @@ where
 
   scan (lower upper : UInt8) (aSize bSize aPos bPos : USize)
       (ha : aSize = a.utf8ByteSize.toUSize) (hb : bSize = b.utf8ByteSize.toUSize) : Bool :=
-    bif hbPos : bPos <ᵇ bSize then
-      have hbPos := lt_of_decideLT_eq_true hbPos
+    uif hbPos : bPos < bSize then
       let bByte := String.Internal.ugetUTF8Byte b bPos
         (Std.lt_of_lt_of_le (USize.lt_iff_toNat_lt.1 hbPos) (hb ▸ USize.toNat_ofNat_le))
       -- `lower` and `upper` are ASCII, so a non-ASCII byte can never match and it is fine to
       -- check for a match first
-      bif bByte == lower || bByte == upper then
+      uif bByte == lower || bByte == upper then
         goFastScalar aSize bSize (aPos + 1) (bPos + 1) ha hb
       -- If `b` contains a non-ASCII byte we give up on the fast path
-      else bif bByte &&& 0x80 != 0 then
+      else uif bByte &&& 0x80 != 0 then
         go ⟨aPos.toNat⟩ ⟨bPos.toNat⟩
       else
         scan lower upper aSize bSize aPos (bPos + 1) ha hb
@@ -60,17 +58,15 @@ where
       false
 
   go (aPos bPos : String.Pos.Raw) : Bool :=
-    bif ha : aPos.atEnd a then
+    uif ha : aPos.atEnd a then
       true
-    else bif hb : bPos.atEnd b then
+    else uif hb : bPos.atEnd b then
       false
     else
-      have ha := Bool.ne_true_of_eq_false ha
-      have hb := Bool.ne_true_of_eq_false hb
       let ac := aPos.get' a ha
       let bc := bPos.get' b hb
       let bPos := bPos.next' b hb
-      bif ac.toLower == bc.toLower then
+      uif ac.toLower == bc.toLower then
         let aPos := aPos.next' a ha
         go aPos bPos
       else
@@ -95,31 +91,31 @@ partial def minimizeGlobalIdentifierInContext (currNamespace : Name) (openDecls 
     let candidate? := match openDecl with
       | .simple ns except =>
         let candidate := shortenInOpenNamespace id ns
-        bif ! except.contains candidate then
+        uif ! except.contains candidate then
           some candidate
         else
           none
       | .explicit alias declName =>
-        bif declName == id then
+        uif declName == id then
           some alias
         else
           none
     if let some candidate := candidate? then
-      bif candidate.getNumParts <ᵇ minimized.getNumParts then
+      uif candidate.getNumParts < minimized.getNumParts then
         minimized := candidate
   return minimized
 where
   shortenInCurrentNamespace (id : Name) (currentNamespace : Name) : Name :=
-    bif currentNamespace matches .anonymous then
+    uif currentNamespace matches .anonymous then
       id
     else
       let maybeShortened := shortenInOpenNamespace id currentNamespace
-      bif maybeShortened != id then
+      uif maybeShortened != id then
         maybeShortened
       else
         shortenInCurrentNamespace id currentNamespace.getPrefix
   shortenInOpenNamespace (id : Name) (openNamespace : Name) : Name :=
-    bif openNamespace == id then
+    uif openNamespace == id then
       id
     else
       id.replacePrefix openNamespace .anonymous
@@ -134,7 +130,7 @@ where
   visit (type : Expr) : StateRefT (Array Name) MetaM Unit := do
     let .const typeName _ := type.getAppFn | return ()
     modify fun s => s.push typeName
-    bif isStructure (← getEnv) typeName then
+    uif isStructure (← getEnv) typeName then
       for parentName in (← getAllParentStructures typeName) do
         modify fun s => s.push parentName
     let some type ← unfoldDefinitionGuarded? type | return ()
@@ -151,7 +147,7 @@ where
   visit (type : Expr) : StateRefT (Array Name) MetaM Unit := do
     try
       let type ← try Meta.whnfCoreUnfoldingAnnotations type catch _ => pure type
-      bif type.isForall then
+      uif type.isForall then
         Meta.forallTelescope type fun _ type => visit type
       else
         let type ← instantiateMVars type

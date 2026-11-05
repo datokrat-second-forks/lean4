@@ -76,22 +76,20 @@ def getExternAttrData? (env : Environment) (n : Name) : Option ExternAttrData :=
   externAttr.getParam? env n
 
 private def parseOptNum (pattern : String.Slice) (it : pattern.Pos) (r : Nat) : pattern.Pos × Nat :=
-  bif h : it =ᵇ pattern.endPos then (it, r)
+  uif h : it = pattern.endPos then (it, r)
   else
-    have h := ne_of_decideEq_eq_false h
     let c := it.get h
-    bif '0' ≤ᵇ c && c ≤ᵇ '9'
+    uif '0' ≤ c ∧ c ≤ '9'
     then
       parseOptNum pattern (it.next h) (r*10 + (c.toNat - '0'.toNat))
     else (it, r)
 termination_by it
 
 def expandExternPatternAux (args : List String) (pattern : String) (it : pattern.Pos) (r : String) : String :=
-  bif h : it =ᵇ pattern.endPos then r
+  uif h : it = pattern.endPos then r
   else
-    have h := ne_of_decideEq_eq_false h
     let c := it.get h
-    bif c ≠ᵇ '#' then expandExternPatternAux args pattern (it.next h) (r.push c)
+    uif c ≠ '#' then expandExternPatternAux args pattern (it.next h) (r.push c)
     else
       let it₁      := it.next h
       let (it₂, j) := parseOptNum (pattern.sliceFrom it₁) (String.Slice.startPos _) 0

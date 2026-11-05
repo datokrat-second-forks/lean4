@@ -166,7 +166,7 @@ def SnapshotTask.get (t : SnapshotTask α) : α :=
 
 /-- Returns task result if already finished or else `none`. -/
 def SnapshotTask.get? (t : SnapshotTask α) : BaseIO (Option α) :=
-  return bif (← IO.hasFinished t.task) then some t.task.get else none
+  return uif (← IO.hasFinished t.task) then some t.task.get else none
 
 /--
 Arbitrary value paired with a syntax that should be inspected when considering the value for reuse.
@@ -245,7 +245,7 @@ def SnapshotTreeTransform.transformInfoTree? (trans : SnapshotTreeTransform) (t 
 /-- Composes two `SnapshotTreeTransform`s, applying `inner` first and then `outer`. -/
 def SnapshotTreeTransform.compose (outer inner : SnapshotTreeTransform) : SnapshotTreeTransform where
   addTrailing :=
-    bif inner.addTrailing.stopPos == outer.addTrailing.startPos then
+    uif inner.addTrailing.stopPos == outer.addTrailing.startPos then
       { inner.addTrailing with stopPos := outer.addTrailing.stopPos }
     else inner.addTrailing
 
@@ -254,7 +254,7 @@ abbrev ToSnapshotTreeM (α : Type) := ReaderT SnapshotTreeTransform Id α
 
 /-- Applies the current `SnapshotTreeTransform` to a `Snapshot`. -/
 def Snapshot.transform (s : Snapshot) : ToSnapshotTreeM Snapshot := do
-  bif (← read).isIdentity then
+  uif (← read).isIdentity then
     return s
   match s.infoTree?.bind ((← read).transformInfoTree? ·) with
   | some t => return { s with infoTree? := some t }
@@ -262,7 +262,7 @@ def Snapshot.transform (s : Snapshot) : ToSnapshotTreeM Snapshot := do
 
 /-- Applies the current `SnapshotTreeTransform` to a `SnapshotTree` and recursively to its children. -/
 partial def SnapshotTree.transform (t : SnapshotTree) : ToSnapshotTreeM SnapshotTree := do
-  bif (← read).isIdentity then
+  uif (← read).isIdentity then
     return t
   let element ← Snapshot.transform t.element
   let trans ← read
@@ -420,22 +420,22 @@ private def reportMessages (msgLog : MessageLog) (opts : Options)
         {msg with severity}
       else
         msg
-    let numErrors := numErrors + (bif msg.severity matches .error then 1 else 0)
+    let numErrors := numErrors + (uif msg.severity matches .error then 1 else 0)
     let maxErrorsReached := maxErrors.get opts != 0 && numErrors >ᵇ maxErrors.get opts
     let msg : Message :=
-      bif maxErrorsReached then { msg with
+      uif maxErrorsReached then { msg with
         data := s!"maximum number of errors ({maxErrors.get opts}; from option `maxErrors`) reached, exiting"
         severity := .error
       } else
         msg
     unless msg.isSilent do
-      bif json then
+      uif json then
         let j ← msg.toJson
         IO.println j.compress
       else
         let s ← msg.toString includeEndPos
         IO.print s
-    bif maxErrorsReached then
+    uif maxErrorsReached then
       IO.Process.exit 1
     return numErrors
 

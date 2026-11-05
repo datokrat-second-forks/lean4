@@ -176,22 +176,22 @@ def indexLinter : Linter
   where run := withSetOptionIn fun stx => do
     -- We intentionally do not use `getLinterValue` here, as we do *not* want to opt in to `linter.all`.
     unless (← getOptions).get linter.indexVariables.name false do return
-    bif (← get).messages.hasErrors then return
-    bif ! (← getInfoState).enabled then return
+    uif (← get).messages.hasErrors then return
+    uif ! (← getInfoState).enabled then return
     for t in ← getInfoTrees do
       for (idxStx, n) in numericalIndices t do
         if let .str _ n := n then
-          bif !allowedIndices.contains (stripBinderName n) then
+          uif !allowedIndices.contains (stripBinderName n) then
             Linter.logLint linter.indexVariables idxStx
               m!"Forbidden variable appearing as an index: use `i`, `j`, or `k`: {n}"
       for (idxStx, n) in numericalWidths t do
         if let .str _ n := n then
-          bif !allowedWidths.contains (stripBinderName n) then
+          uif !allowedWidths.contains (stripBinderName n) then
             Linter.logLint linter.indexVariables idxStx
               m!"Forbidden variable appearing as a width: use `n` or `m`: {n}"
       for (idxStx, n) in bitVecWidths t do
         if let .str _ n := n then
-          bif !allowedBitVecWidths.contains (stripBinderName n) then
+          uif !allowedBitVecWidths.contains (stripBinderName n) then
             Linter.logLint linter.indexVariables idxStx
               m!"Forbidden variable appearing as a BitVec width: use `w`: {n}"
 
@@ -209,12 +209,12 @@ def allowedVectorNames : List String := ["ws", "xs", "ys", "zs", "as", "bs", "cs
 /-- Find all binders appearing in the given info tree. -/
 def binders (t : InfoTree) (p : Expr → Bool := fun _ => true) : IO (List (Syntax × Name × Expr)) :=
   t.collectTermInfoM fun ctx ti => do
-    bif ti.isBinder then do
+    uif ti.isBinder then do
       -- Something is wrong here: sometimes `inferType` fails with an unknown fvar error,
       -- despite passing the local context here.
       -- We fail quietly by returning a `Unit` type.
       let ty ← ctx.runMetaM ti.lctx do instantiateMVars (← (Meta.inferType ti.expr) <|> pure (.const `Unit []))
-      bif p ty.cleanupAnnotations then
+      uif p ty.cleanupAnnotations then
         if let .fvar i := ti.expr then
           match ti.lctx.find? i with
           | some ldecl => return some (ti.stx, ldecl.userName, ty)
@@ -232,14 +232,14 @@ A linter which validates that all `List`/`Array`/`Vector` variables use allowed 
 def listVariablesLinter : Linter
   where run := withSetOptionIn fun stx => do
     unless (← getOptions).get linter.listVariables.name false do return
-    bif (← get).messages.hasErrors then return
-    bif ! (← getInfoState).enabled then return
+    uif (← get).messages.hasErrors then return
+    uif ! (← getInfoState).enabled then return
     for t in ← getInfoTrees do
       let binders ← binders t
       for (stx, n, ty) in binders.filter fun (_, _, ty) => ty.isAppOf `List do
         if let .str _ n := n then
         let n := stripBinderName n
-        bif !allowedListNames.contains n then
+        uif !allowedListNames.contains n then
           -- Allow `L` or `xss` for `List (List α)` or `List (Array α)`
           unless ((ty.getArg! 0).isAppOf `List || (ty.getArg! 0).isAppOf `Array) && (n == "L" || n == "xss") do
             Linter.logLint linter.listVariables stx
@@ -247,7 +247,7 @@ def listVariablesLinter : Linter
       for (stx, n, ty) in binders.filter fun (_, _, ty) => ty.isAppOf `Array do
         if let .str _ n := n then
         let n := stripBinderName n
-        bif !allowedArrayNames.contains n then
+        uif !allowedArrayNames.contains n then
           -- Allow `xss` for `Array (Array α)` or `Array (Vector α)`
           unless ((ty.getArg! 0).isAppOf `Array || (ty.getArg! 0).isAppOf `Vector) && n == "xss" do
             Linter.logLint linter.listVariables stx
@@ -255,7 +255,7 @@ def listVariablesLinter : Linter
       for (stx, n, ty) in binders.filter fun (_, _, ty) => ty.isAppOf `Vector do
         if let .str _ n := n then
         let n := stripBinderName n
-        bif !allowedVectorNames.contains n then
+        uif !allowedVectorNames.contains n then
           -- Allow `xss` for `Vector (Vector α)`
           unless (ty.getArg! 0).isAppOf `Vector && n == "xss" do
             Linter.logLint linter.listVariables stx

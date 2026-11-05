@@ -51,9 +51,9 @@ private def univParamsGrouped (e : Expr) (selfNames : NameSet) : Std.HashSet (Ar
       | .sort u =>
         modify (·.insert (CollectLevelParams.visitLevel u {}).params)
       | .const n us => do
-        bif selfNames.contains n then return
+        uif selfNames.contains n then return
         if let .str p s := n then
-          bif selfNames.contains p && s.startsWith "proof_" then return
+          uif selfNames.contains p && s.startsWith "proof_" then return
         modify (us.foldl (·.insert <| CollectLevelParams.visitLevel · {} |>.params))
       | _ => pure ()
     Prod.snd <$> go.run {}
@@ -67,21 +67,21 @@ private partial def badParams (l : Array (Array Name)) : Array Name :=
   let goodLevels := l.filterMap fun
     | #[u] => some u
     | _ => none
-  bif goodLevels.isEmpty then
-    l.flatten.foldl (init := #[]) fun acc x => bif acc.contains x then acc else acc.push x
+  uif goodLevels.isEmpty then
+    l.flatten.foldl (init := #[]) fun acc x => uif acc.contains x then acc else acc.push x
   else
     badParams <| l.map (·.filter (!goodLevels.contains ·))
 
 @[inherit_doc linter.checkUnivs]
 def checkUnivsLinter : Linter where run := withSetOptionIn fun _ => do
   unless getLinterValue linter.checkUnivs (← getLinterOptions) do return
-  bif (← get).messages.hasErrors then return
+  uif (← get).messages.hasErrors then return
   let env ← getEnv
   let mut seen : NameSet := {}
   for t in ← getInfoTrees do
     let decls := getNewDecls t
     for declName in decls do
-      bif seen.contains declName then continue
+      uif seen.contains declName then continue
       seen := seen.insert declName
       let some info := env.find? declName | continue
       -- For an inductive, take constructors into account as well

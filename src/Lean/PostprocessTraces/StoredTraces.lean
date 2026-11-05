@@ -162,7 +162,7 @@ private meta def resolveStoredTrace (id : Ident) : CommandElabM StoredTrace := d
   let some t := findStoredTrace? (← getEnv) declName
     | let available := allStoredTraces (← getEnv) |>.map (m!"`{privateToUserName ·.1}`")
       let hint :=
-        bif available.isEmpty then
+        uif available.isEmpty then
           m!"no traces have been stored in this file"
         else
           m!"stored traces: {MessageData.joinSep available ", "}"

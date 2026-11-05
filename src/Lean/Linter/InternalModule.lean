@@ -65,7 +65,7 @@ def isInternalDecl (declName : Name) : Bool :=
 
 @[inherit_doc linter.coreInternal.internalModule]
 def internalModuleLinter : Linter where run := withSetOptionIn fun _ => do
-  bif (← get).messages.hasErrors then return
+  uif (← get).messages.hasErrors then return
   unless getLinterValue linter.coreInternal.internalModule (← getLinterOptions) do return
   let env ← getEnv
   let mainModule := env.mainModule
@@ -74,10 +74,10 @@ def internalModuleLinter : Linter where run := withSetOptionIn fun _ => do
   let mut seen : NameSet := {}
   for t in ← getInfoTrees do
     for declName in getNewDecls t do
-      bif seen.contains declName then continue
+      uif seen.contains declName then continue
       seen := seen.insert declName
       unless env.contains declName do continue
-      bif isInternalDecl declName then continue
+      uif isInternalDecl declName then continue
       logLint linter.coreInternal.internalModule (← getRef)
         m!"`{.ofConstName declName}` is a non-internal declaration in the internal module \
           `{mainModule}`; declarations in internal modules should themselves be internal.\n\

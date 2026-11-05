@@ -56,14 +56,14 @@ def argKinds (fn : Expr) (n : Nat) : MetaM (Array ArgKind) := do
     forallBoundedTelescope fnType n fun xs _ =>
       xs.mapM fun x => do
         let decl ← x.fvarId!.getDecl
-        bif decl.binderInfo.isInstImplicit then
+        uif decl.binderInfo.isInstImplicit then
           return .instImplicit
         -- The sort of the parameter type is the sort of the argument's type. It decides whether the
         -- argument is a proof unless it depends on universe variables.
         try
           match ← whnfD (← inferType decl.type) with
           | .sort u =>
-            return bif u.isAlwaysZero then .proof else bif u.isNeverZero then .value else .unknown
+            return uif u.isAlwaysZero then .proof else uif u.isNeverZero then .value else .unknown
           | _ => return .unknown
         catch _ =>
           return .unknown
@@ -310,7 +310,7 @@ def combine (selector₁ selector₂ : Selector) : Selector := fun g c => do
     let key := (s.name, s.flag)
     dedupMap := dedupMap.alter key fun
     | none => some s
-    | some s' => bif s.score >ᵇ s'.score then some s else some s'
+    | some s' => uif s.score > s'.score then some s else some s'
 
   let deduped := dedupMap.valuesArray
   let sorted := deduped.qsort (fun s₁ s₂ => s₁.score > s₂.score)
@@ -326,7 +326,7 @@ Other callers (like "simp") still receive suggestions from these modules.
 def filterGrindAnnotated (selector : Selector) : Selector := fun g c => do
   let suggestions ← selector g c
   -- Only filter when caller is "grind"
-  bif c.caller == some "grind" then
+  uif c.caller == some "grind" then
     let env ← getEnv
     suggestions.filterM fun s => do
       -- Check if the suggestion's module is grind-annotated
@@ -358,9 +358,8 @@ def intersperse (selector₁ selector₂ : Selector) (ratio : Float := 0.5) : Se
   let mut count₂ := 0.0
 
   -- Intersperse while both arrays have elements
-  while h : i₁ <ᵇ suggestions₁.size && i₂ <ᵇ suggestions₂.size && result.size <ᵇ c.maxSuggestions do
-    have h : i₁ < suggestions₁.size ∧ i₂ < suggestions₂.size := by
-      simp only [Bool.and_eq_true] at h; exact ⟨lt_of_decideLT_eq_true h.1.1, lt_of_decideLT_eq_true h.1.2⟩
+  while h : i₁ < suggestions₁.size ∧ i₂ < suggestions₂.size ∧ result.size < c.maxSuggestions do
+    have h : i₁ < suggestions₁.size ∧ i₂ < suggestions₂.size := ⟨h.1, h.2.1⟩
     -- Take from whichever selector keeps the running fraction of `selector₁`
     -- contributions closest to `ratio`. Comparing the two candidate next states
     -- (rather than the achieved fraction) stays accurate at the endpoints, so
@@ -369,7 +368,7 @@ def intersperse (selector₁ selector₂ : Selector) (ratio : Float := 0.5) : Se
     let total := count₁ + count₂
     let errIfTake₁ := Float.abs ((count₁ + 1) / (total + 1) - ratio)
     let errIfTake₂ := Float.abs (count₁ / (total + 1) - ratio)
-    bif errIfTake₁ ≤ᵇ errIfTake₂ then
+    uif errIfTake₁ ≤ errIfTake₂ then
       result := result.push suggestions₁[i₁]
       i₁ := i₁ + 1
       count₁ := count₁ + 1
@@ -379,14 +378,14 @@ def intersperse (selector₁ selector₂ : Selector) (ratio : Float := 0.5) : Se
       count₂ := count₂ + 1
 
   -- Append remaining elements from selector₁
-  while h : i₁ <ᵇ suggestions₁.size && result.size <ᵇ c.maxSuggestions do
-    have h : i₁ < suggestions₁.size := by simp only [Bool.and_eq_true] at h; exact lt_of_decideLT_eq_true h.1
+  while h : i₁ < suggestions₁.size ∧ result.size < c.maxSuggestions do
+    have h : i₁ < suggestions₁.size := h.1
     result := result.push suggestions₁[i₁]
     i₁ := i₁ + 1
 
   -- Append remaining elements from selector₂
-  while h : i₂ <ᵇ suggestions₂.size && result.size <ᵇ c.maxSuggestions do
-    have h : i₂ < suggestions₂.size := by simp only [Bool.and_eq_true] at h; exact lt_of_decideLT_eq_true h.1
+  while h : i₂ < suggestions₂.size ∧ result.size < c.maxSuggestions do
+    have h : i₂ < suggestions₂.size := h.1
     result := result.push suggestions₂[i₂]
     i₂ := i₂ + 1
 
@@ -433,19 +432,19 @@ def isDeniedModule (env : Environment) (moduleName : Name) : Bool :=
   (moduleDenyListExt.getState env).any fun p => moduleName.anyS (· == p)
 
 def isDeniedPremise (env : Environment) (name : Name) (allowPrivate : Bool := false) : Bool := Id.run do
-  bif name == ``sorryAx then return true
+  uif name == ``sorryAx then return true
   -- Allow private names through if allowPrivate is set (e.g., for currentFile selector)
-  bif name.isInternalDetail && !(allowPrivate && isPrivateName name) then return true
-  bif isInstanceReducibleCore env name then return true
-  bif Lean.Linter.isDeprecated env name then return true
-  bif (nameDenyListExt.getState env).any (fun p => name.anyS (· == p)) then return true
+  uif name.isInternalDetail && !(allowPrivate && isPrivateName name) then return true
+  uif isInstanceReducibleCore env name then return true
+  uif Lean.Linter.isDeprecated env name then return true
+  uif (nameDenyListExt.getState env).any (fun p => name.anyS (· == p)) then return true
   if let some moduleIdx := env.getModuleIdxFor? name then
     let moduleName := env.header.modules[moduleIdx.toNat]!.module
-    bif isDeniedModule env moduleName then
+    uif isDeniedModule env moduleName then
       return true
   let some ci := env.find? name | return true
   if let .const fnName _ := ci.type.getForallBody.getAppFn then
-    bif (typePrefixDenyListExt.getState env).any (fun p => p.isPrefixOf fnName) then return true
+    uif (typePrefixDenyListExt.getState env).any (fun p => p.isPrefixOf fnName) then return true
   return false
 
 end DenyList
@@ -476,12 +475,12 @@ def currentFile : Selector := fun _ cfg => do
   -- `map₂` contains the locally defined constants
   let mut suggestions := #[]
   for (name, _) in env.constants.map₂ do
-    bif suggestions.size ≥ᵇ max then
+    uif suggestions.size ≥ max then
       break
     -- Allow private names since they're accessible from the current module
-    bif isDeniedPremise env name (allowPrivate := true) then
+    uif isDeniedPremise env name (allowPrivate := true) then
       continue
-    bif wasOriginallyTheorem env name then
+    uif wasOriginallyTheorem env name then
       suggestions := suggestions.push { name := name, score := 1.0 }
   return suggestions
 
@@ -538,7 +537,7 @@ open Lean Elab Command in
 @[builtin_command_elab setLibrarySuggestionsCmd, inherit_doc setLibrarySuggestionsCmd]
 def elabSetLibrarySuggestions : CommandElab
   | `(command| set_library_suggestions $selector) => do
-    bif !(← getEnv).header.moduleNames.contains `Lean.LibrarySuggestions.Basic then
+    uif !(← getEnv).header.moduleNames.contains `Lean.LibrarySuggestions.Basic then
       logWarning "Add `import Lean.LibrarySuggestions.Basic` before using the `set_library_suggestions` command."
     -- Generate a fresh name for the selector definition
     let name ← liftMacroM <| Macro.addMacroScope `_librarySuggestions
@@ -555,7 +554,7 @@ open Lean.Elab.Tactic in
     let allScoresOne := suggestions.all (·.score == 1.0)
     for s in suggestions do
       msg := msg ++ Format.line ++ "  " ++ MessageData.ofConstName s.name
-      bif !allScoresOne then
+      uif !allScoresOne then
         msg := msg ++ m!" (score: {s.score})"
       if let some flag := s.flag then
         msg := msg ++ m!" [{flag}]"

@@ -103,7 +103,7 @@ then we instantiate the `before` variable in a new context and continue diffing 
 
  -/
 partial def exprDiffCore (before after : SubExpr) : MetaM ExprDiff := do
-  bif before.expr == after.expr then
+  uif before.expr == after.expr then
     return ∅
   match before.expr, after.expr with
   | .mdata _ e₀, _ => exprDiffCore {before with expr := e₀} after
@@ -111,7 +111,7 @@ partial def exprDiffCore (before after : SubExpr) : MetaM ExprDiff := do
   | .app .., .app .. =>
     let (fn₀, args₀) := after.expr.withApp Prod.mk
     let (fn₁, args₁) := before.expr.withApp Prod.mk
-    bif fn₀ != fn₁ || args₀.size != args₁.size then
+    uif fn₀ != fn₁ || args₀.size != args₁.size then
       return ExprDiff.withChange before after
     let args := Array.zip args₀ args₁
     let args ← args.mapIdxM (fun i (beforeArg, afterArg) =>
@@ -122,15 +122,15 @@ partial def exprDiffCore (before after : SubExpr) : MetaM ExprDiff := do
     return args.foldl (init := ∅) (· ++ ·)
   | .forallE .., _ => piDiff before after
   | .lam n₀ d₀ b₀ i₀, .lam n₁ d₁ b₁ i₁=>
-    bif n₀ != n₁ || i₀ != i₁ then
+    uif n₀ != n₁ || i₀ != i₁ then
       return ExprDiff.withChange before after
     let δd ← exprDiffCore ⟨d₀, before.pos.pushBindingDomain⟩ ⟨d₁, after.pos.pushBindingDomain⟩
-    bif δd.isEmpty then
+    uif δd.isEmpty then
       return ← exprDiffCore ⟨b₀, before.pos.pushBindingBody⟩ ⟨b₁, after.pos.pushBindingBody⟩
     else
       return δd ++ ExprDiff.withChangePos before.pos.pushBindingBody after.pos.pushBindingBody
   | .proj n₀ i₀ e₀, .proj n₁ i₁ e₁ =>
-    bif n₀ != n₁ || i₀ != i₁ then
+    uif n₀ != n₁ || i₀ != i₁ then
       return ExprDiff.withChange before after
     else
       exprDiffCore ⟨e₀, before.pos.pushProj⟩ ⟨e₁, after.pos.pushProj⟩
@@ -140,12 +140,12 @@ partial def exprDiffCore (before after : SubExpr) : MetaM ExprDiff := do
       let .forallE n₀ d₀ b₀ i₀ := before.expr
         | return ∅
       if let .forallE n₁ d₁ b₁ i₁ := after.expr then
-        bif n₀ == n₁ && i₀ == i₁ then
+        uif n₀ == n₁ && i₀ == i₁ then
           -- assume that these are the same binders
           let δd ← exprDiffCore
             ⟨d₀, before.pos.pushBindingDomain⟩
             ⟨d₁, after.pos.pushBindingDomain⟩
-          bif δd.isEmpty then
+          uif δd.isEmpty then
             -- the types have changed, so we can no longer meaningfully compare the targets
             let δt ← Lean.Meta.withLocalDecl n₀ i₀ d₀ fun x =>
               exprDiffCore
@@ -158,7 +158,7 @@ partial def exprDiffCore (before after : SubExpr) : MetaM ExprDiff := do
       -- however, a special case is intros:
       if let some s := List.isSuffixOf? after.expr.getForallBinderNames before.expr.getForallBinderNames then
         -- s ++ namesAfter = namesBefore
-        bif s.length == 0 then
+        uif s.length == 0 then
           throwError "should not happen"
         let body₀ := before.expr.getForallBodyMaxDepth s.length
         let mut δ : ExprDiff ← (do
@@ -179,7 +179,7 @@ partial def exprDiffCore (before after : SubExpr) : MetaM ExprDiff := do
 def exprDiff (e₀ e₁ : Expr) (useAfter := true) : MetaM ExprDiff := do
   let s₀ := ⟨e₀, Pos.root⟩
   let s₁ := ⟨e₁, Pos.root⟩
-  bif useAfter then
+  uif useAfter then
     exprDiffCore s₀ s₁
   else
     exprDiffCore s₁ s₀
@@ -189,7 +189,7 @@ this function decorates `infoAfter` with tags indicating where the expression ha
 
 If `useAfter == false` before and after are swapped. -/
 def addDiffTags (useAfter : Bool) (diff : ExprDiff) (info₁ : CodeWithInfos) : MetaM CodeWithInfos := do
-  let cs := bif useAfter then diff.changesAfter else diff.changesBefore
+  let cs := uif useAfter then diff.changesAfter else diff.changesBefore
   info₁.mergePosMap (fun info d => pure <| info.withDiffTag <| ExprDiffTag.toDiffTag useAfter d) cs
 
 open Meta
@@ -203,13 +203,13 @@ def diffHypothesesBundle (useAfter : Bool) (ctx₀  : LocalContext) (h₁ : Inte
   /- Strategy: we say a hypothesis has mutated if the ppName is the same but the fvarid has changed.
      this indicates that something like `rewrite at` has hit it. -/
   for (ppName, fvid) in Array.zip h₁.names h₁.fvarIds do
-    bif !(ctx₀.contains fvid) then
+    uif !(ctx₀.contains fvid) then
       if let some decl₀ := ctx₀.findFromUserName? (.mkSimple ppName) then
         -- on ctx₀ there is an fvar with the same name as this one.
         let t₀ ← instantiateMVars decl₀.type
         return ← withTypeDiff t₀ h₁
       else
-        bif useAfter then
+        uif useAfter then
           return {h₁ with isInserted? := true }
         else
           return {h₁ with isRemoved? := true }
@@ -251,8 +251,8 @@ def diffInteractiveGoal (useAfter : Bool) (g₀ : MVarId) (i₁ : InteractiveGoa
 If `useAfter` is `true` then `igs₁` is the set of interactive goals _after_ the tactic has been applied.
 Otherwise `igs₁` is the set of interactive goals _before_. -/
 public def diffInteractiveGoals (useAfter : Bool) (info : Elab.TacticInfo) (igs₁ : InteractiveGoals) : MetaM InteractiveGoals := do
-    bif ! showTacticDiff.get (← getOptions) then return igs₁ else
-    let goals₀ := bif useAfter then info.goalsBefore else info.goalsAfter
+    uif ! showTacticDiff.get (← getOptions) then return igs₁ else
+    let goals₀ := uif useAfter then info.goalsBefore else info.goalsAfter
     let parentMap : MVarIdMap MVarIdSet ← info.goalsBefore.foldlM (init := ∅) (fun s g => do
       let ms ← Expr.mvar g |> Lean.Meta.getMVars
       let ms := MVarIdSet.ofArray ms
@@ -266,10 +266,10 @@ public def diffInteractiveGoals (useAfter : Bool) (info : Elab.TacticInfo) (igs�
       let g₁ := ig₁.mvarId
       withGoalCtx (g₁ : MVarId) (fun _lctx₁ _md₁ => do
         -- if the goal is present on the previous version then continue
-        bif goals₀.any (fun g₀ => g₀ == g₁) then
+        uif goals₀.any (fun g₀ => g₀ == g₁) then
           return {ig₁ with isInserted? := none}
-        let some g₀ := goals₀.find? (fun g₀ => bif useAfter then isParent g₀ g₁ else isParent g₁ g₀)
-          | return bif useAfter then {ig₁ with isInserted? := true } else {ig₁ with isRemoved? := true}
+        let some g₀ := goals₀.find? (fun g₀ => uif useAfter then isParent g₀ g₁ else isParent g₁ g₀)
+          | return uif useAfter then {ig₁ with isInserted? := true } else {ig₁ with isRemoved? := true}
         let ig₁ ← diffInteractiveGoal useAfter g₀ ig₁
         return ig₁
       )

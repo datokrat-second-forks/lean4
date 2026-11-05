@@ -141,7 +141,7 @@ otherwise recurses into the children. Matching subtrees are not searched for nes
 -/
 partial def collectSubtrees (p : TracePattern) (t : TraceTree)
     (acc : Array TraceTree := #[]) : CoreM (Array TraceTree) := do
-  bif (← p t) then
+  uif (← p t) then
     return acc.push t
   t.children.foldlM (fun acc c => collectSubtrees p c acc) acc
 
@@ -152,10 +152,10 @@ ancestor or transitive child. Matching subtrees are not searched for nested matc
 -/
 partial def filterSubtrees (p : TracePattern) (t : TraceTree) :
     CoreM (Option TraceTree) := do
-  bif (← p t) then
+  uif (← p t) then
     return some t
   let children ← t.children.filterMapM (filterSubtrees p)
-  bif children.isEmpty then
+  uif children.isEmpty then
     return none
   return some (t.withChildren children)
 
@@ -181,7 +181,7 @@ where
     | .withContext ctx m       => go (fun m => wrap (.withContext ctx m)) m
     | .withNamingContext ctx m => go (fun m => wrap (.withNamingContext ctx m)) m
     | .tagged n (.trace data head children) =>
-      bif n == `trace then
+      uif n == `trace then
         some (fun children => wrap (.tagged n (.trace data head children)), children)
       else
         none
@@ -196,7 +196,7 @@ meta def postprocessMessage (post : TracePostprocessor) (msg : Message) :
   let some (rebuild, roots) := traceContainer? msg.data
     | return some msg
   let roots ← post (roots.map TraceTree.ofMessageData)
-  bif roots.isEmpty then
+  uif roots.isEmpty then
     return none
   return some { msg with data := rebuild (roots.map (·.toMessageData)) }
 
@@ -236,9 +236,9 @@ private meta def evalPostprocessor (post : Term) : TermElabM TracePostprocessor 
     Term.synthesizeSyntheticMVarsNoPostponing
     let e ← instantiateMVars e
     -- on elaboration errors, abort before `evalExpr` reports a redundant `sorryAx` error
-    bif e.hasSyntheticSorry then
+    uif e.hasSyntheticSorry then
       throwAbortTerm
-    bif (← Term.logUnassignedUsingErrorInfos (← Meta.getMVars e)) then
+    uif (← Term.logUnassignedUsingErrorInfos (← Meta.getMVars e)) then
       throwAbortTerm
     -- the cast in `evalExpr` is sound: `e` was elaborated at `type`, which denotes the type
     -- argument `TracePostprocessor`

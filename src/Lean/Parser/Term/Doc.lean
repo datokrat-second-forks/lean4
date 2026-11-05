@@ -71,11 +71,11 @@ def getRecommendedSpellingsForName (env : Environment) (declName : Name) :
 the docstring. -/
 def getRecommendedSpellingString (env : Environment) (declName : Name) : String := Id.run do
   let spellings := getRecommendedSpellingsForName env declName
-  bif spellings.size == 0 then ""
+  uif spellings.size == 0 then ""
   else "\n\nConventions for notations in identifiers:\n\n" ++ String.join (spellings.toList.map bullet) |>.trimAsciiEnd |>.copy
 where
   indentLine (str : String) : String :=
-    (bif str.all Char.isWhitespace then str else "   " ++ str) ++ "\n"
+    (uif str.all Char.isWhitespace then str else "   " ++ str) ++ "\n"
   bullet (spelling : RecommendedSpelling) : String :=
     let firstLine := s!" * The recommended spelling of `{spelling.«notation»}` in identifiers is `{spelling.recommendedSpelling}`"
     let additionalInfoLines := spelling.additionalInformation?.map (·.split '\n' |>.toStringList)

@@ -77,7 +77,7 @@ def recordLints (fileMap : FileMap) (env : Environment)
       unless m.data.isLinterMessage do
         return env
       let kind := m.data.kind
-      bif kind.isAnonymous then
+      uif kind.isAnonymous then
         return env
       let sm ← m.serialize
       return lintLogExt.addEntry env { linter := kind, message := sm, position?, file := m.fileName }
@@ -108,7 +108,7 @@ selection (e.g. `lake lint --lint-only`).
 -/
 def logCodeQualityEntryIf [Monad m] [MonadOptions m] [MonadEnv m]
     (linterOption : Lean.Option Bool) (e : CodeQuality.Entry) : m Unit := do
-  bif getLinterValue linterOption (← getLinterOptions) then
+  uif getLinterValue linterOption (← getLinterOptions) then
     modifyEnv (codeQualityLogExt.addEntry · { linter? := some linterOption.name, entry := e })
 
 end Lean.Linter

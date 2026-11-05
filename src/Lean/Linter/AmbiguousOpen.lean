@@ -28,10 +28,10 @@ instead of only the innermost one, so that namespaces shadowed by the scope sear
 private def scopeCandidates (env : Environment) (id : Name) : Name → List Name
   | ns@(.str p _) =>
     let rest := scopeCandidates env id p
-    bif env.isNamespace (ns ++ id) then (ns ++ id) :: rest else rest
+    uif env.isNamespace (ns ++ id) then (ns ++ id) :: rest else rest
   | _ =>
     let id := id.replacePrefix rootNamespace .anonymous
-    bif env.isNamespace id then [id] else []
+    uif env.isNamespace id then [id] else []
 
 /--
 Warns if the namespace identifier `nsStx` of an `open` declaration can also be interpreted as an
@@ -48,7 +48,7 @@ def checkAmbiguousOpen [Monad m] [MonadEnv m] [MonadOptions m] [MonadLog m]
   -- identifiers written in the original source.
   let .original .. := info | return
   -- Identifiers with preresolved namespaces are not resolved against the environment.
-  bif preresolved.any fun | .namespace _ => true | _ => false then return
+  uif preresolved.any fun | .namespace _ => true | _ => false then return
   -- `resolveNamespace` can return duplicates, e.g. when several `open` declarations make the
   -- same namespace visible.
   let resolved := resolved.eraseDups
@@ -64,12 +64,12 @@ def checkAmbiguousOpen [Monad m] [MonadEnv m] [MonadOptions m] [MonadLog m]
       | .simple ns [] => ns == n
       | _ => false
   let shadowed := candidates.filter fun n => !resolved.contains n && !isAccessible n
-  bif shadowed.isEmpty then return
+  uif shadowed.isEmpty then return
   let display (n : Name) : MessageData := m!"`{rootNamespace ++ n}`"
   let displayAll (ns : List Name) : MessageData := MessageData.joinSep (ns.map display) ", "
   -- A shadowed interpretation is a non-innermost scope match, so `currNamespace` is nonempty.
   let shadowedNote :=
-    bif shadowed.length == 1 then m!"{displayAll shadowed} is silently not opened"
+    uif shadowed.length == 1 then m!"{displayAll shadowed} is silently not opened"
     else m!"{displayAll shadowed} are silently not opened"
   let hint :=
     m!" Specify the namespace unambiguously, e.g. `{rootNamespace ++ resolved.head!}`. The \

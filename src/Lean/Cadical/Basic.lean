@@ -82,21 +82,21 @@ public def isValid (s : State) : Bool := (s.bits &&& valid.bits) != ⟨0⟩
 public def isInvalid (s : State) : Bool := (s.bits &&& invalid.bits) != ⟨0⟩
 
 public def toString (s : State) : String :=
-  bif s == .initializing then
+  uif s == .initializing then
     "INITIALIZING"
-  else bif s == .configuring then
+  else uif s == .configuring then
     "CONFIGURING"
-  else bif s == .steady then
+  else uif s == .steady then
     "STEADY"
-  else bif s == .adding then
+  else uif s == .adding then
     "ADDING"
-  else bif s == .solving then
+  else uif s == .solving then
     "SOLVING"
-  else bif s == .satisfied then
+  else uif s == .satisfied then
     "SATISFIED"
-  else bif s == .unsatisfied then
+  else uif s == .unsatisfied then
     "UNSATISFIED"
-  else bif s == .inconclusive then
+  else uif s == .inconclusive then
     "INCONCLUSIVE"
   else
     "INVALID_STATE"
@@ -151,11 +151,11 @@ open Std.Sat
 @[inline]
 def toApiLit (lit : Nat) (pol : Bool) : IO Int32 := do
   let lit := lit + 1
-  bif lit >ᵇ Int32.maxValue.toNatClampNeg then
+  uif lit > Int32.maxValue.toNatClampNeg then
     throw <| .userError "Literal {lit} too large for SAT API"
   else
     let lit := lit.toInt32
-    let lit := bif pol then lit else -lit
+    let lit := uif pol then lit else -lit
     return lit
 
 /--
@@ -204,7 +204,7 @@ Obtain the value of a literal in the current model if it exists.
 -/
 public def val (s : Solver) (lit : Nat) : IO Bool := do
   let state ← s.state
-  bif state != .satisfied then
+  uif state != .satisfied then
     throw <| .userError s!"State should be {State.satisfied} but is {state}"
   let lit ← toApiLit lit true
   let val ← s.solver.val lit

@@ -50,17 +50,17 @@ def constructorNameAsVariable : Linter where
           match ti.expr with
           | .fvar id .. =>
             let some range := info.range? | return
-            bif (← warnings.get).contains range then return
+            uif (← warnings.get).contains range then return
             let .original .. := info.stx.getHeadInfo | return
-            bif ti.isBinder then
+            uif ti.isBinder then
               -- This is a local variable declaration.
               let some ldecl := ti.lctx.find? id | return
               -- Skip declarations which are outside the command syntax range, like `variable`s
               -- (it would be confusing to lint these), or those which are macro-generated
-              bif !cmdStxRange.contains range.start || ldecl.userName.hasMacroScopes then return
+              uif !cmdStxRange.contains range.start || ldecl.userName.hasMacroScopes then return
               let opts ← ci.options.toLinterOptions
               -- we have to check for the option again here because it can be set locally
-              bif !getLinterValue linter.constructorNameAsVariable opts then return
+              uif !getLinterValue linter.constructorNameAsVariable opts then return
               if let n@(.str .anonymous s) := info.stx.getId then
                 -- Check whether the type is an inductive type, and get its constructors
                 let ty ←
@@ -73,15 +73,15 @@ def constructorNameAsVariable : Linter where
                       -- Only warn when the constructor has 0 fields. Pattern variables can't be
                       -- confused with constructors that want arguments.
                       if let some (.ctorInfo ctorInfo) := (← getEnv).find? c then
-                        bif ctorInfo.numFields >ᵇ 0 then continue
+                        uif ctorInfo.numFields > 0 then continue
                       if let .str _ cn := c then
-                        bif cn == s then
+                        uif cn == s then
                           warnings.modify (·.insert range (info.stx, n, c))
             else pure ()
           | .const .. =>
             let some range := info.range? | return
             let .original .. := info.stx.getHeadInfo | return
-            bif ti.isBinder then
+            uif ti.isBinder then
               constRanges.modify fun s => s.insert range
           | _ => pure ()
         | _ => pure ())

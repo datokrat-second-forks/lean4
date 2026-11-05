@@ -36,25 +36,25 @@ builtin_initialize weakSpecializeAttr : TagAttribute ←
     "mark type for weak specialization: instances are only specialized when another argument already triggers specialization"
 
 private def elabSpecArgs (declName : Name) (args : Array Syntax) : MetaM (Array Nat) := do
-  bif args.isEmpty then return #[]
+  uif args.isEmpty then return #[]
   let info ← getConstInfo declName
   Meta.forallTelescopeReducing info.type fun xs _ => do
     let argNames ← xs.mapM fun x => x.fvarId!.getUserName
     let mut result := #[]
     for arg in args do
       if let some idx := arg.isNatLit? then
-        bif idx == 0 then throwErrorAt arg "Invalid specialization argument index `0`: Index must be greater than 0"
+        uif idx == 0 then throwErrorAt arg "Invalid specialization argument index `0`: Index must be greater than 0"
         let idx := idx - 1
-        bif h : idx ≥ᵇ argNames.size then
+        uif h : idx ≥ argNames.size then
           throwErrorAt arg "Invalid argument index `{idx}`: `{.ofConstName declName}` has only {argNames.size} arguments"
         else
-          bif result.contains idx then throwErrorAt arg "Invalid specialization argument index `{idx + 1}`: \
+          uif result.contains idx then throwErrorAt arg "Invalid specialization argument index `{idx + 1}`: \
             The argument at this index (`{argNames[idx]}`) has already been specified as a specialization candidate"
           result := result.push idx
       else
         let argName := arg.getId
         if let some idx := argNames.idxOf? argName then
-          bif result.contains idx then throwErrorAt arg "Invalid specialization argument name `{argName}`: \
+          uif result.contains idx then throwErrorAt arg "Invalid specialization argument name `{argName}`: \
             It has already been specified as a specialization candidate"
           result := result.push idx
         else

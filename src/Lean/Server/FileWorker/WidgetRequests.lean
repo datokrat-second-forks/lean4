@@ -74,7 +74,7 @@ where
     | _,    tt        => tt
   ppExprForPopup (e : Expr) (explicit : Bool) : MetaM CodeWithInfos := do
     -- When hovering over a metavariable, we want to see its value, even if `pp.instantiateMVars` is false.
-    bif explicit then
+    uif explicit then
       if let .mvar mvarId := e then
         if let some e' ← getExprMVarAssignment? mvarId then
           return ← ppExprForPopupAux e' false
@@ -82,7 +82,7 @@ where
   ppExprForPopupAux (e : Expr) (explicit : Bool) : MetaM CodeWithInfos := do
     -- When `explicit` is false, keep the top-level tag so that users can also see the explicit version of the term on an additional hover.
     maybeWithoutTopLevelHighlight explicit <$> ppExprTagged e do
-      bif explicit then
+      uif explicit then
         withOptionAtCurrPos pp.tagAppFns.name true do
         withOptionAtCurrPos pp.explicit.name true do
         withOptionAtCurrPos pp.mvars.anonymous.name true do
@@ -134,7 +134,7 @@ builtin_initialize
       let rc ← read
       let ls ← locationLinksOfInfo rc.doc.meta kind i
       let ls := ls.map (·.toLocationLink)
-      bif !ls.isEmpty then return ls
+      uif !ls.isEmpty then return ls
       -- TODO(WN): unify handling of delab'd (infoview) and elab'd (editor) applications
       let .ofTermInfo ti := i.info | return #[]
       let .app _ _ := ti.expr | return #[]
@@ -160,7 +160,7 @@ def lazyTraceChildrenToInteractive (children : WithRpcRef LazyTraceChildren) :
 builtin_initialize registerBuiltinRpcProcedure ``lazyTraceChildrenToInteractive _ _ lazyTraceChildrenToInteractive
 
 private def kmpSearch (query text : String) : Array String.Pos.Raw := Id.run do
-  bif query.isEmpty then
+  uif query.isEmpty then
     return #[]
   let query := query.toUTF8
   let text := text.toUTF8
@@ -171,7 +171,7 @@ private def kmpSearch (query text : String) : Array String.Pos.Raw := Id.run do
     while qi >= 0 && text[ti] != query[qi.toNat]! do
       qi := table[qi.toNat]!
     qi := qi + 1
-    bif qi == query.size then
+    uif qi == query.size then
       r := r.push <| (ti + 1) - query.size
       qi := table[qi.toNat]!
   return r.map (⟨·⟩)
@@ -197,18 +197,18 @@ private def matchEndPos (query : String) (startPos : String.Pos.Raw) : String.Po
 private def highlightStringMatches? (query text : String) (matchPositions : Array String.Pos.Raw)
     (highlight : α) (offset : String.Pos.Raw := ⟨0⟩) (mapIdx : Nat → Nat := id) :
     Option (TaggedText α) := Id.run do
-  bif query.isEmpty || text.isEmpty || matchPositions.isEmpty then
+  uif query.isEmpty || text.isEmpty || matchPositions.isEmpty then
     return none
   let mut anyMatch : Bool := false
   let mut r : Array (TaggedText α) := #[]
   let mut p : String.Pos.Raw := ⟨0⟩
   for i in 0...matchPositions.size do
-    bif p ≥ᵇ text.rawEndPos then
+    uif p ≥ text.rawEndPos then
       break
     let i := mapIdx i
     let globalMatchPos := matchPositions[i]!
     let matchPos := globalMatchPos.unoffsetBy offset
-    bif matchPos ≥ᵇ text.rawEndPos then
+    uif matchPos ≥ text.rawEndPos then
       break
     if let some nonMatch := nonMatch? p matchPos then
       r := r.push nonMatch
@@ -220,9 +220,9 @@ private def highlightStringMatches? (query text : String) (matchPositions : Arra
     anyMatch := true
   if let some nonMatch := nonMatch? p text.rawEndPos then
     r := r.push nonMatch
-  bif ! anyMatch then
+  uif ! anyMatch then
     return none
-  bif h : r.size =ᵇ 1 then
+  uif h : r.size = 1 then
     return some r[0]
   return some (.append r)
 where
@@ -262,7 +262,7 @@ where
     let n := ms.size
     let mut ms := ms
     for i in 0...n do
-      bif p ≥ᵇ matchEndPos query ms[n - i - 1]! then
+      uif p ≥ matchEndPos query ms[n - i - 1]! then
         ms := ms.pop
     return ms
 
@@ -377,11 +377,11 @@ private partial def unfoldMessageDataTracesContaining (msg : MessageData) (nctx 
     let unfolded ← children.mapM (unfoldMessageDataTracesContaining · nctx ctx?)
     let children := unfolded.map (·.1)
     let anyUnfolded := unfolded.any (·.2)
-    bif anyUnfolded then
+    uif anyUnfolded then
       return (.trace { data with collapsed := false } traceMsg children, true)
     let fmt ← traceMsg.formatAux nctx ctx?
     let s := fmt.pretty (indent := indent)
-    bif contains query s then
+    uif contains query s then
       return (.trace { data with collapsed := false } traceMsg children, true)
     return (.trace data traceMsg children, false)
   | .withContext ctx msg =>
@@ -420,7 +420,7 @@ private partial def highlightMatchesAux (msg : InteractiveMessage) :
       let highlighted ← children.mapM (highlightMatchesAux ·)
       let anyHighlighted := highlighted.any (·.2)
       let children := highlighted.map (·.1)
-      bif ! anyHighlighted then
+      uif ! anyHighlighted then
         return unchangedChildren.get
       return expandedChildren children
     | .lazy c => do
@@ -431,7 +431,7 @@ private partial def highlightMatchesAux (msg : InteractiveMessage) :
         unfoldMessageDataTracesContaining query indent child nctx none
       let anyUnfolded := unfolded.any (·.2)
       let children := unfolded.map (·.1)
-      bif ! anyUnfolded then
+      uif ! anyUnfolded then
         return unchangedChildren.get
       let children ← children.mapM (msgToInteractive · true indent)
       let highlighted ← children.mapM highlightMatchesAux
@@ -442,7 +442,7 @@ private partial def highlightMatchesAux (msg : InteractiveMessage) :
     let anyHighlighted := highlighted.any (·.isHighlighted)
     let anyTrace := highlighted.any (·.isTrace)
     let as := highlighted.map (·.msg)
-    bif ! anyTrace then
+    uif ! anyTrace then
       let (msg, isHighlighted) := highlightInteractiveMessageWithExprs query msg
       return { msg, isHighlighted, isTrace := false }
     return { msg := .append as, isHighlighted := anyHighlighted, isTrace := true }

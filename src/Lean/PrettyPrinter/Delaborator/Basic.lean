@@ -180,11 +180,11 @@ def getPPOption (opt : Options → α) : DelabM α := do
 
 def whenPPOption (opt : Options → Bool) (d : Delab) : Delab := do
   let b ← getPPOption opt
-  bif b then d else failure
+  uif b then d else failure
 
 def whenNotPPOption (opt : Options → Bool) (d : Delab) : Delab := do
   let b ← getPPOption opt
-  bif b then failure else d
+  uif b then failure else d
 
 /-- Set the given option at the current position and execute `x` in this context. -/
 def withOptionAtCurrPos (k : Name) (v : DataValue) (x : DelabM α) : DelabM α := do
@@ -261,7 +261,7 @@ and associated `Info` already.
 -/
 def annotateTermInfoUnlessAnnotated (stx : Term) : Delab := do
   if let some (.synthetic ⟨pos⟩ ⟨pos'⟩) := stx.raw.getInfo? then
-    bif pos == pos' && (← get).infos.contains pos then
+    uif pos == pos' && (← get).infos.contains pos then
       return stx
   annotateTermInfo stx
 
@@ -291,17 +291,17 @@ If `suggestion` has macro scopes then the result does as well.
 -/
 def getUnusedName (suggestion : Name) (body : Expr) (preserveName : Bool := false) (avoid : NameSet := {}) : DelabM Name := do
   let (hasScopes, suggestion) :=
-    bif suggestion.isAnonymous then
+    uif suggestion.isAnonymous then
       -- Use a nicer binder name than `[anonymous]`. We probably shouldn't do this in all LocalContext use cases, so do it here.
       (true, `a)
     else
       (suggestion.hasMacroScopes, suggestion.eraseMacroScopes)
   let lctx ← getLCtx
-  bif !lctx.usesUserName suggestion || (preserveName && !hasScopes) then
+  uif !lctx.usesUserName suggestion || (preserveName && !hasScopes) then
     return suggestion
-  else bif preserveName then
+  else uif preserveName then
     withFreshMacroScope <| MonadQuotation.addMacroScope suggestion
-  else bif (← getPPOption getPPSafeShadowing) && !avoid.contains suggestion && !bodyUsesSuggestion lctx suggestion then
+  else uif (← getPPOption getPPSafeShadowing) && !avoid.contains suggestion && !bodyUsesSuggestion lctx suggestion then
     return suggestion
   else
     return lctx.getUnusedName suggestion
@@ -384,10 +384,10 @@ delaborated as `⋯`.
 -/
 def shouldOmitExpr (e : Expr) : DelabM Bool := do
   -- Atomic expressions never get omitted, so we can do an early return here.
-  bif e.isAtomic then
+  uif e.isAtomic then
     return false
 
-  bif (← getPPOption getPPDeepTerms) then
+  uif (← getPPOption getPPDeepTerms) then
     return false
 
   let depth := (← read).depth
@@ -409,10 +409,10 @@ See `Lean.PrettyPrinter.Delaborator.isShallowExpression`.
 -/
 def shouldOmitProof (e : Expr) : DelabM Bool := do
   -- Atomic expressions never get omitted, so we can do an early return here.
-  bif e.isAtomic then
+  uif e.isAtomic then
     return false
 
-  bif (← getPPOption getPPProofs) then
+  uif (← getPPOption getPPProofs) then
     return false
 
   unless (← try Meta.isProof e catch _ => pure false) do
@@ -435,23 +435,23 @@ partial def delabFor : Name → Delab
   | k              =>
     (do annotateTermInfoUnlessAnnotated (← (delabAttribute.getValues (← getEnv) k).firstM id))
     -- have `app.Option.some` fall back to `app` etc.
-    <|> bif k.isAtomic then failure else delabFor k.getRoot
+    <|> uif k.isAtomic then failure else delabFor k.getRoot
 
 partial def delab : Delab := do
   checkSystem "delab"
 
-  bif (← get).steps ≥ᵇ (← getPPOption getPPMaxSteps) then
+  uif (← get).steps ≥ (← getPPOption getPPMaxSteps) then
     return ← omission .maxSteps
   modify fun s => {s with steps := s.steps + 1}
 
   let e ← getExpr
 
-  bif (← shouldOmitExpr e) then
+  uif (← shouldOmitExpr e) then
     return ← omission .deep
 
-  bif (← shouldOmitProof e) then
+  uif (← shouldOmitProof e) then
     let pf ← omission .proof
-    bif (← getPPOption getPPProofsWithType) then
+    uif (← getPPOption getPPProofsWithType) then
       let stx ← withType delab
       return ← annotateCurPos (← `(($pf : $stx)))
     else
@@ -459,7 +459,7 @@ partial def delab : Delab := do
 
   let k ← getExprKind
   let stx ← withIncDepth <| delabFor k <|> (liftM $ show MetaM _ from throwError "don't know how to delaborate `{k}`")
-  bif (← getPPOption getPPAnalyzeTypeAscriptions <&&> getPPOption getPPAnalysisNeedsType <&&> pure !e.isMData) then
+  uif (← getPPOption getPPAnalyzeTypeAscriptions <&&> getPPOption getPPAnalysisNeedsType <&&> pure !e.isMData) then
     let typeStx ← withType delab
     `(($stx : $typeStx)) >>= annotateCurPos
   else
@@ -499,7 +499,7 @@ open SubExpr (Pos PosMap)
 open Delaborator (OptionsPerPos topDownAnalyze DelabM getPPOption)
 
 def delabLevel (l : Level) (prec : Nat) : MetaM Syntax.Level := do
-  let l ← bif getPPInstantiateMVars (← getOptions) then instantiateLevelMVars l else pure l
+  let l ← uif getPPInstantiateMVars (← getOptions) then instantiateLevelMVars l else pure l
   let mvars := getPPMVarsLevels (← getOptions)
   return Level.quote l prec (mvars := mvars) (lIndex? := (← getMCtx).findLevelIndex?)
 
@@ -511,16 +511,16 @@ def delabCore (e : Expr) (optionsPerPos : OptionsPerPos := {}) (delab : DelabM �
   trace[PrettyPrinter.delab.input] "{Std.format e}"
   let mut opts ← getOptions
   -- default `pp.proofs` to `true` if `e` is a proof
-  bif pp.proofs.get? opts == none &&
+  uif pp.proofs.get? opts == none &&
       -- necessary for `delabConstWithSignature`, and harmless otherwise
       !e.isConst then
-    try bif (← Meta.isProof e) then opts := pp.proofs.set opts true
+    try uif (← Meta.isProof e) then opts := pp.proofs.set opts true
     catch _ => pure ()
   withOptions (fun _ => opts) do
-    let e ← bif getPPInstantiateMVars opts then instantiateMVars e else pure e
-    let e ← bif getPPBeta opts then Core.betaReduce e else pure e
+    let e ← uif getPPInstantiateMVars opts then instantiateMVars e else pure e
+    let e ← uif getPPBeta opts then Core.betaReduce e else pure e
     let optionsPerPos ←
-      bif !getPPAll opts && getPPAnalyze opts && optionsPerPos.isEmpty then
+      uif !getPPAll opts && getPPAnalyze opts && optionsPerPos.isEmpty then
         topDownAnalyze e
       else pure optionsPerPos
     let (stx, {infos := infos, ..}) ← catchInternalId Delaborator.delabFailureId

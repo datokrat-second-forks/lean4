@@ -29,7 +29,7 @@ Getter for the registered environment linters. The result is sorted by the linte
 def getEnvLinters (opts? : Option LinterOptions := none) : CoreM (Array NamedEnvLinter) := do
   let mut result := #[]
   for (optName, declName) in envLinterExt.getState (← getEnv) do
-      bif opts?.all (isLinterEnabledByOptions optName) then
+      uif opts?.all (isLinterEnabledByOptions optName) then
         let linter ← getEnvLinter optName declName
         result := result.binInsert (·.optName.lt ·.optName) linter
   pure result
@@ -82,7 +82,7 @@ def sortResults (results : Std.HashMap Name α) : CoreM <| Array (Name × α) :=
 /-- Formats a linter warning as `#check` command with comment. -/
 def printWarning (declName : Name) (warning : MessageData) (useErrorFormat : Bool := false)
   (filePath : System.FilePath := default) : CoreM MessageData := do
-  bif useErrorFormat then
+  uif useErrorFormat then
     if let some range ← findDeclarationRanges? declName then
       let msg ← addMessageContextPartial
         m!"{filePath}:{range.range.pos.line}:{range.range.pos.column + 1}: error: {
@@ -102,7 +102,7 @@ Formats a map of linter warnings grouped by filename with `-- filename` comments
 -/
 def groupedByFilename (results : Std.HashMap Name MessageData) (useErrorFormat : Bool := false) :
     CoreM MessageData := do
-  let sp ← bif useErrorFormat then getSrcSearchPath else pure {}
+  let sp ← uif useErrorFormat then getSrcSearchPath else pure {}
   let grouped : Std.HashMap Name (System.FilePath × Std.HashMap Name MessageData) ←
     results.foldM (init := {}) fun grouped declName msg => do
       let mod ← findModuleOf? declName
@@ -111,7 +111,7 @@ def groupedByFilename (results : Std.HashMap Name MessageData) (useErrorFormat :
         match grouped[mod]? with
         | some (fp, msgs) => pure (fp, msgs.insert declName msg)
         | none => do
-          let fp ← bif useErrorFormat then
+          let fp ← uif useErrorFormat then
             pure <| (← sp.findWithExt "lean" mod).getD (modToFilePath "." mod "lean")
           else pure default
           pure (fp, .insert {} declName msg)
@@ -131,9 +131,9 @@ def formatLinterResults
     (numLinters : Nat) (useErrorFormat : Bool := false) :
     CoreM MessageData := do
   let formattedResults ← results.filterMapM fun (linter, results) => do
-    bif !results.isEmpty then
+    uif !results.isEmpty then
       let warnings ←
-        bif groupByFilename || useErrorFormat then
+        uif groupByFilename || useErrorFormat then
           groupedByFilename results (useErrorFormat := useErrorFormat)
         else
           printWarnings results
@@ -163,7 +163,7 @@ def getDeclsInPackage (pkg : Name) : CoreM (Array Name) := do
   let mut decls ← getDeclsInCurrModule
   let modules := env.header.moduleNames.map (pkg.isPrefixOf ·)
   return Id.run <| env.constants.map₁.foldlEntriesM (init := decls) fun decls declName (_, modIdx) =>
-    bif modules[modIdx]! then
+    uif modules[modIdx]! then
       decls.push declName
     else decls
 

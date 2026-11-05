@@ -60,10 +60,10 @@ def aliases [Monad m] [MonadEnv m] (tac : Name) : m NameSet := do
   let env ← getEnv
   let mut found := {}
   for (src, tgt) in tacticAlternativeExt.getState env do
-    bif tgt == tac then found := found.insert src
+    uif tgt == tac then found := found.insert src
   for arr in tacticAlternativeExt.toEnvExtension.getState env |>.importedEntries do
     for (src, tgt) in arr do
-      bif tgt == tac then found := found.insert src
+      uif tgt == tac then found := found.insert src
   pure found
 
 builtin_initialize
@@ -81,12 +81,12 @@ builtin_initialize
       let tgtName ← Lean.Elab.realizeGlobalConstNoOverloadWithInfo tgt
       recordExtraModUseFromDecl (isMeta := false) tgtName
 
-      bif !(isTactic (← getEnv) tgtName) then throwErrorAt tgt "`{tgtName}` is not a tactic"
+      uif !(isTactic (← getEnv) tgtName) then throwErrorAt tgt "`{tgtName}` is not a tactic"
       -- If the target is a known syntax kind, ensure that it's a tactic
       let cats := getSyntaxNodeKindCategories (← getEnv) decl
-      bif !cats.isEmpty && cats.all (· != `tactic) then
+      uif !cats.isEmpty && cats.all (· != `tactic) then
         let catNames := cats.map fun c => m!"`{c}`"
-        let s := bif catNames.size >ᵇ 1 then m!"ies" else m!"y"
+        let s := uif catNames.size > 1 then m!"ies" else m!"y"
         throwError "`{decl}` is not a tactic (it is in the categor{s} {.andList catNames.toList})"
 
       if let some tgt' := alternativeOfTactic (← getEnv) tgtName then
@@ -190,8 +190,8 @@ builtin_initialize
       let `(«tactic_tag»|tactic_tag $tags*) := stx
         | throwError "Invalid `[{name}]` attribute syntax"
 
-      bif (← getEnv).find? decl |>.isSome then
-        bif !(isTactic (← getEnv) decl) then
+      uif (← getEnv).find? decl |>.isSome then
+        uif !(isTactic (← getEnv) decl) then
           throwErrorAt stx "`{.ofConstName decl}` is not a tactic"
 
       if let some tgt' := alternativeOfTactic (← getEnv) decl then
@@ -207,10 +207,10 @@ builtin_initialize
               let count := all.length
               let name := (m!"`{·}`")
               let suggestions :=
-                bif count == 0 then m!"(no tags defined)"
-                else bif count == 1 then
+                uif count == 0 then m!"(no tags defined)"
+                else uif count == 1 then
                   MessageData.joinSep (all.map name) ", "
-                else bif count <ᵇ 10 then
+                else uif count < 10 then
                   m!"one of " ++ MessageData.joinSep (all.map name) ", "
                 else
                   m!"one of " ++
@@ -258,11 +258,11 @@ def getTacticExtensions (env : Environment) (tactic : Name) : Array String := Id
 /-- Gets the rendered extensions for the given canonical tactic name -/
 def getTacticExtensionString (env : Environment) (tactic : Name) : String := Id.run do
   let exts := getTacticExtensions env tactic
-  bif exts.size == 0 then ""
+  uif exts.size == 0 then ""
   else "\n\nExtensions:\n\n" ++ String.join (exts.toList.map bullet) |>.trimAsciiEnd |>.copy
 where
   indentLine (str : String.Slice) : String :=
-    (bif str.all Char.isWhitespace then str.copy else "   " ++ str) ++ "\n"
+    (uif str.all Char.isWhitespace then str.copy else "   " ++ str) ++ "\n"
   bullet (str : String) : String :=
     let lines := str.split '\n' |>.toList
     match lines with
@@ -315,8 +315,8 @@ builtin_initialize
           pure (name.getId.toString (escape := false))
         | _ => throwError "Invalid `[{name}]` attribute syntax"
 
-      bif (← getEnv).find? decl |>.isSome then
-        bif !(isTactic (← getEnv) decl) then
+      uif (← getEnv).find? decl |>.isSome then
+        uif !(isTactic (← getEnv) decl) then
           throwErrorAt stx m!"`{.ofConstName decl}` is not a tactic"
         if let some idx := (← getEnv).getModuleIdxFor? decl then
           if let some mod := (← getEnv).allImportedModuleNames[idx]? then
@@ -348,14 +348,14 @@ tactics, and that syntax with tactic names are tactics.
 -/
 private def tacticDocsOnTactics : ParserAttributeHook where
   postAdd (catName declName : Name) (_builtIn : Bool) := do
-    bif catName == `tactic then
+    uif catName == `tactic then
       return
-    bif alternativeOfTactic (← getEnv) declName |>.isSome then
+    uif alternativeOfTactic (← getEnv) declName |>.isSome then
       throwError m!"`{.ofConstName declName}` is not a tactic"
     -- It's sufficient to look in the state (and not the imported entries) because this validation
     -- only needs to check tags added in the current module
     if let some tags := tacticTagExt.getState (← getEnv) |>.find? declName then
-      bif !tags.isEmpty then
+      uif !tags.isEmpty then
         throwError m!"`{.ofConstName declName}` is not a tactic"
     if let some n := tacticNameExt.getState (← getEnv) |>.find? declName then
       throwError m!"`{MessageData.ofConstName declName}` is not a tactic, but it was assigned a tactic name `{n}`"

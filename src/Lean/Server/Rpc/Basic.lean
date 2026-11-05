@@ -156,7 +156,7 @@ def rpcReleaseRef (r : Lsp.RpcRef) : StateM RpcObjectStore Bool := do
   let some referencedObj := st.aliveRefs.find? r
     | return false
   let referencedObj := { referencedObj with rc := referencedObj.rc - 1 }
-  bif referencedObj.rc == 0 then
+  uif referencedObj.rc == 0 then
     set { st with
       aliveRefs := st.aliveRefs.erase r
       refsById := st.refsById.erase referencedObj.id

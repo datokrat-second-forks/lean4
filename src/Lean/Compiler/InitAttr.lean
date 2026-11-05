@@ -225,7 +225,7 @@ entries. Computed at `--incr-(header-)save` time and consumed by `runInitAttrsFo
 def getRegularInitAttrModIdxs (env : Environment) : Array Nat := Id.run do
   let mut idxs := Array.emptyWithCapacity env.header.modules.size
   for modIdx in 0...env.header.modules.size do
-    bif !(regularInitAttr.ext.getModuleEntries env modIdx).isEmpty
+    uif !(regularInitAttr.ext.getModuleEntries env modIdx).isEmpty
         || !(regularInitAttr.ext.getModuleIREntries env modIdx).isEmpty then
       idxs := idxs.push modIdx
   idxs

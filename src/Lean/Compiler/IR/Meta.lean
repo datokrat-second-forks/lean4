@@ -32,7 +32,7 @@ where
 
 private partial def setClosureMeta (decl : Decl) : CompilerM Unit := do
   for ref in collectUsedFDecls decl do
-    bif isDeclMeta (← getEnv) ref then
+    uif isDeclMeta (← getEnv) ref then
       continue
     let some d ← findLocalDecl ref | continue
     trace[compiler.ir.inferMeta] m!"Marking {ref} as meta because it is in `meta` closure"
@@ -40,10 +40,10 @@ private partial def setClosureMeta (decl : Decl) : CompilerM Unit := do
     setClosureMeta d
 
 partial def inferMeta (decls : Array Decl) : CompilerM Unit := do
-  bif !(← getEnv).header.isModule then
+  uif !(← getEnv).header.isModule then
     return
   for decl in decls do
-    bif isMarkedMeta (← getEnv) decl.name then
+    uif isMarkedMeta (← getEnv) decl.name then
       trace[compiler.ir.inferMeta] m!"Marking {decl.name} as meta because it is tagged with `meta`"
       modifyEnv (setDeclMeta · decl.name)
       setClosureMeta decl
@@ -55,7 +55,7 @@ errors from the interpreter itself as those depend on whether we are running in 
 -/
 @[export lean_eval_check_meta]
 private partial def evalCheckMeta (env : Environment) (declName : Name) : Except String Unit := do
-  bif getIRPhases env declName == .runtime then
+  uif getIRPhases env declName == .runtime then
       throw s!"Cannot evaluate constant `{declName}` as it is neither marked nor imported as `meta`"
 
 builtin_initialize

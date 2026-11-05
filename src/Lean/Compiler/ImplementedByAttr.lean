@@ -61,7 +61,7 @@ builtin_initialize implementedByAttr : ParametricAttribute Name ← registerPara
   getParam := fun declName stx => do
     let decl ← getConstInfo declName
     -- `Attr.simple` when parsed by a stage0 without `Lean.Parser.Attr.implemented_by`
-    let (fnNameStx, early) ← bif stx.getKind == `Lean.Parser.Attr.implemented_by then
+    let (fnNameStx, early) ← uif stx.getKind == `Lean.Parser.Attr.implemented_by then
       pure (stx[2], !stx[1].isNone && stx[1][3].getAtomVal == "true")
     else
       pure (← Attribute.Builtin.getIdent stx, false)

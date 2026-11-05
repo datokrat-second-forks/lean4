@@ -91,7 +91,7 @@ def out (s : String) : VersoStringM Unit := modify (· ++ s)
 /-- Indents a block that begins on a fresh line. -/
 def startBlock : VersoStringM Unit := do
   let s ← get
-  bif s.endsWith "\n" then
+  uif s.endsWith "\n" then
     let i ← read
     out ("".pushn ' ' i)
 
@@ -109,10 +109,10 @@ The number of line endings at the end of `s`, counted up to two. A newline that 
 content, so it ends the count.
 -/
 def trailingLineEndings (s : String.Slice) : Nat :=
-  bif !s.endsWith "\n" || endsWithEscapedNewline s then 0
+  uif !s.endsWith "\n" || endsWithEscapedNewline s then 0
   else
     let s := s.dropEnd 1
-    bif !s.endsWith "\n" || endsWithEscapedNewline s then 1 else 2
+    uif !s.endsWith "\n" || endsWithEscapedNewline s then 1 else 2
 
 /-- Ends a block with a blank line, and never with more than one. -/
 def endBlock : VersoStringM Unit := do
@@ -124,12 +124,12 @@ Prints `value` as text.
 -/
 def textString (atLineStart : Bool) (value : String) : String :=
   let text := escaped value
-  bif atLineStart && needsEscape value then "\\" ++ text else text
+  uif atLineStart && needsEscape value then "\\" ++ text else text
 where
   /-- Puts the escape character before each character that ends a text run. -/
   escaped (value : String) : String :=
     value.foldl (init := "") fun out c =>
-      bif isSpecial c then out.push '\\' |>.push c else out.push c
+      uif isSpecial c then out.push '\\' |>.push c else out.push c
   /-- Whether `c` is a special character in Verso that requires escaping in text. -/
   isSpecial : Char → Bool
     -- A newline in text content comes from an escaped newline in the source. Printed without its
@@ -164,7 +164,7 @@ def blank (s : String.Slice) : Bool := s.all (fun c : Char => c.isWhitespace)
 def indentation (s : String.Slice) : Nat := Id.run do
   let mut n : Nat := 0
   for c in s do
-    bif c != ' ' then break
+    uif c != ' ' then break
     n := n + 1
   n
 
@@ -181,7 +181,7 @@ def reindented (i : Nat) (src : String) : String := Id.run do
   -- the first and after the last never reach the output.
   let mut pending := 0
   for l in src.lines do
-    bif blank l then
+    uif blank l then
       unless out.isEmpty do pending := pending + 1
     else
       unless out.isEmpty do out := out.pushn '\n' (pending + 1)
@@ -195,8 +195,8 @@ content. Padding spaces are added if needed, and empty code is mapped to a singl
 -/
 def codeString (value : String) : String :=
   let padded :=
-    bif value.isEmpty then " "
-    else bif value.startsWith "`" || value.endsWith "`" || versoCodeBoundarySpaces value then
+    uif value.isEmpty then " "
+    else uif value.startsWith "`" || value.endsWith "`" || versoCodeBoundarySpaces value then
       " " ++ value ++ " "
     else value
   let delim := "".pushn '`' (longestBacktickRun padded + 1)
@@ -215,9 +215,9 @@ where
     inls.foldl (init := 0) fun best inl =>
       match InlineView.of inl with
       | some (.emph v) =>
-        max best ((bif char == '_' then 1 else 0) + depth v.content)
+        max best ((uif char == '_' then 1 else 0) + depth v.content)
       | some (.bold v) =>
-        max best ((bif char == '*' then 1 else 0) + depth v.content)
+        max best ((uif char == '*' then 1 else 0) + depth v.content)
       | some (.link v) => max best (depth v.content)
       | some (.role v) => max best (depth v.content)
       | _ => best
@@ -292,7 +292,7 @@ This determines whether the body of a role needs to be wrapped in `[` and `]`.
 -/
 def selfDelimiting? (inls : TSyntaxArray ``Parser.inline) :
     Option (TSyntax ``Parser.inline) :=
-  bif h : inls.size =ᵇ 1 then
+  uif h : inls.size = 1 then
     let inl := inls[0]
     match InlineView.of inl with
     | some (.emph ..) | some (.bold ..)
@@ -377,7 +377,7 @@ def linkTargetToString : LinkTargetView → VersoStringM Unit
 partial def versoSyntaxToString'
     (stx : Syntax) (next? : Option Syntax := none) (atLineStart := false) (alternate := false) :
     VersoStringM Unit := do
-  bif stx.getKind == nullKind then
+  uif stx.getKind == nullKind then
     seq stx.getArgs
   else if let some v := ArgValView.of ⟨stx⟩ then
     match v with
@@ -394,7 +394,7 @@ partial def versoSyntaxToString'
       versoSyntaxToString' val.raw
       out ")"
     | .flag _ _ x isOn =>
-      out <| bif isOn then "+" else "-"
+      out <| uif isOn then "+" else "-"
       out <| identString x.raw
   else if let some v := LinkTargetView.of ⟨stx⟩ then
     linkTargetToString v
@@ -424,7 +424,7 @@ partial def versoSyntaxToString'
       -- prints that shorter form, whatever the source wrote.
       let needsBrackets :=
         if let some inl := selfDelimiting? v.content then runsInto inl next? else true
-      bif needsBrackets then
+      uif needsBrackets then
         out "["
         seq (v.content.map (·.raw))
         out "]"
@@ -448,7 +448,7 @@ partial def versoSyntaxToString'
       out <| "#".pushn '#' v.level ++ " "
       -- The marker takes the space after it as whitespace, so text that begins with a space needs
       -- an escape to keep it.
-      bif leadingSpace v.content then out "\\"
+      uif leadingSpace v.content then out "\\"
       seq (v.content.map (·.raw))
       endBlock
     | .para v =>
@@ -457,11 +457,11 @@ partial def versoSyntaxToString'
         -- A paragraph whose content prints as nothing but whitespace would parse back as no
         -- paragraph, so it takes an escape to keep the line. Content that prints an escape of its
         -- own already keeps it.
-        bif v.content.all (printsBlank ·) then out "\\"
+        uif v.content.all (printsBlank ·) then out "\\"
         seq (v.content.map (·.raw)) (lineStart := true)
         endBlock
     | .ul v =>
-      let marker := bif alternate then "- " else "* "
+      let marker := uif alternate then "- " else "* "
       for item in v.items do
         startBlock
         itemStart marker item.contents
@@ -472,7 +472,7 @@ partial def versoSyntaxToString'
       let mut n := v.start
       for item in v.items do
         startBlock
-        let marker := bif alternate then s!"{n}) " else s!"{n}. "
+        let marker := uif alternate then s!"{n}) " else s!"{n}. "
         itemStart marker item.contents
         withReader (· + marker.length) (seq (item.contents.map (·.raw)))
         endBlock
@@ -480,7 +480,7 @@ partial def versoSyntaxToString'
       endBlock
     | .blockquote v =>
       startBlock
-      out <| bif v.content.isEmpty then ">" else "> "
+      out <| uif v.content.isEmpty then ">" else "> "
       withReader (· + 2) (seq (v.content.map (·.raw)))
       endBlock
     | .codeblock v =>
@@ -497,7 +497,7 @@ partial def versoSyntaxToString'
       -- The closing fence is at the start of a line. The contents therefore print as whole
       -- lines, and the last element of the split is the fence's own indentation.
       let written := v.getVersoCodeBlock
-      let contents := bif written.isEmpty || written.endsWith "\n" then written else written ++ "\n"
+      let contents := uif written.isEmpty || written.endsWith "\n" then written else written ++ "\n"
       out <| contents
         |>.split '\n'
         |>.map (fun (l : String.Slice) => "".pushn ' ' i ++ l)
@@ -534,7 +534,7 @@ partial def versoSyntaxToString'
         out ": "
         -- The colon takes the space after it as whitespace, so a term that begins with a space
         -- needs an escape to keep it.
-        bif leadingSpace item.term then out "\\"
+        uif leadingSpace item.term then out "\\"
         seq (item.term.map (·.raw))
         endBlock
         withReader (· + 2) (seq (item.desc.map (·.raw)))
@@ -556,7 +556,7 @@ partial def versoSyntaxToString'
       out " "
       -- The name takes the space after it as whitespace, so text that begins with a space needs an
       -- escape to keep it.
-      bif leadingSpace v.content then out "\\"
+      uif leadingSpace v.content then out "\\"
       seq (v.content.map (·.raw))
       endBlock
     | .metadata v =>
@@ -589,7 +589,7 @@ where
     let alone := marker.dropEndWhile (· == ' ') |>.copy
     match contents[0]? with
     | none => out alone
-    | some first => bif needsLineStart first then out (alone ++ "\n") else out marker
+    | some first => uif needsLineStart first then out (alone ++ "\n") else out marker
 
   /-- Prints sibling elements in order, tracking line starts and list runs. -/
   seq (stxs : Array Syntax) (lineStart := false) : VersoStringM Unit := do
@@ -607,7 +607,7 @@ where
         -- A role prints its brackets where its content would run into the next element. Only the
         -- other elements need the separator.
         let isRole := if let some _ := RoleView.of ⟨stx⟩ then true else false
-        bif !isRole && mergesInto ⟨stx⟩ next then out zwsp
+        uif !isRole && mergesInto ⟨stx⟩ next then out zwsp
       atLineStart := isLinebreak stx
       prev? := choice?
 
@@ -618,7 +618,7 @@ where
       (inls : TSyntaxArray ``Parser.inline) : VersoStringM Unit := do
     let delim := "".pushn char (emphRun char inls)
     out delim
-    bif inls[0]?.bind (openerChar ·.raw) == some char then out zwsp
+    uif inls[0]?.bind (openerChar ·.raw) == some char then out zwsp
     seq (inls.map (·.raw))
     out delim
 
@@ -627,7 +627,7 @@ Leaves `s` with a single newline at its end, where it has one. Each block prints
 after it, which separates it from the next block. The last block in a document has no next block.
 -/
 def oneTrailingNewline (s : String) : String :=
-  bif s.endsWith "\n" then s.dropEndWhile '\n' |>.copy |>.push '\n' else s
+  uif s.endsWith "\n" then s.dropEndWhile '\n' |>.copy |>.push '\n' else s
 
 /--
 Renders `stx` as Verso, ending with the blank line that separates a block from the block after it.
@@ -647,7 +647,7 @@ def versoBlocksToString (blocks : TSyntaxArray ``Parser.block) :
   blocks.toVector.mapM (m := StateM (Option MarkerChoice)) (fun b => do
       -- A blank paragraph prints nothing and leaves the list run unchanged. It therefore cannot
       -- separate two lists of the same kind that the markers have to keep apart.
-      bif blankParagraph b.raw then return ""
+      uif blankParagraph b.raw then return ""
       let choice? := markerFor (← get) b.raw
       set choice?
       pure (separatedToString b.raw (choice?.any (·.alternate))))
@@ -669,5 +669,5 @@ public def document.formatter : Formatter := concat do
       -- `visitArgs` walks the arguments from the right, so the first block pushed is the
       -- document's last. That block needs no separator after it.
       let text := rendered[blocks.size - 1 - k]
-      push (bif k == 0 then oneTrailingNewline text else text)
+      push (uif k == 0 then oneTrailingNewline text else text)
       goLeft

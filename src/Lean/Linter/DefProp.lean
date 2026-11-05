@@ -36,16 +36,16 @@ namespace DefProp
 def defPropLinter : Linter where run := withSetOptionIn fun _ => do
   unless getLinterValue linter.defProp (← getLinterOptions) do
     return
-  bif (← get).messages.hasErrors then
+  uif (← get).messages.hasErrors then
     return
   let env ← getEnv
   for t in ← getInfoTrees do
     for declName in getDeclsByBody t do
       let some info := env.find? declName | continue
       unless info.isDefinition do continue
-      bif info.hints.isAbbrev then continue
+      uif info.hints.isAbbrev then continue
       let isPropType ← liftTermElabM <| isProp info.type
-      bif isPropType then
+      uif isPropType then
         logLintIf linter.defProp (← getRef) m!"\
           Definition `{.ofConstName declName}` is a proposition; use `theorem` instead of `def`"
 

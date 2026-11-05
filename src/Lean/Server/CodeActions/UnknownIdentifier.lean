@@ -18,13 +18,13 @@ open Lean.Lsp
 open Lean.Server.Completion
 
 private def compareRanges (r1 r2 : Lean.Syntax.Range) : Ordering :=
-  bif r1.start <ᵇ r2.start then
+  uif r1.start < r2.start then
     .lt
-  else bif r1.start >ᵇ r2.start then
+  else uif r1.start > r2.start then
     .gt
-  else bif r1.stop <ᵇ r2.stop then
+  else uif r1.stop < r2.stop then
     .lt
-  else bif r1.stop >ᵇ r2.stop then
+  else uif r1.stop > r2.stop then
     .gt
   else
     .eq
@@ -38,10 +38,10 @@ def waitUnknownIdentifierRanges (doc : EditableDocument) (requestedRange : Lean.
   let msgLog := tree.collectMessagesInRange requestedRange |>.get
   let mut ranges := #[]
   for msg in msgLog.unreported do
-    bif ! msg.data.hasTag (· == unknownIdentifierMessageTag) then
+    uif ! msg.data.hasTag (· == unknownIdentifierMessageTag) then
       continue
     let msgRange : Lean.Syntax.Range := ⟨text.ofPosition msg.pos, text.ofPosition <| msg.endPos.getD msg.pos⟩
-    bif ! msgRange.overlaps requestedRange
+    uif ! msgRange.overlaps requestedRange
         (includeFirstStop := true) (includeSecondStop := true) then
       continue
     ranges := ranges.push msgRange
@@ -52,9 +52,9 @@ def waitUnknownIdentifierRanges (doc : EditableDocument) (requestedRange : Lean.
         | return acc
       let some r := ti.stx.getRange? (canonicalOnly := true)
         | return acc
-      bif ! ti.expr.isFVar then
+      uif ! ti.expr.isFVar then
         return acc
-      bif ! ctx.autoImplicits.contains ti.expr then
+      uif ! ctx.autoImplicits.contains ti.expr then
         return acc
       return acc.insert r
   let autoImplicitUsages := autoImplicitUsages.get.toArray
@@ -68,7 +68,7 @@ def waitAllUnknownIdentifierMessageRanges (doc : EditableDocument)
   let msgLog : MessageLog := snaps.map (·.diagnostics.msgLog) |>.foldl (· ++ ·) {}
   let mut ranges := #[]
   for msg in msgLog.unreported do
-    bif ! msg.data.hasTag (· == unknownIdentifierMessageTag) then
+    uif ! msg.data.hasTag (· == unknownIdentifierMessageTag) then
       continue
     let msgRange : Lean.Syntax.Range := ⟨text.ofPosition msg.pos, text.ofPosition <| msg.endPos.getD msg.pos⟩
     ranges := ranges.push msgRange
@@ -80,9 +80,9 @@ def waitAllUnknownIdentifierMessageRanges (doc : EditableDocument)
           | return acc
         let some r := ti.stx.getRange? (canonicalOnly := true)
           | return acc
-        bif ! ti.expr.isFVar then
+        uif ! ti.expr.isFVar then
           return acc
-        bif ! ctx.autoImplicits.contains ti.expr then
+        uif ! ctx.autoImplicits.contains ti.expr then
           return acc
         return acc.insert r
     ranges := ranges ++ autoImplicitUsages.toArray
@@ -151,7 +151,7 @@ def computeDotQuery?
       return none
   let some typeNames := typeNames?
     | return none
-  bif typeNames.isEmpty then
+  uif typeNames.isEmpty then
     return none
   return some {
     identifier := String.Pos.Raw.extract text.source pos tailPos
@@ -182,7 +182,7 @@ def computeDotIdQuery?
   let some expectedType := expectedType?
     | return none
   let typeNames : Array Name ← ctx.runMetaM lctx <| getDotIdCompletionTypeNames expectedType
-  bif typeNames.isEmpty then
+  uif typeNames.isEmpty then
     return none
   return some {
     identifier := id.toString
@@ -221,7 +221,7 @@ def computeQueries
           pure none
       if let some query := query? then
         queries := queries.push query
-    bif ! queries.isEmpty then
+    uif ! queries.isEmpty then
       break
   return queries
 
@@ -247,14 +247,14 @@ private def mkImportText (ctx : Elab.ContextInfo) (mod : Name) :
     String := Id.run do
   let mut text := s!"import {mod}\n"
   if let some parentDecl := ctx.parentDecl? then
-    bif isMarkedMeta ctx.env parentDecl then
+    uif isMarkedMeta ctx.env parentDecl then
       text := s!"meta {text}"
-      bif !isPrivateName parentDecl then
+      uif !isPrivateName parentDecl then
         -- As `meta` declarations go through a second, stricter visibility check in the compiler,
         -- we should add `public` anywhere in a public definition (technically even private defs
         -- could require public imports but that is not something we can check for here).
         text := s!"public {text}"
-    else bif ctx.env.isExporting then
+    else uif ctx.env.isExporting then
       -- Outside `meta`, add `public` only from public scope
       text := s!"public {text}"
   text
@@ -269,7 +269,7 @@ def handleUnknownIdentifierCodeAction
   let doc := rc.doc
   let text := doc.meta.text
   let queries ← computeQueries doc requestedRange.stop
-  bif queries.isEmpty then
+  uif queries.isEmpty then
     return #[]
   let responseTask ← RequestM.sendServerRequest LeanQueryModuleParams LeanQueryModuleResponse "$/lean/queryModule" {
     sourceRequestID := id
@@ -299,11 +299,11 @@ def handleUnknownIdentifierCodeAction
   for query in queries, result in response.queryResults do
     for ⟨mod, decl, isExactMatch⟩ in result do
       let isDeclInEnv := query.ctx.env.contains decl
-      bif ! isDeclInEnv && mod == query.ctx.env.mainModule then
+      uif ! isDeclInEnv && mod == query.ctx.env.mainModule then
         -- Don't offer any code actions for identifiers defined further down in the same file
         continue
       let insertion := query.determineInsertion decl
-      bif ! isDeclInEnv then
+      uif ! isDeclInEnv then
         unknownIdentifierCodeActions := unknownIdentifierCodeActions.push {
           title := s!"Import {insertion.fullName} from {mod}"
           kind? := kind
@@ -319,7 +319,7 @@ def handleUnknownIdentifierCodeAction
           }
           data? := some <| toJson <| mkUnknownIdentifierCodeActionData params
         }
-        bif isExactMatch then
+        uif isExactMatch then
           hasUnambiguousImportCodeAction := true
       else
         unknownIdentifierCodeActions := unknownIdentifierCodeActions.push {
@@ -331,7 +331,7 @@ def handleUnknownIdentifierCodeAction
           }
           data? := some <| toJson <| mkUnknownIdentifierCodeActionData params
         }
-  bif hasUnambiguousImportCodeAction then
+  uif hasUnambiguousImportCodeAction then
     unknownIdentifierCodeActions := unknownIdentifierCodeActions.push <|
       importAllUnknownIdentifiersCodeAction params "quickfix"
   return unknownIdentifierCodeActions
@@ -346,7 +346,7 @@ def handleResolveImportAllUnknownIdentifiersCodeAction?
   let text := doc.meta.text
   let queries ← unknownIdentifierRanges.flatMapM fun unknownIdentifierRange =>
     computeQueries doc unknownIdentifierRange.stop
-  bif queries.isEmpty then
+  uif queries.isEmpty then
     return none
   let responseTask ← RequestM.sendServerRequest LeanQueryModuleParams LeanQueryModuleResponse "$/lean/queryModule" {
     sourceRequestID := id
@@ -370,10 +370,10 @@ def handleResolveImportAllUnknownIdentifiersCodeAction?
     let some ⟨mod, decl, _⟩ := result.find? fun id =>
         id.isExactMatch && ! q.ctx.env.contains id.decl
       | continue
-    bif mod == q.ctx.env.mainModule then
+    uif mod == q.ctx.env.mainModule then
       continue
     let insertion := q.determineInsertion decl
-    bif ! imports.contains mod then
+    uif ! imports.contains mod then
       edits := edits.push {
         range := importInsertionRange
         newText := mkImportText q.ctx mod

@@ -231,8 +231,8 @@ private def expectedToString : List String → String
   | e::es    => e ++ ", " ++ expectedToString es
 
 protected def toString (e : Error) : String :=
-  let unexpected := bif e.unexpected == "" then [] else [e.unexpected]
-  let expected   := bif e.expected == [] then [] else
+  let unexpected := uif e.unexpected == "" then [] else [e.unexpected]
+  let expected   := uif e.expected == [] then [] else
     let expected := e.expected.toArray.qsort (fun e e' => e < e')
     let expected := expected.toList.eraseReps
     ["expected " ++ expectedToString expected]
@@ -245,7 +245,7 @@ def merge (e₁ e₂ : Error) : Error :=
   match e₂ with
   -- We expect errors to be merged to be about the same token, so unconditionally copy second `unexpectedTk`
   | { unexpectedTk, unexpected := u, .. } =>
-    { unexpectedTk, unexpected := bif u == "" then e₁.unexpected else u, expected := e₁.expected ++ e₂.expected }
+    { unexpectedTk, unexpected := uif u == "" then e₁.unexpected else u, expected := e₁.expected ++ e₂.expected }
 
 end Error
 
@@ -304,18 +304,18 @@ def push (stack : SyntaxStack) (a : Syntax) : SyntaxStack :=
   { stack with raw := stack.raw.push a }
 
 def pop (stack : SyntaxStack) : SyntaxStack :=
-  bif stack.size >ᵇ 0 then
+  uif stack.size > 0 then
     { stack with raw := stack.raw.pop }
   else stack
 
 def back (stack : SyntaxStack) : Syntax :=
-  bif stack.size >ᵇ 0 then
+  uif stack.size > 0 then
     stack.raw.back!
   else
     panic! "SyntaxStack.back: element is inaccessible"
 
 def get! (stack : SyntaxStack) (i : Nat) : Syntax :=
-  bif i <ᵇ stack.size then
+  uif i < stack.size then
     stack.raw[stack.drop + i]!
   else
     panic! "SyntaxStack.get!: element is inaccessible"
@@ -377,7 +377,7 @@ def next' (s : ParserState) (c : ParserContext) (pos : String.Pos.Raw) (h : ¬ c
 def mkNode (s : ParserState) (k : SyntaxNodeKind) (iniStackSz : Nat) : ParserState :=
   match s with
   | ⟨stack, lhsPrec, pos, cache, err, recovered⟩ =>
-    bif err != none && stack.size == iniStackSz then
+    uif err != none && stack.size == iniStackSz then
       -- If there is an error but there are no new nodes on the stack, use `missing` instead.
       -- Thus we ensure the property that an syntax tree contains (at least) one `missing` node
       -- if (and only if) there was a parse error.
@@ -414,7 +414,7 @@ def mkError (s : ParserState) (msg : String) : ParserState :=
 
 def mkUnexpectedError (s : ParserState) (msg : String) (expected : List String := []) (pushMissing := true) : ParserState :=
   let s := s.setError { unexpected := msg, expected }
-  bif pushMissing then s.pushSyntax .missing else s
+  uif pushMissing then s.pushSyntax .missing else s
 
 def mkEOIError (s : ParserState) (expected : List String := []) : ParserState :=
   s.mkUnexpectedError "unexpected end of input" expected
@@ -437,7 +437,7 @@ def mkErrorAt (s : ParserState) (msg : String) (pos : String.Pos.Raw) (initStack
 -- position to be significant.
 def mkUnexpectedTokenErrors (s : ParserState) (ex : List String) (iniPos : String.Pos.Raw := 0) : ParserState :=
   let tk := s.stxStack.back
-  let s := s.setPos (bif iniPos >ᵇ 0 then iniPos else tk.getPos?.get!)
+  let s := s.setPos (uif iniPos > 0 then iniPos else tk.getPos?.get!)
   let s := s.setError { unexpectedTk := tk, expected := ex }
   s.popSyntax.pushSyntax .missing
 
@@ -454,7 +454,7 @@ def mkUnexpectedErrorAt (s : ParserState) (msg : String) (pos : String.Pos.Raw) 
 def toErrorMsg (ctx : InputContext) (s : ParserState) : String := Id.run do
   let mut errStr := ""
   for (pos, _stk, err) in s.allErrors do
-    bif errStr != "" then errStr := errStr ++ "\n"
+    uif errStr != "" then errStr := errStr ++ "\n"
     let pos := ctx.fileMap.toPosition pos
     errStr := errStr ++ mkErrorStringWithPos ctx.fileName pos (toString err)
   errStr
@@ -565,7 +565,7 @@ def withCacheFn (parserName : Name) (p : ParserFn) : ParserFn := fun c s => Id.r
     return ⟨s.stxStack.push r.stx, r.lhsPrec, r.newPos, s.cache, r.errorMsg, s.recoveredErrors⟩
   let initStackSz := s.stxStack.raw.size
   let s := withStackDrop initStackSz p c { s with lhsPrec := 0, errorMsg := none }
-  bif s.stxStack.raw.size != initStackSz + 1 then
+  uif s.stxStack.raw.size != initStackSz + 1 then
     panic! s!"withCacheFn: unexpected stack growth {s.stxStack.raw}"
   return { s with cache.parserCache := s.cache.parserCache.insert key ⟨s.stxStack.back, s.lhsPrec, s.pos, s.errorMsg⟩ }
 

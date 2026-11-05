@@ -46,7 +46,7 @@ def withUncountedHeartbeats (x : CoreM α) : CoreM α := do
 
 /-- Wait for `t`, but throw an interrupt exception as soon as the caller is cancelled. -/
 def waitInterruptibly (t : Task (Option α)) : CoreM (Option α) := do
-  bif (← IO.hasFinished t) then
+  uif (← IO.hasFinished t) then
     return t.get
   let some tk := (← readThe Core.Context).cancelTk? | IO.wait t
   let result : IO.Promise (Option (Option α)) ← IO.Promise.new
@@ -103,7 +103,7 @@ def importedRelevantConstants : CoreM (Array (Name × Array Name)) :=
     let mut tasks := #[]
     for i in [0:nTasks] do
       let chunk := names.extract (i * chunkSize) ((i + 1) * chunkSize)
-      bif chunk.isEmpty then
+      uif chunk.isEmpty then
         continue
       -- With a token, every `Core.checkSystem` in the task would read it, and concurrent reads
       -- of one `IO.Ref` spin. `relevantConstantsOfEach` checks `cancelTk?` every 64 statements.

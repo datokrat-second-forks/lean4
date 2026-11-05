@@ -30,7 +30,7 @@ partial def runLakeSetupFile
     (handleStderr      : String → IO Unit)
     : IO LakeSetupFileOutput := do
   let mut args := #["setup-file", filePath.toString, "-"]
-  bif m.dependencyBuildMode matches .never then
+  uif m.dependencyBuildMode matches .never then
     args := args.push "--no-build" |>.push "--no-cache"
   let spawnArgs : Process.SpawnArgs := {
     stdin  := Process.Stdio.piped
@@ -45,7 +45,7 @@ partial def runLakeSetupFile
 
   let rec processStderr (acc : String) : IO String := do
     let line ← lakeProc.stderr.getLine
-    bif line == "" then
+    uif line == "" then
       return acc
     else
       handleStderr line
@@ -76,7 +76,7 @@ partial def setupFile (m : DocumentMeta) (header : ModuleHeader) (handleStderr :
     | return FileSetupResult.noLakefile -- untitled files have no lakefile
 
   let lakePath ← determineLakePath
-  bif !(← System.FilePath.pathExists lakePath) then
+  uif !(← System.FilePath.pathExists lakePath) then
     return FileSetupResult.noLakefile
 
   let result ← runLakeSetupFile m lakePath filePath header handleStderr

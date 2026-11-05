@@ -170,7 +170,7 @@ def getBuiltinVersoDocStrings : IO (NameMap VersoDocString) :=
 def throwIfHasDocString [Monad m] [MonadError m] [MonadEnv m] (declName : Name) : m Unit := do
   let env ← getEnv
   -- only the state visible on this branch, as in `MapDeclarationExtension.insert`
-  bif docStringExt.contains (asyncMode := .local) env declName ||
+  uif docStringExt.contains (asyncMode := .local) env declName ||
       versoDocStringExt.contains (asyncMode := .local) env declName then
     throwError m!"invalid doc string, declaration `{.ofConstName declName}` already has one"
 
@@ -209,7 +209,7 @@ partial def findInternalDocString? (env : Environment) (declName : Name) (includ
   match versoDocStringExt.find? (level := .server) env declName with
   | some v => return some (.inr v)
   | none => pure ()
-  bif includeBuiltin then
+  uif includeBuiltin then
     if let some docStr := (← builtinDocStrings.get).find? declName then
       return some (.inl docStr)
     else if let some doc := (← builtinVersoDocStrings.get).find? declName then
@@ -220,15 +220,15 @@ def addInheritedDocString [Monad m] [MonadError m] [MonadEnv m] [MonadLiftT IO m
     (declName target : Name) : m Unit := do
   unless (← getEnv).getModuleIdxFor? declName |>.isNone do
     throwError "invalid `[inherit_doc]` attribute, declaration `{.ofConstName declName}` is in an imported module"
-  bif inheritDocStringExt.find? (level := .server) (← getEnv) declName |>.isSome then
+  uif inheritDocStringExt.find? (level := .server) (← getEnv) declName |>.isSome then
     throwError "invalid `[inherit_doc]` attribute, declaration `{.ofConstName declName}` already has an `[inherit_doc]` attribute"
-  bif inheritDocStringExt.find? (level := .server) (← getEnv) target == some declName then
+  uif inheritDocStringExt.find? (level := .server) (← getEnv) target == some declName then
     throwError "invalid `[inherit_doc]` attribute, cycle detected"
   -- A public declaration cannot alias the docstring of a private one: the private target is not
   -- exported, so importers have no module index for it and cannot resolve the alias. Copy the
   -- resolved docstring eagerly instead (the target must be local/import, so the docstring is
   -- available).
-  bif !isPrivateName declName && isPrivateName target then
+  uif !isPrivateName declName && isPrivateName target then
     match ← findInternalDocString? (← getEnv) target with
     | some (.inl md)    => modifyEnv (docStringExt.insert · declName md)
     | some (.inr verso) => modifyEnv (versoDocStringExt.insert · declName verso)
@@ -314,7 +314,7 @@ def terminalNesting (snippet : Snippet) : Option Nat :=
   else none
 
 def addBlock (snippet : Snippet) (block : Doc.Block ElabInline ElabBlock) : Snippet :=
-  bif h : snippet.sections.size =ᵇ 0 then
+  uif h : snippet.sections.size = 0 then
     { snippet with text := snippet.text.push block }
   else
     { snippet with
@@ -363,7 +363,7 @@ def add! (docs : VersoModuleDocs) (snippet : Snippet) : VersoModuleDocs :=
     if let some level := docs.terminalNesting then
       snippet.canNestIn level
     else true
-  bif not ok then
+  uif not ok then
     panic! "Can't nest this snippet here"
   else
     { docs with snippets := docs.snippets.push snippet }
@@ -383,7 +383,7 @@ private structure DocContext where
 private def DocContext.level (ctx : DocContext) : Nat := ctx.context.size
 
 private def DocContext.close (ctx : DocContext) : Except String DocContext := do
-  bif h : ctx.context.size =ᵇ 0 then
+  uif h : ctx.context.size = 0 then
     throw "Can't close a section: none are open"
   else
     let last := ctx.context.back
@@ -400,20 +400,20 @@ private def DocContext.close (ctx : DocContext) : Except String DocContext := do
     }
 
 private partial def DocContext.closeAll (ctx : DocContext) : Except String DocContext := do
-  bif ctx.context.size =ᵇ 0 then
+  uif ctx.context.size = 0 then
     return ctx
   else
     (← ctx.close).closeAll
 
 private partial def DocContext.addPart (ctx : DocContext) (partLevel : Nat) (part : Doc.Part ElabInline ElabBlock Empty) : Except String DocContext := do
-  bif partLevel >ᵇ ctx.level then throw s!"Invalid nesting: expected at most {ctx.level} but got {partLevel}"
-  else bif partLevel =ᵇ ctx.level then pure { ctx with priorParts := ctx.priorParts.push part }
+  uif partLevel > ctx.level then throw s!"Invalid nesting: expected at most {ctx.level} but got {partLevel}"
+  else uif partLevel = ctx.level then pure { ctx with priorParts := ctx.priorParts.push part }
   else
     let ctx ← ctx.close
     ctx.addPart partLevel part
 
 private def DocContext.addBlocks (ctx : DocContext) (blocks : Array (Doc.Block ElabInline ElabBlock)) : Except String DocContext := do
-  bif ctx.priorParts.isEmpty then pure { ctx with content := ctx.content ++ blocks }
+  uif ctx.priorParts.isEmpty then pure { ctx with content := ctx.content ++ blocks }
   else throw "Can't add content after sub-parts"
 
 private def DocContext.addSnippet (ctx : DocContext) (snippet : Snippet) : Except String DocContext := do
@@ -464,6 +464,6 @@ def getVersoModuleDoc? (env : Environment) (moduleName : Name) :
 
 def addVersoModuleDocSnippet (env : Environment) (snippet : VersoModuleDocs.Snippet) : Except String Environment :=
   let docs := getMainVersoModuleDocs env
-  bif docs.canAdd snippet then
+  uif docs.canAdd snippet then
     pure <| versoModuleDocExt.addEntry env snippet
   else throw s!"Can't add - incorrect nesting {docs.terminalNesting.map (s!"(expected at most {·})") |>.getD ""})"

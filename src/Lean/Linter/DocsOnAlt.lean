@@ -31,24 +31,24 @@ namespace DocsOnAlt
 
 private partial def docsOnAlt : Linter where
   run stx := do
-    bif getLinterDocsOnAlt (← getLinterOptions) then
+    uif getLinterDocsOnAlt (← getLinterOptions) then
       if let some mods := stx.find? (·.getKind ∈ [``declModifiers, ``Command.syntax]) then
-        bif mods.find? isAltAttr |>.isSome then
+        uif mods.find? isAltAttr |>.isSome then
           if let some doc := mods.find? (·.getKind == ``docComment) then
             let msg := m!"Documentation is ignored on a tactic alternative."
             logLint linter.tactic.docsOnAlt doc msg
       else if let some cmd := stx.find? (·.getKind == ``Command.attribute) then
         let attrs := cmd[2]
         let names := cmd[4].getArgs
-        bif (attrs.find? isAltAttr).isSome then
+        uif (attrs.find? isAltAttr).isSome then
           let infoTrees := (← get).infoState.trees.toArray
           for tree in infoTrees do
             tree.visitM' (postNode := fun ci info _ => do
               match info with
               | .ofTermInfo ti =>
-                bif names.contains ti.stx then
+                uif names.contains ti.stx then
                   if let some (x, _) := ti.expr.const? then
-                    bif (← findInternalDocString? ci.env x).isSome then
+                    uif (← findInternalDocString? ci.env x).isSome then
                       let msg := m!"Documentation for `{.ofConstName x}` is ignored because it is \
                         a tactic alternative."
                       logLint linter.tactic.docsOnAlt ti.stx msg

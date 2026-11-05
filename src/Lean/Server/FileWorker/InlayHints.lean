@@ -75,13 +75,13 @@ def applyEditToHint? (hintMod : Name) (ihi : Elab.InlayHintInfo) (range : Lean.S
     range.contains ihi.position (includeStop := true) ||
       ihi.textEdits.any (range.overlaps ·.range (includeFirstStop := true)) ||
       isLabelLocAffectedByEdit
-  bif isInlayHintInvalidatedByEdit then
+  uif isInlayHintInvalidatedByEdit then
     none
   let byteOffset : Int := (newText.toRawSubstring.bsize : Int) - (range.bsize : Int)
   let shift (p : String.Pos.Raw) : String.Pos.Raw :=
-    bif range.stop <ᵇ p then
+    uif range.stop < p then
       ⟨p.byteIdx + byteOffset |>.toNat⟩
-    else bif p <ᵇ range.start then
+    else uif p < range.start then
       p
     else -- `range.start <= p && p <= range.stop`
       panic! s!"Got position {p} that should have been invalidated by edit at range {range.start}-{range.stop}"
@@ -94,7 +94,7 @@ def applyEditToHint? (hintMod : Name) (ihi : Elab.InlayHintInfo) (range : Lean.S
       | .name s => .name s
       | .parts ps => .parts <| ps.map fun p => { p with
         location? := p.location?.map fun loc =>
-          bif loc.module == hintMod then
+          uif loc.module == hintMod then
             { loc with range := shiftRange loc.range }
           else
             loc
@@ -120,7 +120,7 @@ def handleInlayHints (p : InlayHintParams) (s : InlayHintState) :
   let ctx ← read
   let text := ctx.doc.meta.text
   let range := text.lspRangeToUtf8Range p.range
-  bif s.isFirstRequestAfterEdit then
+  uif s.isFirstRequestAfterEdit then
     -- We immediately respond to the first inlay hint request after an edit with the old inlay hints,
     -- without waiting for the edit delay.
     -- The reason for this is that in VS Code, when it hasn't received a new set of inlay hints,
@@ -145,7 +145,7 @@ def handleInlayHints (p : InlayHintParams) (s : InlayHintState) :
       let timeSinceLastEditMs := timestamp - lastEditTimestamp
       inlayHintEditDelayMs - timeSinceLastEditMs
   let (snaps, _, isComplete) ← ctx.doc.cmdSnaps.getFinishedPrefixWithConsistentLatency editDelayMs.toUInt32 (cancelTks := ctx.cancelTk.cancellationTasks)
-  bif (← ctx.cancelTk.wasCancelled) then
+  uif (← ctx.cancelTk.wasCancelled) then
     -- Inlay hint request has been cancelled, either by a cancellation request or another edit.
     -- In the former case, we will simply discard the result and respond with a request error
     -- denoting cancellation.
@@ -220,7 +220,7 @@ where
             inlayHintInvalidated := true
             break
         ihi := ihi'
-      bif ! inlayHintInvalidated then
+      uif ! inlayHintInvalidated then
         updatedOldInlayHints := updatedOldInlayHints.push ihi
     return updatedOldInlayHints
 
@@ -233,7 +233,7 @@ where
       let edit := ⟨changeRange, newText⟩
       return oldInlayHints.any (·.textEdits.contains edit)
     let timestamp ← IO.monoMsNow
-    bif isInlayHintInsertionEdit then
+    uif isInlayHintInsertionEdit then
       -- For some stupid reason, VS Code doesn't remove the inlay hint when applying it, so we
       -- try to figure out whether the edit was an insertion of an inlay hint and then respond
       -- to the request without latency so that it inserted ASAP.

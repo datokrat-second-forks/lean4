@@ -38,7 +38,7 @@ private def projInfo (c : Name) : MetaM (Option (Name × Nat × Bool × Bool × 
   let info ← getConstInfoInduct s
   if let some fieldInfo := getFieldInfo? env s field then
     return (field, info.numParams, true, fieldInfo.subobject?.isSome, isFromClass)
-  else bif structInfo.parentInfo.any (·.projFn == c) then
+  else uif structInfo.parentInfo.any (·.projFn == c) then
     return (field, info.numParams, false, true, isFromClass)
   else
     return none
@@ -57,11 +57,11 @@ Like `Lean.Elab.Term.typeMatchesBaseName` but does not use `Function` for pi typ
 -/
 private partial def typeMatchesBaseName (type : Expr) (baseName : Name) : MetaM Bool := do
   withReducibleAndInstances do
-    bif (← isAppOfBaseName type baseName) then
+    uif (← isAppOfBaseName type baseName) then
       return true
     else
       let type ← whnfCore type
-      bif (← isAppOfBaseName type baseName) then
+      uif (← isAppOfBaseName type baseName) then
         return true
       else
         match ← unfoldDefinition? type with
@@ -88,9 +88,9 @@ private def generalizedFieldInfo (c : Name) (args : Array Expr) : MetaM (Name ×
       let fvarId := params[i].fvarId!
       -- If there is a motive, we will treat this as a sort of control flow structure and so we won't use field notation.
       -- Plus, recursors tend to be riskier when using dot notation.
-      bif (← fvarId.getUserName) == `motive then
+      uif (← fvarId.getUserName) == `motive then
         failure
-      bif (← typeMatchesBaseName (← fvarId.getType) baseName) then
+      uif (← typeMatchesBaseName (← fvarId.getType) baseName) then
         guard (← fvarId.getBinderInfo).isExplicit
         -- We require an exact match for the base name.
         -- While `Lean.Elab.Term.resolveLValLoop` is able to unfold the type and iterate, we do not attempt to exploit this feature.
@@ -103,7 +103,7 @@ private def generalizedFieldInfo (c : Name) (args : Array Expr) : MetaM (Name ×
     failure
 
 private def testAppOf (e : Expr) (c : Name) : MetaM Bool := do
-  bif e.isAppOf c then
+  uif e.isAppOf c then
     return true
   else
     return (← whnfD e).isAppOf c
@@ -115,11 +115,11 @@ returns the field name to use and the argument index for the object of the field
 def fieldNotationCandidate? (f : Expr) (args : Array Expr) (useGeneralizedFieldNotation : Bool) : MetaM (Option (Name × Nat)) := do
   let env ← getEnv
   let .const c .. := f.consumeMData | return none
-  bif (← isInaccessiblePrivateName c) then
+  uif (← isInaccessiblePrivateName c) then
     return none
-  bif c.getPrefix.isAnonymous then return none
+  uif c.getPrefix.isAnonymous then return none
   -- If there is `pp_nodot` on this function, then don't use field notation for it.
-  bif hasPPNoDotAttribute env c then
+  uif hasPPNoDotAttribute env c then
     return none
   -- Handle structure projections
   if let some (field, numParams, _isTrueProj, isParentProj, isFromClass) ← projInfo c then
@@ -129,7 +129,7 @@ def fieldNotationCandidate? (f : Expr) (args : Array Expr) (useGeneralizedFieldN
     unless ← testAppOf (← inferType args[numParams]!) c.getPrefix do return none
     return (field, numParams)
   -- Handle generalized field notation
-  bif useGeneralizedFieldNotation then
+  uif useGeneralizedFieldNotation then
     try
       -- Avoid field notation for theorems
       guard !(← isProof f)
@@ -146,7 +146,7 @@ def parentProj? (explicit : Bool) (e : Expr) : MetaM (Option Name) := do
   unless e.isApp do return none
   let .const c .. := e.getAppFn | return none
   let some (field, numParams, isTrueProj, isParentProj, _isFromClass) ← projInfo c | return none
-  bif isTrueProj && isParentProj && (!explicit || numParams == 0) && e.getAppNumArgs == numParams + 1 then
+  uif isTrueProj && isParentProj && (!explicit || numParams == 0) && e.getAppNumArgs == numParams + 1 then
     return some field
   else
     return none

@@ -23,7 +23,7 @@ builtin_initialize unboxAttr : TagAttribute ←
     let cinfo ← getConstInfo declName;
     match cinfo with
     | ConstantInfo.inductInfo v =>
-      bif v.isRec then throwError "Cannot add attribute `[unbox]` to `{.ofConstName declName}`: Recursive inductive datatypes are not supported"
+      uif v.isRec then throwError "Cannot add attribute `[unbox]` to `{.ofConstName declName}`: Recursive inductive datatypes are not supported"
       else pure ()
     | _ => throwError "Cannot add attribute `[unbox]` to `{.ofConstName declName}`: `[unbox]` can only be added to inductive types"
 

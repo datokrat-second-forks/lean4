@@ -100,7 +100,7 @@ def VersoDocstringView.of (docComment : TSyntax [``docComment, ``moduleDoc]) : V
   let body := docComment.raw[1]
   { opener := docComment.raw[0]
     markup :=
-      bif body[0].isOfKind Doc.parseFailureKind then .parseFailure body[0][0]
+      uif body[0].isOfKind Doc.parseFailureKind then .parseFailure body[0][0]
       else .document ⟨body[0]⟩
     closer := body[1] }
 
@@ -153,7 +153,7 @@ parse error.
 def parseVersoDocStringAt (openPos startPos endPos : String.Pos.Raw) :
     CoreM (Option VersoDocument) := do
   let text ← getFileMap
-  let endPos := bif endPos ≤ᵇ text.source.rawEndPos then endPos else text.source.rawEndPos
+  let endPos := uif endPos ≤ text.source.rawEndPos then endPos else text.source.rawEndPos
   have endPos_valid : endPos ≤ text.source.rawEndPos := by
     unfold endPos
     split <;> simp [*]
@@ -173,7 +173,7 @@ def parseVersoDocStringAt (openPos startPos endPos : String.Pos.Raw) :
   -- TODO parse one block at a time for error recovery purposes
   let s := (Doc.Parser.documentFn blockCtxt).run ictx pmctx (getTokenTable env) s
 
-  bif s.allErrors.isEmpty then
+  uif s.allErrors.isEmpty then
     return some ⟨s.stxStack.back⟩
   for (pos, _, err) in s.allErrors do
     logMessage (mkVersoParseMessage ictx pos err)
@@ -276,7 +276,7 @@ def versoDocStringOfText
   let s := Doc.Parser.documentFn.run ictx pmctx (getTokenTable env) s
 
   let errors := s.allErrors
-  bif !errors.isEmpty then
+  uif !errors.isEmpty then
     for (_, _, err) in errors do
       logError err.toString
     return { text := #[], subsections := #[], deferredChecks := #[] }
@@ -303,14 +303,14 @@ def versoDocString
   let body := docComment.raw[1]
   -- Re-parsing reads the comment from its delimiters and its content, so every one of those needs a
   -- source position. A macro-generated docstring may lack any of them.
-  bif (docStringRange docComment).toOption.isSome then
+  uif (docStringRange docComment).toOption.isSome then
     -- Source positions are available, so re-parse from source for interactive features.
     if let some stx ← parseVersoDocString docComment then
       let ((text, subsections), deferredChecks) ←
         Doc.elabBlocks stx |>.exec declName binders
       return { text, subsections, deferredChecks }
     else return { text := #[], subsections := #[], deferredChecks := #[] }
-  else bif body.isOfKind ``versoCommentBody then
+  else uif body.isOfKind ``versoCommentBody then
     match (VersoDocstringView.of docComment).markup with
     | .parseFailure text =>
       -- The markup failed to parse, so re-parse its text to report the error.
@@ -352,7 +352,7 @@ def addMarkdownDocString
     [MonadError m] [MonadLog m] [AddMessageContext m]
     (declName : Name) (docComment : TSyntax `Lean.Parser.Command.docComment) :
     m Unit := do
-  bif declName.isAnonymous then
+  uif declName.isAnonymous then
     -- This case might happen on partial elaboration; ignore instead of triggering any panics below
     return
   unless (← getEnv).getModuleIdxFor? declName |>.isNone do
@@ -372,7 +372,7 @@ def addVersoDocStringCore [Monad m] [MonadEnv m] [MonadLiftT BaseIO m] [MonadErr
   -- The decl name can be anonymous due to attempts to elaborate incomplete syntax. If the name is
   -- anonymous, the `MapDeclarationExtension.insert` panics due to not being on the right async
   -- branch. Better to just do nothing.
-  bif declName.isAnonymous then return
+  uif declName.isAnonymous then return
   unless (← getEnv).getModuleIdxFor? declName |>.isNone do
     throwError s!"invalid doc string, declaration '{declName}' is in an imported module"
   modifyEnv fun env =>
@@ -386,7 +386,7 @@ Adds an elaborated Verso module docstring to the environment.
 -/
 def addVersoModDocStringCore [Monad m] [MonadEnv m] [MonadLiftT BaseIO m] [MonadError m]
   (docs : VersoModuleDocs.Snippet) (deferred : Array Doc.DeferredCheck) : m Unit := do
-  bif (getMainModuleDoc (← getEnv)).isEmpty then
+  uif (getMainModuleDoc (← getEnv)).isEmpty then
     -- The snippet's index is the number of snippets already present.
     let n := (getMainVersoModuleDocs (← getEnv)).snippets.size
     match addVersoModuleDocSnippet (← getEnv) docs with
@@ -434,7 +434,7 @@ def addDocStringOf
     (isVerso : Bool) (declName : Name) (binders : Syntax)
     (docComment : TSyntax `Lean.Parser.Command.docComment) :
     TermElabM Unit := do
-  bif isVerso then
+  uif isVerso then
     addVersoDocString declName binders docComment
   else
     addMarkdownDocString declName docComment

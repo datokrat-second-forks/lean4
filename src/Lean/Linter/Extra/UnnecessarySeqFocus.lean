@@ -109,7 +109,7 @@ abbrev M (ω) := StateRefT (Std.HashMap Lean.Syntax.Range Entry) (ST ω)
 /-- Accumulates the set of tactic syntaxes that should be evaluated at least once. -/
 @[specialize] partial def getTactics {ω} (stx : Syntax) : M ω Unit := do
   if let .node _ k args := stx then
-    bif isSeqFocus k then
+    uif isSeqFocus k then
       if let some r := stx.getRange? true then
         modify fun m => m.insert r { stx, used := false }
     args.forM getTactics
@@ -121,8 +121,7 @@ Each `(n, i)` means that the array must have length `n` and we will descend into
 def getPath : Info → PersistentArray InfoTree → List ((n : Nat) × Fin n) → Option Info
   | i, _, [] => some i
   | _, c, ⟨n, i, h⟩::ns =>
-    bif e : c.size =ᵇ n then
-      have e := eq_of_decideEq_eq_true e
+    uif e : c.size = n then
       if let .node i c' := c[i]'(e ▸ h) then getPath i c' ns else none
     else none
 
@@ -138,7 +137,7 @@ partial def markUsedTactics {ω} : InfoTree → M ω Unit
     if let .ofTacticInfo i := i then
       if let some r := i.stx.getRange? true then
       if let some entry := (← get)[r]? then
-      bif i.stx.getKind == ``Parser.Tactic.«tactic_<;>_» then
+      uif i.stx.getKind == ``Parser.Tactic.«tactic_<;>_» then
         let isBad := do
           unless i.goalsBefore.length == 1 || !multigoals.contains i.stx[0].getKind do
             none
@@ -147,8 +146,8 @@ partial def markUsedTactics {ω} : InfoTree → M ω Unit
           let .ofTacticInfo i ← getPath (.ofTacticInfo i) c
             [⟨1, 0⟩, ⟨2, 1⟩, ⟨1, 0⟩, ⟨5, 0⟩] | none
           guard <| i.goalsAfter.length == 1
-        modify fun s => bif isBad.isSome then s.insert r { entry with used := true } else s.erase r
-      else bif i.stx.getKind == ``Parser.Tactic.Conv.«conv_<;>_» then
+        modify fun s => uif isBad.isSome then s.insert r { entry with used := true } else s.erase r
+      else uif i.stx.getKind == ``Parser.Tactic.Conv.«conv_<;>_» then
         let isBad := do
           unless i.goalsBefore.length == 1 || !multigoals.contains i.stx[0].getKind do
             none
@@ -157,7 +156,7 @@ partial def markUsedTactics {ω} : InfoTree → M ω Unit
           let .ofTacticInfo i ← getPath (.ofTacticInfo i) c
             [⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩, ⟨2, 1⟩, ⟨1, 0⟩, ⟨5, 0⟩] | none
           guard <| i.goalsAfter.length == 1
-        modify fun s => bif isBad.isSome then s.insert r { entry with used := true } else s.erase r
+        modify fun s => uif isBad.isSome then s.insert r { entry with used := true } else s.erase r
     markUsedTacticsList c
   | .context _ t => markUsedTactics t
   | .hole _ => pure ()
@@ -169,7 +168,7 @@ def unnecessarySeqFocusLinter : Linter where run := withSetOptionIn fun stx => d
   unless getLinterValue linter.extra.unnecessarySeqFocus (← getLinterOptions)
       && (← getInfoState).enabled do
     return
-  bif (← get).messages.hasErrors then
+  uif (← get).messages.hasErrors then
     return
   let trees ← getInfoTrees
   let multigoals ← multigoalKindsRef.get
@@ -178,11 +177,11 @@ def unnecessarySeqFocusLinter : Linter where run := withSetOptionIn fun stx => d
     markUsedTacticsList multigoals trees
   let (_, map) := runST fun _ => go.run {}
   let unused := map.fold (init := #[]) fun acc r { stx, used } =>
-    bif used then acc.push (stx[1].getRange?.getD r, stx[1]) else acc
+    uif used then acc.push (stx[1].getRange?.getD r, stx[1]) else acc
   let key (r : Lean.Syntax.Range) := (r.start.byteIdx, (-r.stop.byteIdx : Int))
   let mut last : Lean.Syntax.Range := ⟨0, 0⟩
   for (r, stx) in let _ := @lexOrd; let _ := @ltOfOrd.{0}; unused.qsort (key ·.1 < key ·.1) do
-    bif last.start ≤ᵇ r.start && r.stop ≤ᵇ last.stop then continue
+    uif last.start ≤ r.start ∧ r.stop ≤ last.stop then continue
     logLintIf linter.extra.unnecessarySeqFocus stx
       "Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice"
     last := r

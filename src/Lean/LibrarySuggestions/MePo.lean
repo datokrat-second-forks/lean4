@@ -47,7 +47,7 @@ def mepo (initialRelevant : NameSet) (score : NameSet → NameSet → Float) (ac
   let mut relevant := initialRelevant
   let mut accepted : Array Suggestion := {}
   for (n, ci) in env.constants do
-    bif (← accept ci) then
+    uif (← accept ci) then
       candidates := candidates.push (n, ci.type.getUsedConstantsAsSet)
   while candidates.size > 0 && accepted.size < maxSuggestions do
     trace[mepo] m!"Considering candidates with threshold {p}."
@@ -55,7 +55,7 @@ def mepo (initialRelevant : NameSet) (score : NameSet → NameSet → Float) (ac
     let (newAccepted, candidates') := candidates.map
       (fun (n, c) => (n, c, score relevant c))
       |>.partition fun (_, _, s) => p ≤ s
-    bif newAccepted.isEmpty then return accepted
+    uif newAccepted.isEmpty then return accepted
     trace[mepo] m!"Accepted {newAccepted.map fun (n, _, s) => (n, s)}."
     -- Scores from different iterations are not comparable: each iteration accepts
     -- against a strictly larger `relevant` set and a higher threshold. We order the
@@ -76,7 +76,7 @@ open MePo
 public def mepoSelector (useRarity : Bool) (p : Float := 0.6) (c : Float := 2.4) : Selector := fun g config => do
   let constants ← g.getRelevantConstants
   let env ← getEnv
-  let score ← bif useRarity then do
+  let score ← uif useRarity then do
     let frequency ← symbolFrequencyMap
     pure <| frequencyScore (fun n => frequency.getD n 0)
   else

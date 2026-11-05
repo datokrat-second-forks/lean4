@@ -124,7 +124,7 @@ Escapes `value` so that `TSyntax.getVersoText` reads it back unchanged. Only the
 itself needs escaping, since decoding drops the backslash from any pair.
 -/
 private def escapeVersoText (value : String) : String :=
-  value.foldl (init := "") fun out c => bif c == '\\' then out ++ "\\\\" else out.push c
+  value.foldl (init := "") fun out c => uif c == '\\' then out ++ "\\\\" else out.push c
 
 
 /--
@@ -166,10 +166,10 @@ private def codeLinesFrom (info : SourceInfo) (value : String) : Array Syntax :=
   let mut line := ""
   for c in value do
     line := line.push c
-    bif c == '\n' then
+    uif c == '\n' then
       lines := lines.push (Syntax.mkLit versoCodeLineKind line (info := info))
       line := ""
-  bif !line.isEmpty || lines.isEmpty then
+  uif !line.isEmpty || lines.isEmpty then
     lines := lines.push (Syntax.mkLit versoCodeLineKind line (info := info))
   return lines
 
@@ -581,7 +581,7 @@ def UnorderedListItemView.of (stx : TSyntax ``Parser.ListItem.item) :
     Option UnorderedListItemView :=
   match stx with
   | `(Parser.ListItem.item| $m:listMarker $bs*) =>
-    bif m.getVersoDelimiter.front? |>.any (· ∈ ['*', '-', '+']) then some ⟨stx, m, bs⟩ else none
+    uif m.getVersoDelimiter.front? |>.any (· ∈ ['*', '-', '+']) then some ⟨stx, m, bs⟩ else none
   | _ => none
 
 /--
@@ -605,7 +605,7 @@ A view of `stx`, if it is an ordered list's item. Its marker must be a number.
 def OrderedListItemView.of (stx : TSyntax ``Parser.ListItem.item) : Option OrderedListItemView :=
   match stx with
   | `(Parser.ListItem.item| $m:listMarker $bs*) =>
-    bif m.getVersoDelimiter.front? |>.any (·.isDigit) then some ⟨stx, m, bs⟩ else none
+    uif m.getVersoDelimiter.front? |>.any (·.isDigit) then some ⟨stx, m, bs⟩ else none
   | _ => none
 
 /--
@@ -741,7 +741,7 @@ def CodeBlockView.of (stx : TSyntax ``Parser.block) : Option CodeBlockView :=
         $closeFence:codeBlockFence) =>
     -- Empty content parses with no tokens of its own, so its location is the closing fence.
     let content : VersoCodeBlock :=
-      bif s.raw.getPos?.isSome then s else ⟨s.raw.setInfo (emptyContentInfo closeFence)⟩
+      uif s.raw.getPos?.isSome then s else ⟨s.raw.setInfo (emptyContentInfo closeFence)⟩
     some {
       stx, openFence, name? := name, args := args.getD #[], content, closeFence
     }

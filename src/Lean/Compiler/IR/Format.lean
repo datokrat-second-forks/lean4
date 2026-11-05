@@ -32,9 +32,9 @@ instance : ToFormat LitVal := ⟨private_decl% formatLitVal⟩
 private def formatCtorInfo : CtorInfo → Format
   | { name := name, cidx := cidx, usize := usize, ssize := ssize, .. } => Id.run do
     let mut r := f!"ctor_{cidx}"
-    bif usize >ᵇ 0 || ssize >ᵇ 0 then
+    uif usize > 0 ∨ ssize > 0 then
       r := f!"{r}.{usize}.{ssize}"
-    bif name != Name.anonymous then
+    uif name != Name.anonymous then
       r := f!"{r}[{name}]"
     r
 
@@ -43,7 +43,7 @@ instance : ToFormat CtorInfo := ⟨private_decl% formatCtorInfo⟩
 private def formatExpr : Expr → Format
   | Expr.ctor i ys      => format i ++ formatArray ys
   | Expr.reset n x      => "reset[" ++ format n ++ "] " ++ format x
-  | Expr.reuse x i u ys => "reuse" ++ (bif u then "!" else "") ++ " " ++ format x ++ " in " ++ format i ++ formatArray ys
+  | Expr.reuse x i u ys => "reuse" ++ (uif u then "!" else "") ++ " " ++ format x ++ " in " ++ format i ++ formatArray ys
   | Expr.proj i x       => "proj[" ++ format i ++ "] " ++ format x
   | Expr.uproj i x      => "uproj[" ++ format i ++ "] " ++ format x
   | Expr.sproj n o x    => "sproj[" ++ format n ++ ", " ++ format o ++ "] " ++ format x
@@ -82,7 +82,7 @@ instance : ToFormat IRType := ⟨private_decl% formatIRType⟩
 instance : ToString IRType := ⟨toString ∘ format⟩
 
 private def formatParam : Param → Format
-  | { x := name, borrow := b, ty := ty } => "(" ++ format name ++ " : " ++ (bif b then "@& " else "") ++ format ty ++ ")"
+  | { x := name, borrow := b, ty := ty } => "(" ++ format name ++ " : " ++ (uif b then "@& " else "") ++ format ty ++ ")"
 
 instance : ToFormat Param := ⟨private_decl% formatParam⟩
 
@@ -100,8 +100,8 @@ def formatFnBodyHead : FnBody → Format
   | FnBody.uset x i y _        => "uset " ++ format x ++ "[" ++ format i ++ "] := " ++ format y
   | FnBody.sset x i o y ty _   => "sset " ++ format x ++ "[" ++ format i ++ ", " ++ format o ++ "] : " ++ format ty ++ " := " ++ format y
   | FnBody.setTag x cidx _     => "setTag " ++ format x ++ " := " ++ format cidx
-  | FnBody.inc x n _ _ _       => "inc" ++ (bif n != 1 then Format.sbracket (format n) else "") ++ " " ++ format x
-  | FnBody.dec x n _ _ _       => "dec" ++ (bif n != 1 then Format.sbracket (format n) else "") ++ " " ++ format x
+  | FnBody.inc x n _ _ _       => "inc" ++ (uif n != 1 then Format.sbracket (format n) else "") ++ " " ++ format x
+  | FnBody.dec x n _ _ _       => "dec" ++ (uif n != 1 then Format.sbracket (format n) else "") ++ " " ++ format x
   | FnBody.del x _             => "del " ++ format x
   | FnBody.case _   x _     _  => "case " ++ format x ++ " of ..."
   | FnBody.jmp j ys            => "jmp " ++ format j ++ formatArray ys
@@ -120,8 +120,8 @@ partial def formatFnBody (fnBody : FnBody) (indent : Nat := 2) : Format :=
     | FnBody.uset x i y b        => "uset " ++ format x ++ "[" ++ format i ++ "] := " ++ format y ++ ";" ++ Format.line ++ loop b
     | FnBody.sset x i o y ty b   => "sset " ++ format x ++ "[" ++ format i ++ ", " ++ format o ++ "] : " ++ format ty ++ " := " ++ format y ++ ";" ++ Format.line ++ loop b
     | FnBody.setTag x cidx b     => "setTag " ++ format x ++ " := " ++ format cidx ++ ";" ++ Format.line ++ loop b
-    | FnBody.inc x n _ _ b       => "inc" ++ (bif n != 1 then Format.sbracket (format n) else "") ++ " " ++ format x ++ ";" ++ Format.line ++ loop b
-    | FnBody.dec x n _ _ b       => "dec" ++ (bif n != 1 then Format.sbracket (format n) else "") ++ " " ++ format x ++ ";" ++ Format.line ++ loop b
+    | FnBody.inc x n _ _ b       => "inc" ++ (uif n != 1 then Format.sbracket (format n) else "") ++ " " ++ format x ++ ";" ++ Format.line ++ loop b
+    | FnBody.dec x n _ _ b       => "dec" ++ (uif n != 1 then Format.sbracket (format n) else "") ++ " " ++ format x ++ ";" ++ Format.line ++ loop b
     | FnBody.del x b             => "del " ++ format x ++ ";" ++ Format.line ++ loop b
     | FnBody.case _ x xType cs   => "case " ++ format x ++ " : " ++ format xType ++ " of" ++ cs.foldl (fun r c => r ++ Format.line ++ formatAlt loop indent c) Format.nil
     | FnBody.jmp j ys            => "jmp " ++ format j ++ formatArray ys

@@ -70,12 +70,12 @@ where
       f child acc |>.bind (sync := true) fun (acc, control) => Id.run do
         let .proceed foldChildrenOfChild := control
           | return .pure (acc, true)
-        bif ! foldChildrenOfChild then
+        uif ! foldChildrenOfChild then
           return traverseChildren acc otherChildren
         let subtreeTask := child.task.bind (sync := true) fun tree =>
           traverseTree acc tree
         return subtreeTask.bind (sync := true) fun (acc, done) => Id.run do
-          bif done then
+          uif done then
             return .pure (acc, done)
           return traverseChildren acc otherChildren
 
@@ -102,7 +102,7 @@ public partial def SnapshotTree.findInfoTreeAtPos (text : FileMap) (tree : Snaps
       -- syntax that we can use here, so ignoring snapshots with non-canonical syntax can only
       -- at worst break incrementality in request handlers.
       | return .pure (none, .proceed (foldChildren := true))
-    bif ! text.rangeContainsHoverPos range hoverPos includeStop then
+    uif ! text.rangeContainsHoverPos range hoverPos includeStop then
       -- Subtrees of the snapshot tree always have syntax ranges that are contained in those of
       -- their parents, so we can terminate early here.
       return .pure (none, .proceed (foldChildren := false))
@@ -118,7 +118,7 @@ public partial def SnapshotTree.foldInfosInRange (tree : SnapshotTree) (requeste
       | return .pure (acc, .proceed (foldChildren := false))
     let some range := stx.getRangeWithTrailing? (canonicalOnly := true)
       | return .pure (acc, .proceed (foldChildren := true))
-    bif ! range.overlaps requestedRange (includeFirstStop := true) (includeSecondStop := true) then
+    uif ! range.overlaps requestedRange (includeFirstStop := true) (includeSecondStop := true) then
       return .pure (acc, .proceed (foldChildren := false))
     return snap.task.map (sync := true) fun tree => Id.run do
       let some infoTree := tree.element.infoTree?
@@ -126,7 +126,7 @@ public partial def SnapshotTree.foldInfosInRange (tree : SnapshotTree) (requeste
       let acc := infoTree.foldInfo (init := acc) fun ctx i acc => Id.run do
         let some r := i.range?
           | return acc
-        bif ! r.overlaps requestedRange (includeFirstStop := true) (includeSecondStop := true) then
+        uif ! r.overlaps requestedRange (includeFirstStop := true) (includeSecondStop := true) then
           return acc
         return f ctx i acc
       return (acc, .proceed (foldChildren := true))
@@ -138,7 +138,7 @@ public partial def SnapshotTree.collectMessagesInRange (tree : SnapshotTree)
       | return .pure (log, .proceed (foldChildren := true))
     let some range := stx.getRangeWithTrailing? (canonicalOnly := true)
       | return .pure (log, .proceed (foldChildren := true))
-    bif ! range.overlaps requestedRange (includeFirstStop := true) (includeSecondStop := true) then
+    uif ! range.overlaps requestedRange (includeFirstStop := true) (includeSecondStop := true) then
       return .pure (log, .proceed (foldChildren := false))
     return snap.task.map (sync := true) fun tree => Id.run do
       return (log ++ tree.element.diagnostics.msgLog, .proceed (foldChildren := true))
@@ -159,9 +159,9 @@ public partial def findCmdParsedSnap (initSnap : InitialSnapshot) (text : FileMa
     firstCmdSnapTask.bind (sync := true) go
 where
   go (cmdParsed : CommandParsedSnapshot) : Task (Option CommandParsedSnapshot) := Id.run do
-    bif containsHoverPos cmdParsed then
+    uif containsHoverPos cmdParsed then
       return .pure (some cmdParsed)
-    bif isAfterHoverPos cmdParsed then
+    uif isAfterHoverPos cmdParsed then
       -- This should never happen in principle
       -- (commands + trailing ws are consecutive and there is no unassigned space between them),
       -- but it's always good to eliminate one additional assumption.

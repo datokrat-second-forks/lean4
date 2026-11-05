@@ -195,9 +195,9 @@ def longestBacktickRun (str : String) : Nat := Id.run do
   let mut best : Nat := 0
   let mut run : Nat := 0
   for c in str do
-    bif c == '`' then
+    uif c == '`' then
       run := run + 1
-      bif run >ᵇ best then best := run
+      uif run > best then best := run
     else run := 0
   best
 
@@ -218,13 +218,11 @@ Verso does not use escapes such as `\n` for newlines.
 private def unescapeVerso (str : String) : String := Id.run do
   let mut out := ""
   let mut iter := str.startPos
-  while h : iter ≠ᵇ str.endPos do
-    have h := ne_of_decideNe_eq_true h
+  while h : iter ≠ str.endPos do
     let c := iter.get h
     iter := iter.next h
-    bif c == '\\' then
-      bif h : iter ≠ᵇ str.endPos then
-        have h := ne_of_decideNe_eq_true h
+    uif c == '\\' then
+      uif h : iter ≠ str.endPos then
         out := out.push (iter.get h)
         iter := iter.next h
     else
@@ -237,7 +235,7 @@ gives `value` back. The escape character escapes itself.
 -/
 private def escapeVersoDelimited (delimiters : List Char) (value : String) : String :=
   value.foldl (init := "") fun out c =>
-    bif c == '\\' || delimiters.contains c then out.push '\\' |>.push c else out.push c
+    uif c == '\\' || delimiters.contains c then out.push '\\' |>.push c else out.push c
 
 /-- Escapes `value` so that `getVersoLinkUrl` reads it back unchanged. -/
 def escapeVersoLinkUrl (value : String) : String := escapeVersoDelimited [')'] value
@@ -468,7 +466,7 @@ private def atomOf (s : String) : Lean.Parser.Parser :=
       let st' := chars c st
       -- The characters are read one at a time, so a failure names the one that did not match. The
       -- atom is what was expected, and reporting it at the start says where it would have begun.
-      bif st'.hasError then st'.mkErrorAt s!"'{s}'" st.pos else st'
+      uif st'.hasError then st'.mkErrorAt s!"'{s}'" st.pos else st'
   }
 
 open Lean.Parser in
@@ -477,7 +475,7 @@ private def charRun (ch : Char) : Lean.Parser.Parser :=
   tokenWithAntiquot {
     fn := rawFn (trailingWs := true) fun c st =>
       let st' := takeWhile1Fn (· == ch) s!"'{ch}'" c st
-      bif st'.hasError then st'.mkErrorAt s!"one or more '{ch}'" st.pos else st'
+      uif st'.hasError then st'.mkErrorAt s!"one or more '{ch}'" st.pos else st'
   }
 
 open Lean.Parser in
@@ -486,10 +484,10 @@ private def bulletAtom : Lean.Parser.Parser := onFirstUse fun _ =>
   tokenWithAntiquot {
     -- A single scan, so that nothing pushes a wrapper node beside the atom.
     fn := rawFn (trailingWs := true) fun c s =>
-      bif h : c.atEnd s.pos then s.mkEOIError
+      uif h : c.atEnd s.pos then s.mkEOIError
       else
-        let ch := c.get' s.pos (Bool.ne_true_of_eq_false h)
-        bif ch == '*' || ch == '-' || ch == '+' then s.next' c s.pos (Bool.ne_true_of_eq_false h)
+        let ch := c.get' s.pos h
+        uif ch == '*' || ch == '-' || ch == '+' then s.next' c s.pos h
         else s.mkErrorAt "'*', '-', or '+'" s.pos
   }
 
@@ -500,7 +498,7 @@ private def numberAtom : Lean.Parser.Parser := onFirstUse fun _ =>
     fn := rawFn (trailingWs := true) fun c s =>
       let s' := (takeWhile1Fn (·.isDigit) "'0'-'9'" >>
         satisfyFn (fun c => c == '.' || c == ')') "'.' or ')'") c s
-      bif s'.hasError then s'.mkErrorAt "a number followed by '.' or ')'" s.pos else s'
+      uif s'.hasError then s'.mkErrorAt "a number followed by '.' or ')'" s.pos else s'
   }
 
 open Lean.Parser Lean.Parser.Term in
@@ -606,19 +604,19 @@ delimiter must have the same length as the opening delimiter.
 private def matchingDelimiterLengths (delim : Lean.Parser.Parser) (ch : Char) (contents : Lean.Parser.Parser) :
     ParserFn := fun c s =>
   let s := delim.fn c s
-  bif s.hasError then s
+  uif s.hasError then s
   else
     let opener := s.stxStack.back
     let s := contents.fn c s
-    bif s.hasError then s
+    uif s.hasError then s
     else
       let closerPos := s.pos
       let s := delim.fn c s
-      bif s.hasError then s
+      uif s.hasError then s
       else
         match runLength opener, runLength s.stxStack.back with
         | some open', some close' =>
-          bif open' == close' then s
+          uif open' == close' then s
           else s.mkErrorAt s!"'{"".pushn ch open'}' to close what '{"".pushn ch open'}' opened"
             closerPos
         | _, _ => s

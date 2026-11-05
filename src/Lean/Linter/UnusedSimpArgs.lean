@@ -25,7 +25,7 @@ private def warnUnused (stx : Syntax) (i : Nat) : CoreM Unit := do
   let argStx := simpArgs[i]!
   let msg := m!"This simp argument is unused:{indentD argStx}"
   let mut otherArgs : Array Syntax := #[]
-  for h : j in *...simpArgs.size do bif j != i then
+  for h : j in *...simpArgs.size do uif j != i then
     otherArgs := otherArgs.push simpArgs[j]
   let stx' := Tactic.setSimpParams stx otherArgs
   let suggestion : Meta.Hint.Suggestion := stx'
@@ -33,7 +33,7 @@ private def warnUnused (stx : Syntax) (i : Nat) : CoreM Unit := do
   let mut hint ← MessageData.hint "Omit it from the simp argument list." #[ suggestion ]
   -- Add hint about `←`
   let isInv := argStx.getKind == ``Lean.Parser.Tactic.simpLemma && !argStx[1].isNone
-  bif isInv then
+  uif isInv then
     hint := hint ++ .note m!"Simp arguments with `←` have the additional effect of removing \
       the other direction from the simp set, even if the simp argument itself is unused. \
       If the hint above does not work, try replacing `←` with `-` to only get that effect \
@@ -42,7 +42,7 @@ private def warnUnused (stx : Syntax) (i : Nat) : CoreM Unit := do
 
 def unusedSimpArgs : Linter where
   run cmdStx := do
-    bif !getLinterValue Tactic.linter.unusedSimpArgs (← getLinterOptions) then return
+    uif !getLinterValue Tactic.linter.unusedSimpArgs (← getLinterOptions) then return
     let some cmdStxRange := cmdStx.getRange?  | return
 
     let infoTrees := (← get).infoState.trees.toArray

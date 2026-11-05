@@ -143,7 +143,7 @@ def publishDiagnostics (doc : EditableDocumentCore) (incrementalDiagnosticSuppor
     let publishedDiagsAmount := ds.publishedDiagsAmount
     set <| { ds with publishedDiagsAmount := diags.size, isIncremental := true }
     let (diagsToSend, isIncremental) :=
-      bif useIncremental then
+      uif useIncremental then
         let newDiags := diags.foldl (init := #[]) (start := publishedDiagsAmount) fun acc d =>
           acc.push d.toDiagnostic
         (newDiags, true)
@@ -154,7 +154,7 @@ def publishDiagnostics (doc : EditableDocumentCore) (incrementalDiagnosticSuppor
           acc.push d.toDiagnostic
         (allDiags, false)
     let isIncremental? :=
-      bif incrementalDiagnosticSupport then
+      uif incrementalDiagnosticSupport then
         some isIncremental
       else
         none

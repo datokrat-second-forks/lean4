@@ -31,7 +31,7 @@ def determineSignatureHelp (tree : Elab.InfoTree) (appStx : Syntax)
   let app := appInfo.expr
   let some fmt ← appCtx.runMetaM appInfo.lctx do
       let appType ← instantiateMVars <| ← Meta.inferType app
-      bif ! appType.isForall then
+      uif ! appType.isForall then
         return none
       let (stx, _) ← PrettyPrinter.delabCore appType
         (delab := PrettyPrinter.Delaborator.delabForallWithSignature)
@@ -103,7 +103,7 @@ def findSignatureHelp? (text : FileMap) (ctx? : Option Lsp.SignatureHelpContext)
   -- every space in the comment.
   -- This branch avoids this particular annoyance, but doesn't prevent the signature help from
   -- triggering on other comment kinds.
-  bif isPositionInLineComment text requestedPos then
+  uif isPositionInLineComment text requestedPos then
     return none
   let stack? := cmdStx.findStack? fun stx => Id.run do
     let some range := stx.getRangeWithTrailing? (canonicalOnly := true)
@@ -119,7 +119,7 @@ def findSignatureHelp? (text : FileMap) (ctx? : Option Lsp.SignatureHelpContext)
     let (kind?, control) := determineCandidateKind stx parent
     if let some kind := kind? then
       candidates := candidates.push ⟨kind, stx⟩
-    bif control matches .stop then
+    uif control matches .stop then
       break
   -- Uses a stable sort so that we prefer inner candidates over outer candidates.
   candidates := candidates.toList.mergeSort (fun c1 c2 => c1.kind.prio >= c2.kind.prio) |>.toArray
@@ -130,7 +130,7 @@ def findSignatureHelp? (text : FileMap) (ctx? : Option Lsp.SignatureHelpContext)
   -- but the `.termArg` candidates are not semantically valid left-hand sides of applications.
   let hasHighPrioCandidate := candidates.any (·.kind.prio > CandidateKind.termArg.prio)
   for candidate in candidates do
-    bif candidate.kind matches .termArg && hasHighPrioCandidate then
+    uif candidate.kind matches .termArg && hasHighPrioCandidate then
       -- If all high prio candidates agree that there is no function application here,
       -- we trust them instead of falling back to `.termArg` candidates.
       -- This ensures that no signature help is displayed for a function that is passed as
@@ -161,7 +161,7 @@ where
     -- If we are ever on the interior of a term, then we will also be on the interior of terms
     -- further up in the syntax stack, as these subsume the inner term, and so we terminate
     -- the search early in this case.
-    bif requestedPos <ᵇ tailPos then
+    uif requestedPos < tailPos then
       return (none, .stop)
     let isManualTrigger := ctx?.any (·.triggerKind matches .invoked)
     let isRetrigger := ctx?.any (·.isRetrigger)
@@ -175,9 +175,9 @@ where
     -- the signature help (`Ctrl+Shift+Space` in VS Code). We also display it in successive lines
     -- if the user never closed it in the meantime, i.e. when the signature help was simply
     -- retriggered.
-    bif ! isManualTrigger && ! isRetrigger && isCursorAfterTailPosLine then
+    uif ! isManualTrigger && ! isRetrigger && isCursorAfterTailPosLine then
       return (none, .continue)
-    bif stx matches .ident .. then
+    uif stx matches .ident .. then
       match parent with
       -- Do not yield a candidate `f` for `_ |>.f <cursor>`, `_.f <cursor>` or `.f <cursor>`.
       -- Since `f` is an `identArg` candidate, has a `TermInfo` of its own and is a subterm of
@@ -190,9 +190,9 @@ where
       | return c none
     -- `nullKind` is usually used for grouping together arguments, so we just skip it until
     -- we have more tangible nodes at hand.
-    bif kind == nullKind then
+    uif kind == nullKind then
       return c none
-    bif kind == ``Parser.Term.app then
+    uif kind == ``Parser.Term.app then
       return c appArg
     match stx with
     | `($_ <| $_) => return c pipeArg
@@ -201,6 +201,6 @@ where
     | `(.$_:ident) => return c termArg
     | `($_.$_:ident) => return c termArg
     | _ =>
-      bif args.size ≤ᵇ 1 then
+      uif args.size ≤ 1 then
         return c none
       return c termArg

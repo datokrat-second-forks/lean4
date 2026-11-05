@@ -88,19 +88,19 @@ def namePartsToName (parts : Array NamePart) : Name :=
 
 /-- Format name parts using `Name.toString` for correct escaping. -/
 def formatNameParts (comps : Array NamePart) : String :=
-  bif comps.isEmpty then "" else (namePartsToName comps).toString
+  uif comps.isEmpty then "" else (namePartsToName comps).toString
 
 def matchSuffix (c : NamePart) : Option String :=
   match c with
   | NamePart.str s =>
-    bif s == "_redArg" then some "arity↓"
-    else bif s == "_boxed" then some "boxed"
-    else bif s == "_impl" then some "impl"
-    else bif s == "_lam" || s == "_lambda" || s == "_elam" then some "λ"
-    else bif s == "_jp" then some "jp"
-    else bif s == "_closed" then some "closed"
-    else bif (dropPrefix? s "_lam_").any isAllDigits then some "λ"
-    else bif (dropPrefix? s "_elam_").any isAllDigits then some "λ"
+    uif s == "_redArg" then some "arity↓"
+    else uif s == "_boxed" then some "boxed"
+    else uif s == "_impl" then some "impl"
+    else uif s == "_lam" || s == "_lambda" || s == "_elam" then some "λ"
+    else uif s == "_jp" then some "jp"
+    else uif s == "_closed" then some "closed"
+    else uif (dropPrefix? s "_lam_").any isAllDigits then some "λ"
+    else uif (dropPrefix? s "_elam_").any isAllDigits then some "λ"
     else none
   | _ => none
 
@@ -111,11 +111,11 @@ def isSpecIndex (c : NamePart) : Bool :=
 
 def stripPrivate (comps : Array NamePart) (start stop : Nat) :
     Nat × Bool :=
-  bif stop - start ≥ᵇ 3 && comps[start]? == some (NamePart.str "_private") then
+  uif stop - start ≥ 3 ∧ comps[start]? == some (NamePart.str "_private") then
     Id.run do
       for i in [start + 1 : stop] do
-        bif comps[i]? == some (NamePart.num 0) then
-          bif i + 1 <ᵇ stop then return (i + 1, true)
+        uif comps[i]? == some (NamePart.num 0) then
+          uif i + 1 < stop then return (i + 1, true)
           else return (start, false)
       return (start, false)
   else
@@ -127,9 +127,9 @@ structure SpecEntry where
 
 def processSpecContext (comps : Array NamePart) : SpecEntry := Id.run do
   let mut begin_ := 0
-  bif comps.size ≥ᵇ 3 && comps[0]? == some (NamePart.str "_private") then
+  uif comps.size ≥ 3 ∧ comps[0]? == some (NamePart.str "_private") then
     for i in [1:comps.size] do
-      bif comps[i]? == some (NamePart.num 0) && i + 1 <ᵇ comps.size then
+      uif comps[i]? == some (NamePart.num 0) ∧ i + 1 < comps.size then
         begin_ := i + 1
         break
   let mut parts : Array NamePart := #[]
@@ -138,15 +138,15 @@ def processSpecContext (comps : Array NamePart) : SpecEntry := Id.run do
     let c := comps[i]!
     match matchSuffix c with
     | some flag =>
-      bif !flags.contains flag then
+      uif !flags.contains flag then
         flags := flags.push flag
     | none =>
-      bif isSpecIndex c then pure ()
+      uif isSpecIndex c then pure ()
       else parts := parts.push c
   { name := formatNameParts parts, flags }
 
 def postprocessNameParts (components : Array NamePart) : String := Id.run do
-  bif components.isEmpty then return ""
+  uif components.isEmpty then return ""
 
   let (privStart, isPrivate) := stripPrivate components 0 components.size
   let mut parts := components.extract privStart components.size
@@ -164,7 +164,7 @@ def postprocessNameParts (components : Array NamePart) : String := Id.run do
     | none =>
       match last with
       | NamePart.num _ =>
-        bif parts.size ≥ᵇ 2 then
+        uif parts.size ≥ 2 then
           match matchSuffix parts[parts.size - 2]! with
           | some flag =>
             flags := flags.push flag
@@ -173,14 +173,14 @@ def postprocessNameParts (components : Array NamePart) : String := Id.run do
         else cont := false
       | _ => cont := false
 
-  bif isPrivate then
+  uif isPrivate then
     flags := flags.push "private"
 
   -- Strip hygienic suffixes (_@ onward)
   for i in [:parts.size] do
     match parts[i]! with
     | NamePart.str s =>
-      bif s.startsWith "_@" then
+      uif s.startsWith "_@" then
         parts := parts.extract 0 i
         break
     | _ => pure ()
@@ -189,7 +189,7 @@ def postprocessNameParts (components : Array NamePart) : String := Id.run do
   let mut specEntries : Array SpecEntry := #[]
   let mut firstAt : Option Nat := none
   for i in [:parts.size] do
-    bif parts[i]! == NamePart.str "_at_" then
+    uif parts[i]! == NamePart.str "_at_" then
       firstAt := some i
       break
 
@@ -203,20 +203,20 @@ def postprocessNameParts (components : Array NamePart) : String := Id.run do
     let mut skipNext := false
 
     for i in [:rest.size] do
-      bif skipNext then
+      uif skipNext then
         skipNext := false
         continue
       let p := rest[i]!
-      bif p == NamePart.str "_at_" then
+      uif p == NamePart.str "_at_" then
         if let some ctx := currentCtx then
           entries := entries.push ctx
         currentCtx := some #[]
-      else bif p == NamePart.str "_spec" then
+      else uif p == NamePart.str "_spec" then
         if let some ctx := currentCtx then
           entries := entries.push ctx
           currentCtx := none
         skipNext := true
-      else bif match p with | NamePart.str s => s.startsWith "_spec" | _ => false then
+      else uif match p with | NamePart.str s => s.startsWith "_spec" | _ => false then
         if let some ctx := currentCtx then
           entries := entries.push ctx
           currentCtx := none
@@ -226,25 +226,25 @@ def postprocessNameParts (components : Array NamePart) : String := Id.run do
         | none => remaining := remaining.push p
 
     if let some ctx := currentCtx then
-      bif !ctx.isEmpty then
+      uif !ctx.isEmpty then
         entries := entries.push ctx
 
     for entry in entries do
       let se := processSpecContext entry
-      bif !se.name.isEmpty || !se.flags.isEmpty then
+      uif !se.name.isEmpty || !se.flags.isEmpty then
         specEntries := specEntries.push se
 
     parts := base ++ remaining
 
-  let name := bif parts.isEmpty then "?" else formatNameParts parts
+  let name := uif parts.isEmpty then "?" else formatNameParts parts
   let mut result := name
 
-  bif !flags.isEmpty then
+  uif !flags.isEmpty then
     result := result ++ " [" ++ String.intercalate ", " flags.toList ++ "]"
 
   for entry in specEntries do
-    let ctxStr := bif entry.name.isEmpty then "?" else entry.name
-    bif !entry.flags.isEmpty then
+    let ctxStr := uif entry.name.isEmpty then "?" else entry.name
+    uif !entry.flags.isEmpty then
       result := result ++ " spec at " ++ ctxStr ++ "["
         ++ String.intercalate ", " entry.flags.toList ++ "]"
     else
@@ -261,15 +261,15 @@ Tries each underscore as a split point; the first valid split (shortest single-c
 package where the remainder is a valid mangled name) is correct. -/
 def demangleWithPkg (s : String) : Option (String × String) := do
   for ⟨pos, h⟩ in s.positions do
-    bif pos.get h == '_' && pos ≠ᵇ s.startPos then
+    uif pos.get h == '_' ∧ pos ≠ s.startPos then
       let nextPos := pos.next h
-      bif nextPos == s.endPos then continue
+      uif nextPos == s.endPos then continue
       let pkg := s.extract s.startPos pos
       let body := s.extract nextPos s.endPos
       let validPkg := match Name.demangle? pkg with
         | some (.str .anonymous _) => true
         | _ => false
-      bif validPkg && (Name.demangle? body).isSome then
+      uif validPkg && (Name.demangle? body).isSome then
         let pkgName := match Name.demangle pkg with
           | .str .anonymous s => s
           | _ => pkg
@@ -284,7 +284,7 @@ def stripColdSuffix (s : String) : String × String :=
 def demangleCore (s : String) : Option String := do
   -- _init_l_
   if let some body := dropPrefix? s "_init_l_" then
-    bif !body.isEmpty then return s!"[init] {demangleBody body}"
+    uif !body.isEmpty then return s!"[init] {demangleBody body}"
 
   -- _init_lp_
   if let some after := dropPrefix? s "_init_lp_" then
@@ -293,7 +293,7 @@ def demangleCore (s : String) : Option String := do
 
   -- initialize_l_
   if let some body := dropPrefix? s "initialize_l_" then
-    bif !body.isEmpty then return s!"[module_init] {demangleBody body}"
+    uif !body.isEmpty then return s!"[module_init] {demangleBody body}"
 
   -- initialize_lp_
   if let some after := dropPrefix? s "initialize_lp_" then
@@ -302,11 +302,11 @@ def demangleCore (s : String) : Option String := do
 
   -- initialize_ (bare module init)
   if let some body := dropPrefix? s "initialize_" then
-    bif !body.isEmpty then return s!"[module_init] {demangleBody body}"
+    uif !body.isEmpty then return s!"[module_init] {demangleBody body}"
 
   -- l_
   if let some body := dropPrefix? s "l_" then
-    bif !body.isEmpty then return demangleBody body
+    uif !body.isEmpty then return demangleBody body
 
   -- lp_
   if let some after := dropPrefix? s "lp_" then
@@ -316,30 +316,30 @@ def demangleCore (s : String) : Option String := do
   none
 
 public def demangleSymbol (symbol : String) : Option String := do
-  bif symbol.isEmpty then none
+  uif symbol.isEmpty then none
 
   -- Strip .cold suffix first
   let (core, coldSuffix) := stripColdSuffix symbol
 
   -- Handle lean_apply_N
   if let some rest := dropPrefix? core "lean_apply_" then
-    bif isAllDigits rest then
+    uif isAllDigits rest then
       let r := s!"<apply/{rest}>"
-      bif coldSuffix.isEmpty then return r else return s!"{r} {coldSuffix}"
+      uif coldSuffix.isEmpty then return r else return s!"{r} {coldSuffix}"
 
   -- Handle _lean_main
-  bif core == "_lean_main" then
-    bif coldSuffix.isEmpty then return "[lean] main"
+  uif core == "_lean_main" then
+    uif coldSuffix.isEmpty then return "[lean] main"
     else return s!"[lean] main {coldSuffix}"
 
   -- Try prefix-based demangling
   let result ← demangleCore core
-  bif coldSuffix.isEmpty then return result
+  uif coldSuffix.isEmpty then return result
   else return s!"{result} {coldSuffix}"
 
 def skipWhile (s : String) (pos : s.Pos) (pred : Char → Bool) : s.Pos :=
-  bif h : pos =ᵇ s.endPos then pos
-  else bif pred (pos.get (ne_of_decideEq_eq_false h)) then skipWhile s (pos.next (ne_of_decideEq_eq_false h)) pred
+  uif h : pos = s.endPos then pos
+  else uif pred (pos.get h) then skipWhile s (pos.next h) pred
   else pos
 termination_by pos
 
@@ -354,23 +354,23 @@ where
   -- Linux glibc: ./lean(SYMBOL+0x2a) [0x555...]
   tryLinux (line : String) : Option (String × String × String) := do
     let parenPos ← line.find? '('
-    bif h : parenPos =ᵇ line.endPos then none else
-    let symStart := parenPos.next (ne_of_decideEq_eq_false h)
+    uif h : parenPos = line.endPos then none else
+    let symStart := parenPos.next h
     let delimPos ← symStart.find? (fun c => c == '+' || c == ')')
-    bif delimPos == symStart then none else
+    uif delimPos == symStart then none else
     some (splitAt₂ line symStart delimPos)
   -- macOS: N   lib   0xADDR SYMBOL + offset
   tryMacOS (line : String) : Option (String × String × String) := do
     let zxPos ← line.find? "0x"
-    bif h : zxPos =ᵇ line.endPos then none else
-    let afterZero := zxPos.next (ne_of_decideEq_eq_false h)
-    bif h2 : afterZero =ᵇ line.endPos then none else
-    let afterX := afterZero.next (ne_of_decideEq_eq_false h2)
+    uif h : zxPos = line.endPos then none else
+    let afterZero := zxPos.next h
+    uif h2 : afterZero = line.endPos then none else
+    let afterX := afterZero.next h2
     let afterHex := skipWhile line afterX (·.isHexDigit)
     let symStart := skipWhile line afterHex (· == ' ')
-    bif symStart == line.endPos then none else
+    uif symStart == line.endPos then none else
     let symEnd := (symStart.find? " + ").getD line.endPos
-    bif symEnd == symStart then none else
+    uif symEnd == symStart then none else
     some (splitAt₂ line symStart symEnd)
 
 public def demangleBtLine (line : String) : Option String := do

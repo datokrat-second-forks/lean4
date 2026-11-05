@@ -38,7 +38,7 @@ instance : Coe (List α) (AsyncList ε α) := ⟨ofList⟩
 When `p` is not true of any element, it returns the entire list. -/
 partial def waitUntil (p : α → Bool) : AsyncList ε α → ServerTask (List α × Option ε)
   | cons hd tl =>
-    bif !p hd then
+    uif !p hd then
       (tl.waitUntil p).mapCheap fun ⟨l, e?⟩ => ⟨hd :: l, e?⟩
     else
       .pure ⟨[hd], none⟩
@@ -58,7 +58,7 @@ is found, the task throws the terminating value. -/
 partial def waitFind? (p : α → Bool) : AsyncList ε α → ServerTask (Except ε (Option α))
   | nil => .pure <| .ok none
   | cons hd tl =>
-    bif p hd then .pure <| Except.ok <| some hd
+    uif p hd then .pure <| Except.ok <| some hd
     else tl.waitFind? p
   | delayed tl =>
     tl.bindCheap fun
@@ -76,7 +76,7 @@ partial def getFinishedPrefix : AsyncList ε α → BaseIO (List α × Option ε
     pure ⟨hd :: tl, e?, isComplete⟩
   | nil => pure ⟨[], none, true⟩
   | delayed tl => do
-    bif (← tl.hasFinished) then
+    uif (← tl.hasFinished) then
       match ← tl.wait with
       | Except.ok tl => tl.getFinishedPrefix
       | Except.error e => pure ⟨[], some e, true⟩
@@ -85,7 +85,7 @@ partial def getFinishedPrefix : AsyncList ε α → BaseIO (List α × Option ε
 partial def getFinishedPrefixWithTimeout (xs : AsyncList ε α) (timeoutMs : UInt32)
     (cancelTks : List (ServerTask Unit) := []) : BaseIO (List α × Option ε × Bool) := do
   let timeoutTask : ServerTask (Unit ⊕ Except ε (AsyncList ε α)) ←
-    bif timeoutMs == 0 then
+    uif timeoutMs == 0 then
       pure <| ServerTask.pure (Sum.inl ())
     else
       ServerTask.BaseIO.asTask do
@@ -101,7 +101,7 @@ where
       return ⟨hd :: tl, e?, isComplete⟩
     | nil => return ⟨[], none, true⟩
     | delayed tl =>
-      bif (← tl.hasFinished) then
+      uif (← tl.hasFinished) then
         match ← tl.wait with
         | .ok tl => go timeoutTask tl
         | .error e => return ⟨[], some e, true⟩
@@ -124,12 +124,12 @@ partial def getFinishedPrefixWithConsistentLatency (xs : AsyncList ε α) (laten
   return r
 where
   sleepWithCancellation (sleepDurationMs : UInt32) : BaseIO Unit := do
-    bif sleepDurationMs == 0 then
+    uif sleepDurationMs == 0 then
       return
-    bif cancelTks.isEmpty then
+    uif cancelTks.isEmpty then
       IO.sleep sleepDurationMs
       return
-    bif (← cancelTks.anyM (·.hasFinished)) then
+    uif (← cancelTks.anyM (·.hasFinished)) then
       return
     let sleepTask ← Lean.Server.ServerTask.BaseIO.asTask do
       IO.sleep sleepDurationMs

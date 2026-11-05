@@ -70,7 +70,7 @@ where
   go (body : Expr) (current : Nat) (acc : Array Nat) : Array Nat :=
     match body.cleanupAnnotations with
     | .forallE _ type body bi => go body (current+1) <|
-      bif bi.isInstImplicit && p type && !(body.hasLooseBVar 0) then
+      uif bi.isInstImplicit && p type && !(body.hasLooseBVar 0) then
         acc.push current
       else
         acc
@@ -92,7 +92,7 @@ Blocks on everything but the constant's body (if any), which is not accessible t
 private def findConstValOfKind? (env : Environment) (p : ConstantKind → Bool) (decl : Name)
     (skipRealize := false) : Option ConstantVal := do
   let info ← env.findAsync? decl skipRealize
-  bif p info.kind then info.toConstantVal else none
+  uif p info.kind then info.toConstantVal else none
 
 /--
 Like `findConstVal?`, but only finds the `ConstantVal` for `decl` in `env` if it is a theorem.
@@ -151,7 +151,7 @@ private instance : ToMessageData Parameter where
       m!"[{type}] (#{param.idx + 1})"
     else
       m!"parameter #{param.idx + 1}"
-    bif param.appearsInTypeProof then
+    uif param.appearsInTypeProof then
       msg := m!"{msg} (used in type, but only in a proof)"
     return msg
 
@@ -201,7 +201,7 @@ The indices start at 0, and do not count `let`s.
 private partial def collectUnnecessaryInstanceBinderIdxsWhere (p : Expr → Bool) (e : Expr) :
     MetaM (Array Nat) := do
   let (instances, fvarIdSet) ← go e 0 #[] |>.run {}
-  return instances.filterMap fun i => bif fvarIdSet.contains i.fvarId then none else some i.idx
+  return instances.filterMap fun i => uif fvarIdSet.contains i.fvarId then none else some i.idx
 where
   /-- Enter foralls recursively, creating a telescope for binders which are instances of concern
   and instantiating all other bvars with `sorry`. The only free variables therefore arise from
@@ -209,9 +209,9 @@ where
   go (e : Expr) (currentBinderIdx : Nat) (currentFVars : Array InstanceOfConcern) :
       StateRefT FVarIdSet MetaM (Array InstanceOfConcern) := do
     let e := e.cleanupAnnotations
-    bif h : e.isForall then
+    uif h : e.isForall then
       collectFVarsOutsideOfProofs (e.forallDomain h)
-      bif e.binderInfo.isInstImplicit && p (e.forallDomain h) then
+      uif e.binderInfo.isInstImplicit && p (e.forallDomain h) then
         forallBoundedTelescope e (some 1) fun fvar e => do
           let fvarId := fvar[0]!.fvarId!
           go e (currentBinderIdx + 1) (currentFVars.push { fvarId, idx := currentBinderIdx })
@@ -278,7 +278,7 @@ def unusedDecidableInTypeLinter : Linter where run := withSetOptionIn fun _ => d
   unless getLinterValue linter.extra.unusedDecidableInType (← getLinterOptions)
       && (← getInfoState).enabled do
     return
-  bif (← get).messages.hasErrors then
+  uif (← get).messages.hasErrors then
     return
   let env ← getEnv
   for t in ← getInfoTrees do

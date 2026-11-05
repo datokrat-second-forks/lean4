@@ -15,7 +15,7 @@ import Init.Data.String.Lemmas.FindPos
 namespace String
 
 def digitChar (n : UInt32) (h : n < 16) : Char :=
-  bif h' : n <ᵇ 10 then ⟨n + 48, ?_⟩
+  uif h' : n < 10 then ⟨n + 48, ?_⟩
   else ⟨n + 87, ?_⟩
 where finally all_goals
   simp_all [UInt32.lt_iff_toNat_lt, UInt32.isValidChar, Nat.isValidChar]; omega
@@ -33,17 +33,16 @@ where finally
 
 
 def mangleAux (s : String) (pos : s.Pos) (r : String) : String :=
-  bif h : pos =ᵇ s.endPos then r else
-  have h := ne_of_decideEq_eq_false h
+  uif h : pos = s.endPos then r else
   let c := pos.get h
   let pos := pos.next h
-  bif c.isAlpha || c.isDigit then
+  uif c.isAlpha || c.isDigit then
     mangleAux s pos (r.push c)
-  else bif c =ᵇ '_' then
+  else uif c = '_' then
     mangleAux s pos (r ++ "__")
-  else bif c.toNat <ᵇ 0x100 then
+  else uif c.toNat < 0x100 then
     mangleAux s pos (pushHex 2 c.val (r ++ "_x"))
-  else bif c.toNat <ᵇ 0x10000 then
+  else uif c.toNat < 0x10000 then
     mangleAux s pos (pushHex 4 c.val (r ++ "_u"))
   else
     mangleAux s pos (pushHex 8 c.val (r ++ "_U"))
@@ -59,17 +58,17 @@ namespace Lean
 def checkLowerHex : Nat → (s : String) → s.Pos → Bool
   | 0, _, _ => true
   | k + 1, s, pos =>
-    bif h : pos =ᵇ s.endPos then
+    uif h : pos = s.endPos then
       false
     else
-      let ch := pos.get (ne_of_decideEq_eq_false h)
+      let ch := pos.get h
       (ch.isDigit || (ch.val >= 97 && ch.val <= 102)) && -- 0-9a-f
-        checkLowerHex k s (pos.next (ne_of_decideEq_eq_false h))
+        checkLowerHex k s (pos.next h)
 
 def fromHex? (c : Char) : Option Nat :=
-  bif c.isDigit then
+  uif c.isDigit then
     some (c.val - 48).toNat
-  else bif c.val ≥ᵇ 97 && c.val ≤ᵇ 102 then
+  else uif c.val ≥ 97 ∧ c.val ≤ 102 then
     some (c.val - 87).toNat
   else none
 
@@ -78,10 +77,9 @@ def parseLowerHex? (k : Nat) (s : String) (p : s.Pos) (acc : Nat) :
   match k with
   | 0 => some (p, acc)
   | k + 1 =>
-    bif h : p =ᵇ s.endPos then
+    uif h : p = s.endPos then
       none
     else
-      have h := ne_of_decideEq_eq_false h
       match fromHex? (p.get h) with
       | some d => parseLowerHex? k s (p.next h) (acc <<< 4 ||| d)
       | none => none
@@ -91,25 +89,24 @@ theorem lt_of_parseLowerHex?_eq_some {k : Nat} {s : String} {p q : s.Pos} {acc :
   fun_induction parseLowerHex? with
   | case1 => simp at hk
   | case2 => simp
-  | case3 p acc k h _ d x ih =>
+  | case3 p acc k h d x ih =>
     match k with
     | 0 => simpa [parseLowerHex?] using fun h _ => h ▸ p.lt_next
     | k + 1 => exact fun h => String.Pos.lt_trans p.lt_next (ih (by simp) h)
   | case4 => simp
 
 def checkDisambiguation (s : String) (p : s.Pos) : Bool :=
-  bif h : p =ᵇ s.endPos then true else
-    have h := ne_of_decideEq_eq_false h
+  uif h : p = s.endPos then true else
     let b := p.get h
-    bif b =ᵇ '_' then
+    uif b = '_' then
       checkDisambiguation s (p.next h)
-    else bif b =ᵇ 'x' then
+    else uif b = 'x' then
       checkLowerHex 2 s (p.next h)
-    else bif b =ᵇ 'u' then
+    else uif b = 'u' then
       checkLowerHex 4 s (p.next h)
-    else bif b =ᵇ 'U' then
+    else uif b = 'U' then
       checkLowerHex 8 s (p.next h)
-    else bif b.val ≥ᵇ 48 && b.val ≤ᵇ 57 then
+    else uif b.val ≥ 48 ∧ b.val ≤ 57 then
       true
     else false
 termination_by p
@@ -125,10 +122,10 @@ def Name.mangleAux : Name → String
     let m := String.Internal.mangle s
     match p with
     | Name.anonymous =>
-      bif checkDisambiguation m m.startPos then "00" ++ m else m
+      uif checkDisambiguation m m.startPos then "00" ++ m else m
     | p              =>
       let m1 := mangleAux p
-      m1 ++ (bif needDisambiguation p m then "_00" else "_") ++ m
+      m1 ++ (uif needDisambiguation p m then "_00" else "_") ++ m
   | Name.num p n =>
     match p with
     | Name.anonymous => n.repr ++ "_"
@@ -145,7 +142,7 @@ IR declarations.
 -/
 @[export lean_mk_mangled_boxed_name]
 public def mkMangledBoxedName (s : String) : String :=
-  bif s.endsWith "__" then
+  uif s.endsWith "__" then
     s ++ "_00__boxed"
   else
     s ++ "___boxed"
@@ -174,18 +171,17 @@ public def mkPackageSymbolPrefix (pkg? : Option PkgId) : String :=
 -- assumes `s` has been generated `Name.mangle n ""`
 def Name.demangleAux (s : String) (p₀ : s.Pos) (res : Name)
     (acc : String) (ucount : Nat) : Name :=
-  bif hp₀ : p₀ =ᵇ s.endPos then res.str (acc.pushn '_' (ucount / 2)) else
-  have hp₀ := ne_of_decideEq_eq_false hp₀
+  uif hp₀ : p₀ = s.endPos then res.str (acc.pushn '_' (ucount / 2)) else
   let ch := p₀.get hp₀
   let p := p₀.next hp₀
-  bif ch =ᵇ '_' then demangleAux s p res acc (ucount + 1) else
-  bif ucount % 2 =ᵇ 0 then
+  uif ch = '_' then demangleAux s p res acc (ucount + 1) else
+  uif ucount % 2 = 0 then
     demangleAux s p res (acc.pushn '_' (ucount / 2) |>.push ch) 0
-  else bif ch.isDigit then
+  else uif ch.isDigit then
     let res := res.str (acc.pushn '_' (ucount / 2))
-    bif h : ch =ᵇ '0' && p ≠ᵇ s.endPos then
-      have h' := ne_of_decideNe_eq_true (Bool.and_eq_true_iff.mp h).2
-      bif p.get h' =ᵇ '0' then
+    uif h : ch = '0' ∧ p ≠ s.endPos then
+      have h' := h.2
+      uif p.get h' = '0' then
         demangleAux s (p.next h') res "" 0
       else
         decodeNum s p res (ch.val - 48).toNat
@@ -213,32 +209,30 @@ def Name.demangleAux (s : String) (p₀ : s.Pos) (res : Name)
 termination_by p₀
 where
   decodeNum (s : String) (p : s.Pos) (res : Name) (n : Nat) : Name :=
-    bif h : p =ᵇ s.endPos then res.num n else
-    have h := ne_of_decideEq_eq_false h
+    uif h : p = s.endPos then res.num n else
     let ch := p.get h
     let p := p.next h
-    bif ch.isDigit then
+    uif ch.isDigit then
       decodeNum s p res (n * 10 + (ch.val - 48).toNat)
     else -- assume ch = '_'
       let res := res.num n
-      bif h : p =ᵇ s.endPos then res else
-      nameStart s (p.next (ne_of_decideEq_eq_false h)) res -- assume s.get' p h = '_'
+      uif h : p = s.endPos then res else
+      nameStart s (p.next h) res -- assume s.get' p h = '_'
   termination_by p
   nameStart (s : String) (p : s.Pos) (res : Name) : Name :=
-    bif h : p =ᵇ s.endPos then res else
-    have h := ne_of_decideEq_eq_false h
+    uif h : p = s.endPos then res else
     let ch := p.get h
     let p := p.next h
-    bif ch.isDigit then
-      bif h : ch =ᵇ '0' && p ≠ᵇ s.endPos then
-        have h' := ne_of_decideNe_eq_true (Bool.and_eq_true_iff.mp h).2
-        bif p.get h' =ᵇ '0' then
+    uif ch.isDigit then
+      uif h : ch = '0' ∧ p ≠ s.endPos then
+        have h' := h.2
+        uif p.get h' = '0' then
           demangleAux s (p.next h') res "" 0
         else
           decodeNum s p res (ch.val - 48).toNat
       else
         decodeNum s p res (ch.val - 48).toNat
-    else bif ch =ᵇ '_' then
+    else uif ch = '_' then
       demangleAux s p res "" 1
     else
       demangleAux s p res (String.singleton ch) 0
@@ -254,7 +248,7 @@ Returns the demangled version of `s`, if it's the result of `Name.mangle _ ""`. 
 -/
 public def Name.demangle? (s : String) : Option Name :=
   let n := demangle s
-  bif mangleAux n =ᵇ s then some n else none
+  uif mangleAux n = s then some n else none
 
 -- For correctness of mangle/demangle, see https://gist.github.com/Rob23oba/5ddef42a1743858e9334461ca57c4be8
 

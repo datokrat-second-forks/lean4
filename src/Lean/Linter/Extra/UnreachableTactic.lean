@@ -70,9 +70,9 @@ variable (ignoreTacticKinds : NameHashSet) (isTacKind : SyntaxNodeKind → Bool)
 /-- Accumulates the set of tactic syntaxes that should be evaluated at least once. -/
 @[specialize] partial def getTactics (stx : Syntax) : M Unit := do
   if let .node _ k args := stx then
-    bif !isIgnoreTacticKind ignoreTacticKinds k then
+    uif !isIgnoreTacticKind ignoreTacticKinds k then
       args.forM getTactics
-    bif isTacKind k then
+    uif isTacKind k then
       if let some r := stx.getRange? true then
         modify fun m => m.insert r stx
 
@@ -99,7 +99,7 @@ def unreachableTacticLinter : Linter where run := withSetOptionIn fun stx => do
   unless getLinterValue linter.extra.unreachableTactic (← getLinterOptions)
     && (← getInfoState).enabled do
     return
-  bif (← get).messages.hasErrors then
+  uif (← get).messages.hasErrors then
     return
   let cats := (Parser.parserExtension.getState (← getEnv)).categories
   -- These lookups may fail when the linter is run in a fresh, empty environment
@@ -116,7 +116,7 @@ def unreachableTacticLinter : Linter where run := withSetOptionIn fun stx => do
   let key (r : Lean.Syntax.Range) := (r.start.byteIdx, (-r.stop.byteIdx : Int))
   let mut last : Lean.Syntax.Range := ⟨0, 0⟩
   for (r, stx) in let _ := @lexOrd; let _ := @ltOfOrd.{0}; unreachable.qsort (key ·.1 < key ·.1) do
-    bif last.start ≤ᵇ r.start && r.stop ≤ᵇ last.stop then continue
+    uif last.start ≤ r.start ∧ r.stop ≤ last.stop then continue
     logLintIf linter.extra.unreachableTactic stx "this tactic is never executed"
     last := r
 

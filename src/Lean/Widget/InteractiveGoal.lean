@@ -98,7 +98,7 @@ def InteractiveGoalCore.pretty (g : InteractiveGoalCore) (userName? : Option Str
   ret ++ f!"{goalPrefix}{Format.nest indent g.type.stripTags}"
 where
   addLine (fmt : Format) : Format :=
-    bif fmt.isNil then fmt else fmt ++ Format.line
+    uif fmt.isNil then fmt else fmt ++ Format.line
 
 def InteractiveGoal.pretty (g : InteractiveGoal) : Format :=
   g.toInteractiveGoalCore.pretty g.userName? g.goalPrefix
@@ -121,7 +121,7 @@ open Meta in
 def addInteractiveHypothesisBundle (hyps : Array InteractiveHypothesisBundle)
     (ids : Array (String × FVarId)) (type : Expr) (value? : Option Expr := none) (tactic := false ) :
     MetaM (Array InteractiveHypothesisBundle) := do
-  bif ids.size == 0 then
+  uif ids.size == 0 then
     throwError "Can only add a nonzero number of ids as an InteractiveHypothesisBundle."
   let fvarIds := ids.map Prod.snd
   let names := ids.map Prod.fst
@@ -130,16 +130,16 @@ def addInteractiveHypothesisBundle (hyps : Array InteractiveHypothesisBundle)
     fvarIds
     type        := (← ppExprTagged type)
     val?        := (← value?.mapM ppLetValueExprTagged)
-    isInstance? := bif (← isClass? type).isSome then true else none
-    isType?     := bif (← instantiateMVars type).isSort then true else none
+    isInstance? := uif (← isClass? type).isSome then true else none
+    isType?     := uif (← instantiateMVars type).isSort then true else none
   }
 where
   ppLetValueExprTagged (value : Expr) : MetaM CodeWithInfos := do
-    bif (← ppGoal.shouldShowLetValue tactic value) then
+    uif (← ppGoal.shouldShowLetValue tactic value) then
       ppExprTagged value
     else
       ppExprTagged value do PrettyPrinter.Delaborator.omission <| .string <|
-        bif tactic then
+        uif tactic then
           "Value omitted since `pp.showLetValues` is false and \
           the expression's depth exceeds both `pp.showLetValues.tactic.threshold` and `pp.showLetValues.threshold`."
         else
@@ -165,7 +165,7 @@ def goalToInteractive (mvarId : MVarId) : MetaM InteractiveGoal := do
     let tactic := mvarDecl.kind.isSyntheticOpaque
     let pushPending (ids : Array (String × FVarId)) (type? : Option Expr) (hyps : Array InteractiveHypothesisBundle)
         : MetaM (Array InteractiveHypothesisBundle) :=
-      bif ids.isEmpty then
+      uif ids.isEmpty then
         pure hyps
       else
         match type? with
@@ -175,7 +175,7 @@ def goalToInteractive (mvarId : MVarId) : MetaM InteractiveGoal := do
     let mut prevType? : Option Expr := none
     let mut hyps : Array InteractiveHypothesisBundle := #[]
     for localDecl in lctx do
-      bif !ppAuxDecls && localDecl.isAuxDecl || !ppImplDetailHyps && localDecl.isImplementationDetail then
+      uif !ppAuxDecls && localDecl.isAuxDecl || !ppImplDetailHyps && localDecl.isImplementationDetail then
         continue
       else
         match localDecl with
@@ -186,7 +186,7 @@ def goalToInteractive (mvarId : MVarId) : MetaM InteractiveGoal := do
           -- and it suffices to simply `toString` them.
           let varName := toString varName
           let type ← instantiateMVars type
-          bif prevType? == none || prevType? == some type then
+          uif prevType? == none || prevType? == some type then
             varNames := varNames.push (varName, fvarId)
           else
             hyps ← pushPending varNames prevType? hyps

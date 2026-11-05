@@ -26,11 +26,11 @@ def visitExpr : Expr → ExceptT Name M Unit
 where
   getSorryDepFor? (f : Name) : ExceptT Name M Unit := do
     let found (g : Name) :=
-      bif g == ``sorryAx then
+      uif g == ``sorryAx then
         throwThe Name f
       else
         throwThe Name g
-    bif f == ``sorryAx then
+    uif f == ``sorryAx then
       throwThe Name f
     else if let some g := (← get).localSorryMap.find? f then
       found g
@@ -65,7 +65,7 @@ def visitDecl (d : Decl) : M Unit := do
 partial def collect (decls : Array Decl) : M Unit := do
   modify fun s => { s with modified := false }
   decls.forM visitDecl
-  bif (← get).modified then
+  uif (← get).modified then
     collect decls
 
 end Sorry

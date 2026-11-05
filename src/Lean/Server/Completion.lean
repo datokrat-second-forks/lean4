@@ -24,7 +24,7 @@ private def filterDuplicateCompletionItems
     let key := (i.label, i.textEdit?)
     let (isDup, index') := index.containsThenInsert key
     index := index'
-    bif ! isDup then
+    uif ! isDup then
       r := r.push i
   return r
 
@@ -63,7 +63,7 @@ partial def find?
         | _ =>
           pure #[]
       allCompletions := allCompletions ++ completions
-    bif ! allCompletions.isEmpty then
+    uif ! allCompletions.isEmpty then
       -- Stop accumulating completions with lower priority if we found completions for a higher
       -- priority.
       break

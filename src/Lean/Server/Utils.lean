@@ -39,12 +39,12 @@ def chainRight (a : Stream) (b : Stream) (flushEagerly : Bool := false) : Stream
     read := fun sz => do
       let bs ← a.read sz
       b.write bs
-      bif flushEagerly then b.flush
+      uif flushEagerly then b.flush
       pure bs
     getLine := do
       let ln ← a.getLine
       b.putStr ln
-      bif flushEagerly then b.flush
+      uif flushEagerly then b.flush
       pure ln }
 
 /-- Like `tee a | b` on Unix. See `chainOut`. -/
@@ -53,11 +53,11 @@ def chainLeft (a : Stream) (b : Stream) (flushEagerly : Bool := false) : Stream 
     flush := a.flush *> b.flush
     write := fun bs => do
       a.write bs
-      bif flushEagerly then a.flush
+      uif flushEagerly then a.flush
       b.write bs
     putStr := fun s => do
       a.putStr s
-      bif flushEagerly then a.flush
+      uif flushEagerly then a.flush
       b.putStr s }
 
 /-- Prefixes all written outputs with `pre`. -/
@@ -197,7 +197,7 @@ def documentUriFromModule? (modName : Name) : IO (Option DocumentUri) := do
 def moduleFromDocumentUri (uri : DocumentUri) : IO Name := do
   let some path := System.Uri.fileUriToPath? uri
     | return externalUriToName uri
-  bif path.extension != "lean" then
+  uif path.extension != "lean" then
     return externalUriToName uri
   let some modNameInPath ← searchModuleNameOfFileName path (← getSrcSearchPath)
     | return externalUriToName uri

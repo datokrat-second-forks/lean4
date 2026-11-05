@@ -216,7 +216,7 @@ def addPrecCheck (prec : Nat) : ParenthesizerM Unit :=
 /-- Execute `x` at the right-most child of the current node, if any, then advance to the left. -/
 def visitArgs (x : ParenthesizerM Unit) : ParenthesizerM Unit := do
   let stx ← getCur
-  bif stx.getArgs.size >ᵇ 0 then
+  uif stx.getArgs.size > 0 then
     goDown (stx.getArgs.size - 1) *> x <* goUp
   goLeft
 
@@ -241,18 +241,18 @@ def maybeParenthesize (cat : Name) (canJuxtapose : Bool) (mkParen : Syntax → S
   x
   let { minPrec := some minPrec, trailPrec := trailPrec, trailCat := trailCat, .. } ← get
     | trace[PrettyPrinter.parenthesize] "visited a syntax tree without precedences?!{line ++ format stx}"
-  trace[PrettyPrinter.parenthesize] (m!"...precedences are {prec} >? {minPrec}" ++ bif canJuxtapose then m!", {(trailPrec, trailCat)} <=? {(st.contPrec, st.contCat)}" else "")
+  trace[PrettyPrinter.parenthesize] (m!"...precedences are {prec} >? {minPrec}" ++ uif canJuxtapose then m!", {(trailPrec, trailCat)} <=? {(st.contPrec, st.contCat)}" else "")
   /- Should we parenthesize?
      * Note about forceParens mode: we don't insert outermost parentheses (we use the syntax traverser parents to detect this),
        and we don't insert parentheses when we are at `maxPrec` (since this is effectively infinity).
   -/
-  bif (((← read).forceParens && !st.stxTrav.parents.isEmpty && minPrec <ᵇ Parser.maxPrec)
+  uif (((← read).forceParens && !st.stxTrav.parents.isEmpty && minPrec <ᵇ Parser.maxPrec)
       || prec >ᵇ minPrec
       || canJuxtapose && match trailPrec, st.contPrec with | some trailPrec, some contPrec => trailCat == st.contCat && trailPrec ≤ᵇ contPrec | _, _ => false) then
       -- The recursive `visit` call, by the invariant, has moved to the preceding node. In order to parenthesize
       -- the original node, we must first move to the right, except if we already were at the left-most child in the first
       -- place.
-      bif idx >ᵇ 0 then goRight
+      uif idx > 0 then goRight
       let mut stx ← getCur
       -- Move leading/trailing whitespace of `stx` outside of parentheses
       if let SourceInfo.original _ pos trail endPos := stx.getHeadInfo then
@@ -272,7 +272,7 @@ def maybeParenthesize (cat : Name) (canJuxtapose : Bool) (mkParen : Syntax → S
   let { trailPrec := trailPrec, .. } ← get
   -- If we already had a token at this level, keep the trailing parser. Otherwise, use the minimum of
   -- `prec` and `trailPrec`.
-  bif st.visitedToken then
+  uif st.visitedToken then
     modify fun stP => { stP with trailPrec := st.trailPrec, trailCat := st.trailCat }
   else
     let trailPrec := match trailPrec with
@@ -289,7 +289,7 @@ def visitToken : Parenthesizer := do
 @[combinator_parenthesizer orelse, expose] partial def orelse.parenthesizer (p1 p2 : Parenthesizer) : Parenthesizer := do
   let stx ← getCur
   -- `orelse` may produce `choice` nodes for antiquotations
-  bif stx.getKind == `choice then
+  uif stx.getKind == `choice then
     visitArgs $ stx.getArgs.size.forM fun _ _ => do
       orelse.parenthesizer p1 p2
   else
@@ -333,21 +333,21 @@ opaque parenthesizerForKind (k : SyntaxNodeKind) : Parenthesizer
 def withAntiquot.parenthesizer (antiP p : Parenthesizer) : Parenthesizer := do
   let stx ← getCur
   -- early check as minor optimization that also cleans up the backtrack traces
-  bif stx.isAntiquot || stx.isAntiquotSplice then
+  uif stx.isAntiquot || stx.isAntiquotSplice then
     orelse.parenthesizer antiP p
   else
     p
 
 @[combinator_parenthesizer withAntiquotSuffixSplice, expose]
 def withAntiquotSuffixSplice.parenthesizer (_ : SyntaxNodeKind) (p suffix : Parenthesizer) : Parenthesizer := do
-  bif (← getCur).isAntiquotSuffixSplice then
+  uif (← getCur).isAntiquotSuffixSplice then
     visitArgs <| suffix *> p
   else
     p
 
 @[combinator_parenthesizer tokenWithAntiquot, expose]
 def tokenWithAntiquot.parenthesizer (p : Parenthesizer) : Parenthesizer := do
-  bif (← getCur).isTokenAntiquot then
+  uif (← getCur).isTokenAntiquot then
     visitArgs p
   else
     p
@@ -355,7 +355,7 @@ def tokenWithAntiquot.parenthesizer (p : Parenthesizer) : Parenthesizer := do
 partial def parenthesizeCategoryCore (cat : Name) (_prec : Nat) : Parenthesizer :=
   withReader (fun ctx => { ctx with cat := cat }) do
     let stx ← getCur
-    bif stx.getKind == `choice then
+    uif stx.getKind == `choice then
       visitArgs $ stx.getArgs.size.forM fun _ _ => do
         parenthesizeCategoryCore cat _prec
     else
@@ -434,7 +434,7 @@ def andthen.parenthesizer (p1 p2 : Parenthesizer) : Parenthesizer :=
 
 def checkKind (k : SyntaxNodeKind) : Parenthesizer := do
   let stx ← getCur
-  bif k != stx.getKind then
+  uif k != stx.getKind then
     trace[PrettyPrinter.parenthesize.backtrack] "unexpected node kind '{stx.getKind}', expected '{k}'"
     -- HACK; see `orelse.parenthesizer`
     throwBacktrack
@@ -482,7 +482,7 @@ def trailingNode.parenthesizer (k : SyntaxNodeKind) (prec lhsPrec : Nat) (p : Pa
 
 @[combinator_parenthesizer symbolNoAntiquot, expose] def symbolNoAntiquot.parenthesizer (sym : String) := do
   let stx ← getCur
-  bif stx.isToken sym then
+  uif stx.isToken sym then
     visitToken
   else
     trace[PrettyPrinter.parenthesize.backtrack] "unexpected syntax '{format stx}', expected symbol '{sym}'"
@@ -490,7 +490,7 @@ def trailingNode.parenthesizer (k : SyntaxNodeKind) (prec lhsPrec : Nat) (p : Pa
 @[combinator_parenthesizer nonReservedSymbolNoAntiquot, expose] def nonReservedSymbolNoAntiquot.parenthesizer := symbolNoAntiquot.parenthesizer
 @[combinator_parenthesizer unicodeSymbolNoAntiquot, expose] def unicodeSymbolNoAntiquot.parenthesizer (sym asciiSym : String) (_preserveForPP : Bool) := do
   let stx ← getCur
-  bif stx.isToken sym || stx.isToken asciiSym then
+  uif stx.isToken sym || stx.isToken asciiSym then
     visitToken
   else
     trace[PrettyPrinter.parenthesize.backtrack] "unexpected syntax '{format stx}', expected symbol '{sym}' or '{asciiSym}'"
@@ -519,7 +519,7 @@ def many1NoAntiquot.parenthesizer (p : Parenthesizer) : Parenthesizer := do
 @[combinator_parenthesizer many1Unbox, expose]
 def many1Unbox.parenthesizer (p : Parenthesizer) : Parenthesizer := do
   let stx ← getCur
-  bif stx.getKind == nullKind then
+  uif stx.getKind == nullKind then
     manyNoAntiquot.parenthesizer p
   else
     p
@@ -531,7 +531,7 @@ def optionalNoAntiquot.parenthesizer (p : Parenthesizer) : Parenthesizer := do
 @[combinator_parenthesizer sepByNoAntiquot, expose]
 def sepByNoAntiquot.parenthesizer (p pSep : Parenthesizer) : Parenthesizer := do
   let stx ← getCur
-  visitArgs <| (List.range stx.getArgs.size).reverse.forM fun i => bif i % 2 == 0 then p else pSep
+  visitArgs <| (List.range stx.getArgs.size).reverse.forM fun i => uif i % 2 == 0 then p else pSep
 
 @[combinator_parenthesizer sepBy1NoAntiquot, expose] def sepBy1NoAntiquot.parenthesizer := sepByNoAntiquot.parenthesizer
 
@@ -564,7 +564,7 @@ def sepByNoAntiquot.parenthesizer (p pSep : Parenthesizer) : Parenthesizer := do
 @[combinator_parenthesizer interpolatedStr, expose]
 def interpolatedStr.parenthesizer (p : Parenthesizer) : Parenthesizer := do
   visitArgs $ (← getCur).getArgs.reverse.forM fun chunk =>
-    bif chunk.isOfKind interpolatedStrLitKind then
+    uif chunk.isOfKind interpolatedStrLitKind then
       goLeft
     else
       p
@@ -572,10 +572,10 @@ def interpolatedStr.parenthesizer (p : Parenthesizer) : Parenthesizer := do
 @[combinator_parenthesizer hexnumNoAntiquot, expose] def hexnum.parenthesizer := visitToken
 
 @[combinator_parenthesizer _root_.ite, expose, macro_inline] def ite {_ : Type} (c : Prop) [Decidable c] (t e : Parenthesizer) : Parenthesizer :=
-  bif decide c then t else e
+  uif decide c then t else e
 
 @[combinator_parenthesizer _root_.cond, expose, macro_inline] def cond {_ : Type} (c : Bool) (t e : Parenthesizer) : Parenthesizer :=
-  bif c then t else e
+  uif c then t else e
 
 @[combinator_parenthesizer UDecidable.ite, expose, macro_inline]
 def uite {_ : Type} (c : Prop) [UDecidable c] (t e : Parenthesizer) : Parenthesizer :=

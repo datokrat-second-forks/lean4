@@ -105,7 +105,7 @@ def registerBuiltinRpcProcedure (method : Name) paramType respType
   let errMsg := s!"Failed to register builtin RPC call handler for '{method}'"
   unless (← initializing) do
     throw <| IO.userError s!"{errMsg}: only possible during initialization"
-  bif (←builtinRpcProcedures.get).contains method then
+  uif (←builtinRpcProcedures.get).contains method then
     throw <| IO.userError s!"{errMsg}: already registered"
 
   let proc := wrapRpcProcedure method paramType respType handler
@@ -115,9 +115,9 @@ open Lean Elab Command Term Meta in
 def registerRpcProcedure (method : Name) : CoreM Unit := do
   let env ← getEnv
   let errMsg := m!"Failed to register RPC call handler for '{method}'"
-  bif (←builtinRpcProcedures.get).contains method then
+  uif (←builtinRpcProcedures.get).contains method then
     throwError m!"{errMsg}: already registered (builtin)"
-  bif userRpcProcedures.contains env method then
+  uif userRpcProcedures.contains env method then
     throwError m!"{errMsg}: already registered"
   let wrappedName := method ++ `_rpc_wrapped
   let procT := mkConst ``RpcProcedure

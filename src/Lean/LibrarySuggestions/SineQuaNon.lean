@@ -49,18 +49,18 @@ Return the constants in `consts` that are not in `denyList` and are approximatel
 def triggersOf (frequency : Name → Nat) (denyList : NameSet) (consts : Array Name)
     (maxTolerance : Float) : Array (Name × Float) := Id.run do
   let frequencies := consts.filterMap fun n => Id.run do
-    bif denyList.contains n then
+    uif denyList.contains n then
       return none
     let f := frequency n
-    return bif f =ᵇ 0 then
+    return uif f = 0 then
       none
     else
       some (n, f.toFloat)
-  bif frequencies.isEmpty then
+  uif frequencies.isEmpty then
     return #[]
   let minFrequency := frequencies.foldl (fun acc (_, f) => min acc f) (frequencies[0]!.2)
   return frequencies.filterMap
-    (fun (n, f) => bif f ≤ᵇ minFrequency * maxTolerance then some (n, f / minFrequency) else none)
+    (fun (n, f) => uif f ≤ minFrequency * maxTolerance then some (n, f / minFrequency) else none)
 
 def triggerSymbolsUsing (frequency : Name → Nat) (denyList : NameSet)
     (ci : ConstantInfo) (maxTolerance : Float) : MetaM (Array (Name × Float)) :=
@@ -115,7 +115,7 @@ def sineQuaNonTriggersFor (decl : Name) : CoreM (List (Name × Float)) := do
     (v.find? fun (n, _) => n == decl) |>.map fun (_, f) => (t, f)
 
 local instance : Ord (Float × Name) where
-  compare x y := bif x.1 <ᵇ y.1 then .lt else bif x.1 >ᵇ y.1 then .gt else Name.cmp x.2 y.2
+  compare x y := uif x.1 < y.1 then .lt else uif x.1 > y.1 then .gt else Name.cmp x.2 y.2
 
 def frequencyScore (n : Name) (frequencyWeight : Float := 0.01) : MetaM Float := do
   let f ← symbolFrequency n
@@ -137,12 +137,12 @@ public partial def sineQuaNon (names : NameSet) (maxSuggestions : Nat) (depthFac
   return r.map (fun (n, f) => { name := n, score := 1 / f })
 where go (denyList : NameSet)(pastTriggers : NameSet) (triggerQueue : Std.TreeSet (Float × Name) compare)
     (acceptedTheorems : Array (Name × Float)) (queuedTheorems : Std.TreeSet (Float × Name) compare) : MetaM (Array (Name × Float)) := do
-  bif acceptedTheorems.size ≥ᵇ maxSuggestions then return acceptedTheorems else
+  uif acceptedTheorems.size ≥ maxSuggestions then return acceptedTheorems else
   -- Is there a companion to `min?` that gives the minimum element along with the rest of the set?
   match triggerQueue.min? with
   | some (tf, t) => do
     let qf? := queuedTheorems.min?.map (·.1)
-    bif match qf? with | none => true | some qf => tf <ᵇ qf then
+    uif match qf? with | none => true | some qf => tf <ᵇ qf then
       trace[sineQuaNon] m!"\
         acceptedTheorems: {acceptedTheorems}\n\
         pastTriggers: {pastTriggers.toList}\n\
@@ -158,7 +158,7 @@ where go (denyList : NameSet)(pastTriggers : NameSet) (triggerQueue : Std.TreeSe
     let ci ← getConstInfo q
     let (pastTriggers', triggersQueue') ← (← ci.type.relevantConstants).foldlM (init := (pastTriggers, triggerQueue))
       fun ⟨pastTriggers', triggersQueue'⟩ n => do
-        bif pastTriggers'.contains n || denyList.contains n then
+        uif pastTriggers'.contains n || denyList.contains n then
           pure ⟨pastTriggers', triggersQueue'⟩
         else
           pure <| ⟨pastTriggers'.insert n, triggersQueue'.insert (qf * depthFactor * (← frequencyScore n frequencyWeight), n)⟩

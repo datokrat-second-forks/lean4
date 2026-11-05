@@ -47,9 +47,9 @@ def coeLinter : Linter where
         | .ofCustomInfo ci =>
           if let some trace := ci.value.get? Elab.Term.CoeExpansionTrace then
             for coeDecl in trace.expandedCoeDecls do
-              bif isCoreModule && coercionsBannedInCore.contains coeDecl then
+              uif isCoreModule && coercionsBannedInCore.contains coeDecl then
                 logWarningAt ci.stx m!"This term uses the coercion `{coeDecl}`, which is banned in Lean's core library."
-              bif shouldWarnOnDeprecated then
+              uif shouldWarnOnDeprecated then
                 let some attr := deprecatedAttr.getParam? (← getEnv) coeDecl | pure ()
                 logLint linter.deprecatedCoercions ci.stx <| .tagged ``deprecatedAttr <|
                   m!"This term uses the deprecated coercion `{.ofConstName coeDecl true}`."

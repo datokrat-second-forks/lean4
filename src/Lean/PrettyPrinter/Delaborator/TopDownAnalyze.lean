@@ -171,9 +171,9 @@ private def typeUnknown (e : Expr) : MetaM Bool := do
 def isHBinOp (e : Expr) : Bool := Id.run do
   -- TODO: instead of tracking these explicitly,
   -- consider a more general solution that checks for defaultInstances
-  bif e.getAppNumArgs != 6 then return false
+  uif e.getAppNumArgs != 6 then return false
   let f := e.getAppFn
-  bif !f.isConst then return false
+  uif !f.isConst then return false
 
   -- Note: we leave out `HPow.hPow because we expect its homogeneous
   -- version will change soon
@@ -185,13 +185,13 @@ def isHBinOp (e : Expr) : Bool := Id.run do
   ops.any fun op => op == f.constName!
 
 def replaceLPsWithVars (e : Expr) : MetaM Expr := do
-  bif !e.hasLevelParam then return e
+  uif !e.hasLevelParam then return e
   let lps := collectLevelParams {} e |>.params
   let mut replaceMap : Std.HashMap Name Level := {}
   for lp in lps do replaceMap := replaceMap.insert lp (← mkFreshLevelMVar)
   return e.replaceLevel fun
     | Level.param n .. => replaceMap[n]!
-    | l => bif !l.hasParam then some l else none
+    | l => uif !l.hasParam then some l else none
 
 def isDefEqAssigning (t s : Expr) : MetaM Bool := do
   withConfig (fun cfg => { cfg with assignSyntheticOpaque := true }) do
@@ -252,7 +252,7 @@ instance (priority := low) : MonadWithReaderOf SubExpr AnalyzeM where
 def tryUnify (e₁ e₂ : Expr) : AnalyzeM Unit := do
   try
     let r ← isDefEqAssigning e₁ e₂
-    bif !r then modify fun s => { s with postponed := s.postponed.push (e₁, e₂) }
+    uif !r then modify fun s => { s with postponed := s.postponed.push (e₁, e₂) }
     pure ()
   catch _ =>
     modify fun s => { s with postponed := s.postponed.push (e₁, e₂) }
@@ -267,12 +267,12 @@ where
   inspectAux (fType mType : Expr) (i : Nat) (args mvars : Array Expr) := do
     let fType ← whnf fType
     let mType ← whnf mType
-    bif !(i <ᵇ args.size) then return ()
+    uif ¬(i < args.size) then return ()
     match fType, mType with
     | Expr.forallE _ fd fb _, Expr.forallE _ _  mb _ => do
       -- TODO: do I need to check (← okBottomUp? args[i] mvars[i] fuel).isSafe here?
       -- if so, I'll need to take a callback
-      bif fd.isOutParam then
+      uif fd.isOutParam then
         tryUnify (args[i]!) (mvars[i]!)
       inspectAux (fb.instantiate1 args[i]!) (mb.instantiate1 mvars[i]!) (i+1) args mvars
     | _, _ => return ()
@@ -291,20 +291,20 @@ partial def canBottomUp (e : Expr) (mvar? : Option Expr := none) (fuel : Nat := 
   match fuel with
   | 0 => return false
   | fuel + 1 =>
-    bif (← isTrivialBottomUp e) then return true
+    uif (← isTrivialBottomUp e) then return true
     let f := e.getAppFn
-    bif !f.isConst && !f.isFVar then return false
+    uif !f.isConst && !f.isFVar then return false
     let args := e.getAppArgs
     let fType ← replaceLPsWithVars (← inferType e.getAppFn)
     let (mvars, bInfos, resultType) ← forallMetaBoundedTelescope fType e.getAppArgs.size
     for h : i in *...mvars.size do
-      bif bInfos[i]! == BinderInfo.instImplicit then
+      uif bInfos[i]! == BinderInfo.instImplicit then
         inspectOutParams args[i]! mvars[i]
-      else bif bInfos[i]! == BinderInfo.default then
-        bif (← isTrivialBottomUp args[i]!) then tryUnify args[i]! mvars[i]
-        else bif (← typeUnknown mvars[i] <&&> canBottomUp args[i]! (some mvars[i]) fuel) then tryUnify args[i]! mvars[i]
-    bif (← (pure (isHBinOp e) <&&> (valUnknown mvars[0]! <||> valUnknown mvars[1]!))) then tryUnify mvars[0]! mvars[1]!
-    bif mvar?.isSome then tryUnify resultType (← inferType mvar?.get!)
+      else uif bInfos[i]! == BinderInfo.default then
+        uif (← isTrivialBottomUp args[i]!) then tryUnify args[i]! mvars[i]
+        else uif (← typeUnknown mvars[i] <&&> canBottomUp args[i]! (some mvars[i]) fuel) then tryUnify args[i]! mvars[i]
+    uif (← (pure (isHBinOp e) <&&> (valUnknown mvars[0]! <||> valUnknown mvars[1]!))) then tryUnify mvars[0]! mvars[1]!
+    uif mvar?.isSome then tryUnify resultType (← inferType mvar?.get!)
     return !(← valUnknown resultType)
 
 def withKnowing (knowsType knowsLevel : Bool) (x : AnalyzeM α) : AnalyzeM α := do
@@ -313,7 +313,7 @@ def withKnowing (knowsType knowsLevel : Bool) (x : AnalyzeM α) : AnalyzeM α :=
 builtin_initialize analyzeFailureId : InternalExceptionId ← registerInternalExceptionId `analyzeFailure
 
 def checkKnowsType : AnalyzeM Unit := do
-  bif !(← read).knowsType then
+  uif !(← read).knowsType then
     throw $ Exception.internal analyzeFailureId
 
 def annotateBoolAt (n : Name) (pos : Pos) : AnalyzeM Unit := do
@@ -348,8 +348,8 @@ mutual
     trace[pp.analyze] "{(← read).knowsType}.{(← read).knowsLevel}"
     let e ← getExpr
     let opts ← getOptions
-    bif (← (pure !e.isAtomic) <&&> pure !(getPPProofs opts) <&&> (try Meta.isProof e catch _ => pure false)) then
-      bif getPPProofsWithType opts then
+    uif (← (pure !e.isAtomic) <&&> pure !(getPPProofs opts) <&&> (try Meta.isProof e catch _ => pure false)) then
+      uif getPPProofsWithType opts then
         withType $ withKnowing true true $ analyze
       return ()
     else
@@ -370,12 +370,12 @@ mutual
   where
     analyzeApp := do
       let mut willKnowType := (← read).knowsType
-      bif !(← read).knowsType && !(← canBottomUp (← getExpr)) then
+      uif !(← read).knowsType && !(← canBottomUp (← getExpr)) then
         annotateBool `pp.analysis.needsType
         withType $ withKnowing true false $ analyze
         willKnowType := true
 
-      else bif (← (pure !(← read).knowsType <||> pure (← read).inBottomUp) <&&> isStructureInstance (← getExpr)) then
+      else uif (← (pure !(← read).knowsType <||> pure (← read).inBottomUp) <&&> isStructureInstance (← getExpr)) then
         withType do
           annotateBool `pp.structureInstanceTypes
           withKnowing true false $ analyze
@@ -390,15 +390,15 @@ mutual
       let args := args.shrink mvars.size
 
       -- Unify with the expected type
-      bif (← read).knowsType then tryUnify (← inferType (mkAppN f args)) resultType
+      uif (← read).knowsType then tryUnify (← inferType (mkAppN f args)) resultType
 
       -- Prevent using dot notation if the expected of the argument can't be determined.
       -- TODO: is canBottomUp sufficient for this?
-      bif getPPFieldNotation (← getOptions) then
+      uif getPPFieldNotation (← getOptions) then
         if let some (_, idx) ← fieldNotationCandidate? f args (getPPFieldNotationGeneralized (← getOptions)) then
-          bif idx <ᵇ args.size then
+          uif idx < args.size then
             withKnowing false false do
-              bif !(← canBottomUp args[idx]!) then
+              uif !(← canBottomUp args[idx]!) then
                 annotateBool `pp.analysis.noDot
           else
             annotateBool `pp.analysis.noDot
@@ -414,21 +414,21 @@ mutual
         funBinders   := .replicate args.size false
       }
 
-      bif !rest.isEmpty then
+      uif !rest.isEmpty then
         -- Note: this shouldn't happen for type-correct terms
-        bif !args.isEmpty then
+        uif !args.isEmpty then
           analyzeAppStaged (mkAppN f args) rest
 
     maybeAddBlockImplicit : AnalyzeM Unit := do
       -- See `MonadLift.noConfusion for an example where this is necessary.
-      bif !(← read).parentIsApp then
+      uif !(← read).parentIsApp then
         let type ← inferType (← getExpr)
-        bif type.isForall && type.bindingInfo! == BinderInfo.implicit then
+        uif type.isForall && type.bindingInfo! == BinderInfo.implicit then
           annotateBool `pp.analysis.blockImplicit
 
     analyzeConst : AnalyzeM Unit := do
       let Expr.const _ ls .. ← getExpr | unreachable!
-      bif !(← read).knowsLevel && !ls.isEmpty then
+      uif !(← read).knowsLevel && !ls.isEmpty then
         -- TODO: this is a very crude heuristic, motivated by https://github.com/leanprover/lean4/issues/590
         unless getPPAnalyzeOmitMax (← getOptions) && ls.any containsBadMax do
         annotateBool `pp.universes
@@ -439,13 +439,13 @@ mutual
       withBindingBody Name.anonymous analyze
 
     analyzeLam : AnalyzeM Unit := do
-      bif !(← read).knowsType then annotateBool `pp.funBinderTypes
+      uif !(← read).knowsType then annotateBool `pp.funBinderTypes
       withBindingDomain $ withKnowing true false analyze
       withBindingBody Name.anonymous analyze
 
     analyzeLet : AnalyzeM Unit := do
       let Expr.letE _ _ v _    .. ← getExpr | unreachable!
-      bif !(← canBottomUp v) then
+      uif !(← canBottomUp v) then
         annotateBool `pp.analysis.letVarType
         withLetVarType $ withKnowing true false analyze
         withLetValue $ withKnowing true true analyze
@@ -477,24 +477,24 @@ mutual
       let { args, mvars, bInfos, ..} ← read
       for target in [fun _ => none, fun i => some mvars[i]!] do
         for h : i in *...args.size do
-          bif bInfos[i]! == BinderInfo.default then
-            bif (← typeUnknown mvars[i]! <&&> canBottomUp args[i] (target i)) then
+          uif bInfos[i]! == BinderInfo.default then
+            uif (← typeUnknown mvars[i]! <&&> canBottomUp args[i] (target i)) then
               tryUnify args[i]! mvars[i]!
               modify fun s => { s with bottomUps := s.bottomUps.set! i true }
 
     checkOutParams := do
       let { args, mvars, bInfos, ..} ← read
       for h : i in *...args.size do
-        bif bInfos[i]! == BinderInfo.instImplicit then inspectOutParams args[i] mvars[i]!
+        uif bInfos[i]! == BinderInfo.instImplicit then inspectOutParams args[i] mvars[i]!
 
     collectHigherOrders := do
       let { args, mvars, bInfos, ..} ← read
       for h : i in *...args.size do
-        bif !(bInfos[i]! == BinderInfo.implicit || bInfos[i]! == BinderInfo.strictImplicit) then continue
-        bif !(← isHigherOrder (← inferType args[i])) then continue
-        bif getPPAnalyzeTrustId (← getOptions) && isIdLike args[i]! then continue
+        uif !(bInfos[i]! == BinderInfo.implicit || bInfos[i]! == BinderInfo.strictImplicit) then continue
+        uif !(← isHigherOrder (← inferType args[i])) then continue
+        uif getPPAnalyzeTrustId (← getOptions) && isIdLike args[i]! then continue
 
-        bif getPPAnalyzeTrustKnownFOType2TypeHOFuns (← getOptions) && !(← valUnknown mvars[i]!)
+        uif getPPAnalyzeTrustKnownFOType2TypeHOFuns (← getOptions) && !(← valUnknown mvars[i]!)
           && (← isType2Type (args[i]!)) && (← isFOLike (args[i]!)) then continue
 
         tryUnify args[i]! mvars[i]!
@@ -502,7 +502,7 @@ mutual
 
     hBinOpHeuristic := do
       let { mvars, ..} ← read
-      bif (← (pure (isHBinOp (← getExpr)) <&&> (valUnknown mvars[0]! <||> valUnknown mvars[1]!))) then
+      uif (← (pure (isHBinOp (← getExpr)) <&&> (valUnknown mvars[0]! <||> valUnknown mvars[1]!))) then
         tryUnify mvars[0]! mvars[1]!
 
     collectTrivialBottomUps := do
@@ -510,8 +510,8 @@ mutual
       -- Boo.mk : {α : Type u_1} → {β : Type u_2} → α → β → Boo.{u_1, u_2} α β
       let { args, mvars, bInfos, ..} ← read
       for h : i in *...args.size do
-        bif bInfos[i]! == BinderInfo.default then
-          bif (← valUnknown mvars[i]! <&&> isTrivialBottomUp args[i]) then
+        uif bInfos[i]! == BinderInfo.default then
+          uif (← valUnknown mvars[i]! <&&> isTrivialBottomUp args[i]) then
             tryUnify args[i]! mvars[i]!
             modify fun s => { s with bottomUps := s.bottomUps.set! i true }
 
@@ -523,7 +523,7 @@ mutual
         | Expr.lam .., Expr.forallE _ t b .. =>
           let mut annotated := false
           for i in *...argIdx do
-            bif (← pure (bInfos[i]! == BinderInfo.implicit) <&&> valUnknown mvars[i]! <&&> withNewMCtxDepth (checkpointDefEq t mvars[i]!)) then
+            uif (← pure (bInfos[i]! == BinderInfo.implicit) <&&> valUnknown mvars[i]! <&&> withNewMCtxDepth (checkpointDefEq t mvars[i]!)) then
               annotateBool `pp.funBinderTypes
               tryUnify args[i]! mvars[i]!
               -- Note: currently we always analyze the lambda binding domains in `analyzeLam`
@@ -536,14 +536,14 @@ mutual
         | _, _ => return false
 
       for i in *...args.size do
-        bif bInfos[i]! == BinderInfo.default then
+        uif bInfos[i]! == BinderInfo.default then
           let b ← withNaryArg i (core i (← inferType mvars[i]!))
-          bif b then modify fun s => { s with funBinders := s.funBinders.set! i true }
+          uif b then modify fun s => { s with funBinders := s.funBinders.set! i true }
 
     analyzeFn := do
       -- Now, if this is the first staging, analyze the n-ary function without expected type
       let {f, fType, forceRegularApp ..} ← read
-      bif !f.isApp then withKnowing false (forceRegularApp || !(← hasLevelMVarAtCurrDepth (← instantiateMVars fType))) $ withNaryFn (analyze (parentIsApp := true))
+      uif !f.isApp then withKnowing false (forceRegularApp || !(← hasLevelMVarAtCurrDepth (← instantiateMVars fType))) $ withNaryFn (analyze (parentIsApp := true))
 
     annotateNamedArg (n : Name) : AnalyzeAppM Unit := do
       annotateBool `pp.analysis.namedArg
@@ -556,7 +556,7 @@ mutual
       let argType ← inferType arg
 
       let processNaturalImplicit : AnalyzeAppM Unit := do
-        bif (← valUnknown mvars[i]! <||> pure higherOrders[i]!) && !forceRegularApp then
+        uif (← valUnknown mvars[i]! <||> pure higherOrders[i]!) && !forceRegularApp then
           annotateNamedArg (← mvarName mvars[i]!)
           modify fun s => { s with provideds := s.provideds.set! i true }
         else
@@ -567,7 +567,7 @@ mutual
 
           match bInfos[i]! with
           | BinderInfo.default =>
-            bif (← pure (getPPAnalyzeExplicitHoles (← getOptions)) <&&> pure !(← valUnknown mvars[i]!) <&&> pure !(← readThe Context).inBottomUp <&&> pure !(← isFunLike arg) <&&> pure !funBinders[i]! <&&> checkpointDefEq mvars[i]! arg) then
+            uif (← pure (getPPAnalyzeExplicitHoles (← getOptions)) <&&> pure !(← valUnknown mvars[i]!) <&&> pure !(← readThe Context).inBottomUp <&&> pure !(← isFunLike arg) <&&> pure !funBinders[i]! <&&> checkpointDefEq mvars[i]! arg) then
               annotateBool `pp.analysis.hole
             else
               modify fun s => { s with provideds := s.provideds.set! i true }
@@ -579,29 +579,29 @@ mutual
             -- Note: apparently checking valUnknown here is not sound, because the elaborator
             -- will not happily assign instImplicits that it cannot synthesize
             let mut provided := true
-            bif !getPPInstances (← getOptions) then
+            uif !getPPInstances (← getOptions) then
               annotateBool `pp.analysis.skip
               provided := false
-            else bif getPPAnalyzeCheckInstances (← getOptions) then
+            else uif getPPAnalyzeCheckInstances (← getOptions) then
               let instResult ← try trySynthInstance argType catch _ => pure LOption.undef
               match instResult with
               | LOption.some inst =>
-                bif (← checkpointDefEq inst arg) then annotateBool `pp.analysis.skip; provided := false
+                uif (← checkpointDefEq inst arg) then annotateBool `pp.analysis.skip; provided := false
                 else annotateNamedArg (← mvarName mvars[i]!)
               | _                 => annotateNamedArg (← mvarName mvars[i]!)
             else annotateBool `pp.analysis.skip; provided := false
             modify fun s => { s with provideds := s.provideds.set! i provided }
-          bif (← get).provideds[i]! then withKnowing (!(← typeUnknown mvars[i]!)) true analyze
+          uif (← get).provideds[i]! then withKnowing (!(← typeUnknown mvars[i]!)) true analyze
           tryUnify mvars[i]! args[i]!
 
     maybeSetExplicit := do
       let { f, args, bInfos, ..} ← read
-      bif (← get).namedArgs.any nameNotRoundtrippable then
+      uif (← get).namedArgs.any nameNotRoundtrippable then
         annotateBool `pp.explicit
         for i in *...args.size do
-          bif !(← get).provideds[i]! then
+          uif !(← get).provideds[i]! then
             withNaryArg (f.getAppNumArgs + i) do annotateBool `pp.analysis.hole
-          bif bInfos[i]! == BinderInfo.instImplicit && getPPInstanceTypes (← getOptions) then
+          uif bInfos[i]! == BinderInfo.instImplicit && getPPInstanceTypes (← getOptions) then
             withType (withKnowing true false analyze)
 
 end

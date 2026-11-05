@@ -105,7 +105,7 @@ section Utils
     match privateToUserName? declName with
     | none => return declName
     | some userName =>
-      bif mkPrivateName (← getEnv) userName == declName then
+      uif mkPrivateName (← getEnv) userName == declName then
         return userName
       else
         return none
@@ -119,27 +119,27 @@ section Utils
   private def matchDecl? (ns : Name) (id : Name) (danglingDot : Bool) (declName : Name) : MetaM (Option Name) := do
     let some declName ← normPrivateName? declName
       | return none
-    bif !ns.isPrefixOf declName then
+    uif !ns.isPrefixOf declName then
       return none
     let declName := declName.replacePrefix ns Name.anonymous
-    bif danglingDot then
+    uif danglingDot then
       -- If the input is `id.` and `declName` is of the form `id.atomic`, complete with `atomicName`
-      bif id.isPrefixOf declName then
+      uif id.isPrefixOf declName then
         let declName := declName.replacePrefix id Name.anonymous
-        bif declName.isAtomic && !declName.isAnonymous then
+        uif declName.isAtomic && !declName.isAnonymous then
           return some declName
     else if let (.str p₁ s₁, .str p₂ s₂) := (id, declName) then
-      bif p₁ == p₂ then
+      uif p₁ == p₂ then
         -- If the namespaces agree, fuzzy-match on the trailing part
-        bif s₁.charactersIn s₂ then
+        uif s₁.charactersIn s₂ then
           return some <| .mkSimple s₂
         else
           return none
-      else bif p₁.isAnonymous then
+      else uif p₁.isAnonymous then
         -- If `id` is namespace-less, also fuzzy-match declaration names in arbitrary namespaces
         -- (but don't match the namespace itself).
         -- Penalize score by component length of added namespace.
-        bif s₁.charactersIn s₂ then
+        uif s₁.charactersIn s₂ then
           return some declName
         else
           return none
@@ -149,7 +149,7 @@ section Utils
       [MonadCancellable m] (f : Name → EligibleDecl → m PUnit) : m PUnit := do
     let _ ← StateT.run (s := 0) <| forEligibleDeclsM fun decl ci => do
       modify (· + 1)
-      bif (← get) ≥ᵇ 10000 then
+      uif (← get) ≥ 10000 then
         RequestCancellation.check
         set <| 0
       f decl ci
@@ -159,7 +159,7 @@ end Utils
 section IdCompletionUtils
 
   private def matchAtomic (id : Name) (declName : Name) (danglingDot : Bool) : Bool :=
-    bif danglingDot then
+    uif danglingDot then
       false
     else
       match id, declName with
@@ -177,12 +177,12 @@ section IdCompletionUtils
       | Name.num ..    => unreachable!
       | .str p s =>
         let (p', len) := go p
-        bif len + 1 ≥ᵇ newLen then
+        uif len + 1 ≥ newLen then
           (p', len)
         else
-          let optDot := bif p.isAnonymous then 0 else 1
+          let optDot := uif p.isAnonymous then 0 else 1
           let len'   := len + optDot + s.length
-          bif len' ≤ᵇ newLen then
+          uif len' ≤ newLen then
             (id, len')
           else
             (Name.mkStr p (String.Pos.Raw.extract s 0 ⟨newLen - optDot - len⟩), newLen)
@@ -198,7 +198,7 @@ section IdCompletionUtils
           some label
         | some bestLabel =>
           -- for open namespaces `A` and `A.B` and a decl `A.B.c`, pick the decl `c` over `B.c`
-          bif label.isSuffixOf bestLabel then
+          uif label.isSuffixOf bestLabel then
             some label
           else
             some bestLabel
@@ -213,7 +213,7 @@ section IdCompletionUtils
     for openDecl in ctx.openDecls do
       let OpenDecl.simple ns exs := openDecl
         | pure ()
-      bif exs.contains declName then
+      uif exs.contains declName then
         continue
       matchUsingNamespace ns
     matchUsingNamespace Name.anonymous
@@ -235,7 +235,7 @@ section DotCompletionUtils
   -/
   private def stripPrivatePrefix (n : Name) : Name :=
     match n with
-    | .num _ 0 => bif isPrivatePrefix n then .anonymous else n
+    | .num _ 0 => uif isPrivatePrefix n then .anonymous else n
     | _ => n
 
   /--
@@ -287,7 +287,7 @@ section DotCompletionUtils
     let isConstOf := match e.getAppFn with
       | .const name .. => (privateToUserName? name).getD name == declName
       | _ => false
-    bif isConstOf then
+    uif isConstOf then
       return true
     let some e ← unfoldDefinitionGuarded? e | return false
     isDefEqToAppOf e declName
@@ -297,7 +297,7 @@ section DotCompletionUtils
       for x in xs do
         let localDecl ← x.fvarId!.getDecl
         let type := localDecl.type.consumeMData
-        bif (← isDefEqToAppOf type typeName) then
+        uif (← isDefEqToAppOf type typeName) then
           return true
       return false
 
@@ -308,12 +308,12 @@ section DotCompletionUtils
   private partial def isDotIdCompletionMethod (typeNameSet : NameSetModPrivate) (info : ConstantInfo) : MetaM Bool := do
     let rec visit (type : Expr) : MetaM Bool := do
       let type ← try whnfCoreUnfoldingAnnotations type catch _ => pure type
-      bif type.isForall then
+      uif type.isForall then
         forallTelescope type fun _ type => visit type
       else
         let type ← instantiateMVars type
         let .const typeName _ := type.getAppFn | return false
-        bif typeNameSet.contains typeName then
+        uif typeNameSet.contains typeName then
           return true
         else if let some type' ← unfoldDefinitionGuarded? type then
           visit type'
@@ -331,8 +331,8 @@ private def idCompletionCore
     (danglingDot : Bool)
     : M Unit := do
   let mut id := id
-  bif id.hasMacroScopes then
-    bif stx.getHeadInfo matches .original .. then
+  uif id.hasMacroScopes then
+    uif stx.getHeadInfo matches .original .. then
       id := id.eraseMacroScopes
     else
       -- Identifier is synthetic and has macro scopes => no completions
@@ -343,10 +343,10 @@ private def idCompletionCore
   if let HoverInfo.inside delta := hoverInfo then
     id := truncate id delta
     danglingDot := false
-  bif id.isAtomic then
+  uif id.isAtomic then
     -- search for matches in the local context
     for localDecl in (← getLCtx) do
-      bif matchAtomic id localDecl.userName danglingDot then
+      uif matchAtomic id localDecl.userName danglingDot then
         addUnresolvedCompletionItem localDecl.userName (.fvar localDecl.fvarId)
           (kind := CompletionItemKind.variable) (tags := #[])
   -- search for matches in the environment
@@ -358,7 +358,7 @@ private def idCompletionCore
   RequestCancellation.check
   let matchAlias (ns : Name) (alias : Name) : Bool :=
     -- Recall that aliases may not be atomic and include the namespace where they were created.
-    bif ns.isPrefixOf alias then
+    uif ns.isPrefixOf alias then
       let alias := alias.replacePrefix ns Name.anonymous
       matchAtomic id alias danglingDot
     else
@@ -367,24 +367,24 @@ private def idCompletionCore
   -- Auxiliary function for `alias`
   let addAlias (alias : Name) (declNames : List Name) : M Unit := do
     declNames.forM fun declName => do
-      bif allowCompletion eligibleHeaderDecls env declName then
+      uif allowCompletion eligibleHeaderDecls env declName then
         addUnresolvedCompletionItemForDecl (.mkSimple alias.getString!) declName
   -- search explicitly open `ids`
   for openDecl in ctx.openDecls do
     match openDecl with
     | OpenDecl.explicit openedId resolvedId =>
-      bif allowCompletion eligibleHeaderDecls env resolvedId then
-        bif matchAtomic id openedId danglingDot then
+      uif allowCompletion eligibleHeaderDecls env resolvedId then
+        uif matchAtomic id openedId danglingDot then
           addUnresolvedCompletionItemForDecl (.mkSimple openedId.getString!) resolvedId
     | OpenDecl.simple ns _      =>
       getAliasState env |>.forM fun alias declNames => do
-        bif matchAlias ns alias then
+        uif matchAlias ns alias then
           addAlias alias declNames
   -- search for aliases
   getAliasState env |>.forM fun alias declNames => do
     -- use current namespace
     let rec searchAlias (ns : Name) : M Unit := do
-      bif matchAlias ns alias then
+      uif matchAlias ns alias then
         addAlias alias declNames
       else
         match ns with
@@ -392,7 +392,7 @@ private def idCompletionCore
         | _ => return ()
     searchAlias ctx.currNamespace
   -- Search keywords
-  bif !danglingDot then
+  uif !danglingDot then
     if let .str .anonymous s := id then
       let keywords := Parser.getTokenTable env
       for keyword in keywords.findPrefix s do
@@ -426,18 +426,18 @@ def dotCompletion
       getDotCompletionTypeNameSet (← instantiateMVars (← inferType info.expr))
     catch _ =>
       pure Std.TreeSet.empty
-    bif nameSet.isEmpty then
+    uif nameSet.isEmpty then
       return
 
     forEligibleDeclsWithCancellationM fun declName decl => do
       let unnormedTypeName := declName.getPrefix
-      bif ! nameSet.contains unnormedTypeName then
+      uif ! nameSet.contains unnormedTypeName then
         return
       let some declName ← normPrivateName? declName
         | return
       let c := decl.info
       let typeName := declName.getPrefix
-      bif ! (← isDotCompletionMethod typeName c) then
+      uif ! (← isDotCompletionMethod typeName c) then
         return
       addUnresolvedCompletionItem (.mkSimple c.name.getString!) (.const c.name)
         (← decl.kind) (← decl.tags)
@@ -456,26 +456,26 @@ def dotIdCompletion
       | return ()
 
     let typeNames ← getDotIdCompletionTypeNames expectedType
-    bif typeNames.isEmpty then
+    uif typeNames.isEmpty then
       return ()
 
     let nameSet := NameSetModPrivate.ofArray typeNames
 
     forEligibleDeclsWithCancellationM fun declName decl => do
       let unnormedTypeName := declName.getPrefix
-      bif ! nameSet.contains unnormedTypeName then
+      uif ! nameSet.contains unnormedTypeName then
         return
 
       let some declName ← normPrivateName? declName
         | return
 
       let c := decl.info
-      bif ! (← isDotIdCompletionMethod nameSet c) then
+      uif ! (← isDotIdCompletionMethod nameSet c) then
         return
 
       let kind ← decl.kind
       let tags ← decl.tags
-      bif id.isAnonymous then
+      uif id.isAnonymous then
         -- We're completing a lone dot => offer all decls of the type
         addUnresolvedCompletionItem (.mkSimple c.name.getString!) (.const c.name) kind tags
         return
@@ -497,7 +497,7 @@ def fieldIdCompletion
     let fieldNames := getStructureFieldsFlattened (← getEnv) structName (includeSubobjectFields := false)
     for fieldName in fieldNames do
       let .str _ fieldName := fieldName | continue
-      bif ! idStr.charactersIn fieldName then
+      uif ! idStr.charactersIn fieldName then
         continue
       let item := { label := fieldName, detail? := "field", documentation? := none, kind? := CompletionItemKind.field }
       addItem item
@@ -515,19 +515,19 @@ private def trailingDotCompletion [ForIn Id Coll (Name × α)]
     match stx.getSubstring? (withLeading := false) (withTrailing := false) with
     | none => ("", false)  -- the `ident` is `missing`, list all options
     | some ss =>
-      bif !ss.stopPos.atEnd ss.str && ss.stopPos.get ss.str == '.' then
+      uif !ss.stopPos.atEnd ss.str && ss.stopPos.get ss.str == '.' then
         -- include trailing dot, which is not parsed by `ident`
         (ss.toString ++ ".", true)
       else
         (ss.toString, false)
   let mut items := #[]
   for (name, value) in entries do
-    bif partialName.charactersIn name.toString then
+    uif partialName.charactersIn name.toString then
       let textEdit? :=
-        bif !caps.textDocument?.any (·.completion?.any (·.completionItem?.any (·.insertReplaceSupport?.any (·)))) then
+        uif !caps.textDocument?.any (·.completion?.any (·.completionItem?.any (·.insertReplaceSupport?.any (·)))) then
           none -- InsertReplaceEdit not supported by client
         else if let some ⟨start, stop⟩ := stx.getRange? then
-          let stop := bif trailingDot then stop + ' ' else stop
+          let stop := uif trailingDot then stop + ' ' else stop
           let range := ⟨ctx.fileMap.utf8PosToLspPos start, ctx.fileMap.utf8PosToLspPos stop⟩
           some { newText := name.toString, insert := range, replace := range : InsertReplaceEdit }
         else
@@ -618,7 +618,7 @@ private def findEndSectionCompletionCandidates
         continue
     let some partiallyCompletedScopeName := scopeNames[i + idComponents.size - 1]?
       | continue
-    bif ! partiallyCompletedIdComponent.charactersIn partiallyCompletedScopeName then
+    uif ! partiallyCompletedIdComponent.charactersIn partiallyCompletedScopeName then
       continue
     let mut isPrefixMatch := true
     for j in 0...<idComponents.size - 1 do
@@ -626,10 +626,10 @@ private def findEndSectionCompletionCandidates
         | isPrefixMatch := false
           break
       let idComponent := idComponents[j]!
-      bif idComponent != scopeName then
+      uif idComponent != scopeName then
         isPrefixMatch := false
         break
-    bif isPrefixMatch then
+    uif isPrefixMatch then
       r := r.push <| mkCandidate (i + idComponents.size - 1)
   return r
 where
@@ -645,7 +645,7 @@ def endSectionCompletion
     (scopeNames        : List String)
     : IO (Array ResolvableCompletionItem) := do
   let mut idComponents := id?.map (fun id => id.components.toArray.map (·.toString)) |>.getD #[]
-  bif danglingDot then
+  uif danglingDot then
     idComponents := idComponents.push ""
   let scopeNames := scopeNames.toArray.pop.takeWhile (! ·.isEmpty) |>.reverse
   let candidates := findEndSectionCompletionCandidates idComponents scopeNames
