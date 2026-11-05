@@ -517,6 +517,7 @@ def constantReplacer (e : Expr) : M (Option Expr) := do
     if let some e ← replaceUnsafeRecName fn args then return some e
     if let some e ← inlineMatcher e fn args then return some e
     if let some e ← csimp fn args then return some e
+    if let some e ← earlyImplementedBy fn args then return some e
     if let some e ← macroInline fn args then return some e
     return none
 where
@@ -524,6 +525,13 @@ where
     let .const declName us := fn | return none
     let some safeDeclName := isUnsafeRecName? declName | return none
     return some <| mkAppN (.const safeDeclName us) args
+
+  earlyImplementedBy (fn : Expr) (args : Array Expr) : M (Option Expr) := do
+    let .const declName us := fn | return none
+    let env ← getEnv
+    unless isEarlyImplementedBy env declName do return none
+    let some impl := getImplementedBy? env declName | return none
+    return some <| mkAppN (.const impl us) args
 
   macroInline (fn : Expr) (args : Array Expr) : M (Option Expr) := do
     let .const declName us := fn | return none

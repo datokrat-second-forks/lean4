@@ -235,7 +235,8 @@ builtin_initialize addBuiltinUnusedVariablesIgnoreFn (fun _ stack _ =>
     stx.isOfKind ``Lean.Parser.Command.declSig) &&
   (stack[5]? |>.any fun (stx, _) => match stx[0] with
     | `(Lean.Parser.Command.declModifiersT| $[$_:docComment]? @[$[$attrs:attr],*] $[$vis]? $[protected]? $[noncomputable]?) =>
-      attrs.any (fun attr => attr.raw.isOfKind ``Parser.Attr.extern || attr matches `(attr| implemented_by $_))
+      attrs.any (fun attr => attr.raw.isOfKind ``Parser.Attr.extern ||
+        attr.raw.isOfKind ``Parser.Attr.implemented_by || attr matches `(attr| implemented_by $_))
     | _ => false))
 
 /--

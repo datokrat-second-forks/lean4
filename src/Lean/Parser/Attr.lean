@@ -48,6 +48,12 @@ namespace Attr
 @[builtin_attr_parser] def default_instance := leading_parser nonReservedSymbol "default_instance" >> optional (ppSpace >> priorityParser)
 @[builtin_attr_parser] def «specialize»     := leading_parser (nonReservedSymbol "specialize") >> many (ppSpace >> (ident <|> numLit))
 
+/-- `@[implemented_by f]` and `@[implemented_by (early := true) f]` (see `Lean.Compiler.implementedByAttr`). -/
+@[builtin_attr_parser] def implemented_by := leading_parser
+  nonReservedSymbol "implemented_by " >>
+    optional ("(" >> nonReservedSymbol "early" >> " := " >>
+      (nonReservedSymbol "true" <|> nonReservedSymbol "false") >> ") ") >> ident
+
 def externEntry := leading_parser
   optional (ident >> ppSpace) >> optional (nonReservedSymbol "inline ") >> strLit
 @[builtin_attr_parser] def extern     := leading_parser
