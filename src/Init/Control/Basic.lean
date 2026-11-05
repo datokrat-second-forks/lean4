@@ -8,6 +8,7 @@ module
 prelude
 public import Init.Core
 public import Init.BinderNameHint
+public import Init.UDecidable.Basic
 
 @[expose] public section
 
@@ -122,8 +123,8 @@ export Alternative (failure)
 /--
 If the proposition `p` is true, does nothing, else fails (using `failure`).
 -/
-@[always_inline, inline] def guard {f : Type → Type v} [Alternative f] (p : Prop) [Decidable p] : f Unit :=
-  bif decide p then pure () else failure
+@[always_inline, inline] def guard {f : Type → Type v} [Alternative f] (p : Prop) [UDecidable p] : f Unit :=
+  uif p then pure () else failure
 
 /--
 Returns `some x` if `f` succeeds with value `x`, else returns `none`.

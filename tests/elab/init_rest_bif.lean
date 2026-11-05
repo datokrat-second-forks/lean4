@@ -8,12 +8,18 @@ still reduces, and that the `Bool` helpers that used to coerce propositions redu
 
 open Lean
 
-/-! `guard` keeps its `Decidable` parameter and reduces on concrete propositions. -/
+/-!
+`guard` takes a `UDecidable` instance (ADR-66), so it no longer reduces by `rfl` or `decide`;
+`cbv` and `simp` evaluate it.
+-/
 
-example : (do guard (1 < 2); pure 3 : Option Nat) = some 3 := rfl
-example : (do guard (2 < 1); pure 3 : Option Nat) = none := rfl
+example : (do guard (1 < 2); pure 3 : Option Nat) = some 3 := by cbv
+example : (do guard (2 < 1); pure 3 : Option Nat) = none := by cbv
 example : ([1, 2, 3].filterMap fun x => (do guard (x > 1); pure x : Option Nat)) = [2, 3] := by
-  decide
+  cbv
+example : (do guard (2 < 1); pure 3 : Option Nat) = none := by simp [guard]
+example : (do guard (1 < 2); pure 3 : Option Nat) = some 3 := by simp [guard]
+
 
 /-! `Name` and `Syntax` helpers. -/
 
