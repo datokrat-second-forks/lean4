@@ -567,12 +567,12 @@ theorem Decidable.not_or_self (p : Prop) [h : Decidable p] : ¬p ∨ p := by
 theorem Decidable.by_contra [Decidable p] : (¬p → False) → p := of_not_not
 
 /-- Construct a non-Prop by cases on an `Or`, when the left conjunct is decidable. -/
-@[expose] protected def Or.by_cases [Decidable p] {α : Sort u} (h : p ∨ q) (h₁ : p → α) (h₂ : q → α) : α :=
-  if hp : p then h₁ hp else h₂ (h.resolve_left hp)
+@[expose] protected def Or.by_cases [UDecidable p] {α : Sort u} (h : p ∨ q) (h₁ : p → α) (h₂ : q → α) : α :=
+  uif hp : p then h₁ hp else h₂ (h.resolve_left hp)
 
 /-- Construct a non-Prop by cases on an `Or`, when the right conjunct is decidable. -/
-@[expose] protected def Or.by_cases' [Decidable q] {α : Sort u} (h : p ∨ q) (h₁ : p → α) (h₂ : q → α) : α :=
-  if hq : q then h₂ hq else h₁ (h.resolve_right hq)
+@[expose] protected def Or.by_cases' [UDecidable q] {α : Sort u} (h : p ∨ q) (h₁ : p → α) (h₂ : q → α) : α :=
+  uif hq : q then h₂ hq else h₁ (h.resolve_right hq)
 
 @[inline]
 instance exists_prop_decidable {p} (P : p → Prop)

@@ -359,8 +359,8 @@ In particular, if `x < y` then the result is `Ordering.lt`. If `x = y` then the 
 
 `compareOfLessAndBEq` uses `BEq` instead of `DecidableEq`.
 -/
-@[inline, expose] def compareOfLessAndEq {α} (x y : α) [LT α] [Decidable (x < y)] [DecidableEq α] : Ordering :=
-  bif decide (x < y) then Ordering.lt
+@[inline, expose] def compareOfLessAndEq {α} (x y : α) [LT α] [DecidableLT α] [DecidableEq α] : Ordering :=
+  bif x <ᵇ y then Ordering.lt
   else bif x =ᵇ y then Ordering.eq
   else Ordering.gt
 
@@ -372,8 +372,8 @@ In particular, if `x < y` then the result is `Ordering.lt`. If `x == y` then the
 
 `compareOfLessAndEq` uses `DecidableEq` instead of `BEq`.
 -/
-@[inline] def compareOfLessAndBEq {α} (x y : α) [LT α] [Decidable (x < y)] [BEq α] : Ordering :=
-  bif decide (x < y) then .lt
+@[inline] def compareOfLessAndBEq {α} (x y : α) [LT α] [DecidableLT α] [BEq α] : Ordering :=
+  bif x <ᵇ y then .lt
   else bif x == y then .eq
   else .gt
 

@@ -69,6 +69,12 @@ example : compare (3 : UInt8) 3 = .eq := by decide
 example : compare (3 : Int8) 4 = .lt := by decide
 example : compareOfLessAndEq (3 : Nat) 5 = .lt := by decide
 example : compareOfLessAndBEq (5 : Nat) 3 = .gt := by decide
+example : compareOfLessAndEq (3 : Nat) 5 = .lt := rfl
+example : compare (3 : UInt64) 5 = .lt := by decide +kernel
+
+/-- `compareOfLessAndEq` takes `DecidableLT` and compares with `<ᵇ` (ADR-68). -/
+example {α} [LT α] [DecidableLT α] [DecidableEq α] (x y : α) :
+    compareOfLessAndEq x y = bif x <ᵇ y then .lt else bif x =ᵇ y then .eq else .gt := rfl
 example : compare #[1, 2, 3] #[1, 2, 4] = .lt := by decide
 example : compare #[1, 2] #[1, 2] = .eq := by decide
 example : compare #[1, 2, 3] #[1, 2] = .gt := by decide

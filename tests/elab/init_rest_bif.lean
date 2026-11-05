@@ -20,6 +20,11 @@ example : ([1, 2, 3].filterMap fun x => (do guard (x > 1); pure x : Option Nat))
 example : (do guard (2 < 1); pure 3 : Option Nat) = none := by simp [guard]
 example : (do guard (1 < 2); pure 3 : Option Nat) = some 3 := by simp [guard]
 
+/-! `Or.by_cases` and `Or.by_cases'` take `UDecidable` instances (ADR-68). -/
+
+example (p : Prop) [UDecidable p] (h : p ∨ True) : Nat := h.by_cases (fun _ => 1) (fun _ => 2)
+example : (Or.inl rfl : 1 = 1 ∨ False).by_cases (fun _ => 1) (fun _ => 2) = 1 := by cbv
+example : (Or.inr rfl : False ∨ 1 = 1).by_cases' (fun _ => 1) (fun _ => 2) = 2 := by cbv
 
 /-! `Name` and `Syntax` helpers. -/
 

@@ -116,7 +116,7 @@ partial def natCoreNumDigits (acc digits : Nat) : Parser (Nat × Nat) := do
       return (acc, digits)
 
 @[inline]
-def lookahead (p : Char → Prop) (desc : String) [DecidablePred p] : Parser Unit := do
+def lookahead (p : Char → Prop) (desc : String) [UDecidablePred p] : Parser Unit := do
   let c ← peek!
   uif (p c) then
     return ()
