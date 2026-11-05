@@ -22,7 +22,7 @@ namespace Lean.Char
 
 /-- Returns the number of bytes required to encode this `Char` in UTF-16. -/
 def utf16Size (c : Char) : UInt32 :=
-  bif c.val ≤ᵇ 0xFFFF then 1 else 2
+  uif c.val ≤ 0xFFFF then 1 else 2
 
 end Lean.Char
 
@@ -70,9 +70,9 @@ namespace Lean
 namespace FileMap
 
 private def lineStartPos (text : FileMap) (line : Nat) : String.Pos.Raw :=
-  bif h : line <ᵇ text.positions.size then
+  uif h : line < text.positions.size then
     text.positions[line]
-  else bif text.positions.isEmpty then
+  else uif text.positions.isEmpty then
     0
   else
     text.positions.back!

@@ -109,15 +109,15 @@ partial def evalLetValue (e : LetValue .pure) : FixParamM Unit := do
 
 partial def isEquivalentFunDecl? (decl : FunDecl .pure) : FixParamM (Option Nat) := do
   let .let { fvarId, value := (.fvar funFvarId args), .. } k := decl.value | return none
-  bif args.size != decl.params.size then return none
+  uif args.size != decl.params.size then return none
   let .return retFVarId := k | return none
-  bif retFVarId != fvarId then return none
+  uif retFVarId != fvarId then return none
   let some (.val funIdx) := (← read).assignment.get? funFvarId | return none
   for h : i in [:decl.params.size] do
     let param := decl.params[i]
     -- TODO: Eliminate this dynamic bounds check.
     let arg := args[i]!
-    bif arg != .fvar param.fvarId && arg != .erased then return none
+    uif arg != .fvar param.fvarId && arg != .erased then return none
   return some funIdx
 
 partial def evalCode (code : Code .pure) : FixParamM Unit := do
@@ -137,10 +137,10 @@ partial def evalCode (code : Code .pure) : FixParamM Unit := do
 
 partial def evalApp (declName : Name) (args : Array (Arg .pure)) : FixParamM Unit := do
   let main := (← read).main
-  bif declName == main.name then
+  uif declName == main.name then
     -- Recursive call to the function being analyzed
     for h : i in *...main.params.size do
-      bif _h : i <ᵇ args.size then
+      uif _h : i < args.size then
         have : i < main.params.size := h
         let param := main.params[i]
         let val ← evalArg args[i]
@@ -154,11 +154,11 @@ partial def evalApp (declName : Name) (args : Array (Arg .pure)) : FixParamM Uni
     unless (← get).fixed.contains true do
       throw () -- stop analysis, none of the arguments are fixed.
   for decl in (← read).decls do
-    bif declName == decl.name then
+    uif declName == decl.name then
       -- Call to another function in the same mutual block.
       let mut values := #[]
       for i in *...decl.params.size do
-        bif h : i <ᵇ args.size then
+        uif h : i < args.size then
           values := values.push (← evalArg args[i])
         else
           values := values.push .top

@@ -40,7 +40,7 @@ where
     decls.forM process
 
   process (decl : Decl pu) : ToposortM pu Unit := do
-    bif (← get).seen.contains decl.name then
+    uif (← get).seen.contains decl.name then
       return ()
 
     let env ← getEnv

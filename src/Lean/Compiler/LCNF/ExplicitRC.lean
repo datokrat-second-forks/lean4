@@ -176,7 +176,7 @@ def modifyLive (f : LiveVars → LiveVars) : RcM Unit :=
 def Context.addDerivedValue (ctx : Context) (parents : Array FVarId) (child : FVarId) : Context :=
   let derivedValMap := ctx.derivedValMap.insert child { parents }
   let derivedValMap :=
-    bif ctx.resetTargets.contains child then
+    uif ctx.resetTargets.contains child then
       derivedValMap
     else
       parents.foldl (init := derivedValMap) fun derivedValMap parent =>
@@ -188,7 +188,7 @@ def Context.addUnconditionalBorrow (ctx : Context) (fvarId : FVarId) : Context :
 
 def Context.addDerivedLetValue (ctx : Context) (parents : Array FVarId) (decl : LetDecl .impure) :
     Context :=
-  bif !decl.type.isPossibleRef then
+  uif !decl.type.isPossibleRef then
     ctx
   else
     let parents := parents.filter fun parent => (ctx.varMap.get? parent).any (·.isPossibleRef)
@@ -231,7 +231,7 @@ def withParams (ps : Array (Param .impure)) (x : RcM α) : RcM α := do
       }
       let ctx := { ctx with idx := ctx.idx + 1, varMap }
       let ctx := ctx.addDerivedValue #[] p.fvarId
-      bif p.borrow && p.type.isPossibleRef then ctx.addUnconditionalBorrow p.fvarId else ctx
+      uif p.borrow && p.type.isPossibleRef then ctx.addUnconditionalBorrow p.fvarId else ctx
   withReader update x
 
 @[inline]
@@ -294,7 +294,7 @@ partial def addDescendants (fvarId : FVarId) (derivedValMap : DerivedValMap) (li
     info.children.foldl (init := liveVars) fun liveVars child =>
       let cinfo := derivedValMap.get! child
       let parentsOk := cinfo.parents.all fun fvarId => (liveVars.vars.contains fvarId || liveVars.borrows.contains fvarId)
-      let liveVars := bif parentsOk && shouldAdd child then liveVars.insertBorrow child else liveVars
+      let liveVars := uif parentsOk && shouldAdd child then liveVars.insertBorrow child else liveVars
       addDescendants child derivedValMap liveVars shouldAdd
   else
     liveVars
@@ -306,7 +306,7 @@ alive after all).
 -/
 @[specialize]
 def useVar (fvarId : FVarId) (shouldBorrow : FVarId → Bool := fun _ => true) : RcM Unit := do
-  bif !(← isLive fvarId) then
+  uif !(← isLive fvarId) then
     let derivedValMap := (← read).derivedValMap
     modifyLive fun liveVars => { liveVars with vars := liveVars.vars.insert fvarId }
     modifyLive fun liveVars =>
@@ -369,7 +369,7 @@ def setRetLiveVars : RcM Unit := do
 
 @[inline]
 def addInc (fvarId : FVarId) (k : Code .impure) (n : Nat := 1) : RcM (Code .impure) := do
-  bif n == 0 then
+  uif n == 0 then
     return k
   else
     let info ← getVarInfo fvarId
@@ -379,7 +379,7 @@ def addDec (fvarId : FVarId) (k : Code .impure) : RcM (Code .impure) := do
   let info ← getVarInfo fvarId
   match info.ctorInfo with
   | some ctorInfo =>
-    bif ctorInfo.isRef then
+    uif ctorInfo.isRef then
       return .dec fvarId 1 false info.persistent (some ctorInfo.size) k
     else
       return k
@@ -402,10 +402,10 @@ def addPrologForAlt (altLiveVars : LiveVars) (k : Code .impure) : RcM (Code .imp
   let mut decs := #[]
   for fvarId in (← get).liveVars.vars do
     let info ← getVarInfo fvarId
-    bif !altLiveVars.vars.contains fvarId then
-      bif info.isPossibleRef && !(← isBorrowed fvarId) then
+    uif !altLiveVars.vars.contains fvarId then
+      uif info.isPossibleRef && !(← isBorrowed fvarId) then
         decs := decs.push (fvarId, info.idx)
-    else bif (← isBorrowed fvarId) && !altLiveVars.borrows.contains fvarId then
+    else uif (← isBorrowed fvarId) && !altLiveVars.borrows.contains fvarId then
       incs := incs.push (fvarId, info.idx)
 
   -- We sort them by their consistent index as to avoid noise in generated C code by changing
@@ -447,7 +447,7 @@ def getNumConsumptions (arg : FVarId) (args : Array (Arg .impure)) (consumeParam
   for h : i in 0...args.size do
     let arg' := args[i]
     if let .fvar arg' := arg' then
-      bif arg == arg' && consumeParamPred i then
+      uif arg == arg' && consumeParamPred i then
         num := num + 1
   return num
 
@@ -458,11 +458,11 @@ def addIncBeforeAux (args : Array (Arg .impure)) (consumeParamPred : Nat → Boo
     let arg := args[i]
     if let .fvar fvarId := arg then
       let info ← getVarInfo fvarId
-      bif !info.isPossibleRef || !isFirstOcc args i then
+      uif !info.isPossibleRef || !isFirstOcc args i then
         continue
       let numConsumptions := getNumConsumptions fvarId args consumeParamPred
       let numIncs ←
-        bif (← isLive fvarId) -- `fvarId` is live after executing the instruction
+        uif (← isLive fvarId) -- `fvarId` is live after executing the instruction
             || (← isBorrowed fvarId)
             || isBorrowParamAux fvarId args consumeParamPred then -- `fvarId` is used in a position that is passed as a borrow reference
           pure (numConsumptions)
@@ -505,7 +505,7 @@ def addDecAfterFullApp (args : Array (Arg .impure)) (ps : Array (Param .impure))
       This is why we check whether it is the first occurrence.
       -/
       let info ← getVarInfo fvarId
-      bif info.isPossibleRef
+      uif info.isPossibleRef
           && isFirstOcc args i
           && isBorrowParam fvarId args ps
           && !(← isLive fvarId)
@@ -518,7 +518,7 @@ Add `dec` for `fvarId` if `fvarId` is a reference, not alive in `k` and not borr
 -/
 def addDecIfNeeded (fvarId : FVarId) (k : Code .impure) : RcM (Code .impure) := do
   let info ← getVarInfo fvarId
-  bif info.isPossibleRef && !(← isBorrowed fvarId) && !(← isLive fvarId) then
+  uif info.isPossibleRef && !(← isBorrowed fvarId) && !(← isLive fvarId) then
     addDec fvarId k
   else
     return k
@@ -547,7 +547,7 @@ def LetDecl.explicitRc (code : Code .impure) (decl : LetDecl .impure) (k : Code 
       addIncBeforeConsumeAll args (code.updateLet! decl k)
     | .oproj (var := fvarId) .. =>
       let k ← addDecIfNeeded fvarId k
-      let k ← bif (← isBorrowed decl.fvarId) then pure k else addInc decl.fvarId k
+      let k ← uif (← isBorrowed decl.fvarId) then pure k else addInc decl.fvarId k
       pure <| code.updateLet! decl k
     | .uproj (var := fvarId) .. | .sproj (var := fvarId) .. | .unbox (fvarId := fvarId) .. =>
       let k ← addDecIfNeeded fvarId k
@@ -556,11 +556,11 @@ def LetDecl.explicitRc (code : Code .impure) (decl : LetDecl .impure) (k : Code 
       let ps := (← getImpureSignature? f).get!.params
       let k ← addDecAfterFullApp args ps k
       let value ←
-        bif f == ``Array.getInternal && (← isBorrowed decl.fvarId) then
+        uif f == ``Array.getInternal && (← isBorrowed decl.fvarId) then
           pure <| .fap ``Array.getInternalBorrowed args
-        else bif f == ``Array.get!Internal && (← isBorrowed decl.fvarId) then
+        else uif f == ``Array.get!Internal && (← isBorrowed decl.fvarId) then
           pure <| .fap ``Array.get!InternalBorrowed args
-        else bif f == ``Array.uget && (← isBorrowed decl.fvarId) then
+        else uif f == ``Array.uget && (← isBorrowed decl.fvarId) then
           pure <| .fap ``Array.ugetBorrowed args
         else
           pure <| decl.value
@@ -640,7 +640,7 @@ partial def Code.explicitRc (code : Code .impure) : RcM (Code .impure) := do
     setRetLiveVars
     let info ← getVarInfo fvarId
     useVar fvarId
-    bif info.isPossibleRef && (← isBorrowed fvarId) then
+    uif info.isPossibleRef && (← isBorrowed fvarId) then
       addInc fvarId code
     else
       return code

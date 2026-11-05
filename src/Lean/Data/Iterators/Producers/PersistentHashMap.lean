@@ -51,7 +51,7 @@ def Zipper.step (it : IterM (α := Zipper α β) Id (α × β)) : IterStep (Iter
   match it.internalState with
   | .done => .done
   | .consEntries es z' =>
-    bif h : 0 <ᵇ es.size then
+    uif h : 0 < es.size then
       let z : Zipper α β := .consEntries (es.drop 1) z'
       match es[0] with
       | .null => .skip ⟨z⟩
@@ -60,7 +60,7 @@ def Zipper.step (it : IterM (α := Zipper α β) Id (α × β)) : IterStep (Iter
     else
       .skip ⟨z'⟩
   | .consCollision keys vals hsz z' =>
-    bif h : 0 <ᵇ vals.size then
+    uif h : 0 < vals.size then
       .yield ⟨.consCollision (keys.drop 1) (vals.drop 1) (by simp [*]) z'⟩ (keys[0], vals[0])
     else
       .skip ⟨z'⟩
@@ -78,8 +78,7 @@ termination_by (sizeOf node, 0)
 where
   /-- Counts the total entries in an entries array starting at index `i`. -/
   measureEntries (es : Array (Entry α β (Node α β))) (i : Nat) : Nat :=
-    bif h : i <ᵇ es.size then
-      have h := lt_of_decideLT_eq_true h
+    uif h : i < es.size then
       (match h_eq : es[i] with
        | .null => 1
        | .entry _ _ => 1

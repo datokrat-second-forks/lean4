@@ -63,32 +63,32 @@ def getLine (fmap : FileMap) (x : Nat) : Nat :=
 
 partial def ofString (s : String) : FileMap :=
   let rec loop (i : String.Pos.Raw) (ps : Array String.Pos.Raw) : FileMap :=
-    bif i.atEnd s then { source := s, positions := ps.push i }
+    uif i.atEnd s then { source := s, positions := ps.push i }
     else
       let c := i.get s
       let i := i.next s
-      bif c == '\n' then loop i (ps.push i)
+      uif c == '\n' then loop i (ps.push i)
       else loop i ps
   loop 0 #[0]
 
 partial def toPosition (fmap : FileMap) (pos : String.Pos.Raw) : Position :=
   match fmap with
   | { source := str, positions := ps } =>
-    bif ps.size ≥ᵇ 2 && pos ≤ᵇ ps.back! then
+    uif ps.size ≥ 2 ∧ pos ≤ ps.back! then
       let rec toColumn (i : String.Pos.Raw) (c : Nat) : Nat :=
-        bif i == pos || i.atEnd str then c
+        uif i == pos || i.atEnd str then c
         else toColumn (i.next str) (c+1)
       let rec loop (b e : Nat) :=
         let posB := ps[b]!
-        bif e == b + 1 then { line := fmap.getLine b, column := toColumn posB 0 }
+        uif e == b + 1 then { line := fmap.getLine b, column := toColumn posB 0 }
         else
           let m := (b + e) / 2;
           let posM := ps[m]!
-          bif pos == posM then { line := fmap.getLine m, column := 0 }
-          else bif pos >ᵇ posM then loop m e
+          uif pos == posM then { line := fmap.getLine m, column := 0 }
+          else uif pos > posM then loop m e
           else loop b m
       loop 0 (ps.size - 1)
-    else bif ps.isEmpty then
+    else uif ps.isEmpty then
       ⟨0, 0⟩
     else
       -- Some systems like the delaborator use synthetic positions without an input file,
@@ -99,9 +99,9 @@ partial def toPosition (fmap : FileMap) (pos : String.Pos.Raw) : Position :=
 /-- Convert a `Lean.Position` to a `String.Pos`. -/
 def ofPosition (text : FileMap) (pos : Position) : String.Pos.Raw :=
   let colPos :=
-    bif h : pos.line - 1 <ᵇ text.positions.size then
+    uif h : pos.line - 1 < text.positions.size then
       text.positions[pos.line - 1]
-    else bif text.positions.isEmpty then
+    else uif text.positions.isEmpty then
       0
     else
       text.positions.back!
@@ -112,7 +112,7 @@ Returns the position of the start of (1-based) line `line`.
 This gives the same result as `map.ofPosition ⟨line, 0⟩`, but is more efficient.
 -/
 def lineStart (map : FileMap) (line : Nat) : String.Pos.Raw :=
-  bif h : line - 1 <ᵇ map.positions.size then
+  uif h : line - 1 < map.positions.size then
     map.positions[line - 1]
   else map.positions.back?.getD 0
 

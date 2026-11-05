@@ -29,18 +29,18 @@ Remark: we still generate code for declarations tagged as `[inline]`
 and `[specialize]` since they can be partially applied.
 -/
 def shouldGenerateCode (declName : Name) : CoreM Bool := do
-  bif (← isCompIrrelevant |>.run') then return false
+  uif (← isCompIrrelevant |>.run') then return false
   let env ← getEnv
-  bif isExtern env declName then return true
+  uif isExtern env declName then return true
   -- Look up the decl in the kernel environment, since it will appear there
   -- as an axiom (rather than a definition) in the case of a kernel error.
   let some info := env.constants.find? declName | return false
   unless info.hasValue (allowOpaque := true) do return false
-  bif hasMacroInlineAttribute env declName then return false
-  bif (getImplementedBy? env declName).isSome then return false
-  bif (← Meta.isMatcher declName) then return false
-  bif (← Meta.isMatcherLike declName) then return false
-  bif isCasesOnLike env declName then return false
+  uif hasMacroInlineAttribute env declName then return false
+  uif (getImplementedBy? env declName).isSome then return false
+  uif (← Meta.isMatcher declName) then return false
+  uif (← Meta.isMatcherLike declName) then return false
+  uif isCasesOnLike env declName then return false
   -- TODO: check if type class instance
   return true
 where
@@ -59,14 +59,14 @@ def checkpoint (stepName : Name) (decls : Array (Decl pu)) (shouldCheck : Bool) 
   let go : CompilerM Unit := do
     for decl in decls do
       trace[Compiler.stat] "{decl.name} : {decl.size}"
-      bif shouldTrace then
-        bif compiler.traceUnnormalized.get (← getOptions) then
+      uif shouldTrace then
+        uif compiler.traceUnnormalized.get (← getOptions) then
           Lean.addTrace clsName m!"size: {decl.size}\n{← ppDecl decl}"
         else
           Lean.addTrace clsName m!"size: {decl.size}\n{← ppDecl' decl (← getPhase)}"
-      bif shouldCheck then
+      uif shouldCheck then
         decl.check
-  bif shouldTrace || shouldCheck then
+  uif shouldTrace || shouldCheck then
     withOptions (fun opts => opts.set `pp.motives.pi false) go
   else
     go
@@ -132,7 +132,7 @@ partial def run (declNames : Array Name) (baseOpts : Options) : CompilerM Unit :
   Moreover, some declarations get very big during simplification.
   -/
 
-  bif (← declNames.anyM isInductive) then
+  uif (← declNames.anyM isInductive) then
     -- Eagerly compute and persist the cross-module inductive infos for these inductive types in
     -- their defining module. The computation walks each constructor's field types, which can
     -- reference constants from non-transitively (privately) imported modules; the defining module is
@@ -144,13 +144,13 @@ partial def run (declNames : Array Name) (baseOpts : Options) : CompilerM Unit :
 
   for declName in declNames do
     if let some fnName := Compiler.getImplementedBy? (← getEnv) declName then
-      bif (← getEnv).header.isModule && (← compiler.postponeCompile.getM) then
+      uif (← getEnv).header.isModule && (← compiler.postponeCompile.getM) then
         -- must postpone here as well so that visibility marking happens in the correct process
         modifyEnv (postponedCompileDeclsExt.addEntry · { declNames := #[declName], options := ← getOptions })
       else
         -- Ensure the impl target is compiled first so `getLocalDeclAt?` succeeds
         resumeCompilation fnName baseOpts
-        bif !isDeclPublic (← getEnv) fnName then
+        uif !isDeclPublic (← getEnv) fnName then
           if let some decl ← getLocalDeclAt? fnName .base then
             trace[Compiler.inferVisibility] m!"Marking {fnName} as opaque because it implements {declName}"
             LCNF.markDeclPublicRec .base decl
@@ -159,11 +159,11 @@ partial def run (declNames : Array Name) (baseOpts : Options) : CompilerM Unit :
               if let some decl ← getLocalDeclAt? fnName .impure then
                 LCNF.markDeclPublicRec .impure decl
   let declNames ← declNames.filterM (shouldGenerateCode ·)
-  bif declNames.isEmpty then return
+  uif declNames.isEmpty then return
   for declName in declNames do
-    bif declName == `main then
+    uif declName == `main then
       if let some info ← getDeclInfo? declName then
-        bif !(isValidMainType info.type) then
+        uif !(isValidMainType info.type) then
           throwError "`main` function must have type `(List String →)? IO (UInt32 | Unit | PUnit)`"
 
   let decls ← declNames.mapM toDecl
@@ -171,12 +171,12 @@ partial def run (declNames : Array Name) (baseOpts : Options) : CompilerM Unit :
     checkMeta decl
 
   -- Now that we have done all input checks, check for postponement
-  bif (← getEnv).header.isModule && (← compiler.postponeCompile.getM) then
+  uif (← getEnv).header.isModule && (← compiler.postponeCompile.getM) then
     modifyEnv (postponedCompileDeclsExt.addEntry · { declNames := decls.map (·.name), options := ← getOptions })
     -- meta defs are compiled locally so they are available for execution/compilation without
     -- importing `.ir` but still marked for `leanir` compilation so that we do not have to persist
     -- module-local compilation information between the two processes
-    bif decls.any (isMarkedMeta (← getEnv) ·.name) then
+    uif decls.any (isMarkedMeta (← getEnv) ·.name) then
       -- avoid re-compiling the meta defs in this process; the entry for `leanir` is not affected
       modifyEnv (postponedCompileDeclsExt.modifyState · fun s => decls.foldl (·.erase ·.name) s)
     else
@@ -205,7 +205,7 @@ partial def run (declNames : Array Name) (baseOpts : Options) : CompilerM Unit :
     withPhase .impure do
       let decls ← runPassManagerPart .impure .impure "compilation (LCNF impure)" manager.impurePasses decls isCheckEnabled
 
-      bif (← Lean.isTracingEnabledFor `Compiler.result) then
+      uif (← Lean.isTracingEnabledFor `Compiler.result) then
         for decl in decls do
           let decl ← normalizeFVarIds decl
           Lean.addTrace `Compiler.result m!"size: {decl.size}\n{← ppDecl' decl (← getPhase)}"

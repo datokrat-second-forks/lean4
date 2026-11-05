@@ -72,9 +72,9 @@ Return `true` if the given declaration should be lambda lifted.
 -/
 def shouldLift (decl : FunDecl .pure) : LiftM Bool := do
   let minSize := (← read).minSize
-  bif decl.value.size <ᵇ minSize then
+  uif decl.value.size < minSize then
     return false
-  else bif (← read).liftInstParamOnly then
+  else uif (← read).liftInstParamOnly then
     hasInstParam decl
   else
     return true
@@ -82,7 +82,7 @@ def shouldLift (decl : FunDecl .pure) : LiftM Bool := do
 partial def mkAuxDeclName : LiftM Name := do
   let nextIdx ← modifyGet fun s => (s.nextIdx, { s with nextIdx := s.nextIdx + 1})
   let nameNew := (← read).mainDecl.name ++ (← read).suffix.appendIndexAfter nextIdx
-  bif (← getDecl? nameNew).isNone then return nameNew
+  uif (← getDecl? nameNew).isNone then return nameNew
   mkAuxDeclName
 
 def replaceFunDecl (decl : FunDecl .pure) (value : LetValue .pure) : LiftM (LetDecl .pure) := do
@@ -99,7 +99,7 @@ occurring in `decl`.
 -/
 def mkAuxDecl (closure : Array (Param .pure)) (decl : FunDecl .pure) : LiftM (LetDecl .pure) := do
   let nameNew ← mkAuxDeclName
-  let inlineAttr? ← bif (← read).inheritInlineAttrs then pure (← read).mainDecl.inlineAttr? else pure none
+  let inlineAttr? ← uif (← read).inheritInlineAttrs then pure (← read).mainDecl.inlineAttr? else pure none
   let auxDecl ← go nameNew (← read).mainDecl.safe inlineAttr? |>.run' {}
   let us := auxDecl.levelParams.map mkLevelParam
   let auxDeclName ← match (← cacheAuxDecl auxDecl) with
@@ -123,15 +123,15 @@ where
     return decl.setLevelParams
 
 def etaContractibleDecl? (decl : FunDecl .pure) : LiftM (Option (LetDecl .pure)) := do
-  bif !(← read).allowEtaContraction then return none
+  uif !(← read).allowEtaContraction then return none
   let .let { fvarId := letVar, value := .const declName us args, .. } (.return retVar) := decl.value
     | return none
-  bif letVar != retVar then return none
-  bif args.size != decl.params.size then return none
-  bif (← getDecl? declName).isNone then return none
+  uif letVar != retVar then return none
+  uif args.size != decl.params.size then return none
+  uif (← getDecl? declName).isNone then return none
   for arg in args, param in decl.params do
     let .fvar argVar := arg | return none
-    bif argVar != param.fvarId then return none
+    uif argVar != param.fvarId then return none
 
   let value := .const declName us #[]
   replaceFunDecl decl value
@@ -148,7 +148,7 @@ mutual
       return code.updateLet! decl k
     | .fun decl k =>
       let decl ← visitFunDecl decl
-      bif (← shouldLift decl) then
+      uif (← shouldLift decl) then
         let declNew ← do
           if let some letDecl ← etaContractibleDecl? decl then
             pure letDecl
@@ -216,7 +216,7 @@ def eagerLambdaLifting : Pass where
   name       := `eagerLambdaLifting
   run        := fun decls => do
     decls.foldlM (init := #[]) fun decls decl => do
-      bif decl.inlineable || (← isInstanceReducible decl.name) then
+      uif decl.inlineable || (← isInstanceReducible decl.name) then
         return decls.push decl
       else
         return decls ++ (← decl.lambdaLifting (liftInstParamOnly := true) (allowEtaContraction := false) (suffix := `_elam))

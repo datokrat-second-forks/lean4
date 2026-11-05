@@ -45,7 +45,7 @@ abbrev M := StateM State
 Normalize universe level parameter names in the given universe level.
 -/
 partial def normLevel (u : Level) : M Level := do
-  bif !u.hasParam then
+  uif !u.hasParam then
     return u
   else match u with
     | .zero     => return u
@@ -65,7 +65,7 @@ partial def normLevel (u : Level) : M Level := do
 Normalize universe level parameter names in the given expression.
 -/
 partial def normExpr (e : Expr) : M Expr := do
-  bif !e.hasLevelParam then
+  uif !e.hasLevelParam then
     return e
   else match e with
     | .const _ us      => return e.updateConst! (← us.mapM normLevel)

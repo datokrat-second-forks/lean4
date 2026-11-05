@@ -30,7 +30,7 @@ public def levenshtein (str1 str2 : String) (cutoff : Nat) : Option Nat := Id.ru
   let len2 := str2.length
 
   -- The lower bound on the Levenshtein distance is the difference in lengths
-  bif max len1 len2 - min len1 len2 >ᵇ cutoff then return none
+  uif max len1 len2 - min len1 len2 > cutoff then return none
 
   let mut v0 := Vector.replicate (len2 + 1) 0
   let mut v1 := v0
@@ -39,18 +39,16 @@ public def levenshtein (str1 str2 : String) (cutoff : Nat) : Option Nat := Id.ru
     v0 := v0.set i i
   let mut iter1 := str1.startPos
   let mut i := 0
-  while h1 : iter1 ≠ᵇ str1.endPos do
-    have h1 := ne_of_decideNe_eq_true h1
+  while h1 : iter1 ≠ str1.endPos do
     v1 := v1.set 0 (i+1)
     let mut iter2 := str2.startPos
     let mut j : Fin (len2 + 1) := 0
-    while h2 : iter2 ≠ᵇ str2.endPos do
-      have h2 := ne_of_decideNe_eq_true h2
+    while h2 : iter2 ≠ str2.endPos do
       let j' : Fin (len2 + 1) := j + 1
       let deletionCost := v0[j'] + 1
       let insertionCost := v1[j] + 1
       let substCost :=
-        bif iter1.get h1 == iter2.get h2 then v0[j]
+        uif iter1.get h1 == iter2.get h2 then v0[j]
         else v0[j] + 1
       let cost := min (min deletionCost insertionCost) substCost
       v1 := v1.set j' cost
@@ -59,6 +57,6 @@ public def levenshtein (str1 str2 : String) (cutoff : Nat) : Option Nat := Id.ru
     iter1 := iter1.next h1
     i := i + 1
     -- Terminate early if it's impossible that the result is below the cutoff
-    bif v1.all (· > cutoff) then return none
+    uif v1.all (· > cutoff) then return none
     v0 := v1
   some v0[len2]

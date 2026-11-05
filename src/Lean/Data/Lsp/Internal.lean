@@ -155,7 +155,7 @@ instance : ToJson DeclInfo where
 instance : FromJson DeclInfo where
   fromJson?
     | .arr xs => do
-      bif xs.size != 8 then
+      uif xs.size != 8 then
         throw s!"Expected list of length 8, not length {xs.size}"
       return {
         rangeStartPosLine := ← fromJson? xs[0]!
@@ -218,7 +218,7 @@ def RefInfo.Location.range (l : RefInfo.Location) : Lsp.Range :=
 
 /-- Name of the parent declaration of this location. -/
 def RefInfo.Location.parentDecl? (l : RefInfo.Location) : Option String :=
-  bif l.parentDecl.isEmpty then
+  uif l.parentDecl.isEmpty then
     none
   else
     some l.parentDecl
@@ -245,14 +245,14 @@ instance : FromJson RefInfo where
   -- This implementation is optimized to prevent redundant intermediate allocations.
   fromJson? j := do
     let toLocation (a : Array Json) : Except String RefInfo.Location := do
-      bif h : a.size ≠ᵇ 4 && a.size ≠ᵇ 5 then
+      uif h : a.size ≠ 4 ∧ a.size ≠ 5 then
         .error s!"Expected list of length 4 or 5, not {a.size}"
       else
         let startPosLine ← fromJson? a[0]
         let startPosCharacter ← fromJson? a[1]
         let endPosLine ← fromJson? a[2]
         let endPosCharacter ← fromJson? a[3]
-        bif h' : a.size =ᵇ 5 then
+        uif h' : a.size = 5 then
           return {
             startPosLine
             startPosCharacter

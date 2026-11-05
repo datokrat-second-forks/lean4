@@ -81,7 +81,7 @@ def replace [BEq α] (a : α) (b : β) : AssocList α β → AssocList α β
     | false => cons k v (replace a b es)
 
 def insert [BEq α] (m : AssocList α β) (k : α) (v : β) : AssocList α β :=
-  bif m.contains k then
+  uif m.contains k then
     m.replace k v
   else
     m.insertNew k v

@@ -116,7 +116,7 @@ def checkAppArgs (f : Expr) (args : Array (Arg .pure)) : CheckM Unit := do
   let mut j := 0
   for h : i in *...args.size do
     let arg := args[i]
-    bif fType.isErased then
+    uif fType.isErased then
       return ()
     fType := fType.headBeta
     let (d, b) ←
@@ -128,7 +128,7 @@ def checkAppArgs (f : Expr) (args : Array (Arg .pure)) : CheckM Unit := do
         | .forallE _ d b _ => j := i; pure (d, b)
         | _ => return ()
     let expectedType := instantiateRevRangeArgs d j i args
-    bif (← checkTypes) then
+    uif (← checkTypes) then
       let argType ← arg.inferType
       unless (← compatibleTypes argType expectedType) do
         throwError "type mismatch at LCNF application{indentExpr (mkAppN f (args.map Arg.toExpr))}\nargument {arg.toExpr} has type{indentExpr argType}\nbut is expected to have type{indentExpr expectedType}"
@@ -164,7 +164,7 @@ def checkParams (params : Array (Param .pure)) : CheckM Unit :=
 
 def checkLetDecl (letDecl : LetDecl .pure) : CheckM Unit := do
   checkLetValue letDecl.value
-  bif (← checkTypes) then
+  uif (← checkTypes) then
     let valueType ← letDecl.value.inferType
     unless (← compatibleTypes letDecl.type valueType) do
       throwError "type mismatch at `{letDecl.binderName}`, value has type{indentExpr valueType}\nbut is expected to have type{indentExpr letDecl.type}"
@@ -172,7 +172,7 @@ def checkLetDecl (letDecl : LetDecl .pure) : CheckM Unit := do
     throwError "LCNF let declaration mismatch at `{letDecl.binderName}`, does not match value in local context"
 
 def addFVarId (fvarId : FVarId) : CheckM Unit := do
-  bif (← get).all.contains fvarId then
+  uif (← get).all.contains fvarId then
     throwError "invalid LCNF, free variables are not unique `{fvarId.name}`"
   modify fun s => { s with all := s.all.insert fvarId }
 
@@ -197,7 +197,7 @@ partial def checkFunDeclCore (declName : Name) (params : Array (Param .pure)) (t
   checkParams params
   withParams params do
     discard <| check value
-    bif (← checkTypes) then
+    uif (← checkTypes) then
       let valueType ← mkForallParams params (← value.inferType)
       unless (← compatibleTypes type valueType) do
         throwError "type mismatch at `{.ofConstName declName}`, value has type{indentExpr valueType}\nbut is expected to have type{indentExpr type}"
@@ -221,7 +221,7 @@ partial def checkCases (c : Cases .pure) : CheckM Unit := do
     | .default k => hasDefault := true; check k
     | .alt ctorName params k =>
       checkParams params
-      bif ctorNames.contains ctorName then
+      uif ctorNames.contains ctorName then
         throwError "invalid LCNF `cases`, alternative `{ctorName}` occurs more than once"
       ctorNames := ctorNames.insert ctorName
       let .ctorInfo val ← getConstInfo ctorName | throwError "invalid LCNF `cases`, `{ctorName}` is not a constructor name"

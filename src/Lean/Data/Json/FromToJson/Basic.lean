@@ -173,11 +173,11 @@ instance [ToJson α] [ToJson β] : ToJson (α × β) where
 
 protected def Name.fromJson? (j : Json) : Except String Name := do
   let s ← j.getStr?
-  bif s == "[anonymous]" then
+  uif s == "[anonymous]" then
     return Name.anonymous
   else
     let n := s.toName
-    bif n.isAnonymous then throw s!"expected a `Name`, got '{j}'"
+    uif n.isAnonymous then throw s!"expected a `Name`, got '{j}'"
     return n
 
 instance : FromJson Name where
@@ -188,11 +188,11 @@ instance : ToJson Name where
 
 protected def NameMap.fromJson? [FromJson α] : Json → Except String (NameMap α)
   | .obj obj => obj.foldlM (init := {}) fun m k v => do
-    bif k == "[anonymous]" then
+    uif k == "[anonymous]" then
       return m.insert .anonymous (← fromJson? v)
     else
       let n := k.toName
-      bif n.isAnonymous then
+      uif n.isAnonymous then
         throw s!"expected a `Name`, got '{k}'"
       else
         return m.insert n (← fromJson? v)
@@ -221,7 +221,7 @@ def bignumToJson (n : Nat) : Json :=
 -- This is intentionally in the `Lean` namespace to avoid polluting the global namespace.
 protected def USize.fromJson? (j : Json) : Except String USize := do
   let n ← bignumFromJson? j
-  bif n ≥ᵇ USize.size then
+  uif n ≥ USize.size then
     throw s!"value '{j}' is too large for `USize`"
   return USize.ofNat n
 
@@ -234,7 +234,7 @@ instance : ToJson USize where
 -- This is intentionally in the `Lean` namespace to avoid polluting the global namespace.
 protected def UInt64.fromJson? (j : Json) : Except String UInt64 := do
   let n ← bignumFromJson? j
-  bif n ≥ᵇ UInt64.size then
+  uif n ≥ UInt64.size then
     throw s!"value '{j}' is too large for `UInt64`"
   return UInt64.ofNat n
 
@@ -306,9 +306,9 @@ def parseTagged
     (tag : String)
     (nFields : Nat)
     (fieldNames? : Option (Array Name)) : Except String (Array Json) :=
-  bif nFields == 0 then
+  uif nFields == 0 then
     match getStr? json with
-    | Except.ok s => bif s == tag then Except.ok #[] else throw s!"incorrect tag: {s} ≟ {tag}"
+    | Except.ok s => uif s == tag then Except.ok #[] else throw s!"incorrect tag: {s} ≟ {tag}"
     | Except.error err => Except.error err
   else
     match getObjVal? json tag with
@@ -321,12 +321,12 @@ def parseTagged
             fields := fields.push (←getObjVal? payload fieldName.getString!)
           Except.ok fields
       | none =>
-        bif nFields == 1 then
+        uif nFields == 1 then
           Except.ok #[payload]
         else
           match getArr? payload with
           | Except.ok fields =>
-            bif fields.size == nFields then
+            uif fields.size == nFields then
               Except.ok fields
             else
               Except.error s!"incorrect number of fields: {fields.size} ≟ {nFields}"
@@ -347,11 +347,11 @@ def parseCtorFields
   | some fieldNames =>
     fieldNames.mapM (getObjVal? payload ·.getString!)
   | none =>
-    bif nFields == 1 then
+    uif nFields == 1 then
       Except.ok #[payload]
     else
       let fields ← getArr? payload
-      bif fields.size == nFields then
+      uif fields.size == nFields then
         Except.ok fields
       else
         Except.error s!"incorrect number of fields: {fields.size} ≟ {nFields}"

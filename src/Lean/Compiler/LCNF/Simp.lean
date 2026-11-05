@@ -37,14 +37,14 @@ def Decl.simp? (decl : Decl .pure) : SimpM (Option (Decl .pure)) := do
   if let some code ← simpJpCases? code then
     let decl := { decl with value := .code code }
     decl.reduceJpArity
-  else bif (← get).simplified then
+  else uif (← get).simplified then
     return some { decl with value := .code code }
   else
     return none
 
 partial def Decl.simp (decl : Decl .pure) (config : Config) : CompilerM (Decl .pure) := do
   let mut config := config
-  bif (← isTemplateLike decl) then
+  uif (← isTemplateLike decl) then
     /-
     We do not eta-expand or inline partial applications in template like code.
     Recall we don't want to generate code for them.

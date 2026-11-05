@@ -85,7 +85,7 @@ def size (m : KVMap) : Nat :=
 
 def findCore : List (Name × DataValue) → Name → Option DataValue
   | [],       _  => none
-  | (k,v)::m, k' => bif k == k' then some v else findCore m k'
+  | (k,v)::m, k' => uif k == k' then some v else findCore m k'
 
 def find : KVMap → Name → Option DataValue
   | ⟨m⟩, k => findCore m k
@@ -95,7 +95,7 @@ def findD (m : KVMap) (k : Name) (d₀ : DataValue) : DataValue :=
 
 def insertCore : List (Name × DataValue) → Name → DataValue → List (Name × DataValue)
   | [],       k', v' => [(k',v')]
-  | (k,v)::m, k', v' => bif k == k' then (k, v') :: m else (k, v) :: insertCore m k' v'
+  | (k,v)::m, k', v' => uif k == k' then (k, v') :: m else (k, v) :: insertCore m k' v'
 
 def insert : KVMap → Name → DataValue → KVMap
   | ⟨m⟩, k, v => ⟨insertCore m k v⟩

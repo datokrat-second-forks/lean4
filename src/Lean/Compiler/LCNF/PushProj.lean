@@ -94,7 +94,7 @@ where
   go (decls : Array (CodeDecl .impure)) (alts : Array (Alt .impure)) (altsUsed : Array FVarIdHashSet)
       (ctx : Array (CodeDecl .impure)) (ctxUsed : FVarIdHashSet) :
       CompilerM (Array (CodeDecl .impure) × Array (Alt .impure)) :=
-    bif decls.isEmpty then
+    uif decls.isEmpty then
       return (ctx.reverse, alts)
     else
       let b := decls.back!
@@ -102,14 +102,14 @@ where
       let done := fun (_ : Unit) => return (bs.push b ++ ctx.reverse, alts)
       let skip := fun (_ : Unit) => go bs alts altsUsed (ctx.push b) (b.collectUsed ctxUsed)
       let push (fvar : FVarId) : CompilerM (Array (CodeDecl .impure) × Array (Alt .impure)) := do
-        bif !ctxUsed.contains fvar then
+        uif !ctxUsed.contains fvar then
           let alts ← alts.mapIdxM fun i alt => alt.mapCodeM fun k => do
-            bif altsUsed[i]!.contains fvar then
+            uif altsUsed[i]!.contains fvar then
               return attachCodeDecls #[b] k
             else
               return k
           let altsUsed := altsUsed.map fun used =>
-            bif used.contains fvar then
+            uif used.contains fvar then
               b.collectUsed used
             else
               used

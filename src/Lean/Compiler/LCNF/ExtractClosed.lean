@@ -73,21 +73,21 @@ partial def shouldExtractLetValue (isRoot : Bool) (v : LetValue .pure) : M Bool 
     return !isRoot || v >= Nat.pow 2 63
   | .lit _ | .erased => return !isRoot
   | .const name _ args =>
-    bif (← read).sccDecls.any (·.name == name) then
+    uif (← read).sccDecls.any (·.name == name) then
       return false
-    bif hasNeverExtractAttribute (← getEnv) name then
+    uif hasNeverExtractAttribute (← getEnv) name then
       return false
-    bif isRoot then
+    uif isRoot then
       if let some constInfo := (← getEnv).find? name then
         let shouldExtract := match constInfo with
         | .defnInfo val => val.type.isForall
         | .ctorInfo _ => !(args.all isIrrelevantArg)
         | _ => true
-        bif !shouldExtract then
+        uif !shouldExtract then
           return false
       if let some decl ← LCNF.getMonoDecl? name then
         -- We don't want to extract constants as root terms
-        bif decl.getArity == 0 then
+        uif decl.getArity == 0 then
           return false
     args.allM shouldExtractArg
   | .fvar fnVar args => return (← shouldExtractFVar fnVar) && (← args.allM shouldExtractArg)
@@ -141,22 +141,22 @@ where
     | 0 => return none
     | nextSize + 1 =>
       let .const ``Array.push _ #[_, .fvar arrId, elemArg] := decl.value | return none
-      bif arrId != prevArrayId then return none
-      bif !(← shouldExtractArg elemArg) then return none
-      bif nextSize != 0 then
+      uif arrId != prevArrayId then return none
+      uif !(← shouldExtractArg elemArg) then return none
+      uif nextSize != 0 then
         let illegalSet := illegalSet.insert decl.fvarId
         let .let nextDecl nextK := k | return none
         identifyChain decl.fvarId nextDecl nextK illegalSet nextSize
       else
         let occursCheck (decl : LetDecl .pure) (k : Code .pure) (illegalSet : FVarIdSet) := do
-          bif k.dependsOn illegalSet then return none
+          uif k.dependsOn illegalSet then return none
           return some (decl, k)
         -- At this point we can be at the end of an `Array` literal or right before the end of a
         -- `ByteArray` or `FloatArray` literal, let's check.
         match k with
         | .let nextDecl@{ value := .const ``ByteArray.mk _ #[.fvar arrayId] _, .. } nextK
         | .let nextDecl@{ value := .const ``FloatArray.mk _ #[.fvar arrayId] _, .. } nextK =>
-          bif arrayId != decl.fvarId then
+          uif arrayId != decl.fvarId then
             occursCheck decl k illegalSet
           else
             let illegalSet := illegalSet.insert decl.fvarId
@@ -173,7 +173,7 @@ partial def visitCode (code : Code .pure) : M (Code .pure) := do
         let name ← performExtraction decl
         let decl ← decl.updateValue (.const name [] #[])
         return code.updateLet! decl (← visitCode k)
-      else bif (← shouldExtractLetValue true decl.value) then
+      else uif (← shouldExtractLetValue true decl.value) then
         let name ← performExtraction decl
         let decl ← decl.updateValue (.const name [] #[])
         return code.updateLet! decl (← visitCode k)
@@ -184,7 +184,7 @@ partial def visitCode (code : Code .pure) : M (Code .pure) := do
     | .const ``Array.mkEmpty _ #[_, .fvar sizeId]
     | .const ``Array.emptyWithCapacity _ #[_, .fvar sizeId] =>
       if let some (.lit (.nat n)) ← findLetValue? (pu := .pure) sizeId then
-        bif n == 0 then
+        uif n == 0 then
           let name ← performExtraction decl
           let decl ← decl.updateValue (.const name [] #[])
           return code.updateLet! decl (← visitCode k)
@@ -244,7 +244,7 @@ end ExtractClosed
 partial def Decl.extractClosed (decl : Decl .pure) (sccDecls : Array (Decl .pure)) :
     CompilerM (Array (Decl .pure)) := do
   let mut ⟨decl, s⟩ ← ExtractClosed.visitDecl decl |>.run { baseName := decl.name, sccDecls } |>.run {}
-  bif !s.decls.isEmpty then
+  uif !s.decls.isEmpty then
     -- Closed term extraction might have left behind dead values.
     decl ← decl.elimDeadVars
   return s.decls.push decl
@@ -253,7 +253,7 @@ def extractClosed : Pass where
   phase := .mono
   name := `extractClosed
   run := fun decls => do
-    bif (← getConfig).extractClosed then
+    uif (← getConfig).extractClosed then
       decls.foldlM (init := #[]) fun newDecls decl =>
         return newDecls ++ (← decl.extractClosed decls)
     else

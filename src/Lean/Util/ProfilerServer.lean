@@ -26,9 +26,9 @@ open _root_.Std Async Http
 /-- Best-effort: spawn the platform-specific "open this URL in the default browser" command. -/
 def openInBrowser (url : String) : IO Unit := do
   let args : IO.Process.SpawnArgs :=
-    bif System.Platform.isWindows then
+    uif System.Platform.isWindows then
       { cmd := "cmd", args := #["/c", "start", "", url] }
-    else bif System.Platform.isOSX then
+    else uif System.Platform.isOSX then
       { cmd := "open", args := #[url] }
     else
       { cmd := "xdg-open", args := #[url] }

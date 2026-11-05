@@ -2153,11 +2153,11 @@ private partial def parseNamedCharRefData (data : String) : Array (String × Str
   go 0 (Array.emptyWithCapacity 2125)
 where
   space (i : String.Pos.Raw) : String.Pos.Raw :=
-    bif h : i.atEnd data then i
-    else bif i.get' data (Bool.ne_true_of_eq_false h) == ' ' then i
-    else space (i.next' data (Bool.ne_true_of_eq_false h))
+    uif h : i.atEnd data then i
+    else uif i.get' data h == ' ' then i
+    else space (i.next' data h)
   go (i : String.Pos.Raw) (acc : Array (String × String)) : Array (String × String) :=
-    bif i.atEnd data then acc
+    uif i.atEnd data then acc
     else
       let nameEnd := space i
       let denotationStart := nameEnd.next data
@@ -2189,32 +2189,31 @@ must denote a Unicode scalar value that is not U+0000, U+000D,
 a noncharacter, or a control other than ASCII whitespace. -/
 def characterReference? (ref : String) : Option String :=
   let i : String.Pos.Raw := 0
-  bif h : i.atEnd ref then none
-  else bif i.get' ref (Bool.ne_true_of_eq_false h) == '#' then
-    let i := i.next' ref (Bool.ne_true_of_eq_false h)
-    bif h : i.atEnd ref then none
-    else bif i.get' ref (Bool.ne_true_of_eq_false h) == 'x' || i.get' ref (Bool.ne_true_of_eq_false h) == 'X' then numeric 16 ref (i.next' ref (Bool.ne_true_of_eq_false h))
+  uif h : i.atEnd ref then none
+  else uif i.get' ref h == '#' then
+    let i := i.next' ref h
+    uif h : i.atEnd ref then none
+    else uif i.get' ref h == 'x' || i.get' ref h == 'X' then numeric 16 ref (i.next' ref h)
     else numeric 10 ref i
   else namedCharacterReference? ref
 where
   numeric (radix : Nat) (ref : String) (i : String.Pos.Raw) : Option String := do
     let mut n : Nat := 0
     let mut i := i
-    while h : !i.atEnd ref do
-      have h : ¬i.atEnd ref := by simpa using h
+    while h : ¬i.atEnd ref do
       let d ← digit? (i.get' ref h)
-      bif d ≥ᵇ radix then none
+      uif d ≥ radix then none
       n := n * radix + d
-      bif n >ᵇ 0x10FFFF then none -- exceeded Unicode range
+      uif n > 0x10FFFF then none -- exceeded Unicode range
       i := i.next' ref h
     let c := Char.ofNat n
-    bif c == '\x00' || c == '\x0d' || isNonCharacter c || (isControl c && !isAsciiWhitespace c) then
+    uif c == '\x00' || c == '\x0d' || isNonCharacter c || (isControl c && !isAsciiWhitespace c) then
       none
     return String.singleton c
   digit? (c : Char) : Option Nat :=
-    bif '0' ≤ᵇ c && c ≤ᵇ '9' then some (c.toNat - '0'.toNat)
-    else bif 'a' ≤ᵇ c && c ≤ᵇ 'f' then some (10 + c.toNat - 'a'.toNat)
-    else bif 'A' ≤ᵇ c && c ≤ᵇ 'F' then some (10 + c.toNat - 'A'.toNat)
+    uif '0' ≤ c ∧ c ≤ '9' then some (c.toNat - '0'.toNat)
+    else uif 'a' ≤ c ∧ c ≤ 'f' then some (10 + c.toNat - 'a'.toNat)
+    else uif 'A' ≤ c ∧ c ≤ 'F' then some (10 + c.toNat - 'A'.toNat)
     else none
 
 end Lean.Html

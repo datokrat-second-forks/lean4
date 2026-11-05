@@ -35,7 +35,7 @@ abbrev Visitor := State → State
 
 mutual
   partial def visit (e : Expr) : Visitor := fun s =>
-    bif !e.hasExprMVar || s.visited.contains { expr := e } then s
+    uif !e.hasExprMVar || s.visited.contains { expr := e } then s
     else main e { s with visited := s.visited.insert { expr := e } }
 
   partial def main : Expr → Visitor
@@ -47,7 +47,7 @@ mutual
     | Expr.mdata _ b       => visit b
     -- Equal metavariables may be different objects.
     | Expr.mvar mvarId     => fun s =>
-      bif s.mvarSet.contains mvarId then s
+      uif s.mvarSet.contains mvarId then s
       else { s with mvarSet := s.mvarSet.insert mvarId, result := s.result.push mvarId }
     | _                    => id
 end

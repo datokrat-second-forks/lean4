@@ -63,7 +63,7 @@ public def filterPairsM {m} [Monad m] {α} (a : Array α) (f : α → α → m (
 public def mask {α} (mask : Array Bool) (xs : Array α) : Array α := Id.run do
   let mut ys := #[]
   for b in mask, x in xs do
-    bif b then ys := ys.push x
+    uif b then ys := ys.push x
   return ys
 
 /--
@@ -77,14 +77,14 @@ public def zipMasked {α} (mask : Array Bool) (xs ys : Array α) : Array α := I
   let mut j := 0
   let mut zs := #[]
   for b in mask do
-    bif b then
-      bif h : j <ᵇ ys.size then
+    uif b then
+      uif h : j < ys.size then
         zs := zs.push ys[j]
         j := j + 1
       else
         panic! "zipMaskedArray: not enough elements in ys"
     else
-      bif h : i <ᵇ xs.size then
+      uif h : i < xs.size then
         zs := zs.push xs[i]
         i := i + 1
       else

@@ -21,7 +21,7 @@ namespace PP
 abbrev M := ReaderT LocalContext CompilerM
 
 private def join (as : Array α) (f : α → M Format) : M Format := do
-  bif h : 0 <ᵇ as.size then
+  uif h : 0 < as.size then
     let mut result ← f as[0]
     for a in as[1...*] do
       result := f!"{result} {← f a}"
@@ -49,8 +49,8 @@ def ppArg (e : Arg pu) : M Format := do
   | .erased => return "◾"
   | .fvar fvarId => ppFVar fvarId
   | .type e _ =>
-    bif pp.explicit.get (← getOptions) then
-      bif e.isConst || e.isProp || e.isType0 || e.isFVar then
+    uif pp.explicit.get (← getOptions) then
+      uif e.isConst || e.isProp || e.isType0 || e.isFVar then
         ppExpr e
       else
         return Format.paren (←  ppExpr e)
@@ -68,9 +68,9 @@ def ppLitValue (lit : LitValue) : M Format := do
 private def formatCtorInfo : CtorInfo → Format
   | { name := name, cidx := cidx, usize := usize, ssize := ssize, .. } => Id.run do
     let mut r := f!"ctor_{cidx}"
-    bif usize >ᵇ 0 || ssize >ᵇ 0 then
+    uif usize > 0 ∨ ssize > 0 then
       r := f!"{r}.{usize}.{ssize}"
-    bif name != Name.anonymous then
+    uif name != Name.anonymous then
       r := f!"{r}[{name}]"
     r
 
@@ -91,14 +91,14 @@ def ppLetValue (e : LetValue pu) : M Format := do
   | .sproj i offset fvarId _ => return f!"sproj[{i}, {offset}] {← ppFVar fvarId}"
   | .reset n fvarId _ => return f!"reset[{n}] {← ppFVar fvarId}"
   | .reuse fvarId info updateHeader args _ =>
-    return f!"reuse" ++ (bif updateHeader then f!"!" else f!"") ++ f!" {← ppFVar fvarId} in {info}{← ppArgs args}"
+    return f!"reuse" ++ (uif updateHeader then f!"!" else f!"") ++ f!" {← ppFVar fvarId} in {info}{← ppArgs args}"
   | .box _ fvarId _ => return f!"box {← ppFVar fvarId}"
   | .unbox fvarId _ => return f!"unbox {← ppFVar fvarId}"
   | .isShared fvarId _ => return f!"isShared {← ppFVar fvarId}"
 
 def ppParam (param : Param pu) : M Format := do
-  let borrow := bif param.borrow then "@&" else ""
-  bif pp.funBinderTypes.get (← getOptions) then
+  let borrow := uif param.borrow then "@&" else ""
+  uif pp.funBinderTypes.get (← getOptions) then
     return Format.paren f!"{param.binderName} : {borrow}{← ppExpr param.type}"
   else
     return format s!"{borrow}{param.binderName}"
@@ -107,13 +107,13 @@ def ppParams (params : Array (Param pu)) : M Format := do
   prefixJoin " " params ppParam
 
 def ppLetDecl (letDecl : LetDecl pu) : M Format := do
-  bif pp.letVarTypes.get (← getOptions) then
+  uif pp.letVarTypes.get (← getOptions) then
     return f!"let {letDecl.binderName} : {← ppExpr letDecl.type} := {← ppLetValue letDecl.value}"
   else
     return f!"let {letDecl.binderName} := {← ppLetValue letDecl.value}"
 
 def getFunType (ps : Array (Param pu)) (type : Expr) : CoreM Expr :=
-  bif type.isErased then
+  uif type.isErased then
     pure type
   else
     match pu with
@@ -139,12 +139,12 @@ mutual
     | .return fvarId => return f!"return {← ppFVar fvarId}"
     | .jmp fvarId args => return f!"goto {← ppFVar fvarId}{← ppArgs args}"
     | .unreach type =>
-      bif pp.all.get (← getOptions) then
+      uif pp.all.get (← getOptions) then
         return f!"⊥ : {← ppExpr type}"
       else
         return "⊥"
     | .sset fvarId i offset y ty k _ =>
-      bif pp.letVarTypes.get (← getOptions) then
+      uif pp.letVarTypes.get (← getOptions) then
         return f!"sset {← ppFVar fvarId}[{i}, {offset}] : {← ppExpr ty} := {← ppFVar y};" ++ .line ++ (← ppCode k)
       else
         return f!"sset {← ppFVar fvarId}[{i}, {offset}] := {← ppFVar y};" ++ .line ++ (← ppCode k)
@@ -155,17 +155,17 @@ mutual
     | .setTag fvarId cidx k _ =>
       return f!"setTag {← ppFVar fvarId} := {cidx};" ++ .line ++ (← ppCode k)
     | .inc fvarId n check persistent k _ =>
-      let ann := (bif persistent then "[persistent]" else "") ++ (bif !check then "[ref]" else "")
-      bif n != 1 then
+      let ann := (uif persistent then "[persistent]" else "") ++ (uif !check then "[ref]" else "")
+      uif n != 1 then
         return f!"inc[{n}]{ann} {← ppFVar fvarId};" ++ .line ++ (← ppCode k)
       else
         return f!"inc{ann} {← ppFVar fvarId};" ++ .line ++ (← ppCode k)
     | .dec fvarId n check persistent objs? k _ =>
       let mut ann := ""
-      bif persistent then ann := ann ++ "[persistent]"
-      bif !check then ann := ann ++ "[ref]"
+      uif persistent then ann := ann ++ "[persistent]"
+      uif !check then ann := ann ++ "[ref]"
       if let some objs := objs? then ann := ann ++ s!"[{objs} objs]"
-      bif n != 1 then
+      uif n != 1 then
         return f!"dec[{n}]{ann} {← ppFVar fvarId};" ++ .line ++ (← ppCode k)
       else
         return f!"dec{ann} {← ppFVar fvarId};" ++ .line ++ (← ppCode k)

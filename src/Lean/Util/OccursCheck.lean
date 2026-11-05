@@ -16,7 +16,7 @@ namespace Lean
   Return true if `e` does **not** contain `mvarId` directly or indirectly
   This function considers assignments and delayed assignments. -/
 partial def occursCheck [Monad m] [MonadMCtx m] (mvarId : MVarId) (e : Expr) : m Bool := do
-  bif !e.hasExprMVar then
+  uif !e.hasExprMVar then
     return true
   else
     match (← visit e |>.run |>.run {}) with
@@ -24,7 +24,7 @@ partial def occursCheck [Monad m] [MonadMCtx m] (mvarId : MVarId) (e : Expr) : m
     | (.error .., _) => return false
 where
   visitMVar (mvarId' : MVarId) : ExceptT Unit (StateT ExprSet m) Unit := do
-    bif mvarId == mvarId' then
+    uif mvarId == mvarId' then
       throw () -- found
     else
       match (← getExprMVarAssignment? mvarId') with
@@ -35,9 +35,9 @@ where
         | none   => return ()
 
   visit (e : Expr) : ExceptT Unit (StateT ExprSet m) Unit := do
-    bif !e.hasExprMVar then
+    uif !e.hasExprMVar then
       return ()
-    else bif (← get).contains e then
+    else uif (← get).contains e then
       return ()
     else
       modify fun s => s.insert e

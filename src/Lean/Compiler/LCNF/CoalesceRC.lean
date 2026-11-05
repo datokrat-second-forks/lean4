@@ -59,7 +59,7 @@ where
       let k ← go k
       modify fun s => { s with incAccum := s.incAccum.alter fvarId (fun v? => some ((v?.getD 0) + n)) }
       let s ← get
-      bif s.incAccum[fvarId]! == s.incTotal[fvarId]! then
+      uif s.incAccum[fvarId]! == s.incTotal[fvarId]! then
         return .inc fvarId s.incTotal[fvarId]! check persistent k
       else
         return k
@@ -67,7 +67,7 @@ where
       modify fun s => { s with decTotal := s.decTotal.alter fvarId (fun v? => some ((v?.getD 0) + n)) }
       let k ← go k
       let s ← get
-      bif !s.decPlaced.contains fvarId then
+      uif !s.decPlaced.contains fvarId then
         modify fun s => { s with decPlaced := s.decPlaced.insert fvarId }
         return .dec fvarId s.decTotal[fvarId]! check persistent objs? k
       else

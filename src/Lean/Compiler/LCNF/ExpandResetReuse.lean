@@ -88,9 +88,9 @@ partial def eraseProjIncFor (nFields : Nat) (targetId : FVarId) (ds : Array (Cod
       let d' := ds[ds.size - 2]!
       let .let { fvarId := w, value := .oproj i x _, .. } := d'
         | break
-      bif !(w == z && targetId == x) then
+      uif !(w == z && targetId == x) then
         break
-      bif mask[i]!.isSome then
+      uif mask[i]!.isSome then
         /-
         Suppose we encounter a situation like
         ```
@@ -117,7 +117,7 @@ partial def eraseProjIncFor (nFields : Nat) (targetId : FVarId) (ds : Array (Cod
       ds := ds.pop.pop
       mask := mask.set! i (some z)
       keep := keep.push d'
-      keep := bif n == 1 then keep else keep.push (.inc z (n - 1) c p)
+      keep := uif n == 1 then keep else keep.push (.inc z (n - 1) c p)
     | _ => break
 
   return (ds ++ keep.reverse, mask)
@@ -172,7 +172,7 @@ def partitionSelfSets (selfId : FVarId) (sets : Array (CodeDecl .impure)) :
       | .uset _ i y => isSelfUset selfId i y
       | .sset _ i offset y _ => isSelfSset selfId i offset y
       | _ => unreachable!
-    bif (← isSelfSet) then
+    uif (← isSelfSet) then
       selfSets := selfSets.push set
     else
       necessarySets := necessarySets.push set
@@ -187,7 +187,7 @@ def collectSucceedingSets (target : FVarId) (k : Code .impure) :
     match k with
     | .oset (fvarId := fvarId) (k := k') .. | .sset (fvarId := fvarId) (k := k') ..
     | .uset (fvarId := fvarId) (k := k') .. =>
-      bif target != fvarId then
+      uif target != fvarId then
         break
       sets := sets.push k.toCodeDecl!
       k := k'
@@ -204,7 +204,7 @@ partial def processResetCont (resetTokenId : FVarId) (code : Code .impure) (orig
     (isSharedId : FVarId) (currentRetType : Expr) : CompilerM (Code .impure) := do
   match code with
   | .dec y n _ _ _ k =>
-    bif resetTokenId == y then
+    uif resetTokenId == y then
       assert! n == 1 -- n must be one since `resetToken := reset ...`
       return .del resetTokenId k
     else
@@ -213,7 +213,7 @@ partial def processResetCont (resetTokenId : FVarId) (code : Code .impure) (orig
   | .let decl k =>
     match decl.value with
     | .reuse y c u xs =>
-      bif resetTokenId != y then
+      uif resetTokenId != y then
         let k ← processResetCont resetTokenId k origAllocId isSharedId currentRetType
         return code.updateCont! k
 
@@ -275,9 +275,9 @@ where
       (contJpId : FVarId) (origAllocId : FVarId) : CompilerM (Code .impure) := do
     let mut code := .jmp contJpId #[.fvar resetTokenId]
     for h : idx in 0...args.size do
-      bif !(← isSelfOset origAllocId idx args[idx]) then
+      uif !(← isSelfOset origAllocId idx args[idx]) then
         code := .oset resetTokenId idx args[idx] code
-    bif update then
+    uif update then
       code := .setTag resetTokenId info.cidx code
     return code
 
@@ -360,7 +360,7 @@ where
       CompilerM (Code .impure) := do
     let mut code := .jmp resetJpId #[.fvar origAllocId, .fvar isSharedId]
     for h : idx in 0...mask.size do
-      bif mask[idx].isSome then
+      uif mask[idx].isSome then
         continue
       let fieldDecl ← mkLetDecl (← mkFreshBinderName `unused) tobject (.oproj idx origAllocId)
       code := .let fieldDecl (.dec fieldDecl.fvarId 1 true false none code)
@@ -369,7 +369,7 @@ where
 end
 
 def Decl.expandResetReuse (decl : Decl .impure) : CompilerM (Decl .impure) := do
-  bif (← getConfig).resetReuse then
+  uif (← getConfig).resetReuse then
     let value ← decl.value.mapCodeM (·.expandResetReuse #[] decl.type)
     let decl := { decl with value }
     return decl

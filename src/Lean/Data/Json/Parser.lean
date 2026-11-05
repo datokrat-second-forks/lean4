@@ -19,25 +19,25 @@ namespace Lean.Json.Parser
 
 def hexChar : Parser UInt16 := do
   let c ← any
-  bif '0' ≤ᵇ c && c ≤ᵇ '9' then
+  uif '0' ≤ c ∧ c ≤ '9' then
     pure $ (c.val - '0'.val).toUInt16
-  else bif 'a' ≤ᵇ c && c ≤ᵇ 'f' then
+  else uif 'a' ≤ c ∧ c ≤ 'f' then
     pure $ (c.val - 'a'.val + 10).toUInt16
-  else bif 'A' ≤ᵇ c && c ≤ᵇ 'F' then
+  else uif 'A' ≤ c ∧ c ≤ 'F' then
     pure $ (c.val - 'A'.val + 10).toUInt16
   else
     fail "invalid hex character"
 
 def finishSurrogatePair (low : UInt16) : Parser Char := do
   let c ← any
-  bif c != '\\' then fail ""
+  uif c != '\\' then fail ""
   let c ← any
-  bif c != 'u' then fail ""
+  uif c != 'u' then fail ""
   let c ← any
-  bif c != 'd' && c != 'D' then fail ""
+  uif c != 'd' && c != 'D' then fail ""
   let u2 ← hexChar; let u3 ← hexChar; let u4 ← hexChar
   let val := (u2 <<< 8) ||| (u3 <<< 4) ||| u4
-  bif val <ᵇ 0xC00 then fail "" -- low or not a surrogate
+  uif val < 0xC00 then fail "" -- low or not a surrogate
   let charVal := (((low.toUInt32 &&& 0x3FF) <<< 10) ||| (val.toUInt32 &&& 0x3FF)) + 0x10000
   uif h : charVal.isValidChar then
     return ⟨charVal, h⟩
@@ -58,33 +58,33 @@ def escapedChar : Parser Char := do
   | 'u'  =>
     let u1 ← hexChar; let u2 ← hexChar; let u3 ← hexChar; let u4 ← hexChar
     let val := (u1 <<< 12) ||| (u2 <<< 8) ||| (u3 <<< 4) ||| u4
-    bif h : val <ᵇ 0xD800 then
-      return ⟨val.toUInt32, Or.inl (lt_of_decideLT_eq_true h)⟩
-    else bif h' : val <ᵇ 0xE000 then
+    uif h : val < 0xD800 then
+      return ⟨val.toUInt32, Or.inl h⟩
+    else uif h' : val < 0xE000 then
       -- low or high surrogate
-      bif val <ᵇ 0xDC00 then
+      uif val < 0xDC00 then
         -- low surrogate
         attempt (finishSurrogatePair val) <|> pure '\ufffd'
       else
         -- high/lone surrogate
         return '\ufffd' -- replacement character
     else
-      return ⟨val.toUInt32, Or.inr ⟨Nat.not_lt.mp (not_lt_of_decideLT_eq_false h'), Nat.lt_trans val.toFin.isLt (by decide)⟩⟩
+      return ⟨val.toUInt32, Or.inr ⟨Nat.not_lt.mp h', Nat.lt_trans val.toFin.isLt (by decide)⟩⟩
   | _ => fail "illegal \\u escape"
 
 partial def strCore (acc : String) : Parser String := do
   let c ← peek!
-  bif c == '"' then
+  uif c == '"' then
     skip
     return acc
   else
     let c ← any
-    bif c == '\\' then
+    uif c == '\\' then
       strCore (acc.push (← escapedChar))
     -- as to whether c.val > 0xffff should be split up and encoded with multiple \u,
     -- the JSON standard is not definite: both directly printing the character
     -- and encoding it with multiple \u is allowed. we choose the former.
-    else bif 0x0020 ≤ᵇ c.val && c.val ≤ᵇ 0x10ffff then
+    else uif 0x0020 ≤ c.val ∧ c.val ≤ 0x10ffff then
       strCore (acc.push c)
     else
       fail "unexpected character in string"
@@ -92,11 +92,11 @@ partial def strCore (acc : String) : Parser String := do
 @[inline] def str : Parser String := strCore ""
 
 partial def natCore (acc : Nat) : Parser Nat := do
-  bif (← isEof) then
+  uif (← isEof) then
     return acc
   else
     let c ← peek!
-    bif '0' ≤ᵇ c && c ≤ᵇ '9' then
+    uif '0' ≤ c ∧ c ≤ '9' then
       skip
       let acc' := 10*acc + (c.val - '0'.val).toNat
       natCore acc'
@@ -104,11 +104,11 @@ partial def natCore (acc : Nat) : Parser Nat := do
       return acc
 
 partial def natCoreNumDigits (acc digits : Nat) : Parser (Nat × Nat) := do
-  bif (← isEof) then
+  uif (← isEof) then
     return (acc, digits)
   else
     let c ← peek!
-    bif '0' ≤ᵇ c && c ≤ᵇ '9' then
+    uif '0' ≤ c ∧ c ≤ '9' then
       skip
       let acc' := 10*acc + (c.val - '0'.val).toNat
       natCoreNumDigits acc' (digits+1)
@@ -118,7 +118,7 @@ partial def natCoreNumDigits (acc digits : Nat) : Parser (Nat × Nat) := do
 @[inline]
 def lookahead (p : Char → Prop) (desc : String) [DecidablePred p] : Parser Unit := do
   let c ← peek!
-  bif decide (p c) then
+  uif (p c) then
     return ()
   else
     fail <| "expected " ++ desc
@@ -141,7 +141,7 @@ def natMaybeZero : Parser Nat := do
 @[inline]
 def numSign : Parser Int := do
   let c ← peek!
-  bif c == '-' then
+  uif c == '-' then
     skip
     return (-1 : Int)
   else
@@ -150,7 +150,7 @@ def numSign : Parser Int := do
 @[inline]
 def nat : Parser Nat := do
   let c ← peek!
-  bif c == '0' then
+  uif c == '0' then
     skip
     return 0
   else
@@ -160,14 +160,14 @@ def nat : Parser Nat := do
 def numWithDecimals : Parser JsonNumber := do
   let sign ← numSign
   let whole ← nat
-  bif (← isEof) then
+  uif (← isEof) then
     pure <| JsonNumber.fromInt (sign * whole)
   else
     let c ← peek!
-    bif c == '.' then
+    uif c == '.' then
       skip
       let (n, d) ← natNumDigits
-      bif d >ᵇ USize.size then fail "too many decimals"
+      uif d > USize.size then fail "too many decimals"
       let mantissa' := sign * (whole * (10^d : Nat) + n)
       let exponent' := d
       pure <| JsonNumber.mk mantissa' exponent'
@@ -176,24 +176,24 @@ def numWithDecimals : Parser JsonNumber := do
 
 @[inline]
 def exponent (value : JsonNumber) : Parser JsonNumber := do
-  bif (← isEof) then
+  uif (← isEof) then
     return value
   else
     let c ← peek!
-    bif c == 'e' || c == 'E' then
+    uif c == 'e' || c == 'E' then
       skip
       let c ← peek!
-      bif c == '-' then
+      uif c == '-' then
         skip
         let n ← natMaybeZero
         return value.shiftr n
       else
-        bif c =ᵇ '+' then skip
+        uif c = '+' then skip
         let n ← natMaybeZero
         -- `shiftl` currently consumes time/memory linear in n,
         -- and panics in `Nat.pow` for sufficiently large n.
         -- This could be improved by supporting positive exponents in `JsonNumber`.
-        bif n >ᵇ 100_000 then fail "exponent too large"
+        uif n > 100_000 then fail "exponent too large"
         return value.shiftl n
     else
       return value
@@ -208,10 +208,10 @@ mutual
     let hd ← anyCore
     let acc' := acc.push hd
     let c ← any
-    bif c == ']' then
+    uif c == ']' then
       ws
       return acc'
-    else bif c == ',' then
+    else uif c == ',' then
       ws
       arrayCore acc'
     else
@@ -221,14 +221,14 @@ mutual
       Parser (Std.TreeMap.Raw String Json) := do
     lookahead (fun c => c == '"') "\""; skip;
     let k ← str; ws
-    bif kvs.contains k then fail s!"duplicate object key {k.quote}"
+    uif kvs.contains k then fail s!"duplicate object key {k.quote}"
     lookahead (fun c => c == ':') ":"; skip; ws
     let v ← anyCore
     let c ← any
-    bif c == '}' then
+    uif c == '}' then
       ws
       return kvs.insert k v
-    else bif c == ',' then
+    else uif c == ',' then
       ws
       objectCore (kvs.insert k v)
     else
@@ -236,39 +236,39 @@ mutual
 
   partial def anyCore : Parser Json := do
     let c ← peek!
-    bif c == '[' then
+    uif c == '[' then
       skip; ws
       let c ← peek!
-      bif c == ']' then
+      uif c == ']' then
         skip; ws
         return Json.arr (Array.mkEmpty 0)
       else
         let a ← arrayCore (Array.mkEmpty 4)
         return Json.arr a
-    else bif c == '{' then
+    else uif c == '{' then
       skip; ws
       let c ← peek!
-      bif c == '}' then
+      uif c == '}' then
         skip; ws
         return Json.obj ∅
       else
         let kvs ← objectCore ∅
         return Json.obj kvs
-    else bif c == '\"' then
+    else uif c == '\"' then
       skip
       let s ← str
       ws
       return Json.str s
-    else bif c == 'f' then
+    else uif c == 'f' then
       skipString "false"; ws
       return Json.bool false
-    else bif c == 't' then
+    else uif c == 't' then
       skipString "true"; ws
       return Json.bool true
-    else bif c == 'n' then
+    else uif c == 'n' then
       skipString "null"; ws
       return Json.null
-    else bif c == '-' || ('0' ≤ᵇ c && c ≤ᵇ '9') then
+    else uif c == '-' ∨ ('0' ≤ c ∧ c ≤ '9') then
       let n ← num
       ws
       return Json.num n

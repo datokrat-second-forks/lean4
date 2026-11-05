@@ -25,7 +25,7 @@ instance : Inhabited OpenDecl := ⟨simple Name.anonymous []⟩
 instance : ToString OpenDecl := ⟨fun decl =>
   match decl with
   | explicit id decl => toString id ++ " → " ++ toString decl
-  | simple ns ex     => toString ns ++ (bif ex == [] then "" else " hiding " ++ toString ex)⟩
+  | simple ns ex     => toString ns ++ (uif ex == [] then "" else " hiding " ++ toString ex)⟩
 
 end OpenDecl
 

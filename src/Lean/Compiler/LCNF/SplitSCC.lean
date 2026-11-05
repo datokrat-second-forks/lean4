@@ -25,14 +25,14 @@ where
       if let .let decl _ := c then
         match decl.value with
         | .const name .. | .fap name .. | .pap name .. =>
-          bif scc.contains name then
+          uif scc.contains name then
             modify fun s => s.insert name
         | _ => return
 
 end SplitScc
 
 public def splitScc (scc : Array (Decl pu)) : CompilerM (Array (Array (Decl pu))) := do
-  bif scc.size == 1 then
+  uif scc.size == 1 then
     return #[scc]
   let declMap := Std.HashMap.ofArray <| scc.map fun decl => (decl.name, decl)
   let callers := Std.HashMap.ofArray <| ← scc.mapM fun decl => do

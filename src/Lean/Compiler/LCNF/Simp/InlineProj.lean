@@ -67,7 +67,7 @@ where
             let auxDecl ← mkLetDeclErased
             modify (·.push (.let auxDecl))
             pure auxDecl.fvarId
-        bif projs.isEmpty then
+        uif projs.isEmpty then
           return fvarId
         else
           visit fvarId projs

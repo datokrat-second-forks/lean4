@@ -22,7 +22,7 @@ structure ToMonoM.State where
 abbrev ToMonoM := StateRefT ToMonoM.State CompilerM
 
 def Param.toMono (param : Param .pure) : ToMonoM (Param .pure) := do
-  bif isTypeFormerType param.type then
+  uif isTypeFormerType param.type then
     modify fun s => { s with typeParams := s.typeParams.insert param.fvarId }
   param.update (← toMonoType param.type)
 
@@ -31,7 +31,7 @@ def argToMono (arg : Arg .pure) : ToMonoM (Arg .pure) := do
   match arg with
   | .erased | .type .. => return .erased
   | .fvar fvarId =>
-    bif (← get).typeParams.contains fvarId then
+    uif (← get).typeParams.contains fvarId then
       return .erased
     else
       return arg
@@ -43,7 +43,7 @@ def argsToMonoWithFnType (args : Array (Arg .pure)) (type : Expr)
   for arg in args do
     let monoArg ← if let some (.forallE _ d b _ ) := remainingType then
       remainingType := some b
-      bif d.isErased then
+      uif d.isErased then
         pure .erased
       else
         argToMono arg
@@ -64,9 +64,9 @@ partial def LetValue.toMono (e : LetValue .pure) : ToMonoM (LetValue .pure) := d
   match e with
   | .erased | .lit .. => return e
   | .const declName _ args =>
-    bif declName == ``Quot.mk then
+    uif declName == ``Quot.mk then
       return args[2]!.toLetValue
-    else bif declName == ``Quot.lcInv then
+    else uif declName == ``Quot.lcInv then
       match args[2]! with
       | .fvar fvarId =>
         let mut extraArgs : Array (Arg .pure) := .emptyWithCapacity (args.size - 3)
@@ -76,9 +76,9 @@ partial def LetValue.toMono (e : LetValue .pure) : ToMonoM (LetValue .pure) := d
         return .fvar fvarId extraArgs
       | .erased | .type _ =>
         return .erased
-    else bif declName == ``Nat.zero then
+    else uif declName == ``Nat.zero then
       return .lit (.nat 0)
-    else bif declName == ``Nat.succ then
+    else uif declName == ``Nat.succ then
       -- This should have been handled in Code.toMono.
       unreachable!
     else if let some (.ctorInfo ctorInfo) := (← getEnv).find? declName then
@@ -94,15 +94,15 @@ partial def LetValue.toMono (e : LetValue .pure) : ToMonoM (LetValue .pure) := d
           args.mapM argToMono
       return .const declName [] args
   | .fvar fvarId args =>
-    bif (← get).typeParams.contains fvarId then
+    uif (← get).typeParams.contains fvarId then
       return .erased
     else
       return .fvar fvarId (← args.mapM argToMono)
   | .proj structName fieldIdx fvarId =>
-    bif (← get).typeParams.contains fvarId then
+    uif (← get).typeParams.contains fvarId then
       return .erased
     else if let some info ← hasTrivialStructure? structName then
-      bif info.fieldIdx == fieldIdx then
+      uif info.fieldIdx == fieldIdx then
         return .fvar fvarId #[]
       else
         return .erased
@@ -151,7 +151,7 @@ partial def casesNatToMono (c: Cases .pure) (_ : c.typeName == ``Nat) : ToMonoM 
     | .default k => return alt.updateCode (← k.toMono)
     | .alt ctorName ps k =>
       eraseParams ps
-      bif ctorName == ``Nat.succ then
+      uif ctorName == ``Nat.succ then
         let p := ps[0]!
         let oneDecl ← mkLetDecl `one natType (.lit (.nat 1))
         let subOneDecl := { fvarId := p.fvarId, binderName := p.binderName, type := natType, value := .const ``Nat.sub [] #[.fvar c.discr, .fvar oneDecl.fvarId] }
@@ -174,7 +174,7 @@ partial def casesIntToMono (c: Cases .pure) (_ : c.typeName == ``Int) : ToMonoM 
     | .alt ctorName ps k =>
       eraseParams ps
       let p := ps[0]!
-      bif ctorName == ``Int.negSucc then
+      uif ctorName == ``Int.negSucc then
         let absDecl ← mkLetDecl `abs natType (.const ``Int.natAbs [] #[.fvar c.discr])
         let oneDecl ← mkLetDecl `one natType (.lit (.nat 1))
         let subOneDecl := { fvarId := p.fvarId, binderName := p.binderName, type := natType, value := .const ``Nat.sub [] #[.fvar absDecl.fvarId, .fvar oneDecl.fvarId] }
@@ -327,33 +327,33 @@ partial def Code.toMono (code : Code .pure) : ToMonoM (Code .pure) := do
   | .jmp fvarId args => return code.updateJmp! fvarId (← args.mapM argToMono)
   | .return .. => return code
   | .cases c =>
-    bif h : c.typeName == ``Nat then
+    uif h : c.typeName == ``Nat then
       casesNatToMono c h
-    else bif h : c.typeName == ``Int then
+    else uif h : c.typeName == ``Int then
       casesIntToMono c h
-    else bif h : c.typeName == ``UInt8 then
+    else uif h : c.typeName == ``UInt8 then
       casesUIntToMono c ``UInt8 h
-    else bif h : c.typeName == ``UInt16 then
+    else uif h : c.typeName == ``UInt16 then
       casesUIntToMono c ``UInt16 h
-    else bif h : c.typeName == ``UInt32 then
+    else uif h : c.typeName == ``UInt32 then
       casesUIntToMono c ``UInt32 h
-    else bif h : c.typeName == ``UInt64 then
+    else uif h : c.typeName == ``UInt64 then
       casesUIntToMono c ``UInt64 h
-    else bif h : c.typeName == ``Array then
+    else uif h : c.typeName == ``Array then
       casesArrayToMono c h
-    else bif h : c.typeName == ``ByteArray then
+    else uif h : c.typeName == ``ByteArray then
       casesByteArrayToMono c h
-    else bif h : c.typeName == ``FloatArray then
+    else uif h : c.typeName == ``FloatArray then
       casesFloatArrayToMono c h
-    else bif h : c.typeName == ``String then
+    else uif h : c.typeName == ``String then
       casesStringToMono c h
-    else bif h : c.typeName == ``Float then
+    else uif h : c.typeName == ``Float then
       casesFloatToMono c h
-    else bif h : c.typeName == ``Float32 then
+    else uif h : c.typeName == ``Float32 then
       casesFloat32ToMono c h
-    else bif h : c.typeName == ``Thunk then
+    else uif h : c.typeName == ``Thunk then
       casesThunkToMono c h
-    else bif h : c.typeName == ``Task then
+    else uif h : c.typeName == ``Task then
       casesTaskToMono c h
     else if let some info ← hasTrivialStructure? c.typeName then
       trivialStructToMono info c
@@ -362,7 +362,7 @@ partial def Code.toMono (code : Code .pure) : ToMonoM (Code .pure) := do
       let env ← getEnv
       let some (.inductInfo inductInfo) := env.find? c.typeName | panic! "expected inductive type"
       let casesOnName := mkCasesOnName inductInfo.name
-      bif (getImplementedBy? env casesOnName).isSome then
+      uif (getImplementedBy? env casesOnName).isSome then
         -- TODO: Enforce that this is only used for computed fields.
         let typeName := c.typeName ++ `_impl
         let alts ← c.alts.mapM fun alt => do

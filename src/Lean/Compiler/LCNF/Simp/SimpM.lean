@@ -136,7 +136,7 @@ where
     let numOccs := (← read).inlineStackOccs.find? declName |>.getD 0
     let numOccs := numOccs + 1
     let inlineIfReduce ← if let some ⟨_, decl⟩ ← getDecl? declName then pure decl.inlineIfReduceAttr else pure false
-    bif recursive && inlineIfReduce && numOccs >ᵇ (← getConfig).maxRecInlineIfReduce then
+    uif recursive ∧ inlineIfReduce ∧ numOccs > (← getConfig).maxRecInlineIfReduce then
       throwError "function `{.ofConstName declName}` has been recursively inlined more than #{(← getConfig).maxRecInlineIfReduce}, consider removing the attribute `[inline_if_reduce]` from this declaration or increasing the limit using `set_option compiler.maxRecInlineIfReduce <num>`"
     return numOccs
 
@@ -146,7 +146,7 @@ Similar to the default `Lean.withIncRecDepth`, but include the `inlineStack` in 
 @[inline] def withIncRecDepth (x : SimpM α) : SimpM α := do
   let curr ← MonadRecDepth.getRecDepth
   let max  ← MonadRecDepth.getMaxRecDepth
-  bif max != 0 && curr == max then
+  uif max != 0 && curr == max then
     throwMaxRecDepth
   else
     MonadRecDepth.withRecDepth (curr+1) x
@@ -159,7 +159,7 @@ where
       let mut prev := declName
       let mut ellipsis := false
       for declName in stack do
-        bif prev == declName then
+        uif prev == declName then
           unless ellipsis do
             ellipsis := true
             fmt := fmt ++ "...\n"
@@ -200,7 +200,7 @@ def isSmall (code : Code .pure) : SimpM Bool :=
 Return `true` if the given local function declaration should be inlined.
 -/
 def shouldInlineLocal (decl : FunDecl .pure) : SimpM Bool := do
-  bif (← isOnceOrMustInline decl.fvarId) then
+  uif (← isOnceOrMustInline decl.fvarId) then
     return true
   else
     isSmall decl.value
@@ -247,5 +247,5 @@ def addFVarSubst (fvarId : FVarId) (fvarId' : FVarId) : SimpM Unit := do
   let binderName ← getBinderName fvarId
   unless binderName.isInternal do
     let binderName' ← getBinderName fvarId'
-    bif binderName'.isInternal then
+    uif binderName'.isInternal then
       modify fun s => { s with binderRenaming := s.binderRenaming.insert fvarId' binderName }

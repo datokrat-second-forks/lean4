@@ -62,18 +62,18 @@ to entities such as `&amp;` during rendering.
 
 Use {lean}`false` in raw text elements ({lit}`script` and {lit}`style`). -/
 def ofString (escape : Bool) : String → Html :=
-  bif escape then text else raw
+  uif escape then text else raw
 
 instance : Coe String Html := ⟨.text⟩
 
 /-- Appends two HTML forests. -/
 def append : Html → Html → Html
   | x@(.seq xs), y@(.seq ys) =>
-    bif x.isEmpty then .seq ys
-    else bif y.isEmpty then .seq xs
+    uif x.isEmpty then .seq ys
+    else uif y.isEmpty then .seq xs
     else .seq (xs ++ ys)
-  | .seq xs, y => bif xs.isEmpty then y else .seq (xs.push y)
-  | x, .seq ys => bif ys.isEmpty then x else .seq (#[x] ++ ys)
+  | .seq xs, y => uif xs.isEmpty then y else .seq (xs.push y)
+  | x, .seq ys => uif ys.isEmpty then x else .seq (#[x] ++ ys)
   | x, y => .seq #[x, y]
 
 instance : Append Html := ⟨.append⟩

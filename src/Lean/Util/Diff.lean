@@ -109,8 +109,8 @@ def Histogram.addRight (histogram : Histogram α lsize rsize) (index : Fin rsize
 def matchPrefix (left right : Subarray α) : Array α × Subarray α × Subarray α :=
   let rec go (pref : Array α) : Array α × Subarray α × Subarray α :=
     let i := pref.size
-    bif _ : i <ᵇ left.size && i <ᵇ right.size then
-      bif left[i]'(by omega) == right[i]'(by omega) then
+    uif _ : i < left.size ∧ i < right.size then
+      uif left[i]'(by omega) == right[i]'(by omega) then
         go <| pref.push <| left[i]'(by omega)
       else (pref, left.drop pref.size, right.drop pref.size)
     else (pref, left.drop pref.size, right.drop pref.size)
@@ -120,8 +120,8 @@ def matchPrefix (left right : Subarray α) : Array α × Subarray α × Subarray
 /-- Given two `Subarray`s, find their common suffix and return their differing prefixes -/
 def matchSuffix (left right : Subarray α) : Subarray α × Subarray α × Array α :=
   let rec go (i : Nat) : Subarray α × Subarray α × Array α :=
-    bif _ : i <ᵇ left.size && i <ᵇ right.size then
-      bif left[left.size - i - 1]'(by omega) == right[right.size - i - 1]'(by omega) then
+    uif _ : i < left.size ∧ i < right.size then
+      uif left[left.size - i - 1]'(by omega) == right[right.size - i - 1]'(by omega) then
         go i.succ
       else
         (left.take (left.size - i), right.take (right.size - i), (left.drop (left.size - i)).toArray)
@@ -154,7 +154,7 @@ partial def lcs (left right : Subarray α) : Array α := Id.run do
       | none =>
         best := some ((lc + rc), k, li, ri)
       | some (count, _) =>
-        bif lc + rc <ᵇ count then
+        uif lc + rc < count then
           best := some ((lc + rc), k, li, ri)
   let some (_, v, li, ri) := best
     | return pref ++ suff
@@ -168,9 +168,9 @@ partial def lcs (left right : Subarray α) : Array α := Id.run do
 Computes an edit script to transform `left` into `right`.
 -/
 def diff [Inhabited α] (original edited : Array α) : Array (Action × α) :=
-  bif h : !(0 <ᵇ original.size) then
+  uif h : ¬(0 < original.size) then
     edited.map (.insert, ·)
-  else bif h' : !(0 <ᵇ edited.size) then
+  else uif h' : ¬(0 < edited.size) then
     original.map (.delete, ·)
   else Id.run do
     have : original.size > 0 := by omega
@@ -189,10 +189,10 @@ def diff [Inhabited α] (original edited : Array α) : Array (Action × α) :=
       out := out.push <| (.skip, d)
       i := i.succ
       j := j.succ
-    while h : i <ᵇ original.size do
+    while h : i < original.size do
       out := out.push <| (.delete, original[i])
       i := i.succ
-    while h : j <ᵇ edited.size do
+    while h : j < edited.size do
       out := out.push <| (.insert, edited[j])
       j := j.succ
     out
@@ -202,7 +202,7 @@ def linesToString [ToString α] (lines : Array (Action × α)) : String := Id.ru
   let mut out : String := ""
   for (act, line) in lines do
     let lineStr := toString line
-    bif lineStr == "" then
+    uif lineStr == "" then
       out := out ++ s!"{act.linePrefix}\n"
     else
       out := out ++ s!"{act.linePrefix} {lineStr}\n"

@@ -19,13 +19,13 @@ Instantiate level parameters
   e.replace replaceFn
 where
   @[specialize] replaceFn (e : Expr) : Option Expr :=
-    bif !e.hasLevelParam then e else match e with
+    uif !e.hasLevelParam then e else match e with
     | const _ us => e.updateConst! (us.map fun u => u.substParams s)
     | sort u => e.updateSort! (u.substParams s)
     | _ => none
 
 private def getParamSubst : List Name → List Level → Name → Option Level
-  | p::ps, u::us, p' => bif p == p' then some u else getParamSubst ps us p'
+  | p::ps, u::us, p' => uif p == p' then some u else getParamSubst ps us p'
   | _,     _,     _  => none
 
 /--
@@ -41,7 +41,7 @@ Instantiate universe level parameters names `paramNames` with `lvls` in `e`.
 If the two lists have different length, the smallest one is used.
 -/
 def instantiateLevelParams (e : Expr) (paramNames : List Name) (lvls : List Level) : Expr :=
-  bif paramNames.isEmpty || lvls.isEmpty then e else
+  uif paramNames.isEmpty || lvls.isEmpty then e else
     instantiateLevelParamsImpl e paramNames lvls
 
 /--
@@ -50,15 +50,15 @@ If the two lists have different length, the smallest one is used.
 (Does not preserve expression sharing.)
 -/
 def instantiateLevelParamsNoCache (e : Expr) (paramNames : List Name) (lvls : List Level) : Expr :=
-  bif paramNames.isEmpty || lvls.isEmpty then e else
+  uif paramNames.isEmpty || lvls.isEmpty then e else
     e.replaceNoCache (instantiateLevelParamsCore.replaceFn (getParamSubst paramNames lvls))
 
 private partial def getParamSubstArray (ps : Array Name) (us : Array Level) (p' : Name) (i : Nat) : Option Level :=
-  bif h : i <ᵇ ps.size then
+  uif h : i < ps.size then
     let p := ps[i]
-    bif h : i <ᵇ us.size then
+    uif h : i < us.size then
       let u := us[i]
-      bif p == p' then some u else getParamSubstArray ps us p' (i+1)
+      uif p == p' then some u else getParamSubstArray ps us p' (i+1)
     else none
   else none
 
@@ -67,6 +67,6 @@ Instantiate universe level parameters names `paramNames` with `lvls` in `e`.
 If the two arrays have different length, the smallest one is used.
 -/
 def instantiateLevelParamsArray (e : Expr) (paramNames : Array Name) (lvls : Array Level) : Expr :=
-  bif paramNames.isEmpty || lvls.isEmpty then e else
+  uif paramNames.isEmpty || lvls.isEmpty then e else
     e.instantiateLevelParamsCore fun p =>
       getParamSubstArray paramNames lvls p 0

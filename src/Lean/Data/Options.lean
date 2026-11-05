@@ -99,7 +99,7 @@ structure OptionDecl where
 
 def OptionDecl.fullDescr (self : OptionDecl) : String := Id.run do
   let mut descr := self.descr
-  bif (`backward).isPrefixOf self.name then
+  uif (`backward).isPrefixOf self.name then
     unless descr.isEmpty do
       descr := descr ++ "\n\n"
     descr := descr ++ "\
@@ -119,7 +119,7 @@ def registerOption (name : Name) (decl : OptionDecl) : IO Unit := do
   unless (← initializing) do
     throw (IO.userError "Failed to register option: Options can only be registered during initialization")
   let decls ← optionDeclsRef.get
-  bif decls.contains name then
+  uif decls.contains name then
     throw $ IO.userError s!"Invalid option declaration `{name}`: Option already exists"
   optionDeclsRef.set $ decls.insert name decl
 
@@ -216,7 +216,7 @@ private def updateBool (opts : Options) (name : Name) (val : Bool) : Options :=
 
 /-- Similar to `set`, but update `opts` only if it doesn't already contains an setting for `opt.name` -/
 protected def setIfNotSet [KVMap.Value α] (opts : Options) (opt : Lean.Option α) (val : α) : Options :=
-  bif opts.contains opt.name then opts else opt.set opts val
+  uif opts.contains opt.name then opts else opt.set opts val
 
 protected def register [KVMap.Value α] (name : Name) (decl : Lean.Option.Decl α) (ref : Name := by exact decl_name%) : IO (Lean.Option α) := do
   registerOption name {

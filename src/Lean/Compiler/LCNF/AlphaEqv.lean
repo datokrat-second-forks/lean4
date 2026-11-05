@@ -33,7 +33,7 @@ def eqvType (e₁ e₂ : Expr) : EqvM Bool := do
   | _, _ => return e₁ == e₂
 
 def eqvTypes (es₁ es₂ : Array Expr) : EqvM Bool := do
-  bif es₁.size =ᵇ es₂.size then
+  uif es₁.size = es₂.size then
     for e₁ in es₁, e₂ in es₂ do
       unless (← eqvType e₁ e₂) do
         return false
@@ -49,7 +49,7 @@ def eqvArg (a₁ a₂ : Arg pu) : EqvM Bool := do
   | _, _ => return false
 
 def eqvArgs (as₁ as₂ : Array (Arg pu)) : EqvM Bool := do
-  bif as₁.size =ᵇ as₂.size then
+  uif as₁.size = as₂.size then
     for a₁ in as₁, a₂ in as₂ do
       unless (← eqvArg a₁ a₂) do
         return false
@@ -82,10 +82,9 @@ def eqvLetValue (e₁ e₂ : LetValue pu) : EqvM Bool := do
   withReader (·.insert fvarId₂ fvarId₁) x
 
 @[inline] def withParams (params₁ params₂ : Array (Param pu)) (x : EqvM Bool) : EqvM Bool := do
-  bif h : params₂.size =ᵇ params₁.size then
+  uif h : params₂.size = params₁.size then
     let rec @[specialize] go (i : Nat) : EqvM Bool := do
-      bif h : i <ᵇ params₁.size then
-        have h := lt_of_decideLT_eq_true h
+      uif h : i < params₁.size then
         let p₁ := params₁[i]
         have : i < params₂.size := by simp_all +arith
         let p₂ := params₂[i]
@@ -110,7 +109,7 @@ def sortAlts (alts : Array (Alt pu)) : Array (Alt pu) :=
 mutual
 
 partial def eqvAlts (alts₁ alts₂ : Array (Alt pu)) : EqvM Bool := do
-  bif alts₁.size =ᵇ alts₂.size then
+  uif alts₁.size = alts₂.size then
     let alts₁ := sortAlts alts₁
     let alts₂ := sortAlts alts₂
     for alt₁ in alts₁, alt₂ in alts₂ do

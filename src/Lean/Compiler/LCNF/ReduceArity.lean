@@ -61,7 +61,7 @@ structure State where
 abbrev FindUsedM := ReaderT Context <| StateRefT State CompilerM
 
 def visitFVar (fvarId : FVarId) : FindUsedM Unit := do
-  bif (← read).params.contains fvarId then
+  uif (← read).params.contains fvarId then
     modify fun s => { s with used := s.used.insert fvarId }
 
 def visitArg (arg : Arg .pure) : FindUsedM Unit := do
@@ -76,7 +76,7 @@ def visitLetValue (e : LetValue .pure) : FindUsedM Unit := do
   | .fvar fvarId args => visitFVar fvarId; args.forM visitArg
   | .const declName _ args =>
     let decl := (← read).decl
-    bif declName == decl.name then
+    uif declName == decl.name then
       for param in decl.params, arg in args do
         match arg with
         | .fvar fvarId =>
@@ -131,14 +131,14 @@ partial def reduce (code : Code .pure) : ReduceM (Code .pure) := do
     unless declName == (← read).declName do return code.updateLet! decl (← reduce k)
     let mut argsNew := #[]
     let mask := (← read).paramMask
-    bif (← read).allUnused then
+    uif (← read).allUnused then
       argsNew := #[.erased]
       -- keep over-application
       argsNew := argsNew ++ args.drop mask.size
     else
       for h : i in *...args.size do
         -- keep over-application
-        bif mask.getD i true then
+        uif mask.getD i true then
           argsNew := argsNew.push args[i]
     let decl ← decl.updateValue (.const (← read).auxDeclName [] argsNew)
     return code.updateLet! decl (← reduce k)
@@ -157,10 +157,10 @@ open FindUsed ReduceArity Internalize
 def Decl.reduceArity (decl : Decl .pure) : CompilerM (Array (Decl .pure)) := do
   match decl.value with
   | .code code =>
-    bif decl.params.isEmpty then
+    uif decl.params.isEmpty then
       return #[decl]
     let used ← collectUsedParams decl
-    bif used.size == decl.params.size then
+    uif used.size == decl.params.size then
       -- Do nothing if all params were used
       return #[decl]
 
@@ -172,7 +172,7 @@ def Decl.reduceArity (decl : Decl .pure) : CompilerM (Array (Decl .pure)) := do
     let auxName   := decl.name ++ `_redArg
     let mkAuxDecl : CompilerM (Decl .pure) := do
       let params ←
-        bif allUnused then
+        uif allUnused then
           pure #[← mkParam `_dummy ImpureType.void false]
         else
           pure <| decl.params.filter fun param => used.contains param.fvarId
@@ -186,11 +186,11 @@ def Decl.reduceArity (decl : Decl .pure) : CompilerM (Array (Decl .pure)) := do
     let updateDecl : InternalizeM .pure (Decl .pure) := do
       let params ← decl.params.mapM internalizeParam
       let mut args := #[]
-      bif allUnused then
+      uif allUnused then
         args := #[.erased]
       else
         for used in mask, param in params do
-          bif used then
+          uif used then
             args := args.push param.toArg
       let letDecl ← mkAuxLetDecl (.const auxName [] args)
       let value := .code (.let letDecl (.return letDecl.fvarId))

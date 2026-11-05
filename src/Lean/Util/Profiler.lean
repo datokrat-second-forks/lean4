@@ -183,7 +183,7 @@ def categories : Array Category := #[
 /-- Returns first `startTime` in the trace tree, if any. -/
 private partial def getFirstStart? : MessageData → Option Float
     | .trace data _ children => do
-      bif data.startTime != 0 then
+      uif data.startTime != 0 then
         return data.startTime
       if let some startTime := children.findSome? getFirstStart? then
         return startTime
@@ -197,12 +197,12 @@ private partial def addTrace (pp : Bool) (thread : ThreadWithMaps) (trace : Mess
 where
   go parentStackIdx? ctx? : _ → StateT ThreadWithMaps IO Unit
     | .trace data msg children => do
-      bif data.startTime == 0 then
+      uif data.startTime == 0 then
         return  -- no time data, skip
       let mut funcName := data.cls.toString
-      bif !data.tag.isEmpty then
+      uif !data.tag.isEmpty then
         funcName := s!"{funcName}: {data.tag}"
-      bif pp then
+      uif pp then
         funcName := s!"{funcName}: {← msg.format ctx?}"
       let strIdx ← modifyGet fun thread =>
         if let some idx := thread.stringMap[funcName]? then
@@ -288,20 +288,20 @@ def Profile.export (name : String) (startTime : Float) (traceStates : Array Trac
   let tids := traceStates.groupByKey (·.tid)
   let stopTime := (← IO.monoNanosNow).toFloat / 1000000000
   let threads ← tids.toArray.qsort (fun (t1, _) (t2, _) => t1 < t2) |>.mapM fun (tid, traceStates) => do
-    let mut thread := { Thread.new (bif tid =ᵇ 0 then name else toString tid) with isMainThread := tid = 0 }
+    let mut thread := { Thread.new (uif tid = 0 then name else toString tid) with isMainThread := tid = 0 }
     let traces := traceStates.map (·.traces.toArray)
     -- sort traces of thread by start time
     let traces := traces.qsort (fun tr1 tr2 =>
       let f tr := tr[0]? |>.bind (getFirstStart? ·.msg) |>.getD 0
       f tr1 < f tr2)
     let mut traces := traces.flatMap id |>.map (·.msg)
-    bif tid =ᵇ 0 then
+    uif tid = 0 then
       -- wrap entire trace up to current time in `runFrontend` node
       traces := #[.trace {
         cls := `runFrontend, startTime, stopTime,
         collapsed := true } "" traces]
     for trace in traces do
-      bif thread.lastTime >ᵇ 0.0 then
+      uif thread.lastTime > 0.0 then
         if let some nextStart := getFirstStart? trace then
           -- add 0% CPU run time slice between traces
           thread := { thread with samples := {

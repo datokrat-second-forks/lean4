@@ -34,7 +34,7 @@ private def refreshBinderName (binderName : Name) : InternalizeM pu Name := do
   | .num p _ =>
     return .num p (← modifyGetThe CompilerM.State fun s => (s.nextIdx, { s with nextIdx := s.nextIdx + 1 }))
   | _ =>
-    bif (← read).uniqueIdents then
+    uif (← read).uniqueIdents then
       return .num binderName (← modifyGetThe CompilerM.State fun s => (s.nextIdx, { s with nextIdx := s.nextIdx + 1 }))
     else
       return binderName
@@ -56,7 +56,7 @@ private def mkNewFVarId (fvarId : FVarId) : InternalizeM pu FVarId := do
   return fvarId'
 
 private partial def internalizeExpr (e : Expr) : InternalizeM pu Expr := do
-  bif pu == .impure then
+  uif pu == .impure then
     -- impure types don't contain fvars
     return e
   go e
@@ -67,13 +67,13 @@ where
     | _ => go e
 
   go (e : Expr) : InternalizeM pu Expr := do
-    bif e.hasFVar then
+    uif e.hasFVar then
       match e with
       | .fvar fvarId =>
         match (← get)[fvarId]? with
         | some (.fvar fvarId') =>
           -- In LCNF, types can't depend on let-bound fvars.
-          bif (← findParam? (pu := pu) fvarId').isSome then
+          uif (← findParam? (pu := pu) fvarId').isSome then
             return .fvar fvarId'
           else
             return anyExpr

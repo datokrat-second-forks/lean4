@@ -18,7 +18,7 @@ abbrev Visitor := Option LMVarId → Option LMVarId
 
 mutual
   partial def visit (p : LMVarId → Bool) (e : Expr) : Visitor := fun s =>
-    bif s.isSome || !e.hasLevelMVar then s else main p e s
+    uif s.isSome || !e.hasLevelMVar then s else main p e s
 
   partial def main (p : LMVarId → Bool) : Expr → Visitor
     | .sort l          => visitLevel p l
@@ -32,7 +32,7 @@ mutual
     | _                    => id
 
   partial def visitLevel (p : LMVarId → Bool) (l : Level) : Visitor := fun s =>
-    bif s.isSome || !l.hasMVar then s else mainLevel p l s
+    uif s.isSome || !l.hasMVar then s else mainLevel p l s
 
   partial def mainLevel (p : LMVarId → Bool) : Level → Visitor
     | .zero        => id
@@ -40,7 +40,7 @@ mutual
     | .max l₁ l₂   => visitLevel p l₁ ∘ visitLevel p l₂
     | .imax l₁ l₂  => visitLevel p l₁ ∘ visitLevel p l₂
     | .param _     => id
-    | .mvar mvarId => fun s => bif p mvarId then some mvarId else s
+    | .mvar mvarId => fun s => uif p mvarId then some mvarId else s
 end
 
 end FindLevelMVar

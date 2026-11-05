@@ -376,7 +376,7 @@ private def messageMetaDataParser (input : String) : Parser MessageMetaData := d
 where
   parseStr : Parser String := do
     let c ← peek!
-    bif  c != '"' then
+    uif  c != '"' then
       fail "expected \""
     skip
     str
@@ -437,7 +437,7 @@ section
     let m ← h.readMessage nBytes
     match m with
     | Message.request id method params? =>
-      bif method =ᵇ expectedMethod then
+      uif method = expectedMethod then
         let j := toJson params?
         match fromJson? j with
         | Except.ok v => pure ⟨id, expectedMethod, v⟩
@@ -450,7 +450,7 @@ section
     let m ← h.readMessage nBytes
     match m with
     | Message.notification method params? =>
-      bif method =ᵇ expectedMethod then
+      uif method = expectedMethod then
         let j := toJson params?
         match fromJson? j with
         | Except.ok v => pure ⟨expectedMethod, v⟩
@@ -463,7 +463,7 @@ section
     let m ← h.readMessage nBytes
     match m with
     | Message.response id result =>
-      bif id == expectedID then
+      uif id == expectedID then
         match fromJson? result with
         | Except.ok v => pure ⟨expectedID, v⟩
         | Except.error inner => throw $ userError s!"Unexpected result '{result.compress}'\n{inner}"

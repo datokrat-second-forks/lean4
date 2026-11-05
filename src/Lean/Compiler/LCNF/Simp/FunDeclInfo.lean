@@ -121,7 +121,7 @@ where
       addLetValueOccs decl.value
       go k
     | .fun decl k =>
-      bif mustInline then
+      uif mustInline then
         modify fun s => s.addMustInline decl.fvarId
       go decl.value; go k
     | .jp decl k => go decl.value; go k

@@ -52,14 +52,14 @@ Remark: if the result is `true`, then `a` and `b` are indeed compatible.
 If it is `false`, we must use the full-check.
 -/
 partial def compatibleTypesQuick (a b : Expr) : Bool :=
-  bif a.isErased || b.isErased then
+  uif a.isErased || b.isErased then
     true
   else
     let a' := a.headBeta
     let b' := b.headBeta
-    bif a != a' || b != b' then
+    uif a != a' || b != b' then
       compatibleTypesQuick a' b'
-    else bif a == b then
+    else uif a == b then
       true
     else
       match a, b with
@@ -79,14 +79,14 @@ namespace Pure
 Complete check for `compatibleTypes`. It eta-expands type formers. See comment at `compatibleTypes`.
 -/
 partial def compatibleTypesFull (a b : Expr) : InferTypeM Bool := do
-  bif a.isErased || b.isErased then
+  uif a.isErased || b.isErased then
     return true
   else
     let a' := a.headBeta
     let b' := b.headBeta
-    bif a != a' || b != b' then
+    uif a != a' || b != b' then
       compatibleTypesFull a' b'
-    else bif a == b then
+    else uif a == b then
       return true
     else
       match a, b with
@@ -106,10 +106,10 @@ partial def compatibleTypesFull (a b : Expr) : InferTypeM Bool := do
       | .mdata _ e, _ => compatibleTypesFull e b
       | _, .mdata _ e => compatibleTypesFull a e
       | _, _ =>
-        bif a.isLambda then
+        uif a.isLambda then
           let some b ← etaExpand? b | return false
           compatibleTypesFull a b
-        else bif b.isLambda then
+        else uif b.isLambda then
           let some a ← etaExpand? a | return false
           compatibleTypesFull a b
         else
@@ -145,7 +145,7 @@ For item 2, we would have to modify the `toLCNFType` function and make sure a ty
 type is not always a type former (see `S.mk` type and example in the note above).
 -/
 def compatibleTypes (a b : Expr) : InferTypeM Bool := do
-  bif compatibleTypesQuick a b then
+  uif compatibleTypesQuick a b then
     return true
   else
     compatibleTypesFull a b

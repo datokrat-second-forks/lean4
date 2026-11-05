@@ -174,15 +174,15 @@ where
       args.forM removeCandidatesInArg
       if let some candidateInfo ← findCandidate? fvarId then
         -- Erase candidate that are not fully applied or applied outside of tail position
-        bif valId != decl.fvarId || args.size != candidateInfo.arity then
+        uif valId != decl.fvarId || args.size != candidateInfo.arity then
           eraseCandidate fvarId
         -- Out of scope join point candidate handling
         else
           let currDepth := (← read).definitionDepth
           let calleeDepth := (← read).scope.get! fvarId
-          bif currDepth == calleeDepth then
+          uif currDepth == calleeDepth then
             return ()
-          else bif calleeDepth + 1 == currDepth then
+          else uif calleeDepth + 1 == currDepth then
             addDependency fvarId (← read).currentFunction.get!
           else
             eraseCandidate fvarId
@@ -218,8 +218,8 @@ where
     | .let decl k =>
       match k, decl.value with
       | .return valId, .fvar fvarId args =>
-        bif valId == decl.fvarId then
-          bif (← read).contains fvarId then
+        uif valId == decl.fvarId then
+          uif (← read).contains fvarId then
             eraseLetDecl decl
             return .jmp fvarId args
           else
@@ -290,7 +290,7 @@ Replace a free variable if necessary, that is:
 otherwise just return `fvar`.
 -/
 def replaceFVar (fvar : FVarId) : ExtendM FVarId := do
-  bif (← read).candidates.contains fvar then
+  uif (← read).candidates.contains fvar then
     if let some currentJp := (← read).currentJp? then
       if let some replacement := (← get).fvarMap[currentJp]![fvar]? then
         return replacement.fvarId
@@ -302,7 +302,7 @@ if we are currently within a join point. Then execute `x`.
 -/
 def withNewCandidate (fvar : FVarId) (x : ExtendM α) : ExtendM α := do
   addToScope fvar
-  bif (← read).currentJp?.isSome then
+  uif (← read).currentJp?.isSome then
     withReader (fun ctx => { ctx with candidates := ctx.candidates.insert fvar }) do
       x
   else
@@ -312,7 +312,7 @@ def withNewCandidate (fvar : FVarId) (x : ExtendM α) : ExtendM α := do
 Same as `withNewCandidate` but with multiple `FVarId`s.
 -/
 def withNewCandidates (fvars : Array FVarId) (x : ExtendM α) : ExtendM α := do
-  bif (← read).currentJp?.isSome then
+  uif (← read).currentJp?.isSome then
     let candidates := (← read).candidates
     let folder (acc : FVarIdSet) (val : FVarId) := do
       addToScope val
@@ -345,7 +345,7 @@ def extendByIfNecessary (fvar : FVarId) : ExtendM Unit := do
   if let some currentJp := (← read).currentJp? then
     let mut translator := (← get).fvarMap[currentJp]!
     let candidates := (← read).candidates
-    bif !(← isInScope fvar) && !translator.contains fvar && candidates.contains fvar then
+    uif !(← isInScope fvar) && !translator.contains fvar && candidates.contains fvar then
       let typ ← getType fvar
       let newParam ← mkAuxParam typ
       translator := translator.insert fvar newParam
@@ -366,7 +366,7 @@ as well because we need to drag these variables through at the call sites
 of `j.2` in `j.1`.
 -/
 def mergeJpContextIfNecessary (jp : FVarId) : ExtendM Unit := do
-  bif (← read).currentJp?.isSome then
+  uif (← read).currentJp?.isSome then
     let additionalArgs := (← get).fvarMap[jp]!.toArray
     for (fvar, _) in additionalArgs do
       extendByIfNecessary fvar
@@ -576,12 +576,12 @@ where
         let mut newArgs := knownArgs
         for (param, arg) in decl.params.zip args do
           if let some knownVal := newArgs[param.fvarId]? then
-            bif arg != knownVal then
+            uif arg != knownVal then
               newArgs := newArgs.erase param.fvarId
         modify fun s => { s with jpJmpArgs := s.jpJmpArgs.insert fn newArgs }
       else
         let folder := fun acc (param, arg) => do
-          bif (← allFVarM (isInJpScope fn) arg) then
+          uif (← allFVarM (isInJpScope fn) arg) then
             return acc.insert param.fvarId arg
           else
             return acc
@@ -595,14 +595,14 @@ where
       if let some reducibleArgs := (← read).jpJmpArgs.get? decl.fvarId then
         let filter param := do
           let erasable := reducibleArgs.contains param.fvarId
-          bif erasable then
+          uif erasable then
             eraseParam param
           return !erasable
         let newParams ← decl.params.filterM filter
         let mut newValue ← goReduce decl.value
         newValue ← replaceFVars newValue reducibleArgs false
         let newType ←
-          bif newParams.size != decl.params.size then
+          uif newParams.size != decl.params.size then
             mkForallParams newParams (← newValue.inferType)
           else
             pure decl.type
@@ -633,7 +633,7 @@ end JoinPointCommonArgs
 def Decl.findJoinPoints? (decl : Decl .pure) : CompilerM (Option (Decl .pure)) := do
   let findResult ← JoinPointFinder.find decl
   trace[Compiler.findJoinPoints] "Found {findResult.candidates.size} jp candidates for {decl.name}"
-  bif findResult.candidates.isEmpty then
+  uif findResult.candidates.isEmpty then
     return none
   else
     return some (← JoinPointFinder.replace decl findResult)

@@ -99,7 +99,7 @@ Whether to ignore `decl` for the floating mechanism. We want to do this if:
 - `decl` is a projection from a variable that is storing a typeclass instance
 -/
 def ignore? (decl : LetDecl .pure) : BaseFloatM Bool :=  do
-   bif (← isArrowClass? decl.type).isSome then
+   uif (← isArrowClass? decl.type).isSome then
      return true
    else if let .proj _ _ fvarId := decl.value then
      return (← isArrowClass? (← getType fvarId)).isSome
@@ -125,19 +125,19 @@ def initialDecisions (cs : Cases .pure) : BaseFloatM (Std.HashMap FVarId Decisio
   let mut map := Std.HashMap.emptyWithCapacity (← read).decls.length
   let owned : Std.HashSet FVarId := ∅
   let typeName := cs.typeName
-  bif typeName == ``EST.Out || typeName == ``ST.Out then
+  uif typeName == ``EST.Out || typeName == ``ST.Out then
     return Std.HashMap.ofList <| (← read).decls.map fun decl => (decl.fvarId, .dont)
   (map, _) ← (← read).decls.foldlM (init := (map, owned)) fun (acc, owned) val => do
     if let .let decl := val then
-      bif (← ignore? decl) then
+      uif (← ignore? decl) then
         return (acc.insert decl.fvarId .dont, owned)
     let (dont, owned) ← (visitDecl (← getEnv) val).run owned
-    bif dont then
+    uif dont then
       return (acc.insert val.fvarId .dont, owned)
     else
       return (acc.insert val.fvarId .unknown, owned)
 
-  bif map.contains cs.discr then
+  uif map.contains cs.discr then
     map := map.insert cs.discr .dont
   (_, map) ← goCases cs |>.run map
   return map
@@ -156,7 +156,7 @@ where
       | some sig =>
         let mut res := false
         for h : i in *...args.size do
-          bif (← visitArg args[i] (sig.params[i]?.any (·.borrow))) then
+          uif (← visitArg args[i] (sig.params[i]?.any (·.borrow))) then
             res := true
         return res
     | .fvar x args =>
@@ -173,9 +173,9 @@ where
 
   goFVar (plannedDecision : Decision) (var : FVarId) : StateRefT (Std.HashMap FVarId Decision) BaseFloatM Unit := do
     if let some decision := (← get)[var]? then
-      bif decision matches .unknown then
+      uif decision matches .unknown then
         modify fun s => s.insert var plannedDecision
-      else bif decision != plannedDecision then
+      else uif decision != plannedDecision then
         modify fun s => s.insert var .dont
       -- otherwise we already have the proper decision
 
@@ -215,7 +215,7 @@ def dontFloat (decl : CodeDecl .pure) : FloatM Unit := do
   modify fun s => { s with newArms := s.newArms.insert .dont (decl :: s.newArms[Decision.dont]!) }
 where
   goFVar (fvar : FVarId) : FloatM Unit := do
-    bif (← get).decision.contains fvar then
+    uif (← get).decision.contains fvar then
       modify fun s => { s with decision := s.decision.insert fvar .dont }
 
 /--
@@ -271,9 +271,9 @@ def float (decl : CodeDecl .pure) : FloatM Unit := do
 where
   goFVar (fvar : FVarId) (arm : Decision) : FloatM Unit := do
     let some decision := (← get).decision[fvar]? | return ()
-    bif decision == .unknown then
+    uif decision == .unknown then
       modify fun s => { s with decision := s.decision.insert fvar arm }
-    else bif decision != arm then
+    else uif decision != arm then
       modify fun s => { s with decision := s.decision.insert fvar .dont }
 
 /--
@@ -292,13 +292,13 @@ where
   goCases : FloatM Unit := do
     for decl in (← read).decls do
       let currentDecision := (← get).decision[decl.fvarId]!
-      bif currentDecision == .unknown then
+      uif currentDecision == .unknown then
         /-
         If the decision is still unknown by now this means `decl` is
         unused in its continuation and can hence be removed.
         -/
         eraseCodeDecl decl
-      else bif currentDecision == .dont then
+      else uif currentDecision == .dont then
         dontFloat decl
       else
         float decl

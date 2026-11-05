@@ -38,7 +38,7 @@ instance : OfNat JsonNumber n := ⟨JsonNumber.fromNat n⟩
 
 private partial def countDigits (n : Nat) : Nat :=
   let rec loop (n digits : Nat) : Nat :=
-    bif n ≤ᵇ 9 then
+    uif n ≤ 9 then
       digits
     else
       loop (n/10) (digits+1)
@@ -51,14 +51,14 @@ This is a normal form: if `m1 * 10^-e1 = m2 * 10^-e2`,
 then `normalize ⟨m1, e1⟩ == normalize ⟨m2, e2⟩`. -/
 protected def normalize : JsonNumber → Int × Nat × Int
   | ⟨m, e⟩ => Id.run do
-    bif m =ᵇ 0 then (0, 0, 0)
+    uif m = 0 then (0, 0, 0)
     else
-      let sign : Int := bif m >ᵇ 0 then 1 else -1
+      let sign : Int := uif m > 0 then 1 else -1
       let mut mAbs := m.natAbs
       let nDigits := countDigits mAbs
       -- eliminate trailing zeros
       for _ in *...nDigits do
-        bif mAbs % 10 =ᵇ 0 then
+        uif mAbs % 10 = 0 then
           mAbs := mAbs / 10
         else
           break
@@ -68,22 +68,22 @@ protected def normalize : JsonNumber → Int × Nat × Int
 def lt (a b : JsonNumber) : Bool :=
   let (as, am, ae) := a.normalize
   let (bs, bm, be) := b.normalize
-  bif as ≠ᵇ bs then as < bs
-  else bif as =ᵇ 0 then false -- 0 ≮ 0
+  uif as ≠ bs then as < bs
+  else uif as = 0 then false -- 0 ≮ 0
   else
     let ((am, ae), (bm, be)) :=
-      bif as =ᵇ -1 then
+      uif as = -1 then
         ((bm, be), (am, ae))
       else
         ((am, ae), (bm, be))
-    bif ae <ᵇ be then true
-    else bif ae >ᵇ be then false
+    uif ae < be then true
+    else uif ae > be then false
     else
       let amDigits := countDigits am
       let bmDigits := countDigits bm
       -- align the mantissas
       let (am, bm) :=
-        bif amDigits <ᵇ bmDigits then
+        uif amDigits < bmDigits then
           (am * 10^(bmDigits - amDigits), bm)
         else
           (am, bm * 10^(amDigits - bmDigits))
@@ -107,14 +107,14 @@ noncomputable instance instUDecidableLt (a b : JsonNumber) : UDecidable (a < b) 
 
 instance : Ord JsonNumber where
   compare x y :=
-    bif x <ᵇ y then Ordering.lt
-    else bif x >ᵇ y then Ordering.gt
+    uif x < y then Ordering.lt
+    else uif x > y then Ordering.gt
     else Ordering.eq
 
 protected def toString : JsonNumber → String
   | ⟨m, 0⟩ => m.repr
   | ⟨m, e⟩ =>
-    let sign := bif m ≥ᵇ 0 then "" else "-"
+    let sign := uif m ≥ 0 then "" else "-"
     let m := m.natAbs
     -- if there are too many zeroes after the decimal, we
     -- use exponents to compress the representation.
@@ -122,17 +122,17 @@ protected def toString : JsonNumber → String
     -- the size of the representation would otherwise
     -- grow exponentially in the value of exponent.
     let exp : Int := 9 + countDigits m - (e : Int)
-    let exp := bif exp <ᵇ 0 then exp else 0
+    let exp := uif exp < 0 then exp else 0
     let e' := 10 ^ (e - exp.natAbs)
     let left := (m / e').repr
-    bif m % e' =ᵇ 0 && exp =ᵇ 0 then
+    uif m % e' = 0 ∧ exp = 0 then
       s!"{sign}{left}"
     else
       let right := e' + m % e'
         |>.repr.toRawSubstring.drop 1
         |>.dropRightWhile (fun c => c = '0')
         |>.toString
-      let exp := bif exp =ᵇ 0 then "" else "e" ++ exp.repr
+      let exp := uif exp = 0 then "" else "e" ++ exp.repr
       s!"{sign}{left}.{right}{exp}"
 
 /-- `shiftl n s` shifts `n` by `s` places to the left, i.e., multiplies it by `10^s`. -/
@@ -153,7 +153,7 @@ instance : Repr JsonNumber where
 
 instance : OfScientific JsonNumber where
   ofScientific mantissa exponentSign decimalExponent :=
-    bif exponentSign then
+    uif exponentSign then
       {mantissa := mantissa, exponent := decimalExponent}
     else
       {mantissa := (mantissa * 10 ^ decimalExponent : Nat), exponent := 0}
@@ -164,7 +164,7 @@ instance : Neg JsonNumber where
 instance : Inhabited JsonNumber := ⟨0⟩
 
 def toFloat : JsonNumber → Float
-  | ⟨m, e⟩ => (bif m ≥ᵇ 0 then 1.0 else -1.0) * OfScientific.ofScientific m.natAbs true e
+  | ⟨m, e⟩ => (uif m ≥ 0 then 1.0 else -1.0) * OfScientific.ofScientific m.natAbs true e
 
 /-- Creates a json number from a positive float, panicking if it isn't.
 [todo]EdAyers: Currently goes via a string representation, when more float primitives are available
@@ -177,12 +177,12 @@ private def fromPositiveFloat! (x : Float) : JsonNumber :=
 /-- Attempts to convert a float to a JsonNumber, if the number isn't finite returns
 the appropriate string from "NaN", "Infinity", "-Infinity". -/
 def fromFloat? (x : Float): Sum String JsonNumber :=
-  bif x.isNaN then Sum.inl "NaN"
-  else bif x.isInf then
-    Sum.inl <| bif x >ᵇ 0 then "Infinity" else "-Infinity"
-  else bif x == 0.0 then
+  uif x.isNaN then Sum.inl "NaN"
+  else uif x.isInf then
+    Sum.inl <| uif x > 0 then "Infinity" else "-Infinity"
+  else uif x == 0.0 then
     Sum.inr 0 -- special case to avoid -0.0
-  else bif x <ᵇ 0.0 then
+  else uif x < 0.0 then
     Sum.inr <| Neg.neg <| fromPositiveFloat! <| Neg.neg <| x
   else
     Sum.inr <| fromPositiveFloat! <| x

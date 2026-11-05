@@ -70,7 +70,7 @@ where
     | .cases c => visitVar c.discr <||> c.alts.anyM (go ·.getCode)
     | .jmp fvarId args =>
       (pure <| args.any (·.dependsOn (← read).targetSet)) <||> do
-        bif (← get).visitedJps.contains fvarId then
+        uif (← get).visitedJps.contains fvarId then
           return false
         else
           let some decl ← findFunDecl? fvarId | unreachable!

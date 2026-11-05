@@ -19,7 +19,7 @@ class TraverseFVar (α : Type) where
 export TraverseFVar (mapFVarM forFVarM)
 
 partial def Expr.mapFVarM [MonadLiftT CompilerM m] [Monad m] (f : FVarId → m FVarId) (e : Expr) : m Expr := do
-  bif e.hasFVar then
+  uif e.hasFVar then
     match e with
     | .app fn arg => return e.updateApp! (← mapFVarM f fn) (← mapFVarM f arg)
     | .fvar fvarId => return e.updateFVar! (← f fvarId)
@@ -32,7 +32,7 @@ partial def Expr.mapFVarM [MonadLiftT CompilerM m] [Monad m] (f : FVarId → m F
     return e
 
 partial def Expr.forFVarM [Monad m] (f : FVarId → m Unit) (e : Expr) : m Unit := do
-  bif e.hasFVar then
+  uif e.hasFVar then
     match e with
     | .app fn arg =>
       forFVarM f fn
@@ -259,13 +259,13 @@ def anyFVarM [Monad m] [TraverseFVar α] (f : FVarId → m Bool) (x : α) : m Bo
   return (← TraverseFVar.forFVarM go x |>.run) matches none
 where
   go (fvar : FVarId) : OptionT m Unit := do
-    bif (← f fvar) then failure
+    uif (← f fvar) then failure
 
 def allFVarM [Monad m] [TraverseFVar α] (f : FVarId → m Bool) (x : α) : m Bool := do
   return (← TraverseFVar.forFVarM go x |>.run) matches .some ..
 where
   go (fvar : FVarId) : OptionT m Unit := do
-    bif !(← f fvar) then failure
+    uif !(← f fvar) then failure
 
 def anyFVar [TraverseFVar α] (f : FVarId → Bool) (x : α) : Bool :=
   Id.run <| anyFVarM (pure <| f ·) x

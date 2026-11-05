@@ -97,7 +97,7 @@ def getBoolLit (fvarId : FVarId) : CompilerM (Option Bool) := do
   | _ => return none
 
 def mkBoolLit (b : Bool) : FolderM (LetValue .pure) :=
-  let ctor := bif b then ``Bool.true else ``Bool.false
+  let ctor := uif b then ``Bool.true else ``Bool.false
   return .const ctor [] #[]
 
 instance : Literal Bool where
@@ -121,7 +121,7 @@ def mkCharLit (c : Char) : FolderM (LetValue .pure) := do
   /-
   Depending on our phase `Char` is a structure or has been unwrapped to a UInt32, act accordingly.
   -/
-  bif (← getPhase) <ᵇ .mono then
+  uif (← getPhase) < .mono then
     let natId ← mkAuxLit c.toNat
     return .const ``Char.ofNat [] #[.fvar natId]
   else
@@ -243,8 +243,8 @@ def Folder.mkBinaryDecisionProcedure [Literal α] [Literal β] {r : α → β �
   let some arg₁ ← getLit fvarId₁ | return none
   let some arg₂ ← getLit fvarId₂ | return none
   let result := folder arg₁ arg₂ |>.decide
-  bif (← getPhase) <ᵇ .mono then
-    bif result then
+  uif (← getPhase) < .mono then
+    uif result then
       return some <| .const ``Decidable.isTrue [] #[.erased, .erased]
     else
       return some <| .const ``Decidable.isFalse [] #[.erased, .erased]
@@ -263,8 +263,8 @@ def Folder.mkBinaryUSizeDecisionProcedure {r64 : UInt64 → UInt64 → Prop} {r3
   let res64 := (f64 arg₁ arg₂).decide
   let res32 := (f32 arg₁.toUInt32 arg₂.toUInt32).decide
   unless res64 == res32 do return none
-  bif (← getPhase) <ᵇ .mono then
-    bif res64 then
+  uif (← getPhase) < .mono then
+    uif res64 then
       return some <| .const ``Decidable.isTrue [] #[.erased, .erased]
     else
       return some <| .const ``Decidable.isFalse [] #[.erased, .erased]
@@ -435,7 +435,7 @@ interpretation, return that exponent.
 private def getUSizePow2Exponent? (x : UInt64) : Option UInt64 :=
   let exponent64 := x.log2
   let exponent32 := x.toUInt32.log2
-  bif UInt64.shiftLeft 1 exponent64 == x && UInt32.shiftLeft 1 exponent32 == x.toUInt32 &&
+  uif UInt64.shiftLeft 1 exponent64 == x && UInt32.shiftLeft 1 exponent32 == x.toUInt32 &&
       exponent64 == exponent32.toUInt64 then
     some exponent64
   else
@@ -531,7 +531,7 @@ def foldNatPow (args : Array (Arg .pure)) : FolderM (Option (LetValue .pure)) :=
   let #[.fvar fvarId₁, .fvar fvarId₂] := args | return none
   let some value₁ ← getNatLit fvarId₁ | return none
   let some value₂ ← getNatLit fvarId₂ | return none
-  bif value₂ <ᵇ natPowThreshold then
+  uif value₂ < natPowThreshold then
     return .some (.lit (.nat (value₁ ^ value₂)))
   else
     return none
@@ -554,7 +554,7 @@ def Folder.ofNatLT (f : Nat → LitValue) (args : Array (Arg .pure)) : FolderM (
   return some (.lit (f value))
 
 def Folder.charOfNat (args : Array (Arg .pure)) : FolderM (Option (LetValue .pure)) := do
-  bif (← getPhase) <ᵇ .mono then return none
+  uif (← getPhase) < .mono then return none
   Folder.ofNat (fun v => .uint32 (Char.ofNat v).val) args
 
 def Folder.toNat (args : Array (Arg .pure)) : FolderM (Option (LetValue .pure)) := do
@@ -562,7 +562,7 @@ def Folder.toNat (args : Array (Arg .pure)) : FolderM (Option (LetValue .pure)) 
   let some (.lit lit) ← findLetValue? (pu := .pure) fvarId | return none
   match lit with
   | .uint8 v | .uint16 v | .uint32 v | .uint64 v => return some (.lit (.nat v.toNat))
-  | .usize v => bif v.toUInt32.toUInt64 == v then return some (.lit (.nat v.toNat)) else return none
+  | .usize v => uif v.toUInt32.toUInt64 == v then return some (.lit (.nat v.toNat)) else return none
   | .nat _ | .str _ => return none
 
 def Folder.getObjTagNat (args : Array (Arg .pure)) : FolderM (Option (LetValue .pure)) := do
@@ -575,13 +575,13 @@ def Folder.getObjTagNat (args : Array (Arg .pure)) : FolderM (Option (LetValue .
   If called on single ctor inductives we might learn that they are trivial inductives later and
   unwrap them. Similarly for runtime built-ins their actual stored tag might be different from cidx.
   -/
-  bif inductVal.numCtors == 1 || isRuntimeBuiltinType inductVal.name then return none
+  uif inductVal.numCtors == 1 || isRuntimeBuiltinType inductVal.name then return none
   return some (.lit (.nat ctorVal.cidx))
 
 def Folder.natCtorIdx (args : Array (Arg .pure)) : FolderM (Option (LetValue .pure)) := do
   let #[.fvar fvarId] := args | return none
   let some (.lit (.nat val)) ← findLetValue? (pu := .pure) fvarId | return none
-  bif val == 0 then
+  uif val == 0 then
     return some (.lit (.nat 0))
   else
     return some (.lit (.nat 1))

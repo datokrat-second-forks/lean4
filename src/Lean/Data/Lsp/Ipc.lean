@@ -55,7 +55,7 @@ def shutdown (requestNo : Nat) : IpcM Unit := do
     match shutMsg with
     | Message.response id result =>
       assert! result.isNull
-      bif id != requestNo then
+      uif id != requestNo then
         throw <| IO.userError s!"Expected id {requestNo}, got id {id}"
 
       hOut.writeLspNotification ⟨"exit", Json.null⟩
@@ -79,7 +79,7 @@ partial def readResponseAs (expectedID : RequestID) (α) [FromJson α] :
   let m ← (←stdout).readLspMessage
   match m with
   | Message.response id result =>
-    bif id == expectedID then
+    uif id == expectedID then
       match fromJson? result with
       | Except.ok v => pure ⟨expectedID, v⟩
       | Except.error inner => throw $ userError s!"Unexpected result '{result.compress}'\n{inner}"
@@ -118,7 +118,7 @@ def mergePublishDiagnosticsParams (prev? : Option PublishDiagnosticsParams)
   let replace := { next with isIncremental? := some false }
   let some prev := prev?
     | return replace
-  bif next.isIncremental?.getD false then
+  uif next.isIncremental?.getD false then
     return { next with
       diagnostics := prev.diagnostics ++ next.diagnostics
       isIncremental? := some false }
@@ -141,12 +141,12 @@ where
   loop (accumulated? : Option PublishDiagnosticsParams) := do
     match (←readMessage) with
     | Message.response id _ =>
-      bif id == waitForDiagnosticsId then
+      uif id == waitForDiagnosticsId then
         return accumulated?.map fun p =>
           ⟨"textDocument/publishDiagnostics", normalizePublishDiagnosticsParams p⟩
       else loop accumulated?
     | Message.responseError id _ msg _ =>
-      bif id == waitForDiagnosticsId then
+      uif id == waitForDiagnosticsId then
         throw $ userError s!"Waiting for diagnostics failed: {msg}"
       else loop accumulated?
     | Message.notification "textDocument/publishDiagnostics" (some param) =>
@@ -161,10 +161,10 @@ partial def waitForILeans (waitForILeansId : RequestID := 0) (target : DocumentU
   while true do
     match (← readMessage) with
     | .response id _ =>
-      bif id == waitForILeansId then
+      uif id == waitForILeansId then
         return
     | .responseError id _ msg _ =>
-      bif id == waitForILeansId then
+      uif id == waitForILeansId then
         throw $ userError s!"Waiting for ILeans failed: {msg}"
     | _ =>
       pure ()
@@ -174,10 +174,10 @@ partial def waitForWatchdogILeans (waitForILeansId : RequestID := 0) : IpcM Unit
   while true do
     match (← readMessage) with
     | .response id _ =>
-      bif id == waitForILeansId then
+      uif id == waitForILeansId then
         return
     | .responseError id _ msg _ =>
-      bif id == waitForILeansId then
+      uif id == waitForILeansId then
         throw $ userError s!"Waiting for ILeans failed: {msg}"
     | _ =>
       pure ()
@@ -209,7 +209,7 @@ partial def expandIncomingCallHierarchy (requestNo : Nat) (uri : DocumentUri) (p
   return (hierarchies, requestNo)
 where
   go (requestNo : Nat) (item : CallHierarchyItem) (fromRanges : Array Range) (visited : Std.TreeSet String) : IpcM (CallHierarchy × Nat) := do
-    bif visited.contains item.name then
+    uif visited.contains item.name then
       return ({ item, fromRanges := #[], children := #[] }, requestNo)
     writeRequest {
       id := requestNo
@@ -251,7 +251,7 @@ partial def expandOutgoingCallHierarchy (requestNo : Nat) (uri : DocumentUri) (p
   return (hierarchies, requestNo)
 where
   go (requestNo : Nat) (item : CallHierarchyItem) (fromRanges : Array Range) (visited : Std.TreeSet String) : IpcM (CallHierarchy × Nat) := do
-    bif visited.contains item.name then
+    uif visited.contains item.name then
       return ({ item, fromRanges := #[], children := #[] }, requestNo)
     writeRequest {
       id := requestNo
@@ -299,7 +299,7 @@ partial def expandModuleHierarchyImports (requestNo : Nat) (uri : DocumentUri) :
   return (hierarchy, requestNo)
 where
   go (requestNo : Nat) (item : LeanImport) (visited : Std.TreeSet String) : IpcM (ModuleHierarchy × Nat) := do
-    bif visited.contains item.module.name then
+    uif visited.contains item.module.name then
       return ({ item, children := #[] }, requestNo)
     writeRequest {
       id := requestNo
@@ -342,7 +342,7 @@ partial def expandModuleHierarchyImportedBy (requestNo : Nat) (uri : DocumentUri
   return (hierarchy, requestNo)
 where
   go (requestNo : Nat) (item : LeanImport) (visited : Std.TreeSet String) : IpcM (ModuleHierarchy × Nat) := do
-    bif visited.contains item.module.name then
+    uif visited.contains item.module.name then
       return ({ item, children := #[] }, requestNo)
     writeRequest {
       id := requestNo

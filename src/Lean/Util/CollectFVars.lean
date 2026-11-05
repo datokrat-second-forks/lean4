@@ -41,7 +41,7 @@ abbrev Visitor := State → State
 
 mutual
   partial def visit (e : Expr) : Visitor := fun s =>
-    bif !e.hasFVar || s.visited.contains { expr := e } then s
+    uif !e.hasFVar || s.visited.contains { expr := e } then s
     else main e { s with visited := s.visited.insert { expr := e } }
 
   partial def main : Expr → Visitor
@@ -52,7 +52,7 @@ mutual
     | .app f a         => visit a ∘ visit f
     | .mdata _ b       => visit b
     -- Equal free variables may be different objects.
-    | .fvar fvarId     => fun s => bif s.fvarSet.contains fvarId then s else s.add fvarId
+    | .fvar fvarId     => fun s => uif s.fvarSet.contains fvarId then s else s.add fvarId
     | _                => id
 end
 

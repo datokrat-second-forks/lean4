@@ -74,7 +74,7 @@ instance : Union NameSet where
   union := NameSet.append
 
 instance : Inter NameSet where
-  inter := fun s t => s.foldl (fun r n => bif t.contains n then r.insert n else r) {}
+  inter := fun s t => s.foldl (fun r n => uif t.contains n then r.insert n else r) {}
 
 instance : SDiff NameSet where
   sdiff := fun s t => t.foldl (fun s n => s.erase n) s

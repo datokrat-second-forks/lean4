@@ -83,7 +83,7 @@ find potential reuse opportunities for the memory used for `x`. If it finds them
 partial def S (x : FVarId) (info : CtorInfo) (c : Code .impure) : ReuseM (Code .impure) := do
   let w ← mkFreshFVarId
   let (c, changed) ← go w c
-  bif changed then
+  uif changed then
     let decl := {
       fvarId := w,
       binderName := (← mkFreshBinderName),
@@ -101,7 +101,7 @@ where
       return (c.updateCont! k, changed)
     match c with
     | .let decl@{ value := .ctor info' ys _, .. } k =>
-      bif (← mayReuse info info') then
+      uif (← mayReuse info info') then
         let updateNecessary := info.cidx != info'.cidx
         let code := .let (← decl.update decl.type (.reuse w info' updateNecessary ys)) k
         return (code, true)
@@ -109,7 +109,7 @@ where
         goK k
     | .jp decl k =>
       let (value, changed) ← go w decl.value
-      bif changed then
+      uif changed then
         return (c.updateFun! (← decl.updateValue value) k, changed)
       else
         goK k
@@ -153,7 +153,7 @@ def classifyUse (instr : CodeDecl .impure) (x : FVarId) : ReuseM UseClassificati
       let mut result := .none
       for arg in args, param in sig.params do
         if let .fvar y := arg then
-          bif y == x then
+          uif y == x then
             result :=
               match result, param.borrow with
               | .ownedArg, true => .other
@@ -163,17 +163,17 @@ def classifyUse (instr : CodeDecl .impure) (x : FVarId) : ReuseM UseClassificati
               | .none, false => .ownedArg
       return result
     else
-      bif e.dependsOn { x } then
+      uif e.dependsOn { x } then
         return .ownedArg
       else
         return .none
   | .let { value := e@(.pap ..), .. } | .let { value := e@(.fvar ..), .. } =>
-    bif e.dependsOn { x } then
+    uif e.dependsOn { x } then
       return .ownedArg
     else
       return .none
   | _ =>
-    bif instr.dependsOn { x } then
+    uif instr.dependsOn { x } then
       return .other
     else
       return .none
@@ -187,7 +187,7 @@ anymore and then invokes `S` to look for reuse opportunities after these positio
 -/
 partial def D (x : FVarId) (info : CtorInfo) (c : Code .impure) : ReuseM (Code .impure) := do
   let (c, xAlive) ← go c
-  bif xAlive then
+  uif xAlive then
     return c
   else
     S x info c
@@ -204,7 +204,7 @@ where
   go (c : Code .impure) : ReuseM (Code .impure × Bool) := do
     match c with
     | .cases cs =>
-      bif (← c.isFVarLiveIn x) then
+      uif (← c.isFVarLiveIn x) then
         /- If `x` is live in `c`, we recursively process each branch. -/
         let alts ← cs.alts.mapMonoM (·.mapCodeM (D x info))
         return (c.updateAlts! alts, true)
@@ -222,7 +222,7 @@ where
       return (c.updateFun! (← decl.updateValue value) k, found)
     | .let _ k | .sset _ _ _ _ _ k _ | .uset _ _ _ k _ =>
       let instr := c.toCodeDecl!
-      bif isCtorUsing instr x then
+      uif isCtorUsing instr x then
         /-
         If the scrutinee `x` (the one that is providing memory) is being
         stored in a constructor, then reuse will probably not be able to reuse memory at runtime.
@@ -231,7 +231,7 @@ where
         return (c, true)
       else
         let (k, found) ← go k
-        bif found then
+        uif found then
           return (c.updateCont! k, true)
         else
           match (← classifyUse instr x) with
@@ -262,7 +262,7 @@ partial def Code.insertResetReuse (c : Code .impure) : ReuseM (Code .impure) := 
         let alt ← alt.mapCodeM (·.insertResetReuse)
         match alt with
         | .ctorAlt info k =>
-          bif info.isScalar || alreadyFound || borrowed then
+          uif info.isScalar || alreadyFound || borrowed then
             -- If `alreadyFound`, then we don't try to reuse memory cell to avoid
             -- double reset.
             return alt
@@ -283,7 +283,7 @@ partial def Code.insertResetReuse (c : Code .impure) : ReuseM (Code .impure) := 
 partial def Decl.insertResetReuseCore (decl : Decl .impure) : ReuseM (Decl .impure) := do
   let value ← decl.value.mapCodeM fun code => do
     let alreadyFound ←
-      bif (← read).relaxedReuse then
+      uif (← read).relaxedReuse then
         pure (← (collectResets code).run {}).snd
       else
         pure {}
@@ -315,7 +315,7 @@ def Decl.insertResetReuse (decl : Decl .impure) : CompilerM (Decl .impure) := do
 
   The second pass addresses issue #4089.
   -/
-  bif (← getConfig).resetReuse then
+  uif (← getConfig).resetReuse then
     let ownedness ← decl.analyzePropagatedBorrows
     let decl ← decl.applyOwnedness ownedness
     let decl ← decl.insertResetReuseCore |>.run { relaxedReuse := false, ownedness }
