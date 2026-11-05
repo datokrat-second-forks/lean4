@@ -422,6 +422,36 @@ instance {s : String} (l r : s.Pos) : Decidable (l ≤ r) :=
 instance {s : String} (l r : s.Pos) : Decidable (l < r) :=
 decidable_of_iff' _ Pos.lt_iff
 
+/-- The implementation of `instStringPosEq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instStringPosEqImpl {s : String} (l r : s.Pos) : UDecidable (l = r) :=
+  UDecidable.ofIff (l.offset = r.offset) ⟨String.Pos.ext, congrArg _⟩
+
+noncomputable instance _root_.UDecidable.instStringPosEq {s : String} (l r : s.Pos) : UDecidable (l = r) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instStringPosEq_csimp : @_root_.UDecidable.instStringPosEq = @_root_.UDecidable.instStringPosEqImpl := rfl
+
+/-- The implementation of `instStringPosLe` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instStringPosLeImpl {s : String} (l r : s.Pos) : UDecidable (l ≤ r) :=
+  UDecidable.ofIff (l.offset ≤ r.offset) Pos.le_iff.symm
+
+noncomputable instance _root_.UDecidable.instStringPosLe {s : String} (l r : s.Pos) : UDecidable (l ≤ r) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instStringPosLe_csimp : @_root_.UDecidable.instStringPosLe = @_root_.UDecidable.instStringPosLeImpl := rfl
+
+/-- The implementation of `instStringPosLt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instStringPosLtImpl {s : String} (l r : s.Pos) : UDecidable (l < r) :=
+  UDecidable.ofIff (l.offset < r.offset) Pos.lt_iff.symm
+
+noncomputable instance _root_.UDecidable.instStringPosLt {s : String} (l r : s.Pos) : UDecidable (l < r) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instStringPosLt_csimp : @_root_.UDecidable.instStringPosLt = @_root_.UDecidable.instStringPosLtImpl := rfl
+
 /--
 A region or slice of some underlying string.
 
@@ -623,6 +653,36 @@ instance {s : Slice} (l r : s.Pos) : Decidable (l ≤ r) :=
 
 instance {s : Slice} (l r : s.Pos) : Decidable (l < r) :=
   decidable_of_iff' _ Slice.Pos.lt_iff
+
+/-- The implementation of `instSlicePosEq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instSlicePosEqImpl {s : Slice} (l r : s.Pos) : UDecidable (l = r) :=
+  UDecidable.ofIff (l.offset = r.offset) ⟨Slice.Pos.ext, congrArg _⟩
+
+noncomputable instance _root_.UDecidable.instSlicePosEq {s : Slice} (l r : s.Pos) : UDecidable (l = r) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instSlicePosEq_csimp : @_root_.UDecidable.instSlicePosEq = @_root_.UDecidable.instSlicePosEqImpl := rfl
+
+/-- The implementation of `instSlicePosLe` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instSlicePosLeImpl {s : Slice} (l r : s.Pos) : UDecidable (l ≤ r) :=
+  UDecidable.ofIff (l.offset ≤ r.offset) Slice.Pos.le_iff.symm
+
+noncomputable instance _root_.UDecidable.instSlicePosLe {s : Slice} (l r : s.Pos) : UDecidable (l ≤ r) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instSlicePosLe_csimp : @_root_.UDecidable.instSlicePosLe = @_root_.UDecidable.instSlicePosLeImpl := rfl
+
+/-- The implementation of `instSlicePosLt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instSlicePosLtImpl {s : Slice} (l r : s.Pos) : UDecidable (l < r) :=
+  UDecidable.ofIff (l.offset < r.offset) Slice.Pos.lt_iff.symm
+
+noncomputable instance _root_.UDecidable.instSlicePosLt {s : Slice} (l r : s.Pos) : UDecidable (l < r) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instSlicePosLt_csimp : @_root_.UDecidable.instSlicePosLt = @_root_.UDecidable.instSlicePosLtImpl := rfl
 
 /--
 `pos.IsAtEnd` is just shorthand for `pos = s.endPos` that is easier to write if `s` is long.

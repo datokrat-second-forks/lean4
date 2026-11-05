@@ -128,10 +128,14 @@ A field type without a native instance falls back to `UDecidable.ofDecidable`, w
 reports.
 -/
 
+structure DecOnly where
+  n : Nat
+  deriving DecidableEq
+
 structure OnlyDecidable where
-  s : String.Pos.Raw
+  s : DecOnly
   deriving UDecidableEq
 
 /-- error: instUDecidableEqOnlyDecidable.udecEq uses `Decidable` -/
 #guard_msgs in
-#check_native (⟨0⟩ : OnlyDecidable) = ⟨0⟩
+#check_native (⟨⟨0⟩⟩ : OnlyDecidable) = ⟨⟨0⟩⟩

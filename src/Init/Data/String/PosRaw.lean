@@ -57,6 +57,36 @@ instance (p₁ p₂ : String.Pos.Raw) : Decidable (p₁ ≤ p₂) :=
 instance (p₁ p₂ : String.Pos.Raw) : Decidable (p₁ < p₂) :=
   inferInstanceAs (Decidable (p₁.byteIdx < p₂.byteIdx))
 
+/-- The implementation of `instStringPosRawEq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instStringPosRawEqImpl (p₁ p₂ : String.Pos.Raw) : UDecidable (p₁ = p₂) :=
+  UDecidable.ofIff (p₁.byteIdx = p₂.byteIdx) ⟨String.Pos.Raw.ext, congrArg _⟩
+
+noncomputable instance _root_.UDecidable.instStringPosRawEq (p₁ p₂ : String.Pos.Raw) : UDecidable (p₁ = p₂) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instStringPosRawEq_csimp : @_root_.UDecidable.instStringPosRawEq = @_root_.UDecidable.instStringPosRawEqImpl := rfl
+
+/-- The implementation of `instStringPosRawLe` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instStringPosRawLeImpl (p₁ p₂ : String.Pos.Raw) : UDecidable (p₁ ≤ p₂) :=
+  UDecidable.ofIff (p₁.byteIdx ≤ p₂.byteIdx) Iff.rfl
+
+noncomputable instance _root_.UDecidable.instStringPosRawLe (p₁ p₂ : String.Pos.Raw) : UDecidable (p₁ ≤ p₂) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instStringPosRawLe_csimp : @_root_.UDecidable.instStringPosRawLe = @_root_.UDecidable.instStringPosRawLeImpl := rfl
+
+/-- The implementation of `instStringPosRawLt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instStringPosRawLtImpl (p₁ p₂ : String.Pos.Raw) : UDecidable (p₁ < p₂) :=
+  UDecidable.ofIff (p₁.byteIdx < p₂.byteIdx) Iff.rfl
+
+noncomputable instance _root_.UDecidable.instStringPosRawLt (p₁ p₂ : String.Pos.Raw) : UDecidable (p₁ < p₂) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instStringPosRawLt_csimp : @_root_.UDecidable.instStringPosRawLt = @_root_.UDecidable.instStringPosRawLtImpl := rfl
+
 @[simp]
 theorem Pos.Raw.byteIdx_sub_char {p : Pos.Raw} {c : Char} : (p - c).byteIdx = p.byteIdx - c.utf8Size := rfl
 
