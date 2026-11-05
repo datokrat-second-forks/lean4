@@ -129,20 +129,20 @@ private def rightPadAscii (n : Nat) (a : Char) (s : String) : String :=
   s ++ "".pushn a (n - s.positions.length)
 
 private def pad (size : Nat) (n : Int) (cut : Bool := false) : String :=
-  let (sign, n) := bif n <ᵇ 0 then ("-", -n) else ("", n)
+  let (sign, n) := uif n < 0 then ("-", -n) else ("", n)
 
   let numStr := toString n
-  bif numStr.utf8ByteSize >ᵇ size then
-    sign ++ bif cut then numStr.drop (numStr.utf8ByteSize - size) |>.copy else numStr
+  uif numStr.utf8ByteSize > size then
+    sign ++ uif cut then numStr.drop (numStr.utf8ByteSize - size) |>.copy else numStr
   else
     sign ++ leftPadAscii size '0' numStr
 
 private def rightTruncate (size : Nat)  (n : Int) (cut : Bool := false) : String :=
-  let (sign, n) := bif n <ᵇ 0 then ("-", -n) else ("", n)
+  let (sign, n) := uif n < 0 then ("-", -n) else ("", n)
 
   let numStr := toString n
-  bif numStr.length >ᵇ size then
-    sign ++ bif cut then numStr.take size |>.copy else numStr
+  uif numStr.length > size then
+    sign ++ uif cut then numStr.take size |>.copy else numStr
   else
     sign ++ rightPadAscii size '0' numStr
 
@@ -229,7 +229,7 @@ private def formatExtendedDayPeriod (arr : Vector String 6) (period : ExtendedDa
   arr.get (extendedDayPeriodIndex period)
 
 private def toSigned (data : Int) : String :=
-  bif data <ᵇ 0 then toString data else "+" ++ toString data
+  uif data < 0 then toString data else "+" ++ toString data
 
 private inductive Reason
   | yes
@@ -238,22 +238,22 @@ private inductive Reason
 deriving BEq
 
 private def toIsoString (offset : Offset) (withMinutes : Reason) (withSeconds : Reason) (colon : Bool) (padHour : Bool := true) : String :=
-  let (sign, time) := bif offset.second.val ≥ᵇ 0 then ("+", offset.second) else ("-", -offset.second)
+  let (sign, time) := uif offset.second.val ≥ 0 then ("+", offset.second) else ("-", -offset.second)
   let time := PlainTime.ofSeconds time
   let pad := leftPadAscii 2 '0' ∘ toString
 
-  let hourStr := bif padHour then pad time.hour.val else toString time.hour.val
+  let hourStr := uif padHour then pad time.hour.val else toString time.hour.val
   let data := s!"{sign}{hourStr}"
 
   let data :=
-    bif withMinutes == .yes || (withMinutes == .optional && time.minute.val ≠ᵇ 0) then
-      s!"{data}{bif colon then ":" else ""}{pad time.minute.val}"
+    uif withMinutes == .yes ∨ (withMinutes == .optional ∧ time.minute.val ≠ 0) then
+      s!"{data}{uif colon then ":" else ""}{pad time.minute.val}"
     else
       data
 
   let data :=
-    bif withSeconds == .yes || (withSeconds == .optional && time.second.val ≠ᵇ 0) then
-      s!"{data}{bif colon then ":" else ""}{pad time.second.val}"
+    uif withSeconds == .yes ∨ (withSeconds == .optional ∧ time.second.val ≠ 0) then
+      s!"{data}{uif colon then ":" else ""}{pad time.second.val}"
     else
       data
 
@@ -261,19 +261,19 @@ private def toIsoString (offset : Offset) (withMinutes : Reason) (withSeconds : 
 
 /-- Classify a `PlainTime` into a `DayPeriod` for the `b` pattern. -/
 def classifyDayPeriod (hour : Hour.Ordinal) (minute : Minute.Ordinal) (second : Second.Ordinal true) : DayPeriod :=
-  bif hour.val =ᵇ 0 && minute.val =ᵇ 0 && second.val =ᵇ 0 then .midnight
-  else bif hour.val =ᵇ 12 && minute.val =ᵇ 0 && second.val =ᵇ 0 then .noon
-  else bif hour.val <ᵇ 12 then .am
+  uif hour.val = 0 ∧ minute.val = 0 ∧ second.val = 0 then .midnight
+  else uif hour.val = 12 ∧ minute.val = 0 ∧ second.val = 0 then .noon
+  else uif hour.val < 12 then .am
   else .pm
 
 /-- Classify a `PlainTime` into an `ExtendedDayPeriod` for the `B` pattern (CLDR flexible periods). -/
 def classifyExtendedDayPeriod (hour : Hour.Ordinal) (minute : Minute.Ordinal) (second : Second.Ordinal true) : ExtendedDayPeriod :=
-  bif hour.val =ᵇ 0 && minute.val =ᵇ 0 && second.val =ᵇ 0 then .midnight
-  else bif hour.val =ᵇ 12 && minute.val =ᵇ 0 && second.val =ᵇ 0 then .noon
-  else bif hour.val <ᵇ 6 then .night
-  else bif hour.val <ᵇ 12 then .morning
-  else bif hour.val <ᵇ 18 then .afternoon
-  else bif hour.val <ᵇ 21 then .evening
+  uif hour.val = 0 ∧ minute.val = 0 ∧ second.val = 0 then .midnight
+  else uif hour.val = 12 ∧ minute.val = 0 ∧ second.val = 0 then .noon
+  else uif hour.val < 6 then .night
+  else uif hour.val < 12 then .morning
+  else uif hour.val < 18 then .afternoon
+  else uif hour.val < 21 then .evening
   else .night
 
 set_option linter.missingDocs false in  -- TODO
@@ -326,7 +326,7 @@ private def formatWith (dateformat : DateFormat) (modifier : Modifier) (data : T
     | .twoLetterShort => formatEraShort dateformat.symbols data
   | .y format =>
     let info := data.toInt
-    let info := bif info ≤ᵇ 0 then -info + 1 else info
+    let info := uif info ≤ 0 then -info + 1 else info
     match format with
     | .any      => pad 0 info
     | .twoDigit => pad 2 (info % 100)
@@ -340,7 +340,7 @@ private def formatWith (dateformat : DateFormat) (modifier : Modifier) (data : T
     | .extended n => pad n data.toInt
   | .Y format =>
     let info := data.toInt
-    let info := bif info ≤ᵇ 0 then -info + 1 else info
+    let info := uif info ≤ 0 then -info + 1 else info
     match format with
     | .any      => pad 0 info
     | .twoDigit => pad 2 (info % 100)
@@ -439,18 +439,18 @@ private def formatWith (dateformat : DateFormat) (modifier : Modifier) (data : T
   | .O format =>
     match format with
     | .short =>
-      bif data.second == 0 then "GMT"
+      uif data.second == 0 then "GMT"
       else
-        let (sign, time) := bif data.second.val ≥ᵇ 0 then ("+", data.second) else ("-", -data.second)
+        let (sign, time) := uif data.second.val ≥ 0 then ("+", data.second) else ("-", -data.second)
         let t := PlainTime.ofSeconds time
         let pad := leftPadAscii 2 '0' ∘ toString
-        bif t.minute.val == 0
+        uif t.minute.val == 0
           then s!"GMT{sign}{t.hour.val}"
           else s!"GMT{sign}{t.hour.val}:{pad t.minute.val}"
     | .full  =>
-      bif data.second == 0 then "GMT" else s!"GMT{toIsoString data .yes .no true}"
+      uif data.second == 0 then "GMT" else s!"GMT{toIsoString data .yes .no true}"
   | .X format =>
-    bif data.second == 0 then
+    uif data.second == 0 then
       "Z"
     else
       match format with
@@ -476,11 +476,11 @@ private def formatWith (dateformat : DateFormat) (modifier : Modifier) (data : T
     | .hourMinute =>
       toIsoString data .yes .optional false
     | .full =>
-      bif data.second.val =ᵇ 0
+      uif data.second.val = 0
         then "GMT"
         else s!"GMT{toIsoString data .yes .no true}"
     | .hourMinuteSecondColon =>
-      bif data.second == 0
+      uif data.second == 0
         then "Z"
         else toIsoString data .yes .optional true
 
@@ -516,27 +516,27 @@ private def dateFromModifier (dateformat : DateFormat) (date : DateTime) : TypeF
   | .N _ => date.date.get.time.toNanoseconds
   | .V .unknown => "unk"
   | .V .short =>
-    bif tz.name.startsWith "+" || tz.name.startsWith "-"
+    uif tz.name.startsWith "+" || tz.name.startsWith "-"
       then s!"GMT{toIsoString tz.offset .yes .no true}"
       else tz.name
   | .V .full =>
-    bif tz.name.startsWith "+" || tz.name.startsWith "-"
+    uif tz.name.startsWith "+" || tz.name.startsWith "-"
       then s!"GMT{toIsoString tz.offset .yes .no true}"
       else tz.name
   | .z .short =>
-    bif tz.abbreviation.startsWith "+" || tz.abbreviation.startsWith "-"
+    uif tz.abbreviation.startsWith "+" || tz.abbreviation.startsWith "-"
       then s!"GMT{toIsoString tz.offset .yes .no true}"
       else tz.abbreviation
   | .z .full =>
-    bif tz.name.startsWith "+" || tz.name.startsWith "-"
+    uif tz.name.startsWith "+" || tz.name.startsWith "-"
       then s!"GMT{toIsoString tz.offset .yes .no true}"
       else tz.name
   | .v .short =>
-    bif tz.abbreviation.startsWith "+" || tz.abbreviation.startsWith "-"
+    uif tz.abbreviation.startsWith "+" || tz.abbreviation.startsWith "-"
       then s!"GMT{toIsoString tz.offset .yes .no true}"
       else tz.abbreviation
   | .v .full =>
-    bif tz.name.startsWith "+" || tz.name.startsWith "-"
+    uif tz.name.startsWith "+" || tz.name.startsWith "-"
       then s!"GMT{toIsoString tz.offset .yes .no true}"
       else tz.name
   | .O _ => tz.offset
@@ -644,7 +644,7 @@ private def parseExtendedDayPeriodFrom (arr : Vector String 6) : Parser Extended
 
 private def exactly (parse : Parser α) (size : Nat) : Parser (Array α) :=
   let rec go (acc : Array α) (count : Nat) : Parser (Array α) :=
-    bif count ≥ᵇ size then
+    uif count ≥ size then
       pure acc
     else do
       let res ← parse
@@ -655,7 +655,7 @@ private def exactly (parse : Parser α) (size : Nat) : Parser (Array α) :=
 
 private def exactlyChars (parse : Parser Char) (size : Nat) : Parser String :=
   let rec go (acc : String) (count : Nat) : Parser String :=
-    bif count ≥ᵇ size then
+    uif count ≥ size then
       pure acc
     else do
       let res ← parse
@@ -667,7 +667,7 @@ private def exactlyChars (parse : Parser Char) (size : Nat) : Parser String :=
 private def parseSigned (parser : Parser Nat) : Parser Int := do
   let signed ← optional (pstring "-")
   let res ← parser
-  return bif signed.isSome then -res else res
+  return uif signed.isSome then -res else res
 
 private def parseNum (size : Nat) : Parser Nat :=
   String.toNat! <$> exactlyChars (satisfy Char.isDigit) size
@@ -679,7 +679,7 @@ private def parseAtLeastNum (size : Nat) : Parser Nat :=
     pure (start ++ end_)
 
 private def parseFlexibleNum (size : Nat) : Parser Nat :=
-  bif size =ᵇ 1 then parseAtLeastNum 1 else parseNum size
+  uif size = 1 then parseAtLeastNum 1 else parseNum size
 
 private def parseFractionNum (size : Nat) (pad : Nat) : Parser Nat :=
   String.toNat! <$> rightPadAscii pad '0' <$> exactlyChars (satisfy Char.isDigit) size
@@ -689,7 +689,7 @@ private def parseIdentifier : Parser String :=
 
 private def parseNatToBounded { n m : Nat } (parser : Parser Nat) : Parser (Bounded.LE n m) := do
   let res ← parser
-  bif h : n ≤ᵇ res && res ≤ᵇ m then
+  uif h : n ≤ res ∧ res ≤ m then
     return Bounded.LE.ofNat' res (by simpa only [Bool.and_eq_true, decideLE_eq_true_iff] using h)
   else
     fail s!"need a natural number in the interval of {n} to {m}"
@@ -704,10 +704,10 @@ private def parseOffset (withMinutes : Reason) (withSeconds : Reason) (withColon
   let sign ← (pchar '+' *> pure 1) <|> (pchar '-' *> pure (-1))
   let hours : Hour.Offset ← UnitVal.ofInt <$> parseOneOrTwoNum
 
-  bif hours.val <ᵇ 0 || hours.val >ᵇ 23 then
+  uif hours.val < 0 ∨ hours.val > 23 then
     fail s!"invalid hour offset: {hours.val}. Must be between 0 and 23."
 
-  let colon := bif withColon then pchar ':' else pure ':'
+  let colon := uif withColon then pchar ':' else pure ':'
 
   let parseUnit {n} (reason : Reason) : Parser (Option (UnitVal n)) :=
     match reason with
@@ -718,13 +718,13 @@ private def parseOffset (withMinutes : Reason) (withSeconds : Reason) (withColon
   let minutes : Option Minute.Offset ← parseUnit withMinutes
 
   if let some m := minutes then
-    bif m.val >ᵇ 59 then
+    uif m.val > 59 then
       fail s!"invalid minute offset: {m.val}. Must be between 0 and 59."
 
   let seconds : Option Second.Offset ← parseUnit withSeconds
 
   if let some s := seconds then
-    bif s.val >ᵇ 59 then
+    uif s.val > 59 then
       fail s!"invalid second offset: {s.val}. Must be between 0 and 59."
 
   let hours := hours.toSeconds + (minutes.getD 0).toSeconds + (seconds.getD 0)
@@ -780,7 +780,7 @@ private def parseWith (config : FormatConfig) : (mod : Modifier) → Parser (Typ
     match format with
     | .inl fmt => do
       let n ← parseFlexibleNum fmt.padding
-      bif !(1 ≤ᵇ n && n ≤ᵇ 7) then fail "need a natural number in the interval of 1 to 7"
+      uif ¬(1 ≤ n ∧ n ≤ 7) then fail "need a natural number in the interval of 1 to 7"
       let firstOrd : Int := config.dateformat.firstDayOfWeek.toOrdinal.val
       let absOrd : Int := ((n : Int) - 1 + firstOrd - 1) % 7 + 1
       return Weekday.ofOrdinal (Bounded.LE.ofNatWrapping absOrd (by decide))
@@ -810,7 +810,7 @@ private def parseWith (config : FormatConfig) : (mod : Modifier) → Parser (Typ
   | .H format => parseNatToBounded (parseFlexibleNum format.padding)
   | .m format => parseNatToBounded (parseFlexibleNum format.padding)
   | .s format =>
-    bif config.allowLeapSeconds then
+    uif config.allowLeapSeconds then
       parseNatToBounded (parseFlexibleNum format.padding)
     else do
       let res : Bounded.LE 0 59 ← parseNatToBounded (parseFlexibleNum format.padding)
@@ -1032,8 +1032,8 @@ private def build (builder : DateBuilder) (aw : Awareness) : Option DateTime :=
     |>.getD (PlainTime.mk hour minute second nano)
 
   let datetime : Option PlainDateTime :=
-    bif valid : day ≤ᵇ month.days year.isLeap then
-      let date : PlainDate := { year, month, day, valid := le_of_decideLE_eq_true valid }
+    uif valid : day ≤ month.days year.isLeap then
+      let date : PlainDate := { year, month, day, valid := valid }
       some { date, time }
     else
       none

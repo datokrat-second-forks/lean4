@@ -55,11 +55,11 @@ namespace Text
 `classify` classifies the number of pattern letters into a `Text` type.
 -/
 def classify (num : Nat) : Option Text :=
-  bif num <ᵇ 4 then
+  uif num < 4 then
     some (.short)
-  else bif num =ᵇ 4 then
+  else uif num = 4 then
     some (.full)
-  else bif num =ᵇ 5 then
+  else uif num = 5 then
     some (.narrow)
   else
     none
@@ -81,7 +81,7 @@ structure Number where
 `classifyNumberText` classifies the number of pattern letters into either a `Number` or `Text`.
 -/
 def classifyNumberText : Nat → Option (Number ⊕ Text)
-  | n => bif n <ᵇ 3 then some (.inl ⟨n⟩) else .inr <$> (Text.classify n)
+  | n => uif n < 3 then some (.inl ⟨n⟩) else .inr <$> (Text.classify n)
 
 /--
 `Fraction` represents the fraction of a second, which can either be full nanoseconds
@@ -106,9 +106,9 @@ namespace Fraction
 `classify` classifies the number of pattern letters into either a `Fraction`. It's used for `nano`.
 -/
 def classify (nat : Nat) : Option Fraction :=
-  bif nat <ᵇ 9 then
+  uif nat < 9 then
     some (.truncated nat)
-  else bif nat =ᵇ 9 then
+  else uif nat = 9 then
     some (.nano)
   else
     none
@@ -147,13 +147,13 @@ namespace Year
 `classify` classifies the number of pattern letters into a `Year` format.
 -/
 def classify (num : Nat) : Option Year :=
-  bif num =ᵇ 1 then
+  uif num = 1 then
     some .any
-  else bif num =ᵇ 2 then
+  else uif num = 2 then
     some .twoDigit
-  else bif num =ᵇ 4 then
+  else uif num = 4 then
     some .fourDigit
-  else bif num >ᵇ 4 || num =ᵇ 3 then
+  else uif num > 4 ∨ num = 3 then
     some (.extended num)
   else
     none
@@ -191,11 +191,11 @@ namespace ZoneId
 - Otherwise, it returns none.
 -/
 def classify (num : Nat) : Option ZoneId :=
-  bif num =ᵇ 1 then
+  uif num = 1 then
     some (.unknown)
-  else bif num =ᵇ 2 then
+  else uif num = 2 then
     some (.short)
-  else bif num =ᵇ 4 then
+  else uif num = 4 then
     some (.full)
   else
     none
@@ -227,17 +227,17 @@ into a `ZoneName` format.
 - Otherwise, it returns none.
 -/
 def classify (letter : Char) (num : Nat) : Option ZoneName :=
-  bif letter == 'z' then
-    bif num <ᵇ 4 then
+  uif letter == 'z' then
+    uif num < 4 then
       some (.short)
-    else bif num =ᵇ 4 then
+    else uif num = 4 then
       some (.full)
     else
       none
-  else bif letter == 'v' then
-    bif num =ᵇ 1 then
+  else uif letter == 'v' then
+    uif num = 1 then
       some (.short)
-    else bif num =ᵇ 4 then
+    else uif num = 4 then
       some (.full)
     else
       none
@@ -285,15 +285,15 @@ namespace OffsetX
 `classify` classifies the number of pattern letters into an `OffsetX` format.
 -/
 def classify (num : Nat) : Option OffsetX :=
-  bif num =ᵇ 1 then
+  uif num = 1 then
     some (.hour)
-  else bif num =ᵇ 2 then
+  else uif num = 2 then
     some (.hourMinute)
-  else bif num =ᵇ 3 then
+  else uif num = 3 then
     some (.hourMinuteColon)
-  else bif num =ᵇ 4 then
+  else uif num = 4 then
     some (.hourMinuteSecond)
-  else bif num =ᵇ 5 then
+  else uif num = 5 then
     some (.hourMinuteSecondColon)
   else
     none
@@ -687,7 +687,7 @@ private def parseText (constructor : Text → Modifier) (p : String) : Parser Mo
   parseMod constructor Text.classify p
 
 private def classifyNumberMax (max : Nat) : Nat → Option Number
-  | n => bif n ≤ᵇ max then some ⟨n⟩ else none
+  | n => uif n ≤ max then some ⟨n⟩ else none
 
 private def classifySingleNumber : Nat → Option Number
   | 1 => some ⟨1⟩
@@ -729,9 +729,9 @@ private def parseNumberText (constructor : (Number ⊕ Text) → Modifier) (p : 
 
 private def classifyWeekdayNumberText : Nat → Option (Number ⊕ Text)
   | n =>
-    bif n <ᵇ 3 then
+    uif n < 3 then
       some (.inl ⟨n⟩)
-    else bif n =ᵇ 6 then
+    else uif n = 6 then
       some (.inr .twoLetterShort)
     else
       .inr <$> Text.classify n
@@ -743,7 +743,7 @@ private def classifyStandaloneWeekdayNumberText : Nat → Option (Number ⊕ Tex
   | 1 => some (.inl ⟨1⟩)
   | 6 => some (.inr .twoLetterShort)
   | n =>
-    bif n ≥ᵇ 3 then
+    uif n ≥ 3 then
       .inr <$> Text.classify n
     else
       none

@@ -53,7 +53,7 @@ def idFromPath (path : System.FilePath) : Option String := do
   let last ← res[res.size - 1]?
   let last₁ ← res[res.size - 2]?
 
-  bif last₁ == "zoneinfo"
+  uif last₁ == "zoneinfo"
     then some <| last.trimAscii.copy
     else some <| last₁.trimAscii.copy ++ "/" ++ last.trimAscii
 
@@ -96,10 +96,10 @@ Parses the value of the `TZ` environment variable. Returns `none` for empty or
 `:` (empty path after the colon) values.
 -/
 def parseTZValue (tz : String) : Option TZSpec :=
-  bif tz.startsWith ":" then
+  uif tz.startsWith ":" then
     let p := (tz.drop 1).toString
-    bif p.isEmpty then none else some (.filePath p)
-  else bif !tz.isEmpty then
+    uif p.isEmpty then none else some (.filePath p)
+  else uif !tz.isEmpty then
     some (.zoneId tz)
   else
     none
@@ -110,7 +110,7 @@ Returns the first path in `searchPaths` joined with `rel` that exists on disk, o
 def findInPaths (searchPaths : Array System.FilePath) (rel : String) : IO (Option System.FilePath) := do
   for base in searchPaths do
     let full := base.join rel
-    bif ← full.pathExists then
+    uif ← full.pathExists then
       return some full
 
   return none
@@ -129,7 +129,7 @@ def resolveLocalPath (zonesPaths : Array System.FilePath) : IO System.FilePath :
 
   match spec with
   | .filePath p =>
-    bif p.startsWith "/" then return p
+    uif p.startsWith "/" then return p
     if let some path ← findInPaths zonesPaths p then return path
     throw <| IO.userError s!"TZ='{tz}': path '{p}' not found in any zoneinfo directory"
   | .zoneId id =>
@@ -154,7 +154,7 @@ def resolveZonesPaths (db : TZdb) : IO (Array System.FilePath) := do
   match ← IO.getEnv "TZDIR" with
   | none | some "" => return db.zonesPaths
   | some d =>
-    bif ← System.FilePath.pathExists d then return (#[(d : System.FilePath)] ++ db.zonesPaths)
+    uif ← System.FilePath.pathExists d then return (#[(d : System.FilePath)] ++ db.zonesPaths)
     else return db.zonesPaths
 
 /--
@@ -171,7 +171,7 @@ call so that runtime changes are reflected immediately.
 -/
 def getZoneRules (db : TZdb) (id : String) : IO ZoneRules := do
   for base in ← db.resolveZonesPaths do
-    bif ← (base.join id).pathExists then
+    uif ← (base.join id).pathExists then
       return ← readRulesFromDisk base id
 
   throw <| IO.userError s!"cannot find {id} in the local timezone database"

@@ -160,7 +160,7 @@ def findTransitionIndexForTimestamp (transitions : Array Transition) (timestamp 
   match transitions.findIdx? (fun t => t.time.val >ᵇ value.val) with
   | some 0 => none
   | some i => some (i - 1)
-  | none => bif transitions.isEmpty then none else some (transitions.size - 1)
+  | none => uif transitions.isEmpty then none else some (transitions.size - 1)
 
 /--
 Finds the transition in effect at a given timestamp in `Array Transition`.
@@ -258,7 +258,7 @@ def findLocalTimeTypeForTimestamp (zr : ZoneRules) (timestamp : Timestamp) : Loc
   let some t := zr.transitions[lastIdx]?
     | return zr.initialLocalTimeType
 
-  let some rule := bif lastIdx + 1 == zr.transitions.size then zr.transitionRule else none
+  let some rule := uif lastIdx + 1 == zr.transitions.size then zr.transitionRule else none
     | return t.localTimeType
 
   let tz := rule.timezoneAt timestamp
@@ -279,7 +279,7 @@ def findLocalTimeTypeForWallTime (zr : ZoneRules) (wallTime : WallTime) : LocalT
 
   for t in zr.transitions do
     let localTransitionTime := t.timestamp.toWallTime ltt.gmtOffset
-    bif wallTime <ᵇ localTransitionTime then
+    uif wallTime < localTransitionTime then
       return ltt
     ltt := t.localTimeType
 

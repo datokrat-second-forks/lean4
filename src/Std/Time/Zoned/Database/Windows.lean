@@ -51,7 +51,7 @@ def getZoneRules (id : String) : IO TimeZone.ZoneRules := do
       transitions := transitions.push { time := Second.Offset.ofInt start.toInt, localTimeType := toLocalTime res.snd }
 
       -- Avoid zone rules for more than year 3000
-      bif res.fst ≤ᵇ start || res.fst ≥ᵇ 32503690800 then
+      uif res.fst ≤ start ∨ res.fst ≥ 32503690800 then
         break
 
       start := res.fst

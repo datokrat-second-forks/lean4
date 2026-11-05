@@ -43,10 +43,10 @@ deriving Repr, DecidableEq
 instance : ToString Duration where
   toString s :=
     let (sign, secs, nanos) :=
-      bif s.second.val >ᵇ 0 then ("" ,s.second, s.nano.val)
-      else bif s.second.val <ᵇ 0 then ("-", -s.second, -s.nano.val)
-      else bif s.nano.val <ᵇ 0 then ("-", -s.second, -s.nano.val) else ("", s.second, s.nano.val)
-    sign ++ toString secs ++ (bif s.nano.val == 0 then "" else "." ++ (leftPad 9 <| toString nanos)) ++ "s"
+      uif s.second.val > 0 then ("" ,s.second, s.nano.val)
+      else uif s.second.val < 0 then ("-", -s.second, -s.nano.val)
+      else uif s.nano.val < 0 then ("-", -s.second, -s.nano.val) else ("", s.second, s.nano.val)
+    sign ++ toString secs ++ (uif s.nano.val == 0 then "" else "." ++ (leftPad 9 <| toString nanos)) ++ "s"
   where
     leftPad n s := "".pushn '0' (n - s.length) ++ s
 

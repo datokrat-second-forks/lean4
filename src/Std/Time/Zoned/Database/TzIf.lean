@@ -188,13 +188,13 @@ private def toUInt32 (bs : ByteArray) : UInt32 :=
 
 private def toInt32 (bs : ByteArray) : Int32 :=
   let n := toUInt32 bs |>.toNat
-  bif n <ᵇ (1 <<< 31)
+  uif n < (1 <<< 31)
     then Int.ofNat n
     else Int.negOfNat (UInt32.size - n)
 
 private def toInt64 (bs : ByteArray) : Int64 :=
   let n := ByteArray.toUInt64BE! bs |>.toNat
-  bif n <ᵇ (1 <<< 63)
+  uif n < (1 <<< 63)
     then Int.ofNat n
     else Int.negOfNat (UInt64.size - n)
 
@@ -250,7 +250,7 @@ private def parseAbbreviations (times : Array LocalTimeType) (n : UInt32) : Pars
   for time in times do
     for indx in time.abbreviationIndex.toNat...n.toNat do
       let char := chars[indx]!
-      bif char == 0 then
+      uif char == 0 then
         strings := strings.push current
         current := ""
         break
@@ -290,7 +290,7 @@ private def parseTZifV1 : Parser TZifV1 := do
 private def parseFooter : Parser (Option String) := do
   let char ← pu8
 
-  bif char == 0x0A then pure () else return none
+  uif char == 0x0A then pure () else return none
 
   let tzString ← many (satisfy (· != 0x0A))
   let mut str := ""
