@@ -899,6 +899,16 @@ theorem elem_eq_true_of_mem [BEq α] [ReflBEq α] {a : α} {as : List α} (h : a
 instance [BEq α] [LawfulBEq α] (a : α) (as : List α) : Decidable (a ∈ as) :=
   decidable_of_decidable_of_iff (Iff.intro mem_of_elem_eq_true elem_eq_true_of_mem)
 
+/-- The implementation of `instListMemOfLawfulBEq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instListMemOfLawfulBEqImpl [BEq α] [LawfulBEq α] (a : α) (as : List α) : UDecidable (a ∈ as) :=
+  UDecidable.mk (elem a as) ⟨mem_of_elem_eq_true, elem_eq_true_of_mem⟩
+
+noncomputable instance _root_.UDecidable.instListMemOfLawfulBEq [BEq α] [LawfulBEq α] (a : α) (as : List α) : UDecidable (a ∈ as) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instListMemOfLawfulBEq_csimp : @_root_.UDecidable.instListMemOfLawfulBEq = @_root_.UDecidable.instListMemOfLawfulBEqImpl := rfl
+
 theorem mem_append_left {a : α} {as : List α} (bs : List α) : a ∈ as → a ∈ as ++ bs := by
   intro h
   induction h with

@@ -183,6 +183,30 @@ This function does not reduce in the kernel. It is compiled to the C inequality 
 @[extern "lean_float32_decLe"] instance Float32.decLe (a b : Float32) : Decidable (a ≤ b) :=
   inferInstanceAs (Decidable (a.le b))
 
+namespace UDecidable
+
+/-- The implementation of `instFloat32Lt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instFloat32LtImpl (a b : Float32) : UDecidable (a < b) :=
+  UDecidable.ofDecidableImpl _
+
+noncomputable instance instFloat32Lt (a b : Float32) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instFloat32Lt_csimp : @instFloat32Lt = @instFloat32LtImpl := rfl
+
+/-- The implementation of `instFloat32Le` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instFloat32LeImpl (a b : Float32) : UDecidable (a ≤ b) :=
+  UDecidable.ofDecidableImpl _
+
+noncomputable instance instFloat32Le (a b : Float32) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instFloat32Le_csimp : @instFloat32Le = @instFloat32LeImpl := rfl
+
+end UDecidable
+
 /--
 Converts a floating-point number to a string.
 

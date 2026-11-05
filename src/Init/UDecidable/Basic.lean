@@ -835,6 +835,16 @@ noncomputable instance instProdEq [UDecidableEq α] [UDecidableEq β] : UDecidab
 
 @[csimp] theorem instProdEq_csimp : @instProdEq = @instProdEqImpl := rfl
 
+/-- The implementation of `instProdLexLt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instProdLexLtImpl [LT α] [LT β] [UDecidableEq α] [UDecidableLT α] [UDecidableLT β] (s t : α × β) : UDecidable (Prod.lexLt s t) :=
+  ofIff (s.1 < t.1 ∨ (s.1 = t.1 ∧ s.2 < t.2)) Iff.rfl
+
+noncomputable instance instProdLexLt [LT α] [LT β] [UDecidableEq α] [UDecidableLT α] [UDecidableLT β] (s t : α × β) : UDecidable (Prod.lexLt s t) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instProdLexLt_csimp : @instProdLexLt = @instProdLexLtImpl := rfl
+
 /-- The implementation of `instSumEq` in compiled code and `cbv`. -/
 @[expose, inline, instance_reducible] def instSumEqImpl [UDecidableEq α] [UDecidableEq β] : UDecidableEq (Sum α β)
   | .inl a, .inl b => ofIff (a = b) ⟨congrArg Sum.inl, Sum.inl.inj⟩

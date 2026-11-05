@@ -47,6 +47,16 @@ inductive Purity where
   | impure
   deriving Inhabited, DecidableEq, Hashable
 
+/-- The implementation of `Purity.instUDecidableEq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def Purity.instUDecidableEqImpl (a b : Purity) : UDecidable (a = b) :=
+  UDecidable.ofDecidableImpl _
+
+noncomputable instance Purity.instUDecidableEq (a b : Purity) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem Purity.instUDecidableEq_csimp : @Purity.instUDecidableEq = @Purity.instUDecidableEqImpl := rfl
+
 instance : ToString Purity where
   toString
     | .pure => "pure"

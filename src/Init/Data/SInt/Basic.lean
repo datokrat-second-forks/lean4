@@ -2029,3 +2029,159 @@ instance : Max ISize where
   max a b := bif a ≤ᵇ b then b else a
 instance : Min ISize where
   min a b := bif a ≤ᵇ b then a else b
+
+/-! `UDecidable` instances, decided by the `Decidable` decision procedures (which are `extern`). -/
+
+namespace UDecidable
+
+/-- The implementation of `instInt8Eq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt8EqImpl (a b : Int8) : UDecidable (a = b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt8Eq (a b : Int8) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt8Eq_csimp : @instInt8Eq = @instInt8EqImpl := rfl
+
+/-- The implementation of `instInt8Le` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt8LeImpl (a b : Int8) : UDecidable (a ≤ b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt8Le (a b : Int8) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt8Le_csimp : @instInt8Le = @instInt8LeImpl := rfl
+
+/-- The implementation of `instInt8Lt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt8LtImpl (a b : Int8) : UDecidable (a < b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt8Lt (a b : Int8) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt8Lt_csimp : @instInt8Lt = @instInt8LtImpl := rfl
+
+/-- The implementation of `instInt16Eq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt16EqImpl (a b : Int16) : UDecidable (a = b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt16Eq (a b : Int16) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt16Eq_csimp : @instInt16Eq = @instInt16EqImpl := rfl
+
+/-- The implementation of `instInt16Le` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt16LeImpl (a b : Int16) : UDecidable (a ≤ b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt16Le (a b : Int16) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt16Le_csimp : @instInt16Le = @instInt16LeImpl := rfl
+
+/-- The implementation of `instInt16Lt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt16LtImpl (a b : Int16) : UDecidable (a < b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt16Lt (a b : Int16) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt16Lt_csimp : @instInt16Lt = @instInt16LtImpl := rfl
+
+/-- The implementation of `instInt32Eq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt32EqImpl (a b : Int32) : UDecidable (a = b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt32Eq (a b : Int32) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt32Eq_csimp : @instInt32Eq = @instInt32EqImpl := rfl
+
+/-- The implementation of `instInt32Le` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt32LeImpl (a b : Int32) : UDecidable (a ≤ b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt32Le (a b : Int32) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt32Le_csimp : @instInt32Le = @instInt32LeImpl := rfl
+
+/-- The implementation of `instInt32Lt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt32LtImpl (a b : Int32) : UDecidable (a < b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt32Lt (a b : Int32) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt32Lt_csimp : @instInt32Lt = @instInt32LtImpl := rfl
+
+/-- The implementation of `instInt64Eq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt64EqImpl (a b : Int64) : UDecidable (a = b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt64Eq (a b : Int64) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt64Eq_csimp : @instInt64Eq = @instInt64EqImpl := rfl
+
+/-- The implementation of `instInt64Le` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt64LeImpl (a b : Int64) : UDecidable (a ≤ b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt64Le (a b : Int64) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt64Le_csimp : @instInt64Le = @instInt64LeImpl := rfl
+
+/-- The implementation of `instInt64Lt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instInt64LtImpl (a b : Int64) : UDecidable (a < b) :=
+  ofDecidableImpl _
+
+noncomputable instance instInt64Lt (a b : Int64) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instInt64Lt_csimp : @instInt64Lt = @instInt64LtImpl := rfl
+
+/-- The implementation of `instISizeEq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instISizeEqImpl (a b : ISize) : UDecidable (a = b) :=
+  ofDecidableImpl _
+
+noncomputable instance instISizeEq (a b : ISize) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instISizeEq_csimp : @instISizeEq = @instISizeEqImpl := rfl
+
+/-- The implementation of `instISizeLe` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instISizeLeImpl (a b : ISize) : UDecidable (a ≤ b) :=
+  ofDecidableImpl _
+
+noncomputable instance instISizeLe (a b : ISize) : UDecidable (a ≤ b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instISizeLe_csimp : @instISizeLe = @instISizeLeImpl := rfl
+
+/-- The implementation of `instISizeLt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instISizeLtImpl (a b : ISize) : UDecidable (a < b) :=
+  ofDecidableImpl _
+
+noncomputable instance instISizeLt (a b : ISize) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instISizeLt_csimp : @instISizeLt = @instISizeLtImpl := rfl
+
+end UDecidable

@@ -41,6 +41,26 @@ instance : LE Phase where
 instance {p1 p2 : Phase} : Decidable (p1 < p2) := Nat.decLt p1.toNat p2.toNat
 instance {p1 p2 : Phase} : Decidable (p1 ≤ p2) := Nat.decLe p1.toNat p2.toNat
 
+/-- The implementation of `Phase.instUDecidableLt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def Phase.instUDecidableLtImpl {p1 p2 : Phase} : UDecidable (p1 < p2) :=
+  UDecidable.ofDecidableImpl _
+
+noncomputable instance Phase.instUDecidableLt {p1 p2 : Phase} : UDecidable (p1 < p2) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem Phase.instUDecidableLt_csimp : @Phase.instUDecidableLt = @Phase.instUDecidableLtImpl := rfl
+
+/-- The implementation of `Phase.instUDecidableLe` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def Phase.instUDecidableLeImpl {p1 p2 : Phase} : UDecidable (p1 ≤ p2) :=
+  UDecidable.ofDecidableImpl _
+
+noncomputable instance Phase.instUDecidableLe {p1 p2 : Phase} : UDecidable (p1 ≤ p2) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem Phase.instUDecidableLe_csimp : @Phase.instUDecidableLe = @Phase.instUDecidableLeImpl := rfl
+
 @[simp] theorem Phase.le_refl (p : Phase) : p ≤ p := by
   cases p <;> decide
 

@@ -95,6 +95,16 @@ instance ltProp : LT JsonNumber :=
 instance (a b : JsonNumber) : Decidable (a < b) :=
   inferInstanceAs (Decidable (lt a b = true))
 
+/-- The implementation of `instUDecidableLt` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def instUDecidableLtImpl (a b : JsonNumber) : UDecidable (a < b) :=
+  UDecidable.mk (lt a b) Iff.rfl
+
+noncomputable instance instUDecidableLt (a b : JsonNumber) : UDecidable (a < b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem instUDecidableLt_csimp : @instUDecidableLt = @instUDecidableLtImpl := rfl
+
 instance : Ord JsonNumber where
   compare x y :=
     bif x <ᵇ y then Ordering.lt

@@ -342,6 +342,16 @@ instance : LawfulBEq Name where
 instance : DecidableEq Name :=
   fun a b => if h : a == b then .isTrue (by simp_all) else .isFalse (by simp_all)
 
+/-- The implementation of `instNameEq` in compiled code and `cbv`. -/
+@[inline, instance_reducible] def _root_.UDecidable.instNameEqImpl (a b : Name) : UDecidable (a = b) :=
+  UDecidable.mk (a == b) Name.beq_iff_eq
+
+noncomputable instance _root_.UDecidable.instNameEq (a b : Name) : UDecidable (a = b) := by
+  repeat intro
+  exact UDecidable.classical _
+
+@[csimp] theorem _root_.UDecidable.instNameEq_csimp : @_root_.UDecidable.instNameEq = @_root_.UDecidable.instNameEqImpl := rfl
+
 end Name
 
 namespace NameGenerator
