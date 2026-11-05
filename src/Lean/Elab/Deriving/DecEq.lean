@@ -232,10 +232,33 @@ def mkAuxFunctions (u : Flavor) (ctx : Context) : TermElabM (TSyntax `command) :
     res := res.push (← mkAuxFunction u ctx auxFunName indVal)
   `(command| mutual $[$res:command]* end)
 
+open TSyntax.Compat in
+/--
+The `UDecidableEq` instance `instName` for `indVal`: classical in the logic, implemented by `impl` in
+compiled code and `cbv` via `@[csimp]`, like all `UDecidable` instances. A computable instance
+would be called instead of inlined, since the compiler does not inline instances in the base phase.
+-/
+def mkUInstanceCmds (instName : Name) (impl : Ident) (indVal : InductiveVal) :
+    TermElabM (Array Syntax) := do
+  let argNames ← mkInductArgNames indVal
+  let binders ← mkImplicitBinders argNames
+  let binders := binders ++ (← mkInstImplicitBinders ``UDecidableEq indVal argNames)
+  let indType ← mkInductiveApp indVal argNames
+  let inst := mkIdent instName
+  let csimpName := mkIdent (instName.appendAfter "_csimp")
+  return #[← `(noncomputable instance $inst:ident $binders:implicitBinder* :
+        $(mkCIdent ``UDecidableEq) $indType :=
+      fun a b => UDecidable.classical (a = b)),
+    ← `(@[csimp] theorem $csimpName:ident : @$inst = @$impl := rfl)]
+
 def mkDecEqCmds (u : Flavor) (indVal : InductiveVal) : TermElabM (Array Syntax) := do
   let ctx ← mkContext u.className (if u then "udecEq" else "decEq") indVal.name
-  let cmds := #[← mkAuxFunctions u ctx] ++
-    (← mkInstanceCmds ctx u.className #[indVal.name] (useAnonCtor := false))
+  let instCmds ← if u then
+      let some i := ctx.typeInfos.findIdx? (·.name == indVal.name) | unreachable!
+      mkUInstanceCmds ctx.instName (mkIdent ctx.auxFunNames[i]!) indVal
+    else
+      mkInstanceCmds ctx u.className #[indVal.name] (useAnonCtor := false)
+  let cmds := #[← mkAuxFunctions u ctx] ++ instCmds
   trace[Elab.Deriving.decEq] "\n{cmds}"
   return cmds
 
@@ -314,9 +337,16 @@ def mkDecEqEnum (u : Flavor) (declName : Name) : CommandElabM Unit := do
       | rfl)
     let body ← mkDIte u h (← `(x.ctorIdx = y.ctorIdx)) (← mkIsTrue u eqProof)
       (← mkIsFalse u (← `(fun h => by subst h; contradiction)))
-    `(instance : $(mkCIdent u.className) $(mkCIdent declName) := fun x y => $body)
+    if u then
+      let instName ← mkInstName u.className declName
+      let impl := mkIdent (instName ++ `udecEq)
+      let implCmd ← `(@[inline, instance_reducible] def $impl:ident :
+          $(mkCIdent u.className) $(mkCIdent declName) := fun x y => $body)
+      return #[implCmd] ++ (← mkUInstanceCmds instName impl (← getConstInfoInduct declName))
+    else
+      return #[← `(instance : $(mkCIdent u.className) $(mkCIdent declName) := fun x y => $body)]
   trace[Elab.Deriving.decEq] "\n{cmd}"
-  elabCommand cmd
+  cmd.forM elabCommand
 
 def mkDecEqInstance (u : Flavor) (declName : Name) : CommandElabM Bool := do
   withoutExposeFromCtors declName do

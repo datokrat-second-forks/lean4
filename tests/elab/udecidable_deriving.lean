@@ -139,3 +139,82 @@ structure OnlyDecidable where
 /-- error: instUDecidableEqOnlyDecidable.udecEq uses `Decidable` -/
 #guard_msgs in
 #check_native (⟨⟨0⟩⟩ : OnlyDecidable) = ⟨⟨0⟩⟩
+
+/-!
+The instances are classical in the logic and implemented via `@[csimp]`, like all `UDecidable`
+instances.
+-/
+
+/--
+info: @[instance_reducible] def instUDecidableEqColor : UDecidableEq Color :=
+fun a b => UDecidable.classical (a = b)
+-/
+#guard_msgs in
+#print instUDecidableEqColor
+
+/-- info: instUDecidableEqColor_csimp : instUDecidableEqColor = instUDecidableEqColor.udecEq -/
+#guard_msgs in
+#check instUDecidableEqColor_csimp
+
+/--
+info: instUDecidableEqTree_csimp : @instUDecidableEqTree = @instUDecidableEqTree.udecEq
+-/
+#guard_msgs in
+#check instUDecidableEqTree_csimp
+
+/-- A universe-polymorphic type. -/
+structure Box (α : Type u) where
+  val : α
+  deriving UDecidableEq
+
+/-- A universe-polymorphic enumeration. -/
+inductive Mode : Type u where
+  | on | off
+  deriving UDecidableEq
+
+#check_native (⟨1⟩ : Box Nat) = ⟨1⟩
+#check_native (Mode.on : Mode.{1}) = .off
+
+/-- info: [true, false] -/
+#guard_msgs in
+#eval [UDecidable.decide ((⟨1⟩ : Box Nat) = ⟨1⟩), UDecidable.decide (Mode.on.{0} = .off)]
+
+/-! `cbv` evaluates the derived instances through their implementations. -/
+
+example : (uif Color.red = .red then 1 else 2) = 1 := by cbv
+example : (uif Color.red = .blue then 1 else 2) = 2 := by cbv
+example : (uif (⟨1, 2⟩ : Point) = ⟨1, 2⟩ then 1 else 2) = 1 := by cbv
+example : (uif (⟨1, 2⟩ : Point) = ⟨1, 3⟩ then 1 else 2) = 2 := by cbv
+example : (uif Tree.node .leaf 1 .leaf = .node .leaf 1 .leaf then 1 else 2) = 1 := by cbv
+
+/-!
+Compiled code compares enumerations inline, as `if` does with a derived `DecidableEq`, instead of
+calling the instance.
+-/
+
+/--
+trace: [Compiler.IR] [result]
+    def colorEq (x_1 : u8) (x_2 : u8) : tobj :=
+      let x_3 : tobj := box x_1;
+      let x_4 : tagged := getObjTagNat ◾ x_3;
+      dec x_3;
+      let x_5 : tobj := box x_2;
+      let x_6 : tagged := getObjTagNat ◾ x_5;
+      dec x_5;
+      let x_7 : u8 := Nat.decEq x_4 x_6;
+      case x_7 : u8 of
+      Bool.false →
+        let x_8 : tagged := 2;
+        ret x_8
+      Bool.true →
+        let x_9 : tagged := 1;
+        ret x_9
+    def colorEq._boxed (x_1 : tagged) (x_2 : tagged) : tobj :=
+      let x_3 : u8 := unbox x_1;
+      let x_4 : u8 := unbox x_2;
+      let x_5 : tobj := colorEq x_3 x_4;
+      ret x_5
+-/
+#guard_msgs in
+set_option trace.compiler.ir.result true in
+def colorEq (x y : Color) : Nat := uif x = y then 1 else 2
