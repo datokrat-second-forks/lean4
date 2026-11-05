@@ -577,6 +577,10 @@ def interpolatedStr.parenthesizer (p : Parenthesizer) : Parenthesizer := do
 @[combinator_parenthesizer _root_.cond, expose, macro_inline] def cond {_ : Type} (c : Bool) (t e : Parenthesizer) : Parenthesizer :=
   bif c then t else e
 
+@[combinator_parenthesizer UDecidable.ite, expose, macro_inline]
+def uite {_ : Type} (c : Prop) [UDecidable c] (t e : Parenthesizer) : Parenthesizer :=
+  uif c then t else e
+
 open Parser
 
 abbrev ParenthesizerAliasValue := AliasValue Parenthesizer

@@ -583,6 +583,10 @@ def interpolatedStr.formatter (p : Formatter) : Formatter := do
 @[combinator_formatter _root_.cond, expose, macro_inline] def cond {_ : Type} (c : Bool) (t e : Formatter) : Formatter :=
   bif c then t else e
 
+@[combinator_formatter UDecidable.ite, expose, macro_inline]
+def uite {_ : Type} (c : Prop) [UDecidable c] (t e : Formatter) : Formatter :=
+  uif c then t else e
+
 abbrev FormatterAliasValue := AliasValue Formatter
 
 builtin_initialize formatterAliasesRef : IO.Ref (NameMap FormatterAliasValue) ← IO.mkRef {}
