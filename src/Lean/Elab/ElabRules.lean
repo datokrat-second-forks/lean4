@@ -34,32 +34,32 @@ def elabElabRulesAux (doc? : Option (TSyntax ``docComment))
       | none => #[attr]
   let vis := Parser.Command.visibility.ofAttrKind attrKind
   if let some expId := expty? then
-    if catName == `term then
+    bif catName == `term then
       `($[$doc?:docComment]? @[$(← mkAttrs `term_elab),*] $vis:visibility
         aux_def elabRules $(mkIdent k) : Lean.Elab.Term.TermElab :=
         fun stx expectedType? => Lean.Elab.Term.withExpectedType expectedType? fun $expId => match stx with
           $alts:matchAlt* | _ => no_error_if_unused% throwUnsupportedSyntax)
-    else if catName == `doElem then
+    else bif catName == `doElem then
       `($[$doc?:docComment]? @[$(← mkAttrs `doElem_elab),*] $vis:visibility
         aux_def elabRules $(mkIdent k) : Lean.Elab.Do.DoElab :=
         fun stx $expId => match stx with
           $alts:matchAlt* | _ => no_error_if_unused% throwUnsupportedSyntax)
     else
       throwErrorAt expId "syntax category `{catName}` does not support expected type specification"
-  else if catName == `term then
+  else bif catName == `term then
     `($[$doc?:docComment]? @[$(← mkAttrs `term_elab),*] $vis:visibility
       aux_def elabRules $(mkIdent k) : Lean.Elab.Term.TermElab :=
       fun stx _ => match stx with
         $alts:matchAlt* | _ => no_error_if_unused% throwUnsupportedSyntax)
-  else if catName == `command then
+  else bif catName == `command then
     `($[$doc?:docComment]? @[$(← mkAttrs `command_elab),*] $vis:visibility
       aux_def elabRules $(mkIdent k) : Lean.Elab.Command.CommandElab :=
       fun $alts:matchAlt* | _ => no_error_if_unused% throwUnsupportedSyntax)
-  else if catName == `tactic || catName == `conv then
+  else bif catName == `tactic || catName == `conv then
     `($[$doc?:docComment]? @[$(← mkAttrs `tactic),*] $vis:visibility
       aux_def elabRules $(mkIdent k) : Lean.Elab.Tactic.Tactic :=
       fun $alts:matchAlt* | _ => no_error_if_unused% throwUnsupportedSyntax)
-  else if catName == `doElem then
+  else bif catName == `doElem then
     `($[$doc?:docComment]? @[$(← mkAttrs `doElem_elab),*] $vis:visibility
       aux_def elabRules $(mkIdent k) : Lean.Elab.Do.DoElab :=
       fun stx cont => match stx with

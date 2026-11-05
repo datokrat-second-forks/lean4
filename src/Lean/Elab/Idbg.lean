@@ -36,7 +36,7 @@ def nameToJson : Name → Json
 
 /-- Inverse of `nameToJson`. -/
 partial def nameFromJson? (j : Json) : Except String Name := do
-  if j.isNull then return .anonymous
+  bif j.isNull then return .anonymous
   if let some arr := (j.getObjVal? "str").toOption then
     let #[p, s] := (← fromJson? arr : Array Json) | .error "str expects 2 elements"
     return .str (← nameFromJson? p) (← fromJson? s)
@@ -84,7 +84,7 @@ partial def levelToJson : Level → Json
 
 /-- Deserialize `Level` from JSON. -/
 partial def levelFromJson? (j : Json) : Except String Level := do
-  if (j.getObjVal? "zero").toOption.isSome then
+  bif (j.getObjVal? "zero").toOption.isSome then
     return .zero
   if let some l := (j.getObjVal? "succ").toOption then
     return .succ (← levelFromJson? l)
@@ -125,7 +125,7 @@ partial def exprFromJson? (j : Json) : Except String Expr := do
     return .mvar ⟨← nameFromJson? id⟩
   if let some l := (j.getObjVal? "sort").toOption then
     return .sort (← levelFromJson? l)
-  if (j.getObjVal? "const").toOption.isSome then
+  bif (j.getObjVal? "const").toOption.isSome then
     let n ← nameFromJson? (← j.getObjVal? "const")
     let ls : Array Json ← fromJson? (← j.getObjVal? "levels")
     return .const n (← ls.toList.mapM levelFromJson?)
@@ -173,7 +173,7 @@ def recvMsg (client : TCP.Socket.Client) : IO String := do
   repeat
     let t ← (client.recv? 1).toIO
     let some chunk ← t.block | throw (.userError "idbg: connection closed")
-    if chunk[0]! == '\n'.toUInt8 then break
+    bif chunk[0]! == '\n'.toUInt8 then break
     header := header ++ chunk
   let some lenStr := String.fromUTF8? header | throw (.userError "idbg: invalid header")
   let some len := lenStr.toNat? | throw (.userError "idbg: invalid length")
@@ -285,7 +285,7 @@ def elabIdbgCore (e : Syntax) (body : TSyntax `term) (ref : Syntax) (expectedTyp
   let lctx ← getLCtx
   let mut localDecls : Array LocalDecl := #[]
   for decl in lctx do
-    if decl.isAuxDecl then continue
+    bif decl.isAuxDecl then continue
     localDecls := localDecls.push decl
   let localFVars := localDecls.map (mkFVar ·.fvarId)
 
@@ -311,14 +311,14 @@ def elabIdbgCore (e : Syntax) (body : TSyntax `term) (ref : Syntax) (expectedTyp
     let abstractedType ← Meta.inferType abstractedValue
     return (← instantiateMVars abstractedValue, ← instantiateMVars abstractedType)
 
-  if abstractedValue.hasMVar then
+  bif abstractedValue.hasMVar then
     throwError "idbg: abstracted value still has metavariables"
-  if abstractedType.hasMVar then
+  bif abstractedType.hasMVar then
     throwError "idbg: abstracted type still has metavariables"
 
   -- Server mode: serialize and serve in a background snapshot task.
   -- Skip if expression contains sorry (partial input during editing).
-  if Elab.inServer.get (← getOptions) && !abstractedValue.hasSorry then
+  bif Elab.inServer.get (← getOptions) && !abstractedValue.hasSorry then
     let json := Json.mkObj [
       ("type", exprToJson abstractedType),
       ("value", exprToJson abstractedValue)

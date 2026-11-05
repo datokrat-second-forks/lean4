@@ -76,7 +76,7 @@ where fmtPos pos info :=
   | _                                 => f!"{pos}†"
 
 private def formatElabInfo (ctx : ContextInfo) (info : ElabInfo) : Format :=
-  if info.elaborator.isAnonymous then
+  bif info.elaborator.isAnonymous then
     formatStxRange ctx info.stx
   else
     f!"{formatStxRange ctx info.stx} @ {info.elaborator}"
@@ -116,7 +116,7 @@ def FieldInfo.format (ctx : ContextInfo) (info : FieldInfo) : IO Format := do
     return f!"[Field] {info.fieldName} : {← Meta.ppExpr (← Meta.inferType info.val)} := {← Meta.ppExpr info.val} @ {formatStxRange ctx info.stx}"
 
 def ContextInfo.ppGoals (ctx : ContextInfo) (goals : List MVarId) : IO Format :=
-  if goals.isEmpty then
+  bif goals.isEmpty then
     return "no goals"
   else
     ctx.runMetaM {} (return Std.Format.prefixJoin "\n" (← goals.mapM (Meta.ppGoal ·)))
@@ -205,7 +205,7 @@ partial def InfoTree.format (tree : InfoTree) (ctx? : Option ContextInfo := none
     | none => return "• <context-not-available>"
     | some ctx =>
       let fmt ← i.format ctx
-      if cs.size == 0 then
+      bif cs.size == 0 then
         return .nestD f!"• {fmt}"
       else
         let ctx? := i.updateContext? ctx?
@@ -224,11 +224,11 @@ def getResetInfoTrees : m (PersistentArray InfoTree) := do
   return trees
 
 def pushInfoTree (t : InfoTree) : m Unit := do
-  if (← getInfoState).enabled then
+  bif (← getInfoState).enabled then
     modifyInfoTrees fun ts => ts.push t
 
 def pushInfoLeaf (t : Info) : m Unit := do
-  if (← getInfoState).enabled then
+  bif (← getInfoState).enabled then
     pushInfoTree <| InfoTree.node (children := {}) t
 
 def addCompletionInfo (info : CompletionInfo) : m Unit := do
@@ -250,7 +250,7 @@ But also adds this resolved name to the infotree. This means that when you hover
 over a name in the source file you will see the fully resolved name in the hover info.-/
 def realizeGlobalConstNoOverloadWithInfo (id : Syntax) (expectedType? : Option Expr := none) : CoreM Name := do
   let n ← realizeGlobalConstNoOverload id
-  if (← getInfoState).enabled then
+  bif (← getInfoState).enabled then
     -- we do not store a specific elaborator since identifiers are special-cased by the server anyway
     addConstInfo id n expectedType?
   return n
@@ -258,7 +258,7 @@ def realizeGlobalConstNoOverloadWithInfo (id : Syntax) (expectedType? : Option E
 /-- Similar to `realizeGlobalConstNoOverloadWithInfo`, except if there are multiple name resolutions then it returns them as a list. -/
 def realizeGlobalConstWithInfos (id : Syntax) (expectedType? : Option Expr := none) : CoreM (List Name) := do
   let ns ← realizeGlobalConst id
-  if (← getInfoState).enabled then
+  bif (← getInfoState).enabled then
     for n in ns do
       addConstInfo id n expectedType?
   return ns
@@ -266,7 +266,7 @@ def realizeGlobalConstWithInfos (id : Syntax) (expectedType? : Option Expr := no
 /-- Similar to `realizeGlobalName`, but it also adds the resolved name to the info tree. -/
 def realizeGlobalNameWithInfos (ref : Syntax) (id : Name) : CoreM (List (Name × List String)) := do
   let ns ← realizeGlobalName id
-  if (← getInfoState).enabled then
+  bif (← getInfoState).enabled then
     for (n, _) in ns do
       addConstInfo ref n
   return ns
@@ -290,7 +290,7 @@ def withInfoContext'
     (mkInfo : α → m (Sum Info MVarId))
     (mkInfoOnError : m Info) :
     m α := do
-  if (← getInfoState).enabled then
+  bif (← getInfoState).enabled then
     let treesSaved ← getResetInfoTrees
     Prod.fst <$> MonadFinally.tryFinally' x fun a? => do
       let info ← do
@@ -307,7 +307,7 @@ def withInfoContext'
 /-- Saves the current list of trees `t₀`, runs `x` to produce a new tree list `t₁` and
 runs `mkInfoTree t₁` to get `n : InfoTree` and then restores the trees to be `t₀ ++ [n]`.-/
 def withInfoTreeContext [MonadFinally m] (x : m α) (mkInfoTree : PersistentArray InfoTree → m InfoTree) : m α := do
-  if (← getInfoState).enabled then
+  bif (← getInfoState).enabled then
     let treesSaved ← getResetInfoTrees
     Prod.fst <$> MonadFinally.tryFinally' x fun _ => do
       let st    ← getInfoState
@@ -324,7 +324,7 @@ private def withSavedPartialInfoContext [MonadFinally m]
     (x : m α)
     (ctx? : m (Option PartialContextInfo))
     : m α := do
-  if !(← getInfoState).enabled then
+  bif !(← getInfoState).enabled then
     return ← x
   let treesSaved ← getResetInfoTrees
   Prod.fst <$> MonadFinally.tryFinally' x fun _ => do
@@ -398,11 +398,11 @@ Runs `x`. The last info tree that is pushed while running `x` is assigned to `mv
 pushed info trees are silently discarded.
 -/
 @[inline] def withInfoHole [MonadFinally m] [Monad m] [MonadInfoTree m] (mvarId : MVarId) (x : m α) : m α := do
-  if (← getInfoState).enabled then
+  bif (← getInfoState).enabled then
     let treesSaved ← getResetInfoTrees
     Prod.fst <$> MonadFinally.tryFinally' x fun _ => modifyInfoState fun s =>
-      if h : s.trees.size > 0 then
-        have : s.trees.size - 1 < s.trees.size := Nat.sub_lt h (by decide)
+      bif h : s.trees.size >ᵇ 0 then
+        have : s.trees.size - 1 < s.trees.size := Nat.sub_lt (lt_of_decideLT_eq_true h) (by decide)
         { s with trees := treesSaved, assignment := s.assignment.insert mvarId s.trees[s.trees.size - 1] }
       else
         { s with trees := treesSaved }

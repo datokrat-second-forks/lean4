@@ -24,9 +24,9 @@ def Syntax.prettyPrint (stx : Syntax) : Format :=
 
 def MacroScopesView.format (view : MacroScopesView) (mainModule : Name) : Format :=
   Std.format <|
-    if view.scopes.isEmpty then
+    bif view.scopes.isEmpty then
       view.name
-    else if view.ctx == mainModule then
+    else bif view.ctx == mainModule then
       view.scopes.foldl Name.mkNum (view.name ++ view.imported)
     else
       view.scopes.foldl Name.mkNum (view.name ++ view.imported ++ view.ctx)
@@ -41,7 +41,7 @@ def MacroScopesView.equalScope (a b : MacroScopesView) : Bool :=
 namespace Elab
 
 def expandOptNamedPrio (stx : Syntax) : MacroM Nat :=
-  if stx.isNone then
+  bif stx.isNone then
     return eval_prio default
   else match stx[0] with
     | `(Parser.Command.namedPrio| (priority := $prio)) => evalPrio prio
@@ -68,7 +68,7 @@ register_builtin_option pp.macroStack : Bool := {
 }
 
 def addMacroStack {m} [Monad m] [MonadOptions m] (msgData : MessageData) (macroStack : MacroStack) : m MessageData := do
-  if !pp.macroStack.get (← getOptions) then pure msgData else
+  bif !pp.macroStack.get (← getOptions) then pure msgData else
   match macroStack with
   | []             => pure msgData
   | stack@(top::_) =>
@@ -79,11 +79,11 @@ def addMacroStack {m} [Monad m] [MonadOptions m] (msgData : MessageData) (macroS
       msgData
 
 def checkSyntaxNodeKind [Monad m] [MonadEnv m] [MonadError m] (k : Name) : m Name := do
-  if Parser.isValidSyntaxNodeKind (← getEnv) k then
+  bif Parser.isValidSyntaxNodeKind (← getEnv) k then
     return k
-  if !(← getEnv).isExporting && !isPrivateName k then
+  bif !(← getEnv).isExporting && !isPrivateName k then
     let k := mkPrivateName (← getEnv) k
-    if Parser.isValidSyntaxNodeKind (← getEnv) k then
+    bif Parser.isValidSyntaxNodeKind (← getEnv) k then
       return k
   throwError "failed"
 
@@ -161,7 +161,7 @@ def expandMacroImpl? (env : Environment) : Syntax → MacroM (Option (Name × Ex
   for e in macroAttribute.getEntries env stx.getKind do
     try
       let stx' ← withFreshMacroScope (e.value stx)
-      if !e.isBuiltin then
+      bif !e.isBuiltin then
         modify fun st => { st with expandedMacroDecls := e.declName :: st.expandedMacroDecls }
       return some (e.declName, Except.ok stx')
     catch
@@ -212,7 +212,7 @@ def liftMacroM [Monad m] [MonadMacroAdapter m] [MonadEnv m] [MonadRecDepth m] [M
           } { macroScope := (← MonadMacroAdapter.getNextMacroScope) } with
   | EStateM.Result.error Macro.Exception.unsupportedSyntax _ => throwUnsupportedSyntax
   | EStateM.Result.error (Macro.Exception.error ref msg) _   =>
-    if msg == maxRecDepthErrorMessage then
+    bif msg == maxRecDepthErrorMessage then
       -- Make sure we can detect exception using `Exception.isMaxRecDepth`
       throwMaxRecDepthAt ref
     else
@@ -229,10 +229,10 @@ def liftMacroM [Monad m] [MonadMacroAdapter m] [MonadEnv m] [MonadRecDepth m] [M
 
 partial def mkUnusedBaseName (baseName : Name) : MacroM Name := do
   let currNamespace ← Macro.getCurrNamespace
-  if ← Macro.hasDecl (currNamespace ++ baseName) then
+  bif (← Macro.hasDecl (currNamespace ++ baseName)) then
     let rec loop (idx : Nat) := do
       let name := baseName.appendIndexAfter idx
-      if ← Macro.hasDecl (currNamespace ++ name) then
+      bif (← Macro.hasDecl (currNamespace ++ name)) then
         loop (idx+1)
       else
         return name
@@ -249,10 +249,10 @@ partial def findUnusedName [Monad m] [MonadEnv m] (name : Name)
     (avoid : Environment → Name → Bool := fun env name => env.contains name) :
     m Name := do
   let env ← getEnv
-  if avoid env name then
+  bif avoid env name then
     let rec loop (idx : Nat) := do
       let name := name.appendIndexAfter idx
-      if avoid env name then
+      bif avoid env name then
         loop (idx+1)
       else
         return name
@@ -280,7 +280,7 @@ def nestedExceptionToMessageData [Monad m] [MonadLog m] (ex : Exception) : m Mes
   match ex.getRef.getPos? with
   | none       => return ex.toMessageData
   | some exPos =>
-    if pos == exPos then
+    bif pos == exPos then
       return ex.toMessageData
     else
       let exPosition := (← getFileMap).toPosition exPos

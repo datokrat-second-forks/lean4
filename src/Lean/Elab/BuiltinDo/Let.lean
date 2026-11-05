@@ -51,25 +51,25 @@ def LetOrReassign.checkMutVars (letOrReassign : LetOrReassign) (vars : Array Ide
     -- Reassigning an erased variable wraps its value, which only the single-variable form can do.
     unless vars.size == 1 do
       for v in vars do
-        if ((← findMutVar? v.getId).map (·.erased)).getD false then
+        bif ((← findMutVar? v.getId).map (·.erased)).getD false then
           throwErrorAt v "an erased variable takes a plain reassignment, as in `{v.getId} := e`"
   | _         => checkMutVarsForShadowing vars
 
 def LetOrReassign.registerReassignAliasInfo (letOrReassign : LetOrReassign) (vars : Array Ident) : DoElabM Unit := do
-  if letOrReassign matches .reassign then
+  bif letOrReassign matches .reassign then
     for var in vars do
       registerMutVarAlias var.getId
 
 def elabWithReassignments (letOrReassign : LetOrReassign) (vars : Array Ident) (k : DoElabM Expr) : DoElabM Expr := do
   declareMutVars? letOrReassign.getLetMutTk? vars letOrReassign.isErasedDecl do
     letOrReassign.registerReassignAliasInfo vars
-    if ← isErased letOrReassign vars then
+    bif (← isErased letOrReassign vars) then
       vars.foldr (init := k) withErasedProj
     else
       k
 
 private def pushTypeIntoReassignment (letOrReassign : LetOrReassign) (decl : TSyntax ``letDecl) : TermElabM (TSyntax ``letDecl) := do
-  if letOrReassign matches .reassign then
+  bif letOrReassign matches .reassign then
     match decl with
     | `(letDecl| $x:ident $[: $xType?]? := $rhs) =>
       -- We use `Term.elabTermEnsuringType` instead of `Term.ensureHasType` to turn type
@@ -93,9 +93,9 @@ private def pushTypeIntoReassignment (letOrReassign : LetOrReassign) (decl : TSy
     pure decl
 
 private def checkLetConfigInDo (config : Term.LetConfig) : DoElabM Unit := do
-  if config.postponeValue then
+  bif config.postponeValue then
     throwError "`+postponeValue` is not supported in `do` blocks"
-  if config.generalize then
+  bif config.generalize then
     throwError "`+generalize` is not supported in `do` blocks"
 
 /-- Wrap an erased binding `x : t := e` as `x : Erased t := Erased.mk e`. For a reassignment,
@@ -116,7 +116,7 @@ partial def elabDoLetOrReassign (config : Term.LetConfig) (letOrReassign : LetOr
   let isErased ← isErased letOrReassign vars
   -- Some decl preprocessing on the patterns and expected types:
   let decl ← pushTypeIntoReassignment letOrReassign decl
-  let decl ← if isErased then wrapErasedDecl decl else pure decl
+  let decl ← bif isErased then wrapErasedDecl decl else pure decl
   let mγ ← mkMonadApp (← read).doBlockResultType
   match decl with
   | `(letDecl| $decl:letEqnsDecl) =>
@@ -142,14 +142,14 @@ partial def elabDoLetOrReassign (config : Term.LetConfig) (letOrReassign : LetOr
     Term.withMacroExpansion (← getRef) term do Term.elabTermEnsuringType term (some mγ)
   | `(letDecl| $decl:letIdDecl) =>
     let { id, binders, type, value } := Term.mkLetIdDeclView decl
-    let id ← if id.isIdent then pure id else Term.mkFreshIdent id (canonical := true)
+    let id ← bif id.isIdent then pure id else Term.mkFreshIdent id (canonical := true)
     let nondep := config.nondep || letOrReassign matches .have
     -- Only non-`mut` lets will be elaborated as `let`s; `let mut` and reassigns behave as `have`s.
     -- See `elabLetDeclAux` for rationale.
     let (type, val) ← Term.elabBindersEx binders fun xs => do
       let fvars := xs.map (·.2) -- discard binders
       let ty ← Term.withSynthesize (postpone := .partial) <| Term.elabType type
-      let letMsg := if nondep then "have" else "let"
+      let letMsg := bif nondep then "have" else "let"
       Term.registerCustomErrorIfMVar ty type m!"failed to infer `{letMsg}` declaration type"
       Term.registerLevelMVarErrorExprInfo ty type m!"failed to infer universe levels in `{letMsg}` declaration type"
       let lctx' := fvars.foldl (init := ← getLCtx) fun lctx fvar =>
@@ -166,7 +166,7 @@ partial def elabDoLetOrReassign (config : Term.LetConfig) (letOrReassign : LetOr
       match config.eq? with
       | none =>
         let body ← elabWithReassignments letOrReassign vars dec.continueWithUnit
-        if config.zeta then
+        bif config.zeta then
           pure <| (← body.abstractM #[x]).instantiate1 val
         else
           mkLetFVars #[x] body (usedLetOnly := config.usedOnly) (generalizeNondepLet := false)
@@ -175,9 +175,9 @@ partial def elabDoLetOrReassign (config : Term.LetConfig) (letOrReassign : LetOr
         withLetDecl h.getId hTy (← mkEqRefl x) (nondep := true) fun h' => do
           Term.addLocalVarInfo h h'
           let body ← elabWithReassignments letOrReassign vars dec.continueWithUnit
-          if config.zeta then
+          bif config.zeta then
             pure <| (← body.abstractM #[x, h']).instantiateRev #[val, ← mkEqRefl val]
-          else if nondep then
+          else bif nondep then
             let f ← mkLambdaFVars #[x, h'] body
             return mkApp2 f val (← mkEqRefl val)
           else
@@ -186,7 +186,7 @@ partial def elabDoLetOrReassign (config : Term.LetConfig) (letOrReassign : LetOr
 
 private def getLetConfigAndCheckMut (letConfigStx : TSyntax ``Parser.Term.letConfig)
     (mutTk? : Option Syntax) (initConfig : Term.LetConfig := {}) : DoElabM Term.LetConfig := do
-  if mutTk?.isSome && !letConfigStx.raw[0].getArgs.isEmpty then
+  bif mutTk?.isSome && !letConfigStx.raw[0].getArgs.isEmpty then
     throwErrorAt letConfigStx "configuration options are not allowed with `let mut`"
   Term.mkLetConfig letConfigStx initConfig
 
@@ -246,7 +246,7 @@ private def getLetConfigAndCheckMut (letConfigStx : TSyntax ``Parser.Term.letCon
   letOrReassign.checkMutVars vars
   let mut body ← body?.getDM `(doSeqIndent|pure PUnit.unit)
   -- In case of `let mut`, we need to re-declare the pattern variables as `let mut`s inside `body`.
-  if mutTk?.isSome then
+  bif mutTk?.isSome then
     for var in vars do
       body ← `(doSeqIndent| let mut $var := $var; do $body:doSeqIndent)
   if let some h := config.eq? then
@@ -258,7 +258,7 @@ private def getLetConfigAndCheckMut (letConfigStx : TSyntax ``Parser.Term.letCon
   let `(doLetArrow| let%$tk $[mut%$mutTk?]? $cfg:letConfig $decl) := stx | throwUnsupportedSyntax
   let config ← getLetConfigAndCheckMut cfg mutTk?
   checkLetConfigInDo config
-  if config.nondep || config.usedOnly || config.zeta || config.eq?.isSome then
+  bif config.nondep || config.usedOnly || config.zeta || config.eq?.isSome then
     throwErrorAt cfg "configuration options are not supported with `←`"
   match decl with
   | `(doIdDecl| $x:ident $[: $xType?]? ← $rhs) =>

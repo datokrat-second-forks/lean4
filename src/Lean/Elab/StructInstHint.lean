@@ -65,7 +65,7 @@ def mkMissingFieldsHint (fields : Array (Name × Option Expr)) (stx : Syntax) : 
     pure s!"{fieldName} := {value}"
   let useSingleLine ← isSingleLineStyle view
   let suggestionText :=
-    if useSingleLine then
+    bif useSingleLine then
       .group (behavior := .fill) <|
         newFields.foldl (init := Std.Format.nil) (fun acc sug => acc ++ "," ++ .line ++ format sug)
     else
@@ -86,22 +86,22 @@ def mkMissingFieldsHint (fields : Array (Name × Option Expr)) (stx : Syntax) : 
   -- If a line separates the leader and `}`, and there's no intervening text, `interveningLineEndPos?`
   -- gives the position on that line (the min of column `indent` and the line end) at which to insert
   let interveningLineEndPos? :=
-    if leaderLine + 1 ≥ (fileMap.utf8PosToLspPos view.closingPos).line then none else
+    bif leaderLine + 1 ≥ᵇ (fileMap.utf8PosToLspPos view.closingPos).line then none else
       let leaderLineEnd := findLineEnd fileMap.source view.leaderTailPos
       let indentPos := (indent + 1).fold (init := leaderLineEnd) (fun _ _ p => p.next fileMap.source)
       let interveningLineEnd := findLineEnd fileMap.source (leaderLineEnd.next fileMap.source)
       let nextTwoLines := Substring.Raw.mk fileMap.source view.leaderTailPos interveningLineEnd
-      if nextTwoLines.all (·.isWhitespace) then some (min indentPos nextTwoLines.stopPos) else none
+      bif nextTwoLines.all (·.isWhitespace) then some (min indentPos nextTwoLines.stopPos) else none
 
   let (preWs, postWs) : Format × Format :=
     -- If we're in single-line mode, `suggestionText` already has a leading `, `, so insert it as-is
-    if useSingleLine then
+    bif useSingleLine then
       (.nil, .nil)
     -- Ensure a line break for consistent indentation if fields exist or there are no fields after `with`
-    else if view.numFields > 0 || (view.hasWith && !leaderClosingSeparated) then
+    else bif view.numFields >ᵇ 0 || (view.hasWith && !leaderClosingSeparated) then
       (.line, .nil)
     -- If there is no intervening line, add spaces before and after for `{ f := v\n ...}` style
-    else if !leaderClosingSeparated then
+    else bif !leaderClosingSeparated then
       (" ", " ")
     -- If there is an intervening line, insert therein if the region is empty; else insert before
     -- it, as the nonempty region may contain a type annotation
@@ -130,7 +130,7 @@ where
     -- TODO: selectively let through macro-expanded `where` notation
     guard <| stx.getHeadInfo matches .original ..
     guard <| stx.getKind == ``Parser.Term.structInst
-    let (leader, hasWith) := if stx[1][1] matches .missing then
+    let (leader, hasWith) := bif stx[1][1] matches .missing then
       (stx[0], false)
     else
       (stx[1][1], true)

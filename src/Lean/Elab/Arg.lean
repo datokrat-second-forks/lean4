@@ -54,26 +54,26 @@ instance : ToMessageData NamedArg where
   Add a new named argument to `namedArgs`, and throw an error if it already contains a named argument
   with the same name. -/
 def addNamedArg (namedArgs : Array NamedArg) (namedArg : NamedArg) : MetaM (Array NamedArg) := do
-  if namedArgs.any (namedArg.name == ·.name) then
+  bif namedArgs.any (namedArg.name == ·.name) then
     throwErrorAt namedArg.ref "Argument `{namedArg.name}` was already set"
   return namedArgs.push namedArg
 
 partial def expandArgs (args : Array Syntax) : MetaM (Array NamedArg × Array Arg × Bool) := do
   let (args, ellipsis) :=
-    if args.isEmpty then
+    bif args.isEmpty then
       (args, false)
-    else if args.back!.isOfKind ``Lean.Parser.Term.ellipsis then
+    else bif args.back!.isOfKind ``Lean.Parser.Term.ellipsis then
       (args.pop, true)
     else
       (args, false)
   let (namedArgs, args) ← args.foldlM (init := (#[], #[])) fun (namedArgs, args) stx => do
-    if stx.getKind == ``Lean.Parser.Term.namedArgument then
+    bif stx.getKind == ``Lean.Parser.Term.namedArgument then
       -- trailing_tparser try ("(" >> ident >> " := ") >> termParser >> ")"
       let name := stx[1].getId.eraseMacroScopes
       let val  := stx[3]
       let namedArgs ← addNamedArg namedArgs { ref := stx, name := name, val := Arg.stx val }
       return (namedArgs, args)
-    else if stx.getKind == ``Lean.Parser.Term.ellipsis then
+    else bif stx.getKind == ``Lean.Parser.Term.ellipsis then
       throwErrorAt stx "unexpected '..'"
     else
       return (namedArgs, args.push $ Arg.stx stx)

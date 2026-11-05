@@ -37,11 +37,11 @@ private def mkLetRecDeclView (letRec : Syntax) : TermElabM LetRecView := do
   for attrDeclStx in letRec[1][0].getSepArgs do
     let docStr? := attrDeclStx[0].getOptional?.map (TSyntax.mk ·)
     let attrOptStx := attrDeclStx[1]
-    let attrs ← if attrOptStx.isNone then pure #[] else elabDeclAttrs attrOptStx[0]
+    let attrs ← bif attrOptStx.isNone then pure #[] else elabDeclAttrs attrOptStx[0]
     let decl := attrDeclStx[2][0]
-    if decl.isOfKind `Lean.Parser.Term.letPatDecl then
+    bif decl.isOfKind `Lean.Parser.Term.letPatDecl then
       throwErrorAt decl "patterns are not allowed in 'let rec' expressions"
-    else if decl.isOfKind ``Lean.Parser.Term.letIdDecl || decl.isOfKind ``Lean.Parser.Term.letEqnsDecl then
+    else bif decl.isOfKind ``Lean.Parser.Term.letIdDecl || decl.isOfKind ``Lean.Parser.Term.letEqnsDecl then
       let declId := decl[0][0]
       unless declId.isIdent do
         throwErrorAt declId "'let rec' expressions must be named"
@@ -49,9 +49,9 @@ private def mkLetRecDeclView (letRec : Syntax) : TermElabM LetRecView := do
       let parentName? ← getDeclName?
       let mut declName := parentName?.getD Name.anonymous ++ shortDeclName
       let env ← getEnv
-      if env.header.isModule && !env.isExporting then
+      bif env.header.isModule && !env.isExporting then
         declName := mkPrivateName env declName
-      if decls.any fun decl => decl.declName == declName then
+      bif decls.any fun decl => decl.declName == declName then
         withRef declId do
           throwError "`{.ofConstName declName}` has already been declared"
       let binderStx := decl[1]
@@ -70,7 +70,7 @@ private def mkLetRecDeclView (letRec : Syntax) : TermElabM LetRecView := do
           let type ← mkForallFVars xs type
           pure (type, binderIds)
       let mvar ← mkFreshExprMVar type MetavarKind.syntheticOpaque
-      let valStx ← if decl.isOfKind `Lean.Parser.Term.letIdDecl then
+      let valStx ← bif decl.isOfKind `Lean.Parser.Term.letIdDecl then
         pure decl[4]
       else
         liftMacroM <| expandMatchAltsIntoMatch decl decl[3]
@@ -85,7 +85,7 @@ private def mkLetRecDeclView (letRec : Syntax) : TermElabM LetRecView := do
 
 private partial def withAuxLocalDecls {α} (views : Array LetRecDeclView) (k : Array Expr → TermElabM α) : TermElabM α :=
   let rec loop (i : Nat) (fvars : Array Expr) : TermElabM α :=
-    if h : i < views.size then
+    bif h : i <ᵇ views.size then
       let view := views[i]
       withAuxDecl view.shortDeclName view.type view.declName fun fvar => loop (i+1) (fvars.push fvar)
     else
@@ -109,7 +109,7 @@ private def elabLetRecDeclValues (view : LetRecView) : TermElabM (Array Expr) :=
 private def registerLetRecsToLift (views : Array LetRecDeclView) (fvars : Array Expr) (values : Array Expr) : TermElabM Unit := do
   let letRecsToLiftCurr := (← get).letRecsToLift
   for view in views do
-    if letRecsToLiftCurr.any fun toLift => toLift.declName == view.declName then
+    bif letRecsToLiftCurr.any fun toLift => toLift.declName == view.declName then
       withRef view.ref do
         throwError "`{view.declName}` has already been declared"
   let lctx ← getLCtx

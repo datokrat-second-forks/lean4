@@ -38,11 +38,11 @@ def Nat.toOrdinal : Nat -> String
   | 8 => "eighth"
   | 9 => "ninth"
   | 10 => "tenth"
-  | n => if n % 100 > 10 && n % 100 < 20 then
+  | n => bif n % 100 >ᵇ 10 && n % 100 <ᵇ 20 then
       s!"{n}th"
-    else if n % 10 == 2 then
+    else bif n % 10 == 2 then
       s!"{n}nd"
-    else if n % 10 == 3 then
+    else bif n % 10 == 3 then
       s!"{n}rd"
     else
       s!"{n}th"
@@ -104,7 +104,7 @@ Give alternative forms of a string if the `count` is 1 or not.
 def Nat.plural [HasPluralDefaults α] (count : Nat)
     (singular : α := HasPluralDefaults.singular)
     (plural : α := HasPluralDefaults.plural singular) :=
-  if count = 1 then
+  bif count =ᵇ 1 then
     singular
   else
     plural

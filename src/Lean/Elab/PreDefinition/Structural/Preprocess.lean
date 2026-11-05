@@ -15,7 +15,7 @@ namespace Lean.Elab.Structural
 open Meta
 
 private def shouldBetaReduce (e : Expr) (recFnNames : Array Name) : Bool :=
-  if e.isHeadBetaTarget then
+  bif e.isHeadBetaTarget then
     e.getAppFn.find? (fun e => e.isConst && recFnNames.contains e.constName!) |>.isSome
   else
     false
@@ -47,14 +47,14 @@ def preprocess (e : Expr) (recFnNames : Array Name) (numFixedParams : Nat) : Cor
   let e ← unfoldIfArgIsAppOf recFnNames numFixedParams e
   Core.transform e
     (pre := fun e =>
-      if shouldBetaReduce e recFnNames then
+      bif shouldBetaReduce e recFnNames then
         return .visit e.headBeta
       else
         return .continue)
     (post := fun e => do
-      if e.isApp && e.getAppFn.isMData then
+      bif e.isApp && e.getAppFn.isMData then
         let .mdata m f := e.getAppFn | unreachable!
-        if m.isRecApp then
+        bif m.isRecApp then
           return .done (.mdata m (f.beta e.getAppArgs))
       return .continue)
 

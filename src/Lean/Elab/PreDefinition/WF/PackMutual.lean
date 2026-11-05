@@ -27,13 +27,13 @@ open Meta
 -/
 def withAppN (n : Nat) (e : Expr) (k : Array Expr → MetaM Expr) : MetaM Expr := do
   let args := e.getAppArgs
-  if n ≤ args.size then
+  bif n ≤ᵇ args.size then
     let e' ← k args[*...n]
     return mkAppN e' args[n...*]
   else
     let missing := n - args.size
     forallBoundedTelescope (← inferType e) missing fun xs _ => do
-      if xs.size < missing then
+      bif xs.size <ᵇ missing then
         throwError "Failed to eta-expand partial application"
       let e' ← k (args ++ xs)
       mkLambdaFVars xs e'
@@ -49,7 +49,7 @@ def packCalls (fixedParamPerms : FixedParamPerms) (argsPacker : ArgsPacker) (fun
   let domain := fType.bindingDomain!
   transform e (skipConstInApp := true) (post := fun e => do
     let f := e.getAppFn
-    if !f.isConst then
+    bif !f.isConst then
       return TransformStep.done e
     if let some fidx := funNames.idxOf? f.constName! then
       assert! fidx < fixedParamPerms.perms.size
@@ -64,10 +64,10 @@ def packCalls (fixedParamPerms : FixedParamPerms) (argsPacker : ArgsPacker) (fun
     )
 
 def mutualName (fixedParamPerms : FixedParamPerms) (argsPacker : ArgsPacker) (preDefs : Array PreDefinition) : Name :=
-  if fixedParamPerms.fixedArePrefix && argsPacker.onlyOneUnary then
+  bif fixedParamPerms.fixedArePrefix && argsPacker.onlyOneUnary then
     preDefs[0]!.declName
   else
-    if argsPacker.numFuncs > 1 then
+    bif argsPacker.numFuncs >ᵇ 1 then
       preDefs[0]!.declName ++ `_mutual
     else
       preDefs[0]!.declName ++ `_unary
@@ -78,7 +78,7 @@ module.
 -/
 def packMutual (fixedParamPerms : FixedParamPerms) (argsPacker : ArgsPacker) (preDefs : Array PreDefinition) : MetaM PreDefinition := do
   let newFn := mutualName fixedParamPerms argsPacker preDefs
-  if newFn = preDefs[0]!.declName then
+  bif newFn =ᵇ preDefs[0]!.declName then
     return preDefs[0]!
   -- Bring the fixed prefix into scope
   fixedParamPerms.perms[0]!.forallTelescope preDefs[0]!.type fun ys => do
@@ -120,7 +120,7 @@ def varyingVarNames (fixedParamPerms : FixedParamPerms) (preDefIdx : Nat) (preDe
     assert! fixedParamPerms.perms[preDefIdx]!.size = arity
     let mut ns := #[]
     for x in xs, paramInfo in fixedParamPerms.perms[preDefIdx]! do
-      if paramInfo.isSome then continue -- skip fixed parameters
+      bif paramInfo.isSome then continue -- skip fixed parameters
       ns := ns.push (← x.fvarId!.getUserName)
     return ns
 

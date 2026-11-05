@@ -32,9 +32,9 @@ remove `let_fun`-lambdas that contain explicit termination proofs.
 def floatRecApp (e : Expr) : CoreM Expr :=
   Core.transform e
     (post := fun e => do
-      if e.isApp && e.getAppFn.isMData then
+      bif e.isApp && e.getAppFn.isMData then
         let .mdata m f := e.getAppFn | unreachable!
-        if m.isRecApp then
+        bif m.isRecApp then
           return .done (.mdata m (f.beta e.getAppArgs))
       return .continue)
 

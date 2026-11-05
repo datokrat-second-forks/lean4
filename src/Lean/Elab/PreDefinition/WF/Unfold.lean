@@ -62,7 +62,7 @@ def rwFixEq (mvarId : MVarId) : MetaM MVarId := mvarId.withContext do
 
 def isForallMotive (matcherApp : MatcherApp) : MetaM (Option Expr) := do
   lambdaBoundedTelescope matcherApp.motive matcherApp.discrs.size fun xs t =>
-    if xs.size == matcherApp.discrs.size && t.isForall && !t.bindingBody!.hasLooseBVar 0 then
+    bif xs.size == matcherApp.discrs.size && t.isForall && !t.bindingBody!.hasLooseBVar 0 then
       return some (← mkLambdaFVars xs t.bindingBody!)
     else
       return none
@@ -70,7 +70,7 @@ def isForallMotive (matcherApp : MatcherApp) : MetaM (Option Expr) := do
 
 /-- Generalization of `splitMatch` that can handle `casesOn` -/
 def splitMatchOrCasesOn (mvarId : MVarId) (e : Expr) (matcherInfo : MatcherInfo) : MetaM (List MVarId) := do
-  if (← isMatcherApp e) then
+  bif (← isMatcherApp e) then
     Split.splitMatch mvarId e
   else
     -- For casesOn, the last discriminant is the major premise;
@@ -172,9 +172,9 @@ builtin_simproc_decl matcherPushArg (_) := fun e => do
   unless fArg.isLambda do return .continue
   unless fArg.bindingBody!.isLambda do return .continue
   unless fArg.bindingBody!.bindingBody!.isApp do return .continue
-  if fArg.bindingBody!.bindingBody!.hasLooseBVar 0 then return .continue
+  bif fArg.bindingBody!.bindingBody!.hasLooseBVar 0 then return .continue
   unless fArg.bindingBody!.bindingBody!.appArg! == .bvar 1 do return .continue
-  if fArg.bindingBody!.bindingBody!.appFn!.hasLooseBVar 1 then return .continue
+  bif fArg.bindingBody!.bindingBody!.appFn!.hasLooseBVar 1 then return .continue
 
   let fExpr := fArg.bindingBody!.bindingBody!.appFn!
   let fExprType ← inferType fExpr
@@ -222,7 +222,7 @@ public def mkUnfoldEq (preDef : PreDefinition) (unaryPreDefName : Name) (wfPrepr
       let mvarId := main.mvarId!
       let wfPreprocessProof ← Simp.mkCongr { expr := type.appFn! } (← wfPreprocessProof.addExtraArgs xs)
       let mvarId ← applySimpResultToTarget mvarId type wfPreprocessProof
-      let mvarId ← if preDef.declName != unaryPreDefName then deltaLHS mvarId else pure mvarId
+      let mvarId ← bif preDef.declName != unaryPreDefName then deltaLHS mvarId else pure mvarId
       let mvarId ← rwFixEq mvarId
       mkUnfoldProof preDef.declName mvarId
 

@@ -59,31 +59,31 @@ private def checkUniverseOffset [Monad m] [MonadError m] [MonadOptions m] (n : N
 
 partial def elabLevel (stx : Syntax) : LevelElabM Level := withRef stx do
   let kind := stx.getKind
-  if kind == ``Lean.Parser.Level.paren then
+  bif kind == ``Lean.Parser.Level.paren then
     elabLevel (stx.getArg 1)
-  else if kind == ``Lean.Parser.Level.max then
+  else bif kind == ``Lean.Parser.Level.max then
     let args := stx.getArg 1 |>.getArgs
     args[*...(args.size - 1)].foldrM (init := ← elabLevel args.back!) fun stx lvl =>
       return mkLevelMax' (← elabLevel stx) lvl
-  else if kind == ``Lean.Parser.Level.imax then
+  else bif kind == ``Lean.Parser.Level.imax then
     let args := stx.getArg 1 |>.getArgs
     args[*...(args.size - 1)].foldrM (init := ← elabLevel args.back!) fun stx lvl =>
       return mkLevelIMax' (← elabLevel stx) lvl
-  else if kind == ``Lean.Parser.Level.hole then
+  else bif kind == ``Lean.Parser.Level.hole then
     mkFreshLevelMVar
-  else if kind == numLitKind then
+  else bif kind == numLitKind then
     match stx.isNatLit? with
     | some val => checkUniverseOffset val; return Level.ofNat val
     | none     => throwIllFormedSyntax
-  else if kind == identKind then
+  else bif kind == identKind then
     let paramName := stx.getId
     unless (← get).levelNames.contains paramName do
-      if (← read).autoBoundImplicit && isValidAutoBoundLevelName paramName (relaxedAutoImplicit.get (← read).options) then
+      bif (← read).autoBoundImplicit && isValidAutoBoundLevelName paramName (relaxedAutoImplicit.get (← read).options) then
         modify fun s => { s with levelNames := paramName :: s.levelNames }
       else
         throwError "unknown universe level `{mkIdent paramName}`"
     return mkLevelParam paramName
-  else if kind == `Lean.Parser.Level.addLit then
+  else bif kind == `Lean.Parser.Level.addLit then
     let lvl ← elabLevel (stx.getArg 0)
     match stx.getArg 2 |>.isNatLit? with
     | some val => checkUniverseOffset val; return lvl.addOffset val

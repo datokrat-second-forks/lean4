@@ -33,12 +33,12 @@ private def mkHeader (kind : String) (id : Name) (levelParams : List Name) (type
   | .semireducible => pure ()
 
   let env ← getEnv
-  if env.header.isModule && (env.setExporting true |>.find? id |>.any (·.isDefinition)) then
+  bif env.header.isModule && (env.setExporting true |>.find? id |>.any (·.isDefinition)) then
     attrs := attrs.push m!"expose"
 
-  if defeqAttr.hasTag (← getEnv) id then
+  bif defeqAttr.hasTag (← getEnv) id then
     attrs := attrs.push m!"defeq"
-  else if backwardDefeqAttr.hasTag (← getEnv) id then
+  else bif backwardDefeqAttr.hasTag (← getEnv) id then
     attrs := attrs.push m!"backward_defeq"
 
   let mut m : MessageData := m!""
@@ -53,17 +53,17 @@ private def mkHeader (kind : String) (id : Name) (levelParams : List Name) (type
   let id' ← match privateToUserName? id with
     | some id' =>
       m := m ++ "private "
-      if getPPPrivateNames (← getOptions) then pure id else pure id'
+      bif getPPPrivateNames (← getOptions) then pure id else pure id'
     | none =>
       pure id
 
-  if isProtected (← getEnv) id then
+  bif isProtected (← getEnv) id then
     m := m ++ "protected "
 
-  if isMarkedMeta (← getEnv) id then
+  bif isMarkedMeta (← getEnv) id then
     m := m ++ "meta "
 
-  if sig then
+  bif sig then
     return m!"{m}{kind} {id'}{levelParamsToMessageData levelParams} : {type}"
   else
     return m!"{m}{kind}"
@@ -76,7 +76,7 @@ private def printAxiomLike (kind : String) (id : Name) (levelParams : List Name)
   logInfo (← mkHeader kind id levelParams type safety)
 
 private def printDefLike (sigOnly : Bool) (kind : String) (id : Name) (levelParams : List Name) (type : Expr) (value? : Option Expr) (safety := DefinitionSafety.safe) : CommandElabM Unit := do
-  if sigOnly then
+  bif sigOnly then
     printAxiomLike kind id levelParams type safety
   else
     let m ← mkHeader kind id levelParams type safety
@@ -88,7 +88,7 @@ private def printQuot (id : Name) (levelParams : List Name) (type : Expr) : Comm
 
 private def printInduct (id : Name) (levelParams : List Name) (numParams : Nat) (type : Expr)
     (ctors : List Name) (isUnsafe : Bool) : CommandElabM Unit := do
-  let mut m ← mkHeader "inductive" id levelParams type (if isUnsafe then .unsafe else .safe)
+  let mut m ← mkHeader "inductive" id levelParams type (bif isUnsafe then .unsafe else .safe)
   m := m ++ Format.line ++ "number of parameters: " ++ toString numParams
   m := m ++ Format.line ++ "constructors:"
   for ctor in ctors do
@@ -98,7 +98,7 @@ private def printInduct (id : Name) (levelParams : List Name) (numParams : Nat) 
 
 open Meta in
 private def printRecursor (sigOnly : Bool) (recInfo : RecursorVal) : CommandElabM Unit := do
-  let mut m ← mkHeader "recursor" recInfo.name recInfo.levelParams recInfo.type (if recInfo.isUnsafe then .unsafe else .safe) (sig := false)
+  let mut m ← mkHeader "recursor" recInfo.name recInfo.levelParams recInfo.type (bif recInfo.isUnsafe then .unsafe else .safe) (sig := false)
   m := m!"{m} {.signature recInfo.name}"
   unless sigOnly do
     m := m ++ Format.line ++ m!"number of parameters: {recInfo.numParams}{positionsString 0 recInfo.numParams}"
@@ -106,9 +106,9 @@ private def printRecursor (sigOnly : Bool) (recInfo : RecursorVal) : CommandElab
     m := m ++ Format.line ++ m!"number of minor premises: {recInfo.numMinors}{positionsString recInfo.getFirstMinorIdx recInfo.numMinors}"
     m := m ++ Format.line ++ m!"number of indices: {recInfo.numIndices}{positionsString recInfo.getFirstIndexIdx recInfo.numIndices}"
     m := m ++ Format.line ++ m!"major premise position: {recInfo.getMajorIdx+1}"
-    if recInfo.k then
+    bif recInfo.k then
       m := m ++ Format.line ++ m!"supports K-like reduction"
-    if recInfo.rules.isEmpty then
+    bif recInfo.rules.isEmpty then
       m := m ++ Format.line ++ "rules: (none)"
     else
       m := m ++ Format.line ++ "rules:"
@@ -118,8 +118,8 @@ private def printRecursor (sigOnly : Bool) (recInfo : RecursorVal) : CommandElab
   logInfo m
 where
   positionsString (firstIndex count : Nat) : String :=
-    if count = 0 then ""
-    else if count = 1 then s!" (position {firstIndex+1})"
+    bif count =ᵇ 0 then ""
+    else bif count =ᵇ 1 then s!" (position {firstIndex+1})"
     else s!" (positions {firstIndex+1}–{firstIndex+count})"
   /--
   Given the recursor rule, creates a message like `List.rec nil cons (List.cons x xs) ==> cons x xs`.
@@ -169,7 +169,7 @@ Multiple parents could be the origin of a field, but we say the first parent tha
 private partial def getFieldOrigin (structName field : Name) : MetaM StructureFieldInfo := do
   let env ← getEnv
   for parent in getStructureParentInfo env structName do
-    if (findField? env parent.structName field).isSome then
+    bif (findField? env parent.structName field).isSome then
       return ← getFieldOrigin parent.structName field
   let some fi := getFieldInfo? env structName field
     | throwError "no such field {field} in {structName}"
@@ -179,8 +179,8 @@ open Meta in
 private partial def printStructure (id : Name) (levelParams : List Name) (numParams : Nat) (type : Expr) (ctor : Name)
     (isUnsafe : Bool) : CommandElabM Unit := do
   let env ← getEnv
-  let kind := if isClass env id then "class" else "structure"
-  let header ← mkHeader kind id levelParams type (if isUnsafe then .unsafe else .safe) (sig := false)
+  let kind := bif isClass env id then "class" else "structure"
+  let header ← mkHeader kind id levelParams type (bif isUnsafe then .unsafe else .safe) (sig := false)
   let levels := levelParams.map Level.param
   liftTermElabM <| forallTelescope (← getConstInfo id).type fun params _ =>
     let s := Expr.const id levels
@@ -211,7 +211,7 @@ private partial def printStructure (id : Name) (levelParams : List Name) (numPar
           else
             pure set
       let fields := getStructureFieldsFlattened env id (includeSubobjectFields := false)
-      if fields.isEmpty then
+      bif fields.isEmpty then
         m := m ++ Format.line ++ "fields: (none)"
       else
         m := m ++ Format.line ++ "fields:"
@@ -222,7 +222,7 @@ private partial def printStructure (id : Name) (levelParams : List Name) (numPar
           let some source := findField? env id field | panic! "missing structure field info"
           let fi ← getFieldOrigin source field
           let proj := fi.projFn
-          let modifier := if isPrivateName proj then "private " else ""
+          let modifier := bif isPrivateName proj then "private " else ""
           let ftype ← inferType (fieldMap.get! field)
           let value ←
             if let some stx := autoParams.find? field then
@@ -238,11 +238,11 @@ private partial def printStructure (id : Name) (levelParams : List Name) (numPar
           m := m ++ indentD (m!"{modifier}{.ofConstName proj (fullNames := true)} : {MessageData.nest 2 ftype}{value}")
       -- Constructor
       let cinfo := getStructureCtor (← getEnv) id
-      let ctorModifier := if isPrivateName cinfo.name then "private " else ""
+      let ctorModifier := bif isPrivateName cinfo.name then "private " else ""
       m := m ++ Format.line ++ "constructor:" ++ indentD (ctorModifier ++ .signature cinfo.name)
       -- Resolution order
       let resOrder ← getStructureResolutionOrder id
-      if resOrder.size > 1 then
+      bif resOrder.size >ᵇ 1 then
         m := m ++ Format.line ++ "field notation resolution order:"
           ++ indentD (MessageData.joinSep (resOrder.map (.ofConstName · (fullNames := true))).toList ", ")
       -- Omit proofs; the delaborator enables `pp.proofs` for non-constant proofs, but we don't want this for default values
@@ -254,17 +254,17 @@ private def printIdCore (sigOnly : Bool) (id : Name) : CommandElabM Unit := do
   match env.find? id with
   | ConstantInfo.axiomInfo { levelParams := us, type := t, isUnsafe := u, .. } =>
     match getOriginalConstKind? env id with
-    | some .defn => printDefLike sigOnly "def" id us t none (if u then .unsafe else .safe)
-    | some .thm => printDefLike sigOnly "theorem" id us t none (if u then .unsafe else .safe)
-    | _  => printAxiomLike "axiom" id us t (if u then .unsafe else .safe)
+    | some .defn => printDefLike sigOnly "def" id us t none (bif u then .unsafe else .safe)
+    | some .thm => printDefLike sigOnly "theorem" id us t none (bif u then .unsafe else .safe)
+    | _  => printAxiomLike "axiom" id us t (bif u then .unsafe else .safe)
   | ConstantInfo.defnInfo  { levelParams := us, type := t, value := v, safety := s, .. } => printDefLike sigOnly "def" id us t v s
   | ConstantInfo.thmInfo  { levelParams := us, type := t, value := v, .. } => printDefLike sigOnly "theorem" id us t v
-  | ConstantInfo.opaqueInfo  { levelParams := us, type := t, isUnsafe := u, .. } => printAxiomLike "opaque" id us t (if u then .unsafe else .safe)
+  | ConstantInfo.opaqueInfo  { levelParams := us, type := t, isUnsafe := u, .. } => printAxiomLike "opaque" id us t (bif u then .unsafe else .safe)
   | ConstantInfo.quotInfo  { levelParams := us, type := t, .. } => printQuot id us t
-  | ConstantInfo.ctorInfo { levelParams := us, type := t, isUnsafe := u, .. } => printAxiomLike "constructor" id us t (if u then .unsafe else .safe)
+  | ConstantInfo.ctorInfo { levelParams := us, type := t, isUnsafe := u, .. } => printAxiomLike "constructor" id us t (bif u then .unsafe else .safe)
   | ConstantInfo.recInfo recInfo => printRecursor sigOnly recInfo
   | ConstantInfo.inductInfo { levelParams := us, numParams, type := t, ctors, isUnsafe := u, .. } =>
-    if isStructure env id then
+    bif isStructure env id then
       printStructure id us numParams t ctors[0]! u
     else
       printInduct id us numParams t ctors u
@@ -292,7 +292,7 @@ private def printIdSig (id : Syntax) : CommandElabM Unit := do
 
 private def printAxiomsOf (constName : Name) : CommandElabM Unit := do
   let axioms ← collectAxioms constName
-  if axioms.isEmpty then
+  bif axioms.isEmpty then
     logInfo m!"'{constName}' does not depend on any axioms"
   else
     logInfo m!"'{constName}' depends on axioms: {axioms.qsort Name.lt |>.map MessageData.ofConstName |>.toList}"

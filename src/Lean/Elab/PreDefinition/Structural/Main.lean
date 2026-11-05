@@ -50,7 +50,7 @@ private def elimMutualRecursion (preDefs : Array PreDefinition) (fixedParamPerms
 
   let withFunTypesAndMotives (k : Array Expr → Array Expr → MetaM (Array PreDefinition)) :
       MetaM (Array PreDefinition) := do
-    if isIndPred then
+    bif isIndPred then
       withFunTypes values fun funTypes => do
         let motives ← recArgInfos.mapIdxM fun idx r =>
           mkIndPredBRecOnMotive r values[idx]! funTypes[idx]!
@@ -71,7 +71,7 @@ private def elimMutualRecursion (preDefs : Array PreDefinition) (fixedParamPerms
   -- For inductive predicates, `mkIndPredBRecOnF` additionally creates matchers as side effects
   -- (inside `withoutModifyingEnv`); these are replayed immediately after.
   let FArgs ← recArgInfos.mapIdxM fun idx r =>
-    if isIndPred then do
+    bif isIndPred then do
       let (fArg, matchers) ← withRecFunsAsAxioms preDefs do
         mkIndPredBRecOnF recArgInfos positions r values[idx]! FTypes[idx]! (brecOnConst 0).getAppArgs
       matchers.forM (·)
@@ -87,7 +87,7 @@ private def elimMutualRecursion (preDefs : Array PreDefinition) (fixedParamPerms
   -- `getMaxHeight` computes the correct height for parent definitions.
   -- For inductive predicates, the previous inline behavior is kept.
   let FArgs ←
-    if isIndPred then
+    bif isIndPred then
       pure FArgs
     else
       let us := preDefs[0]!.levelParams.map mkLevelParam
@@ -103,7 +103,7 @@ private def elimMutualRecursion (preDefs : Array PreDefinition) (fixedParamPerms
           name := fName, levelParams := preDefs[idx]!.levelParams,
           type := fType, value := fValue,
           hints := .abbrev,
-          safety := if preDefs[idx]!.modifiers.isUnsafe then .unsafe else .safe,
+          safety := bif preDefs[idx]!.modifiers.isUnsafe then .unsafe else .safe,
           all := [fName] })
         modifyEnv (setDefHeightOverride · fName fHeight)
         setReducibleAttribute fName
@@ -153,15 +153,15 @@ private def inferRecArgPos (preDefs : Array PreDefinition) (termMeasure?s : Arra
       -- We may have to turn some fixed parameters into varying parameters
       let recArgInfos := recArgInfos.mapIdx fun i recArgInfo =>
         {recArgInfo with fixedParamPerm := fixedParamPerms'.perms[i]!}
-      if xs'.size != xs.size then
+      bif xs'.size != xs.size then
         trace[Elab.definition.structural] "Reduced fixed params from {xs} to {xs'}, erasing {toErase.map mkFVar}"
         trace[Elab.definition.structural] "New recArgInfos {repr recArgInfos}"
       -- Check that the parameters of the IndGroupInsts are still fine
         for recArgInfo in recArgInfos do
           for indParam in recArgInfo.indGroupInst.params do
             for y in toErase do
-              if (← dependsOn indParam y) then
-                if indParam.isFVarOf y then
+              bif (← dependsOn indParam y) then
+                bif indParam.isFVarOf y then
                   throwError "its type is an inductive datatype and the datatype parameter\
                     {indentExpr indParam}\n\
                     which cannot be fixed as it is an index or depends on an index, and indices \

@@ -32,7 +32,7 @@ def addPreDefsFromUnary (docCtx : LocalContext × LocalInstances) (preDefs : Arr
   -- Do not complain if the user sets @[semireducible], which usually is a noop,
   -- we recognize that below and then do not set @[irreducible]
   withOptions (allowUnsafeReducibility.set · true) do
-    if unaryPreDefNonRec.declName = preDefs[0]!.declName then
+    bif unaryPreDefNonRec.declName =ᵇ preDefs[0]!.declName then
       addNonRec docCtx preDefNonRec (applyAttrAfterCompilation := false) (cacheProofs := cacheProofs)
         (isRecursive := true)
     else

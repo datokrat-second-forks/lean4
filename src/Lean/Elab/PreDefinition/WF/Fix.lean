@@ -50,7 +50,7 @@ private def LCtxId := FVarId
 
 private def getLCtxId : MetaM LCtxId := do
   let lctx := (← getLCtx)
-  if lctx.isEmpty then
+  bif lctx.isEmpty then
     throwError "unexpected empty local context"
   return lctx.decls[lctx.size - 1]!.get!.fvarId
 
@@ -76,7 +76,7 @@ private partial def replaceRecApps (recFnName : Name) (fixedPrefixSize : Nat) (F
   return e
 where
   processRec (F : Expr) (e : Expr) : RecM recFnName Expr := do
-    if e.getAppNumArgs < fixedPrefixSize + 1 then
+    bif e.getAppNumArgs <ᵇ fixedPrefixSize + 1 then
       trace[Elab.definition.wf] "replaceRecApp: eta-expanding{indentExpr e}"
       loop F (← etaExpand e)
     else
@@ -87,7 +87,7 @@ where
       return mkAppN r (← args[fixedPrefixSize<...*].toArray.mapM (loop F))
 
   processApp (F : Expr) (e : Expr) : RecM recFnName Expr := do
-    if e.isAppOf recFnName then
+    bif e.isAppOf recFnName then
       processRec F e
     else
       e.withApp fun f args => return mkAppN (← loop F f) (← args.mapM (loop F))
@@ -96,11 +96,11 @@ where
     modifyGet (HasConstCache.contains e |>.run)
 
   loop (F : Expr) (e : Expr) : RecM recFnName Expr := do
-    if !(← containsRecFn e) then
+    bif !(← containsRecFn e) then
       return e
     if let some (newE, lctxId) := (← getThe (ExprMap _)).get? e then
       -- only use if the local context is still valid, else ignore and override
-      if (← LCtxId.isValid lctxId) then
+      bif (← LCtxId.isValid lctxId) then
         return newE
     let e' ← loopGo F e
     -- we only ever extend the local context in this procedure
@@ -108,7 +108,7 @@ where
     -- (note that we assume here that the local context is not empty)
     let lctxId ← getLCtxId
     modifyThe (ExprMap _) fun map => map.insert e (e', lctxId)
-    if (debug.definition.wf.replaceRecApps.get (← getOptions)) then
+    bif (debug.definition.wf.replaceRecApps.get (← getOptions)) then
       withTransparency .all do withNewMCtxDepth do
         unless (← isTypeCorrect e') do
           throwError "Type error introduced when transforming{indentExpr e}\nto{indentExpr e'}"
@@ -136,7 +136,7 @@ where
       else
         return mkMData d (← loop F b)
     | Expr.proj n i e => return mkProj n i (← loop F e)
-    | Expr.const .. => if e.isConstOf recFnName then processRec F e else return e
+    | Expr.const .. => bif e.isConstOf recFnName then processRec F e else return e
     | Expr.app .. =>
       match (← matchMatcherApp? (alsoCasesOn := true) e) with
       | some matcherApp =>
@@ -158,7 +158,7 @@ where
 
 /-- Refine `F` over `PSum.casesOn` -/
 private partial def processSumCasesOn (x F val : Expr) (k : (x : Expr) → (F : Expr) → (val : Expr) → TermElabM Expr) : TermElabM Expr := do
-  if x.isFVar && val.isAppOfArity ``PSum.casesOn 6 && val.getArg! 3 == x && (val.getArg! 4).isLambda && (val.getArg! 5).isLambda then
+  bif x.isFVar && val.isAppOfArity ``PSum.casesOn 6 && val.getArg! 3 == x && (val.getArg! 4).isLambda && (val.getArg! 5).isLambda then
     let args := val.getAppArgs
     let α := args[0]!
     let β := args[1]!
@@ -181,7 +181,7 @@ private partial def processSumCasesOn (x F val : Expr) (k : (x : Expr) → (F : 
 
 /-- Refine `F` over `PSigma.casesOn` -/
 private partial def processPSigmaCasesOn (x F val : Expr) (k : (F : Expr) → (val : Expr) → TermElabM Expr) : TermElabM Expr := do
-  if x.isFVar && val.isAppOfArity ``PSigma.casesOn 5 && val.getArg! 3 == x && (val.getArg! 4).isLambda && (val.getArg! 4).bindingBody!.isLambda then
+  bif x.isFVar && val.isAppOfArity ``PSigma.casesOn 5 && val.getArg! 3 == x && (val.getArg! 4).isLambda && (val.getArg! 4).bindingBody!.isLambda then
     let args := val.getAppArgs
     let [_, u, v] := val.getAppFn.constLevels! | unreachable!
     let α := args[0]!
@@ -217,13 +217,13 @@ def assignSubsumed (mvars : Array MVarId) : MetaM (Array MVarId) :=
   mvars.filterPairsM fun mv₁ mv₂ => do
     let mvdecl₁ ← mv₁.getDecl
     let mvdecl₂ ← mv₂.getDecl
-    if mvdecl₁.type == mvdecl₂.type then
+    bif mvdecl₁.type == mvdecl₂.type then
       -- same goals; check contexts.
-        if mvdecl₁.lctx.isSubPrefixOf mvdecl₂.lctx then
+        bif mvdecl₁.lctx.isSubPrefixOf mvdecl₂.lctx then
           -- mv₁ is better
           mv₂.assign (.mvar mv₁)
           return (true, false)
-        if mvdecl₂.lctx.isSubPrefixOf mvdecl₁.lctx then
+        bif mvdecl₂.lctx.isSubPrefixOf mvdecl₁.lctx then
           -- mv₂ is better
           mv₁.assign (.mvar mv₂)
           return (false, true)

@@ -68,7 +68,7 @@ partial def InfoTree.findInfo? (p : Info → Bool) (t : InfoTree) : Option Info 
   match t with
   | context _ t => findInfo? p t
   | node i ts   =>
-    if p i then
+    bif p i then
       some i
     else
       ts.findSome? (findInfo? p)
@@ -207,7 +207,7 @@ partial def InfoTree.addTrailing? (trailing : Substring.Raw) : Elab.InfoTree →
       if let some c' := c.addTrailing? trailing then
         changed := true
         newChildren := newChildren.set i c'
-    if stx?.isNone && !changed then
+    bif stx?.isNone && !changed then
       return none
     let info := match stx? with
       | some stx => info.setStx stx

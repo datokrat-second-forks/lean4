@@ -54,11 +54,11 @@ where
           ctorArgs2 := ctorArgs2.push (← `(_))
         for i in *...ctorInfo.numFields do
           let x := xs[indVal.numParams + i]!
-          if (← isProof x) then
+          bif (← isProof x) then
             -- If resulting type depends on this field or is a proof, we don't need to compare
             ctorArgs1 := ctorArgs1.push (← `(_))
             ctorArgs2 := ctorArgs2.push (← `(_))
-          else if occursOrInType (← getLCtx) x type then
+          else bif occursOrInType (← getLCtx) x type then
             -- If resulting type depends on this field, we don't need to compare
             -- but use inaccessible patterns fail during pattern match compilation if their
             -- equality does not actually follow from the equality between their types
@@ -103,7 +103,7 @@ def mkMatchNew (header : Header) (indVal : InductiveVal) : TermElabM Term := do
       let mut rhsCont : Term → TermElabM Term := fun rhs => pure rhs
       for i in *...ctorInfo.numFields do
         let x := xs[indVal.numParams + i]!
-        if occursOrInType (← getLCtx) x type then
+        bif occursOrInType (← getLCtx) x type then
           -- If resulting type depends on this field, we don't need to compare
           -- and the casesOnSameCtor only has a parameter for it once
           ctorArgs1 := ctorArgs1.push (← `(_))
@@ -114,16 +114,16 @@ def mkMatchNew (header : Header) (indVal : InductiveVal) : TermElabM Term := do
           ctorArgs1 := ctorArgs1.push a
           ctorArgs2 := ctorArgs2.push b
           let xType ← inferType x
-          if (← isProp xType) then
+          bif (← isProp xType) then
             continue
           else
             rhsCont := fun rhs => `(Ordering.then (compare $a $b) $rhs) >>= rhsCont
       let rhs ← rhsCont (← `(Ordering.eq))
-      if ctorArgs1.isEmpty then
+      bif ctorArgs1.isEmpty then
         -- Unit thunking argument
         ctorArgs1 := ctorArgs1.push (← `(()))
       `(@fun $ctorArgs1:term* $ctorArgs2:term* =>$rhs:term)
-  if indVal.numCtors == 1 then
+  bif indVal.numCtors == 1 then
     `( $(mkCIdent casesOnSameCtorName) $x1:term $x2:term rfl $alts:term* )
   else
     `( match h : compare ($(mkCIdent ctorIdxName) $x1:ident) ($(mkCIdent ctorIdxName) $x2:ident) with
@@ -134,7 +134,7 @@ def mkMatchNew (header : Header) (indVal : InductiveVal) : TermElabM Term := do
      )
 
 def mkMatch (header : Header) (indVal : InductiveVal) : TermElabM Term := do
-  if indVal.numCtors ≥ deriving.ord.linear_construction_threshold.get (← getOptions) then
+  bif indVal.numCtors ≥ᵇ deriving.ord.linear_construction_threshold.get (← getOptions) then
     mkMatchNew header indVal
   else
     mkMatchOld header indVal
@@ -144,11 +144,11 @@ def mkAuxFunction (ctx : Context) (i : Nat) : TermElabM Command := do
   let indVal     := ctx.typeInfos[i]!
   let header     ← mkOrdHeader indVal
   let mut body   ← mkMatch header indVal
-  if ctx.usePartial then
+  bif ctx.usePartial then
     let letDecls ← mkLocalInstanceLetDecls ctx `Ord header.argNames
     body ← mkLet letDecls body
   let binders    := header.binders
-  if ctx.usePartial then
+  bif ctx.usePartial then
     `(partial def $(mkIdent auxFunName):ident $binders:bracketedBinder* : Ordering := $body:term)
   else
     `(def $(mkIdent auxFunName):ident $binders:bracketedBinder* : Ordering := $body:term)
@@ -185,14 +185,14 @@ open Command
 def mkOrdInstance (declName : Name) : CommandElabM Unit := do
   withoutExposeFromCtors declName do
     let cmds ← liftTermElabM <|
-      if (← isEnumType declName) then
+      bif (← isEnumType declName) then
         mkOrdEnumCmd declName
       else
         mkOrdInstanceCmds declName
     cmds.forM elabCommand
 
 def mkOrdInstanceHandler (declNames : Array Name) : CommandElabM Bool := do
-  if (← declNames.allM isInductive) then
+  bif (← declNames.allM isInductive) then
     for declName in declNames do
       mkOrdInstance declName
     return true

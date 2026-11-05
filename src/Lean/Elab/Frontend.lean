@@ -251,7 +251,7 @@ private def setMainModule (snap : Language.Lean.InitialSnapshot) (m : Name) :
   let some parsed := snap.result? | return snap
   let processed := parsed.processedSnap.get
   let some hps := processed.result? | return snap
-  if hps.cmdState.env.header.mainModule == m then
+  bif hps.cmdState.env.header.mainModule == m then
     return snap
   let newEnv := hps.cmdState.env.setMainModule m
   -- `Command.mkState` derives `auxDeclNGen.namePrefix` from `mkPrivateName env .anonymous`, which
@@ -379,10 +379,10 @@ def runFrontend
     saveSnap incrFile (Language.Lean.truncateToHeader snap)
 
   -- stats should be displayed even if there are (non-import) errors
-  if printStats then
+  bif printStats then
     env.displayStats
 
-  if hasErrors then
+  bif hasErrors then
     return none
 
   if let some oleanFileName := oleanFileName? then
@@ -408,7 +408,7 @@ def runFrontend
     let traceStates := snaps.getAll.map (·.traces)
     let profile ← Firefox.Profile.export mainModuleName.toString startTime traceStates opts
     IO.FS.writeFile ⟨out⟩ <| Json.compress <| toJson profile
-  else if trace.profiler.serve.get finalOpts then
+  else bif trace.profiler.serve.get finalOpts then
     let traceStates := snaps.getAll.map (·.traces)
     let profile ← Firefox.Profile.export mainModuleName.toString startTime traceStates opts
     Firefox.Profile.serve <| Json.compress <| toJson profile

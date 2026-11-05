@@ -139,11 +139,11 @@ lambda of `value`, and throws appropriate errors.
 -/
 def TerminationBy.checkVars (funName : Name) (extraParams : Nat) (tb : TerminationBy) : MetaM Unit := do
   unless tb.synthetic do
-    if h : tb.vars.size > extraParams then
+    bif h : tb.vars.size >ᵇ extraParams then
       let mut msg := m!"{parameters tb.vars.size} bound in `termination_by`, but the body of " ++
         m!"{funName} only binds {parameters extraParams}."
       if let `($ident:ident) := tb.vars[0] then
-        if ident.getId.isSuffixOf funName then
+        bif ident.getId.isSuffixOf funName then
             msg := msg ++ m!" (Since Lean v4.6.0, the `termination_by` clause no longer " ++
               "expects the function name here.)"
       throwErrorAt tb.ref msg

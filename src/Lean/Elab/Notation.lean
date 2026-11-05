@@ -21,7 +21,7 @@ open Lean.Parser.Command
 private partial def antiquote (vars : Array Syntax) : Syntax → Syntax
   | stx => match stx with
   | `($id:ident) =>
-    if vars.any (fun var => var.getId == id.getId) then
+    bif vars.any (fun var => var.getId == id.getId) then
       mkAntiquotNode id (kind := `term) (isPseudoKind := true)
     else
       stx
@@ -36,7 +36,7 @@ private partial def antiquote (vars : Array Syntax) : Syntax → Syntax
     | `($f:ident $_args*) | `($f:ident) =>
       attrs.getElems.map fun stx => Unhygienic.run do
         if let `(attrInstance| $attr:ident) := stx then
-          if attr.getId.eraseMacroScopes == `inherit_doc then
+          bif attr.getId.eraseMacroScopes == `inherit_doc then
             return ← `(attrInstance| $attr:ident $f:ident)
         pure ⟨stx⟩
     | _ => attrs
@@ -49,7 +49,7 @@ def expandNotationItemIntoSyntaxItem : TSyntax ``notationItem → MacroM (TSynta
   -- | `(notationItem| $u:unicodeAtom)      => `(stx| $u:unicodeAtom)
   -- | _                                    => Macro.throwUnsupported
   | stx =>
-    if stx.raw.isOfKind ``Parser.Syntax.unicodeAtom then
+    bif stx.raw.isOfKind ``Parser.Syntax.unicodeAtom then
       return ⟨stx.raw⟩
     else
       Macro.throwUnsupported
@@ -57,13 +57,13 @@ def expandNotationItemIntoSyntaxItem : TSyntax ``notationItem → MacroM (TSynta
 /-- Convert `notation` command lhs item into a pattern element -/
 def expandNotationItemIntoPattern (stx : Syntax) : MacroM Syntax :=
   let k := stx.getKind
-  if k == ``Lean.Parser.Command.identPrec then
+  bif k == ``Lean.Parser.Command.identPrec then
     return mkAntiquotNode stx[0] (kind := `term) (isPseudoKind := true)
-  else if k == strLitKind then
+  else bif k == strLitKind then
     strLitToPattern stx
-  else if k == ``Parser.Syntax.unicodeAtom then
+  else bif k == ``Parser.Syntax.unicodeAtom then
     let preserveForPP := !stx[4].isNone
-    if preserveForPP then
+    bif preserveForPP then
       -- Use the ascii atom for the pattern; that way delaboration gives the ASCII version,
       -- which is the preferred form according to `ParserDescr.unicodeSymbol`.
       strLitToPattern stx[3]
@@ -91,9 +91,9 @@ partial def hasDuplicateAntiquot (stxs : Array Syntax) : Bool := Id.run do
   let mut seen := NameSet.empty
   for stx in stxs do
     for node in Syntax.topDown stx true do
-      if node.isAntiquot then
+      bif node.isAntiquot then
         let ident := node.getAntiquotTerm.getId
-        if seen.contains ident then
+        bif seen.contains ident then
           return true
         else
           seen := seen.insert ident
@@ -149,7 +149,7 @@ def mkUnexpander (attrKind : TSyntax ``attrKind) (pat qrhs : Term) : OptionT Mac
     let patArgs ← liftMacroM <| items.mapM expandNotationItemIntoPattern
     let pat : Term := ⟨mkNode kind patArgs⟩
     let macroDecl ← `($attrKind:attrKind macro_rules | `($pat) => ``($qrhs))
-    if isLocalAttrKind attrKind then
+    bif isLocalAttrKind attrKind then
       -- Make sure the quotation pre-checker takes section variables into account for local notation.
       let opts ← getOptions
       let opts := Term.Quotation.quotPrecheck.allowSectionVars.set opts true

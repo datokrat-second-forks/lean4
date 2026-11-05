@@ -45,9 +45,9 @@ where
     if let .proj t n e := f then
       return ← go e fun brecOnApp x c => k brecOnApp x (mkAppN (mkProj t n c) xs)
     if let .const name _ := f then
-      if isBRecOnRecursor (← getEnv) name then
+      bif isBRecOnRecursor (← getEnv) name then
         let arity ← forallTelescope (← inferType f) fun xs _ => return xs.size
-        if arity ≤ xs.size then
+        bif arity ≤ᵇ xs.size then
           let brecOnApp := mkAppN f xs[:arity]
           let extraArgs := xs[arity:]
           return ← withLocalDeclD `x (← inferType brecOnApp) fun x =>
@@ -111,10 +111,10 @@ where
 
   go (mvarId : MVarId) : MetaM Unit := do
     withTraceNode `Elab.definition.structural.eqns (fun _ => return m!"step:\n{MessageData.ofGoal mvarId}") do
-      if (← tryURefl mvarId) then
+      bif (← tryURefl mvarId) then
         trace[Elab.definition.structural.eqns] "tryURefl succeeded"
         return ()
-      else if (← tryContradiction mvarId) then
+      else bif (← tryContradiction mvarId) then
         trace[Elab.definition.structural.eqns] "tryContadiction succeeded"
         return ()
       else if let some mvarId ← whnfReducibleLHS? mvarId then

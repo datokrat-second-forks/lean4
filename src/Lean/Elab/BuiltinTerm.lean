@@ -22,7 +22,7 @@ open Meta
   return mkSort Level.zero
 
 private def elabOptLevel (stx : Syntax) : TermElabM Level :=
-  if stx.isNone then
+  bif stx.isNone then
     pure Level.zero
   else
     elabLevel stx[0]
@@ -47,7 +47,7 @@ private def elabOptLevel (stx : Syntax) : TermElabM Level :=
 
 @[builtin_term_elab «completion»] def elabCompletion : TermElab := fun stx expectedType? => do
   /- `ident.` is ambiguous in Lean, we may try to be completing a declaration name or access a "field". -/
-  if stx[0].isIdent then
+  bif stx[0].isIdent then
     -- Add both an `id` and a `dot` `CompletionInfo` and have the language server figure out which
     -- one to use.
     addCompletionInfo <| CompletionInfo.id stx stx[0].getId (danglingDot := true) (← getLCtx) expectedType?
@@ -62,20 +62,20 @@ private def elabOptLevel (stx : Syntax) : TermElabM Level :=
     elabPipeCompletion stx expectedType?
 
 @[builtin_term_elab «hole»] def elabHole : TermElab := fun stx expectedType? => do
-  let kind := if (← read).inPattern || !(← read).holesAsSyntheticOpaque then MetavarKind.natural else MetavarKind.syntheticOpaque
+  let kind := bif (← read).inPattern || !(← read).holesAsSyntheticOpaque then MetavarKind.natural else MetavarKind.syntheticOpaque
   let mvar ← mkFreshExprMVar expectedType? kind
   registerMVarErrorHoleInfo mvar.mvarId! stx
   pure mvar
 
 @[builtin_term_elab «syntheticHole»] def elabSyntheticHole : TermElab := fun stx expectedType? => do
   let arg  := stx[1]
-  let userName := if arg.isIdent then arg.getId else Name.anonymous
+  let userName := bif arg.isIdent then arg.getId else Name.anonymous
   let mkNewHole : Unit → TermElabM Expr := fun _ => do
-    let kind := if (← read).inPattern then MetavarKind.natural else MetavarKind.syntheticOpaque
+    let kind := bif (← read).inPattern then MetavarKind.natural else MetavarKind.syntheticOpaque
     let mvar ← mkFreshExprMVar expectedType? kind userName
     registerMVarErrorHoleInfo mvar.mvarId! stx
     return mvar
-  if userName.isAnonymous || (← read).inPattern then
+  bif userName.isAnonymous || (← read).inPattern then
     mkNewHole ()
   else
     match (← getMCtx).findUserName? userName with
@@ -84,21 +84,21 @@ private def elabOptLevel (stx : Syntax) : TermElabM Level :=
       let mvar := mkMVar mvarId
       let mvarDecl ← getMVarDecl mvarId
       let lctx ← getLCtx
-      if mvarDecl.lctx.isSubPrefixOf lctx then
+      bif mvarDecl.lctx.isSubPrefixOf lctx then
         return mvar
       else match (← getExprMVarAssignment? mvarId) with
       | some val =>
         let val ← instantiateMVars val
-        if (← MetavarContext.isWellFormed lctx val) then
+        bif (← MetavarContext.isWellFormed lctx val) then
           return val
         else
           withLCtx mvarDecl.lctx mvarDecl.localInstances do
             throwError "synthetic hole has already been defined and assigned to value incompatible with the current context{indentExpr val}"
       | none =>
-        if (← mvarId.isDelayedAssigned) then
+        bif (← mvarId.isDelayedAssigned) then
           -- We can try to improve this case if needed.
           throwError "synthetic hole has already been defined and delayed-assigned with an incompatible local context"
-        else if lctx.isSubPrefixOf mvarDecl.lctx then
+        else bif lctx.isSubPrefixOf mvarDecl.lctx then
           let mvarNew ← mkNewHole ()
           mvarId.assign mvarNew
           return mvarNew
@@ -144,7 +144,7 @@ private def getMVarFromUserName (ident : Syntax) : MetaM Expr := do
 @[builtin_term_elab «waitIfTypeContainsMVar»] def elabWaitIfTypeContainsMVar : TermElab := fun stx expectedType? => do
   match stx with
   | `(wait_if_type_contains_mvar% ? $n; $b) =>
-    if (← instantiateMVars (← inferType (← getMVarFromUserName n))).hasExprMVar then
+    bif (← instantiateMVars (← inferType (← getMVarFromUserName n))).hasExprMVar then
       tryPostpone
     elabTerm b expectedType?
   | _ => throwUnsupportedSyntax
@@ -152,7 +152,7 @@ private def getMVarFromUserName (ident : Syntax) : MetaM Expr := do
 @[builtin_term_elab «waitIfContainsMVar»] def elabWaitIfContainsMVar : TermElab := fun stx expectedType? => do
   match stx with
   | `(wait_if_contains_mvar% ? $n; $b) =>
-    if (← getMVarFromUserName n).hasExprMVar then
+    bif (← getMVarFromUserName n).hasExprMVar then
       tryPostpone
     elabTerm b expectedType?
   | _ => throwUnsupportedSyntax
@@ -190,7 +190,7 @@ def isEmptyByBlock (stx : Syntax) : Bool :=
   elabTerm stx[1] (mkNoImplicitLambdaAnnotation <$> expectedType?)
 
 @[builtin_term_elab Lean.Parser.Term.cdot] def elabBadCDot : TermElab := fun stx expectedType? => do
-  if stx[0].getAtomVal == "." then
+  bif stx[0].getAtomVal == "." then
     -- Users may input bad cdots because they are trying to auto-complete them using the expected type
     addCompletionInfo <| CompletionInfo.dotId stx .anonymous (← getLCtx) expectedType?
   throwError "invalid occurrence of `·` notation, it must be surrounded by parentheses (e.g. `(· + 1)`)"
@@ -217,7 +217,7 @@ private def mkFreshTypeMVarFor (expectedType? : Option Expr) : TermElabM Expr :=
   catch ex =>
     match expectedType? with
     | some expectedType =>
-      if (← isProp expectedType) then
+      bif (← isProp expectedType) then
         throwError m!"numerals are data in Lean, but the expected type is a proposition{indentExpr expectedType} : Prop"
       else
         throwError m!"numerals are data in Lean, but the expected type is universe polymorphic and may be a proposition{indentExpr expectedType} : {← inferType expectedType}"
@@ -269,7 +269,7 @@ def elabScientificLit : TermElab := fun stx expectedType? => do
 
 @[builtin_term_elab Parser.Term.withDeclName] def elabWithDeclName : TermElab := fun stx expectedType? => do
   let id := stx[2].getId
-  let id ← if stx[1].isNone then pure id else pure <| (← getCurrNamespace) ++ id
+  let id ← bif stx[1].isNone then pure id else pure <| (← getCurrNamespace) ++ id
   let e := stx[3]
   withMacroExpansion stx e <| withDeclName id <| elabTerm e expectedType?
 
@@ -299,7 +299,7 @@ def elabScientificLit : TermElab := fun stx expectedType? => do
   overhead could be significant.
 -/
 private def mkSilentAnnotationIfHole (e : Expr) : TermElabM Expr := do
-  if (← isTacticOrPostponedHole? e).isSome then
+  bif (← isTacticOrPostponedHole? e).isSome then
     return mkAnnotation `_silent e
   else
     return e
@@ -342,7 +342,7 @@ private def resynthInstImplicitArgs (type : Expr) : TermElabM Expr := do
   let args := type.getAppArgs
   let (mvars, bis, _) ← forallMetaTelescope (← inferType fn)
   for i in [:mvars.size] do
-    if bis[i]!.isInstImplicit then
+    bif bis[i]!.isInstImplicit then
       mvars[i]!.mvarId!.assign (← mkInstMVar (← inferType mvars[i]!))
     else
       mvars[i]!.mvarId!.assign args[i]!
@@ -352,7 +352,7 @@ private def resynthInstImplicitArgs (type : Expr) : TermElabM Expr := do
 @[builtin_term_elab Lean.Parser.Term.inferInstanceAs] def elabInferInstanceAs : TermElab := fun stx expectedType? => do
   -- The type argument is the last child (works for both `inferInstanceAs T` and `inferInstanceAs <| T`)
   let typeStx := stx[stx.getNumArgs - 1]!
-  if !backward.inferInstanceAs.wrap.get (← getOptions) then
+  bif !backward.inferInstanceAs.wrap.get (← getOptions) then
     return (← elabTerm (← `(_root_.inferInstanceAs $(⟨typeStx⟩))) expectedType?)
 
   let some expectedType ← tryPostponeIfHasMVars? expectedType? |
@@ -370,7 +370,7 @@ private def resynthInstImplicitArgs (type : Expr) : TermElabM Expr := do
   let type ← withSynthesize <| resynthInstImplicitArgs type
   let type ← instantiateMVars type
   let inst ← synthInstance type
-  let inst ← if backward.inferInstanceAs.wrap.get (← getOptions) then
+  let inst ← bif backward.inferInstanceAs.wrap.get (← getOptions) then
     -- Wrap instance so its type matches the expected type exactly.
     let logCompileErrors := !(← read).isNoncomputableSection && !(← read).declName?.any (Lean.isNoncomputable (← getEnv))
     let isMeta := (← read).declName?.any (isMarkedMeta (← getEnv))
@@ -390,14 +390,14 @@ private def resynthInstImplicitArgs (type : Expr) : TermElabM Expr := do
   let body := stx[3]
   let canClear ← id do
     if let some expectedType := expectedType? then
-      if ← dependsOn expectedType fvarId then
+      bif (← dependsOn expectedType fvarId) then
         return false
     for ldecl in ← getLCtx do
-      if ldecl.fvarId != fvarId then
-        if ← localDeclDependsOn ldecl fvarId then
+      bif ldecl.fvarId != fvarId then
+        bif (← localDeclDependsOn ldecl fvarId) then
           return false
     return true
-  if canClear then
+  bif canClear then
     withErasedFVars #[fvarId] do elabTerm body expectedType?
   else
     elabTerm body expectedType?
@@ -419,7 +419,7 @@ private def resynthInstImplicitArgs (type : Expr) : TermElabM Expr := do
     try
       withSaveInfoContext <| elabTerm stx[5] expectedType?
     finally
-      if stx[1].getId == `diagnostics then
+      bif stx[1].getId == `diagnostics then
         reportDiag
 
 @[builtin_term_elab withAnnotateTerm] def elabWithAnnotateTerm : TermElab := fun stx expectedType? => do
@@ -451,14 +451,14 @@ private opaque evalFilePath (stx : Syntax) : TermElabM System.FilePath
 @[builtin_term_elab «privateDecl»] def elabPrivateDecl : TermElab := fun stx expectedType? => do
   match stx with
   | `(Parser.Term.privateDecl| private_decl% $e) =>
-    if (← getEnv).isExporting then
+    bif (← getEnv).isExporting then
       let name ← mkAuxDeclName `_private
       withoutExporting do
         let e ← elabTermAndSynthesize e expectedType?
         let e ← mkAuxDefinitionFor (compile := false) name e
         -- Inline as changing visibility should not affect run time.
         setInlineAttribute name
-        if (← read).declName?.any (isMarkedMeta (← getEnv)) then
+        bif (← read).declName?.any (isMarkedMeta (← getEnv)) then
           modifyEnv (markMeta · name)
         let logCompileErrors := !(← read).isNoncomputableSection && !(← read).declName?.any (Lean.isNoncomputable (← getEnv))
         compileDecls (logErrors := logCompileErrors) #[name]

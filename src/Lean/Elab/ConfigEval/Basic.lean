@@ -31,12 +31,12 @@ def evalExprWithElab {α : Type} [EvalExpr α] (stx : Term) : TermElabM α :=
     let ty? := EvalExpr.expectedType? α
     let e ← Term.withSynthesize <| Term.elabTermEnsuringType stx ty?
     let e ← instantiateMVars e
-    if e.hasSorry then
-      if e.hasSyntheticSorry then
+    bif e.hasSorry then
+      bif e.hasSyntheticSorry then
         -- An error has already been logged.
         throwAbortTerm
       throwError "Expression contains `sorry`:{indentExpr e}"
-    if (← Term.logUnassignedUsingErrorInfos (← getMVars e)) then
+    bif (← Term.logUnassignedUsingErrorInfos (← getMVars e)) then
       throwAbortTerm
     catchInternalId unsupportedSyntaxExceptionId
       (evalExpr e)
@@ -62,7 +62,7 @@ private partial def stripParens : Term → Term
     (expectedType? : Option Expr) (f : Term → TermElabM (α × Expr)) (stx : Term) :
     TermElabM (α × Expr) := do
   let (v, e) ← withRef stx <| f (stripParens stx)
-  if (← getInfoState).enabled then
+  bif (← getInfoState).enabled then
     addTermInfo' stx e (expectedType? := expectedType?)
   return (v, e)
 
@@ -129,29 +129,29 @@ def ConfigItem.shift (item : ConfigItem) : ConfigItem :=
     prevOptionComps := item.root :: item.prevOptionComps }
 
 def ConfigItem.checkNotBool (item : ConfigItem) : TermElabM Unit := do
-  if item.bool?.isSome then
+  bif item.bool?.isSome then
     throwErrorAt item.option m!"Option is not boolean-valued, so `({item.origOptionName} := ...)` syntax must be used"
 
 def ConfigItem.throwInvalidOption {α} (item : ConfigItem) (structName? : Option Name) : TermElabM α :=
   let name := item.origOptionName
-  let nameMsg := if name.isAnonymous then m!"" else m!" `{name}`"
+  let nameMsg := bif name.isAnonymous then m!"" else m!" `{name}`"
   let structMsg := if let some structName := structName? then m!" for `{.ofConstName structName}`" else m!""
   throwErrorAt item.option "Invalid configuration option{nameMsg}{structMsg}"
 
 def ConfigItem.throwCannotSetOption {α} (item : ConfigItem) (structName? : Option Name) : TermElabM α :=
   let name := item.origOptionName
-  let nameMsg := if name.isAnonymous then m!"" else m!" `{name}`"
+  let nameMsg := bif name.isAnonymous then m!"" else m!" `{name}`"
   let structMsg := if let some structName := structName? then m!" for `{.ofConstName structName}`" else m!""
   throwErrorAt item.option "Cannot set option{nameMsg}{structMsg} using configuration syntax."
 
 nonrec def ConfigItem.addConstInfo (item : ConfigItem) (projFn : Name) : TermElabM Unit := do
-  if (← getInfoState).enabled then
-    if (← getEnv).contains projFn then -- in case we are in Lean prelude
+  bif (← getInfoState).enabled then
+    bif (← getEnv).contains projFn then -- in case we are in Lean prelude
       addConstInfo item.root projFn
 
 nonrec def ConfigItem.addCompletionInfo (item : ConfigItem) (structName : Name) : TermElabM Unit := do
-  if (← getInfoState).enabled then
-    if (← getEnv).contains structName then -- in case we are in Lean prelude
+  bif (← getInfoState).enabled then
+    bif (← getEnv).contains structName then -- in case we are in Lean prelude
       addCompletionInfo (CompletionInfo.fieldId item.root item.root.getId {} structName)
 
 variable {α : Type} {m : Type → Type} [Monad m] [MonadRef m] in
@@ -191,7 +191,7 @@ to decide what to do for items containing `Syntax.missing`.
     m α := do
   let doFail (_ : Unit) : m α := withRef cfg do onErr init cfg
   let atomAsIdent (si : SourceInfo) (val : String) : Ident :=
-    let n := if val.contains '.' then String.toName val else Name.mkSimple val
+    let n := bif val.contains '.' then String.toName val else Name.mkSimple val
     ⟨.ident si val.toRawSubstring n []⟩
   -- Matches ident/atom. Trusts that atoms are valid as idents and converts to idents,
   -- preserving the original source info.
@@ -201,23 +201,23 @@ to decide what to do for items containing `Syntax.missing`.
     | .atom si val => some <| atomAsIdent si val
     | _ => none
   let isPosNeg? (val : String) : Option Bool :=
-    if val == "+" then some true
-    else if val == "-" then some false
+    bif val == "+" then some true
+    else bif val == "-" then some false
     else none
-  if cfg.isOfKind nullKind then
+  bif cfg.isOfKind nullKind then
     foldConfigsM init cfg.getArgs k onErr
-  else if cfg.getNumArgs == 1 then
+  else bif cfg.getNumArgs == 1 then
     foldConfigM init (cfg.getArg 0) k onErr
-  else if cfg.getNumArgs ≥ 1 then
+  else bif cfg.getNumArgs ≥ᵇ 1 then
     match cfg.getArg 0 with
     | arg@(.atom _ val) =>
       if let some b := isPosNeg? val then
-        if cfg.getNumArgs == 2 then
+        bif cfg.getNumArgs == 2 then
           if let some ident := getIdent? (cfg.getArg 1) then
-            let value := if b then mkCIdentFrom arg ``true else mkCIdentFrom arg ``false
+            let value := bif b then mkCIdentFrom arg ``true else mkCIdentFrom arg ``false
             return ← k init { ref := cfg, option := ident, bool? := some b, value }
-      else if val == "(" then
-        if cfg.getNumArgs ≤ 5 then
+      else bif val == "(" then
+        bif cfg.getNumArgs ≤ᵇ 5 then
           if let some ident := getIdent? (cfg.getArg 1) then
             -- Assuming `cfg.getArg 2` is `:=`
             return ← k init { ref := cfg, option := ident, value := cfg.getArg 3 }
@@ -245,9 +245,9 @@ def EvalConfigItem.trySet {α} (eval : EvalConfigItem α)
   try
     eval.set config item
   catch ex =>
-    if logExceptions then
+    bif logExceptions then
       if let .internal id := ex then
-        if id == abortTermExceptionId then
+        bif id == abortTermExceptionId then
           -- An error has already been logged
           return config
       logException ex
@@ -263,16 +263,16 @@ If `cfgType?` is present, then it adds completion info when the identifier is mi
 -/
 def EvalConfigItem.defaultOnErr {α : Type} (cfg : α) (cfgItem : Syntax) (cfgType? : Option Expr := none) : TermElabM α := do
   if let some cfgType := cfgType? then
-    if (← getInfoState).enabled then
+    bif (← getInfoState).enabled then
       -- Assumption: the configuration item might be malformed, but if the
       -- first token is an atom and the second is missing, it is almost surely
       -- `"(" ...`, `"+" ...`, or `"-" ...` and completion would be helpful.
-      if (cfgItem.getArg 0).isAtom && (cfgItem.getArg 1).isMissing then
+      bif (cfgItem.getArg 0).isAtom && (cfgItem.getArg 1).isMissing then
         -- This expression is used only for its inferred type in the completion system.
         let expr : Expr := mkApp2 (.const ``id [1]) cfgType (.const `_cfg_dummy [])
         let info := { elaborator := `ConfigEval, stx := cfgItem.getArg 0, lctx := {}, expectedType? := none, expr }
         addCompletionInfo <| .dot info none
-  if cfgItem.hasMissing then
+  bif cfgItem.hasMissing then
     return cfg
   else
     throwUnsupportedSyntax
@@ -319,7 +319,7 @@ def EvalConfigItem.setConfig' {α : Type} (eval : EvalConfigItem α)
     (init : α) (cfg : Syntax)
     (onErr : α → Syntax → TermElabM α := defaultOnErr)
     (logExceptions : Bool := false) : CoreM α := do
-  if cfg.matchesNull 0 || (cfg.getNumArgs == 1 && (cfg.getArg 0).matchesNull 0) then
+  bif cfg.matchesNull 0 || (cfg.getNumArgs == 1 && (cfg.getArg 0).matchesNull 0) then
     -- These represent an empty null node or an `optConfig`-like syntax with no arguments.
     -- Return without doing `runConfigElab`.
     return init
@@ -333,7 +333,7 @@ def EvalConfigItem.setConfigs' {α : Type} (eval : EvalConfigItem α)
     (init : α) (cfgs : Array Syntax)
     (onErr : α → Syntax → TermElabM α := defaultOnErr)
     (logExceptions : Bool := false) : CoreM α := do
-  if cfgs.isEmpty then
+  bif cfgs.isEmpty then
     return init
   else
     runConfigElab (eval.setConfigs init cfgs onErr logExceptions)

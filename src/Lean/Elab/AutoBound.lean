@@ -56,11 +56,11 @@ an error message.
 def checkValidAutoBoundImplicitName (n : Name) (allowed : Bool) (relaxed : Bool) : Except MessageData Bool :=
   match n with
   | .str .anonymous s =>
-    if s.isEmpty then
+    bif s.isEmpty then
       .ok false
-    else if allowed && (relaxed || isValidAutoBoundSuffix s) then
+    else bif allowed && (relaxed || isValidAutoBoundSuffix s) then
       .ok true
-    else if !allowed then
+    else bif !allowed then
       .error <| .note m!"It is not possible to treat `{.ofConstName n}` as an implicitly bound variable here because the `autoImplicit` option is set to `{.ofConstName ``false}`."
     else
       .error <| .note m!"It is not possible to treat `{.ofConstName n}` as an implicitly bound variable here because it has multiple characters while the `relaxedAutoImplicit` option is set to `{.ofConstName ``false}`."

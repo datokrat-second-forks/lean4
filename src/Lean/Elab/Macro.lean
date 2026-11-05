@@ -32,9 +32,9 @@ open Lean.Parser.Command
       -- Elide `scoped` for `macro_rules`; this allows for using scoped macros in unscoped macros
       -- for back-compat and unlike with `local`, there would be no benefit to enforcing `scoped`.
       let mut rulesKind := attrKind
-      if rulesKind matches `(attrKind| scoped) then
+      bif rulesKind matches `(attrKind| scoped) then
         rulesKind ← `(attrKind| )
-      let macroRulesCmd ← if rhs.getArgs.size == 1 then
+      let macroRulesCmd ← bif rhs.getArgs.size == 1 then
         -- `rhs` is a `term`
         let rhs := ⟨rhs[0]⟩
         `($[$doc?:docComment]? $rulesKind:attrKind macro_rules | `($pat) => Functor.map (@TSyntax.raw $(quote cat.getId.eraseMacroScopes)) $rhs)

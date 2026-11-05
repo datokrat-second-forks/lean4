@@ -106,14 +106,14 @@ This parameter is varying. Set and propagate that information.
 -/
 partial def Info.setVarying (funIdx paramIdx : Nat) (info : Info) : Info := Id.run do
   let mut info : Info := info
-  if info.mayBeFixed funIdx paramIdx then
+  bif info.mayBeFixed funIdx paramIdx then
     -- Set this as varying
     info := { info with graph := info.graph.modify funIdx (·.set! paramIdx none) }
     -- Propagate along edges for already observed calls
     for otherFunIdx in *...info.graph.size do
       for otherParamIdx in *...info.graph[otherFunIdx]!.size do
         if let some otherParamInfo := info.graph[otherFunIdx]![otherParamIdx]! then
-          if otherParamInfo[funIdx]! = some paramIdx then
+          bif otherParamInfo[funIdx]! =ᵇ some paramIdx then
             info := Info.setVarying otherFunIdx otherParamIdx info
     -- Propagate along type dependencies edges
     for dependingParam in info.revDeps[funIdx]![paramIdx]! do
@@ -127,11 +127,11 @@ def Info.getCallerParam? (calleeIdx argIdx callerIdx : Nat) (info : Info) : Opti
 We observe a possibly valid edge.
 -/
 partial def Info.setCallerParam (calleeIdx argIdx callerIdx paramIdx : Nat) (info : Info) : Info :=
-  if info.mayBeFixed calleeIdx argIdx then
-    if info.mayBeFixed callerIdx paramIdx then
+  bif info.mayBeFixed calleeIdx argIdx then
+    bif info.mayBeFixed callerIdx paramIdx then
       if let some paramIdx' := info.getCallerParam? calleeIdx argIdx callerIdx then
       -- We already have an etry
-      if paramIdx = paramIdx' then
+      bif paramIdx =ᵇ paramIdx' then
         -- all good
         info
       else
@@ -152,7 +152,7 @@ partial def Info.setCallerParam (calleeIdx argIdx callerIdx paramIdx : Nat) (inf
           for otherArgIdx in *...info.graph[otherFunIdx]!.size do
             if let some otherArgsInfo := info.graph[otherFunIdx]![otherArgIdx]! then
               if let some paramIdx' := otherArgsInfo[calleeIdx]! then
-                if paramIdx' = argIdx then
+                bif paramIdx' =ᵇ argIdx then
                   info := info.setCallerParam otherFunIdx otherArgIdx callerIdx paramIdx
 
         return info
@@ -183,7 +183,7 @@ def getParamRevDeps (value : Expr) : MetaM (Array (Array Nat)) := do
     for h : i in *...xs.size do
       let mut deps := #[]
       for h : j in (i+1)...xs.size do
-        if (← dependsOn (← inferType xs[j]) xs[i].fvarId!) then
+        bif (← dependsOn (← inferType xs[j]) xs[i].fvarId!) then
           deps := deps.push j
       revDeps := revDeps.push deps
     pure revDeps
@@ -208,8 +208,8 @@ def getFixedParamsInfo (preDefs : Array PreDefinition) : MetaM FixedParams.Info 
         let n := f.constName!
         let some calleeIdx := preDefs.findIdx? (·.declName = n) | return .continue
         for argIdx in *...arities[calleeIdx]! do
-          if (← ref.get).mayBeFixed calleeIdx argIdx then
-            if h : argIdx < args.size then
+          bif (← ref.get).mayBeFixed calleeIdx argIdx then
+            bif h : argIdx <ᵇ args.size then
               let arg := args[argIdx]
               -- We have seen this before (or it is a self-call), so only check that one param
               if let some paramIdx := (← ref.get).getCallerParam? calleeIdx argIdx callerIdx then
@@ -221,9 +221,9 @@ def getFixedParamsInfo (preDefs : Array PreDefinition) : MetaM FixedParams.Info 
               -- Try all parameters
               let mut any := false
               for h : paramIdx in *...params.size do
-                if (← ref.get).mayBeFixed callerIdx paramIdx then
+                bif (← ref.get).mayBeFixed callerIdx paramIdx then
                   let param := params[paramIdx]
-                  if (← withoutProofIrrelevance <| withReducible <| isDefEq param arg) then
+                  bif (← withoutProofIrrelevance <| withReducible <| isDefEq param arg) then
                     ref.modify (Info.setCallerParam calleeIdx argIdx callerIdx paramIdx)
                     any := true
               unless any do
@@ -368,7 +368,7 @@ where
         assert! fixedParamIdx < xs.size
         go mask (← Meta.instantiateLambda value #[xs[fixedParamIdx]!])
      | .none::mask, value =>
-        if mask.all Option.isNone then
+        bif mask.all Option.isNone then
           -- Nothing left to do. Also helpful if we may encounter an eta-contracted value
           return value
         else
@@ -382,7 +382,7 @@ Expects `xs` to match the arity of the function.
 -/
 def FixedParamPerm.pickFixed (perm : FixedParamPerm) (xs : Array α) : Array α := Id.run do
   assert! xs.size = perm.size
-  if h : xs.size = 0 then
+  bif h : xs.size =ᵇ 0 then
     pure #[]
   else
     let dummy := xs[0]
@@ -403,7 +403,7 @@ Unlike `pickFixed`, this function can handle over- or under-application.
 def FixedParamPerm.pickVarying (perm : FixedParamPerm) (xs : Array α) : Array α := Id.run do
   let mut ys := #[]
   for h : i in *...xs.size do
-    if perm[i]?.join.isNone then ys := ys.push xs[i]
+    bif perm[i]?.join.isNone then ys := ys.push xs[i]
   pure ys
 
 /--
@@ -417,17 +417,17 @@ partial def FixedParamPerm.buildArgs (perm : FixedParamPerm) (fixedArgs varyingA
   go 0 0 #[]
 where
   go i j (xs : Array α) :=
-    if _ : i < perm.size then
+    bif _ : i <ᵇ perm.size then
       if let some fixedParamIdx := perm[i] then
-        if _ : fixedParamIdx < fixedArgs.size then
+        bif _ : fixedParamIdx <ᵇ fixedArgs.size then
           go (i + 1) j (xs.push fixedArgs[fixedParamIdx])
         else
           panic! "FixedParams.buildArgs: too few fixed args"
       else
-        if _ : j < varyingArgs.size then
+        bif _ : j <ᵇ varyingArgs.size then
           go (i + 1) (j + 1) (xs.push varyingArgs[j])
         else
-          if perm[i...*].all Option.isNone then
+          bif perm[i...*].all Option.isNone then
             xs -- Under-application
           else
             panic! "FixedParams.buildArgs: too few varying args"
@@ -470,10 +470,10 @@ def FixedParamPerms.erase  (fixedParamPerms : FixedParamPerms) (xs : Array Expr)
     for h : funIdx in *...fixedParamPerms.perms.size do
       for h : paramIdx₁ in *...fixedParamPerms.perms[funIdx].size do
         if let some fixedParamIdx₁ := fixedParamPerms.perms[funIdx][paramIdx₁] then
-          if mask[fixedParamIdx₁]! then
+          bif mask[fixedParamIdx₁]! then
             for paramIdx₂ in fixedParamPerms.revDeps[funIdx]![paramIdx₁]! do
               if let some fixedParamIdx₂ := fixedParamPerms.perms[funIdx][paramIdx₂]! then
-                if !mask[fixedParamIdx₂]! then
+                bif !mask[fixedParamIdx₂]! then
                   mask := mask.set! fixedParamIdx₂ true
                   changed := true
   -- Calculate reindexing map, variables to keep, variables to erase
@@ -481,7 +481,7 @@ def FixedParamPerms.erase  (fixedParamPerms : FixedParamPerms) (xs : Array Expr)
   let mut fvarsToErase :=#[]
   let mut toKeep :=#[]
   for i in *...mask.size, erase in mask, x in xs do
-    if erase then
+    bif erase then
       reindex := reindex.push none
       fvarsToErase := fvarsToErase.push x.fvarId!
     else

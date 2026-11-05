@@ -136,10 +136,10 @@ private def collect (env : Environment) (inPackage : Name → Bool) :
   let mut out := #[]
   for i in [0:env.header.moduleNames.size] do
     let mod := env.header.moduleNames[i]!
-    if inPackage mod then
+    bif inPackage mod then
       out := out ++ (deferredCheckExt.getModuleEntries env i).map (mod, ·)
   let mod := env.mainModule
-  if inPackage mod then
+  bif inPackage mod then
     out := out ++ (deferredCheckExt.getState env).map (mod, ·)
   return out
 
@@ -161,7 +161,7 @@ def run (inPackage : Name → Bool) (shouldCheck : DeferredCheck → CoreM Bool 
   for (mod, c) in collect env inPackage do
     unless (← shouldCheck c) do continue
     let missing := c.imports.filter (!moduleNames.contains ·)
-    if !missing.isEmpty then
+    bif !missing.isEmpty then
       failures := failures.push (mod, c,
         m!"the check requires {missing.toList} to be imported, but they are not")
     else

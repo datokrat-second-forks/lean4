@@ -63,7 +63,7 @@ partial def mkEqnProof (declName : Name) (type : Expr) : MetaM Expr := do
 
     -- Try rfl before deltaLHS to avoid `id` checkpoints in the proof, which would make
     -- the lemma ineligible for dsimp
-    if (← tryURefl mvarId) then
+    bif (← tryURefl mvarId) then
       trace[Elab.definition.eqns] "proved directly by rfl"
       return ← instantiateMVars main
 
@@ -79,9 +79,9 @@ partial def mkEqnProof (declName : Name) (type : Expr) : MetaM Expr := do
   -/
   go (mvarId : MVarId) : MetaM Unit := do
     withTraceNode `Elab.definition.eqns (fun _ => return m!"step:\n{MessageData.ofGoal mvarId}") do
-    if (← tryURefl mvarId) then
+    bif (← tryURefl mvarId) then
       return ()
-    else if (← tryContradiction mvarId) then
+    else bif (← tryContradiction mvarId) then
       return ()
     else if let some mvarId ← simpMatch? mvarId then
       go mvarId
@@ -120,19 +120,19 @@ def simpEqnType (eqnType : Expr) : MetaM Expr := do
     let mut eliminated : FVarIdSet := {}
     for y in ys.reverse do
       trace[Elab.definition] ">> simpEqnType: {← inferType y}, {type}"
-      if proofVars.contains y.fvarId! then
+      bif proofVars.contains y.fvarId! then
         let some (_, Expr.fvar fvarId, rhs) ← matchEq? (← inferType y) | throwError "unexpected hypothesis in alternative{indentExpr eqnType}"
         eliminated := eliminated.insert fvarId
         type := type.replaceFVarId fvarId rhs
-      else if eliminated.contains y.fvarId! then
-        if (← dependsOn type y.fvarId!) then
+      else bif eliminated.contains y.fvarId! then
+        bif (← dependsOn type y.fvarId!) then
           type ← mkForallFVars #[y] type
       else
         if let some (_, lhs, rhs) ← matchEq? (← inferType y) then
-          if (← isDefEq lhs rhs) then
-            if !(← dependsOn type y.fvarId!) then
+          bif (← isDefEq lhs rhs) then
+            bif !(← dependsOn type y.fvarId!) then
               continue
-            else if !(← lhsDependsOn type y.fvarId!) then
+            else bif !(← lhsDependsOn type y.fvarId!) then
               -- Since the `lhs` of the `type` does not depend on `y`, we replace it with `Eq.refl` in the `rhs`
               type := type.replaceFVar y (← mkEqRefl lhs)
               continue
@@ -146,7 +146,7 @@ where
       e.forEachWhere Match.isNamedPattern fun e => do
         let some e := Match.isNamedPattern? e | unreachable!
         let arg := e.appArg!.consumeMData
-        if arg.isFVar then
+        bif arg.isFVar then
           ST.Prim.Ref.modify ref (·.insert arg.fvarId!)
       ST.Prim.Ref.get ref
     runST (go e)
@@ -156,7 +156,7 @@ partial def saveEqn (mvarId : MVarId) : StateRefT (Array Expr) MetaM Unit := mva
   let target ← mvarId.getType'
   let fvarState := collectFVars {} target
   let fvarState ← (← getLCtx).foldrM (init := fvarState) fun decl fvarState => do
-    if fvarState.fvarSet.contains decl.fvarId then
+    bif fvarState.fvarSet.contains decl.fvarId then
       return collectFVars fvarState (← instantiateMVars decl.type)
     else
       return fvarState
@@ -168,7 +168,7 @@ partial def saveEqn (mvarId : MVarId) : StateRefT (Array Expr) MetaM Unit := mva
     modified := false
     for decl in (← getLCtx) do
       unless fvarIdSet.contains decl.fvarId do
-        if (← isProp decl.type) then
+        bif (← isProp decl.type) then
           let type ← instantiateMVars decl.type
           unless (← isIrrelevant fvarIdSet type) do
             modified := true
@@ -184,7 +184,7 @@ where
     2- It is of the form `x = t` or `t = x` where `x` is a free variable
        that is not in `fvarIdSet`. This can of equality can be eliminated by substitution.  -/
   isIrrelevant (fvarIdSet : FVarIdSet) (type : Expr) : MetaM Bool := do
-    if Option.isNone <| type.find? fun e => e.isFVar && fvarIdSet.contains e.fvarId! then
+    bif Option.isNone <| type.find? fun e => e.isFVar && fvarIdSet.contains e.fvarId! then
       return true
     else if let some (_, lhs, rhs) := type.eq? then
       return (lhs.isFVar && !fvarIdSet.contains lhs.fvarId!)
@@ -234,14 +234,14 @@ def shouldUseSimpMatch (e : Expr) : MetaM Bool := do
       if let some info := isMatcherAppCore? env e then
         let args := e.getAppArgs
         for discr in args[info.getFirstDiscrPos...(info.getFirstDiscrPos + info.numDiscrs)] do
-          if (← Meta.isConstructorApp discr) then
+          bif (← Meta.isConstructorApp discr) then
             throwThe Unit ()
   return (← (find e).run) matches .error _
 
 def findMatchToSplit? (deepRecursiveSplit : Bool) (env : Environment) (e : Expr)
     (declNames : Array Name) (exceptionSet : ExprSet) : Option Expr :=
   e.findExt? fun e => Id.run do
-    if e.hasLooseBVars || exceptionSet.contains e then
+    bif e.hasLooseBVars || exceptionSet.contains e then
       return Expr.FindStep.visit
     else if let some info := isMatcherAppCore? env e then
       let args := e.getAppArgs
@@ -249,27 +249,27 @@ def findMatchToSplit? (deepRecursiveSplit : Bool) (env : Environment) (e : Expr)
       let mut hasFVarDiscr := false
       for i in info.getFirstDiscrPos...(info.getFirstDiscrPos + info.numDiscrs) do
         let discr := args[i]!
-        if discr.isFVar then
+        bif discr.isFVar then
           hasFVarDiscr := true
           break
       unless hasFVarDiscr do
         return Expr.FindStep.visit
       -- For non-recursive functions (`declNames` empty), we split here
-      if declNames.isEmpty then
+      bif declNames.isEmpty then
           return Expr.FindStep.found
       -- For recursive functions, the “new” behavior is to likewise split
-      if deepRecursiveSplit then
+      bif deepRecursiveSplit then
           return Expr.FindStep.found
       -- Else, the “old” behavior is split only when at least one alternative contains a `declNames`
       -- application with loose bound variables.
       for i in info.getFirstAltPos...(info.getFirstAltPos + info.numAlts) do
         let alt := args[i]!
-        if Option.isSome <| alt.find? fun e => declNames.any e.isAppOf && e.hasLooseBVars then
+        bif Option.isSome <| alt.find? fun e => declNames.any e.isAppOf && e.hasLooseBVars then
           return Expr.FindStep.found
       return Expr.FindStep.visit
     else
       let Expr.const declName .. := e.getAppFn | return Expr.FindStep.visit
-      if declName == ``WellFounded.fix || isBRecOnRecursor env declName then
+      bif declName == ``WellFounded.fix || isBRecOnRecursor env declName then
         -- We should not go inside unfolded nested recursive applications
         return Expr.FindStep.done
       else
@@ -300,7 +300,7 @@ where
     if let some mvarId ← expandRHS? mvarId then
       return (← go mvarId)
 
-    if (← shouldUseSimpMatch (← mvarId.getType')) then
+    bif (← shouldUseSimpMatch (← mvarId.getType')) then
       if let some mvarId ← simpMatch? mvarId then
         return (← go mvarId)
 
@@ -331,10 +331,10 @@ where
       let mut s := collectFVars (collectFVars {} type) value
       let mut xsNew := #[]
       for x in xs.reverse do
-        if s.fvarSet.contains x.fvarId! then
+        bif s.fvarSet.contains x.fvarId! then
           s := collectFVars s (lctx.getFVar! x).type
           xsNew := xsNew.push x
-      if xsNew.size == xs.size then
+      bif xsNew.size == xs.size then
         return (declType, declValue)
       else
         xsNew := xsNew.reverse
@@ -396,13 +396,13 @@ def mkEqns (declName : Name) (declNames : Array Name) : MetaM (Array Name) := do
   return thmNames
 
 def getEqnsFor? (declName : Name) : MetaM (Option (Array Name)) := do
-  if (← isRecursiveDefinition declName) then
+  bif (← isRecursiveDefinition declName) then
     let some (.defnInfo info) := (← getEnv).find? declName |
       throwError "internal error: recursive definition `{declName}` is not a definition"
     let n ← mkEqns declName info.all.toArray
     return some n
-  if (← getEnv).contains declName then
-    if backward.eqns.nonrecursive.get (← getOptions) then
+  bif (← getEnv).contains declName then
+    bif backward.eqns.nonrecursive.get (← getOptions) then
       mkEqns declName #[]
     else
       let eq1 := mkEqLikeNameFor (← getEnv) declName eqn1ThmSuffix

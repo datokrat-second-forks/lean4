@@ -44,7 +44,7 @@ def validateForwarder (headApp : Term) (forwarded probeExpr : Expr) : MetaM Unit
     reject m!"its return type pins `α` to a concrete type"
   let argMentionsAlpha (arg : Expr) : MetaM (Option Expr) := do
     let ty ← inferType arg
-    if (← instantiateMVars ty).findMVar? (· == alphaRet.mvarId!) |>.isSome then
+    bif (← instantiateMVars ty).findMVar? (· == alphaRet.mvarId!) |>.isSome then
       return some ty
     else return none
   forallTelescopeReducing (← inferType forwarded) fun args body => do
@@ -57,7 +57,7 @@ def validateForwarder (headApp : Term) (forwarded probeExpr : Expr) : MetaM Unit
     for (fvar, appArg) in fvars.zip probeExpr.getAppArgs do
       unless (← fvar.fvarId!.getDecl).binderInfo matches .default do continue
       let appArgInst ← instantiateMVars appArg
-      if appArgInst == forwarded then continue
+      bif appArgInst == forwarded then continue
       if let some ty ← argMentionsAlpha appArgInst then
         reject m!"`α` appears in an applied explicit argument of type `{ty}`"
 
@@ -85,7 +85,7 @@ public def tryElabForwardApp? (e : Term) (dec : DoElemCont) : DoElabM (Option Ex
     let slotType ← instantiateMVars (← inferType forwarded)
     let (binders, _, isPattern) ←
       liftMacroM <| Term.expandFunBinders (arg.binders.map (·.raw)) (← `(_))
-    if isPattern then
+    bif isPattern then
       throwError "\
         A `do←` binder must be a variable. Bind a variable and `match` on it in the body."
     Term.elabFunBinders binders (some slotType) fun bsExpr _ => runInBase do

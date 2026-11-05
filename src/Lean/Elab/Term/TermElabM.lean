@@ -509,7 +509,7 @@ def withNarrowedTacticReuse [Monad m] [MonadReaderOf Context m] [MonadLiftT Base
     }
   }) do
     if let some oldOuter := ctx.tacSnap?.bind (·.old?) then
-      if (← read).tacSnap?.bind (·.old?) |>.isNone then
+      bif (← read).tacSnap?.bind (·.old?) |>.isNone then
         oldOuter.val.cancelRec
     withReuseContext inner (act inner)
 
@@ -538,7 +538,7 @@ def withoutTacticIncrementality [Monad m] [MonadWithReaderOf Context m] [MonadOp
   let opts ← getOptions
   withTheReader Term.Context (fun ctx => { ctx with tacSnap? := ctx.tacSnap?.filter fun tacSnap => Id.run do
     if let some old := tacSnap.old? then
-      if cond && opts.getBool `trace.Elab.reuse then
+      bif cond && opts.getBool `trace.Elab.reuse then
         dbg_trace "reuse stopped: guard failed at {old.stx}"
     return !cond
   }) act
@@ -549,7 +549,7 @@ def withoutTacticReuse [Monad m] [MonadWithReaderOf Context m] [MonadOptions m]
   let opts ← getOptions
   withTheReader Term.Context (fun ctx => { ctx with tacSnap? := ctx.tacSnap?.map fun tacSnap =>
     { tacSnap with old? := tacSnap.old?.filter fun old => Id.run do
-      if cond && opts.getBool `trace.Elab.reuse then
+      bif cond && opts.getBool `trace.Elab.reuse then
         dbg_trace "reuse stopped: guard failed at {old.stx}"
       return !cond }
   }) act
@@ -587,7 +587,7 @@ def observing (x : TermElabM α) : TermElabM (TermElabResult α) := do
       s.restore (restoreInfo := true)
       return .error ex sNew
     | ex@(.internal id _) =>
-      if id == postponeExceptionId then
+      bif id == postponeExceptionId then
         s.restore (restoreInfo := true)
       throw ex
 
@@ -682,7 +682,7 @@ instance : ToString LVal where
     | .fieldName _ n levels .. => n ++ levelsToString levels
 where
   levelsToString levels :=
-    if levels.isEmpty then "" else ".{" ++ String.intercalate "," (levels.map toString) ++ "}"
+    bif levels.isEmpty then "" else ".{" ++ String.intercalate "," (levels.map toString) ++ "}"
 
 /-- Return the name of the declaration being elaborated if available. -/
 def getDeclName? : TermElabM (Option Name) := return (← read).declName?
@@ -785,7 +785,7 @@ available in the monadic context and only needed for the final info tree.
 -/
 def getInfoTreeWithContext? : TermElabM (Option InfoTree) := do
   let st ← getInfoState
-  if st.trees.size > 1 then
+  bif st.trees.size >ᵇ 1 then
     return panic! "getInfoTreeWithContext: overfull tree"
   let some t := st.trees[0]? |
     return none
@@ -800,7 +800,7 @@ def getInfoTreeWithContext? : TermElabM (Option InfoTree) := do
 
 /-- For testing `TermElabM` methods. The #eval command will sign the error. -/
 def throwErrorIfErrors : TermElabM Unit := do
-  if (← MonadLog.hasErrors) then
+  bif (← MonadLog.hasErrors) then
     throwError "Error(s)"
 
 def traceAtCmdPos (cls : Name) (msg : Unit → MessageData) : TermElabM Unit :=
@@ -898,7 +898,7 @@ def registerMVarArgName (mvarId : MVarId) (argName : Name) : TermElabM Unit :=
   cannot continue if there are metavariables in patterns.
   We only want to log it if we haven't logged any errors so far. -/
 def throwMVarError (m : MessageData) : TermElabM α := do
-  if (← MonadLog.hasErrors) then
+  bif (← MonadLog.hasErrors) then
     throwAbortTerm
   else
     throwError m
@@ -922,7 +922,7 @@ where
   addArgName (msg : MessageData) (extra : String := "") : TermElabM MessageData := do
     match (← get).mvarArgNames.get? mvarErrorInfo.mvarId with
     | none => return msg
-    | some argName => return if argName.hasMacroScopes then msg else msg ++ extra ++ m!" `{argName}`"
+    | some argName => return bif argName.hasMacroScopes then msg else msg ++ extra ++ m!" `{argName}`"
 
   appendExtra (msg : MessageData) : MessageData :=
     match extraMsg? with
@@ -937,7 +937,7 @@ where
 
   Remark: We only log the "unfilled holes" as new errors if no error has been logged so far. -/
 def logUnassignedUsingErrorInfos (pendingMVarIds : Array MVarId) (extraMsg? : Option MessageData := none) : TermElabM Bool := do
-  if pendingMVarIds.isEmpty then
+  bif pendingMVarIds.isEmpty then
     return false
   else
     let hasOtherErrors ← MonadLog.hasErrors
@@ -951,7 +951,7 @@ def logUnassignedUsingErrorInfos (pendingMVarIds : Array MVarId) (extraMsg? : Op
         /- The metavariable `mvarErrorInfo.mvarId` may have been assigned or
            delayed assigned to another metavariable that is unassigned. -/
         let mvarDeps ← getMVars (mkMVar mvarId)
-        if mvarDeps.any pendingMVarIds.contains then do
+        bif mvarDeps.any pendingMVarIds.contains then do
           unless hasOtherErrors do
             errors := errors.push mvarErrorInfo
           hasNewErrors := true
@@ -971,7 +971,7 @@ def registerLevelMVarErrorExprInfo (expr : Expr) (ref : Syntax) (msgData? : Opti
 def exposeLevelMVars (e : Expr) : MetaM Expr :=
   Core.transform e
     (pre := fun e => do
-      if e.isSorry then
+      bif e.isSorry then
         -- (kmill) Exposing metavariables in a `sorry` exposes its encoding.
         -- On balance, for now it seems better to see `sorry` than ``sorryAx.{?u + 1} (Name → Sort ?u) false `external...hygCtx._hyg.6``
         return .done e
@@ -979,10 +979,10 @@ def exposeLevelMVars (e : Expr) : MetaM Expr :=
         return .continue)
     (post := fun e => do
       match e with
-      | .const _ us     => return .done <| if us.any (·.hasMVar) then e.setPPUniverses true else e
-      | .sort u         => return .done <| if u.hasMVar then e.setPPUniverses true else e
-      | .lam _ t _ _    => return .done <| if t.hasLevelMVar then e.setOption `pp.funBinderTypes true else e
-      | .letE _ t _ _ _ => return .done <| if t.hasLevelMVar then e.setOption `pp.letVarTypes true else e
+      | .const _ us     => return .done <| bif us.any (·.hasMVar) then e.setPPUniverses true else e
+      | .sort u         => return .done <| bif u.hasMVar then e.setPPUniverses true else e
+      | .lam _ t _ _    => return .done <| bif t.hasLevelMVar then e.setOption `pp.funBinderTypes true else e
+      | .letE _ t _ _ _ => return .done <| bif t.hasLevelMVar then e.setOption `pp.letVarTypes true else e
       | _               => return .done e)
 
 def LevelMVarErrorInfo.logError (levelMVarErrorInfo : LevelMVarErrorInfo) : TermElabM Unit :=
@@ -1000,7 +1000,7 @@ Returns `true` if there are any relevant `LevelMVarErrorInfo`s and we should "ab
 Remark: we only log unassigned level metavariables as new errors if no error has been logged so far.
 -/
 def logUnassignedLevelMVarsUsingErrorInfos (pendingLevelMVarIds : Array LMVarId) : TermElabM Bool := do
-  if pendingLevelMVarIds.isEmpty then
+  bif pendingLevelMVarIds.isEmpty then
     return false
   else
     let hasOtherErrors ← MonadLog.hasErrors
@@ -1009,7 +1009,7 @@ def logUnassignedLevelMVarsUsingErrorInfos (pendingLevelMVarIds : Array LMVarId)
     for levelMVarErrorInfo in (← get).levelMVarErrorInfos do
       let e ← instantiateMVars levelMVarErrorInfo.expr
       let lmvars := (collectLevelMVars {} e).result
-      if lmvars.any pendingLevelMVarIds.contains then do
+      bif lmvars.any pendingLevelMVarIds.contains then do
         unless hasOtherErrors do
           errors := errors.push levelMVarErrorInfo
         hasNewErrors := true
@@ -1023,13 +1023,13 @@ Gives entire applications to `f`.
 -/
 partial def forEachExprWithExposedLevelMVars (e : Expr) (f : Expr → TermElabM Unit) : TermElabM Unit := do
   let rec visitLevel (u : Level) (e : Expr) : TermElabM Unit := do
-    if u.hasMVar then
+    bif u.hasMVar then
       let e' ← exposeLevelMVars e
       f e'
   let withExpr (e : Expr) (m : ReaderT Expr (MonadCacheT ExprStructEq Unit TermElabM) Unit) :=
     withReader (fun _ => e) m
   let rec visit (e : Expr) (head := false) : ReaderT Expr (MonadCacheT ExprStructEq Unit TermElabM) Unit := do
-    if e.hasLevelMVar then
+    bif e.hasLevelMVar then
       checkCache { val := e : ExprStructEq } fun _ => do
         match e with
         | .forallE n d b c | .lam n d b c => withExpr e do visit d; withLocalDecl n c d fun x => visit (b.instantiate1 x)
@@ -1037,7 +1037,7 @@ partial def forEachExprWithExposedLevelMVars (e : Expr) (f : Expr → TermElabM 
         | .mdata _ b     => withExpr e do visit b
         | .proj _ _ b    => withExpr e do visit b
         | .sort u        => visitLevel u (← read)
-        | .const _ us    => (if head then id else withExpr e) <| us.forM (visitLevel · (← read))
+        | .const _ us    => (bif head then id else withExpr e) <| us.forM (visitLevel · (← read))
         | .app ..        => withExpr e do e.withApp fun f args => do visit f true; args.forM visit
         | _              => pure ()
   visit e |>.run e |>.run {}
@@ -1045,7 +1045,7 @@ partial def forEachExprWithExposedLevelMVars (e : Expr) (f : Expr → TermElabM 
 /-- Ensure metavariables registered using `registerMVarErrorInfos` (and used in the given declaration) have been assigned. -/
 def ensureNoUnassignedMVars (decl : Declaration) : TermElabM Unit := do
   let pendingMVarIds ← getMVarsAtDecl decl
-  if (← logUnassignedUsingErrorInfos pendingMVarIds) then
+  bif (← logUnassignedUsingErrorInfos pendingMVarIds) then
     throwAbortCommand
 
 /--
@@ -1092,7 +1092,7 @@ private def applyAttributesCore
   Remark: if the declaration has syntax errors, `declName` may be `.anonymous` see issue #4309
   In this case, we skip attribute application.
   -/
-  if declName == .anonymous then
+  bif declName == .anonymous then
     return
   withDeclName declName do
     for attr in attrs do
@@ -1108,10 +1108,10 @@ private def applyAttributesCore
         let runAttr := do
           -- not truly an elaborator, but a sensible target for go-to-definition
           let elaborator := attrImpl.ref
-          if (← getInfoState).enabled then
+          bif (← getInfoState).enabled then
             withInfoContext (mkInfo := return .ofCommandInfo { elaborator, stx := attr.stx }) do
               try runAttr
-              finally if attr.stx[0].isIdent || attr.stx[0].isAtom then
+              finally bif attr.stx[0].isIdent || attr.stx[0].isAtom then
                 -- Add an additional node over the leading identifier if there is one to make it look more function-like.
                 -- Do this last because we want user-created infos to take precedence
                 pushInfoLeaf <| .ofCommandInfo { elaborator, stx := attr.stx[0] }
@@ -1120,7 +1120,7 @@ private def applyAttributesCore
         match applicationTime? with
         | none => runAttr
         | some applicationTime =>
-          if applicationTime == attrImpl.applicationTime then
+          bif applicationTime == attrImpl.applicationTime then
             runAttr
 
 /-- Apply given attributes **at** a given application time -/
@@ -1180,7 +1180,7 @@ partial def visit (e : Expr) : M Unit := do
       | .ldecl (value := v) .. => visit v
     | .mvar mvarId ..    =>
       let e' ← instantiateMVars e
-      if e' != e then
+      bif e' != e then
         visit e'
       else
         match (← getDelayedMVarAssignment? mvarId) with
@@ -1201,7 +1201,7 @@ If the `trace.Meta.synthInstance` option is not already set, gives a hint explai
 -/
 def useTraceSynthMsg : MessageData :=
   MessageData.lazy fun ctx =>
-    if trace.Meta.synthInstance.get ctx.opts then
+    bif trace.Meta.synthInstance.get ctx.opts then
       pure .nil
     else
       pure <| .hint' s!"Type class instance resolution failures can be inspected with the `set_option {trace.Meta.synthInstance.name} true` command."
@@ -1242,10 +1242,10 @@ def synthesizeInstMVarCore (instMVar : MVarId) (maxResultSize? : Option Nat := n
   let result ← trySynthInstance type maxResultSize?
   match result with
   | LOption.some val =>
-    if (← instMVar.isAssigned) then
+    bif (← instMVar.isAssigned) then
       let oldVal ← instantiateMVars (mkMVar instMVar)
       unless (← isDefEq oldVal val) do
-        if (← containsPendingMVar oldVal <||> containsPendingMVar val) then
+        bif (← containsPendingMVar oldVal <||> containsPendingMVar val) then
           /- If `val` or `oldVal` contains metavariables directly or indirectly (e.g., in a let-declaration),
              we return `false` to indicate we should try again later. This is very coarse grain since
              the metavariable may not be responsible for the failure. We should refine the test in the future if needed.
@@ -1278,13 +1278,13 @@ def synthesizeInstMVarCore (instMVar : MVarId) (maxResultSize? : Option Nat := n
     return true
   | .undef => return false -- we will try later
   | .none  =>
-    if (← read).ignoreTCFailures then
+    bif (← read).ignoreTCFailures then
       return false
     else
       let msg ← match type with
         | .app (.const cls _) (.const typ _) =>
           -- This has the structure of a `deriving`-style type class, alter feedback accordingly
-          if ← hasDerivingHandler cls then
+          bif (← hasDerivingHandler cls) then
             pure <| extraErrorMsg ++ .hint' m!"Adding the command `deriving instance {cls} for {typ}` may allow Lean to derive the missing instance."
           else
             pure <| extraErrorMsg ++ useTraceSynthMsg
@@ -1339,7 +1339,7 @@ Argument `f?` is used only for generating error messages when inserting coercion
 def ensureHasType (expectedType? : Option Expr) (e : Expr)
     (errorMsgHeader? : Option String := none) (f? : Option Expr := none) : TermElabM Expr := do
   let some expectedType := expectedType? | return e
-  if (← isDefEq (← inferType e) expectedType) then
+  bif (← isDefEq (← inferType e) expectedType) then
     return e
   else
     mkCoe expectedType e f? errorMsgHeader?
@@ -1348,7 +1348,7 @@ def ensureHasTypeWithErrorMsgs (expectedType? : Option Expr) (e : Expr)
     (mkImmedErrorMsg : (errorMsg? : Option MessageData) → (expectedType e : Expr) → MetaM MessageData)
     (mkErrorMsg : MVarId → (expectedType e : Expr) → MetaM MessageData) : TermElabM Expr := do
   let some expectedType := expectedType? | return e
-  if (← isDefEq (← inferType e) expectedType) then
+  bif (← isDefEq (← inferType e) expectedType) then
     return e
   else
     mkCoeWithErrorMsgs expectedType e mkImmedErrorMsg mkErrorMsg
@@ -1373,7 +1373,7 @@ def exceptionToSorry (ex : Exception) (expectedType? : Option Expr) : TermElabM 
 
 /-- If `mayPostpone == true`, throw `Exception.postpone`. -/
 def tryPostpone : TermElabM Unit := do
-  if (← read).mayPostpone then
+  bif (← read).mayPostpone then
     throwPostpone
 
 /-- Return `true` if `e` reduces (by unfolding only `[reducible]` declarations) to `?m ...` -/
@@ -1382,7 +1382,7 @@ def isMVarApp (e : Expr) : TermElabM Bool :=
 
 /-- If `mayPostpone == true` and `e`'s head is a metavariable, throw `Exception.postpone`. -/
 def tryPostponeIfMVar (e : Expr) : TermElabM Unit := do
-  if (← isMVarApp e) then
+  bif (← isMVarApp e) then
     tryPostpone
 
 /-- If `e? = some e`, then `tryPostponeIfMVar e`, otherwise it is just `tryPostpone`. -/
@@ -1399,7 +1399,7 @@ def tryPostponeIfHasMVars? (expectedType? : Option Expr) : TermElabM (Option Exp
   tryPostponeIfNoneOrMVar expectedType?
   let some expectedType := expectedType? | return none
   let expectedType ← instantiateMVars expectedType
-  if expectedType.hasExprMVar then
+  bif expectedType.hasExprMVar then
     tryPostpone
     return none
   return some expectedType
@@ -1473,7 +1473,7 @@ The `tacticCode` syntax is the full `by ..` syntax.
 -/
 def mkTacticMVar (type : Expr) (tacticCode : Syntax) (kind : TacticMVarKind)
     (delayOnMVars := false) : TermElabM Expr := do
-  if ← pure (debug.byAsSorry.get (← getOptions)) <&&> isProp type then
+  bif (← pure (debug.byAsSorry.get (← getOptions)) <&&> isProp type) then
     withRef tacticCode <| mkLabeledSorry type false (unique := true)
   else
     let mvar ← mkFreshExprMVar type MetavarKind.syntheticOpaque
@@ -1500,7 +1500,7 @@ def mkTacticMVar (type : Expr) (tacticCode : Syntax) (kind : TacticMVarKind)
   This is a bit hackish, but elaborators like `let_mvar%` are rare.
 -/
 def mkSaveInfoAnnotation (e : Expr) : Expr :=
-  if e.isMVar then
+  bif e.isMVar then
     mkAnnotation `save_info e
   else
     e
@@ -1587,7 +1587,7 @@ is a constant they will see the constant's doc string.
 def addTermInfo (stx : Syntax) (e : Expr) (expectedType? : Option Expr := none)
     (lctx? : Option LocalContext := none) (elaborator := Name.anonymous)
     (isBinder := false) (force := false) (isDisplayableTerm := false): TermElabM Expr := do
-  if (← read).inPattern && !force then
+  bif (← read).inPattern && !force then
     return mkPatternWithRef e stx
   else
     discard <| withInfoContext'
@@ -1605,7 +1605,7 @@ def addTermInfo' (stx : Syntax) (e : Expr) (expectedType? : Option Expr := none)
 def withInfoContext' (stx : Syntax) (x : TermElabM Expr)
     (mkInfo : Expr → TermElabM (Sum Info MVarId)) (mkInfoOnError : TermElabM Info) :
     TermElabM Expr := do
-  if (← read).inPattern then
+  bif (← read).inPattern then
     let e ← x
     return mkPatternWithRef e stx
   else
@@ -1673,16 +1673,16 @@ private def elabUsingElabFnsAux (s : SavedState) (stx : Syntax) (expectedType? :
           elabFn.value stx expectedType?
         catch ex => match ex with
           | .error .. =>
-            if (← read).errToSorry then
+            bif (← read).errToSorry then
               exceptionToSorry ex expectedType?
             else
               throw ex
           | .internal id _ =>
-            if (← read).errToSorry && id == abortTermExceptionId then
+            bif (← read).errToSorry && id == abortTermExceptionId then
               exceptionToSorry ex expectedType?
-            else if id == unsupportedSyntaxExceptionId then
+            else bif id == unsupportedSyntaxExceptionId then
               throw ex  -- to outer try
-            else if catchExPostpone && id == postponeExceptionId then
+            else bif catchExPostpone && id == postponeExceptionId then
               /- If `elab` threw `Exception.postpone`, we reset any state modifications.
                 For example, we want to make sure pending synthetic metavariables created by `elab` before
                 it threw `Exception.postpone` are discarded.
@@ -1703,7 +1703,7 @@ private def elabUsingElabFnsAux (s : SavedState) (stx : Syntax) (expectedType? :
               throw ex)
     catch ex => match ex with
       | .internal id _ =>
-        if id == unsupportedSyntaxExceptionId then
+        bif id == unsupportedSyntaxExceptionId then
           s.restore  -- also removes the info tree created above
           elabUsingElabFnsAux s stx expectedType? catchExPostpone elabFns
         else
@@ -1729,7 +1729,7 @@ See `Core.DeprecationCheck.userWritten`.
 -/
 @[inline] def withoutCheckDeprecatedSynthetic [MonadWithReaderOf Core.Context m] : m α → m α :=
   withTheReader Core.Context fun ctx =>
-    if ctx.checkDeprecated matches .all then { ctx with checkDeprecated := .userWritten } else ctx
+    bif ctx.checkDeprecated matches .all then { ctx with checkDeprecated := .userWritten } else ctx
 
 /--
 Runs `x`, which elaborates `stx` or its macro expansion. If the kind of `stx` is deprecated, `x`
@@ -1737,7 +1737,7 @@ reports deprecations only in syntax written by the user: `stx` is reported as a 
 deprecated constants and syntax its expansion refers to are not reported as well.
 -/
 def withDeprecationContextForSyntax (stx : Syntax) (x : TermElabM α) : TermElabM α := do
-  if isDeprecatedSyntax (← getEnv) stx.getKind then
+  bif isDeprecatedSyntax (← getEnv) stx.getKind then
     withoutCheckDeprecatedSynthetic x
   else
     x
@@ -1816,7 +1816,7 @@ def hasNoImplicitLambdaAnnotation (type : Expr) : Bool :=
   annotation? `noImplicitLambda type |>.isSome
 
 def mkNoImplicitLambdaAnnotation (type : Expr) : Expr :=
-  if hasNoImplicitLambdaAnnotation type then
+  bif hasNoImplicitLambdaAnnotation type then
     type
   else
     mkAnnotation `noImplicitLambda type
@@ -1850,17 +1850,17 @@ inductive UseImplicitLambdaResult where
   Remark: implicit lambdas are not triggered by the strict implicit binder annotation `{{a : α}} → β`
 -/
 private def useImplicitLambda (stx : Syntax) (expectedType? : Option Expr) : TermElabM UseImplicitLambdaResult := do
-  if blockImplicitLambda stx then
+  bif blockImplicitLambda stx then
     return .no
   let some expectedType := expectedType? | return .no
-  if hasNoImplicitLambdaAnnotation expectedType then
+  bif hasNoImplicitLambdaAnnotation expectedType then
     return .no
   let expectedType ← whnfForall expectedType
   let .forallE _ _ _ c := expectedType | return .no
   unless c.isImplicit || c.isInstImplicit do
     return .no
   if let some x ← isLocalIdent? stx then
-    if (← isMVarApp (← inferType x)) then
+    bif (← isMVarApp (← inferType x)) then
       /-
       If `stx` is a local variable without type information, then adding implicit lambdas makes elaboration fail.
       We should try to postpone elaboration until the type of the local variable becomes available, or disable
@@ -1890,7 +1890,7 @@ private def useImplicitLambda (stx : Syntax) (expectedType? : Option Expr) : Ter
 private def decorateErrorMessageWithLambdaImplicitVars (ex : Exception) (impFVars : Array Expr) : TermElabM Exception := do
   match ex with
   | .error ref msg =>
-    if impFVars.isEmpty then
+    bif impFVars.isEmpty then
       return Exception.error ref msg
     else
       let mut msg := m!"{msg}\nthe following variables have been introduced by the implicit lambda feature"
@@ -1918,7 +1918,7 @@ where
   loop (type : Expr) (fvars : Array Expr) : TermElabM Expr := do
     match (← whnfForall type) with
     | .forallE n d b c =>
-      if c.isExplicit then
+      bif c.isExplicit then
         elabImplicitLambdaAux stx catchExPostpone type fvars
       else withFreshMacroScope do
         let n ← MonadQuotation.addMacroScope n
@@ -1944,7 +1944,7 @@ private partial def elabTermAux (expectedType? : Option Expr) (catchExPostpone :
     | _ =>
       reportDeprecatedSyntax stx
       withDeprecationContextForSyntax stx do
-      let useImplicitResult ← if implicitLambda && (← read).implicitLambda then useImplicitLambda stx expectedType? else pure .no
+      let useImplicitResult ← bif implicitLambda && (← read).implicitLambda then useImplicitLambda stx expectedType? else pure .no
       match useImplicitResult with
       | .yes expectedType => elabImplicitLambda stx catchExPostpone expectedType
       | .no => elabUsingElabFns stx expectedType? catchExPostpone
@@ -1953,8 +1953,8 @@ private partial def elabTermAux (expectedType? : Option Expr) (catchExPostpone :
         Try to postpone elaboration, and if we cannot postpone anymore disable implicit lambdas.
         See comment at `useImplicitLambda`.
         -/
-        if (← read).mayPostpone then
-          if catchExPostpone then
+        bif (← read).mayPostpone then
+          bif catchExPostpone then
             postponeElabTerm stx expectedType?
           else
             throwPostpone
@@ -1999,7 +1999,7 @@ def elabTermEnsuringType (stx : Syntax) (expectedType? : Option Expr) (catchExPo
   try
     withRef stx <| ensureHasType expectedType? e errorMsgHeader?
   catch ex =>
-    if (← read).errToSorry && ex matches .error .. then
+    bif (← read).errToSorry && ex matches .error .. then
       withRef stx <| exceptionToSorry ex expectedType?
     else
       throw ex
@@ -2010,7 +2010,7 @@ def commitIfNoErrors? (x : TermElabM α) : TermElabM (Option α) := do
   Core.resetMessageLog
   try
     let a ← x
-    if (← MonadLog.hasErrors) then
+    bif (← MonadLog.hasErrors) then
       restoreState saved
       return none
     else
@@ -2041,17 +2041,17 @@ def mkInstMVar (type : Expr) (extraErrorMsg? : Option MessageData := none) : Ter
   Make sure `e` is a type by inferring its type and making sure it is an `Expr.sort`
   or is unifiable with `Expr.sort`, or can be coerced into one. -/
 def ensureType (e : Expr) : TermElabM Expr := do
-  if (← isType e) then
+  bif (← isType e) then
     return e
   else
     let eType ← inferType e
     let u ← mkFreshLevelMVar
-    if (← isDefEq eType (mkSort u)) then
+    bif (← isDefEq eType (mkSort u)) then
       return e
     else if let some coerced ← coerceToSort? e then
       return coerced
     else
-      if (← instantiateMVars e).hasSyntheticSorry then
+      bif (← instantiateMVars e).hasSyntheticSorry then
         throwAbortTerm
       throwError "type expected, got\n  ({← instantiateMVars e} : {← instantiateMVars eType})"
 
@@ -2067,7 +2067,7 @@ def elabType (stx : Syntax) : TermElabM Expr := do
 partial def withAutoBoundImplicit (k : TermElabM α) : TermElabM α := do
   let autoImplicitEnabled := autoImplicit.get (← getOptions)
   let initCtx : AutoBoundImplicitContext := { autoImplicitEnabled }
-  if autoImplicitEnabled then
+  bif autoImplicitEnabled then
     let rec loop (s : SavedState) (ctx : AutoBoundImplicitContext) : TermElabM α := withIncRecDepth do
       checkSystem "auto-implicit"
       try
@@ -2099,7 +2099,7 @@ partial def withAutoBoundImplicitForbiddenPred (p : Name → Bool) (x : TermElab
 partial def collectUnassignedMVars (type : Expr) (init : Array Expr := #[]) (except : MVarId → Bool := fun _ => false)
     : TermElabM (Array Expr) := do
   let mvarIds ← getMVars type
-  if mvarIds.isEmpty then
+  bif mvarIds.isEmpty then
     return init
   else
     go mvarIds.toList init init
@@ -2109,15 +2109,15 @@ where
     | [] => return result
     | mvarId :: mvarIds => do
       let visited := visited.push (mkMVar mvarId)
-      if (← mvarId.isAssigned) then
+      bif (← mvarId.isAssigned) then
         go mvarIds result visited
-      else if result.contains (mkMVar mvarId) || except mvarId then
+      else bif result.contains (mkMVar mvarId) || except mvarId then
         go mvarIds result visited
       else
         let mvarType := (← getMVarDecl mvarId).type
         let mvarIdsNew ← getMVars mvarType
         let mvarIdsNew := mvarIdsNew.filter fun mvarId => !visited.contains (mkMVar mvarId)
-        if mvarIdsNew.isEmpty then
+        bif mvarIdsNew.isEmpty then
           go mvarIds (result.push (mkMVar mvarId)) visited
         else
           go (mvarIdsNew.toList ++ mvarId :: mvarIds) result visited
@@ -2137,7 +2137,7 @@ def addAutoBoundImplicitsInlayHint (autos : Array Expr) (inlayHintPos : String.P
   -- This also means that inserting the inlay hint with the syntax displayed in the inlay hint will
   -- cause a "failed to infer binder type" error, since we don't have a name to insert in the code.
   let autos := autos.filter (· matches .fvar ..)
-  if autos.isEmpty then
+  bif autos.isEmpty then
     return
   let autoNames ← autos.mapM (·.fvarId!.getUserName)
   let formattedHint := s!" \{{" ".intercalate <| Array.toList <| autoNames.map toString}}"
@@ -2186,10 +2186,10 @@ where
       if let some inlayHintPos := inlayHintPos? then
         addAutoBoundImplicitsInlayHint autos inlayHintPos
       for auto in autos do
-        if auto.isFVar then
+        bif auto.isFVar then
           let localDecl ← auto.fvarId!.getDecl
           for x in xs do
-            if (← localDeclDependsOn localDecl x.fvarId!) then
+            bif (← localDeclDependsOn localDecl x.fvarId!) then
               throwError "invalid auto implicit argument `{auto}`, it depends on explicitly provided argument `{x}`"
       return autos ++ xs
     | auto :: todo =>
@@ -2205,7 +2205,7 @@ where
 -/
 def addAutoBoundImplicits' (xs : Array Expr) (type : Expr) (k : Array Expr → Expr → TermElabM α) (inlayHintPos? : Option String.Pos.Raw := none) : TermElabM α := do
   let xs ← addAutoBoundImplicits xs inlayHintPos?
-  if xs.all (·.isFVar) then
+  bif xs.all (·.isFVar) then
     k xs type
   else
     forallBoundedTelescope (← mkForallFVars xs type) xs.size fun xs type => k xs type
@@ -2223,7 +2223,7 @@ def isLetRecAuxMVar (mvarId : MVarId) : TermElabM Bool := do
   return (← get).letRecsToLift.any (·.mvarId == mvarId)
 
 def checkDeprecatedCore (constName : Name) (allowSuggestion := true) : TermElabM Unit := do
-  if (← Core.shouldCheckDeprecated (← getRef)) then
+  bif (← Core.shouldCheckDeprecated (← getRef)) then
     Linter.checkDeprecated constName allowSuggestion
 
 /--
@@ -2236,7 +2236,7 @@ def checkDeprecatedCore (constName : Name) (allowSuggestion := true) : TermElabM
 def mkConst (constName : Name) (explicitLevels : List Level := []) : TermElabM Expr := do
   checkDeprecatedCore constName (allowSuggestion := false)
   let cinfo ← getConstVal constName
-  if explicitLevels.length > cinfo.levelParams.length then
+  bif explicitLevels.length >ᵇ cinfo.levelParams.length then
     throwError "too many explicit universe levels for `{constName}`"
   else
     let numMissingLevels := cinfo.levelParams.length - explicitLevels.length
@@ -2250,7 +2250,7 @@ def checkDeprecated (ref : Syntax) (e : Expr) : TermElabM Unit := do
 private def mkConsts (candidates : List (Name × List String)) (explicitLevels : List Level) : TermElabM (List (Expr × List String × List Level)) := do
   candidates.foldlM (init := []) fun result (declName, projs) => do
     -- levels apply to the last projection, not the constant
-    let (constLevels, projLevels) := if projs.isEmpty then (explicitLevels, []) else ([], explicitLevels)
+    let (constLevels, projLevels) := bif projs.isEmpty then (explicitLevels, []) else ([], explicitLevels)
     -- TODO: better support for `mkConst` failure. We may want to cache the failures, and report them if all candidates fail.
     /-
     We disable `checkDeprecated` here because there may be many overloaded symbols.
@@ -2275,8 +2275,8 @@ def throwInvalidExplicitUniversesForLocal {α} (e : Expr) : TermElabM α :=
 def resolveName (stx : Syntax) (n : Name) (preresolved : List Syntax.Preresolved) (explicitLevels : List Level) (expectedType? : Option Expr := none) : TermElabM (List (Expr × List String × List Level)) := do
   addCompletionInfo <| CompletionInfo.id stx stx.getId (danglingDot := false) (← getLCtx) expectedType?
   let processLocal (e : Expr) (projs : List String) := do
-    if projs.isEmpty then
-      if explicitLevels.isEmpty then
+    bif projs.isEmpty then
+      bif explicitLevels.isEmpty then
         return [(e, [], [])]
       else
         throwInvalidExplicitUniversesForLocal e
@@ -2291,7 +2291,7 @@ def resolveName (stx : Syntax) (n : Name) (preresolved : List Syntax.Preresolved
   let ctx ← read
   if let some (e, projs) := preresolved.findSome? fun (n, projs) => ctx.sectionFVars.find? n |>.map (·, projs) then
     return ← processLocal e projs  -- section variables should shadow global decls
-  if preresolved.isEmpty then
+  bif preresolved.isEmpty then
     mkConsts (← realizeGlobalName n) explicitLevels
   else
     mkConsts preresolved explicitLevels
@@ -2322,7 +2322,7 @@ def resolveId? (stx : Syntax) (kind := "term") (withInfo := false) : TermElabM (
     match fs with
     | []  => return none
     | [f] =>
-      let f ← if withInfo then addTermInfo stx f else pure f
+      let f ← bif withInfo then addTermInfo stx f else pure f
       checkDeprecated stx f
       return some f
     | _   => throwError "ambiguous {kind}, use fully qualified name, possible interpretations {fs}"

@@ -31,7 +31,7 @@ namespace Lean.Elab.Command
 
   match stx[1] with
   | Syntax.node _ ``Lean.Parser.Command.commentBody #[.atom _ doc, _] =>
-    if getMainVersoModuleDocs (← getEnv) |>.isEmpty then
+    bif getMainVersoModuleDocs (← getEnv) |>.isEmpty then
       modifyEnv fun env => addMainModuleDoc env ⟨doc, range⟩
     else
       throwError m!"Can't add Markdown-format module docs because there is already Verso-format content present."
@@ -59,7 +59,7 @@ private def addScope (isNewNamespace : Bool) (header : String) (newNamespace : N
     } :: s.scopes
   }
   pushScope
-  if isNewNamespace then
+  bif isNewNamespace then
     activateScoped newNamespace
 
 private def addScopes (header : Name) (isNewNamespace : Bool) (isNoncomputable isPublic isMeta : Bool := false)
@@ -70,7 +70,7 @@ where go
   | .str p header => do
     go p
     let currNamespace ← getCurrNamespace
-    addScope isNewNamespace header (if isNewNamespace then Name.mkStr currNamespace header else currNamespace) isNoncomputable isPublic isMeta attrs
+    addScope isNewNamespace header (bif isNewNamespace then Name.mkStr currNamespace header else currNamespace) isNoncomputable isPublic isMeta attrs
   | _ => throwError "invalid scope"
 
 private def addNamespace (header : Name) : CommandElabM Unit :=
@@ -95,7 +95,7 @@ private def innermostScopeName? : List Scope → Option Name
 private def checkEndHeader : Name → List Scope → Option Name
   | .anonymous, _ => none
   | .str p s, { header := h, .. } :: scopes =>
-    if h == s then
+    bif h == s then
       (.str · s) <$> checkEndHeader p scopes
     else
       some <| .mkSimple h
@@ -110,7 +110,7 @@ private def checkEndHeader : Name → List Scope → Option Name
   match stx with
   | `(Parser.Command.section| $[@[expose%$expTk]]? $[public%$publicTk]? $[noncomputable%$ncTk]? $[meta%$metaTk]? section $(header?)?) =>
     -- TODO: allow more attributes?
-    let attrs ← if expTk.isSome then
+    let attrs ← bif expTk.isSome then
       pure [← `(Parser.Term.attrInstance| expose)]
     else
       pure []
@@ -134,7 +134,7 @@ private def nameOfScopes : (ss : List Scope) → (n : Nat := ss.length) → Name
   | _, 0 => .anonymous
   | [], _ => .anonymous
   | s :: ss, n + 1 =>
-    if s.header == "" then
+    bif s.header == "" then
       .anonymous
     else
     .str (nameOfScopes ss n) s.header
@@ -156,28 +156,28 @@ where
   | _, .anonymous, _ => some .anonymous
   | .anonymous, _, _ => none
   | .num p n, seg@(.num p' n'), allowOffset => do
-    if n == n' then
+    bif n == n' then
       if let some nm := findSuffixMatch p p' (allowOffset := false) then
         return .num nm n
-    if allowOffset then
+    bif allowOffset then
       return .num (← findSuffixMatch p seg allowOffset) n
     else
       none
   | .str p s, seg@(.str p' s'), allowOffset => do
-    if s == s' then
+    bif s == s' then
       if let some nm := findSuffixMatch p p' (allowOffset := false) then
         return .str nm s
-    if allowOffset then
+    bif allowOffset then
       return .str (← findSuffixMatch p seg allowOffset) s
     else
       none
   | .str p s, seg, allowOffset =>
-    if allowOffset then
+    bif allowOffset then
       return .str (← findSuffixMatch p seg allowOffset) s
     else
       none
   | .num p n, seg, allowOffset =>
-    if allowOffset then
+    bif allowOffset then
       return .num (← findSuffixMatch p seg allowOffset) n
     else
       none
@@ -202,7 +202,7 @@ intended to end.
 private def mkSingleScopeReplacementHint? (scopes : List Scope) := do
   -- Recall that there is always an anonymous topmost scope, so `scopes.length = 2` when there is
   -- only one active scope:
-  if scopes.length == 2 then
+  bif scopes.length == 2 then
     let name := nameOfScopes scopes
     some <$> MessageData.hint m!"Use current scope name `{name}`:" #[(← `(end $(mkIdent name)))]
       (codeActionPrefix? := "Replace scope name: ")
@@ -230,7 +230,7 @@ private def throwScopeNameMismatch (header : Name) (scopes : List Scope) (endSiz
         intervening scopes `{suffix}`:"
       MessageData.hint hintMsg #[← `(end $(mkIdent suffix))]
         (codeActionPrefix? := "Add intervening scopes: ")
-    else if correspondingScopes != allScopes then
+    else bif correspondingScopes != allScopes then
       pure <| .note m!"The current scopes are `{allScopes}`"
     else pure .nil
   throwError m!"Invalid name after `end`: Expected `{correspondingScopes}`, but found `{header}`" ++ help
@@ -251,7 +251,7 @@ private def throwUnnecessaryScopeName (header : Name) : CommandElabM Unit := do
     | some n => n.getNumParts
   let scopes ← getScopes
   let numScopes := scopes.length
-  if numScopes == 1 then
+  bif numScopes == 1 then
     throwNoScope
   match header? with
   | none        =>
@@ -259,13 +259,13 @@ private def throwUnnecessaryScopeName (header : Name) : CommandElabM Unit := do
     if let some name := innermostScopeName? scopes then
       throwMissingName name
   | some header =>
-    if endSize >= numScopes then
+    bif endSize ≥ᵇ numScopes then
       throwTooManyScopeComponents header scopes
     else
       addCompletionInfo <| .endSection stx header danglingDot <| scopes.map (·.header)
       let scopesName := nameOfScopes scopes endSize
-      if scopesName != header then
-        if scopesName == .anonymous then
+      bif scopesName != header then
+        bif scopesName == .anonymous then
           throwUnnecessaryScopeName header
         else
           throwScopeNameMismatch header scopes endSize
@@ -273,7 +273,7 @@ private def throwUnnecessaryScopeName (header : Name) : CommandElabM Unit := do
   popScopes endSize
 
 private partial def elabChoiceAux (choiceStx : Syntax) (i : Nat) : CommandElabM Unit :=
-  if i < choiceStx.getNumArgs then
+  bif i <ᵇ choiceStx.getNumArgs then
     catchInternalId unsupportedSyntaxExceptionId
       (do
         elabCommand (choiceStx.getArg i)
@@ -294,7 +294,7 @@ private partial def elabChoiceAux (choiceStx : Syntax) (i : Nat) : CommandElabM 
 @[builtin_command_elab «docs_to_verso»] def elabDocsToVerso : CommandElab := fun stx => do
   let xs := stx[1].getArgs
   for x in xs do
-    if x.getKind == identKind then -- skip commas
+    bif x.getKind == identKind then -- skip commas
       let declName ← liftCoreM <| realizeGlobalConstNoOverload x
       runTermElabM <| fun _ => withRef x <| makeDocStringVerso declName
       -- Add the info afterwards so the hover shows the updated docstring
@@ -304,12 +304,12 @@ private partial def elabChoiceAux (choiceStx : Syntax) (i : Nat) : CommandElabM 
   let `(export $ns ($ids*)) := stx | throwUnsupportedSyntax
   let nss ← resolveNamespace ns
   let currNamespace ← getCurrNamespace
-  if nss == [currNamespace] then throwError "invalid 'export', self export"
+  bif nss == [currNamespace] then throwError "invalid 'export', self export"
   let mut aliases := #[]
   for idStx in ids do
     let id := idStx.getId
     let declName ← resolveNameUsingNamespaces nss idStx
-    if (← getInfoState).enabled then
+    bif (← getInfoState).enabled then
       addConstInfo idStx declName
     aliases := aliases.push (currNamespace ++ id, declName)
   modify fun s => { s with env := aliases.foldl (init := s.env) fun env p => addAlias env p.1 p.2 }
@@ -356,9 +356,9 @@ private def replaceBinderAnnotation (binder : TSyntax ``Parser.Term.bracketedBin
   for varDecl in varDecls.reverse do
     let (ids, ty?, binderInfo') ← match varDecl with
       | `(bracketedBinderF|($ids* $[: $ty?]? $(annot?)?)) =>
-        if annot?.isSome then
+        bif annot?.isSome then
           for binderId in binderIds do
-            if containsId ids binderId then
+            bif containsId ids binderId then
               throwErrorAt binderId "cannot update binder annotation of variables with default values/tactics"
         pure (ids, ty?, .default)
       | `(bracketedBinderF|{$ids* $[: $ty?]?}) =>
@@ -369,13 +369,13 @@ private def replaceBinderAnnotation (binder : TSyntax ``Parser.Term.bracketedBin
         pure (#[⟨id⟩], some ty, .instImplicit)
       | _ =>
         varDeclsNew := varDeclsNew.push varDecl; continue
-    if binderInfo == binderInfo' then
+    bif binderInfo == binderInfo' then
       -- no update, ensure we don't have redundant annotations.
       for binderId in binderIds do
-        if containsId ids binderId then
+        bif containsId ids binderId then
           throwErrorAt binderId "redundant binder annotation update"
       varDeclsNew := varDeclsNew.push varDecl
-    else if binderIds.all fun binderId => !containsId ids binderId then
+    else bif binderIds.all fun binderId => !containsId ids binderId then
       -- `binderIds` and `ids` are disjoint
       varDeclsNew := varDeclsNew.push varDecl
     else
@@ -394,7 +394,7 @@ private def replaceBinderAnnotation (binder : TSyntax ``Parser.Term.bracketedBin
           binderIds := binderIds.eraseIdx idx
           modifiedVarDecls := true
           let newBinder ← mkBinder id binderInfo
-          if binderInfo.isInstImplicit then
+          bif binderInfo.isInstImplicit then
             -- We elaborate the new binder to make sure it's valid as instance implicit
             try
               runTermElabM fun _ => Term.withSynthesize <| Term.withAutoBoundImplicit <|
@@ -405,9 +405,9 @@ private def replaceBinderAnnotation (binder : TSyntax ``Parser.Term.bracketedBin
           varDeclsNew := varDeclsNew.push (← mkBinder id binderInfo)
         else
           varDeclsNew := varDeclsNew.push (← mkBinder id binderInfo')
-  if modifiedVarDecls then
+  bif modifiedVarDecls then
     modifyScope fun scope => { scope with varDecls := varDeclsNew.reverse }
-  if binderIds.size != binderIdsIniSize then
+  bif binderIds.size != binderIdsIniSize then
     binderIds.mapM fun binderId =>
       match binderInfo with
         | .default => `(bracketedBinderF| ($binderId))
@@ -451,7 +451,7 @@ def elabCheckCore (ignoreStuckTC : Bool) : CommandElab
     -- Users might be testing out buggy elaborators. Let's typecheck before proceeding:
     withRef tk <| Meta.check e
     let e ← Term.levelMVarToParam (← instantiateMVars e)
-    if e.isSyntheticSorry then
+    bif e.isSyntheticSorry then
       return
     let type ← inferType e
     logInfoAt tk m!"{e} : {type}"
@@ -472,7 +472,7 @@ where
       let e ← Term.elabTerm term none
       Term.synthesizeSyntheticMVarsNoPostponing (ignoreStuckTC := cfg.ignoreStuckTC)
       let e ← instantiateMVars e
-      if cfg.check then
+      bif cfg.check then
         -- Users might be testing out buggy elaborators. Let's typecheck before proceeding:
         withRef tk <| Meta.check e
       let e ← Term.levelMVarToParam (← instantiateMVars e)
@@ -500,7 +500,7 @@ def failIfSucceeds (x : CommandElabM Unit) : CommandElabM Unit := do
     | Exception.internal id _  => do logError (← id.getName); pure false
   finally
     restoreMessages prevMessages
-  if succeeded then
+  bif succeeded then
     throwError "unexpected success"
 
 @[builtin_command_elab «check_failure»] def elabCheckFailure : CommandElab
@@ -614,13 +614,13 @@ open Lean.Parser.Command.InternalSyntax in
 
 @[builtin_command_elab version] def elabVersion : CommandElab := fun _ => do
   let mut target := System.Platform.target
-  if target.isEmpty then target := "unknown"
+  bif target.isEmpty then target := "unknown"
   -- Only one should be set, but good to know if multiple are set in error.
   let platforms :=
-    (if System.Platform.isWindows then [" Windows"] else [])
-    ++ (if System.Platform.isOSX then [" macOS"] else [])
-    ++ (if System.Platform.isLinux then [" Linux"] else [])
-    ++ (if System.Platform.isEmscripten then [" Emscripten"] else [])
+    (bif System.Platform.isWindows then [" Windows"] else [])
+    ++ (bif System.Platform.isOSX then [" macOS"] else [])
+    ++ (bif System.Platform.isLinux then [" Linux"] else [])
+    ++ (bif System.Platform.isEmscripten then [" Emscripten"] else [])
   logInfo m!"Lean {Lean.versionString}\nTarget: {target}{String.join platforms}"
 
 @[builtin_command_elab Parser.Command.exit] def elabExit : CommandElab := fun _ =>
@@ -637,36 +637,36 @@ open Lean.Parser.Command.InternalSyntax in
   let mut msg : Array MessageData := #[]
   let isExpose := scope.attrs.any (· matches `(attrInstance| expose))
   -- Section header
-  if isExpose || scope.isPublic || scope.isNoncomputable || scope.isMeta then
-    let expTk? := if isExpose then some Syntax.missing else none
-    let publicTk? := if scope.isPublic then some Syntax.missing else none
-    let ncTk? := if scope.isNoncomputable then some Syntax.missing else none
-    let metaTk? := if scope.isMeta then some Syntax.missing else none
+  bif isExpose || scope.isPublic || scope.isNoncomputable || scope.isMeta then
+    let expTk? := bif isExpose then some Syntax.missing else none
+    let publicTk? := bif scope.isPublic then some Syntax.missing else none
+    let ncTk? := bif scope.isNoncomputable then some Syntax.missing else none
+    let metaTk? := bif scope.isMeta then some Syntax.missing else none
     msg := msg.push <| ← `(Parser.Command.section| $[@[expose%$expTk?]]? $[public%$publicTk?]? $[noncomputable%$ncTk?]? $[meta%$metaTk?]? section)
   -- Namespace
-  if !scope.currNamespace.isAnonymous then
+  bif !scope.currNamespace.isAnonymous then
     msg := msg.push <| ← `(command| namespace $(mkIdent scope.currNamespace))
   -- Open namespaces
   if let some openMsg ← describeOpenDecls scope.openDecls.reverse then
     msg := msg.push openMsg
   -- Universe levels
-  if !scope.levelNames.isEmpty then
+  bif !scope.levelNames.isEmpty then
     let levels := scope.levelNames.reverse.map mkIdent
     msg := msg.push <| ← `(command| universe $levels.toArray*)
   -- Variables
-  if !scope.varDecls.isEmpty then
+  bif !scope.varDecls.isEmpty then
     let varDecls : Array (TSyntax `Lean.Parser.Term.bracketedBinder) := scope.varDecls.map (⟨·.raw.unsetTrailing⟩)
     msg := msg.push <| ← `(command| variable $varDecls*)
   -- Included variables
-  if !scope.includedVars.isEmpty then
+  bif !scope.includedVars.isEmpty then
     msg := msg.push <| ← `(command| include $(scope.includedVars.toArray.map (mkIdent ·.eraseMacroScopes))*)
   -- Omitted variables
-  if !scope.omittedVars.isEmpty then
+  bif !scope.omittedVars.isEmpty then
     msg := msg.push <| ← `(command| omit $(scope.omittedVars.toArray.map (mkIdent ·.eraseMacroScopes))*)
   -- Options
   if let some optionsMsg ← describeOptions scope.opts then
     msg := msg.push optionsMsg
-  if msg.isEmpty then
+  bif msg.isEmpty then
     logInfo m!"-- In root namespace with initial scope"
   else
     logInfo <| MessageData.joinSep msg.toList "\n\n"
@@ -681,7 +681,7 @@ where
     let mut lines : Array MessageData := #[]
     let mut simple : Array Name := #[]
     let flush (lines : Array MessageData) (simple : Array Name) : CommandElabM (Array MessageData × Array Name) := do
-      if simple.isEmpty then
+      bif simple.isEmpty then
         return (lines, simple)
       else
         return (lines.push <| ← `(command| open $(simple.map mkIdent)*), #[])
@@ -693,26 +693,26 @@ where
         let «from» := Name.mkSimple decl.getString!
         lines := lines.push <| ← `(command| open $(mkIdent ns) renaming $(mkIdent «from») → $(mkIdent id))
       | .simple ns ex =>
-        if ex == [] then
+        bif ex == [] then
           simple := simple.push ns
         else
           (lines, simple) ← flush lines simple
           lines := lines.push <| ← `(command| open $(mkIdent ns) hiding $[$(ex.toArray.map mkIdent)]*)
     (lines, _) ← flush lines simple
-    return if lines.isEmpty then none else MessageData.joinSep lines.toList "\n"
+    return bif lines.isEmpty then none else MessageData.joinSep lines.toList "\n"
 
   describeOptions (opts : Options) : CommandElabM (Option MessageData) := do
     let mut lines : Array MessageData := #[]
     let decls ← getOptionDecls
     for (name, val) in opts do
       -- `#guard_msgs` sets this option internally, we don't want it to end up in its output
-      if name == `Elab.async then
+      bif name == `Elab.async then
         continue
       let (isSet, isUnknown) :=
         match decls.find? name with
         | some decl => (decl.defValue != val, false)
         | none      => (true, true)
-      if isSet then
+      bif isSet then
         let cmd : TSyntax `command ←
           match val with
           | .ofBool true  => `(set_option $(mkIdent name) true)
@@ -720,11 +720,11 @@ where
           | .ofString str => `(set_option $(mkIdent name) $(Syntax.mkStrLit str))
           | .ofNat n      => `(set_option $(mkIdent name) $(Syntax.mkNatLit n))
           | _             => `(set_option $(mkIdent name) 0 /- unrepresentable value -/)
-        if isUnknown then
+        bif isUnknown then
           lines := lines.push m!"-- {cmd} -- unknown option"
         else
           lines := lines.push cmd
-    return if lines.isEmpty then none else MessageData.joinSep lines.toList "\n"
+    return bif lines.isEmpty then none else MessageData.joinSep lines.toList "\n"
 
 @[builtin_command_elab Parser.Command.withExporting] def elabWithExporting : CommandElab
   | `(Parser.Command.withExporting| #with_exporting $cmd) =>
@@ -743,9 +743,9 @@ def elabDeprecatedModule : CommandElab
   | stx@`(Parser.Command.deprecated_module| deprecated_module $[$msg?]? $[(since := $since?)]?) => do
     let message? := msg?.map TSyntax.getString
     let since? := since?.map TSyntax.getString
-    if (deprecatedModuleExt.getState (← getEnv)).isSome then
+    bif (deprecatedModuleExt.getState (← getEnv)).isSome then
       logWarning "module is already marked as deprecated"
-    if since?.isNone then
+    bif since?.isNone then
       logWarning <| m!"`deprecated_module` should specify the date or library version \
         at which the deprecation was introduced, using `(since := \"...\")`" ++
         (← liftCoreM <| Linter.mkSinceHint stx)
@@ -804,9 +804,9 @@ private def elabDeprecatedSyntaxReplacement (kind : SyntaxNodeKind) (alts : Arra
   let env ← getEnv
   -- Elaboration and compilation errors of the alternatives have already been reported
   let some info := env.find? declName | throwAbortCommand
-  if info.value?.any (·.hasSyntheticSorry) || hasCompileError env declName then
+  bif info.value?.any (·.hasSyntheticSorry) || hasCompileError env declName then
     throwAbortCommand
-  if (IR.getSorryDep env declName).isSome then
+  bif (IR.getSorryDep env declName).isSome then
     throwError "invalid deprecated_syntax alternatives, they must not use `sorry`"
   -- Section variables used by the alternatives become parameters of the definition
   unless info.type.isConstOf ``Lean.Macro do
@@ -816,13 +816,13 @@ private def elabDeprecatedSyntaxReplacement (kind : SyntaxNodeKind) (alts : Arra
 @[builtin_command_elab Parser.Command.deprecatedSyntax] def elabDeprecatedSyntax : CommandElab := fun stx => do
   let id := stx[1]
   let kind ← liftCoreM <| checkSyntaxNodeKindAtNamespaces id.getId (← getCurrNamespace)
-  let text? := if stx[2].isNone then none else stx[2][0].isStrLit?
-  let since? := if stx[3].isNone then none else stx[3][3].isStrLit?
-  if since?.isNone then
+  let text? := bif stx[2].isNone then none else stx[2][0].isStrLit?
+  let since? := bif stx[3].isNone then none else stx[3][3].isStrLit?
+  bif since?.isNone then
     logWarning <| m!"`deprecated_syntax` should specify the date or library version at which the \
       deprecation was introduced, using `(since := \"...\")`" ++
       (← liftCoreM <| Linter.mkSinceHint (mkNullNode (stx.getArgs.extract 0 4)))
-  let replacement? ← if stx[4].isNone then pure none else
+  let replacement? ← bif stx[4].isNone then pure none else
     some <$> elabDeprecatedSyntaxReplacement kind stx[4][0][0].getArgs
   modifyEnv fun env =>
     deprecatedSyntaxExt.addEntry env { kind, text?, since? }

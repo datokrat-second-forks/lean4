@@ -23,7 +23,7 @@ open Meta
 
 public def simpMatch? (mvarId : MVarId) : MetaM (Option MVarId) := do
   let mvarId' ← Split.simpMatchTarget mvarId
-  if mvarId != mvarId' then return some mvarId' else return none
+  bif mvarId != mvarId' then return some mvarId' else return none
 
 /--
 Simplify `if-then-expression`s in the goal target.
@@ -31,7 +31,7 @@ If `useNewSemantics` is `true`, the flag `backward.split` is ignored.
 -/
 public def simpIf? (mvarId : MVarId) (useNewSemantics := false) : MetaM (Option MVarId) := do
   let mvarId' ← simpIfTarget mvarId (useDecide := true) (useNewSemantics := useNewSemantics)
-  if mvarId != mvarId' then return some mvarId' else return none
+  bif mvarId != mvarId' then return some mvarId' else return none
 
 /-- Try to close goal using `rfl` with smart unfolding turned off. -/
 public def tryURefl (mvarId : MVarId) : MetaM Bool :=
@@ -60,7 +60,7 @@ public def whnfReducibleLHS? (mvarId : MVarId) : MetaM (Option MVarId) := mvarId
   let target ← mvarId.getType'
   let some (_, lhs, rhs) := target.eq? | return none
   let lhs' ← whnfAux lhs
-  if lhs' != lhs then
+  bif lhs' != lhs then
     return some (← mvarId.replaceTargetDefEq (← mkEq lhs' rhs))
   else
     return none

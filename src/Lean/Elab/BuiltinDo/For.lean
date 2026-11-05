@@ -29,16 +29,16 @@ open Lean.Meta
   | `(doFor| for%$tk $decls:doForDecl,* $[$inv:doLoopInvariant]? $[$dec:doLoopDecreasing]? do $body) =>
     let decls := decls.getElems
     if let some inv := inv then
-      if decls.size > 1 then
+      bif decls.size >ᵇ 1 then
         Macro.throwErrorAt inv "The `invariant` clause takes a `for` loop over a single collection."
     let `(doForDecl| $[$h? : ]? $pattern in $xs) := decls[0]! | Macro.throwUnsupported
     let mut doElems := #[]
     let mut body := body
     -- Expand `pattern` into an `Ident` `x`:
     let x ←
-      if pattern.raw.isIdent then
+      bif pattern.raw.isIdent then
         pure ⟨pattern⟩
-      else if pattern.raw.isOfKind ``Lean.Parser.Term.hole then
+      else bif pattern.raw.isOfKind ``Lean.Parser.Term.hole then
         Term.mkFreshIdent pattern
       else
         -- This case is a last resort, because it introduces a `match` and that will cause eager
@@ -90,7 +90,7 @@ open Lean.Meta
 container that lacks it is reported at the clause. -/
 private def checkPureForIn (invClause : Syntax) (h? : Option Syntax) (xs α : Expr) (mi : MonadInfo) :
     DoElabM Unit := withRef invClause do
-  let cls := if h?.isSome then `Std.Internal.PureForIn' else `Std.Internal.PureForIn
+  let cls := bif h?.isSome then `Std.Internal.PureForIn' else `Std.Internal.PureForIn
   unless (← getEnv).contains cls do return
   let ty ← Term.elabType <| ←
     `($(mkIdent cls) $(← Term.exprToSyntax mi.m) $(← Term.exprToSyntax (← inferType xs))
@@ -113,18 +113,18 @@ private def assertionLanguage? : DoElabM (Option Expr) := do
   let .some _ ← trySynthInstance (mkAppN wpMonad args) | return none
   let some pred := args[1]? | return none
   let pred ← instantiateMVars pred
-  return if pred.hasExprMVar then none else some pred
+  return bif pred.hasExprMVar then none else some pred
 
 /-- Report a clause that binds more arguments than the loop's assertions take, such as the state of
 a state monad. The language's arguments are the arrows before its result. -/
 private def checkAssertionBinders (ref : Syntax) (what : String) (binders : Nat)
     (pred? : Option Expr) : DoElabM Unit := do
-  if binders == 0 then return
+  bif binders == 0 then return
   let some pred := pred? | return
   let arity := pred.getForallArity
-  if binders > arity then
-    let takes := if arity == 1 then m!"one argument" else m!"{arity} arguments"
-    let has := if binders == 1 then m!"one binder" else m!"{binders} binders"
+  bif binders >ᵇ arity then
+    let takes := bif arity == 1 then m!"one argument" else m!"{arity} arguments"
+    let has := bif binders == 1 then m!"one binder" else m!"{binders} binders"
     throwErrorAt ref "The {what} of a loop in this monad takes {takes}, and this clause has \
       {has}. The loop's mutable variables are named without binding them."
 
@@ -133,7 +133,7 @@ private def checkAssertionBinders (ref : Syntax) (what : String) (binders : Nat)
 that the pair successfully elaborates. -/
 private def mkAssertionFun (binders : TSyntaxArray ``Lean.Parser.Term.funBinder) (body : Term)
     (pred? : Option Expr) : DoElabM Term := do
-  if binders.isEmpty then return body
+  bif binders.isEmpty then return body
   let f ← `(fun $binders* => $body)
   let some pred := pred? | return f
   let mut tys := #[]
@@ -149,9 +149,9 @@ private def mkAssertionFun (binders : TSyntaxArray ``Lean.Parser.Term.funBinder)
 private def mkStatePat (loopMutVars : Array MutVar) (returnsEarly : Bool) : DoElabM Term := do
   let hole ← `(_)
   let mut binders : Array Term := #[]
-  if returnsEarly then binders := binders.push hole
+  bif returnsEarly then binders := binders.push hole
   for mv in loopMutVars do binders := binders.push ⟨mv.ident.raw⟩
-  if returnsEarly && loopMutVars.isEmpty then binders := binders.push hole
+  bif returnsEarly && loopMutVars.isEmpty then binders := binders.push hole
   match binders with
     | #[]  => `(_)
     | #[b] => pure b
@@ -229,7 +229,7 @@ private def mkForInPureWithInvariant (g : ForInApp) (invClause : TSyntax ``doLoo
   checkAssertionBinders invClause "invariant" assertionBinders.size pred?
   let invBody ← mkAssertionFun assertionBinders invBody pred?
   let invLam ← `(fun $loopBinders* => $(← g.mkStateFun invBody))
-  let gadget := if h?.isSome then ``Std.WP.Gadget.forInPureWithInvariant'
+  let gadget := bif h?.isSome then ``Std.WP.Gadget.forInPureWithInvariant'
     else ``Std.WP.Gadget.forInPureWithInvariant
   g.mkCall invClause gadget #[invLam]
 
@@ -248,7 +248,7 @@ private def mkForInLoopGadget (g : ForInApp)
     checkAssertionBinders invClause "invariant" assertionBinders.size pred?
     let invBody ← mkAssertionFun assertionBinders invBody pred?
     let exitVar := mkIdentFrom invClause (← mkFreshUserName `__exit)
-    let invBody ← if exitBinder.raw.isOfKind ``hole then pure invBody else
+    let invBody ← bif exitBinder.raw.isOfKind ``hole then pure invBody else
       let exitPat : Term := ⟨exitBinder.raw⟩
       `(match $exitVar:ident with | $exitPat => $invBody)
     -- `WhileInvariant.mk` keeps the clause's declared type on the term. A bare lambda carries the
@@ -294,7 +294,7 @@ private def mkForInLoopGadget (g : ForInApp)
   let returnVarName ← mkFreshUserName `__r
   let loopMutVars := mutVars.filter fun x => info.reassigns.contains x.getId
   let loopMutVarNames :=
-    if info.returnsEarly then
+    bif info.returnsEarly then
       returnVarName :: (loopMutVars.map (·.getId)).toList
     else
       (loopMutVars.map (·.getId)).toList
@@ -302,7 +302,7 @@ private def mkForInLoopGadget (g : ForInApp)
     let mut defs := #[]
     unless e.isNone || info.returnsEarly do
       throwError "Early returning {e} but the info said there is no early return"
-    if info.returnsEarly then
+    bif info.returnsEarly then
       let returnVar ←
         match e with
         | none => mkNone oldReturnCont.resultType
@@ -320,7 +320,7 @@ private def mkForInLoopGadget (g : ForInApp)
       let u ← getDecLevel (← inferType v)
       discard <| isLevelDefEq u mi.u
       defs := defs.push v
-    if info.returnsEarly && loopMutVars.isEmpty then
+    bif info.returnsEarly && loopMutVars.isEmpty then
       defs := defs.push (mkConst ``Unit.unit)
     return defs
 
@@ -382,7 +382,7 @@ private def mkForInLoopGadget (g : ForInApp)
     let g : ForInApp :=
       { xs, init := preS, body, σ, statePat := ← mkStatePat loopMutVars info.returnsEarly,
         erasedMutVars := loopMutVars.filter (·.erased) }
-    if (← instantiateMVars ρ).isConstOf ``Lean.Loop then
+    bif (← instantiateMVars ρ).isConstOf ``Lean.Loop then
       if let some e ← mkForInLoopGadget g inv? dec? then forIn := e
     else if let some decClause := dec? then
       throwErrorAt decClause "A `for` loop terminates with the collection it iterates; \
@@ -394,9 +394,9 @@ private def mkForInLoopGadget (g : ForInApp)
   let rest ←
     withLocalDeclD s σ fun postS => do mkLambdaFVars #[postS] <| ← do
       bindMutVarsFromTuple loopMutVarNames postS.fvarId! do
-        if info.returnsEarly then
+        bif info.returnsEarly then
           let ret ← getFVarFromUserName returnVarName
-          let ret ← if loopMutVars.isEmpty then mkAppM ``Prod.fst #[ret] else pure ret
+          let ret ← bif loopMutVars.isEmpty then mkAppM ``Prod.fst #[ret] else pure ret
           let motive := mkLambda `_ .default (← inferType ret) (← mkMonadApp γ)
           let app := mkApp3 (mkConst ``Break.runK.match_1 [mi.u, mi.v.succ]) oldReturnCont.resultType motive ret
           let none := mkSimpleThunk (← dec.continueWithUnit)

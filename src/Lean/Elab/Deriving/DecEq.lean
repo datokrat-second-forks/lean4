@@ -36,17 +36,17 @@ class, of `isTrue`/`isFalse` and of the dependent `if`.
 abbrev Flavor := Bool
 
 def Flavor.className (u : Flavor) : Name :=
-  if u then ``UDecidableEq else ``DecidableEq
+  bif u then ``UDecidableEq else ``DecidableEq
 
 def mkIsTrue (u : Flavor) (h : Term) : TermElabM Term :=
-  if u then ``(UDecidable.isTrue $h) else `(isTrue $h)
+  bif u then ``(UDecidable.isTrue $h) else `(isTrue $h)
 
 def mkIsFalse (u : Flavor) (h : Term) : TermElabM Term :=
-  if u then ``(UDecidable.isFalse $h) else `(isFalse $h)
+  bif u then ``(UDecidable.isFalse $h) else `(isFalse $h)
 
 /-- `if h : c then t else e`, where `h` is bound in both branches. -/
 def mkDIte (u : Flavor) (h : Ident) (c t e : Term) : TermElabM Term :=
-  if u then ``(UDecidable.dite $c (fun $h:ident => $t) (fun $h:ident => $e))
+  bif u then ``(UDecidable.dite $c (fun $h:ident => $t) (fun $h:ident => $e))
   else `(if $h:ident : $c then $t else $e)
 
 def mkDecEqHeader (u : Flavor) (indVal : InductiveVal) : TermElabM Header := do
@@ -61,7 +61,7 @@ where
   mkSameCtorRhs : List (Ident × Ident × Option Name × Bool) → TermElabM Term
     | [] => do mkIsTrue u (← `(rfl))
     | (a, b, recField, isProof) :: todo => withFreshMacroScope do
-      let rhs ← if isProof then
+      let rhs ← bif isProof then
         `(have h : @$a = @$b := rfl; by subst h; exact $(← mkSameCtorRhs todo):term)
       else
         let sameCtor ← mkSameCtorRhs todo
@@ -83,7 +83,7 @@ where
         -- add `_` pattern for indices
         for _ in *...indVal.numIndices do
           patterns := patterns.push (← `(_))
-        if ctorName₁ == ctorName₂ then
+        bif ctorName₁ == ctorName₂ then
           let alt ← forallTelescopeReducing ctorInfo.type fun xs type => do
             let type ← Core.betaReduce type -- we 'beta-reduce' to eliminate "artificial" dependencies
             let mut patterns  := patterns
@@ -96,7 +96,7 @@ where
             let mut todo := #[]
             for i in *...ctorInfo.numFields do
               let x := xs[indVal.numParams + i]!
-              if occursOrInType (← getLCtx) x type then
+              bif occursOrInType (← getLCtx) x type then
                 -- If resulting type depends on this field, we don't need to compare
                 -- but use inaccessible patterns fail during pattern match compilation if their
                 -- equality does not actually follow from the equality between their types
@@ -120,7 +120,7 @@ where
             let rhs ← mkSameCtorRhs todo.toList
             `(matchAltExpr| | $[$patterns:term],* => $rhs:term)
           alts := alts.push alt
-        else if (← compatibleCtors ctorName₁ ctorName₂) then
+        else bif (← compatibleCtors ctorName₁ ctorName₂) then
           patterns := patterns ++ #[(← `($(mkIdent ctorName₁) ..)), (← `($(mkIdent ctorName₂) ..))]
           let rhs ← mkIsFalse u (← `(by intro h; injection h))
           alts := alts.push (← `(matchAltExpr| | $[$patterns:term],* => $rhs:term))
@@ -147,7 +147,7 @@ def mkMatchNew (u : Flavor) (ctx : Context) (header : Header) (indVal : Inductiv
 
       for i in *...ctorInfo.numFields do
         let x := xs[indVal.numParams + i]!
-        if type.containsFVar x.fvarId! then
+        bif type.containsFVar x.fvarId! then
           -- If resulting type depends on this field, we don't need to bring it into
           -- scope nor compare it
           ctorArgs1 := ctorArgs1.push (← `(_))
@@ -163,14 +163,14 @@ def mkMatchNew (u : Flavor) (ctx : Context) (header : Header) (indVal : Inductiv
           let recField  := indValNum.map (ctx.auxFunNames[·]!)
           let isProof ← isProp xType
           todo := todo.push (a, b, recField, isProof)
-      if ctorArgs1.isEmpty then
+      bif ctorArgs1.isEmpty then
         -- Unit thunking argument
         ctorArgs1 := ctorArgs1.push (← `(()))
       let rhs ← mkSameCtorRhs todo.toList
       `(@fun $ctorArgs1:term* $ctorArgs2:term* =>$rhs:term)
-  if indVal.numCtors == 1 then
+  bif indVal.numCtors == 1 then
     `( $(mkCIdent casesOnSameCtorName) $x1:term $x2:term rfl $alts:term* )
-  else if u then
+  else bif u then
     let h : Ident ← `(h)
     mkDIte u h (← `($(mkCIdent ctorIdxName) $x1:ident = $(mkCIdent ctorIdxName) $x2:ident))
       (← `($(mkCIdent casesOnSameCtorName) $x1:term $x2:term $h:ident $alts:term*))
@@ -183,7 +183,7 @@ where
   mkSameCtorRhs : List (Ident × Ident × Option Name × Bool) → TermElabM Term
     | [] => do mkIsTrue u (← `(rfl))
     | (a, b, recField, isProof) :: todo => withFreshMacroScope do
-      let rhs ← if isProof then
+      let rhs ← bif isProof then
         `(have h : @$a = @$b := rfl; by subst h; exact $(← mkSameCtorRhs todo):term)
       else
         let sameCtor ← mkSameCtorRhs todo
@@ -199,7 +199,7 @@ where
 
 def mkMatch (u : Flavor) (ctx : Context) (header : Header) (indVal : InductiveVal) :
     TermElabM Term := do
-  if indVal.numCtors ≥ deriving.decEq.linear_construction_threshold.get (← getOptions) then
+  bif indVal.numCtors ≥ᵇ deriving.decEq.linear_construction_threshold.get (← getOptions) then
     mkMatchNew u ctx header indVal
   else
     mkMatchOld u ctx header indVal
@@ -211,12 +211,12 @@ def mkAuxFunction (u : Flavor) (ctx : Context) (auxFunName : Name) (indVal : Ind
   let binders := header.binders
   let target₁ := mkIdent header.targetNames[0]!
   let target₂ := mkIdent header.targetNames[1]!
-  let termSuffix ← if indVal.isRec
+  let termSuffix ← bif indVal.isRec
     then `(Parser.Termination.suffix|termination_by structural $target₁)
     else `(Parser.Termination.suffix|)
-  let type    ← if u then ``(UDecidable ($target₁ = $target₂))
+  let type    ← bif u then ``(UDecidable ($target₁ = $target₂))
     else `(Decidable ($target₁ = $target₂))
-  if u then
+  bif u then
     `(@[instance_reducible] def $(mkIdent auxFunName):ident $binders:bracketedBinder* :
         $type:term := $body:term
       $termSuffix:suffix)
@@ -252,8 +252,8 @@ def mkUInstanceCmds (instName : Name) (impl : Ident) (indVal : InductiveVal) :
     ← `(@[csimp] theorem $csimpName:ident : @$inst = @$impl := rfl)]
 
 def mkDecEqCmds (u : Flavor) (indVal : InductiveVal) : TermElabM (Array Syntax) := do
-  let ctx ← mkContext u.className (if u then "udecEq" else "decEq") indVal.name
-  let instCmds ← if u then
+  let ctx ← mkContext u.className (bif u then "udecEq" else "decEq") indVal.name
+  let instCmds ← bif u then
       let some i := ctx.typeInfos.findIdx? (·.name == indVal.name) | unreachable!
       mkUInstanceCmds ctx.instName (mkIdent ctx.auxFunNames[i]!) indVal
     else
@@ -266,7 +266,7 @@ open Command
 
 def mkDecEq (u : Flavor) (declName : Name) : CommandElabM Bool := do
   let indVal ← getConstInfoInduct declName
-  if indVal.isNested then
+  bif indVal.isNested then
     return false -- nested inductive types are not supported yet
   else
     let cmds ← liftTermElabM <| mkDecEqCmds u indVal
@@ -337,7 +337,7 @@ def mkDecEqEnum (u : Flavor) (declName : Name) : CommandElabM Unit := do
       | rfl)
     let body ← mkDIte u h (← `(x.ctorIdx = y.ctorIdx)) (← mkIsTrue u eqProof)
       (← mkIsFalse u (← `(fun h => by subst h; contradiction)))
-    if u then
+    bif u then
       let instName ← mkInstName u.className declName
       let impl := mkIdent (instName ++ `udecEq)
       let implCmd ← `(@[inline, instance_reducible] def $impl:ident :
@@ -350,7 +350,7 @@ def mkDecEqEnum (u : Flavor) (declName : Name) : CommandElabM Unit := do
 
 def mkDecEqInstance (u : Flavor) (declName : Name) : CommandElabM Bool := do
   withoutExposeFromCtors declName do
-  if (← isEnumType declName) then
+  bif (← isEnumType declName) then
     mkDecEqEnum u declName
     return true
   else

@@ -25,7 +25,7 @@ def Lean.Parser.Command.classInductive :=
 private def inductiveSyntaxToView (modifiers : Modifiers) (decl : Syntax) (isCoinductive : Bool) : TermElabM InductiveView := do
   let isClass := decl.isOfKind ``Parser.Command.classInductive
   -- **Note**: We use `addFirstAttr` to make sure the `[class]` attribute is processed **before** `[univ_out_params]
-  let modifiers := if isClass then modifiers.addFirstAttr { name := `class } else modifiers
+  let modifiers := bif isClass then modifiers.addFirstAttr { name := `class } else modifiers
   let (binders, type?) := expandOptDeclSig decl[2]
   let declId           := decl[1]
   let ⟨name, declName, levelNames, docString?⟩ ← Term.expandDeclId (← getCurrNamespace) (← Term.getLevelNames) declId modifiers
@@ -33,14 +33,14 @@ private def inductiveSyntaxToView (modifiers : Modifiers) (decl : Syntax) (isCoi
   -- correct scope for each individual inductive declaration (used e.g. to infer ctor visibility
   -- below), so let's do that now.
   withExporting (isExporting := !isPrivateName declName) do
-    if modifiers.isMeta then
+    bif modifiers.isMeta then
       modifyEnv (markMeta · declName)
     addDeclarationRangesForBuiltin declName modifiers.stx decl
     /-
       Relates to issue
       https://github.com/leanprover/lean4/issues/10503
     -/
-    if declName.hasMacroScopes && isCoinductive then
+    bif declName.hasMacroScopes && isCoinductive then
       throwError "Coinductive predicates are not allowed inside of macro scopes"
     let ctors      ← decl[4].getArgs.mapM fun ctor => withRef ctor do
       /-
@@ -51,11 +51,11 @@ private def inductiveSyntaxToView (modifiers : Modifiers) (decl : Syntax) (isCoi
       let modifiersStx := ctor[2]
       let mut ctorModifiers ← elabModifiers ⟨modifiersStx⟩
       if let some leadingDocComment := ctor[0].getOptional? then
-        if ctorModifiers.docString?.isSome then
+        bif ctorModifiers.docString?.isSome then
           logErrorAt leadingDocComment "Duplicate doc string"
         ctorModifiers := { ctorModifiers with
           docString? := some ⟨leadingDocComment⟩ }
-      if ctorModifiers.isPrivate && modifiers.isPrivate then
+      bif ctorModifiers.isPrivate && modifiers.isPrivate then
         let hint ← do
           let .original .. := modifiersStx.getHeadInfo | pure .nil
           let some range := modifiersStx[2].getRangeWithTrailing? | pure .nil
@@ -69,17 +69,17 @@ private def inductiveSyntaxToView (modifiers : Modifiers) (decl : Syntax) (isCoi
             toCodeActionTitle? := some fun _ => "Delete `private` modifier"
           }]
         throwError m!"Constructor cannot be marked `private` because it is already in a `private` inductive datatype" ++ hint
-      if ctorModifiers.isProtected && modifiers.isPrivate then
+      bif ctorModifiers.isProtected && modifiers.isPrivate then
         throwError "Constructor cannot be `protected` because it is in a `private` inductive datatype"
       checkValidCtorModifier ctorModifiers
       let ctorName := ctor.getIdAt 3
-      if ctorName.hasMacroScopes && isCoinductive then
+      bif ctorName.hasMacroScopes && isCoinductive then
         throwError "Coinductive predicates are not allowed inside of macro scopes"
       let ctorName := declName ++ ctorName
       let ctorName ← withRef ctor[3] <| applyVisibility ctorModifiers ctorName
       let (binders, type?) := expandOptDeclSig ctor[4]
       addDeclarationRangesFromSyntax ctorName ctor ctor[3]
-      if modifiers.isMeta then
+      bif modifiers.isMeta then
         modifyEnv (markMeta · ctorName)
       return { ref := ctor, declId := ctor[3], modifiers := ctorModifiers, declName := ctorName, binders := binders, type? := type? : CtorView }
     let computedFields ← (decl[5].getOptional?.map (·[1].getArgs) |>.getD #[]).mapM fun cf => withRef cf do
@@ -89,7 +89,7 @@ private def inductiveSyntaxToView (modifiers : Modifiers) (decl : Syntax) (isCoi
     -- elaborates it against the `monotone` goal of this predicate's functor.
     let monotonicity? : Option Term ← decl[7].getOptional?.mapM fun stx =>
       withRef stx `(by $(⟨stx[1]⟩))
-    if decl[3][0].isToken ":=" then
+    bif decl[3][0].isToken ":=" then
       -- https://github.com/leanprover/lean4/issues/5236
       withRef decl[0] <| Linter.logLintIf Linter.linter.deprecated decl[3]
         "`inductive ... :=` has been deprecated in favor of `inductive ... where`"
@@ -129,10 +129,10 @@ private def replaceArrowBinderNames (type : Expr) (newNames : Array Name) : Expr
   go type 0
 where
   go (type : Expr) (i : Nat) : Expr :=
-    if h : i < newNames.size then
+    bif h : i <ᵇ newNames.size then
       match type with
       | .forallE n d b bi =>
-        if n.hasMacroScopes then
+        bif n.hasMacroScopes then
           mkForall newNames[i] bi d (go b (i+1))
         else
           mkForall n bi d (go b (i+1))
@@ -166,15 +166,15 @@ private def reorderCtorArgs (ctorType : Expr) : MetaM Expr := do
       unless b.isFVar && as.contains b do
         break
       let localDecl ← getFVarLocalDecl b
-      if localDecl.binderInfo.isExplicit then
+      bif localDecl.binderInfo.isExplicit then
         break
       unless localDecl.userName.hasMacroScopes do
         break
-      if (← localDeclDependsOnPred localDecl fun fvarId => as.any fun p => p.fvarId! == fvarId) then
+      bif (← localDeclDependsOnPred localDecl fun fvarId => as.any fun p => p.fvarId! == fvarId) then
         break
       bsPrefix := bsPrefix.push b
       as := as.erase b
-    if bsPrefix.isEmpty then
+    bif bsPrefix.isEmpty then
       return ctorType
     else
       let r ← mkForallFVars (bsPrefix ++ as) type
@@ -220,7 +220,7 @@ private def elabCtors (indFVars : Array Expr) (params : Array Expr) (r : ElabHea
         let elabCtorType : TermElabM Expr := do
           match ctorView.type? with
           | none          =>
-            if indFamily then
+            bif indFamily then
               throwError "Missing resulting type for constructor `{ctorView.declName}`: \
                 Its resulting type must be specified because it is part of an inductive family declaration"
             return mkAppN indFVar params
@@ -282,7 +282,7 @@ where
   checkParamOccs (ctorType : Expr) : MetaM Expr :=
     let visit (e : Expr) : StateT (List Expr) MetaM TransformStep := do
       let f := e.getAppFn
-      if indFVars.contains f then
+      bif indFVars.contains f then
         let mut args := e.getAppArgs
         -- Prefer throwing an "argument mismatch" error rather than a "missing parameter" one
         for i in *...min args.size params.size do
@@ -319,7 +319,7 @@ where
     let lazyAppMsg := MessageData.ofLazyM do
       if let some fvarId := indFVar.fvarId? then
         if let some decl := (← getLCtx).find? fvarId then
-          if (← whnfD decl.type).isForall then
+          bif (← whnfD decl.type).isForall then
             return m!" an application of"
       return m!""
     throwNamedErrorAt ctorType lean.ctorResultingTypeMismatch "Unexpected resulting type for constructor `{declName}`: \

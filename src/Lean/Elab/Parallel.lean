@@ -247,7 +247,7 @@ def parFirst {α : Type} (jobs : List (CoreM α)) (cancel : Bool := true) : Core
   for result in iter do
     match result with
     | .ok value =>
-      if cancel then cancelHook
+      bif cancel then cancelHook
       return value
     | .error _ => continue
   throwError "All parallel tasks failed"
@@ -382,7 +382,7 @@ def parFirst {α : Type} (jobs : List (MetaM α)) (cancel : Bool := true) : Meta
   for result in iter do
     match result with
     | .ok value =>
-      if cancel then cancelHook
+      bif cancel then cancelHook
       return value
     | .error _ => continue
   throwError "All parallel tasks failed"
@@ -519,7 +519,7 @@ def parFirst {α : Type} (jobs : List (TermElabM α)) (cancel : Bool := true) : 
   for result in iter do
     match result with
     | .ok value =>
-      if cancel then cancelHook
+      bif cancel then cancelHook
       return value
     | .error _ => continue
   throwError "All parallel tasks failed"
@@ -656,7 +656,7 @@ def parFirst {α : Type} (jobs : List (TacticM α)) (cancel : Bool := true) : Ta
   for result in iter do
     match result with
     | .ok value =>
-      if cancel then cancelHook
+      bif cancel then cancelHook
       return value
     | .error _ => continue
   throwError "All parallel tasks failed"

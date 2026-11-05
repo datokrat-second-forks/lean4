@@ -21,16 +21,16 @@ register_builtin_option hygiene : Bool := {
 def getAntiquotationIds (stx : Syntax) : TermElabM (Array Ident) := do
   let mut ids := #[]
   for stx in stx.topDown (firstChoiceOnly := true) do
-    if (isAntiquot stx || isTokenAntiquot stx) && !isEscapedAntiquot stx then
+    bif (isAntiquot stx || isTokenAntiquot stx) && !isEscapedAntiquot stx then
       let anti := getAntiquotTerm stx
-      if anti.isIdent then ids := ids.push ⟨anti⟩
-      else if anti.isOfKind ``Parser.Term.hole then pure ()
+      bif anti.isIdent then ids := ids.push ⟨anti⟩
+      else bif anti.isOfKind ``Parser.Term.hole then pure ()
       else throwErrorAt stx "complex antiquotation not allowed here"
   return ids
 
 /-- Get all pattern vars (as `Syntax.ident`s) in `stx` -/
 partial def getPatternVars (stx : Syntax) : TermElabM (Array Syntax) :=
-  if stx.isQuot then
+  bif stx.isQuot then
     getAntiquotationIds stx
   else match stx with
     | `(_)            => return #[]
@@ -47,7 +47,7 @@ returns the `"term"` atom if present.
 -/
 def getAntiquotKindSpec? (antiquot : Syntax) : Option Syntax :=
   let name := antiquot[3][1]
-  if name.isMissing then none else some name
+  bif name.isMissing then none else some name
 
 def resolveSectionVariable (sectionVars : NameMap Name) (id : Name) : List (Name × List String) :=
   -- decode macro scopes from name before recursion

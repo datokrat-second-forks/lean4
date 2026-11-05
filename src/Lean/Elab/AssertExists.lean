@@ -34,7 +34,7 @@ def Environment.importPath (env : Environment) (imported : Name) : Array Name :=
   if let some idx := env.getModuleIdx? imported then
     let mut target := imported
     for i in [idx.toNat + 1 : modData.size] do
-      if modData[i]!.imports.any (·.module == target) then
+      bif modData[i]!.imports.any (·.module == target) then
         target := modNames[i]!
         result := result.push modNames[i]!
   return result
@@ -184,25 +184,25 @@ def elabCheckAssertions : CommandElab := fun stx => do
   let tk := stx[1]
   let env ← getEnv
   let entries := getSortedAssertExists env
-  if entries.isEmpty && tk.isNone then logInfo "No assertions made." else
+  bif entries.isEmpty && tk.isNone then logInfo "No assertions made." else
   let allMods := env.allImportedModuleNames
   let mut msgs : Array MessageData := #[m!""]
   let mut outcome := m!""
   let mut allExist? := true
   for d in entries do
-    let type := if d.isDecl then "declaration" else "module"
-    let cond := if d.isDecl then env.contains d.givenName else allMods.contains d.givenName
-    outcome := if cond then m!"{checkEmoji}" else m!"{crossEmoji}"
+    let type := bif d.isDecl then "declaration" else "module"
+    let cond := bif d.isDecl then env.contains d.givenName else allMods.contains d.givenName
+    outcome := bif cond then m!"{checkEmoji}" else m!"{crossEmoji}"
     allExist? := allExist? && cond
-    if tk.isNone || !cond then
+    bif tk.isNone || !cond then
       msgs := msgs.push m!"{outcome} '{d.givenName}' ({type}) asserted in '{d.modName}'."
   msgs := msgs.push m!"---"
     |>.push m!"{checkEmoji} means the declaration or import exists."
     |>.push m!"{crossEmoji} means the declaration or import does not exist."
   let msg := MessageData.joinSep msgs.toList "\n"
-  if allExist? && tk.isNone then
+  bif allExist? && tk.isNone then
     logInfo msg
-  if !allExist? then
+  bif !allExist? then
     logWarning msg
 
 end Lean.Elab.Command

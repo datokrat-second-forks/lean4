@@ -34,8 +34,8 @@ open Linter.MissingDocs Parser Term in
 /-- Missing docs handler for `binder_predicate` -/
 @[builtin_missing_docs_handler Lean.Parser.Command.binderPredicate]
 def checkBinderPredicate : SimpleHandler := fun stx => do
-  if stx[0].isNone && stx[2][0][0].getKind != ``«local» then
-    if stx[4].isNone then lint stx[3] "binder predicate"
+  bif stx[0].isNone && stx[2][0][0].getKind != ``«local» then
+    bif stx[4].isNone then lint stx[3] "binder predicate"
     else lintNamed stx[4][0][3] "binder predicate"
 
 end Lean.Elab.Command

@@ -138,7 +138,7 @@ want to catch and process them at the command level.
   try
     x
   catch ex =>
-    if ex.isInterrupt then
+    bif ex.isInterrupt then
       throw ex
     else
       h ex
@@ -342,7 +342,7 @@ instance : MonadLog CommandElabM where
   getFileName := return (← read).fileName
   hasErrors   := return (← get).messages.hasErrors
   logMessage msg := do
-    if (← read).suppressElabErrors then
+    bif (← read).suppressElabErrors then
       -- discard elaboration errors on parse error
       unless msg.data.hasTag (· matches `trace) do
         return
@@ -377,7 +377,7 @@ def runLinters (stx : Syntax) (infoTreePromise? : Option (IO.Promise InfoTree) :
               -- trees currently breaks from linters adding context-less info nodes
               let newInfoState ← getInfoState
               let newState := Linter.codeQualityLogExt.getState (← get).env
-              if newInfoState.enabled then
+              bif newInfoState.enabled then
                 producedInfoTrees.modify fun old =>
                   old.append (newInfoState.trees.foldl (·.push ·) {} (start := originalSize))
               modify fun s => { savedState with messages := s.messages, traceState := s.traceState }
@@ -385,7 +385,7 @@ def runLinters (stx : Syntax) (infoTreePromise? : Option (IO.Promise InfoTree) :
               producedCodeQualityEntries.modify (· ++ newState.extract oldStateSize)
 
       if let some infoTreePromise := infoTreePromise? then
-        if (← getInfoState).enabled then
+        bif (← getInfoState).enabled then
           infoTreePromise.resolve <|
             mkLinterInfoGroupNode (← producedInfoTrees.get)
 
@@ -445,7 +445,7 @@ def runStatefulLinters (stx : Syntax) (prev : Array LinterState)
             onError
           finally
             let newInfoState ← getInfoState
-            if newInfoState.enabled then
+            bif newInfoState.enabled then
               producedInfoTrees.modify fun old =>
                 old.append (newInfoState.trees.foldl (·.push ·) {} (start := originalSize))
             let newState := Linter.codeQualityLogExt.getState (← get).env
@@ -463,7 +463,7 @@ def runStatefulLinters (stx : Syntax) (prev : Array LinterState)
         postSt := postSt.push (← run "post" i (pure prev[i]!) (l.post stx prev preSt))
         i := i + 1
       if let some infoTreePromise := infoTreePromise? then
-        if (← getInfoState).enabled then
+        bif (← getInfoState).enabled then
           infoTreePromise.resolve <|
             mkLinterInfoGroupNode (← producedInfoTrees.get)
       if let some codeQualityEntriesPromise := codeQualityEntriesPromise? then
@@ -526,7 +526,7 @@ def wrapAsyncAsSnapshot {α : Type} (act : α → CommandElabM Unit) (cancelTk? 
     match (← (f a).toBaseIO) with
     | .ok (output, st) =>
       let mut msgs := st.messages
-      if !output.isEmpty then
+      bif !output.isEmpty then
         msgs := msgs.add {
           fileName := ctx.fileName
           severity := MessageSeverity.information
@@ -548,7 +548,7 @@ def logSnapshotTask (task : Language.SnapshotTask Language.SnapshotTree) : Comma
 open Language in
 def runLintersAsync (stx : Syntax) : CommandElabM Unit := do
   let lintersCodeQualityEntriesPromise ← IO.Promise.new (α := Array Linter.CodeQualityLogEntry)
-  if !Elab.async.get (← getOptions) then
+  bif !Elab.async.get (← getOptions) then
     withoutModifyingEnv do
       runLinters stx (codeQualityEntriesPromise? := lintersCodeQualityEntriesPromise)
       modify fun s => { s with codeQualityEntryTasks :=
@@ -596,11 +596,11 @@ Runs the module linters on `cmds`, the commands of the module, asynchronously if
 set.
 -/
 def runModuleLintersAsync (cmds : Array Syntax) : CommandElabM Unit := do
-  if (← moduleLintersRef.get).isEmpty then return
+  bif (← moduleLintersRef.get).isEmpty then return
   let codeQualityEntriesPromise ← IO.Promise.new (α := Array Linter.CodeQualityLogEntry)
   modify fun s => { s with codeQualityEntryTasks :=
     s.codeQualityEntryTasks.push (codeQualityEntriesPromise.resultD #[]) }
-  if !Elab.async.get (← getOptions) then
+  bif !Elab.async.get (← getOptions) then
     withoutModifyingEnv do
       runModuleLinters cmds codeQualityEntriesPromise
     return
@@ -613,9 +613,9 @@ def runModuleLintersAsync (cmds : Array Syntax) : CommandElabM Unit := do
 
 open Language in
 def runStatefulLintersAsync (stx : Syntax) : CommandElabM Unit := do
-  if (← statefulLintersRef.get).isEmpty then return
+  bif (← statefulLintersRef.get).isEmpty then return
   let statefulLintersCodeQualityEntriesPromise ← IO.Promise.new (α := Array Linter.CodeQualityLogEntry)
-  if !Elab.async.get (← getOptions) then
+  bif !Elab.async.get (← getOptions) then
     -- We only block when switching the `Elab.async` in the middle of elaborating a file.
     let prev := (← prevLinterStatesTask (← get).prevLinterStates).get
     let postSt ← withoutModifyingEnv <|
@@ -697,12 +697,12 @@ Disables incremental command reuse *and* reporting for `act` if `cond` is true b
 def withoutCommandIncrementality (cond : Bool) (act : CommandElabM α) : CommandElabM α := do
   let opts ← getOptions
   -- Cancel old elaboration when discarding it (for commands without incrementality support)
-  if cond then
+  bif cond then
     if let some old := (← read).snap?.bind (·.old?) then
       old.val.cancelRec
   withReader (fun ctx => { ctx with snap? := ctx.snap?.filter fun snap => Id.run do
     if let some old := snap.old? then
-      if cond && opts.getBool `trace.Elab.reuse then
+      bif cond && opts.getBool `trace.Elab.reuse then
         dbg_trace "reuse stopped: guard failed at {old.stx}"
     return !cond
   }) act
@@ -712,7 +712,7 @@ Warns if the kind of `stx` is deprecated. Must run inside the info tree context 
 the warning may come with a code action.
 -/
 private def checkDeprecatedCommand (stx : Syntax) : CommandElabM Unit := do
-  if isDeprecatedSyntax (← getEnv) stx.getKind then
+  bif isDeprecatedSyntax (← getEnv) stx.getKind then
     liftCoreM <| checkDeprecatedSyntax stx (← read).macroStack
 
 private def elabCommandUsing (s : State) (stx : Syntax) : List (KeyedDeclsAttribute.AttributeEntry CommandElab) → CommandElabM Unit
@@ -775,7 +775,7 @@ where go := do
   withLogging <| withRef stx <| withIncRecDepth <| withFreshMacroScope do
     match stx with
     | Syntax.node _ k args =>
-      if k == nullKind then
+      bif k == nullKind then
         -- list of commands => elaborate in order
         -- The parser will only ever return a single command at a time, but syntax quotations can return multiple ones
         -- Incrementality is currently limited to the common case where the sequence is the direct
@@ -784,7 +784,7 @@ where go := do
           args.forM elabCommand
       else withTraceNode `Elab.command (fun _ => return stx) (tag :=
         -- special case: show actual declaration kind for `declaration` commands
-        (if stx.isOfKind ``Parser.Command.declaration then stx[1] else stx).getKind.toString) do
+        (bif stx.isOfKind ``Parser.Command.declaration then stx[1] else stx).getKind.toString) do
         let s ← get
         match (← liftMacroM <| expandMacroImpl? s.env stx) with
         | some (decl, stxNew?) =>
@@ -795,7 +795,7 @@ where go := do
               -- Support incrementality; see also Note [Incremental Macros]
               if let some snap := (←read).snap? then
                 -- Unpack nested commands; see `MacroExpandedSnapshot.next`
-                let cmds := if stxNew.isOfKind nullKind then stxNew.getArgs else #[stxNew]
+                let cmds := bif stxNew.isOfKind nullKind then stxNew.getArgs else #[stxNew]
                 let nextMacroScope := (← get).nextMacroScope
                 let hasTraces := (← getTraceState).traces.size > 0
                 let oldSnap? := do
@@ -805,10 +805,10 @@ where go := do
                   -- check absence of traces; see Note [Incremental Macros]
                   guard <| !oldSnap.hasTraces && !hasTraces
                   return oldSnap
-                if snap.old?.isSome && oldSnap?.isNone then
+                bif snap.old?.isSome && oldSnap?.isNone then
                   snap.old?.forM (·.val.cancelRec)
                 let oldCmds? := oldSnap?.map fun old =>
-                  if old.newStx.isOfKind nullKind then old.newStx.getArgs else #[old.newStx]
+                  bif old.newStx.isOfKind nullKind then old.newStx.getArgs else #[old.newStx]
                 let cmdPromises ← cmds.mapM fun _ => IO.Promise.new
                 let cancelTk? := (← read).cancelTk?
                 snap.new.resolve <| .ofTyped {
@@ -836,7 +836,7 @@ where go := do
                       let old ← oldSnap?
                       return { stx := (← oldCmd?), val := (← old.next[i]?) }
                   } }) do
-                    if oldSnap?.isSome && (← read).snap?.isNone then
+                    bif oldSnap?.isSome && (← read).snap?.isNone then
                       oldSnap?.bind (·.next[i]?) |>.forM (·.cancelRec)
                     elabCommand cmd
                     -- Resolve promise for commands not supporting incrementality; waiting for
@@ -909,7 +909,7 @@ def withInitQuotContext (hint? : Option UInt64) (act : CommandElabM Unit) : Comm
 private partial def recordUsedSyntaxKinds (stx : Syntax) : CommandElabM Unit := do
   if let .node _ k .. := stx then
     -- do not record builtin parsers, they do not have to be imported
-    if !(← Parser.builtinSyntaxNodeKindSetRef.get).contains k then
+    bif !(← Parser.builtinSyntaxNodeKindSetRef.get).contains k then
       recordExtraModUseFromDecl (isMeta := true) k
   stx.forArgsM recordUsedSyntaxKinds
 
@@ -1075,7 +1075,7 @@ def runTermElabM (elabFn : Array Expr → TermElabM α) : CommandElabM α := do
           -- So, we use `Core.resetMessageLog`.
           Core.resetMessageLog
           let xs ← Term.addAutoBoundImplicits xs none
-          if xs.all (·.isFVar) then
+          bif xs.all (·.isFVar) then
             Term.withoutAutoBoundImplicit <| elabFn xs
           else
             -- Abstract any mvars that appear in `xs` using `mkForallFVars` (the type `mkSort Level.zero` is an arbitrary placeholder)
@@ -1119,7 +1119,7 @@ def getLevelNames : CommandElabM (List Name) :=
 def addUnivLevel (idStx : Syntax) : CommandElabM Unit := withRef idStx do
   let id := idStx.getId
   let levelNames ← getLevelNames
-  if levelNames.elem id then
+  bif levelNames.elem id then
     throwAlreadyDeclaredUniverseLevel id
   else
     modifyScope fun scope => { scope with levelNames := id :: scope.levelNames }
@@ -1158,7 +1158,7 @@ private def liftCommandElabMCore (cmd : CommandElabM α) (throwOnError : Bool) :
     auxDeclNGen := commandState.auxDeclNGen
     traceState.traces := coreState.traceState.traces ++ commandState.traceState.traces
   }
-  if throwOnError then
+  bif throwOnError then
     if let some err := commandState.messages.toArray.find? (·.severity matches .error) then
       throwError err.data
   modify fun coreState => { coreState with
@@ -1198,7 +1198,7 @@ used to generate visibility syntax for declarations that is independent of the p
 `public section`s.
 -/
 def visibility.ofBool (isPublic : Bool) : TSyntax ``visibility :=
-  Unhygienic.run <| if isPublic then `(visibility| public) else `(visibility| private)
+  Unhygienic.run <| bif isPublic then `(visibility| public) else `(visibility| private)
 
 /--
 Returns syntax for `private` if `attrKind` is `local` and `public` otherwise.

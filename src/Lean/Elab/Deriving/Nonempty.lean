@@ -33,7 +33,7 @@ private def mkNonemptyInstance (declName : Name) : TermElabM Syntax.Command := d
       by constructor; first $[| $ctorTacs:tactic]*)
 
 def mkNonemptyInstanceHandler (declNames : Array Name) : CommandElabM Bool := do
-  if (← declNames.allM isInductive) then
+  bif (← declNames.allM isInductive) then
     for declName in declNames do
       withoutExposeFromCtors declName do
         elabCommand (← liftTermElabM do mkNonemptyInstance declName)

@@ -50,11 +50,11 @@ private def elabTermForEval (term : Syntax) (expectedType? : Option Expr) : Term
   let e ← Term.elabTermEnsuringType term ty
   synthesizeWithHinting ty
   let e ← instantiateMVars e
-  if (← Term.logUnassignedUsingErrorInfos (← getMVars e)) then throwAbortTerm
-  if ← isProof e then
+  bif (← Term.logUnassignedUsingErrorInfos (← getMVars e)) then throwAbortTerm
+  bif (← isProof e) then
     throwError m!"Cannot evaluate, proofs are not computationally relevant"
-  let e ← if (← isProp e) then mkDecide e else pure e
-  if ← isType e then
+  let e ← bif (← isProp e) then mkDecide e else pure e
+  bif (← isType e) then
     throwError m!"Cannot evaluate, types are not computationally relevant"
   trace[Elab.eval] "elaborated term:{indentExpr e}"
   return e
@@ -71,7 +71,7 @@ where
       for m in #[``CommandElabM, ``TermElabM, ``IO] do
         s.restore true
         try
-          if ← isDefEq ty (← mkFreshMonadApp m) then
+          bif (← isDefEq ty (← mkFreshMonadApp m)) then
             Term.synthesizeSyntheticMVarsNoPostponing
             return
         catch _ => pure ()
@@ -97,7 +97,7 @@ private def addAndCompileExprForEval (declName : Name) (value : Expr) (allowSorr
   -- These are the most permissive respective settings that are guaranteed not to lead to missing
   -- IR errors.
   withOptions (fun opts =>
-      if Elab.inServer.get opts then
+      bif Elab.inServer.get opts then
         Compiler.compiler.checkMeta.set opts false
       else
         Compiler.compiler.relaxedMetaCheck.set opts true) do
@@ -106,7 +106,7 @@ private def addAndCompileExprForEval (declName : Name) (value : Expr) (allowSorr
   assert! (← getEnv).contains declName
   unless allowSorry do
     let axioms ← collectAxioms declName
-    if axioms.contains ``sorryAx then
+    bif axioms.contains ``sorryAx then
       throwError "\
         Aborting evaluation since the expression depends on the 'sorry' axiom, \
         which can lead to runtime instability and crashes.\n\n\
@@ -150,7 +150,7 @@ Currently auto-derivation does not attempt to derive recursively.
 private def mkFormat (e : Expr) : MetaM Expr := do
   mkRepr e <|> (do mkAppM ``Std.Format.text #[← mkToString e])
   <|> do
-    if eval.derive.repr.get (← getOptions) then
+    bif eval.derive.repr.get (← getOptions) then
       if let .const name _ := (← whnf (← inferType e)).getAppFn then
         try
           trace[Elab.eval] "Attempting to derive a `Repr` instance for `{.ofConstName name}`"

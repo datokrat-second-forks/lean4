@@ -59,11 +59,11 @@ unsafe builtin_initialize precheckAttribute : KeyedDeclsAttribute Precheck ←
 partial def precheck : Precheck := fun stx => do
   checkDeprecatedQuotedSyntax stx
   if let p::_ := precheckAttribute.getValues (← getEnv) stx.getKind then
-    if ← catchInternalId unsupportedSyntaxExceptionId (do withRef stx <| p stx; pure true) (fun _ => pure false) then
+    bif (← catchInternalId unsupportedSyntaxExceptionId (do withRef stx <| p stx; pure true) (fun _ => pure false)) then
       return
-  if stx.isAnyAntiquot then
+  bif stx.isAnyAntiquot then
     return
-  if !hasQuotedIdent stx then
+  bif !hasQuotedIdent stx then
     return  -- we only precheck identifiers, so there is nothing to check here
   if let some stx' ← liftMacroM <| expandMacro? stx then
     precheck stx'
@@ -74,16 +74,16 @@ where
   hasQuotedIdent
     | Syntax.ident .. => true
     | stx =>
-      if stx.isAnyAntiquot then
+      bif stx.isAnyAntiquot then
         false
-      else if stx.isOfKind hygieneInfoKind then
+      else bif stx.isOfKind hygieneInfoKind then
         false
       else
         stx.getArgs.any hasQuotedIdent
 
 def runPrecheck (stx : Syntax) : TermElabM Unit := do
   let opts ← getOptions
-  if quotPrecheck.get opts && hygiene.get opts then
+  bif quotPrecheck.get opts && hygiene.get opts then
     precheck stx |>.run { quotLCtx := {} }
 
 private def isSectionVariable (e : Expr) : TermElabM Bool := do
@@ -101,7 +101,7 @@ private def isQuotLocal (quotLCtx : NameSet) (n : Name) : Bool :=
 @[builtin_quot_precheck ident] def precheckIdent : Precheck := fun stx =>
   match stx with
   | Syntax.ident _    _      val preresolved => do
-    if !preresolved.isEmpty then
+    bif !preresolved.isEmpty then
       return
     /- The precheck currently ignores field notation.
        For example: the following notation is accepted although `foo` is not a valid field name for a `Nat` value.
@@ -119,13 +119,13 @@ private def isQuotLocal (quotLCtx : NameSet) (n : Name) : Bool :=
             !(resolveSectionVariable (← readThe Term.Context).sectionVars val).isEmpty do
           checkDeprecatedCore declName
       return
-    if isQuotLocal (← read).quotLCtx val then
+    bif isQuotLocal (← read).quotLCtx val then
       return
     let rs ← try resolveName stx val [] [] catch _ => pure []
     for (e, _, _) in rs do
       match e with
       | Expr.fvar _      .. =>
-        if quotPrecheck.allowSectionVars.get (← getOptions) && (← isSectionVariable e) then
+        bif quotPrecheck.allowSectionVars.get (← getOptions) && (← isSectionVariable e) then
           return
       | _ => pure ()
     throwError m!"Unknown identifier `{val}` at quotation precheck"

@@ -32,15 +32,15 @@ public def Forward.matchApp? (e : Term) : Option (Term × ForwardArg) := do
   let `($head $args*) := (⟨dropParens e.raw⟩ : Term) | none
   let last : Term := ⟨dropParens (← args.back?).raw⟩
   let arg : ForwardArg ←
-    if last.raw.isOfKind ``doForward then
+    bif last.raw.isOfKind ``doForward then
       some ⟨#[], ⟨last.raw[2]⟩⟩
     else if let `(fun $bs:funBinder* => $rest) := last then
       let rest := dropParens rest.raw
-      if rest.isOfKind ``doForward then some ⟨bs, ⟨rest[2]⟩⟩ else none
+      bif rest.isOfKind ``doForward then some ⟨bs, ⟨rest[2]⟩⟩ else none
     else none
   let preArgs := args.pop
   let head' : Term :=
-    if preArgs.isEmpty then head
+    bif preArgs.isEmpty then head
     else ⟨mkNode ``Lean.Parser.Term.app #[head, mkNullNode preArgs]⟩
   some (head', arg)
 

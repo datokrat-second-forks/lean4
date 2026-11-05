@@ -84,7 +84,7 @@ private def getSimpContext : MetaM Simp.Context := do
     (config        := { Simp.neutralConfig with dsimp := true, congrConsts := false })
 
 def isWfParam? (e : Expr) : Option Expr :=
-  if e.isAppOfArity ``wfParam 2 then
+  bif e.isAppOfArity ``wfParam 2 then
     e.appArg!
   else
     none
@@ -94,7 +94,7 @@ def mkWfParam (e : Expr) : MetaM Expr :=
 
 /-- `f (wfParam x) ==> wfParam (f x)` if `f` is a projection -/
 builtin_dsimproc_decl paramProj (_) := fun e => do
-  if h : e.isApp then
+  bif h : e.isApp then
     let some a' := isWfParam? (e.appArg h) | return .continue
     let f := e.getAppFn
     unless f.isConst do return .continue
@@ -125,13 +125,13 @@ private def anyLetValueIsWfParam (e : Expr) : Bool :=
 
 private def numLetsWithValueNotIsWfParam (e : Expr) (acc := 0) : Nat :=
   match e with
-  | .letE _ _ v b _ => if (isWfParam? v).isSome then acc else numLetsWithValueNotIsWfParam b (acc + 1)
+  | .letE _ _ v b _ => bif (isWfParam? v).isSome then acc else numLetsWithValueNotIsWfParam b (acc + 1)
   | _               => acc
 
 private partial def processParamLet (e : Expr) : MetaM Expr := do
   if let .letE _ t v b _ := e then
     if let some v' := isWfParam? v then
-      if ← Meta.isProp t then
+      bif (← Meta.isProp t) then
         processParamLet <| e.updateLetE! t v' b
       else
         let u ← getLevel t
@@ -162,9 +162,9 @@ These `have`s may have been introduced by `simp`, which converts `let`s to `have
 -/
 private def nonPropHaveToLet (e : Expr) : MetaM Expr := do
   Meta.transform e (pre := fun e => do
-    if (← Meta.isProof e) then
+    bif (← Meta.isProof e) then
       return .done e
-    else if e.isLet then
+    else bif e.isLet then
       -- Recall that `Meta.transform` processes entire let telescopes,
       -- so we need to handle the telescope all at once.
       let lctx ← getLCtx
@@ -201,8 +201,8 @@ def preprocess (e : Expr) : MetaM Simp.Result := do
     -- Remove left-over markers
     let e'' ← Core.transform result.expr fun e =>
       e.withApp fun f as => do
-        if f.isConstOf ``wfParam then
-          if h : as.size ≥ 2 then
+        bif f.isConstOf ``wfParam then
+          bif h : as.size ≥ᵇ 2 then
             return .continue (mkAppN as[1] as[2...*])
         return .continue
 

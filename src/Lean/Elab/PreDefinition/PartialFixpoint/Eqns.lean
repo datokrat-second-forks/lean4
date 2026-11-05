@@ -65,7 +65,7 @@ def mkFixEq (declNameNonRec : Name) : MetaM Name := do
     let (type, value) ← lambdaTelescope info.value fun xs body => do
       let lhs := mkAppN (mkConst declNameNonRec us) xs
       let rhs := mkApp (mkAppN (mkConst functionalName us) xs) lhs
-      let thm := if body.isAppOf ``Order.fix then ``Order.fix_eq else ``Order.lfp_monotone_fix
+      let thm := bif body.isAppOf ``Order.fix then ``Order.fix_eq else ``Order.lfp_monotone_fix
       let value := mkAppN (mkConst thm body.getAppFn.constLevels!) body.getAppArgs
       return (← mkForallFVars xs (← mkEq lhs rhs), ← mkLambdaFVars xs value)
     addDecl <| (← mkThmOrUnsafeDef { name, type, value, levelParams := info.levelParams })
@@ -77,7 +77,7 @@ public def registerEqnsInfo (preDefs : Array PreDefinition) (declNameNonRec : Na
   unless preDefs.all fun p => p.kind.isTheorem do
     unless (← preDefs.allM fun p => isProp p.type) do
       let declNames := preDefs.map (·.declName)
-      let fixEq? ← if declNameNonRec != preDefs[0]!.declName then
+      let fixEq? ← bif declNameNonRec != preDefs[0]!.declName then
         some <$> mkFixEq declNameNonRec
       else
         pure none
@@ -93,14 +93,14 @@ def deltaLHSUntilFix (declName declNameNonRec : Name) (mvarId : MVarId) : MetaM 
   mvarId.replaceTargetDefEq (← mkEq lhs' rhs)
 
 partial def rwFixUnder (lhs : Expr) : MetaM Expr := do
-  if lhs.isAppOfArity ``Order.fix 4 then
+  bif lhs.isAppOfArity ``Order.fix 4 then
     return mkAppN (mkConst ``Order.fix_eq lhs.getAppFn.constLevels!) lhs.getAppArgs
-  else if lhs.isAppOfArity ``Order.lfp_monotone 4 then
+  else bif lhs.isAppOfArity ``Order.lfp_monotone 4 then
     return mkAppN (mkConst ``Order.lfp_monotone_fix lhs.getAppFn.constLevels!) lhs.getAppArgs
-  else if lhs.isApp then
+  else bif lhs.isApp then
     let h ← rwFixUnder lhs.appFn!
     mkAppM ``congrFun #[h, lhs.appArg!]
-  else if lhs.isProj then
+  else bif lhs.isProj then
     let f := mkLambda `p .default (← inferType lhs.projExpr!) (lhs.updateProj! (.bvar 0))
     let h ← rwFixUnder lhs.projExpr!
     mkAppM ``congrArg #[f, h]
@@ -181,7 +181,7 @@ where
 def getUnfoldFor? (declName : Name) : MetaM (Option Name) := do
   let name := mkEqLikeNameFor (← getEnv) declName unfoldThmSuffix
   let env ← getEnv
-  if env.contains name then return name
+  bif env.contains name then return name
   let some info := eqnInfoExt.find? env declName | return none
   return some (← mkUnfoldEq declName info)
 

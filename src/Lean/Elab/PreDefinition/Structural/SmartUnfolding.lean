@@ -48,7 +48,7 @@ where
           return mkAppN (← visit f) (← args.mapM visit)
       match (← matchMatcherApp? e) with
       | some matcherApp =>
-        if recFns.all fun (fnName, recArgPos) => !recArgHasLooseBVarsAt fnName recArgPos e then
+        bif recFns.all fun (fnName, recArgPos) => !recArgHasLooseBVarsAt fnName recArgPos e then
           processApp e
         else
           let mut altsNew := #[]
@@ -58,7 +58,7 @@ where
                 throwError "unexpected matcher application alternative{indentExpr alt}\nat application{indentExpr e}"
               let altBody ← visit altBody
               let containsSUnfoldMatch := Option.isSome <| altBody.find? fun e => smartUnfoldingMatch? e |>.isSome
-              let altBody := if !containsSUnfoldMatch then markSmartUnfoldingMatchAlt altBody else altBody
+              let altBody := bif !containsSUnfoldMatch then markSmartUnfoldingMatchAlt altBody else altBody
               mkLambdaFVars xs altBody
             altsNew := altsNew.push altNew
           return markSmartUnfoldingMatch { matcherApp with alts := altsNew }.toExpr
@@ -68,7 +68,7 @@ where
 partial def addSmartUnfoldingDef
     (docCtx : LocalContext × LocalInstances) (preDef : PreDefinition) (recFns : Array (Name × Nat)) :
     TermElabM Unit := do
-  if (← isProp preDef.type) then
+  bif (← isProp preDef.type) then
     return ()
   else
     withEnableInfoTree false do

@@ -55,24 +55,24 @@ def State.mkEOIError (s : State) : State :=
 partial def finishCommentBlock (nesting : Nat) : Parser := fun input s =>
   let input := input
   let i     := s.pos
-  if h : i.atEnd input then eoi s
+  bif h : i.atEnd input then eoi s
   else
-    let curr := i.get' input h
-    let i    := i.next' input h
-    if curr == '-' then
-      if h : i.atEnd input then eoi s
+    let curr := i.get' input (Bool.ne_true_of_eq_false h)
+    let i    := i.next' input (Bool.ne_true_of_eq_false h)
+    bif curr == '-' then
+      bif h : i.atEnd input then eoi s
       else
-        let curr := i.get' input h
-        if curr == '/' then -- "-/" end of comment
-          if nesting == 1 then s.next input i
-          else finishCommentBlock (nesting-1) input (s.next' input i h)
+        let curr := i.get' input (Bool.ne_true_of_eq_false h)
+        bif curr == '/' then -- "-/" end of comment
+          bif nesting == 1 then s.next input i
+          else finishCommentBlock (nesting-1) input (s.next' input i (Bool.ne_true_of_eq_false h))
         else
           finishCommentBlock nesting input (s.setPos i)
-    else if curr == '/' then
-      if h : i.atEnd input then eoi s
+    else bif curr == '/' then
+      bif h : i.atEnd input then eoi s
       else
-        let curr := i.get' input h
-        if curr == '-' then finishCommentBlock (nesting+1) input (s.next' input i h)
+        let curr := i.get' input (Bool.ne_true_of_eq_false h)
+        bif curr == '-' then finishCommentBlock (nesting+1) input (s.next' input i (Bool.ne_true_of_eq_false h))
         else finishCommentBlock nesting input (s.setPos i)
     else finishCommentBlock nesting input (s.setPos i)
 where
@@ -80,57 +80,57 @@ where
 
 @[specialize] partial def takeUntil (p : Char → Bool) : Parser := fun input s =>
   let i := s.pos
-  if h : i.atEnd input then s
-  else if p (i.get' input h) then s
-  else takeUntil p input (s.next' input i h)
+  bif h : i.atEnd input then s
+  else bif p (i.get' input (Bool.ne_true_of_eq_false h)) then s
+  else takeUntil p input (s.next' input i (Bool.ne_true_of_eq_false h))
 
 @[inline] def takeWhile (p : Char → Bool) : Parser :=
   takeUntil (fun c => !p c)
 
 @[inline] def andthen (p q : Parser) : Parser := fun input s =>
   let s := p input s
-  if s.error? matches some .. then s else q input s
+  bif s.error? matches some .. then s else q input s
 
 instance : AndThen Parser where
   andThen p q := andthen p (q ())
 
 partial def whitespace : Parser := fun input s =>
   let i := s.pos
-  if h : i.atEnd input then s
+  bif h : i.atEnd input then s
   else
-    let curr := i.get' input h
-    if curr == '\t' then
+    let curr := i.get' input (Bool.ne_true_of_eq_false h)
+    bif curr == '\t' then
       s.mkError "tabs are not allowed; please configure your editor to expand them"
-    else if curr.isWhitespace then whitespace input (s.next input i)
-    else if curr == '-' then
-      let i    := i.next' input h
+    else bif curr.isWhitespace then whitespace input (s.next input i)
+    else bif curr == '-' then
+      let i    := i.next' input (Bool.ne_true_of_eq_false h)
       let curr := i.get input
-      if curr == '-' then andthen (takeUntil (fun c => c = '\n')) whitespace input (s.next input i)
+      bif curr == '-' then andthen (takeUntil (fun c => c = '\n')) whitespace input (s.next input i)
       else s
-    else if curr == '/' then
-      let i        := i.next' input h
+    else bif curr == '/' then
+      let i        := i.next' input (Bool.ne_true_of_eq_false h)
       let curr     := i.get input
-      if curr == '-' then
+      bif curr == '-' then
         let i    := i.next input
         let curr := i.get input
-        if curr == '-' || curr == '!' then s -- "/--" and "/-!" doc comment are actual tokens
+        bif curr == '-' || curr == '!' then s -- "/--" and "/-!" doc comment are actual tokens
         else andthen (finishCommentBlock 1) whitespace input (s.next input i)
       else s
     else s
 
 @[inline] partial def keywordCore (k : String) (failure : Parser) (success : Parser) : Parser := fun input s =>
   let rec @[specialize] go (i j : String.Pos.Raw) : State :=
-    if h₁ : i.atEnd k then
+    bif h₁ : i.atEnd k then
       success input <| whitespace input (s.setPos j)
-    else if h₂ : j.atEnd input then
+    else bif h₂ : j.atEnd input then
       failure input s
     else
-      let curr₁ := i.get' k h₁
-      let curr₂ := j.get' input h₂
-      if curr₁ != curr₂ then
+      let curr₁ := i.get' k (Bool.ne_true_of_eq_false h₁)
+      let curr₂ := j.get' input (Bool.ne_true_of_eq_false h₂)
+      bif curr₁ != curr₂ then
         failure input s
       else
-        go (i.next' k h₁) (j.next' input h₂)
+        go (i.next' k (Bool.ne_true_of_eq_false h₁)) (j.next' input (Bool.ne_true_of_eq_false h₂))
   go 0 s.pos
 
 @[inline] def keyword (k : String) : Parser :=
@@ -139,12 +139,12 @@ partial def whitespace : Parser := fun input s =>
 @[inline] def isIdCont : String → State → Bool := fun input s =>
   let i := s.pos
   let curr := i.get input
-  if curr == '.' then
+  bif curr == '.' then
     let i := i.next input
-    if h : i.atEnd input then
+    bif h : i.atEnd input then
       false
     else
-      let curr := i.get' input h
+      let curr := i.get' input (Bool.ne_true_of_eq_false h)
       isIdFirst curr || isIdBeginEscape curr
   else
     false
@@ -165,30 +165,30 @@ partial def moduleIdent : Parser := fun input s =>
     {s with isMeta := false, importAll := false, isExported := !s.isModule}
   let rec parse (module : Name) (s : State) :=
     let i := s.pos
-    if h : i.atEnd input then
+    bif h : i.atEnd input then
       s.mkEOIError
     else
-      let curr := i.get' input h
-      if isIdBeginEscape curr then
-        let startPart := i.next' input h
+      let curr := i.get' input (Bool.ne_true_of_eq_false h)
+      bif isIdBeginEscape curr then
+        let startPart := i.next' input (Bool.ne_true_of_eq_false h)
         let s         := takeUntil isIdEndEscape input (s.setPos startPart)
-        if h : s.pos.atEnd input then
+        bif h : s.pos.atEnd input then
           s.mkError "unterminated identifier escape"
         else
           let stopPart  := s.pos
-          let s         := s.next' input s.pos h
+          let s         := s.next' input s.pos (Bool.ne_true_of_eq_false h)
           let module    := .str module (String.Pos.Raw.extract input startPart stopPart)
-          if isIdCont input s then
+          bif isIdCont input s then
             let s := s.next input s.pos
             parse module s
           else
             finalize module input s
-      else if isIdFirst curr then
+      else bif isIdFirst curr then
         let startPart := i
-        let s         := takeWhile isIdRestFast input (s.next' input i h)
+        let s         := takeWhile isIdRestFast input (s.next' input i (Bool.ne_true_of_eq_false h))
         let stopPart  := s.pos
         let module    := .str module (String.Pos.Raw.extract input startPart stopPart)
-        if isIdCont input s then
+        bif isIdCont input s then
           let s := s.next input s.pos
           parse module s
         else
@@ -200,14 +200,14 @@ partial def moduleIdent : Parser := fun input s =>
 @[inline] def atomic (p : Parser) : Parser := fun input s =>
   let pos := s.pos
   let s := p input s
-  if s.error? matches some .. then {s with pos} else s
+  bif s.error? matches some .. then {s with pos} else s
 
 @[specialize] partial def manyImports (p : Parser) : Parser := fun input s =>
   let pos := s.pos
   let s := p input s
-  if s.error? matches some .. then
-    if s.pos == pos then s.clearError else s
-  else if s.badModifier then
+  bif s.error? matches some .. then
+    bif s.pos == pos then s.clearError else s
+  else bif s.badModifier then
     let err := "cannot use 'public', 'meta', or 'all' without 'module'"
     {s with pos, badModifier := false, error? := some err}
   else
@@ -217,19 +217,19 @@ def setIsModule (isModule : Bool) : Parser := fun _ s =>
   { s with isModule, isExported := !isModule }
 
 def setMeta : Parser := fun _ s =>
-  if s.isModule then
+  bif s.isModule then
     { s with isMeta := true }
   else
     { s with badModifier := true }
 
 def setExported : Parser := fun _ s =>
-  if s.isModule then
+  bif s.isModule then
     { s with isExported := true }
   else
     { s with badModifier := true }
 
 def setImportAll : Parser := fun _ s =>
-  if s.isModule then
+  bif s.isModule then
     { s with importAll := true }
   else
     { s with badModifier := true }

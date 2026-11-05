@@ -214,41 +214,41 @@ Initializes the elaborator associated to the given syntax.
 -/
 def mkInductiveView (modifiers : Modifiers) (stx : Syntax) : TermElabM InductiveElabStep1 := do
   let handlers := inductiveElabAttr.getValues (← getEnv) stx.getKind
-  if handlers.isEmpty then
+  bif handlers.isEmpty then
     throwErrorAt stx "Failed to elaborate inductive type declaration: There is no `@[inductive_elab]` \
       handler for `{.ofConstName stx.getKind}` syntax"
   handlers[0]!.mkInductiveView modifiers stx
 
 def checkValidInductiveModifier [Monad m] [MonadError m] (modifiers : Modifiers)
     (allowNoncomputable := false) : m Unit := do
-  if modifiers.isNoncomputable && !allowNoncomputable then
+  bif modifiers.isNoncomputable && !allowNoncomputable then
     throwError "Invalid modifier: Inductive declarations cannot be marked as `noncomputable`"
-  if modifiers.isPartial then
+  bif modifiers.isPartial then
     throwError "Invalid modifier: Inductive declarations cannot be marked as `partial`"
 
 def checkValidCtorModifier [Monad m] [MonadError m] (modifiers : Modifiers) : m Unit := do
-  if modifiers.isNoncomputable then
+  bif modifiers.isNoncomputable then
     throwError "Invalid modifier: Constructors cannot be marked as `noncomputable`"
-  if modifiers.isPartial then
+  bif modifiers.isPartial then
     throwError "Invalid modifier: Constructors cannot be marked as `partial`"
-  if modifiers.isUnsafe then
+  bif modifiers.isUnsafe then
     throwError "Invalid modifier: Constructors cannot be marked as `unsafe`"
-  if modifiers.attrs.size != 0 then
+  bif modifiers.attrs.size != 0 then
     throwError "Invalid attribute: Attributes cannot be added to constructors"
 
 private def checkUnsafe (rs : Array PreElabHeaderResult) : TermElabM Unit := do
   let isUnsafe := rs[0]!.view.modifiers.isUnsafe
   for r in rs do
     unless r.view.modifiers.isUnsafe == isUnsafe do
-      let unsafeStr (b : Bool) := if b then "unsafe" else "safe"
+      let unsafeStr (b : Bool) := bif b then "unsafe" else "safe"
       throwErrorAt r.view.ref m!"Invalid mutually inductive types: `{r.view.declName}` is {unsafeStr (!isUnsafe)}, \
         but `{rs[0]!.view.declName}` is {unsafeStr isUnsafe}"
         ++ .note m!"Safe and unsafe inductive declarations cannot both occur in the same `mutual` block"
 
 private def checkClass (rs : Array PreElabHeaderResult) : TermElabM Unit := do
-  if rs.size > 1 then
+  bif rs.size >ᵇ 1 then
     for r in rs do
-      if r.view.isClass then
+      bif r.view.isClass then
         throwErrorAt r.view.ref "Invalid mutually inductive type: Mutually inductive classes are not supported"
 
 private def checkNumParams (rs : Array PreElabHeaderResult) : TermElabM Nat := do
@@ -266,7 +266,7 @@ Executes `k` using the `Syntax` reference associated with constructor `ctorName`
 def withCtorRef [Monad m] [MonadRef m] (views : Array InductiveView) (ctorName : Name) (k : m α) : m α := do
   for view in views do
     for ctor in view.ctors do
-      if ctor.declName == ctorName then
+      bif ctor.declName == ctorName then
         return (← withRef ctor.ref k)
   k
 
@@ -286,7 +286,7 @@ Execute `k` with updated binder information for `xs`. Any `x` that is explicit b
 def withExplicitToImplicit (xs : Array Expr) (k : TermElabM α) : TermElabM α := do
   let mut toImplicit := #[]
   for x in xs do
-    if (← getFVarLocalDecl x).binderInfo.isExplicit then
+    bif (← getFVarLocalDecl x).binderInfo.isExplicit then
       toImplicit := toImplicit.push (x.fvarId!, BinderInfo.implicit)
   withNewBinderInfos toImplicit k
 
@@ -315,7 +315,7 @@ private def checkParamsAndResultType (type firstType : Expr) (numParams : Nat) :
 Auxiliary function for checking whether the types in mutually inductive declaration are compatible.
 -/
 private def checkHeaders (rs : Array PreElabHeaderResult) (numParams : Nat) (i : Nat) (firstType? : Option Expr) : TermElabM Unit := do
-  if h : i < rs.size then
+  bif h : i <ᵇ rs.size then
     let type ← checkHeader rs[i] numParams firstType?
     checkHeaders rs numParams (i+1) type
 where
@@ -329,7 +329,7 @@ where
 
 private def elabHeadersAux (views : Array InductiveView) (i : Nat) (acc : Array PreElabHeaderResult) : TermElabM (Array PreElabHeaderResult) :=
   Term.withAutoBoundImplicitForbiddenPred (fun n => views.any (·.shortDeclName == n)) do
-    if h : i < views.size then
+    bif h : i <ᵇ views.size then
       let view := views[i]
       let acc ← withRef view.ref <| Term.withDeprecationContextFromAttrs view.modifiers.attrs <|
           Term.withAutoBoundImplicit <| Term.elabBinders view.binders.getArgs fun params => do
@@ -342,7 +342,7 @@ private def elabHeadersAux (views : Array InductiveView) (i : Nat) (acc : Array 
             <|> view.declId.getTailPos? (canonicalOnly := true)
           let indices ← Term.addAutoBoundImplicits #[] inlayHintPos?
           let type ← mkForallFVars indices type
-          if view.allowIndices then
+          bif view.allowIndices then
             unless (← isTypeFormerType type) do
               throwErrorAt typeStx m!"Invalid resulting type: Expected a sort or an indexed family of sorts"
                 ++ .hint' m!"Examples of valid sorts include `Type _`, `Sort _`, and `Prop`"
@@ -365,7 +365,7 @@ Elaborates all the headers in the inductive views.
 -/
 private def elabHeaders (views : Array InductiveView) : TermElabM (Array PreElabHeaderResult) := do
   let rs ← elabHeadersAux views 0 #[]
-  if rs.size > 1 then
+  bif rs.size >ᵇ 1 then
     checkUnsafe rs
     checkClass rs
     let numParams ← checkNumParams rs
@@ -383,7 +383,7 @@ private def withInductiveLocalDecls (rs : Array PreElabHeaderResult) (x : Array 
   let r0 := rs[0]!
   forallBoundedTelescope r0.type r0.numParams fun params _ => withRef r0.view.ref do
     let rec loop (i : Nat) (indFVars : Array Expr) := do
-      if h : i < rs.size then
+      bif h : i <ᵇ rs.size then
         let r := rs[i]
         for param in params, origParam in r.origParams do
           if let .fvar origFVar := origParam then
@@ -403,14 +403,14 @@ private def throwLevelNameMismatch [Monad m] [MonadError m]
     ++ .note m!"All inductive declarations in the same `mutual` block must have the same universe level parameters"
 
 private def InductiveElabStep1.checkLevelNames (views : Array InductiveView) : TermElabM Unit := do
-  if h : views.size > 1 then
+  bif h : views.size >ᵇ 1 then
     let levelNames := views[0].levelNames
     for view in views do
       unless view.levelNames == levelNames do
         withRef view.ref <| throwLevelNameMismatch view.levelNames levelNames view.shortDeclName views[0].shortDeclName
 
 private def ElabHeaderResult.checkLevelNames (rs : Array PreElabHeaderResult) : TermElabM Unit := do
-  if h : rs.size > 1 then
+  bif h : rs.size >ᵇ 1 then
     let levelNames := rs[0].levelNames
     for r in rs do
       unless r.levelNames == levelNames do
@@ -459,7 +459,7 @@ def elabParamInfoUpdates
       let lctx ← getLCtx
       let decls := ids.filterMap fun id => lctx.findFromUserName? id.getId
       let decls ← decls.filterM fun decl => maybeParam decl.fvarId
-      if decls.size != ids.size then
+      bif decls.size != ids.size then
         -- Then either these are for a new variables or the binder isn't only for parameters
         return (binders.extract i, overrides)
       for decl in decls, id in ids do
@@ -515,7 +515,7 @@ For `i ∈ [numParams, arity)`, we have that `result[i]` if this index of the in
 -/
 private def computeFixedIndexBitMask (numParams : Nat) (indType : InductiveType) (indFVars : Array Expr) : MetaM (Array Bool) := do
   let arity ← getArity indType
-  if arity ≤ numParams then
+  bif arity ≤ᵇ numParams then
     return .replicate arity false
   else
     let maskRef ← IO.mkRef (.replicate numParams false ++ .replicate (arity - numParams) true)
@@ -534,7 +534,7 @@ private def computeFixedIndexBitMask (numParams : Nat) (indType : InductiveType)
             xType.forEachWhere (stopWhenVisited := true) cond fun e => do
               let eArgs := e.getAppArgs
               for i in numParams...eArgs.size do
-                if i >= typeArgs.size then
+                bif i ≥ᵇ typeArgs.size then
                   maskRef.modify (resetMaskAt · i)
                 else
                   unless eArgs[i]! == typeArgs[i]! do
@@ -557,7 +557,7 @@ private def computeFixedIndexBitMask (numParams : Nat) (indType : InductiveType)
 
 /-- Return true iff `arrowType` is an arrow and its domain is defeq to `type` -/
 private def isDomainDefEq (arrowType : Expr) (type : Expr) : MetaM Bool := do
-  if !arrowType.isForall then
+  bif !arrowType.isForall then
     return false
   else
     /-
@@ -583,11 +583,11 @@ then the first `j` indices are potentially eligible for promotion to parameters.
 Additionally, the fields must be definitionally equal across all constructors to be eligible for promotion.
 -/
 private def fixedIndicesToParams (numParams : Nat) (indTypes : List InductiveType) (indFVars : Array Expr) : MetaM Nat := do
-  if !inductive.autoPromoteIndices.get (← getOptions) then
+  bif !inductive.autoPromoteIndices.get (← getOptions) then
     return numParams
   let masks ← indTypes.mapM (computeFixedIndexBitMask numParams · indFVars)
   trace[Elab.inductive] "masks: {masks}"
-  if masks.all fun mask => !mask.contains true then
+  bif masks.all fun mask => !mask.contains true then
     return numParams
   -- We process just a non-fixed prefix of the indices for now. Reason: we don't want to change the order.
   -- TODO: extend it in the future. For example, it should be reasonable to change
@@ -598,13 +598,13 @@ private def fixedIndicesToParams (numParams : Nat) (indTypes : List InductiveTyp
     let ctorTypes ← indTypes.mapM fun indType => indType.ctors.mapM fun ctor => do whnfD (← instantiateForall ctor.type params)
     let typesToCheck := otherTypes ++ ctorTypes.flatten
     let rec go (i : Nat) (type : Expr) (typesToCheck : List Expr) : MetaM Nat := do
-      if i < mask.size then
-        if !masks.all fun mask => i < mask.size && mask[i]! then
+      bif i <ᵇ mask.size then
+        bif !masks.all fun mask => i < mask.size && mask[i]! then
            return i
-        if !type.isForall then
+        bif !type.isForall then
           return i
         let paramType := type.bindingDomain!
-        if !(← typesToCheck.allM fun type => isDomainDefEq type paramType) then
+        bif !(← typesToCheck.allM fun type => isDomainDefEq type paramType) then
           trace[Elab.inductive] "domain not def eq: {i}, {type} =?= {paramType}"
           return i
         withLocalDeclD `a paramType fun paramNew => do
@@ -743,7 +743,7 @@ private partial def simplifyResultingUniverse (u : Level) (paramConst := false) 
   let varies (l : Level) := l.hasMVar || (!paramConst && l.hasParam)
   let simpAcc (acc : LevelMap Nat) : LevelMap Nat :=
     -- If there's a variable, then these dominate at infinity; constants can be eliminated
-    if (acc.any fun l _ => varies l) then acc.filter (fun l _ => varies l) else acc
+    bif (acc.any fun l _ => varies l) then acc.filter (fun l _ => varies l) else acc
   let germMax (acc : LevelMap Nat) : Level :=
     (simpAcc acc).fold (init := Level.zero) fun u l offset => mkLevelMax' u (l.addOffset offset)
   let accInsert (acc : LevelMap Nat) (u : Level) (offset : Nat) : LevelMap Nat :=
@@ -755,9 +755,9 @@ private partial def simplifyResultingUniverse (u : Level) (paramConst := false) 
     | .succ _ => simp u.getLevelOffset (offset + u.getOffset) acc
     | .max a b => simp b offset (simp a offset acc)
     | .imax a b =>
-      if b.isAlwaysZero then
+      bif b.isAlwaysZero then
         accInsert acc Level.zero offset
-      else if a.isAlwaysZero || b.isNeverZero then
+      else bif a.isAlwaysZero || b.isNeverZero then
         simp b offset (simp a offset acc)
       else
         /- The remaining simplification we consider is when `a ≤ b` then `imax a b = b`.
@@ -767,7 +767,7 @@ private partial def simplifyResultingUniverse (u : Level) (paramConst := false) 
         let acca := simp a 0 {}
         let accb := simp b 0 {}
         let accab := simpAcc (acca.fold (init := accb) accInsert)
-        if accab.all (fun l n => if let some m := accb[l]? then n ≤ m else false) then
+        bif accab.all (fun l n => if let some m := accb[l]? then n ≤ m else false) then
           accb.fold (init := acc) fun acc l n => accInsert acc l (n + offset)
         else
           accInsert acc (Level.imax (germMax acca) (germMax accb)) offset
@@ -783,14 +783,14 @@ to solve for a least `?m`.
 Throws an exception if `u` has metavariables and isn't of the right form for inference.
 -/
 private def processResultingUniverseForInference (u : Level) : TermElabM Level := do
-  if u.hasMVar then
+  bif u.hasMVar then
     unless u.collectMVars.size == 1 do
       throwCannotInferResultingUniverse u m!"The resulting universe contains more than one metavariable"
     -- Simplify the universe level and see if we get `?m + k`.
     -- We treat parameters is constants since, for example, simplifying `(max u ?m) + k` to `?m + k`
     -- does not change the solvability of the constraints.
     let u' := simplifyResultingUniverse u.normalize (paramConst := true)
-    if u'.getLevelOffset.isMVar then
+    bif u'.getLevelOffset.isMVar then
       trace[Elab.inductive] "resulting universe: {u}, simplified universe: {u'}"
       return u'
     else
@@ -850,17 +850,17 @@ where
     | .succ u           => go u (rOffset - 1)
     | .zero =>
       /- `0 ≤ ?r + rOffset` always holds for non-negative `rOffset` values. -/
-      if rOffset < 0 then
+      bif rOffset <ᵇ 0 then
         modify fun acc => acc.push .zero rOffset
     | .mvar lmvarId =>
-      if u == r then
+      bif u == r then
         /- `?r ≤ ?r + rOffset` always holds for non-negative `rOffset` values,
         but `?r + (-rOffset) ≤ ?r` is impossible. -/
-        if rOffset < 0 then
+        bif rOffset <ᵇ 0 then
           throw m!"Level inequality `{Level.addOffset r rOffset.natAbs} ≤ {r}` is inconsistent."
-      else if typeLMVarIds.contains lmvarId then
+      else bif typeLMVarIds.contains lmvarId then
         modify fun acc => acc.push u rOffset
-      else if rOffset < 0 then
+      else bif rOffset <ᵇ 0 then
         modify fun acc => acc.push .zero rOffset
 
 /--
@@ -958,7 +958,7 @@ private def inferResultingUniverse (views : Array InductiveView)
   let u ← getResultingUniverse indTypes >>= instantiateLevelMVars
   -- For `Prop` candidates, need to examine `u` itself, rather than `univForInfer` (which has been simplified).
   if let Level.mvar mvarId := u.normalize then
-    if ← isPropCandidate numParams indTypes indFVars then
+    bif (← isPropCandidate numParams indTypes indFVars) then
       -- May as well assign now, since `Level.zero` is already normalized.
       assignLevelMVar mvarId Level.zero
       return { u := u, assign? := none }
@@ -969,7 +969,7 @@ private def inferResultingUniverse (views : Array InductiveView)
   /- Collect universe level constraints -/
   let acc ← collectUniverseConstraints views r rOffset numParams indTypes typeLMVarIds
   -- Add `1 ≤ ?r + rOffset` if `rOffset = 0`.
-  let acc := if rOffset == 0 then acc.push .zero (-1) else acc
+  let acc := bif rOffset == 0 then acc.push .zero (-1) else acc
   -- Filter the accumulated constraints for the ones that are not already satisfied.
   let rConstraints := acc.levels.fold (init := []) fun parts l k =>
     /-
@@ -977,7 +977,7 @@ private def inferResultingUniverse (views : Array InductiveView)
     Adding `rOffset - k` to both sides gets the "ideal" constraint `l + (rOffset - k) ≤ ?r + rOffset`.
     If `l + (rOffset - k) ≤ u` already, we do not need to incorporate it.
     -/
-    if u.geq (l.addOffset (rOffset - k).toNat) then
+    bif u.geq (l.addOffset (rOffset - k).toNat) then
       parts
     else
       (l, k) :: parts
@@ -986,10 +986,10 @@ private def inferResultingUniverse (views : Array InductiveView)
   let rInferred := Level.normalize <| rConstraints.foldl (init := Level.zero) fun u' (level, k) =>
     -- If `k ≤ 0`, then add `level + (-k) ≤ ?r` constraint, otherwise add `level ≤ ?r`.
     mkLevelMax' u' <| level.addOffset (-k).toNat
-  let uInferred := (u.replace fun v => if v == r then some rInferred else none).normalize
+  let uInferred := (u.replace fun v => bif v == r then some rInferred else none).normalize
   /- Analyze "bad" constraints if there are any, and report an error if needed. -/
-  if rConstraints.any (fun (_, k) => k > 0) then
-    let uAtZero := u.replace fun v => if v == r then some Level.zero else none
+  bif rConstraints.any (fun (_, k) => k > 0) then
+    let uAtZero := u.replace fun v => bif v == r then some Level.zero else none
     /- For "bad" level constraints (those of the form `l ≤ ?r + k` where `k > 0`),
     we add `rOffset - k` to both sides to get the ideal constraint. -/
     let uIdeal := Level.normalize <| rConstraints.foldl (init := uAtZero) fun u' (level, k) =>
@@ -997,7 +997,7 @@ private def inferResultingUniverse (views : Array InductiveView)
     unless uIdeal.geq uInferred do
       withViewTypeRef views do
         let badConstraints := rConstraints.foldl (init := []) fun msgs (level, k) =>
-          if k <= 0 then
+          bif k ≤ᵇ 0 then
             msgs
           else
             indentD m!"{level} ≤ {Level.addOffset r k.toNat}" :: msgs
@@ -1051,7 +1051,7 @@ private partial def propagateUniversesToConstructors
     (numParams : Nat) (indTypes : List InductiveType) (inferResult : ResultingUniverseResult):
     TermElabM Unit := do
   let u := (← instantiateLevelMVars inferResult.u).normalize
-  if u.isZero then
+  bif u.isZero then
     return
   let u' := simplifyResultingUniverse u
   let r := u'.getLevelOffset
@@ -1068,7 +1068,7 @@ private partial def propagateUniversesToConstructors
     -- If `hasLo` is true, then we want `1 ≤ v` as well.
     -- There's a unique solution if `k'=0` or `k'=1`, depending on the value of `hasLo`.
     let hasLo := loConstraint.contains v.mvarId!
-    if k' == (if hasLo then 1 else 0) then
+    bif k' == (bif hasLo then 1 else 0) then
       assignLevelMVar v.mvarId! (r.addOffset k'.toNat)
 where
   collectConstraints (r : Level) (k : Int) :
@@ -1084,7 +1084,7 @@ where
   -/
   extractConstraints (v : Level) (r : Level) (k : Int) (lo : Nat) :
       StateT (AccLevelState × LMVarIdSet) MetaM Unit := do
-    if v.hasMVar then
+    bif v.hasMVar then
       match v with
       | .zero | .param .. => pure ()
       | .succ _ => extractConstraints v.getLevelOffset r (k - v.getOffset) 0
@@ -1097,12 +1097,12 @@ where
       Heuristic: Since we're aiming for `b ≥ lo`, if `lo > 0` then we assume the `imax` will simplify to `max`.
       -/
       | .imax a b =>
-        if lo > 0 then
+        bif lo >ᵇ 0 then
           extractConstraints a r k lo
         extractConstraints b r k lo
       | .mvar mvarId =>
-        if v != r then
-          modify fun (acc, los) => (acc.push v k, if lo > 0 then los.insert mvarId else los)
+        bif v != r then
+          modify fun (acc, los) => (acc.push v k, bif lo >ᵇ 0 then los.insert mvarId else los)
 
 /--
 Converts universe metavariables in the type (not the constructors) into new parameters.
@@ -1115,7 +1115,7 @@ private def levelMVarToParamAtInductives
   let rmvarId? := resultUniv.assign?.map (fun (mvarId, _) => mvarId)
   indTypes.forM fun indType => do
     discard <| Term.levelMVarToParam indType.type (except := fun mvar => rmvarId? == some mvar)
-    if rmvarId?.isSome then
+    bif rmvarId?.isSome then
       -- Hasn't been assigned, so be sure to visit full resulting universe level
       discard <| Term.levelMVarToParam (mkSort resultUniv.u)
     indType.ctors.forM fun ctor => do
@@ -1136,9 +1136,9 @@ private def checkResultingUniversePolymorphism (views : Array InductiveView) (u 
         ++ .hint' m!"A possible solution is to use levels of the form `max 1 _` or `_ + 1` to ensure the universe is of the form `Type _`"
   unless u.isZero || u.isNeverZero do
     for view in views do
-      if !view.allowSortPolymorphism then
+      bif !view.allowSortPolymorphism then
         doErrFor view
-    if bootstrap.inductiveCheckResultingUniverse.get (← getOptions) then
+    bif bootstrap.inductiveCheckResultingUniverse.get (← getOptions) then
       -- TODO: heuristic for allowing `Sort` polymorphism?
       doErrFor views[0]!
 
@@ -1214,11 +1214,11 @@ private def replaceIndFVarsWithConsts (views : Array InductiveView) (indFVars : 
     let ctors ← indType.ctors.mapM fun ctor => do
       let type ← forallBoundedTelescope ctor.type numParams fun params type => do
         let type := type.replace fun e =>
-          if !e.isFVar then
+          bif !e.isFVar then
             none
           else match indFVar2Const[e]? with
             | none   => none
-            | some c => if applyVariables then mkAppN c (params.extract 0 numVars) else c
+            | some c => bif applyVariables then mkAppN c (params.extract 0 numVars) else c
         instantiateMVars (← mkForallFVars params type)
       return { ctor with type }
     return { indType with ctors }
@@ -1262,7 +1262,7 @@ private def mkReplaceIndFVars (views : Array InductiveView) (indFVars : Array Ex
    (levelParams : List Name) (vars : Array Expr) : Expr → MetaM Expr := fun e => do
     let indFVar2Const := mkIndFVar2Const views indFVars levelParams
     return (← instantiateMVars e).replace fun e' =>
-      if !e'.isFVar then
+      bif !e'.isFVar then
         none
       else
         match indFVar2Const[e']? with
@@ -1290,7 +1290,7 @@ def replaceIndFVars (numParams : Nat) (oldFVars : Array Expr) (calls : Array Exp
   let replacementMap : ExprMap Expr := {}
   let replacementMap := replacementMap.insertMany <| oldFVars.zip calls
   e.replace (fun e =>
-    if e.isApp || numParams == 0 then
+    bif e.isApp || numParams == 0 then
       if let some replacement := replacementMap.get? e.getAppFn then
         mkAppN replacement <| e.getAppArgs.extract numParams
       else
@@ -1307,7 +1307,7 @@ private def ensureNoUnassignedMVarsAtInductives (indTypes : List InductiveType) 
     for ctor in indType.ctors do
       mvars := ctor.type.collectMVars mvars
   let pendingMVarIds := mvars.result
-  if (← Term.logUnassignedUsingErrorInfos pendingMVarIds) then
+  bif (← Term.logUnassignedUsingErrorInfos pendingMVarIds) then
     throwAbortCommand
 
 private def ensureNoUnassignedLevelMVarsAtInductives
@@ -1320,9 +1320,9 @@ private def ensureNoUnassignedLevelMVarsAtInductives
       lmvars := collectLevelMVars lmvars ctor.type
   let pendingLevelMVars := lmvars.result
   unless pendingLevelMVars.isEmpty do
-    if (← Term.logUnassignedLevelMVarsUsingErrorInfos pendingLevelMVars) then
+    bif (← Term.logUnassignedLevelMVarsUsingErrorInfos pendingLevelMVars) then
       throwAbortCommand
-    else if (← MonadLog.hasErrors) then
+    else bif (← MonadLog.hasErrors) then
       throwAbortCommand
     else
       -- This is a fallback in case we don't have an error info available for the universe level metavariables.
@@ -1442,7 +1442,7 @@ private def addTermInfoViews (views : Array InductiveView) : TermElabM Unit := -
     for view in views do
       do Term.addTermInfo' view.declId (← mkConstWithLevelParams view.declName) (isBinder := true)
       for ctor in view.ctors do
-        if (ctor.declId.getPos? (canonicalOnly := true)).isSome then do
+        bif (ctor.declId.getPos? (canonicalOnly := true)).isSome then do
           Term.addTermInfo' ctor.declId (← mkConstWithLevelParams ctor.declName) (isBinder := true)
           enableRealizationsForConst ctor.declName
 
@@ -1452,7 +1452,7 @@ private def mkInductiveDeclCore
   let views := elabs.map (·.view)
   let view0 := views[0]!
   let isCoinductive := views.any (·.isCoinductive)
-  if isCoinductive then
+  bif isCoinductive then
     if let some i ← rs.findIdxM? (forallTelescopeReducing ·.type fun _ body => pure !body.isProp) then
       throwErrorAt views[i]!.declId "`coinductive` keyword can only be used to define predicates"
   let allUserLevelNames := rs[0]!.levelNames
@@ -1555,14 +1555,14 @@ private def mkAuxConstructions (declNames : Array Name) : TermElabM Unit := do
   let hasNat  := env.contains ``Nat
   for n in declNames do
     -- `mkRecOn` reuses `casesOn` where it can, so build that first
-    if hasUnit then mkCasesOn n
+    bif hasUnit then mkCasesOn n
     mkRecOn n
-    if hasNat then mkCtorIdx n
-    if hasNat then mkCtorElim n
-    if hasUnit && hasEq && hasHEq then mkNoConfusion n
-    if hasUnit && hasProd then mkBelow n
+    bif hasNat then mkCtorIdx n
+    bif hasNat then mkCtorElim n
+    bif hasUnit && hasEq && hasHEq then mkNoConfusion n
+    bif hasUnit && hasProd then mkBelow n
   for n in declNames do
-    if hasUnit && hasProd then mkBRecOn n
+    bif hasUnit && hasProd then mkBRecOn n
 
 def updateViewWithFunctorName (view : InductiveView) : InductiveView :=
   let newCtors := view.ctors.map (fun ctor => {ctor with declName := ctor.declName.updatePrefix (addFunctorPostfix ctor.declName.getPrefix)})
@@ -1582,7 +1582,7 @@ private def elabInductiveViews (vars : Array Expr) (elabs : Array InductiveElabS
       -- Values of a `noncomputable` type can only be constructed and inspected through
       -- `implemented_by` functions, which choose their own representation.
       for e in elabs do
-        if e.view.modifiers.isNoncomputable then
+        bif e.view.modifiers.isNoncomputable then
           for ctor in e.view.ctors do
             modifyEnv (addNoncomputable · ctor.declName)
           modifyEnv (addNoncomputable · (mkCasesOnName e.view.declName))
@@ -1619,23 +1619,23 @@ private def checkNoInductiveNameConflicts (elabs : Array InductiveElabStep1) (is
     throwErrorAt cur msg
   -- Maps names of inductive types to `true` and those of constructors to `false`, along with syntax refs
   let mut uniqueNames : Std.HashMap Name (Bool × Syntax) := {}
-  let declString := if isCoinductive then "coinductive predicate" else "inductive type"
+  let declString := bif isCoinductive then "coinductive predicate" else "inductive type"
   trace[Elab.inductive] "declString: {declString}"
   for { view, .. } in elabs do
     let typeDeclName := privateToUserName view.declName
     if let some (prevNameIsType, prevRef) := uniqueNames[typeDeclName]? then
-      let declKinds := if prevNameIsType then "multiple " ++ declString ++ "s" else "an " ++ declString ++ " and a constructor"
+      let declKinds := bif prevNameIsType then "multiple " ++ declString ++ "s" else "an " ++ declString ++ " and a constructor"
       throwErrorsAt prevRef view.declId m!"Cannot define {declKinds} with the same name `{typeDeclName}`"
     uniqueNames := uniqueNames.insert typeDeclName (true, view.declId)
     for ctor in view.ctors do
       let ctorName := privateToUserName ctor.declName
       if let some (prevNameIsType, prevRef) := uniqueNames[ctorName]? then
-        let declKinds := if prevNameIsType then "an {declString} and a constructor" else "multiple constructors"
+        let declKinds := bif prevNameIsType then "an {declString} and a constructor" else "multiple constructors"
         throwErrorsAt prevRef ctor.declId m!"Cannot define {declKinds} with the same name `{ctorName}`"
       uniqueNames := uniqueNames.insert ctorName (false, ctor.declId)
 
 private def applyComputedFields (indViews : Array InductiveView) : CommandElabM Unit := do
-  if indViews.all (·.computedFields.isEmpty) then return
+  bif indViews.all (·.computedFields.isEmpty) then return
 
   let mut computedFields := #[]
   let mut computedFieldDefs := #[]
@@ -1670,7 +1670,7 @@ private def applyDerivingHandlers (views : Array InductiveView) : CommandElabM U
         processed := processed.insert className
         let mut declNames := #[]
         for view in views do
-          if view.derivingClasses.any fun classView' => classView'.cls == classView.cls then
+          bif view.derivingClasses.any fun classView' => classView'.cls == classView.cls then
             declNames := declNames.push view.declName
         classView.applyHandlers declNames
 
@@ -1722,7 +1722,7 @@ def elabInductives (inductives : Array (Modifiers × Syntax)) : CommandElabM Uni
   elabs.forM fun e => checkValidInductiveModifier e.view.modifiers e.view.allowNoncomputable
   liftTermElabM <| elabs.forM fun e => withRef e.view.ref do
     Term.applyAttributesAt e.view.declName e.view.modifiers.attrs .beforeElaboration
-  if isCoinductive then
+  bif isCoinductive then
     runTermElabM fun vars => do
       let flatElabs := elabs.map fun e => {e with view := updateViewWithFunctorName e.view}
       elabFlatInductiveViews vars flatElabs
@@ -1753,7 +1753,7 @@ def elabMutualInductive (elems : Array Syntax) : CommandElabM Unit := do
   let inductives ← elems.mapM fun stx => do
     let modifiers ← elabModifiers ⟨stx[0]⟩
     pure (modifiers, stx[1])
-  if inductives.any (·.1.isMeta) && inductives.any (!·.1.isMeta) then
+  bif inductives.any (·.1.isMeta) && inductives.any (!·.1.isMeta) then
     throwError "A mix of `meta` and non-`meta` declarations in the same `mutual` block is not supported"
   elabInductives inductives
 

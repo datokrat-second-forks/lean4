@@ -22,7 +22,7 @@ namespace Lean.Elab.Term
   ```
 -/
 def expandOptType (ref : Syntax) (optType : Syntax) : Syntax :=
-  if optType.isNone then
+  bif optType.isNone then
     mkHole ref
   else
     optType[0][1]
@@ -43,7 +43,7 @@ def expandMatchAlt (stx : TSyntax ``matchAlt) : Array (TSyntax ``matchAlt) :=
   -- Not using syntax quotations here to keep source location
   -- of the pattern sequence (`$term,*`) intact
   let patss := stx.raw[1].getSepArgs
-  if patss.size ≤ 1 then
+  bif patss.size ≤ᵇ 1 then
     #[stx]
   else
     patss.map fun pats => stx.raw.setArg 1 (mkNullNode #[pats])
@@ -63,7 +63,7 @@ def expandMatchAlts? (stx : Syntax) : MacroM (Option Syntax) := do
   | _ => return none
   where
     expand (alts : Array (TSyntax ``matchAlt)) : MacroM (Option (Array (TSyntax ``matchAlt))) := do
-      if alts.any shouldExpandMatchAlt then
+      bif alts.any shouldExpandMatchAlt then
         let alts ← alts.foldlM (init := #[]) fun alts alt => return alts ++ expandMatchAlt alt
         return some alts
       else
@@ -78,7 +78,7 @@ def clearInMatchAlt (stx : TSyntax ``matchAlt) (vars : Array Ident) : TSyntax ``
     return rhs
 
 def clearInMatch (stx : Syntax) (vars : Array Ident) : MacroM Syntax := do
-  if vars.isEmpty then return stx
+  bif vars.isEmpty then return stx
   match stx with
   | `(match $[$gen]? $[$motive]? $discrs,* with $alts:matchAlt*) =>
     let alts := alts.map (clearInMatchAlt · vars)

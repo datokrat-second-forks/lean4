@@ -52,7 +52,7 @@ partial def containsAtom (e : Expr) (atom : String) : MetaM Bool := do
     | (``Parser.symbol, #[.lit (.strVal tk)]) => pure (tk.trimAscii == atom.toSlice)
     | (``Parser.symbol, #[_nonlit]) => pure false
     | (``Parser.withCache, #[_, p]) => containsAtom p atom
-    | _ => if tryWhnf then attempt (← Meta.whnf p) false else pure false
+    | _ => bif tryWhnf then attempt (← Meta.whnf p) false else pure false
   attempt e true
 
 /--
@@ -69,7 +69,7 @@ partial def containsAtom' (e : Expr) (atom : String) : MetaM (Option Expr) := do
     | (``ParserDescr.symbol, #[.lit (.strVal tk)])
     | (``Parser.symbol, #[.lit (.strVal tk)])
     | (``Parser.nonReservedSymbol, #[.lit (.strVal tk), _]) =>
-        if tk.trimAscii == atom.toSlice then
+        bif tk.trimAscii == atom.toSlice then
           pure (Expr.app (.const ``ParserDescr.const []) (toExpr ``Parser.skip))
         else pure none
     | (``Parser.withAntiquot, #[_, p]) => containsAtom' p atom
@@ -81,7 +81,7 @@ partial def containsAtom' (e : Expr) (atom : String) : MetaM (Option Expr) := do
       else containsAtom' p2 atom
     | (``Parser.symbol, #[_nonlit]) => pure none
     | (``Parser.withCache, #[_, p]) => containsAtom' p atom
-    | _ => if tryWhnf then attempt (← Meta.whnf p) false else pure none
+    | _ => bif tryWhnf then attempt (← Meta.whnf p) false else pure none
   attempt e true
 
 partial def canEpsilon (e : Expr) : MetaM Bool := do
@@ -102,7 +102,7 @@ partial def canEpsilon (e : Expr) : MetaM Bool := do
       canEpsilon p1 <&&> canEpsilon p2
     | (``Parser.withCache, #[_, p]) => canEpsilon p
     | _ =>
-      if tryWhnf then attempt (← Meta.whnf p) false
+      bif tryWhnf then attempt (← Meta.whnf p) false
       else pure false -- Conservative approximation
   attempt e true
 
@@ -120,7 +120,7 @@ partial def startsWithAtom? (e : Expr) (atom : String) : MetaM (Option Expr) := 
     | (``ParserDescr.symbol, #[.lit (.strVal tk)])
     | (``Parser.symbol, #[.lit (.strVal tk)])
     | (``Parser.nonReservedSymbol, #[.lit (.strVal tk), _]) =>
-        if tk.trimAscii == atom.toSlice then
+        bif tk.trimAscii == atom.toSlice then
           pure (Expr.app (.const ``ParserDescr.const []) (toExpr ``Parser.skip))
         else pure none
     | (``Parser.withAntiquot, #[_, p]) => startsWithAtom? p atom
@@ -129,12 +129,12 @@ partial def startsWithAtom? (e : Expr) (atom : String) : MetaM (Option Expr) := 
     | (``ParserDescr.binary, #[(.app _ (.lit (.strVal "andthen"))), p1, p2]) =>
       if let some r ← startsWithAtom? p1 atom then
         pure <| some <| mkApp3 (.const ``ParserDescr.binary []) (toExpr ``Parser.andthen) r p2
-      else if ← canEpsilon p1 then
+      else bif (← canEpsilon p1) then
         startsWithAtom? p2 atom
       else pure none
     | (``Parser.symbol, #[_nonlit]) => pure none
     | (``Parser.withCache, #[_, p]) => startsWithAtom? p atom
-    | _ => if tryWhnf then attempt (← Meta.whnf p) false else pure none
+    | _ => bif tryWhnf then attempt (← Meta.whnf p) false else pure none
   attempt e true
 
 /--
@@ -165,7 +165,7 @@ def withAtom (cat : Name) (atom : String) : DocM (Array Name) := do
   let mut found := #[]
   for (k, _) in kinds do
     if let some d := env.find? k |>.bind (·.value?) then
-      if (← containsAtom d atom) then
+      bif (← containsAtom d atom) then
         found := found.push k
   return found
 
@@ -180,7 +180,7 @@ where
       | [] => return false
       | .ident .. :: _ => return false
       | .atom _ s :: ss =>
-        if a.trimAscii == s.trimAscii then
+        bif a.trimAscii == s.trimAscii then
           set as
           go ss
         else return false
@@ -224,7 +224,7 @@ def parserDescrHasAtom (atom : String) (p : ParserDescr) : TermElabM (Option Par
   | .node _ _ p | .trailingNode _ _ _ p | .unary _ p =>
     parserDescrHasAtom atom p
   | .nonReservedSymbol tk _ | .symbol tk =>
-    if tk.trimAscii == atom.toSlice then
+    bif tk.trimAscii == atom.toSlice then
       pure (some (.const ``Parser.skip))
     else pure none
   | .binary ``Parser.andthen p1 p2 =>
@@ -246,13 +246,13 @@ def parserDescrStartsWithAtom (atom : String) (p : ParserDescr) : TermElabM (Opt
   | .node _ _ p | .trailingNode _ _ _ p | .unary _ p =>
     parserDescrStartsWithAtom atom p
   | .nonReservedSymbol tk _ | .symbol tk =>
-    if tk.trimAscii == atom.toSlice then
+    bif tk.trimAscii == atom.toSlice then
       pure (some (.const ``Parser.skip))
     else pure none
   | .binary ``Parser.andthen p1 p2 =>
     if let some p1' ← parserDescrStartsWithAtom atom p1 then
       pure <| some <| .binary ``Parser.andthen p1' p2
-    else if parserDescrCanEps p1 then parserDescrStartsWithAtom atom p2
+    else bif parserDescrCanEps p1 then parserDescrStartsWithAtom atom p2
     else pure none
   | .binary ``Parser.orelse p1 p2 =>
     let p1' ← parserDescrHasAtom atom p1
@@ -277,7 +277,7 @@ partial def parserDescrHasAtoms (atoms : List String) (p : ParserDescr) : TermEl
   | [] => pure true
   | a :: as =>
     if let some p' ← parserDescrHasAtom a p then
-      if ← parserDescrStartsWithAtoms as p' then pure true
+      bif (← parserDescrStartsWithAtoms as p') then pure true
       else parserDescrHasAtoms (a :: as) p'
     else pure false
 
@@ -294,13 +294,13 @@ def kindHasAtoms (k : Name) (atoms : List String) : TermElabM Bool := do
   let env ← getEnv
   if let some ci := env.find? k then
     if let some d := ci.value? then
-      if (← exprContainsAtoms d atoms) then
+      bif (← exprContainsAtoms d atoms) then
         return true
-    else if ci.type == .const ``Parser [] then
-      if (← namedParserHasAtomPrefix atoms k) then
+    else bif ci.type == .const ``Parser [] then
+      bif (← namedParserHasAtomPrefix atoms k) then
         return true
-    else if ci.type == .const ``ParserDescr [] then
-      if (← parserDescrNameHasAtoms atoms k) then
+    else bif ci.type == .const ``ParserDescr [] then
+      bif (← parserDescrNameHasAtoms atoms k) then
         return true
   return false
 
@@ -311,7 +311,7 @@ def withAtoms (cat : Name) (atoms : List String) : TermElabM (Array Name) := do
   let kinds := catContents.kinds
   let mut found := #[]
   for (k, _) in kinds do
-    if (← kindHasAtoms k atoms) then
+    bif (← kindHasAtoms k atoms) then
       found := found.push k
   return found
 
@@ -324,9 +324,9 @@ def kwImpl (cat : Ident := mkIdent .anonymous) (of : Ident := mkIdent .anonymous
   let cat' := cat.getId
   let of' ← do
     let x := of.getId
-    if x.isAnonymous then pure x else realizeGlobalConstNoOverloadWithInfo of
+    bif x.isAnonymous then pure x else realizeGlobalConstNoOverloadWithInfo of
   let cats ←
-    if cat'.isAnonymous then
+    bif cat'.isAnonymous then
       pure parsers.categories.toArray
     else
       if let some catImpl := parsers.categories.find? cat' then
@@ -335,27 +335,27 @@ def kwImpl (cat : Ident := mkIdent .anonymous) (of : Ident := mkIdent .anonymous
 
   let mut candidates := #[]
   for (catName, category) in cats do
-    if !of'.isAnonymous then
-      if category.kinds.contains of' then
-        if (← kindHasAtoms of' atoms) then
+    bif !of'.isAnonymous then
+      bif category.kinds.contains of' then
+        bif (← kindHasAtoms of' atoms) then
           candidates := candidates.push (catName, of')
     else
       let which ← withAtoms catName atoms
       candidates := candidates ++ (which.map (catName, ·))
 
-  if h : candidates.size = 0 then
+  bif h : candidates.size =ᵇ 0 then
     logErrorAt s m!"No syntax found with atoms `{" ".intercalate atoms}`"
     return .code <| " ".intercalate atoms
-  else if h : candidates.size > 1 then
+  else bif h : candidates.size >ᵇ 1 then
     let choices := .andList (candidates.map (fun (c, k) => m!"{.ofConstName k} : {c}")).toList
     let catSuggs := categorySuggestions cat' candidates
     let ofSuggs ← ofSuggestions of' candidates
     let hintText :=
-      if catSuggs.isEmpty then
-        if ofSuggs.isEmpty then m!""
+      bif catSuggs.isEmpty then
+        bif ofSuggs.isEmpty then m!""
         else m!"Specify the syntax kind:"
       else
-        if ofSuggs.isEmpty then m!"Specify the category:"
+        bif ofSuggs.isEmpty then m!"Specify the category:"
         else m!"Specify the category or syntax kind:"
 
     let range? :=
@@ -371,7 +371,7 @@ def kwImpl (cat : Ident := mkIdent .anonymous) (of : Ident := mkIdent .anonymous
   else
     let (catName, k) := candidates[0]
     addConstInfo s k
-    if of'.isAnonymous && suggest then
+    bif of'.isAnonymous && suggest then
       let k' ← unresolveNameGlobalAvoidingLocals k
       if let some h ← makeHint m!"Specify the syntax kind:" #[s!" (of := {k'})"] then
         logInfo h
@@ -379,7 +379,7 @@ def kwImpl (cat : Ident := mkIdent .anonymous) (of : Ident := mkIdent .anonymous
     return .custom (Data.Atom.mk k catName) #[.code s.getVersoCode]
 where
   categorySuggestions (c candidates) := Id.run do
-    if c.isAnonymous then
+    bif c.isAnonymous then
       let mut counts : NameMap Nat := {}
       for (cat, _) in candidates do
         counts := counts.alter cat (some <| 1 + ·.getD 0)
@@ -388,7 +388,7 @@ where
       return sorted.map (s!" (cat := {·})")
     else return #[]
   ofSuggestions (o candidates) : TermElabM (Array String):= do
-    if o.isAnonymous then
+    bif o.isAnonymous then
       let sorted := candidates |>.map (·.2) |>.qsort (fun x y => x.toString < y.toString)
       sorted.mapM fun k => do
         let k ← unresolveNameGlobalAvoidingLocals k
@@ -402,7 +402,7 @@ where
       | _ => none
     if let some ⟨b, e⟩ := range? then
       let str := String.Pos.Raw.extract (← getFileMap).source b e
-      let str := if str.startsWith "kw?" then "kw" ++ str.drop 3 else str
+      let str := bif str.startsWith "kw?" then "kw" ++ str.drop 3 else str
       let stx := Syntax.mkStrLit str (info := .synthetic b e (canonical := true))
       let suggs := suggestions.map (fun (s : String) => {suggestion := str ++ s})
       some <$> MessageData.hint hintText suggs (ref? := some stx)

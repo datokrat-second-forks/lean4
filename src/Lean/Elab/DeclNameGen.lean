@@ -47,7 +47,7 @@ private def getParentProjArg (e : Expr) : MetaM (Option Expr) := do
   let some info := env.getProjectionFnInfo? c | return none
   unless e.getAppNumArgs == info.numParams + 1 do return none
   let some (.ctorInfo cVal) := env.find? info.ctorName | return none
-  if isSubobjectField? env cVal.induct (Name.mkSimple field) |>.isNone then return none
+  bif isSubobjectField? env cVal.induct (Name.mkSimple field) |>.isNone then return none
   return e.appArg!
 
 /--
@@ -57,7 +57,7 @@ Expressions can also be replaced by `.bvar 0` if they shouldn't be mentioned.
 -/
 private partial def winnowExpr (e : Expr) : MetaM Expr := do
   let rec visit (e : Expr) : MonadCacheT Expr Expr MetaM Expr := checkCache e fun _ => do
-    if ← isProof e then
+    bif (← isProof e) then
       return .bvar 0
     match e with
     | .app .. =>
@@ -77,14 +77,14 @@ private partial def winnowExpr (e : Expr) : MetaM Expr := do
           let .forallE _ _ fty' bi := fty | failure
           fty := fty'
           let arg := args[i]
-          if ← pure bi.isExplicit <||> (pure !arg.isSort <&&> isTypeFormer arg) then
+          bif (← pure bi.isExplicit <||> (pure !arg.isSort <&&> isTypeFormer arg)) then
             unless (← isProof arg) do
               e' := .app e' (← visit arg)
         return e'
     | .forallE n ty body bi =>
       withLocalDecl n bi ty fun arg => do
         -- In a dependent forall the body implies `ty`, so we won't mention it.
-        let ty' ← if body.hasLooseBVars then pure (.bvar 0) else visit ty
+        let ty' ← bif body.hasLooseBVars then pure (.bvar 0) else visit ty
         return .forallE n ty' (← visit (body.instantiate1 arg)) bi
     | .lam n ty body bi =>
       if let some e := Expr.etaExpandedStrict? e then
@@ -95,8 +95,8 @@ private partial def winnowExpr (e : Expr) : MetaM Expr := do
           visit (body.instantiate1 arg)
     | .letE _n _t v b _ => visit (b.instantiate1 v)
     | .sort .. =>
-      if e.isProp then return .sort Level.zero
-      else if e.isType then return .sort Level.one
+      bif e.isProp then return .sort Level.zero
+      else bif e.isType then return .sort Level.one
       else return .sort (.param `u)
     | .const name .. => return .const name []
     | .mdata _ e' => visit e'
@@ -126,7 +126,7 @@ private def mkBaseNameCore (e : Expr) (omitTopForall : Bool := false) : MkNameM 
   visit e omitTopForall
 where
   visit (e : Expr) (omitTopForall : Bool := false) : MkNameM String := do
-    if (← get).seen.contains e then
+    bif (← get).seen.contains e then
       return ""
     else
       let s ← visit' e omitTopForall
@@ -142,7 +142,7 @@ where
     | .app f x => (· ++ ·) <$> visit f <*> visit x
     | .forallE _ ty body _ =>
       let sty ← visit ty
-      if omitTopForall && sty == "" then
+      bif omitTopForall && sty == "" then
         visit body true
       else
         ("Forall" ++ sty ++ ·) <$> visit body
@@ -164,7 +164,7 @@ where
     | .forallE _ ty body _ =>
       let (foralls, sb) ← visit body
       let st ← mkBaseNameCore ty (omitTopForall := true)
-      if st == "" then
+      bif st == "" then
         return (foralls, sb)
       else
         return (("Of" ++ st) :: foralls, sb)
@@ -179,7 +179,7 @@ private def visitNamespace (ns : Name) : MkNameM Unit := do
   | .num ns' _ => visitNamespace ns'
   | .str ns' _ =>
     let env ← getEnv
-    if env.contains ns then
+    bif env.contains ns then
       modify fun st => {st with seen := st.seen.insert (.const ns []), consts := st.consts.insert ns}
     visitNamespace ns'
 
@@ -227,11 +227,11 @@ def mkBaseNameWithSuffix (pre : String) (type : Expr) : MetaM Name := do
   -- We can also avoid adding the full module suffix if the instance refers to "project"-local names.
   let isProjectLocal := isModuleLocal || modules.any fun mod? => mod?.map (·.getRoot) == project
   let name := Name.mkSimple <|
-    if !isProjectLocal then
+    bif !isProjectLocal then
       s!"{name}{moduleToSuffix project}"
     else
       name
-  if Option.isSome <| type.find? (fun e => if let .const n _ := e then n.hasMacroScopes else false) then
+  bif Option.isSome <| type.find? (fun e => if let .const n _ := e then n.hasMacroScopes else false) then
     mkFreshUserName name
   else
     return name
@@ -296,7 +296,7 @@ def mkInstanceNameOfType (type : Expr)
     TermElabM Name := do
   let mut name ← NameGen.mkBaseNameWithSuffix "inst" type
   name ← findUnusedName ((← getCurrNamespace) ++ name) avoid
-  if (type.find? (·.constName?.any isPrivateName)).isSome then
+  bif (type.find? (·.constName?.any isPrivateName)).isSome then
     return mkPrivateName (← getEnv) name
   else
     return name

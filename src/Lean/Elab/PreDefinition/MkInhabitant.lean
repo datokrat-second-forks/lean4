@@ -16,7 +16,7 @@ open Meta
 
 private def withInhabitedInstances (xs : Array Expr) (k : Array Expr → MetaM α) : MetaM α := do
   let rec go (i : Nat) (insts : Array Expr) : MetaM α := do
-    if h : i < xs.size then
+    bif h : i <ᵇ xs.size then
       let x := xs[i]
       let xTy ← inferType x
       let u ← getLevel xTy
@@ -30,7 +30,7 @@ private def withInhabitedInstances (xs : Array Expr) (k : Array Expr → MetaM �
 
 private def mkInhabitant? (type : Expr) (useOfNonempty : Bool) : MetaM (Option Expr) := do
   try
-    if useOfNonempty then
+    bif useOfNonempty then
       return some (← mkOfNonempty type)
     else
       return some (← mkDefault type)
@@ -45,7 +45,7 @@ private partial def mkInhabitantForAux? (xs insts : Array Expr) (type : Expr) (u
     mkLambdaFVars xs (← mkLetFVars (usedLetOnly := true) insts val)
   else
     let type ← whnfCore type
-    if type.isForall then
+    bif type.isForall then
       forallTelescope type fun xs' type' =>
         withInhabitedInstances xs' fun insts' =>
           mkInhabitantForAux? (xs ++ xs') (insts ++ insts') type' useOfNonempty

@@ -67,9 +67,9 @@ private partial def mkInst (classExpr : Expr) (declName : Name) (declVal val : E
     | throwError "Failed to delta derive instance for `{.ofConstName declName}`, not a class:{indentExpr classExpr}"
   let mut instMVars := #[]
   for x in xs, bi in bis do
-    if !(← x.mvarId!.isAssigned) then
+    bif !(← x.mvarId!.isAssigned) then
       -- Assumption: assigned inst implicits are already either solved or registered as synthetic
-      if bi.isInstImplicit then
+      bif bi.isInstImplicit then
         x.mvarId!.setKind .synthetic
         instMVars := instMVars.push x.mvarId!
   let instVal ← mkFreshExprMVar classExpr (kind := .synthetic)
@@ -86,7 +86,7 @@ private partial def mkInst (classExpr : Expr) (declName : Name) (declVal val : E
       unless bi.isExplicit do
         continue
       let decl ← x.mvarId!.getDecl
-      if decl.type.isOutParam then
+      bif decl.type.isOutParam then
         continue
       unless ← isMVarApp x do
         /-
@@ -117,7 +117,7 @@ private partial def mkInst (classExpr : Expr) (declName : Name) (declVal val : E
         messages := messages ++ (← Core.getMessageLog)
         restoreState state
         continue
-      if (← MonadLog.hasErrors) then
+      bif (← MonadLog.hasErrors) then
         -- Sometimes elaboration only logs errors
         trace[Elab.Deriving] "Option for argument {i} failed, logged errors"
         messages := messages ++ (← Core.getMessageLog)
@@ -132,11 +132,11 @@ private partial def mkInst (classExpr : Expr) (declName : Name) (declVal val : E
       -- This behaves as if the user wrote `instance : Cls T := inferInstanceAs (Cls T')`.
       let mut xs' := xs.set! i declVal
       for j in [:xs'.size], bi in bis do
-        if bi.isInstImplicit then
+        bif bi.isInstImplicit then
           let origInst ← instantiateMVars xs[j]!
           let argTy ← instantiateMVars (← inferType xs[j]!)
           let targetArgTy := argTy.replace fun e =>
-            if e == val then declVal else none
+            bif e == val then declVal else none
           if let some targetInst ← synthInstance? targetArgTy then
             unless ← isDefEq origInst targetInst do
               throwDeltaDeriveFailure className declName
@@ -150,10 +150,10 @@ private partial def mkInst (classExpr : Expr) (declName : Name) (declVal val : E
       if let some val' ← unfoldDefinition? val then
         return ← withTraceNode `Elab.Deriving (fun _ => return m!"Unfolded value to {val'}") <| go val'
     catch ex =>
-      if !messages.hasErrors then
+      bif !messages.hasErrors then
         throw ex
       Core.resetMessageLog
-    if !anyDefEqSuccess then
+    bif !anyDefEqSuccess then
       throwDeltaDeriveFailure className declName (m!"the class has no explicit non-out-param parameters where\
         {indentExpr declVal}\n\
         can be inserted.")
@@ -204,7 +204,7 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
           -- We need to elaborate the class within this context to ensure metavariables can unify with `xs`.
           let classExpr ← elabTerm classStx none
           synthesizeSyntheticMVars (postpone := .partial)
-          if (← MonadLog.hasErrors) then
+          bif (← MonadLog.hasErrors) then
             throwAbortTerm
           -- We allow `classExpr` to be a pi type, to support giving more hypotheses to the derived instance.
           -- (Possibly `classExpr` is not a type due to being underapplied, but `forallTelescopeReducing` tolerates this.)
@@ -217,7 +217,7 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
             -- Compute instance name early so `wrapInstance` can use it for aux def naming.
             let mut instName ← mkInstanceNameOfType preNormClosure.type
             let isMeta := (← read).isMetaSection || isMarkedMeta (← getEnv) declName
-            let inst ← if backward.inferInstanceAs.wrap.get (← getOptions) then
+            let inst ← bif backward.inferInstanceAs.wrap.get (← getOptions) then
               withDeclNameForAuxNaming instName <| withNewMCtxDepth <|
                 wrapInstance result.instVal result.instType
                   (logCompileErrors := false)  -- covered by noncomputable check below
@@ -230,7 +230,7 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
           Core.setMessageLog (msgLog ++ (← Core.getMessageLog))
   let env ← getEnv
   let isPropType ← isProp result.type
-  if isPropType then
+  bif isPropType then
     let decl ← mkThmOrUnsafeDef {
       name := instName, levelParams := result.levelParams.toList,
       type := result.type, value := result.value
@@ -243,7 +243,7 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
     -- `noncomputable`, give an actionable error with a `Try this:` suggestion.
     unless isNoncomputable || (← read).isNoncomputableSection do
       let noncompRef? := preNormValue.foldConsts none fun n acc =>
-        acc <|> if Lean.isNoncomputable (asyncMode := .local) env n then some n else none
+        acc <|> bif Lean.isNoncomputable (asyncMode := .local) env n then some n else none
       if let some noncompRef := noncompRef? then
         if let some cmdRef := cmdRef? then
           if let some origText := cmdRef.reprint then
@@ -252,7 +252,7 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
         throwError "failed to derive instance because it depends on \
           `{.ofConstName noncompRef}`, which is noncomputable"
     let isMeta := (← read).isMetaSection || isMarkedMeta (← getEnv) declName
-    if isNoncomputable || (← read).isNoncomputableSection then
+    bif isNoncomputable || (← read).isNoncomputableSection then
       addDecl <| Declaration.defnDecl decl
       modifyEnv (addNoncomputable · instName)
     else
@@ -261,7 +261,7 @@ def processDefDeriving (view : DerivingClassView) (decl : Expr) (isNoncomputable
   -- For Prop-typed instances (theorems), skip `instance_reducible` since reducibility hints are
   -- irrelevant for theorems. This matches the behavior of the handwritten `instance` command
   -- (see `MutualDef.lean`).
-  if isPropType then
+  bif isPropType then
     addInstance instName AttributeKind.global (eval_prio default)
   else
     registerInstance instName AttributeKind.global (eval_prio default)
@@ -289,7 +289,7 @@ def registerDerivingHandler (className : Name) (handler : DerivingHandler) : IO 
 
 def applyDerivingHandlers (className : Name) (typeNames : Array Name) (setExpose := false) : CommandElabM Unit := do
   withScope (fun sc => { sc with
-    attrs := if setExpose then Unhygienic.run `(Parser.Term.attrInstance| expose) :: sc.attrs else sc.attrs
+    attrs := bif setExpose then Unhygienic.run `(Parser.Term.attrInstance| expose) :: sc.attrs else sc.attrs
     -- Deactivate some linting options that only make writing deriving handlers more painful.
     opts := sc.opts.set `warn.exposeOnPrivate false
     -- When any of the types are private, the deriving handler will need access to the private scope
@@ -299,7 +299,7 @@ def applyDerivingHandlers (className : Name) (typeNames : Array Name) (setExpose
     match (← derivingHandlersRef.get).find? className with
     | some handlers =>
       for handler in handlers do
-        if (← handler typeNames) then
+        bif (← handler typeNames) then
           return ()
       throwError "None of the deriving handlers for class `{.ofConstName className}` applied to \
         {.andList <| typeNames.toList.map (m!"`{.ofConstName ·}`")}"
@@ -331,7 +331,7 @@ private def elabDefDeriving (classes : Array DerivingClassView) (decls : Array S
   for decl in decls do
     withRef decl <| withLogging do
       let declExpr ←
-        if decl.isIdent then
+        bif decl.isIdent then
           let declName ← realizeGlobalConstNoOverload decl
           let info ← getConstInfo declName
           unless info.isDefinition do
@@ -354,15 +354,15 @@ private def elabDefDeriving (classes : Array DerivingClassView) (decls : Array S
     let isNoncomputable := ncTk?.isSome
     let classes ← liftCoreM <| classes.mapM DerivingClassView.ofSyntax
     let decls : Array Syntax := decls
-    if decls.all Syntax.isIdent then
+    bif decls.all Syntax.isIdent then
       let declNames ← liftCoreM <| decls.mapM (realizeGlobalConstNoOverloadWithInfo ·)
       -- If any of the declarations are definitions, then we commit to delta deriving.
       let infos ← declNames.mapM getConstInfo
-      if infos.any (·.isDefinition) then
+      bif infos.any (·.isDefinition) then
         elabDefDeriving classes decls (isNoncomputable := isNoncomputable) (cmdRef? := stx)
       else
         -- Otherwise, we commit to using deriving handlers.
-        if isNoncomputable then
+        bif isNoncomputable then
           withScope (fun sc => { sc with isNoncomputable := true }) do
             for cls in classes do
               cls.applyHandlers declNames

@@ -199,7 +199,7 @@ where
     | `(leftact% $f $lhs $rhs) => processBinOp s .leftact f lhs rhs
     | `(rightact% $f $lhs $rhs) => processBinOp s .rightact f lhs rhs
     | `(($h:hygieneInfo $e)) =>
-      if hasCDot e h.getHygieneInfo then
+      bif hasCDot e h.getHygieneInfo then
         processLeaf s
       else
         go e
@@ -214,8 +214,8 @@ where
   processBinOp (ref : Syntax) (kind : BinOpKind) (f lhs rhs : Syntax) := do
     let some f ← resolveId? f | throwUnknownConstantAt f f.getId
     -- treat corresponding argument as leaf for `leftact/rightact`
-    let lhs ← if kind == .leftact then processLeaf lhs else go lhs
-    let rhs ← if kind == .rightact then processLeaf rhs else go rhs
+    let lhs ← bif kind == .leftact then processLeaf lhs else go lhs
+    let rhs ← bif kind == .rightact then processLeaf rhs else go rhs
     return .binop ref kind f lhs rhs
 
   processUnOp (ref : Syntax) (f arg : Syntax) := do
@@ -229,7 +229,7 @@ where
 
 -- Auxiliary function used at `analyze`
 private def hasCoe (fromType toType : Expr) : TermElabM Bool := do
-  if (← getEnv).contains ``CoeT then
+  bif (← getEnv).contains ``CoeT then
     withLocalDeclD `x fromType fun x => do
     match ← coerceSimple? x toType with
     | .some _ => return true
@@ -258,7 +258,7 @@ private def analyze (t : Tree) (expectedType? : Option Expr) : TermElabM Analyze
     | none => pure none
     | some expectedType =>
       let expectedType := (← instantiateMVars expectedType).cleanupAnnotations
-      if isUnknown expectedType then pure none else pure (some expectedType)
+      bif isUnknown expectedType then pure none else pure (some expectedType)
   (go t *> get).run' { max? }
 where
    go (t : Tree) : StateRefT AnalyzeResult TermElabM Unit := do
@@ -271,7 +271,7 @@ where
        | .unop _ _ arg => go arg
        | .term _ _ val =>
          let type := (← instantiateMVars (← inferType val)).cleanupAnnotations
-         if isUnknown type then
+         bif isUnknown type then
            modify fun s => { s with hasUnknown := true }
          else
            match (← get).max? with
@@ -304,9 +304,9 @@ where
               instead of unfolding definitions.
              -/
              unless (← withNewMCtxDepth <| withConfig (fun config => { config with isDefEqStuckEx := true }) <| isDefEqGuarded max type) do
-               if (← hasCoe type max) then
+               bif (← hasCoe type max) then
                  return ()
-               else if (← hasCoe max type) then
+               else bif (← hasCoe max type) then
                  modify fun s => { s with max? := type }
                else
                  trace[Elab.binop] "uncomparable types: {max}, {type}"
@@ -314,7 +314,7 @@ where
 
 private def mkBinOp (lazy : Bool) (f : Expr) (lhs rhs : Expr) : TermElabM Expr := do
   let mut rhs := rhs
-  if lazy then
+  bif lazy then
     rhs ← mkFunUnit rhs
   elabAppArgs f #[] #[Arg.expr lhs, Arg.expr rhs] (expectedType? := none) (explicit := false) (ellipsis := false) (resultIsOutParamSupport := false)
 
@@ -368,12 +368,12 @@ private def hasHeterogeneousDefaultInstances (f : Expr) (maxType : Expr) (lhs : 
   let .const typeName .. := maxType.getAppFn | return false
   let className := fName.getPrefix
   let defInstances ← getDefaultInstances className
-  if defInstances.length ≤ 1 then return false
+  bif defInstances.length ≤ᵇ 1 then return false
   for (instName, _) in defInstances do
     if let .app (.app (.app _heteroClass lhsType) rhsType) _resultType :=
         (← getConstInfo instName).type.getForallBody then
-      if  lhs && rhsType.isAppOf typeName then return true
-      if !lhs && lhsType.isAppOf typeName then return true
+      bif  lhs && rhsType.isAppOf typeName then return true
+      bif !lhs && lhsType.isAppOf typeName then return true
   return false
 
 /--
@@ -427,7 +427,7 @@ mutual
 
           Remark: We assume `binrel%` elaborator is only used with homogeneous predicates.
         -/
-        if (← pure isPred <||> hasHomogeneousInstance f maxType) then
+        bif (← pure isPred <||> hasHomogeneousInstance f maxType) then
           return .binop ref kind f (← go lhs f true false) (← go rhs f false false)
         else
           let r ← withRef ref do
@@ -439,12 +439,12 @@ mutual
       | .term ref trees e =>
         let type := (← instantiateMVars (← inferType e)).cleanupAnnotations
         trace[Elab.binop] "visiting {e} : {type} =?= {maxType}"
-        if isUnknown type then
+        bif isUnknown type then
           if let some f := f? then
-            if (← hasHeterogeneousDefaultInstances f maxType lhs) then
+            bif (← hasHeterogeneousDefaultInstances f maxType lhs) then
               -- See comment at `hasHeterogeneousDefaultInstances`
               return t
-        if (← isDefEqGuarded maxType type) then
+        bif (← isDefEqGuarded maxType type) then
           return t
         else
           trace[Elab.binop] "added coercion: {e} : {type} => {maxType}"
@@ -456,7 +456,7 @@ mutual
   private partial def toExpr (tree : Tree) (expectedType? : Option Expr) : TermElabM Expr := do
     let r ← analyze tree expectedType?
     trace[Elab.binop] "hasUncomparable: {r.hasUncomparable}, hasUnknown: {r.hasUnknown}, maxType: {r.max?}"
-    if r.hasUncomparable || r.max?.isNone then
+    bif r.hasUncomparable || r.max?.isNone then
       let result ← toExprCore tree
       ensureHasType expectedType? result
     else
@@ -532,7 +532,7 @@ def elabBinRelCore (noProp : Bool) (stx : Syntax) (expectedType? : Option Expr) 
     let tree := .binop stx .regular f lhs rhs
     let r ← analyze tree none
     trace[Elab.binrel] "hasUncomparable: {r.hasUncomparable}, hasUnknown: {r.hasUnknown}, maxType: {r.max?}"
-    if r.hasUncomparable || r.max?.isNone then
+    bif r.hasUncomparable || r.max?.isNone then
       -- Use default elaboration strategy + `toBoolIfNecessary`
       let lhs ← toExprCore lhs
       let rhs ← toExprCore rhs
@@ -544,8 +544,8 @@ def elabBinRelCore (noProp : Bool) (stx : Syntax) (expectedType? : Option Expr) 
     else
       let mut maxType := r.max?.get!
       /- If `noProp == true` and `maxType` is `Prop`, then set `maxType := Bool`. `See toBoolIfNecessary` -/
-      if noProp then
-        if (← withNewMCtxDepth <| isDefEq maxType (mkSort Level.zero)) then
+      bif noProp then
+        bif (← withNewMCtxDepth <| isDefEq maxType (mkSort Level.zero)) then
           maxType := Lean.mkConst ``Bool
       let result ← toExprCore (← applyCoe tree maxType (isPred := true))
       trace[Elab.binrel] "result: {result}"
@@ -554,9 +554,9 @@ def elabBinRelCore (noProp : Bool) (stx : Syntax) (expectedType? : Option Expr) 
 where
   /-- If `noProp == true` and `e` has type `Prop`, then coerce it to `Bool`. -/
   toBoolIfNecessary (e : Expr) : TermElabM Expr := do
-    if noProp then
+    bif noProp then
       -- We use `withNewMCtxDepth` to make sure metavariables are not assigned
-      if (← withNewMCtxDepth <| isDefEq (← inferType e) (mkSort Level.zero)) then
+      bif (← withNewMCtxDepth <| isDefEq (← inferType e) (mkSort Level.zero)) then
         return (← ensureHasType (Lean.mkConst ``Bool) e)
     return e
 
@@ -575,7 +575,7 @@ def elabDefaultOrNonempty : TermElab :=  fun stx expectedType? => do
     catch _ => try
       mkOfNonempty expectedType
     catch _ =>
-      if stx[1].isNone then
+      bif stx[1].isNone then
         throwError "\
           failed to synthesize '{.ofConstName ``Inhabited}' or '{.ofConstName ``Nonempty}' instance for\
           {indentExpr expectedType}\n\

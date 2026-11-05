@@ -29,12 +29,12 @@ private def resolveAtomicNameForConstNamespace (c : Name) (id : Ident) : TermEla
   -- For atomic names, resolve them as if `c` is the namespace.
   if let Name.str Name.anonymous s := n then
     let n' := Name.str c s
-    if (← getEnv).contains n' then
-      if (← getInfoState).enabled then
+    bif (← getEnv).contains n' then
+      bif (← getInfoState).enabled then
         addConstInfo id n'
       return s
   let n ← realizeGlobalConstNoOverloadWithInfo id
-  if !n.hasMacroScopes && n.getPrefix == c then
+  bif !n.hasMacroScopes && n.getPrefix == c then
     if let Name.str _ s := n then
       return s
   throwUnsupportedSyntax
@@ -48,8 +48,8 @@ private def resolveDottedAtomicNameForConstNamespace (c : Name) (id : Ident) : T
   if let Name.str Name.anonymous s := n then
     addCompletionInfo <| CompletionInfo.dotId id n {} (← mkConstWithLevelParams c)
     let n' := Name.str c s
-    if (← getEnv).contains n' then
-      if (← getInfoState).enabled then
+    bif (← getEnv).contains n' then
+      bif (← getInfoState).enabled then
         addConstInfo id n'
       return s
     else
@@ -101,7 +101,7 @@ def ensureEvalTerm
     let evalTermDef := mkIdent (instName ++ Name.mkSimple "evalTerm")
     let mut stxCases : Array (String × Term) := #[]
     for ctorName in ival.ctors do
-      if useCtor ival ctorName then
+      bif useCtor ival ctorName then
         let (xs, _, _) ← forallMetaTelescopeReducing (← inferType (mkConst ctorName))
         let .str _ ctorName' := ctorName | unreachable!
         let vs ← xs.mapM fun _ => mkIdent <$> Core.mkFreshUserName `v
@@ -111,7 +111,7 @@ def ensureEvalTerm
         let val ← `(pure ($(mkCIdent ctorName) $vs*, $expr))
         let recArgs ← xs.mapM fun x => return (← instantiateMVars (← inferType x)) == type'
         let val ← (((Array.range xs.size).zip recArgs).zip (vs.zip es)).foldrM (init := val) fun ((idx, recArg), v, e) val =>
-          if recArg then
+          bif recArg then
             `($evalTermDef args[$(quote idx)]! >>= fun ($v, $e) => $val)
           else
             `(EvalTerm.evalTerm args[$(quote idx)]! >>= fun ($v, $e) => $val)
@@ -131,7 +131,7 @@ where
       | throwError "`{.ofConstName indTypeName}` is not an inductive type"
     unless ival.levelParams.isEmpty && ival.numParams == 0 && ival.numIndices == 0 do
       throwError "`{.ofConstName indTypeName}` has universe parameters, parameters, or indices"
-    if ival.isNested || ival.isReflexive then
+    bif ival.isNested || ival.isReflexive then
       throwError "`{.ofConstName indTypeName}` has unsupported recursion"
     return ival
   useCtor (ival : InductiveVal) (ctorName : Name) : Bool :=
@@ -140,15 +140,15 @@ where
     let ival ← getIndType type
     let mut deps := #[]
     for ctorName in ival.ctors do
-      if useCtor ival ctorName then
+      bif useCtor ival ctorName then
         let (xs, bis, _) ← forallMetaTelescopeReducing (← inferType (mkConst ctorName))
         unless bis.all (·.isExplicit) do
           throwError "Every field of `{.ofConstName ctorName}` must be explicit"
         for x in xs do
           let xTy ← inferType x
-          if xTy.hasMVar then
+          bif xTy.hasMVar then
             throwError "Field `{x}` of `{.ofConstName ctorName}` is dependent"
-          if xTy == type then
+          bif xTy == type then
             continue
           deps := deps.push xTy
     return deps

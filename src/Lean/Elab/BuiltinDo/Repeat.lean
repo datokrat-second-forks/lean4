@@ -32,8 +32,8 @@ remove the following code without breaking the do block's type.
   let mut expanded ←
     `(doElem| for%$tk _ in Loop.mk $[$inv?:doLoopInvariant]? $[$var?:doLoopDecreasing]? do $seq)
   let info ← inferControlInfoSeq seq
-  if !info.breaks then
-    if !(← Meta.isDefEqGuarded dec.resultType (← mkPUnit)) then
+  bif !info.breaks then
+    bif !(← Meta.isDefEqGuarded dec.resultType (← mkPUnit)) then
       expanded ← `(doElem| do $expanded:doElem; unreachable!)
   Term.withMacroExpansion stx expanded <|
     withRef expanded <| elabDoElem ⟨expanded⟩ dec

@@ -64,11 +64,11 @@ def mkAuxFunction (ctx : Context) (i : Nat) : TermElabM Command := do
   let indVal     := ctx.typeInfos[i]!
   let header     ← mkHashableHeader indVal
   let mut body   ← mkMatch ctx header indVal
-  if ctx.usePartial then
+  bif ctx.usePartial then
     let letDecls ← mkLocalInstanceLetDecls ctx `Hashable header.argNames
     body ← mkLet letDecls body
   let binders    := header.binders
-  if ctx.usePartial then
+  bif ctx.usePartial then
     -- TODO(Dany): Get rid of this code branch altogether once we have well-founded recursion
     `(partial def $(mkIdent auxFunName):ident $binders:bracketedBinder* : UInt64 := $body:term)
   else
@@ -88,7 +88,7 @@ private def mkHashableInstanceCmds (declName : Name) : TermElabM (Array Syntax) 
 
 def mkHashableHandler (declNames : Array Name) : CommandElabM Bool := do
   withoutExporting do  -- This deriving handler handles visibility of generated decls syntactically
-  if (← declNames.allM isInductive)  then
+  bif (← declNames.allM isInductive)  then
     for declName in declNames do
       withoutExposeFromCtors declName do
         let cmds ← liftTermElabM <| mkHashableInstanceCmds declName

@@ -30,7 +30,7 @@ def wfRecursion (docCtx : LocalContext × LocalInstances) (preDefs : Array PreDe
     let fixedParamPerms ← getFixedParamPerms preDefs
     let varNamess ← preDefs.mapIdxM fun i preDef => varyingVarNames fixedParamPerms i preDef
     for varNames in varNamess, preDef in preDefs do
-      if varNames.isEmpty then
+      bif varNames.isEmpty then
         throwError "well-founded recursion cannot be used, `{preDef.declName}` does not take any (non-fixed) arguments"
     let argsPacker := { varNamess }
     let numSectionVars := preDefs[0]!.numSectionVars
@@ -64,7 +64,7 @@ def wfRecursion (docCtx : LocalContext × LocalInstances) (preDefs : Array PreDe
       unless useNatRec do
         preDefs.forM fun preDef =>
           preDef.modifiers.attrs.forM fun a => do
-            if a.name = `reducible || a.name = `semireducible then
+            bif a.name =ᵇ `reducible || a.name =ᵇ `semireducible then
               logWarningAt a.stx s!"marking functions defined by well-founded recursion as `{a.name}` is not effective"
 
       let (value, envNew) ← withoutModifyingEnv' do

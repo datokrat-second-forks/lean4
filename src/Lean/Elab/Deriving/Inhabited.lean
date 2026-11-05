@@ -38,13 +38,13 @@ where
         addLocalInstancesForParamsAux k xs (i+1) insts map
 
   addLocalInstancesForParams {α} (xs : Array Expr) (k : Array Expr → LocalInst2Index → TermElabM α) : TermElabM α := do
-    if addHypotheses then
+    bif addHypotheses then
       addLocalInstancesForParamsAux k xs.toList 0 #[] {}
     else
       k #[] {}
 
   collectUsedLocalsInsts (usedInstIdxs : IndexSet) (localInst2Index : LocalInst2Index) (e : Expr) : IndexSet :=
-    if localInst2Index.isEmpty then
+    bif localInst2Index.isEmpty then
       usedInstIdxs
     else
       let visit {ω} : StateRefT IndexSet (ST ω) Unit :=
@@ -65,7 +65,7 @@ where
       let arg := mkIdent (← mkFreshUserName `a)
       indArgs := indArgs.push arg
       binders := binders.push <| ← `(bracketedBinderF| { $arg:ident })
-      if usedInstIdxs.contains i then
+      bif usedInstIdxs.contains i then
         binders := binders.push <| ← `(bracketedBinderF| [Inhabited $arg:ident ])
     let type ← `(@$(mkCIdent inductiveTypeName):ident $indArgs:ident*)
     `(instance $instId:ident $binders:bracketedBinder* : Inhabited $type := ⟨$auxFunId⟩)
@@ -87,7 +87,7 @@ where
     addLocalInstancesForParams xs[0...indVal.numParams] fun insts localInst2Index => do
       let type := mkAppN (.const inductiveTypeName us) xs
       let val ←
-        if isStructure (← getEnv) inductiveTypeName then
+        bif isStructure (← getEnv) inductiveTypeName then
           withTraceNode `Elab.Deriving.inhabited (fun _ => return m!"using structure instance elaborator") do
             let stx ← `(structInstDefault| struct_inst_default%)
             withoutErrToSorry <| elabTermAndSynthesize stx type
@@ -100,7 +100,7 @@ where
             pure <| mkAppN val mvars
       solveMVarsWithDefault val
       let val ← instantiateMVars val
-      if val.hasMVar then
+      bif val.hasMVar then
         throwError "default value contains metavariables{inlineExprTrailing val}"
       let fvars := Lean.collectFVars {} val
       let insts' := insts.filter (fvars.fvarSet.contains ·.fvarId!)
@@ -129,7 +129,7 @@ where
         (type        := auxType)
         (value       := auxVal)
         (hints       := ReducibilityHints.regular (getMaxHeight (← getEnv) auxVal + 1))
-      if isMarkedMeta (← getEnv) inductiveTypeName then
+      bif isMarkedMeta (← getEnv) inductiveTypeName then
         modifyEnv (markMeta · auxFunName)
       compileDecls #[auxFunName]
         (logErrors := !(← read).isNoncomputableSection || isMarkedMeta (← getEnv) auxFunName)
@@ -144,14 +144,14 @@ private def mkInhabitedInstance (declName : Name) : CommandElabM Unit := do
   let indVal ← getConstInfoInduct declName
   let doIt (addHypotheses : Bool) : CommandElabM Bool := do
     for ctorName in indVal.ctors do
-      if (← mkInhabitedInstanceUsing declName ctorName addHypotheses) then
+      bif (← mkInhabitedInstanceUsing declName ctorName addHypotheses) then
         return true
     return false
   unless (← doIt false <||> doIt true) do
     throwError "failed to generate `Inhabited` instance for `{.ofConstName declName}`"
 
 def mkInhabitedInstanceHandler (declNames : Array Name) : CommandElabM Bool := do
-  if (← declNames.allM isInductive) then
+  bif (← declNames.allM isInductive) then
     declNames.forM mkInhabitedInstance
     return true
   else

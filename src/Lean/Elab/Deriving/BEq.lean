@@ -62,7 +62,7 @@ where
         for i in *...ctorInfo.numFields do
           let pos := indVal.numParams + ctorInfo.numFields - i - 1
           let x := xs[pos]!
-          if occursOrInType (← getLCtx) x type then
+          bif occursOrInType (← getLCtx) x type then
             -- If resulting type depends on this field, we don't need to compare
             -- but use inaccessible patterns fail during pattern match compilation if their
             -- equality does not actually follow from the equality between their types
@@ -75,25 +75,25 @@ where
             ctorArgs1 := ctorArgs1.push a
             ctorArgs2 := ctorArgs2.push b
             let xType ← inferType x
-            if (← isProp xType) then
+            bif (← isProp xType) then
               continue
-            if xType.isAppOf indVal.name then
-              if rhs_empty then
+            bif xType.isAppOf indVal.name then
+              bif rhs_empty then
                 rhs ← `($(mkIdent auxFunName):ident $a:ident $b:ident)
                 rhs_empty := false
               else
                 rhs ← `($(mkIdent auxFunName):ident $a:ident $b:ident && $rhs)
             /- If `x` appears in the type of another field, use `eq_of_beq` to
                unify the types of the subsequent variables -/
-            else if ← xs[(pos+1)...*].anyM
-                (fun fvar => (Expr.containsFVar · x.fvarId!) <$> (inferType fvar)) then
+            else bif (← xs[(pos+1)...*].anyM
+                (fun fvar => (Expr.containsFVar · x.fvarId!) <$> (inferType fvar))) then
               rhs ← `(if h : $a:ident == $b:ident then by
                         cases (eq_of_beq h)
                         exact $rhs
                       else false)
               rhs_empty := false
             else
-              if rhs_empty then
+              bif rhs_empty then
                 rhs ← `($a:ident == $b:ident)
                 rhs_empty := false
               else
@@ -131,7 +131,7 @@ def mkMatchNew (header : Header) (indVal : InductiveVal) (auxFunName : Name) : T
       for i in *...ctorInfo.numFields do
         let pos := indVal.numParams + ctorInfo.numFields - i - 1
         let x := xs[pos]!
-        if type.containsFVar x.fvarId! then
+        bif type.containsFVar x.fvarId! then
           -- If resulting type depends on this field, we don't need to compare
           -- and the casesOnSameCtor only has a parameter for it once
           ctorArgs1 := ctorArgs1.push (← `(_))
@@ -142,34 +142,34 @@ def mkMatchNew (header : Header) (indVal : InductiveVal) (auxFunName : Name) : T
           ctorArgs1 := ctorArgs1.push a
           ctorArgs2 := ctorArgs2.push b
           let xType ← inferType x
-          if (← isProp xType) then
+          bif (← isProp xType) then
             continue
-          if xType.isAppOf indVal.name then
-            if rhs_empty then
+          bif xType.isAppOf indVal.name then
+            bif rhs_empty then
               rhs ← `($(mkIdent auxFunName):ident $a:ident $b:ident)
               rhs_empty := false
             else
               rhs ← `($(mkIdent auxFunName):ident $a:ident $b:ident && $rhs)
           /- If `x` appears in the type of another field, use `eq_of_beq` to
               unify the types of the subsequent variables -/
-          else if ← xs[(pos+1)...*].anyM
-              (fun fvar => (Expr.containsFVar · x.fvarId!) <$> (inferType fvar)) then
+          else bif (← xs[(pos+1)...*].anyM
+              (fun fvar => (Expr.containsFVar · x.fvarId!) <$> (inferType fvar))) then
             rhs ← `(if h : $a:ident == $b:ident then by
                       cases (eq_of_beq h)
                       exact $rhs
                     else false)
             rhs_empty := false
           else
-            if rhs_empty then
+            bif rhs_empty then
               rhs ← `($a:ident == $b:ident)
               rhs_empty := false
             else
               rhs ← `($a:ident == $b:ident && $rhs)
-      if ctorArgs1.isEmpty then
+      bif ctorArgs1.isEmpty then
         -- Unit thunking argument
         ctorArgs1 := ctorArgs1.push (← `(()))
       `(@fun $ctorArgs1.reverse:term* $ctorArgs2.reverse:term* =>$rhs:term)
-  if indVal.numCtors == 1 then
+  bif indVal.numCtors == 1 then
     `( $(mkCIdent casesOnSameCtorName) $x1:term $x2:term rfl $alts:term* )
   else
     `( match Nat.decEq ($(mkCIdent ctorIdxName) $x1:ident) ($(mkCIdent ctorIdxName) $x2:ident) with
@@ -177,7 +177,7 @@ def mkMatchNew (header : Header) (indVal : InductiveVal) (auxFunName : Name) : T
       | .isFalse _ => false)
 
 def mkMatch (header : Header) (indVal : InductiveVal) (auxFunName : Name) : TermElabM Term := do
-  if indVal.numCtors ≥ deriving.beq.linear_construction_threshold.get (← getOptions) then
+  bif indVal.numCtors ≥ᵇ deriving.beq.linear_construction_threshold.get (← getOptions) then
     mkMatchNew header indVal auxFunName
   else
     mkMatchOld header indVal auxFunName
@@ -188,11 +188,11 @@ def mkAuxFunction (ctx : Context) (i : Nat) : TermElabM Command := do
   let indVal     := ctx.typeInfos[i]!
   let header     ← mkBEqHeader indVal
   let mut body   ← mkMatch header indVal auxFunName
-  if ctx.usePartial then
+  bif ctx.usePartial then
     let letDecls ← mkLocalInstanceLetDecls ctx `BEq header.argNames
     body ← mkLet letDecls body
   let binders    := header.binders
-  if ctx.usePartial then
+  bif ctx.usePartial then
     `(partial def $(mkIdent auxFunName):ident $binders:bracketedBinder* : Bool := $body:term)
   else
     `(def $(mkIdent auxFunName):ident $binders:bracketedBinder* : Bool := $body:term)
@@ -226,7 +226,7 @@ def mkBEqInstance (declName : Name) : CommandElabM Unit := do
   withoutExposeFromCtors declName do
     let ctx ← liftTermElabM <| mkContext ``BEq "beq" declName
     let cmds ← liftTermElabM <|
-      if (← isEnumType declName) then
+      bif (← isEnumType declName) then
         mkBEqEnumCmd ctx declName
       else
         mkBEqInstanceCmds ctx declName
@@ -235,7 +235,7 @@ def mkBEqInstance (declName : Name) : CommandElabM Unit := do
       elabCommand (← `(attribute [method_specs] $(mkIdent ctx.instName):ident))
 
 def mkBEqInstanceHandler (declNames : Array Name) : CommandElabM Bool := do
-  if (← declNames.allM isInductive) then
+  bif (← declNames.allM isInductive) then
     for declName in declNames do
       mkBEqInstance declName
     return true
