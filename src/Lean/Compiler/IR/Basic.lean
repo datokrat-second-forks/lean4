@@ -172,7 +172,7 @@ def CtorInfo.isScalar (info : CtorInfo) : Bool :=
   !info.isRef
 
 def CtorInfo.type (info : CtorInfo) : IRType :=
-  if info.isRef then .object else .tagged
+  bif info.isRef then .object else .tagged
 
 inductive Expr where
   /-- We use `ctor` mainly for constructing Lean object/tobject values `lean_ctor_object` in the runtime.
@@ -317,14 +317,14 @@ def push (bs : Array FnBody) (b : FnBody) : Array FnBody :=
   bs.push b
 
 partial def flattenAux (b : FnBody) (r : Array FnBody) : (Array FnBody) × FnBody :=
-  if b.isTerminal then (r, b)
+  bif b.isTerminal then (r, b)
   else flattenAux b.body (push r b)
 
 def FnBody.flatten (b : FnBody) : (Array FnBody) × FnBody :=
   flattenAux b #[]
 
 partial def reshapeAux (a : Array FnBody) (i : Nat) (b : FnBody) : FnBody :=
-  if i == 0 then b
+  bif i == 0 then b
   else
     let i         := i - 1
     let (curr, a) := a.swapAt! i default
@@ -493,16 +493,16 @@ def Expr.alphaEqv (ρ : IndexRenaming) : Expr → Expr → Bool
 instance : AlphaEqv Expr := ⟨Expr.alphaEqv⟩
 
 def addVarRename (ρ : IndexRenaming) (x₁ x₂ : Nat) :=
-  if x₁ == x₂ then ρ else ρ.insert x₁ x₂
+  bif x₁ == x₂ then ρ else ρ.insert x₁ x₂
 
 def addParamRename (ρ : IndexRenaming) (p₁ p₂ : Param) : Option IndexRenaming :=
-  if p₁.ty == p₂.ty && p₁.borrow = p₂.borrow then
+  bif p₁.ty == p₂.ty && p₁.borrow =ᵇ p₂.borrow then
     some (addVarRename ρ p₁.x.idx p₂.x.idx)
   else
     none
 
 def addParamsRename (ρ : IndexRenaming) (ps₁ ps₂ : Array Param) : Option IndexRenaming := do
-  if ps₁.size != ps₂.size then
+  bif ps₁.size != ps₂.size then
     failure
   else
     let mut ρ := ρ

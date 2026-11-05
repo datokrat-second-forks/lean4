@@ -353,7 +353,7 @@ If the option is defined in a library, use '-D{`weak ++ name}' to set it conditi
 
 private def getNiceCommandStartPos? (stx : Syntax) : Option String.Pos.Raw := do
   let mut stx := stx
-  if stx[0].isOfKind ``Command.declModifiers then
+  bif stx[0].isOfKind ``Command.declModifiers then
     -- modifiers are morally before the actual declaration
     stx := stx[1]
   stx.getPos?
@@ -442,14 +442,14 @@ where
           -- ...and the edit is after the second-next command (see note [Incremental Parsing])...
           if let some nextCom ← processed.firstCmdSnap.get? then
             if let some nextNextCom ← nextCom.nextCmdSnap?.bindM (·.get?) then
-              if (← isBeforeEditPos nextNextCom.parserState.pos) then
+              bif (← isBeforeEditPos nextNextCom.parserState.pos) then
                 -- ...go immediately to next snapshot
                 return (← unchanged old old.stx oldSuccess.parserState)
 
     withHeaderExceptions ({ · with ictx, stx := .missing, result? := none, metaSnap := default }) do
       -- parsing the header should be cheap enough to do synchronously
       let (stx, parserState, msgLog) ← Parser.parseHeader ictx
-      if msgLog.hasErrors then
+      bif msgLog.hasErrors then
         return {
           ictx, stx
           diagnostics := .empty
@@ -468,7 +468,7 @@ where
       -- to uphold the invariant that concatenating all top-level snapshots' syntax trees results in
       -- the original file.
       if let some old := old? then
-        if trimmedStx.eqWithInfo old.stx.unsetTrailing then
+        bif trimmedStx.eqWithInfo old.stx.unsetTrailing then
           -- Here we must make sure to pass the *new* syntax and parser state; see NOTE in
           -- `unchanged`
           return (← unchanged old stx parserState)
@@ -505,11 +505,11 @@ where
         (headerStx? := stx) (origHeaderStx? := origStx)
       let stopTime := (← IO.monoNanosNow).toFloat / 1000000000
       let diagnostics := (← Snapshot.Diagnostics.ofMessageLog msgLog)
-      if msgLog.hasErrors then
+      bif msgLog.hasErrors then
         return { diagnostics, result? := none, metaSnap := default }
 
       let mut traceState := default
-      if trace.profiler.isExporting setup.opts then
+      bif trace.profiler.isExporting setup.opts then
         traceState := {
           traces := #[{
             ref := .missing,
@@ -587,7 +587,7 @@ where
     if let some old := old? then
       if let some nextCom ← old.nextCmdSnap?.bindM (·.get?) then
         if let some nextNextCom ← nextCom.nextCmdSnap?.bindM (·.get?) then
-          if (← isBeforeEditPos nextNextCom.parserState.pos) then
+          bif (← isBeforeEditPos nextNextCom.parserState.pos) then
             return (← unchanged old old.parserState)
 
     let beginPos := parserState.pos
@@ -605,7 +605,7 @@ where
       -- NOTE: as `parserState.pos` includes trailing whitespace, this forces reprocessing even if
       -- only that whitespace changes, which is wasteful but still necessary because it may
       -- influence the range of error messages such as from a trailing `exact`
-      if stx.eqWithInfo old.stx then
+      bif stx.eqWithInfo old.stx then
         -- Here we must make sure to pass the *new* parser state; see NOTE in `unchanged`
         return (← unchanged old parserState)
       -- On first change, immediately cancel old invocation for all subsequent commands. This
@@ -618,7 +618,7 @@ where
 
     -- check for cancellation, most likely during elaboration of previous command, before starting
     -- processing of next command
-    if (← parseCancelTk.isSet) then
+    bif (← parseCancelTk.isSet) then
       if let some old := old? then
         -- all of `old` is discarded, so cancel all of it
         toSnapshotTree old |>.children.forM (·.cancelRec)
@@ -640,21 +640,21 @@ where
       return
 
     -- Start new task when leaving fast-forwarding path; see "General notes" above
-    let _ ← (if sync then BaseIO.asTask else (.pure <$> ·)) do
+    let _ ← (bif sync then BaseIO.asTask else (.pure <$> ·)) do
       -- definitely resolved in `doElab` task
       let elabPromise ← IO.Promise.new
       let resultPromise ← IO.Promise.new
       let finishedPromise ← IO.Promise.new
       let reportPromise ← IO.Promise.new
       let minimalSnapshots := internal.cmdlineSnapshots.get cmdState.scopes.head!.opts
-      let (stx', parserState') := if minimalSnapshots && !Parser.isTerminalCommand stx then
+      let (stx', parserState') := bif minimalSnapshots && !Parser.isTerminalCommand stx then
         (default, default)
       else
         (stx, parserState)
       -- report terminal tasks on first line of decl such as not to hide incremental tactics'
       -- progress
       let initRange? := .ofOptionInheriting <| getNiceCommandStartPos? stx |>.map fun pos => ⟨pos, pos⟩
-      let next? ← if Parser.isTerminalCommand stx then pure none
+      let next? ← bif Parser.isTerminalCommand stx then pure none
         -- for now, wait on "command finished" snapshot before parsing next command
         else some <$> IO.Promise.new
       let nextCmdSnap? := next?.map ({
@@ -685,7 +685,7 @@ where
 
       let mut reportedCmdState := cmdState
       let cmdline := internal.cmdlineSnapshots.get scope.opts && !Parser.isTerminalCommand stx
-      if cmdline then
+      bif cmdline then
         -- discard all metadata apart from the environment; see `internal.cmdlineSnapshots`
         reportedCmdState := { env := reportedCmdState.env, maxRecDepth := 0 }
       resultPromise.resolve {
@@ -700,7 +700,7 @@ where
         let infoTree := infoSt.trees[0]!
         let opts := cmdState.scopes.head!.opts
         let mut msgLog := MessageLog.empty
-        if checkTraceOption (← inheritedTraceOptions.get) opts `Elab.info then
+        bif checkTraceOption (← inheritedTraceOptions.get) opts `Elab.info then
           if let .ok msg ← infoTree.format.toBaseIO then
             let data := .tagged `trace <| .trace { cls := `Elab.info } .nil #[msg]
             msgLog := msgLog.add {
@@ -716,7 +716,7 @@ where
 
       -- report traces when *all* tasks are finished
       let traceTask ←
-        if checkTraceOption (← inheritedTraceOptions.get) cmdState.scopes.head!.opts `Elab.snapshotTree then
+        bif checkTraceOption (← inheritedTraceOptions.get) cmdState.scopes.head!.opts `Elab.snapshotTree then
           -- We want to trace all of `CommandParsedSnapshot` but `traceTask` is part of it, so let's
           -- create a temporary snapshot tree containing all tasks but it
           let snaps := #[
@@ -762,13 +762,13 @@ where
       messages := .empty, traceState := {}, snapshotTasks := #[], codeQualityEntryTasks := #[] }
     let cmdCtx : Elab.Command.Context := { ctx with
       cmdPos       := beginPos
-      snap?        := if internal.cmdlineSnapshots.get scope.opts then none else snap
+      snap?        := bif internal.cmdlineSnapshots.get scope.opts then none else snap
       cancelTk?    := some cancelTk
     }
     let act : Elab.Command.CommandElabM Unit := do
       let _ ← getResetInfoTrees
       Elab.Command.elabCommandTopLevel stx
-      if Parser.isTerminalCommand stx then
+      bif Parser.isTerminalCommand stx then
         Elab.Command.runModuleLintersAsync revCmds.reverse.toArray
     let (output, _) ←
       IO.FS.withIsolatedStreams (isolateStderr := Core.stderrAsMessages.get scope.opts) do
@@ -776,7 +776,7 @@ where
           withLoggingExceptions act cmdCtx cmdStateRef
     let cmdState ← cmdStateRef.get
     let mut messages := cmdState.messages
-    if !output.isEmpty then
+    bif !output.isEmpty then
       messages := messages.add {
         fileName := ctx.fileName
         severity := MessageSeverity.information

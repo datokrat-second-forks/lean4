@@ -110,7 +110,7 @@ def collectAvailableImportsFromSrcSearchPath : IO AvailableImports :=
   (·.2) <$> StateT.run (s := #[]) do
     let srcSearchPath ← getSrcSearchPath
     for p in srcSearchPath do
-      if ! (← p.isDir) then
+      bif ! (← p.isDir) then
         continue
       Lean.forEachModuleInDir p fun mod => do
         modify (·.push mod)
@@ -136,10 +136,10 @@ def addCompletionItemData (uri : DocumentUri) (pos : Lsp.Position) (completionLi
 def find (uri : DocumentUri) (pos : Lsp.Position) (text : FileMap) (headerStx : TSyntax ``Parser.Module.header) (availableImports : AvailableImports) : CompletionList :=
   let availableImports := availableImports.toImportTrie
   let completionPos := text.lspPosToUtf8Pos pos
-  if isImportNameCompletionRequest headerStx completionPos then
+  bif isImportNameCompletionRequest headerStx completionPos then
     let allAvailableImportNameCompletions := availableImports.toArray.map ({ label := toString · })
     addCompletionItemData uri pos { isIncomplete := false, items := allAvailableImportNameCompletions }
-  else if isImportCmdCompletionRequest headerStx completionPos then
+  else bif isImportCmdCompletionRequest headerStx completionPos then
     let allAvailableFullImportCompletions := availableImports.toArray.map ({ label := s!"import {·}" })
     addCompletionItemData uri pos { isIncomplete := false, items := allAvailableFullImportCompletions }
   else

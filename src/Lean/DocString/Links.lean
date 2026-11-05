@@ -38,11 +38,11 @@ builtin_initialize manualRoot : String ←
       pure root
     else
       let root := getManualRoot ()
-      if root.isEmpty then
+      bif root.isEmpty then
         pure fallbackManualRoot
       else
         pure root
-  return if r.endsWith "/" then r else r ++ "/"
+  return bif r.endsWith "/" then r else r ++ "/"
 
 /--
 The manual domain for error explanations.
@@ -80,7 +80,7 @@ private def rw (path : String) : Except String String := do
   | kind :: args =>
     if let some domain := domainMap.get? kind then
       if let [s] := args then
-        if s.isEmpty then
+        bif s.isEmpty then
           throw s!"Empty {kind} ID"
         return s!"find/?domain={domain}&name={s}"
       else
@@ -125,7 +125,7 @@ def rewriteManualLinksCore (s : String) : Id (Array (Lean.Syntax.Range × String
         let c' := iter'.get h'
         let pre' := iter'
         iter' := iter'.next h'
-        if urlChar c' && ¬iter'.IsAtEnd then
+        bif urlChar c' && iter' ≠ᵇ s.endPos then
           continue
         match rw (s.extract start pre') with
         | .error err =>
@@ -162,7 +162,7 @@ This assumes that all such links have already been validated by `validateDocComm
 -/
 def rewriteManualLinks (docString : String) : BaseIO String := do
   let (errs, str) ← rewriteManualLinksCore docString
-  if !errs.isEmpty then
+  bif !errs.isEmpty then
     let errReport :=
       r#"**❌ Syntax Errors in Lean Language Reference Links**
 
@@ -185,7 +185,7 @@ This is intended to be used before saving a docstring that is later subject to r
 -/
 def validateBuiltinDocString (docString : String) : IO Unit := do
   let (errs, _) ← rewriteManualLinksCore docString
-  if !errs.isEmpty then
+  bif !errs.isEmpty then
     throw <| IO.userError <|
       s!"Errors in builtin documentation comment:\n" ++
       String.join (errs.toList.map fun (⟨s, e⟩, msg) => s!" * {repr <| String.Pos.Raw.extract docString s e}:\n    {msg}\n")

@@ -113,7 +113,7 @@ on the same line as the declaration. It is used for declarations nested inside o
 such as inductive constructors, structure projections, and `let rec` / `where` definitions. -/
 def declModifiers (inline : Bool) := leading_parser
   optional docComment >>
-  optional (Term.«attributes» >> if inline then skip else ppDedent ppLine) >>
+  optional (Term.«attributes» >> bif inline then skip else ppDedent ppLine) >>
   optional visibility >>
   optional «protected» >>
   optional («meta» <|> «noncomputable») >>

@@ -31,29 +31,29 @@ builtin_initialize eligibleHeaderDeclsMutex : Std.Mutex (Option EligibleHeaderDe
 def getCompletionKindForDecl (constInfo : ConstantInfo)
     : MetaM Lsp.CompletionItemKind := do
   let env ← getEnv
-  if constInfo.isCtor then
+  bif constInfo.isCtor then
     return .constructor
-  else if constInfo.isInductive then
-    if isClass env constInfo.name then
+  else bif constInfo.isInductive then
+    bif isClass env constInfo.name then
       return .class
-    else if (← isEnumType constInfo.name) then
+    else bif (← isEnumType constInfo.name) then
       return .enum
     else
       return .struct
-  else if wasOriginallyTheorem env constInfo.name then
+  else bif wasOriginallyTheorem env constInfo.name then
     return .event
-  else if (← isProjectionFn constInfo.name) then
+  else bif (← isProjectionFn constInfo.name) then
     return .field
   else
     let isFunction : Bool ← withTheReader Core.Context ({ · with maxHeartbeats := 0 }) do
       return (← whnf constInfo.type).isForall
-    if isFunction then
+    bif isFunction then
       return .function
     else
       return .constant
 
 def getCompletionTagsForDecl (declName : Name) : MetaM (Array Lsp.CompletionItemTag) := do
-  if Linter.isDeprecated (← getEnv) declName then
+  bif Linter.isDeprecated (← getEnv) declName then
     return #[.deprecated]
   else
     return #[]
@@ -71,7 +71,7 @@ def getEligibleHeaderDecls (env : Environment) : MetaM EligibleHeaderDecls := do
       let mut eligibleHeaderDecls : EligibleHeaderDecls := {}
       -- map₁ are the header decls
       for (declName, c) in env.constants.map₁ do
-        if allowCompletion env declName then
+        bif allowCompletion env declName then
           let kind ← getCompletionKindForDecl c
           let tags ← getCompletionTagsForDecl declName
           eligibleHeaderDecls := eligibleHeaderDecls.insert declName {
@@ -89,7 +89,7 @@ def forEligibleDeclsM [Monad m] [MonadEnv m] [MonadLiftT MetaM m]
   (← getEligibleHeaderDecls env).forM f
   -- map₂ are exactly the local decls
   env.constants.map₂.forM fun name c => do
-    if allowCompletion env name then
+    bif allowCompletion env name then
       f name {
         info := c
         -- Lazily compute the kind and the tags when needed.

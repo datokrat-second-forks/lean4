@@ -78,7 +78,8 @@ termination_by (sizeOf node, 0)
 where
   /-- Counts the total entries in an entries array starting at index `i`. -/
   measureEntries (es : Array (Entry α β (Node α β))) (i : Nat) : Nat :=
-    if h : i < es.size then
+    bif h : i <ᵇ es.size then
+      have h := lt_of_decideLT_eq_true h
       (match h_eq : es[i] with
        | .null => 1
        | .entry _ _ => 1

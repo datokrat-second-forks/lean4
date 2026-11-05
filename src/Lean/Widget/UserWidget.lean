@@ -61,7 +61,7 @@ builtin_initialize widgetModuleAttrImpl : AttributeImpl ←
   let mkAttr (builtin : Bool) (name : Name) := do
     let impl := {
       name
-      descr           := (if builtin then "(builtin) " else "") ++
+      descr           := (bif builtin then "(builtin) " else "") ++
         "Registers a widget module. Its type must implement Lean.Widget.ToModule."
       applicationTime := .afterCompilation
       add             := fun decl stx kind => Prod.fst <$> MetaM.run do
@@ -77,7 +77,7 @@ builtin_initialize widgetModuleAttrImpl : AttributeImpl ←
         if let some (n, _) := moduleRegistry.getState env |>.get? mod.javascriptHash then
           logWarning m!"A widget module with the same hash (JS source code) was already registered at {.ofConstName n true}."
         let env ← getEnv
-        if builtin then
+        bif builtin then
           let h := mkConst decl
           declareBuiltin decl <| mkApp2 (mkConst ``addBuiltinModule) (toExpr decl) h
         else

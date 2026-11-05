@@ -52,14 +52,14 @@ private def isLogEnabledFor (opts : Options) (optName : Name) : Bool :=
   | _     => opts.getBool tracePrefixOptionName
 
 private def logDeclsAux (optName : Name) (cls : Name) (decls : Array Decl) : CompilerM Unit := do
-  if isLogEnabledFor (← getOptions) optName then
+  bif isLogEnabledFor (← getOptions) optName then
     log (LogEntry.step cls decls)
 
 @[inline] def logDecls (cls : Name) (decl : Array Decl) : CompilerM Unit :=
   logDeclsAux (tracePrefixOptionName ++ cls) cls decl
 
 private def logMessageIfAux {α : Type} [ToFormat α] (optName : Name) (a : α) : CompilerM Unit := do
-  if isLogEnabledFor (← getOptions) optName then
+  bif isLogEnabledFor (← getOptions) optName then
     log (LogEntry.message (format a))
 
 @[inline] def logMessageIf {α : Type} [ToFormat α] (cls : Name) (a : α) : CompilerM Unit :=
@@ -90,15 +90,15 @@ builtin_initialize declMapExt : SimplePersistentEnvExtension Decl DeclMap ←
       let decls := entries.foldl (init := #[]) fun decls decl => decls.push decl
       let entries := sortDecls decls
       -- Do not save all IR even in .olean.private as it will be in .ir anyway
-      .uniform <| if env.header.isModule then
+      .uniform <| bif env.header.isModule then
         entries.filterMap fun d => do
-          if isDeclMeta env d.name then
+          bif isDeclMeta env d.name then
             return d
           guard <| Compiler.LCNF.isDeclPublic env d.name
           -- TODO: boxed `[extern]`s are created eagerly by lean but we need to see their IR in
           -- leanir. It would be nicer to make them part of standard `compileDecls` so they can be
           -- postponed like anyone else.
-          if Compiler.LCNF.isBoxedName d.name && isExtern env d.name.getPrefix then
+          bif Compiler.LCNF.isBoxedName d.name && isExtern env d.name.getPrefix then
             return d
           -- Bodies of imported IR decls are not relevant for codegen, only interpretation
           match d with
@@ -209,7 +209,7 @@ def findDecl' (n : Name) (decls : Array Decl) : CompilerM (Option Decl) :=
   return findEnvDecl' (← getEnv) n decls
 
 def containsDecl' (n : Name) (decls : Array Decl) : CompilerM Bool := do
-  if decls.any fun decl => decl.name == n then
+  bif decls.any fun decl => decl.name == n then
     return true
   else
     containsDecl n

@@ -75,7 +75,7 @@ def CancellableM.run (tk : RequestCancellationToken) (x : CancellableM α) :
 
 def CancellableT.checkCancelled [Monad m] [MonadLiftT BaseIO m] : CancellableT m Unit := do
   let tk ← read
-  if ← tk.wasCancelledByCancelRequest then
+  bif (← tk.wasCancelledByCancelRequest) then
     throw .requestCancelled
 
 def CancellableM.checkCancelled : CancellableM Unit :=

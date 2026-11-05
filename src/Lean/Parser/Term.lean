@@ -31,12 +31,12 @@ def docCommentOpen (sym : String) : Parser where
   fn c s :=
     let startPos := s.pos
     let s := symbolFn sym c s
-    if s.hasError then s
+    bif s.hasError then s
     else
       match s.stxStack.back with
       | .atom (.original _ _ trailing _) _ =>
         -- The token's trailing whitespace only needs to be cut when a comment follows the delimiter.
-        if trailing.all (·.isWhitespace) then s
+        bif trailing.all (·.isWhitespace) then s
         else
           -- The whitespace here is a prefix of what the token's own scan accepted, so a tab or an
           -- isolated carriage return has already been reported.
@@ -73,17 +73,17 @@ open Lean.Parser in
 def versoCommentBodyFn : ParserFn := fun c s =>
   -- The opening `/--` or `/-!` is the token on the stack, and its trailing whitespace reaches the
   -- content where this parser starts.
-  let openPos? := if s.stxStack.isEmpty then none else s.stxStack.back.getPos?
+  let openPos? := bif s.stxStack.isEmpty then none else s.stxStack.back.getPos?
   match openPos? with
   | none => s.mkError "internal error: expected the documentation comment's opening delimiter"
   | some openPos =>
     let startPos := s.pos
     let s := finishCommentBlock (pushMissingOnError := true) 1 c s
-    if !s.hasError then
+    bif !s.hasError then
       let iniSz := s.stackSize
       let commentEndPos := s.pos
       let endPos := c.prev (c.prev commentEndPos)
-      let endPos := if endPos ≤ c.inputString.rawEndPos then endPos else c.inputString.rawEndPos
+      let endPos := bif endPos ≤ᵇ c.inputString.rawEndPos then endPos else c.inputString.rawEndPos
       let c' := c.setEndPos endPos (by unfold endPos; split <;> simp [*])
       let blockCtxt := Doc.Parser.BlockCtxt.forDocString c.fileMap openPos startPos endPos
       -- The docstring parses with no recovered errors. This makes it easy to know that the recovered
@@ -91,7 +91,7 @@ def versoCommentBodyFn : ParserFn := fun c s =>
       let iniErrs := s.recoveredErrors
       let s := Doc.Parser.documentFn blockCtxt c' ({ s with recoveredErrors := #[] }.setPos startPos)
       let s :=
-        if s.errorMsg.isSome || !s.recoveredErrors.isEmpty || !c'.atEnd s.pos then
+        bif s.errorMsg.isSome || !s.recoveredErrors.isEmpty || !c'.atEnd s.pos then
           -- Docstring parsing must always succeed, or else later error messages are atrocious! Syntax
           -- errors in the docs should not cause verso-docstring-expecting commands to be removed from
           -- consideration. So, at this stage, we push an indication of the failure, and then later,
@@ -133,10 +133,10 @@ def versoCommentBody.formatter : PrettyPrinter.Formatter := do
     let markup ← getCur
     -- Markup that did not parse is kept as the text that was written.
     let text :=
-      if markup.isOfKind Doc.parseFailureKind then markup[0].getAtomVal
+      bif markup.isOfKind Doc.parseFailureKind then markup[0].getAtomVal
       else Doc.Parser.versoDocumentToString (⟨markup⟩ : Doc.VersoDocument)
     let text := text.trimAsciiEnd.copy
-    if text.contains '\n' then
+    bif text.contains '\n' then
       -- Content that spans lines puts each delimiter on a line of its own. The pretty printer
       -- does the right thing with indentation and text nodes that contain newlines.
       pushWhitespace "\n"
@@ -159,7 +159,7 @@ closing delimiter, and the closing delimiter is an atom of its own.
 def commentBodyFn : ParserFn := fun c s =>
   let startPos := s.pos
   let s := finishCommentBlock (pushMissingOnError := true) 1 c s
-  if s.hasError then s
+  bif s.hasError then s
   else
     let closerPos := c.prev (c.prev s.pos)
     let textEnd := Id.run do
@@ -167,7 +167,7 @@ def commentBodyFn : ParserFn := fun c s =>
       while pos > startPos do
         let prev := c.prev pos
         let ch := c.get prev
-        if ch == ' ' || ch == '\n' then pos := prev else break
+        bif ch == ' ' || ch == '\n' then pos := prev else break
       return pos
     let info := SourceInfo.original (c.mkEmptySubstringAt startPos) startPos
       (c.substring textEnd closerPos) textEnd
@@ -580,7 +580,7 @@ def letIdDecl   := leading_parser (withAnonymousAntiquot := false)
 /- Remark: `requireParens` forces the pattern to have parentheses, for trying before `letIdDecl`.
    We need this because for `let (rfl) := h`, which would parse as `letIdDecl` due to `hygieneInfo`. -/
 def letPatDecl (requireParens := false) := leading_parser (withAnonymousAntiquot := false)
-  atomic (ppSpace >> (if requireParens then lookahead "(" >> paren else termParser) >> pushNone >> optType >> " := ") >> termParser
+  atomic (ppSpace >> (bif requireParens then lookahead "(" >> paren else termParser) >> pushNone >> optType >> " := ") >> termParser
 /-
   Remark: the following `(" := " <|> matchAlts)` is a hack we use
   to produce a better error message at `letDecl`.

@@ -16,7 +16,7 @@ abbrev M := StateT IndexSet Id
 
 def checkId (id : Index) : M Bool :=
   modifyGet fun s =>
-    if s.contains id then (false, s)
+    bif s.contains id then (false, s)
     else (true, s.insert id)
 
 def checkParams (ps : Array Param) : M Bool :=
@@ -26,7 +26,7 @@ partial def checkFnBody : FnBody → M Bool
   | .vdecl x _ _ b    => checkId x.idx <&&> checkFnBody b
   | .jdecl j ys _ b   => checkId j.idx <&&> checkParams ys <&&> checkFnBody b
   | .case _ _ _ alts  => alts.allM fun alt => checkFnBody alt.body
-  | b                 => if b.isTerminal then pure true else checkFnBody b.body
+  | b                 => bif b.isTerminal then pure true else checkFnBody b.body
 
 partial def checkDecl : Decl → M Bool
   | .fdecl (xs := xs) (body := b) .. => checkParams xs <&&> checkFnBody b
@@ -174,6 +174,6 @@ end MapVars
 
 /-- Replace `x` with `y` in `b`. This function assumes `b` does not shadow `x` -/
 def FnBody.replaceVar (x y : VarId) (b : FnBody) : FnBody :=
-  b.mapVars fun z => if x == z then y else z
+  b.mapVars fun z => bif x == z then y else z
 
 end Lean.IR

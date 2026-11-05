@@ -221,12 +221,12 @@ def sepByIndent.formatter (p : Formatter) (_sep : String) (pSep : Formatter) : F
     i % 2 == 1 && n.matchesNull 0 && i != stx.getArgs.size - 1) |>.any id
   visitArgs do
     for i in (List.range stx.getArgs.size).reverse do
-      if i % 2 == 0 then p else pSep <|>
+      bif i % 2 == 0 then p else pSep <|>
         -- If the final separator is a newline, skip it.
-        ((if i == stx.getArgs.size - 1 then pure () else pushWhitespace "\n") *> goLeft)
+        ((bif i == stx.getArgs.size - 1 then pure () else pushWhitespace "\n") *> goLeft)
   -- If there is any newline separator, then we add an `align` at the start
   -- so that `withPosition` will pick up the right column.
-  if hasNewlineSep then
+  bif hasNewlineSep then
     pushAlign (force := true)
 
 @[combinator_formatter sepBy1Indent, expose] def sepBy1Indent.formatter := sepByIndent.formatter
@@ -308,7 +308,7 @@ open PrettyPrinter Parser
   unless (← get).isUngrouped do
     modify fun st => { st with stack := st.stack.modify (st.stack.size - 1) (·.nest (0 - indent)) }
 @[combinator_formatter ppHardLineUnlessUngrouped, expose] def ppHardLineUnlessUngrouped.formatter : Formatter := do
-  if (← get).isUngrouped then
+  bif (← get).isUngrouped then
     Formatter.pushLine
   else
     ppLine.formatter

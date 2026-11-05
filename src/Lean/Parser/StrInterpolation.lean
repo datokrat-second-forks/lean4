@@ -18,25 +18,25 @@ partial def interpolatedStrFn (p : ParserFn) : ParserFn := fun c s =>
   let stackSize := s.stackSize
   let rec parse (startPos : String.Pos.Raw) (c : ParserContext) (s : ParserState) : ParserState :=
     let i := s.pos
-    if c.atEnd i then
+    bif c.atEnd i then
       let s := s.mkError "unterminated string literal"
       s.mkNode interpolatedStrKind stackSize
     else
       let curr := c.get i
       let s    := s.setPos (c.next i)
-      if curr == '\"' then
+      bif curr == '\"' then
         let s := mkNodeToken interpolatedStrLitKind startPos true c s
         s.mkNode interpolatedStrKind stackSize
-      else if curr == '\\' then
+      else bif curr == '\\' then
         andthenFn (quotedCharCoreFn isQuotableCharForStrInterpolant true) (parse startPos) c s
-      else if curr == '{' then
+      else bif curr == '{' then
         let s := mkNodeToken interpolatedStrLitKind startPos true c s
         let s := p c s
-        if s.hasError then s
+        bif s.hasError then s
         else
           let i := s.pos
           let curr := c.get i
-          if curr == '}' then
+          bif curr == '}' then
             let s := s.setPos (c.next i)
             parse i c s
           else
@@ -45,11 +45,11 @@ partial def interpolatedStrFn (p : ParserFn) : ParserFn := fun c s =>
       else
         parse startPos c s
   let startPos := s.pos
-  if c.atEnd startPos then
+  bif c.atEnd startPos then
     s.mkEOIError
   else
     let curr  := c.get s.pos;
-    if curr != '\"' then
+    bif curr != '\"' then
       s.mkError "interpolated string"
     else
       let s := s.next c startPos

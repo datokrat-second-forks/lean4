@@ -63,17 +63,17 @@ def isInstanceProjection (e : Expr) : MetaM Bool := do
 
 /-- Checks whether `ti1` is an instance projection info that subsumes `ti2`. -/
 def isInstanceProjectionInfoFor (kind : GoToKind) (ti1 ti2 : TermInfo) : MetaM Bool := do
-  if kind == .type then
+  bif kind == .type then
     return false
   let some startPos1 := ti1.stx.getPos? (canonicalOnly := true)
     | return false
   let some startPos2 := ti2.stx.getPos? (canonicalOnly := true)
     | return false
-  if startPos1 != startPos2 then
+  bif startPos1 != startPos2 then
     return false
   let e1 ← instantiateMVars ti1.expr
   let e2 ← instantiateMVars ti2.expr
-  if ! (← isInstanceProjection e1) || (← isInstanceProjection e2) then
+  bif ! (← isInstanceProjection e1) || (← isInstanceProjection e2) then
     return false
   return e1.getAppFn' == e2.getAppFn'
 
@@ -93,7 +93,7 @@ def GoToM.run (ctx : GoToContext) (ci : ContextInfo) (lctx : LocalContext) (act 
 def locationLinksFromDecl (declName : Name) : GoToM (Array LeanLocationLink) := do
   let ctx ← read
   -- Potentially this name is a builtin that has not been imported yet:
-  if ! (← getEnv).contains declName then
+  bif ! (← getEnv).contains declName then
     return #[]
   let some (declModName, declModUri) ← declMod?
     | return #[]
@@ -190,14 +190,14 @@ where
     let some ei := originInfo.toElabInfo?
       | return #[]
     let e := ei.elaborator
-    if e == `Delab then
+    bif e == `Delab then
       return #[]
-    if e == `Lean.Elab.Term.elabApp || e == `Lean.Elab.Term.elabIdent then
+    bif e == `Lean.Elab.Term.elabApp || e == `Lean.Elab.Term.elabIdent then
       return #[]
     let mut names := #[]
-    if env.contains e then
+    bif env.contains e then
       names := names.push e
-    if ctx.kind == .declaration && env.contains ei.stx.getKind then
+    bif ctx.kind == .declaration && env.contains ei.stx.getKind then
       names := names.push ei.stx.getKind
     return names
 
@@ -239,7 +239,7 @@ where
   extractInstances (e : Expr) : GoToM (Array Name) := do
     match e with
     | .const declName _ =>
-      if ! (← Lean.Meta.isInstance declName) then
+      bif ! (← Lean.Meta.isInstance declName) then
         return #[]
       return #[declName]
     | .app fn arg =>
@@ -291,7 +291,7 @@ def locationLinksFromDelabTermInfo (dti : DelabTermInfo) : GoToM (Array LeanLoca
 
 def locationLinksFromFieldInfo (fi : FieldInfo) : GoToM (Array LeanLocationLink) := do
   let ctx ← read
-  if ctx.kind != .type then
+  bif ctx.kind != .type then
     return ← locationLinksFromDecl fi.projName
   let expr ← instantiateMVars (← Meta.inferType fi.val)
   let some n := expr.getAppFn.constName?
@@ -303,7 +303,7 @@ def locationLinksFromOptionInfo (i : OptionInfo) : GoToM (Array LeanLocationLink
 
 def locationLinksFromCommandInfo (i : CommandInfo) : GoToM (Array LeanLocationLink) := do
   let ctx ← read
-  if ! (i matches ⟨`import, _⟩) || ctx.kind == .type then
+  bif ! (i matches ⟨`import, _⟩) || ctx.kind == .type then
     return #[]
   locationLinksFromImport i
 
@@ -335,7 +335,7 @@ def locationLinksOfInfo (doc : DocumentMeta) (kind : GoToKind) (ictx : InfoWithC
         locationLinksFromDecl dei.name
       | _ =>
         pure #[]
-    if kind == .declaration || ll.isEmpty then
+    bif kind == .declaration || ll.isEmpty then
       return ll ++ (← locationLinksDefault)
     return ll
 

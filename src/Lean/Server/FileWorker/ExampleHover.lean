@@ -32,8 +32,9 @@ private def addCommentAt (indent : Nat) (line : String) : String := Id.run do
   let s := "".pushn ' ' indent ++ "-- "
   let mut iter := line.startPos
   for _i in *...indent do
-    if h : ¬iter.IsAtEnd then
-      if iter.get h == ' ' then
+    bif h : iter ≠ᵇ line.endPos then
+      have h := ne_of_decideNe_eq_true h
+      bif iter.get h == ' ' then
         iter := iter.next h
       else
         -- Non-whitespace found *before* the indentation level. This output should be indented
@@ -43,7 +44,7 @@ private def addCommentAt (indent : Nat) (line : String) : String := Id.run do
       -- The line was entirely ' ', and was shorter than the indentation level. No `--` added.
       return line
   let remaining := line.sliceFrom iter
-  if remaining.all (· == ' ') then
+  bif remaining.all (· == ' ') then
     return line
   else
     return s ++ remaining
@@ -58,11 +59,11 @@ private def lines (s : String) : Array String := Id.run do
   while h : ¬iter.IsAtEnd do
     let c := iter.get h
     iter := iter.next h
-    if c == '\n' then
+    bif c == '\n' then
       result := result.push <| s.extract lineStart iter
       lineStart := iter
 
-  if iter != lineStart then
+  bif iter != lineStart then
     result := result.push <| s.extract lineStart iter
   return result
 
@@ -91,25 +92,25 @@ def rewriteExamples (docstring : String) : String := Id.run do
     let indent := l.takeWhile (· == ' ') |>.utf8ByteSize -- this makes sense because we know the slice consists only of spaces
     let mut l' := l.trimAsciiStart
     -- Is this a code block fence?
-    if l'.startsWith "```" then
+    bif l'.startsWith "```" then
       let count := l'.takeWhile (· == '`') |>.utf8ByteSize -- this makes sense because we know the slice consists only of ticks
       l' := l'.dropWhile (· == '`')
       l' := l'.dropWhile (· == ' ')
       match inOutput with
       | .normal =>
-        if l'.startsWith "output" then
+        bif l'.startsWith "output" then
           inOutput := .output indent count
         else
           inOutput := .nonOutput count
         result := result ++ l
       | .output i c =>
-        if c == count then
+        bif c == count then
           inOutput := .normal
           result := result ++ l
         else
           result := result ++ addCommentAt i l
       | .nonOutput c =>
-        if c == count then
+        bif c == count then
           inOutput := .normal
         result := result ++ l
     else -- Current line is not a fence ("```")

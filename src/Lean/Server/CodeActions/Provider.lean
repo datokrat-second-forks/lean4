@@ -103,7 +103,7 @@ where
   results are found, and `some none` (none yet) if no results are found. -/
   go (stack : Syntax.Stack) (stx : Syntax) (prev? : Option String.Pos.Raw := none) :
       Option (Option FindTacticResult) := do
-    if stx.getKind == ``Parser.Tactic.tacticSeq then
+    bif stx.getKind == ``Parser.Tactic.tacticSeq then
       -- TODO: this implementation is a bit too strict about the beginning of tacticSeqs.
       -- We would like to be able to parse
       -- · |
@@ -112,13 +112,13 @@ where
       -- at index 0, but we currently use the start of the tacticSeq, which is the foo token,
       -- as the earliest possible location that will be associated to the sequence.
       let bracket := stx[0].getKind == ``Parser.Tactic.tacticSeqBracketed
-      let argIdx := if bracket then 1 else 0
+      let argIdx := bif bracket then 1 else 0
       let (stack, stx) := ((stx[0], argIdx) :: (stx, 0) :: stack, stx[0][argIdx])
       let mainRes := stx[0].getPos?.map fun pos =>
         let i := Id.run do
           for i in *...stx.getNumArgs do
             if let some pos' := stx[2*i].getPos? then
-              if range.stop < pos' then
+              bif range.stop <ᵇ pos' then
                 return i
           (stx.getNumArgs + 1) / 2
         .tacticSeq (bracket || preferred pos) i ((stx, 0) :: stack)
@@ -127,9 +127,9 @@ where
         if let some inner := visit stx[i] then
           let stack := (stx, i) :: stack
           if let some child := (← go stack stx[i]) <|>
-            (if inner then some (.tactic ((stx[i], 0) :: stack)) else none)
+            (bif inner then some (.tactic ((stx[i], 0) :: stack)) else none)
           then
-            if childRes.isSome then failure
+            bif childRes.isSome then failure
             childRes := merge mainRes child
       return childRes <|> mainRes
     else
@@ -138,7 +138,7 @@ where
       for i in *...stx.getNumArgs do
         if let some _ := visit stx[i] prev? then
           if let some child ← go ((stx, i) :: stack) stx[i] prev? then
-            if childRes.isSome then failure
+            bif childRes.isSome then failure
             childRes := child
         prev? := stx[i].getTailPos? true <|> prev?
       return childRes
@@ -159,7 +159,7 @@ partial def findInfoTree? (kind : SyntaxNodeKind) (tgtRange : Lean.Syntax.Range)
       if let some range := i.stx.getRange? canonicalOnly then
         -- FIXME: info tree needs to be organized better so that this works
         -- guard <| range.includes tgtRange
-        if i.stx.getKind == kind && range == tgtRange && f ctx i then
+        bif i.stx.getKind == kind && range == tgtRange && f ctx i then
           return (ctx, node)
     for t in ts do
       if let some res := findInfoTree? kind tgtRange (i.updateContext? ctx?) t f canonicalOnly then

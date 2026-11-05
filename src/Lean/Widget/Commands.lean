@@ -78,7 +78,7 @@ open Command in
         else
           let name ← mkFreshUserName (wi.id ++ `_instance)
           let wiExpr ← instantiateMVars wiExpr
-          if wiExpr.hasMVar then
+          bif wiExpr.hasMVar then
             throwError "failed to compile expression, it contains metavariables{indentExpr wiExpr}"
           addAndCompile <| Declaration.defnDecl {
             name

@@ -34,7 +34,7 @@ private def isValidMacroInline (declName : Name) : CoreM Bool := do
   unless info.all.length = 1 do
     -- We do not allow `[macro_inline]` attributes at mutual recursive definitions
     return false
-  if (← Meta.isRecursiveDefinition declName) then
+  bif (← Meta.isRecursiveDefinition declName) then
     -- It is recursive
     return false
   return true
@@ -68,8 +68,8 @@ builtin_initialize inlineAttrs : EnumAttributes InlineAttributeKind ←
      (`macro_inline, "mark definition to always be inlined before ANF conversion", .macroInline),
      (`always_inline, "mark definition to be always inlined", .alwaysInline)]
     fun declName kind => do
-      if kind matches .macroInline then
-        if !(checkIsDefinition (← getEnv) declName |>.isOk) then
+      bif kind matches .macroInline then
+        bif !(checkIsDefinition (← getEnv) declName |>.isOk) then
           throwError "invalid `[macro_inline]` attribute, `{.ofConstName declName}` must be an exposed definition"
         unless (← isValidMacroInline declName) do
           throwError "Cannot add `[macro_inline]` attribute to `{.ofConstName declName}`: This attribute does not support this kind of declaration; only non-recursive definitions are supported"

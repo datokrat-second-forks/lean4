@@ -179,7 +179,7 @@ def binderIdent : Parser  := ident <|> hole
 
 @[run_builtin_parser_attribute_hooks]
 def binderType (requireType := false) : Parser :=
-  if requireType then node nullKind (" : " >> termParser) else optional (" : " >> termParser)
+  bif requireType then node nullKind (" : " >> termParser) else optional (" : " >> termParser)
 @[run_builtin_parser_attribute_hooks]
 def binderTactic  := leading_parser
   atomic (symbol " := " >> " by ") >> Tactic.tacticSeq

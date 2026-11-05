@@ -107,7 +107,7 @@ def handleHover (p : HoverParams)
         let info := result.info
         if let some range := info.range? then
           -- prefer info tree if at least as specific as parser docstring
-          if stxDoc?.all fun (_, stxRange) => stxRange.includes range then
+          bif stxDoc?.all fun (_, stxRange) => stxRange.includes range then
             if let some hoverFmt ← info.fmtHover? ctx then
               return mkHover (toString hoverFmt.fmt) range
 
@@ -156,7 +156,7 @@ def findGoalsAt? (doc : EditableDocument) (hoverPos : String.Pos.Raw) : ServerTa
         -- When there is no trailing whitespace, we also consider snapshots directly before the
         -- cursor.
         let hasNoTrailingWhitespace := tailPos == trailingPos
-        if ! text.rangeContainsHoverPos snapRange hoverPos (includeStop := hasNoTrailingWhitespace) then
+        bif ! text.rangeContainsHoverPos snapRange hoverPos (includeStop := hasNoTrailingWhitespace) then
           return .pure (oldGoals, .proceed (foldChildren := false))
 
         return snap.task.map (sync := true) fun tree => Id.run do
@@ -169,7 +169,7 @@ def findGoalsAt? (doc : EditableDocument) (hoverPos : String.Pos.Raw) : ServerTa
             text.rangeContainsHoverPos optimalSnapRange hoverPos
                 (includeStop := hasNoTrailingWhitespace)
               || goals.any fun goal => ! goal.indented
-          if isOptimalGoalSet then
+          bif isOptimalGoalSet then
             return (goals, .done)
 
           return (goals, .proceed (foldChildren := true))
@@ -193,10 +193,10 @@ def getInteractiveGoals (p : Lsp.PlainGoalParams) : RequestM (RequestTask (Optio
   mapTaskCostly (findGoalsAt? doc hoverPos) <| Option.mapM fun rs => do
     let goals : List Widget.InteractiveGoals ← rs.mapM fun { ctxInfo := ci, tacticInfo := ti, useAfter := useAfter, .. } => do
       let ciAfter := { ci with mctx := ti.mctxAfter }
-      let ci := if useAfter then ciAfter else { ci with mctx := ti.mctxBefore }
+      let ci := bif useAfter then ciAfter else { ci with mctx := ti.mctxBefore }
       -- compute the interactive goals
       let goals ← ci.runMetaM {} (do
-        let goals := List.toArray <| if useAfter then ti.goalsAfter else ti.goalsBefore
+        let goals := List.toArray <| bif useAfter then ti.goalsAfter else ti.goalsBefore
         let goals ← goals.mapM Widget.goalToInteractive
         return ⟨goals⟩
       )
@@ -215,7 +215,7 @@ def handlePlainGoal (p : PlainGoalParams)
     : RequestM (RequestTask (Option PlainGoal)) := do
   let t ← getInteractiveGoals p
   return t.mapCheap <| Except.map <| Option.map <| fun {goals, ..} =>
-    if goals.isEmpty then
+    bif goals.isEmpty then
       { goals := #[], rendered := "no goals" }
     else
       let goalStrs := goals.map (toString ·.pretty)
@@ -236,7 +236,7 @@ def getInteractiveTermGoal (p : Lsp.PlainTermGoalParams)
     let ty ← ci.runMetaM i.lctx do
       instantiateMVars <| ti.expectedType?.getD (← Meta.inferType ti.expr)
     -- for binders, hide the last hypothesis (the binder itself)
-    let lctx' := if ti.isBinder then i.lctx.pop else i.lctx
+    let lctx' := bif ti.isBinder then i.lctx.pop else i.lctx
     let goal ← ci.runMetaM lctx' do
       Widget.goalToInteractive (← Meta.mkFreshExprMVar ty).mvarId!
     let range := if let some r := i.range? then r.toLspRange text else ⟨p.position, p.position⟩
@@ -259,7 +259,7 @@ partial def handleDocumentHighlight (p : DocumentHighlightParams)
   let rec highlightReturn? (doRange? : Option Range) : Syntax → Option DocumentHighlight
     | `(doElem|return%$i $e) => Id.run do
       if let some range := i.getRange? then
-        if range.contains pos then
+        bif range.contains pos then
           return some { range := doRange?.getD (range.toLspRange text), kind? := DocumentHighlightKind.text }
       highlightReturn? doRange? e
     | `(do%$i $elems) => highlightReturn? (i.getRange?.get!.toLspRange text) elems
@@ -274,7 +274,7 @@ partial def handleDocumentHighlight (p : DocumentHighlightParams)
         if let some loc := info.definition? then
           ranges := ranges.push loc.range
         ranges := ranges.append <| info.usages.map (·.range)
-    if ranges.isEmpty then
+    bif ranges.isEmpty then
       return none
     return some <| ranges.map ({ range := ·, kind? := DocumentHighlightKind.text })
 
@@ -305,7 +305,7 @@ def NamespaceEntry.finish (text : FileMap) (syms : Array DocumentSymbol) (endStx
     let name := name.foldr (fun x y => y ++ x) Name.anonymous
     prevSiblings.push <| DocumentSymbol.mk {
       -- anonymous sections are represented by `«»` name components
-      name := if name == `«» then "<section>" else name.toString
+      name := bif name == `«» then "<section>" else name.toString
       kind := .namespace
       range := range.toLspRange text
       selectionRange := selection.getRange?.getD range |>.toLspRange text
@@ -340,10 +340,10 @@ where
         let rec popStack n syms
           | [] => toDocumentSymbols text stxs syms []
           | entry :: stack =>
-            if entry.name.length == n then
+            bif entry.name.length == n then
               let syms := entry.finish text syms stx
               toDocumentSymbols text stxs syms stack
-            else if entry.name.length > n then
+            else bif entry.name.length >ᵇ n then
               let syms := { entry with name := entry.name.take n, prevSiblings := #[] }.finish text syms stx
               toDocumentSymbols text stxs syms ({ entry with name := entry.name.drop n } :: stack)
             else
@@ -438,10 +438,10 @@ partial def handleFoldingRange (_ : FoldingRangeParams)
       | `(end $[$id $[.$_]?]?) => do
         let rec popRanges n sections := do
           if let (size, start)::rest := sections then
-            if size == n then
+            bif size == n then
               addRange text FoldingRangeKind.region start stx.getTailPos?
               addRanges text rest stxs
-            else if size > n then
+            else bif size >ᵇ n then
               -- we don't add a range here because vscode doesn't like
               -- multiple folding regions with the same start line
               addRanges text ((size - n, start)::rest) stxs
@@ -456,7 +456,7 @@ partial def handleFoldingRange (_ : FoldingRangeParams)
         addRanges text [] body.raw.toList
         addRanges text sections stxs
       | _ => do
-        if isImport stx then
+        bif isImport stx then
           let (imports, stxs) := stxs.span isImport
           let last := imports.getLastD stx
           addRange text FoldingRangeKind.imports stx.getPos? last.getTailPos?
@@ -498,7 +498,7 @@ partial def handleFoldingRange (_ : FoldingRangeParams)
       if let (some startP, some endP) := (start?, stop?) then
         let startP := text.utf8PosToLspPos startP
         let endP := text.utf8PosToLspPos endP
-        if startP.line != endP.line then
+        bif startP.line != endP.line then
           modify fun st => st.push
             { startLine := startP.line
               endLine := endP.line
@@ -517,7 +517,7 @@ partial def handleWaitForDiagnostics (p : WaitForDiagnosticsParams)
     : RequestM (RequestTask WaitForDiagnostics) := do
   let rec waitLoop : RequestM EditableDocument := do
     let doc ← readDoc
-    if p.version ≤ doc.meta.version then
+    bif p.version ≤ᵇ doc.meta.version then
       return doc
     else
       IO.sleep 50

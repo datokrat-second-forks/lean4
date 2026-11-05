@@ -37,11 +37,11 @@ partial def atLeastAux (n : Nat) (p : ParserFn) : ParserFn := fun c s => Id.run 
   let iniSz  := s.stackSize
   let iniPos := s.pos
   let mut s  := p c s
-  if s.hasError then
-    return if iniPos == s.pos && n == 0 then s.restore iniSz iniPos else s
-  if iniPos == s.pos then
+  bif s.hasError then
+    return bif iniPos == s.pos && n == 0 then s.restore iniSz iniPos else s
+  bif iniPos == s.pos then
     return s.mkUnexpectedError "invalid 'atLeast' parser combinator application, parser did not consume anything"
-  if s.stackSize > iniSz + 1 then
+  bif s.stackSize >ᵇ iniSz + 1 then
     s := s.mkNode nullKind iniSz
   atLeastAux (n - 1) p c s
 
@@ -66,8 +66,8 @@ Describes a character for an error message. Newline and tab become “newline”
 characters are quoted.
 -/
 def describeChar (ch : Char) : String :=
-  if ch == '\n' then "newline"
-  else if ch == '\t' then "tab"
+  bif ch == '\n' then "newline"
+  else bif ch == '\t' then "tab"
   else s!"'{ch}'"
 
 /--
@@ -76,9 +76,9 @@ the unexpected character and mentions `expected` as what would have been read in
 -/
 def expectFn (p : Char → Bool) (expected : String) : ParserFn := fun c s =>
   let i := s.pos
-  if h : c.atEnd i then s.mkEOIError [expected]
-  else if p (c.get' i h) then s.next' c i h
-  else s.mkUnexpectedError s!"unexpected {describeChar (c.get' i h)}" [expected]
+  bif h : c.atEnd i then s.mkEOIError [expected]
+  else bif p (c.get' i (Bool.ne_true_of_eq_false h)) then s.next' c i (Bool.ne_true_of_eq_false h)
+  else s.mkUnexpectedError s!"unexpected {describeChar (c.get' i (Bool.ne_true_of_eq_false h))}" [expected]
 
 /--
 Reads the character `c` as a token, consuming the whitespace after it when `trailingWs` is set. If
@@ -96,7 +96,7 @@ after `p` consumed input is unchanged.
 def expectedFn (msg : String) (p : ParserFn) : ParserFn := fun c s =>
   let iniPos := s.pos
   let s := p c s
-  if s.hasError && s.pos == iniPos then
+  bif s.hasError && s.pos == iniPos then
     s.setError { expected := [msg] }
   else s
 
@@ -104,14 +104,14 @@ partial def atMostAux (n : Nat) (p : ParserFn) (msg : String) : ParserFn :=
   fun c s => Id.run do
     let iniSz  := s.stackSize
     let iniPos := s.pos
-    if n == 0 then return notFollowedByFn p msg c s
+    bif n == 0 then return notFollowedByFn p msg c s
     let mut s := p c s
-    if s.hasError then
-      return if iniPos == s.pos then s.restore iniSz iniPos else s
-    if iniPos == s.pos then
+    bif s.hasError then
+      return bif iniPos == s.pos then s.restore iniSz iniPos else s
+    bif iniPos == s.pos then
       return s.mkUnexpectedError "invalid 'atMost' parser combinator application, parser did not \
         consume anything"
-    if s.stackSize > iniSz + 1 then
+    bif s.stackSize >ᵇ iniSz + 1 then
       s := s.mkNode nullKind iniSz
     atMostAux (n - 1) p msg c s
 
@@ -135,25 +135,25 @@ partial def satisfyEscFn (p : Char → Bool)
     (errorMsg : String := "unexpected character") :
     ParserFn := fun c s =>
   let i := s.pos
-  if h : c.atEnd i then s.mkEOIError
-  else if c.get' i h == '\\' then
-    let s := s.next' c i h
+  bif h : c.atEnd i then s.mkEOIError
+  else bif c.get' i (Bool.ne_true_of_eq_false h) == '\\' then
+    let s := s.next' c i (Bool.ne_true_of_eq_false h)
     let i := s.pos
-    if h : c.atEnd i then s.mkEOIError
-    else s.next' c i h
-  else if p (c.get' i h) then s.next' c i h
+    bif h : c.atEnd i then s.mkEOIError
+    else s.next' c i (Bool.ne_true_of_eq_false h)
+  else bif p (c.get' i (Bool.ne_true_of_eq_false h)) then s.next' c i (Bool.ne_true_of_eq_false h)
   else s.mkUnexpectedError errorMsg
 
 partial def takeUntilEscFn (p : Char → Bool) : ParserFn := fun c s =>
   let i := s.pos
-  if h : c.atEnd i then s
-  else if c.get' i h == '\\' then
-    let s := s.next' c i h
+  bif h : c.atEnd i then s
+  else bif c.get' i (Bool.ne_true_of_eq_false h) == '\\' then
+    let s := s.next' c i (Bool.ne_true_of_eq_false h)
     let i := s.pos
-    if h : c.atEnd i then s.mkEOIError
-    else takeUntilEscFn p c (s.next' c i h)
-  else if p (c.get' i h) then s
-  else takeUntilEscFn p c (s.next' c i h)
+    bif h : c.atEnd i then s.mkEOIError
+    else takeUntilEscFn p c (s.next' c i (Bool.ne_true_of_eq_false h))
+  else bif p (c.get' i (Bool.ne_true_of_eq_false h)) then s
+  else takeUntilEscFn p c (s.next' c i (Bool.ne_true_of_eq_false h))
 
 /--
 Parses as `p`, but discards the result.
@@ -180,7 +180,7 @@ where
       while i > 0 do
         i := i - 1
         args ← args.modifyM i go
-        if ← get then break
+        bif (← get) then break
       return .node info k args
     | .atom (.original lead pos trail stop) val => do
       set true
@@ -207,7 +207,7 @@ def extendTrailingAbove (input : String) (base : Nat) (stopPos : String.Pos.Raw)
     let top := s.stxStack.back
     s := s.popSyntax
     let (top, ext) := extendLastTrailing input stopPos top
-    if ext then
+    bif ext then
       s := s.pushSyntax top
       extended := true
       break
@@ -229,7 +229,7 @@ the surrounding parse can reprint it.
 def wsFallback (ws : ParserFn) (base : Nat) : ParserFn := fun c s =>
   let startPos := s.pos
   let s := ws c s
-  if s.hasError || s.pos == startPos then s
+  bif s.hasError || s.pos == startPos then s
   else (extendTrailingAbove c.inputString base s.pos s).1
 
 /--
@@ -257,8 +257,8 @@ def eatIndent (col : Nat) : ParserFn := fun c s => Id.run do
   let mut s := s
   for _ in 0...col do
     let i := s.pos
-    if h : c.atEnd i then return s
-    else if c.get' i h == ' ' then s := s.next' c i h
+    bif h : c.atEnd i then return s
+    else bif c.get' i (Bool.ne_true_of_eq_false h) == ' ' then s := s.next' c i (Bool.ne_true_of_eq_false h)
     else return s
   return s
 
@@ -275,8 +275,8 @@ def codeBoundarySpacesToWs : ParserFn := fun c s =>
     let text := lines.foldl (fun acc l => acc ++ (Syntax.isLit? versoCodeLineKind l).getD "") ""
     -- The check guarantees a space at each end of the text. The line parser never produces an empty
     -- token, so those spaces are the first token's first character and the last token's last one.
-    if !versoCodeBoundarySpaces text then s
-    else if !lines.all originalLine then
+    bif !versoCodeBoundarySpaces text then s
+    else bif !lines.all originalLine then
       s.mkError "internal error: expected code lines with original source info"
     else
       -- A single line is both the first and the last line, and receives both edits in turn.
@@ -288,7 +288,7 @@ def codeBoundarySpacesToWs : ParserFn := fun c s =>
         -- follows it.
         let s := s.popSyntax
         let (s, extended) := extendTrailingAbove c.inputString (s.stxStack.size - 1) (start + ' ') s
-        if extended then s.pushSyntax (.node info ``versoCode #[.node info' `null newLines])
+        bif extended then s.pushSyntax (.node info ``versoCode #[.node info' `null newLines])
         else s.mkError "internal error: expected a token below the inline code content"
   | other => s.mkError s!"internal error: expected inline code content on stack top, got {other}"
 where
@@ -325,7 +325,7 @@ characters. Indentation past `col` is code content, and so is the indentation of
 token before it did not end.
 -/
 def codeLineTailWs (col : Nat) : ParserFn := fun c s =>
-  if afterLineEnd c s then eatIndent col c s else s
+  bif afterLineEnd c s then eatIndent col c s else s
 
 /--
 Whether the most recent token's trailing whitespace ends at the current position and contains a
@@ -351,21 +351,21 @@ def atNewLine (c : ParserContext) (s : ParserState) : Bool :=
 Runs `p` unless the most recent token consumed its line's end as trailing whitespace.
 -/
 def unlessLineEndConsumed (p : ParserFn) : ParserFn := fun c s =>
-  if consumedLineEnd s then s else p c s
+  bif consumedLineEnd s then s else p c s
 
 /--
 If the current position is a newline, consumes it and runs `blanks`. Otherwise consumes nothing.
 -/
 def optNlWs (blanks : ParserFn := skipFn) : ParserFn := fun c s =>
-  if h : c.atEnd s.pos then s
-  else if c.get' s.pos h == '\n' then blanks c (s.next' c s.pos h)
+  bif h : c.atEnd s.pos then s
+  else bif c.get' s.pos (Bool.ne_true_of_eq_false h) == '\n' then blanks c (s.next' c s.pos (Bool.ne_true_of_eq_false h))
   else s
 
 /--
 Consumes the rest of the document if it consists only of whitespace. Otherwise, does nothing.
 -/
 def docEndWs : ParserFn := fun c s =>
-  if s.pos < c.endPos &&
+  bif s.pos <ᵇ c.endPos &&
       (Substring.Raw.mk c.inputString s.pos c.endPos).all Char.isWhitespace then
     s.setPos c.endPos
   else s
@@ -378,7 +378,7 @@ def asTokenAux (trailing : ParserFn) (startPos : String.Pos.Raw) : ParserFn := f
   -- `asTokenAux` pushes the token with empty trailing whitespace and keeps the error.
   let s := trailing c s
   let trail :=
-    if s.hasError then c.mkEmptySubstringAt stopPos
+    bif s.hasError then c.mkEmptySubstringAt stopPos
     else c.substring stopPos s.pos
   s.pushSyntax <| .atom (SourceInfo.original leading startPos trail stopPos) val
 
@@ -390,7 +390,7 @@ public def asTokenFn (p : ParserFn) (trailing : ParserFn := skipFn) : ParserFn :
   let startPos := s.pos
   let iniSz := s.stxStack.size
   let s := p c s
-  if s.hasError then s
+  bif s.hasError then s
   else asTokenAux trailing startPos c (s.shrinkStack iniSz)
 
 def _root_.Lean.Parser.ParserContext.currentColumn
@@ -431,7 +431,7 @@ def withNoPosition (p : ParserFn) : ParserFn :=
 
 /-- Fails unless the current column is at least `col`. -/
 def checkIndent (col : Nat) : ParserFn := fun c s =>
-  if c.currentColumn s ≥ col then s else s.mkErrorAt s!"indentation at {col}" s.pos
+  bif c.currentColumn s ≥ᵇ col then s else s.mkErrorAt s!"indentation at {col}" s.pos
 
 /--
 Fails unless the current column is at least the saved position's, reporting `what` and that column.
@@ -442,7 +442,7 @@ def checkIndentGe (what : String) : ParserFn := fun c s =>
   | none => s
   | some savedPos =>
     let col := c.fileMap.toPosition savedPos |>.column
-    if c.currentColumn s ≥ col then s
+    bif c.currentColumn s ≥ᵇ col then s
     else s.mkError s!"{what} with indentation at least {col}"
 
 /--
@@ -454,7 +454,7 @@ def checkIndentEq (what : String) : ParserFn := fun c s =>
   | none => s
   | some savedPos =>
     let col := c.fileMap.toPosition savedPos |>.column
-    if c.currentColumn s == col then s
+    bif c.currentColumn s == col then s
     else s.mkError s!"{what} at column {col}"
 
 /-- Runs `p` with the position at which it starts. -/
@@ -479,7 +479,7 @@ def unterminatedError (c : ParserContext) (openPos openStop : String.Pos.Raw) (w
     (nameOpenerLine := false) : Error :=
   let opener := atomAt c openPos openStop
   let what :=
-    if nameOpenerLine then s!"{what} opened on line {(c.fileMap.toPosition openPos).line}"
+    bif nameOpenerLine then s!"{what} opened on line {(c.fileMap.toPosition openPos).line}"
     else what
   { unexpectedTk := opener, unexpected := s!"unterminated {what}",
     expected := [s!"'{opener.getAtomVal}'"] }
@@ -490,14 +490,14 @@ Elsewhere this parser succeeds and consumes nothing.
 -/
 def unterminatedAtEnd (openPos openStop : String.Pos.Raw) (what : String)
     (nameOpenerLine := false) : ParserFn := fun c s =>
-  if c.atEnd s.pos then
+  bif c.atEnd s.pos then
     s.setError (unterminatedError c openPos openStop what nameOpenerLine) |>.pushSyntax .missing
   else s
 
 /-- The end of the sequence of `ch` that begins at `pos`. -/
 partial def findCharSeqEnd (ictx : InputContext) (ch : Char) (pos : String.Pos.Raw) :
     String.Pos.Raw :=
-  if ictx.atEnd pos || ictx.get pos != ch then pos else findCharSeqEnd ictx ch (ictx.next pos)
+  bif ictx.atEnd pos || ictx.get pos != ch then pos else findCharSeqEnd ictx ch (ictx.next pos)
 
 /--
 When inline code has failed to parse, finds the sequence of backticks to report as "too many
@@ -517,10 +517,10 @@ def longerBackticks? (c : ParserContext) (count : Nat) (start : String.Pos.Raw) 
     Option (String.Pos.Raw × String.Pos.Raw) := do
   let mut i := start
   while !c.atEnd i && c.get i != '\n' do
-    if c.get i == '`' then
+    bif c.get i == '`' then
       let seqStop := findCharSeqEnd c '`' i
       let n := i.byteDistance seqStop
-      if n ≥ count then
+      bif n ≥ᵇ count then
         guard (n > count)
         return (i, seqStop)
       i := seqStop
@@ -562,21 +562,23 @@ def atBlockStart (c : ParserContext) (s : ParserState) : Bool :=
     let mut iter := c.inputString.pos! lineStart
     while h : iter.offset < s.pos && ¬iter.IsAtEnd && iter.offset < c.endPos do
       have h : ¬iter.IsAtEnd := by simp at h; exact h.1.2
-      if (iter.get h).isDigit then
+      bif (iter.get h).isDigit then
         while h : ¬iter.IsAtEnd && iter.get!.isDigit && iter.offset < s.pos do
           iter := iter.next (by simp at h; exact h.1.1)
-        if h : iter.IsAtEnd then return false
-        else if iter.get h == '.' || iter.get h == ')' then iter := iter.next h
-      else if iter.get h == ' ' then iter := iter.next h
-      else if iter.get h == '>' then iter := iter.next h
-      else if iter.get h == '*' then iter := iter.next h
-      else if iter.get h == '+' then iter := iter.next h
-      else if iter.get h == '-' then iter := iter.next h
+        bif h : iter =ᵇ c.inputString.endPos then return false
+        else
+          have h := ne_of_decideEq_eq_false h
+          bif iter.get h == '.' || iter.get h == ')' then iter := iter.next h
+      else bif iter.get h == ' ' then iter := iter.next h
+      else bif iter.get h == '>' then iter := iter.next h
+      else bif iter.get h == '*' then iter := iter.next h
+      else bif iter.get h == '+' then iter := iter.next h
+      else bif iter.get h == '-' then iter := iter.next h
       else return false
     true
 
 def onlyBlockOpeners : ParserFn := fun c s =>
-  if atBlockStart c s then s
+  bif atBlockStart c s then s
   else s.mkErrorAt "beginning of line or sequence of nestable block openers" s.pos
 
 def nl := satisfyFn (· == '\n') "newline"
@@ -585,7 +587,7 @@ def nl := satisfyFn (· == '\n') "newline"
 Reads the end of a line, which is a newline or the end of the input.
 -/
 def lineEnd : ParserFn := fun c s =>
-  if c.atEnd s.pos then s
+  bif c.atEnd s.pos then s
   else expectFn (· == '\n') "newline" c s
 
 def pushMissing : ParserFn := fun _c s =>
@@ -593,15 +595,16 @@ def pushMissing : ParserFn := fun _c s =>
 
 def strFn (str : String) : ParserFn := asTokenFn <| fun c s =>
   let rec go (iter : str.Pos) (s : ParserState) :=
-    if h : iter.IsAtEnd then s
+    bif h : iter =ᵇ str.endPos then s
     else
+      have h := ne_of_decideEq_eq_false h
       let ch := iter.get h
       go (iter.next h) <| satisfyFn (· == ch) ch.toString c s
   termination_by iter
   let iniPos := s.pos
   let iniSz := s.stxStack.size
   let s := go str.startPos s
-  if s.hasError then s.mkErrorAt s!"'{str}'" iniPos (some iniSz) else s
+  bif s.hasError then s.mkErrorAt s!"'{str}'" iniPos (some iniSz) else s
 
 /--
 Ordered lists may have two styles of marker, with trailing dots or parentheses.
@@ -691,42 +694,42 @@ performs limited lookahead for characters that only begin a different inline as 
 -/
 public def inlineTextCharFn : ParserFn := fun c s =>
   let i := s.pos
-  if h : c.atEnd i then s.mkEOIError
+  bif h : c.atEnd i then s.mkEOIError
   else
-    let curr := c.get' i h
+    let curr := c.get' i (Bool.ne_true_of_eq_false h)
     match curr with
     | '\\' =>
-      let s := s.next' c i h
+      let s := s.next' c i (Bool.ne_true_of_eq_false h)
       let i := s.pos
-      if h : c.atEnd i then s.mkEOIError
-      else s.next' c i h
+      bif h : c.atEnd i then s.mkEOIError
+      else s.next' c i (Bool.ne_true_of_eq_false h)
     | '\n' => s.mkUnexpectedErrorAt "unexpected newline" i
     | '*' | '_' | '[' | ']' | '{' | '}' | '`' =>
       (s.setPos i).mkUnexpectedError s!"unexpected '{curr}' (use '\\{curr}' to escape)" ["text"]
     | '!' =>
-      let s := s.next' c i h
+      let s := s.next' c i (Bool.ne_true_of_eq_false h)
       let i' := s.pos
-      if h : c.atEnd i' then s
-      else if c.get' i' h == '['
+      bif h : c.atEnd i' then s
+      else bif c.get' i' (Bool.ne_true_of_eq_false h) == '['
       then s.mkUnexpectedErrorAt "![" i
       else s
     | '$' =>
-      let s := s.next' c i h
+      let s := s.next' c i (Bool.ne_true_of_eq_false h)
       let i' := s.pos
-      if h : c.atEnd i' then
+      bif h : c.atEnd i' then
         s
-      else if c.get' i' h == '`' then
+      else bif c.get' i' (Bool.ne_true_of_eq_false h) == '`' then
         s.mkUnexpectedErrorAt "$`" i
-      else if c.get' i' h == '$' then
-        let s := s.next' c i' h
+      else bif c.get' i' (Bool.ne_true_of_eq_false h) == '$' then
+        let s := s.next' c i' (Bool.ne_true_of_eq_false h)
         let i' := s.pos
-        if h : c.atEnd i' then
+        bif h : c.atEnd i' then
           s
-        else if c.get' i' h == '`' then
+        else bif c.get' i' (Bool.ne_true_of_eq_false h) == '`' then
           s.mkUnexpectedErrorAt "$$`" i
         else s
       else s
-    | _ => s.next' c i h
+    | _ => s.next' c i (Bool.ne_true_of_eq_false h)
 
 /--
 Parses block opener prefixes. If this parser succeeds at the beginning of a line, then a special
@@ -751,14 +754,14 @@ If the current position is not a newline, returns `false`.
 def lineContinues (c : ParserContext) (s : ParserState) : Bool := Id.run do
   let mut s := s
   let i := s.pos
-  if h : c.atEnd i then return false
-  else if c.get' i h != '\n' then return false
-  else s := s.next' c i h
+  bif h : c.atEnd i then return false
+  else bif c.get' i (Bool.ne_true_of_eq_false h) != '\n' then return false
+  else s := s.next' c i (Bool.ne_true_of_eq_false h)
   repeat
     let i := s.pos
-    if h : c.atEnd i then return true
-    else if c.get' i h == ' ' then s := s.next' c i h
-    else if c.get' i h == '\n' then return false
+    bif h : c.atEnd i then return true
+    else bif c.get' i (Bool.ne_true_of_eq_false h) == ' ' then s := s.next' c i (Bool.ne_true_of_eq_false h)
+    else bif c.get' i (Bool.ne_true_of_eq_false h) == '\n' then return false
     else break
   return (blockOpenerFn c s).hasError
 
@@ -773,9 +776,9 @@ and the blank lines after it, up to and including the last newline. If the curre
 newline, it does nothing.
 -/
 def blockTailWs (allowNewlines : Bool) : ParserFn := fun c s =>
-  if h : c.atEnd s.pos then s
-  else if c.get' s.pos h != '\n' then s
-  else if allowNewlines && lineContinues c s then s
+  bif h : c.atEnd s.pos then s
+  else bif c.get' s.pos (Bool.ne_true_of_eq_false h) != '\n' then s
+  else bif allowNewlines && lineContinues c s then s
   else lineTailWsFn c s
 
 /--
@@ -783,22 +786,22 @@ Parses an argument value, which may be a string, an identifier, or a numeral. Th
 records the input consumed by `trailing` as its trailing whitespace.
 -/
 public def valFn (trailing : ParserFn := skipFn) : ParserFn := fun c s =>
-  if h : c.atEnd s.pos then
+  bif h : c.atEnd s.pos then
     s.mkEOIError
   else
-    let ch := c.get' s.pos h
+    let ch := c.get' s.pos (Bool.ne_true_of_eq_false h)
     let i := s.stackSize
     let finish (s : ParserState) : ParserState :=
-      if s.hasError then s else withTrailing trailing c s
-    if ch == '\"' then
+      bif s.hasError then s else withTrailing trailing c s
+    bif ch == '\"' then
       let startPos := s.pos
-      let s := strLitFnAux startPos false c (s.next' c startPos h)
-      let s := finish (if s.hasError then s else onOneLine startPos c s)
+      let s := strLitFnAux startPos false c (s.next' c startPos (Bool.ne_true_of_eq_false h))
+      let s := finish (bif s.hasError then s else onOneLine startPos c s)
       s.mkNode ``ArgVal.str i
-    else if isIdFirst ch || isIdBeginEscape ch then
+    else bif isIdFirst ch || isIdBeginEscape ch then
       let s := finish (rawIdentFn (includeWhitespace := false) c s)
       s.mkNode ``ArgVal.ident i
-    else if ch.isDigit then
+    else bif ch.isDigit then
       let s := finish (numberFnAux false c s)
       s.mkNode ``ArgVal.num i
     else
@@ -807,7 +810,7 @@ where
   onOneLine (startPos : String.Pos.Raw) : ParserFn := fun c s => Id.run do
     let mut i := startPos
     while i < s.pos do
-      if c.get i == '\n' then
+      bif c.get i == '\n' then
         -- The position stays after the literal, so the argument list resumes behind it.
         return s.mkUnexpectedTokenError "a string argument on one line" (iniPos := s.pos)
       i := c.next i
@@ -843,7 +846,7 @@ def recoverPendingError (recover : ParserFn) : ParserFn := fun c s =>
   if let some msg := s.errorMsg then
     let errPos := s.pos
     let s' := recover c { s with errorMsg := none }
-    if s'.hasError then s
+    bif s'.hasError then s
     else { s with
       pos := s'.pos,
       errorMsg := none,
@@ -888,12 +891,12 @@ informative. A name ends at `]` and may not span a line, so those expect `closer
 -/
 def closeRefNameWith (closer : String) : ParserFn := fun c s =>
   let cutShort :=
-    if h : c.atEnd s.pos then false
+    bif h : c.atEnd s.pos then false
     else
-      let ch := c.get' s.pos h
+      let ch := c.get' s.pos (Bool.ne_true_of_eq_false h)
       !(ch == ']' || ch == '\n')
   -- The characters listed are those `isRefNameChar` rejects, less the two that end a name.
-  if cutShort then s.mkError "a character other than '^', '[', '\\', or a tab"
+  bif cutShort then s.mkError "a character other than '^', '[', '\\', or a tab"
   else strFn closer c s
 
 @[inherit_doc closeRefNameWith]
@@ -917,7 +920,7 @@ def recoverEolWithAtErrPos (stxs : Array Syntax) (p : ParserFn) : ParserFn := fu
   if let some msg := s.errorMsg then
     let errPos := s.pos
     let s' := (ignoreFn skipToNewline) c {s with errorMsg := none}
-    if s'.hasError then s
+    bif s'.hasError then s
     else
       let s' := stxs.foldl (init := s'.shrinkStack iniSz) (·.pushSyntax ·)
       { s' with recoveredErrors := s.recoveredErrors.push (errPos, s'.stxStack, msg) }
@@ -964,10 +967,10 @@ where
     withTrailing tail
   flagName : ParserFn := expectedFn "flag name" (rawIdentFn (includeWhitespace := false))
   noSpace : ParserFn := fun c s =>
-    if h : c.atEnd s.pos then s
+    bif h : c.atEnd s.pos then s
     else
-      let ch := c.get' s.pos h
-      if ch == ' ' then
+      let ch := c.get' s.pos (Bool.ne_true_of_eq_false h)
+      bif ch == ' ' then
         s.mkError "no space before"
       else s
   potentiallyNamed iniSz :=
@@ -995,7 +998,7 @@ where
 Fails when the line the argument list is on has already ended.
 -/
 def guardSameLine : ParserFn := fun c s =>
-  if atNewLine c s then s.mkError "argument on the same line" else s
+  bif atNewLine c s then s.mkError "argument on the same line" else s
 
 /--
 Skips the spaces between a name and its arguments. The tokens themselves consume this whitespace as
@@ -1005,7 +1008,7 @@ they are parsed, so on ordinary parses this parser consumes nothing. Call sites 
 def nameArgWhitespace : ParserFn := fun c s =>
   -- After a line end, the construct that resumes on the next line records its indentation, not
   -- this argument list.
-  if atNewLine c s then s else eatSpaces c s
+  bif atNewLine c s then s else eatSpaces c s
 
 /--
 Parses zero or more arguments to a role, directive, command, or code block. Each argument's final
@@ -1084,15 +1087,15 @@ deriving Inhabited
 A linebreak that isn't a block break (that is, there's non-space content on the next line)
 -/
 def linebreakFn (ctxt : InlineCtxt) : ParserFn :=
-  if ctxt.allowNewlines then
+  bif ctxt.allowNewlines then
     nodeFn ``Inline.linebreak <| asTokenFn (trailing := eatSpaces) fun c s =>
-      if lineContinues c s then skipChFn '\n' c s
+      bif lineContinues c s then skipChFn '\n' c s
       else s.mkError "newline"
   else
     errorFn "Newlines not allowed here"
 
 partial def notInLink (ctxt : InlineCtxt) : ParserFn := fun _ s =>
-  if ctxt.inLink then s.mkUnexpectedError "a link inside a link" else s
+  bif ctxt.inLink then s.mkUnexpectedError "a link inside a link" else s
 
 /-- The context for inline elements nested inside another inline element. -/
 def InlineCtxt.inner (ctxt : InlineCtxt) : InlineCtxt := { ctxt with tail := skipFn }
@@ -1100,9 +1103,9 @@ def InlineCtxt.inner (ctxt : InlineCtxt) : InlineCtxt := { ctxt with tail := ski
 -- Like `satisfyFn (· == '\n')` but with a better error message that mentions what was expected.
 def newlineOrUnexpected (msg : String) : ParserFn := fun c s =>
   let i := s.pos
-  if h : c.atEnd i then s.mkEOIError
-  else if c.get' i h == '\n' then s.next' c i h
-  else s.mkUnexpectedError s!"unexpected {describeChar (c.get' i h)}" [msg]
+  bif h : c.atEnd i then s.mkEOIError
+  else bif c.get' i (Bool.ne_true_of_eq_false h) == '\n' then s.next' c i (Bool.ne_true_of_eq_false h)
+  else s.mkUnexpectedError s!"unexpected {describeChar (c.get' i (Bool.ne_true_of_eq_false h))}" [msg]
 
 mutual
   partial def emphLike
@@ -1132,10 +1135,10 @@ mutual
         expectFn (· == char) s!"'{char}' to open nested {noun}" >>
         atMostFn (d - 2) (satisfyFn (· == char) s!"{char}") s!"at most {d - 1} {plural}"
     noSpaceBefore : ParserFn := fun c s =>
-      if s.pos == 0 then s
+      bif s.pos == 0 then s
       else
         let prior := c.get (c.prev s.pos)
-        if prior.isWhitespace then
+        bif prior.isWhitespace then
           s.mkUnexpectedError s!"unexpected space before the closing '{char}'"
         else s
 
@@ -1178,7 +1181,7 @@ mutual
     orUnclosedAt (openPos openStop : String.Pos.Raw) (count : Nat) (p : ParserFn) : ParserFn :=
       fun c s =>
         let s := p c s
-        if s.hasError then { s with errorMsg := some (unclosedCodeError c openPos openStop count) }
+        bif s.hasError then { s with errorMsg := some (unclosedCodeError c openPos openStop count) }
         else s
     /--
     Parses the content and closer of inline code whose opener extends from `openPos` to `openStop`.
@@ -1210,13 +1213,13 @@ mutual
           asTokenFn (trailing := codeLineTailWs ctxt.baseColumn) fun c s =>
             let startPos := s.pos
             let s := manyFn (codeContentsFn maxCount) c s
-            if s.hasError then s
+            bif s.hasError then s
             else
               let i := s.pos
-              if h : c.atEnd i then
-                if i == startPos then codeContentsFn maxCount c s else s
-              else if c.get' i h == '\n' then s.next' c i h
-              else if i == startPos then codeContentsFn maxCount c s
+              bif h : c.atEnd i then
+                bif i == startPos then codeContentsFn maxCount c s else s
+              else bif c.get' i (Bool.ne_true_of_eq_false h) == '\n' then s.next' c i (Bool.ne_true_of_eq_false h)
+              else bif i == startPos then codeContentsFn maxCount c s
               else s
     codeContentsFn (maxCount : Nat) : ParserFn :=
       atomicFn' (asTokenFn (satisfyFn (maxCount > 0 && · == '`') >> atMostFn (maxCount - 1) (chFn '`') s!"at most {maxCount} backticks")) <|>
@@ -1255,7 +1258,7 @@ mutual
 
   partial def linkTargetFn (tail : ParserFn := skipFn) : ParserFn := fun c s =>
     let s := (ref <|> url) c s
-    if s.hasError then
+    bif s.hasError then
       match s.errorMsg with
       | some e => s.setError { e with
           expected := ["link target '(url)' or '[ref]' (use '\\[' for a literal '[')"] }
@@ -1296,7 +1299,7 @@ mutual
     -- ends at the end of the line and has no content.
     nameAndArgsThenContent (base : Nat) : ParserFn := fun c s =>
       let s := recoverAtErrPos (nameAndArgs base) closingBraceOnLine c s
-      if s.hasError then recoverPendingError (ignoreFn skipToNewline >> noContent) c s
+      bif s.hasError then recoverPendingError (ignoreFn skipToNewline >> noContent) c s
       else (bracketed <|> atomicFn' nonBracketed) c s
     -- The brace is the role's closing delimiter, so recovery pushes it.
     closingBraceOnLine : ParserFn :=
@@ -1307,9 +1310,9 @@ mutual
       wsFallback eatSpaces base >>
       rawFn (fun c s =>
         let i := s.pos
-        if h : c.atEnd i then s.mkEOIError [closeMsg]
-        else if c.get' i h == '}' then s.next' c i h
-        else (s.setPos i).mkUnexpectedError s!"unexpected {describeChar (c.get' i h)}" [closeMsg])
+        bif h : c.atEnd i then s.mkEOIError [closeMsg]
+        else bif c.get' i (Bool.ne_true_of_eq_false h) == '}' then s.next' c i (Bool.ne_true_of_eq_false h)
+        else (s.setPos i).mkUnexpectedError s!"unexpected {describeChar (c.get' i (Bool.ne_true_of_eq_false h))}" [closeMsg])
           false
     closeMsg := "positional argument, named argument, flag, or '}' (use '\\{' for a literal '{')"
     bracketed :=
@@ -1344,7 +1347,7 @@ Parses a line of text (that is, one or more inline elements). When `recordTraili
 top-level inline's final token consumes the whitespace that follows it as its trailing whitespace.
 -/
 public def textLineFn (ctxt : InlineCtxt := {}) (recordTrailing := false) : ParserFn :=
-  if !recordTrailing then
+  bif !recordTrailing then
     many1Fn (inlineFn ctxt)
   else fun c s => Id.run do
     let ctxt := { ctxt with tail := blockTailWs ctxt.allowNewlines }
@@ -1356,11 +1359,11 @@ public def textLineFn (ctxt : InlineCtxt := {}) (recordTrailing := false) : Pars
       let itPos := s.pos
       let itRec := s.recoveredErrors.size
       s := inlineFn ctxt c s
-      if s.hasError then
-        if s.pos == itPos && !first then
+      bif s.hasError then
+        bif s.pos == itPos && !first then
           s := s.restore itSz itPos
         break
-      if s.pos == itPos then
+      bif s.pos == itPos then
         s := s.mkUnexpectedError "invalid 'many' parser combinator application, parser did not consume anything"
         break
       first := false
@@ -1369,17 +1372,17 @@ public def textLineFn (ctxt : InlineCtxt := {}) (recordTrailing := false) : Pars
       -- consumed its line's end as trailing whitespace ends the text. After error recovery, the
       -- text ends if the inline's final token consumed its line's end; otherwise, the next
       -- round parses a linebreak by lookahead as usual.
-      if s.recoveredErrors.size == itRec then
-        if h : c.atEnd s.pos then
+      bif s.recoveredErrors.size == itRec then
+        bif h : c.atEnd s.pos then
           break
-        else if c.get' s.pos h == '\n' then
-          if ctxt.allowNewlines then
+        else bif c.get' s.pos (Bool.ne_true_of_eq_false h) == '\n' then
+          bif ctxt.allowNewlines then
             s := nodeFn ``Inline.linebreak (asTokenFn (skipChFn '\n') eatSpaces) c s
           else
             break
-        else if consumedLineEnd s then
+        else bif consumedLineEnd s then
           break
-      else if consumedLineEnd s then
+      else bif consumedLineEnd s then
         break
     return s.mkNode nullKind iniSz
 
@@ -1438,13 +1441,13 @@ The trailing whitespace of a block's final token. When `recordTrailing` is set, 
 rest of its line and any blank lines that follow. Otherwise it takes nothing.
 -/
 def blockTrailingWs (ctxt : BlockCtxt) : ParserFn :=
-  if ctxt.recordTrailing then lineTailWsFn else skipFn
+  bif ctxt.recordTrailing then lineTailWsFn else skipFn
 
 /--
 The separator between blocks in a sequence.
 -/
 def blockSepFallback (base : Nat) : ParserFn := fun c s =>
-  if s.recoveredErrors.isEmpty then s
+  bif s.recoveredErrors.isEmpty then s
   else wsFallback lineTailWsFn base c s
 
 /--
@@ -1455,19 +1458,19 @@ def minContentIndent (text : FileMap) (startPos endPos : String.Pos.Raw)
     (init : Nat) : Nat := Id.run do
   let mut result := init
   let mut thisLineCol := 0
-  if h : endPos ≤ text.source.rawEndPos then
-    let endPos := text.source.posGE endPos h
-    if h : startPos ≤ text.source.rawEndPos then
-      let mut i := text.source.posGE startPos h
+  bif h : endPos ≤ᵇ text.source.rawEndPos then
+    let endPos := text.source.posGE endPos (le_of_decideLE_eq_true h)
+    bif h : startPos ≤ᵇ text.source.rawEndPos then
+      let mut i := text.source.posGE startPos (le_of_decideLE_eq_true h)
       let mut afterNewline := false
       while h : i ≠ text.source.endPos do
         let c := i.get h
         i := i.next h
-        if i > endPos then break
-        if c == '\n' then
+        bif i >ᵇ endPos then break
+        bif c == '\n' then
           afterNewline := true
           thisLineCol := 0
-        else if afterNewline && c != ' ' then
+        else bif afterNewline && c != ' ' then
           result := min result thisLineCol
           afterNewline := false
         else thisLineCol:= thisLineCol + 1
@@ -1494,14 +1497,14 @@ public def BlockCtxt.forDocString (text : FileMap) (openPos : String.Pos.Raw)
   -- We look for non-whitespace characters that appear after a newline and check their column.
   let baseColumn := minContentIndent text startPos endPos baseColumn
   let position := text.toPosition startPos
-  if position.column ≤ baseColumn then { baseColumn }
+  bif position.column ≤ᵇ baseColumn then { baseColumn }
   else
     -- Skip leading spaces to find where content actually starts
     let pos := Id.run do
-      if h : startPos ≤ text.source.rawEndPos then
-        let mut pos := text.source.posGE startPos h
+      bif h : startPos ≤ᵇ text.source.rawEndPos then
+        let mut pos := text.source.posGE startPos (le_of_decideLE_eq_true h)
         while h : pos ≠ text.source.endPos do
-          if pos.get h == ' ' then
+          bif pos.get h == ' ' then
             pos := pos.next h
           else
             break
@@ -1537,13 +1540,13 @@ def atBaseColumn (ctxt : BlockCtxt) (c : ParserContext) (pos : String.Pos.Raw) :
   (c.fileMap.toPosition pos).column ≤ ctxt.baseColumn || atDocStart ctxt c pos
 
 def bol (ctxt : BlockCtxt) : ParserFn := fun c s =>
-  if atBol ctxt c s then s
+  bif atBol ctxt c s then s
   else s.mkErrorAt s!"beginning of line at {c.fileMap.toPosition s.pos}" s.pos
 
 def bolThen (ctxt : BlockCtxt) (p : ParserFn) (description : String) : ParserFn := fun c s =>
-  if atBol ctxt c s then
+  bif atBol ctxt c s then
     let s := p c s
-    if s.hasError then
+    bif s.hasError then
       s.mkErrorAt description s.pos
     else s
   else s.mkErrorAt description s.pos
@@ -1564,10 +1567,10 @@ where
   -- message that names the construct. The unexpected token that's used includes the source range
   -- for the message.
   atLineStart : ParserFn := fun c s =>
-    if atBol ctxt c s then s
+    bif atBol ctxt c s then s
     else
       let s' := atomicFn' (eatSpaces >> strFn "%%%") c s
-      if s'.hasError then s'
+      bif s'.hasError then s'
       else s'.setError { unexpectedTk := s'.stxStack.back, unexpected := misplacedMsg }
   misplacedMsg := "unexpected metadata block opener '%%%' (must be at start of line)"
   opener :=
@@ -1576,7 +1579,7 @@ where
     -- starts at their column and aligns the fields there. That column must be the base column.
     withTrailing (eatSpaces >> ignoreFn (chFn '\n') >> eatSpaces) >> atBaseColumn
   atBaseColumn : ParserFn := fun c s =>
-    if c.currentColumn s == ctxt.baseColumn then s
+    bif c.currentColumn s == ctxt.baseColumn then s
     else s.mkErrorAt s!"metadata contents at column {ctxt.baseColumn}" s.pos
   closer :=
     bolThen ctxt (strFn "%%%") "%%% (at line beginning)" >>
@@ -1591,29 +1594,29 @@ public def lookaheadOrderedListMarker (p : OrderedListType → Int → ParserFn)
   let iniPos := s.pos
   let iniSz := s.stxStack.size
   let s := (onlyBlockOpeners >> checkIndentGe "list marker") c s
-  if s.hasError then s.setPos iniPos |>.shrinkStack iniSz
+  bif s.hasError then s.setPos iniPos |>.shrinkStack iniSz
   else
   let numPos := s.pos
   let s := ignoreFn (takeWhile1Fn (·.isDigit) "digits") c s
-  if s.hasError then {s with pos := iniPos}.shrinkStack iniSz else
+  bif s.hasError then {s with pos := iniPos}.shrinkStack iniSz else
   let digits := c.extract numPos s.pos
   match digits.toNat? with
   | none => {s.mkError s!"digits, got '{digits}'" with pos := iniPos}
   | some n =>
     let i := s.pos
-    if h : c.atEnd i then {s.mkEOIError with pos := iniPos}
+    bif h : c.atEnd i then {s.mkEOIError with pos := iniPos}
     else
-      let (s, next, type) := match c.get' i h with
-        | '.' => (s.next' c i h, (chFn ' ' <|> chFn '\n'), OrderedListType.numDot)
-        | ')' => (s.next' c i h, (chFn ' ' <|> chFn '\n'), OrderedListType.parenAfter)
+      let (s, next, type) := match c.get' i (Bool.ne_true_of_eq_false h) with
+        | '.' => (s.next' c i (Bool.ne_true_of_eq_false h), (chFn ' ' <|> chFn '\n'), OrderedListType.numDot)
+        | ')' => (s.next' c i (Bool.ne_true_of_eq_false h), (chFn ' ' <|> chFn '\n'), OrderedListType.parenAfter)
         | other =>
           (s.setError { unexpected := s!"unexpected '{other}'", expected := ["'.'", "')'"] },
            skipFn,
            .numDot)
-      if s.hasError then {s with pos := iniPos}
+      bif s.hasError then {s with pos := iniPos}
       else
         let s := next c s
-        if s.hasError then {s with pos := iniPos}
+        bif s.hasError then {s with pos := iniPos}
         else
           p type n c (s.shrinkStack iniSz |>.setPos numPos)
 
@@ -1626,17 +1629,17 @@ public def lookaheadUnorderedListMarker (p : UnorderedListType → ParserFn) :
   let iniSz := s.stxStack.size
   let s := (onlyBlockOpeners >> checkIndentGe "list marker") c s
   let markerPos := s.pos
-  if s.hasError then s.setPos iniPos |>.shrinkStack iniSz
-  else if h : c.atEnd s.pos then s.mkEOIError.setPos iniPos |>.shrinkStack iniSz
-  else let (s, type) : (_ × UnorderedListType) := match c.get' s.pos h with
-    | '*' => (s.next' c s.pos h, .asterisk)
-    | '-' => (s.next' c s.pos h, .dash)
-    | '+' => (s.next' c s.pos h, .plus)
+  bif s.hasError then s.setPos iniPos |>.shrinkStack iniSz
+  else bif h : c.atEnd s.pos then s.mkEOIError.setPos iniPos |>.shrinkStack iniSz
+  else let (s, type) : (_ × UnorderedListType) := match c.get' s.pos (Bool.ne_true_of_eq_false h) with
+    | '*' => (s.next' c s.pos (Bool.ne_true_of_eq_false h), .asterisk)
+    | '-' => (s.next' c s.pos (Bool.ne_true_of_eq_false h), .dash)
+    | '+' => (s.next' c s.pos (Bool.ne_true_of_eq_false h), .plus)
     | other => (s.setError {expected := ["*", "-", "+"], unexpected := s!"'{other}'"}, .plus)
-  if s.hasError then s.setPos iniPos
+  bif s.hasError then s.setPos iniPos
   else
     let s := (chFn ' ' <|> chFn '\n') c s
-    if s.hasError then s.setPos iniPos
+    bif s.hasError then s.setPos iniPos
     else p type c (s.shrinkStack iniSz |>.setPos markerPos)
 
 def skipUntilDedent (indent : Nat) : ParserFn :=
@@ -1740,7 +1743,7 @@ mutual
     let startPos := s.pos
     -- Non-paragraph blocks take precedence wherever one may open.
     let notBlockOpener :=
-      if atBlockStart c s then notFollowedByFn blockOpenerFn "block opener" else skipFn
+      bif atBlockStart c s then notFollowedByFn blockOpenerFn "block opener" else skipFn
     (nodeFn ``Block.para <|
       notBlockOpener >>
       textLineFn { baseColumn := ctxt.baseColumn } (recordTrailing := ctxt.recordTrailing) >>
@@ -1752,7 +1755,7 @@ mutual
         -- A text line wraps its inlines in one node, so its children are the elements to
         -- inspect.
         let element := s.stxStack.get! i
-        let inlines := if element.getKind == nullKind then element.getArgs else #[element]
+        let inlines := bif element.getKind == nullKind then element.getArgs else #[element]
         for inline in inlines do
           unless blankInline inline do return s
         i := i + 1
@@ -1786,11 +1789,11 @@ mutual
       match c.savedPos? with
       | none => s
       | some pos =>
-        if (c.fileMap.toPosition pos).column ≤ ctxt.baseColumn then s
+        bif (c.fileMap.toPosition pos).column ≤ᵇ ctxt.baseColumn then s
         else s.mkErrorAt indentMsg s.pos
 
     checkNonIndented (markerPos : String.Pos.Raw) : ParserFn := fun c s =>
-      if atBaseColumn ctxt c markerPos then s
+      bif atBaseColumn ctxt c markerPos then s
       else
         let marker := s.stxStack.back
         s.popSyntax.setError { unexpectedTk := marker.getArg 0, expected := [indentMsg] }
@@ -1876,7 +1879,7 @@ mutual
     withDelimiter (atDepth : Nat) (p : SourceInfo → String → ParserFn) : ParserFn := fun c s =>
         match delimiterAtom (s.stxStack.get! (s.stxStack.size - (atDepth + 1))) with
         | .atom info str =>
-          if str.all (· == ':') then
+          bif str.all (· == ':') then
             p info str c s
           else
             s.mkError s!"Internal error - index {atDepth} wasn't the directive delimiter - it was the atom {str}"
@@ -1900,7 +1903,7 @@ mutual
 
     guardOpenerSize : ParserFn := withDelimiterSize 0 fun x =>
         if let some m := ctxt.maxDirective then
-          if x < m then skipFn else fun _ s => s.mkError "Too many ':'s here"
+          bif x <ᵇ m then skipFn else fun _ s => s.mkError "Too many ':'s here"
         else skipFn
 
     closeDelimiter (delimiterPos : String.Pos.Raw) (str : String) : ParserFn := fun c s =>
@@ -1926,7 +1929,7 @@ mutual
       | ⟨stack, lhsPrec, _, cache, some msg, _⟩ => ⟨stack, lhsPrec, iniPos, cache, some msg, iniErrs⟩
       | other => other
     let s := intro c s
-    if s.hasError then restorePosOnErr s
+    bif s.hasError then restorePosOnErr s
     else
       s.mkNode ``Block.command iniSz
   where
@@ -1954,8 +1957,8 @@ mutual
   where
     -- Commit earlier for better errors when unambiguous
     atLineStart : ParserFn := fun ctx s =>
-      if atBol c ctx s then s
-      else if (bracketedName ctx (eatSpaces ctx s)).hasError then
+      bif atBol c ctx s then s
+      else bif (bracketedName ctx (eatSpaces ctx s)).hasError then
         s.mkErrorAt "link reference definition" s.pos
       else
         let s' := (eatSpaces >> chFn '[') ctx s
@@ -1980,22 +1983,22 @@ mutual
     bracketedName : ParserFn := fun c s =>
       let ok : Bool := Id.run do
         let mut i := s.pos
-        if h : c.atEnd i then return false
-        else if c.get' i h != '[' then return false
+        bif h : c.atEnd i then return false
+        else bif c.get' i (Bool.ne_true_of_eq_false h) != '[' then return false
         else i := c.next i
-        if h : c.atEnd i then return false
-        else if c.get' i h == '^' then return false
+        bif h : c.atEnd i then return false
+        else bif c.get' i (Bool.ne_true_of_eq_false h) == '^' then return false
         repeat
-          if h : c.atEnd i then return false
+          bif h : c.atEnd i then return false
           else
-            let ch := c.get' i h
-            if ch == '\n' then return false
-            else if ch == ']' then
+            let ch := c.get' i (Bool.ne_true_of_eq_false h)
+            bif ch == '\n' then return false
+            else bif ch == ']' then
               let j := c.next i
               return !c.atEnd j && c.get j == ':'
             else i := c.next i
         return false
-      if ok then s else s.mkErrorAt "link reference definition" s.pos
+      bif ok then s else s.mkErrorAt "link reference definition" s.pos
 
     /--
     Reads the URL, which ends at the last character on the line that is not a space. The spaces
@@ -2005,13 +2008,13 @@ mutual
       let mut stop := s.pos
       let mut i := s.pos
       repeat
-        if h : c.atEnd i then break
+        bif h : c.atEnd i then break
         else
-          let ch := c.get' i h
-          if ch == '\n' then break
+          let ch := c.get' i (Bool.ne_true_of_eq_false h)
+          bif ch == '\n' then break
           else
             i := c.next i
-            if ch != ' ' then stop := i
+            bif ch != ' ' then stop := i
       return s.setPos stop
 
   /--
@@ -2049,11 +2052,11 @@ mutual
     indentMsg := "block"
 
     withTrailingFallback (block : ParserFn) : ParserFn := fun ctx s =>
-      if !c.recordTrailing then block ctx s
+      bif !c.recordTrailing then block ctx s
       else
         let base := s.stxStack.size
         let s := block ctx s
-        if s.hasError then s else blockSepFallback base ctx s
+        bif s.hasError then s else blockSepFallback base ctx s
 
     /--
     Reports a tab where a block would begin. This check records the error at the tab, consuming it
@@ -2061,13 +2064,13 @@ mutual
     -/
     noTabs : ParserFn := fun c s =>
       let s' := eatSpaces c s
-      if h : c.atEnd s'.pos then s
-      else if c.get' s'.pos h == '\t' then
+      bif h : c.atEnd s'.pos then s
+      else bif c.get' s'.pos (Bool.ne_true_of_eq_false h) == '\t' then
         let err : Error :=
           { unexpected := "tabs are not allowed; please configure your editor to expand them" }
         -- `skipBlank` skips the tab and the rest of a line with nothing else on it, so that a line
         -- indented with a tab still parses and a line of only whitespace ends the block before it.
-        let s'' := skipBlank c (s'.next' c s'.pos h)
+        let s'' := skipBlank c (s'.next' c s'.pos (Bool.ne_true_of_eq_false h))
         { s'' with recoveredErrors := s''.recoveredErrors.push (s'.pos, s''.stxStack, err) }
       else s
 
@@ -2080,12 +2083,12 @@ mutual
       let mut keep := s.pos
       repeat
         let i := s.pos
-        if h : c.atEnd i then break
+        bif h : c.atEnd i then break
         else
-          let ch := c.get' i h
-          if ch == ' ' || ch == '\t' then s := s.next' c i h
-          else if ch == '\n' then
-            s := s.next' c i h
+          let ch := c.get' i (Bool.ne_true_of_eq_false h)
+          bif ch == ' ' || ch == '\t' then s := s.next' c i (Bool.ne_true_of_eq_false h)
+          else bif ch == '\n' then
+            s := s.next' c i (Bool.ne_true_of_eq_false h)
             keep := s.pos
           else break
       return s.setPos keep
@@ -2113,7 +2116,7 @@ mutual
   `ctxt` is the context that the blocks were parsed with.
   -/
   partial def earlyStopErrorFn (ctxt : BlockCtxt) : ParserFn := fun c s =>
-    if c.atEnd s.pos then s
+    bif c.atEnd s.pos then s
     else
       let s' := blockFn ctxt c (mkParserState c.inputString |>.setPos s.pos)
       let (errPos, e) : String.Pos.Raw × Error :=
@@ -2124,7 +2127,7 @@ mutual
           -- the character.
           (s.pos, { unexpected := s!"unexpected '{c.get s.pos}'" })
       -- A recovered error at the position where the blocks stopped is the error that stopped them.
-      if s.recoveredErrors.any (·.1 == errPos) then s
+      bif s.recoveredErrors.any (·.1 == errPos) then s
       else { s with errorMsg := some e, pos := errPos }
 
   /--
@@ -2142,7 +2145,7 @@ mutual
     -- `structure`. Clearing it lets the document's top-level blocks start at any column.
     let s := (withNoPosition <| ignoreFn lineTailWsFn >>
       blocksFn blockContext >> wsFallback docEndWs base >> earlyStopErrorFn blockContext) c s
-    if s.hasError then s
+    bif s.hasError then s
     else
       let s := s.mkNode ``Parser.document base
       s.popSyntax.pushSyntax (setStartLeading startPos s.stxStack.back)
@@ -2174,7 +2177,7 @@ public def locateError (ictx : InputContext) (pos : String.Pos.Raw) (e : Error) 
   if let some ⟨start, stop⟩ := e.unexpectedTk.getRange? then
     -- A parser that names what it found says it better than the token does, so its message stands.
     let unexpected :=
-      if !e.unexpected.isEmpty then
+      bif !e.unexpected.isEmpty then
         e.unexpected
       else
         match e.unexpectedTk with
@@ -2182,12 +2185,12 @@ public def locateError (ictx : InputContext) (pos : String.Pos.Raw) (e : Error) 
         | .atom _ val => s!"unexpected token '{val}'"
         | _ => "unexpected token"
     (start, some stop, { e with unexpected })
-  else if ictx.atEnd pos || ictx.get pos == '\n' then
+  else bif ictx.atEnd pos || ictx.get pos == '\n' then
     (pos, none, e)
   else
     -- A delimiter is a run of its character, so the whole run is one delimiter to mark.
     let ch := ictx.get pos
-    let stop := if isGrowableVersoDelimiter ch then findCharSeqEnd ictx ch pos else ictx.next pos
+    let stop := bif isGrowableVersoDelimiter ch then findCharSeqEnd ictx ch pos else ictx.next pos
     (pos, some stop, e)
 
 /--
@@ -2228,7 +2231,7 @@ public def documentInfo : ParserInfo where
   -- insert saves significant initialization time.
   collectKinds s :=
     documentKinds.foldl (init := s) fun s k =>
-      if s.contains k then s else s.insert k
+      bif s.contains k then s else s.insert k
 
 section
 open Lean.PrettyPrinter
@@ -2237,7 +2240,7 @@ open Lean.PrettyPrinter
 Parses as `ifVerso` if the option `doc.verso` is `true`, or as `ifNotVerso` otherwise.
 -/
 public def ifVersoFn (ifVerso ifNotVerso : ParserFn) : ParserFn := fun c s =>
-  if c.options.getBool `doc.verso then ifVerso c s
+  bif c.options.getBool `doc.verso then ifVerso c s
   else ifNotVerso c s
 
 @[inherit_doc ifVersoFn]
@@ -2263,11 +2266,11 @@ Checks `doc.verso.module` if explicitly set, otherwise falls back to `doc.verso`
 -/
 public def ifVersoModuleDocsFn (ifVerso ifNotVerso : ParserFn) : ParserFn := fun c s =>
   let useVerso :=
-    if c.options.contains `doc.verso.module then
+    bif c.options.contains `doc.verso.module then
       c.options.getBool `doc.verso.module
     else
       c.options.getBool `doc.verso
-  if useVerso then ifVerso c s
+  bif useVerso then ifVerso c s
   else ifNotVerso c s
 
 @[inherit_doc ifVersoModuleDocsFn]

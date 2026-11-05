@@ -21,7 +21,7 @@ def topDownSkipQuot (stx : Syntax) : TopDownSkipQuot := ⟨stx⟩
 partial instance [Monad m] : ForIn m TopDownSkipQuot Syntax where
   forIn := fun ⟨stx⟩ init f => do
     let rec @[specialize] loop stx b [Inhabited (type_of% b)] := do
-      if stx.isQuot then return ForInStep.yield b
+      bif stx.isQuot then return ForInStep.yield b
       match (← f stx b) with
       | ForInStep.yield b' =>
         let mut b := b'

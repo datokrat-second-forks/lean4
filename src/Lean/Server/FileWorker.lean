@@ -229,10 +229,10 @@ This option can only be set on the command line, not in the lakefile or via `set
     ServerTask.BaseIO.asTask do
       IO.sleep (server.reportDelayMs.get ctx.cmdlineOpts).toUInt32 -- "Debouncing 1."
       let (_, st) ← handleTasks #[.finished none <| toSnapshotTree doc.initSnap] |>.run {}
-      if (← cancelTk.isSet) then
+      bif (← cancelTk.isSet) then
         return ()
       -- callback at the end of reporting
-      if st.hasFatal then
+      bif st.hasFatal then
         discard <| ctx.chanOut.send <| .ofMsg <| mkFileProgressAtPosNotification doc.meta 0 .fatalError
       else
         discard <| ctx.chanOut.send <| .ofMsg <| mkFileProgressDoneNotification doc.meta
@@ -248,16 +248,17 @@ This option can only be set on the command line, not in the lakefile or via `set
     them to finish.
     -/
     handleTasks (ts : Array (SnapshotTask SnapshotTree)) : StateT ReportSnapshotsState BaseIO Unit := do
-      if (← cancelTk.isSet) then
+      bif (← cancelTk.isSet) then
         return ()
       let ts ← ts.flatMapM handleFinished
       -- all `ts` are now (likely) in-progress, report them
       sendFileProgress ts
       -- check again whether this has changed before committing to waiting
-      if (← ts.anyM (IO.hasFinished ·.task)) then
+      bif (← ts.anyM (IO.hasFinished ·.task)) then
         handleTasks ts
-      else if h : ts.size > 0 then
-        if !(← get).hasBlocked then  -- "Debouncing 2."
+      else bif h : ts.size >ᵇ 0 then
+        have h := lt_of_decideLT_eq_true h
+        bif !(← get).hasBlocked then  -- "Debouncing 2."
           publishDiagnostics ctx doc
           modify fun st => { st with hasBlocked := true }
         -- wait for at least one task to finish; there is a race condition here where a task may
@@ -270,7 +271,7 @@ This option can only be set on the command line, not in the lakefile or via `set
     /-- Recursively handles finished tasks and replaces them with their unfinished children. -/
     handleFinished (t : SnapshotTask SnapshotTree) :
         StateT ReportSnapshotsState BaseIO (Array (SnapshotTask SnapshotTree)) := do
-      if (← IO.hasFinished t.task) then
+      bif (← IO.hasFinished t.task) then
         let node ← IO.wait t.task
         handleNode node
         -- limit children's reported range to that of the parent, if any, to avoid strange
@@ -295,14 +296,14 @@ This option can only be set on the command line, not in the lakefile or via `set
 
     /-- Handles information of a single now-finished snapshot. -/
     handleNode (node : SnapshotTree) : StateT ReportSnapshotsState BaseIO Unit := do
-      if node.element.diagnostics.msgLog.hasUnreported then
+      bif node.element.diagnostics.msgLog.hasUnreported then
         let diags ←
           if let some memorized ← node.element.diagnostics.interactiveDiagsRef?.bindM fun ref => do
               return (← ref.get).bind (·.get? MemorizedInteractiveDiagnostics) then
             pure memorized.diags
           else
             let mut msgs := node.element.diagnostics.msgLog.toArray
-            if ! ctx.initParams.capabilities.silentDiagnosticSupport then
+            bif ! ctx.initParams.capabilities.silentDiagnosticSupport then
               msgs := msgs.filter (! ·.isSilent)
             let diags ← msgs.mapM
               (Widget.msgToInteractiveDiagnostic doc.meta.text · ctx.clientHasWidgets)
@@ -310,14 +311,14 @@ This option can only be set on the command line, not in the lakefile or via `set
               cacheRef.set <| some <| .mk { diags : MemorizedInteractiveDiagnostics }
             pure diags
         doc.appendDiagnostics diags
-        if (← get).hasBlocked then
+        bif (← get).hasBlocked then
           publishDiagnostics ctx doc
 
       modify fun st => { st with hasFatal := st.hasFatal || node.element.isFatal }
 
       if let some itree := node.element.infoTree? then
         let mut newInfoTrees := (← get).newInfoTrees.push itree
-        if (← get).hasBlocked then
+        bif (← get).hasBlocked then
           ctx.chanOut.sync.send <| .ofMsg <| ← mkIleanInfoUpdateNotification doc.meta newInfoTrees
           newInfoTrees := #[]
         modify fun st => { st with newInfoTrees, allInfoTrees := st.allInfoTrees.push itree }
@@ -330,7 +331,7 @@ This option can only be set on the command line, not in the lakefile or via `set
       let ranges := ranges.qsort (·.start < ·.start)
       let ranges := ranges.foldl (init := #[]) fun rs r => match rs[rs.size - 1]? with
         | some last =>
-          if last.stop < r.start then
+          bif last.stop <ᵇ r.start then
             rs.push r
           else
             rs.pop.push { last with stop := max last.stop r.stop }
@@ -379,7 +380,7 @@ def setupImports
     (stx         : Elab.HeaderSyntax)
     : Language.ProcessingT IO (Except Language.Lean.HeaderProcessedSnapshot SetupImportsResult) := do
   let importsAlreadyLoaded ← importsLoadedRef.modifyGet ((·, true))
-  if importsAlreadyLoaded then
+  bif importsAlreadyLoaded then
     -- As we never unload imports in the server, we should not run the code below twice in the
     -- same process and instead ask the watchdog to restart the worker
     IO.sleep 200  -- give user time to make further edits before restart
@@ -519,7 +520,7 @@ section Initialization
             some params.version
           | _ => none
         if let some version := version? then
-          if version < (← maxDocVersion.get) then
+          bif version <ᵇ (← maxDocVersion.get) then
             return
 
           -- note that because of `server.reportDelayMs`, we cannot simply set `maxDocVersion` here
@@ -597,7 +598,7 @@ section NotificationHandling
       serverRequestEmitter := sendUntypedServerRequest ctx
     }
     RequestM.runInIO (handleOnDidChange p) rc
-    if ¬ changes.isEmpty then
+    bif ! changes.isEmpty then
       let newDocText := foldDocumentChanges changes oldDoc.meta.text
       updateDocument { oldDoc.meta with
         version := newVersion
@@ -707,7 +708,7 @@ section MessageHandling
     | some task => ServerTask.IO.mapTaskCostly (t := task) fun (result : Except Error AvailableImportsCache) => do
       let mut ⟨availableImports, lastRequestTimestampMs⟩ ← IO.ofExcept result
       let timestampNowMs ← IO.monoMsNow
-      if timestampNowMs - lastRequestTimestampMs >= 10000 then
+      bif timestampNowMs - lastRequestTimestampMs ≥ᵇ 10000 then
         availableImports ← ImportCompletion.collectAvailableImports
       lastRequestTimestampMs := timestampNowMs
       let completions := ImportCompletion.find uri params.position text ⟨st.doc.initSnap.stx⟩ availableImports
@@ -728,7 +729,7 @@ section MessageHandling
       | "textDocument/completion" =>
         let params ← parseParams CompletionParams params
         -- Must not wait on import processing snapshot
-        if ! ImportCompletion.isImportCompletionRequest st.doc.meta.text ⟨st.doc.initSnap.stx⟩ params then
+        bif ! ImportCompletion.isImportCompletionRequest st.doc.meta.text ⟨st.doc.initSnap.stx⟩ params then
           return false
         let importCachingTask ← handleImportCompletionRequest id params
         set { st with importCachingTask? := some importCachingTask }
@@ -755,7 +756,7 @@ section MessageHandling
       let r := diag.fullRange
       let diagStartLine := r.start.line
       let diagEndLine   :=
-        if r.end.character == 0 then
+        bif r.end.character == 0 then
           r.end.line
         else
           r.end.line + 1
@@ -770,7 +771,7 @@ section MessageHandling
     match method with
     | "$/lean/rpc/call" =>
       let params ← RequestM.parseRequestParams Lsp.RpcCallParams params
-      if params.method != `Lean.Widget.getInteractiveDiagnostics then
+      bif params.method != `Lean.Widget.getInteractiveDiagnostics then
         return none
       let some seshRef := st.rpcSessions.get? params.sessionId
         | throw RequestError.rpcNeedsReconnect
@@ -785,12 +786,12 @@ section MessageHandling
       let some data := params.data?
         | throw (RequestError.invalidParams "Expected a data field on CodeAction.")
       let data ← RequestM.parseRequestParams CodeActionResolveData data
-      if data.providerName == importUnknownIdentifiersProvider then
+      bif data.providerName == importUnknownIdentifiersProvider then
         return some <| RequestTask.pure { response? := jsonParams, serialized := jsonParams.compress, isComplete := true }
-      if data.providerName == importAllUnknownIdentifiersProvider then
+      bif data.providerName == importAllUnknownIdentifiersProvider then
         return some <| ← RequestM.asTask do
           let unknownIdentifierRanges ← waitAllUnknownIdentifierMessageRanges st.doc
-          if unknownIdentifierRanges.isEmpty then
+          bif unknownIdentifierRanges.isEmpty then
             let p := toJson params
             return { response? := p, serialized := p.compress, isComplete := true }
           let action? ← handleResolveImportAllUnknownIdentifiersCodeAction? id params unknownIdentifierRanges
@@ -813,9 +814,9 @@ section MessageHandling
           | return r
         let isSourceAction := params.context.only?.any fun only =>
             only.contains "source" || only.contains "source.organizeImports"
-        if isSourceAction then
+        bif isSourceAction then
           let unknownIdentifierRanges ← waitAllUnknownIdentifierMessageRanges doc
-          if unknownIdentifierRanges.isEmpty then
+          bif unknownIdentifierRanges.isEmpty then
             return r
           let .ok (codeActions : Array CodeAction) := fromJson? response
             | return r
@@ -824,10 +825,10 @@ section MessageHandling
         else
           let requestedRange := doc.meta.text.lspRangeToUtf8Range params.range
           let (unknownIdentifierRanges, isAnyUnknownIdentifierMessage) ← waitUnknownIdentifierRanges doc requestedRange
-          if unknownIdentifierRanges.isEmpty then
+          bif unknownIdentifierRanges.isEmpty then
             return r
           let kind :=
-            if isAnyUnknownIdentifierMessage then
+            bif isAnyUnknownIdentifierMessage then
               "quickfix"
             else
               "refactor"
@@ -858,7 +859,7 @@ section MessageHandling
     | Except.ok requestTask =>
       ServerTask.IO.mapTaskCheap (t := requestTask) fun
         | Except.ok r => do
-          if ← cancelTk.wasCancelledByCancelRequest then
+          bif (← cancelTk.wasCancelledByCancelRequest) then
             -- Try not to emit a partial response if this request was cancelled.
             -- Clients usually discard responses for requests that they cancelled anyways,
             -- but it's still good to send less over the wire in this case.
@@ -874,7 +875,7 @@ section MessageHandling
       ctx.modifyPartialHandler method fun h => { h with
         requestsInFlight := h.requestsInFlight - 1
         pendingRefreshInfo? :=
-          if isComplete then
+          bif isComplete then
             none
           else
             some { lastRefreshTimestamp := timestamp, successiveRefreshAttempts := 0 }
@@ -891,7 +892,7 @@ section MessageHandling
     }
 
     let hasHandledSpecialCase ← handleStatefulPreRequestSpecialCases id method params
-    if hasHandledSpecialCase then
+    bif hasHandledSpecialCase then
       return
 
     let cancelTk ← RequestCancellationToken.new
@@ -930,7 +931,7 @@ section MainLoop
     let msg ← hIn.readLspMessage
     let filterFinishedTasks (acc : PendingRequestMap) (id : RequestID) (task : ServerTask (Except IO.Error Unit))
         : IO PendingRequestMap := do
-      if ← task.hasFinished then
+      bif (← task.hasFinished) then
         -- Handler tasks are constructed so that the only possible errors here
         -- are failures of writing a response into the stream.
         if let Except.error e ← task.wait then
@@ -943,7 +944,7 @@ section MainLoop
     -- Opportunistically (i.e. when we wake up on messages) check if any RPC session has expired.
     for (id, seshRef) in st.rpcSessions do
       let sesh ← seshRef.get
-      if (← sesh.hasExpired) then
+      bif (← sesh.hasExpired) then
         st := { st with rpcSessions := st.rpcSessions.erase id }
 
     set st
@@ -979,21 +980,21 @@ def runRefreshTasks : WorkerM (Array (ServerTask Unit)) := do
         let lastRefreshTimestamp? ← ctx.modifyGetPartialHandler method fun h => Id.run do
           let some info := h.pendingRefreshInfo?
             | return (none, h)
-          if info.successiveRefreshAttempts >= maxSuccessiveRefreshAttempts then
+          bif info.successiveRefreshAttempts ≥ᵇ maxSuccessiveRefreshAttempts then
             return (none, { h with pendingRefreshInfo? := none })
           return (some info.lastRefreshTimestamp, h)
         let some lastRefreshTimestamp := lastRefreshTimestamp?
           | let cancelled ← sleepWithCancellation refreshIntervalMs.toUInt32
-            if cancelled then
+            bif cancelled then
               return
             continue
 
         let currentTimestamp ← IO.monoMsNow
         let passedTimeMs := currentTimestamp - lastRefreshTimestamp
         let remainingTimeMs := refreshIntervalMs - passedTimeMs
-        if remainingTimeMs > 0 then
+        bif remainingTimeMs >ᵇ 0 then
           let cancelled ← sleepWithCancellation remainingTimeMs.toUInt32
-          if cancelled then
+          bif cancelled then
             return
 
         let currentTimestamp ← IO.monoMsNow
@@ -1004,7 +1005,7 @@ def runRefreshTasks : WorkerM (Array (ServerTask Unit)) := do
           -- the response for the request in flight.
           -- To avoid this (especially for long-running requests), we only emit refresh requests
           -- once there are no pending requests anymore.
-          if h.requestsInFlight > 0 then
+          bif h.requestsInFlight >ᵇ 0 then
             return (false, h)
           let h := { h with
             pendingRefreshInfo? := some {
@@ -1013,9 +1014,9 @@ def runRefreshTasks : WorkerM (Array (ServerTask Unit)) := do
             }
           }
           (true, h)
-        if ! canRefresh then
+        bif ! canRefresh then
           let cancelled ← sleepWithCancellation refreshIntervalMs.toUInt32
-          if cancelled then
+          bif cancelled then
             return
           continue
         let _ ← sendServerRequest (Option Nat) (Option Nat) ctx refreshMethod none
@@ -1024,15 +1025,15 @@ def runRefreshTasks : WorkerM (Array (ServerTask Unit)) := do
 where
 
   sleepWithCancellation (ms : UInt32) : BaseIO Bool := do
-    if (← IO.checkCanceled) then
+    bif (← IO.checkCanceled) then
       return true
     let napMs := 200
     let mut remainingMs := ms
     while remainingMs > 0 do
-      let remainingNapMs := if remainingMs < napMs then remainingMs else napMs
+      let remainingNapMs := bif remainingMs <ᵇ napMs then remainingMs else napMs
       IO.sleep remainingNapMs
       remainingMs := remainingMs - remainingNapMs
-      if (← IO.checkCanceled) then
+      bif (← IO.checkCanceled) then
         return true
     return false
 

@@ -242,7 +242,7 @@ private def mkSMulStep (kind : Kind) (isNat : Bool) (e₁ k a : Expr) : NormM (E
       pure (sr.type, sr.u, ← getNatCastFn', ← getMulFn', mkApp2 (mkConst ``Grind.smul_nat_eq_mul [sr.u]) sr.type sr.semiringInst)
   -- `↑k` is `k` itself when the scalar type is the carrier (`Nat` or `Int`); the cast is
   -- definitionally the identity there, and the kernel unfolds it in the expected-type check.
-  let k' := bif type.isConstOf (if isNat then ``Nat else ``Int) then k else mkApp castFn k
+  let k' := bif type.isConstOf (bif isNat then ``Nat else ``Int) then k else mkApp castFn k
   let e₂ ← share (mkApp2 mulFn k' a)
   return (e₂, mkExpectedPropHint (mkApp2 thm k a) (mkApp3 (mkConst ``Eq [u.succ]) type e₁ e₂))
 

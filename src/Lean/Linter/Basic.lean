@@ -38,7 +38,7 @@ ordinary elaboration of outer `set_option`s, since it
 -/
 partial def withSetOptionIn (cmd : Syntax → CommandElabM α) : Syntax → CommandElabM α :=
   fun stx => do
-  if stx.getKind == ``Lean.Parser.Command.in &&
+  bif stx.getKind == ``Lean.Parser.Command.in &&
      stx[0].getKind == ``Lean.Parser.Command.set_option then
       -- Do not modify the infotrees when elaborating, and silently ignore errors.
       let opts ← withEnableInfoTree false try

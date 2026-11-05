@@ -127,7 +127,7 @@ where
   go
     | [] => [s]
     | x :: xs =>
-      if s.tailPos < x.tailPos then s :: x :: xs else x :: go xs
+      bif s.tailPos <ᵇ x.tailPos then s :: x :: xs else x :: go xs
 
 /--
 Handles state transitions that are not due to a new token. If `nextToken?` is `none`, then there are
@@ -146,7 +146,7 @@ private def HandleOverlapState.untilToken (st : HandleOverlapState) (nextToken? 
       -- we end it now
       let endNow : Bool :=
         if let some t := nextToken? then curr.tailPos ≤ t.pos else true
-      if endNow then
+      bif endNow then
         st := { st with
           nonOverlapping := st.nonOverlapping.push curr,
           -- Because all surrounding tokens end later than the current token, the new current token
@@ -180,7 +180,7 @@ where
       | none, t =>
         some t
       | some soFar, t =>
-        if better t soFar then
+        bif better t soFar then
           some t
         else
           some soFar
@@ -201,13 +201,13 @@ private def HandleOverlapState.token (st : HandleOverlapState) (t : AbsoluteLspS
   let some curr := st.current?
     | -- If there was no current token, then there's no surrounding tokens either
       return { st with current? := some t }
-  if curr.priority > t.priority then
+  bif curr.priority >ᵇ t.priority then
     -- Insert t into surrounding, continue with current
     return st.insertSurrounding t
   -- Tied priorities: make the token that starts later or ends earlier current.
-  if curr.priority == t.priority then
-    if curr.pos == t.pos then -- if `t` starts later, transition to it. Same start, keep the one that ends first.
-      if curr.tailPos < t.tailPos then
+  bif curr.priority == t.priority then
+    bif curr.pos == t.pos then -- if `t` starts later, transition to it. Same start, keep the one that ends first.
+      bif curr.tailPos <ᵇ t.tailPos then
         return st.insertSurrounding t
 
   -- Transition to t, save current if it's longer than t
@@ -217,12 +217,12 @@ private def HandleOverlapState.token (st : HandleOverlapState) (t : AbsoluteLspS
       let curr := { curr with tailPos := t.pos }
       -- Only save the token if it actually takes up space. This step is what filters out
       -- actual duplicates.
-      if curr.pos < curr.tailPos then
+      bif curr.pos <ᵇ curr.tailPos then
         st.nonOverlapping.push curr
       else
         st.nonOverlapping
   }
-  if curr.tailPos > t.tailPos then
+  bif curr.tailPos >ᵇ t.tailPos then
     return st.insertSurrounding curr
   else
     return st
@@ -290,7 +290,7 @@ def computeDeltaLspSemanticTokens (tokens : Array AbsoluteLspSemanticToken) : Se
   let mut lastPos : Lsp.Position := ⟨0, 0⟩
   for ⟨pos, tailPos, tokenType, _⟩ in tokens do
     let deltaLine := pos.line - lastPos.line
-    let deltaStart := pos.character - (if pos.line == lastPos.line then lastPos.character else 0)
+    let deltaStart := pos.character - (bif pos.line == lastPos.line then lastPos.character else 0)
     let length := tailPos.character - pos.character
     let tokenType := tokenType.toNat
     let tokenModifiers := 0
@@ -320,7 +320,7 @@ where
   -/
   codeLine (line : Syntax) (value : String) : Option Syntax := do
     let ⟨pos, tailPos⟩ ← line.getRange?
-    let tailPos := if value.endsWith "\n" then tailPos - '\n' else tailPos
+    let tailPos := bif value.endsWith "\n" then tailPos - '\n' else tailPos
     return .ofRange ⟨pos, tailPos⟩
 
   goArg (arg : TSyntax ``Parser.arg) :
@@ -466,16 +466,16 @@ partial def collectSyntaxBasedSemanticTokens (text : FileMap) : (stx : Syntax) �
     let tokens := collectSyntaxBasedSemanticTokens text e
     tokens.push { stx := field, type := SemanticTokenType.property }
   | stx => Id.run do
-    if noHighlightKinds.contains stx.getKind then
+    bif noHighlightKinds.contains stx.getKind then
       return #[]
-    if docKinds.contains stx.getKind then
+    bif docKinds.contains stx.getKind then
       -- Docs are only highlighted in Verso format.
-      if stx[1].isOfKind ``Lean.Parser.Command.versoCommentBody then
+      bif stx[1].isOfKind ``Lean.Parser.Command.versoCommentBody then
         return collectVersoTokens stx[1] (collectSyntaxBasedSemanticTokens text)
       else
         return #[]
     let mut tokens :=
-      if stx.isOfKind choiceKind then
+      bif stx.isOfKind choiceKind then
         collectSyntaxBasedSemanticTokens text stx[0]
       else
         stx.getArgs.map (collectSyntaxBasedSemanticTokens text) |>.flatten
@@ -483,7 +483,7 @@ partial def collectSyntaxBasedSemanticTokens (text : FileMap) : (stx : Syntax) �
       | return tokens
     let isRegularKeyword := val.front?.any isIdFirst
     let isHashKeyword := ((val.dropPrefix? '#').bind (·.front?)).any isIdFirst
-    if ! isRegularKeyword && ! isHashKeyword then
+    bif ! isRegularKeyword && ! isHashKeyword then
       return tokens
     return tokens.push { stx, type := keywordSemanticTokenMap.getD val .keyword }
 
@@ -498,12 +498,12 @@ def collectInfoBasedSemanticTokens (i : Elab.InfoTree) : Array LeanSemanticToken
       if let Expr.fvar fvarId .. := ti.expr then
         if let some localDecl := ti.lctx.find? fvarId then
           -- Recall that `isAuxDecl` is an auxiliary declaration used to elaborate a recursive definition.
-          if localDecl.isAuxDecl then
-            if ti.isBinder then
+          bif localDecl.isAuxDecl then
+            bif ti.isBinder then
               return { stx := ti.stx, type := SemanticTokenType.function }
-          else if ! localDecl.isImplementationDetail then
+          else bif ! localDecl.isImplementationDetail then
             return { stx := ti.stx, type := SemanticTokenType.variable }
-    if ti.stx.getKind == Parser.Term.identProjKind then
+    bif ti.stx.getKind == Parser.Term.identProjKind then
       return {stx := ti.stx, type := SemanticTokenType.property }
     none
 
@@ -526,7 +526,7 @@ def computeSemanticTokens  (doc : EditableDocument) (beginPos : String.Pos.Raw)
     (endPos? : Option String.Pos.Raw) (snaps : List Snapshots.Snapshot) : RequestM SemanticTokens := do
   let mut leanSemanticTokens := #[]
   for s in snaps do
-    if s.endPos <= beginPos then
+    bif s.endPos ≤ᵇ beginPos then
       continue
     let syntaxBasedSemanticTokens := collectSyntaxBasedSemanticTokens doc.meta.text s.stx
     let infoBasedSemanticTokens := collectInfoBasedSemanticTokens s.infoTree

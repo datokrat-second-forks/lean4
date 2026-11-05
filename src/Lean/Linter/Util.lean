@@ -39,7 +39,7 @@ where
         return some <| i :: results
       else
         return some results
-    else if i.contains range.start && i.contains (includeStop := true) range.stop then
+    else bif i.contains range.start && i.contains (includeStop := true) range.stop then
       if let .ofMacroExpansionInfo i := i then
         return some [i]
       else
@@ -52,7 +52,7 @@ def getDeclsByBody (t : InfoTree) : List Name :=
   t.collectNodesBottomUp fun ctx i _ decls =>
     match i with
     | .ofCustomInfo i =>
-      if i.value.typeName == ``Lean.Elab.Term.BodyInfo then
+      bif i.value.typeName == ``Lean.Elab.Term.BodyInfo then
         if let some decl := ctx.parentDecl? then
           decl :: decls
         else decls
@@ -70,7 +70,7 @@ def getNewDecls (t : InfoTree) : List Name :=
   t.collectNodesBottomUp fun _ i _ acc =>
     match i with
     | .ofTermInfo ti =>
-      if ti.isBinder && ti.expr.isConst then
+      bif ti.isBinder && ti.expr.isConst then
         ti.expr.constName! :: acc
       else
         acc
@@ -92,7 +92,7 @@ def findMatchingDecl? [Monad m] [MonadInfoTree m] [MonadEnv m] [MonadFileMap m]
       let some ranges ← findDeclarationRangesCore? declName | continue
       let r := ranges.range
       unless !r.pos.lt stxRange.pos && !stxRange.endPos.lt r.endPos do continue
-      if best?.all fun (_, b) => r.pos.lt b.pos then
+      bif best?.all fun (_, b) => r.pos.lt b.pos then
         best? := some (declName, r)
   return best?.map (·.1)
 

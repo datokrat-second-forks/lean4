@@ -171,19 +171,19 @@ to declarations of type `IgnoreFunction` for use by the unused variables linter.
 builtin_initialize
   let mkAttr (builtin : Bool) (name : Name) := registerBuiltinAttribute {
     name
-    descr           := (if builtin then "(builtin) " else "") ++
+    descr           := (bif builtin then "(builtin) " else "") ++
       "Marks a function of type `Lean.Linter.IgnoreFunction` for suppressing unused variable warnings"
     applicationTime := .afterCompilation
     add             := fun decl stx kind => do
       Attribute.Builtin.ensureNoArgs stx
-      if !builtin then
+      bif !builtin then
         ensureAttrDeclIsMeta name decl kind
       unless kind == AttributeKind.global do throwAttrMustBeGlobal name kind
       let declType := (← getConstInfo decl).type
       unless declType.isConstOf ``IgnoreFunction do
         throwAttrDeclNotOfExpectedType name decl declType (mkConst ``Lean.Linter.IgnoreFunction)
       let env ← getEnv
-      if builtin then
+      bif builtin then
         let h := mkConst decl
         declareBuiltin decl <| mkApp (mkConst ``addBuiltinUnusedVariablesIgnoreFn) h
       else
@@ -321,20 +321,20 @@ partial def visitAssignments (set : IO.Ref (Std.HashSet USize))
 where
   /-- Visit a `PersistentHashMap.Node`, collecting all fvars in it into `fvarUses` -/
   visitNode node : MonadCacheT Expr Unit IO Unit := do
-    if ← insertObj set node then
+    bif (← insertObj set node) then
       match node with
       | .entries entries => for e in entries do visitEntry e
       | .collision _ vs _ => for e in vs do visitExpr e
   /-- Visit a `PersistentHashMap.Entry`, collecting all fvars in it into `fvarUses` -/
   visitEntry e : MonadCacheT Expr Unit IO Unit := do
-    if ← insertObj set e then
+    bif (← insertObj set e) then
       match e with
       | .entry _ e => visitExpr e
       | .ref node => visitNode node
       | .null => pure ()
   /-- Visit an `Expr`, collecting all fvars in it into `fvarUses` -/
   visitExpr e : MonadCacheT Expr Unit IO Unit := do
-    if ← insertObj set e then
+    bif (← insertObj set e) then
       ForEachExpr.visit (e := e) fun e => do
         match e with
         | .fvar id => fvarUses.modify (·.insert id); return false
@@ -398,7 +398,7 @@ where
         let ignored ← read
         match info with
         | .ofCustomInfo ti =>
-          if !linter.unusedVariables.analyzeTactics.get ci.options then
+          bif !linter.unusedVariables.analyzeTactics.get ci.options then
             if let some bodyInfo := ti.value.get? Elab.Term.BodyInfo then
               if let some value := bodyInfo.value? then
                 -- the body is the only `Expr` we will analyze in this case
@@ -412,31 +412,31 @@ where
                   go children.toArray ci
                 return false
         | .ofTermInfo ti =>
-          if ignored then return true
+          bif ignored then return true
           match ti.expr with
           | .const .. =>
-            if ti.isBinder then
+            bif ti.isBinder then
               let some range := info.range? | return true
               let .original .. := info.stx.getHeadInfo | return true -- we are not interested in canonical syntax here
               modify fun s => { s with constDecls := s.constDecls.insert range }
           | .fvar id .. =>
             let some range := info.range? | return true
             let .original .. := info.stx.getHeadInfo | return true -- we are not interested in canonical syntax here
-            if ti.isBinder then
+            bif ti.isBinder then
               -- This is a local variable declaration.
-              if ignored then return true
+              bif ignored then return true
               let some ldecl := ti.lctx.find? id | return true
               -- Skip declarations which are outside the command syntax range, like `variable`s
               -- (it would be confusing to lint these), or those which are macro-generated
-              if !cmdStxRange.contains range.start || ldecl.userName.hasMacroScopes then return true
+              bif !cmdStxRange.contains range.start || ldecl.userName.hasMacroScopes then return true
               let opts : LinterOptions := { toOptions := ci.options, linterSets }
               -- we have to check for the option again here because it can be set locally
-              if !getLinterUnusedVariables opts then return true
+              bif !getLinterUnusedVariables opts then return true
               let stx := skipDeclIdIfPresent info.stx
               if let .str _ s := stx.getId then
                 -- If the variable name is `_foo` then it is intentionally (possibly) unused, so skip.
                 -- This is the suggested way to silence the warning
-                if s.startsWith "_" then return true
+                bif s.startsWith "_" then return true
               -- Record this either as a new `fvarDefs`, or an alias of an existing one
               modify fun s =>
                 if let some ref := s.fvarDefs[range]? then
@@ -450,11 +450,11 @@ where
         | .ofTacticInfo ti =>
           -- When ignoring new binders, no need to look at intermediate tactic states either as
           -- references to binders outside the body will be covered by the body `Expr`
-          if ignored then return true
+          bif ignored then return true
           -- Keep track of the `MetavarContext` after a tactic for later
           modify fun s => { s with assignments := s.assignments.push ti.mctxAfter.eAssignment }
         | .ofFVarAliasInfo i =>
-          if ignored then return true
+          bif ignored then return true
           -- record any aliases we find
           modify fun s =>
             let id := followAliases s.fvarAliases i.baseId
@@ -464,7 +464,7 @@ where
   /-- Since declarations attach the declaration info to the `declId`,
   we skip that to get to the `.ident` if possible. -/
   skipDeclIdIfPresent (stx : Syntax) : Syntax :=
-    if stx.isOfKind ``Lean.Parser.Command.declId then
+    bif stx.isOfKind ``Lean.Parser.Command.declId then
       stx[0]
     else
       stx
@@ -482,7 +482,7 @@ def unusedVariables : Linter where
       return
 
     -- NOTE: `messages` is local to the current command
-    if (← get).messages.hasErrors then
+    bif (← get).messages.hasErrors then
       return
 
     let some cmdStxRange := cmdStx.getRange?
@@ -490,7 +490,7 @@ def unusedVariables : Linter where
 
     -- We used to look for `sorry` on the `Expr` level, which is more robust, but just too expensive
     -- on huge declarations (see e.g. `omega_stress` benchmark).
-    if hasSorry cmdStx then
+    bif hasSorry cmdStx then
       return
 
     let infoTrees := (← get).infoState.trees.toArray
@@ -501,7 +501,7 @@ def unusedVariables : Linter where
     let (_, s) ← (collectReferences infoTrees cmdStxRange linterSets).run {}
 
     -- If there are no local defs then there is nothing to do
-    if s.fvarDefs.isEmpty then return
+    bif s.fvarDefs.isEmpty then return
 
     -- Resolve all recursive references in `fvarAliases`.
     -- At this point everything in `fvarAliases` is guaranteed not to be itself an alias,
@@ -514,7 +514,7 @@ def unusedVariables : Linter where
     -- Collect all non-alias fvars corresponding to `fvarUses` by resolving aliases in the list.
     -- Unlike `s.fvarUses`, `fvarUsesRef` is guaranteed to contain no aliases.
     let fvarUsesRef ← IO.mkRef <| fvarAliases.fold (init := s.fvarUses) fun fvarUses id baseId =>
-      if fvarUses.contains id then fvarUses.insert baseId else fvarUses
+      bif fvarUses.contains id then fvarUses.insert baseId else fvarUses
 
     -- Collect ignore functions
     let ignoreFns ← getUnusedVariablesIgnoreFns
@@ -526,9 +526,9 @@ def unusedVariables : Linter where
       let fvarUses ← fvarUsesRef.get
       -- If any of the `fvar`s corresponding to this declaration is (an alias of) a variable in
       -- `fvarUses`, then it is used
-      if aliases.any fun id => fvarUses.contains (getCanonVar id) then continue
+      bif aliases.any fun id => fvarUses.contains (getCanonVar id) then continue
       -- If this is a global declaration then it is (potentially) used after the command
-      if s.constDecls.contains range then continue
+      bif s.constDecls.contains range then continue
 
       -- Get the syntax stack for this variable declaration
       let some ((id', _) :: stack) := cmdStx.findStack? (·.getRange?.any (·.includes range))
@@ -536,10 +536,10 @@ def unusedVariables : Linter where
 
       -- If it is blacklisted by an `ignoreFn` then skip it
       let linterOpts ← opts.toLinterOptions
-      if id'.isIdent && ignoreFns.any (· declStx stack linterOpts) then continue
+      bif id'.isIdent && ignoreFns.any (· declStx stack linterOpts) then continue
 
       -- Evaluate ignore functions again on macro expansion outputs
-      if ← infoTrees.anyM fun tree => do
+      bif ← infoTrees.anyM fun tree => do
         let some macroExpansions ← collectMacroExpansions? range tree | return false
         return macroExpansions.any fun expansion =>
           -- in a macro expansion, there may be multiple leafs whose (synthetic) range
@@ -556,7 +556,7 @@ def unusedVariables : Linter where
         continue
 
       -- Visiting the metavariable assignments is expensive so we delay initialization
-      if !initializedMVars then
+      bif !initializedMVars then
         -- collect additional `fvarUses` from tactic assignments
         visitAssignments (← IO.mkRef {}) fvarUsesRef s.assignments
         -- Resolve potential aliases again to preserve `fvarUsesRef` invariant
@@ -564,7 +564,7 @@ def unusedVariables : Linter where
         initializedMVars := true
         let fvarUses ← fvarUsesRef.get
         -- Redo the initial check because `fvarUses` could be bigger now
-        if aliases.any fun id => fvarUses.contains (getCanonVar id) then continue
+        bif aliases.any fun id => fvarUses.contains (getCanonVar id) then continue
 
       -- If we made it this far then the variable is unused and not ignored
       unused := unused.push (declStx, userName)

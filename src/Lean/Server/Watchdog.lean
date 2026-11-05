@@ -287,7 +287,7 @@ section ServerM
 
     for removedImport in removedImports do
       let importedByRemovedImport' := importedBy.get! removedImport |>.erase uri
-      if importedByRemovedImport'.isEmpty then
+      bif importedByRemovedImport'.isEmpty then
         importedBy := importedBy.erase removedImport
       else
         importedBy := importedBy.insert removedImport importedByRemovedImport'
@@ -299,7 +299,7 @@ section ServerM
           |> importedBy.insert addedImport
 
     let imports :=
-      if imports.isEmpty then
+      bif imports.isEmpty then
         d.imports.erase uri
       else
         d.imports.insert uri imports
@@ -523,8 +523,8 @@ section ServerM
       let rd := rd.modifyFinalizedWorkerILeanVersions (·.insert uri params.version)
       set rd
       for pendingWaitForILeanRequest in pendingWaitForILeanRequests do
-        if pendingWaitForILeanRequest.uri == uri
-            && pendingWaitForILeanRequest.version <= params.version then
+        bif pendingWaitForILeanRequest.uri == uri
+            && pendingWaitForILeanRequest.version ≤ᵇ params.version then
           writeMessage {
             id := pendingWaitForILeanRequest.id
             result := ⟨⟩
@@ -532,7 +532,7 @@ section ServerM
           }
 
   def emitServerRequestResponse [ToJson α] (fw : FileWorker) (r : Response α) : IO Unit := do
-    if ! ((← fw.state.atomically get) matches .running) then
+    bif ! ((← fw.state.atomically get) matches .running) then
       return
     try
       fw.stdin.writeLspResponse r
@@ -540,7 +540,7 @@ section ServerM
       pure ()
 
   def emitServerRequestResponseError (fw : FileWorker) (r : ResponseError Unit) : IO Unit := do
-    if ! ((← fw.state.atomically get) matches .running) then
+    bif ! ((← fw.state.atomically get) matches .running) then
       return
     try
       fw.stdin.writeLspResponseError r
@@ -554,15 +554,15 @@ section ServerM
   def ModuleQueryMatchScore.compare (ms1 ms2 : ModuleQueryMatchScore) : Ordering :=
     let ⟨e1, s1⟩ := ms1
     let ⟨e2, s2⟩ := ms2
-    if e1 && !e2 then
+    bif e1 && !e2 then
       .gt
-    else if !e1 && e2 then
+    else bif !e1 && e2 then
       .lt
     else
       let d := s1 - s2
-      if d >= 0.0001 then
+      bif d ≥ᵇ 0.0001 then
         .gt
-      else if d <= -0.0001 then
+      else bif d ≤ᵇ -0.0001 then
         .lt
       else
         .eq
@@ -575,7 +575,7 @@ section ServerM
     let ⟨ms1, _, s1⟩ := m1
     let ⟨ms2, _, s2⟩ := m2
     let r := ms1.compare ms2
-    if r != .eq then
+    bif r != .eq then
       r
     else
       Ord.compare s2.length s1.length
@@ -583,36 +583,36 @@ section ServerM
   def ModuleQueryMatch.compare (m1 m2 : ModuleQueryMatch) : Ordering :=
     let d1 := m1.decl
     let d2 := m2.decl
-    if d2.isSuffixOf d1 then
+    bif d2.isSuffixOf d1 then
       .lt
-    else if d1.isSuffixOf d2 then
+    else bif d1.isSuffixOf d2 then
       .gt
     else
       m1.fastCompare m2
 
   def matchAgainstQuery? (query : LeanModuleQuery) (decl : Name) : Option ModuleQueryMatch := do
-    if isPrivateName decl then
+    bif isPrivateName decl then
       none
     let mut bestMatch? : Option ModuleQueryMatch := matchDecl? decl decl.toString
     for openNamespace in query.openNamespaces do
       match openNamespace with
       | .allExcept «namespace» exceptions =>
-        if exceptions.contains decl then
+        bif exceptions.contains decl then
           continue
-        if ! «namespace».isPrefixOf decl then
+        bif ! «namespace».isPrefixOf decl then
           continue
         let namespacedDecl : Name := decl.replacePrefix «namespace» .anonymous
         let match? := matchDecl? decl namespacedDecl.toString
         bestMatch? := chooseBestMatch? bestMatch? match?
       | .renamed «from» to =>
-        if decl != «from» then
+        bif decl != «from» then
           continue
         let match? := matchDecl? decl to.toString
         bestMatch? := chooseBestMatch? bestMatch? match?
     bestMatch?
   where
     matchDecl? (decl : Name) (identifier : String) : Option ModuleQueryMatch := do
-      if identifier == query.identifier then
+      bif identifier == query.identifier then
         return { decl, declAsString := decl.toString, isExactMatch := true, score := 1.0 }
       let score ← FuzzyMatching.fuzzyMatchScoreWithThreshold? query.identifier identifier
       return { decl, declAsString := decl.toString, isExactMatch := false, score }
@@ -621,7 +621,7 @@ section ServerM
       | none, some m => some m
       | some m, none => some m
       | some m1, some m2 =>
-        if m1.compare m2 == .lt then
+        bif m1.compare m2 == .lt then
           m2
         else
           m1
@@ -643,7 +643,7 @@ section ServerM
           isExactMatch := m.ident.isExactMatch
         }
         queryResults := queryResults.push result
-      if ← cancelTk.isSet then
+      bif (← cancelTk.isSet) then
         emitServerRequestResponseError fw {
           id, code := ErrorCode.requestCancelled, message := ""
         }
@@ -718,12 +718,12 @@ section ServerM
           targetSelectionRange := newTargetRange
         }
       }
-    if r.all (·.isDefault) then
+    bif r.all (·.isDefault) then
       -- The file worker produced fallback location links.
       -- Let's see if we can obtain better ones using the .ileans, just to be safe.
       let params' ← parseParams TextDocumentPositionParams req.param
       let definitions ← findDefinitions fw params'
-      if ! definitions.isEmpty then
+      bif ! definitions.isEmpty then
         return toJson definitions
     return toJson <| r.map (·.toLocationLink)
 
@@ -774,7 +774,7 @@ section ServerM
 
         pendingWorkerToWatchdogRequests := ∅
         for (id, task, cancelTk) in pendingWorkerToWatchdogRequests' do
-          if ← task.hasFinished then
+          bif (← task.hasFinished) then
             continue
           pendingWorkerToWatchdogRequests := pendingWorkerToWatchdogRequests.insert id (task, cancelTk)
 
@@ -789,7 +789,7 @@ section ServerM
       fw.state.atomically (m := StateT (Std.TreeMap RequestID (ServerTask Unit × CancelToken)) ServerM) do
         let s ← get
         let uri := fw.doc.uri
-        if s matches .terminating then
+        bif s matches .terminating then
           return
         -- Re. `o.writeLspMessage msg`:
         -- Writes to Lean I/O channels are atomic, so these won't trample on each other.
@@ -806,14 +806,14 @@ section ServerM
             writeSerializedMessage resp
         | .responseError id code _ _ => do
           let wasPending ← erasePendingRequest uri id
-          if code matches .requestCancelled then
+          bif code matches .requestCancelled then
             let pendingWorkerToWatchdogRequests ← getThe (Std.TreeMap RequestID (ServerTask Unit × CancelToken))
             if let some (_, cancelTk) := pendingWorkerToWatchdogRequests.get? id then
               cancelTk.set
-          if wasPending then
+          bif wasPending then
             writeSerializedMessage msg
         | .request id method =>
-          if method == "$/lean/queryModule" then
+          bif method == "$/lean/queryModule" then
             if let .ok params := parseRequestParams? LeanQueryModuleParams msg then
               let (task, cancelTk) ← handleQueryModule fw id params
               modifyThe (Std.TreeMap RequestID (ServerTask Unit × CancelToken)) (·.insert params.sourceRequestID (task, cancelTk))
@@ -850,7 +850,7 @@ section ServerM
     let exitCode ← Std.Mutex.new none
     let initialDependencyBuildMode := m.dependencyBuildMode
     let updatedDependencyBuildMode :=
-      if initialDependencyBuildMode matches .once then
+      bif initialDependencyBuildMode matches .once then
         -- By sending the first `didOpen` notification, we build the dependencies once
         -- => no future builds
         .never
@@ -928,7 +928,7 @@ section ServerM
     | WorkerState.cannotWrite | WorkerState.terminating =>
       return
     | WorkerState.crashed =>
-      if ! (msg matches .notification "textDocument/didChange" ..) then
+      bif ! (msg matches .notification "textDocument/didChange" ..) then
         -- Only restart crashed FileWorkers on `didChange`.
         return
       eraseFileWorker uri
@@ -1114,14 +1114,14 @@ def handleCallHierarchyOutgoingCalls (p : CallHierarchyOutgoingCallsParams)
       return itemData.name == parentDecl.toName
 
     let outgoingUsages := outgoingUsages.map (·.range)
-    if outgoingUsages.isEmpty then
+    bif outgoingUsages.isEmpty then
       return none
 
     let some item := callHierarchyItemOf? references ident
       | return none
 
     -- filter local defs from outgoing calls
-    if item.name == p.item.name then
+    bif item.name == p.item.name then
       return none
 
     return some ⟨item, outgoingUsages⟩
@@ -1173,7 +1173,7 @@ def handleModuleHierarchyImportedBy (p : LeanModuleHierarchyImportedByParams) : 
   }
 
 def handleWorkspaceSymbol (p : WorkspaceSymbolParams) : ReaderT ReferenceRequestContext IO (Array SymbolInformation) := do
-  if p.query.isEmpty then
+  bif p.query.isEmpty then
     return #[]
   let references := (← read).references
   let filterMapIdent ident := do
@@ -1184,7 +1184,7 @@ def handleWorkspaceSymbol (p : WorkspaceSymbolParams) : ReaderT ReferenceRequest
   let ltSymbol symbol1 symbol2 :=
     let (ident1, score1) := symbol1.ident
     let (ident2, score2) := symbol2.ident
-    if score1 == score2 then
+    bif score1 == score2 then
       ident1.length < ident2.length
     else
       score1 > score2
@@ -1206,7 +1206,7 @@ def handlePrepareRename (p : PrepareRenameParams) : ReaderT ReferenceRequestCont
   return references.findRange? module p.position (includeStop := true)
 
 def handleRename (p : RenameParams) : ReaderT ReferenceRequestContext IO Lsp.WorkspaceEdit := do
-  if (String.toName p.newName).isAnonymous then
+  bif (String.toName p.newName).isAnonymous then
     throwServerError s!"Can't rename: `{p.newName}` is not an identifier"
   let mut refs : Std.HashMap DocumentUri (Std.TreeMap Lsp.Position Lsp.Position) := ∅
   for { uri, range } in (← handleReference { p with context.includeDeclaration := true }) do
@@ -1217,7 +1217,7 @@ def handleRename (p : RenameParams) : ReaderT ReferenceRequestContext IO Lsp.Wor
     let mut last := ⟨0, 0⟩
     let mut arr := #[]
     for (start, stop) in map do
-      if last ≤ start then
+      bif last ≤ᵇ start then
         arr := arr.push { range := ⟨start, stop⟩, newText := p.newName }
         last := stop
     return changes.insert uri arr
@@ -1248,7 +1248,7 @@ section NotificationHandling
       | return
     let oldDoc := fw.doc
     let newVersion := doc.version?.getD 0
-    if changes.isEmpty then
+    bif changes.isEmpty then
       return
     let newDocText := foldDocumentChanges changes oldDoc.text
     let newDoc : DocumentMeta := { oldDoc with
@@ -1271,7 +1271,7 @@ section NotificationHandling
     let dependents := importData.importedBy.getD p.textDocument.uri ∅
 
     for ⟨uri, _⟩ in fws do
-      if ! dependents.contains uri then
+      bif ! dependents.contains uri then
         continue
       notifyAboutStaleDependency uri p.textDocument.uri
 
@@ -1282,20 +1282,20 @@ section NotificationHandling
     let changes := p.changes.filterMap fun c => do return (c, ← fileUriToPath? c.uri)
     let leanChanges := changes.filter fun (_, path) => path.extension == "lean"
     let ileanChanges := changes.filter fun (_, path) => path.extension == "ilean"
-    if ! leanChanges.isEmpty then
+    bif ! leanChanges.isEmpty then
       let importData ← (← read).importData.get
       for (c, _) in leanChanges do
         let dependents := importData.importedBy.getD c.uri ∅
         for dependent in dependents do
           notifyAboutStaleDependency dependent c.uri
-    if ! ileanChanges.isEmpty then
+    bif ! ileanChanges.isEmpty then
       let oleanSearchPath ← Lean.searchPathRef.get
       for (c, path) in ileanChanges do
         if let FileChangeType.Deleted := c.type then
           modifyReferences (·.removeIlean path)
           continue
         let isIleanInSearchPath := (← searchModuleNameOfFileName path oleanSearchPath).isSome
-        if ! isIleanInSearchPath then
+        bif ! isIleanInSearchPath then
           continue
         try
           let ilean ← Ilean.load path
@@ -1322,7 +1322,7 @@ end NotificationHandling
 section MessageHandling
   def forwardRequestToWorker (id : RequestID) (method : String) (params : Json) : ServerM Unit := do
     let fileId : DocumentUri ←
-      if method == "$/lean/rpc/connect" then
+      bif method == "$/lean/rpc/connect" then
         let ps ← parseParams Lsp.RpcConnectParams params
         pure <| fileSource ps
       else
@@ -1331,7 +1331,7 @@ section MessageHandling
           writeMessage <| e.toLspResponseError id
           return
         | Except.ok uri => pure uri
-    if ! (← fileWorkerExists fileId) then
+    bif ! (← fileWorkerExists fileId) then
       /- Clients may send requests to closed files, which we respond to with an error.
       For example, VSCode sometimes sends requests just after closing a file,
       and RPC clients may also do so, e.g. due to remaining timers. -/
@@ -1424,7 +1424,7 @@ section MessageHandling
         let some lastFinalizedVersion := (← get).finalizedWorkerILeanVersions[uri]?
           | deferResponse
             return
-        if lastFinalizedVersion < version then
+        bif lastFinalizedVersion <ᵇ version then
           deferResponse
           return
         writeMessage {
@@ -1506,7 +1506,7 @@ section MainLoop
     for (_, fw) in workers do
       let some commTask := fw.commTask?
         | continue
-      if (← getWorkerState fw) matches WorkerState.crashed then
+      bif (← getWorkerState fw) matches WorkerState.crashed then
         continue
       workerTasks := workerTasks.push <| commTask.mapCheap (ServerEvent.workerEvent fw)
 
@@ -1539,7 +1539,7 @@ section MainLoop
         throwServerError s!"IO error while processing events for {uri}: {e}"
       | WorkerEvent.crashed exitCode =>
         let (errorCode, errorCausePointer) :=
-          if exitCode = 1 then
+          bif exitCode =ᵇ 1 then
             (ErrorCode.workerExited, "see stderr for exception")
           else
             (ErrorCode.workerCrashed, "likely due to a stack overflow or a bug")
@@ -1687,10 +1687,10 @@ def startLoadingReferences (referenceData : Std.Mutex ReferenceData) : IO Unit :
       try
         -- Avoid loading an ilean twice
         let realPath ← FS.realPath path
-        if visitedPaths.contains realPath then continue
+        bif visitedPaths.contains realPath then continue
         visitedPaths := visitedPaths.insert realPath
 
-        let compactedIlean? : Option Ilean ← if checkForCompactedIlean then
+        let compactedIlean? : Option Ilean ← bif checkForCompactedIlean then
           try
             let .some compactedIlean ← Ilean.loadCompacted? path | pure .none
             compactedIleanCount := compactedIleanCount + 1
@@ -1719,7 +1719,7 @@ def startLoadingReferences (referenceData : Std.Mutex ReferenceData) : IO Unit :
 
     -- This warning message only makes sense if we're only building .ilean.mmap files for read-only toolchain and library files.
     -- For other use cases, this will be too noisy.
-    if compactedIleanErrors > 0 then
+    bif compactedIleanErrors >ᵇ 0 then
       (← getStderr).putStrLn s!"Attempted to load {compactedIleanCount} .{Ilean.compactedExt} {compactedIleanCount.plural "file"}, but failed to load {compactedIleanErrors} of them"
   referenceData.atomically <| modify fun rd =>
     { rd with loadingTask := task.mapCheap fun _ => () }
@@ -1780,7 +1780,7 @@ def initAndRunWatchdog (args : List String) (i o : FS.Stream) : IO Unit := do
   }
   let logCfg ← Logging.LogConfig.ofLspLogConfig <| initRequest.param.initializationOptions?.bind (·.logCfg?)
   let logChan? ←
-    if logCfg.isEnabled then
+    bif logCfg.isEnabled then
       pure <| some <| ← Std.Channel.new (capacity := some 1024)
     else
       pure none

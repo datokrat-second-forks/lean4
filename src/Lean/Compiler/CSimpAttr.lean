@@ -42,7 +42,7 @@ private def isConstantReplacement? (declName : Name) : CoreM (Option Entry) := d
   match info.type.eq? with
   | some (_, Expr.const fromDeclName us, Expr.const toDeclName vs) =>
     let set := Std.HashSet.ofList us
-    if set.size == us.length && set.all Level.isParam && us == vs then
+    bif set.size == us.length && set.all Level.isParam && us == vs then
       return some { fromDeclName, toDeclName, thmName := declName }
     else
       return none

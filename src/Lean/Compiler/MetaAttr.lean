@@ -46,7 +46,7 @@ private builtin_initialize declMetaExt : SimplePersistentEnvExtension Name NameS
 
 /-- Whether a declaration should be exported for interpretation. -/
 def isDeclMeta (env : Environment) (declName : Name) : Bool :=
-  if !env.header.isModule then
+  bif !env.header.isModule then
     true
   else
     -- The interpreter may call the boxed variant even if the IR does not directly reference it, so
@@ -63,7 +63,7 @@ def isDeclMeta (env : Environment) (declName : Name) : Bool :=
 
 /-- Marks a declaration to be exported for interpretation. -/
 def setDeclMeta (env : Environment) (declName : Name) : Environment :=
-  if isDeclMeta env declName then
+  bif isDeclMeta env declName then
     env
   else
     declMetaExt.addEntry env declName
@@ -73,19 +73,19 @@ Returns the IR phases of the given declaration that should be considered accessi
 additional IR loaded for language server purposes into account.
 -/
 def getIRPhases (env : Environment) (declName : Name) : IRPhases := Id.run do
-  if !env.header.isModule then
+  bif !env.header.isModule then
     return .all
   match env.getModuleIdxFor? declName with
   | some idx =>
-    if isMarkedMeta env declName then
+    bif isMarkedMeta env declName then
       .comptime
     else
       env.header.modules[idx]?.map (·.irPhases) |>.get!
   | none =>
-    if env.find? declName |>.all (·.isCtor) then
+    bif env.find? declName |>.all (·.isCtor) then
       -- Do not check ctors (trivial) or decls not in env (compiler-generated)
       .all
-    else if isMarkedMeta env declName then
+    else bif isMarkedMeta env declName then
       .comptime
     else
       .runtime

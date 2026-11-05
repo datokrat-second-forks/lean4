@@ -52,7 +52,7 @@ elab_rules : tactic
   let some cancelTk := ctx.cancelTk? | unreachable!
   -- TODO: `CancelToken` should probably use `Promise`
   while true do
-    if (← cancelTk.isSet) then
+    bif (← cancelTk.isSet) then
       break
     IO.sleep 30
   IO.eprintln "cancelled!"
@@ -94,10 +94,10 @@ elab_rules : tactic
   }}
 
   while true do
-    if (← (← getUnblockedCancelTk).isSet) then
+    bif (← (← getUnblockedCancelTk).isSet) then
       break
     IO.sleep 30
-  if (← cancelTk.isSet) then
+  bif (← cancelTk.isSet) then
     IO.eprintln "cancelled!"
     log "cancelled (should never be visible)"
 
@@ -112,10 +112,10 @@ elab "wait_for_unblock_async" : tactic => do
     let ctx ← readThe Core.Context
     let some cancelTk := ctx.cancelTk? | unreachable!
     while true do
-      if (← (← getUnblockedCancelTk).isSet) then
+      bif (← (← getUnblockedCancelTk).isSet) then
         break
       IO.sleep 30
-    if (← cancelTk.isSet) then
+    bif (← cancelTk.isSet) then
       IO.eprintln "cancelled!"
       log "cancelled (should never be visible)"
   let t ← BaseIO.asTask (act ())
@@ -147,7 +147,7 @@ elab_rules : tactic
     let some cancelTk := ctx.cancelTk? | unreachable!
     -- TODO: `CancelToken` should probably use `Promise`
     while true do
-      if (← cancelTk.isSet) then
+      bif (← cancelTk.isSet) then
         break
       IO.sleep 30
     IO.eprintln "cancelled!"
@@ -179,7 +179,7 @@ elab_rules : tactic
     let ctx ← readThe Core.Context
     -- TODO: `CancelToken` should probably use `Promise`
     while true do
-      if (← cancelTk.isSet) then
+      bif (← cancelTk.isSet) then
         break
       IO.sleep 30
     IO.eprintln "cancelled!"
@@ -209,7 +209,7 @@ elab_rules : command
   let some cancelTk := (← read).cancelTk? | unreachable!
   let act ← Core.wrapAsyncAsSnapshot (cancelTk? := none) fun _ => do
     while true do
-      if (← cancelTk.isSet) then
+      bif (← cancelTk.isSet) then
         break
       IO.sleep 30
     IO.eprintln "cancelled!"
@@ -233,7 +233,7 @@ capturing it in a `cancelTk.onSet` closure that calls `prom.resolve`. -/
 meta def mkTestTask (label : String) : BaseIO (Option (IO.Promise Unit)) := do
   let prom ← IO.Promise.new
   testTasksRef.modifyGet fun m =>
-    if m.contains label then (none, m) else (some prom, m.insert label prom.result?)
+    bif m.contains label then (none, m) else (some prom, m.insert label prom.result?)
 
 /-- Block until the test task named `label` fires. Prints a diagnostic to stderr if
 the underlying promise was dropped without resolution, or if no task is registered for

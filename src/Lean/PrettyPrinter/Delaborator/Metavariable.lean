@@ -24,16 +24,16 @@ private def delabMVarAuxAux {α} (m : MVarId)
     (ppMVars : Bool)
     (ppMVarsAnonymous : Bool) :
     MetaM α := do
-  if ppMVars then
+  bif ppMVars then
     if let some decl ← m.findDecl? then
       match decl.userName with
       | .anonymous =>
-        if ppMVarsAnonymous then
+        bif ppMVarsAnonymous then
           mkMVar <| Name.num `m (decl.index + 1)
         else
           mkMVarPlaceholder
       | n =>
-        if some m == (← getMCtx).findUserName? n then
+        bif some m == (← getMCtx).findUserName? n then
           mkMVar n
         else
           mkMVarDead n
@@ -79,7 +79,7 @@ def checkDelayedMVarAssignment (e : Expr) (decl : DelayedMetavarAssignment) : Me
     let some ldecl := mdecl.lctx.find? fvarId | return false
     unless ldecl.hasValue do
       let .fvar argFVarId := arg | return false
-      if seenFVars.contains argFVarId then
+      bif seenFVars.contains argFVarId then
         return false
       seenFVars := seenFVars.insert argFVarId
   return true
@@ -138,16 +138,16 @@ private def describeMVar (mvarId : MVarId) (lctxInitIndices : Nat) (fromDelayed 
   unless decl.userName.isAnonymous || some mvarId == (← getMCtx).findUserName? decl.userName do
     msg := msg ++ "\n\nThis metavariable has a name but it is unreachable."
   if let some e ← getExprMVarAssignment? mvarId then
-    if !fromDelayed then
+    bif !fromDelayed then
       msg := msg ++ "\n\nThis metavariable has been assigned."
     else
       msg := msg ++ "\n\nThis metavariable has been assigned, but it appears here via a *delayed assignment*. " ++ delayedExpl
       msg := msg ++ (← collectAwaiting e)
-  else if !(← mvarId.isAssignable) then
+  else bif !(← mvarId.isAssignable) then
     msg := msg ++ "\n\nThis metavariable cannot be assigned due to the current metavariable context depth."
-  else if fromDelayed then
+  else bif fromDelayed then
     msg := msg ++ "\n\nThis metavariable appears here via a *delayed assignment*. " ++ delayedExpl
-  if fromDelayed && !decl.lctx.isSubPrefixOf (← getLCtx) then
+  bif fromDelayed && !decl.lctx.isSubPrefixOf (← getLCtx) then
     msg := msg ++ (← extraLCtxVars decl)
   else
     msg := msg ++ (← absentLCtxVars decl)
@@ -156,15 +156,15 @@ where
   wrap (n : String) := s!"`{n}`"
   namesToString (ns : List Name) : String :=
     String.intercalate ", " <| ns.map fun n => wrap <|
-      if n.hasMacroScopes then
+      bif n.hasMacroScopes then
         n.eraseMacroScopes.toString ++ " (unreachable)"
       else
         n.toString
   extraLCtxVars (mdecl : MetavarDecl) : MetaM String := do
     let lctx ← getLCtx
     let ns := mdecl.lctx.foldr (init := []) fun decl ns =>
-      if lctx.contains decl.fvarId then ns else decl.userName :: ns
-    if ns.isEmpty then
+      bif lctx.contains decl.fvarId then ns else decl.userName :: ns
+    bif ns.isEmpty then
       return ""
     else
       return s!"\n\nAdditional {ns.length.plural "variable"} in this metavariable's local context: " ++ namesToString ns
@@ -172,8 +172,8 @@ where
     let lctx ← getLCtx
     let lctxInitIndices := lctxInitIndices
     let ns := lctx.foldr (init := []) fun decl ns =>
-      if decl.index ≥ lctxInitIndices || mdecl.lctx.contains decl.fvarId then ns else decl.userName :: ns
-    if ns.isEmpty then
+      bif decl.index ≥ᵇ lctxInitIndices || mdecl.lctx.contains decl.fvarId then ns else decl.userName :: ns
+    bif ns.isEmpty then
       return ""
     else
       return s!"\n\n{ns.length.plural "Variable"} absent from this metavariable's local context: " ++ namesToString ns
@@ -187,7 +187,7 @@ where
       return !mdecl.lctx.isSubPrefixOf lctx
     unless awaitingMVars'.isEmpty do
       awaitingMVars := awaitingMVars'
-    if awaitingMVars.isEmpty then
+    bif awaitingMVars.isEmpty then
       return ""
     else
       let awaitingStrs ← awaitingMVars.mapM (wrap <$> delabMVarAsStr ·)

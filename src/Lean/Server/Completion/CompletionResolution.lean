@@ -18,7 +18,7 @@ private partial def consumeImplicitPrefix (e : Expr) (k : Expr → MetaM α) : M
   match e with
   | Expr.forallE n d b c =>
     -- We do not consume instance implicit arguments because the user probably wants be aware of this dependency
-    if c == .implicit then
+    bif c == .implicit then
       Meta.withLocalDecl n c d fun arg =>
         consumeImplicitPrefix (b.instantiate1 arg) k
     else
@@ -36,7 +36,7 @@ def CompletionItem.resolve
   let lctx ← getLCtx
   let mut item := item
 
-  if item.detail?.isNone then
+  bif item.detail?.isNone then
     let type? := match id with
       | .const declName =>
         env.find? declName |>.map ConstantInfo.type
@@ -47,7 +47,7 @@ def CompletionItem.resolve
         return toString (← Meta.ppExpr typeWithoutImplicits)
     item := { item with detail? := detail? }
 
-  if item.documentation?.isNone then
+  bif item.documentation?.isNone then
     let docStringPrefix? := Id.run do
       let .const declName := id
         | none

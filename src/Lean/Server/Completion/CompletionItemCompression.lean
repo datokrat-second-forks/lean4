@@ -63,10 +63,10 @@ def compressEditFast (acc : String) (edit : InsertReplaceEdit) : String :=
 
 def compressCompletionTagsFast (acc : String) (tags : Array CompletionItemTag) (i : Nat) :
     String :=
-  if h : i < tags.size then
+  bif h : i <ᵇ tags.size then
     let acc := acc ++ (tags[i].ctorIdx + 1).repr
     let acc :=
-      if i < tags.size - 1 then
+      bif i <ᵇ tags.size - 1 then
         acc ++ ","
       else
         acc
@@ -96,9 +96,9 @@ def compressItemFast (acc : String) (item : ResolvableCompletionItem) : String :
     acc := acc ++ ",\"data\":"
     acc := compressItemDataFast acc data
   if let some tags := item.tags? then
-    if h : tags.size > 0 then
+    bif h : tags.size >ᵇ 0 then
       acc := acc ++ ",\"tags\":["
-      if tags.size == 1 then
+      bif tags.size == 1 then
         acc := acc ++ (tags[0].ctorIdx + 1).repr
       else
         acc := compressCompletionTagsFast acc tags 0
@@ -108,10 +108,10 @@ def compressItemFast (acc : String) (item : ResolvableCompletionItem) : String :
 def compressItemsFast
     (acc : String) (items : Array ResolvableCompletionItem) (i : Nat) :
     String :=
-  if h : i < items.size then
+  bif h : i <ᵇ items.size then
     let acc := compressItemFast acc items[i]
     let acc :=
-      if i < items.size - 1 then
+      bif i <ᵇ items.size - 1 then
         acc ++ ","
       else
         acc

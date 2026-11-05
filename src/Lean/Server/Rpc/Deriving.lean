@@ -30,12 +30,12 @@ private def deriveStructureInstance (indVal : InductiveVal) (params : Array Expr
   let mut encInits := #[]
   let mut decInits := #[]
   for fieldName in fields do
-    if fieldName == `__rpcref then
+    bif fieldName == `__rpcref then
         throwError "'__rpcref' is reserved and cannot be used as a field name. \
           See the `RpcEncodable` docstring."
     let fid := mkIdent fieldName
     fieldIds := fieldIds.push fid
-    if isOptField fieldName then
+    bif isOptField fieldName then
       fieldTys := fieldTys.push (← `(Option Json))
       encInits := encInits.push (← `(structInstField| $fid:ident := ← (a.$fid).mapM rpcEncode))
       decInits := decInits.push (← `(structInstField| $fid:ident := ← (a.$fid).mapM rpcDecode))
@@ -75,7 +75,7 @@ private def deriveInductiveInstance (indVal : InductiveVal) (params : Array Expr
     -- create the constructor
     let fieldStxs ← argVars.mapM fun arg => do
       let name := (← getFVarLocalDecl arg).userName
-      if name == `__rpcref then
+      bif name == `__rpcref then
         throwError "'__rpcref' is reserved and cannot be used as an argument name. \
           See the `RpcEncodable` docstring."
       `(bracketedBinderF| ($(mkIdent name) : Json))
@@ -122,16 +122,16 @@ using the `RpcEncodablePacket`. -/
 private def deriveInstance (declNames : Array Name) : CommandElabM Bool := do
   let #[typeName] := declNames | return false
   let indVal ← getConstInfoInduct typeName
-  if indVal.all.length ≠ 1 then
+  bif indVal.all.length ≠ᵇ 1 then
     throwError "mutually inductive types are not supported"
-  if indVal.numIndices ≠ 0 then
+  bif indVal.numIndices ≠ᵇ 0 then
     throwError "indexed inductive families are not supported"
 
   elabCommand <| ← liftTermElabM do
     forallTelescopeReducing indVal.type fun params _ => do
       let encInstBinders ← (← params.filterM (isType ·)).mapM fun p => do
         `(bracketedBinderF| [RpcEncodable $(mkIdent (← getFVarLocalDecl p).userName):ident])
-      if isStructure (← getEnv) typeName then
+      bif isStructure (← getEnv) typeName then
           deriveStructureInstance indVal params encInstBinders
       else
           deriveInductiveInstance indVal params encInstBinders

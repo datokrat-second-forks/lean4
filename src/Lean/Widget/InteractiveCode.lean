@@ -46,7 +46,7 @@ structure SubexprInfo where
 abbrev CodeWithInfos := TaggedText SubexprInfo
 
 def CodeWithInfos.mergePosMap [Monad m] (merger : SubexprInfo → α → m SubexprInfo) (pm : Lean.SubExpr.PosMap α) (tt : CodeWithInfos) : m CodeWithInfos :=
-  if pm.isEmpty then return tt else
+  bif pm.isEmpty then return tt else
   tt.mapM (fun (info : SubexprInfo) =>
     match pm.get? info.subexprPos with
     | some a => merger info a
@@ -81,8 +81,8 @@ Pretty prints the expression `e` using delaborator `delab`, returning an object 
 the pretty printed syntax paired with information needed to support hovers.
 -/
 def ppExprTagged (e : Expr) (delab : Delab := Delaborator.delab) : MetaM CodeWithInfos := do
-  if pp.raw.get (← getOptions) then
-    let e ← if getPPInstantiateMVars (← getOptions) then instantiateMVars e else pure e
+  bif pp.raw.get (← getOptions) then
+    let e ← bif getPPInstantiateMVars (← getOptions) then instantiateMVars e else pure e
     return .text (toString e)
   let ⟨fmt, infos⟩ ← PrettyPrinter.ppExprWithInfos e (delab := delab)
   let tt := TaggedText.prettyTagged fmt

@@ -43,7 +43,7 @@ private def throwParserCategoryAlreadyDefined {α} (catName : Name) : ExceptT St
   throw s!"parser category `{catName}` has already been defined"
 
 private def addParserCategoryCore (categories : ParserCategories) (catName : Name) (initial : ParserCategory) : Except String ParserCategories :=
-  if categories.contains catName then
+  bif categories.contains catName then
     throwParserCategoryAlreadyDefined catName
   else
     pure $ categories.insert catName initial
@@ -95,7 +95,7 @@ private def ParserExtension.mkInitial : IO ParserExtension.State := do
   pure { tokens := tokens, kinds := kinds, categories := categories }
 
 private def addTokenConfig (tokens : TokenTable) (tk : Token) : Except String TokenTable := do
-  if tk == "" then throw "invalid empty symbol"
+  bif tk == "" then throw "invalid empty symbol"
   else match tokens.find? tk with
     | none   => pure $ tokens.insert tk tk
     | some _ => pure tokens
@@ -167,7 +167,7 @@ def ParserExtension.addEntryImpl (s : State) (e : Entry) : State :=
   | Entry.kind k =>
     { s with kinds := s.kinds.insert k }
   | Entry.category catName declName behavior =>
-    if s.categories.contains catName then s
+    bif s.categories.contains catName then s
     else { s with
            categories := s.categories.insert catName { declName, behavior } }
   | Entry.parser catName declName leading parser prio =>
@@ -185,7 +185,7 @@ abbrev AliasTable (α) := NameMap (AliasValue α)
 
 def registerAliasCore {α} (mapRef : IO.Ref (AliasTable α)) (aliasName : Name) (value : AliasValue α) : IO Unit := do
   unless (← initializing) do throw ↑"aliases can only be registered during initialization"
-  if (← mapRef.get).contains aliasName then
+  bif (← mapRef.get).contains aliasName then
     throw ↑s!"alias `{aliasName}` has already been declared"
   mapRef.modify (·.insert aliasName value)
 
@@ -363,11 +363,11 @@ def isParserCategory (env : Environment) (catName : Name) : Bool :=
 def getSyntaxNodeKindCategories (env : Environment) (kind : SyntaxNodeKind) : Array Name := Id.run do
   let mut cats := #[]
   for (catName, cat) in (parserExtension.getState env).categories do
-    if cat.kinds.contains kind then cats := cats.push catName
+    bif cat.kinds.contains kind then cats := cats.push catName
   return cats
 
 def addParserCategory (env : Environment) (catName declName : Name) (behavior : LeadingIdentBehavior) : Except String Environment := do
-  if isParserCategory env catName then
+  bif isParserCategory env catName then
     throwParserCategoryAlreadyDefined catName
   else
     return parserExtension.addEntry env <| ParserExtension.Entry.category catName declName behavior
@@ -399,7 +399,7 @@ register_builtin_option internal.parseQuotWithCurrentStage : Bool := {
 
 /-- Interpret `declName` if possible and inside a quotation, or else run `p`. The `ParserInfo` will always be taken from `p`. -/
 def evalInsideQuot (declName : Name) : Parser → Parser := withFn fun f c s =>
-  if c.quotDepth > 0 && !c.suppressInsideQuot && internal.parseQuotWithCurrentStage.get c.options && c.env.contains declName then
+  bif c.quotDepth >ᵇ 0 && !c.suppressInsideQuot && internal.parseQuotWithCurrentStage.get c.options && c.env.contains declName then
     adaptUncacheableContextFn (fun ctx =>
       { ctx with options := ctx.options.set `interpreter.prefer_native false })
       -- HACK: silently fall back to running compiled `f` on eval error, otherwise parser imported
@@ -432,7 +432,7 @@ def mkCategoryAntiquotParser (kind : Name) : Parser :=
   (mkCategoryAntiquotParser kind).fn
 
 def categoryParserFnImpl (catName : Name) : ParserFn := fun ctx s =>
-  let catName := if catName == `syntax then `stx else catName -- temporary Hack
+  let catName := bif catName == `syntax then `stx else catName -- temporary Hack
   let categories := (parserExtension.getState ctx.env).categories
   match getCategory categories catName with
   | some cat =>
@@ -472,7 +472,7 @@ def mkInputContext (input : String) (fileName : String)
     (endPos_valid : endPos ≤ input.rawEndPos := by simp) :
     InputContext :=
   let text := FileMap.ofString input
-  let next := if normalizeLineEndings then
+  let next := bif normalizeLineEndings then
     -- Convert the stop position to a line/column position so crlf translation doesn't invalidate it
     let endPos' := text.toPosition endPos
     let text := FileMap.ofString text.source.crlfToLf
@@ -481,8 +481,8 @@ def mkInputContext (input : String) (fileName : String)
     (text, endPos)
   let text := next.1
   let endPos' := next.2
-  if h : endPos' ≤ text.source.rawEndPos then
-    .mk text.source fileName (fileMap := text) (endPos := endPos') (endPos_valid := h)
+  bif h : endPos' ≤ᵇ text.source.rawEndPos then
+    .mk text.source fileName (fileMap := text) (endPos := endPos') (endPos_valid := (le_of_decideLE_eq_true h))
   else
     .mk text.source fileName (fileMap := text)
 
@@ -494,9 +494,9 @@ def runParserCategory (env : Environment) (catName : Name) (input : String) (fil
   let p := andthenFn whitespace (categoryParserFnImpl catName)
   let ictx := mkInputContext input fileName
   let s := p.run ictx { env, options := {} } (getTokenTable env) (mkParserState input)
-  if !s.allErrors.isEmpty  then
+  bif !s.allErrors.isEmpty  then
     Except.error (s.toErrorMsg ictx)
-  else if ictx.atEnd s.pos then
+  else bif ictx.atEnd s.pos then
     Except.ok s.stxStack.back
   else
     Except.error ((s.mkError "end of input").toErrorMsg ictx)
@@ -613,7 +613,7 @@ private def withNamespaces (ids : Array Name) (addOpenSimple : Bool) : ParserFn 
   let c := ids.foldl (init := c) fun c id =>
     let nss := ResolveName.resolveNamespace c.env c.currNamespace c.openDecls id
     let (env, openDecls) := nss.foldl (init := (c.env, c.openDecls)) fun (env, openDecls) ns =>
-      let openDecls := if addOpenSimple then OpenDecl.simple ns [] :: openDecls else openDecls
+      let openDecls := bif addOpenSimple then OpenDecl.simple ns [] :: openDecls else openDecls
       let env := parserExtension.activateScoped env ns
       (env, openDecls)
     { c with env, openDecls }
@@ -621,14 +621,14 @@ private def withNamespaces (ids : Array Name) (addOpenSimple : Bool) : ParserFn 
   { c with tokens }
 
 def withOpenDeclFnCore (openDeclStx : Syntax) (p : ParserFn) : ParserFn := fun c s =>
-  if openDeclStx.getKind == `Lean.Parser.Command.openSimple then
+  bif openDeclStx.getKind == `Lean.Parser.Command.openSimple then
     withNamespaces (openDeclStx[0].getArgs.map fun stx => stx.getId) (addOpenSimple := true) p c s
-  else if openDeclStx.getKind == `Lean.Parser.Command.openScoped then
+  else bif openDeclStx.getKind == `Lean.Parser.Command.openScoped then
     withNamespaces (openDeclStx[1].getArgs.map fun stx => stx.getId) (addOpenSimple := false) p c s
-  else if openDeclStx.getKind == `Lean.Parser.Command.openOnly then
+  else bif openDeclStx.getKind == `Lean.Parser.Command.openOnly then
     -- It does not activate scoped attributes, nor affects namespace resolution
     p c s
-  else if openDeclStx.getKind == `Lean.Parser.Command.openHiding then
+  else bif openDeclStx.getKind == `Lean.Parser.Command.openHiding then
     -- TODO: it does not activate scoped attributes, but it affects namespaces resolution of open decls parsed by `p`.
     p c s
   else
@@ -636,9 +636,9 @@ def withOpenDeclFnCore (openDeclStx : Syntax) (p : ParserFn) : ParserFn := fun c
 
 /-- If the parsing stack is of the form `#[.., openCommand]`, we process the open command, and execute `p` -/
 def withOpenFn (p : ParserFn) : ParserFn := fun c s =>
-  if s.stxStack.size > 0 then
+  bif s.stxStack.size >ᵇ 0 then
     let stx := s.stxStack.back
-    if stx.getKind == `Lean.Parser.Command.open then
+    bif stx.getKind == `Lean.Parser.Command.open then
       withOpenDeclFnCore stx[1] p c s
     else
       p c s
@@ -650,7 +650,7 @@ def withOpenFn (p : ParserFn) : ParserFn := fun c s =>
 
 /-- If the parsing stack is of the form `#[.., openDecl]`, we process the open declaration, and execute `p` -/
 def withOpenDeclFn (p : ParserFn) : ParserFn := fun c s =>
-  if s.stxStack.size > 0 then
+  bif s.stxStack.size >ᵇ 0 then
     let stx := s.stxStack.back
     withOpenDeclFnCore stx p c s
   else
@@ -686,9 +686,9 @@ If the parsing stack's last element is a `set_option` command, then its value is
 while parsing `p`.
 -/
 def withSetOptionFn (p : ParserFn) : ParserFn := fun c s =>
-  if s.stxStack.size > 0 then
+  bif s.stxStack.size >ᵇ 0 then
     let stx := s.stxStack.back
-    if stx.getKind == `Lean.Parser.Command.set_option then
+    bif stx.getKind == `Lean.Parser.Command.set_option then
       withSetOptionValueFnCore stx[1] stx[3] p c s
     else
       p c s
@@ -704,7 +704,7 @@ below it.
 -/
 def withSetOptionValueFn (p : ParserFn) : ParserFn := fun c s =>
   let sz := s.stxStack.size
-  if sz ≥ 3 then
+  bif sz ≥ᵇ 3 then
     withSetOptionValueFnCore (s.stxStack.get! (sz - 3)) s.stxStack.back p c s
   else
     p c s
@@ -751,7 +751,7 @@ private def resolveParserNameCore (env : Environment) (opts : Options) (currName
 
   let erased := val.eraseMacroScopes
 
-  if isParserCategory env erased then
+  bif isParserCategory env erased then
     return [.category erased]
 
   let resolved ← ResolveName.resolveGlobalName env opts currNamespace openDecls val |>.filterMap fun
@@ -768,7 +768,7 @@ private def resolveParserNameCore (env : Environment) (opts : Options) (currName
 
 /-- Resolve the given parser name and return a list of candidates. -/
 def ParserContext.resolveParserName (ctx : ParserContext) (id : Ident) (unsetExporting := false) : List ParserResolution :=
-  let env := if unsetExporting then ctx.env.setExporting false else ctx.env
+  let env := bif unsetExporting then ctx.env.setExporting false else ctx.env
   Parser.resolveParserNameCore env ctx.options ctx.currNamespace ctx.openDecls id
 
 /-- Resolve the given parser name and return a list of candidates. -/
@@ -777,7 +777,7 @@ def resolveParserName (id : Ident) : CoreM (List ParserResolution) :=
 
 def parserOfStackFn (offset : Nat) : ParserFn := fun ctx s => Id.run do
   let stack := s.stxStack
-  if stack.size < offset + 1 then
+  bif stack.size <ᵇ offset + 1 then
     return s.mkUnexpectedError ("failed to determine parser using syntax stack, stack is too small")
   let parserName@(.ident ..) := stack.get! (stack.size - offset - 1)
     | s.mkUnexpectedError ("failed to determine parser using syntax stack, the specified element on the stack is not an identifier")
@@ -798,7 +798,7 @@ def parserOfStackFn (offset : Nat) : ParserFn := fun ctx s => Id.run do
         return s.mkUnexpectedError s!"parser alias {parserName}, must not take parameters"
     | _::_::_ => return s.mkUnexpectedError s!"ambiguous parser name {parserName}"
     | [] => return s.mkUnexpectedError s!"unknown parser {parserName}"
-  if !s.hasError && s.stackSize != iniSz + 1 then
+  bif !s.hasError && s.stackSize != iniSz + 1 then
     return s.mkUnexpectedError "expected parser to return exactly one syntax object"
   s
 

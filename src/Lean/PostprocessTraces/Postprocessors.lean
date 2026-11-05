@@ -28,7 +28,7 @@ For large traces, this is an expensive pattern because all head messages need to
 pretty-printed; to select nodes by their exact trace class, prefer the much cheaper `ofClass`.
 -/
 def containsString (pat : String) : TracePattern := fun t => do
-  if (t.cls?.map (·.toString)).any (containsSubstr · pat) then
+  bif (t.cls?.map (·.toString)).any (containsSubstr · pat) then
     return true
   return containsSubstr (← t.headText) pat
 
@@ -99,11 +99,11 @@ partial def exposeSubtrees (p : TracePattern) : TracePostprocessor := fun roots 
 where
   /-- Returns the transformed tree and whether it contains a match. -/
   go (t : TraceTree) : CoreM (TraceTree × Bool) := do
-    if ← p t then return (t, true)
+    bif (← p t) then return (t, true)
     let results ← t.children.mapM go
     let hasMatchBelow := results.any (·.2)
     let t := t.withChildren (results.map (·.1))
-    let t := if hasMatchBelow then t.modifyData ({ · with collapsed := false }) else t
+    let t := bif hasMatchBelow then t.modifyData ({ · with collapsed := false }) else t
     return (t, hasMatchBelow)
 
 /-- Appends the number of nodes inside each subtree to the subtree's head message. -/
@@ -116,7 +116,7 @@ where
     | .node data msg children wrap =>
       let results := children.map go
       let n := results.foldl (fun n (_, k) => n + k) 1
-      let suffix := if n == 1 then "" else "s"
+      let suffix := bif n == 1 then "" else "s"
       (.node data m!"{msg} ({n} node{suffix})" (results.map (·.1)) wrap, n)
 
 /-- Formats a duration in milliseconds with one decimal place, e.g. `12.3ms`. -/
@@ -136,7 +136,7 @@ where
     | .leaf msg => .leaf msg
     | t@(.node data msg children wrap) =>
       let msg :=
-        if data.startTime == 0 then msg
+        bif data.startTime == 0 then msg
         else m!"{msg} (self: {formatMs (t.selfElapsed * 1000)})"
       .node data msg (children.map go) wrap
 

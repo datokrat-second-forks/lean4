@@ -155,15 +155,15 @@ def findReferenceLocation?
     (includeStop : Bool := false)
     : Option Location := do
   if let some loc := self.definition? then
-    if contains loc.range pos then
+    bif contains loc.range pos then
       return loc
   for loc in self.usages do
-    if contains loc.range pos then
+    bif contains loc.range pos then
       return loc
   none
 where
   contains (range : Lsp.Range) (pos : Lsp.Position) : Bool :=
-    range.start <= pos && (if includeStop then pos <= range.end else pos < range.end)
+    range.start <= pos && (bif includeStop then pos <= range.end else pos < range.end)
 
 /-- Checks whether any of the ranges in `self.definition?` or `self.usages` contains `pos`. -/
 def contains (self : RefInfo) (pos : Lsp.Position) (includeStop := false) : Bool := Id.run do
@@ -184,7 +184,7 @@ def findAt
     : Array RefIdent := Id.run do
   let mut result := #[]
   for (ident, info) in self do
-    if info.contains pos includeStop then
+    bif info.contains pos includeStop then
       result := result.push ident
   result
 
@@ -231,14 +231,14 @@ Returns `.some ilean` if `<path>.ilean.mmap` exists, has a timestamp >= `<path>.
 Raises an `IO.Error` if the `.ilean.mmap` cannot be loaded.
 -/
 def loadCompacted? (ileanPath : System.FilePath) : IO (Option Ilean) := do
-  if ileanPath.extension ≠ .some "ilean" then throw (.userError s!"Ilean.loadCompacted?: '{ileanPath}' not an .ilean")
+  bif ileanPath.extension ≠ᵇ .some "ilean" then throw (.userError s!"Ilean.loadCompacted?: '{ileanPath}' not an .ilean")
 
   let compactedIleanPath := ileanPath.withExtension Ilean.compactedExt
   let .ok compactedModified := (← compactedIleanPath.metadata.toBaseIO) |>.map FS.Metadata.modified
     | return .none -- assume file does not exist
 
   -- The strict inequality is important on systems like Nix that reset all timestamps to the epoch: we don't want that to prevent loading the compacted version
-  if compactedModified < (← ileanPath.metadata).modified then
+  bif compactedModified <ᵇ (← ileanPath.metadata).modified then
     return .none
 
   -- nb: ignoring the region means we can't unmap this ilean later
@@ -292,7 +292,7 @@ def findReferences (text : FileMap) (trees : Array InfoTree) : Array Reference :
           | return
         let some range := info.range?
           | return
-        if info.stx.getHeadInfo matches .original .. then  -- we are not interested in canonical syntax here
+        bif info.stx.getHeadInfo matches .original .. then  -- we are not interested in canonical syntax here
           modify (·.push { ident, range := range.toLspRange text, stx := info.stx, ci, info, isBinder }))
     get
 
@@ -325,9 +325,9 @@ partial def combineIdents (trees : Array InfoTree) (refs : Array Reference) : Ar
   let mut refs' := #[]
   for ref in refs do
     let id := ref.ident
-    if idMap.contains id then
+    bif idMap.contains id then
       refs' := refs'.push { ref with ident := findCanonicalRepresentative idMap id, aliases := #[id] }
-    else if !idMap.contains id then
+    else bif !idMap.contains id then
       refs' := refs'.push ref
   refs'
 where
@@ -360,7 +360,7 @@ where
 
       -- compress `idMap` so that all identifiers in a class point to the best representative
       for id in «class» do
-        if id != bestRepresentative then
+        bif id != bestRepresentative then
           r := r.insert id bestRepresentative
     return r
 
@@ -391,7 +391,7 @@ where
     let idMap ← get
     let id := findCanonicalRepresentative idMap id
     let baseId := findCanonicalRepresentative idMap baseId
-    if baseId != id then
+    bif baseId != id then
       modify (·.insert id baseId)
 
 /--
@@ -402,7 +402,7 @@ Yields to separate groups for declaration and usages if `allowSimultaneousBinder
 def dedupReferences (refs : Array Reference) (allowSimultaneousBinderUse := false) : Array Reference := Id.run do
   let mut refsByIdAndRange : Std.HashMap (RefIdent × Option Bool × Lsp.Range) Reference := ∅
   for ref in refs do
-    let isBinder := if allowSimultaneousBinderUse then some ref.isBinder else none
+    let isBinder := bif allowSimultaneousBinderUse then some ref.isBinder else none
     let key := (ref.ident, isBinder, ref.range)
     refsByIdAndRange := refsByIdAndRange.alter key fun
       | some ref' => some { ref' with aliases := ref'.aliases ++ ref.aliases }
@@ -421,7 +421,7 @@ def findModuleRefs (text : FileMap) (trees : Array InfoTree) (localVars : Bool :
     dedupReferences (allowSimultaneousBinderUse := allowSimultaneousBinderUse) <|
     combineIdents trees <|
     findReferences text trees
-  if !localVars then
+  bif !localVars then
     refs := refs.filter fun
       | { ident := RefIdent.fvar .., .. } => false
       | _ => true
@@ -507,7 +507,7 @@ def DirectImports.convertImportInfos (infos : Array Lsp.ImportInfo) : IO DirectI
       module
       isAll := i.isAll
       isPrivate := i.isPrivate
-      metaKind := if i.isMeta then .meta else .nonMeta
+      metaKind := bif i.isMeta then .meta else .nonMeta
     }
   let index := ordered.groupByKey (·.module)
     |>.toArray
@@ -690,7 +690,7 @@ abbrev AllRefsMap := Std.TreeMap Name (DocumentUri × Lsp.ModuleRefs × Lsp.Decl
 def allRefs (self : References) : AllRefsMap :=
   let ileanRefs := self.ileans.foldl (init := ∅) fun m name { moduleUri, refs, decls, .. } => m.insert name (moduleUri, refs, decls)
   self.workers.foldl (init := ileanRefs) fun m name i@{ moduleUri, refs, decls, ..} =>
-    if i.hasRefs then
+    bif i.hasRefs then
       m.insert name (moduleUri, refs, decls)
     else
       m
@@ -707,7 +707,7 @@ def allDirectImports (self : References) : AllDirectImportsMap := Id.run do
   for (name, ilean) in self.ileans do
     allDirectImports := allDirectImports.insert name (ilean.moduleUri, ilean.directImports)
   for (name, worker) in self.workers do
-    if worker.hasRefs then
+    bif worker.hasRefs then
       allDirectImports := allDirectImports.insert name (worker.moduleUri, worker.directImports)
   return allDirectImports
 
@@ -717,7 +717,7 @@ The current references in a file worker take precedence over those in .ilean fil
 -/
 def getModuleRefs? (self : References) (mod : Name) : Option (DocumentUri × Lsp.ModuleRefs × Lsp.Decls) := do
   if let some worker := self.workers[mod]? then
-    if worker.hasRefs then
+    bif worker.hasRefs then
       return (worker.moduleUri, worker.refs, worker.decls)
   if let some ilean := self.ileans[mod]? then
     return (ilean.moduleUri, ilean.refs, ilean.decls)
@@ -729,7 +729,7 @@ The current imports in a file worker take precedence over those in .ilean files.
 -/
 def getDirectImports? (self : References) (mod : Name) : Option DirectImports := do
   if let some worker := self.workers[mod]? then
-    if worker.hasRefs then
+    bif worker.hasRefs then
       return worker.directImports
   if let some ilean := self.ileans[mod]? then
     return ilean.directImports
@@ -738,7 +738,7 @@ def getDirectImports? (self : References) (mod : Name) : Option DirectImports :=
 /-- Gets the set of declarations of `mod`. -/
 def getDecls? (self : References) (mod : Name) : Option Decls := do
   if let some worker := self.workers[mod]? then
-    if worker.hasRefs then
+    bif worker.hasRefs then
       return worker.decls
   if let some ilean := self.ileans[mod]? then
     return ilean.decls
@@ -812,7 +812,7 @@ def referringTo
     : Array DocumentRefInfo := Id.run do
   let mut result := #[]
   for (moduleUri, module, info, decls) in self.allRefsFor ident do
-    if includeDefinition then
+    bif includeDefinition then
       if let some loc := info.definition? then
         let parentDecl? := do
           ParentDecl.ofDecls? decls <| ← loc.parentDecl?
@@ -856,7 +856,7 @@ def definitionsMatching
   let mut result := #[]
   for (module, moduleUri, refs, _) in self.allRefs do
     if let some cancelTk := cancelTk? then
-      if ← cancelTk.isSet then
+      bif (← cancelTk.isSet) then
         return result
     for (ident, info) in refs do
       let (RefIdent.const _ nameString, some loc) := (ident, info.definition?)

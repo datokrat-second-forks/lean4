@@ -86,11 +86,11 @@ builtin_initialize codeActionProviderExt : SimplePersistentEnvExtension Name Nam
 builtin_initialize
   let mkAttr (builtin : Bool) (name : Name) := registerBuiltinAttribute {
     name
-    descr           := (if builtin then "(builtin) " else "") ++
+    descr           := (bif builtin then "(builtin) " else "") ++
       "Use to decorate methods for suggesting code actions. This is a low-level interface for making code actions."
     applicationTime := .afterCompilation
     add             := fun decl stx kind => do
-      if !builtin then
+      bif !builtin then
         ensureAttrDeclIsMeta `name decl kind
       Attribute.Builtin.ensureNoArgs stx
       unless kind == AttributeKind.global do throwAttrMustBeGlobal name kind
@@ -98,7 +98,7 @@ builtin_initialize
       unless declType.isConstOf ``CodeActionProvider do
         throwAttrDeclNotOfExpectedType name decl declType (mkConst ``Lean.Server.CodeActionProvider)
       let env ← getEnv
-      if builtin then
+      bif builtin then
         let h := mkConst decl
         declareBuiltin decl <| mkApp2 (mkConst ``addBuiltinCodeActionProvider) (toExpr decl) h
       else

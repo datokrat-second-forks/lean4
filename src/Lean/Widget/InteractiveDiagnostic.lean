@@ -155,7 +155,7 @@ where
   | ctx,      compose d₁ d₂            => do let d₁ ← go nCtx ctx d₁; let d₂ ← go nCtx ctx d₂; pure $ d₁ ++ d₂
   | ctx,      group d                  => Format.group <$> go nCtx ctx d
   | ctx,      .trace data header children => do
-    if data.cls.isAnonymous then
+    bif data.cls.isAnonymous then
       -- Sequence of top-level traces collected by `addTraceAsMessages`, do not indent.
       -- As with nested sibling nodes, we do not separate them with newlines but rely on the client
       -- to never put trace nodes on the same line.
@@ -165,10 +165,10 @@ where
     header := match data.result? with
       | some r => f!"{r.toEmoji} {header}"
       | none => header
-    if data.startTime != 0 then
+    bif data.startTime != 0 then
       header := f!"[{data.stopTime - data.startTime}] {header}"
     let nodes ←
-      if data.collapsed && !children.isEmpty then
+      bif data.collapsed && !children.isEmpty then
         let children := children.map fun child =>
           MessageData.withNamingContext nCtx <|
             match ctx with
@@ -191,7 +191,7 @@ where
   /-- Recursively moves child nodes after the first `blockSize` into a new "more" node. -/
   chopUpChildren (cls : Name) (blockSize : Nat) (children : Subarray MessageData) :
       Array MessageData :=
-    if blockSize > 0 && children.size > blockSize + 1 then  -- + 1 to make idempotent
+    bif blockSize >ᵇ 0 && children.size >ᵇ blockSize + 1 then  -- + 1 to make idempotent
       let more := chopUpChildren cls blockSize (children.drop blockSize)
       (children.take blockSize).toArray.push <|
         .trace { collapsed := true, cls }
@@ -199,7 +199,7 @@ where
     else children
 
 partial def msgToInteractive (msgData : MessageData) (hasWidgets : Bool) (indent : Nat := 0) : IO InteractiveMessage := do
-  if !hasWidgets then
+  bif !hasWidgets then
     return (TaggedText.prettyTagged (← msgData.format)).rewrite fun _ tt => .text tt.stripTags
   let (fmt, embeds) ← msgToInteractiveAux msgData
   let rec fmtToTT (fmt : Format) (indent : Nat) : IO InteractiveMessage :=
@@ -237,7 +237,7 @@ def msgToInteractiveDiagnostic (text : FileMap) (m : Message) (hasWidgets : Bool
       /-
         Truncate messages that are more than one line long.
         This is a workaround to avoid big blocks of "red squiggly lines" on VS Code. -/
-      let endPos := if !m.keepFullRange && endPos.line > m.pos.line then { line := m.pos.line + 1, column := 0 } else endPos
+      let endPos := bif !m.keepFullRange && endPos.line >ᵇ m.pos.line then { line := m.pos.line + 1, column := 0 } else endPos
       text.leanPosToLspPos endPos
     | none        => low
   let range : Range := ⟨low, high⟩
@@ -246,15 +246,15 @@ def msgToInteractiveDiagnostic (text : FileMap) (m : Message) (hasWidgets : Bool
     | .information => .information
     | .warning     => .warning
     | .error       => .error
-  let isSilent? := if m.isSilent then some true else none
+  let isSilent? := bif m.isSilent then some true else none
   let source? := some "Lean 4"
   let tags? :=
-    if m.data.isDeprecationWarning then some #[.deprecated]
-    else if m.data.isUnusedVariableWarning then some #[.unnecessary]
+    bif m.data.isDeprecationWarning then some #[.deprecated]
+    else bif m.data.isUnusedVariableWarning then some #[.unnecessary]
     else none
   let leanTags? :=
-    if m.data.hasTag (· == `Tactic.unsolvedGoals) then some #[.unsolvedGoals]
-    else if m.data.hasTag (· == `goalsAccomplished) then some #[.goalsAccomplished]
+    bif m.data.hasTag (· == `Tactic.unsolvedGoals) then some #[.unsolvedGoals]
+    else bif m.data.hasTag (· == `goalsAccomplished) then some #[.goalsAccomplished]
     else none
   let message := match (← msgToInteractive m.data hasWidgets |>.toBaseIO) with
     | .ok msg => msg

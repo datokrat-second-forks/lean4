@@ -20,7 +20,7 @@ private def filterDuplicateCompletionInfos
   -- so it's fine if this is quadratic (we don't need to implement `Hashable` / `LT` this way).
   let mut deduplicatedInfos : Array ContextualizedCompletionInfo := #[]
   for i in infos do
-    if deduplicatedInfos.any (fun di => eq di.info i.info) then
+    bif deduplicatedInfos.any (fun di => eq di.info i.info) then
       continue
     deduplicatedInfos := deduplicatedInfos.push i
   deduplicatedInfos
@@ -56,7 +56,7 @@ def findCompletionInfosAt
   let ⟨hoverLine, _⟩ := fileMap.toPosition hoverPos
   let mut isComplete := true
   let mut completionInfoCandidates := infoTree.foldInfo (init := #[]) (go hoverLine)
-  if completionInfoCandidates.isEmpty then
+  bif completionInfoCandidates.isEmpty then
     completionInfoCandidates := findSyntheticCompletions fileMap hoverPos cmdStx infoTree
     isComplete := false
   return (filterDuplicateCompletionInfos completionInfoCandidates, isComplete)
@@ -69,23 +69,23 @@ where
       : Array ContextualizedCompletionInfo := Id.run do
     let .ofCompletionInfo completionInfo := info
       | return best
-    if ! containsHoverPos completionInfo then
+    bif ! containsHoverPos completionInfo then
       return best
     let headPos := info.pos?.get!
     let tailPos := info.tailPos?.get!
     let hoverInfo :=
-      if hoverPos < tailPos then
+      bif hoverPos <ᵇ tailPos then
         HoverInfo.inside (headPos.byteDistance hoverPos)
       else
         HoverInfo.after
     let ⟨headPosLine, _⟩ := fileMap.toPosition headPos
     let ⟨tailPosLine, _⟩ := fileMap.toPosition info.tailPos?.get!
-    if headPosLine != hoverLine || headPosLine != tailPosLine then
+    bif headPosLine != hoverLine || headPosLine != tailPosLine then
       return best
     return best.push { hoverInfo, ctx, info := completionInfo }
   containsHoverPos (i : CompletionInfo) : Bool := Id.run do
     if let .option stx := i then
-      if stx[1].isMissing then
+      bif stx[1].isMissing then
         let some range := stx.getRangeWithTrailing? (canonicalOnly := true)
           | return false
         return range.contains hoverPos (includeStop := false)

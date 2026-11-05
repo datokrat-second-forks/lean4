@@ -54,7 +54,7 @@ def MessageMethod.all : MessageMethod → Array String
 
 public def messageMethod? : JsonRpc.Message → Option MessageMethod
   | .request _ method params? => do
-    if method == "$/lean/rpc/call" then
+    bif method == "$/lean/rpc/call" then
       let params := toJson params?
       if let .ok (callParams : Lsp.RpcCallParams) := fromJson? params then
         return .rpcRequest callParams.method.toString
@@ -73,16 +73,16 @@ def messageId? : JsonRpc.Message → Option JsonRpc.RequestID
 def isMsgAllowed (cfg : LogConfig)
     (pending : Std.HashMap JsonRpc.RequestID MessageMethod)
     (msg : JsonRpc.Message) : Bool := Id.run do
-  if ! cfg.isEnabled then
+  bif ! cfg.isEnabled then
     return false
   let some method := method?
     | return false
   let allMethods := method.all
   if let some allowedMethods := cfg.allowedMethods? then
-    if allMethods.any (! allowedMethods.contains ·) then
+    bif allMethods.any (! allowedMethods.contains ·) then
       return false
   if let some disallowedMethods := cfg.disallowedMethods? then
-    if allMethods.any (disallowedMethods.contains ·) then
+    bif allMethods.any (disallowedMethods.contains ·) then
       return false
   return true
 where
@@ -106,7 +106,7 @@ structure LogEntry where
 
 public def writeLogEntry (cfg : LogConfig) (pending : Std.HashMap JsonRpc.RequestID MessageMethod)
     (log : IO.FS.Handle) (direction : JsonRpc.MessageDirection) (msg : JsonRpc.Message) : IO Unit := do
-  if ! isMsgAllowed cfg pending msg then
+  bif ! isMsgAllowed cfg pending msg then
     return
   let entry : LogEntry := {
     time := ← Std.Time.DateTime.now

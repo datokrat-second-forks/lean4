@@ -161,7 +161,7 @@ def callLeanRefcountFn (builder : LLVM.Builder llvmctx)
     (delta : Option (LLVM.Value llvmctx) := Option.none) : M llvmctx Unit := do
   let fnName :=  s!"lean_{kind}{if checkRef? then "" else "_ref"}{if delta.isNone then "" else "_n"}"
   let retty ← LLVM.voidType llvmctx
-  let argtys ← if delta.isNone then pure #[← LLVM.voidPtrType llvmctx] else pure #[← LLVM.voidPtrType llvmctx, ← LLVM.size_tType llvmctx]
+  let argtys ← bif delta.isNone then pure #[← LLVM.voidPtrType llvmctx] else pure #[← LLVM.voidPtrType llvmctx, ← LLVM.size_tType llvmctx]
   let fn ← getOrCreateFunctionPrototype (← getLLVMModule) retty fnName argtys
   let fnty ← LLVM.functionType retty argtys
   match delta with
@@ -352,7 +352,7 @@ def toCName (n : Name) : M llvmctx String := do
   match getExportNameFor? env n with
   | some (.str .anonymous s) => return s
   | some _                   => throwInvalidExportName n
-  | none                     => return if n == `main then leanMainFn else getSymbolStem env n
+  | none                     => return bif n == `main then leanMainFn else getSymbolStem env n
 
 def toCInitName (n : Name) : M llvmctx String := do
   let env ← getEnv
@@ -391,7 +391,7 @@ def buildPrologueAlloca (builder : LLVM.Builder llvmctx) (ty : LLVM.LLVMType llv
   let origBB ← LLVM.getInsertBlock builder
 
   let fn ← builderGetInsertionFn builder
-  if (← LLVM.countBasicBlocks fn) == 0 then
+  bif (← LLVM.countBasicBlocks fn) == 0 then
     throw "Attempt to obtain first BB of function without BBs"
 
   let entryBB ← LLVM.getEntryBasicBlock fn
@@ -494,10 +494,10 @@ def emitFnDeclAux (mod : LLVM.Module llvmctx)
   -- bollu: if we have a declaration with no parameters, then we emit it as a global pointer.
   -- bollu: Otherwise, we emit it as a function
   let global ←
-    if ps.isEmpty then
+    bif ps.isEmpty then
         let retty ← (toLLVMType decl.resultType)
         let global ← LLVM.getOrAddGlobal mod cppBaseName retty
-        if !isExternal then
+        bif !isExternal then
           LLVM.setInitializer global (← LLVM.getUndef retty)
         pure global
     else
@@ -505,19 +505,19 @@ def emitFnDeclAux (mod : LLVM.Module llvmctx)
         let mut argtys := #[]
         for p in ps do
           -- if it is extern, then we must not add erased args
-          if !(isExternC env decl.name) || !p.ty.isErased then
+          bif !(isExternC env decl.name) || !p.ty.isErased then
             argtys := argtys.push (← toLLVMType p.ty)
         -- TODO (bollu): simplify this API, this code of `closureMaxArgs` is duplicated in multiple places.
-        if argtys.size > closureMaxArgs && isBoxedName decl.name then
+        bif argtys.size >ᵇ closureMaxArgs && isBoxedName decl.name then
           argtys := #[← LLVM.pointerType (← LLVM.voidPtrType llvmctx)]
         let fnty ← LLVM.functionType retty argtys (isVarArg := false)
         LLVM.getOrAddFunction mod cppBaseName fnty
   -- we must now set symbol visibility for global.
-  if ps.isEmpty then
-    if isClosedTermName env decl.name then LLVM.setVisibility global LLVM.Visibility.hidden -- static
-    else if isExternal then pure () -- extern (Recall that C/LLVM funcs are extern linkage by default.)
+  bif ps.isEmpty then
+    bif isClosedTermName env decl.name then LLVM.setVisibility global LLVM.Visibility.hidden -- static
+    else bif isExternal then pure () -- extern (Recall that C/LLVM funcs are extern linkage by default.)
     else LLVM.setDLLStorageClass global LLVM.DLLStorageClass.export  -- LEAN_EXPORT
-  else if !isExternal
+  else bif !isExternal
     -- An extern decl might be linked in from a different translation unit.
     -- Thus, we cannot export an external declaration as we do not define it,
     -- only declare its presence.
@@ -599,7 +599,7 @@ def emitCtorSetArgs (builder : LLVM.Builder llvmctx)
 def emitCtor (builder : LLVM.Builder llvmctx)
     (z : VarId) (c : CtorInfo) (ys : Array Arg) : M llvmctx Unit := do
   let (_llvmty, slot) ← emitLhsSlot_ z
-  if c.size == 0 && c.usize == 0 && c.ssize == 0 then do
+  bif c.size == 0 && c.usize == 0 && c.ssize == 0 then do
     let v ← callLeanBox builder (← constIntSizeT c.cidx) "lean_box_outv"
     let _ ← LLVM.buildStore builder v slot
   else do
@@ -610,7 +610,7 @@ def emitCtor (builder : LLVM.Builder llvmctx)
 def emitInc (builder : LLVM.Builder llvmctx)
     (x : VarId) (n : Nat) (checkRef? : Bool) : M llvmctx Unit := do
   let xv ← emitLhsVal builder x
-  if n != 1
+  bif n != 1
   then do
      let nv ← constIntSizeT n
      callLeanRefcountFn builder (kind := RefcountKind.inc) (checkRef? := checkRef?) (delta := nv) xv
@@ -619,14 +619,14 @@ def emitInc (builder : LLVM.Builder llvmctx)
 def emitDec (builder : LLVM.Builder llvmctx)
     (x : VarId) (n : Nat) (checkRef? : Bool) : M llvmctx Unit := do
   let xv ← emitLhsVal builder x
-  if n != 1
+  bif n != 1
   then throw "expected n = 1 for emitDec"
   else callLeanRefcountFn builder (kind := RefcountKind.dec) (checkRef? := checkRef?) xv
 
 def emitNumLit (builder : LLVM.Builder llvmctx)
     (t : IRType) (v : Nat) : M llvmctx (LLVM.Value llvmctx) := do
-  if t.isObj then
-    if v < UInt32.size then
+  bif t.isObj then
+    bif v <ᵇ UInt32.size then
       callLeanUnsignedToNatFn builder v
     else
       callLeanCStrToNatFn builder v
@@ -641,12 +641,12 @@ def quoteString (s : String) : String :=
   let q := "\"";
   let q := s.foldl
     (fun q c => q ++
-      if c == '\n' then "\\n"
-      else if c == '\r' then "\\r"
-      else if c == '\t' then "\\t"
-      else if c == '\\' then "\\\\"
-      else if c == '\"' then "\\\""
-      else if c.toNat <= 31 then
+      bif c == '\n' then "\\n"
+      else bif c == '\r' then "\\r"
+      else bif c == '\t' then "\\t"
+      else bif c == '\\' then "\\\\"
+      else bif c == '\"' then "\\\""
+      else bif c.toNat ≤ᵇ 31 then
         "\\x" ++ toHexDigit (c.toNat / 16) ++ toHexDigit (c.toNat % 16)
       -- TODO(Leo) : we should use `\unnnn` for escaping unicode characters.
       else String.singleton c)
@@ -662,7 +662,7 @@ def emitSimpleExternalCall (builder : LLVM.Builder llvmctx)
   let mut args := #[]
   let mut argTys := #[]
   for (p, y) in ps.zip ys do
-    if !p.ty.isErased then
+    bif !p.ty.isErased then
       let (_yty, yv) ← emitArgVal builder y ""
       argTys := argTys.push (← toLLVMType p.ty)
       args := args.push yv
@@ -702,7 +702,7 @@ def getOrAddFunIdValue (builder : LLVM.Builder llvmctx) (f : FunId) : M llvmctx 
   let decl ← getDecl f
   let fcname ← toCName f
   let retty ← toLLVMType decl.resultType
-  if decl.params.isEmpty then
+  bif decl.params.isEmpty then
      let gslot ← LLVM.getOrAddGlobal (← getLLVMModule) fcname retty
      LLVM.buildLoad2 builder retty gslot
   else
@@ -725,7 +725,7 @@ def emitPartialApp (builder : LLVM.Builder llvmctx) (z : VarId) (f : FunId) (ys 
     callLeanClosureSetFn builder zval (← constIntUnsigned i) yval
 
 def emitApp (builder : LLVM.Builder llvmctx) (z : VarId) (f : VarId) (ys : Array Arg) : M llvmctx Unit := do
-  if ys.size > closureMaxArgs then do
+  bif ys.size >ᵇ closureMaxArgs then do
     let aargs ← buildPrologueAlloca builder (← LLVM.arrayType (← LLVM.voidPtrType llvmctx) (UInt64.ofNat ys.size)) "aargs"
     for i in List.range ys.size do
       let (yty, yv) ← emitArgVal builder ys[i]!
@@ -758,7 +758,7 @@ def emitFullApp (builder : LLVM.Builder llvmctx)
   let decl ← getDecl f
   match decl with
   | .fdecl .. | .extern _ _ _ { entries := [.opaque] } =>
-    if ys.size > 0 then
+    bif ys.size >ᵇ 0 then
         let fv ← getOrAddFunIdValue builder f
         let ys ←  ys.mapM (fun y => do
             let (yty, yslot) ← emitArgSlot_ builder y
@@ -930,7 +930,7 @@ def emitUnbox (builder : LLVM.Builder llvmctx)
   -- NOTE(bollu) : note that lean_unbox only returns an i64, but we may need to truncate to
   -- smaller widths. see `phashmap` for an example of this occurring at calls to `lean_unbox`
   let zval ←
-    if IRType.isIntegerType t
+    bif IRType.isIntegerType t
     then LLVM.buildSextOrTrunc builder zval (← toLLVMType t)
     else pure zval
   emitLhsSlotStore builder z zval
@@ -969,7 +969,7 @@ def emitReuse (builder : LLVM.Builder llvmctx)
    (fun builder => do
        let xv ← emitLhsVal builder x
        emitLhsSlotStore builder z xv
-       if updtHeader then
+       bif updtHeader then
           let zv ← emitLhsVal builder z
           callLeanCtorSetTag builder zv (← constInt8 c.cidx)
        return ShouldForwardControlFlow.yes
@@ -1006,13 +1006,13 @@ partial def declareVars (builder : LLVM.Builder llvmctx) (f : FnBody) : M llvmct
       for param in xs do declareVar builder param.x param.ty
       declareVars builder b
   | e => do
-      if e.isTerminal then pure () else declareVars builder e.body
+      bif e.isTerminal then pure () else declareVars builder e.body
 
 def emitTag (builder : LLVM.Builder llvmctx) (x : VarId) (xType : IRType) : M llvmctx (LLVM.Value llvmctx) := do
-  if xType.isObj then do
+  bif xType.isObj then do
     let xval ← emitLhsVal builder x
     callLeanObjTag builder xval
-  else if xType.isScalar then do
+  else bif xType.isScalar then do
     emitLhsVal builder x
   else
     throw "Do not know how to `emitTag` in general."
@@ -1094,7 +1094,7 @@ def emitSetTag (builder : LLVM.Builder llvmctx) (x : VarId) (i : Nat) : M llvmct
   let _ ← LLVM.buildCall2 builder fnty fn  #[xv, ← constInt8 i]
 
 def ensureHasDefault' (alts : Array Alt) : Array Alt :=
-  if alts.any Alt.isDefault then alts
+  bif alts.any Alt.isDefault then alts
   else
     let last := alts.back!
     let alts := alts.pop
@@ -1157,7 +1157,7 @@ partial def emitBlock (builder : LLVM.Builder llvmctx) (b : FnBody) : M llvmctx 
        emitBlock builder b
   | d@(FnBody.vdecl x t v b)   => do
     let llvmctx ← read
-    if isTailCallTo llvmctx.mainFn d then
+    bif isTailCallTo llvmctx.mainFn d then
       emitTailCall builder llvmctx.mainFn v
     else
       emitVDecl builder x t v
@@ -1190,7 +1190,7 @@ end
 
 def emitFnArgs (builder : LLVM.Builder llvmctx)
     (needsPackedArgs? : Bool)  (llvmfn : LLVM.Value llvmctx) (params : Array Param) : M llvmctx Unit := do
-  if needsPackedArgs? then do
+  bif needsPackedArgs? then do
       let argsp ← LLVM.getParam llvmfn 0 -- lean_object **args
       for h : i in *...params.size do
           let param := params[i]
@@ -1221,11 +1221,11 @@ def emitDeclAux (mod : LLVM.Module llvmctx) (builder : LLVM.Builder llvmctx) (d 
     match d with
     | .fdecl (f := f) (xs := xs) (type := t) (body := b) .. =>
       let baseName ← toCName f
-      let name := if xs.size > 0 then baseName else "_init_" ++ baseName
+      let name := bif xs.size >ᵇ 0 then baseName else "_init_" ++ baseName
       let retty ← toLLVMType t
       let mut argtys := #[]
       let needsPackedArgs? := xs.size > closureMaxArgs && isBoxedName d.name
-      if needsPackedArgs? then
+      bif needsPackedArgs? then
           argtys := #[← LLVM.pointerType (← LLVM.voidPtrType llvmctx)]
       else
         for x in xs do
@@ -1236,7 +1236,7 @@ def emitDeclAux (mod : LLVM.Module llvmctx) (builder : LLVM.Builder llvmctx) (d 
       -- TODO: consider refactoring these into a separate concept (e.g. 'setLinkageAndVisibility')
       --       Find the spots where this refactor needs to happen by grepping for 'LEAN_EXPORT'
       --       in the C backend
-      if xs.size == 0 then
+      bif xs.size == 0 then
         LLVM.setVisibility llvmfn LLVM.Visibility.hidden -- "static "
       else
         LLVM.setDLLStorageClass llvmfn LLVM.DLLStorageClass.export  -- LEAN_EXPORT: make symbol visible to the interpreter
@@ -1282,7 +1282,7 @@ def callPureDeclInitFn (builder : LLVM.Builder llvmctx)
 def emitDeclInit (builder : LLVM.Builder llvmctx)
     (parentFn : LLVM.Value llvmctx) (d : Decl) : M llvmctx Unit := do
   let env ← getEnv
-  if isIOUnitInitFn env d.name then do
+  bif isIOUnitInitFn env d.name then do
     let world ← callLeanIOMkWorld builder
     let resv ← callIODeclInitFn builder (← toCName d.name) world
     let err? ← callLeanIOResultIsError builder resv "is_error"
@@ -1291,7 +1291,7 @@ def emitDeclInit (builder : LLVM.Builder llvmctx)
         let _ ← LLVM.buildRet builder resv
         pure ShouldForwardControlFlow.no)
     -- TODO (bollu) : emit lean_dec_ref. For now, it does not matter.
-  else if d.params.size == 0 then
+  else bif d.params.size == 0 then
     match getInitFnNameFor? env d.name with
     | some initFn =>
       let llvmty ← toLLVMType d.resultType
@@ -1300,7 +1300,7 @@ def emitDeclInit (builder : LLVM.Builder llvmctx)
       let initBB ← builderAppendBasicBlock builder s!"do_{d.name}_init"
       let restBB ← builderAppendBasicBlock builder s!"post_{d.name}_init"
       let checkBuiltin? := getBuiltinInitFnNameFor? env d.name |>.isSome
-      if checkBuiltin? then
+      bif checkBuiltin? then
         -- `builtin` is set to true if the initializer is part of the executable,
         -- and not loaded dynamically.
         let builtinParam ← LLVM.getParam parentFn 0
@@ -1316,7 +1316,7 @@ def emitDeclInit (builder : LLVM.Builder llvmctx)
         (fun builder => do
           let _ ← LLVM.buildRet builder resv
           pure ShouldForwardControlFlow.no)
-      if d.resultType.isScalar then
+      bif d.resultType.isScalar then
         let dval ← callLeanIOResultGetValue builder resv s!"{d.name}_res"
         let dval ← callUnboxForType builder d.resultType dval
         LLVM.buildStore builder dval dslot
@@ -1332,7 +1332,7 @@ def emitDeclInit (builder : LLVM.Builder llvmctx)
       LLVM.setInitializer dslot (← LLVM.getUndef llvmty)
       let dval ← callPureDeclInitFn builder (← toCInitName d.name) (← toLLVMType d.resultType)
       LLVM.buildStore builder dval dslot
-      if d.resultType.isObj then
+      bif d.resultType.isObj then
          callLeanMarkPersistentFn builder dval
 
 def callModInitFn (builder : LLVM.Builder llvmctx)
@@ -1477,7 +1477,7 @@ def callLeanMainFn (builder : LLVM.Builder llvmctx)
     (name : String) : M llvmctx (LLVM.Value llvmctx) := do
   let retty ← LLVM.voidPtrType llvmctx
   let voidptr ← LLVM.voidPtrType llvmctx
-  let argtys := if argv?.isSome then #[ voidptr, voidptr ] else #[ voidptr ]
+  let argtys := bif argv?.isSome then #[ voidptr, voidptr ] else #[ voidptr ]
   let fn ← getOrCreateFunctionPrototype (← getLLVMModule) retty leanMainFn argtys
   let fnty ← LLVM.functionType retty argtys
   let args := match argv? with
@@ -1514,7 +1514,7 @@ def emitMainFn (mod : LLVM.Module llvmctx) (builder : LLVM.Builder llvmctx) : M 
   let truncArgcval ← LLVM.buildSextOrTrunc builder argcval (← LLVM.i32Type llvmctx)
   let argvval ← callLeanSetupLibUV builder truncArgcval argvval
 
-  if usesLeanAPI then callLeanInitialize builder else callLeanInitializeRuntimeModule builder
+  bif usesLeanAPI then callLeanInitialize builder else callLeanInitializeRuntimeModule builder
     /- We disable panic messages because they do not mesh well with extracted closed terms.
         See issue #534. We can remove this workaround after we implement issue #467. -/
   callLeanSetPanicMessages builder (← LLVM.constFalse llvmctx)
@@ -1532,7 +1532,7 @@ def emitMainFn (mod : LLVM.Module llvmctx) (builder : LLVM.Builder llvmctx) : M 
     (fun builder => do -- then clause of the builder)
       callLeanDecRef builder resv
       callLeanInitTaskManager builder
-      if xs.size == 2 then
+      bif xs.size == 2 then
         let inv ← callLeanBox builder (← constIntSizeT 0) "inv"
         let _ ← LLVM.buildStore builder inv inslot
         let ity ← LLVM.size_tType llvmctx
@@ -1578,7 +1578,7 @@ def emitMainFn (mod : LLVM.Module llvmctx) (builder : LLVM.Builder llvmctx) : M 
   let res_is_ok ← callLeanIOResultIsOk builder resv "res_is_ok"
   buildIfThenElse_ builder "res.is.ok" res_is_ok
     (fun builder => -- then builder
-      if retTy.constName? == some ``UInt32 then do
+      bif retTy.constName? == some ``UInt32 then do
         let resv ← LLVM.buildLoad2 builder resty res "resv"
         let retv ← callLeanUnboxUint32 builder (← callLeanIOResultGetValue builder resv "io_val") "retv"
         let retv ← LLVM.buildSext builder retv (← LLVM.i64Type llvmctx) "retv_sext"
@@ -1606,7 +1606,7 @@ def hasMainFn : M llvmctx Bool := do
   return decls.any (fun d => d.name == `main)
 
 def emitMainFnIfNeeded (mod : LLVM.Module llvmctx) (builder : LLVM.Builder llvmctx) : M llvmctx Unit := do
-  if (← hasMainFn) then emitMainFn mod builder
+  bif (← hasMainFn) then emitMainFn mod builder
 
 def main : M llvmctx Unit := do
   emitFnDecls
@@ -1622,14 +1622,14 @@ def getLeanHBcPath : IO System.FilePath := do
 /-- Get the names of all global symbols in the module -/
 partial def getModuleGlobals (mod : LLVM.Module llvmctx) : IO (Array (LLVM.Value llvmctx)) := do
   let rec go (v : LLVM.Value llvmctx) (acc : Array (LLVM.Value llvmctx)) : IO (Array (LLVM.Value llvmctx)) := do
-    if v.isNull then return acc
+    bif v.isNull then return acc
     else go (← LLVM.getNextGlobal v) (acc.push v)
   go (← LLVM.getFirstGlobal mod) #[]
 
 /-- Get the names of all global functions in the module -/
 partial def getModuleFunctions (mod : LLVM.Module llvmctx) : IO (Array (LLVM.Value llvmctx)) := do
   let rec go (v : LLVM.Value llvmctx) (acc : Array (LLVM.Value llvmctx)) : IO (Array (LLVM.Value llvmctx)) := do
-    if v.isNull then return acc
+    bif v.isNull then return acc
     else go (← LLVM.getNextFunction v) (acc.push v)
   go (← LLVM.getFirstFunction mod) #[]
 
@@ -1655,7 +1655,7 @@ def emitLLVM (env : Environment) (modName : Name) (filepath : String) : IO Unit 
            -- | Do not insert internal linkage for
            -- intrinsics such as `@llvm.umul.with.overflow.i64` which clang generates, and also
            -- for declarations such as `lean_inc_ref_cold` which are externally defined.
-           if (← LLVM.isDeclaration func) then
+           bif (← LLVM.isDeclaration func) then
              return none
            else
              return some (← func.getName)

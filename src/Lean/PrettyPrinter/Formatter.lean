@@ -178,7 +178,7 @@ def fold (fn : Array Format → Format) (x : FormatterM Unit) : FormatterM Unit 
 
 /-- Execute `x` and concatenate generated Format objects. -/
 def concat (x : FormatterM Unit) : FormatterM Unit := do
-  fold (Array.foldl (fun acc f => if acc.isNil then f else f ++ acc) Format.nil) x
+  fold (Array.foldl (fun acc f => bif acc.isNil then f else f ++ acc) Format.nil) x
 
 def indent (x : Formatter) (indent : Option Int := none) : Formatter := do
   concat x
@@ -207,7 +207,7 @@ def withMaybeTag (pos? : Option String.Pos.Raw) (x : FormatterM Unit) : Formatte
     concat x
     modify fun st => {
       st with stack := st.stack.modify (st.stack.size - 1) fun fmt =>
-        if fmt matches Format.tag .. then fmt
+        bif fmt matches Format.tag .. then fmt
         else Format.tag p.byteIdx fmt
     }
   else
@@ -216,7 +216,7 @@ def withMaybeTag (pos? : Option String.Pos.Raw) (x : FormatterM Unit) : Formatte
 @[combinator_formatter orelse, expose] partial def orelse.formatter (p1 p2 : Formatter) : Formatter := do
   let stx ← getCur
   -- `orelse` may produce `choice` nodes for antiquotations
-  if stx.getKind == `choice then
+  bif stx.getKind == `choice then
     visitArgs do
       -- format only last choice
       -- TODO: We could use elaborator data here to format the chosen child when available
@@ -275,14 +275,14 @@ def withAntiquot.formatter (antiP p : Formatter) : Formatter :=
 
 @[combinator_formatter withAntiquotSuffixSplice, expose]
 def withAntiquotSuffixSplice.formatter (_ : SyntaxNodeKind) (p suffix : Formatter) : Formatter := do
-  if (← getCur).isAntiquotSuffixSplice then
+  bif (← getCur).isAntiquotSuffixSplice then
     visitArgs <| suffix *> p
   else
     p
 
 @[combinator_formatter tokenWithAntiquot, expose]
 def tokenWithAntiquot.formatter (p : Formatter) : Formatter := do
-  if (← getCur).isTokenAntiquot then
+  bif (← getCur).isTokenAntiquot then
     visitArgs p
   else
     p
@@ -291,12 +291,12 @@ def categoryFormatterCore (cat : Name) : Formatter := withReader ({ · with cat 
   modify fun st => { st with mustBeGrouped := true, isUngrouped := false }
   let stx ← getCur
   trace[PrettyPrinter.format] "formatting {indentD (format stx)}"
-  if stx.getKind == `choice then
+  bif stx.getKind == `choice then
     visitArgs do
       -- format only last choice
       -- TODO: We could use elaborator data here to format the chosen child when available
       formatterForKind (← getCur).getKind
-  else if cat == `rawStx then
+  else bif cat == `rawStx then
     withAntiquot.formatter (mkAntiquot.formatter' cat.toString cat (isPseudoKind := true)) (push stx.formatStx *> goLeft)
   else
     withAntiquot.formatter (mkAntiquot.formatter' cat.toString cat (isPseudoKind := true)) (formatterForKind stx.getKind)
@@ -336,7 +336,7 @@ def andthen.formatter (p1 p2 : Formatter) : Formatter := p2 *> p1
 
 def checkKind (k : SyntaxNodeKind) : FormatterM Unit := do
   let stx ← getCur
-  if k != stx.getKind then
+  bif k != stx.getKind then
     trace[PrettyPrinter.format.backtrack] "unexpected node kind '{stx.getKind}', expected '{k}'"
     throwBacktrack
 
@@ -375,7 +375,7 @@ def parseToken (s : String) : FormatterM ParserState := do
 /-- Whether adjoining `tk` and `leadWord` requires a space to keep their tokens separate. -/
 def needsTokenSeparator (tk leadWord : String) (ident leadWordIdent : Bool)
     (table : Parser.TokenTable) : CoreM Bool := do
-  if ident && leadWordIdent then
+  bif ident && leadWordIdent then
     return true
   let tk := tk.trimAsciiStart.copy
   return (← parseTokenCore (tk ++ leadWord) table).pos > tk.rawEndPos
@@ -387,38 +387,38 @@ def pushToken (info : SourceInfo) (tk : String) (ident : Bool) : FormatterM Unit
     unless ss'.isEmpty do
       let preNL := Substring.Raw.contains { ss with stopPos := ss'.startPos } '\n'
       let postNL := Substring.Raw.contains { ss with startPos := ss'.stopPos } '\n'
-      if postNL then
+      bif postNL then
         pushWhitespace "\n"
-      else if !(← get).leadWord.isEmpty then
+      else bif !(← get).leadWord.isEmpty then
         pushLine
       push ss'.toString
-      if preNL then
+      bif preNL then
         pushWhitespace "\n"
       else
         pushLine
 
   let st ← get
   -- If there is no space between `tk` and the next word, see if we should insert a discretionary space.
-  if st.leadWord != "" && tk.trimAsciiEnd == tk.toSlice then
+  bif st.leadWord != "" && tk.trimAsciiEnd == tk.toSlice then
     let insertSpace ← needsTokenSeparator tk st.leadWord ident st.leadWordIdent (← read).table
-    if !insertSpace then
+    bif !insertSpace then
       -- extend `leadWord` if not prefixed by whitespace
       push tk
-      modify fun st => { st with leadWord := if tk.trimAsciiStart == tk.toSlice then tk ++ st.leadWord else "", leadWordIdent := ident }
+      modify fun st => { st with leadWord := bif tk.trimAsciiStart == tk.toSlice then tk ++ st.leadWord else "", leadWordIdent := ident }
     else
       pushLine
       push tk
-      modify fun st => { st with leadWord := if tk.trimAsciiStart == tk.toSlice then tk else "", leadWordIdent := ident }
+      modify fun st => { st with leadWord := bif tk.trimAsciiStart == tk.toSlice then tk else "", leadWordIdent := ident }
   else
     -- already separated => use `tk` as is
-    if st.leadWord == "" then
+    bif st.leadWord == "" then
       push tk.trimAsciiEnd.copy
-    else if tk.endsWith " " then
+    else bif tk.endsWith " " then
       pushLine
       push tk.trimAsciiEnd.copy
     else
       push tk -- preserve special whitespace for tokens like ":=\n"
-    modify fun st => { st with leadWord := if tk.trimAsciiStart == tk.toSlice then tk else "", leadWordIdent := ident }
+    modify fun st => { st with leadWord := bif tk.trimAsciiStart == tk.toSlice then tk else "", leadWordIdent := ident }
 
   if let SourceInfo.original ss _ _ _ := info then
     -- preserve non-whitespace content (comments)
@@ -429,12 +429,12 @@ def pushToken (info : SourceInfo) (tk : String) (ident : Bool) : FormatterM Unit
       -- Indentation is automatically increased when entering a category, but comments should be aligned
       -- with the actual token, so dedent
       indent (indent := some (-Std.Format.getIndent (← getOptions))) do
-        if postNL then
+        bif postNL then
           pushWhitespace "\n"
         else
           pushLine
         pushWhitespace ss'.toString
-        if preNL then
+        bif preNL then
           pushWhitespace "\n"
         else
           -- It is conceivable that the start of comment syntax could be misinterpreted as part of a token,
@@ -445,7 +445,7 @@ def pushToken (info : SourceInfo) (tk : String) (ident : Bool) : FormatterM Unit
 @[combinator_formatter symbolNoAntiquot, expose]
 def symbolNoAntiquot.formatter (sym : String) : Formatter := do
   let stx ← getCur
-  if stx.isToken sym then
+  bif stx.isToken sym then
     let (Syntax.atom info _) := stx | unreachable!
     withMaybeTag (getExprPos? stx) <| pushToken info sym false
     goLeft
@@ -465,10 +465,10 @@ def unicodeSymbolNoAntiquot.formatter (sym asciiSym : String) (preserveForPP : B
   let stx ← getCur
   let usesUnicode := stx.isToken sym
   let usesAscii := stx.isToken asciiSym
-  if usesUnicode || usesAscii then
+  bif usesUnicode || usesAscii then
     let (Syntax.atom info _) := stx | unreachable!
     -- Use unicode version if pp.unicode is enabled and either preserveForPP is false or the syntax contains the unicode version
-    if getPPUnicode (← getOptions) && (!preserveForPP || usesUnicode) then
+    bif getPPUnicode (← getOptions) && (!preserveForPP || usesUnicode) then
       withMaybeTag (getExprPos? stx) <| pushToken info sym false
     else
       withMaybeTag (getExprPos? stx) <| pushToken info asciiSym false
@@ -499,7 +499,7 @@ def identNoAntiquot.formatter : Formatter := do
 
 def visitAtom (k : SyntaxNodeKind) : Formatter := do
   let stx ← getCur
-  if k != Name.anonymous then
+  bif k != Name.anonymous then
     checkKind k
   let Syntax.atom info val ← pure $ stx.ifNode (fun n => n.getArg 0) (fun _ => stx)
     | throwError m!"not an atom: {stx}"
@@ -529,7 +529,7 @@ def optionalNoAntiquot.formatter (p : Formatter) : Formatter := do
 @[combinator_formatter many1Unbox, expose]
 def many1Unbox.formatter (p : Formatter) : Formatter := do
   let stx ← getCur
-  if stx.getKind == nullKind then do
+  bif stx.getKind == nullKind then do
     manyNoAntiquot.formatter p
   else
     p
@@ -537,14 +537,14 @@ def many1Unbox.formatter (p : Formatter) : Formatter := do
 @[combinator_formatter sepByNoAntiquot, expose]
 def sepByNoAntiquot.formatter (p pSep : Formatter) : Formatter := do
   let stx ← getCur
-  visitArgs <| stx.getArgs.size.forRevM fun i _ => if i % 2 == 0 then p else pSep
+  visitArgs <| stx.getArgs.size.forRevM fun i _ => bif i % 2 == 0 then p else pSep
 
 @[combinator_formatter sepBy1NoAntiquot, expose] def sepBy1NoAntiquot.formatter := sepByNoAntiquot.formatter
 
 @[combinator_formatter withoutInfo, expose] def withoutInfo.formatter (p : Formatter) : Formatter := p
 @[combinator_formatter checkWsBefore, expose] def checkWsBefore.formatter : Formatter := do
   let st ← get
-  if st.leadWord != "" then
+  bif st.leadWord != "" then
     pushLine
 
 @[combinator_formatter checkPrec, expose] def checkPrec.formatter : Formatter := pure ()
@@ -578,7 +578,10 @@ def interpolatedStr.formatter (p : Formatter) : Formatter := do
 @[combinator_formatter hexnumNoAntiquot, expose] def hexnum.formatter := visitAtom hexnumKind
 
 @[combinator_formatter _root_.ite, expose, macro_inline] def ite {_ : Type} (c : Prop) [Decidable c] (t e : Formatter) : Formatter :=
-  if c then t else e
+  bif decide c then t else e
+
+@[combinator_formatter _root_.cond, expose, macro_inline] def cond {_ : Type} (c : Bool) (t e : Formatter) : Formatter :=
+  bif c then t else e
 
 abbrev FormatterAliasValue := AliasValue Formatter
 
@@ -617,7 +620,7 @@ def continuation : String := " [...]"
 instance : Std.Format.MonadPrettyFormat M where
   pushOutput s := do
     let lineEnd := s.find '\n'
-    if ¬lineEnd.IsAtEnd then
+    bif lineEnd ≠ᵇ s.endPos then
       let s := (s.sliceTo lineEnd).trimAsciiEnd.copy ++ continuation
       modify fun st => { st with line := st.line.append s }
       throw ()
@@ -653,7 +656,7 @@ def format (formatter : Formatter) (stx : Syntax) : CoreM Format := do
     (do
       let (_, st) ← (concat formatter { table, options }).run { stxTrav := .fromSyntax stx }
       let mut f := st.stack[0]!
-      if pp.oneline.get options then
+      bif pp.oneline.get options then
         f := OneLine.pretty f (Std.Format.format.width.get options)
       return .fill f)
     (fun _ => throwError "format: uncaught backtrack exception")

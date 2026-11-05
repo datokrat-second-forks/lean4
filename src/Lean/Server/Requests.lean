@@ -178,7 +178,7 @@ def parseRequestParams (paramType : Type) [FromJson paramType] (params : Json)
 
 def checkCancelled : RequestM Unit := do
   let rc ← readThe RequestContext
-  if ← rc.cancelTk.wasCancelledByCancelRequest then
+  bif (← rc.cancelTk.wasCancelledByCancelRequest) then
     throw .requestCancelled
 
 def sendServerRequest
@@ -312,9 +312,9 @@ def registerLspRequestHandler (method : String)
     (handler : paramType → RequestM (RequestTask respType))
     (serialize? : Option (respType → String) := none) :
     IO Unit := do
-  if !(← Lean.initializing) then
+  bif !(← Lean.initializing) then
     throw <| IO.userError s!"Failed to register LSP request handler for '{method}': only possible during initialization"
-  if (← requestHandlers.get).contains method then
+  bif (← requestHandlers.get).contains method then
     throw <| IO.userError s!"Failed to register LSP request handler for '{method}': already registered"
   let fileSource := fun j =>
     parseRequestParams paramType j |>.map Lsp.fileSource
@@ -352,7 +352,7 @@ def chainLspRequestHandler (method : String)
     paramType [FromJson paramType]
     respType [FromJson respType] [ToJson respType]
     (handler : paramType → RequestTask respType → RequestM (RequestTask respType)) : IO Unit := do
-  if !(← Lean.initializing) then
+  bif !(← Lean.initializing) then
     throw <| IO.userError s!"Failed to chain LSP request handler for '{method}': only possible during initialization"
   if let some oldHandler ← lookupLspRequestHandler method then
     let handle := fun j => do
@@ -442,7 +442,7 @@ private def overrideStatefulLspRequestHandler
     (handler : paramType → stateType → RequestM (LspResponse respType × stateType))
     (onDidChange : DidChangeTextDocumentParams → StateT stateType RequestM Unit)
     : IO Unit := do
-  if !(← Lean.initializing) then
+  bif !(← Lean.initializing) then
     throw <| IO.userError s!"Failed to register stateful LSP request handler for '{method}': only possible during initialization"
   let fileSource := fun j =>
     parseRequestParams paramType j |>.map Lsp.fileSource
@@ -501,7 +501,7 @@ private def registerStatefulLspRequestHandler
     (handler : paramType → stateType → RequestM (LspResponse respType × stateType))
     (onDidChange : DidChangeTextDocumentParams → StateT stateType RequestM Unit)
     : IO Unit := do
-  if (← requestHandlers.get).contains method then
+  bif (← requestHandlers.get).contains method then
     throw <| IO.userError s!"Failed to register stateful LSP request handler for '{method}': already registered"
   overrideStatefulLspRequestHandler method completeness paramType respType stateType initState handler onDidChange
 
@@ -545,7 +545,7 @@ def chainStatefulLspRequestHandler (method : String)
     stateType [TypeName stateType]
     (handler : paramType → LspResponse respType → stateType → RequestM (LspResponse respType × stateType))
     (onDidChange : DidChangeTextDocumentParams → StateT stateType RequestM Unit) : IO Unit := do
-  if ! (← Lean.initializing) then
+  bif ! (← Lean.initializing) then
     throw <| IO.userError s!"Failed to chain stateful LSP request handler for '{method}': only possible during initialization"
   let some oldHandler ← lookupStatefulLspRequestHandler method
     | throw <| IO.userError s!"Failed to chain stateful LSP request handler for '{method}': no initial handler registered"
@@ -578,7 +578,7 @@ def handleOnDidChange (p : DidChangeTextDocumentParams) : RequestM Unit := do
     handler.onDidChange p
 
 def handleLspRequest (method : String) (params : Json) : RequestM (RequestTask SerializedLspResponse) := do
-  if ← isStatefulLspRequestMethod method then
+  bif (← isStatefulLspRequestMethod method) then
     match ← lookupStatefulLspRequestHandler method with
     | none =>
       throw <| .internalError
@@ -592,7 +592,7 @@ def handleLspRequest (method : String) (params : Json) : RequestM (RequestTask S
     | some rh => rh.handle params
 
 def routeLspRequest (method : String) (params : Json) : IO (Except RequestError DocumentUri) := do
-  if ← isStatefulLspRequestMethod method then
+  bif (← isStatefulLspRequestMethod method) then
     match ← lookupStatefulLspRequestHandler method with
     | none => return Except.error <| RequestError.methodNotFound method
     | some rh => return rh.fileSource params

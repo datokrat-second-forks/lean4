@@ -28,12 +28,12 @@ where
       (childValues : List (Option (Option α)))
       : Option α :=
     let bestChildValue := childValues.map (·.join) |>.foldl (init := none) fun v best =>
-      if isBetter v best then
+      bif isBetter v best then
         v
       else
         best
     if let some v := f ctx info cs then
-      if isBetter v bestChildValue then
+      bif isBetter v bestChildValue then
         v
       else
         bestChildValue
@@ -56,7 +56,7 @@ private def findClosestInfoWithLocalContextAt?
     (infoTree : InfoTree)
     : Option (ContextInfo × Info) :=
   findBest? infoTree isBetter fun ctx info _ =>
-    if info.occursInOrOnBoundary hoverPos then
+    bif info.occursInOrOnBoundary hoverPos then
       (ctx, info)
     else
       none
@@ -64,13 +64,13 @@ where
   isBetter (a b : ContextInfo × Info) : Bool :=
     let (_, ia) := a
     let (_, ib) := b
-    if !ia.lctx.isEmpty && ib.lctx.isEmpty then
+    bif !ia.lctx.isEmpty && ib.lctx.isEmpty then
       true
-    else if ia.lctx.isEmpty && !ib.lctx.isEmpty then
+    else bif ia.lctx.isEmpty && !ib.lctx.isEmpty then
       false
-    else if ia.isSmaller ib then
+    else bif ia.isSmaller ib then
       true
-    else if ib.isSmaller ia then
+    else bif ib.isSmaller ia then
       false
     else
       false
@@ -87,7 +87,7 @@ private def findSyntheticIdentifierCompletion?
   let some (stx, _) := stack.head?
     | none
   let isDotIdCompletion := stack.any fun (stx, _) => stx matches `(.$_:ident)
-  if isDotIdCompletion then
+  bif isDotIdCompletion then
     -- An identifier completion is never useful in a dotId completion context.
     none
   let some (id, danglingDot) :=
@@ -98,7 +98,7 @@ private def findSyntheticIdentifierCompletion?
     | none
   let tailPos := stx.getTailPos?.get!
   let hoverInfo :=
-    if hoverPos < tailPos then
+    bif hoverPos <ᵇ tailPos then
       HoverInfo.inside (hoverPos.byteDistance tailPos)
     else
       HoverInfo.after
@@ -130,12 +130,12 @@ where
       let isCursorInCompletionRange :=
         startPos.byteIdx - leadingWs <= hoverPos.byteIdx
           && hoverPos.byteIdx <= endPos.byteIdx + stx.getTrailingSize
-      if ! isCursorInCompletionRange then
+      bif ! isCursorInCompletionRange then
         return false
       let mut wsBeforeArg := leadingWs
       let mut lastArgTailPos? := leadingTokenTailPos?
       for arg in stx.getArgs do
-        if go hoverFilePos arg wsBeforeArg lastArgTailPos? then
+        bif go hoverFilePos arg wsBeforeArg lastArgTailPos? then
           return true
         -- We must account for the whitespace before an argument because the syntax nodes we use
         -- to identify tactic blocks only start *after* the whitespace following a `by`, and we
@@ -190,22 +190,22 @@ where
       return isCursorAfterSemicolon
 
   getTacticsNode? (stx : Syntax) : Option Syntax :=
-    if stx.getKind == ``Parser.Tactic.tacticSeq1Indented then
+    bif stx.getKind == ``Parser.Tactic.tacticSeq1Indented then
       some stx[0]
-    else if stx.getKind == ``Parser.Tactic.tacticSeqBracketed then
+    else bif stx.getKind == ``Parser.Tactic.tacticSeqBracketed then
       some stx[1]
     else
       none
 
   isCompletionInEmptyTacticBlock (stx : Syntax) (leadingTokenTailPos? : Option String.Pos.Raw) : Bool := Id.run do
-    if ! isCursorInProperWhitespace fileMap hoverPos then
+    bif ! isCursorInProperWhitespace fileMap hoverPos then
       return false
-    if ! isEmptyTacticBlock stx then
+    bif ! isEmptyTacticBlock stx then
       return false
     -- Bracketed tactic blocks `{ ... }` are delimited by the braces themselves, so tactics
     -- inserted in an empty bracketed block can appear at any column between the braces
     -- (`withoutPosition` disables indentation constraints inside `tacticSeqBracketed`).
-    if stx.getKind == ``Parser.Tactic.tacticSeqBracketed then
+    bif stx.getKind == ``Parser.Tactic.tacticSeqBracketed then
       let some openEndPos := stx[0].getTailPos?
         | return false
       let some closeStartPos := stx[2].getPos?
@@ -224,7 +224,7 @@ where
       | return true
     let hoverFilePos := fileMap.toPosition hoverPos
     let tokenTailFilePos := fileMap.toPosition tokenTailPos
-    if hoverFilePos.line == tokenTailFilePos.line then
+    bif hoverFilePos.line == tokenTailFilePos.line then
       return hoverPos.byteIdx >= tokenTailPos.byteIdx
     let expectedColumn := countLeadingSpaces (fileMap.lineStart tokenTailFilePos.line) + 2
     return hoverFilePos.column == expectedColumn
@@ -233,7 +233,7 @@ where
     let mut p := pos
     let mut n : Nat := 0
     while ! p.atEnd fileMap.source do
-      if p.get fileMap.source != ' ' then
+      bif p.get fileMap.source != ' ' then
         break
       p := p.next fileMap.source
       n := n + 1
@@ -275,7 +275,7 @@ private def findSyntheticTacticCompletion?
     (infoTree : InfoTree)
     : Option ContextualizedCompletionInfo := do
   let ctx ← findOutermostContextInfo? infoTree
-  if ! isSyntheticTacticCompletion fileMap hoverPos cmdStx then
+  bif ! isSyntheticTacticCompletion fileMap hoverPos cmdStx then
     none
   -- Neither `HoverInfo` nor the syntax in `.tactic` are important for tactic completion.
   return { hoverInfo := HoverInfo.after, ctx, info := .tactic .missing }
@@ -323,7 +323,7 @@ private def findWithLeadingToken?
     match foundStx? with
     | some foundStx => foundStx
     | none =>
-      if p leadingToken? stx then
+      bif p leadingToken? stx then
         some stx
       else
         none
@@ -335,7 +335,7 @@ private def isSyntheticStructFieldCompletion
     : Bool := Id.run do
   let isCursorOnWhitespace := isCursorOnWhitespace fileMap hoverPos
   let isCursorInProperWhitespace := isCursorInProperWhitespace fileMap hoverPos
-  if ! isCursorOnWhitespace then
+  bif ! isCursorOnWhitespace then
     return false
 
   let hoverFilePos := fileMap.toPosition hoverPos
@@ -344,7 +344,7 @@ private def isSyntheticStructFieldCompletion
     let some leadingToken := leadingToken?
       | return false
 
-    if stx.getKind != ``Parser.Term.structInstFields then
+    bif stx.getKind != ``Parser.Term.structInstFields then
       return false
 
     let fieldsAndSeps := stx[0].getArgs
@@ -358,22 +358,22 @@ private def isSyntheticStructFieldCompletion
 
     let isCompletionInEmptyBlock :=
       fieldsAndSeps.isEmpty && outerBounds.contains hoverPos (includeStop := true)
-    if isCompletionInEmptyBlock then
+    bif isCompletionInEmptyBlock then
       return true
 
     let isCompletionAfterSep := fieldsAndSeps.zipIdx.any fun (fieldOrSep, i) => Id.run do
-      if i % 2 == 0 || !fieldOrSep.isAtom then
+      bif i % 2 == 0 || !fieldOrSep.isAtom then
         return false
       let sep := fieldOrSep
       let some sepTailPos := sep.getTailPos?
         | return false
       return sepTailPos <= hoverPos
         && hoverPos.byteIdx <= sepTailPos.byteIdx + sep.getTrailingSize
-    if isCompletionAfterSep then
+    bif isCompletionAfterSep then
       return true
 
     let isCompletionOnIndentation := Id.run do
-      if ! isCursorInProperWhitespace then
+      bif ! isCursorInProperWhitespace then
         return false
       let some firstFieldPos := stx.getPos?
         | return false
@@ -388,12 +388,12 @@ private def findSyntheticFieldCompletion?
   (cmdStx   : Syntax)
   (infoTree : InfoTree)
   : Option ContextualizedCompletionInfo := do
-  if ! isSyntheticStructFieldCompletion fileMap hoverPos cmdStx then
+  bif ! isSyntheticStructFieldCompletion fileMap hoverPos cmdStx then
     none
   let (ctx, expectedType) ← findExpectedTypeAt infoTree hoverPos
   let .const typeName _ := expectedType.getAppFn
     | none
-  if ! isStructure ctx.env typeName then
+  bif ! isStructure ctx.env typeName then
     none
   return { hoverInfo := HoverInfo.after, ctx, info := .fieldId .missing none .empty typeName }
 

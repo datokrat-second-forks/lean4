@@ -34,7 +34,7 @@ abbrev M := ReaderT Environment (StateM State)
 @[inline] def collect (f : FunId) : M Unit :=
   modify fun { set, order } =>
     let (contained, set) := set.containsThenInsert f
-    if !contained then
+    bif !contained then
       { set, order := order.push f }
     else
       { set, order }
@@ -86,7 +86,7 @@ partial def collectFnBody : FnBody → Collector
   | .vdecl x t _ b    => collectVar x t ∘ collectFnBody b
   | .jdecl j xs v b   => collectJP j xs ∘ collectParams xs ∘ collectFnBody v ∘ collectFnBody b
   | .case _ _ _ alts  => fun s => alts.foldl (fun s alt => collectFnBody alt.body s) s
-  | e                 => if e.isTerminal then id else collectFnBody e.body
+  | e                 => bif e.isTerminal then id else collectFnBody e.body
 
 def collectDecl : Decl → Collector
   | .fdecl (xs := xs) (body := b) .. => collectParams xs ∘ collectFnBody b
