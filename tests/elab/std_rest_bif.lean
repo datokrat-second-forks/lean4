@@ -2,11 +2,12 @@ import Std.Tactic.BVDecide
 import Std.Time
 import Std.Http
 /-!
-The remaining definitions in `Std` (the `bv_decide` checker, reflection and bitblaster, `Std.Sat`,
-`Std.Time`, `Std.Http`, `Parsec`, `Sync`) use `bif` or dependent `bif` instead of a `Decidable`
-`if`. These checks ensure that whatever reduced before still reduces, including the `Bool` helpers
-that used to coerce propositions (`Year.Offset.isLeap`, the HTTP character classes), and that
-`bv_decide` still proves small goals.
+The `bv_decide` denotations, `Std.Time`'s calendar arithmetic and bounds, and the HTTP helpers
+checked here use `bif`, so they still reduce; the `bv_decide` checker and bitblaster, `Std.Sat`,
+`Parsec`, `Sync` and the rest of `Std.Http` and `Std.Time` use `uif` and are checked with `cbv`.
+These checks ensure that whatever must reduce still does, including the `Bool` helpers that used to
+coerce propositions (`Year.Offset.isLeap`, the HTTP character classes), and that `bv_decide` still
+proves small goals.
 -/
 
 open Std.Sat Std.Tactic.BVDecide
