@@ -142,7 +142,7 @@ def elabArrayTable (x : TSyntax ``arrayTable) : TomlElabM Unit := withRef x do
   let k ← elabHeaderKeys ks.pop
   let k := k.str (← elabSimpleKey tailKey)
   if let some ty := (← get).keyTys.find? k then
-    if ty matches .array then
+    bif ty matches .array then
       let s ← get
       let some keyTys := s.arrParents.find? k >>= s.arrKeyTys.find?
         | throwError "(internal) bad array key `{k}`"

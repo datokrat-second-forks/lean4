@@ -30,10 +30,11 @@ def recBuildWithIndex (info : BuildInfo) : FetchM (Job (BuildData info.key)) :=
   match info with
   | .target pkg target => do
     if let some decl := pkg.findTargetDecl? target then
-      if h : decl.kind.isAnonymous then
+      bif h : decl.kind.isAnonymous then
         let key := BuildKey.packageTarget pkg.keyName target
         fetchOrCreate key do (decl.targetConfig h).fetchFn pkg
       else
+        have h := Bool.ne_true_of_eq_false h
         let kind := ⟨decl.kind, by simp [decl.target_eq_type h]⟩
         let job := Job.pure (kind := kind) <| decl.mkConfigTarget pkg
         return cast (by simp [decl.data_eq_target h]) job
@@ -41,9 +42,10 @@ def recBuildWithIndex (info : BuildInfo) : FetchM (Job (BuildData info.key)) :=
       error s!"invalid target '{info}': target not found in package"
   | .facet target kind data facet => do
     if let some config := (← getWorkspace).findFacetConfig? facet then
-      if h : config.kind = kind then
+      bif h : config.kind =ᵇ kind then
+        have h := eq_of_decideEq_eq_true h
         let recFetch := config.fetchFn <| cast (by simp [h]) data
-        if config.memoize then
+        bif config.memoize then
           let key := BuildKey.facet target facet
           fetchOrCreate key recFetch
         else

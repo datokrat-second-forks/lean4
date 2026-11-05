@@ -74,7 +74,7 @@ Tries to download and unpack the package's cached build archive
 (e.g., from Reservoir or GitHub).
 -/
 def Package.fetchOptBuildCacheCore (self : Package) : FetchM (Job Bool) := do
-  if self.preferReleaseBuild then
+  bif self.preferReleaseBuild then
     self.optGitHubRelease.fetch
   else
     self.optReservoirBarrel.fetch
@@ -91,14 +91,14 @@ def Package.maybeFetchBuildCache (self : Package) : FetchM (Job Bool) := do
     (self.preferReleaseBuild || -- GitHub release
       ((self.scope == "leanprover" || self.scope == "leanprover-community")
         && !(← getElanToolchain).isEmpty)) -- Reservoir
-  if shouldFetch then
+  bif shouldFetch then
     self.optBuildCache.fetch
   else
     return pure true
 
 @[inline]
 def Package.optFacetDetails (self : Package) (facet : Name) : JobM String := do
-  if (← getIsVerbose) then
+  bif (← getIsVerbose) then
     return s!" (see '{self.baseName}:{Name.eraseHead facet}' for details)"
   else
     return " (run with '-v' for details)"
@@ -111,7 +111,7 @@ def Package.maybeFetchBuildCacheWithWarning (self : Package) := do
   let job ← self.maybeFetchBuildCache
   job.mapM fun success => do
     unless success do
-      if self.preferReleaseBuild then
+      bif self.preferReleaseBuild then
         let details ← self.optFacetDetails optGitHubReleaseFacet
         logWarning s!"building from source; failed to fetch GitHub release{details}"
       else
@@ -139,14 +139,14 @@ public def Package.extraDepFacetConfig : PackageFacetConfig extraDepFacet :=
 
 /-- Compute the package's Reservoir barrel URL. -/
 def Package.getBarrelUrl (self : Package) : JobM String := do
-  if self.scope.isEmpty then
+  bif self.scope.isEmpty then
     error "package has no Reservoir scope"
   let repo := GitRepo.mk self.dir
   let some rev ← repo.getHeadRevision?
     | error "failed to resolve HEAD revision"
   let env ← getLakeEnv
   let mut url := Reservoir.pkgApiUrl env self.scope self.reservoirName
-  if env.toolchain.isEmpty then
+  bif env.toolchain.isEmpty then
     error "Lean toolchain not known; Reservoir only hosts builds for known toolchains"
   url := s!"{url}/barrel?rev={rev}&toolchain={uriEncode env.toolchain}"
   return url
@@ -228,7 +228,7 @@ Perform a build job after first checking for an (optional) cached build
 for the package (e.g., from Reservoir or GitHub).
 -/
 public def Package.afterBuildCacheAsync (self : Package) (build : JobM (Job α)) : FetchM (Job α) := do
-  if self.isRoot then
+  bif self.isRoot then
     build
   else
     (← self.maybeFetchBuildCache).bindM fun _ => do
@@ -240,7 +240,7 @@ public def Package.afterBuildCacheAsync (self : Package) (build : JobM (Job α))
  for the package (e.g., from Reservoir or GitHub).
 -/
 public def Package.afterBuildCacheSync (self : Package) (build : JobM α) : FetchM (Job α) := do
-  if self.isRoot then
+  bif self.isRoot then
     Job.async build
   else
     (← self.maybeFetchBuildCache).mapM fun _  => do

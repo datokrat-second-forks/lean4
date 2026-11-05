@@ -353,7 +353,7 @@ def escapeName! : Name → String
 | _                 => unreachable!
 
 def dotlessName (name : Name) :=
-  name.toString false |>.map fun chr => if chr == '.' then '-' else chr
+  name.toString false |>.map fun chr => bif chr == '.' then '-' else chr
 
 def InitTemplate.configFileContents
   (tmp : InitTemplate) (lang : ConfigLang) (pkgName : Name) (root : Name)
@@ -379,26 +379,26 @@ def createLeanActionWorkflow (dir : FilePath) (tmp : InitTemplate) : LogIO PUnit
   IO.FS.createDirAll workflowDir
 
   let workflowFile := workflowDir / "lean_action_ci.yml"
-  if (← workflowFile.pathExists) then
+  bif (← workflowFile.pathExists) then
     logVerbose "lean-action CI workflow already exists"
     return
-  if tmp = .math then
+  bif tmp =ᵇ .math then
     IO.FS.writeFile workflowFile mathBuildActionWorkflowContents
   else
     IO.FS.writeFile workflowFile leanActionWorkflowContents
   logVerbose s!"created lean-action CI workflow at '{workflowFile}'"
 
-  if tmp = .math then
+  bif tmp =ᵇ .math then
     -- A workflow for automatically creating update PRs/issues.
     let workflowFile := workflowDir / "update.yml"
-    if (← workflowFile.pathExists) then
+    bif (← workflowFile.pathExists) then
       logVerbose "Mathlib update CI workflow already exists"
       return
     IO.FS.writeFile workflowFile mathUpdateActionWorkflowContents
     logVerbose s!"created Mathlib update CI workflow at '{workflowFile}'"
     -- A workflow for tagging commits that bump the Lean toolchain version.
     let workflowFile := workflowDir / "create-release.yml"
-    if (← workflowFile.pathExists) then
+    bif (← workflowFile.pathExists) then
       logVerbose "create-release CI workflow already exists"
       return
     IO.FS.writeFile workflowFile createReleaseActionWorkflowContents
@@ -410,7 +410,7 @@ def initPkg
   (env : Lake.Env) (offline := false)
 : LoggerIO PUnit := do
   let configFile :=  dir / defaultConfigFile.addExtension lang.fileExtension
-  if (← configFile.pathExists) then
+  bif (← configFile.pathExists) then
     error "package already initialized"
 
   createLeanActionWorkflow dir tmp
@@ -419,12 +419,12 @@ def initPkg
   let (root, rootFile?) ← id do
     let root := name
     let rootFile := Lean.modToFilePath dir root "lean"
-    if tmp = .exe || (← rootFile.pathExists) then
+    bif tmp =ᵇ .exe || (← rootFile.pathExists) then
       return (root, none)
     else
       let root := toUpperCamelCase name
       let rootFile := Lean.modToFilePath dir root "lean"
-      if (← rootFile.pathExists) then
+      bif (← rootFile.pathExists) then
         return (root, none)
       else
         return (root, rootFile)
@@ -444,15 +444,15 @@ def initPkg
     unless (← basicFile.pathExists) do
       IO.FS.createDirAll libDir
       IO.FS.writeFile basicFile basicFileContents
-    let rootContents := if tmp = .math then
+    let rootContents := bif tmp =ᵇ .math then
       mathLibRootFileContents root
     else
       libRootFileContents root.toString root
     IO.FS.writeFile rootFile rootContents
-  if tmp matches .std | .exe then
+  bif tmp matches .std | .exe then
     let mainFile := dir / mainFileName
     unless (← mainFile.pathExists) do
-      if tmp = .exe then
+      bif tmp =ᵇ .exe then
         IO.FS.writeFile mainFile <| exeFileContents
       else
         IO.FS.writeFile mainFile <| mainFileContents root
@@ -460,7 +460,7 @@ def initPkg
   -- Initialize a README.md file if none exists.
   let readmeFile := dir / "README.md"
   unless (← readmeFile.pathExists) do
-    let contents := if tmp = .math then
+    let contents := bif tmp =ᵇ .math then
         mathReadmeFileContents <| dotlessName name
       else
         readmeFileContents <| dotlessName name
@@ -487,7 +487,7 @@ def initPkg
   [1]: https://github.com/leanprover/lean4/issues/2518
   -/
   let toolchainFile := dir / toolchainFileName
-  if env.toolchain.isEmpty then
+  bif env.toolchain.isEmpty then
       -- Empty githash implies dev build
       unless env.lean.githash.isEmpty do
         unless (← toolchainFile.pathExists) do
@@ -495,8 +495,8 @@ def initPkg
             no known toolchain name for the current Elan/Lean/Lake"
     else
       IO.FS.writeFile toolchainFile <| env.toolchain ++ "\n"
-  if tmp matches .mathLax | .math then
-    if leanVer?.isNone then
+  bif tmp matches .mathLax | .math then
+    bif leanVer?.isNone then
       logWarning "creating a new math package with a non-release Lean toolchain; \
         Mathlib may not work properly"
     unless offline do
@@ -504,9 +504,9 @@ def initPkg
       updateManifest { lakeEnv := env, wsDir := dir, updateToolchain := false }
 
 def validatePkgName (pkgName : String) : LogIO PUnit := do
-  if pkgName.isEmpty || pkgName.all (· == '.') || pkgName.any (· ∈ ['/', '\\']) then
+  bif pkgName.isEmpty || pkgName.all (· == '.') || pkgName.any (· ∈ ['/', '\\']) then
     error s!"illegal package name '{pkgName}'"
-  if pkgName.toLower ∈ ["init", "lean", "lake", "main"] then
+  bif ["init", "lean", "lake", "main"].contains pkgName.toLower then
     error "reserved package name"
 
 public def init
@@ -514,7 +514,7 @@ public def init
   (env : Lake.Env) (cwd : FilePath := ".") (offline := false)
 : LoggerIO PUnit := do
   let name ← id do
-    if name == "." then
+    bif name == "." then
       let path ← IO.FS.realPath cwd
       match path.fileName with
       | some dirName => return dirName

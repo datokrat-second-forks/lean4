@@ -37,16 +37,16 @@ Components are composed of alphanumerics or a `*`.
   fun p => go #[] p p (String.Pos.le_refl _)
 where
   go cs iniPos p (iniPos_le : iniPos ≤ p) :=
-    if h : p = s.endPos then
+    bif h : p =ᵇ s.endPos then
       let c := String.Slice.mk s iniPos p iniPos_le
       .ok (cs.push c) p
     else
-      let c := p.get h
-      if c == '.' then
+      let c := p.get (ne_of_decideEq_eq_false h)
+      bif c == '.' then
         let c := String.Slice.mk s iniPos p iniPos_le
-        go (cs.push c) (p.next h) (p.next h) (Nat.le_refl _)
-      else if c.isAlphanum || c == '*' then
-        go cs iniPos (p.next h)
+        go (cs.push c) (p.next (ne_of_decideEq_eq_false h)) (p.next (ne_of_decideEq_eq_false h)) (Nat.le_refl _)
+      else bif c.isAlphanum || c == '*' then
+        go cs iniPos (p.next (ne_of_decideEq_eq_false h))
           (String.Pos.le_trans iniPos_le (String.Pos.le_of_lt p.lt_next))
       else
         let c := String.Slice.mk s iniPos p iniPos_le
@@ -56,9 +56,9 @@ where
 /-- Returns whether a version component is a wildcard. -/
 def isWildVer (s : String.Slice) : Bool :=
   let p := s.startPos
-  if h : p ≠ s.endPos then
-    if p.next h = s.endPos then
-      let c := s.startPos.get h
+  bif h : p ≠ᵇ s.endPos then
+    bif p.next (ne_of_decideNe_eq_true h) =ᵇ s.endPos then
+      let c := s.startPos.get (ne_of_decideNe_eq_true h)
       c == 'x' || c == 'X' || c == '*'
     else false
   else false
@@ -74,7 +74,7 @@ inductive VerComponent
 def parseVerComponent {σ} (what : String) (s? : Option String.Slice) : EStateM String σ VerComponent := do
     let some s := s?
       | return .none
-    if isWildVer s then
+    bif isWildVer s then
       return .wild
     let some n := s.toNat?
       | throw s!"invalid {what} version: expected numeral or wildcard, got '{s.copy}'"
@@ -82,12 +82,12 @@ def parseVerComponent {σ} (what : String) (s? : Option String.Slice) : EStateM 
 
 def parseSpecialDescr? (s : String) : EStateM String s.Pos (Option String) := do
   let p ← get
-  if h : p = s.endPos then
+  bif h : p =ᵇ s.endPos then
     return none
   else
-    let c := p.get h
-    if c == '-' then
-      let p := p.next h
+    let c := p.get (ne_of_decideEq_eq_false h)
+    bif c == '-' then
+      let p := p.next (ne_of_decideEq_eq_false h)
       let p' := nextUntilWhitespace p
       set p'
       let specialDescr := s.extract p p'
@@ -96,18 +96,18 @@ def parseSpecialDescr? (s : String) : EStateM String s.Pos (Option String) := do
       return none
 where
   nextUntilWhitespace p :=
-    if h : p = s.endPos then
+    bif h : p =ᵇ s.endPos then
       p
-    else if (p.get h).isWhitespace then
+    else bif (p.get (ne_of_decideEq_eq_false h)).isWhitespace then
       p
     else
-      nextUntilWhitespace (p.next h)
+      nextUntilWhitespace (p.next (ne_of_decideEq_eq_false h))
   termination_by p
 
 def parseSpecialDescr (s : String) : EStateM String s.Pos String := do
   let some specialDescr ← parseSpecialDescr? s
     | return ""
-  if specialDescr.isEmpty then
+  bif specialDescr.isEmpty then
     throw "invalid version: '-' suffix cannot be empty"
   return specialDescr
 
@@ -117,7 +117,7 @@ def parseSpecialDescr (s : String) : EStateM String s.Pos String := do
 : Except String α :=
   match x s startPos with
   | .ok v p =>
-    if p = endPos then
+    bif p =ᵇ endPos then
       return v
     else
       let tail := p.offset.extract s endPos.offset
@@ -143,7 +143,7 @@ public instance : Max SemVerCore := maxOfLe
 def parseM (s : String) : EStateM String s.Pos SemVerCore := do
   try
     let cs ← parseVerComponents s
-    if h : cs.size = 3 then
+    bif h : cs.size =ᵇ 3 then
       let major ← parseVerNat "major" cs[0]
       let minor ← parseVerNat "minor" cs[1]
       let patch ← parseVerNat "patch" cs[2]
@@ -213,7 +213,7 @@ public def parse (s : String) : Except String StdVer := do
   runVerParse s parseM
 
 public protected def toString (ver : StdVer) : String :=
-  if ver.specialDescr.isEmpty then
+  bif ver.specialDescr.isEmpty then
     ver.toSemVerCore.toString
   else
     s!"{ver.toSemVerCore}-{ver.specialDescr}"
@@ -257,15 +257,15 @@ public instance : Coe LeanVer ToolchainVer := ⟨ToolchainVer.release⟩
 public def ofString (ver : String) : ToolchainVer := Id.run do
   let colonPos := ver.find ':'
   let (origin, tag) :=
-    if h : ¬colonPos.IsAtEnd then
-      let pos := colonPos.next h
-      (ver.extract ver.startPos colonPos, ver.extract pos ver.endPos)
-    else
+    bif h : colonPos =ᵇ ver.endPos then
       ("", ver)
+    else
+      let pos := colonPos.next (ne_of_decideEq_eq_false h)
+      (ver.extract ver.startPos colonPos, ver.extract pos ver.endPos)
   let noOrigin := origin.isEmpty
-  if tag.startsWith "v" then
+  bif tag.startsWith "v" then
     if let .ok ver := StdVer.parse (tag.drop 1).copy then
-      if noOrigin|| origin == defaultOrigin then
+      bif noOrigin|| origin == defaultOrigin then
         return .release ver
   else if let some rest := tag.dropPrefix? "nightly-" then
     let rest := rest.toString
@@ -275,18 +275,18 @@ public def ofString (ver : String) : ToolchainVer := Id.run do
         let suffix ← (rest.drop 10).dropPrefix? "-rev"
         suffix.toString.toNat?
       -- Accept if no suffix (plain nightly) or valid -revK suffix
-      if rest.chars.length ≤ 10 || rev?.isSome then
-        if noOrigin then
+      bif rest.chars.length ≤ᵇ 10 || rev?.isSome then
+        bif noOrigin then
           return .nightly date rev?
         else if let some suffix := origin.dropPrefix? defaultOrigin then
-          if suffix.isEmpty || suffix == "-nightly" then
+          bif suffix.isEmpty || suffix == "-nightly" then
             return .nightly date rev?
   else if let some n := tag.dropPrefix?  "pr-release-" then
     if let some n := n.toNat? then
-      if noOrigin || origin == prOrigin then
+      bif noOrigin || origin == prOrigin then
         return .pr n
   else if let .ok ver := StdVer.parse ver then
-    if noOrigin || origin == defaultOrigin then
+    bif noOrigin || origin == defaultOrigin then
       return .release ver
   return .other ver
 
@@ -363,8 +363,8 @@ def parseM
 : EStateM String s.Pos ComparatorOp := fun p =>
   if let some (tk, op) := trie.matchPrefix s p.offset then
     let p' := p.offset + tk
-    if h : p'.IsValid s then
-      .ok op (.mk p' h)
+    bif h : p'.isValid s then
+      .ok op (.mk p' (String.Pos.Raw.isValid_eq_true_iff.mp h))
     else
       .error "(internal) comparison operator parse produced invalid position" p
   else
@@ -384,7 +384,7 @@ where trie :=
 
 public def ofString? (s : String) : Option ComparatorOp :=
   match parseM s s.startPos with
-  | .ok op p => if p = s.endPos then some op else none
+  | .ok op p => bif p =ᵇ s.endPos then some op else none
   | .error .. => none
 
 public protected def toString (self : ComparatorOp) : String :=
@@ -422,11 +422,11 @@ public instance : Inhabited VerComparator := ⟨.wild⟩
 def parseM (s : String) : EStateM String s.Pos VerComparator := do
   let iniPos ← get
   let op ← ComparatorOp.parseM s
-  if (← get) = s.endPos then
+  bif (← get) =ᵇ s.endPos then
     throw s!"invalid comparison: expected version after `{s.sliceFrom iniPos}`"
   let core ← SemVerCore.parseM s
   if let some specialDescr ← parseSpecialDescr? s then
-    if  specialDescr.isEmpty then
+    bif  specialDescr.isEmpty then
       return {ver := .ofSemVerCore core, op, includeSuffixes := true}
     else
       return {ver := .mk core specialDescr, op}
@@ -446,7 +446,7 @@ public def test (self : VerComparator) (ver : StdVer) : Bool :=
     | .eq => ver = selfVer
     | .ne => ver ≠ selfVer
   let {op, ver := selfVer, includeSuffixes} := self
-  if includeSuffixes then
+  bif includeSuffixes then
     fullCheck op selfVer ver
   else
     match selfVer.specialDescr, ver.specialDescr with
@@ -455,7 +455,7 @@ public def test (self : VerComparator) (ver : StdVer) : Bool :=
     | "", _ =>
       false
     | selfDescr, verDescr =>
-      if selfVer.toSemVerCore = ver.toSemVerCore then
+      bif selfVer.toSemVerCore =ᵇ ver.toSemVerCore then
         match op with
         | .lt => verDescr < selfDescr
         | .le => verDescr ≤ selfDescr
@@ -488,13 +488,13 @@ public instance : ToString VerRange := ⟨VerRange.toString⟩
   {toString := fmtOrs clauses, clauses}
 where
   fmtOrs ors :=
-    if h : ors.size = 0 then
+    bif h : ors.size =ᵇ 0 then
       ""
     else
       ors.foldl (init := fmtAnds ors[0]) (start := 1) fun s ands =>
         s!"{s} || {fmtAnds ands}"
   fmtAnds ands :=
-    if h : ands.size = 0 then
+    bif h : ands.size =ᵇ 0 then
       "<empty>"
     else
       ands.foldl (init := ands[0].toString) (start := 1) fun s v =>
@@ -505,52 +505,52 @@ where
   return {toString := s, clauses}
 where
   go needsRange ors (ands : Array VerComparator) p :=
-    if h : p = s.endPos then
-      if needsRange || ands.size == 0 then
+    bif h : p =ᵇ s.endPos then
+      bif needsRange || ands.size == 0 then
         .error "expected version range" p
       else
         .ok (ors.push ands) p
     else
-      let c := p.get h
-      if c.isAlphanum || c == '*' then
+      let c := p.get (ne_of_decideEq_eq_false h)
+      bif c.isAlphanum || c == '*' then
         match parseWild s ands p with
         | .ok ands p =>
           go false ors ands p
         | .error e p => .error e p
-      else if c == '^' then
-        let p := p.next h
-        if p = s.endPos then
+      else bif c == '^' then
+        let p := p.next (ne_of_decideEq_eq_false h)
+        bif p =ᵇ s.endPos then
           .error  "invalid caret range: expected version after `^`" p
         else
           match parseCaret s ands p with
           | .ok ands p =>
             go false ors ands p
           | .error e p => .error e p
-      else if c == '~' then
-        let p := p.next h
-        if p = s.endPos then
+      else bif c == '~' then
+        let p := p.next (ne_of_decideEq_eq_false h)
+        bif p =ᵇ s.endPos then
           .error "invalid tilde range: expected version after `~`" p
         else
           match parseTilde s ands p with
           | .ok ands p =>
             go false ors ands p
           | .error e p => .error e p
-      else if c.isWhitespace then
-        go needsRange ors ands (p.next h)
-      else if c == ',' then
-        if needsRange then
+      else bif c.isWhitespace then
+        go needsRange ors ands (p.next (ne_of_decideEq_eq_false h))
+      else bif c == ',' then
+        bif needsRange then
           .error "expected version range" p
         else
-          go true ors ands (p.next h)
-      else if c == '|' then
-        let p := p.next h
-        if h : p = s.endPos then
+          go true ors ands (p.next (ne_of_decideEq_eq_false h))
+      else bif c == '|' then
+        let p := p.next (ne_of_decideEq_eq_false h)
+        bif h : p =ᵇ s.endPos then
           .error "expected '|' after first '|'" p
-        else if p.get h = '|' then
-          if ands.size = 0 then
+        else bif p.get (ne_of_decideEq_eq_false h) =ᵇ '|' then
+          bif ands.size =ᵇ 0 then
             .error "expected version range" p
           else
-            go true (ors.push ands) #[] (p.next h)
+            go true (ors.push ands) #[] (p.next (ne_of_decideEq_eq_false h))
         else
           .error "expected '|' after first '|'" p
       else
@@ -568,9 +568,9 @@ where
     let major? ← parseVerComponent "major" cs[0]?
     let minor? ← parseVerComponent "minor" cs[1]?
     let patch? ← parseVerComponent "patch" cs[2]?
-    if (← get).get?.any (· == '-') then
+    bif (← get).get?.any (· == '-') then
       throw "invalid wildcard range: wildcard versions do not support suffixes"
-    else if cs.size > 3 then
+    else bif cs.size >ᵇ 3 then
       throw s!"invalid wildcard range: incorrect number of components: got {cs.size}, expected 1-3"
     else
       match major?, minor?, patch? with
@@ -591,23 +591,23 @@ where
   parseCaret (s : String) ands : EStateM String s.Pos _ := do
     let cs ← parseVerComponents s
     let specialDescr ← parseSpecialDescr s
-    if h : cs.size = 1 then
+    bif h : cs.size =ᵇ 1 then
       let major ← parseVerNat "major" cs[0]
       return appendRange ands {major} {major := major + 1} specialDescr
-    else if h : cs.size = 2 then
+    else bif h : cs.size =ᵇ 2 then
       let major ← parseVerNat "major" cs[0]
       let minor ← parseVerNat "minor" cs[1]
-      if major = 0 then
+      bif major =ᵇ 0 then
         return appendRange ands {major, minor}  {major, minor := minor + 1} specialDescr
       else
         return appendRange ands {major, minor}  {major := major + 1} specialDescr
-    else if h : cs.size = 3 then
+    else bif h : cs.size =ᵇ 3 then
       let major ← parseVerNat "major" cs[0]
       let minor ← parseVerNat "minor" cs[1]
       let patch ← parseVerNat "patch" cs[2]
-      if major = 0 then
-        if minor = 0 then
-          if patch = 0 && specialDescr.isEmpty then
+      bif major =ᵇ 0 then
+        bif minor =ᵇ 0 then
+          bif patch =ᵇ 0 && specialDescr.isEmpty then
             throw "invalid caret range: `^0.0.0` is degenerate; use `=0.0.0` instead"
           else
             return appendRange ands {major, minor, patch}  {major,  minor, patch := patch + 1} specialDescr
@@ -620,14 +620,14 @@ where
   parseTilde (s : String) ands : EStateM String s.Pos _ := do
     let cs ← parseVerComponents s
     let specialDescr ← parseSpecialDescr s
-    if h : cs.size = 1 then
+    bif h : cs.size =ᵇ 1 then
       let major ← parseVerNat "major" cs[0]
       return appendRange ands {major} {major := major + 1} specialDescr
-    else if h : cs.size = 2 then
+    else bif h : cs.size =ᵇ 2 then
       let major ← parseVerNat "major" cs[0]
       let minor ← parseVerNat "minor" cs[1]
       return appendRange ands {major, minor} {major, minor := minor + 1} specialDescr
-    else if h : cs.size = 3 then
+    else bif h : cs.size =ᵇ 3 then
       let major ← parseVerNat "major" cs[0]
       let minor ← parseVerNat "minor" cs[1]
       let patch ← parseVerNat "patch" cs[2]

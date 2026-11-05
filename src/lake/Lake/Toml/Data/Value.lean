@@ -67,14 +67,14 @@ public def ppString (s : String) : String :=
     | '\"' => s ++ "\\\""
     | '\\' => s ++ "\\\\"
     | _ =>
-      if c.val < 0x20 || c.val == 0x7F then
+      bif c.val <ᵇ 0x20 || c.val == 0x7F then
         s ++ "\\u" ++ lpadAscii (String.ofList <| Nat.toDigits 16 c.val.toNat) '0' 4
       else
         s.push c
   s.push '\"'
 
 public def ppSimpleKey (k : String) : String :=
-  if k.all (fun c => c.isAlphanum || c == '_' || c == '-') then
+  bif k.all (fun c => c.isAlphanum || c == '_' || c == '-') then
     k
   else
     ppString k
@@ -82,7 +82,7 @@ public def ppSimpleKey (k : String) : String :=
 public partial def ppKey (k : Name) : String :=
   match k with
   | .str p s =>
-    if p.isAnonymous then
+    bif p.isAnonymous then
       ppSimpleKey s
     else
       s!"{ppKey p}.{ppSimpleKey s}"
@@ -116,9 +116,9 @@ public def ppTable (t : Table) : String :=
   let (ts, fs) := t.items.foldl (init := ("", "")) fun (ts, fs) (k,v) =>
     match v with
     | .array _ vs =>
-      if vs.isEmpty then
+      bif vs.isEmpty then
         (ts.append s!"{ppKey k} = []\n", fs)
-      else if vs.all (· matches .table ..) then
+      else bif vs.all (· matches .table ..) then
         let fs := vs.foldl (init := fs) fun s v =>
           match v with
           | .table _ t =>

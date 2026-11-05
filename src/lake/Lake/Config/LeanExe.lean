@@ -52,14 +52,14 @@ namespace LeanExe
 
 /-- Return the root module if the name matches; otherwise, return `none`. -/
 public def isRoot? (name : Name) (self : LeanExe) : Option Module :=
-  if name == self.config.root then some self.root else none
+  bif name == self.config.root then some self.root else none
 
 /--
 Return the root module if the file stem of the path
 matches the source file. Otherwise, returns `none`.
 -/
 public def isRootSrc? (path : FilePath) (self : LeanExe) : Option Module :=
-  if path.withExtension "" == self.root.srcPath "" then some self.root else none
+  bif path.withExtension "" == self.root.srcPath "" then some self.root else none
 
 /--
 The file name of binary executable
@@ -85,9 +85,9 @@ If `supportInterpreter := true`, Lake adds `-rdynamic` on non-Windows
 systems. On Windows, it links in a manifest for Unicode path support.
 -/
 public def exeOnlyLinkArgs (self : LeanExe) : Array String :=
-  if System.Platform.isWindows then
+  bif System.Platform.isWindows then
     #["-Wl,--whole-archive", "-lleanmanifest", "-Wl,--no-whole-archive"]
-  else if self.config.supportInterpreter then
+  else bif self.config.supportInterpreter then
     #["-rdynamic"]
   else
     #[]

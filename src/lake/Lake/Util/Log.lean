@@ -133,7 +133,7 @@ public structure LogEntry where
   deriving Inhabited, ToJson, FromJson
 
 public protected def LogEntry.toString (self : LogEntry) (useAnsi := false) : String :=
-  if useAnsi then
+  bif useAnsi then
     let {level := lv, message := msg} := self
     let pre := Ansi.chalk lv.ansiColor s!"{lv.toString}:"
     s!"{pre} {msg}"
@@ -155,7 +155,7 @@ public instance : ToString LogEntry := ⟨LogEntry.toString⟩
   {level := .error, message}
 
 public def LogEntry.ofSerialMessage (msg : SerialMessage) : LogEntry :=
-  let str := if msg.caption.trimAscii.isEmpty then
+  let str := bif msg.caption.trimAscii.isEmpty then
      msg.data.trimAscii.copy else s!"{msg.caption.trimAscii}:\n{msg.data.trimAscii}"
   {
     level := .ofMessageSeverity msg.severity
@@ -196,7 +196,7 @@ export MonadLog (logEntry)
 public def logToStream
   (e : LogEntry) (out : IO.FS.Stream) (minLv : LogLevel) (useAnsi : Bool)
 : BaseIO PUnit := do
-  if e.level ≥ minLv then
+  bif e.level ≥ᵇ minLv then
     out.putStrLn (e.toString useAnsi) |>.catchExceptions fun _ => pure ()
 
 namespace MonadLog
@@ -413,7 +413,7 @@ from an `ELogT` (e.g., `LogIO`).
   let iniPos ← getLogPos
   let a ← x
   let endPos ← getLogPos
-  if iniPos ≠ endPos then
+  bif iniPos ≠ᵇ endPos then
     throw iniPos
   else
     return a
@@ -631,11 +631,11 @@ On failure, all logs will be printed, ignoring the  `LogConfig.outLv` setting.
   (self : LogIO α) (cfg : LogConfig := {})
 : BaseIO (Option α) := do
   let (a?, log) ← self.run? {}
-  let failed := a?.isNone ∨ cfg.failLv ≤ log.maxLv
-  let outLv := if failed then .trace else cfg.outLv
+  let failed := a?.isNone || cfg.failLv ≤ᵇ log.maxLv
+  let outLv := bif failed then .trace else cfg.outLv
   let logger ← cfg.out.getLogger outLv cfg.ansiMode
   log.replay (logger := logger)
-  return if failed  then none else a?
+  return bif failed  then none else a?
 
 -- deprecated 2024-05-18, reversed 2024-10-18
 public abbrev captureLog := @ELogT.run?

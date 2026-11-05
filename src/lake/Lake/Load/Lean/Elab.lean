@@ -83,7 +83,7 @@ def elabConfigFile
   s.commandState.messages.forM (logMessage ·)
 
   -- Check result
-  if s.commandState.messages.hasErrors then
+  bif s.commandState.messages.hasErrors then
     error s!"{configFile}: package configuration has errors"
   else
     return s.commandState.env
@@ -129,7 +129,7 @@ def importConfigFileCore (olean : FilePath) (leanOpts : Options) : IO Environmen
   let extDescrs ← persistentEnvExtensionsRef.get
   let extNameIdx ← mkExtNameMap 0
   let env := mod.entries.foldl (init := env) fun env (extName, ents) =>
-    if lakeExts.contains extName then
+    bif lakeExts.contains extName then
       match extNameIdx[extName]? with
       | some entryIdx =>
         -- Use `sync` to avoid `async` checks, which are not relevant here as there is only one
@@ -218,7 +218,7 @@ public def importConfigFile (cfg : LoadConfig) : LogIO Environment := do
     simultaneous reconfigures are likely to produce unexpected results
     anyway, so the error seems wise nonetheless.
     -/
-    if (← hLock.tryLock) then
+    bif (← hLock.tryLock) then
       h.unlock
       let h ← IO.FS.Handle.mk traceFile .readWrite
       h.lock
@@ -261,7 +261,7 @@ public def importConfigFile (cfg : LoadConfig) : LogIO Environment := do
       h.unlock
       IO.FS.removeFile traceFile
   let validateTrace h : LogIO Environment := id do
-    if cfg.reconfigure then
+    bif cfg.reconfigure then
       elabConfig (← acquireTrace h) cfg.lakeOpts
     else
       h.lock (exclusive := false)
@@ -270,10 +270,10 @@ public def importConfigFile (cfg : LoadConfig) : LogIO Environment := do
       | .ok json =>
         match fromJson? json with
         | .ok (trace : ConfigTrace) =>
-          let upToDate := (← olean.pathExists) ∧
-            trace.idx = cfg.pkgIdx ∧ trace.name = cfg.pkgName ∧  trace.configHash = configHash ∧
-            trace.platform = System.Platform.target ∧  trace.leanHash = cfg.lakeEnv.leanGithash
-          if upToDate then
+          let upToDate := (← olean.pathExists) &&
+            trace.idx =ᵇ cfg.pkgIdx && trace.name =ᵇ cfg.pkgName &&  trace.configHash =ᵇ configHash &&
+            trace.platform =ᵇ System.Platform.target &&  trace.leanHash =ᵇ cfg.lakeEnv.leanGithash
+          bif upToDate then
             let env ← importConfigFileCore olean cfg.leanOpts
             h.unlock
             return env
@@ -287,7 +287,7 @@ public def importConfigFile (cfg : LoadConfig) : LogIO Environment := do
             elabConfig (← acquireTrace h) cfg.lakeOpts
       | .error _ =>
         elabConfig (← acquireTrace h) cfg.lakeOpts
-  if (← traceFile.pathExists) then
+  bif (← traceFile.pathExists) then
     validateTrace <| ← IO.FS.Handle.mk traceFile .read
   else
     IO.FS.createDirAll cfg.lakeDir

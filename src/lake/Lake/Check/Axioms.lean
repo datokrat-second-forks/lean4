@@ -28,11 +28,11 @@ structure State where
 abbrev AxiomsM := ReaderT Context <| StateT State <| Except String
 
 partial def loop : AxiomsM Unit := do
-  if (← get).worklist.isEmpty then
+  bif (← get).worklist.isEmpty then
     return ()
 
   let target ← modifyGet fun s => (s.worklist.back!, { s with worklist := s.worklist.pop })
-  if (← get).checked.contains target then
+  bif (← get).checked.contains target then
     loop
   else
     let some info := (← read).solution.constMap[target]?
@@ -48,10 +48,10 @@ where
       | throw s!"Constant not found in solution '{n}'"
 
     if let .axiomInfo info := info then
-      if !(← read).legalAxioms.contains info.name then
+      bif !(← read).legalAxioms.contains info.name then
         throw s!"Illegal axiom detected: '{n}'"
 
-    if !(← get).checked.contains n then
+    bif !(← get).checked.contains n then
       modify fun s => { s with worklist := s.worklist.push n }
 
 end Axioms
@@ -69,7 +69,7 @@ public def usedAxioms (env : LeanExport.ExportedEnv) : Array (Lean.Name × Lean.
         unless ref == name do
           if let some (.axiomInfo ..) := env.constMap[ref]? then
             modify fun used => used.alter ref fun
-              | some r => some (if name.lt r then name else r)
+              | some r => some (bif name.lt r then name else r)
               | none   => some name
   (collect.run {}).2.toArray.qsort (·.1.lt ·.1)
 

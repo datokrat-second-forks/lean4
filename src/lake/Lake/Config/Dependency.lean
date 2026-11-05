@@ -130,4 +130,4 @@ namespace Dependency
 @[inline] public def resolverDescr (dep : Dependency) : String :=
   let name := dep.name.toString (escape := false)
   let name := dep.version.toString?.elim name (s!"{name}@{·}")
-  if dep.scope.isEmpty then name else s!"{dep.scope}/{name}"
+  bif dep.scope.isEmpty then name else s!"{dep.scope}/{name}"

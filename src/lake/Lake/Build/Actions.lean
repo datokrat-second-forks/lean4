@@ -56,7 +56,7 @@ public def compileLeanModule
     args := args ++ #["-i", ileanFile.toString]
   let opts := setup.options.toOptions
   let postponeCompile := setup.isModule && Compiler.compiler.postponeCompile.get opts
-  if !postponeCompile then
+  bif !postponeCompile then
     if let some cFile := arts.c? then
       createParentDirs cFile
       args := args ++ #["-c", cFile.toString]
@@ -85,7 +85,7 @@ public def compileLeanModule
         let msg := {msg with fileName := mkRelPathString relLeanFile}
         logSerialMessage msg
         return txt
-      else if txt.isEmpty && ln.isEmpty then
+      else bif txt.isEmpty && ln.isEmpty then
         return txt
       else
         return txt ++ ln ++ "\n"
@@ -99,9 +99,9 @@ public def compileLeanModule
   -- case where Lean logs errors but exits successfully.
   -- See https://github.com/leanprover/lean4/issues/10825
   let hasErrors := (← getLog).takeFrom outLogPos |>.any (·.level matches .error)
-  if out.exitCode = 1 && hasErrors then
+  bif out.exitCode =ᵇ 1 && hasErrors then
     failure
-  else if out.exitCode ≠ 0 || hasErrors then
+  else bif out.exitCode ≠ᵇ 0 || hasErrors then
     error s!"Lean exited with code {out.exitCode}"
 
 public def compileO
@@ -123,7 +123,7 @@ public def mkArgs (basePath : FilePath) (args : Array String) : LogIO (Array Str
   args.forM fun arg =>
     -- Escape special characters
     let arg := arg.foldl (init := "") fun s c =>
-      if c == '\\' || c == '"' then
+      bif c == '\\' || c == '"' then
         s.push '\\' |>.push c
       else
         s.push c
@@ -138,7 +138,7 @@ public def compileStaticLib
   -- `ar rcs` does not remove old files from the archive, so it must be deleted first
   removeFileIfExists libFile
   let args := #["rcs"]
-  let args := if thin then args.push "--thin" else args
+  let args := bif thin then args.push "--thin" else args
   let args := args.push libFile.toString ++ (← mkArgs libFile <| oFiles.map toString)
   proc {cmd := ar.toString, args}
 
@@ -170,7 +170,7 @@ public def compileExe
 public def download
   (url : String) (file : FilePath) (headers : Array String := #[])
 : LogIO PUnit := do
-  if (← file.pathExists) then
+  bif (← file.pathExists) then
     IO.FS.removeFile file
   else
     createParentDirs file
@@ -182,7 +182,7 @@ public def download
 public def untar (file : FilePath) (dir : FilePath) (gzip := true) : LogIO PUnit := do
   IO.FS.createDirAll dir
   let mut opts := "-xvv"
-  if gzip then
+  bif gzip then
     opts := opts.push 'z'
   proc (quiet := true) {
     cmd := "tar",
@@ -196,7 +196,7 @@ public def tar
 : LogIO PUnit := do
   createParentDirs file
   let mut args := #["-cvv"]
-  if gzip then
+  bif gzip then
     args := args.push "-z"
   for path in excludePaths do
     args := args.push s!"--exclude={path}"
@@ -204,5 +204,5 @@ public def tar
     cmd := "tar"
     args := args ++ #["-f", file.toString, "-C", dir.toString, "."]
     -- don't pack `._` files on MacOS
-    env := if Platform.isOSX then #[("COPYFILE_DISABLE", "true")] else #[]
+    env := bif Platform.isOSX then #[("COPYFILE_DISABLE", "true")] else #[]
   }

@@ -79,7 +79,7 @@ public configuration LeanExeConfig (name : Name) extends LeanConfig where
   potentially with exported Lean symbols.
   -/
   nativeFacets (shouldExport : Bool) : Array (ModuleFacet FilePath) :=
-    #[if shouldExport then Module.oExportFacet else Module.oFacet]
+    #[bif shouldExport then Module.oExportFacet else Module.oFacet]
 
 deriving Inhabited
 

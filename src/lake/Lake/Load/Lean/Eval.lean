@@ -100,8 +100,8 @@ public def LakefileConfig.loadFromEnv
   let constTargetMap ← IO.ofExcept <| mkOrdTagMap env targetAttr fun name => do
     evalConstCheck env opts ConfigDecl name
   let targetDecls ← constTargetMap.toArray.mapM fun decl => do
-    if h : decl.pkg = keyName then
-      return .mk decl h
+    bif h : decl.pkg =ᵇ keyName then
+      return .mk decl (eq_of_decideEq_eq_true h)
     else
       error s!"target '{decl.name}' was defined in package '{decl.pkg}', \
         but registered under '{keyName}'"
@@ -135,7 +135,8 @@ public def LakefileConfig.loadFromEnv
   let postUpdateHooks ← postUpdateAttr.getAllEntries env |>.mapM fun name =>
     match evalConstCheck env opts PostUpdateHookDecl name with
     | .ok decl =>
-      if h : decl.pkg = keyName then
+      bif h : decl.pkg =ᵇ keyName then
+        have h := eq_of_decideEq_eq_true h
         return OpaquePostUpdateHook.mk ⟨cast (by rw [h]) decl.fn⟩
       else
         error s!"post-update hook was defined in '{decl.pkg}', but was registered in '{keyName}'"
@@ -145,15 +146,16 @@ public def LakefileConfig.loadFromEnv
   let testDrivers ← testDriverAttr.getAllEntries env |>.mapM fun name =>
     if let some decl := constTargetMap.find? name then
       return decl.name
-    else if scripts.contains name then
+    else bif scripts.contains name then
       return name
     else
       error s!"{prettyName}: package is missing script or target '{name}' marked as a test driver"
   let testDriver ← id do
-    if testDrivers.size > 1 then
+    bif testDrivers.size >ᵇ 1 then
       error s!"{prettyName}: only one script, executable, or library can be tagged @[test_driver]"
-    else if h : testDrivers.size > 0 then
-      if pkgDecl.config.testDriver.isEmpty then
+    else bif h : testDrivers.size >ᵇ 0 then
+      have h := lt_of_decideLT_eq_true h
+      bif pkgDecl.config.testDriver.isEmpty then
         return (testDrivers[0]'h |>.toString)
       else
         error s!"{prettyName}: cannot both set testDriver and use @[test_driver]"
@@ -162,15 +164,16 @@ public def LakefileConfig.loadFromEnv
   let lintDrivers ← lintDriverAttr.getAllEntries env |>.mapM fun name =>
     if let some decl := constTargetMap.find? name then
       return decl.name
-    else if scripts.contains name then
+    else bif scripts.contains name then
       return name
     else
       error s!"{prettyName}: package is missing script or target '{name}' marked as a lint driver"
   let lintDriver ← id do
-    if lintDrivers.size > 1 then
+    bif lintDrivers.size >ᵇ 1 then
       error s!"{prettyName}: only one script or executable can be tagged @[lint_driver]"
-    else if h : lintDrivers.size > 0 then
-      if pkgDecl.config.lintDriver.isEmpty then
+    else bif h : lintDrivers.size >ᵇ 0 then
+      have h := lt_of_decideLT_eq_true h
+      bif pkgDecl.config.lintDriver.isEmpty then
         return (lintDrivers[0]'h |>.toString)
       else
         error s!"{prettyName}: cannot both set lintDriver and use @[lint_driver]"

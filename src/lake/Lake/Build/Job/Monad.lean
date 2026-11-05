@@ -204,7 +204,7 @@ Like `wait?`, but a canceled job cancels the current job as well (via
 public def waitUnlessCanceled? (self : Job α) : JobM (Option α) := do
   match (← self.wait) with
   | .ok a _ => return some a
-  | r@(.error ..) => if r.isCanceled then cancelJob else return none
+  | r@(.error ..) => bif r.isCanceled then cancelJob else return none
 
 /--
 The result of a job continuation canceled by the build's cancellation token
@@ -227,7 +227,7 @@ If the build's cancellation token is set, errors without running `f`.
   BaseIO.mapTask (t := task) (prio := prio) (sync := sync) fun
     | .ok a s => do
       if let some tk := ctx.cancelTk? then
-        if ← tk.isSet then return canceledResult s
+        bif (← tk.isSet) then return canceledResult s
       let trace := mixTrace trace s.trace
       withLoggedIO (f a) |>.toFn fetch pkg? stack store ctx {s with trace}
     | .error n s => return .error n s
@@ -245,7 +245,7 @@ If the build's cancellation token is set, errors without running `f`.
   BaseIO.bindTask task (prio := prio) (sync := sync) fun
     | .ok a sa => do
       if let some tk := ctx.cancelTk? then
-        if ← tk.isSet then return Task.pure (canceledResult sa)
+        bif (← tk.isSet) then return Task.pure (canceledResult sa)
       let trace := mixTrace trace sa.trace
       match (← withLoggedIO (f a) |>.toFn fetch pkg? stack store ctx {sa with trace}) with
       | .ok job sa =>

@@ -43,18 +43,18 @@ public def mkMessageStringCore
     str := caption ++ ":\n" ++ str
   match severity with
   | .information =>
-    if infoWithPos then
+    bif infoWithPos then
       str := mkErrorStringWithPos fileName pos (endPos := endPos?) "info: " ++ str
   | .warning =>
     str := mkErrorStringWithPos fileName pos (endPos := endPos?) "warning: " ++ str
   | .error =>
     str := mkErrorStringWithPos fileName pos (endPos := endPos?) "error: " ++ str
-  if str.isEmpty || str.back != '\n' then
+  bif str.isEmpty || str.back != '\n' then
     str := str ++ "\n"
   return str
 
 public def mkMessageString (msg : Message) (includeEndPos := false) (infoWithPos := false) : BaseIO String := do
-  let endPos? := if includeEndPos then msg.endPos else none
+  let endPos? := bif includeEndPos then msg.endPos else none
   let s ← msg.data.toString
   return mkMessageStringCore msg.severity msg.fileName msg.caption s msg.pos endPos? infoWithPos
 

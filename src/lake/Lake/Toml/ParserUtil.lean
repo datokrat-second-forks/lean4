@@ -32,7 +32,7 @@ public def isHexDigit (c : Char) : Bool :=
 public def skipFn : ParserFn := fun _ s => s
 
 public scoped instance : AndThen ParserFn where
-  andThen p q := fun c s => let s := p c s; if s.hasError then s else q () c s
+  andThen p q := fun c s => let s := p c s; bif s.hasError then s else q () c s
 
 /-- `ParserFn` combinator that runs `f` with the current position. -/
 @[always_inline, inline] public def usePosFn (f : String.Pos.Raw → ParserFn) : ParserFn :=
@@ -43,7 +43,7 @@ public def optFn (p : ParserFn) : ParserFn := fun c s =>
   let iniSz  := s.stackSize
   let iniPos := s.pos
   let s := p c s
-  if s.hasError && s.pos == iniPos then s.restore iniSz iniPos else  s
+  bif s.hasError && s.pos == iniPos then s.restore iniSz iniPos else  s
 
 /-- A sequence of `n` repetitions of a parser function. -/
 @[inline] public def repeatFn (n : Nat) (p : ParserFn) : ParserFn := fun c s =>
@@ -51,7 +51,7 @@ public def optFn (p : ParserFn) : ParserFn := fun c s =>
     | 0, s => s
     | n+1, s =>
       let s := p c s
-      if s.hasError then s else loop n s
+      bif s.hasError then s else loop n s
   loop n s
 
 public def mkUnexpectedCharError (s : ParserState) (c : Char)  (expected : List String := []) (pushMissing := true) : ParserState :=
@@ -59,12 +59,12 @@ public def mkUnexpectedCharError (s : ParserState) (c : Char)  (expected : List 
 
 @[inline] public def satisfyFn (p : Char → Bool) (expected : List String := [])  : ParserFn := fun c s =>
   let i := s.pos
-  if h : c.atEnd i then
+  bif h : c.atEnd i then
     s.mkEOIError expected
   else
-    let curr := c.get' i h
-    if p curr then
-      s.next' c i h
+    let curr := c.get' i (Bool.ne_true_of_eq_false h)
+    bif p curr then
+      s.next' c i (Bool.ne_true_of_eq_false h)
     else
       mkUnexpectedCharError s curr expected
 
@@ -84,11 +84,11 @@ public def chFn (c : Char) (expected : List String := [s!"'{c}'"]) : ParserFn :=
   satisfyFn (fun d => d == c) expected
 
 public partial def strAuxFn (str : String) (expected : List String) (strPos : String.Pos.Raw) : ParserFn := fun c s =>
-  if h₁ : strPos.atEnd str then
+  bif h₁ : strPos.atEnd str then
     s
   else
-    let s := chFn (strPos.get' str h₁) expected c s
-    if s.hasError then s else strAuxFn str expected (strPos.next' str h₁) c s
+    let s := chFn (strPos.get' str (Bool.ne_true_of_eq_false h₁)) expected c s
+    bif s.hasError then s else strAuxFn str expected (strPos.next' str (Bool.ne_true_of_eq_false h₁)) c s
 
 /-- Consume a matching string atomically. -/
 public def strFn (str : String) (expected : List String := [s!"'{str}'"]) : ParserFn :=
@@ -98,27 +98,27 @@ mutual
 
 public partial def sepByChar1AuxFn (p : Char → Bool) (sep : Char) (expected : List String := []) : ParserFn := fun c s =>
   let i := s.pos
-  if h : c.atEnd i then
+  bif h : c.atEnd i then
     s
   else
-    let curr := c.get' i h
-    if p curr then
-      sepByChar1AuxFn p sep expected c (s.next' c i h)
-    else if curr == sep then
-      sepByChar1Fn p sep expected c (s.next' c i h)
+    let curr := c.get' i (Bool.ne_true_of_eq_false h)
+    bif p curr then
+      sepByChar1AuxFn p sep expected c (s.next' c i (Bool.ne_true_of_eq_false h))
+    else bif curr == sep then
+      sepByChar1Fn p sep expected c (s.next' c i (Bool.ne_true_of_eq_false h))
     else
       s
 
 public partial def sepByChar1Fn (p : Char → Bool) (sep : Char) (expected : List String := []) : ParserFn := fun c s =>
   let i := s.pos
-  if h : c.atEnd i then
+  bif h : c.atEnd i then
     s
   else
-    let curr := c.get' i h
-    let s := s.next' c i h
-    if p curr then
+    let curr := c.get' i (Bool.ne_true_of_eq_false h)
+    let s := s.next' c i (Bool.ne_true_of_eq_false h)
+    bif p curr then
       sepByChar1AuxFn p sep expected c s
-    else if curr == sep then
+    else bif curr == sep then
       s.mkUnexpectedError s!"unexpected separator '{curr}'" expected
     else
       mkUnexpectedCharError s curr expected
@@ -140,7 +140,7 @@ public def pushAtom (startPos : String.Pos.Raw) (trailingFn := skipFn) : ParserF
 public def atomFn (p : ParserFn) (trailingFn := skipFn) : ParserFn := fun c s =>
   let startPos := s.pos
   let s := p c s
-  if s.hasError then s else
+  bif s.hasError then s else
   pushAtom startPos trailingFn c s
 
 public def atom (p : ParserFn) (trailingFn := skipFn) : Parser where
@@ -197,7 +197,7 @@ public def pushLit (kind : SyntaxNodeKind) (startPos : String.Pos.Raw) (trailing
 public def litFn (kind : SyntaxNodeKind) (p : ParserFn) (trailingFn := skipFn) : ParserFn := fun c s =>
   let iniPos := s.pos
   let s := p c s
-  if s.hasError then s else
+  bif s.hasError then s else
   pushLit kind iniPos trailingFn c s
 
 public def lit (kind : SyntaxNodeKind) (p : ParserFn) (trailingFn := skipFn) : Parser where
@@ -288,7 +288,7 @@ public def sepBy1Linebreak (p : Parser) (allowTrailingLinebreak := true) : Parse
   sepBy1NoAntiquot p (checkLinebreakBefore >> pushNone) allowTrailingLinebreak
 
 public def skipInsideQuotFn (p : ParserFn) : ParserFn := fun c s =>
-  if c.quotDepth > 0 then s else p c s
+  bif c.quotDepth >ᵇ 0 then s else p c s
 
 @[run_parser_attribute_hooks]
 public def skipInsideQuot (p : Parser) : Parser :=

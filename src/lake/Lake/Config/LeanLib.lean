@@ -60,10 +60,10 @@ The names of the library's root modules
 /-- The name of the native library (e.g., what is passed to `-l`). -/
 public def libName (self : LeanLib) : String :=
   let libName :=
-    if self.config.libName.isEmpty then
+    bif self.config.libName.isEmpty then
       mkModuleInitializationStem self.name self.pkg.id?
     else self.config.libName
-  if self.libPrefixOnWindows && System.Platform.isWindows then
+  bif self.libPrefixOnWindows && System.Platform.isWindows then
     s!"lib{libName}"
   else libName
 
@@ -89,7 +89,7 @@ public def libName (self : LeanLib) : String :=
 
 /-- Whether the shared binary of this library is a valid plugin. -/
 public def isPlugin (self : LeanLib) : Bool :=
-  if h : self.roots.size = 1 then
+  bif h : self.roots.size =ᵇ 1 then
     self.libName == mkModuleInitializationStem self.roots[0] self.pkg.id?
   else false
 

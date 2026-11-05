@@ -212,16 +212,16 @@ where
     let ⟨ws, depIdxs, lt_of_mem, start_le⟩ ← pkg.depConfigs.foldrM (m := m) (init := s) fun dep s => do
       if let some wsIdx := s.ws.packages.findFinIdx? (·.baseName == dep.name) then
         return s.reuseDep wsIdx -- already handled in another branch
-      if pkg.baseName = dep.name then
+      bif pkg.baseName =ᵇ dep.name then
         error s!"{pkg.prettyName}: package requires itself (or a package with the same name)"
       let matDep ← resolve pkg dep s.ws
       s.newDep matDep dep.opts leanOpts reconfigure
     let ws := ws.setDepIdxs pkg depIdxs (Nat.lt_of_lt_of_le lt_start start_le) lt_of_mem
     have start_le : start ≤ ws.packages.size := Nat.le_trans start_le (by simp [ws])
     -- Recursively load the dependencies' dependencies
-    if next_lt : next < ws.packages.size then
+    bif next_lt : next <ᵇ ws.packages.size then
       let ⟨le_maxSmallNat⟩ ← guardBySize! ws.packages
-      go ws next next_lt (next+1) (Nat.lt_add_one next)
+      go ws next (lt_of_decideLT_eq_true next_lt) (next+1) (Nat.lt_add_one next)
     else
       return ws
   termination_by Lean.maxSmallNat - i
@@ -273,7 +273,7 @@ def reuseManifest
     -- Move packages directory
     if let some oldRelPkgsDir := manifest.packagesDir? then
       let oldPkgsDir := ws.dir / oldRelPkgsDir
-      if oldRelPkgsDir.normalize != ws.relPkgsDir.normalize && (← oldPkgsDir.pathExists) then
+      bif oldRelPkgsDir.normalize != ws.relPkgsDir.normalize && (← oldPkgsDir.pathExists) then
         logInfo s!"workspace packages directory changed; \
           renaming '{oldPkgsDir}' to '{ws.pkgsDir}'"
         let doRename : IO Unit := do
@@ -318,7 +318,7 @@ def updateAndMaterializeDep
     a manifest, it will instead be locked as `<relPkgDir>/<relPath>`.
     Adding a `.` here eliminates this difference.
     -/
-    let relPkgDir := if pkg.relDir == "." then pkg.relDir else pkg.relDir / "."
+    let relPkgDir := bif pkg.relDir == "." then pkg.relDir else pkg.relDir / "."
     let matDep ← dep.materialize inherited ws.lakeEnv ws.dir ws.relPkgsDir relPkgDir
     store matDep.name matDep.manifestEntry
     return matDep
@@ -378,34 +378,34 @@ def Workspace.updateToolchain
       | return s
     let some tc := s.tc?
       | return s.replace dep.name depTc? dep.fixedToolchain
-    if dep.fixedToolchain then
-      if s.fixed then
-        if tc = depTc then
+    bif dep.fixedToolchain then
+      bif s.fixed then
+        bif tc =ᵇ depTc then
           return s
         else
           return s.addClash dep.name depTc dep.fixedToolchain -- true
       else
-        if tc ≤ depTc then
+        bif tc ≤ᵇ depTc then
           return s.replace dep.name depTc dep.fixedToolchain -- true
         else
           return s.addClash dep.name depTc dep.fixedToolchain -- true
     else
-      if depTc ≤ tc then
+      bif depTc ≤ᵇ tc then
         return s
-      else if !s.fixed && tc < depTc then
+      else bif !s.fixed && tc <ᵇ depTc then
         return s.replace dep.name depTc dep.fixedToolchain -- false
       else
         return s.addClash dep.name depTc dep.fixedToolchain -- false
-  if 0 < tcs.size then
+  bif 0 <ᵇ tcs.size then
     let s := "toolchain not updated; multiple toolchain candidates:"
     let addEntry s tc src fixed :=
-      let fixed := if fixed then " (fixed toolchain)" else ""
+      let fixed := bif fixed then " (fixed toolchain)" else ""
       s!"{s}\n  {tc}\n    from {src}{fixed}"
     let s := if let some tc := tc? then addEntry s tc src fixed else s
     let s := tcs.foldl (init := s) fun s ⟨src, tc, fixed⟩ => addEntry s tc src fixed
     logWarning s
   else if let some tc := tc? then
-    if rootTc?.any (· == tc) then
+    bif rootTc?.any (· == tc) then
       logInfo "toolchain not updated; already up-to-date"
       return
     logInfo s!"updating toolchain to '{tc}'"
@@ -475,7 +475,7 @@ def Workspace.updateAndMaterializeCore
   (updateToolchain := true)
 : LoggerIO (Workspace × NameMap PackageEntry) := UpdateT.run do
   reuseManifest ws toUpdate
-  if updateToolchain then
+  bif updateToolchain then
     let numDeps := ws.root.depConfigs.size
     -- Update and materialize the top-level dependenciess
     let deps : Vector _ numDeps := Vector.mk ws.root.depConfigs.reverse (by simp [numDeps])
@@ -498,10 +498,10 @@ def Workspace.updateAndMaterializeCore
     let stop := ws.packages.size
     let ws := ws.setDepIdxs ws.root (start...<stop).toArray ws.wsIdx_root_lt <| by
       simp [Std.Rco.mem_toArray_iff_mem, Std.Rco.mem_iff, stop]
-    if start_ne : start ≠ stop then
+    bif start_ne : start ≠ᵇ stop then
       -- Resolve the top-level dependencies' dependencies'
       have start_lt : start < ws.packages.size := by
-        simpa [ws] using Nat.lt_of_le_of_ne start_le start_ne
+        simpa [ws] using Nat.lt_of_le_of_ne start_le (ne_of_decideNe_eq_true start_ne)
       ws.resolveDepsCore updateAndAddDep
         start start_lt (start+1) (Nat.lt_add_one start)
         (leanOpts := leanOpts) (reconfigure := true)
@@ -575,8 +575,8 @@ def validateManifest
     let some entry := pkgEntries.find? dep.name | return
     match src, entry.src with
     | .git (url := url) (rev := rev) .., .git (url := url') (inputRev? := rev')  .. =>
-      if url ≠ url' then warnOutOfDate "git url"
-      if rev ≠ rev' then warnOutOfDate "git revision"
+      bif url ≠ᵇ url' then warnOutOfDate "git url"
+      bif rev ≠ᵇ rev' then warnOutOfDate "git revision"
     | .path .., .path .. => pure ()
     | _, _ => warnOutOfDate "source kind (git/path)"
 
@@ -590,7 +590,7 @@ public def Workspace.materializeDeps
   (overrides : Array PackageEntry := #[])
 : LoggerIO Workspace := do
   -- Load locked dependencies
-  if !manifest.packages.isEmpty && manifest.packagesDir? != some (mkRelPathString ws.relPkgsDir) then
+  bif !manifest.packages.isEmpty && manifest.packagesDir? != some (mkRelPathString ws.relPkgsDir) then
     logWarning <|
       "manifest out of date: packages directory changed; \
       use `lake update` to rebuild the manifest \
@@ -605,14 +605,14 @@ public def Workspace.materializeDeps
     map.insert entry.name entry
   pkgEntries := overrides.foldl (init := pkgEntries) fun map entry =>
     map.insert entry.name entry
-  if pkgEntries.isEmpty && !ws.root.depConfigs.isEmpty then
+  bif pkgEntries.isEmpty && !ws.root.depConfigs.isEmpty then
     error "missing manifest; use `lake update` to generate one"
   -- Materialize all dependencies
   let materialize pkg dep ws := do
     if let some entry := pkgEntries.find? dep.name then
       entry.materialize ws.lakeEnv ws.dir relPkgsDir
     else
-      if pkg.isRoot then
+      bif pkg.isRoot then
         error <|
           s!"dependency '{dep.name}' not in manifest; \
           use `lake update {dep.name}` to add it"

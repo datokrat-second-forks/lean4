@@ -214,7 +214,7 @@ scoped macro (name := builtinFacetCommand)
   let nsName :: _ ← Macro.resolveNamespace ns.getId
     | Macro.throwErrorAt ns s!"unknown or ambiguous target namespace `{ns.getId}`"
   let kindName := facetKindForNamespace nsName
-  if kindName.isAnonymous then
+  bif kindName.isAnonymous then
     Macro.throwErrorAt ns s!"unknown target namespace `{ns.getId}`"
   let nameLit := Name.quoteFrom name name.getId (canonical := id?.isSome)
   let kindLit := Name.quoteFrom ns kindName (canonical := true)

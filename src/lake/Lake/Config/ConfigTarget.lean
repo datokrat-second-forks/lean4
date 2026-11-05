@@ -36,7 +36,8 @@ public instance : BEq (ConfigTarget k) := ⟨(·.name == ·.name)⟩
 @[inline] public def Package.configTargets (kind : Name) (self : Package) : Array (ConfigTarget kind) :=
   self.targetDecls.foldl (init := #[]) fun a t =>
     let {name := n, kind := k, config, pkg_eq, ..} := t
-    if kind_eq : k = kind then
+    bif kind_eq : k =ᵇ kind then
+      have kind_eq := eq_of_decideEq_eq_true kind_eq
       a.push ⟨self, n, kind_eq ▸ pkg_eq ▸ config⟩
     else
       a
@@ -45,7 +46,8 @@ public instance : BEq (ConfigTarget k) := ⟨(·.name == ·.name)⟩
 @[inline] public def Package.findConfigTarget? (kind : Name) (name : Name) (self : Package) : Option (ConfigTarget kind) :=
   self.findTargetDecl? name |>.bind fun t =>
     let {name, kind := k, config, pkg_eq, ..} := t
-    if kind_eq : k = kind then
+    bif kind_eq : k =ᵇ kind then
+      have kind_eq := eq_of_decideEq_eq_true kind_eq
       some ⟨self, name, kind_eq ▸ pkg_eq ▸ config⟩
     else
       none

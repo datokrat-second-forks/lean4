@@ -82,11 +82,11 @@ variable [Monad m] [MonadStateOf ArgList m]
 /-- Process a multiple short options grouped together (ex. `-xyz` as `x`, `y`, `z`). -/
 @[inline] public def multiShortOption (handle : Char → m PUnit) (opt : String) : m PUnit := do
   let rec loop (p : String.Pos.Raw) := do
-    if h : p.atEnd opt then
+    bif h : p.atEnd opt then
       return
     else
-      handle (p.get' opt h)
-      loop (p.next' opt h)
+      handle (p.get' opt (Bool.ne_true_of_eq_false h))
+      loop (p.next' opt (Bool.ne_true_of_eq_false h))
   termination_by opt.utf8ByteSize - p.byteIdx
   decreasing_by
     simp [String.Pos.Raw.atEnd] at h
@@ -97,19 +97,19 @@ variable [Monad m] [MonadStateOf ArgList m]
 /-- Splits a long option of the form `"--long foo bar"` into `--long` and `"foo bar"`. -/
 @[inline] public def longOptionOrSpace (handle : String → m α) (opt : String) : m α :=
   let pos := opt.find ' '
-  if h : pos = opt.endPos then
+  bif h : pos =ᵇ opt.endPos then
     handle opt
   else do
-    consArg <| opt.extract (pos.next h) opt.endPos
+    consArg <| opt.extract (pos.next (ne_of_decideEq_eq_false h)) opt.endPos
     handle <| opt.extract opt.startPos pos
 
 /-- Splits a long option of the form `--long=arg` into `--long` and `arg`. -/
 @[inline] public def longOptionOrEq (handle : String → m α) (opt : String) : m α :=
   let pos := opt.find '='
-  if h : pos = opt.endPos then
+  bif h : pos =ᵇ opt.endPos then
     handle opt
   else do
-    consArg <| opt.extract (pos.next h) opt.endPos
+    consArg <| opt.extract (pos.next (ne_of_decideEq_eq_false h)) opt.endPos
     handle <| opt.extract opt.startPos pos
 
 /-- Process a long option  of the form `--long`, `--long=arg`, `"--long arg"`. -/
@@ -121,7 +121,7 @@ variable [Monad m] [MonadStateOf ArgList m]
   (shortHandle : Char → m α) (longHandle : String → m α)
   (opt : String)
 : m α :=
-  if opt.chars.length == 2 then -- `-x`
+  bif opt.chars.length == 2 then -- `-x`
     shortHandle (String.Pos.Raw.get opt ⟨1⟩)
   else -- `-c(.+)`
     match String.Pos.Raw.get opt ⟨2⟩ with
@@ -138,7 +138,7 @@ An option is an argument of length > 1 starting with a dash (`-`).
 An option may consume additional elements of the argument list.
 -/
 @[inline] public def option (handlers : OptionHandlers m α) (opt : String) : m α :=
-  if String.Pos.Raw.get opt ⟨1⟩ == '-' then -- `--(.*)`
+  bif String.Pos.Raw.get opt ⟨1⟩ == '-' then -- `--(.*)`
     longOption handlers.long opt
   else
     shortOption handlers.short handlers.longShort opt
@@ -148,7 +148,7 @@ public def processLeadingOption (handle : String → m PUnit) : m PUnit := do
   match (← getArgs) with
   | [] => pure ()
   | arg :: args =>
-    if arg.chars.length > 1 && String.Pos.Raw.get arg 0 == '-' then -- `-(.+)`
+    bif arg.chars.length >ᵇ 1 && String.Pos.Raw.get arg 0 == '-' then -- `-(.+)`
       setArgs args
       handle arg
 
@@ -159,11 +159,11 @@ Consumes empty leading arguments in the argument list.
 public partial def processLeadingOptions (handle : String → m PUnit) : m PUnit := do
   if let arg :: args ← getArgs then
     let len := arg.chars.length
-    if len > 1 && String.Pos.Raw.get arg 0 == '-' then -- `-(.+)`
+    bif len >ᵇ 1 && String.Pos.Raw.get arg 0 == '-' then -- `-(.+)`
       setArgs args
       handle arg
       processLeadingOptions handle
-    else if len == 0 then -- skip empty leading args
+    else bif len == 0 then -- skip empty leading args
       setArgs args
       processLeadingOptions handle
 
@@ -173,10 +173,10 @@ public partial def collectArgs
 : m (Array String) := do
   if let some arg ← takeArg? then
     let len := arg.chars.length
-    if len > 1 && String.Pos.Raw.get arg 0 == '-' then -- `-(.+)`
+    bif len >ᵇ 1 && String.Pos.Raw.get arg 0 == '-' then -- `-(.+)`
       option arg
       collectArgs option args
-    else if len == 0 then -- skip empty args
+    else bif len == 0 then -- skip empty args
       collectArgs option args
     else
       collectArgs option (args.push arg)

@@ -29,7 +29,7 @@ namespace Lake
 Computes the cache to use for the package based on the environment.
 -/
 public def computeLakeCache (pkg : Package) (lakeEnv : Lake.Env) : Cache :=
-  if pkg.bootstrap then
+  bif pkg.bootstrap then
     lakeEnv.lakeSystemCache?.getD ⟨pkg.lakeDir / "cache"⟩
   else
     lakeEnv.lakeCache?.getD ⟨pkg.lakeDir / "cache"⟩
@@ -379,7 +379,7 @@ This prepends the detected {lean}`self.lakeEnv.path` of the system environment w
 the workspace's {lean}`binPath`. On Windows, it also adds the workspace's {lean}`sharedLibPath`.
 -/
 public def augmentedPath (self : Workspace) : SearchPath :=
-  if Platform.isWindows then
+  bif Platform.isWindows then
     self.binPath ++ self.sharedLibPath ++ self.lakeEnv.path
   else
     self.binPath ++ self.lakeEnv.path
@@ -422,10 +422,10 @@ public def augmentedEnvVars (self : Workspace) : Array (String × Option String)
     ("LEAN_PATH", some self.augmentedLeanPath.toString),
     ("LEAN_SRC_PATH", some self.augmentedLeanSrcPath.toString),
     -- Allow the Lean version to change dynamically within core
-    ("LEAN_GITHASH", if self.bootstrap then none else some self.lakeEnv.leanGithash),
+    ("LEAN_GITHASH", bif self.bootstrap then none else some self.lakeEnv.leanGithash),
     ("PATH", some self.augmentedPath.toString)
   ]
-  if Platform.isWindows then
+  bif Platform.isWindows then
     vars
   else
     vars.push (sharedLibPathEnvVar, some self.augmentedSharedLibPath.toString)

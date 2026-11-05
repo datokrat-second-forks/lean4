@@ -82,7 +82,7 @@ public structure BinderSyntaxView where
   deriving Inhabited, Repr
 
 public def expandOptType (ref : Syntax) (optType : Syntax) : Term :=
-  if optType.isNone then
+  bif optType.isNone then
     mkHoleFrom ref
   else
     ⟨optType[0][1]⟩
@@ -90,7 +90,7 @@ public def expandOptType (ref : Syntax) (optType : Syntax) : Term :=
 public def getBinderIds (ids : Syntax) : MacroM (Array BinderIdent) :=
   ids.getArgs.mapM fun id =>
     let k := id.getKind
-    if k == identKind || k == `Lean.Parser.Term.hole then
+    bif k == identKind || k == `Lean.Parser.Term.hole then
       return ⟨id⟩
     else
       Macro.throwErrorAt id "identifier or `_` expected"
@@ -101,10 +101,10 @@ public def expandBinderIdent (stx : Syntax) : MacroM Ident :=
   | _    => pure ⟨stx⟩
 
 public def expandOptIdent (stx : Syntax) : BinderIdent :=
-  if stx.isNone then mkHoleFrom stx else ⟨stx[0]⟩
+  bif stx.isNone then mkHoleFrom stx else ⟨stx[0]⟩
 
 public def expandBinderType (ref : Syntax) (stx : Syntax) : Term :=
-  if stx.getNumArgs == 0 then mkHoleFrom ref else ⟨stx[1]⟩
+  bif stx.getNumArgs == 0 then mkHoleFrom ref else ⟨stx[1]⟩
 
 public def expandBinderModifier (optBinderModifier : Syntax) : Option BinderModifier :=
   optBinderModifier.getOptional?.map (⟨·⟩)
@@ -113,7 +113,7 @@ public def expandBinderCore
   (binders : Array BinderSyntaxView) (stx : Syntax)
 : MacroM (Array BinderSyntaxView) := do
   let k := stx.getKind
-  if stx.isIdent || k == ``Term.hole then
+  bif stx.isIdent || k == ``Term.hole then
     -- binderIdent
     return binders.push {
       ref := stx
@@ -121,7 +121,7 @@ public def expandBinderCore
       type := mkHoleFrom stx,
       info := .default
     }
-  else if k == ``Lean.Parser.Term.explicitBinder then
+  else bif k == ``Lean.Parser.Term.explicitBinder then
     -- `(` binderIdent+ binderType (binderDefault <|> binderTactic)? `)`
     let ids ← getBinderIds stx[1]
     let type := stx[2]
@@ -133,7 +133,7 @@ public def expandBinderCore
       info := .default,
       modifier?
     }
-  else if k == ``Lean.Parser.Term.implicitBinder then
+  else bif k == ``Lean.Parser.Term.implicitBinder then
     -- `{` binderIdent+ binderType `}`
     let ids ← getBinderIds stx[1]
     let type := stx[2]
@@ -143,7 +143,7 @@ public def expandBinderCore
       type := expandBinderType id type
       info := .implicit
     }
-  else if k == ``Lean.Parser.Term.strictImplicitBinder then
+  else bif k == ``Lean.Parser.Term.strictImplicitBinder then
     -- `⦃` binderIdent+ binderType `⦄`
     let ids ← getBinderIds stx[1]
     let type := stx[2]
@@ -153,7 +153,7 @@ public def expandBinderCore
       type := expandBinderType id type
       info := .strictImplicit
     }
-  else if k == ``Lean.Parser.Term.instBinder then
+  else bif k == ``Lean.Parser.Term.instBinder then
     -- `[` optIdent type `]`
     let id := expandOptIdent stx[1]
     let type := stx[2]

@@ -37,7 +37,8 @@ def getModuleFacetJob? (facet : Name) [FamilyOut FacetOut facet α]
   match k with
   | .moduleFacet m f
   | .packageModuleFacet p m f =>
-    if h : f = facet then
+    bif h : f =ᵇ facet then
+      have h := eq_of_decideEq_eq_true h
       have of_data := by unfold BuildData; simp [h]
       some (m, cast of_data v)
     else none
@@ -71,7 +72,8 @@ def getPackageFacetJob? (facet : Name) [FamilyOut FacetOut facet α]
     (k : BuildKey) (v : Job (BuildData k)) : Option (Job α) :=
   match k with
   | .packageFacet p f =>
-    if h : f = facet then
+    bif h : f =ᵇ facet then
+      have h := eq_of_decideEq_eq_true h
       have of_data := by unfold BuildData; simp [h]
       some (cast of_data v)
     else none
@@ -92,7 +94,8 @@ def getTargetFacetJob? (facet : Name) [FamilyOut FacetOut facet α]
     (k : BuildKey) (v : Job (BuildData k)) : Option (Job α) :=
   match k with
   | .targetFacet _ _ f =>
-    if h : f = facet then
+    bif h : f =ᵇ facet then
+      have h := eq_of_decideEq_eq_true h
       have of_data := by unfold BuildData; simp [h]
       some (cast of_data v)
     else none

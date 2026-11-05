@@ -37,19 +37,19 @@ def elabBoolean (x : TSyntax ``boolean) : CoreM Bool := do
 
 def decodeDecNum (s : String) : Nat :=
   s.foldl (init := 0) fun n c =>
-    if c == '_' then n else n*10 + (c.val - '0'.val).toNat
+    bif c == '_' then n else n*10 + (c.val - '0'.val).toNat
 
 def decodeSign (s : String) : Bool × String :=
-  if s.front == '-' then
+  bif s.front == '-' then
     (true, s.drop 1 |>.copy)
-  else if s.front == '+' then
+  else bif s.front == '+' then
     (false, s.drop 1 |>.copy)
   else
     (false, s)
 
 def decodeDecInt (s : String) : Int :=
   let (neg, s) := inline <| decodeSign s
-  if neg then
+  bif neg then
     .negOfNat <| decodeDecNum s
   else
     .ofNat <| decodeDecNum s
@@ -63,7 +63,7 @@ def decodeMantissa (s : String) : Nat × Nat :=
     | '_' => (m,e)
     | '.' => (m,0)
     | c => (m*10 + (c.val - '0'.val).toNat, e+1)
-  (m, if e ≥ s.length then 0 else e)
+  (m, bif e ≥ᵇ s.length then 0 else e)
 
 def decodeFrExp (s : String) : Nat × Int :=
   match s.split (fun c => c == 'E' || c == 'e') |>.toStringList with
@@ -78,14 +78,14 @@ def decodeFrExp (s : String) : Nat × Int :=
 
 def decodeFloat (s : String) : Float :=
   let (neg, s) := decodeSign s
-  if s = "inf" then
-    if neg then -1.0/0 else 1.0/0
-  else if s = "nan" then
-    if neg then -(0.0/0) else 0.0/0
+  bif s =ᵇ "inf" then
+    bif neg then -1.0/0 else 1.0/0
+  else bif s =ᵇ "nan" then
+    bif neg then -(0.0/0) else 0.0/0
   else
     let (m, e) := decodeFrExp s
     let flt := Float.ofScientific m (e < 0) e.natAbs
-    if neg then -flt else flt
+    bif neg then -flt else flt
 
 def elabFloat (x : TSyntax ``float) : CoreM Float := do
   return decodeFloat <| ← elabLit x "float"
@@ -93,22 +93,22 @@ def elabFloat (x : TSyntax ``float) : CoreM Float := do
 def elabBinNum (x : TSyntax ``binNum) : CoreM Nat := do
   let spelling ← elabLit x "binary number"
   return spelling.drop 2 |>.foldl (init := 0) fun n c =>
-    if c == '_' then n else n*2 + (c.val - '0'.val).toNat
+    bif c == '_' then n else n*2 + (c.val - '0'.val).toNat
 
 def elabOctNum (x : TSyntax ``octNum) : CoreM Nat := do
   let spelling ← elabLit x "octal number"
   return spelling.drop 2 |>.foldl (init := 0) fun n c =>
-    if c == '_' then n else n*8 + (c.val - '0'.val).toNat
+    bif c == '_' then n else n*8 + (c.val - '0'.val).toNat
 
 def decodeHexDigit (c : Char) : Nat :=
-  if c  ≤ '9' then (c.val - '0'.val).toNat
-  else if c  ≤ 'F' then 10 + (c.val - 'A'.val).toNat
+  bif c  ≤ᵇ '9' then (c.val - '0'.val).toNat
+  else bif c  ≤ᵇ 'F' then 10 + (c.val - 'A'.val).toNat
   else 10 + (c.val - 'a'.val).toNat
 
 def elabHexNum (x : TSyntax ``hexNum) : CoreM Nat := do
   let spelling ← elabLit x "hexadecimal number"
   return spelling.drop 2 |>.foldl (init := 0) fun n c =>
-    if c == '_' then n else n*16 + decodeHexDigit c
+    bif c == '_' then n else n*16 + decodeHexDigit c
 
 def elabDateTime (x : TSyntax ``dateTime) : CoreM DateTime := do
   let spelling ← elabLit x "date-time"
@@ -127,24 +127,24 @@ def decodeHexDigits (s : Substring.Raw) : Nat :=
   s.foldl (init := 0) fun n c => n*16 + decodeHexDigit c
 
 partial def elabBasicStringCore (lit : String) (i : String.Pos.Raw := 0) (out := "") : CoreM String := do
-  if h : i.atEnd lit then
+  bif h : i.atEnd lit then
     return out
   else
-    let curr := i.get' lit h
-    let i := i.next' lit h
-    if curr == '\\' then
-      if h : i.atEnd lit then
+    let curr := i.get' lit (Bool.ne_true_of_eq_false h)
+    let i := i.next' lit (Bool.ne_true_of_eq_false h)
+    bif curr == '\\' then
+      bif h : i.atEnd lit then
         return out
       else
-        let curr := i.get' lit h
+        let curr := i.get' lit (Bool.ne_true_of_eq_false h)
         let elabUnicodeEscape escape :=
           let val := decodeHexDigits escape
-          if h : val.isValidChar then
-            let ch := Char.ofNatAux val h
+          bif h : decide val.isValidChar then
+            let ch := Char.ofNatAux val (of_decide_eq_true h)
             elabBasicStringCore lit escape.stopPos (out.push ch)
           else
             throwError "invalid unicode escape `{escape}`"
-        let next := i.next' lit h
+        let next := i.next' lit (Bool.ne_true_of_eq_false h)
         match curr with
         | 'b'  => elabBasicStringCore lit next (out.push '\x08')
         | 't'  => elabBasicStringCore lit next (out.push '\t')
@@ -166,9 +166,9 @@ def elabBasicString (x : TSyntax ``basicString) : CoreM String := do
   withRef x <| elabBasicStringCore (spelling.drop 1 |>.dropEnd 1 |>.copy)
 
 def dropInitialNewline (s : String) : String :=
-  if s.front == '\r' then
+  bif s.front == '\r' then
     s.drop 2 |>.copy
-  else if s.front == '\n' then
+  else bif s.front == '\n' then
     s.drop 1 |>.copy
   else
     s
@@ -226,7 +226,7 @@ def elabInlineTable (x : TSyntax ``inlineTable) (elabVal : TSyntax ``val → Cor
         modify fun t => t.push k none
       return k
     let k ← k.str <$> elabSimpleKey tailKey
-    if t.contains k then
+    bif t.contains k then
       throwErrorAt tailKey m!"cannot redefine key `{k}`"
     else
       return t.push k (← elabVal v)

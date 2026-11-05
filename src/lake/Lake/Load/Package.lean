@@ -64,7 +64,7 @@ Return whether a configuration file with the given name
 and/or a supported extension exists.
 -/
 public def configFileExists (cfgFile : FilePath) : BaseIO Bool :=
-  if cfgFile.extension.isSome then
+  bif cfgFile.extension.isSome then
     cfgFile.pathExists
   else
     let leanFile := cfgFile.addExtension "lean"
@@ -76,7 +76,7 @@ Returns the normalized real path of the configuration file (if it exists).
 Otherwise, returns an empty string.
 -/
 public def realConfigFile (cfgFile : FilePath) : BaseIO FilePath := do
-  if cfgFile.extension.isSome then
+  bif cfgFile.extension.isSome then
     resolvePath cfgFile
   else
     if let some path ← resolvePath? (cfgFile.addExtension "lean") then
@@ -93,7 +93,7 @@ detects its configuration language (if necessary).
 public def resolveConfigFile
   (name : String) (cfg : LoadConfig)
 : LogIO {cfg : LoadConfig // cfg.configLang?.isSome} := do
-  if h : cfg.configLang?.isSome then
+  bif h : cfg.configLang?.isSome then
     let some configFile ← resolvePath? cfg.configFile
       | error s!"{name}: configuration file not found: {cfg.configFile}"
     return ⟨{cfg with configFile}, h⟩
@@ -110,7 +110,7 @@ public def resolveConfigFile
     let leanFile := cfg.pkgDir / relLeanFile
     let tomlFile := cfg.pkgDir / relTomlFile
     if let some configFile ← resolvePath? leanFile then
-      if (← tomlFile.pathExists) then
+      bif (← tomlFile.pathExists) then
         logInfo s!"{name}: {relLeanFile} and {relTomlFile} are both present; using {relLeanFile}"
       return ⟨{cfg with configFile, relConfigFile := relLeanFile, configLang? := some .lean}, rfl⟩
     else if let some configFile ← resolvePath? tomlFile then

@@ -61,7 +61,7 @@ If `updateDeps` is true, updates the manifest before resolving dependencies.
 public def loadWorkspace (config : LoadConfig) : LoggerIO Workspace := do
   let {reconfigure, leanOpts, updateDeps, updateToolchain, packageOverrides, ..} := config
   let ws ← loadWorkspaceRoot config
-  if updateDeps then
+  bif updateDeps then
     ws.updateAndMaterialize {} leanOpts updateToolchain
   else if let some manifest ← Manifest.load? ws.manifestFile then
     ws.materializeDeps manifest leanOpts reconfigure packageOverrides

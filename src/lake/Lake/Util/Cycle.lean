@@ -80,7 +80,7 @@ If adding `key` produces a cycle, the cyclic call stack is thrown.
   [BEq κ] [Monad m] [MonadCycle κ m] (key : κ) (act : m α)
 : m α := do
   let parents ← getCallStack
-  if parents.contains key then
+  bif parents.contains key then
     throwCycle <| key :: (parents.partition (· != key)).1 ++ [key]
   else
     withCallStack (key :: parents) act

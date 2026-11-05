@@ -35,12 +35,13 @@ def PartialBuildKey.fetchInCoreAux
   | .packageTarget pkgName target =>
     let pkg ← resolveTargetPackageD pkgName
     let key := BuildKey.packageTarget pkg.keyName target
-    if facetless then
+    bif facetless then
       if let some decl := pkg.findTargetDecl? target then
-        if h : decl.kind.isAnonymous then
+        bif h : decl.kind.isAnonymous then
           let job ← ( pkg.target target).fetch
           return ⟨key, cast (by simp) job⟩
         else
+          have h := Bool.ne_true_of_eq_false h
           let facet := decl.kind.str "default"
           let tgt := decl.mkConfigTarget pkg
           let tgt := cast (by simp [decl.target_eq_type h]) tgt
@@ -55,14 +56,14 @@ def PartialBuildKey.fetchInCoreAux
       -- Use the resolved target for the facet's build-store key.
       let ⟨target, job⟩ ← PartialBuildKey.fetchInCoreAux target false
       let kind := job.kind
-      if h : kind.isAnonymous then
+      bif h : kind.isAnonymous then
         error s!"invalid target '{root}': targets of opaque data kinds do not support facets"
       else
-        let shortFacet := if shortFacet.isAnonymous then `default else shortFacet
+        let shortFacet := bif shortFacet.isAnonymous then `default else shortFacet
         have facet := kind ++ shortFacet
         let some cfg := (← getWorkspace).findFacetConfig? facet
           | error s!"invalid target '{root}': unknown facet '{facet}'"
-        let job ← (job.cast h).bindM (kind := cfg.outKind) fun data =>
+        let job ← (job.cast (Bool.ne_true_of_eq_false h)).bindM (kind := cfg.outKind) fun data =>
           fetch (.facet target kind data facet)
         return ⟨.facet target facet, cast (by simp) job⟩
 where
@@ -124,12 +125,12 @@ def BuildKey.fetchCore
   | facet target facetName => do
       let job ← target.fetchCore
       let kind := job.kind
-      if h : kind.isAnonymous then
+      bif h : kind.isAnonymous then
         error s!"invalid target '{self}': targets of opaque data kinds do not support facets"
       else
         let some cfg := (← getWorkspace).findFacetConfig? facetName
           | error s!"invalid target '{root}': unknown facet '{facetName}'"
-        (job.cast h).bindM (kind := cfg.outKind) fun data =>
+        (job.cast (Bool.ne_true_of_eq_false h)).bindM (kind := cfg.outKind) fun data =>
           fetch (.facet target kind data facetName)
 
 @[inline] public protected def BuildKey.fetch
@@ -141,13 +142,14 @@ public protected def Target.fetchIn
 := do
   let ⟨_, job⟩ ← self.key.fetchInCore defaultPkg
   have ⟨kind, ⟨h_anon, h_kind⟩⟩ := (inferInstance : DataKind α)
-  if h : job.kind.name = kind then
+  bif h : job.kind.name =ᵇ kind then
+    have h := eq_of_decideEq_eq_true h
     have h := by
       have h_job := h ▸ job.kind.wf
       rw [h_job h_anon, h_kind]
     return cast h job
   else
-    let actual := if job.kind.name.isAnonymous then "unknown" else s!"'{job.kind.name}'"
+    let actual := bif job.kind.name.isAnonymous then "unknown" else s!"'{job.kind.name}'"
     error s!"type mismatch in target '{self.key}': expected '{kind}', got {actual}"
 
 public protected def TargetArray.fetchIn

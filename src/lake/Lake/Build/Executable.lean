@@ -22,7 +22,7 @@ The build function definition for a Lean executable.
 def LeanExe.recBuildExe (self : LeanExe) : FetchM (Job FilePath) :=
   withRegisterJob s!"{self.name}:exe" <| withCurrPackage self.pkg do
   let infoJob ←
-    if self.supportInterpreter
+    bif self.supportInterpreter
     then self.root.linkInfoExport.fetch
     else self.root.linkInfoNoExport.fetch
   infoJob.mapM fun info => do

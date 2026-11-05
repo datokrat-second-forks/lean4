@@ -45,11 +45,11 @@ namespace CacheMap
 public def schemaVersion : Date := {year := 2026, month := 3, day := 17}
 
 def checkSchemaVersion (inputName : String) (line : String) : LogIO Unit := do
-  if line.isEmpty then
+  bif line.isEmpty then
     error s!"{inputName}: expected schema version on line 1"
   match Json.parse line >>= fromJson? with
   | .ok (ver : Date) =>
-    if ver < schemaVersion then
+    bif ver <ᵇ schemaVersion then
       logWarning s!"{inputName}: unknown schema version '{ver}'; may not parse correctly"
   | .error e =>
     logWarning s!"{inputName}: invalid header on line 1: {e}"
@@ -83,27 +83,27 @@ public partial def parse
   let rec loop (i : Nat) (cache : CacheMap) {contents : String} (pos : contents.Pos) := do
     let lfPos := pos.find '\n'
     let line := contents.slice pos lfPos (by simp [lfPos])
-    if line.trimAscii.isEmpty then
+    bif line.trimAscii.isEmpty then
       return cache
     let cache ← parseCacheEntry inputName i cache line.copy platformIndependent
-    if h : lfPos.IsAtEnd then
+    bif h : lfPos =ᵇ contents.endPos then
       return cache
     else
-      loop (i+1) cache (lfPos.next h)
+      loop (i+1) cache (lfPos.next (ne_of_decideEq_eq_false h))
   let lfPos := contents.find '\n'
   let line := contents.sliceTo lfPos
   checkSchemaVersion inputName line.trimAscii.copy
-  if h : lfPos.IsAtEnd then
+  bif h : lfPos =ᵇ contents.endPos then
     return {}
   else
-    loop 2 {} (lfPos.next h)
+    loop 2 {} (lfPos.next (ne_of_decideEq_eq_false h))
 
 @[inline] partial def loadCore
   (h : IO.FS.Handle) (fileName : String) (platformIndependent : Bool)
 : LogIO CacheMap := do
   let rec loop (i : Nat) (cache : CacheMap) := do
     let line ← h.getLine
-    if line.isEmpty then
+    bif line.isEmpty then
       return cache
     let cache ← parseCacheEntry fileName i cache line platformIndependent
     loop (i+1) cache
@@ -146,10 +146,10 @@ public def load? (file : FilePath) (platformIndependent := false) : LogIO (Optio
 def writeCacheEntries
   (h : IO.FS.Handle) (cache : CacheMap) (platformIndependent : Bool)
 : LogIO Unit :=
-  if platformIndependent then
+  bif platformIndependent then
     cache.forM fun k ⟨v, platformIndependentMapping⟩ => do
       -- skip platform-dependent outputs in platform-independent maps
-      if platformIndependentMapping then
+      bif platformIndependentMapping then
         h.putStrLn (Json.arr #[toJson k, toJson v]).compress
   else
     cache.forM fun k ⟨v, _⟩ => do
@@ -356,7 +356,7 @@ public protected def toJson (out : CacheOutput) : Json := Id.run do
     |>.insert "schemaVersion" schemaVersion
     |>.insert "service" out.service?
   if let some scope := out.scope? then
-    obj := obj.insert (if scope.isRepo then "repo" else "scope") scope.toJson
+    obj := obj.insert (bif scope.isRepo then "repo" else "scope") scope.toJson
   return obj.insert "data" out.data
 
 public instance : ToJson CacheOutput := ⟨CacheOutput.toJson⟩
@@ -364,7 +364,7 @@ public instance : ToJson CacheOutput := ⟨CacheOutput.toJson⟩
 public protected def fromJson? (json : Json) : Except String CacheOutput := do
   if let .obj obj := json then
     let obj := JsonObject.mk obj
-    if obj.contains "schemaVersion" then
+    bif obj.contains "schemaVersion" then
       -- presumably the new format
       -- (the edge case of a custom output with a `schemaVersion` is not worth covering)
       let data ← obj.get "data"
@@ -440,7 +440,7 @@ def writeOutputsCore
   createParentDirs file
   let out := {service?, scope? := remoteScope?, data := out : CacheOutput}
   let contents := (toJson out).pretty
-  if overwrite then
+  bif overwrite then
     IO.FS.writeFile file contents
   else
     writeFileIfNew file contents
@@ -508,7 +508,7 @@ public def length (self : CachePlatform) : Nat := self.raw.chars.length
 
 /-- Returns a string representation of the platform identifier. -/
 public protected def toString (self : CachePlatform) : String :=
-  if self.isNone then "none" else self.raw
+  bif self.isNone then "none" else self.raw
 
 instance : ToString CachePlatform := ⟨CachePlatform.toString⟩
 
@@ -540,7 +540,7 @@ public def length (self : CacheToolchain) : Nat := self.raw.chars.length
 
 /-- Returns a string representation of the toolchain identifier. -/
 public protected def toString (self : CacheToolchain) : String :=
-  if self.isNone then "none" else self.raw
+  bif self.isNone then "none" else self.raw
 
 instance : ToString CacheToolchain := ⟨CacheToolchain.toString⟩
 
@@ -552,7 +552,7 @@ end CacheToolchain
 public def downloadArtifactCore (hash : Hash) (url : String) (path : FilePath) : LogIO Unit := do
   download url path
   let actualHash ← computeFileHash path
-  if actualHash != hash then
+  bif actualHash != hash then
     let errPos ← getLogPos
     logError s!"{path}: downloaded artifact hash mismatch, got {actualHash}"
     IO.FS.removeFile path
@@ -661,7 +661,7 @@ def s3ArtifactUrl (contentHash : Hash) (service : CacheService) (scope : CacheSe
   s!"{endpoint}/{contentHash.hex}.art"
 
 public def artifactUrl (contentHash : Hash) (service : CacheService) (scope : CacheServiceScope) : String :=
-  if service.isReservoir then
+  bif service.isReservoir then
     let endpoint :=
       match scope.impl with
       | .repo scope => appendScope s!"{service.impl.apiEndpoint}/repositories" scope
@@ -676,7 +676,7 @@ public def downloadArtifact
 : LoggerIO Unit := do
   let url := service.artifactUrl descr.hash scope
   let path := cache.artifactDir / descr.relPath
-  if (← path.pathExists) && !force then
+  bif (← path.pathExists) && !force then
     return
   logInfo s!"{scope}: downloading artifact {descr.hash}\
     \n  local path: {path}\
@@ -708,7 +708,7 @@ structure TransferInfo where
   extraPaths : Array FilePath := #[]
 
 @[inline] def TransferInfo.addPath (self : TransferInfo) (path : FilePath) (extra := true) : TransferInfo :=
-  if extra then
+  bif extra then
     {self with extraPaths := self.extraPaths.push path}
   else
     {self with path, extraPaths := self.extraPaths.push self.path}
@@ -726,7 +726,7 @@ structure TransferDict where
 
 @[inline] def TransferDict.addIfNew
   (self : TransferDict) (url : String) (hash : Hash) (path : FilePath)
-: TransferDict := if self.indices.contains hash then self else self.push url hash path
+: TransferDict := bif self.indices.contains hash then self else self.push url hash path
 
 @[inline] def TransferDict.add
   (self : TransferDict) (url : String) (hash : Hash) (path : FilePath) (extra := true)
@@ -753,7 +753,7 @@ partial def monitorTransfer
   (cfg : TransferConfig) (h hOut : IO.FS.Handle) (s : TransferState)
 : LoggerIO TransferState := do
   let line ← h.getLine
-  if line.trimAscii.isEmpty then
+  bif line.trimAscii.isEmpty then
     return s
   else
     let s ← (·.2) <$> StateT.run (s := s) do
@@ -798,7 +798,7 @@ where
       | .ok contents =>
         logDownload
         let actualHash := Hash.ofByteArray contents
-        if actualHash != hash then
+        bif actualHash != hash then
           logError s!"{tmpPath}: downloaded artifact hash mismatch, got {actualHash}"
           modify ({· with didError := true})
         else if let .error e ← IO.FS.rename tmpPath path |>.toBaseIO then
@@ -839,14 +839,14 @@ where
       let tmpPath := tmpPath info.path
       unless code? matches .ok 404 do -- ignore response bodies on 404s
         if let .ok size := out.getAs Nat "size_download" then
-          if size > 0 then
+          bif size >ᵇ 0 then
             if let .ok contentType := out.getAs String "content_type" then
-              if contentType != artifactContentType then
+              bif contentType != artifactContentType then
                 if let .ok resp ← IO.FS.readFile tmpPath |>.toBaseIO then
                   msg := s!"{msg}\nunexpected response:\n{resp}"
     | .put =>
       if let .ok size := out.getAs Nat "size_download" then
-        if size > 0 then
+        bif size >ᵇ 0 then
           if let some resp := String.fromUTF8? (← hOut.read size.toUSize) then
             msg := s!"{msg}\nunexpected response:\n{resp}"
     logError msg
@@ -889,16 +889,16 @@ def transferArtifacts
   let rc ← child.wait
   let stdout ← child.stdout.readToEnd
   let mut didError := s.didError
-  if s.numSuccesses < cfg.infos.size then
+  bif s.numSuccesses <ᵇ cfg.infos.size then
     let action := match cfg.kind with | .get => "download" | .put => "upload"
     logError s!"{cfg.scope}: failed to {action} some artifacts"
     didError := true
   unless stdout.isEmpty do
     logWarning s!"{cfg.scope}: curl produced unexpected output:\n{stdout.trimAsciiEnd}"
-  if rc != 0 then
+  bif rc != 0 then
     logError s!"{cfg.scope}: curl exited with code {rc}"
     didError := true
-  if didError then
+  bif didError then
     failure
 
 def reservoirArtifactsUrl (service : CacheService) (scope : CacheServiceScope) : String :=
@@ -912,32 +912,32 @@ public def downloadArtifacts
    (descrs : Array ArtifactDescr) (cache : Cache)
    (service : CacheService) (scope : CacheServiceScope) (force := false)
 : LoggerIO Unit := do
-  if descrs.isEmpty then
+  bif descrs.isEmpty then
     logWarning "no artifacts to download"
     return
   let {infos, ..} ← descrs.foldlM (init := TransferDict.empty) fun s {descr} => do
     let hash := descr.hash
     let url := service.artifactUrl hash scope
     let path := cache.artifactDir / descr.relPath
-    if force then
+    bif force then
       removeFileIfExists path
       return s.add url hash path
-    else if (← path.pathExists) then
+    else bif (← path.pathExists) then
       return s.add url hash path (extra := false)
     else
       return s.add url hash path
   let infos ← infos.filterM fun info => do
-    if info.extraPaths.isEmpty then
+    bif info.extraPaths.isEmpty then
       not <$> info.path.pathExists
     else
       match (← createExtraPaths info.path info.extraPaths |>.toBaseIO) with
       | .ok _ => return false
       | .error (.noFileOrDirectory ..) => return true
       | .error e => error s!"failed to copy artifact: {e}"
-  if infos.isEmpty then
+  bif infos.isEmpty then
     return
   let infos ← id do
-    if service.isReservoir then
+    bif service.isReservoir then
       -- Artifact cloud storage URLs are fetched in a single request
       -- to avoid hammering the Reservoir web host
       fetchUrls (service.reservoirArtifactsUrl scope) infos
@@ -971,7 +971,8 @@ where
     | .ok (resp :  ReservoirResp (Array String)) =>
       match resp with
       | .data urls =>
-        if h : infos.size = urls.size then
+        bif h : infos.size =ᵇ urls.size then
+          have h := eq_of_decideEq_eq_true h
           let s := infos.size.fold (init := infos.toVector) fun i hi s =>
             s.set i {s[i] with url := urls[i]'(h ▸ hi)}
           return s.toArray
@@ -1017,7 +1018,7 @@ public def uploadArtifacts
   (descrs : Vector ArtifactDescr n) (paths : Vector FilePath n)
   (service : CacheService) (scope : CacheServiceScope)
 : LoggerIO Unit := do
-  if n = 0 then
+  bif n =ᵇ 0 then
     logWarning "no artifacts to upload"
     return
   let {infos, ..} ← n.foldM (init := TransferDict.empty) fun i _ s => do
@@ -1049,7 +1050,7 @@ public def revisionUrl
   (rev : GitRev) (service : CacheService) (scope : CacheServiceScope)
   (platform := CachePlatform.none) (toolchain := CacheToolchain.none)
 : String :=
-  if service.isReservoir then Id.run do
+  bif service.isReservoir then Id.run do
     let mut url :=
       match scope.impl with
       | .str s => appendScope s!"{service.impl.apiEndpoint}/packages" s
@@ -1070,14 +1071,14 @@ public def downloadRevisionOutputs?
 : LoggerIO (Option CacheMap) := do
   -- TODO: toolchain-scoped revision paths for system cache?
   let path := cache.revisionPath localScope rev
-  if (← path.pathExists) && !force then
+  bif (← path.pathExists) && !force then
     return ← CacheMap.load path platform.isNone
   let url := service.revisionUrl rev remoteScope platform toolchain
   logInfo s!"\
     {localScope}: downloading build outputs for revision {rev}\
     \n  local path: {path}\
     \n  remote URL: {url}"
-  let headers := if service.isReservoir then Reservoir.lakeHeaders else {}
+  let headers := bif service.isReservoir then Reservoir.lakeHeaders else {}
   let contents? ← try getUrl? url headers catch e =>
     logError s!"{remoteScope}: output lookup failed"
     throw e

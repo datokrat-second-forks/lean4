@@ -182,7 +182,7 @@ structure State where
   reservedNames : Std.HashSet Name := Id.run do
     let mut m := {}
     for (c, _) in env.constants do
-      if isReservedName env c then
+      bif isReservedName env c then
         m := m.insert c
     return m
   indirectModUses : Std.HashMap Name (Array ModuleIdx) :=
@@ -201,27 +201,27 @@ def addTransitiveImps (transImps : Needs) (imp : Import) (j : Nat) (impTransImps
   let mut transImps := transImps
 
   -- `j ∈ transDeps[i].pub` if `i -(public import)->+ j`
-  if imp.isExported && !imp.isMeta then
+  bif imp.isExported && !imp.isMeta then
     transImps := transImps.union .pub {j} |>.union .pub (impTransImps.get .pub)
 
-  if !imp.isExported && !imp.isMeta then
+  bif !imp.isExported && !imp.isMeta then
     -- `j ∈ transDeps[i].priv` if `i -(import ...)-> _ -(public import)->* j`
     transImps := transImps.union .priv {j} |>.union .priv (impTransImps.get .pub)
-    if imp.importAll then
+    bif imp.importAll then
       -- `j ∈ transDeps[i].priv` if `i -(import all)->+ i'` and `j ∈ transDeps[i'].pub/priv`
       transImps := transImps.union .priv (impTransImps.get .pub ∪ impTransImps.get .priv)
 
   -- `j ∈ transDeps[i].metaPub` if `i -(public (meta)? import)->* _ -(public meta import)-> _ -(public (meta)? import)->* j`
-  if imp.isExported then
+  bif imp.isExported then
     transImps := transImps.union .metaPub (impTransImps.get .metaPub)
-    if imp.isMeta then
+    bif imp.isMeta then
       transImps := transImps.union .metaPub {j} |>.union .metaPub (impTransImps.get .pub ∪ impTransImps.get .metaPub)
 
-  if !imp.isExported then
-    if imp.isMeta then
+  bif !imp.isExported then
+    bif imp.isMeta then
       -- `j ∈ transDeps[i].metaPriv` if `i -(meta import ...)-> _ -(public (meta)? import)->* j`
       transImps := transImps.union .metaPriv {j} |>.union .metaPriv (impTransImps.get .pub ∪ impTransImps.get .metaPub)
-    if imp.importAll then
+    bif imp.importAll then
       -- `j ∈ transDeps[i].metaPriv` if `i -(import all)->+ i'` and `j ∈ transDeps[i'].metaPub/metaPriv`
       transImps := transImps.union .metaPriv (impTransImps.get .metaPub ∪ impTransImps.get .metaPriv)
     else
@@ -236,7 +236,7 @@ def isDeclMeta' (env : Environment) (declName : Name) : Bool :=
   -- TODO: It would be better to base the entire `meta` inference on the IR only and consider module
   -- references from any other context as compatible with both phases.
   let inferFor :=
-    if declName.isStr && (declName.getString!.startsWith "match_" || declName.getString! == "_unsafe_rec") then declName.getPrefix else declName
+    bif declName.isStr && (declName.getString!.startsWith "match_" || declName.getString! == "_unsafe_rec") then declName.getPrefix else declName
   -- `isMarkedMeta` knows about non-defs such as `meta structure`, isDeclMeta knows about decls
   -- implicitly marked meta
   isMarkedMeta env inferFor || isDeclMeta env inferFor
@@ -249,7 +249,7 @@ def getDepConstName? (s : State) (ref : Name) : Option Name := do
   -- Ignore references to reserved names, they can be re-generated in-place
   guard <| !s.reservedNames.contains ref
   -- `_simp_...` constants are similar, use base decl instead
-  return if ref.isStr && ref.getString!.startsWith "_simp_" then
+  return bif ref.isStr && ref.getString!.startsWith "_simp_" then
     ref.getPrefix
   else
     ref
@@ -265,8 +265,8 @@ def calcNeeds (s : State) (i : ModuleIdx) : Needs := Id.run do
     needs := visitExpr k ci.type needs
     if let some e := ci.value? (allowOpaque := true) then
       -- type and value has identical visibility under `meta`
-      let k := if k.isMeta then k else
-        if pubCI?.any (·.hasValue (allowOpaque := true)) then .pub else .priv
+      let k := bif k.isMeta then k else
+        bif pubCI?.any (·.hasValue (allowOpaque := true)) then .pub else .priv
       needs := visitExpr k e needs
 
   for use in getExtraModUses env i do
@@ -283,10 +283,10 @@ where
       if let some c := getDepConstName? s c then
         if let some (j : Nat) := env.getModuleIdxFor? c then
           let k := { k with isMeta := k.isMeta && !isDeclMeta' env c }
-          if j != i then
+          bif j != i then
             deps := deps.union k {j}
             for (indMod : Nat) in s.indirectModUses[c]?.getD #[] do
-              if s.transDeps[i]!.has k indMod then
+              bif s.transDeps[i]!.has k indMod then
                 deps := deps.union k {indMod}
       return deps
 
@@ -305,13 +305,13 @@ def getExplanations (s : State) (i : ModuleIdx) : Explanations := Id.run do
     let k := { isExported := pubCI?.isSome, isMeta := isDeclMeta' env ci.name }
     deps := visitExpr k ci.name ci.type deps
     if let some e := ci.value? (allowOpaque := true) then
-      let k := if k.isMeta then k else
-        if pubCI?.any (·.hasValue (allowOpaque := true)) then .pub else .priv
+      let k := bif k.isMeta then k else
+        bif pubCI?.any (·.hasValue (allowOpaque := true)) then .pub else .priv
       deps := visitExpr k ci.name e deps
 
   for use in getExtraModUses env i do
     let j := env.getModuleIdx? use.module |>.get!
-    if !deps.contains (j, { use with }) then
+    bif !deps.contains (j, { use with }) then
       deps := deps.insert (j, { use with }) none
 
   return deps
@@ -326,13 +326,13 @@ where
           let k := { k with isMeta := k.isMeta && !isDeclMeta' env c }
           deps := addExplanation j k name c deps
         for indMod in s.indirectModUses[c]?.getD #[] do
-          if s.transDeps[i]!.has k indMod then
+          bif s.transDeps[i]!.has k indMod then
             deps := addExplanation indMod k name (`_indirect ++ c) deps
       return deps
   addExplanation (j : ModuleIdx) (k : NeedsKind) (use def_ : Name) (deps : Explanations) : Explanations :=
-    if
+    bif
       if let some (some (name', _)) := deps[(j, k)]? then
-        decide (use.toString.chars.length < name'.toString.chars.length)
+        use.toString.chars.length <ᵇ name'.toString.chars.length
       else true
     then
       deps.insert (j, k) (use, def_)
@@ -358,7 +358,7 @@ Returns for each module whether it is a reflexive-transitive import of `i`, disr
 def getImportClosure (s : State) (i : Nat) : Array Bool := Id.run do
   let mut closure := Array.replicate s.mods.size false |>.set! i true
   for j in (0...=i).toArray.reverse do
-    if closure[j]! then
+    bif closure[j]! then
       for imp in s.mods[j]!.imports do
         closure := closure.set! (s.env.getModuleIdx? imp.module |>.get!).toNat true
   return closure
@@ -385,7 +385,7 @@ def parseHeaderFromString (text path : String) :
       TSyntax ``Parser.Module.header × String.Pos ictx.fileMap.source) := do
   let inputCtx := Parser.mkInputContext text path
   let (header, parserState, msgs) ← Parser.parseHeader inputCtx
-  if !msgs.toList.isEmpty then -- skip this file if there are parse errors
+  bif !msgs.toList.isEmpty then -- skip this file if there are parse errors
     msgs.forM fun msg => msg.toString >>= IO.println
     throw <| .userError "parse errors in file"
   -- the insertion point for `add` is the first newline after the imports
@@ -431,19 +431,19 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
     (i : Nat) (needs : Needs) (headerStx : TSyntax ``Parser.Module.header) (args : Args)
     (addDownstream := false) (addOnly := false) : StateT State IO Unit := do
   let modName := (← get).modNames[i]!
-  if isExtraRevModUse (← get).env i then
-    modify fun s => { s with preserve := s.preserve.union (if args.addPublic then .pub else .priv) {i} }
-    if args.trace then
+  bif isExtraRevModUse (← get).env i then
+    modify fun s => { s with preserve := s.preserve.union (bif args.addPublic then .pub else .priv) {i} }
+    bif args.trace then
       IO.eprintln s!"Preserving `{modName}` because of recorded extra rev use"
 
   -- only process modules in the selected packages
   -- TODO: should be after `keep-downstream` but core headers are not found yet?
-  if !pkgs.any (·.isPrefixOf modName) then
+  bif !pkgs.any (·.isPrefixOf modName) then
     return
 
   let (module?, prelude?, imports) := decodeHeader headerStx
-  if module?.any (·.raw.getTrailing?.any (·.toString.contains "shake: keep-downstream")) then
-    modify fun s => { s with preserve := s.preserve.union (if args.addPublic then .pub else .priv) {i} }
+  bif module?.any (·.raw.getTrailing?.any (·.toString.contains "shake: keep-downstream")) then
+    modify fun s => { s with preserve := s.preserve.union (bif args.addPublic then .pub else .priv) {i} }
 
   let s ← get
 
@@ -459,24 +459,24 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
     let j : Nat := s.env.getModuleIdx? imp.module |>.get!
     let k := NeedsKind.ofImport imp
     let reason? :=
-      if impStx.raw.getTrailing?.any (·.toString.contains "shake: keep") then
+      bif impStx.raw.getTrailing?.any (·.toString.contains "shake: keep") then
         some "`shake: keep`"
-      else if args.keepPublic && imp.isExported && !(`Init).isPrefixOf modName then
+      else bif args.keepPublic && imp.isExported && !(`Init).isPrefixOf modName then
         -- TODO: allow per-library configuration instead of hardcoding `Init`
         some "`--keep-public`"
-      else if addOnly then
+      else bif addOnly then
         some "`--add-only` / `--only` / `shake: keep-all`"
       else none
     if let some msg := reason? then
       deps := deps.union k {j}
       reasons := reasons.insert (j, k) msg
-      if args.trace then
+      bif args.trace then
         IO.eprintln s!"Adding `{imp}` as additional dependency"
   for j in [0:s.mods.size] do
     for k in NeedsKind.all do
       -- Remove `meta` while preserving, no use-case for preserving `meta` so far.
       -- Downgrade to private unless `--add-public` is used.
-      if s.transDepsOrig[i]!.has k j &&
+      bif s.transDepsOrig[i]!.has k j &&
           (s.preserve.has { k with isMeta := false, isExported := false } j ||
            s.preserve.has { k with isMeta := false, isExported := true } j) then
         let k' := { k with isMeta := false, isExported := k.isExported && args.addPublic }
@@ -487,19 +487,19 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
     let k := NeedsKind.ofImport imp
     deps := deps.union k {j}
     reasons := reasons.insert (j, k) <|
-      if k.isExported then "`--add-public-downstream`" else "`--add-downstream`"
+      bif k.isExported then "`--add-public-downstream`" else "`--add-downstream`"
 
   -- Do transitive reduction of `needs` in `deps`.
-  if !addOnly then
+  bif !addOnly then
     for j in [0:s.mods.size] do
       let transDeps := s.transDeps[j]!
       for k in NeedsKind.all do
-        if deps.has k j then
+        bif deps.has k j then
           let transDeps := addTransitiveImps .empty { k with module := .anonymous } j transDeps
           for k' in NeedsKind.all do
             deps := deps.sub k' (transDeps.sub k' {j} |>.get k')
 
-  if prelude?.isNone then
+  bif prelude?.isNone then
     let j : Nat := s.env.getModuleIdx? `Init |>.get!
     deps := deps.union .pub {j}
     deps := deps.union .metaPub {j}
@@ -510,22 +510,22 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   for imp in s.mods[i]!.imports do
     let j : Nat := s.env.getModuleIdx? imp.module |>.get!
     let k := NeedsKind.ofImport imp
-    if deps.has k j || imp.importAll then
+    bif deps.has k j || imp.importAll then
       let wasInDeps := deps.has k j
       transDeps := addTransitiveImps transDeps imp j s.transDeps[j]!
       deps := deps.union k {j}
-      if !wasInDeps && imp.importAll then
+      bif !wasInDeps && imp.importAll then
         reasons := reasons.insert (j, k) "`import all` always being preserved"
     -- skip folder-nested `public (meta)? import`s but remove `meta`
-    else if modName.isPrefixOf imp.module then
+    else bif modName.isPrefixOf imp.module then
       let imp := { imp with isMeta := false }
       let k := { k with isMeta := false }
-      if args.trace then
+      bif args.trace then
         IO.eprintln s!"`{imp}` is preserved as folder-nested import"
       transDeps := addTransitiveImps transDeps imp j s.transDeps[j]!
       deps := deps.union k {j}
       reasons := reasons.insert (j, k) "folder-nested import"
-      if !s.mods[i]!.imports.contains imp then
+      bif !s.mods[i]!.imports.contains imp then
         alwaysAdd := alwaysAdd.push imp
 
   -- If `transDeps` does not cover `deps`, then we have to add back some imports until it does.
@@ -536,22 +536,22 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   let mut toAdd : Array Import := #[]
   for j in (0...s.mods.size).toArray.reverse do
     for k in NeedsKind.all do
-      if deps.has k j && !newTransDeps.has k j && !newTransDeps.has { k with isExported := true } j then
+      bif deps.has k j && !newTransDeps.has k j && !newTransDeps.has { k with isExported := true } j then
         -- `add-public/keep-prefix` may change the import and even module we're considering
         let mut k := k
         let mut imp : Import := { k with module := s.modNames[j]! }
         let mut j := j
-        if args.trace then
+        bif args.trace then
           IO.eprintln s!"`{imp}` is needed{if needs.has k j then " (calculated)" else ""}"
-        if args.addPublic && !k.isExported &&
+        bif args.addPublic && !k.isExported &&
             -- also add as public if previously `public meta`, which could be from automatic porting
             (s.transDepsOrig[i]!.has { k with isExported := true } j || s.transDepsOrig[i]!.has { k with isExported := true, isMeta := true } j) then
           k := { k with isExported := true }
           imp := { imp with isExported := true }
-          if args.trace then
+          bif args.trace then
             IO.eprintln s!"* upgrading to `{imp}` because of `--add-public`"
           reasons := reasons.insert (j, k) "`--add-public`"
-        if args.keepPrefix then
+        bif args.keepPrefix then
           let rec tryPrefix : Name → Option ModuleIdx
             | .str p _ => tryPrefix p <|> (do
               let j' ← s.env.getModuleIdx? p
@@ -567,24 +567,24 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
             imp := { imp with module := s.modNames[j']! }
             j := j'
             keptPrefix := true
-            if args.trace then
+            bif args.trace then
               IO.eprintln s!"* upgrading to `{imp}` because of `--keep-prefix`"
             reasons := reasons.insert (j, k) s!"`--keep-prefix` upgrade from `{origModule}`"
-        if !s.mods[i]!.imports.contains imp then
+        bif !s.mods[i]!.imports.contains imp then
           toAdd := toAdd.push imp
         deps := deps.union k {j}
         newTransDeps := addTransitiveImps newTransDeps imp j s.transDeps[j]!
 
-  if keptPrefix then
+  bif keptPrefix then
     -- if an import was replaced by `--keep-prefix`, we did not necessarily visit the modules in
     -- dependency order anymore and so we have to redo the transitive closure checking
     newTransDeps := transDeps
     for j in (0...s.mods.size).toArray.reverse do
       for k in NeedsKind.all do
-        if deps.has k j then
+        bif deps.has k j then
           let mut imp : Import := { k with module := s.modNames[j]! }
-          if toAdd.contains imp && (newTransDeps.has k j || newTransDeps.has { k with isExported := true } j) then
-            if args.trace then
+          bif toAdd.contains imp && (newTransDeps.has k j || newTransDeps.has { k with isExported := true } j) then
+            bif args.trace then
               IO.eprintln s!"Removing `{imp}` from imports to be added because it is now implied"
             toAdd := toAdd.erase imp
             deps := deps.sub k {j}
@@ -599,16 +599,16 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
   for imp in s.mods[i]!.imports do
     let j := s.env.getModuleIdx? imp.module |>.get!
     let k := NeedsKind.ofImport imp
-    if args.keepImplied && newTransDeps.has k j then
-      if args.trace && !deps.has k j then
+    bif args.keepImplied && newTransDeps.has k j then
+      bif args.trace && !deps.has k j then
         IO.eprintln s!"`{imp}` is implied by other imports"
-    else if !deps.has k j then
-      if args.trace then
+    else bif !deps.has k j then
+      bif args.trace then
         IO.eprintln s!"`{imp}` is now unused"
       toRemove := toRemove.push imp
     -- A private import should also be removed if the public version has been added
-    else if !k.isExported && !imp.importAll && newTransDeps.has { k with isExported := true } j then
-      if args.trace then
+    else bif !k.isExported && !imp.importAll && newTransDeps.has { k with isExported := true } j then
+      bif args.trace then
         IO.eprintln s!"`{imp}` is already covered by `{ { imp with isExported := true } }`"
       toRemove := toRemove.push imp
 
@@ -617,25 +617,25 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
     edits := toRemove.foldl (init := s.edits) fun edits imp =>
       edits.remove modName imp }
 
-  if !toAdd.isEmpty || !toRemove.isEmpty || args.explain then
+  bif !toAdd.isEmpty || !toRemove.isEmpty || args.explain then
     if let some path ← srcSearchPath.findModuleWithExt "lean" s.modNames[i]! then
       println! "{path}:"
     else
       println! "{s.modNames[i]!}:"
 
-  if !toRemove.isEmpty then
+  bif !toRemove.isEmpty then
     println! "  remove {toRemove}"
 
-  if args.githubStyle then
+  bif args.githubStyle then
     try
       let ⟨path, inputCtx, stx, endHeader⟩ ← parseHeader srcSearchPath s.modNames[i]!
       let (_, _, imports) := decodeHeader stx
       for stx in imports do
-        if toRemove.any fun imp => imp == decodeImport stx then
+        bif toRemove.any fun imp => imp == decodeImport stx then
           let pos := inputCtx.fileMap.toPosition stx.raw.getPos?.get!
           println! "{path}:{pos.line}:{pos.column+1}: warning: unused import \
             (use `lake shake --fix` to fix this, or `lake shake --update` to ignore)"
-      if !toAdd.isEmpty then
+      bif !toAdd.isEmpty then
         -- we put the insert message on the beginning of the last import line
         let pos := inputCtx.fileMap.toPosition endHeader.offset
         println! "{path}:{pos.line-1}:1: warning: \
@@ -647,13 +647,13 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
     edits := toAdd.foldl (init := s.edits) fun edits imp =>
       edits.add s.modNames[i]! imp }
 
-  if !toAdd.isEmpty then
+  bif !toAdd.isEmpty then
     println! "  add {toAdd}"
 
   -- recalculate transitive dependencies of downstream modules
   let mut newTransDepsI := Needs.empty
   for imp in s.mods[i]!.imports do
-    if !toRemove.contains imp then
+    bif !toRemove.contains imp then
       let j := s.env.getModuleIdx? imp.module |>.get!
       newTransDepsI := addTransitiveImps newTransDepsI imp j s.transDeps[j]!
   for imp in toAdd do
@@ -662,9 +662,9 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
 
   modify fun s => { s with transDeps := s.transDeps.set! i newTransDepsI }
 
-  if args.explain then
+  bif args.explain then
     let explanation := getExplanations s i
-    let sanitize n := if n.hasMacroScopes then (sanitizeName n).run' { options := {} } else n
+    let sanitize n := bif n.hasMacroScopes then (sanitizeName n).run' { options := {} } else n
     let run (imp : Import) := do
       let j := s.env.getModuleIdx? imp.module |>.get!
       let k := NeedsKind.ofImport imp
@@ -680,7 +680,7 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
         else
           println! "    (no traced reason)"
     for j in s.mods[i]!.imports do
-      if !toRemove.contains j then
+      bif !toRemove.contains j then
         run j
     for i in toAdd do run i
 
@@ -706,10 +706,10 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
   let (_, s) ← importModulesCore imps (isExported := true) |>.run
   let s := s.markAllExported
   let mut env ← finalizeImport s (isModule := true) imps {} (leakEnv := true) (loadExts := false)
-  if env.header.moduleData.any (!·.isModule) then
+  bif env.header.moduleData.any (!·.isModule) then
     throw <| .userError "`lake shake` only works with `module`s currently"
   if let some imp := args.addDownstream? then
-    if env.getModuleIdx? imp.module |>.isNone then
+    bif env.getModuleIdx? imp.module |>.isNone then
       throw <| .userError s!"cannot add `{imp.module}` downstream, \
         it is not imported by any of the checked modules"
   -- the one env ext we want to initialize
@@ -726,12 +726,12 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
 
   -- Parse headers in parallel
   let headers ← s.mods.mapIdxM fun i _ =>
-    if !pkgs.any (·.isPrefixOf s.modNames[i]!) then
+    bif !pkgs.any (·.isPrefixOf s.modNames[i]!) then
       pure <| Task.pure <| .ok ⟨default, default, default, default⟩
     else
       BaseIO.asTask (parseHeader srcSearchPath s.modNames[i]! |>.toBaseIO)
 
-  if args.fix then
+  bif args.fix then
     println! "The following changes will be made automatically:"
 
   -- Check all selected modules
@@ -751,9 +751,9 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
     | .error e =>
       println! e.toString
 
-  if !args.fix then
+  bif !args.fix then
     -- return error if any issues were found
-    return if (← get).edits.isEmpty then 0 else 1
+    return bif (← get).edits.isEmpty then 0 else 1
 
   -- Apply the edits to existing files
   let mut count := 0
@@ -772,7 +772,7 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
     let mut seen : Std.HashSet Import := {}
     for stx in imports do
       let mod := decodeImport stx
-      if remove.contains mod || seen.contains mod then
+      bif remove.contains mod || seen.contains mod then
         out := out ++ text.extract pos (text.pos! stx.raw.getPos?.get!)
         -- We use the end position of the syntax, but include whitespace up to the first newline
         pos := text.pos! stx.raw.getTailPos?.get! |>.find '\n'
@@ -780,7 +780,7 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
       seen := seen.insert mod
     out := out ++ text.extract pos insertion
     for mod in add do
-      if !seen.contains mod then
+      bif !seen.contains mod then
         seen := seen.insert mod
         out := out ++ s!"{mod}\n"
     out := out ++ text.extract insertion text.endPos
@@ -790,7 +790,7 @@ public def run (args : Args) (srcSearchPath : SearchPath := {}) : IO UInt32 := d
 
   -- Since we throw an error upon encountering issues, we can be sure that everything worked
   -- if we reach this point of the script.
-  if count > 0 then
+  bif count >ᵇ 0 then
     println! "Successfully applied {count} suggestions."
   else
     println! "No edits required."

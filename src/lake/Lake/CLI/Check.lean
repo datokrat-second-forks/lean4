@@ -130,10 +130,10 @@ def whichExe (exe : String) : IO (Option System.FilePath) := do
   let out ←
     try IO.Process.output { cmd := "which", args := #[exe] }
     catch _ => return none
-  if out.exitCode != 0 then
+  bif out.exitCode != 0 then
     return none
   let path := out.stdout.trimAscii.toString
-  return if path.isEmpty then none else some (path : System.FilePath)
+  return bif path.isEmpty then none else some (path : System.FilePath)
 
 def missingSandboxError (cmd exe : String) : String :=
 s!"`lake {cmd}` needs `{exe}` to sandbox the code it checks, and it was not found.
@@ -192,7 +192,7 @@ def buildSandboxArgs (spawnArgs : SandboxArgs) (env : Array (String × String))
     "--die-with-parent",
     "--new-session"
   ]
-  let args := if spawnArgs.network then args ++ #["--share-net"] else args
+  let args := bif spawnArgs.network then args ++ #["--share-net"] else args
   let args :=
     if let some cwd := spawnArgs.cwd then
       args ++ #["--chdir", cwd.toString]
@@ -223,7 +223,7 @@ open IO.Process in
 partial def runSandBoxedWithStdoutTo (handle : IO.FS.Handle) (spawnArgs : SandboxArgs) : M Unit := do
   let (stderr, exitCode) ← pipedOutput (← sandboxSpawnArgs spawnArgs)
   IO.eprint stderr
-  if exitCode != 0 then
+  bif exitCode != 0 then
     throw <| .userError s!"Child exited with {exitCode}"
 where
   pipedOutput (args : SpawnArgs) : IO (String × UInt32) := do
@@ -231,7 +231,7 @@ where
     let stdout ← IO.asTask (prio := .dedicated) do
       let rec loop : IO Unit := do
         let buf ← child.stdout.read 4096
-        if buf.isEmpty then
+        bif buf.isEmpty then
           handle.flush
           return ()
         else
@@ -246,7 +246,7 @@ where
 def runSandBoxedWithStdout (spawnArgs : SandboxArgs) : M String := do
   let { stdout, stderr, exitCode } ← IO.Process.output (← sandboxSpawnArgs spawnArgs)
   IO.eprint stderr
-  if exitCode != 0 then
+  bif exitCode != 0 then
     throw <| .userError s!"Child exited with {exitCode}"
   return stdout
 
@@ -257,7 +257,7 @@ def runSandBoxedExitCode (spawnArgs : SandboxArgs) : M UInt32 := do
 
 def runSandBoxed (spawnArgs : SandboxArgs) : M Unit := do
   let ret ← runSandBoxedExitCode spawnArgs
-  if ret != 0 then
+  bif ret != 0 then
     throw <| .userError s!"Child exited with {ret}"
 
 /--
@@ -274,7 +274,7 @@ def safeResolveWorkspace : M (String × String) := do
   let projectDir ← getProjectDir
   let dotLakeDir := projectDir / ".lake"
 
-  if !(← System.FilePath.pathExists dotLakeDir) then
+  bif !(← System.FilePath.pathExists dotLakeDir) then
     IO.FS.createDir dotLakeDir
 
   let whichLake := (← read).whichLake
@@ -297,7 +297,7 @@ def safeResolveWorkspace : M (String × String) := do
       leanPath := rest.toString
     else if let some rest := line.dropPrefix? "PATH=" then
       binPath := rest.toString
-  if leanPath.isEmpty || binPath.isEmpty then
+  bif leanPath.isEmpty || binPath.isEmpty then
     throw <| .userError "`lake env` did not report the project's search path"
   return (leanPath, binPath)
 
@@ -312,7 +312,7 @@ def safeResolveDeps : M Unit := do
   IO.println "Resolving dependencies"
   let projectDir ← getProjectDir
   let dotLakeDir := projectDir / ".lake"
-  if !(← System.FilePath.pathExists dotLakeDir) then
+  bif !(← System.FilePath.pathExists dotLakeDir) then
     IO.FS.createDir dotLakeDir
   runSandBoxed {
     cmd := (← read).whichLake.toString,
@@ -360,7 +360,7 @@ def safeLakeBuild (targets : Array Lean.Name) : M Unit := do
   let projectDir ← getProjectDir
   let dotLakeDir := projectDir / ".lake"
 
-  if !(← System.FilePath.pathExists dotLakeDir) then
+  bif !(← System.FilePath.pathExists dotLakeDir) then
     IO.FS.createDir dotLakeDir
 
   let whichLake := (← read).whichLake
@@ -422,7 +422,7 @@ def runExternalKernel (kernelName : String) (kernelCommand : Array String)
     configHandle.flush
 
     let mut kernelArgs := kernelCommand[1...*].toArray
-    if isNanodaKernel kernelName then
+    bif isNanodaKernel kernelName then
       kernelArgs := kernelArgs.push configPath.toString
     else
       kernelArgs := kernelArgs.push solutionPath.toString
@@ -442,7 +442,7 @@ def runExternalKernel (kernelName : String) (kernelCommand : Array String)
     }
     try
       let ret ← runSandBoxedExitCode spawnArgs
-      if ret != 0 then
+      bif ret != 0 then
         IO.println s!"{kernelName} kernel rejected the solution"
         return some s!"{kernelName} exited with {ret}"
       else
@@ -508,7 +508,7 @@ def primitiveTargets : M (Array Lean.Name) := do
 
 def builtinTargets : M (Array Lean.Name) := do
   let mut additional := #[]
-  if (← getLegalAxioms).contains ``Quot.sound then
+  bif (← getLegalAxioms).contains ``Quot.sound then
     additional := additional ++ #[``Quot, ``Quot.mk, ``Quot.lift, ``Quot.ind]
   return additional
 
@@ -559,7 +559,7 @@ Resolution writes the manifest, and the sandbox does not grant write access to t
 directory, so a project without one fails inside the sandbox with a bare `permission denied`.
 -/
 def checkManifest (cmd : String) (projectDir : System.FilePath) : IO (Option ExitCode) := do
-  if ← (projectDir / "lake-manifest.json").pathExists then
+  bif (← (projectDir / "lake-manifest.json").pathExists) then
     return none
   return some (← cannotRun s!"'{projectDir}' has no `lake-manifest.json`, and `lake {cmd}` resolves \
     dependencies inside a sandbox that cannot write to the project directory. Run `lake build` \
@@ -587,7 +587,7 @@ def resolveModuleStore (cmd : String)
     let some path := path? | continue
     unless ← path.pathExists do
       return .error (← cannotRun s!"`lake {cmd} {flag}`: '{path}' does not exist")
-    if ← path.isDir then
+    bif (← path.isDir) then
       return .error (← cannotRun s!"`lake {cmd} {flag}`: '{path}' is a directory")
     store := store.insert kind (← IO.FS.realPath path)
   return .ok store
@@ -600,11 +600,11 @@ def mkContext (cmd : String) (paranoid : Bool) (inadvisablyNoSandbox : Bool) (le
     (lake : LakeInstall) (projectDir : System.FilePath)
     (moduleStore : Std.HashMap ModuleKind System.FilePath) : IO (Except ExitCode Context) := do
   let whichSandbox ←
-    if inadvisablyNoSandbox then
+    bif inadvisablyNoSandbox then
       IO.eprintln s!"WARNING: Sandbox disabled, this run is not trustworthy."
       pure .noSandbox
     else
-      if !System.Platform.isLinux then
+      bif !System.Platform.isLinux then
         return .error (← cannotRun
           s!"`lake {cmd}` sandboxes the code it checks with `bwrap`, which needs Linux namespaces.")
 
@@ -620,7 +620,7 @@ def mkContext (cmd : String) (paranoid : Bool) (inadvisablyNoSandbox : Bool) (le
     | return .error (← cannotRun s!"`lake {cmd}` needs `git` on PATH to build inside the sandbox")
   let some envBinPath ← whichExe "env"
     | return .error (← cannotRun s!"`lake {cmd}` needs `env` on PATH to build inside the sandbox")
-  let bundledKernels := if paranoid then Check.bundledKernels lean else #[]
+  let bundledKernels := bif paranoid then Check.bundledKernels lean else #[]
 
   return .ok {
     projectDir := ← IO.FS.realPath projectDir
@@ -646,16 +646,16 @@ def mkContext (cmd : String) (paranoid : Bool) (inadvisablyNoSandbox : Bool) (le
 /-- Resolves the external kernels a configuration asks for. -/
 def resolveExternalKernels (cfg : Config) : IO (Except ExitCode (Std.TreeMap String (Array String))) := do
   let mut externalKernels := cfg.external_kernels?.getD {}
-  if cfg.enable_nanoda?.getD false && !externalKernels.isEmpty then
+  bif cfg.enable_nanoda?.getD false && !externalKernels.isEmpty then
     return .error (← cannotRun "cannot use `enable_nanoda` and `external_kernels` at the same \
       time; register nanoda in the list instead")
   for (kernelName, kernelCommand) in externalKernels do
-    if kernelCommand.isEmpty then
+    bif kernelCommand.isEmpty then
       return .error (← cannotRun s!"`{kernelName}` has an empty command")
-  if cfg.enable_nanoda?.getD false then
+  bif cfg.enable_nanoda?.getD false then
     externalKernels := externalKernels.insert "nanoda" #["nanoda_bin"]
   for (kernelName, kernelCommand) in externalKernels do
-    if (← whichExe kernelCommand[0]!).isNone then
+    bif (← whichExe kernelCommand[0]!).isNone then
       return .error (← cannotRun s!"`{kernelName}` kernel `{kernelCommand[0]!}` was not found")
   return .ok externalKernels
 
@@ -665,7 +665,7 @@ def standardAxioms : Array Lean.Name :=
 /-- Reports the axioms the checked modules rest on, and rejects any beyond `standardAxioms`. -/
 def checkUsedAxioms (exported : LeanExport.ExportedEnv) : M Unit := do
   let used := usedAxioms exported
-  if used.isEmpty then
+  bif used.isEmpty then
     IO.println "Uses no axioms"
   else
     IO.println s!"Uses axioms: {", ".intercalate (used.toList.map (·.1.toString))}"
@@ -715,7 +715,7 @@ public def runComparator (configFile? : Option System.FilePath)
 
   let theoremNames := cfg.theorem_names.map String.toName
   let definitionNames := cfg.definition_names.getD #[] |>.map String.toName
-  if theoremNames.isEmpty && definitionNames.isEmpty then
+  bif theoremNames.isEmpty && definitionNames.isEmpty then
     return ← cannotRun "nothing to check: the configuration names no theorems or definitions"
   let externalKernels ←
     match ← resolveExternalKernels cfg with
@@ -723,7 +723,7 @@ public def runComparator (configFile? : Option System.FilePath)
     | .ok ks => pure ks
 
   let needsProject := !(moduleStore.contains .challenge && moduleStore.contains .solution)
-  if needsProject then
+  bif needsProject then
     if let some rc ← checkManifest "comparator" base.projectDir then
       return rc
 
@@ -736,7 +736,7 @@ public def runComparator (configFile? : Option System.FilePath)
       legalAxioms := cfg.permitted_axioms.map String.toName,
       externalKernels
     }
-    if needsProject then
+    bif needsProject then
       let (leanPath, binPath) ← ReaderT.run safeResolveWorkspace ctx
       ReaderT.run compareIt { ctx with leanPath, binPath }
     else

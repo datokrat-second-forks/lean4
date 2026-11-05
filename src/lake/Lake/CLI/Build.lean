@@ -60,7 +60,7 @@ public def querySpecs (specs : Array BuildSpec) (fmt : OutFormat) : FetchM (Job 
 /-! ## Parsing CLI Build Target Specifiers -/
 
 public def parsePackageSpec (ws : Workspace) (spec : String) : Except CliError Package :=
-  if spec.isEmpty then
+  bif spec.isEmpty then
     return ws.root
   else
     match ws.findPackageByName? <| stringToLegalOrSimpleName spec with
@@ -70,7 +70,7 @@ public def parsePackageSpec (ws : Workspace) (spec : String) : Except CliError P
 def resolveModuleTarget
   (ws : Workspace) (mod : Module) (facet : Name)
 : Except CliError BuildSpec :=
-  if facet.isAnonymous then
+  bif facet.isAnonymous then
     return mkBuildSpec mod.irArts
   else
     if let some config := ws.findModuleFacetConfig? (Module.facetKind ++ facet) then do
@@ -81,7 +81,7 @@ def resolveModuleTarget
 def resolveCustomTarget
   (pkg : Package) (name facet : Name) (config : TargetConfig pkg.keyName name)
 : Except CliError BuildSpec :=
-  if !facet.isAnonymous then
+  bif !facet.isAnonymous then
     throw <| CliError.invalidFacet name facet
   else do
     return {info := pkg.target name, format := config.format}
@@ -90,10 +90,11 @@ def resolveConfigDeclTarget
   (ws : Workspace) (pkg : Package)
   {target : Name} (decl : NConfigDecl pkg.keyName target) (facet : Name)
 : Except CliError (Array BuildSpec) := do
-  if h : decl.kind.isAnonymous then
+  bif h : decl.kind.isAnonymous then
     Array.singleton <$> resolveCustomTarget pkg target facet (decl.targetConfig h)
   else
-    let facet := if facet.isAnonymous then `default else facet
+    have h := Bool.ne_true_of_eq_false h
+    let facet := bif facet.isAnonymous then `default else facet
     if let some config := ws.findFacetConfig? (decl.kind ++ facet) then
       let tgt := decl.mkConfigTarget pkg
       let tgt := cast (by simp [decl.target_eq_type h]) tgt
@@ -120,7 +121,7 @@ def resolveDefaultPackageTarget
 def resolvePackageTarget
   (ws : Workspace) (pkg : Package) (facet : Name)
 : Except CliError (Array BuildSpec) :=
-  if facet.isAnonymous then
+  bif facet.isAnonymous then
     resolveDefaultPackageTarget ws pkg
   else
     if let some config := ws.findPackageFacetConfig? (Package.facetKind ++ facet) then do
@@ -145,17 +146,17 @@ def resolveTargetLikeSpec
 : Except CliError (Array BuildSpec) := do
   match spec.split '/' |>.toList with
   | [spec] =>
-    if spec.isEmpty then
+    bif spec.isEmpty then
       resolvePackageTarget ws ws.root facet
-    else if explicit then
+    else bif explicit then
       resolvePackageTarget ws (← parsePackageSpec ws spec.copy) facet
     else
       resolveTargetInWorkspace ws (stringToLegalOrSimpleName spec.copy) facet
   | [pkgSpec, targetSpec] =>
     let pkg ← parsePackageSpec ws pkgSpec.copy
-    if targetSpec.isEmpty then
+    bif targetSpec.isEmpty then
       resolvePackageTarget ws pkg facet
-    else if targetSpec.startsWith "+" then
+    else bif targetSpec.startsWith "+" then
       let mod := targetSpec.drop 1 |>.copy.toName
       if let some mod := pkg.findTargetModule? mod then
         Array.singleton <$> resolveModuleTarget ws mod facet
@@ -164,7 +165,7 @@ def resolveTargetLikeSpec
     else
       resolveTargetInPackage ws pkg (stringToLegalOrSimpleName targetSpec.copy) facet
   | _ =>
-    if isMaybePath then
+    bif isMaybePath then
       throw <| CliError.unknownModulePath spec
     else
       throw <| CliError.invalidTargetSpec spec '/'
@@ -172,17 +173,17 @@ def resolveTargetLikeSpec
 def resolveTargetBaseSpec
   (ws : Workspace) (spec : String) (facet : Name)
 : EIO CliError (Array BuildSpec) := do
-  if spec.startsWith "@" then
+  bif spec.startsWith "@" then
     let spec := spec.drop 1
     resolveTargetLikeSpec ws spec.copy facet (explicit := true)
-  else if spec.startsWith "+" then
+  else bif spec.startsWith "+" then
     let mod := spec.drop 1 |>.toName
     if let some mod := ws.findTargetModule? mod then
       Array.singleton <$> resolveModuleTarget ws mod facet
     else
       throw <| CliError.unknownModule mod
   else if let some path ← resolvePath? spec then
-    if (← path.isDir) then
+    bif (← path.isDir) then
       resolveTargetLikeSpec ws spec facet
     else if let some mod := ws.findModuleBySrc? path then
       Array.singleton <$> resolveModuleTarget ws mod facet
@@ -201,7 +202,7 @@ public def parseExeTargetSpec
     | some exe => return exe
     | none => throw <| CliError.unknownExe spec
   | [pkgSpec, targetSpec] =>
-    let pkgSpec := if pkgSpec.startsWith "@" then pkgSpec.drop 1 else pkgSpec
+    let pkgSpec := bif pkgSpec.startsWith "@" then pkgSpec.drop 1 else pkgSpec
     let pkg ← parsePackageSpec ws pkgSpec.copy
     let targetName := stringToLegalOrSimpleName targetSpec.copy
     match pkg.findLeanExe? targetName with
@@ -227,6 +228,6 @@ public def parseTargetSpecs
   let mut results := #[]
   for spec in specs do
     results := results ++ (← parseTargetSpec ws spec)
-  if results.isEmpty then
+  bif results.isEmpty then
     results ← resolveDefaultPackageTarget ws ws.root
   return results

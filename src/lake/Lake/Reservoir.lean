@@ -55,7 +55,7 @@ public protected def fromJson? (val : Json) : Except String RegistrySrc := do
     let obj ← JsonObject.fromJson? val
     if let some url ← obj.get? "gitUrl" then
       let githubUrl? ← (← obj.get? "host").bindM fun host =>
-        if host == "github" then obj.get? "repoUrl" else pure none
+        bif host == "github" then obj.get? "repoUrl" else pure none
       let defaultBranch? ← obj.get? "defaultBranch"
       let subDir? ← obj.get? "subDir"
       return .git obj url githubUrl? defaultBranch? subDir?
@@ -122,7 +122,7 @@ public def Reservoir.fetchPkg? (lakeEnv : Lake.Env) (owner pkg : String) : LogIO
       | .data pkg =>
         return pkg
       | .error status msg =>
-        if status == 404 then
+        bif status == 404 then
           return none
         else
           error s!"{owner}/{pkg}: Reservoir lookup failed: {msg}"

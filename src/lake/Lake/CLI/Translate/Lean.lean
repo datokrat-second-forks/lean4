@@ -49,7 +49,7 @@ instance [ToLean α] : ToLean (Array α) where
   toLean xs := let xs : Array Term := xs.map toLean; Unhygienic.run `(#[$xs,*])
 
 instance : ToLean Bool where
-  toLean b := mkIdent <| if b then `true else `false
+  toLean b := mkIdent <| bif b then `true else `false
 
 class ToLean? (α : Type u) where
   toLean? : α → Option Term
@@ -88,7 +88,7 @@ instance [ToLean? α] [field : ConfigField σ name α] : AddDeclField σ name wh
 @[inline] def addDeclFieldNotEmpty
   [ToLean α] (name : Name) (val : Array α) (fs : Array DeclField)
 : Array DeclField :=
-  if val.isEmpty then fs else addDeclFieldCore name (toLean val) fs
+  bif val.isEmpty then fs else addDeclFieldCore name (toLean val) fs
 
 instance [ToLean α] [field : ConfigField σ name (Array α)] : AddDeclField σ name where
   addDeclField cfg := addDeclFieldNotEmpty name (field.get cfg)
@@ -96,7 +96,7 @@ instance [ToLean α] [field : ConfigField σ name (Array α)] : AddDeclField σ 
 @[inline] def addDeclFieldD
   [ToLean α] [BEq α] (name : Name) (val : α) (default : α) (fs : Array DeclField)
 : Array DeclField :=
-  if val == default then fs else addDeclFieldCore name (toLean val) fs
+  bif val == default then fs else addDeclFieldCore name (toLean val) fs
 
 instance [ToLean α] [BEq α] [field : ConfigField σ name α] : AddDeclField σ name where
   addDeclField cfg := addDeclFieldD name (field.get cfg) (field.mkDefault cfg)
@@ -118,7 +118,7 @@ namespace MkDeclFields end MkDeclFields
 export MkDeclFields (mkDeclFields)
 
 def mkDeclValWhere? (fields : Array DeclField) : Option (TSyntax ``declValWhere) :=
-  if fields.isEmpty then none else Unhygienic.run `(declValWhere|where $fields*)
+  bif fields.isEmpty then none else Unhygienic.run `(declValWhere|where $fields*)
 
 /-! ## Value Encoders -/
 
@@ -157,7 +157,7 @@ protected def LeanVer.toLean (v : LeanVer) : Term := Unhygienic.run do
 instance : ToLean LeanVer := ⟨LeanVer.toLean⟩
 
 def getEscapedNameParts? (acc : List String) : Name → Option (List String)
-  | Name.anonymous => if acc.isEmpty then none else some acc
+  | Name.anonymous => bif acc.isEmpty then none else some acc
   | Name.str n s => do
     let s ← Name.escapePart s
     getEscapedNameParts? (s::acc) n
@@ -206,7 +206,7 @@ instance [ToLean? β] : ToLean? (PatternDescr α β) := ⟨PatternDescr.toLean?�
 
 protected def StrPatDescr.toLean (pat : StrPatDescr) : Term :=
   match pat with
-  | .mem xs => if xs.isEmpty then Unhygienic.run `(∅) else (toLean xs)
+  | .mem xs => bif xs.isEmpty then Unhygienic.run `(∅) else (toLean xs)
   | .startsWith affix => Unhygienic.run `(.$(mkIdent `startsWith) $(toLean affix))
   | .endsWith affix => Unhygienic.run `(.$(mkIdent `endsWith) $(toLean affix))
 
@@ -228,18 +228,18 @@ where
     | .module n =>
       `(`+$(mkIdent n)$(mkSuffixes fs)*)
     | .package n =>
-      if n.isAnonymous then
+      bif n.isAnonymous then
         `(`@$(mkSuffixes fs):facetSuffix*)
       else
         `(`@$(mkIdent n)$(mkSuffixes fs)*)
     | .packageModule p m =>
-      if p.isAnonymous then
+      bif p.isAnonymous then
         `(`+$(mkIdent m)$(mkSuffixes fs)*)
       else
         `(`@$(mkIdent p)/+$(mkIdent m)$(mkSuffixes fs)*)
     | .packageTarget p t =>
       let t ← `(packageTargetLit|$(mkIdent t):ident)
-      if p.isAnonymous then
+      bif p.isAnonymous then
         `(`@/$t$(mkSuffixes fs)*)
       else
         `(`@$(mkIdent p)/$t$(mkSuffixes fs)*)
@@ -257,7 +257,7 @@ def Dependency.mkRequire (cfg : Dependency) : RequireDecl := Unhygienic.run do
   let src? ← cfg.src?.mapM fun src =>
     match src with
     | .path dir copy =>
-      if copy then
+      bif copy then
         `(fromSource|copy $(toLean dir):term)
       else
         `(fromSource|$(toLean dir):term)
@@ -269,13 +269,13 @@ def Dependency.mkRequire (cfg : Dependency) : RequireDecl := Unhygienic.run do
     | .git rev =>
       match cfg.src? with
       | some (.git (rev := some gitRev) ..) =>
-        if gitRev == rev then
+        bif gitRev == rev then
           return none -- will be derived from the source above
         else some <$> `(verSpec|git $(toLean rev))
       | _ => some <$> `(verSpec|git $(toLean rev))
     | .ver ver => some <$> `(verSpec|$(toLean ver.toString):term)
-  let scope? := if cfg.scope.isEmpty then none else some (toLean cfg.scope)
-  let opts? := if cfg.opts.isEmpty then none else some <| Unhygienic.run do
+  let scope? := bif cfg.scope.isEmpty then none else some (toLean cfg.scope)
+  let opts? := bif cfg.opts.isEmpty then none else some <| Unhygienic.run do
     cfg.opts.foldlM (init := mkCIdent ``NameMap.empty) fun stx opt val =>
       `($stx |>.insert $(toLean opt) $(toLean val))
   `(requireDecl|require $[$scope? /]? $(mkIdent cfg.name):ident $[@ $ver?]?
@@ -293,7 +293,7 @@ meta def genMkDeclFields
     as.push (mkIdent <| .mkSimple s!"x_{i+1}")
   let ty := Syntax.mkCApp tyName tyArgs
   let val ← info.fields.foldlM (init := val) fun val {name, canonical, ..} => do
-    if !canonical || exclude.contains name then
+    bif !canonical || exclude.contains name then
       return val
     else
       `($val |> addDeclField cfg $(quote name))
@@ -328,28 +328,28 @@ protected def LeanLibConfig.mkCommand
   (cfg : LeanLibConfig n) (defaultTarget : Bool)
 : Command := Unhygienic.run do
   let declVal? := mkDeclValWhere? (mkDeclFields cfg)
-  let attrs? ← if defaultTarget then some <$> `(Term.attributes|@[default_target]) else pure none
+  let attrs? ← bif defaultTarget then some <$> `(Term.attributes|@[default_target]) else pure none
   `(leanLibCommand|$[$attrs?:attributes]? lean_lib $(mkIdent n):ident $[$declVal?]?)
 
 protected def LeanExeConfig.mkCommand
   (cfg : LeanExeConfig n) (defaultTarget : Bool)
 : Command := Unhygienic.run do
   let declVal? := mkDeclValWhere? (mkDeclFields cfg)
-  let attrs? ← if defaultTarget then some <$> `(Term.attributes|@[default_target]) else pure none
+  let attrs? ← bif defaultTarget then some <$> `(Term.attributes|@[default_target]) else pure none
   `(leanExeCommand|$[$attrs?:attributes]? lean_exe $(mkIdent n):ident $[$declVal?]?)
 
 protected def InputFileConfig.mkCommand
   (cfg : InputFileConfig n) (defaultTarget : Bool)
 : Command := Unhygienic.run do
   let declVal? := mkDeclValWhere? (mkDeclFields cfg)
-  let attrs? ← if defaultTarget then some <$> `(Term.attributes|@[default_target]) else pure none
+  let attrs? ← bif defaultTarget then some <$> `(Term.attributes|@[default_target]) else pure none
   `(inputFileCommand|$[$attrs?:attributes]? input_file $(mkIdent n):ident $[$declVal?]?)
 
 protected def InputDirConfig.mkCommand
   (cfg : InputDirConfig n) (defaultTarget : Bool)
 : Command := Unhygienic.run do
   let declVal? := mkDeclValWhere? (mkDeclFields cfg)
-  let attrs? ← if defaultTarget then some <$> `(Term.attributes|@[default_target]) else pure none
+  let attrs? ← bif defaultTarget then some <$> `(Term.attributes|@[default_target]) else pure none
   `(inputDirCommand|$[$attrs?:attributes]? input_dir $(mkIdent n):ident $[$declVal?]?)
 
 @[inline] def Package.mkTargetCommands

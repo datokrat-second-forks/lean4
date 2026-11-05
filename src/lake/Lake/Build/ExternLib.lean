@@ -44,7 +44,7 @@ public def buildLeanSharedLibOfStatic
     buildFileUnlessUpToDate' dynlib do
       let lean ← getLeanInstall
       let baseArgs :=
-        if System.Platform.isOSX then
+        bif System.Platform.isOSX then
           #[s!"-Wl,-force_load,{staticLib}"]
         else
           #["-Wl,--whole-archive", staticLib.toString, "-Wl,--no-whole-archive"]
@@ -65,9 +65,9 @@ public def ExternLib.sharedFacetConfig : ExternLibFacetConfig sharedFacet :=
 def computeDynlibOfShared (sharedLibTarget : Job FilePath) : SpawnM (Job Dynlib) :=
   sharedLibTarget.mapM fun sharedLib => do
     if let some stem := sharedLib.fileStem then
-      if Platform.isWindows then
+      bif Platform.isWindows then
         return {path := sharedLib, name := stem}
-      else if stem.startsWith "lib" then
+      else bif stem.startsWith "lib" then
         return {path := sharedLib, name := stem.drop 3 |>.copy}
       else
         error s!"shared library `{sharedLib}` does not start with `lib`; this is not supported on Unix"

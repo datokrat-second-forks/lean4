@@ -24,4 +24,4 @@ public instance [MonadLift m n] [MonadExit m] : MonadExit n where
 
 /-- Exit with `ExitCode` if it is not 0. Otherwise, continue. -/
 @[inline] public def exitIfErrorCode [Pure m] [MonadExit m]  (rc : ExitCode) : m Unit :=
-  if rc != 0 then exit rc else pure ()
+  bif rc != 0 then exit rc else pure ()

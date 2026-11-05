@@ -40,7 +40,7 @@ Locate the named, buildable module in the library
 (which implies it is local and importable).
 -/
 public def LeanLib.findModule? (mod : Name) (self : LeanLib) : Option Module :=
-  if self.isBuildableModule mod then some {lib := self, name := mod} else none
+  bif self.isBuildableModule mod then some {lib := self, name := mod} else none
 
 /--
 Returns the buildable module in the library whose source file or directory is `path`.
@@ -148,7 +148,7 @@ public abbrev pkg (self : Module) : Package :=
   self.irPath "bc"
 
 public def bcFile? (self : Module) : Option FilePath :=
-  if Lean.Internal.hasLLVMBackend () then some self.bcFile else none
+  bif Lean.Internal.hasLLVMBackend () then some self.bcFile else none
 
 @[inline] public def bcoFile (self : Module) : FilePath :=
   self.irPath "bc.o"
@@ -222,7 +222,7 @@ public def dynlibSuffix := "-1"
 /-- **For internal use only.** -/
 @[inline, deprecated "Deprecated without replacement." (since := "2026-08-19")]
 public def leanIncludeDir? (self : Module) : Option FilePath :=
-  if self.pkg.bootstrap then some <| self.pkg.bootstrapIncludeDir else none
+  bif self.pkg.bootstrap then some <| self.pkg.bootstrapIncludeDir else none
 
 @[inline] public def platformIndependent (self : Module) : Option Bool :=
   self.lib.platformIndependent

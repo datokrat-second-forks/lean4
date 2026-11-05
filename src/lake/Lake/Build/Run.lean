@@ -94,7 +94,7 @@ def renderProgress
 : MonitorM PUnit := do
   let {jobNo, totalJobs, ..} ← get
   let {useAnsi, showProgress, ..} ← read
-  if showProgress ∧ useAnsi then
+  bif showProgress && useAnsi then
     let spinnerIcon ← modifyGet fun s =>
         (spinnerFrames[s.spinnerIdx], {s with spinnerIdx := s.spinnerIdx + ⟨1, by decide⟩})
     let resetCtrl ← modifyGet fun s => (s.resetCtrl, {s with resetCtrl := Ansi.resetLine})
@@ -102,7 +102,7 @@ def renderProgress
       -- Prefer the newest running job.
       -- This avoids the monitor focusing too long on any one job.
       -- (e.g., "Running job computation")
-      if _ : 0 < running.size then
+      bif _ : 0 <ᵇ running.size then
         s!"Running {running[running.size - 1].caption} (+ {running.size - 1} more)"
       else
         s!"Running {unfinished[unfinished.size - 1].caption}"
@@ -117,36 +117,36 @@ def reportJob (job : OpaqueJob) : MonitorM PUnit := do
   let maxLv := log.maxLv
   let failed := strictAnd log.hasEntries (maxLv ≥ failLv)
   let canceled := canceled && !failed
-  if wantsRebuild then
-    modify fun s => if s.wantsRebuild then s else {s with wantsRebuild := true}
-  if failed && !optional then
+  bif wantsRebuild then
+    modify fun s => bif s.wantsRebuild then s else {s with wantsRebuild := true}
+  bif failed && !optional then
     modify fun s => {s with failures := s.failures.push caption}
   let hasOutput := failed || (log.hasEntries && maxLv ≥ outLv)
   let showJob :=
     (!optional || showOptional) &&
     (hasOutput || canceled || (showProgress && !useAnsi && action ≥ minAction))
-  if showJob then
-    let verb := if canceled then "Canceled" else action.verb failed
-    let icon := if hasOutput then maxLv.icon else if canceled then '⊘' else '✔'
-    let opt := if optional then " (Optional)" else ""
-    let time := if showTime && buildTime > 0 then s!" ({formatTime buildTime})" else ""
+  bif showJob then
+    let verb := bif canceled then "Canceled" else action.verb failed
+    let icon := bif hasOutput then maxLv.icon else bif canceled then '⊘' else '✔'
+    let opt := bif optional then " (Optional)" else ""
+    let time := bif showTime && buildTime >ᵇ 0 then s!" ({formatTime buildTime})" else ""
     let caption := s!"{icon} [{jobNo}/{totalJobs}]{opt} {verb} {caption}{time}"
     let caption :=
-      if useAnsi then
-        let color := if hasOutput then maxLv.ansiColor else if canceled then "33" else "32"
+      bif useAnsi then
+        let color := bif hasOutput then maxLv.ansiColor else bif canceled then "33" else "32"
         Ansi.chalk color caption
       else
         caption
     let resetCtrl ← modifyGet fun s => (s.resetCtrl, {s with resetCtrl := ""})
     print s!"{resetCtrl}{caption}\n"
-    if hasOutput then
-      let outLv := if failed then .trace else outLv
+    bif hasOutput then
+      let outLv := bif failed then .trace else outLv
       log.replay (logger := .stream out outLv useAnsi)
     flush
 where
   formatTime ms :=
-    if ms > 10000 then s!"{ms / 1000}s"
-    else if ms > 1000 then s!"{(ms) / 1000}.{(ms+50) / 100 % 10}s"
+    bif ms >ᵇ 10000 then s!"{ms / 1000}s"
+    else bif ms >ᵇ 1000 then s!"{(ms) / 1000}.{(ms+50) / 100 % 10}s"
     else s!"{ms}ms"
 
 def drainQueue : MonitorM (Array OpaqueJob) := do
@@ -172,7 +172,7 @@ def sleep : MonitorM PUnit := do
   let now ← IO.monoMsNow
   let lastUpdate := (← get).lastUpdate
   let sleepTime : Nat := (← read).updateFrequency - (now - lastUpdate)
-  if sleepTime > 0 then
+  bif sleepTime >ᵇ 0 then
     IO.sleep sleepTime.toUInt32
   let now ← IO.monoMsNow
   modify fun s => {s with lastUpdate := now}
@@ -182,12 +182,12 @@ partial def loop
 : MonitorM PUnit := do
   let (running, unfinished) ← scanJobs new unfinished
   let ctx ← read
-  if ctx.failFast then
+  bif ctx.failFast then
     if let some tk := ctx.cancelTk? then
       unless (← get).failures.isEmpty do
         tk.set
-  if h : 0 < unfinished.size then
-    renderProgress running unfinished h
+  bif h : 0 <ᵇ unfinished.size then
+    renderProgress running unfinished (lt_of_decideLT_eq_true h)
     sleep
     let new ← drainQueue
     loop new unfinished
@@ -195,7 +195,7 @@ partial def loop
     -- Must recheck queue for new tasks before terminating the loop.
     -- Finished tasks may have registered new tasks.
     let new ← drainQueue
-    if 0 < new.size then
+    bif 0 <ᵇ new.size then
       loop new unfinished
 
 def main (init : Array OpaqueJob) : MonitorM PUnit := do
@@ -225,9 +225,9 @@ def mkMonitorContext
   let useAnsi ← cfg.ansiMode.isEnabled out
   let outLv := cfg.outLv
   let failLv := cfg.failLv
-  let isVerbose := cfg.verbosity = .verbose
+  let isVerbose := cfg.verbosity matches .verbose
   let showProgress := cfg.showProgress
-  let minAction := if isVerbose then .unknown else .unpack
+  let minAction := bif isVerbose then .unknown else .unpack
   let showOptional := isVerbose
   let showTime := isVerbose || !useAnsi
   let updateFrequency := 100
@@ -296,23 +296,23 @@ def BuildContext.saveOutputs
   let isVerbose := bctx.verbosity matches .verbose
   match (← (← ref.get).writeFile outputsFile pkg.isPlatformIndependent ∅) with
   | .ok _ log =>
-    if !log.isEmpty && isVerbose then
+    bif !log.isEmpty && isVerbose then
       print! out "There were issues saving input-to-output mappings from the build:\n"
       log.replay
   | .error _ log =>
     print! out "Failed to save input-to-output mappings from the build.\n"
-    if isVerbose then
+    bif isVerbose then
       log.replay
 
 def reportResult (cfg : BuildConfig) (out : IO.FS.Stream) (result : MonitorResult) : BaseIO Unit := do
-  if result.failures.isEmpty then
-    if cfg.showProgress && cfg.showSuccess then
+  bif result.failures.isEmpty then
+    bif cfg.showProgress && cfg.showSuccess then
       let numJobs := result.numJobs
-      if numJobs == 0 then
+      bif numJobs == 0 then
         print! out "Nothing to build.\n"
       else
-        let jobs := if numJobs == 1 then "1 job" else s!"{numJobs} jobs"
-        if cfg.noBuild then
+        let jobs := bif numJobs == 1 then "1 job" else s!"{numJobs} jobs"
+        bif cfg.noBuild then
           print! out s!"All targets up-to-date ({jobs}).\n"
         else
           print! out s!"Build completed successfully ({jobs}).\n"
@@ -331,7 +331,7 @@ instance : CoeOut (BuildResult α) MonitorResult := ⟨BuildResult.toMonitorResu
 
 def monitorJob (ctx : MonitorContext) (job : Job α) : BaseIO (BuildResult α) := do
   let result ← monitorJobs' ctx #[job]
-  if result.isOk then
+  bif result.isOk then
     if let some a ← job.wait? then
       return {toMonitorResult := result, out := .ok a}
     else
@@ -348,7 +348,7 @@ def mkBuildContext
   opaqueWs := ws
   toBuildConfig := {cfg with
     macosxDeploymentTarget? := ← id do
-      if System.Platform.isOSX then
+      bif System.Platform.isOSX then
         match cfg.macosxDeploymentTarget? with
         | some ver => return some ver
         | none =>
@@ -358,7 +358,7 @@ def mkBuildContext
         return cfg.macosxDeploymentTarget?
     }
   outputsRef? := ← id do
-    if cfg.outputsFile?.isSome && cfg.outputsIdx < ws.packages.size then
+    bif cfg.outputsFile?.isSome && cfg.outputsIdx <ᵇ ws.packages.size then
       some <$> CacheRef.mk
     else
       return none
@@ -402,7 +402,7 @@ def finalizeBuild
   | .ok a =>
     return a
   | .error e =>
-    if cfg.noBuild && result.wantsRebuild then
+    bif cfg.noBuild && result.wantsRebuild then
       IO.Process.exit noBuildCode.toUInt8
     else
       throw (IO.userError e)
@@ -416,7 +416,7 @@ public def Workspace.runFetchM
   (ws : Workspace) (build : FetchM α) (cfg : BuildConfig := {}) (caption := "job computation")
 : IO α := do
   let jobs ← mkJobQueue
-  let cancelTk? ← if cfg.failFast then some <$> IO.CancelToken.new else pure none
+  let cancelTk? ← bif cfg.failFast then some <$> IO.CancelToken.new else pure none
   let mctx ← mkMonitorContext cfg jobs cancelTk?
   let bctx ← mkBuildContext ws cfg jobs cancelTk?
   let job ← startBuild bctx build caption
@@ -457,7 +457,7 @@ public def Workspace.runBuild
   (ws : Workspace) (build : FetchM (Job α)) (cfg : BuildConfig := {})
 : IO α := do
   let jobs ← mkJobQueue
-  let cancelTk? ← if cfg.failFast then some <$> IO.CancelToken.new else pure none
+  let cancelTk? ← bif cfg.failFast then some <$> IO.CancelToken.new else pure none
   let mctx ← mkMonitorContext cfg jobs cancelTk?
   let bctx ← mkBuildContext ws cfg jobs cancelTk?
   let job ← startBuild bctx build

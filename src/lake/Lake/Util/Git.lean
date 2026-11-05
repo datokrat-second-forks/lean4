@@ -29,9 +29,9 @@ make GitHub API requests. That is, do not accept SSH URLs and
 drop an ending `.git`.
 -/
 public def filterUrl? (url : String) : Option String :=
-  if url.startsWith "git" then
+  bif url.startsWith "git" then
     none
-  else if url.endsWith ".git" then
+  else bif url.endsWith ".git" then
     some <| url.dropEnd 4 |>.copy
   else
     some url
@@ -102,7 +102,7 @@ public def cwd : GitRepo := ⟨"."⟩
 
 @[inline] def testExecGit (args : Array String) (repo : GitRepo) : LogIO Bool := do
   let out ← rawProc {cmd := "git", args, cwd := repo.dir}
-  logOutput out (if out.exitCode = 0 then logVerbose else logInfo)
+  logOutput out (bif out.exitCode =ᵇ 0 then logVerbose else logInfo)
   return out.exitCode = 0
 
 public def clone (url : String) (repo : GitRepo) : LogIO PUnit  :=
@@ -145,7 +145,7 @@ public def findCommit? (rev : GitRev) (repo : GitRepo) : BaseIO  (Option GitRev)
   repo.captureGit? #["rev-parse", "--verify", "--end-of-options", rev ++ "^{commit}"]
 
 public def resolveRevision (rev : GitRev) (repo : GitRepo) : LogIO GitRev := do
-  if rev.isFullSha1 then return rev
+  bif rev.isFullSha1 then return rev
   if let some rev ← repo.resolveRevision? rev then return rev
   error s!"{repo}: revision not found '{rev}'"
 
@@ -160,7 +160,7 @@ public def getHeadRevision (repo : GitRepo) : LogIO GitRev := do
 public def fetchRevision? (repo : GitRepo) (remote : String) (rev : GitRev) : LogIO (Option GitRev) := do
   -- `--refetch` is expensive and not needed here as Lake uses a single, fixed filter
   let args := #["fetch", "--tags", "--force", "--filter=tree:0", remote, rev]
-  if (← repo.testExecGit args) then
+  bif (← repo.testExecGit args) then
     let some rev ← repo.resolveRevision? .fetchHead
       | error s!"{repo}: could not resolve 'FETCH_HEAD' to a commit after fetching; \
           this may be an issue with Lake; please report it"
@@ -170,12 +170,12 @@ public def fetchRevision? (repo : GitRepo) (remote : String) (rev : GitRev) : Lo
 
 public def getHeadRevisions (repo : GitRepo) (n : Nat := 0) : LogIO (Array GitRev) := do
   let args := #["rev-list", "HEAD"]
-  let args := if n != 0 then args ++ #["-n", toString n] else args
+  let args := bif n != 0 then args ++ #["-n", toString n] else args
   let revs ← repo.captureGit args
   return revs.split '\n' |>.toStringArray
 
 public def resolveRemoteRevision (rev : GitRev) (remote := Git.defaultRemote) (repo : GitRepo) : LogIO GitRev := do
-  if rev.isFullSha1 then return rev
+  bif rev.isFullSha1 then return rev
   if let some rev ← repo.resolveRevision? (rev.withRemote remote) then return rev
   if let some rev ← repo.resolveRevision? rev then return rev
   error s!"{repo}: revision not found '{rev}'"

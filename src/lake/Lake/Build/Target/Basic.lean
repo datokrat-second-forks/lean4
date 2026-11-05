@@ -31,7 +31,7 @@ public abbrev TargetArray α := Array (Target α)
 namespace Target
 
 public protected def repr (x : Target α) (prec : Nat) : Format :=
-  let indent := if prec >= max_prec then 1 else 2
+  let indent := bif prec ≥ᵇ max_prec then 1 else 2
   let ctor := "Lake.Target.mk" ++ Format.line ++ reprArg x.key
   Repr.addAppParen (.group (.nest indent ctor)) prec
 

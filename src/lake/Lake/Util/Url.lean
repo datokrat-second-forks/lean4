@@ -18,22 +18,22 @@ open Lean
 namespace Lake
 
 public def hexEncodeByte (b : UInt8) : Char :=
-  if b = 0 then '0' else
-  if b = 1 then '1' else
-  if b = 2 then '2' else
-  if b = 3 then '3' else
-  if b = 4 then '4' else
-  if b = 5 then '5' else
-  if b = 6 then '6' else
-  if b = 7 then '7' else
-  if b = 8 then '8' else
-  if b = 9 then '9' else
-  if b = 0xa then 'A' else
-  if b = 0xb then 'B' else
-  if b = 0xc then 'C' else
-  if b = 0xd then 'D' else
-  if b = 0xe then 'E' else
-  if b = 0xf then 'F' else
+  bif b =ᵇ 0 then '0' else
+  bif b =ᵇ 1 then '1' else
+  bif b =ᵇ 2 then '2' else
+  bif b =ᵇ 3 then '3' else
+  bif b =ᵇ 4 then '4' else
+  bif b =ᵇ 5 then '5' else
+  bif b =ᵇ 6 then '6' else
+  bif b =ᵇ 7 then '7' else
+  bif b =ᵇ 8 then '8' else
+  bif b =ᵇ 9 then '9' else
+  bif b =ᵇ 0xa then 'A' else
+  bif b =ᵇ 0xb then 'B' else
+  bif b =ᵇ 0xc then 'C' else
+  bif b =ᵇ 0xd then 'D' else
+  bif b =ᵇ 0xe then 'E' else
+  bif b =ᵇ 0xf then 'F' else
   '*'
 
 /-- Encode a byte as a URI escape code (e.g., `%20`). -/
@@ -44,13 +44,13 @@ public def uriEscapeByte (b : UInt8) (s := "") : String :=
 @[specialize] public def foldlUtf8M [Monad m] (c : Char) (f : σ → UInt8 → m σ) (init : σ) : m σ := do
   let s := init
   let v := c.val
-  if v ≤ 0x7f then
+  bif v ≤ᵇ 0x7f then
     f s v.toUInt8
-  else if v ≤ 0x7ff then
+  else bif v ≤ᵇ 0x7ff then
     let s ← f s <| (v >>>  6).toUInt8 &&& 0x1f ||| 0xc0
     let s ← f s <| v.toUInt8 &&& 0x3f ||| 0x80
     return s
-  else if v ≤ 0xffff then
+  else bif v ≤ᵇ 0xffff then
     let s ← f s <| (v >>> 12).toUInt8 &&& 0x0f ||| 0xe0
     let s ← f s <| (v >>>  6).toUInt8 &&& 0x3f ||| 0x80
     let s ← f s <| v.toUInt8 &&& 0x3f ||| 0x80
@@ -92,7 +92,7 @@ public def isUriUnreservedMark (c : Char)  : Bool :=
 
 /-- Encodes anything but a URI unreserved character as a URI escape sequences. -/
 public def uriEncodeChar (c : Char) (s := "") : String :=
-  if c.isAlphanum || isUriUnreservedMark c then
+  bif c.isAlphanum || isUriUnreservedMark c then
     s.push c
   else
     uriEscapeChar c s
@@ -129,9 +129,9 @@ public def getUrl?
       | .ok (some code) => return code
       | .ok none => error s!"curl's JSON output did not contain a response code"
       | .error e => error s!"curl's JSON output contained an invalid JSON response code: {e}"
-    if code == 200 then
+    bif code == 200 then
       return some out.stdout.trimAscii.copy
-    else if code == 404 then
+    else bif code == 404 then
       return none
     else
       error s!"failed to GET URL, error {code}; received:\n{out.stdout}"

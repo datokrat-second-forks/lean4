@@ -55,12 +55,12 @@ public def merge (a b : JobAction) : JobAction :=
   max a b -- inlines `max`
 
 public def verb (failed : Bool) : (self : JobAction) → String
-| .unknown => if failed then "Running" else "Ran"
-| .reuse => if failed then "Reusing" else "Reused"
-| .replay => if failed then "Replaying" else "Replayed"
-| .unpack => if failed then "Unpacking" else "Unpacked"
-| .fetch => if failed then "Fetching" else "Fetched"
-| .build => if failed then "Building" else "Built"
+| .unknown => bif failed then "Running" else "Ran"
+| .reuse => bif failed then "Reusing" else "Reused"
+| .replay => bif failed then "Replaying" else "Replayed"
+| .unpack => bif failed then "Unpacking" else "Unpacked"
+| .fetch => bif failed then "Fetching" else "Fetched"
+| .build => bif failed then "Building" else "Built"
 
 end JobAction
 
@@ -184,7 +184,7 @@ Useful if the job is already known to be completed.
 
 /-- Sets the job's caption if the job's current caption is empty. -/
 @[inline] public def setCaption? (caption : String) (job : Job α) : Job α :=
-  if job.caption.isEmpty then {job with caption} else job
+  bif job.caption.isEmpty then {job with caption} else job
 
 @[inline] public def mapResult
   [OptDataKind β] (f : JobResult α → JobResult β) (self : Job α)

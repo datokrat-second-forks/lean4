@@ -110,7 +110,7 @@ def mkConfigFields
     addCompletionInfo <| .fieldId x fieldName {} tyName
     if let some info := infos.find? fieldName then
       let c := info.realName
-      if !info.canonical && m.contains c then
+      bif !info.canonical && m.contains c then
         logWarningAt id m!"redefined field '{c}' ('{fieldName}' is an alias of '{c}')"
       m := m.insert c {ref := id, val}
     else
